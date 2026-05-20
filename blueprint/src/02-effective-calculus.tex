@@ -1,0 +1,188 @@
+\chapter{Effective Calculus}
+
+\section{Finite sums}
+
+\begin{definition}[Left Riemann interval]\label{def:left-riemann}
+\lean{ComputableAnalysis.riemannLeftInterval}
+\uses{def:real-fun-raw,def:raw-real-arithmetic}
+For \(a,b\in\Q\) and \(N>0\), set
+\[
+  h=\mesh(a,b,N)=\frac{b-a}{N},\qquad
+  x_k=a+kh,\quad 0\le k<N.
+\]
+If \(g\) is a real-valued function and \(p\) is an evaluation precision, the
+left Riemann interval is
+\[
+  R_{N,p}(g;a,b)
+  =
+  \sum_{k=0}^{N-1} h\cdot g(x_k,p),
+\]
+where the sum and scalar multiplication are rational interval operations.
+\end{definition}
+
+\begin{definition}[Endpoint difference interval]\label{def:endpoint-diff}
+\lean{ComputableAnalysis.endpointDifferenceInterval}
+\uses{def:real-fun-raw,def:raw-real-arithmetic}
+For a real-valued function \(F\), define
+\[
+  E_p(F;a,b)
+  =
+  F(b,p)-F(a,p).
+\]
+If \(F(a,p)=[A^-,A^+]\) and
+\(F(b,p)=[B^-,B^+]\), then
+\[
+  E_p(F;a,b)=[B^- - A^+,B^+ - A^-].
+\]
+\end{definition}
+
+\section{The effective FTC}
+
+\begin{definition}[Effective derivative, exact rational form]
+\label{def:effective-derivative-exact}
+\lean{ComputableAnalysis.EffectiveDerivativeExact}
+Let \(F,f:\Q\to\Q\).  An exact effective derivative certificate for
+\(F'=f\) is a function \(\delta:\Q_{>0}\to\Q_{>0}\) such that
+\[
+  0<h\le \delta(\eps)
+  \quad\Longrightarrow\quad
+  \left|
+    \frac{F(x+h)-F(x)}{h}-f(x)
+  \right|
+  \le \eps
+\]
+for all rational \(x,h\).  This is the finite-difference content of
+differentiability, stated without limits over completed real numbers.
+\end{definition}
+
+\begin{definition}[Effective FTC certificate]\label{def:effective-ftc}
+\lean{ComputableAnalysis.EffectiveFTC}
+\uses{def:left-riemann,def:endpoint-diff}
+Let \(F,dF\) be real-valued functions and let \(a,b\in\Q\).  An effective FTC
+certificate consists of functions
+\[
+  N:\Q_{>0}\to\N,\qquad p:\Q_{>0}\to\N
+\]
+such that for every positive rational \(\eps\),
+\[
+  \close_\eps
+  \left(
+    R_{N(\eps),p(\eps)}(dF;a,b),
+    E_{p(\eps)}(F;a,b)
+  \right).
+\]
+The certificate is intentionally finite: to get precision \(\eps\), it tells
+us how many subintervals and how much pointwise evaluation precision are
+needed.
+\end{definition}
+
+\begin{theorem}[Effective FTC bridge]\label{thm:effective-ftc-bridge}
+\lean{ComputableAnalysis.FTC.effectiveFTC_equiv_endpoint}
+\uses{def:left-riemann,def:endpoint-diff,def:effective-ftc,def:raw-equiv}
+\leanok
+Given an effective FTC certificate for \(F,dF,a,b\), the real-number algorithm
+formed by scheduled Riemann sums is equivalent to the real-number algorithm
+formed by scheduled endpoint differences:
+\[
+  \left(n\mapsto
+    R_{N(\eps_n),p(\eps_n)}(dF;a,b)
+  \right)
+  \Equiv
+  \left(n\mapsto
+    E_{p(\eps_n)}(F;a,b)
+  \right),
+\]
+where \(\eps_0=1\) and \(\eps_n=1/n\) for \(n>0\).
+\end{theorem}
+
+\begin{proof}
+At stage \(n\), the certificate gives overlap and width bounds at precision
+\(\eps_n\).  Same-stage overlap is therefore a valid cofinal schedule for
+equivalence.
+\end{proof}
+
+\begin{theorem}[Finite-sum FTC estimate]\label{thm:finite-ftc-estimate}
+\uses{def:effective-derivative-exact}
+Suppose \(F,f:\Q\to\Q\), \(a<b\), and \(F'=f\) is certified by
+\(\delta\).  If \(N\) is chosen so that
+\[
+  0<h=\frac{b-a}{N}\le \delta\!\left(\frac{\eps}{b-a}\right),
+\]
+then
+\[
+  \left|
+    \sum_{k=0}^{N-1} h f(a+kh) - (F(b)-F(a))
+  \right|
+  \le \eps .
+\]
+\end{theorem}
+
+\begin{proof}
+Write \(x_k=a+kh\).  The derivative certificate gives
+\[
+  F(x_{k+1})-F(x_k)=h f(x_k)+h e_k,
+  \qquad |e_k|\le \frac{\eps}{b-a}.
+\]
+Summing over \(k\) telescopes the left side:
+\[
+  F(b)-F(a)
+  =
+  \sum_{k=0}^{N-1} h f(x_k)
+  +
+  h\sum_{k=0}^{N-1} e_k.
+\]
+Since \(Nh=b-a\),
+\[
+  \left|h\sum_{k=0}^{N-1}e_k\right|
+  \le hN\frac{\eps}{b-a}
+  =\eps .
+\]
+\end{proof}
+
+\begin{corollary}[Exact rational FTC]\label{cor:exact-rational-ftc}
+\uses{thm:finite-ftc-estimate,def:effective-ftc,thm:effective-ftc-bridge}
+An exact effective derivative certificate for \(F'=f\), together with valid
+interval wrappers for \(F\) and \(f\), yields an effective FTC
+certificate.  Hence the definite integral of \(f\) over \([a,b]\)
+is equivalent to \(F(b)-F(a)\).
+\end{corollary}
+
+\section{Toward general interval integration}
+
+\begin{conjecture}[Integral construction from interval regularity]
+\label{conj:integral-existence}
+\lean{ComputableAnalysis.Integral.ExistsConstructionFor}
+\uses{def:interval-regular,def:raw-real}
+If \(F\) is interval-regular on a rational interval \([a,b]\),
+then there is an integral real-number algorithm
+\[
+  n\longmapsto I_n(F;a,b)
+\]
+whose intervals are ordered, nested, and shrink to zero.
+\end{conjecture}
+
+\begin{conjecture}[General effective FTC]\label{conj:general-effective-ftc}
+\lean{ComputableAnalysis.DefiniteIntegralEqualsEndpointDifference}
+\uses{conj:integral-existence,def:function-on-interval,def:interval-regular,thm:effective-ftc-bridge}
+Let \(F\) be a function on \([a,b]\), and let \(dF\) be an
+interval-regular derivative of \(F\).  Then the constructed integral of
+\(dF\) is equivalent to the endpoint difference:
+\[
+  \int_a^b dF(x)\dd x \Equiv F(b)-F(a).
+\]
+\end{conjecture}
+
+\begin{example}[The square function]\label{ex:square-ftc}
+\lean{ComputableAnalysis.ExactFunction.square_derivative_effective}
+\uses{def:effective-derivative-exact,thm:finite-ftc-estimate}
+For \(F(x)=x^2\) and \(f(x)=2x\),
+\[
+  \frac{F(x+h)-F(x)}{h}-f(x)=h.
+\]
+Thus \(0<h\le \eps\) proves the effective derivative estimate.  The finite
+FTC estimate then gives the familiar identity
+\[
+  \int_0^1 2x\dd x = 1
+\]
+as a statement about rational sums and endpoint intervals.
+\end{example}

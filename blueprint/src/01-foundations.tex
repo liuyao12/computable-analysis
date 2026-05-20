@@ -1,0 +1,466 @@
+\chapter{Interval Arithmetic}
+
+\section{Real numbers}
+
+\begin{definition}[Rational interval]\label{def:qinterval}
+\lean{ComputableAnalysis.QInterval}
+A \emph{rational interval} is a pair of rational numbers
+\[
+  [a,b]\in\Q\times\Q,\qquad a\le b.
+\]
+This is a formal interval object, not the set of rational points between
+\(a\) and \(b\).  The \emph{width} of the rational interval is defined as \(b-a\).
+
+Two rational intervals \((a, b)\) and \((c, d)\) \emph{overlap} when
+\[
+  a\le d\ \text{and}\ c\le b.
+\]
+\end{definition}
+
+\begin{definition}[Interval sequence]\label{def:interval-sequence}
+\uses{def:qinterval}
+An \emph{interval sequence} is a sequence of rational intervals
+\[
+  [a_n,b_n]_{n\in\N},
+  \qquad a_n \leq b_n\in\Q.
+\]
+\end{definition}
+
+\begin{definition}[real number]\label{def:raw-real}
+\lean{ComputableAnalysis.RealRaw}
+\uses{def:interval-sequence}
+A \emph{real number} is an interval sequence \(x=[a_n,b_n]_{n\in\N}\) satisfying the
+following validity conditions:
+\[
+  n\le m\Rightarrow
+  a_n\le a_m\le b_m\le b_n,
+\]
+and
+\[
+  \lim_{n\to\infty}(b_n-a_n)=0.
+\]
+Formally, the last condition means
+\[
+  \forall \eps\in\Q_{>0}\ \exists N\ \forall n\ge N,\quad
+  b_n-a_n\le \eps.
+\]
+\end{definition}
+
+\begin{remark}[Computable number]\label{rem:computable-presentations}
+\uses{def:interval-sequence,def:raw-real}
+When the map 
+\[
+  n\mapsto (a_n,b_n)
+\]
+is given by a finite, terminating algorithm, as we always do in this project,
+the real number is said to be \emph{computable}. Storing all the rational numbers
+in an infinite table is not permitted. The evaluation at \(n\) is referred to as
+\emph{computing} the real number at stage \(n\).
+\end{remark}
+
+\begin{definition}[Stage schedules]\label{def:stage-schedule}
+\uses{def:raw-real}
+A \emph{stage schedule} is an increasing function
+\[
+  \sigma:\N\to\N.
+\]
+Here increasing means \(\sigma(n)<\sigma(n+1)\) for all \(n\).
+If \(x=[a_n,b_n]_{n\in\N}\), then the scheduled real number is
+\[
+  \sigma\ldot x=[a_{\sigma(n)},b_{\sigma(n)}]_{n\in\N}.
+\]
+\end{definition}
+
+\begin{definition}[Positive and negative real numbers]\label{def:raw-real-sign}
+\lean{ComputableAnalysis.RealRaw.Pos}
+\lean{ComputableAnalysis.RealRaw.Neg}
+\uses{def:raw-real}
+Let \(x=[a_n,b_n]_{n\in\N}\) be a real number.  We say that \(x\) is
+\emph{positive} (resp. \emph{negative}) if there is some \(N\in\N\) such that
+\( a_N > 0\) (resp. \( b_N<0 \)).
+The number \(x\) is \emph{nonzero} if it is either positive or negative.
+\end{definition}
+
+\begin{definition}[Interval Arithmetic]\label{def:raw-real-arithmetic}
+\lean{ComputableAnalysis.RealRaw.add}
+\lean{ComputableAnalysis.RealRaw.sub}
+\lean{ComputableAnalysis.RealRaw.mul}
+\uses{def:raw-real,def:stage-schedule,def:raw-real-sign}
+Let \(x\) and \(y\) be real numbers:
+\[
+  x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}.
+\]
+Their sum is defined stagewise:
+\[
+  x+y := [a_n+c_n,b_n+d_n]_{n\in\N},
+\]
+Negation of \([c_n,d_n]\) is given by \([-d_n,-c_n]\), so the difference is
+\[
+  x-y := [a_n-d_n,b_n-c_n]_{n\in\N},
+\]
+The product is defined by taking the bounding interval of all endpoint
+products:
+\[
+  xy:=
+  \left[
+    \min S_n,\max S_n
+  \right]_{n\in\N},
+  \qquad
+  S_n=\{a_nc_n,a_nd_n,b_nc_n,b_nd_n\}.
+\]
+If \(x\) is nonzero, then every sufficiently late interval avoids
+zero.  After passing to a stage schedule whose first stage is late enough,
+we define
+\[
+  x^{-1}:= [ b_{\sigma(n)}^{-1}, a_{\sigma(n)}^{-1} ]_{n\in\N}.
+\]
+Then \(y/x\) is defined as \(yx^{-1}\), when \(x\) is nonzero.
+\end{definition}
+
+
+\begin{proposition}[Arithmetic preserves real numbers]\label{prop:raw-arithmetic-valid}
+\uses{def:raw-real,def:raw-real-arithmetic}
+The operations \(x+y\), \(x-y\), \(-x\), and \(xy\) are real numbers
+whenever \(x\) and \(y\) are.  If \(x\) is nonzero, then \(x^{-1}\)
+is also a real number.
+\end{proposition}
+
+\begin{definition}[Equivalence of real numbers]\label{def:raw-equiv}
+\lean{ComputableAnalysis.RealRaw.Equiv}
+\uses{def:raw-real,def:stage-schedule}
+Two real numbers
+\[
+  x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}
+\]
+are \emph{equivalent} if there exist stage schedules \(\alpha,\beta:\N\to\N\) 
+such that \( \alpha\ldot x \) overlaps with \(\beta\ldot y\) at all stages, i.e.,
+\[
+  [a_{\alpha(n)},b_{\alpha(n)}] \mbox{ overlaps with }
+  [c_{\beta(n)},d_{\beta(n)}]
+  \qquad\text{for all }n.
+\]
+\end{definition}
+
+\begin{proposition}[Sign respects equivalence]\label{prop:raw-sign-equiv}
+\uses{def:raw-real-sign,def:raw-equiv}
+If \(x\sim y\), then \(x\) is positive if and only if \(y\) is positive,
+and \(x\) is negative if and only if \(y\) is negative.
+\end{proposition}
+
+\begin{proposition}[Arithmetic respects equivalence]\label{prop:raw-arithmetic-equiv}
+\lean{ComputableAnalysis.RealRaw.add_equiv}
+\lean{ComputableAnalysis.RealRaw.sub_equiv}
+\uses{def:raw-real-arithmetic,def:raw-equiv}
+If \(x\sim x'\) and \(y\sim y'\), then
+\[
+  x+y\sim x'+y',\qquad x-y\sim x'-y',
+\]
+and similarly for negation, multiplication, and every arithmetic operation
+whose interval algorithm has been certified.
+\end{proposition}
+
+\begin{definition}[Abstract real numbers]\label{def:reals-quotient}
+\uses{def:raw-real,def:raw-equiv}
+The \emph{abstract real numbers} are the equivalence classes of real numbers
+under the equivalence relation above.  We denote this quotient by \(\R\):
+\[
+  \R=\{\text{real numbers}\}/\sim.
+\]
+After passing to the quotient, a real number in the sense above may be referred to as a
+\emph{representative} of the abstract real number it determines.  When the
+distinction is clear, we simply call elements of \(\R\) real numbers.  The
+rational number \(q\in\Q\) is represented by the constant representative
+\[
+  [q,q]_{n\in\N}
+\]
+\end{definition}
+
+\begin{definition}[Positive and negative abstract real numbers]\label{def:abstract-real-sign}
+\uses{def:reals-quotient,def:raw-real-sign,prop:raw-sign-equiv}
+An abstract real number \(X\in\R\) is \emph{positive} if one, equivalently
+every, representative of \(X\) is positive.  It is \emph{negative} if one,
+equivalently every, representative of \(X\) is negative.
+\end{definition}
+
+\begin{theorem}[Field of abstract real numbers]\label{thm:raw-reals-field}
+\uses{def:reals-quotient,prop:raw-arithmetic-valid,prop:raw-arithmetic-equiv}
+The arithmetic operations on real numbers descend to abstract real
+numbers, and \(\R\) forms a field.  The inverse of a nonzero class is
+represented by first finding a stage whose interval avoids \(0\), then
+applying rational interval reciprocal arithmetic from that stage onward.
+\end{theorem}
+
+\begin{definition}[Order on abstract real numbers]\label{def:abstract-real-order}
+\uses{def:abstract-real-sign,thm:raw-reals-field}
+For abstract real numbers \(X,Y\in\R\), define
+\[
+  X<Y
+  \quad\Longleftrightarrow\quad
+  Y-X\ \text{is positive}.
+\]
+Equivalently, if \(x=[a_n,b_n]_{n\in\N}\) and
+\(y=[c_n,d_n]_{n\in\N}\) are representatives of \(X\) and \(Y\), then
+\(X<Y\) means that for some stage \(N\),
+\[
+  0<c_N-b_N.
+\]
+\end{definition}
+
+\begin{proposition}[Order is well-defined]\label{prop:abstract-real-order-well-defined}
+\uses{def:abstract-real-order,prop:raw-sign-equiv,prop:raw-arithmetic-equiv}
+The relation \(<\) is independent of the chosen representatives.
+\end{proposition}
+
+\section{Examples of real numbers}
+
+\begin{remark}[Types of real numbers]\label{rem:sources-of-raw-reals}
+\uses{def:interval-sequence,def:raw-real}
+In practice, there are various ways of defining real numbers, most of which
+fall into one of the following types:
+\begin{itemize}
+  \item Algebraic numbers, i.e., solutions to polynomial equations such as
+  \(x^2-2=0\).  Newton's method, or tangent-secant method, works well here, starting with a rational
+  interval such as \([1,2]\).
+
+  \item Infinite series, for example,
+  \[
+    \frac{\pi}{4}
+    =
+    1-\frac{1}{3}+\frac{1}{5}-\frac{1}{7}+\cdots
+  \]
+  and
+  \[
+    \frac{\pi^2}{6}
+    =
+    1+\frac{1}{4}+\frac{1}{9}+\frac{1}{16}+\cdots .
+  \]
+  of Leibniz and Euler. These are easy to implement, though the latter requires a little
+  care with the upper bound (hint: telescoping sum).
+
+  \item Continued fractions, such as
+  \[
+    \frac{4}{\pi}
+    =
+    1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cfrac{7^2}{2+\ddots}}}}.
+  \]
+  and finite truncations work as rational bounds.
+
+  \item Periods, i.e., integrals of rational or algebraic functions:
+  \[
+    \frac{\pi}{4}
+    =
+    \int_0^1\frac{\dd x}{1+x^2},
+  \]
+  \[
+    \frac{\pi}{6}
+    =
+    \int_0^{1/2}\frac{\dd x}{\sqrt{1-x^2}},
+  \]
+  \[
+    \frac{\pi}{12}+\frac{\sqrt3}{8}
+    =
+    \int_0^{1/2}\sqrt{1-x^2}\,\dd x.
+  \]
+  and upper and lower Riemann sums work. (The last one is what Newton used to compute \(\pi\),
+  with binomial expansion.)
+
+  \item Integrals (proper or not) of transcendental functions are also
+  likely in play, for instance
+  \[
+    \sqrt{2\pi}
+    =
+    \int_{-\infty}^{\infty} e^{-x^2/2}\,\dd x.
+  \]
+\end{itemize}
+
+One may define \(\pi\) by one of these formulas, and the others would be
+theorems (of equivalence of two real numbers). Or perhaps one should
+define \(\pi\) by Archimedes' method of exhaustion.
+\end{remark}
+
+\begin{remark}[Functions]\label{rem:parameterized-constructions}
+\uses{rem:sources-of-raw-reals}
+In many of these algorithms, there is a natural variable that could assume
+different values (\(\rm sqrt\), \(\arctan\), \(\arcsin\) in the examples above), 
+so it makes sense to define (computable) \emph{functions} first, as an algorithm
+\[
+  n, t \mapsto [a_n(t),b_n(t)].
+\]
+However, not all (rational) values of \(t\) would result in a real number.
+\end{remark}
+
+\begin{remark}[Complex parameters]\label{rem:complex-parameters}
+\uses{rem:parameterized-constructions,def:qbox}
+Many of these variables can also take complex values (at least for \(t+si\) with \(t, s \in \Q\)).
+For example, power series may be evaluated inside a disk in the complex plane, and integrals can
+be taken over a path in the complex plane (Abelian integrals).
+\end{remark}
+
+\begin{remark}[Calculus as equivalence]\label{rem:calculus-as-equivalence}
+\uses{def:raw-equiv,rem:sources-of-raw-reals}
+A great deal of calculus (of differentials and integrals) is the art of proving that two
+real numbers are equivalent. In fact, the great innovation of Newton and
+Leibniz is that the art can be turned mechanical, with the formula
+\[
+  \int_a^b f'(x)\, dx = f(b) - f(a)
+\]
+\end{remark}
+
+\section{Functions and domains}
+
+\begin{definition}[Real-valued function]\label{def:real-fun-raw}
+\lean{ComputableAnalysis.RealFunRaw}
+\uses{def:raw-real}
+A real-valued function consists of a rational domain predicate
+\[
+  D_f\subseteq \Q
+\]
+and an evaluator
+\[
+  f_q:\N\to\{\text{rational intervals}\}
+\]
+for each \(q\in D_f\).  Validity says that for every \(q\in D_f\), the
+sequence \(f_q\) is a real number.
+\end{definition}
+
+\begin{definition}[Function on an interval]\label{def:function-on-interval}
+\lean{ComputableAnalysis.FunctionOnInterval}
+\uses{def:qinterval,def:real-fun-raw}
+A function on a rational interval \([a,b]\) is a partial real-valued function
+\(f\), a proof that every rational point \(x\in\Q\cap[a,b]\) is in the
+domain of \(f\), and a proof that every such point evaluates to a real
+number.
+\end{definition}
+
+\begin{definition}[Interval regularity]\label{def:interval-regular}
+\lean{ComputableAnalysis.IntervalRegularOn}
+\uses{def:function-on-interval}
+Let \(F\) be a function on \([a,b]\).  An interval-regularity
+certificate assigns to each rational subinterval
+\[
+  K=[r,s]\subseteq [a,b]
+\]
+and each stage \(n\) a rational output interval \(Y(K,n)\).  It supplies a
+modulus \(M:\N\to\N\) such that whenever
+\[
+  s-r\le \frac{1}{M(n)},
+\]
+and \(Y(K,n)=[u,v]\), we have
+\[
+  0\le v-u\le \frac{1}{n},
+\]
+and for every rational point \(x\in K\), the point-value interval
+\(F(x,n)\) overlaps \(Y(K,n)\).
+\end{definition}
+
+\begin{remark}[Completeness is replaced by moduli]\label{rem:completeness-replaced-by-moduli}
+\uses{def:interval-regular}
+Classical compactness, uniform continuity, and existence of suprema are not
+used as black boxes.  The project records the finite data that those theorems
+usually hide: interval images, rates, nesting, and overlap proofs.
+\end{remark}
+
+\section{Complex numbers}
+
+We could define complex numbers as pairs of real numbers.  Instead, we use
+box sequences, the complex analogue of interval sequences.
+
+\begin{definition}[Rational box]\label{def:qbox}
+\lean{ComputableAnalysis.QBox}
+\uses{def:qinterval}
+A \emph{rational box} is a formal expression
+\[
+  [a,b]+i[c,d],
+\]
+where \([a,b]\) and \([c,d]\) are rational intervals.  Here \(i\) is a
+formal symbol marking the second coordinate; the rule \(i^2=-1\) is enforced
+by the multiplication formula below.
+\end{definition}
+
+\begin{definition}[complex number]\label{def:complex-raw}
+\lean{ComputableAnalysis.ComplexRaw}
+\uses{def:qbox,def:raw-real,def:raw-equiv}
+A \emph{complex number} is a box sequence
+\[
+  z=\bigl([a_n,b_n]+i[c_n,d_n]\bigr)_{n\in\N}
+\]
+whose real and imaginary coordinate interval sequences are real numbers.
+Two complex numbers are equivalent when their real parts are equivalent and
+their imaginary parts are equivalent.
+\end{definition}
+
+\begin{definition}[Complex arithmetic]\label{def:complex-arithmetic}
+\lean{ComputableAnalysis.ComplexRaw.add}
+\lean{ComputableAnalysis.ComplexRaw.mul}
+\uses{def:complex-raw,def:raw-real-arithmetic}
+For complex numbers
+\[
+  z=x+iy,\qquad w=u+iv,
+\]
+define
+\[
+  z+w=(x+u)+i(y+v),\qquad -z=(-x)+i(-y),
+\]
+and
+\[
+  zw=(xu-yv)+i(xv+yu).
+\]
+At the level of rational boxes, multiplication is implemented by applying
+real interval arithmetic to these four real products and taking bounding
+intervals.
+\end{definition}
+
+\begin{definition}[Complex inverse]\label{def:complex-inverse}
+\lean{ComputableAnalysis.ComplexRaw.inv}
+\uses{def:complex-arithmetic,def:raw-real-arithmetic,def:raw-real-sign}
+A complex number \(z=x+iy\) is \emph{nonzero} if
+\[
+  x^2+y^2
+\]
+is nonzero as a real number.  For nonzero \(z\), define
+\[
+  z^{-1}
+  =
+  \frac{x}{x^2+y^2}
+  -
+  i\,\frac{y}{x^2+y^2}.
+\]
+\end{definition}
+
+\begin{definition}[Abstract complex numbers]\label{def:complex-quotient}
+\uses{def:complex-raw}
+The \emph{abstract complex numbers} are the equivalence classes of
+complex numbers under the equivalence relation above.  We denote this
+quotient by \(\C\):
+\[
+  \C=\{\text{complex numbers}\}/\sim.
+\]
+After passing to the quotient, a complex number in the sense above is called
+a \emph{representative} of the abstract complex number it determines.  When
+the distinction is clear, we simply call elements of \(\C\) complex numbers.
+\end{definition}
+
+\begin{theorem}[Field of abstract complex numbers]\label{thm:complex-field}
+\uses{def:complex-quotient,def:complex-arithmetic,def:complex-inverse}
+The arithmetic operations above descend to abstract complex numbers, and
+\(\C\) forms a field.
+\end{theorem}
+
+\begin{definition}[Embedding of real numbers]\label{def:real-embedding-complex}
+\uses{def:reals-quotient,def:complex-quotient}
+The embedding
+\[
+  \iota:\R\hookrightarrow \C
+\]
+sends the abstract real number represented by \(x\) to the abstract complex
+number represented by
+\[
+  x+i0.
+\]
+\end{definition}
+
+\begin{proposition}[Real embedding respects arithmetic]\label{prop:real-embedding-complex}
+\uses{def:real-embedding-complex,thm:raw-reals-field,thm:complex-field}
+The embedding \(\iota\) respects \(0\), \(1\), addition, negation,
+multiplication, and inverses of nonzero real numbers.
+\end{proposition}

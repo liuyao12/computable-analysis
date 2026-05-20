@@ -1,0 +1,27 @@
+\chapter*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+
+The aim of this project is to formalize a strain of classical mathematics
+that was already effective in practice before the modern completeness theory
+of the real numbers was isolated.  The guiding idea is simple: replace an
+appeal to a completed continuum by a transparent rational interval algorithm,
+then prove the finite estimates that make the algorithm valid.
+
+The main objects are therefore not arbitrary points of a complete metric
+space.  They are algorithms
+\[
+  n \longmapsto [a_n,b_n],
+  \qquad a_n,b_n\in\Q,\qquad a_n\le b_n,
+\]
+whose intervals are nested and whose widths shrink to zero.  Equality means
+overlap at every requested precision, possibly after cofinal changes of
+stage.  This is strong enough for the fundamental theorem of calculus, the
+fundamental theorem of algebra, Archimedes' computation of pi, Euler's
+series arguments, and the elementary functions, but it keeps the proof
+obligations finite and inspectable.
+
+\input{01-foundations.tex}
+\input{02-effective-calculus.tex}
+\input{03-algebra-fta.tex}
+\input{04-classical-results.tex}
+\input{05-roadmap.tex}

@@ -1,0 +1,244 @@
+\chapter{Classical Results in Effective Form}
+
+\section{Euclidean arithmetic and irrationality}
+
+\begin{theorem}[Euclid's infinitude of primes]\label{thm:euclid-primes}
+For every \(N\in\N\), there is a prime \(p>N\).  The finite argument is the
+usual one: let
+\[
+  M=1+\prod_{q\le N,\ q\ \mathrm{prime}} q.
+\]
+Any prime divisor \(p\mid M\) is not among the primes \(q\le N\), so \(p>N\).
+\end{theorem}
+
+\begin{theorem}[Irrationality of nonsquare square roots]
+\label{thm:sqrt-irrational}
+\lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
+\uses{def:raw-real}
+Let \(q\in\Q_{\ge 0}\).  If there is no \(r\in\Q\) with \(r^2=q\), then the
+computable square-root real number for \(q\) is irrational:
+\[
+  \sqrt q\notin\Q.
+\]
+Equivalently, for a rational number in lowest terms, \(\sqrt q\) is rational
+exactly when the normalized numerator and denominator are both integer
+squares.
+\end{theorem}
+
+\section{Archimedes and pi}
+
+\begin{definition}[Pythagorean circle samples]\label{def:pythagorean-samples}
+\lean{ComputableAnalysis.RationalCircle.Stage.point}
+For \(u\in\Q_{\ge 0}\), set
+\[
+  P(u)=
+  \left(
+    \frac{1-u^2}{1+u^2},
+    \frac{2u}{1+u^2}
+  \right).
+\]
+Then
+\[
+  P(u)_x^2+P(u)_y^2=1.
+\]
+Sampling \(u=k/N\) gives rational points on the first quadrant of the unit
+circle, avoiding trigonometric functions.
+\end{definition}
+
+\begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}
+\uses{def:pythagorean-samples,def:raw-equiv}
+At each rational sample stage, the interval for pi obtained from unit-disk
+area overlaps the interval for pi obtained from half-circumference:
+\[
+  \pi_{\mathrm{area}}\Equiv \pi_{\mathrm{circ}}.
+\]
+The proof reduces to finite inequalities comparing inscribed chords and
+outer tangent segments.  The current Lean proof target is
+\code{ComputableAnalysis.PiProofs.archimedesTheorem}.
+\end{theorem}
+
+\begin{conjecture}[Geometric pi validity]\label{conj:geometric-pi-validity}
+\uses{thm:finite-archimedes,def:raw-real}
+The area and circumference algorithms for pi are real numbers: their intervals
+are ordered, nested under dyadic refinement, and have widths tending to zero.
+The current Lean proof package target is
+\code{ComputableAnalysis.PiProofs.ValidityProofs}.
+\end{conjecture}
+
+\section{Arctangent, Leibniz, and Machin}
+
+\begin{definition}[Power-series arctangent]\label{def:arctan-series}
+\lean{ComputableAnalysis.arctan}
+\uses{def:raw-real}
+For \(|x|\le 1\), the arctangent series is represented by alternating
+intervals for
+\[
+  \arctan(x)=
+  x-\frac{x^3}{3}+\frac{x^5}{5}-\frac{x^7}{7}+\cdots .
+\]
+The interval at stage \(n\) is bounded by two consecutive alternating partial
+sums.
+\end{definition}
+
+\begin{theorem}[Leibniz as arctangent]\label{thm:leibniz-arctan}
+\uses{def:arctan-series,def:raw-equiv}
+The Leibniz pi algorithm is equivalent to four times the arctangent series at
+\(1\):
+\[
+  \pi_{\mathrm{Leibniz}}
+  \Equiv
+  4\arctan(1).
+\]
+Equivalently,
+\[
+  \pi
+  =
+  4\left(1-\frac13+\frac15-\frac17+\cdots\right)
+\]
+as an equivalence of real numbers.
+The current Lean proof target is
+\code{ComputableAnalysis.PiProofs.piLeibniz\_equiv\_four\_arctan\_one}.
+\end{theorem}
+
+\begin{theorem}[Machin tangent identity]\label{thm:machin-tangent}
+\uses{def:arctan-series,def:qbox}
+The rational tangent algebra proves
+\[
+  \tan\!\left(4\arctan\frac15-\arctan\frac{1}{239}\right)=1.
+\]
+Equivalently, the Gaussian-rational identity
+\[
+  (5+i)^4=(2+2i)(239+i)
+\]
+records the same branch calculation.
+The current Lean proof target is
+\code{ComputableAnalysis.PiProofs.MachinIdentity.quarter\_tangent\_identity}.
+\end{theorem}
+
+\begin{conjecture}[Leibniz-Machin agreement]\label{conj:leibniz-machin}
+\uses{thm:leibniz-arctan,thm:machin-tangent,def:raw-equiv}
+The Leibniz and Machin interval algorithms compute the same abstract real
+number:
+\[
+  4\arctan(1)
+  \Equiv
+  16\arctan\frac15-4\arctan\frac{1}{239}.
+\]
+The remaining analytic bridge is that the power-series arctangent respects
+the geometric branch equality on the certified domain \([-1,1]\).
+The current Lean proposition target is
+\code{ComputableAnalysis.PiProofs.LeibnizEqMachin}.
+\end{conjecture}
+
+\section{Exponential, trigonometric functions, and Taylor expansions}
+
+\begin{definition}[Exponential representations]\label{def:exp-reps}
+\lean{ComputableAnalysis.ExpProofs.EPowerSeriesEqEuler}
+\uses{def:raw-equiv}
+The project compares at least two algorithms for \(e\):
+\[
+  e_{\mathrm{series}}
+  =
+  \sum_{n=0}^{\infty}\frac1{n!},
+  \qquad
+  e_{\mathrm{Euler}}
+  =
+  \lim_{m\to\infty}\left(1+\frac1m\right)^m.
+\]
+Both are implemented as rational interval algorithms; equality means
+equivalence of real numbers, not equality in an assumed completed \(\R\).
+\end{definition}
+
+\begin{theorem}[Formal derivative table]\label{thm:formal-derivative-table}
+\lean{ComputableAnalysis.FirstYearCalculus.checked_power_series_table}
+The coefficient streams for the standard power series satisfy the familiar
+formal identities:
+\[
+  (\exp)'=\exp,\qquad
+  (\sin)'=\cos,\qquad
+  (\cos)'=-\sin,
+\]
+\[
+  (\sinh)'=\cosh,\qquad
+  (\cosh)'=\sinh.
+\]
+\end{theorem}
+
+\begin{definition}[Taylor by iterated FTC]\label{def:taylor-iterated-ftc}
+\lean{ComputableAnalysis.Taylor.IteratedFTCChain}
+\uses{conj:general-effective-ftc}
+A Taylor expansion is generated by repeatedly applying the effective FTC:
+\[
+  F(x)
+  =
+  F(a)+\int_a^x F'(t)\dd t,
+\]
+\[
+  F'(t)
+  =
+  F'(a)+\int_a^t F''(s)\dd s,
+\]
+and so on.  After \(n\) steps this gives the polynomial part plus an
+explicit iterated-integral remainder.
+\end{definition}
+
+\begin{theorem}[Arctangent kernel remainder]\label{thm:atan-kernel-rem}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finiteRemainderRoute}
+\uses{def:taylor-iterated-ftc}
+\leanok
+For rational \(x\), the algebraic identity
+\[
+  \frac{1}{1+x^2}
+  =
+  \sum_{k=0}^{n} (-1)^k x^{2k}
+  +
+  \frac{(-1)^{n+1}x^{2n+2}}{1+x^2}
+\]
+holds with the effective bound
+\[
+  \left|
+    \frac{(-1)^{n+1}x^{2n+2}}{1+x^2}
+  \right|
+  \le |x|^{2n+2}.
+\]
+This is the finite algebra behind the arctangent Taylor remainder.
+\end{theorem}
+
+\section{Euler's Basel problem}
+
+\begin{definition}[Zeta-two interval series]\label{def:zeta-two-raw}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw}
+\uses{def:raw-real}
+The interval algorithm for \(\zeta(2)\) is
+\[
+  Z_n=
+  \left[
+    \sum_{k=1}^{n}\frac1{k^2},
+    \sum_{k=1}^{n}\frac1{k^2}+\frac1n
+  \right]
+\]
+for \(n>0\), with a harmless coarse stage at \(n=0\).
+\end{definition}
+
+\begin{theorem}[Basel series validity]\label{thm:zeta-two-valid}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
+\uses{def:zeta-two-raw,def:raw-real}
+\leanok
+The intervals \(Z_n\) form a real number.  The key finite estimate is the
+telescoping bound
+\[
+  \frac{1}{(m+1)^2}\le \frac1m-\frac1{m+1}.
+\]
+\end{theorem}
+
+\begin{conjecture}[Euler's Basel theorem]\label{conj:basel}
+\lean{ComputableAnalysis.Basel.eulerBasel_geometricPi}
+\uses{def:zeta-two-raw,conj:geometric-pi-validity,def:raw-equiv}
+For the geometric pi real number,
+\[
+  \zeta(2)\Equiv \frac{\pi^2}{6}.
+\]
+Possible constructive routes include Euler's sine product, a Fourier-series
+argument with explicit rational tail bounds, or a contour-integral proof once
+the complex path-integral layer is mature.
+\end{conjecture}

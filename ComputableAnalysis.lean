@@ -1,0 +1,29 @@
+-- This module serves as the root of the `ComputableAnalysis` library.
+-- Import modules here that should be built as part of the library.
+import ComputableAnalysis.AbelianIntegrals
+import ComputableAnalysis.Algebraic
+import ComputableAnalysis.AlgebraicNumbers
+import ComputableAnalysis.AlgebraicFunctions
+import ComputableAnalysis.Basic
+import ComputableAnalysis.Basel
+import ComputableAnalysis.Calculus
+import ComputableAnalysis.ComplexInterval
+import ComputableAnalysis.ComplexPathIntegral
+import ComputableAnalysis.ComplexPolynomial
+import ComputableAnalysis.Differential
+import ComputableAnalysis.DirichletSeries
+import ComputableAnalysis.Elementary
+import ComputableAnalysis.ElementaryFunctions
+import ComputableAnalysis.Exp
+import ComputableAnalysis.ExpProofs
+import ComputableAnalysis.Extension
+import ComputableAnalysis.FirstYearCalculus
+import ComputableAnalysis.FTC
+import ComputableAnalysis.FTA
+import ComputableAnalysis.FunctionDomains
+import ComputableAnalysis.Pi
+import ComputableAnalysis.RationalCircle
+import ComputableAnalysis.Polynomial
+import ComputableAnalysis.PowerSeries
+import ComputableAnalysis.Series
+import ComputableAnalysis.Taylor

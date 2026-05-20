@@ -1,0 +1,125 @@
+\chapter{The Fundamental Theorem of Algebra}
+
+\section{Polynomial roots as computable objects}
+
+\begin{definition}[Rational-complex polynomial]\label{def:qcomplex-poly}
+\lean{ComputableAnalysis.CPoly.Coeffs}
+\uses{def:complex-raw}
+A rational-complex polynomial is a finite list
+\[
+  (a_0,\ldots,a_d),\qquad a_j\in\Qi,
+\]
+interpreted as
+\[
+  p(z)=a_0+a_1z+\cdots+a_dz^d.
+\]
+Positive degree means that some coefficient with index \(d\ge 1\) is
+nonzero.
+\end{definition}
+
+\begin{definition}[Computable root]\label{def:computable-root}
+\lean{ComputableAnalysis.IsComputableRoot}
+\uses{def:qcomplex-poly,def:complex-raw,def:raw-equiv}
+Let \(p\in\Qi[z]\).  A computable root of \(p\) is a complex number \(z\)
+such that the interval evaluation of \(p(z)\) is equivalent to zero:
+\[
+  p(z)\Equiv 0.
+\]
+\end{definition}
+
+\begin{definition}[Algebraic complex number]\label{def:algebraic-complex}
+\lean{ComputableAnalysis.AlgebraicComplex}
+\uses{def:qcomplex-poly,def:computable-root}
+An algebraic complex number is a computable complex number together with a
+rational-complex annihilating polynomial.  The intended mature version also
+stores enough isolation data to make arithmetic and equality computable.
+\end{definition}
+
+\section{Base cases}
+
+\begin{theorem}[Monic linear polynomials]\label{thm:monic-linear-root}
+\lean{ComputableAnalysis.monicLinear_has_computable_root}
+\uses{def:computable-root}
+\leanok
+For every \(r\in\Qi\), the polynomial \(z-r\) has the computable root \(r\).
+\end{theorem}
+
+\begin{theorem}[The root of \(z^2+1\)]\label{thm:z2-plus-one-root}
+\lean{ComputableAnalysis.zSqPlusOne_has_computable_root}
+\uses{def:computable-root}
+\leanok
+The polynomial \(z^2+1\) has \(i\) as a computable root:
+\[
+  i^2+1=0.
+\]
+\end{theorem}
+
+\section{FTA statements}
+
+\begin{conjecture}[Computable FTA]\label{conj:computable-fta}
+\lean{ComputableAnalysis.ComputableFTA}
+\uses{def:qcomplex-poly,def:computable-root}
+Every positive-degree rational-complex polynomial has a computable complex
+root:
+\[
+  \forall p\in\Qi[z],\quad \deg(p)>0
+  \Longrightarrow
+  \exists z\in\ComplexRaw,\quad z\Valid\ \text{and}\ p(z)\Equiv 0.
+\]
+\end{conjecture}
+
+\begin{conjecture}[Algebraic FTA]\label{conj:algebraic-fta}
+\lean{ComputableAnalysis.AlgebraicFTA}
+\uses{def:qcomplex-poly,def:algebraic-complex}
+Every positive-degree rational-complex polynomial has an algebraic complex
+root:
+\[
+  \forall p\in\Qi[z],\quad \deg(p)>0
+  \Longrightarrow
+  \exists \alpha\ \text{algebraic},\quad p(\alpha)\Equiv 0.
+\]
+\end{conjecture}
+
+\begin{theorem}[Algebraic roots give computable roots]
+\label{thm:computable-fta-of-algebraic-fta}
+\lean{ComputableAnalysis.ComputableFTA_of_AlgebraicFTA}
+\uses{conj:computable-fta,conj:algebraic-fta}
+\leanok
+The algebraic FTA implies the computable FTA.
+\end{theorem}
+
+\section{Two constructive routes}
+
+\begin{proposition}[Algebraic route]\label{prop:fta-algebraic-route}
+\uses{conj:algebraic-fta}
+It is enough to build an algebraic closure of \(\Qi\) with computable
+embeddings into complex interval boxes.  The finite proof obligations are:
+\begin{enumerate}
+  \item factor a nonconstant polynomial into irreducible factors over \(\Qi\);
+  \item adjoin one formal root of an irreducible factor by a quotient algebra;
+  \item isolate a complex embedding of that root by rational boxes;
+  \item prove that interval evaluation overlaps zero.
+\end{enumerate}
+\end{proposition}
+
+\begin{proposition}[Analytic search route]\label{prop:fta-analytic-route}
+\uses{conj:computable-fta,def:qbox}
+An alternative proof avoids abstract algebraic closure.  For a positive-degree
+polynomial \(p\), choose a rational square \(B\subset\C\) so large that
+\[
+  |a_d z^d| >
+  |a_{d-1}z^{d-1}+\cdots+a_0|
+  \qquad (z\in\partial B).
+\]
+Then the winding number of \(p(\partial B)\) around zero is \(d\).  Subdivide
+\(B\) rationally, using interval arithmetic to discard boxes whose image
+does not meet zero and to keep a box whose root count is positive.  A nested
+sequence of such boxes is a computable root.
+\end{proposition}
+
+\begin{remark}
+The algebraic route is closer to pre-completeness algebra.  The analytic
+route is closer to the usual complex-analytic proof of FTA, but it must be
+made finite by replacing open-cover and compactness arguments with explicit
+box bounds and winding-number computations.
+\end{remark}

@@ -1,0 +1,87 @@
+\chapter{Formalization Roadmap}
+
+\section{What counts as progress}
+
+The project should prefer theorem statements that end in one of the following
+finite conclusions:
+\[
+  \RealRaw.\Valid,\qquad
+  \ComplexRaw.\Valid,\qquad
+  x\Equiv y,\qquad
+  \close_\eps(I,J).
+\]
+These are the computational substitutes for classical existence and equality.
+Whenever a classical proof says "choose a sufficiently fine partition" or
+"take a small enough neighborhood", the blueprint should identify the
+corresponding explicit modulus.
+
+\section{Near-term milestones}
+
+\begin{enumerate}
+  \item Prove the exact rational FTC route:
+  turn \cref{thm:finite-ftc-estimate} into Lean constructors for
+  `EffectiveFTCExact` and `EffectiveFTC`.
+
+  \item Prove integrability from interval regularity:
+  refine \cref{conj:integral-existence} into concrete Riemann-sum plans,
+  nesting lemmas, and width bounds.
+
+  \item Extend polynomial calculus:
+  formalize exact derivative and FTC certificates for all rational
+  polynomials, then rational functions on certified denominator-nonzero
+  intervals.
+
+  \item Finish arctangent soundness:
+  prove that geometric arctangent and power-series arctangent agree on
+  \([-1,1]\), giving \cref{conj:leibniz-machin}.
+
+  \item Finish geometric pi validity:
+  prove dyadic nesting and width shrinkage for the area and circumference
+  algorithms, completing \cref{conj:geometric-pi-validity}.
+
+  \item Choose an FTA route:
+  either develop algebraic complex numbers with isolation boxes, or develop
+  the argument-principle box-search route.
+\end{enumerate}
+
+\section{Lean declaration index}
+
+\begin{itemize}
+  \item Foundations:
+  \code{QInterval}, \code{QBox}, \code{RealRaw}, \code{RealRaw.Equiv}, \code{ComplexRaw},
+  \code{RealFunRaw}, \code{FunctionOnInterval}, \code{IntervalRegularOn}.
+
+  \item FTC:
+  \code{EffectiveDerivativeExact}, \code{EffectiveFTC},
+  \code{FTC.effectiveFTC\_equiv\_endpoint},
+  \code{DefiniteIntegralEqualsEndpointDifference}.
+
+  \item FTA:
+  \code{CPoly.Coeffs}, \code{IsComputableRoot}, \code{AlgebraicComplex},
+  \code{ComputableFTA}, \code{AlgebraicFTA},
+  \code{ComputableFTA\_of\_AlgebraicFTA}.
+
+  \item Pi:
+  \code{piLeibniz}, \code{piMachin}, \code{piCircleArea},
+  \code{piCircumference}, \code{PiProofs.archimedesTheorem},
+  \code{PiProofs.LeibnizEqMachin}.
+
+  \item Series and elementary functions:
+  \code{DirichletSeries.zetaTwoRaw},
+  \code{Basel.eulerBasel\_geometricPi},
+  \code{ExpProofs.EPowerSeriesEqEuler},
+  \code{Taylor.IteratedFTCChain},
+  \code{Taylor.ArctanKernel.finiteRemainderRoute}.
+\end{itemize}
+
+\section{A useful style rule}
+
+Every major theorem should have three layers:
+\begin{enumerate}
+  \item a readable mathematical statement in the blueprint;
+  \item a Lean proposition or structure with the same quantifier shape;
+  \item small finite lemmas that discharge the numerical or algebraic
+  estimates.
+\end{enumerate}
+This keeps the project faithful to the historical mathematics while making
+the formal work genuinely computable.
