@@ -15,6 +15,9 @@ definitions/proved bridge theorems.
 
 ## Blueprint
 
+The rendered blueprint is available at
+[liuyao12.github.io/computable-analysis](https://liuyao12.github.io/computable-analysis/).
+
 The LaTeX blueprint lives in `blueprint/`.  It is
 organized around the computable-real foundations, the effective FTC, the FTA,
 and classical pre-completeness results such as Archimedes' pi, Leibniz/Machin,
