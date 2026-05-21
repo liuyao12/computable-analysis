@@ -279,20 +279,20 @@ end SegmentIntegralRaw
 produces a computable complex number: ordered boxes, nesting, and coordinate
 widths that shrink to zero. -/
 structure RiemannSumCertificate (I : SegmentIntegralRaw) where
-  width_height_nonneg :
-    forall eps, 0 <= (I.compute eps).width /\ 0 <= (I.compute eps).height
+  ordered :
+    forall eps, (I.compute eps).Ordered
   nested :
-    forall eps delta, eps <= delta ->
-      (I.compute eps).lo.re <= (I.compute delta).lo.re /\
-      (I.compute delta).hi.re <= (I.compute eps).hi.re /\
-      (I.compute eps).lo.im <= (I.compute delta).lo.im /\
-      (I.compute delta).hi.im <= (I.compute eps).hi.im
+    forall eps delta, eps <= delta -> QBox.NestedIn (I.compute delta) (I.compute eps)
   widths_shrink : ComplexRaw.WidthsShrinkToZero I.compute
 
 namespace RiemannSumCertificate
 
 theorem valid {I : SegmentIntegralRaw} (cert : RiemannSumCertificate I) : I.Valid :=
-  ⟨cert.width_height_nonneg, cert.nested, cert.widths_shrink⟩
+  ⟨fun eps => (QBox.ordered_iff_width_height_nonneg (I.compute eps)).1 (cert.ordered eps),
+    fun eps delta h =>
+      let hnest := cert.nested eps delta h
+      ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩,
+    cert.widths_shrink⟩
 
 def complexRaw {I : SegmentIntegralRaw} (_cert : RiemannSumCertificate I) : ComplexRaw :=
   I.toComplexRaw

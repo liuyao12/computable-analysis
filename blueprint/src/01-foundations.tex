@@ -1,6 +1,6 @@
 \chapter{Interval Arithmetic}
 
-\section{Real numbers}
+\section{Real numbers \humanchecked}
 
 \begin{definition}[Rational interval]\label{def:qinterval}
 \lean{ComputableAnalysis.QInterval}
@@ -11,7 +11,7 @@ A \emph{rational interval} is a pair of rational numbers
 This is a formal interval object, not the set of rational points between
 \(a\) and \(b\).  The \emph{width} of the rational interval is defined as \(b-a\).
 
-Two rational intervals \((a, b)\) and \((c, d)\) \emph{overlap} when
+Two rational intervals \([a, b]\) and \([c, d]\) \emph{overlap} when
 \[
   a\le d\ \text{and}\ c\le b.
 \]
@@ -50,7 +50,7 @@ Formally, the last condition means
 \uses{def:interval-sequence,def:raw-real}
 When the map 
 \[
-  n\mapsto (a_n,b_n)
+  n\mapsto [a_n,b_n]
 \]
 is given by a finite, terminating algorithm, as we always do in this project,
 the real number is said to be \emph{computable}. Storing all the rational numbers
@@ -85,7 +85,7 @@ Negation of \([c_n,d_n]\) is given by \([-d_n,-c_n]\), so the difference is
 \[
   x-y := [a_n-d_n,b_n-c_n]_{n\in\N},
 \]
-The product is defined by taking the bounding interval of all endpoint
+The product is defined by taking the bounding interval of all four
 products:
 \[
   xy:=
@@ -156,38 +156,37 @@ For every stage schedule \(\sigma\), one has
 \[
   x\sim \sigma\ldot x.
 \]
-Thus, to prove \(x\sim y\), it is enough to find schedules
-\(\sigma,\tau\) and prove
+Thus, to prove \(x\sim y\), it is enough to choose schedules
+\(\sigma,\tau\) that make
 \[
-  \sigma\ldot x\sim \tau\ldot y.
+  \sigma\ldot x\sim \tau\ldot y
 \]
+easier to show.
 \end{proposition}
 
 \begin{definition}[Abstract real numbers]\label{def:reals-quotient}
+\lean{ComputableAnalysis.Real}
 \uses{def:raw-real,def:raw-equiv}
 The \emph{abstract real numbers} are the equivalence classes of real numbers
 under the equivalence relation above.  We denote this quotient by \(\R\):
 \[
   \R=\{\text{real numbers}\}/\sim.
 \]
-After passing to the quotient, a real number in the sense above may be referred to as a
-\emph{representative} of the abstract real number it determines.  When the
-distinction is clear, we simply call elements of \(\R\) real numbers.
+After passing to the quotient, a real number in the sense above is a
+\emph{representative} of the abstract real number it determines.
 \end{definition}
 
 \begin{theorem}[\(\R\) extends \(\Q\) as an ordered field]\label{thm:raw-reals-field}
+\lean{ComputableAnalysis.Real.ofRat}
 \lean{ComputableAnalysis.RealRaw.add_equiv}
 \lean{ComputableAnalysis.RealRaw.sub_equiv}
 \uses{def:reals-quotient,def:raw-real-sign,def:raw-real-arithmetic,prop:raw-arithmetic-valid}
 The arithmetic operations and order on real numbers are compatible with
 equivalence, and therefore descend to equivalence classes.  With these
 descended operations and order, \(\R\) is an ordered field.
-The embedding \(\Q\hookrightarrow\R\) sends \(q\) to the class of
-\[
-  [q,q]_{n\in\N}.
-\]
-It preserves \(0\), \(1\), addition, negation, multiplication, inverses of
-nonzero rational numbers, and order.
+The map \(\Q\hookrightarrow\R\) that sends \(q\) to the class of
+\( [q,q]_{n\in\N} \)
+is a (homomorphic) embedding of ordered fields.
 \end{theorem}
 
 \begin{remark}[Completeness]\label{rem:real-completeness}
@@ -200,7 +199,7 @@ existence or convergence, we build the relevant interval sequence and prove
 its validity directly.
 \end{remark}
 
-\section{Examples of real numbers}
+\section{Examples of real numbers \humanchecked}
 
 \begin{remark}[Types of real numbers]\label{rem:sources-of-raw-reals}
 \uses{def:interval-sequence,def:raw-real}
@@ -267,130 +266,126 @@ theorems (of equivalence of two real numbers). Or perhaps one should
 define \(\pi\) by Archimedes' method of exhaustion.
 \end{remark}
 
-\begin{remark}[Functions]\label{rem:parameterized-constructions}
+\begin{remark}[Calculus as equivalence]\label{rem:calculus-as-equivalence}
+\uses{def:raw-equiv,rem:sources-of-raw-reals}
+A great deal of calculus is the art of proving that independently constructed
+real numbers are equivalent. The great advance by Newton and Leibniz is
+to turn that art mechanical, by leveraging the fundamental formula
+\[
+  \int_a^b f'(x)\,\dd x = f(b)-f(a)
+\]
+which we shall establish, \emph{without} the completeness of real numbers.
+\end{remark}
+
+\begin{remark}[Algorithm with a variable]\label{rem:parameterized-constructions}
 \uses{rem:sources-of-raw-reals}
 In many of these algorithms, there is a natural variable that could assume
-different values (\(\rm sqrt\), \(\arctan\), \(\arcsin\) in the examples above), 
-so it makes sense to define (computable) \emph{functions} first, as an algorithm
+different values (\(\sqrt{\phantom{x}}\), \(\arctan\), \(\arcsin\) in the
+examples above), so it makes sense to define the algorithms
 \[
-  n, t \mapsto [a_n(t),b_n(t)].
+  n,t\longmapsto [a_n(t),b_n(t)]
 \]
-However, not all (rational) values of \(t\) would result in a real number.
+to be (computable) \emph{functions}. However, not all rational values of \(t\)
+need to result in a real number.
+
+This turns out to be crucial for establishing many of the equivalences of real
+numbers, and is how calculus appears to be the study of functions.
 \end{remark}
 
 \begin{remark}[Complex variable]\label{rem:complex-parameters}
-\uses{rem:parameterized-constructions,def:qbox}
-Many of these variables can also take complex values (at least for \(t+si\) with \(t, s \in \Q\)).
-For example, power series may be evaluated inside a disk in the complex plane, and integrals can
-be taken over a path in the complex plane (Abelian integrals).
+\uses{rem:parameterized-constructions,def:qcomplex,def:qbox}
+It turns out that sometimes it makes sense for the variable to assume complex values
+(at least for \(t+si\), with \(t,s\in\Q\)).  For example, power series may be evaluated
+inside a disk in the complex plane, and integrals can be taken over paths in the complex plane.
 \end{remark}
 
-\begin{remark}[Calculus as equivalence]\label{rem:calculus-as-equivalence}
-\uses{def:raw-equiv,rem:sources-of-raw-reals}
-A great deal of calculus (of differentials and integrals) is the art of proving that two
-real numbers are equivalent. In fact, the great innovation of Newton and
-Leibniz is that the art can be turned mechanical, with the formula
-\[
-  \int_a^b f'(x)\, dx = f(b) - f(a)
-\]
-\end{remark}
+\section{Complex numbers \humanchecked}
 
-\section{Functions and domains}
+One could define complex numbers as pairs of real numbers.  Instead, we follow
+the interval arithmetic more closely, using rectangular boxes with rational corners
+from the start.
 
-\begin{definition}[Real-valued function]\label{def:real-fun-raw}
-\lean{ComputableAnalysis.RealFunRaw}
-\uses{def:raw-real}
-A real-valued function consists of a rational domain predicate
+\begin{definition}\label{def:qcomplex}
+\lean{ComputableAnalysis.QComplex}
+Let
 \[
-  D_f\subseteq \Q
+  \Q(i):=\{r+is:r,s\in\Q\},
 \]
-and an evaluator
+with the standard field operations:
 \[
-  f_q:\N\to\{\text{rational intervals}\}
+  (r+is)(u+iv)=(ru-sv)+i(rv+su),
 \]
-for each \(q\in D_f\).  Validity says that for every \(q\in D_f\), the
-sequence \(f_q\) is a real number.
+etc. We also use the coordinatewise (partial) order:
+\[
+  r+is \le u+iv
+  \quad\Longleftrightarrow\quad
+  r\le u\ \text{and}\ s\le v.
+\]
+Note that this is not a total/linear order on \(\Q(i)\).
 \end{definition}
-
-\begin{definition}[Function on an interval]\label{def:function-on-interval}
-\lean{ComputableAnalysis.FunctionOnInterval}
-\uses{def:qinterval,def:real-fun-raw}
-A function on a rational interval \([a,b]\) is a partial real-valued function
-\(f\), a proof that every rational point \(x\in\Q\cap[a,b]\) is in the
-domain of \(f\), and a proof that every such point evaluates to a real
-number.
-\end{definition}
-
-\begin{definition}[Interval regularity]\label{def:interval-regular}
-\lean{ComputableAnalysis.IntervalRegularOn}
-\uses{def:function-on-interval}
-Let \(F\) be a function on \([a,b]\).  An interval-regularity
-certificate assigns to each rational subinterval
-\[
-  K=[r,s]\subseteq [a,b]
-\]
-and each stage \(n\) a rational output interval \(Y(K,n)\).  It supplies a
-modulus \(M:\N\to\N\) such that whenever
-\[
-  s-r\le \frac{1}{M(n)},
-\]
-and \(Y(K,n)=[u,v]\), we have
-\[
-  0\le v-u\le \frac{1}{n},
-\]
-and for every rational point \(x\in K\), the point-value interval
-\(F(x,n)\) overlaps \(Y(K,n)\).
-\end{definition}
-
-\begin{remark}[Completeness is replaced by moduli]\label{rem:completeness-replaced-by-moduli}
-\uses{def:interval-regular}
-Classical compactness, uniform continuity, and existence of suprema are not
-used as black boxes.  The project records the finite data that those theorems
-usually hide: interval images, rates, nesting, and overlap proofs.
-\end{remark}
-
-\section{Complex numbers}
-
-We could define complex numbers as pairs of real numbers.  Instead, we use
-box sequences, the complex analogue of interval sequences.
 
 \begin{definition}[Rational box]\label{def:qbox}
 \lean{ComputableAnalysis.QBox}
-\uses{def:qinterval}
-A \emph{rational box} is a formal expression
+\uses{def:qcomplex}
+A \emph{rational box} is a pair
 \[
-  [a,b]+i[c,d],
+  \cbox{a}{b}\in \Q(i)\times\Q(i),
+  \qquad a\le b.
 \]
-where \([a,b]\) and \([c,d]\) are rational intervals.  Here \(i\) is a
-formal symbol marking the second coordinate; the rule \(i^2=-1\) is enforced
-by the multiplication formula below.
+Two boxes \(\cbox{a}{b}\) and
+\(\cbox{c}{d}\) \emph{overlap} if
+\[
+  a\le d\ \text{and}\ c\le b.
+\]
+\end{definition}
+
+\begin{definition}[Box sequence]\label{def:box-sequence}
+\uses{def:qbox}
+A \emph{box sequence} is a sequence of rational boxes
+\[
+  \cbox{a_n}{b_n}_{n\in\N}.
+\]
 \end{definition}
 
 \begin{definition}[complex number]\label{def:complex-raw}
 \lean{ComputableAnalysis.ComplexRaw}
-\uses{def:qbox,def:raw-real,def:raw-equiv}
-A \emph{complex number} is a box sequence
+\uses{def:box-sequence,def:raw-equiv}
+A \emph{complex number} is a nested box sequence
 \[
-  z=\bigl([a_n,b_n]+i[c_n,d_n]\bigr)_{n\in\N}
+  z=\cbox{a_n}{b_n}_{n\in\N}
 \]
-whose real and imaginary coordinate interval sequences are real numbers.
-Two complex numbers are equivalent when their real parts are equivalent and
-their imaginary parts are equivalent.
+satisfying
+\[
+  n\le m\Rightarrow a_n\le a_m\le b_m\le b_n,
+\]
+and whose real and imaginary widths both shrink to \(0\).  Equivalently, its
+coordinate interval sequences are real numbers.  Two complex numbers are
+equivalent when their boxes overlap at every stage, i.e. coordinatewise
+equivalence of the real and imaginary parts.
 \end{definition}
 
 \begin{definition}[Complex arithmetic]\label{def:complex-arithmetic}
 \lean{ComputableAnalysis.ComplexRaw.add}
 \lean{ComputableAnalysis.ComplexRaw.mul}
 \uses{def:complex-raw,def:raw-real-arithmetic}
-For complex numbers
+For complex numbers as box sequences
+\[
+  z=\cbox{a_n}{b_n}_{n\in\N},\qquad
+  w=\cbox{c_n}{d_n}_{n\in\N},
+\]
+addition is stagewise:
+\[
+  z+w=\cbox{a_n+c_n}{b_n+d_n}_{n\in\N}.
+\]
+Negation reverses the box:
+\[
+  -z=\cbox{-b_n}{-a_n}_{n\in\N}.
+\]
+For multiplication, write the same box sequences in coordinates as
 \[
   z=x+iy,\qquad w=u+iv,
 \]
-define
-\[
-  z+w=(x+u)+i(y+v),\qquad -z=(-x)+i(-y),
-\]
-and
+where \(x,y,u,v\) are real numbers.  Then define
 \[
   zw=(xu-yv)+i(xv+yu).
 \]
@@ -417,16 +412,16 @@ is nonzero as a real number.  For nonzero \(z\), define
 \end{definition}
 
 \begin{definition}[Abstract complex numbers]\label{def:complex-quotient}
+\lean{ComputableAnalysis.Complex}
 \uses{def:complex-raw}
-The \emph{abstract complex numbers} are the equivalence classes of
-complex numbers under the equivalence relation above.  We denote this
-quotient by \(\C\):
+The \emph{abstract complex numbers} are the equivalence classes of complex
+numbers under the equivalence relation above.  We denote this quotient by
+\(\C\):
 \[
   \C=\{\text{complex numbers}\}/\sim.
 \]
-After passing to the quotient, a complex number in the sense above is called
-a \emph{representative} of the abstract complex number it determines.  When
-the distinction is clear, we simply call elements of \(\C\) complex numbers.
+After passing to the quotient, a complex number in the sense above is a
+\emph{representative} of the abstract complex number it determines.
 \end{definition}
 
 \begin{theorem}[Field of abstract complex numbers]\label{thm:complex-field}
@@ -435,21 +430,120 @@ The arithmetic operations above descend to abstract complex numbers, and
 \(\C\) forms a field.
 \end{theorem}
 
-\begin{definition}[Embedding of real numbers]\label{def:real-embedding-complex}
-\uses{def:reals-quotient,def:complex-quotient}
-The embedding
+\begin{theorem}[\(\C\) extends \(\Q(i)\) and \(\R\)]\label{thm:rational-complex-field-square}
+\lean{ComputableAnalysis.ComplexRaw.ofQComplex}
+\lean{ComputableAnalysis.Complex.ofQComplex}
+\lean{ComputableAnalysis.Complex.ofReal}
+\uses{def:qcomplex,def:complex-quotient,thm:raw-reals-field,thm:complex-field}
+The natural embeddings of fields form a commutative square
 \[
-  \iota:\R\hookrightarrow \C
+\begin{array}{ccc}
+\Q & \longrightarrow & \Q(i)\\
+\downarrow & & \downarrow\\
+\R & \longrightarrow & \C
+\end{array}
 \]
-sends the abstract real number represented by \(x\) to the abstract complex
-number represented by
+of field homomorphisms.
+\end{theorem}
+
+\section{Functions and domains}
+
+\begin{definition}[Complex-valued function representation]\label{def:function-raw}
+\lean{ComputableAnalysis.FunctionRaw}
+\uses{def:qcomplex,def:complex-raw}
+A \emph{complex-valued function representation} consists of a rational domain
+predicate
 \[
-  x+i0.
+  D_f\subseteq \Q(i)
 \]
+and, for every \(q\in D_f\), a complex number
+\[
+  f(q)=\bigl(B_n(q)\bigr)_{n\in\N}.
+\]
+Validity says that each pointwise box sequence \(f(q)\) is a complex number.
+This is the underlying notion even when a concrete function is intended only
+for real inputs or real outputs.
 \end{definition}
 
-\begin{proposition}[Real embedding respects arithmetic]\label{prop:real-embedding-complex}
-\uses{def:real-embedding-complex,thm:raw-reals-field,thm:complex-field}
-The embedding \(\iota\) respects \(0\), \(1\), addition, negation,
-multiplication, and inverses of nonzero real numbers.
-\end{proposition}
+\begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}
+\lean{ComputableAnalysis.RealFunRaw}
+\uses{def:function-raw,thm:rational-complex-field-square}
+A real-input function is a complex-valued function representation whose domain
+is restricted to the rational real axis \(q=x+i0\).  It is \emph{real-valued}
+when each output box lies on the real axis, equivalently when its imaginary
+coordinate is the zero real number.
+
+The current real-function layer records this common special case directly as
+a rational domain predicate \(D_f\subseteq\Q\) and rational interval outputs.
+It should be viewed as a convenient real-axis presentation of the complex
+function layer, not as a separate foundation.
+\end{definition}
+
+\begin{definition}[Rational segment]\label{def:rational-segment}
+\uses{def:qcomplex}
+A \emph{rational segment} in the complex plane is determined by two distinct
+rational complex points \(p,q\in\Q(i)\).  Its rational points are
+\[
+  (1-t)p+tq,\qquad t\in\Q,\quad 0\le t\le 1.
+\]
+The segment is real when \(p\) and \(q\) lie on the rational real axis.
+\end{definition}
+
+\begin{definition}[Agreement on an overlap]\label{def:function-agrees-on-overlap}
+\uses{def:function-raw,def:rational-segment,def:complex-raw}
+Let \(f\) and \(g\) be complex-valued function representations.  An
+\emph{agreement-on-overlap certificate} consists of a nontrivial rational
+segment \(S\) such that every rational point of \(S\) lies in both domains, and
+for every rational point \(q\in S\), the complex numbers \(f(q)\) and \(g(q)\)
+are equivalent.
+
+This is a local agreement statement with an explicit witness.  For arbitrary
+functions it is not promoted to a global equivalence relation; transitivity
+requires additional analytic structure.
+\end{definition}
+
+\begin{definition}[Function on an interval]\label{def:function-on-interval}
+\lean{ComputableAnalysis.FunctionOnInterval}
+\uses{def:qinterval,def:real-fun-raw,def:rational-segment}
+A function on a rational interval \([a,b]\) is the real-axis special case of
+the preceding setup: the interval is the rational segment from \(a+i0\) to
+\(b+i0\), the function is defined at every rational point of that segment, and
+the pointwise outputs are real numbers.
+\end{definition}
+
+\begin{definition}[Interval regularity]\label{def:interval-regular}
+\lean{ComputableAnalysis.IntervalRegularOn}
+\uses{def:function-on-interval}
+Let \(F\) be a real-valued function on \([a,b]\).  An interval-regularity
+certificate assigns to each rational subinterval
+\[
+  K=[r,s]\subseteq [a,b]
+\]
+and each stage \(n\) a rational output interval \(Y(K,n)\).  It supplies a
+modulus \(M:\N\to\N\) such that whenever
+\[
+  s-r\le \frac{1}{M(n)},
+\]
+and \(Y(K,n)=[u,v]\), we have
+\[
+  0\le v-u\le \frac{1}{n},
+\]
+and for every rational point \(x\in K\), the point-value interval
+\(F(x,n)\) overlaps \(Y(K,n)\).
+\end{definition}
+
+\begin{remark}[Holomorphic branch equivalence]\label{rem:holomorphic-branch-equivalence}
+\uses{def:function-agrees-on-overlap}
+For later complex analysis, holomorphic function representations will carry
+stronger domain data.  On that layer, overlap should be witnessed by a
+nonempty open region, such as a rational disk contained in the intersection of
+the domains.  The identity principle can then turn local agreement on such an
+overlap into a transitive branch-equivalence relation.
+\end{remark}
+
+\begin{remark}[Completeness is replaced by moduli]\label{rem:completeness-replaced-by-moduli}
+\uses{def:interval-regular}
+Classical compactness, uniform continuity, and existence of suprema are not
+used as black boxes.  The project records the finite data that those theorems
+usually hide: interval images, rates, nesting, and overlap proofs.
+\end{remark}

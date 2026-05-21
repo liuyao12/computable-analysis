@@ -15,33 +15,6 @@ algebraic proofs are intentionally left as `sorry` placeholders for now.
 
 namespace ComputableAnalysis
 
-private theorem ofQComplex_valid (z : QComplex) :
-    (ComplexRaw.ofQComplex z).Valid := by
-  constructor
-  · intro n
-    constructor
-    · show 0 <= z.re - z.re
-      grind
-    · show 0 <= z.im - z.im
-      grind
-  · constructor
-    · intro n m hnm
-      simp [ComplexRaw.ofQComplex]
-    · intro eps
-      exact ⟨0, by
-        intro n _hn
-        constructor
-        · show ((ComplexRaw.ofQComplex z).compute n).width <= eps.val
-          simp [ComplexRaw.ofQComplex, QBox.width]
-          have hzero : z.re - z.re = 0 := by grind
-          rw [hzero]
-          exact Rat.le_of_lt eps.property
-        · show ((ComplexRaw.ofQComplex z).compute n).height <= eps.val
-          simp [ComplexRaw.ofQComplex, QBox.height]
-          have hzero : z.im - z.im = 0 := by grind
-          rw [hzero]
-          exact Rat.le_of_lt eps.property⟩
-
 namespace RatPoly
 
 abbrev Coeffs := List Rat
@@ -93,7 +66,7 @@ def IsComputableRoot (coeffs : CPoly.Coeffs) (z : ComplexCert) : Prop :=
 
 def exactComplexCert (z : QComplex) : ComplexCert where
   raw := ComplexRaw.ofQComplex z
-  valid := ofQComplex_valid z
+  valid := ComplexRaw.ofQComplex_valid z
 
 /-- Any exact rational-complex root is automatically a computable root. -/
 theorem exactRoot_is_computable

@@ -22,6 +22,7 @@ import ComputableAnalysis.FTC
 import ComputableAnalysis.FTA
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.Pi
+import ComputableAnalysis.PiProofs
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.Polynomial
 import ComputableAnalysis.PowerSeries

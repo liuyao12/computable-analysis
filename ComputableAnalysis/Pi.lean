@@ -19,11 +19,11 @@ def leibnizSeries : RealRaw where
 
 /-- Pi from the Leibniz alternating series. -/
 def piLeibniz : RealRaw :=
-  4 * leibnizSeries
+  (4 : Nat) * leibnizSeries
 
 /-- Pi from Machin's formula. -/
 def piMachin : RealRaw :=
-  4 * (4 * arctan (1 / 5) - arctan (1 / 239))
+  (4 : Nat) * ((4 : Nat) * arctan (1 / 5) - arctan (1 / 239))
 
 structure PiCirclePoint where
   x : Rat

@@ -770,13 +770,12 @@ def midpoint (x : RealRaw) (n : Nat) : Rat := (x.compute n).midpoint
 
 end RealRaw
 
-/-- A certified computable real number.
+/-- A certified handle for a defined real number.
 
-The preferred representative is the raw algorithm used for evaluation, together
-with its validity proof.  Alternative raw algorithms can be registered once
-they have been proved valid and equivalent to the preferred one.  This keeps
-computation first-class instead of hiding it behind a quotient or a separate
-certificate wrapper.
+This is the concrete project-facing layer above `RealRaw`: it records a chosen
+valid raw algorithm, together with any alternative raw algorithms already proved
+valid and equivalent to it.  The structure keeps computation first-class while
+still tracking the equivalence class it is meant to represent.
 -/
 structure Real where
   preferred : RealRaw
@@ -997,6 +996,30 @@ deriving Repr, DecidableEq
 
 namespace QComplex
 
+/-- Coordinatewise order on rational complex points.  This is a bookkeeping
+order for rectangular boxes, not the field order of a number system. -/
+instance : LE QComplex where
+  le z w := z.re <= w.re /\ z.im <= w.im
+
+@[simp] theorem le_def (z w : QComplex) :
+    z <= w ↔ z.re <= w.re /\ z.im <= w.im := Iff.rfl
+
+theorem le_refl (z : QComplex) : z <= z :=
+  ⟨Rat.le_refl, Rat.le_refl⟩
+
+instance decidableLE (z w : QComplex) : Decidable (z <= w) := by
+  change Decidable (z.re <= w.re /\ z.im <= w.im)
+  infer_instance
+
+theorem le_trans {z w u : QComplex} (hzw : z <= w) (hwu : w <= u) : z <= u :=
+  ⟨Rat.le_trans hzw.1 hwu.1, Rat.le_trans hzw.2 hwu.2⟩
+
+theorem le_antisymm {z w : QComplex} (hzw : z <= w) (hwz : w <= z) : z = w := by
+  cases z
+  cases w
+  simp at hzw hwz ⊢
+  exact ⟨Rat.le_antisymm hzw.1 hwz.1, Rat.le_antisymm hzw.2 hwz.2⟩
+
 def ofRat (q : Rat) : QComplex := { re := q, im := 0 }
 def zero : QComplex := { re := 0, im := 0 }
 def one : QComplex := { re := 1, im := 0 }
@@ -1016,6 +1039,21 @@ def inv? (z : QComplex) : Option QComplex :=
     some { re := z.re / n, im := -z.im / n }
 def div? (z w : QComplex) : Option QComplex := (inv? w).map (mul z)
 
+instance : OfNat QComplex n where
+  ofNat := ofRat n
+
+instance : HAdd QComplex QComplex QComplex where
+  hAdd := add
+
+instance : Neg QComplex where
+  neg := neg
+
+instance : HSub QComplex QComplex QComplex where
+  hSub := sub
+
+instance : HMul QComplex QComplex QComplex where
+  hMul := mul
+
 end QComplex
 
 structure QBox where
@@ -1028,9 +1066,30 @@ namespace QBox
 def width (B : QBox) : Rat := B.hi.re - B.lo.re
 def height (B : QBox) : Rat := B.hi.im - B.lo.im
 def center (B : QBox) : QComplex := { re := (B.lo.re + B.hi.re) / 2, im := (B.lo.im + B.hi.im) / 2 }
-def Overlaps (A B : QBox) : Prop := A.lo.re <= B.hi.re /\ B.lo.re <= A.hi.re /\ A.lo.im <= B.hi.im /\ B.lo.im <= A.hi.im
-def overlaps (A B : QBox) : Bool := decide (A.lo.re <= B.hi.re /\ B.lo.re <= A.hi.re /\ A.lo.im <= B.hi.im /\ B.lo.im <= A.hi.im)
+
+/-- A rational box is ordered when its lower endpoint is below its upper
+endpoint in the coordinatewise order on rational complex points. -/
+def Ordered (B : QBox) : Prop := B.lo <= B.hi
+
+/-- `inner` is nested in `outer` when both endpoints are contained
+coordinatewise. -/
+def NestedIn (inner outer : QBox) : Prop :=
+  outer.lo <= inner.lo /\ inner.hi <= outer.hi
+
+def Overlaps (A B : QBox) : Prop := A.lo <= B.hi /\ B.lo <= A.hi
+
+instance overlapsDecidable (A B : QBox) : Decidable (Overlaps A B) := by
+  unfold Overlaps
+  infer_instance
+
+def overlaps (A B : QBox) : Bool := decide (Overlaps A B)
 def widthHeightOk (B : QBox) (eps : QPos) : Bool := decide (0 <= B.width /\ B.width <= eps.val /\ 0 <= B.height /\ B.height <= eps.val)
+
+theorem ordered_iff_width_height_nonneg (B : QBox) :
+    B.Ordered ↔ 0 <= B.width /\ 0 <= B.height := by
+  unfold Ordered width height
+  simp [Rat.sub_eq_add_neg]
+  grind
 
 private def displayEndpointStrings (lo hi : Rat) : String × String :=
   if lo = hi then
@@ -1076,8 +1135,8 @@ def WidthsShrinkToZero (compute : Nat -> QBox) : Prop :=
     forall n : Nat, N <= n ->
       (compute n).width <= eps.val /\ (compute n).height <= eps.val
 
-/-- A raw complex algorithm is valid when every stage is an ordered box,
-later boxes nest inside earlier boxes, and both coordinate widths tend to
+/-- A raw complex algorithm is valid when every stage is an ordered rational
+box, later boxes nest inside earlier boxes, and both coordinate widths tend to
 zero.  No fixed speed such as `1/n` is part of this definition. -/
 def ValidCompute (compute : Nat -> QBox) : Prop :=
   (forall n, 0 <= (compute n).width /\ 0 <= (compute n).height) /\
@@ -1114,7 +1173,7 @@ inductive Rate (compute : Nat -> QBox) where
 
 end ComplexRaw
 
-/-- Raw rectangle algorithm for a complex number. -/
+/-- Raw box-sequence algorithm for a complex number. -/
 structure ComplexRaw where
   compute : Nat -> QBox
   rate : ComplexRaw.Rate compute := .unknown
@@ -1122,6 +1181,16 @@ structure ComplexRaw where
 namespace ComplexRaw
 
 def Valid (z : ComplexRaw) : Prop := ValidCompute z.compute
+
+theorem valid_ordered {compute : Nat -> QBox}
+    (h : ValidCompute compute) (n : Nat) : (compute n).Ordered :=
+  (QBox.ordered_iff_width_height_nonneg (compute n)).2 (h.1 n)
+
+theorem valid_nestedIn {compute : Nat -> QBox}
+    (h : ValidCompute compute) {n m : Nat} (hnm : n <= m) :
+    QBox.NestedIn (compute m) (compute n) := by
+  have hnest := h.2.1 n m hnm
+  exact ⟨⟨hnest.1, hnest.2.2.1⟩, ⟨hnest.2.1, hnest.2.2.2⟩⟩
 
 structure CompareAt where
   left : Bool
@@ -1215,13 +1284,13 @@ theorem equiv_refl (z : ComplexRaw) (hz : z.Valid) : z.Equiv z := by
   have him : (z.compute eps).lo.im <= (z.compute eps).hi.im := by
     unfold QBox.height at hheight
     grind [Rat.sub_eq_add_neg]
-  exact (compareAt_overlap_iff z z eps eps).2 ⟨hre, hre, him, him⟩
+  exact (compareAt_overlap_iff z z eps eps).2
+    ⟨⟨hre, him⟩, ⟨hre, him⟩⟩
 
 theorem equiv_symm {z w : ComplexRaw} : z.Equiv w -> w.Equiv z := by
   intro h n
   have hover := (compareAt_overlap_iff z w n n).1 (h n)
-  exact (compareAt_overlap_iff w z n n).2
-    ⟨hover.2.1, hover.1, hover.2.2.2, hover.2.2.1⟩
+  exact (compareAt_overlap_iff w z n n).2 ⟨hover.2, hover.1⟩
 
 theorem sameStageOverlap_of_equiv {z w : ComplexRaw}
     (_hz : z.Valid) (_hw : w.Valid) :
@@ -1238,18 +1307,18 @@ theorem allStagesOverlap_of_sameStageOverlap {z w : ComplexRaw}
     have hzw_m := (compareAt_overlap_iff z w m m).1 (hzw m)
     apply (compareAt_overlap_iff z w n m).2
     exact ⟨
-      Rat.le_trans hznest.1 hzw_m.1,
-      Rat.le_trans hzw_m.2.1 hznest.2.1,
-      Rat.le_trans hznest.2.2.1 hzw_m.2.2.1,
-      Rat.le_trans hzw_m.2.2.2 hznest.2.2.2⟩
+      ⟨Rat.le_trans hznest.1 hzw_m.1.1,
+        Rat.le_trans hznest.2.2.1 hzw_m.1.2⟩,
+      ⟨Rat.le_trans hzw_m.2.1 hznest.2.1,
+        Rat.le_trans hzw_m.2.2 hznest.2.2.2⟩⟩
   · have hwnest := hw.2.1 m n hmn
     have hzw_n := (compareAt_overlap_iff z w n n).1 (hzw n)
     apply (compareAt_overlap_iff z w n m).2
     exact ⟨
-      Rat.le_trans hzw_n.1 hwnest.2.1,
-      Rat.le_trans hwnest.1 hzw_n.2.1,
-      Rat.le_trans hzw_n.2.2.1 hwnest.2.2.2,
-      Rat.le_trans hwnest.2.2.1 hzw_n.2.2.2⟩
+      ⟨Rat.le_trans hzw_n.1.1 hwnest.2.1,
+        Rat.le_trans hzw_n.1.2 hwnest.2.2.2⟩,
+      ⟨Rat.le_trans hwnest.1 hzw_n.2.1,
+        Rat.le_trans hwnest.2.2.1 hzw_n.2.2⟩⟩
 
 theorem allStagesOverlap_of_equiv {z w : ComplexRaw}
     (hz : z.Valid) (hw : w.Valid) :
@@ -1299,7 +1368,7 @@ private theorem equiv_trans_re_left {x y z : ComplexRaw}
     have hyGapLe :
         (x.compute n).lo.re - (z.compute n).hi.re <=
           (y.compute m).width := by
-      grind [QBox.width, QBox.Overlaps, Rat.sub_eq_add_neg]
+      grind [QBox.width, QBox.Overlaps, QComplex.le_def, Rat.sub_eq_add_neg]
     have hthirdLt :
         ((x.compute n).lo.re - (z.compute n).hi.re) / 3 <
           (x.compute n).lo.re - (z.compute n).hi.re := by
@@ -1352,7 +1421,7 @@ private theorem equiv_trans_im_left {x y z : ComplexRaw}
     have hyGapLe :
         (x.compute n).lo.im - (z.compute n).hi.im <=
           (y.compute m).height := by
-      grind [QBox.height, QBox.Overlaps, Rat.sub_eq_add_neg]
+      grind [QBox.height, QBox.Overlaps, QComplex.le_def, Rat.sub_eq_add_neg]
     have hthirdLt :
         ((x.compute n).lo.im - (z.compute n).hi.im) / 3 <
           (x.compute n).lo.im - (z.compute n).hi.im := by
@@ -1380,12 +1449,40 @@ theorem equiv_trans {x y z : ComplexRaw}
   intro n
   apply (compareAt_overlap_iff x z n n).2
   exact ⟨
-    equiv_trans_re_left hx hy hz hxySame hyzSame n,
-    equiv_trans_re_left hz hy hx hzySame hyxSame n,
-    equiv_trans_im_left hx hy hz hxySame hyzSame n,
-    equiv_trans_im_left hz hy hx hzySame hyxSame n⟩
+    ⟨equiv_trans_re_left hx hy hz hxySame hyzSame n,
+      equiv_trans_im_left hx hy hz hxySame hyzSame n⟩,
+    ⟨equiv_trans_re_left hz hy hx hzySame hyxSame n,
+      equiv_trans_im_left hz hy hx hzySame hyxSame n⟩⟩
 
 def ofQComplex (z : QComplex) : ComplexRaw where compute := fun _ => { lo := z, hi := z }
+
+theorem ofQComplex_valid (z : QComplex) :
+    (ofQComplex z).Valid := by
+  constructor
+  · intro n
+    constructor
+    · show 0 <= z.re - z.re
+      grind
+    · show 0 <= z.im - z.im
+      grind
+  · constructor
+    · intro n m hnm
+      simp [ofQComplex]
+    · intro eps
+      exact ⟨0, by
+        intro n hn
+        constructor
+        · show ((ofQComplex z).compute n).width <= eps.val
+          simp [ofQComplex, QBox.width]
+          have hzero : z.re - z.re = 0 := by grind
+          rw [hzero]
+          exact Rat.le_of_lt eps.property
+        · show ((ofQComplex z).compute n).height <= eps.val
+          simp [ofQComplex, QBox.height]
+          have hzero : z.im - z.im = 0 := by grind
+          rw [hzero]
+          exact Rat.le_of_lt eps.property⟩
+
 def center (z : ComplexRaw) (n : Nat) : QComplex := (z.compute n).center
 
 /-- Embed a raw real interval algorithm as a raw complex-box algorithm on the
@@ -1432,7 +1529,8 @@ theorem ofRealRaw_equiv_of_equiv {x y : RealRaw}
   have hstage := (RealRaw.compareAt_overlap_iff x y n n).1 (h n)
   exact (compareAt_overlap_iff (ofRealRaw x) (ofRealRaw y)
     n n).2
-    ⟨hstage.1, hstage.2, by simp [ofRealRaw], by simp [ofRealRaw]⟩
+    ⟨⟨hstage.1, by simp [ofRealRaw]⟩,
+      ⟨hstage.2, by simp [ofRealRaw]⟩⟩
 theorem coe_realRaw_equiv_of_equiv {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) (h : x.Equiv y) :
     (x : ComplexRaw).Equiv (y : ComplexRaw) :=
@@ -1492,11 +1590,11 @@ structure ComplexCert where
   raw : ComplexRaw
   valid : raw.Valid
 
-/-- A certified computable complex number.
+/-- A certified handle for a defined complex number.
 
-The preferred representative is the box algorithm used for evaluation.
-Alternative representatives can be registered once they are proved equivalent to
-the preferred one.
+This is the concrete project-facing layer above `ComplexRaw`: it records a
+chosen valid box algorithm, together with any alternative box algorithms already
+proved equivalent to it.
 -/
 structure Complex where
   preferred : ComplexCert
@@ -1513,6 +1611,16 @@ def ofCert (z : ComplexCert) : Complex where
   coherent := by
     intro rep h
     cases h
+
+def ofRaw (z : ComplexRaw) (h : z.Valid) : Complex :=
+  ofCert { raw := z, valid := h }
+
+def ofQComplex (z : QComplex) : Complex :=
+  ofRaw (ComplexRaw.ofQComplex z) (ComplexRaw.ofQComplex_valid z)
+
+def ofReal (x : Real) : Complex :=
+  ofRaw (ComplexRaw.ofRealRaw x.preferred)
+    (ComplexRaw.ofRealRaw_valid x.preferred x.valid)
 
 def compute (z : Complex) (n : Nat) : QBox :=
   z.preferred.raw.compute n
@@ -1538,6 +1646,12 @@ def Equiv (z w : Complex) : Prop :=
 
 theorem equiv_refl (z : Complex) : z.Equiv z :=
   ComplexRaw.equiv_refl z.preferred.raw z.preferred.valid
+
+theorem equiv_symm {z w : Complex} : z.Equiv w -> w.Equiv z :=
+  ComplexRaw.equiv_symm
+
+theorem equiv_trans {z w u : Complex} : z.Equiv w -> w.Equiv u -> z.Equiv u :=
+  ComplexRaw.equiv_trans z.preferred.valid w.preferred.valid u.preferred.valid
 
 structure Representation (z : Complex) where
   cert : ComplexCert
@@ -2011,16 +2125,10 @@ instance (n : Nat) : OfNat ComplexRaw n where
   ofNat := ofQComplex (QComplex.ofRat n)
 
 def add (z w : ComplexRaw) : ComplexRaw where
-  compute := fun eps =>
-    let Z := z.compute eps
-    let W := w.compute eps
-    { lo := QComplex.add Z.lo W.lo, hi := QComplex.add Z.hi W.hi }
+  compute := fun eps => QBox.add (z.compute eps) (w.compute eps)
 
 def neg (z : ComplexRaw) : ComplexRaw where
-  compute := fun eps =>
-    let Z := z.compute eps
-    { lo := { re := -Z.hi.re, im := -Z.hi.im },
-      hi := { re := -Z.lo.re, im := -Z.lo.im } }
+  compute := fun eps => QBox.neg (z.compute eps)
 
 def sub (z w : ComplexRaw) : ComplexRaw :=
   add z (neg w)

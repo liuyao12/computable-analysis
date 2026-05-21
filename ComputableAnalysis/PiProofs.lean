@@ -713,13 +713,13 @@ theorem leibnizSeries_equiv_dirichletLChi4AtOne :
   exact ⟨hordered, hordered⟩
 
 theorem fourArctanOneValid :
-    (4 * arctan (1 : Rat) : RealRaw).Valid :=
+    ((4 : Nat) * arctan (1 : Rat) : RealRaw).Valid :=
   RealRaw.natScale_valid 4
     (arctan_valid_at arctanValid arctan_one_mem_domain)
 
 /-- The Leibniz definition of pi is equivalent to `4 * arctan 1`. -/
 theorem piLeibniz_equiv_four_arctan_one :
-    piLeibniz.Equiv (4 * arctan (1 : Rat) : RealRaw) := by
+    piLeibniz.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) := by
   unfold piLeibniz
   exact RealRaw.natScale_equiv 4 leibnizSeries_equiv_arctan_one
 
@@ -804,11 +804,11 @@ theorem quarter_tangent_identity :
   native_decide
 
 def BranchIdentity : Prop :=
-  (4 * arctan ((1 : Rat) / 5) - arctan ((1 : Rat) / 239)).Equiv
+  ((4 : Nat) * arctan ((1 : Rat) / 5) - arctan ((1 : Rat) / 239)).Equiv
     (arctan (1 : Rat))
 
 def GeometricBranchIdentity : Prop :=
-  (4 * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
+  ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
       ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Equiv
     (ArctanGeometry.arctanGeom (1 : Rat))
 
@@ -876,30 +876,30 @@ theorem branchIdentity_of_geometricBranchIdentity
     simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
       hGeomValid (1 : Rat) (by trivial)
   have hps4_15 :
-      (4 * arctan ((1 : Rat) / 5) : RealRaw).Valid :=
+      ((4 : Nat) * arctan ((1 : Rat) / 5) : RealRaw).Valid :=
     RealRaw.natScale_valid 4 hps15
   have hg4_15 :
-      (4 * ArctanGeometry.arctanGeom ((1 : Rat) / 5) : RealRaw).Valid :=
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) : RealRaw).Valid :=
     RealRaw.natScale_valid 4 hg15
   have hpsExpr :
-      (4 * arctan ((1 : Rat) / 5) -
+      ((4 : Nat) * arctan ((1 : Rat) / 5) -
         arctan ((1 : Rat) / 239) : RealRaw).Valid :=
     RealRaw.sub_valid hps4_15 hps239
   have hgExpr :
-      (4 * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
         ArctanGeometry.arctanGeom ((1 : Rat) / 239) : RealRaw).Valid :=
     RealRaw.sub_valid hg4_15 hg239
   have hleft :
-      (4 * arctan ((1 : Rat) / 5) -
+      ((4 : Nat) * arctan ((1 : Rat) / 5) -
         arctan ((1 : Rat) / 239) : RealRaw).Equiv
-      (4 * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
         ArctanGeometry.arctanGeom ((1 : Rat) / 239) : RealRaw) :=
     RealRaw.sub_equiv
       hps4_15 hg4_15 hps239 hg239
       (RealRaw.natScale_equiv 4 hagree.one_fifth)
       hagree.one_239
   have htoGeomOne :
-      (4 * arctan ((1 : Rat) / 5) -
+      ((4 : Nat) * arctan ((1 : Rat) / 5) -
         arctan ((1 : Rat) / 239) : RealRaw).Equiv
       (ArctanGeometry.arctanGeom (1 : Rat)) :=
     RealRaw.equiv_trans
@@ -919,7 +919,7 @@ theorem branchLaw_of_geometricBranchLaw
 
 theorem piMachin_eq_four_arctan_one_of_branchIdentity
     (h : BranchIdentity) :
-    piMachin.Equiv (4 * arctan (1 : Rat) : RealRaw) := by
+    piMachin.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) := by
   unfold piMachin
   exact RealRaw.natScale_equiv 4 h
 
@@ -928,10 +928,10 @@ end MachinIdentity
 theorem leibnizEqMachin_of_machinBranchIdentity
     (h : MachinIdentity.BranchIdentity) : LeibnizEqMachin := by
   have hmachin :
-      piMachin.Equiv (4 * arctan (1 : Rat) : RealRaw) :=
+      piMachin.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) :=
     MachinIdentity.piMachin_eq_four_arctan_one_of_branchIdentity h
   exact RealRaw.equiv_trans
-    (x := piLeibniz) (y := (4 * arctan (1 : Rat) : RealRaw))
+    (x := piLeibniz) (y := ((4 : Nat) * arctan (1 : Rat) : RealRaw))
     (z := piMachin)
     leibnizValid fourArctanOneValid machinValid
     piLeibniz_equiv_four_arctan_one
