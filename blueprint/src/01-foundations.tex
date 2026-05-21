@@ -26,7 +26,7 @@ An \emph{interval sequence} is a sequence of rational intervals
 \]
 \end{definition}
 
-\begin{definition}[real number]\label{def:raw-real}
+\begin{definition}[Real number]\label{def:raw-real}
 \lean{ComputableAnalysis.RealRaw}
 \uses{def:interval-sequence}
 A \emph{real number} is an interval sequence \(x=[a_n,b_n]_{n\in\N}\) satisfying the
@@ -55,21 +55,8 @@ When the map
 is given by a finite, terminating algorithm, as we always do in this project,
 the real number is said to be \emph{computable}. Storing all the rational numbers
 in an infinite table is not permitted. The evaluation at \(n\) is referred to as
-\emph{computing} the real number at stage \(n\).
+\emph{computing} the real number \emph{at stage} \(n\).
 \end{remark}
-
-\begin{definition}[Stage schedules]\label{def:stage-schedule}
-\uses{def:raw-real}
-A \emph{stage schedule} is an increasing function
-\[
-  \sigma:\N\to\N.
-\]
-Here increasing means \(\sigma(n)<\sigma(n+1)\) for all \(n\).
-If \(x=[a_n,b_n]_{n\in\N}\), then the scheduled real number is
-\[
-  \sigma\ldot x=[a_{\sigma(n)},b_{\sigma(n)}]_{n\in\N}.
-\]
-\end{definition}
 
 \begin{definition}[Positive and negative real numbers]\label{def:raw-real-sign}
 \lean{ComputableAnalysis.RealRaw.Pos}
@@ -85,7 +72,7 @@ The number \(x\) is \emph{nonzero} if it is either positive or negative.
 \lean{ComputableAnalysis.RealRaw.add}
 \lean{ComputableAnalysis.RealRaw.sub}
 \lean{ComputableAnalysis.RealRaw.mul}
-\uses{def:raw-real,def:stage-schedule,def:raw-real-sign}
+\uses{def:raw-real,def:raw-real-sign}
 Let \(x\) and \(y\) be real numbers:
 \[
   x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}.
@@ -108,11 +95,11 @@ products:
   \qquad
   S_n=\{a_nc_n,a_nd_n,b_nc_n,b_nd_n\}.
 \]
-If \(x\) is nonzero, then every sufficiently late interval avoids
-zero.  After passing to a stage schedule whose first stage is late enough,
+If \(x\) is nonzero, let \(N\) be the smallest natural number such that
+\([a_N,b_N]\) avoids zero.  Then
 we define
 \[
-  x^{-1}:= [ b_{\sigma(n)}^{-1}, a_{\sigma(n)}^{-1} ]_{n\in\N}.
+  x^{-1}:= [ b_{N+n}^{-1}, a_{N+n}^{-1} ]_{n\in\N}.
 \]
 Then \(y/x\) is defined as \(yx^{-1}\), when \(x\) is nonzero.
 \end{definition}
@@ -127,36 +114,53 @@ is also a real number.
 
 \begin{definition}[Equivalence of real numbers]\label{def:raw-equiv}
 \lean{ComputableAnalysis.RealRaw.Equiv}
-\uses{def:raw-real,def:stage-schedule}
+\uses{def:raw-real}
 Two real numbers
 \[
   x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}
 \]
-are \emph{equivalent} if there exist stage schedules \(\alpha,\beta:\N\to\N\) 
-such that \( \alpha\ldot x \) overlaps with \(\beta\ldot y\) at all stages, i.e.,
+are \emph{equivalent} if they overlap at every stage, i.e.,
 \[
-  [a_{\alpha(n)},b_{\alpha(n)}] \mbox{ overlaps with }
-  [c_{\beta(n)},d_{\beta(n)}]
+  [a_n,b_n] \mbox{ overlaps with } [c_n,d_n]
   \qquad\text{for all }n.
 \]
 \end{definition}
 
-\begin{proposition}[Sign respects equivalence]\label{prop:raw-sign-equiv}
-\uses{def:raw-real-sign,def:raw-equiv}
-If \(x\sim y\), then \(x\) is positive if and only if \(y\) is positive,
-and \(x\) is negative if and only if \(y\) is negative.
+\begin{proposition}[Equivalence relation]\label{prop:raw-equiv-relation}
+\lean{ComputableAnalysis.RealRaw.equiv_refl}
+\lean{ComputableAnalysis.RealRaw.equiv_symm}
+\lean{ComputableAnalysis.RealRaw.equiv_trans}
+\uses{def:raw-real,def:raw-equiv}
+Equivalence of real numbers is an equivalence relation.
 \end{proposition}
 
-\begin{proposition}[Arithmetic respects equivalence]\label{prop:raw-arithmetic-equiv}
-\lean{ComputableAnalysis.RealRaw.add_equiv}
-\lean{ComputableAnalysis.RealRaw.sub_equiv}
-\uses{def:raw-real-arithmetic,def:raw-equiv}
-If \(x\sim x'\) and \(y\sim y'\), then
+\begin{definition}[Stage schedules]\label{def:stage-schedule}
+\lean{ComputableAnalysis.RealRaw.StageSchedule}
+\lean{ComputableAnalysis.RealRaw.schedule}
+\uses{def:raw-real,def:raw-equiv}
+A \emph{stage schedule} is an increasing function
 \[
-  x+y\sim x'+y',\qquad x-y\sim x'-y',
+  \sigma:\N\to\N.
 \]
-and similarly for negation, multiplication, and every arithmetic operation
-whose interval algorithm has been certified.
+If \(x=[a_n,b_n]_{n\in\N}\), then the scheduled real number is
+\[
+  \sigma\ldot x=[a_{\sigma(n)},b_{\sigma(n)}]_{n\in\N}.
+\]
+\end{definition}
+
+\begin{proposition}[Using stage schedules]\label{prop:stage-schedule-equiv}
+\lean{ComputableAnalysis.RealRaw.schedule_equiv}
+\lean{ComputableAnalysis.RealRaw.equiv_of_schedule_equiv}
+\uses{def:stage-schedule,def:raw-equiv}
+For every stage schedule \(\sigma\), one has
+\[
+  x\sim \sigma\ldot x.
+\]
+Thus, to prove \(x\sim y\), it is enough to find schedules
+\(\sigma,\tau\) and prove
+\[
+  \sigma\ldot x\sim \tau\ldot y.
+\]
 \end{proposition}
 
 \begin{definition}[Abstract real numbers]\label{def:reals-quotient}
@@ -168,48 +172,33 @@ under the equivalence relation above.  We denote this quotient by \(\R\):
 \]
 After passing to the quotient, a real number in the sense above may be referred to as a
 \emph{representative} of the abstract real number it determines.  When the
-distinction is clear, we simply call elements of \(\R\) real numbers.  The
-rational number \(q\in\Q\) is represented by the constant representative
+distinction is clear, we simply call elements of \(\R\) real numbers.
+\end{definition}
+
+\begin{theorem}[\(\R\) extends \(\Q\) as an ordered field]\label{thm:raw-reals-field}
+\lean{ComputableAnalysis.RealRaw.add_equiv}
+\lean{ComputableAnalysis.RealRaw.sub_equiv}
+\uses{def:reals-quotient,def:raw-real-sign,def:raw-real-arithmetic,prop:raw-arithmetic-valid}
+The arithmetic operations and order on real numbers are compatible with
+equivalence, and therefore descend to equivalence classes.  With these
+descended operations and order, \(\R\) is an ordered field.
+The embedding \(\Q\hookrightarrow\R\) sends \(q\) to the class of
 \[
-  [q,q]_{n\in\N}
+  [q,q]_{n\in\N}.
 \]
-\end{definition}
-
-\begin{definition}[Positive and negative abstract real numbers]\label{def:abstract-real-sign}
-\uses{def:reals-quotient,def:raw-real-sign,prop:raw-sign-equiv}
-An abstract real number \(X\in\R\) is \emph{positive} if one, equivalently
-every, representative of \(X\) is positive.  It is \emph{negative} if one,
-equivalently every, representative of \(X\) is negative.
-\end{definition}
-
-\begin{theorem}[Field of abstract real numbers]\label{thm:raw-reals-field}
-\uses{def:reals-quotient,prop:raw-arithmetic-valid,prop:raw-arithmetic-equiv}
-The arithmetic operations on real numbers descend to abstract real
-numbers, and \(\R\) forms a field.  The inverse of a nonzero class is
-represented by first finding a stage whose interval avoids \(0\), then
-applying rational interval reciprocal arithmetic from that stage onward.
+It preserves \(0\), \(1\), addition, negation, multiplication, inverses of
+nonzero rational numbers, and order.
 \end{theorem}
 
-\begin{definition}[Order on abstract real numbers]\label{def:abstract-real-order}
-\uses{def:abstract-real-sign,thm:raw-reals-field}
-For abstract real numbers \(X,Y\in\R\), define
-\[
-  X<Y
-  \quad\Longleftrightarrow\quad
-  Y-X\ \text{is positive}.
-\]
-Equivalently, if \(x=[a_n,b_n]_{n\in\N}\) and
-\(y=[c_n,d_n]_{n\in\N}\) are representatives of \(X\) and \(Y\), then
-\(X<Y\) means that for some stage \(N\),
-\[
-  0<c_N-b_N.
-\]
-\end{definition}
-
-\begin{proposition}[Order is well-defined]\label{prop:abstract-real-order-well-defined}
-\uses{def:abstract-real-order,prop:raw-sign-equiv,prop:raw-arithmetic-equiv}
-The relation \(<\) is independent of the chosen representatives.
-\end{proposition}
+\begin{remark}[Completeness]\label{rem:real-completeness}
+\uses{thm:raw-reals-field}
+The definition above is equivalent to the standard definition by equivalence
+classes of Cauchy sequences of rational numbers, hence \(\R\) is complete.
+In this project, however, we avoid using completeness as a black box by
+working with computable numbers as much as possible.  When a proof needs
+existence or convergence, we build the relevant interval sequence and prove
+its validity directly.
+\end{remark}
 
 \section{Examples of real numbers}
 
@@ -289,7 +278,7 @@ so it makes sense to define (computable) \emph{functions} first, as an algorithm
 However, not all (rational) values of \(t\) would result in a real number.
 \end{remark}
 
-\begin{remark}[Complex parameters]\label{rem:complex-parameters}
+\begin{remark}[Complex variable]\label{rem:complex-parameters}
 \uses{rem:parameterized-constructions,def:qbox}
 Many of these variables can also take complex values (at least for \(t+si\) with \(t, s \in \Q\)).
 For example, power series may be evaluated inside a disk in the complex plane, and integrals can

@@ -479,17 +479,19 @@ def SameStageOverlap (x y : RealRaw) : Prop :=
 /-- Equality of raw real algorithms.
 
 Two raw representatives are equivalent when their interval computations
-overlap along cofinal increasing schedules of stages.  This lets each
-algorithm use its own natural refinement clock. -/
+overlap at every common stage. Stage schedules are a proof technique rather
+than part of the definition. -/
 def Equiv (x y : RealRaw) : Prop :=
-  Exists fun sx : StageSchedule =>
-  Exists fun sy : StageSchedule =>
-    forall n, compareAt x y (sx.stage n) (sy.stage n) = .overlap
+  x.SameStageOverlap y
 
 theorem sameStageOverlap_equiv {x y : RealRaw} :
     x.SameStageOverlap y -> x.Equiv y := by
   intro h
-  exact ⟨StageSchedule.id, StageSchedule.id, fun n => h (StageSchedule.id.stage n)⟩
+  exact h
+
+def schedule (sigma : StageSchedule) (x : RealRaw) : RealRaw where
+  compute := fun n => x.compute (sigma.stage n)
+
 
 /-- Stronger than `Equiv`: every interval produced by one raw algorithm
 overlaps every interval produced by the other, even at different stages. -/
@@ -540,14 +542,9 @@ theorem equiv_refl (x : RealRaw) (hx : x.Valid) : x.Equiv x :=
   sameStageOverlap_equiv (sameStageOverlap_refl x hx)
 
 theorem equiv_symm {x y : RealRaw} : x.Equiv y -> y.Equiv x := by
-  intro h
-  rcases h with ⟨sx, sy, hoverlap⟩
-  exact ⟨sy, sx, fun n =>
-    (compareAt_overlap_iff y x (sy.stage n) (sx.stage n)).2
-      ⟨((compareAt_overlap_iff x y (sx.stage n) (sy.stage n)).1
-          (hoverlap n)).2,
-        ((compareAt_overlap_iff x y (sx.stage n) (sy.stage n)).1
-          (hoverlap n)).1⟩⟩
+  intro h n
+  have hover := (compareAt_overlap_iff x y n n).1 (h n)
+  exact (compareAt_overlap_iff y x n n).2 ⟨hover.2, hover.1⟩
 
 theorem allStagesOverlap_refl (x : RealRaw) (hx : x.Valid) :
     x.AllStagesOverlap x := by
@@ -564,6 +561,30 @@ theorem allStagesOverlap_refl (x : RealRaw) (hx : x.Valid) :
     · exact Rat.le_trans hnest.2.1 hnest.2.2
     · exact Rat.le_trans hnest.1 hnest.2.1
 
+theorem schedule_valid (x : RealRaw) (hx : x.Valid)
+    (sigma : StageSchedule) :
+    (schedule sigma x).Valid := by
+  constructor
+  · intro n
+    exact hx.1 (sigma.stage n)
+  · constructor
+    · intro n m hnm
+      exact hx.2.1 (sigma.stage n) (sigma.stage m)
+        (sigma.monotone n m hnm)
+    · intro eps
+      obtain ⟨N, hN⟩ := hx.2.2 eps
+      obtain ⟨k, hk⟩ := sigma.cofinal N
+      refine ⟨k, ?_⟩
+      intro n hkn
+      exact hN (sigma.stage n)
+        (Nat.le_trans hk (sigma.monotone k n hkn))
+
+theorem schedule_equiv (x : RealRaw) (hx : x.Valid)
+    (sigma : StageSchedule) :
+    x.Equiv (schedule sigma x) := by
+  intro n
+  exact allStagesOverlap_refl x hx n (sigma.stage n)
+
 theorem allStagesOverlap_symm {x y : RealRaw} :
     x.AllStagesOverlap y -> y.AllStagesOverlap x := by
   intro h n m
@@ -578,30 +599,12 @@ theorem strongEquiv_symm {x y : RealRaw} :
   intro h
   exact ⟨allStagesOverlap_symm h.1, h.2.2, h.2.1⟩
 
-/-- For certified/nested raw algorithms, scheduled equivalence already implies
-same-stage overlap. -/
+/-- Unfold equivalence back to the same-stage overlap predicate. -/
 theorem sameStageOverlap_of_equiv {x y : RealRaw}
-    (hx : x.Valid) (hy : y.Valid) :
+    (_hx : x.Valid) (_hy : y.Valid) :
     x.Equiv y -> x.SameStageOverlap y := by
-  intro hxy n
-  rcases hxy with ⟨sx, sy, hoverlap⟩
-  obtain ⟨kx, hkx⟩ := sx.cofinal n
-  obtain ⟨ky, hky⟩ := sy.cofinal n
-  let k := max kx ky
-  have hkx_le : kx <= k := Nat.le_max_left kx ky
-  have hky_le : ky <= k := Nat.le_max_right kx ky
-  have hxstage : n <= (sx.stage k) :=
-    Nat.le_trans hkx (sx.monotone kx k hkx_le)
-  have hystage : n <= (sy.stage k) :=
-    Nat.le_trans hky (sy.monotone ky k hky_le)
-  have hxnest := hx.2.1 n (sx.stage k) hxstage
-  have hynest := hy.2.1 n (sy.stage k) hystage
-  have hover := (compareAt_overlap_iff x y (sx.stage k) (sy.stage k)).1
-    (hoverlap k)
-  apply (compareAt_overlap_iff x y n n).2
-  constructor
-  · exact Rat.le_trans hxnest.1 (Rat.le_trans hover.1 hynest.2.2)
-  · exact Rat.le_trans hynest.1 (Rat.le_trans hover.2 hxnest.2.2)
+  intro hxy
+  exact hxy
 
 theorem allStagesOverlap_of_sameStageOverlap {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) :
@@ -621,12 +624,8 @@ theorem allStagesOverlap_of_sameStageOverlap {x y : RealRaw}
     · exact Rat.le_trans hxy_n.1 hynest.2.2
     · exact Rat.le_trans hynest.1 hxy_n.2
 
-/-- For certified/nested raw algorithms, scheduled equivalence already implies
-all-stages overlap.
-
-This is the formal reason that the two candidate definitions of equality
-coincide once the raw algorithms have validity certificates.  It is not true
-for completely arbitrary, uncertified raw algorithms. -/
+/-- For certified/nested raw algorithms, same-stage equivalence implies
+all-stages overlap. -/
 theorem allStagesOverlap_of_equiv {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) :
     x.Equiv y -> x.AllStagesOverlap y :=
@@ -699,6 +698,18 @@ theorem equiv_trans {x y z : RealRaw}
   · exact equiv_trans_left hz hy hx
       (sameStageOverlap_of_equiv hz hy (equiv_symm hyz))
       (sameStageOverlap_of_equiv hy hx (equiv_symm hxy)) n
+
+theorem equiv_of_schedule_equiv {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    (sigma tau : StageSchedule) :
+    (schedule sigma x).Equiv (schedule tau y) -> x.Equiv y := by
+  intro hscheduled
+  have hsx : (schedule sigma x).Valid := schedule_valid x hx sigma
+  have hty : (schedule tau y).Valid := schedule_valid y hy tau
+  exact equiv_trans hx hsx hy
+    (schedule_equiv x hx sigma)
+    (equiv_trans hsx hty hy hscheduled
+      (equiv_symm (schedule_equiv y hy tau)))
 
 end RealRaw
 
@@ -1173,18 +1184,15 @@ def SameStageOverlap (z w : ComplexRaw) : Prop :=
 
 /--
 Two raw complex representatives are equivalent when their box computations
-overlap along cofinal increasing schedules of stages.
+overlap at every common stage.
 -/
 def Equiv (z w : ComplexRaw) : Prop :=
-  Exists fun sz : RealRaw.StageSchedule =>
-  Exists fun sw : RealRaw.StageSchedule =>
-    forall n, compareAt z w (sz.stage n) (sw.stage n) = .overlap
+  z.SameStageOverlap w
 
 theorem sameStageOverlap_equiv {z w : ComplexRaw} :
     z.SameStageOverlap w -> z.Equiv w := by
   intro h
-  exact ⟨RealRaw.StageSchedule.id, RealRaw.StageSchedule.id,
-    fun n => h (RealRaw.StageSchedule.id.stage n)⟩
+  exact h
 
 /-- Stronger than `Equiv`: every box of one raw algorithm overlaps every box
 of the other, even at different stages. -/
@@ -1210,39 +1218,16 @@ theorem equiv_refl (z : ComplexRaw) (hz : z.Valid) : z.Equiv z := by
   exact (compareAt_overlap_iff z z eps eps).2 ⟨hre, hre, him, him⟩
 
 theorem equiv_symm {z w : ComplexRaw} : z.Equiv w -> w.Equiv z := by
-  intro h
-  rcases h with ⟨sz, sw, hoverlap⟩
-  refine ⟨sw, sz, ?_⟩
-  intro n
-  have hover := (compareAt_overlap_iff z w (sz.stage n) (sw.stage n)).1
-    (hoverlap n)
-  exact (compareAt_overlap_iff w z (sw.stage n) (sz.stage n)).2
+  intro h n
+  have hover := (compareAt_overlap_iff z w n n).1 (h n)
+  exact (compareAt_overlap_iff w z n n).2
     ⟨hover.2.1, hover.1, hover.2.2.2, hover.2.2.1⟩
 
 theorem sameStageOverlap_of_equiv {z w : ComplexRaw}
-    (hz : z.Valid) (hw : w.Valid) :
+    (_hz : z.Valid) (_hw : w.Valid) :
     z.Equiv w -> z.SameStageOverlap w := by
-  intro hzw n
-  rcases hzw with ⟨sz, sw, hoverlap⟩
-  obtain ⟨kz, hkz⟩ := sz.cofinal n
-  obtain ⟨kw, hkw⟩ := sw.cofinal n
-  let k := max kz kw
-  have hkz_le : kz <= k := Nat.le_max_left kz kw
-  have hkw_le : kw <= k := Nat.le_max_right kz kw
-  have hzstage : n <= (sz.stage k) :=
-    Nat.le_trans hkz (sz.monotone kz k hkz_le)
-  have hwstage : n <= (sw.stage k) :=
-    Nat.le_trans hkw (sw.monotone kw k hkw_le)
-  have hznest := hz.2.1 n (sz.stage k) hzstage
-  have hwnest := hw.2.1 n (sw.stage k) hwstage
-  have hover := (compareAt_overlap_iff z w (sz.stage k) (sw.stage k)).1
-    (hoverlap k)
-  apply (compareAt_overlap_iff z w n n).2
-  exact ⟨
-    Rat.le_trans hznest.1 (Rat.le_trans hover.1 hwnest.2.1),
-    Rat.le_trans hwnest.1 (Rat.le_trans hover.2.1 hznest.2.1),
-    Rat.le_trans hznest.2.2.1 (Rat.le_trans hover.2.2.1 hwnest.2.2.2),
-    Rat.le_trans hwnest.2.2.1 (Rat.le_trans hover.2.2.2 hznest.2.2.2)⟩
+  intro hzw
+  exact hzw
 
 theorem allStagesOverlap_of_sameStageOverlap {z w : ComplexRaw}
     (hz : z.Valid) (hw : w.Valid) :
@@ -1443,13 +1428,10 @@ theorem coe_realRaw_valid (x : RealRaw) (hx : x.Valid) :
 theorem ofRealRaw_equiv_of_equiv {x y : RealRaw}
     (_hx : x.Valid) (_hy : y.Valid) (h : x.Equiv y) :
     (ofRealRaw x).Equiv (ofRealRaw y) := by
-  rcases h with ⟨sx, sy, hoverlap⟩
-  refine ⟨sx, sy, ?_⟩
   intro n
-  have hstage := (RealRaw.compareAt_overlap_iff x y
-    (sx.stage n) (sy.stage n)).1 (hoverlap n)
+  have hstage := (RealRaw.compareAt_overlap_iff x y n n).1 (h n)
   exact (compareAt_overlap_iff (ofRealRaw x) (ofRealRaw y)
-    (sx.stage n) (sy.stage n)).2
+    n n).2
     ⟨hstage.1, hstage.2, by simp [ofRealRaw], by simp [ofRealRaw]⟩
 theorem coe_realRaw_equiv_of_equiv {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) (h : x.Equiv y) :
@@ -1956,13 +1938,9 @@ theorem natScale_valid (n : Nat) {x : RealRaw}
 theorem scaleRat_equiv_of_nonneg {r : Rat} {x y : RealRaw}
     (hr : 0 <= r) (hxy : x.Equiv y) :
     (scaleRat r x).Equiv (scaleRat r y) := by
-  rcases hxy with ⟨sx, sy, hoverlap⟩
-  refine ⟨sx, sy, ?_⟩
   intro n
-  have h := (compareAt_overlap_iff x y (sx.stage n) (sy.stage n)).1
-    (hoverlap n)
-  apply (compareAt_overlap_iff (scaleRat r x) (scaleRat r y)
-    (sx.stage n) (sy.stage n)).2
+  have h := (compareAt_overlap_iff x y n n).1 (hxy n)
+  apply (compareAt_overlap_iff (scaleRat r x) (scaleRat r y) n n).2
   unfold scaleRat scaleRatCompute
   simp [hr, QInterval.Overlaps]
   exact ⟨Rat.mul_le_mul_of_nonneg_left h.1 hr,
@@ -1974,14 +1952,11 @@ theorem natScale_equiv (n : Nat) {x y : RealRaw}
 
 theorem neg_equiv {x y : RealRaw}
     (hxy : x.Equiv y) : (-x).Equiv (-y) := by
-  rcases hxy with ⟨sx, sy, hoverlap⟩
-  refine ⟨sx, sy, ?_⟩
   intro n
-  have h := (compareAt_overlap_iff x y (sx.stage n) (sy.stage n)).1
-    (hoverlap n)
-  apply (compareAt_overlap_iff (-x) (-y) (sx.stage n) (sy.stage n)).2
+  have h := (compareAt_overlap_iff x y n n).1 (hxy n)
+  apply (compareAt_overlap_iff (-x) (-y) n n).2
   change QInterval.Overlaps
-    (negCompute x (sx.stage n)) (negCompute y (sy.stage n))
+    (negCompute x n) (negCompute y n)
   unfold negCompute QInterval.Overlaps
   exact ⟨Rat.neg_le_neg h.2, Rat.neg_le_neg h.1⟩
 

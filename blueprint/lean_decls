@@ -6,6 +6,13 @@ ComputableAnalysis.RealRaw.add
 ComputableAnalysis.RealRaw.sub
 ComputableAnalysis.RealRaw.mul
 ComputableAnalysis.RealRaw.Equiv
+ComputableAnalysis.RealRaw.equiv_refl
+ComputableAnalysis.RealRaw.equiv_symm
+ComputableAnalysis.RealRaw.equiv_trans
+ComputableAnalysis.RealRaw.StageSchedule
+ComputableAnalysis.RealRaw.schedule
+ComputableAnalysis.RealRaw.schedule_equiv
+ComputableAnalysis.RealRaw.equiv_of_schedule_equiv
 ComputableAnalysis.RealRaw.add_equiv
 ComputableAnalysis.RealRaw.sub_equiv
 ComputableAnalysis.RealFunRaw
