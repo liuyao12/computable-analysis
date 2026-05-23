@@ -1,188 +1,287 @@
-\chapter{Effective Calculus}
+\chapter{Fundamental Theorem of Calculus}
 
-\section{Finite sums}
+\section{Exact Convexity}
 
-\begin{definition}[Left Riemann interval]\label{def:left-riemann}
-\lean{ComputableAnalysis.riemannLeftInterval}
-\uses{def:real-fun-raw,def:raw-real-arithmetic}
-For \(a,b\in\Q\) and \(N>0\), set
+\begin{definition}[Exact raw-real order]\label{def:raw-real-order}
+\lean{ComputableAnalysis.RealRaw.Le}
+\uses{def:raw-real}
+\leanok
+For raw reals \(X,Y\), define
 \[
-  h=\mesh(a,b,N)=\frac{b-a}{N},\qquad
-  x_k=a+kh,\quad 0\le k<N.
+  X\le Y
 \]
-If \(g\) is a real-valued function and \(p\) is an evaluation precision, the
-left Riemann interval is
+to mean that every rational lower approximation to \(X\) is at most every
+rational upper approximation to \(Y\):
 \[
-  R_{N,p}(g;a,b)
-  =
-  \sum_{k=0}^{N-1} h\cdot g(x_k,p),
+  \forall n,m,\qquad X_n^- \le Y_m^+.
 \]
-where the sum and scalar multiplication are rational interval operations.
+This is not the executable one-stage comparison.  It is the exact order
+relation used in mathematical statements.  For valid raw representatives,
+\[
+  X\Equiv Y
+  \quad\Longleftrightarrow\quad
+  X\le Y\ \text{and}\ Y\le X.
+\]
 \end{definition}
 
-\begin{definition}[Endpoint difference interval]\label{def:endpoint-diff}
+\begin{definition}[Endpoint difference real]\label{def:endpoint-diff}
 \lean{ComputableAnalysis.endpointDifferenceInterval}
 \uses{def:real-fun-raw,def:raw-real-arithmetic}
-For a real-valued function \(F\), define
+For a raw real-valued function \(F\), define
 \[
-  E_p(F;a,b)
-  =
-  F(b,p)-F(a,p).
+  E(F;u,v)=F(v)-F(u).
 \]
-If \(F(a,p)=[A^-,A^+]\) and
-\(F(b,p)=[B^-,B^+]\), then
+At stage \(p\), if \(F(u)_p=[A^-,A^+]\) and
+\(F(v)_p=[B^-,B^+]\), then
 \[
-  E_p(F;a,b)=[B^- - A^+,B^+ - A^-].
+  E(F;u,v)_p=[B^- - A^+,B^+ - A^-].
 \]
 \end{definition}
 
-\section{The effective FTC}
-
-\begin{definition}[Effective derivative, exact rational form]
-\label{def:effective-derivative-exact}
-\lean{ComputableAnalysis.EffectiveDerivativeExact}
-Let \(F,f:\Q\to\Q\).  An exact effective derivative certificate for
-\(F'=f\) is a function \(\delta:\Q_{>0}\to\Q_{>0}\) such that
-\[
-  0<h\le \delta(\eps)
-  \quad\Longrightarrow\quad
-  \left|
-    \frac{F(x+h)-F(x)}{h}-f(x)
-  \right|
-  \le \eps
-\]
-for all rational \(x,h\).  This is the finite-difference content of
-differentiability, stated without limits over completed real numbers.
-\end{definition}
-
-\begin{definition}[Effective FTC certificate]\label{def:effective-ftc}
-\lean{ComputableAnalysis.EffectiveFTC}
-\uses{def:left-riemann,def:endpoint-diff}
-Let \(F,dF\) be real-valued functions and let \(a,b\in\Q\).  An effective FTC
-certificate consists of functions
-\[
-  N:\Q_{>0}\to\N,\qquad p:\Q_{>0}\to\N
-\]
-such that for every positive rational \(\eps\),
-\[
-  \close_\eps
-  \left(
-    R_{N(\eps),p(\eps)}(dF;a,b),
-    E_{p(\eps)}(F;a,b)
-  \right).
-\]
-The certificate is intentionally finite: to get precision \(\eps\), it tells
-us how many subintervals and how much pointwise evaluation precision are
-needed.
-\end{definition}
-
-\begin{theorem}[Effective FTC bridge]\label{thm:effective-ftc-bridge}
-\lean{ComputableAnalysis.FTC.effectiveFTC_equiv_endpoint}
-\uses{def:left-riemann,def:endpoint-diff,def:effective-ftc,def:raw-equiv}
+\begin{definition}[Rational secant raw real]\label{def:rational-secant}
+\lean{ComputableAnalysis.secantRaw}
+\uses{def:endpoint-diff,def:raw-real-order}
 \leanok
-Given an effective FTC certificate for \(F,dF,a,b\), the real-number algorithm
-formed by scheduled Riemann sums is equivalent to the real-number algorithm
-formed by scheduled endpoint differences:
+For rational \(u<v\), the secant of \(F\) on \([u,v]\) is the raw real
 \[
-  \left(n\mapsto
-    R_{N(\eps_n),p(\eps_n)}(dF;a,b)
-  \right)
-  \Equiv
-  \left(n\mapsto
-    E_{p(\eps_n)}(F;a,b)
-  \right),
+  \Sec_F(u,v)=\frac{F(v)-F(u)}{v-u}.
 \]
-where \(\eps_0=1\) and \(\eps_n=1/n\) for \(n>0\).
+Its finite stages are the rational interval slopes
+\[
+  \Sec_F(u,v)_p=E(F;u,v)_p/(v-u).
+\]
+\end{definition}
+
+\begin{definition}[Exact convexity]\label{def:exact-convexity}
+\lean{ComputableAnalysis.ExactConvexOn}
+\uses{def:rational-secant,def:raw-real-order}
+\leanok
+A raw real-valued function \(F\) is convex on the rational interval
+\([a,b]\) when it is defined and valid at every rational point of
+\([a,b]\), and its rational secants are monotone:
+\[
+  \Sec_F(w,x)\le \Sec_F(y,z)
+\]
+whenever
+\[
+  a\le w<x\le y<z\le b.
+\]
+Concavity is the same statement with the secant order reversed.
+\end{definition}
+
+\section{One-Sided Convex Derivatives}
+
+\begin{definition}[Right derivative of a convex function]
+\label{def:convex-right-derivative}
+\lean{ComputableAnalysis.RightDerivativeAt}
+\uses{def:exact-convexity}
+Let \(F\) be convex on \([a,b]\), and let \(q<b\) be rational.  The right
+secants
+\[
+  \Sec_F(q,q+h),\qquad h>0,\quad q+h\le b,
+\]
+are monotone as \(h\downarrow 0\) and bounded below by any left secant ending
+at \(q\).  The right derivative \(D_+F(q)\) is the exact raw real represented
+by the infimum of these right secants:
+\[
+  D_+F(q)=\inf_{0<h,\ q+h\le b}\Sec_F(q,q+h).
+\]
+Equivalently, it is the limit of any rational sequence \(h_n\downarrow0\)
+with \(q+h_n\le b\).
+\end{definition}
+
+\begin{definition}[Left derivative of a convex function]
+\label{def:convex-left-derivative}
+\lean{ComputableAnalysis.LeftDerivativeAt}
+\uses{def:exact-convexity}
+For \(a<q\), the left derivative is
+\[
+  D_-F(q)=\sup_{0<h,\ a\le q-h}\Sec_F(q-h,q).
+\]
+For convex \(F\), \(D_-F(q)\le D_+F(q)\).  The ordinary two-sided derivative
+exists exactly at the rational points where these two one-sided derivatives
+are equivalent.
+\end{definition}
+
+\begin{theorem}[Right derivative is monotone]
+\label{thm:convex-right-derivative-increasing}
+\lean{ComputableAnalysis.rightDerivativeAt_mono}
+\uses{def:convex-right-derivative}
+\leanok
+If \(F\) is convex on \([a,b]\), then
+\[
+  q_1<q_2
+  \quad\Longrightarrow\quad
+  D_+F(q_1)\le D_+F(q_2)
+\]
+for rational \(q_1,q_2<b\).
 \end{theorem}
 
 \begin{proof}
-At stage \(n\), the certificate gives overlap and width bounds at precision
-\(\eps_n\).  Same-stage overlap is therefore a valid cofinal schedule for
-equivalence.
+Choose rational \(h_1,h_2>0\) so small that
+\[
+  q_1+h_1\le q_2\le q_2+h_2.
+\]
+Convexity gives
+\[
+  \Sec_F(q_1,q_1+h_1)\le \Sec_F(q_2,q_2+h_2).
+\]
+Taking the infimum over right secants on both sides gives the claim.
 \end{proof}
 
-\begin{theorem}[Finite-sum FTC estimate]\label{thm:finite-ftc-estimate}
-\uses{def:effective-derivative-exact}
-Suppose \(F,f:\Q\to\Q\), \(a<b\), and \(F'=f\) is certified by
-\(\delta\).  If \(N\) is chosen so that
+\begin{remark}[Corners]\label{rem:convex-corners}
+\uses{def:convex-left-derivative,def:convex-right-derivative}
+Convexity does not imply existence of the two-sided derivative.  The function
+\(|x|\) is convex and has \(D_-F(0)<D_+F(0)\).  The universal FTC for convex
+functions must therefore use a one-sided derivative, or else explicitly
+restrict to the points where the left and right derivatives agree.
+\end{remark}
+
+\section{Integrating Monotone Derivatives}
+
+\begin{definition}[Integral of a monotone raw function]
+\label{def:monotone-integral}
+\uses{def:raw-real-order}
+Let \(g\) be a monotone rational-input raw real-valued function on
+\([a,b]\).  Its integral is the common raw real obtained from lower and upper
+Darboux sums over rational partitions:
 \[
-  0<h=\frac{b-a}{N}\le \delta\!\left(\frac{\eps}{b-a}\right),
+  L(P,g)\le \int_a^b g(x)\,dx \le U(P,g),
 \]
-then
+with the mesh of \(P\) tending to zero.  Monotonicity supplies the cell
+infimum and supremum from endpoint values, so the only analytic ingredient is
+the completeness of raw reals for nested rational intervals.
+\end{definition}
+
+\begin{theorem}[Monotone functions are integrable]
+\label{thm:monotone-integrable}
+\uses{def:monotone-integral}
+Every monotone rational-input raw real-valued function on a rational interval
+has an integral in the sense of \cref{def:monotone-integral}.
+\end{theorem}
+
+\section{Convex FTC}
+
+\begin{theorem}[Convex FTC]\label{thm:convex-ftc}
+\uses{def:exact-convexity,def:convex-right-derivative,def:monotone-integral}
+If \(F\) is convex on a rational interval \([a,b]\), then the right
+derivative \(D_+F\) is integrable and
 \[
-  \left|
-    \sum_{k=0}^{N-1} h f(a+kh) - (F(b)-F(a))
-  \right|
-  \le \eps .
+  \int_a^b D_+F(x)\,dx \Equiv F(b)-F(a).
 \]
+Equivalently, the same conclusion holds with the left derivative \(D_-F\).
 \end{theorem}
 
 \begin{proof}
-Write \(x_k=a+kh\).  The derivative certificate gives
+For a partition \(P:a=x_0<\cdots<x_N=b\), convexity gives
 \[
-  F(x_{k+1})-F(x_k)=h f(x_k)+h e_k,
-  \qquad |e_k|\le \frac{\eps}{b-a}.
+  D_+F(x_i)
+  \le
+  \Sec_F(x_i,x_{i+1})
+  \le
+  D_-F(x_{i+1})
 \]
-Summing over \(k\) telescopes the left side:
+on each cell.  Multiplying by \(x_{i+1}-x_i\) and summing yields Darboux
+lower and upper sums enclosing
 \[
-  F(b)-F(a)
-  =
-  \sum_{k=0}^{N-1} h f(x_k)
-  +
-  h\sum_{k=0}^{N-1} e_k.
+  \sum_i \bigl(F(x_{i+1})-F(x_i)\bigr)=F(b)-F(a).
 \]
-Since \(Nh=b-a\),
-\[
-  \left|h\sum_{k=0}^{N-1}e_k\right|
-  \le hN\frac{\eps}{b-a}
-  =\eps .
-\]
+The gap between the sums is controlled by monotonicity of the one-sided
+derivatives, and tends to zero under rational refinement.  Hence the integral
+and the endpoint difference represent the same raw real.
 \end{proof}
 
-\begin{corollary}[Exact rational FTC]\label{cor:exact-rational-ftc}
-\uses{thm:finite-ftc-estimate,def:effective-ftc,thm:effective-ftc-bridge}
-An exact effective derivative certificate for \(F'=f\), together with valid
-interval wrappers for \(F\) and \(f\), yields an effective FTC
-certificate.  Hence the definite integral of \(f\) over \([a,b]\)
-is equivalent to \(F(b)-F(a)\).
-\end{corollary}
+\begin{remark}[No effective side conditions]\label{rem:no-effective-side-conditions}
+\uses{thm:convex-ftc}
+The theorem does not ask for derivative bounds, local controls, or overlap
+estimates as hypotheses.  Those are proof artifacts from an earlier approach.
+The mathematical input is exact convexity; the derivative, its monotonicity,
+its integrability, and the endpoint equality are consequences.
+\end{remark}
 
-\section{Toward general interval integration}
+\begin{remark}[Piecewise convexity]\label{rem:no-piecewise-ftc}
+\uses{thm:convex-ftc}
+There is no separate named theorem for piecewise convex or concave functions.
+In an example proof, split the interval at rational breakpoints where the
+convexity proof changes, apply \cref{thm:convex-ftc} on each piece, and
+combine the endpoint equalities by raw-real arithmetic and transitivity.
+\end{remark}
 
-\begin{conjecture}[Integral construction from interval regularity]
-\label{conj:integral-existence}
-\lean{ComputableAnalysis.Integral.ExistsConstructionFor}
-\uses{def:interval-regular,def:raw-real}
-If \(F\) is interval-regular on a rational interval \([a,b]\),
-then there is an integral real-number algorithm
-\[
-  n\longmapsto I_n(F;a,b)
-\]
-whose intervals are ordered, nested, and shrink to zero.
-\end{conjecture}
+\section{Formula Identification and Examples}
 
-\begin{conjecture}[General effective FTC]\label{conj:general-effective-ftc}
-\lean{ComputableAnalysis.DefiniteIntegralEqualsEndpointDifference}
-\uses{conj:integral-existence,def:function-on-interval,def:interval-regular,thm:effective-ftc-bridge}
-Let \(F\) be a function on \([a,b]\), and let \(dF\) be an
-interval-regular derivative of \(F\).  Then the constructed integral of
-\(dF\) is equivalent to the endpoint difference:
-\[
-  \int_a^b dF(x)\dd x \Equiv F(b)-F(a).
-\]
-\end{conjecture}
+\begin{definition}[Formula identification]\label{def:formula-identification}
+\uses{def:convex-right-derivative}
+Let \(g\) be a proposed raw function formula.  On a rational interval,
+\(g\) is identified with \(D_+F\) when it is equivalent to the right-secant
+infimum defining \(D_+F\).  The formula is not a guess: it is proved from
+finite secant inequalities or algebraic identities for the particular
+function.
+\end{definition}
 
-\begin{example}[The square function]\label{ex:square-ftc}
-\lean{ComputableAnalysis.ExactFunction.square_derivative_effective}
-\uses{def:effective-derivative-exact,thm:finite-ftc-estimate}
-For \(F(x)=x^2\) and \(f(x)=2x\),
+\begin{theorem}[Formula identification closure]
+\label{thm:formula-identification-ftc}
+\uses{def:formula-identification,thm:convex-ftc}
+If \(g\) is identified with \(D_+F\) on \([a,b]\), then
 \[
-  \frac{F(x+h)-F(x)}{h}-f(x)=h.
+  \int_a^b g(x)\,dx \Equiv F(b)-F(a).
 \]
-Thus \(0<h\le \eps\) proves the effective derivative estimate.  The finite
-FTC estimate then gives the familiar identity
+\end{theorem}
+
+\begin{example}[Polynomials]\label{ex:polynomial-ftc}
+\uses{thm:formula-identification-ftc}
+For rational polynomials, convexity or concavity on an interval is proved by
+finite algebra, usually by certifying the sign of the second derivative on
+that interval.  The derivative formula is the formal polynomial derivative.
+\end{example}
+
+\begin{example}[Rational functions]\label{ex:rational-function-ftc}
+\uses{thm:formula-identification-ftc}
+For rational functions, the domain must first be certified on the interval.
+Denominator-apartness is a sufficient way to rule out hidden singularities
+such as \(1/(x^2-2)\) on \([1,2]\).  After the domain is certified,
+convexity and formula identification reduce to finite sign estimates.
+\end{example}
+
+\begin{example}[Power series]\label{ex:power-series-convex-ftc}
+\uses{thm:formula-identification-ftc}
+For a power series on a certified convergence interval, convexity can be
+proved by enclosing the second differentiated series and its tail.  The
+derivative formula is obtained by termwise differentiation, again with a tail
+certificate.
+\end{example}
+
+\begin{example}[Geometric arctangent]\label{ex:arctan-ftc}
+\uses{thm:formula-identification-ftc}
+Let \(A(x)\) be the geometric arctangent, defined by sector-area intervals.
+On \(0\le u<v\), the finite geometric inequality
 \[
-  \int_0^1 2x\dd x = 1
+  \frac{1}{1+v^2}
+  \le
+  \Sec_A(u,v)
+  \le
+  \frac{1}{1+u^2}
 \]
-as a statement about rational sums and endpoint intervals.
+identifies the right derivative with
+\[
+  K(x)=\frac{1}{1+x^2}.
+\]
+The Taylor route then integrates the finite identity for \(K\) and its
+explicit remainder.
+\end{example}
+
+\begin{example}[Logarithm]\label{ex:log-ftc}
+\uses{thm:formula-identification-ftc}
+For logarithm on \(0<a\le x\le b\), the derivative formula is \(1/x\).
+The positivity certificate supplies the domain-apartness data needed for
+interval division, and the secant inequalities identify \(1/x\) with the
+one-sided convex derivative.
+\end{example}
+
+\begin{example}[Square root and arcsine]\label{ex:sqrt-arcsine-ftc}
+\uses{thm:convex-ftc,thm:formula-identification-ftc}
+The function \(\sqrt{x}\) is concave on positive intervals, so
+\(-\sqrt{x}\) is convex.  The formula \(1/(2\sqrt{x})\) requires both a
+certified square-root interval and apartness from \(0\).  For arcsine, the
+kernel \((1-x^2)^{-1/2}\) similarly requires a certified interval inside
+\((-1,1)\).
 \end{example}

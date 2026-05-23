@@ -1,4 +1,5 @@
 import ComputableAnalysis.RationalCircle
+import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.Basic
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.Taylor
@@ -1223,6 +1224,155 @@ theorem piCircumferenceComputeAtStage_eq_common (stage : Nat) :
   simp [piCircumferenceComputeAtStage, piCircumferenceCommonComputeAtStage,
     innerBoundary, outerBoundary, piCircumference_innerBoundaryFrom_eq,
     piCircumference_outerBoundaryFrom_eq]
+
+theorem arctanGeometry_samplePoint_one_eq (stage k : Nat) :
+    ArctanGeometry.samplePoint 1 stage k = circleSamplePoint stage k := by
+  simp [ArctanGeometry.samplePoint, ArctanGeometry.parameter,
+    ArctanGeometry.circlePoint, circleSamplePoint, circleParameter,
+    circlePoint]
+
+theorem arctanGeometry_tangentIntersection_eq
+    (p q : PiCirclePoint) :
+    ArctanGeometry.tangentIntersection p q = tangentIntersection p q := by
+  simp [ArctanGeometry.tangentIntersection, tangentIntersection,
+    ArctanGeometry.pointCross, pointCross]
+
+theorem arctanGeometry_outerTangentPoint_one_eq (stage k : Nat) :
+    ArctanGeometry.outerTangentPoint 1 stage k =
+      outerTangentPoint stage k := by
+  simp [ArctanGeometry.outerTangentPoint, outerTangentPoint,
+    arctanGeometry_samplePoint_one_eq,
+    arctanGeometry_tangentIntersection_eq]
+
+theorem arctanGeometry_innerBoundaryFrom_one_eq
+    (stage k count : Nat) :
+    ArctanGeometry.innerBoundaryFrom 1 stage k count =
+      innerBoundaryFrom stage k count := by
+  unfold ArctanGeometry.innerBoundaryFrom innerBoundaryFrom
+  induction count generalizing k with
+  | zero =>
+      simp [piCircleArea.innerBoundaryFrom]
+  | succ count ih =>
+      simp [piCircleArea.innerBoundaryFrom,
+        arctanGeometry_samplePoint_one_eq, ih]
+
+theorem arctanGeometry_innerBoundary_one_eq (stage : Nat) :
+    ArctanGeometry.innerBoundary 1 stage = innerBoundary stage := by
+  simp [ArctanGeometry.innerBoundary, innerBoundary,
+    arctanGeometry_innerBoundaryFrom_one_eq]
+
+theorem arctanGeometry_outerBoundaryFrom_one_eq
+    (stage k count : Nat) :
+    ArctanGeometry.outerBoundaryFrom 1 stage k count =
+      outerBoundaryFrom stage k count := by
+  unfold ArctanGeometry.outerBoundaryFrom outerBoundaryFrom
+  induction count generalizing k with
+  | zero =>
+      simp [piCircleArea.outerBoundaryFrom]
+  | succ count ih =>
+      simp [piCircleArea.outerBoundaryFrom,
+        arctanGeometry_samplePoint_one_eq,
+        arctanGeometry_outerTangentPoint_one_eq, ih]
+
+theorem arctanGeometry_outerBoundary_one_eq (stage : Nat) :
+    ArctanGeometry.outerBoundary 1 stage = outerBoundary stage := by
+  simp [ArctanGeometry.outerBoundary, outerBoundary,
+    arctanGeometry_samplePoint_one_eq,
+    arctanGeometry_outerBoundaryFrom_one_eq]
+
+theorem arctanGeometry_twiceSignedAreaAux_eq
+    (first prev : PiCirclePoint) (vertices : List PiCirclePoint) :
+    ArctanGeometry.twiceSignedAreaAux first prev vertices =
+      twiceSignedAreaAux first prev vertices := by
+  rfl
+
+theorem arctanGeometry_twiceSignedArea_eq
+    (vertices : List PiCirclePoint) :
+    ArctanGeometry.twiceSignedArea vertices = twiceSignedArea vertices := by
+  cases vertices <;> rfl
+
+theorem arctanGeometry_polygonArea_eq
+    (vertices : List PiCirclePoint) :
+    ArctanGeometry.polygonArea vertices = polygonArea vertices := by
+  simp [ArctanGeometry.polygonArea, polygonArea,
+    arctanGeometry_twiceSignedArea_eq]
+
+theorem arctanGeometry_innerSectorArea_one_eq (stage : Nat) :
+    ArctanGeometry.innerSectorArea 1 stage = innerQuarterArea stage := by
+  simp [ArctanGeometry.innerSectorArea, innerQuarterArea,
+    ArctanGeometry.originPoint, originPoint,
+    arctanGeometry_innerBoundary_one_eq,
+    arctanGeometry_polygonArea_eq]
+
+theorem arctanGeometry_outerSectorArea_one_eq (stage : Nat) :
+    ArctanGeometry.outerSectorArea 1 stage = outerQuarterArea stage := by
+  simp [ArctanGeometry.outerSectorArea, outerQuarterArea,
+    ArctanGeometry.originPoint, originPoint,
+    arctanGeometry_outerBoundary_one_eq,
+    arctanGeometry_polygonArea_eq]
+
+theorem four_arctanGeom_one_compute_eq_piCircleArea_compute
+    (n : Nat) :
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute n) =
+      piCircleArea.compute n := by
+  rw [piCircleArea_compute_eq]
+  change (RealRaw.scaleRat (4 : Rat)
+      (ArctanGeometry.arctanGeom (1 : Rat))).compute n =
+    piCircleAreaComputeAtStage (piStage n)
+  have hnonzero : ¬(1 : Rat) = 0 := by native_decide
+  have hnonneg : (0 : Rat) <= 1 := by native_decide
+  have hfour : (0 : Rat) <= 4 := by native_decide
+  simp [ArctanGeometry.arctanGeom, hnonzero, hnonneg, hfour,
+    ArctanGeometry.positiveRaw,
+    ArctanGeometry.positiveComputeAtStage, ArctanGeometry.stage,
+    piStage, piCircleAreaComputeAtStage, RealRaw.scaleRat,
+    RealRaw.scaleRatCompute, arctanGeometry_innerSectorArea_one_eq,
+    arctanGeometry_outerSectorArea_one_eq]
+
+theorem fourArctanGeomOneValid_of_geometricValid
+    (hGeomValid : ArctanGeometry.Valid) :
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) := by
+  have hgeom : (ArctanGeometry.arctanGeom (1 : Rat)).Valid := by
+    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
+      hGeomValid (1 : Rat) (by trivial)
+  exact RealRaw.natScale_valid 4 hgeom
+
+theorem leibnizEqArea_of_powerSeriesGeometryAgreement
+    (hGeomValid : ArctanGeometry.Valid)
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    LeibnizEqArea := by
+  have hpowGeom :
+      (arctan (1 : Rat)).Equiv (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    ArctanGeometry.powerSeries_equiv_geometric_of_agreement
+      hagree (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide)
+  have hscaled :
+      (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
+    RealRaw.natScale_equiv 4 hpowGeom
+  have hgeomScaledValid :
+      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) :=
+    fourArctanGeomOneValid_of_geometricValid hGeomValid
+  have hleibnizToGeom :
+      piLeibniz.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
+    RealRaw.equiv_trans
+      leibnizValid fourArctanOneValid hgeomScaledValid
+      piLeibniz_equiv_four_arctan_one hscaled
+  intro n
+  have hover := (RealRaw.compareAt_overlap_iff piLeibniz
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
+    (hleibnizToGeom n)
+  apply (RealRaw.compareAt_overlap_iff piLeibniz piCircleArea n n).2
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  exact hover
+
+theorem leibnizEqArea_of_kernelComparisonRoute
+    (route : Taylor.ArctanComparison.KernelComparisonRoute) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_powerSeriesGeometryAgreement
+    route.geometric_valid
+    (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
+      route)
 
 theorem pointSegmentNormSq_nonneg (p q : PiCirclePoint) :
     0 <= pointSegmentNormSq p q := by
@@ -2827,9 +2977,79 @@ structure AgreementProofs where
   leibniz_eq_area : LeibnizEqArea
   area_eq_circumference : AreaEqCircumference
 
+theorem leibnizEqCircumference_of_validity_and_agreement
+    (validity : ValidityProofs) (agreement : AgreementProofs) :
+    piLeibniz.Equiv piCircumference :=
+  RealRaw.equiv_trans
+    validity.leibniz validity.area validity.circumference
+    agreement.leibniz_eq_area
+    agreement.area_eq_circumference
+
+theorem machinEqArea_of_validity_and_agreement
+    (validity : ValidityProofs) (agreement : AgreementProofs) :
+    piMachin.Equiv piCircleArea :=
+  RealRaw.equiv_trans
+    validity.machin validity.leibniz validity.area
+    (RealRaw.equiv_symm agreement.leibniz_eq_machin)
+    agreement.leibniz_eq_area
+
+theorem machinEqCircumference_of_validity_and_agreement
+    (validity : ValidityProofs) (agreement : AgreementProofs) :
+    piMachin.Equiv piCircumference :=
+  RealRaw.equiv_trans
+    validity.machin validity.area validity.circumference
+    (machinEqArea_of_validity_and_agreement validity agreement)
+    agreement.area_eq_circumference
+
+/-- All pairwise pi-algorithm equivalences derived from the small generating
+set and validity certificates. -/
+structure PairwiseAgreementProofs where
+  leibniz_eq_machin : piLeibniz.Equiv piMachin
+  machin_eq_leibniz : piMachin.Equiv piLeibniz
+  leibniz_eq_area : piLeibniz.Equiv piCircleArea
+  area_eq_leibniz : piCircleArea.Equiv piLeibniz
+  area_eq_circumference : piCircleArea.Equiv piCircumference
+  circumference_eq_area : piCircumference.Equiv piCircleArea
+  leibniz_eq_circumference : piLeibniz.Equiv piCircumference
+  circumference_eq_leibniz : piCircumference.Equiv piLeibniz
+  machin_eq_area : piMachin.Equiv piCircleArea
+  area_eq_machin : piCircleArea.Equiv piMachin
+  machin_eq_circumference : piMachin.Equiv piCircumference
+  circumference_eq_machin : piCircumference.Equiv piMachin
+
+theorem pairwiseAgreementProofs_of_validity_and_agreement
+    (validity : ValidityProofs) (agreement : AgreementProofs) :
+    PairwiseAgreementProofs where
+  leibniz_eq_machin := agreement.leibniz_eq_machin
+  machin_eq_leibniz := RealRaw.equiv_symm agreement.leibniz_eq_machin
+  leibniz_eq_area := agreement.leibniz_eq_area
+  area_eq_leibniz := RealRaw.equiv_symm agreement.leibniz_eq_area
+  area_eq_circumference := agreement.area_eq_circumference
+  circumference_eq_area := RealRaw.equiv_symm agreement.area_eq_circumference
+  leibniz_eq_circumference :=
+    leibnizEqCircumference_of_validity_and_agreement validity agreement
+  circumference_eq_leibniz :=
+    RealRaw.equiv_symm
+      (leibnizEqCircumference_of_validity_and_agreement validity agreement)
+  machin_eq_area :=
+    machinEqArea_of_validity_and_agreement validity agreement
+  area_eq_machin :=
+    RealRaw.equiv_symm
+      (machinEqArea_of_validity_and_agreement validity agreement)
+  machin_eq_circumference :=
+    machinEqCircumference_of_validity_and_agreement validity agreement
+  circumference_eq_machin :=
+    RealRaw.equiv_symm
+      (machinEqCircumference_of_validity_and_agreement validity agreement)
+
 structure PiProofsComplete where
   validity : ValidityProofs
   agreement : AgreementProofs
+
+theorem PiProofsComplete.pairwiseAgreement
+    (proofs : PiProofsComplete) : PairwiseAgreementProofs :=
+  pairwiseAgreementProofs_of_validity_and_agreement
+    proofs.validity proofs.agreement
 
 /-- The remaining mathematical obligations needed to close the pi proof layer.
 
@@ -2905,7 +3125,6 @@ theorem piProofsComplete_of_linearStepRemainders
 
 theorem piProofsComplete_of_kernelComparisonRoute
     (geometric_validity : GeometricValidityRemainders)
-    (hleibnizArea : LeibnizEqArea)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PiProofsComplete :=
@@ -2913,32 +3132,74 @@ theorem piProofsComplete_of_kernelComparisonRoute
     { geometric_validity := geometric_validity
       leibniz_eq_machin :=
         leibnizEqMachin_of_kernelComparisonRoute route hgeom
-      leibniz_eq_area := hleibnizArea }
+      leibniz_eq_area :=
+        leibnizEqArea_of_kernelComparisonRoute route }
 
 theorem piProofsComplete_of_stepRemainders_and_kernelComparisonRoute
     (geometric_steps : GeometricStepRemainders)
-    (hleibnizArea : LeibnizEqArea)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PiProofsComplete :=
   piProofsComplete_of_kernelComparisonRoute
     (geometricValidityRemainders_of_stepRemainders geometric_steps)
-    hleibnizArea
     route
     hgeom
 
 theorem piProofsComplete_of_linearStepRemainders_and_kernelComparisonRoute
     (geometric_linear_steps : GeometricLinearStepRemainders)
-    (hleibnizArea : LeibnizEqArea)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PiProofsComplete :=
   piProofsComplete_of_stepRemainders_and_kernelComparisonRoute
     (geometricStepRemainders_of_linearStepRemainders
       geometric_linear_steps)
-    hleibnizArea
     route
     hgeom
+
+theorem pairwiseAgreementProofs_of_completionRemainders
+    (remainders : CompletionRemainders) :
+    PairwiseAgreementProofs :=
+  PiProofsComplete.pairwiseAgreement
+    (piProofsComplete_of_completionRemainders remainders)
+
+theorem pairwiseAgreementProofs_of_stepRemainders
+    (remainders : CompletionStepRemainders) :
+    PairwiseAgreementProofs :=
+  PiProofsComplete.pairwiseAgreement
+    (piProofsComplete_of_stepRemainders remainders)
+
+theorem pairwiseAgreementProofs_of_linearStepRemainders
+    (remainders : CompletionLinearStepRemainders) :
+    PairwiseAgreementProofs :=
+  PiProofsComplete.pairwiseAgreement
+    (piProofsComplete_of_linearStepRemainders remainders)
+
+theorem pairwiseAgreementProofs_of_kernelComparisonRoute
+    (geometric_validity : GeometricValidityRemainders)
+    (route : Taylor.ArctanComparison.KernelComparisonRoute)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    PairwiseAgreementProofs :=
+  PiProofsComplete.pairwiseAgreement
+    (piProofsComplete_of_kernelComparisonRoute
+      geometric_validity route hgeom)
+
+theorem pairwiseAgreementProofs_of_stepRemainders_and_kernelComparisonRoute
+    (geometric_steps : GeometricStepRemainders)
+    (route : Taylor.ArctanComparison.KernelComparisonRoute)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    PairwiseAgreementProofs :=
+  PiProofsComplete.pairwiseAgreement
+    (piProofsComplete_of_stepRemainders_and_kernelComparisonRoute
+      geometric_steps route hgeom)
+
+theorem pairwiseAgreementProofs_of_linearStepRemainders_and_kernelComparisonRoute
+    (geometric_linear_steps : GeometricLinearStepRemainders)
+    (route : Taylor.ArctanComparison.KernelComparisonRoute)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    PairwiseAgreementProofs :=
+  PiProofsComplete.pairwiseAgreement
+    (piProofsComplete_of_linearStepRemainders_and_kernelComparisonRoute
+      geometric_linear_steps route hgeom)
 
 end PiProofs
 

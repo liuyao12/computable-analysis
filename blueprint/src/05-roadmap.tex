@@ -12,28 +12,47 @@ finite conclusions:
 \]
 These are the computational substitutes for classical existence and equality.
 Whenever a classical proof says "choose a sufficiently fine partition" or
-"take a small enough neighborhood", the blueprint should identify the
-corresponding explicit modulus.
+"take a small enough neighborhood", the blueprint should say whether this is
+an exact existence step using raw-real completeness, or a later executable
+algorithm requiring an explicit modulus.
 
 \section{Near-term milestones}
 
 \begin{enumerate}
-  \item Prove the exact rational FTC route:
-  turn \cref{thm:finite-ftc-estimate} into Lean constructors for
-  `EffectiveFTCExact` and `EffectiveFTC`.
+  \item Finish the exact order layer:
+  prove the remaining order laws for \cref{def:raw-real-order}, especially
+  transitivity and compatibility with raw-real arithmetic under valid
+  representatives.
 
-  \item Prove integrability from interval regularity:
-  refine \cref{conj:integral-existence} into concrete Riemann-sum plans,
-  nesting lemmas, and width bounds.
+  \item Formalize raw-real completeness:
+  construct exact raw reals from nested rational intervals, then use this to
+  define infima and suprema of bounded monotone rational families.
 
-  \item Extend polynomial calculus:
-  formalize exact derivative and FTC certificates for all rational
-  polynomials, then rational functions on certified denominator-nonzero
-  intervals.
+  \item Define one-sided convex derivatives:
+  formalize \cref{def:convex-right-derivative} and
+  \cref{def:convex-left-derivative} as infimum and supremum constructions for
+  rational secants of an \cref{def:exact-convexity} function.
 
-  \item Finish arctangent soundness:
-  prove that geometric arctangent and power-series arctangent agree on
-  \([-1,1]\), giving \cref{conj:leibniz-machin}.
+  \item Prove monotone integrability:
+  construct \cref{def:monotone-integral} from Darboux sums and prove
+  \cref{thm:monotone-integrable}.
+
+  \item Close the exact convex FTC:
+  prove \cref{thm:convex-ftc} from exact convexity, one-sided derivatives,
+  monotone integrability, and the telescoping secant inequalities.
+
+  \item Prove the interval arithmetic formula-identification rules:
+  sums, scalar multiples, products, and reciprocals should transform
+  formula-identification cell controls into new cell controls.
+
+  \item Finish geometric arctangent cell control:
+  prove the finite sector-area inequalities in \cref{ex:arctan-ftc} and use
+  them to construct the kernel comparison route for \(1/(1+x^2)\).
+
+  \item Derive arctangent Taylor soundness from FTC:
+  combine geometric arctangent cell control with the finite kernel remainder
+  identity to prove that the geometric and power-series arctangents agree on
+  \([0,1]\), giving the analytic bridge needed for pi.
 
   \item Finish geometric pi validity:
   prove dyadic nesting and width shrinkage for the area and circumference
@@ -52,9 +71,16 @@ corresponding explicit modulus.
   \code{RealFunRaw}, \code{FunctionOnInterval}, \code{IntervalRegularOn}.
 
   \item FTC:
-  \code{EffectiveDerivativeExact}, \code{EffectiveFTC},
-  \code{FTC.effectiveFTC\_equiv\_endpoint},
-  \code{DefiniteIntegralEqualsEndpointDifference}.
+  exact raw order and convexity:
+  \code{RealRaw.Le}, \code{secantRaw}, \code{ExactConvexOn},
+  \code{ExactConcaveOn}.
+  The older declarations
+  \code{DerivativeBoundFTC}, \code{LegacyConvexFTC}, and
+  \code{legacyConvexFTC}
+  are now legacy certificate-shaped scaffolding, not the main theorem target.
+  Blueprint targets still to receive final Lean names:
+  \code{rightDerivative}, \code{leftDerivative},
+  \code{monotoneIntegral}, and the exact \code{convexFTC}.
 
   \item FTA:
   \code{CPoly.Coeffs}, \code{IsComputableRoot}, \code{AlgebraicComplex},

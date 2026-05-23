@@ -90,6 +90,42 @@ def endpointRawOfEffectiveFTC
     (h : EffectiveFTC F dF a b) : RealRaw where
   compute := endpointComputeOfEffectiveFTC h
 
+def integralPlanOfEffectiveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b) : Nat -> Integral.Plan :=
+  fun n =>
+    let eps := requestedPrecision n
+    { subdivisions := h.chooseN eps,
+      evalPrecision := h.chooseEvalPrecision eps }
+
+theorem riemannComputeOfEffectiveFTC_eq_integralPlan
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b) (n : Nat) :
+    riemannComputeOfEffectiveFTC h n =
+      riemannLeftInterval dF a b
+        ((integralPlanOfEffectiveFTC h n).subdivisions)
+        ((integralPlanOfEffectiveFTC h n).evalPrecision) := by
+  simp [riemannComputeOfEffectiveFTC, integralPlanOfEffectiveFTC]
+
+theorem integral_compute_eq_riemannComputeOfEffectiveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hplan : c.plan = integralPlanOfEffectiveFTC h) :
+    (Integral.integral dF a b c).compute =
+      riemannComputeOfEffectiveFTC h := by
+  funext n
+  simp [Integral.integral, Integral.Certificate.realRaw,
+    Integral.Raw.toRealRaw, Integral.Raw.compute, Integral.algorithm,
+    riemannComputeOfEffectiveFTC, integralPlanOfEffectiveFTC, hplan]
+
+theorem integral_valid_of_construction
+    {f : RealFunRaw} {a b : Rat}
+    (c : Integral.Construction f a b) :
+    (Integral.integral f a b c).Valid := by
+  simpa [RealRaw.Valid, Integral.integral, Integral.Certificate.realRaw,
+    Integral.Raw.toRealRaw] using c.certificate.valid
+
 /-- General effective FTC, in computable-real form.
 
 An `EffectiveFTC` certificate already says that, for every rational precision,
@@ -106,6 +142,54 @@ theorem effectiveFTC_equiv_endpoint
   have hgood := h.good (requestedPrecision n)
   exact (RealRaw.compareAt_overlap_iff
     (riemannRawOfEffectiveFTC h) (endpointRawOfEffectiveFTC h) n n).2 hgood.1
+
+/-- FTC bridge for a chosen integral construction.
+
+If the integral construction uses exactly the Riemann-sum plan supplied by an
+`EffectiveFTC` certificate, then the constructed integral is equivalent to the
+scheduled endpoint-difference raw algorithm from that certificate.  This is the
+main reusable form for later equivalence proofs: the analytic work is isolated
+in the `EffectiveFTC` certificate, while the integral side only has to expose
+the same finite-stage schedule. -/
+theorem effectiveFTC_integral_equiv_scheduledEndpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hplan : c.plan = integralPlanOfEffectiveFTC h) :
+    (Integral.integral dF a b c).Equiv (endpointRawOfEffectiveFTC h) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hgood := h.good (requestedPrecision n)
+  apply (RealRaw.compareAt_overlap_iff
+    (Integral.integral dF a b c) (endpointRawOfEffectiveFTC h) n n).2
+  rw [integral_compute_eq_riemannComputeOfEffectiveFTC h c hplan]
+  exact hgood.1
+
+/-- Transport the scheduled FTC bridge to the canonical endpoint-difference
+algorithm when that endpoint schedule has separately been proved equivalent to
+the canonical endpoint computation.
+
+This theorem is intentionally split from `effectiveFTC_integral_equiv_scheduledEndpoint`:
+cofinality or monotonicity of the endpoint precision schedule is representation
+specific, so later files can prove it in the form most convenient for the
+function `F`. -/
+theorem effectiveFTC_definiteIntegralEqualsEndpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (hplan : c.plan = integralPlanOfEffectiveFTC h)
+    (hscheduledEndpoint : (endpointRawOfEffectiveFTC h).Valid)
+    (hendpoint_equiv :
+      (endpointRawOfEffectiveFTC h).Equiv
+        (endpointDifferenceRaw F a b hendpoint)) :
+    DefiniteIntegralEqualsEndpointDifference F dF a b c hendpoint := by
+  exact RealRaw.equiv_trans
+    (integral_valid_of_construction c)
+    hscheduledEndpoint
+    hendpoint
+    (effectiveFTC_integral_equiv_scheduledEndpoint h c hplan)
+    hendpoint_equiv
 
 end FTC
 

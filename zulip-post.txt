@@ -1,0 +1,68 @@
+Hi all,
+
+I've been experimenting with a Lean project on computable analysis:
+
+https://github.com/liuyao12/computable-analysis
+
+Rendered blueprint:
+
+https://liuyao12.github.io/computable-analysis/
+
+The basic idea is to build real and complex numbers from executable interval/box algorithms. A "real number" starts as a nested sequence of rational intervals with shrinking width; equivalence is by overlap. Complex numbers are built similarly from rational boxes.
+
+This project started as an autoformalization experiment in Codex. I could get some definitions and fragments, but not very far as a direct formalization attempt. So I changed strategy: I asked Codex to draft a blueprint first, then used that blueprint to guide the Lean files. Much of the current project is therefore both auto-blueprinted and AI-assisted, with parts gradually being checked and rewritten by hand. Sections 1.1-1.3 of the blueprint are now marked as human-checked.
+
+One motivation is educational: I'd like this to become something first-year calculus students can touch in Lean. Instead of starting from abstract completeness, they can evaluate concrete algorithms for numbers they already know, then prove that different algorithms define equivalent numbers.
+
+For example, `ComputableAnalysis/Pi.lean` contains an interval version of the Leibniz series:
+
+```lean
+/-- The Leibniz alternating series, computing `pi / 4`. -/
+def leibnizSeries : RealRaw where
+  compute := fun n =>
+    let state : Rat × Rat := (List.range n).foldl
+      (fun state (i : Nat) =>
+        let term1 : Rat := 1 / (4 * i + 3)
+        let term2 : Rat := 1 / (4 * i + 5)
+        let lo := state.1 - term1
+        let hi := lo + term2
+        (hi, lo))
+      (1, 0)
+    { lo := state.2, hi := state.1 }
+
+/-- Pi from the Leibniz alternating series. -/
+def piLeibniz : RealRaw :=
+  (4 : Nat) * leibnizSeries
+
+/-- Pi from Machin's formula. -/
+def piMachin : RealRaw :=
+  (4 : Nat) * ((4 : Nat) * arctan (1 / 5) - arctan (1 / 239))
+
+namespace PiExamples
+
+#eval! (piLeibniz.compute 10).display
+#eval! (piMachin.compute 10).display
+#eval! (piCircleArea.compute 10).display
+#eval! (piCircumference.compute 10).display
+
+end PiExamples
+```
+
+This currently displays:
+
+```text
+"[3.09..., 3.18...] width=0.09756"
+"[3.1415926535897932384626433832712..., 3.1415926535897932384626433832798...] width=8.581e-30"
+"[3.1415912..., 3.1415933...] width=0.000002077"
+"[3.1415923..., 3.1415933...] width=0.000001038"
+```
+
+So the algorithms are not just specifications; they can be run. Then the proof side tries to show validity of these interval sequences and equivalence between independently constructed numbers.
+
+I am curious whether this could be a useful target for autoformalization/proof-automation tools. The project has a fairly explicit blueprint, executable definitions, and many proof goals that are elementary but tedious: interval arithmetic, shrinking bounds, equivalence of algorithms, and eventually more calculus-style equivalences. There are still rough edges and some placeholder algebraic-number proofs, but the core direction is becoming clearer.
+
+I would be very happy for feedback on:
+
+- whether the foundation is framed in a Lean-friendly way,
+- whether the blueprint is useful as a guide for automation,
+- and whether this might be a good small benchmark for AI-assisted formalization.

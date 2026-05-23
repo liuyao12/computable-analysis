@@ -35,11 +35,50 @@ def scaleRat (r : Rat) (f : RealFunRaw) : RealFunRaw where
 
 end RealFunRaw
 
-def intervalCloseAtPrecision (I J : QInterval) (n : Nat) : Prop :=
-  QInterval.CloseAt I J (if hn : n = 0 then
-      { val := 1, property := by native_decide }
+def precisionAtStage (n : Nat) : QPos :=
+  if hn : n = 0 then
+      { val := 1, property := by grind }
     else
-      { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) })
+      { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) }
+
+def intervalCloseAtPrecision (I J : QInterval) (n : Nat) : Prop :=
+  QInterval.CloseAt I J (precisionAtStage n)
+
+namespace QInterval
+
+/-- A weak interval order: the two interval enclosures are compatible with
+some value of the left endpoint being at most some value of the right endpoint.
+This is the order notion used for qualitative monotonicity and convexity
+certificates, where finite rational enclosures may still overlap. -/
+def WeakLe (I J : QInterval) : Prop :=
+  I.lo <= J.hi
+
+/-- A strong interval order: every value in the left interval is at most every
+value in the right interval.  This is useful for certified bounds. -/
+def StrongLe (I J : QInterval) : Prop :=
+  I.hi <= J.lo
+
+def addInterval (I J : QInterval) : QInterval :=
+  { lo := I.lo + J.lo, hi := I.hi + J.hi }
+
+def scaleByRat (r : Rat) (I : QInterval) : QInterval :=
+  if 0 <= r then
+    { lo := r * I.lo, hi := r * I.hi }
+  else
+    { lo := r * I.hi, hi := r * I.lo }
+
+def subInterval (I J : QInterval) : QInterval :=
+  { lo := I.lo - J.hi, hi := I.hi - J.lo }
+
+def divByRat (I : QInterval) (h : Rat) : QInterval :=
+  scaleByRat (1 / h) I
+
+/-- Interval enclosure of `(Fy - Fx) / dx`.  For a secant slope, `dx` will be
+the rational difference `y - x`; the caller carries the proof that `x < y`. -/
+def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
+  divByRat (subInterval Fy Fx) dx
+
+end QInterval
 
 /-- Effective modulus on a rational interval.
 
@@ -252,6 +291,531 @@ def inDomainInterval (a b x : Rat) : Prop :=
 def subintervalOf (I : QInterval) (a b : Rat) : Prop :=
   a <= I.lo /\ I.lo <= I.hi /\ I.hi <= b
 
+/-- A rational closed subinterval of a rational closed interval.  This is the
+piece size used by the convex/concave calculus certificates below. -/
+structure RationalSubinterval (a b : Rat) where
+  lower : Rat
+  upper : Rat
+  lower_mem : a <= lower
+  ordered : lower <= upper
+  upper_mem : upper <= b
+
+namespace RationalSubinterval
+
+def contains {a b : Rat} (C : RationalSubinterval a b) (x : Rat) : Prop :=
+  C.lower <= x /\ x <= C.upper
+
+theorem contains_inDomain {a b : Rat} (C : RationalSubinterval a b)
+    {x : Rat} (hx : C.contains x) :
+    inDomainInterval a b x :=
+  And.intro
+    (Rat.le_trans C.lower_mem hx.1)
+    (Rat.le_trans hx.2 C.upper_mem)
+
+def whole (a b : Rat) (hab : a <= b) : RationalSubinterval a b where
+  lower := a
+  upper := b
+  lower_mem := Rat.le_refl
+  ordered := hab
+  upper_mem := Rat.le_refl
+
+def width {a b : Rat} (C : RationalSubinterval a b) : Rat :=
+  C.upper - C.lower
+
+def scaleBound {a b : Rat} (C : RationalSubinterval a b)
+    (B : QInterval) : QInterval :=
+  QInterval.scaleByRat C.width B
+
+end RationalSubinterval
+
+/-- A finite rational partition of `[a,b]`, represented by monotone rational
+grid points.  The cells are the short intervals on which derivative bounds are
+certified. -/
+structure RationalPartition (a b : Rat) where
+  pieces : Nat
+  positive : 0 < pieces
+  point : Nat -> Rat
+  left_endpoint : point 0 = a
+  right_endpoint : point pieces = b
+  monotone :
+    forall i j, i <= j -> j <= pieces -> point i <= point j
+
+namespace RationalPartition
+
+def cell {a b : Rat} (P : RationalPartition a b)
+    (k : Nat) (hk : k < P.pieces) : RationalSubinterval a b where
+  lower := P.point k
+  upper := P.point (k + 1)
+  lower_mem := by
+    have hkPieces : k <= P.pieces := Nat.le_of_lt hk
+    have h := P.monotone 0 k (Nat.zero_le k) hkPieces
+    simpa [P.left_endpoint] using h
+  ordered := by
+    exact P.monotone k (k + 1) (Nat.le_succ k) (Nat.succ_le_of_lt hk)
+  upper_mem := by
+    have h := P.monotone (k + 1) P.pieces (Nat.succ_le_of_lt hk) (Nat.le_refl P.pieces)
+    simpa [P.right_endpoint] using h
+
+def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
+    (bound : (k : Nat) -> k < P.pieces -> QInterval) : QInterval :=
+  (List.range P.pieces).foldl
+    (fun acc k =>
+      if hk : k < P.pieces then
+        QInterval.addInterval acc ((P.cell k hk).scaleBound (bound k hk))
+      else
+        acc)
+    { lo := 0, hi := 0 }
+
+end RationalPartition
+
+/-- A certified enclosure of derivative values on one rational subinterval.
+
+This is the FTC-facing primitive: for every rational point in a short cell,
+the pointwise derivative enclosure at the chosen evaluation precision is
+contained in the supplied rational interval.  No convexity or differentiability
+topology is mentioned here. -/
+structure DerivativeBoundOnSubinterval
+    (dF : RealFunRaw) {a b : Rat} (C : RationalSubinterval a b) where
+  bound : Nat -> QInterval
+  evalPrecision : Nat -> Nat
+  domain_on : forall x, C.contains x -> dF.domain x
+  bound_ordered : forall n, 0 <= (bound n).width
+  contains_values :
+    forall n x (_hx : C.contains x),
+      QInterval.ContainsInterval
+        (bound n)
+        (dF.compute x (evalPrecision n))
+
+/-- Local endpoint control supplied by a derivative bound.  This is the
+constructive substitute for invoking a classical mean-value theorem: the
+scaled derivative range encloses the endpoint difference of the primitive on
+this short cell. -/
+structure LocalFTCFromDerivativeBound
+    (F dF : RealFunRaw) {a b : Rat}
+    (C : RationalSubinterval a b)
+    (B : DerivativeBoundOnSubinterval dF C) where
+  primitive_domain_lower : F.domain C.lower
+  primitive_domain_upper : F.domain C.upper
+  endpointPrecision : Nat -> Nat
+  endpoint_contained :
+    forall n,
+      QInterval.ContainsInterval
+        (C.scaleBound (B.bound n))
+        (endpointDifferenceInterval F C.lower C.upper (endpointPrecision n))
+
+/-- Local finite certificate that a candidate derivative matches the computed
+secant behavior of the original function on one rational cell.
+
+The `bound` field is the common rational interval enclosure.  The
+`candidate_contained` field says the candidate derivative `dF` lies in that
+bound at every rational point of the cell.  The
+`endpoint_difference_contained` field says the actual endpoint difference of
+`F` on the same cell is contained in the cell width times that bound.  Thus the
+candidate derivative is not guessed: it is certified against finite secant
+inequalities for the concrete algorithm. -/
+structure CandidateDerivativeCellControl
+    (F dF : RealFunRaw) {a b : Rat} (C : RationalSubinterval a b) where
+  bound : Nat -> QInterval
+  derivativeEvalPrecision : Nat -> Nat
+  endpointPrecision : Nat -> Nat
+  primitive_domain_lower : F.domain C.lower
+  primitive_domain_upper : F.domain C.upper
+  candidate_domain_on : forall x, C.contains x -> dF.domain x
+  bound_ordered : forall n, 0 <= (bound n).width
+  candidate_contained :
+    forall n x (_hx : C.contains x),
+      QInterval.ContainsInterval
+        (bound n)
+        (dF.compute x (derivativeEvalPrecision n))
+  endpoint_difference_contained :
+    forall n,
+      QInterval.ContainsInterval
+        (C.scaleBound (bound n))
+        (endpointDifferenceInterval F C.lower C.upper (endpointPrecision n))
+
+namespace CandidateDerivativeCellControl
+
+def toDerivativeBound
+    {F dF : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    (H : CandidateDerivativeCellControl F dF C) :
+    DerivativeBoundOnSubinterval dF C where
+  bound := H.bound
+  evalPrecision := H.derivativeEvalPrecision
+  domain_on := H.candidate_domain_on
+  bound_ordered := H.bound_ordered
+  contains_values := H.candidate_contained
+
+def toLocalFTC
+    {F dF : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    (H : CandidateDerivativeCellControl F dF C) :
+    LocalFTCFromDerivativeBound F dF C H.toDerivativeBound where
+  primitive_domain_lower := H.primitive_domain_lower
+  primitive_domain_upper := H.primitive_domain_upper
+  endpointPrecision := H.endpointPrecision
+  endpoint_contained := H.endpoint_difference_contained
+
+end CandidateDerivativeCellControl
+
+/-- FTC data based on derivative bounds over short rational cells.
+
+The FTC-facing assumption is the derivative-range bound on each cell.  How
+those bounds are produced is deliberately separate: monotonicity, convexity,
+concavity, power-series tails, or formula-specific interval arithmetic can all
+feed the same structure.
+
+For each requested rational precision `eps`, the certificate chooses a rational
+partition of `[a,b]`, derivative enclosures on its cells, and an endpoint
+evaluation precision for `F(b)-F(a)`.  The summed derivative-bound interval is
+the Riemann-style enclosure; the theorem-facing obligations are exactly that
+this enclosure has width at most `eps`, the endpoint-difference interval has
+width at most `eps`, and the two intervals overlap. -/
+structure DerivativeBoundFTC (F dF : RealFunRaw) (a b : Rat) where
+  primitive_domain_lower : F.domain a
+  primitive_domain_upper : F.domain b
+  choosePartition : QPos -> RationalPartition a b
+  chooseEndpointPrecision : QPos -> Nat
+  chooseBoundStage : QPos -> Nat
+  derivativeBound :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        DerivativeBoundOnSubinterval dF ((choosePartition eps).cell k hk)
+  localControl :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        LocalFTCFromDerivativeBound F dF
+          ((choosePartition eps).cell k hk)
+          (derivativeBound eps k hk)
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk => (derivativeBound eps k hk).bound (chooseBoundStage eps))).width <=
+        eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseEndpointPrecision eps)).width <=
+        eps.val
+  overlap :
+    forall eps,
+      QInterval.Overlaps
+        ((choosePartition eps).boundIntegralSum
+          (fun k hk => (derivativeBound eps k hk).bound (chooseBoundStage eps)))
+        (endpointDifferenceInterval F a b (chooseEndpointPrecision eps))
+
+namespace DerivativeBoundFTC
+
+def boundedIntegralInterval
+    {F dF : RealFunRaw} {a b : Rat}
+  (h : DerivativeBoundFTC F dF a b) (eps : QPos) : QInterval :=
+  (h.choosePartition eps).boundIntegralSum
+    (fun k hk => (h.derivativeBound eps k hk).bound (h.chooseBoundStage eps))
+
+def endpointInterval
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) (eps : QPos) : QInterval :=
+  endpointDifferenceInterval F a b (h.chooseEndpointPrecision eps)
+
+theorem closeAt
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) (eps : QPos) :
+    QInterval.CloseAt (h.boundedIntegralInterval eps) (h.endpointInterval eps) eps := by
+  exact ⟨h.overlap eps, h.riemann_width eps, h.endpoint_width eps⟩
+
+def boundedIntegralCompute
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) : Nat -> QInterval :=
+  fun n => h.boundedIntegralInterval (precisionAtStage n)
+
+def endpointCompute
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) : Nat -> QInterval :=
+  fun n => h.endpointInterval (precisionAtStage n)
+
+def boundedIntegralRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) : RealRaw where
+  compute := h.boundedIntegralCompute
+
+def endpointRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) : RealRaw where
+  compute := h.endpointCompute
+
+/-- The derivative-bound FTC bridge, in computable-real form. -/
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) :
+    h.boundedIntegralRaw.Equiv h.endpointRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hgood := h.closeAt (precisionAtStage n)
+  exact (RealRaw.compareAt_overlap_iff
+    h.boundedIntegralRaw h.endpointRaw n n).2 hgood.1
+
+end DerivativeBoundFTC
+
+/-- Global finite certificate for the "candidate derivative versus computed
+secants" strategy.
+
+For each requested precision, choose a rational partition.  On each cell,
+`cellControl` supplies one rational interval family that simultaneously:
+
+* contains the candidate derivative values, and
+* contains the actual endpoint secant behavior of `F` after scaling by the
+  cell width.
+
+The remaining fields are exactly the numerical FTC closure conditions: the
+summed bound interval and the endpoint-difference interval are narrow and
+overlap. -/
+structure CandidateDerivativeFTC (F dF : RealFunRaw) (a b : Rat) where
+  primitive_domain_lower : F.domain a
+  primitive_domain_upper : F.domain b
+  choosePartition : QPos -> RationalPartition a b
+  chooseEndpointPrecision : QPos -> Nat
+  chooseBoundStage : QPos -> Nat
+  cellControl :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        CandidateDerivativeCellControl F dF ((choosePartition eps).cell k hk)
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk => (cellControl eps k hk).bound (chooseBoundStage eps))).width <=
+        eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseEndpointPrecision eps)).width <=
+        eps.val
+  overlap :
+    forall eps,
+      QInterval.Overlaps
+        ((choosePartition eps).boundIntegralSum
+          (fun k hk => (cellControl eps k hk).bound (chooseBoundStage eps)))
+        (endpointDifferenceInterval F a b (chooseEndpointPrecision eps))
+
+namespace CandidateDerivativeFTC
+
+def toDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CandidateDerivativeFTC F dF a b) :
+    DerivativeBoundFTC F dF a b where
+  primitive_domain_lower := h.primitive_domain_lower
+  primitive_domain_upper := h.primitive_domain_upper
+  choosePartition := h.choosePartition
+  chooseEndpointPrecision := h.chooseEndpointPrecision
+  chooseBoundStage := h.chooseBoundStage
+  derivativeBound := fun eps k hk =>
+    (h.cellControl eps k hk).toDerivativeBound
+  localControl := fun eps k hk =>
+    (h.cellControl eps k hk).toLocalFTC
+  riemann_width := h.riemann_width
+  endpoint_width := h.endpoint_width
+  overlap := h.overlap
+
+/-- The closure theorem for the candidate-derivative strategy. -/
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CandidateDerivativeFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.toDerivativeBoundFTC.equiv_endpoint
+
+end CandidateDerivativeFTC
+
+inductive MonotonicityKind where
+  | nondecreasing
+  | nonincreasing
+deriving DecidableEq, Repr
+
+def endpointDerivativeBound
+    (kind : MonotonicityKind) (dF : RealFunRaw)
+    {a b : Rat} (C : RationalSubinterval a b) (prec : Nat) : QInterval :=
+  match kind with
+  | .nondecreasing =>
+      { lo := (dF.compute C.lower prec).lo,
+        hi := (dF.compute C.upper prec).hi }
+  | .nonincreasing =>
+      { lo := (dF.compute C.upper prec).lo,
+        hi := (dF.compute C.lower prec).hi }
+
+/-- A common way to produce a derivative bound: prove the derivative is
+monotone on the short cell, then use endpoint derivative enclosures as the
+range bound. -/
+structure MonotoneDerivativeBoundMethod
+    (dF : RealFunRaw) {a b : Rat} (C : RationalSubinterval a b) where
+  kind : MonotonicityKind
+  evalPrecision : Nat -> Nat
+  domain_on : forall x, C.contains x -> dF.domain x
+  endpoint_bound_ordered :
+    forall n, 0 <= (endpointDerivativeBound kind dF C (evalPrecision n)).width
+  endpoint_contains_values :
+    forall n x (_hx : C.contains x),
+      QInterval.ContainsInterval
+        (endpointDerivativeBound kind dF C (evalPrecision n))
+        (dF.compute x (evalPrecision n))
+
+namespace MonotoneDerivativeBoundMethod
+
+def toDerivativeBound
+    {dF : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    (M : MonotoneDerivativeBoundMethod dF C) :
+    DerivativeBoundOnSubinterval dF C where
+  bound := fun n => endpointDerivativeBound M.kind dF C (M.evalPrecision n)
+  evalPrecision := M.evalPrecision
+  domain_on := M.domain_on
+  bound_ordered := M.endpoint_bound_ordered
+  contains_values := M.endpoint_contains_values
+
+end MonotoneDerivativeBoundMethod
+
+inductive CurvatureKind where
+  | convex
+  | concave
+deriving DecidableEq, Repr
+
+namespace CurvatureKind
+
+def derivativeMonotonicity : CurvatureKind -> MonotonicityKind
+  | .convex => .nondecreasing
+  | .concave => .nonincreasing
+
+end CurvatureKind
+
+def secantSlopeIntervalOfRealFun
+    (F : RealFunRaw) (x y : Rat) (prec : Nat) : QInterval :=
+  QInterval.slopeBetween (F.compute y prec) (F.compute x prec) (y - x)
+
+/-- Rational secant-slope formulation of convexity/concavity on a short cell.
+
+This is a helper certificate for producing derivative bounds.  The FTC layer
+above only consumes `DerivativeBoundOnSubinterval`; it does not depend on this
+curvature data directly. -/
+structure CurvatureOnSubinterval
+    (F : RealFunRaw) {a b : Rat} (C : RationalSubinterval a b) where
+  kind : CurvatureKind
+  evalPrecision : Nat -> Nat
+  domain_on : forall x, C.contains x -> F.domain x
+  secant_slope_order :
+    forall n w x y z,
+      C.contains w ->
+      C.contains x ->
+      C.contains y ->
+      C.contains z ->
+      w < x ->
+      x <= y ->
+      y < z ->
+        match kind with
+        | .convex =>
+            QInterval.WeakLe
+              (secantSlopeIntervalOfRealFun F w x (evalPrecision n))
+              (secantSlopeIntervalOfRealFun F y z (evalPrecision n))
+        | .concave =>
+            QInterval.WeakLe
+              (secantSlopeIntervalOfRealFun F y z (evalPrecision n))
+              (secantSlopeIntervalOfRealFun F w x (evalPrecision n))
+
+/-- Evidence that a derivative bound was obtained through a curvature
+argument: convexity supplies nondecreasing derivative bounds, concavity supplies
+nonincreasing derivative bounds.  The result fed to FTC is still just
+`toDerivativeBound`. -/
+structure DerivativeBoundFromCurvature
+    (F dF : RealFunRaw) {a b : Rat} (C : RationalSubinterval a b) where
+  curvature : CurvatureOnSubinterval F C
+  monotoneDerivative : MonotoneDerivativeBoundMethod dF C
+  compatible :
+    monotoneDerivative.kind = curvature.kind.derivativeMonotonicity
+
+namespace DerivativeBoundFromCurvature
+
+def toDerivativeBound
+    {F dF : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
+    (H : DerivativeBoundFromCurvature F dF C) :
+    DerivativeBoundOnSubinterval dF C :=
+  H.monotoneDerivative.toDerivativeBound
+
+end DerivativeBoundFromCurvature
+
+/-- Legacy convexity-facing FTC data.
+
+This is the older certificate-shaped route: convexity is only a method for
+obtaining the derivative bounds consumed by `DerivativeBoundFTC`.  The main
+convex FTC should no longer be stated this way; it should start from exact
+convexity and construct the one-sided derivative and its integral. -/
+structure LegacyConvexFTC (F dF : RealFunRaw) (a b : Rat) where
+  primitive_domain_lower : F.domain a
+  primitive_domain_upper : F.domain b
+  choosePartition : QPos -> RationalPartition a b
+  chooseEndpointPrecision : QPos -> Nat
+  chooseBoundStage : QPos -> Nat
+  convexBound :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        DerivativeBoundFromCurvature F dF ((choosePartition eps).cell k hk)
+  convex_kind :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        (convexBound eps k hk).curvature.kind = CurvatureKind.convex
+  localControl :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        LocalFTCFromDerivativeBound F dF
+          ((choosePartition eps).cell k hk)
+          ((convexBound eps k hk).toDerivativeBound)
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk =>
+          ((convexBound eps k hk).toDerivativeBound).bound (chooseBoundStage eps))).width <=
+        eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseEndpointPrecision eps)).width <=
+        eps.val
+  overlap :
+    forall eps,
+      QInterval.Overlaps
+        ((choosePartition eps).boundIntegralSum
+          (fun k hk =>
+            ((convexBound eps k hk).toDerivativeBound).bound (chooseBoundStage eps)))
+        (endpointDifferenceInterval F a b (chooseEndpointPrecision eps))
+
+namespace LegacyConvexFTC
+
+def toDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : LegacyConvexFTC F dF a b) :
+    DerivativeBoundFTC F dF a b where
+  primitive_domain_lower := h.primitive_domain_lower
+  primitive_domain_upper := h.primitive_domain_upper
+  choosePartition := h.choosePartition
+  chooseEndpointPrecision := h.chooseEndpointPrecision
+  chooseBoundStage := h.chooseBoundStage
+  derivativeBound := fun eps k hk => (h.convexBound eps k hk).toDerivativeBound
+  localControl := h.localControl
+  riemann_width := h.riemann_width
+  endpoint_width := h.endpoint_width
+  overlap := h.overlap
+
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : LegacyConvexFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.toDerivativeBoundFTC.equiv_endpoint
+
+end LegacyConvexFTC
+
+/-- Legacy convexity-facing FTC.
+
+Once a convexity certificate has produced derivative bounds on the chosen
+rational partition cells, the old effective FTC conclusion is exactly the
+derivative-bound endpoint equivalence. -/
+theorem legacyConvexFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : LegacyConvexFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.equiv_endpoint
+
 /-- A partial function together with a proof that it is defined at every
 rational point of a closed rational interval.
 
@@ -272,6 +836,13 @@ namespace FunctionOnInterval
 def compute (F : FunctionOnInterval) (x : Rat) (hx : inDomainInterval F.lower F.upper x)
     (n : Nat) : QInterval :=
   F.raw.compute x (F.defined_on x hx) n
+
+def secantSlopeInterval (F : FunctionOnInterval)
+    (x y : Rat)
+    (hx : inDomainInterval F.lower F.upper x)
+    (hy : inDomainInterval F.lower F.upper y)
+    (n : Nat) : QInterval :=
+  QInterval.slopeBetween (F.compute y hy n) (F.compute x hx n) (y - x)
 
 end FunctionOnInterval
 

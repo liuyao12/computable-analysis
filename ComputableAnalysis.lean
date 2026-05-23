@@ -4,6 +4,7 @@ import ComputableAnalysis.AbelianIntegrals
 import ComputableAnalysis.Algebraic
 import ComputableAnalysis.AlgebraicNumbers
 import ComputableAnalysis.AlgebraicFunctions
+import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.Basic
 import ComputableAnalysis.Basel
 import ComputableAnalysis.Calculus
@@ -21,6 +22,7 @@ import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FTC
 import ComputableAnalysis.FTA
 import ComputableAnalysis.FunctionDomains
+import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.Pi
 import ComputableAnalysis.PiProofs
 import ComputableAnalysis.RationalCircle

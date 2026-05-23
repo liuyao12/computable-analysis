@@ -482,21 +482,31 @@ theorem eEuler_valid_of_centerStepMovement
   eEuler_valid_of_centerMovement
     (eulerCenterMovement_of_stepMovement hstep)
 
-def ECentersOverlap : Prop :=
+def CentersOverlap (x : Rat) : Prop :=
   forall n,
-    powerSeriesCenter 1 n - powerSeriesTailRadius 1 n <=
-      eulerCenter 1 n + stageRadius n /\
-    eulerCenter 1 n - stageRadius n <=
-      powerSeriesCenter 1 n + powerSeriesTailRadius 1 n
+    powerSeriesCenter x n - powerSeriesTailRadius x n <=
+      eulerCenter x n + stageRadius n /\
+    eulerCenter x n - stageRadius n <=
+      powerSeriesCenter x n + powerSeriesTailRadius x n
 
-theorem ePowerSeries_eq_eEuler_of_centersOverlap
-    (hoverlap : ECentersOverlap) : EPowerSeriesEqEuler := by
+theorem expPowerSeries_eq_expEuler_of_centersOverlap
+    (x : Rat) (hoverlap : CentersOverlap x) :
+    (expPowerSeries x).Equiv (expEuler x) := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
   have h := hoverlap n
-  apply (RealRaw.compareAt_overlap_iff (expPowerSeries 1) (expEuler 1) n n).2
+  apply (RealRaw.compareAt_overlap_iff
+    (expPowerSeries x) (expEuler x) n n).2
   rw [expPowerSeries_compute_eq, expEuler_compute_eq]
   exact h
+
+def ECentersOverlap : Prop :=
+  CentersOverlap 1
+
+theorem ePowerSeries_eq_eEuler_of_centersOverlap
+    (hoverlap : ECentersOverlap) : EPowerSeriesEqEuler := by
+  simpa [EPowerSeriesEqEuler, ECentersOverlap, ePowerSeries, eEuler]
+    using expPowerSeries_eq_expEuler_of_centersOverlap 1 hoverlap
 
 structure ExpProofRemainders where
   powerSeries_ratio_bound : EPowerSeriesRatioBound
@@ -509,6 +519,11 @@ structure ExpProofsComplete where
   powerSeries_valid : EPowerSeriesValid
   euler_valid : EEulerValid
   powerSeries_eq_euler : EPowerSeriesEqEuler
+
+theorem eEuler_eq_ePowerSeries_of_complete
+    (proofs : ExpProofsComplete) :
+    eEuler.Equiv ePowerSeries :=
+  RealRaw.equiv_symm proofs.powerSeries_eq_euler
 
 theorem complete_of_remainders
     (remainders : ExpProofRemainders) : ExpProofsComplete where

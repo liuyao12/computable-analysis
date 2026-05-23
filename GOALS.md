@@ -70,6 +70,35 @@ references to the relevant declarations.
 - Proved bridge: once the construction exists, the integral is a computable
   real.
   See `integral_construction_proves_well_defined_for`.
+- FTC route for ordinary functions: do not pursue a generic "effective FTC"
+  whose hypotheses are derivative bounds and local controls.  The main theorem
+  should be the exact convex FTC: exact convexity on `[a,b]` implies the
+  one-sided convex derivative is monotone, integrable, and has integral
+  `F b - F a`.
+- Exact convexity is now stated through `RealRaw.Le` and rational secants.
+  See `RealRaw.Le`, `secantRaw`, and `ExactConvexOn`.
+- Convex derivative: for a convex function, define the right derivative as
+  the infimum of right secants `Sec_F(q,q+h)` as `h > 0` tends to zero, and
+  the left derivative as the supremum of left secants.  The full two-sided
+  derivative exists only where these agree; corners such as `abs` should not
+  block the universal one-sided FTC.
+- Convex FTC proof step: for each partition cell `[x_i,x_{i+1}]`, convexity
+  gives
+  `D_+F(x_i) <= Sec_F(x_i,x_{i+1}) <= D_-F(x_{i+1})`.
+  Multiplying by the cell width and summing gives Darboux sums around the
+  telescoping endpoint difference `F b - F a`.  Monotonicity and completeness
+  shrink the Darboux gap.
+- Piecewise convexity: if a function switches convexity, split the interval at
+  rational breakpoints, apply the exact convex FTC on each piece, and combine
+  endpoint equalities by raw-real arithmetic and transitivity.  Do not add a
+  separate piecewise theorem unless the examples force a reusable abstraction.
+- Formula-identification route: to identify a proposed kernel, prove that it
+  lies in the same shrinking enclosures as the pointwise derivative produced
+  by secants.  For arctangent, this means proving finite sector-area secant
+  inequalities and comparing them with `1/(1+x^2)`.
+- Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
+  They are handled before calculus by denominator-apartness or
+  interval-regularity certificates on the rational interval.
 
 ## Inverse Functions
 
@@ -120,9 +149,14 @@ references to the relevant declarations.
 
 ## Constructive Differential Calculus
 
-- Derivatives are finite-difference interval estimates on rational intervals,
-  not limits in a classical real topology.  See `HasDerivativeOnInterval` in
-  `ComputableAnalysis/Differential.lean`.
+- Derivatives are extracted from shrinking finite-difference intervals on
+  rational cells, not assumed as limits in a classical real topology.  See
+  `HasDerivativeOnInterval` in `ComputableAnalysis/Differential.lean`.
+- Convexity and concavity are helper certificates for producing slope
+  enclosures on short intervals.  The rational secant-slope layer is
+  `CurvatureOnSubinterval`; the current implementation still has older
+  declaration names such as `MonotoneDerivativeBoundMethod` and
+  `DerivativeBoundFromCurvature`.
 - The first proved power-series brick is formal: the coefficient stream
   `1/n!` is fixed by formal differentiation.  See
   `FormalPowerSeries.expCoeff_derivative` in
@@ -627,17 +661,14 @@ students actually compute.
 
 ## Long-Term Theorems
 
-- Effective FTC: the integral of a derivative agrees with endpoint
-  difference, at every requested precision.
-  The preferred computable-number conclusion is
-  `DefiniteIntegralEqualsEndpointDifference`, whose equality is
-  `RealRaw.Equiv` between the definite integral over `[a,b]` and
-  `F(b)-F(a)`.  The finite-sum estimate version is `EffectiveFTC`, and the
-  exact rational-function version `EffectiveFTCExact` includes an explicit
-  derivative certificate.
-- First checked FTC base case: affine functions satisfy the exact effective
-  FTC with one subdivision.  See `FTC.affineExactCertificate` and
-  `FTC.affine_exact` in `ComputableAnalysis/FTC.lean`.
+- Convex FTC: for the examples in Chapter 2, the main calculus theorem is the
+  convex/concave secant route.  Define the pointwise derivative from shrinking
+  centered secant hulls, form Riemann sums of that derivative, and prove the
+  endpoint identity by neighboring-secant enclosures plus telescoping.
+- Legacy exact FTC facts remain useful as sanity checks, but they are no
+  longer the main dependency for elementary functions.  The affine exact
+  certificate is `FTC.affineExactCertificate` / `FTC.affine_exact` in
+  `ComputableAnalysis/FTC.lean`.
 - First checked exact derivative facts: the derivative of an affine function
   is its constant slope, and the derivative of `x^2` is `2x`.
   See `ExactFunction.affine_derivative_effective` and
@@ -648,7 +679,7 @@ students actually compute.
   See `FTC.ftcError_square_doubleId_zero_one_succ` and
   `FTC.ftcCheck_square_doubleId_zero_one_succ` in
   `ComputableAnalysis/FTC.lean`.
-- This estimate is now packaged as an effective FTC certificate:
+- This estimate is packaged in the older effective FTC style:
   `FTC.square_doubleId_zero_one_effective` chooses `eps.den + 1`
   subdivisions for any positive rational `eps`.
 - First checked non-affine computable-number FTC theorem:

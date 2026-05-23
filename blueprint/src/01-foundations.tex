@@ -35,14 +35,9 @@ following validity conditions:
   n\le m\Rightarrow
   a_n\le a_m\le b_m\le b_n,
 \]
-and
+and for any $\eps\in\Q_{>0}$, there exists $N\in\N$ such that
 \[
-  \lim_{n\to\infty}(b_n-a_n)=0.
-\]
-Formally, the last condition means
-\[
-  \forall \eps\in\Q_{>0}\ \exists N\ \forall n\ge N,\quad
-  b_n-a_n\le \eps.
+  b_N-a_N \le \eps.
 \]
 \end{definition}
 
@@ -54,7 +49,7 @@ When the map
 \]
 is given by a finite, terminating algorithm, as we always do in this project,
 the real number is said to be \emph{computable}. Storing all the rational numbers
-in an infinite table is not permitted. The evaluation at \(n\) is referred to as
+in an infinite table is not permitted. Evaluating at \(n\) is referred to as
 \emph{computing} the real number \emph{at stage} \(n\).
 \end{remark}
 
@@ -144,7 +139,7 @@ A \emph{stage schedule} is an increasing function
 \]
 If \(x=[a_n,b_n]_{n\in\N}\), then the scheduled real number is
 \[
-  \sigma\ldot x=[a_{\sigma(n)},b_{\sigma(n)}]_{n\in\N}.
+  \sigma\ldot x:=[a_{\sigma(n)},b_{\sigma(n)}]_{n\in\N}.
 \]
 \end{definition}
 
@@ -170,7 +165,7 @@ easier to show.
 The \emph{abstract real numbers} are the equivalence classes of real numbers
 under the equivalence relation above.  We denote this quotient by \(\R\):
 \[
-  \R=\{\text{real numbers}\}/\sim.
+  \R:=\{\text{real numbers}\}/\sim.
 \]
 After passing to the quotient, a real number in the sense above is a
 \emph{representative} of the abstract real number it determines.
@@ -294,7 +289,7 @@ numbers, and is how calculus appears to be the study of functions.
 
 \begin{remark}[Complex variable]\label{rem:complex-parameters}
 \uses{rem:parameterized-constructions,def:qcomplex,def:qbox}
-It turns out that sometimes it makes sense for the variable to assume complex values
+It turns out that often it makes sense for the variable to assume complex values
 (at least for \(t+si\), with \(t,s\in\Q\)).  For example, power series may be evaluated
 inside a disk in the complex plane, and integrals can be taken over paths in the complex plane.
 \end{remark}
@@ -305,7 +300,7 @@ One could define complex numbers as pairs of real numbers.  Instead, we follow
 the interval arithmetic more closely, using rectangular boxes with rational corners
 from the start.
 
-\begin{definition}\label{def:qcomplex}
+\begin{definition}[Field \(\Q(i)\)]\label{def:qcomplex}
 \lean{ComputableAnalysis.QComplex}
 Let
 \[
@@ -375,11 +370,11 @@ For complex numbers as box sequences
 \]
 addition is stagewise:
 \[
-  z+w=\cbox{a_n+c_n}{b_n+d_n}_{n\in\N}.
+  z+w:=\cbox{a_n+c_n}{b_n+d_n}_{n\in\N}.
 \]
 Negation reverses the box:
 \[
-  -z=\cbox{-b_n}{-a_n}_{n\in\N}.
+  -z:=\cbox{-b_n}{-a_n}_{n\in\N}.
 \]
 For multiplication, write the same box sequences in coordinates as
 \[
@@ -387,7 +382,7 @@ For multiplication, write the same box sequences in coordinates as
 \]
 where \(x,y,u,v\) are real numbers.  Then define
 \[
-  zw=(xu-yv)+i(xv+yu).
+  zw:=(xu-yv)+i(xv+yu).
 \]
 At the level of rational boxes, multiplication is implemented by applying
 real interval arithmetic to these four real products and taking bounding
@@ -404,7 +399,7 @@ A complex number \(z=x+iy\) is \emph{nonzero} if
 is nonzero as a real number.  For nonzero \(z\), define
 \[
   z^{-1}
-  =
+  :=
   \frac{x}{x^2+y^2}
   -
   i\,\frac{y}{x^2+y^2}.
@@ -418,13 +413,13 @@ The \emph{abstract complex numbers} are the equivalence classes of complex
 numbers under the equivalence relation above.  We denote this quotient by
 \(\C\):
 \[
-  \C=\{\text{complex numbers}\}/\sim.
+  \C:=\{\text{complex numbers}\}/\sim.
 \]
 After passing to the quotient, a complex number in the sense above is a
 \emph{representative} of the abstract complex number it determines.
 \end{definition}
 
-\begin{theorem}[Field of abstract complex numbers]\label{thm:complex-field}
+\begin{theorem}[\(\C\) is a field]\label{thm:complex-field}
 \uses{def:complex-quotient,def:complex-arithmetic,def:complex-inverse}
 The arithmetic operations above descend to abstract complex numbers, and
 \(\C\) forms a field.

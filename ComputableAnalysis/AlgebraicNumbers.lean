@@ -115,6 +115,16 @@ def Equiv (z w : AlgebraicComplex) : Prop :=
 def Nonzero (z : AlgebraicComplex) : Prop :=
   ¬ z.value.raw.Equiv ComplexRaw.zero
 
+theorem equiv_refl (z : AlgebraicComplex) : z.Equiv z :=
+  ComplexRaw.equiv_refl z.value.raw z.value.valid
+
+theorem equiv_symm {z w : AlgebraicComplex} : z.Equiv w -> w.Equiv z :=
+  ComplexRaw.equiv_symm
+
+theorem equiv_trans {z w u : AlgebraicComplex} :
+    z.Equiv w -> w.Equiv u -> z.Equiv u :=
+  ComplexRaw.equiv_trans z.value.valid w.value.valid u.value.valid
+
 def ofQComplex (z : QComplex) : AlgebraicComplex where
   value := exactComplexCert z
   annihilator := RatPoly.qcomplexRoot z

@@ -29,10 +29,32 @@ def midpoint (I : QInterval) : Rat := (I.lo + I.hi) / 2
 def Overlaps (I J : QInterval) : Prop := I.lo <= J.hi /\ J.lo <= I.hi
 def CloseAt (I J : QInterval) (eps : QPos) : Prop :=
   Overlaps I J /\ I.width <= eps.val /\ J.width <= eps.val
+/-- `outer.ContainsInterval inner` says the rational interval `outer` encloses
+the whole rational interval `inner`. -/
+def ContainsInterval (outer inner : QInterval) : Prop :=
+  outer.lo <= inner.lo /\ inner.hi <= outer.hi
 def overlaps (I J : QInterval) : Bool := decide (I.lo <= J.hi /\ J.lo <= I.hi)
 def closeAt (I J : QInterval) (eps : QPos) : Bool :=
   decide (I.lo <= J.hi /\ J.lo <= I.hi /\ I.width <= eps.val /\ J.width <= eps.val)
 def widthOk (I : QInterval) (eps : QPos) : Bool := decide (0 <= I.width /\ I.width <= eps.val)
+
+/-- The smallest rational interval containing both input intervals. -/
+def hull (I J : QInterval) : QInterval :=
+  { lo := min I.lo J.lo, hi := max I.hi J.hi }
+
+theorem hull_contains_left (I J : QInterval) : (hull I J).ContainsInterval I := by
+  unfold ContainsInterval hull
+  grind
+
+theorem hull_contains_right (I J : QInterval) : (hull I J).ContainsInterval J := by
+  unfold ContainsInterval hull
+  grind
+
+theorem hull_least {K I J : QInterval}
+    (hI : K.ContainsInterval I) (hJ : K.ContainsInterval J) :
+    K.ContainsInterval (hull I J) := by
+  unfold ContainsInterval hull at *
+  grind
 
 def inv (I : QInterval) : QInterval :=
   if 0 < I.lo then
@@ -484,6 +506,17 @@ than part of the definition. -/
 def Equiv (x y : RealRaw) : Prop :=
   x.SameStageOverlap y
 
+/-- Exact order of raw reals, expressed directly through rational interval
+approximations.
+
+This is deliberately not the executable interval comparison `compareAt`.
+It says that every rational lower approximation to `x` is at most every
+rational upper approximation to `y`.  For valid shrinking representatives,
+this is the order relation that survives changes of representative and is the
+right primitive for exact convexity. -/
+def Le (x y : RealRaw) : Prop :=
+  forall n m, (x.compute n).lo <= (y.compute m).hi
+
 theorem sameStageOverlap_equiv {x y : RealRaw} :
     x.SameStageOverlap y -> x.Equiv y := by
   intro h
@@ -636,6 +669,84 @@ theorem equiv_iff_allStagesOverlap {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) :
     x.Equiv y ↔ x.AllStagesOverlap y :=
   ⟨allStagesOverlap_of_equiv hx hy, RealRaw.allStagesOverlap_equiv⟩
+
+theorem le_refl (x : RealRaw) (hx : x.Valid) : x.Le x := by
+  intro n m
+  have hover := (compareAt_overlap_iff x x n m).1
+    (allStagesOverlap_refl x hx n m)
+  exact hover.1
+
+theorem le_of_equiv {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) :
+    x.Equiv y -> x.Le y := by
+  intro hxy n m
+  have hall := allStagesOverlap_of_equiv hx hy hxy
+  have hover := (compareAt_overlap_iff x y n m).1 (hall n m)
+  exact hover.1
+
+theorem equiv_of_le_of_ge {x y : RealRaw}
+    (hxy : x.Le y) (hyx : y.Le x) :
+    x.Equiv y := by
+  intro n
+  apply (compareAt_overlap_iff x y n n).2
+  exact ⟨hxy n n, hyx n n⟩
+
+theorem equiv_iff_le_and_ge {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) :
+    x.Equiv y ↔ x.Le y /\ y.Le x := by
+  constructor
+  · intro hxy
+    exact ⟨le_of_equiv hx hy hxy, le_of_equiv hy hx (equiv_symm hxy)⟩
+  · intro h
+    exact equiv_of_le_of_ge h.1 h.2
+
+theorem le_trans {x y z : RealRaw}
+    (hy : y.Valid) :
+    x.Le y -> y.Le z -> x.Le z := by
+  intro hxy hyz n m
+  by_cases hgood : (x.compute n).lo <= (z.compute m).hi
+  · exact hgood
+  · exfalso
+    have hgap : 0 < (x.compute n).lo - (z.compute m).hi := by
+      rw [←Rat.lt_iff_sub_pos]
+      simpa [Rat.not_le] using hgood
+    have htwo : (0 : Rat) < 2 := by
+      exact (Rat.natCast_pos).2 (by omega : 0 < (2 : Nat))
+    have hgapHalfPos : 0 < ((x.compute n).lo - (z.compute m).hi) / 2 := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos hgap ((Rat.inv_pos).2 htwo)
+    obtain ⟨k, hk⟩ := hy.2.2
+      { val := ((x.compute n).lo - (z.compute m).hi) / 2,
+        property := hgapHalfPos }
+    have hxyk := hxy n k
+    have hyzk := hyz k m
+    have hsmall :
+        (y.compute k).width <=
+          ((x.compute n).lo - (z.compute m).hi) / 2 :=
+      hk k (Nat.le_refl k)
+    have hgap_le_width :
+        (x.compute n).lo - (z.compute m).hi <= (y.compute k).width := by
+      grind [QInterval.width, Rat.sub_eq_add_neg]
+    have hhalf_lt :
+        ((x.compute n).lo - (z.compute m).hi) / 2 <
+          (x.compute n).lo - (z.compute m).hi := by
+      rw [Rat.div_lt_iff htwo]
+      grind
+    have hgap_le_half :
+        (x.compute n).lo - (z.compute m).hi <=
+          ((x.compute n).lo - (z.compute m).hi) / 2 :=
+      Rat.le_trans hgap_le_width hsmall
+    have hne :
+        (x.compute n).lo - (z.compute m).hi ≠
+      ((x.compute n).lo - (z.compute m).hi) / 2 := by
+      intro heq
+      rw [←heq] at hhalf_lt
+      exact Rat.lt_irrefl hhalf_lt
+    have hgap_lt_half :
+        (x.compute n).lo - (z.compute m).hi <
+          ((x.compute n).lo - (z.compute m).hi) / 2 :=
+      Rat.lt_of_le_of_ne hgap_le_half hne
+    exact Rat.lt_irrefl (rat_lt_trans hgap_lt_half hhalf_lt)
 
 private theorem equiv_trans_left {x y z : RealRaw}
     (hx : x.Valid) (hy : y.Valid) (hz : z.Valid)

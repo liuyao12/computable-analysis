@@ -1,4 +1,3 @@
-import ComputableAnalysis.Elementary
 import ComputableAnalysis.Pi
 
 /-!
@@ -474,7 +473,7 @@ theorem chordSegmentNormSq_le_tangentCrossSum_sq
     have hcne : cross p q ≠ 0 := Rat.ne_of_gt hcross_pos
     grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
   rw [hseg]
-  rw [←hprod_eq]
+  rw [← hprod_eq]
   unfold sq
   exact Rat.mul_le_mul_of_nonneg_left hcross_le hs_nonneg
 
@@ -825,162 +824,451 @@ theorem piCircumference_compute_eq_commonStage (n : Nat) :
   rw [piCircumference_compute_eq_stage]
   exact Stage.circumferenceInterval_eq_common (dyadicStage n)
 
-end RationalCircle
-
-namespace ArctanGeometry
+namespace Trigonometry
 
 /-!
-Geometric arctangent.
+Exact trigonometry on the rational circle.
 
-For rational `x`, the point
-`((1 - x^2) / (1 + x^2), 2x / (1 + x^2))` lies on the unit circle at angle
-`2 * arctan x`, so the unit-sector area from `0` to this parameter is
-`arctan x`.
+The parameter `u` is the rational slope coordinate for the stereographic
+circle chart.  This gives a first, fully rational layer of circle-coordinate
+identities before the later angle-to-point algorithm turns arbitrary raw
+angles into circle points.
 -/
 
-def stage (n : Nat) : Nat :=
-  2 ^ n
+def point (u : Rat) : PiCirclePoint :=
+  Stage.point u
 
-theorem stage_pos (n : Nat) : 0 < stage n := by
-  unfold stage
-  exact Nat.pow_pos (by omega : 0 < 2)
+def cos (u : Rat) : Rat :=
+  (point u).x
 
-def parameter (y : Rat) (stage k : Nat) : Rat :=
-  y * (k : Rat) / (stage : Rat)
+def sin (u : Rat) : Rat :=
+  (point u).y
 
-def circlePoint (u : Rat) : PiCirclePoint :=
-  let d := 1 + u * u
-  { x := (1 - u * u) / d,
-    y := (2 * u) / d }
+def tan (u : Rat) : Rat :=
+  sin u / cos u
 
-def samplePoint (y : Rat) (stage k : Nat) : PiCirclePoint :=
-  circlePoint (parameter y stage k)
+def cot (u : Rat) : Rat :=
+  cos u / sin u
 
-def originPoint : PiCirclePoint :=
-  { x := 0, y := 0 }
+def sec (u : Rat) : Rat :=
+  1 / cos u
 
-def pointCross (p q : PiCirclePoint) : Rat :=
-  p.x * q.y - p.y * q.x
+def csc (u : Rat) : Rat :=
+  1 / sin u
 
-def tangentIntersection (p q : PiCirclePoint) : PiCirclePoint :=
-  let det := pointCross p q
-  { x := (q.y - p.y) / det,
-    y := (p.x - q.x) / det }
+def cosRaw (u : Rat) : RealRaw :=
+  RealRaw.ofRat (cos u)
 
-def outerTangentPoint (y : Rat) (stage k : Nat) : PiCirclePoint :=
-  tangentIntersection
-    (samplePoint y stage k) (samplePoint y stage (k + 1))
+def sinRaw (u : Rat) : RealRaw :=
+  RealRaw.ofRat (sin u)
 
-def innerBoundaryFrom (y : Rat) (stage k count : Nat) :
-    List PiCirclePoint :=
-  piCircleArea.innerBoundaryFrom (samplePoint y stage) k count
+def tanRaw (u : Rat) : RealRaw :=
+  RealRaw.ofRat (tan u)
 
-def innerBoundary (y : Rat) (stage : Nat) : List PiCirclePoint :=
-  innerBoundaryFrom y stage 0 (stage + 1)
+def cotRaw (u : Rat) : RealRaw :=
+  RealRaw.ofRat (cot u)
 
-def outerBoundaryFrom (y : Rat) (stage k count : Nat) :
-    List PiCirclePoint :=
-  piCircleArea.outerBoundaryFrom
-    (samplePoint y stage) (outerTangentPoint y stage) k count
+def secRaw (u : Rat) : RealRaw :=
+  RealRaw.ofRat (sec u)
 
-def outerBoundary (y : Rat) (stage : Nat) : List PiCirclePoint :=
-  samplePoint y stage 0 :: outerBoundaryFrom y stage 0 stage
+def cscRaw (u : Rat) : RealRaw :=
+  RealRaw.ofRat (csc u)
 
-def twiceSignedAreaAux
-    (first prev : PiCirclePoint) : List PiCirclePoint -> Rat
-  | vertices => piCircleArea.twiceSignedAreaAux pointCross first prev vertices
+def dyadicPoint (n k : Nat) : PiCirclePoint :=
+  (dyadicStage n).samplePoint k
 
-def twiceSignedArea : List PiCirclePoint -> Rat
-  | [] => 0
-  | first :: rest => twiceSignedAreaAux first first rest
+def dyadicCos (n k : Nat) : Rat :=
+  (dyadicPoint n k).x
 
-def polygonArea (vertices : List PiCirclePoint) : Rat :=
-  qabs (twiceSignedArea vertices / 2)
+def dyadicSin (n k : Nat) : Rat :=
+  (dyadicPoint n k).y
 
-def innerSectorArea (y : Rat) (stage : Nat) : Rat :=
-  polygonArea (originPoint :: innerBoundary y stage)
+def pointMul (p q : PiCirclePoint) : PiCirclePoint :=
+  { x := p.x * q.x - p.y * q.y,
+    y := p.x * q.y + p.y * q.x }
 
-def outerSectorArea (y : Rat) (stage : Nat) : Rat :=
-  polygonArea (originPoint :: outerBoundary y stage)
+def composedPoint (u v : Rat) : PiCirclePoint :=
+  pointMul (point u) (point v)
 
-def positiveComputeAtStage (y : Rat) (stage : Nat) : QInterval :=
-  if stage = 0 then
-    { lo := 0, hi := 0 }
-  else
-    { lo := innerSectorArea y stage,
-      hi := outerSectorArea y stage }
+def composedCos (u v : Rat) : Rat :=
+  (composedPoint u v).x
 
-def positiveRaw (y : Rat) : RealRaw :=
-  if y = 0 then
-    RealRaw.ofRat 0
-  else
-    { compute := fun n => positiveComputeAtStage y (stage n) }
+def composedSin (u v : Rat) : Rat :=
+  (composedPoint u v).y
 
-/-- Geometric arctangent on rational slopes. Positive inputs are sector
-areas; negative inputs use oddness. -/
-def arctanGeom (x : Rat) : RealRaw :=
-  if x = 0 then
-    RealRaw.ofRat 0
-  else if 0 <= x then
-    positiveRaw x
-  else
-    -positiveRaw (-x)
+def doublePoint (u : Rat) : PiCirclePoint :=
+  composedPoint u u
 
-theorem circlePoint_zero :
-    circlePoint 0 = ({ x := 1, y := 0 } : PiCirclePoint) := by
+def doubleCos (u : Rat) : Rat :=
+  (doublePoint u).x
+
+def doubleSin (u : Rat) : Rat :=
+  (doublePoint u).y
+
+theorem cos_eq (u : Rat) :
+    cos u = (1 - u * u) / (1 + u * u) := rfl
+
+theorem sin_eq (u : Rat) :
+    sin u = (2 * u) / (1 + u * u) := rfl
+
+theorem point_eq (u : Rat) :
+    point u = ({ x := cos u, y := sin u } : PiCirclePoint) := by
+  rfl
+
+theorem cos_sq_add_sin_sq (u : Rat) :
+    sq (cos u) + sq (sin u) = 1 := by
+  simpa [point, cos, sin, sq] using Stage.point_normSq u
+
+theorem pointMul_normSq_of_unit
+    {p q : PiCirclePoint}
+    (hp : Stage.normSq p = 1) (hq : Stage.normSq q = 1) :
+    Stage.normSq (pointMul p q) = 1 := by
+  unfold pointMul Stage.normSq at *
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem composedPoint_normSq (u v : Rat) :
+    Stage.normSq (composedPoint u v) = 1 :=
+  pointMul_normSq_of_unit (Stage.point_normSq_unit u)
+    (Stage.point_normSq_unit v)
+
+theorem composed_cos_eq (u v : Rat) :
+    composedCos u v = cos u * cos v - sin u * sin v := by
+  rfl
+
+theorem composed_sin_eq (u v : Rat) :
+    composedSin u v = cos u * sin v + sin u * cos v := by
+  rfl
+
+theorem composed_cos_sq_add_sin_sq (u v : Rat) :
+    sq (composedCos u v) + sq (composedSin u v) = 1 := by
+  simpa [composedCos, composedSin, sq] using composedPoint_normSq u v
+
+theorem double_cos_eq_sq_sub_sq (u : Rat) :
+    doubleCos u = sq (cos u) - sq (sin u) := by
+  unfold doubleCos doublePoint composedPoint pointMul sq
+  rfl
+
+theorem double_sin_eq_two_mul (u : Rat) :
+    doubleSin u = 2 * cos u * sin u := by
+  unfold doubleSin doublePoint composedPoint pointMul cos sin
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem double_cos_eq_one_sub_two_sin_sq (u : Rat) :
+    doubleCos u = 1 - 2 * sq (sin u) := by
+  rw [double_cos_eq_sq_sub_sq]
+  have hcircle := cos_sq_add_sin_sq u
+  unfold sq at *
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem double_cos_eq_two_cos_sq_sub_one (u : Rat) :
+    doubleCos u = 2 * sq (cos u) - 1 := by
+  rw [double_cos_eq_sq_sub_sq]
+  have hcircle := cos_sq_add_sin_sq u
+  unfold sq at *
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem cos_zero : cos 0 = 1 := by
   native_decide
 
-theorem samplePoint_zero (y : Rat) (stage : Nat) :
-    samplePoint y stage 0 = ({ x := 1, y := 0 } : PiCirclePoint) := by
-  unfold samplePoint parameter
-  have hparam : y * ((0 : Nat) : Rat) / (stage : Rat) = 0 := by
-    rw [show ((0 : Nat) : Rat) = 0 by rfl]
-    rw [Rat.div_def]
-    simp
-  rw [hparam]
-  exact circlePoint_zero
+theorem sin_zero : sin 0 = 0 := by
+  native_decide
 
-theorem samplePoint_self (y : Rat) (stage : Nat) (hstage : 0 < stage) :
-    samplePoint y stage stage = circlePoint y := by
-  unfold samplePoint parameter
-  rw [show y * (stage : Rat) / (stage : Rat) = y by
-    rw [Rat.div_def]
-    have hne : (stage : Rat) ≠ 0 := by
-      exact_mod_cast Nat.ne_of_gt hstage
-    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]]
+theorem cos_one : cos 1 = 0 := by
+  native_decide
 
-theorem positiveRaw_zero :
-    positiveRaw 0 = RealRaw.ofRat 0 := by
-  simp [positiveRaw]
+theorem sin_one : sin 1 = 1 := by
+  native_decide
 
-theorem arctanGeom_zero :
-    arctanGeom 0 = RealRaw.ofRat 0 := by
-  simp [arctanGeom]
+theorem tan_eq_sin_div_cos (u : Rat) :
+    tan u = sin u / cos u := rfl
 
-def functionRaw : PartialRealFunRaw where
-  definedAt := fun _ => True
-  compute := fun x _ => (arctanGeom x).compute
+theorem cot_eq_cos_div_sin (u : Rat) :
+    cot u = cos u / sin u := rfl
 
-def representation : Elementary.Arctan.FunctionRepresentation where
-  name := "arctan.geom"
-  raw := functionRaw
+theorem sec_eq_one_div_cos (u : Rat) :
+    sec u = 1 / cos u := rfl
 
-def Valid : Prop :=
-  forall x h, RealRaw.ValidCompute (functionRaw.compute x h)
+theorem csc_eq_one_div_sin (u : Rat) :
+    csc u = 1 / sin u := rfl
 
-def PowerSeriesAgreesOnUnit : Prop :=
-  Elementary.Arctan.Equivalent Elementary.Arctan.powerSeries representation
+theorem tan_mul_cos {u : Rat} (hcos : Ne (cos u) 0) :
+    tan u * cos u = sin u := by
+  unfold tan
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
-theorem powerSeries_equiv_geometric_of_agreement
-    (h : PowerSeriesAgreesOnUnit) {x : Rat}
-    (hx : Elementary.Arctan.powerSeriesDomain x) :
-    (arctan x).Equiv (arctanGeom x) := by
-  have hgeom : representation.raw.definedAt x := by
-    simp [representation, functionRaw]
-  simpa [Elementary.Arctan.powerSeries, representation, functionRaw,
-    Elementary.Arctan.powerSeriesFunctionRaw, PartialRealFunRaw.AgreeOnOverlap,
-    RealRaw.Equiv] using h x hx hgeom
+theorem cot_mul_sin {u : Rat} (hsin : Ne (sin u) 0) :
+    cot u * sin u = cos u := by
+  unfold cot
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
-end ArctanGeometry
+theorem sec_mul_cos {u : Rat} (hcos : Ne (cos u) 0) :
+    sec u * cos u = 1 := by
+  unfold sec
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem csc_mul_sin {u : Rat} (hsin : Ne (sin u) 0) :
+    csc u * sin u = 1 := by
+  unfold csc
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem one_add_tan_sq_eq_sec_sq {u : Rat} (hcos : Ne (cos u) 0) :
+    1 + sq (tan u) = sq (sec u) := by
+  unfold tan sec sq
+  rw [Rat.div_def, Rat.div_def]
+  have hcircle := cos_sq_add_sin_sq u
+  unfold sq at hcircle
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem one_add_cot_sq_eq_csc_sq {u : Rat} (hsin : Ne (sin u) 0) :
+    1 + sq (cot u) = sq (csc u) := by
+  unfold cot csc sq
+  rw [Rat.div_def, Rat.div_def]
+  have hcircle := cos_sq_add_sin_sq u
+  unfold sq at hcircle
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem cos_neg (u : Rat) :
+    cos (-u) = cos u := by
+  unfold cos point Stage.point
+  simp
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem sin_neg (u : Rat) :
+    sin (-u) = -sin u := by
+  unfold sin point Stage.point
+  simp
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem tan_neg (u : Rat) :
+    tan (-u) = -tan u := by
+  unfold tan
+  rw [sin_neg, cos_neg]
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem cot_neg (u : Rat) :
+    cot (-u) = -cot u := by
+  unfold cot
+  rw [cos_neg, sin_neg]
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem sec_neg (u : Rat) :
+    sec (-u) = sec u := by
+  unfold sec
+  rw [cos_neg]
+
+theorem csc_neg (u : Rat) :
+    csc (-u) = -csc u := by
+  unfold csc
+  rw [sin_neg]
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem cosRaw_valid (u : Rat) :
+    (cosRaw u).Valid := by
+  simpa [cosRaw] using RealRaw.ofRat_valid (cos u)
+
+theorem sinRaw_valid (u : Rat) :
+    (sinRaw u).Valid := by
+  simpa [sinRaw] using RealRaw.ofRat_valid (sin u)
+
+theorem tanRaw_valid (u : Rat) :
+    (tanRaw u).Valid := by
+  simpa [tanRaw] using RealRaw.ofRat_valid (tan u)
+
+theorem cotRaw_valid (u : Rat) :
+    (cotRaw u).Valid := by
+  simpa [cotRaw] using RealRaw.ofRat_valid (cot u)
+
+theorem secRaw_valid (u : Rat) :
+    (secRaw u).Valid := by
+  simpa [secRaw] using RealRaw.ofRat_valid (sec u)
+
+theorem cscRaw_valid (u : Rat) :
+    (cscRaw u).Valid := by
+  simpa [cscRaw] using RealRaw.ofRat_valid (csc u)
+
+theorem dyadic_point_refineIndex (n k : Nat) :
+    dyadicPoint (n + 1) (Stage.refineIndex k) =
+      dyadicPoint n k := by
+  unfold dyadicPoint
+  exact dyadicStage_samplePoint_refineIndex n k
+
+theorem dyadic_cos_refineIndex (n k : Nat) :
+    dyadicCos (n + 1) (Stage.refineIndex k) =
+      dyadicCos n k := by
+  unfold dyadicCos dyadicPoint
+  rw [dyadicStage_samplePoint_refineIndex]
+
+theorem dyadic_sin_refineIndex (n k : Nat) :
+    dyadicSin (n + 1) (Stage.refineIndex k) =
+      dyadicSin n k := by
+  unfold dyadicSin dyadicPoint
+  rw [dyadicStage_samplePoint_refineIndex]
+
+theorem dyadic_cos_sq_add_sin_sq (n k : Nat) :
+    sq (dyadicCos n k) + sq (dyadicSin n k) = 1 := by
+  simpa [dyadicCos, dyadicSin, dyadicPoint, sq] using
+    Stage.samplePoint_normSq (dyadicStage n) k
+
+theorem dyadic_cos_zero (n : Nat) :
+    dyadicCos n 0 = 1 := by
+  rw [dyadicCos, dyadicPoint, Stage.samplePoint_zero]
+
+theorem dyadic_sin_zero (n : Nat) :
+    dyadicSin n 0 = 0 := by
+  rw [dyadicSin, dyadicPoint, Stage.samplePoint_zero]
+
+theorem dyadic_cos_last (n : Nat) :
+    dyadicCos n (dyadicSubdivisions n) = 0 := by
+  unfold dyadicCos dyadicPoint
+  change ((dyadicStage n).samplePoint (dyadicStage n).subdivisions).x = 0
+  rw [Stage.samplePoint_last _ (dyadicStage_positive n)]
+
+theorem dyadic_sin_last (n : Nat) :
+    dyadicSin n (dyadicSubdivisions n) = 1 := by
+  unfold dyadicSin dyadicPoint
+  change ((dyadicStage n).samplePoint (dyadicStage n).subdivisions).y = 1
+  rw [Stage.samplePoint_last _ (dyadicStage_positive n)]
+
+/-- A first exact identity package for the rational half-angle trigonometric
+functions.  Later angle-based sine and cosine should prove the same package by
+equivalence with these rational-circle stages. -/
+structure BasicIdentityPackage : Prop where
+  circle : forall u : Rat, sq (cos u) + sq (sin u) = 1
+  tan_cancel : forall u : Rat, Ne (cos u) 0 -> tan u * cos u = sin u
+  cot_cancel : forall u : Rat, Ne (sin u) 0 -> cot u * sin u = cos u
+  sec_cancel : forall u : Rat, Ne (cos u) 0 -> sec u * cos u = 1
+  csc_cancel : forall u : Rat, Ne (sin u) 0 -> csc u * sin u = 1
+  tan_pythagorean :
+    forall u : Rat, Ne (cos u) 0 -> 1 + sq (tan u) = sq (sec u)
+  cot_pythagorean :
+    forall u : Rat, Ne (sin u) 0 -> 1 + sq (cot u) = sq (csc u)
+  add_cos :
+    forall u v : Rat, composedCos u v = cos u * cos v - sin u * sin v
+  add_sin :
+    forall u v : Rat, composedSin u v = cos u * sin v + sin u * cos v
+  double_cos :
+    forall u : Rat, doubleCos u = sq (cos u) - sq (sin u)
+  double_sin :
+    forall u : Rat, doubleSin u = 2 * cos u * sin u
+  cos_even : forall u : Rat, cos (-u) = cos u
+  sin_odd : forall u : Rat, sin (-u) = -sin u
+  tan_odd : forall u : Rat, tan (-u) = -tan u
+
+theorem basicIdentityPackage : BasicIdentityPackage where
+  circle := cos_sq_add_sin_sq
+  tan_cancel := fun _ h => tan_mul_cos h
+  cot_cancel := fun _ h => cot_mul_sin h
+  sec_cancel := fun _ h => sec_mul_cos h
+  csc_cancel := fun _ h => csc_mul_sin h
+  tan_pythagorean := fun _ h => one_add_tan_sq_eq_sec_sq h
+  cot_pythagorean := fun _ h => one_add_cot_sq_eq_csc_sq h
+  add_cos := composed_cos_eq
+  add_sin := composed_sin_eq
+  double_cos := double_cos_eq_sq_sub_sq
+  double_sin := double_sin_eq_two_mul
+  cos_even := cos_neg
+  sin_odd := sin_neg
+  tan_odd := tan_neg
+
+end Trigonometry
+
+namespace GeometricTrig
+
+/-!
+Algorithmic target for geometric sine and cosine.
+
+The geometric construction should first build a circle-point algorithm.  It is
+encoded as a complex-valued raw function: for a real rational angle `theta`,
+the output box encloses the point `x + i y` on the oriented unit circle.  The
+trigonometric algorithms are then just the coordinate projections.
+-/
+
+def realAxisDomain (pointRaw : FunctionRaw) : Rat -> Prop :=
+  fun theta => pointRaw.domain (QComplex.ofRat theta)
+
+def pointAt (pointRaw : FunctionRaw)
+    (theta : Rat) (htheta : realAxisDomain pointRaw theta) : ComplexRaw :=
+  pointRaw.evalRaw (QComplex.ofRat theta) htheta
+
+def cosFunctionRawOfPoint (pointRaw : FunctionRaw) : PartialRealFunRaw where
+  definedAt := realAxisDomain pointRaw
+  compute := fun theta htheta n =>
+    let B := pointRaw.compute (QComplex.ofRat theta) htheta n
+    { lo := B.lo.re, hi := B.hi.re }
+
+def sinFunctionRawOfPoint (pointRaw : FunctionRaw) : PartialRealFunRaw where
+  definedAt := realAxisDomain pointRaw
+  compute := fun theta htheta n =>
+    let B := pointRaw.compute (QComplex.ofRat theta) htheta n
+    { lo := B.lo.im, hi := B.hi.im }
+
+theorem cosFunctionRawOfPoint_compute_eq
+    (pointRaw : FunctionRaw) (theta : Rat)
+    (htheta : (cosFunctionRawOfPoint pointRaw).definedAt theta) (n : Nat) :
+    (cosFunctionRawOfPoint pointRaw).compute theta htheta n =
+      { lo := (pointRaw.compute (QComplex.ofRat theta) htheta n).lo.re,
+        hi := (pointRaw.compute (QComplex.ofRat theta) htheta n).hi.re } := by
+  rfl
+
+theorem sinFunctionRawOfPoint_compute_eq
+    (pointRaw : FunctionRaw) (theta : Rat)
+    (htheta : (sinFunctionRawOfPoint pointRaw).definedAt theta) (n : Nat) :
+    (sinFunctionRawOfPoint pointRaw).compute theta htheta n =
+      { lo := (pointRaw.compute (QComplex.ofRat theta) htheta n).lo.im,
+        hi := (pointRaw.compute (QComplex.ofRat theta) htheta n).hi.im } := by
+  rfl
+
+/-- The theorem-facing package for the chapter: construct the geometric point
+algorithm first, then obtain the sine and cosine algorithms by projection and
+prove the identities for those projected algorithms. -/
+structure FunctionRawConstruction where
+  pointRaw : FunctionRaw
+  point_valid_on_real_axis :
+    forall theta htheta, ComplexRaw.Valid (pointAt pointRaw theta htheta)
+  cos_valid :
+    forall theta htheta,
+      RealRaw.ValidCompute ((cosFunctionRawOfPoint pointRaw).compute theta htheta)
+  sin_valid :
+    forall theta htheta,
+      RealRaw.ValidCompute ((sinFunctionRawOfPoint pointRaw).compute theta htheta)
+  unit_circle_law : Prop
+  identity_package : Prop
+
+namespace FunctionRawConstruction
+
+def cosFunctionRaw (C : FunctionRawConstruction) : PartialRealFunRaw :=
+  cosFunctionRawOfPoint C.pointRaw
+
+def sinFunctionRaw (C : FunctionRawConstruction) : PartialRealFunRaw :=
+  sinFunctionRawOfPoint C.pointRaw
+
+theorem cosFunctionRaw_valid (C : FunctionRawConstruction) :
+    forall theta htheta,
+      RealRaw.ValidCompute (C.cosFunctionRaw.compute theta htheta) :=
+  C.cos_valid
+
+theorem sinFunctionRaw_valid (C : FunctionRawConstruction) :
+    forall theta htheta,
+      RealRaw.ValidCompute (C.sinFunctionRaw.compute theta htheta) :=
+  C.sin_valid
+
+end FunctionRawConstruction
+
+end GeometricTrig
+
+end RationalCircle
 
 end ComputableAnalysis

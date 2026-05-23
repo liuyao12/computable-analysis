@@ -1,7 +1,7 @@
 import ComputableAnalysis.Calculus
+import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.PowerSeries
-import ComputableAnalysis.RationalCircle
 
 /-!
 # Taylor expansions by iterated FTC
@@ -346,6 +346,15 @@ theorem powerSeriesAgreesOnUnit_of_kernelComparisonRoute
     hpsValid hkValid hgeomValid
     (route.powerSeries_eq_kernel x hx)
     (RealRaw.equiv_symm (route.geometric_eq_kernel x hx))
+
+theorem geometricAgreesWithPowerSeriesOnUnit_of_kernelComparisonRoute
+    (route : KernelComparisonRoute) :
+    forall (x : Rat) (_hx : unitDomain x),
+      (ArctanGeometry.arctanGeom x).Equiv (arctan x) := by
+  intro x hx
+  exact ArctanGeometry.geometric_equiv_powerSeries_of_agreement
+    (powerSeriesAgreesOnUnit_of_kernelComparisonRoute route)
+    hx
 
 /-- The finite algebra already available for the power-series half of the
 comparison.  This records that the needed Taylor bricks are present before we
