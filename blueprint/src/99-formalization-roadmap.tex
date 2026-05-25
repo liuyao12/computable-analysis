@@ -1,4 +1,5 @@
-\chapter{Formalization Roadmap}
+\chapter*{Formalization Roadmap}
+\addcontentsline{toc}{chapter}{Formalization Roadmap}
 
 \section{What counts as progress}
 
@@ -7,9 +8,10 @@ finite conclusions:
 \[
   \RealRaw.\Valid,\qquad
   \ComplexRaw.\Valid,\qquad
-  x\Equiv y,\qquad
   \close_\eps(I,J).
 \]
+Equivalence of two raw representatives is also a standard finite target, but
+the blueprint states it in prose instead of using a separate relation symbol.
 These are the computational substitutes for classical existence and equality.
 Whenever a classical proof says "choose a sufficiently fine partition" or
 "take a small enough neighborhood", the blueprint should say whether this is
@@ -56,7 +58,12 @@ algorithm requiring an explicit modulus.
 
   \item Finish geometric pi validity:
   prove dyadic nesting and width shrinkage for the area and circumference
-  algorithms, completing \cref{conj:geometric-pi-validity}.
+  algorithms.
+
+  \item Build exponential and logarithm from the three independent
+  constructions in \cref{def:exp-power-series-real},
+  \cref{def:exp-euler-real}, and \cref{def:log-integral}, then close the
+  pairwise comparison estimates for \cref{def:exp-three-way-agreement}.
 
   \item Choose an FTA route:
   either develop algebraic complex numbers with isolation boxes, or develop
@@ -93,8 +100,9 @@ algorithm requiring an explicit modulus.
   \code{PiProofs.LeibnizEqMachin}.
 
   \item Series and elementary functions:
-  \code{DirichletSeries.zetaTwoRaw},
-  \code{Basel.eulerBasel\_geometricPi},
+  \code{expPowerSeries}, \code{expEuler}, \code{exp.ps}, \code{exp.euler},
+  \code{exp.representationsAgree},
+  \code{RatFun.oneOverXOnPositiveInterval},
   \code{ExpProofs.EPowerSeriesEqEuler},
   \code{Taylor.IteratedFTCChain},
   \code{Taylor.ArctanKernel.finiteRemainderRoute}.

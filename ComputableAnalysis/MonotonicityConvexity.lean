@@ -10,11 +10,14 @@ interval algorithms of the form `n, t ↦ [a_n(t), b_n(t)]`.
 
 namespace ComputableAnalysis
 
-/-- Raw-real secant of a rational-input raw function.  This is the exact
-object used in the new convexity statement; finite interval slope enclosures
-are its stages. -/
-def secantRaw (F : RealFunRaw) (x y : Rat) : RealRaw where
-  compute := fun n => secantSlopeIntervalOfRealFun F x y n
+/-- Raw-real secant of a rational-input raw function.
+
+The definition is intentionally expressed through the public `RealRaw`
+arithmetic operations, so the endpoint computations can ask their subroutines
+for whatever internal stage the current precision model needs. -/
+def secantRaw (F : RealFunRaw) (x y : Rat) : RealRaw :=
+  RealRaw.scaleRat (1 / (y - x))
+    ({ compute := F.applyCompute y } - { compute := F.applyCompute x })
 
 /-- Exact convexity on rational points of a rational interval.
 
@@ -72,10 +75,7 @@ theorem secantRaw_valid
       (RealRaw.scaleRat (1 / (y - x)) (Y - X)).Valid :=
     RealRaw.scaleRat_valid_of_nonneg hscale_nonneg
       (RealRaw.sub_valid hY hX)
-  simpa [secantRaw, secantSlopeIntervalOfRealFun, RealFunRaw.applyCompute,
-    X, Y, RealRaw.scaleRat, RealRaw.scaleRatCompute, RealRaw.sub,
-    RealRaw.subCompute, QInterval.slopeBetween, QInterval.divByRat,
-    QInterval.subInterval, QInterval.scaleByRat] using hscale
+  simpa [secantRaw, X, Y] using hscale
 
 end ExactConvexOn
 

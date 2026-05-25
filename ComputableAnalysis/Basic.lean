@@ -371,6 +371,178 @@ def ValidCompute (compute : Nat -> QInterval) : Prop :=
     (compute m).hi <= (compute n).hi) /\
   WidthsShrinkToZero compute
 
+/-- Positive-stage precision bound for the controlled redesign.
+
+Stage `0` is only a bootstrap interval.  The meaningful precision contract
+starts at positive `N`: the interval width must be strictly smaller than
+`1 / N`. -/
+def PositivePrecisionBound (compute : Nat -> QInterval) : Prop :=
+  forall N : Nat, 0 < N -> (compute N).width < (1 : Rat) / (N : Rat)
+
+/-- Controlled validity: ordered nested intervals with an explicit
+positive-stage precision bound. -/
+def PrecisionValidCompute (compute : Nat -> QInterval) : Prop :=
+  (forall n, 0 <= (compute n).width) /\
+  (forall n m, n <= m ->
+    (compute n).lo <= (compute m).lo /\
+    (compute m).lo <= (compute m).hi /\
+    (compute m).hi <= (compute n).hi) /\
+  PositivePrecisionBound compute
+
+theorem one_div_nat_le_of_den_le
+    (eps : QPos) {n : Nat} (hn : eps.val.den <= n) :
+    (1 : Rat) / (n : Rat) <= eps.val := by
+  have hdenNatPos : 0 < eps.val.den :=
+    Nat.pos_of_ne_zero eps.val.den_nz
+  have hnNatPos : 0 < n := Nat.lt_of_lt_of_le hdenNatPos hn
+  have hnRatPos : 0 < (n : Rat) := (Rat.natCast_pos).2 hnNatPos
+  have hqNonneg : 0 <= eps.val := Rat.le_of_lt eps.property
+  have hdenle : (eps.val.den : Rat) <= (n : Rat) := by
+    exact_mod_cast hn
+  have hmul :
+      eps.val * (eps.val.den : Rat) <= eps.val * (n : Rat) :=
+    Rat.mul_le_mul_of_nonneg_left hdenle hqNonneg
+  have hdenmul :
+      (eps.val.den : Rat) * eps.val = (eps.val.num : Rat) :=
+    rat_den_mul_self eps.val
+  have hnumPos : 0 < eps.val.num :=
+    rat_num_pos_of_pos eps.property
+  have hone_le_num : (1 : Rat) <= (eps.val.num : Rat) := by
+    exact_mod_cast hnumPos
+  apply Rat.le_of_mul_le_mul_right (c := (n : Rat))
+  · rw [Rat.div_def]
+    calc
+      1 * (n : Rat)⁻¹ * (n : Rat) = 1 := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (eps.val.num : Rat) := hone_le_num
+      _ = eps.val * (eps.val.den : Rat) := by
+        rw [Rat.mul_comm, hdenmul]
+      _ <= eps.val * (n : Rat) := hmul
+  · exact hnRatPos
+
+theorem widthsShrinkToZero_of_positivePrecisionBound
+    {compute : Nat -> QInterval}
+    (hprec : PositivePrecisionBound compute) :
+    WidthsShrinkToZero compute := by
+  intro eps
+  refine ⟨eps.val.den, ?_⟩
+  intro n hn
+  have hdenNatPos : 0 < eps.val.den :=
+    Nat.pos_of_ne_zero eps.val.den_nz
+  have hnNatPos : 0 < n := Nat.lt_of_lt_of_le hdenNatPos hn
+  exact Rat.le_trans
+    (Rat.le_of_lt (hprec n hnNatPos))
+    (one_div_nat_le_of_den_le eps hn)
+
+theorem validCompute_of_precisionValidCompute
+    {compute : Nat -> QInterval}
+    (h : PrecisionValidCompute compute) :
+    ValidCompute compute := by
+  constructor
+  · exact h.1
+  · constructor
+    · exact h.2.1
+    · exact widthsShrinkToZero_of_positivePrecisionBound h.2.2
+
+/-- Adjacent-stage validity criterion.
+
+Most concrete algorithms naturally prove only that stage `n + 1` refines
+stage `n`.  Together with the initial interval order and width shrinkage, this
+implies the full `ValidCompute` nesting condition by induction. -/
+def StepValidCompute (compute : Nat -> QInterval) : Prop :=
+  0 <= (compute 0).width /\
+  (forall n,
+    (compute n).lo <= (compute (n + 1)).lo /\
+    (compute (n + 1)).lo <= (compute (n + 1)).hi /\
+    (compute (n + 1)).hi <= (compute n).hi) /\
+  WidthsShrinkToZero compute
+
+theorem endpointMonotone_of_stepValidCompute
+    {compute : Nat -> QInterval}
+    (h : StepValidCompute compute) :
+    forall n m, n <= m ->
+      (compute n).lo <= (compute m).lo /\
+      (compute m).hi <= (compute n).hi := by
+  intro n m hnm
+  induction hnm with
+  | refl =>
+      constructor <;> exact Rat.le_refl
+  | step hnm ih =>
+      rename_i k
+      have hnext := h.2.1 k
+      constructor
+      · exact Rat.le_trans ih.1 hnext.1
+      · exact Rat.le_trans hnext.2.2 ih.2
+
+theorem validCompute_of_stepValidCompute
+    {compute : Nat -> QInterval}
+    (h : StepValidCompute compute) :
+    ValidCompute compute := by
+  constructor
+  · intro n
+    cases n with
+    | zero => exact h.1
+    | succ n =>
+        have hnext := h.2.1 n
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      have hmono := endpointMonotone_of_stepValidCompute h n m hnm
+      constructor
+      · exact hmono.1
+      · constructor
+        · cases m with
+          | zero =>
+              have h0 := h.1
+              unfold QInterval.width at h0
+              grind [Rat.sub_eq_add_neg]
+          | succ m =>
+              have hm := h.2.1 m
+              exact hm.2.1
+        · exact hmono.2
+    · exact h.2.2
+
+/-- Adjacent-stage criterion for the controlled precision contract. -/
+def StepPrecisionValidCompute (compute : Nat -> QInterval) : Prop :=
+  0 <= (compute 0).width /\
+  (forall n,
+    (compute n).lo <= (compute (n + 1)).lo /\
+    (compute (n + 1)).lo <= (compute (n + 1)).hi /\
+    (compute (n + 1)).hi <= (compute n).hi) /\
+  PositivePrecisionBound compute
+
+theorem precisionValidCompute_of_stepPrecisionValidCompute
+    {compute : Nat -> QInterval}
+    (h : StepPrecisionValidCompute compute) :
+    PrecisionValidCompute compute := by
+  constructor
+  · intro n
+    cases n with
+    | zero => exact h.1
+    | succ n =>
+        have hnext := h.2.1 n
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      let hstep : StepValidCompute compute :=
+        ⟨h.1, h.2.1, widthsShrinkToZero_of_positivePrecisionBound h.2.2⟩
+      have hmono := endpointMonotone_of_stepValidCompute hstep n m hnm
+      constructor
+      · exact hmono.1
+      · constructor
+        · cases m with
+          | zero =>
+              have h0 := h.1
+              unfold QInterval.width at h0
+              grind [Rat.sub_eq_add_neg]
+          | succ m =>
+              have hm := h.2.1 m
+              exact hm.2.1
+        · exact hmono.2
+    · exact h.2.2
+
 /-- Optional convergence-rate metadata for a raw interval algorithm.
 
 This is deliberately not another kind of real number. It is just information
@@ -418,6 +590,12 @@ structure RealRaw where
 namespace RealRaw
 
 def Valid (x : RealRaw) : Prop := ValidCompute x.compute
+
+def PrecisionValid (x : RealRaw) : Prop := PrecisionValidCompute x.compute
+
+theorem valid_of_precisionValid {x : RealRaw} (hx : x.PrecisionValid) :
+    x.Valid :=
+  validCompute_of_precisionValidCompute hx
 
 /-- A cofinal schedule of requested stages.
 
@@ -849,6 +1027,21 @@ theorem ofRat_valid (q : Rat) : ValidCompute (fun _ : Nat => { lo := q, hi := q 
         show q - q <= eps.val
         rw [rat_sub_self]
         exact Rat.le_of_lt eps.property⟩
+
+theorem ofRat_precisionValid (q : Rat) :
+    PrecisionValidCompute (fun _ : Nat => { lo := q, hi := q }) := by
+  constructor
+  · intro n
+    show 0 <= q - q
+    rw [rat_sub_self]
+    exact Rat.le_refl
+  · constructor
+    · intro n m h
+      simp
+    · intro N hN
+      show q - q < (1 : Rat) / (N : Rat)
+      rw [rat_sub_self]
+      exact one_div_nat_pos hN
 
 def ofRat (q : Rat) : RealRaw where
   compute := fun _ => { lo := q, hi := q }
@@ -1850,8 +2043,9 @@ def one : RealRaw := ofRat 1
 
 def addCompute (x y : RealRaw) : Nat -> QInterval :=
   fun n =>
-    let X := x.compute n
-    let Y := y.compute n
+    let k := 2 * n
+    let X := x.compute k
+    let Y := y.compute k
     { lo := X.lo + Y.lo, hi := X.hi + Y.hi }
 
 def negCompute (x : RealRaw) : Nat -> QInterval :=
@@ -1861,13 +2055,52 @@ def negCompute (x : RealRaw) : Nat -> QInterval :=
 
 def subCompute (x y : RealRaw) : Nat -> QInterval :=
   fun n =>
-    let X := x.compute n
-    let Y := y.compute n
+    let k := 2 * n
+    let X := x.compute k
+    let Y := y.compute k
     { lo := X.lo - Y.hi, hi := X.hi - Y.lo }
+
+def endpointAbsPrecisionBound (a b : Rat) : Nat :=
+  (qabs a).num.natAbs + (qabs b).num.natAbs + 2
+
+def initialAbsPrecisionBound (x : RealRaw) : Nat :=
+  endpointAbsPrecisionBound (x.compute 0).lo (x.compute 0).hi
+
+def mulPrecisionFactor (x y : RealRaw) : Nat :=
+  initialAbsPrecisionBound x + initialAbsPrecisionBound y + 1
+
+def mulStage (x y : RealRaw) (n : Nat) : Nat :=
+  mulPrecisionFactor x y * n
+
+theorem mulPrecisionFactor_pos (x y : RealRaw) :
+    0 < mulPrecisionFactor x y := by
+  unfold mulPrecisionFactor initialAbsPrecisionBound endpointAbsPrecisionBound
+  omega
+
+theorem le_mulStage (x y : RealRaw) (n : Nat) :
+    n <= mulStage x y n := by
+  unfold mulStage
+  exact Nat.le_mul_of_pos_left n (mulPrecisionFactor_pos x y)
+
+def scaleRatPrecisionFactor (r : Rat) : Nat :=
+  (qabs r).num.natAbs + 1
+
+def scaleRatStage (r : Rat) (n : Nat) : Nat :=
+  scaleRatPrecisionFactor r * n
+
+theorem scaleRatPrecisionFactor_pos (r : Rat) :
+    0 < scaleRatPrecisionFactor r := by
+  unfold scaleRatPrecisionFactor
+  exact Nat.succ_pos (qabs r).num.natAbs
+
+theorem le_scaleRatStage (r : Rat) (n : Nat) :
+    n <= scaleRatStage r n := by
+  unfold scaleRatStage
+  exact Nat.le_mul_of_pos_left n (scaleRatPrecisionFactor_pos r)
 
 def scaleRatCompute (r : Rat) (x : RealRaw) : Nat -> QInterval :=
   fun n =>
-    let X := x.compute n
+    let X := x.compute (scaleRatStage r n)
     if 0 <= r then
       { lo := r * X.lo, hi := r * X.hi }
     else
@@ -1875,8 +2108,9 @@ def scaleRatCompute (r : Rat) (x : RealRaw) : Nat -> QInterval :=
 
 def mulCompute (x y : RealRaw) : Nat -> QInterval :=
   fun n =>
-    let X := x.compute n
-    let Y := y.compute n
+    let k := mulStage x y n
+    let X := x.compute k
+    let Y := y.compute k
     QBox.mulRealInterval X.lo X.hi Y.lo Y.hi
 
 def add (x y : RealRaw) : RealRaw where
@@ -1946,19 +2180,86 @@ private theorem valid_width_order
   have hn := h.2.1 n n (Nat.le_refl n)
   exact hn.2.1
 
+private theorem precision_width_order
+    {compute : Nat -> QInterval}
+    (h : RealRaw.PrecisionValidCompute compute) (n : Nat) :
+    (compute n).lo <= (compute n).hi := by
+  have hn := h.1 n
+  unfold QInterval.width at hn
+  grind [Rat.sub_eq_add_neg]
+
+private theorem one_div_two_mul_nat_add_self {N : Nat} (hN : 0 < N) :
+    (1 : Rat) / ((2 * N : Nat) : Rat) +
+        (1 : Rat) / ((2 * N : Nat) : Rat) =
+      (1 : Rat) / (N : Rat) := by
+  rw [Rat.div_def, Rat.div_def, Rat.one_mul, Rat.one_mul]
+  have hNne : Not ((N : Rat) = 0) :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hN)
+  have h2ne : Not ((2 : Rat) = 0) := by native_decide
+  have hcast : ((2 * N : Nat) : Rat) = (2 : Rat) * (N : Rat) := by
+    simp
+  rw [hcast]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem addCompute_precisionValid {x y : RealRaw}
+    (hx : x.PrecisionValid) (hy : y.PrecisionValid) :
+    RealRaw.PrecisionValidCompute (addCompute x y) := by
+  constructor
+  · intro n
+    have hxord := precision_width_order hx (2 * n)
+    have hyord := precision_width_order hy (2 * n)
+    unfold addCompute QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      have h2nm : 2 * n <= 2 * m := by omega
+      have hxnm := hx.2.1 (2 * n) (2 * m) h2nm
+      have hynm := hy.2.1 (2 * n) (2 * m) h2nm
+      unfold addCompute
+      constructor
+      · grind
+      · constructor <;> grind
+    · intro N hN
+      have h2N : 0 < 2 * N := by omega
+      have hxsmall := hx.2.2 (2 * N) h2N
+      have hysmall := hy.2.2 (2 * N) h2N
+      unfold addCompute QInterval.width
+      change
+        (x.compute (2 * N)).hi + (y.compute (2 * N)).hi -
+          ((x.compute (2 * N)).lo + (y.compute (2 * N)).lo) <
+        (1 : Rat) / (N : Rat)
+      calc
+        (x.compute (2 * N)).hi + (y.compute (2 * N)).hi -
+            ((x.compute (2 * N)).lo + (y.compute (2 * N)).lo)
+            = (x.compute (2 * N)).width +
+                (y.compute (2 * N)).width := by
+              unfold QInterval.width
+              grind [Rat.sub_eq_add_neg]
+        _ < (1 : Rat) / ((2 * N : Nat) : Rat) +
+              (1 : Rat) / ((2 * N : Nat) : Rat) := by
+              grind
+        _ = (1 : Rat) / (N : Rat) :=
+              one_div_two_mul_nat_add_self hN
+
+theorem add_precisionValid {x y : RealRaw}
+    (hx : x.PrecisionValid) (hy : y.PrecisionValid) :
+    (x + y).PrecisionValid :=
+  addCompute_precisionValid hx hy
+
 theorem addCompute_valid {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) :
     RealRaw.ValidCompute (addCompute x y) := by
   constructor
   · intro n
-    have hxord := valid_width_order hx n
-    have hyord := valid_width_order hy n
+    have hxord := valid_width_order hx (2 * n)
+    have hyord := valid_width_order hy (2 * n)
     unfold addCompute QInterval.width
     grind [Rat.sub_eq_add_neg]
   · constructor
     · intro n m hnm
-      have hxnm := hx.2.1 n m hnm
-      have hynm := hy.2.1 n m hnm
+      have h2nm : 2 * n <= 2 * m := by omega
+      have hxnm := hx.2.1 (2 * n) (2 * m) h2nm
+      have hynm := hy.2.1 (2 * n) (2 * m) h2nm
       unfold addCompute
       constructor
       · grind
@@ -1973,21 +2274,25 @@ theorem addCompute_valid {x y : RealRaw}
       intro n hn
       have hnx : Nx <= n := Nat.le_trans (Nat.le_max_left Nx Ny) hn
       have hny : Ny <= n := Nat.le_trans (Nat.le_max_right Nx Ny) hn
-      have hxeps := hNx n hnx
-      have hyeps := hNy n hny
+      have hnx2 : Nx <= 2 * n := by omega
+      have hny2 : Ny <= 2 * n := by omega
+      have hxeps := hNx (2 * n) hnx2
+      have hyeps := hNy (2 * n) hny2
       unfold addCompute QInterval.width
       change
-        (x.compute n).hi + (y.compute n).hi -
-          ((x.compute n).lo + (y.compute n).lo) <= eps.val
+        (x.compute (2 * n)).hi + (y.compute (2 * n)).hi -
+          ((x.compute (2 * n)).lo + (y.compute (2 * n)).lo) <= eps.val
       calc
-        (x.compute n).hi + (y.compute n).hi -
-            ((x.compute n).lo + (y.compute n).lo)
+        (x.compute (2 * n)).hi + (y.compute (2 * n)).hi -
+            ((x.compute (2 * n)).lo + (y.compute (2 * n)).lo)
             <= eps2.val + eps2.val := by
           have hxeps' :
-              (x.compute n).hi - (x.compute n).lo <= eps2.val := by
+              (x.compute (2 * n)).hi -
+                (x.compute (2 * n)).lo <= eps2.val := by
             simpa [QInterval.width] using hxeps
           have hyeps' :
-              (y.compute n).hi - (y.compute n).lo <= eps2.val := by
+              (y.compute (2 * n)).hi -
+                (y.compute (2 * n)).lo <= eps2.val := by
             simpa [QInterval.width] using hyeps
           grind [Rat.sub_eq_add_neg]
         _ = eps.val := add_halves eps.val
@@ -2026,17 +2331,18 @@ theorem subCompute_valid {x y : RealRaw}
     RealRaw.ValidCompute (subCompute x y) := by
   constructor
   · intro n
-    have hxord := valid_width_order hx n
-    have hyord := valid_width_order hy n
+    have hxord := valid_width_order hx (2 * n)
+    have hyord := valid_width_order hy (2 * n)
     unfold subCompute QInterval.width
     change 0 <=
-      ((x.compute n).hi - (y.compute n).lo) -
-        ((x.compute n).lo - (y.compute n).hi)
+      ((x.compute (2 * n)).hi - (y.compute (2 * n)).lo) -
+        ((x.compute (2 * n)).lo - (y.compute (2 * n)).hi)
     grind [Rat.sub_eq_add_neg]
   · constructor
     · intro n m hnm
-      have hxnm := hx.2.1 n m hnm
-      have hynm := hy.2.1 n m hnm
+      have h2nm : 2 * n <= 2 * m := by omega
+      have hxnm := hx.2.1 (2 * n) (2 * m) h2nm
+      have hynm := hy.2.1 (2 * n) (2 * m) h2nm
       unfold subCompute
       constructor
       · grind [Rat.sub_eq_add_neg]
@@ -2051,24 +2357,68 @@ theorem subCompute_valid {x y : RealRaw}
       intro n hn
       have hnx : Nx <= n := Nat.le_trans (Nat.le_max_left Nx Ny) hn
       have hny : Ny <= n := Nat.le_trans (Nat.le_max_right Nx Ny) hn
-      have hxeps := hNx n hnx
-      have hyeps := hNy n hny
+      have hnx2 : Nx <= 2 * n := by omega
+      have hny2 : Ny <= 2 * n := by omega
+      have hxeps := hNx (2 * n) hnx2
+      have hyeps := hNy (2 * n) hny2
       unfold subCompute QInterval.width
       change
-        ((x.compute n).hi - (y.compute n).lo) -
-          ((x.compute n).lo - (y.compute n).hi) <= eps.val
+        ((x.compute (2 * n)).hi - (y.compute (2 * n)).lo) -
+          ((x.compute (2 * n)).lo - (y.compute (2 * n)).hi) <= eps.val
       calc
-        ((x.compute n).hi - (y.compute n).lo) -
-            ((x.compute n).lo - (y.compute n).hi)
+        ((x.compute (2 * n)).hi - (y.compute (2 * n)).lo) -
+            ((x.compute (2 * n)).lo - (y.compute (2 * n)).hi)
             <= eps2.val + eps2.val := by
           have hxeps' :
-              (x.compute n).hi - (x.compute n).lo <= eps2.val := by
+              (x.compute (2 * n)).hi -
+                (x.compute (2 * n)).lo <= eps2.val := by
             simpa [QInterval.width] using hxeps
           have hyeps' :
-              (y.compute n).hi - (y.compute n).lo <= eps2.val := by
+              (y.compute (2 * n)).hi -
+                (y.compute (2 * n)).lo <= eps2.val := by
             simpa [QInterval.width] using hyeps
           grind [Rat.sub_eq_add_neg]
         _ = eps.val := add_halves eps.val
+
+theorem subCompute_precisionValid {x y : RealRaw}
+    (hx : x.PrecisionValid) (hy : y.PrecisionValid) :
+    RealRaw.PrecisionValidCompute (subCompute x y) := by
+  constructor
+  · intro n
+    have hxord := precision_width_order hx (2 * n)
+    have hyord := precision_width_order hy (2 * n)
+    unfold subCompute QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      have h2nm : 2 * n <= 2 * m := by omega
+      have hxnm := hx.2.1 (2 * n) (2 * m) h2nm
+      have hynm := hy.2.1 (2 * n) (2 * m) h2nm
+      unfold subCompute
+      constructor
+      · grind [Rat.sub_eq_add_neg]
+      · constructor <;> grind [Rat.sub_eq_add_neg]
+    · intro N hN
+      have h2N : 0 < 2 * N := by omega
+      have hxsmall := hx.2.2 (2 * N) h2N
+      have hysmall := hy.2.2 (2 * N) h2N
+      unfold subCompute QInterval.width
+      change
+        ((x.compute (2 * N)).hi - (y.compute (2 * N)).lo) -
+          ((x.compute (2 * N)).lo - (y.compute (2 * N)).hi) <
+        (1 : Rat) / (N : Rat)
+      calc
+        ((x.compute (2 * N)).hi - (y.compute (2 * N)).lo) -
+            ((x.compute (2 * N)).lo - (y.compute (2 * N)).hi)
+            = (x.compute (2 * N)).width +
+                (y.compute (2 * N)).width := by
+              unfold QInterval.width
+              grind [Rat.sub_eq_add_neg]
+        _ < (1 : Rat) / ((2 * N : Nat) : Rat) +
+              (1 : Rat) / ((2 * N : Nat) : Rat) := by
+              grind
+        _ = (1 : Rat) / (N : Rat) :=
+              one_div_two_mul_nat_add_self hN
 
 private theorem mul_width_shrink
     {compute : Nat -> QInterval} (h : RealRaw.ValidCompute compute)
@@ -2114,17 +2464,24 @@ theorem scaleRatCompute_valid_of_nonneg {r : Rat} {x : RealRaw}
     RealRaw.ValidCompute (scaleRatCompute r x) := by
   constructor
   · intro n
-    have hxord := valid_width_order hx n
+    have hxord := valid_width_order hx (scaleRatStage r n)
     unfold scaleRatCompute QInterval.width
     simp [hr]
-    change 0 <= r * (x.compute n).hi - r * (x.compute n).lo
+    change 0 <=
+      r * (x.compute (scaleRatStage r n)).hi -
+        r * (x.compute (scaleRatStage r n)).lo
     have hmul :
-        r * (x.compute n).lo <= r * (x.compute n).hi :=
+        r * (x.compute (scaleRatStage r n)).lo <=
+          r * (x.compute (scaleRatStage r n)).hi :=
       Rat.mul_le_mul_of_nonneg_left hxord hr
     grind [Rat.sub_eq_add_neg]
   · constructor
     · intro n m hnm
-      have hxnm := hx.2.1 n m hnm
+      have hstage :
+          scaleRatStage r n <= scaleRatStage r m := by
+        unfold scaleRatStage
+        exact Nat.mul_le_mul_left (scaleRatPrecisionFactor r) hnm
+      have hxnm := hx.2.1 (scaleRatStage r n) (scaleRatStage r m) hstage
       unfold scaleRatCompute
       simp [hr]
       constructor
@@ -2132,14 +2489,50 @@ theorem scaleRatCompute_valid_of_nonneg {r : Rat} {x : RealRaw}
       · constructor
         · exact Rat.mul_le_mul_of_nonneg_left hxnm.2.1 hr
         · exact Rat.mul_le_mul_of_nonneg_left hxnm.2.2 hr
-    · intro eps
-      obtain ⟨N, hN⟩ := mul_width_shrink hx hr eps
-      refine ⟨N, ?_⟩
-      intro n hn
-      have hwidth := hN n hn
-      unfold scaleRatCompute QInterval.width
-      simp [hr]
-      simpa [QInterval.width] using hwidth
+    · by_cases hr0 : r = 0
+      · intro eps
+        refine ⟨0, ?_⟩
+        intro n _hn
+        unfold scaleRatCompute QInterval.width
+        simp [hr0]
+        grind [Rat.sub_eq_add_neg, Rat.le_of_lt eps.property]
+      · have hrpos : 0 < r := by grind
+        intro eps
+        let scaled : QPos :=
+          ⟨eps.val / r, by
+            rw [Rat.div_def]
+            exact Rat.mul_pos eps.property ((Rat.inv_pos).2 hrpos)⟩
+        obtain ⟨N, hN⟩ := hx.2.2 scaled
+        refine ⟨N, ?_⟩
+        intro n hn
+        have hfactor_pos : 0 < scaleRatPrecisionFactor r := by
+          unfold scaleRatPrecisionFactor
+          exact Nat.succ_pos (qabs r).num.natAbs
+        have hn_stage : n <= scaleRatStage r n := by
+          unfold scaleRatStage
+          exact Nat.le_mul_of_pos_left n hfactor_pos
+        have hNstage : N <= scaleRatStage r n :=
+          Nat.le_trans hn hn_stage
+        have hwidth := hN (scaleRatStage r n) hNstage
+        unfold scaleRatCompute QInterval.width
+        simp [hr]
+        have hwidth' :
+            (x.compute (scaleRatStage r n)).hi -
+              (x.compute (scaleRatStage r n)).lo <= scaled.val := by
+          simpa [QInterval.width] using hwidth
+        calc
+          r * (x.compute (scaleRatStage r n)).hi -
+              r * (x.compute (scaleRatStage r n)).lo =
+              r * (x.compute (scaleRatStage r n)).width := by
+                unfold QInterval.width
+                grind [Rat.sub_eq_add_neg, Rat.mul_add]
+          _ <= r * scaled.val := by
+                exact Rat.mul_le_mul_of_nonneg_left hwidth' hr
+          _ = eps.val := by
+                dsimp [scaled]
+                rw [Rat.div_def]
+                have hrne : r ≠ 0 := Rat.ne_of_gt hrpos
+                grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 theorem add_valid {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) : (x + y).Valid :=
@@ -2151,6 +2544,11 @@ theorem neg_valid {x : RealRaw} (hx : x.Valid) : (-x).Valid :=
 theorem sub_valid {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) : (x - y).Valid :=
   subCompute_valid hx hy
+
+theorem sub_precisionValid {x y : RealRaw}
+    (hx : x.PrecisionValid) (hy : y.PrecisionValid) :
+    (x - y).PrecisionValid :=
+  subCompute_precisionValid hx hy
 
 theorem scaleRat_valid_of_nonneg {r : Rat} {x : RealRaw}
     (hr : 0 <= r) (hx : x.Valid) : (scaleRat r x).Valid :=
@@ -2164,7 +2562,8 @@ theorem scaleRat_equiv_of_nonneg {r : Rat} {x y : RealRaw}
     (hr : 0 <= r) (hxy : x.Equiv y) :
     (scaleRat r x).Equiv (scaleRat r y) := by
   intro n
-  have h := (compareAt_overlap_iff x y n n).1 (hxy n)
+  have h := (compareAt_overlap_iff x y
+    (scaleRatStage r n) (scaleRatStage r n)).1 (hxy (scaleRatStage r n))
   apply (compareAt_overlap_iff (scaleRat r x) (scaleRat r y) n n).2
   unfold scaleRat scaleRatCompute
   simp [hr, QInterval.Overlaps]
@@ -2192,10 +2591,10 @@ theorem add_equiv {x x' y y' : RealRaw}
     (x + y).Equiv (x' + y') := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
-  have hxSame := (RealRaw.compareAt_overlap_iff x x' n n).1
-    (RealRaw.sameStageOverlap_of_equiv hx hx' hxx' n)
-  have hySame := (RealRaw.compareAt_overlap_iff y y' n n).1
-    (RealRaw.sameStageOverlap_of_equiv hy hy' hyy' n)
+  have hxSame := (RealRaw.compareAt_overlap_iff x x' (2 * n) (2 * n)).1
+    (RealRaw.sameStageOverlap_of_equiv hx hx' hxx' (2 * n))
+  have hySame := (RealRaw.compareAt_overlap_iff y y' (2 * n) (2 * n)).1
+    (RealRaw.sameStageOverlap_of_equiv hy hy' hyy' (2 * n))
   apply (RealRaw.compareAt_overlap_iff (x + y) (x' + y') n n).2
   unfold QInterval.Overlaps at hxSame hySame
   change QInterval.Overlaps (addCompute x y n) (addCompute x' y' n)
@@ -2209,10 +2608,10 @@ theorem sub_equiv {x x' y y' : RealRaw}
     (x - y).Equiv (x' - y') := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
-  have hxSame := (RealRaw.compareAt_overlap_iff x x' n n).1
-    (RealRaw.sameStageOverlap_of_equiv hx hx' hxx' n)
-  have hySame := (RealRaw.compareAt_overlap_iff y y' n n).1
-    (RealRaw.sameStageOverlap_of_equiv hy hy' hyy' n)
+  have hxSame := (RealRaw.compareAt_overlap_iff x x' (2 * n) (2 * n)).1
+    (RealRaw.sameStageOverlap_of_equiv hx hx' hxx' (2 * n))
+  have hySame := (RealRaw.compareAt_overlap_iff y y' (2 * n) (2 * n)).1
+    (RealRaw.sameStageOverlap_of_equiv hy hy' hyy' (2 * n))
   apply (RealRaw.compareAt_overlap_iff (x - y) (x' - y') n n).2
   unfold QInterval.Overlaps at hxSame hySame
   change QInterval.Overlaps (subCompute x y n) (subCompute x' y' n)

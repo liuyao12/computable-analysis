@@ -1,0 +1,291 @@
+\chapter{Exponential and Logarithm}
+
+The goal of this chapter is not to borrow exponential or logarithm from an
+ambient real analysis library.  It is to construct the algorithms and then
+prove that the standard constructive definitions agree.  The three
+independent routes are:
+\[
+  x\longmapsto\sum_{n=0}^{\infty}\frac{x^n}{n!},
+  \qquad
+  x\longmapsto\lim_{m\to\infty}\left(1+\frac{x}{m}\right)^m,
+\]
+and the inverse of the logarithmic integral
+\[
+  \operatorname{Log}(x)=\int_1^x \frac{\dd t}{t}.
+\]
+The formalization is meant to expose the executable raw functions first.  The
+agreement theorems are then organized as finite interval estimates,
+calculus uniqueness, and inverse-function certificates.
+
+\section{Power-Series Exponential}
+
+\begin{definition}[Real power-series exponential]\label{def:exp-power-series-real}
+\lean{ComputableAnalysis.expPowerSeries}
+\uses{def:raw-real}
+\leanok
+For \(x\in\Q\), define the power-series exponential algorithm by rational
+interval stages around the finite partial sums
+\[
+  S_N(x)=\sum_{k=0}^{N-1}\frac{x^k}{k!}.
+\]
+The omitted tail is bounded by a geometric majorant.  At stage \(n\), the
+algorithm chooses a finite number \(N=N(x,n)\), computes the next omitted
+term, proves a rational ratio bound
+\[
+  \rho=\frac{|x|}{N+1}<1,
+\]
+and outputs
+\[
+  \left[
+    S_N(x)-\frac{|x|^N/N!}{1-\rho},
+    S_N(x)+\frac{|x|^N/N!}{1-\rho}
+  \right].
+\]
+\end{definition}
+
+\begin{definition}[Complex power-series exponential]\label{def:exp-power-series-function}
+\lean{ComputableAnalysis.exp.ps}
+\uses{def:function-raw,def:complex-raw,def:exp-power-series-real}
+\leanok
+The complex power-series representation is defined on all rational complex
+inputs and uses the same power-series enclosure machinery in complex boxes.
+Its real-axis restriction is
+\[
+  \code{ComputableAnalysis.exp.realPowerSeries}.
+\]
+\end{definition}
+
+\begin{theorem}[Power-series validity package]\label{thm:exp-power-series-valid}
+\lean{ComputableAnalysis.ExpProofs.PowerSeriesValid}
+\uses{def:exp-power-series-real}
+For every rational input \(x\), the intervals in
+\(\code{ComputableAnalysis.expPowerSeries}\) are ordered, nested after
+refinement, and have widths tending to zero.  The formal proof is separated
+into finite
+obligations:
+\[
+  \rho_n<1,\qquad
+  \text{tail widths shrink to }0,\qquad
+  \text{successive displayed boxes are nested}.
+\]
+This separation keeps the executable definition readable while making the
+remaining proof work local to rational inequalities.
+\end{theorem}
+
+\section{Euler-Limit Exponential}
+
+\begin{definition}[Euler-limit exponential]\label{def:exp-euler-real}
+\lean{ComputableAnalysis.expEuler}
+\uses{def:raw-real}
+\leanok
+For \(x\in\Q\), define
+\[
+  \lim_{m\to\infty}\left(1+\frac{x}{m}\right)^m
+\]
+as the Euler-limit exponential raw real by evaluating the finite product at
+a stage-dependent integer \(m=m(n)\), and displaying it with an explicit
+rational radius.
+\end{definition}
+
+\begin{definition}[Euler-limit function representation]\label{def:exp-euler-function}
+\lean{ComputableAnalysis.exp.euler}
+\uses{def:function-raw,def:exp-euler-real}
+\leanok
+The complex Euler-limit representation is the entire function
+\[
+  z\longmapsto \lim_{m\to\infty}\left(1+\frac{z}{m}\right)^m.
+\]
+Its finite stage computes the rational complex power
+\[
+  \left(1+\frac{z}{m}\right)^m
+\]
+and wraps it in a complex error box.  The real-axis restriction is
+\[
+  \code{ComputableAnalysis.exp.realEuler}.
+\]
+\end{definition}
+
+\begin{theorem}[Euler-limit validity package]\label{thm:exp-euler-valid}
+\lean{ComputableAnalysis.ExpProofs.EulerValid}
+\uses{def:exp-euler-real}
+For every rational \(x\), the Euler-limit interval algorithm represents a
+raw real.  The current proof boundary reduces validity to the finite
+nesting estimates for
+\[
+  \left(1+\frac{x}{m(n)}\right)^{m(n)}
+\]
+together with the explicit stage-radius shrinkage.
+\end{theorem}
+
+\section{Logarithm as an Integral}
+
+\begin{definition}[Positive reciprocal kernel]\label{def:positive-reciprocal-kernel}
+\lean{ComputableAnalysis.RatFun.oneOverXOnPositiveInterval}
+\uses{def:function-on-interval}
+\leanok
+On a certified positive rational interval \(0<a\le x\le b\), the rational
+function
+\[
+  x\longmapsto \frac1x
+\]
+is a valid function on the interval.  The positivity certificate is the
+domain-apartness data needed for interval division.
+\end{definition}
+
+\begin{definition}[Logarithmic integral]\label{def:log-integral}
+\uses{def:positive-reciprocal-kernel,def:monotone-integral}
+For \(x>0\), define logarithm constructively by
+\[
+  \operatorname{Log}(x)=\int_1^x \frac{\dd t}{t}.
+\]
+On a finite positive interval this is built by integrating the reciprocal
+kernel.  For \(x<1\), the orientation convention is
+\[
+  \operatorname{Log}(x)=-\int_x^1 \frac{\dd t}{t}.
+\]
+The formal target is a raw real-valued function whose domain is the positive
+rational line, with the FTC proof identifying its derivative as \(1/x\).
+\end{definition}
+
+\begin{definition}[Exponential from inverse logarithmic integral]
+\label{def:exp-from-log-integral}
+\lean{ComputableAnalysis.exp.LogIntegralInverseBranch}
+\uses{def:log-integral,def:function-on-interval}
+\leanok
+A finite inverse branch packages a positive source interval, the logarithmic
+integral on that interval, and an inverse raw function.  If \(y\) lies in the
+certified range, the branch returns the unique positive \(x\) with
+\[
+  \int_1^x \frac{\dd t}{t}=y.
+\]
+This is the integral definition of exponential on that branch.  The
+associated raw function is
+\[
+  \code{ComputableAnalysis.exp.fromLogIntegral}.
+\]
+\end{definition}
+
+\begin{definition}[Integral-inverse exponential on an interval]
+\label{def:exp-from-log-integral-interval}
+\lean{ComputableAnalysis.exp.FromLogIntegralOnInterval}
+\uses{def:exp-from-log-integral,def:function-on-interval}
+\leanok
+For a rational interval of \(y\)-values, an inverse-log-integral branch gives
+a function on that interval:
+\[
+  y\longmapsto \operatorname{Log}^{-1}(y).
+\]
+The branch data contains exactly the domain proof, pointwise validity proof,
+and inverse certificate needed to treat this as a normal function on an
+interval.
+\end{definition}
+
+\section{Agreement of the Definitions}
+
+\begin{definition}[Three-way agreement target]\label{def:exp-three-way-agreement}
+\lean{ComputableAnalysis.exp.representationsAgree}
+\uses{def:exp-power-series-function,def:exp-euler-function,def:exp-from-log-integral}
+\leanok
+The main comparison statement says that the power-series function, the
+Euler-limit function, and the inverse-log-integral function agree on every
+common certified domain.
+In Lean this is deliberately phrased as a package of pairwise agreement
+statements, because the three proofs use different estimates.
+\end{definition}
+
+\begin{theorem}[Agreement from the three estimates]
+\label{thm:exp-three-way-agreement-from-estimates}
+\lean{ComputableAnalysis.exp.representationsAgree_of_estimates}
+\uses{def:exp-three-way-agreement}
+\leanok
+If the power-series/Euler estimate, the power-series/integral-inverse
+estimate, and the Euler/integral-inverse estimate have all been proved, then
+the three representations agree.
+\end{theorem}
+
+\begin{theorem}[Power series agrees with Euler limit]
+\label{thm:exp-power-series-euler}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_eq_expEuler_of_centersOverlap}
+\uses{def:exp-power-series-real,def:exp-euler-real}
+For each rational \(x\), the power-series and Euler-limit raw real
+algorithms are equivalent once their displayed intervals are valid and the
+center sequences overlap at every requested precision.  For \(x=1\), this
+gives the comparison between the two algorithms for \(e\), recorded as
+\[
+  \code{ComputableAnalysis.ExpProofs.EPowerSeriesEqEuler}.
+\]
+\end{theorem}
+
+\begin{theorem}[Power series agrees with inverse logarithmic integral]
+\label{thm:exp-power-series-log-integral}
+\lean{ComputableAnalysis.exp.powerSeries_equiv_logIntegralInverse_on_interval}
+\uses{def:exp-power-series-function,def:exp-from-log-integral-interval,thm:convex-ftc}
+\leanok
+On a rational interval, the comparison is reduced to uniqueness for the
+initial-value problem
+\[
+  f'=f,\qquad f(0)=1.
+\]
+The power-series exponential solves this equation by termwise
+differentiation and the inverse-log-integral exponential solves it by the
+inverse-function theorem applied to
+\[
+  \operatorname{Log}'(x)=1/x.
+\]
+The current Lean theorem states the final reduction from these two solution
+certificates to function equivalence.
+\end{theorem}
+
+\begin{definition}[Euler product versus logarithmic integral estimate]
+\label{def:exp-euler-log-integral-estimate}
+\lean{ComputableAnalysis.exp.EulerProductIntegralEstimate}
+\uses{def:exp-euler-function,def:exp-from-log-integral}
+\leanok
+The direct comparison between
+\[
+  \left(1+\frac{x}{m}\right)^m
+\]
+and the inverse logarithmic integral is a finite product estimate.  It is the
+constructive version of comparing a multiplicative step
+\[
+  u\longmapsto u\left(1+\frac{x}{m}\right)
+\]
+with the accumulated integral of \(1/t\).  This estimate supplies the
+Euler/integral-inverse component of the three-way agreement package.
+\end{definition}
+
+\section{Formalization Order}
+
+\begin{enumerate}
+\item Complete the real raw validity proofs for
+\(\code{ComputableAnalysis.expPowerSeries}\) and
+\(\code{ComputableAnalysis.expEuler}\).  The intended closing theorem is
+\[
+  \code{ComputableAnalysis.ExpProofs.complete_of_remainders}.
+\]
+
+\item Promote the reciprocal kernel into the logarithm function
+\[
+  \operatorname{Log}(x)=\int_1^x \frac{\dd t}{t}
+\]
+on positive rational inputs, using \cref{def:monotone-integral} and
+\cref{thm:convex-ftc}.
+
+\item Prove that the logarithmic integral is strictly increasing on positive
+intervals, construct finite inverse branches, and assemble them into the
+interval representation of exponential obtained from the logarithmic
+integral.
+
+\item Prove \(\operatorname{Log}'(x)=1/x\) and the inverse-branch derivative identity, then
+close \cref{thm:exp-power-series-log-integral} through the uniqueness theorem
+for \(f'=f,\ f(0)=1\).
+
+\item Prove the Euler product estimate, close the Euler/log-integral
+comparison, and combine the three pairwise estimates with
+\cref{thm:exp-three-way-agreement-from-estimates}.
+
+\item Define the final logarithm as the integral function and prove the
+inverse laws on certified domains:
+the logarithm of the exponential represents the original input, and the
+exponential of the logarithm represents the original positive input.
+\end{enumerate}

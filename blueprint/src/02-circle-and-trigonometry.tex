@@ -1,0 +1,430 @@
+\chapter{Circle and Trigonometry}
+\label{ch:rational-circle-trigonometry}
+
+The purpose of this chapter is to construct trigonometric functions as
+algorithms from the geometry of the unit circle, and then prove their
+identities from that construction.  The chapter has four layers: rational
+circle geometry, Archimedes-style exhaustion estimates, trigonometric
+function algorithms, and the identities proved from those algorithms.
+
+\section{Rational Circle}
+
+\begin{definition}[Rational circle parametrization]
+\label{def:rational-circle-point}
+\lean{ComputableAnalysis.RationalCircle.Stage.point}
+For a rational slope coordinate \(u\in\Q\), define
+\[
+  P(u)=
+  \left(
+    \frac{1-u^2}{1+u^2},
+    \frac{2u}{1+u^2}
+  \right).
+\]
+This is the rational stereographic chart for the unit circle, with the
+missing point handled separately when needed.
+\end{definition}
+
+\begin{theorem}[Rational circle equation]
+\label{thm:rational-circle-equation}
+\lean{ComputableAnalysis.RationalCircle.Stage.point_normSq}
+\uses{def:rational-circle-point}
+\leanok
+For every \(u\in\Q\),
+\[
+  P(u)_x^2+P(u)_y^2=1.
+\]
+\end{theorem}
+
+\begin{definition}[Dyadic rational circle stages]
+\label{def:dyadic-rational-circle-stages}
+\lean{ComputableAnalysis.RationalCircle.dyadicStage}
+\uses{def:rational-circle-point}
+At stage \(n\), let \(N_n=2^n\).  For \(0\le k\le N_n\), the finite circle
+sample is
+\[
+  C_{n,k}=P\left(\frac{k}{N_n}\right).
+\]
+The list \(C_{n,0},\ldots,C_{n,N_n}\) is the rational first-quadrant
+sampling used by both the exhaustion estimates and the geometric point
+algorithm.
+\end{definition}
+
+\begin{theorem}[Dyadic refinement]
+\label{thm:dyadic-rational-circle-refinement}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
+\uses{def:dyadic-rational-circle-stages}
+\leanok
+The next dyadic stage keeps every old sample:
+\[
+  C_{n+1,2k}=C_{n,k}.
+\]
+The odd indices \(C_{n+1,2k+1}\) are the new rational points inserted between
+old neighbors.
+\end{theorem}
+
+\begin{theorem}[Dyadic samples are circle samples]
+\label{thm:dyadic-trig-samples}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
+\uses{def:dyadic-rational-circle-stages,thm:rational-circle-equation}
+\leanok
+For every stage \(n\) and index \(k\), the dyadic sample coordinates satisfy
+\[
+  C_{n,k,x}^2+C_{n,k,y}^2=1.
+\]
+The endpoints are
+\[
+  C_{n,0}=(1,0),
+  \qquad
+  C_{n,N_n}=(0,1).
+\]
+\end{theorem}
+
+\section{Archimedes Method of Exhaustion}
+
+\begin{definition}[Area and circumference enclosures]
+\label{def:archimedes-area-circumference-enclosures}
+\lean{ComputableAnalysis.piCircleArea}
+\lean{ComputableAnalysis.piCircumference}
+\lean{ComputableAnalysis.circumferenceSqrtPrecision}
+\lean{ComputableAnalysis.RationalCircle.Stage.areaInterval}
+\lean{ComputableAnalysis.RationalCircle.Stage.lengthPrecision}
+\lean{ComputableAnalysis.RationalCircle.Stage.circumferenceInterval}
+\uses{def:dyadic-rational-circle-stages}
+\leanok
+At each rational circle stage, the inner polygon and outer tangent polygon
+give a rational area interval for the unit disk and a rational path-length
+interval for the unit circle.  The corresponding raw reals are the area
+algorithm \(\code{ComputableAnalysis.piCircleArea}\) and the circumference
+algorithm \(\code{ComputableAnalysis.piCircumference}\).
+For circumference, the polygon subdivision stage and the square-root
+subroutine stage are deliberately separated.  If the polygon has \(N\)
+subdivisions, each rational segment length is computed by asking the
+square-root subroutine for the finer stage
+\[
+  (N+1)^3.
+\]
+Thus the main geometric gap is controlled by the polygon refinement, while
+the accumulated square-root wiggle is kept smaller by a cheap internal
+precision schedule.
+The same finite geometry is later reused for sector-area comparisons in the
+angle-to-circle-point algorithm.
+\end{definition}
+
+\begin{theorem}[Finite Archimedes bounds]
+\label{thm:finite-archimedes-bounds}
+\lean{ComputableAnalysis.PiProofs.FiniteArchimedesStage}
+\lean{ComputableAnalysis.PiProofs.FiniteArchimedesBounds}
+\lean{ComputableAnalysis.PiProofs.finiteArchimedesBounds}
+\uses{def:archimedes-area-circumference-enclosures}
+\leanok
+For each positive polygon stage, the inner sector area is below the
+corresponding chordal path estimate, and the tangent path estimate is below
+the outer sector area after the usual normalization.  Equivalently, the area
+and circumference intervals overlap at the same stage: the lower endpoint of
+the area interval is below the upper endpoint of the circumference interval,
+and the lower endpoint of the circumference interval is below the upper
+endpoint of the area interval.
+\end{theorem}
+
+\begin{theorem}[Archimedes area-circumference agreement]
+\label{thm:archimedes-area-circumference-agreement}
+\lean{ComputableAnalysis.PiProofs.archimedesTheorem}
+\uses{thm:finite-archimedes-bounds,def:raw-equiv}
+\leanok
+The polygonal area algorithm and the half-circumference algorithm compute
+the same raw real.  In Lean this is the raw-equivalence theorem between
+\(\code{ComputableAnalysis.piCircleArea}\) and
+\(\code{ComputableAnalysis.piCircumference}\).
+This is the Archimedes bridge between exhaustion by area and exhaustion by
+length.
+\end{theorem}
+
+\begin{conjecture}[Geometric pi validity package]
+\label{conj:geometric-pi-validity}
+\lean{ComputableAnalysis.PiProofs.ValidityProofs}
+\lean{ComputableAnalysis.PiProofs.DyadicCellRefinementBounds}
+\lean{ComputableAnalysis.PiProofs.pointCross_split_difference_mul_den}
+\lean{ComputableAnalysis.PiProofs.pointCross_split_le}
+\lean{ComputableAnalysis.PiProofs.innerAreaCellSplitBound}
+\lean{ComputableAnalysis.PiProofs.pointTangentCrossSum_formula_of_lt}
+\lean{ComputableAnalysis.PiProofs.tangentWidth_split_difference_mul_den_of_nonneg}
+\lean{ComputableAnalysis.PiProofs.tangentWidth_split_le}
+\lean{ComputableAnalysis.PiProofs.outerAreaCellSplitBound}
+\lean{ComputableAnalysis.PiProofs.innerEdgeCrosses_le_refinedInnerEdgeCrosses}
+\lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_refinedInnerFanPerimeter}
+\lean{ComputableAnalysis.PiProofs.innerQuarterArea_mono_of_inner_area_cell_bounds}
+\lean{ComputableAnalysis.PiProofs.refinedOuterEdgeCrosses_le_outerEdgeCrosses}
+\lean{ComputableAnalysis.PiProofs.refinedOuterFanPerimeter_le_outerFanPerimeter}
+\lean{ComputableAnalysis.PiProofs.outerQuarterArea_antitone_of_outer_area_cell_bounds}
+\lean{ComputableAnalysis.PiProofs.areaStageRefines_rationalCircle}
+\lean{ComputableAnalysis.PiProofs.areaStepRefines_rationalCircle}
+\lean{ComputableAnalysis.PiProofs.DyadicCellBoundsYieldStageRefinement}
+\lean{ComputableAnalysis.PiProofs.rationalPointPathLength_cons_cons_lo}
+\lean{ComputableAnalysis.PiProofs.rationalPointPathLength_cons_cons_hi}
+\lean{ComputableAnalysis.PiProofs.innerPathLengthLo_le_refinedInnerPathLengthLo}
+\lean{ComputableAnalysis.PiProofs.innerQuarterLength_mono_of_inner_length_cell_bounds}
+\lean{ComputableAnalysis.PiProofs.refinedOuterPathLengthHi_le_outerPathLengthHi}
+\lean{ComputableAnalysis.PiProofs.outerQuarterLength_antitone_of_outer_length_cell_bounds}
+\lean{ComputableAnalysis.PiProofs.circumferenceStageRefines_of_length_cell_bounds}
+\lean{ComputableAnalysis.PiProofs.dyadicCellBoundsYieldStageRefinement}
+\lean{ComputableAnalysis.PiProofs.dyadicGeometricStageRefines_of_cellBounds}
+\lean{ComputableAnalysis.PiProofs.geometricStepRemainders_of_dyadic_stage_refinement}
+\lean{ComputableAnalysis.PiProofs.geometricStepRemainders_of_dyadic_cell_bounds}
+\lean{ComputableAnalysis.PiProofs.areaValid_of_stepRefines_and_shrinking}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines_and_shrinking}
+\uses{def:archimedes-area-circumference-enclosures,def:raw-real}
+The area and circumference algorithms are valid raw reals: their intervals
+are ordered, nested under dyadic refinement, and have widths tending to zero.
+The nesting proof is organized locally.  A level \(n+1\) dyadic subdivision
+splits each level \(n\) cell into two cells; the Lean interface isolates the
+four local inequalities for inner area, outer area, inner length, and outer
+length.  The two area inequalities are formalized.  The inner-area split is
+the determinant identity for three ordered rational-circle points; the
+outer-area split rewrites tangent widths as
+\(2(v-u)/(1+uv)\) and clears denominators, leaving the nonnegative product
+\((v-u)(w-v)(w-u)\).  Summing these local inequalities proves that the
+inscribed quarter-area increases and the circumscribed quarter-area decreases
+under dyadic refinement, giving the Lean theorem
+\(\texttt{areaStepRefines\_rationalCircle}\).
+
+For circumference, the same summation layer is now formalized with the
+separate square-root precision schedule: coarse segment intervals are
+computed at stage \((N+1)^3\), while the refined stage uses \((2N+1)^3\).
+If the local inner and outer length split bounds hold at a stage, then the
+inner quarter-length lower endpoint increases and the outer quarter-length
+upper endpoint decreases at the refined stage.  Thus
+\(\texttt{dyadicCellBoundsYieldStageRefinement}\) turns the four local cell
+bounds into dyadic stage refinement.  What remains for full geometric
+validity is to prove the two local length inequalities themselves, and then
+give explicit width bounds for the area and length polygon gaps.
+\end{conjecture}
+
+\section{Trigonometric Functions}
+
+The main function-level object is a raw function that sends an input angle to
+a certified box around the corresponding point on the oriented unit circle:
+\[
+  \Theta \longmapsto C(\Theta)=(X(\Theta),Y(\Theta)).
+\]
+Cosine and sine are then coordinate projections:
+\[
+  \cos(\Theta)=X(\Theta),
+  \qquad
+  \sin(\Theta)=Y(\Theta).
+\]
+
+\begin{definition}[Rational-circle coordinates]
+\label{def:rational-circle-sin-cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin}
+\uses{def:rational-circle-point}
+For a rational slope coordinate \(u\), define the exact rational coordinates
+\[
+  c(u)=P(u)_x,\qquad s(u)=P(u)_y.
+\]
+Equivalently,
+\[
+  c(u)=\frac{1-u^2}{1+u^2},
+  \qquad
+  s(u)=\frac{2u}{1+u^2}.
+\]
+These are finite-stage coordinate functions, not yet the full angle-input
+trigonometric functions.
+\end{definition}
+
+\begin{definition}[Other rational-circle coordinate functions]
+\label{def:rational-circle-other-trig}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc}
+\uses{def:rational-circle-sin-cos}
+On this rational circle layer, the quotient and reciprocal coordinate
+functions are
+\[
+  t(u)=\frac{s(u)}{c(u)},\quad
+  \operatorname{ct}(u)=\frac{c(u)}{s(u)},
+\]
+\[
+  \operatorname{sc}(u)=\frac1{c(u)},\quad
+  \operatorname{cs}(u)=\frac1{s(u)}.
+\]
+The full partial functions will later carry explicit denominator-apartness
+domain data.
+\end{definition}
+
+\begin{definition}[Angle-to-circle-point raw function]
+\label{def:geometric-point-functionraw}
+\uses{def:dyadic-rational-circle-stages,def:archimedes-area-circumference-enclosures}
+The central construction target is a raw function
+\[
+  C : \Q \to \hbox{boxes in }\Q^2
+\]
+whose value at a rational angle input \(\Theta\) encloses the point on the
+oriented unit circle with signed sector area \(\Theta/2\), after period
+reduction.
+
+The intended algorithm is:
+\begin{enumerate}
+  \item reduce \(\Theta\) to a fundamental period interval;
+  \item choose the quadrant and orientation;
+  \item search over rational slope intervals using dyadic circle stages;
+  \item use inner and outer rational sector areas to certify which arc
+  contains the target;
+  \item return the coordinate box of the certified arc, transformed back by
+  the quadrant data.
+\end{enumerate}
+The algorithm may be refactored internally, but its public output should be a
+single point raw function.
+\end{definition}
+
+\begin{definition}[Sine and cosine by coordinate projection]
+\label{def:geometric-sin-cos-functionraw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint_compute_eq}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint_compute_eq}
+\uses{def:geometric-point-functionraw}
+\leanok
+Given a circle-point raw function \(C\), define
+\[
+  \cos_C(\Theta)=\operatorname{re}(C(\Theta)),
+  \qquad
+  \sin_C(\Theta)=\operatorname{im}(C(\Theta)).
+\]
+In Lean this is a projection from a complex-valued `FunctionRaw` on the real
+axis to two `PartialRealFunRaw` coordinate algorithms.
+\end{definition}
+
+\begin{definition}[FunctionRaw construction package]
+\label{def:geometric-trig-functionraw-construction}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.cosFunctionRaw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.sinFunctionRaw}
+\uses{def:geometric-sin-cos-functionraw}
+\leanok
+The theorem-facing construction package records:
+\[
+  C,\quad \cos_C,\quad \sin_C,
+\]
+validity of the point and coordinate algorithms, the unit-circle law, and the
+identity package to be proved for the projected functions.
+\end{definition}
+
+\section{Trigonometric Identities}
+
+\begin{theorem}[Pythagorean identity on the rational circle]
+\label{thm:rational-circle-pythagorean}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_sq_add_sin_sq}
+\uses{def:rational-circle-sin-cos,thm:rational-circle-equation}
+\leanok
+For every rational slope coordinate \(u\),
+\[
+  c(u)^2+s(u)^2=1.
+\]
+\end{theorem}
+
+\begin{theorem}[Basic rational-circle identity package]
+\label{thm:rational-circle-basic-identities}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.basicIdentityPackage}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_cos_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_sin_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.double_cos_eq_sq_sub_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.double_sin_eq_two_mul}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_tan_sq_eq_sec_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_cot_sq_eq_csc_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_neg}
+\uses{def:rational-circle-other-trig,thm:rational-circle-pythagorean}
+\leanok
+The rational-circle coordinates satisfy the quotient, reciprocal,
+Pythagorean, parity, double-coordinate, and composition identities.  In
+particular,
+\[
+  1+t(u)^2=\operatorname{sc}(u)^2\quad(c(u)\ne0),
+  \qquad
+  1+\operatorname{ct}(u)^2=\operatorname{cs}(u)^2\quad(s(u)\ne0),
+\]
+and
+\[
+  (P(u)P(v))_x=c(u)c(v)-s(u)s(v),
+\]
+\[
+  (P(u)P(v))_y=c(u)s(v)+s(u)c(v).
+\]
+\end{theorem}
+
+\begin{theorem}[Circle group law]
+\label{thm:rational-circle-group-law}
+\uses{def:rational-circle-point}
+Let
+\[
+  P(u)\cdot P(v)
+  =
+  (P(u)_xP(v)_x-P(u)_yP(v)_y,\,
+   P(u)_xP(v)_y+P(u)_yP(v)_x)
+\]
+be multiplication of unit-circle points.  In the stereographic chart, this
+has a rational chart-change formula away from the missing point.  The missing
+point is handled by the same quadrant or projective branch data used by the
+geometric point algorithm.
+\end{theorem}
+
+\begin{theorem}[Projected addition formulas]
+\label{thm:geometric-addition-formulas}
+\uses{def:geometric-trig-functionraw-construction,thm:rational-circle-group-law}
+Once the point raw function is proved compatible with circle multiplication,
+the projected functions satisfy
+\[
+  \cos_C(a+b)=\cos_C(a)\cos_C(b)-\sin_C(a)\sin_C(b),
+\]
+\[
+  \sin_C(a+b)=\sin_C(a)\cos_C(b)+\cos_C(a)\sin_C(b).
+\]
+The proof should first be finite and rational on circle boxes, then lifted to
+the raw functions by validity and equivalence of the coordinate projections.
+\end{theorem}
+
+\begin{theorem}[Standard geometric trigonometric identities]
+\label{thm:geometric-trig-identities}
+\uses{thm:geometric-addition-formulas,thm:rational-circle-basic-identities}
+The final identity package for this chapter contains:
+\[
+  \sin_C^2 x+\cos_C^2 x=1,\quad
+  1+\tan_C^2 x=\sec_C^2 x,\quad
+  1+\cot_C^2 x=\csc_C^2 x,
+\]
+the parity formulas, double-angle formulas, half-angle formulas, cofunction
+formulas, and period formulas.  Each identity should be proved from the
+circle point construction and its algebra, not by importing another
+trigonometric representation.
+\end{theorem}
+
+\subsection{Formalization Order}
+
+\begin{enumerate}
+  \item Keep the exact rational-circle layer small and complete: points,
+  dyadic refinement, circle multiplication, quotient functions, and the
+  finite identity package.
+
+  \item Complete the Archimedes method of exhaustion: polygonal area and
+  circumference enclosures, same-stage overlap, validity, and the shared
+  geometric pi real.
+
+  \item Build the geometric point raw function as the public algorithm:
+  sector-area bounds, dyadic bisection, period reduction, quadrant handling,
+  validity, and shrinking widths.
+
+  \item Define sine and cosine as coordinate projections of the point raw
+  function.  Define the remaining trigonometric functions as partial
+  quotient or reciprocal raw functions with explicit apartness domains.
+
+  \item Prove the identities for the projected algorithms.  The main proof
+  inputs are the unit-circle law, circle multiplication, and the correctness
+  of period and quadrant reduction.
+
+  \item Put comparison with any other representation in a later comparison
+  chapter or file.  That later stage can import the other definitions it
+  needs; this chapter should not depend on them.
+\end{enumerate}

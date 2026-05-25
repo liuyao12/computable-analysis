@@ -1,4 +1,4 @@
-\chapter{The Fundamental Theorem of Algebra}
+\chapter{Fundamental Theorem of Algebra}
 
 \section{Polynomial roots as computable objects}
 
@@ -21,10 +21,7 @@ nonzero.
 \lean{ComputableAnalysis.IsComputableRoot}
 \uses{def:qcomplex-poly,def:complex-raw,def:raw-equiv}
 Let \(p\in\Qi[z]\).  A computable root of \(p\) is a complex number \(z\)
-such that the interval evaluation of \(p(z)\) is equivalent to zero:
-\[
-  p(z)\Equiv 0.
-\]
+such that the interval evaluation of \(p(z)\) is equivalent to zero.
 \end{definition}
 
 \begin{definition}[Algebraic complex number]\label{def:algebraic-complex}
@@ -60,24 +57,16 @@ The polynomial \(z^2+1\) has \(i\) as a computable root:
 \lean{ComputableAnalysis.ComputableFTA}
 \uses{def:qcomplex-poly,def:computable-root}
 Every positive-degree rational-complex polynomial has a computable complex
-root:
-\[
-  \forall p\in\Qi[z],\quad \deg(p)>0
-  \Longrightarrow
-  \exists z\in\ComplexRaw,\quad z\Valid\ \text{and}\ p(z)\Equiv 0.
-\]
+root.  In Lean this means that the root candidate is a valid complex raw real
+and the interval evaluation of the polynomial at that candidate represents
+zero.
 \end{conjecture}
 
 \begin{conjecture}[Algebraic FTA]\label{conj:algebraic-fta}
 \lean{ComputableAnalysis.AlgebraicFTA}
 \uses{def:qcomplex-poly,def:algebraic-complex}
 Every positive-degree rational-complex polynomial has an algebraic complex
-root:
-\[
-  \forall p\in\Qi[z],\quad \deg(p)>0
-  \Longrightarrow
-  \exists \alpha\ \text{algebraic},\quad p(\alpha)\Equiv 0.
-\]
+root whose polynomial evaluation represents zero.
 \end{conjecture}
 
 \begin{theorem}[Algebraic roots give computable roots]

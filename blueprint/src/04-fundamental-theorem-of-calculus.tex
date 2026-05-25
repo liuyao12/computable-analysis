@@ -17,11 +17,8 @@ rational upper approximation to \(Y\):
 \]
 This is not the executable one-stage comparison.  It is the exact order
 relation used in mathematical statements.  For valid raw representatives,
-\[
-  X\Equiv Y
-  \quad\Longleftrightarrow\quad
-  X\le Y\ \text{and}\ Y\le X.
-\]
+two raw reals are equivalent exactly when each is at most the other in this
+order.
 \end{definition}
 
 \begin{definition}[Endpoint difference real]\label{def:endpoint-diff}
@@ -165,10 +162,8 @@ has an integral in the sense of \cref{def:monotone-integral}.
 \begin{theorem}[Convex FTC]\label{thm:convex-ftc}
 \uses{def:exact-convexity,def:convex-right-derivative,def:monotone-integral}
 If \(F\) is convex on a rational interval \([a,b]\), then the right
-derivative \(D_+F\) is integrable and
-\[
-  \int_a^b D_+F(x)\,dx \Equiv F(b)-F(a).
-\]
+derivative \(D_+F\) is integrable and its integral represents the same raw
+real as \(F(b)-F(a)\).
 Equivalently, the same conclusion holds with the left derivative \(D_-F\).
 \end{theorem}
 
@@ -222,9 +217,7 @@ function.
 \label{thm:formula-identification-ftc}
 \uses{def:formula-identification,thm:convex-ftc}
 If \(g\) is identified with \(D_+F\) on \([a,b]\), then
-\[
-  \int_a^b g(x)\,dx \Equiv F(b)-F(a).
-\]
+the integral of \(g\) represents the same raw real as \(F(b)-F(a)\).
 \end{theorem}
 
 \begin{example}[Polynomials]\label{ex:polynomial-ftc}

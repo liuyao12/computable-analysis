@@ -154,9 +154,71 @@ def sqrtBisectStep (q : Rat) (I : QInterval) : QInterval :=
 
 def sqrtBisect (q : Rat) : Nat -> QInterval -> QInterval
   | 0, I => I
-  | n + 1, I => sqrtBisect q n (sqrtBisectStep q I)
+  | n + 1, I => sqrtBisectStep q (sqrtBisect q n I)
 
-def sqrtFuel (q : Rat) (eps : QPos) : Nat := eps.val.den + (sqrtUpperBound q).den + 8
+def sqrtInitialWidthBound (q : Rat) : Nat :=
+  (qabs (sqrtUpperBound q)).num.natAbs + 1
+
+def dyadicFuel (target : Nat) : Nat :=
+  if target <= 1 then
+    1
+  else
+    1 + dyadicFuel ((target + 1) / 2)
+termination_by target
+decreasing_by omega
+
+theorem dyadicFuel_pos (target : Nat) : 0 < dyadicFuel target := by
+  unfold dyadicFuel
+  by_cases h : target <= 1
+  case pos => simp [h]
+  case neg =>
+    simp [h]
+    omega
+
+theorem dyadicFuel_mono (a b : Nat) (h : a <= b) :
+    dyadicFuel a <= dyadicFuel b := by
+  unfold dyadicFuel
+  by_cases hb : b <= 1
+  case pos =>
+    have ha : a <= 1 := by omega
+    simp [ha, hb]
+  case neg =>
+    by_cases ha : a <= 1
+    case pos =>
+      simp [ha, hb]
+    case neg =>
+      simp [ha, hb]
+      have hhalf : (a + 1) / 2 <= (b + 1) / 2 := by omega
+      exact dyadicFuel_mono ((a + 1) / 2) ((b + 1) / 2) hhalf
+termination_by b
+decreasing_by omega
+
+theorem dyadicFuel_bound (target : Nat) :
+    target < 2 ^ dyadicFuel target := by
+  unfold dyadicFuel
+  by_cases hsmall : target <= 1
+  case pos =>
+    simp [hsmall]
+    omega
+  case neg =>
+    simp [hsmall]
+    have hhalf_lt : (target + 1) / 2 < target := by omega
+    have ihhalf := dyadicFuel_bound ((target + 1) / 2)
+    rw [show 1 + dyadicFuel ((target + 1) / 2) =
+      dyadicFuel ((target + 1) / 2) + 1 by omega]
+    rw [Nat.pow_succ]
+    calc
+      target <= 2 * ((target + 1) / 2) := by omega
+      _ < 2 * 2 ^ dyadicFuel ((target + 1) / 2) := by omega
+      _ = 2 ^ dyadicFuel ((target + 1) / 2) * 2 := by omega
+termination_by target
+decreasing_by omega
+
+def sqrtFuel (q : Rat) (eps : QPos) : Nat :=
+  dyadicFuel (eps.val.den * sqrtInitialWidthBound q)
+
+def sqrtStageFuel (q : Rat) (n : Nat) : Nat :=
+  dyadicFuel ((n + 1) * sqrtInitialWidthBound q)
 
 def sqrtApprox? (q : Rat) (eps : QPos) : Option QInterval :=
   if q < 0 then none else some (sqrtBisect q (sqrtFuel q eps) { lo := 0, hi := sqrtUpperBound q })
@@ -164,14 +226,7 @@ def sqrtApprox? (q : Rat) (eps : QPos) : Option QInterval :=
 def sqrtDomain (q : Rat) : Prop := ¬ q < 0
 
 def sqrtApproxOnDomain (q : Rat) (_h : sqrtDomain q) (n : Nat) : QInterval :=
-  let eps : QPos :=
-    if hn : n = 0 then
-      { val := 1, property := by native_decide }
-    else
-      { val := (1 / (n : Rat)), property := by
-          rw [Rat.div_def, Rat.one_mul]
-          exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn)) }
-  sqrtBisect q (sqrtFuel q eps) { lo := 0, hi := sqrtUpperBound q }
+  sqrtBisect q (sqrtStageFuel q n) { lo := 0, hi := sqrtUpperBound q }
 
 def sqrtPartialRaw : PartialRealFunRaw where
   definedAt := sqrtDomain
@@ -289,6 +344,21 @@ private theorem midpoint_nonneg {I : QInterval}
     0 <= I.midpoint := by
   exact Rat.le_trans hlo (lo_le_midpoint hle)
 
+private theorem sqrtBisectStep_contains {q : Rat} {I : QInterval}
+    (hI : I.lo <= I.hi) : I.ContainsInterval (sqrtBisectStep q I) := by
+  have hlom : I.lo <= I.midpoint := lo_le_midpoint hI
+  have hmhi : I.midpoint <= I.hi := midpoint_le_hi hI
+  unfold QInterval.ContainsInterval sqrtBisectStep
+  by_cases htest : sq I.midpoint <= q
+  case pos => simp [htest, hlom]
+  case neg => simp [htest, hmhi]
+
+private theorem containsInterval_trans {A B C : QInterval}
+    (hAB : A.ContainsInterval B) (hBC : B.ContainsInterval C) :
+    A.ContainsInterval C := by
+  unfold QInterval.ContainsInterval at *
+  grind
+
 theorem sqrtBisectStep_spec {q : Rat} {I : QInterval}
     (hI : SqrtIntervalSpec q I) :
     SqrtIntervalSpec q (sqrtBisectStep q I) := by
@@ -312,7 +382,203 @@ theorem sqrtBisect_spec (q : Rat) :
       SqrtIntervalSpec q (sqrtBisect q fuel I)
   | 0, _I, hI => hI
   | fuel + 1, I, hI =>
-      sqrtBisect_spec q fuel (sqrtBisectStep q I) (sqrtBisectStep_spec hI)
+      sqrtBisectStep_spec (sqrtBisect_spec q fuel I hI)
+
+theorem sqrtBisectStep_width (q : Rat) (I : QInterval) :
+    (sqrtBisectStep q I).width = I.width / 2 := by
+  unfold sqrtBisectStep
+  change (if sq I.midpoint <= q then
+      ({ lo := I.midpoint, hi := I.hi } : QInterval)
+    else
+      ({ lo := I.lo, hi := I.midpoint } : QInterval)).width =
+    I.width / 2
+  by_cases h : sq I.midpoint <= q
+  case pos =>
+    simp [QInterval.width, QInterval.midpoint]
+    rw [Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  case neg =>
+    simp [QInterval.width, QInterval.midpoint]
+    rw [Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+
+theorem sqrtBisect_width (q : Rat) :
+    forall fuel I,
+      (sqrtBisect q fuel I).width = I.width / ((2 : Rat) ^ fuel)
+  | 0, I => by
+      simp [sqrtBisect]
+      rw [Rat.div_def]
+      grind
+  | fuel + 1, I => by
+      unfold sqrtBisect
+      rw [sqrtBisectStep_width q (sqrtBisect q fuel I)]
+      rw [sqrtBisect_width q fuel I]
+      rw [Rat.div_def, Rat.div_def]
+      rw [Rat.pow_succ]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem sqrtBisect_contains_of_le (q : Rat) {I : QInterval}
+    (hI : SqrtIntervalSpec q I) {n m : Nat} (hnm : n <= m) :
+    (sqrtBisect q n I).ContainsInterval (sqrtBisect q m I) := by
+  induction hnm with
+  | refl =>
+      unfold QInterval.ContainsInterval
+      constructor <;> exact Rat.le_refl
+  | step hle ih =>
+      rename_i k
+      have hspec_k : SqrtIntervalSpec q (sqrtBisect q k I) :=
+        sqrtBisect_spec q k I hI
+      have hstep :
+          (sqrtBisect q k I).ContainsInterval
+            (sqrtBisect q (k + 1) I) := by
+        change (sqrtBisect q k I).ContainsInterval
+          (sqrtBisectStep q (sqrtBisect q k I))
+        exact sqrtBisectStep_contains hspec_k.2.1
+      exact containsInterval_trans ih hstep
+
+theorem sqrtStageFuel_mono (q : Rat) {n m : Nat} (hnm : n <= m) :
+    sqrtStageFuel q n <= sqrtStageFuel q m := by
+  unfold sqrtStageFuel
+  exact dyadicFuel_mono _ _
+    (Nat.mul_le_mul_right _ (Nat.succ_le_succ hnm))
+
+theorem sqrtStageFuel_pos (q : Rat) (n : Nat) :
+    0 < sqrtStageFuel q n := by
+  unfold sqrtStageFuel
+  exact dyadicFuel_pos _
+
+private theorem rat_nonneg_lt_numNatAbs_succ {r : Rat} (hr : 0 <= r) :
+    r < ((r.num.natAbs + 1 : Nat) : Rat) := by
+  have hdenpos : 0 < (r.den : Rat) :=
+    (Rat.natCast_pos).2 (Nat.pos_of_ne_zero r.den_nz)
+  have hdenge : (1 : Rat) <= (r.den : Rat) := by
+    have h : 1 <= r.den :=
+      Nat.succ_le_of_lt (Nat.pos_of_ne_zero r.den_nz)
+    exact_mod_cast h
+  have hrden : r <= (r.den : Rat) * r := by
+    calc
+      r = 1 * r := by grind
+      _ <= (r.den : Rat) * r :=
+        Rat.mul_le_mul_of_nonneg_right hdenge hr
+  have hnum_nonneg : 0 <= r.num := by
+    by_cases hrzero : r = 0
+    case pos =>
+      rw [hrzero]
+      native_decide
+    case neg =>
+      have hrpos : 0 < r := by grind
+      exact Int.le_of_lt (rat_num_pos_of_pos hrpos)
+  have hnumcast : ((r.num.natAbs : Nat) : Rat) = (r.num : Rat) := by
+    exact_mod_cast (Int.natAbs_of_nonneg hnum_nonneg)
+  have hle : r <= ((r.num.natAbs : Nat) : Rat) := by
+    calc
+      r <= (r.den : Rat) * r := hrden
+      _ = (r.num : Rat) := rat_den_mul_self r
+      _ = ((r.num.natAbs : Nat) : Rat) := by rw [hnumcast]
+  have hlt :
+      ((r.num.natAbs : Nat) : Rat) <
+        ((r.num.natAbs + 1 : Nat) : Rat) := by
+    exact_mod_cast Nat.lt_succ_self r.num.natAbs
+  grind
+
+private theorem rat_le_qabs (r : Rat) : r <= qabs r := by
+  unfold qabs
+  by_cases hneg : r < 0
+  case pos => simp [hneg]; grind
+  case neg => simp [hneg]
+
+theorem sqrtUpperBound_lt_initialWidthBound {q : Rat} (hq : 0 <= q) :
+    sqrtUpperBound q < (sqrtInitialWidthBound q : Rat) := by
+  unfold sqrtInitialWidthBound
+  have hU_nonneg : 0 <= sqrtUpperBound q := sqrtUpperBound_nonneg hq
+  have hle : sqrtUpperBound q <= qabs (sqrtUpperBound q) := rat_le_qabs _
+  have hlt :=
+    rat_nonneg_lt_numNatAbs_succ (qabs_nonneg (sqrtUpperBound q))
+  grind
+
+private theorem nat_lt_two_pow_self {n : Nat} (hn : 0 < n) : n < 2 ^ n := by
+  induction n with
+  | zero => contradiction
+  | succ n ih =>
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          have hpos : 0 < n + 1 := Nat.succ_pos n
+          have ih' : n + 1 < 2 ^ (n + 1) := ih hpos
+          calc
+            n + 1 + 1 <= 2 * (n + 1) := by omega
+            _ < 2 * 2 ^ (n + 1) := by omega
+            _ = 2 ^ (n + 1 + 1) := by
+              rw [Nat.pow_succ]
+              omega
+
+private theorem nat_cast_two_pow (n : Nat) :
+    ((2 ^ n : Nat) : Rat) = (2 : Rat) ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Rat.pow_succ]
+      change ((2 ^ (n + 1) : Nat) : Rat) = (2 : Rat) ^ n * 2
+      rw [show (2 : Rat) ^ n = ((2 ^ n : Nat) : Rat) from Eq.symm ih]
+      exact_mod_cast Nat.pow_succ 2 n
+
+private theorem rat_nat_lt_two_pow_self {n : Nat} (hn : 0 < n) :
+    (n : Rat) < (2 : Rat) ^ n := by
+  have hnat := nat_lt_two_pow_self hn
+  have hcast : (n : Rat) < ((2 ^ n : Nat) : Rat) := by
+    exact_mod_cast hnat
+  simpa [nat_cast_two_pow n] using hcast
+
+private theorem div_lt_one_div_nat_of_mul_lt {U : Rat} {D t : Nat}
+    (hD : 0 < D) (ht : (D : Rat) * U < (2 : Rat) ^ t) :
+    U / ((2 : Rat) ^ t) < (1 : Rat) / (D : Rat) := by
+  have hpowpos : 0 < (2 : Rat) ^ t :=
+    Rat.pow_pos (by native_decide : (0 : Rat) < 2)
+  have hDpos : 0 < (D : Rat) := (Rat.natCast_pos).2 hD
+  rw [Rat.div_lt_iff hpowpos]
+  rw [Rat.div_def]
+  refine Rat.lt_of_mul_lt_mul_left (c := (D : Rat)) ?h ?hc
+  case h =>
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  case hc =>
+    exact Rat.le_of_lt hDpos
+
+theorem sqrtStage_width_lt_one_div {q : Rat} (hq : 0 <= q)
+    {N : Nat} (hN : 0 < N) :
+    sqrtUpperBound q / ((2 : Rat) ^ sqrtStageFuel q N) <
+      (1 : Rat) / (N : Rat) := by
+  let U := sqrtUpperBound q
+  let B := sqrtInitialWidthBound q
+  let target := (N + 1) * sqrtInitialWidthBound q
+  let t := sqrtStageFuel q N
+  have hBpos : 0 < B := by
+    dsimp [B, sqrtInitialWidthBound]
+    exact Nat.succ_pos _
+  have hBgt : U < (B : Rat) := by
+    dsimp [U, B]
+    exact sqrtUpperBound_lt_initialWidthBound hq
+  have hNratpos : 0 < (N : Rat) := (Rat.natCast_pos).2 hN
+  have hNU_lt_NB : (N : Rat) * U < (N : Rat) * (B : Rat) :=
+    Rat.mul_lt_mul_of_pos_left hBgt hNratpos
+  have hNB_le_target : (N : Rat) * (B : Rat) <= (target : Rat) := by
+    dsimp [target, B]
+    have hnat :
+        N * sqrtInitialWidthBound q <=
+          (N + 1) * sqrtInitialWidthBound q := by
+      exact Nat.mul_le_mul_right _ (Nat.le_succ N)
+    exact_mod_cast hnat
+  have htarget_lt_pow_nat : target < 2 ^ t := by
+    dsimp [target, t, sqrtStageFuel]
+    exact dyadicFuel_bound ((N + 1) * sqrtInitialWidthBound q)
+  have htarget_lt_pow : (target : Rat) < (2 : Rat) ^ t := by
+    have hcast : (target : Rat) < ((2 ^ t : Nat) : Rat) := by
+      exact_mod_cast htarget_lt_pow_nat
+    simpa [nat_cast_two_pow t] using hcast
+  have hNU_lt_pow : (N : Rat) * U < (2 : Rat) ^ t := by grind
+  change U / ((2 : Rat) ^ t) < (1 : Rat) / (N : Rat)
+  exact div_lt_one_div_nat_of_mul_lt hN hNU_lt_pow
 
 theorem sqrtApproxOnDomain_spec (q : Rat) (h : sqrtDomain q) (n : Nat) :
     SqrtIntervalSpec q (sqrtApproxOnDomain q h n) := by
@@ -362,6 +628,83 @@ theorem sqrtRaw_stage_spec (q : Rat) (h : sqrtDomain q) (n : Nat) :
 
 def SqrtRawSpec (q : Rat) (h : sqrtDomain q) : Prop :=
   SqrtRealRawSpec q (sqrtRaw q h)
+
+theorem sqrtApproxOnDomain_width_lt_one_div
+    (q : Rat) (h : sqrtDomain q) {N : Nat} (hN : 0 < N) :
+    (sqrtApproxOnDomain q h N).width < (1 : Rat) / (N : Rat) := by
+  have hq : 0 <= q := by
+    unfold sqrtDomain at h
+    grind
+  unfold sqrtApproxOnDomain
+  rw [sqrtBisect_width]
+  change (sqrtUpperBound q - 0) / ((2 : Rat) ^ sqrtStageFuel q N) <
+    (1 : Rat) / (N : Rat)
+  have hzero : sqrtUpperBound q - 0 = sqrtUpperBound q := by
+    grind [Rat.sub_eq_add_neg]
+  rw [hzero]
+  exact sqrtStage_width_lt_one_div hq hN
+
+theorem sqrtApproxOnDomain_precisionValidCompute
+    (q : Rat) (h : sqrtDomain q) :
+    RealRaw.PrecisionValidCompute (sqrtApproxOnDomain q h) := by
+  have hq : 0 <= q := by
+    unfold sqrtDomain at h
+    grind
+  constructor
+  · intro n
+    have hspec := sqrtApproxOnDomain_spec q h n
+    have hle : (sqrtApproxOnDomain q h n).lo <=
+        (sqrtApproxOnDomain q h n).hi := hspec.2.1
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      have hfuel : sqrtStageFuel q n <= sqrtStageFuel q m :=
+        sqrtStageFuel_mono q hnm
+      have hcontains :=
+        sqrtBisect_contains_of_le q (sqrtInitialSpec hq) hfuel
+      have hspec_m := sqrtApproxOnDomain_spec q h m
+      unfold sqrtApproxOnDomain at hcontains hspec_m ⊢
+      constructor
+      · exact hcontains.1
+      · constructor
+        · exact hspec_m.2.1
+        · exact hcontains.2
+    · intro N hN
+      exact sqrtApproxOnDomain_width_lt_one_div q h hN
+
+theorem sqrtPartialRaw_precisionValid
+    (q : Rat) (h : sqrtPartialRaw.definedAt q) :
+    RealRaw.PrecisionValidCompute (sqrtPartialRaw.compute q h) := by
+  simpa [sqrtPartialRaw] using sqrtApproxOnDomain_precisionValidCompute q h
+
+theorem sqrtPartialRaw_valid
+    (q : Rat) (h : sqrtPartialRaw.definedAt q) :
+    RealRaw.ValidCompute (sqrtPartialRaw.compute q h) :=
+  RealRaw.validCompute_of_precisionValidCompute
+    (sqrtPartialRaw_precisionValid q h)
+
+theorem sqrtRaw_precisionValid (q : Rat) (h : sqrtDomain q) :
+    (sqrtRaw q h).PrecisionValid := by
+  simpa [RealRaw.PrecisionValid, sqrtRaw] using
+    sqrtApproxOnDomain_precisionValidCompute q h
+
+theorem sqrtRaw_valid (q : Rat) (h : sqrtDomain q) :
+    (sqrtRaw q h).Valid :=
+  RealRaw.valid_of_precisionValid (sqrtRaw_precisionValid q h)
+
+theorem sqrtRaw_spec (q : Rat) (h : sqrtDomain q) : SqrtRawSpec q h := by
+  constructor
+  · exact sqrtRaw_valid q h
+  · exact sqrtRaw_stage_spec q h
+
+theorem sqrtDomain_of_nonneg {q : Rat} (hq : 0 <= q) : sqrtDomain q := by
+  unfold sqrtDomain
+  grind
+
+theorem sqrtRaw_valid_of_nonneg (q : Rat) (hq : 0 <= q) :
+    (sqrtRaw q (sqrtDomain_of_nonneg hq)).Valid :=
+  sqrtRaw_valid q (sqrtDomain_of_nonneg hq)
 
 theorem sq_le_sq_of_nonneg_le {a b : Rat} (ha : 0 <= a) (hab : a <= b) :
     sq a <= sq b := by

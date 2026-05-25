@@ -467,12 +467,15 @@ theorem leibnizSeries_compute_eq (n : Nat) :
   simp
 
 theorem compute_eq (n : Nat) :
-    piLeibniz.compute n = { lo := 4 * lo n, hi := 4 * hi n } := by
+    piLeibniz.compute n =
+      { lo := 4 * lo (RealRaw.scaleRatStage 4 n),
+        hi := 4 * hi (RealRaw.scaleRatStage 4 n) } := by
   change (RealRaw.scaleRat (4 : Rat) leibnizSeries).compute n =
-    { lo := 4 * lo n, hi := 4 * hi n }
+    { lo := 4 * lo (RealRaw.scaleRatStage 4 n),
+      hi := 4 * hi (RealRaw.scaleRatStage 4 n) }
   have h4 : (0 : Rat) <= 4 := by native_decide
   simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, h4,
-    leibnizSeries_compute_eq n]
+    leibnizSeries_compute_eq (RealRaw.scaleRatStage 4 n)]
 
 theorem state_succ (n : Nat) :
     state (n + 1) = step (state n) n := by
@@ -586,10 +589,10 @@ theorem interval_ordered (n : Nat) :
 
 theorem compute_width_eq (n : Nat) :
     (piLeibniz.compute n).width =
-      4 / ((4 * n + 1 : Nat) : Rat) := by
+      4 / ((4 * RealRaw.scaleRatStage 4 n + 1 : Nat) : Rat) := by
   rw [compute_eq]
   unfold QInterval.width
-  have hwidth := width_eq n
+  have hwidth := width_eq (RealRaw.scaleRatStage 4 n)
   rw [Rat.div_def]
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm]
@@ -600,13 +603,14 @@ theorem widths_shrink : RealRaw.WidthsShrinkToZero piLeibniz.compute := by
   intro n hn
   rw [compute_width_eq n]
   have hfour :
-      4 / ((4 * n + 1 : Nat) : Rat) <=
+      4 / ((4 * RealRaw.scaleRatStage 4 n + 1 : Nat) : Rat) <=
         1 / (((eps.val.den + 1 : Nat) : Rat)) := by
-    let A : Rat := ((4 * n + 1 : Nat) : Rat)
+    let A : Rat := ((4 * RealRaw.scaleRatStage 4 n + 1 : Nat) : Rat)
     let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
     have hApos : 0 < A := by
       dsimp [A]
-      exact (Rat.natCast_pos).2 (by omega : 0 < 4 * n + 1)
+      exact (Rat.natCast_pos).2
+        (by omega : 0 < 4 * RealRaw.scaleRatStage 4 n + 1)
     have hBpos : 0 < B := by
       dsimp [B]
       exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
@@ -615,8 +619,11 @@ theorem widths_shrink : RealRaw.WidthsShrinkToZero piLeibniz.compute := by
     have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
     have hscaledRat : (4 : Rat) * B <= A := by
       dsimp [A, B]
+      have hn_stage : n <= RealRaw.scaleRatStage 4 n :=
+        RealRaw.le_scaleRatStage 4 n
       exact_mod_cast (by omega :
-        4 * (eps.val.den + 1) <= 4 * n + 1)
+        4 * (eps.val.den + 1) <=
+          4 * RealRaw.scaleRatStage 4 n + 1)
     apply Rat.le_of_mul_le_mul_right (c := A * B)
     · calc
         (4 / A) * (A * B) = 4 * B := by
@@ -639,18 +646,24 @@ theorem valid : LeibnizValid := by
     exact Rat.mul_nonneg
       (by native_decide : (0 : Rat) <= 4)
       (Rat.le_of_lt ((Rat.inv_pos).2
-        ((Rat.natCast_pos).2 (by omega : 0 < 4 * n + 1))))
+        ((Rat.natCast_pos).2
+          (by omega : 0 < 4 * RealRaw.scaleRatStage 4 n + 1))))
   · constructor
     · intro n m hnm
       rw [compute_eq n, compute_eq m]
+      have hstage :
+          RealRaw.scaleRatStage 4 n <= RealRaw.scaleRatStage 4 m := by
+        unfold RealRaw.scaleRatStage
+        exact Nat.mul_le_mul_left (RealRaw.scaleRatPrecisionFactor 4) hnm
       constructor
       · exact Rat.mul_le_mul_of_nonneg_left
-          (lo_mono hnm) (by native_decide : (0 : Rat) <= 4)
+          (lo_mono hstage) (by native_decide : (0 : Rat) <= 4)
       · constructor
         · exact Rat.mul_le_mul_of_nonneg_left
-            (interval_ordered m) (by native_decide : (0 : Rat) <= 4)
+            (interval_ordered (RealRaw.scaleRatStage 4 m))
+            (by native_decide : (0 : Rat) <= 4)
         · exact Rat.mul_le_mul_of_nonneg_left
-            (hi_anti hnm) (by native_decide : (0 : Rat) <= 4)
+            (hi_anti hstage) (by native_decide : (0 : Rat) <= 4)
     · exact widths_shrink
 
 end LeibnizValidity
@@ -1104,27 +1117,29 @@ def piCircleAreaComputeAtStage (stage : Nat) : QInterval :=
     hi := 4 * outerQuarterArea stage }
 
 def piCircumferenceComputeAtStage (stage : Nat) : QInterval :=
+  let precision := circumferenceSqrtPrecision stage
   let innerQuarter := rationalPointPathLength
     (piCircumference.innerBoundaryFrom (circleSamplePoint stage)
-      0 (stage + 1)) stage
+      0 (stage + 1)) precision
   let outerQuarter := rationalPointPathLength
     (circleSamplePoint stage 0 ::
       piCircumference.outerBoundaryFrom
-        (circleSamplePoint stage) (outerTangentPoint stage) 0 stage) stage
+        (circleSamplePoint stage) (outerTangentPoint stage) 0 stage) precision
   { lo := (4 * innerQuarter.lo) / 2,
     hi := (4 * outerQuarter.hi) / 2 }
 
 def piCircumferenceCommonComputeAtStage (stage : Nat) : QInterval :=
-  let innerQuarter := rationalPointPathLength (innerBoundary stage) stage
-  let outerQuarter := rationalPointPathLength (outerBoundary stage) stage
+  let precision := circumferenceSqrtPrecision stage
+  let innerQuarter := rationalPointPathLength (innerBoundary stage) precision
+  let outerQuarter := rationalPointPathLength (outerBoundary stage) precision
   { lo := (4 * innerQuarter.lo) / 2,
     hi := (4 * outerQuarter.hi) / 2 }
 
 def innerQuarterLength (stage : Nat) : QInterval :=
-  rationalPointPathLength (innerBoundary stage) stage
+  rationalPointPathLength (innerBoundary stage) (circumferenceSqrtPrecision stage)
 
 def outerQuarterLength (stage : Nat) : QInterval :=
-  rationalPointPathLength (outerBoundary stage) stage
+  rationalPointPathLength (outerBoundary stage) (circumferenceSqrtPrecision stage)
 
 def pointSegmentNormSq (p q : PiCirclePoint) : Rat :=
   let dx := q.x - p.x
@@ -1314,11 +1329,11 @@ theorem arctanGeometry_outerSectorArea_one_eq (stage : Nat) :
 theorem four_arctanGeom_one_compute_eq_piCircleArea_compute
     (n : Nat) :
     (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute n) =
-      piCircleArea.compute n := by
-  rw [piCircleArea_compute_eq]
+      piCircleArea.compute (RealRaw.scaleRatStage 4 n) := by
+  rw [piCircleArea_compute_eq (RealRaw.scaleRatStage 4 n)]
   change (RealRaw.scaleRat (4 : Rat)
       (ArctanGeometry.arctanGeom (1 : Rat))).compute n =
-    piCircleAreaComputeAtStage (piStage n)
+    piCircleAreaComputeAtStage (piStage (RealRaw.scaleRatStage 4 n))
   have hnonzero : ¬(1 : Rat) = 0 := by native_decide
   have hnonneg : (0 : Rat) <= 1 := by native_decide
   have hfour : (0 : Rat) <= 4 := by native_decide
@@ -1336,43 +1351,6 @@ theorem fourArctanGeomOneValid_of_geometricValid
     simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
       hGeomValid (1 : Rat) (by trivial)
   exact RealRaw.natScale_valid 4 hgeom
-
-theorem leibnizEqArea_of_powerSeriesGeometryAgreement
-    (hGeomValid : ArctanGeometry.Valid)
-    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
-    LeibnizEqArea := by
-  have hpowGeom :
-      (arctan (1 : Rat)).Equiv (ArctanGeometry.arctanGeom (1 : Rat)) :=
-    ArctanGeometry.powerSeries_equiv_geometric_of_agreement
-      hagree (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide)
-  have hscaled :
-      (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv
-        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
-    RealRaw.natScale_equiv 4 hpowGeom
-  have hgeomScaledValid :
-      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) :=
-    fourArctanGeomOneValid_of_geometricValid hGeomValid
-  have hleibnizToGeom :
-      piLeibniz.Equiv
-        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
-    RealRaw.equiv_trans
-      leibnizValid fourArctanOneValid hgeomScaledValid
-      piLeibniz_equiv_four_arctan_one hscaled
-  intro n
-  have hover := (RealRaw.compareAt_overlap_iff piLeibniz
-      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
-    (hleibnizToGeom n)
-  apply (RealRaw.compareAt_overlap_iff piLeibniz piCircleArea n n).2
-  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
-  exact hover
-
-theorem leibnizEqArea_of_kernelComparisonRoute
-    (route : Taylor.ArctanComparison.KernelComparisonRoute) :
-    LeibnizEqArea :=
-  leibnizEqArea_of_powerSeriesGeometryAgreement
-    route.geometric_valid
-    (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
-      route)
 
 theorem pointSegmentNormSq_nonneg (p q : PiCirclePoint) :
     0 <= pointSegmentNormSq p q := by
@@ -1440,10 +1418,10 @@ theorem pointSegmentLengthInterval_hi_nonneg
     (pointSegmentLengthInterval_lo_le_hi p q n)
 
 theorem chordLengthLo_le_outerTangentCrossSum
-    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    (stage : Nat) (hstage : 0 < stage) (precision k : Nat) :
     (pointSegmentLengthInterval
       (circleSamplePoint stage k)
-      (circleSamplePoint stage (k + 1)) stage).lo <=
+      (circleSamplePoint stage (k + 1)) precision).lo <=
       outerTangentCrossSum stage k := by
   have hnonneg :
       0 <= outerTangentCrossSum stage k := by
@@ -1472,7 +1450,7 @@ theorem chordLengthLo_le_outerTangentCrossSum
         (rationalCircleStage stage) hstage k
   exact pointSegmentLengthInterval_lo_le_of_sq_le
     (circleSamplePoint stage k)
-    (circleSamplePoint stage (k + 1)) stage hnonneg hsq
+    (circleSamplePoint stage (k + 1)) precision hnonneg hsq
 
 def ConsecutiveCrossNonneg : List PiCirclePoint -> Prop
   | [] => True
@@ -2234,7 +2212,7 @@ structure CrossFanBounds (stage : Nat) where
   outerCrossNonneg :
     ConsecutiveCrossNonneg (outerBoundary stage)
   outerCrossLeLength :
-    ConsecutiveCrossLe stage (outerBoundary stage)
+    ConsecutiveCrossLe (circumferenceSqrtPrecision stage) (outerBoundary stage)
   innerPerimeter_le_outerPerimeter :
     Fan.perimeter (innerFanWidths stage) <=
       Fan.perimeter (outerFanWidths stage)
@@ -2257,7 +2235,8 @@ def sectorFanBoundsOfCrossFanBounds
     bounds.innerComputedLo_le_outerPerimeter
   outerPerimeter_le_outerComputedHi :=
     Fan.sectorFanPerimeter_le_pathLength_hi
-      stage (outerBoundary stage) bounds.outerCrossLeLength
+      (circumferenceSqrtPrecision stage)
+      (outerBoundary stage) bounds.outerCrossLeLength
 
 theorem finiteArchimedesBounds_of_crossFanBounds
     (bounds : forall stage : Nat, 0 < stage -> CrossFanBounds stage) :
@@ -2276,7 +2255,7 @@ structure LocalTangentBounds (stage : Nat) where
   outerCrossNonneg :
     ConsecutiveCrossNonneg (outerBoundary stage)
   outerCrossLeLength :
-    ConsecutiveCrossLe stage (outerBoundary stage)
+    ConsecutiveCrossLe (circumferenceSqrtPrecision stage) (outerBoundary stage)
   chordCross_le_tangentCrossSum :
     forall k,
       pointCross (circleSamplePoint stage k)
@@ -2286,7 +2265,8 @@ structure LocalTangentBounds (stage : Nat) where
     forall k,
       (pointSegmentLengthInterval
         (circleSamplePoint stage k)
-        (circleSamplePoint stage (k + 1)) stage).lo <=
+        (circleSamplePoint stage (k + 1))
+        (circumferenceSqrtPrecision stage)).lo <=
         outerTangentCrossSum stage k
 
 theorem localTangentBounds
@@ -2297,11 +2277,13 @@ theorem localTangentBounds
   outerCrossNonneg :=
     outerBoundary_consecutiveCrossNonneg stage hstage
   outerCrossLeLength :=
-    outerBoundary_consecutiveCrossLe stage hstage stage
+    outerBoundary_consecutiveCrossLe stage hstage
+      (circumferenceSqrtPrecision stage)
   chordCross_le_tangentCrossSum :=
     chordCross_le_outerTangentCrossSum stage hstage
   chordLengthLo_le_tangentCrossSum :=
     chordLengthLo_le_outerTangentCrossSum stage hstage
+      (circumferenceSqrtPrecision stage)
 
 theorem innerEdgeCrosses_le_outerTangentEdgeCrosses
     (stage : Nat)
@@ -2466,17 +2448,19 @@ theorem innerQuarterLength_lo_le_outerFanPerimeter_of_adjacent
       forall k,
         (pointSegmentLengthInterval
           (circleSamplePoint stage k)
-          (circleSamplePoint stage (k + 1)) stage).lo <=
+          (circleSamplePoint stage (k + 1))
+          (circumferenceSqrtPrecision stage)).lo <=
           outerTangentCrossSum stage k) :
     (innerQuarterLength stage).lo <=
       Fan.perimeter (outerFanWidths stage) := by
+  let precision := circumferenceSqrtPrecision stage
   have h :=
     innerPathLo_le_outerTangentEdgeCrosses
-      stage stage hlocal stage 0
+      stage precision hlocal stage 0
   have h' :
       (rationalPointPathLength
         (circleSamplePoint stage 0 ::
-          innerBoundaryFrom stage (0 + 1) stage) stage).lo <=
+          innerBoundaryFrom stage (0 + 1) stage) precision).lo <=
       0 + Fan.perimeter
         (Fan.edgeCrossesFrom
           (circleSamplePoint stage 0)
@@ -2493,7 +2477,8 @@ theorem innerQuarterLength_lo_le_outerFanPerimeter
     (innerQuarterLength stage).lo <=
       Fan.perimeter (outerFanWidths stage) :=
   innerQuarterLength_lo_le_outerFanPerimeter_of_adjacent
-    stage (chordLengthLo_le_outerTangentCrossSum stage hstage)
+    stage (chordLengthLo_le_outerTangentCrossSum stage hstage
+      (circumferenceSqrtPrecision stage))
 
 def crossFanBoundsOfLocalTangentBounds
     (stage : Nat) (bounds : LocalTangentBounds stage) :
@@ -2770,6 +2755,9 @@ theorem widthsShrink_of_natOverSuccBound
 def AreaWidthsShrink : Prop :=
   RealRaw.WidthsShrinkToZero piCircleArea.compute
 
+def AreaPositivePrecision : Prop :=
+  RealRaw.PositivePrecisionBound piCircleArea.compute
+
 def AreaWidthLinearBound (C : Nat) : Prop :=
   WidthBoundedByNatOverSucc piCircleArea.compute C
 
@@ -2786,6 +2774,9 @@ def CircumferenceNested : Prop :=
 
 def CircumferenceWidthsShrink : Prop :=
   RealRaw.WidthsShrinkToZero piCircumference.compute
+
+def CircumferencePositivePrecision : Prop :=
+  RealRaw.PositivePrecisionBound piCircumference.compute
 
 def CircumferenceWidthLinearBound (C : Nat) : Prop :=
   WidthBoundedByNatOverSucc piCircumference.compute C
@@ -2825,6 +2816,889 @@ def AreaStepRefines : Prop :=
 
 def CircumferenceStepRefines : Prop :=
   EndpointStepRefines piCircumference.compute
+
+/-!
+Dyadic refinement should not be proved by attacking the full interval
+endpoint inequalities directly.  The geometric content is local: one coarse
+arc is split into two fine arcs, and a small cell inequality says the
+inscribed quantity improves while the circumscribed quantity shrinks.  The
+definitions below isolate that local target and then provide the thin wrapper
+that turns stage-to-stage refinement into the public `EndpointStepRefines`
+obligations.
+-/
+
+theorem piStage_succ (n : Nat) :
+    piStage (n + 1) = 2 * piStage n := by
+  unfold piStage
+  simpa [Nat.mul_comm] using (Nat.pow_succ 2 n)
+
+theorem circleSamplePoint_refine_even (stage k : Nat) :
+    circleSamplePoint (2 * stage) (2 * k) =
+      circleSamplePoint stage k := by
+  simpa [rationalCircleStage, RationalCircle.Stage.refineIndex]
+    using RationalCircle.Stage.samplePoint_refineIndex_of_refinement
+      (coarse := rationalCircleStage stage)
+      (fine := rationalCircleStage (2 * stage))
+      (by rfl)
+      k
+
+theorem circleSamplePoint_refine_succ_even (stage k : Nat) :
+    circleSamplePoint (2 * stage) (2 * k + 2) =
+      circleSamplePoint stage (k + 1) := by
+  have h :=
+    RationalCircle.Stage.samplePoint_refineIndex_of_refinement
+      (coarse := rationalCircleStage stage)
+      (fine := rationalCircleStage (2 * stage))
+      (by rfl)
+      (k + 1)
+  simpa [rationalCircleStage, RationalCircle.Stage.refineIndex, Nat.mul_add,
+    Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+
+def InnerAreaCellSplitBound (stage k : Nat) : Prop :=
+  pointCross (circleSamplePoint stage k) (circleSamplePoint stage (k + 1)) <=
+    pointCross
+        (circleSamplePoint (2 * stage) (2 * k))
+        (circleSamplePoint (2 * stage) (2 * k + 1)) +
+      pointCross
+        (circleSamplePoint (2 * stage) (2 * k + 1))
+        (circleSamplePoint (2 * stage) (2 * k + 2))
+
+def OuterAreaCellSplitBound (stage k : Nat) : Prop :=
+  outerTangentCrossSum (2 * stage) (2 * k) +
+      outerTangentCrossSum (2 * stage) (2 * k + 1) <=
+    outerTangentCrossSum stage k
+
+def InnerLengthCellSplitBound (stage k : Nat) : Prop :=
+  (pointSegmentLengthInterval
+      (circleSamplePoint stage k)
+      (circleSamplePoint stage (k + 1))
+      (circumferenceSqrtPrecision stage)).lo <=
+    (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k))
+        (circleSamplePoint (2 * stage) (2 * k + 1))
+        (circumferenceSqrtPrecision (2 * stage))).lo +
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k + 1))
+        (circleSamplePoint (2 * stage) (2 * k + 2))
+        (circumferenceSqrtPrecision (2 * stage))).lo
+
+def OuterLengthCellSplitBound (stage k : Nat) : Prop :=
+  (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k))
+        (outerTangentPoint (2 * stage) (2 * k))
+        (circumferenceSqrtPrecision (2 * stage))).hi +
+      (pointSegmentLengthInterval
+        (outerTangentPoint (2 * stage) (2 * k))
+        (circleSamplePoint (2 * stage) (2 * k + 1))
+        (circumferenceSqrtPrecision (2 * stage))).hi +
+      ((pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k + 1))
+        (outerTangentPoint (2 * stage) (2 * k + 1))
+        (circumferenceSqrtPrecision (2 * stage))).hi +
+      (pointSegmentLengthInterval
+        (outerTangentPoint (2 * stage) (2 * k + 1))
+        (circleSamplePoint (2 * stage) (2 * k + 2))
+        (circumferenceSqrtPrecision (2 * stage))).hi) <=
+    (pointSegmentLengthInterval
+      (circleSamplePoint stage k)
+      (outerTangentPoint stage k)
+      (circumferenceSqrtPrecision stage)).hi +
+      (pointSegmentLengthInterval
+        (outerTangentPoint stage k)
+        (circleSamplePoint stage (k + 1))
+        (circumferenceSqrtPrecision stage)).hi
+
+/-- Determinant identity behind the local inner-area split.  Multiplying by the
+positive rational denominator keeps the algebra in polynomial form. -/
+theorem pointCross_split_difference_mul_den
+    (u v w : Rat) :
+    let du := 1 + u * u
+    let dv := 1 + v * v
+    let dw := 1 + w * w
+    (RationalCircle.Stage.cross
+        (RationalCircle.Stage.point u)
+        (RationalCircle.Stage.point v) +
+      RationalCircle.Stage.cross
+        (RationalCircle.Stage.point v)
+        (RationalCircle.Stage.point w) -
+      RationalCircle.Stage.cross
+        (RationalCircle.Stage.point u)
+        (RationalCircle.Stage.point w)) *
+        (du * dv * dw) =
+      4 * (v - u) * (w - u) * (w - v) := by
+  dsimp
+  rw [RationalCircle.Stage.point_cross_formula,
+    RationalCircle.Stage.point_cross_formula,
+    RationalCircle.Stage.point_cross_formula]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hdupos : 0 < 1 + u * u :=
+    RationalCircle.Stage.one_add_square_pos u
+  have hdvpos : 0 < 1 + v * v :=
+    RationalCircle.Stage.one_add_square_pos v
+  have hdwpos : 0 < 1 + w * w :=
+    RationalCircle.Stage.one_add_square_pos w
+  have hdune : 1 + u * u ≠ 0 := Rat.ne_of_gt hdupos
+  have hdvne : 1 + v * v ≠ 0 := Rat.ne_of_gt hdvpos
+  have hdwne : 1 + w * w ≠ 0 := Rat.ne_of_gt hdwpos
+  have hduvne : (1 + u * u) * (1 + v * v) ≠ 0 :=
+    Rat.ne_of_gt (Rat.mul_pos hdupos hdvpos)
+  have hdvwne : (1 + v * v) * (1 + w * w) ≠ 0 :=
+    Rat.ne_of_gt (Rat.mul_pos hdvpos hdwpos)
+  have hduwne : (1 + u * u) * (1 + w * w) ≠ 0 :=
+    Rat.ne_of_gt (Rat.mul_pos hdupos hdwpos)
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_rev,
+    Rat.mul_inv_cancel]
+
+theorem pointCross_split_le
+    {u v w : Rat} (huv : u <= v) (hvw : v <= w) :
+    RationalCircle.Stage.cross
+        (RationalCircle.Stage.point u)
+        (RationalCircle.Stage.point w) <=
+      RationalCircle.Stage.cross
+          (RationalCircle.Stage.point u)
+          (RationalCircle.Stage.point v) +
+        RationalCircle.Stage.cross
+          (RationalCircle.Stage.point v)
+          (RationalCircle.Stage.point w) := by
+  let x :=
+    RationalCircle.Stage.cross
+        (RationalCircle.Stage.point u)
+        (RationalCircle.Stage.point v) +
+      RationalCircle.Stage.cross
+        (RationalCircle.Stage.point v)
+        (RationalCircle.Stage.point w) -
+      RationalCircle.Stage.cross
+        (RationalCircle.Stage.point u)
+        (RationalCircle.Stage.point w)
+  let den := (1 + u * u) * (1 + v * v) * (1 + w * w)
+  have hdenpos : 0 < den := by
+    dsimp [den]
+    exact Rat.mul_pos
+      (Rat.mul_pos
+        (RationalCircle.Stage.one_add_square_pos u)
+        (RationalCircle.Stage.one_add_square_pos v))
+      (RationalCircle.Stage.one_add_square_pos w)
+  have hdiff1 : 0 <= v - u := by
+    grind [Rat.sub_eq_add_neg]
+  have hdiff2 : 0 <= w - u := by
+    grind [Rat.sub_eq_add_neg]
+  have hdiff3 : 0 <= w - v := by
+    grind [Rat.sub_eq_add_neg]
+  have hnum : 0 <= 4 * (v - u) * (w - u) * (w - v) := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 4) hdiff1)
+        hdiff2)
+      hdiff3
+  have hmul : x * den = 4 * (v - u) * (w - u) * (w - v) := by
+    dsimp [x, den]
+    simpa using pointCross_split_difference_mul_den u v w
+  have hx_nonneg : 0 <= x := by
+    apply Rat.le_of_mul_le_mul_right (c := den)
+    · simpa [hmul] using hnum
+    · exact hdenpos
+  dsimp [x] at hx_nonneg
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/-- Rational simplification for a tangent-width expression.  This is kept
+separate from the circle formulas so the geometric step below reduces to a
+small algebraic cancellation. -/
+theorem tangentWidth_div_simplify
+    {A B D : Rat} (hApos : 0 < A) (hB : B ≠ 0) (hD : D ≠ 0) :
+    (2 * D * D / A) / (2 * D * B / A) +
+      (2 * D * D / A) / (2 * D * B / A) =
+      2 * D / B := by
+  simp only [Rat.div_def]
+  have hA : A ≠ 0 := Rat.ne_of_gt hApos
+  have h2 : (2 : Rat) ≠ 0 := by native_decide
+  have h2D : 2 * D ≠ 0 := by
+    intro h
+    have h' : (2 : Rat) = 0 ∨ D = 0 := Rat.mul_eq_zero.mp h
+    cases h' with
+    | inl htwo => exact h2 htwo
+    | inr hD0 => exact hD hD0
+  have h2DB : 2 * D * B ≠ 0 := by
+    intro h
+    have h' : 2 * D = 0 ∨ B = 0 := Rat.mul_eq_zero.mp h
+    cases h' with
+    | inl h2D0 => exact h2D h2D0
+    | inr hB0 => exact hB hB0
+  have hAinvpos : 0 < A⁻¹ := (Rat.inv_pos).2 hApos
+  have hAinv : A⁻¹ ≠ 0 := Rat.ne_of_gt hAinvpos
+  have _hden : 2 * D * B * A⁻¹ ≠ 0 := by
+    intro h
+    have h' : 2 * D * B = 0 ∨ A⁻¹ = 0 := Rat.mul_eq_zero.mp h
+    cases h' with
+    | inl h2DB0 => exact h2DB h2DB0
+    | inr hA0 => exact hAinv hA0
+  have hc1 : (2 * D * B * A⁻¹)⁻¹ = A * (2 * D * B)⁻¹ := by
+    rw [Rat.inv_mul_rev]
+    rw [Rat.inv_inv]
+  have hc2 : (2 * D * B)⁻¹ = B⁻¹ * (2 * D)⁻¹ := by
+    rw [Rat.inv_mul_rev]
+  rw [hc1, hc2]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+    Rat.add_assoc, Rat.add_comm]
+
+/-- Exact rational formula for the two tangent fan widths over the chord
+between parameters `u` and `v`. -/
+theorem pointTangentCrossSum_formula_of_lt
+    {u v : Rat} (hu : 0 <= u) (hv : 0 <= v) (huv : u < v) :
+    RationalCircle.Stage.cross (RationalCircle.Stage.point u)
+        (RationalCircle.Stage.tangentIntersection
+          (RationalCircle.Stage.point u) (RationalCircle.Stage.point v)) +
+      RationalCircle.Stage.cross
+        (RationalCircle.Stage.tangentIntersection
+          (RationalCircle.Stage.point u) (RationalCircle.Stage.point v))
+        (RationalCircle.Stage.point v) =
+      2 * (v - u) / (1 + u * v) := by
+  rw [RationalCircle.Stage.cross_left_tangentIntersection
+    (RationalCircle.Stage.point_normSq_unit u)]
+  rw [RationalCircle.Stage.cross_tangentIntersection_right
+    (RationalCircle.Stage.point_normSq_unit v)]
+  rw [RationalCircle.Stage.one_sub_point_dot_formula]
+  rw [RationalCircle.Stage.point_cross_formula]
+  let A := (1 + u * u) * (1 + v * v)
+  let B := 1 + u * v
+  let D := v - u
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact Rat.mul_pos (RationalCircle.Stage.one_add_square_pos u)
+      (RationalCircle.Stage.one_add_square_pos v)
+  have hBpos : 0 < B := by
+    dsimp [B]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hu hv
+  have hB : B ≠ 0 := Rat.ne_of_gt hBpos
+  have hDpos : 0 < D := by
+    dsimp [D]
+    grind [Rat.sub_eq_add_neg]
+  have hD : D ≠ 0 := Rat.ne_of_gt hDpos
+  simpa [A, B, D] using
+    tangentWidth_div_simplify (A := A) (B := B) (D := D)
+      hApos hB hD
+
+/-- Denominator-cleared identity for the tangent-width split. -/
+theorem tangentWidth_split_difference_mul_den_of_nonneg
+    {u v w : Rat} (hu : 0 <= u) (hv : 0 <= v) (hw : 0 <= w) :
+    let A := 1 + u * v
+    let B := 1 + v * w
+    let C := 1 + u * w
+    (2 * (w - u) / C -
+        (2 * (v - u) / A + 2 * (w - v) / B)) * (A * B * C) =
+      2 * (v - u) * (w - v) * (w - u) := by
+  dsimp
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hApos : 0 < 1 + u * v :=
+    RationalCircle.Stage.one_add_mul_pos_of_nonneg hu hv
+  have hBpos : 0 < 1 + v * w :=
+    RationalCircle.Stage.one_add_mul_pos_of_nonneg hv hw
+  have hCpos : 0 < 1 + u * w :=
+    RationalCircle.Stage.one_add_mul_pos_of_nonneg hu hw
+  have hA : 1 + u * v ≠ 0 := Rat.ne_of_gt hApos
+  have hB : 1 + v * w ≠ 0 := Rat.ne_of_gt hBpos
+  have hC : 1 + u * w ≠ 0 := Rat.ne_of_gt hCpos
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_rev,
+    Rat.mul_inv_cancel]
+
+theorem tangentWidth_split_le
+    {u v w : Rat} (hu : 0 <= u) (huv : u <= v) (hvw : v <= w) :
+    2 * (v - u) / (1 + u * v) +
+        2 * (w - v) / (1 + v * w) <=
+      2 * (w - u) / (1 + u * w) := by
+  have hv : 0 <= v := Rat.le_trans hu huv
+  have hw : 0 <= w := Rat.le_trans hv hvw
+  let A := 1 + u * v
+  let B := 1 + v * w
+  let C := 1 + u * w
+  let den := A * B * C
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hu hv
+  have hBpos : 0 < B := by
+    dsimp [B]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hv hw
+  have hCpos : 0 < C := by
+    dsimp [C]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hu hw
+  have hdenpos : 0 < den := by
+    dsimp [den]
+    exact Rat.mul_pos (Rat.mul_pos hApos hBpos) hCpos
+  have hdiffmul :=
+    tangentWidth_split_difference_mul_den_of_nonneg
+      (u := u) (v := v) (w := w) hu hv hw
+  have hnonnegRhs : 0 <= 2 * (v - u) * (w - v) * (w - u) := by
+    have h1 : 0 <= v - u := by grind [Rat.sub_eq_add_neg]
+    have h2 : 0 <= w - v := by grind [Rat.sub_eq_add_neg]
+    have h3 : 0 <= w - u := by grind [Rat.sub_eq_add_neg]
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) h1) h2)
+      h3
+  have hdiffmul_nonneg :
+      0 <= (2 * (w - u) / C -
+          (2 * (v - u) / A + 2 * (w - v) / B)) * den := by
+    rw [show (2 * (w - u) / C -
+          (2 * (v - u) / A + 2 * (w - v) / B)) * den =
+        2 * (v - u) * (w - v) * (w - u) by
+          simpa [A, B, C, den] using hdiffmul]
+    exact hnonnegRhs
+  have hdiff_nonneg :
+      0 <= 2 * (w - u) / C -
+        (2 * (v - u) / A + 2 * (w - v) / B) := by
+    have hzero : (0 : Rat) * den <=
+        (2 * (w - u) / C -
+          (2 * (v - u) / A + 2 * (w - v) / B)) * den := by
+      simpa using hdiffmul_nonneg
+    exact Rat.le_of_mul_le_mul_right hzero hdenpos
+  dsimp [A, B, C] at hdiff_nonneg
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem circleParameter_refine_even (stage k : Nat) :
+    circleParameter (2 * stage) (2 * k) = circleParameter stage k := by
+  simpa [rationalCircleStage, RationalCircle.Stage.refineIndex,
+    RationalCircle.Stage.parameter, circleParameter]
+    using RationalCircle.Stage.parameter_refineIndex_of_refinement
+      (coarse := rationalCircleStage stage)
+      (fine := rationalCircleStage (2 * stage))
+      (by rfl)
+      k
+
+theorem circleParameter_refine_succ_even (stage k : Nat) :
+    circleParameter (2 * stage) (2 * k + 2) =
+      circleParameter stage (k + 1) := by
+  have h :=
+    RationalCircle.Stage.parameter_refineIndex_of_refinement
+      (coarse := rationalCircleStage stage)
+      (fine := rationalCircleStage (2 * stage))
+      (by rfl)
+      (k + 1)
+  simpa [rationalCircleStage, RationalCircle.Stage.refineIndex,
+    RationalCircle.Stage.parameter, circleParameter, Nat.mul_add,
+    Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+
+theorem outerTangentCrossSum_eq_parameter_formula
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    outerTangentCrossSum stage k =
+      2 * (circleParameter stage (k + 1) - circleParameter stage k) /
+        (1 + circleParameter stage k * circleParameter stage (k + 1)) := by
+  let S := rationalCircleStage stage
+  let u := S.parameter k
+  let v := S.parameter (k + 1)
+  have hu : 0 <= u := by
+    dsimp [u, S, rationalCircleStage]
+    exact RationalCircle.Stage.parameter_nonneg
+      (rationalCircleStage stage) hstage k
+  have huvle : u <= v := by
+    dsimp [u, v, S]
+    exact RationalCircle.Stage.parameter_mono
+      (rationalCircleStage stage) hstage (Nat.le_succ k)
+  have hv : 0 <= v := Rat.le_trans hu huvle
+  have huv : u < v := by
+    have hgap : v - u = 1 / (stage : Rat) := by
+      dsimp [u, v, S, rationalCircleStage]
+      simpa using
+        RationalCircle.Stage.parameter_succ_sub
+          (rationalCircleStage stage) k
+    have hgap_pos : 0 < v - u := by
+      rw [hgap, Rat.div_def, Rat.one_mul]
+      exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+    grind [Rat.sub_eq_add_neg]
+  have hformula := pointTangentCrossSum_formula_of_lt hu hv huv
+  simpa [S, u, v, rationalCircleStage, outerTangentCrossSum,
+    outerTangentPoint, circleSamplePoint, circleParameter, circlePoint,
+    pointCross, tangentIntersection, RationalCircle.Stage.samplePoint,
+    RationalCircle.Stage.parameter, RationalCircle.Stage.point,
+    RationalCircle.Stage.cross, RationalCircle.Stage.tangentIntersection]
+    using hformula
+
+theorem outerAreaCellSplitBound
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    OuterAreaCellSplitBound stage k := by
+  unfold OuterAreaCellSplitBound
+  have hfine : 0 < 2 * stage := by omega
+  rw [outerTangentCrossSum_eq_parameter_formula (2 * stage) hfine (2 * k)]
+  rw [outerTangentCrossSum_eq_parameter_formula (2 * stage) hfine (2 * k + 1)]
+  rw [outerTangentCrossSum_eq_parameter_formula stage hstage k]
+  let u := circleParameter (2 * stage) (2 * k)
+  let v := circleParameter (2 * stage) (2 * k + 1)
+  let w := circleParameter (2 * stage) (2 * k + 1 + 1)
+  have hu : 0 <= u := by
+    dsimp [u, circleParameter]
+    exact RationalCircle.Stage.parameter_nonneg
+      (rationalCircleStage (2 * stage)) hfine (2 * k)
+  have huv : u <= v := by
+    dsimp [u, v, circleParameter]
+    exact RationalCircle.Stage.parameter_mono
+      (rationalCircleStage (2 * stage)) hfine (by omega)
+  have hvw : v <= w := by
+    dsimp [v, w, circleParameter]
+    exact RationalCircle.Stage.parameter_mono
+      (rationalCircleStage (2 * stage)) hfine (by omega)
+  have hsplit := tangentWidth_split_le hu huv hvw
+  have hlast :
+      circleParameter (2 * stage) (2 * k + 1 + 1) =
+        circleParameter stage (k + 1) :=
+    by
+      have hidx : 2 * k + 1 + 1 = 2 + 2 * k := by omega
+      rw [hidx]
+      simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+        using circleParameter_refine_succ_even stage k
+  have hfirst :
+      circleParameter (2 * stage) (2 * k) =
+        circleParameter stage k :=
+    circleParameter_refine_even stage k
+  have hlastNorm :
+      circleParameter (2 * stage) (1 + (1 + 2 * k)) =
+        circleParameter stage (k + 1) := by
+    have hidx : 1 + (1 + 2 * k) = 2 * k + 1 + 1 := by omega
+    rw [hidx]
+    exact hlast
+  simpa [u, v, w, hfirst, hlast, hlastNorm, Nat.add_assoc, Nat.add_comm,
+    Nat.add_left_comm] using hsplit
+
+theorem innerAreaCellSplitBound
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    InnerAreaCellSplitBound stage k := by
+  unfold InnerAreaCellSplitBound
+  rw [← circleSamplePoint_refine_even stage k,
+    ← circleSamplePoint_refine_succ_even stage k]
+  let S := rationalCircleStage (2 * stage)
+  have hS : 0 < S.subdivisions := by
+    dsimp [S, rationalCircleStage]
+    omega
+  have h01 : S.parameter (2 * k) <= S.parameter (2 * k + 1) :=
+    RationalCircle.Stage.parameter_mono S hS (by omega)
+  have h12 : S.parameter (2 * k + 1) <= S.parameter (2 * k + 2) :=
+    RationalCircle.Stage.parameter_mono S hS (by omega)
+  have hsplit := pointCross_split_le h01 h12
+  simpa [S, rationalCircleStage, circleSamplePoint, circlePoint,
+    circleParameter, pointCross, RationalCircle.Stage.samplePoint,
+    RationalCircle.Stage.parameter, RationalCircle.Stage.point,
+    RationalCircle.Stage.cross] using hsplit
+
+structure DyadicCellRefinementBounds (stage : Nat) where
+  inner_area :
+    forall k, k < stage -> InnerAreaCellSplitBound stage k
+  outer_area :
+    forall k, k < stage -> OuterAreaCellSplitBound stage k
+  inner_length :
+    forall k, k < stage -> InnerLengthCellSplitBound stage k
+  outer_length :
+    forall k, k < stage -> OuterLengthCellSplitBound stage k
+
+theorem innerEdgeCrosses_le_refinedInnerEdgeCrosses
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> InnerAreaCellSplitBound stage k) :
+    forall count k, k + count <= stage ->
+      Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint stage k)
+          (innerBoundaryFrom stage (k + 1) count)) <=
+      Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint (2 * stage) (2 * k))
+          (innerBoundaryFrom (2 * stage) (2 * k + 1) (2 * count)))
+  | 0, k, _hbound => by
+      simp [innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+        Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
+  | count + 1, k, hbound => by
+      have hk : k < stage := by omega
+      have htailBound : k + 1 + count <= stage := by omega
+      have hhead := hlocal k hk
+      have htail :=
+        innerEdgeCrosses_le_refinedInnerEdgeCrosses
+          stage hlocal count (k + 1) htailBound
+      simp [innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+        Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
+      calc
+        pointCross (circleSamplePoint stage k)
+            (circleSamplePoint stage (k + 1)) +
+          Fan.sumRat
+            (Fan.edgeCrossesFrom
+              (circleSamplePoint stage (k + 1))
+              (innerBoundaryFrom stage (k + 2) count)) <=
+          (pointCross (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1)) +
+            pointCross (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2))) +
+          Fan.sumRat
+            (Fan.edgeCrossesFrom
+              (circleSamplePoint (2 * stage) (2 * (k + 1)))
+              (innerBoundaryFrom (2 * stage) (2 * (k + 1) + 1)
+                (2 * count))) := by
+            exact Fan.rat_add_le_add hhead htail
+        _ =
+          pointCross (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1)) +
+          (pointCross (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2)) +
+            Fan.sumRat
+              (Fan.edgeCrossesFrom
+                (circleSamplePoint (2 * stage) (2 * k + 2))
+                (innerBoundaryFrom (2 * stage) (2 * k + 3)
+                  (2 * count)))) := by
+            grind [Nat.mul_add, Nat.add_assoc, Nat.add_comm,
+              Nat.add_left_comm, Rat.add_assoc, Rat.add_comm]
+
+theorem innerFanPerimeter_le_refinedInnerFanPerimeter
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> InnerAreaCellSplitBound stage k) :
+    Fan.perimeter (innerFanWidths stage) <=
+      Fan.perimeter (innerFanWidths (2 * stage)) := by
+  have h :=
+    innerEdgeCrosses_le_refinedInnerEdgeCrosses
+      stage hlocal stage 0 (by omega)
+  have h' :
+      0 + Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint stage 0)
+          (innerBoundaryFrom stage (0 + 1) stage)) <=
+      0 + Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint (2 * stage) (2 * 0))
+          (innerBoundaryFrom (2 * stage) (2 * 0 + 1) (2 * stage))) := by
+    exact (Rat.add_le_add_left).2 h
+  simpa [innerFanWidths, innerBoundary, Fan.sectorFanWidths,
+    Fan.perimeter, innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+    Fan.edgeCrossesFrom, Fan.sumRat, pointCross_origin_left] using h'
+
+theorem innerQuarterArea_mono_of_inner_area_cell_bounds
+    (stage : Nat) (hstage : 0 < stage)
+    (hlocal : forall k, k < stage -> InnerAreaCellSplitBound stage k) :
+    innerQuarterArea stage <= innerQuarterArea (2 * stage) := by
+  have hper :=
+    innerFanPerimeter_le_refinedInnerFanPerimeter stage hlocal
+  have hnonnegCoarse : 0 <= Fan.sumRat (innerFanWidths stage) :=
+    Fan.sumRat_nonneg (innerFanWidths stage)
+      (sectorFanBounds stage hstage).innerWidths_nonneg
+  have hfinePos : 0 < 2 * stage := by omega
+  have hnonnegFine : 0 <= Fan.sumRat (innerFanWidths (2 * stage)) :=
+    Fan.sumRat_nonneg (innerFanWidths (2 * stage))
+      (sectorFanBounds (2 * stage) hfinePos).innerWidths_nonneg
+  rw [innerQuarterArea_eq_variable_unit_fan stage hnonnegCoarse]
+  rw [innerQuarterArea_eq_variable_unit_fan (2 * stage) hnonnegFine]
+  rw [innerFanPieces, innerFanPieces]
+  rw [Fan.variableArea_unitPieces_eq_area,
+    Fan.variableArea_unitPieces_eq_area]
+  rw [Fan.area_one_eq_half_perimeter,
+    Fan.area_one_eq_half_perimeter]
+  exact div_two_le_div_two hper
+
+theorem refinedOuterEdgeCrosses_le_outerEdgeCrosses
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> OuterAreaCellSplitBound stage k) :
+    forall count k, k + count <= stage ->
+      Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint (2 * stage) (2 * k))
+          (outerBoundaryFrom (2 * stage) (2 * k) (2 * count))) <=
+      Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint stage k)
+          (outerBoundaryFrom stage k count))
+  | 0, k, _hbound => by
+      simp [outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+        Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
+  | count + 1, k, hbound => by
+      have hk : k < stage := by omega
+      have htailBound : k + 1 + count <= stage := by omega
+      have hhead := hlocal k hk
+      have htail :=
+        refinedOuterEdgeCrosses_le_outerEdgeCrosses
+          stage hlocal count (k + 1) htailBound
+      simp [outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+        Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
+      calc
+        pointCross (circleSamplePoint (2 * stage) (2 * k))
+            (outerTangentPoint (2 * stage) (2 * k)) +
+          (pointCross (outerTangentPoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1)) +
+            (pointCross (circleSamplePoint (2 * stage) (2 * k + 1))
+                (outerTangentPoint (2 * stage) (2 * k + 1)) +
+              (pointCross (outerTangentPoint (2 * stage) (2 * k + 1))
+                  (circleSamplePoint (2 * stage) (2 * k + 1 + 1)) +
+                Fan.sumRat
+                  (Fan.edgeCrossesFrom
+                    (circleSamplePoint (2 * stage) (2 * k + 1 + 1))
+                    (outerBoundaryFrom (2 * stage) (2 * k + 1 + 1)
+                      (2 * count)))))) <=
+          outerTangentCrossSum stage k +
+            Fan.sumRat
+              (Fan.edgeCrossesFrom
+                (circleSamplePoint stage (k + 1))
+                (outerBoundaryFrom stage (k + 1) count)) := by
+            have hcombined := Fan.rat_add_le_add hhead htail
+            have hidx : 2 + 2 * k = 1 + (1 + 2 * k) := by omega
+            simpa [OuterAreaCellSplitBound, outerTangentCrossSum,
+              Fan.perimeter, hidx, Nat.mul_add, Nat.add_assoc, Nat.add_comm,
+              Nat.add_left_comm, Rat.add_assoc, Rat.add_comm] using hcombined
+        _ =
+          pointCross (circleSamplePoint stage k)
+              (outerTangentPoint stage k) +
+            (pointCross (outerTangentPoint stage k)
+                (circleSamplePoint stage (k + 1)) +
+              Fan.sumRat
+                (Fan.edgeCrossesFrom
+                  (circleSamplePoint stage (k + 1))
+                  (outerBoundaryFrom stage (k + 1) count))) := by
+            grind [outerTangentCrossSum, Rat.add_assoc, Rat.add_comm]
+
+theorem refinedOuterFanPerimeter_le_outerFanPerimeter
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> OuterAreaCellSplitBound stage k) :
+    Fan.perimeter (outerFanWidths (2 * stage)) <=
+      Fan.perimeter (outerFanWidths stage) := by
+  have h :=
+    refinedOuterEdgeCrosses_le_outerEdgeCrosses
+      stage hlocal stage 0 (by omega)
+  have h' :
+      0 + Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint (2 * stage) (2 * 0))
+          (outerBoundaryFrom (2 * stage) (2 * 0) (2 * stage))) <=
+      0 + Fan.perimeter
+        (Fan.edgeCrossesFrom
+          (circleSamplePoint stage 0)
+          (outerBoundaryFrom stage 0 stage)) := by
+    exact (Rat.add_le_add_left).2 h
+  simpa [outerFanWidths, outerBoundary, Fan.sectorFanWidths,
+    Fan.perimeter, outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+    Fan.edgeCrossesFrom, Fan.sumRat, pointCross_origin_left] using h'
+
+theorem outerQuarterArea_antitone_of_outer_area_cell_bounds
+    (stage : Nat) (hstage : 0 < stage)
+    (hlocal : forall k, k < stage -> OuterAreaCellSplitBound stage k) :
+    outerQuarterArea (2 * stage) <= outerQuarterArea stage := by
+  have hper :=
+    refinedOuterFanPerimeter_le_outerFanPerimeter stage hlocal
+  have hnonnegCoarse : 0 <= Fan.sumRat (outerFanWidths stage) :=
+    (sectorFanBounds stage hstage).outerWidths_sum_nonneg
+  have hfinePos : 0 < 2 * stage := by omega
+  have hnonnegFine : 0 <= Fan.sumRat (outerFanWidths (2 * stage)) :=
+    (sectorFanBounds (2 * stage) hfinePos).outerWidths_sum_nonneg
+  rw [outerQuarterArea_eq_area_one stage hnonnegCoarse]
+  rw [outerQuarterArea_eq_area_one (2 * stage) hnonnegFine]
+  rw [Fan.area_one_eq_half_perimeter,
+    Fan.area_one_eq_half_perimeter]
+  exact div_two_le_div_two hper
+
+structure AreaStageRefines (coarse fine : Nat) where
+  innerQuarterArea_mono :
+    innerQuarterArea coarse <= innerQuarterArea fine
+  outerQuarterArea_antitone :
+    outerQuarterArea fine <= outerQuarterArea coarse
+
+theorem areaStageRefines_of_area_cell_bounds
+    (stage : Nat) (hstage : 0 < stage)
+    (hinner : forall k, k < stage -> InnerAreaCellSplitBound stage k)
+    (houter : forall k, k < stage -> OuterAreaCellSplitBound stage k) :
+    AreaStageRefines stage (2 * stage) where
+  innerQuarterArea_mono :=
+    innerQuarterArea_mono_of_inner_area_cell_bounds
+      stage hstage hinner
+  outerQuarterArea_antitone :=
+    outerQuarterArea_antitone_of_outer_area_cell_bounds
+      stage hstage houter
+
+theorem areaStageRefines_rationalCircle
+    (stage : Nat) (hstage : 0 < stage) :
+    AreaStageRefines stage (2 * stage) :=
+  areaStageRefines_of_area_cell_bounds
+    stage hstage
+    (fun k _hk => innerAreaCellSplitBound stage hstage k)
+    (fun k _hk => outerAreaCellSplitBound stage hstage k)
+
+structure CircumferenceStageRefines (coarse fine : Nat) where
+  innerQuarterLength_mono :
+    (innerQuarterLength coarse).lo <= (innerQuarterLength fine).lo
+  outerQuarterLength_antitone :
+    (outerQuarterLength fine).hi <= (outerQuarterLength coarse).hi
+
+theorem rationalPointPathLength_cons_cons_lo
+    (p q : PiCirclePoint) (rest : List PiCirclePoint) (n : Nat) :
+    (rationalPointPathLength (p :: q :: rest) n).lo =
+      (pointSegmentLengthInterval p q n).lo +
+        (rationalPointPathLength (q :: rest) n).lo := by
+  simp [rationalPointPathLength, rationalPointPathLength.totalLength,
+    pointSegmentLengthInterval, pointSegmentNormSq]
+
+theorem rationalPointPathLength_cons_cons_hi
+    (p q : PiCirclePoint) (rest : List PiCirclePoint) (n : Nat) :
+    (rationalPointPathLength (p :: q :: rest) n).hi =
+      (pointSegmentLengthInterval p q n).hi +
+        (rationalPointPathLength (q :: rest) n).hi := by
+  simp [rationalPointPathLength, rationalPointPathLength.totalLength,
+    pointSegmentLengthInterval, pointSegmentNormSq]
+
+theorem innerPathLengthLo_le_refinedInnerPathLengthLo
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> InnerLengthCellSplitBound stage k) :
+    forall count k, k + count <= stage ->
+      (rationalPointPathLength
+        (circleSamplePoint stage k ::
+          innerBoundaryFrom stage (k + 1) count)
+        (circumferenceSqrtPrecision stage)).lo <=
+      (rationalPointPathLength
+        (circleSamplePoint (2 * stage) (2 * k) ::
+          innerBoundaryFrom (2 * stage) (2 * k + 1) (2 * count))
+        (circumferenceSqrtPrecision (2 * stage))).lo
+  | 0, _k, _hbound => by
+      simp [innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+        rationalPointPathLength, rationalPointPathLength.totalLength]
+  | count + 1, k, hbound => by
+      have hk : k < stage := by omega
+      have htailBound : k + 1 + count <= stage := by omega
+      have hhead := hlocal k hk
+      have htail :=
+        innerPathLengthLo_le_refinedInnerPathLengthLo
+          stage hlocal count (k + 1) htailBound
+      simp only [innerBoundaryFrom, piCircleArea.innerBoundaryFrom]
+      rw [rationalPointPathLength_cons_cons_lo]
+      rw [rationalPointPathLength_cons_cons_lo]
+      rw [rationalPointPathLength_cons_cons_lo]
+      have hcombined := Fan.rat_add_le_add hhead htail
+      simpa [InnerLengthCellSplitBound, Nat.mul_add, Nat.add_assoc,
+        Nat.add_left_comm, Rat.add_assoc] using hcombined
+
+theorem innerQuarterLength_mono_of_inner_length_cell_bounds
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> InnerLengthCellSplitBound stage k) :
+    (innerQuarterLength stage).lo <=
+      (innerQuarterLength (2 * stage)).lo := by
+  have h :=
+    innerPathLengthLo_le_refinedInnerPathLengthLo
+      stage hlocal stage 0 (by omega)
+  simpa [innerQuarterLength, innerBoundary, innerBoundaryFrom,
+    piCircleArea.innerBoundaryFrom, Nat.add_assoc]
+    using h
+
+theorem refinedOuterPathLengthHi_le_outerPathLengthHi
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> OuterLengthCellSplitBound stage k) :
+    forall count k, k + count <= stage ->
+      (rationalPointPathLength
+        (circleSamplePoint (2 * stage) (2 * k) ::
+          outerBoundaryFrom (2 * stage) (2 * k) (2 * count))
+        (circumferenceSqrtPrecision (2 * stage))).hi <=
+      (rationalPointPathLength
+        (circleSamplePoint stage k ::
+          outerBoundaryFrom stage k count)
+        (circumferenceSqrtPrecision stage)).hi
+  | 0, _k, _hbound => by
+      simp [outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+        rationalPointPathLength, rationalPointPathLength.totalLength]
+  | count + 1, k, hbound => by
+      have hk : k < stage := by omega
+      have htailBound : k + 1 + count <= stage := by omega
+      have hhead := hlocal k hk
+      have htail :=
+        refinedOuterPathLengthHi_le_outerPathLengthHi
+          stage hlocal count (k + 1) htailBound
+      simp only [outerBoundaryFrom, piCircleArea.outerBoundaryFrom]
+      rw [rationalPointPathLength_cons_cons_hi]
+      rw [rationalPointPathLength_cons_cons_hi]
+      rw [rationalPointPathLength_cons_cons_hi]
+      rw [rationalPointPathLength_cons_cons_hi]
+      rw [rationalPointPathLength_cons_cons_hi]
+      rw [rationalPointPathLength_cons_cons_hi]
+      have hcombined := Fan.rat_add_le_add hhead htail
+      simpa [OuterLengthCellSplitBound, Nat.mul_add, Nat.add_assoc,
+        Nat.add_left_comm, Rat.add_assoc] using hcombined
+
+theorem outerQuarterLength_antitone_of_outer_length_cell_bounds
+    (stage : Nat)
+    (hlocal : forall k, k < stage -> OuterLengthCellSplitBound stage k) :
+    (outerQuarterLength (2 * stage)).hi <=
+      (outerQuarterLength stage).hi := by
+  have h :=
+    refinedOuterPathLengthHi_le_outerPathLengthHi
+      stage hlocal stage 0 (by omega)
+  simpa [outerQuarterLength, outerBoundary, outerBoundaryFrom,
+    piCircleArea.outerBoundaryFrom, Nat.add_assoc]
+    using h
+
+theorem circumferenceStageRefines_of_length_cell_bounds
+    (stage : Nat) (_hstage : 0 < stage)
+    (hinner : forall k, k < stage -> InnerLengthCellSplitBound stage k)
+    (houter : forall k, k < stage -> OuterLengthCellSplitBound stage k) :
+    CircumferenceStageRefines stage (2 * stage) where
+  innerQuarterLength_mono :=
+    innerQuarterLength_mono_of_inner_length_cell_bounds
+      stage hinner
+  outerQuarterLength_antitone :=
+    outerQuarterLength_antitone_of_outer_length_cell_bounds
+      stage houter
+
+/-- Target theorem shape: summing the local dyadic cell inequalities gives
+stage refinement.  This is intentionally a proposition for now; proving this
+is the next small combinatorial step, separate from the cell inequalities
+themselves. -/
+def DyadicCellBoundsYieldStageRefinement : Prop :=
+  forall stage, 0 < stage ->
+    DyadicCellRefinementBounds stage ->
+      AreaStageRefines stage (2 * stage) /\
+      CircumferenceStageRefines stage (2 * stage)
+
+theorem dyadicCellBoundsYieldStageRefinement :
+    DyadicCellBoundsYieldStageRefinement := by
+  intro stage hstage hcell
+  constructor
+  · exact areaStageRefines_of_area_cell_bounds
+      stage hstage hcell.inner_area hcell.outer_area
+  · exact circumferenceStageRefines_of_length_cell_bounds
+      stage hstage hcell.inner_length hcell.outer_length
+
+theorem areaInterval_stepRefines_of_stageRefines
+    {coarse fine : Nat} (h : AreaStageRefines coarse fine) :
+    (piCircleAreaComputeAtStage coarse).lo <=
+        (piCircleAreaComputeAtStage fine).lo /\
+      (piCircleAreaComputeAtStage fine).hi <=
+        (piCircleAreaComputeAtStage coarse).hi := by
+  constructor
+  · unfold piCircleAreaComputeAtStage
+    exact four_mul_le_four_mul h.innerQuarterArea_mono
+  · unfold piCircleAreaComputeAtStage
+    exact four_mul_le_four_mul h.outerQuarterArea_antitone
+
+theorem circumferenceInterval_stepRefines_of_stageRefines
+    {coarse fine : Nat} (h : CircumferenceStageRefines coarse fine) :
+    (piCircumferenceCommonComputeAtStage coarse).lo <=
+        (piCircumferenceCommonComputeAtStage fine).lo /\
+      (piCircumferenceCommonComputeAtStage fine).hi <=
+        (piCircumferenceCommonComputeAtStage coarse).hi := by
+  constructor
+  · unfold piCircumferenceCommonComputeAtStage
+    exact div_two_le_div_two
+      (four_mul_le_four_mul h.innerQuarterLength_mono)
+  · unfold piCircumferenceCommonComputeAtStage
+    exact div_two_le_div_two
+      (four_mul_le_four_mul h.outerQuarterLength_antitone)
+
+theorem areaStepRefines_of_dyadic_stage_refinement
+    (hrefine :
+      forall n, AreaStageRefines (piStage n) (piStage (n + 1))) :
+    AreaStepRefines := by
+  intro n
+  rw [piCircleArea_compute_eq, piCircleArea_compute_eq]
+  exact areaInterval_stepRefines_of_stageRefines (hrefine n)
+
+theorem areaStepRefines_rationalCircle : AreaStepRefines :=
+  areaStepRefines_of_dyadic_stage_refinement
+    (fun n => by
+      rw [piStage_succ]
+      exact areaStageRefines_rationalCircle (piStage n) (piStage_pos n))
+
+theorem circumferenceStepRefines_of_dyadic_stage_refinement
+    (hrefine :
+      forall n, CircumferenceStageRefines (piStage n) (piStage (n + 1))) :
+    CircumferenceStepRefines := by
+  intro n
+  rw [piCircumference_compute_eq, piCircumference_compute_eq,
+    piCircumferenceComputeAtStage_eq_common,
+    piCircumferenceComputeAtStage_eq_common]
+  exact circumferenceInterval_stepRefines_of_stageRefines (hrefine n)
 
 theorem areaNested_of_endpointMonotone
     (hmono : EndpointMonotone piCircleArea.compute) :
@@ -2868,6 +3742,50 @@ theorem circumferenceNested_of_stepRefines
   circumferenceNested_of_endpointMonotone
     (endpointMonotone_of_stepRefines hstep)
 
+theorem leibnizEqArea_of_powerSeriesGeometryAgreement
+    (hGeomValid : ArctanGeometry.Valid)
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    LeibnizEqArea := by
+  have hpowGeom :
+      (arctan (1 : Rat)).Equiv (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    ArctanGeometry.powerSeries_equiv_geometric_of_agreement
+      hagree (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide)
+  have hscaled :
+      (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
+    RealRaw.natScale_equiv 4 hpowGeom
+  have hgeomScaledValid :
+      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) :=
+    fourArctanGeomOneValid_of_geometricValid hGeomValid
+  have hleibnizToGeom :
+      piLeibniz.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
+    RealRaw.equiv_trans
+      leibnizValid fourArctanOneValid hgeomScaledValid
+      piLeibniz_equiv_four_arctan_one hscaled
+  have hareaNested : AreaNested :=
+    areaNested_of_stepRefines areaStepRefines_rationalCircle
+  intro n
+  have hover := (RealRaw.compareAt_overlap_iff piLeibniz
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
+    (hleibnizToGeom n)
+  have hstage : n <= RealRaw.scaleRatStage 4 n :=
+    RealRaw.le_scaleRatStage 4 n
+  have hnested := hareaNested n (RealRaw.scaleRatStage 4 n) hstage
+  apply (RealRaw.compareAt_overlap_iff piLeibniz piCircleArea n n).2
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n] at hnested
+  constructor
+  · exact Rat.le_trans hover.1 hnested.2.2
+  · exact Rat.le_trans hnested.1 hover.2
+
+theorem leibnizEqArea_of_kernelComparisonRoute
+    (route : Taylor.ArctanComparison.KernelComparisonRoute) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_powerSeriesGeometryAgreement
+    route.geometric_valid
+    (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
+      route)
+
 theorem areaValid_of_nested_and_shrinking
     (hnested : AreaNested) (hshrink : AreaWidthsShrink) :
     AreaValid := by
@@ -2897,6 +3815,103 @@ theorem circumferenceValid_of_nested_and_shrinking
     case right =>
       exact hshrink
 
+theorem areaStepValidCompute_of_stepRefines
+    (hstep : AreaStepRefines) (hshrink : AreaWidthsShrink) :
+    RealRaw.StepValidCompute piCircleArea.compute := by
+  constructor
+  · exact piCircleArea_ordered 0
+  · constructor
+    · intro n
+      have href := hstep n
+      have hordered := piCircleArea_ordered (n + 1)
+      constructor
+      · exact href.1
+      · constructor
+        · unfold QInterval.width at hordered
+          grind [Rat.sub_eq_add_neg]
+        · exact href.2
+    · exact hshrink
+
+theorem circumferenceStepValidCompute_of_stepRefines
+    (hstep : CircumferenceStepRefines)
+    (hshrink : CircumferenceWidthsShrink) :
+    RealRaw.StepValidCompute piCircumference.compute := by
+  constructor
+  · exact piCircumference_ordered 0
+  · constructor
+    · intro n
+      have href := hstep n
+      have hordered := piCircumference_ordered (n + 1)
+      constructor
+      · exact href.1
+      · constructor
+        · unfold QInterval.width at hordered
+          grind [Rat.sub_eq_add_neg]
+        · exact href.2
+    · exact hshrink
+
+theorem areaStepPrecisionValidCompute_of_stepRefines
+    (hstep : AreaStepRefines) (hprecision : AreaPositivePrecision) :
+    RealRaw.StepPrecisionValidCompute piCircleArea.compute := by
+  constructor
+  · exact piCircleArea_ordered 0
+  · constructor
+    · intro n
+      have href := hstep n
+      have hordered := piCircleArea_ordered (n + 1)
+      constructor
+      · exact href.1
+      · constructor
+        · unfold QInterval.width at hordered
+          grind [Rat.sub_eq_add_neg]
+        · exact href.2
+    · exact hprecision
+
+theorem circumferenceStepPrecisionValidCompute_of_stepRefines
+    (hstep : CircumferenceStepRefines)
+    (hprecision : CircumferencePositivePrecision) :
+    RealRaw.StepPrecisionValidCompute piCircumference.compute := by
+  constructor
+  · exact piCircumference_ordered 0
+  · constructor
+    · intro n
+      have href := hstep n
+      have hordered := piCircumference_ordered (n + 1)
+      constructor
+      · exact href.1
+      · constructor
+        · unfold QInterval.width at hordered
+          grind [Rat.sub_eq_add_neg]
+        · exact href.2
+    · exact hprecision
+
+theorem areaPrecisionValid_of_stepRefines_and_precision
+    (hstep : AreaStepRefines) (hprecision : AreaPositivePrecision) :
+    RealRaw.PrecisionValidCompute piCircleArea.compute :=
+  RealRaw.precisionValidCompute_of_stepPrecisionValidCompute
+    (areaStepPrecisionValidCompute_of_stepRefines hstep hprecision)
+
+theorem circumferencePrecisionValid_of_stepRefines_and_precision
+    (hstep : CircumferenceStepRefines)
+    (hprecision : CircumferencePositivePrecision) :
+    RealRaw.PrecisionValidCompute piCircumference.compute :=
+  RealRaw.precisionValidCompute_of_stepPrecisionValidCompute
+    (circumferenceStepPrecisionValidCompute_of_stepRefines
+      hstep hprecision)
+
+theorem areaValid_of_stepRefines_and_shrinking
+    (hstep : AreaStepRefines) (hshrink : AreaWidthsShrink) :
+    AreaValid :=
+  RealRaw.validCompute_of_stepValidCompute
+    (areaStepValidCompute_of_stepRefines hstep hshrink)
+
+theorem circumferenceValid_of_stepRefines_and_shrinking
+    (hstep : CircumferenceStepRefines)
+    (hshrink : CircumferenceWidthsShrink) :
+    CircumferenceValid :=
+  RealRaw.validCompute_of_stepValidCompute
+    (circumferenceStepValidCompute_of_stepRefines hstep hshrink)
+
 structure GeometricValidityRemainders where
   area_nested : AreaNested
   area_widths_shrink : AreaWidthsShrink
@@ -2908,6 +3923,51 @@ structure GeometricStepRemainders where
   area_widths_shrink : AreaWidthsShrink
   circumference_step_refines : CircumferenceStepRefines
   circumference_widths_shrink : CircumferenceWidthsShrink
+
+structure DyadicGeometricStageRefines (n : Nat) where
+  area : AreaStageRefines (piStage n) (piStage (n + 1))
+  circumference :
+    CircumferenceStageRefines (piStage n) (piStage (n + 1))
+
+theorem dyadicGeometricStageRefines_of_cellBounds
+    (hyield : DyadicCellBoundsYieldStageRefinement)
+    (hcell : forall n, DyadicCellRefinementBounds (piStage n)) :
+    forall n, DyadicGeometricStageRefines n := by
+  intro n
+  have hrefine :=
+    hyield (piStage n) (piStage_pos n) (hcell n)
+  refine
+    { area := ?_
+      circumference := ?_ }
+  · rw [piStage_succ]
+    exact hrefine.1
+  · rw [piStage_succ]
+    exact hrefine.2
+
+theorem geometricStepRemainders_of_dyadic_stage_refinement
+    (hrefine : forall n, DyadicGeometricStageRefines n)
+    (harea_widths : AreaWidthsShrink)
+    (hcircumference_widths : CircumferenceWidthsShrink) :
+    GeometricStepRemainders where
+  area_step_refines :=
+    areaStepRefines_of_dyadic_stage_refinement
+      (fun n => (hrefine n).area)
+  area_widths_shrink := harea_widths
+  circumference_step_refines :=
+    circumferenceStepRefines_of_dyadic_stage_refinement
+      (fun n => (hrefine n).circumference)
+  circumference_widths_shrink := hcircumference_widths
+
+theorem geometricStepRemainders_of_dyadic_cell_bounds
+    (hyield : DyadicCellBoundsYieldStageRefinement)
+    (hcell : forall n, DyadicCellRefinementBounds (piStage n))
+    (harea_widths : AreaWidthsShrink)
+    (hcircumference_widths : CircumferenceWidthsShrink) :
+    GeometricStepRemainders :=
+  geometricStepRemainders_of_dyadic_stage_refinement
+    (dyadicGeometricStageRefines_of_cellBounds hyield hcell)
+    harea_widths
+    hcircumference_widths
 
 structure GeometricLinearStepRemainders where
   area_step_refines : AreaStepRefines
@@ -2958,9 +4018,17 @@ theorem validityProofs_of_geometric_remainders
 
 theorem validityProofs_of_geometric_step_remainders
     (remainders : GeometricStepRemainders) :
-    ValidityProofs :=
-  validityProofs_of_geometric_remainders
-    (geometricValidityRemainders_of_stepRemainders remainders)
+    ValidityProofs where
+  leibniz := leibnizValid
+  machin := machinValid
+  area :=
+    areaValid_of_stepRefines_and_shrinking
+      remainders.area_step_refines
+      remainders.area_widths_shrink
+  circumference :=
+    circumferenceValid_of_stepRefines_and_shrinking
+      remainders.circumference_step_refines
+      remainders.circumference_widths_shrink
 
 theorem validityProofs_of_geometric_linear_step_remainders
     (remainders : GeometricLinearStepRemainders) :

@@ -1,6 +1,6 @@
-\chapter{Interval Arithmetic}
+\chapter{Computable Numbers and Functions}
 
-\section{Real numbers \humanchecked}
+\section{Interval Arithmetic and Real Numbers \humanchecked}
 
 \begin{definition}[Rational interval]\label{def:qinterval}
 \lean{ComputableAnalysis.QInterval}
@@ -28,6 +28,8 @@ An \emph{interval sequence} is a sequence of rational intervals
 
 \begin{definition}[Real number]\label{def:raw-real}
 \lean{ComputableAnalysis.RealRaw}
+\lean{ComputableAnalysis.RealRaw.PrecisionValid}
+\lean{ComputableAnalysis.RealRaw.PrecisionValidCompute}
 \uses{def:interval-sequence}
 A \emph{real number} is an interval sequence \(x=[a_n,b_n]_{n\in\N}\) satisfying the
 following validity conditions:
@@ -35,10 +37,12 @@ following validity conditions:
   n\le m\Rightarrow
   a_n\le a_m\le b_m\le b_n,
 \]
-and for any $\eps\in\Q_{>0}$, there exists $N\in\N$ such that
+and for every positive stage \(n\),
 \[
-  b_N-a_N \le \eps.
+  b_n-a_n < \frac{1}{n}.
 \]
+Stage \(0\) is allowed to be a convenient initial interval; the quantitative
+precision contract starts only at \(n>0\).
 \end{definition}
 
 \begin{remark}[Computable number]\label{rem:computable-presentations}
@@ -66,30 +70,67 @@ The number \(x\) is \emph{nonzero} if it is either positive or negative.
 \begin{definition}[Interval Arithmetic]\label{def:raw-real-arithmetic}
 \lean{ComputableAnalysis.RealRaw.add}
 \lean{ComputableAnalysis.RealRaw.sub}
+\lean{ComputableAnalysis.RealRaw.scaleRat}
+\lean{ComputableAnalysis.RealRaw.scaleRatStage}
 \lean{ComputableAnalysis.RealRaw.mul}
+\lean{ComputableAnalysis.RealRaw.mulStage}
+\lean{ComputableAnalysis.RealRaw.mulPrecisionFactor}
 \uses{def:raw-real,def:raw-real-sign}
 Let \(x\) and \(y\) be real numbers:
 \[
   x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}.
 \]
-Their sum is defined stagewise:
+The arithmetic operations are algorithms with their own internal precision
+schedules.  For addition, a request for stage \(n\) asks each input for stage
+\(2n\):
 \[
-  x+y := [a_n+c_n,b_n+d_n]_{n\in\N},
+  (x+y)_n := [a_{2n}+c_{2n},b_{2n}+d_{2n}],
 \]
-Negation of \([c_n,d_n]\) is given by \([-d_n,-c_n]\), so the difference is
+Negation of \([c_n,d_n]\) is given by \([-d_n,-c_n]\).  Hence subtraction uses
+the same doubled request:
 \[
-  x-y := [a_n-d_n,b_n-c_n]_{n\in\N},
+  (x-y)_n := [a_{2n}-d_{2n},b_{2n}-c_{2n}].
 \]
-The product is defined by taking the bounding interval of all four
-products:
+For a rational scalar \(r\), the formal algorithm first chooses a linear
+internal stage depending on \(|r|\), then scales the resulting interval.  The
+point of these stage choices is that a requested output precision can be
+passed directly to the operation; the operation itself manages the precision
+requested from its subroutines.
+
+For products, first take rational bounds from the initial intervals.  For
+example set
 \[
-  xy:=
+  A_x=1+\max(|a_0|,|b_0|),\qquad
+  A_y=1+\max(|c_0|,|d_0|).
+\]
+Choose a natural number \(M(x,y)\) large enough that
+\[
+  M(x,y) > A_x+A_y.
+\]
+The Lean definition implements this as a named stage factor computed from the
+stage-zero rational endpoints; the proof only uses that it is a sufficiently
+large positive integer.
+At requested stage \(n\), compute both inputs at the internal stage
+\[
+  k=M(x,y)n
+\]
+and take the interval hull of the four endpoint products:
+\[
+  (xy)_n :=
   \left[
-    \min S_n,\max S_n
-  \right]_{n\in\N},
+    \min S_k,\max S_k
+  \right],
   \qquad
-  S_n=\{a_nc_n,a_nd_n,b_nc_n,b_nd_n\}.
+  S_k=\{a_kc_k,a_kd_k,b_kc_k,b_kd_k\}.
 \]
+The proof uses the product rule estimate
+\[
+  \operatorname{width}((xy)_n)
+  \le A_x(d_k-c_k)+A_y(b_k-a_k)
+\]
+for \(k=M(x,y)n\).  Increasing \(M(x,y)\) by a fixed safety factor gives the strict bound
+\(\operatorname{width}((xy)_n)<1/n\) for every \(n>0\).
+
 If \(x\) is nonzero, let \(N\) be the smallest natural number such that
 \([a_N,b_N]\) avoids zero.  Then
 we define
@@ -99,12 +140,60 @@ we define
 Then \(y/x\) is defined as \(yx^{-1}\), when \(x\) is nonzero.
 \end{definition}
 
+\begin{definition}[Square-root subroutine]\label{def:sqrt-subroutine}
+\lean{ComputableAnalysis.sqrtPartialRaw}
+\lean{ComputableAnalysis.sqrtApproxOnDomain}
+\lean{ComputableAnalysis.sqrtInitialWidthBound}
+\lean{ComputableAnalysis.dyadicFuel}
+\lean{ComputableAnalysis.dyadicFuel_bound}
+\lean{ComputableAnalysis.sqrtStageFuel}
+\uses{def:qinterval,def:raw-real-arithmetic}
+For \(q\in\Q_{\ge 0}\), the square-root algorithm starts from the rational
+interval
+\[
+  [0,\max(1,q)]
+\]
+and repeatedly bisects it.  At each step, if the midpoint \(m\) satisfies
+\(m^2\le q\), replace the lower endpoint by \(m\); otherwise replace the upper
+endpoint by \(m\).  Put \(U=\max(1,q)\), choose the integer
+\[
+B(q)=|\operatorname{num}(U)|+1,
+\]
+so that \(U<B(q)\).  Define the dyadic fuel \(D(T)\) recursively by halving
+the target \(T\) until it is at most \(1\), with the proved bound
+\[
+  T<2^{D(T)}.
+\]
+At stage \(n\), run
+\[
+  D((n+1)B(q))
+\]
+bisection steps.  After \(t\) bisections the width is exactly \(U/2^t\).  Since
+\((n+1)B(q)>nU\) and \((n+1)B(q)<2^{D((n+1)B(q))}\), this returns an
+interval \([\ell_n,u_n]\) such that, for every \(n>0\),
+\[
+  0\le \ell_n\le u_n,\qquad
+  \ell_n^2\le q\le u_n^2,\qquad
+  u_n-\ell_n<\frac1n.
+\]
+This is the primitive used for rational segment lengths in the circumference
+algorithm.  When a larger construction sums many square-root subroutines, it
+must request a sufficiently large internal precision from each square-root
+call, just as addition, scaling, and multiplication do for their inputs.
+\end{definition}
+
 
 \begin{proposition}[Arithmetic preserves real numbers]\label{prop:raw-arithmetic-valid}
+\lean{ComputableAnalysis.RealRaw.add_precisionValid}
+\lean{ComputableAnalysis.RealRaw.sub_precisionValid}
+\lean{ComputableAnalysis.sqrtRaw_valid}
+\lean{ComputableAnalysis.sqrtRaw_spec}
 \uses{def:raw-real,def:raw-real-arithmetic}
 The operations \(x+y\), \(x-y\), \(-x\), and \(xy\) are real numbers
 whenever \(x\) and \(y\) are.  If \(x\) is nonzero, then \(x^{-1}\)
-is also a real number.
+is also a real number.  For every rational \(q\ge 0\), the square-root
+subroutine defines a valid raw real satisfying the square-root enclosure
+invariant at every stage.
 \end{proposition}
 
 \begin{definition}[Equivalence of real numbers]\label{def:raw-equiv}

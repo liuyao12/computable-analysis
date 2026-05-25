@@ -111,6 +111,9 @@ def areaInterval (S : Stage) : QInterval :=
   { lo := 4 * S.innerQuarterArea,
     hi := 4 * S.outerQuarterArea }
 
+def lengthPrecision (S : Stage) : Nat :=
+  circumferenceSqrtPrecision S.subdivisions
+
 def circumferenceInnerBoundaryFrom
     (S : Stage) (k count : Nat) : List PiCirclePoint :=
   piCircumference.innerBoundaryFrom S.samplePoint k count
@@ -126,16 +129,16 @@ def circumferenceOuterBoundary (S : Stage) : List PiCirclePoint :=
   S.samplePoint 0 :: S.circumferenceOuterBoundaryFrom 0 S.subdivisions
 
 def innerQuarterLength (S : Stage) : QInterval :=
-  rationalPointPathLength S.innerBoundary S.subdivisions
+  rationalPointPathLength S.innerBoundary S.lengthPrecision
 
 def outerQuarterLength (S : Stage) : QInterval :=
-  rationalPointPathLength S.outerBoundary S.subdivisions
+  rationalPointPathLength S.outerBoundary S.lengthPrecision
 
 def circumferenceInterval (S : Stage) : QInterval :=
   let innerQuarter :=
-    rationalPointPathLength S.circumferenceInnerBoundary S.subdivisions
+    rationalPointPathLength S.circumferenceInnerBoundary S.lengthPrecision
   let outerQuarter :=
-    rationalPointPathLength S.circumferenceOuterBoundary S.subdivisions
+    rationalPointPathLength S.circumferenceOuterBoundary S.lengthPrecision
   { lo := (4 * innerQuarter.lo) / 2,
     hi := (4 * outerQuarter.hi) / 2 }
 

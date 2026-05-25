@@ -44,13 +44,22 @@ private theorem square_sum_sqrtDomain (dx dy : Rat) :
   have hy : 0 <= dy * dy := rat_square_nonneg dy
   grind
 
+/-- Internal sqrt precision used for circumference at a polygon stage.
+
+The polygon stage controls the number of circle subdivisions.  Segment
+lengths are separate sqrt subcomputations, so we ask them for a cubic amount
+of extra precision.  This keeps accumulated sqrt wiggle small compared with
+the polygon gap. -/
+def circumferenceSqrtPrecision (stage : Nat) : Nat :=
+  (stage + 1) * (stage + 1) * (stage + 1)
+
 /-- Total length of a polygonal path through rational points. -/
-def rationalPointPathLength (points : List PiCirclePoint) (n : Nat) : QInterval :=
+def rationalPointPathLength (points : List PiCirclePoint) (precision : Nat) : QInterval :=
   let segmentLength := fun (p q : PiCirclePoint) =>
     let dx := q.x - p.x
     let dy := q.y - p.y
     let normSq := dx * dx + dy * dy
-    sqrtPartialRaw.compute normSq (square_sum_sqrtDomain dx dy) n
+    sqrtPartialRaw.compute normSq (square_sum_sqrtDomain dx dy) precision
   let rec totalLength : List PiCirclePoint -> QInterval
     | [] => { lo := 0, hi := 0 }
     | [_] => { lo := 0, hi := 0 }
@@ -142,8 +151,9 @@ def piCircumference : RealRaw where
             samplePoint (k + 1) ::
               outerBoundaryFrom (k + 1) count
     let outerBoundary := samplePoint 0 :: outerBoundaryFrom 0 stage
-    let innerQuarter := rationalPointPathLength innerBoundary stage
-    let outerQuarter := rationalPointPathLength outerBoundary stage
+    let sqrtPrecision := circumferenceSqrtPrecision stage
+    let innerQuarter := rationalPointPathLength innerBoundary sqrtPrecision
+    let outerQuarter := rationalPointPathLength outerBoundary sqrtPrecision
     { lo := (4 * innerQuarter.lo) / 2,
       hi := (4 * outerQuarter.hi) / 2 }
 

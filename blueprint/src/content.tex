@@ -13,16 +13,17 @@ space.  They are algorithms
   n \longmapsto [a_n,b_n],
   \qquad a_n,b_n\in\Q,\qquad a_n\le b_n,
 \]
-whose intervals are nested and whose widths shrink to zero.  Equality means
+whose intervals are nested and whose positive requested stages have width
+less than \(1/n\).  Stage \(0\) is only a bootstrap interval.  Equality means
 overlap at every requested precision, possibly after cofinal changes of
 stage.  This is strong enough for the fundamental theorem of calculus, the
 fundamental theorem of algebra, Archimedes' computation of pi, Euler's
 series arguments, and the elementary functions, but it keeps the proof
 obligations finite and inspectable.
 
-\input{01-foundations.tex}
-\input{02-effective-calculus.tex}
-\input{03-algebra-fta.tex}
-\input{04-classical-results.tex}
-\input{06-rational-circle-trigonometry.tex}
-\input{05-roadmap.tex}
+\input{01-computable-numbers-and-functions.tex}
+\input{02-circle-and-trigonometry.tex}
+\input{03-exponential-and-logarithm.tex}
+\input{04-fundamental-theorem-of-calculus.tex}
+\input{05-fundamental-theorem-of-algebra.tex}
+\input{99-formalization-roadmap.tex}
