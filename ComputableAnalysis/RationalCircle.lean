@@ -1018,6 +1018,35 @@ theorem csc_mul_sin {u : Rat} (hsin : Ne (sin u) 0) :
   rw [Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+theorem cos_mul_sec {u : Rat} (hcos : Ne (cos u) 0) :
+    cos u * sec u = 1 := by
+  rw [Rat.mul_comm]
+  exact sec_mul_cos hcos
+
+theorem sin_mul_csc {u : Rat} (hsin : Ne (sin u) 0) :
+    sin u * csc u = 1 := by
+  rw [Rat.mul_comm]
+  exact csc_mul_sin hsin
+
+theorem tan_eq_sin_mul_sec (u : Rat) :
+    tan u = sin u * sec u := by
+  unfold tan sec
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem cot_eq_cos_mul_csc (u : Rat) :
+    cot u = cos u * csc u := by
+  unfold cot csc
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem tan_mul_cot {u : Rat}
+    (hcos : Ne (cos u) 0) (hsin : Ne (sin u) 0) :
+    tan u * cot u = 1 := by
+  unfold tan cot
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 theorem one_add_tan_sq_eq_sec_sq {u : Rat} (hcos : Ne (cos u) 0) :
     1 + sq (tan u) = sq (sec u) := by
   unfold tan sec sq
@@ -1027,6 +1056,11 @@ theorem one_add_tan_sq_eq_sec_sq {u : Rat} (hcos : Ne (cos u) 0) :
   grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+theorem sec_sq_sub_tan_sq_eq_one {u : Rat} (hcos : Ne (cos u) 0) :
+    sq (sec u) - sq (tan u) = 1 := by
+  have h := one_add_tan_sq_eq_sec_sq (u := u) hcos
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 theorem one_add_cot_sq_eq_csc_sq {u : Rat} (hsin : Ne (sin u) 0) :
     1 + sq (cot u) = sq (csc u) := by
   unfold cot csc sq
@@ -1035,6 +1069,59 @@ theorem one_add_cot_sq_eq_csc_sq {u : Rat} (hsin : Ne (sin u) 0) :
   unfold sq at hcircle
   grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem csc_sq_sub_cot_sq_eq_one {u : Rat} (hsin : Ne (sin u) 0) :
+    sq (csc u) - sq (cot u) = 1 := by
+  have h := one_add_cot_sq_eq_csc_sq (u := u) hsin
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem sin_sq_add_cos_sq (u : Rat) :
+    sq (sin u) + sq (cos u) = 1 := by
+  have h := cos_sq_add_sin_sq u
+  grind [Rat.add_comm]
+
+theorem sin_sq_eq_one_sub_cos_sq (u : Rat) :
+    sq (sin u) = 1 - sq (cos u) := by
+  have h := cos_sq_add_sin_sq u
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem cos_sq_eq_one_sub_sin_sq (u : Rat) :
+    sq (cos u) = 1 - sq (sin u) := by
+  have h := cos_sq_add_sin_sq u
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem double_sin_eq_two_sin_mul_cos (u : Rat) :
+    doubleSin u = 2 * sin u * cos u := by
+  rw [double_sin_eq_two_mul]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem composedCos_comm (u v : Rat) :
+    composedCos u v = composedCos v u := by
+  rw [composed_cos_eq, composed_cos_eq]
+  grind [Rat.sub_eq_add_neg, Rat.mul_comm]
+
+theorem composedSin_comm (u v : Rat) :
+    composedSin u v = composedSin v u := by
+  rw [composed_sin_eq, composed_sin_eq]
+  grind [Rat.add_comm, Rat.mul_comm]
+
+theorem composedCos_zero_left (u : Rat) :
+    composedCos 0 u = cos u := by
+  rw [composed_cos_eq, cos_zero, sin_zero]
+  grind
+
+theorem composedSin_zero_left (u : Rat) :
+    composedSin 0 u = sin u := by
+  rw [composed_sin_eq, cos_zero, sin_zero]
+  grind
+
+theorem composedCos_zero_right (u : Rat) :
+    composedCos u 0 = cos u := by
+  rw [composedCos_comm, composedCos_zero_left]
+
+theorem composedSin_zero_right (u : Rat) :
+    composedSin u 0 = sin u := by
+  rw [composedSin_comm, composedSin_zero_left]
 
 theorem cos_neg (u : Rat) :
     cos (-u) = cos u := by
@@ -1074,6 +1161,20 @@ theorem csc_neg (u : Rat) :
   rw [sin_neg]
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.neg_mul, Rat.mul_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem composedCos_self_neg (u : Rat) :
+    composedCos u (-u) = 1 := by
+  rw [composed_cos_eq, cos_neg, sin_neg]
+  have hcircle := cos_sq_add_sin_sq u
+  unfold sq at hcircle
+  grind [Rat.sub_eq_add_neg, Rat.mul_neg, Rat.neg_mul,
+    Rat.add_assoc, Rat.add_comm]
+
+theorem composedSin_self_neg (u : Rat) :
+    composedSin u (-u) = 0 := by
+  rw [composed_sin_eq, cos_neg, sin_neg]
+  grind [Rat.mul_neg, Rat.neg_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
 
 theorem cosRaw_valid (u : Rat) :
     (cosRaw u).Valid := by
@@ -1147,41 +1248,103 @@ functions.  Later angle-based sine and cosine should prove the same package by
 equivalence with these rational-circle stages. -/
 structure BasicIdentityPackage : Prop where
   circle : forall u : Rat, sq (cos u) + sq (sin u) = 1
+  circle_comm : forall u : Rat, sq (sin u) + sq (cos u) = 1
+  sin_sq_complement : forall u : Rat, sq (sin u) = 1 - sq (cos u)
+  cos_sq_complement : forall u : Rat, sq (cos u) = 1 - sq (sin u)
   tan_cancel : forall u : Rat, Ne (cos u) 0 -> tan u * cos u = sin u
   cot_cancel : forall u : Rat, Ne (sin u) 0 -> cot u * sin u = cos u
   sec_cancel : forall u : Rat, Ne (cos u) 0 -> sec u * cos u = 1
   csc_cancel : forall u : Rat, Ne (sin u) 0 -> csc u * sin u = 1
+  cos_sec_cancel : forall u : Rat, Ne (cos u) 0 -> cos u * sec u = 1
+  sin_csc_cancel : forall u : Rat, Ne (sin u) 0 -> sin u * csc u = 1
+  tan_as_sin_mul_sec : forall u : Rat, tan u = sin u * sec u
+  cot_as_cos_mul_csc : forall u : Rat, cot u = cos u * csc u
+  tan_cot_cancel :
+    forall u : Rat, Ne (cos u) 0 -> Ne (sin u) 0 -> tan u * cot u = 1
   tan_pythagorean :
     forall u : Rat, Ne (cos u) 0 -> 1 + sq (tan u) = sq (sec u)
   cot_pythagorean :
     forall u : Rat, Ne (sin u) 0 -> 1 + sq (cot u) = sq (csc u)
+  sec_tan_pythagorean :
+    forall u : Rat, Ne (cos u) 0 -> sq (sec u) - sq (tan u) = 1
+  csc_cot_pythagorean :
+    forall u : Rat, Ne (sin u) 0 -> sq (csc u) - sq (cot u) = 1
   add_cos :
     forall u v : Rat, composedCos u v = cos u * cos v - sin u * sin v
   add_sin :
     forall u v : Rat, composedSin u v = cos u * sin v + sin u * cos v
+  add_cos_comm : forall u v : Rat, composedCos u v = composedCos v u
+  add_sin_comm : forall u v : Rat, composedSin u v = composedSin v u
+  add_cos_zero_left : forall u : Rat, composedCos 0 u = cos u
+  add_sin_zero_left : forall u : Rat, composedSin 0 u = sin u
+  add_cos_zero_right : forall u : Rat, composedCos u 0 = cos u
+  add_sin_zero_right : forall u : Rat, composedSin u 0 = sin u
+  add_cos_self_neg : forall u : Rat, composedCos u (-u) = 1
+  add_sin_self_neg : forall u : Rat, composedSin u (-u) = 0
   double_cos :
     forall u : Rat, doubleCos u = sq (cos u) - sq (sin u)
+  double_cos_one_sub_two_sin_sq :
+    forall u : Rat, doubleCos u = 1 - 2 * sq (sin u)
+  double_cos_two_cos_sq_sub_one :
+    forall u : Rat, doubleCos u = 2 * sq (cos u) - 1
   double_sin :
     forall u : Rat, doubleSin u = 2 * cos u * sin u
+  double_sin_comm :
+    forall u : Rat, doubleSin u = 2 * sin u * cos u
+  cos_at_zero : cos 0 = 1
+  sin_at_zero : sin 0 = 0
+  cos_at_one : cos 1 = 0
+  sin_at_one : sin 1 = 1
   cos_even : forall u : Rat, cos (-u) = cos u
   sin_odd : forall u : Rat, sin (-u) = -sin u
   tan_odd : forall u : Rat, tan (-u) = -tan u
+  cot_odd : forall u : Rat, cot (-u) = -cot u
+  sec_even : forall u : Rat, sec (-u) = sec u
+  csc_odd : forall u : Rat, csc (-u) = -csc u
 
 theorem basicIdentityPackage : BasicIdentityPackage where
   circle := cos_sq_add_sin_sq
+  circle_comm := sin_sq_add_cos_sq
+  sin_sq_complement := sin_sq_eq_one_sub_cos_sq
+  cos_sq_complement := cos_sq_eq_one_sub_sin_sq
   tan_cancel := fun _ h => tan_mul_cos h
   cot_cancel := fun _ h => cot_mul_sin h
   sec_cancel := fun _ h => sec_mul_cos h
   csc_cancel := fun _ h => csc_mul_sin h
+  cos_sec_cancel := fun _ h => cos_mul_sec h
+  sin_csc_cancel := fun _ h => sin_mul_csc h
+  tan_as_sin_mul_sec := tan_eq_sin_mul_sec
+  cot_as_cos_mul_csc := cot_eq_cos_mul_csc
+  tan_cot_cancel := fun _ hcos hsin => tan_mul_cot hcos hsin
   tan_pythagorean := fun _ h => one_add_tan_sq_eq_sec_sq h
   cot_pythagorean := fun _ h => one_add_cot_sq_eq_csc_sq h
+  sec_tan_pythagorean := fun _ h => sec_sq_sub_tan_sq_eq_one h
+  csc_cot_pythagorean := fun _ h => csc_sq_sub_cot_sq_eq_one h
   add_cos := composed_cos_eq
   add_sin := composed_sin_eq
+  add_cos_comm := composedCos_comm
+  add_sin_comm := composedSin_comm
+  add_cos_zero_left := composedCos_zero_left
+  add_sin_zero_left := composedSin_zero_left
+  add_cos_zero_right := composedCos_zero_right
+  add_sin_zero_right := composedSin_zero_right
+  add_cos_self_neg := composedCos_self_neg
+  add_sin_self_neg := composedSin_self_neg
   double_cos := double_cos_eq_sq_sub_sq
+  double_cos_one_sub_two_sin_sq := double_cos_eq_one_sub_two_sin_sq
+  double_cos_two_cos_sq_sub_one := double_cos_eq_two_cos_sq_sub_one
   double_sin := double_sin_eq_two_mul
+  double_sin_comm := double_sin_eq_two_sin_mul_cos
+  cos_at_zero := cos_zero
+  sin_at_zero := sin_zero
+  cos_at_one := cos_one
+  sin_at_one := sin_one
   cos_even := cos_neg
   sin_odd := sin_neg
   tan_odd := tan_neg
+  cot_odd := cot_neg
+  sec_even := sec_neg
+  csc_odd := csc_neg
 
 end Trigonometry
 

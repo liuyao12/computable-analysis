@@ -1,0 +1,178 @@
+\chapter{Infinite Series}
+\label{ch:infinite-series}
+
+\section{Series Algorithms}
+
+\begin{definition}[Alternating series intervals]
+\label{def:alternating-series-intervals}
+\lean{ComputableAnalysis.Series.AlternatingRaw}
+\lean{ComputableAnalysis.Series.alternatingInterval}
+\uses{def:raw-real}
+An alternating series with nonnegative decreasing terms is computed by
+successive partial sums.  At stage \(n\), the natural interval is the interval
+between the \(2n\)-th and \((2n+1)\)-st partial sums.  The width is exactly
+the next term magnitude, so convergence reduces to the finite proof that the
+term magnitudes shrink to zero.
+\end{definition}
+
+\section{Arctangent, Leibniz, and Machin}
+
+\begin{definition}[Power-series arctangent]\label{def:arctan-series}
+\lean{ComputableAnalysis.arctan}
+\uses{def:alternating-series-intervals,def:raw-real}
+For \(|x|\le 1\), the arctangent series is represented by alternating
+intervals for
+\[
+  \arctan(x)=
+  x-\frac{x^3}{3}+\frac{x^5}{5}-\frac{x^7}{7}+\cdots .
+\]
+The interval at stage \(n\) is bounded by two consecutive alternating partial
+sums.  This is a computable inverse-circular function whose agreement with
+the geometric arctangent is a later comparison theorem.
+\end{definition}
+
+\begin{theorem}[Leibniz as arctangent]\label{thm:leibniz-arctan}
+\uses{def:arctan-series,def:raw-equiv}
+For the Leibniz algorithm, pi is computed as four times the arctangent series
+at \(1\):
+\[
+  \pi \sim 4\arctan(1).
+\]
+Equivalently, this algorithm is the alternating series
+\[
+  \pi
+  =
+  4\left(1-\frac13+\frac15-\frac17+\cdots\right)
+\]
+as an equivalence of real numbers.
+The current Lean proof target is
+\code{ComputableAnalysis.PiProofs.piLeibniz\_equiv\_four\_arctan\_one}.
+\end{theorem}
+
+\begin{theorem}[Machin tangent identity]\label{thm:machin-tangent}
+\uses{def:arctan-series,def:qbox}
+The rational tangent algebra proves
+\[
+  \tan\!\left(4\arctan\frac15-\arctan\frac{1}{239}\right)=1.
+\]
+Equivalently, the Gaussian-rational identity
+\[
+  (5+i)^4=(2+2i)(239+i)
+\]
+records the same branch calculation.
+The current Lean proof target is
+\code{ComputableAnalysis.PiProofs.MachinIdentity.quarter\_tangent\_identity}.
+\end{theorem}
+
+\begin{theorem}[Leibniz-Machin agreement]\label{thm:leibniz-machin}
+\uses{thm:leibniz-arctan,thm:machin-tangent,def:raw-equiv}
+The Leibniz and Machin interval algorithms compute the same abstract real
+number.  In the power-series arctangent notation, this is the agreement
+between the two rational linear combinations of arctangent values:
+\[
+  4\arctan(1) \sim 16\arctan\frac15-4\arctan\frac{1}{239}.
+\]
+The remaining Lean work is to prove that the power-series arctangent respects
+the geometric branch equality on the certified domain \([-1,1]\).
+The current Lean proposition target is
+\code{ComputableAnalysis.PiProofs.LeibnizEqMachin}.
+\end{theorem}
+
+\section{General Power Series}
+
+\begin{definition}[Formal power series]
+\label{def:formal-power-series}
+\lean{ComputableAnalysis.FormalPowerSeries.Coeffs}
+\lean{ComputableAnalysis.FormalPowerSeries.derivative}
+\lean{ComputableAnalysis.FormalPowerSeries.HasFormalDerivative}
+\uses{def:raw-real}
+A formal power series is a rational coefficient stream
+\[
+  c:\N\to\Q,\qquad \sum_{n\ge0}c_nz^n.
+\]
+Formal differentiation is the coefficient operation
+\[
+  (c')_n=(n+1)c_{n+1}.
+\]
+This is algebraic data, separate from convergence of the associated raw
+function.
+\end{definition}
+
+\begin{definition}[Geometric majorants for power series]
+\label{def:power-series-geometric-majorant}
+\lean{ComputableAnalysis.RationalMajorant.GeometricCertificate}
+\lean{ComputableAnalysis.RationalMajorant.geometric_tail_bound_valid}
+\uses{def:formal-power-series}
+To turn a power series into a computable function, the tail is bounded by a
+geometric majorant after a finite starting index.  The finite estimate is:
+if \(0\le r\le 1/2\), then the tail of \(Cr^n\) is bounded by twice its first
+omitted term.  This is the reusable rational estimate behind power-series
+validity.
+\end{definition}
+
+\begin{definition}[Complex power-series evaluators]
+\label{def:complex-power-series-evaluators}
+\lean{ComputableAnalysis.ComplexSeries.expPartial}
+\lean{ComputableAnalysis.ComplexSeries.sinPartial}
+\lean{ComputableAnalysis.ComplexSeries.cosPartial}
+\uses{def:formal-power-series,def:qcomplex}
+The elementary power-series algorithms are developed over rational complex
+inputs.  Real functions are then obtained by restricting these complex
+algorithms to the real axis.
+\end{definition}
+
+\begin{theorem}[Formal derivative table]\label{thm:formal-derivative-table}
+\lean{ComputableAnalysis.FirstYearCalculus.checked_power_series_table}
+\uses{def:formal-power-series}
+\leanok
+The coefficient streams for the standard power series satisfy the familiar
+formal identities:
+\[
+  (\exp)'=\exp,\qquad
+  (\sin)'=\cos,\qquad
+  (\cos)'=-\sin,
+\]
+\[
+  (\sinh)'=\cosh,\qquad
+  (\cosh)'=\sinh.
+\]
+\end{theorem}
+
+\section{Euler's Basel Problem}
+
+\begin{definition}[Zeta-two interval series]\label{def:zeta-two-raw}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw}
+\uses{def:raw-real}
+The interval algorithm for \(\zeta(2)\) is
+\[
+  Z_n=
+  \left[
+    \sum_{k=1}^{n}\frac1{k^2},
+    \sum_{k=1}^{n}\frac1{k^2}+\frac1n
+  \right]
+\]
+for \(n>0\), with a harmless coarse stage at \(n=0\).
+\end{definition}
+
+\begin{theorem}[Basel series validity]\label{thm:zeta-two-valid}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
+\uses{def:zeta-two-raw,def:raw-real}
+\leanok
+The intervals \(Z_n\) form a real number.  The key finite estimate is the
+telescoping bound
+\[
+  \frac{1}{(m+1)^2}\le \frac1m-\frac1{m+1}.
+\]
+\end{theorem}
+
+\begin{conjecture}[Euler's Basel theorem]\label{conj:basel}
+\lean{ComputableAnalysis.Basel.eulerBasel_geometricPi}
+\uses{def:zeta-two-raw,thm:geometric-pi-validity,def:raw-equiv}
+For the geometric pi real number,
+\[
+  \zeta(2)\Equiv \frac{\pi^2}{6}.
+\]
+Possible constructive routes include Euler's sine product, a Fourier-series
+argument with explicit rational tail bounds, or a contour-integral proof once
+the complex path-integral layer is mature.
+\end{conjecture}

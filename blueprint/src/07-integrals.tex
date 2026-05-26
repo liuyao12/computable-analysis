@@ -1,0 +1,157 @@
+\chapter{Integrals}
+\label{ch:integrals}
+
+\section{Constructive Definite Integrals}
+
+This chapter is the comparison layer.  The trigonometric functions constructed
+in Chapter~\ref{ch:rational-circle-trigonometry} remain the geometric
+algorithms.  Integral formulas enter only after those algorithms exist, as
+theorems saying that a Riemann-sum algorithm computes the same raw real as an
+endpoint expression or an inverse branch.
+
+\begin{definition}[Interval function as a total raw evaluator]
+\label{def:function-on-interval-to-realfunraw}
+\lean{ComputableAnalysis.FunctionOnInterval.toRealFunRaw}
+\lean{ComputableAnalysis.FunctionOnInterval.toRealFunRaw_valid}
+\uses{def:real-fun-raw}
+\leanok
+A function certified on a rational interval \([a,b]\) can be exposed as a
+\code{RealFunRaw} whose domain is exactly that interval.  The total
+\code{compute} field has a dummy value outside the interval, but every
+mathematical statement carries the domain proof, so only interval-certified
+evaluations are used.
+\end{definition}
+
+\begin{definition}[Definite integral identity package]
+\label{def:definite-integral-identity}
+\lean{ComputableAnalysis.Integral.DefiniteIdentity}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityOnInterval}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_effectiveFTC}
+\uses{def:endpoint-diff}
+\leanok
+For raw functions \(f\) and \(F\), a definite integral identity over
+\([a,b]\) consists of:
+\begin{enumerate}
+  \item a certified Riemann-sum construction for \(f\) on \([a,b]\);
+  \item a validity proof for the endpoint-difference raw real \(F(b)-F(a)\);
+  \item an equivalence proof, in the raw-real overlap sense, between the
+  constructed integral and that endpoint difference.
+\end{enumerate}
+The interval version packages the same statement when \(f\) and \(F\) are
+already certified as \code{FunctionOnInterval}s.
+\end{definition}
+
+\section{Trigonometric Functions as Integral Identities}
+
+\begin{definition}[Geometric sine and cosine on an interval]
+\label{def:geometric-trig-on-interval}
+\lean{ComputableAnalysis.IntegralIdentities.geometricCosOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.geometricSinOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.geometricCosOnInterval_valid}
+\lean{ComputableAnalysis.IntegralIdentities.geometricSinOnInterval_valid}
+\uses{def:geometric-point-functionraw}
+\leanok
+Once the geometric point algorithm is available on a rational interval, its
+coordinate projections restrict to interval-certified sine and cosine
+functions.  This is only a domain wrapper around the geometric algorithms; it
+does not introduce a new definition of sine or cosine.
+\end{definition}
+
+\begin{definition}[Geometric trigonometric integral identities]
+\label{def:geometric-trig-integral-identities}
+\lean{ComputableAnalysis.IntegralIdentities.GeometricTrigIntegralIdentities}
+\uses{def:geometric-trig-on-interval,def:definite-integral-identity}
+\leanok
+The integral identity target for the geometric trigonometric functions on
+\([a,b]\) is the pair of definite integral statements
+\[
+  \int_a^b \cos(t)\dd t
+  \quad\hbox{equals}\quad
+  \sin(b)-\sin(a),
+\]
+\[
+  \int_a^b \sin(t)\dd t
+  \quad\hbox{equals}\quad
+  -\cos(b)+\cos(a).
+\]
+In Lean this is a structure, not yet an existence theorem: it records the
+precise derivative, integral-construction, and endpoint-equivalence data that
+must be supplied by the later geometric proof.
+\end{definition}
+
+\begin{definition}[Inverse elementary integral identities]
+\label{def:inverse-elementary-integral-identities}
+\lean{ComputableAnalysis.IntegralIdentities.InverseElementaryIntegralIdentities}
+\uses{def:definite-integral-identity}
+\leanok
+The inverse trigonometric and logarithmic comparison targets are:
+\[
+  \int_0^x \frac{\dd t}{1+t^2}
+  \quad\hbox{equals the chosen arctangent branch at }x,
+\]
+\[
+  \int_0^x \frac{\dd t}{\sqrt{1-t^2}}
+  \quad\hbox{equals the chosen arcsine branch at }x,
+\]
+and
+\[
+  \int_1^x \frac{\dd t}{t}
+  \quad\hbox{equals the chosen logarithm branch at }x.
+\]
+These are branch-local statements.  They are not imported into the geometric
+definition of trigonometric functions; they are used to prove that different
+constructions agree.
+\end{definition}
+
+\section{Abelian Integrals Related to Trigonometry}
+
+\begin{definition}[Algebraic differentials and Abelian integral inverses]
+\label{def:abelian-trig-integral-representations}
+\lean{ComputableAnalysis.AbelianIntegral.DifferentialRaw}
+\lean{ComputableAnalysis.AbelianIntegral.Raw}
+\lean{ComputableAnalysis.AbelianIntegral.InverseRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.AbelianTrigIntegralRepresentations}
+\uses{def:inverse-elementary-integral-identities}
+\leanok
+An Abelian integral is represented by an algebraic branch, an algebraic
+differential, a path, and a certified Riemann-sum algorithm.  The elementary
+trigonometric comparison cases include:
+\[
+  \operatorname{arctan}(x)
+  \quad\hbox{from}\quad
+  \int_0^x \frac{\dd t}{1+t^2},
+\]
+\[
+  \operatorname{arcsin}(x)
+  \quad\hbox{from}\quad
+  \int_0^x \frac{\dd t}{w}
+  \quad\hbox{on the curve } w^2=1-t^2.
+\]
+The same infrastructure also records the next Abelian family beyond circular
+trigonometry, for example elliptic integrals such as
+\[
+  \int_0^x
+    \frac{\dd t}{\sqrt{(1-t^2)(1-k^2t^2)}}.
+\]
+This is the natural home for the comparison between circular functions,
+inverse trigonometric functions, logarithmic integrals, and later elliptic
+examples such as ellipse circumference.
+\end{definition}
+
+\section{Proof Order}
+
+The intended formalization order is:
+\begin{enumerate}
+  \item prove the geometric trigonometric algorithms valid and prove the
+  exact identities from Chapter~\ref{ch:rational-circle-trigonometry};
+  \item prove the derivative certificates for geometric sine and cosine from
+  the circle construction;
+  \item feed those certificates into the definite-integral identity package;
+  \item prove arctangent, arcsine, and logarithm integral identities on their
+  chosen branches;
+  \item prove the Abelian inverse representations agree with the corresponding
+  geometric or power-series algorithms.
+\end{enumerate}
+
+This keeps the definitions honest: geometry first, then integrals as
+comparison theorems.

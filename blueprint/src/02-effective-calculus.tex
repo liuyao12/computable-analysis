@@ -1,8 +1,8 @@
 \chapter{Fundamental Theorem of Calculus}
 
-\section{Exact Convexity}
+\section{Convexity}
 
-\begin{definition}[Exact raw-real order]\label{def:raw-real-order}
+\begin{definition}[Raw-real order]\label{def:raw-real-order}
 \lean{ComputableAnalysis.RealRaw.Le}
 \uses{def:raw-real}
 \leanok
@@ -15,16 +15,16 @@ rational upper approximation to \(Y\):
 \[
   \forall n,m,\qquad X_n^- \le Y_m^+.
 \]
-This is not the executable one-stage comparison.  It is the exact order
-relation used in mathematical statements.  For valid raw representatives,
+This is the order relation used in mathematical statements.  For valid raw
+representatives,
 \[
-  X\Equiv Y
+  X\sim Y
   \quad\Longleftrightarrow\quad
   X\le Y\ \text{and}\ Y\le X.
 \]
 \end{definition}
 
-\begin{definition}[Endpoint difference real]\label{def:endpoint-diff}
+\begin{definition}[Endpoint difference]\label{def:endpoint-diff}
 \lean{ComputableAnalysis.endpointDifferenceInterval}
 \uses{def:real-fun-raw,def:raw-real-arithmetic}
 For a raw real-valued function \(F\), define
@@ -38,7 +38,7 @@ At stage \(p\), if \(F(u)_p=[A^-,A^+]\) and
 \]
 \end{definition}
 
-\begin{definition}[Rational secant raw real]\label{def:rational-secant}
+\begin{definition}[Rational secant]\label{def:rational-secant}
 \lean{ComputableAnalysis.secantRaw}
 \uses{def:endpoint-diff,def:raw-real-order}
 \leanok
@@ -52,7 +52,7 @@ Its finite stages are the rational interval slopes
 \]
 \end{definition}
 
-\begin{definition}[Exact convexity]\label{def:exact-convexity}
+\begin{definition}[Convexity]\label{def:exact-convexity}
 \lean{ComputableAnalysis.ExactConvexOn}
 \uses{def:rational-secant,def:raw-real-order}
 \leanok
@@ -69,7 +69,7 @@ whenever
 Concavity is the same statement with the secant order reversed.
 \end{definition}
 
-\section{One-Sided Convex Derivatives}
+\section{Derivative of a Convex Function}
 
 \begin{definition}[Right derivative of a convex function]
 \label{def:convex-right-derivative}
@@ -81,8 +81,8 @@ secants
   \Sec_F(q,q+h),\qquad h>0,\quad q+h\le b,
 \]
 are monotone as \(h\downarrow 0\) and bounded below by any left secant ending
-at \(q\).  The right derivative \(D_+F(q)\) is the exact raw real represented
-by the infimum of these right secants:
+at \(q\).  The right derivative \(D_+F(q)\) is represented by the infimum of
+these right secants:
 \[
   D_+F(q)=\inf_{0<h,\ q+h\le b}\Sec_F(q,q+h).
 \]
@@ -129,6 +129,67 @@ Convexity gives
 Taking the infimum over right secants on both sides gives the claim.
 \end{proof}
 
+\begin{definition}[Derivative formula identification]\label{def:formula-identification}
+\uses{def:convex-right-derivative}
+Let \(g\) be a proposed raw function formula.  On a rational interval,
+\(g\) is identified with \(D_+F\) when it is equivalent to the right-secant
+infimum defining \(D_+F\).  The formula is not a guess: it is proved from
+finite secant inequalities or algebraic identities for the particular
+function.
+\end{definition}
+
+\begin{example}[Trigonometric functions]\label{ex:trig-derivatives}
+\uses{def:formula-identification,thm:geometric-trig-identities,def:geometric-trig-integral-identities}
+For the geometric sine and cosine from the circle chapter, convexity or
+concavity is checked on intervals where the sign of the appropriate second
+derivative is certified by the circle algorithm.  The derivative formulas are
+\[
+  (\sin)'=\cos,\qquad (\cos)'=-\sin.
+\]
+The integral identities in Chapter~\ref{ch:integrals} are the corresponding
+definite-integral statements once these derivative certificates are supplied.
+\end{example}
+
+\begin{example}[Exponential]\label{ex:exp-derivative}
+\uses{def:formula-identification,def:exp-reps}
+For the exponential functions constructed in the exponential and logarithm
+chapter, convexity follows from positivity and the derivative formula is
+\[
+  (\exp)'=\exp.
+\]
+The power-series construction proves this by termwise differentiation; the
+Euler-limit construction must then be compared with the same derivative
+formula through the representation-agreement theorem.
+\end{example}
+
+\begin{example}[Logarithm]\label{ex:log-ftc}
+\uses{def:formula-identification,def:log-integral}
+For logarithm on \(0<a\le x\le b\), the derivative formula is
+\[
+  (\log)'(x)=\frac1x.
+\]
+The positivity certificate supplies the domain-apartness data needed for
+interval division, and the secant inequalities identify \(1/x\) with the
+one-sided derivative.  Since \(1/x\) is decreasing on positive intervals,
+\(\log\) is concave there.
+\end{example}
+
+\begin{example}[Geometric arctangent]\label{ex:arctan-ftc}
+\uses{def:formula-identification,def:inverse-elementary-integral-identities}
+Let \(A(x)\) be the geometric arctangent branch.  On \(0\le u<v\), the finite
+sector-area inequality
+\[
+  \frac{1}{1+v^2}
+  \le
+  \Sec_A(u,v)
+  \le
+  \frac{1}{1+u^2}
+\]
+identifies the derivative with \(1/(1+x^2)\).  This is the bridge from the
+geometric construction to the arctangent integral and Taylor-series
+representations.
+\end{example}
+
 \begin{remark}[Corners]\label{rem:convex-corners}
 \uses{def:convex-left-derivative,def:convex-right-derivative}
 Convexity does not imply existence of the two-sided derivative.  The function
@@ -137,37 +198,27 @@ functions must therefore use a one-sided derivative, or else explicitly
 restrict to the points where the left and right derivatives agree.
 \end{remark}
 
-\section{Integrating Monotone Derivatives}
+\section{Fundamental Theorem of Calculus}
 
-\begin{definition}[Integral of a monotone raw function]
-\label{def:monotone-integral}
-\uses{def:raw-real-order}
-Let \(g\) be a monotone rational-input raw real-valued function on
-\([a,b]\).  Its integral is the common raw real obtained from lower and upper
-Darboux sums over rational partitions:
-\[
-  L(P,g)\le \int_a^b g(x)\,dx \le U(P,g),
-\]
-with the mesh of \(P\) tending to zero.  Monotonicity supplies the cell
-infimum and supremum from endpoint values, so the only analytic ingredient is
-the completeness of raw reals for nested rational intervals.
-\end{definition}
+The integral used in this chapter is the constructive definite integral
+already introduced in Chapter~\ref{ch:integrals}.  The present chapter proves
+when such an integral is equal to an endpoint difference.
 
 \begin{theorem}[Monotone functions are integrable]
 \label{thm:monotone-integrable}
-\uses{def:monotone-integral}
+\uses{def:definite-integral-identity,def:raw-real-order}
 Every monotone rational-input raw real-valued function on a rational interval
-has an integral in the sense of \cref{def:monotone-integral}.
+has a constructive definite integral.  Monotonicity supplies the lower and
+upper cell values from endpoint evaluations, and Darboux sums converge under
+rational refinement.
 \end{theorem}
 
-\section{Convex FTC}
-
-\begin{theorem}[Convex FTC]\label{thm:convex-ftc}
-\uses{def:exact-convexity,def:convex-right-derivative,def:monotone-integral}
+\begin{theorem}[Fundamental theorem of calculus]\label{thm:convex-ftc}
+\uses{def:exact-convexity,def:convex-right-derivative,thm:monotone-integrable,def:definite-integral-identity}
 If \(F\) is convex on a rational interval \([a,b]\), then the right
 derivative \(D_+F\) is integrable and
 \[
-  \int_a^b D_+F(x)\,dx \Equiv F(b)-F(a).
+  \int_a^b D_+F(x)\,\dd x \sim F(b)-F(a).
 \]
 Equivalently, the same conclusion holds with the left derivative \(D_-F\).
 \end{theorem}
@@ -191,13 +242,14 @@ derivatives, and tends to zero under rational refinement.  Hence the integral
 and the endpoint difference represent the same raw real.
 \end{proof}
 
-\begin{remark}[No effective side conditions]\label{rem:no-effective-side-conditions}
-\uses{thm:convex-ftc}
-The theorem does not ask for derivative bounds, local controls, or overlap
-estimates as hypotheses.  Those are proof artifacts from an earlier approach.
-The mathematical input is exact convexity; the derivative, its monotonicity,
-its integrability, and the endpoint equality are consequences.
-\end{remark}
+\begin{theorem}[Formula identification closure]
+\label{thm:formula-identification-ftc}
+\uses{def:formula-identification,thm:convex-ftc}
+If \(g\) is identified with \(D_+F\) on \([a,b]\), then
+\[
+  \int_a^b g(x)\,\dd x \sim F(b)-F(a).
+\]
+\end{theorem}
 
 \begin{remark}[Piecewise convexity]\label{rem:no-piecewise-ftc}
 \uses{thm:convex-ftc}
@@ -207,81 +259,57 @@ convexity proof changes, apply \cref{thm:convex-ftc} on each piece, and
 combine the endpoint equalities by raw-real arithmetic and transitivity.
 \end{remark}
 
-\section{Formula Identification and Examples}
+\section{Taylor's Theorem}
 
-\begin{definition}[Formula identification]\label{def:formula-identification}
-\uses{def:convex-right-derivative}
-Let \(g\) be a proposed raw function formula.  On a rational interval,
-\(g\) is identified with \(D_+F\) when it is equivalent to the right-secant
-infimum defining \(D_+F\).  The formula is not a guess: it is proved from
-finite secant inequalities or algebraic identities for the particular
-function.
+\begin{definition}[Taylor by iterated FTC]\label{def:taylor-iterated-ftc}
+\lean{ComputableAnalysis.Taylor.IteratedFTCChain}
+\uses{thm:convex-ftc,thm:formula-identification-ftc}
+A Taylor expansion is generated by repeatedly applying the FTC on rational
+subintervals where the needed convexity or concavity certificates are
+available:
+\[
+  F(x)
+  =
+  F(a)+\int_a^x F'(t)\,\dd t.
+\]
+Iterating this statement gives the polynomial part plus an explicit
+iterated-integral remainder.
 \end{definition}
 
-\begin{theorem}[Formula identification closure]
-\label{thm:formula-identification-ftc}
-\uses{def:formula-identification,thm:convex-ftc}
-If \(g\) is identified with \(D_+F\) on \([a,b]\), then
+\begin{theorem}[Taylor's theorem with integral remainder]\label{thm:taylor-integral-remainder}
+\uses{def:taylor-iterated-ftc}
+If \(F\) has the required derivative-identification certificates through
+order \(n+1\) on a rational interval, then
 \[
-  \int_a^b g(x)\,dx \Equiv F(b)-F(a).
+  F(x)
+  =
+  \sum_{k=0}^{n} \frac{F^{(k)}(a)}{k!}(x-a)^k
+  +
+  R_n(x),
 \]
+where the remainder is represented by an iterated constructive integral of
+\(F^{(n+1)}\).  Bounding that final integral gives the usual effective
+Taylor estimate.
 \end{theorem}
 
-\begin{example}[Polynomials]\label{ex:polynomial-ftc}
-\uses{thm:formula-identification-ftc}
-For rational polynomials, convexity or concavity on an interval is proved by
-finite algebra, usually by certifying the sign of the second derivative on
-that interval.  The derivative formula is the formal polynomial derivative.
-\end{example}
-
-\begin{example}[Rational functions]\label{ex:rational-function-ftc}
-\uses{thm:formula-identification-ftc}
-For rational functions, the domain must first be certified on the interval.
-Denominator-apartness is a sufficient way to rule out hidden singularities
-such as \(1/(x^2-2)\) on \([1,2]\).  After the domain is certified,
-convexity and formula identification reduce to finite sign estimates.
-\end{example}
-
-\begin{example}[Power series]\label{ex:power-series-convex-ftc}
-\uses{thm:formula-identification-ftc}
-For a power series on a certified convergence interval, convexity can be
-proved by enclosing the second differentiated series and its tail.  The
-derivative formula is obtained by termwise differentiation, again with a tail
-certificate.
-\end{example}
-
-\begin{example}[Geometric arctangent]\label{ex:arctan-ftc}
-\uses{thm:formula-identification-ftc}
-Let \(A(x)\) be the geometric arctangent, defined by sector-area intervals.
-On \(0\le u<v\), the finite geometric inequality
+\begin{theorem}[Arctangent kernel remainder]\label{thm:atan-kernel-rem}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finiteRemainderRoute}
+\uses{def:taylor-iterated-ftc}
+\leanok
+For rational \(x\), the algebraic identity
 \[
-  \frac{1}{1+v^2}
-  \le
-  \Sec_A(u,v)
-  \le
-  \frac{1}{1+u^2}
+  \frac{1}{1+x^2}
+  =
+  \sum_{k=0}^{n} (-1)^k x^{2k}
+  +
+  \frac{(-1)^{n+1}x^{2n+2}}{1+x^2}
 \]
-identifies the right derivative with
+holds with the effective bound
 \[
-  K(x)=\frac{1}{1+x^2}.
+  \left|
+    \frac{(-1)^{n+1}x^{2n+2}}{1+x^2}
+  \right|
+  \le |x|^{2n+2}.
 \]
-The Taylor route then integrates the finite identity for \(K\) and its
-explicit remainder.
-\end{example}
-
-\begin{example}[Logarithm]\label{ex:log-ftc}
-\uses{thm:formula-identification-ftc}
-For logarithm on \(0<a\le x\le b\), the derivative formula is \(1/x\).
-The positivity certificate supplies the domain-apartness data needed for
-interval division, and the secant inequalities identify \(1/x\) with the
-one-sided convex derivative.
-\end{example}
-
-\begin{example}[Square root and arcsine]\label{ex:sqrt-arcsine-ftc}
-\uses{thm:convex-ftc,thm:formula-identification-ftc}
-The function \(\sqrt{x}\) is concave on positive intervals, so
-\(-\sqrt{x}\) is convex.  The formula \(1/(2\sqrt{x})\) requires both a
-certified square-root interval and apartness from \(0\).  For arcsine, the
-kernel \((1-x^2)^{-1/2}\) similarly requires a certified interval inside
-\((-1,1)\).
-\end{example}
+This is the finite algebra behind the arctangent Taylor remainder.
+\end{theorem}

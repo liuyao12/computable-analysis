@@ -1,4 +1,4 @@
-\chapter{Interval Arithmetic}
+\chapter{Computable Numbers and Functions}
 
 \section{Real numbers \humanchecked}
 
@@ -196,15 +196,55 @@ its validity directly.
 
 \section{Examples of real numbers \humanchecked}
 
-\begin{remark}[Types of real numbers]\label{rem:sources-of-raw-reals}
-\uses{def:interval-sequence,def:raw-real}
-In practice, there are various ways of defining real numbers, most of which
-fall into one of the following types:
-\begin{itemize}
-  \item Algebraic numbers, i.e., solutions to polynomial equations such as
-  \(x^2-2=0\).  Newton's method, or tangent-secant method, works well here, starting with a rational
-  interval such as \([1,2]\).
+\begin{remark}[Algebraic numbers, starting with \(\sqrt2\)]
+\label{rem:algebraic-numbers-sqrt-two}
+\lean{ComputableAnalysis.sqrt}
+\lean{ComputableAnalysis.sqrtRaw}
+\lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
+\uses{def:raw-real}
+The first nontrivial computable real number to keep in mind is \(\sqrt2\).
+In pseudocode, with all arithmetic performed in \(\Q\), the stage algorithm is:
+\begin{verbatim}
+def sqrt2(n):
+    a = 1
+    b = 2
+    for _ in range(n):
+        a = (2 + a*b) / (a + b)
+        b = (b + 2/b) / 2
+    return [a, b]
+\end{verbatim}
+This is the stage-based version of the precision loop: instead of looping
+until \(b-a\le\eps\), the raw-real algorithm returns the interval after the
+requested stage \(n\), and the proof later shows that the widths tend to
+zero.  The invariant is that \(a^2\le 2\le b^2\), so each returned interval
+contains the positive solution of
+\[
+  x^2-2=0.
+\]
+Algebraic numbers more generally are solutions of polynomial equations with
+rational coefficients.  They can be represented by interval algorithms that
+isolate a root and then refine the isolating interval.  The Lean square-root
+algorithm is the rational-input instance of this idea, and the finite square
+criterion proves that \(\sqrt2\) is not equivalent to any rational number.
+\end{remark}
 
+\begin{remark}[Pseudocode convention]\label{rem:pseudocode-convention}
+\uses{rem:computable-presentations,rem:algebraic-numbers-sqrt-two}
+When an algorithm is displayed as a code block, it is Python-like pseudocode
+for rational arithmetic.  Variables such as \(a,b,x,y\) represent rational
+numbers unless the text explicitly says otherwise; assignments, loops, and
+lists are finite operations; and no floating-point approximation is being
+used.  A code block records the intended terminating stage algorithm, while
+the surrounding propositions prove that the returned rational intervals are
+nested and have widths tending to zero.
+\end{remark}
+
+\begin{remark}[Other types of real numbers]\label{rem:sources-of-raw-reals}
+\uses{def:interval-sequence,def:raw-real,rem:algebraic-numbers-sqrt-two}
+Beyond algebraic numbers, there are other useful ways of defining real
+numbers.  Most of the non-algebraic examples in this project fall into one of
+the following types:
+\begin{itemize}
   \item Infinite series, for example,
   \[
     \frac{\pi}{4}

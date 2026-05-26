@@ -1,7 +1,7 @@
-\chapter{Rational Circle and Geometric Trigonometry}
+\chapter{Circle and Trigonometry}
 \label{ch:rational-circle-trigonometry}
 
-\section{Chapter Goal}
+\section{Overview}
 
 The purpose of this chapter is to construct trigonometric functions as
 algorithms from the geometry of the unit circle, and then prove their
@@ -33,67 +33,195 @@ period reduction, or quadrant bookkeeping.  The stable interface is:
   \hbox{identity package}.
 \]
 
-\section{Rational Points on the Circle}
+\section{Rational Circle}
 
-\begin{definition}[Rational circle parametrization]
-\label{def:rational-circle-point}
+\begin{remark}[Rational circle parametrization]
+\label{rem:rational-circle-point}
 \lean{ComputableAnalysis.RationalCircle.Stage.point}
-For a rational slope coordinate \(u\in\Q\), define
+The rational points used below come from the usual stereographic chart on the
+unit circle.  In the pseudocode convention of this blueprint, this is:
+\begin{verbatim}
+def circle_point(u):
+    d = 1 + u*u
+    return Point((1 - u*u) / d, (2*u) / d)
+\end{verbatim}
+In formulas this is the point
 \[
   P(u)=
   \left(
     \frac{1-u^2}{1+u^2},
     \frac{2u}{1+u^2}
-  \right).
+  \right),
 \]
-This is the rational stereographic chart for the unit circle, with the
-missing point handled separately when needed.
-\end{definition}
+with the missing point of the chart handled separately when needed.  This
+parametrization is background for the algorithms, rather than a separate
+object of study in the chapter.
+\end{remark}
 
-\begin{theorem}[Rational circle equation]
-\label{thm:rational-circle-equation}
+\begin{remark}[Rational circle equation]
+\label{rem:rational-circle-equation}
 \lean{ComputableAnalysis.RationalCircle.Stage.point_normSq}
-\uses{def:rational-circle-point}
-\leanok
+\uses{rem:rational-circle-point}
 For every \(u\in\Q\),
 \[
   P(u)_x^2+P(u)_y^2=1.
 \]
-\end{theorem}
+This is a rational identity after clearing the denominator \(1+u^2\).  Lean
+records it as \code{ComputableAnalysis.RationalCircle.Stage.point\_normSq}.
+\end{remark}
 
-\begin{definition}[Dyadic rational circle stages]
-\label{def:dyadic-rational-circle-stages}
+\begin{remark}[Dyadic subdivision of a rational interval]
+\label{rem:dyadic-rational-circle-stages}
 \lean{ComputableAnalysis.RationalCircle.dyadicStage}
-\uses{def:rational-circle-point}
-At stage \(n\), let \(N_n=2^n\).  For \(0\le k\le N_n\), the finite circle
-sample is
+\uses{rem:rational-circle-point,rem:pseudocode-convention}
+Start with a rational interval \([x,y]\).  Bisect every current interval
+\(n\) times, and then map the resulting rational parameters to the circle by
+the rational parametrization \(P\).  Equivalently, the rational parameters
+after \(n\) bisections are
 \[
-  C_{n,k}=P\left(\frac{k}{N_n}\right).
+  x+\frac{k}{2^n}(y-x),
+  \qquad 0\le k\le 2^n.
 \]
-The list \(C_{n,0},\ldots,C_{n,N_n}\) is the rational first-quadrant
-sampling used by the geometric point algorithm.
-\end{definition}
+\begin{verbatim}
+def dyadic_subdivision(x, y, n):
+    s = [x, y]
+    for _ in range(n):
+        t = []
+        for i in range(len(s) - 1):
+            a = s[i]
+            b = s[i + 1]
+            t.append(a)
+            t.append((a + b) / 2)
+        t.append(s[-1])
+        s = t
+    return s
 
-\begin{theorem}[Dyadic refinement]
-\label{thm:dyadic-rational-circle-refinement}
+def circle_subdivision(x, y, n):
+    return [circle_point(u) for u in dyadic_subdivision(x, y, n)]
+
+def circle_stage(n):
+    return circle_subdivision(0, 1, n)
+\end{verbatim}
+\end{remark}
+
+\begin{remark}[What bisection refinement means]
+\label{rem:dyadic-rational-circle-refinement}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
-\uses{def:dyadic-rational-circle-stages}
-\leanok
-The next dyadic stage keeps every old sample:
+\uses{rem:dyadic-rational-circle-stages}
+There is no separate abstract definition of refinement being used here.  The
+concrete fact is just that one more bisection keeps every old parameter and
+inserts one midpoint between adjacent old parameters.  Thus, after mapping to
+the circle, the even-indexed points in the next list are the old points:
 \[
   C_{n+1,2k}=C_{n,k}.
 \]
-The odd indices \(C_{n+1,2k+1}\) are the new rational points inserted between
-old neighbors.
+The odd indices are the new rational circle points coming from the inserted
+midpoints.  Lean records this concrete bookkeeping statement as
+\code{ComputableAnalysis.RationalCircle.Trigonometry.dyadic\_point\_refineIndex}.
+\end{remark}
+
+\section{Archimedes' Method of Exhaustion}
+
+\begin{definition}[Rational triangle area]\label{def:rational-triangle-area}
+\uses{rem:pseudocode-convention}
+A rational triangle is a triangle whose vertices have rational coordinates.
+Its area is rational, because it is computed by the determinant formula:
+\begin{verbatim}
+def sub(p, q):
+    return Point(p.x - q.x, p.y - q.y)
+
+def cross(p, q):
+    return p.x*q.y - p.y*q.x
+
+def triangle_area(p, q, r):
+    return abs(cross(sub(q, p), sub(r, p)) / 2)
+\end{verbatim}
+Thus every line in the algorithm is a rational operation, followed only by
+the absolute value on \(\Q\).
+\end{definition}
+
+\begin{definition}[Circle-area stage algorithm]\label{def:circle-area-stage-algorithm}
+\lean{ComputableAnalysis.piCircleArea}
+\uses{rem:dyadic-rational-circle-stages,def:rational-triangle-area}
+The area algorithm for the unit disk is the cleanest Archimedean
+construction, because every polygonal area is rational and requires no
+subroutine approximation.  At stage \(n\), form the dyadic rational boundary
+points and the outer tangent polygon, then return four times the quarter-disk
+area interval.  In this definition, the function named \code{pi} is the
+circle-area algorithm for pi.
+\begin{verbatim}
+def tangent_intersection(p, q):
+    det = cross(p, q)
+    return Point((q.y - p.y) / det, (p.x - q.x) / det)
+
+def fan_area(origin, boundary):
+    total = 0
+    for k in range(len(boundary) - 1):
+        total += triangle_area(origin, boundary[k], boundary[k + 1])
+    return total
+
+def circle_boundaries(n):
+    samples = circle_stage(n)
+    outer = [samples[0]]
+    for k in range(len(samples) - 1):
+        outer.append(tangent_intersection(samples[k], samples[k + 1]))
+        outer.append(samples[k + 1])
+    return samples, outer
+
+def pi(n):
+    inner, outer = circle_boundaries(n)
+    origin = Point(0, 0)
+    inner_quarter = fan_area(origin, inner)
+    outer_quarter = fan_area(origin, outer)
+    return [4*inner_quarter, 4*outer_quarter]
+\end{verbatim}
+\end{definition}
+
+\begin{definition}[Circumference stage algorithm]\label{def:circle-circumference-stage-algorithm}
+\lean{ComputableAnalysis.piCircumference}
+\uses{def:circle-area-stage-algorithm}
+The circumference algorithm uses the same inner and outer rational boundaries,
+but replaces polygonal area by path length.  The square-root subroutine is
+therefore part of the proof interface: its stage choices must leave enough
+room for the finite chord and tangent inequalities to close.  In this
+definition, the function named \code{pi} is the circumference algorithm for
+pi.
+\begin{verbatim}
+def pi(n):
+    inner, outer = circle_boundaries(n)
+    inner_len = path_length_interval(inner, 2**n)
+    outer_len = path_length_interval(outer, 2**n)
+    return [(4*inner_len.lo)/2, (4*outer_len.hi)/2]
+\end{verbatim}
+\end{definition}
+
+\begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}
+\uses{def:circle-area-stage-algorithm,def:circle-circumference-stage-algorithm,def:raw-equiv}
+At each rational sample stage, the interval for pi obtained from unit-disk
+area overlaps the interval for pi obtained from half-circumference.  After
+validity is established for both algorithms, this gives equivalence of the
+two raw reals.
+The proof reduces to finite inequalities comparing inscribed chords and
+outer tangent segments.  The current Lean proof target is
+\code{ComputableAnalysis.PiProofs.archimedesTheorem}.
 \end{theorem}
 
-\section{Exact Rational Circle Identities}
+\begin{theorem}[Geometric pi validity]\label{thm:geometric-pi-validity}
+\uses{thm:finite-archimedes,def:raw-real}
+The area and circumference algorithms for pi are real numbers: their intervals
+are ordered, nested under dyadic refinement, and have widths tending to zero.
+This is the exhaustion principle in the raw-real setting, and it is the
+starting point for the later calculus constructions.  The remaining work is
+to finish the Lean proof, not to settle a mathematical uncertainty.
+\end{theorem}
+
+\section{Trigonometric Functions}
 
 \begin{definition}[Rational-circle coordinates]
 \label{def:rational-circle-sin-cos}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cos}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sin}
-\uses{def:rational-circle-point}
+\uses{rem:rational-circle-point}
 For a rational slope coordinate \(u\), define the exact rational coordinates
 \[
   c(u)=P(u)_x,\qquad s(u)=P(u)_y.
@@ -129,6 +257,8 @@ The full partial functions will later carry explicit denominator-apartness
 domain data.
 \end{definition}
 
+\section{Trigonometric Identities}
+
 \begin{theorem}[Pythagorean identity on the rational circle]
 \label{thm:rational-circle-pythagorean}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_sq_add_sin_sq}
@@ -149,9 +279,17 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.double_sin_eq_two_mul}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_tan_sq_eq_sec_sq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_cot_sq_eq_csc_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_sq_sub_tan_sq_eq_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_sq_sub_cot_sq_eq_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_eq_sin_mul_sec}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_eq_cos_mul_csc}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_mul_cot}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_neg}
 \uses{def:rational-circle-other-trig,thm:rational-circle-pythagorean}
 \leanok
 The rational-circle coordinates satisfy:
@@ -172,6 +310,19 @@ The rational-circle coordinates satisfy:
 \[
   1+\operatorname{ct}(u)^2=\operatorname{cs}(u)^2\quad(s(u)\ne0).
 \]
+Equivalently,
+\[
+  \operatorname{sc}(u)^2-t(u)^2=1\quad(c(u)\ne0),
+  \qquad
+  \operatorname{cs}(u)^2-\operatorname{ct}(u)^2=1\quad(s(u)\ne0).
+\]
+The quotient functions can also be written as
+\[
+  t(u)=s(u)\operatorname{sc}(u),
+  \qquad
+  \operatorname{ct}(u)=c(u)\operatorname{cs}(u),
+\]
+and \(t(u)\operatorname{ct}(u)=1\) whenever both denominators are nonzero.
 They also satisfy parity and the circle-composition formulas
 \[
   (P(u)P(v))_x=c(u)c(v)-s(u)s(v),
@@ -180,12 +331,20 @@ They also satisfy parity and the circle-composition formulas
   (P(u)P(v))_y=c(u)s(v)+s(u)c(v),
 \]
 with the double-coordinate formulas as the case \(u=v\).
+The identity package also records the zero element and inverse laws for
+circle composition, the two complementary square identities, and the two
+alternate double-coordinate formulas
+\[
+  (P(u)^2)_x=1-2s(u)^2=2c(u)^2-1,
+  \qquad
+  (P(u)^2)_y=2s(u)c(u).
+\]
 \end{theorem}
 
 \begin{theorem}[Dyadic samples are circle samples]
 \label{thm:dyadic-trig-samples}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
-\uses{def:dyadic-rational-circle-stages,def:rational-circle-sin-cos}
+\uses{rem:dyadic-rational-circle-stages,def:rational-circle-sin-cos}
 \leanok
 For every stage \(n\) and index \(k\), the dyadic sample coordinates satisfy
 \[
@@ -212,15 +371,19 @@ oriented unit circle with signed sector area \(\Theta/2\), after period
 reduction.
 
 The intended algorithm is:
-\begin{enumerate}
-  \item reduce \(\Theta\) to a fundamental period interval;
-  \item choose the quadrant and orientation;
-  \item search over rational slope intervals using dyadic circle stages;
-  \item use inner and outer rational sector areas to certify which arc
-  contains the target;
-  \item return the coordinate box of the certified arc, transformed back by
-  the quadrant data.
-\end{enumerate}
+\begin{verbatim}
+def geometric_point_stage(theta, n):
+    theta0, quadrant = reduce_period_and_quadrant(theta)
+    samples = circle_stage(n)
+    arc = certified_arc_by_sector_area(theta0, samples)
+    box = coordinate_box(arc)
+    return apply_quadrant(quadrant, box)
+\end{verbatim}
+Here each helper is a finite rational procedure: period reduction is integer
+division by the chosen period representative, the arc search scans or bisects
+the dyadic rational samples, the certificate compares rational inner and outer
+sector areas, and the final quadrant map only changes signs and swaps
+coordinates.
 The algorithm may be refactored internally, but its public output should be a
 single point raw function.
 \end{definition}
@@ -262,7 +425,7 @@ identity package to be proved for the projected functions.
 
 \begin{theorem}[Circle group law]
 \label{thm:rational-circle-group-law}
-\uses{def:rational-circle-point}
+\uses{rem:rational-circle-point}
 Let
 \[
   P(u)\cdot P(v)

@@ -22,6 +22,7 @@ import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FTC
 import ComputableAnalysis.FTA
 import ComputableAnalysis.FunctionDomains
+import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.Pi
 import ComputableAnalysis.PiProofs
