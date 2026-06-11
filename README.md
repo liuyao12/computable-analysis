@@ -34,6 +34,7 @@ leanblueprint serve
 The rendered blueprint is produced by the `Build blueprint pages` workflow.
 Pull requests that touch the blueprint run `leanblueprint web` as a render
 check.  The public GitHub Pages site is deployed from that same workflow after
-a merge to `main`, or by manually running the workflow from the Actions tab.
+a merge or push to the repository default branch, or by manually running the
+workflow from the Actions tab.
 The generated `blueprint/web` directory is a build artifact and should not be
 committed.
