@@ -71,6 +71,22 @@ def expEuler (x : Rat) : RealRaw where
       if n = 0 then 1 else 1 / (((2 * n : Nat) : Rat))
     { lo := center - radius, hi := center + radius }
 
+
+/-- A stage of the sharp compound-interest enclosure for `e`.
+
+At external stage `n`, use `m = n + 1` and the classical rational bounds
+`(1 + 1/m)^m <= e <= (1 + 1/m)^(m+1)`. -/
+def eCompoundInterestStage (n : Nat) : QInterval :=
+  let m : Nat := n + 1
+  let base : Rat := 1 + 1 / (m : Rat)
+  let lo : Rat := base ^ m
+  { lo := lo, hi := lo * base }
+
+/-- The number `e`, computed from the sharp compound-interest intervals
+`[(1 + 1/m)^m, (1 + 1/m)^(m+1)]`. -/
+def eCompoundInterest : RealRaw where
+  compute := eCompoundInterestStage
+
 /-- The number `e`, computed from the exponential power series at `1`. -/
 def ePowerSeries : RealRaw :=
   expPowerSeries 1
@@ -82,6 +98,7 @@ def eEuler : RealRaw :=
 namespace ExpExamples
 
 #eval! (ePowerSeries.compute 10).display
+#eval! (eCompoundInterest.compute 10).display
 #eval! (ePowerSeries.compute 100).display
 #eval! (eEuler.compute 10).display
 #eval! (eEuler.compute 100).display

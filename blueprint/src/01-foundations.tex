@@ -486,32 +486,51 @@ of field homomorphisms.
 \begin{definition}[Complex-valued function representation]\label{def:function-raw}
 \lean{ComputableAnalysis.FunctionRaw}
 \uses{def:qcomplex,def:complex-raw}
-A \emph{complex-valued function representation} consists of a rational domain
-predicate
+A \emph{complex-valued function representation} consists of:
+\begin{enumerate}
+  \item a rational domain predicate \(D_f\subseteq\Q(i)\), and
+  \item a finite stage algorithm which, given \(z\in D_f\) and \(n\in\N\),
+  returns a rational complex box \(B_f(z,n)\).
+\end{enumerate}
+The pointwise validity requirement is:
+for every fixed rational input \(z\in D_f\), the sequence
 \[
-  D_f\subseteq \Q(i)
+  n\longmapsto B_f(z,n)
 \]
-and, for every \(q\in D_f\), a complex number
-\[
-  f(q)=\bigl(B_n(q)\bigr)_{n\in\N}.
-\]
-Validity says that each pointwise box sequence \(f(q)\) is a complex number.
-This is the underlying notion even when a concrete function is intended only
-for real inputs or real outputs.
+is a complex number in the sense of \cref{def:complex-raw}.  Thus a function is
+not a map from all real or complex inputs to completed values; it is a rational
+input, stage-indexed box algorithm whose fixed-input stages form computable
+numbers.  The domain may be all rational points in a region, or only the
+rational points of a branch domain, but every use of the function carries the
+domain proof.
 \end{definition}
 
 \begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}
 \lean{ComputableAnalysis.RealFunRaw}
+\lean{ComputableAnalysis.PartialRealFunRaw}
 \uses{def:function-raw,thm:rational-complex-field-square}
-A real-input function is a complex-valued function representation whose domain
-is restricted to the rational real axis \(q=x+i0\).  It is \emph{real-valued}
-when each output box lies on the real axis, equivalently when its imaginary
-coordinate is the zero real number.
+A real-input real-valued function is the real-axis specialization of
+\cref{def:function-raw}.  It consists of a rational domain predicate
+\(D_f\subseteq\Q\) and a stage algorithm
+\[
+  (x,n)\longmapsto [a_f(x,n),b_f(x,n)],
+  \qquad x\in D_f,\quad n\in\N,
+\]
+such that for every fixed rational \(x\in D_f\), the sequence
+\[
+  n\longmapsto [a_f(x,n),b_f(x,n)]
+\]
+is a real number in the sense of \cref{def:raw-real}.  In applications we often
+also require \(D_f\) to contain at least one nontrivial rational interval; this
+is recorded by the interval wrappers below rather than by changing the basic
+function definition.
 
-The current real-function layer records this common special case directly as
-a rational domain predicate \(D_f\subseteq\Q\) and rational interval outputs.
-It should be viewed as a convenient real-axis presentation of the complex
-function layer, not as a separate foundation.
+Lean has two presentations of this same idea.  \code{RealFunRaw} keeps the
+\code{compute} field total on rational inputs and stores a domain predicate
+saying where it is valid.  \code{PartialRealFunRaw} makes the domain proof an
+argument to \code{compute}.  In both cases, validity means exactly the
+pointwise condition above: for each fixed rational input in the domain, the
+stage sequence is a raw real.
 \end{definition}
 
 \begin{definition}[Rational segment]\label{def:rational-segment}
@@ -545,6 +564,22 @@ the preceding setup: the interval is the rational segment from \(a+i0\) to
 \(b+i0\), the function is defined at every rational point of that segment, and
 the pointwise outputs are real numbers.
 \end{definition}
+
+
+\begin{remark}[How the later elementary functions fit]
+\label{rem:elementary-functions-are-function-representations}
+\uses{def:real-fun-raw,def:function-on-interval}
+The elementary functions constructed later all use this same shape.
+Power-series arctangent has domain \([-1,1]\) and sends \((x,n)\) to an
+alternating-series interval.  Geometric sine and cosine have rational
+normalized-quarter-turn input \(t\) and stage \(n\) obtained by projecting the
+stage-\(n\) circle-point box.  Exponential is represented by power-series,
+compound-interest, and inverse-log-integral stage algorithms.  Logarithm is a
+\code{FunctionOnInterval} on positive rational branches, defined by the
+integral of \(1/x\).  In every case, fixing a rational input in the stated
+domain leaves an interval sequence in the stage variable, and the validity
+proof is precisely the proof that this sequence is a raw real.
+\end{remark}
 
 \begin{definition}[Interval regularity]\label{def:interval-regular}
 \lean{ComputableAnalysis.IntervalRegularOn}

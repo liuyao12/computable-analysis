@@ -100,15 +100,16 @@ identities from that construction.  The Archimedean area algorithm above is
 the first such construction: it gives \(\pi\) from rational polygonal areas
 before any appeal to analytic trigonometric functions.
 
-The main later algorithmic object is a raw function that sends an input angle
-to a certified box around the corresponding point on the oriented unit circle:
+The main later algorithmic object is a raw function that sends a normalized
+quarter-turn input to a certified box around the corresponding point on the
+oriented unit circle:
 \[
-  \Theta \longmapsto C(\Theta)=(X(\Theta),Y(\Theta)).
+  t \longmapsto C(t)=(X(t),Y(t)),\qquad t\in\Q\hbox{ represents }t\pi/2.
 \]
 Cosine and sine are then not separate primary algorithms.  They are the two
 coordinate projections:
 \[
-  \cos(\Theta)=X(\Theta),\qquad \sin(\Theta)=Y(\Theta).
+  \cos(t\pi/2)=X(t),\qquad \sin(t\pi/2)=Y(t).
 \]
 This organization is intentional.  It keeps the finite geometric proof in one
 place, and it makes the trigonometric identities consequences of the circle
@@ -117,16 +118,110 @@ law rather than independent analytic facts.
 As the construction becomes sharper, the Lean development may need
 refactoring.  The blueprint should therefore track stable interfaces rather
 than overcommit to the first internal implementation of the bisection search,
-period reduction, or quadrant bookkeeping.  The stable interface is:
+period reduction, or quadrant bookkeeping.  Chapter~\ref{ch:rational-circle-trigonometry}
+now owns the geometric route to trigonometry: first define \(\pi\), then define
+geometric and power-series arctangents, then construct the monotone inverse of
+arctangent.  Sine and cosine are deliberately not functions of radian inputs in
+their first interface.  Their input is a rational number \(t\), interpreted as
+``the angle \(t\pi/2\)''.  This makes \(t=1\) the point at ninety degrees and
+keeps the external input rational even though the corresponding radian value is
+generally not rational.
+
+The stable interface is:
 \[
   \hbox{rational area algorithms for }\pi\hbox{ and }\arctan
   \quad\leadsto\quad
-  \hbox{monotone inverse arctangent}
+  \hbox{monotone inverse arctangent on normalized quarter-turns}
   \quad\leadsto\quad
   \hbox{sine and cosine raw functions}
   \quad\leadsto\quad
   \hbox{identity package}.
 \]
+The sanity check for later chapters is always equivalence of \(\pi\)
+representatives: the geometric area, geometric circumference, Leibniz, and
+Machin algorithms should become interchangeable after the finite estimates and
+branch comparisons are supplied.
+
+
+\section{Arctangent, its inverse, and normalized quarter-turn angles}
+
+\begin{definition}[Geometric arctangent]
+\label{def:geometric-arctan}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
+\uses{def:circle-area-stage-algorithm,rem:rational-circle-point}
+For a rational slope \(x\), the point \(P(x)\) lies on the unit circle at twice
+the angle whose tangent is \(x\).  The geometric arctangent algorithm returns
+the sector area between \(P(0)=(1,0)\) and \(P(x)\), with oddness used for
+negative slopes.  Thus it is an area algorithm for \(\arctan(x)\), separate
+from the power-series algorithm of Chapter~\ref{ch:infinite-series}.
+\end{definition}
+
+\begin{definition}[Normalized quarter-turns as angles]
+\label{def:quarter-turn-angle}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.QuarterTurn}
+\uses{def:circle-area-stage-algorithm}
+An input angle for the first sine and cosine algorithms is a rational number
+\(t\in\Q\), interpreted as \(t\pi/2\).  The raw real represented by this input is
+not the rational number \(t\); it is the product of \(t/2\) with whichever
+certified \(\pi\)-algorithm is being used.  Lean records this convention by the
+abbreviation \code{QuarterTurn} and by the raw representative
+\code{quarterTurnRaw}.
+\end{definition}
+
+\begin{definition}[Monotone inverse arctangent interface]
+\label{def:inverse-arctan-interface}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.ArctanInverseConstruction}
+\uses{def:geometric-arctan,def:quarter-turn-angle,def:qbox}
+The inverse-arctangent step is the bisection/search layer which, for a
+normalized rational quarter-turn input \(t\), finds the corresponding
+tangent-slope information on the unit branch \(0\le t\le1\) and supplies the
+branch-reduction data needed to recover the
+point on the oriented unit circle.  The blueprint does not require the first
+implementation to be final.  The stable Lean-facing contract asks for:
+\begin{enumerate}
+\item a raw tangent/inverse-arctangent function on quarter-turn inputs,
+\item validity of that raw function on its stated branch,
+\item the left and right inverse laws against geometric arctangent, and
+\item compatibility with the chosen \(\pi\)-representative.
+\end{enumerate}
+This is the bridge between the geometric area definition of \(\pi\) and the
+coordinate algorithms for sine and cosine.
+\end{definition}
+
+\begin{definition}[Sine and cosine from a circle-point algorithm]
+\label{def:sin-cos-from-circle-point}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction}
+\uses{def:inverse-arctan-interface}
+After inverse arctangent has located the point on the oriented unit circle, the
+trigonometric functions are projections:
+\[
+  \cos(t\pi/2)=X(t),\qquad \sin(t\pi/2)=Y(t).
+\]
+Lean packages this as a complex-valued point algorithm plus real-coordinate
+projection functions \code{cosFunctionRawOfPoint} and
+\code{sinFunctionRawOfPoint}.  The first identity theorem for these functions
+should be the unit-circle law; all addition, parity, double-angle, reciprocal,
+and tangent identities are then consequences of the circle law and point
+multiplication.
+\end{definition}
+
+\begin{remark}[Sine and cosine are instances of the function definition]
+\label{rem:sin-cos-function-instance}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint}
+\uses{def:real-fun-raw,def:sin-cos-from-circle-point}
+For a chosen circle-point algorithm \(C\), the functions \(\sin\) and \(\cos\)
+are instances of \cref{def:real-fun-raw}: their rational domain is the set of
+normalized quarter-turn inputs where \(C\) is defined, and their stage
+algorithms are
+\[
+  (t,n)\longmapsto \operatorname{re}(C(t,n)),
+  \qquad
+  (t,n)\longmapsto \operatorname{im}(C(t,n)).
+\]
+For fixed rational \(t\) in the domain, validity of the point algorithm implies
+that each projected sequence in \(n\) is a raw real.
+\end{remark}
 
 \section{Rational Circle}
 
@@ -325,18 +420,19 @@ between \(P(x)\) and \(P(y)\).
 \begin{definition}[Inverse arctangent search]
 \label{def:inverse-arctan-search}
 \uses{def:arctan-area-stage-algorithm,thm:arctan-area-valid-monotone}
-For an angle parameter \(\theta\) known to satisfy
-\(0\le\theta\le\arctan(1)=\pi/4\), define its tangent parameter \(u\in[0,1]\)
+For an angle parameter \(t\) interpreted as \(t\pi/2\) and known on the
+principal first-octant branch \(0\le t\le 1/2\), define its
+tangent parameter \(u\in[0,1]\)
 by bisection against the monotone arctangent algorithm.
 \begin{verbatim}
-def inverse_arctan(theta, n):
+def inverse_arctan(t, n):
     lo, hi = 0, 1
     for i in range(n):
         m = (lo+hi)/2
         am = arctan(m, n+i)
-        if am.hi < theta:
+        if am.hi < t*pi/2:
             lo = m
-        elif theta < am.lo:
+        elif t*pi/2 < am.lo:
             hi = m
         else:
             lo, hi = lo, hi
@@ -345,24 +441,24 @@ def inverse_arctan(theta, n):
 The stage used for \code{arctan(m, n+i)} is intentionally allowed to increase
 inside the search: the comparison must be refined until it certifies which
 side of \(m\) contains the inverse, or else safely keeps the current bracket.
-The output is a rational interval for \(u=\tan(\theta)\).
+The output is a rational interval for \(u=\tan(t\pi/2)\).
 \end{definition}
 
 \begin{definition}[Sine and cosine from inverse arctangent]
 \label{def:sin-cos-from-inverse-arctan}
 \uses{def:inverse-arctan-search,rem:rational-circle-point}
-On the first octant, compute an interval for \(u=\tan(\theta)\) by
+On the first octant, compute an interval for \(u=\tan(t\pi/2)\) by
 \cref{def:inverse-arctan-search} and then evaluate the rational circle
 coordinates
 \[
-  \cos(\theta)=\frac{1-u^2}{1+u^2},
+  \cos(t\pi/2)=\frac{1-u^2}{1+u^2},
   \qquad
-  \sin(\theta)=\frac{2u}{1+u^2}.
+  \sin(t\pi/2)=\frac{2u}{1+u^2}.
 \]
 Interval evaluation of these rational formulas gives boxes for sine and
 cosine without ever computing a square root.  Quadrant, sign, and reciprocal
-reductions extend the construction to the usual angle domain once \(\pi\) and
-\(\pi/4=\arctan(1)\) have been identified.
+reductions extend the construction to the full normalized interval \([0,1]\)
+once \(\pi/4=\arctan(1)\) and the endpoint at \(t=1\) have been identified.
 \end{definition}
 
 \section{Trigonometric Functions}
@@ -517,14 +613,14 @@ The central construction target is a raw function
 \[
   C : \Q \to \hbox{boxes in }\Q^2
 \]
-whose value at a rational angle input \(\Theta\) encloses the corresponding
-oriented unit-circle point.  The construction is now routed through the
-monotone inverse of the arctangent area algorithm, not through a square-root
-normalization.
+whose value at a rational input \(t\), interpreted as \(t\pi/2\), encloses the
+corresponding oriented unit-circle point.  The construction is now routed
+through the monotone inverse of the arctangent area algorithm, not through a
+square-root normalization.
 \begin{verbatim}
-def geometric_point_stage(theta, n):
-    theta0, transform = reduce_period_octant_and_sign(theta)
-    u = inverse_arctan(theta0, n)
+def geometric_point_stage(t, n):
+    t0, transform = reduce_period_quadrant_and_sign(t)
+    u = inverse_arctan(t0, n)
     box = interval_eval(lambda t: Point((1-t*t)/(1+t*t), 2*t/(1+t*t)), u)
     return apply_octant_transform(transform, box)
 \end{verbatim}
@@ -546,9 +642,9 @@ function.
 \leanok
 Given a circle-point raw function \(C\), define
 \[
-  \cos_C(\Theta)=\operatorname{re}(C(\Theta)),
+  \cos_C(t\pi/2)=\operatorname{re}(C(t)),
   \qquad
-  \sin_C(\Theta)=\operatorname{im}(C(\Theta)).
+  \sin_C(t\pi/2)=\operatorname{im}(C(t)).
 \]
 In Lean this is a projection from a complex-valued `FunctionRaw` on the real
 axis to two `PartialRealFunRaw` coordinate algorithms.

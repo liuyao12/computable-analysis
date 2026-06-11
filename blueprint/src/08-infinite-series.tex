@@ -1,6 +1,19 @@
 \chapter{Infinite Series}
 \label{ch:infinite-series}
 
+Chapter~\ref{ch:infinite-series} starts after the geometric trigonometry and
+integral chapters have fixed the main comparison interfaces: geometric \(\pi\),
+geometric arctangent, arctangent as \(\int_0^x dt/(1+t^2)\), and sine/cosine
+on normalized quarter-turn inputs.  Its first job is not to introduce a second,
+unrelated value of \(\pi\), but to prove that the classical series
+computations land on the same value.  The running examples are the Leibniz
+series for \(4\arctan(1)\) and Machin's faster combination
+\(16\arctan(1/5)-4\arctan(1/239)\).  The sanity check for the chapter is
+that these series algorithms become equivalent to the geometric and integral
+\(\pi\) algorithms from Chapters~\ref{ch:rational-circle-trigonometry} and
+\ref{ch:integrals}.
+
+
 \section{Series Algorithms}
 
 \begin{definition}[Alternating series intervals]
@@ -19,16 +32,20 @@ term magnitudes shrink to zero.
 
 \begin{definition}[Power-series arctangent]\label{def:arctan-series}
 \lean{ComputableAnalysis.arctan}
-\uses{def:alternating-series-intervals,def:raw-real}
+\lean{ComputableAnalysis.PiProofs.arctanFunction}
+\uses{def:alternating-series-intervals,def:real-fun-raw}
 For \(|x|\le 1\), the arctangent series is represented by alternating
 intervals for
 \[
   \arctan(x)=
   x-\frac{x^3}{3}+\frac{x^5}{5}-\frac{x^7}{7}+\cdots .
 \]
-The interval at stage \(n\) is bounded by two consecutive alternating partial
-sums.  This is a computable inverse-circular function whose agreement with
-the geometric arctangent is a later comparison theorem.
+This is an instance of \cref{def:real-fun-raw}: the domain is the rational
+interval \([-1,1]\), and the stage algorithm sends \((x,n)\) to the interval
+between two consecutive alternating partial sums.  For fixed rational
+\(x\in[-1,1]\), the resulting sequence in \(n\) is a raw real.  Lean keeps the
+readable evaluator \code{arctan : Rat -> RealRaw} and wraps it as the
+proof-facing function \code{PiProofs.arctanFunction}.
 \end{definition}
 
 \begin{theorem}[Leibniz as arctangent]\label{thm:leibniz-arctan}

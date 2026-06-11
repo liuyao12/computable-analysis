@@ -29,8 +29,36 @@ def EPowerSeriesValid : Prop :=
 def EEulerValid : Prop :=
   eEuler.Valid
 
+def ECompoundInterestValid : Prop :=
+  eCompoundInterest.Valid
+
 def EPowerSeriesEqEuler : Prop :=
   ePowerSeries.Equiv eEuler
+
+def EPowerSeriesEqCompoundInterest : Prop :=
+  ePowerSeries.Equiv eCompoundInterest
+
+/-- Three-way agreement target for the definitions of `e`: power series,
+compound interest, and an externally supplied inverse-log-integral
+representative. -/
+def EThreeWayAgreement (eLogIntegral : RealRaw) : Prop :=
+  ePowerSeries.Equiv eCompoundInterest /\
+  ePowerSeries.Equiv eLogIntegral /\
+  eCompoundInterest.Equiv eLogIntegral
+
+/-- Remaining estimates needed to close the three definitions of `e` for a
+chosen inverse-log-integral representative. -/
+structure EThreeWayRemainders (eLogIntegral : RealRaw) where
+  powerSeries_eq_compoundInterest : EPowerSeriesEqCompoundInterest
+  powerSeries_eq_logIntegral : ePowerSeries.Equiv eLogIntegral
+  compoundInterest_eq_logIntegral : eCompoundInterest.Equiv eLogIntegral
+
+theorem eThreeWayAgreement_of_remainders {eLogIntegral : RealRaw}
+    (remainders : EThreeWayRemainders eLogIntegral) :
+    EThreeWayAgreement eLogIntegral :=
+  ⟨remainders.powerSeries_eq_compoundInterest,
+   remainders.powerSeries_eq_logIntegral,
+   remainders.compoundInterest_eq_logIntegral⟩
 
 def PowerSeriesRatioBound (x : Rat) : Prop :=
   forall n, expPowerSeriesTailRatioBound x n < 1
@@ -66,6 +94,10 @@ theorem expPowerSeries_compute_eq (x : Rat) (n : Nat) :
 theorem expEuler_compute_eq (x : Rat) (n : Nat) :
     (expEuler x).compute n =
       intervalAround (eulerCenter x n) (stageRadius n) := by
+  rfl
+
+theorem eCompoundInterest_compute_eq (n : Nat) :
+    eCompoundInterest.compute n = eCompoundInterestStage n := by
   rfl
 
 theorem intervalAround_width (center radius : Rat) :

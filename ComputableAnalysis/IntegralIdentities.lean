@@ -1,3 +1,4 @@
+import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.ElementaryFunctions
 import ComputableAnalysis.FTC
 import ComputableAnalysis.RationalCircle
@@ -150,6 +151,65 @@ def definiteIdentity_of_effectiveFTC
 end Integral
 
 namespace IntegralIdentities
+
+/-- The rational kernel `x ↦ 1 / (1 + x^2)` used by the integral
+representation of arctangent. -/
+def oneOverOnePlusSquareRaw : PartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x _ _ =>
+    let y : Rat := 1 / (1 + x * x)
+    { lo := y, hi := y }
+
+/-- The kernel `1 / (1 + x^2)` certified on an arbitrary rational interval. -/
+def oneOverOnePlusSquareOnInterval (a b : Rat) : FunctionOnInterval where
+  raw := oneOverOnePlusSquareRaw
+  lower := a
+  upper := b
+  defined_on := fun _ _ => trivial
+  valid_on := by
+    intro x hx
+    simpa [oneOverOnePlusSquareRaw] using
+      RealRaw.ofRat_valid (1 / (1 + x * x))
+
+theorem oneOverOnePlusSquareOnInterval_valid (a b : Rat) :
+    (oneOverOnePlusSquareOnInterval a b).toRealFunRaw.Valid :=
+  FunctionOnInterval.toRealFunRaw_valid _
+
+/-- The theorem target for the integral arctangent comparison on `[0, x]`.
+It says that the integral of `1 / (1 + t^2)` computes the chosen arctangent
+branch. -/
+def ArctanIntegralComputes (x : Rat) (arctanBranch : RealRaw) : Prop :=
+  Exists fun c : Integral.Construction
+      (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x =>
+    (Integral.integral
+      (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x c).Equiv
+      arctanBranch
+
+/-- A resulting pi computation from the integral arctangent at `1`. -/
+def PiFromArctanIntegral (arctanAtOne : RealRaw) : RealRaw :=
+  RealRaw.scaleRat 4 arctanAtOne
+
+/-- The geometric-pi comparison target for the integral arctangent computation. -/
+def PiFromArctanIntegralAgrees (arctanAtOne : RealRaw) : Prop :=
+  (PiFromArctanIntegral arctanAtOne).Equiv piCircleArea
+
+/-- The integral-arctangent route to geometric pi, isolated into the two
+mathematical bridges that still need estimates: first show the integral kernel
+computes the geometric arctangent at `1`, then identify `4 * arctanGeom 1`
+with the geometric area definition of pi. -/
+structure ArctanIntegralPiRoute where
+  integral_computes_geom_at_one :
+    ArctanIntegralComputes 1 (ArctanGeometry.arctanGeom 1)
+  four_geom_arctan_one_eq_pi :
+    PiFromArctanIntegralAgrees (ArctanGeometry.arctanGeom 1)
+
+namespace ArctanIntegralPiRoute
+
+theorem pi_agrees (R : ArctanIntegralPiRoute) :
+    PiFromArctanIntegralAgrees (ArctanGeometry.arctanGeom 1) :=
+  R.four_geom_arctan_one_eq_pi
+
+end ArctanIntegralPiRoute
 
 /-- The geometric cosine algorithm, restricted to a rational interval where it
 is defined. -/

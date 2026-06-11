@@ -993,6 +993,10 @@ end Real
 
 /-- Raw real-valued function on rational inputs.
 
+A single-variable function representation is a domain together with a stage
+algorithm `x, n ↦ [a, b]`.  Validity is pointwise: for each fixed rational
+`x` in the domain, the sequence in `n` is a raw real.
+
 The computation field remains total on rationals so existing total-function
 machinery can use it directly.  The attached domain records where the
 representation is intended to be interpreted, and the optional rate metadata
@@ -1038,8 +1042,10 @@ structure RealFunCert where
 
 /-- A partial rational-input real-valued function.
 
-The computation is only available together with a proof that the input is in
-the domain, so undefined points cannot be assigned placeholder values.
+This is the proof-relevant version of the same `x, n ↦ [a, b]` notion: the
+computation is only available together with a proof that the input is in the
+domain, so undefined points cannot be assigned placeholder values.  Validity is
+again pointwise in the input.
 -/
 structure PartialRealFunRaw where
   definedAt : Rat -> Prop

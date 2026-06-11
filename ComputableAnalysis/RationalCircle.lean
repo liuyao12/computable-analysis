@@ -1353,13 +1353,62 @@ namespace GeometricTrig
 /-!
 Algorithmic target for geometric sine and cosine.
 
+Angles in this namespace are normalized quarter-turns: the rational input `t`
+denotes the geometric angle `t * (pi / 2)`.  Thus `0` is the positive real axis
+and `1` is ninety degrees.  This keeps function inputs rational while avoiding
+an external radian input.
+
 The geometric construction should first build a circle-point algorithm.  It is
-encoded as a complex-valued raw function: for a real rational angle `theta`,
+encoded as a complex-valued raw function: for a normalized quarter-turn input,
 the output box encloses the point `x + i y` on the oriented unit circle.  The
 trigonometric algorithms are then just the coordinate projections.
 -/
 
-def realAxisDomain (pointRaw : FunctionRaw) : Rat -> Prop :=
+/-- Rational input interpreted as the angle `t * (pi / 2)`, so `1` is a
+quarter turn. -/
+abbrev QuarterTurn := Rat
+
+/-- The raw real angle represented by a normalized quarter-turn input, using
+the current geometric-area `pi` algorithm. -/
+def quarterTurnRaw (t : QuarterTurn) : RealRaw :=
+  RealRaw.scaleRat (t / 2) piCircleArea
+
+/-- Principal branch for the inverse-arctangent search, measured in normalized
+quarter-turns.  This is the interval `[0, 1]`, corresponding to
+`[0, pi / 2]`. -/
+def unitIntervalBranch (t : QuarterTurn) : Prop :=
+  0 <= t /\ t <= 1
+
+/-- Stable interface for the monotone inverse-arctangent step.
+
+A concrete implementation may use bisection, interval Newton steps, or a more
+specialized rational search.  The downstream trigonometric construction only
+needs this contract: a raw tangent/slope algorithm on normalized rational
+quarter-turns, its validity on the principal branch, inverse laws relating it
+to the chosen arctangent representative, and compatibility with the selected
+`pi` algorithm. -/
+structure ArctanInverseConstruction where
+  tangentRaw : PartialRealFunRaw
+  branch_spec : forall t : QuarterTurn, tangentRaw.definedAt t -> unitIntervalBranch t
+  tangent_valid : forall t ht, RealRaw.ValidCompute (tangentRaw.compute t ht)
+  left_inverse_law : Prop
+  right_inverse_law : Prop
+  pi_compatibility : Prop
+
+namespace ArctanInverseConstruction
+
+theorem tangentRaw_valid (C : ArctanInverseConstruction) :
+    forall q hq, RealRaw.ValidCompute (C.tangentRaw.compute q hq) :=
+  C.tangent_valid
+
+theorem branch (C : ArctanInverseConstruction)
+    (t : QuarterTurn) (ht : C.tangentRaw.definedAt t) :
+    unitIntervalBranch t :=
+  C.branch_spec t ht
+
+end ArctanInverseConstruction
+
+def realAxisDomain (pointRaw : FunctionRaw) : QuarterTurn -> Prop :=
   fun theta => pointRaw.domain (QComplex.ofRat theta)
 
 def pointAt (pointRaw : FunctionRaw)
