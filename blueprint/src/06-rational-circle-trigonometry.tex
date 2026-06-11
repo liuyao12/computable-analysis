@@ -1,14 +1,81 @@
 \chapter{Circle and Trigonometry}
 \label{ch:rational-circle-trigonometry}
 
+\section{Archimedes' Method of Exhaustion}
+
+Archimedes' method of exhaustion computes the area of the unit disk by
+trapping it between an inscribed polygon and a circumscribed polygon, then
+refining the polygons until the two areas are forced close together.  The
+usual modern presentation starts with a regular polygon and repeatedly doubles
+the number of sides, producing regular polygons with \(2n\) sides (or,
+equivalently, with twice as many sides at each refinement step).  That version
+is geometrically natural, but its vertices generally have coordinates involving
+square roots and other non-rational quantities.  It is therefore not the most
+transparent first algorithm for a blueprint whose basic data are rational
+intervals.
+
+We instead use rational points on the circle.  The stereographic parameter
+\(u\in\Q\) gives a rational point \(P(u)\) on the unit circle, and bisection of
+rational parameter intervals keeps all data rational.  Polygonal area is then
+especially convenient: determinants of rational coordinates are rational, so
+no square-root subroutine is needed.  Thus the first computation of \(\pi\) in
+this development is an area computation, not a circumference computation.
+
+\begin{definition}[Circle-area exhaustion algorithm]\label{def:circle-area-stage-algorithm}
+\lean{ComputableAnalysis.piCircleArea}
+\uses{rem:pseudocode-convention}
+The following stage algorithm maintains a rational lower bound \(a\) and a
+rational upper bound \(b\) for the area of the unit disk.  It starts from the
+obvious bounds \(2\le \pi\le4\) and refines the quarter-circle arc represented
+by the rational parameter interval \([0,1]\).  For each current parameter
+interval \([p,q]\), insert the midpoint \(m=(p+q)/2\).  The functions
+\code{inner} and \code{outer} are the rational area corrections contributed by
+replacing the one old chord/tangent piece with the two refined pieces.
+\begin{verbatim}
+def pi(n):
+    a = 2
+    b = 4
+
+    def inner(p, m, q):
+        return 2*(q-p)*(m-p)*(q-m) / ((1+p*p)*(1+m*m)*(1+q*q))
+
+    def outer(p, m, q):
+        return (q-p)*(m-p)*(q-m) / ((1+p*q)*(1+p*m)*(1+m*q))
+
+    intervals = [(0, 1)]
+
+    for i in range(n):
+        new_intervals = []
+
+        for p, q in intervals:
+            m = (p+q)/2
+
+            a = a + 4*inner(p, m, q)
+            b = b - 4*outer(p, m, q)
+
+            new_intervals.append((p, m))
+            new_intervals.append((m, q))
+
+        intervals = new_intervals
+
+    return [a, b]
+\end{verbatim}
+Every operation in this pseudocode is a rational operation.  The returned pair
+is the first raw interval algorithm for \(\pi\): the lower endpoint is the
+area of the refined inscribed rational polygon, and the upper endpoint is the
+area of the corresponding refined outer tangent polygon.
+\end{definition}
+
 \section{Overview}
 
 The purpose of this chapter is to construct trigonometric functions as
 algorithms from the geometry of the unit circle, and then prove their
-identities from that construction.
+identities from that construction.  The Archimedean area algorithm above is
+the first such construction: it gives \(\pi\) from rational polygonal areas
+before any appeal to analytic trigonometric functions.
 
-The main algorithmic object is a raw function that sends an input angle to a
-certified box around the corresponding point on the oriented unit circle:
+The main later algorithmic object is a raw function that sends an input angle
+to a certified box around the corresponding point on the oriented unit circle:
 \[
   \Theta \longmapsto C(\Theta)=(X(\Theta),Y(\Theta)).
 \]
@@ -120,7 +187,7 @@ midpoints.  Lean records this concrete bookkeeping statement as
 \code{ComputableAnalysis.RationalCircle.Trigonometry.dyadic\_point\_refineIndex}.
 \end{remark}
 
-\section{Archimedes' Method of Exhaustion}
+\section{Finite Area and Circumference Certificates}
 
 \begin{definition}[Rational triangle area]\label{def:rational-triangle-area}
 \uses{rem:pseudocode-convention}
@@ -137,44 +204,9 @@ def triangle_area(p, q, r):
     return abs(cross(sub(q, p), sub(r, p)) / 2)
 \end{verbatim}
 Thus every line in the algorithm is a rational operation, followed only by
-the absolute value on \(\Q\).
-\end{definition}
-
-\begin{definition}[Circle-area stage algorithm]\label{def:circle-area-stage-algorithm}
-\lean{ComputableAnalysis.piCircleArea}
-\uses{rem:dyadic-rational-circle-stages,def:rational-triangle-area}
-The area algorithm for the unit disk is the cleanest Archimedean
-construction, because every polygonal area is rational and requires no
-subroutine approximation.  At stage \(n\), form the dyadic rational boundary
-points and the outer tangent polygon, then return four times the quarter-disk
-area interval.  In this definition, the function named \code{pi} is the
-circle-area algorithm for pi.
-\begin{verbatim}
-def tangent_intersection(p, q):
-    det = cross(p, q)
-    return Point((q.y - p.y) / det, (p.x - q.x) / det)
-
-def fan_area(origin, boundary):
-    total = 0
-    for k in range(len(boundary) - 1):
-        total += triangle_area(origin, boundary[k], boundary[k + 1])
-    return total
-
-def circle_boundaries(n):
-    samples = circle_stage(n)
-    outer = [samples[0]]
-    for k in range(len(samples) - 1):
-        outer.append(tangent_intersection(samples[k], samples[k + 1]))
-        outer.append(samples[k + 1])
-    return samples, outer
-
-def pi(n):
-    inner, outer = circle_boundaries(n)
-    origin = Point(0, 0)
-    inner_quarter = fan_area(origin, inner)
-    outer_quarter = fan_area(origin, outer)
-    return [4*inner_quarter, 4*outer_quarter]
-\end{verbatim}
+the absolute value on \(\Q\).  This determinant calculation is the finite
+geometric fact packaged by the incremental area corrections in
+\cref{def:circle-area-stage-algorithm}.
 \end{definition}
 
 \begin{definition}[Circumference stage algorithm]\label{def:circle-circumference-stage-algorithm}
