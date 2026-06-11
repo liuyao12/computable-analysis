@@ -816,6 +816,18 @@ theorem legacyConvexFTC
       h.toDerivativeBoundFTC.endpointRaw :=
   h.equiv_endpoint
 
+/-- Completed convexity-facing FTC bridge used by the integral chapter.
+
+This is currently the derivative-bound formulation: convexity supplies the
+local monotone derivative bounds, and the general derivative-bound FTC returns
+endpoint equivalence for the integral raw real. -/
+theorem convexFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : LegacyConvexFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  legacyConvexFTC h
+
 /-- A partial function together with a proof that it is defined at every
 rational point of a closed rational interval.
 

@@ -179,6 +179,18 @@ end LogIntegralInverseBranch
 def fromLogIntegral (branch : LogIntegralInverseBranch) : PartialRealFunRaw :=
   branch.toPartialRealFunRaw
 
+/-- The logarithm function represented by the logarithmic integral branch itself.
+It is a `FunctionOnInterval`, hence an instance of the foundational
+single-variable function notion: rational input plus stage returns a raw real
+interval sequence. -/
+def logFromIntegral (branch : LogIntegralInverseBranch) : FunctionOnInterval :=
+  branch.logBranch.function
+
+/-- The inverse-log-integral exponential representation is a partial real
+function in the sense of Section 1.4. -/
+def expFromLogIntegral (branch : LogIntegralInverseBranch) : PartialRealFunRaw :=
+  fromLogIntegral branch
+
 def eFromLogIntegralBranchRaw
     (branch : LogIntegralInverseBranch) (h : branch.inputDomain 1) : RealRaw :=
   (fromLogIntegral branch).evalRaw 1 h

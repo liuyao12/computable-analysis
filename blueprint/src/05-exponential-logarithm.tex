@@ -1,0 +1,128 @@
+\chapter{Exponential and Logarithm}
+\label{ch:exponential-logarithm}
+
+This chapter develops exponential and logarithm after the integral and series
+chapters.  The intended order is important: the logarithmic-integral
+representation of exponential depends on Chapter~\ref{ch:integrals}, while the
+power-series representation depends on Chapter~\ref{ch:infinite-series}.
+The guiding sanity check is the same as for \(\pi\): independent computations
+of the same constant or function should be proved equivalent as raw reals.
+
+\section{Three definitions of \texorpdfstring{$e$}{e}}
+
+\begin{definition}[Power-series \texorpdfstring{$e$}{e}]
+\label{def:e-power-series}
+\lean{ComputableAnalysis.ePowerSeries}
+\uses{def:arctan-series}
+The first definition is the specialization of the exponential power series at
+\(1\):
+\[
+  e = \sum_{k=0}^{\infty}\frac{1}{k!}.
+\]
+The existing Lean raw representative is \code{ePowerSeries}.
+\end{definition}
+
+\begin{definition}[Compound-interest \texorpdfstring{$e$}{e} intervals]
+\label{def:e-compound-interest}
+\lean{ComputableAnalysis.eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_compute_eq}
+\uses{def:raw-real}
+The second definition uses the classical limit
+\[
+  e = \lim_{m\to\infty}\left(1+\frac1m\right)^m.
+\]
+At stage \(n\), let \(m=n+1\) and set
+\[
+  a_m=\left(1+\frac1m\right)^m,
+  \qquad
+  b_m=\left(1+\frac1m\right)^{m+1}.
+\]
+The finite interval is
+\[
+  [a_m,b_m].
+\]
+This is the standard rational enclosure: \(a_m\) is increasing, \(b_m\) is
+decreasing, and the width is exactly \(b_m-a_m=a_m/m\).  This gives the
+correct interval output for the compound-interest computation of \(e\).
+\end{definition}
+
+\begin{definition}[\texorpdfstring{$e$}{e} from the inverse logarithmic integral]
+\label{def:e-log-integral}
+\lean{ComputableAnalysis.exp.eFromLogIntegralBranchRaw}
+\uses{def:inverse-elementary-integral-identities}
+The third definition views exponential as the inverse of
+\[
+  \log x = \int_1^x \frac{dt}{t}
+\]
+on a positive branch.  Then \(e\) is the unique positive value whose
+logarithmic integral is \(1\).  Lean already packages finite branches of this
+construction as \code{LogIntegralInverseBranch}; evaluating such a branch at
+\(1\) gives \code{eFromLogIntegralBranchRaw}.
+\end{definition}
+
+\begin{theorem}[Agreement of the three \texorpdfstring{$e$}{e} definitions]
+\label{thm:e-three-way-agreement}
+\lean{ComputableAnalysis.ExpProofs.EThreeWayAgreement}
+\uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:raw-equiv}
+The three raw representatives of \(e\) should be equivalent:
+\[
+  e_{\mathrm{series}} \Equiv e_{\mathrm{compound}}
+  \Equiv e_{\mathrm{log}^{-1}}.
+\]
+The power-series/compound-interest bridge is an explicit rational estimate;
+the logarithmic-integral bridge is an inverse-function theorem for the
+monotone integral of \(1/x\).  Lean records the remaining estimates in
+\code{EThreeWayRemainders} and closes the displayed agreement by
+\code{eThreeWayAgreement\_of\_remainders}.
+\end{theorem}
+
+\section{Exponential and logarithm}
+
+\begin{definition}[Exponential representations]
+\label{def:exp-representations}
+\lean{ComputableAnalysis.exp.realPowerSeries}
+\lean{ComputableAnalysis.exp.realEuler}
+\lean{ComputableAnalysis.exp.expFromLogIntegral}
+\lean{ComputableAnalysis.exp.representationsAgree}
+\lean{ComputableAnalysis.exp.representationsAgree_of_estimates}
+\uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:real-fun-raw}
+For general rational input, exponential has three representations: power
+series, Euler/compound-interest limit, and inverse logarithmic integral.  Each
+is an instance of \cref{def:real-fun-raw}: the stage algorithm sends \((x,n)\)
+to an interval or box enclosing the value of \(\exp(x)\), and for every fixed
+rational input in the representation domain the stages form a raw real.  The
+formal interface records agreement of these representations on common domains.
+\end{definition}
+
+\begin{definition}[Logarithm]
+\label{def:logarithm-integral}
+\lean{ComputableAnalysis.exp.logFromIntegral}
+\uses{def:e-log-integral,def:real-fun-raw}
+The logarithm is first the positive-branch integral
+\[
+  \log x = \int_1^x \frac{dt}{t}.
+\]
+On any chosen positive branch this is a \code{FunctionOnInterval}, hence an
+instance of \cref{def:real-fun-raw}: for rational \(x\) in the branch interval
+and stage \(n\), the integral construction returns a rational interval, and for
+fixed \(x\) these intervals form a raw real.  Its inverse branch is
+exponential.  Later algebraic identities such as \(\log(xy)=\log x+\log y\)
+and \(\exp(x+y)=\exp(x)\exp(y)\) should be proved from uniqueness of the
+inverse and then transported between representations.
+\end{definition}
+
+\section{Euler's identity}
+
+\begin{theorem}[Euler identity]
+\label{thm:euler-identity}
+\uses{def:geometric-sin-cos-functionraw,def:exp-representations}
+The exponential power series over rational complex boxes should agree with the
+geometric sine and cosine functions from Chapter~\ref{ch:rational-circle-trigonometry}:
+\[
+  \exp(i\theta)=\cos(\theta)+i\sin(\theta).
+\]
+With the normalized quarter-turn convention this is stated for rational
+\(t\), where \(\theta=t\pi/2\).  The proof route is to first prove the formal
+power-series identity, then use the already established agreement between
+power-series and geometric trigonometry.
+\end{theorem}
