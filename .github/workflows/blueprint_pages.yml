@@ -34,7 +34,16 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y graphviz libgraphviz-dev pkg-config poppler-utils
+          sudo apt-get install -y \
+            graphviz \
+            libgraphviz-dev \
+            pkg-config \
+            poppler-utils \
+            ghostscript \
+            dvisvgm \
+            texlive-latex-base \
+            texlive-latex-extra \
+            texlive-pictures
 
       - name: Install blueprint dependencies
         run: python -m pip install -r blueprint/requirements.txt
