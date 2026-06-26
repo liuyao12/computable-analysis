@@ -1379,6 +1379,19 @@ quarter-turns.  This is the interval `[0, 1]`, corresponding to
 def unitIntervalBranch (t : QuarterTurn) : Prop :=
   0 <= t /\ t <= 1
 
+theorem unitIntervalBranch_zero : unitIntervalBranch 0 := by
+  unfold unitIntervalBranch
+  constructor <;> native_decide
+
+theorem unitIntervalBranch_one : unitIntervalBranch 1 := by
+  unfold unitIntervalBranch
+  constructor <;> native_decide
+
+theorem unitIntervalBranch_half :
+    unitIntervalBranch ((1 : Rat) / 2) := by
+  unfold unitIntervalBranch
+  constructor <;> native_decide
+
 /-- Stable interface for the monotone inverse-arctangent step.
 
 A concrete implementation may use bisection, interval Newton steps, or a more
@@ -1405,6 +1418,16 @@ theorem branch (C : ArctanInverseConstruction)
     (t : QuarterTurn) (ht : C.tangentRaw.definedAt t) :
     unitIntervalBranch t :=
   C.branch_spec t ht
+
+theorem branch_nonneg (C : ArctanInverseConstruction)
+    (t : QuarterTurn) (ht : C.tangentRaw.definedAt t) :
+    0 <= t :=
+  (C.branch t ht).1
+
+theorem branch_le_one (C : ArctanInverseConstruction)
+    (t : QuarterTurn) (ht : C.tangentRaw.definedAt t) :
+    t <= 1 :=
+  (C.branch t ht).2
 
 end ArctanInverseConstruction
 

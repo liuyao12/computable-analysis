@@ -2225,8 +2225,14 @@ theorem sub_equiv {x x' y y' : RealRaw}
   unfold subCompute QInterval.Overlaps
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+def Pos (x : RealRaw) : Prop :=
+  Exists fun n : Nat => 0 < (x.compute n).lo
+
+def Neg (x : RealRaw) : Prop :=
+  Exists fun n : Nat => (x.compute n).hi < 0
+
 def ApartZero (x : RealRaw) : Prop :=
-  Exists fun n : Nat => (x.compute n).hi < 0 \/ 0 < (x.compute n).lo
+  x.Pos \/ x.Neg
 
 def HasComputableInv (x : RealRaw) : Prop :=
   x.Valid -> ApartZero x -> Exists fun y : RealRaw => y.Valid

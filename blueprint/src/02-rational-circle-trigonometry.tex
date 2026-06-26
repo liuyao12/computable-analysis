@@ -6,13 +6,11 @@
 Archimedes' method of exhaustion computes the area of the unit disk by
 trapping it between an inscribed polygon and a circumscribed polygon, then
 refining the polygons until the two areas are forced close together.  The
-usual modern presentation starts with a regular polygon and repeatedly doubles
-the number of sides, producing regular polygons with \(2n\) sides (or,
-equivalently, with twice as many sides at each refinement step).  That version
-is geometrically natural, but its vertices generally have coordinates involving
-square roots and other non-rational quantities.  It is therefore not the most
-transparent first algorithm for a blueprint whose basic data are rational
-intervals.
+classical presentation starts with a hexagon and repeatedly doubles the number
+of sides, producing regular \(6\cdot2^n\)-gons.  That version is geometrically
+natural, but its vertices generally have coordinates involving square roots
+and other non-rational quantities.  It is therefore not the most transparent
+first algorithm for a blueprint whose basic data are rational intervals.
 
 We instead use rational parametrizations of the circle.  The stereographic
 parameter \(u\in\Q\) gives a rational point \(P(u)\) on the unit circle, and
@@ -59,37 +57,50 @@ second keeps every vertex rational.}
 
 \begin{definition}[Circle-area exhaustion algorithm]\label{def:circle-area-stage-algorithm}
 \lean{ComputableAnalysis.piCircleArea}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
 \uses{rem:pseudocode-convention}
-The following stage algorithm maintains a rational lower bound \(a\) and a
-rational upper bound \(b\) for the area of the unit disk.  It starts from the
-obvious bounds \(2\le \pi\le4\) and refines the quarter-circle arc represented
-by the rational parameter interval \([0,1]\).  For each current parameter
-interval \([p,q]\), insert the midpoint \(m=(p+q)/2\).  The functions
-\code{inner} and \code{outer} are the rational area corrections contributed by
-replacing the one old chord/tangent piece with the two refined pieces.
+The compact stage algorithm is a finite rational polygon computation.  For a
+rational endpoint \(x\), \code{sector(x,n)} takes dyadic rational parameters
+from \(0\) to \(x\), maps them to rational circle points, and returns the areas
+of the inscribed chord fan and the outer tangent fan.  The case \(x=1\) is the
+quarter circle, so multiplying by \(4\) gives the area definition of \(\pi\).
 \begin{verbatim}
-def pi(n):
-    a, b = 2, 4
-    def inner(p, m, q):
-        return 2*(q-p)*(m-p)*(q-m) / ((1+p*p)*(1+m*m)*(1+q*q))
-    def outer(p, m, q):
-        return (q-p)*(m-p)*(q-m) / ((1+p*q)*(1+p*m)*(1+m*q))
-    intervals = [(0, 1)]
-    for i in range(n):
-        new_intervals = []
-        for p, q in intervals:
-            m = (p+q)/2
-            a = a + 4*inner(p, m, q)
-            b = b - 4*outer(p, m, q)
-            new_intervals.append((p, m))
-            new_intervals.append((m, q))
-        intervals = new_intervals
-    return [a, b]
+def P(u):
+    d = 1 + u*u
+    return ((1 - u*u)/d, 2*u/d)
+
+def det(p, q):
+    return p[0]*q[1] - p[1]*q[0]
+
+def area(vs):
+    n = len(vs)
+    return abs(sum(det(vs[i], vs[(i+1) % n]) for i in range(n)) / 2)
+
+def tangent(p, q):
+    z = det(p, q)
+    return ((q[1] - p[1])/z, (p[0] - q[0])/z)
+
+def sector(x, n):
+    m = 2**n
+    ps = [P(x*k/m) for k in range(m + 1)]
+    ts = [tangent(ps[i], ps[i+1]) for i in range(m)]
+    outer = [ps[0]] + [z for i,t in enumerate(ts) for z in (t, ps[i+1])]
+    return [area([(0,0)] + ps), area([(0,0)] + outer)]
+
+def pi_area(n):
+    lo, hi = sector(1, n)
+    return [4*lo, 4*hi]
+
+def atan_area(x, n):
+    return sector(x, n)
 \end{verbatim}
 Every operation in this pseudocode is a rational operation.  The returned pair
-is the first raw interval algorithm for \(\pi\): the lower endpoint is the
-area of the refined inscribed rational polygon, and the upper endpoint is the
-area of the corresponding refined outer tangent polygon.
+for \code{pi\_area} is the first raw interval algorithm for \(\pi\): the lower
+endpoint is the area of the refined inscribed rational polygon, and the upper
+endpoint is the area of the corresponding refined outer tangent polygon.  The
+same \code{sector} routine is also the geometric arctangent algorithm used
+below; in particular \(\pi = 4\arctan(1)\) is already visible at the level of
+the stage computation.
 \end{definition}
 
 \section{Overview}
@@ -119,13 +130,14 @@ As the construction becomes sharper, the Lean development may need
 refactoring.  The blueprint should therefore track stable interfaces rather
 than overcommit to the first internal implementation of the bisection search,
 period reduction, or quadrant bookkeeping.  Chapter~\ref{ch:rational-circle-trigonometry}
-now owns the geometric route to trigonometry: first define \(\pi\), then define
-geometric and power-series arctangents, then construct the monotone inverse of
-arctangent.  Sine and cosine are deliberately not functions of radian inputs in
-their first interface.  Their input is a rational number \(t\), interpreted as
-``the angle \(t\pi/2\)''.  This makes \(t=1\) the point at ninety degrees and
-keeps the external input rational even though the corresponding radian value is
-generally not rational.
+now owns the geometric route to trigonometry: first define \(\pi\) by rational
+polygonal area, then observe that the same sector algorithm computes
+\(\arctan(x)\), then construct the monotone inverse of arctangent.  Sine and
+cosine are deliberately not functions of radian inputs in their first
+interface.  Their input is a rational number \(t\), interpreted as ``the angle
+\(t\pi/2\)''.  This makes \(t=1\) the point at ninety degrees and keeps the
+external input rational even though the corresponding radian value is generally
+not rational.
 
 The stable interface is:
 \[
@@ -148,17 +160,22 @@ branch comparisons are supplied.
 \begin{definition}[Geometric arctangent]
 \label{def:geometric-arctan}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
 \uses{def:circle-area-stage-algorithm,rem:rational-circle-point}
 For a rational slope \(x\), the point \(P(x)\) lies on the unit circle at twice
 the angle whose tangent is \(x\).  The geometric arctangent algorithm returns
 the sector area between \(P(0)=(1,0)\) and \(P(x)\), with oddness used for
 negative slopes.  Thus it is an area algorithm for \(\arctan(x)\), separate
-from the power-series algorithm of Chapter~\ref{ch:infinite-series}.
+from the power-series algorithm of Chapter~\ref{ch:infinite-series}.  The
+special case \(x=1\) is the quarter circle, so the stage equality
+\(\pi=4\arctan(1)\) is a geometric fact before any series comparison enters.
 \end{definition}
 
 \begin{definition}[Normalized quarter-turns as angles]
 \label{def:quarter-turn-angle}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.QuarterTurn}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.quarterTurnRaw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch}
 \uses{def:circle-area-stage-algorithm}
 An input angle for the first sine and cosine algorithms is a rational number
 \(t\in\Q\), interpreted as \(t\pi/2\).  The raw real represented by this input is
@@ -171,6 +188,8 @@ abbreviation \code{QuarterTurn} and by the raw representative
 \begin{definition}[Monotone inverse arctangent interface]
 \label{def:inverse-arctan-interface}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.ArctanInverseConstruction}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch_zero}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch_one}
 \uses{def:geometric-arctan,def:quarter-turn-angle,def:qbox}
 The inverse-arctangent step is the bisection/search layer which, for a
 normalized rational quarter-turn input \(t\), finds the corresponding
@@ -374,30 +393,16 @@ to finish the Lean proof, not to settle a mathematical uncertainty.
 
 \begin{definition}[Arctangent area stage algorithm]
 \label{def:arctan-area-stage-algorithm}
+\lean{ComputableAnalysis.ArctanGeometry.positiveComputeAtStage}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_nonneg_compute_eq}
 \uses{def:circle-area-stage-algorithm,rem:pseudocode-convention}
-For \(0\le x\le1\), the same rational area corrections give an interval for
-the sector area from \(P(0)=(1,0)\) to \(P(x)\).  Since that sector has angle
-\(2\arctan(x)\), its area is \(\arctan(x)\).  The initial lower bound is the
-triangle area \(x/(1+x^2)\), and the initial upper bound is the area \(x\) of
-the two-tangent polygon.
+For \(0\le x\le1\), the same rational polygon computation gives an interval
+for the sector area from \(P(0)=(1,0)\) to \(P(x)\).  Since that sector has
+angle \(2\arctan(x)\), its area is \(\arctan(x)\).  In the compact code of
+\cref{def:circle-area-stage-algorithm}, this is just:
 \begin{verbatim}
 def arctan(x, n):
-    a, b = x/(1+x*x), x
-    def inner(p, m, q):
-        return 2*(q-p)*(m-p)*(q-m) / ((1+p*p)*(1+m*m)*(1+q*q))
-    def outer(p, m, q):
-        return (q-p)*(m-p)*(q-m) / ((1+p*q)*(1+p*m)*(1+m*q))
-    intervals = [(0, x)]
-    for i in range(n):
-        new_intervals = []
-        for p, q in intervals:
-            m = (p+q)/2
-            a = a + inner(p, m, q)
-            b = b - outer(p, m, q)
-            new_intervals.append((p, m))
-            new_intervals.append((m, q))
-        intervals = new_intervals
-    return [a, b]
+    return atan_area(x, n)
 \end{verbatim}
 The restriction \(0\le x\le1\) is the only range needed for the first
 trigonometric construction.  The complementary ranges are handled later by
@@ -746,3 +751,11 @@ representation.
   chapter or file.  That later stage can import the other definitions it
   needs; this chapter should not depend on them.
 \end{enumerate}
+
+The next chapter abstracts the same finite pattern.  Instead of circle-sector
+fans, it starts with a monotone rational function on a rational interval,
+forms dyadic lower and upper sums, and proves that these sums define the
+corresponding definite integral as a raw real.  The arctangent computation in
+this chapter is the motivating example: it is the integral of the monotone
+kernel \(1/(1+x^2)\), but here it has first been presented in geometric
+polygonal form.

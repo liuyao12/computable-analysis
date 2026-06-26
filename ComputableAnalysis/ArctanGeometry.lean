@@ -112,6 +112,28 @@ def arctanGeom (x : Rat) : RealRaw :=
   else
     -positiveRaw (-x)
 
+theorem positiveComputeAtStage_eq_bounds
+    (y : Rat) {s : Nat} (hs : s ≠ 0) :
+    positiveComputeAtStage y s =
+      { lo := innerSectorArea y s, hi := outerSectorArea y s } := by
+  simp [positiveComputeAtStage, hs]
+
+theorem positiveRaw_compute_eq_positiveComputeAtStage
+    {y : Rat} (hy : y ≠ 0) (n : Nat) :
+    (positiveRaw y).compute n = positiveComputeAtStage y (stage n) := by
+  simp [positiveRaw, hy]
+
+theorem arctanGeom_nonneg_compute_eq
+    {x : Rat} (hx0 : x ≠ 0) (hx : 0 <= x) (n : Nat) :
+    (arctanGeom x).compute n = positiveComputeAtStage x (stage n) := by
+  simp [arctanGeom, positiveRaw, hx0, hx]
+
+theorem arctanGeom_one_compute_eq (n : Nat) :
+    (arctanGeom 1).compute n = positiveComputeAtStage 1 (stage n) := by
+  have hnonzero : (1 : Rat) ≠ 0 := by native_decide
+  have hnonneg : (0 : Rat) <= 1 := by native_decide
+  exact arctanGeom_nonneg_compute_eq hnonzero hnonneg n
+
 theorem circlePoint_zero :
     circlePoint 0 = ({ x := 1, y := 0 } : PiCirclePoint) := by
   native_decide
