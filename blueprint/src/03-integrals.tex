@@ -89,7 +89,16 @@ partial raw function with trivial domain and as a certified
 
 \begin{definition}[Arctangent as an integral]
 \label{def:arctan-integral}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_valid}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralComputes}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_equiv_arctanGeom_of_functionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.PiFromArctanIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.PiFromArctanIntegralAgrees}
 \uses{def:one-over-one-plus-square-kernel,def:inverse-elementary-integral-identities}
@@ -102,11 +111,36 @@ This gives a new computation of \(\pi\) via
   \pi \Equiv 4\arctan_{\int}(1).
 \]
 The comparison theorem should identify this integral arctangent with both the
-geometric-sector arctangent and the power-series arctangent.  Lean isolates the
-remaining route as \code{ArctanIntegralPiRoute}: prove that the integral kernel
-computes \code{arctanGeom 1}, then prove that four times that value agrees with
-the geometric area definition of \(\pi\).
+geometric-sector arctangent and the power-series arctangent.  Following the
+function-equivalence convention, the preferred Lean target is
+\code{ArctanIntegralGeomFunctionAgreement}: the integral representation and the
+geometric representation agree on the overlap of their domains.  The current
+integral representation is defined for \(0\le x\), while the geometric
+representation is total, so their overlap is the nonnegative rational branch.
+The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \end{definition}
+
+\begin{theorem}[Integral arctangent gives another pi computation]
+\label{thm:arctan-integral-pi}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement}
+\lean{ComputableAnalysis.PiProofs.exists_piFromArctanIntegral_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_geom_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
+\lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_function_agreement}
+\uses{def:arctan-integral,thm:geometric-arctan-one-area-pi}
+Any certified integral construction for
+\[
+  \arctan_{\int}(1)=\int_0^1 \frac{\dd t}{1+t^2}
+\]
+that agrees with the geometric sector arctangent gives a new raw-real
+representative of \(\pi\):
+\[
+  4\arctan_{\int}(1)\sim \pi_{\mathrm{area}}.
+\]
+Thus the remaining analytic work is exactly the function-level
+arctangent-integral comparison \code{ArctanIntegralGeomFunctionAgreement};
+once that is supplied, the pi equivalence is already formalized.
+\end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}
 

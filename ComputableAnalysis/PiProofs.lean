@@ -2,6 +2,7 @@ import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.Basic
 import ComputableAnalysis.DirichletSeries
+import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.Taylor
 
 /-!
@@ -2603,6 +2604,116 @@ theorem piCircleArea_ordered (n : Nat) :
   exact piCircleAreaComputeAtStage_ordered
     (piStage n) (piStage_pos n)
 
+theorem four_arctanGeom_one_equiv_piCircleArea :
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Equiv
+      piCircleArea) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)
+    piCircleArea n n).2
+  rw [four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  have hordered := piCircleArea_ordered n
+  unfold QInterval.Overlaps QInterval.width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem piCircleArea_equiv_four_arctanGeom_one :
+    piCircleArea.Equiv
+      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
+
+theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv piCircleArea) := by
+  have hpowGeom :
+      (arctan (1 : Rat)).Equiv (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    ArctanGeometry.powerSeries_equiv_geometric_of_agreement
+      hagree (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide)
+  have hscaled :
+      (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
+    RealRaw.natScale_equiv 4 hpowGeom
+  intro n
+  have hover := (RealRaw.compareAt_overlap_iff
+      ((4 : Nat) * arctan (1 : Rat) : RealRaw)
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
+    (hscaled n)
+  apply (RealRaw.compareAt_overlap_iff
+    ((4 : Nat) * arctan (1 : Rat) : RealRaw) piCircleArea n n).2
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  exact hover
+
+theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
+      hagree)
+
+theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
+    (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
+    (hgeom :
+      (IntegralIdentities.arctanIntegral (1 : Rat) c).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegral (1 : Rat) c)).Equiv
+        piCircleArea := by
+  have hscaled :
+      (IntegralIdentities.PiFromArctanIntegral
+        (IntegralIdentities.arctanIntegral (1 : Rat) c)).Equiv
+          ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    exact RealRaw.natScale_equiv 4 hgeom
+  intro n
+  have hover := (RealRaw.compareAt_overlap_iff
+      (IntegralIdentities.PiFromArctanIntegral
+        (IntegralIdentities.arctanIntegral (1 : Rat) c))
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
+    (hscaled n)
+  apply (RealRaw.compareAt_overlap_iff
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegral (1 : Rat) c))
+    piCircleArea n n).2
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  exact hover
+
+theorem exists_piFromArctanIntegral_equiv_piCircleArea
+    (hgeom : IntegralIdentities.ArctanIntegralGeomAgreement (1 : Rat)) :
+    Exists fun c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat) =>
+      (IntegralIdentities.PiFromArctanIntegral
+        (IntegralIdentities.arctanIntegral (1 : Rat) c)).Equiv
+          piCircleArea := by
+  rcases hgeom with ⟨c, hc⟩
+  exact ⟨c, piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement c hc⟩
+
+theorem arctanIntegralPiRoute_of_geom_agreement
+    (hgeom : IntegralIdentities.ArctanIntegralGeomAgreement (1 : Rat)) :
+    IntegralIdentities.ArctanIntegralPiRoute where
+  integral_computes_geom_at_one := hgeom
+  four_geom_arctan_one_eq_pi := by
+    simpa [IntegralIdentities.PiFromArctanIntegralAgrees,
+      IntegralIdentities.PiFromArctanIntegral] using
+      four_arctanGeom_one_equiv_piCircleArea
+
+theorem piFromArctanIntegral_equiv_piCircleArea_of_function_agreement
+    (data : IntegralIdentities.ArctanIntegralData)
+    (hgeom : IntegralIdentities.ArctanIntegralGeomFunctionAgreement data) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegral (1 : Rat)
+        (data.constructionAt (1 : Rat) (by native_decide)))).Equiv
+        piCircleArea :=
+  piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
+    (data.constructionAt (1 : Rat) (by native_decide))
+    (IntegralIdentities.arctanIntegral_equiv_arctanGeom_of_functionAgreement
+      data hgeom (by native_decide))
+
+theorem arctanIntegralPiRoute_of_function_agreement
+    (data : IntegralIdentities.ArctanIntegralData)
+    (hgeom : IntegralIdentities.ArctanIntegralGeomFunctionAgreement data) :
+    IntegralIdentities.ArctanIntegralPiRoute :=
+  arctanIntegralPiRoute_of_geom_agreement
+    (IntegralIdentities.arctanIntegralGeomAgreement_one_of_functionAgreement
+      data hgeom)
+
 theorem piCircumference_ordered (n : Nat) :
     0 <= (piCircumference.compute n).width := by
   rw [piCircumference_compute_eq,
@@ -2819,6 +2930,64 @@ theorem endpointMonotone_of_stepRefines
       constructor
       · exact Rat.le_trans ih.1 hnext.1
       · exact Rat.le_trans hnext.2 ih.2
+
+/-- The ordered-interval obligation for the midpoint update loop that should
+become the single public `piCircleArea` implementation. -/
+def PiCircleAreaLoopOrdered : Prop :=
+  forall n, 0 <= (piCircleAreaLoop.compute n).width
+
+/-- The nesting obligation for the midpoint update loop. -/
+def PiCircleAreaLoopNested : Prop :=
+  forall n m, n <= m ->
+    (piCircleAreaLoop.compute n).lo <= (piCircleAreaLoop.compute m).lo /\
+    (piCircleAreaLoop.compute m).lo <= (piCircleAreaLoop.compute m).hi /\
+    (piCircleAreaLoop.compute m).hi <= (piCircleAreaLoop.compute n).hi
+
+/-- The width-shrinking obligation for the midpoint update loop. -/
+def PiCircleAreaLoopWidthsShrink : Prop :=
+  RealRaw.WidthsShrinkToZero piCircleAreaLoop.compute
+
+def PiCircleAreaLoopStepRefines : Prop :=
+  EndpointStepRefines piCircleAreaLoop.compute
+
+def PiCircleAreaLoopWidthLinearBound (C : Nat) : Prop :=
+  WidthBoundedByNatOverSucc piCircleAreaLoop.compute C
+
+theorem piCircleAreaLoopWidthsShrink_of_linearBound
+    {C : Nat} (hbound : PiCircleAreaLoopWidthLinearBound C) :
+    PiCircleAreaLoopWidthsShrink :=
+  widthsShrink_of_natOverSuccBound hbound
+
+theorem piCircleAreaLoopNested_of_endpointMonotone
+    (hordered : PiCircleAreaLoopOrdered)
+    (hmono : EndpointMonotone piCircleAreaLoop.compute) :
+    PiCircleAreaLoopNested := by
+  intro n m hnm
+  have h := hmono n m hnm
+  constructor
+  case left =>
+    exact h.1
+  case right =>
+    constructor
+    case left =>
+      have hwidth := hordered m
+      grind [QInterval.width, Rat.sub_eq_add_neg]
+    case right =>
+      exact h.2
+
+theorem piCircleAreaLoopNested_of_stepRefines
+    (hordered : PiCircleAreaLoopOrdered)
+    (hstep : PiCircleAreaLoopStepRefines) :
+    PiCircleAreaLoopNested :=
+  piCircleAreaLoopNested_of_endpointMonotone hordered
+    (endpointMonotone_of_stepRefines hstep)
+
+theorem piCircleAreaLoopValid_of_ordered_nested_and_shrinking
+    (hordered : PiCircleAreaLoopOrdered)
+    (hnested : PiCircleAreaLoopNested)
+    (hshrink : PiCircleAreaLoopWidthsShrink) :
+    RealRaw.ValidCompute piCircleAreaLoop.compute := by
+  exact ⟨hordered, hnested, hshrink⟩
 
 def AreaStepRefines : Prop :=
   EndpointStepRefines piCircleArea.compute

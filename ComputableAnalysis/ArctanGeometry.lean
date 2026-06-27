@@ -165,6 +165,154 @@ theorem arctanGeom_zero :
     arctanGeom 0 = RealRaw.ofRat 0 := by
   simp [arctanGeom]
 
+/-- State for the update-loop presentation of geometric arctangent.  The
+interval `[lo, hi]` stores current sector-area bounds, and `intervals` stores
+the rational parameter intervals being refined. -/
+structure AreaLoopState where
+  lo : Rat
+  hi : Rat
+  intervals : List (Rat × Rat)
+deriving Repr, DecidableEq
+
+/-- The area added to the inscribed sector approximation when adjacent
+parameters `p < q < r` replace the old interval `[p,r]` by two intervals. -/
+def arctanAreaIncrement (p q r : Rat) : Rat :=
+  (2 * (r - p) * (q - p) * (r - q)) /
+    ((1 + p * p) * (1 + q * q) * (1 + r * r))
+
+/-- The area removed from the outer tangent sector approximation when adjacent
+parameters `p < q < r` replace the old interval `[p,r]` by two intervals. -/
+def arctanAreaDecrement (p q r : Rat) : Rat :=
+  ((r - p) * (q - p) * (r - q)) /
+    ((1 + p * r) * (1 + p * q) * (1 + q * r))
+
+namespace AreaLoopState
+
+def refineAux : Rat -> Rat -> List (Rat × Rat) -> AreaLoopState
+  | lo, hi, [] => { lo := lo, hi := hi, intervals := [] }
+  | lo, hi, (p, r) :: rest =>
+      let q := (p + r) / 2
+      let next := refineAux
+        (lo + arctanAreaIncrement p q r)
+        (hi - arctanAreaDecrement p q r)
+        rest
+      { next with intervals := (p, q) :: (q, r) :: next.intervals }
+
+end AreaLoopState
+
+def refineAreaLoopState (state : AreaLoopState) : AreaLoopState :=
+  AreaLoopState.refineAux state.lo state.hi state.intervals
+
+def iterateAreaLoopState : Nat -> AreaLoopState -> AreaLoopState
+  | 0, state => state
+  | n + 1, state => iterateAreaLoopState n (refineAreaLoopState state)
+
+def arctanAreaLoopInitial (x : Rat) : AreaLoopState :=
+  { lo := x / (1 + x * x), hi := x, intervals := [(0, x)] }
+
+def arctanAreaLoopState (x : Rat) (n : Nat) : AreaLoopState :=
+  iterateAreaLoopState n (arctanAreaLoopInitial x)
+
+def positiveLoopComputeAtStage (x : Rat) (n : Nat) : QInterval :=
+  let state := arctanAreaLoopState x n
+  { lo := state.lo, hi := state.hi }
+
+def positiveLoopRaw (x : Rat) : RealRaw where
+  compute := positiveLoopComputeAtStage x
+
+/-- Geometric arctangent, presented as an explicit rational update loop.  This
+duplicates the exhaustion algorithm rather than factoring it through the pi
+definition, so the later comparison theorem can relate two independent raw
+objects. -/
+def arctanGeomLoop (x : Rat) : RealRaw :=
+  if x = 0 then
+    RealRaw.ofRat 0
+  else if 0 <= x then
+    positiveLoopRaw x
+  else
+    -positiveLoopRaw (-x)
+
+theorem arctanAreaIncrement_eq_circleAreaIncrement (p m q : Rat) :
+    arctanAreaIncrement p m q = circleAreaIncrement p m q := rfl
+
+theorem arctanAreaDecrement_eq_circleAreaDecrement (p m q : Rat) :
+    arctanAreaDecrement p m q = circleAreaDecrement p m q := rfl
+
+theorem arctanGeomLoop_one_compute_eq (n : Nat) :
+    (arctanGeomLoop 1).compute n = positiveLoopComputeAtStage 1 n := by
+  have hnonzero : ¬(1 : Rat) = 0 := by native_decide
+  have hnonneg : (0 : Rat) <= 1 := by native_decide
+  simp [arctanGeomLoop, positiveLoopRaw, hnonzero, hnonneg]
+
+def toPiAreaLoopState (state : AreaLoopState) : AreaBoundsLoopState :=
+  { lo := state.lo, hi := state.hi, intervals := state.intervals }
+
+theorem refineAux_toPiAreaLoopState
+    (lo hi : Rat) (intervals : List (Rat × Rat)) :
+    AreaBoundsLoopState.refineAux lo hi intervals =
+      toPiAreaLoopState (AreaLoopState.refineAux lo hi intervals) := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaBoundsLoopState.refineAux, AreaLoopState.refineAux,
+        toPiAreaLoopState]
+  | cons pq rest ih =>
+      rcases pq with ⟨p, r⟩
+      let q := (p + r) / 2
+      simp [AreaBoundsLoopState.refineAux, AreaLoopState.refineAux,
+        toPiAreaLoopState, arctanAreaIncrement, circleAreaIncrement,
+        arctanAreaDecrement, circleAreaDecrement]
+      rw [ih]
+      simp [toPiAreaLoopState]
+
+theorem refineAreaBounds_toPiAreaLoopState (state : AreaLoopState) :
+    refineAreaBounds (toPiAreaLoopState state) =
+      toPiAreaLoopState (refineAreaLoopState state) := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_toPiAreaLoopState lo hi intervals
+
+theorem iterateAreaBounds_toPiAreaLoopState (n : Nat)
+    (state : AreaLoopState) :
+    iterateAreaBounds n (toPiAreaLoopState state) =
+      toPiAreaLoopState (iterateAreaLoopState n state) := by
+  induction n generalizing state with
+  | zero => rfl
+  | succ n ih =>
+      simp [iterateAreaBounds, iterateAreaLoopState]
+      rw [refineAreaBounds_toPiAreaLoopState]
+      exact ih (refineAreaLoopState state)
+
+theorem piCircleAreaLoopInitial_eq_arctanAreaLoopInitial_one :
+    piCircleAreaLoopInitial =
+      toPiAreaLoopState (arctanAreaLoopInitial 1) := by
+  native_decide
+
+theorem piCircleAreaLoopState_eq_arctanAreaLoopState_one
+    (n : Nat) :
+    piCircleAreaLoopState n =
+      toPiAreaLoopState (arctanAreaLoopState 1 n) := by
+  unfold piCircleAreaLoopState arctanAreaLoopState
+  rw [piCircleAreaLoopInitial_eq_arctanAreaLoopInitial_one]
+  exact iterateAreaBounds_toPiAreaLoopState n (arctanAreaLoopInitial 1)
+
+/-- The comparison target saying that the loop definition of pi agrees stage by
+stage with four times the loop definition of geometric arctangent at `1`. -/
+def PiAreaLoopCompatibility : Prop :=
+  forall n : Nat,
+    (((4 : Nat) * arctanGeomLoop (1 : Rat) : RealRaw).compute n) =
+      piCircleAreaLoop.compute n
+
+theorem piAreaLoopCompatibility : PiAreaLoopCompatibility := by
+  intro n
+  have hnonneg : (0 : Rat) <= 4 := by native_decide
+  have hstate := piCircleAreaLoopState_eq_arctanAreaLoopState_one n
+  change (RealRaw.scaleRat (4 : Rat) (arctanGeomLoop (1 : Rat))).compute n =
+    piCircleAreaLoop.compute n
+  simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, hnonneg,
+    arctanGeomLoop_one_compute_eq, positiveLoopComputeAtStage,
+    piCircleAreaLoop, piCircleAreaLoopCompute, hstate,
+    toPiAreaLoopState]
+
 def functionRaw : PartialRealFunRaw where
   definedAt := fun _ => True
   compute := fun x _ => (arctanGeom x).compute

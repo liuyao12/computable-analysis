@@ -63,6 +63,96 @@ algorithm requiring an explicit modulus.
   the argument-principle box-search route.
 \end{enumerate}
 
+\section{Pi scoreboard}
+\lean{ComputableAnalysis.piLeibniz}
+\lean{ComputableAnalysis.piMachin}
+\lean{ComputableAnalysis.piCircleArea}
+\lean{ComputableAnalysis.piCircumference}
+\lean{ComputableAnalysis.PiProofs.leibnizValid}
+\lean{ComputableAnalysis.PiProofs.machinValid}
+\lean{ComputableAnalysis.PiProofs.fourArctanOneValid}
+\lean{ComputableAnalysis.PiProofs.areaValid_of_nested_and_shrinking}
+\lean{ComputableAnalysis.PiProofs.PiCircleAreaLoopOrdered}
+\lean{ComputableAnalysis.PiProofs.PiCircleAreaLoopNested}
+\lean{ComputableAnalysis.PiProofs.PiCircleAreaLoopWidthsShrink}
+\lean{ComputableAnalysis.PiProofs.piCircleAreaLoopValid_of_ordered_nested_and_shrinking}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_nested_and_shrinking}
+\lean{ComputableAnalysis.PiProofs.GeometricValidityRemainders}
+\lean{ComputableAnalysis.PiProofs.piLeibniz_equiv_four_arctan_one}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.archimedesTheorem}
+\lean{ComputableAnalysis.ArctanGeometry.piAreaLoopCompatibility}
+\lean{ComputableAnalysis.PiProofs.four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchLaw}
+
+This score counts completed formalization work.  A \(\pi\)-computation counts
+as definition-complete only after its interval sequence has been verified as a
+valid raw real: each interval is ordered, the sequence is nested, and the
+widths shrink to zero.  Equivalence counts when there is a formalized chain of
+\code{RealRaw.Equiv} theorems connecting the computation to
+\code{piCircleArea}.
+
+The current score is:
+\[
+  \text{definitions completed}=3/7,\qquad
+  \text{equivalences to \code{piCircleArea} formalized}=3/7.
+\]
+
+\begin{center}
+\begin{tabular}{p{0.22\textwidth}p{0.46\textwidth}cc}
+\textbf{Computation} & \textbf{Description} &
+\textbf{Definition} & \textbf{Equiv.}\\
+\hline
+\code{piLeibniz} &
+Alternating Leibniz series, \(4(1-1/3+1/5-\cdots)\). &
+\(\checkmark\) & \(\times\)\\
+\code{piMachin} &
+Machin formula \(4(4\arctan(1/5)-\arctan(1/239))\). &
+\(\checkmark\) & \(\times\)\\
+\code{piCircleArea} &
+Rational midpoint area exhaustion using increment/decrement triangles; current
+baseline for pi comparisons. &
+\(\times\) & \(\checkmark\)\\
+\code{piCircumference} &
+Rational polygon circumference using interval square roots for side lengths. &
+\(\times\) & \(\checkmark\)\\
+\code{4 * arctan(1)} &
+Power-series arctangent at \(1\), equivalent to the Leibniz computation. &
+\(\checkmark\) & \(\times\)\\
+\code{4 * arctanGeom(1)} &
+Geometric sector-area arctangent at slope \(1\). &
+\(\times\) & \(\checkmark\)\\
+\code{4 * arctanIntegral(1)} &
+Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
+\(\times\) & \(\times\)
+\end{tabular}
+\end{center}
+
+The checkmarks in the equivalence column are witnessed by
+\code{PiProofs.archimedesTheorem},
+\code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}, and the baseline
+role of \code{piCircleArea}.  The following routes are formalized, but still
+depend on missing hypotheses:
+\begin{center}
+\begin{tabular}{lll}
+\textbf{Pending fact} & \textbf{Lean theorem or target} & \textbf{Missing input}\\
+\hline
+power-series arctangent to area \(\pi\) &
+\code{PiProofs.four\_arctan\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement} &
+\code{ArctanGeometry.PowerSeriesAgreesOnUnit}\\
+integral arctangent to area \(\pi\) &
+\code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
+\code{ArctanIntegralGeomFunctionAgreement}\\
+Leibniz to Machin &
+\code{PiProofs.leibnizEqMachin\_of\_machinBranchLaw} &
+Machin branch law\\
+area and circumference validity &
+\code{PiProofs.GeometricValidityRemainders} &
+midpoint-loop ordering, dyadic nesting, and width shrinkage
+\end{tabular}
+\end{center}
+
 \section{Lean declaration index}
 
 \begin{itemize}
@@ -89,8 +179,10 @@ algorithm requiring an explicit modulus.
 
   \item Pi:
   \code{piLeibniz}, \code{piMachin}, \code{piCircleArea},
-  \code{piCircumference}, \code{PiProofs.archimedesTheorem},
-  \code{PiProofs.LeibnizEqMachin}.
+  \code{piCircumference}, \code{PiProofs.PiCircleAreaLoopOrdered},
+  \code{PiProofs.PiCircleAreaLoopNested},
+  \code{PiProofs.PiCircleAreaLoopWidthsShrink},
+  \code{PiProofs.archimedesTheorem}, \code{PiProofs.LeibnizEqMachin}.
 
   \item Series and elementary functions:
   \code{DirichletSeries.zetaTwoRaw},

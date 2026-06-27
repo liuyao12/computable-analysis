@@ -61,7 +61,78 @@ def rationalPointPathLength (points : List PiCirclePoint) (n : Nat) : QInterval 
           hi := length.hi + tail.hi }
   totalLength points
 
-/-- Pi as the area of the unit disk. -/
+/-- State for the update-loop presentation of area exhaustion.  The interval
+`[lo, hi]` stores the current lower and upper quarter-sector area bounds, while
+`intervals` stores the rational parameter intervals still being refined. -/
+structure AreaBoundsLoopState where
+  lo : Rat
+  hi : Rat
+  intervals : List (Rat × Rat)
+deriving Repr, DecidableEq
+
+/-- The area added to the inscribed chord fan when adjacent parameters
+`p < q < r` replace the old interval `[p,r]` by two intervals. -/
+def circleAreaIncrement (p q r : Rat) : Rat :=
+  (2 * (r - p) * (q - p) * (r - q)) /
+    ((1 + p * p) * (1 + q * q) * (1 + r * r))
+
+/-- The area removed from the outer tangent fan when adjacent parameters
+`p < q < r` replace the old interval `[p,r]` by two intervals. -/
+def circleAreaDecrement (p q r : Rat) : Rat :=
+  ((r - p) * (q - p) * (r - q)) /
+    ((1 + p * r) * (1 + p * q) * (1 + q * r))
+
+namespace AreaBoundsLoopState
+
+def refineAux : Rat -> Rat -> List (Rat × Rat) -> AreaBoundsLoopState
+  | lo, hi, [] => { lo := lo, hi := hi, intervals := [] }
+  | lo, hi, (p, r) :: rest =>
+      let q := (p + r) / 2
+      let next := refineAux
+        (lo + circleAreaIncrement p q r)
+        (hi - circleAreaDecrement p q r)
+        rest
+      { next with intervals := (p, q) :: (q, r) :: next.intervals }
+
+end AreaBoundsLoopState
+
+/-- Refine every current rational parameter interval once, updating the lower
+and upper area bounds by the explicit increment and decrement formulas. -/
+def refineAreaBounds (state : AreaBoundsLoopState) : AreaBoundsLoopState :=
+  AreaBoundsLoopState.refineAux state.lo state.hi state.intervals
+
+/-- Iterate the area-bound refinement loop. -/
+def iterateAreaBounds : Nat -> AreaBoundsLoopState -> AreaBoundsLoopState
+  | 0, state => state
+  | n + 1, state => iterateAreaBounds n (refineAreaBounds state)
+
+def piCircleAreaLoopInitial : AreaBoundsLoopState :=
+  { lo := 1 / 2, hi := 1, intervals := [(0, 1)] }
+
+def piCircleAreaLoopState (n : Nat) : AreaBoundsLoopState :=
+  iterateAreaBounds n piCircleAreaLoopInitial
+
+def piCircleAreaLoopCompute (n : Nat) : QInterval :=
+  let state := piCircleAreaLoopState n
+  { lo := 4 * state.lo, hi := 4 * state.hi }
+
+/-- Pi as the area of the unit disk, presented as the intended rational update
+loop: start with the quarter-square bounds and refine each rational parameter
+interval by one midpoint insertion. -/
+def piCircleAreaLoop : RealRaw where
+  compute := piCircleAreaLoopCompute
+
+theorem piCircleAreaLoop_compute_eq (n : Nat) :
+    piCircleAreaLoop.compute n = piCircleAreaLoopCompute n := rfl
+
+theorem piCircleAreaLoop_compute_zero :
+    piCircleAreaLoop.compute 0 = { lo := 2, hi := 4 } := by
+  native_decide
+
+/-- Pi as the area of the unit disk, currently in the polygon-boundary form used
+by the existing finite comparison proofs.  This is proof scaffolding for the
+same midpoint-refinement algorithm exposed above, and should be folded into the
+loop presentation once that verification is complete. -/
 def piCircleArea : RealRaw where
   compute := fun n =>
     let stage : Nat := 2 ^ n

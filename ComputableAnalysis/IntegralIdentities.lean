@@ -178,12 +178,79 @@ theorem oneOverOnePlusSquareOnInterval_valid (a b : Rat) :
 /-- The theorem target for the integral arctangent comparison on `[0, x]`.
 It says that the integral of `1 / (1 + t^2)` computes the chosen arctangent
 branch. -/
+abbrev ArctanIntegralConstruction (x : Rat) :=
+  Integral.Construction
+    (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x
+
+def arctanIntegral (x : Rat)
+    (c : ArctanIntegralConstruction x) : RealRaw :=
+  Integral.integral
+    (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x c
+
+theorem arctanIntegral_valid (x : Rat)
+    (c : ArctanIntegralConstruction x) :
+    (arctanIntegral x c).Valid :=
+  by
+    simpa [arctanIntegral] using FTC.integral_valid_of_construction c
+
 def ArctanIntegralComputes (x : Rat) (arctanBranch : RealRaw) : Prop :=
-  Exists fun c : Integral.Construction
-      (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x =>
-    (Integral.integral
-      (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw 0 x c).Equiv
-      arctanBranch
+  Exists fun c : ArctanIntegralConstruction x =>
+    (arctanIntegral x c).Equiv arctanBranch
+
+/-- Pointwise version of the integral/geometric arctangent comparison.  The
+function-level statement below is the preferred interface; this pointwise form
+is useful for pi at `x = 1`. -/
+def ArctanIntegralGeomAgreement (x : Rat) : Prop :=
+  ArctanIntegralComputes x (ArctanGeometry.arctanGeom x)
+
+/-- A choice of integral construction for each nonnegative rational input.
+
+The current definite-integral wrapper is oriented from `0` to `x`, so this
+first integral-arctangent representation is naturally defined on `0 <= x`.
+The overlap convention then compares it with total geometric arctangent exactly
+on the nonnegative rationals. -/
+structure ArctanIntegralData where
+  constructionAt : forall x, 0 <= x -> ArctanIntegralConstruction x
+
+def arctanIntegralFunctionRaw
+    (data : ArctanIntegralData) : PartialRealFunRaw where
+  definedAt := fun x => 0 <= x
+  compute := fun x hx => (arctanIntegral x (data.constructionAt x hx)).compute
+  rate := fun x hx => (arctanIntegral x (data.constructionAt x hx)).rate
+
+def arctanIntegralRepresentation
+    (data : ArctanIntegralData) :
+    Elementary.Arctan.FunctionRepresentation where
+  name := "arctan.integral"
+  raw := arctanIntegralFunctionRaw data
+
+def ArctanIntegralGeomFunctionAgreement
+    (data : ArctanIntegralData) : Prop :=
+  Elementary.Arctan.Equivalent
+    (arctanIntegralRepresentation data)
+    ArctanGeometry.representation
+
+theorem arctanIntegral_equiv_arctanGeom_of_functionAgreement
+    (data : ArctanIntegralData)
+    (h : ArctanIntegralGeomFunctionAgreement data)
+    {x : Rat} (hx : 0 <= x) :
+    (arctanIntegral x (data.constructionAt x hx)).Equiv
+      (ArctanGeometry.arctanGeom x) := by
+  have hgeom : ArctanGeometry.representation.raw.definedAt x := by
+    simp [ArctanGeometry.representation, ArctanGeometry.functionRaw]
+  simpa [ArctanIntegralGeomFunctionAgreement,
+    arctanIntegralRepresentation, arctanIntegralFunctionRaw,
+    ArctanGeometry.representation, ArctanGeometry.functionRaw,
+    PartialRealFunRaw.AgreeOnOverlap, RealRaw.Equiv] using
+    h x hx hgeom
+
+theorem arctanIntegralGeomAgreement_one_of_functionAgreement
+    (data : ArctanIntegralData)
+    (h : ArctanIntegralGeomFunctionAgreement data) :
+    ArctanIntegralGeomAgreement (1 : Rat) := by
+  exact ⟨data.constructionAt (1 : Rat) (by native_decide),
+    arctanIntegral_equiv_arctanGeom_of_functionAgreement
+      data h (by native_decide)⟩
 
 /-- A resulting pi computation from the integral arctangent at `1`. -/
 def PiFromArctanIntegral (arctanAtOne : RealRaw) : RealRaw :=

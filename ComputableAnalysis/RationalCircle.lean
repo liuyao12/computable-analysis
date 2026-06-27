@@ -905,6 +905,9 @@ def doubleCos (u : Rat) : Rat :=
 def doubleSin (u : Rat) : Rat :=
   (doublePoint u).y
 
+def quarterComplementParameter (u : Rat) : Rat :=
+  (1 - u) / (1 + u)
+
 theorem cos_eq (u : Rat) :
     cos u = (1 - u * u) / (1 + u * u) := rfl
 
@@ -1123,6 +1126,24 @@ theorem composedSin_zero_right (u : Rat) :
     composedSin u 0 = sin u := by
   rw [composedSin_comm, composedSin_zero_left]
 
+theorem composedCos_one_left (u : Rat) :
+    composedCos 1 u = -sin u := by
+  rw [composed_cos_eq, cos_one, sin_one]
+  grind
+
+theorem composedSin_one_left (u : Rat) :
+    composedSin 1 u = cos u := by
+  rw [composed_sin_eq, cos_one, sin_one]
+  grind
+
+theorem composedCos_one_right (u : Rat) :
+    composedCos u 1 = -sin u := by
+  rw [composedCos_comm, composedCos_one_left]
+
+theorem composedSin_one_right (u : Rat) :
+    composedSin u 1 = cos u := by
+  rw [composedSin_comm, composedSin_one_left]
+
 theorem cos_neg (u : Rat) :
     cos (-u) = cos u := by
   unfold cos point Stage.point
@@ -1162,6 +1183,48 @@ theorem csc_neg (u : Rat) :
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.neg_mul, Rat.mul_neg, Rat.mul_assoc, Rat.mul_comm]
 
+theorem composed_cos_sub (u v : Rat) :
+    composedCos u (-v) = cos u * cos v + sin u * sin v := by
+  rw [composed_cos_eq, cos_neg, sin_neg]
+  grind [Rat.sub_eq_add_neg, Rat.mul_neg, Rat.neg_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem composed_sin_sub (u v : Rat) :
+    composedSin u (-v) = sin u * cos v - cos u * sin v := by
+  rw [composed_sin_eq, cos_neg, sin_neg]
+  grind [Rat.sub_eq_add_neg, Rat.mul_neg, Rat.neg_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem composed_cos_neg_left (u v : Rat) :
+    composedCos (-u) v = cos u * cos v + sin u * sin v := by
+  rw [composed_cos_eq, cos_neg, sin_neg]
+  grind [Rat.sub_eq_add_neg, Rat.mul_neg, Rat.neg_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem composed_sin_neg_left (u v : Rat) :
+    composedSin (-u) v = cos u * sin v - sin u * cos v := by
+  rw [composed_sin_eq, cos_neg, sin_neg]
+  grind [Rat.sub_eq_add_neg, Rat.mul_neg, Rat.neg_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem composedCos_neg_one_left (u : Rat) :
+    composedCos (-1) u = sin u := by
+  rw [composed_cos_eq, cos_neg, sin_neg, cos_one, sin_one]
+  grind [Rat.neg_mul, Rat.mul_neg]
+
+theorem composedSin_neg_one_left (u : Rat) :
+    composedSin (-1) u = -cos u := by
+  rw [composed_sin_eq, cos_neg, sin_neg, cos_one, sin_one]
+  grind [Rat.neg_mul, Rat.mul_neg]
+
+theorem composedCos_neg_one_right (u : Rat) :
+    composedCos u (-1) = sin u := by
+  rw [composedCos_comm, composedCos_neg_one_left]
+
+theorem composedSin_neg_one_right (u : Rat) :
+    composedSin u (-1) = -cos u := by
+  rw [composedSin_comm, composedSin_neg_one_left]
+
 theorem composedCos_self_neg (u : Rat) :
     composedCos u (-u) = 1 := by
   rw [composed_cos_eq, cos_neg, sin_neg]
@@ -1175,6 +1238,70 @@ theorem composedSin_self_neg (u : Rat) :
   rw [composed_sin_eq, cos_neg, sin_neg]
   grind [Rat.mul_neg, Rat.neg_mul, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm]
+
+theorem product_to_sum_cos_cos (u v : Rat) :
+    composedCos u v + composedCos u (-v) = 2 * cos u * cos v := by
+  rw [composed_cos_sub, composed_cos_eq]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem product_to_sum_sin_sin (u v : Rat) :
+    composedCos u (-v) - composedCos u v = 2 * sin u * sin v := by
+  rw [composed_cos_sub, composed_cos_eq]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem product_to_sum_sin_cos (u v : Rat) :
+    composedSin u v + composedSin u (-v) = 2 * sin u * cos v := by
+  rw [composed_sin_sub, composed_sin_eq]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem product_to_sum_cos_sin (u v : Rat) :
+    composedSin u v - composedSin u (-v) = 2 * cos u * sin v := by
+  rw [composed_sin_sub, composed_sin_eq]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem one_add_ne_zero_of_nonneg {u : Rat} (hu : 0 <= u) :
+    Ne (1 + u) 0 := by
+  grind
+
+theorem one_add_pos_of_nonneg {u : Rat} (hu : 0 <= u) :
+    0 < 1 + u := by
+  grind
+
+theorem quarterComplementParameter_zero :
+    quarterComplementParameter 0 = 1 := by
+  native_decide
+
+theorem quarterComplementParameter_one :
+    quarterComplementParameter 1 = 0 := by
+  native_decide
+
+theorem cos_quarterComplementParameter {u : Rat}
+    (hu : Ne (1 + u) 0) :
+    cos (quarterComplementParameter u) = sin u := by
+  simp [quarterComplementParameter, cos, sin, point, Stage.point, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg, Rat.mul_inv_cancel]
+
+theorem sin_quarterComplementParameter {u : Rat}
+    (hu : Ne (1 + u) 0) :
+    sin (quarterComplementParameter u) = cos u := by
+  simp [quarterComplementParameter, cos, sin, point, Stage.point, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg, Rat.mul_inv_cancel]
+
+theorem cos_quarterComplementParameter_of_nonneg {u : Rat}
+    (hu : 0 <= u) :
+    cos (quarterComplementParameter u) = sin u :=
+  cos_quarterComplementParameter (one_add_ne_zero_of_nonneg hu)
+
+theorem sin_quarterComplementParameter_of_nonneg {u : Rat}
+    (hu : 0 <= u) :
+    sin (quarterComplementParameter u) = cos u :=
+  sin_quarterComplementParameter (one_add_ne_zero_of_nonneg hu)
 
 theorem cosRaw_valid (u : Rat) :
     (cosRaw u).Valid := by
@@ -1279,8 +1406,36 @@ structure BasicIdentityPackage : Prop where
   add_sin_zero_left : forall u : Rat, composedSin 0 u = sin u
   add_cos_zero_right : forall u : Rat, composedCos u 0 = cos u
   add_sin_zero_right : forall u : Rat, composedSin u 0 = sin u
+  add_cos_quarter_left : forall u : Rat, composedCos 1 u = -sin u
+  add_sin_quarter_left : forall u : Rat, composedSin 1 u = cos u
+  add_cos_quarter_right : forall u : Rat, composedCos u 1 = -sin u
+  add_sin_quarter_right : forall u : Rat, composedSin u 1 = cos u
+  add_cos_neg_quarter_left : forall u : Rat, composedCos (-1) u = sin u
+  add_sin_neg_quarter_left : forall u : Rat, composedSin (-1) u = -cos u
+  add_cos_neg_quarter_right : forall u : Rat, composedCos u (-1) = sin u
+  add_sin_neg_quarter_right : forall u : Rat, composedSin u (-1) = -cos u
   add_cos_self_neg : forall u : Rat, composedCos u (-u) = 1
   add_sin_self_neg : forall u : Rat, composedSin u (-u) = 0
+  sub_cos_right :
+    forall u v : Rat, composedCos u (-v) = cos u * cos v + sin u * sin v
+  sub_sin_right :
+    forall u v : Rat, composedSin u (-v) = sin u * cos v - cos u * sin v
+  sub_cos_left :
+    forall u v : Rat, composedCos (-u) v = cos u * cos v + sin u * sin v
+  sub_sin_left :
+    forall u v : Rat, composedSin (-u) v = cos u * sin v - sin u * cos v
+  product_sum_cos_cos :
+    forall u v : Rat,
+      composedCos u v + composedCos u (-v) = 2 * cos u * cos v
+  product_sum_sin_sin :
+    forall u v : Rat,
+      composedCos u (-v) - composedCos u v = 2 * sin u * sin v
+  product_sum_sin_cos :
+    forall u v : Rat,
+      composedSin u v + composedSin u (-v) = 2 * sin u * cos v
+  product_sum_cos_sin :
+    forall u v : Rat,
+      composedSin u v - composedSin u (-v) = 2 * cos u * sin v
   double_cos :
     forall u : Rat, doubleCos u = sq (cos u) - sq (sin u)
   double_cos_one_sub_two_sin_sq :
@@ -1301,6 +1456,20 @@ structure BasicIdentityPackage : Prop where
   cot_odd : forall u : Rat, cot (-u) = -cot u
   sec_even : forall u : Rat, sec (-u) = sec u
   csc_odd : forall u : Rat, csc (-u) = -csc u
+  complement_zero : quarterComplementParameter 0 = 1
+  complement_one : quarterComplementParameter 1 = 0
+  complement_cos :
+    forall u : Rat, Ne (1 + u) 0 ->
+      cos (quarterComplementParameter u) = sin u
+  complement_sin :
+    forall u : Rat, Ne (1 + u) 0 ->
+      sin (quarterComplementParameter u) = cos u
+  complement_cos_first_quadrant :
+    forall u : Rat, 0 <= u ->
+      cos (quarterComplementParameter u) = sin u
+  complement_sin_first_quadrant :
+    forall u : Rat, 0 <= u ->
+      sin (quarterComplementParameter u) = cos u
 
 theorem basicIdentityPackage : BasicIdentityPackage where
   circle := cos_sq_add_sin_sq
@@ -1328,8 +1497,24 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   add_sin_zero_left := composedSin_zero_left
   add_cos_zero_right := composedCos_zero_right
   add_sin_zero_right := composedSin_zero_right
+  add_cos_quarter_left := composedCos_one_left
+  add_sin_quarter_left := composedSin_one_left
+  add_cos_quarter_right := composedCos_one_right
+  add_sin_quarter_right := composedSin_one_right
+  add_cos_neg_quarter_left := composedCos_neg_one_left
+  add_sin_neg_quarter_left := composedSin_neg_one_left
+  add_cos_neg_quarter_right := composedCos_neg_one_right
+  add_sin_neg_quarter_right := composedSin_neg_one_right
   add_cos_self_neg := composedCos_self_neg
   add_sin_self_neg := composedSin_self_neg
+  sub_cos_right := composed_cos_sub
+  sub_sin_right := composed_sin_sub
+  sub_cos_left := composed_cos_neg_left
+  sub_sin_left := composed_sin_neg_left
+  product_sum_cos_cos := product_to_sum_cos_cos
+  product_sum_sin_sin := product_to_sum_sin_sin
+  product_sum_sin_cos := product_to_sum_sin_cos
+  product_sum_cos_sin := product_to_sum_cos_sin
   double_cos := double_cos_eq_sq_sub_sq
   double_cos_one_sub_two_sin_sq := double_cos_eq_one_sub_two_sin_sq
   double_cos_two_cos_sq_sub_one := double_cos_eq_two_cos_sq_sub_one
@@ -1345,6 +1530,14 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   cot_odd := cot_neg
   sec_even := sec_neg
   csc_odd := csc_neg
+  complement_zero := quarterComplementParameter_zero
+  complement_one := quarterComplementParameter_one
+  complement_cos := fun _ h => cos_quarterComplementParameter h
+  complement_sin := fun _ h => sin_quarterComplementParameter h
+  complement_cos_first_quadrant := fun _ h =>
+    cos_quarterComplementParameter_of_nonneg h
+  complement_sin_first_quadrant := fun _ h =>
+    sin_quarterComplementParameter_of_nonneg h
 
 end Trigonometry
 

@@ -26,81 +26,115 @@ determinants of rational coordinates are rational, so no square-root
 subroutine is needed.  Thus the first computation of \(\pi\) in this
 development is an area computation, not a circumference computation.
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
 \centering
-\begin{tikzpicture}[scale=2.15, line cap=round, line join=round]
-  \draw[->,gray] (-0.05,0) -- (1.15,0);
-  \draw[->,gray] (0,-0.05) -- (0,1.15);
-  \draw[thick] (1,0) arc[start angle=0,end angle=90,radius=1];
-  \draw[blue,thick] (1,0) -- (0.9239,0.3827) -- (0.7071,0.7071) --
-    (0.3827,0.9239) -- (0,1);
-  \foreach \x/\y in {1/0,0.9239/0.3827,0.7071/0.7071,0.3827/0.9239,0/1}
-    \fill[blue] (\x,\y) circle (0.015);
-  \node[align=center] at (0.55,-0.28) {regular subdivision\\non-rational vertices};
+\begin{tikzpicture}[scale=3.35, line cap=round, line join=round, >=stealth]
+  \coordinate (O) at (0,0);
+  \coordinate (P) at (1,0);
+  \coordinate (M) at (0.6,0.8);
+  \coordinate (Q) at (0,1);
+  \coordinate (T) at (1,1);
+  \coordinate (A) at (1,0.5);
+  \coordinate (B) at (0.333,1);
 
-  \begin{scope}[xshift=1.65cm]
-    \draw[->,gray] (-0.05,0) -- (1.15,0);
-    \draw[->,gray] (0,-0.05) -- (0,1.15);
-    \draw[thick] (1,0) arc[start angle=0,end angle=90,radius=1];
-    \draw[red,thick] (1,0) -- (0.8824,0.4706) -- (0.6,0.8) --
-      (0.28,0.96) -- (0,1);
-    \foreach \x/\y in {1/0,0.8824/0.4706,0.6/0.8,0.28/0.96,0/1}
-      \fill[red] (\x,\y) circle (0.015);
-    \node[align=center] at (0.55,-0.28) {dyadic rational parameters\\Pythagorean points};
-  \end{scope}
+  \fill[teal!25] (P) -- (M) -- (Q) -- cycle;
+  \fill[orange!28] (A) -- (T) -- (B) -- cycle;
+
+  \draw[->,gray!70] (-0.06,0) -- (1.48,0);
+  \draw[->,gray!70] (0,-0.06) -- (0,1.15);
+  \draw[thick] (P) arc[start angle=0,end angle=90,radius=1];
+
+  \draw[gray!55] (O) -- (P);
+  \draw[gray!55] (O) -- (M);
+  \draw[gray!55] (O) -- (Q);
+
+  \draw[blue!55,dashed] (P) -- (Q);
+  \draw[blue!75!black,very thick] (P) -- (M) -- (Q);
+
+  \draw[orange!70!black,dashed] (P) -- (T) -- (Q);
+  \draw[red!72!black,very thick] (P) -- (A) -- (M) -- (B) -- (Q);
+
+  \foreach \z in {O,P,M,Q,T,A,B}
+    \fill[black] (\z) circle (0.012);
+
+  \node[below left] at (O) {\scriptsize \(O\)};
+  \node[below right] at (P) {\scriptsize \(P(p)\)};
+  \node[anchor=south west] at (0.59,0.78) {\scriptsize \(P(m)\)};
+  \node[left] at (Q) {\scriptsize \(P(q)\)};
+  \node[above left] at (T) {\scriptsize old tangent};
+
+  \node[align=left,teal!50!black,anchor=west] at (1.16,0.38)
+    {\scriptsize increment\\[-1pt]\scriptsize added};
+  \draw[->,teal!50!black] (1.14,0.41) -- (0.55,0.55);
+  \node[align=left,orange!60!black,anchor=west] at (1.16,0.84)
+    {\scriptsize decrement\\[-1pt]\scriptsize removed};
+  \draw[->,orange!60!black] (1.14,0.87) -- (0.75,0.93);
 \end{tikzpicture}
-\caption{On the first quadrant, regular angular subdivision and rational
-parameter subdivision give visibly similar exhaustion polygons, but only the
-second keeps every vertex rational.}
-\label{fig:regular-vs-rational-polygons}
+\caption{One rational bisection step.  Inserting \(P(m)\) replaces the old
+inscribed chord by two chords and adds the green triangle to the lower bound.
+The same insertion replaces the old tangent cap by two smaller tangent caps
+and removes the orange triangle from the upper bound.}
+\label{fig:area-refinement-step}
 \end{figure}
 
 \begin{definition}[Circle-area exhaustion algorithm]\label{def:circle-area-stage-algorithm}
+\lean{ComputableAnalysis.piCircleAreaLoop}
 \lean{ComputableAnalysis.piCircleArea}
+\lean{ComputableAnalysis.circleAreaIncrement}
+\lean{ComputableAnalysis.circleAreaDecrement}
+\lean{ComputableAnalysis.refineAreaBounds}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
 \uses{rem:pseudocode-convention}
-The compact stage algorithm is a finite rational polygon computation.  For a
-rational endpoint \(x\), \code{sector(x,n)} takes dyadic rational parameters
-from \(0\) to \(x\), maps them to rational circle points, and returns the areas
-of the inscribed chord fan and the outer tangent fan.  The case \(x=1\) is the
-quarter circle, so multiplying by \(4\) gives the area definition of \(\pi\).
+The loop form of the stage algorithm keeps a current lower bound \(a\), a
+current upper bound \(b\), and the list of rational parameter intervals still
+being refined.  On one interval \([p,r]\), let \(q=(p+r)/2\).  The lower-bound
+increment is the area of the new chord triangle, and the upper-bound decrement
+is the tangent triangle removed from the old outer cap:
+\[
+  \Delta(p,q,r)=
+    \frac{2(r-p)(q-p)(r-q)}
+      {(1+p^2)(1+q^2)(1+r^2)},
+\]
+\[
+  \nabla(p,q,r)=
+    \frac{(r-p)(q-p)(r-q)}
+      {(1+pr)(1+pq)(1+qr)}.
+\]
+The case \(p=0,r=1\) is the quarter circle.  The initial quarter-sector bounds
+are \(1/2\le\pi/4\le1\), and the final answer is multiplied by \(4\).
 \begin{verbatim}
-def P(u):
-    d = 1 + u*u
-    return ((1 - u*u)/d, 2*u/d)
+def piCircleArea(n):
+    a, b = 1/2, 1
+    intervals = [(0, 1)]
 
-def det(p, q):
-    return p[0]*q[1] - p[1]*q[0]
+    def increment(p, q, r):
+        return (2*(r-p)*(q-p)*(r-q) /
+                ((1+p*p)*(1+q*q)*(1+r*r)))
 
-def area(vs):
-    n = len(vs)
-    return abs(sum(det(vs[i], vs[(i+1) % n]) for i in range(n)) / 2)
+    def decrement(p, q, r):
+        return ((r-p)*(q-p)*(r-q) /
+                ((1+p*r)*(1+p*q)*(1+q*r)))
 
-def tangent(p, q):
-    z = det(p, q)
-    return ((q[1] - p[1])/z, (p[0] - q[0])/z)
+    for _ in range(n):
+        next_intervals = []
+        for p, r in intervals:
+            q = (p + r) / 2
+            a = a + increment(p, q, r)
+            b = b - decrement(p, q, r)
+            next_intervals.append((p, q))
+            next_intervals.append((q, r))
+        intervals = next_intervals
 
-def sector(x, n):
-    m = 2**n
-    ps = [P(x*k/m) for k in range(m + 1)]
-    ts = [tangent(ps[i], ps[i+1]) for i in range(m)]
-    outer = [ps[0]] + [z for i,t in enumerate(ts) for z in (t, ps[i+1])]
-    return [area([(0,0)] + ps), area([(0,0)] + outer)]
-
-def pi_area(n):
-    lo, hi = sector(1, n)
-    return [4*lo, 4*hi]
-
-def atan_area(x, n):
-    return sector(x, n)
+    return [4*a, 4*b]
 \end{verbatim}
 Every operation in this pseudocode is a rational operation.  The returned pair
-for \code{pi\_area} is the first raw interval algorithm for \(\pi\): the lower
-endpoint is the area of the refined inscribed rational polygon, and the upper
-endpoint is the area of the corresponding refined outer tangent polygon.  The
-same \code{sector} routine is also the geometric arctangent algorithm used
-below; in particular \(\pi = 4\arctan(1)\) is already visible at the level of
-the stage computation.
+for \code{piCircleArea} is meant to be the first raw interval algorithm for
+\(\pi\): the lower endpoint is the area of the refined inscribed rational
+polygon, and the upper endpoint is the area of the corresponding refined outer
+tangent polygon.  The Lean development is being consolidated so that this
+increment/decrement loop is the single public \code{piCircleArea} definition;
+the polygon-boundary presentation should remain only as proof scaffolding where
+it is useful.
 \end{definition}
 
 \section{Overview}
@@ -131,11 +165,13 @@ refactoring.  The blueprint should therefore track stable interfaces rather
 than overcommit to the first internal implementation of the bisection search,
 period reduction, or quadrant bookkeeping.  Chapter~\ref{ch:rational-circle-trigonometry}
 now owns the geometric route to trigonometry: first define \(\pi\) by rational
-polygonal area, then observe that the same sector algorithm computes
-\(\arctan(x)\), then construct the monotone inverse of arctangent.  Sine and
-cosine are deliberately not functions of radian inputs in their first
-interface.  Their input is a rational number \(t\), interpreted as ``the angle
-\(t\pi/2\)''.  This makes \(t=1\) the point at ninety degrees and keeps the
+polygonal area, then observe that the same refinement pattern computes
+\(\arctan(x)\), then construct the monotone inverse of arctangent.  For
+clarity, the arctangent object is not factored through the \(\pi\) object: it
+uses the same increment and decrement formulas, but is packaged as its own raw
+function.  Sine and cosine are deliberately not functions of radian inputs in
+their first interface.  Their input is a rational number \(t\), interpreted as
+``the angle \(t\pi/2\)''.  This makes \(t=1\) the point at ninety degrees and keeps the
 external input rational even though the corresponding radian value is generally
 not rational.
 
@@ -150,9 +186,11 @@ The stable interface is:
   \hbox{identity package}.
 \]
 The sanity check for later chapters is always equivalence of \(\pi\)
-representatives: the geometric area, geometric circumference, Leibniz, and
-Machin algorithms should become interchangeable after the finite estimates and
-branch comparisons are supplied.
+representatives.  Chapter~\ref{ch:rational-circle-trigonometry} should settle
+the geometric area/circumference comparison and the geometric identity
+\(\pi=4\arctan(1)\).  Comparisons with the Leibniz and Machin algorithms pass
+through the power-series arctangent and belong after the series estimates are
+available.
 
 
 \section{Arctangent, its inverse, and normalized quarter-turn angles}
@@ -160,16 +198,33 @@ branch comparisons are supplied.
 \begin{definition}[Geometric arctangent]
 \label{def:geometric-arctan}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeomLoop}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
+\lean{ComputableAnalysis.ArctanGeometry.PiAreaLoopCompatibility}
+\lean{ComputableAnalysis.ArctanGeometry.piAreaLoopCompatibility}
 \uses{def:circle-area-stage-algorithm,rem:rational-circle-point}
 For a rational slope \(x\), the point \(P(x)\) lies on the unit circle at twice
 the angle whose tangent is \(x\).  The geometric arctangent algorithm returns
 the sector area between \(P(0)=(1,0)\) and \(P(x)\), with oddness used for
 negative slopes.  Thus it is an area algorithm for \(\arctan(x)\), separate
 from the power-series algorithm of Chapter~\ref{ch:infinite-series}.  The
-special case \(x=1\) is the quarter circle, so the stage equality
-\(\pi=4\arctan(1)\) is a geometric fact before any series comparison enters.
+special case \(x=1\) is the quarter circle, so the loop-level comparison
+\(\pi=4\arctan(1)\) is geometric before any series comparison enters.
 \end{definition}
+
+\begin{theorem}[Geometric arctangent gives the area definition of pi]
+\label{thm:geometric-arctan-one-area-pi}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\uses{def:circle-area-stage-algorithm,def:geometric-arctan}
+The geometric sector-area arctangent satisfies
+\[
+  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
+\]
+The Lean proof first proves stage equality of the two rational polygon
+computations and then uses the established ordering of each area interval to
+turn that equality into raw-real equivalence.
+\end{theorem}
 
 \begin{definition}[Normalized quarter-turns as angles]
 \label{def:quarter-turn-angle}
@@ -393,20 +448,50 @@ to finish the Lean proof, not to settle a mathematical uncertainty.
 
 \begin{definition}[Arctangent area stage algorithm]
 \label{def:arctan-area-stage-algorithm}
+\lean{ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaIncrement}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaDecrement}
 \lean{ComputableAnalysis.ArctanGeometry.positiveComputeAtStage}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_nonneg_compute_eq}
 \uses{def:circle-area-stage-algorithm,rem:pseudocode-convention}
 For \(0\le x\le1\), the same rational polygon computation gives an interval
 for the sector area from \(P(0)=(1,0)\) to \(P(x)\).  Since that sector has
-angle \(2\arctan(x)\), its area is \(\arctan(x)\).  In the compact code of
-\cref{def:circle-area-stage-algorithm}, this is just:
+angle \(2\arctan(x)\), its area is \(\arctan(x)\).  The arctangent version
+uses the same rational increment and decrement formulas, but it is written as
+its own loop.  The initial lower bound is the chord-triangle area
+\(x/(1+x^2)\), and the initial upper bound is the tangent-triangle area \(x\).
 \begin{verbatim}
+def increment(p, q, r):
+    return (2*(r-p)*(q-p)*(r-q) /
+            ((1+p*p)*(1+q*q)*(1+r*r)))
+
+def decrement(p, q, r):
+    return ((r-p)*(q-p)*(r-q) /
+            ((1+p*r)*(1+p*q)*(1+q*r)))
+
+def refine(a, b, intervals):
+    new_intervals = []
+    for p, r in intervals:
+        q = (p + r) / 2
+        a = a + increment(p, q, r)
+        b = b - decrement(p, q, r)
+        new_intervals.append((p, q))
+        new_intervals.append((q, r))
+    return a, b, new_intervals
+
 def arctan(x, n):
-    return atan_area(x, n)
+    a = x / (1 + x*x)
+    b = x
+    intervals = [(0, x)]
+    for _ in range(n):
+        a, b, intervals = refine(a, b, intervals)
+    return [a, b]
 \end{verbatim}
 The restriction \(0\le x\le1\) is the only range needed for the first
 trigonometric construction.  The complementary ranges are handled later by
-symmetry, reciprocal identities, and period reduction.
+symmetry, reciprocal identities, and period reduction.  The theorem relating
+the loop version at \(x=1\) to the loop version of \(\pi\) is proved as a
+separate stagewise comparison, not made true by definitional identification.
 \end{definition}
 
 \begin{theorem}[Arctangent validity and monotonicity]
