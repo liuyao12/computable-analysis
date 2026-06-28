@@ -1249,133 +1249,11 @@ theorem piCircumferenceComputeAtStage_eq_common (stage : Nat) :
     innerBoundary, outerBoundary, piCircumference_innerBoundaryFrom_eq,
     piCircumference_outerBoundaryFrom_eq]
 
-theorem arctanGeometry_samplePoint_one_eq (stage k : Nat) :
-    ArctanGeometry.samplePoint 1 stage k = circleSamplePoint stage k := by
-  simp [ArctanGeometry.samplePoint, ArctanGeometry.parameter,
-    ArctanGeometry.circlePoint, circleSamplePoint, circleParameter,
-    circlePoint]
-
-theorem arctanGeometry_tangentIntersection_eq
-    (p q : PiCirclePoint) :
-    ArctanGeometry.tangentIntersection p q = tangentIntersection p q := by
-  simp [ArctanGeometry.tangentIntersection, tangentIntersection,
-    ArctanGeometry.pointCross, pointCross]
-
-theorem arctanGeometry_outerTangentPoint_one_eq (stage k : Nat) :
-    ArctanGeometry.outerTangentPoint 1 stage k =
-      outerTangentPoint stage k := by
-  simp [ArctanGeometry.outerTangentPoint, outerTangentPoint,
-    arctanGeometry_samplePoint_one_eq,
-    arctanGeometry_tangentIntersection_eq]
-
-theorem arctanGeometry_innerBoundaryFrom_one_eq
-    (stage k count : Nat) :
-    ArctanGeometry.innerBoundaryFrom 1 stage k count =
-      innerBoundaryFrom stage k count := by
-  unfold ArctanGeometry.innerBoundaryFrom innerBoundaryFrom
-  induction count generalizing k with
-  | zero =>
-      simp [piCircleAreaPolygon.innerBoundaryFrom]
-  | succ count ih =>
-      simp [piCircleAreaPolygon.innerBoundaryFrom,
-        arctanGeometry_samplePoint_one_eq, ih]
-
-theorem arctanGeometry_innerBoundary_one_eq (stage : Nat) :
-    ArctanGeometry.innerBoundary 1 stage = innerBoundary stage := by
-  simp [ArctanGeometry.innerBoundary, innerBoundary,
-    arctanGeometry_innerBoundaryFrom_one_eq]
-
-theorem arctanGeometry_outerBoundaryFrom_one_eq
-    (stage k count : Nat) :
-    ArctanGeometry.outerBoundaryFrom 1 stage k count =
-      outerBoundaryFrom stage k count := by
-  unfold ArctanGeometry.outerBoundaryFrom outerBoundaryFrom
-  induction count generalizing k with
-  | zero =>
-      simp [piCircleAreaPolygon.outerBoundaryFrom]
-  | succ count ih =>
-      simp [piCircleAreaPolygon.outerBoundaryFrom,
-        arctanGeometry_samplePoint_one_eq,
-        arctanGeometry_outerTangentPoint_one_eq, ih]
-
-theorem arctanGeometry_outerBoundary_one_eq (stage : Nat) :
-    ArctanGeometry.outerBoundary 1 stage = outerBoundary stage := by
-  simp [ArctanGeometry.outerBoundary, outerBoundary,
-    arctanGeometry_samplePoint_one_eq,
-    arctanGeometry_outerBoundaryFrom_one_eq]
-
-theorem arctanGeometry_twiceSignedAreaAux_eq
-    (first prev : PiCirclePoint) (vertices : List PiCirclePoint) :
-    ArctanGeometry.twiceSignedAreaAux first prev vertices =
-      twiceSignedAreaAux first prev vertices := by
-  rfl
-
-theorem arctanGeometry_twiceSignedArea_eq
-    (vertices : List PiCirclePoint) :
-    ArctanGeometry.twiceSignedArea vertices = twiceSignedArea vertices := by
-  cases vertices <;> rfl
-
-theorem arctanGeometry_polygonArea_eq
-    (vertices : List PiCirclePoint) :
-    ArctanGeometry.polygonArea vertices = polygonArea vertices := by
-  simp [ArctanGeometry.polygonArea, polygonArea,
-    arctanGeometry_twiceSignedArea_eq]
-
-theorem arctanGeometry_innerSectorArea_one_eq (stage : Nat) :
-    ArctanGeometry.innerSectorArea 1 stage = innerQuarterArea stage := by
-  simp [ArctanGeometry.innerSectorArea, innerQuarterArea,
-    ArctanGeometry.originPoint, originPoint,
-    arctanGeometry_innerBoundary_one_eq,
-    arctanGeometry_polygonArea_eq]
-
-theorem arctanGeometry_outerSectorArea_one_eq (stage : Nat) :
-    ArctanGeometry.outerSectorArea 1 stage = outerQuarterArea stage := by
-  simp [ArctanGeometry.outerSectorArea, outerQuarterArea,
-    ArctanGeometry.originPoint, originPoint,
-    arctanGeometry_outerBoundary_one_eq,
-    arctanGeometry_polygonArea_eq]
-
-theorem four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute
-    (n : Nat) :
-    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).compute n) =
-      piCircleAreaPolygon.compute n := by
-  rw [piCircleAreaPolygon_compute_eq]
-  change (RealRaw.scaleRat (4 : Rat)
-      (ArctanGeometry.arctanGeomPolygon (1 : Rat))).compute n =
-    piCircleAreaPolygonComputeAtStage (piStage n)
-  have hnonzero : ¬(1 : Rat) = 0 := by native_decide
-  have hnonneg : (0 : Rat) <= 1 := by native_decide
-  have hfour : (0 : Rat) <= 4 := by native_decide
-  simp [ArctanGeometry.arctanGeomPolygon, hnonzero, hnonneg, hfour,
-    ArctanGeometry.positiveRaw,
-    ArctanGeometry.positiveComputeAtStage, ArctanGeometry.stage,
-    piStage, piCircleAreaPolygonComputeAtStage, RealRaw.scaleRat,
-    RealRaw.scaleRatCompute, arctanGeometry_innerSectorArea_one_eq,
-    arctanGeometry_outerSectorArea_one_eq]
-
 theorem four_arctanGeom_one_compute_eq_piCircleArea_compute
     (n : Nat) :
     (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute n) =
       piCircleArea.compute n :=
   ArctanGeometry.piAreaCompatibility n
-
-theorem fourArctanGeomPolygonOneValid_of_geometricPolygonValid
-    (hGeomValid : ArctanGeometry.PolygonValid) :
-    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).Valid) := by
-  have hgeom : (ArctanGeometry.arctanGeomPolygon (1 : Rat)).Valid := by
-    simpa [RealRaw.Valid, ArctanGeometry.polygonFunctionRaw] using
-      hGeomValid (1 : Rat) (by trivial)
-  exact RealRaw.natScale_valid 4 hgeom
-
-theorem areaPolygonValid_of_arctanGeometryPolygonValid
-    (hGeomValid : ArctanGeometry.PolygonValid) : AreaPolygonValid := by
-  have hgeom := fourArctanGeomPolygonOneValid_of_geometricPolygonValid hGeomValid
-  have hcompute :
-      (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).compute) =
-        piCircleAreaPolygon.compute := by
-    funext n
-    exact four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute n
-  simpa [AreaPolygonValid, RealRaw.Valid, hcompute] using hgeom
 
 theorem piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
@@ -2653,43 +2531,6 @@ theorem piCircleAreaPolygon_equiv_self :
   have hordered := piCircleAreaPolygon_ordered n
   unfold QInterval.width at hordered
   constructor <;> grind [Rat.sub_eq_add_neg]
-
-theorem four_arctanGeomPolygon_one_equiv_piCircleAreaPolygon :
-    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).Equiv
-      piCircleAreaPolygon) := by
-  intro n
-  apply (RealRaw.compareAt_overlap_iff
-    ((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)
-    piCircleAreaPolygon n n).2
-  rw [four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute n]
-  have hordered := piCircleAreaPolygon_ordered n
-  unfold QInterval.Overlaps QInterval.width at *
-  constructor <;> grind [Rat.sub_eq_add_neg]
-
-theorem piCircleAreaPolygon_equiv_four_arctanGeomPolygon_one :
-    piCircleAreaPolygon.Equiv
-      (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)) :=
-  RealRaw.equiv_symm four_arctanGeomPolygon_one_equiv_piCircleAreaPolygon
-
-theorem four_arctanGeomPolygon_one_equiv_piCircleArea
-    (hpoly : PiCircleAreaPolygonAgreement) :
-    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).Equiv
-      piCircleArea) := by
-  intro n
-  apply (RealRaw.compareAt_overlap_iff
-    ((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)
-    piCircleArea n n).2
-  rw [hpoly n]
-  rw [four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute n]
-  have hordered := piCircleAreaPolygon_ordered n
-  unfold QInterval.Overlaps QInterval.width at *
-  constructor <;> grind [Rat.sub_eq_add_neg]
-
-theorem piCircleArea_equiv_four_arctanGeomPolygon_one
-    (hpoly : PiCircleAreaPolygonAgreement) :
-    piCircleArea.Equiv
-      (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)) :=
-  RealRaw.equiv_symm (four_arctanGeomPolygon_one_equiv_piCircleArea hpoly)
 
 theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :

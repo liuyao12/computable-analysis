@@ -48,19 +48,16 @@ for equivalence scorekeeping.
 The area loop validity package is now formalized as
 `PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
 `PiProofs.fourArctanGeomOneValid` and
-`PiProofs.four_arctanGeom_one_equiv_piCircleArea`.  The first open
-geometric bridge is `PiCircleAreaPolygonAgreement`.
+`PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The Leibniz-to-area route is now reduced to
 `PowerSeriesAgreesOnUnit` via
 `piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement`.
 
-The public `piCircleArea` is now the increment/decrement loop.  The older
-polygon-boundary presentation is retained as `piCircleAreaPolygon` only as
-proof scaffolding.  The loop is now directly verified; the next proof step is
-`PiCircleAreaPolygonAgreement` so the polygon-based Archimedes, circumference,
-and polygon-scaffold comparisons transport back to the public baseline.
+The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
+code that remains in Lean is internal scaffolding for circumference and finite
+Archimedes estimates, not another pi computation to count.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.
