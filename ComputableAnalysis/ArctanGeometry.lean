@@ -59,14 +59,14 @@ def outerTangentPoint (y : Rat) (stage k : Nat) : PiCirclePoint :=
 
 def innerBoundaryFrom (y : Rat) (stage k count : Nat) :
     List PiCirclePoint :=
-  piCircleArea.innerBoundaryFrom (samplePoint y stage) k count
+  piCircleAreaPolygon.innerBoundaryFrom (samplePoint y stage) k count
 
 def innerBoundary (y : Rat) (stage : Nat) : List PiCirclePoint :=
   innerBoundaryFrom y stage 0 (stage + 1)
 
 def outerBoundaryFrom (y : Rat) (stage k count : Nat) :
     List PiCirclePoint :=
-  piCircleArea.outerBoundaryFrom
+  piCircleAreaPolygon.outerBoundaryFrom
     (samplePoint y stage) (outerTangentPoint y stage) k count
 
 def outerBoundary (y : Rat) (stage : Nat) : List PiCirclePoint :=
@@ -74,7 +74,7 @@ def outerBoundary (y : Rat) (stage : Nat) : List PiCirclePoint :=
 
 def twiceSignedAreaAux
     (first prev : PiCirclePoint) : List PiCirclePoint -> Rat
-  | vertices => piCircleArea.twiceSignedAreaAux pointCross first prev vertices
+  | vertices => piCircleAreaPolygon.twiceSignedAreaAux pointCross first prev vertices
 
 def twiceSignedArea : List PiCirclePoint -> Rat
   | [] => 0
@@ -282,17 +282,17 @@ theorem iterateAreaBounds_toPiAreaLoopState (n : Nat)
       rw [refineAreaBounds_toPiAreaLoopState]
       exact ih (refineAreaLoopState state)
 
-theorem piCircleAreaLoopInitial_eq_arctanAreaLoopInitial_one :
-    piCircleAreaLoopInitial =
+theorem piCircleAreaInitial_eq_arctanAreaLoopInitial_one :
+    piCircleAreaInitial =
       toPiAreaLoopState (arctanAreaLoopInitial 1) := by
   native_decide
 
-theorem piCircleAreaLoopState_eq_arctanAreaLoopState_one
+theorem piCircleAreaState_eq_arctanAreaLoopState_one
     (n : Nat) :
-    piCircleAreaLoopState n =
+    piCircleAreaState n =
       toPiAreaLoopState (arctanAreaLoopState 1 n) := by
-  unfold piCircleAreaLoopState arctanAreaLoopState
-  rw [piCircleAreaLoopInitial_eq_arctanAreaLoopInitial_one]
+  unfold piCircleAreaState arctanAreaLoopState
+  rw [piCircleAreaInitial_eq_arctanAreaLoopInitial_one]
   exact iterateAreaBounds_toPiAreaLoopState n (arctanAreaLoopInitial 1)
 
 /-- The comparison target saying that the loop definition of pi agrees stage by
@@ -300,17 +300,17 @@ stage with four times the loop definition of geometric arctangent at `1`. -/
 def PiAreaLoopCompatibility : Prop :=
   forall n : Nat,
     (((4 : Nat) * arctanGeomLoop (1 : Rat) : RealRaw).compute n) =
-      piCircleAreaLoop.compute n
+      piCircleArea.compute n
 
 theorem piAreaLoopCompatibility : PiAreaLoopCompatibility := by
   intro n
   have hnonneg : (0 : Rat) <= 4 := by native_decide
-  have hstate := piCircleAreaLoopState_eq_arctanAreaLoopState_one n
+  have hstate := piCircleAreaState_eq_arctanAreaLoopState_one n
   change (RealRaw.scaleRat (4 : Rat) (arctanGeomLoop (1 : Rat))).compute n =
-    piCircleAreaLoop.compute n
+    piCircleArea.compute n
   simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, hnonneg,
     arctanGeomLoop_one_compute_eq, positiveLoopComputeAtStage,
-    piCircleAreaLoop, piCircleAreaLoopCompute, hstate,
+    piCircleArea, piCircleAreaCompute, hstate,
     toPiAreaLoopState]
 
 def functionRaw : PartialRealFunRaw where

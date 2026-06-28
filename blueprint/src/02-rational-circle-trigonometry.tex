@@ -78,12 +78,14 @@ and removes the orange triangle from the upper bound.}
 \end{figure}
 
 \begin{definition}[Circle-area exhaustion algorithm]\label{def:circle-area-stage-algorithm}
-\lean{ComputableAnalysis.piCircleAreaLoop}
 \lean{ComputableAnalysis.piCircleArea}
+\lean{ComputableAnalysis.piCircleAreaPolygon}
 \lean{ComputableAnalysis.circleAreaIncrement}
 \lean{ComputableAnalysis.circleAreaDecrement}
 \lean{ComputableAnalysis.refineAreaBounds}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
+\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeomLoop_one_compute_eq_piCircleArea_compute}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute}
 \uses{rem:pseudocode-convention}
 The loop form of the stage algorithm keeps a current lower bound \(a\), a
 current upper bound \(b\), and the list of rational parameter intervals still
@@ -131,10 +133,9 @@ Every operation in this pseudocode is a rational operation.  The returned pair
 for \code{piCircleArea} is meant to be the first raw interval algorithm for
 \(\pi\): the lower endpoint is the area of the refined inscribed rational
 polygon, and the upper endpoint is the area of the corresponding refined outer
-tangent polygon.  The Lean development is being consolidated so that this
-increment/decrement loop is the single public \code{piCircleArea} definition;
-the polygon-boundary presentation should remain only as proof scaffolding where
-it is useful.
+tangent polygon.  In Lean this increment/decrement loop is the single public
+\code{piCircleArea} definition.  The polygon-boundary presentation is retained
+as \code{piCircleAreaPolygon} only as proof scaffolding where it is useful.
 \end{definition}
 
 \section{Overview}
@@ -221,9 +222,12 @@ The geometric sector-area arctangent satisfies
 \[
   4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
 \]
-The Lean proof first proves stage equality of the two rational polygon
-computations and then uses the established ordering of each area interval to
-turn that equality into raw-real equivalence.
+For the public loop definition, the direct Lean statement is the stage
+equality between \code{piCircleArea} and the loop version
+\code{4 * arctanGeomLoop(1)}.  The older polygon arctangent comparison gives
+the displayed raw-real equivalence once the bridge
+\code{PiCircleAreaPolygonAgreement} identifies \code{piCircleArea} with the
+polygon scaffold.
 \end{theorem}
 
 \begin{definition}[Normalized quarter-turns as angles]

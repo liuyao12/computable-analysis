@@ -106,34 +106,35 @@ def iterateAreaBounds : Nat -> AreaBoundsLoopState -> AreaBoundsLoopState
   | 0, state => state
   | n + 1, state => iterateAreaBounds n (refineAreaBounds state)
 
-def piCircleAreaLoopInitial : AreaBoundsLoopState :=
+def piCircleAreaInitial : AreaBoundsLoopState :=
   { lo := 1 / 2, hi := 1, intervals := [(0, 1)] }
 
-def piCircleAreaLoopState (n : Nat) : AreaBoundsLoopState :=
-  iterateAreaBounds n piCircleAreaLoopInitial
+def piCircleAreaState (n : Nat) : AreaBoundsLoopState :=
+  iterateAreaBounds n piCircleAreaInitial
 
-def piCircleAreaLoopCompute (n : Nat) : QInterval :=
-  let state := piCircleAreaLoopState n
+def piCircleAreaCompute (n : Nat) : QInterval :=
+  let state := piCircleAreaState n
   { lo := 4 * state.lo, hi := 4 * state.hi }
 
-/-- Pi as the area of the unit disk, presented as the intended rational update
-loop: start with the quarter-square bounds and refine each rational parameter
+/-- Pi as the area of the unit disk, presented as the rational update loop:
+start with the quarter-square bounds and refine each rational parameter
 interval by one midpoint insertion. -/
-def piCircleAreaLoop : RealRaw where
-  compute := piCircleAreaLoopCompute
+def piCircleArea : RealRaw where
+  compute := piCircleAreaCompute
 
-theorem piCircleAreaLoop_compute_eq (n : Nat) :
-    piCircleAreaLoop.compute n = piCircleAreaLoopCompute n := rfl
+theorem piCircleArea_compute_eq (n : Nat) :
+    piCircleArea.compute n = piCircleAreaCompute n := rfl
 
-theorem piCircleAreaLoop_compute_zero :
-    piCircleAreaLoop.compute 0 = { lo := 2, hi := 4 } := by
+theorem piCircleArea_compute_zero :
+    piCircleArea.compute 0 = { lo := 2, hi := 4 } := by
   native_decide
 
-/-- Pi as the area of the unit disk, currently in the polygon-boundary form used
-by the existing finite comparison proofs.  This is proof scaffolding for the
-same midpoint-refinement algorithm exposed above, and should be folded into the
-loop presentation once that verification is complete. -/
-def piCircleArea : RealRaw where
+/-- Polygon-boundary presentation of the same intended area exhaustion.
+
+This is retained as proof scaffolding for finite geometric comparisons.  It is
+not the public pi computation; `piCircleArea` is the increment/decrement loop
+above. -/
+def piCircleAreaPolygon : RealRaw where
   compute := fun n =>
     let stage : Nat := 2 ^ n
     let parameter := fun (k : Nat) => (k : Rat) / (stage : Rat)

@@ -27,6 +27,12 @@ def MachinValid : Prop :=
 def AreaValid : Prop :=
   RealRaw.ValidCompute piCircleArea.compute
 
+def AreaPolygonValid : Prop :=
+  RealRaw.ValidCompute piCircleAreaPolygon.compute
+
+def PiCircleAreaPolygonAgreement : Prop :=
+  forall n, piCircleArea.compute n = piCircleAreaPolygon.compute n
+
 def CircumferenceValid : Prop :=
   RealRaw.ValidCompute piCircumference.compute
 
@@ -671,6 +677,18 @@ theorem arctan_one_state_eq_leibniz_state (n : Nat) :
       simp [LeibnizValidity.lo, LeibnizValidity.hi, LeibnizValidity.state_succ,
         LeibnizValidity.step]
 
+/-- Stagewise equality between the Leibniz interval and the power-series
+arctangent interval at `1`. -/
+theorem leibnizSeries_compute_eq_arctan_one (n : Nat) :
+    leibnizSeries.compute n = (arctan (1 : Rat)).compute n := by
+  have hnonneg : (0 : Rat) <= 1 := by native_decide
+  have hqabs : qabs (1 : Rat) = 1 := by native_decide
+  rw [LeibnizValidity.leibnizSeries_compute_eq n]
+  rw [ArctanValidity.arctan_compute_nonneg (1 : Rat) hnonneg n]
+  rw [hqabs]
+  simp [ArctanValidity.positiveRaw, ArctanValidity.lo,
+    ArctanValidity.hi, arctan_one_state_eq_leibniz_state n]
+
 /-- The Leibniz series is equivalent to the power-series arctangent at `1`.
 
 The proof is by stagewise equality of the two algorithms, but the public
@@ -679,17 +697,8 @@ theorem leibnizSeries_equiv_arctan_one :
     leibnizSeries.Equiv (arctan (1 : Rat)) := by
   apply RealRaw.sameStageOverlap_equiv
   intro n
-  have hcompute :
-      leibnizSeries.compute n = (arctan (1 : Rat)).compute n := by
-    have hnonneg : (0 : Rat) <= 1 := by native_decide
-    have hqabs : qabs (1 : Rat) = 1 := by native_decide
-    rw [LeibnizValidity.leibnizSeries_compute_eq n]
-    rw [ArctanValidity.arctan_compute_nonneg (1 : Rat) hnonneg n]
-    rw [hqabs]
-    simp [ArctanValidity.positiveRaw, ArctanValidity.lo,
-      ArctanValidity.hi, arctan_one_state_eq_leibniz_state n]
   apply (RealRaw.compareAt_overlap_iff leibnizSeries (arctan (1 : Rat)) n n).2
-  rw [hcompute]
+  rw [leibnizSeries_compute_eq_arctan_one n]
   have hx : (arctan (1 : Rat)).Valid :=
     arctan_valid_at arctanValid arctan_one_mem_domain
   have hnest := hx.2.1 n n (Nat.le_refl n)
@@ -724,6 +733,19 @@ theorem piLeibniz_equiv_four_arctan_one :
     piLeibniz.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) := by
   unfold piLeibniz
   exact RealRaw.natScale_equiv 4 leibnizSeries_equiv_arctan_one
+
+/-- Stagewise equality between the Leibniz pi computation and
+`4 * arctan(1)`. -/
+theorem piLeibniz_compute_eq_four_arctan_one (n : Nat) :
+    piLeibniz.compute n =
+      (((4 : Nat) * arctan (1 : Rat) : RealRaw).compute n) := by
+  unfold piLeibniz
+  change
+    (RealRaw.scaleRat (4 : Rat) leibnizSeries).compute n =
+      (RealRaw.scaleRat (4 : Rat) (arctan (1 : Rat))).compute n
+  simp [RealRaw.scaleRat, RealRaw.scaleRatCompute,
+    (by native_decide : (0 : Rat) <= 4),
+    leibnizSeries_compute_eq_arctan_one n]
 
 namespace MachinIdentity
 
@@ -1029,7 +1051,7 @@ def tangentIntersection (p q : PiCirclePoint) : PiCirclePoint :=
     y := (p.x - q.x) / det }
 
 def innerBoundaryFrom (stage k count : Nat) : List PiCirclePoint :=
-  piCircleArea.innerBoundaryFrom (circleSamplePoint stage) k count
+  piCircleAreaPolygon.innerBoundaryFrom (circleSamplePoint stage) k count
 
 def innerBoundary (stage : Nat) : List PiCirclePoint :=
   innerBoundaryFrom stage 0 (stage + 1)
@@ -1077,7 +1099,7 @@ theorem chordCross_le_outerTangentCrossSum
       (rationalCircleStage stage) hstage k
 
 def outerBoundaryFrom (stage k count : Nat) : List PiCirclePoint :=
-  piCircleArea.outerBoundaryFrom
+  piCircleAreaPolygon.outerBoundaryFrom
     (circleSamplePoint stage) (outerTangentPoint stage) k count
 
 def outerBoundary (stage : Nat) : List PiCirclePoint :=
@@ -1085,7 +1107,7 @@ def outerBoundary (stage : Nat) : List PiCirclePoint :=
 
 def twiceSignedAreaAux
     (first prev : PiCirclePoint) : List PiCirclePoint -> Rat
-  | vertices => piCircleArea.twiceSignedAreaAux pointCross first prev vertices
+  | vertices => piCircleAreaPolygon.twiceSignedAreaAux pointCross first prev vertices
 
 def twiceSignedArea : List PiCirclePoint -> Rat
   | [] => 0
@@ -1100,7 +1122,7 @@ def innerQuarterArea (stage : Nat) : Rat :=
 def outerQuarterArea (stage : Nat) : Rat :=
   polygonArea (originPoint :: outerBoundary stage)
 
-def piCircleAreaComputeAtStage (stage : Nat) : QInterval :=
+def piCircleAreaPolygonComputeAtStage (stage : Nat) : QInterval :=
   { lo := 4 * innerQuarterArea stage,
     hi := 4 * outerQuarterArea stage }
 
@@ -1144,7 +1166,7 @@ theorem pointSegmentNormSq_self (p : PiCirclePoint) :
 
 theorem piCircleArea_innerBoundaryFrom_eq
     (stage k count : Nat) :
-    piCircleArea.innerBoundaryFrom (circleSamplePoint stage) k count =
+    piCircleAreaPolygon.innerBoundaryFrom (circleSamplePoint stage) k count =
       innerBoundaryFrom stage k count := by
   rfl
 
@@ -1155,12 +1177,12 @@ theorem piCircumference_innerBoundaryFrom_eq
   induction count generalizing k with
   | zero => rfl
   | succ count ih =>
-      simp [piCircumference.innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+      simp [piCircumference.innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
         innerBoundaryFrom, ih]
 
 theorem piCircleArea_outerBoundaryFrom_eq
     (stage k count : Nat) :
-    piCircleArea.outerBoundaryFrom
+    piCircleAreaPolygon.outerBoundaryFrom
         (circleSamplePoint stage) (outerTangentPoint stage) k count =
       outerBoundaryFrom stage k count := by
   rfl
@@ -1173,12 +1195,12 @@ theorem piCircumference_outerBoundaryFrom_eq
   induction count generalizing k with
   | zero => rfl
   | succ count ih =>
-      simp [piCircumference.outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+      simp [piCircumference.outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         outerBoundaryFrom, ih]
 
 theorem piCircleArea_twiceSignedAreaAux_eq
     (first prev : PiCirclePoint) (vertices : List PiCirclePoint) :
-    piCircleArea.twiceSignedAreaAux pointCross first prev vertices =
+    piCircleAreaPolygon.twiceSignedAreaAux pointCross first prev vertices =
       twiceSignedAreaAux first prev vertices := by
   rfl
 
@@ -1188,7 +1210,7 @@ theorem innerBoundaryFrom_length (stage k count : Nat) :
   | zero => rfl
   | succ count ih =>
       unfold innerBoundaryFrom
-      simp [piCircleArea.innerBoundaryFrom]
+      simp [piCircleAreaPolygon.innerBoundaryFrom]
       exact ih (k + 1)
 
 theorem innerBoundary_length (stage : Nat) :
@@ -1201,7 +1223,7 @@ theorem outerBoundaryFrom_length (stage k count : Nat) :
   | zero => rfl
   | succ count ih =>
       unfold outerBoundaryFrom
-      simp [piCircleArea.outerBoundaryFrom]
+      simp [piCircleAreaPolygon.outerBoundaryFrom]
       change (outerBoundaryFrom stage (k + 1) count).length + 1 + 1 =
         2 * (count + 1)
       rw [ih (k + 1)]
@@ -1211,8 +1233,9 @@ theorem outerBoundary_length (stage : Nat) :
     (outerBoundary stage).length = 2 * stage + 1 := by
   simp [outerBoundary, outerBoundaryFrom_length]
 
-theorem piCircleArea_compute_eq (n : Nat) :
-    piCircleArea.compute n = piCircleAreaComputeAtStage (piStage n) := by
+theorem piCircleAreaPolygon_compute_eq (n : Nat) :
+    piCircleAreaPolygon.compute n =
+      piCircleAreaPolygonComputeAtStage (piStage n) := by
   rfl
 
 theorem piCircumference_compute_eq (n : Nat) :
@@ -1252,9 +1275,9 @@ theorem arctanGeometry_innerBoundaryFrom_one_eq
   unfold ArctanGeometry.innerBoundaryFrom innerBoundaryFrom
   induction count generalizing k with
   | zero =>
-      simp [piCircleArea.innerBoundaryFrom]
+      simp [piCircleAreaPolygon.innerBoundaryFrom]
   | succ count ih =>
-      simp [piCircleArea.innerBoundaryFrom,
+      simp [piCircleAreaPolygon.innerBoundaryFrom,
         arctanGeometry_samplePoint_one_eq, ih]
 
 theorem arctanGeometry_innerBoundary_one_eq (stage : Nat) :
@@ -1269,9 +1292,9 @@ theorem arctanGeometry_outerBoundaryFrom_one_eq
   unfold ArctanGeometry.outerBoundaryFrom outerBoundaryFrom
   induction count generalizing k with
   | zero =>
-      simp [piCircleArea.outerBoundaryFrom]
+      simp [piCircleAreaPolygon.outerBoundaryFrom]
   | succ count ih =>
-      simp [piCircleArea.outerBoundaryFrom,
+      simp [piCircleAreaPolygon.outerBoundaryFrom,
         arctanGeometry_samplePoint_one_eq,
         arctanGeometry_outerTangentPoint_one_eq, ih]
 
@@ -1312,23 +1335,29 @@ theorem arctanGeometry_outerSectorArea_one_eq (stage : Nat) :
     arctanGeometry_outerBoundary_one_eq,
     arctanGeometry_polygonArea_eq]
 
-theorem four_arctanGeom_one_compute_eq_piCircleArea_compute
+theorem four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute
     (n : Nat) :
     (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute n) =
-      piCircleArea.compute n := by
-  rw [piCircleArea_compute_eq]
+      piCircleAreaPolygon.compute n := by
+  rw [piCircleAreaPolygon_compute_eq]
   change (RealRaw.scaleRat (4 : Rat)
       (ArctanGeometry.arctanGeom (1 : Rat))).compute n =
-    piCircleAreaComputeAtStage (piStage n)
+    piCircleAreaPolygonComputeAtStage (piStage n)
   have hnonzero : ¬(1 : Rat) = 0 := by native_decide
   have hnonneg : (0 : Rat) <= 1 := by native_decide
   have hfour : (0 : Rat) <= 4 := by native_decide
   simp [ArctanGeometry.arctanGeom, hnonzero, hnonneg, hfour,
     ArctanGeometry.positiveRaw,
     ArctanGeometry.positiveComputeAtStage, ArctanGeometry.stage,
-    piStage, piCircleAreaComputeAtStage, RealRaw.scaleRat,
+    piStage, piCircleAreaPolygonComputeAtStage, RealRaw.scaleRat,
     RealRaw.scaleRatCompute, arctanGeometry_innerSectorArea_one_eq,
     arctanGeometry_outerSectorArea_one_eq]
+
+theorem four_arctanGeomLoop_one_compute_eq_piCircleArea_compute
+    (n : Nat) :
+    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).compute n) =
+      piCircleArea.compute n :=
+  ArctanGeometry.piAreaLoopCompatibility n
 
 theorem fourArctanGeomOneValid_of_geometricValid
     (hGeomValid : ArctanGeometry.Valid) :
@@ -1338,8 +1367,18 @@ theorem fourArctanGeomOneValid_of_geometricValid
       hGeomValid (1 : Rat) (by trivial)
   exact RealRaw.natScale_valid 4 hgeom
 
-theorem leibnizEqArea_of_powerSeriesGeometryAgreement
-    (hGeomValid : ArctanGeometry.Valid)
+theorem areaPolygonValid_of_arctanGeometryValid
+    (hGeomValid : ArctanGeometry.Valid) : AreaPolygonValid := by
+  have hgeom := fourArctanGeomOneValid_of_geometricValid hGeomValid
+  have hcompute :
+      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute) =
+        piCircleAreaPolygon.compute := by
+    funext n
+    exact four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n
+  simpa [AreaPolygonValid, RealRaw.Valid, hcompute] using hgeom
+
+theorem piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement
+    (hpoly : PiCircleAreaPolygonAgreement)
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     LeibnizEqArea := by
   have hpowGeom :
@@ -1350,28 +1389,31 @@ theorem leibnizEqArea_of_powerSeriesGeometryAgreement
       (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv
         ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
     RealRaw.natScale_equiv 4 hpowGeom
-  have hgeomScaledValid :
-      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) :=
-    fourArctanGeomOneValid_of_geometricValid hGeomValid
-  have hleibnizToGeom :
-      piLeibniz.Equiv
-        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
-    RealRaw.equiv_trans
-      leibnizValid fourArctanOneValid hgeomScaledValid
-      piLeibniz_equiv_four_arctan_one hscaled
   intro n
-  have hover := (RealRaw.compareAt_overlap_iff piLeibniz
+  have hover := (RealRaw.compareAt_overlap_iff
+      ((4 : Nat) * arctan (1 : Rat) : RealRaw)
       ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
-    (hleibnizToGeom n)
+    (hscaled n)
   apply (RealRaw.compareAt_overlap_iff piLeibniz piCircleArea n n).2
-  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  rw [hpoly n]
+  rw [piLeibniz_compute_eq_four_arctan_one n]
+  rw [← four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
   exact hover
 
+theorem leibnizEqArea_of_powerSeriesGeometryAgreement
+    (_hGeomValid : ArctanGeometry.Valid)
+    (hpoly : PiCircleAreaPolygonAgreement)
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    LeibnizEqArea :=
+  piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement hpoly hagree
+
 theorem leibnizEqArea_of_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
     (route : Taylor.ArctanComparison.KernelComparisonRoute) :
     LeibnizEqArea :=
   leibnizEqArea_of_powerSeriesGeometryAgreement
     route.geometric_valid
+    hpoly
     (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
       route)
 
@@ -1576,15 +1618,15 @@ theorem innerBoundaryFrom_consecutiveCrossNonneg
     ConsecutiveCrossNonneg (innerBoundaryFrom stage k count) := by
   induction count generalizing k with
   | zero =>
-      simp [innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+      simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
         ConsecutiveCrossNonneg]
   | succ count ih =>
       cases count with
       | zero =>
-          simp [innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+          simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
             ConsecutiveCrossNonneg]
       | succ count =>
-          simp [innerBoundaryFrom, piCircleArea.innerBoundaryFrom,
+          simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
             ConsecutiveCrossNonneg]
           exact ⟨circleSamplePoint_cross_nonneg_of_order
               stage hstage (Nat.le_succ k),
@@ -1603,10 +1645,10 @@ theorem outerBoundaryFrom_consecutiveCrossNonneg
       (circleSamplePoint stage k :: outerBoundaryFrom stage k count) := by
   induction count generalizing k with
   | zero =>
-      simp [outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         ConsecutiveCrossNonneg]
   | succ count ih =>
-      simp [outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         ConsecutiveCrossNonneg]
       exact ⟨entryTangentCross_nonneg stage hstage k,
         ⟨exitTangentCross_nonneg stage hstage k, ih (k + 1)⟩⟩
@@ -1624,10 +1666,10 @@ theorem outerBoundaryFrom_consecutiveCrossLe
       (circleSamplePoint stage k :: outerBoundaryFrom stage k count) := by
   induction count generalizing k with
   | zero =>
-      simp [outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         ConsecutiveCrossLe]
   | succ count ih =>
-      simp [outerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         ConsecutiveCrossLe]
       exact ⟨entryTangentCross_le_segment_hi stage hstage precision k,
         ⟨exitTangentCross_le_segment_hi stage hstage precision k,
@@ -1881,7 +1923,7 @@ theorem twiceSignedAreaAux_origin_eq_sum_edgeCrossesFrom
       exact pointCross_origin_right prev
   | cons vertex rest ih =>
       simp [twiceSignedAreaAux, edgeCrossesFrom, sumRat,
-        piCircleArea.twiceSignedAreaAux]
+        piCircleAreaPolygon.twiceSignedAreaAux]
       change pointCross prev vertex + twiceSignedAreaAux originPoint vertex rest =
         pointCross prev vertex + sumRat (edgeCrossesFrom vertex rest)
       rw [ih vertex]
@@ -2322,7 +2364,7 @@ theorem innerEdgeCrosses_le_outerTangentEdgeCrosses
           (outerBoundaryFrom stage k count))
   | 0, k => by
       simp [innerBoundaryFrom, outerBoundaryFrom,
-        piCircleArea.innerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
   | count + 1, k => by
       have hhead := hlocal k
@@ -2330,7 +2372,7 @@ theorem innerEdgeCrosses_le_outerTangentEdgeCrosses
         innerEdgeCrosses_le_outerTangentEdgeCrosses
           stage hlocal count (k + 1)
       simp [innerBoundaryFrom, outerBoundaryFrom,
-        piCircleArea.innerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
       calc
         pointCross (circleSamplePoint stage k)
@@ -2375,7 +2417,7 @@ theorem innerPathLo_le_outerTangentEdgeCrosses
           (outerBoundaryFrom stage k count))
   | 0, k => by
       simp [innerBoundaryFrom, outerBoundaryFrom,
-        piCircleArea.innerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         rationalPointPathLength, rationalPointPathLength.totalLength,
         Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
   | count + 1, k => by
@@ -2394,7 +2436,7 @@ theorem innerPathLo_le_outerTangentEdgeCrosses
           outerTangentCrossSum stage k := by
         simpa [pointSegmentLengthInterval] using hhead
       simp [innerBoundaryFrom, outerBoundaryFrom,
-        piCircleArea.innerBoundaryFrom, piCircleArea.outerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
         rationalPointPathLength, rationalPointPathLength.totalLength,
         Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
       calc
@@ -2450,8 +2492,8 @@ theorem innerFanPerimeter_le_outerFanPerimeter_of_adjacent
     exact (Rat.add_le_add_left).2 h
   simpa [innerFanWidths, outerFanWidths, innerBoundary, outerBoundary,
     Fan.sectorFanWidths, Fan.perimeter, innerBoundaryFrom,
-    outerBoundaryFrom, piCircleArea.innerBoundaryFrom,
-    piCircleArea.outerBoundaryFrom, Fan.edgeCrossesFrom, Fan.sumRat,
+    outerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+    piCircleAreaPolygon.outerBoundaryFrom, Fan.edgeCrossesFrom, Fan.sumRat,
     pointCross_origin_left] using h'
 
 theorem innerFanPerimeter_le_outerFanPerimeter
@@ -2485,8 +2527,8 @@ theorem innerQuarterLength_lo_le_outerFanPerimeter_of_adjacent
     grind [Fan.perimeter]
   simpa [innerQuarterLength, outerFanWidths, innerBoundary, outerBoundary,
     Fan.sectorFanWidths, Fan.perimeter, innerBoundaryFrom,
-    outerBoundaryFrom, piCircleArea.innerBoundaryFrom,
-    piCircleArea.outerBoundaryFrom, Fan.edgeCrossesFrom, Fan.sumRat,
+    outerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+    piCircleAreaPolygon.outerBoundaryFrom, Fan.edgeCrossesFrom, Fan.sumRat,
     pointCross_origin_left] using h'
 
 theorem innerQuarterLength_lo_le_outerFanPerimeter
@@ -2573,14 +2615,14 @@ theorem innerQuarterLength_lo_le_outerQuarterLength_hi
   innerQuarterLength_lo_le_outerQuarterLength_hi_of_sectorFanBounds
     stage (sectorFanBounds stage hstage)
 
-theorem piCircleAreaComputeAtStage_ordered
+theorem piCircleAreaPolygonComputeAtStage_ordered
     (stage : Nat) (hstage : 0 < stage) :
-    0 <= (piCircleAreaComputeAtStage stage).width := by
+    0 <= (piCircleAreaPolygonComputeAtStage stage).width := by
   have h := innerQuarterArea_le_outerQuarterArea stage hstage
   have hscaled :
       4 * innerQuarterArea stage <= 4 * outerQuarterArea stage :=
     four_mul_le_four_mul h
-  unfold piCircleAreaComputeAtStage QInterval.width
+  unfold piCircleAreaPolygonComputeAtStage QInterval.width
   grind [Rat.sub_eq_add_neg]
 
 theorem piCircumferenceCommonComputeAtStage_ordered
@@ -2598,30 +2640,64 @@ theorem piCircumferenceCommonComputeAtStage_ordered
   simpa [piCircumferenceCommonComputeAtStage, innerQuarterLength,
     outerQuarterLength, QInterval.width] using hnonneg
 
-theorem piCircleArea_ordered (n : Nat) :
-    0 <= (piCircleArea.compute n).width := by
-  rw [piCircleArea_compute_eq]
-  exact piCircleAreaComputeAtStage_ordered
+theorem piCircleAreaPolygon_ordered (n : Nat) :
+    0 <= (piCircleAreaPolygon.compute n).width := by
+  rw [piCircleAreaPolygon_compute_eq]
+  exact piCircleAreaPolygonComputeAtStage_ordered
     (piStage n) (piStage_pos n)
 
-theorem four_arctanGeom_one_equiv_piCircleArea :
+theorem piCircleArea_equiv_self (hvalid : AreaValid) :
+    piCircleArea.Equiv piCircleArea :=
+  RealRaw.equiv_refl piCircleArea hvalid
+
+theorem piCircleAreaPolygon_equiv_self :
+    piCircleAreaPolygon.Equiv piCircleAreaPolygon := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    piCircleAreaPolygon piCircleAreaPolygon n n).2
+  have hordered := piCircleAreaPolygon_ordered n
+  unfold QInterval.width at hordered
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem four_arctanGeom_one_equiv_piCircleAreaPolygon :
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Equiv
+      piCircleAreaPolygon) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)
+    piCircleAreaPolygon n n).2
+  rw [four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
+  have hordered := piCircleAreaPolygon_ordered n
+  unfold QInterval.Overlaps QInterval.width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem piCircleAreaPolygon_equiv_four_arctanGeom_one :
+    piCircleAreaPolygon.Equiv
+      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleAreaPolygon
+
+theorem four_arctanGeom_one_equiv_piCircleArea
+    (hpoly : PiCircleAreaPolygonAgreement) :
     (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Equiv
       piCircleArea) := by
   intro n
   apply (RealRaw.compareAt_overlap_iff
     ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)
     piCircleArea n n).2
-  rw [four_arctanGeom_one_compute_eq_piCircleArea_compute n]
-  have hordered := piCircleArea_ordered n
+  rw [hpoly n]
+  rw [four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
+  have hordered := piCircleAreaPolygon_ordered n
   unfold QInterval.Overlaps QInterval.width at *
   constructor <;> grind [Rat.sub_eq_add_neg]
 
-theorem piCircleArea_equiv_four_arctanGeom_one :
+theorem piCircleArea_equiv_four_arctanGeom_one
+    (hpoly : PiCircleAreaPolygonAgreement) :
     piCircleArea.Equiv
       (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
-  RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
+  RealRaw.equiv_symm (four_arctanGeom_one_equiv_piCircleArea hpoly)
 
 theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
+    (hpoly : PiCircleAreaPolygonAgreement)
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv piCircleArea) := by
   have hpowGeom :
@@ -2639,17 +2715,20 @@ theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
     (hscaled n)
   apply (RealRaw.compareAt_overlap_iff
     ((4 : Nat) * arctan (1 : Rat) : RealRaw) piCircleArea n n).2
-  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  rw [hpoly n]
+  rw [← four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
   exact hover
 
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
+    (hpoly : PiCircleAreaPolygonAgreement)
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
     (four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
-      hagree)
+      hpoly hagree)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
+    (hpoly : PiCircleAreaPolygonAgreement)
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
     (hgeom :
       (IntegralIdentities.arctanIntegral (1 : Rat) c).Equiv
@@ -2673,28 +2752,33 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (IntegralIdentities.PiFromArctanIntegral
       (IntegralIdentities.arctanIntegral (1 : Rat) c))
     piCircleArea n n).2
-  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  rw [hpoly n]
+  rw [← four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
   exact hover
 
 theorem exists_piFromArctanIntegral_equiv_piCircleArea
+    (hpoly : PiCircleAreaPolygonAgreement)
     (hgeom : IntegralIdentities.ArctanIntegralGeomAgreement (1 : Rat)) :
     Exists fun c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat) =>
       (IntegralIdentities.PiFromArctanIntegral
         (IntegralIdentities.arctanIntegral (1 : Rat) c)).Equiv
           piCircleArea := by
   rcases hgeom with ⟨c, hc⟩
-  exact ⟨c, piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement c hc⟩
+  exact ⟨c, piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
+    hpoly c hc⟩
 
 theorem arctanIntegralPiRoute_of_geom_agreement
+    (hpoly : PiCircleAreaPolygonAgreement)
     (hgeom : IntegralIdentities.ArctanIntegralGeomAgreement (1 : Rat)) :
     IntegralIdentities.ArctanIntegralPiRoute where
   integral_computes_geom_at_one := hgeom
   four_geom_arctan_one_eq_pi := by
     simpa [IntegralIdentities.PiFromArctanIntegralAgrees,
       IntegralIdentities.PiFromArctanIntegral] using
-      four_arctanGeom_one_equiv_piCircleArea
+      four_arctanGeom_one_equiv_piCircleArea hpoly
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_function_agreement
+    (hpoly : PiCircleAreaPolygonAgreement)
     (data : IntegralIdentities.ArctanIntegralData)
     (hgeom : IntegralIdentities.ArctanIntegralGeomFunctionAgreement data) :
     (IntegralIdentities.PiFromArctanIntegral
@@ -2702,15 +2786,17 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_function_agreement
         (data.constructionAt (1 : Rat) (by native_decide)))).Equiv
         piCircleArea :=
   piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
+    hpoly
     (data.constructionAt (1 : Rat) (by native_decide))
     (IntegralIdentities.arctanIntegral_equiv_arctanGeom_of_functionAgreement
       data hgeom (by native_decide))
 
 theorem arctanIntegralPiRoute_of_function_agreement
+    (hpoly : PiCircleAreaPolygonAgreement)
     (data : IntegralIdentities.ArctanIntegralData)
     (hgeom : IntegralIdentities.ArctanIntegralGeomFunctionAgreement data) :
     IntegralIdentities.ArctanIntegralPiRoute :=
-  arctanIntegralPiRoute_of_geom_agreement
+  arctanIntegralPiRoute_of_geom_agreement hpoly
     (IntegralIdentities.arctanIntegralGeomAgreement_one_of_functionAgreement
       data hgeom)
 
@@ -2723,7 +2809,7 @@ theorem piCircumference_ordered (n : Nat) :
 
 theorem areaLower_le_circumferenceUpper_of_finite
     (bounds : FiniteArchimedesBounds) (stage : Nat) (hstage : 0 < stage) :
-    (piCircleAreaComputeAtStage stage).lo <=
+    (piCircleAreaPolygonComputeAtStage stage).lo <=
       (piCircumferenceCommonComputeAtStage stage).hi := by
   have h :=
     (bounds.atStage stage hstage).innerArea_le_half_outerLength
@@ -2736,13 +2822,13 @@ theorem areaLower_le_circumferenceUpper_of_finite
         four_mul_le_four_mul h
       _ = (4 * (outerQuarterLength stage).hi) / 2 := by
         grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
-  simpa [piCircleAreaComputeAtStage, piCircumferenceCommonComputeAtStage,
+  simpa [piCircleAreaPolygonComputeAtStage, piCircumferenceCommonComputeAtStage,
     outerQuarterLength] using hscaled
 
 theorem circumferenceLower_le_areaUpper_of_finite
     (bounds : FiniteArchimedesBounds) (stage : Nat) (hstage : 0 < stage) :
     (piCircumferenceCommonComputeAtStage stage).lo <=
-      (piCircleAreaComputeAtStage stage).hi := by
+      (piCircleAreaPolygonComputeAtStage stage).hi := by
   have h :=
     (bounds.atStage stage hstage).innerLength_le_twice_outerArea
   have hscaled :
@@ -2760,7 +2846,7 @@ theorem circumferenceLower_le_areaUpper_of_finite
           2 * (2 * outerQuarterArea stage) := h2
       _ = 4 * outerQuarterArea stage := by
         grind [Rat.mul_assoc, Rat.mul_comm]
-  simpa [piCircleAreaComputeAtStage, piCircumferenceCommonComputeAtStage,
+  simpa [piCircleAreaPolygonComputeAtStage, piCircumferenceCommonComputeAtStage,
     innerQuarterLength] using hscaled
 
 /-- The direct finite Archimedes overlap needed for the two geometric
@@ -2792,31 +2878,41 @@ theorem areaEqCircumference_of_bounds
     (areaCircumference_sameStageOverlap_of_bounds bounds)
 
 theorem areaCircumferenceOverlapBounds_of_finite
+    (hpoly : PiCircleAreaPolygonAgreement)
     (bounds : FiniteArchimedesBounds) :
     AreaCircumferenceOverlapBounds where
   areaLower_le_circumferenceUpper := by
     intro n
-    rw [piCircleArea_compute_eq, piCircumference_compute_eq,
+    rw [hpoly n]
+    rw [piCircleAreaPolygon_compute_eq, piCircumference_compute_eq,
       piCircumferenceComputeAtStage_eq_common]
     exact areaLower_le_circumferenceUpper_of_finite
       bounds (piStage n) (piStage_pos n)
   circumferenceLower_le_areaUpper := by
     intro n
-    rw [piCircleArea_compute_eq, piCircumference_compute_eq,
+    rw [hpoly n]
+    rw [piCircleAreaPolygon_compute_eq, piCircumference_compute_eq,
       piCircumferenceComputeAtStage_eq_common]
     exact circumferenceLower_le_areaUpper_of_finite
       bounds (piStage n) (piStage_pos n)
 
 theorem areaEqCircumference_of_finite
+    (hpoly : PiCircleAreaPolygonAgreement)
     (bounds : FiniteArchimedesBounds) :
     AreaEqCircumference :=
   areaEqCircumference_of_bounds
-    (areaCircumferenceOverlapBounds_of_finite bounds)
+    (areaCircumferenceOverlapBounds_of_finite hpoly bounds)
 
 /-- Archimedes' theorem: the polygonal area and circumference definitions of
 pi determine the same computable real. -/
-theorem archimedesTheorem : AreaEqCircumference :=
-  areaEqCircumference_of_finite finiteArchimedesBounds
+theorem archimedesTheorem
+    (hpoly : PiCircleAreaPolygonAgreement) : AreaEqCircumference :=
+  areaEqCircumference_of_finite hpoly finiteArchimedesBounds
+
+theorem piCircumference_equiv_piCircleArea
+    (hpoly : PiCircleAreaPolygonAgreement) :
+    piCircumference.Equiv piCircleArea :=
+  RealRaw.equiv_symm (archimedesTheorem hpoly)
 
 /-- Validity certificates for the four public pi algorithms. -/
 structure ValidityProofs where
@@ -2825,11 +2921,756 @@ structure ValidityProofs where
   area : AreaValid
   circumference : CircumferenceValid
 
+namespace AreaLoopValidity
+
+def areaGap (p r : Rat) : Rat :=
+  ((r - p) * (r - p) * (r - p)) /
+    ((1 + p * r) * (1 + p * p) * (1 + r * r))
+
+def areaGapSum : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest => areaGap p r + areaGapSum rest
+
+def areaCubeSum : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      (r - p) * (r - p) * (r - p) + areaCubeSum rest
+
+def IntervalsWellFormed : List (Rat × Rat) -> Prop
+  | [] => True
+  | (p, r) :: rest =>
+      0 <= p /\ p <= r /\ r <= 1 /\ IntervalsWellFormed rest
+
+private theorem inv_zero_rat : (0 : Rat)⁻¹ = 0 := by
+  native_decide
+
+private theorem rat_add_le_add {a b c d : Rat}
+    (hab : a <= b) (hcd : c <= d) :
+    a + c <= b + d := by
+  grind
+
+private theorem div_zero_den (a : Rat) : a / 0 = 0 := by
+  rw [Rat.div_def, inv_zero_rat]
+  grind
+
+private theorem two_mul_ne_zero {d : Rat} (hd : d ≠ 0) :
+    2 * d ≠ 0 := by
+  intro hz
+  have h2 : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem four_mul_ne_zero {d : Rat} (hd : d ≠ 0) :
+    4 * d ≠ 0 := by
+  intro hz
+  have h4 : (4 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem eight_mul_ne_zero {d : Rat} (hd : d ≠ 0) :
+    8 * d ≠ 0 := by
+  intro hz
+  have h8 : (8 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem half_square_div_eq (h d : Rat) :
+    (2 * h * (h / 2) * (h / 2)) / d =
+      (h * h * h) / (2 * d) := by
+  by_cases hd : d = 0
+  · rw [hd]
+    have h2d : 2 * (0 : Rat) = 0 := by grind
+    rw [h2d]
+    simp [div_zero_den]
+  · have h2 : (2 : Rat) ≠ 0 := by native_decide
+    have h2d : 2 * d ≠ 0 := two_mul_ne_zero hd
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem quarter_div_eq (h d : Rat) :
+    (h * (h / 2) * (h / 2)) / d =
+      (h * h * h) / (4 * d) := by
+  by_cases hd : d = 0
+  · rw [hd]
+    have h4d : 4 * (0 : Rat) = 0 := by grind
+    rw [h4d]
+    simp [div_zero_den]
+  · have h2 : (2 : Rat) ≠ 0 := by native_decide
+    have h4d : 4 * d ≠ 0 := four_mul_ne_zero hd
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem eighth_div_eq (h d : Rat) :
+    ((h / 2) * (h / 2) * (h / 2)) / d =
+      (h * h * h) / (8 * d) := by
+  by_cases hd : d = 0
+  · rw [hd]
+    have h8d : 8 * (0 : Rat) = 0 := by grind
+    rw [h8d]
+    simp [div_zero_den]
+  · have h2 : (2 : Rat) ≠ 0 := by native_decide
+    have h8d : 8 * d ≠ 0 := eight_mul_ne_zero hd
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem midpoint_left_sub (p r : Rat) :
+    (p + r) / 2 - p = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  have h2 : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem midpoint_right_sub (p r : Rat) :
+    r - (p + r) / 2 = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  have h2 : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem areaGap_eq_factor (p r : Rat) :
+    areaGap p r =
+      ((r - p) * (r - p) * (r - p)) *
+        (1 / ((1 + p * r) * (1 + p * p) * (1 + r * r))) := by
+  unfold areaGap
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+private theorem increment_mid_eq_factor (p r : Rat) :
+    let q : Rat := (p + r) / 2
+    circleAreaIncrement p q r =
+      ((r - p) * (r - p) * (r - p)) *
+        (1 / (2 * (1 + p * p) * (1 + q * q) * (1 + r * r))) := by
+  intro q
+  unfold circleAreaIncrement
+  dsimp [q]
+  rw [midpoint_left_sub, midpoint_right_sub]
+  rw [half_square_div_eq]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+private theorem decrement_mid_eq_factor (p r : Rat) :
+    let q : Rat := (p + r) / 2
+    circleAreaDecrement p q r =
+      ((r - p) * (r - p) * (r - p)) *
+        (1 / (4 * (1 + p * r) * (1 + p * q) * (1 + q * r))) := by
+  intro q
+  unfold circleAreaDecrement
+  dsimp [q]
+  rw [midpoint_left_sub, midpoint_right_sub]
+  rw [quarter_div_eq]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+private theorem areaGap_left_mid_eq_factor (p r : Rat) :
+    let q : Rat := (p + r) / 2
+    areaGap p q =
+      ((r - p) * (r - p) * (r - p)) *
+        (1 / (8 * (1 + p * q) * (1 + p * p) * (1 + q * q))) := by
+  intro q
+  unfold areaGap
+  dsimp [q]
+  rw [midpoint_left_sub]
+  rw [eighth_div_eq]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+private theorem areaGap_right_mid_eq_factor (p r : Rat) :
+    let q : Rat := (p + r) / 2
+    areaGap q r =
+      ((r - p) * (r - p) * (r - p)) *
+        (1 / (8 * (1 + q * r) * (1 + q * q) * (1 + r * r))) := by
+  intro q
+  unfold areaGap
+  dsimp [q]
+  rw [midpoint_right_sub]
+  rw [eighth_div_eq]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+private theorem rat_eq_of_mul_eq_mul_pos {a b c : Rat}
+    (hc : 0 < c) (h : a * c = b * c) : a = b := by
+  have hcne : c ≠ 0 := Rat.ne_of_gt hc
+  calc
+    a = (a * c) * c⁻¹ := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem abstract_gap_den_identity {a b c x y z : Rat}
+    (hx : x + c = 2 * a) (hz : z + c = 2 * b)
+    (hy : a + b = 2 * y) :
+    8 * a * b * y =
+      4 * a * b * c + 2 * x * y * z + c * b * z + c * x * a := by
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem cancel_cxz {a b c x y z : Rat}
+    (hcxz : c * x * z ≠ 0) :
+    (1 / (c * x * z)) * (8 * (a * b * c * x * y * z)) =
+      8 * a * b * y := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem cancel_2xyz {a b c x y z : Rat}
+    (h2xyz : 2 * x * y * z ≠ 0) :
+    (1 / (2 * x * y * z)) * (8 * (a * b * c * x * y * z)) =
+      4 * a * b * c := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem cancel_4cab {a b c x y z : Rat}
+    (h4cab : 4 * c * a * b ≠ 0) :
+    (1 / (4 * c * a * b)) * (8 * (a * b * c * x * y * z)) =
+      2 * x * y * z := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem cancel_8axy {a b c x y z : Rat}
+    (h8axy : 8 * a * x * y ≠ 0) :
+    (1 / (8 * a * x * y)) * (8 * (a * b * c * x * y * z)) =
+      c * b * z := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem cancel_8byz {a b c x y z : Rat}
+    (h8byz : 8 * b * y * z ≠ 0) :
+    (1 / (8 * b * y * z)) * (8 * (a * b * c * x * y * z)) =
+      c * x * a := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem abstract_gap_recip_identity {a b c x y z : Rat}
+    (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
+    (hxpos : 0 < x) (hypos : 0 < y) (hzpos : 0 < z)
+    (hx : x + c = 2 * a) (hz : z + c = 2 * b)
+    (hy : a + b = 2 * y) :
+    1 / (c * x * z) =
+      1 / (2 * x * y * z) + 1 / (4 * c * a * b) +
+        1 / (8 * a * x * y) + 1 / (8 * b * y * z) := by
+  let D : Rat := a * b * c * x * y * z
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos
+      (Rat.mul_pos (Rat.mul_pos (Rat.mul_pos (Rat.mul_pos ha hb) hc) hxpos)
+        hypos)
+      hzpos
+  have h8Dpos : 0 < 8 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 8) hDpos
+  have hcxz : c * x * z ≠ 0 :=
+    Rat.ne_of_gt (Rat.mul_pos (Rat.mul_pos hc hxpos) hzpos)
+  have h2xyz : 2 * x * y * z ≠ 0 :=
+    Rat.ne_of_gt
+      (Rat.mul_pos
+        (Rat.mul_pos
+          (Rat.mul_pos (by native_decide : (0 : Rat) < 2) hxpos)
+          hypos)
+        hzpos)
+  have h4cab : 4 * c * a * b ≠ 0 :=
+    Rat.ne_of_gt
+      (Rat.mul_pos
+        (Rat.mul_pos (Rat.mul_pos (by native_decide : (0 : Rat) < 4) hc)
+          ha)
+        hb)
+  have h8axy : 8 * a * x * y ≠ 0 :=
+    Rat.ne_of_gt
+      (Rat.mul_pos
+        (Rat.mul_pos (Rat.mul_pos (by native_decide : (0 : Rat) < 8) ha)
+          hxpos)
+        hypos)
+  have h8byz : 8 * b * y * z ≠ 0 :=
+    Rat.ne_of_gt
+      (Rat.mul_pos
+        (Rat.mul_pos (Rat.mul_pos (by native_decide : (0 : Rat) < 8) hb)
+          hypos)
+        hzpos)
+  apply rat_eq_of_mul_eq_mul_pos h8Dpos
+  calc
+    (1 / (c * x * z)) * (8 * D) = 8 * a * b * y := by
+      dsimp [D]
+      exact cancel_cxz hcxz
+    _ = 4 * a * b * c + 2 * x * y * z + c * b * z + c * x * a :=
+      abstract_gap_den_identity hx hz hy
+    _ =
+        (1 / (2 * x * y * z) + 1 / (4 * c * a * b) +
+          1 / (8 * a * x * y) + 1 / (8 * b * y * z)) * (8 * D) := by
+      dsimp [D]
+      rw [Rat.add_mul, Rat.add_mul, Rat.add_mul]
+      rw [cancel_2xyz h2xyz, cancel_4cab h4cab,
+        cancel_8axy h8axy, cancel_8byz h8byz]
+
+private theorem local_gap_refine {p r : Rat}
+    (hp0 : 0 <= p) (hpr : p <= r) :
+    let q : Rat := (p + r) / 2
+    areaGap p r =
+      circleAreaIncrement p q r + circleAreaDecrement p q r +
+        areaGap p q + areaGap q r := by
+  intro q
+  let a : Rat := 1 + p * q
+  let b : Rat := 1 + q * r
+  let c : Rat := 1 + p * r
+  let x : Rat := 1 + p * p
+  let y : Rat := 1 + q * q
+  let z : Rat := 1 + r * r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)))
+  have hr0 : 0 <= r := by grind
+  have ha : 0 < a := by
+    dsimp [a]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hq0
+  have hb : 0 < b := by
+    dsimp [b]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hq0 hr0
+  have hc : 0 < c := by
+    dsimp [c]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hr0
+  have hxpos : 0 < x := by
+    dsimp [x]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have hypos : 0 < y := by
+    dsimp [y]
+    exact RationalCircle.Stage.one_add_square_pos q
+  have hzpos : 0 < z := by
+    dsimp [z]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have hxrel : x + c = 2 * a := by
+    dsimp [x, c, a, q]
+    rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hzrel : z + c = 2 * b := by
+    dsimp [z, c, b, q]
+    rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hyrel : a + b = 2 * y := by
+    dsimp [a, b, y, q]
+    rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hrecip :=
+    abstract_gap_recip_identity ha hb hc hxpos hypos hzpos hxrel hzrel hyrel
+  rw [areaGap_eq_factor p r]
+  rw [increment_mid_eq_factor p r]
+  rw [decrement_mid_eq_factor p r]
+  rw [areaGap_left_mid_eq_factor p r]
+  rw [areaGap_right_mid_eq_factor p r]
+  dsimp [q, a, b, c, x, y, z] at hrecip ⊢
+  rw [hrecip]
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem midpoint_nonneg {p r : Rat}
+    (hp0 : 0 <= p) (hr0 : 0 <= r) :
+    0 <= (p + r) / 2 := by
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg (Rat.add_nonneg hp0 hr0)
+    (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)))
+
+private theorem left_le_midpoint {p r : Rat} (hpr : p <= r) :
+    p <= (p + r) / 2 := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    calc
+      p * 2 <= p + r := by grind
+      _ = ((p + r) * (2 : Rat)⁻¹) * 2 := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · native_decide
+
+private theorem midpoint_le_right {p r : Rat} (hpr : p <= r) :
+    (p + r) / 2 <= r := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    calc
+      ((p + r) * (2 : Rat)⁻¹) * 2 = p + r := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= r * 2 := by grind
+  · native_decide
+
+private theorem increment_nonneg {p q r : Rat}
+    (hpq : p <= q) (hqr : q <= r) :
+    0 <= circleAreaIncrement p q r := by
+  unfold circleAreaIncrement
+  rw [Rat.div_def]
+  have hpq' : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hqr' : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hrp' : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hnum : 0 <= 2 * (r - p) * (q - p) * (r - q) := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hrp')
+        hpq')
+      hqr'
+  have hden : 0 < (1 + p * p) * (1 + q * q) * (1 + r * r) := by
+    exact Rat.mul_pos
+      (Rat.mul_pos (RationalCircle.Stage.one_add_square_pos p)
+        (RationalCircle.Stage.one_add_square_pos q))
+      (RationalCircle.Stage.one_add_square_pos r)
+  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+private theorem decrement_nonneg {p q r : Rat}
+    (hp0 : 0 <= p) (hpq : p <= q) (hqr : q <= r) :
+    0 <= circleAreaDecrement p q r := by
+  unfold circleAreaDecrement
+  rw [Rat.div_def]
+  have hq0 : 0 <= q := by grind
+  have hr0 : 0 <= r := by grind
+  have hpq' : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hqr' : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hrp' : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hnum : 0 <= (r - p) * (q - p) * (r - q) := by
+    exact Rat.mul_nonneg (Rat.mul_nonneg hrp' hpq') hqr'
+  have hden : 0 < (1 + p * r) * (1 + p * q) * (1 + q * r) := by
+    exact Rat.mul_pos
+      (Rat.mul_pos
+        (RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hr0)
+        (RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hq0))
+      (RationalCircle.Stage.one_add_mul_pos_of_nonneg hq0 hr0)
+  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+private theorem refineAux_wellFormed
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : IntervalsWellFormed intervals) :
+    IntervalsWellFormed
+      (AreaBoundsLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaBoundsLoopState.refineAux, IntervalsWellFormed]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hq0 : 0 <= q := by
+        dsimp [q]
+        exact midpoint_nonneg hp0 (by grind)
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have hq1 : q <= 1 := Rat.le_trans hqr hr1
+      have htail :=
+        ih (lo + circleAreaIncrement p q r)
+          (hi - circleAreaDecrement p q r) hrest
+      simp [AreaBoundsLoopState.refineAux, IntervalsWellFormed, q,
+        hp0, hpq, hqr, hr1, hq0, hq1, htail]
+
+theorem refineAreaBounds_wellFormed (state : AreaBoundsLoopState)
+    (hwf : IntervalsWellFormed state.intervals) :
+    IntervalsWellFormed (refineAreaBounds state).intervals := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_wellFormed lo hi intervals hwf
+
+private theorem refineAux_lo_mono
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : IntervalsWellFormed intervals) :
+    lo <= (AreaBoundsLoopState.refineAux lo hi intervals).lo := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaBoundsLoopState.refineAux]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have hinc : 0 <= circleAreaIncrement p q r :=
+        increment_nonneg hpq hqr
+      have htail :=
+        ih (lo + circleAreaIncrement p q r)
+          (hi - circleAreaDecrement p q r) hrest
+      simp [AreaBoundsLoopState.refineAux]
+      exact Rat.le_trans (by grind) htail
+
+private theorem refineAux_hi_anti
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : IntervalsWellFormed intervals) :
+    (AreaBoundsLoopState.refineAux lo hi intervals).hi <= hi := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaBoundsLoopState.refineAux]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have hdec : 0 <= circleAreaDecrement p q r :=
+        decrement_nonneg hp0 hpq hqr
+      have htail :=
+        ih (lo + circleAreaIncrement p q r)
+          (hi - circleAreaDecrement p q r) hrest
+      simp [AreaBoundsLoopState.refineAux]
+      exact Rat.le_trans htail (by grind)
+
+theorem refineAreaBounds_lo_mono (state : AreaBoundsLoopState)
+    (hwf : IntervalsWellFormed state.intervals) :
+    state.lo <= (refineAreaBounds state).lo := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_lo_mono lo hi intervals hwf
+
+theorem refineAreaBounds_hi_anti (state : AreaBoundsLoopState)
+    (hwf : IntervalsWellFormed state.intervals) :
+    (refineAreaBounds state).hi <= state.hi := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_hi_anti lo hi intervals hwf
+
+private theorem refineAux_gapSum_extra
+    (extra lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : IntervalsWellFormed intervals)
+    (hgap : hi - lo = extra + areaGapSum intervals) :
+    let next := AreaBoundsLoopState.refineAux lo hi intervals
+    next.hi - next.lo = extra + areaGapSum next.intervals := by
+  induction intervals generalizing extra lo hi with
+  | nil =>
+      intro next
+      simp [areaGapSum] at hgap ⊢
+      exact hgap
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hlocal := local_gap_refine hp0 hpr
+      dsimp [q] at hlocal
+      let extra' : Rat := extra + areaGap p q + areaGap q r
+      have hstart :
+          (hi - circleAreaDecrement p q r) -
+              (lo + circleAreaIncrement p q r) =
+            extra' + areaGapSum rest := by
+        dsimp [extra']
+        calc
+          (hi - circleAreaDecrement p q r) -
+              (lo + circleAreaIncrement p q r)
+              = hi - lo -
+                  (circleAreaIncrement p q r +
+                    circleAreaDecrement p q r) := by
+                grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+          _ = extra + areaGapSum ((p, r) :: rest) -
+                  (circleAreaIncrement p q r +
+                    circleAreaDecrement p q r) := by
+                rw [hgap]
+          _ = extra' + areaGapSum rest := by
+                simp [areaGapSum]
+                rw [hlocal]
+                grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      have htail :=
+        ih extra' (lo + circleAreaIncrement p q r)
+          (hi - circleAreaDecrement p q r) hrest hstart
+      simp [AreaBoundsLoopState.refineAux, areaGapSum]
+      simpa [extra', areaGapSum, Rat.add_assoc, Rat.add_comm] using htail
+
+theorem refineAreaBounds_gapSum (state : AreaBoundsLoopState)
+    (hwf : IntervalsWellFormed state.intervals)
+    (hgap : state.hi - state.lo = areaGapSum state.intervals) :
+    let next := refineAreaBounds state
+    next.hi - next.lo = areaGapSum next.intervals := by
+  cases state with
+  | mk lo hi intervals =>
+      have hgap' : hi - lo = 0 + areaGapSum intervals := by
+        grind
+      have h := refineAux_gapSum_extra 0 lo hi intervals hwf hgap'
+      have h' :
+          (AreaBoundsLoopState.refineAux lo hi intervals).hi -
+              (AreaBoundsLoopState.refineAux lo hi intervals).lo =
+            areaGapSum
+              (AreaBoundsLoopState.refineAux lo hi intervals).intervals := by
+        grind
+      simpa [refineAreaBounds] using h'
+
+private theorem cube_midpoint_split (p r : Rat) :
+    let q : Rat := (p + r) / 2
+    (q - p) * (q - p) * (q - p) +
+        (r - q) * (r - q) * (r - q) =
+      ((r - p) * (r - p) * (r - p)) / 4 := by
+  intro q
+  dsimp [q]
+  rw [midpoint_left_sub, midpoint_right_sub]
+  have h2 : (2 : Rat) ≠ 0 := by native_decide
+  have h4 : (4 : Rat) ≠ 0 := by native_decide
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem refineAux_cubeSum
+    (lo hi : Rat) (intervals : List (Rat × Rat)) :
+    areaCubeSum
+        (AreaBoundsLoopState.refineAux lo hi intervals).intervals =
+      areaCubeSum intervals / 4 := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaBoundsLoopState.refineAux, areaCubeSum, Rat.div_def]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      let q : Rat := (p + r) / 2
+      have hsplit := cube_midpoint_split p r
+      dsimp [q] at hsplit
+      have htail :=
+        ih (lo + circleAreaIncrement p q r)
+          (hi - circleAreaDecrement p q r)
+      simp [AreaBoundsLoopState.refineAux, areaCubeSum]
+      rw [htail]
+      have h4 : (4 : Rat) ≠ 0 := by native_decide
+      calc
+        ((p + r) / 2 - p) * ((p + r) / 2 - p) *
+              ((p + r) / 2 - p) +
+            ((r - (p + r) / 2) * (r - (p + r) / 2) *
+                (r - (p + r) / 2) + areaCubeSum rest / 4)
+            =
+          (((p + r) / 2 - p) * ((p + r) / 2 - p) *
+              ((p + r) / 2 - p) +
+            (r - (p + r) / 2) * (r - (p + r) / 2) *
+                (r - (p + r) / 2)) + areaCubeSum rest / 4 := by
+            grind [Rat.add_assoc, Rat.add_comm]
+        _ = (r - p) * (r - p) * (r - p) / 4 +
+              areaCubeSum rest / 4 := by
+            rw [hsplit]
+        _ = ((r - p) * (r - p) * (r - p) +
+              areaCubeSum rest) / 4 := by
+            rw [Rat.div_def, Rat.div_def, Rat.div_def]
+            grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+              Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem refineAreaBounds_cubeSum (state : AreaBoundsLoopState) :
+    areaCubeSum (refineAreaBounds state).intervals =
+      areaCubeSum state.intervals / 4 := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_cubeSum lo hi intervals
+
+private theorem areaGap_nonneg {p r : Rat}
+    (hp0 : 0 <= p) (hpr : p <= r) :
+    0 <= areaGap p r := by
+  rw [areaGap_eq_factor]
+  have hr0 : 0 <= r := by grind
+  have hdiff : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hcube : 0 <= (r - p) * (r - p) * (r - p) :=
+    Rat.mul_nonneg (Rat.mul_nonneg hdiff hdiff) hdiff
+  have hden : 0 < (1 + p * r) * (1 + p * p) * (1 + r * r) := by
+    exact Rat.mul_pos
+      (Rat.mul_pos
+        (RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hr0)
+        (RationalCircle.Stage.one_add_square_pos p))
+      (RationalCircle.Stage.one_add_square_pos r)
+  have hinv : 0 <= 1 / ((1 + p * r) * (1 + p * p) * (1 + r * r)) := by
+    rw [Rat.div_def]
+    have hpos := (Rat.inv_pos).2 hden
+    grind
+  exact Rat.mul_nonneg hcube hinv
+
+private theorem one_div_le_one_of_one_le {d : Rat}
+    (hd : 1 <= d) :
+    1 / d <= 1 := by
+  have hdpos : 0 < d := by grind
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  apply Rat.le_of_mul_le_mul_right (c := d)
+  · calc
+      (1 / d) * d = 1 := by
+        rw [Rat.div_def]
+        have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= d := hd
+      _ = 1 * d := by grind
+  · exact hdpos
+
+private theorem areaGap_le_cube {p r : Rat}
+    (hp0 : 0 <= p) (hpr : p <= r) :
+    areaGap p r <= (r - p) * (r - p) * (r - p) := by
+  rw [areaGap_eq_factor]
+  have hr0 : 0 <= r := by grind
+  have hprmul : 0 <= p * r := Rat.mul_nonneg hp0 hr0
+  have hpp : 0 <= p * p := RationalCircle.Stage.ratSquare_nonneg p
+  have hrr : 0 <= r * r := RationalCircle.Stage.ratSquare_nonneg r
+  let A : Rat := 1 + p * r
+  let B : Rat := 1 + p * p
+  let C : Rat := 1 + r * r
+  have hA1 : 1 <= A := by dsimp [A]; grind
+  have hB1 : 1 <= B := by dsimp [B]; grind
+  have hC1 : 1 <= C := by dsimp [C]; grind
+  have hB0 : 0 <= B := by grind
+  have hC0 : 0 <= C := by grind
+  have hAB : 1 <= A * B := by
+    calc
+      1 = 1 * 1 := by grind
+      _ <= A * 1 := Rat.mul_le_mul_of_nonneg_right hA1 (by native_decide)
+      _ <= A * B := Rat.mul_le_mul_of_nonneg_left hB1 (by grind)
+  have hABC : 1 <= A * B * C := by
+    calc
+      1 = 1 * 1 := by grind
+      _ <= (A * B) * 1 :=
+        Rat.mul_le_mul_of_nonneg_right hAB (by native_decide)
+      _ <= (A * B) * C :=
+        Rat.mul_le_mul_of_nonneg_left hC1 (by grind)
+  have hinv : 1 / (A * B * C) <= 1 :=
+    one_div_le_one_of_one_le hABC
+  have hdiff : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hcube : 0 <= (r - p) * (r - p) * (r - p) :=
+    Rat.mul_nonneg (Rat.mul_nonneg hdiff hdiff) hdiff
+  dsimp [A, B, C] at hinv
+  calc
+    (r - p) * (r - p) * (r - p) *
+        (1 / ((1 + p * r) * (1 + p * p) * (1 + r * r)))
+        <= (r - p) * (r - p) * (r - p) * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hinv hcube
+    _ = (r - p) * (r - p) * (r - p) := by
+          rw [Rat.mul_one]
+
+theorem areaGapSum_nonneg
+    (intervals : List (Rat × Rat))
+    (hwf : IntervalsWellFormed intervals) :
+    0 <= areaGapSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [areaGapSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
+      have hhead := areaGap_nonneg hp0 hpr
+      have htail := ih hrest
+      simp [areaGapSum]
+      exact Rat.add_nonneg hhead htail
+
+theorem areaGapSum_le_cubeSum
+    (intervals : List (Rat × Rat))
+    (hwf : IntervalsWellFormed intervals) :
+    areaGapSum intervals <= areaCubeSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [areaGapSum, areaCubeSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
+      have hhead := areaGap_le_cube hp0 hpr
+      have htail := ih hrest
+      simp [areaGapSum, areaCubeSum]
+      exact rat_add_le_add hhead htail
+
+end AreaLoopValidity
+
 def AreaNested : Prop :=
   forall n m, n <= m ->
     (piCircleArea.compute n).lo <= (piCircleArea.compute m).lo /\
     (piCircleArea.compute m).lo <= (piCircleArea.compute m).hi /\
     (piCircleArea.compute m).hi <= (piCircleArea.compute n).hi
+
+def AreaOrdered : Prop :=
+  forall n, 0 <= (piCircleArea.compute n).width
 
 def WidthBoundedByNatOverSucc
     (compute : Nat -> QInterval) (C : Nat) : Prop :=
@@ -2931,63 +3772,36 @@ theorem endpointMonotone_of_stepRefines
       · exact Rat.le_trans ih.1 hnext.1
       · exact Rat.le_trans hnext.2 ih.2
 
-/-- The ordered-interval obligation for the midpoint update loop that should
-become the single public `piCircleArea` implementation. -/
-def PiCircleAreaLoopOrdered : Prop :=
-  forall n, 0 <= (piCircleAreaLoop.compute n).width
+theorem piCircleArea_equiv_piCircleAreaPolygon_of_polygonAgreement
+    (hagree : PiCircleAreaPolygonAgreement) :
+    piCircleArea.Equiv piCircleAreaPolygon := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff piCircleArea piCircleAreaPolygon n n).2
+  rw [hagree n]
+  have hordered := piCircleAreaPolygon_ordered n
+  unfold QInterval.width at hordered
+  constructor <;> grind [Rat.sub_eq_add_neg]
 
-/-- The nesting obligation for the midpoint update loop. -/
-def PiCircleAreaLoopNested : Prop :=
-  forall n m, n <= m ->
-    (piCircleAreaLoop.compute n).lo <= (piCircleAreaLoop.compute m).lo /\
-    (piCircleAreaLoop.compute m).lo <= (piCircleAreaLoop.compute m).hi /\
-    (piCircleAreaLoop.compute m).hi <= (piCircleAreaLoop.compute n).hi
-
-/-- The width-shrinking obligation for the midpoint update loop. -/
-def PiCircleAreaLoopWidthsShrink : Prop :=
-  RealRaw.WidthsShrinkToZero piCircleAreaLoop.compute
-
-def PiCircleAreaLoopStepRefines : Prop :=
-  EndpointStepRefines piCircleAreaLoop.compute
-
-def PiCircleAreaLoopWidthLinearBound (C : Nat) : Prop :=
-  WidthBoundedByNatOverSucc piCircleAreaLoop.compute C
-
-theorem piCircleAreaLoopWidthsShrink_of_linearBound
-    {C : Nat} (hbound : PiCircleAreaLoopWidthLinearBound C) :
-    PiCircleAreaLoopWidthsShrink :=
-  widthsShrink_of_natOverSuccBound hbound
-
-theorem piCircleAreaLoopNested_of_endpointMonotone
-    (hordered : PiCircleAreaLoopOrdered)
-    (hmono : EndpointMonotone piCircleAreaLoop.compute) :
-    PiCircleAreaLoopNested := by
-  intro n m hnm
-  have h := hmono n m hnm
+theorem piCircleAreaPolygonValid_of_polygonAgreement_and_areaValid
+    (hagree : PiCircleAreaPolygonAgreement)
+    (hvalid : AreaValid) :
+    AreaPolygonValid := by
+  unfold AreaValid RealRaw.ValidCompute at hvalid
+  unfold AreaPolygonValid RealRaw.ValidCompute
   constructor
-  case left =>
-    exact h.1
-  case right =>
-    constructor
-    case left =>
-      have hwidth := hordered m
-      grind [QInterval.width, Rat.sub_eq_add_neg]
-    case right =>
-      exact h.2
-
-theorem piCircleAreaLoopNested_of_stepRefines
-    (hordered : PiCircleAreaLoopOrdered)
-    (hstep : PiCircleAreaLoopStepRefines) :
-    PiCircleAreaLoopNested :=
-  piCircleAreaLoopNested_of_endpointMonotone hordered
-    (endpointMonotone_of_stepRefines hstep)
-
-theorem piCircleAreaLoopValid_of_ordered_nested_and_shrinking
-    (hordered : PiCircleAreaLoopOrdered)
-    (hnested : PiCircleAreaLoopNested)
-    (hshrink : PiCircleAreaLoopWidthsShrink) :
-    RealRaw.ValidCompute piCircleAreaLoop.compute := by
-  exact ⟨hordered, hnested, hshrink⟩
+  · intro n
+    rw [← hagree n]
+    exact hvalid.1 n
+  · constructor
+    · intro n m hnm
+      rw [← hagree n, ← hagree m]
+      exact hvalid.2.1 n m hnm
+    · intro eps
+      obtain ⟨N, hN⟩ := hvalid.2.2 eps
+      refine ⟨N, ?_⟩
+      intro n hn
+      rw [← hagree n]
+      exact hN n hn
 
 def AreaStepRefines : Prop :=
   EndpointStepRefines piCircleArea.compute
@@ -2996,6 +3810,7 @@ def CircumferenceStepRefines : Prop :=
   EndpointStepRefines piCircumference.compute
 
 theorem areaNested_of_endpointMonotone
+    (hordered : AreaOrdered)
     (hmono : EndpointMonotone piCircleArea.compute) :
     AreaNested := by
   intro n m hnm
@@ -3006,7 +3821,7 @@ theorem areaNested_of_endpointMonotone
   case right =>
     constructor
     case left =>
-      have hwidth := piCircleArea_ordered m
+      have hwidth := hordered m
       grind [QInterval.width, Rat.sub_eq_add_neg]
     case right =>
       exact h.2
@@ -3028,8 +3843,9 @@ theorem circumferenceNested_of_endpointMonotone
       exact h.2
 
 theorem areaNested_of_stepRefines
+    (hordered : AreaOrdered)
     (hstep : AreaStepRefines) : AreaNested :=
-  areaNested_of_endpointMonotone
+  areaNested_of_endpointMonotone hordered
     (endpointMonotone_of_stepRefines hstep)
 
 theorem circumferenceNested_of_stepRefines
@@ -3038,18 +3854,229 @@ theorem circumferenceNested_of_stepRefines
     (endpointMonotone_of_stepRefines hstep)
 
 theorem areaValid_of_nested_and_shrinking
+    (hordered : AreaOrdered)
     (hnested : AreaNested) (hshrink : AreaWidthsShrink) :
     AreaValid := by
   unfold AreaValid RealRaw.ValidCompute
   constructor
   case left =>
-    exact piCircleArea_ordered
+    exact hordered
   case right =>
     constructor
     case left =>
       exact hnested
     case right =>
       exact hshrink
+
+namespace AreaLoopValidity
+
+theorem iterateAreaBounds_succ_refine
+    (n : Nat) (state : AreaBoundsLoopState) :
+    iterateAreaBounds (n + 1) state =
+      refineAreaBounds (iterateAreaBounds n state) := by
+  induction n generalizing state with
+  | zero =>
+      rfl
+  | succ n ih =>
+      simp [iterateAreaBounds]
+      exact ih (refineAreaBounds state)
+
+theorem piCircleAreaState_succ (n : Nat) :
+    piCircleAreaState (n + 1) =
+      refineAreaBounds (piCircleAreaState n) := by
+  unfold piCircleAreaState
+  exact iterateAreaBounds_succ_refine n piCircleAreaInitial
+
+theorem state_wellFormed (n : Nat) :
+    IntervalsWellFormed (piCircleAreaState n).intervals := by
+  induction n with
+  | zero =>
+      change IntervalsWellFormed [(0, 1)]
+      simp [IntervalsWellFormed]
+      native_decide
+  | succ n ih =>
+      rw [piCircleAreaState_succ]
+      exact refineAreaBounds_wellFormed (piCircleAreaState n) ih
+
+theorem state_gapSum (n : Nat) :
+    (piCircleAreaState n).hi - (piCircleAreaState n).lo =
+      areaGapSum (piCircleAreaState n).intervals := by
+  induction n with
+  | zero =>
+      native_decide
+  | succ n ih =>
+      rw [piCircleAreaState_succ]
+      exact refineAreaBounds_gapSum
+        (piCircleAreaState n) (state_wellFormed n) ih
+
+private theorem one_div_four_pow_succ (n : Nat) :
+    (1 / (((4 ^ n : Nat) : Rat))) / 4 =
+      1 / (((4 ^ (n + 1) : Nat) : Rat)) := by
+  let A : Rat := ((4 ^ n : Nat) : Rat)
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 4))
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have h4 : (4 : Rat) ≠ 0 := by native_decide
+  have hA4 : A * 4 ≠ 0 := by
+    intro hz
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hpow :
+      (((4 ^ (n + 1) : Nat) : Rat)) = A * 4 := by
+    dsimp [A]
+    exact_mod_cast (by
+      simpa using (Nat.pow_succ 4 n))
+  rw [hpow]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem state_cubeSum (n : Nat) :
+    areaCubeSum (piCircleAreaState n).intervals =
+      1 / (((4 ^ n : Nat) : Rat)) := by
+  induction n with
+  | zero =>
+      native_decide
+  | succ n ih =>
+      rw [piCircleAreaState_succ]
+      rw [refineAreaBounds_cubeSum, ih]
+      exact one_div_four_pow_succ n
+
+theorem areaOrdered : AreaOrdered := by
+  intro n
+  let state := piCircleAreaState n
+  have hgap : state.hi - state.lo = areaGapSum state.intervals := by
+    dsimp [state]
+    exact state_gapSum n
+  have hnonneg : 0 <= areaGapSum state.intervals := by
+    dsimp [state]
+    exact areaGapSum_nonneg _ (state_wellFormed n)
+  change 0 <= (piCircleAreaCompute n).width
+  unfold piCircleAreaCompute QInterval.width
+  dsimp [state] at hgap hnonneg
+  change 0 <= 4 * (piCircleAreaState n).hi -
+    4 * (piCircleAreaState n).lo
+  have hwidth :
+      4 * (piCircleAreaState n).hi -
+          4 * (piCircleAreaState n).lo =
+        4 * ((piCircleAreaState n).hi - (piCircleAreaState n).lo) := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add]
+  rw [hwidth, hgap]
+  exact Rat.mul_nonneg (by native_decide : (0 : Rat) <= 4) hnonneg
+
+theorem areaStepRefines : AreaStepRefines := by
+  intro n
+  have hwf := state_wellFormed n
+  have hsucc := piCircleAreaState_succ n
+  constructor
+  · change (piCircleAreaCompute n).lo <= (piCircleAreaCompute (n + 1)).lo
+    unfold piCircleAreaCompute
+    rw [hsucc]
+    exact Rat.mul_le_mul_of_nonneg_left
+      (refineAreaBounds_lo_mono (piCircleAreaState n) hwf)
+      (by native_decide : (0 : Rat) <= 4)
+  · change (piCircleAreaCompute (n + 1)).hi <= (piCircleAreaCompute n).hi
+    unfold piCircleAreaCompute
+    rw [hsucc]
+    exact Rat.mul_le_mul_of_nonneg_left
+      (refineAreaBounds_hi_anti (piCircleAreaState n) hwf)
+      (by native_decide : (0 : Rat) <= 4)
+
+private theorem one_div_nat_le_one_div_nat_of_le
+    {a b : Nat} (ha : 0 < a) (hab : a <= b) :
+    1 / (b : Rat) <= 1 / (a : Rat) := by
+  let A : Rat := (a : Rat)
+  let B : Rat := (b : Rat)
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact (Rat.natCast_pos).2 ha
+  have hBpos : 0 < B := by
+    dsimp [B]
+    exact (Rat.natCast_pos).2 (Nat.lt_of_lt_of_le ha hab)
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+  have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+  have hAleB : A <= B := by
+    dsimp [A, B]
+    exact_mod_cast hab
+  apply Rat.le_of_mul_le_mul_right (c := A * B)
+  · calc
+      (1 / B) * (A * B) = A := by
+        rw [Rat.div_def]
+        have hcancel : B * B⁻¹ = 1 := Rat.mul_inv_cancel B hBne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= B := hAleB
+      _ = (1 / A) * (A * B) := by
+        rw [Rat.div_def]
+        have hcancel : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hABpos
+
+private theorem succ_le_four_pow (n : Nat) :
+    n + 1 <= 4 ^ n := by
+  induction n with
+  | zero =>
+      simp
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 4 * (n + 1) := by omega
+        _ <= 4 * 4 ^ n := Nat.mul_le_mul_left 4 ih
+        _ = 4 ^ (n + 1) := by
+          rw [Nat.pow_succ]
+          omega
+
+private theorem four_mul_one_div_eq_div (N : Nat) :
+    4 * (1 / (N : Rat)) = 4 / (N : Rat) := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+theorem areaWidthLinearBound_four : AreaWidthLinearBound 4 := by
+  intro n
+  let state := piCircleAreaState n
+  have hwf := state_wellFormed n
+  have hgap := state_gapSum n
+  have hgap_le_cube := areaGapSum_le_cubeSum _ hwf
+  have hcube := state_cubeSum n
+  change (piCircleAreaCompute n).width <=
+    (4 : Rat) / (((n + 1 : Nat) : Rat))
+  unfold piCircleAreaCompute QInterval.width
+  have hwidth :
+      4 * state.hi - 4 * state.lo =
+        4 * (state.hi - state.lo) := by
+    dsimp [state]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add]
+  rw [hwidth]
+  calc
+    4 * ((piCircleAreaState n).hi - (piCircleAreaState n).lo)
+        = 4 * areaGapSum (piCircleAreaState n).intervals := by
+          rw [hgap]
+    _ <= 4 * areaCubeSum (piCircleAreaState n).intervals :=
+          Rat.mul_le_mul_of_nonneg_left hgap_le_cube
+            (by native_decide : (0 : Rat) <= 4)
+    _ = 4 * (1 / (((4 ^ n : Nat) : Rat))) := by
+          rw [hcube]
+    _ = 4 / (((4 ^ n : Nat) : Rat)) := by
+          exact four_mul_one_div_eq_div (4 ^ n)
+    _ <= 4 / (((n + 1 : Nat) : Rat)) := by
+          have hone :
+              1 / (((4 ^ n : Nat) : Rat)) <=
+                1 / (((n + 1 : Nat) : Rat)) :=
+            one_div_nat_le_one_div_nat_of_le
+              (Nat.succ_pos n) (succ_le_four_pow n)
+          rw [← four_mul_one_div_eq_div (4 ^ n),
+            ← four_mul_one_div_eq_div (n + 1)]
+          exact Rat.mul_le_mul_of_nonneg_left hone
+            (by native_decide : (0 : Rat) <= 4)
+
+theorem areaWidthsShrink : AreaWidthsShrink :=
+  areaWidthsShrink_of_linearBound areaWidthLinearBound_four
+
+theorem areaNested : AreaNested :=
+  areaNested_of_stepRefines areaOrdered areaStepRefines
+
+theorem areaValid : AreaValid :=
+  areaValid_of_nested_and_shrinking areaOrdered areaNested areaWidthsShrink
+
+end AreaLoopValidity
 
 theorem circumferenceValid_of_nested_and_shrinking
     (hnested : CircumferenceNested)
@@ -3067,18 +4094,21 @@ theorem circumferenceValid_of_nested_and_shrinking
       exact hshrink
 
 structure GeometricValidityRemainders where
+  area_ordered : AreaOrdered
   area_nested : AreaNested
   area_widths_shrink : AreaWidthsShrink
   circumference_nested : CircumferenceNested
   circumference_widths_shrink : CircumferenceWidthsShrink
 
 structure GeometricStepRemainders where
+  area_ordered : AreaOrdered
   area_step_refines : AreaStepRefines
   area_widths_shrink : AreaWidthsShrink
   circumference_step_refines : CircumferenceStepRefines
   circumference_widths_shrink : CircumferenceWidthsShrink
 
 structure GeometricLinearStepRemainders where
+  area_ordered : AreaOrdered
   area_step_refines : AreaStepRefines
   area_width_constant : Nat
   area_width_bound : AreaWidthLinearBound area_width_constant
@@ -3090,6 +4120,7 @@ structure GeometricLinearStepRemainders where
 theorem geometricStepRemainders_of_linearStepRemainders
     (remainders : GeometricLinearStepRemainders) :
     GeometricStepRemainders where
+  area_ordered := remainders.area_ordered
   area_step_refines := remainders.area_step_refines
   area_widths_shrink :=
     areaWidthsShrink_of_linearBound remainders.area_width_bound
@@ -3101,8 +4132,10 @@ theorem geometricStepRemainders_of_linearStepRemainders
 theorem geometricValidityRemainders_of_stepRemainders
     (remainders : GeometricStepRemainders) :
     GeometricValidityRemainders where
+  area_ordered := remainders.area_ordered
   area_nested :=
-    areaNested_of_stepRefines remainders.area_step_refines
+    areaNested_of_stepRefines
+      remainders.area_ordered remainders.area_step_refines
   area_widths_shrink :=
     remainders.area_widths_shrink
   circumference_nested :=
@@ -3118,6 +4151,7 @@ theorem validityProofs_of_geometric_remainders
   machin := machinValid
   area :=
     areaValid_of_nested_and_shrinking
+      remainders.area_ordered
       remainders.area_nested
       remainders.area_widths_shrink
   circumference :=
@@ -3227,6 +4261,7 @@ this file, and the Leibniz and Machin algorithms are already valid.  What
 remains is geometric validity for the two polygon algorithms, plus the two
 bridges that connect the analytic definitions to the geometric one. -/
 structure CompletionRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
   geometric_validity : GeometricValidityRemainders
   leibniz_eq_machin : LeibnizEqMachin
   leibniz_eq_area : LeibnizEqArea
@@ -3236,7 +4271,8 @@ theorem agreementProofs_of_completionRemainders
     AgreementProofs where
   leibniz_eq_machin := remainders.leibniz_eq_machin
   leibniz_eq_area := remainders.leibniz_eq_area
-  area_eq_circumference := archimedesTheorem
+  area_eq_circumference :=
+    archimedesTheorem remainders.area_polygon_agreement
 
 theorem piProofsComplete_of_completionRemainders
     (remainders : CompletionRemainders) :
@@ -3251,6 +4287,7 @@ theorem piProofsComplete_of_completionRemainders
 width-shrinking for the two geometric algorithms, instead of proving full
 nesting directly. -/
 structure CompletionStepRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
   geometric_steps : GeometricStepRemainders
   leibniz_eq_machin : LeibnizEqMachin
   leibniz_eq_area : LeibnizEqArea
@@ -3260,6 +4297,7 @@ def CompletionStepRemainders.toCompletionRemainders
   geometric_validity :=
     geometricValidityRemainders_of_stepRemainders
       remainders.geometric_steps
+  area_polygon_agreement := remainders.area_polygon_agreement
   leibniz_eq_machin := remainders.leibniz_eq_machin
   leibniz_eq_area := remainders.leibniz_eq_area
 
@@ -3273,6 +4311,7 @@ theorem piProofsComplete_of_stepRemainders
 inequalities and linear width estimates, together with the two analytic
 bridges to the Leibniz definition. -/
 structure CompletionLinearStepRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
   geometric_linear_steps : GeometricLinearStepRemainders
   leibniz_eq_machin : LeibnizEqMachin
   leibniz_eq_area : LeibnizEqArea
@@ -3283,6 +4322,7 @@ def CompletionLinearStepRemainders.toCompletionStepRemainders
   geometric_steps :=
     geometricStepRemainders_of_linearStepRemainders
       remainders.geometric_linear_steps
+  area_polygon_agreement := remainders.area_polygon_agreement
   leibniz_eq_machin := remainders.leibniz_eq_machin
   leibniz_eq_area := remainders.leibniz_eq_area
 
@@ -3293,33 +4333,39 @@ theorem piProofsComplete_of_linearStepRemainders
     remainders.toCompletionStepRemainders
 
 theorem piProofsComplete_of_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
     (geometric_validity : GeometricValidityRemainders)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PiProofsComplete :=
   piProofsComplete_of_completionRemainders
-    { geometric_validity := geometric_validity
+    { area_polygon_agreement := hpoly
+      geometric_validity := geometric_validity
       leibniz_eq_machin :=
         leibnizEqMachin_of_kernelComparisonRoute route hgeom
       leibniz_eq_area :=
-        leibnizEqArea_of_kernelComparisonRoute route }
+        leibnizEqArea_of_kernelComparisonRoute hpoly route }
 
 theorem piProofsComplete_of_stepRemainders_and_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
     (geometric_steps : GeometricStepRemainders)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PiProofsComplete :=
   piProofsComplete_of_kernelComparisonRoute
+    hpoly
     (geometricValidityRemainders_of_stepRemainders geometric_steps)
     route
     hgeom
 
 theorem piProofsComplete_of_linearStepRemainders_and_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
     (geometric_linear_steps : GeometricLinearStepRemainders)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PiProofsComplete :=
   piProofsComplete_of_stepRemainders_and_kernelComparisonRoute
+    hpoly
     (geometricStepRemainders_of_linearStepRemainders
       geometric_linear_steps)
     route
@@ -3344,31 +4390,34 @@ theorem pairwiseAgreementProofs_of_linearStepRemainders
     (piProofsComplete_of_linearStepRemainders remainders)
 
 theorem pairwiseAgreementProofs_of_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
     (geometric_validity : GeometricValidityRemainders)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PairwiseAgreementProofs :=
   PiProofsComplete.pairwiseAgreement
     (piProofsComplete_of_kernelComparisonRoute
-      geometric_validity route hgeom)
+      hpoly geometric_validity route hgeom)
 
 theorem pairwiseAgreementProofs_of_stepRemainders_and_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
     (geometric_steps : GeometricStepRemainders)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PairwiseAgreementProofs :=
   PiProofsComplete.pairwiseAgreement
     (piProofsComplete_of_stepRemainders_and_kernelComparisonRoute
-      geometric_steps route hgeom)
+      hpoly geometric_steps route hgeom)
 
 theorem pairwiseAgreementProofs_of_linearStepRemainders_and_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
     (geometric_linear_steps : GeometricLinearStepRemainders)
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PairwiseAgreementProofs :=
   PiProofsComplete.pairwiseAgreement
     (piProofsComplete_of_linearStepRemainders_and_kernelComparisonRoute
-      geometric_linear_steps route hgeom)
+      hpoly geometric_linear_steps route hgeom)
 
 end PiProofs
 

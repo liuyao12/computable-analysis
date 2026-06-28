@@ -79,20 +79,20 @@ def tangentPoint (S : Stage) (k : Nat) : PiCirclePoint :=
   tangentIntersection (S.samplePoint k) (S.samplePoint (k + 1))
 
 def innerBoundaryFrom (S : Stage) (k count : Nat) : List PiCirclePoint :=
-  piCircleArea.innerBoundaryFrom S.samplePoint k count
+  piCircleAreaPolygon.innerBoundaryFrom S.samplePoint k count
 
 def innerBoundary (S : Stage) : List PiCirclePoint :=
   S.innerBoundaryFrom 0 (S.subdivisions + 1)
 
 def outerBoundaryFrom (S : Stage) (k count : Nat) : List PiCirclePoint :=
-  piCircleArea.outerBoundaryFrom S.samplePoint S.tangentPoint k count
+  piCircleAreaPolygon.outerBoundaryFrom S.samplePoint S.tangentPoint k count
 
 def outerBoundary (S : Stage) : List PiCirclePoint :=
   S.samplePoint 0 :: S.outerBoundaryFrom 0 S.subdivisions
 
 def twiceSignedAreaAux
     (first prev : PiCirclePoint) : List PiCirclePoint -> Rat
-  | vertices => piCircleArea.twiceSignedAreaAux cross first prev vertices
+  | vertices => piCircleAreaPolygon.twiceSignedAreaAux cross first prev vertices
 
 def twiceSignedArea : List PiCirclePoint -> Rat
   | [] => 0
@@ -717,7 +717,7 @@ theorem innerBoundaryFrom_length (S : Stage) (k count : Nat) :
   | zero => rfl
   | succ count ih =>
       unfold innerBoundaryFrom
-      simp [piCircleArea.innerBoundaryFrom]
+      simp [piCircleAreaPolygon.innerBoundaryFrom]
       exact ih (k + 1)
 
 theorem innerBoundary_length (S : Stage) :
@@ -730,7 +730,7 @@ theorem outerBoundaryFrom_length (S : Stage) (k count : Nat) :
   | zero => rfl
   | succ count ih =>
       unfold outerBoundaryFrom
-      simp [piCircleArea.outerBoundaryFrom]
+      simp [piCircleAreaPolygon.outerBoundaryFrom]
       change (S.outerBoundaryFrom (k + 1) count).length + 1 + 1 =
         2 * (count + 1)
       rw [ih (k + 1)]
@@ -748,7 +748,7 @@ theorem circumferenceInnerBoundaryFrom_eq
   | zero => rfl
   | succ count ih =>
       simp [circumferenceInnerBoundaryFrom, innerBoundaryFrom,
-        piCircumference.innerBoundaryFrom, piCircleArea.innerBoundaryFrom]
+        piCircumference.innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom]
       exact ih (k + 1)
 
 theorem circumferenceOuterBoundaryFrom_eq
@@ -759,7 +759,7 @@ theorem circumferenceOuterBoundaryFrom_eq
   | zero => rfl
   | succ count ih =>
       simp [circumferenceOuterBoundaryFrom, outerBoundaryFrom,
-        piCircumference.outerBoundaryFrom, piCircleArea.outerBoundaryFrom]
+        piCircumference.outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom]
       exact ih (k + 1)
 
 theorem circumferenceInnerBoundary_eq (S : Stage) :
@@ -810,8 +810,8 @@ def areaIntervalAt (n : Nat) : QInterval :=
 def circumferenceIntervalAt (n : Nat) : QInterval :=
   (dyadicStage n).circumferenceInterval
 
-theorem piCircleArea_compute_eq_stage (n : Nat) :
-    piCircleArea.compute n = areaIntervalAt n := by
+theorem piCircleAreaPolygon_compute_eq_stage (n : Nat) :
+    piCircleAreaPolygon.compute n = areaIntervalAt n := by
   rfl
 
 theorem piCircumference_compute_eq_stage (n : Nat) :
