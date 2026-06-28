@@ -288,6 +288,32 @@ theorem dot_self_eq_normSq (p : PiCirclePoint) :
   unfold dot normSq
   grind [Rat.add_assoc, Rat.add_comm, Rat.mul_comm]
 
+/-- Coordinate law of cosines, in squared-length form.
+
+This is the rational analytic-geometry identity behind the usual formula
+`|q - p|^2 = |p|^2 + |q|^2 - 2 p dot q`. -/
+theorem segmentNormSq_law_of_cosines (p q : PiCirclePoint) :
+    segmentNormSq p q = normSq p + normSq q - 2 * dot p q := by
+  unfold segmentNormSq normSq dot
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- If two unit vectors and the chord between them all have squared length
+`1`, then their dot product is `1/2`.
+
+Geometrically, the origin together with the two endpoints forms an equilateral
+triangle; the included angle is therefore sixty degrees. -/
+theorem dot_eq_half_of_unit_equilateral
+    {p q : PiCirclePoint}
+    (hp : normSq p = 1) (hq : normSq q = 1)
+    (hseg : segmentNormSq p q = 1) :
+    dot p q = (1 : Rat) / 2 := by
+  have h := segmentNormSq_law_of_cosines p q
+  rw [hp, hq, hseg] at h
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
 theorem one_sub_point_dot_formula (u v : Rat) :
     1 - dot (point u) (point v) =
       (2 * (v - u) * (v - u)) /

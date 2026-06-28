@@ -96,17 +96,28 @@ theorem unitIntervalBranch_four_fifths :
   unfold unitIntervalBranch
   constructor <;> native_decide
 
+theorem unitIntervalBranch_one_third :
+    unitIntervalBranch ((1 : Rat) / 3) := by
+  unfold unitIntervalBranch
+  constructor <;> native_decide
+
+theorem unitIntervalBranch_two_thirds :
+    unitIntervalBranch ((2 : Rat) / 3) := by
+  unfold unitIntervalBranch
+  constructor <;> native_decide
+
 namespace SpecialAngles
 
 /-!
 Named special-value targets for the normalized angle layer.
 
 Here `t` denotes the angle `t * (pi / 2)`.  Thus `1 / 2` is forty-five
-degrees, `2 / 5` is thirty-six degrees, and `4 / 5` is seventy-two degrees.
-The cosine values at thirty-six and seventy-two degrees only need the rational
-sqrt algorithm for `sqrt(5)`.  The corresponding sine values are recorded by
-their squares; turning them into positive nested square-root values belongs to
-the later raw-real square-root operation.
+degrees, `1 / 3` is thirty degrees, `2 / 3` is sixty degrees, `2 / 5`
+is thirty-six degrees, and `4 / 5` is seventy-two degrees.  The cosine values
+at thirty-six and seventy-two degrees only need the rational sqrt algorithm
+for `sqrt(5)`.  The corresponding sine values are recorded by their squares;
+turning them into positive nested square-root values belongs to the later
+raw-real square-root operation.
 -/
 
 theorem sqrtHalfDomain : sqrtDomain ((1 : Rat) / 2) := by
@@ -128,6 +139,12 @@ def cosFortyFiveValue : RealRaw :=
 
 def sinFortyFiveValue : RealRaw :=
   sqrtHalfValue
+
+def sinThirtyValue : RealRaw :=
+  RealRaw.ofRat ((1 : Rat) / 2)
+
+def cosSixtyValue : RealRaw :=
+  RealRaw.ofRat ((1 : Rat) / 2)
 
 def cosThirtySixValue : RealRaw :=
   RealRaw.scaleRat ((1 : Rat) / 4) (sqrtFiveValue + RealRaw.ofRat 1)
@@ -160,6 +177,14 @@ theorem sqrtFiveValue_valid_of_spec
     (h : SqrtRawSpec (5 : Rat) sqrtFiveDomain) :
     sqrtFiveValue.Valid := by
   simpa [sqrtFiveValue] using h.1
+
+theorem sinThirtyValue_valid :
+    sinThirtyValue.Valid := by
+  simpa [sinThirtyValue] using RealRaw.ofRat_valid ((1 : Rat) / 2)
+
+theorem cosSixtyValue_valid :
+    cosSixtyValue.Valid := by
+  simpa [cosSixtyValue] using RealRaw.ofRat_valid ((1 : Rat) / 2)
 
 theorem cosThirtySixValue_valid_of_sqrtFiveSpec
     (h : SqrtRawSpec (5 : Rat) sqrtFiveDomain) :
@@ -220,8 +245,8 @@ def SinSquareValue (C : FunctionRawConstruction) (t : QuarterTurn)
     (rawSquare (C.sinFunctionRaw.evalRaw t ht)).Equiv value
 
 /-- Special values expected of the geometric, normalized-angle sine and cosine
-construction once the angle-to-circle-point algorithm has endpoint and
-pentagon-value theorems. -/
+construction once the angle-to-circle-point algorithm has endpoint,
+equilateral-triangle, and pentagon-value theorems. -/
 structure SpecialAngleValueTargets (C : FunctionRawConstruction) : Prop where
   cos_zero : CosValue C 0 (RealRaw.ofRat 1)
   sin_zero : SinValue C 0 (RealRaw.ofRat 0)
@@ -229,6 +254,8 @@ structure SpecialAngleValueTargets (C : FunctionRawConstruction) : Prop where
   sin_one : SinValue C 1 (RealRaw.ofRat 1)
   cos_forty_five : CosValue C ((1 : Rat) / 2) cosFortyFiveValue
   sin_forty_five : SinValue C ((1 : Rat) / 2) sinFortyFiveValue
+  sin_thirty : SinValue C ((1 : Rat) / 3) sinThirtyValue
+  cos_sixty : CosValue C ((2 : Rat) / 3) cosSixtyValue
   cos_thirty_six : CosValue C ((2 : Rat) / 5) cosThirtySixValue
   cos_seventy_two : CosValue C ((4 : Rat) / 5) cosSeventyTwoValue
   sin_thirty_six_square :
