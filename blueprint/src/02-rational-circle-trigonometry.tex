@@ -592,6 +592,70 @@ The full partial functions will later carry explicit denominator-apartness
 domain data.
 \end{definition}
 
+\begin{theorem}[Rational-circle special values]
+\label{thm:rational-circle-special-values}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.specialValuePackage}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cosRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sinRaw_half_equiv}
+\uses{def:rational-circle-sin-cos}
+\leanok
+In the rational slope chart \(u=\tan(\theta/2)\), the endpoint values are
+\[
+  c(0)=1,\qquad s(0)=0,\qquad c(1)=0,\qquad s(1)=1.
+\]
+The first nontrivial rational sample is
+\[
+  c(1/2)=3/5,\qquad s(1/2)=4/5.
+\]
+The same values are also recorded as exact raw-real equivalences for
+\code{cosRaw} and \code{sinRaw}.  These are not yet the usual angle special
+values: \(u=1/2\) is a Pythagorean-circle sample, not \(45^\circ\).
+\end{theorem}
+
+\begin{definition}[Geometric special-value targets]
+\label{def:geometric-trig-special-values}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleValueTargets}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtySixSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSeventyTwoSquareValue}
+\uses{def:geometric-sin-cos-functionraw,rem:algebraic-numbers-sqrt-two}
+\leanok
+For the normalized angle input \(t\), the geometric functions should satisfy
+\[
+  \cos(\tfrac12\cdot\tfrac\pi2)=
+  \sin(\tfrac12\cdot\tfrac\pi2)=\sqrt{1/2}.
+\]
+The pentagon values at \(36^\circ\) and \(72^\circ\), corresponding to
+\(t=2/5\) and \(t=4/5\), are recorded as
+\[
+  \cos(36^\circ)=\frac{1+\sqrt5}{4},
+  \qquad
+  \cos(72^\circ)=\frac{\sqrt5-1}{4},
+\]
+and, without introducing nested raw-real square roots yet,
+\[
+  \sin^2(36^\circ)=\frac{5-\sqrt5}{8},
+  \qquad
+  \sin^2(72^\circ)=\frac{5+\sqrt5}{8}.
+\]
+These are target statements for any completed \code{FunctionRawConstruction}.
+The square-root computations \(\sqrt{1/2}\) and \(\sqrt5\) use the rational
+square-root algorithm from Chapter~\ref{ch:foundations}; the full positive
+nested square-root formulas for the two sine values are postponed until the
+raw-real square-root operation is available.
+\end{definition}
+
 \section{Trigonometric Identities}
 
 \begin{theorem}[Pythagorean identity on the rational circle]

@@ -31,3 +31,4 @@ import ComputableAnalysis.Polynomial
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
 import ComputableAnalysis.Taylor
+import ComputableAnalysis.TrigSpecialValues
