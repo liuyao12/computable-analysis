@@ -2941,74 +2941,28 @@ def IntervalsWellFormed : List (Rat × Rat) -> Prop
   | (p, r) :: rest =>
       0 <= p /\ p <= r /\ r <= 1 /\ IntervalsWellFormed rest
 
-private theorem inv_zero_rat : (0 : Rat)⁻¹ = 0 := by
-  native_decide
-
 private theorem rat_add_le_add {a b c d : Rat}
     (hab : a <= b) (hcd : c <= d) :
     a + c <= b + d := by
   grind
 
-private theorem div_zero_den (a : Rat) : a / 0 = 0 := by
-  rw [Rat.div_def, inv_zero_rat]
-  grind
-
-private theorem two_mul_ne_zero {d : Rat} (hd : d ≠ 0) :
-    2 * d ≠ 0 := by
-  intro hz
-  have h2 : (2 : Rat) ≠ 0 := by native_decide
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
-private theorem four_mul_ne_zero {d : Rat} (hd : d ≠ 0) :
-    4 * d ≠ 0 := by
-  intro hz
-  have h4 : (4 : Rat) ≠ 0 := by native_decide
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
-private theorem eight_mul_ne_zero {d : Rat} (hd : d ≠ 0) :
-    8 * d ≠ 0 := by
-  intro hz
-  have h8 : (8 : Rat) ≠ 0 := by native_decide
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
 private theorem half_square_div_eq (h d : Rat) :
     (2 * h * (h / 2) * (h / 2)) / d =
       (h * h * h) / (2 * d) := by
-  by_cases hd : d = 0
-  · rw [hd]
-    have h2d : 2 * (0 : Rat) = 0 := by grind
-    rw [h2d]
-    simp [div_zero_den]
-  · have h2 : (2 : Rat) ≠ 0 := by native_decide
-    have h2d : 2 * d ≠ 0 := two_mul_ne_zero hd
-    rw [Rat.div_def, Rat.div_def, Rat.div_def]
-    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 private theorem quarter_div_eq (h d : Rat) :
     (h * (h / 2) * (h / 2)) / d =
       (h * h * h) / (4 * d) := by
-  by_cases hd : d = 0
-  · rw [hd]
-    have h4d : 4 * (0 : Rat) = 0 := by grind
-    rw [h4d]
-    simp [div_zero_den]
-  · have h2 : (2 : Rat) ≠ 0 := by native_decide
-    have h4d : 4 * d ≠ 0 := four_mul_ne_zero hd
-    rw [Rat.div_def, Rat.div_def, Rat.div_def]
-    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 private theorem eighth_div_eq (h d : Rat) :
     ((h / 2) * (h / 2) * (h / 2)) / d =
       (h * h * h) / (8 * d) := by
-  by_cases hd : d = 0
-  · rw [hd]
-    have h8d : 8 * (0 : Rat) = 0 := by grind
-    rw [h8d]
-    simp [div_zero_den]
-  · have h2 : (2 : Rat) ≠ 0 := by native_decide
-    have h8d : 8 * d ≠ 0 := eight_mul_ne_zero hd
-    rw [Rat.div_def, Rat.div_def, Rat.div_def]
-    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 private theorem midpoint_left_sub (p r : Rat) :
     (p + r) / 2 - p = (r - p) / 2 := by
@@ -3104,39 +3058,10 @@ private theorem abstract_gap_den_identity {a b c x y z : Rat}
   grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm]
 
-private theorem cancel_cxz {a b c x y z : Rat}
-    (hcxz : c * x * z ≠ 0) :
-    (1 / (c * x * z)) * (8 * (a * b * c * x * y * z)) =
-      8 * a * b * y := by
-  rw [Rat.div_def]
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
-private theorem cancel_2xyz {a b c x y z : Rat}
-    (h2xyz : 2 * x * y * z ≠ 0) :
-    (1 / (2 * x * y * z)) * (8 * (a * b * c * x * y * z)) =
-      4 * a * b * c := by
-  rw [Rat.div_def]
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
-private theorem cancel_4cab {a b c x y z : Rat}
-    (h4cab : 4 * c * a * b ≠ 0) :
-    (1 / (4 * c * a * b)) * (8 * (a * b * c * x * y * z)) =
-      2 * x * y * z := by
-  rw [Rat.div_def]
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
-private theorem cancel_8axy {a b c x y z : Rat}
-    (h8axy : 8 * a * x * y ≠ 0) :
-    (1 / (8 * a * x * y)) * (8 * (a * b * c * x * y * z)) =
-      c * b * z := by
-  rw [Rat.div_def]
-  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
-private theorem cancel_8byz {a b c x y z : Rat}
-    (h8byz : 8 * b * y * z ≠ 0) :
-    (1 / (8 * b * y * z)) * (8 * (a * b * c * x * y * z)) =
-      c * x * a := by
-  rw [Rat.div_def]
+private theorem cancel_common {d t common : Rat}
+    (hd : d ≠ 0) (hcommon : common = t * d) :
+    (1 / d) * common = t := by
+  rw [hcommon, Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 private theorem abstract_gap_recip_identity {a b c x y z : Rat}
@@ -3187,7 +3112,10 @@ private theorem abstract_gap_recip_identity {a b c x y z : Rat}
   calc
     (1 / (c * x * z)) * (8 * D) = 8 * a * b * y := by
       dsimp [D]
-      exact cancel_cxz hcxz
+      exact cancel_common
+        (d := c * x * z) (t := 8 * a * b * y)
+        (common := 8 * (a * b * c * x * y * z))
+        hcxz (by grind [Rat.mul_assoc, Rat.mul_comm])
     _ = 4 * a * b * c + 2 * x * y * z + c * b * z + c * x * a :=
       abstract_gap_den_identity hx hz hy
     _ =
@@ -3195,8 +3123,22 @@ private theorem abstract_gap_recip_identity {a b c x y z : Rat}
           1 / (8 * a * x * y) + 1 / (8 * b * y * z)) * (8 * D) := by
       dsimp [D]
       rw [Rat.add_mul, Rat.add_mul, Rat.add_mul]
-      rw [cancel_2xyz h2xyz, cancel_4cab h4cab,
-        cancel_8axy h8axy, cancel_8byz h8byz]
+      rw [cancel_common
+          (d := 2 * x * y * z) (t := 4 * a * b * c)
+          (common := 8 * (a * b * c * x * y * z))
+          h2xyz (by grind [Rat.mul_assoc, Rat.mul_comm]),
+        cancel_common
+          (d := 4 * c * a * b) (t := 2 * x * y * z)
+          (common := 8 * (a * b * c * x * y * z))
+          h4cab (by grind [Rat.mul_assoc, Rat.mul_comm]),
+        cancel_common
+          (d := 8 * a * x * y) (t := c * b * z)
+          (common := 8 * (a * b * c * x * y * z))
+          h8axy (by grind [Rat.mul_assoc, Rat.mul_comm]),
+        cancel_common
+          (d := 8 * b * y * z) (t := c * x * a)
+          (common := 8 * (a * b * c * x * y * z))
+          h8byz (by grind [Rat.mul_assoc, Rat.mul_comm])]
 
 private theorem local_gap_refine {p r : Rat}
     (hp0 : 0 <= p) (hpr : p <= r) :
@@ -3370,10 +3312,11 @@ theorem refineAreaBounds_wellFormed (state : AreaBoundsLoopState)
   | mk lo hi intervals =>
       exact refineAux_wellFormed lo hi intervals hwf
 
-private theorem refineAux_lo_mono
+private theorem refineAux_endpoint_refines
     (lo hi : Rat) (intervals : List (Rat × Rat))
     (hwf : IntervalsWellFormed intervals) :
-    lo <= (AreaBoundsLoopState.refineAux lo hi intervals).lo := by
+    lo <= (AreaBoundsLoopState.refineAux lo hi intervals).lo /\
+      (AreaBoundsLoopState.refineAux lo hi intervals).hi <= hi := by
   induction intervals generalizing lo hi with
   | nil =>
       simp [AreaBoundsLoopState.refineAux]
@@ -3389,50 +3332,28 @@ private theorem refineAux_lo_mono
         exact midpoint_le_right hpr
       have hinc : 0 <= circleAreaIncrement p q r :=
         increment_nonneg hpq hqr
-      have htail :=
-        ih (lo + circleAreaIncrement p q r)
-          (hi - circleAreaDecrement p q r) hrest
-      simp [AreaBoundsLoopState.refineAux]
-      exact Rat.le_trans (by grind) htail
-
-private theorem refineAux_hi_anti
-    (lo hi : Rat) (intervals : List (Rat × Rat))
-    (hwf : IntervalsWellFormed intervals) :
-    (AreaBoundsLoopState.refineAux lo hi intervals).hi <= hi := by
-  induction intervals generalizing lo hi with
-  | nil =>
-      simp [AreaBoundsLoopState.refineAux]
-  | cons interval rest ih =>
-      rcases interval with ⟨p, r⟩
-      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
-      let q : Rat := (p + r) / 2
-      have hpq : p <= q := by
-        dsimp [q]
-        exact left_le_midpoint hpr
-      have hqr : q <= r := by
-        dsimp [q]
-        exact midpoint_le_right hpr
       have hdec : 0 <= circleAreaDecrement p q r :=
         decrement_nonneg hp0 hpq hqr
       have htail :=
         ih (lo + circleAreaIncrement p q r)
           (hi - circleAreaDecrement p q r) hrest
       simp [AreaBoundsLoopState.refineAux]
-      exact Rat.le_trans htail (by grind)
+      exact ⟨Rat.le_trans (by grind) htail.1,
+        Rat.le_trans htail.2 (by grind)⟩
 
 theorem refineAreaBounds_lo_mono (state : AreaBoundsLoopState)
     (hwf : IntervalsWellFormed state.intervals) :
     state.lo <= (refineAreaBounds state).lo := by
   cases state with
   | mk lo hi intervals =>
-      exact refineAux_lo_mono lo hi intervals hwf
+      exact (refineAux_endpoint_refines lo hi intervals hwf).1
 
 theorem refineAreaBounds_hi_anti (state : AreaBoundsLoopState)
     (hwf : IntervalsWellFormed state.intervals) :
     (refineAreaBounds state).hi <= state.hi := by
   cases state with
   | mk lo hi intervals =>
-      exact refineAux_hi_anti lo hi intervals hwf
+      exact (refineAux_endpoint_refines lo hi intervals hwf).2
 
 private theorem refineAux_gapSum_extra
     (extra lo hi : Rat) (intervals : List (Rat × Rat))
@@ -3583,8 +3504,7 @@ private theorem one_div_le_one_of_one_le {d : Rat}
   · calc
       (1 / d) * d = 1 := by
         rw [Rat.div_def]
-        have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
-        grind [Rat.mul_assoc, Rat.mul_comm]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
       _ <= d := hd
       _ = 1 * d := by grind
   · exact hdpos
@@ -3631,35 +3551,35 @@ private theorem areaGap_le_cube {p r : Rat}
     _ = (r - p) * (r - p) * (r - p) := by
           rw [Rat.mul_one]
 
-theorem areaGapSum_nonneg
+private theorem areaGapSum_bounds
     (intervals : List (Rat × Rat))
     (hwf : IntervalsWellFormed intervals) :
-    0 <= areaGapSum intervals := by
+    0 <= areaGapSum intervals /\
+      areaGapSum intervals <= areaCubeSum intervals := by
   induction intervals with
   | nil =>
-      simp [areaGapSum]
+      simp [areaGapSum, areaCubeSum]
   | cons interval rest ih =>
       rcases interval with ⟨p, r⟩
       rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
-      have hhead := areaGap_nonneg hp0 hpr
+      have hhead_nonneg := areaGap_nonneg hp0 hpr
+      have hhead_le := areaGap_le_cube hp0 hpr
       have htail := ih hrest
-      simp [areaGapSum]
-      exact Rat.add_nonneg hhead htail
+      simp [areaGapSum, areaCubeSum]
+      exact ⟨Rat.add_nonneg hhead_nonneg htail.1,
+        rat_add_le_add hhead_le htail.2⟩
+
+theorem areaGapSum_nonneg
+    (intervals : List (Rat × Rat))
+    (hwf : IntervalsWellFormed intervals) :
+    0 <= areaGapSum intervals :=
+  (areaGapSum_bounds intervals hwf).1
 
 theorem areaGapSum_le_cubeSum
     (intervals : List (Rat × Rat))
     (hwf : IntervalsWellFormed intervals) :
-    areaGapSum intervals <= areaCubeSum intervals := by
-  induction intervals with
-  | nil =>
-      simp [areaGapSum, areaCubeSum]
-  | cons interval rest ih =>
-      rcases interval with ⟨p, r⟩
-      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
-      have hhead := areaGap_le_cube hp0 hpr
-      have htail := ih hrest
-      simp [areaGapSum, areaCubeSum]
-      exact rat_add_le_add hhead htail
+    areaGapSum intervals <= areaCubeSum intervals :=
+  (areaGapSum_bounds intervals hwf).2
 
 end AreaLoopValidity
 
@@ -3981,36 +3901,6 @@ theorem areaStepRefines : AreaStepRefines := by
       (refineAreaBounds_hi_anti (piCircleAreaState n) hwf)
       (by native_decide : (0 : Rat) <= 4)
 
-private theorem one_div_nat_le_one_div_nat_of_le
-    {a b : Nat} (ha : 0 < a) (hab : a <= b) :
-    1 / (b : Rat) <= 1 / (a : Rat) := by
-  let A : Rat := (a : Rat)
-  let B : Rat := (b : Rat)
-  have hApos : 0 < A := by
-    dsimp [A]
-    exact (Rat.natCast_pos).2 ha
-  have hBpos : 0 < B := by
-    dsimp [B]
-    exact (Rat.natCast_pos).2 (Nat.lt_of_lt_of_le ha hab)
-  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
-  have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
-  have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
-  have hAleB : A <= B := by
-    dsimp [A, B]
-    exact_mod_cast hab
-  apply Rat.le_of_mul_le_mul_right (c := A * B)
-  · calc
-      (1 / B) * (A * B) = A := by
-        rw [Rat.div_def]
-        have hcancel : B * B⁻¹ = 1 := Rat.mul_inv_cancel B hBne
-        grind [Rat.mul_assoc, Rat.mul_comm]
-      _ <= B := hAleB
-      _ = (1 / A) * (A * B) := by
-        rw [Rat.div_def]
-        have hcancel : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
-        grind [Rat.mul_assoc, Rat.mul_comm]
-  · exact hABpos
-
 private theorem succ_le_four_pow (n : Nat) :
     n + 1 <= 4 ^ n := by
   induction n with
@@ -4060,8 +3950,8 @@ theorem areaWidthLinearBound_four : AreaWidthLinearBound 4 := by
           have hone :
               1 / (((4 ^ n : Nat) : Rat)) <=
                 1 / (((n + 1 : Nat) : Rat)) :=
-            one_div_nat_le_one_div_nat_of_le
-              (Nat.succ_pos n) (succ_le_four_pow n)
+            FTC.one_div_nat_antitone (Nat.succ_pos n)
+              (Nat.pow_pos (by omega : 0 < 4)) (succ_le_four_pow n)
           rw [← four_mul_one_div_eq_div (4 ^ n),
             ← four_mul_one_div_eq_div (n + 1)]
           exact Rat.mul_le_mul_of_nonneg_left hone
