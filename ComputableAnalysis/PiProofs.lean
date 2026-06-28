@@ -1335,50 +1335,49 @@ theorem arctanGeometry_outerSectorArea_one_eq (stage : Nat) :
     arctanGeometry_outerBoundary_one_eq,
     arctanGeometry_polygonArea_eq]
 
-theorem four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute
+theorem four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute
     (n : Nat) :
-    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute n) =
+    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).compute n) =
       piCircleAreaPolygon.compute n := by
   rw [piCircleAreaPolygon_compute_eq]
   change (RealRaw.scaleRat (4 : Rat)
-      (ArctanGeometry.arctanGeom (1 : Rat))).compute n =
+      (ArctanGeometry.arctanGeomPolygon (1 : Rat))).compute n =
     piCircleAreaPolygonComputeAtStage (piStage n)
   have hnonzero : ¬(1 : Rat) = 0 := by native_decide
   have hnonneg : (0 : Rat) <= 1 := by native_decide
   have hfour : (0 : Rat) <= 4 := by native_decide
-  simp [ArctanGeometry.arctanGeom, hnonzero, hnonneg, hfour,
+  simp [ArctanGeometry.arctanGeomPolygon, hnonzero, hnonneg, hfour,
     ArctanGeometry.positiveRaw,
     ArctanGeometry.positiveComputeAtStage, ArctanGeometry.stage,
     piStage, piCircleAreaPolygonComputeAtStage, RealRaw.scaleRat,
     RealRaw.scaleRatCompute, arctanGeometry_innerSectorArea_one_eq,
     arctanGeometry_outerSectorArea_one_eq]
 
-theorem four_arctanGeomLoop_one_compute_eq_piCircleArea_compute
+theorem four_arctanGeom_one_compute_eq_piCircleArea_compute
     (n : Nat) :
-    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).compute n) =
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute n) =
       piCircleArea.compute n :=
-  ArctanGeometry.piAreaLoopCompatibility n
+  ArctanGeometry.piAreaCompatibility n
 
-theorem fourArctanGeomOneValid_of_geometricValid
-    (hGeomValid : ArctanGeometry.Valid) :
-    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) := by
-  have hgeom : (ArctanGeometry.arctanGeom (1 : Rat)).Valid := by
-    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
+theorem fourArctanGeomPolygonOneValid_of_geometricPolygonValid
+    (hGeomValid : ArctanGeometry.PolygonValid) :
+    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).Valid) := by
+  have hgeom : (ArctanGeometry.arctanGeomPolygon (1 : Rat)).Valid := by
+    simpa [RealRaw.Valid, ArctanGeometry.polygonFunctionRaw] using
       hGeomValid (1 : Rat) (by trivial)
   exact RealRaw.natScale_valid 4 hgeom
 
-theorem areaPolygonValid_of_arctanGeometryValid
-    (hGeomValid : ArctanGeometry.Valid) : AreaPolygonValid := by
-  have hgeom := fourArctanGeomOneValid_of_geometricValid hGeomValid
+theorem areaPolygonValid_of_arctanGeometryPolygonValid
+    (hGeomValid : ArctanGeometry.PolygonValid) : AreaPolygonValid := by
+  have hgeom := fourArctanGeomPolygonOneValid_of_geometricPolygonValid hGeomValid
   have hcompute :
-      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute) =
+      (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).compute) =
         piCircleAreaPolygon.compute := by
     funext n
-    exact four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n
+    exact four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute n
   simpa [AreaPolygonValid, RealRaw.Valid, hcompute] using hgeom
 
 theorem piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement
-    (hpoly : PiCircleAreaPolygonAgreement)
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     LeibnizEqArea := by
   have hpowGeom :
@@ -1395,25 +1394,21 @@ theorem piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement
       ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
     (hscaled n)
   apply (RealRaw.compareAt_overlap_iff piLeibniz piCircleArea n n).2
-  rw [hpoly n]
   rw [piLeibniz_compute_eq_four_arctan_one n]
-  rw [← four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   exact hover
 
 theorem leibnizEqArea_of_powerSeriesGeometryAgreement
     (_hGeomValid : ArctanGeometry.Valid)
-    (hpoly : PiCircleAreaPolygonAgreement)
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     LeibnizEqArea :=
-  piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement hpoly hagree
+  piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree
 
 theorem leibnizEqArea_of_kernelComparisonRoute
-    (hpoly : PiCircleAreaPolygonAgreement)
     (route : Taylor.ArctanComparison.KernelComparisonRoute) :
     LeibnizEqArea :=
   leibnizEqArea_of_powerSeriesGeometryAgreement
     route.geometric_valid
-    hpoly
     (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
       route)
 
@@ -2659,45 +2654,44 @@ theorem piCircleAreaPolygon_equiv_self :
   unfold QInterval.width at hordered
   constructor <;> grind [Rat.sub_eq_add_neg]
 
-theorem four_arctanGeom_one_equiv_piCircleAreaPolygon :
-    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Equiv
+theorem four_arctanGeomPolygon_one_equiv_piCircleAreaPolygon :
+    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).Equiv
       piCircleAreaPolygon) := by
   intro n
   apply (RealRaw.compareAt_overlap_iff
-    ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)
+    ((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)
     piCircleAreaPolygon n n).2
-  rw [four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
+  rw [four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute n]
   have hordered := piCircleAreaPolygon_ordered n
   unfold QInterval.Overlaps QInterval.width at *
   constructor <;> grind [Rat.sub_eq_add_neg]
 
-theorem piCircleAreaPolygon_equiv_four_arctanGeom_one :
+theorem piCircleAreaPolygon_equiv_four_arctanGeomPolygon_one :
     piCircleAreaPolygon.Equiv
-      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
-  RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleAreaPolygon
+      (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm four_arctanGeomPolygon_one_equiv_piCircleAreaPolygon
 
-theorem four_arctanGeom_one_equiv_piCircleArea
+theorem four_arctanGeomPolygon_one_equiv_piCircleArea
     (hpoly : PiCircleAreaPolygonAgreement) :
-    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Equiv
+    (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw).Equiv
       piCircleArea) := by
   intro n
   apply (RealRaw.compareAt_overlap_iff
-    ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)
+    ((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)
     piCircleArea n n).2
   rw [hpoly n]
-  rw [four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
+  rw [four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute n]
   have hordered := piCircleAreaPolygon_ordered n
   unfold QInterval.Overlaps QInterval.width at *
   constructor <;> grind [Rat.sub_eq_add_neg]
 
-theorem piCircleArea_equiv_four_arctanGeom_one
+theorem piCircleArea_equiv_four_arctanGeomPolygon_one
     (hpoly : PiCircleAreaPolygonAgreement) :
     piCircleArea.Equiv
-      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
-  RealRaw.equiv_symm (four_arctanGeom_one_equiv_piCircleArea hpoly)
+      (((4 : Nat) * ArctanGeometry.arctanGeomPolygon (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm (four_arctanGeomPolygon_one_equiv_piCircleArea hpoly)
 
 theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
-    (hpoly : PiCircleAreaPolygonAgreement)
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv piCircleArea) := by
   have hpowGeom :
@@ -2715,20 +2709,16 @@ theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
     (hscaled n)
   apply (RealRaw.compareAt_overlap_iff
     ((4 : Nat) * arctan (1 : Rat) : RealRaw) piCircleArea n n).2
-  rw [hpoly n]
-  rw [← four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   exact hover
 
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
-    (hpoly : PiCircleAreaPolygonAgreement)
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
-    (four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
-      hpoly hagree)
+    (four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
-    (hpoly : PiCircleAreaPolygonAgreement)
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
     (hgeom :
       (IntegralIdentities.arctanIntegral (1 : Rat) c).Equiv
@@ -2752,12 +2742,10 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (IntegralIdentities.PiFromArctanIntegral
       (IntegralIdentities.arctanIntegral (1 : Rat) c))
     piCircleArea n n).2
-  rw [hpoly n]
-  rw [← four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute n]
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   exact hover
 
 theorem exists_piFromArctanIntegral_equiv_piCircleArea
-    (hpoly : PiCircleAreaPolygonAgreement)
     (hgeom : IntegralIdentities.ArctanIntegralGeomAgreement (1 : Rat)) :
     Exists fun c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat) =>
       (IntegralIdentities.PiFromArctanIntegral
@@ -2765,20 +2753,18 @@ theorem exists_piFromArctanIntegral_equiv_piCircleArea
           piCircleArea := by
   rcases hgeom with ⟨c, hc⟩
   exact ⟨c, piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
-    hpoly c hc⟩
+    c hc⟩
 
 theorem arctanIntegralPiRoute_of_geom_agreement
-    (hpoly : PiCircleAreaPolygonAgreement)
+    (harea :
+      IntegralIdentities.PiFromArctanIntegralAgrees
+        (ArctanGeometry.arctanGeom (1 : Rat)))
     (hgeom : IntegralIdentities.ArctanIntegralGeomAgreement (1 : Rat)) :
     IntegralIdentities.ArctanIntegralPiRoute where
   integral_computes_geom_at_one := hgeom
-  four_geom_arctan_one_eq_pi := by
-    simpa [IntegralIdentities.PiFromArctanIntegralAgrees,
-      IntegralIdentities.PiFromArctanIntegral] using
-      four_arctanGeom_one_equiv_piCircleArea hpoly
+  four_geom_arctan_one_eq_pi := harea
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_function_agreement
-    (hpoly : PiCircleAreaPolygonAgreement)
     (data : IntegralIdentities.ArctanIntegralData)
     (hgeom : IntegralIdentities.ArctanIntegralGeomFunctionAgreement data) :
     (IntegralIdentities.PiFromArctanIntegral
@@ -2786,17 +2772,18 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_function_agreement
         (data.constructionAt (1 : Rat) (by native_decide)))).Equiv
         piCircleArea :=
   piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
-    hpoly
     (data.constructionAt (1 : Rat) (by native_decide))
     (IntegralIdentities.arctanIntegral_equiv_arctanGeom_of_functionAgreement
       data hgeom (by native_decide))
 
 theorem arctanIntegralPiRoute_of_function_agreement
-    (hpoly : PiCircleAreaPolygonAgreement)
+    (harea :
+      IntegralIdentities.PiFromArctanIntegralAgrees
+        (ArctanGeometry.arctanGeom (1 : Rat)))
     (data : IntegralIdentities.ArctanIntegralData)
     (hgeom : IntegralIdentities.ArctanIntegralGeomFunctionAgreement data) :
     IntegralIdentities.ArctanIntegralPiRoute :=
-  arctanIntegralPiRoute_of_geom_agreement hpoly
+  arctanIntegralPiRoute_of_geom_agreement harea
     (IntegralIdentities.arctanIntegralGeomAgreement_one_of_functionAgreement
       data hgeom)
 
@@ -3968,34 +3955,34 @@ theorem areaValid : AreaValid :=
 
 end AreaLoopValidity
 
-theorem fourArctanGeomLoopOneValid :
-    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).Valid) := by
+theorem fourArctanGeomOneValid :
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) := by
   have hcompute :
-      (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).compute) =
+      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute) =
         piCircleArea.compute := by
     funext n
-    exact four_arctanGeomLoop_one_compute_eq_piCircleArea_compute n
+    exact four_arctanGeom_one_compute_eq_piCircleArea_compute n
   change RealRaw.ValidCompute
-    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).compute)
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute)
   rw [hcompute]
   simpa [AreaValid] using AreaLoopValidity.areaValid
 
-theorem four_arctanGeomLoop_one_equiv_piCircleArea :
-    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).Equiv
+theorem four_arctanGeom_one_equiv_piCircleArea :
+    (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Equiv
       piCircleArea) := by
   intro n
   apply (RealRaw.compareAt_overlap_iff
-    ((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw)
+    ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)
     piCircleArea n n).2
-  rw [four_arctanGeomLoop_one_compute_eq_piCircleArea_compute n]
+  rw [four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   have hordered := AreaLoopValidity.areaOrdered n
   unfold QInterval.Overlaps QInterval.width at *
   constructor <;> grind [Rat.sub_eq_add_neg]
 
-theorem piCircleArea_equiv_four_arctanGeomLoop_one :
+theorem piCircleArea_equiv_four_arctanGeom_one :
     piCircleArea.Equiv
-      (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw)) :=
-  RealRaw.equiv_symm four_arctanGeomLoop_one_equiv_piCircleArea
+      (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
 
 theorem circumferenceValid_of_nested_and_shrinking
     (hnested : CircumferenceNested)
@@ -4263,7 +4250,7 @@ theorem piProofsComplete_of_kernelComparisonRoute
       leibniz_eq_machin :=
         leibnizEqMachin_of_kernelComparisonRoute route hgeom
       leibniz_eq_area :=
-        leibnizEqArea_of_kernelComparisonRoute hpoly route }
+        leibnizEqArea_of_kernelComparisonRoute route }
 
 theorem piProofsComplete_of_stepRemainders_and_kernelComparisonRoute
     (hpoly : PiCircleAreaPolygonAgreement)

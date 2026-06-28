@@ -102,9 +102,10 @@ def positiveRaw (y : Rat) : RealRaw :=
   else
     { compute := fun n => positiveComputeAtStage y (stage n) }
 
-/-- Geometric arctangent on rational slopes. Positive inputs are sector
-areas; negative inputs use oddness. -/
-def arctanGeom (x : Rat) : RealRaw :=
+/-- Polygon-boundary scaffold for geometric arctangent on rational slopes.
+The public computation below is the explicit rational update algorithm
+`arctanGeom`; this version is retained for finite polygon comparison proofs. -/
+def arctanGeomPolygon (x : Rat) : RealRaw :=
   if x = 0 then
     RealRaw.ofRat 0
   else if 0 <= x then
@@ -123,16 +124,16 @@ theorem positiveRaw_compute_eq_positiveComputeAtStage
     (positiveRaw y).compute n = positiveComputeAtStage y (stage n) := by
   simp [positiveRaw, hy]
 
-theorem arctanGeom_nonneg_compute_eq
+theorem arctanGeomPolygon_nonneg_compute_eq
     {x : Rat} (hx0 : x ≠ 0) (hx : 0 <= x) (n : Nat) :
-    (arctanGeom x).compute n = positiveComputeAtStage x (stage n) := by
-  simp [arctanGeom, positiveRaw, hx0, hx]
+    (arctanGeomPolygon x).compute n = positiveComputeAtStage x (stage n) := by
+  simp [arctanGeomPolygon, positiveRaw, hx0, hx]
 
-theorem arctanGeom_one_compute_eq (n : Nat) :
-    (arctanGeom 1).compute n = positiveComputeAtStage 1 (stage n) := by
+theorem arctanGeomPolygon_one_compute_eq (n : Nat) :
+    (arctanGeomPolygon 1).compute n = positiveComputeAtStage 1 (stage n) := by
   have hnonzero : (1 : Rat) ≠ 0 := by native_decide
   have hnonneg : (0 : Rat) <= 1 := by native_decide
-  exact arctanGeom_nonneg_compute_eq hnonzero hnonneg n
+  exact arctanGeomPolygon_nonneg_compute_eq hnonzero hnonneg n
 
 theorem circlePoint_zero :
     circlePoint 0 = ({ x := 1, y := 0 } : PiCirclePoint) := by
@@ -161,9 +162,9 @@ theorem positiveRaw_zero :
     positiveRaw 0 = RealRaw.ofRat 0 := by
   simp [positiveRaw]
 
-theorem arctanGeom_zero :
-    arctanGeom 0 = RealRaw.ofRat 0 := by
-  simp [arctanGeom]
+theorem arctanGeomPolygon_zero :
+    arctanGeomPolygon 0 = RealRaw.ofRat 0 := by
+  simp [arctanGeomPolygon]
 
 /-- State for the update-loop presentation of geometric arctangent.  The
 interval `[lo, hi]` stores current sector-area bounds, and `intervals` stores
@@ -220,11 +221,11 @@ def positiveLoopComputeAtStage (x : Rat) (n : Nat) : QInterval :=
 def positiveLoopRaw (x : Rat) : RealRaw where
   compute := positiveLoopComputeAtStage x
 
-/-- Geometric arctangent, presented as an explicit rational update loop.  This
-duplicates the exhaustion algorithm rather than factoring it through the pi
-definition, so the later comparison theorem can relate two independent raw
+/-- Geometric arctangent, presented as an explicit rational update algorithm.
+This duplicates the exhaustion algorithm rather than factoring it through the
+pi definition, so the later comparison theorem can relate two independent raw
 objects. -/
-def arctanGeomLoop (x : Rat) : RealRaw :=
+def arctanGeom (x : Rat) : RealRaw :=
   if x = 0 then
     RealRaw.ofRat 0
   else if 0 <= x then
@@ -238,11 +239,20 @@ theorem arctanAreaIncrement_eq_circleAreaIncrement (p m q : Rat) :
 theorem arctanAreaDecrement_eq_circleAreaDecrement (p m q : Rat) :
     arctanAreaDecrement p m q = circleAreaDecrement p m q := rfl
 
-theorem arctanGeomLoop_one_compute_eq (n : Nat) :
-    (arctanGeomLoop 1).compute n = positiveLoopComputeAtStage 1 n := by
+theorem arctanGeom_nonneg_compute_eq
+    {x : Rat} (hx0 : x ≠ 0) (hx : 0 <= x) (n : Nat) :
+    (arctanGeom x).compute n = positiveLoopComputeAtStage x n := by
+  simp [arctanGeom, positiveLoopRaw, hx0, hx]
+
+theorem arctanGeom_one_compute_eq (n : Nat) :
+    (arctanGeom 1).compute n = positiveLoopComputeAtStage 1 n := by
   have hnonzero : ¬(1 : Rat) = 0 := by native_decide
   have hnonneg : (0 : Rat) <= 1 := by native_decide
-  simp [arctanGeomLoop, positiveLoopRaw, hnonzero, hnonneg]
+  exact arctanGeom_nonneg_compute_eq hnonzero hnonneg n
+
+theorem arctanGeom_zero :
+    arctanGeom 0 = RealRaw.ofRat 0 := by
+  simp [arctanGeom]
 
 def toPiAreaLoopState (state : AreaLoopState) : AreaBoundsLoopState :=
   { lo := state.lo, hi := state.hi, intervals := state.intervals }
@@ -296,20 +306,20 @@ theorem piCircleAreaState_eq_arctanAreaLoopState_one
   exact iterateAreaBounds_toPiAreaLoopState n (arctanAreaLoopInitial 1)
 
 /-- The comparison target saying that the loop definition of pi agrees stage by
-stage with four times the loop definition of geometric arctangent at `1`. -/
-def PiAreaLoopCompatibility : Prop :=
+stage with four times the geometric arctangent at `1`. -/
+def PiAreaCompatibility : Prop :=
   forall n : Nat,
-    (((4 : Nat) * arctanGeomLoop (1 : Rat) : RealRaw).compute n) =
+    (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw).compute n) =
       piCircleArea.compute n
 
-theorem piAreaLoopCompatibility : PiAreaLoopCompatibility := by
+theorem piAreaCompatibility : PiAreaCompatibility := by
   intro n
   have hnonneg : (0 : Rat) <= 4 := by native_decide
   have hstate := piCircleAreaState_eq_arctanAreaLoopState_one n
-  change (RealRaw.scaleRat (4 : Rat) (arctanGeomLoop (1 : Rat))).compute n =
+  change (RealRaw.scaleRat (4 : Rat) (arctanGeom (1 : Rat))).compute n =
     piCircleArea.compute n
   simp [RealRaw.scaleRat, RealRaw.scaleRatCompute, hnonneg,
-    arctanGeomLoop_one_compute_eq, positiveLoopComputeAtStage,
+    arctanGeom_one_compute_eq, positiveLoopComputeAtStage,
     piCircleArea, piCircleAreaCompute, hstate,
     toPiAreaLoopState]
 
@@ -323,6 +333,17 @@ def representation : Elementary.Arctan.FunctionRepresentation where
 
 def Valid : Prop :=
   forall x h, RealRaw.ValidCompute (functionRaw.compute x h)
+
+def polygonFunctionRaw : PartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x _ => (arctanGeomPolygon x).compute
+
+def polygonRepresentation : Elementary.Arctan.FunctionRepresentation where
+  name := "arctan.geom.polygon"
+  raw := polygonFunctionRaw
+
+def PolygonValid : Prop :=
+  forall x h, RealRaw.ValidCompute (polygonFunctionRaw.compute x h)
 
 def PowerSeriesAgreesOnUnit : Prop :=
   Elementary.Arctan.Equivalent Elementary.Arctan.powerSeries representation

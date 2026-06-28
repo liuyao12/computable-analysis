@@ -84,11 +84,11 @@ and removes the orange triangle from the upper bound.}
 \lean{ComputableAnalysis.circleAreaDecrement}
 \lean{ComputableAnalysis.refineAreaBounds}
 \lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeomLoop_one_compute_eq_piCircleArea_compute}
-\lean{ComputableAnalysis.PiProofs.fourArctanGeomLoopOneValid}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeomLoop_one_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeomLoop_one}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
+\lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeomPolygon_one_compute_eq_piCircleAreaPolygon_compute}
 \uses{rem:pseudocode-convention}
 The loop form of the stage algorithm keeps a current lower bound \(a\), a
 current upper bound \(b\), and the list of rational parameter intervals still
@@ -202,36 +202,37 @@ available.
 \begin{definition}[Geometric arctangent]
 \label{def:geometric-arctan}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeomLoop}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeomPolygon}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
-\lean{ComputableAnalysis.ArctanGeometry.PiAreaLoopCompatibility}
-\lean{ComputableAnalysis.ArctanGeometry.piAreaLoopCompatibility}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeomPolygon_one_compute_eq}
+\lean{ComputableAnalysis.ArctanGeometry.PiAreaCompatibility}
+\lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
 \uses{def:circle-area-stage-algorithm,rem:rational-circle-point}
 For a rational slope \(x\), the point \(P(x)\) lies on the unit circle at twice
 the angle whose tangent is \(x\).  The geometric arctangent algorithm returns
 the sector area between \(P(0)=(1,0)\) and \(P(x)\), with oddness used for
 negative slopes.  Thus it is an area algorithm for \(\arctan(x)\), separate
 from the power-series algorithm of Chapter~\ref{ch:infinite-series}.  The
-special case \(x=1\) is the quarter circle, so the loop-level comparison
+special case \(x=1\) is the quarter circle, so the comparison
 \(\pi=4\arctan(1)\) is geometric before any series comparison enters.
 \end{definition}
 
 \begin{theorem}[Geometric arctangent gives the area definition of pi]
 \label{thm:geometric-arctan-one-area-pi}
-\lean{ComputableAnalysis.PiProofs.fourArctanGeomLoopOneValid}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeomLoop_one_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeomLoop_one}
+\lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeomPolygon_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeomPolygon_one}
 \uses{def:circle-area-stage-algorithm,def:geometric-arctan}
-The loop-level geometric sector-area arctangent satisfies
+The geometric sector-area arctangent satisfies
 \[
-  4\arctan_{\mathrm{geom,loop}}(1)\sim \pi_{\mathrm{area}}.
+  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
 \]
 Lean proves this by transporting the verified \code{piCircleArea} interval
-algorithm across the same-stage equality with \code{4 * arctanGeomLoop(1)}.
+algorithm across the same-stage equality with \code{4 * arctanGeom(1)}.
 The older polygon arctangent comparison will give the analogous raw-real
-equivalence for \code{arctanGeom} itself once
+equivalence for \code{arctanGeomPolygon} once
 \code{PiCircleAreaPolygonAgreement} identifies \code{piCircleArea} with the
 polygon scaffold.
 \end{theorem}
@@ -458,7 +459,7 @@ to finish the Lean proof, not to settle a mathematical uncertainty.
 
 \begin{definition}[Arctangent area stage algorithm]
 \label{def:arctan-area-stage-algorithm}
-\lean{ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaIncrement}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaDecrement}
 \lean{ComputableAnalysis.ArctanGeometry.positiveComputeAtStage}
@@ -467,8 +468,8 @@ to finish the Lean proof, not to settle a mathematical uncertainty.
 For \(0\le x\le1\), the same rational polygon computation gives an interval
 for the sector area from \(P(0)=(1,0)\) to \(P(x)\).  Since that sector has
 angle \(2\arctan(x)\), its area is \(\arctan(x)\).  The arctangent version
-uses the same rational increment and decrement formulas, but it is written as
-its own loop.  The initial lower bound is the chord-triangle area
+uses the same rational increment and decrement formulas, but it is packaged as
+its own raw algorithm.  The initial lower bound is the chord-triangle area
 \(x/(1+x^2)\), and the initial upper bound is the tangent-triangle area \(x\).
 \begin{verbatim}
 def increment(p, q, r):
@@ -500,7 +501,7 @@ def arctan(x, n):
 The restriction \(0\le x\le1\) is the only range needed for the first
 trigonometric construction.  The complementary ranges are handled later by
 symmetry, reciprocal identities, and period reduction.  The theorem relating
-the loop version at \(x=1\) to the loop version of \(\pi\) is proved as a
+the arctangent algorithm at \(x=1\) to \code{piCircleArea} is proved as a
 separate stagewise comparison, not made true by definitional identification.
 \end{definition}
 

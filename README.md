@@ -33,7 +33,7 @@ for equivalence scorekeeping.
 | `piCircleArea` | Rational midpoint area exhaustion using increment/decrement triangles; current baseline for pi comparisons. | ✓ | N/A |
 | `piCircumference` | Rational polygon circumference using interval square roots for side lengths. | ✗ | ✗ |
 | **Arctangent-at-one routes** | The following rows compute pi through `4 * arctan(1)` using geometric, integral, or series representations. |  |  |
-| `4 * arctanGeomLoop(1)` | Geometric sector-area arctangent loop at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
+| `4 * arctanGeom(1)` | Geometric sector-area arctangent at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
 | `4 * arctanIntegral(1)` | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
 | `4 * arctan(1)` | Power-series arctangent at `1`, equal to the Leibniz computation. | ✓ | ✗ |
 | `piLeibniz` | Alternating series for `4 * arctan(1)`, namely `4 * (1 - 1/3 + 1/5 - ...)`. | ✓ | ✗ |
@@ -47,20 +47,20 @@ for equivalence scorekeeping.
 
 The area loop validity package is now formalized as
 `PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
-`PiProofs.fourArctanGeomLoopOneValid` and
-`PiProofs.four_arctanGeomLoop_one_equiv_piCircleArea`.  The first open
+`PiProofs.fourArctanGeomOneValid` and
+`PiProofs.four_arctanGeom_one_equiv_piCircleArea`.  The first open
 geometric bridge is `PiCircleAreaPolygonAgreement`.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The Leibniz-to-area route is now reduced to
-`PowerSeriesAgreesOnUnit` and `PiCircleAreaPolygonAgreement` via
+`PowerSeriesAgreesOnUnit` via
 `piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement`.
 
 The public `piCircleArea` is now the increment/decrement loop.  The older
 polygon-boundary presentation is retained as `piCircleAreaPolygon` only as
 proof scaffolding.  The loop is now directly verified; the next proof step is
 `PiCircleAreaPolygonAgreement` so the polygon-based Archimedes, circumference,
-and geometric-arctangent comparisons transport back to the public baseline.
+and polygon-scaffold comparisons transport back to the public baseline.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.
