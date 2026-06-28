@@ -657,6 +657,12 @@ raw-real square-root operation is available.
 \end{definition}
 
 \begin{remark}[Gauss's 17-gon]
+\lean{ComputableAnalysis.GaussSeventeen.powerSeriesCheck_default}
+\lean{ComputableAnalysis.GaussSeventeen.cosPowerSeriesInterval}
+\lean{ComputableAnalysis.GaussSeventeen.sinPowerSeriesInterval}
+\lean{ComputableAnalysis.GaussSeventeen.cosRadicalInterval}
+\lean{ComputableAnalysis.GaussSeventeen.sinRadicalInterval}
+\leanok
 The pentagon values are the first hint that special angles naturally lead to
 small algebraic computations.  A much more striking example is Gauss's
 constructibility theorem for the regular \(17\)-gon.  In our normalized angle
@@ -671,8 +677,15 @@ certificate is
   +2\sqrt{17+3\sqrt{17}-\sqrt{170+38\sqrt{17}}}}{16}.
 \]
 The corresponding sine is the positive square root of \(1-\cos^2(2\pi/17)\).
-This is a good eventual test case for the algebraic-number layer, but it is
-well outside the formal scope of this chapter.
+This is a good eventual test case for the algebraic-number layer, but a proof
+is well outside the formal scope of this chapter.
+
+What we can already do is compute a finite consistency check.  The Lean code
+uses \code{piCircleArea} to enclose \(2\pi/17\), evaluates the sine and cosine
+power series by rational recurrence, separately evaluates the displayed
+nested radical by rational interval arithmetic, and checks that the resulting
+cosine and sine intervals overlap at the chosen stages.  This is only a
+precision check, not a formal proof of Gauss's theorem.
 \end{remark}
 
 \section{Trigonometric Identities}
