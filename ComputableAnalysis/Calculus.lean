@@ -181,6 +181,66 @@ structure Construction (f : RealFunRaw) (a b : Rat) where
 def integral (f : RealFunRaw) (a b : Rat) (c : Construction f a b) : RealRaw :=
   Certificate.realRaw c.certificate
 
+/-- The exact constant integrand `x ↦ c`, as a raw function. -/
+def constantFunRaw (c : Rat) : RealFunRaw :=
+  RealFunRaw.exact (fun _ => c)
+
+/-- The exact linear primitive `x ↦ c*x`, used for the constant-integral
+sanity check. -/
+def linearPrimitiveFunRaw (c : Rat) : RealFunRaw :=
+  RealFunRaw.exact (fun x => c * x)
+
+/-- One-cell Riemann sums already compute constant integrands exactly. -/
+def constantPlan : Nat -> Plan :=
+  fun _ => { subdivisions := 1, evalPrecision := 0 }
+
+theorem riemannLeftInterval_constant_one
+    (c a b : Rat) (prec : Nat) :
+    riemannLeftInterval (constantFunRaw c) a b 1 prec =
+      { lo := (b - a) * c, hi := (b - a) * c } := by
+  unfold riemannLeftInterval constantFunRaw RealFunRaw.exact leftPoint mesh
+  simp
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem constant_algorithm_compute
+    (c a b : Rat) (n : Nat) :
+    (algorithm (constantFunRaw c) a b constantPlan).compute n =
+      { lo := (b - a) * c, hi := (b - a) * c } := by
+  simp [Raw.compute, algorithm, constantPlan]
+  exact riemannLeftInterval_constant_one c a b 0
+
+/-- The exact one-cell constant-integrand algorithm is a valid integral
+construction on every rational interval. -/
+def constantConstruction (c a b : Rat) :
+    Construction (constantFunRaw c) a b where
+  plan := constantPlan
+  certificate := by
+    refine ⟨?_, ?_, ?_⟩
+    · intro n
+      rw [constant_algorithm_compute]
+      simp [QInterval.width]
+      grind [Rat.sub_eq_add_neg]
+    · intro n m _hnm
+      rw [constant_algorithm_compute, constant_algorithm_compute]
+      simp
+    · intro eps
+      refine ⟨0, ?_⟩
+      intro n _hn
+      rw [constant_algorithm_compute]
+      show (b - a) * c - (b - a) * c <= eps.val
+      grind [Rat.sub_eq_add_neg]
+
+theorem constantIntegral_compute
+    (c a b : Rat) (n : Nat) :
+    (integral (constantFunRaw c) a b (constantConstruction c a b)).compute n =
+      { lo := (b - a) * c, hi := (b - a) * c } := by
+  simp [integral, Certificate.realRaw, Raw.toRealRaw, constantConstruction,
+    constant_algorithm_compute]
+
+theorem constantIntegral_valid (c a b : Rat) :
+    (integral (constantFunRaw c) a b (constantConstruction c a b)).Valid :=
+  (constantConstruction c a b).certificate.valid
+
 /-- Linearity in the first argument.  The construction data for
 the left and right sides may differ; equality is interval-overlap equivalence
 of the resulting computable reals. -/

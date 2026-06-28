@@ -41,6 +41,51 @@ The interval version packages the same statement when \(f\) and \(F\) are
 already certified as \code{FunctionOnInterval}s.
 \end{definition}
 
+\begin{definition}[The constant-integrand algorithm]
+\label{def:constant-integral-construction}
+\lean{ComputableAnalysis.Integral.constantFunRaw}
+\lean{ComputableAnalysis.Integral.linearPrimitiveFunRaw}
+\lean{ComputableAnalysis.Integral.constantPlan}
+\lean{ComputableAnalysis.Integral.riemannLeftInterval_constant_one}
+\lean{ComputableAnalysis.Integral.constant_algorithm_compute}
+\lean{ComputableAnalysis.Integral.constantConstruction}
+\lean{ComputableAnalysis.Integral.constantIntegral_compute}
+\lean{ComputableAnalysis.Integral.constantIntegral_valid}
+\uses{def:definite-integral-identity}
+\leanok
+As a first completely checked integral construction, take the exact rational
+integrand \(x\mapsto c\).  The plan uses one subinterval and no evaluation
+refinement:
+\[
+  h=b-a,\qquad
+  L_1=\sum_{k<1} h\,c=(b-a)c.
+\]
+Since every stage returns the exact interval
+\(\bigl[(b-a)c,(b-a)c\bigr]\), the boxes are ordered, nested, and shrink
+immediately.  Lean packages this as a certified
+\code{Integral.Construction} for every rational \(a,b,c\).
+\end{definition}
+
+\begin{theorem}[Constant-integrand endpoint identity]
+\label{thm:constant-integral-endpoint-identity}
+\lean{ComputableAnalysis.Integral.endpointDifference_linearPrimitive_compute}
+\lean{ComputableAnalysis.Integral.constantPrimitiveEndpoint_valid}
+\lean{ComputableAnalysis.Integral.constant_integral_equiv_endpoint}
+\lean{ComputableAnalysis.Integral.constantDefiniteIdentity}
+\uses{def:constant-integral-construction,def:definite-integral-identity}
+\leanok
+For the primitive \(F(x)=cx\), the endpoint-difference raw real computes
+\[
+  F(b)-F(a)=cb-ca.
+\]
+The constant-integrand construction computes \((b-a)c\), and Lean proves the
+two exact rational intervals overlap at every stage.  Thus the first
+\code{DefiniteIdentity} is fully formalized:
+\[
+  \int_a^b c\,\dd x \Equiv cb-ca.
+\]
+\end{theorem}
+
 \section{Monotone integrands and convex FTC}
 
 The first integral theorem should be for monotone functions on rational
@@ -50,7 +95,7 @@ especially transparent.
 
 \begin{theorem}[Monotone integral construction]
 \label{thm:monotone-integral-construction}
-\uses{def:definite-integral-identity}
+\uses{def:constant-integral-construction,def:definite-integral-identity}
 A function with certified monotonicity on \([a,b]\) has a valid rational
 Riemann-sum integral.  The construction uses left and right sums, or equivalent
 interval sums, and the width estimate is the finite monotone-variation bound.

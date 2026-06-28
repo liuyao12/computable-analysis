@@ -148,6 +148,51 @@ def definiteIdentity_of_effectiveFTC
     FTC.effectiveFTC_definiteIntegralEqualsEndpoint
       h c hendpoint hplan hscheduledEndpoint hendpoint_equiv
 
+theorem endpointDifference_linearPrimitive_compute
+    (c a b : Rat) (n : Nat) :
+    endpointDifferenceCompute (Integral.linearPrimitiveFunRaw c) a b n =
+      { lo := c * b - c * a, hi := c * b - c * a } := by
+  unfold endpointDifferenceCompute endpointDifferenceInterval
+    Integral.linearPrimitiveFunRaw RealFunRaw.exact
+  simp
+
+theorem constantPrimitiveEndpoint_valid (c a b : Rat) :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute (Integral.linearPrimitiveFunRaw c) a b) := by
+  have hcompute :
+      endpointDifferenceCompute (Integral.linearPrimitiveFunRaw c) a b =
+        fun _ : Nat => { lo := c * b - c * a, hi := c * b - c * a } := by
+    funext n
+    exact endpointDifference_linearPrimitive_compute c a b n
+  rw [hcompute]
+  exact RealRaw.ofRat_valid (c * b - c * a)
+
+/-- The first fully verified definite-integral identity: the one-cell
+Riemann-sum integral of the constant function `c` equals the endpoint
+difference of the primitive `x ↦ c*x`. -/
+theorem constant_integral_equiv_endpoint (c a b : Rat) :
+    DefiniteIntegralEqualsEndpointDifference
+      (Integral.linearPrimitiveFunRaw c) (Integral.constantFunRaw c)
+      a b (Integral.constantConstruction c a b)
+      (constantPrimitiveEndpoint_valid c a b) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  rw [Integral.constantIntegral_compute]
+  simp [endpointDifferenceRaw, endpointDifference_linearPrimitive_compute]
+  have harea : (b - a) * c = c * b - c * a := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  rw [harea]
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
+def constantDefiniteIdentity (c a b : Rat) :
+    DefiniteIdentity
+      (Integral.constantFunRaw c) (Integral.linearPrimitiveFunRaw c) a b where
+  construction := Integral.constantConstruction c a b
+  endpoint_valid := constantPrimitiveEndpoint_valid c a b
+  equivalent := constant_integral_equiv_endpoint c a b
+
 end Integral
 
 namespace IntegralIdentities
