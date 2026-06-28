@@ -3968,6 +3968,35 @@ theorem areaValid : AreaValid :=
 
 end AreaLoopValidity
 
+theorem fourArctanGeomLoopOneValid :
+    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).Valid) := by
+  have hcompute :
+      (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).compute) =
+        piCircleArea.compute := by
+    funext n
+    exact four_arctanGeomLoop_one_compute_eq_piCircleArea_compute n
+  change RealRaw.ValidCompute
+    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).compute)
+  rw [hcompute]
+  simpa [AreaValid] using AreaLoopValidity.areaValid
+
+theorem four_arctanGeomLoop_one_equiv_piCircleArea :
+    (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw).Equiv
+      piCircleArea) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw)
+    piCircleArea n n).2
+  rw [four_arctanGeomLoop_one_compute_eq_piCircleArea_compute n]
+  have hordered := AreaLoopValidity.areaOrdered n
+  unfold QInterval.Overlaps QInterval.width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem piCircleArea_equiv_four_arctanGeomLoop_one :
+    piCircleArea.Equiv
+      (((4 : Nat) * ArctanGeometry.arctanGeomLoop (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm four_arctanGeomLoop_one_equiv_piCircleArea
+
 theorem circumferenceValid_of_nested_and_shrinking
     (hnested : CircumferenceNested)
     (hshrink : CircumferenceWidthsShrink) :

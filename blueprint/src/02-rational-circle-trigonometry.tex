@@ -85,6 +85,9 @@ and removes the orange triangle from the upper bound.}
 \lean{ComputableAnalysis.refineAreaBounds}
 \lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeomLoop_one_compute_eq_piCircleArea_compute}
+\lean{ComputableAnalysis.PiProofs.fourArctanGeomLoopOneValid}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeomLoop_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeomLoop_one}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleAreaPolygon_compute}
 \uses{rem:pseudocode-convention}
 The loop form of the stage algorithm keeps a current lower bound \(a\), a
@@ -215,17 +218,20 @@ special case \(x=1\) is the quarter circle, so the loop-level comparison
 
 \begin{theorem}[Geometric arctangent gives the area definition of pi]
 \label{thm:geometric-arctan-one-area-pi}
+\lean{ComputableAnalysis.PiProofs.fourArctanGeomLoopOneValid}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeomLoop_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeomLoop_one}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
 \uses{def:circle-area-stage-algorithm,def:geometric-arctan}
-The geometric sector-area arctangent satisfies
+The loop-level geometric sector-area arctangent satisfies
 \[
-  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
+  4\arctan_{\mathrm{geom,loop}}(1)\sim \pi_{\mathrm{area}}.
 \]
-For the public loop definition, the direct Lean statement is the stage
-equality between \code{piCircleArea} and the loop version
-\code{4 * arctanGeomLoop(1)}.  The older polygon arctangent comparison gives
-the displayed raw-real equivalence once the bridge
+Lean proves this by transporting the verified \code{piCircleArea} interval
+algorithm across the same-stage equality with \code{4 * arctanGeomLoop(1)}.
+The older polygon arctangent comparison will give the analogous raw-real
+equivalence for \code{arctanGeom} itself once
 \code{PiCircleAreaPolygonAgreement} identifies \code{piCircleArea} with the
 polygon scaffold.
 \end{theorem}

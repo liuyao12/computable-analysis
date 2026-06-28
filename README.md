@@ -24,8 +24,8 @@ For formula rows that compute a related quantity first, such as `zeta(2)` or
 algorithm is verified, while the equivalence column records whether the pi
 formula has been connected back to `piCircleArea`.
 
-Current count: definitions completed `5/13`; equivalences to `piCircleArea`
-formalized `0/12` applicable rows.  The baseline row `piCircleArea` is `N/A`
+Current count: definitions completed `6/13`; equivalences to `piCircleArea`
+formalized `1/12` applicable rows.  The baseline row `piCircleArea` is `N/A`
 for equivalence scorekeeping.
 
 | Computation | Description | Definition verified | Equivalent to `piCircleArea` |
@@ -33,7 +33,7 @@ for equivalence scorekeeping.
 | `piCircleArea` | Rational midpoint area exhaustion using increment/decrement triangles; current baseline for pi comparisons. | ✓ | N/A |
 | `piCircumference` | Rational polygon circumference using interval square roots for side lengths. | ✗ | ✗ |
 | **Arctangent-at-one routes** | The following rows compute pi through `4 * arctan(1)` using geometric, integral, or series representations. |  |  |
-| `4 * arctanGeom(1)` | Geometric sector-area arctangent at slope `1`; the loop version has stage equality with `piCircleArea`. | ✗ | ✗ |
+| `4 * arctanGeomLoop(1)` | Geometric sector-area arctangent loop at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
 | `4 * arctanIntegral(1)` | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
 | `4 * arctan(1)` | Power-series arctangent at `1`, equal to the Leibniz computation. | ✓ | ✗ |
 | `piLeibniz` | Alternating series for `4 * arctan(1)`, namely `4 * (1 - 1/3 + 1/5 - ...)`. | ✓ | ✗ |
@@ -46,8 +46,10 @@ for equivalence scorekeeping.
 | `ComplexLogPi` | One chosen complex-log pi formula, for example principal-branch `log(-1) = i*pi`, with three computable `Log` constructions compared; Euler identity is a bridge theorem, not a separate pi computation. | ✗ | ✗ |
 
 The area loop validity package is now formalized as
-`PiProofs.AreaLoopValidity.areaValid`.  The first open geometric bridge is
-`PiCircleAreaPolygonAgreement`.
+`PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
+`PiProofs.fourArctanGeomLoopOneValid` and
+`PiProofs.four_arctanGeomLoop_one_equiv_piCircleArea`.  The first open
+geometric bridge is `PiCircleAreaPolygonAgreement`.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The Leibniz-to-area route is now reduced to
