@@ -656,6 +656,25 @@ nested square-root formulas for the two sine values are postponed until the
 raw-real square-root operation is available.
 \end{definition}
 
+\begin{remark}[Gauss's 17-gon]
+The pentagon values are the first hint that special angles naturally lead to
+small algebraic computations.  A much more striking example is Gauss's
+constructibility theorem for the regular \(17\)-gon.  In our normalized angle
+coordinate, one seventeenth of a full turn is \(t=4/17\), and the theorem says
+that \(\cos(2\pi/17)\) and \(\sin(2\pi/17)\) lie in a tower of quadratic
+extensions of \(\Q\), hence are given by nested square roots and are
+ruler-and-compass constructible.  For instance, one possible explicit
+certificate is
+\[
+\cos(2\pi/17)=
+\frac{-1+\sqrt{17}+\sqrt{34-2\sqrt{17}}
+  +2\sqrt{17+3\sqrt{17}-\sqrt{170+38\sqrt{17}}}}{16}.
+\]
+The corresponding sine is the positive square root of \(1-\cos^2(2\pi/17)\).
+This is a good eventual test case for the algebraic-number layer, but it is
+well outside the formal scope of this chapter.
+\end{remark}
+
 \section{Trigonometric Identities}
 
 \begin{theorem}[Pythagorean identity on the rational circle]
