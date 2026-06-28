@@ -656,6 +656,42 @@ nested square-root formulas for the two sine values are postponed until the
 raw-real square-root operation is available.
 \end{definition}
 
+\begin{center}
+\small
+\begin{tabular}{p{0.25\textwidth}p{0.38\textwidth}cc}
+\textbf{Input} & \textbf{Special value} &
+\textbf{formal theorem} & \textbf{finite check}\\
+\hline
+Rational slope chart, \(u=0\) &
+\(c(0)=1,\ s(0)=0\) &
+\(\checkmark\) & --\\
+Rational slope chart, \(u=1\) &
+\(c(1)=0,\ s(1)=1\) &
+\(\checkmark\) & --\\
+Rational slope chart, \(u=1/2\) &
+\(c(1/2)=3/5,\ s(1/2)=4/5\) &
+\(\checkmark\) & --\\
+Normalized angle, \(45^\circ\) (\(t=1/2\)) &
+\(\cos=\sin=\sqrt{1/2}\) &
+\(\times\) & \(\times\)\\
+Normalized angles, \(36^\circ,72^\circ\) (\(t=2/5,4/5\)) &
+\(\cos(36^\circ)=(1+\sqrt5)/4,\quad
+  \cos(72^\circ)=(\sqrt5-1)/4\);
+  sine values recorded by their squares &
+\(\times\) & \(\times\)\\
+One seventeenth of a full turn (\(t=4/17\)) &
+Gauss nested radical for \(\cos(2\pi/17)\), and
+\(\sin(2\pi/17)=\sqrt{1-\cos^2(2\pi/17)}\) &
+\(\times\) & \(\checkmark\)\\
+\end{tabular}
+\end{center}
+
+Here ``formal theorem'' means that Lean proves the displayed trigonometric
+value identity, not merely that the right-hand side has been named as a target
+raw value.  The finite check for the \(17\)-gon is the executable interval
+overlap test in \code{GaussSeventeen}; it is deliberately weaker than a proof
+of Gauss's constructibility theorem.
+
 \begin{remark}[Gauss's 17-gon]
 \lean{ComputableAnalysis.GaussSeventeen.powerSeriesCheck_default}
 \lean{ComputableAnalysis.GaussSeventeen.cosPowerSeriesInterval}
