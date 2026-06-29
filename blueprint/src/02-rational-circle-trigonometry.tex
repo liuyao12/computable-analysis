@@ -12,69 +12,95 @@ natural, but its vertices generally have coordinates involving square roots
 and other non-rational quantities.  It is therefore not the most transparent
 first algorithm for a blueprint whose basic data are rational intervals.
 
-We instead use rational parametrizations of the circle.  The stereographic
-parameter \(u\in\Q\) gives a rational point \(P(u)\) on the unit circle, and
-bisection of rational parameter intervals keeps all data rational.  This is
-the normalized version of the classical parametrization of Pythagorean triples:
-Euclid already knew that triples of the form
+We instead use the rational parametrization of the circle.  Put a vertical
+parameter segment from \((1,0)\) to \((1,2)\), and for \(u\in[0,1]\cap\Q\)
+let \(L(u)=(1,2u)\).  The line through \((-1,0)\) and \(L(u)\) meets the unit
+circle again at
+\[
+  P(u)=
+  \left(
+    \frac{1-u^2}{1+u^2},
+    \frac{2u}{1+u^2}
+  \right).
+\]
+This is the normalized version of the classical parametrization of
+Pythagorean triples: Euclid already knew that triples of the form
 \[
   (r^2-s^2,\,2rs,\,r^2+s^2)
 \]
 satisfy the Pythagorean equation, and dividing by \(r^2+s^2\) gives a rational
-point on the unit circle.  Polygonal area is then especially convenient:
-determinants of rational coordinates are rational, so no square-root
-subroutine is needed.  Thus the first computation of \(\pi\) in this
-development is an area computation, not a circumference computation.
+point on the unit circle.  Bisection on the vertical parameter segment keeps
+all data rational, and the corresponding points \(P(u)\) partition the
+quarter-circle.  Polygonal area is then especially convenient: determinants
+of rational coordinates are rational, so no square-root subroutine is needed.
+Thus the first computation of \(\pi\) in this development is an area
+computation, not a circumference computation.
+
+\begin{remark}[Rational circle parametrization]
+\label{rem:rational-circle-point}
+\lean{ComputableAnalysis.RationalCircle.Stage.point}
+In the pseudocode convention of this blueprint, the point construction is:
+\begin{verbatim}
+def circle_point(u):
+    d = 1 + u*u
+    return Point((1 - u*u) / d, (2*u) / d)
+\end{verbatim}
+The parameter \(u\) is not an angle.  It is the height coordinate on the
+vertical line, normalized so that \(L(u)=(1,2u)\).  The endpoint \(u=0\) gives
+\((1,0)\), and \(u=1\) gives \((0,1)\).
+\end{remark}
 
 \begin{figure}[!htbp]
 \centering
-\begin{tikzpicture}[scale=3.35, line cap=round, line join=round, >=stealth]
+\begin{tikzpicture}[scale=2.25, line cap=round, line join=round, >=stealth]
   \coordinate (O) at (0,0);
-  \coordinate (P) at (1,0);
-  \coordinate (M) at (0.6,0.8);
-  \coordinate (Q) at (0,1);
-  \coordinate (T) at (1,1);
-  \coordinate (A) at (1,0.5);
-  \coordinate (B) at (0.333,1);
+  \coordinate (W) at (-1,0);
+  \coordinate (L0) at (1,0);
+  \coordinate (L1) at (1,0.5);
+  \coordinate (L2) at (1,1);
+  \coordinate (L3) at (1,1.5);
+  \coordinate (L4) at (1,2);
+  \coordinate (P0) at (1,0);
+  \coordinate (P1) at (0.882,0.471);
+  \coordinate (P2) at (0.6,0.8);
+  \coordinate (P3) at (0.28,0.96);
+  \coordinate (P4) at (0,1);
+  \coordinate (Lx) at (1,1.2);
+  \coordinate (Px) at (0.471,0.882);
 
-  \fill[teal!25] (P) -- (M) -- (Q) -- cycle;
-  \fill[orange!28] (A) -- (T) -- (B) -- cycle;
+  \fill[teal!18] (O) -- (P0) -- (P1) -- (P2) -- (P3) -- (P4) -- cycle;
+  \draw[->,gray!70] (-1.18,0) -- (1.25,0);
+  \draw[->,gray!70] (0,-0.08) -- (0,1.16);
+  \draw[thick] (P0) arc[start angle=0,end angle=90,radius=1];
+  \draw[teal!70!black,very thick] (P0) -- (P1) -- (P2) -- (P3) -- (P4);
 
-  \draw[->,gray!70] (-0.06,0) -- (1.48,0);
-  \draw[->,gray!70] (0,-0.06) -- (0,1.15);
-  \draw[thick] (P) arc[start angle=0,end angle=90,radius=1];
+  \draw[blue!70!black,very thick] (L0) -- (L4);
+  \foreach \L in {L0,L1,L2,L3,L4} {
+    \draw[gray!50] (W) -- (\L);
+    \fill[black] (\L) circle (0.014);
+  }
+  \draw[orange!80!black,very thick] (W) -- (Lx);
+  \draw[orange!80!black,very thick] (W) -- (Px);
 
-  \draw[gray!55] (O) -- (P);
-  \draw[gray!55] (O) -- (M);
-  \draw[gray!55] (O) -- (Q);
-
-  \draw[blue!55,dashed] (P) -- (Q);
-  \draw[blue!75!black,very thick] (P) -- (M) -- (Q);
-
-  \draw[orange!70!black,dashed] (P) -- (T) -- (Q);
-  \draw[red!72!black,very thick] (P) -- (A) -- (M) -- (B) -- (Q);
-
-  \foreach \z in {O,P,M,Q,T,A,B}
-    \fill[black] (\z) circle (0.012);
+  \foreach \P in {P0,P1,P2,P3,P4,Px}
+    \fill[black] (\P) circle (0.014);
+  \fill[black] (W) circle (0.014);
+  \fill[black] (O) circle (0.014);
 
   \node[below left] at (O) {\scriptsize \(O\)};
-  \node[below right] at (P) {\scriptsize \(P(p)\)};
-  \node[anchor=south west] at (0.59,0.78) {\scriptsize \(P(m)\)};
-  \node[left] at (Q) {\scriptsize \(P(q)\)};
-  \node[above left] at (T) {\scriptsize old tangent};
-
-  \node[align=left,teal!50!black,anchor=west] at (1.16,0.38)
-    {\scriptsize increment\\[-1pt]\scriptsize added};
-  \draw[->,teal!50!black] (1.14,0.41) -- (0.55,0.55);
-  \node[align=left,orange!60!black,anchor=west] at (1.16,0.84)
-    {\scriptsize decrement\\[-1pt]\scriptsize removed};
-  \draw[->,orange!60!black] (1.14,0.87) -- (0.75,0.93);
+  \node[below left] at (W) {\scriptsize \((-1,0)\)};
+  \node[below right] at (L0) {\scriptsize \((1,0)\)};
+  \node[above right] at (L4) {\scriptsize \((1,2)\)};
+  \node[right] at (Lx) {\scriptsize \((1,2x)\)};
+  \node[above left] at (Px) {\scriptsize \(P(x)\)};
+  \node[below right] at (P0) {\scriptsize \(P(0)\)};
+  \node[left] at (P4) {\scriptsize \(P(1)\)};
 \end{tikzpicture}
-\caption{One rational bisection step.  Inserting \(P(m)\) replaces the old
-inscribed chord by two chords and adds the green triangle to the lower bound.
-The same insertion replaces the old tangent cap by two smaller tangent caps
-and removes the orange triangle from the upper bound.}
-\label{fig:area-refinement-step}
+\caption{The rational parameter line for the quarter-circle.  Equally
+subdividing the vertical segment from \((1,0)\) to \((1,2)\), then projecting
+from \((-1,0)\), gives rational points \(P(u)\) which partition the arc from
+\((1,0)\) to \((0,1)\).}
+\label{fig:rational-parameter-line}
 \end{figure}
 
 \begin{definition}[Circle-area exhaustion algorithm]\label{def:circle-area-stage-algorithm}
@@ -138,78 +164,65 @@ tangent polygon.  In Lean this increment/decrement loop is the single public
 \code{piCircleArea} definition.
 \end{definition}
 
-\section{Overview}
+\section{Sector Area, Arctangent, and Normalized Angles}
 
-The purpose of this chapter is to construct trigonometric functions as
-algorithms from the geometry of the unit circle, and then prove their
-identities from that construction.  The Archimedean area algorithm above is
-the first such construction: it gives \(\pi\) from rational polygonal areas
-before any appeal to analytic trigonometric functions.
-
-The main later algorithmic object is a raw function that sends a normalized
-quarter-turn input to a certified box around the corresponding point on the
-oriented unit circle:
+The second algorithm is not a new idea, but the same exhaustion procedure with
+a moving endpoint.  For \(0\le x\le1\), take the point \(L(x)=(1,2x)\) on the
+vertical parameter segment and project it from \((-1,0)\) to the unit-circle
+point \(P(x)\).  Refining the parameter interval \([0,x]\) gives rational
+inner and outer polygonal bounds for the sector from \(P(0)=(1,0)\) to
+\(P(x)\).  The geometric angle of this sector is \(2\arctan(x)\); since a unit
+sector has area equal to half its angle, the area computed by the algorithm is
+\(\arctan(x)\).  Thus \(x=1\) is exactly the quarter-circle case, and
 \[
-  t \longmapsto C(t)=(X(t),Y(t)),\qquad t\in\Q\hbox{ represents }t\pi/2.
+  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
 \]
-Cosine and sine are then not separate primary algorithms.  They are the two
-coordinate projections:
-\[
-  \cos(t\pi/2)=X(t),\qquad \sin(t\pi/2)=Y(t).
-\]
-This organization is intentional.  It keeps the finite geometric proof in one
-place, and it makes the trigonometric identities consequences of the circle
-law rather than independent analytic facts.
 
-As the construction becomes sharper, the Lean development may need
-refactoring.  The blueprint should therefore track stable interfaces rather
-than overcommit to the first internal implementation of the bisection search,
-period reduction, or quadrant bookkeeping.  Chapter~\ref{ch:rational-circle-trigonometry}
-now owns the geometric route to trigonometry: first define \(\pi\) by rational
-polygonal area, then observe that the same refinement pattern computes
-\(\arctan(x)\), then construct the monotone inverse of arctangent.  For
-clarity, the arctangent object is not factored through the \(\pi\) object: it
-uses the same increment and decrement formulas, but is packaged as its own raw
-function.  Sine and cosine are deliberately not functions of radian inputs in
-their first interface.  Their input is a rational number \(t\), interpreted as
-``the angle \(t\pi/2\)''.  This makes \(t=1\) the point at ninety degrees and keeps the
-external input rational even though the corresponding radian value is generally
-not rational.
-
-The stable interface is:
-\[
-  \hbox{rational area algorithms for }\pi\hbox{ and }\arctan
-  \quad\leadsto\quad
-  \hbox{monotone inverse arctangent on normalized quarter-turns}
-  \quad\leadsto\quad
-  \hbox{sine and cosine raw functions}
-  \quad\leadsto\quad
-  \hbox{identity package}.
-\]
-The sanity check for later chapters is always equivalence of \(\pi\)
-representatives.  Chapter~\ref{ch:rational-circle-trigonometry} should settle
-the geometric area/circumference comparison and the geometric identity
-\(\pi=4\arctan(1)\).  Comparisons with the Leibniz and Machin algorithms pass
-through the power-series arctangent and belong after the series estimates are
-available.
-
-
-\section{Arctangent, its inverse, and normalized quarter-turn angles}
-
-\begin{definition}[Geometric arctangent]
+\begin{definition}[Geometric arctangent area algorithm]
 \label{def:geometric-arctan}
+\label{def:arctan-area-stage-algorithm}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaIncrement}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaDecrement}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_nonneg_compute_eq}
 \lean{ComputableAnalysis.ArctanGeometry.PiAreaCompatibility}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
-\uses{def:circle-area-stage-algorithm,rem:rational-circle-point}
-For a rational slope \(x\), the point \(P(x)\) lies on the unit circle at twice
-the angle whose tangent is \(x\).  The geometric arctangent algorithm returns
-the sector area between \(P(0)=(1,0)\) and \(P(x)\), with oddness used for
-negative slopes.  Thus it is an area algorithm for \(\arctan(x)\), separate
-from the power-series algorithm of Chapter~\ref{ch:infinite-series}.  The
-special case \(x=1\) is the quarter circle, so the comparison
-\(\pi=4\arctan(1)\) is geometric before any series comparison enters.
+\uses{def:circle-area-stage-algorithm,rem:rational-circle-point,rem:pseudocode-convention}
+For \(0\le x\le1\), the arctangent algorithm starts with the chord-triangle
+lower bound \(x/(1+x^2)\) and the tangent-triangle upper bound \(x\).  It then
+bisects the current rational parameter intervals, using exactly the same
+increment and decrement formulas as \code{piCircleArea}.
+\begin{verbatim}
+def arctanGeom(x, n):
+    a = x / (1 + x*x)
+    b = x
+    intervals = [(0, x)]
+
+    def increment(p, q, r):
+        return (2*(r-p)*(q-p)*(r-q) /
+                ((1+p*p)*(1+q*q)*(1+r*r)))
+
+    def decrement(p, q, r):
+        return ((r-p)*(q-p)*(r-q) /
+                ((1+p*r)*(1+p*q)*(1+q*r)))
+
+    for _ in range(n):
+        next_intervals = []
+        for p, r in intervals:
+            q = (p + r) / 2
+            a = a + increment(p, q, r)
+            b = b - decrement(p, q, r)
+            next_intervals.append((p, q))
+            next_intervals.append((q, r))
+        intervals = next_intervals
+
+    return [a, b]
+\end{verbatim}
+The algorithm is packaged as its own raw function, not as a definitional
+alias of \code{piCircleArea}.  The special case \(x=1\) is related to
+\code{piCircleArea} by a theorem, which is the right proof obligation for the
+geometric identity \(\pi=4\arctan(1)\).
 \end{definition}
 
 \begin{theorem}[Geometric arctangent gives the area definition of pi]
@@ -224,6 +237,20 @@ The geometric sector-area arctangent satisfies
 \]
 Lean proves this by transporting the verified \code{piCircleArea} interval
 algorithm across the same-stage equality with \code{4 * arctanGeom(1)}.
+\end{theorem}
+
+\begin{theorem}[Arctangent validity and monotonicity]
+\label{thm:arctan-area-valid-monotone}
+\uses{def:arctan-area-stage-algorithm,def:raw-real-order}
+For each rational \(x\in[0,1]\), \code{arctanGeom(x,n)} should be a valid raw
+real.  Moreover, the resulting function is monotone: if
+\(0\le x\le y\le1\), then
+\[
+  \arctan_{\mathrm{geom}}(x)\le \arctan_{\mathrm{geom}}(y).
+\]
+The finite proof compares nested rational sectors.  Strict monotonicity on
+apart rational inputs follows from the positive area of the additional sector
+between \(P(x)\) and \(P(y)\).
 \end{theorem}
 
 \begin{definition}[Normalized quarter-turns as angles]
@@ -262,6 +289,49 @@ This is the bridge between the geometric area definition of \(\pi\) and the
 coordinate algorithms for sine and cosine.
 \end{definition}
 
+\begin{definition}[Inverse arctangent search]
+\label{def:inverse-arctan-search}
+\uses{def:arctan-area-stage-algorithm,thm:arctan-area-valid-monotone}
+For an angle parameter \(t\) interpreted as \(t\pi/2\) and known on the
+principal first-octant branch \(0\le t\le 1/2\), define its tangent parameter
+\(u\in[0,1]\) by bisection against the monotone arctangent algorithm.
+\begin{verbatim}
+def inverse_arctan(t, n):
+    lo, hi = 0, 1
+    for i in range(n):
+        m = (lo + hi) / 2
+        am = arctanGeom(m, n+i)
+        if am.hi < t*pi/2:
+            lo = m
+        elif t*pi/2 < am.lo:
+            hi = m
+        else:
+            lo, hi = lo, hi
+    return [lo, hi]
+\end{verbatim}
+The stage used for \code{arctanGeom(m, n+i)} is intentionally allowed to
+increase inside the search: the comparison must be refined until it certifies
+which side of \(m\) contains the inverse, or else safely keeps the current
+bracket.  The output is a rational interval for \(u=\tan(t\pi/2)\).
+\end{definition}
+
+\begin{definition}[Sine and cosine from inverse arctangent]
+\label{def:sin-cos-from-inverse-arctan}
+\uses{def:inverse-arctan-search,rem:rational-circle-point}
+On the first octant, compute an interval for \(u=\tan(t\pi/2)\) by
+\cref{def:inverse-arctan-search} and then evaluate the rational circle
+coordinates
+\[
+  \cos(t\pi/2)=\frac{1-u^2}{1+u^2},
+  \qquad
+  \sin(t\pi/2)=\frac{2u}{1+u^2}.
+\]
+Interval evaluation of these rational formulas gives boxes for sine and
+cosine without ever computing a square root.  Quadrant, sign, and reciprocal
+reductions extend the construction to the full normalized interval \([0,1]\)
+once \(\pi/4=\arctan(1)\) and the endpoint at \(t=1\) have been identified.
+\end{definition}
+
 \begin{definition}[Sine and cosine from a circle-point algorithm]
 \label{def:sin-cos-from-circle-point}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction}
@@ -295,31 +365,6 @@ algorithms are
 \]
 For fixed rational \(t\) in the domain, validity of the point algorithm implies
 that each projected sequence in \(n\) is a raw real.
-\end{remark}
-
-\section{Rational Circle}
-
-\begin{remark}[Rational circle parametrization]
-\label{rem:rational-circle-point}
-\lean{ComputableAnalysis.RationalCircle.Stage.point}
-The rational points used below come from the usual stereographic chart on the
-unit circle.  In the pseudocode convention of this blueprint, this is:
-\begin{verbatim}
-def circle_point(u):
-    d = 1 + u*u
-    return Point((1 - u*u) / d, (2*u) / d)
-\end{verbatim}
-In formulas this is the point
-\[
-  P(u)=
-  \left(
-    \frac{1-u^2}{1+u^2},
-    \frac{2u}{1+u^2}
-  \right),
-\]
-with the missing point of the chart handled separately when needed.  This
-parametrization is background for the algorithms, rather than a separate
-object of study in the chapter.
 \end{remark}
 
 \begin{remark}[Rational circle equation]
@@ -443,112 +488,6 @@ This is the exhaustion principle in the raw-real setting, and it is the
 starting point for the later calculus constructions.  The remaining work is
 to finish the Lean proof, not to settle a mathematical uncertainty.
 \end{theorem}
-
-\section{Arctangent by the Same Exhaustion}
-
-\begin{definition}[Arctangent area stage algorithm]
-\label{def:arctan-area-stage-algorithm}
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
-\lean{ComputableAnalysis.ArctanGeometry.arctanAreaIncrement}
-\lean{ComputableAnalysis.ArctanGeometry.arctanAreaDecrement}
-\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_nonneg_compute_eq}
-\uses{def:circle-area-stage-algorithm,rem:pseudocode-convention}
-For \(0\le x\le1\), the same rational polygon computation gives an interval
-for the sector area from \(P(0)=(1,0)\) to \(P(x)\).  Since that sector has
-angle \(2\arctan(x)\), its area is \(\arctan(x)\).  The arctangent version
-uses the same rational increment and decrement formulas, but it is packaged as
-its own raw algorithm.  The initial lower bound is the chord-triangle area
-\(x/(1+x^2)\), and the initial upper bound is the tangent-triangle area \(x\).
-\begin{verbatim}
-def increment(p, q, r):
-    return (2*(r-p)*(q-p)*(r-q) /
-            ((1+p*p)*(1+q*q)*(1+r*r)))
-
-def decrement(p, q, r):
-    return ((r-p)*(q-p)*(r-q) /
-            ((1+p*r)*(1+p*q)*(1+q*r)))
-
-def refine(a, b, intervals):
-    new_intervals = []
-    for p, r in intervals:
-        q = (p + r) / 2
-        a = a + increment(p, q, r)
-        b = b - decrement(p, q, r)
-        new_intervals.append((p, q))
-        new_intervals.append((q, r))
-    return a, b, new_intervals
-
-def arctan(x, n):
-    a = x / (1 + x*x)
-    b = x
-    intervals = [(0, x)]
-    for _ in range(n):
-        a, b, intervals = refine(a, b, intervals)
-    return [a, b]
-\end{verbatim}
-The restriction \(0\le x\le1\) is the only range needed for the first
-trigonometric construction.  The complementary ranges are handled later by
-symmetry, reciprocal identities, and period reduction.  The theorem relating
-the arctangent algorithm at \(x=1\) to \code{piCircleArea} is proved as a
-separate stagewise comparison, not made true by definitional identification.
-\end{definition}
-
-\begin{theorem}[Arctangent validity and monotonicity]
-\label{thm:arctan-area-valid-monotone}
-\uses{def:arctan-area-stage-algorithm,def:raw-real-order}
-For each rational \(x\in[0,1]\), \code{arctan(x,n)} is a valid raw real.
-Moreover, the resulting function is monotone: if \(0\le x\le y\le1\), then
-\[
-  \arctan(x)\le \arctan(y).
-\]
-The finite proof compares nested rational sectors.  Strict monotonicity on
-apart rational inputs follows from the positive area of the additional sector
-between \(P(x)\) and \(P(y)\).
-\end{theorem}
-
-\begin{definition}[Inverse arctangent search]
-\label{def:inverse-arctan-search}
-\uses{def:arctan-area-stage-algorithm,thm:arctan-area-valid-monotone}
-For an angle parameter \(t\) interpreted as \(t\pi/2\) and known on the
-principal first-octant branch \(0\le t\le 1/2\), define its
-tangent parameter \(u\in[0,1]\)
-by bisection against the monotone arctangent algorithm.
-\begin{verbatim}
-def inverse_arctan(t, n):
-    lo, hi = 0, 1
-    for i in range(n):
-        m = (lo+hi)/2
-        am = arctan(m, n+i)
-        if am.hi < t*pi/2:
-            lo = m
-        elif t*pi/2 < am.lo:
-            hi = m
-        else:
-            lo, hi = lo, hi
-    return [lo, hi]
-\end{verbatim}
-The stage used for \code{arctan(m, n+i)} is intentionally allowed to increase
-inside the search: the comparison must be refined until it certifies which
-side of \(m\) contains the inverse, or else safely keeps the current bracket.
-The output is a rational interval for \(u=\tan(t\pi/2)\).
-\end{definition}
-
-\begin{definition}[Sine and cosine from inverse arctangent]
-\label{def:sin-cos-from-inverse-arctan}
-\uses{def:inverse-arctan-search,rem:rational-circle-point}
-On the first octant, compute an interval for \(u=\tan(t\pi/2)\) by
-\cref{def:inverse-arctan-search} and then evaluate the rational circle
-coordinates
-\[
-  \cos(t\pi/2)=\frac{1-u^2}{1+u^2},
-  \qquad
-  \sin(t\pi/2)=\frac{2u}{1+u^2}.
-\]
-Interval evaluation of these rational formulas gives boxes for sine and
-cosine without ever computing a square root.  Quadrant, sign, and reciprocal
-reductions extend the construction to the full normalized interval \([0,1]\)
-once \(\pi/4=\arctan(1)\) and the endpoint at \(t=1\) have been identified.
-\end{definition}
 
 \section{Trigonometric Functions}
 
@@ -685,43 +624,58 @@ equilateral chord.
 
 \begin{center}
 \small
-\begin{tabular}{p{0.25\textwidth}p{0.38\textwidth}cc}
-\textbf{Input} & \textbf{Special value} &
-\textbf{formal theorem} & \textbf{finite check}\\
+\begin{tabular}{c c p{0.22\textwidth}p{0.22\textwidth}p{0.18\textwidth}}
+\textbf{\(t\)} & \textbf{degrees} &
+\textbf{\(\sin(t\pi/2)\)} &
+\textbf{\(\cos(t\pi/2)\)} &
+\textbf{\(\tan(t\pi/2)\)}\\
 \hline
-Rational slope chart, \(u=0\) &
-\(c(0)=1,\ s(0)=0\) &
-\(\checkmark\) & --\\
-Rational slope chart, \(u=1\) &
-\(c(1)=0,\ s(1)=1\) &
-\(\checkmark\) & --\\
-Rational slope chart, \(u=1/2\) &
-\(c(1/2)=3/5,\ s(1/2)=4/5\) &
-\(\checkmark\) & --\\
-Normalized angle, \(45^\circ\) (\(t=1/2\)) &
-\(\cos=\sin=\sqrt{1/2}\) &
-\(\times\) & \(\times\)\\
-Normalized angles, \(30^\circ,60^\circ\) (\(t=1/3,2/3\)) &
-\(\sin(30^\circ)=\cos(60^\circ)=1/2\);
-equilateral dot-product lemma formalized &
-\(\times\) & \(\times\)\\
-Normalized angles, \(36^\circ,72^\circ\) (\(t=2/5,4/5\)) &
-\(\cos(36^\circ)=(1+\sqrt5)/4,\quad
-  \cos(72^\circ)=(\sqrt5-1)/4\);
-  sine values recorded by their squares &
-\(\times\) & \(\times\)\\
-One seventeenth of a full turn (\(t=4/17\)) &
-Gauss nested radical for \(\cos(2\pi/17)\), and
-\(\sin(2\pi/17)=\sqrt{1-\cos^2(2\pi/17)}\) &
-\(\times\) & \(\checkmark\)\\
+\(0\) & \(0\) &
+\(0^{\ast}\) &
+\(1^{\ast}\) &
+\(0^{\ast}\)\\
+\(1/3\) & \(30\) &
+\(1/2\) &
+\(\sqrt3/2\) &
+\(1/\sqrt3\)\\
+\(2/5\) & \(36\) &
+\(\sqrt{(5-\sqrt5)/8}\) &
+\((1+\sqrt5)/4\) &
+\(\sqrt{5-2\sqrt5}\)\\
+\(1/2\) & \(45\) &
+\(\sqrt{1/2}\) &
+\(\sqrt{1/2}\) &
+\(1\)\\
+\(2/3\) & \(60\) &
+\(\sqrt3/2\) &
+\(1/2\) &
+\(\sqrt3\)\\
+\(4/5\) & \(72\) &
+\(\sqrt{(5+\sqrt5)/8}\) &
+\((\sqrt5-1)/4\) &
+\(\sqrt{5+2\sqrt5}\)\\
+\(1\) & \(90\) &
+\(1^{\ast}\) &
+\(0^{\ast}\) &
+\(\text{undefined}\)\\
+\(4/17\) & \(360/17\) &
+\(\sqrt{1-C^2}^{\dagger}\) &
+\(C^{\dagger}\) &
+\((\sqrt{1-C^2}/C)^{\dagger}\)\\
 \end{tabular}
 \end{center}
 
-Here ``formal theorem'' means that Lean proves the displayed trigonometric
-value identity, not merely that the right-hand side has been named as a target
-raw value.  The finite check for the \(17\)-gon is the executable interval
-overlap test in \code{GaussSeventeen}; it is deliberately weaker than a proof
-of Gauss's constructibility theorem.
+Here \(C\) denotes the Gauss nested radical for \(\cos(2\pi/17)\) displayed
+below.  A superscript \(\ast\) means that the displayed endpoint value is
+formalized in Lean at the currently available rational-circle layer; a superscript
+\(\dagger\) means that the displayed value is available as an executable
+finite interval check.  Unmarked entries are the intended special-value
+theorems for the completed normalized-angle sine, cosine, and tangent
+functions.  For example, the equilateral dot-product lemma above is already
+formalized, but the normalized-angle theorem identifying \(t=1/3\) with the
+\(30^\circ\) value is still open.  The finite check for the \(17\)-gon is the
+executable interval overlap test in \code{GaussSeventeen}; it is deliberately
+weaker than a proof of Gauss's constructibility theorem.
 
 \begin{remark}[Gauss's 17-gon]
 \lean{ComputableAnalysis.GaussSeventeen.powerSeriesCheck_default}
