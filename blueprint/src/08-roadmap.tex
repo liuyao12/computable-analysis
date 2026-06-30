@@ -179,7 +179,7 @@ The current score is:
 
 \begin{center}
 \begin{tabular}{p{0.22\textwidth}p{0.14\textwidth}p{0.34\textwidth}cc}
-\textbf{Computation} & \textbf{Blueprint refs} & \textbf{Description} &
+\textbf{Computation} & \textbf{Blueprint links} & \textbf{Description} &
 \textbf{Definition} & \textbf{Equiv.}\\
 \hline
 \code{piCircleArea} &
@@ -194,7 +194,8 @@ Rational polygon circumference using interval square roots for side lengths. &
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent-to-pi routes}:
 \cref{def:arctan-area-stage-algorithm},
 \cref{def:arctan-integral}, \cref{def:arctan-series},
-\cref{thm:leibniz-arctan}, and \cref{thm:leibniz-machin}.}\\
+\cref{thm:leibniz-arctan} for \code{arctanSeries(1)}, and
+\cref{thm:leibniz-machin}.}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
@@ -211,14 +212,17 @@ Domain-aware \code{ConstructionFor} packaging of midpoint rectangle sums for
 Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
 \(\times\) & \(\times\)\\
 \code{4 * arctanSeries(1)} &
-\cref{def:arctan-series}; \cref{thm:leibniz-arctan} &
-Power-series arctangent at \(1\); the Leibniz alternating series is its
-historical expansion. &
+\cref{def:arctan-series};
+\cref{thm:leibniz-arctan} &
+Power-series arctangent at \(1\); at this endpoint its alternating expansion is
+the historical Leibniz series. &
 \(\checkmark\) & \(\times\)\\
 \code{piMachin} &
-\cref{thm:leibniz-machin} &
+\cref{thm:machin-tangent}; \cref{thm:leibniz-machin} &
 Machin's arctangent combination
-\(4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\). &
+\(4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\),
+placed here because it first compares with
+\(4\arctan_{\mathrm{series}}(1)\). &
 \(\checkmark\) & \(\times\)\\
 \code{6 * arcsinIntegral(1/2)} &
 \cref{def:inverse-elementary-integral-identities} &
@@ -246,19 +250,20 @@ rational bounds. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
 the single formula \(\pi=-2i\log(i)\), tested through the different logarithm
-constructions in \cref{def:exp-representations}, \cref{def:logarithm-integral},
-and \cref{thm:euler-identity}.}\\
+constructions in \cref{def:complex-log-series-at-i},
+\cref{def:complex-log-path-integral-at-i},
+\cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}.}\\
 \code{-2i * LogSeries(i)} &
-\cref{def:exp-representations}; \cref{thm:euler-identity} &
-Complex logarithm obtained from power-series exponential data and a certified
-branch taking \(i\) back to a quarter turn. &
+\cref{def:complex-log-series-at-i}; \cref{thm:euler-identity} &
+Complex logarithm obtained from local power-series exponential data and a
+certified branch taking \(i\) back to a quarter turn. &
 \(\times\) & \(\times\)\\
-\code{-2i * LogIntegral(i)} &
-\cref{def:logarithm-integral} &
+\code{-2i * LogPathIntegral(i)} &
+\cref{def:complex-log-path-integral-at-i} &
 Complex logarithm as a path integral of \(dz/z\) from \(1\) to \(i\). &
 \(\times\) & \(\times\)\\
 \code{-2i * LogInvExp(i)} &
-\cref{thm:euler-identity} &
+\cref{def:complex-log-inv-exp-at-i}; \cref{thm:euler-identity} &
 Logarithm as the chosen inverse branch of complex exponential, with Euler
 identity proving the branch value at \(i\). &
 \(\times\) & \(\times\)
@@ -374,6 +379,10 @@ agreements.
   \code{PiProofs.areaValid\_of\_nested\_and\_shrinking},
   \code{PiProofs.piCircleArea\_equiv\_self},
   \code{ArctanGeometry.PowerSeriesAgreesAt},
+  \code{Taylor.ArctanKernel.kernelRemainder\_nonneg\_oddPartial},
+  \code{Taylor.ArctanKernel.kernelRemainder\_nonpos\_evenPartial},
+  \code{Taylor.ArctanKernel.kernelPartial\_odd\_le\_kernel},
+  \code{Taylor.ArctanKernel.kernel\_le\_kernelPartial\_even},
   \code{Taylor.ArctanComparison.KernelComparisonAt},
   \code{PiProofs.PowerSeriesEqualsRectangleKernelAtOne},
   \code{PiProofs.LeibnizEqualsRectangleRawAtOne},
@@ -402,6 +411,8 @@ agreements.
   \code{ExpProofs.EPowerSeriesEqEuler},
   \code{Taylor.IteratedFTCChain},
   \code{Taylor.ArctanKernel.finiteRemainderRoute},
+  \code{Taylor.ArctanKernel.kernelPartial\_odd\_le\_kernel},
+  \code{Taylor.ArctanKernel.kernel\_le\_kernelPartial\_even},
   \code{ArctanGeometry.integralLowerStep\_refine},
   \code{ArctanGeometry.integralUpperStep\_refine},
   \code{ArctanGeometry.integralSumInterval\_ordered},

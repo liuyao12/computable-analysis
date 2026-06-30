@@ -74,6 +74,10 @@ equivalence.
 \begin{theorem}[Power-series arctangent agrees with area pi]
 \label{thm:power-series-arctan-area-pi}
 \lean{ComputableAnalysis.ArctanGeometry.PowerSeriesAgreesAt}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonneg_oddPartial}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonpos_evenPartial}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartial_odd_le_kernel}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernel_le_kernelPartial_even}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.KernelComparisonAt}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt}
 \lean{ComputableAnalysis.PiProofs.rectangleKernelIntegralAtNonnegativeUnit}
@@ -109,7 +113,9 @@ geometric arctangent agrees with it on the nonnegative unit branch, and
 transports the pointwise power-series statement to the concrete comparison
 \code{LeibnizEqualsRectangleRawAtOne}.  This is now the finite missing input:
 compare the Leibniz intervals with the rectangle-sum integral intervals at
-\(1\).  From that Lean constructs
+\(1\).  Lean also proves the finite kernel bracketing facts that odd
+arctangent-kernel truncations lie below \(1/(1+x^2)\) and even truncations lie
+above it.  From the remaining rectangle comparison Lean constructs
 \code{Taylor.ArctanComparison.KernelComparisonAt 1} and then
 \code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The older unit-interval
 hypothesis

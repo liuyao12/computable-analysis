@@ -111,6 +111,73 @@ and \(\exp(x+y)=\exp(x)\exp(y)\) should be proved from uniqueness of the
 inverse and then transported between representations.
 \end{definition}
 
+\section{Complex logarithm at \texorpdfstring{$i$}{i}}
+
+\begin{definition}[Logarithm from local power-series continuation]
+\label{def:complex-log-series-at-i}
+\uses{def:exp-representations,rem:holomorphic-branch-equivalence}
+The first complex route to \(\pi\) computes a branch of \(\log(i)\) by local
+power-series data.  One starts with the local inverse to the complex
+exponential, represented by rational complex boxes, and transports that branch
+from \(1\) to \(i\) through overlapping certified neighborhoods.  This should
+produce a raw complex number denoted informally by
+\[
+  \log_{\mathrm{series}}(i).
+\]
+The intended \(\pi\)-algorithm is the real value
+\[
+  -2i\,\log_{\mathrm{series}}(i).
+\]
+\end{definition}
+
+\begin{definition}[Logarithm from the path integral]
+\label{def:complex-log-path-integral-at-i}
+\uses{def:logarithm-integral,rem:complex-parameters}
+The second route defines the same branch value by the path integral
+\[
+  \log_{\mathrm{path}}(i)=\int_{\gamma}\frac{dz}{z},
+\]
+where \(\gamma\) is a certified polygonal or circular path from \(1\) to \(i\)
+avoiding \(0\).  The existing complex path-integral layer is designed to supply
+finite rational box sums for this construction.  The corresponding
+\(\pi\)-algorithm is
+\[
+  -2i\,\log_{\mathrm{path}}(i).
+\]
+\end{definition}
+
+\begin{definition}[Logarithm as an inverse exponential branch]
+\label{def:complex-log-inv-exp-at-i}
+\uses{def:exp-representations,thm:euler-identity}
+The third route treats \(\log(i)\) as the chosen inverse branch of complex
+exponential.  The branch condition selects the point on the imaginary axis in
+the first quadrant, and Euler's identity is the essential proof that this
+chosen inverse takes \(i\) to a quarter turn:
+\[
+  \exp\!\left(i\frac{\pi}{2}\right)=i.
+\]
+The induced \(\pi\)-algorithm is
+\[
+  -2i\,\log_{\mathrm{invexp}}(i).
+\]
+\end{definition}
+
+\begin{theorem}[Logarithm-at-\texorpdfstring{$i$}{i} pi routes]
+\label{thm:log-at-i-pi-routes}
+\uses{def:complex-log-series-at-i,def:complex-log-path-integral-at-i,def:complex-log-inv-exp-at-i,thm:euler-identity}
+Each construction above should be a verified raw complex number with the same
+chosen branch value at \(i\).  Once the three branch agreements are proved, the
+real raw numbers
+\[
+  -2i\,\log_{\mathrm{series}}(i),\qquad
+  -2i\,\log_{\mathrm{path}}(i),\qquad
+  -2i\,\log_{\mathrm{invexp}}(i)
+\]
+become three independent \(\pi\)-computations.  Their comparison with
+\code{piCircleArea} is meant to test both Euler's identity and the branch
+equivalence machinery for complex logarithm.
+\end{theorem}
+
 \section{Euler's identity}
 
 \begin{theorem}[Euler identity]

@@ -215,6 +215,118 @@ theorem qabs_kernelRemainder_le_power (x : Rat) (n : Nat) :
   have hdiv := div_between_of_between hp hd hpow.1 hpow.2
   exact qabs_le_of_between hdiv.1 hdiv.2
 
+private theorem rat_mul_nonpos_of_nonneg_of_nonpos {a b : Rat}
+    (ha : 0 <= a) (hb : b <= 0) : a * b <= 0 := by
+  have hnb : 0 <= -b := by grind
+  have h := Rat.mul_nonneg ha hnb
+  grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg]
+
+private theorem rat_mul_nonpos_of_nonpos_of_nonneg {a b : Rat}
+    (ha : a <= 0) (hb : 0 <= b) : a * b <= 0 := by
+  have h := rat_mul_nonpos_of_nonneg_of_nonpos hb ha
+  grind [Rat.mul_comm]
+
+private theorem rat_mul_nonneg_of_nonpos_of_nonpos {a b : Rat}
+    (ha : a <= 0) (hb : b <= 0) : 0 <= a * b := by
+  have hna : 0 <= -a := by grind
+  have hnb : 0 <= -b := by grind
+  have h := Rat.mul_nonneg hna hnb
+  grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg]
+
+private theorem neg_pow_even_nonneg_and_odd_nonpos {u : Rat}
+    (hu : 0 <= u) (k : Nat) :
+    0 <= (-u) ^ (2 * k) /\ (-u) ^ (2 * k + 1) <= 0 := by
+  induction k with
+  | zero =>
+      constructor
+      · simp
+        native_decide
+      · rw [show 2 * 0 + 1 = 0 + 1 by omega]
+        rw [Rat.pow_succ]
+        simp
+        grind
+  | succ k ih =>
+      have hneg : -u <= 0 := by grind
+      have hevenSucc : 0 <= (-u) ^ (2 * (k + 1)) := by
+        rw [show 2 * (k + 1) = 2 * k + 1 + 1 by omega]
+        rw [Rat.pow_succ]
+        exact rat_mul_nonneg_of_nonpos_of_nonpos ih.2 hneg
+      constructor
+      · exact hevenSucc
+      · rw [show 2 * (k + 1) + 1 = 2 * (k + 1) + 1 by omega]
+        rw [Rat.pow_succ]
+        exact rat_mul_nonpos_of_nonneg_of_nonpos hevenSucc hneg
+
+private theorem neg_pow_even_nonneg {u : Rat}
+    (hu : 0 <= u) (k : Nat) : 0 <= (-u) ^ (2 * k) :=
+  (neg_pow_even_nonneg_and_odd_nonpos hu k).1
+
+private theorem neg_pow_odd_nonpos {u : Rat}
+    (hu : 0 <= u) (k : Nat) : (-u) ^ (2 * k + 1) <= 0 :=
+  (neg_pow_even_nonneg_and_odd_nonpos hu k).2
+
+/-- Odd finite truncations leave a nonnegative arctangent-kernel remainder. -/
+theorem kernelRemainder_nonneg_oddPartial (x : Rat) (k : Nat) :
+    0 <= kernelRemainder x (2 * k + 1) := by
+  unfold kernelRemainder remainderNumerator
+  let d : Rat := 1 + x * x
+  have hu : 0 <= x * x := RatFun.rat_square_nonneg x
+  have hnum : 0 <= (- (x * x)) ^ (2 * k + 1 + 1) := by
+    simpa [show 2 * k + 1 + 1 = 2 * (k + 1) by omega]
+      using neg_pow_even_nonneg hu (k + 1)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    grind [RatFun.rat_square_nonneg x]
+  have hinv : 0 <= Inv.inv d := Rat.le_of_lt ((Rat.inv_pos).2 hdpos)
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg hnum hinv
+
+/-- Even finite truncations leave a nonpositive arctangent-kernel remainder. -/
+theorem kernelRemainder_nonpos_evenPartial (x : Rat) (k : Nat) :
+    kernelRemainder x (2 * k) <= 0 := by
+  unfold kernelRemainder remainderNumerator
+  let d : Rat := 1 + x * x
+  have hu : 0 <= x * x := RatFun.rat_square_nonneg x
+  have hnum : (- (x * x)) ^ (2 * k + 1) <= 0 :=
+    neg_pow_odd_nonpos hu k
+  have hdpos : 0 < d := by
+    dsimp [d]
+    grind [RatFun.rat_square_nonneg x]
+  have hinv : 0 <= Inv.inv d := Rat.le_of_lt ((Rat.inv_pos).2 hdpos)
+  rw [Rat.div_def]
+  exact rat_mul_nonpos_of_nonpos_of_nonneg hnum hinv
+
+/-- Odd arctangent-kernel truncations are lower bounds for `1/(1+x^2)`. -/
+theorem kernelPartial_odd_le_kernel (x : Rat) (k : Nat) :
+    kernelPartial x (2 * k + 1) <= 1 / (1 + x * x) := by
+  have hrem := kernelRemainder_nonneg_oddPartial x k
+  have hbase := (Rat.add_le_add_left
+    (a := (0 : Rat))
+    (b := kernelRemainder x (2 * k + 1))
+    (c := kernelPartial x (2 * k + 1))).mpr hrem
+  rw [Rat.add_zero] at hbase
+  calc
+    kernelPartial x (2 * k + 1) <=
+        kernelPartial x (2 * k + 1) +
+          kernelRemainder x (2 * k + 1) := hbase
+    _ = 1 / (1 + x * x) := by
+      rw [←one_div_one_add_square_eq_partial_add_remainder]
+
+/-- Even arctangent-kernel truncations are upper bounds for `1/(1+x^2)`. -/
+theorem kernel_le_kernelPartial_even (x : Rat) (k : Nat) :
+    1 / (1 + x * x) <= kernelPartial x (2 * k) := by
+  have hrem := kernelRemainder_nonpos_evenPartial x k
+  have hbase := (Rat.add_le_add_left
+    (a := kernelRemainder x (2 * k))
+    (b := (0 : Rat))
+    (c := kernelPartial x (2 * k))).mpr hrem
+  rw [Rat.add_zero] at hbase
+  calc
+    1 / (1 + x * x) =
+        kernelPartial x (2 * k) + kernelRemainder x (2 * k) :=
+      one_div_one_add_square_eq_partial_add_remainder x (2 * k)
+    _ <= kernelPartial x (2 * k) := hbase
+
 /-- Combined finite-division route for arctangent's kernel.
 
 For each finite stage, `1/(1+x^2)` is a finite alternating polynomial plus a
