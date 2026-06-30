@@ -104,11 +104,15 @@ Then \(y/x\) is defined as \(yx^{-1}\), when \(x\) is nonzero.
 \lean{ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg}
 \lean{ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos}
 \lean{ComputableAnalysis.RealRaw.valid_of_natScale_valid}
+\lean{ComputableAnalysis.RealRaw.scaleRat_equiv_of_nonneg}
+\lean{ComputableAnalysis.RealRaw.equiv_of_scaleRat_equiv_of_pos}
+\lean{ComputableAnalysis.RealRaw.equiv_of_natScale_equiv}
 \uses{def:raw-real,def:raw-real-arithmetic}
 The operations \(x+y\), \(x-y\), \(-x\), and \(xy\) are real numbers
 whenever \(x\) and \(y\) are.  If \(x\) is nonzero, then \(x^{-1}\)
 is also a real number.  Positive rational scaling is reversible at the level
-of validity: if \(r>0\) and \(rx\) is a valid raw real, then \(x\) is valid.
+of validity and equivalence: if \(r>0\), then validity of \(rx\) implies
+validity of \(x\), and \(rx\sim ry\) implies \(x\sim y\).
 \end{proposition}
 
 \begin{definition}[Equivalence of real numbers]\label{def:raw-equiv}

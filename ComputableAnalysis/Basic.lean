@@ -2227,9 +2227,28 @@ theorem scaleRat_equiv_of_nonneg {r : Rat} {x y : RealRaw}
   exact ⟨Rat.mul_le_mul_of_nonneg_left h.1 hr,
     Rat.mul_le_mul_of_nonneg_left h.2 hr⟩
 
+theorem equiv_of_scaleRat_equiv_of_pos {r : Rat} {x y : RealRaw}
+    (hr : 0 < r) (hxy : (scaleRat r x).Equiv (scaleRat r y)) :
+    x.Equiv y := by
+  have hr_nonneg : 0 <= r := Rat.le_of_lt hr
+  intro n
+  have h := (compareAt_overlap_iff (scaleRat r x) (scaleRat r y) n n).1
+    (hxy n)
+  apply (compareAt_overlap_iff x y n n).2
+  unfold scaleRat scaleRatCompute at h
+  simp [hr_nonneg, QInterval.Overlaps] at h
+  exact ⟨le_of_mul_le_mul_pos_left hr h.1,
+    le_of_mul_le_mul_pos_left hr h.2⟩
+
 theorem natScale_equiv (n : Nat) {x y : RealRaw}
     (hxy : x.Equiv y) : (n * x).Equiv (n * y) :=
   scaleRat_equiv_of_nonneg (Rat.natCast_nonneg : 0 <= (n : Rat)) hxy
+
+theorem equiv_of_natScale_equiv {n : Nat} {x y : RealRaw}
+    (hn : 0 < n) (hxy : ((n : Nat) * x : RealRaw).Equiv (n * y)) :
+    x.Equiv y := by
+  change (scaleRat (n : Rat) x).Equiv (scaleRat (n : Rat) y) at hxy
+  exact equiv_of_scaleRat_equiv_of_pos ((Rat.natCast_pos).2 hn) hxy
 
 theorem neg_equiv {x y : RealRaw}
     (hxy : x.Equiv y) : (-x).Equiv (-y) := by

@@ -84,6 +84,8 @@ The current Lean theorem keeps the comparison hypothesis explicit as
 \end{theorem}
 
 \begin{theorem}[Machin tangent identity]\label{thm:machin-tangent}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.gaussian_identity}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.quarter_tangent_identity}
 \uses{def:arctan-series,def:qbox}
 The rational tangent algebra proves
 \[
@@ -94,11 +96,17 @@ Equivalently, the Gaussian-rational identity
   (5+i)^4=(2+2i)(239+i)
 \]
 records the same branch calculation.
-The current Lean proof target is
-\code{ComputableAnalysis.PiProofs.MachinIdentity.quarter\_tangent\_identity}.
+Lean verifies both the Gaussian-rational identity and the resulting rational
+tangent identity exactly.
 \end{theorem}
 
 \begin{theorem}[Leibniz-Machin agreement]\label{thm:leibniz-machin}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.piMachin_eq_four_arctan_one_of_branchIdentity}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_of_piMachin_eq_four_arctan_one}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctan_one}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchIdentity}
+\lean{ComputableAnalysis.PiProofs.machinBranchIdentity_of_leibnizEqMachin}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
 \uses{thm:leibniz-arctan,thm:machin-tangent,def:raw-equiv}
 The Leibniz and Machin interval algorithms compute the same abstract real
 number.  In the power-series arctangent notation, this is the agreement
@@ -109,9 +117,11 @@ between the two rational linear combinations of arctangent values:
   -4\arctan_{\mathrm{series}}\frac{1}{239}.
 \]
 The remaining Lean work is to prove that the power-series arctangent respects
-the geometric branch equality on the certified domain \([-1,1]\).
-The current Lean proposition target is
-\code{ComputableAnalysis.PiProofs.LeibnizEqMachin}.
+the geometric branch equality on the certified domain \([-1,1]\).  Lean now
+proves that the raw-real agreement target \code{LeibnizEqMachin} is equivalent
+to the underlying Machin branch identity: the outer factor \(4\) can be
+cancelled by the positive-scaling cancellation theorem for raw-real
+equivalence.
 \end{theorem}
 
 \section{General Power Series}

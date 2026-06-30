@@ -947,6 +947,19 @@ theorem piMachin_eq_four_arctan_one_of_branchIdentity
   unfold piMachin
   exact RealRaw.natScale_equiv 4 h
 
+theorem branchIdentity_of_piMachin_eq_four_arctan_one
+    (h : piMachin.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw)) :
+    BranchIdentity := by
+  unfold piMachin at h
+  exact RealRaw.equiv_of_natScale_equiv
+    (by omega : 0 < (4 : Nat)) h
+
+theorem branchIdentity_iff_piMachin_eq_four_arctan_one :
+    BranchIdentity ↔
+      piMachin.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) :=
+  ⟨piMachin_eq_four_arctan_one_of_branchIdentity,
+    branchIdentity_of_piMachin_eq_four_arctan_one⟩
+
 end MachinIdentity
 
 theorem leibnizEqMachin_of_machinBranchIdentity
@@ -960,6 +973,21 @@ theorem leibnizEqMachin_of_machinBranchIdentity
     leibnizValid fourArctanOneValid machinValid
     piLeibniz_equiv_four_arctan_one
     (RealRaw.equiv_symm hmachin)
+
+theorem machinBranchIdentity_of_leibnizEqMachin
+    (h : LeibnizEqMachin) : MachinIdentity.BranchIdentity := by
+  have hmachin :
+      piMachin.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) :=
+    RealRaw.equiv_trans
+      machinValid leibnizValid fourArctanOneValid
+      (RealRaw.equiv_symm h)
+      piLeibniz_equiv_four_arctan_one
+  exact MachinIdentity.branchIdentity_of_piMachin_eq_four_arctan_one hmachin
+
+theorem leibnizEqMachin_iff_machinBranchIdentity :
+    LeibnizEqMachin ↔ MachinIdentity.BranchIdentity :=
+  ⟨machinBranchIdentity_of_leibnizEqMachin,
+    leibnizEqMachin_of_machinBranchIdentity⟩
 
 theorem leibnizEqMachin_of_machinBranchLaw
     (h : MachinIdentity.BranchLaw) : LeibnizEqMachin :=

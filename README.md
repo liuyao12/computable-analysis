@@ -63,6 +63,10 @@ The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced
 to `PowerSeriesAgreesOnUnit`, and the scoreboard counts that computation only
 once as `4 * arctanSeries(1)`.
+For Machin, Lean now proves
+`PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
+identity is exactly the remaining raw-real agreement target, after cancelling
+the common outer factor `4`.
 
 The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
 code that remains in Lean is internal scaffolding for circumference and finite
