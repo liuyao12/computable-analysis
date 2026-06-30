@@ -621,6 +621,83 @@ theorem state_succ (n : Nat) :
   rw [List.range_succ, List.foldl_append]
   rfl
 
+/-- The Leibniz loop endpoints are the finite integrals of the odd/even
+arctangent-kernel truncations over `[0,1]`.  This is the algebraic bridge that
+turns the endpoint series into a finite polynomial-integral comparison. -/
+theorem endpoints_eq_kernelPartialIntegral (n : Nat) :
+    hi n = Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n) /\
+      lo (n + 1) =
+        Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n + 1) := by
+  induction n with
+  | zero =>
+      constructor
+      · simp [hi, state, Taylor.ArctanKernel.kernelPartialIntegralAtOne]
+      · rw [lo, state_succ, step]
+        simp [state, Taylor.ArctanKernel.kernelPartialIntegralAtOne,
+          Taylor.ArctanKernel.kernelTermIntegralAtOne]
+        native_decide
+  | succ n ih =>
+      have hloAsStep :
+          hi n - 1 / (4 * (n : Rat) + 3) =
+            Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n + 1) := by
+        rw [←ih.2]
+        rw [lo, state_succ, step]
+        simp
+        rw [show (state n).1 = hi n by rfl]
+      have hhiSucc : hi (n + 1) =
+          Taylor.ArctanKernel.kernelPartialIntegralAtOne
+            (2 * (n + 1)) := by
+        rw [hi, state_succ, step]
+        simp
+        rw [show (state n).1 = hi n by rfl]
+        rw [hloAsStep]
+        rw [show 2 * (n + 1) = 2 * n + 2 by omega]
+        rw [Taylor.ArctanKernel.kernelPartialIntegralAtOne_even_succ]
+      constructor
+      · exact hhiSucc
+      · rw [lo, state_succ, step]
+        simp
+        rw [show (state (n + 1)).1 = hi (n + 1) by rfl]
+        rw [hhiSucc]
+        rw [Taylor.ArctanKernel.kernelPartialIntegralAtOne_odd_succ]
+        grind
+
+theorem hi_eq_kernelPartialIntegral_even (n : Nat) :
+    hi n = Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n) :=
+  (endpoints_eq_kernelPartialIntegral n).1
+
+theorem lo_eq_kernelPartialIntegral_odd_succ (n : Nat) :
+    lo (n + 1) =
+      Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n + 1) :=
+  (endpoints_eq_kernelPartialIntegral n).2
+
+def lowerKernelPartialAtStage : Nat -> Rat
+  | 0 => 0
+  | n + 1 => Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n + 1)
+
+def upperKernelPartialAtStage (n : Nat) : Rat :=
+  Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n)
+
+theorem lo_eq_lowerKernelPartialAtStage (n : Nat) :
+    lo n = lowerKernelPartialAtStage n := by
+  cases n with
+  | zero =>
+      simp [lo, state, lowerKernelPartialAtStage]
+  | succ n =>
+      simp [lowerKernelPartialAtStage,
+        lo_eq_kernelPartialIntegral_odd_succ n]
+
+theorem hi_eq_upperKernelPartialAtStage (n : Nat) :
+    hi n = upperKernelPartialAtStage n := by
+  simp [upperKernelPartialAtStage, hi_eq_kernelPartialIntegral_even n]
+
+theorem leibnizSeries_compute_eq_kernelPartialIntegralInterval (n : Nat) :
+    leibnizSeries.compute n =
+      { lo := lowerKernelPartialAtStage n,
+        hi := upperKernelPartialAtStage n } := by
+  rw [leibnizSeries_compute_eq n]
+  simp [lo_eq_lowerKernelPartialAtStage, hi_eq_upperKernelPartialAtStage]
+
 private theorem one_div_nat_le_one_div_nat_of_le
     {a b : Nat} (ha : 0 < a) (hab : a <= b) :
     1 / (b : Rat) <= 1 / (a : Rat) := by
@@ -881,6 +958,35 @@ def LeibnizEqualsRectangleRawAtOne : Prop :=
 def LeibnizEqualsRectangleRawAtOneSpecial : Prop :=
   leibnizSeries.Equiv ArctanGeometry.arctanIntegralRectangleRawAtOne
 
+/-- The finite rational inequalities that remain for comparing the Leibniz
+endpoint truncations with the rectangle-sum integral at `1`.
+
+At stage `n`, the Leibniz interval is already identified with the integrated
+odd/even kernel truncations.  Thus the remaining proof can be stated without
+completed reals: rectangle lower bound below the even truncation, and odd
+truncation below rectangle upper bound. -/
+def LeibnizRectangleKernelBoundsAtOne : Prop :=
+  forall n,
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).lo <=
+      LeibnizValidity.upperKernelPartialAtStage n /\
+    LeibnizValidity.lowerKernelPartialAtStage n <=
+      (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).hi
+
+theorem leibnizEqualsRectangleRawAtOneSpecial_of_kernelBounds
+    (h : LeibnizRectangleKernelBoundsAtOne) :
+    LeibnizEqualsRectangleRawAtOneSpecial := by
+  unfold LeibnizEqualsRectangleRawAtOneSpecial
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    leibnizSeries ArctanGeometry.arctanIntegralRectangleRawAtOne n n).2
+  rw [LeibnizValidity.leibnizSeries_compute_eq_kernelPartialIntegralInterval n]
+  change QInterval.Overlaps
+    { lo := LeibnizValidity.lowerKernelPartialAtStage n,
+      hi := LeibnizValidity.upperKernelPartialAtStage n }
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne n)
+  exact ⟨(h n).2, (h n).1⟩
+
 theorem leibnizEqualsRectangleRawAtOne_of_special
     (h : LeibnizEqualsRectangleRawAtOneSpecial) :
     LeibnizEqualsRectangleRawAtOne := by
@@ -892,6 +998,12 @@ theorem leibnizEqualsRectangleRawAtOne_of_special
       (x := (1 : Rat)) (by native_decide) (by native_decide))
     h
     arctanIntegralRectangleRawAtOne_equiv_raw_one
+
+theorem leibnizEqualsRectangleRawAtOne_of_kernelBounds
+    (h : LeibnizRectangleKernelBoundsAtOne) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_special
+    (leibnizEqualsRectangleRawAtOneSpecial_of_kernelBounds h)
 
 theorem special_of_leibnizEqualsRectangleRawAtOne
     (h : LeibnizEqualsRectangleRawAtOne) :

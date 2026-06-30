@@ -86,6 +86,15 @@ bracketing lemmas
 rational inequalities needed for that comparison route.  The older
 unit-interval agreement theorem still feeds this pointwise bridge when broader
 arctangent comparison data is available.
+Lean now also identifies the Leibniz endpoints with the integrated odd/even
+finite kernel truncations over `[0,1]` via
+`PiProofs.LeibnizValidity.endpoints_eq_kernelPartialIntegral`.  The concrete
+remaining finite target is
+`PiProofs.LeibnizRectangleKernelBoundsAtOne`: for every stage, prove the
+rectangle lower bound lies below the even kernel-truncation integral and the
+odd kernel-truncation integral lies below the rectangle upper bound.  The
+wrapper `PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds` then gives
+the raw-real equivalence needed by the table route.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling

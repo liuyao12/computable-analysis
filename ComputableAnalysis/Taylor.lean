@@ -110,6 +110,58 @@ def kernelPartial (x : Rat) (n : Nat) : Rat :=
 def kernelRemainder (x : Rat) (n : Nat) : Rat :=
   remainderNumerator (x * x) n / (1 + x * x)
 
+/-- Integral over `[0,1]` of the `j`-th monomial in the arctangent-kernel
+finite expansion. -/
+def kernelTermIntegralAtOne (j : Nat) : Rat :=
+  (-1 : Rat) ^ j / (2 * (j : Rat) + 1)
+
+/-- Integral over `[0,1]` of the finite arctangent-kernel truncation
+`1 - x^2 + x^4 - ... + (-x^2)^n`. -/
+def kernelPartialIntegralAtOne : Nat -> Rat
+  | 0 => 1
+  | n + 1 => kernelPartialIntegralAtOne n + kernelTermIntegralAtOne (n + 1)
+
+private theorem neg_one_pow_even (n : Nat) :
+    (-1 : Rat) ^ (2 * n) = 1 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [show 2 * (n + 1) = 2 * n + 1 + 1 by omega]
+      rw [Rat.pow_succ, Rat.pow_succ, ih]
+      native_decide
+
+private theorem neg_one_pow_odd (n : Nat) :
+    (-1 : Rat) ^ (2 * n + 1) = -1 := by
+  rw [show 2 * n + 1 = 2 * n + 1 by omega]
+  rw [Rat.pow_succ, neg_one_pow_even]
+  native_decide
+
+/-- Advancing from an even arctangent-kernel truncation to the next odd one
+subtracts the next Leibniz denominator. -/
+theorem kernelPartialIntegralAtOne_odd_succ (n : Nat) :
+    kernelPartialIntegralAtOne (2 * n + 1) =
+      kernelPartialIntegralAtOne (2 * n) - 1 / (4 * (n : Rat) + 3) := by
+  rw [show 2 * n + 1 = 2 * n + 1 by omega]
+  simp [kernelPartialIntegralAtOne, kernelTermIntegralAtOne]
+  rw [neg_one_pow_odd]
+  have hden : 2 * (2 * (n : Rat) + 1) + 1 = 4 * (n : Rat) + 3 := by
+    grind
+  rw [hden]
+  grind [Rat.sub_eq_add_neg]
+
+/-- Advancing from an odd arctangent-kernel truncation to the next even one
+adds the next Leibniz denominator. -/
+theorem kernelPartialIntegralAtOne_even_succ (n : Nat) :
+    kernelPartialIntegralAtOne (2 * n + 2) =
+      kernelPartialIntegralAtOne (2 * n + 1) + 1 / (4 * (n : Rat) + 5) := by
+  rw [show 2 * n + 2 = (2 * n + 1) + 1 by omega]
+  simp [kernelPartialIntegralAtOne, kernelTermIntegralAtOne]
+  rw [show 2 * n + 1 + 1 = 2 * (n + 1) by omega]
+  rw [neg_one_pow_even]
+  have hden : 2 * (2 * (n : Rat) + 1 + 1) + 1 = 4 * (n : Rat) + 5 := by
+    grind
+  rw [hden]
+
 theorem qabs_le_of_between {r b : Rat}
     (hlo : -b <= r) (hhi : r <= b) :
     qabs r <= b := by
