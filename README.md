@@ -105,6 +105,14 @@ table-facing wrapper
 `PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds`, so
 that uniform one-cell result is sufficient to complete the `4 * arctanSeries(1)`
 equivalence row.
+Lean now also proves the pointwise finite-division bounds behind this target as
+`PiProofs.LeibnizRectangleBridge.leibnizRectanglePointwiseCellBoundsAtOne`.  The
+remaining analytic/combinatorial bridge has been isolated as
+`PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne`:
+turn those pointwise bounds into the corresponding finite polynomial integral
+cell bounds.  The wrapper
+`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge`
+then completes the table row from that bridge.
 The base package
 `PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase`
 is formalized: the even `m = 0` lower-cell inequality holds on every unit

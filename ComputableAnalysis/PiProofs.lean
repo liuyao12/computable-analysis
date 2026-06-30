@@ -1008,6 +1008,16 @@ def OddKernelCellBound (m : Nat) : Prop :=
     Taylor.ArctanKernel.kernelPartialIntegralBetween p r m <=
       ArctanGeometry.integralUpperStep p r
 
+def EvenKernelPointwiseCellBound (m : Nat) : Prop :=
+  forall {p x r : Rat}, 0 <= p -> p <= x -> x <= r ->
+    ArctanGeometry.integralKernel r <=
+      Taylor.ArctanKernel.kernelPartial x m
+
+def OddKernelPointwiseCellBound (m : Nat) : Prop :=
+  forall {p x r : Rat}, 0 <= p -> p <= x -> x <= r ->
+    Taylor.ArctanKernel.kernelPartial x m <=
+      ArctanGeometry.integralKernel p
+
 private instance evenKernelCellBoundsDecidable (m : Nat) :
     (intervals : List (Rat × Rat)) -> Decidable (EvenKernelCellBounds m intervals)
   | [] => isTrue trivial
@@ -1036,6 +1046,14 @@ def LeibnizRectangleUniformCellBoundsAtOne : Prop :=
   (forall n, EvenKernelCellBound (2 * n)) /\
   (forall n, OddKernelCellBound (2 * n + 1))
 
+def LeibnizRectanglePointwiseCellBoundsAtOne : Prop :=
+  (forall n, EvenKernelPointwiseCellBound (2 * n)) /\
+  (forall n, OddKernelPointwiseCellBound (2 * n + 1))
+
+def LeibnizRectanglePointwiseIntegralBridgeAtOne : Prop :=
+  LeibnizRectanglePointwiseCellBoundsAtOne ->
+    LeibnizRectangleUniformCellBoundsAtOne
+
 theorem evenKernelCellBounds_of_cellBound
     {m : Nat} {intervals : List (Rat × Rat)}
     (hcell : EvenKernelCellBound m)
@@ -1063,6 +1081,42 @@ theorem oddKernelCellBounds_of_cellBound
       rcases h with ⟨hp0, hpr, hrest⟩
       simp [OddKernelCellBounds]
       exact ⟨hcell hp0 hpr, ih hrest⟩
+
+theorem evenKernelPointwiseCellBound_even (n : Nat) :
+    EvenKernelPointwiseCellBound (2 * n) := by
+  intro p x r hp0 hpx hxr
+  have hx0 : 0 <= x := Rat.le_trans hp0 hpx
+  have hkernel :
+      ArctanGeometry.integralKernel r <=
+        ArctanGeometry.integralKernel x :=
+    ArctanGeometry.integralKernel_antitone_nonneg hx0 hxr
+  have hpartial :
+      ArctanGeometry.integralKernel x <=
+        Taylor.ArctanKernel.kernelPartial x (2 * n) := by
+    exact Taylor.ArctanKernel.kernel_le_kernelPartial_even x n
+  exact Rat.le_trans hkernel hpartial
+
+theorem oddKernelPointwiseCellBound_odd (n : Nat) :
+    OddKernelPointwiseCellBound (2 * n + 1) := by
+  intro p x r hp0 hpx _hxr
+  have hpartial :
+      Taylor.ArctanKernel.kernelPartial x (2 * n + 1) <=
+        ArctanGeometry.integralKernel x := by
+    exact Taylor.ArctanKernel.kernelPartial_odd_le_kernel x n
+  have hkernel :
+      ArctanGeometry.integralKernel x <=
+        ArctanGeometry.integralKernel p :=
+    ArctanGeometry.integralKernel_antitone_nonneg hp0 hpx
+  exact Rat.le_trans hpartial hkernel
+
+theorem leibnizRectanglePointwiseCellBoundsAtOne :
+    LeibnizRectanglePointwiseCellBoundsAtOne :=
+  ⟨evenKernelPointwiseCellBound_even, oddKernelPointwiseCellBound_odd⟩
+
+theorem uniformCellBounds_of_pointwiseIntegralBridge
+    (h : LeibnizRectanglePointwiseIntegralBridgeAtOne) :
+    LeibnizRectangleUniformCellBoundsAtOne :=
+  h leibnizRectanglePointwiseCellBoundsAtOne
 
 theorem integralKernel_le_one (r : Rat) :
     ArctanGeometry.integralKernel r <= 1 := by
@@ -1506,6 +1560,12 @@ theorem leibnizEqualsRectangleRawAtOne_of_uniformCellBounds
   leibnizEqualsRectangleRawAtOne_of_kernelBounds
     (LeibnizRectangleBridge.kernelBounds_of_cellBounds
       (LeibnizRectangleBridge.cellBounds_of_uniformCellBounds h))
+
+theorem leibnizEqualsRectangleRawAtOne_of_pointwiseIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_uniformCellBounds
+    (LeibnizRectangleBridge.uniformCellBounds_of_pointwiseIntegralBridge h)
 
 theorem special_of_leibnizEqualsRectangleRawAtOne
     (h : LeibnizEqualsRectangleRawAtOne) :
@@ -3668,6 +3728,12 @@ theorem four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds
   four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
     (leibnizEqualsRectangleRawAtOne_of_uniformCellBounds h)
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds
+    (LeibnizRectangleBridge.uniformCellBounds_of_pointwiseIntegralBridge h)
+
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
@@ -3720,6 +3786,12 @@ theorem piCircleArea_equiv_four_arctanSeries_one_of_uniformCellBounds
     piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
     (four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds h)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_pointwiseIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge h)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
