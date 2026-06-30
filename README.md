@@ -35,7 +35,7 @@ for equivalence scorekeeping.
 | **Arctangent routes** | [Chapters 2-4](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series) | These rows compute pi through geometric, integral, or series arctangent algorithms. |  |  |
 | [`4 * arctanGeom(1)`](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm) | Chapter 2 | Geometric sector-area arctangent at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
 | [`4 * arctanIntegral(1)`](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral) | Chapter 3 | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
-| [`4 * arctanSeries(1)`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series) | Chapter 4 | Power-series arctangent at `1`; `piLeibniz` is just the current Lean name for this pi computation. | ✓ | ✗ |
+| [`4 * arctanSeries(1)`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series) | Chapter 4 | Power-series arctangent at `1`, i.e. the Leibniz alternating series written as an arctangent computation. | ✓ | ✗ |
 | [`piMachin`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent) | Chapter 4 | Machin's arctangent combination, `4 * (4 * arctanSeries(1/5) - arctanSeries(1/239))`. | ✓ | ✗ |
 | [`6 * arcsinIntegral(1/2)`](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | Chapter 3 | Period formula `pi/6 = integral_0^(1/2) dx / sqrt(1 - x^2)`. | ✗ | ✗ |
 | [`NewtonSegmentPi`](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Chapter 1 | Newton circle-segment formula `pi/12 + sqrt(3)/8 = integral_0^(1/2) sqrt(1 - x^2) dx`. | ✗ | ✗ |
@@ -54,8 +54,8 @@ The area loop validity package is now formalized as
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced
-to `PowerSeriesAgreesOnUnit`; some Lean theorem names still say `piLeibniz`,
-but the scoreboard counts that computation only once as `4 * arctanSeries(1)`.
+to `PowerSeriesAgreesOnUnit`, and the scoreboard counts that computation only
+once as `4 * arctanSeries(1)`.
 
 The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
 code that remains in Lean is internal scaffolding for circumference and finite

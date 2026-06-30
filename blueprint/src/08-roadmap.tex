@@ -64,7 +64,6 @@ algorithm requiring an explicit modulus.
 \end{enumerate}
 
 \section{Pi scoreboard}
-\lean{ComputableAnalysis.piLeibniz}
 \lean{ComputableAnalysis.piMachin}
 \lean{ComputableAnalysis.piCircleArea}
 \lean{ComputableAnalysis.piCircumference}
@@ -82,9 +81,6 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_nested_and_shrinking}
 \lean{ComputableAnalysis.PiProofs.GeometricValidityRemainders}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_self}
-\lean{ComputableAnalysis.PiProofs.piLeibniz_equiv_four_arctan_one}
-\lean{ComputableAnalysis.PiProofs.piLeibniz_compute_eq_four_arctan_one}
-\lean{ComputableAnalysis.PiProofs.piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
 \lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
@@ -144,8 +140,8 @@ Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
 \(\times\) & \(\times\)\\
 \code{4 * arctanSeries(1)} &
 \cref{def:arctan-series} &
-Power-series arctangent at \(1\); \code{piLeibniz} is just the current Lean
-name for this pi computation. &
+Power-series arctangent at \(1\), i.e. the Leibniz alternating series written
+as an arctangent computation. &
 \(\checkmark\) & \(\times\)\\
 \code{piMachin} &
 \cref{thm:machin-tangent} &
@@ -213,8 +209,7 @@ hypotheses:
 \hline
 power-series arctangent to area \(\pi\) &
 \code{PiProofs.four\_arctan\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement} &
-\code{ArctanGeometry.PowerSeriesAgreesOnUnit}; some current theorem names use
-\code{piLeibniz} as the implementation alias\\
+\code{ArctanGeometry.PowerSeriesAgreesOnUnit}\\
 integral arctangent to area \(\pi\) &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
 \code{ArctanIntegralGeomFunctionAgreement}\\
@@ -272,7 +267,7 @@ computation in the scoreboard.
   \code{ComputableFTA\_of\_AlgebraicFTA}.
 
   \item Pi:
-  \code{piLeibniz}, \code{piMachin}, \code{piCircleArea},
+  \code{piMachin}, \code{piCircleArea},
   \code{piCircumference},
   \code{PiProofs.AreaOrdered}, \code{PiProofs.AreaNested},
   \code{PiProofs.AreaWidthsShrink},
@@ -282,7 +277,7 @@ computation in the scoreboard.
   \code{PiProofs.PiCircleAreaPolygonAgreement},
   \code{PiProofs.areaValid\_of\_nested\_and\_shrinking},
   \code{PiProofs.piCircleArea\_equiv\_self},
-  \code{PiProofs.piLeibniz\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
+  \code{PiProofs.four\_arctan\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
   \code{PiProofs.archimedesTheorem},
   \code{PiProofs.piCircumference\_equiv\_piCircleArea},
   \code{PiProofs.LeibnizEqMachin}.
