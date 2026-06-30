@@ -24,26 +24,28 @@ For formula rows that compute a related quantity first, such as `zeta(2)` or
 algorithm is verified, while the equivalence column records whether the pi
 formula has been connected back to `piCircleArea`.
 
-Current count: definitions completed `6/13`; equivalences to `piCircleArea`
-formalized `1/12` applicable rows.  The baseline row `piCircleArea` is `N/A`
+Current count: definitions completed `5/14`; equivalences to `piCircleArea`
+formalized `1/13` applicable rows.  The baseline row `piCircleArea` is `N/A`
 for equivalence scorekeeping.
 
-| Computation | Description | Definition verified | Equivalent to `piCircleArea` |
-| --- | --- | --- | --- |
-| `piCircleArea` | Rational midpoint area exhaustion using increment/decrement triangles; current baseline for pi comparisons. | ✓ | N/A |
-| `piCircumference` | Rational polygon circumference using interval square roots for side lengths. | ✗ | ✗ |
-| **Arctangent-at-one routes** | The following rows compute pi through `4 * arctan(1)` using geometric, integral, or series representations. |  |  |
-| `4 * arctanGeom(1)` | Geometric sector-area arctangent at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
-| `4 * arctanIntegral(1)` | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
-| `4 * arctan(1)` | Power-series arctangent at `1`, equal to the Leibniz computation. | ✓ | ✗ |
-| `piLeibniz` | Alternating series for `4 * arctan(1)`, namely `4 * (1 - 1/3 + 1/5 - ...)`. | ✓ | ✗ |
-| `6 * arcsinIntegral(1/2)` | Period formula `pi/6 = integral_0^(1/2) dx / sqrt(1 - x^2)`. | ✗ | ✗ |
-| `NewtonSegmentPi` | Newton circle-segment formula `pi/12 + sqrt(3)/8 = integral_0^(1/2) sqrt(1 - x^2) dx`. | ✗ | ✗ |
-| `GaussianPi` | Gaussian integral `sqrt(2*pi) = integral_(-infty)^infty exp(-x^2/2) dx`; pi is recovered by squaring and halving. | ✗ | ✗ |
-| `piMachin` | Machin formula, `4 * (4 * arctan(1/5) - arctan(1/239))`. | ✓ | ✗ |
-| `baselSeriesRaw` / `pi^2/6` | Euler's Basel series, `zeta(2) = 1 + 1/4 + 1/9 + ... = pi^2/6`; the zeta-side interval is verified. | ✓ | ✗ |
-| `Brouncker(4/pi)` | Continued fraction for `4 / pi`, with finite truncations expected to give rational bounds. | ✗ | ✗ |
-| `ComplexLogPi` | One chosen complex-log pi formula, for example principal-branch `log(-1) = i*pi`, with three computable `Log` constructions compared; Euler identity is a bridge theorem, not a separate pi computation. | ✗ | ✗ |
+| Computation | Blueprint | Description | Definition verified | Equivalent to `piCircleArea` |
+| --- | --- | --- | --- | --- |
+| [`piCircleArea`](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm) | Chapter 2 | Rational midpoint area exhaustion using increment/decrement triangles; current baseline for pi comparisons. | ✓ | N/A |
+| [`piCircumference`](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm) | Chapter 2 | Rational polygon circumference using interval square roots for side lengths. | ✗ | ✗ |
+| **Arctangent routes** | [Chapters 2-4](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series) | These rows compute pi through geometric, integral, or series arctangent algorithms. |  |  |
+| [`4 * arctanGeom(1)`](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm) | Chapter 2 | Geometric sector-area arctangent at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
+| [`4 * arctanIntegral(1)`](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral) | Chapter 3 | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
+| [`4 * arctanSeries(1)`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series) | Chapter 4 | Power-series arctangent at `1`; `piLeibniz` is just the current Lean name for this pi computation. | ✓ | ✗ |
+| [`piMachin`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent) | Chapter 4 | Machin's arctangent combination, `4 * (4 * arctanSeries(1/5) - arctanSeries(1/239))`. | ✓ | ✗ |
+| [`6 * arcsinIntegral(1/2)`](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | Chapter 3 | Period formula `pi/6 = integral_0^(1/2) dx / sqrt(1 - x^2)`. | ✗ | ✗ |
+| [`NewtonSegmentPi`](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Chapter 1 | Newton circle-segment formula `pi/12 + sqrt(3)/8 = integral_0^(1/2) sqrt(1 - x^2) dx`. | ✗ | ✗ |
+| [`GaussianPi`](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Chapter 1 | Gaussian integral `sqrt(2*pi) = integral_(-infty)^infty exp(-x^2/2) dx`; pi is recovered by squaring and halving. | ✗ | ✗ |
+| [`baselSeriesRaw` / `pi^2/6`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw) | Chapter 4 | Euler's Basel series, `zeta(2) = 1 + 1/4 + 1/9 + ... = pi^2/6`; the zeta-side interval is verified. | ✓ | ✗ |
+| [`Brouncker(4/pi)`](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Chapter 1 | Continued fraction for `4 / pi`, with finite truncations expected to give rational bounds. | ✗ | ✗ |
+| **Logarithm-at-i routes** | [Chapter 5](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | These rows compute pi from `Log(i) = i*pi/2`; Euler identity is an essential bridge. |  |  |
+| [`-2i * LogSeries(i)`](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:exp-representations) | Chapter 5 | Complex logarithm obtained from power-series exponential data and branch inversion near `i`. | ✗ | ✗ |
+| [`-2i * LogIntegral(i)`](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:logarithm-integral) | Chapter 5 | Complex logarithm as a path integral of `dz/z` from `1` to `i`. | ✗ | ✗ |
+| [`-2i * LogInvExp(i)`](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | Chapter 5 | Logarithm as the chosen inverse branch of complex exponential, with Euler identity locating `i`. | ✗ | ✗ |
 
 The area loop validity package is now formalized as
 `PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
@@ -51,9 +53,9 @@ The area loop validity package is now formalized as
 `PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
-as an equivalence target.  The Leibniz-to-area route is now reduced to
-`PowerSeriesAgreesOnUnit` via
-`piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement`.
+as an equivalence target.  The series-arctangent-to-area route is now reduced
+to `PowerSeriesAgreesOnUnit`; some Lean theorem names still say `piLeibniz`,
+but the scoreboard counts that computation only once as `4 * arctanSeries(1)`.
 
 The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
 code that remains in Lean is internal scaffolding for circumference and finite

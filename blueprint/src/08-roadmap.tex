@@ -113,71 +113,92 @@ whether the corresponding \(\pi\)-formula has been connected back to
 
 The current score is:
 \[
-  \text{definitions completed}=6/13,\qquad
-  \text{equivalences to \code{piCircleArea} formalized}=1/12
+  \text{definitions completed}=5/14,\qquad
+  \text{equivalences to \code{piCircleArea} formalized}=1/13
   \text{ applicable rows}.
 \]
 
 \begin{center}
-\begin{tabular}{p{0.24\textwidth}p{0.44\textwidth}cc}
-\textbf{Computation} & \textbf{Description} &
+\begin{tabular}{p{0.22\textwidth}p{0.12\textwidth}p{0.36\textwidth}cc}
+\textbf{Computation} & \textbf{Blueprint} & \textbf{Description} &
 \textbf{Definition} & \textbf{Equiv.}\\
 \hline
 \code{piCircleArea} &
+\cref{def:circle-area-stage-algorithm} &
 Rational midpoint area exhaustion using increment/decrement triangles; current
 baseline for pi comparisons. &
 \(\checkmark\) & N/A\\
 \code{piCircumference} &
+\cref{def:circle-circumference-stage-algorithm} &
 Rational polygon circumference using interval square roots for side lengths. &
 \(\times\) & \(\times\)\\
-\multicolumn{4}{l}{\textbf{Arctangent-at-one routes}}\\
+\multicolumn{5}{l}{\textbf{Arctangent routes}}\\
 \code{4 * arctanGeom(1)} &
+\cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
 \code{piCircleArea}. &
 \(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanIntegral(1)} &
+\cref{def:arctan-integral} &
 Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
 \(\times\) & \(\times\)\\
-\code{4 * arctan(1)} &
-Power-series arctangent at \(1\), equivalent to the Leibniz computation. &
+\code{4 * arctanSeries(1)} &
+\cref{def:arctan-series} &
+Power-series arctangent at \(1\); \code{piLeibniz} is just the current Lean
+name for this pi computation. &
 \(\checkmark\) & \(\times\)\\
-\code{piLeibniz} &
-Alternating series for \(4\arctan(1)\), namely
-\(4(1-1/3+1/5-\cdots)\). &
+\code{piMachin} &
+\cref{thm:machin-tangent} &
+Machin's arctangent combination
+\(4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\). &
 \(\checkmark\) & \(\times\)\\
 \code{6 * arcsinIntegral(1/2)} &
+\cref{def:inverse-elementary-integral-identities} &
 Period formula \(\pi/6=\int_0^{1/2} dx/\sqrt{1-x^2}\). &
 \(\times\) & \(\times\)\\
 \code{NewtonSegmentPi} &
+\cref{rem:sources-of-raw-reals} &
 Newton circle-segment formula
 \(\pi/12+\sqrt3/8=\int_0^{1/2}\sqrt{1-x^2}\,dx\). &
 \(\times\) & \(\times\)\\
 \code{GaussianPi} &
+\cref{rem:sources-of-raw-reals} &
 Gaussian integral
 \(\sqrt{2\pi}=\int_{-\infty}^{\infty}\exp(-x^2/2)\,dx\). &
 \(\times\) & \(\times\)\\
-\code{piMachin} &
-Machin formula \(4(4\arctan(1/5)-\arctan(1/239))\). &
-\(\checkmark\) & \(\times\)\\
 \code{baselSeriesRaw} / \(\pi^2/6\) &
+\cref{def:zeta-two-raw} &
 Euler's Basel series
 \(\zeta(2)=1+1/4+1/9+\cdots=\pi^2/6\); the zeta-side interval is verified. &
 \(\checkmark\) & \(\times\)\\
 \code{Brouncker(4/pi)} &
+\cref{rem:sources-of-raw-reals} &
 Continued fraction for \(4/\pi\), with finite truncations expected to give
 rational bounds. &
 \(\times\) & \(\times\)\\
-\code{ComplexLogPi} &
-One chosen complex-log pi formula, for example principal-branch
-\(\log(-1)=i\pi\), with three computable \code{Log} constructions compared.
-Euler identity is a bridge theorem, not a separate pi computation. &
+\multicolumn{5}{l}{\textbf{Logarithm-at-\(i\) routes}}\\
+\code{-2i * LogSeries(i)} &
+\cref{def:exp-representations} &
+Complex logarithm obtained from power-series exponential data and branch
+inversion near \(i\). &
+\(\times\) & \(\times\)\\
+\code{-2i * LogIntegral(i)} &
+\cref{def:logarithm-integral} &
+Complex logarithm as a path integral of \(dz/z\) from \(1\) to \(i\). &
+\(\times\) & \(\times\)\\
+\code{-2i * LogInvExp(i)} &
+\cref{thm:euler-identity} &
+Logarithm as the chosen inverse branch of complex exponential, with Euler
+identity locating \(i\). &
 \(\times\) & \(\times\)
 \end{tabular}
 \end{center}
 
-The arctangent block is the only local grouping in the table.  It records the
-geometric, integral, and power-series algorithms for the \(4\arctan(1)\)
-route, together with the Leibniz series that computes the same quantity.
+The arctangent block records the geometric, integral, power-series, and
+Machin algorithms built from arctangent values.  The logarithm-at-\(i\) block
+records a separate family of future computations: each one should identify
+\(\log(i)=i\pi/2\) using a different construction of \code{Log}, with Euler's
+identity providing the essential branch bridge.
 
 The first non-baseline checkmark in the equivalence column is the geometric
 arctangent theorem
@@ -192,10 +213,8 @@ hypotheses:
 \hline
 power-series arctangent to area \(\pi\) &
 \code{PiProofs.four\_arctan\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement} &
-\code{ArctanGeometry.PowerSeriesAgreesOnUnit}\\
-Leibniz to area \(\pi\) &
-\code{PiProofs.piLeibniz\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement} &
-\code{ArctanGeometry.PowerSeriesAgreesOnUnit}\\
+\code{ArctanGeometry.PowerSeriesAgreesOnUnit}; some current theorem names use
+\code{piLeibniz} as the implementation alias\\
 integral arctangent to area \(\pi\) &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
 \code{ArctanIntegralGeomFunctionAgreement}\\
@@ -205,10 +224,10 @@ the internal finite-geometry bridge used by circumference comparisons\\
 Basel to area \(\pi\) &
 \code{Basel.eulerBasel\_geometricPi} &
 Euler's Basel theorem for the geometric pi representative\\
-complex-log pi route &
+logarithm-at-\(i\) pi routes &
 \code{exp.logFromIntegral} and future complex \code{Log} representations &
-three \code{Log} constructions, their branch agreement, and Euler identity\\
-Leibniz to Machin &
+three \code{Log(i)} constructions, their branch agreement, and Euler identity\\
+arctan-series to Machin &
 \code{PiProofs.leibnizEqMachin\_of\_machinBranchLaw} &
 Machin branch law\\
 remaining geometric pi validity &
