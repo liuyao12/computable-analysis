@@ -152,7 +152,13 @@ Lean now reduces the path-width part of that width-bound target to exact finite
 data: each segment interval has the power-of-two square-root bisection width
 recorded by `PiProofs.pointSegmentLengthInterval_width_eq`, and a whole
 rational polygonal path has width equal to the sum of those segment budgets via
-`PiProofs.rationalPointPathLength_width_eq_segmentBudget`.
+`PiProofs.rationalPointPathLength_width_eq_segmentBudget`.  The public
+circumference width is also reduced to the quarter-gap target by
+`PiProofs.piCircumference_compute_width_eq`; it is enough to prove
+`PiProofs.CircumferenceQuarterGapLinearBound`, i.e. an explicit linear bound
+on twice the gap between the outer path upper endpoint and the inner path lower
+endpoint.  The outer tangent fan is now certified to lie inside the outer path
+interval by `PiProofs.outerFanPerimeter_mem_outerQuarterLength`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

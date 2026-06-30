@@ -178,6 +178,16 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_powerSeriesRectangleKernelAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.ConsecutiveLengthLoLeCross}
+\lean{ComputableAnalysis.PiProofs.entryTangentSegment_lo_le_cross}
+\lean{ComputableAnalysis.PiProofs.exitTangentSegment_lo_le_cross}
+\lean{ComputableAnalysis.PiProofs.outerBoundaryFrom_consecutiveLengthLoLeCross}
+\lean{ComputableAnalysis.PiProofs.outerBoundary_consecutiveLengthLoLeCross}
+\lean{ComputableAnalysis.PiProofs.Fan.pathLength_lo_le_edgeCrosses}
+\lean{ComputableAnalysis.PiProofs.Fan.pathLength_lo_le_sectorFanPerimeter}
+\lean{ComputableAnalysis.PiProofs.outerQuarterLength_lo_le_outerFanPerimeter}
+\lean{ComputableAnalysis.PiProofs.outerFanPerimeter_le_outerQuarterLength_hi}
+\lean{ComputableAnalysis.PiProofs.outerFanPerimeter_mem_outerQuarterLength}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthSum}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthBudget}
@@ -185,6 +195,11 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_eq_segmentWidthSum}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthSum_eq_budget}
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_eq_segmentBudget}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterGap}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCommonComputeAtStage_width_eq}
+\lean{ComputableAnalysis.PiProofs.piCircumference_compute_width_eq}
+\lean{ComputableAnalysis.PiProofs.CircumferenceQuarterGapLinearBound}
+\lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_of_quarterGapLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines_and_linearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferenceLinearRemainders}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_linearRemainders}
@@ -403,6 +418,13 @@ computation in the scoreboard.  The current public completion package is
 area-loop validity and leaves only dyadic circumference refinement, a
 circumference width bound, the polygon bridge, and the analytic arctangent
 agreements.
+The width-bound target has been sharpened to
+\code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
+\code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
+circumference width to twice the quarter gap between the outer path upper
+endpoint and the inner path lower endpoint.  The outer tangent fan is also now
+certified to lie inside the outer path-length interval through
+\code{PiProofs.outerFanPerimeter\_mem\_outerQuarterLength}.
 
 \section{Lean declaration index}
 

@@ -2554,6 +2554,13 @@ def ConsecutiveCrossLe (precision : Nat) : List PiCirclePoint -> Prop
       pointCross p q <= (pointSegmentLengthInterval p q precision).hi /\
         ConsecutiveCrossLe precision (q :: rest)
 
+def ConsecutiveLengthLoLeCross (precision : Nat) : List PiCirclePoint -> Prop
+  | [] => True
+  | [_] => True
+  | p :: q :: rest =>
+      (pointSegmentLengthInterval p q precision).lo <= pointCross p q /\
+        ConsecutiveLengthLoLeCross precision (q :: rest)
+
 theorem circleSamplePoint_cross_nonneg_of_order
     (stage : Nat) (hstage : 0 < stage)
     {i j : Nat} (hij : i <= j) :
@@ -2637,6 +2644,35 @@ theorem exitTangentCross_le_segment_hi
       rw [exitTangentSegmentNormSq_eq_cross_sq stage hstage k]
       exact Rat.le_refl)
 
+theorem entryTangentSegment_lo_le_cross
+    (stage : Nat) (hstage : 0 < stage) (precision k : Nat) :
+    (pointSegmentLengthInterval
+      (circleSamplePoint stage k)
+      (outerTangentPoint stage k) precision).lo <=
+      pointCross (circleSamplePoint stage k)
+        (outerTangentPoint stage k) :=
+  pointSegmentLengthInterval_lo_le_of_sq_le
+    (circleSamplePoint stage k) (outerTangentPoint stage k) precision
+    (entryTangentCross_nonneg stage hstage k)
+    (by
+      rw [entryTangentSegmentNormSq_eq_cross_sq stage hstage k]
+      exact Rat.le_refl)
+
+theorem exitTangentSegment_lo_le_cross
+    (stage : Nat) (hstage : 0 < stage) (precision k : Nat) :
+    (pointSegmentLengthInterval
+      (outerTangentPoint stage k)
+      (circleSamplePoint stage (k + 1)) precision).lo <=
+      pointCross (outerTangentPoint stage k)
+        (circleSamplePoint stage (k + 1)) :=
+  pointSegmentLengthInterval_lo_le_of_sq_le
+    (outerTangentPoint stage k)
+    (circleSamplePoint stage (k + 1)) precision
+    (exitTangentCross_nonneg stage hstage k)
+    (by
+      rw [exitTangentSegmentNormSq_eq_cross_sq stage hstage k]
+      exact Rat.le_refl)
+
 theorem innerBoundaryFrom_consecutiveCrossNonneg
     (stage : Nat) (hstage : 0 < stage) (count k : Nat) :
     ConsecutiveCrossNonneg (innerBoundaryFrom stage k count) := by
@@ -2704,6 +2740,28 @@ theorem outerBoundary_consecutiveCrossLe
     ConsecutiveCrossLe precision (outerBoundary stage) := by
   unfold outerBoundary
   exact outerBoundaryFrom_consecutiveCrossLe
+    stage hstage precision stage 0
+
+theorem outerBoundaryFrom_consecutiveLengthLoLeCross
+    (stage : Nat) (hstage : 0 < stage) (precision count k : Nat) :
+    ConsecutiveLengthLoLeCross precision
+      (circleSamplePoint stage k :: outerBoundaryFrom stage k count) := by
+  induction count generalizing k with
+  | zero =>
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
+        ConsecutiveLengthLoLeCross]
+  | succ count ih =>
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
+        ConsecutiveLengthLoLeCross]
+      exact ⟨entryTangentSegment_lo_le_cross stage hstage precision k,
+        ⟨exitTangentSegment_lo_le_cross stage hstage precision k,
+          ih (k + 1)⟩⟩
+
+theorem outerBoundary_consecutiveLengthLoLeCross
+    (stage : Nat) (hstage : 0 < stage) (precision : Nat) :
+    ConsecutiveLengthLoLeCross precision (outerBoundary stage) := by
+  unfold outerBoundary
+  exact outerBoundaryFrom_consecutiveLengthLoLeCross
     stage hstage precision stage 0
 
 theorem circlePoint_normSq (u : Rat) :
@@ -3187,6 +3245,59 @@ theorem sectorFanPerimeter_le_pathLength_hi
         _ <= (rationalPointPathLength (first :: rest) precision).hi :=
             htail
 
+theorem pathLength_lo_le_edgeCrosses
+    (precision : Nat) :
+    forall (prev : PiCirclePoint) (vertices : List PiCirclePoint),
+      ConsecutiveLengthLoLeCross precision (prev :: vertices) ->
+      (rationalPointPathLength (prev :: vertices) precision).lo <=
+        perimeter (edgeCrossesFrom prev vertices)
+  | _prev, [], _h => by
+      simp [edgeCrossesFrom, perimeter, sumRat,
+        rationalPointPathLength, rationalPointPathLength.totalLength]
+  | prev, vertex :: rest, h => by
+      have hhead :
+          (pointSegmentLengthInterval prev vertex precision).lo <=
+            pointCross prev vertex := h.1
+      have htail :
+          ConsecutiveLengthLoLeCross precision (vertex :: rest) := h.2
+      have ih :=
+        pathLength_lo_le_edgeCrosses precision vertex rest htail
+      have ih' :
+          (rationalPointPathLength (vertex :: rest) precision).lo <=
+            sumRat (edgeCrossesFrom vertex rest) := by
+        simpa [perimeter] using ih
+      have hhead' :
+          (sqrtPartialRaw.compute
+            ((vertex.x - prev.x) * (vertex.x - prev.x) +
+              (vertex.y - prev.y) * (vertex.y - prev.y))
+            (pointSegmentNormSq_sqrtDomain prev vertex) precision).lo <=
+            pointCross prev vertex := by
+        simpa [pointSegmentLengthInterval, pointSegmentNormSq] using hhead
+      simp [edgeCrossesFrom, perimeter, sumRat,
+        rationalPointPathLength, rationalPointPathLength.totalLength]
+      exact rat_add_le_add hhead' ih'
+
+theorem pathLength_lo_le_sectorFanPerimeter
+    (precision : Nat) :
+    forall vertices : List PiCirclePoint,
+      ConsecutiveLengthLoLeCross precision vertices ->
+      (rationalPointPathLength vertices precision).lo <=
+        perimeter (sectorFanWidths vertices)
+  | [], _h => by
+      simp [sectorFanWidths, edgeCrossesFrom, perimeter, sumRat,
+        rationalPointPathLength, rationalPointPathLength.totalLength]
+  | first :: rest, h => by
+      have htail :=
+        pathLength_lo_le_edgeCrosses precision first rest h
+      have horigin : pointCross originPoint first = 0 :=
+        pointCross_origin_left first
+      unfold sectorFanWidths perimeter
+      simp [edgeCrossesFrom, sumRat, horigin]
+      calc
+        (rationalPointPathLength (first :: rest) precision).lo <=
+            sumRat (edgeCrossesFrom first rest) := htail
+        _ = 0 + sumRat (edgeCrossesFrom first rest) := by grind
+
 end Fan
 
 private theorem four_mul_le_four_mul {a b : Rat} (h : a <= b) :
@@ -3652,6 +3763,32 @@ theorem innerQuarterLength_lo_le_outerFanPerimeter
   innerQuarterLength_lo_le_outerFanPerimeter_of_adjacent
     stage (chordLengthLo_le_outerTangentCrossSum stage hstage)
 
+theorem outerQuarterLength_lo_le_outerFanPerimeter
+    (stage : Nat) (hstage : 0 < stage) :
+    (outerQuarterLength stage).lo <=
+      Fan.perimeter (outerFanWidths stage) := by
+  simpa [outerQuarterLength, outerFanWidths] using
+    Fan.pathLength_lo_le_sectorFanPerimeter
+      stage (outerBoundary stage)
+      (outerBoundary_consecutiveLengthLoLeCross stage hstage stage)
+
+theorem outerFanPerimeter_le_outerQuarterLength_hi
+    (stage : Nat) (hstage : 0 < stage) :
+    Fan.perimeter (outerFanWidths stage) <=
+      (outerQuarterLength stage).hi :=
+  Fan.sectorFanPerimeter_le_pathLength_hi
+    stage (outerBoundary stage)
+    (outerBoundary_consecutiveCrossLe stage hstage stage)
+
+theorem outerFanPerimeter_mem_outerQuarterLength
+    (stage : Nat) (hstage : 0 < stage) :
+    (outerQuarterLength stage).lo <=
+        Fan.perimeter (outerFanWidths stage) /\
+      Fan.perimeter (outerFanWidths stage) <=
+        (outerQuarterLength stage).hi :=
+  ⟨outerQuarterLength_lo_le_outerFanPerimeter stage hstage,
+    outerFanPerimeter_le_outerQuarterLength_hi stage hstage⟩
+
 def crossFanBoundsOfLocalTangentBounds
     (stage : Nat) (bounds : LocalTangentBounds stage) :
     CrossFanBounds stage where
@@ -3753,6 +3890,30 @@ theorem piCircumferenceCommonComputeAtStage_ordered
     grind [Rat.sub_eq_add_neg]
   simpa [piCircumferenceCommonComputeAtStage, innerQuarterLength,
     outerQuarterLength, QInterval.width] using hnonneg
+
+private theorem four_div_two_eq_two_mul (x : Rat) :
+    (4 * x) / 2 = 2 * x := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+def circumferenceQuarterGap (stage : Nat) : Rat :=
+  (outerQuarterLength stage).hi - (innerQuarterLength stage).lo
+
+theorem piCircumferenceCommonComputeAtStage_width_eq
+    (stage : Nat) :
+    (piCircumferenceCommonComputeAtStage stage).width =
+      2 * circumferenceQuarterGap stage := by
+  simp [piCircumferenceCommonComputeAtStage, circumferenceQuarterGap,
+    innerQuarterLength, outerQuarterLength, QInterval.width,
+    four_div_two_eq_two_mul]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem piCircumference_compute_width_eq (n : Nat) :
+    (piCircumference.compute n).width =
+      2 * circumferenceQuarterGap (piStage n) := by
+  rw [piCircumference_compute_eq, piCircumferenceComputeAtStage_eq_common]
+  exact piCircumferenceCommonComputeAtStage_width_eq (piStage n)
 
 theorem piCircleAreaPolygon_ordered (n : Nat) :
     0 <= (piCircleAreaPolygon.compute n).width := by
@@ -4828,6 +4989,18 @@ def CircumferenceWidthsShrink : Prop :=
 
 def CircumferenceWidthLinearBound (C : Nat) : Prop :=
   WidthBoundedByNatOverSucc piCircumference.compute C
+
+def CircumferenceQuarterGapLinearBound (C : Nat) : Prop :=
+  forall n,
+    2 * circumferenceQuarterGap (piStage n) <=
+      (C : Rat) / (((n + 1 : Nat) : Rat))
+
+theorem circumferenceWidthLinearBound_of_quarterGapLinearBound
+    {C : Nat} (hgap : CircumferenceQuarterGapLinearBound C) :
+    CircumferenceWidthLinearBound C := by
+  intro n
+  rw [piCircumference_compute_width_eq]
+  exact hgap n
 
 theorem circumferenceWidthsShrink_of_linearBound
     {C : Nat} (hbound : CircumferenceWidthLinearBound C) :
