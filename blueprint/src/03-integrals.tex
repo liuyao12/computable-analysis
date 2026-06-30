@@ -199,6 +199,8 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopInitial_squareSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_squareSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_one_squareSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_hi_eq_geometricUpperSum}
@@ -210,6 +212,13 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_step_refines}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_refines_add}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_nested}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_widthsShrink}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_valid}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_ordered}
@@ -218,6 +227,12 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_widthsShrink}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_valid}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelInterval}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_raw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
@@ -264,18 +279,19 @@ rectangle-sum interval contains, and overlaps, the actual \code{arctanGeom}
 stage interval.  The rectangle-sum intervals are themselves ordered and nested
 along the actual arctangent loop.
 
-For \(x=1\), Lean also proves the mesh estimate needed for validity.  The sum
-of squared cell lengths is exactly \(2^{-n}\) after \(n\) midpoint refinements,
-and each rectangle gap is bounded by \(2(r-p)^2\).  Hence the concrete
-rectangle-sum raw real \code{arctanIntegralRectangleRawAtOne} is valid and
+For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
+estimate needed for validity.  The sum of squared cell lengths is exactly
+\(x^2/2^n\) after \(n\) midpoint refinements, hence is bounded by \(2^{-n}\),
+and each rectangle gap is bounded by \(2(r-p)^2\).  Therefore the concrete
+rectangle-sum raw real \code{arctanIntegralRectangleRaw x} is valid on the
+unit branch.  Lean packages the same schedule as
+\code{arctanIntegralRectangleFor x}, an \code{Integral.ConstructionFor} for
+the kernel on \([0,x]\).  At \(x=1\), the rectangle raw real is also proved
 equivalent to \code{arctanGeom(1)}.  This is the finite algebraic core of the
-comparison
-\(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  Lean now also packages this
-same rectangle schedule as
-\code{arctanIntegralRectangleForAtOne}, an \code{Integral.ConstructionFor}
-for the kernel on \([0,1]\).  The remaining work is to identify the older
-point-Riemann \code{arctanIntegral(1)} API with this rectangle schedule, or
-replace it by the domain-aware construction interface throughout.
+comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  The remaining work is
+to identify the older point-Riemann \code{arctanIntegral(1)} API with this
+rectangle schedule, or replace it by the domain-aware construction interface
+throughout.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]

@@ -57,7 +57,10 @@ domain-aware theorem
 `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`; the more
 general older `arctanIntegral(1)` row remains pending because that
 point-Riemann construction wrapper has not yet been identified with this
-rectangle schedule.
+rectangle schedule.  The rectangle schedule itself is now verified more
+generally as `ArctanGeometry.arctanIntegralRectangleRaw_valid` and
+`IntegralIdentities.arctanIntegralRectangleFor_valid` for rational
+`0 <= x <= 1`; the scoreboard row records the specialization needed for pi.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

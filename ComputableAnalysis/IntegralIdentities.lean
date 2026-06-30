@@ -228,9 +228,63 @@ theorem oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity
   rw [RationalCircle.Stage.sectorAreaDensity_eq_one_over_one_plus_square]
   simp [oneOverOnePlusSquareRaw]
 
+/-- The arctangent kernel on `[0, x]`, as a domain-aware function. -/
+abbrev arctanKernelInterval (x : Rat) : FunctionOnInterval :=
+  oneOverOnePlusSquareOnInterval 0 x
+
 /-- The arctangent kernel on the unit interval, as a domain-aware function. -/
 abbrev arctanKernelIntervalAtOne : FunctionOnInterval :=
-  oneOverOnePlusSquareOnInterval 0 1
+  arctanKernelInterval 1
+
+/-- The verified midpoint-rectangle construction for
+`∫_0^x dt / (1 + t^2)`, for rational `x` in `[0, 1]`. -/
+def arctanIntegralRectangleConstruction
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    Integral.ConstructionFor (arctanKernelInterval x) where
+  compute := ArctanGeometry.arctanIntegralRectangleCompute x
+  certificate := by
+    simpa [ArctanGeometry.arctanIntegralRectangleRaw] using
+      ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1
+
+/-- The domain-aware integral raw real supplied by the rectangle construction
+for the arctangent kernel on `[0, x]`, with `0 <= x <= 1`. -/
+def arctanIntegralRectangleFor
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) : RealRaw :=
+  Integral.integralFor (arctanKernelInterval x)
+    (arctanIntegralRectangleConstruction x hx0 hx1)
+
+theorem arctanIntegralRectangleFor_valid
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralRectangleFor x hx0 hx1).Valid := by
+  change RealRaw.ValidCompute
+    (ArctanGeometry.arctanIntegralRectangleCompute x)
+  exact (arctanIntegralRectangleConstruction x hx0 hx1).certificate
+
+theorem arctanIntegralRectangleFor_compute_eq
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    (arctanIntegralRectangleFor x hx0 hx1).compute n =
+      ArctanGeometry.arctanIntegralRectangleCompute x n := rfl
+
+theorem arctanIntegralRectangleFor_equiv_raw
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralRectangleFor x hx0 hx1).Equiv
+      (ArctanGeometry.arctanIntegralRectangleRaw x) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanIntegralRectangleFor x hx0 hx1)
+    (ArctanGeometry.arctanIntegralRectangleRaw x) n n).2
+  have hordered :=
+    ArctanGeometry.arctanIntegralRectangleCompute_ordered hx0 n
+  have hle :
+      (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+        (ArctanGeometry.arctanIntegralRectangleCompute x n).hi := by
+    unfold QInterval.width at hordered
+    grind [Rat.sub_eq_add_neg]
+  change QInterval.Overlaps
+    (ArctanGeometry.arctanIntegralRectangleCompute x n)
+    (ArctanGeometry.arctanIntegralRectangleCompute x n)
+  exact ⟨hle, hle⟩
 
 /-- The verified rectangle-sum construction for
 `∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
