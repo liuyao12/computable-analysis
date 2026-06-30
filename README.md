@@ -148,6 +148,11 @@ as `PiProofs.CircumferenceLinearRemainders`: prove dyadic one-step refinement
 for `piCircumference` and any explicit linear width bound.  The public area
 validity is already reused by
 `PiProofs.piProofsComplete_of_circumferenceRemainders`.
+Lean now reduces the path-width part of that width-bound target to exact finite
+data: each segment interval has the power-of-two square-root bisection width
+recorded by `PiProofs.pointSegmentLengthInterval_width_eq`, and a whole
+rational polygonal path has width equal to the sum of those segment budgets via
+`PiProofs.rationalPointPathLength_width_eq_segmentBudget`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

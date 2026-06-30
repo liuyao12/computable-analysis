@@ -2474,6 +2474,17 @@ theorem pointSegmentLengthInterval_width_nonneg
   have h := pointSegmentLengthInterval_lo_le_hi p q n
   grind [QInterval.width, Rat.sub_eq_add_neg]
 
+theorem pointSegmentLengthInterval_width_eq
+    (p q : PiCirclePoint) (n : Nat) :
+    (pointSegmentLengthInterval p q n).width =
+      sqrtUpperBound (pointSegmentNormSq p q) /
+        (((2 ^ sqrtFuel (pointSegmentNormSq p q) (sqrtStageEps n) : Nat) :
+          Rat)) := by
+  unfold pointSegmentLengthInterval
+  simpa [sqrtPartialRaw] using
+    sqrtApproxOnDomain_width_eq (pointSegmentNormSq p q)
+      (pointSegmentNormSq_sqrtDomain p q) n
+
 theorem pointSegmentLengthInterval_le_hi_of_sq_le
     (p q : PiCirclePoint) (n : Nat) {r : Rat}
     (hrsq : sq r <= pointSegmentNormSq p q) :
@@ -2771,6 +2782,96 @@ theorem rationalPointPathLength_width_nonneg
     0 <= (rationalPointPathLength points n).width := by
   have h := rationalPointPathLength_lo_le_hi points n
   grind [QInterval.width, Rat.sub_eq_add_neg]
+
+def pathSegmentWidthSum : List PiCirclePoint -> Nat -> Rat
+  | [], _ => 0
+  | [_], _ => 0
+  | p :: q :: rest, n =>
+      (pointSegmentLengthInterval p q n).width +
+        pathSegmentWidthSum (q :: rest) n
+
+def pathSegmentWidthBudget : List PiCirclePoint -> Nat -> Rat
+  | [], _ => 0
+  | [_], _ => 0
+  | p :: q :: rest, n =>
+      sqrtUpperBound (pointSegmentNormSq p q) /
+          (((2 ^ sqrtFuel (pointSegmentNormSq p q) (sqrtStageEps n) : Nat) :
+            Rat)) +
+        pathSegmentWidthBudget (q :: rest) n
+
+theorem rationalPointPathLength_width_nil (n : Nat) :
+    (rationalPointPathLength [] n).width = 0 := by
+  simp [rationalPointPathLength, rationalPointPathLength.totalLength,
+    QInterval.width]
+  grind
+
+theorem rationalPointPathLength_width_single
+    (p : PiCirclePoint) (n : Nat) :
+    (rationalPointPathLength [p] n).width = 0 := by
+  simp [rationalPointPathLength, rationalPointPathLength.totalLength,
+    QInterval.width]
+  grind
+
+theorem rationalPointPathLength_width_cons_cons
+    (p q : PiCirclePoint) (rest : List PiCirclePoint) (n : Nat) :
+    (rationalPointPathLength (p :: q :: rest) n).width =
+      (pointSegmentLengthInterval p q n).width +
+        (rationalPointPathLength (q :: rest) n).width := by
+  unfold rationalPointPathLength pointSegmentLengthInterval
+    pointSegmentNormSq QInterval.width
+  simp [rationalPointPathLength.totalLength]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem rationalPointPathLength_width_eq_segmentWidthSum
+    (points : List PiCirclePoint) (n : Nat) :
+    (rationalPointPathLength points n).width =
+      pathSegmentWidthSum points n := by
+  induction points with
+  | nil =>
+      simp [pathSegmentWidthSum, rationalPointPathLength,
+        rationalPointPathLength.totalLength, QInterval.width]
+      grind
+  | cons p ps ih =>
+      cases ps with
+      | nil =>
+          simp [pathSegmentWidthSum, rationalPointPathLength,
+            rationalPointPathLength.totalLength, QInterval.width]
+          grind
+      | cons q qs =>
+          rw [rationalPointPathLength_width_cons_cons]
+          simp [pathSegmentWidthSum, ih]
+
+theorem pathSegmentWidthSum_nonneg
+    (points : List PiCirclePoint) (n : Nat) :
+    0 <= pathSegmentWidthSum points n := by
+  induction points with
+  | nil => simp [pathSegmentWidthSum]
+  | cons p ps ih =>
+      cases ps with
+      | nil => simp [pathSegmentWidthSum]
+      | cons q qs =>
+          simp [pathSegmentWidthSum]
+          exact Rat.add_nonneg
+            (pointSegmentLengthInterval_width_nonneg p q n) ih
+
+theorem pathSegmentWidthSum_eq_budget
+    (points : List PiCirclePoint) (n : Nat) :
+    pathSegmentWidthSum points n = pathSegmentWidthBudget points n := by
+  induction points with
+  | nil => simp [pathSegmentWidthSum, pathSegmentWidthBudget]
+  | cons p ps ih =>
+      cases ps with
+      | nil => simp [pathSegmentWidthSum, pathSegmentWidthBudget]
+      | cons q qs =>
+          simp [pathSegmentWidthSum, pathSegmentWidthBudget,
+            pointSegmentLengthInterval_width_eq, ih]
+
+theorem rationalPointPathLength_width_eq_segmentBudget
+    (points : List PiCirclePoint) (n : Nat) :
+    (rationalPointPathLength points n).width =
+      pathSegmentWidthBudget points n := by
+  rw [rationalPointPathLength_width_eq_segmentWidthSum,
+    pathSegmentWidthSum_eq_budget]
 
 private theorem div_two_le_div_two {x y : Rat} (hxy : x <= y) :
     x / 2 <= y / 2 := by

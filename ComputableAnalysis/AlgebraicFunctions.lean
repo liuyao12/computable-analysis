@@ -163,15 +163,17 @@ def sqrtApprox? (q : Rat) (eps : QPos) : Option QInterval :=
 
 def sqrtDomain (q : Rat) : Prop := ¬ q < 0
 
+def sqrtStageEps (n : Nat) : QPos :=
+  if hn : n = 0 then
+    { val := 1, property := by native_decide }
+  else
+    { val := (1 / (n : Rat)), property := by
+        rw [Rat.div_def, Rat.one_mul]
+        exact (Rat.inv_pos).2
+          ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn)) }
+
 def sqrtApproxOnDomain (q : Rat) (_h : sqrtDomain q) (n : Nat) : QInterval :=
-  let eps : QPos :=
-    if hn : n = 0 then
-      { val := 1, property := by native_decide }
-    else
-      { val := (1 / (n : Rat)), property := by
-          rw [Rat.div_def, Rat.one_mul]
-          exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn)) }
-  sqrtBisect q (sqrtFuel q eps) { lo := 0, hi := sqrtUpperBound q }
+  sqrtBisect q (sqrtFuel q (sqrtStageEps n)) { lo := 0, hi := sqrtUpperBound q }
 
 def sqrtPartialRaw : PartialRealFunRaw where
   definedAt := sqrtDomain
@@ -320,6 +322,17 @@ theorem sqrtBisect_width_eq (q : Rat) (fuel : Nat) (I : QInterval) :
             (((2 ^ fuel : Nat) : Rat)) * 2 := by
         exact_mod_cast (by simpa using (Nat.pow_succ 2 fuel))
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem sqrtApproxOnDomain_width_eq
+    (q : Rat) (h : sqrtDomain q) (n : Nat) :
+    (sqrtApproxOnDomain q h n).width =
+      sqrtUpperBound q /
+        (((2 ^ sqrtFuel q (sqrtStageEps n) : Nat) : Rat)) := by
+  unfold sqrtApproxOnDomain
+  rw [sqrtBisect_width_eq]
+  simp [QInterval.width]
+  rw [Rat.div_def]
+  grind [Rat.mul_inv_cancel]
 
 theorem sqrtBisectStep_contains
     (q : Rat) {I : QInterval} (hI : I.lo <= I.hi) :
