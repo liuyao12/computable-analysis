@@ -96,6 +96,11 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.OddKernelCellBounds}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.integralKernel_le_one}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.integralLowerStep_le_kernelPartialIntegralBetween_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_zero_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneBase}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.arctanAreaLoopState_one_kernelPartialIntegralSum}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_cellBounds}
@@ -147,7 +152,11 @@ inequality package
 from that Lean constructs \code{PiProofs.LeibnizRectangleKernelBoundsAtOne},
 then \code{PiProofs.LeibnizEqualsRectangleRawAtOne}, then
 \code{Taylor.ArctanComparison.KernelComparisonAt 1} and then
-\code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The older unit-interval
+\code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The base cell package
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneBase}
+is already verified: the even \(m=0\) lower-cell inequality holds on every unit
+partition, and the first odd \(m=1\) midpoint stage is checked exactly.  The
+older unit-interval
 hypothesis
 \code{ArctanGeometry.PowerSeriesAgreesOnUnit} still feeds the same bridge when
 broader arctangent comparison data is available.

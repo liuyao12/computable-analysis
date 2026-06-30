@@ -96,6 +96,10 @@ midpoint partition.  Lean sums those cell inequalities to
 `PiProofs.LeibnizRectangleKernelBoundsAtOne`, and the wrapper
 `PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds` then gives the
 raw-real equivalence needed by the table route.
+The base package
+`PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase`
+is formalized: the even `m = 0` lower-cell inequality holds on every unit
+partition, and the first odd `m = 1` midpoint stage is checked exactly.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling

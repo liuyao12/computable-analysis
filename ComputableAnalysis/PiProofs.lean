@@ -1031,6 +1031,52 @@ theorem integralLowerStep_le_kernelPartialIntegralBetween_zero
       Rat.mul_le_mul_of_nonneg_left hk hlen
     _ = r - p := by rw [Rat.mul_one]
 
+theorem evenKernelCellBounds_zero_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    EvenKernelCellBounds 0 intervals := by
+  induction intervals with
+  | nil =>
+      simp [EvenKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨_hp0, hpr, _hr1, hrest⟩
+      simp [EvenKernelCellBounds]
+      exact ⟨integralLowerStep_le_kernelPartialIntegralBetween_zero hpr,
+        ih hrest⟩
+
+theorem evenKernelCellBoundsAtOne_zero :
+    EvenKernelCellBounds 0
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 0).intervals :=
+  evenKernelCellBounds_zero_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 0)
+
+theorem oddKernelCellBoundsAtOne_zero :
+    OddKernelCellBounds 1
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 1).intervals := by
+  simp [ArctanGeometry.arctanAreaLoopState,
+    ArctanGeometry.iterateAreaLoopState,
+    ArctanGeometry.refineAreaLoopState,
+    ArctanGeometry.AreaLoopState.refineAux,
+    ArctanGeometry.arctanAreaLoopInitial,
+    OddKernelCellBounds,
+    ArctanGeometry.integralUpperStep,
+    ArctanGeometry.integralKernel,
+    Taylor.ArctanKernel.kernelPartialIntegralBetween,
+    Taylor.ArctanKernel.kernelTermIntegralBetween]
+  constructor <;> native_decide
+
+def LeibnizRectangleKernelCellBoundsAtOneBase : Prop :=
+  EvenKernelCellBounds 0
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 0).intervals /\
+    OddKernelCellBounds 1
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 1).intervals
+
+theorem leibnizRectangleKernelCellBoundsAtOneBase :
+    LeibnizRectangleKernelCellBoundsAtOneBase :=
+  ⟨evenKernelCellBoundsAtOne_zero, oddKernelCellBoundsAtOne_zero⟩
+
 theorem integralLowerSum_le_kernelPartialIntegralSum
     {m : Nat} {intervals : List (Rat × Rat)}
     (h : EvenKernelCellBounds m intervals) :
