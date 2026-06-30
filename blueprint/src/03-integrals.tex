@@ -236,6 +236,10 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_compute_eq}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_raw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
@@ -293,7 +297,10 @@ the kernel on \([0,x]\), and proves this domain-aware construction equivalent
 to \code{arctanGeom x} throughout the rational unit branch.  The zero endpoint
 uses a small degenerate-loop invariant, while the positive endpoint proof is
 exactly the finite rectangle/geometric overlap.  This is the finite algebraic
-core of the comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  The
+core of the comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  Lean also
+wraps this construction as
+\code{arctanIntegralRectangleRepresentation} and proves the function-level
+overlap agreement \code{arctanIntegralRectangleFunctionAgreement}.  The
 remaining work is to identify the older point-Riemann \code{arctanIntegral(1)}
 API with this rectangle schedule, or replace it by the domain-aware
 construction interface throughout.

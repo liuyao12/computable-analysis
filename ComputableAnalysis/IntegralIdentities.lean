@@ -302,6 +302,37 @@ theorem arctanIntegralRectangleFor_equiv_arctanGeom
     arctanIntegralRectangleConstruction,
     ArctanGeometry.arctanIntegralRectangleRaw] using hover
 
+/-- The verified rectangle-integral arctangent as a partial function on the
+rational unit branch. -/
+def arctanIntegralRectangleFunctionRaw : PartialRealFunRaw where
+  definedAt := fun x => 0 <= x ∧ x <= 1
+  compute := fun x hx => (arctanIntegralRectangleFor x hx.1 hx.2).compute
+  rate := fun x hx => (arctanIntegralRectangleFor x hx.1 hx.2).rate
+
+def arctanIntegralRectangleRepresentation :
+    Elementary.Arctan.FunctionRepresentation where
+  name := "arctan.integral.rectangle"
+  raw := arctanIntegralRectangleFunctionRaw
+
+theorem arctanIntegralRectangleFunctionRaw_valid :
+    forall x h, RealRaw.ValidCompute
+      (arctanIntegralRectangleFunctionRaw.compute x h) := by
+  intro x hx
+  simpa [arctanIntegralRectangleFunctionRaw] using
+    arctanIntegralRectangleFor_valid x hx.1 hx.2
+
+theorem arctanIntegralRectangleFunctionAgreement :
+    Elementary.Arctan.Equivalent
+      arctanIntegralRectangleRepresentation
+      ArctanGeometry.representation := by
+  intro x hx _hgeom
+  simpa [Elementary.Arctan.Equivalent,
+    arctanIntegralRectangleRepresentation,
+    arctanIntegralRectangleFunctionRaw,
+    ArctanGeometry.representation, ArctanGeometry.functionRaw,
+    PartialRealFunRaw.evalRaw] using
+    arctanIntegralRectangleFor_equiv_arctanGeom x hx.1 hx.2
+
 /-- The verified rectangle-sum construction for
 `∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
 kernel interval. -/
