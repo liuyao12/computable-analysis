@@ -104,9 +104,10 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.archimedesTheorem}
 \lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleArea}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
-\lean{ComputableAnalysis.PiProofs.four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesOneValid}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
-\lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctan_one}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchLaw}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw}
@@ -134,7 +135,7 @@ The current score is:
 
 \begin{center}
 \begin{tabular}{p{0.22\textwidth}p{0.14\textwidth}p{0.34\textwidth}cc}
-\textbf{Computation} & \textbf{Blueprint link} & \textbf{Description} &
+\textbf{Computation} & \textbf{Blueprint refs} & \textbf{Description} &
 \textbf{Definition} & \textbf{Equiv.}\\
 \hline
 \code{piCircleArea} &
@@ -148,8 +149,8 @@ Rational polygon circumference using interval square roots for side lengths. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent-to-pi routes}:
 \cref{def:arctan-area-stage-algorithm},
-\cref{def:arctan-integral}, \cref{thm:leibniz-arctan}, and
-\cref{thm:leibniz-machin}.}\\
+\cref{def:arctan-integral}, \cref{def:arctan-series},
+\cref{thm:leibniz-arctan}, and \cref{thm:leibniz-machin}.}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
@@ -166,9 +167,9 @@ Domain-aware \code{ConstructionFor} packaging of midpoint rectangle sums for
 Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
 \(\times\) & \(\times\)\\
 \code{4 * arctanSeries(1)} &
-\cref{thm:leibniz-arctan} &
-Power-series arctangent at \(1\); this is the Leibniz alternating series, so
-there is no separate \code{piLeibniz} row. &
+\cref{def:arctan-series}; \cref{thm:leibniz-arctan} &
+Power-series arctangent at \(1\); the Leibniz alternating series is its
+historical expansion. &
 \(\checkmark\) & \(\times\)\\
 \code{piMachin} &
 \cref{thm:leibniz-machin} &
@@ -200,12 +201,13 @@ Continued fraction for \(4/\pi\), with finite truncations expected to give
 rational bounds. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
-\cref{def:exp-representations}, \cref{def:logarithm-integral}, and
-\cref{thm:euler-identity}.}\\
+the single formula \(\pi=-2i\log(i)\), tested through the different logarithm
+constructions in \cref{def:exp-representations}, \cref{def:logarithm-integral},
+and \cref{thm:euler-identity}.}\\
 \code{-2i * LogSeries(i)} &
-\cref{def:exp-representations} &
-Complex logarithm obtained from power-series exponential data and branch
-inversion near \(i\). &
+\cref{def:exp-representations}; \cref{thm:euler-identity} &
+Complex logarithm obtained from power-series exponential data and a certified
+branch taking \(i\) back to a quarter turn. &
 \(\times\) & \(\times\)\\
 \code{-2i * LogIntegral(i)} &
 \cref{def:logarithm-integral} &
@@ -214,7 +216,7 @@ Complex logarithm as a path integral of \(dz/z\) from \(1\) to \(i\). &
 \code{-2i * LogInvExp(i)} &
 \cref{thm:euler-identity} &
 Logarithm as the chosen inverse branch of complex exponential, with Euler
-identity locating \(i\). &
+identity proving the branch value at \(i\). &
 \(\times\) & \(\times\)
 \end{tabular}
 \end{center}
@@ -222,13 +224,13 @@ identity locating \(i\). &
 The arctangent block records the geometric, integral-rectangle,
 general-integral, power-series, and Machin algorithms built from arctangent
 values.  The power-series row is deliberately named
-\code{4 * arctanSeries(1)}; the Leibniz series is its historical expansion, not
-a second pi computation.  The concrete rectangle row is completed; the general
-\code{arctanIntegral(1)} row remains pending until the older point-Riemann
-wrapper is identified with that rectangle schedule.  The logarithm-at-\(i\) block
-records a separate family of future computations: each one should identify
-\(\log(i)=i\pi/2\) using a different construction of \code{Log}, with Euler's
-identity providing the essential branch bridge.
+\code{4 * arctanSeries(1)}; the Leibniz series is its historical expansion.  The
+concrete rectangle row is completed; the general \code{arctanIntegral(1)} row
+remains pending until the older point-Riemann wrapper is identified with that
+rectangle schedule.  The logarithm-at-\(i\) block records a separate family of
+future computations: each one should identify \(\log(i)=i\pi/2\) using a
+different construction of \code{Log}, with Euler's identity providing the
+essential branch bridge.
 
 The first non-baseline checkmark in the equivalence column is the geometric
 arctangent theorem
@@ -243,7 +245,7 @@ on missing hypotheses:
 \textbf{Pending fact} & \textbf{Lean theorem or target} & \textbf{Missing input}\\
 \hline
 power-series arctangent to area \(\pi\) &
-\code{PiProofs.four\_arctan\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement} &
+\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement} &
 \code{ArctanGeometry.PowerSeriesAgreesOnUnit}\\
 integral arctangent to area \(\pi\) &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &

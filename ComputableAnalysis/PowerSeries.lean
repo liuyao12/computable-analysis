@@ -602,4 +602,12 @@ def arctan (x : Rat) : RealRaw where
     else
       { lo := -state.2, hi := -state.1 }
 
+/-- Table-facing name for the arctangent power-series evaluator.
+
+The older proofs keep the shorter name `arctan`; this alias makes explicit that
+this construction is the alternating power-series arctangent, distinct from the
+geometric and integral arctangent constructions. -/
+def arctanSeries (x : Rat) : RealRaw :=
+  arctan x
+
 end ComputableAnalysis

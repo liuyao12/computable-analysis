@@ -704,6 +704,18 @@ theorem leibnizSeries_equiv_arctan_one :
   have hnest := hx.2.1 n n (Nat.le_refl n)
   exact ⟨hnest.2.1, hnest.2.1⟩
 
+/-- Stagewise equality between the Leibniz interval and the table-facing
+`arctanSeries(1)` interval. -/
+theorem leibnizSeries_compute_eq_arctanSeries_one (n : Nat) :
+    leibnizSeries.compute n = (arctanSeries (1 : Rat)).compute n := by
+  simpa [arctanSeries] using leibnizSeries_compute_eq_arctan_one n
+
+/-- The Leibniz series is equivalent to the table-facing power-series
+arctangent at `1`. -/
+theorem leibnizSeries_equiv_arctanSeries_one :
+    leibnizSeries.Equiv (arctanSeries (1 : Rat)) := by
+  simpa [arctanSeries] using leibnizSeries_equiv_arctan_one
+
 /-- The Leibniz series is equivalent to the Dirichlet L-value `L(1, chi4)`.
 
 Here too the algorithms are stagewise equal, so equivalence is immediate. -/
@@ -728,11 +740,25 @@ theorem fourArctanOneValid :
   RealRaw.natScale_valid 4
     (arctan_valid_at arctanValid arctan_one_mem_domain)
 
+/-- Scoreboard-facing validity theorem for `4 * arctanSeries(1)`.
+
+The implementation is the same power-series evaluator as `arctan`; the separate
+name keeps it visually distinct from geometric and integral arctangent routes. -/
+theorem fourArctanSeriesOneValid :
+    ((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Valid := by
+  simpa [arctanSeries] using fourArctanOneValid
+
 /-- The Leibniz definition of pi is equivalent to `4 * arctan 1`. -/
 theorem piLeibniz_equiv_four_arctan_one :
     piLeibniz.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) := by
   unfold piLeibniz
   exact RealRaw.natScale_equiv 4 leibnizSeries_equiv_arctan_one
+
+/-- The legacy `piLeibniz` raw real is the scoreboard row
+`4 * arctanSeries(1)`. -/
+theorem piLeibniz_equiv_four_arctanSeries_one :
+    piLeibniz.Equiv ((4 : Nat) * arctanSeries (1 : Rat) : RealRaw) := by
+  simpa [arctanSeries] using piLeibniz_equiv_four_arctan_one
 
 /-- Stagewise equality between the Leibniz pi computation and
 `4 * arctan(1)`. -/
@@ -746,6 +772,13 @@ theorem piLeibniz_compute_eq_four_arctan_one (n : Nat) :
   simp [RealRaw.scaleRat, RealRaw.scaleRatCompute,
     (by native_decide : (0 : Rat) <= 4),
     leibnizSeries_compute_eq_arctan_one n]
+
+/-- Stagewise equality between the legacy Leibniz pi computation and the
+scoreboard expression `4 * arctanSeries(1)`. -/
+theorem piLeibniz_compute_eq_four_arctanSeries_one (n : Nat) :
+    piLeibniz.compute n =
+      (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).compute n) := by
+  simpa [arctanSeries] using piLeibniz_compute_eq_four_arctan_one n
 
 namespace MachinIdentity
 
@@ -959,6 +992,23 @@ theorem branchIdentity_iff_piMachin_eq_four_arctan_one :
       piMachin.Equiv ((4 : Nat) * arctan (1 : Rat) : RealRaw) :=
   ⟨piMachin_eq_four_arctan_one_of_branchIdentity,
     branchIdentity_of_piMachin_eq_four_arctan_one⟩
+
+theorem piMachin_eq_four_arctanSeries_one_of_branchIdentity
+    (h : BranchIdentity) :
+    piMachin.Equiv ((4 : Nat) * arctanSeries (1 : Rat) : RealRaw) := by
+  simpa [arctanSeries] using piMachin_eq_four_arctan_one_of_branchIdentity h
+
+theorem branchIdentity_of_piMachin_eq_four_arctanSeries_one
+    (h : piMachin.Equiv ((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :
+    BranchIdentity :=
+  branchIdentity_of_piMachin_eq_four_arctan_one (by
+    simpa [arctanSeries] using h)
+
+theorem branchIdentity_iff_piMachin_eq_four_arctanSeries_one :
+    BranchIdentity ↔
+      piMachin.Equiv ((4 : Nat) * arctanSeries (1 : Rat) : RealRaw) :=
+  ⟨piMachin_eq_four_arctanSeries_one_of_branchIdentity,
+    branchIdentity_of_piMachin_eq_four_arctanSeries_one⟩
 
 end MachinIdentity
 
@@ -2581,11 +2631,24 @@ theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
   rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   exact hover
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) := by
+  simpa [arctanSeries] using
+    four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree
+
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
     (four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
+      hagree)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))

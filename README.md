@@ -26,27 +26,28 @@ formula has been connected back to `piCircleArea`.
 
 Current count: definitions completed `6/15`; equivalences to `piCircleArea`
 formalized `2/14` applicable rows.  The baseline row `piCircleArea` is `N/A`
-for equivalence scorekeeping.
+for equivalence scorekeeping.  The blueprint-links column points to the relevant
+generated blueprint anchors.
 
-| Computation | Blueprint link | Description | Definition verified | Equivalent to `piCircleArea` |
+| Computation | Blueprint links | Description | Definition verified | Equivalent to `piCircleArea` |
 | --- | --- | --- | --- | --- |
 | `piCircleArea` | [Ch. 2: circle-area algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm) | Rational midpoint area exhaustion using increment/decrement triangles; current baseline for pi comparisons. | ✓ | N/A |
 | `piCircumference` | [Ch. 2: circumference algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm) | Rational polygon circumference using interval square roots for side lengths. | ✗ | ✗ |
-| **Arctangent-to-pi routes** | [Ch. 2: geometric](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [Ch. 3: integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [Ch. 4: series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | Direct rows compute pi as `4 * arctanGeom(1)`, `4 * arctanIntegral(1)`, or `4 * arctanSeries(1)`; `piMachin` is grouped here as a faster arctangent-series combination. |  |  |
+| **Arctangent-to-pi routes** | [Ch. 2: geometric](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [Ch. 3: integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [Ch. 4: arctan series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [Leibniz agreement](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | This block contains the routes that first compute arctangent values: `4 * arctanGeom(1)`, the arctangent integral rows, `4 * arctanSeries(1)`, and the faster Machin combination. |  |  |
 | `4 * arctanGeom(1)` | [Ch. 2: geometric arctangent](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm) | Geometric sector-area arctangent at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [Ch. 3: finite rectangle comparison](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison) | Domain-aware `ConstructionFor` packaging of midpoint rectangle sums for `integral_0^1 dt / (1 + t^2)`, using the same rational refinement schedule as `arctanGeom(1)`. | ✓ | ✓ |
 | `4 * arctanIntegral(1)` | [Ch. 3: arctangent integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral) | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
-| `4 * arctanSeries(1)` | [Ch. 4: arctanSeries(1)](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan) | Power-series arctangent at `1`; this is the Leibniz alternating series, so there is no separate `piLeibniz` row. | ✓ | ✗ |
+| `4 * arctanSeries(1)` | [Ch. 4: arctan series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [Leibniz agreement](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan) | Power-series arctangent at `1`; the Leibniz alternating series is its historical expansion. | ✓ | ✗ |
 | `piMachin` | [Ch. 4: Machin agreement](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | Machin's arctangent-series combination, `4 * (4 * arctanSeries(1/5) - arctanSeries(1/239))`. | ✓ | ✗ |
 | `6 * arcsinIntegral(1/2)` | [Ch. 3: inverse elementary integrals](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | Period formula `pi/6 = integral_0^(1/2) dx / sqrt(1 - x^2)`. | ✗ | ✗ |
 | `NewtonSegmentPi` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Newton circle-segment formula `pi/12 + sqrt(3)/8 = integral_0^(1/2) sqrt(1 - x^2) dx`. | ✗ | ✗ |
 | `GaussianPi` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Gaussian integral `sqrt(2*pi) = integral_(-infty)^infty exp(-x^2/2) dx`; pi is recovered by squaring and halving. | ✗ | ✗ |
 | `baselSeriesRaw` / `pi^2/6` | [Ch. 4: zeta-two intervals](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw) | Euler's Basel series, `zeta(2) = 1 + 1/4 + 1/9 + ... = pi^2/6`; the zeta-side interval is verified. | ✓ | ✗ |
 | `Brouncker(4/pi)` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Continued fraction for `4 / pi`, with finite truncations expected to give rational bounds. | ✗ | ✗ |
-| **Logarithm-at-i routes** | [Ch. 5: exp/log representations](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:exp-representations), [log integral](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:logarithm-integral), [Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | These rows compute pi from `Log(i) = i*pi/2` using different constructions of `Log`; they are intended tests for branch control and Euler's identity. |  |  |
-| `-2i * LogSeries(i)` | [Ch. 5: exp/log representations](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:exp-representations) | Complex logarithm obtained from power-series exponential data and branch inversion near `i`. | ✗ | ✗ |
+| **Logarithm-at-i routes** | [Ch. 5: exp/log representations](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:exp-representations), [log integral](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:logarithm-integral), [Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | These rows all compute pi from the single formula `pi = -2i * Log(i)`, but use different constructions of `Log`; they are intended tests for branch control and Euler's identity. |  |  |
+| `-2i * LogSeries(i)` | [Ch. 5: exp/log representations](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:exp-representations), [Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | Complex logarithm obtained from power-series exponential data and a certified branch taking `i` back to a quarter turn. | ✗ | ✗ |
 | `-2i * LogIntegral(i)` | [Ch. 5: logarithm integral](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:logarithm-integral) | Complex logarithm as a path integral of `dz/z` from `1` to `i`. | ✗ | ✗ |
-| `-2i * LogInvExp(i)` | [Ch. 5: Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | Logarithm as the chosen inverse branch of complex exponential, with Euler identity locating `i`. | ✗ | ✗ |
+| `-2i * LogInvExp(i)` | [Ch. 5: Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | Logarithm as the chosen inverse branch of complex exponential, with Euler identity proving the branch value at `i`. | ✗ | ✗ |
 
 The area loop validity package is now formalized as
 `PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
@@ -67,8 +68,8 @@ row records the specialization needed for pi.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced
-to `PowerSeriesAgreesOnUnit`, and the scoreboard counts the Leibniz computation
-only once, under the explicit name `4 * arctanSeries(1)`.
+to `PowerSeriesAgreesOnUnit`, and the scoreboard counts the Leibniz alternating
+series only once, under the explicit name `4 * arctanSeries(1)`.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling
