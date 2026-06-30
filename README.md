@@ -119,8 +119,8 @@ is formalized: the even `m = 0` lower-cell inequality holds on every unit
 partition, and the first odd `m = 1` upper-cell inequality is proved on every
 nonnegative ordered partition.
 As a computational regression check on the full cellwise target, Lean now also
-certifies the concrete midpoint partitions through stage `n <= 4` as
-`PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFour`.
+certifies the concrete midpoint partitions through stage `n <= 12` as
+`PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToTwelve`.
 The bridge theorems
 `PiProofs.LeibnizRectangleBridge.cellBoundsUpTo_of_cellBounds` and
 `PiProofs.LeibnizRectangleBridge.cellBounds_of_cellBoundsUpToAll` record that

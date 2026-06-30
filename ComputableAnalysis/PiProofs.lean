@@ -1341,6 +1341,10 @@ theorem leibnizRectangleKernelCellBoundsAtOneUpToFour :
     LeibnizRectangleKernelCellBoundsAtOneUpTo 4 :=
   ⟨evenKernelCellBoundsAtOne_le_four, oddKernelCellBoundsAtOne_le_four⟩
 
+theorem leibnizRectangleKernelCellBoundsAtOneUpToTwelve :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 12 := by
+  constructor <;> native_decide
+
 theorem integralLowerSum_le_kernelPartialIntegralSum
     {m : Nat} {intervals : List (Rat × Rat)}
     (h : EvenKernelCellBounds m intervals) :
