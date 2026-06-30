@@ -5257,6 +5257,48 @@ def CircumferencePathWidthBudgetLinearBound (C : Nat) : Prop :=
     2 * circumferencePathWidthBudget (piStage n) <=
       (C : Rat) / (((n + 1 : Nat) : Rat))
 
+def CircumferencePathSegmentUniformLinearBound (C : Nat) : Prop :=
+  forall n,
+    let stage := piStage n
+    let B : Rat :=
+      (C : Rat) / (6 * (stage : Rat) * (((n + 1 : Nat) : Rat)))
+    InnerBoundarySegmentBudgetLe stage B /\
+      OuterBoundarySegmentBudgetLe stage B
+
+theorem circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound
+    {C : Nat} (hseg : CircumferencePathSegmentUniformLinearBound C) :
+    CircumferencePathWidthBudgetLinearBound C := by
+  intro n
+  let stage := piStage n
+  let N : Rat := ((n + 1 : Nat) : Rat)
+  let B : Rat := (C : Rat) / (6 * (stage : Rat) * N)
+  have hstage_pos : 0 < (stage : Rat) := by
+    dsimp [stage]
+    exact (Rat.natCast_pos).2 (piStage_pos n)
+  have hN_pos : 0 < N := by
+    dsimp [N]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hden_ne : 6 * (stage : Rat) * N ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.mul_pos
+      (Rat.mul_pos (by native_decide : (0 : Rat) < 6) hstage_pos)
+      hN_pos)
+  have hdata := hseg n
+  dsimp [stage, B] at hdata
+  have hbudget :=
+    circumferencePathWidthBudget_le_three_stage_mul
+      (piStage n)
+      ((C : Rat) / (6 * ((piStage n) : Rat) * N))
+      hdata.1 hdata.2
+  calc
+    2 * circumferencePathWidthBudget (piStage n) <=
+        2 * ((3 * ((piStage n) : Rat)) *
+          ((C : Rat) / (6 * ((piStage n) : Rat) * N))) := by
+      exact Rat.mul_le_mul_of_nonneg_left hbudget
+        (by native_decide : (0 : Rat) <= 2)
+    _ = (C : Rat) / N := by
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 theorem fanGapPathBudgetLinearBound_of_parts
     {Cfan Cpath : Nat}
     (hfan : CircumferenceFanGapLinearBound Cfan)

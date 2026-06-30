@@ -167,7 +167,9 @@ budgets, via
 linear target now splits into independent fan-gap and path-budget linear
 bounds by `PiProofs.fanGapPathBudgetLinearBound_of_parts`; the path-budget side
 has the segment-count reduction
-`PiProofs.circumferencePathWidthBudget_le_three_stage_mul`.
+`PiProofs.circumferencePathWidthBudget_le_three_stage_mul` and is now reduced
+to the per-segment square-root budget target
+`PiProofs.CircumferencePathSegmentUniformLinearBound`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

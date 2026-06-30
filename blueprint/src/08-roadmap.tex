@@ -222,6 +222,8 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.CircumferenceFanGapPathBudgetLinearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferenceFanGapLinearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferencePathWidthBudgetLinearBound}
+\lean{ComputableAnalysis.PiProofs.CircumferencePathSegmentUniformLinearBound}
+\lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.fanGapPathBudgetLinearBound_of_parts}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_of_fanGapPathBudgetLinearBound}
@@ -458,7 +460,11 @@ gap plus the two certified path-width budgets.  This combined target now
 splits into independent fan-gap and path-budget linear bounds via
 \code{PiProofs.fanGapPathBudgetLinearBound\_of\_parts}; the path-budget side
 has a finite segment-count wrapper
-\code{PiProofs.circumferencePathWidthBudget\_le\_three\_stage\_mul}.
+\code{PiProofs.circumferencePathWidthBudget\_le\_three\_stage\_mul}.  The
+path-budget linear bound is now reduced further to
+\code{PiProofs.CircumferencePathSegmentUniformLinearBound}, which asks for a
+uniform square-root interval budget on every inner and outer segment at each
+dyadic stage.
 
 \section{Lean declaration index}
 
