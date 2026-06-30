@@ -100,6 +100,104 @@ theorem arctanKernel_one_mem_unitDomain :
   unfold Elementary.Arctan.powerSeriesDomain qabs
   native_decide
 
+/-- The rectangle-sum construction, viewed as the Taylor comparison kernel
+integral on a nonnegative unit-branch input.  The construction is intentionally
+kept in `PiProofs`: it uses the already verified rectangle schedule from
+`ArctanGeometry` while targeting the oriented-kernel interface from `Taylor`. -/
+def rectangleKernelIntegralAtNonnegativeUnit
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    Taylor.ArctanComparison.KernelIntegralAt x where
+  construction :=
+    { compute := ArctanGeometry.arctanIntegralRectangleCompute x
+      certificate := by
+        simpa [ArctanGeometry.arctanIntegralRectangleRaw] using
+          ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1 }
+
+theorem rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (ArctanGeometry.arctanIntegralRectangleRaw x).Equiv
+      (Taylor.ArctanComparison.kernelIntegralRaw x
+        (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (ArctanGeometry.arctanIntegralRectangleRaw x)
+    (Taylor.ArctanComparison.kernelIntegralRaw x
+      (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)) n n).2
+  have hordered :=
+    ArctanGeometry.arctanIntegralRectangleCompute_ordered hx0 n
+  have hle :
+      (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+        (ArctanGeometry.arctanIntegralRectangleCompute x n).hi := by
+    unfold QInterval.width at hordered
+    grind [Rat.sub_eq_add_neg]
+  change QInterval.Overlaps
+    (ArctanGeometry.arctanIntegralRectangleCompute x n)
+    ((Taylor.ArctanComparison.kernelIntegralRaw x
+      (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)).compute n)
+  simp [Taylor.ArctanComparison.kernelIntegralRaw,
+    Taylor.ArctanComparison.positiveKernelIntegralRaw,
+    rectangleKernelIntegralAtNonnegativeUnit, Integral.integralFor, hx0]
+  exact ⟨hle, hle⟩
+
+theorem arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (ArctanGeometry.arctanGeom x).Equiv
+      (Taylor.ArctanComparison.kernelIntegralRaw x
+        (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)) := by
+  have hgeomValid : (ArctanGeometry.arctanGeom x).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hx0 hx1
+  have hrectValid : (ArctanGeometry.arctanIntegralRectangleRaw x).Valid :=
+    ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1
+  have hkValid :
+      (Taylor.ArctanComparison.kernelIntegralRaw x
+        (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)).Valid :=
+    Taylor.ArctanComparison.kernelIntegralRaw_valid x
+      (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)
+  exact RealRaw.equiv_trans
+    hgeomValid hrectValid hkValid
+    (RealRaw.equiv_symm
+      (ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom hx0))
+    (rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit
+      x hx0 hx1)
+
+theorem arctanGeom_one_equiv_rectangleKernelIntegral :
+    (ArctanGeometry.arctanGeom (1 : Rat)).Equiv
+      (Taylor.ArctanComparison.kernelIntegralRaw (1 : Rat)
+        (rectangleKernelIntegralAtNonnegativeUnit
+          (1 : Rat) (by native_decide) (by native_decide))) :=
+  arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit
+    (1 : Rat) (by native_decide) (by native_decide)
+
+theorem arctanDomain_of_nonnegativeUnit
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) : arctanDomain x := by
+  unfold arctanDomain
+  constructor
+  · grind
+  · exact hx1
+
+theorem arctanKernel_unitDomain_of_nonnegativeUnit
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    Taylor.ArctanComparison.unitDomain x := by
+  unfold Taylor.ArctanComparison.unitDomain
+  unfold Elementary.Arctan.powerSeriesDomain qabs
+  have hnot : ¬x < 0 := by grind
+  simp [hnot]
+  exact hx1
+
+/-- The remaining analytic equality at a nonnegative unit-branch input, after
+the rectangle construction and the geometric-kernel comparison have been
+filled in. -/
+def PowerSeriesEqualsRectangleKernelAt
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) : Prop :=
+  (arctan x).Equiv
+    (Taylor.ArctanComparison.kernelIntegralRaw x
+      (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1))
+
+abbrev PowerSeriesEqualsRectangleKernelAtOne : Prop :=
+  PowerSeriesEqualsRectangleKernelAt
+    (1 : Rat) (by native_decide) (by native_decide)
+
 theorem machinValid_of_arctanValid
     (hArctan : ArctanValid) : MachinValid := by
   have h15 : (arctan ((1 : Rat) / 5)).Valid :=
@@ -461,6 +559,24 @@ end ArctanValidity
 
 theorem arctanValid : ArctanValid :=
   ArctanValidity.valid
+
+def kernelComparisonAt_of_powerSeriesEqualsRectangleKernelAt
+    {x : Rat} {hx0 : 0 <= x} {hx1 : x <= 1}
+    (hps : PowerSeriesEqualsRectangleKernelAt x hx0 hx1) :
+    Taylor.ArctanComparison.KernelComparisonAt x where
+  domain := arctanKernel_unitDomain_of_nonnegativeUnit hx0 hx1
+  integral := rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1
+  powerSeries_valid :=
+    arctan_valid_at arctanValid
+      (arctanDomain_of_nonnegativeUnit hx0 hx1)
+  powerSeries_eq_kernel := hps
+  geometric_eq_kernel :=
+    arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit x hx0 hx1
+
+def kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne
+    (hps : PowerSeriesEqualsRectangleKernelAtOne) :
+    Taylor.ArctanComparison.KernelComparisonAt (1 : Rat) :=
+  kernelComparisonAt_of_powerSeriesEqualsRectangleKernelAt hps
 
 theorem machinValid : MachinValid :=
   machinValid_of_arctanValid arctanValid
@@ -916,6 +1032,25 @@ structure KernelComparisonAtMachinInputs where
   one_239 : Taylor.ArctanComparison.KernelComparisonAt ((1 : Rat) / 239)
   one : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)
 
+structure PowerSeriesEqualsRectangleKernelAtMachinInputs where
+  one_fifth :
+    PowerSeriesEqualsRectangleKernelAt
+      ((1 : Rat) / 5) (by native_decide) (by native_decide)
+  one_239 :
+    PowerSeriesEqualsRectangleKernelAt
+      ((1 : Rat) / 239) (by native_decide) (by native_decide)
+  one : PowerSeriesEqualsRectangleKernelAtOne
+
+def kernelComparisonAtMachinInputs_of_powerSeriesEqualsRectangleKernelAtMachinInputs
+    (hps : PowerSeriesEqualsRectangleKernelAtMachinInputs) :
+    KernelComparisonAtMachinInputs where
+  one_fifth :=
+    kernelComparisonAt_of_powerSeriesEqualsRectangleKernelAt hps.one_fifth
+  one_239 :=
+    kernelComparisonAt_of_powerSeriesEqualsRectangleKernelAt hps.one_239
+  one :=
+    kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne hps.one
+
 theorem branchIdentity_of_branchLaw (h : BranchLaw) : BranchIdentity :=
   h quarter_tangent_identity
 
@@ -1129,6 +1264,14 @@ theorem leibnizEqMachin_of_kernelComparisonAtMachinInputs
   leibnizEqMachin_of_geometricRoute_on_unit
     (MachinIdentity.powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs
       route)
+    hgeom
+
+theorem leibnizEqMachin_of_powerSeriesRectangleKernelAtMachinInputs
+    (hps : MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs)
+    (hgeom : MachinIdentity.GeometricBranchLaw) : LeibnizEqMachin :=
+  leibnizEqMachin_of_kernelComparisonAtMachinInputs
+    (MachinIdentity.kernelComparisonAtMachinInputs_of_powerSeriesEqualsRectangleKernelAtMachinInputs
+      hps)
     hgeom
 
 def MachinIdentity.KernelComparisonAtMachinInputs.ofKernelComparisonRoute
@@ -2767,6 +2910,12 @@ theorem four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
   four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne
     (Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt route)
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne
+    (hps : PowerSeriesEqualsRectangleKernelAtOne) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
+    (kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne hps)
+
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
@@ -2799,6 +2948,13 @@ theorem piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne
   RealRaw.equiv_symm
     (four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
       route)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne
+    (hps : PowerSeriesEqualsRectangleKernelAtOne) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne
+      hps)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
@@ -4101,6 +4257,23 @@ theorem piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs
   RealRaw.equiv_symm
     (piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
       route hgeom)
+
+theorem piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs
+    (hps : MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    piMachin.Equiv piCircleArea :=
+  piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
+    (MachinIdentity.kernelComparisonAtMachinInputs_of_powerSeriesEqualsRectangleKernelAtMachinInputs
+      hps)
+    hgeom
+
+theorem piCircleArea_equiv_piMachin_of_powerSeriesRectangleKernelAtMachinInputs
+    (hps : MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    piCircleArea.Equiv piMachin :=
+  RealRaw.equiv_symm
+    (piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs
+      hps hgeom)
 
 theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (((4 : Nat) *

@@ -74,21 +74,23 @@ row records the specialization needed for pi.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced
-to the pointwise kernel route `Taylor.ArctanComparison.KernelComparisonAt 1`,
-which produces `ArctanGeometry.PowerSeriesAgreesAt 1`.  The scoreboard counts
-the Leibniz alternating series only once, under the explicit name
-`4 * arctanSeries(1)`.  The older unit-interval agreement theorem still feeds
-this pointwise bridge when broader arctangent comparison data is available.
+to `PiProofs.PowerSeriesEqualsRectangleKernelAtOne`: Lean now supplies the
+Taylor-kernel rectangle construction and the geometric-kernel comparison, and
+this remaining hypothesis is exactly the power-series equality to that
+rectangle kernel at `1`.  The scoreboard counts the Leibniz alternating series
+only once, under the explicit name `4 * arctanSeries(1)`.  The older
+unit-interval agreement theorem still feeds this pointwise bridge when broader
+arctangent comparison data is available.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling
 the common outer factor `4`.  The bridge from a geometric Machin branch law now
-uses the pointwise package
-`PiProofs.MachinIdentity.KernelComparisonAtMachinInputs` through
-`PiProofs.leibnizEqMachin_of_kernelComparisonAtMachinInputs`; this isolates
-the remaining analytic checks to the inputs `1/5`, `1/239`, and `1`, plus the
-geometric branch law.  The table-facing bridge
-`PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs`
+uses `PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs`
+through `PiProofs.leibnizEqMachin_of_powerSeriesRectangleKernelAtMachinInputs`;
+this isolates the remaining analytic checks to the power-series/rectangle
+kernel equalities at `1/5`, `1/239`, and `1`, plus the geometric branch law.
+The table-facing bridge
+`PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs`
 then connects Machin to the area baseline once those inputs are supplied.
 
 The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary

@@ -76,10 +76,16 @@ equivalence.
 \lean{ComputableAnalysis.ArctanGeometry.PowerSeriesAgreesAt}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.KernelComparisonAt}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt}
+\lean{ComputableAnalysis.PiProofs.rectangleKernelIntegralAtNonnegativeUnit}
+\lean{ComputableAnalysis.PiProofs.arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit}
+\lean{ComputableAnalysis.PiProofs.PowerSeriesEqualsRectangleKernelAtOne}
+\lean{ComputableAnalysis.PiProofs.kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement}
@@ -92,10 +98,13 @@ also equivalent to \(4\arctan_{\mathrm{series}}(1)\):
 \[
   4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
 \]
-The current Lean theorem keeps the comparison hypothesis explicit as
-\code{Taylor.ArctanComparison.KernelComparisonAt 1}.  This pointwise
-kernel-integral route produces \code{ArctanGeometry.PowerSeriesAgreesAt 1}.
-The older unit-interval hypothesis
+Lean now supplies the rectangle construction for the Taylor kernel and proves
+the geometric arctangent agrees with it on the nonnegative unit branch.  Thus
+the current pointwise missing input is the power-series equality
+\code{PowerSeriesEqualsRectangleKernelAtOne}; from this Lean constructs
+\code{Taylor.ArctanComparison.KernelComparisonAt 1} and then
+\code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The older unit-interval
+hypothesis
 \code{ArctanGeometry.PowerSeriesAgreesOnUnit} still feeds the same bridge when
 broader arctangent comparison data is available.
 \end{theorem}
@@ -124,14 +133,19 @@ tangent identity exactly.
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_of_geometricBranchIdentity_on_unit}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.KernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.kernelComparisonAtMachinInputs_of_powerSeriesEqualsRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.machinBranchIdentity_of_leibnizEqMachin}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_geometricRoute_on_unit}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_powerSeriesRectangleKernelAtMachinInputs}
 \uses{thm:leibniz-arctan,thm:machin-tangent,def:raw-equiv}
 The Leibniz and Machin interval algorithms compute the same abstract real
 number.  In the power-series arctangent notation, this is the agreement
@@ -145,10 +159,11 @@ Lean now proves that the raw-real agreement target \code{LeibnizEqMachin} is
 equivalent to the underlying Machin branch identity: the outer factor \(4\) can
 be cancelled by the positive-scaling cancellation theorem for raw-real
 equivalence.  The geometric route uses only pointwise data at \(1/5\),
-\(1/239\), and \(1\), packaged as
-\code{MachinIdentity.KernelComparisonAtMachinInputs}, together with the
-geometric branch law.  With the same pointwise package, Lean also supplies the
-table-facing bridge from \code{piMachin} to the area baseline
+\(1/239\), and \(1\).  Since the rectangle-kernel/geometric half is now
+formalized, the sharper package is
+\code{MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}, together
+with the geometric branch law.  With the same pointwise package, Lean also
+supplies the table-facing bridge from \code{piMachin} to the area baseline
 \code{piCircleArea}.
 \end{theorem}
 
