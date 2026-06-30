@@ -2926,6 +2926,62 @@ def SegmentBudgetLeAt
       (((2 ^ sqrtFuel (pointSegmentNormSq p q) (sqrtStageEps precision) :
         Nat) : Rat)) <= B
 
+theorem circleParameter_succ_sub (stage k : Nat) :
+    circleParameter stage (k + 1) - circleParameter stage k =
+      1 / (stage : Rat) := by
+  simpa [rationalCircleStage, circleParameter,
+    RationalCircle.Stage.parameter] using
+    RationalCircle.Stage.parameter_succ_sub (rationalCircleStage stage) k
+
+def adjacentChordNormSqFormula (stage k : Nat) : Rat :=
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  let d := (1 : Rat) / (stage : Rat)
+  (4 * d * d) / ((1 + u * u) * (1 + v * v))
+
+def entryTangentNormSqFormula (stage k : Nat) : Rat :=
+  sq (pointCross (circleSamplePoint stage k) (outerTangentPoint stage k))
+
+def exitTangentNormSqFormula (stage k : Nat) : Rat :=
+  sq (pointCross (outerTangentPoint stage k)
+    (circleSamplePoint stage (k + 1)))
+
+theorem adjacentChordSegmentNormSq_eq_formula
+    (stage k : Nat) :
+    pointSegmentNormSq
+        (circleSamplePoint stage k) (circleSamplePoint stage (k + 1)) =
+      adjacentChordNormSqFormula stage k := by
+  have hbase :
+      pointSegmentNormSq
+          (circleSamplePoint stage k) (circleSamplePoint stage (k + 1)) =
+        (4 * (circleParameter stage (k + 1) - circleParameter stage k) *
+            (circleParameter stage (k + 1) - circleParameter stage k)) /
+          ((1 + circleParameter stage k * circleParameter stage k) *
+            (1 + circleParameter stage (k + 1) *
+              circleParameter stage (k + 1))) := by
+    simpa [circleSamplePoint, circlePoint, pointSegmentNormSq,
+      RationalCircle.Stage.point, RationalCircle.Stage.segmentNormSq] using
+      RationalCircle.Stage.point_segmentNormSq_formula
+        (circleParameter stage k) (circleParameter stage (k + 1))
+  rw [hbase]
+  unfold adjacentChordNormSqFormula
+  rw [circleParameter_succ_sub]
+
+def InnerAdjacentChordFormulaBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  forall k,
+    sqrtUpperBound (adjacentChordNormSqFormula stage k) /
+        (((2 ^ sqrtFuel (adjacentChordNormSqFormula stage k)
+          (sqrtStageEps stage) : Nat) : Rat)) <= B
+
+def OuterAdjacentTangentFormulaBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  forall k,
+    sqrtUpperBound (entryTangentNormSqFormula stage k) /
+        (((2 ^ sqrtFuel (entryTangentNormSqFormula stage k)
+          (sqrtStageEps stage) : Nat) : Rat)) <= B /\
+    sqrtUpperBound (exitTangentNormSqFormula stage k) /
+        (((2 ^ sqrtFuel (exitTangentNormSqFormula stage k)
+          (sqrtStageEps stage) : Nat) : Rat)) <= B
+
 def InnerAdjacentSegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
   forall k,
     SegmentBudgetLeAt stage B
@@ -2943,6 +2999,28 @@ def InnerBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
 
 def OuterBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
   ConsecutiveBudgetLe stage B (outerBoundary stage)
+
+theorem innerAdjacentSegmentBudgetLe_of_chordFormulaBudget
+    {stage : Nat} {B : Rat}
+    (h : InnerAdjacentChordFormulaBudgetLe stage B) :
+    InnerAdjacentSegmentBudgetLe stage B := by
+  intro k
+  unfold SegmentBudgetLeAt
+  rw [adjacentChordSegmentNormSq_eq_formula]
+  exact h k
+
+theorem outerAdjacentSegmentBudgetLe_of_tangentFormulaBudget
+    {stage : Nat} {B : Rat} (hstage : 0 < stage)
+    (h : OuterAdjacentTangentFormulaBudgetLe stage B) :
+    OuterAdjacentSegmentBudgetLe stage B := by
+  intro k
+  constructor
+  · unfold SegmentBudgetLeAt
+    rw [entryTangentSegmentNormSq_eq_cross_sq stage hstage k]
+    exact (h k).1
+  · unfold SegmentBudgetLeAt
+    rw [exitTangentSegmentNormSq_eq_cross_sq stage hstage k]
+    exact (h k).2
 
 theorem rationalPointPathLength_width_nil (n : Nat) :
     (rationalPointPathLength [] n).width = 0 := by
@@ -5340,6 +5418,24 @@ def CircumferenceAdjacentSegmentUniformLinearBound (C : Nat) : Prop :=
     InnerAdjacentSegmentBudgetLe stage B /\
       OuterAdjacentSegmentBudgetLe stage B
 
+def CircumferenceFormulaSegmentUniformLinearBound (C : Nat) : Prop :=
+  forall n,
+    let stage := piStage n
+    let B : Rat :=
+      (C : Rat) / (6 * (stage : Rat) * (((n + 1 : Nat) : Rat)))
+    InnerAdjacentChordFormulaBudgetLe stage B /\
+      OuterAdjacentTangentFormulaBudgetLe stage B
+
+theorem adjacentSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound
+    {C : Nat}
+    (hseg : CircumferenceFormulaSegmentUniformLinearBound C) :
+    CircumferenceAdjacentSegmentUniformLinearBound C := by
+  intro n
+  have h := hseg n
+  dsimp at h ⊢
+  exact ⟨innerAdjacentSegmentBudgetLe_of_chordFormulaBudget h.1,
+    outerAdjacentSegmentBudgetLe_of_tangentFormulaBudget (piStage_pos n) h.2⟩
+
 theorem pathSegmentUniformLinearBound_of_adjacentSegmentUniformLinearBound
     {C : Nat}
     (hseg : CircumferenceAdjacentSegmentUniformLinearBound C) :
@@ -5349,6 +5445,13 @@ theorem pathSegmentUniformLinearBound_of_adjacentSegmentUniformLinearBound
   dsimp at h ⊢
   exact ⟨innerBoundarySegmentBudgetLe_of_adjacent h.1,
     outerBoundarySegmentBudgetLe_of_adjacent h.2⟩
+
+theorem pathSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound
+    {C : Nat}
+    (hseg : CircumferenceFormulaSegmentUniformLinearBound C) :
+    CircumferencePathSegmentUniformLinearBound C :=
+  pathSegmentUniformLinearBound_of_adjacentSegmentUniformLinearBound
+    (adjacentSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound hseg)
 
 theorem circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound
     {C : Nat} (hseg : CircumferencePathSegmentUniformLinearBound C) :
@@ -5383,6 +5486,13 @@ theorem circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound
     _ = (C : Rat) / N := by
       rw [Rat.div_def, Rat.div_def]
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem circumferencePathWidthBudgetLinearBound_of_formulaSegmentUniformLinearBound
+    {C : Nat}
+    (hseg : CircumferenceFormulaSegmentUniformLinearBound C) :
+    CircumferencePathWidthBudgetLinearBound C :=
+  circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound
+    (pathSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound hseg)
 
 theorem fanGapPathBudgetLinearBound_of_parts
     {Cfan Cpath : Nat}

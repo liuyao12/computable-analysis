@@ -168,10 +168,10 @@ linear target now splits into independent fan-gap and path-budget linear
 bounds by `PiProofs.fanGapPathBudgetLinearBound_of_parts`; the path-budget side
 has the segment-count reduction
 `PiProofs.circumferencePathWidthBudget_le_three_stage_mul` and is now reduced
-to adjacent inner-chord and outer-tangent segment checks by
-`PiProofs.pathSegmentUniformLinearBound_of_adjacentSegmentUniformLinearBound`.
-The remaining target is the finite rational predicate
-`PiProofs.CircumferenceAdjacentSegmentUniformLinearBound`.
+to explicit adjacent inner-chord and outer-tangent formulas by
+`PiProofs.circumferencePathWidthBudgetLinearBound_of_formulaSegmentUniformLinearBound`.
+The remaining finite rational predicate is
+`PiProofs.CircumferenceFormulaSegmentUniformLinearBound`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

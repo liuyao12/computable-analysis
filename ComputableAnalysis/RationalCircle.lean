@@ -612,6 +612,16 @@ theorem point_normSq_unit (u : Rat) :
     normSq (point u) = 1 := by
   simpa [normSq] using point_normSq u
 
+theorem point_segmentNormSq_formula (u v : Rat) :
+    segmentNormSq (point u) (point v) =
+      (4 * (v - u) * (v - u)) /
+        ((1 + u * u) * (1 + v * v)) := by
+  rw [segmentNormSq_eq_two_one_sub_dot_of_unit
+    (point_normSq_unit u) (point_normSq_unit v)]
+  rw [one_sub_point_dot_formula]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 theorem samplePoint_normSq_unit (S : Stage) (k : Nat) :
     normSq (S.samplePoint k) = 1 := by
   simpa [samplePoint] using point_normSq_unit (S.parameter k)
