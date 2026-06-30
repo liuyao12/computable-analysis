@@ -34,7 +34,7 @@ for equivalence scorekeeping.
 | `piCircumference` | [Ch. 2: circumference algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm) | Rational polygon circumference using interval square roots for side lengths. | ✗ | ✗ |
 | **Arctangent routes** | [Ch. 2: geometric](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [Ch. 3: integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [Ch. 4: series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series) | These rows compute pi through geometric, integral, or series arctangent algorithms. |  |  |
 | `4 * arctanGeom(1)` | [Ch. 2: geometric arctangent](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm) | Geometric sector-area arctangent at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
-| `4 * arctanIntegralRectangleRawAtOne` | [Ch. 3: finite rectangle comparison](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison) | Midpoint lower/upper rectangle sums for `integral_0^1 dt / (1 + t^2)`, using the same rational refinement schedule as `arctanGeom(1)`. | ✓ | ✓ |
+| `4 * arctanIntegralRectangleForAtOne` | [Ch. 3: finite rectangle comparison](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison) | Domain-aware `ConstructionFor` packaging of midpoint rectangle sums for `integral_0^1 dt / (1 + t^2)`, using the same rational refinement schedule as `arctanGeom(1)`. | ✓ | ✓ |
 | `4 * arctanIntegral(1)` | [Ch. 3: arctangent integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral) | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
 | `4 * arctanSeries(1)` | [Ch. 4: power-series arctangent](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series) | Power-series arctangent at `1`, i.e. the Leibniz alternating series written as an arctangent computation. | ✓ | ✗ |
 | `piMachin` | [Ch. 4: Machin tangent identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent) | Machin's arctangent combination, `4 * (4 * arctanSeries(1/5) - arctanSeries(1/239))`. | ✓ | ✗ |
@@ -52,10 +52,12 @@ The area loop validity package is now formalized as
 `PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
 `PiProofs.fourArctanGeomOneValid` and
 `PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
-The concrete rectangle-sum arctangent route is also completed through
-`PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea`; the more
-general `arctanIntegral(1)` row remains pending because the project integral
-construction wrapper has not yet been identified with this rectangle schedule.
+The concrete rectangle-sum arctangent route is also completed through the
+domain-aware theorem
+`PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`; the more
+general older `arctanIntegral(1)` row remains pending because that
+point-Riemann construction wrapper has not yet been identified with this
+rectangle schedule.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

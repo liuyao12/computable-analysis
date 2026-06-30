@@ -228,6 +228,72 @@ theorem oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity
   rw [RationalCircle.Stage.sectorAreaDensity_eq_one_over_one_plus_square]
   simp [oneOverOnePlusSquareRaw]
 
+/-- The arctangent kernel on the unit interval, as a domain-aware function. -/
+abbrev arctanKernelIntervalAtOne : FunctionOnInterval :=
+  oneOverOnePlusSquareOnInterval 0 1
+
+/-- The verified rectangle-sum construction for
+`∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
+kernel interval. -/
+def arctanIntegralRectangleConstructionAtOne :
+    Integral.ConstructionFor arctanKernelIntervalAtOne where
+  compute := ArctanGeometry.arctanIntegralRectangleComputeAtOne
+  certificate := by
+    simpa [ArctanGeometry.arctanIntegralRectangleRawAtOne] using
+      ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+
+/-- The domain-aware integral raw real supplied by the rectangle construction
+for the arctangent kernel on `[0, 1]`. -/
+def arctanIntegralRectangleForAtOne : RealRaw :=
+  Integral.integralFor arctanKernelIntervalAtOne
+    arctanIntegralRectangleConstructionAtOne
+
+theorem arctanIntegralRectangleForAtOne_valid :
+    arctanIntegralRectangleForAtOne.Valid := by
+  change RealRaw.ValidCompute
+    ArctanGeometry.arctanIntegralRectangleComputeAtOne
+  exact arctanIntegralRectangleConstructionAtOne.certificate
+
+theorem arctanIntegralRectangleForAtOne_compute_eq (n : Nat) :
+    arctanIntegralRectangleForAtOne.compute n =
+      ArctanGeometry.arctanIntegralRectangleComputeAtOne n := rfl
+
+theorem arctanIntegralRectangleForAtOne_equiv_raw :
+    arctanIntegralRectangleForAtOne.Equiv
+      ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    arctanIntegralRectangleForAtOne
+    ArctanGeometry.arctanIntegralRectangleRawAtOne n n).2
+  have hordered :=
+    ArctanGeometry.arctanIntegralRectangleComputeAtOne_ordered n
+  have hle :
+      (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).lo <=
+        (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).hi := by
+    unfold QInterval.width at hordered
+    grind [Rat.sub_eq_add_neg]
+  change QInterval.Overlaps
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne n)
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne n)
+  exact ⟨hle, hle⟩
+
+theorem arctanIntegralRectangleForAtOne_equiv_arctanGeom_one :
+    arctanIntegralRectangleForAtOne.Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+  by
+    intro n
+    apply (RealRaw.compareAt_overlap_iff
+      arctanIntegralRectangleForAtOne
+      (ArctanGeometry.arctanGeom (1 : Rat)) n n).2
+    have hover := (RealRaw.compareAt_overlap_iff
+      ArctanGeometry.arctanIntegralRectangleRawAtOne
+      (ArctanGeometry.arctanGeom (1 : Rat)) n n).1
+        (ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one n)
+    simpa [arctanIntegralRectangleForAtOne, Integral.integralFor,
+      arctanIntegralRectangleConstructionAtOne,
+      ArctanGeometry.arctanIntegralRectangleRawAtOne] using hover
+
 /-- The theorem target for the integral arctangent comparison on `[0, x]`.
 It says that the integral of `1 / (1 + t^2)` computes the chosen arctangent
 branch. -/
