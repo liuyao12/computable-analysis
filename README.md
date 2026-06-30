@@ -158,7 +158,12 @@ circumference width is also reduced to the quarter-gap target by
 `PiProofs.CircumferenceQuarterGapLinearBound`, i.e. an explicit linear bound
 on twice the gap between the outer path upper endpoint and the inner path lower
 endpoint.  The outer tangent fan is now certified to lie inside the outer path
-interval by `PiProofs.outerFanPerimeter_mem_outerQuarterLength`.
+interval by `PiProofs.outerFanPerimeter_mem_outerQuarterLength`.  Lean further
+reduces the quarter-gap bound to
+`PiProofs.CircumferenceFanGapPathBudgetLinearBound`: the quarter gap is bounded
+by the rational outer-minus-inner fan perimeter gap plus the two path-width
+budgets, via
+`PiProofs.circumferenceQuarterGap_le_fanGap_add_pathWidthBudget`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

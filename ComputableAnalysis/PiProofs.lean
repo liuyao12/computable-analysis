@@ -2571,6 +2571,28 @@ theorem circleSamplePoint_cross_nonneg_of_order
     RationalCircle.Stage.samplePoint_cross_nonneg_of_order
       (rationalCircleStage stage) hstage hij
 
+theorem circleSamplePoint_cross_le_segment_hi
+    (stage precision i j : Nat) :
+    pointCross (circleSamplePoint stage i) (circleSamplePoint stage j) <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage i)
+        (circleSamplePoint stage j) precision).hi := by
+  have hsq :
+      sq (pointCross (circleSamplePoint stage i)
+          (circleSamplePoint stage j)) <=
+        pointSegmentNormSq
+          (circleSamplePoint stage i) (circleSamplePoint stage j) := by
+    simpa [circleSamplePoint_eq_rationalCircleStage,
+      pointCross_eq_rationalCircleCross,
+      pointSegmentNormSq_eq_rationalCircleSegmentNormSq] using
+      RationalCircle.Stage.cross_sq_le_segmentNormSq_of_unit
+        (RationalCircle.Stage.samplePoint_normSq_unit
+          (rationalCircleStage stage) i)
+        (RationalCircle.Stage.samplePoint_normSq_unit
+          (rationalCircleStage stage) j)
+  exact pointSegmentLengthInterval_le_hi_of_sq_le
+    (circleSamplePoint stage i) (circleSamplePoint stage j) precision hsq
+
 theorem entryTangentCross_nonneg
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
     0 <= pointCross (circleSamplePoint stage k)
@@ -2698,6 +2720,32 @@ theorem innerBoundary_consecutiveCrossNonneg
   unfold innerBoundary
   exact innerBoundaryFrom_consecutiveCrossNonneg
     stage hstage (stage + 1) 0
+
+theorem innerBoundaryFrom_consecutiveCrossLe
+    (stage precision count k : Nat) :
+    ConsecutiveCrossLe precision (innerBoundaryFrom stage k count) := by
+  induction count generalizing k with
+  | zero =>
+      simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+        ConsecutiveCrossLe]
+  | succ count ih =>
+      cases count with
+      | zero =>
+          simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+            ConsecutiveCrossLe]
+      | succ count =>
+          simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+            ConsecutiveCrossLe]
+          exact ⟨circleSamplePoint_cross_le_segment_hi
+              stage precision k (k + 1),
+            ih (k + 1)⟩
+
+theorem innerBoundary_consecutiveCrossLe
+    (stage precision : Nat) :
+    ConsecutiveCrossLe precision (innerBoundary stage) := by
+  unfold innerBoundary
+  exact innerBoundaryFrom_consecutiveCrossLe
+    stage precision (stage + 1) 0
 
 theorem outerBoundaryFrom_consecutiveCrossNonneg
     (stage : Nat) (hstage : 0 < stage) (count k : Nat) :
@@ -2930,6 +2978,12 @@ theorem rationalPointPathLength_width_eq_segmentBudget
       pathSegmentWidthBudget points n := by
   rw [rationalPointPathLength_width_eq_segmentWidthSum,
     pathSegmentWidthSum_eq_budget]
+
+theorem pathSegmentWidthBudget_nonneg
+    (points : List PiCirclePoint) (n : Nat) :
+    0 <= pathSegmentWidthBudget points n := by
+  rw [← pathSegmentWidthSum_eq_budget]
+  exact pathSegmentWidthSum_nonneg points n
 
 private theorem div_two_le_div_two {x y : Rat} (hxy : x <= y) :
     x / 2 <= y / 2 := by
@@ -3728,6 +3782,15 @@ theorem innerFanPerimeter_le_outerFanPerimeter
   innerFanPerimeter_le_outerFanPerimeter_of_adjacent
     stage (chordCross_le_outerTangentCrossSum stage hstage)
 
+theorem innerFanPerimeter_le_innerQuarterLength_hi
+    (stage : Nat) :
+    Fan.perimeter (innerFanWidths stage) <=
+      (innerQuarterLength stage).hi := by
+  simpa [innerQuarterLength, innerFanWidths] using
+    Fan.sectorFanPerimeter_le_pathLength_hi
+      stage (innerBoundary stage)
+      (innerBoundary_consecutiveCrossLe stage stage)
+
 theorem innerQuarterLength_lo_le_outerFanPerimeter_of_adjacent
     (stage : Nat)
     (hlocal :
@@ -3914,6 +3977,88 @@ theorem piCircumference_compute_width_eq (n : Nat) :
       2 * circumferenceQuarterGap (piStage n) := by
   rw [piCircumference_compute_eq, piCircumferenceComputeAtStage_eq_common]
   exact piCircumferenceCommonComputeAtStage_width_eq (piStage n)
+
+def circumferenceFanGap (stage : Nat) : Rat :=
+  Fan.perimeter (outerFanWidths stage) - Fan.perimeter (innerFanWidths stage)
+
+def circumferencePathWidthBudget (stage : Nat) : Rat :=
+  pathSegmentWidthBudget (innerBoundary stage) stage +
+    pathSegmentWidthBudget (outerBoundary stage) stage
+
+theorem circumferenceFanGap_nonneg
+    (stage : Nat) (hstage : 0 < stage) :
+    0 <= circumferenceFanGap stage := by
+  have h := innerFanPerimeter_le_outerFanPerimeter stage hstage
+  unfold circumferenceFanGap
+  grind [Rat.sub_eq_add_neg]
+
+theorem circumferencePathWidthBudget_nonneg (stage : Nat) :
+    0 <= circumferencePathWidthBudget stage := by
+  unfold circumferencePathWidthBudget
+  exact Rat.add_nonneg
+    (pathSegmentWidthBudget_nonneg (innerBoundary stage) stage)
+    (pathSegmentWidthBudget_nonneg (outerBoundary stage) stage)
+
+theorem circumferenceQuarterGap_le_fanGap_add_pathWidthBudget
+    (stage : Nat) (hstage : 0 < stage) :
+    circumferenceQuarterGap stage <=
+      circumferenceFanGap stage + circumferencePathWidthBudget stage := by
+  let I := innerQuarterLength stage
+  let O := outerQuarterLength stage
+  let Fi := Fan.perimeter (innerFanWidths stage)
+  let Fo := Fan.perimeter (outerFanWidths stage)
+  have hFo_lo : O.lo <= Fo := by
+    dsimp [O, Fo]
+    exact outerQuarterLength_lo_le_outerFanPerimeter stage hstage
+  have hFi_hi : Fi <= I.hi := by
+    dsimp [I, Fi]
+    exact innerFanPerimeter_le_innerQuarterLength_hi stage
+  have hOwidth : O.hi - Fo <= O.width := by
+    dsimp [O]
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hIwidth : Fi - I.lo <= I.width := by
+    dsimp [I]
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hsum :
+      O.hi - I.lo = (O.hi - Fo) + (Fo - Fi) + (Fi - I.lo) := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  have hparts :
+      (O.hi - Fo) + (Fo - Fi) + (Fi - I.lo) <=
+        O.width + (Fo - Fi) + I.width := by
+    grind [Rat.add_assoc, Rat.add_comm]
+  have hbudgetI :
+      I.width = pathSegmentWidthBudget (innerBoundary stage) stage := by
+    dsimp [I]
+    exact rationalPointPathLength_width_eq_segmentBudget
+      (innerBoundary stage) stage
+  have hbudgetO :
+      O.width = pathSegmentWidthBudget (outerBoundary stage) stage := by
+    dsimp [O]
+    exact rationalPointPathLength_width_eq_segmentBudget
+      (outerBoundary stage) stage
+  unfold circumferenceQuarterGap circumferenceFanGap
+    circumferencePathWidthBudget
+  dsimp [I, O, Fi, Fo] at hsum hparts hbudgetI hbudgetO
+  rw [hsum]
+  calc
+    (outerQuarterLength stage).hi - Fan.perimeter (outerFanWidths stage) +
+          (Fan.perimeter (outerFanWidths stage) -
+            Fan.perimeter (innerFanWidths stage)) +
+        (Fan.perimeter (innerFanWidths stage) - (innerQuarterLength stage).lo)
+        <=
+      (outerQuarterLength stage).width +
+          (Fan.perimeter (outerFanWidths stage) -
+            Fan.perimeter (innerFanWidths stage)) +
+        (innerQuarterLength stage).width := hparts
+    _ =
+      (Fan.perimeter (outerFanWidths stage) -
+          Fan.perimeter (innerFanWidths stage)) +
+        (pathSegmentWidthBudget (innerBoundary stage) stage +
+          pathSegmentWidthBudget (outerBoundary stage) stage) := by
+        rw [hbudgetI, hbudgetO]
+        grind [Rat.add_assoc, Rat.add_comm]
 
 theorem piCircleAreaPolygon_ordered (n : Nat) :
     0 <= (piCircleAreaPolygon.compute n).width := by
@@ -5001,6 +5146,33 @@ theorem circumferenceWidthLinearBound_of_quarterGapLinearBound
   intro n
   rw [piCircumference_compute_width_eq]
   exact hgap n
+
+def CircumferenceFanGapPathBudgetLinearBound (C : Nat) : Prop :=
+  forall n,
+    2 * (circumferenceFanGap (piStage n) +
+      circumferencePathWidthBudget (piStage n)) <=
+      (C : Rat) / (((n + 1 : Nat) : Rat))
+
+theorem circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound
+    {C : Nat} (hbound : CircumferenceFanGapPathBudgetLinearBound C) :
+    CircumferenceQuarterGapLinearBound C := by
+  intro n
+  have hgap :=
+    circumferenceQuarterGap_le_fanGap_add_pathWidthBudget
+      (piStage n) (piStage_pos n)
+  have hscaled :
+      2 * circumferenceQuarterGap (piStage n) <=
+        2 * (circumferenceFanGap (piStage n) +
+          circumferencePathWidthBudget (piStage n)) :=
+    Rat.mul_le_mul_of_nonneg_left hgap
+      (by native_decide : (0 : Rat) <= 2)
+  exact Rat.le_trans hscaled (hbound n)
+
+theorem circumferenceWidthLinearBound_of_fanGapPathBudgetLinearBound
+    {C : Nat} (hbound : CircumferenceFanGapPathBudgetLinearBound C) :
+    CircumferenceWidthLinearBound C :=
+  circumferenceWidthLinearBound_of_quarterGapLinearBound
+    (circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound hbound)
 
 theorem circumferenceWidthsShrink_of_linearBound
     {C : Nat} (hbound : CircumferenceWidthLinearBound C) :

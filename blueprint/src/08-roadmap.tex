@@ -179,6 +179,9 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.ConsecutiveLengthLoLeCross}
+\lean{ComputableAnalysis.PiProofs.circleSamplePoint_cross_le_segment_hi}
+\lean{ComputableAnalysis.PiProofs.innerBoundaryFrom_consecutiveCrossLe}
+\lean{ComputableAnalysis.PiProofs.innerBoundary_consecutiveCrossLe}
 \lean{ComputableAnalysis.PiProofs.entryTangentSegment_lo_le_cross}
 \lean{ComputableAnalysis.PiProofs.exitTangentSegment_lo_le_cross}
 \lean{ComputableAnalysis.PiProofs.outerBoundaryFrom_consecutiveLengthLoLeCross}
@@ -188,6 +191,7 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.outerQuarterLength_lo_le_outerFanPerimeter}
 \lean{ComputableAnalysis.PiProofs.outerFanPerimeter_le_outerQuarterLength_hi}
 \lean{ComputableAnalysis.PiProofs.outerFanPerimeter_mem_outerQuarterLength}
+\lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_innerQuarterLength_hi}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthSum}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthBudget}
@@ -195,11 +199,20 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_eq_segmentWidthSum}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthSum_eq_budget}
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_eq_segmentBudget}
+\lean{ComputableAnalysis.PiProofs.pathSegmentWidthBudget_nonneg}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterGap}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCommonComputeAtStage_width_eq}
 \lean{ComputableAnalysis.PiProofs.piCircumference_compute_width_eq}
+\lean{ComputableAnalysis.PiProofs.circumferenceFanGap}
+\lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget}
+\lean{ComputableAnalysis.PiProofs.circumferenceFanGap_nonneg}
+\lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget_nonneg}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterGap_le_fanGap_add_pathWidthBudget}
 \lean{ComputableAnalysis.PiProofs.CircumferenceQuarterGapLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_of_quarterGapLinearBound}
+\lean{ComputableAnalysis.PiProofs.CircumferenceFanGapPathBudgetLinearBound}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound}
+\lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_of_fanGapPathBudgetLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines_and_linearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferenceLinearRemainders}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_linearRemainders}
@@ -424,7 +437,12 @@ The width-bound target has been sharpened to
 circumference width to twice the quarter gap between the outer path upper
 endpoint and the inner path lower endpoint.  The outer tangent fan is also now
 certified to lie inside the outer path-length interval through
-\code{PiProofs.outerFanPerimeter\_mem\_outerQuarterLength}.
+\code{PiProofs.outerFanPerimeter\_mem\_outerQuarterLength}.  Lean further
+reduces this to the finite target
+\code{PiProofs.CircumferenceFanGapPathBudgetLinearBound}: the theorem
+\code{PiProofs.circumferenceQuarterGap\_le\_fanGap\_add\_pathWidthBudget}
+shows that the quarter gap is bounded by the outer-minus-inner fan perimeter
+gap plus the two certified path-width budgets.
 
 \section{Lean declaration index}
 
