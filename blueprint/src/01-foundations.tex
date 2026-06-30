@@ -208,6 +208,9 @@ its validity directly.
 \label{rem:algebraic-numbers-sqrt-two}
 \lean{ComputableAnalysis.sqrt}
 \lean{ComputableAnalysis.sqrtRaw}
+\lean{ComputableAnalysis.sqrtBisectStep_width_eq_half}
+\lean{ComputableAnalysis.sqrtBisect_width_eq}
+\lean{ComputableAnalysis.sqrtBisectStep_contains}
 \lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
 \uses{def:raw-real}
 The first nontrivial computable real number to keep in mind is \(\sqrt2\).
@@ -234,6 +237,11 @@ rational coefficients.  They can be represented by interval algorithms that
 isolate a root and then refine the isolating interval.  The Lean square-root
 algorithm is the rational-input instance of this idea, and the finite square
 criterion proves that \(\sqrt2\) is not equivalent to any rational number.
+Lean now also records the exact bisection-width facts for the rational
+square-root subroutine: one bisection halves the interval width, \(k\)
+bisections divide the width by \(2^k\), and each bisection stays inside the
+previous ordered interval.  These are the small interval-shrinking facts needed
+later for square-root path lengths such as the circumference computation.
 \end{remark}
 
 \begin{remark}[Pseudocode convention]\label{rem:pseudocode-convention}

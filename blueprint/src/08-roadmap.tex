@@ -63,7 +63,7 @@ algorithm requiring an explicit modulus.
   the argument-principle box-search route.
 \end{enumerate}
 
-\section{Pi scoreboard}
+\section{Pi scoreboard}\label{sec:pi-scoreboard}
 \lean{ComputableAnalysis.piMachin}
 \lean{ComputableAnalysis.piCircleArea}
 \lean{ComputableAnalysis.piCircumference}
@@ -222,11 +222,14 @@ baseline for pi comparisons. &
 \cref{def:circle-circumference-stage-algorithm} &
 Rational polygon circumference using interval square roots for side lengths. &
 \(\times\) & \(\times\)\\
-\multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent-to-pi routes}:
+\multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes via
+\code{4 * arctanSeries(1)}}:
 \cref{def:arctan-area-stage-algorithm},
 \cref{def:arctan-integral}, \cref{def:arctan-series},
 \cref{thm:leibniz-arctan} for \code{arctanSeries(1)}, and
-\cref{thm:leibniz-machin}.}\\
+\cref{thm:leibniz-machin}.  These are the routes whose comparison runs through
+the quarter-turn arctangent value; \code{piMachin} is included through its
+agreement with \code{4 * arctanSeries(1)}.}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
@@ -280,8 +283,8 @@ Continued fraction for \(4/\pi\), with finite truncations expected to give
 rational bounds. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
-the single formula \(\pi=-2i\log(i)\), tested through the different logarithm
-constructions in \cref{def:complex-log-series-at-i},
+the single formula \(\pi=-2i\log(i)\), tested through different definitions
+or computations of \(\log(i)\) in \cref{def:complex-log-series-at-i},
 \cref{def:complex-log-path-integral-at-i},
 \cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}.}\\
 \code{-2i * LogSeries(i)} &
@@ -302,15 +305,16 @@ identity proving the branch value at \(i\). &
 \end{center}
 
 The arctangent block records the geometric, integral-rectangle,
-general-integral, power-series, and Machin algorithms built from arctangent
-values.  The power-series row is deliberately named
-\code{4 * arctanSeries(1)}; the Leibniz series is its historical expansion.  The
+general-integral, power-series, and Machin routes whose \(\pi\)-comparison goes
+through the quarter-turn arctangent value.  The power-series row is
+deliberately named \code{4 * arctanSeries(1)}; the Leibniz series is its
+historical expansion.  The
 concrete rectangle row is completed; the general \code{arctanIntegral(1)} row
 remains pending until the older point-Riemann wrapper is identified with that
 rectangle schedule.  The logarithm-at-\(i\) block records a separate family of
 future computations: each one should identify \(\log(i)=i\pi/2\) using a
-different construction of \code{Log}, with Euler's identity providing the
-essential branch bridge.
+different definition or computation of \code{Log}, with Euler's identity
+providing the essential branch bridge.
 
 The first non-baseline checkmark in the equivalence column is the geometric
 arctangent theorem

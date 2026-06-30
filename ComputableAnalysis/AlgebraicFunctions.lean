@@ -289,6 +289,48 @@ private theorem midpoint_nonneg {I : QInterval}
     0 <= I.midpoint := by
   exact Rat.le_trans hlo (lo_le_midpoint hle)
 
+theorem sqrtBisectStep_width_eq_half (q : Rat) (I : QInterval) :
+    (sqrtBisectStep q I).width = I.width / 2 := by
+  unfold sqrtBisectStep QInterval.width QInterval.midpoint
+  by_cases h : sq ((I.lo + I.hi) / 2) <= q
+  · simp [h]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  · simp [h]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+
+theorem sqrtBisect_width_eq (q : Rat) (fuel : Nat) (I : QInterval) :
+    (sqrtBisect q fuel I).width =
+      I.width / (((2 ^ fuel : Nat) : Rat)) := by
+  induction fuel generalizing I with
+  | zero =>
+      simp [sqrtBisect]
+      rw [Rat.div_def]
+      grind [Rat.mul_inv_cancel]
+  | succ fuel ih =>
+      simp [sqrtBisect]
+      rw [ih]
+      rw [sqrtBisectStep_width_eq_half]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def]
+      have hpow :
+          (((2 ^ (fuel + 1) : Nat) : Rat)) =
+            (((2 ^ fuel : Nat) : Rat)) * 2 := by
+        exact_mod_cast (by simpa using (Nat.pow_succ 2 fuel))
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem sqrtBisectStep_contains
+    (q : Rat) {I : QInterval} (hI : I.lo <= I.hi) :
+    I.ContainsInterval (sqrtBisectStep q I) := by
+  unfold QInterval.ContainsInterval sqrtBisectStep QInterval.midpoint
+  by_cases h : sq ((I.lo + I.hi) / 2) <= q
+  · simp [h]
+    exact lo_le_midpoint hI
+  · simp [h]
+    exact midpoint_le_hi hI
+
 theorem sqrtBisectStep_spec {q : Rat} {I : QInterval}
     (hI : SqrtIntervalSpec q I) :
     SqrtIntervalSpec q (sqrtBisectStep q I) := by

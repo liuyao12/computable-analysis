@@ -25,6 +25,9 @@ ComputableAnalysis.RealRaw.add_equiv
 ComputableAnalysis.RealRaw.sub_equiv
 ComputableAnalysis.sqrt
 ComputableAnalysis.sqrtRaw
+ComputableAnalysis.sqrtBisectStep_width_eq_half
+ComputableAnalysis.sqrtBisect_width_eq
+ComputableAnalysis.sqrtBisectStep_contains
 ComputableAnalysis.sqrt_irrational_iff_not_square
 ComputableAnalysis.QComplex
 ComputableAnalysis.QBox
