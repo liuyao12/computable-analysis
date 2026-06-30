@@ -114,14 +114,23 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit}
 \lean{ComputableAnalysis.PiProofs.PowerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.LeibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.EvenKernelCellBound}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.OddKernelCellBound}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_of_cellBound}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_of_cellBound}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_zero}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_one_le_integralUpperStep}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBound_one}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_one_of_nonnegative}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpTo}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_le_four}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_le_four}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFour}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_uniformCellBounds}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBoundsUpTo_of_cellBounds}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_uniformCellBounds}
 \lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
@@ -129,10 +138,12 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_leibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_uniformCellBounds}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
@@ -305,6 +316,12 @@ For the finite Leibniz-to-rectangle bridge, Lean now proves the even
 upper-cell inequality on every nonnegative ordered partition; these are
 packaged in
 \code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase}.
+The preferred remaining target is the uniform one-cell statement
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne}:
+even lower-cell inequalities on rational unit cells and odd upper-cell
+inequalities on nonnegative ordered rational cells.  Lean proves that this
+one-cell statement implies the table-facing equivalence through
+\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_uniformCellBounds}.
 It also certifies the concrete midpoint partitions through \(n\le4\) as
 \code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFour}.
 The auxiliary bridge between finite prefixes and the final statement is
@@ -408,6 +425,10 @@ agreements.
   \code{PiProofs.LeibnizRectangleBridge.kernelPartialIntegralSum},
   \code{PiProofs.LeibnizRectangleBridge.EvenKernelCellBounds},
   \code{PiProofs.LeibnizRectangleBridge.OddKernelCellBounds},
+  \code{PiProofs.LeibnizRectangleBridge.EvenKernelCellBound},
+  \code{PiProofs.LeibnizRectangleBridge.OddKernelCellBound},
+  \code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne},
+  \code{PiProofs.LeibnizRectangleBridge.cellBounds\_of\_uniformCellBounds},
   \code{PiProofs.LeibnizRectangleBridge.evenKernelCellBounds\_zero\_of\_unit},
   \code{PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween\_one\_le\_integralUpperStep},
   \code{PiProofs.LeibnizRectangleBridge.oddKernelCellBounds\_one\_of\_nonnegative},

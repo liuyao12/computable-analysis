@@ -96,6 +96,15 @@ midpoint partition.  Lean sums those cell inequalities to
 `PiProofs.LeibnizRectangleKernelBoundsAtOne`, and the wrapper
 `PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds` then gives the
 raw-real equivalence needed by the table route.
+The preferred mathematical target is now the one-cell version
+`PiProofs.LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne`: prove
+the even lower-cell inequality on every rational unit cell and the odd
+upper-cell inequality on every nonnegative ordered rational cell.  Lean proves
+`PiProofs.LeibnizRectangleBridge.cellBounds_of_uniformCellBounds` and the
+table-facing wrapper
+`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds`, so
+that uniform one-cell result is sufficient to complete the `4 * arctanSeries(1)`
+equivalence row.
 The base package
 `PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase`
 is formalized: the even `m = 0` lower-cell inequality holds on every unit
