@@ -913,8 +913,10 @@ theorem powerSeriesGeometryAtMachinInputs_of_agreement
     ArctanGeometry.powerSeries_equiv_geometric_of_agreement h
       (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide)
 
-theorem branchIdentity_of_geometricBranchIdentity
-    (hGeomValid : ArctanGeometry.Valid)
+theorem branchIdentity_of_geometricBranchIdentity_at_inputs
+    (hg15 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid)
+    (hg239 : (ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Valid)
+    (hg1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid)
     (hagree : PowerSeriesGeometryAtMachinInputs)
     (hgeom : GeometricBranchIdentity) : BranchIdentity := by
   have hps15 : (arctan ((1 : Rat) / 5)).Valid :=
@@ -923,15 +925,6 @@ theorem branchIdentity_of_geometricBranchIdentity
     arctan_valid_at arctanValid arctan_one_239_mem_domain
   have hps1 : (arctan (1 : Rat)).Valid :=
     arctan_valid_at arctanValid arctan_one_mem_domain
-  have hg15 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid := by
-    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
-      hGeomValid ((1 : Rat) / 5) (by trivial)
-  have hg239 : (ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Valid := by
-    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
-      hGeomValid ((1 : Rat) / 239) (by trivial)
-  have hg1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid := by
-    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
-      hGeomValid (1 : Rat) (by trivial)
   have hps4_15 :
       ((4 : Nat) * arctan ((1 : Rat) / 5) : RealRaw).Valid :=
     RealRaw.natScale_valid 4 hps15
@@ -966,6 +959,34 @@ theorem branchIdentity_of_geometricBranchIdentity
     htoGeomOne
     (RealRaw.equiv_symm hagree.one)
 
+theorem branchIdentity_of_geometricBranchIdentity
+    (hGeomValid : ArctanGeometry.Valid)
+    (hagree : PowerSeriesGeometryAtMachinInputs)
+    (hgeom : GeometricBranchIdentity) : BranchIdentity := by
+  have hg15 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid := by
+    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
+      hGeomValid ((1 : Rat) / 5) (by trivial)
+  have hg239 : (ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Valid := by
+    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
+      hGeomValid ((1 : Rat) / 239) (by trivial)
+  have hg1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid := by
+    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
+      hGeomValid (1 : Rat) (by trivial)
+  exact branchIdentity_of_geometricBranchIdentity_at_inputs
+    hg15 hg239 hg1 hagree hgeom
+
+theorem branchIdentity_of_geometricBranchIdentity_on_unit
+    (hagree : PowerSeriesGeometryAtMachinInputs)
+    (hgeom : GeometricBranchIdentity) : BranchIdentity :=
+  branchIdentity_of_geometricBranchIdentity_at_inputs
+    (ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat) / 5) (by native_decide) (by native_decide))
+    (ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat) / 239) (by native_decide) (by native_decide))
+    (ArctanGeometry.arctanGeom_valid_on_unit
+      (x := 1) (by native_decide) (by native_decide))
+    hagree hgeom
+
 theorem branchLaw_of_geometricBranchLaw
     (hGeomValid : ArctanGeometry.Valid)
     (hagree : PowerSeriesGeometryAtMachinInputs)
@@ -973,6 +994,13 @@ theorem branchLaw_of_geometricBranchLaw
   fun htangent =>
     branchIdentity_of_geometricBranchIdentity
       hGeomValid hagree (h htangent)
+
+theorem branchLaw_of_geometricBranchLaw_on_unit
+    (hagree : PowerSeriesGeometryAtMachinInputs)
+    (h : GeometricBranchLaw) : BranchLaw :=
+  fun htangent =>
+    branchIdentity_of_geometricBranchIdentity_on_unit
+      hagree (h htangent)
 
 theorem piMachin_eq_four_arctan_one_of_branchIdentity
     (h : BranchIdentity) :
@@ -1051,6 +1079,13 @@ theorem leibnizEqMachin_of_geometricRoute
   leibnizEqMachin_of_machinBranchLaw
     (MachinIdentity.branchLaw_of_geometricBranchLaw
       hGeomValid hagree hgeom)
+
+theorem leibnizEqMachin_of_geometricRoute_on_unit
+    (hagree : MachinIdentity.PowerSeriesGeometryAtMachinInputs)
+    (hgeom : MachinIdentity.GeometricBranchLaw) : LeibnizEqMachin :=
+  leibnizEqMachin_of_machinBranchLaw
+    (MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit
+      hagree hgeom)
 
 theorem leibnizEqMachin_of_kernelComparisonRoute
     (route : Taylor.ArctanComparison.KernelComparisonRoute)

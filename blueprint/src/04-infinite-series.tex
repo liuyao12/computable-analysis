@@ -107,9 +107,12 @@ tangent identity exactly.
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.piMachin_eq_four_arctanSeries_one_of_branchIdentity}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_of_piMachin_eq_four_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctanSeries_one}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_of_geometricBranchIdentity_on_unit}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.machinBranchIdentity_of_leibnizEqMachin}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_geometricRoute_on_unit}
 \uses{thm:leibniz-arctan,thm:machin-tangent,def:raw-equiv}
 The Leibniz and Machin interval algorithms compute the same abstract real
 number.  In the power-series arctangent notation, this is the agreement
@@ -124,7 +127,9 @@ the geometric branch equality on the certified domain \([-1,1]\).  Lean now
 proves that the raw-real agreement target \code{LeibnizEqMachin} is equivalent
 to the underlying Machin branch identity: the outer factor \(4\) can be
 cancelled by the positive-scaling cancellation theorem for raw-real
-equivalence.
+equivalence.  The geometric route now uses only the verified unit-branch
+validity of \code{arctanGeom} at \(1/5\), \(1/239\), and \(1\), not a global
+validity hypothesis for all rational inputs.
 \end{theorem}
 
 \section{General Power Series}

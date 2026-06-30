@@ -277,16 +277,21 @@ certifies the unscaled raw real \code{arctanGeom(1)}.
 
 \begin{theorem}[Arctangent validity and monotonicity]
 \label{thm:arctan-area-valid-monotone}
+\lean{ComputableAnalysis.ArctanGeometry.positiveLoopRaw_valid_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
 \uses{def:arctan-area-stage-algorithm,def:raw-real-order}
-For each rational \(x\in[0,1]\), \code{arctanGeom(x,n)} should be a valid raw
-real.  Moreover, the resulting function is monotone: if
+For each rational \(x\in[0,1]\), \code{arctanGeom(x,n)} is a valid raw real:
+the geometric lower and upper sector bounds are ordered, nested, and shrinking.
+Moreover, the resulting function should be monotone: if
 \(0\le x\le y\le1\), then
 \[
   \arctan_{\mathrm{geom}}(x)\le \arctan_{\mathrm{geom}}(y).
 \]
-The finite proof compares nested rational sectors.  Strict monotonicity on
-apart rational inputs follows from the positive area of the additional sector
-between \(P(x)\) and \(P(y)\).
+The validity proof is finite: endpoint monotonicity comes from nonnegative
+increment/decrement triangles, while shrinking follows because the geometric
+intervals sit inside the already verified rectangle-sum intervals.  Strict
+monotonicity on apart rational inputs should follow from the positive area of
+the additional sector between \(P(x)\) and \(P(y)\).
 \end{theorem}
 
 \begin{definition}[Normalized quarter-turns as angles]

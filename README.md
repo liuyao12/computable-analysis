@@ -53,6 +53,9 @@ The area loop validity package is now formalized as
 `PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
 `PiProofs.fourArctanGeomOneValid` and
 `PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
+The geometric arctangent algorithm is also verified on the unit branch as
+`ArctanGeometry.arctanGeom_valid_on_unit`, by direct ordered/nested/shrinking
+proofs for the increment/decrement loop.
 The concrete rectangle-sum arctangent route is also completed through the
 domain-aware theorem
 `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`; the more
@@ -73,7 +76,9 @@ series only once, under the explicit name `4 * arctanSeries(1)`.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling
-the common outer factor `4`.
+the common outer factor `4`.  The bridge from a geometric Machin branch law now
+uses `PiProofs.leibnizEqMachin_of_geometricRoute_on_unit`, so it no longer
+needs a global geometric-arctangent validity assumption.
 
 The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
 code that remains in Lean is internal scaffolding for circumference and finite
