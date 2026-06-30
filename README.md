@@ -163,7 +163,11 @@ reduces the quarter-gap bound to
 `PiProofs.CircumferenceFanGapPathBudgetLinearBound`: the quarter gap is bounded
 by the rational outer-minus-inner fan perimeter gap plus the two path-width
 budgets, via
-`PiProofs.circumferenceQuarterGap_le_fanGap_add_pathWidthBudget`.
+`PiProofs.circumferenceQuarterGap_le_fanGap_add_pathWidthBudget`.  The combined
+linear target now splits into independent fan-gap and path-budget linear
+bounds by `PiProofs.fanGapPathBudgetLinearBound_of_parts`; the path-budget side
+has the segment-count reduction
+`PiProofs.circumferencePathWidthBudget_le_three_stage_mul`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

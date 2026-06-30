@@ -2905,6 +2905,21 @@ def pathSegmentWidthBudget : List PiCirclePoint -> Nat -> Rat
             Rat)) +
         pathSegmentWidthBudget (q :: rest) n
 
+def pathSegmentCount : List PiCirclePoint -> Nat
+  | [] => 0
+  | [_] => 0
+  | _p :: q :: rest => 1 + pathSegmentCount (q :: rest)
+
+def ConsecutiveBudgetLe (precision : Nat) (B : Rat) :
+    List PiCirclePoint -> Prop
+  | [] => True
+  | [_] => True
+  | p :: q :: rest =>
+      sqrtUpperBound (pointSegmentNormSq p q) /
+          (((2 ^ sqrtFuel (pointSegmentNormSq p q) (sqrtStageEps precision) :
+            Nat) : Rat)) <= B /\
+        ConsecutiveBudgetLe precision B (q :: rest)
+
 theorem rationalPointPathLength_width_nil (n : Nat) :
     (rationalPointPathLength [] n).width = 0 := by
   simp [rationalPointPathLength, rationalPointPathLength.totalLength,
@@ -2984,6 +2999,56 @@ theorem pathSegmentWidthBudget_nonneg
     0 <= pathSegmentWidthBudget points n := by
   rw [← pathSegmentWidthSum_eq_budget]
   exact pathSegmentWidthSum_nonneg points n
+
+theorem pathSegmentWidthBudget_le_count_mul
+    (precision : Nat) (B : Rat) :
+    forall points : List PiCirclePoint,
+      ConsecutiveBudgetLe precision B points ->
+      pathSegmentWidthBudget points precision <=
+        (pathSegmentCount points : Rat) * B
+  | [], _h => by
+      simp [pathSegmentWidthBudget, pathSegmentCount]
+  | [_p], _h => by
+      simp [pathSegmentWidthBudget, pathSegmentCount]
+  | p :: q :: rest, h => by
+      have hhead := h.1
+      have htail := h.2
+      have ih :=
+        pathSegmentWidthBudget_le_count_mul precision B (q :: rest) htail
+      simp [pathSegmentWidthBudget, pathSegmentCount]
+      calc
+        sqrtUpperBound (pointSegmentNormSq p q) /
+              ↑(2 ^ sqrtFuel (pointSegmentNormSq p q)
+                (sqrtStageEps precision)) +
+            pathSegmentWidthBudget (q :: rest) precision
+            <= B + (pathSegmentCount (q :: rest) : Rat) * B := by
+          grind
+        _ = (1 + (pathSegmentCount (q :: rest) : Rat)) * B := by
+          grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+            Rat.mul_assoc, Rat.mul_comm]
+
+theorem pathSegmentCount_eq_length_pred (points : List PiCirclePoint) :
+    pathSegmentCount points = points.length - 1 := by
+  induction points with
+  | nil => rfl
+  | cons p ps ih =>
+      cases ps with
+      | nil => rfl
+      | cons q qs =>
+          change 1 + pathSegmentCount (q :: qs) = (q :: qs).length
+          rw [ih]
+          have hpos : 0 < (q :: qs).length := by simp
+          omega
+
+theorem pathSegmentCount_innerBoundary (stage : Nat) :
+    pathSegmentCount (innerBoundary stage) = stage := by
+  rw [pathSegmentCount_eq_length_pred, innerBoundary_length]
+  omega
+
+theorem pathSegmentCount_outerBoundary (stage : Nat) :
+    pathSegmentCount (outerBoundary stage) = 2 * stage := by
+  rw [pathSegmentCount_eq_length_pred, outerBoundary_length]
+  omega
 
 private theorem div_two_le_div_two {x y : Rat} (hxy : x <= y) :
     x / 2 <= y / 2 := by
@@ -3984,6 +4049,35 @@ def circumferenceFanGap (stage : Nat) : Rat :=
 def circumferencePathWidthBudget (stage : Nat) : Rat :=
   pathSegmentWidthBudget (innerBoundary stage) stage +
     pathSegmentWidthBudget (outerBoundary stage) stage
+
+def InnerBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  ConsecutiveBudgetLe stage B (innerBoundary stage)
+
+def OuterBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  ConsecutiveBudgetLe stage B (outerBoundary stage)
+
+theorem circumferencePathWidthBudget_le_three_stage_mul
+    (stage : Nat) (B : Rat)
+    (hinner : InnerBoundarySegmentBudgetLe stage B)
+    (houter : OuterBoundarySegmentBudgetLe stage B) :
+    circumferencePathWidthBudget stage <= (3 * (stage : Rat)) * B := by
+  have hi :=
+    pathSegmentWidthBudget_le_count_mul
+      stage B (innerBoundary stage) hinner
+  have ho :=
+    pathSegmentWidthBudget_le_count_mul
+      stage B (outerBoundary stage) houter
+  rw [pathSegmentCount_innerBoundary] at hi
+  rw [pathSegmentCount_outerBoundary] at ho
+  unfold circumferencePathWidthBudget
+  calc
+    pathSegmentWidthBudget (innerBoundary stage) stage +
+        pathSegmentWidthBudget (outerBoundary stage) stage <=
+      (stage : Rat) * B + (↑(2 * stage) : Rat) * B := by
+        grind
+    _ = (3 * (stage : Rat)) * B := by
+        grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm]
 
 theorem circumferenceFanGap_nonneg
     (stage : Nat) (hstage : 0 < stage) :
@@ -5152,6 +5246,41 @@ def CircumferenceFanGapPathBudgetLinearBound (C : Nat) : Prop :=
     2 * (circumferenceFanGap (piStage n) +
       circumferencePathWidthBudget (piStage n)) <=
       (C : Rat) / (((n + 1 : Nat) : Rat))
+
+def CircumferenceFanGapLinearBound (C : Nat) : Prop :=
+  forall n,
+    2 * circumferenceFanGap (piStage n) <=
+      (C : Rat) / (((n + 1 : Nat) : Rat))
+
+def CircumferencePathWidthBudgetLinearBound (C : Nat) : Prop :=
+  forall n,
+    2 * circumferencePathWidthBudget (piStage n) <=
+      (C : Rat) / (((n + 1 : Nat) : Rat))
+
+theorem fanGapPathBudgetLinearBound_of_parts
+    {Cfan Cpath : Nat}
+    (hfan : CircumferenceFanGapLinearBound Cfan)
+    (hpath : CircumferencePathWidthBudgetLinearBound Cpath) :
+    CircumferenceFanGapPathBudgetLinearBound (Cfan + Cpath) := by
+  intro n
+  have hf := hfan n
+  have hp := hpath n
+  calc
+    2 * (circumferenceFanGap (piStage n) +
+        circumferencePathWidthBudget (piStage n)) =
+      2 * circumferenceFanGap (piStage n) +
+        2 * circumferencePathWidthBudget (piStage n) := by
+        grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm]
+    _ <=
+      (Cfan : Rat) / (((n + 1 : Nat) : Rat)) +
+        (Cpath : Rat) / (((n + 1 : Nat) : Rat)) := by
+        grind
+    _ =
+      ((Cfan + Cpath : Nat) : Rat) / (((n + 1 : Nat) : Rat)) := by
+        rw [Rat.div_def, Rat.div_def, Rat.div_def]
+        grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm]
 
 theorem circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound
     {C : Nat} (hbound : CircumferenceFanGapPathBudgetLinearBound C) :

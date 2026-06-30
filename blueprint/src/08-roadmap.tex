@@ -200,17 +200,29 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthSum_eq_budget}
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_eq_segmentBudget}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthBudget_nonneg}
+\lean{ComputableAnalysis.PiProofs.pathSegmentCount}
+\lean{ComputableAnalysis.PiProofs.ConsecutiveBudgetLe}
+\lean{ComputableAnalysis.PiProofs.pathSegmentWidthBudget_le_count_mul}
+\lean{ComputableAnalysis.PiProofs.pathSegmentCount_eq_length_pred}
+\lean{ComputableAnalysis.PiProofs.pathSegmentCount_innerBoundary}
+\lean{ComputableAnalysis.PiProofs.pathSegmentCount_outerBoundary}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterGap}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCommonComputeAtStage_width_eq}
 \lean{ComputableAnalysis.PiProofs.piCircumference_compute_width_eq}
 \lean{ComputableAnalysis.PiProofs.circumferenceFanGap}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget}
+\lean{ComputableAnalysis.PiProofs.InnerBoundarySegmentBudgetLe}
+\lean{ComputableAnalysis.PiProofs.OuterBoundarySegmentBudgetLe}
+\lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget_le_three_stage_mul}
 \lean{ComputableAnalysis.PiProofs.circumferenceFanGap_nonneg}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget_nonneg}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterGap_le_fanGap_add_pathWidthBudget}
 \lean{ComputableAnalysis.PiProofs.CircumferenceQuarterGapLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_of_quarterGapLinearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferenceFanGapPathBudgetLinearBound}
+\lean{ComputableAnalysis.PiProofs.CircumferenceFanGapLinearBound}
+\lean{ComputableAnalysis.PiProofs.CircumferencePathWidthBudgetLinearBound}
+\lean{ComputableAnalysis.PiProofs.fanGapPathBudgetLinearBound_of_parts}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_of_fanGapPathBudgetLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines_and_linearBound}
@@ -442,7 +454,11 @@ reduces this to the finite target
 \code{PiProofs.CircumferenceFanGapPathBudgetLinearBound}: the theorem
 \code{PiProofs.circumferenceQuarterGap\_le\_fanGap\_add\_pathWidthBudget}
 shows that the quarter gap is bounded by the outer-minus-inner fan perimeter
-gap plus the two certified path-width budgets.
+gap plus the two certified path-width budgets.  This combined target now
+splits into independent fan-gap and path-budget linear bounds via
+\code{PiProofs.fanGapPathBudgetLinearBound\_of\_parts}; the path-budget side
+has a finite segment-count wrapper
+\code{PiProofs.circumferencePathWidthBudget\_le\_three\_stage\_mul}.
 
 \section{Lean declaration index}
 
