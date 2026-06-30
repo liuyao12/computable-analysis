@@ -89,6 +89,11 @@ needs a global geometric-arctangent validity assumption.
 The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
 code that remains in Lean is internal scaffolding for circumference and finite
 Archimedes estimates, not another pi computation to count.
+For the circumference row, the remaining certification target is now isolated
+as `PiProofs.CircumferenceLinearRemainders`: prove dyadic one-step refinement
+for `piCircumference` and any explicit linear width bound.  The public area
+validity is already reused by
+`PiProofs.piProofsComplete_of_circumferenceRemainders`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

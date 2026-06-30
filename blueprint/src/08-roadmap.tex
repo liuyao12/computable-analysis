@@ -120,6 +120,13 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchLaw}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_geometricRoute_on_unit}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines_and_linearBound}
+\lean{ComputableAnalysis.PiProofs.CircumferenceLinearRemainders}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_linearRemainders}
+\lean{ComputableAnalysis.PiProofs.validityProofs_of_circumference_linear_remainders}
+\lean{ComputableAnalysis.PiProofs.CompletionCircumferenceRemainders}
+\lean{ComputableAnalysis.PiProofs.piProofsComplete_of_circumferenceRemainders}
+\lean{ComputableAnalysis.PiProofs.piProofsComplete_of_circumferenceRemainders_and_kernelComparisonRoute}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
 \lean{ComputableAnalysis.Basel.eulerBasel_geometricPi}
@@ -280,8 +287,9 @@ three \code{Log(i)} constructions, their branch agreement, and Euler identity\\
 \code{PiProofs.leibnizEqMachin\_of\_geometricRoute\_on\_unit} &
 power-series/geometric agreement at Machin inputs and the geometric branch law\\
 remaining geometric pi validity &
-\code{PiProofs.GeometricValidityRemainders} &
-circumference nesting, circumference width shrinkage, and polygon bridge
+\code{PiProofs.CircumferenceLinearRemainders} &
+\code{CircumferenceStepRefines}, a \code{CircumferenceWidthLinearBound C}, and
+the polygon bridge
 \end{tabular}
 \end{center}
 
@@ -295,7 +303,11 @@ verifies \code{4 * arctanGeom(1)} through
 \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}.  The bridge
 \code{PiProofs.PiCircleAreaPolygonAgreement} remains an internal finite-geometry
 target for circumference and Archimedes estimates, not a separate pi
-computation in the scoreboard.
+computation in the scoreboard.  The current public completion package is
+\code{PiProofs.CompletionCircumferenceRemainders}: it reuses the proved
+area-loop validity and leaves only dyadic circumference refinement, a
+circumference width bound, the polygon bridge, and the analytic arctangent
+agreements.
 
 \section{Lean declaration index}
 
@@ -336,6 +348,8 @@ computation in the scoreboard.
   \code{ArctanGeometry.PowerSeriesAgreesAt},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
+  \code{PiProofs.CircumferenceLinearRemainders},
+  \code{PiProofs.piProofsComplete\_of\_circumferenceRemainders},
   \code{PiProofs.archimedesTheorem},
   \code{PiProofs.piCircumference\_equiv\_piCircleArea},
   \code{PiProofs.LeibnizEqMachin}.

@@ -4038,12 +4038,42 @@ theorem circumferenceValid_of_nested_and_shrinking
     case right =>
       exact hshrink
 
+theorem circumferenceValid_of_stepRefines_and_linearBound
+    (hstep : CircumferenceStepRefines)
+    {C : Nat} (hbound : CircumferenceWidthLinearBound C) :
+    CircumferenceValid :=
+  circumferenceValid_of_nested_and_shrinking
+    (circumferenceNested_of_stepRefines hstep)
+    (circumferenceWidthsShrink_of_linearBound hbound)
+
+structure CircumferenceLinearRemainders where
+  step_refines : CircumferenceStepRefines
+  width_constant : Nat
+  width_bound : CircumferenceWidthLinearBound width_constant
+
+theorem circumferenceValid_of_linearRemainders
+    (remainders : CircumferenceLinearRemainders) :
+    CircumferenceValid :=
+  circumferenceValid_of_stepRefines_and_linearBound
+    remainders.step_refines remainders.width_bound
+
 structure GeometricValidityRemainders where
   area_ordered : AreaOrdered
   area_nested : AreaNested
   area_widths_shrink : AreaWidthsShrink
   circumference_nested : CircumferenceNested
   circumference_widths_shrink : CircumferenceWidthsShrink
+
+def CircumferenceLinearRemainders.toGeometricValidityRemainders
+    (remainders : CircumferenceLinearRemainders) :
+    GeometricValidityRemainders where
+  area_ordered := AreaLoopValidity.areaOrdered
+  area_nested := AreaLoopValidity.areaNested
+  area_widths_shrink := AreaLoopValidity.areaWidthsShrink
+  circumference_nested :=
+    circumferenceNested_of_stepRefines remainders.step_refines
+  circumference_widths_shrink :=
+    circumferenceWidthsShrink_of_linearBound remainders.width_bound
 
 structure GeometricStepRemainders where
   area_ordered : AreaOrdered
@@ -4115,6 +4145,12 @@ theorem validityProofs_of_geometric_linear_step_remainders
     ValidityProofs :=
   validityProofs_of_geometric_step_remainders
     (geometricStepRemainders_of_linearStepRemainders remainders)
+
+theorem validityProofs_of_circumference_linear_remainders
+    (remainders : CircumferenceLinearRemainders) :
+    ValidityProofs :=
+  validityProofs_of_geometric_remainders
+    remainders.toGeometricValidityRemainders
 
 /-- A small generating set of agreement proofs.
 
@@ -4202,9 +4238,10 @@ theorem PiProofsComplete.pairwiseAgreement
 /-- The remaining mathematical obligations needed to close the pi proof layer.
 
 The Archimedes bridge `piCircleArea = piCircumference` is already proved in
-this file, and the Leibniz and Machin algorithms are already valid.  What
-remains is geometric validity for the two polygon algorithms, plus the two
-bridges that connect the analytic definitions to the geometric one. -/
+this file, the public area loop is already valid, and the Leibniz and Machin
+algorithms are already valid.  This legacy package still accepts the full
+geometric-validity record for compatibility with the older polygon/circumference
+route. -/
 structure CompletionRemainders where
   area_polygon_agreement : PiCircleAreaPolygonAgreement
   geometric_validity : GeometricValidityRemainders
@@ -4277,6 +4314,34 @@ theorem piProofsComplete_of_linearStepRemainders
   piProofsComplete_of_stepRemainders
     remainders.toCompletionStepRemainders
 
+/-- Current public completion route.
+
+The public `piCircleArea` validity is already discharged by the
+increment/decrement loop.  To certify the circumference row it is enough to
+prove one-step dyadic refinement and a linear width bound for
+`piCircumference`, plus the polygon bridge and the analytic arctangent
+agreements. -/
+structure CompletionCircumferenceRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
+  circumference : CircumferenceLinearRemainders
+  leibniz_eq_machin : LeibnizEqMachin
+  leibniz_eq_area : LeibnizEqArea
+
+def CompletionCircumferenceRemainders.toCompletionRemainders
+    (remainders : CompletionCircumferenceRemainders) :
+    CompletionRemainders where
+  area_polygon_agreement := remainders.area_polygon_agreement
+  geometric_validity :=
+    remainders.circumference.toGeometricValidityRemainders
+  leibniz_eq_machin := remainders.leibniz_eq_machin
+  leibniz_eq_area := remainders.leibniz_eq_area
+
+theorem piProofsComplete_of_circumferenceRemainders
+    (remainders : CompletionCircumferenceRemainders) :
+    PiProofsComplete :=
+  piProofsComplete_of_completionRemainders
+    remainders.toCompletionRemainders
+
 theorem piProofsComplete_of_kernelComparisonRoute
     (hpoly : PiCircleAreaPolygonAgreement)
     (geometric_validity : GeometricValidityRemainders)
@@ -4286,6 +4351,20 @@ theorem piProofsComplete_of_kernelComparisonRoute
   piProofsComplete_of_completionRemainders
     { area_polygon_agreement := hpoly
       geometric_validity := geometric_validity
+      leibniz_eq_machin :=
+        leibnizEqMachin_of_kernelComparisonRoute route hgeom
+      leibniz_eq_area :=
+        leibnizEqArea_of_kernelComparisonRoute route }
+
+theorem piProofsComplete_of_circumferenceRemainders_and_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
+    (circumference : CircumferenceLinearRemainders)
+    (route : Taylor.ArctanComparison.KernelComparisonRoute)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    PiProofsComplete :=
+  piProofsComplete_of_circumferenceRemainders
+    { area_polygon_agreement := hpoly
+      circumference := circumference
       leibniz_eq_machin :=
         leibnizEqMachin_of_kernelComparisonRoute route hgeom
       leibniz_eq_area :=
