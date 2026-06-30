@@ -79,12 +79,26 @@ equivalence.
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartial_odd_le_kernel}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernel_le_kernelPartial_even}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralAtOne}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOne}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOne_odd_succ}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOne_even_succ}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_zero_one}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_zero_one}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_split}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_split}
 \lean{ComputableAnalysis.PiProofs.LeibnizValidity.endpoints_eq_kernelPartialIntegral}
 \lean{ComputableAnalysis.PiProofs.LeibnizValidity.leibnizSeries_compute_eq_kernelPartialIntegralInterval}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleKernelBoundsAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralSum}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.EvenKernelCellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.OddKernelCellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.integralKernel_le_one}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.integralLowerStep_le_kernelPartialIntegralBetween_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.arctanAreaLoopState_one_kernelPartialIntegralSum}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_cellBounds}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOneSpecial_of_kernelBounds}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.KernelComparisonAt}
@@ -125,10 +139,13 @@ compare the Leibniz intervals with the rectangle-sum integral intervals at
 \(1\).  Lean also proves the finite kernel bracketing facts that odd
 arctangent-kernel truncations lie below \(1/(1+x^2)\) and even truncations lie
 above it.  It then identifies the Leibniz interval endpoints with the
-integrals over \([0,1]\) of those odd/even finite kernel truncations.  The
-remaining input is the concrete stagewise inequality package
-\code{PiProofs.LeibnizRectangleKernelBoundsAtOne}; from that Lean constructs
-\code{PiProofs.LeibnizEqualsRectangleRawAtOne}, then
+integrals over \([0,1]\) of those odd/even finite kernel truncations, and
+proves that the midpoint-partition sums of finite cell integrals equal the
+single \([0,1]\) finite integral.  The remaining input is the cellwise
+inequality package
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne};
+from that Lean constructs \code{PiProofs.LeibnizRectangleKernelBoundsAtOne},
+then \code{PiProofs.LeibnizEqualsRectangleRawAtOne}, then
 \code{Taylor.ArctanComparison.KernelComparisonAt 1} and then
 \code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The older unit-interval
 hypothesis

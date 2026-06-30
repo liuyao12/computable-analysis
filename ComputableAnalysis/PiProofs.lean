@@ -972,6 +972,214 @@ def LeibnizRectangleKernelBoundsAtOne : Prop :=
     LeibnizValidity.lowerKernelPartialAtStage n <=
       (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).hi
 
+namespace LeibnizRectangleBridge
+
+private theorem rat_add_le_add {a b c d : Rat}
+    (hab : a <= b) (hcd : c <= d) : a + c <= b + d := by
+  grind
+
+def kernelPartialIntegralSum (m : Nat) : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r m +
+        kernelPartialIntegralSum m rest
+
+def EvenKernelCellBounds (m : Nat) : List (Rat × Rat) -> Prop
+  | [] => True
+  | (p, r) :: rest =>
+      ArctanGeometry.integralLowerStep p r <=
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r m /\
+      EvenKernelCellBounds m rest
+
+def OddKernelCellBounds (m : Nat) : List (Rat × Rat) -> Prop
+  | [] => True
+  | (p, r) :: rest =>
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r m <=
+        ArctanGeometry.integralUpperStep p r /\
+      OddKernelCellBounds m rest
+
+theorem integralKernel_le_one (r : Rat) :
+    ArctanGeometry.integralKernel r <= 1 := by
+  unfold ArctanGeometry.integralKernel
+  let d : Rat := 1 + r * r
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have hdge : 1 <= d := by
+    dsimp [d]
+    have hsq := RationalCircle.Stage.ratSquare_nonneg r
+    grind
+  apply Rat.le_of_mul_le_mul_right (c := d)
+  · calc
+      (1 / d) * d = 1 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= d := hdge
+      _ = 1 * d := by grind
+  · exact hdpos
+
+theorem integralLowerStep_le_kernelPartialIntegralBetween_zero
+    {p r : Rat} (hpr : p <= r) :
+    ArctanGeometry.integralLowerStep p r <=
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 0 := by
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hk := integralKernel_le_one r
+  unfold ArctanGeometry.integralLowerStep
+  simp [Taylor.ArctanKernel.kernelPartialIntegralBetween]
+  calc
+    (r - p) * ArctanGeometry.integralKernel r <= (r - p) * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hk hlen
+    _ = r - p := by rw [Rat.mul_one]
+
+theorem integralLowerSum_le_kernelPartialIntegralSum
+    {m : Nat} {intervals : List (Rat × Rat)}
+    (h : EvenKernelCellBounds m intervals) :
+    ArctanGeometry.integralLowerSum intervals <=
+      kernelPartialIntegralSum m intervals := by
+  induction intervals with
+  | nil => simp [ArctanGeometry.integralLowerSum, kernelPartialIntegralSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hhead, htail⟩
+      simp [ArctanGeometry.integralLowerSum, kernelPartialIntegralSum]
+      exact rat_add_le_add hhead (ih htail)
+
+theorem kernelPartialIntegralSum_le_integralUpperSum
+    {m : Nat} {intervals : List (Rat × Rat)}
+    (h : OddKernelCellBounds m intervals) :
+    kernelPartialIntegralSum m intervals <=
+      ArctanGeometry.integralUpperSum intervals := by
+  induction intervals with
+  | nil => simp [ArctanGeometry.integralUpperSum, kernelPartialIntegralSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hhead, htail⟩
+      simp [ArctanGeometry.integralUpperSum, kernelPartialIntegralSum]
+      exact rat_add_le_add hhead (ih htail)
+
+theorem refineAux_kernelPartialIntegralSum
+    (m : Nat) (lo hi : Rat) (intervals : List (Rat × Rat)) :
+    kernelPartialIntegralSum m
+      (ArctanGeometry.AreaLoopState.refineAux lo hi intervals).intervals =
+        kernelPartialIntegralSum m intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [ArctanGeometry.AreaLoopState.refineAux, kernelPartialIntegralSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      let q : Rat := (p + r) / 2
+      simp [ArctanGeometry.AreaLoopState.refineAux, kernelPartialIntegralSum]
+      rw [ih]
+      have hsplit :=
+        Taylor.ArctanKernel.kernelPartialIntegralBetween_split p q r m
+      calc
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p q m +
+              (Taylor.ArctanKernel.kernelPartialIntegralBetween q r m +
+                kernelPartialIntegralSum m rest)
+            = (Taylor.ArctanKernel.kernelPartialIntegralBetween p q m +
+                Taylor.ArctanKernel.kernelPartialIntegralBetween q r m) +
+                kernelPartialIntegralSum m rest := by
+              grind [Rat.add_assoc, Rat.add_comm]
+        _ = Taylor.ArctanKernel.kernelPartialIntegralBetween p r m +
+              kernelPartialIntegralSum m rest := by
+              rw [←hsplit]
+
+theorem refineAreaLoopState_kernelPartialIntegralSum
+    (m : Nat) (state : ArctanGeometry.AreaLoopState) :
+    kernelPartialIntegralSum m
+      (ArctanGeometry.refineAreaLoopState state).intervals =
+        kernelPartialIntegralSum m state.intervals := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_kernelPartialIntegralSum m lo hi intervals
+
+theorem iterateAreaLoopState_kernelPartialIntegralSum
+    (m n : Nat) (state : ArctanGeometry.AreaLoopState) :
+    kernelPartialIntegralSum m
+      (ArctanGeometry.iterateAreaLoopState n state).intervals =
+        kernelPartialIntegralSum m state.intervals := by
+  induction n generalizing state with
+  | zero =>
+      simp [ArctanGeometry.iterateAreaLoopState]
+  | succ n ih =>
+      simp [ArctanGeometry.iterateAreaLoopState]
+      calc
+        kernelPartialIntegralSum m
+            (ArctanGeometry.iterateAreaLoopState n
+              (ArctanGeometry.refineAreaLoopState state)).intervals =
+            kernelPartialIntegralSum m
+              (ArctanGeometry.refineAreaLoopState state).intervals :=
+          ih (ArctanGeometry.refineAreaLoopState state)
+        _ = kernelPartialIntegralSum m state.intervals :=
+          refineAreaLoopState_kernelPartialIntegralSum m state
+
+theorem arctanAreaLoopState_one_kernelPartialIntegralSum
+    (m n : Nat) :
+    kernelPartialIntegralSum m
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals =
+        Taylor.ArctanKernel.kernelPartialIntegralAtOne m := by
+  unfold ArctanGeometry.arctanAreaLoopState
+  rw [iterateAreaLoopState_kernelPartialIntegralSum]
+  simp [ArctanGeometry.arctanAreaLoopInitial, kernelPartialIntegralSum]
+  rw [Taylor.ArctanKernel.kernelPartialIntegralBetween_zero_one]
+  grind
+
+/-- Cellwise finite inequalities on the actual midpoint partitions.
+
+This is now the concrete finite target behind the rectangle comparison: even
+kernel truncation integrals dominate lower rectangles on stage `n`, and odd
+kernel truncation integrals are dominated by upper rectangles on stage
+`n + 1`. -/
+def LeibnizRectangleKernelCellBoundsAtOne : Prop :=
+  (forall n,
+    EvenKernelCellBounds (2 * n)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals) /\
+  (forall n,
+    OddKernelCellBounds (2 * n + 1)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) (n + 1)).intervals)
+
+theorem kernelBounds_of_cellBounds
+    (h : LeibnizRectangleKernelCellBoundsAtOne) :
+    LeibnizRectangleKernelBoundsAtOne := by
+  intro n
+  constructor
+  · have hcell := h.1 n
+    have hsum := integralLowerSum_le_kernelPartialIntegralSum hcell
+    unfold ArctanGeometry.arctanIntegralRectangleComputeAtOne
+    unfold ArctanGeometry.integralSumInterval
+    dsimp
+    calc
+      ArctanGeometry.integralLowerSum
+          (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals <=
+          kernelPartialIntegralSum (2 * n)
+            (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals := hsum
+      _ = Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n) :=
+          arctanAreaLoopState_one_kernelPartialIntegralSum (2 * n) n
+      _ = LeibnizValidity.upperKernelPartialAtStage n := by
+          simp [LeibnizValidity.upperKernelPartialAtStage]
+  · cases n with
+    | zero =>
+        native_decide
+    | succ n =>
+        have hcell := h.2 n
+        have hsum := kernelPartialIntegralSum_le_integralUpperSum hcell
+        unfold ArctanGeometry.arctanIntegralRectangleComputeAtOne
+        unfold ArctanGeometry.integralSumInterval
+        dsimp
+        calc
+          LeibnizValidity.lowerKernelPartialAtStage (n + 1) =
+              Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n + 1) := by
+                simp [LeibnizValidity.lowerKernelPartialAtStage]
+          _ = kernelPartialIntegralSum (2 * n + 1)
+              (ArctanGeometry.arctanAreaLoopState (1 : Rat)
+                (n + 1)).intervals := by
+                rw [arctanAreaLoopState_one_kernelPartialIntegralSum]
+          _ <= ArctanGeometry.integralUpperSum
+              (ArctanGeometry.arctanAreaLoopState (1 : Rat)
+                (n + 1)).intervals := hsum
+
+end LeibnizRectangleBridge
+
 theorem leibnizEqualsRectangleRawAtOneSpecial_of_kernelBounds
     (h : LeibnizRectangleKernelBoundsAtOne) :
     LeibnizEqualsRectangleRawAtOneSpecial := by

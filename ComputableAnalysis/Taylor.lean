@@ -115,11 +115,24 @@ finite expansion. -/
 def kernelTermIntegralAtOne (j : Nat) : Rat :=
   (-1 : Rat) ^ j / (2 * (j : Rat) + 1)
 
+/-- Integral over `[p,r]` of the `j`-th monomial in the arctangent-kernel
+finite expansion. -/
+def kernelTermIntegralBetween (p r : Rat) (j : Nat) : Rat :=
+  (-1 : Rat) ^ j * (r ^ (2 * j + 1) - p ^ (2 * j + 1)) /
+    (2 * (j : Rat) + 1)
+
 /-- Integral over `[0,1]` of the finite arctangent-kernel truncation
 `1 - x^2 + x^4 - ... + (-x^2)^n`. -/
 def kernelPartialIntegralAtOne : Nat -> Rat
   | 0 => 1
   | n + 1 => kernelPartialIntegralAtOne n + kernelTermIntegralAtOne (n + 1)
+
+/-- Integral over `[p,r]` of the finite arctangent-kernel truncation
+`1 - x^2 + x^4 - ... + (-x^2)^n`. -/
+def kernelPartialIntegralBetween (p r : Rat) : Nat -> Rat
+  | 0 => r - p
+  | n + 1 => kernelPartialIntegralBetween p r n +
+      kernelTermIntegralBetween p r (n + 1)
 
 private theorem neg_one_pow_even (n : Nat) :
     (-1 : Rat) ^ (2 * n) = 1 := by
@@ -161,6 +174,59 @@ theorem kernelPartialIntegralAtOne_even_succ (n : Nat) :
   have hden : 2 * (2 * (n : Rat) + 1 + 1) + 1 = 4 * (n : Rat) + 5 := by
     grind
   rw [hden]
+
+private theorem one_pow_rat (m : Nat) : (1 : Rat) ^ m = 1 := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+      rw [Rat.pow_succ, ih]
+      grind
+
+private theorem zero_pow_rat_succ (m : Nat) : (0 : Rat) ^ (m + 1) = 0 := by
+  rw [Rat.pow_succ]
+  simp
+
+theorem kernelTermIntegralBetween_zero_one (j : Nat) :
+    kernelTermIntegralBetween 0 1 j = kernelTermIntegralAtOne j := by
+  unfold kernelTermIntegralBetween kernelTermIntegralAtOne
+  rw [one_pow_rat]
+  rw [show 2 * j + 1 = 2 * j + 1 by omega]
+  rw [zero_pow_rat_succ]
+  grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem kernelPartialIntegralBetween_zero_one (n : Nat) :
+    kernelPartialIntegralBetween 0 1 n = kernelPartialIntegralAtOne n := by
+  induction n with
+  | zero =>
+      native_decide
+  | succ n ih =>
+      simp [kernelPartialIntegralBetween, kernelPartialIntegralAtOne]
+      rw [ih, kernelTermIntegralBetween_zero_one]
+
+/-- Finite monomial integrals add across an intermediate point. -/
+theorem kernelTermIntegralBetween_split (p q r : Rat) (j : Nat) :
+    kernelTermIntegralBetween p r j =
+      kernelTermIntegralBetween p q j +
+        kernelTermIntegralBetween q r j := by
+  unfold kernelTermIntegralBetween
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Finite arctangent-kernel truncation integrals add across an intermediate
+point. -/
+theorem kernelPartialIntegralBetween_split (p q r : Rat) (n : Nat) :
+    kernelPartialIntegralBetween p r n =
+      kernelPartialIntegralBetween p q n +
+        kernelPartialIntegralBetween q r n := by
+  induction n with
+  | zero =>
+      simp [kernelPartialIntegralBetween]
+      grind [Rat.sub_eq_add_neg]
+  | succ n ih =>
+      simp [kernelPartialIntegralBetween]
+      rw [ih, kernelTermIntegralBetween_split p q r (n + 1)]
+      grind [Rat.add_assoc, Rat.add_comm]
 
 theorem qabs_le_of_between {r b : Rat}
     (hlo : -b <= r) (hhi : r <= b) :

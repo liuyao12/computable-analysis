@@ -89,12 +89,13 @@ arctangent comparison data is available.
 Lean now also identifies the Leibniz endpoints with the integrated odd/even
 finite kernel truncations over `[0,1]` via
 `PiProofs.LeibnizValidity.endpoints_eq_kernelPartialIntegral`.  The concrete
-remaining finite target is
-`PiProofs.LeibnizRectangleKernelBoundsAtOne`: for every stage, prove the
-rectangle lower bound lies below the even kernel-truncation integral and the
-odd kernel-truncation integral lies below the rectangle upper bound.  The
-wrapper `PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds` then gives
-the raw-real equivalence needed by the table route.
+remaining finite target has been sharpened to
+`PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne`:
+prove the even/odd finite kernel-truncation inequalities on each cell of the
+midpoint partition.  Lean sums those cell inequalities to
+`PiProofs.LeibnizRectangleKernelBoundsAtOne`, and the wrapper
+`PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds` then gives the
+raw-real equivalence needed by the table route.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling
