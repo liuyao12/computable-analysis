@@ -67,7 +67,6 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.piMachin}
 \lean{ComputableAnalysis.piCircleArea}
 \lean{ComputableAnalysis.piCircumference}
-\lean{ComputableAnalysis.PiProofs.leibnizValid}
 \lean{ComputableAnalysis.PiProofs.machinValid}
 \lean{ComputableAnalysis.PiProofs.fourArctanOneValid}
 \lean{ComputableAnalysis.PiProofs.areaValid_of_nested_and_shrinking}
@@ -120,7 +119,7 @@ The current score is:
 
 \begin{center}
 \begin{tabular}{p{0.22\textwidth}p{0.12\textwidth}p{0.36\textwidth}cc}
-\textbf{Computation} & \textbf{Blueprint} & \textbf{Description} &
+\textbf{Computation} & \textbf{Blueprint link} & \textbf{Description} &
 \textbf{Definition} & \textbf{Equiv.}\\
 \hline
 \code{piCircleArea} &
@@ -132,7 +131,8 @@ baseline for pi comparisons. &
 \cref{def:circle-circumference-stage-algorithm} &
 Rational polygon circumference using interval square roots for side lengths. &
 \(\times\) & \(\times\)\\
-\multicolumn{5}{l}{\textbf{Arctangent routes}}\\
+\multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
+\cref{def:arctan-area-stage-algorithm,def:arctan-integral,def:arctan-series}.}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
@@ -182,7 +182,8 @@ Euler's Basel series
 Continued fraction for \(4/\pi\), with finite truncations expected to give
 rational bounds. &
 \(\times\) & \(\times\)\\
-\multicolumn{5}{l}{\textbf{Logarithm-at-\(i\) routes}}\\
+\multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
+\cref{def:exp-representations,def:logarithm-integral,thm:euler-identity}.}\\
 \code{-2i * LogSeries(i)} &
 \cref{def:exp-representations} &
 Complex logarithm obtained from power-series exponential data and branch
@@ -236,7 +237,7 @@ Euler's Basel theorem for the geometric pi representative\\
 logarithm-at-\(i\) pi routes &
 \code{exp.logFromIntegral} and future complex \code{Log} representations &
 three \code{Log(i)} constructions, their branch agreement, and Euler identity\\
-arctan-series to Machin &
+\code{4 * arctanSeries(1)} to \code{piMachin} &
 \code{PiProofs.leibnizEqMachin\_of\_machinBranchLaw} &
 Machin branch law\\
 remaining geometric pi validity &

@@ -284,7 +284,6 @@ ComputableAnalysis.ComputableFTA_of_AlgebraicFTA
 ComputableAnalysis.piMachin
 ComputableAnalysis.piCircleArea
 ComputableAnalysis.piCircumference
-ComputableAnalysis.PiProofs.leibnizValid
 ComputableAnalysis.PiProofs.machinValid
 ComputableAnalysis.PiProofs.fourArctanOneValid
 ComputableAnalysis.PiProofs.areaValid_of_nested_and_shrinking
