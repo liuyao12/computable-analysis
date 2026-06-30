@@ -274,11 +274,13 @@ Rational polygon circumference using interval square roots for side lengths. &
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
 \cref{def:arctan-area-stage-algorithm},
 \cref{def:arctan-integral}, \cref{def:arctan-series},
-\cref{thm:leibniz-arctan} for \code{arctanSeries(1)}, and
-\cref{thm:leibniz-machin}.  These are the routes built from the quarter-turn
-arctangent value.  The Leibniz series is counted only through the explicit
-\code{4 * arctanSeries(1)} row, and \code{piMachin} is included through its
-agreement with \code{4 * arctanSeries(1)}.}\\
+\cref{thm:power-series-arctan-area-pi} for
+\code{4 * arctanSeries(1)}, and \cref{thm:leibniz-machin} for
+\code{piMachin}.  These rows first compute arctangent values and then multiply
+or combine them to get pi.  The Leibniz series is represented only by the
+endpoint row \code{4 * arctanSeries(1)}.  The \code{piMachin} row is included
+here because its first bridge is agreement
+with \code{4 * arctanSeries(1)}.}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
@@ -296,7 +298,8 @@ Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
 \(\times\) & \(\times\)\\
 \code{4 * arctanSeries(1)} &
 \cref{def:arctan-series};
-\cref{thm:leibniz-arctan} &
+\cref{thm:leibniz-arctan};
+\cref{thm:power-series-arctan-area-pi} &
 Power-series arctangent at \(1\); at this endpoint its alternating expansion is
 the historical Leibniz series. &
 \(\checkmark\) & \(\times\)\\
@@ -304,7 +307,7 @@ the historical Leibniz series. &
 \cref{thm:machin-tangent}; \cref{thm:leibniz-machin} &
 Machin's arctangent combination
 \(4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\),
-placed here because it first compares with
+grouped with the arctangent routes because its comparison first passes through
 \(4\arctan_{\mathrm{series}}(1)\). &
 \(\checkmark\) & \(\times\)\\
 \code{6 * arcsinIntegral(1/2)} &
@@ -332,21 +335,27 @@ Continued fraction for \(4/\pi\), with finite truncations expected to give
 rational bounds. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
-the single formula \(\pi=-2i\log(i)\), tested through different definitions
-or computations of \(\log(i)\) in \cref{def:complex-log-series-at-i},
+the single formula \(\pi=-2i\log(i)\), tested through several different
+definitions or computations of \(\log(i)\) in
+\cref{thm:log-at-i-pi-routes}, \cref{def:complex-log-series-at-i},
 \cref{def:complex-log-path-integral-at-i},
-\cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}.}\\
+\cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}.  These
+rows are meant to test branch control, agreement of logarithm constructions,
+and Euler's identity.}\\
 \code{-2i * LogSeries(i)} &
-\cref{def:complex-log-series-at-i}; \cref{thm:euler-identity} &
+\cref{def:complex-log-series-at-i};
+\cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
 Complex logarithm obtained from local power-series exponential data and a
 certified branch taking \(i\) back to a quarter turn. &
 \(\times\) & \(\times\)\\
 \code{-2i * LogPathIntegral(i)} &
-\cref{def:complex-log-path-integral-at-i} &
+\cref{def:complex-log-path-integral-at-i};
+\cref{thm:log-at-i-pi-routes} &
 Complex logarithm as a path integral of \(dz/z\) from \(1\) to \(i\). &
 \(\times\) & \(\times\)\\
 \code{-2i * LogInvExp(i)} &
-\cref{def:complex-log-inv-exp-at-i}; \cref{thm:euler-identity} &
+\cref{def:complex-log-inv-exp-at-i};
+\cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
 Logarithm as the chosen inverse branch of complex exponential, with Euler
 identity proving the branch value at \(i\). &
 \(\times\) & \(\times\)
