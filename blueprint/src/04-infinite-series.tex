@@ -75,6 +75,8 @@ equivalence.
 \label{thm:power-series-arctan-area-pi}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement}
+\lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
 \uses{thm:leibniz-arctan,thm:geometric-arctan-one-area-pi}
 Once the power-series arctangent has been compared with the geometric
 sector-area arctangent on the unit interval, the area definition of \(\pi\) is
@@ -83,7 +85,9 @@ also equivalent to \(4\arctan_{\mathrm{series}}(1)\):
   4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
 \]
 The current Lean theorem keeps the comparison hypothesis explicit as
-\code{ArctanGeometry.PowerSeriesAgreesOnUnit}.
+\code{ArctanGeometry.PowerSeriesAgreesOnUnit}; a kernel-integral comparison
+route now produces that hypothesis using the proved on-domain validity of
+\code{arctanGeom}.
 \end{theorem}
 
 \begin{theorem}[Machin tangent identity]\label{thm:machin-tangent}

@@ -85,6 +85,7 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.arctanGeomOneValid}
 \lean{ComputableAnalysis.ArctanGeometry.positiveLoopRaw_valid_on_unit}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw}
@@ -107,6 +108,8 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleArea}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
+\lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
 \lean{ComputableAnalysis.PiProofs.fourArctanSeriesOneValid}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctanSeries_one}
@@ -243,7 +246,10 @@ uses \code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea}.
 The theorem \code{ArctanGeometry.arctanGeom\_valid\_on\_unit} now verifies the
 geometric arctangent loop itself for all rational \(0\le x\le1\), although this
 does not change the count because the \(\pi\)-specialization was already marked
-definition-complete.
+definition-complete.  The companion theorem
+\code{ArctanGeometry.arctanGeom\_valid\_on\_powerSeriesDomain} gives the
+same validity on \(|x|\le1\), so the kernel-comparison route no longer carries
+a separate global geometric-validity assumption.
 The theorem \code{PiProofs.piCircleArea\_equiv\_self} exists for transport,
 but the baseline row is not counted as a comparison target.  The following
 routes are formalized, or at least named as project targets, but still depend

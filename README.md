@@ -55,7 +55,10 @@ The area loop validity package is now formalized as
 `PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
 The geometric arctangent algorithm is also verified on the unit branch as
 `ArctanGeometry.arctanGeom_valid_on_unit`, by direct ordered/nested/shrinking
-proofs for the increment/decrement loop.
+proofs for the increment/decrement loop.  The same validity is packaged on the
+power-series domain `|x| <= 1` as
+`ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`, so the kernel-comparison
+route no longer needs to assume global validity of the geometric arctangent.
 The concrete rectangle-sum arctangent route is also completed through the
 domain-aware theorem
 `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`; the more

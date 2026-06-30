@@ -1950,6 +1950,23 @@ theorem arctanGeom_valid_on_unit
   · simpa [arctanGeom, positiveLoopRaw, hzero, hx0] using
       positiveLoopRaw_valid_on_unit hx0 hx1
 
+theorem arctanGeom_valid_on_powerSeriesDomain
+    {x : Rat} (hx : Elementary.Arctan.powerSeriesDomain x) :
+    (arctanGeom x).Valid := by
+  by_cases hx0 : 0 <= x
+  · have hnotlt : ¬ x < 0 := by grind
+    have hx1 : x <= 1 := by
+      simpa [Elementary.Arctan.powerSeriesDomain, qabs, hnotlt] using hx
+    exact arctanGeom_valid_on_unit hx0 hx1
+  · have hxlt : x < 0 := by grind
+    have hneg0 : 0 <= -x := by grind
+    have hneg1 : -x <= 1 := by
+      simpa [Elementary.Arctan.powerSeriesDomain, qabs, hxlt] using hx
+    have hpos : (positiveLoopRaw (-x)).Valid :=
+      positiveLoopRaw_valid_on_unit hneg0 hneg1
+    have hzero : x ≠ 0 := by grind
+    simpa [arctanGeom, hzero, hx0] using RealRaw.neg_valid hpos
+
 theorem arctanAreaIncrement_eq_circleAreaIncrement (p m q : Rat) :
     arctanAreaIncrement p m q = circleAreaIncrement p m q := rfl
 

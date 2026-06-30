@@ -279,9 +279,12 @@ certifies the unscaled raw real \code{arctanGeom(1)}.
 \label{thm:arctan-area-valid-monotone}
 \lean{ComputableAnalysis.ArctanGeometry.positiveLoopRaw_valid_on_unit}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain}
 \uses{def:arctan-area-stage-algorithm,def:raw-real-order}
 For each rational \(x\in[0,1]\), \code{arctanGeom(x,n)} is a valid raw real:
 the geometric lower and upper sector bounds are ordered, nested, and shrinking.
+This has also been packaged on the symmetric power-series domain \(|x|\le1\),
+using oddness to reduce the negative branch to the positive loop.
 Moreover, the resulting function should be monotone: if
 \(0\le x\le y\le1\), then
 \[

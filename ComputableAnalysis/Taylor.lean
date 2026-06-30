@@ -327,7 +327,6 @@ def GeometryEqualsKernelIntegral (data : KernelIntegralData) : Prop :=
 structure KernelComparisonRoute where
   data : KernelIntegralData
   powerSeries_valid : forall (x : Rat) (_hx : unitDomain x), (arctan x).Valid
-  geometric_valid : ArctanGeometry.Valid
   powerSeries_eq_kernel : PowerSeriesEqualsKernelIntegral data
   geometric_eq_kernel : GeometryEqualsKernelIntegral data
 
@@ -339,9 +338,8 @@ theorem powerSeriesAgreesOnUnit_of_kernelComparisonRoute
     route.powerSeries_valid x hx
   have hkValid : (kernelIntegralRaw x (route.data.integralAt x hx)).Valid :=
     kernelIntegralRaw_valid x (route.data.integralAt x hx)
-  have hgeomValid : (ArctanGeometry.arctanGeom x).Valid := by
-    simpa [RealRaw.Valid, ArctanGeometry.functionRaw] using
-      route.geometric_valid x (by trivial)
+  have hgeomValid : (ArctanGeometry.arctanGeom x).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain hx
   exact RealRaw.equiv_trans
     hpsValid hkValid hgeomValid
     (route.powerSeries_eq_kernel x hx)

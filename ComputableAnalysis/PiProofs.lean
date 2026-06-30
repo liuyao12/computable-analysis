@@ -1090,8 +1090,7 @@ theorem leibnizEqMachin_of_geometricRoute_on_unit
 theorem leibnizEqMachin_of_kernelComparisonRoute
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) : LeibnizEqMachin :=
-  leibnizEqMachin_of_geometricRoute
-    route.geometric_valid
+  leibnizEqMachin_of_geometricRoute_on_unit
     (MachinIdentity.powerSeriesGeometryAtMachinInputs_of_agreement
       (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
         route))
@@ -1395,11 +1394,15 @@ theorem leibnizEqArea_of_powerSeriesGeometryAgreement
     LeibnizEqArea :=
   piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree
 
+theorem leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    LeibnizEqArea :=
+  piLeibniz_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree
+
 theorem leibnizEqArea_of_kernelComparisonRoute
     (route : Taylor.ArctanComparison.KernelComparisonRoute) :
     LeibnizEqArea :=
-  leibnizEqArea_of_powerSeriesGeometryAgreement
-    route.geometric_valid
+  leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit
     (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
       route)
 
