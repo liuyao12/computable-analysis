@@ -2162,9 +2162,59 @@ theorem scaleRat_valid_of_nonneg {r : Rat} {x : RealRaw}
     (hr : 0 <= r) (hx : x.Valid) : (scaleRat r x).Valid :=
   scaleRatCompute_valid_of_nonneg hr hx
 
+private theorem le_of_mul_le_mul_pos_left {r a b : Rat}
+    (hr : 0 < r) (h : r * a <= r * b) : a <= b := by
+  apply Rat.le_of_mul_le_mul_right (c := r)
+  · simpa [Rat.mul_comm] using h
+  · exact hr
+
+theorem scaleRat_width_of_nonneg {r : Rat} (hr : 0 <= r)
+    (x : RealRaw) (n : Nat) :
+    ((scaleRat r x).compute n).width = r * (x.compute n).width := by
+  unfold scaleRat scaleRatCompute QInterval.width
+  simp [hr]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add]
+
+theorem valid_of_scaleRat_valid_of_pos {r : Rat} {x : RealRaw}
+    (hr : 0 < r) (hscale : (scaleRat r x).Valid) : x.Valid := by
+  have hr_nonneg : 0 <= r := Rat.le_of_lt hr
+  constructor
+  · intro n
+    have hs := hscale.1 n
+    rw [scaleRat_width_of_nonneg hr_nonneg x n] at hs
+    have hmul : r * 0 <= r * (x.compute n).width := by
+      simpa using hs
+    exact le_of_mul_le_mul_pos_left hr hmul
+  · constructor
+    · intro n m hnm
+      have hs := hscale.2.1 n m hnm
+      unfold scaleRat scaleRatCompute at hs
+      simp [hr_nonneg] at hs
+      constructor
+      · exact le_of_mul_le_mul_pos_left hr hs.1
+      · constructor
+        · exact le_of_mul_le_mul_pos_left hr hs.2.1
+        · exact le_of_mul_le_mul_pos_left hr hs.2.2
+    · intro eps
+      let scaled : QPos := ⟨r * eps.val, Rat.mul_pos hr eps.property⟩
+      obtain ⟨N, hN⟩ := hscale.2.2 scaled
+      refine ⟨N, ?_⟩
+      intro n hn
+      have hw := hN n hn
+      rw [scaleRat_width_of_nonneg hr_nonneg x n] at hw
+      have hmul : r * (x.compute n).width <= r * eps.val := by
+        simpa [scaled] using hw
+      exact le_of_mul_le_mul_pos_left hr hmul
+
 theorem natScale_valid (n : Nat) {x : RealRaw}
     (hx : x.Valid) : (n * x).Valid :=
   scaleRat_valid_of_nonneg (Rat.natCast_nonneg : 0 <= (n : Rat)) hx
+
+theorem valid_of_natScale_valid {n : Nat} {x : RealRaw}
+    (hn : 0 < n) (hscale : ((n : Nat) * x : RealRaw).Valid) : x.Valid := by
+  change (scaleRat (n : Rat) x).Valid at hscale
+  exact valid_of_scaleRat_valid_of_pos
+    ((Rat.natCast_pos).2 hn) hscale
 
 theorem scaleRat_equiv_of_nonneg {r : Rat} {x y : RealRaw}
     (hr : 0 <= r) (hxy : x.Equiv y) :

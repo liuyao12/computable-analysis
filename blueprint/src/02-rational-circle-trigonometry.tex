@@ -261,6 +261,7 @@ than by taking area or derivative facts as primitives.
 \begin{theorem}[Geometric arctangent gives the area definition of pi]
 \label{thm:geometric-arctan-one-area-pi}
 \lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
+\lean{ComputableAnalysis.PiProofs.arctanGeomOneValid}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
 \uses{def:circle-area-stage-algorithm,def:geometric-arctan}
@@ -270,6 +271,8 @@ The geometric sector-area arctangent satisfies
 \]
 Lean proves this by transporting the verified \code{piCircleArea} interval
 algorithm across the same-stage equality with \code{4 * arctanGeom(1)}.
+The positive-scaling converse in \cref{prop:raw-arithmetic-valid} then also
+certifies the unscaled raw real \code{arctanGeom(1)}.
 \end{theorem}
 
 \begin{theorem}[Arctangent validity and monotonicity]

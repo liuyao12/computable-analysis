@@ -82,6 +82,7 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_self}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
 \lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
+\lean{ComputableAnalysis.PiProofs.arctanGeomOneValid}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne}
@@ -255,7 +256,8 @@ increment/decrement loop.  It is directly verified by
 \code{PiProofs.AreaLoopValidity.areaValid}, which proves ordered intervals,
 nesting, and width shrinkage for the public baseline.  The same proof now
 verifies \code{4 * arctanGeom(1)} through
-\code{PiProofs.fourArctanGeomOneValid}, and same-stage equality gives
+\code{PiProofs.fourArctanGeomOneValid}; the positive-scaling converse gives
+\code{PiProofs.arctanGeomOneValid}, and same-stage equality gives
 \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}.  The bridge
 \code{PiProofs.PiCircleAreaPolygonAgreement} remains an internal finite-geometry
 target for circumference and Archimedes estimates, not a separate pi
@@ -292,6 +294,7 @@ computation in the scoreboard.
   \code{PiProofs.AreaWidthsShrink},
   \code{PiProofs.AreaLoopValidity.areaValid},
   \code{PiProofs.fourArctanGeomOneValid},
+  \code{PiProofs.arctanGeomOneValid},
   \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea},
   \code{PiProofs.PiCircleAreaPolygonAgreement},
   \code{PiProofs.areaValid\_of\_nested\_and\_shrinking},

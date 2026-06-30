@@ -3808,6 +3808,11 @@ theorem fourArctanGeomOneValid :
   rw [hcompute]
   simpa [AreaValid] using AreaLoopValidity.areaValid
 
+theorem arctanGeomOneValid :
+    (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+  RealRaw.valid_of_natScale_valid (by omega : 0 < (4 : Nat))
+    fourArctanGeomOneValid
+
 theorem four_arctanGeom_one_equiv_piCircleArea :
     (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Equiv
       piCircleArea) := by
