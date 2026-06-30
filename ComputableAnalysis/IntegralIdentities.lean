@@ -220,6 +220,14 @@ theorem oneOverOnePlusSquareOnInterval_valid (a b : Rat) :
     (oneOverOnePlusSquareOnInterval a b).toRealFunRaw.Valid :=
   FunctionOnInterval.toRealFunRaw_valid _
 
+theorem oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity
+    (u : Rat) (h : oneOverOnePlusSquareRaw.definedAt u) (n : Nat) :
+    oneOverOnePlusSquareRaw.compute u h n =
+      { lo := RationalCircle.Stage.sectorAreaDensity u,
+        hi := RationalCircle.Stage.sectorAreaDensity u } := by
+  rw [RationalCircle.Stage.sectorAreaDensity_eq_one_over_one_plus_square]
+  simp [oneOverOnePlusSquareRaw]
+
 /-- The theorem target for the integral arctangent comparison on `[0, x]`.
 It says that the integral of `1 / (1 + t^2)` computes the chosen arctangent
 branch. -/

@@ -275,6 +275,41 @@ theorem point_cross_nonneg_of_nonneg_of_le
   rw [Rat.div_def]
   exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
 
+/-- Derivative of the rational circle parametrization
+`u ↦ ((1-u^2)/(1+u^2), 2u/(1+u^2))`.  This is an exact rational function,
+not a limiting construction. -/
+def pointDerivative (u : Rat) : PiCirclePoint :=
+  let d := 1 + u * u
+  { x := (-4 * u) / (d * d),
+    y := (2 * (1 - u * u)) / (d * d) }
+
+/-- The signed area speed of the parametrized unit-circle sector. -/
+def sectorAreaSpeed (u : Rat) : Rat :=
+  cross (point u) (pointDerivative u)
+
+/-- The unit-sector area density: half of the signed area speed. -/
+def sectorAreaDensity (u : Rat) : Rat :=
+  sectorAreaSpeed u / 2
+
+theorem sectorAreaSpeed_eq_two_over_one_plus_square (u : Rat) :
+    sectorAreaSpeed u = 2 / (1 + u * u) := by
+  unfold sectorAreaSpeed pointDerivative cross point
+  simp
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  have hdpos : 0 < 1 + u * u := one_add_square_pos u
+  have hdne : 1 + u * u ≠ 0 := Rat.ne_of_gt hdpos
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem sectorAreaDensity_eq_one_over_one_plus_square (u : Rat) :
+    sectorAreaDensity u = 1 / (1 + u * u) := by
+  unfold sectorAreaDensity
+  rw [sectorAreaSpeed_eq_two_over_one_plus_square]
+  rw [Rat.div_def, Rat.div_def]
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 private theorem rat_sq_nonneg (x : Rat) : 0 <= sq x := by
   unfold sq
   by_cases hx : 0 <= x

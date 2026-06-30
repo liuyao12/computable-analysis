@@ -225,6 +225,37 @@ alias of \code{piCircleArea}.  The special case \(x=1\) is related to
 geometric identity \(\pi=4\arctan(1)\).
 \end{definition}
 
+\begin{theorem}[Sector-area density]
+\label{thm:sector-area-density}
+\lean{ComputableAnalysis.RationalCircle.Stage.pointDerivative}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaSpeed}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaDensity}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaSpeed_eq_two_over_one_plus_square}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaDensity_eq_one_over_one_plus_square}
+\uses{rem:rational-circle-point}
+\leanok
+For the rational parametrization \(P(u)=(X(u),Y(u))\), the exact derivative is
+\[
+  P'(u)=
+  \left(
+    \frac{-4u}{(1+u^2)^2},
+    \frac{2(1-u^2)}{(1+u^2)^2}
+  \right).
+\]
+The signed area speed of the sector is
+\[
+  X(u)Y'(u)-Y(u)X'(u)=\frac{2}{1+u^2}.
+\]
+Therefore the unit-sector area density is
+\[
+  \frac12\bigl(X(u)Y'(u)-Y(u)X'(u)\bigr)
+  =
+  \frac{1}{1+u^2}.
+\]
+This is the exact algebraic bridge from the rational-circle exhaustion
+algorithm to the integral kernel used in Chapter~\ref{ch:integrals}.
+\end{theorem}
+
 \begin{theorem}[Geometric arctangent gives the area definition of pi]
 \label{thm:geometric-arctan-one-area-pi}
 \lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}

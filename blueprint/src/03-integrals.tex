@@ -121,7 +121,8 @@ endpoint-difference raw real.
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval_valid}
-\uses{def:function-on-interval-to-realfunraw}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity}
+\uses{def:function-on-interval-to-realfunraw,thm:sector-area-density}
 \leanok
 The rational kernel
 \[
@@ -129,7 +130,9 @@ The rational kernel
 \]
 is total on rational inputs, since \(1+x^2>0\).  Lean exposes it both as a
 partial raw function with trivial domain and as a certified
-\code{FunctionOnInterval} on any rational interval.
+\code{FunctionOnInterval} on any rational interval.  It also proves that this
+raw kernel computes the exact sector-area density of the rational circle
+parametrization from \cref{thm:sector-area-density}.
 \end{definition}
 
 \begin{definition}[Arctangent as an integral]
@@ -151,6 +154,9 @@ Define another arctangent representative by
 \[
   \arctan_{\int}(x)=\int_0^x \frac{dt}{1+t^2}.
 \]
+The preceding density calculation shows why this is the right kernel: it is
+the differential area swept by the same rational parametrized circle sectors
+used by \(\arctan_{\mathrm{geom}}\).
 This gives a new computation of \(\pi\) via
 \[
   \pi \Equiv 4\arctan_{\int}(1).
