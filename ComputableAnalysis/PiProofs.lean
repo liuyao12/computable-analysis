@@ -2684,6 +2684,12 @@ theorem four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
   simpa [arctanSeries] using
     four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
+    (route : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne
+    (Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt route)
+
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
@@ -2709,6 +2715,13 @@ theorem piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement
   RealRaw.equiv_symm
     (four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
       hagree)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne
+    (route : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
+      route)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
@@ -3980,6 +3993,17 @@ theorem piCircleArea_equiv_four_arctanGeom_one :
     piCircleArea.Equiv
       (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
+
+theorem leibnizEqArea_of_kernelComparisonAtOne
+    (route : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)) :
+    LeibnizEqArea :=
+  RealRaw.equiv_trans
+    leibnizValid
+    fourArctanSeriesOneValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piLeibniz_equiv_four_arctanSeries_one
+    (four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
+      route)
 
 theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (((4 : Nat) *

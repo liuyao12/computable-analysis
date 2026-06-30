@@ -74,8 +74,13 @@ equivalence.
 \begin{theorem}[Power-series arctangent agrees with area pi]
 \label{thm:power-series-arctan-area-pi}
 \lean{ComputableAnalysis.ArctanGeometry.PowerSeriesAgreesAt}
+\lean{ComputableAnalysis.Taylor.ArctanComparison.KernelComparisonAt}
+\lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
@@ -88,11 +93,11 @@ also equivalent to \(4\arctan_{\mathrm{series}}(1)\):
   4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
 \]
 The current Lean theorem keeps the comparison hypothesis explicit as
-\code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The older unit-interval
-hypothesis \code{ArctanGeometry.PowerSeriesAgreesOnUnit} still feeds this
-pointwise bridge, and a kernel-integral comparison route produces the
-unit-interval hypothesis using the proved on-domain validity of
-\code{arctanGeom}.
+\code{Taylor.ArctanComparison.KernelComparisonAt 1}.  This pointwise
+kernel-integral route produces \code{ArctanGeometry.PowerSeriesAgreesAt 1}.
+The older unit-interval hypothesis
+\code{ArctanGeometry.PowerSeriesAgreesOnUnit} still feeds the same bridge when
+broader arctangent comparison data is available.
 \end{theorem}
 
 \begin{theorem}[Machin tangent identity]\label{thm:machin-tangent}

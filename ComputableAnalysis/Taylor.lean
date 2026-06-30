@@ -324,6 +324,26 @@ def GeometryEqualsKernelIntegral (data : KernelIntegralData) : Prop :=
     (ArctanGeometry.arctanGeom x).Equiv
       (kernelIntegralRaw x (data.integralAt x hx))
 
+structure KernelComparisonAt (x : Rat) where
+  domain : unitDomain x
+  integral : KernelIntegralAt x
+  powerSeries_valid : (arctan x).Valid
+  powerSeries_eq_kernel : (arctan x).Equiv (kernelIntegralRaw x integral)
+  geometric_eq_kernel :
+    (ArctanGeometry.arctanGeom x).Equiv (kernelIntegralRaw x integral)
+
+theorem powerSeriesAgreesAt_of_kernelComparisonAt
+    {x : Rat} (route : KernelComparisonAt x) :
+    ArctanGeometry.PowerSeriesAgreesAt x := by
+  have hkValid : (kernelIntegralRaw x route.integral).Valid :=
+    kernelIntegralRaw_valid x route.integral
+  have hgeomValid : (ArctanGeometry.arctanGeom x).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain route.domain
+  exact RealRaw.equiv_trans
+    route.powerSeries_valid hkValid hgeomValid
+    route.powerSeries_eq_kernel
+    (RealRaw.equiv_symm route.geometric_eq_kernel)
+
 structure KernelComparisonRoute where
   data : KernelIntegralData
   powerSeries_valid : forall (x : Rat) (_hx : unitDomain x), (arctan x).Valid
@@ -344,6 +364,16 @@ theorem powerSeriesAgreesOnUnit_of_kernelComparisonRoute
     hpsValid hkValid hgeomValid
     (route.powerSeries_eq_kernel x hx)
     (RealRaw.equiv_symm (route.geometric_eq_kernel x hx))
+
+theorem powerSeriesAgreesAt_of_kernelComparisonRoute
+    (route : KernelComparisonRoute) {x : Rat} (hx : unitDomain x) :
+    ArctanGeometry.PowerSeriesAgreesAt x :=
+  powerSeriesAgreesAt_of_kernelComparisonAt
+    { domain := hx
+      integral := route.data.integralAt x hx
+      powerSeries_valid := route.powerSeries_valid x hx
+      powerSeries_eq_kernel := route.powerSeries_eq_kernel x hx
+      geometric_eq_kernel := route.geometric_eq_kernel x hx }
 
 theorem geometricAgreesWithPowerSeriesOnUnit_of_kernelComparisonRoute
     (route : KernelComparisonRoute) :
