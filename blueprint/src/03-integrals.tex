@@ -171,6 +171,55 @@ representation is total, so their overlap is the nonnegative rational branch.
 The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \end{definition}
 
+\begin{theorem}[Finite arctangent--integral comparison]
+\label{thm:finite-arctan-integral-comparison}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep}
+\lean{ComputableAnalysis.ArctanGeometry.geometricLowerStep}
+\lean{ComputableAnalysis.ArctanGeometry.geometricUpperStep}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.geometricCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellInterval_contains_geometricCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellInterval_overlaps_geometricCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.NonnegativeIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
+\uses{def:one-over-one-plus-square-kernel,def:geometric-arctan}
+\leanok
+On a nonnegative cell \(0\le p\le r\), let
+\[
+  L_{p,r}=(r-p)\frac{1}{1+r^2},
+  \qquad
+  R_{p,r}=(r-p)\frac{1}{1+p^2}
+\]
+be the lower and upper rectangle contributions for the decreasing kernel
+\(1/(1+u^2)\).  Let
+\[
+  G_{p,r}=
+    \frac{(r-p)(1+pr)}{(1+p^2)(1+r^2)},
+  \qquad
+  U_{p,r}=\frac{r-p}{1+pr}
+\]
+be the corresponding inscribed and circumscribed geometric sector
+contributions.  Lean proves the finite inequalities
+\[
+  L_{p,r}\le G_{p,r},\qquad
+  U_{p,r}\le R_{p,r},
+  \qquad
+  L_{p,r}\le U_{p,r},\qquad
+  G_{p,r}\le R_{p,r}.
+\]
+Consequently, for every finite nonnegative ordered partition, the rectangle
+sum interval contains the geometric sector-sum interval, and in particular the
+two finite intervals overlap.  This is the finite algebraic core of the
+comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\); the remaining work is
+to connect the project's integral-construction schedule and the
+\code{arctanGeom} refinement loop to these sums.
+\end{theorem}
+
 \begin{theorem}[Integral arctangent gives another pi computation]
 \label{thm:arctan-integral-pi}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement}
@@ -178,7 +227,7 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_geom_agreement}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_function_agreement}
-\uses{def:arctan-integral,thm:geometric-arctan-one-area-pi}
+\uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
 Any certified integral construction for
 \[
   \arctan_{\int}(1)=\int_0^1 \frac{\dd t}{1+t^2}
