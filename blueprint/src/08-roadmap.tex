@@ -125,7 +125,7 @@ The current score is:
 \]
 
 \begin{center}
-\begin{tabular}{p{0.22\textwidth}p{0.12\textwidth}p{0.36\textwidth}cc}
+\begin{tabular}{p{0.22\textwidth}p{0.14\textwidth}p{0.34\textwidth}cc}
 \textbf{Computation} & \textbf{Blueprint link} & \textbf{Description} &
 \textbf{Definition} & \textbf{Equiv.}\\
 \hline
@@ -138,8 +138,10 @@ baseline for pi comparisons. &
 \cref{def:circle-circumference-stage-algorithm} &
 Rational polygon circumference using interval square roots for side lengths. &
 \(\times\) & \(\times\)\\
-\multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
-\cref{def:arctan-area-stage-algorithm,def:arctan-integral,def:arctan-series}.}\\
+\multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent-to-pi routes}:
+\cref{def:arctan-area-stage-algorithm},
+\cref{def:arctan-integral}, \cref{thm:leibniz-arctan}, and
+\cref{thm:leibniz-machin}.}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
@@ -156,12 +158,12 @@ Domain-aware \code{ConstructionFor} packaging of midpoint rectangle sums for
 Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
 \(\times\) & \(\times\)\\
 \code{4 * arctanSeries(1)} &
-\cref{def:arctan-series} &
-Power-series arctangent at \(1\), i.e. the Leibniz alternating series written
-as an arctangent computation. &
+\cref{thm:leibniz-arctan} &
+Power-series arctangent at \(1\); this is the Leibniz alternating series, so
+there is no separate \code{piLeibniz} row. &
 \(\checkmark\) & \(\times\)\\
 \code{piMachin} &
-\cref{thm:machin-tangent} &
+\cref{thm:leibniz-machin} &
 Machin's arctangent combination
 \(4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\). &
 \(\checkmark\) & \(\times\)\\
@@ -190,7 +192,8 @@ Continued fraction for \(4/\pi\), with finite truncations expected to give
 rational bounds. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
-\cref{def:exp-representations,def:logarithm-integral,thm:euler-identity}.}\\
+\cref{def:exp-representations}, \cref{def:logarithm-integral}, and
+\cref{thm:euler-identity}.}\\
 \code{-2i * LogSeries(i)} &
 \cref{def:exp-representations} &
 Complex logarithm obtained from power-series exponential data and branch
@@ -210,7 +213,9 @@ identity locating \(i\). &
 
 The arctangent block records the geometric, integral-rectangle,
 general-integral, power-series, and Machin algorithms built from arctangent
-values.  The concrete rectangle row is completed; the general
+values.  The power-series row is deliberately named
+\code{4 * arctanSeries(1)}; the Leibniz series is its historical expansion, not
+a second pi computation.  The concrete rectangle row is completed; the general
 \code{arctanIntegral(1)} row remains pending until the older point-Riemann
 wrapper is identified with that rectangle schedule.  The logarithm-at-\(i\) block
 records a separate family of future computations: each one should identify
