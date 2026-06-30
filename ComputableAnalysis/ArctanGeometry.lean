@@ -111,6 +111,80 @@ def integralCellInterval (p r : Rat) : QInterval :=
 def geometricCellInterval (p r : Rat) : QInterval :=
   { lo := geometricLowerStep p r, hi := geometricUpperStep p r }
 
+private theorem containsInterval_refl (I : QInterval) :
+    I.ContainsInterval I := by
+  unfold QInterval.ContainsInterval
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
+private theorem containsInterval_trans {I J K : QInterval}
+    (hIJ : I.ContainsInterval J) (hJK : J.ContainsInterval K) :
+    I.ContainsInterval K := by
+  unfold QInterval.ContainsInterval at *
+  exact ⟨Rat.le_trans hIJ.1 hJK.1, Rat.le_trans hJK.2 hIJ.2⟩
+
+theorem integralKernel_antitone_nonneg
+    {p q : Rat} (hp0 : 0 <= p) (hpq : p <= q) :
+    integralKernel q <= integralKernel p := by
+  have hsq : 1 + p * p <= 1 + q * q := by
+    have hq0 : 0 <= q := Rat.le_trans hp0 hpq
+    have hleft : p * p <= p * q :=
+      Rat.mul_le_mul_of_nonneg_left hpq hp0
+    have hright : p * q <= q * q :=
+      Rat.mul_le_mul_of_nonneg_right hpq hq0
+    have hmul : p * p <= q * q := Rat.le_trans hleft hright
+    grind
+  exact one_div_le_one_div_of_pos_of_le
+    (RationalCircle.Stage.one_add_square_pos p) hsq
+
+theorem integralLowerStep_le_integralUpperStep
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
+    integralLowerStep p r <= integralUpperStep p r := by
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hk : integralKernel r <= integralKernel p :=
+    integralKernel_antitone_nonneg hp0 hpr
+  unfold integralLowerStep integralUpperStep
+  exact Rat.mul_le_mul_of_nonneg_left hk hlen
+
+theorem integralLowerStep_refine
+    {p q r : Rat} (hp0 : 0 <= p) (hpq : p <= q) (hqr : q <= r) :
+    integralLowerStep p r <=
+      integralLowerStep p q + integralLowerStep q r := by
+  have hqp : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hrq : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hq0 : 0 <= q := Rat.le_trans hp0 hpq
+  have hk : integralKernel r <= integralKernel q :=
+    integralKernel_antitone_nonneg hq0 hqr
+  unfold integralLowerStep
+  calc
+    (r - p) * integralKernel r
+        = (q - p) * integralKernel r + (r - q) * integralKernel r := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ <= (q - p) * integralKernel q + (r - q) * integralKernel r := by
+          exact rat_add_le_add
+            (Rat.mul_le_mul_of_nonneg_left hk hqp)
+            (Rat.le_refl)
+    _ = (q - p) * integralKernel q + (r - q) * integralKernel r := rfl
+
+theorem integralUpperStep_refine
+    {p q r : Rat} (hp0 : 0 <= p) (hpq : p <= q) (hqr : q <= r) :
+    integralUpperStep p q + integralUpperStep q r <=
+      integralUpperStep p r := by
+  have hqp : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hrq : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hk : integralKernel q <= integralKernel p :=
+    integralKernel_antitone_nonneg hp0 hpq
+  unfold integralUpperStep
+  calc
+    (q - p) * integralKernel p + (r - q) * integralKernel q
+        <= (q - p) * integralKernel p + (r - q) * integralKernel p := by
+          exact rat_add_le_add
+            (Rat.le_refl)
+            (Rat.mul_le_mul_of_nonneg_left hk hrq)
+    _ = (r - p) * integralKernel p := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 private theorem rat_eq_of_mul_eq_mul_pos {a b c : Rat}
     (hc : 0 < c) (h : a * c = b * c) : a = b := by
   have hcne : c ≠ 0 := Rat.ne_of_gt hc
@@ -442,6 +516,28 @@ theorem geometricUpperSum_le_integralUpperSum
         (geometricUpperStep_le_integralUpperStep hp0 hpr)
         (ih hrest)
 
+theorem integralLowerSum_le_integralUpperSum
+    (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    integralLowerSum intervals <= integralUpperSum intervals := by
+  induction intervals with
+  | nil => simp [integralLowerSum, integralUpperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hrest⟩
+      simp [integralLowerSum, integralUpperSum]
+      exact rat_add_le_add
+        (integralLowerStep_le_integralUpperStep hp0 hpr)
+        (ih hrest)
+
+theorem integralSumInterval_ordered
+    (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    0 <= (integralSumInterval intervals).width := by
+  unfold integralSumInterval QInterval.width
+  have hle := integralLowerSum_le_integralUpperSum intervals hwf
+  grind [Rat.sub_eq_add_neg]
+
 theorem integralSumInterval_contains_geometricSumInterval
     (intervals : List (Rat × Rat))
     (hwf : NonnegativeIntervals intervals) :
@@ -597,6 +693,92 @@ private theorem refineAux_hi_eq_geometricUpperSum_extra
       simp [AreaLoopState.refineAux, geometricUpperSum]
       simpa [extra', geometricUpperSum, Rat.add_assoc, Rat.add_comm] using htail
 
+private theorem refineAux_integralLowerSum_mono
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    integralLowerSum intervals <=
+      integralLowerSum
+        (AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaLoopState.refineAux, integralLowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have htail :=
+        ih (lo + arctanAreaIncrement p q r)
+          (hi - arctanAreaDecrement p q r) hrest
+      have hhead := integralLowerStep_refine hp0 hpq hqr
+      simp [AreaLoopState.refineAux, integralLowerSum]
+      calc
+        integralLowerStep p r + integralLowerSum rest
+            <= (integralLowerStep p q + integralLowerStep q r) +
+                integralLowerSum rest :=
+              rat_add_le_add hhead (Rat.le_refl)
+        _ <= (integralLowerStep p q + integralLowerStep q r) +
+              integralLowerSum
+                (AreaLoopState.refineAux
+                  (lo + arctanAreaIncrement p q r)
+                  (hi - arctanAreaDecrement p q r) rest).intervals :=
+              rat_add_le_add (Rat.le_refl) htail
+        _ = integralLowerStep p q +
+              (integralLowerStep q r +
+                integralLowerSum
+                  (AreaLoopState.refineAux
+                    (lo + arctanAreaIncrement p q r)
+                    (hi - arctanAreaDecrement p q r) rest).intervals) := by
+              grind [Rat.add_assoc, Rat.add_comm]
+
+private theorem refineAux_integralUpperSum_anti
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    integralUpperSum
+        (AreaLoopState.refineAux lo hi intervals).intervals <=
+      integralUpperSum intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaLoopState.refineAux, integralUpperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have htail :=
+        ih (lo + arctanAreaIncrement p q r)
+          (hi - arctanAreaDecrement p q r) hrest
+      have hhead := integralUpperStep_refine hp0 hpq hqr
+      simp [AreaLoopState.refineAux, integralUpperSum]
+      calc
+        integralUpperStep p q +
+              (integralUpperStep q r +
+                integralUpperSum
+                  (AreaLoopState.refineAux
+                    (lo + arctanAreaIncrement p q r)
+                    (hi - arctanAreaDecrement p q r) rest).intervals)
+            = (integralUpperStep p q + integralUpperStep q r) +
+                integralUpperSum
+                  (AreaLoopState.refineAux
+                    (lo + arctanAreaIncrement p q r)
+                    (hi - arctanAreaDecrement p q r) rest).intervals := by
+              grind [Rat.add_assoc, Rat.add_comm]
+        _ <= (integralUpperStep p q + integralUpperStep q r) +
+              integralUpperSum rest :=
+              rat_add_le_add (Rat.le_refl) htail
+        _ <= integralUpperStep p r + integralUpperSum rest :=
+              rat_add_le_add hhead (Rat.le_refl)
+
 def refineAreaLoopState (state : AreaLoopState) : AreaLoopState :=
   AreaLoopState.refineAux state.lo state.hi state.intervals
 
@@ -637,9 +819,31 @@ theorem refineAreaLoopState_hi_eq_geometricUpperSum
       unfold refineAreaLoopState
       grind
 
+theorem refineAreaLoopState_integralSumInterval_refines
+    (state : AreaLoopState)
+    (hwf : NonnegativeIntervals state.intervals) :
+    (integralSumInterval state.intervals).ContainsInterval
+      (integralSumInterval (refineAreaLoopState state).intervals) := by
+  cases state with
+  | mk lo hi intervals =>
+      unfold QInterval.ContainsInterval integralSumInterval refineAreaLoopState
+      exact ⟨refineAux_integralLowerSum_mono lo hi intervals hwf,
+        refineAux_integralUpperSum_anti lo hi intervals hwf⟩
+
 def iterateAreaLoopState : Nat -> AreaLoopState -> AreaLoopState
   | 0, state => state
   | n + 1, state => iterateAreaLoopState n (refineAreaLoopState state)
+
+theorem iterateAreaLoopState_succ_refine
+    (n : Nat) (state : AreaLoopState) :
+    iterateAreaLoopState (n + 1) state =
+      refineAreaLoopState (iterateAreaLoopState n state) := by
+  induction n generalizing state with
+  | zero =>
+      rfl
+  | succ n ih =>
+      simp [iterateAreaLoopState]
+      exact ih (refineAreaLoopState state)
 
 theorem iterateAreaLoopState_intervals_nonnegative
     (n : Nat) (state : AreaLoopState)
@@ -687,6 +891,12 @@ def arctanAreaLoopInitial (x : Rat) : AreaLoopState :=
 def arctanAreaLoopState (x : Rat) (n : Nat) : AreaLoopState :=
   iterateAreaLoopState n (arctanAreaLoopInitial x)
 
+theorem arctanAreaLoopState_succ (x : Rat) (n : Nat) :
+    arctanAreaLoopState x (n + 1) =
+      refineAreaLoopState (arctanAreaLoopState x n) := by
+  unfold arctanAreaLoopState
+  exact iterateAreaLoopState_succ_refine n (arctanAreaLoopInitial x)
+
 theorem arctanAreaLoopInitial_intervals_nonnegative
     {x : Rat} (hx : 0 <= x) :
     NonnegativeIntervals (arctanAreaLoopInitial x).intervals := by
@@ -716,6 +926,36 @@ theorem arctanAreaLoop_integralSum_overlaps_geometricSum
   integralSumInterval_overlaps_geometricSumInterval
     (arctanAreaLoopState x n).intervals
     (arctanAreaLoopState_intervals_nonnegative hx n)
+
+theorem arctanAreaLoop_integralSum_ordered
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    0 <= (integralSumInterval (arctanAreaLoopState x n).intervals).width :=
+  integralSumInterval_ordered
+    (arctanAreaLoopState x n).intervals
+    (arctanAreaLoopState_intervals_nonnegative hx n)
+
+theorem arctanAreaLoop_integralSum_step_refines
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    (integralSumInterval (arctanAreaLoopState x n).intervals).ContainsInterval
+      (integralSumInterval (arctanAreaLoopState x (n + 1)).intervals) := by
+  rw [arctanAreaLoopState_succ]
+  exact refineAreaLoopState_integralSumInterval_refines
+    (arctanAreaLoopState x n)
+    (arctanAreaLoopState_intervals_nonnegative hx n)
+
+theorem arctanAreaLoop_integralSum_refines_add
+    {x : Rat} (hx : 0 <= x) (n k : Nat) :
+    (integralSumInterval (arctanAreaLoopState x n).intervals).ContainsInterval
+      (integralSumInterval (arctanAreaLoopState x (n + k)).intervals) := by
+  induction k with
+  | zero =>
+      simp
+      exact containsInterval_refl
+        (integralSumInterval (arctanAreaLoopState x n).intervals)
+  | succ k ih =>
+      rw [show n + (k + 1) = (n + k) + 1 by omega]
+      exact containsInterval_trans ih
+        (arctanAreaLoop_integralSum_step_refines hx (n + k))
 
 private theorem arctanAreaLoopInitial_lo_eq_geometricLowerSum
     (x : Rat) :

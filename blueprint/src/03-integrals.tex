@@ -180,6 +180,9 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.geometricUpperStep}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellInterval}
 \lean{ComputableAnalysis.ArctanGeometry.geometricCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel_antitone_nonneg}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep_refine}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_refine}
 \lean{ComputableAnalysis.ArctanGeometry.geometricLowerStep_refine}
 \lean{ComputableAnalysis.ArctanGeometry.geometricUpperStep_refine}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellInterval_contains_geometricCellInterval}
@@ -187,6 +190,7 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.NonnegativeIntervals}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
@@ -197,6 +201,9 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_overlaps_geometricSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_contains_positiveLoop}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_overlaps_positiveLoop}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_step_refines}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_refines_add}
 \uses{def:one-over-one-plus-square-kernel,def:geometric-arctan}
 \leanok
 On a nonnegative cell \(0\le p\le r\), let
@@ -216,7 +223,10 @@ be the lower and upper rectangle contributions for the decreasing kernel
 be the corresponding inscribed and circumscribed geometric sector
 contributions.  Lean proves the local refinement identities saying that the
 increment/decrement update is exactly the change in the two geometric sums
-when \([p,r]\) is split at \(q\).  It also proves the finite inequalities
+when \([p,r]\) is split at \(q\).  It proves the analogous monotone-kernel
+inequalities saying that lower rectangle sums increase and upper rectangle
+sums decrease under midpoint refinement.  It also proves the finite
+comparison inequalities
 \[
   L_{p,r}\le G_{p,r},\qquad
   U_{p,r}\le R_{p,r},
@@ -230,9 +240,12 @@ two finite intervals overlap.  Lean also proves that every nonnegative
 \code{arctanGeom} refinement stage has such a partition, and that the loop
 lower and upper bounds are exactly the corresponding geometric sums.  Thus the
 rectangle-sum interval contains, and overlaps, the actual \code{arctanGeom}
-stage interval.  This is the finite algebraic core of the comparison
+stage interval.  The rectangle-sum intervals are themselves ordered and nested
+along the actual arctangent loop.  This is the finite algebraic core of the
+comparison
 \(\arctan_{\int}=\arctan_{\mathrm{geom}}\); the remaining work is to connect
-the project's integral-construction schedule to the rectangle sums.
+the project's integral-construction schedule to these rectangle sums and prove
+their widths shrink.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]
