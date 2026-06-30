@@ -1031,6 +1031,98 @@ theorem integralLowerStep_le_kernelPartialIntegralBetween_zero
       Rat.mul_le_mul_of_nonneg_left hk hlen
     _ = r - p := by rw [Rat.mul_one]
 
+theorem kernelPartialIntegralBetween_one_le_integralUpperStep
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 <=
+      ArctanGeometry.integralUpperStep p r := by
+  let L : Rat := r - p
+  let S : Rat := r * r + r * p + p * p
+  let D : Rat := 1 + p * p
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have h3Dpos : 0 < 3 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 3) hDpos
+  have hD1 : 1 <= D := by
+    dsimp [D]
+    have hsq := RationalCircle.Stage.ratSquare_nonneg p
+    grind
+  have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+  have hpp_le_rp : p * p <= r * p :=
+    Rat.mul_le_mul_of_nonneg_right hpr hp0
+  have hrp_le_rr : r * p <= r * r :=
+    Rat.mul_le_mul_of_nonneg_left hpr hr0
+  have hpp_le_rr : p * p <= r * r :=
+    Rat.le_trans hpp_le_rp hrp_le_rr
+  have hthree : 3 * (p * p) <= S := by
+    dsimp [S]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm]
+  have hS0 : 0 <= S := by
+    dsimp [S]
+    exact Rat.add_nonneg
+      (Rat.add_nonneg (Rat.mul_nonneg hr0 hr0) (Rat.mul_nonneg hr0 hp0))
+      (Rat.mul_nonneg hp0 hp0)
+  have hS_le_SD : S <= S * D := by
+    calc
+      S = S * 1 := by grind
+      _ <= S * D := Rat.mul_le_mul_of_nonneg_left hD1 hS0
+  have hthreeSD : 3 * (p * p) <= S * D :=
+    Rat.le_trans hthree hS_le_SD
+  have hbig0 : L * (3 * (p * p)) <= L * (S * D) :=
+    Rat.mul_le_mul_of_nonneg_left hthreeSD hL0
+  have hcube : r ^ 3 - p ^ 3 = L * S := by
+    dsimp [L, S]
+    repeat rw [Rat.pow_succ]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hbig : L * (3 * (p * p)) <= (r ^ 3 - p ^ 3) * D := by
+    rw [hcube]
+    dsimp [D] at hbig0 ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hkernel_formula :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 =
+        (r - p) - (r ^ 3 - p ^ 3) / 3 := by
+    simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+      Taylor.ArctanKernel.kernelTermIntegralBetween]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  have hupper_mul :
+      ArctanGeometry.integralUpperStep p r * (3 * D) = L * 3 := by
+    unfold ArctanGeometry.integralUpperStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 * (3 * D) =
+        L * 3 * D - (r ^ 3 - p ^ 3) * D := by
+    rw [hkernel_formula]
+    rw [Rat.div_def]
+    dsimp [L, D]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 3 * D)
+  · rw [hkernel_mul, hupper_mul]
+    have hrew : L * 3 * D = L * 3 + L * (3 * (p * p)) := by
+      dsimp [D]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+        Rat.add_assoc, Rat.add_comm]
+    calc
+      L * 3 * D - (r ^ 3 - p ^ 3) * D =
+          L * 3 + L * (3 * (p * p)) -
+            (r ^ 3 - p ^ 3) * D := by
+        rw [hrew]
+      _ <= L * 3 + (r ^ 3 - p ^ 3) * D -
+            (r ^ 3 - p ^ 3) * D := by
+          grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      _ = L * 3 := by
+          grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  · exact h3Dpos
+
 theorem evenKernelCellBounds_zero_of_unit
     {intervals : List (Rat × Rat)}
     (h : ArctanGeometry.UnitIntervals intervals) :
@@ -1045,6 +1137,20 @@ theorem evenKernelCellBounds_zero_of_unit
       exact ⟨integralLowerStep_le_kernelPartialIntegralBetween_zero hpr,
         ih hrest⟩
 
+theorem oddKernelCellBounds_one_of_nonnegative
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.NonnegativeIntervals intervals) :
+    OddKernelCellBounds 1 intervals := by
+  induction intervals with
+  | nil =>
+      simp [OddKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp0, hpr, hrest⟩
+      simp [OddKernelCellBounds]
+      exact ⟨kernelPartialIntegralBetween_one_le_integralUpperStep hp0 hpr,
+        ih hrest⟩
+
 theorem evenKernelCellBoundsAtOne_zero :
     EvenKernelCellBounds 0
       (ArctanGeometry.arctanAreaLoopState (1 : Rat) 0).intervals :=
@@ -1054,18 +1160,10 @@ theorem evenKernelCellBoundsAtOne_zero :
 
 theorem oddKernelCellBoundsAtOne_zero :
     OddKernelCellBounds 1
-      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 1).intervals := by
-  simp [ArctanGeometry.arctanAreaLoopState,
-    ArctanGeometry.iterateAreaLoopState,
-    ArctanGeometry.refineAreaLoopState,
-    ArctanGeometry.AreaLoopState.refineAux,
-    ArctanGeometry.arctanAreaLoopInitial,
-    OddKernelCellBounds,
-    ArctanGeometry.integralUpperStep,
-    ArctanGeometry.integralKernel,
-    Taylor.ArctanKernel.kernelPartialIntegralBetween,
-    Taylor.ArctanKernel.kernelTermIntegralBetween]
-  constructor <;> native_decide
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 1).intervals :=
+  oddKernelCellBounds_one_of_nonnegative
+    (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
+      (x := (1 : Rat)) (by native_decide) 1)
 
 def LeibnizRectangleKernelCellBoundsAtOneBase : Prop :=
   EvenKernelCellBounds 0

@@ -114,6 +114,8 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit}
 \lean{ComputableAnalysis.PiProofs.PowerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.LeibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_one_le_integralUpperStep}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_one_of_nonnegative}
 \lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
@@ -292,6 +294,11 @@ definition-complete.  The companion theorem
 \code{ArctanGeometry.arctanGeom\_valid\_on\_powerSeriesDomain} gives the
 same validity on \(|x|\le1\), so the kernel-comparison route no longer carries
 a separate global geometric-validity assumption.
+For the finite Leibniz-to-rectangle bridge, Lean now proves the even
+\(m=0\) lower-cell inequality on every unit partition and the odd \(m=1\)
+upper-cell inequality on every nonnegative ordered partition; these are
+packaged in
+\code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase}.
 The theorem \code{PiProofs.piCircleArea\_equiv\_self} exists for transport,
 but the baseline row is not counted as a comparison target.  The following
 routes are formalized, or at least named as project targets, but still depend
@@ -392,6 +399,8 @@ agreements.
   \code{PiProofs.LeibnizRectangleBridge.EvenKernelCellBounds},
   \code{PiProofs.LeibnizRectangleBridge.OddKernelCellBounds},
   \code{PiProofs.LeibnizRectangleBridge.evenKernelCellBounds\_zero\_of\_unit},
+  \code{PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween\_one\_le\_integralUpperStep},
+  \code{PiProofs.LeibnizRectangleBridge.oddKernelCellBounds\_one\_of\_nonnegative},
   \code{PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne\_zero},
   \code{PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne\_zero},
   \code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneBase},
