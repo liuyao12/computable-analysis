@@ -211,8 +211,15 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piCircumference_compute_width_eq}
 \lean{ComputableAnalysis.PiProofs.circumferenceFanGap}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget}
+\lean{ComputableAnalysis.PiProofs.SegmentBudgetLeAt}
+\lean{ComputableAnalysis.PiProofs.InnerAdjacentSegmentBudgetLe}
+\lean{ComputableAnalysis.PiProofs.OuterAdjacentSegmentBudgetLe}
 \lean{ComputableAnalysis.PiProofs.InnerBoundarySegmentBudgetLe}
 \lean{ComputableAnalysis.PiProofs.OuterBoundarySegmentBudgetLe}
+\lean{ComputableAnalysis.PiProofs.innerBoundaryFrom_consecutiveBudgetLe}
+\lean{ComputableAnalysis.PiProofs.innerBoundarySegmentBudgetLe_of_adjacent}
+\lean{ComputableAnalysis.PiProofs.outerBoundaryFrom_consecutiveBudgetLe}
+\lean{ComputableAnalysis.PiProofs.outerBoundarySegmentBudgetLe_of_adjacent}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget_le_three_stage_mul}
 \lean{ComputableAnalysis.PiProofs.circumferenceFanGap_nonneg}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudget_nonneg}
@@ -223,6 +230,8 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.CircumferenceFanGapLinearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferencePathWidthBudgetLinearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferencePathSegmentUniformLinearBound}
+\lean{ComputableAnalysis.PiProofs.CircumferenceAdjacentSegmentUniformLinearBound}
+\lean{ComputableAnalysis.PiProofs.pathSegmentUniformLinearBound_of_adjacentSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.fanGapPathBudgetLinearBound_of_parts}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound}
@@ -471,9 +480,11 @@ splits into independent fan-gap and path-budget linear bounds via
 has a finite segment-count wrapper
 \code{PiProofs.circumferencePathWidthBudget\_le\_three\_stage\_mul}.  The
 path-budget linear bound is now reduced further to
-\code{PiProofs.CircumferencePathSegmentUniformLinearBound}, which asks for a
-uniform square-root interval budget on every inner and outer segment at each
-dyadic stage.
+\code{PiProofs.CircumferenceAdjacentSegmentUniformLinearBound}, which asks for
+uniform square-root interval budgets only on adjacent inner-chord segments and
+outer tangent entry/exit segments at each dyadic stage.  Lean then promotes
+those local checks to the existing path-segment target by
+\code{PiProofs.pathSegmentUniformLinearBound\_of\_adjacentSegmentUniformLinearBound}.
 
 \section{Lean declaration index}
 

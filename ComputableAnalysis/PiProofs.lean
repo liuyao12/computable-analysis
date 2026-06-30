@@ -2920,6 +2920,30 @@ def ConsecutiveBudgetLe (precision : Nat) (B : Rat) :
             Nat) : Rat)) <= B /\
         ConsecutiveBudgetLe precision B (q :: rest)
 
+def SegmentBudgetLeAt
+    (precision : Nat) (B : Rat) (p q : PiCirclePoint) : Prop :=
+  sqrtUpperBound (pointSegmentNormSq p q) /
+      (((2 ^ sqrtFuel (pointSegmentNormSq p q) (sqrtStageEps precision) :
+        Nat) : Rat)) <= B
+
+def InnerAdjacentSegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  forall k,
+    SegmentBudgetLeAt stage B
+      (circleSamplePoint stage k) (circleSamplePoint stage (k + 1))
+
+def OuterAdjacentSegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  forall k,
+    SegmentBudgetLeAt stage B
+      (circleSamplePoint stage k) (outerTangentPoint stage k) /\
+    SegmentBudgetLeAt stage B
+      (outerTangentPoint stage k) (circleSamplePoint stage (k + 1))
+
+def InnerBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  ConsecutiveBudgetLe stage B (innerBoundary stage)
+
+def OuterBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
+  ConsecutiveBudgetLe stage B (outerBoundary stage)
+
 theorem rationalPointPathLength_width_nil (n : Nat) :
     (rationalPointPathLength [] n).width = 0 := by
   simp [rationalPointPathLength, rationalPointPathLength.totalLength,
@@ -3049,6 +3073,55 @@ theorem pathSegmentCount_outerBoundary (stage : Nat) :
     pathSegmentCount (outerBoundary stage) = 2 * stage := by
   rw [pathSegmentCount_eq_length_pred, outerBoundary_length]
   omega
+
+theorem innerBoundaryFrom_consecutiveBudgetLe
+    (stage : Nat) (B : Rat)
+    (h : InnerAdjacentSegmentBudgetLe stage B)
+    (count k : Nat) :
+    ConsecutiveBudgetLe stage B (innerBoundaryFrom stage k count) := by
+  induction count generalizing k with
+  | zero =>
+      simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+        ConsecutiveBudgetLe]
+  | succ count ih =>
+      cases count with
+      | zero =>
+          simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+            ConsecutiveBudgetLe]
+      | succ count =>
+          simp [innerBoundaryFrom, piCircleAreaPolygon.innerBoundaryFrom,
+            ConsecutiveBudgetLe]
+          exact ⟨by simpa [SegmentBudgetLeAt] using h k, ih (k + 1)⟩
+
+theorem innerBoundarySegmentBudgetLe_of_adjacent
+    {stage : Nat} {B : Rat}
+    (h : InnerAdjacentSegmentBudgetLe stage B) :
+    InnerBoundarySegmentBudgetLe stage B := by
+  unfold InnerBoundarySegmentBudgetLe innerBoundary
+  exact innerBoundaryFrom_consecutiveBudgetLe stage B h (stage + 1) 0
+
+theorem outerBoundaryFrom_consecutiveBudgetLe
+    (stage : Nat) (B : Rat)
+    (h : OuterAdjacentSegmentBudgetLe stage B)
+    (count k : Nat) :
+    ConsecutiveBudgetLe stage B
+      (circleSamplePoint stage k :: outerBoundaryFrom stage k count) := by
+  induction count generalizing k with
+  | zero =>
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
+        ConsecutiveBudgetLe]
+  | succ count ih =>
+      simp [outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
+        ConsecutiveBudgetLe]
+      exact ⟨by simpa [SegmentBudgetLeAt] using (h k).1,
+        ⟨by simpa [SegmentBudgetLeAt] using (h k).2, ih (k + 1)⟩⟩
+
+theorem outerBoundarySegmentBudgetLe_of_adjacent
+    {stage : Nat} {B : Rat}
+    (h : OuterAdjacentSegmentBudgetLe stage B) :
+    OuterBoundarySegmentBudgetLe stage B := by
+  unfold OuterBoundarySegmentBudgetLe outerBoundary
+  exact outerBoundaryFrom_consecutiveBudgetLe stage B h stage 0
 
 private theorem div_two_le_div_two {x y : Rat} (hxy : x <= y) :
     x / 2 <= y / 2 := by
@@ -4049,12 +4122,6 @@ def circumferenceFanGap (stage : Nat) : Rat :=
 def circumferencePathWidthBudget (stage : Nat) : Rat :=
   pathSegmentWidthBudget (innerBoundary stage) stage +
     pathSegmentWidthBudget (outerBoundary stage) stage
-
-def InnerBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
-  ConsecutiveBudgetLe stage B (innerBoundary stage)
-
-def OuterBoundarySegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
-  ConsecutiveBudgetLe stage B (outerBoundary stage)
 
 theorem circumferencePathWidthBudget_le_three_stage_mul
     (stage : Nat) (B : Rat)
@@ -5264,6 +5331,24 @@ def CircumferencePathSegmentUniformLinearBound (C : Nat) : Prop :=
       (C : Rat) / (6 * (stage : Rat) * (((n + 1 : Nat) : Rat)))
     InnerBoundarySegmentBudgetLe stage B /\
       OuterBoundarySegmentBudgetLe stage B
+
+def CircumferenceAdjacentSegmentUniformLinearBound (C : Nat) : Prop :=
+  forall n,
+    let stage := piStage n
+    let B : Rat :=
+      (C : Rat) / (6 * (stage : Rat) * (((n + 1 : Nat) : Rat)))
+    InnerAdjacentSegmentBudgetLe stage B /\
+      OuterAdjacentSegmentBudgetLe stage B
+
+theorem pathSegmentUniformLinearBound_of_adjacentSegmentUniformLinearBound
+    {C : Nat}
+    (hseg : CircumferenceAdjacentSegmentUniformLinearBound C) :
+    CircumferencePathSegmentUniformLinearBound C := by
+  intro n
+  have h := hseg n
+  dsimp at h ⊢
+  exact ⟨innerBoundarySegmentBudgetLe_of_adjacent h.1,
+    outerBoundarySegmentBudgetLe_of_adjacent h.2⟩
 
 theorem circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound
     {C : Nat} (hseg : CircumferencePathSegmentUniformLinearBound C) :
