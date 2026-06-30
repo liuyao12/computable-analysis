@@ -134,6 +134,12 @@ def sqrtHalfValue : RealRaw :=
 def sqrtFiveValue : RealRaw :=
   sqrtRaw (5 : Rat) sqrtFiveDomain
 
+def sqrtFiveHalfValue : RealRaw :=
+  RealRaw.scaleRat ((1 : Rat) / 2) sqrtFiveValue
+
+def sqrtFiveQuarterValue : RealRaw :=
+  RealRaw.scaleRat ((1 : Rat) / 4) sqrtFiveValue
+
 def cosFortyFiveValue : RealRaw :=
   sqrtHalfValue
 
@@ -178,6 +184,20 @@ theorem sqrtFiveValue_valid_of_spec
     sqrtFiveValue.Valid := by
   simpa [sqrtFiveValue] using h.1
 
+theorem sqrtFiveHalfValue_valid_of_sqrtFiveSpec
+    (h : SqrtRawSpec (5 : Rat) sqrtFiveDomain) :
+    sqrtFiveHalfValue.Valid := by
+  unfold sqrtFiveHalfValue
+  exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+    (sqrtFiveValue_valid_of_spec h)
+
+theorem sqrtFiveQuarterValue_valid_of_sqrtFiveSpec
+    (h : SqrtRawSpec (5 : Rat) sqrtFiveDomain) :
+    sqrtFiveQuarterValue.Valid := by
+  unfold sqrtFiveQuarterValue
+  exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+    (sqrtFiveValue_valid_of_spec h)
+
 theorem sinThirtyValue_valid :
     sinThirtyValue.Valid := by
   simpa [sinThirtyValue] using RealRaw.ofRat_valid ((1 : Rat) / 2)
@@ -185,6 +205,16 @@ theorem sinThirtyValue_valid :
 theorem cosSixtyValue_valid :
     cosSixtyValue.Valid := by
   simpa [cosSixtyValue] using RealRaw.ofRat_valid ((1 : Rat) / 2)
+
+theorem cosFortyFiveValue_valid_of_sqrtHalfSpec
+    (h : SqrtRawSpec ((1 : Rat) / 2) sqrtHalfDomain) :
+    cosFortyFiveValue.Valid := by
+  simpa [cosFortyFiveValue] using sqrtHalfValue_valid_of_spec h
+
+theorem sinFortyFiveValue_valid_of_sqrtHalfSpec
+    (h : SqrtRawSpec ((1 : Rat) / 2) sqrtHalfDomain) :
+    sinFortyFiveValue.Valid := by
+  simpa [sinFortyFiveValue] using sqrtHalfValue_valid_of_spec h
 
 theorem cosThirtySixValue_valid_of_sqrtFiveSpec
     (h : SqrtRawSpec (5 : Rat) sqrtFiveDomain) :
@@ -225,6 +255,39 @@ theorem sinSeventyTwoSquareValue_valid_of_sqrtFiveSpec
   unfold sinSeventyTwoSquareValue
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
     (RealRaw.add_valid hfive hsqrt)
+
+structure SpecialAngleDisplayedValuesValid : Prop where
+  sqrt_half : sqrtHalfValue.Valid
+  sqrt_five : sqrtFiveValue.Valid
+  sqrt_five_half : sqrtFiveHalfValue.Valid
+  sqrt_five_quarter : sqrtFiveQuarterValue.Valid
+  cos_forty_five : cosFortyFiveValue.Valid
+  sin_forty_five : sinFortyFiveValue.Valid
+  sin_thirty : sinThirtyValue.Valid
+  cos_sixty : cosSixtyValue.Valid
+  cos_thirty_six : cosThirtySixValue.Valid
+  cos_seventy_two : cosSeventyTwoValue.Valid
+  sin_thirty_six_square : sinThirtySixSquareValue.Valid
+  sin_seventy_two_square : sinSeventyTwoSquareValue.Valid
+
+theorem specialAngleDisplayedValuesValid_of_sqrtSpecs
+    (hhalf : SqrtRawSpec ((1 : Rat) / 2) sqrtHalfDomain)
+    (hfive : SqrtRawSpec (5 : Rat) sqrtFiveDomain) :
+    SpecialAngleDisplayedValuesValid where
+  sqrt_half := sqrtHalfValue_valid_of_spec hhalf
+  sqrt_five := sqrtFiveValue_valid_of_spec hfive
+  sqrt_five_half := sqrtFiveHalfValue_valid_of_sqrtFiveSpec hfive
+  sqrt_five_quarter := sqrtFiveQuarterValue_valid_of_sqrtFiveSpec hfive
+  cos_forty_five := cosFortyFiveValue_valid_of_sqrtHalfSpec hhalf
+  sin_forty_five := sinFortyFiveValue_valid_of_sqrtHalfSpec hhalf
+  sin_thirty := sinThirtyValue_valid
+  cos_sixty := cosSixtyValue_valid
+  cos_thirty_six := cosThirtySixValue_valid_of_sqrtFiveSpec hfive
+  cos_seventy_two := cosSeventyTwoValue_valid_of_sqrtFiveSpec hfive
+  sin_thirty_six_square :=
+    sinThirtySixSquareValue_valid_of_sqrtFiveSpec hfive
+  sin_seventy_two_square :=
+    sinSeventyTwoSquareValue_valid_of_sqrtFiveSpec hfive
 
 def CosValue (C : FunctionRawConstruction) (t : QuarterTurn)
     (value : RealRaw) : Prop :=

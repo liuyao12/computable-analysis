@@ -595,6 +595,8 @@ values: \(u=1/2\) is a Pythagorean-circle sample, not \(45^\circ\).
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleValueTargets}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveHalfValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveQuarterValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtyValue}
@@ -603,6 +605,8 @@ values: \(u=1/2\) is a Pythagorean-circle sample, not \(45^\circ\).
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtySixSquareValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSeventyTwoSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleDisplayedValuesValid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid_of_sqrtSpecs}
 \uses{def:geometric-sin-cos-functionraw,rem:algebraic-numbers-sqrt-two}
 \leanok
 For the normalized angle input \(t\), the geometric functions should satisfy
@@ -632,7 +636,9 @@ These are target statements for any completed \code{FunctionRawConstruction}.
 The square-root computations \(\sqrt{1/2}\) and \(\sqrt5\) use the rational
 square-root algorithm from Chapter~\ref{ch:foundations}; the full positive
 nested square-root formulas for the two sine values are postponed until the
-raw-real square-root operation is available.
+raw-real square-root operation is available.  Lean also packages the displayed
+raw values above as valid computable reals, assuming the existing square-root
+specifications for \(\sqrt{1/2}\) and \(\sqrt5\).
 \end{definition}
 
 \begin{theorem}[Law of cosines and the equilateral value]
