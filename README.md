@@ -74,8 +74,11 @@ row records the specialization needed for pi.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced
-to `PowerSeriesAgreesOnUnit`, and the scoreboard counts the Leibniz alternating
-series only once, under the explicit name `4 * arctanSeries(1)`.
+to the pointwise target `ArctanGeometry.PowerSeriesAgreesAt 1`, and the
+scoreboard counts the Leibniz alternating series only once, under the explicit
+name `4 * arctanSeries(1)`.  The older unit-interval agreement theorem still
+feeds this pointwise bridge when broader arctangent comparison data is
+available.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling

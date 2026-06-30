@@ -107,6 +107,9 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.archimedesTheorem}
 \lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleArea}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
+\lean{ComputableAnalysis.ArctanGeometry.PowerSeriesAgreesAt}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
@@ -259,8 +262,8 @@ on missing hypotheses:
 \textbf{Pending fact} & \textbf{Lean theorem or target} & \textbf{Missing input}\\
 \hline
 power-series arctangent to area \(\pi\) &
-\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement} &
-\code{ArctanGeometry.PowerSeriesAgreesOnUnit}\\
+\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAtOne} &
+\code{ArctanGeometry.PowerSeriesAgreesAt 1}\\
 integral arctangent to area \(\pi\) &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
 \code{ArctanIntegralGeomFunctionAgreement}\\
@@ -330,7 +333,9 @@ computation in the scoreboard.
   \code{PiProofs.PiCircleAreaPolygonAgreement},
   \code{PiProofs.areaValid\_of\_nested\_and\_shrinking},
   \code{PiProofs.piCircleArea\_equiv\_self},
-  \code{PiProofs.four\_arctan\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
+  \code{ArctanGeometry.PowerSeriesAgreesAt},
+  \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAtOne},
+  \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
   \code{PiProofs.archimedesTheorem},
   \code{PiProofs.piCircumference\_equiv\_piCircleArea},
   \code{PiProofs.LeibnizEqMachin}.

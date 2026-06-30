@@ -2648,17 +2648,13 @@ theorem piCircleAreaPolygon_equiv_self :
   unfold QInterval.width at hordered
   constructor <;> grind [Rat.sub_eq_add_neg]
 
-theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
-    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne
+    (hagree : ArctanGeometry.PowerSeriesAgreesAt (1 : Rat)) :
     (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv piCircleArea) := by
-  have hpowGeom :
-      (arctan (1 : Rat)).Equiv (ArctanGeometry.arctanGeom (1 : Rat)) :=
-    ArctanGeometry.powerSeries_equiv_geometric_of_agreement
-      hagree (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide)
   have hscaled :
       (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv
         ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
-    RealRaw.natScale_equiv 4 hpowGeom
+    RealRaw.natScale_equiv 4 hagree
   intro n
   have hover := (RealRaw.compareAt_overlap_iff
       ((4 : Nat) * arctan (1 : Rat) : RealRaw)
@@ -2668,6 +2664,19 @@ theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
     ((4 : Nat) * arctan (1 : Rat) : RealRaw) piCircleArea n n).2
   rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   exact hover
+
+theorem four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
+    (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
+    (((4 : Nat) * arctan (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne
+    (ArctanGeometry.powerSeriesAgreesAt_of_agreement
+      hagree (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide))
+
+theorem four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne
+    (hagree : ArctanGeometry.PowerSeriesAgreesAt (1 : Rat)) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) := by
+  simpa [arctanSeries] using
+    four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne hagree
 
 theorem four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
@@ -2680,6 +2689,19 @@ theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
     (four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement hagree)
+
+theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAtOne
+    (hagree : ArctanGeometry.PowerSeriesAgreesAt (1 : Rat)) :
+    piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctan_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne hagree)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne
+    (hagree : ArctanGeometry.PowerSeriesAgreesAt (1 : Rat)) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne
+      hagree)
 
 theorem piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :

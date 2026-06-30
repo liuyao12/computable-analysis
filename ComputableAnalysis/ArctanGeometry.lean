@@ -2148,6 +2148,9 @@ def Valid : Prop :=
 def PowerSeriesAgreesOnUnit : Prop :=
   Elementary.Arctan.Equivalent Elementary.Arctan.powerSeries representation
 
+def PowerSeriesAgreesAt (x : Rat) : Prop :=
+  (arctan x).Equiv (arctanGeom x)
+
 theorem powerSeries_equiv_geometric_of_agreement
     (h : PowerSeriesAgreesOnUnit) {x : Rat}
     (hx : Elementary.Arctan.powerSeriesDomain x) :
@@ -2164,6 +2167,12 @@ theorem geometric_equiv_powerSeries_of_agreement
     (arctanGeom x).Equiv (arctan x) :=
   RealRaw.equiv_symm
     (powerSeries_equiv_geometric_of_agreement h hx)
+
+theorem powerSeriesAgreesAt_of_agreement
+    (h : PowerSeriesAgreesOnUnit) {x : Rat}
+    (hx : Elementary.Arctan.powerSeriesDomain x) :
+    PowerSeriesAgreesAt x :=
+  powerSeries_equiv_geometric_of_agreement h hx
 
 end ArctanGeometry
 
