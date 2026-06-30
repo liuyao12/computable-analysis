@@ -359,18 +359,124 @@ def refineAux : Rat -> Rat -> List (Rat × Rat) -> AreaLoopState
 
 end AreaLoopState
 
+private theorem midpoint_nonneg {p r : Rat}
+    (hp0 : 0 <= p) (hr0 : 0 <= r) :
+    0 <= (p + r) / 2 := by
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg (Rat.add_nonneg hp0 hr0)
+    (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)))
+
+private theorem left_le_midpoint {p r : Rat} (hpr : p <= r) :
+    p <= (p + r) / 2 := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    calc
+      p * 2 <= p + r := by grind
+      _ = ((p + r) * (2 : Rat)⁻¹) * 2 := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · native_decide
+
+private theorem midpoint_le_right {p r : Rat} (hpr : p <= r) :
+    (p + r) / 2 <= r := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    calc
+      ((p + r) * (2 : Rat)⁻¹) * 2 = p + r := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= r * 2 := by grind
+  · native_decide
+
+private theorem refineAux_intervals_nonnegative
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    NonnegativeIntervals
+      (AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaLoopState.refineAux, NonnegativeIntervals]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hq0 : 0 <= q := by
+        dsimp [q]
+        exact midpoint_nonneg hp0 (Rat.le_trans hp0 hpr)
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have htail :=
+        ih (lo + arctanAreaIncrement p q r)
+          (hi - arctanAreaDecrement p q r) hrest
+      simp [AreaLoopState.refineAux, NonnegativeIntervals, q,
+        hp0, hpq, hq0, hqr, htail]
+
 def refineAreaLoopState (state : AreaLoopState) : AreaLoopState :=
   AreaLoopState.refineAux state.lo state.hi state.intervals
+
+theorem refineAreaLoopState_intervals_nonnegative
+    (state : AreaLoopState)
+    (hwf : NonnegativeIntervals state.intervals) :
+    NonnegativeIntervals (refineAreaLoopState state).intervals := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_intervals_nonnegative lo hi intervals hwf
 
 def iterateAreaLoopState : Nat -> AreaLoopState -> AreaLoopState
   | 0, state => state
   | n + 1, state => iterateAreaLoopState n (refineAreaLoopState state)
+
+theorem iterateAreaLoopState_intervals_nonnegative
+    (n : Nat) (state : AreaLoopState)
+    (hwf : NonnegativeIntervals state.intervals) :
+    NonnegativeIntervals (iterateAreaLoopState n state).intervals := by
+  induction n generalizing state with
+  | zero =>
+      simpa [iterateAreaLoopState] using hwf
+  | succ n ih =>
+      simpa [iterateAreaLoopState] using
+        ih (refineAreaLoopState state)
+          (refineAreaLoopState_intervals_nonnegative state hwf)
 
 def arctanAreaLoopInitial (x : Rat) : AreaLoopState :=
   { lo := x / (1 + x * x), hi := x, intervals := [(0, x)] }
 
 def arctanAreaLoopState (x : Rat) (n : Nat) : AreaLoopState :=
   iterateAreaLoopState n (arctanAreaLoopInitial x)
+
+theorem arctanAreaLoopInitial_intervals_nonnegative
+    {x : Rat} (hx : 0 <= x) :
+    NonnegativeIntervals (arctanAreaLoopInitial x).intervals := by
+  simp [arctanAreaLoopInitial, NonnegativeIntervals, hx]
+
+theorem arctanAreaLoopState_intervals_nonnegative
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    NonnegativeIntervals (arctanAreaLoopState x n).intervals := by
+  unfold arctanAreaLoopState
+  exact iterateAreaLoopState_intervals_nonnegative n
+    (arctanAreaLoopInitial x)
+    (arctanAreaLoopInitial_intervals_nonnegative hx)
+
+theorem arctanAreaLoop_integralSum_contains_geometricSum
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    (integralSumInterval (arctanAreaLoopState x n).intervals).ContainsInterval
+      (geometricSumInterval (arctanAreaLoopState x n).intervals) :=
+  integralSumInterval_contains_geometricSumInterval
+    (arctanAreaLoopState x n).intervals
+    (arctanAreaLoopState_intervals_nonnegative hx n)
+
+theorem arctanAreaLoop_integralSum_overlaps_geometricSum
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    QInterval.Overlaps
+      (integralSumInterval (arctanAreaLoopState x n).intervals)
+      (geometricSumInterval (arctanAreaLoopState x n).intervals) :=
+  integralSumInterval_overlaps_geometricSumInterval
+    (arctanAreaLoopState x n).intervals
+    (arctanAreaLoopState_intervals_nonnegative hx n)
 
 def positiveLoopComputeAtStage (x : Rat) (n : Nat) : QInterval :=
   let state := arctanAreaLoopState x n

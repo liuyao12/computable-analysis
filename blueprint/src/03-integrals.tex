@@ -187,6 +187,9 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_contains_geometricSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_overlaps_geometricSum}
 \uses{def:one-over-one-plus-square-kernel,def:geometric-arctan}
 \leanok
 On a nonnegative cell \(0\le p\le r\), let
@@ -214,10 +217,13 @@ contributions.  Lean proves the finite inequalities
 \]
 Consequently, for every finite nonnegative ordered partition, the rectangle
 sum interval contains the geometric sector-sum interval, and in particular the
-two finite intervals overlap.  This is the finite algebraic core of the
-comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\); the remaining work is
-to connect the project's integral-construction schedule and the
-\code{arctanGeom} refinement loop to these sums.
+two finite intervals overlap.  Lean also proves that every nonnegative
+\code{arctanGeom} refinement stage has such a partition, so the same
+containment and overlap theorems apply to the actual loop intervals.  This is
+the finite algebraic core of the comparison
+\(\arctan_{\int}=\arctan_{\mathrm{geom}}\); the remaining work is to identify
+the loop bounds themselves with the corresponding sector sums, and to connect
+the project's integral-construction schedule to the rectangle sums.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]
