@@ -60,7 +60,8 @@ point-Riemann construction wrapper has not yet been identified with this
 rectangle schedule.  The rectangle schedule itself is now verified more
 generally as `ArctanGeometry.arctanIntegralRectangleRaw_valid` and
 `IntegralIdentities.arctanIntegralRectangleFor_valid` for rational
-`0 <= x <= 1`; the scoreboard row records the specialization needed for pi.
+`0 <= x <= 1`, and it is now proved equivalent to `arctanGeom x` on that
+unit branch.  The scoreboard row records the specialization needed for pi.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

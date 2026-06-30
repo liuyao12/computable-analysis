@@ -1710,6 +1710,71 @@ theorem arctanGeom_one_compute_eq (n : Nat) :
   have hnonneg : (0 : Rat) <= 1 := by native_decide
   exact arctanGeom_nonneg_compute_eq hnonzero hnonneg n
 
+private def ZeroIntervals : List (Rat × Rat) -> Prop
+  | [] => True
+  | (p, r) :: rest => p = 0 ∧ r = 0 ∧ ZeroIntervals rest
+
+private theorem refineAux_zero
+    {lo hi : Rat} {intervals : List (Rat × Rat)}
+    (hlo : lo = 0) (hhi : hi = 0) (hz : ZeroIntervals intervals) :
+    (AreaLoopState.refineAux lo hi intervals).lo = 0 ∧
+      (AreaLoopState.refineAux lo hi intervals).hi = 0 ∧
+      ZeroIntervals (AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaLoopState.refineAux, ZeroIntervals, hlo, hhi]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hz with ⟨hp, hr, hrest⟩
+      subst p
+      subst r
+      subst lo
+      subst hi
+      have hnext := ih (lo := 0 + arctanAreaIncrement 0 ((0 + 0) / 2) 0)
+        (hi := 0 - arctanAreaDecrement 0 ((0 + 0) / 2) 0)
+        (by native_decide)
+        (by native_decide)
+        hrest
+      simp [AreaLoopState.refineAux, ZeroIntervals, hnext]
+      native_decide
+
+private theorem arctanAreaLoopState_zero (n : Nat) :
+    (arctanAreaLoopState 0 n).lo = 0 ∧
+      (arctanAreaLoopState 0 n).hi = 0 ∧
+      ZeroIntervals (arctanAreaLoopState 0 n).intervals := by
+  induction n with
+  | zero =>
+      simp [arctanAreaLoopState, iterateAreaLoopState, arctanAreaLoopInitial,
+        ZeroIntervals]
+      native_decide
+  | succ n ih =>
+      rw [arctanAreaLoopState_succ]
+      exact refineAux_zero ih.1 ih.2.1 ih.2.2
+
+theorem positiveLoopComputeAtStage_zero (n : Nat) :
+    positiveLoopComputeAtStage 0 n = { lo := 0, hi := 0 } := by
+  have h := arctanAreaLoopState_zero n
+  simp [positiveLoopComputeAtStage, h.1, h.2.1]
+
+theorem arctanIntegralRectangleRaw_equiv_arctanGeom
+    {x : Rat} (hx : 0 <= x) :
+    (arctanIntegralRectangleRaw x).Equiv (arctanGeom x) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanIntegralRectangleRaw x) (arctanGeom x) n n).2
+  by_cases hzero : x = 0
+  · subst x
+    have hover := arctanAreaLoop_integralSum_overlaps_positiveLoop
+      (x := 0) (by native_decide) n
+    rw [positiveLoopComputeAtStage_zero n] at hover
+    simpa [arctanIntegralRectangleRaw, arctanIntegralRectangleCompute,
+      arctanGeom, RealRaw.ofRat] using hover
+  · change QInterval.Overlaps
+      (integralSumInterval (arctanAreaLoopState x n).intervals)
+      ((arctanGeom x).compute n)
+    rw [arctanGeom_nonneg_compute_eq hzero hx n]
+    exact arctanAreaLoop_integralSum_overlaps_positiveLoop hx n
+
 theorem arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one :
     arctanIntegralRectangleRawAtOne.Equiv (arctanGeom 1) := by
   intro n

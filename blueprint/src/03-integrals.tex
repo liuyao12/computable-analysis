@@ -205,6 +205,7 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_hi_eq_geometricUpperSum}
 \lean{ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage_eq_geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage_zero}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_contains_geometricSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_overlaps_geometricSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_contains_positiveLoop}
@@ -219,6 +220,7 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_widthsShrink}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_ordered}
@@ -233,6 +235,7 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_compute_eq}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_raw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
@@ -286,12 +289,14 @@ and each rectangle gap is bounded by \(2(r-p)^2\).  Therefore the concrete
 rectangle-sum raw real \code{arctanIntegralRectangleRaw x} is valid on the
 unit branch.  Lean packages the same schedule as
 \code{arctanIntegralRectangleFor x}, an \code{Integral.ConstructionFor} for
-the kernel on \([0,x]\).  At \(x=1\), the rectangle raw real is also proved
-equivalent to \code{arctanGeom(1)}.  This is the finite algebraic core of the
-comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  The remaining work is
-to identify the older point-Riemann \code{arctanIntegral(1)} API with this
-rectangle schedule, or replace it by the domain-aware construction interface
-throughout.
+the kernel on \([0,x]\), and proves this domain-aware construction equivalent
+to \code{arctanGeom x} throughout the rational unit branch.  The zero endpoint
+uses a small degenerate-loop invariant, while the positive endpoint proof is
+exactly the finite rectangle/geometric overlap.  This is the finite algebraic
+core of the comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  The
+remaining work is to identify the older point-Riemann \code{arctanIntegral(1)}
+API with this rectangle schedule, or replace it by the domain-aware
+construction interface throughout.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]

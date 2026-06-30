@@ -286,6 +286,22 @@ theorem arctanIntegralRectangleFor_equiv_raw
     (ArctanGeometry.arctanIntegralRectangleCompute x n)
   exact ⟨hle, hle⟩
 
+theorem arctanIntegralRectangleFor_equiv_arctanGeom
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralRectangleFor x hx0 hx1).Equiv
+      (ArctanGeometry.arctanGeom x) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanIntegralRectangleFor x hx0 hx1)
+    (ArctanGeometry.arctanGeom x) n n).2
+  have hover := (RealRaw.compareAt_overlap_iff
+    (ArctanGeometry.arctanIntegralRectangleRaw x)
+    (ArctanGeometry.arctanGeom x) n n).1
+      (ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom hx0 n)
+  simpa [arctanIntegralRectangleFor, Integral.integralFor,
+    arctanIntegralRectangleConstruction,
+    ArctanGeometry.arctanIntegralRectangleRaw] using hover
+
 /-- The verified rectangle-sum construction for
 `∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
 kernel interval. -/
