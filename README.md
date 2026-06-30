@@ -83,8 +83,13 @@ For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling
 the common outer factor `4`.  The bridge from a geometric Machin branch law now
-uses `PiProofs.leibnizEqMachin_of_geometricRoute_on_unit`, so it no longer
-needs a global geometric-arctangent validity assumption.
+uses the pointwise package
+`PiProofs.MachinIdentity.KernelComparisonAtMachinInputs` through
+`PiProofs.leibnizEqMachin_of_kernelComparisonAtMachinInputs`; this isolates
+the remaining analytic checks to the inputs `1/5`, `1/239`, and `1`, plus the
+geometric branch law.  The table-facing bridge
+`PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs`
+then connects Machin to the area baseline once those inputs are supplied.
 
 The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
 code that remains in Lean is internal scaffolding for circumference and finite

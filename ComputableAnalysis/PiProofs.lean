@@ -82,6 +82,24 @@ theorem arctan_one_mem_domain :
   unfold arctanDomain
   constructor <;> native_decide
 
+theorem arctanKernel_one_fifth_mem_unitDomain :
+    Taylor.ArctanComparison.unitDomain ((1 : Rat) / 5) := by
+  unfold Taylor.ArctanComparison.unitDomain
+  unfold Elementary.Arctan.powerSeriesDomain qabs
+  native_decide
+
+theorem arctanKernel_one_239_mem_unitDomain :
+    Taylor.ArctanComparison.unitDomain ((1 : Rat) / 239) := by
+  unfold Taylor.ArctanComparison.unitDomain
+  unfold Elementary.Arctan.powerSeriesDomain qabs
+  native_decide
+
+theorem arctanKernel_one_mem_unitDomain :
+    Taylor.ArctanComparison.unitDomain (1 : Rat) := by
+  unfold Taylor.ArctanComparison.unitDomain
+  unfold Elementary.Arctan.powerSeriesDomain qabs
+  native_decide
+
 theorem machinValid_of_arctanValid
     (hArctan : ArctanValid) : MachinValid := by
   have h15 : (arctan ((1 : Rat) / 5)).Valid :=
@@ -893,6 +911,11 @@ structure PowerSeriesGeometryAtMachinInputs where
   one :
     (arctan (1 : Rat)).Equiv (ArctanGeometry.arctanGeom (1 : Rat))
 
+structure KernelComparisonAtMachinInputs where
+  one_fifth : Taylor.ArctanComparison.KernelComparisonAt ((1 : Rat) / 5)
+  one_239 : Taylor.ArctanComparison.KernelComparisonAt ((1 : Rat) / 239)
+  one : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)
+
 theorem branchIdentity_of_branchLaw (h : BranchLaw) : BranchIdentity :=
   h quarter_tangent_identity
 
@@ -912,6 +935,19 @@ theorem powerSeriesGeometryAtMachinInputs_of_agreement
   one :=
     ArctanGeometry.powerSeries_equiv_geometric_of_agreement h
       (by unfold Elementary.Arctan.powerSeriesDomain qabs; native_decide)
+
+theorem powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs
+    (route : KernelComparisonAtMachinInputs) :
+    PowerSeriesGeometryAtMachinInputs where
+  one_fifth :=
+    Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt
+      route.one_fifth
+  one_239 :=
+    Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt
+      route.one_239
+  one :=
+    Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt
+      route.one
 
 theorem branchIdentity_of_geometricBranchIdentity_at_inputs
     (hg15 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid)
@@ -1087,13 +1123,54 @@ theorem leibnizEqMachin_of_geometricRoute_on_unit
     (MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit
       hagree hgeom)
 
+theorem leibnizEqMachin_of_kernelComparisonAtMachinInputs
+    (route : MachinIdentity.KernelComparisonAtMachinInputs)
+    (hgeom : MachinIdentity.GeometricBranchLaw) : LeibnizEqMachin :=
+  leibnizEqMachin_of_geometricRoute_on_unit
+    (MachinIdentity.powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs
+      route)
+    hgeom
+
+def MachinIdentity.KernelComparisonAtMachinInputs.ofKernelComparisonRoute
+    (route : Taylor.ArctanComparison.KernelComparisonRoute) :
+    MachinIdentity.KernelComparisonAtMachinInputs where
+  one_fifth :=
+    { domain := arctanKernel_one_fifth_mem_unitDomain
+      integral := route.data.integralAt ((1 : Rat) / 5)
+        arctanKernel_one_fifth_mem_unitDomain
+      powerSeries_valid := route.powerSeries_valid ((1 : Rat) / 5)
+        arctanKernel_one_fifth_mem_unitDomain
+      powerSeries_eq_kernel := route.powerSeries_eq_kernel ((1 : Rat) / 5)
+        arctanKernel_one_fifth_mem_unitDomain
+      geometric_eq_kernel := route.geometric_eq_kernel ((1 : Rat) / 5)
+        arctanKernel_one_fifth_mem_unitDomain }
+  one_239 :=
+    { domain := arctanKernel_one_239_mem_unitDomain
+      integral := route.data.integralAt ((1 : Rat) / 239)
+        arctanKernel_one_239_mem_unitDomain
+      powerSeries_valid := route.powerSeries_valid ((1 : Rat) / 239)
+        arctanKernel_one_239_mem_unitDomain
+      powerSeries_eq_kernel := route.powerSeries_eq_kernel ((1 : Rat) / 239)
+        arctanKernel_one_239_mem_unitDomain
+      geometric_eq_kernel := route.geometric_eq_kernel ((1 : Rat) / 239)
+        arctanKernel_one_239_mem_unitDomain }
+  one :=
+    { domain := arctanKernel_one_mem_unitDomain
+      integral := route.data.integralAt (1 : Rat)
+        arctanKernel_one_mem_unitDomain
+      powerSeries_valid := route.powerSeries_valid (1 : Rat)
+        arctanKernel_one_mem_unitDomain
+      powerSeries_eq_kernel := route.powerSeries_eq_kernel (1 : Rat)
+        arctanKernel_one_mem_unitDomain
+      geometric_eq_kernel := route.geometric_eq_kernel (1 : Rat)
+        arctanKernel_one_mem_unitDomain }
+
 theorem leibnizEqMachin_of_kernelComparisonRoute
     (route : Taylor.ArctanComparison.KernelComparisonRoute)
     (hgeom : MachinIdentity.GeometricBranchLaw) : LeibnizEqMachin :=
-  leibnizEqMachin_of_geometricRoute_on_unit
-    (MachinIdentity.powerSeriesGeometryAtMachinInputs_of_agreement
-      (Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute
-        route))
+  leibnizEqMachin_of_kernelComparisonAtMachinInputs
+    (MachinIdentity.KernelComparisonAtMachinInputs.ofKernelComparisonRoute
+      route)
     hgeom
 
 def piStage (n : Nat) : Nat :=
@@ -4004,6 +4081,26 @@ theorem leibnizEqArea_of_kernelComparisonAtOne
     piLeibniz_equiv_four_arctanSeries_one
     (four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
       route)
+
+theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
+    (route : MachinIdentity.KernelComparisonAtMachinInputs)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    piMachin.Equiv piCircleArea :=
+  RealRaw.equiv_trans
+    machinValid
+    leibnizValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    (RealRaw.equiv_symm
+      (leibnizEqMachin_of_kernelComparisonAtMachinInputs route hgeom))
+    (leibnizEqArea_of_kernelComparisonAtOne route.one)
+
+theorem piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs
+    (route : MachinIdentity.KernelComparisonAtMachinInputs)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    piCircleArea.Equiv piMachin :=
+  RealRaw.equiv_symm
+    (piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
+      route hgeom)
 
 theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (((4 : Nat) *

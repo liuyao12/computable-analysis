@@ -122,9 +122,14 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.KernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchLaw}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_geometricRoute_on_unit}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines_and_linearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferenceLinearRemainders}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_linearRemainders}
@@ -289,8 +294,9 @@ logarithm-at-\(i\) pi routes &
 \code{exp.logFromIntegral} and future complex \code{Log} representations &
 three \code{Log(i)} constructions, their branch agreement, and Euler identity\\
 \code{4 * arctanSeries(1)} to \code{piMachin} &
-\code{PiProofs.leibnizEqMachin\_of\_geometricRoute\_on\_unit} &
-power-series/geometric agreement at Machin inputs and the geometric branch law\\
+\code{PiProofs.leibnizEqMachin\_of\_kernelComparisonAtMachinInputs} &
+\code{Taylor.ArctanComparison.KernelComparisonAt} at \(1/5\), \(1/239\), and
+\(1\), plus the geometric branch law\\
 remaining geometric pi validity &
 \code{PiProofs.CircumferenceLinearRemainders} &
 \code{CircumferenceStepRefines}, a \code{CircumferenceWidthLinearBound C}, and
@@ -352,10 +358,13 @@ agreements.
   \code{PiProofs.piCircleArea\_equiv\_self},
   \code{ArctanGeometry.PowerSeriesAgreesAt},
   \code{Taylor.ArctanComparison.KernelComparisonAt},
+  \code{PiProofs.MachinIdentity.KernelComparisonAtMachinInputs},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_kernelComparisonAtOne},
   \code{PiProofs.leibnizEqArea\_of\_kernelComparisonAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
+  \code{PiProofs.leibnizEqMachin\_of\_kernelComparisonAtMachinInputs},
+  \code{PiProofs.piMachin\_equiv\_piCircleArea\_of\_kernelComparisonAtMachinInputs},
   \code{PiProofs.CircumferenceLinearRemainders},
   \code{PiProofs.piProofsComplete\_of\_circumferenceRemainders},
   \code{PiProofs.archimedesTheorem},
