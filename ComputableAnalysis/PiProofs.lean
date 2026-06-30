@@ -998,6 +998,30 @@ def OddKernelCellBounds (m : Nat) : List (Rat × Rat) -> Prop
         ArctanGeometry.integralUpperStep p r /\
       OddKernelCellBounds m rest
 
+private instance evenKernelCellBoundsDecidable (m : Nat) :
+    (intervals : List (Rat × Rat)) -> Decidable (EvenKernelCellBounds m intervals)
+  | [] => isTrue trivial
+  | (p, r) :: rest => by
+      dsimp [EvenKernelCellBounds]
+      exact @instDecidableAnd
+        (ArctanGeometry.integralLowerStep p r <=
+          Taylor.ArctanKernel.kernelPartialIntegralBetween p r m)
+        (EvenKernelCellBounds m rest)
+        inferInstance
+        (evenKernelCellBoundsDecidable m rest)
+
+private instance oddKernelCellBoundsDecidable (m : Nat) :
+    (intervals : List (Rat × Rat)) -> Decidable (OddKernelCellBounds m intervals)
+  | [] => isTrue trivial
+  | (p, r) :: rest => by
+      dsimp [OddKernelCellBounds]
+      exact @instDecidableAnd
+        (Taylor.ArctanKernel.kernelPartialIntegralBetween p r m <=
+          ArctanGeometry.integralUpperStep p r)
+        (OddKernelCellBounds m rest)
+        inferInstance
+        (oddKernelCellBoundsDecidable m rest)
+
 theorem integralKernel_le_one (r : Rat) :
     ArctanGeometry.integralKernel r <= 1 := by
   unfold ArctanGeometry.integralKernel
@@ -1175,6 +1199,60 @@ theorem leibnizRectangleKernelCellBoundsAtOneBase :
     LeibnizRectangleKernelCellBoundsAtOneBase :=
   ⟨evenKernelCellBoundsAtOne_zero, oddKernelCellBoundsAtOne_zero⟩
 
+def LeibnizRectangleKernelCellBoundsAtOneUpTo (N : Nat) : Prop :=
+  (forall n, n <= N ->
+    EvenKernelCellBounds (2 * n)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals) /\
+  (forall n, n <= N ->
+    OddKernelCellBounds (2 * n + 1)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) (n + 1)).intervals)
+
+theorem evenKernelCellBoundsAtOne_le_four
+    (n : Nat) (hn : n <= 4) :
+    EvenKernelCellBounds (2 * n)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals := by
+  cases n with
+  | zero =>
+      simpa using evenKernelCellBoundsAtOne_zero
+  | succ n =>
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          cases n with
+          | zero => native_decide
+          | succ n =>
+              cases n with
+              | zero => native_decide
+              | succ n =>
+                  cases n with
+                  | zero => native_decide
+                  | succ n => omega
+
+theorem oddKernelCellBoundsAtOne_le_four
+    (n : Nat) (hn : n <= 4) :
+    OddKernelCellBounds (2 * n + 1)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) (n + 1)).intervals := by
+  cases n with
+  | zero =>
+      simpa using oddKernelCellBoundsAtOne_zero
+  | succ n =>
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          cases n with
+          | zero => native_decide
+          | succ n =>
+              cases n with
+              | zero => native_decide
+              | succ n =>
+                  cases n with
+                  | zero => native_decide
+                  | succ n => omega
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToFour :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 4 :=
+  ⟨evenKernelCellBoundsAtOne_le_four, oddKernelCellBoundsAtOne_le_four⟩
+
 theorem integralLowerSum_le_kernelPartialIntegralSum
     {m : Nat} {intervals : List (Rat × Rat)}
     (h : EvenKernelCellBounds m intervals) :
@@ -1281,6 +1359,23 @@ def LeibnizRectangleKernelCellBoundsAtOne : Prop :=
   (forall n,
     OddKernelCellBounds (2 * n + 1)
       (ArctanGeometry.arctanAreaLoopState (1 : Rat) (n + 1)).intervals)
+
+theorem cellBoundsUpTo_of_cellBounds
+    (h : LeibnizRectangleKernelCellBoundsAtOne) (N : Nat) :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo N := by
+  unfold LeibnizRectangleKernelCellBoundsAtOne at h
+  unfold LeibnizRectangleKernelCellBoundsAtOneUpTo
+  exact ⟨fun n _hn => h.1 n, fun n _hn => h.2 n⟩
+
+theorem cellBounds_of_cellBoundsUpToAll
+    (h : forall N, LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelCellBoundsAtOne := by
+  unfold LeibnizRectangleKernelCellBoundsAtOne
+  constructor
+  · intro n
+    exact (h n).1 n (Nat.le_refl n)
+  · intro n
+    exact (h n).2 n (Nat.le_refl n)
 
 theorem kernelBounds_of_cellBounds
     (h : LeibnizRectangleKernelCellBoundsAtOne) :

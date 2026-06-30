@@ -101,6 +101,14 @@ The base package
 is formalized: the even `m = 0` lower-cell inequality holds on every unit
 partition, and the first odd `m = 1` upper-cell inequality is proved on every
 nonnegative ordered partition.
+As a computational regression check on the full cellwise target, Lean now also
+certifies the concrete midpoint partitions through stage `n <= 4` as
+`PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFour`.
+The bridge theorems
+`PiProofs.LeibnizRectangleBridge.cellBoundsUpTo_of_cellBounds` and
+`PiProofs.LeibnizRectangleBridge.cellBounds_of_cellBoundsUpToAll` record that
+the full cellwise theorem is exactly the same target as proving every finite
+prefix.
 For Machin, Lean now proves
 `PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
 identity is exactly the remaining raw-real agreement target, after cancelling

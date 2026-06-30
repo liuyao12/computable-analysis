@@ -116,6 +116,12 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.LeibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_one_le_integralUpperStep}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_one_of_nonnegative}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpTo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_le_four}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_le_four}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFour}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBoundsUpTo_of_cellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_cellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
@@ -299,6 +305,10 @@ For the finite Leibniz-to-rectangle bridge, Lean now proves the even
 upper-cell inequality on every nonnegative ordered partition; these are
 packaged in
 \code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase}.
+It also certifies the concrete midpoint partitions through \(n\le4\) as
+\code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFour}.
+The auxiliary bridge between finite prefixes and the final statement is
+\code{PiProofs.LeibnizRectangleBridge.cellBounds\_of\_cellBoundsUpToAll}.
 The theorem \code{PiProofs.piCircleArea\_equiv\_self} exists for transport,
 but the baseline row is not counted as a comparison target.  The following
 routes are formalized, or at least named as project targets, but still depend
@@ -401,6 +411,9 @@ agreements.
   \code{PiProofs.LeibnizRectangleBridge.evenKernelCellBounds\_zero\_of\_unit},
   \code{PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween\_one\_le\_integralUpperStep},
   \code{PiProofs.LeibnizRectangleBridge.oddKernelCellBounds\_one\_of\_nonnegative},
+  \code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpTo},
+  \code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFour},
+  \code{PiProofs.LeibnizRectangleBridge.cellBounds\_of\_cellBoundsUpToAll},
   \code{PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne\_zero},
   \code{PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne\_zero},
   \code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneBase},
