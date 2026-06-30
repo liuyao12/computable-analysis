@@ -188,12 +188,18 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.integralCellInterval_contains_geometricCellInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellInterval_overlaps_geometricCellInterval}
 \lean{ComputableAnalysis.ArctanGeometry.NonnegativeIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.UnitIntervals}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.intervalSquareSum}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellWidth_le_two_square}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_width_le_two_squareSum}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_one_squareSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_hi_eq_geometricUpperSum}
 \lean{ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage_eq_geometricSumInterval}
@@ -204,6 +210,14 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_step_refines}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_refines_add}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_nested}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_widthsShrink}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_valid}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one}
 \uses{def:one-over-one-plus-square-kernel,def:geometric-arctan}
 \leanok
 On a nonnegative cell \(0\le p\le r\), let
@@ -241,11 +255,16 @@ two finite intervals overlap.  Lean also proves that every nonnegative
 lower and upper bounds are exactly the corresponding geometric sums.  Thus the
 rectangle-sum interval contains, and overlaps, the actual \code{arctanGeom}
 stage interval.  The rectangle-sum intervals are themselves ordered and nested
-along the actual arctangent loop.  This is the finite algebraic core of the
+along the actual arctangent loop.
+
+For \(x=1\), Lean also proves the mesh estimate needed for validity.  The sum
+of squared cell lengths is exactly \(2^{-n}\) after \(n\) midpoint refinements,
+and each rectangle gap is bounded by \(2(r-p)^2\).  Hence the concrete
+rectangle-sum raw real \code{arctanIntegralRectangleRawAtOne} is valid and
+equivalent to \code{arctanGeom(1)}.  This is the finite algebraic core of the
 comparison
 \(\arctan_{\int}=\arctan_{\mathrm{geom}}\); the remaining work is to connect
-the project's integral-construction schedule to these rectangle sums and prove
-their widths shrink.
+the project's general integral-construction schedule to these rectangle sums.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]
@@ -255,6 +274,7 @@ their widths shrink.
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_geom_agreement}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_function_agreement}
+\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
 Any certified integral construction for
 \[
@@ -266,7 +286,12 @@ representative of \(\pi\):
   4\arctan_{\int}(1)\sim \pi_{\mathrm{area}}.
 \]
 Thus the remaining analytic work is the function-level arctangent-integral
-comparison \code{ArctanIntegralGeomFunctionAgreement}.
+comparison \code{ArctanIntegralGeomFunctionAgreement}.  Independently, the
+concrete rectangle-sum schedule at \(1\) already gives a completed finite
+integral-style pi route:
+\[
+  4\,\code{arctanIntegralRectangleRawAtOne}\sim \pi_{\mathrm{area}}.
+\]
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}

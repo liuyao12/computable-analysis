@@ -85,6 +85,10 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_valid}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.archimedesTheorem}
 \lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleArea}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
@@ -109,8 +113,8 @@ whether the corresponding \(\pi\)-formula has been connected back to
 
 The current score is:
 \[
-  \text{definitions completed}=5/14,\qquad
-  \text{equivalences to \code{piCircleArea} formalized}=1/13
+  \text{definitions completed}=6/15,\qquad
+  \text{equivalences to \code{piCircleArea} formalized}=2/14
   \text{ applicable rows}.
 \]
 
@@ -133,6 +137,12 @@ Rational polygon circumference using interval square roots for side lengths. &
 \cref{def:arctan-area-stage-algorithm} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
 \code{piCircleArea}. &
+\(\checkmark\) & \(\checkmark\)\\
+\code{4 * arctanIntegralRectangleRawAtOne} &
+\cref{thm:finite-arctan-integral-comparison} &
+Midpoint lower/upper rectangle sums for
+\(\int_0^1 dt/(1+t^2)\), using the same rational refinement schedule as
+\code{arctanGeom(1)}. &
 \(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanIntegral(1)} &
 \cref{def:arctan-integral} &
@@ -190,19 +200,23 @@ identity locating \(i\). &
 \end{tabular}
 \end{center}
 
-The arctangent block records the geometric, integral, power-series, and
-Machin algorithms built from arctangent values.  The logarithm-at-\(i\) block
+The arctangent block records the geometric, integral-rectangle,
+general-integral, power-series, and Machin algorithms built from arctangent
+values.  The concrete rectangle row is completed; the general
+\code{arctanIntegral(1)} row remains pending until the project integral
+wrapper is connected to that rectangle schedule.  The logarithm-at-\(i\) block
 records a separate family of future computations: each one should identify
 \(\log(i)=i\pi/2\) using a different construction of \code{Log}, with Euler's
 identity providing the essential branch bridge.
 
 The first non-baseline checkmark in the equivalence column is the geometric
 arctangent theorem
-\code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}.  The theorem
-\code{PiProofs.piCircleArea\_equiv\_self} exists for transport, but the
-baseline row is not counted as a comparison target.  The following routes are
-formalized, or at least named as project targets, but still depend on missing
-hypotheses:
+\code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}; the rectangle row
+uses \code{PiProofs.four\_arctanIntegralRectangleRawAtOne\_equiv\_piCircleArea}.
+The theorem \code{PiProofs.piCircleArea\_equiv\_self} exists for transport,
+but the baseline row is not counted as a comparison target.  The following
+routes are formalized, or at least named as project targets, but still depend
+on missing hypotheses:
 \begin{center}
 \begin{tabular}{lll}
 \textbf{Pending fact} & \textbf{Lean theorem or target} & \textbf{Missing input}\\
@@ -300,7 +314,10 @@ computation in the scoreboard.
   \code{ArctanGeometry.arctanAreaLoop\_integralSum\_contains\_positiveLoop},
   \code{ArctanGeometry.arctanAreaLoop\_integralSum\_overlaps\_positiveLoop},
   \code{ArctanGeometry.arctanAreaLoop\_integralSum\_step\_refines},
-  \code{ArctanGeometry.arctanAreaLoop\_integralSum\_refines\_add}.
+  \code{ArctanGeometry.arctanAreaLoop\_integralSum\_refines\_add},
+  \code{ArctanGeometry.arctanIntegralRectangleRawAtOne\_valid},
+  \code{ArctanGeometry.arctanIntegralRectangleRawAtOne\_equiv\_arctanGeom\_one},
+  \code{PiProofs.four\_arctanIntegralRectangleRawAtOne\_equiv\_piCircleArea}.
 \end{itemize}
 
 \section{A useful style rule}

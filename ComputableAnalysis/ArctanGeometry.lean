@@ -1,4 +1,5 @@
 import ComputableAnalysis.Elementary
+import ComputableAnalysis.FTC
 import ComputableAnalysis.RationalCircle
 
 /-!
@@ -438,6 +439,24 @@ def NonnegativeIntervals : List (Rat × Rat) -> Prop
   | (p, r) :: rest =>
       0 <= p /\ p <= r /\ NonnegativeIntervals rest
 
+/-- A finite partition whose cells lie in the unit interval. -/
+def UnitIntervals : List (Rat × Rat) -> Prop
+  | [] => True
+  | (p, r) :: rest =>
+      0 <= p /\ p <= r /\ r <= 1 /\ UnitIntervals rest
+
+theorem unitIntervals_nonnegative
+    (intervals : List (Rat × Rat))
+    (hwf : UnitIntervals intervals) :
+    NonnegativeIntervals intervals := by
+  induction intervals with
+  | nil =>
+      simp [NonnegativeIntervals]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, _hr1, hrest⟩
+      exact ⟨hp0, hpr, ih hrest⟩
+
 def integralLowerSum : List (Rat × Rat) -> Rat
   | [] => 0
   | (p, r) :: rest => integralLowerStep p r + integralLowerSum rest
@@ -453,6 +472,10 @@ def geometricLowerSum : List (Rat × Rat) -> Rat
 def geometricUpperSum : List (Rat × Rat) -> Rat
   | [] => 0
   | (p, r) :: rest => geometricUpperStep p r + geometricUpperSum rest
+
+def intervalSquareSum : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest => (r - p) * (r - p) + intervalSquareSum rest
 
 def integralSumInterval (intervals : List (Rat × Rat)) : QInterval :=
   { lo := integralLowerSum intervals, hi := integralUpperSum intervals }
@@ -537,6 +560,128 @@ theorem integralSumInterval_ordered
   unfold integralSumInterval QInterval.width
   have hle := integralLowerSum_le_integralUpperSum intervals hwf
   grind [Rat.sub_eq_add_neg]
+
+private theorem one_le_one_add_square (x : Rat) :
+    1 <= 1 + x * x := by
+  have hsq := RationalCircle.Stage.ratSquare_nonneg x
+  grind
+
+private theorem one_le_square_den (p r : Rat) :
+    1 <= (1 + p * p) * (1 + r * r) := by
+  have hp1 : 1 <= 1 + p * p := one_le_one_add_square p
+  have hr1 : 1 <= 1 + r * r := one_le_one_add_square r
+  calc
+    1 = 1 * 1 := by grind
+    _ <= (1 + p * p) * 1 :=
+          Rat.mul_le_mul_of_nonneg_right hp1 (by native_decide)
+    _ <= (1 + p * p) * (1 + r * r) :=
+          Rat.mul_le_mul_of_nonneg_left hr1 (by grind)
+
+private theorem div_le_two_of_sum_le_two {p r D : Rat}
+    (hDpos : 0 < D) (hD1 : 1 <= D) (hsum : p + r <= 2) :
+    (p + r) / D <= 2 := by
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  apply Rat.le_of_mul_le_mul_right (c := D)
+  · calc
+      ((p + r) / D) * D = p + r := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= 2 := hsum
+      _ <= 2 * D := by
+        calc
+          (2 : Rat) = 2 * 1 := by grind
+          _ <= 2 * D := Rat.mul_le_mul_of_nonneg_left hD1 (by native_decide)
+  · exact hDpos
+
+private theorem kernel_diff_le_two_len {p r : Rat}
+    (hpr : p <= r) (hr1 : r <= 1) :
+    integralKernel p - integralKernel r <= 2 * (r - p) := by
+  let A : Rat := 1 + p * p
+  let B : Rat := 1 + r * r
+  let D : Rat := A * B
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have hBpos : 0 < B := by
+    dsimp [B]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos hApos hBpos
+  have hD1 : 1 <= D := by
+    dsimp [D, A, B]
+    exact one_le_square_den p r
+  have hp1 : p <= 1 := Rat.le_trans hpr hr1
+  have hsum : p + r <= 2 := by grind
+  have hratio : (p + r) / D <= 2 :=
+    div_le_two_of_sum_le_two hDpos hD1 hsum
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  apply Rat.le_of_mul_le_mul_right (c := D)
+  · calc
+      (integralKernel p - integralKernel r) * D =
+          (r - p) * (p + r) := by
+        dsimp [D, A, B]
+        unfold integralKernel
+        rw [Rat.div_def, Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+          Rat.mul_inv_cancel]
+      _ = (r - p) * ((p + r) / D) * D := by
+        dsimp [D, A, B]
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (r - p) * 2 * D := by
+        exact Rat.mul_le_mul_of_nonneg_right
+          (Rat.mul_le_mul_of_nonneg_left hratio hlen)
+          (Rat.le_of_lt hDpos)
+      _ = (2 * (r - p)) * D := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hDpos
+
+theorem integralCellWidth_le_two_square {p r : Rat}
+    (hpr : p <= r) (hr1 : r <= 1) :
+    integralUpperStep p r - integralLowerStep p r <=
+      2 * ((r - p) * (r - p)) := by
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hdiff := kernel_diff_le_two_len hpr hr1
+  unfold integralUpperStep integralLowerStep
+  calc
+    (r - p) * integralKernel p - (r - p) * integralKernel r
+        = (r - p) * (integralKernel p - integralKernel r) := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add]
+    _ <= (r - p) * (2 * (r - p)) :=
+          Rat.mul_le_mul_of_nonneg_left hdiff hlen
+    _ = 2 * ((r - p) * (r - p)) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem integralSumInterval_width_le_two_squareSum
+    (intervals : List (Rat × Rat))
+    (hwf : UnitIntervals intervals) :
+    (integralSumInterval intervals).width <=
+      2 * intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      change (0 : Rat) - 0 <= 2 * 0
+      native_decide
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨_hp0, hpr, hr1, hrest⟩
+      have hcell := integralCellWidth_le_two_square hpr hr1
+      have htail := ih hrest
+      unfold integralSumInterval QInterval.width
+      simp [integralLowerSum, integralUpperSum, intervalSquareSum]
+      calc
+        integralUpperStep p r + integralUpperSum rest -
+              (integralLowerStep p r + integralLowerSum rest)
+            = (integralUpperStep p r - integralLowerStep p r) +
+                (integralUpperSum rest - integralLowerSum rest) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+        _ <= 2 * ((r - p) * (r - p)) +
+              2 * intervalSquareSum rest :=
+              rat_add_le_add hcell htail
+        _ = 2 * (((r - p) * (r - p)) +
+              intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
 theorem integralSumInterval_contains_geometricSumInterval
     (intervals : List (Rat × Rat))
@@ -625,6 +770,96 @@ private theorem refineAux_intervals_nonnegative
           (hi - arctanAreaDecrement p q r) hrest
       simp [AreaLoopState.refineAux, NonnegativeIntervals, q,
         hp0, hpq, hq0, hqr, htail]
+
+private theorem refineAux_intervals_unit
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hwf : UnitIntervals intervals) :
+    UnitIntervals
+      (AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaLoopState.refineAux, UnitIntervals]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hq0 : 0 <= q := by
+        dsimp [q]
+        exact midpoint_nonneg hp0 (Rat.le_trans hp0 hpr)
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have hq1 : q <= 1 := Rat.le_trans hqr hr1
+      have htail :=
+        ih (lo + arctanAreaIncrement p q r)
+          (hi - arctanAreaDecrement p q r) hrest
+      simp [AreaLoopState.refineAux, UnitIntervals, q,
+        hp0, hpq, hq0, hqr, hq1, hr1, htail]
+
+private theorem midpoint_left_sub (p r : Rat) :
+    (p + r) / 2 - p = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+private theorem midpoint_right_sub (p r : Rat) :
+    r - (p + r) / 2 = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+private theorem square_midpoint_split (p r : Rat) :
+    let q : Rat := (p + r) / 2
+    (q - p) * (q - p) + (r - q) * (r - q) =
+      ((r - p) * (r - p)) / 2 := by
+  intro q
+  dsimp [q]
+  rw [midpoint_left_sub, midpoint_right_sub]
+  repeat rw [Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+private theorem refineAux_squareSum
+    (lo hi : Rat) (intervals : List (Rat × Rat)) :
+    intervalSquareSum
+        (AreaLoopState.refineAux lo hi intervals).intervals =
+      intervalSquareSum intervals / 2 := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      change (0 : Rat) = 0 / 2
+      native_decide
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      let q : Rat := (p + r) / 2
+      have htail :=
+        ih (lo + arctanAreaIncrement p q r)
+          (hi - arctanAreaDecrement p q r)
+      have hsplit := square_midpoint_split p r
+      simp [AreaLoopState.refineAux, intervalSquareSum]
+      calc
+        (q - p) * (q - p) +
+              ((r - q) * (r - q) +
+                intervalSquareSum
+                  (AreaLoopState.refineAux
+                    (lo + arctanAreaIncrement p q r)
+                    (hi - arctanAreaDecrement p q r) rest).intervals)
+            = ((r - p) * (r - p)) / 2 +
+                intervalSquareSum rest / 2 := by
+              rw [htail]
+              dsimp [q] at hsplit
+              rw [← hsplit]
+              grind [Rat.add_assoc, Rat.add_comm]
+        _ = (((r - p) * (r - p)) +
+              intervalSquareSum rest) / 2 := by
+              rw [Rat.div_def, Rat.div_def, Rat.div_def]
+              grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+                Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 private theorem refineAux_lo_eq_geometricLowerSum_extra
     (extra lo hi : Rat) (intervals : List (Rat × Rat))
@@ -790,6 +1025,22 @@ theorem refineAreaLoopState_intervals_nonnegative
   | mk lo hi intervals =>
       exact refineAux_intervals_nonnegative lo hi intervals hwf
 
+theorem refineAreaLoopState_intervals_unit
+    (state : AreaLoopState)
+    (hwf : UnitIntervals state.intervals) :
+    UnitIntervals (refineAreaLoopState state).intervals := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_intervals_unit lo hi intervals hwf
+
+theorem refineAreaLoopState_squareSum
+    (state : AreaLoopState) :
+    intervalSquareSum (refineAreaLoopState state).intervals =
+      intervalSquareSum state.intervals / 2 := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_squareSum lo hi intervals
+
 theorem refineAreaLoopState_lo_eq_geometricLowerSum
     (state : AreaLoopState)
     (hlo : state.lo = geometricLowerSum state.intervals) :
@@ -857,6 +1108,18 @@ theorem iterateAreaLoopState_intervals_nonnegative
         ih (refineAreaLoopState state)
           (refineAreaLoopState_intervals_nonnegative state hwf)
 
+theorem iterateAreaLoopState_intervals_unit
+    (n : Nat) (state : AreaLoopState)
+    (hwf : UnitIntervals state.intervals) :
+    UnitIntervals (iterateAreaLoopState n state).intervals := by
+  induction n generalizing state with
+  | zero =>
+      simpa [iterateAreaLoopState] using hwf
+  | succ n ih =>
+      simpa [iterateAreaLoopState] using
+        ih (refineAreaLoopState state)
+          (refineAreaLoopState_intervals_unit state hwf)
+
 theorem iterateAreaLoopState_lo_eq_geometricLowerSum
     (n : Nat) (state : AreaLoopState)
     (hlo : state.lo = geometricLowerSum state.intervals) :
@@ -902,6 +1165,11 @@ theorem arctanAreaLoopInitial_intervals_nonnegative
     NonnegativeIntervals (arctanAreaLoopInitial x).intervals := by
   simp [arctanAreaLoopInitial, NonnegativeIntervals, hx]
 
+theorem arctanAreaLoopInitial_intervals_unit
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    UnitIntervals (arctanAreaLoopInitial x).intervals := by
+  simp [arctanAreaLoopInitial, UnitIntervals, hx0, hx1]
+
 theorem arctanAreaLoopState_intervals_nonnegative
     {x : Rat} (hx : 0 <= x) (n : Nat) :
     NonnegativeIntervals (arctanAreaLoopState x n).intervals := by
@@ -909,6 +1177,45 @@ theorem arctanAreaLoopState_intervals_nonnegative
   exact iterateAreaLoopState_intervals_nonnegative n
     (arctanAreaLoopInitial x)
     (arctanAreaLoopInitial_intervals_nonnegative hx)
+
+theorem arctanAreaLoopState_intervals_unit
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    UnitIntervals (arctanAreaLoopState x n).intervals := by
+  unfold arctanAreaLoopState
+  exact iterateAreaLoopState_intervals_unit n
+    (arctanAreaLoopInitial x)
+    (arctanAreaLoopInitial_intervals_unit hx0 hx1)
+
+private theorem one_div_two_pow_succ (n : Nat) :
+    (1 / (((2 ^ n : Nat) : Rat))) / 2 =
+      1 / (((2 ^ (n + 1) : Nat) : Rat)) := by
+  let A : Rat := ((2 ^ n : Nat) : Rat)
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have h2 : (2 : Rat) ≠ 0 := by native_decide
+  have hA2 : A * 2 ≠ 0 := by
+    intro hz
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hpow :
+      (((2 ^ (n + 1) : Nat) : Rat)) = A * 2 := by
+    dsimp [A]
+    exact_mod_cast (by
+      simpa using (Nat.pow_succ 2 n))
+  rw [hpow]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem arctanAreaLoopState_one_squareSum (n : Nat) :
+    intervalSquareSum (arctanAreaLoopState 1 n).intervals =
+      1 / (((2 ^ n : Nat) : Rat)) := by
+  induction n with
+  | zero =>
+      native_decide
+  | succ n ih =>
+      rw [arctanAreaLoopState_succ, refineAreaLoopState_squareSum, ih]
+      exact one_div_two_pow_succ n
 
 theorem arctanAreaLoop_integralSum_contains_geometricSum
     {x : Rat} (hx : 0 <= x) (n : Nat) :
@@ -1019,6 +1326,178 @@ theorem arctanAreaLoop_integralSum_overlaps_positiveLoop
   rw [positiveLoopComputeAtStage_eq_geometricSumInterval hx n]
   exact arctanAreaLoop_integralSum_overlaps_geometricSum hx n
 
+/-- The rectangle-sum arctangent computation at `1`, using the same midpoint
+partition schedule as `arctanGeom`. -/
+def arctanIntegralRectangleComputeAtOne (n : Nat) : QInterval :=
+  integralSumInterval (arctanAreaLoopState 1 n).intervals
+
+def arctanIntegralRectangleRawAtOne : RealRaw where
+  compute := arctanIntegralRectangleComputeAtOne
+
+theorem arctanIntegralRectangleComputeAtOne_ordered (n : Nat) :
+    0 <= (arctanIntegralRectangleComputeAtOne n).width := by
+  unfold arctanIntegralRectangleComputeAtOne
+  exact arctanAreaLoop_integralSum_ordered
+    (x := 1) (by native_decide) n
+
+private theorem arctanIntegralRectangleComputeAtOne_step_refines (n : Nat) :
+    (arctanIntegralRectangleComputeAtOne n).ContainsInterval
+      (arctanIntegralRectangleComputeAtOne (n + 1)) := by
+  unfold arctanIntegralRectangleComputeAtOne
+  exact arctanAreaLoop_integralSum_step_refines
+    (x := 1) (by native_decide) n
+
+theorem arctanIntegralRectangleComputeAtOne_nested :
+    forall n m, n <= m ->
+      (arctanIntegralRectangleComputeAtOne n).lo <=
+        (arctanIntegralRectangleComputeAtOne m).lo /\
+      (arctanIntegralRectangleComputeAtOne m).lo <=
+        (arctanIntegralRectangleComputeAtOne m).hi /\
+      (arctanIntegralRectangleComputeAtOne m).hi <=
+        (arctanIntegralRectangleComputeAtOne n).hi := by
+  intro n m hnm
+  induction hnm with
+  | refl =>
+      have hordered := arctanIntegralRectangleComputeAtOne_ordered n
+      constructor
+      · exact Rat.le_refl
+      · constructor
+        · grind [QInterval.width, Rat.sub_eq_add_neg]
+        · exact Rat.le_refl
+  | step hnk ih =>
+      rename_i k
+      have hstep := arctanIntegralRectangleComputeAtOne_step_refines k
+      unfold QInterval.ContainsInterval at hstep
+      have hordered := arctanIntegralRectangleComputeAtOne_ordered (k + 1)
+      constructor
+      · exact Rat.le_trans ih.1 hstep.1
+      · constructor
+        · grind [QInterval.width, Rat.sub_eq_add_neg]
+        · exact Rat.le_trans hstep.2 ih.2.2
+
+private theorem succ_le_two_pow_succ (n : Nat) :
+    n + 1 <= 2 ^ (n + 1) := by
+  induction n with
+  | zero =>
+      simp
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 2 * (n + 1) := by omega
+        _ <= 2 * 2 ^ (n + 1) := Nat.mul_le_mul_left 2 ih
+        _ = 2 ^ (n + 1 + 1) := by
+          rw [Nat.pow_succ]
+          omega
+
+private theorem four_mul_one_div_eq_div (N : Nat) :
+    4 * (1 / (N : Rat)) = 4 / (N : Rat) := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+private theorem two_mul_one_div_two_pow_eq_four_mul_one_div_two_pow_succ
+    (n : Nat) :
+    2 * (1 / (((2 ^ n : Nat) : Rat))) =
+      4 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) := by
+  let A : Rat := ((2 ^ n : Nat) : Rat)
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have h2 : (2 : Rat) ≠ 0 := by native_decide
+  have hA2 : A * 2 ≠ 0 := by
+    intro hz
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hpow :
+      (((2 ^ (n + 1) : Nat) : Rat)) = A * 2 := by
+    dsimp [A]
+    exact_mod_cast (by
+      simpa using (Nat.pow_succ 2 n))
+  rw [hpow]
+  repeat rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem arctanIntegralRectangleComputeAtOne_width_le_four_div_succ
+    (n : Nat) :
+    (arctanIntegralRectangleComputeAtOne n).width <=
+      (4 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  have hmesh :
+      (arctanIntegralRectangleComputeAtOne n).width <=
+        2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    unfold arctanIntegralRectangleComputeAtOne
+    calc
+      (integralSumInterval (arctanAreaLoopState 1 n).intervals).width
+          <= 2 * intervalSquareSum
+              (arctanAreaLoopState 1 n).intervals :=
+            integralSumInterval_width_le_two_squareSum
+              (arctanAreaLoopState 1 n).intervals
+              (arctanAreaLoopState_intervals_unit
+                (x := 1) (by native_decide) (by native_decide) n)
+      _ = 2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+            rw [arctanAreaLoopState_one_squareSum n]
+  calc
+    (arctanIntegralRectangleComputeAtOne n).width
+        <= 2 * (1 / (((2 ^ n : Nat) : Rat))) := hmesh
+    _ = 4 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) :=
+          two_mul_one_div_two_pow_eq_four_mul_one_div_two_pow_succ n
+    _ <= 4 * (1 / (((n + 1 : Nat) : Rat))) := by
+          have hone :
+              1 / (((2 ^ (n + 1) : Nat) : Rat)) <=
+                1 / (((n + 1 : Nat) : Rat)) :=
+            FTC.one_div_nat_antitone (Nat.succ_pos n)
+              (Nat.pow_pos (by omega : 0 < 2))
+              (succ_le_two_pow_succ n)
+          exact Rat.mul_le_mul_of_nonneg_left hone
+            (by native_decide : (0 : Rat) <= 4)
+    _ = 4 / (((n + 1 : Nat) : Rat)) := by
+          exact four_mul_one_div_eq_div (n + 1)
+
+theorem arctanIntegralRectangleComputeAtOne_widthsShrink :
+    RealRaw.WidthsShrinkToZero arctanIntegralRectangleComputeAtOne := by
+  intro eps
+  refine ⟨4 * (eps.val.den + 1), ?_⟩
+  intro n hn
+  have hmain :
+      (4 : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (4 : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+    have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega :
+        4 * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hABpos
+  exact Rat.le_trans
+    (arctanIntegralRectangleComputeAtOne_width_le_four_div_succ n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
+theorem arctanIntegralRectangleRawAtOne_valid :
+    arctanIntegralRectangleRawAtOne.Valid := by
+  change RealRaw.ValidCompute arctanIntegralRectangleComputeAtOne
+  constructor
+  · exact arctanIntegralRectangleComputeAtOne_ordered
+  · constructor
+    · exact arctanIntegralRectangleComputeAtOne_nested
+    · exact arctanIntegralRectangleComputeAtOne_widthsShrink
+
 def positiveLoopRaw (x : Rat) : RealRaw where
   compute := positiveLoopComputeAtStage x
 
@@ -1050,6 +1529,18 @@ theorem arctanGeom_one_compute_eq (n : Nat) :
   have hnonzero : ¬(1 : Rat) = 0 := by native_decide
   have hnonneg : (0 : Rat) <= 1 := by native_decide
   exact arctanGeom_nonneg_compute_eq hnonzero hnonneg n
+
+theorem arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one :
+    arctanIntegralRectangleRawAtOne.Equiv (arctanGeom 1) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    arctanIntegralRectangleRawAtOne (arctanGeom 1) n n).2
+  change QInterval.Overlaps
+    (integralSumInterval (arctanAreaLoopState 1 n).intervals)
+    ((arctanGeom 1).compute n)
+  rw [arctanGeom_one_compute_eq n]
+  exact arctanAreaLoop_integralSum_overlaps_positiveLoop
+    (x := 1) (by native_decide) n
 
 theorem arctanGeom_zero :
     arctanGeom 0 = RealRaw.ofRat 0 := by

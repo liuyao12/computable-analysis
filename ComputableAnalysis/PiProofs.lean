@@ -3825,6 +3825,24 @@ theorem piCircleArea_equiv_four_arctanGeom_one :
       (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
 
+theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
+    (((4 : Nat) *
+        ArctanGeometry.arctanIntegralRectangleRawAtOne : RealRaw).Equiv
+      piCircleArea) := by
+  have hscale :
+      (((4 : Nat) *
+          ArctanGeometry.arctanIntegralRectangleRawAtOne : RealRaw).Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
+    RealRaw.natScale_equiv 4
+      ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one
+  exact RealRaw.equiv_trans
+    (RealRaw.natScale_valid 4
+      ArctanGeometry.arctanIntegralRectangleRawAtOne_valid)
+    fourArctanGeomOneValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscale
+    four_arctanGeom_one_equiv_piCircleArea
+
 theorem circumferenceValid_of_nested_and_shrinking
     (hnested : CircumferenceNested)
     (hshrink : CircumferenceWidthsShrink) :
