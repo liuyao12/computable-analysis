@@ -79,14 +79,20 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.rectangleKernelIntegralAtNonnegativeUnit}
 \lean{ComputableAnalysis.PiProofs.arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit}
 \lean{ComputableAnalysis.PiProofs.PowerSeriesEqualsRectangleKernelAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
@@ -98,10 +104,12 @@ also equivalent to \(4\arctan_{\mathrm{series}}(1)\):
 \[
   4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
 \]
-Lean now supplies the rectangle construction for the Taylor kernel and proves
-the geometric arctangent agrees with it on the nonnegative unit branch.  Thus
-the current pointwise missing input is the power-series equality
-\code{PowerSeriesEqualsRectangleKernelAtOne}; from this Lean constructs
+Lean now supplies the rectangle construction for the Taylor kernel, proves the
+geometric arctangent agrees with it on the nonnegative unit branch, and
+transports the pointwise power-series statement to the concrete comparison
+\code{LeibnizEqualsRectangleRawAtOne}.  This is now the finite missing input:
+compare the Leibniz intervals with the rectangle-sum integral intervals at
+\(1\).  From that Lean constructs
 \code{Taylor.ArctanComparison.KernelComparisonAt 1} and then
 \code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The older unit-interval
 hypothesis

@@ -113,14 +113,20 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.rectangleKernelIntegralAtNonnegativeUnit}
 \lean{ComputableAnalysis.PiProofs.arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit}
 \lean{ComputableAnalysis.PiProofs.PowerSeriesEqualsRectangleKernelAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
@@ -290,8 +296,8 @@ on missing hypotheses:
 \textbf{Pending fact} & \textbf{Lean theorem or target} & \textbf{Missing input}\\
 \hline
 power-series arctangent to area \(\pi\) &
-\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesRectangleKernelAtOne} &
-\code{PiProofs.PowerSeriesEqualsRectangleKernelAtOne}\\
+\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_leibnizEqualsRectangleRawAtOne} &
+\code{PiProofs.LeibnizEqualsRectangleRawAtOne}\\
 integral arctangent to area \(\pi\) &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
 \code{ArctanIntegralGeomFunctionAgreement}\\
@@ -370,12 +376,15 @@ agreements.
   \code{ArctanGeometry.PowerSeriesAgreesAt},
   \code{Taylor.ArctanComparison.KernelComparisonAt},
   \code{PiProofs.PowerSeriesEqualsRectangleKernelAtOne},
+  \code{PiProofs.LeibnizEqualsRectangleRawAtOne},
   \code{PiProofs.MachinIdentity.KernelComparisonAtMachinInputs},
   \code{PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_kernelComparisonAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesRectangleKernelAtOne},
+  \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_leibnizEqualsRectangleRawAtOne},
   \code{PiProofs.leibnizEqArea\_of\_kernelComparisonAtOne},
+  \code{PiProofs.leibnizEqArea\_of\_leibnizEqualsRectangleRawAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
   \code{PiProofs.leibnizEqMachin\_of\_kernelComparisonAtMachinInputs},
   \code{PiProofs.leibnizEqMachin\_of\_powerSeriesRectangleKernelAtMachinInputs},

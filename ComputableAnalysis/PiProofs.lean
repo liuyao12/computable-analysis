@@ -799,6 +799,10 @@ end LeibnizValidity
 theorem leibnizValid : LeibnizValid :=
   LeibnizValidity.valid
 
+theorem leibnizSeriesValid : leibnizSeries.Valid := by
+  exact RealRaw.valid_of_natScale_valid (by omega : 0 < (4 : Nat))
+    (by simpa [piLeibniz] using leibnizValid)
+
 theorem arctan_one_state_eq_leibniz_state (n : Nat) :
     ArctanValidity.state 1 n =
       (LeibnizValidity.lo n, LeibnizValidity.hi n, (1 : Rat)) := by
@@ -849,6 +853,128 @@ arctangent at `1`. -/
 theorem leibnizSeries_equiv_arctanSeries_one :
     leibnizSeries.Equiv (arctanSeries (1 : Rat)) := by
   simpa [arctanSeries] using leibnizSeries_equiv_arctan_one
+
+theorem arctanIntegralRectangleRawAtOne_compute_eq_raw_one (n : Nat) :
+    ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n =
+      (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)).compute n := rfl
+
+theorem arctanIntegralRectangleRawAtOne_equiv_raw_one :
+    ArctanGeometry.arctanIntegralRectangleRawAtOne.Equiv
+      (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ArctanGeometry.arctanIntegralRectangleRawAtOne
+    (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)) n n).2
+  change QInterval.Overlaps
+    (ArctanGeometry.arctanIntegralRectangleCompute (1 : Rat) n)
+    (ArctanGeometry.arctanIntegralRectangleCompute (1 : Rat) n)
+  have hordered :=
+    ArctanGeometry.arctanIntegralRectangleCompute_ordered
+      (x := (1 : Rat)) (by native_decide) n
+  unfold QInterval.Overlaps QInterval.width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+def LeibnizEqualsRectangleRawAtOne : Prop :=
+  leibnizSeries.Equiv (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat))
+
+def LeibnizEqualsRectangleRawAtOneSpecial : Prop :=
+  leibnizSeries.Equiv ArctanGeometry.arctanIntegralRectangleRawAtOne
+
+theorem leibnizEqualsRectangleRawAtOne_of_special
+    (h : LeibnizEqualsRectangleRawAtOneSpecial) :
+    LeibnizEqualsRectangleRawAtOne := by
+  unfold LeibnizEqualsRectangleRawAtOne
+  exact RealRaw.equiv_trans
+    leibnizSeriesValid
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    (ArctanGeometry.arctanIntegralRectangleRaw_valid
+      (x := (1 : Rat)) (by native_decide) (by native_decide))
+    h
+    arctanIntegralRectangleRawAtOne_equiv_raw_one
+
+theorem special_of_leibnizEqualsRectangleRawAtOne
+    (h : LeibnizEqualsRectangleRawAtOne) :
+    LeibnizEqualsRectangleRawAtOneSpecial := by
+  unfold LeibnizEqualsRectangleRawAtOneSpecial
+  exact RealRaw.equiv_trans
+    leibnizSeriesValid
+    (ArctanGeometry.arctanIntegralRectangleRaw_valid
+      (x := (1 : Rat)) (by native_decide) (by native_decide))
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    h
+    (RealRaw.equiv_symm arctanIntegralRectangleRawAtOne_equiv_raw_one)
+
+theorem powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne
+    (h : LeibnizEqualsRectangleRawAtOne) :
+    PowerSeriesEqualsRectangleKernelAtOne := by
+  unfold PowerSeriesEqualsRectangleKernelAtOne
+  unfold PowerSeriesEqualsRectangleKernelAt
+  have hArctanValid : (arctan (1 : Rat)).Valid :=
+    arctan_valid_at arctanValid arctan_one_mem_domain
+  have hRectValid :
+      (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)).Valid :=
+    ArctanGeometry.arctanIntegralRectangleRaw_valid
+      (x := (1 : Rat)) (by native_decide) (by native_decide)
+  have hKernelValid :
+      (Taylor.ArctanComparison.kernelIntegralRaw (1 : Rat)
+        (rectangleKernelIntegralAtNonnegativeUnit
+          (1 : Rat) (by native_decide) (by native_decide))).Valid :=
+    Taylor.ArctanComparison.kernelIntegralRaw_valid (1 : Rat)
+      (rectangleKernelIntegralAtNonnegativeUnit
+        (1 : Rat) (by native_decide) (by native_decide))
+  have hArctanLeibniz : (arctan (1 : Rat)).Equiv leibnizSeries :=
+    RealRaw.equiv_symm leibnizSeries_equiv_arctan_one
+  have hRectKernel :
+      (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)).Equiv
+        (Taylor.ArctanComparison.kernelIntegralRaw (1 : Rat)
+          (rectangleKernelIntegralAtNonnegativeUnit
+            (1 : Rat) (by native_decide) (by native_decide))) :=
+    rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit
+      (1 : Rat) (by native_decide) (by native_decide)
+  exact RealRaw.equiv_trans
+    hArctanValid
+    leibnizSeriesValid
+    hKernelValid
+    hArctanLeibniz
+    (RealRaw.equiv_trans
+      leibnizSeriesValid hRectValid hKernelValid h hRectKernel)
+
+theorem leibnizEqualsRectangleRawAtOne_of_powerSeriesEqualsRectangleKernelAtOne
+    (h : PowerSeriesEqualsRectangleKernelAtOne) :
+    LeibnizEqualsRectangleRawAtOne := by
+  unfold LeibnizEqualsRectangleRawAtOne
+  unfold PowerSeriesEqualsRectangleKernelAtOne at h
+  unfold PowerSeriesEqualsRectangleKernelAt at h
+  have hArctanValid : (arctan (1 : Rat)).Valid :=
+    arctan_valid_at arctanValid arctan_one_mem_domain
+  have hKernelValid :
+      (Taylor.ArctanComparison.kernelIntegralRaw (1 : Rat)
+        (rectangleKernelIntegralAtNonnegativeUnit
+          (1 : Rat) (by native_decide) (by native_decide))).Valid :=
+    Taylor.ArctanComparison.kernelIntegralRaw_valid (1 : Rat)
+      (rectangleKernelIntegralAtNonnegativeUnit
+        (1 : Rat) (by native_decide) (by native_decide))
+  have hRectValid :
+      (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)).Valid :=
+    ArctanGeometry.arctanIntegralRectangleRaw_valid
+      (x := (1 : Rat)) (by native_decide) (by native_decide)
+  have hLeibnizArctan : leibnizSeries.Equiv (arctan (1 : Rat)) :=
+    leibnizSeries_equiv_arctan_one
+  have hKernelRect :
+      (Taylor.ArctanComparison.kernelIntegralRaw (1 : Rat)
+        (rectangleKernelIntegralAtNonnegativeUnit
+          (1 : Rat) (by native_decide) (by native_decide))).Equiv
+        (ArctanGeometry.arctanIntegralRectangleRaw (1 : Rat)) :=
+    RealRaw.equiv_symm
+      (rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit
+        (1 : Rat) (by native_decide) (by native_decide))
+  exact RealRaw.equiv_trans
+    leibnizSeriesValid
+    hArctanValid
+    hRectValid
+    hLeibnizArctan
+    (RealRaw.equiv_trans hArctanValid hKernelValid hRectValid h hKernelRect)
 
 /-- The Leibniz series is equivalent to the Dirichlet L-value `L(1, chi4)`.
 
@@ -2916,6 +3042,12 @@ theorem four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAt
   four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
     (kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne hps)
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+    (h : LeibnizEqualsRectangleRawAtOne) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne
+    (powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne h)
+
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
@@ -2955,6 +3087,13 @@ theorem piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAt
   RealRaw.equiv_symm
     (four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne
       hps)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_leibnizEqualsRectangleRawAtOne
+    (h : LeibnizEqualsRectangleRawAtOne) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+      h)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
@@ -4237,6 +4376,18 @@ theorem leibnizEqArea_of_kernelComparisonAtOne
     piLeibniz_equiv_four_arctanSeries_one
     (four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne
       route)
+
+theorem leibnizEqArea_of_powerSeriesRectangleKernelAtOne
+    (hps : PowerSeriesEqualsRectangleKernelAtOne) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_kernelComparisonAtOne
+    (kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne hps)
+
+theorem leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
+    (h : LeibnizEqualsRectangleRawAtOne) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_powerSeriesRectangleKernelAtOne
+    (powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne h)
 
 theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
     (route : MachinIdentity.KernelComparisonAtMachinInputs)
