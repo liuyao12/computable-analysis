@@ -919,6 +919,13 @@ private theorem rat_square_pos_of_ne_zero {x : Rat} (hx : x ≠ 0) :
     have hsq : 0 < (-x) * (-x) := Rat.mul_pos hnegpos hnegpos
     grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
 
+private theorem rat_square_nonneg (x : Rat) : 0 <= x * x := by
+  by_cases hx : 0 <= x
+  · exact Rat.mul_nonneg hx hx
+  · have hneg : 0 <= -x := by grind
+    have hsq : 0 <= (-x) * (-x) := Rat.mul_nonneg hneg hneg
+    grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg]
+
 private theorem rat_eq_of_mul_eq_mul_ne {a b c : Rat}
     (hc : c ≠ 0) (h : a * c = b * c) : a = b := by
   calc
@@ -977,6 +984,34 @@ theorem reciprocalQuartic_projective_substitution_data
       reciprocalDifferenceJacobian x * (x * x) = 1 + x * x :=
   ⟨reciprocalDifference_quartic_denominator a x hx,
     reciprocalDifferenceJacobian_square_cleared x hx⟩
+
+/-- In the clean pi case \(a=-1\), the shifted Cauchy denominator is
+`u^2 + 1`, hence strictly positive on rational inputs. -/
+theorem shiftedCauchyDenominator_minus_one_pos (u : Rat) :
+    0 < shiftedCauchyDenominator (-1) u := by
+  unfold shiftedCauchyDenominator
+  have hs : 0 <= u * u := rat_square_nonneg u
+  grind
+
+/-- In the clean pi case \(a=-1\), the reciprocal quartic denominator is
+strictly positive on rational inputs. -/
+theorem reciprocalQuarticDenominator_minus_one_pos (x : Rat) :
+    0 < reciprocalQuarticDenominator (-1) x := by
+  by_cases hxzero : x = 0
+  · subst x
+    unfold reciprocalQuarticDenominator
+    native_decide
+  · have hden := reciprocalDifference_quartic_denominator (-1) x hxzero
+    have hx2pos : 0 < x * x := rat_square_pos_of_ne_zero hxzero
+    have hEpos :
+        0 < shiftedCauchyDenominator (-1) (reciprocalDifference x) :=
+      shiftedCauchyDenominator_minus_one_pos (reciprocalDifference x)
+    have hprod :
+        0 < x * x *
+          shiftedCauchyDenominator (-1) (reciprocalDifference x) :=
+      Rat.mul_pos hx2pos hEpos
+    rw [hden] at hprod
+    exact hprod
 
 /-- Folding the positive half-line by the reciprocal map produces the symmetric
 density \((1+x^2)/(x^4+a x^2+1)\) on the unit interval. -/
@@ -1048,6 +1083,20 @@ theorem reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy
   rw [reciprocalQuarticUnitFoldDensity_eq_symmetric a x hx hQ hQrec]
   exact reciprocalQuarticSymmetricDensity_eq_pullback_shiftedCauchy
     a x hx hQ hE
+
+/-- The denominator-free specialization of the full finite algebra chain for
+the pi-producing quartic \(x^4-x^2+1\). -/
+theorem reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy
+    (x : Rat) (hx : x ≠ 0) :
+    reciprocalQuarticUnitFoldDensity (-1) x =
+      reciprocalDifferenceJacobian x *
+        shiftedCauchyKernel (-1) (reciprocalDifference x) := by
+  exact reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy
+    (-1) x hx
+    (Rat.ne_of_gt (reciprocalQuarticDenominator_minus_one_pos x))
+    (Rat.ne_of_gt (reciprocalQuarticDenominator_minus_one_pos (1 / x)))
+    (Rat.ne_of_gt
+      (shiftedCauchyDenominator_minus_one_pos (reciprocalDifference x)))
 
 /-- The geometric cosine algorithm, restricted to a rational interval where it
 is defined. -/

@@ -560,6 +560,9 @@ rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_symmetric}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator_minus_one_pos}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_pos}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -594,6 +597,12 @@ integral bookkeeping over the full projective line:
 \[
   \frac12\int_{-\infty}^{\infty}\frac{\dd u}{u^2+a+2}.
 \]
+For the pi case \(a=-1\), Lean also proves the needed denominator positivity:
+\[
+  u^2+1>0,\qquad x^4-x^2+1>0.
+\]
+Thus the full finite pullback identity for \(a=-1\) is now available without
+extra denominator hypotheses, under only \(x\ne0\).
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}

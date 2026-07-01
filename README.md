@@ -95,8 +95,10 @@ the reciprocal quartic
 `integral_(-infty)^infty dx/(x^4 + a*x^2 + 1)`.  Lean formalizes the exact
 folding and substitution algebra for `x ↦ 1/x` and `u = x - 1/x` as
 `IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
-the `a = -1` case should become another pi computation once the improper Farey
-integral construction is available.
+the `a = -1` denominator side conditions are discharged in
+`IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy`.
+That case should become another pi computation once the improper Farey integral
+construction is available.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced
