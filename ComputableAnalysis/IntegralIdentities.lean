@@ -923,6 +923,29 @@ def reciprocalQuarticUnitFoldDensity (a x : Rat) : Rat :=
 def reciprocalQuarticExpectedPiMultiple (b : Rat) : RealRaw :=
   RealRaw.scaleRat (1 / b) piCircleArea
 
+/-- Expected raw value of the clean projective test
+`∫_(-∞)^∞ dx/(x^4 - x^2 + 1)`, namely `pi`.  This is only the expected value;
+the projective/Farey construction still has to be supplied separately. -/
+def reciprocalQuarticMinusOneExpectedPi : RealRaw :=
+  reciprocalQuarticExpectedPiMultiple 1
+
+/-- The theorem-facing obligation for a future projective-line/Farey
+construction of the clean reciprocal quartic integral: its produced raw real
+must agree with the expected pi value. -/
+def ReciprocalQuarticMinusOneProjectiveAgreement
+    (projectiveIntegral : RealRaw) : Prop :=
+  projectiveIntegral.Equiv reciprocalQuarticMinusOneExpectedPi
+
+/-- Data for the clean reciprocal quartic pi route.  The finite algebraic
+pullback is already formalized above; this structure isolates the remaining
+analytic/improper-integral construction as a verified raw real equivalent to the
+expected value. -/
+structure ReciprocalQuarticMinusOneProjectiveRoute where
+  projectiveIntegral : RealRaw
+  projectiveIntegral_valid : projectiveIntegral.Valid
+  computes_expected :
+    ReciprocalQuarticMinusOneProjectiveAgreement projectiveIntegral
+
 /-- The rational parameter condition under which the reciprocal quartic integral
 is expected to reduce to a rational multiple of pi. -/
 def ReciprocalQuarticPiParameter (a b : Rat) : Prop :=

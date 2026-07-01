@@ -106,8 +106,12 @@ references to the relevant declarations.
   Lean also identifies that shifted Cauchy kernel with the existing arctangent
   kernel through
   `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
-  The remaining work is the improper/Farey integral construction that turns the
-  `a=-1` case into another computation of `piCircleArea`.
+  The expected-value side is packaged as
+  `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, and Lean proves
+  `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The
+  remaining work is the improper/Farey integral construction that supplies a
+  `ReciprocalQuarticMinusOneProjectiveRoute` and turns the `a=-1` case into
+  another counted computation of `piCircleArea`.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

@@ -6403,6 +6403,50 @@ theorem piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea :
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- The expected value of the clean reciprocal quartic projective integral is a
+valid raw real, because it is just the baseline area-pi raw real scaled by `1`. -/
+theorem reciprocalQuarticMinusOneExpectedPi_valid :
+    IntegralIdentities.reciprocalQuarticMinusOneExpectedPi.Valid := by
+  unfold IntegralIdentities.reciprocalQuarticMinusOneExpectedPi
+    IntegralIdentities.reciprocalQuarticExpectedPiMultiple
+  exact RealRaw.scaleRat_valid_of_nonneg
+    (by native_decide : (0 : Rat) <= 1 / 1)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+
+/-- The expected value of the clean reciprocal quartic projective integral is
+equivalent to the baseline circle-area pi.  This is only the expected-value
+comparison; constructing the improper/projective integral is the remaining
+analytic work. -/
+theorem reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea :
+    IntegralIdentities.reciprocalQuarticMinusOneExpectedPi.Equiv
+      piCircleArea := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    IntegralIdentities.reciprocalQuarticMinusOneExpectedPi piCircleArea n n).2
+  have hordered :=
+    RealRaw.interval_order_of_valid piCircleArea
+      (by simpa [AreaValid] using AreaLoopValidity.areaValid) n
+  unfold IntegralIdentities.reciprocalQuarticMinusOneExpectedPi
+    IntegralIdentities.reciprocalQuarticExpectedPiMultiple
+    RealRaw.scaleRat RealRaw.scaleRatCompute
+  have hunit : (1 / (1 : Rat)) = 1 := by native_decide
+  have hnonneg : (0 : Rat) <= 1 / (1 : Rat) := by native_decide
+  simpa [hunit, hnonneg] using ⟨hordered, hordered⟩
+
+/-- A verified projective-line construction for the clean reciprocal quartic test
+would immediately give another formal pi computation once it is proved to agree
+with the expected value isolated in `IntegralIdentities`. -/
+theorem reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea
+    (R : IntegralIdentities.ReciprocalQuarticMinusOneProjectiveRoute) :
+    R.projectiveIntegral.Equiv piCircleArea :=
+  RealRaw.equiv_trans
+    R.projectiveIntegral_valid
+    reciprocalQuarticMinusOneExpectedPi_valid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    R.computes_expected
+    reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea
+
 theorem circumferenceValid_of_nested_and_shrinking
     (hnested : CircumferenceNested)
     (hshrink : CircumferenceWidthsShrink) :

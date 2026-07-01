@@ -24,8 +24,8 @@ For formula rows that compute a related quantity first, such as `zeta(2)` or
 algorithm is verified, while the equivalence column records whether the pi
 formula has been connected back to `piCircleArea`.
 
-Current count: definitions completed `7/16`; equivalences to `piCircleArea`
-formalized `2/15` applicable rows.  The baseline row `piCircleArea` is `N/A`
+Current count: definitions completed `7/17`; equivalences to `piCircleArea`
+formalized `2/16` applicable rows.  The baseline row `piCircleArea` is `N/A`
 for equivalence scorekeeping.  The rendered scoreboard is in
 [Ch. 8: pi scoreboard](https://liuyao12.github.io/computable-analysis/sect0005.html#sec:pi-scoreboard),
 and the blueprint-links column points to the relevant generated blueprint
@@ -45,6 +45,7 @@ anchors for each computation.
 | `6 * arcsinIntegral(1/2)` | [Ch. 3: inverse elementary integrals](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | Period formula `pi/6 = integral_0^(1/2) dx / sqrt(1 - x^2)`. | ✗ | ✗ |
 | `NewtonSegmentPi` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Newton circle-segment formula `pi/12 + sqrt(3)/8 = integral_0^(1/2) sqrt(1 - x^2) dx`. | ✗ | ✗ |
 | `GaussianPi` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Gaussian integral `sqrt(2*pi) = integral_(-infty)^infty exp(-x^2/2) dx`; pi is recovered by squaring and halving. | ✗ | ✗ |
+| `reciprocalQuarticMinusOneProjectiveRoute` | [Ch. 3: quartic test kernel](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-quartic-test-kernel), [route package](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:reciprocal-quartic-route-package) | Projective-line/Farey benchmark `integral_(-infty)^infty dx/(x^4 - x^2 + 1) = pi`; the rational folding to the arctangent kernel is formalized, but the improper integral construction is still pending. | ✗ | ✗ |
 | `baselSeriesRaw` / `pi^2/6` | [Ch. 4: zeta-two intervals](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw) | Euler's Basel series, `zeta(2) = 1 + 1/4 + 1/9 + ... = pi^2/6`; the zeta-side interval is verified. | ✓ | ✗ |
 | `Brouncker(4/pi)` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | Continued fraction for `4 / pi`, with finite truncations expected to give rational bounds. | ✗ | ✗ |
 | **Logarithm-at-i routes** | [route overview](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [series continuation](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-series-at-i), [path integral](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-path-integral-at-i), [inverse exp](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-inv-exp-at-i), [Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | These rows all compute pi from the single formula `pi = -2i * log(i)`, using different definitions/computations of the same branch value `log(i)`.  They are intended tests for branch control, agreement of logarithm constructions, and Euler's identity. |  |  |
@@ -99,8 +100,11 @@ the `a = -1` denominator side conditions are discharged in
 `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy`.
 Lean also identifies that target kernel with the existing arctangent kernel via
 `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
-That case should become another pi computation once the improper Farey integral
-construction is available.
+The expected value package is now formalized as
+`IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, with
+`PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`; this is not
+counted in the scoreboard until an actual improper Farey construction supplies a
+`ReciprocalQuarticMinusOneProjectiveRoute`.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

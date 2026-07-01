@@ -330,6 +330,12 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
 \lean{ComputableAnalysis.Basel.eulerBasel_geometricPi}
 \lean{ComputableAnalysis.exp.logFromIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneExpectedPi}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveRoute}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_valid}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
 
 This score counts completed formalization work.  A \(\pi\)-computation counts
 as definition-complete only after its interval sequence has been verified as a
@@ -344,8 +350,8 @@ whether the corresponding \(\pi\)-formula has been connected back to
 
 The current score is:
 \[
-  \text{definitions completed}=7/16,\qquad
-  \text{equivalences to \code{piCircleArea} formalized}=2/15
+  \text{definitions completed}=7/17,\qquad
+  \text{equivalences to \code{piCircleArea} formalized}=2/16
   \text{ applicable rows}.
 \]
 
@@ -424,6 +430,14 @@ Newton circle-segment formula
 Gaussian integral
 \(\sqrt{2\pi}=\int_{-\infty}^{\infty}\exp(-x^2/2)\,dx\). &
 \(\times\) & \(\times\)\\
+\code{reciprocalQuarticMinusOneProjectiveRoute} &
+\cref{def:reciprocal-quartic-test-kernel};
+\cref{thm:reciprocal-quartic-route-package} &
+Projective-line/Farey benchmark
+\(\int_{-\infty}^{\infty} dx/(x^4-x^2+1)=\pi\); the rational folding to the
+arctangent kernel is formalized, but the improper integral construction is still
+pending. &
+\(\times\) & \(\times\)\\
 \code{baselSeriesRaw} / \(\pi^2/6\) &
 \cref{def:zeta-two-raw} &
 Euler's Basel series
@@ -487,6 +501,12 @@ The logarithm-at-\(i\) block records a separate family of future computations:
 each one should identify \(\log(i)=i\pi/2\) using a different definition or
 computation of \code{log}, with Euler's identity providing the essential branch
 bridge.
+The reciprocal quartic row is deliberately still marked pending: Lean proves the
+expected value
+\code{PiProofs.reciprocalQuarticMinusOneExpectedPi\_equiv\_piCircleArea} and the
+finite rational substitution algebra, but the row counts only after a verified
+projective-line Farey integral supplies
+\code{ReciprocalQuarticMinusOneProjectiveRoute}.
 
 The first non-baseline checkmark in the equivalence column is the geometric
 arctangent theorem
@@ -546,6 +566,10 @@ three \code{log(i)} constructions, their branch agreement, and Euler identity\\
 \code{PiProofs.leibnizEqMachin\_of\_powerSeriesRectangleKernelAtMachinInputs} &
 \code{PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}
 and the geometric branch law\\
+reciprocal quartic projective integral &
+\code{PiProofs.reciprocalQuarticMinusOneProjectiveRoute\_equiv\_piCircleArea} &
+an improper Farey construction satisfying
+\code{ReciprocalQuarticMinusOneProjectiveAgreement}\\
 remaining geometric pi validity &
 \code{PiProofs.CircumferenceLinearRemainders} &
 \code{CircumferenceStepRefines}, a \code{CircumferenceWidthLinearBound C}, and

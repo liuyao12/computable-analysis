@@ -533,6 +533,9 @@ rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticExpectedPiMultiple}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneExpectedPi}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveRoute}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticPiParameter}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticPiParameter_minus_one}
 \uses{def:one-over-one-plus-square-kernel}
@@ -551,7 +554,11 @@ It also names the unit-folded density obtained by sending the tail
 \([1,\infty]\) back to \([0,1]\) by \(x\mapsto1/x\).
 The parameter predicate \code{ReciprocalQuarticPiParameter(a,b)} records the
 rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
-\((a,b)=(-1,1)\).
+\((a,b)=(-1,1)\).  For this clean case Lean also names the expected raw value
+\code{reciprocalQuarticMinusOneExpectedPi}.  A future full projective/Farey
+construction is expected to supply a
+\code{ReciprocalQuarticMinusOneProjectiveRoute}, namely a verified raw real for
+the improper integral together with agreement with that expected value.
 \end{definition}
 
 \begin{theorem}[Projective substitution for the quartic test]
@@ -613,6 +620,28 @@ extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 with the existing arctangent kernel \(\code{ArctanGeometry.integralKernel}(u)\),
 so the pi-case quartic test now lands directly in the same rational kernel used
 by the verified rectangle and Farey arctangent constructions.
+\end{theorem}
+
+\begin{theorem}[Route package for the clean reciprocal quartic test]
+\label{thm:reciprocal-quartic-route-package}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_valid}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
+\uses{def:reciprocal-quartic-test-kernel,thm:reciprocal-quartic-projective-substitution,thm:geometric-pi-validity}
+\leanok
+The clean benchmark
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}=\pi
+\]
+now has a theorem-facing package.  Lean proves that the expected raw value
+\code{reciprocalQuarticMinusOneExpectedPi} is valid and equivalent to the
+baseline \code{piCircleArea}.  Consequently, once the projective-line Farey
+construction itself is verified and shown to satisfy
+\code{ReciprocalQuarticMinusOneProjectiveAgreement}, the resulting
+\code{ReciprocalQuarticMinusOneProjectiveRoute} immediately gives a formal
+\(\pi\)-computation equivalent to \code{piCircleArea}.  This route package is
+not counted as a completed scoreboard row until that improper-integral raw real
+is supplied.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}
