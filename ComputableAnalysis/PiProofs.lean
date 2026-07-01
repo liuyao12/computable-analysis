@@ -2485,6 +2485,27 @@ theorem pointSegmentLengthInterval_width_eq
     sqrtApproxOnDomain_width_eq (pointSegmentNormSq p q)
       (pointSegmentNormSq_sqrtDomain p q) n
 
+theorem pointSegmentLengthInterval_contains_of_le_precision
+    (p q : PiCirclePoint) {n m : Nat} (hnm : n <= m) :
+    (pointSegmentLengthInterval p q n).ContainsInterval
+      (pointSegmentLengthInterval p q m) := by
+  unfold pointSegmentLengthInterval
+  simpa [sqrtPartialRaw] using
+    sqrtApproxOnDomain_contains_of_le (pointSegmentNormSq p q)
+      (pointSegmentNormSq_sqrtDomain p q) hnm
+
+theorem pointSegmentLengthInterval_lo_mono_precision
+    (p q : PiCirclePoint) {n m : Nat} (hnm : n <= m) :
+    (pointSegmentLengthInterval p q n).lo <=
+      (pointSegmentLengthInterval p q m).lo :=
+  (pointSegmentLengthInterval_contains_of_le_precision p q hnm).1
+
+theorem pointSegmentLengthInterval_hi_anti_precision
+    (p q : PiCirclePoint) {n m : Nat} (hnm : n <= m) :
+    (pointSegmentLengthInterval p q m).hi <=
+      (pointSegmentLengthInterval p q n).hi :=
+  (pointSegmentLengthInterval_contains_of_le_precision p q hnm).2
+
 theorem pointSegmentLengthInterval_le_hi_of_sq_le
     (p q : PiCirclePoint) (n : Nat) {r : Rat}
     (hrsq : sq r <= pointSegmentNormSq p q) :
@@ -2888,6 +2909,52 @@ theorem rationalPointPathLength_width_nonneg
     0 <= (rationalPointPathLength points n).width := by
   have h := rationalPointPathLength_lo_le_hi points n
   grind [QInterval.width, Rat.sub_eq_add_neg]
+
+theorem rationalPointPathLength_contains_of_le_precision
+    (points : List PiCirclePoint) {n m : Nat} (hnm : n <= m) :
+    (rationalPointPathLength points n).ContainsInterval
+      (rationalPointPathLength points m) := by
+  induction points with
+  | nil =>
+      simp [rationalPointPathLength, rationalPointPathLength.totalLength,
+        QInterval.ContainsInterval]
+  | cons p ps ih =>
+      cases ps with
+      | nil =>
+          simp [rationalPointPathLength, rationalPointPathLength.totalLength,
+            QInterval.ContainsInterval]
+      | cons q qs =>
+          have hseg :=
+            pointSegmentLengthInterval_contains_of_le_precision p q hnm
+          have htail := ih
+          unfold QInterval.ContainsInterval at hseg htail ⊢
+          simp [rationalPointPathLength, rationalPointPathLength.totalLength,
+            pointSegmentLengthInterval, pointSegmentNormSq] at *
+          constructor <;> grind
+
+theorem rationalPointPathLength_lo_mono_precision
+    (points : List PiCirclePoint) {n m : Nat} (hnm : n <= m) :
+    (rationalPointPathLength points n).lo <=
+      (rationalPointPathLength points m).lo :=
+  (rationalPointPathLength_contains_of_le_precision points hnm).1
+
+theorem rationalPointPathLength_hi_anti_precision
+    (points : List PiCirclePoint) {n m : Nat} (hnm : n <= m) :
+    (rationalPointPathLength points m).hi <=
+      (rationalPointPathLength points n).hi :=
+  (rationalPointPathLength_contains_of_le_precision points hnm).2
+
+theorem innerBoundaryPathLength_contains_of_le_precision
+    (stage : Nat) {n m : Nat} (hnm : n <= m) :
+    (rationalPointPathLength (innerBoundary stage) n).ContainsInterval
+      (rationalPointPathLength (innerBoundary stage) m) :=
+  rationalPointPathLength_contains_of_le_precision (innerBoundary stage) hnm
+
+theorem outerBoundaryPathLength_contains_of_le_precision
+    (stage : Nat) {n m : Nat} (hnm : n <= m) :
+    (rationalPointPathLength (outerBoundary stage) n).ContainsInterval
+      (rationalPointPathLength (outerBoundary stage) m) :=
+  rationalPointPathLength_contains_of_le_precision (outerBoundary stage) hnm
 
 def pathSegmentWidthSum : List PiCirclePoint -> Nat -> Rat
   | [], _ => 0

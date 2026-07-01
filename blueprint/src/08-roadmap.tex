@@ -206,12 +206,20 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.outerFanPerimeter_mem_outerQuarterLength}
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_innerQuarterLength_hi}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
+\lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_contains_of_le_precision}
+\lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_lo_mono_precision}
+\lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_hi_anti_precision}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthSum}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthBudget}
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_cons_cons}
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_eq_segmentWidthSum}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthSum_eq_budget}
 \lean{ComputableAnalysis.PiProofs.rationalPointPathLength_width_eq_segmentBudget}
+\lean{ComputableAnalysis.PiProofs.rationalPointPathLength_contains_of_le_precision}
+\lean{ComputableAnalysis.PiProofs.rationalPointPathLength_lo_mono_precision}
+\lean{ComputableAnalysis.PiProofs.rationalPointPathLength_hi_anti_precision}
+\lean{ComputableAnalysis.PiProofs.innerBoundaryPathLength_contains_of_le_precision}
+\lean{ComputableAnalysis.PiProofs.outerBoundaryPathLength_contains_of_le_precision}
 \lean{ComputableAnalysis.PiProofs.pathSegmentWidthBudget_nonneg}
 \lean{ComputableAnalysis.PiProofs.pathSegmentCount}
 \lean{ComputableAnalysis.PiProofs.ConsecutiveBudgetLe}
@@ -541,8 +549,12 @@ asks for square-root interval budgets only on the finitely many explicit
 adjacent chord norm-square formulas and tangent cross-square formulas that
 occur at each dyadic stage.  The square-root stage schedule is now exposed by
 \code{sqrtStageEps\_den\_eq}, \code{sqrtFuel\_sqrtStageEps\_eq}, and
-\code{sqrtApproxOnDomain\_width\_eq\_positive\_stage}, so these finite budgets
-can be attacked as explicit inequalities in the dyadic stage.
+\code{sqrtApproxOnDomain\_width\_eq\_positive\_stage}; Lean also lifts the
+square-root nesting proof to fixed rational polygonal paths through
+\code{PiProofs.rationalPointPathLength\_contains\_of\_le\_precision}.  Thus
+precision-only refinements of path lengths no longer need to repeat the
+square-root bisection argument, and the remaining finite budgets can be
+attacked as explicit inequalities in the dyadic stage.
 The tangent entry and exit cross terms are both identified with the same
 rational expression \((v-u)/(1+uv)\), and Lean records positivity for the
 chord and tangent formulas.  Lean promotes the finite formula-level target
