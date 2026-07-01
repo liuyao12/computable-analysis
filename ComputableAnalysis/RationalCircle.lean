@@ -1482,6 +1482,11 @@ private theorem rat_one_div_le_one_div_of_pos_of_le {a b : Rat}
       rw [Rat.div_def]
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+private theorem rat_add_le_add {a b c d : Rat}
+    (hab : a <= b) (hcd : c <= d) :
+    a + c <= b + d := by
+  grind
+
 /-- One cell in the global Farey subdivision of `[0,1]`. -/
 structure FareyCell where
   left : FareyFraction
@@ -1604,6 +1609,18 @@ def DenSumListAtLeast (n : Nat) : List FareyCell -> Prop
   | [] => True
   | cell :: rest => cell.DenSumAtLeast n /\ DenSumListAtLeast n rest
 
+def WidthListAtMost (M : Rat) : List FareyCell -> Prop
+  | [] => True
+  | cell :: rest => cell.width <= M /\ WidthListAtMost M rest
+
+def widthSum : List FareyCell -> Rat
+  | [] => 0
+  | cell :: rest => cell.width + widthSum rest
+
+def widthSquareSum : List FareyCell -> Rat
+  | [] => 0
+  | cell :: rest => cell.width * cell.width + widthSquareSum rest
+
 theorem subdivideList_length (cells : List FareyCell) :
     (subdivideList cells).length = 2 * cells.length := by
   induction cells with
@@ -1661,6 +1678,56 @@ theorem subdivideList_denSum_ge_succ {cells : List FareyCell} {n : Nat}
       exact ⟨leftChild_denSum_ge_succ hcell,
         rightChild_denSum_ge_succ hcell, ih hrest⟩
 
+theorem width_nonneg_of_unit {cell : FareyCell} (hcell : cell.Unit) :
+    0 <= cell.width := by
+  rcases hcell with ⟨_hl0, hlr, _hr1⟩
+  unfold width
+  grind [Rat.sub_eq_add_neg]
+
+theorem child_width_sum (cell : FareyCell) :
+    cell.leftChild.width + cell.rightChild.width = cell.width := by
+  unfold leftChild rightChild width mediant
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem subdivideList_widthSum (cells : List FareyCell) :
+    widthSum (subdivideList cells) = widthSum cells := by
+  induction cells with
+  | nil =>
+      simp [subdivideList, widthSum]
+  | cons cell rest ih =>
+      simp [subdivideList, widthSum]
+      rw [ih]
+      have hchild := child_width_sum cell
+      grind [Rat.add_assoc, Rat.add_comm]
+
+theorem widthSquare_le_bound_mul_width
+    {cell : FareyCell} {M : Rat}
+    (hunit : cell.Unit) (hbound : cell.width <= M) :
+    cell.width * cell.width <= M * cell.width := by
+  exact Rat.mul_le_mul_of_nonneg_right hbound
+    (width_nonneg_of_unit hunit)
+
+theorem widthSquareSum_le_bound_mul_widthSum
+    {cells : List FareyCell} {M : Rat}
+    (hunit : UnitList cells) (hbound : WidthListAtMost M cells) :
+    widthSquareSum cells <= M * widthSum cells := by
+  induction cells with
+  | nil =>
+      simp [widthSquareSum, widthSum]
+  | cons cell rest ih =>
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hbound with ⟨hcellBound, hrestBound⟩
+      have hhead := widthSquare_le_bound_mul_width hcellUnit hcellBound
+      have htail := ih hrestUnit hrestBound
+      simp [widthSquareSum, widthSum]
+      calc
+        cell.width * cell.width + widthSquareSum rest
+            <= M * cell.width + M * widthSum rest :=
+              rat_add_le_add hhead htail
+        _ = M * (cell.width + widthSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+                Rat.mul_assoc, Rat.mul_comm]
+
 theorem den_product_ge_denSum_sub_one (cell : FareyCell) :
     cell.left.den + cell.right.den - 1 <=
       cell.left.den * cell.right.den := by
@@ -1702,6 +1769,23 @@ theorem width_le_one_div_succ_of_adjacent_denSumAtLeast
     exact (Rat.natCast_le_natCast).2 hprodNat
   exact rat_one_div_le_one_div_of_pos_of_le
     ((Rat.natCast_pos).2 (Nat.succ_pos n)) hprodRat
+
+theorem widthListAtMost_one_div_succ_of_adjacent_denSum
+    {cells : List FareyCell} {n : Nat}
+    (hadj : AdjacentList cells)
+    (hden : DenSumListAtLeast (n + 2) cells) :
+    WidthListAtMost (1 / (((n + 1 : Nat) : Rat))) cells := by
+  induction cells with
+  | nil =>
+      simp [WidthListAtMost]
+  | cons cell rest ih =>
+      rcases hadj with ⟨hcellAdj, hrestAdj⟩
+      rcases hden with ⟨hcellDen, hrestDen⟩
+      change cell.width <= 1 / (((n + 1 : Nat) : Rat)) /\
+        WidthListAtMost (1 / (((n + 1 : Nat) : Rat))) rest
+      exact ⟨width_le_one_div_succ_of_adjacent_denSumAtLeast
+          hcellAdj hcellDen,
+        ih hrestAdj hrestDen⟩
 
 end FareyCell
 
@@ -1791,6 +1875,43 @@ theorem fareyUnitStage_denSum_ge (n : Nat) :
       exact fareyUnitSeed_denSum_ge_two
   | succ _ ih =>
       exact fareyUnitSubdivide_denSum_ge_succ ih
+
+theorem fareyUnitSeed_widthSum :
+    FareyCell.widthSum fareyUnitSeed = 1 := by
+  native_decide
+
+theorem fareyUnitSubdivide_widthSum (cells : List FareyCell) :
+    FareyCell.widthSum (fareyUnitSubdivide cells) =
+      FareyCell.widthSum cells :=
+  FareyCell.subdivideList_widthSum cells
+
+theorem fareyUnitStage_widthSum (n : Nat) :
+    FareyCell.widthSum (fareyUnitStage n) = 1 := by
+  induction n with
+  | zero =>
+      exact fareyUnitSeed_widthSum
+  | succ n ih =>
+      calc
+        FareyCell.widthSum (fareyUnitStage (n + 1)) =
+            FareyCell.widthSum (fareyUnitSubdivide (fareyUnitStage n)) := by
+              rfl
+        _ = FareyCell.widthSum (fareyUnitStage n) := by
+              rw [fareyUnitSubdivide_widthSum]
+        _ = 1 := ih
+
+theorem fareyUnitStage_widthSquareSum_le_one_div_succ (n : Nat) :
+    FareyCell.widthSquareSum (fareyUnitStage n) <=
+      1 / (((n + 1 : Nat) : Rat)) := by
+  have hbound :
+      FareyCell.WidthListAtMost
+        (1 / (((n + 1 : Nat) : Rat))) (fareyUnitStage n) :=
+    FareyCell.widthListAtMost_one_div_succ_of_adjacent_denSum
+      (fareyUnitStage_adjacent n) (fareyUnitStage_denSum_ge n)
+  have hsquares :=
+    FareyCell.widthSquareSum_le_bound_mul_widthSum
+      (fareyUnitStage_unit n) hbound
+  rw [fareyUnitStage_widthSum n] at hsquares
+  simpa using hsquares
 
 def dyadicStage (n : Nat) : Stage :=
   { subdivisions := dyadicSubdivisions n }
