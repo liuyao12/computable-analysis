@@ -527,6 +527,9 @@ rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalDifferenceJacobian}
 \lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator}
 \lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyKernel}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator_minus_one_eq_one_plus_square}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyKernel_minus_one_eq_integralKernel}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw_compute_eq_shiftedCauchyKernel_minus_one}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticExpectedPiMultiple}
@@ -563,6 +566,7 @@ rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
 \lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator_minus_one_pos}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_pos}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -602,7 +606,13 @@ For the pi case \(a=-1\), Lean also proves the needed denominator positivity:
   u^2+1>0,\qquad x^4-x^2+1>0.
 \]
 Thus the full finite pullback identity for \(a=-1\) is now available without
-extra denominator hypotheses, under only \(x\ne0\).
+extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
+\[
+  \frac{1}{u^2+1}
+\]
+with the existing arctangent kernel \(\code{ArctanGeometry.integralKernel}(u)\),
+so the pi-case quartic test now lands directly in the same rational kernel used
+by the verified rectangle and Farey arctangent constructions.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}

@@ -97,6 +97,8 @@ folding and substitution algebra for `x ↦ 1/x` and `u = x - 1/x` as
 `IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
 the `a = -1` denominator side conditions are discharged in
 `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy`.
+Lean also identifies that target kernel with the existing arctangent kernel via
+`IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
 That case should become another pi computation once the improper Farey integral
 construction is available.
 

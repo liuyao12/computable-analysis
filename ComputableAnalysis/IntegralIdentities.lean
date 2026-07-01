@@ -884,6 +884,29 @@ def shiftedCauchyDenominator (a u : Rat) : Rat :=
 def shiftedCauchyKernel (a u : Rat) : Rat :=
   1 / shiftedCauchyDenominator a u
 
+/-- At `a = -1`, the shifted Cauchy denominator is exactly the arctangent
+denominator. -/
+theorem shiftedCauchyDenominator_minus_one_eq_one_plus_square (u : Rat) :
+    shiftedCauchyDenominator (-1) u = 1 + u * u := by
+  unfold shiftedCauchyDenominator
+  grind [Rat.add_assoc, Rat.add_comm]
+
+/-- At `a = -1`, the shifted Cauchy kernel is the arctangent kernel. -/
+theorem shiftedCauchyKernel_minus_one_eq_integralKernel (u : Rat) :
+    shiftedCauchyKernel (-1) u = ArctanGeometry.integralKernel u := by
+  unfold shiftedCauchyKernel ArctanGeometry.integralKernel
+  rw [shiftedCauchyDenominator_minus_one_eq_one_plus_square]
+
+/-- The raw arctangent kernel computes the shifted Cauchy kernel in the
+pi-producing case `a = -1`. -/
+theorem oneOverOnePlusSquareRaw_compute_eq_shiftedCauchyKernel_minus_one
+    (u : Rat) (h : oneOverOnePlusSquareRaw.definedAt u) (n : Nat) :
+    oneOverOnePlusSquareRaw.compute u h n =
+      { lo := shiftedCauchyKernel (-1) u,
+        hi := shiftedCauchyKernel (-1) u } := by
+  rw [shiftedCauchyKernel_minus_one_eq_integralKernel]
+  simp [oneOverOnePlusSquareRaw, ArctanGeometry.integralKernel]
+
 /-- The symmetrized quartic density that appears after pairing `x` with
 `1/x` on the positive half-line. -/
 def reciprocalQuarticSymmetricDensity (a x : Rat) : Rat :=
@@ -1097,6 +1120,16 @@ theorem reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy
     (Rat.ne_of_gt (reciprocalQuarticDenominator_minus_one_pos (1 / x)))
     (Rat.ne_of_gt
       (shiftedCauchyDenominator_minus_one_pos (reciprocalDifference x)))
+
+/-- The denominator-free pi-case pullback, stated directly with the arctangent
+kernel used by the existing Farey and rectangle constructions. -/
+theorem reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel
+    (x : Rat) (hx : x ≠ 0) :
+    reciprocalQuarticUnitFoldDensity (-1) x =
+      reciprocalDifferenceJacobian x *
+        ArctanGeometry.integralKernel (reciprocalDifference x) := by
+  rw [reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy x hx]
+  rw [shiftedCauchyKernel_minus_one_eq_integralKernel]
 
 /-- The geometric cosine algorithm, restricted to a rational interval where it
 is defined. -/

@@ -103,6 +103,9 @@ references to the relevant declarations.
   `IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
   the clean pi case has its denominator side conditions discharged as
   `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy`.
+  Lean also identifies that shifted Cauchy kernel with the existing arctangent
+  kernel through
+  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
   The remaining work is the improper/Farey integral construction that turns the
   `a=-1` case into another computation of `piCircleArea`.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
