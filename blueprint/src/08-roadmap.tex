@@ -99,11 +99,24 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleRepresentation}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitGeomFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.archimedesTheorem}
 \lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleArea}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
@@ -415,11 +428,14 @@ through the quarter-turn arctangent value.  The power-series row is
 deliberately named \code{4 * arctanSeries(1)}; the Leibniz series is its
 historical expansion.  The
 concrete rectangle row is completed; the general \code{arctanIntegral(1)} row
-remains pending until the older point-Riemann wrapper is identified with that
-rectangle schedule.  The logarithm-at-\(i\) block records a separate family of
-future computations: each one should identify \(\log(i)=i\pi/2\) using a
-different definition or computation of \code{Log}, with Euler's identity
-providing the essential branch bridge.
+remains pending until the older nonnegative point-Riemann wrapper is identified
+with the domain-aware rectangle schedule.  The unit-branch integral interface
+is already completed through
+\code{PiProofs.piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
+The logarithm-at-\(i\) block records a separate family of future computations:
+each one should identify \(\log(i)=i\pi/2\) using a different definition or
+computation of \code{Log}, with Euler's identity providing the essential branch
+bridge.
 
 The first non-baseline checkmark in the equivalence column is the geometric
 arctangent theorem
@@ -667,9 +683,12 @@ the finite one through
   \code{IntegralIdentities.arctanIntegralRectangleFor\_valid},
   \code{IntegralIdentities.arctanIntegralRectangleFor\_equiv\_arctanGeom},
   \code{IntegralIdentities.arctanIntegralRectangleFunctionAgreement},
+  \code{IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement},
+  \code{IntegralIdentities.arctanIntegralRectangleUnitComputes\_one},
   \code{IntegralIdentities.arctanIntegralRectangleForAtOne\_valid},
   \code{IntegralIdentities.arctanIntegralRectangleForAtOne\_equiv\_arctanGeom\_one},
-  \code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea}.
+  \code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea},
+  \code{PiProofs.piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
 \end{itemize}
 
 \section{A useful style rule}

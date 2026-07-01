@@ -63,16 +63,19 @@ power-series domain `|x| <= 1` as
 route no longer needs to assume global validity of the geometric arctangent.
 The concrete rectangle-sum arctangent route is also completed through the
 domain-aware theorem
-`PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`; the more
-general older `arctanIntegral(1)` row remains pending because that
+`PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`; equivalently,
+the unit-branch construction is now named by
+`PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea`.  The more
+general older `arctanIntegral(1)` row remains pending because that nonnegative
 point-Riemann construction wrapper has not yet been identified with this
-rectangle schedule.  The rectangle schedule itself is now verified more
+domain-aware schedule.  The rectangle schedule itself is now verified more
 generally as `ArctanGeometry.arctanIntegralRectangleRaw_valid` and
 `IntegralIdentities.arctanIntegralRectangleFor_valid` for rational
 `0 <= x <= 1`, and it is now proved equivalent to `arctanGeom x` on that
-unit branch.  The same fact is packaged as the function-level agreement
-`IntegralIdentities.arctanIntegralRectangleFunctionAgreement`.  The scoreboard
-row records the specialization needed for pi.
+unit branch.  The same fact is packaged as the function-level agreements
+`IntegralIdentities.arctanIntegralRectangleFunctionAgreement` and
+`IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement`.  The
+scoreboard row records the specialization needed for pi.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

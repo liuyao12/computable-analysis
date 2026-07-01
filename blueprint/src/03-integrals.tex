@@ -147,6 +147,10 @@ parametrization from \cref{thm:sector-area-density}.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRepresentation}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_equiv_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitGeomFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.PiFromArctanIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.PiFromArctanIntegralAgrees}
 \uses{def:one-over-one-plus-square-kernel,def:inverse-elementary-integral-identities}
@@ -240,6 +244,11 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleRepresentation}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
@@ -300,10 +309,13 @@ exactly the finite rectangle/geometric overlap.  This is the finite algebraic
 core of the comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  Lean also
 wraps this construction as
 \code{arctanIntegralRectangleRepresentation} and proves the function-level
-overlap agreement \code{arctanIntegralRectangleFunctionAgreement}.  The
-remaining work is to identify the older point-Riemann \code{arctanIntegral(1)}
-API with this rectangle schedule, or replace it by the domain-aware
-construction interface throughout.
+overlap agreement \code{arctanIntegralRectangleFunctionAgreement}.  Lean now
+also packages the same construction as the unit-branch integral arctangent
+\code{arctanIntegralUnit}; the theorem
+\code{arctanIntegralRectangleUnitFunctionAgreement} proves the expected
+agreement on \(0\le x\le1\).  The remaining cleanup is to identify the older
+nonnegative point-Riemann \code{arctanIntegral(1)} API with this
+domain-aware schedule, or replace that older API throughout.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]
@@ -315,6 +327,7 @@ construction interface throughout.
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}
 \uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
 Any certified integral construction for
 \[
@@ -332,6 +345,9 @@ integral-style pi route:
 \[
   4\,\code{arctanIntegralRectangleForAtOne}\sim \pi_{\mathrm{area}}.
 \]
+Equivalently, the unit-branch construction
+\code{arctanIntegralRectangleUnitData} gives the table-facing theorem
+\code{piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}

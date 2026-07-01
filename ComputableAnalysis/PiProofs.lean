@@ -6230,6 +6230,39 @@ theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
+theorem piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegralUnit (1 : Rat)
+        (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
+          (1 : Rat) (by native_decide) (by native_decide)))).Equiv
+        piCircleArea := by
+  have hscaled :
+      (IntegralIdentities.PiFromArctanIntegral
+        (IntegralIdentities.arctanIntegralUnit (1 : Rat)
+          (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
+            (1 : Rat) (by native_decide) (by native_decide)))).Equiv
+          ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    exact RealRaw.natScale_equiv 4
+      (IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom
+        (1 : Rat) (by native_decide) (by native_decide))
+  have hleft :
+      (IntegralIdentities.PiFromArctanIntegral
+        (IntegralIdentities.arctanIntegralUnit (1 : Rat)
+          (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
+            (1 : Rat) (by native_decide) (by native_decide)))).Valid := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    apply RealRaw.natScale_valid
+    unfold IntegralIdentities.arctanIntegralUnit Integral.integralFor
+    exact (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
+      (1 : Rat) (by native_decide) (by native_decide)).certificate
+  exact RealRaw.equiv_trans
+    hleft
+    fourArctanGeomOneValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanGeom_one_equiv_piCircleArea
+
 theorem circumferenceValid_of_nested_and_shrinking
     (hnested : CircumferenceNested)
     (hshrink : CircumferenceWidthsShrink) :

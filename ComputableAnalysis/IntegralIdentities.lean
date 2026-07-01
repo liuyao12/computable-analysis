@@ -333,6 +333,101 @@ theorem arctanIntegralRectangleFunctionAgreement :
     PartialRealFunRaw.evalRaw] using
     arctanIntegralRectangleFor_equiv_arctanGeom x hx.1 hx.2
 
+/-- A unit-branch integral arctangent construction.  This is the domain-aware
+version of the integral route currently proved by rectangle sums: it only asks
+for integral constructions on inputs `0 <= x <= 1`. -/
+def arctanIntegralUnit
+    (x : Rat) (c : Integral.ConstructionFor (arctanKernelInterval x)) :
+    RealRaw :=
+  Integral.integralFor (arctanKernelInterval x) c
+
+def ArctanIntegralUnitComputes
+    (x : Rat) (_hx0 : 0 <= x) (_hx1 : x <= 1)
+    (arctanBranch : RealRaw) : Prop :=
+  Exists fun c : Integral.ConstructionFor (arctanKernelInterval x) =>
+    (arctanIntegralUnit x c).Equiv arctanBranch
+
+structure ArctanIntegralUnitData where
+  constructionAt :
+    forall x, 0 <= x -> x <= 1 ->
+      Integral.ConstructionFor (arctanKernelInterval x)
+
+def arctanIntegralUnitFunctionRaw
+    (data : ArctanIntegralUnitData) : PartialRealFunRaw where
+  definedAt := fun x => 0 <= x ∧ x <= 1
+  compute := fun x hx =>
+    (arctanIntegralUnit x
+      (data.constructionAt x hx.1 hx.2)).compute
+  rate := fun x hx =>
+    (arctanIntegralUnit x
+      (data.constructionAt x hx.1 hx.2)).rate
+
+def arctanIntegralUnitRepresentation
+    (data : ArctanIntegralUnitData) :
+    Elementary.Arctan.FunctionRepresentation where
+  name := "arctan.integral.unit"
+  raw := arctanIntegralUnitFunctionRaw data
+
+def ArctanIntegralUnitGeomFunctionAgreement
+    (data : ArctanIntegralUnitData) : Prop :=
+  Elementary.Arctan.Equivalent
+    (arctanIntegralUnitRepresentation data)
+    ArctanGeometry.representation
+
+theorem arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement
+    (data : ArctanIntegralUnitData)
+    (h : ArctanIntegralUnitGeomFunctionAgreement data)
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralUnit x
+      (data.constructionAt x hx0 hx1)).Equiv
+        (ArctanGeometry.arctanGeom x) := by
+  have hgeom : ArctanGeometry.representation.raw.definedAt x := by
+    simp [ArctanGeometry.representation, ArctanGeometry.functionRaw]
+  simpa [ArctanIntegralUnitGeomFunctionAgreement,
+    arctanIntegralUnitRepresentation, arctanIntegralUnitFunctionRaw,
+    ArctanGeometry.representation, ArctanGeometry.functionRaw,
+    PartialRealFunRaw.evalRaw] using
+    h x ⟨hx0, hx1⟩ hgeom
+
+/-- The rectangle construction supplies the verified unit-branch integral
+arctangent data. -/
+def arctanIntegralRectangleUnitData : ArctanIntegralUnitData where
+  constructionAt := arctanIntegralRectangleConstruction
+
+theorem arctanIntegralRectangleUnit_equiv_arctanGeom
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralUnit x
+      (arctanIntegralRectangleUnitData.constructionAt x hx0 hx1)).Equiv
+        (ArctanGeometry.arctanGeom x) := by
+  simpa [arctanIntegralUnit, arctanIntegralRectangleUnitData,
+    arctanIntegralRectangleFor] using
+    arctanIntegralRectangleFor_equiv_arctanGeom x hx0 hx1
+
+theorem arctanIntegralRectangleUnitFunctionAgreement :
+    ArctanIntegralUnitGeomFunctionAgreement
+      arctanIntegralRectangleUnitData := by
+  intro x hx _hgeom
+  simpa [ArctanIntegralUnitGeomFunctionAgreement,
+    arctanIntegralUnitRepresentation, arctanIntegralUnitFunctionRaw,
+    arctanIntegralUnit, arctanIntegralRectangleUnitData,
+    arctanIntegralRectangleFor, ArctanGeometry.representation,
+    ArctanGeometry.functionRaw, PartialRealFunRaw.evalRaw] using
+    arctanIntegralRectangleFor_equiv_arctanGeom x hx.1 hx.2
+
+theorem arctanIntegralRectangleUnitComputes
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    ArctanIntegralUnitComputes x hx0 hx1
+      (ArctanGeometry.arctanGeom x) :=
+  ⟨arctanIntegralRectangleUnitData.constructionAt x hx0 hx1,
+    arctanIntegralRectangleUnit_equiv_arctanGeom x hx0 hx1⟩
+
+theorem arctanIntegralRectangleUnitComputes_one :
+    ArctanIntegralUnitComputes (1 : Rat)
+      (by native_decide) (by native_decide)
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+  arctanIntegralRectangleUnitComputes
+    (1 : Rat) (by native_decide) (by native_decide)
+
 /-- The verified rectangle-sum construction for
 `∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
 kernel interval. -/
