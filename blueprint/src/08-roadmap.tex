@@ -372,95 +372,78 @@ The current score is:
 \hline
 \code{piCircleArea} &
 \cref{def:circle-area-stage-algorithm}; \cref{thm:geometric-pi-validity} &
-Rational midpoint area exhaustion using increment/decrement triangles; current
-baseline for pi comparisons. &
+\([4a_n,4b_n]\) from rational midpoint increment/decrement triangles. &
 \(\checkmark\) & N/A\\
 \code{piCircumference} &
 \cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
-Rational polygon circumference using interval square roots for side lengths. &
+\(L_n\le \pi\le U_n\) from polygonal circumference bounds. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
 \cref{def:arctan-area-stage-algorithm},
 \cref{def:arctan-integral}, \cref{def:arctan-series},
 \cref{thm:power-series-arctan-area-pi} for
 \code{4 * arctanSeries(1)}, and \cref{thm:leibniz-machin} for
-\code{piMachin}.  These rows first compute arctangent values and then multiply
-or combine them to get pi.  The Leibniz series is counted only as the endpoint
-expansion of \code{arctanSeries(1)}.  The \code{piMachin} row is included here
-because its first bridge is agreement with \code{4 * arctanSeries(1)}.}\\
+\code{piMachin}.  These rows use \(\pi=4\arctan(1)\) or Machin's
+\(\pi=4(4\arctan(1/5)-\arctan(1/239))\).}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm};
 \cref{thm:geometric-arctan-one-area-pi} &
-Geometric sector-area arctangent at slope \(1\); it has stage equality with
-\code{piCircleArea}. &
+\(\pi=4\arctan_{\mathrm{geom}}(1)\). &
 \(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanIntegralRectangleForAtOne} &
 \cref{thm:finite-arctan-integral-comparison};
 \cref{thm:arctan-integral-pi} &
-Domain-aware \code{ConstructionFor} packaging of midpoint rectangle sums for
-\(\int_0^1 dt/(1+t^2)\), using the same rational refinement schedule as
-\code{arctanGeom(1)}. &
+\(\pi=4\int_0^1 \frac{dt}{1+t^2}\), via midpoint rectangle sums. &
 \(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanIntegralFareyFor(1)} &
 \cref{thm:finite-arctan-integral-comparison};
 \cref{thm:arctan-integral-pi} &
-Domain-aware \code{ConstructionFor} packaging of the global Farey-prefix
-integral \(I(0,1)\), equivalent to \(4\,\code{fareyIntegralPrefixRaw(1)}\). &
+\(\pi=4I(0,1)\), where \(I\) uses the global Farey-prefix mesh. &
 \(\checkmark\) & \(\times\)\\
 \code{4 * arctanIntegral(1)} &
 \cref{def:arctan-integral}; \cref{thm:arctan-integral-pi} &
-Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
+\(\pi=4\int_0^1 \frac{dt}{1+t^2}\). &
 \(\times\) & \(\times\)\\
 \code{4 * arctanSeries(1)} &
 \cref{def:arctan-series};
 \cref{thm:leibniz-arctan};
 \cref{thm:power-series-arctan-area-pi} &
-Power-series arctangent at \(1\); at this endpoint its alternating expansion is
-the historical Leibniz series. &
+\(\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}\). &
 \(\checkmark\) & \(\times\)\\
 \code{piMachin} &
 \cref{def:arctan-series};
 \cref{thm:machin-tangent}; \cref{thm:leibniz-machin} &
-Machin's arctangent combination
-\(4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\),
-grouped with the arctangent routes because its comparison first passes through
-\(4\arctan_{\mathrm{series}}(1)\). &
+\(\pi=4(4\arctan_{\mathrm{series}}(1/5)-
+\arctan_{\mathrm{series}}(1/239))\). &
 \(\checkmark\) & \(\times\)\\
 \code{6 * arcsinIntegral(1/2)} &
 \cref{def:inverse-elementary-integral-identities} &
-Period formula \(\pi/6=\int_0^{1/2} dx/\sqrt{1-x^2}\). &
+\(\pi=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}\). &
 \(\times\) & \(\times\)\\
 \code{NewtonSegmentPi} &
 \cref{rem:sources-of-raw-reals} &
-Newton circle-segment formula
-\(\pi/12+\sqrt3/8=\int_0^{1/2}\sqrt{1-x^2}\,dx\). &
+\(\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)\). &
 \(\times\) & \(\times\)\\
 \code{GaussianPi} &
 \cref{rem:sources-of-raw-reals} &
-Gaussian integral
-\(\sqrt{2\pi}=\int_{-\infty}^{\infty}\exp(-x^2/2)\,dx\). &
+\(\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2\). &
 \(\times\) & \(\times\)\\
 \code{reciprocalQuarticMinusOneProjectiveRoute} &
 \cref{def:reciprocal-quartic-test-kernel};
 \cref{thm:reciprocal-quartic-route-package} &
-Projective-line/Farey benchmark
-\(\int_{-\infty}^{\infty} dx/(x^4-x^2+1)=\pi\); the rational folding to the
-arctangent kernel is formalized, but the improper integral construction is still
-pending. &
+\(\pi=\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}\). &
 \(\times\) & \(\times\)\\
 \code{baselSeriesRaw} / \(\pi^2/6\) &
 \cref{def:zeta-two-raw} &
-Euler's Basel series
-\(\zeta(2)=1+1/4+1/9+\cdots=\pi^2/6\); the zeta-side interval is verified. &
+\(\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6\). &
 \(\checkmark\) & \(\times\)\\
 \code{Brouncker(4/pi)} &
 \cref{rem:sources-of-raw-reals} &
-Continued fraction for \(4/\pi\), with finite truncations expected to give
-rational bounds. &
+Brouncker continued fraction for \(4/\pi\). &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
-the single formula \(\pi=-2i\log(i)\), tested through several different
-definitions or computations of the same branch value \(\log(i)\) in
+\(\pi=-2i\log(i)\), tested through several different definitions of
+\(\log(i)\) in
 \cref{thm:log-at-i-pi-routes}, \cref{def:complex-log-series-at-i},
 \cref{def:complex-log-path-integral-at-i},
 \cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}.  These
@@ -469,19 +452,17 @@ and Euler's identity.}\\
 \code{-2i * logSeries(i)} &
 \cref{def:complex-log-series-at-i};
 \cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
-Complex logarithm obtained from local power-series exponential data and a
-certified branch taking \(i\) back to a quarter turn. &
+\(\pi=-2i\,\log_{\mathrm{series}}(i)\). &
 \(\times\) & \(\times\)\\
 \code{-2i * logPathIntegral(i)} &
 \cref{def:complex-log-path-integral-at-i};
 \cref{thm:log-at-i-pi-routes} &
-Complex logarithm as a path integral of \(dz/z\) from \(1\) to \(i\). &
+\(\pi=-2i\int_1^i dz/z\). &
 \(\times\) & \(\times\)\\
 \code{-2i * logInvExp(i)} &
 \cref{def:complex-log-inv-exp-at-i};
 \cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
-Logarithm as the chosen inverse branch of complex exponential, with Euler
-identity proving the branch value at \(i\). &
+\(\pi=-2i\,\log_{\exp^{-1}}(i)\). &
 \(\times\) & \(\times\)
 \end{tabular}
 \end{center}
