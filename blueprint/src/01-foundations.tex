@@ -209,9 +209,13 @@ its validity directly.
 \lean{ComputableAnalysis.sqrt}
 \lean{ComputableAnalysis.sqrtRaw}
 \lean{ComputableAnalysis.sqrtStageEps}
+\lean{ComputableAnalysis.one_div_natCast_den_eq}
+\lean{ComputableAnalysis.sqrtStageEps_den_eq}
+\lean{ComputableAnalysis.sqrtFuel_sqrtStageEps_eq}
 \lean{ComputableAnalysis.sqrtBisectStep_width_eq_half}
 \lean{ComputableAnalysis.sqrtBisect_width_eq}
 \lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq}
+\lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq_positive_stage}
 \lean{ComputableAnalysis.sqrtBisectStep_contains}
 \lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
 \uses{def:raw-real}
@@ -243,7 +247,10 @@ Lean now also records the exact bisection-width facts for the rational
 square-root subroutine: one bisection halves the interval width, \(k\)
 bisections divide the width by \(2^k\), each bisection stays inside the
 previous ordered interval, and the public staged square-root approximation has
-the corresponding explicit power-of-two width.  These are the small
+the corresponding explicit power-of-two width.  For positive stages, Lean also
+normalizes the precision denominator and the \(\code{sqrtFuel}\) schedule, so
+the public width unfolds to the concrete denominator
+\(2^{n+\code{den}(\code{sqrtUpperBound}\ q)+8}\).  These are the small
 interval-shrinking facts needed later for square-root path lengths such as the
 circumference computation.
 \end{remark}

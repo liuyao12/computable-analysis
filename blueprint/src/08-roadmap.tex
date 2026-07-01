@@ -539,7 +539,10 @@ path-budget linear bound is now reduced further to
 \code{PiProofs.CircumferenceFiniteFormulaSegmentUniformLinearBound}, which
 asks for square-root interval budgets only on the finitely many explicit
 adjacent chord norm-square formulas and tangent cross-square formulas that
-occur at each dyadic stage.
+occur at each dyadic stage.  The square-root stage schedule is now exposed by
+\code{sqrtStageEps\_den\_eq}, \code{sqrtFuel\_sqrtStageEps\_eq}, and
+\code{sqrtApproxOnDomain\_width\_eq\_positive\_stage}, so these finite budgets
+can be attacked as explicit inequalities in the dyadic stage.
 The tangent entry and exit cross terms are both identified with the same
 rational expression \((v-u)/(1+uv)\), and Lean records positivity for the
 chord and tangent formulas.  Lean promotes the finite formula-level target

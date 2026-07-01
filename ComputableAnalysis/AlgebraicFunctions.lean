@@ -172,6 +172,27 @@ def sqrtStageEps (n : Nat) : QPos :=
         exact (Rat.inv_pos).2
           ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn)) }
 
+theorem one_div_natCast_den_eq (n : Nat) (hn : n ≠ 0) :
+    (1 / (n : Rat)).den = n := by
+  rw [Rat.div_def]
+  rw [Rat.inv_def]
+  change (1 * Rat.divInt 1 (n : Int)).den = n
+  rw [Rat.one_mul]
+  change (Rat.divInt 1 (Int.ofNat n)).den = n
+  rw [Rat.divInt.eq_1]
+  change (mkRat 1 n).den = n
+  simp [mkRat, Rat.normalize_eq, hn]
+
+theorem sqrtStageEps_den_eq (n : Nat) (hn : n ≠ 0) :
+    (sqrtStageEps n).val.den = n := by
+  simp [sqrtStageEps, hn]
+  exact one_div_natCast_den_eq n hn
+
+theorem sqrtFuel_sqrtStageEps_eq (q : Rat) (n : Nat) (hn : n ≠ 0) :
+    sqrtFuel q (sqrtStageEps n) = n + (sqrtUpperBound q).den + 8 := by
+  unfold sqrtFuel
+  rw [sqrtStageEps_den_eq n hn]
+
 def sqrtApproxOnDomain (q : Rat) (_h : sqrtDomain q) (n : Nat) : QInterval :=
   sqrtBisect q (sqrtFuel q (sqrtStageEps n)) { lo := 0, hi := sqrtUpperBound q }
 
@@ -333,6 +354,14 @@ theorem sqrtApproxOnDomain_width_eq
   simp [QInterval.width]
   rw [Rat.div_def]
   grind [Rat.mul_inv_cancel]
+
+theorem sqrtApproxOnDomain_width_eq_positive_stage
+    (q : Rat) (h : sqrtDomain q) (n : Nat) (hn : n ≠ 0) :
+    (sqrtApproxOnDomain q h n).width =
+      sqrtUpperBound q /
+        (((2 ^ (n + (sqrtUpperBound q).den + 8) : Nat) : Rat)) := by
+  rw [sqrtApproxOnDomain_width_eq]
+  rw [sqrtFuel_sqrtStageEps_eq q n hn]
 
 theorem sqrtBisectStep_contains
     (q : Rat) {I : QInterval} (hI : I.lo <= I.hi) :
