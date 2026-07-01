@@ -90,6 +90,13 @@ formal additivity, zero-length, reversal, add-reverse-zero, and endpoint-prefix
 normalization laws.  The Farey arctangent wrapper also records the zero
 endpoint and the unit-branch `ArctanIntegralUnitComputes` package against the
 prefix raw.
+The next projective-line integral benchmark is now named in Chapter 3:
+the reciprocal quartic
+`integral_(-infty)^infty dx/(x^4 + a*x^2 + 1)`.  Lean formalizes the exact
+substitution algebra for `u = x - 1/x` as
+`IntegralIdentities.reciprocalQuartic_projective_substitution_data`; the
+`a = -1` case should become another pi computation once the improper Farey
+integral construction is available.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

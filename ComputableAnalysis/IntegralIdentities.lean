@@ -857,6 +857,97 @@ theorem pi_agrees (R : ArctanIntegralPiRoute) :
 
 end ArctanIntegralPiRoute
 
+/-- The denominator of the reciprocal quartic test integrand. -/
+def reciprocalQuarticDenominator (a x : Rat) : Rat :=
+  x * x * x * x + a * (x * x) + 1
+
+/-- The reciprocal quartic kernel
+`x ↦ 1 / (x^4 + a*x^2 + 1)`, written without powers so the finite algebra is
+transparent to Lean. -/
+def reciprocalQuarticKernel (a x : Rat) : Rat :=
+  1 / reciprocalQuarticDenominator a x
+
+/-- The projective-line substitution used on the positive half-line. -/
+def reciprocalDifference (x : Rat) : Rat :=
+  x - 1 / x
+
+/-- The formal derivative of `x - 1/x`, expressed as a rational function. -/
+def reciprocalDifferenceJacobian (x : Rat) : Rat :=
+  1 + 1 / (x * x)
+
+/-- The denominator of the shifted Cauchy kernel obtained after the substitution
+`u = x - 1/x`. -/
+def shiftedCauchyDenominator (a u : Rat) : Rat :=
+  u * u + a + 2
+
+/-- The shifted Cauchy kernel `u ↦ 1 / (u^2 + a + 2)`. -/
+def shiftedCauchyKernel (a u : Rat) : Rat :=
+  1 / shiftedCauchyDenominator a u
+
+/-- The symmetrized quartic density that appears after pairing `x` with
+`1/x` on the positive half-line. -/
+def reciprocalQuarticSymmetricDensity (a x : Rat) : Rat :=
+  (1 + x * x) * reciprocalQuarticKernel a x
+
+/-- Expected value of the full-line reciprocal quartic test integral when
+`a + 2 = b^2` and `0 < b`: it should be `pi / b`. -/
+def reciprocalQuarticExpectedPiMultiple (b : Rat) : RealRaw :=
+  RealRaw.scaleRat (1 / b) piCircleArea
+
+/-- The rational parameter condition under which the reciprocal quartic integral
+is expected to reduce to a rational multiple of pi. -/
+def ReciprocalQuarticPiParameter (a b : Rat) : Prop :=
+  0 < b ∧ a + 2 = b * b
+
+theorem reciprocalQuarticPiParameter_minus_one :
+    ReciprocalQuarticPiParameter (-1) 1 := by
+  unfold ReciprocalQuarticPiParameter
+  constructor <;> native_decide
+
+/-- Clearing denominators in the projective substitution:
+\[
+  x^2\left((x-1/x)^2+a+2\right)=x^4+a x^2+1.
+\]
+This is the finite rational identity behind the quartic test integral. -/
+theorem reciprocalDifference_quartic_denominator
+    (a x : Rat) (hx : x ≠ 0) :
+    x * x * shiftedCauchyDenominator a (reciprocalDifference x) =
+      reciprocalQuarticDenominator a x := by
+  unfold shiftedCauchyDenominator reciprocalDifference
+    reciprocalQuarticDenominator
+  rw [Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Clearing the denominator in the formal derivative of `x - 1/x`. -/
+theorem reciprocalDifferenceJacobian_square_cleared
+    (x : Rat) (hx : x ≠ 0) :
+    reciprocalDifferenceJacobian x * (x * x) = 1 + x * x := by
+  have hx2pos : 0 < x * x := by
+    by_cases hxpos : 0 < x
+    · exact Rat.mul_pos hxpos hxpos
+    · have hxneg : x < 0 := by grind
+      have hnegpos : 0 < -x := by grind
+      have hsq : 0 < (-x) * (-x) := Rat.mul_pos hnegpos hnegpos
+      grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+  have hx2 : x * x ≠ 0 := Rat.ne_of_gt hx2pos
+  unfold reciprocalDifferenceJacobian
+  rw [Rat.div_def]
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The two denominator-cleared identities that convert the reciprocal quartic
+kernel into the shifted Cauchy kernel under `u = x - 1/x`.  This is the algebraic
+core of the test integral over the projective line; the later integral theorem
+will supply the Farey/improper-integral bookkeeping. -/
+theorem reciprocalQuartic_projective_substitution_data
+    (a x : Rat) (hx : x ≠ 0) :
+    x * x * shiftedCauchyDenominator a (reciprocalDifference x) =
+        reciprocalQuarticDenominator a x ∧
+      reciprocalDifferenceJacobian x * (x * x) = 1 + x * x :=
+  ⟨reciprocalDifference_quartic_denominator a x hx,
+    reciprocalDifferenceJacobian_square_cleared x hx⟩
+
 /-- The geometric cosine algorithm, restricted to a rational interval where it
 is defined. -/
 def geometricCosOnInterval

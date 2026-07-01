@@ -500,6 +500,85 @@ The theorem
 packages the resulting chain of raw-real equivalences.
 \end{theorem}
 
+\section{A Projective-Line Test Integral}
+
+The Farey subdivision is meant to work uniformly on the projective line, not
+only on bounded intervals.  A useful test, simpler than the Gaussian integral
+but still genuinely projective, is
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4+a x^2+1}.
+\]
+For \(a>-2\), the classical value is
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4+a x^2+1}
+    =\frac{\pi}{\sqrt{a+2}}.
+\]
+Thus when \(a=b^2-2\) with rational \(b>0\), the integral should give the
+rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}=\pi.
+\]
+
+\begin{definition}[The reciprocal quartic test kernel]
+\label{def:reciprocal-quartic-test-kernel}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticKernel}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifference}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifferenceJacobian}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyKernel}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticExpectedPiMultiple}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticPiParameter}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticPiParameter_minus_one}
+\uses{def:one-over-one-plus-square-kernel}
+\leanok
+Lean names the rational functions used in the substitution:
+\[
+  Q_a(x)=x^4+a x^2+1,\qquad
+  u=x-\frac1x,\qquad
+  \frac{\dd u}{\dd x}=1+\frac1{x^2}.
+\]
+The transformed kernel is the shifted Cauchy kernel
+\[
+  \frac{1}{u^2+a+2}.
+\]
+The parameter predicate \code{ReciprocalQuarticPiParameter(a,b)} records the
+rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
+\((a,b)=(-1,1)\).
+\end{definition}
+
+\begin{theorem}[Projective substitution for the quartic test]
+\label{thm:reciprocal-quartic-projective-substitution}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifference_quartic_denominator}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifferenceJacobian_square_cleared}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuartic_projective_substitution_data}
+\uses{def:reciprocal-quartic-test-kernel}
+\leanok
+The rational algebra behind the test integral is already formalized.  For
+\(x\ne0\),
+\[
+  x^2\left(\left(x-\frac1x\right)^2+a+2\right)
+    =x^4+a x^2+1,
+\]
+and
+\[
+  \left(1+\frac1{x^2}\right)x^2=1+x^2.
+\]
+Pairing the positive half-line point \(x\) with its reciprocal \(1/x\) gives
+\[
+  \int_0^\infty \frac{\dd x}{x^4+a x^2+1}
+   = \frac12\int_0^\infty
+      \frac{1+x^2}{x^4+a x^2+1}\,\dd x.
+\]
+With \(u=x-1/x\), the preceding identities convert the symmetrized density to
+\(\dd u/(u^2+a+2)\), so the remaining formal work is the improper-Farey
+integral bookkeeping over the full projective line:
+\[
+  \frac12\int_{-\infty}^{\infty}\frac{\dd u}{u^2+a+2}.
+\]
+\end{theorem}
+
 \section{Trigonometric Functions as Integral Identities}
 
 \begin{definition}[Geometric sine and cosine on an interval]
