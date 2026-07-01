@@ -123,6 +123,20 @@ theorem integralUpperStep_nonneg {p r : Rat} (hpr : p <= r) :
   unfold integralUpperStep
   exact Rat.mul_nonneg hlen (Rat.le_of_lt (integralKernel_pos p))
 
+theorem integralLowerStep_nonneg {p r : Rat} (hpr : p <= r) :
+    0 <= integralLowerStep p r := by
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  unfold integralLowerStep
+  exact Rat.mul_nonneg hlen (Rat.le_of_lt (integralKernel_pos r))
+
+theorem integralUpperStep_left_subcell_le
+    {p q r : Rat} (_hpq : p <= q) (hqr : q <= r) :
+    integralUpperStep p q <= integralUpperStep p r := by
+  have hlen : q - p <= r - p := by grind [Rat.sub_eq_add_neg]
+  unfold integralUpperStep
+  exact Rat.mul_le_mul_of_nonneg_right hlen
+    (Rat.le_of_lt (integralKernel_pos p))
+
 private theorem containsInterval_refl (I : QInterval) :
     I.ContainsInterval I := by
   unfold QInterval.ContainsInterval
@@ -702,6 +716,236 @@ theorem fareyIntegralPrefixStageInterval_ordered
   unfold fareyIntegralPrefixStageInterval
   exact fareyIntegralPrefixInterval_ordered x
     (RationalCircle.fareyUnitStage n) (RationalCircle.fareyUnitStage_unit n)
+
+theorem fareyIntegralLowerPrefix_subdivide_mono
+    (x : Rat) (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    fareyIntegralLowerPrefix x cells <=
+      fareyIntegralLowerPrefix x
+        (RationalCircle.FareyCell.subdivideList cells) := by
+  induction cells with
+  | nil =>
+      simp [fareyIntegralLowerPrefix, fareyLowerCellsUpTo,
+        RationalCircle.FareyCell.subdivideList, integralLowerSum]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      rcases hcell with ⟨hl0, hlr, _hr1⟩
+      have hpq :
+          cell.left.value <= cell.mediant.value :=
+        RationalCircle.FareyFraction.value_le_mediant_of_le hlr
+      have hqr :
+          cell.mediant.value <= cell.right.value :=
+        RationalCircle.FareyFraction.mediant_le_value_of_le hlr
+      have htail := ih hrest
+      by_cases hright : cell.right.value <= x
+      · have hmed : cell.mediant.value <= x := Rat.le_trans hqr hright
+        have hmed' : (cell.left.mediant cell.right).value <= x := by
+          simpa [RationalCircle.FareyCell.mediant] using hmed
+        have hhead :=
+          integralLowerStep_refine hl0 hpq hqr
+        simp [fareyIntegralLowerPrefix, fareyLowerCellsUpTo,
+          RationalCircle.FareyCell.subdivideList,
+          RationalCircle.FareyCell.toRatInterval,
+          RationalCircle.FareyCell.leftChild,
+          RationalCircle.FareyCell.rightChild,
+          RationalCircle.FareyCell.mediant, hright, hmed',
+          integralLowerSum]
+        calc
+          integralLowerStep cell.left.value cell.right.value +
+              integralLowerSum (fareyLowerCellsUpTo x rest)
+              <=
+            (integralLowerStep cell.left.value cell.mediant.value +
+                integralLowerStep cell.mediant.value cell.right.value) +
+              integralLowerSum (fareyLowerCellsUpTo x rest) :=
+                rat_add_le_add hhead (Rat.le_refl)
+          _ <=
+            (integralLowerStep cell.left.value cell.mediant.value +
+                integralLowerStep cell.mediant.value cell.right.value) +
+              integralLowerSum
+                (fareyLowerCellsUpTo x
+                  (RationalCircle.FareyCell.subdivideList rest)) :=
+                rat_add_le_add (Rat.le_refl) htail
+          _ =
+            integralLowerStep cell.left.value cell.mediant.value +
+              (integralLowerStep cell.mediant.value cell.right.value +
+                integralLowerSum
+                  (fareyLowerCellsUpTo x
+                    (RationalCircle.FareyCell.subdivideList rest))) := by
+                grind [Rat.add_assoc, Rat.add_comm]
+      · by_cases hmed : cell.mediant.value <= x
+        · have hleft_nonneg :
+            0 <= integralLowerStep cell.left.value cell.mediant.value :=
+            integralLowerStep_nonneg hpq
+          have hmed' : (cell.left.mediant cell.right).value <= x := by
+            simpa [RationalCircle.FareyCell.mediant] using hmed
+          simp [fareyIntegralLowerPrefix, fareyLowerCellsUpTo,
+            RationalCircle.FareyCell.subdivideList,
+            RationalCircle.FareyCell.toRatInterval,
+            RationalCircle.FareyCell.leftChild,
+            RationalCircle.FareyCell.rightChild,
+            RationalCircle.FareyCell.mediant, hright, hmed',
+            integralLowerSum]
+          calc
+            integralLowerSum (fareyLowerCellsUpTo x rest) <=
+                integralLowerSum
+                  (fareyLowerCellsUpTo x
+                    (RationalCircle.FareyCell.subdivideList rest)) := htail
+            _ <= integralLowerStep cell.left.value cell.mediant.value +
+                integralLowerSum
+                  (fareyLowerCellsUpTo x
+                    (RationalCircle.FareyCell.subdivideList rest)) := by
+                grind
+        · simp [fareyIntegralLowerPrefix, fareyLowerCellsUpTo,
+            RationalCircle.FareyCell.subdivideList,
+            RationalCircle.FareyCell.leftChild,
+            RationalCircle.FareyCell.rightChild,
+            RationalCircle.FareyCell.mediant, hright,
+            show ¬(cell.left.mediant cell.right).value <= x from by
+              intro hh
+              exact hmed (by
+                simpa [RationalCircle.FareyCell.mediant] using hh)]
+          exact htail
+
+theorem fareyIntegralUpperPrefix_subdivide_anti
+    (x : Rat) (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    fareyIntegralUpperPrefix x
+        (RationalCircle.FareyCell.subdivideList cells) <=
+      fareyIntegralUpperPrefix x cells := by
+  induction cells with
+  | nil =>
+      simp [fareyIntegralUpperPrefix, fareyUpperCellsUpTo,
+        RationalCircle.FareyCell.subdivideList, integralUpperSum]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      rcases hcell with ⟨hl0, hlr, _hr1⟩
+      have hpq :
+          cell.left.value <= cell.mediant.value :=
+        RationalCircle.FareyFraction.value_le_mediant_of_le hlr
+      have hqr :
+          cell.mediant.value <= cell.right.value :=
+        RationalCircle.FareyFraction.mediant_le_value_of_le hlr
+      have htail := ih hrest
+      by_cases hleft : cell.left.value <= x
+      · by_cases hmed : cell.mediant.value <= x
+        · have hmed' : (cell.left.mediant cell.right).value <= x := by
+            simpa [RationalCircle.FareyCell.mediant] using hmed
+          have hhead := integralUpperStep_refine hl0 hpq hqr
+          simp [fareyIntegralUpperPrefix, fareyUpperCellsUpTo,
+            RationalCircle.FareyCell.subdivideList,
+            RationalCircle.FareyCell.toRatInterval,
+            RationalCircle.FareyCell.leftChild,
+            RationalCircle.FareyCell.rightChild,
+            RationalCircle.FareyCell.mediant, hleft, hmed',
+            integralUpperSum]
+          calc
+            integralUpperStep cell.left.value cell.mediant.value +
+                (integralUpperStep cell.mediant.value cell.right.value +
+                  integralUpperSum
+                    (fareyUpperCellsUpTo x
+                      (RationalCircle.FareyCell.subdivideList rest)))
+                =
+              (integralUpperStep cell.left.value cell.mediant.value +
+                  integralUpperStep cell.mediant.value cell.right.value) +
+                integralUpperSum
+                  (fareyUpperCellsUpTo x
+                    (RationalCircle.FareyCell.subdivideList rest)) := by
+                  grind [Rat.add_assoc, Rat.add_comm]
+            _ <=
+              (integralUpperStep cell.left.value cell.mediant.value +
+                  integralUpperStep cell.mediant.value cell.right.value) +
+                integralUpperSum (fareyUpperCellsUpTo x rest) :=
+                  rat_add_le_add (Rat.le_refl) htail
+            _ <=
+              integralUpperStep cell.left.value cell.right.value +
+                integralUpperSum (fareyUpperCellsUpTo x rest) :=
+                  rat_add_le_add hhead (Rat.le_refl)
+        · have hmed' : ¬(cell.left.mediant cell.right).value <= x := by
+            intro hh
+            exact hmed (by
+              simpa [RationalCircle.FareyCell.mediant] using hh)
+          have hhead := integralUpperStep_left_subcell_le hpq hqr
+          simp [fareyIntegralUpperPrefix, fareyUpperCellsUpTo,
+            RationalCircle.FareyCell.subdivideList,
+            RationalCircle.FareyCell.toRatInterval,
+            RationalCircle.FareyCell.leftChild,
+            RationalCircle.FareyCell.rightChild,
+            RationalCircle.FareyCell.mediant, hleft, hmed',
+            integralUpperSum]
+          calc
+            integralUpperStep cell.left.value cell.mediant.value +
+                integralUpperSum
+                  (fareyUpperCellsUpTo x
+                    (RationalCircle.FareyCell.subdivideList rest))
+                <=
+              integralUpperStep cell.left.value cell.mediant.value +
+                integralUpperSum (fareyUpperCellsUpTo x rest) :=
+                  rat_add_le_add (Rat.le_refl) htail
+            _ <=
+              integralUpperStep cell.left.value cell.right.value +
+                integralUpperSum (fareyUpperCellsUpTo x rest) :=
+                  rat_add_le_add hhead (Rat.le_refl)
+      · have hmed' : ¬(cell.left.mediant cell.right).value <= x := by
+          intro hh
+          exact hleft (Rat.le_trans hpq (by
+            simpa [RationalCircle.FareyCell.mediant] using hh))
+        simp [fareyIntegralUpperPrefix, fareyUpperCellsUpTo,
+          RationalCircle.FareyCell.subdivideList,
+          RationalCircle.FareyCell.leftChild,
+          RationalCircle.FareyCell.rightChild,
+          RationalCircle.FareyCell.mediant, hleft, hmed']
+        exact htail
+
+theorem fareyIntegralPrefixInterval_subdivide_refines
+    (x : Rat) (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    (fareyIntegralPrefixInterval x cells).ContainsInterval
+      (fareyIntegralPrefixInterval x
+        (RationalCircle.FareyCell.subdivideList cells)) := by
+  unfold QInterval.ContainsInterval fareyIntegralPrefixInterval
+  exact ⟨fareyIntegralLowerPrefix_subdivide_mono x cells hcells,
+    fareyIntegralUpperPrefix_subdivide_anti x cells hcells⟩
+
+theorem fareyIntegralPrefixStageInterval_step_refines
+    (x : Rat) (n : Nat) :
+    (fareyIntegralPrefixStageInterval x n).ContainsInterval
+      (fareyIntegralPrefixStageInterval x (n + 1)) := by
+  unfold fareyIntegralPrefixStageInterval
+  change (fareyIntegralPrefixInterval x (RationalCircle.fareyUnitStage n)).ContainsInterval
+    (fareyIntegralPrefixInterval x
+      (RationalCircle.fareyUnitSubdivide (RationalCircle.fareyUnitStage n)))
+  unfold RationalCircle.fareyUnitSubdivide
+  exact fareyIntegralPrefixInterval_subdivide_refines x
+    (RationalCircle.fareyUnitStage n) (RationalCircle.fareyUnitStage_unit n)
+
+theorem fareyIntegralPrefixStageInterval_nested
+    (x : Rat) :
+    forall n m, n <= m ->
+      (fareyIntegralPrefixStageInterval x n).lo <=
+        (fareyIntegralPrefixStageInterval x m).lo /\
+      (fareyIntegralPrefixStageInterval x m).lo <=
+        (fareyIntegralPrefixStageInterval x m).hi /\
+      (fareyIntegralPrefixStageInterval x m).hi <=
+        (fareyIntegralPrefixStageInterval x n).hi := by
+  intro n m hnm
+  induction hnm with
+  | refl =>
+      have hordered := fareyIntegralPrefixStageInterval_ordered x n
+      constructor
+      · exact Rat.le_refl
+      · constructor
+        · grind [QInterval.width, Rat.sub_eq_add_neg]
+        · exact Rat.le_refl
+  | step hnk ih =>
+      rename_i k
+      have hstep := fareyIntegralPrefixStageInterval_step_refines x k
+      unfold QInterval.ContainsInterval at hstep
+      have hordered := fareyIntegralPrefixStageInterval_ordered x (k + 1)
+      constructor
+      · exact Rat.le_trans ih.1 hstep.1
+      · constructor
+        · grind [QInterval.width, Rat.sub_eq_add_neg]
+        · exact Rat.le_trans hstep.2 ih.2.2
 
 theorem integralLowerSum_le_geometricLowerSum
     (intervals : List (Rat × Rat))

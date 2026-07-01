@@ -198,6 +198,8 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.intervalSquareSum}
 \lean{ComputableAnalysis.ArctanGeometry.integralKernel_pos}
 \lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_nonneg}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep_nonneg}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_left_subcell_le}
 \lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo}
 \lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix}
@@ -213,6 +215,11 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_le_upperPrefix}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_subdivide_mono}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUpperPrefix_subdivide_anti}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_subdivide_refines}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_step_refines}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_nested}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellWidth_le_two_square}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_width_le_two_squareSum}
@@ -322,7 +329,9 @@ the theorem \code{fareyIntegralStageInterval\_add} proves that the stage
 interval for \([a,c]\) is the interval sum of the stages for \([a,b]\) and
 \([b,c]\).  Lean also proves that the selected lower and upper Farey cells
 are unit intervals, and that the prefix interval itself is ordered at every
-Farey unit stage.
+Farey unit stage.  Refining the global Farey mesh increases the lower prefix
+and decreases the upper prefix, so the prefix intervals are nested from one
+stage to the next and hence for all \(n\le m\).
 
 For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
 estimate needed for validity.  The sum of squared cell lengths is exactly
