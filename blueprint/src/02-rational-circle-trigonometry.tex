@@ -513,24 +513,42 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.FareyFraction.value_le_mediant_of_le}
 \lean{ComputableAnalysis.RationalCircle.FareyFraction.mediant_le_value_of_le}
 \lean{ComputableAnalysis.RationalCircle.FareyCell}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.det}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.Adjacent}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.Unit}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.denSum}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.DenSumAtLeast}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.toRatInterval}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.mediant}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.det_leftChild}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.det_rightChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.unit_leftChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.unit_rightChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.AdjacentList}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.UnitList}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.DenSumListAtLeast}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_length}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_adjacent}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_unit}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild_denSum_ge_succ}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild_denSum_ge_succ}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_denSum_ge_succ}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSeed}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage_length}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_adjacent}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_adjacent}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_adjacent}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_unit}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_unit}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage_unit}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_denSum_ge_two}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_denSum_ge_succ}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_denSum_ge}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_zero}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_one}
@@ -581,7 +599,10 @@ integral sums: to compute up to \(x\), take all cells with right endpoint at
 or before \(x\) for the lower sum, and include the first cell crossing \(x\)
 for the upper sum.  Lean proves that mediants stay between their endpoints,
 that subdivision preserves the unit-cell invariant \(0\le p\le r\le1\), and
-that every unit Farey stage has length \(2^n\).
+that every unit Farey stage has length \(2^n\).  Lean also proves the
+determinant-one adjacency invariant for these cells and the denominator-growth
+bound \(\operatorname{den}(p)+\operatorname{den}(r)\ge n+2\) at stage \(n\);
+these are the arithmetic inputs for the later Farey mesh-size estimate.
 \end{remark}
 
 \begin{remark}[What bisection refinement means]

@@ -1473,9 +1473,22 @@ deriving Repr, DecidableEq
 
 namespace FareyCell
 
+def det (cell : FareyCell) : Int :=
+  (cell.right.num : Int) * (cell.left.den : Int) -
+    (cell.left.num : Int) * (cell.right.den : Int)
+
+def Adjacent (cell : FareyCell) : Prop :=
+  cell.det = 1
+
 def Unit (cell : FareyCell) : Prop :=
   0 <= cell.left.value /\ cell.left.value <= cell.right.value /\
     cell.right.value <= 1
+
+def denSum (cell : FareyCell) : Nat :=
+  cell.left.den + cell.right.den
+
+def DenSumAtLeast (n : Nat) (cell : FareyCell) : Prop :=
+  n <= cell.denSum
 
 def toRatInterval (cell : FareyCell) : Rat × Rat :=
   (cell.left.value, cell.right.value)
@@ -1488,6 +1501,20 @@ def leftChild (cell : FareyCell) : FareyCell :=
 
 def rightChild (cell : FareyCell) : FareyCell :=
   { left := cell.mediant, right := cell.right }
+
+theorem det_leftChild (cell : FareyCell) :
+    cell.leftChild.det = cell.det := by
+  unfold det leftChild mediant FareyFraction.mediant
+  simp [Int.natCast_add, Int.mul_add, Int.add_mul]
+  grind [Int.sub_eq_add_neg, Int.add_assoc, Int.add_comm,
+    Int.mul_assoc, Int.mul_comm]
+
+theorem det_rightChild (cell : FareyCell) :
+    cell.rightChild.det = cell.det := by
+  unfold det rightChild mediant FareyFraction.mediant
+  simp [Int.natCast_add, Int.mul_add, Int.add_mul]
+  grind [Int.sub_eq_add_neg, Int.add_assoc, Int.add_comm,
+    Int.mul_assoc, Int.mul_comm]
 
 theorem unit_leftChild {cell : FareyCell} (hcell : cell.Unit) :
     cell.leftChild.Unit := by
@@ -1507,9 +1534,17 @@ def subdivideList : List FareyCell -> List FareyCell
   | [] => []
   | cell :: rest => cell.leftChild :: cell.rightChild :: subdivideList rest
 
+def AdjacentList : List FareyCell -> Prop
+  | [] => True
+  | cell :: rest => cell.Adjacent /\ AdjacentList rest
+
 def UnitList : List FareyCell -> Prop
   | [] => True
   | cell :: rest => cell.Unit /\ UnitList rest
+
+def DenSumListAtLeast (n : Nat) : List FareyCell -> Prop
+  | [] => True
+  | cell :: rest => cell.DenSumAtLeast n /\ DenSumListAtLeast n rest
 
 theorem subdivideList_length (cells : List FareyCell) :
     (subdivideList cells).length = 2 * cells.length := by
@@ -1518,6 +1553,17 @@ theorem subdivideList_length (cells : List FareyCell) :
   | cons cell rest ih =>
       simp [subdivideList, ih]
       omega
+
+theorem subdivideList_adjacent {cells : List FareyCell}
+    (hcells : AdjacentList cells) : AdjacentList (subdivideList cells) := by
+  induction cells with
+  | nil =>
+      simp [subdivideList, AdjacentList]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      simp [subdivideList, AdjacentList]
+      exact ⟨by simpa [Adjacent, det_leftChild] using hcell,
+        by simpa [Adjacent, det_rightChild] using hcell, ih hrest⟩
 
 theorem subdivideList_unit {cells : List FareyCell}
     (hcells : UnitList cells) : UnitList (subdivideList cells) := by
@@ -1528,6 +1574,34 @@ theorem subdivideList_unit {cells : List FareyCell}
       rcases hcells with ⟨hcell, hrest⟩
       simp [subdivideList, UnitList]
       exact ⟨unit_leftChild hcell, unit_rightChild hcell, ih hrest⟩
+
+theorem leftChild_denSum_ge_succ {cell : FareyCell} {n : Nat}
+    (h : cell.DenSumAtLeast n) :
+    cell.leftChild.DenSumAtLeast (n + 1) := by
+  have hleftpos : 0 < cell.left.den := cell.left.den_pos
+  unfold DenSumAtLeast denSum at h ⊢
+  simp [leftChild, mediant, FareyFraction.mediant]
+  omega
+
+theorem rightChild_denSum_ge_succ {cell : FareyCell} {n : Nat}
+    (h : cell.DenSumAtLeast n) :
+    cell.rightChild.DenSumAtLeast (n + 1) := by
+  have hrightpos : 0 < cell.right.den := cell.right.den_pos
+  unfold DenSumAtLeast denSum at h ⊢
+  simp [rightChild, mediant, FareyFraction.mediant]
+  omega
+
+theorem subdivideList_denSum_ge_succ {cells : List FareyCell} {n : Nat}
+    (hcells : DenSumListAtLeast n cells) :
+    DenSumListAtLeast (n + 1) (subdivideList cells) := by
+  induction cells with
+  | nil =>
+      simp [subdivideList, DenSumListAtLeast]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      simp [subdivideList, DenSumListAtLeast]
+      exact ⟨leftChild_denSum_ge_succ hcell,
+        rightChild_denSum_ge_succ hcell, ih hrest⟩
 
 end FareyCell
 
@@ -1562,6 +1636,24 @@ theorem fareyUnitStage_length (n : Nat) :
         _ = 2 * 2 ^ n := by rw [ih]
         _ = 2 ^ (n + 1) := by rw [Nat.pow_succ, Nat.mul_comm]
 
+theorem fareyUnitSeed_adjacent :
+    FareyCell.AdjacentList fareyUnitSeed := by
+  simp [fareyUnitSeed, FareyCell.AdjacentList, FareyCell.Adjacent,
+    FareyCell.det, FareyFraction.zero, FareyFraction.one]
+
+theorem fareyUnitSubdivide_adjacent {cells : List FareyCell}
+    (hcells : FareyCell.AdjacentList cells) :
+    FareyCell.AdjacentList (fareyUnitSubdivide cells) :=
+  FareyCell.subdivideList_adjacent hcells
+
+theorem fareyUnitStage_adjacent (n : Nat) :
+    FareyCell.AdjacentList (fareyUnitStage n) := by
+  induction n with
+  | zero =>
+      exact fareyUnitSeed_adjacent
+  | succ _ ih =>
+      exact fareyUnitSubdivide_adjacent ih
+
 theorem fareyUnitSeed_unit : FareyCell.UnitList fareyUnitSeed := by
   simp [fareyUnitSeed, FareyCell.UnitList, FareyCell.Unit,
     FareyFraction.value_zero, FareyFraction.value_one]
@@ -1579,6 +1671,26 @@ theorem fareyUnitStage_unit (n : Nat) :
       exact fareyUnitSeed_unit
   | succ n ih =>
       exact fareyUnitSubdivide_unit ih
+
+theorem fareyUnitSeed_denSum_ge_two :
+    FareyCell.DenSumListAtLeast 2 fareyUnitSeed := by
+  simp [fareyUnitSeed, FareyCell.DenSumListAtLeast,
+    FareyCell.DenSumAtLeast, FareyCell.denSum,
+    FareyFraction.zero, FareyFraction.one]
+
+theorem fareyUnitSubdivide_denSum_ge_succ
+    {cells : List FareyCell} {n : Nat}
+    (hcells : FareyCell.DenSumListAtLeast n cells) :
+    FareyCell.DenSumListAtLeast (n + 1) (fareyUnitSubdivide cells) :=
+  FareyCell.subdivideList_denSum_ge_succ hcells
+
+theorem fareyUnitStage_denSum_ge (n : Nat) :
+    FareyCell.DenSumListAtLeast (n + 2) (fareyUnitStage n) := by
+  induction n with
+  | zero =>
+      exact fareyUnitSeed_denSum_ge_two
+  | succ _ ih =>
+      exact fareyUnitSubdivide_denSum_ge_succ ih
 
 def dyadicStage (n : Nat) : Stage :=
   { subdivisions := dyadicSubdivisions n }
