@@ -98,10 +98,10 @@ references to the relevant declarations.
   inequalities and comparing them with `1/(1+x^2)`.
 - Projective-line test integral: use the reciprocal quartic
   `∫_(-∞)^∞ dx/(x^4+a*x^2+1)` as a simpler full-line benchmark before the
-  Gaussian integral.  The exact rational substitution identities for
-  `u=x-1/x` are formalized as
-  `IntegralIdentities.reciprocalQuartic_projective_substitution_data`; the
-  remaining work is the improper/Farey integral construction that turns the
+  Gaussian integral.  The exact rational folding and substitution identities
+  for `x ↦ 1/x` and `u=x-1/x` are formalized through
+  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
+  the remaining work is the improper/Farey integral construction that turns the
   `a=-1` case into another computation of `piCircleArea`.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or

@@ -528,6 +528,7 @@ rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
 \lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator}
 \lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyKernel}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticExpectedPiMultiple}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticPiParameter}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticPiParameter_minus_one}
@@ -543,6 +544,8 @@ The transformed kernel is the shifted Cauchy kernel
 \[
   \frac{1}{u^2+a+2}.
 \]
+It also names the unit-folded density obtained by sending the tail
+\([1,\infty]\) back to \([0,1]\) by \(x\mapsto1/x\).
 The parameter predicate \code{ReciprocalQuarticPiParameter(a,b)} records the
 rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
 \((a,b)=(-1,1)\).
@@ -551,12 +554,26 @@ rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
 \begin{theorem}[Projective substitution for the quartic test]
 \label{thm:reciprocal-quartic-projective-substitution}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalDifference_quartic_denominator}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_reciprocal_cleared}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalDifferenceJacobian_square_cleared}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuartic_projective_substitution_data}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_symmetric}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_eq_pullback_shiftedCauchy}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
-The rational algebra behind the test integral is already formalized.  For
-\(x\ne0\),
+The rational algebra behind the test integral is already formalized.  First,
+the quartic denominator is reciprocal after clearing the projective factor:
+\[
+  x^4 Q_a(1/x)=Q_a(x).
+\]
+Consequently, after the usual nonzero-denominator hypotheses are supplied, the
+positive half-line folded to the unit interval has density
+\[
+  \frac{1}{Q_a(x)}+\frac{1}{x^2Q_a(1/x)}
+    =\frac{1+x^2}{Q_a(x)}.
+\]
+Second, for \(x\ne0\),
 \[
   x^2\left(\left(x-\frac1x\right)^2+a+2\right)
     =x^4+a x^2+1,

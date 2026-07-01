@@ -889,6 +889,12 @@ def shiftedCauchyKernel (a u : Rat) : Rat :=
 def reciprocalQuarticSymmetricDensity (a x : Rat) : Rat :=
   (1 + x * x) * reciprocalQuarticKernel a x
 
+/-- The folded positive-half-line density obtained by sending the tail
+`[1, infinity)` back to `[0,1]` by `x ↦ 1/x`. -/
+def reciprocalQuarticUnitFoldDensity (a x : Rat) : Rat :=
+  reciprocalQuarticKernel a x +
+    (1 / (x * x)) * reciprocalQuarticKernel a (1 / x)
+
 /-- Expected value of the full-line reciprocal quartic test integral when
 `a + 2 = b^2` and `0 < b`: it should be `pi / b`. -/
 def reciprocalQuarticExpectedPiMultiple (b : Rat) : RealRaw :=
@@ -903,6 +909,26 @@ theorem reciprocalQuarticPiParameter_minus_one :
     ReciprocalQuarticPiParameter (-1) 1 := by
   unfold ReciprocalQuarticPiParameter
   constructor <;> native_decide
+
+private theorem rat_square_pos_of_ne_zero {x : Rat} (hx : x ≠ 0) :
+    0 < x * x := by
+  by_cases hxpos : 0 < x
+  · exact Rat.mul_pos hxpos hxpos
+  · have hxneg : x < 0 := by grind
+    have hnegpos : 0 < -x := by grind
+    have hsq : 0 < (-x) * (-x) := Rat.mul_pos hnegpos hnegpos
+    grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+private theorem rat_eq_of_mul_eq_mul_ne {a b c : Rat}
+    (hc : c ≠ 0) (h : a * c = b * c) : a = b := by
+  calc
+    a = (a * c) * c⁻¹ := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
 
 /-- Clearing denominators in the projective substitution:
 \[
@@ -919,18 +945,22 @@ theorem reciprocalDifference_quartic_denominator
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+/-- The quartic denominator is reciprocal after clearing the expected
+projective factor \(x^4\). -/
+theorem reciprocalQuarticDenominator_reciprocal_cleared
+    (a x : Rat) (hx : x ≠ 0) :
+    x * x * x * x * reciprocalQuarticDenominator a (1 / x) =
+      reciprocalQuarticDenominator a x := by
+  unfold reciprocalQuarticDenominator
+  rw [Rat.div_def]
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 /-- Clearing the denominator in the formal derivative of `x - 1/x`. -/
 theorem reciprocalDifferenceJacobian_square_cleared
     (x : Rat) (hx : x ≠ 0) :
     reciprocalDifferenceJacobian x * (x * x) = 1 + x * x := by
-  have hx2pos : 0 < x * x := by
-    by_cases hxpos : 0 < x
-    · exact Rat.mul_pos hxpos hxpos
-    · have hxneg : x < 0 := by grind
-      have hnegpos : 0 < -x := by grind
-      have hsq : 0 < (-x) * (-x) := Rat.mul_pos hnegpos hnegpos
-      grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
-  have hx2 : x * x ≠ 0 := Rat.ne_of_gt hx2pos
+  have hx2 : x * x ≠ 0 := Rat.ne_of_gt (rat_square_pos_of_ne_zero hx)
   unfold reciprocalDifferenceJacobian
   rw [Rat.div_def]
   grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
@@ -947,6 +977,77 @@ theorem reciprocalQuartic_projective_substitution_data
       reciprocalDifferenceJacobian x * (x * x) = 1 + x * x :=
   ⟨reciprocalDifference_quartic_denominator a x hx,
     reciprocalDifferenceJacobian_square_cleared x hx⟩
+
+/-- Folding the positive half-line by the reciprocal map produces the symmetric
+density \((1+x^2)/(x^4+a x^2+1)\) on the unit interval. -/
+theorem reciprocalQuarticUnitFoldDensity_eq_symmetric
+    (a x : Rat) (hx : x ≠ 0)
+    (hQ : reciprocalQuarticDenominator a x ≠ 0)
+    (hQrec : reciprocalQuarticDenominator a (1 / x) ≠ 0) :
+    reciprocalQuarticUnitFoldDensity a x =
+      reciprocalQuarticSymmetricDensity a x := by
+  apply rat_eq_of_mul_eq_mul_ne (c := reciprocalQuarticDenominator a x) hQ
+  have hrec := reciprocalQuarticDenominator_reciprocal_cleared a x hx
+  have hx2 : x * x ≠ 0 := Rat.ne_of_gt (rat_square_pos_of_ne_zero hx)
+  calc
+    reciprocalQuarticUnitFoldDensity a x *
+        reciprocalQuarticDenominator a x
+        = 1 + x * x := by
+          unfold reciprocalQuarticUnitFoldDensity reciprocalQuarticKernel
+          rw [Rat.add_mul, Rat.div_def, Rat.div_def, Rat.div_def]
+          rw [← hrec]
+          grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+            Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    _ = reciprocalQuarticSymmetricDensity a x *
+        reciprocalQuarticDenominator a x := by
+          unfold reciprocalQuarticSymmetricDensity reciprocalQuarticKernel
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The exact pullback-density identity for the reciprocal quartic test
+integral.  The positivity hypotheses needed in analysis will imply the two
+nonzero denominator assumptions here. -/
+theorem reciprocalQuarticSymmetricDensity_eq_pullback_shiftedCauchy
+    (a x : Rat) (hx : x ≠ 0)
+    (hQ : reciprocalQuarticDenominator a x ≠ 0)
+    (hE : shiftedCauchyDenominator a (reciprocalDifference x) ≠ 0) :
+    reciprocalQuarticSymmetricDensity a x =
+      reciprocalDifferenceJacobian x *
+        shiftedCauchyKernel a (reciprocalDifference x) := by
+  apply rat_eq_of_mul_eq_mul_ne (c := reciprocalQuarticDenominator a x) hQ
+  calc
+    reciprocalQuarticSymmetricDensity a x *
+        reciprocalQuarticDenominator a x
+        = 1 + x * x := by
+          unfold reciprocalQuarticSymmetricDensity reciprocalQuarticKernel
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    _ = (reciprocalDifferenceJacobian x *
+          shiftedCauchyKernel a (reciprocalDifference x)) *
+          reciprocalQuarticDenominator a x := by
+          have hden :=
+            reciprocalDifference_quartic_denominator a x hx
+          have hjac :=
+            reciprocalDifferenceJacobian_square_cleared x hx
+          unfold shiftedCauchyKernel
+          rw [Rat.div_def]
+          rw [← hden]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The whole finite algebra chain used by the reciprocal quartic test:
+fold the positive half-line by \(x\leftrightarrow1/x\), then substitute
+`u = x - 1/x`. -/
+theorem reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy
+    (a x : Rat) (hx : x ≠ 0)
+    (hQ : reciprocalQuarticDenominator a x ≠ 0)
+    (hQrec : reciprocalQuarticDenominator a (1 / x) ≠ 0)
+    (hE : shiftedCauchyDenominator a (reciprocalDifference x) ≠ 0) :
+    reciprocalQuarticUnitFoldDensity a x =
+      reciprocalDifferenceJacobian x *
+        shiftedCauchyKernel a (reciprocalDifference x) := by
+  rw [reciprocalQuarticUnitFoldDensity_eq_symmetric a x hx hQ hQrec]
+  exact reciprocalQuarticSymmetricDensity_eq_pullback_shiftedCauchy
+    a x hx hQ hE
 
 /-- The geometric cosine algorithm, restricted to a rational interval where it
 is defined. -/

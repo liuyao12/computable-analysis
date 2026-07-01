@@ -93,9 +93,9 @@ prefix raw.
 The next projective-line integral benchmark is now named in Chapter 3:
 the reciprocal quartic
 `integral_(-infty)^infty dx/(x^4 + a*x^2 + 1)`.  Lean formalizes the exact
-substitution algebra for `u = x - 1/x` as
-`IntegralIdentities.reciprocalQuartic_projective_substitution_data`; the
-`a = -1` case should become another pi computation once the improper Farey
+folding and substitution algebra for `x ↦ 1/x` and `u = x - 1/x` as
+`IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
+the `a = -1` case should become another pi computation once the improper Farey
 integral construction is available.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
