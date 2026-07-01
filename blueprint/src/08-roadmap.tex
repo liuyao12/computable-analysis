@@ -231,14 +231,21 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.adjacentTangentCrossFormula_pos}
 \lean{ComputableAnalysis.PiProofs.entryTangentNormSqFormula_nonneg}
 \lean{ComputableAnalysis.PiProofs.exitTangentNormSqFormula_nonneg}
+\lean{ComputableAnalysis.PiProofs.FormulaBudgetLeAt}
 \lean{ComputableAnalysis.PiProofs.InnerAdjacentChordFormulaBudgetLe}
 \lean{ComputableAnalysis.PiProofs.OuterAdjacentTangentFormulaBudgetLe}
+\lean{ComputableAnalysis.PiProofs.InnerAdjacentChordFormulaBudgetLeUpTo}
+\lean{ComputableAnalysis.PiProofs.OuterAdjacentTangentFormulaBudgetLeUpTo}
 \lean{ComputableAnalysis.PiProofs.InnerAdjacentSegmentBudgetLe}
 \lean{ComputableAnalysis.PiProofs.OuterAdjacentSegmentBudgetLe}
 \lean{ComputableAnalysis.PiProofs.InnerBoundarySegmentBudgetLe}
 \lean{ComputableAnalysis.PiProofs.OuterBoundarySegmentBudgetLe}
 \lean{ComputableAnalysis.PiProofs.innerAdjacentSegmentBudgetLe_of_chordFormulaBudget}
 \lean{ComputableAnalysis.PiProofs.outerAdjacentSegmentBudgetLe_of_tangentFormulaBudget}
+\lean{ComputableAnalysis.PiProofs.innerBoundaryFrom_consecutiveBudgetLe_of_chordFormulaBudgetUpTo}
+\lean{ComputableAnalysis.PiProofs.outerBoundaryFrom_consecutiveBudgetLe_of_tangentFormulaBudgetUpTo}
+\lean{ComputableAnalysis.PiProofs.innerBoundarySegmentBudgetLe_of_chordFormulaBudgetUpTo}
+\lean{ComputableAnalysis.PiProofs.outerBoundarySegmentBudgetLe_of_tangentFormulaBudgetUpTo}
 \lean{ComputableAnalysis.PiProofs.innerBoundaryFrom_consecutiveBudgetLe}
 \lean{ComputableAnalysis.PiProofs.innerBoundarySegmentBudgetLe_of_adjacent}
 \lean{ComputableAnalysis.PiProofs.outerBoundaryFrom_consecutiveBudgetLe}
@@ -255,11 +262,15 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.CircumferencePathSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferenceAdjacentSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.CircumferenceFormulaSegmentUniformLinearBound}
+\lean{ComputableAnalysis.PiProofs.CircumferenceFiniteFormulaSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.adjacentSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.pathSegmentUniformLinearBound_of_adjacentSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.pathSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound}
+\lean{ComputableAnalysis.PiProofs.finiteFormulaSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound}
+\lean{ComputableAnalysis.PiProofs.pathSegmentUniformLinearBound_of_finiteFormulaSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudgetLinearBound_of_formulaSegmentUniformLinearBound}
+\lean{ComputableAnalysis.PiProofs.circumferencePathWidthBudgetLinearBound_of_finiteFormulaSegmentUniformLinearBound}
 \lean{ComputableAnalysis.PiProofs.fanGapPathBudgetLinearBound_of_parts}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterGapLinearBound_of_fanGapPathBudgetLinearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_of_fanGapPathBudgetLinearBound}
@@ -507,14 +518,19 @@ splits into independent fan-gap and path-budget linear bounds via
 has a finite segment-count wrapper
 \code{PiProofs.circumferencePathWidthBudget\_le\_three\_stage\_mul}.  The
 path-budget linear bound is now reduced further to
-\code{PiProofs.CircumferenceFormulaSegmentUniformLinearBound}, which asks for
-uniform square-root interval budgets on the explicit adjacent chord norm-square
-formula and on the two tangent cross-square formulas at each dyadic stage.
+\code{PiProofs.CircumferenceFiniteFormulaSegmentUniformLinearBound}, which
+asks for square-root interval budgets only on the finitely many explicit
+adjacent chord norm-square formulas and tangent cross-square formulas that
+occur at each dyadic stage.
 The tangent entry and exit cross terms are both identified with the same
 rational expression \((v-u)/(1+uv)\), and Lean records positivity for the
-chord and tangent formulas.  Lean promotes that formula-level target through
-the adjacent-segment and path-segment targets to the path-width linear bound by
-\code{PiProofs.circumferencePathWidthBudgetLinearBound\_of\_formulaSegmentUniformLinearBound}.
+chord and tangent formulas.  Lean promotes the finite formula-level target
+directly through the path-segment target to the path-width linear bound by
+\code{PiProofs.circumferencePathWidthBudgetLinearBound\_of\_finiteFormulaSegmentUniformLinearBound}.
+The stronger unbounded convenience target
+\code{PiProofs.CircumferenceFormulaSegmentUniformLinearBound} still implies
+the finite one through
+\code{PiProofs.finiteFormulaSegmentUniformLinearBound\_of\_formulaSegmentUniformLinearBound}.
 
 \section{Lean declaration index}
 
@@ -612,6 +628,9 @@ the adjacent-segment and path-segment targets to the path-width linear bound by
   \code{PiProofs.piMachin\_equiv\_piCircleArea\_of\_powerSeriesRectangleKernelAtMachinInputs},
   \code{PiProofs.pointSegmentLengthInterval\_width\_eq},
   \code{PiProofs.rationalPointPathLength\_width\_eq\_segmentBudget},
+  \code{PiProofs.CircumferenceFiniteFormulaSegmentUniformLinearBound},
+  \code{PiProofs.pathSegmentUniformLinearBound\_of\_finiteFormulaSegmentUniformLinearBound},
+  \code{PiProofs.circumferencePathWidthBudgetLinearBound\_of\_finiteFormulaSegmentUniformLinearBound},
   \code{PiProofs.CircumferenceLinearRemainders},
   \code{PiProofs.piProofsComplete\_of\_circumferenceRemainders},
   \code{PiProofs.archimedesTheorem},

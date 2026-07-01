@@ -168,13 +168,15 @@ linear target now splits into independent fan-gap and path-budget linear
 bounds by `PiProofs.fanGapPathBudgetLinearBound_of_parts`; the path-budget side
 has the segment-count reduction
 `PiProofs.circumferencePathWidthBudget_le_three_stage_mul` and is now reduced
-to explicit adjacent inner-chord and outer-tangent formulas by
-`PiProofs.circumferencePathWidthBudgetLinearBound_of_formulaSegmentUniformLinearBound`.
+to the finite-stage explicit inner-chord and outer-tangent formulas by
+`PiProofs.circumferencePathWidthBudgetLinearBound_of_finiteFormulaSegmentUniformLinearBound`.
+The stronger unbounded convenience predicate still implies this finite target
+through `PiProofs.finiteFormulaSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound`.
 The tangent entry and exit cross terms are now both identified with the same
 rational expression `(v - u) / (1 + u * v)`, and Lean records positivity for
 the chord and tangent formulas.
 The remaining finite rational predicate is
-`PiProofs.CircumferenceFormulaSegmentUniformLinearBound`.
+`PiProofs.CircumferenceFiniteFormulaSegmentUniformLinearBound`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.
