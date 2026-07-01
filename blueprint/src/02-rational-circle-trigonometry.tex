@@ -518,12 +518,15 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.FareyCell.Unit}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.denSum}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.DenSumAtLeast}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.width}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.toRatInterval}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.mediant}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.det_leftChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.det_rightChild}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.crossDetRat_eq_one_of_adjacent}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.width_eq_inv_den_mul_den_of_adjacent}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.unit_leftChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.unit_rightChild}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList}
@@ -536,6 +539,9 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild_denSum_ge_succ}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild_denSum_ge_succ}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_denSum_ge_succ}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.den_product_ge_denSum_sub_one}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.den_product_ge_succ_of_denSumAtLeast}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.width_le_one_div_succ_of_adjacent_denSumAtLeast}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSeed}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage}
@@ -602,7 +608,12 @@ that subdivision preserves the unit-cell invariant \(0\le p\le r\le1\), and
 that every unit Farey stage has length \(2^n\).  Lean also proves the
 determinant-one adjacency invariant for these cells and the denominator-growth
 bound \(\operatorname{den}(p)+\operatorname{den}(r)\ge n+2\) at stage \(n\);
-these are the arithmetic inputs for the later Farey mesh-size estimate.
+these are the arithmetic inputs for the Farey mesh-size estimate.  In
+particular, Lean proves that an adjacent cell has rational width
+\[
+  r-p = \frac{1}{\operatorname{den}(p)\operatorname{den}(r)}
+\]
+and hence any stage-\(n\) unit Farey cell has width at most \(1/(n+1)\).
 \end{remark}
 
 \begin{remark}[What bisection refinement means]

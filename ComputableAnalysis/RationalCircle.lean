@@ -1465,6 +1465,23 @@ theorem mediant_le_value_of_le {p q : FareyFraction}
 
 end FareyFraction
 
+private theorem rat_one_div_le_one_div_of_pos_of_le {a b : Rat}
+    (ha : 0 < a) (hab : a <= b) :
+    1 / b <= 1 / a := by
+  have hb : 0 < b := by grind
+  have hane : a ≠ 0 := Rat.ne_of_gt ha
+  have hbne : b ≠ 0 := Rat.ne_of_gt hb
+  have habpos : 0 < a * b := Rat.mul_pos ha hb
+  refine Rat.le_of_mul_le_mul_right (c := a * b) ?_ habpos
+  calc
+    (1 / b) * (a * b) = a := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    _ <= b := hab
+    _ = (1 / a) * (a * b) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 /-- One cell in the global Farey subdivision of `[0,1]`. -/
 structure FareyCell where
   left : FareyFraction
@@ -1489,6 +1506,9 @@ def denSum (cell : FareyCell) : Nat :=
 
 def DenSumAtLeast (n : Nat) (cell : FareyCell) : Prop :=
   n <= cell.denSum
+
+def width (cell : FareyCell) : Rat :=
+  cell.right.value - cell.left.value
 
 def toRatInterval (cell : FareyCell) : Rat × Rat :=
   (cell.left.value, cell.right.value)
@@ -1515,6 +1535,44 @@ theorem det_rightChild (cell : FareyCell) :
   simp [Int.natCast_add, Int.mul_add, Int.add_mul]
   grind [Int.sub_eq_add_neg, Int.add_assoc, Int.add_comm,
     Int.mul_assoc, Int.mul_comm]
+
+theorem crossDetRat_eq_one_of_adjacent {cell : FareyCell}
+    (hadj : cell.Adjacent) :
+    (cell.right.num : Rat) * (cell.left.den : Rat) -
+      (cell.left.num : Rat) * (cell.right.den : Rat) = 1 := by
+  have hrat := congrArg (fun z : Int => (z : Rat)) hadj
+  unfold Adjacent det at hrat
+  grind [Rat.intCast_natCast, Rat.sub_eq_add_neg, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem width_eq_inv_den_mul_den_of_adjacent {cell : FareyCell}
+    (hadj : cell.Adjacent) :
+    cell.width = 1 / ((cell.left.den : Rat) * (cell.right.den : Rat)) := by
+  have hdet := crossDetRat_eq_one_of_adjacent hadj
+  have hldpos : (0 : Rat) < cell.left.den :=
+    (Rat.natCast_pos).2 cell.left.den_pos
+  have hrdpos : (0 : Rat) < cell.right.den :=
+    (Rat.natCast_pos).2 cell.right.den_pos
+  have hldne : (cell.left.den : Rat) ≠ 0 := Rat.ne_of_gt hldpos
+  have hrdne : (cell.right.den : Rat) ≠ 0 := Rat.ne_of_gt hrdpos
+  have hldcancel :
+      (cell.left.den : Rat) * (cell.left.den : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hldne
+  have hrdcancel :
+      (cell.right.den : Rat) * (cell.right.den : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hrdne
+  unfold width FareyFraction.value
+  calc
+    (cell.right.num : Rat) / (cell.right.den : Rat) -
+        (cell.left.num : Rat) / (cell.left.den : Rat)
+        = (((cell.right.num : Rat) * (cell.left.den : Rat) -
+            (cell.left.num : Rat) * (cell.right.den : Rat)) /
+            ((cell.left.den : Rat) * (cell.right.den : Rat))) := by
+          rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ = 1 / ((cell.left.den : Rat) * (cell.right.den : Rat)) := by
+          rw [hdet]
 
 theorem unit_leftChild {cell : FareyCell} (hcell : cell.Unit) :
     cell.leftChild.Unit := by
@@ -1602,6 +1660,48 @@ theorem subdivideList_denSum_ge_succ {cells : List FareyCell} {n : Nat}
       simp [subdivideList, DenSumListAtLeast]
       exact ⟨leftChild_denSum_ge_succ hcell,
         rightChild_denSum_ge_succ hcell, ih hrest⟩
+
+theorem den_product_ge_denSum_sub_one (cell : FareyCell) :
+    cell.left.den + cell.right.den - 1 <=
+      cell.left.den * cell.right.den := by
+  have hb1 : 1 <= cell.right.den :=
+    Nat.succ_le_of_lt cell.right.den_pos
+  have hbpred : cell.right.den - 1 + 1 = cell.right.den :=
+    Nat.sub_add_cancel hb1
+  calc
+    cell.left.den + cell.right.den - 1 =
+        cell.left.den + (cell.right.den - 1) := by omega
+    _ <= cell.left.den + cell.left.den * (cell.right.den - 1) := by
+        exact Nat.add_le_add_left
+          (Nat.le_mul_of_pos_left (cell.right.den - 1)
+            cell.left.den_pos)
+          cell.left.den
+    _ = cell.left.den * ((cell.right.den - 1) + 1) := by
+        rw [Nat.mul_add, Nat.mul_one]
+        omega
+    _ = cell.left.den * cell.right.den := by rw [hbpred]
+
+theorem den_product_ge_succ_of_denSumAtLeast
+    {cell : FareyCell} {n : Nat}
+    (h : cell.DenSumAtLeast (n + 2)) :
+    n + 1 <= cell.left.den * cell.right.den := by
+  have hprod := den_product_ge_denSum_sub_one cell
+  unfold DenSumAtLeast denSum at h
+  omega
+
+theorem width_le_one_div_succ_of_adjacent_denSumAtLeast
+    {cell : FareyCell} {n : Nat}
+    (hadj : cell.Adjacent) (hden : cell.DenSumAtLeast (n + 2)) :
+    cell.width <= 1 / (((n + 1 : Nat) : Rat)) := by
+  rw [width_eq_inv_den_mul_den_of_adjacent hadj]
+  have hprodNat := den_product_ge_succ_of_denSumAtLeast hden
+  have hprodRat :
+      (((n + 1 : Nat) : Rat)) <=
+        (cell.left.den : Rat) * (cell.right.den : Rat) := by
+    rw [← Rat.natCast_mul]
+    exact (Rat.natCast_le_natCast).2 hprodNat
+  exact rat_one_div_le_one_div_of_pos_of_le
+    ((Rat.natCast_pos).2 (Nat.succ_pos n)) hprodRat
 
 end FareyCell
 
