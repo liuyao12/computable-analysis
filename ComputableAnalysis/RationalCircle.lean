@@ -1625,6 +1625,14 @@ def widthSquareSum : List FareyCell -> Rat
   | [] => 0
   | cell :: rest => cell.width * cell.width + widthSquareSum rest
 
+theorem widthSquareSum_nonneg (cells : List FareyCell) :
+    0 <= widthSquareSum cells := by
+  induction cells with
+  | nil =>
+      simp [widthSquareSum]
+  | cons cell rest ih =>
+      exact Rat.add_nonneg (Stage.ratSquare_nonneg cell.width) ih
+
 theorem subdivideList_length (cells : List FareyCell) :
     (subdivideList cells).length = 2 * cells.length := by
   induction cells with

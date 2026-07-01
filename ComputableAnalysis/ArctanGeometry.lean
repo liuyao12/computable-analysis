@@ -117,6 +117,17 @@ theorem integralKernel_pos (u : Rat) : 0 < integralKernel u := by
   rw [Rat.div_def]
   simpa using (Rat.inv_pos).2 (RationalCircle.Stage.one_add_square_pos u)
 
+theorem integralKernel_le_one (u : Rat) : integralKernel u <= 1 := by
+  unfold integralKernel
+  have hden : 1 <= 1 + u * u := by
+    have hsq := RationalCircle.Stage.ratSquare_nonneg u
+    grind
+  have hone : (0 : Rat) < 1 := by native_decide
+  have h := one_div_le_one_div_of_pos_of_le hone hden
+  calc
+    integralKernel u <= 1 / (1 : Rat) := h
+    _ = 1 := by native_decide
+
 theorem integralUpperStep_nonneg {p r : Rat} (hpr : p <= r) :
     0 <= integralUpperStep p r := by
   have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
@@ -136,6 +147,15 @@ theorem integralUpperStep_left_subcell_le
   unfold integralUpperStep
   exact Rat.mul_le_mul_of_nonneg_right hlen
     (Rat.le_of_lt (integralKernel_pos p))
+
+theorem integralUpperStep_le_width {p r : Rat} (hpr : p <= r) :
+    integralUpperStep p r <= r - p := by
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  unfold integralUpperStep
+  calc
+    (r - p) * integralKernel p <= (r - p) * 1 :=
+      Rat.mul_le_mul_of_nonneg_left (integralKernel_le_one p) hlen
+    _ = r - p := by grind
 
 private theorem containsInterval_refl (I : QInterval) :
     I.ContainsInterval I := by
