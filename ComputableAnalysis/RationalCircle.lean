@@ -1367,6 +1367,102 @@ theorem value_zero : zero.value = 0 := by
 theorem value_one : one.value = 1 := by
   native_decide
 
+theorem value_nonneg (q : FareyFraction) : 0 <= q.value := by
+  unfold value
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg Rat.natCast_nonneg
+    (Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 q.den_pos)))
+
+theorem value_le_one_of_num_le_den {q : FareyFraction} (h : q.num <= q.den) :
+    q.value <= 1 := by
+  unfold value
+  have hden_pos : (0 : Rat) < q.den := (Rat.natCast_pos).2 q.den_pos
+  apply Rat.le_of_mul_le_mul_right (c := (q.den : Rat))
+  · calc
+      ((q.num : Rat) / (q.den : Rat)) * (q.den : Rat) =
+          (q.num : Rat) := by
+            rw [Rat.div_def]
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (q.den : Rat) := Rat.natCast_le_natCast.2 h
+      _ = (1 : Rat) * (q.den : Rat) := by grind
+  · exact hden_pos
+
+private theorem value_le_value_cross {p q : FareyFraction}
+    (h : p.value <= q.value) :
+    (p.num : Rat) * (q.den : Rat) <=
+      (q.num : Rat) * (p.den : Rat) := by
+  unfold value at h
+  have hpden : (0 : Rat) < p.den := (Rat.natCast_pos).2 p.den_pos
+  have hqden : (0 : Rat) < q.den := (Rat.natCast_pos).2 q.den_pos
+  have hprod_nonneg : 0 <= (p.den : Rat) * (q.den : Rat) :=
+    Rat.le_of_lt (Rat.mul_pos hpden hqden)
+  have hmul := Rat.mul_le_mul_of_nonneg_right h hprod_nonneg
+  calc
+    (p.num : Rat) * (q.den : Rat) =
+        ((p.num : Rat) / (p.den : Rat)) *
+          ((p.den : Rat) * (q.den : Rat)) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    _ <= ((q.num : Rat) / (q.den : Rat)) *
+          ((p.den : Rat) * (q.den : Rat)) := hmul
+    _ = (q.num : Rat) * (p.den : Rat) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem value_le_mediant_of_le {p q : FareyFraction}
+    (h : p.value <= q.value) : p.value <= (p.mediant q).value := by
+  unfold value mediant at *
+  have hpden : (0 : Rat) < p.den := (Rat.natCast_pos).2 p.den_pos
+  have hden : (0 : Rat) < ((p.den + q.den : Nat) : Rat) :=
+    (Rat.natCast_pos).2 (Nat.add_pos_left p.den_pos q.den)
+  have hcross := value_le_value_cross h
+  apply Rat.le_of_mul_le_mul_right
+    (c := (p.den : Rat) * ((p.den + q.den : Nat) : Rat))
+  · calc
+      ((p.num : Rat) * (p.den : Rat)⁻¹) *
+          ((p.den : Rat) * ((p.den + q.den : Nat) : Rat)) =
+          (p.num : Rat) * ((p.den + q.den : Nat) : Rat) := by
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ = (p.num : Rat) * (p.den : Rat) +
+            (p.num : Rat) * (q.den : Rat) := by
+            grind [Rat.mul_add]
+      _ <= (p.num : Rat) * (p.den : Rat) +
+            (q.num : Rat) * (p.den : Rat) := by
+            grind
+      _ = (((p.num + q.num : Nat) : Rat) *
+              (((p.den + q.den : Nat) : Rat))⁻¹) *
+          ((p.den : Rat) * ((p.den + q.den : Nat) : Rat)) := by
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+              Rat.mul_inv_cancel]
+  · exact Rat.mul_pos hpden hden
+
+theorem mediant_le_value_of_le {p q : FareyFraction}
+    (h : p.value <= q.value) : (p.mediant q).value <= q.value := by
+  unfold value mediant at *
+  have hqden : (0 : Rat) < q.den := (Rat.natCast_pos).2 q.den_pos
+  have hden : (0 : Rat) < ((p.den + q.den : Nat) : Rat) :=
+    (Rat.natCast_pos).2 (Nat.add_pos_left p.den_pos q.den)
+  have hcross := value_le_value_cross h
+  apply Rat.le_of_mul_le_mul_right
+    (c := ((p.den + q.den : Nat) : Rat) * (q.den : Rat))
+  · calc
+      (((p.num + q.num : Nat) : Rat) *
+          (((p.den + q.den : Nat) : Rat))⁻¹) *
+          (((p.den + q.den : Nat) : Rat) * (q.den : Rat)) =
+          ((p.num : Rat) + (q.num : Rat)) * (q.den : Rat) := by
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ = (p.num : Rat) * (q.den : Rat) +
+            (q.num : Rat) * (q.den : Rat) := by
+            grind [Rat.add_mul]
+      _ <= (q.num : Rat) * (p.den : Rat) +
+            (q.num : Rat) * (q.den : Rat) := by
+            grind
+      _ = ((q.num : Rat) * (q.den : Rat)⁻¹) *
+          (((p.den + q.den : Nat) : Rat) * (q.den : Rat)) := by
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+              Rat.mul_inv_cancel]
+  · exact Rat.mul_pos hden hqden
+
 end FareyFraction
 
 /-- One cell in the global Farey subdivision of `[0,1]`. -/
@@ -1376,6 +1472,10 @@ structure FareyCell where
 deriving Repr, DecidableEq
 
 namespace FareyCell
+
+def Unit (cell : FareyCell) : Prop :=
+  0 <= cell.left.value /\ cell.left.value <= cell.right.value /\
+    cell.right.value <= 1
 
 def toRatInterval (cell : FareyCell) : Rat × Rat :=
   (cell.left.value, cell.right.value)
@@ -1389,9 +1489,27 @@ def leftChild (cell : FareyCell) : FareyCell :=
 def rightChild (cell : FareyCell) : FareyCell :=
   { left := cell.mediant, right := cell.right }
 
+theorem unit_leftChild {cell : FareyCell} (hcell : cell.Unit) :
+    cell.leftChild.Unit := by
+  rcases hcell with ⟨hl0, hlr, hr1⟩
+  unfold Unit leftChild mediant
+  exact ⟨hl0, FareyFraction.value_le_mediant_of_le hlr,
+    Rat.le_trans (FareyFraction.mediant_le_value_of_le hlr) hr1⟩
+
+theorem unit_rightChild {cell : FareyCell} (hcell : cell.Unit) :
+    cell.rightChild.Unit := by
+  rcases hcell with ⟨hl0, hlr, hr1⟩
+  unfold Unit rightChild mediant
+  exact ⟨Rat.le_trans hl0 (FareyFraction.value_le_mediant_of_le hlr),
+    FareyFraction.mediant_le_value_of_le hlr, hr1⟩
+
 def subdivideList : List FareyCell -> List FareyCell
   | [] => []
   | cell :: rest => cell.leftChild :: cell.rightChild :: subdivideList rest
+
+def UnitList : List FareyCell -> Prop
+  | [] => True
+  | cell :: rest => cell.Unit /\ UnitList rest
 
 theorem subdivideList_length (cells : List FareyCell) :
     (subdivideList cells).length = 2 * cells.length := by
@@ -1400,6 +1518,16 @@ theorem subdivideList_length (cells : List FareyCell) :
   | cons cell rest ih =>
       simp [subdivideList, ih]
       omega
+
+theorem subdivideList_unit {cells : List FareyCell}
+    (hcells : UnitList cells) : UnitList (subdivideList cells) := by
+  induction cells with
+  | nil =>
+      simp [subdivideList, UnitList]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      simp [subdivideList, UnitList]
+      exact ⟨unit_leftChild hcell, unit_rightChild hcell, ih hrest⟩
 
 end FareyCell
 
@@ -1433,6 +1561,24 @@ theorem fareyUnitStage_length (n : Nat) :
         _ = 2 * (fareyUnitStage n).length := fareyUnitSubdivide_length _
         _ = 2 * 2 ^ n := by rw [ih]
         _ = 2 ^ (n + 1) := by rw [Nat.pow_succ, Nat.mul_comm]
+
+theorem fareyUnitSeed_unit : FareyCell.UnitList fareyUnitSeed := by
+  simp [fareyUnitSeed, FareyCell.UnitList, FareyCell.Unit,
+    FareyFraction.value_zero, FareyFraction.value_one]
+  native_decide
+
+theorem fareyUnitSubdivide_unit {cells : List FareyCell}
+    (hcells : FareyCell.UnitList cells) :
+    FareyCell.UnitList (fareyUnitSubdivide cells) :=
+  FareyCell.subdivideList_unit hcells
+
+theorem fareyUnitStage_unit (n : Nat) :
+    FareyCell.UnitList (fareyUnitStage n) := by
+  induction n with
+  | zero =>
+      exact fareyUnitSeed_unit
+  | succ n ih =>
+      exact fareyUnitSubdivide_unit ih
 
 def dyadicStage (n : Nat) : Stage :=
   { subdivisions := dyadicSubdivisions n }
