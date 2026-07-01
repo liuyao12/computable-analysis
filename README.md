@@ -83,7 +83,10 @@ integral route is now also definition-complete as
 `PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one`; its
 equivalence to `piCircleArea` is still pending.  The supporting
 `oneOverOnePlusSquareFareyIntegral(a,b)` construction is verified and now has
-formal additivity, zero-length, and reversal laws.
+formal additivity, zero-length, reversal, add-reverse-zero, and endpoint-prefix
+normalization laws.  The Farey arctangent wrapper also records the zero
+endpoint and the unit-branch `ArctanIntegralUnitComputes` package against the
+prefix raw.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

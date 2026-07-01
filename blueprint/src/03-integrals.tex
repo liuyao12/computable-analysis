@@ -307,14 +307,20 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_self_equiv_zero}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_add_reverse_equiv_zero}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_left_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_right_equiv_neg_prefix}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_compute_eq}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_betweenRaw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_zero_equiv_zero}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitData}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_one}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
@@ -429,13 +435,19 @@ The global Farey-prefix algorithm is also packaged as a
 \[
   J(a,b)+J(b,c)\sim J(a,c),\qquad
   J(a,a)\sim0,\qquad
-  J(a,b)\sim -J(b,a).
+  J(a,b)\sim -J(b,a),\qquad
+  J(a,b)+J(b,a)\sim0.
 \]
+The endpoint normalizations \(J(0,x)\sim F(x)\) and
+\(J(x,0)\sim-F(x)\) are also formalized at this domain-aware layer.
 The arctangent specialization \code{arctanIntegralFareyFor(x)} is \(J(0,x)\);
 it is verified for every rational \(x\), and is equivalent to the prefix raw
-real \code{fareyIntegralPrefixRaw(x)}.  This gives a second verified
-integral-style arctangent computation, with the remaining comparison target
-being the mesh-independent equivalence to the geometric sector arctangent.
+real \code{fareyIntegralPrefixRaw(x)}.  Lean also records the zero endpoint
+\code{arctanIntegralFareyFor(0)}\(\sim0\) and the unit-branch
+\code{ArctanIntegralUnitComputes} package against the prefix raw.  This gives a
+second verified integral-style arctangent computation, with the remaining
+comparison target being the mesh-independent equivalence to the geometric
+sector arctangent.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]

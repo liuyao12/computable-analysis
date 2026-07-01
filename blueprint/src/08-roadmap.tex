@@ -116,12 +116,18 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_self_equiv_zero}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_add_reverse_equiv_zero}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_left_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_right_equiv_neg_prefix}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_zero_equiv_zero}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitData}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_one}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one}
@@ -460,9 +466,12 @@ deliberately named \code{4 * arctanSeries(1)}; the Leibniz series is its
 historical expansion.  The
 concrete rectangle row is completed.  The Farey-prefix row is definition
 complete, and the underlying domain-aware Farey integral already satisfies
-additivity, zero-length, and reversal laws; its equivalence remains pending
+additivity, zero-length, reversal, add-reverse-zero, and endpoint-prefix
+normalization laws; its equivalence remains pending
 until the shared-Farey-mesh integral is compared with the geometric sector
-arctangent.  The general \code{arctanIntegral(1)} row remains pending until
+arctangent.  Lean also records the zero endpoint and the unit-branch
+\code{Computes} package against the Farey prefix raw.  The general
+\code{arctanIntegral(1)} row remains pending until
 the older nonnegative
 point-Riemann wrapper is identified with the domain-aware rectangle schedule.
 The unit-branch integral interface is already completed through

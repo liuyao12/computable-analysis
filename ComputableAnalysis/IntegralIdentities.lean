@@ -556,6 +556,51 @@ theorem oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg
     (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw a b)
     hrawToNegIntegral
 
+theorem oneOverOnePlusSquareFareyIntegral_add_reverse_equiv_zero
+    (a b : Rat) :
+    (oneOverOnePlusSquareFareyIntegral a b +
+      oneOverOnePlusSquareFareyIntegral b a).Equiv (RealRaw.ofRat 0) := by
+  have hleftValid :
+      (oneOverOnePlusSquareFareyIntegral a b +
+        oneOverOnePlusSquareFareyIntegral b a).Valid :=
+    RealRaw.add_valid
+      (oneOverOnePlusSquareFareyIntegral_valid a b)
+      (oneOverOnePlusSquareFareyIntegral_valid b a)
+  have hselfValid :
+      (oneOverOnePlusSquareFareyIntegral a a).Valid :=
+    oneOverOnePlusSquareFareyIntegral_valid a a
+  exact RealRaw.equiv_trans hleftValid hselfValid (RealRaw.ofRat_valid 0)
+    (oneOverOnePlusSquareFareyIntegral_additive a b a)
+    (oneOverOnePlusSquareFareyIntegral_self_equiv_zero a)
+
+theorem oneOverOnePlusSquareFareyIntegral_zero_left_equiv_prefix
+    (x : Rat) :
+    (oneOverOnePlusSquareFareyIntegral 0 x).Equiv
+      (ArctanGeometry.fareyIntegralPrefixRaw x) := by
+  exact RealRaw.equiv_trans
+    (oneOverOnePlusSquareFareyIntegral_valid 0 x)
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x)
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid x)
+    (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw 0 x)
+    (ArctanGeometry.fareyIntegralBetweenRaw_zero_left_equiv_prefix x)
+
+theorem oneOverOnePlusSquareFareyIntegral_zero_right_equiv_neg_prefix
+    (x : Rat) :
+    (oneOverOnePlusSquareFareyIntegral x 0).Equiv
+      (-(ArctanGeometry.fareyIntegralPrefixRaw x)) := by
+  have hleftValid :
+      (oneOverOnePlusSquareFareyIntegral x 0).Valid :=
+    oneOverOnePlusSquareFareyIntegral_valid x 0
+  have hrawValid :
+      (ArctanGeometry.fareyIntegralBetweenRaw x 0).Valid :=
+    ArctanGeometry.fareyIntegralBetweenRaw_valid x 0
+  have hnegPrefixValid :
+      (-(ArctanGeometry.fareyIntegralPrefixRaw x)).Valid :=
+    RealRaw.neg_valid (ArctanGeometry.fareyIntegralPrefixRaw_valid x)
+  exact RealRaw.equiv_trans hleftValid hrawValid hnegPrefixValid
+    (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw x 0)
+    (ArctanGeometry.fareyIntegralBetweenRaw_zero_right_equiv_neg_prefix x)
+
 /-- The global Farey-prefix construction for
 `∫_0^x dt / (1 + t^2)`, packaged as a domain-aware integral construction.
 Unlike the rectangle route, this uses one shared Farey mesh for all endpoints
@@ -612,6 +657,15 @@ theorem arctanIntegralFareyFor_equiv_prefix (x : Rat) :
     (arctanIntegralFareyFor_equiv_betweenRaw x)
     (ArctanGeometry.fareyIntegralBetweenRaw_zero_left_equiv_prefix x)
 
+theorem arctanIntegralFareyFor_zero_equiv_zero :
+    (arctanIntegralFareyFor 0).Equiv (RealRaw.ofRat 0) := by
+  exact RealRaw.equiv_trans
+    (arctanIntegralFareyFor_valid 0)
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid 0)
+    (RealRaw.ofRat_valid 0)
+    (arctanIntegralFareyFor_equiv_prefix 0)
+    ArctanGeometry.fareyIntegralPrefixRaw_zero_equiv_zero
+
 def arctanIntegralFareyUnitData : ArctanIntegralUnitData where
   constructionAt := fun x _hx0 _hx1 => arctanIntegralFareyConstruction x
 
@@ -623,6 +677,20 @@ theorem arctanIntegralFareyUnit_equiv_prefix
   simpa [arctanIntegralUnit, arctanIntegralFareyUnitData,
     arctanIntegralFareyFor] using
     arctanIntegralFareyFor_equiv_prefix x
+
+theorem arctanIntegralFareyUnitComputes_prefix
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    ArctanIntegralUnitComputes x hx0 hx1
+      (ArctanGeometry.fareyIntegralPrefixRaw x) :=
+  ⟨arctanIntegralFareyUnitData.constructionAt x hx0 hx1,
+    arctanIntegralFareyUnit_equiv_prefix x hx0 hx1⟩
+
+theorem arctanIntegralFareyUnitComputes_one :
+    ArctanIntegralUnitComputes (1 : Rat)
+      (by native_decide) (by native_decide)
+      (ArctanGeometry.fareyIntegralPrefixRaw (1 : Rat)) :=
+  arctanIntegralFareyUnitComputes_prefix
+    (1 : Rat) (by native_decide) (by native_decide)
 
 /-- The verified rectangle-sum construction for
 `∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
