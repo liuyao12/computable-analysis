@@ -323,12 +323,12 @@ The current score is:
 \textbf{Definition} & \textbf{Equiv.}\\
 \hline
 \code{piCircleArea} &
-\cref{def:circle-area-stage-algorithm} &
+\cref{def:circle-area-stage-algorithm}; \cref{thm:geometric-pi-validity} &
 Rational midpoint area exhaustion using increment/decrement triangles; current
 baseline for pi comparisons. &
 \(\checkmark\) & N/A\\
 \code{piCircumference} &
-\cref{def:circle-circumference-stage-algorithm} &
+\cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
 Rational polygon circumference using interval square roots for side lengths. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
@@ -337,23 +337,25 @@ Rational polygon circumference using interval square roots for side lengths. &
 \cref{thm:power-series-arctan-area-pi} for
 \code{4 * arctanSeries(1)}, and \cref{thm:leibniz-machin} for
 \code{piMachin}.  These rows first compute arctangent values and then multiply
-or combine them to get pi.  The Leibniz series is represented only by the
-endpoint row \code{4 * arctanSeries(1)}.  The \code{piMachin} row is included
-here because its first bridge is agreement
+or combine them to get pi.  There is no separate \code{piLeibniz} row: the
+Leibniz series is the endpoint expansion of \code{arctanSeries(1)}.  The
+\code{piMachin} row is included here because its first bridge is agreement
 with \code{4 * arctanSeries(1)}.}\\
 \code{4 * arctanGeom(1)} &
-\cref{def:arctan-area-stage-algorithm} &
+\cref{def:arctan-area-stage-algorithm};
+\cref{thm:geometric-arctan-one-area-pi} &
 Geometric sector-area arctangent at slope \(1\); it has stage equality with
 \code{piCircleArea}. &
 \(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanIntegralRectangleForAtOne} &
-\cref{thm:finite-arctan-integral-comparison} &
+\cref{thm:finite-arctan-integral-comparison};
+\cref{thm:arctan-integral-pi} &
 Domain-aware \code{ConstructionFor} packaging of midpoint rectangle sums for
 \(\int_0^1 dt/(1+t^2)\), using the same rational refinement schedule as
 \code{arctanGeom(1)}. &
 \(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanIntegral(1)} &
-\cref{def:arctan-integral} &
+\cref{def:arctan-integral}; \cref{thm:arctan-integral-pi} &
 Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
 \(\times\) & \(\times\)\\
 \code{4 * arctanSeries(1)} &
@@ -364,6 +366,7 @@ Power-series arctangent at \(1\); at this endpoint its alternating expansion is
 the historical Leibniz series. &
 \(\checkmark\) & \(\times\)\\
 \code{piMachin} &
+\cref{def:arctan-series};
 \cref{thm:machin-tangent}; \cref{thm:leibniz-machin} &
 Machin's arctangent combination
 \(4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\),
@@ -396,24 +399,24 @@ rational bounds. &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
 the single formula \(\pi=-2i\log(i)\), tested through several different
-definitions or computations of \(\log(i)\) in
+definitions or computations of the same branch value \(\log(i)\) in
 \cref{thm:log-at-i-pi-routes}, \cref{def:complex-log-series-at-i},
 \cref{def:complex-log-path-integral-at-i},
 \cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}.  These
 rows are meant to test branch control, agreement of logarithm constructions,
 and Euler's identity.}\\
-\code{-2i * LogSeries(i)} &
+\code{-2i * logSeries(i)} &
 \cref{def:complex-log-series-at-i};
 \cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
 Complex logarithm obtained from local power-series exponential data and a
 certified branch taking \(i\) back to a quarter turn. &
 \(\times\) & \(\times\)\\
-\code{-2i * LogPathIntegral(i)} &
+\code{-2i * logPathIntegral(i)} &
 \cref{def:complex-log-path-integral-at-i};
 \cref{thm:log-at-i-pi-routes} &
 Complex logarithm as a path integral of \(dz/z\) from \(1\) to \(i\). &
 \(\times\) & \(\times\)\\
-\code{-2i * LogInvExp(i)} &
+\code{-2i * logInvExp(i)} &
 \cref{def:complex-log-inv-exp-at-i};
 \cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
 Logarithm as the chosen inverse branch of complex exponential, with Euler
@@ -434,7 +437,7 @@ is already completed through
 \code{PiProofs.piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
 The logarithm-at-\(i\) block records a separate family of future computations:
 each one should identify \(\log(i)=i\pi/2\) using a different definition or
-computation of \code{Log}, with Euler's identity providing the essential branch
+computation of \code{log}, with Euler's identity providing the essential branch
 bridge.
 
 The first non-baseline checkmark in the equivalence column is the geometric
@@ -489,8 +492,8 @@ Basel to area \(\pi\) &
 \code{Basel.eulerBasel\_geometricPi} &
 Euler's Basel theorem for the geometric pi representative\\
 logarithm-at-\(i\) pi routes &
-\code{exp.logFromIntegral} and future complex \code{Log} representations &
-three \code{Log(i)} constructions, their branch agreement, and Euler identity\\
+\code{exp.logFromIntegral} and future complex \code{log} representations &
+three \code{log(i)} constructions, their branch agreement, and Euler identity\\
 \code{4 * arctanSeries(1)} to \code{piMachin} &
 \code{PiProofs.leibnizEqMachin\_of\_powerSeriesRectangleKernelAtMachinInputs} &
 \code{PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}

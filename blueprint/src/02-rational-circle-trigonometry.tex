@@ -222,7 +222,7 @@ def arctanGeom(x, n):
 The algorithm is packaged as its own raw function, not as a definitional
 alias of \code{piCircleArea}.  The special case \(x=1\) is related to
 \code{piCircleArea} by a theorem, which is the right proof obligation for the
-geometric identity \(\pi=4\arctan(1)\).
+geometric identity \(\pi=4\arctan_{\mathrm{geom}}(1)\).
 \end{definition}
 
 \begin{theorem}[Sector-area density]
@@ -373,7 +373,8 @@ coordinates
 Interval evaluation of these rational formulas gives boxes for sine and
 cosine without ever computing a square root.  Quadrant, sign, and reciprocal
 reductions extend the construction to the full normalized interval \([0,1]\)
-once \(\pi/4=\arctan(1)\) and the endpoint at \(t=1\) have been identified.
+once \(\pi/4=\arctan_{\mathrm{geom}}(1)\) and the endpoint at \(t=1\) have
+been identified.
 \end{definition}
 
 \begin{definition}[Sine and cosine from a circle-point algorithm]
