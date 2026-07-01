@@ -1134,6 +1134,14 @@ theorem chartAdd_normDen_pos (u v : Rat) :
   rw [chartAdd_normDen_eq]
   exact Rat.mul_pos (Stage.one_add_square_pos u) (Stage.one_add_square_pos v)
 
+theorem ratSquare_pos_of_ne_zero {x : Rat} (hx : x ≠ 0) :
+    0 < x * x := by
+  by_cases hpos : 0 < x
+  · exact Rat.mul_pos hpos hpos
+  · have hneg : 0 < -x := by grind
+    have hs : 0 < (-x) * (-x) := Rat.mul_pos hneg hneg
+    grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
 theorem chartAdd_cosNum_eq (u v : Rat) :
     chartAddCosNum u v =
       (1 - u * u) * (1 - v * v) - (2 * u) * (2 * v) := by
@@ -1173,6 +1181,101 @@ theorem composedSin_chartAdd_denominator_cleared (u v : Rat) :
   have hdvne : 1 + v * v ≠ 0 := Rat.ne_of_gt hdvpos
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem chartPair_cos_denominator_cleared {a b : Rat} (ha : a ≠ 0) :
+    (a * a + b * b) *
+      ((1 - (b / a) * (b / a)) / (1 + (b / a) * (b / a))) =
+      a * a - b * b := by
+  simp [Rat.div_def]
+  have haa : a * a ≠ 0 := Rat.ne_of_gt (ratSquare_pos_of_ne_zero ha)
+  have hzpos :
+      0 < 1 + (b * a⁻¹) * (b * a⁻¹) :=
+    Stage.one_add_square_pos (b * a⁻¹)
+  have hzne : 1 + (b * a⁻¹) * (b * a⁻¹) ≠ 0 :=
+    Rat.ne_of_gt hzpos
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem chartPair_sin_denominator_cleared {a b : Rat} (ha : a ≠ 0) :
+    (a * a + b * b) *
+      ((2 * (b / a)) / (1 + (b / a) * (b / a))) =
+      2 * b * a := by
+  simp [Rat.div_def]
+  have haa : a * a ≠ 0 := Rat.ne_of_gt (ratSquare_pos_of_ne_zero ha)
+  have hzpos :
+      0 < 1 + (b * a⁻¹) * (b * a⁻¹) :=
+    Stage.one_add_square_pos (b * a⁻¹)
+  have hzne : 1 + (b * a⁻¹) * (b * a⁻¹) ≠ 0 :=
+    Rat.ne_of_gt hzpos
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem cos_chartAdd_denominator_cleared {u v : Rat}
+    (hden : Ne (chartAddDen u v) 0) :
+    chartAddNormDen u v * cos (chartAddParameter u v) =
+      chartAddCosNum u v := by
+  simpa [chartAddNormDen, chartAddCosNum, chartAddParameter, sq, cos,
+    point, Stage.point] using
+    (chartPair_cos_denominator_cleared
+      (a := chartAddDen u v) (b := chartAddNum u v) hden)
+
+theorem sin_chartAdd_denominator_cleared {u v : Rat}
+    (hden : Ne (chartAddDen u v) 0) :
+    chartAddNormDen u v * sin (chartAddParameter u v) =
+      chartAddSinNum u v := by
+  simpa [chartAddNormDen, chartAddSinNum, chartAddParameter, sq, sin,
+    point, Stage.point, Rat.mul_assoc] using
+    (chartPair_sin_denominator_cleared
+      (a := chartAddDen u v) (b := chartAddNum u v) hden)
+
+theorem rat_eq_of_pos_mul_eq_mul {a b c : Rat} (hc : 0 < c)
+    (h : c * a = c * b) : a = b := by
+  have hcne : c ≠ 0 := Rat.ne_of_gt hc
+  calc
+    a = c⁻¹ * (c * a) := by
+      have hcancel : c⁻¹ * c = 1 := Rat.inv_mul_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = c⁻¹ * (c * b) := by rw [h]
+    _ = b := by
+      have hcancel : c⁻¹ * c = 1 := Rat.inv_mul_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem composedCos_eq_cos_chartAdd {u v : Rat}
+    (hden : Ne (chartAddDen u v) 0) :
+    composedCos u v = cos (chartAddParameter u v) := by
+  apply rat_eq_of_pos_mul_eq_mul
+    (c := chartAddNormDen u v) (chartAdd_normDen_pos u v)
+  calc
+    chartAddNormDen u v * composedCos u v =
+        ((1 + u * u) * (1 + v * v)) * composedCos u v := by
+      rw [chartAdd_normDen_eq]
+    _ = chartAddCosNum u v :=
+      composedCos_chartAdd_denominator_cleared u v
+    _ = chartAddNormDen u v * cos (chartAddParameter u v) := by
+      rw [cos_chartAdd_denominator_cleared hden]
+
+theorem composedSin_eq_sin_chartAdd {u v : Rat}
+    (hden : Ne (chartAddDen u v) 0) :
+    composedSin u v = sin (chartAddParameter u v) := by
+  apply rat_eq_of_pos_mul_eq_mul
+    (c := chartAddNormDen u v) (chartAdd_normDen_pos u v)
+  calc
+    chartAddNormDen u v * composedSin u v =
+        ((1 + u * u) * (1 + v * v)) * composedSin u v := by
+      rw [chartAdd_normDen_eq]
+    _ = chartAddSinNum u v :=
+      composedSin_chartAdd_denominator_cleared u v
+    _ = chartAddNormDen u v * sin (chartAddParameter u v) := by
+      rw [sin_chartAdd_denominator_cleared hden]
+
+theorem composedPoint_eq_point_chartAdd {u v : Rat}
+    (hden : Ne (chartAddDen u v) 0) :
+    composedPoint u v = point (chartAddParameter u v) := by
+  cases hcp : composedPoint u v
+  simp [point_eq] at *
+  constructor
+  · simpa [composedCos, hcp] using composedCos_eq_cos_chartAdd hden
+  · simpa [composedSin, hcp] using composedSin_eq_sin_chartAdd hden
 
 theorem composed_cos_sq_add_sin_sq (u v : Rat) :
     sq (composedCos u v) + sq (composedSin u v) = 1 := by
@@ -1725,6 +1828,15 @@ structure BasicIdentityPackage : Prop where
     forall u v : Rat,
       ((1 + u * u) * (1 + v * v)) * composedSin u v =
         chartAddSinNum u v
+  chart_add_cos :
+    forall u v : Rat, Ne (chartAddDen u v) 0 ->
+      composedCos u v = cos (chartAddParameter u v)
+  chart_add_sin :
+    forall u v : Rat, Ne (chartAddDen u v) 0 ->
+      composedSin u v = sin (chartAddParameter u v)
+  chart_add_point :
+    forall u v : Rat, Ne (chartAddDen u v) 0 ->
+      composedPoint u v = point (chartAddParameter u v)
   add_cos_comm : forall u v : Rat, composedCos u v = composedCos v u
   add_sin_comm : forall u v : Rat, composedSin u v = composedSin v u
   add_cos_zero_left : forall u : Rat, composedCos 0 u = cos u
@@ -1853,6 +1965,9 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   chart_add_sin_num := chartAdd_sinNum_eq
   chart_add_cos_denominator_cleared := composedCos_chartAdd_denominator_cleared
   chart_add_sin_denominator_cleared := composedSin_chartAdd_denominator_cleared
+  chart_add_cos := fun _ _ h => composedCos_eq_cos_chartAdd h
+  chart_add_sin := fun _ _ h => composedSin_eq_sin_chartAdd h
+  chart_add_point := fun _ _ h => composedPoint_eq_point_chartAdd h
   add_cos_comm := composedCos_comm
   add_sin_comm := composedSin_comm
   add_cos_zero_left := composedCos_zero_left

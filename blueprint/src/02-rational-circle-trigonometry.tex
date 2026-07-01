@@ -810,6 +810,13 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_sinNum_eq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_chartAdd_denominator_cleared}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartPair_cos_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartPair_sin_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_eq_cos_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_eq_sin_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedPoint_eq_point_chartAdd}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.double_cos_eq_sq_sub_sq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.double_sin_eq_two_mul}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_tan_sq_eq_sec_sq}
@@ -995,6 +1002,11 @@ identity package to be proved for the projected functions.
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_normDen_eq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_chartAdd_denominator_cleared}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_eq_cos_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_eq_sin_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedPoint_eq_point_chartAdd}
 \uses{rem:rational-circle-point}
 \leanok
 Let
@@ -1021,8 +1033,12 @@ together with
 \[
   (1-uv)^2+(u+v)^2=(1+u^2)(1+v^2).
 \]
-The remaining normalized chart statement is the division step identifying this
-with \(P((u+v)/(1-uv))\) away from \(1-uv=0\).
+Lean now also carries out the normalization division: when \(1-uv\ne0\), the
+composed point is exactly
+\[
+  P(u)\cdot P(v)=P\!\left(\frac{u+v}{1-uv}\right).
+\]
+The missing-point case \(1-uv=0\) is the expected projective chart transition.
 \end{theorem}
 
 \begin{theorem}[Projected addition formulas]
