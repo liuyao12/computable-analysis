@@ -220,6 +220,20 @@ arguments.
   `z^2` and `z^3 + 2z` around the unit square and check overlap with zero at
   stages `10`, `100`, and `1000`.
 
+## Algebraic Numbers and FTA
+
+- The algebraic-number layer is now proof-honest: exact rational-complex
+  algebraic numbers and exact roots of unity are formalized, while arithmetic
+  closure and algebraic closure are explicit targets rather than theorem
+  placeholders.  See `AlgebraicComplex.MulRawValid`,
+  `AlgebraicComplex.add_annihilator_exists`,
+  `AlgebraicComplex.neg_annihilator_exists`,
+  `AlgebraicComplex.mul_annihilator_exists`,
+  `AlgebraicComplex.inv_exists`, and `AlgPoly.exists_root`.
+- Next finite algebra target: prove `ComplexRaw.mul` preserves validity, then
+  use resultant-style rational polynomial transformations to supply the
+  addition, negation, and multiplication annihilator witnesses.
+
 ## First-Year Calculus Course
 
 The course layer should avoid broad classical theorem dependencies such as IVT

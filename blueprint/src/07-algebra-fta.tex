@@ -35,6 +35,33 @@ rational-complex annihilating polynomial.  The intended mature version also
 stores enough isolation data to make arithmetic and equality computable.
 \end{definition}
 
+\begin{definition}[Algebraic arithmetic targets]
+\label{def:algebraic-arithmetic-targets}
+\lean{ComputableAnalysis.AlgebraicComplex.addRaw}
+\lean{ComputableAnalysis.AlgebraicComplex.negRaw}
+\lean{ComputableAnalysis.AlgebraicComplex.mulRaw}
+\lean{ComputableAnalysis.AlgebraicComplex.addRaw_valid}
+\lean{ComputableAnalysis.AlgebraicComplex.negRaw_valid}
+\lean{ComputableAnalysis.AlgebraicComplex.MulRawValid}
+\lean{ComputableAnalysis.AlgebraicComplex.add_annihilator_exists}
+\lean{ComputableAnalysis.AlgebraicComplex.neg_annihilator_exists}
+\lean{ComputableAnalysis.AlgebraicComplex.mul_annihilator_exists}
+\lean{ComputableAnalysis.AlgebraicComplex.add}
+\lean{ComputableAnalysis.AlgebraicComplex.neg}
+\lean{ComputableAnalysis.AlgebraicComplex.mul}
+\lean{ComputableAnalysis.AlgebraicComplex.inv_exists}
+\lean{ComputableAnalysis.AlgPoly.exists_root}
+\uses{def:algebraic-complex}
+\leanok
+The arithmetic layer is deliberately conditional.  Lean proves validity for
+addition and negation of certified complex raw representatives.  Multiplication
+validity, annihilator construction for sums, negations, and products, inversion,
+and algebraic closure over algebraic coefficients are recorded as explicit
+target propositions.  The constructors \code{add}, \code{neg}, and \code{mul}
+therefore require those target witnesses as arguments instead of asserting
+unproved closure theorems.
+\end{definition}
+
 \section{Base cases}
 
 \begin{theorem}[Monic linear polynomials]\label{thm:monic-linear-root}

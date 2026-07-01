@@ -9,8 +9,9 @@ This file sets up the project-facing algebraic-number layer.
 The point is not to define algebraic numbers as an abstract completed field.
 An algebraic complex number is a certified `ComplexRaw` together with a
 nonzero rational polynomial that it satisfies.  Closure facts and algebraic
-closure over algebraic coefficients are theorem targets; the nontrivial
-algebraic proofs are intentionally left as `sorry` placeholders for now.
+closure over algebraic coefficients are recorded as explicit theorem targets
+until the project supplies the corresponding elimination and isolation
+algorithms.
 -/
 
 namespace ComputableAnalysis
@@ -155,9 +156,8 @@ theorem addRaw_valid (z w : AlgebraicComplex) : (addRaw z w).Valid := by
 theorem negRaw_valid (z : AlgebraicComplex) : (negRaw z).Valid := by
   exact ComplexRaw.neg_valid z.value.valid
 
-theorem mulRaw_valid (z w : AlgebraicComplex) : (mulRaw z w).Valid := by
-  -- Interval multiplication preserves validity.
-  sorry
+def MulRawValid (z w : AlgebraicComplex) : Prop :=
+  (mulRaw z w).Valid
 
 def addCert (z w : AlgebraicComplex) : ComplexCert where
   raw := addRaw z w
@@ -167,59 +167,61 @@ def negCert (z : AlgebraicComplex) : ComplexCert where
   raw := negRaw z
   valid := negRaw_valid z
 
-def mulCert (z w : AlgebraicComplex) : ComplexCert where
+def mulCert (z w : AlgebraicComplex) (hvalid : MulRawValid z w) :
+    ComplexCert where
   raw := mulRaw z w
-  valid := mulRaw_valid z w
+  valid := hvalid
 
 /-- Algebraic closure under addition, expressed as an annihilator-existence
 target for the concrete addition algorithm. -/
-theorem add_annihilator_exists (z w : AlgebraicComplex) :
-    Exists fun p : RatPoly.Coeffs =>
-      RatPoly.Nonzero p /\ ComplexRootWitness p (addCert z w) := by
-  -- Future proof: eliminate `z` and `w` using their rational annihilators,
-  -- e.g. through resultants or finite-dimensional algebra.
-  sorry
+def add_annihilator_exists (z w : AlgebraicComplex) : Prop :=
+  Exists fun p : RatPoly.Coeffs =>
+    RatPoly.Nonzero p /\ ComplexRootWitness p (addCert z w)
 
-theorem neg_annihilator_exists (z : AlgebraicComplex) :
-    Exists fun p : RatPoly.Coeffs =>
-      RatPoly.Nonzero p /\ ComplexRootWitness p (negCert z) := by
-  -- Future proof: transform the annihilator by `X |-> -X`.
-  sorry
+def neg_annihilator_exists (z : AlgebraicComplex) : Prop :=
+  Exists fun p : RatPoly.Coeffs =>
+    RatPoly.Nonzero p /\ ComplexRootWitness p (negCert z)
 
-theorem mul_annihilator_exists (z w : AlgebraicComplex) :
-    Exists fun p : RatPoly.Coeffs =>
-      RatPoly.Nonzero p /\ ComplexRootWitness p (mulCert z w) := by
-  -- Future proof: eliminate `z` and `w` using their rational annihilators.
-  sorry
+def mul_annihilator_exists
+    (z w : AlgebraicComplex) (hvalid : MulRawValid z w) : Prop :=
+  Exists fun p : RatPoly.Coeffs =>
+    RatPoly.Nonzero p /\ ComplexRootWitness p (mulCert z w hvalid)
 
-noncomputable def add (z w : AlgebraicComplex) : AlgebraicComplex :=
-  let h := add_annihilator_exists z w
+/-- Conditional constructor for a sum of algebraic complex numbers.  The proof
+argument is the still-missing elimination/resultant step. -/
+noncomputable def add (z w : AlgebraicComplex)
+    (h : add_annihilator_exists z w) : AlgebraicComplex :=
   { value := addCert z w
     annihilator := Classical.choose h
     nonzero_annihilator := (Classical.choose_spec h).1
     root_witness := (Classical.choose_spec h).2 }
 
-noncomputable def neg (z : AlgebraicComplex) : AlgebraicComplex :=
-  let h := neg_annihilator_exists z
+/-- Conditional constructor for negation.  The proof argument is the polynomial
+transform `X |-> -X`. -/
+noncomputable def neg (z : AlgebraicComplex)
+    (h : neg_annihilator_exists z) : AlgebraicComplex :=
   { value := negCert z
     annihilator := Classical.choose h
     nonzero_annihilator := (Classical.choose_spec h).1
     root_witness := (Classical.choose_spec h).2 }
 
-noncomputable def mul (z w : AlgebraicComplex) : AlgebraicComplex :=
-  let h := mul_annihilator_exists z w
-  { value := mulCert z w
+/-- Conditional constructor for a product.  Besides the elimination/resultant
+annihilator proof, it explicitly requires validity of complex interval
+multiplication for the two representatives. -/
+noncomputable def mul (z w : AlgebraicComplex)
+    (hvalid : MulRawValid z w)
+    (h : mul_annihilator_exists z w hvalid) : AlgebraicComplex :=
+  { value := mulCert z w hvalid
     annihilator := Classical.choose h
     nonzero_annihilator := (Classical.choose_spec h).1
     root_witness := (Classical.choose_spec h).2 }
 
 /-- Inversion closure is recorded relationally for now, since the project does
 not yet have a complex interval inverse algorithm packaged as `ComplexRaw`. -/
-theorem inv_exists (z : AlgebraicComplex) (hz : z.Nonzero) :
-    Exists fun w : AlgebraicComplex =>
-      (mul z w).Equiv (ofRat 1) := by
-  -- Future proof: use the reciprocal polynomial and an apartness certificate.
-  sorry
+def inv_exists (z : AlgebraicComplex) (_hz : z.Nonzero) : Prop :=
+  Exists fun w : AlgebraicComplex =>
+  Exists fun _hvalid : MulRawValid z w =>
+    (mulRaw z w).Equiv (ofRat 1).value.raw
 
 end AlgebraicComplex
 
@@ -392,11 +394,8 @@ def PositiveDegree (p : Coeffs) : Prop :=
 
 /-- Algebraic closure target: every positive-degree polynomial with algebraic
 complex coefficients has an algebraic complex root. -/
-theorem exists_root (p : Coeffs) (hp : PositiveDegree p) :
-    Exists fun z : AlgebraicComplex => Root p z := by
-  -- Future proof: reduce algebraic coefficients to rational data and adjoin a
-  -- root; no real-completeness or transcendental ambient field should be used.
-  sorry
+def exists_root (p : Coeffs) (_hp : PositiveDegree p) : Prop :=
+  Exists fun z : AlgebraicComplex => Root p z
 
 end AlgPoly
 
