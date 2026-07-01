@@ -828,6 +828,15 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_sin}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_cos}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_cos_sin}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_add_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_sub_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_add_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_sub_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_double_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_quarterComplementParameter}
 \uses{def:rational-circle-other-trig,thm:rational-circle-pythagorean}
 \leanok
 The rational-circle coordinates satisfy:
@@ -879,6 +888,11 @@ alternate double-coordinate formulas
 \]
 The subtraction formulas and the four product-to-sum identities are also
 formalized as rational equalities in the same package.
+The quotient identities for tangent and cotangent addition, subtraction, and
+double angle are formalized in denominator-cleared form; this keeps the
+necessary nonzero hypotheses explicit and avoids introducing partial quotient
+functions at this rational stage.  The quarter-complement cofunction formulas
+for \(\tan,\cot,\sec,\csc\) are also proved.
 \end{theorem}
 
 \begin{theorem}[Dyadic samples are circle samples]

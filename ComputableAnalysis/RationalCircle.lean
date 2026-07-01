@@ -1375,6 +1375,56 @@ theorem product_to_sum_cos_sin (u v : Rat) :
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm]
 
+theorem tan_add_denominator_cleared {u v : Rat}
+    (hcu : Ne (cos u) 0) (hcv : Ne (cos v) 0) :
+    (1 - tan u * tan v) * composedSin u v =
+      (tan u + tan v) * composedCos u v := by
+  rw [composed_sin_eq, composed_cos_eq]
+  unfold tan
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem tan_sub_denominator_cleared {u v : Rat}
+    (hcu : Ne (cos u) 0) (hcv : Ne (cos v) 0) :
+    (1 + tan u * tan v) * composedSin u (-v) =
+      (tan u - tan v) * composedCos u (-v) := by
+  rw [composed_sin_sub, composed_cos_sub]
+  unfold tan
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem cot_add_denominator_cleared {u v : Rat}
+    (hsu : Ne (sin u) 0) (hsv : Ne (sin v) 0) :
+    (cot u + cot v) * composedCos u v =
+      (cot u * cot v - 1) * composedSin u v := by
+  rw [composed_sin_eq, composed_cos_eq]
+  unfold cot
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem cot_sub_denominator_cleared {u v : Rat}
+    (hsu : Ne (sin u) 0) (hsv : Ne (sin v) 0) :
+    (cot v - cot u) * composedCos u (-v) =
+      (cot u * cot v + 1) * composedSin u (-v) := by
+  rw [composed_sin_sub, composed_cos_sub]
+  unfold cot
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem tan_double_denominator_cleared {u : Rat}
+    (hcu : Ne (cos u) 0) :
+    (1 - sq (tan u)) * doubleSin u =
+      (2 * tan u) * doubleCos u := by
+  rw [double_sin_eq_two_mul, double_cos_eq_sq_sub_sq]
+  unfold tan sq
+  rw [Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 theorem one_add_ne_zero_of_nonneg {u : Rat} (hu : 0 <= u) :
     Ne (1 + u) 0 := by
   grind
@@ -1404,6 +1454,30 @@ theorem sin_quarterComplementParameter {u : Rat}
   simp [quarterComplementParameter, cos, sin, point, Stage.point, Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg, Rat.mul_inv_cancel]
+
+theorem tan_quarterComplementParameter {u : Rat}
+    (hu : Ne (1 + u) 0) :
+    tan (quarterComplementParameter u) = cot u := by
+  unfold tan cot
+  rw [sin_quarterComplementParameter hu, cos_quarterComplementParameter hu]
+
+theorem cot_quarterComplementParameter {u : Rat}
+    (hu : Ne (1 + u) 0) :
+    cot (quarterComplementParameter u) = tan u := by
+  unfold tan cot
+  rw [sin_quarterComplementParameter hu, cos_quarterComplementParameter hu]
+
+theorem sec_quarterComplementParameter {u : Rat}
+    (hu : Ne (1 + u) 0) :
+    sec (quarterComplementParameter u) = csc u := by
+  unfold sec csc
+  rw [cos_quarterComplementParameter hu]
+
+theorem csc_quarterComplementParameter {u : Rat}
+    (hu : Ne (1 + u) 0) :
+    csc (quarterComplementParameter u) = sec u := by
+  unfold sec csc
+  rw [sin_quarterComplementParameter hu]
 
 theorem cos_quarterComplementParameter_of_nonneg {u : Rat}
     (hu : 0 <= u) :
@@ -1548,6 +1622,22 @@ structure BasicIdentityPackage : Prop where
   product_sum_cos_sin :
     forall u v : Rat,
       composedSin u v - composedSin u (-v) = 2 * cos u * sin v
+  tan_add :
+    forall u v : Rat, Ne (cos u) 0 -> Ne (cos v) 0 ->
+      (1 - tan u * tan v) * composedSin u v =
+        (tan u + tan v) * composedCos u v
+  tan_sub :
+    forall u v : Rat, Ne (cos u) 0 -> Ne (cos v) 0 ->
+      (1 + tan u * tan v) * composedSin u (-v) =
+        (tan u - tan v) * composedCos u (-v)
+  cot_add :
+    forall u v : Rat, Ne (sin u) 0 -> Ne (sin v) 0 ->
+      (cot u + cot v) * composedCos u v =
+        (cot u * cot v - 1) * composedSin u v
+  cot_sub :
+    forall u v : Rat, Ne (sin u) 0 -> Ne (sin v) 0 ->
+      (cot v - cot u) * composedCos u (-v) =
+        (cot u * cot v + 1) * composedSin u (-v)
   double_cos :
     forall u : Rat, doubleCos u = sq (cos u) - sq (sin u)
   double_cos_one_sub_two_sin_sq :
@@ -1558,6 +1648,9 @@ structure BasicIdentityPackage : Prop where
     forall u : Rat, doubleSin u = 2 * cos u * sin u
   double_sin_comm :
     forall u : Rat, doubleSin u = 2 * sin u * cos u
+  tan_double :
+    forall u : Rat, Ne (cos u) 0 ->
+      (1 - sq (tan u)) * doubleSin u = (2 * tan u) * doubleCos u
   cos_at_zero : cos 0 = 1
   sin_at_zero : sin 0 = 0
   cos_at_one : cos 1 = 0
@@ -1576,6 +1669,18 @@ structure BasicIdentityPackage : Prop where
   complement_sin :
     forall u : Rat, Ne (1 + u) 0 ->
       sin (quarterComplementParameter u) = cos u
+  complement_tan :
+    forall u : Rat, Ne (1 + u) 0 ->
+      tan (quarterComplementParameter u) = cot u
+  complement_cot :
+    forall u : Rat, Ne (1 + u) 0 ->
+      cot (quarterComplementParameter u) = tan u
+  complement_sec :
+    forall u : Rat, Ne (1 + u) 0 ->
+      sec (quarterComplementParameter u) = csc u
+  complement_csc :
+    forall u : Rat, Ne (1 + u) 0 ->
+      csc (quarterComplementParameter u) = sec u
   complement_cos_first_quadrant :
     forall u : Rat, 0 <= u ->
       cos (quarterComplementParameter u) = sin u
@@ -1627,11 +1732,21 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   product_sum_sin_sin := product_to_sum_sin_sin
   product_sum_sin_cos := product_to_sum_sin_cos
   product_sum_cos_sin := product_to_sum_cos_sin
+  tan_add := fun _ _ hcu hcv =>
+    tan_add_denominator_cleared hcu hcv
+  tan_sub := fun _ _ hcu hcv =>
+    tan_sub_denominator_cleared hcu hcv
+  cot_add := fun _ _ hsu hsv =>
+    cot_add_denominator_cleared hsu hsv
+  cot_sub := fun _ _ hsu hsv =>
+    cot_sub_denominator_cleared hsu hsv
   double_cos := double_cos_eq_sq_sub_sq
   double_cos_one_sub_two_sin_sq := double_cos_eq_one_sub_two_sin_sq
   double_cos_two_cos_sq_sub_one := double_cos_eq_two_cos_sq_sub_one
   double_sin := double_sin_eq_two_mul
   double_sin_comm := double_sin_eq_two_sin_mul_cos
+  tan_double := fun _ hcu =>
+    tan_double_denominator_cleared hcu
   cos_at_zero := cos_zero
   sin_at_zero := sin_zero
   cos_at_one := cos_one
@@ -1646,6 +1761,10 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   complement_one := quarterComplementParameter_one
   complement_cos := fun _ h => cos_quarterComplementParameter h
   complement_sin := fun _ h => sin_quarterComplementParameter h
+  complement_tan := fun _ h => tan_quarterComplementParameter h
+  complement_cot := fun _ h => cot_quarterComplementParameter h
+  complement_sec := fun _ h => sec_quarterComplementParameter h
+  complement_csc := fun _ h => csc_quarterComplementParameter h
   complement_cos_first_quadrant := fun _ h =>
     cos_quarterComplementParameter_of_nonneg h
   complement_sin_first_quadrant := fun _ h =>
