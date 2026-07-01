@@ -501,6 +501,24 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.fareyStages}
 \lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage}
 \lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage_length}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction.value}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction.zero}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction.one}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction.mediant}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction.value_zero}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction.value_one}
+\lean{ComputableAnalysis.RationalCircle.FareyCell}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.toRatInterval}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.mediant}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_length}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitStage}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_length}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_zero}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_one}
@@ -543,6 +561,13 @@ children inherit the same determinant.  Starting from the four edges
 \]
 therefore gives a full-circle Farey subdivision; after \(n\) refinements the
 edge list has length \(4\cdot2^n\).
+
+For computations restricted to the quarter-circle chart, Lean also keeps a
+finite \([0,1]\) Farey mesh whose cells remember numerator and denominator
+before taking rational values.  This is the common mesh used later for prefix
+integral sums: to compute up to \(x\), take all cells with right endpoint at
+or before \(x\) for the lower sum, and include the first cell crossing \(x\)
+for the upper sum.  The stage length is \(2^n\).
 \end{remark}
 
 \begin{remark}[What bisection refinement means]

@@ -1336,6 +1336,104 @@ theorem fullCircleFareyStage_length (n : Nat) :
   rw [fareyStages_length, fullCircleFareySeed_length]
   rw [Nat.mul_comm]
 
+/-- A finite Farey fraction.  We keep numerator and denominator explicit so
+mediants remain a primitive operation rather than a disguised arithmetic
+average of rationals. -/
+structure FareyFraction where
+  num : Nat
+  den : Nat
+  den_pos : 0 < den
+deriving Repr, DecidableEq
+
+namespace FareyFraction
+
+def value (q : FareyFraction) : Rat :=
+  (q.num : Rat) / (q.den : Rat)
+
+def zero : FareyFraction :=
+  { num := 0, den := 1, den_pos := by omega }
+
+def one : FareyFraction :=
+  { num := 1, den := 1, den_pos := by omega }
+
+def mediant (p q : FareyFraction) : FareyFraction :=
+  { num := p.num + q.num,
+    den := p.den + q.den,
+    den_pos := Nat.add_pos_left p.den_pos q.den }
+
+theorem value_zero : zero.value = 0 := by
+  native_decide
+
+theorem value_one : one.value = 1 := by
+  native_decide
+
+end FareyFraction
+
+/-- One cell in the global Farey subdivision of `[0,1]`. -/
+structure FareyCell where
+  left : FareyFraction
+  right : FareyFraction
+deriving Repr, DecidableEq
+
+namespace FareyCell
+
+def toRatInterval (cell : FareyCell) : Rat × Rat :=
+  (cell.left.value, cell.right.value)
+
+def mediant (cell : FareyCell) : FareyFraction :=
+  cell.left.mediant cell.right
+
+def leftChild (cell : FareyCell) : FareyCell :=
+  { left := cell.left, right := cell.mediant }
+
+def rightChild (cell : FareyCell) : FareyCell :=
+  { left := cell.mediant, right := cell.right }
+
+def subdivideList : List FareyCell -> List FareyCell
+  | [] => []
+  | cell :: rest => cell.leftChild :: cell.rightChild :: subdivideList rest
+
+theorem subdivideList_length (cells : List FareyCell) :
+    (subdivideList cells).length = 2 * cells.length := by
+  induction cells with
+  | nil => simp [subdivideList]
+  | cons cell rest ih =>
+      simp [subdivideList, ih]
+      omega
+
+end FareyCell
+
+/-- The shared Farey mesh on `[0,1]`, used for prefix-style computations. -/
+def fareyUnitSeed : List FareyCell :=
+  [ { left := FareyFraction.zero, right := FareyFraction.one } ]
+
+def fareyUnitSubdivide : List FareyCell -> List FareyCell :=
+  FareyCell.subdivideList
+
+def fareyUnitStage : Nat -> List FareyCell
+  | 0 => fareyUnitSeed
+  | n + 1 => fareyUnitSubdivide (fareyUnitStage n)
+
+theorem fareyUnitSeed_length : fareyUnitSeed.length = 1 := by
+  native_decide
+
+theorem fareyUnitSubdivide_length (cells : List FareyCell) :
+    (fareyUnitSubdivide cells).length = 2 * cells.length :=
+  FareyCell.subdivideList_length cells
+
+theorem fareyUnitStage_length (n : Nat) :
+    (fareyUnitStage n).length = 2 ^ n := by
+  induction n with
+  | zero =>
+      simp [fareyUnitStage, fareyUnitSeed_length]
+  | succ n ih =>
+      calc
+        (fareyUnitStage (n + 1)).length =
+            (fareyUnitSubdivide (fareyUnitStage n)).length := by rfl
+        _ = 2 * (fareyUnitStage n).length := fareyUnitSubdivide_length _
+        _ = 2 * 2 ^ n := by rw [ih]
+        _ = 2 ^ (n + 1) := by rw [Nat.pow_succ, Nat.mul_comm]
+
 def dyadicStage (n : Nat) : Stage :=
   { subdivisions := dyadicSubdivisions n }
 

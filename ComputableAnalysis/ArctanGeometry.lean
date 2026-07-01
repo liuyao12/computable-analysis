@@ -537,6 +537,74 @@ def integralSumInterval (intervals : List (Rat × Rat)) : QInterval :=
 def geometricSumInterval (intervals : List (Rat × Rat)) : QInterval :=
   { lo := geometricLowerSum intervals, hi := geometricUpperSum intervals }
 
+/-- Cells in the global Farey mesh whose right endpoint lies at or before
+`x`.  These give the lower prefix for the monotone arctangent kernel. -/
+def fareyLowerCellsUpTo
+    (x : Rat) : List RationalCircle.FareyCell -> List (Rat × Rat)
+  | [] => []
+  | cell :: rest =>
+      if cell.right.value <= x then
+        cell.toRatInterval :: fareyLowerCellsUpTo x rest
+      else
+        fareyLowerCellsUpTo x rest
+
+/-- Cells in the global Farey mesh whose left endpoint lies before `x`.
+This includes the first cell crossing `x`, hence gives the upper prefix. -/
+def fareyUpperCellsUpTo
+    (x : Rat) : List RationalCircle.FareyCell -> List (Rat × Rat)
+  | [] => []
+  | cell :: rest =>
+      if cell.left.value < x then
+        cell.toRatInterval :: fareyUpperCellsUpTo x rest
+      else
+        fareyUpperCellsUpTo x rest
+
+def fareyIntegralLowerPrefix
+    (x : Rat) (cells : List RationalCircle.FareyCell) : Rat :=
+  integralLowerSum (fareyLowerCellsUpTo x cells)
+
+def fareyIntegralUpperPrefix
+    (x : Rat) (cells : List RationalCircle.FareyCell) : Rat :=
+  integralUpperSum (fareyUpperCellsUpTo x cells)
+
+def fareyIntegralPrefixInterval
+    (x : Rat) (cells : List RationalCircle.FareyCell) : QInterval :=
+  { lo := fareyIntegralLowerPrefix x cells,
+    hi := fareyIntegralUpperPrefix x cells }
+
+/-- The finite Farey approximation to the integral over `[a,b]`, defined as
+a difference of global prefixes.  This is the bookkeeping advantage of a
+single mesh: adjacent interval additivity is built into the definition. -/
+def fareyIntegralBetweenInterval
+    (a b : Rat) (cells : List RationalCircle.FareyCell) : QInterval :=
+  { lo := fareyIntegralLowerPrefix b cells - fareyIntegralLowerPrefix a cells,
+    hi := fareyIntegralUpperPrefix b cells - fareyIntegralUpperPrefix a cells }
+
+def fareyIntegralStageInterval (a b : Rat) (n : Nat) : QInterval :=
+  fareyIntegralBetweenInterval a b (RationalCircle.fareyUnitStage n)
+
+def fareyIntegralPrefixStageInterval (x : Rat) (n : Nat) : QInterval :=
+  fareyIntegralPrefixInterval x (RationalCircle.fareyUnitStage n)
+
+theorem fareyIntegralBetweenInterval_add
+    (a b c : Rat) (cells : List RationalCircle.FareyCell) :
+    fareyIntegralBetweenInterval a c cells =
+      QInterval.addInterval
+        (fareyIntegralBetweenInterval a b cells)
+        (fareyIntegralBetweenInterval b c cells) := by
+  unfold fareyIntegralBetweenInterval QInterval.addInterval
+  simp
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+theorem fareyIntegralStageInterval_add
+    (a b c : Rat) (n : Nat) :
+    fareyIntegralStageInterval a c n =
+      QInterval.addInterval
+        (fareyIntegralStageInterval a b n)
+        (fareyIntegralStageInterval b c n) := by
+  unfold fareyIntegralStageInterval
+  exact fareyIntegralBetweenInterval_add a b c _
+
 theorem integralLowerSum_le_geometricLowerSum
     (intervals : List (Rat × Rat))
     (hwf : NonnegativeIntervals intervals) :

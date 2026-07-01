@@ -196,6 +196,16 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.intervalSquareSum}
+\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo}
+\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUpperPrefix}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenInterval}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralStageInterval}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenInterval_add}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralStageInterval_add}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellWidth_le_two_square}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_width_le_two_squareSum}
@@ -294,6 +304,16 @@ lower and upper bounds are exactly the corresponding geometric sums.  Thus the
 rectangle-sum interval contains, and overlaps, the actual \code{arctanGeom}
 stage interval.  The rectangle-sum intervals are themselves ordered and nested
 along the actual arctangent loop.
+
+Lean now also has the global Farey-prefix version of the same finite
+rectangle sums.  At a fixed Farey stage, the lower prefix up to \(x\) uses the
+cells whose right endpoint is \(\le x\), while the upper prefix uses the cells
+whose left endpoint is \(<x\), thereby including the first cell that crosses
+\(x\).  The approximation to \(\int_a^b du/(1+u^2)\) is then defined as a
+difference of two prefixes.  This makes finite adjacent additivity exact:
+the theorem \code{fareyIntegralStageInterval\_add} proves that the stage
+interval for \([a,c]\) is the interval sum of the stages for \([a,b]\) and
+\([b,c]\).
 
 For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
 estimate needed for validity.  The sum of squared cell lengths is exactly
