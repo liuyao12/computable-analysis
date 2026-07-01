@@ -111,6 +111,15 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_prefix}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
@@ -320,8 +329,8 @@ whether the corresponding \(\pi\)-formula has been connected back to
 
 The current score is:
 \[
-  \text{definitions completed}=6/15,\qquad
-  \text{equivalences to \code{piCircleArea} formalized}=2/14
+  \text{definitions completed}=7/16,\qquad
+  \text{equivalences to \code{piCircleArea} formalized}=2/15
   \text{ applicable rows}.
 \]
 
@@ -361,6 +370,12 @@ Domain-aware \code{ConstructionFor} packaging of midpoint rectangle sums for
 \(\int_0^1 dt/(1+t^2)\), using the same rational refinement schedule as
 \code{arctanGeom(1)}. &
 \(\checkmark\) & \(\checkmark\)\\
+\code{4 * arctanIntegralFareyFor(1)} &
+\cref{thm:finite-arctan-integral-comparison};
+\cref{thm:arctan-integral-pi} &
+Domain-aware \code{ConstructionFor} packaging of the global Farey-prefix
+integral \(I(0,1)\), equivalent to \(4\,\code{fareyIntegralPrefixRaw(1)}\). &
+\(\checkmark\) & \(\times\)\\
 \code{4 * arctanIntegral(1)} &
 \cref{def:arctan-integral}; \cref{thm:arctan-integral-pi} &
 Integral arctangent, \(4\int_0^1 dt/(1+t^2)\). &
@@ -433,14 +448,17 @@ identity proving the branch value at \(i\). &
 \end{center}
 
 The arctangent block records the geometric, integral-rectangle,
-general-integral, power-series, and Machin routes whose \(\pi\)-comparison goes
-through the quarter-turn arctangent value.  The power-series row is
+Farey-prefix integral, general-integral, power-series, and Machin routes whose
+\(\pi\)-comparison goes through the quarter-turn arctangent value.  The
+power-series row is
 deliberately named \code{4 * arctanSeries(1)}; the Leibniz series is its
 historical expansion.  The
-concrete rectangle row is completed; the general \code{arctanIntegral(1)} row
-remains pending until the older nonnegative point-Riemann wrapper is identified
-with the domain-aware rectangle schedule.  The unit-branch integral interface
-is already completed through
+concrete rectangle row is completed.  The Farey-prefix row is definition
+complete, but its equivalence remains pending until the shared-Farey-mesh
+integral is compared with the geometric sector arctangent.  The general
+\code{arctanIntegral(1)} row remains pending until the older nonnegative
+point-Riemann wrapper is identified with the domain-aware rectangle schedule.
+The unit-branch integral interface is already completed through
 \code{PiProofs.piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
 The logarithm-at-\(i\) block records a separate family of future computations:
 each one should identify \(\log(i)=i\pi/2\) using a different definition or

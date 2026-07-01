@@ -299,6 +299,14 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_betweenRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_prefix}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_prefix}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
@@ -404,6 +412,14 @@ also packages the same construction as the unit-branch integral arctangent
 agreement on \(0\le x\le1\).  The remaining cleanup is to identify the older
 nonnegative point-Riemann \code{arctanIntegral(1)} API with this
 domain-aware schedule, or replace that older API throughout.
+
+The global Farey-prefix algorithm is also packaged as a
+\code{ConstructionFor}: \code{arctanIntegralFareyFor(x)} uses
+\code{fareyIntegralBetweenRaw(0,x)}, is verified for every rational \(x\),
+and is equivalent to the prefix raw real \code{fareyIntegralPrefixRaw(x)}.
+This gives a second verified integral-style arctangent computation, with the
+remaining comparison target being the mesh-independent equivalence to the
+geometric sector arctangent.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]
@@ -413,6 +429,9 @@ domain-aware schedule, or replace that older API throughout.
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_geom_agreement}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_function_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}
@@ -436,6 +455,11 @@ integral-style pi route:
 Equivalently, the unit-branch construction
 \code{arctanIntegralRectangleUnitData} gives the table-facing theorem
 \code{piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
+The Farey-prefix construction gives another verified pi computation,
+\code{piFromArctanIntegralFareyAtOne}, and Lean proves that it is equivalent
+to \(4\,\code{fareyIntegralPrefixRaw(1)}\).  Its comparison with
+\(\pi_{\mathrm{area}}\) remains the mesh-independent arctangent-integral
+bridge.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}

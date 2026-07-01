@@ -24,8 +24,8 @@ For formula rows that compute a related quantity first, such as `zeta(2)` or
 algorithm is verified, while the equivalence column records whether the pi
 formula has been connected back to `piCircleArea`.
 
-Current count: definitions completed `6/15`; equivalences to `piCircleArea`
-formalized `2/14` applicable rows.  The baseline row `piCircleArea` is `N/A`
+Current count: definitions completed `7/16`; equivalences to `piCircleArea`
+formalized `2/15` applicable rows.  The baseline row `piCircleArea` is `N/A`
 for equivalence scorekeeping.  The rendered scoreboard is in
 [Ch. 8: pi scoreboard](https://liuyao12.github.io/computable-analysis/sect0005.html#sec:pi-scoreboard),
 and the blueprint-links column points to the relevant generated blueprint
@@ -38,6 +38,7 @@ anchors for each computation.
 | **Arctangent routes** | [geometric `arctanGeom`](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral arctangent](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [`arctanSeries`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [`arctanSeries(1)` area bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [`piMachin` agreement](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | This block contains pi routes that first compute arctangent values and then multiply or combine them to get pi: `4 * arctanGeom(1)`, the arctangent integral rows, `4 * arctanSeries(1)`, and `piMachin`.  The Leibniz series is counted only as the endpoint expansion of `arctanSeries(1)`.  `piMachin` belongs here because its first bridge is agreement with `4 * arctanSeries(1)`. |  |  |
 | `4 * arctanGeom(1)` | [geometric arctangent](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [`4 * arctanGeom(1)` to area pi](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | Geometric sector-area arctangent at slope `1`; it has stage equality with `piCircleArea`. | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [finite rectangle comparison](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [integral pi target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | Domain-aware `ConstructionFor` packaging of midpoint rectangle sums for `integral_0^1 dt / (1 + t^2)`, using the same rational refinement schedule as `arctanGeom(1)`. | ✓ | ✓ |
+| `4 * arctanIntegralFareyFor(1)` | [finite Farey-prefix comparison](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [integral pi target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | Domain-aware `ConstructionFor` packaging of the global Farey-prefix integral `I(0,1)`, equivalent to `4 * fareyIntegralPrefixRaw(1)`. | ✓ | ✗ |
 | `4 * arctanIntegral(1)` | [arctangent integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [integral pi target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | Integral arctangent, `4 * integral_0^1 dt / (1 + t^2)`. | ✗ | ✗ |
 | `4 * arctanSeries(1)` | [`arctanSeries`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [`arctanSeries(1)` endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [area comparison target](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | Power-series arctangent at `1`; at this endpoint its alternating expansion is the historical Leibniz series. | ✓ | ✗ |
 | `piMachin` | [`arctanSeries`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [Machin tangent identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [`piMachin` to `4 * arctanSeries(1)`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | Machin's arctangent-series computation, `4 * (4 * arctanSeries(1/5) - arctanSeries(1/239))`; it is grouped with the arctangent routes because its comparison first passes through `4 * arctanSeries(1)`. | ✓ | ✗ |
@@ -75,7 +76,12 @@ generally as `ArctanGeometry.arctanIntegralRectangleRaw_valid` and
 unit branch.  The same fact is packaged as the function-level agreements
 `IntegralIdentities.arctanIntegralRectangleFunctionAgreement` and
 `IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement`.  The
-scoreboard row records the specialization needed for pi.
+scoreboard row records the specialization needed for pi.  The Farey-prefix
+integral route is now also definition-complete as
+`PiProofs.piFromArctanIntegralFareyAtOne_valid`, and Lean identifies it with
+`4 * fareyIntegralPrefixRaw(1)` via
+`PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one`; its
+equivalence to `piCircleArea` is still pending.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced

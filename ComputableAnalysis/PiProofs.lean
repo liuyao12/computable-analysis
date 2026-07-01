@@ -6255,6 +6255,33 @@ theorem piCircleArea_equiv_piMachin_of_powerSeriesRectangleKernelAtMachinInputs
     (piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs
       hps hgeom)
 
+def piFromArctanIntegralFareyAtOne : RealRaw :=
+  IntegralIdentities.PiFromArctanIntegral
+    (IntegralIdentities.arctanIntegralFareyFor (1 : Rat))
+
+theorem piFromArctanIntegralFareyAtOne_valid :
+    piFromArctanIntegralFareyAtOne.Valid := by
+  unfold piFromArctanIntegralFareyAtOne
+    IntegralIdentities.PiFromArctanIntegral
+  exact RealRaw.scaleRat_valid_of_nonneg
+    (by native_decide : (0 : Rat) <= 4)
+    (IntegralIdentities.arctanIntegralFareyFor_valid (1 : Rat))
+
+theorem piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one :
+    piFromArctanIntegralFareyAtOne.Equiv
+      (((4 : Nat) *
+        ArctanGeometry.fareyIntegralPrefixRaw (1 : Rat) : RealRaw)) := by
+  unfold piFromArctanIntegralFareyAtOne
+    IntegralIdentities.PiFromArctanIntegral
+  change
+    (RealRaw.scaleRat (4 : Rat)
+      (IntegralIdentities.arctanIntegralFareyFor (1 : Rat))).Equiv
+      (RealRaw.scaleRat (4 : Rat)
+        (ArctanGeometry.fareyIntegralPrefixRaw (1 : Rat)))
+  exact RealRaw.scaleRat_equiv_of_nonneg
+    (by native_decide : (0 : Rat) <= 4)
+    (IntegralIdentities.arctanIntegralFareyFor_equiv_prefix (1 : Rat))
+
 theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (((4 : Nat) *
         ArctanGeometry.arctanIntegralRectangleRawAtOne : RealRaw).Equiv

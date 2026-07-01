@@ -428,6 +428,68 @@ theorem arctanIntegralRectangleUnitComputes_one :
   arctanIntegralRectangleUnitComputes
     (1 : Rat) (by native_decide) (by native_decide)
 
+/-- The global Farey-prefix construction for
+`∫_0^x dt / (1 + t^2)`, packaged as a domain-aware integral construction.
+Unlike the rectangle route, this uses one shared Farey mesh for all endpoints
+and then subtracts prefixes. -/
+def arctanIntegralFareyConstruction
+    (x : Rat) : Integral.ConstructionFor (arctanKernelInterval x) where
+  compute := (ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute
+  certificate := ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x
+
+def arctanIntegralFareyFor (x : Rat) : RealRaw :=
+  Integral.integralFor (arctanKernelInterval x)
+    (arctanIntegralFareyConstruction x)
+
+theorem arctanIntegralFareyFor_valid (x : Rat) :
+    (arctanIntegralFareyFor x).Valid := by
+  change RealRaw.ValidCompute
+    ((ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute)
+  exact ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x
+
+theorem arctanIntegralFareyFor_compute_eq (x : Rat) (n : Nat) :
+    (arctanIntegralFareyFor x).compute n =
+      (ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute n := rfl
+
+theorem arctanIntegralFareyFor_equiv_betweenRaw (x : Rat) :
+    (arctanIntegralFareyFor x).Equiv
+      (ArctanGeometry.fareyIntegralBetweenRaw 0 x) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanIntegralFareyFor x)
+    (ArctanGeometry.fareyIntegralBetweenRaw 0 x) n n).2
+  rw [arctanIntegralFareyFor_compute_eq]
+  have hordered :=
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x).1 n
+  have hle :
+      ((ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute n).lo <=
+        ((ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute n).hi := by
+    unfold QInterval.width at hordered
+    grind [Rat.sub_eq_add_neg]
+  exact ⟨hle, hle⟩
+
+theorem arctanIntegralFareyFor_equiv_prefix (x : Rat) :
+    (arctanIntegralFareyFor x).Equiv
+      (ArctanGeometry.fareyIntegralPrefixRaw x) := by
+  exact RealRaw.equiv_trans
+    (arctanIntegralFareyFor_valid x)
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x)
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid x)
+    (arctanIntegralFareyFor_equiv_betweenRaw x)
+    (ArctanGeometry.fareyIntegralBetweenRaw_zero_left_equiv_prefix x)
+
+def arctanIntegralFareyUnitData : ArctanIntegralUnitData where
+  constructionAt := fun x _hx0 _hx1 => arctanIntegralFareyConstruction x
+
+theorem arctanIntegralFareyUnit_equiv_prefix
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralUnit x
+      (arctanIntegralFareyUnitData.constructionAt x hx0 hx1)).Equiv
+        (ArctanGeometry.fareyIntegralPrefixRaw x) := by
+  simpa [arctanIntegralUnit, arctanIntegralFareyUnitData,
+    arctanIntegralFareyFor] using
+    arctanIntegralFareyFor_equiv_prefix x
+
 /-- The verified rectangle-sum construction for
 `∫_0^1 dt / (1 + t^2)`, packaged as a `ConstructionFor` on the arctangent
 kernel interval. -/
