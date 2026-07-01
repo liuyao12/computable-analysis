@@ -1488,6 +1488,101 @@ theorem fareyIntegralPrefixRaw_valid (x : Rat) :
     · exact fareyIntegralPrefixStageInterval_nested x
     · exact fareyIntegralPrefixStageInterval_widthsShrink x
 
+/-- Verified raw integral over `[a,b]` from the global Farey prefix
+construction.  The stage-level `fareyIntegralStageInterval` keeps exact
+finite additivity; this raw wrapper uses interval subtraction so validity is
+immediate from the two verified prefix raws. -/
+def fareyIntegralBetweenRaw (a b : Rat) : RealRaw :=
+  fareyIntegralPrefixRaw b - fareyIntegralPrefixRaw a
+
+theorem fareyIntegralBetweenRaw_valid (a b : Rat) :
+    (fareyIntegralBetweenRaw a b).Valid := by
+  unfold fareyIntegralBetweenRaw
+  exact RealRaw.sub_valid
+    (fareyIntegralPrefixRaw_valid b)
+    (fareyIntegralPrefixRaw_valid a)
+
+theorem fareyIntegralBetweenRaw_compute_eq_subInterval
+    (a b : Rat) (n : Nat) :
+    (fareyIntegralBetweenRaw a b).compute n =
+      QInterval.subInterval
+        (fareyIntegralPrefixStageInterval b n)
+        (fareyIntegralPrefixStageInterval a n) := by
+  rfl
+
+theorem fareyIntegralBetweenRaw_compute_contains_stageInterval
+    (a b : Rat) (n : Nat) :
+    ((fareyIntegralBetweenRaw a b).compute n).ContainsInterval
+      (fareyIntegralStageInterval a b n) := by
+  have haOrdered := fareyIntegralPrefixStageInterval_ordered a n
+  unfold QInterval.ContainsInterval
+  rw [fareyIntegralBetweenRaw_compute_eq_subInterval]
+  unfold fareyIntegralPrefixStageInterval fareyIntegralPrefixInterval at haOrdered ⊢
+  unfold QInterval.width at haOrdered
+  unfold QInterval.subInterval fareyIntegralStageInterval
+    fareyIntegralBetweenInterval
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem fareyIntegralBetweenRaw_width_le_six_div_succ
+    (a b : Rat) (n : Nat) :
+    ((fareyIntegralBetweenRaw a b).compute n).width <=
+      (6 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  have ha :=
+    fareyIntegralPrefixStageInterval_width_le_three_div_succ a n
+  have hb :=
+    fareyIntegralPrefixStageInterval_width_le_three_div_succ b n
+  rw [fareyIntegralBetweenRaw_compute_eq_subInterval]
+  unfold QInterval.subInterval QInterval.width
+  calc
+    (fareyIntegralPrefixStageInterval b n).hi -
+          (fareyIntegralPrefixStageInterval a n).lo -
+        ((fareyIntegralPrefixStageInterval b n).lo -
+          (fareyIntegralPrefixStageInterval a n).hi)
+        =
+      (fareyIntegralPrefixStageInterval b n).width +
+        (fareyIntegralPrefixStageInterval a n).width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+    _ <=
+      (3 : Rat) / (((n + 1 : Nat) : Rat)) +
+        (3 : Rat) / (((n + 1 : Nat) : Rat)) :=
+        rat_add_le_add hb ha
+    _ = (6 : Rat) / (((n + 1 : Nat) : Rat)) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm]
+
+private theorem qinterval_sub_add_sub_overlaps_sub
+    {A B C : QInterval}
+    (hA : 0 <= A.width) (hB : 0 <= B.width) (hC : 0 <= C.width) :
+    QInterval.Overlaps
+      (QInterval.addInterval (QInterval.subInterval B A)
+        (QInterval.subInterval C B))
+      (QInterval.subInterval C A) := by
+  unfold QInterval.width at hA hB hC
+  unfold QInterval.Overlaps QInterval.addInterval QInterval.subInterval
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem fareyIntegralBetweenRaw_additive
+    (a b c : Rat) :
+    (fareyIntegralBetweenRaw a b + fareyIntegralBetweenRaw b c).Equiv
+      (fareyIntegralBetweenRaw a c) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (fareyIntegralBetweenRaw a b + fareyIntegralBetweenRaw b c)
+    (fareyIntegralBetweenRaw a c) n n).2
+  have haOrdered := fareyIntegralPrefixStageInterval_ordered a n
+  have hbOrdered := fareyIntegralPrefixStageInterval_ordered b n
+  have hcOrdered := fareyIntegralPrefixStageInterval_ordered c n
+  have hover :=
+    qinterval_sub_add_sub_overlaps_sub
+      (A := fareyIntegralPrefixStageInterval a n)
+      (B := fareyIntegralPrefixStageInterval b n)
+      (C := fareyIntegralPrefixStageInterval c n)
+      haOrdered hbOrdered hcOrdered
+  simpa [fareyIntegralBetweenRaw_compute_eq_subInterval,
+    RealRaw.addCompute, QInterval.addInterval] using hover
+
 theorem integralSumInterval_contains_geometricSumInterval
     (intervals : List (Rat × Rat))
     (hwf : NonnegativeIntervals intervals) :

@@ -234,6 +234,12 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_widthsShrink}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_compute_eq_subInterval}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_compute_contains_stageInterval}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_width_le_six_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_additive}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
@@ -351,7 +357,15 @@ gives the concrete bound
   \operatorname{width}(F_n(x))\le \frac{3}{n+1}
 \]
 for the Farey prefix interval \(F_n(x)\), and therefore the raw prefix
-algorithm \code{fareyIntegralPrefixRaw(x)} is now verified.
+algorithm \code{fareyIntegralPrefixRaw(x)} is now verified.  Lean then wraps
+the interval \([a,b]\) as
+\code{fareyIntegralBetweenRaw(a,b)=fareyIntegralPrefixRaw(b)-
+fareyIntegralPrefixRaw(a)}.  This verified raw interval contains the exact
+same-stage prefix-difference interval, has width at most \(6/(n+1)\), and
+satisfies adjacent additivity up to raw-real equivalence:
+\[
+  I(a,b)+I(b,c)\sim I(a,c).
+\]
 
 For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
 estimate needed for validity.  The sum of squared cell lengths is exactly
