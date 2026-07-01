@@ -584,8 +584,16 @@ domain data.
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_one}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_half}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_half}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cosRaw_half_equiv}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sinRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tanRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cotRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.secRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cscRaw_half_equiv}
 \uses{def:rational-circle-sin-cos}
 \leanok
 In the rational slope chart \(u=\tan(\theta/2)\), the endpoint values are
@@ -594,24 +602,36 @@ In the rational slope chart \(u=\tan(\theta/2)\), the endpoint values are
 \]
 The first nontrivial rational sample is
 \[
-  c(1/2)=3/5,\qquad s(1/2)=4/5.
+  c(1/2)=3/5,\qquad s(1/2)=4/5,
 \]
-The same values are also recorded as exact raw-real equivalences for
-\code{cosRaw} and \code{sinRaw}.  These are not yet the usual angle special
-values: \(u=1/2\) is a Pythagorean-circle sample, not \(45^\circ\).
+with
+\[
+  \tan(1/2)=4/3,\quad \cot(1/2)=3/4,\quad
+  \sec(1/2)=5/3,\quad \csc(1/2)=5/4.
+\]
+The same values are also recorded as exact raw-real equivalences for the
+corresponding raw functions.  These are not yet the usual angle special values:
+\(u=1/2\) is a Pythagorean-circle sample, not \(45^\circ\).
 \end{theorem}
 
 \begin{definition}[Geometric special-value targets]
 \label{def:geometric-trig-special-values}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleValueTargets}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeHalfValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeThirdValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveHalfValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveQuarterValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtyValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSixtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixtyValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtySixSquareValue}
@@ -627,9 +647,15 @@ For the normalized angle input \(t\), the geometric functions should satisfy
 \]
 The equilateral-triangle values are recorded as
 \[
-  \sin(30^\circ)=\cos(60^\circ)=\frac12,
+  \sin(30^\circ)=\cos(60^\circ)=\frac12,\qquad
+  \cos(30^\circ)=\sin(60^\circ)=\frac{\sqrt3}{2},
 \]
 corresponding to \(t=1/3\) for \(30^\circ\) and \(t=2/3\) for \(60^\circ\).
+The displayed tangent values are represented by
+\(\tan(30^\circ)=\sqrt3/3\) and \(\tan(60^\circ)=\sqrt3\).
+The formal special-angle target package currently records the sine and cosine
+entries; the tangent entries are displayed raw values, awaiting a normalized
+angle tangent construction built from the sine and cosine functions.
 The pentagon values at \(36^\circ\) and \(72^\circ\), corresponding to
 \(t=2/5\) and \(t=4/5\), are recorded as
 \[
@@ -644,12 +670,12 @@ and, without introducing nested raw-real square roots yet,
   \sin^2(72^\circ)=\frac{5+\sqrt5}{8}.
 \]
 These are target statements for any completed \code{FunctionRawConstruction}.
-The square-root computations \(\sqrt{1/2}\) and \(\sqrt5\) use the rational
-square-root algorithm from Chapter~\ref{ch:foundations}; the full positive
-nested square-root formulas for the two sine values are postponed until the
-raw-real square-root operation is available.  Lean also packages the displayed
-raw values above as valid computable reals, assuming the existing square-root
-specifications for \(\sqrt{1/2}\) and \(\sqrt5\).
+The square-root computations \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\) use
+the rational square-root algorithm from Chapter~\ref{ch:foundations}; the full
+positive nested square-root formulas for the two sine values are postponed
+until the raw-real square-root operation is available.  Lean also packages the
+displayed raw values above as valid computable reals, assuming the existing
+square-root specifications for \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\).
 \end{definition}
 
 \begin{theorem}[Law of cosines and the equilateral value]
@@ -792,6 +818,16 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_cos_sub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_sin_sub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_cos_neg_left}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_sin_neg_left}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_self_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_self_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_cos_cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_sin}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_cos_sin}
 \uses{def:rational-circle-other-trig,thm:rational-circle-pythagorean}
 \leanok
 The rational-circle coordinates satisfy:
@@ -841,6 +877,8 @@ alternate double-coordinate formulas
   \qquad
   (P(u)^2)_y=2s(u)c(u).
 \]
+The subtraction formulas and the four product-to-sum identities are also
+formalized as rational equalities in the same package.
 \end{theorem}
 
 \begin{theorem}[Dyadic samples are circle samples]
