@@ -425,6 +425,13 @@ theorem specialAngleDisplayedValuesValid_of_sqrtSpecs
   sin_seventy_two_square :=
     sinSeventyTwoSquareValue_valid_of_sqrtFiveSpec hfive
 
+theorem specialAngleDisplayedValuesValid :
+    SpecialAngleDisplayedValuesValid :=
+  specialAngleDisplayedValuesValid_of_sqrtSpecs
+    (sqrtRaw_spec ((1 : Rat) / 2) sqrtHalfDomain)
+    (sqrtRaw_spec (3 : Rat) sqrtThreeDomain)
+    (sqrtRaw_spec (5 : Rat) sqrtFiveDomain)
+
 def CosValue (C : FunctionRawConstruction) (t : QuarterTurn)
     (value : RealRaw) : Prop :=
   Exists fun ht : C.cosFunctionRaw.definedAt t =>

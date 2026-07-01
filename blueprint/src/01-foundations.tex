@@ -212,11 +212,19 @@ its validity directly.
 \lean{ComputableAnalysis.one_div_natCast_den_eq}
 \lean{ComputableAnalysis.sqrtStageEps_den_eq}
 \lean{ComputableAnalysis.sqrtFuel_sqrtStageEps_eq}
+\lean{ComputableAnalysis.sqrtStageEps_den_mono}
+\lean{ComputableAnalysis.sqrtFuel_sqrtStageEps_mono}
 \lean{ComputableAnalysis.sqrtBisectStep_width_eq_half}
 \lean{ComputableAnalysis.sqrtBisect_width_eq}
 \lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq}
 \lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq_positive_stage}
 \lean{ComputableAnalysis.sqrtBisectStep_contains}
+\lean{ComputableAnalysis.sqrtBisect_contains_of_le_fuel}
+\lean{ComputableAnalysis.sqrtApproxOnDomain_width_le_nat_over_succ}
+\lean{ComputableAnalysis.sqrtApproxOnDomain_valid}
+\lean{ComputableAnalysis.sqrtRaw_valid}
+\lean{ComputableAnalysis.sqrtRaw_spec}
+\lean{ComputableAnalysis.sqrtCertified_of_domain}
 \lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
 \uses{def:raw-real}
 The first nontrivial computable real number to keep in mind is \(\sqrt2\).
@@ -250,7 +258,12 @@ previous ordered interval, and the public staged square-root approximation has
 the corresponding explicit power-of-two width.  For positive stages, Lean also
 normalizes the precision denominator and the \(\code{sqrtFuel}\) schedule, so
 the public width unfolds to the concrete denominator
-\(2^{n+\code{den}(\code{sqrtUpperBound}\ q)+8}\).  These are the small
+\(2^{n+\code{den}(\code{sqrtUpperBound}\ q)+8}\).  The square-root raw real is
+now fully verified: later stages are obtained by extra bisections inside the
+same initial isolating interval, and the explicit width is bounded by a
+rational constant divided by \(n+1\).  Consequently every rational input in
+the square-root domain has a certified optional square-root computation.
+These are the small
 interval-shrinking facts needed later for square-root path lengths such as the
 circumference computation.
 \end{remark}

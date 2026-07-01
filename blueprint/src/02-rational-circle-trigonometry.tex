@@ -639,6 +639,7 @@ corresponding raw functions.  These are not yet the usual angle special values:
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSeventyTwoSquareValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleDisplayedValuesValid}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid_of_sqrtSpecs}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid}
 \uses{def:geometric-sin-cos-functionraw,rem:algebraic-numbers-sqrt-two}
 \leanok
 For the normalized angle input \(t\), the geometric functions should satisfy
@@ -675,7 +676,7 @@ The square-root computations \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\) use
 the rational square-root algorithm from Chapter~\ref{ch:foundations}; the full
 positive nested square-root formulas for the two sine values are postponed
 until the raw-real square-root operation is available.  Lean also packages the
-displayed raw values above as valid computable reals, assuming the existing
+displayed raw values above as valid computable reals, using the now verified
 square-root specifications for \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\).
 \end{definition}
 
