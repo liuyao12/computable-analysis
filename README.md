@@ -81,7 +81,10 @@ integral route is now also definition-complete as
 `PiProofs.piFromArctanIntegralFareyAtOne_valid`, and Lean identifies it with
 `4 * fareyIntegralPrefixRaw(1)` via
 `PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one`; its
-equivalence to `piCircleArea` is still pending.  The supporting
+equivalence to `piCircleArea` is now reduced to the named pointwise target
+`PiProofs.FareyPrefixGeomAgreementAtOne`, with the conditional bridge
+`PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement`.
+The supporting
 `oneOverOnePlusSquareFareyIntegral(a,b)` construction is verified and now has
 formal additivity, zero-length, reversal, add-reverse-zero, and endpoint-prefix
 normalization laws.  The Farey arctangent wrapper also records the zero

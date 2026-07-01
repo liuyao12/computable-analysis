@@ -6282,6 +6282,52 @@ theorem piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one :
     (by native_decide : (0 : Rat) <= 4)
     (IntegralIdentities.arctanIntegralFareyFor_equiv_prefix (1 : Rat))
 
+/-- The remaining pointwise comparison needed to identify the shared-Farey-mesh
+integral route with the geometric sector route at the quarter turn. -/
+def FareyPrefixGeomAgreementAtOne : Prop :=
+  (ArctanGeometry.fareyIntegralPrefixRaw (1 : Rat)).Equiv
+    (ArctanGeometry.arctanGeom (1 : Rat))
+
+theorem arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement
+    (h : FareyPrefixGeomAgreementAtOne) :
+    (IntegralIdentities.arctanIntegralFareyFor (1 : Rat)).Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+  RealRaw.equiv_trans
+    (IntegralIdentities.arctanIntegralFareyFor_valid (1 : Rat))
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid (1 : Rat))
+    arctanGeomOneValid
+    (IntegralIdentities.arctanIntegralFareyFor_equiv_prefix (1 : Rat))
+    h
+
+theorem piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement
+    (h : FareyPrefixGeomAgreementAtOne) :
+    piFromArctanIntegralFareyAtOne.Equiv piCircleArea := by
+  have hscaled :
+      piFromArctanIntegralFareyAtOne.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    unfold piFromArctanIntegralFareyAtOne
+      IntegralIdentities.PiFromArctanIntegral
+    change
+      (RealRaw.scaleRat (4 : Rat)
+        (IntegralIdentities.arctanIntegralFareyFor (1 : Rat))).Equiv
+        (RealRaw.scaleRat (4 : Rat)
+          (ArctanGeometry.arctanGeom (1 : Rat)))
+    exact RealRaw.scaleRat_equiv_of_nonneg
+      (by native_decide : (0 : Rat) <= 4)
+      (arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement h)
+  exact RealRaw.equiv_trans
+    piFromArctanIntegralFareyAtOne_valid
+    fourArctanGeomOneValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanGeom_one_equiv_piCircleArea
+
+theorem piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_prefix_agreement
+    (h : FareyPrefixGeomAgreementAtOne) :
+    piCircleArea.Equiv piFromArctanIntegralFareyAtOne :=
+  RealRaw.equiv_symm
+    (piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement h)
+
 theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (((4 : Nat) *
         ArctanGeometry.arctanIntegralRectangleRawAtOne : RealRaw).Equiv
