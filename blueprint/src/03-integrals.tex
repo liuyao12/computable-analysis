@@ -234,6 +234,9 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_widthsShrink}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_zero_eq_nil_of_unit_adjacent}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_zero_unitStage}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_zero_equiv_zero}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_valid}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_compute_eq_subInterval}
@@ -241,9 +244,11 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_width_le_six_div_succ}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_additive}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_self_equiv_zero}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_zero_left_equiv_prefix}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_reverse_compute}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_reverse_equiv_neg}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_add_reverse_equiv_zero}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_zero_right_equiv_neg_prefix}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
@@ -372,6 +377,11 @@ satisfies adjacent additivity up to raw-real equivalence:
   I(a,a)\sim0,\qquad
   I(a,b)\sim -I(b,a).
 \]
+At the left endpoint, Lean proves that the lower Farey prefix at \(0\)
+selects no cells, hence \(F(0)\sim0\).  Consequently
+\(I(0,x)\sim F(x)\) and \(I(x,0)\sim -F(x)\).  These endpoint-normalization
+laws make the prefix construction line up with the usual notation
+\(\int_0^x du/(1+u^2)\).
 
 For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
 estimate needed for validity.  The sum of squared cell lengths is exactly

@@ -1488,6 +1488,69 @@ theorem fareyIntegralPrefixRaw_valid (x : Rat) :
     · exact fareyIntegralPrefixStageInterval_nested x
     · exact fareyIntegralPrefixStageInterval_widthsShrink x
 
+private theorem fareyCell_right_value_pos_of_unit_adjacent
+    {cell : RationalCircle.FareyCell}
+    (hunit : cell.Unit) (hadj : cell.Adjacent) :
+    0 < cell.right.value := by
+  rcases hunit with ⟨hl0, _hlr, _hr1⟩
+  have hwidthPos : 0 < cell.width := by
+    rw [RationalCircle.FareyCell.width_eq_inv_den_mul_den_of_adjacent hadj]
+    have hldpos : (0 : Rat) < (cell.left.den : Rat) :=
+      (Rat.natCast_pos).2 cell.left.den_pos
+    have hrdpos : (0 : Rat) < (cell.right.den : Rat) :=
+      (Rat.natCast_pos).2 cell.right.den_pos
+    have hdenpos :
+        (0 : Rat) < (cell.left.den : Rat) * (cell.right.den : Rat) :=
+      Rat.mul_pos hldpos hrdpos
+    simpa [Rat.div_def] using (Rat.inv_pos).2 hdenpos
+  unfold RationalCircle.FareyCell.width at hwidthPos
+  grind [Rat.sub_eq_add_neg]
+
+theorem fareyLowerCellsUpTo_zero_eq_nil_of_unit_adjacent
+    (cells : List RationalCircle.FareyCell)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hadj : RationalCircle.FareyCell.AdjacentList cells) :
+    fareyLowerCellsUpTo 0 cells = [] := by
+  induction cells with
+  | nil =>
+      simp [fareyLowerCellsUpTo]
+  | cons cell rest ih =>
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hadj with ⟨hcellAdj, hrestAdj⟩
+      have hrightPos :=
+        fareyCell_right_value_pos_of_unit_adjacent hcellUnit hcellAdj
+      have hrightNot : ¬ cell.right.value <= 0 := by
+        grind
+      have htail := ih hrestUnit hrestAdj
+      simp [fareyLowerCellsUpTo, hrightNot, htail]
+
+theorem fareyIntegralLowerPrefix_zero_unitStage (n : Nat) :
+    fareyIntegralLowerPrefix 0 (RationalCircle.fareyUnitStage n) = 0 := by
+  unfold fareyIntegralLowerPrefix
+  rw [fareyLowerCellsUpTo_zero_eq_nil_of_unit_adjacent
+    (RationalCircle.fareyUnitStage n)
+    (RationalCircle.fareyUnitStage_unit n)
+    (RationalCircle.fareyUnitStage_adjacent n)]
+  simp [integralLowerSum]
+
+theorem fareyIntegralPrefixRaw_zero_equiv_zero :
+    (fareyIntegralPrefixRaw 0).Equiv (RealRaw.ofRat 0) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (fareyIntegralPrefixRaw 0) (RealRaw.ofRat 0) n n).2
+  let Z := fareyIntegralPrefixStageInterval 0 n
+  have hZlo : Z.lo = 0 := by
+    dsimp [Z, fareyIntegralPrefixStageInterval,
+      fareyIntegralPrefixInterval]
+    exact fareyIntegralLowerPrefix_zero_unitStage n
+  have hZnonneg : 0 <= Z.hi := by
+    have hZordered := fareyIntegralPrefixStageInterval_ordered 0 n
+    unfold QInterval.width at hZordered
+    rw [hZlo] at hZordered
+    grind [Rat.sub_eq_add_neg]
+  change QInterval.Overlaps Z ((RealRaw.ofRat 0).compute n)
+  simp [RealRaw.ofRat, QInterval.Overlaps, hZlo, hZnonneg]
+
 /-- Verified raw integral over `[a,b]` from the global Farey prefix
 construction.  The stage-level `fareyIntegralStageInterval` keeps exact
 finite additivity; this raw wrapper uses interval subtraction so validity is
@@ -1597,6 +1660,31 @@ theorem fareyIntegralBetweenRaw_self_equiv_zero
   simp [RealRaw.ofRat]
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+theorem fareyIntegralBetweenRaw_zero_left_equiv_prefix
+    (x : Rat) :
+    (fareyIntegralBetweenRaw 0 x).Equiv (fareyIntegralPrefixRaw x) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (fareyIntegralBetweenRaw 0 x) (fareyIntegralPrefixRaw x) n n).2
+  let X := fareyIntegralPrefixStageInterval x n
+  let Z := fareyIntegralPrefixStageInterval 0 n
+  have hZlo : Z.lo = 0 := by
+    dsimp [Z, fareyIntegralPrefixStageInterval,
+      fareyIntegralPrefixInterval]
+    exact fareyIntegralLowerPrefix_zero_unitStage n
+  have hZnonneg : 0 <= Z.hi := by
+    have hZordered := fareyIntegralPrefixStageInterval_ordered 0 n
+    unfold QInterval.width at hZordered
+    rw [hZlo] at hZordered
+    grind [Rat.sub_eq_add_neg]
+  have hXordered := fareyIntegralPrefixStageInterval_ordered x n
+  rw [fareyIntegralBetweenRaw_compute_eq_subInterval]
+  change QInterval.Overlaps (QInterval.subInterval X Z) X
+  unfold QInterval.width at hXordered
+  unfold QInterval.subInterval QInterval.Overlaps
+  rw [hZlo]
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 theorem fareyIntegralBetweenRaw_reverse_compute
     (a b : Rat) (n : Nat) :
     (fareyIntegralBetweenRaw a b).compute n =
@@ -1652,6 +1740,19 @@ theorem fareyIntegralBetweenRaw_add_reverse_equiv_zero
   exact RealRaw.equiv_trans hleftValid hselfValid hzeroValid
     (fareyIntegralBetweenRaw_additive a b a)
     (fareyIntegralBetweenRaw_self_equiv_zero a)
+
+theorem fareyIntegralBetweenRaw_zero_right_equiv_neg_prefix
+    (x : Rat) :
+    (fareyIntegralBetweenRaw x 0).Equiv (-(fareyIntegralPrefixRaw x)) := by
+  have hx0Valid : (fareyIntegralBetweenRaw x 0).Valid :=
+    fareyIntegralBetweenRaw_valid x 0
+  have hnegBetweenValid : (-(fareyIntegralBetweenRaw 0 x)).Valid :=
+    RealRaw.neg_valid (fareyIntegralBetweenRaw_valid 0 x)
+  have hnegPrefixValid : (-(fareyIntegralPrefixRaw x)).Valid :=
+    RealRaw.neg_valid (fareyIntegralPrefixRaw_valid x)
+  exact RealRaw.equiv_trans hx0Valid hnegBetweenValid hnegPrefixValid
+    (fareyIntegralBetweenRaw_reverse_equiv_neg x 0)
+    (RealRaw.neg_equiv (fareyIntegralBetweenRaw_zero_left_equiv_prefix x))
 
 theorem integralSumInterval_contains_geometricSumInterval
     (intervals : List (Rat × Rat))
