@@ -2933,18 +2933,39 @@ theorem circleParameter_succ_sub (stage k : Nat) :
     RationalCircle.Stage.parameter] using
     RationalCircle.Stage.parameter_succ_sub (rationalCircleStage stage) k
 
+theorem circleParameter_nonneg
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    0 <= circleParameter stage k := by
+  simpa [rationalCircleStage, circleParameter,
+    RationalCircle.Stage.parameter] using
+    RationalCircle.Stage.parameter_nonneg (rationalCircleStage stage) hstage k
+
+theorem circleParameter_lt_succ
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    circleParameter stage k < circleParameter stage (k + 1) := by
+  have hdiff := circleParameter_succ_sub stage k
+  have hpos : 0 < (1 : Rat) / (stage : Rat) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  grind [Rat.sub_eq_add_neg]
+
 def adjacentChordNormSqFormula (stage k : Nat) : Rat :=
   let u := circleParameter stage k
   let v := circleParameter stage (k + 1)
   let d := (1 : Rat) / (stage : Rat)
   (4 * d * d) / ((1 + u * u) * (1 + v * v))
 
+def adjacentTangentCrossFormula (stage k : Nat) : Rat :=
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  let d := (1 : Rat) / (stage : Rat)
+  d / (1 + u * v)
+
 def entryTangentNormSqFormula (stage k : Nat) : Rat :=
-  sq (pointCross (circleSamplePoint stage k) (outerTangentPoint stage k))
+  sq (adjacentTangentCrossFormula stage k)
 
 def exitTangentNormSqFormula (stage k : Nat) : Rat :=
-  sq (pointCross (outerTangentPoint stage k)
-    (circleSamplePoint stage (k + 1)))
+  sq (adjacentTangentCrossFormula stage k)
 
 theorem adjacentChordSegmentNormSq_eq_formula
     (stage k : Nat) :
@@ -2966,6 +2987,124 @@ theorem adjacentChordSegmentNormSq_eq_formula
   rw [hbase]
   unfold adjacentChordNormSqFormula
   rw [circleParameter_succ_sub]
+
+theorem entryTangentCross_eq_formula
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    pointCross (circleSamplePoint stage k) (outerTangentPoint stage k) =
+      adjacentTangentCrossFormula stage k := by
+  have hu0 := circleParameter_nonneg stage hstage k
+  have hv0 := circleParameter_nonneg stage hstage (k + 1)
+  have huv := circleParameter_lt_succ stage hstage k
+  have hbase :
+      pointCross (circleSamplePoint stage k) (outerTangentPoint stage k) =
+        (circleParameter stage (k + 1) - circleParameter stage k) /
+          (1 + circleParameter stage k * circleParameter stage (k + 1)) := by
+    simpa [circleSamplePoint, circlePoint, pointCross, outerTangentPoint,
+      tangentIntersection, RationalCircle.Stage.point,
+      RationalCircle.Stage.cross,
+      RationalCircle.Stage.tangentIntersection] using
+      RationalCircle.Stage.point_entry_tangent_cross_formula hu0 hv0 huv
+  rw [hbase]
+  unfold adjacentTangentCrossFormula
+  rw [circleParameter_succ_sub]
+
+theorem exitTangentCross_eq_formula
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    pointCross (outerTangentPoint stage k)
+        (circleSamplePoint stage (k + 1)) =
+      adjacentTangentCrossFormula stage k := by
+  have hu0 := circleParameter_nonneg stage hstage k
+  have hv0 := circleParameter_nonneg stage hstage (k + 1)
+  have huv := circleParameter_lt_succ stage hstage k
+  have hbase :
+      pointCross (outerTangentPoint stage k)
+          (circleSamplePoint stage (k + 1)) =
+        (circleParameter stage (k + 1) - circleParameter stage k) /
+          (1 + circleParameter stage k * circleParameter stage (k + 1)) := by
+    simpa [circleSamplePoint, circlePoint, pointCross, outerTangentPoint,
+      tangentIntersection, RationalCircle.Stage.point,
+      RationalCircle.Stage.cross,
+      RationalCircle.Stage.tangentIntersection] using
+      RationalCircle.Stage.point_exit_tangent_cross_formula hu0 hv0 huv
+  rw [hbase]
+  unfold adjacentTangentCrossFormula
+  rw [circleParameter_succ_sub]
+
+theorem entryTangentSegmentNormSq_eq_formula
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    pointSegmentNormSq
+        (circleSamplePoint stage k) (outerTangentPoint stage k) =
+      entryTangentNormSqFormula stage k := by
+  rw [entryTangentSegmentNormSq_eq_cross_sq stage hstage k]
+  rw [entryTangentCross_eq_formula stage hstage k]
+  rfl
+
+theorem exitTangentSegmentNormSq_eq_formula
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    pointSegmentNormSq
+        (outerTangentPoint stage k) (circleSamplePoint stage (k + 1)) =
+      exitTangentNormSqFormula stage k := by
+  rw [exitTangentSegmentNormSq_eq_cross_sq stage hstage k]
+  rw [exitTangentCross_eq_formula stage hstage k]
+  rfl
+
+theorem adjacentChordNormSqFormula_nonneg
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    0 <= adjacentChordNormSqFormula stage k := by
+  unfold adjacentChordNormSqFormula
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  let d : Rat := 1 / (stage : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  have hnum : 0 <= 4 * d * d := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 4)
+        (Rat.le_of_lt hdpos))
+      (Rat.le_of_lt hdpos)
+  have hdenpos : 0 < (1 + u * u) * (1 + v * v) :=
+    Rat.mul_pos (RationalCircle.Stage.one_add_square_pos u)
+      (RationalCircle.Stage.one_add_square_pos v)
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+
+theorem adjacentTangentCrossFormula_pos
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    0 < adjacentTangentCrossFormula stage k := by
+  unfold adjacentTangentCrossFormula
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  let d : Rat := 1 / (stage : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  have hu0 : 0 <= u := by
+    dsimp [u]
+    exact circleParameter_nonneg stage hstage k
+  have hv0 : 0 <= v := by
+    dsimp [v]
+    exact circleParameter_nonneg stage hstage (k + 1)
+  have hdenpos : 0 < 1 + u * v :=
+    RationalCircle.Stage.one_add_mul_pos_of_nonneg hu0 hv0
+  rw [Rat.div_def]
+  exact Rat.mul_pos hdpos ((Rat.inv_pos).2 hdenpos)
+
+theorem entryTangentNormSqFormula_nonneg
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    0 <= entryTangentNormSqFormula stage k := by
+  unfold entryTangentNormSqFormula sq
+  have h := adjacentTangentCrossFormula_pos stage hstage k
+  exact Rat.mul_nonneg (Rat.le_of_lt h) (Rat.le_of_lt h)
+
+theorem exitTangentNormSqFormula_nonneg
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    0 <= exitTangentNormSqFormula stage k := by
+  unfold exitTangentNormSqFormula sq
+  have h := adjacentTangentCrossFormula_pos stage hstage k
+  exact Rat.mul_nonneg (Rat.le_of_lt h) (Rat.le_of_lt h)
 
 def InnerAdjacentChordFormulaBudgetLe (stage : Nat) (B : Rat) : Prop :=
   forall k,
@@ -3016,10 +3155,10 @@ theorem outerAdjacentSegmentBudgetLe_of_tangentFormulaBudget
   intro k
   constructor
   · unfold SegmentBudgetLeAt
-    rw [entryTangentSegmentNormSq_eq_cross_sq stage hstage k]
+    rw [entryTangentSegmentNormSq_eq_formula stage hstage k]
     exact (h k).1
   · unfold SegmentBudgetLeAt
-    rw [exitTangentSegmentNormSq_eq_cross_sq stage hstage k]
+    rw [exitTangentSegmentNormSq_eq_formula stage hstage k]
     exact (h k).2
 
 theorem rationalPointPathLength_width_nil (n : Nat) :

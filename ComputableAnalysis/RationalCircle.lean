@@ -622,6 +622,47 @@ theorem point_segmentNormSq_formula (u v : Rat) :
   rw [Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+private theorem tangent_cross_ratio_formula
+    {d s D : Rat} (hd : 0 < d) (hs : 0 < s) (hD : 0 < D) :
+    ((2 * d * d) / D) / ((2 * d * s) / D) = d / s := by
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have h2 : (0 : Rat) < 2 := by native_decide
+  have hDne : D ≠ 0 := Rat.ne_of_gt hD
+  have hsne : s ≠ 0 := Rat.ne_of_gt hs
+  have hdne : d ≠ 0 := Rat.ne_of_gt hd
+  have hfracne : 2 * d * s * D⁻¹ ≠ 0 := by
+    exact Rat.ne_of_gt
+      (Rat.mul_pos (Rat.mul_pos (Rat.mul_pos h2 hd) hs)
+        ((Rat.inv_pos).2 hD))
+  rw [Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem point_entry_tangent_cross_formula
+    {u v : Rat} (hu0 : 0 <= u) (hv0 : 0 <= v) (huv : u < v) :
+    cross (point u) (tangentIntersection (point u) (point v)) =
+      (v - u) / (1 + u * v) := by
+  rw [cross_left_tangentIntersection (point_normSq_unit u)]
+  rw [one_sub_point_dot_formula]
+  rw [point_cross_formula]
+  have hd : 0 < v - u := by grind [Rat.sub_eq_add_neg]
+  have hs : 0 < 1 + u * v := one_add_mul_pos_of_nonneg hu0 hv0
+  have hD : 0 < (1 + u * u) * (1 + v * v) :=
+    Rat.mul_pos (one_add_square_pos u) (one_add_square_pos v)
+  exact tangent_cross_ratio_formula hd hs hD
+
+theorem point_exit_tangent_cross_formula
+    {u v : Rat} (hu0 : 0 <= u) (hv0 : 0 <= v) (huv : u < v) :
+    cross (tangentIntersection (point u) (point v)) (point v) =
+      (v - u) / (1 + u * v) := by
+  rw [cross_tangentIntersection_right (point_normSq_unit v)]
+  rw [one_sub_point_dot_formula]
+  rw [point_cross_formula]
+  have hd : 0 < v - u := by grind [Rat.sub_eq_add_neg]
+  have hs : 0 < 1 + u * v := one_add_mul_pos_of_nonneg hu0 hv0
+  have hD : 0 < (1 + u * u) * (1 + v * v) :=
+    Rat.mul_pos (one_add_square_pos u) (one_add_square_pos v)
+  exact tangent_cross_ratio_formula hd hs hD
+
 theorem samplePoint_normSq_unit (S : Stage) (k : Nat) :
     normSq (S.samplePoint k) = 1 := by
   simpa [samplePoint] using point_normSq_unit (S.parameter k)
