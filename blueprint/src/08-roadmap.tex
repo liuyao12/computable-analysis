@@ -38,8 +38,9 @@ algorithm requiring an explicit modulus.
   prove \cref{thm:monotone-integrable}.
 
   \item Close the convex FTC:
-  prove \cref{thm:convex-ftc} from convexity, one-sided derivatives,
-  monotone integrability, and the telescoping secant inequalities.
+  prove \cref{thm:convex-ftc} by manufacturing the effective FTC certificates
+  of \cref{thm:effective-ftc-certificate} from convexity, one-sided
+  derivatives, monotone integrability, and telescoping secant inequalities.
 
   \item Prove the interval arithmetic formula-identification rules:
   sums, scalar multiples, products, and reciprocals should transform
@@ -134,9 +135,16 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one}
 \lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne}
+\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne}
+\lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne_of_unit_integral_agreement}
+\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne_of_prefix_agreement}
 \lean{ComputableAnalysis.PiProofs.arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_prefix_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_unit_integral_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_definite_identity}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
@@ -487,11 +495,12 @@ historical expansion.  The
 concrete rectangle row is completed.  The Farey-prefix row is definition
 complete, and the underlying domain-aware Farey integral already satisfies
 additivity, zero-length, reversal, add-reverse-zero, and endpoint-prefix
-normalization laws; its equivalence remains pending
-until the shared-Farey-mesh integral is compared with the geometric sector
-arctangent.  The pending pointwise target is now named
-\code{FareyPrefixGeomAgreementAtOne}; proving it immediately gives
-\code{piFromArctanIntegralFareyAtOne\_equiv\_piCircleArea\_of\_prefix\_agreement}.
+normalization laws; its equivalence remains pending until the full-unit Farey
+mesh integral is compared with the geometric sector arctangent.  Lean now
+normalizes \code{fareyIntegralPrefixRaw(1)} to
+\code{fareyIntegralUnitRaw}.  The cleaner pending target is
+\code{FareyUnitIntegralGeomAgreementAtOne}; proving it immediately gives
+\code{piFromArctanIntegralFareyAtOne\_equiv\_piCircleArea\_of\_unit\_integral\_agreement}.
 Lean also records the zero endpoint and the unit-branch
 \code{Computes} package against the Farey prefix raw.  The general
 \code{arctanIntegral(1)} row remains pending until
@@ -514,6 +523,12 @@ The first non-baseline checkmark in the equivalence column is the geometric
 arctangent theorem
 \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}; the rectangle row
 uses \code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea}.
+FTC is tracked as a proof route for such rows, not as a separate computation:
+\code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_definite\_identity}
+and
+\code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC}
+show that a definite-integral identity, respectively an effective FTC
+certificate, can close the arctangent-integral pi equivalence.
 The theorem \code{ArctanGeometry.arctanGeom\_valid\_on\_unit} now verifies the
 geometric arctangent loop itself for all rational \(0\le x\le1\), although this
 does not change the count because the \(\pi\)-specialization was already marked
@@ -554,7 +569,9 @@ power-series arctangent to area \(\pi\) &
 \code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}\\
 integral arctangent to area \(\pi\) &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
-\code{ArctanIntegralGeomFunctionAgreement}\\
+\code{ArctanIntegralGeomFunctionAgreement}; equivalently an effective FTC
+certificate via
+\code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC}\\
 finite area/circumference bridge &
 \code{PiProofs.PiCircleAreaPolygonAgreement} &
 the internal finite-geometry bridge used by circumference comparisons\\
@@ -643,13 +660,14 @@ the finite one through
   raw order and convexity:
   \code{RealRaw.Le}, \code{secantRaw}, \code{ExactConvexOn},
   \code{ExactConcaveOn}.
-  The older declarations
-  \code{DerivativeBoundFTC}, \code{LegacyConvexFTC}, and
-  \code{legacyConvexFTC}
-  are now legacy certificate-shaped scaffolding, not the main theorem target.
+  The current formal proof-route declarations are
+  \code{EffectiveFTC}, \code{FTC.effectiveFTC\_equiv\_endpoint},
+  \code{FTC.effectiveFTC\_integral\_equiv\_scheduledEndpoint},
+  \code{DerivativeBoundFTC}, and \code{convexFTC}.
+  \code{LegacyConvexFTC} remains older certificate-shaped scaffolding.
   Blueprint targets still to receive final Lean names:
   \code{rightDerivative}, \code{leftDerivative},
-  \code{monotoneIntegrable}, and \code{convexFTC}.
+  \code{monotoneIntegrable}, and the full one-sided convex FTC theorem.
 
   \item FTA:
   \code{CPoly.Coeffs}, \code{IsComputableRoot}, \code{AlgebraicComplex},

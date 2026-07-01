@@ -202,7 +202,10 @@ restrict to the points where the left and right derivatives agree.
 
 The integral used in this chapter is the constructive definite integral
 already introduced in Chapter~\ref{ch:integrals}.  The present chapter proves
-when such an integral is equal to an endpoint difference.
+when such an integral is equal to an endpoint difference.  For the pi
+scoreboard, this matters as a proof route: FTC can close the equivalence proof
+for an existing integral computation of \(\pi\), even though it is not itself a
+new pi algorithm.
 
 \begin{theorem}[Monotone functions are integrable]
 \label{thm:monotone-integrable}
@@ -210,17 +213,39 @@ when such an integral is equal to an endpoint difference.
 Every monotone rational-input raw real-valued function on a rational interval
 has a constructive definite integral.  Monotonicity supplies the lower and
 upper cell values from endpoint evaluations, and Darboux sums converge under
-rational refinement.
+rational refinement.  This theorem constructs a valid raw integral; by itself
+it does not identify that integral with a primitive endpoint difference.
+\end{theorem}
+
+\begin{theorem}[Effective FTC certificate]
+\label{thm:effective-ftc-certificate}
+\lean{ComputableAnalysis.EffectiveFTC}
+\lean{ComputableAnalysis.FTC.effectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FTC.effectiveFTC_integral_equiv_scheduledEndpoint}
+\lean{ComputableAnalysis.DerivativeBoundFTC.equiv_endpoint}
+\lean{ComputableAnalysis.convexFTC}
+\uses{def:definite-integral-identity}
+\leanok
+An \code{EffectiveFTC} certificate is a finite schedule saying that, at every
+requested rational precision, a chosen Riemann-sum interval overlaps the
+endpoint-difference interval \(F(b)-F(a)\).  Lean proves that such a certificate
+gives raw-real equivalence between the scheduled integral and the scheduled
+endpoint raw real.  The derivative-bound version is the current reusable
+calculus interface: local derivative bounds on rational partition cells are
+summed and compared with endpoint differences.  This is the formal proof-route
+object used by arctangent-integral pi equivalence targets.
 \end{theorem}
 
 \begin{theorem}[Fundamental theorem of calculus]\label{thm:convex-ftc}
-\uses{def:exact-convexity,def:convex-right-derivative,thm:monotone-integrable,def:definite-integral-identity}
+\uses{def:exact-convexity,def:convex-right-derivative,thm:monotone-integrable,thm:effective-ftc-certificate,def:definite-integral-identity}
 If \(F\) is convex on a rational interval \([a,b]\), then the right
 derivative \(D_+F\) is integrable and
 \[
   \int_a^b D_+F(x)\,\dd x \sim F(b)-F(a).
 \]
 Equivalently, the same conclusion holds with the left derivative \(D_-F\).
+The intended Lean proof should manufacture the effective FTC certificate from
+the one-sided derivative inequalities below.
 \end{theorem}
 
 \begin{proof}

@@ -70,7 +70,14 @@ the unit-branch construction is now named by
 `PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea`.  The more
 general older `arctanIntegral(1)` row remains pending because that nonnegative
 point-Riemann construction wrapper has not yet been identified with this
-domain-aware schedule.  The rectangle schedule itself is now verified more
+domain-aware schedule.  Lean now also records the FTC proof-route interface for
+this same row:
+`PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_definite_identity` and
+`PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC` say that a
+definite-integral identity, respectively an effective FTC certificate, for the
+arctangent primitive and kernel closes the pi equivalence.  These are proof
+routes for existing table entries, not additional pi computations.  The
+rectangle schedule itself is now verified more
 generally as `ArctanGeometry.arctanIntegralRectangleRaw_valid` and
 `IntegralIdentities.arctanIntegralRectangleFor_valid` for rational
 `0 <= x <= 1`, and it is now proved equivalent to `arctanGeom x` on that
@@ -82,9 +89,11 @@ integral route is now also definition-complete as
 `PiProofs.piFromArctanIntegralFareyAtOne_valid`, and Lean identifies it with
 `4 * fareyIntegralPrefixRaw(1)` via
 `PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one`; its
-equivalence to `piCircleArea` is now reduced to the named pointwise target
-`PiProofs.FareyPrefixGeomAgreementAtOne`, with the conditional bridge
-`PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement`.
+equivalence to `piCircleArea` is now reduced to the cleaner full-unit mesh target
+`PiProofs.FareyUnitIntegralGeomAgreementAtOne`, using the normalization
+`ArctanGeometry.fareyIntegralPrefixRaw_one_equiv_unitRaw` and the conditional
+bridge
+`PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement`.
 The supporting
 `oneOverOnePlusSquareFareyIntegral(a,b)` construction is verified and now has
 formal additivity, zero-length, reversal, add-reverse-zero, and endpoint-prefix

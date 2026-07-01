@@ -604,6 +604,57 @@ def fareyUpperCellsUpTo
       else
         fareyUpperCellsUpTo x rest
 
+def fareyCellIntervals
+    (cells : List RationalCircle.FareyCell) : List (Rat × Rat) :=
+  cells.map RationalCircle.FareyCell.toRatInterval
+
+theorem fareyCellIntervals_unit
+    (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    UnitIntervals (fareyCellIntervals cells) := by
+  induction cells with
+  | nil =>
+      simp [fareyCellIntervals, UnitIntervals]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      rcases hcell with ⟨hl0, hlr, hr1⟩
+      change UnitIntervals
+        (RationalCircle.FareyCell.toRatInterval cell ::
+          fareyCellIntervals rest)
+      exact ⟨hl0, hlr, hr1, ih hrest⟩
+
+theorem fareyCellIntervals_nonnegative
+    (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    NonnegativeIntervals (fareyCellIntervals cells) :=
+  unitIntervals_nonnegative (fareyCellIntervals cells)
+    (fareyCellIntervals_unit cells hcells)
+
+theorem fareyLowerCellsUpTo_one_eq_intervals
+    (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    fareyLowerCellsUpTo 1 cells = fareyCellIntervals cells := by
+  induction cells with
+  | nil =>
+      simp [fareyLowerCellsUpTo, fareyCellIntervals]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      rcases hcell with ⟨_hl0, _hlr, hr1⟩
+      simp [fareyLowerCellsUpTo, fareyCellIntervals, hr1, ih hrest]
+
+theorem fareyUpperCellsUpTo_one_eq_intervals
+    (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    fareyUpperCellsUpTo 1 cells = fareyCellIntervals cells := by
+  induction cells with
+  | nil =>
+      simp [fareyUpperCellsUpTo, fareyCellIntervals]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hcell, hrest⟩
+      rcases hcell with ⟨_hl0, hlr, hr1⟩
+      have hleft : cell.left.value <= (1 : Rat) := Rat.le_trans hlr hr1
+      simp [fareyUpperCellsUpTo, fareyCellIntervals, hleft, ih hrest]
+
 def fareyIntegralLowerPrefix
     (x : Rat) (cells : List RationalCircle.FareyCell) : Rat :=
   integralLowerSum (fareyLowerCellsUpTo x cells)
@@ -1487,6 +1538,75 @@ theorem fareyIntegralPrefixRaw_valid (x : Rat) :
   · constructor
     · exact fareyIntegralPrefixStageInterval_nested x
     · exact fareyIntegralPrefixStageInterval_widthsShrink x
+
+theorem fareyIntegralLowerPrefix_one_eq_integralLowerSum
+    (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    fareyIntegralLowerPrefix 1 cells =
+      integralLowerSum (fareyCellIntervals cells) := by
+  unfold fareyIntegralLowerPrefix
+  rw [fareyLowerCellsUpTo_one_eq_intervals cells hcells]
+
+theorem fareyIntegralUpperPrefix_one_eq_integralUpperSum
+    (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    fareyIntegralUpperPrefix 1 cells =
+      integralUpperSum (fareyCellIntervals cells) := by
+  unfold fareyIntegralUpperPrefix
+  rw [fareyUpperCellsUpTo_one_eq_intervals cells hcells]
+
+theorem fareyIntegralPrefixInterval_one_eq_integralSumInterval
+    (cells : List RationalCircle.FareyCell)
+    (hcells : RationalCircle.FareyCell.UnitList cells) :
+    fareyIntegralPrefixInterval 1 cells =
+      integralSumInterval (fareyCellIntervals cells) := by
+  simp [fareyIntegralPrefixInterval, integralSumInterval,
+    fareyIntegralLowerPrefix_one_eq_integralLowerSum cells hcells,
+    fareyIntegralUpperPrefix_one_eq_integralUpperSum cells hcells]
+
+def fareyIntegralUnitStageInterval (n : Nat) : QInterval :=
+  integralSumInterval
+    (fareyCellIntervals (RationalCircle.fareyUnitStage n))
+
+def fareyIntegralUnitRaw : RealRaw where
+  compute := fareyIntegralUnitStageInterval
+
+theorem fareyIntegralPrefixStageInterval_one_eq_unitStageInterval
+    (n : Nat) :
+    fareyIntegralPrefixStageInterval 1 n =
+      fareyIntegralUnitStageInterval n := by
+  unfold fareyIntegralPrefixStageInterval fareyIntegralUnitStageInterval
+  exact fareyIntegralPrefixInterval_one_eq_integralSumInterval
+    (RationalCircle.fareyUnitStage n)
+    (RationalCircle.fareyUnitStage_unit n)
+
+theorem fareyIntegralPrefixRaw_one_compute_eq_unitRaw (n : Nat) :
+    (fareyIntegralPrefixRaw 1).compute n =
+      fareyIntegralUnitRaw.compute n :=
+  fareyIntegralPrefixStageInterval_one_eq_unitStageInterval n
+
+theorem fareyIntegralUnitRaw_valid :
+    fareyIntegralUnitRaw.Valid := by
+  change RealRaw.ValidCompute fareyIntegralUnitStageInterval
+  have hcompute :
+      fareyIntegralUnitStageInterval =
+        fareyIntegralPrefixStageInterval 1 := by
+    funext n
+    exact (fareyIntegralPrefixStageInterval_one_eq_unitStageInterval n).symm
+  rw [hcompute]
+  exact fareyIntegralPrefixRaw_valid 1
+
+theorem fareyIntegralPrefixRaw_one_equiv_unitRaw :
+    (fareyIntegralPrefixRaw 1).Equiv fareyIntegralUnitRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (fareyIntegralPrefixRaw 1) fareyIntegralUnitRaw n n).2
+  rw [fareyIntegralPrefixRaw_one_compute_eq_unitRaw n]
+  have hordered :=
+    RealRaw.interval_order_of_valid fareyIntegralUnitRaw
+      fareyIntegralUnitRaw_valid n
+  exact ⟨hordered, hordered⟩
 
 private theorem fareyCell_right_value_pos_of_unit_adjacent
     {cell : RationalCircle.FareyCell}

@@ -4751,6 +4751,74 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
   rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   exact hover
 
+theorem piFromArctanIntegral_equiv_piCircleArea_of_definite_identity
+    (primitive : RealFunRaw)
+    (I : Integral.DefiniteIdentity
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      primitive 0 1)
+    (hendpoint :
+      (endpointDifferenceRaw primitive 0 1 I.endpoint_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegral (1 : Rat) I.construction)).Equiv
+        piCircleArea := by
+  have hintegralEndpoint :
+      (IntegralIdentities.arctanIntegral (1 : Rat) I.construction).Equiv
+        (endpointDifferenceRaw primitive 0 1 I.endpoint_valid) := by
+    simpa [IntegralIdentities.arctanIntegral] using I.equivalent
+  have hendpointValid :
+      (endpointDifferenceRaw primitive 0 1 I.endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
+  have hgeomValid :
+      (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom :
+      (IntegralIdentities.arctanIntegral (1 : Rat) I.construction).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      (IntegralIdentities.arctanIntegral_valid (1 : Rat) I.construction)
+      hendpointValid
+      hgeomValid
+      hintegralEndpoint
+      hendpoint
+  exact piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
+    I.construction hgeom
+
+theorem piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC
+    (primitive : RealFunRaw)
+    (h : EffectiveFTC primitive
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
+    (hplan : c.plan = FTC.integralPlanOfEffectiveFTC h)
+    (hscheduledEndpoint : (FTC.endpointRawOfEffectiveFTC h).Valid)
+    (hendpoint :
+      (FTC.endpointRawOfEffectiveFTC h).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegral (1 : Rat) c)).Equiv
+        piCircleArea := by
+  have hintegralEndpoint :
+      (IntegralIdentities.arctanIntegral (1 : Rat) c).Equiv
+        (FTC.endpointRawOfEffectiveFTC h) := by
+    simpa [IntegralIdentities.arctanIntegral] using
+      FTC.effectiveFTC_integral_equiv_scheduledEndpoint h c hplan
+  have hgeomValid :
+      (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom :
+      (IntegralIdentities.arctanIntegral (1 : Rat) c).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      (IntegralIdentities.arctanIntegral_valid (1 : Rat) c)
+      hscheduledEndpoint
+      hgeomValid
+      hintegralEndpoint
+      hendpoint
+  exact piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement c hgeom
+
 theorem exists_piFromArctanIntegral_equiv_piCircleArea
     (hgeom : IntegralIdentities.ArctanIntegralGeomAgreement (1 : Rat)) :
     Exists fun c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat) =>
@@ -6288,6 +6356,34 @@ def FareyPrefixGeomAgreementAtOne : Prop :=
   (ArctanGeometry.fareyIntegralPrefixRaw (1 : Rat)).Equiv
     (ArctanGeometry.arctanGeom (1 : Rat))
 
+/-- Cleaner equivalent target for the Farey arctangent row: after normalizing the
+prefix at `1`, compare the full-unit Farey mesh integral directly with the
+geometric sector arctangent. -/
+def FareyUnitIntegralGeomAgreementAtOne : Prop :=
+  ArctanGeometry.fareyIntegralUnitRaw.Equiv
+    (ArctanGeometry.arctanGeom (1 : Rat))
+
+theorem FareyPrefixGeomAgreementAtOne_of_unit_integral_agreement
+    (h : FareyUnitIntegralGeomAgreementAtOne) :
+    FareyPrefixGeomAgreementAtOne :=
+  RealRaw.equiv_trans
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid (1 : Rat))
+    ArctanGeometry.fareyIntegralUnitRaw_valid
+    arctanGeomOneValid
+    ArctanGeometry.fareyIntegralPrefixRaw_one_equiv_unitRaw
+    h
+
+theorem FareyUnitIntegralGeomAgreementAtOne_of_prefix_agreement
+    (h : FareyPrefixGeomAgreementAtOne) :
+    FareyUnitIntegralGeomAgreementAtOne :=
+  RealRaw.equiv_trans
+    ArctanGeometry.fareyIntegralUnitRaw_valid
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid (1 : Rat))
+    arctanGeomOneValid
+    (RealRaw.equiv_symm
+      ArctanGeometry.fareyIntegralPrefixRaw_one_equiv_unitRaw)
+    h
+
 theorem arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement
     (h : FareyPrefixGeomAgreementAtOne) :
     (IntegralIdentities.arctanIntegralFareyFor (1 : Rat)).Equiv
@@ -6327,6 +6423,18 @@ theorem piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_prefix_agreement
     piCircleArea.Equiv piFromArctanIntegralFareyAtOne :=
   RealRaw.equiv_symm
     (piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement h)
+
+theorem piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement
+    (h : FareyUnitIntegralGeomAgreementAtOne) :
+    piFromArctanIntegralFareyAtOne.Equiv piCircleArea :=
+  piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement
+    (FareyPrefixGeomAgreementAtOne_of_unit_integral_agreement h)
+
+theorem piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_unit_integral_agreement
+    (h : FareyUnitIntegralGeomAgreementAtOne) :
+    piCircleArea.Equiv piFromArctanIntegralFareyAtOne :=
+  RealRaw.equiv_symm
+    (piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement h)
 
 theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (((4 : Nat) *
