@@ -533,6 +533,7 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.FareyCell.AdjacentList}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.UnitList}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.DenSumListAtLeast}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.Connects}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.WidthListAtMost}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.widthSum}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquareSum}
@@ -542,9 +543,11 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild_denSum_ge_succ}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild_denSum_ge_succ}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_denSum_ge_succ}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_connects}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.width_nonneg_of_unit}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.child_width_sum}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_widthSum}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSum_eq_value_sub_of_connects}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquare_le_bound_mul_width}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquareSum_le_bound_mul_widthSum}
 \lean{ComputableAnalysis.RationalCircle.FareyCell.den_product_ge_denSum_sub_one}
@@ -561,6 +564,9 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_unit}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_unit}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage_unit}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_connects}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_connects}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_connects}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_denSum_ge_two}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_denSum_ge_succ}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage_denSum_ge}
@@ -618,17 +624,19 @@ integral sums: to compute up to \(x\), take all cells with right endpoint at
 or before \(x\) for the lower sum, and include the first cell crossing \(x\)
 for the upper sum.  Lean proves that mediants stay between their endpoints,
 that subdivision preserves the unit-cell invariant \(0\le p\le r\le1\), and
-that every unit Farey stage has length \(2^n\).  Lean also proves the
+that every unit Farey stage has length \(2^n\).  Lean also proves that these
+cells form a connected partition from \(0\) to \(1\): each cell starts where
+the previous cell ended, and mediant subdivision preserves that chain.  The
 determinant-one adjacency invariant for these cells and the denominator-growth
-bound \(\operatorname{den}(p)+\operatorname{den}(r)\ge n+2\) at stage \(n\);
-these are the arithmetic inputs for the Farey mesh-size estimate.  In
+bound \(\operatorname{den}(p)+\operatorname{den}(r)\ge n+2\) at stage \(n\)
+are then the arithmetic inputs for the Farey mesh-size estimate.  In
 particular, Lean proves that an adjacent cell has rational width
 \[
   r-p = \frac{1}{\operatorname{den}(p)\operatorname{den}(r)}
 \]
 and hence any stage-\(n\) unit Farey cell has width at most \(1/(n+1)\).
-The total width of the unit Farey mesh is invariant under subdivision and is
-therefore exactly \(1\), while the squared-width budget satisfies
+The connected-partition invariant gives the exact total width of the unit
+Farey mesh, namely \(1-0=1\), while the squared-width budget satisfies
 \[
   \sum_{[p,r]\in F_n} (r-p)^2 \le \frac{1}{n+1}.
 \]

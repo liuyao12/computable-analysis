@@ -1609,6 +1609,10 @@ def DenSumListAtLeast (n : Nat) : List FareyCell -> Prop
   | [] => True
   | cell :: rest => cell.DenSumAtLeast n /\ DenSumListAtLeast n rest
 
+def Connects (left right : FareyFraction) : List FareyCell -> Prop
+  | [] => left = right
+  | cell :: rest => cell.left = left /\ Connects cell.right right rest
+
 def WidthListAtMost (M : Rat) : List FareyCell -> Prop
   | [] => True
   | cell :: rest => cell.width <= M /\ WidthListAtMost M rest
@@ -1678,6 +1682,18 @@ theorem subdivideList_denSum_ge_succ {cells : List FareyCell} {n : Nat}
       exact ⟨leftChild_denSum_ge_succ hcell,
         rightChild_denSum_ge_succ hcell, ih hrest⟩
 
+theorem subdivideList_connects {left right : FareyFraction}
+    {cells : List FareyCell}
+    (hcells : Connects left right cells) :
+    Connects left right (subdivideList cells) := by
+  induction cells generalizing left with
+  | nil =>
+      simpa [subdivideList, Connects] using hcells
+  | cons cell rest ih =>
+      rcases hcells with ⟨hleft, hrest⟩
+      simp [subdivideList, Connects, leftChild, rightChild]
+      exact ⟨hleft, ih hrest⟩
+
 theorem width_nonneg_of_unit {cell : FareyCell} (hcell : cell.Unit) :
     0 <= cell.width := by
   rcases hcell with ⟨_hl0, hlr, _hr1⟩
@@ -1699,6 +1715,22 @@ theorem subdivideList_widthSum (cells : List FareyCell) :
       rw [ih]
       have hchild := child_width_sum cell
       grind [Rat.add_assoc, Rat.add_comm]
+
+theorem widthSum_eq_value_sub_of_connects
+    {left right : FareyFraction} {cells : List FareyCell}
+    (hcells : Connects left right cells) :
+    widthSum cells = right.value - left.value := by
+  induction cells generalizing left with
+  | nil =>
+      simp [Connects, widthSum] at hcells ⊢
+      grind [Rat.sub_eq_add_neg]
+  | cons cell rest ih =>
+      rcases hcells with ⟨hleft, hrest⟩
+      have htail := ih hrest
+      unfold widthSum width
+      rw [htail]
+      rw [hleft]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
 theorem widthSquare_le_bound_mul_width
     {cell : FareyCell} {M : Rat}
@@ -1856,6 +1888,26 @@ theorem fareyUnitStage_unit (n : Nat) :
   | succ n ih =>
       exact fareyUnitSubdivide_unit ih
 
+theorem fareyUnitSeed_connects :
+    FareyCell.Connects FareyFraction.zero FareyFraction.one
+      fareyUnitSeed := by
+  simp [fareyUnitSeed, FareyCell.Connects]
+
+theorem fareyUnitSubdivide_connects
+    {left right : FareyFraction} {cells : List FareyCell}
+    (hcells : FareyCell.Connects left right cells) :
+    FareyCell.Connects left right (fareyUnitSubdivide cells) :=
+  FareyCell.subdivideList_connects hcells
+
+theorem fareyUnitStage_connects (n : Nat) :
+    FareyCell.Connects FareyFraction.zero FareyFraction.one
+      (fareyUnitStage n) := by
+  induction n with
+  | zero =>
+      exact fareyUnitSeed_connects
+  | succ n ih =>
+      exact fareyUnitSubdivide_connects ih
+
 theorem fareyUnitSeed_denSum_ge_two :
     FareyCell.DenSumListAtLeast 2 fareyUnitSeed := by
   simp [fareyUnitSeed, FareyCell.DenSumListAtLeast,
@@ -1887,17 +1939,10 @@ theorem fareyUnitSubdivide_widthSum (cells : List FareyCell) :
 
 theorem fareyUnitStage_widthSum (n : Nat) :
     FareyCell.widthSum (fareyUnitStage n) = 1 := by
-  induction n with
-  | zero =>
-      exact fareyUnitSeed_widthSum
-  | succ n ih =>
-      calc
-        FareyCell.widthSum (fareyUnitStage (n + 1)) =
-            FareyCell.widthSum (fareyUnitSubdivide (fareyUnitStage n)) := by
-              rfl
-        _ = FareyCell.widthSum (fareyUnitStage n) := by
-              rw [fareyUnitSubdivide_widthSum]
-        _ = 1 := ih
+  have hconnect := FareyCell.widthSum_eq_value_sub_of_connects
+    (fareyUnitStage_connects n)
+  rw [hconnect]
+  native_decide
 
 theorem fareyUnitStage_widthSquareSum_le_one_div_succ (n : Nat) :
     FareyCell.widthSquareSum (fareyUnitStage n) <=
