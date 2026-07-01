@@ -977,7 +977,16 @@ identity package to be proved for the projected functions.
 
 \begin{theorem}[Circle group law]
 \label{thm:rational-circle-group-law}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.circleOne}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointConj}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_normSq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_comm}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_assoc}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_one_left}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_one_right}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_conj_of_unit}
 \uses{rem:rational-circle-point}
+\leanok
 Let
 \[
   P(u)\cdot P(v)
@@ -985,10 +994,12 @@ Let
   (P(u)_xP(v)_x-P(u)_yP(v)_y,\,
    P(u)_xP(v)_y+P(u)_yP(v)_x)
 \]
-be multiplication of unit-circle points.  In the stereographic chart, this
-has a rational chart-change formula away from the missing point.  The missing
-point is handled by the same quadrant or projective branch data used by the
-geometric point algorithm.
+be multiplication of unit-circle points.  Lean now proves the point-level
+group laws for this operation: exact norm multiplication, commutativity,
+associativity, left and right identity for \((1,0)\), and the conjugate inverse
+law on unit points.  The next layer is the stereographic chart-change formula
+away from the missing point; that formula will use the same quadrant or
+projective branch data as the geometric point algorithm.
 \end{theorem}
 
 \begin{theorem}[Projected addition formulas]

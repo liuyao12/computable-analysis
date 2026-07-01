@@ -999,6 +999,12 @@ def pointMul (p q : PiCirclePoint) : PiCirclePoint :=
   { x := p.x * q.x - p.y * q.y,
     y := p.x * q.y + p.y * q.x }
 
+def circleOne : PiCirclePoint :=
+  { x := 1, y := 0 }
+
+def pointConj (p : PiCirclePoint) : PiCirclePoint :=
+  { x := p.x, y := -p.y }
+
 def composedPoint (u v : Rat) : PiCirclePoint :=
   pointMul (point u) (point v)
 
@@ -1041,6 +1047,50 @@ theorem pointMul_normSq_of_unit
   unfold pointMul Stage.normSq at *
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem pointMul_normSq (p q : PiCirclePoint) :
+    Stage.normSq (pointMul p q) = Stage.normSq p * Stage.normSq q := by
+  cases p; cases q
+  simp [pointMul, Stage.normSq]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem pointMul_comm (p q : PiCirclePoint) :
+    pointMul p q = pointMul q p := by
+  cases p; cases q
+  simp [pointMul]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem pointMul_assoc (p q r : PiCirclePoint) :
+    pointMul (pointMul p q) r = pointMul p (pointMul q r) := by
+  cases p; cases q; cases r
+  simp [pointMul]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem pointMul_one_left (p : PiCirclePoint) :
+    pointMul circleOne p = p := by
+  cases p
+  simp [pointMul, circleOne]
+  grind [Rat.sub_eq_add_neg]
+
+theorem pointMul_one_right (p : PiCirclePoint) :
+    pointMul p circleOne = p := by
+  cases p
+  simp [pointMul, circleOne]
+  grind [Rat.sub_eq_add_neg]
+
+theorem pointMul_conj_of_unit {p : PiCirclePoint}
+    (hp : Stage.normSq p = 1) :
+    pointMul p (pointConj p) = circleOne := by
+  cases p
+  simp [pointMul, pointConj, circleOne, Stage.normSq] at *
+  constructor
+  · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 theorem composedPoint_normSq (u v : Rat) :
     Stage.normSq (composedPoint u v) = 1 :=
