@@ -372,18 +372,18 @@ The current score is:
 \hline
 \code{piCircleArea} &
 \cref{def:circle-area-stage-algorithm}; \cref{thm:geometric-pi-validity} &
-\([4a_n,4b_n]\) from rational midpoint increment/decrement triangles. &
+\(\pi\in[4a_n,4b_n]\). &
 \(\checkmark\) & N/A\\
 \code{piCircumference} &
 \cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
-\(L_n\le \pi\le U_n\) from polygonal circumference bounds. &
+\(L_n\le \pi\le U_n\). &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
 \cref{def:arctan-area-stage-algorithm},
 \cref{def:arctan-integral}, \cref{def:arctan-series},
 \cref{thm:power-series-arctan-area-pi} for
 \code{4 * arctanSeries(1)}, and \cref{thm:leibniz-machin} for
-\code{piMachin}.  These rows use \(\pi=4\arctan(1)\) or Machin's
+\code{piMachin}: \(\pi=4\arctan(1)\);
 \(\pi=4(4\arctan(1/5)-\arctan(1/239))\).}\\
 \code{4 * arctanGeom(1)} &
 \cref{def:arctan-area-stage-algorithm};
@@ -393,12 +393,12 @@ The current score is:
 \code{4 * arctanIntegralRectangleForAtOne} &
 \cref{thm:finite-arctan-integral-comparison};
 \cref{thm:arctan-integral-pi} &
-\(\pi=4\int_0^1 \frac{dt}{1+t^2}\), via midpoint rectangle sums. &
+\(\pi=4\int_0^1 \frac{dt}{1+t^2}\). &
 \(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanIntegralFareyFor(1)} &
 \cref{thm:finite-arctan-integral-comparison};
 \cref{thm:arctan-integral-pi} &
-\(\pi=4I(0,1)\), where \(I\) uses the global Farey-prefix mesh. &
+\(\pi=4I_{\mathrm{Farey}}(0,1)\). &
 \(\checkmark\) & \(\times\)\\
 \code{4 * arctanIntegral(1)} &
 \cref{def:arctan-integral}; \cref{thm:arctan-integral-pi} &
@@ -439,16 +439,13 @@ The current score is:
 \(\checkmark\) & \(\times\)\\
 \code{Brouncker(4/pi)} &
 \cref{rem:sources-of-raw-reals} &
-Brouncker continued fraction for \(4/\pi\). &
+\(\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}\). &
 \(\times\) & \(\times\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
-\(\pi=-2i\log(i)\), tested through several different definitions of
-\(\log(i)\) in
 \cref{thm:log-at-i-pi-routes}, \cref{def:complex-log-series-at-i},
 \cref{def:complex-log-path-integral-at-i},
-\cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}.  These
-rows are meant to test branch control, agreement of logarithm constructions,
-and Euler's identity.}\\
+\cref{def:complex-log-inv-exp-at-i}, and \cref{thm:euler-identity}:
+\(\pi=-2i\log(i)\).}\\
 \code{-2i * logSeries(i)} &
 \cref{def:complex-log-series-at-i};
 \cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
