@@ -202,10 +202,11 @@ restrict to the points where the left and right derivatives agree.
 
 The integral used in this chapter is the constructive definite integral
 already introduced in Chapter~\ref{ch:integrals}.  The present chapter proves
-when such an integral is equal to an endpoint difference.  For the pi
-scoreboard, this matters as a proof route: FTC can close the equivalence proof
-for an existing integral computation of \(\pi\), even though it is not itself a
-new pi algorithm.
+when such an integral is equal to an endpoint difference.  This is one reason
+the pi scoreboard is a useful progress gauge: some existing integral
+computations of \(\pi\) can be proved equivalent by finite comparison, while
+others should eventually be proved equivalent through FTC-style endpoint
+identities.
 
 \begin{theorem}[Monotone functions are integrable]
 \label{thm:monotone-integrable}
@@ -233,7 +234,7 @@ gives raw-real equivalence between the scheduled integral and the scheduled
 endpoint raw real.  The derivative-bound version is the current reusable
 calculus interface: local derivative bounds on rational partition cells are
 summed and compared with endpoint differences.  This is the formal proof-route
-object used by arctangent-integral pi equivalence targets.
+object that can support arctangent-integral pi equivalence targets.
 \end{theorem}
 
 \begin{theorem}[Fundamental theorem of calculus]\label{thm:convex-ftc}

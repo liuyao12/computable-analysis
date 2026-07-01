@@ -70,13 +70,13 @@ the unit-branch construction is now named by
 `PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea`.  The more
 general older `arctanIntegral(1)` row remains pending because that nonnegative
 point-Riemann construction wrapper has not yet been identified with this
-domain-aware schedule.  Lean now also records the FTC proof-route interface for
-this same row:
+domain-aware schedule.  As an indication of the calculus that can enter this
+row, Lean also records:
 `PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_definite_identity` and
 `PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC` say that a
 definite-integral identity, respectively an effective FTC certificate, for the
-arctangent primitive and kernel closes the pi equivalence.  These are proof
-routes for existing table entries, not additional pi computations.  The
+arctangent primitive and kernel closes the pi equivalence.  These support the
+existing table entries rather than adding new pi computations.  The
 rectangle schedule itself is now verified more
 generally as `ArctanGeometry.arctanIntegralRectangleRaw_valid` and
 `IntegralIdentities.arctanIntegralRectangleFor_valid` for rational

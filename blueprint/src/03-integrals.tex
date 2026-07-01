@@ -112,8 +112,8 @@ for that integral algorithm.  The current Lean theorem packages the completed
 derivative-bound route: once finite local derivative bounds on rational
 partition cells enclose both candidate derivative values and primitive endpoint
 differences, the integral raw real is equivalent to the endpoint-difference raw
-real.  This is the proof-route interface used later for pi equivalences; it is
-not counted as a separate pi computation.
+real.  This is one way an integral row in the pi scoreboard can measure genuine
+calculus content, while still counting only the underlying pi computation.
 \end{theorem}
 
 \section{The arctangent integral}
@@ -523,7 +523,7 @@ The theorem
 \code{piFromArctanIntegralFareyAtOne\_equiv\_piCircleArea\_of\_unit\_integral\_agreement}
 packages the resulting chain of raw-real equivalences.
 
-Separately, Lean records an FTC proof route for the same pi benchmark.  If a
+The same pi benchmark can also be closed through calculus.  If a
 definite-integral identity proves that the arctangent kernel integral over
 \([0,1]\) is the endpoint difference of a primitive equivalent to
 \code{arctanGeom(1)}, then
@@ -531,8 +531,8 @@ definite-integral identity proves that the arctangent kernel integral over
 closes the pi equivalence.  The more explicit
 \code{piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC} version uses
 an \code{EffectiveFTC} certificate and a matching integral schedule.  These are
-alternative proof routes for the arctangent-integral rows, not additional rows
-in the pi scoreboard.
+supporting bridge theorems for the arctangent-integral rows, not additional
+rows in the pi scoreboard.
 \end{theorem}
 
 \section{A Projective-Line Test Integral}
