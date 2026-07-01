@@ -429,13 +429,141 @@ theorem arctanIntegralRectangleUnitComputes_one :
     (1 : Rat) (by native_decide) (by native_decide)
 
 /-- The global Farey-prefix construction for
+`∫_a^b dt / (1 + t^2)`, packaged as a domain-aware integral construction.
+The construction uses one shared Farey mesh and subtracts global prefixes, so
+additivity over adjacent intervals is inherited from the raw Farey theorem. -/
+def oneOverOnePlusSquareFareyConstruction
+    (a b : Rat) :
+    Integral.ConstructionFor (oneOverOnePlusSquareOnInterval a b) where
+  compute := (ArctanGeometry.fareyIntegralBetweenRaw a b).compute
+  certificate := ArctanGeometry.fareyIntegralBetweenRaw_valid a b
+
+def oneOverOnePlusSquareFareyIntegral (a b : Rat) : RealRaw :=
+  Integral.integralFor (oneOverOnePlusSquareOnInterval a b)
+    (oneOverOnePlusSquareFareyConstruction a b)
+
+theorem oneOverOnePlusSquareFareyIntegral_valid (a b : Rat) :
+    (oneOverOnePlusSquareFareyIntegral a b).Valid := by
+  change RealRaw.ValidCompute
+    ((ArctanGeometry.fareyIntegralBetweenRaw a b).compute)
+  exact ArctanGeometry.fareyIntegralBetweenRaw_valid a b
+
+theorem oneOverOnePlusSquareFareyIntegral_compute_eq
+    (a b : Rat) (n : Nat) :
+    (oneOverOnePlusSquareFareyIntegral a b).compute n =
+      (ArctanGeometry.fareyIntegralBetweenRaw a b).compute n := rfl
+
+theorem oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw
+    (a b : Rat) :
+    (oneOverOnePlusSquareFareyIntegral a b).Equiv
+      (ArctanGeometry.fareyIntegralBetweenRaw a b) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (oneOverOnePlusSquareFareyIntegral a b)
+    (ArctanGeometry.fareyIntegralBetweenRaw a b) n n).2
+  rw [oneOverOnePlusSquareFareyIntegral_compute_eq]
+  have hordered :=
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid a b).1 n
+  have hle :
+      ((ArctanGeometry.fareyIntegralBetweenRaw a b).compute n).lo <=
+        ((ArctanGeometry.fareyIntegralBetweenRaw a b).compute n).hi := by
+    unfold QInterval.width at hordered
+    grind [Rat.sub_eq_add_neg]
+  exact ⟨hle, hle⟩
+
+theorem oneOverOnePlusSquareFareyIntegral_additive
+    (a b c : Rat) :
+    (oneOverOnePlusSquareFareyIntegral a b +
+      oneOverOnePlusSquareFareyIntegral b c).Equiv
+        (oneOverOnePlusSquareFareyIntegral a c) := by
+  have hleftValid :
+      (oneOverOnePlusSquareFareyIntegral a b +
+        oneOverOnePlusSquareFareyIntegral b c).Valid :=
+    RealRaw.add_valid
+      (oneOverOnePlusSquareFareyIntegral_valid a b)
+      (oneOverOnePlusSquareFareyIntegral_valid b c)
+  have hrawLeftValid :
+      (ArctanGeometry.fareyIntegralBetweenRaw a b +
+        ArctanGeometry.fareyIntegralBetweenRaw b c).Valid :=
+    RealRaw.add_valid
+      (ArctanGeometry.fareyIntegralBetweenRaw_valid a b)
+      (ArctanGeometry.fareyIntegralBetweenRaw_valid b c)
+  have hrawRightValid :
+      (ArctanGeometry.fareyIntegralBetweenRaw a c).Valid :=
+    ArctanGeometry.fareyIntegralBetweenRaw_valid a c
+  have hrightValid :
+      (oneOverOnePlusSquareFareyIntegral a c).Valid :=
+    oneOverOnePlusSquareFareyIntegral_valid a c
+  have hleftRaw :
+      (oneOverOnePlusSquareFareyIntegral a b +
+        oneOverOnePlusSquareFareyIntegral b c).Equiv
+          (ArctanGeometry.fareyIntegralBetweenRaw a b +
+            ArctanGeometry.fareyIntegralBetweenRaw b c) :=
+    RealRaw.add_equiv
+      (oneOverOnePlusSquareFareyIntegral_valid a b)
+      (ArctanGeometry.fareyIntegralBetweenRaw_valid a b)
+      (oneOverOnePlusSquareFareyIntegral_valid b c)
+      (ArctanGeometry.fareyIntegralBetweenRaw_valid b c)
+      (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw a b)
+      (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw b c)
+  have hrawToRight :
+      (ArctanGeometry.fareyIntegralBetweenRaw a b +
+        ArctanGeometry.fareyIntegralBetweenRaw b c).Equiv
+          (oneOverOnePlusSquareFareyIntegral a c) :=
+    RealRaw.equiv_trans hrawLeftValid hrawRightValid hrightValid
+      (ArctanGeometry.fareyIntegralBetweenRaw_additive a b c)
+      (RealRaw.equiv_symm
+        (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw a c))
+  exact RealRaw.equiv_trans hleftValid hrawLeftValid hrightValid
+    hleftRaw hrawToRight
+
+theorem oneOverOnePlusSquareFareyIntegral_self_equiv_zero
+    (a : Rat) :
+    (oneOverOnePlusSquareFareyIntegral a a).Equiv (RealRaw.ofRat 0) := by
+  exact RealRaw.equiv_trans
+    (oneOverOnePlusSquareFareyIntegral_valid a a)
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid a a)
+    (RealRaw.ofRat_valid 0)
+    (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw a a)
+    (ArctanGeometry.fareyIntegralBetweenRaw_self_equiv_zero a)
+
+theorem oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg
+    (a b : Rat) :
+    (oneOverOnePlusSquareFareyIntegral a b).Equiv
+      (-(oneOverOnePlusSquareFareyIntegral b a)) := by
+  have hleftValid :
+      (oneOverOnePlusSquareFareyIntegral a b).Valid :=
+    oneOverOnePlusSquareFareyIntegral_valid a b
+  have hrawLeftValid :
+      (ArctanGeometry.fareyIntegralBetweenRaw a b).Valid :=
+    ArctanGeometry.fareyIntegralBetweenRaw_valid a b
+  have hnegRawValid :
+      (-(ArctanGeometry.fareyIntegralBetweenRaw b a)).Valid :=
+    RealRaw.neg_valid
+      (ArctanGeometry.fareyIntegralBetweenRaw_valid b a)
+  have hnegRightValid :
+      (-(oneOverOnePlusSquareFareyIntegral b a)).Valid :=
+    RealRaw.neg_valid (oneOverOnePlusSquareFareyIntegral_valid b a)
+  have hrawToNegIntegral :
+      (ArctanGeometry.fareyIntegralBetweenRaw a b).Equiv
+        (-(oneOverOnePlusSquareFareyIntegral b a)) :=
+    RealRaw.equiv_trans hrawLeftValid hnegRawValid hnegRightValid
+      (ArctanGeometry.fareyIntegralBetweenRaw_reverse_equiv_neg a b)
+      (RealRaw.neg_equiv
+        (RealRaw.equiv_symm
+          (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw b a)))
+  exact RealRaw.equiv_trans hleftValid hrawLeftValid hnegRightValid
+    (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw a b)
+    hrawToNegIntegral
+
+/-- The global Farey-prefix construction for
 `∫_0^x dt / (1 + t^2)`, packaged as a domain-aware integral construction.
 Unlike the rectangle route, this uses one shared Farey mesh for all endpoints
 and then subtracts prefixes. -/
 def arctanIntegralFareyConstruction
     (x : Rat) : Integral.ConstructionFor (arctanKernelInterval x) where
-  compute := (ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute
-  certificate := ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x
+  compute := (oneOverOnePlusSquareFareyIntegral 0 x).compute
+  certificate := oneOverOnePlusSquareFareyIntegral_valid 0 x
 
 def arctanIntegralFareyFor (x : Rat) : RealRaw :=
   Integral.integralFor (arctanKernelInterval x)
@@ -444,29 +572,35 @@ def arctanIntegralFareyFor (x : Rat) : RealRaw :=
 theorem arctanIntegralFareyFor_valid (x : Rat) :
     (arctanIntegralFareyFor x).Valid := by
   change RealRaw.ValidCompute
-    ((ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute)
-  exact ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x
+    ((oneOverOnePlusSquareFareyIntegral 0 x).compute)
+  exact oneOverOnePlusSquareFareyIntegral_valid 0 x
 
 theorem arctanIntegralFareyFor_compute_eq (x : Rat) (n : Nat) :
     (arctanIntegralFareyFor x).compute n =
-      (ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute n := rfl
+      (oneOverOnePlusSquareFareyIntegral 0 x).compute n := rfl
 
 theorem arctanIntegralFareyFor_equiv_betweenRaw (x : Rat) :
     (arctanIntegralFareyFor x).Equiv
       (ArctanGeometry.fareyIntegralBetweenRaw 0 x) := by
-  intro n
-  apply (RealRaw.compareAt_overlap_iff
-    (arctanIntegralFareyFor x)
-    (ArctanGeometry.fareyIntegralBetweenRaw 0 x) n n).2
-  rw [arctanIntegralFareyFor_compute_eq]
-  have hordered :=
-    (ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x).1 n
-  have hle :
-      ((ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute n).lo <=
-        ((ArctanGeometry.fareyIntegralBetweenRaw 0 x).compute n).hi := by
-    unfold QInterval.width at hordered
-    grind [Rat.sub_eq_add_neg]
-  exact ⟨hle, hle⟩
+  exact RealRaw.equiv_trans
+    (arctanIntegralFareyFor_valid x)
+    (oneOverOnePlusSquareFareyIntegral_valid 0 x)
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x)
+    (by
+      intro n
+      apply (RealRaw.compareAt_overlap_iff
+        (arctanIntegralFareyFor x)
+        (oneOverOnePlusSquareFareyIntegral 0 x) n n).2
+      rw [arctanIntegralFareyFor_compute_eq]
+      have hordered :=
+        (oneOverOnePlusSquareFareyIntegral_valid 0 x).1 n
+      have hle :
+          ((oneOverOnePlusSquareFareyIntegral 0 x).compute n).lo <=
+            ((oneOverOnePlusSquareFareyIntegral 0 x).compute n).hi := by
+        unfold QInterval.width at hordered
+        grind [Rat.sub_eq_add_neg]
+      exact ⟨hle, hle⟩)
+    (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw 0 x)
 
 theorem arctanIntegralFareyFor_equiv_prefix (x : Rat) :
     (arctanIntegralFareyFor x).Equiv

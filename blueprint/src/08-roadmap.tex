@@ -111,6 +111,11 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_self_equiv_zero}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
@@ -454,9 +459,11 @@ power-series row is
 deliberately named \code{4 * arctanSeries(1)}; the Leibniz series is its
 historical expansion.  The
 concrete rectangle row is completed.  The Farey-prefix row is definition
-complete, but its equivalence remains pending until the shared-Farey-mesh
-integral is compared with the geometric sector arctangent.  The general
-\code{arctanIntegral(1)} row remains pending until the older nonnegative
+complete, and the underlying domain-aware Farey integral already satisfies
+additivity, zero-length, and reversal laws; its equivalence remains pending
+until the shared-Farey-mesh integral is compared with the geometric sector
+arctangent.  The general \code{arctanIntegral(1)} row remains pending until
+the older nonnegative
 point-Riemann wrapper is identified with the domain-aware rectangle schedule.
 The unit-branch integral interface is already completed through
 \code{PiProofs.piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.

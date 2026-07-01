@@ -299,6 +299,14 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_self_equiv_zero}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
@@ -414,12 +422,20 @@ nonnegative point-Riemann \code{arctanIntegral(1)} API with this
 domain-aware schedule, or replace that older API throughout.
 
 The global Farey-prefix algorithm is also packaged as a
-\code{ConstructionFor}: \code{arctanIntegralFareyFor(x)} uses
-\code{fareyIntegralBetweenRaw(0,x)}, is verified for every rational \(x\),
-and is equivalent to the prefix raw real \code{fareyIntegralPrefixRaw(x)}.
-This gives a second verified integral-style arctangent computation, with the
-remaining comparison target being the mesh-independent equivalence to the
-geometric sector arctangent.
+\code{ConstructionFor}: first
+\code{oneOverOnePlusSquareFareyIntegral(a,b)} wraps
+\code{fareyIntegralBetweenRaw(a,b)} as the integral of the kernel on
+\([a,b]\).  Lean proves the domain-aware laws
+\[
+  J(a,b)+J(b,c)\sim J(a,c),\qquad
+  J(a,a)\sim0,\qquad
+  J(a,b)\sim -J(b,a).
+\]
+The arctangent specialization \code{arctanIntegralFareyFor(x)} is \(J(0,x)\);
+it is verified for every rational \(x\), and is equivalent to the prefix raw
+real \code{fareyIntegralPrefixRaw(x)}.  This gives a second verified
+integral-style arctangent computation, with the remaining comparison target
+being the mesh-independent equivalence to the geometric sector arctangent.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]

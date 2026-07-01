@@ -81,7 +81,9 @@ integral route is now also definition-complete as
 `PiProofs.piFromArctanIntegralFareyAtOne_valid`, and Lean identifies it with
 `4 * fareyIntegralPrefixRaw(1)` via
 `PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one`; its
-equivalence to `piCircleArea` is still pending.
+equivalence to `piCircleArea` is still pending.  The supporting
+`oneOverOnePlusSquareFareyIntegral(a,b)` construction is verified and now has
+formal additivity, zero-length, and reversal laws.
 
 The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
 as an equivalence target.  The series-arctangent-to-area route is now reduced
