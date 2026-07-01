@@ -1026,6 +1026,24 @@ def doubleSin (u : Rat) : Rat :=
 def quarterComplementParameter (u : Rat) : Rat :=
   (1 - u) / (1 + u)
 
+def chartAddNum (u v : Rat) : Rat :=
+  u + v
+
+def chartAddDen (u v : Rat) : Rat :=
+  1 - u * v
+
+def chartAddParameter (u v : Rat) : Rat :=
+  chartAddNum u v / chartAddDen u v
+
+def chartAddNormDen (u v : Rat) : Rat :=
+  sq (chartAddDen u v) + sq (chartAddNum u v)
+
+def chartAddCosNum (u v : Rat) : Rat :=
+  sq (chartAddDen u v) - sq (chartAddNum u v)
+
+def chartAddSinNum (u v : Rat) : Rat :=
+  2 * chartAddNum u v * chartAddDen u v
+
 theorem cos_eq (u : Rat) :
     cos u = (1 - u * u) / (1 + u * u) := rfl
 
@@ -1104,6 +1122,57 @@ theorem composed_cos_eq (u v : Rat) :
 theorem composed_sin_eq (u v : Rat) :
     composedSin u v = cos u * sin v + sin u * cos v := by
   rfl
+
+theorem chartAdd_normDen_eq (u v : Rat) :
+    chartAddNormDen u v = (1 + u * u) * (1 + v * v) := by
+  unfold chartAddNormDen chartAddDen chartAddNum sq
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem chartAdd_normDen_pos (u v : Rat) :
+    0 < chartAddNormDen u v := by
+  rw [chartAdd_normDen_eq]
+  exact Rat.mul_pos (Stage.one_add_square_pos u) (Stage.one_add_square_pos v)
+
+theorem chartAdd_cosNum_eq (u v : Rat) :
+    chartAddCosNum u v =
+      (1 - u * u) * (1 - v * v) - (2 * u) * (2 * v) := by
+  unfold chartAddCosNum chartAddDen chartAddNum sq
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem chartAdd_sinNum_eq (u v : Rat) :
+    chartAddSinNum u v =
+      (1 - u * u) * (2 * v) + (2 * u) * (1 - v * v) := by
+  unfold chartAddSinNum chartAddDen chartAddNum
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem composedCos_chartAdd_denominator_cleared (u v : Rat) :
+    ((1 + u * u) * (1 + v * v)) * composedCos u v =
+      chartAddCosNum u v := by
+  rw [composed_cos_eq, chartAdd_cosNum_eq]
+  unfold cos sin point Stage.point
+  simp [Rat.div_def]
+  have hdupos : 0 < 1 + u * u := Stage.one_add_square_pos u
+  have hdvpos : 0 < 1 + v * v := Stage.one_add_square_pos v
+  have hdune : 1 + u * u ≠ 0 := Rat.ne_of_gt hdupos
+  have hdvne : 1 + v * v ≠ 0 := Rat.ne_of_gt hdvpos
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem composedSin_chartAdd_denominator_cleared (u v : Rat) :
+    ((1 + u * u) * (1 + v * v)) * composedSin u v =
+      chartAddSinNum u v := by
+  rw [composed_sin_eq, chartAdd_sinNum_eq]
+  unfold cos sin point Stage.point
+  simp [Rat.div_def]
+  have hdupos : 0 < 1 + u * u := Stage.one_add_square_pos u
+  have hdvpos : 0 < 1 + v * v := Stage.one_add_square_pos v
+  have hdune : 1 + u * u ≠ 0 := Rat.ne_of_gt hdupos
+  have hdvne : 1 + v * v ≠ 0 := Rat.ne_of_gt hdvpos
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 theorem composed_cos_sq_add_sin_sq (u v : Rat) :
     sq (composedCos u v) + sq (composedSin u v) = 1 := by
@@ -1636,6 +1705,26 @@ structure BasicIdentityPackage : Prop where
     forall u v : Rat, composedCos u v = cos u * cos v - sin u * sin v
   add_sin :
     forall u v : Rat, composedSin u v = cos u * sin v + sin u * cos v
+  chart_add_norm_den :
+    forall u v : Rat, chartAddNormDen u v = (1 + u * u) * (1 + v * v)
+  chart_add_norm_den_pos :
+    forall u v : Rat, 0 < chartAddNormDen u v
+  chart_add_cos_num :
+    forall u v : Rat,
+      chartAddCosNum u v =
+        (1 - u * u) * (1 - v * v) - (2 * u) * (2 * v)
+  chart_add_sin_num :
+    forall u v : Rat,
+      chartAddSinNum u v =
+        (1 - u * u) * (2 * v) + (2 * u) * (1 - v * v)
+  chart_add_cos_denominator_cleared :
+    forall u v : Rat,
+      ((1 + u * u) * (1 + v * v)) * composedCos u v =
+        chartAddCosNum u v
+  chart_add_sin_denominator_cleared :
+    forall u v : Rat,
+      ((1 + u * u) * (1 + v * v)) * composedSin u v =
+        chartAddSinNum u v
   add_cos_comm : forall u v : Rat, composedCos u v = composedCos v u
   add_sin_comm : forall u v : Rat, composedSin u v = composedSin v u
   add_cos_zero_left : forall u : Rat, composedCos 0 u = cos u
@@ -1758,6 +1847,12 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   csc_cot_pythagorean := fun _ h => csc_sq_sub_cot_sq_eq_one h
   add_cos := composed_cos_eq
   add_sin := composed_sin_eq
+  chart_add_norm_den := chartAdd_normDen_eq
+  chart_add_norm_den_pos := chartAdd_normDen_pos
+  chart_add_cos_num := chartAdd_cosNum_eq
+  chart_add_sin_num := chartAdd_sinNum_eq
+  chart_add_cos_denominator_cleared := composedCos_chartAdd_denominator_cleared
+  chart_add_sin_denominator_cleared := composedSin_chartAdd_denominator_cleared
   add_cos_comm := composedCos_comm
   add_sin_comm := composedSin_comm
   add_cos_zero_left := composedCos_zero_left
