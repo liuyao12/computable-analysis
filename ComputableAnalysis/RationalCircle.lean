@@ -892,6 +892,450 @@ theorem circumferenceInterval_eq_common (S : Stage) :
 
 end Stage
 
+/-- A rational number together with one formal point at infinity.
+
+This is deliberately small: for now it is only the codomain of slope-like
+quantities such as tangent, where the vertical direction should be a genuine
+formal value instead of the rational expression `1 / 0`. -/
+inductive ProjectiveRat where
+  | finite : Rat -> ProjectiveRat
+  | infinity : ProjectiveRat
+deriving DecidableEq
+
+namespace ProjectiveRat
+
+def ofOption : Option Rat -> ProjectiveRat
+  | some q => finite q
+  | none => infinity
+
+def ofHom (n d : Rat) : ProjectiveRat :=
+  if _hd : d = 0 then infinity else finite (n / d)
+
+def num : ProjectiveRat -> Rat
+  | finite q => q
+  | infinity => 1
+
+def den : ProjectiveRat -> Rat
+  | finite _ => 1
+  | infinity => 0
+
+def neg : ProjectiveRat -> ProjectiveRat
+  | finite q => finite (-q)
+  | infinity => infinity
+
+def inv : ProjectiveRat -> ProjectiveRat
+  | finite q => if _hq : q = 0 then infinity else finite (1 / q)
+  | infinity => finite 0
+
+def tanAdd (x y : ProjectiveRat) : ProjectiveRat :=
+  ofHom (x.num * y.den + x.den * y.num) (x.den * y.den - x.num * y.num)
+
+def tanSub (x y : ProjectiveRat) : ProjectiveRat :=
+  tanAdd x y.neg
+
+def tanDouble (x : ProjectiveRat) : ProjectiveRat :=
+  tanAdd x x
+
+theorem ofOption_some (q : Rat) :
+    ofOption (some q) = finite q := rfl
+
+theorem ofOption_none :
+    ofOption none = infinity := rfl
+
+theorem ofHom_den_zero {n d : Rat} (hd : d = 0) :
+    ofHom n d = infinity := by
+  unfold ofHom
+  simp [hd]
+
+theorem ofHom_den_ne_zero {n d : Rat} (hd : d ≠ 0) :
+    ofHom n d = finite (n / d) := by
+  unfold ofHom
+  simp [hd]
+
+theorem neg_finite (q : Rat) :
+    neg (finite q) = finite (-q) := rfl
+
+theorem neg_infinity :
+    neg infinity = infinity := rfl
+
+theorem inv_zero :
+    inv (finite 0) = infinity := by
+  native_decide
+
+theorem inv_finite_ne_zero {q : Rat} (hq : q ≠ 0) :
+    inv (finite q) = finite (1 / q) := by
+  unfold inv
+  simp [hq]
+
+theorem inv_infinity :
+    inv infinity = finite 0 := rfl
+
+theorem tanAdd_finite_finite (x y : Rat) :
+    tanAdd (finite x) (finite y) = ofHom (x + y) (1 - x * y) := by
+  unfold tanAdd num den
+  grind [Rat.add_comm]
+
+theorem tanAdd_finite_infinity (x : Rat) :
+    tanAdd (finite x) infinity = ofHom 1 (-x) := by
+  unfold tanAdd num den
+  change ofHom (x * 0 + 1 * 1) (1 * 0 - x * 1) = ofHom 1 (-x)
+  have hnum : x * 0 + 1 * 1 = 1 := by grind
+  have hden : 1 * 0 - x * 1 = -x := by grind [Rat.sub_eq_add_neg]
+  rw [hnum, hden]
+
+theorem tanAdd_infinity_finite (x : Rat) :
+    tanAdd infinity (finite x) = ofHom 1 (-x) := by
+  unfold tanAdd num den
+  change ofHom (1 * 1 + 0 * x) (0 * 1 - 1 * x) = ofHom 1 (-x)
+  have hnum : 1 * 1 + 0 * x = 1 := by grind
+  have hden : 0 * 1 - 1 * x = -x := by grind [Rat.sub_eq_add_neg]
+  rw [hnum, hden]
+
+theorem tanAdd_infinity_infinity :
+    tanAdd infinity infinity = finite 0 := by
+  native_decide
+
+theorem tanDouble_finite (x : Rat) :
+    tanDouble (finite x) = ofHom (2 * x) (1 - x * x) := by
+  unfold tanDouble
+  rw [tanAdd_finite_finite]
+  have htwo : x + x = 2 * x := by
+    calc
+      x + x = (1 : Rat) * x + (1 : Rat) * x := by grind
+      _ = ((1 : Rat) + 1) * x := by rw [Rat.add_mul]
+      _ = 2 * x := by
+        have h2 : (1 : Rat) + 1 = 2 := by native_decide
+        rw [h2]
+  rw [htwo]
+
+theorem tanDouble_infinity :
+    tanDouble infinity = finite 0 := by
+  native_decide
+
+theorem ofHom_neg_num (n d : Rat) :
+    ofHom (-n) d = (ofHom n d).neg := by
+  unfold ofHom neg
+  by_cases hd : d = 0
+  · simp [hd]
+  · simp [hd]
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.neg_mul]
+
+theorem ofHom_swap_eq_inv {n d : Rat} (hnd : n ≠ 0 ∨ d ≠ 0) :
+    ofHom d n = (ofHom n d).inv := by
+  unfold ofHom inv
+  by_cases hn : n = 0
+  · by_cases hd : d = 0
+    · exfalso
+      cases hnd with
+      | inl hn' => exact hn' hn
+      | inr hd' => exact hd' hd
+    · simp [hn, hd]
+      rw [Rat.div_def]
+      grind
+  · by_cases hd : d = 0
+    · simp [hn, hd]
+      rw [Rat.div_def]
+      grind
+    · simp [hn, hd]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def]
+      grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel]
+
+end ProjectiveRat
+
+/-- The projective slope of a point: `y / x` when `x ≠ 0`, and infinity when the
+point is vertical. -/
+def projectiveSlope (p : PiCirclePoint) : ProjectiveRat :=
+  ProjectiveRat.ofHom p.y p.x
+
+theorem projectiveSlope_x_zero {p : PiCirclePoint} (hx : p.x = 0) :
+    projectiveSlope p = ProjectiveRat.infinity := by
+  unfold projectiveSlope
+  exact ProjectiveRat.ofHom_den_zero hx
+
+theorem projectiveSlope_x_ne_zero {p : PiCirclePoint} (hx : p.x ≠ 0) :
+    projectiveSlope p = ProjectiveRat.finite (p.y / p.x) := by
+  unfold projectiveSlope
+  exact ProjectiveRat.ofHom_den_ne_zero hx
+
+/-- A homogeneous rational parameter for the extended rational line.
+
+The finite parameter `a / b` is represented by `(a : b)`, while `b = 0`
+represents the point at infinity.  This is the natural setting for Farey
+subdivision and for using the rational circle parametrization on the full
+projective parameter line. -/
+structure ProjectiveParameter where
+  a : Int
+  b : Int
+  nonzero : a ≠ 0 ∨ b ≠ 0
+
+namespace ProjectiveParameter
+
+def denom (p : ProjectiveParameter) : Rat :=
+  (p.a : Rat) * (p.a : Rat) + (p.b : Rat) * (p.b : Rat)
+
+private theorem rat_intCast_ne_zero_of_ne_zero {z : Int} (hz : z ≠ 0) :
+    (z : Rat) ≠ 0 := by
+  exact_mod_cast hz
+
+private theorem rat_square_pos_of_ne_zero {x : Rat} (hx : x ≠ 0) :
+    0 < x * x := by
+  by_cases hxpos : 0 < x
+  · exact Rat.mul_pos hxpos hxpos
+  · have hxneg : x < 0 := by grind
+    have hnegpos : 0 < -x := by grind
+    have hsq : 0 < (-x) * (-x) := Rat.mul_pos hnegpos hnegpos
+    grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem denom_pos (p : ProjectiveParameter) : 0 < p.denom := by
+  unfold denom
+  cases p.nonzero with
+  | inl ha =>
+      have hsqa : 0 < (p.a : Rat) * (p.a : Rat) :=
+        rat_square_pos_of_ne_zero (rat_intCast_ne_zero_of_ne_zero ha)
+      have hsqb : 0 <= (p.b : Rat) * (p.b : Rat) :=
+        Stage.ratSquare_nonneg (p.b : Rat)
+      grind
+  | inr hb =>
+      have hsqa : 0 <= (p.a : Rat) * (p.a : Rat) :=
+        Stage.ratSquare_nonneg (p.a : Rat)
+      have hsqb : 0 < (p.b : Rat) * (p.b : Rat) :=
+        rat_square_pos_of_ne_zero (rat_intCast_ne_zero_of_ne_zero hb)
+      grind
+
+def toRat? (p : ProjectiveParameter) : Option Rat :=
+  if _hb : p.b = 0 then none else some ((p.a : Rat) / (p.b : Rat))
+
+def point (p : ProjectiveParameter) : PiCirclePoint :=
+  let a : Rat := p.a
+  let b : Rat := p.b
+  let d := p.denom
+  { x := (b * b - a * a) / d,
+    y := (2 * a * b) / d }
+
+def zero : ProjectiveParameter := { a := 0, b := 1, nonzero := by omega }
+def one : ProjectiveParameter := { a := 1, b := 1, nonzero := by omega }
+def infinity : ProjectiveParameter := { a := 1, b := 0, nonzero := by omega }
+def negOne : ProjectiveParameter := { a := -1, b := 1, nonzero := by omega }
+
+def finitePair (a b : Int) (hb : b ≠ 0) : ProjectiveParameter :=
+  { a := a, b := b, nonzero := Or.inr hb }
+
+theorem toRat?_infinity : infinity.toRat? = none := by
+  native_decide
+
+theorem toRat?_finitePair (a b : Int) (hb : b ≠ 0) :
+    (finitePair a b hb).toRat? = some ((a : Rat) / (b : Rat)) := by
+  unfold toRat? finitePair
+  simp [hb]
+
+theorem point_zero :
+    zero.point = ({ x := 1, y := 0 } : PiCirclePoint) := by
+  native_decide
+
+theorem point_one :
+    one.point = ({ x := 0, y := 1 } : PiCirclePoint) := by
+  native_decide
+
+theorem point_infinity :
+    infinity.point = ({ x := -1, y := 0 } : PiCirclePoint) := by
+  native_decide
+
+theorem point_negOne :
+    negOne.point = ({ x := 0, y := -1 } : PiCirclePoint) := by
+  native_decide
+
+theorem point_normSq (p : ProjectiveParameter) :
+    (point p).x * (point p).x + (point p).y * (point p).y = 1 := by
+  unfold point denom
+  simp
+  have hdenpos :
+      0 < (p.a : Rat) * (p.a : Rat) + (p.b : Rat) * (p.b : Rat) :=
+    denom_pos p
+  have hdenne :
+      (p.a : Rat) * (p.a : Rat) + (p.b : Rat) * (p.b : Rat) ≠ 0 :=
+    Rat.ne_of_gt hdenpos
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem point_finitePair_eq_stagePoint (a b : Int) (hb : b ≠ 0) :
+    (finitePair a b hb).point = Stage.point ((a : Rat) / (b : Rat)) := by
+  unfold finitePair point Stage.point denom
+  simp
+  have hbRat : (b : Rat) ≠ 0 := rat_intCast_ne_zero_of_ne_zero hb
+  rw [Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+def tan (p : ProjectiveParameter) : ProjectiveRat :=
+  projectiveSlope p.point
+
+theorem tan_zero :
+    zero.tan = ProjectiveRat.finite 0 := by
+  native_decide
+
+theorem tan_one :
+    one.tan = ProjectiveRat.infinity := by
+  native_decide
+
+theorem tan_infinity :
+    infinity.tan = ProjectiveRat.finite 0 := by
+  native_decide
+
+def det (p q : ProjectiveParameter) : Int :=
+  p.a * q.b - p.b * q.a
+
+theorem det_zero_one : det zero one = -1 := by
+  native_decide
+
+theorem det_one_infinity : det one infinity = -1 := by
+  native_decide
+
+theorem det_infinity_negOne : det infinity negOne = 1 := by
+  native_decide
+
+theorem det_negOne_zero : det negOne zero = -1 := by
+  native_decide
+
+theorem mediant_nonzero_of_det_ne
+    (p q : ProjectiveParameter) (hdet : det p q ≠ 0) :
+    p.a + q.a ≠ 0 ∨ p.b + q.b ≠ 0 := by
+  by_cases ha : p.a + q.a = 0
+  · by_cases hb : p.b + q.b = 0
+    · exfalso
+      apply hdet
+      have hqa : q.a = -p.a := by omega
+      have hqb : q.b = -p.b := by omega
+      unfold det
+      rw [hqa, hqb]
+      grind [Int.mul_comm, Int.mul_neg, Int.neg_mul, Int.sub_eq_add_neg]
+    · exact Or.inr hb
+  · exact Or.inl ha
+
+def mediantOfDetNe (p q : ProjectiveParameter)
+    (hdet : det p q ≠ 0) : ProjectiveParameter :=
+  { a := p.a + q.a,
+    b := p.b + q.b,
+    nonzero := mediant_nonzero_of_det_ne p q hdet }
+
+theorem det_left_mediantOfDetNe
+    (p q : ProjectiveParameter) (hdet : det p q ≠ 0) :
+    det p (mediantOfDetNe p q hdet) = det p q := by
+  unfold det mediantOfDetNe
+  grind [Int.mul_add, Int.add_mul, Int.add_assoc, Int.add_comm,
+    Int.mul_assoc, Int.mul_comm, Int.sub_eq_add_neg]
+
+theorem det_mediantOfDetNe_right
+    (p q : ProjectiveParameter) (hdet : det p q ≠ 0) :
+    det (mediantOfDetNe p q hdet) q = det p q := by
+  unfold det mediantOfDetNe
+  grind [Int.mul_add, Int.add_mul, Int.add_assoc, Int.add_comm,
+    Int.mul_assoc, Int.mul_comm, Int.sub_eq_add_neg]
+
+end ProjectiveParameter
+
+structure ProjectiveEdge where
+  left : ProjectiveParameter
+  right : ProjectiveParameter
+  det_ne : ProjectiveParameter.det left right ≠ 0
+
+namespace ProjectiveEdge
+
+def mediant (E : ProjectiveEdge) : ProjectiveParameter :=
+  ProjectiveParameter.mediantOfDetNe E.left E.right E.det_ne
+
+theorem det_left_mediant (E : ProjectiveEdge) :
+    ProjectiveParameter.det E.left E.mediant =
+      ProjectiveParameter.det E.left E.right := by
+  simpa [mediant] using
+    ProjectiveParameter.det_left_mediantOfDetNe E.left E.right E.det_ne
+
+theorem det_mediant_right (E : ProjectiveEdge) :
+    ProjectiveParameter.det E.mediant E.right =
+      ProjectiveParameter.det E.left E.right := by
+  simpa [mediant] using
+    ProjectiveParameter.det_mediantOfDetNe_right E.left E.right E.det_ne
+
+def leftChild (E : ProjectiveEdge) : ProjectiveEdge where
+  left := E.left
+  right := E.mediant
+  det_ne := by
+    rw [det_left_mediant]
+    exact E.det_ne
+
+def rightChild (E : ProjectiveEdge) : ProjectiveEdge where
+  left := E.mediant
+  right := E.right
+  det_ne := by
+    rw [det_mediant_right]
+    exact E.det_ne
+
+def subdivideList : List ProjectiveEdge -> List ProjectiveEdge
+  | [] => []
+  | E :: rest => E.leftChild :: E.rightChild :: subdivideList rest
+
+theorem subdivideList_length (edges : List ProjectiveEdge) :
+    (subdivideList edges).length = 2 * edges.length := by
+  induction edges with
+  | nil => simp [subdivideList]
+  | cons E rest ih =>
+      simp [subdivideList, ih]
+      omega
+
+end ProjectiveEdge
+
+def fullCircleFareySeed : List ProjectiveEdge :=
+  [ { left := ProjectiveParameter.zero,
+      right := ProjectiveParameter.one,
+      det_ne := by native_decide },
+    { left := ProjectiveParameter.one,
+      right := ProjectiveParameter.infinity,
+      det_ne := by native_decide },
+    { left := ProjectiveParameter.infinity,
+      right := ProjectiveParameter.negOne,
+      det_ne := by native_decide },
+    { left := ProjectiveParameter.negOne,
+      right := ProjectiveParameter.zero,
+      det_ne := by native_decide } ]
+
+def fareySubdivide : List ProjectiveEdge -> List ProjectiveEdge :=
+  ProjectiveEdge.subdivideList
+
+def fareyStages : Nat -> List ProjectiveEdge -> List ProjectiveEdge
+  | 0, edges => edges
+  | n + 1, edges => fareyStages n (fareySubdivide edges)
+
+def fullCircleFareyStage (n : Nat) : List ProjectiveEdge :=
+  fareyStages n fullCircleFareySeed
+
+theorem fullCircleFareySeed_length : fullCircleFareySeed.length = 4 := by
+  native_decide
+
+theorem fareySubdivide_length (edges : List ProjectiveEdge) :
+    (fareySubdivide edges).length = 2 * edges.length :=
+  ProjectiveEdge.subdivideList_length edges
+
+theorem fareyStages_length (n : Nat) (edges : List ProjectiveEdge) :
+    (fareyStages n edges).length = (2 ^ n) * edges.length := by
+  induction n generalizing edges with
+  | zero => simp [fareyStages]
+  | succ n ih =>
+      calc
+        (fareyStages (n + 1) edges).length =
+            (fareyStages n (fareySubdivide edges)).length := by rfl
+        _ = (2 ^ n) * (fareySubdivide edges).length := ih _
+        _ = (2 ^ n) * (2 * edges.length) := by rw [fareySubdivide_length]
+        _ = (2 ^ n * 2) * edges.length := by rw [← Nat.mul_assoc]
+        _ = (2 ^ (n + 1)) * edges.length := by rw [Nat.pow_succ]
+
+theorem fullCircleFareyStage_length (n : Nat) :
+    (fullCircleFareyStage n).length = 4 * 2 ^ n := by
+  unfold fullCircleFareyStage
+  rw [fareyStages_length, fullCircleFareySeed_length]
+  rw [Nat.mul_comm]
+
 def dyadicStage (n : Nat) : Stage :=
   { subdivisions := dyadicSubdivisions n }
 
@@ -956,8 +1400,11 @@ def cos (u : Rat) : Rat :=
 def sin (u : Rat) : Rat :=
   (point u).y
 
-def tan (u : Rat) : Rat :=
+def finiteTan (u : Rat) : Rat :=
   sin u / cos u
+
+def tan (u : Rat) : ProjectiveRat :=
+  projectiveSlope (point u)
 
 def cot (u : Rat) : Rat :=
   cos u / sin u
@@ -975,7 +1422,7 @@ def sinRaw (u : Rat) : RealRaw :=
   RealRaw.ofRat (sin u)
 
 def tanRaw (u : Rat) : RealRaw :=
-  RealRaw.ofRat (tan u)
+  RealRaw.ofRat (finiteTan u)
 
 def cotRaw (u : Rat) : RealRaw :=
   RealRaw.ofRat (cot u)
@@ -1319,8 +1766,34 @@ theorem cos_one : cos 1 = 0 := by
 theorem sin_one : sin 1 = 1 := by
   native_decide
 
-theorem tan_eq_sin_div_cos (u : Rat) :
-    tan u = sin u / cos u := rfl
+theorem tan_zero :
+    tan 0 = ProjectiveRat.finite 0 := by
+  native_decide
+
+theorem tan_one :
+    tan 1 = ProjectiveRat.infinity := by
+  native_decide
+
+theorem tan_finite_of_cos_ne_zero {u : Rat} (hcos : cos u ≠ 0) :
+    tan u = ProjectiveRat.finite (finiteTan u) := by
+  have hx : (point u).x ≠ 0 := by
+    simpa [cos] using hcos
+  simpa [tan, finiteTan, sin, cos] using
+    projectiveSlope_x_ne_zero (p := point u) hx
+
+theorem sin_ne_zero_or_cos_ne_zero (u : Rat) :
+    sin u ≠ 0 ∨ cos u ≠ 0 := by
+  by_cases hsin : sin u = 0
+  · right
+    intro hcos
+    have hcircle := cos_sq_add_sin_sq u
+    rw [hcos, hsin] at hcircle
+    have hzero : (0 : Rat) + 0 = 0 := by native_decide
+    simp [sq, hzero] at hcircle
+  · exact Or.inl hsin
+
+theorem finiteTan_eq_sin_div_cos (u : Rat) :
+    finiteTan u = sin u / cos u := rfl
 
 theorem cot_eq_cos_div_sin (u : Rat) :
     cot u = cos u / sin u := rfl
@@ -1331,9 +1804,9 @@ theorem sec_eq_one_div_cos (u : Rat) :
 theorem csc_eq_one_div_sin (u : Rat) :
     csc u = 1 / sin u := rfl
 
-theorem tan_mul_cos {u : Rat} (hcos : Ne (cos u) 0) :
-    tan u * cos u = sin u := by
-  unfold tan
+theorem finiteTan_mul_cos {u : Rat} (hcos : Ne (cos u) 0) :
+    finiteTan u * cos u = sin u := by
+  unfold finiteTan
   rw [Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
@@ -1365,9 +1838,9 @@ theorem sin_mul_csc {u : Rat} (hsin : Ne (sin u) 0) :
   rw [Rat.mul_comm]
   exact csc_mul_sin hsin
 
-theorem tan_eq_sin_mul_sec (u : Rat) :
-    tan u = sin u * sec u := by
-  unfold tan sec
+theorem finiteTan_eq_sin_mul_sec (u : Rat) :
+    finiteTan u = sin u * sec u := by
+  unfold finiteTan sec
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
@@ -1377,16 +1850,16 @@ theorem cot_eq_cos_mul_csc (u : Rat) :
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
-theorem tan_mul_cot {u : Rat}
+theorem finiteTan_mul_cot {u : Rat}
     (hcos : Ne (cos u) 0) (hsin : Ne (sin u) 0) :
-    tan u * cot u = 1 := by
-  unfold tan cot
+    finiteTan u * cot u = 1 := by
+  unfold finiteTan cot
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 theorem one_add_tan_sq_eq_sec_sq {u : Rat} (hcos : Ne (cos u) 0) :
-    1 + sq (tan u) = sq (sec u) := by
-  unfold tan sec sq
+    1 + sq (finiteTan u) = sq (sec u) := by
+  unfold finiteTan sec sq
   rw [Rat.div_def, Rat.div_def]
   have hcircle := cos_sq_add_sin_sq u
   unfold sq at hcircle
@@ -1394,7 +1867,7 @@ theorem one_add_tan_sq_eq_sec_sq {u : Rat} (hcos : Ne (cos u) 0) :
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 theorem sec_sq_sub_tan_sq_eq_one {u : Rat} (hcos : Ne (cos u) 0) :
-    sq (sec u) - sq (tan u) = 1 := by
+    sq (sec u) - sq (finiteTan u) = 1 := by
   have h := one_add_tan_sq_eq_sec_sq (u := u) hcos
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
@@ -1491,12 +1964,20 @@ theorem sin_neg (u : Rat) :
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg, Rat.mul_assoc, Rat.mul_comm]
 
-theorem tan_neg (u : Rat) :
-    tan (-u) = -tan u := by
-  unfold tan
+theorem finiteTan_neg (u : Rat) :
+    finiteTan (-u) = -finiteTan u := by
+  unfold finiteTan
   rw [sin_neg, cos_neg]
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.neg_mul, Rat.mul_neg, Rat.mul_assoc, Rat.mul_comm]
+
+theorem tan_neg (u : Rat) :
+    tan (-u) = (tan u).neg := by
+  unfold tan projectiveSlope
+  change ProjectiveRat.ofHom (sin (-u)) (cos (-u)) =
+    (ProjectiveRat.ofHom (sin u) (cos u)).neg
+  rw [sin_neg, cos_neg]
+  exact ProjectiveRat.ofHom_neg_num (sin u) (cos u)
 
 theorem cot_neg (u : Rat) :
     cot (-u) = -cot u := by
@@ -1597,22 +2078,22 @@ theorem product_to_sum_cos_sin (u v : Rat) :
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm]
 
-theorem tan_add_denominator_cleared {u v : Rat}
+theorem finiteTan_add_denominator_cleared {u v : Rat}
     (hcu : Ne (cos u) 0) (hcv : Ne (cos v) 0) :
-    (1 - tan u * tan v) * composedSin u v =
-      (tan u + tan v) * composedCos u v := by
+    (1 - finiteTan u * finiteTan v) * composedSin u v =
+      (finiteTan u + finiteTan v) * composedCos u v := by
   rw [composed_sin_eq, composed_cos_eq]
-  unfold tan
+  unfold finiteTan
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
-theorem tan_sub_denominator_cleared {u v : Rat}
+theorem finiteTan_sub_denominator_cleared {u v : Rat}
     (hcu : Ne (cos u) 0) (hcv : Ne (cos v) 0) :
-    (1 + tan u * tan v) * composedSin u (-v) =
-      (tan u - tan v) * composedCos u (-v) := by
+    (1 + finiteTan u * finiteTan v) * composedSin u (-v) =
+      (finiteTan u - finiteTan v) * composedCos u (-v) := by
   rw [composed_sin_sub, composed_cos_sub]
-  unfold tan
+  unfold finiteTan
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
@@ -1637,12 +2118,12 @@ theorem cot_sub_denominator_cleared {u v : Rat}
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
-theorem tan_double_denominator_cleared {u : Rat}
+theorem finiteTan_double_denominator_cleared {u : Rat}
     (hcu : Ne (cos u) 0) :
-    (1 - sq (tan u)) * doubleSin u =
-      (2 * tan u) * doubleCos u := by
+    (1 - sq (finiteTan u)) * doubleSin u =
+      (2 * finiteTan u) * doubleCos u := by
   rw [double_sin_eq_two_mul, double_cos_eq_sq_sub_sq]
-  unfold tan sq
+  unfold finiteTan sq
   rw [Rat.div_def]
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
@@ -1677,16 +2158,16 @@ theorem sin_quarterComplementParameter {u : Rat}
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg, Rat.mul_inv_cancel]
 
-theorem tan_quarterComplementParameter {u : Rat}
+theorem finiteTan_quarterComplementParameter {u : Rat}
     (hu : Ne (1 + u) 0) :
-    tan (quarterComplementParameter u) = cot u := by
-  unfold tan cot
+    finiteTan (quarterComplementParameter u) = cot u := by
+  unfold finiteTan cot
   rw [sin_quarterComplementParameter hu, cos_quarterComplementParameter hu]
 
 theorem cot_quarterComplementParameter {u : Rat}
     (hu : Ne (1 + u) 0) :
-    cot (quarterComplementParameter u) = tan u := by
-  unfold tan cot
+    cot (quarterComplementParameter u) = finiteTan u := by
+  unfold finiteTan cot
   rw [sin_quarterComplementParameter hu, cos_quarterComplementParameter hu]
 
 theorem sec_quarterComplementParameter {u : Rat}
@@ -1701,6 +2182,18 @@ theorem csc_quarterComplementParameter {u : Rat}
   unfold sec csc
   rw [sin_quarterComplementParameter hu]
 
+theorem tan_quarterComplementParameter {u : Rat}
+    (hu : Ne (1 + u) 0) :
+    tan (quarterComplementParameter u) = (tan u).inv := by
+  unfold tan projectiveSlope
+  change
+    ProjectiveRat.ofHom
+      (sin (quarterComplementParameter u))
+      (cos (quarterComplementParameter u)) =
+        (ProjectiveRat.ofHom (sin u) (cos u)).inv
+  rw [sin_quarterComplementParameter hu, cos_quarterComplementParameter hu]
+  exact ProjectiveRat.ofHom_swap_eq_inv (sin_ne_zero_or_cos_ne_zero u)
+
 theorem cos_quarterComplementParameter_of_nonneg {u : Rat}
     (hu : 0 <= u) :
     cos (quarterComplementParameter u) = sin u :=
@@ -1710,6 +2203,11 @@ theorem sin_quarterComplementParameter_of_nonneg {u : Rat}
     (hu : 0 <= u) :
     sin (quarterComplementParameter u) = cos u :=
   sin_quarterComplementParameter (one_add_ne_zero_of_nonneg hu)
+
+theorem tan_quarterComplementParameter_of_nonneg {u : Rat}
+    (hu : 0 <= u) :
+    tan (quarterComplementParameter u) = (tan u).inv :=
+  tan_quarterComplementParameter (one_add_ne_zero_of_nonneg hu)
 
 theorem cosRaw_valid (u : Rat) :
     (cosRaw u).Valid := by
@@ -1721,7 +2219,7 @@ theorem sinRaw_valid (u : Rat) :
 
 theorem tanRaw_valid (u : Rat) :
     (tanRaw u).Valid := by
-  simpa [tanRaw] using RealRaw.ofRat_valid (tan u)
+  simpa [tanRaw] using RealRaw.ofRat_valid (finiteTan u)
 
 theorem cotRaw_valid (u : Rat) :
     (cotRaw u).Valid := by
@@ -1786,22 +2284,22 @@ structure BasicIdentityPackage : Prop where
   circle_comm : forall u : Rat, sq (sin u) + sq (cos u) = 1
   sin_sq_complement : forall u : Rat, sq (sin u) = 1 - sq (cos u)
   cos_sq_complement : forall u : Rat, sq (cos u) = 1 - sq (sin u)
-  tan_cancel : forall u : Rat, Ne (cos u) 0 -> tan u * cos u = sin u
+  tan_cancel : forall u : Rat, Ne (cos u) 0 -> finiteTan u * cos u = sin u
   cot_cancel : forall u : Rat, Ne (sin u) 0 -> cot u * sin u = cos u
   sec_cancel : forall u : Rat, Ne (cos u) 0 -> sec u * cos u = 1
   csc_cancel : forall u : Rat, Ne (sin u) 0 -> csc u * sin u = 1
   cos_sec_cancel : forall u : Rat, Ne (cos u) 0 -> cos u * sec u = 1
   sin_csc_cancel : forall u : Rat, Ne (sin u) 0 -> sin u * csc u = 1
-  tan_as_sin_mul_sec : forall u : Rat, tan u = sin u * sec u
+  tan_as_sin_mul_sec : forall u : Rat, finiteTan u = sin u * sec u
   cot_as_cos_mul_csc : forall u : Rat, cot u = cos u * csc u
   tan_cot_cancel :
-    forall u : Rat, Ne (cos u) 0 -> Ne (sin u) 0 -> tan u * cot u = 1
+    forall u : Rat, Ne (cos u) 0 -> Ne (sin u) 0 -> finiteTan u * cot u = 1
   tan_pythagorean :
-    forall u : Rat, Ne (cos u) 0 -> 1 + sq (tan u) = sq (sec u)
+    forall u : Rat, Ne (cos u) 0 -> 1 + sq (finiteTan u) = sq (sec u)
   cot_pythagorean :
     forall u : Rat, Ne (sin u) 0 -> 1 + sq (cot u) = sq (csc u)
   sec_tan_pythagorean :
-    forall u : Rat, Ne (cos u) 0 -> sq (sec u) - sq (tan u) = 1
+    forall u : Rat, Ne (cos u) 0 -> sq (sec u) - sq (finiteTan u) = 1
   csc_cot_pythagorean :
     forall u : Rat, Ne (sin u) 0 -> sq (csc u) - sq (cot u) = 1
   add_cos :
@@ -1875,12 +2373,12 @@ structure BasicIdentityPackage : Prop where
       composedSin u v - composedSin u (-v) = 2 * cos u * sin v
   tan_add :
     forall u v : Rat, Ne (cos u) 0 -> Ne (cos v) 0 ->
-      (1 - tan u * tan v) * composedSin u v =
-        (tan u + tan v) * composedCos u v
+      (1 - finiteTan u * finiteTan v) * composedSin u v =
+        (finiteTan u + finiteTan v) * composedCos u v
   tan_sub :
     forall u v : Rat, Ne (cos u) 0 -> Ne (cos v) 0 ->
-      (1 + tan u * tan v) * composedSin u (-v) =
-        (tan u - tan v) * composedCos u (-v)
+      (1 + finiteTan u * finiteTan v) * composedSin u (-v) =
+        (finiteTan u - finiteTan v) * composedCos u (-v)
   cot_add :
     forall u v : Rat, Ne (sin u) 0 -> Ne (sin v) 0 ->
       (cot u + cot v) * composedCos u v =
@@ -1901,14 +2399,25 @@ structure BasicIdentityPackage : Prop where
     forall u : Rat, doubleSin u = 2 * sin u * cos u
   tan_double :
     forall u : Rat, Ne (cos u) 0 ->
-      (1 - sq (tan u)) * doubleSin u = (2 * tan u) * doubleCos u
+      (1 - sq (finiteTan u)) * doubleSin u = (2 * finiteTan u) * doubleCos u
   cos_at_zero : cos 0 = 1
   sin_at_zero : sin 0 = 0
   cos_at_one : cos 1 = 0
   sin_at_one : sin 1 = 1
+  projective_tan_at_zero : tan 0 = ProjectiveRat.finite 0
+  projective_tan_at_one : tan 1 = ProjectiveRat.infinity
+  projective_tan_finite :
+    forall u : Rat, Ne (cos u) 0 -> tan u = ProjectiveRat.finite (finiteTan u)
+  projective_tan_odd : forall u : Rat, tan (-u) = (tan u).neg
+  projective_tan_complement :
+    forall u : Rat, Ne (1 + u) 0 ->
+      tan (quarterComplementParameter u) = (tan u).inv
+  projective_tan_complement_first_quadrant :
+    forall u : Rat, 0 <= u ->
+      tan (quarterComplementParameter u) = (tan u).inv
   cos_even : forall u : Rat, cos (-u) = cos u
   sin_odd : forall u : Rat, sin (-u) = -sin u
-  tan_odd : forall u : Rat, tan (-u) = -tan u
+  tan_odd : forall u : Rat, finiteTan (-u) = -finiteTan u
   cot_odd : forall u : Rat, cot (-u) = -cot u
   sec_even : forall u : Rat, sec (-u) = sec u
   csc_odd : forall u : Rat, csc (-u) = -csc u
@@ -1922,10 +2431,10 @@ structure BasicIdentityPackage : Prop where
       sin (quarterComplementParameter u) = cos u
   complement_tan :
     forall u : Rat, Ne (1 + u) 0 ->
-      tan (quarterComplementParameter u) = cot u
+      finiteTan (quarterComplementParameter u) = cot u
   complement_cot :
     forall u : Rat, Ne (1 + u) 0 ->
-      cot (quarterComplementParameter u) = tan u
+      cot (quarterComplementParameter u) = finiteTan u
   complement_sec :
     forall u : Rat, Ne (1 + u) 0 ->
       sec (quarterComplementParameter u) = csc u
@@ -1944,15 +2453,15 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   circle_comm := sin_sq_add_cos_sq
   sin_sq_complement := sin_sq_eq_one_sub_cos_sq
   cos_sq_complement := cos_sq_eq_one_sub_sin_sq
-  tan_cancel := fun _ h => tan_mul_cos h
+  tan_cancel := fun _ h => finiteTan_mul_cos h
   cot_cancel := fun _ h => cot_mul_sin h
   sec_cancel := fun _ h => sec_mul_cos h
   csc_cancel := fun _ h => csc_mul_sin h
   cos_sec_cancel := fun _ h => cos_mul_sec h
   sin_csc_cancel := fun _ h => sin_mul_csc h
-  tan_as_sin_mul_sec := tan_eq_sin_mul_sec
+  tan_as_sin_mul_sec := finiteTan_eq_sin_mul_sec
   cot_as_cos_mul_csc := cot_eq_cos_mul_csc
-  tan_cot_cancel := fun _ hcos hsin => tan_mul_cot hcos hsin
+  tan_cot_cancel := fun _ hcos hsin => finiteTan_mul_cot hcos hsin
   tan_pythagorean := fun _ h => one_add_tan_sq_eq_sec_sq h
   cot_pythagorean := fun _ h => one_add_cot_sq_eq_csc_sq h
   sec_tan_pythagorean := fun _ h => sec_sq_sub_tan_sq_eq_one h
@@ -1993,9 +2502,9 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   product_sum_sin_cos := product_to_sum_sin_cos
   product_sum_cos_sin := product_to_sum_cos_sin
   tan_add := fun _ _ hcu hcv =>
-    tan_add_denominator_cleared hcu hcv
+    finiteTan_add_denominator_cleared hcu hcv
   tan_sub := fun _ _ hcu hcv =>
-    tan_sub_denominator_cleared hcu hcv
+    finiteTan_sub_denominator_cleared hcu hcv
   cot_add := fun _ _ hsu hsv =>
     cot_add_denominator_cleared hsu hsv
   cot_sub := fun _ _ hsu hsv =>
@@ -2006,14 +2515,21 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   double_sin := double_sin_eq_two_mul
   double_sin_comm := double_sin_eq_two_sin_mul_cos
   tan_double := fun _ hcu =>
-    tan_double_denominator_cleared hcu
+    finiteTan_double_denominator_cleared hcu
   cos_at_zero := cos_zero
   sin_at_zero := sin_zero
   cos_at_one := cos_one
   sin_at_one := sin_one
+  projective_tan_at_zero := tan_zero
+  projective_tan_at_one := tan_one
+  projective_tan_finite := fun _ h => tan_finite_of_cos_ne_zero h
+  projective_tan_odd := tan_neg
+  projective_tan_complement := fun _ h => tan_quarterComplementParameter h
+  projective_tan_complement_first_quadrant := fun _ h =>
+    tan_quarterComplementParameter_of_nonneg h
   cos_even := cos_neg
   sin_odd := sin_neg
-  tan_odd := tan_neg
+  tan_odd := finiteTan_neg
   cot_odd := cot_neg
   sec_even := sec_neg
   csc_odd := csc_neg
@@ -2021,7 +2537,7 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   complement_one := quarterComplementParameter_one
   complement_cos := fun _ h => cos_quarterComplementParameter h
   complement_sin := fun _ h => sin_quarterComplementParameter h
-  complement_tan := fun _ h => tan_quarterComplementParameter h
+  complement_tan := fun _ h => finiteTan_quarterComplementParameter h
   complement_cot := fun _ h => cot_quarterComplementParameter h
   complement_sec := fun _ h => sec_quarterComplementParameter h
   complement_csc := fun _ h => csc_quarterComplementParameter h

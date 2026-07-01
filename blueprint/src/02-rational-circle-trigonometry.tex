@@ -458,10 +458,97 @@ def circle_stage(n):
 \end{verbatim}
 \end{remark}
 
+\begin{remark}[Farey subdivision of the projective parameter line]
+\label{rem:farey-projective-circle-stages}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofOption}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.inv}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_neg_num}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_swap_eq_inv}
+\lean{ComputableAnalysis.RationalCircle.projectiveSlope}
+\lean{ComputableAnalysis.RationalCircle.projectiveSlope_x_zero}
+\lean{ComputableAnalysis.RationalCircle.projectiveSlope_x_ne_zero}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.denom}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.denom_pos}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.toRat?}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.toRat?_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point_normSq}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point_finitePair_eq_stagePoint}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan_one}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.det}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.mediantOfDetNe}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.det_left_mediantOfDetNe}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.det_mediantOfDetNe_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.mediant}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.leftChild}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.rightChild}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.subdivideList}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.subdivideList_length}
+\lean{ComputableAnalysis.RationalCircle.fullCircleFareySeed}
+\lean{ComputableAnalysis.RationalCircle.fareySubdivide}
+\lean{ComputableAnalysis.RationalCircle.fareyStages}
+\lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage}
+\lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage_length}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_finite_of_cos_ne_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter_of_nonneg}
+\uses{rem:rational-circle-point,rem:dyadic-rational-circle-stages}
+For the full circle it is better to treat the parameter line projectively.
+Lean now has a homogeneous rational parameter \((a:b)\), with finite value
+\(a/b\) when \(b\ne0\) and a formal point \(\infty=(1:0)\) when \(b=0\).
+The circle map is polynomial-rational in the homogeneous coordinates:
+\[
+  (a:b)\longmapsto
+  \left(
+    \frac{b^2-a^2}{a^2+b^2},
+    \frac{2ab}{a^2+b^2}
+  \right).
+\]
+For \(b\ne0\) this agrees with the earlier affine parametrization
+\(P(a/b)\), while \(\infty\) maps to \((-1,0)\).  This gives the compactified
+parameter circle needed for full-circle constructions and for later
+``whole real line'' substitutions, where an endpoint at infinity should be a
+formal object rather than a special case.  The same projective line is now
+also the codomain of tangent.  Lean separates these two infinities: the
+projective parameter \(\infty\) is the point \((-1,0)\), whereas the tangent of
+the quarter-turn point is the formal projective value \(\infty\).  In the
+affine quarter-circle chart this is stated as \(\tan(1)=\infty\), with a
+compatibility theorem saying that \(\tan(u)\) is the finite rational quotient
+whenever \(\cos(u)\ne0\).  The negation and quarter-complement identities are
+therefore stated projectively, so that zero and infinity are exchanged without
+adding endpoint exceptions.
+
+The Farey refinement step replaces adjacent projective parameters
+\((a:b)\) and \((c:d)\) by their mediant \((a+c:b+d)\).  Lean states this on
+projective edges whose determinant \(ad-bc\) is nonzero, and proves that both
+children inherit the same determinant.  Starting from the four edges
+\[
+  0,\quad 1,\quad \infty,\quad -1,\quad 0
+\]
+therefore gives a full-circle Farey subdivision; after \(n\) refinements the
+edge list has length \(4\cdot2^n\).
+\end{remark}
+
 \begin{remark}[What bisection refinement means]
 \label{rem:dyadic-rational-circle-refinement}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
-\uses{rem:dyadic-rational-circle-stages}
+\uses{rem:dyadic-rational-circle-stages,rem:farey-projective-circle-stages}
 There is no separate abstract definition of refinement being used here.  The
 concrete fact is just that one more bisection keeps every old parameter and
 inserts one midpoint between adjacent old parameters.  Thus, after mapping to
@@ -557,15 +644,19 @@ trigonometric functions.
 
 \begin{definition}[Other rational-circle coordinate functions]
 \label{def:rational-circle-other-trig}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sec}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.csc}
 \uses{def:rational-circle-sin-cos}
-On this rational circle layer, the quotient and reciprocal coordinate
-functions are
+On this rational circle layer, tangent is projective:
 \[
-  t(u)=\frac{s(u)}{c(u)},\quad
+  \tan(u)=\operatorname{Proj}\bigl(s(u):c(u)\bigr).
+\]
+The finite tangent chart and reciprocal coordinate functions are
+\[
+  t_{\mathrm{fin}}(u)=\frac{s(u)}{c(u)},\quad
   \operatorname{ct}(u)=\frac{c(u)}{s(u)},
 \]
 \[
@@ -585,6 +676,7 @@ domain data.
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_one}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_half}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_half}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_half}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_half}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_half}
@@ -607,7 +699,8 @@ The first nontrivial rational sample is
 \]
 with
 \[
-  \tan(1/2)=4/3,\quad \cot(1/2)=3/4,\quad
+  \tan(1/2)=\operatorname{finite}(4/3),\quad
+  t_{\mathrm{fin}}(1/2)=4/3,\quad \cot(1/2)=3/4,\quad
   \sec(1/2)=5/3,\quad \csc(1/2)=5/4.
 \]
 The same values are also recorded as exact raw-real equivalences for the
@@ -824,11 +917,12 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_cot_sq_eq_csc_sq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_sq_sub_tan_sq_eq_one}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_sq_sub_cot_sq_eq_one}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_eq_sin_mul_sec}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_eq_sin_mul_sec}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_eq_cos_mul_csc}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_mul_cot}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_mul_cot}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_neg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_neg}
@@ -843,12 +937,14 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_sin}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_cos}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_cos_sin}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_add_denominator_cleared}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_sub_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_add_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_sub_denominator_cleared}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_add_denominator_cleared}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_sub_denominator_cleared}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_double_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_double_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_quarterComplementParameter}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter_of_nonneg}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_quarterComplementParameter}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_quarterComplementParameter}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_quarterComplementParameter}
@@ -856,7 +952,7 @@ For every rational slope coordinate \(u\),
 \leanok
 The rational-circle coordinates satisfy:
 \[
-  t(u)c(u)=s(u)\quad(c(u)\ne0),
+  t_{\mathrm{fin}}(u)c(u)=s(u)\quad(c(u)\ne0),
 \]
 \[
   \operatorname{ct}(u)s(u)=c(u)\quad(s(u)\ne0),
@@ -867,25 +963,29 @@ The rational-circle coordinates satisfy:
   \operatorname{cs}(u)s(u)=1\quad(s(u)\ne0),
 \]
 \[
-  1+t(u)^2=\operatorname{sc}(u)^2\quad(c(u)\ne0),
+  1+t_{\mathrm{fin}}(u)^2=\operatorname{sc}(u)^2\quad(c(u)\ne0),
 \]
 \[
   1+\operatorname{ct}(u)^2=\operatorname{cs}(u)^2\quad(s(u)\ne0).
 \]
 Equivalently,
 \[
-  \operatorname{sc}(u)^2-t(u)^2=1\quad(c(u)\ne0),
+  \operatorname{sc}(u)^2-t_{\mathrm{fin}}(u)^2=1\quad(c(u)\ne0),
   \qquad
   \operatorname{cs}(u)^2-\operatorname{ct}(u)^2=1\quad(s(u)\ne0).
 \]
 The quotient functions can also be written as
 \[
-  t(u)=s(u)\operatorname{sc}(u),
+  t_{\mathrm{fin}}(u)=s(u)\operatorname{sc}(u),
   \qquad
   \operatorname{ct}(u)=c(u)\operatorname{cs}(u),
 \]
-and \(t(u)\operatorname{ct}(u)=1\) whenever both denominators are nonzero.
-They also satisfy parity and the circle-composition formulas
+and \(t_{\mathrm{fin}}(u)\operatorname{ct}(u)=1\) whenever both denominators
+are nonzero.  The projective tangent satisfies the corresponding total
+endpoint-safe laws \(\tan(-u)=-\tan(u)\) and
+\(\tan((1-u)/(1+u))=\tan(u)^{-1}\) whenever the displayed parameter is
+defined; in particular zero and infinity are exchanged without a separate
+case split.  The coordinates also satisfy parity and the circle-composition formulas
 \[
   (P(u)P(v))_x=c(u)c(v)-s(u)s(v),
 \]

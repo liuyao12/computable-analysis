@@ -23,8 +23,12 @@ theorem sin_half :
     sin ((1 : Rat) / 2) = (4 : Rat) / 5 := by
   native_decide
 
+theorem finiteTan_half :
+    finiteTan ((1 : Rat) / 2) = (4 : Rat) / 3 := by
+  native_decide
+
 theorem tan_half :
-    tan ((1 : Rat) / 2) = (4 : Rat) / 3 := by
+    tan ((1 : Rat) / 2) = ProjectiveRat.finite ((4 : Rat) / 3) := by
   native_decide
 
 theorem cot_half :
@@ -65,7 +69,8 @@ theorem sinRaw_half_equiv :
 
 theorem tanRaw_half_equiv :
     (tanRaw ((1 : Rat) / 2)).Equiv (RealRaw.ofRat ((4 : Rat) / 3)) := by
-  simpa [tanRaw, tan_half] using RealRaw.ofRat_equiv_self ((4 : Rat) / 3)
+  simpa [tanRaw, finiteTan_half] using
+    RealRaw.ofRat_equiv_self ((4 : Rat) / 3)
 
 theorem cotRaw_half_equiv :
     (cotRaw ((1 : Rat) / 2)).Equiv (RealRaw.ofRat ((3 : Rat) / 4)) := by
@@ -91,7 +96,8 @@ structure SpecialValuePackage : Prop where
   sin_at_one : sin 1 = 1
   cos_at_half : cos ((1 : Rat) / 2) = (3 : Rat) / 5
   sin_at_half : sin ((1 : Rat) / 2) = (4 : Rat) / 5
-  tan_at_half : tan ((1 : Rat) / 2) = (4 : Rat) / 3
+  finite_tan_at_half : finiteTan ((1 : Rat) / 2) = (4 : Rat) / 3
+  tan_at_half : tan ((1 : Rat) / 2) = ProjectiveRat.finite ((4 : Rat) / 3)
   cot_at_half : cot ((1 : Rat) / 2) = (3 : Rat) / 4
   sec_at_half : sec ((1 : Rat) / 2) = (5 : Rat) / 3
   csc_at_half : csc ((1 : Rat) / 2) = (5 : Rat) / 4
@@ -119,6 +125,7 @@ theorem specialValuePackage : SpecialValuePackage where
   sin_at_one := sin_one
   cos_at_half := cos_half
   sin_at_half := sin_half
+  finite_tan_at_half := finiteTan_half
   tan_at_half := tan_half
   cot_at_half := cot_half
   sec_at_half := sec_half
