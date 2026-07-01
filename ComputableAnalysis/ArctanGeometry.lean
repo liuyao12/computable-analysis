@@ -1583,6 +1583,76 @@ theorem fareyIntegralBetweenRaw_additive
   simpa [fareyIntegralBetweenRaw_compute_eq_subInterval,
     RealRaw.addCompute, QInterval.addInterval] using hover
 
+theorem fareyIntegralBetweenRaw_self_equiv_zero
+    (a : Rat) :
+    (fareyIntegralBetweenRaw a a).Equiv (RealRaw.ofRat 0) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (fareyIntegralBetweenRaw a a) (RealRaw.ofRat 0) n n).2
+  have hordered := fareyIntegralPrefixStageInterval_ordered a n
+  rw [fareyIntegralBetweenRaw_compute_eq_subInterval]
+  unfold fareyIntegralPrefixStageInterval fareyIntegralPrefixInterval at hordered ⊢
+  unfold QInterval.width at hordered
+  unfold QInterval.subInterval QInterval.Overlaps
+  simp [RealRaw.ofRat]
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem fareyIntegralBetweenRaw_reverse_compute
+    (a b : Rat) (n : Nat) :
+    (fareyIntegralBetweenRaw a b).compute n =
+      (-(fareyIntegralBetweenRaw b a)).compute n := by
+  change (fareyIntegralBetweenRaw a b).compute n =
+    RealRaw.negCompute (fareyIntegralBetweenRaw b a) n
+  rw [fareyIntegralBetweenRaw_compute_eq_subInterval]
+  unfold RealRaw.negCompute
+  rw [fareyIntegralBetweenRaw_compute_eq_subInterval]
+  unfold QInterval.subInterval
+  have hlo :
+      (fareyIntegralPrefixStageInterval b n).lo -
+          (fareyIntegralPrefixStageInterval a n).hi =
+        -((fareyIntegralPrefixStageInterval a n).hi -
+          (fareyIntegralPrefixStageInterval b n).lo) := by
+    grind [Rat.sub_eq_add_neg]
+  have hhi :
+      (fareyIntegralPrefixStageInterval b n).hi -
+          (fareyIntegralPrefixStageInterval a n).lo =
+        -((fareyIntegralPrefixStageInterval a n).lo -
+          (fareyIntegralPrefixStageInterval b n).hi) := by
+    grind [Rat.sub_eq_add_neg]
+  rw [hlo, hhi]
+
+theorem fareyIntegralBetweenRaw_reverse_equiv_neg
+    (a b : Rat) :
+    (fareyIntegralBetweenRaw a b).Equiv (-(fareyIntegralBetweenRaw b a)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (fareyIntegralBetweenRaw a b)
+    (-(fareyIntegralBetweenRaw b a)) n n).2
+  rw [fareyIntegralBetweenRaw_reverse_compute]
+  have hvalid : (-(fareyIntegralBetweenRaw b a)).Valid :=
+    RealRaw.neg_valid (fareyIntegralBetweenRaw_valid b a)
+  have hordered := hvalid.1 n
+  unfold QInterval.width at hordered
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem fareyIntegralBetweenRaw_add_reverse_equiv_zero
+    (a b : Rat) :
+    (fareyIntegralBetweenRaw a b + fareyIntegralBetweenRaw b a).Equiv
+      (RealRaw.ofRat 0) := by
+  have hleftValid :
+      (fareyIntegralBetweenRaw a b + fareyIntegralBetweenRaw b a).Valid :=
+    RealRaw.add_valid
+      (fareyIntegralBetweenRaw_valid a b)
+      (fareyIntegralBetweenRaw_valid b a)
+  have hselfValid : (fareyIntegralBetweenRaw a a).Valid :=
+    fareyIntegralBetweenRaw_valid a a
+  have hzeroValid : (RealRaw.ofRat 0).Valid :=
+    RealRaw.ofRat_valid 0
+  exact RealRaw.equiv_trans hleftValid hselfValid hzeroValid
+    (fareyIntegralBetweenRaw_additive a b a)
+    (fareyIntegralBetweenRaw_self_equiv_zero a)
+
 theorem integralSumInterval_contains_geometricSumInterval
     (intervals : List (Rat × Rat))
     (hwf : NonnegativeIntervals intervals) :

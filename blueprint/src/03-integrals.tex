@@ -240,6 +240,10 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_compute_contains_stageInterval}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_width_le_six_div_succ}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_additive}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_self_equiv_zero}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_reverse_compute}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_reverse_equiv_neg}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_add_reverse_equiv_zero}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
@@ -364,7 +368,9 @@ fareyIntegralPrefixRaw(a)}.  This verified raw interval contains the exact
 same-stage prefix-difference interval, has width at most \(6/(n+1)\), and
 satisfies adjacent additivity up to raw-real equivalence:
 \[
-  I(a,b)+I(b,c)\sim I(a,c).
+  I(a,b)+I(b,c)\sim I(a,c),\qquad
+  I(a,a)\sim0,\qquad
+  I(a,b)\sim -I(b,a).
 \]
 
 For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
