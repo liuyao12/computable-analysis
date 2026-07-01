@@ -967,6 +967,78 @@ theorem fareyIntegralPrefixStageInterval_nested
         · grind [QInterval.width, Rat.sub_eq_add_neg]
         · exact Rat.le_trans hstep.2 ih.2.2
 
+theorem fareyLowerCellsUpTo_eq_nil_of_connects_left_gt
+    (x : Rat) {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hleft : ¬ left.value <= x) :
+    fareyLowerCellsUpTo x cells = [] := by
+  induction cells generalizing left with
+  | nil =>
+      simp [fareyLowerCellsUpTo]
+  | cons cell rest ih =>
+      rcases hconnect with ⟨hcellLeft, hrestConnect⟩
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hcellUnit with ⟨_hl0, hlr, _hr1⟩
+      have hcellLeftNot : ¬ cell.left.value <= x := by
+        rw [hcellLeft]
+        exact hleft
+      have hcellRightNot : ¬ cell.right.value <= x := by
+        intro hright
+        exact hcellLeftNot (Rat.le_trans hlr hright)
+      have htail :=
+        ih hrestConnect hrestUnit hcellRightNot
+      simp [fareyLowerCellsUpTo, hcellRightNot, htail]
+
+theorem fareyUpperCellsUpTo_eq_nil_of_connects_left_gt
+    (x : Rat) {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hleft : ¬ left.value <= x) :
+    fareyUpperCellsUpTo x cells = [] := by
+  induction cells generalizing left with
+  | nil =>
+      simp [fareyUpperCellsUpTo]
+  | cons cell rest ih =>
+      rcases hconnect with ⟨hcellLeft, hrestConnect⟩
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hcellUnit with ⟨_hl0, hlr, _hr1⟩
+      have hcellLeftNot : ¬ cell.left.value <= x := by
+        rw [hcellLeft]
+        exact hleft
+      have hcellRightNot : ¬ cell.right.value <= x := by
+        intro hright
+        exact hcellLeftNot (Rat.le_trans hlr hright)
+      have htail :=
+        ih hrestConnect hrestUnit hcellRightNot
+      simp [fareyUpperCellsUpTo, hcellLeftNot, htail]
+
+theorem fareyIntegralLowerPrefix_eq_zero_of_connects_left_gt
+    (x : Rat) {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hleft : ¬ left.value <= x) :
+    fareyIntegralLowerPrefix x cells = 0 := by
+  unfold fareyIntegralLowerPrefix
+  rw [fareyLowerCellsUpTo_eq_nil_of_connects_left_gt
+    x hconnect hunit hleft]
+  simp [integralLowerSum]
+
+theorem fareyIntegralUpperPrefix_eq_zero_of_connects_left_gt
+    (x : Rat) {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hleft : ¬ left.value <= x) :
+    fareyIntegralUpperPrefix x cells = 0 := by
+  unfold fareyIntegralUpperPrefix
+  rw [fareyUpperCellsUpTo_eq_nil_of_connects_left_gt
+    x hconnect hunit hleft]
+  simp [integralUpperSum]
+
 theorem integralLowerSum_le_geometricLowerSum
     (intervals : List (Rat × Rat))
     (hwf : NonnegativeIntervals intervals) :
@@ -1188,6 +1260,233 @@ theorem integralSumInterval_width_le_two_squareSum
         _ = 2 * (((r - p) * (r - p)) +
               intervalSquareSum rest) := by
               grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+theorem fareyIntegralPrefixInterval_width_le_two_squareSum_add_bound
+    (x : Rat) {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell} {M : Rat}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hbound : RationalCircle.FareyCell.WidthListAtMost M cells)
+    (hM : 0 <= M) :
+    (fareyIntegralPrefixInterval x cells).width <=
+      2 * RationalCircle.FareyCell.widthSquareSum cells + M := by
+  induction cells generalizing left with
+  | nil =>
+      simp [fareyIntegralPrefixInterval, fareyIntegralLowerPrefix,
+        fareyIntegralUpperPrefix, fareyLowerCellsUpTo, fareyUpperCellsUpTo,
+        integralLowerSum, integralUpperSum, RationalCircle.FareyCell.widthSquareSum,
+        QInterval.width]
+      grind
+  | cons cell rest ih =>
+      rcases hconnect with ⟨hcellLeft, hrestConnect⟩
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hbound with ⟨hcellBound, hrestBound⟩
+      rcases hcellUnit with ⟨hl0, hlr, hr1⟩
+      have htailBound :=
+        ih hrestConnect hrestUnit hrestBound
+      have hcellGap :
+          integralUpperStep cell.left.value cell.right.value -
+              integralLowerStep cell.left.value cell.right.value <=
+            2 * (cell.width * cell.width) := by
+        simpa [RationalCircle.FareyCell.width,
+          RationalCircle.FareyCell.toRatInterval] using
+          integralCellWidth_le_two_square hlr hr1
+      by_cases hright : cell.right.value <= x
+      · have hleftSelect : cell.left.value <= x :=
+          Rat.le_trans hlr hright
+        simp [fareyIntegralPrefixInterval, fareyIntegralLowerPrefix,
+          fareyIntegralUpperPrefix, fareyLowerCellsUpTo, fareyUpperCellsUpTo,
+          hright, hleftSelect, RationalCircle.FareyCell.toRatInterval,
+          integralLowerSum, integralUpperSum, QInterval.width,
+          RationalCircle.FareyCell.widthSquareSum] at htailBound ⊢
+        calc
+          integralUpperStep cell.left.value cell.right.value +
+                integralUpperSum (fareyUpperCellsUpTo x rest) -
+              (integralLowerStep cell.left.value cell.right.value +
+                integralLowerSum (fareyLowerCellsUpTo x rest))
+              =
+            (integralUpperStep cell.left.value cell.right.value -
+                integralLowerStep cell.left.value cell.right.value) +
+              (integralUpperSum (fareyUpperCellsUpTo x rest) -
+                integralLowerSum (fareyLowerCellsUpTo x rest)) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+          _ <=
+            2 * (cell.width * cell.width) +
+              (2 * RationalCircle.FareyCell.widthSquareSum rest + M) :=
+              rat_add_le_add hcellGap htailBound
+          _ =
+            2 *
+                (cell.width * cell.width +
+                  RationalCircle.FareyCell.widthSquareSum rest) + M := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+                Rat.mul_assoc, Rat.mul_comm]
+      · by_cases hleftSelect : cell.left.value <= x
+        · have hlowerTail :
+            fareyIntegralLowerPrefix x rest = 0 :=
+            fareyIntegralLowerPrefix_eq_zero_of_connects_left_gt
+              x hrestConnect hrestUnit hright
+          have hupperTail :
+            fareyIntegralUpperPrefix x rest = 0 :=
+            fareyIntegralUpperPrefix_eq_zero_of_connects_left_gt
+              x hrestConnect hrestUnit hright
+          have hlowerTailSum :
+              integralLowerSum (fareyLowerCellsUpTo x rest) = 0 := by
+            simpa [fareyIntegralLowerPrefix] using hlowerTail
+          have hupperTailSum :
+              integralUpperSum (fareyUpperCellsUpTo x rest) = 0 := by
+            simpa [fareyIntegralUpperPrefix] using hupperTail
+          have hcellUpper_le_width :
+              integralUpperStep cell.left.value cell.right.value <=
+                cell.width := by
+            simpa [RationalCircle.FareyCell.width] using
+              integralUpperStep_le_width hlr
+          have hnonnegSquares :
+              0 <=
+                2 *
+                  (cell.width * cell.width +
+                    RationalCircle.FareyCell.widthSquareSum rest) := by
+            have hs :
+                0 <= cell.width * cell.width +
+                    RationalCircle.FareyCell.widthSquareSum rest :=
+              Rat.add_nonneg
+                (RationalCircle.Stage.ratSquare_nonneg cell.width)
+                (RationalCircle.FareyCell.widthSquareSum_nonneg rest)
+            exact Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hs
+          simp [fareyIntegralPrefixInterval, fareyIntegralLowerPrefix,
+            fareyIntegralUpperPrefix, fareyLowerCellsUpTo, fareyUpperCellsUpTo,
+            hright, hleftSelect, RationalCircle.FareyCell.toRatInterval,
+            integralUpperSum, QInterval.width,
+            RationalCircle.FareyCell.widthSquareSum,
+            hlowerTailSum, hupperTailSum]
+          calc
+            integralUpperStep cell.left.value cell.right.value + 0 - 0
+                <= cell.width := by grind
+            _ <= M := hcellBound
+            _ <=
+                2 *
+                    (cell.width * cell.width +
+                      RationalCircle.FareyCell.widthSquareSum rest) + M := by
+                  grind
+        · simp [fareyIntegralPrefixInterval, fareyIntegralLowerPrefix,
+            fareyIntegralUpperPrefix, fareyLowerCellsUpTo, fareyUpperCellsUpTo,
+            hright, hleftSelect, RationalCircle.FareyCell.widthSquareSum,
+            QInterval.width] at htailBound ⊢
+          have hcellSquaresNonneg :
+              0 <= 2 * (cell.width * cell.width) := by
+            exact Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2)
+              (RationalCircle.Stage.ratSquare_nonneg cell.width)
+          calc
+            fareyIntegralUpperPrefix x rest -
+                fareyIntegralLowerPrefix x rest
+                <=
+              2 * RationalCircle.FareyCell.widthSquareSum rest + M :=
+                htailBound
+            _ <=
+              2 *
+                  (cell.width * cell.width +
+                    RationalCircle.FareyCell.widthSquareSum rest) + M := by
+                grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+                  Rat.mul_assoc, Rat.mul_comm]
+
+theorem fareyIntegralPrefixStageInterval_width_le_three_div_succ
+    (x : Rat) (n : Nat) :
+    (fareyIntegralPrefixStageInterval x n).width <=
+      (3 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  let M : Rat := 1 / (((n + 1 : Nat) : Rat))
+  have hMnonneg : 0 <= M := by
+    dsimp [M]
+    exact Rat.le_of_lt (one_div_nat_pos (Nat.succ_pos n))
+  have hwidthList :
+      RationalCircle.FareyCell.WidthListAtMost M
+        (RationalCircle.fareyUnitStage n) := by
+    dsimp [M]
+    exact
+      RationalCircle.FareyCell.widthListAtMost_one_div_succ_of_adjacent_denSum
+        (RationalCircle.fareyUnitStage_adjacent n)
+        (RationalCircle.fareyUnitStage_denSum_ge n)
+  have hprefix :
+      (fareyIntegralPrefixStageInterval x n).width <=
+        2 *
+          RationalCircle.FareyCell.widthSquareSum
+            (RationalCircle.fareyUnitStage n) + M := by
+    simpa [fareyIntegralPrefixStageInterval, M] using
+      fareyIntegralPrefixInterval_width_le_two_squareSum_add_bound
+        x
+        (left := RationalCircle.FareyFraction.zero)
+        (right := RationalCircle.FareyFraction.one)
+        (cells := RationalCircle.fareyUnitStage n)
+        (M := M)
+        (RationalCircle.fareyUnitStage_connects n)
+        (RationalCircle.fareyUnitStage_unit n)
+        hwidthList
+        hMnonneg
+  have hsquare :=
+    RationalCircle.fareyUnitStage_widthSquareSum_le_one_div_succ n
+  calc
+    (fareyIntegralPrefixStageInterval x n).width
+        <=
+      2 *
+          RationalCircle.FareyCell.widthSquareSum
+            (RationalCircle.fareyUnitStage n) + M := hprefix
+    _ <= 2 * M + M := by
+          exact rat_add_le_add
+            (Rat.mul_le_mul_of_nonneg_left (by simpa [M] using hsquare)
+              (by native_decide : (0 : Rat) <= 2))
+            Rat.le_refl
+    _ = (3 : Rat) / (((n + 1 : Nat) : Rat)) := by
+          dsimp [M]
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem fareyIntegralPrefixStageInterval_widthsShrink
+    (x : Rat) :
+    RealRaw.WidthsShrinkToZero (fareyIntegralPrefixStageInterval x) := by
+  intro eps
+  refine ⟨3 * (eps.val.den + 1), ?_⟩
+  intro n hn
+  have hmain :
+      (3 : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (3 : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega :
+        3 * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hABpos
+  exact Rat.le_trans
+    (fareyIntegralPrefixStageInterval_width_le_three_div_succ x n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
+def fareyIntegralPrefixRaw (x : Rat) : RealRaw where
+  compute := fareyIntegralPrefixStageInterval x
+
+theorem fareyIntegralPrefixRaw_valid (x : Rat) :
+    (fareyIntegralPrefixRaw x).Valid := by
+  change RealRaw.ValidCompute (fareyIntegralPrefixStageInterval x)
+  constructor
+  · exact fareyIntegralPrefixStageInterval_ordered x
+  · constructor
+    · exact fareyIntegralPrefixStageInterval_nested x
+    · exact fareyIntegralPrefixStageInterval_widthsShrink x
 
 theorem integralSumInterval_contains_geometricSumInterval
     (intervals : List (Rat × Rat))

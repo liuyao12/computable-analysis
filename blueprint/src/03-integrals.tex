@@ -217,6 +217,10 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_le_upperPrefix}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_eq_nil_of_connects_left_gt}
+\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo_eq_nil_of_connects_left_gt}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_eq_zero_of_connects_left_gt}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUpperPrefix_eq_zero_of_connects_left_gt}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_subdivide_mono}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUpperPrefix_subdivide_anti}
 \lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_subdivide_refines}
@@ -225,6 +229,11 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellWidth_le_two_square}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_width_le_two_squareSum}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_width_le_two_squareSum_add_bound}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_width_le_three_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_widthsShrink}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_valid}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
@@ -333,7 +342,16 @@ interval for \([a,c]\) is the interval sum of the stages for \([a,b]\) and
 are unit intervals, and that the prefix interval itself is ordered at every
 Farey unit stage.  Refining the global Farey mesh increases the lower prefix
 and decreases the upper prefix, so the prefix intervals are nested from one
-stage to the next and hence for all \(n\le m\).
+stage to the next and hence for all \(n\le m\).  Lean also proves the
+one-crossing bookkeeping lemma for connected Farey lists: once the left
+endpoint of the remaining chain is already past \(x\), no later lower or
+upper prefix cells are selected.  Combining that with the cell gap estimate
+gives the concrete bound
+\[
+  \operatorname{width}(F_n(x))\le \frac{3}{n+1}
+\]
+for the Farey prefix interval \(F_n(x)\), and therefore the raw prefix
+algorithm \code{fareyIntegralPrefixRaw(x)} is now verified.
 
 For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
 estimate needed for validity.  The sum of squared cell lengths is exactly
