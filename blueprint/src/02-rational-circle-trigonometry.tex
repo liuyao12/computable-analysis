@@ -468,6 +468,42 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.neg_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.inv_inv}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.inv_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_finite_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_finite_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_infinity_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_infinity_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_finite_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_finite_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_infinity_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_infinity_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_zero_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_zero_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_comm}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_assoc}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_self}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_left_self}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_cancel_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_cancel_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_self}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_zero_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_zero_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_neg_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_neg_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_neg_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_anti_comm}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_add_cancel}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_sub_cancel}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_zero}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.num_den_nonzero}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_num_den}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_ofHom_ofHom}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_neg_num}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_swap_eq_inv}
 \lean{ComputableAnalysis.RationalCircle.projectiveSlope}
@@ -574,6 +610,7 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_widthSum}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_widthSum}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage_widthSum}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_widthListAtMost_one_div_succ}
 \lean{ComputableAnalysis.RationalCircle.fareyUnitStage_widthSquareSum_le_one_div_succ}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_zero}
@@ -604,9 +641,57 @@ projective parameter \(\infty\) is the point \((-1,0)\), whereas the tangent of
 the quarter-turn point is the formal projective value \(\infty\).  In the
 affine quarter-circle chart this is stated as \(\tan(1)=\infty\), with a
 compatibility theorem saying that \(\tan(u)\) is the finite rational quotient
-whenever \(\cos(u)\ne0\).  The negation and quarter-complement identities are
-therefore stated projectively, so that zero and infinity are exchanged without
-adding endpoint exceptions.
+whenever \(\cos(u)\ne0\).  The negation, subtraction, and
+quarter-complement identities are therefore stated projectively, so that zero
+and infinity are exchanged without adding endpoint exceptions.
+\[
+  -(-x)=x,\qquad (x^{-1})^{-1}=x,\qquad (-x)^{-1}=-(x^{-1}),
+\]
+\[
+  0\oplus x=x=x\oplus0,\qquad
+  (x\oplus y)\oplus z=x\oplus(y\oplus z),
+\]
+\[
+  x\oplus(-x)=(-x)\oplus x=0,\qquad x\ominus x=0,
+\]
+\[
+  x\ominus0=x,\qquad 0\ominus x=-x,\qquad
+  x\ominus(-y)=x\oplus y,
+\]
+\[
+  (-x)\ominus y=-(x\oplus y),
+\]
+\[
+  (-x)\ominus(-y)=-(x\ominus y),\qquad
+  y\ominus x=-(x\ominus y),
+\]
+\[
+  (x\oplus y)\ominus y=x,\qquad
+  (x\ominus y)\oplus y=x.
+\]
+\[
+  2(-x)=-(2x),\qquad
+  (-x)\oplus(-y)=-(x\oplus y).
+\]
+The concrete tangent-addition chart formulas are also stated without deleting
+the exceptional denominator cases:
+\[
+  x\oplus y=[x+y:1-xy],\qquad
+  x\oplus\infty=\infty\oplus x=[1:-x],
+\]
+\[
+  \infty\oplus\infty=0,\qquad
+  2x=[2x:1-x^2],\qquad 2\infty=0.
+\]
+Likewise subtraction has the projective chart formulas
+\[
+  x\ominus y=[x-y:1+xy],\qquad
+  x\ominus\infty=[1:-x],\qquad
+  \infty\ominus x=[1:x],
+\]
+\[
+  \infty\ominus\infty=0.
+\]
 
 The Farey refinement step replaces adjacent projective parameters
 \((a:b)\) and \((c:d)\) by their mediant \((a+c:b+d)\).  Lean states this on
@@ -780,12 +865,31 @@ outer tangent segments.  The current Lean proof target is
 \end{theorem}
 
 \begin{theorem}[Geometric pi validity]\label{thm:geometric-pi-validity}
+\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
+\lean{ComputableAnalysis.PiProofs.circumferenceWidthsShrink}
+\lean{ComputableAnalysis.PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefinesUpToAll_of_stepRefines}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_iff_upToAll}
+\lean{ComputableAnalysis.PiProofs.CircumferenceStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToAll_of_stepRefines}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToAll_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_iff_upToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_stepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRemainders_of_quarterLengthStepRefinesUpToAll}
 \uses{thm:finite-archimedes,def:raw-real}
 The area and circumference algorithms for pi are real numbers: their intervals
 are ordered, nested under dyadic refinement, and have widths tending to zero.
 This is the exhaustion principle in the raw-real setting, and it is the
 starting point for the later calculus constructions.  The remaining work is
-to finish the Lean proof, not to settle a mathematical uncertainty.
+to finish the Lean proof, not to settle a mathematical uncertainty.  Lean now
+packages the circumference target in finite-prefix form: proving all
+\code{CircumferenceQuarterLengthStepRefinesUpTo N} certificates is enough to
+obtain the public \code{CircumferenceValid} proof.  The all-prefix statement is
+now formalized as an iff with the global step-refinement predicate, so this is
+the same obligation in a finite-checkable presentation.
 \end{theorem}
 
 \section{Trigonometric Functions}
@@ -878,6 +982,7 @@ corresponding raw functions.  These are not yet the usual angle special values:
 \begin{definition}[Geometric special-value targets]
 \label{def:geometric-trig-special-values}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleValueTargets}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleTangentValueTargets}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue}
@@ -891,51 +996,148 @@ corresponding raw functions.  These are not yet the usual angle special values:
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtyValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixtyValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSixtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanZeroValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFiveValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixtyValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoSquareValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtySixSquareValue}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSeventyTwoSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtySixSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSeventyTwoSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeHalfValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeThirdValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveHalfValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveQuarterValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSixtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanZeroValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtySixSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSeventyTwoSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtySixSquareValue_valid_of_sqrtFiveSpec}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSeventyTwoSquareValue_valid_of_sqrtFiveSpec}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtySixSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSeventyTwoSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.TanValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.TanSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.rawSquare}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeHalfValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeThirdValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveHalfValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveQuarterValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSixtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanZeroValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirty_square_scale_cosThirty_square_equiv_sinThirty_square}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFive_square_scale_cosFortyFive_square_equiv_sinFortyFive_square}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixty_square_scale_cosSixty_square_equiv_sinSixty_square}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFive_square_add_sinFortyFive_square_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirty_square_add_sinThirty_square_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixty_square_add_sinSixty_square_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySix_square_add_sinThirtySixSquare_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwo_square_add_sinSeventyTwoSquare_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleSquareIdentities}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleSquareIdentities}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleDisplayedSquareIdentities}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedSquareIdentities}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleDisplayedValuesValid}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid_of_sqrtSpecs}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid}
 \uses{def:geometric-sin-cos-functionraw,rem:algebraic-numbers-sqrt-two}
 \leanok
-For the normalized angle input \(t\), the geometric functions should satisfy
+For the normalized angle input \(t\), the target formulas include
 \[
   \cos(\tfrac12\cdot\tfrac\pi2)=
   \sin(\tfrac12\cdot\tfrac\pi2)=\sqrt{1/2}.
 \]
-The equilateral-triangle values are recorded as
 \[
   \sin(30^\circ)=\cos(60^\circ)=\frac12,\qquad
   \cos(30^\circ)=\sin(60^\circ)=\frac{\sqrt3}{2},
 \]
-corresponding to \(t=1/3\) for \(30^\circ\) and \(t=2/3\) for \(60^\circ\).
-The displayed tangent values are represented by
-\(\tan(30^\circ)=\sqrt3/3\) and \(\tan(60^\circ)=\sqrt3\).
-The formal special-angle target package currently records the sine and cosine
-entries; the tangent entries are displayed raw values, awaiting a normalized
-angle tangent construction built from the sine and cosine functions.
-The pentagon values at \(36^\circ\) and \(72^\circ\), corresponding to
-\(t=2/5\) and \(t=4/5\), are recorded as
+\[
+  \tan(30^\circ)=\frac{\sqrt3}{3},\qquad
+  \tan(60^\circ)=\sqrt3,
+\]
 \[
   \cos(36^\circ)=\frac{1+\sqrt5}{4},
   \qquad
   \cos(72^\circ)=\frac{\sqrt5-1}{4},
 \]
-and, without introducing nested raw-real square roots yet,
 \[
   \sin^2(36^\circ)=\frac{5-\sqrt5}{8},
   \qquad
   \sin^2(72^\circ)=\frac{5+\sqrt5}{8}.
 \]
-These are target statements for any completed \code{FunctionRawConstruction}.
+\[
+  \tan^2(36^\circ)=5-2\sqrt5,
+  \qquad
+  \tan^2(72^\circ)=5+2\sqrt5.
+\]
+\[
+  (\sqrt{1/2})^2=1/2,\quad
+  (\sqrt3)^2=3,\quad
+  (\sqrt5)^2=5,\quad
+  (\sqrt3/2)^2=3/4,\quad
+  (\sqrt3/3)^2=1/3,\quad
+  (\sqrt5/2)^2=5/4,\quad
+  (\sqrt5/4)^2=5/16.
+\]
+\[
+  \cos^2(45^\circ)=\sin^2(45^\circ)=1/2,\quad
+  \sin^2(30^\circ)=\cos^2(60^\circ)=1/4,
+\]
+\[
+  \cos^2(30^\circ)=\sin^2(60^\circ)=3/4,\quad
+  \tan^2(30^\circ)=1/3,\quad
+  \tan^2(60^\circ)=3.
+\]
+\[
+  \cos^2(36^\circ)=\frac{3+\sqrt5}{8},\qquad
+  \cos^2(72^\circ)=\frac{3-\sqrt5}{8}.
+\]
+Lean verifies the displayed \(30^\circ\), \(45^\circ\), and \(60^\circ\)
+square data satisfy \(\cos^2+\sin^2\sim1\).
+Lean also verifies the displayed pentagon-angle square data satisfy
+\[
+  \left(\frac{1+\sqrt5}{4}\right)^2+\frac{5-\sqrt5}{8}\sim1,\qquad
+  \left(\frac{\sqrt5-1}{4}\right)^2+\frac{5+\sqrt5}{8}\sim1.
+\]
+The sine and cosine target package is stated for any completed
+\code{FunctionRawConstruction}; the tangent target package is stated for an
+\code{ArctanInverseConstruction}.
 The square-root computations \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\) use
 the rational square-root algorithm from Chapter~\ref{ch:foundations}; the full
-positive nested square-root formulas for the two sine values are postponed
-until the raw-real square-root operation is available.  Lean also packages the
+positive nested square-root formulas for the two sine and tangent values are
+postponed until the raw-real square-root operation is available.  Lean also packages the
 displayed raw values above as valid computable reals, using the now verified
 square-root specifications for \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\).
 \end{definition}
@@ -973,29 +1175,29 @@ equilateral chord.
 \(1^{\ast}\) &
 \(0^{\ast}\)\\
 \(1/3\) & \(30\) &
-\(1/2\) &
-\(\sqrt3/2\) &
-\(1/\sqrt3\)\\
+\(1/2^{\S}\) &
+\((\sqrt3/2)^{\S}\) &
+\((\sqrt3/3)^{\S}\)\\
 \(2/5\) & \(36\) &
-\(\sqrt{(5-\sqrt5)/8}\) &
-\((1+\sqrt5)/4\) &
-\(\sqrt{5-2\sqrt5}\)\\
+\(\sqrt{(5-\sqrt5)/8}^{\S}\) &
+\(((1+\sqrt5)/4)^{\S}\) &
+\(\sqrt{5-2\sqrt5}^{\S}\)\\
 \(1/2\) & \(45\) &
-\(\sqrt{1/2}\) &
-\(\sqrt{1/2}\) &
-\(1\)\\
+\(\sqrt{1/2}^{\S}\) &
+\(\sqrt{1/2}^{\S}\) &
+\(1^{\S}\)\\
 \(2/3\) & \(60\) &
-\(\sqrt3/2\) &
-\(1/2\) &
-\(\sqrt3\)\\
+\((\sqrt3/2)^{\S}\) &
+\(1/2^{\S}\) &
+\(\sqrt3^{\S}\)\\
 \(4/5\) & \(72\) &
-\(\sqrt{(5+\sqrt5)/8}\) &
-\((\sqrt5-1)/4\) &
-\(\sqrt{5+2\sqrt5}\)\\
+\(\sqrt{(5+\sqrt5)/8}^{\S}\) &
+\(((\sqrt5-1)/4)^{\S}\) &
+\(\sqrt{5+2\sqrt5}^{\S}\)\\
 \(1\) & \(90\) &
 \(1^{\ast}\) &
 \(0^{\ast}\) &
-\(\text{undefined}\)\\
+\(\infty^{\ast}\)\\
 \(4/17\) & \(360/17\) &
 \(\sqrt{1-C^2}^{\dagger}\) &
 \(C^{\dagger}\) &
@@ -1005,15 +1207,18 @@ equilateral chord.
 
 Here \(C\) denotes the Gauss nested radical for \(\cos(2\pi/17)\) displayed
 below.  A superscript \(\ast\) means that the displayed endpoint value is
-formalized in Lean at the currently available rational-circle layer; a superscript
-\(\dagger\) means that the displayed value is available as an executable
-finite interval check.  Unmarked entries are the intended special-value
-theorems for the completed normalized-angle sine, cosine, and tangent
-functions.  For example, the equilateral dot-product lemma above is already
-formalized, but the normalized-angle theorem identifying \(t=1/3\) with the
-\(30^\circ\) value is still open.  The finite check for the \(17\)-gon is the
-executable interval overlap test in \code{GaussSeventeen}; it is deliberately
-weaker than a proof of Gauss's constructibility theorem.
+formalized in Lean at the currently available rational-circle layer; a
+superscript \(\S\) means Lean has formalized the displayed algebraic raw value,
+or the displayed square-value when only the square is currently represented,
+as a valid raw real with the corresponding square/Pythagorean checks; and a
+superscript \(\dagger\) means that the displayed value is available as an
+executable finite interval check.  These marks do not yet assert the completed
+normalized-angle theorem for every non-endpoint row.  For example, the
+equilateral dot-product lemma above is already formalized, but the
+normalized-angle theorem identifying \(t=1/3\) with the \(30^\circ\) value is
+still open.  The finite check for the \(17\)-gon is the executable interval
+overlap test in \code{GaussSeventeen}; it is deliberately weaker than a proof
+of Gauss's constructibility theorem.
 
 \begin{remark}[Gauss's 17-gon]
 \lean{ComputableAnalysis.GaussSeventeen.powerSeriesCheck_default}
@@ -1078,6 +1283,11 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_eq_cos_chartAdd}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_eq_sin_chartAdd}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedPoint_eq_point_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.projectiveSlope_pointMul}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_composedPoint_eq_tanAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_chartAddParameter_eq_tanAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_chartSubParameter_eq_tanSub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_chartDoubleParameter_eq_tanDouble}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.double_cos_eq_sq_sub_sq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.double_sin_eq_two_mul}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_tan_sq_eq_sec_sq}
@@ -1173,8 +1383,22 @@ formalized as rational equalities in the same package.
 The quotient identities for tangent and cotangent addition, subtraction, and
 double angle are formalized in denominator-cleared form; this keeps the
 necessary nonzero hypotheses explicit and avoids introducing partial quotient
-functions at this rational stage.  The quarter-complement cofunction formulas
-for \(\tan,\cot,\sec,\csc\) are also proved.
+functions at this rational stage.  The projective tangent version removes the
+endpoint exceptions:
+\[
+  \operatorname{slope}(PQ)=\operatorname{slope}(P)\oplus
+  \operatorname{slope}(Q),
+\]
+and, whenever the displayed chart denominator is nonzero,
+\[
+  \tan\!\left(\frac{u+v}{1-uv}\right)=\tan(u)\oplus\tan(v),\qquad
+  \tan\!\left(\frac{u-v}{1+uv}\right)=\tan(u)\ominus\tan(v),
+\]
+\[
+  \tan\!\left(\frac{2u}{1-u^2}\right)=2\tan(u).
+\]
+The quarter-complement cofunction formulas for \(\tan,\cot,\sec,\csc\) are
+also proved.
 \end{theorem}
 
 \begin{theorem}[Dyadic samples are circle samples]

@@ -1,5 +1,6 @@
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.Pi
+import ComputableAnalysis.PiProofs
 
 /-!
 # Euler Basel problem
@@ -23,25 +24,47 @@ theorem baselSeriesRaw_valid : baselSeriesRaw.Valid := by
 def baselSeries : Real :=
   Real.ofRaw baselSeriesRaw baselSeriesRaw_valid
 
-def intervalScaleRat (r : Rat) (I : QInterval) : QInterval :=
-  if 0 <= r then
-    { lo := r * I.lo, hi := r * I.hi }
-  else
-    { lo := r * I.hi, hi := r * I.lo }
-
-def intervalMul (I J : QInterval) : QInterval :=
-  QBox.mulRealInterval I.lo I.hi J.lo J.hi
-
 /-- Raw interval algorithm for `pi^2 / 6`, using any chosen raw pi
 representative. -/
-def piSquaredOverSixRaw (pi : RealRaw) : RealRaw where
-  compute := fun n =>
-    intervalScaleRat (1 / 6) (intervalMul (pi.compute n) (pi.compute n))
+def piSquaredOverSixRaw (pi : RealRaw) : RealRaw :=
+  RealRaw.scaleRat (1 / 6) (pi * pi)
+
+theorem piSquaredOverSixRaw_valid_of_nonneg_bounded
+    {pi : RealRaw} (hpi : pi.Valid) {B : Rat} (hB : 0 < B)
+    (hbounds : forall n, 0 <= (pi.compute n).lo ∧ (pi.compute n).hi <= B) :
+    (piSquaredOverSixRaw pi).Valid := by
+  unfold piSquaredOverSixRaw
+  exact RealRaw.scaleRat_valid_of_nonneg
+    (by native_decide : (0 : Rat) <= 1 / 6)
+    (RealRaw.mulSelf_valid_of_nonneg_bounded hpi hB hbounds)
 
 /-- The right-hand side of Basel using the current geometric area definition
 of pi. -/
 def geometricPiSquaredOverSixRaw : RealRaw :=
   piSquaredOverSixRaw piCircleArea
+
+theorem piCircleArea_nonneg_bounded_by_four (n : Nat) :
+    0 <= (piCircleArea.compute n).lo ∧ (piCircleArea.compute n).hi <= 4 := by
+  have hvalid : piCircleArea.Valid := by
+    simpa [PiProofs.AreaValid] using PiProofs.AreaLoopValidity.areaValid
+  have hnested := hvalid.2.1 0 n (Nat.zero_le n)
+  constructor
+  · have hlow : (piCircleArea.compute 0).lo <= (piCircleArea.compute n).lo :=
+      hnested.1
+    rw [piCircleArea_compute_zero] at hlow
+    grind
+  · have hhigh : (piCircleArea.compute n).hi <= (piCircleArea.compute 0).hi :=
+      hnested.2.2
+    rw [piCircleArea_compute_zero] at hhigh
+    simpa using hhigh
+
+theorem geometricPiSquaredOverSixRaw_valid :
+    geometricPiSquaredOverSixRaw.Valid := by
+  unfold geometricPiSquaredOverSixRaw
+  exact piSquaredOverSixRaw_valid_of_nonneg_bounded
+    (by simpa [PiProofs.AreaValid] using PiProofs.AreaLoopValidity.areaValid)
+    (by native_decide : (0 : Rat) < 4)
+    piCircleArea_nonneg_bounded_by_four
 
 /- Put the cursor here to compare with the zeta-side interval above. -/
 #eval! geometricPiSquaredOverSixRaw.decimalAt 12

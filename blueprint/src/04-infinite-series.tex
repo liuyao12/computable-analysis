@@ -74,16 +74,21 @@ equivalence.
 \begin{theorem}[Power-series arctangent agrees with area pi]
 \label{thm:power-series-arctan-area-pi}
 \lean{ComputableAnalysis.ArctanGeometry.PowerSeriesAgreesAt}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.pow_mono_nonneg}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonneg_oddPartial}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonpos_evenPartial}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartial_odd_le_kernel}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernel_le_kernelPartial_even}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralAtOne}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_nonneg_even}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_nonpos_odd}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOne}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOne_odd_succ}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOne_even_succ}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_odd_succ_le_even}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_odd_le_even_succ}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_zero_one}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_zero_one}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_split}
@@ -94,16 +99,144 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralSum}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.EvenKernelCellBounds}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.OddKernelCellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpTo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.integralKernel_le_one}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.integralLowerStep_le_kernelPartialIntegralBetween_zero}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_zero_of_unit}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_two_lowerStep}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_two}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_two_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_one}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.OddKernelUnitCellBound}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_one}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_three_le_integralUpperStep_on_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_three}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_three_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_four_lowerStep}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_four}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_four_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_five_le_integralUpperStep_on_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_five}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_five_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_six_lowerStep}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_six}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_six_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_seven_le_integralUpperStep_on_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_seven}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_seven_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_eight_lowerStep}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_eight}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_eight_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_nine_le_integralUpperStep_on_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_nine}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_nine_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_ten_lowerStep}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_ten}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBounds_ten_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialIntegralBetween_eleven_le_integralUpperStep_on_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_eleven}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBounds_eleven_of_unit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitUniformCellBoundsAtOneUpTo_of_le}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitUniformCellBoundsAtOneUpTo_of_unitUniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitUniformCellBoundsAtOneUpToAll_of_unitUniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitUniformCellBoundsAtOne_iff_upToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_le_five}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_le_five}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleUniformUnitCellBoundsAtOneUpToFive}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_one}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_two}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_two}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_three}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_three}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_four}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_four}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_five}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_five}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneBase}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.arctanAreaLoopState_one_kernelPartialIntegralSum}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpTo_of_le}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToOne}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToTwo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToThree}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBoundsAtOne_le_five}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelCellBoundsAtOne_le_five}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBoundsUpTo_of_unitUniformCellBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBoundsUpToAll_of_cellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBoundsAtOne_iff_upToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFive}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFive_of_unitUniform}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_cellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFifteen}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFourteen}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpTo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBoundsAtOneUpTo_of_le}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBoundsUpTo_of_cellBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBoundsUpTo_of_unitUniformCellBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBoundsUpToAll_of_kernelBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBoundsAtOne_iff_upToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBoundsUpToAll_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBoundsUpToAll_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToTwo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToThree}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFour}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFive}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFifteen}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFourteen}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleRawAtOneOverlapsUpTo}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleRawAtOneOverlapsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpTo_of_le}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpTo_of_cellBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpTo_of_unitUniformCellBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToAll_of_kernelBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToAll_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToAll_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToTwo}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToThree}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToFour}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToFive}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToFifteen}
+\lean{ComputableAnalysis.PiProofs.leibnizRectangleRawAtOneOverlapsUpToFourteen}
+\lean{ComputableAnalysis.PiProofs.FourArctanSeriesRectangleRouteOverlapsUpTo}
+\lean{ComputableAnalysis.PiProofs.FourArctanSeriesRectangleRouteOverlapsUpToAll}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpTo_of_le}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpTo_of_leibnizRectangleRaw}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpTo_of_kernelBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpTo_of_cellBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpTo_of_unitUniformCellBoundsUpTo}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToAll_of_leibnizRectangleRaw}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToAll_of_kernelBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToAll_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToAll_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToFive_of_unitUniform}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToFifteen}
+\lean{ComputableAnalysis.PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToFourteen}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitUniformCellBounds_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseIntegralBridgeAtOne_iff_uniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_iff_unitUniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_pointwiseIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_kernelBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_pointwiseIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOneSpecial_of_rawOverlapsUpToAll}
+\lean{ComputableAnalysis.PiProofs.rawOverlapsUpToAll_of_leibnizEqualsRectangleRawAtOneSpecial}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOneSpecial_iff_rawOverlapsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_rawOverlapsUpToAll}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOneSpecial_of_kernelBounds}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.KernelComparisonAt}
@@ -119,56 +252,176 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelBounds}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_rawOverlapsUpToAll}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_leibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelBounds}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_uniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_unitUniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_pointwiseIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_pointwiseUnitIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_leibnizEqualsRectangleRawAtOne}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelBounds}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_uniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_unitUniformCellBounds}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_cellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_pointwiseIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_pointwiseUnitIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
 \uses{thm:leibniz-arctan,thm:geometric-arctan-one-area-pi}
-Once the power-series arctangent has been compared with the geometric
-sector-area arctangent on the unit interval, the area definition of \(\pi\) is
-also equivalent to \(4\arctan_{\mathrm{series}}(1)\):
 \[
   4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
 \]
-Lean now supplies the rectangle construction for the Taylor kernel, proves the
-geometric arctangent agrees with it on the nonnegative unit branch, and
-transports the pointwise power-series statement to the concrete comparison
-\code{LeibnizEqualsRectangleRawAtOne}.  This is now the finite missing input:
-compare the Leibniz intervals with the rectangle-sum integral intervals at
-\(1\).  Lean also proves the finite kernel bracketing facts that odd
-arctangent-kernel truncations lie below \(1/(1+x^2)\) and even truncations lie
-above it.  It then identifies the Leibniz interval endpoints with the
-integrals over \([0,1]\) of those odd/even finite kernel truncations, and
-proves that the midpoint-partition sums of finite cell integrals equal the
-single \([0,1]\) finite integral.  The remaining input is the cellwise
-inequality package
-\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne};
-from that Lean constructs \code{PiProofs.LeibnizRectangleKernelBoundsAtOne},
-then \code{PiProofs.LeibnizEqualsRectangleRawAtOne}, then
-\code{Taylor.ArctanComparison.KernelComparisonAt 1} and then
-\code{ArctanGeometry.PowerSeriesAgreesAt 1}.  The base cell package
-\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneBase}
-is already verified: the even \(m=0\) lower-cell inequality holds on every unit
-partition, and the first odd \(m=1\) midpoint stage is checked exactly.  The
-older unit-interval
-hypothesis
-\code{ArctanGeometry.PowerSeriesAgreesOnUnit} still feeds the same bridge when
-broader arctangent comparison data is available.
+Missing input:
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}.
+Lean also records the direct finite-prefix route:
+\code{PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelBoundsUpToAll}.
+Pointwise bounds:
+\code{PiProofs.LeibnizRectangleBridge.leibnizRectanglePointwiseCellBoundsAtOne};
+cell-integration target:
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne}.
+Since the actual \(\arctan(1)\) partitions stay inside \([0,1]\), Lean also
+records the sharper unit-cell target
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne},
+which is already sufficient for the table-facing pi equivalence.
+\[
+  \frac{r-p}{1+r^2}
+  \le
+  \int_p^r (1-x^2+x^4)\,dx,
+  \qquad
+  \int_p^r (1-x^2+x^4-x^6)\,dx
+  \le
+  \frac{r-p}{1+p^2},
+\]
+\[
+  \frac{r-p}{1+r^2}
+  \le
+  \int_p^r (1-x^2+x^4-x^6+x^8)\,dx,
+  \qquad
+  \int_p^r (1-x^2+x^4-x^6+x^8-x^{10})\,dx
+  \le
+  \frac{r-p}{1+p^2},
+\]
+\[
+  \frac{r-p}{1+r^2}
+  \le
+  \int_p^r \sum_{j=0}^{6}(-1)^j x^{2j}\,dx,
+  \qquad
+  \int_p^r \sum_{j=0}^{7}(-1)^j x^{2j}\,dx
+  \le
+  \frac{r-p}{1+p^2}
+  \qquad(0\le p\le r\le1).
+\]
+\[
+  \frac{r-p}{1+r^2}
+  \le
+  \int_p^r \sum_{j=0}^{8}(-1)^j x^{2j}\,dx,
+  \qquad
+  \int_p^r \sum_{j=0}^{9}(-1)^j x^{2j}\,dx
+  \le
+  \frac{r-p}{1+p^2}
+  \qquad(0\le p\le r\le1).
+\]
+\[
+  \frac{r-p}{1+r^2}
+  \le
+  \int_p^r \sum_{j=0}^{10}(-1)^j x^{2j}\,dx,
+  \qquad
+  \int_p^r \sum_{j=0}^{11}(-1)^j x^{2j}\,dx
+  \le
+  \frac{r-p}{1+p^2}
+  \qquad(0\le p\le r\le1).
+\]
+Lean names:
+\code{PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound\_one},
+\code{PiProofs.LeibnizRectangleBridge.evenKernelCellBound\_two},
+\code{PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound\_three},
+\code{PiProofs.LeibnizRectangleBridge.evenKernelCellBound\_four},
+\code{PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound\_five},
+\code{PiProofs.LeibnizRectangleBridge.evenKernelCellBound\_six},
+\code{PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound\_seven},
+\code{PiProofs.LeibnizRectangleBridge.evenKernelCellBound\_eight},
+\code{PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound\_nine},
+\code{PiProofs.LeibnizRectangleBridge.evenKernelCellBound\_ten}, and
+\code{PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound\_eleven}.
+The corresponding finite unit-cell package is
+\code{PiProofs.LeibnizRectangleBridge.leibnizRectangleUniformUnitCellBoundsAtOneUpToFive};
+Lean transports such a package to finite cell bounds, kernel bounds, and raw
+overlap checks by
+\code{PiProofs.LeibnizRectangleBridge.cellBoundsUpTo\_of\_unitUniformCellBoundsUpTo},
+\code{PiProofs.LeibnizRectangleBridge.kernelBoundsUpTo\_of\_unitUniformCellBoundsUpTo},
+and
+\code{PiProofs.leibnizRectangleRawAtOneOverlapsUpTo\_of\_unitUniformCellBoundsUpTo};
+after multiplying by \(4\), the same input gives
+\code{PiProofs.fourArctanSeriesRectangleRouteOverlapsUpTo\_of\_unitUniformCellBoundsUpTo}.
+Exact prefix:
+\code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFive},
+\code{PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFive}
+and
+\code{PiProofs.leibnizRectangleRawAtOneOverlapsUpToFive}, with the scaled
+unit-cell corollary
+\code{PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToFive\_of\_unitUniform}.
+\[
+  \bigl(\forall N,\ \operatorname{CellBoundsUpTo}(N)\bigr)
+  \Rightarrow
+  4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
+\]
+Lean name:
+\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_cellBoundsUpToAll}.
+The parallel unit-cell route is also named:
+\[
+  \bigl(\forall N,\ \operatorname{UnitCellBoundsUpTo}(N)\bigr)
+  \Rightarrow
+  4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}},
+\]
+via
+\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_unitUniformCellBoundsUpToAll}.
+Lean also records this as a genuine all-prefix formulation:
+\code{PiProofs.LeibnizRectangleBridge.unitUniformCellBoundsAtOne\_iff\_upToAll}
+says the global unit-cell condition is equivalent to proving every finite
+prefix.
+Finite regression check:
+\code{PiProofs.leibnizRectangleRawAtOneOverlapsUpToFifteen}; after scaling
+this is the table-facing check
+\code{PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToFifteen}.  These
+finite certificates are monotone in the prefix bound, so any smaller prefix can
+be reused without repeating the native rational check.  The bridge from
+cellwise bounds to the raw and scaled overlap checks is also now named directly,
+so future finite certificates do not have to repeat the kernel-bound transport.
 \end{theorem}
 
 \begin{theorem}[Machin tangent identity]\label{thm:machin-tangent}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.gaussian_identity}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.quarter_tangent_identity}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.projective_tanFour_one_fifth}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.projective_quarter_tangent_identity}
 \uses{def:arctan-series,def:qbox}
 The rational tangent algebra proves
 \[
   \tan\!\left(4\arctan\frac15-\arctan\frac{1}{239}\right)=1.
+\]
+The same finite computation is also recorded in the projective tangent group:
+\[
+  (2(2[1/5]))\ominus[1/239]=[1].
 \]
 Equivalently, the Gaussian-rational identity
 \[
@@ -307,9 +560,31 @@ telescoping bound
 \]
 \end{theorem}
 
+\begin{definition}[Basel right-hand side]\label{def:basel-geometric-rhs}
+\lean{ComputableAnalysis.Basel.piSquaredOverSixRaw}
+\lean{ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw}
+\uses{def:raw-real,def:circle-area-stage-algorithm}
+For any chosen raw representative \(\pi_0\), define
+\[
+  \frac{\pi_0^2}{6}
+\]
+by the standard stagewise interval square and the nonnegative scale factor
+\(1/6\).  The geometric instance uses \(\pi_0=\code{piCircleArea}\).
+\end{definition}
+
+\begin{theorem}[Geometric Basel right-hand side validity]
+\label{thm:basel-geometric-rhs-valid}
+\lean{ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw_valid}
+\uses{def:basel-geometric-rhs,thm:geometric-pi-validity,def:raw-real}
+\leanok
+The raw interval algorithm \(\code{geometricPiSquaredOverSixRaw}\) is valid.
+Lean proves the general bounded nonnegative square lemma and applies it to the
+area-pi intervals, which are nested inside the stage-zero bound \([2,4]\).
+\end{theorem}
+
 \begin{conjecture}[Euler's Basel theorem]\label{conj:basel}
 \lean{ComputableAnalysis.Basel.eulerBasel_geometricPi}
-\uses{def:zeta-two-raw,thm:geometric-pi-validity,def:raw-equiv}
+\uses{def:zeta-two-raw,thm:basel-geometric-rhs-valid,def:raw-equiv}
 For the geometric pi real number,
 \[
   \zeta(2)\Equiv \frac{\pi^2}{6}.

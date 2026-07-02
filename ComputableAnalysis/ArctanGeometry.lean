@@ -231,6 +231,53 @@ theorem integralUpperStep_refine
           grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
             Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+theorem arctanAreaIncrement_nonneg
+    {p q r : Rat} (hpq : p <= q) (hqr : q <= r) :
+    0 <= arctanAreaIncrement p q r := by
+  have hqp : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hrq : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hrp : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hnum :
+      0 <= 2 * (r - p) * (q - p) * (r - q) := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hrp)
+        hqp)
+      hrq
+  have hden :
+      0 < (1 + p * p) * (1 + q * q) * (1 + r * r) := by
+    exact Rat.mul_pos
+      (Rat.mul_pos
+        (RationalCircle.Stage.one_add_square_pos p)
+        (RationalCircle.Stage.one_add_square_pos q))
+      (RationalCircle.Stage.one_add_square_pos r)
+  unfold arctanAreaIncrement
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+theorem arctanAreaDecrement_nonneg
+    {p q r : Rat} (hp0 : 0 <= p) (hpq : p <= q) (hqr : q <= r) :
+    0 <= arctanAreaDecrement p q r := by
+  have hq0 : 0 <= q := Rat.le_trans hp0 hpq
+  have hr0 : 0 <= r := Rat.le_trans hq0 hqr
+  have hqp : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hrq : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hrp : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hnum : 0 <= (r - p) * (q - p) * (r - q) := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg hrp hqp)
+      hrq
+  have hden :
+      0 < (1 + p * r) * (1 + p * q) * (1 + q * r) := by
+    exact Rat.mul_pos
+      (Rat.mul_pos
+        (RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hr0)
+        (RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hq0))
+      (RationalCircle.Stage.one_add_mul_pos_of_nonneg hq0 hr0)
+  unfold arctanAreaDecrement
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
 private theorem rat_eq_of_mul_eq_mul_pos {a b c : Rat}
     (hc : 0 < c) (h : a * c = b * c) : a = b := by
   have hcne : c ≠ 0 := Rat.ne_of_gt hc
@@ -345,6 +392,56 @@ theorem geometricUpperStep_refine
           rw [Rat.div_def, Rat.div_def]
           grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_assoc,
             Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem geometricLowerStep_refine_le
+    {p q r : Rat} (hpq : p <= q) (hqr : q <= r) :
+    geometricLowerStep p r <=
+      geometricLowerStep p q + geometricLowerStep q r := by
+  have hinc := arctanAreaIncrement_nonneg hpq hqr
+  have href := geometricLowerStep_refine p q r
+  grind
+
+theorem geometricUpperStep_refine_le
+    {p q r : Rat} (hp0 : 0 <= p) (hpq : p <= q) (hqr : q <= r) :
+    geometricUpperStep p q + geometricUpperStep q r <=
+      geometricUpperStep p r := by
+  have hdec := arctanAreaDecrement_nonneg hp0 hpq hqr
+  have href := geometricUpperStep_refine hp0 hpq hqr
+  grind [Rat.sub_eq_add_neg]
+
+theorem geometricUpperStep_nonneg
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
+    0 <= geometricUpperStep p r := by
+  have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hden : 0 < 1 + p * r :=
+    RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hr0
+  unfold geometricUpperStep
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg hlen (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+theorem geometricLowerStep_nonneg
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
+    0 <= geometricLowerStep p r := by
+  have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hfactor : 0 <= 1 + p * r := by
+    have hmul := Rat.mul_nonneg hp0 hr0
+    grind
+  have hleft : 0 < 1 + p * p :=
+    RationalCircle.Stage.one_add_square_pos p
+  have hright : 0 < 1 + r * r :=
+    RationalCircle.Stage.one_add_square_pos r
+  have hden : 0 < (1 + p * p) * (1 + r * r) :=
+    Rat.mul_pos hleft hright
+  unfold geometricLowerStep
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg (Rat.mul_nonneg hlen hfactor)
+    (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+theorem geometricLowerStep_zero_right (p : Rat) :
+    geometricLowerStep p p = 0 := by
+  grind [geometricLowerStep, Rat.sub_eq_add_neg]
 
 private theorem left_square_le_factor {p r : Rat}
     (hp0 : 0 <= p) (hpr : p <= r) :
@@ -544,6 +641,88 @@ def UnitIntervals : List (Rat × Rat) -> Prop
   | (p, r) :: rest =>
       0 <= p /\ p <= r /\ r <= 1 /\ UnitIntervals rest
 
+/-- Ordered coverage of `[a,b]` by a finite list of rational cells.  This is
+the bookkeeping invariant needed to compare different lower/upper sum
+schedules for the same kernel. -/
+def CoversInterval : Rat -> Rat -> List (Rat × Rat) -> Prop
+  | a, b, [] => a = b
+  | a, b, (p, r) :: rest =>
+      p = a /\ p <= r /\ CoversInterval r b rest
+
+theorem CoversInterval.start_le_end
+    {a b : Rat} {intervals : List (Rat × Rat)}
+    (h : CoversInterval a b intervals) :
+    a <= b := by
+  induction intervals generalizing a with
+  | nil =>
+      have hab : a = b := by simpa [CoversInterval] using h
+      rw [hab]
+      exact Rat.le_refl
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp, hpr, hrest⟩
+      subst p
+      exact Rat.le_trans hpr (ih hrest)
+
+theorem CoversInterval.nonnegative
+    {a b : Rat} {intervals : List (Rat × Rat)}
+    (ha : 0 <= a) (h : CoversInterval a b intervals) :
+    NonnegativeIntervals intervals := by
+  induction intervals generalizing a with
+  | nil =>
+      simp [NonnegativeIntervals]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp, hpr, hrest⟩
+      subst p
+      exact ⟨ha, hpr, ih (Rat.le_trans ha hpr) hrest⟩
+
+theorem CoversInterval.unit
+    {a b : Rat} {intervals : List (Rat × Rat)}
+    (ha : 0 <= a) (hb : b <= 1)
+    (h : CoversInterval a b intervals) :
+    UnitIntervals intervals := by
+  induction intervals generalizing a with
+  | nil =>
+      simp [UnitIntervals]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp, hpr, hrest⟩
+      subst p
+      have hr0 : 0 <= r := Rat.le_trans ha hpr
+      have hr1 : r <= 1 :=
+        Rat.le_trans (CoversInterval.start_le_end hrest) hb
+      exact ⟨ha, hpr, hr1, ih hr0 hrest⟩
+
+theorem CoversInterval.append
+    {a b c : Rat} {left right : List (Rat × Rat)}
+    (hleft : CoversInterval a b left)
+    (hright : CoversInterval b c right) :
+    CoversInterval a c (left ++ right) := by
+  induction left generalizing a with
+  | nil =>
+      have hab : a = b := by
+        simpa [CoversInterval] using hleft
+      subst b
+      simpa [CoversInterval] using hright
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hleft with ⟨hp, hpr, hrest⟩
+      subst p
+      simp [CoversInterval]
+      exact ⟨hpr, ih hrest⟩
+
+theorem CoversInterval.single
+    {a b : Rat} (hab : a <= b) :
+    CoversInterval a b [(a, b)] := by
+  simp [CoversInterval, hab]
+
+theorem CoversInterval.extend_right
+    {a b c : Rat} {intervals : List (Rat × Rat)}
+    (h : CoversInterval a b intervals) (hbc : b <= c) :
+    CoversInterval a c (intervals ++ [(b, c)]) :=
+  CoversInterval.append h (CoversInterval.single hbc)
+
 theorem unitIntervals_nonnegative
     (intervals : List (Rat × Rat))
     (hwf : UnitIntervals intervals) :
@@ -629,6 +808,40 @@ theorem fareyCellIntervals_nonnegative
     NonnegativeIntervals (fareyCellIntervals cells) :=
   unitIntervals_nonnegative (fareyCellIntervals cells)
     (fareyCellIntervals_unit cells hcells)
+
+theorem fareyCellIntervals_covers
+    {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells) :
+    CoversInterval left.value right.value (fareyCellIntervals cells) := by
+  induction cells generalizing left with
+  | nil =>
+      have hvalue :
+          left.value = right.value := by
+        exact congrArg RationalCircle.FareyFraction.value
+          (by simpa [RationalCircle.FareyCell.Connects] using hconnect)
+      simpa [fareyCellIntervals, CoversInterval] using hvalue
+  | cons cell rest ih =>
+      rcases hconnect with ⟨hleft, hrestConnect⟩
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hcellUnit with ⟨_hl0, hlr, _hr1⟩
+      change CoversInterval left.value right.value
+        (RationalCircle.FareyCell.toRatInterval cell ::
+          fareyCellIntervals rest)
+      exact ⟨by
+          exact congrArg RationalCircle.FareyFraction.value hleft,
+        by simpa [RationalCircle.FareyCell.toRatInterval] using hlr,
+        ih hrestConnect hrestUnit⟩
+
+theorem fareyUnitStage_intervals_covers (n : Nat) :
+    CoversInterval 0 1
+      (fareyCellIntervals (RationalCircle.fareyUnitStage n)) := by
+  simpa [RationalCircle.FareyFraction.value_zero,
+    RationalCircle.FareyFraction.value_one] using
+    fareyCellIntervals_covers
+      (RationalCircle.fareyUnitStage_connects n)
+      (RationalCircle.fareyUnitStage_unit n)
 
 theorem fareyLowerCellsUpTo_one_eq_intervals
     (cells : List RationalCircle.FareyCell)
@@ -1090,6 +1303,116 @@ theorem fareyIntegralUpperPrefix_eq_zero_of_connects_left_gt
     x hconnect hunit hleft]
   simp [integralUpperSum]
 
+theorem fareyLowerCellsUpTo_covers_prefix
+    (x : Rat) {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hleft : left.value <= x) :
+    Exists fun y =>
+      y <= x /\ CoversInterval left.value y (fareyLowerCellsUpTo x cells) := by
+  induction cells generalizing left with
+  | nil =>
+      exact ⟨left.value, hleft, by simp [fareyLowerCellsUpTo, CoversInterval]⟩
+  | cons cell rest ih =>
+      rcases hconnect with ⟨hcellLeft, hrestConnect⟩
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hcellUnit with ⟨_hl0, hlr, _hr1⟩
+      by_cases hright : cell.right.value <= x
+      · obtain ⟨y, hyx, hcoverRest⟩ :=
+          ih hrestConnect hrestUnit hright
+        have hcover :
+            CoversInterval left.value y
+              ((cell.left.value, cell.right.value) ::
+                fareyLowerCellsUpTo x rest) :=
+          ⟨congrArg RationalCircle.FareyFraction.value hcellLeft,
+            hlr, hcoverRest⟩
+        refine ⟨y, hyx, ?_⟩
+        simpa [fareyLowerCellsUpTo, hright,
+          RationalCircle.FareyCell.toRatInterval] using hcover
+      · have htail :
+            fareyLowerCellsUpTo x rest = [] :=
+          fareyLowerCellsUpTo_eq_nil_of_connects_left_gt
+            x hrestConnect hrestUnit hright
+        refine ⟨left.value, hleft, ?_⟩
+        simp [fareyLowerCellsUpTo, hright, htail, CoversInterval]
+
+theorem fareyUpperCellsUpTo_covers_prefix
+    (x : Rat) {left right : RationalCircle.FareyFraction}
+    {cells : List RationalCircle.FareyCell}
+    (hconnect : RationalCircle.FareyCell.Connects left right cells)
+    (hunit : RationalCircle.FareyCell.UnitList cells)
+    (hleft : left.value <= x) (hright : x <= right.value) :
+    Exists fun y =>
+      x <= y /\ CoversInterval left.value y (fareyUpperCellsUpTo x cells) := by
+  induction cells generalizing left with
+  | nil =>
+      have hvalue : left.value = right.value := by
+        exact congrArg RationalCircle.FareyFraction.value
+          (by simpa [RationalCircle.FareyCell.Connects] using hconnect)
+      have hxleft : x <= left.value := by
+        rwa [hvalue]
+      exact ⟨left.value, hxleft, by simp [fareyUpperCellsUpTo, CoversInterval]⟩
+  | cons cell rest ih =>
+      rcases hconnect with ⟨hcellLeft, hrestConnect⟩
+      rcases hunit with ⟨hcellUnit, hrestUnit⟩
+      rcases hcellUnit with ⟨_hl0, hlr, _hr1⟩
+      have hcellLeftLe : cell.left.value <= x := by
+        rw [hcellLeft]
+        exact hleft
+      by_cases hcellRightLe : cell.right.value <= x
+      · obtain ⟨y, hxy, hcoverRest⟩ :=
+          ih hrestConnect hrestUnit hcellRightLe
+        have hcover :
+            CoversInterval left.value y
+              ((cell.left.value, cell.right.value) ::
+                fareyUpperCellsUpTo x rest) :=
+          ⟨congrArg RationalCircle.FareyFraction.value hcellLeft,
+            hlr, hcoverRest⟩
+        refine ⟨y, hxy, ?_⟩
+        simpa [fareyUpperCellsUpTo, hcellLeftLe,
+          RationalCircle.FareyCell.toRatInterval] using hcover
+      · have htail :
+            fareyUpperCellsUpTo x rest = [] :=
+          fareyUpperCellsUpTo_eq_nil_of_connects_left_gt
+            x hrestConnect hrestUnit hcellRightLe
+        have hxCellRight : x <= cell.right.value := by grind
+        have hcover :
+            CoversInterval left.value cell.right.value
+              [(cell.left.value, cell.right.value)] :=
+          ⟨congrArg RationalCircle.FareyFraction.value hcellLeft,
+            hlr, by simp [CoversInterval]⟩
+        refine ⟨cell.right.value, hxCellRight, ?_⟩
+        simpa [fareyUpperCellsUpTo, hcellLeftLe, htail,
+          RationalCircle.FareyCell.toRatInterval] using hcover
+
+theorem fareyLowerCellsUpTo_unitStage_covers_prefix
+    {x : Rat} (hx0 : 0 <= x) (n : Nat) :
+    Exists fun y =>
+      y <= x /\
+        CoversInterval 0 y
+          (fareyLowerCellsUpTo x (RationalCircle.fareyUnitStage n)) := by
+  simpa [RationalCircle.FareyFraction.value_zero] using
+    fareyLowerCellsUpTo_covers_prefix
+      x
+      (RationalCircle.fareyUnitStage_connects n)
+      (RationalCircle.fareyUnitStage_unit n)
+      (by simpa [RationalCircle.FareyFraction.value_zero] using hx0)
+
+theorem fareyUpperCellsUpTo_unitStage_covers_prefix
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    Exists fun y =>
+      x <= y /\
+        CoversInterval 0 y
+          (fareyUpperCellsUpTo x (RationalCircle.fareyUnitStage n)) := by
+  simpa [RationalCircle.FareyFraction.value_zero] using
+    fareyUpperCellsUpTo_covers_prefix
+      x
+      (RationalCircle.fareyUnitStage_connects n)
+      (RationalCircle.fareyUnitStage_unit n)
+      (by simpa [RationalCircle.FareyFraction.value_zero] using hx0)
+      (by simpa [RationalCircle.FareyFraction.value_one] using hx1)
+
 theorem integralLowerSum_le_geometricLowerSum
     (intervals : List (Rat × Rat))
     (hwf : NonnegativeIntervals intervals) :
@@ -1173,6 +1496,614 @@ theorem integralLowerSum_le_integralUpperSum
       exact rat_add_le_add
         (integralLowerStep_le_integralUpperStep hp0 hpr)
         (ih hrest)
+
+theorem integralLowerSum_nonneg
+    (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    0 <= integralLowerSum intervals := by
+  induction intervals with
+  | nil => simp [integralLowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨_hp0, hpr, hrest⟩
+      simp [integralLowerSum]
+      have hsum := rat_add_le_add
+        (integralLowerStep_nonneg hpr)
+        (ih hrest)
+      grind
+
+theorem integralUpperSum_nonneg
+    (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    0 <= integralUpperSum intervals := by
+  induction intervals with
+  | nil => simp [integralUpperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨_hp0, hpr, hrest⟩
+      simp [integralUpperSum]
+      have hsum := rat_add_le_add
+        (integralUpperStep_nonneg hpr)
+        (ih hrest)
+      grind
+
+theorem integralLowerStep_zero_right (p : Rat) :
+    integralLowerStep p p = 0 := by
+  grind [integralLowerStep, Rat.sub_eq_add_neg]
+
+theorem integralLowerSum_eq_zero_of_covers_point
+    {a : Rat} {intervals : List (Rat × Rat)}
+    (ha : 0 <= a) (hcover : CoversInterval a a intervals) :
+    integralLowerSum intervals = 0 := by
+  induction intervals generalizing a with
+  | nil =>
+      simp [integralLowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hra_le : r <= a := CoversInterval.start_le_end hrest
+      have hra : r = a := by grind
+      subst r
+      have htail := ih ha hrest
+      simp [integralLowerSum, integralLowerStep_zero_right, htail]
+      grind
+
+theorem geometricUpperSum_nonneg
+    (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    0 <= geometricUpperSum intervals := by
+  induction intervals with
+  | nil => simp [geometricUpperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hrest⟩
+      simp [geometricUpperSum]
+      have hsum := rat_add_le_add
+        (geometricUpperStep_nonneg hp0 hpr)
+        (ih hrest)
+      grind
+
+theorem geometricLowerSum_nonneg
+    (intervals : List (Rat × Rat))
+    (hwf : NonnegativeIntervals intervals) :
+    0 <= geometricLowerSum intervals := by
+  induction intervals with
+  | nil => simp [geometricLowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hrest⟩
+      simp [geometricLowerSum]
+      have hsum := rat_add_le_add
+        (geometricLowerStep_nonneg hp0 hpr)
+        (ih hrest)
+      grind
+
+theorem geometricLowerSum_eq_zero_of_covers_point
+    {a : Rat} {intervals : List (Rat × Rat)}
+    (ha : 0 <= a) (hcover : CoversInterval a a intervals) :
+    geometricLowerSum intervals = 0 := by
+  induction intervals generalizing a with
+  | nil =>
+      simp [geometricLowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hra_le : r <= a := CoversInterval.start_le_end hrest
+      have hra : r = a := by grind
+      subst r
+      have htail := ih ha hrest
+      simp [geometricLowerSum, geometricLowerStep_zero_right, htail]
+      grind
+
+theorem integralLowerSum_append
+    (left right : List (Rat × Rat)) :
+    integralLowerSum (left ++ right) =
+      integralLowerSum left + integralLowerSum right := by
+  induction left with
+  | nil =>
+      simp [integralLowerSum]
+      grind
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      simp [integralLowerSum, ih]
+      grind [Rat.add_assoc, Rat.add_comm]
+
+theorem integralUpperSum_append
+    (left right : List (Rat × Rat)) :
+    integralUpperSum (left ++ right) =
+      integralUpperSum left + integralUpperSum right := by
+  induction left with
+  | nil =>
+      simp [integralUpperSum]
+      grind
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      simp [integralUpperSum, ih]
+      grind [Rat.add_assoc, Rat.add_comm]
+
+theorem geometricLowerSum_append
+    (left right : List (Rat × Rat)) :
+    geometricLowerSum (left ++ right) =
+      geometricLowerSum left + geometricLowerSum right := by
+  induction left with
+  | nil =>
+      simp [geometricLowerSum]
+      grind
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      simp [geometricLowerSum, ih]
+      grind [Rat.add_assoc, Rat.add_comm]
+
+theorem geometricUpperSum_append
+    (left right : List (Rat × Rat)) :
+    geometricUpperSum (left ++ right) =
+      geometricUpperSum left + geometricUpperSum right := by
+  induction left with
+  | nil =>
+      simp [geometricUpperSum]
+      grind
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      simp [geometricUpperSum, ih]
+      grind [Rat.add_assoc, Rat.add_comm]
+
+theorem integralLowerSum_le_append_of_nonnegative
+    (left right : List (Rat × Rat))
+    (hright : NonnegativeIntervals right) :
+    integralLowerSum left <= integralLowerSum (left ++ right) := by
+  rw [integralLowerSum_append]
+  have hnonneg := integralLowerSum_nonneg right hright
+  grind
+
+theorem geometricLowerSum_le_append_of_nonnegative
+    (left right : List (Rat × Rat))
+    (hright : NonnegativeIntervals right) :
+    geometricLowerSum left <= geometricLowerSum (left ++ right) := by
+  rw [geometricLowerSum_append]
+  have hnonneg := geometricLowerSum_nonneg right hright
+  grind
+
+theorem integralLowerSum_le_integralUpperSum_of_covers
+    {a b : Rat} (ha : 0 <= a)
+    (lower upper : List (Rat × Rat))
+    (hlower : CoversInterval a b lower)
+    (hupper : CoversInterval a b upper) :
+    integralLowerSum lower <= integralUpperSum upper := by
+  let N := lower.length + upper.length
+  have main :
+      forall N lower upper a b,
+        lower.length + upper.length <= N ->
+        0 <= a ->
+        CoversInterval a b lower ->
+        CoversInterval a b upper ->
+        integralLowerSum lower <= integralUpperSum upper := by
+    intro N
+    induction N with
+    | zero =>
+        intro lower upper a b hlen ha hlower hupper
+        cases lower <;> cases upper <;>
+          simp [integralLowerSum, integralUpperSum] at hlen ⊢
+    | succ N ih =>
+        intro lower upper a b hlen ha hlower hupper
+        cases lower with
+        | nil =>
+            have hupperNonneg :
+                0 <= integralUpperSum upper :=
+              integralUpperSum_nonneg upper
+                (CoversInterval.nonnegative ha hupper)
+            simpa [integralLowerSum] using hupperNonneg
+        | cons lowerHead lowerRest =>
+            cases upper with
+            | nil =>
+                have hab : a = b := by
+                  simpa [CoversInterval] using hupper
+                subst b
+                have hzero :=
+                  integralLowerSum_eq_zero_of_covers_point
+                    (a := a) (intervals := lowerHead :: lowerRest)
+                    ha hlower
+                simp [integralUpperSum, hzero]
+            | cons upperHead upperRest =>
+                rcases lowerHead with ⟨p, r⟩
+                rcases upperHead with ⟨p', s⟩
+                rcases hlower with ⟨hp, hpr, hlowerRest⟩
+                rcases hupper with ⟨hp', hps, hupperRest⟩
+                subst p
+                subst p'
+                by_cases hrs : r <= s
+                · have hr0 : 0 <= r := Rat.le_trans ha hpr
+                  have hsplitUpper :
+                      CoversInterval r b ((r, s) :: upperRest) :=
+                    ⟨rfl, hrs, hupperRest⟩
+                  have hlenRec :
+                      lowerRest.length + (((r, s) :: upperRest).length) <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec :=
+                    ih lowerRest ((r, s) :: upperRest) r b
+                      hlenRec hr0 hlowerRest hsplitUpper
+                  have hheadLow :
+                      integralLowerStep a r <= integralUpperStep a r :=
+                    integralLowerStep_le_integralUpperStep ha hpr
+                  have hheadSplit :
+                      integralUpperStep a r + integralUpperStep r s <=
+                        integralUpperStep a s :=
+                    integralUpperStep_refine ha hpr hrs
+                  simp [integralLowerSum, integralUpperSum] at hrec ⊢
+                  calc
+                    integralLowerStep a r + integralLowerSum lowerRest
+                        <= integralUpperStep a r +
+                            (integralUpperStep r s +
+                              integralUpperSum upperRest) :=
+                          rat_add_le_add hheadLow hrec
+                    _ = (integralUpperStep a r + integralUpperStep r s) +
+                            integralUpperSum upperRest := by
+                          grind [Rat.add_assoc, Rat.add_comm]
+                    _ <= integralUpperStep a s +
+                            integralUpperSum upperRest :=
+                          rat_add_le_add hheadSplit Rat.le_refl
+                · have hsr : s <= r := by grind
+                  have hs0 : 0 <= s := Rat.le_trans ha hps
+                  have hsplitLower :
+                      CoversInterval s b ((s, r) :: lowerRest) :=
+                    ⟨rfl, hsr, hlowerRest⟩
+                  have hlenRec :
+                      (((s, r) :: lowerRest).length) + upperRest.length <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec :=
+                    ih ((s, r) :: lowerRest) upperRest s b
+                      hlenRec hs0 hsplitLower hupperRest
+                  have hheadSplit :
+                      integralLowerStep a r <=
+                        integralLowerStep a s + integralLowerStep s r :=
+                    integralLowerStep_refine ha hps hsr
+                  have hheadLow :
+                      integralLowerStep a s <= integralUpperStep a s :=
+                    integralLowerStep_le_integralUpperStep ha hps
+                  simp [integralLowerSum, integralUpperSum] at hrec ⊢
+                  calc
+                    integralLowerStep a r + integralLowerSum lowerRest
+                        <= (integralLowerStep a s + integralLowerStep s r) +
+                            integralLowerSum lowerRest :=
+                          rat_add_le_add hheadSplit Rat.le_refl
+                    _ = integralLowerStep a s +
+                            (integralLowerStep s r +
+                              integralLowerSum lowerRest) := by
+                          grind [Rat.add_assoc, Rat.add_comm]
+                    _ <= integralLowerStep a s +
+                            integralUpperSum upperRest :=
+                          rat_add_le_add Rat.le_refl hrec
+                    _ <= integralUpperStep a s +
+                            integralUpperSum upperRest :=
+                          rat_add_le_add hheadLow Rat.le_refl
+  exact main N lower upper a b (Nat.le_refl N) ha hlower hupper
+
+theorem integralSumInterval_overlaps_of_covers
+    {a b : Rat} (ha : 0 <= a)
+    (left right : List (Rat × Rat))
+    (hleft : CoversInterval a b left)
+    (hright : CoversInterval a b right) :
+    QInterval.Overlaps (integralSumInterval left)
+      (integralSumInterval right) := by
+  unfold QInterval.Overlaps integralSumInterval
+  exact ⟨
+    integralLowerSum_le_integralUpperSum_of_covers
+      ha left right hleft hright,
+    integralLowerSum_le_integralUpperSum_of_covers
+      ha right left hright hleft⟩
+
+theorem integralLowerSum_le_geometricUpperSum_of_covers
+    {a b : Rat} (ha : 0 <= a)
+    (lower upper : List (Rat × Rat))
+    (hlower : CoversInterval a b lower)
+    (hupper : CoversInterval a b upper) :
+    integralLowerSum lower <= geometricUpperSum upper := by
+  let N := lower.length + upper.length
+  have main :
+      forall N lower upper a b,
+        lower.length + upper.length <= N ->
+        0 <= a ->
+        CoversInterval a b lower ->
+        CoversInterval a b upper ->
+        integralLowerSum lower <= geometricUpperSum upper := by
+    intro N
+    induction N with
+    | zero =>
+        intro lower upper a b hlen ha hlower hupper
+        cases lower <;> cases upper <;>
+          simp [integralLowerSum, geometricUpperSum] at hlen ⊢
+    | succ N ih =>
+        intro lower upper a b hlen ha hlower hupper
+        cases lower with
+        | nil =>
+            have hupperNonneg :
+                0 <= geometricUpperSum upper :=
+              geometricUpperSum_nonneg upper
+                (CoversInterval.nonnegative ha hupper)
+            simpa [integralLowerSum] using hupperNonneg
+        | cons lowerHead lowerRest =>
+            cases upper with
+            | nil =>
+                have hab : a = b := by
+                  simpa [CoversInterval] using hupper
+                subst b
+                have hzero :=
+                  integralLowerSum_eq_zero_of_covers_point
+                    (a := a) (intervals := lowerHead :: lowerRest)
+                    ha hlower
+                simp [geometricUpperSum, hzero]
+            | cons upperHead upperRest =>
+                rcases lowerHead with ⟨p, r⟩
+                rcases upperHead with ⟨p', s⟩
+                rcases hlower with ⟨hp, hpr, hlowerRest⟩
+                rcases hupper with ⟨hp', hps, hupperRest⟩
+                subst p
+                subst p'
+                by_cases hrs : r <= s
+                · have hr0 : 0 <= r := Rat.le_trans ha hpr
+                  have hsplitUpper :
+                      CoversInterval r b ((r, s) :: upperRest) :=
+                    ⟨rfl, hrs, hupperRest⟩
+                  have hlenRec :
+                      lowerRest.length + (((r, s) :: upperRest).length) <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec :=
+                    ih lowerRest ((r, s) :: upperRest) r b
+                      hlenRec hr0 hlowerRest hsplitUpper
+                  have hheadLow :
+                      integralLowerStep a r <= geometricUpperStep a r :=
+                    integralLowerStep_le_geometricUpperStep ha hpr
+                  have hheadSplit :
+                      geometricUpperStep a r + geometricUpperStep r s <=
+                        geometricUpperStep a s :=
+                    geometricUpperStep_refine_le ha hpr hrs
+                  simp [integralLowerSum, geometricUpperSum] at hrec ⊢
+                  calc
+                    integralLowerStep a r + integralLowerSum lowerRest
+                        <= geometricUpperStep a r +
+                            (geometricUpperStep r s +
+                              geometricUpperSum upperRest) :=
+                          rat_add_le_add hheadLow hrec
+                    _ = (geometricUpperStep a r + geometricUpperStep r s) +
+                            geometricUpperSum upperRest := by
+                          grind [Rat.add_assoc, Rat.add_comm]
+                    _ <= geometricUpperStep a s +
+                            geometricUpperSum upperRest :=
+                          rat_add_le_add hheadSplit Rat.le_refl
+                · have hsr : s <= r := by grind
+                  have hs0 : 0 <= s := Rat.le_trans ha hps
+                  have hsplitLower :
+                      CoversInterval s b ((s, r) :: lowerRest) :=
+                    ⟨rfl, hsr, hlowerRest⟩
+                  have hlenRec :
+                      (((s, r) :: lowerRest).length) + upperRest.length <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec :=
+                    ih ((s, r) :: lowerRest) upperRest s b
+                      hlenRec hs0 hsplitLower hupperRest
+                  have hheadSplit :
+                      integralLowerStep a r <=
+                        integralLowerStep a s + integralLowerStep s r :=
+                    integralLowerStep_refine ha hps hsr
+                  have hheadLow :
+                      integralLowerStep a s <= geometricUpperStep a s :=
+                    integralLowerStep_le_geometricUpperStep ha hps
+                  simp [integralLowerSum, geometricUpperSum] at hrec ⊢
+                  calc
+                    integralLowerStep a r + integralLowerSum lowerRest
+                        <= (integralLowerStep a s + integralLowerStep s r) +
+                            integralLowerSum lowerRest :=
+                          rat_add_le_add hheadSplit Rat.le_refl
+                    _ = integralLowerStep a s +
+                            (integralLowerStep s r +
+                              integralLowerSum lowerRest) := by
+                          grind [Rat.add_assoc, Rat.add_comm]
+                    _ <= integralLowerStep a s +
+                            geometricUpperSum upperRest :=
+                          rat_add_le_add Rat.le_refl hrec
+                    _ <= geometricUpperStep a s +
+                            geometricUpperSum upperRest :=
+                          rat_add_le_add hheadLow Rat.le_refl
+  exact main N lower upper a b (Nat.le_refl N) ha hlower hupper
+
+theorem geometricLowerSum_le_integralUpperSum_of_covers
+    {a b : Rat} (ha : 0 <= a)
+    (lower upper : List (Rat × Rat))
+    (hlower : CoversInterval a b lower)
+    (hupper : CoversInterval a b upper) :
+    geometricLowerSum lower <= integralUpperSum upper := by
+  let N := lower.length + upper.length
+  have main :
+      forall N lower upper a b,
+        lower.length + upper.length <= N ->
+        0 <= a ->
+        CoversInterval a b lower ->
+        CoversInterval a b upper ->
+        geometricLowerSum lower <= integralUpperSum upper := by
+    intro N
+    induction N with
+    | zero =>
+        intro lower upper a b hlen ha hlower hupper
+        cases lower <;> cases upper <;>
+          simp [geometricLowerSum, integralUpperSum] at hlen ⊢
+    | succ N ih =>
+        intro lower upper a b hlen ha hlower hupper
+        cases lower with
+        | nil =>
+            have hupperNonneg :
+                0 <= integralUpperSum upper :=
+              integralUpperSum_nonneg upper
+                (CoversInterval.nonnegative ha hupper)
+            simpa [geometricLowerSum] using hupperNonneg
+        | cons lowerHead lowerRest =>
+            cases upper with
+            | nil =>
+                have hab : a = b := by
+                  simpa [CoversInterval] using hupper
+                subst b
+                have hzero :=
+                  geometricLowerSum_eq_zero_of_covers_point
+                    (a := a) (intervals := lowerHead :: lowerRest)
+                    ha hlower
+                simp [integralUpperSum, hzero]
+            | cons upperHead upperRest =>
+                rcases lowerHead with ⟨p, r⟩
+                rcases upperHead with ⟨p', s⟩
+                rcases hlower with ⟨hp, hpr, hlowerRest⟩
+                rcases hupper with ⟨hp', hps, hupperRest⟩
+                subst p
+                subst p'
+                by_cases hrs : r <= s
+                · have hr0 : 0 <= r := Rat.le_trans ha hpr
+                  have hsplitUpper :
+                      CoversInterval r b ((r, s) :: upperRest) :=
+                    ⟨rfl, hrs, hupperRest⟩
+                  have hlenRec :
+                      lowerRest.length + (((r, s) :: upperRest).length) <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec :=
+                    ih lowerRest ((r, s) :: upperRest) r b
+                      hlenRec hr0 hlowerRest hsplitUpper
+                  have hheadLow :
+                      geometricLowerStep a r <= integralUpperStep a r :=
+                    geometricLowerStep_le_integralUpperStep ha hpr
+                  have hheadSplit :
+                      integralUpperStep a r + integralUpperStep r s <=
+                        integralUpperStep a s :=
+                    integralUpperStep_refine ha hpr hrs
+                  simp [geometricLowerSum, integralUpperSum] at hrec ⊢
+                  calc
+                    geometricLowerStep a r + geometricLowerSum lowerRest
+                        <= integralUpperStep a r +
+                            (integralUpperStep r s +
+                              integralUpperSum upperRest) :=
+                          rat_add_le_add hheadLow hrec
+                    _ = (integralUpperStep a r + integralUpperStep r s) +
+                            integralUpperSum upperRest := by
+                          grind [Rat.add_assoc, Rat.add_comm]
+                    _ <= integralUpperStep a s +
+                            integralUpperSum upperRest :=
+                          rat_add_le_add hheadSplit Rat.le_refl
+                · have hsr : s <= r := by grind
+                  have hs0 : 0 <= s := Rat.le_trans ha hps
+                  have hsplitLower :
+                      CoversInterval s b ((s, r) :: lowerRest) :=
+                    ⟨rfl, hsr, hlowerRest⟩
+                  have hlenRec :
+                      (((s, r) :: lowerRest).length) + upperRest.length <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec :=
+                    ih ((s, r) :: lowerRest) upperRest s b
+                      hlenRec hs0 hsplitLower hupperRest
+                  have hheadSplit :
+                      geometricLowerStep a r <=
+                        geometricLowerStep a s + geometricLowerStep s r :=
+                    geometricLowerStep_refine_le hps hsr
+                  have hheadLow :
+                      geometricLowerStep a s <= integralUpperStep a s :=
+                    geometricLowerStep_le_integralUpperStep ha hps
+                  simp [geometricLowerSum, integralUpperSum] at hrec ⊢
+                  calc
+                    geometricLowerStep a r + geometricLowerSum lowerRest
+                        <=
+                          (geometricLowerStep a s + geometricLowerStep s r) +
+                            geometricLowerSum lowerRest :=
+                          rat_add_le_add hheadSplit Rat.le_refl
+                    _ = geometricLowerStep a s +
+                            (geometricLowerStep s r +
+                              geometricLowerSum lowerRest) := by
+                          grind [Rat.add_assoc, Rat.add_comm]
+                    _ <= geometricLowerStep a s +
+                            integralUpperSum upperRest :=
+                          rat_add_le_add Rat.le_refl hrec
+                    _ <= integralUpperStep a s +
+                            integralUpperSum upperRest :=
+                          rat_add_le_add hheadLow Rat.le_refl
+  exact main N lower upper a b (Nat.le_refl N) ha hlower hupper
+
+theorem integralLowerSum_le_geometricUpperSum_of_covers_right
+    {a b c : Rat} (ha : 0 <= a) (hbc : b <= c)
+    (lower upper : List (Rat × Rat))
+    (hlower : CoversInterval a b lower)
+    (hupper : CoversInterval a c upper) :
+    integralLowerSum lower <= geometricUpperSum upper := by
+  have hlong : CoversInterval a c (lower ++ [(b, c)]) :=
+    CoversInterval.extend_right hlower hbc
+  have hb0 : 0 <= b :=
+    Rat.le_trans ha (CoversInterval.start_le_end hlower)
+  have htail : NonnegativeIntervals [(b, c)] := by
+    simp [NonnegativeIntervals, hb0, hbc]
+  have hprefix :
+      integralLowerSum lower <=
+        integralLowerSum (lower ++ [(b, c)]) :=
+    integralLowerSum_le_append_of_nonnegative lower [(b, c)] htail
+  have hcompare :
+      integralLowerSum (lower ++ [(b, c)]) <=
+        geometricUpperSum upper :=
+    integralLowerSum_le_geometricUpperSum_of_covers
+      ha (lower ++ [(b, c)]) upper hlong hupper
+  exact Rat.le_trans hprefix hcompare
+
+theorem geometricLowerSum_le_integralUpperSum_of_covers_right
+    {a b c : Rat} (ha : 0 <= a) (hbc : b <= c)
+    (lower upper : List (Rat × Rat))
+    (hlower : CoversInterval a b lower)
+    (hupper : CoversInterval a c upper) :
+    geometricLowerSum lower <= integralUpperSum upper := by
+  have hlong : CoversInterval a c (lower ++ [(b, c)]) :=
+    CoversInterval.extend_right hlower hbc
+  have hb0 : 0 <= b :=
+    Rat.le_trans ha (CoversInterval.start_le_end hlower)
+  have htail : NonnegativeIntervals [(b, c)] := by
+    simp [NonnegativeIntervals, hb0, hbc]
+  have hprefix :
+      geometricLowerSum lower <=
+        geometricLowerSum (lower ++ [(b, c)]) :=
+    geometricLowerSum_le_append_of_nonnegative lower [(b, c)] htail
+  have hcompare :
+      geometricLowerSum (lower ++ [(b, c)]) <=
+        integralUpperSum upper :=
+    geometricLowerSum_le_integralUpperSum_of_covers
+      ha (lower ++ [(b, c)]) upper hlong hupper
+  exact Rat.le_trans hprefix hcompare
+
+theorem integralSumInterval_overlaps_geometricSumInterval_of_covers
+    {a b : Rat} (ha : 0 <= a)
+    (integral geometric : List (Rat × Rat))
+    (hintegral : CoversInterval a b integral)
+    (hgeometric : CoversInterval a b geometric) :
+    QInterval.Overlaps (integralSumInterval integral)
+      (geometricSumInterval geometric) := by
+  unfold QInterval.Overlaps integralSumInterval geometricSumInterval
+  exact ⟨
+    integralLowerSum_le_geometricUpperSum_of_covers
+      ha integral geometric hintegral hgeometric,
+    geometricLowerSum_le_integralUpperSum_of_covers
+      ha geometric integral hgeometric hintegral⟩
+
+theorem integralBracketInterval_overlaps_geometricSumInterval_of_covers
+    {a lowerEnd x upperEnd : Rat} (ha : 0 <= a)
+    (hlowerEnd : lowerEnd <= x) (hupperEnd : x <= upperEnd)
+    (lower upper geometric : List (Rat × Rat))
+    (hlower : CoversInterval a lowerEnd lower)
+    (hupper : CoversInterval a upperEnd upper)
+    (hgeometric : CoversInterval a x geometric) :
+    QInterval.Overlaps
+      { lo := integralLowerSum lower, hi := integralUpperSum upper }
+      (geometricSumInterval geometric) := by
+  unfold QInterval.Overlaps geometricSumInterval
+  exact ⟨
+    integralLowerSum_le_geometricUpperSum_of_covers_right
+      ha hlowerEnd lower geometric hlower hgeometric,
+    geometricLowerSum_le_integralUpperSum_of_covers_right
+      ha hupperEnd geometric upper hgeometric hupper⟩
 
 theorem integralSumInterval_ordered
     (intervals : List (Rat × Rat))
@@ -1990,6 +2921,30 @@ private theorem refineAux_intervals_unit
       simp [AreaLoopState.refineAux, UnitIntervals, q,
         hp0, hpq, hq0, hqr, hq1, hr1, htail]
 
+private theorem refineAux_intervals_covers
+    (lo hi a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : CoversInterval a b intervals) :
+    CoversInterval a b
+      (AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi a with
+  | nil =>
+      simpa [AreaLoopState.refineAux, CoversInterval] using hcover
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have htail :=
+        ih (lo + arctanAreaIncrement p q r)
+          (hi - arctanAreaDecrement p q r) r hrest
+      simp [AreaLoopState.refineAux, CoversInterval]
+      exact ⟨hp, hpq, hqr, htail⟩
+
 private theorem midpoint_left_sub (p r : Rat) :
     (p + r) / 2 - p = (r - p) / 2 := by
   rw [Rat.div_def, Rat.div_def]
@@ -2051,48 +3006,6 @@ private theorem refineAux_squareSum
               rw [Rat.div_def, Rat.div_def, Rat.div_def]
               grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc,
                 Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
-
-private theorem arctanAreaIncrement_nonneg {p q r : Rat}
-    (hpq : p <= q) (hqr : q <= r) :
-    0 <= arctanAreaIncrement p q r := by
-  unfold arctanAreaIncrement
-  rw [Rat.div_def]
-  have hpq' : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
-  have hqr' : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
-  have hrp' : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
-  have hnum : 0 <= 2 * (r - p) * (q - p) * (r - q) := by
-    exact Rat.mul_nonneg
-      (Rat.mul_nonneg
-        (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hrp')
-        hpq')
-      hqr'
-  have hden : 0 < (1 + p * p) * (1 + q * q) * (1 + r * r) := by
-    exact Rat.mul_pos
-      (Rat.mul_pos
-        (RationalCircle.Stage.one_add_square_pos p)
-        (RationalCircle.Stage.one_add_square_pos q))
-      (RationalCircle.Stage.one_add_square_pos r)
-  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
-
-private theorem arctanAreaDecrement_nonneg {p q r : Rat}
-    (hp0 : 0 <= p) (hpq : p <= q) (hqr : q <= r) :
-    0 <= arctanAreaDecrement p q r := by
-  unfold arctanAreaDecrement
-  rw [Rat.div_def]
-  have hq0 : 0 <= q := Rat.le_trans hp0 hpq
-  have hr0 : 0 <= r := Rat.le_trans hq0 hqr
-  have hpq' : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
-  have hqr' : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
-  have hrp' : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
-  have hnum : 0 <= (r - p) * (q - p) * (r - q) := by
-    exact Rat.mul_nonneg (Rat.mul_nonneg hrp' hpq') hqr'
-  have hden : 0 < (1 + p * r) * (1 + p * q) * (1 + q * r) := by
-    exact Rat.mul_pos
-      (Rat.mul_pos
-        (RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hr0)
-        (RationalCircle.Stage.one_add_mul_pos_of_nonneg hp0 hq0))
-      (RationalCircle.Stage.one_add_mul_pos_of_nonneg hq0 hr0)
-  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
 
 private theorem refineAux_endpoint_refines
     (lo hi : Rat) (intervals : List (Rat × Rat))
@@ -2295,6 +3208,14 @@ theorem refineAreaLoopState_intervals_unit
   | mk lo hi intervals =>
       exact refineAux_intervals_unit lo hi intervals hwf
 
+theorem refineAreaLoopState_intervals_covers
+    (state : AreaLoopState) {a b : Rat}
+    (hcover : CoversInterval a b state.intervals) :
+    CoversInterval a b (refineAreaLoopState state).intervals := by
+  cases state with
+  | mk lo hi intervals =>
+      exact refineAux_intervals_covers lo hi a b intervals hcover
+
 theorem refineAreaLoopState_squareSum
     (state : AreaLoopState) :
     intervalSquareSum (refineAreaLoopState state).intervals =
@@ -2391,6 +3312,18 @@ theorem iterateAreaLoopState_intervals_unit
         ih (refineAreaLoopState state)
           (refineAreaLoopState_intervals_unit state hwf)
 
+theorem iterateAreaLoopState_intervals_covers
+    (n : Nat) (state : AreaLoopState) {a b : Rat}
+    (hcover : CoversInterval a b state.intervals) :
+    CoversInterval a b (iterateAreaLoopState n state).intervals := by
+  induction n generalizing state with
+  | zero =>
+      simpa [iterateAreaLoopState] using hcover
+  | succ n ih =>
+      simpa [iterateAreaLoopState] using
+        ih (refineAreaLoopState state)
+          (refineAreaLoopState_intervals_covers state hcover)
+
 theorem iterateAreaLoopState_lo_eq_geometricLowerSum
     (n : Nat) (state : AreaLoopState)
     (hlo : state.lo = geometricLowerSum state.intervals) :
@@ -2441,6 +3374,11 @@ theorem arctanAreaLoopInitial_intervals_unit
     UnitIntervals (arctanAreaLoopInitial x).intervals := by
   simp [arctanAreaLoopInitial, UnitIntervals, hx0, hx1]
 
+theorem arctanAreaLoopInitial_intervals_covers
+    {x : Rat} (hx : 0 <= x) :
+    CoversInterval 0 x (arctanAreaLoopInitial x).intervals := by
+  simp [arctanAreaLoopInitial, CoversInterval, hx]
+
 theorem arctanAreaLoopState_intervals_nonnegative
     {x : Rat} (hx : 0 <= x) (n : Nat) :
     NonnegativeIntervals (arctanAreaLoopState x n).intervals := by
@@ -2456,6 +3394,14 @@ theorem arctanAreaLoopState_intervals_unit
   exact iterateAreaLoopState_intervals_unit n
     (arctanAreaLoopInitial x)
     (arctanAreaLoopInitial_intervals_unit hx0 hx1)
+
+theorem arctanAreaLoopState_intervals_covers
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    CoversInterval 0 x (arctanAreaLoopState x n).intervals := by
+  unfold arctanAreaLoopState
+  exact iterateAreaLoopState_intervals_covers n
+    (arctanAreaLoopInitial x)
+    (arctanAreaLoopInitial_intervals_covers hx)
 
 private theorem div_two_pow_succ (a : Rat) (n : Nat) :
     (a / (((2 ^ n : Nat) : Rat))) / 2 =
@@ -2599,6 +3545,33 @@ theorem positiveLoopComputeAtStage_eq_geometricSumInterval
   unfold positiveLoopComputeAtStage geometricSumInterval
   simp [arctanAreaLoopState_lo_eq_geometricLowerSum,
     arctanAreaLoopState_hi_eq_geometricUpperSum hx]
+
+theorem fareyIntegralPrefixStageInterval_overlaps_positiveLoop
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n m : Nat) :
+    QInterval.Overlaps (fareyIntegralPrefixStageInterval x n)
+      (positiveLoopComputeAtStage x m) := by
+  obtain ⟨lowerEnd, hlowerEnd, hlowerCover⟩ :=
+    fareyLowerCellsUpTo_unitStage_covers_prefix hx0 n
+  obtain ⟨upperEnd, hupperEnd, hupperCover⟩ :=
+    fareyUpperCellsUpTo_unitStage_covers_prefix hx0 hx1 n
+  rw [positiveLoopComputeAtStage_eq_geometricSumInterval hx0 m]
+  change QInterval.Overlaps
+    { lo :=
+        integralLowerSum
+          (fareyLowerCellsUpTo x (RationalCircle.fareyUnitStage n)),
+      hi :=
+        integralUpperSum
+          (fareyUpperCellsUpTo x (RationalCircle.fareyUnitStage n)) }
+    (geometricSumInterval (arctanAreaLoopState x m).intervals)
+  exact integralBracketInterval_overlaps_geometricSumInterval_of_covers
+    (a := 0) (lowerEnd := lowerEnd) (x := x) (upperEnd := upperEnd)
+    (by native_decide)
+    hlowerEnd hupperEnd
+    (fareyLowerCellsUpTo x (RationalCircle.fareyUnitStage n))
+    (fareyUpperCellsUpTo x (RationalCircle.fareyUnitStage n))
+    (arctanAreaLoopState x m).intervals
+    hlowerCover hupperCover
+    (arctanAreaLoopState_intervals_covers hx0 m)
 
 theorem arctanAreaLoop_integralSum_contains_positiveLoop
     {x : Rat} (hx : 0 <= x) (n : Nat) :
@@ -3099,6 +4072,90 @@ theorem arctanGeom_one_compute_eq (n : Nat) :
   have hnonneg : (0 : Rat) <= 1 := by native_decide
   exact arctanGeom_nonneg_compute_eq hnonzero hnonneg n
 
+theorem fareyIntegralPrefixRaw_equiv_arctanGeom_on_unit
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (fareyIntegralPrefixRaw x).Equiv (arctanGeom x) := by
+  by_cases hzero : x = 0
+  · subst x
+    simpa [arctanGeom] using fareyIntegralPrefixRaw_zero_equiv_zero
+  · intro n
+    apply (RealRaw.compareAt_overlap_iff
+      (fareyIntegralPrefixRaw x) (arctanGeom x) n n).2
+    rw [arctanGeom_nonneg_compute_eq hzero hx0 n]
+    exact fareyIntegralPrefixStageInterval_overlaps_positiveLoop
+      hx0 hx1 n n
+
+theorem fareyIntegralUnitStageInterval_overlaps_rectangleAtOne
+    (n m : Nat) :
+    QInterval.Overlaps (fareyIntegralUnitRaw.compute n)
+      (arctanIntegralRectangleRawAtOne.compute m) := by
+  change QInterval.Overlaps
+    (fareyIntegralUnitStageInterval n)
+    (arctanIntegralRectangleComputeAtOne m)
+  unfold fareyIntegralUnitStageInterval arctanIntegralRectangleComputeAtOne
+  exact integralSumInterval_overlaps_of_covers
+    (a := 0) (b := 1)
+    (by native_decide)
+    (fareyCellIntervals (RationalCircle.fareyUnitStage n))
+    (arctanAreaLoopState 1 m).intervals
+    (fareyUnitStage_intervals_covers n)
+    (arctanAreaLoopState_intervals_covers
+      (x := 1) (by native_decide) m)
+
+theorem fareyIntegralUnitRaw_equiv_arctanIntegralRectangleRawAtOne :
+    fareyIntegralUnitRaw.Equiv arctanIntegralRectangleRawAtOne := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    fareyIntegralUnitRaw arctanIntegralRectangleRawAtOne n n).2
+  exact fareyIntegralUnitStageInterval_overlaps_rectangleAtOne n n
+
+/-- Concrete finite comparison target for the Farey arctangent row: every
+full-unit Farey rectangle stage overlaps every midpoint/geometric sector stage.
+This is the common-refinement obligation left after both schedules have been
+verified independently. -/
+def FareyMidpointUnitCrossBounds : Prop :=
+  forall n m : Nat,
+    QInterval.Overlaps (fareyIntegralUnitRaw.compute n)
+      (positiveLoopComputeAtStage (1 : Rat) m)
+
+theorem fareyIntegralUnitStageInterval_overlaps_positiveLoopAtOne
+    (n m : Nat) :
+    QInterval.Overlaps (fareyIntegralUnitRaw.compute n)
+      (positiveLoopComputeAtStage (1 : Rat) m) := by
+  rw [positiveLoopComputeAtStage_eq_geometricSumInterval
+    (x := 1) (by native_decide) m]
+  change QInterval.Overlaps
+    (fareyIntegralUnitStageInterval n)
+    (geometricSumInterval (arctanAreaLoopState 1 m).intervals)
+  unfold fareyIntegralUnitStageInterval
+  exact integralSumInterval_overlaps_geometricSumInterval_of_covers
+    (a := 0) (b := 1)
+    (by native_decide)
+    (fareyCellIntervals (RationalCircle.fareyUnitStage n))
+    (arctanAreaLoopState 1 m).intervals
+    (fareyUnitStage_intervals_covers n)
+    (arctanAreaLoopState_intervals_covers
+      (x := 1) (by native_decide) m)
+
+theorem fareyMidpointUnitCrossBounds :
+    FareyMidpointUnitCrossBounds := by
+  intro n m
+  exact fareyIntegralUnitStageInterval_overlaps_positiveLoopAtOne n m
+
+theorem fareyIntegralUnitRaw_equiv_arctanGeom_one_of_crossBounds
+    (h : FareyMidpointUnitCrossBounds) :
+    fareyIntegralUnitRaw.Equiv (arctanGeom (1 : Rat)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    fareyIntegralUnitRaw (arctanGeom (1 : Rat)) n n).2
+  rw [arctanGeom_one_compute_eq n]
+  exact h n n
+
+theorem fareyIntegralUnitRaw_equiv_arctanGeom_one_direct :
+    fareyIntegralUnitRaw.Equiv (arctanGeom (1 : Rat)) :=
+  fareyIntegralUnitRaw_equiv_arctanGeom_one_of_crossBounds
+    fareyMidpointUnitCrossBounds
+
 private def ZeroIntervals : List (Rat × Rat) -> Prop
   | [] => True
   | (p, r) :: rest => p = 0 ∧ r = 0 ∧ ZeroIntervals rest
@@ -3175,6 +4232,16 @@ theorem arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one :
   rw [arctanGeom_one_compute_eq n]
   exact arctanAreaLoop_integralSum_overlaps_positiveLoop
     (x := 1) (by native_decide) n
+
+theorem fareyIntegralUnitRaw_equiv_arctanGeom_one :
+    fareyIntegralUnitRaw.Equiv (arctanGeom (1 : Rat)) :=
+  RealRaw.equiv_trans
+    fareyIntegralUnitRaw_valid
+    arctanIntegralRectangleRawAtOne_valid
+    (arctanGeom_valid_on_unit
+      (x := 1) (by native_decide) (by native_decide))
+    fareyIntegralUnitRaw_equiv_arctanIntegralRectangleRawAtOne
+    arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one
 
 theorem arctanGeom_zero :
     arctanGeom 0 = RealRaw.ofRat 0 := by

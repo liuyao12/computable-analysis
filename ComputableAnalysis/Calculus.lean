@@ -15,6 +15,49 @@ def riemannLeftInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : QI
     (fun acc k => let I := g.compute (leftPoint a b n k) prec; { lo := acc.lo + h * I.lo, hi := acc.hi + h * I.hi })
     { lo := 0, hi := 0 }
 
+private theorem riemannLeftInterval_point_fold_eq
+    (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
+    (hpoint : forall x, (g.compute x prec).lo = (g.compute x prec).hi)
+    (xs : List Nat) (acc : QInterval) (hacc : acc.lo = acc.hi) :
+    (xs.foldl
+      (fun acc k =>
+        let I := g.compute (leftPoint a b subdivisions k) prec
+        { lo := acc.lo + mesh a b subdivisions * I.lo,
+          hi := acc.hi + mesh a b subdivisions * I.hi })
+      acc).lo =
+    (xs.foldl
+      (fun acc k =>
+        let I := g.compute (leftPoint a b subdivisions k) prec
+        { lo := acc.lo + mesh a b subdivisions * I.lo,
+          hi := acc.hi + mesh a b subdivisions * I.hi })
+      acc).hi := by
+  induction xs generalizing acc with
+  | nil =>
+      simpa using hacc
+  | cons k rest ih =>
+      apply ih
+      dsimp
+      rw [hacc, hpoint (leftPoint a b subdivisions k)]
+
+theorem riemannLeftInterval_point_eq
+    (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
+    (hpoint : forall x, (g.compute x prec).lo = (g.compute x prec).hi) :
+    (riemannLeftInterval g a b subdivisions prec).lo =
+      (riemannLeftInterval g a b subdivisions prec).hi := by
+  unfold riemannLeftInterval
+  exact riemannLeftInterval_point_fold_eq
+    g a b subdivisions prec hpoint (List.range subdivisions)
+    { lo := 0, hi := 0 } rfl
+
+theorem riemannLeftInterval_point_width_zero
+    (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
+    (hpoint : forall x, (g.compute x prec).lo = (g.compute x prec).hi) :
+    (riemannLeftInterval g a b subdivisions prec).width = 0 := by
+  have h := riemannLeftInterval_point_eq
+    g a b subdivisions prec hpoint
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
 namespace RealFunRaw
 
 def add (f g : RealFunRaw) : RealFunRaw where
@@ -934,6 +977,15 @@ structure ConstructionFor (F : FunctionOnInterval) where
 
 def integralFor (F : FunctionOnInterval) (c : ConstructionFor F) : RealRaw where
   compute := c.compute
+
+theorem integralFor_compute_eq (F : FunctionOnInterval)
+    (c : ConstructionFor F) (n : Nat) :
+    (integralFor F c).compute n = c.compute n := rfl
+
+theorem integralFor_valid (F : FunctionOnInterval)
+    (c : ConstructionFor F) :
+    (integralFor F c).Valid :=
+  c.certificate
 
 end Integral
 

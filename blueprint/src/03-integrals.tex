@@ -24,8 +24,17 @@ evaluations are used.
 
 \begin{definition}[Definite integral identity package]
 \label{def:definite-integral-identity}
+\lean{ComputableAnalysis.Integral.ConstructionFor}
+\lean{ComputableAnalysis.Integral.integralFor}
+\lean{ComputableAnalysis.Integral.integralFor_compute_eq}
+\lean{ComputableAnalysis.Integral.integralFor_valid}
+\lean{ComputableAnalysis.riemannLeftInterval_point_eq}
+\lean{ComputableAnalysis.riemannLeftInterval_point_width_zero}
 \lean{ComputableAnalysis.Integral.DefiniteIdentity}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityOnInterval}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_valid}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.endpoint_formula}
 \lean{ComputableAnalysis.Integral.definiteIdentity_of_effectiveFTC}
 \uses{def:endpoint-diff}
 \leanok
@@ -38,7 +47,10 @@ For raw functions \(f\) and \(F\), a definite integral identity over
   constructed integral and that endpoint difference.
 \end{enumerate}
 The interval version packages the same statement when \(f\) and \(F\) are
-already certified as \code{FunctionOnInterval}s.
+already certified as \code{FunctionOnInterval}s.  The
+\code{DefiniteIdentityFor} variant is the same endpoint-difference interface
+for newer domain-aware \code{ConstructionFor} algorithms, such as the Farey
+constructions below.
 \end{definition}
 
 \begin{definition}[The constant-integrand algorithm]
@@ -123,6 +135,7 @@ calculus content, while still counting only the underlying pi computation.
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval_valid}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval_toRealFunRaw_point}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity}
 \uses{def:function-on-interval-to-realfunraw,thm:sector-area-density}
 \leanok
@@ -142,6 +155,9 @@ parametrization from \cref{thm:sector-area-density}.
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_compute_width_zero}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_stages_constant}
+\lean{ComputableAnalysis.RealRaw.stage_eq_of_valid_zero_width}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralComputes}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralData}
@@ -151,6 +167,9 @@ parametrization from \cref{thm:sector-area-density}.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_equiv_arctanGeom_of_functionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw_valid}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitGeomFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.PiFromArctanIntegral}
@@ -175,6 +194,12 @@ geometric representation agree on the overlap of their domains.  The current
 integral representation is defined for \(0\le x\), while the geometric
 representation is total, so their overlap is the nonnegative rational branch.
 The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
+Lean also records a structural warning for the older point-Riemann
+\code{Integral.Construction} wrapper: because the kernel is evaluated by exact
+point intervals, every stage of \code{arctanIntegral x c} has width zero, and
+validity forces all stages to be equal.  Thus the completed refining integral
+routes in the scoreboard use the domain-aware \code{ConstructionFor} schedules
+below.
 \end{definition}
 
 \begin{theorem}[Finite arctangent--integral comparison]
@@ -305,6 +330,16 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleRepresentation}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitGeomFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitComputes_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitGeomAgreement_one_of_functionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitData}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
@@ -314,6 +349,7 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_valid}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_width_le_six_div_succ}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
 \lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_self_equiv_zero}
@@ -325,9 +361,28 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_fareyIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_betweenRaw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_prefix}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_zero_equiv_zero}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_add_interval}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_add_interval}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_sub_interval}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_equiv_arctanIntegralFareyFor_sub}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_sub_interval_equiv_betweenRaw}
+\lean{ComputableAnalysis.IntegralIdentities.fareyIntegralBetweenRaw_equiv_arctanIntegralFareyFor_sub}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_sub_interval_additive}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_sub_equiv_fareyIntegralBetweenRaw_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.fareyIntegralBetweenRaw_equiv_arctanGeom_sub_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_sub_equiv_oneOverOnePlusSquareFareyIntegral_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_equiv_arctanGeom_sub_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_sub_additive_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_sub}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_one_sub_zero_equiv}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitFareyDefiniteIdentity}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitData}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_prefix}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_prefix}
@@ -339,6 +394,7 @@ The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_compute_eq}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_raw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity}
 \uses{def:one-over-one-plus-square-kernel,def:geometric-arctan}
 \leanok
 On a nonnegative cell \(0\le p\le r\), let
@@ -434,9 +490,12 @@ overlap agreement \code{arctanIntegralRectangleFunctionAgreement}.  Lean now
 also packages the same construction as the unit-branch integral arctangent
 \code{arctanIntegralUnit}; the theorem
 \code{arctanIntegralRectangleUnitFunctionAgreement} proves the expected
-agreement on \(0\le x\le1\).  The remaining cleanup is to identify the older
-nonnegative point-Riemann \code{arctanIntegral(1)} API with this
-domain-aware schedule, or replace that older API throughout.
+agreement on \(0\le x\le1\).  The older nonnegative point-Riemann
+\code{arctanIntegral(1)} API is deliberately left out of the completed
+scoreboard count: Lean proves
+\code{arctanIntegral\_stages\_constant}, so that exact-evaluation wrapper
+does not express the refining lower/upper-sum schedule used by the verified
+integral computations.
 
 The global Farey-prefix algorithm is also packaged as a
 \code{ConstructionFor}: first
@@ -451,19 +510,45 @@ The global Farey-prefix algorithm is also packaged as a
 \]
 The endpoint normalizations \(J(0,x)\sim F(x)\) and
 \(J(x,0)\sim-F(x)\) are also formalized at this domain-aware layer.
-The arctangent specialization \code{arctanIntegralFareyFor(x)} is \(J(0,x)\);
-it is verified for every rational \(x\), and is equivalent to the prefix raw
-real \code{fareyIntegralPrefixRaw(x)}.  Lean also records the zero endpoint
-\code{arctanIntegralFareyFor(0)}\(\sim0\) and the unit-branch
-\code{ArctanIntegralUnitComputes} package against the prefix raw.  This gives a
-second verified integral-style arctangent computation, with the remaining
-comparison target being the mesh-independent equivalence to the geometric
-sector arctangent.  At \(x=1\), Lean proves that the prefix lower and upper
+The arctangent specialization \(A_F(x)=J(0,x)\) satisfies
+\[
+  A_F(a)+J(a,b)\sim A_F(b),\qquad
+  A_F(b)-A_F(a)\sim J(a,b),\qquad
+  A_F(0)\sim0,\qquad A_F(x)\sim F(x).
+\]
+Composing with the wrapper theorem gives the cleaner primitive-difference
+form \(A_F(b)-A_F(a)\sim \code{fareyIntegralBetweenRaw(a,b)}\).  Lean also
+proves the corresponding primitive additivity law
+\[
+  (A_F(b)-A_F(a))+(A_F(c)-A_F(b))\sim A_F(c)-A_F(a).
+\]
+On the rational unit branch \(0\le a,b\le1\), Lean further composes the
+primitive comparison with the geometric arctangent comparison:
+\[
+  \int_a^b\frac{du}{1+u^2}\ \sim\
+  \arctan_{\mathrm{geom}}(b)-\arctan_{\mathrm{geom}}(a).
+\]
+The unit-interval specialization is also packaged as a
+\code{DefiniteIdentityFor}: the Farey integral construction on \([0,1]\)
+computes the endpoint difference of the geometric arctangent restricted to the
+unit branch.  Lean also proves that this endpoint difference is equivalent to
+\(\arctan_{\mathrm{geom}}(1)\), since the value at \(0\) is zero.
+This gives a second verified integral-style arctangent computation.  At
+\(x=1\), Lean proves that the prefix lower and upper
 cell selections are simply all cells of the unit Farey mesh, packages this full
 unit mesh as \code{fareyIntegralUnitRaw}, and proves
 \[
   \code{fareyIntegralPrefixRaw(1)}\sim\code{fareyIntegralUnitRaw}.
 \]
+Since the shared-Farey sums are additive on adjacent intervals, Lean also
+transports additivity to the geometric arctangent endpoint differences:
+\[
+  (\arctan_{\mathrm{geom}}(b)-\arctan_{\mathrm{geom}}(a))+
+  (\arctan_{\mathrm{geom}}(c)-\arctan_{\mathrm{geom}}(b))
+  \sim
+  \arctan_{\mathrm{geom}}(c)-\arctan_{\mathrm{geom}}(a)
+\]
+for rational \(a,b,c\in[0,1]\).
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]
@@ -473,23 +558,54 @@ unit mesh as \code{fareyIntegralUnitRaw}, and proves
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_geom_agreement}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_function_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_valid}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_compute_eq_fareyAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_equiv_fareyAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_geomUnitDefiniteIdentity}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one}
 \lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne}
 \lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne}
+\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne_of_cross_bounds}
+\lean{ComputableAnalysis.PiProofs.fareyUnitIntegralGeomAgreementAtOne}
 \lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne_of_unit_integral_agreement}
 \lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne_of_prefix_agreement}
+\lean{ComputableAnalysis.PiProofs.fareyPrefixGeomAgreementAtOne}
 \lean{ComputableAnalysis.PiProofs.arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement}
+\lean{ComputableAnalysis.PiProofs.arctanIntegralFareyFor_one_equiv_arctanGeom_one}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_prefix_agreement}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_unit_integral_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_cross_bounds}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_cross_bounds}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_definite_identity}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_functionAgreement}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_valid}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralRectangleUnitAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_valid}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_compute_eq_rectangleUnit}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_rectangleUnit}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_geomUnitDefiniteIdentity}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_rectangleUnitAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_fareyAtOne}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_equiv_rectangleDefiniteIdentity}
+\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_fareyDefiniteIdentity}
 \uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
 Any certified integral construction for
 \[
@@ -508,20 +624,26 @@ integral-style pi route:
   4\,\code{arctanIntegralRectangleForAtOne}\sim \pi_{\mathrm{area}}.
 \]
 Equivalently, the unit-branch construction
-\code{arctanIntegralRectangleUnitData} gives the table-facing theorem
-\code{piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
+\code{arctanIntegralRectangleUnitData} gives the table-facing raw real
+\code{piFromArctanIntegralRectangleUnitAtOne} and theorem
+\code{piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.  The same
+rectangle schedule is also packaged as a \code{DefiniteIdentityFor} certificate
+\code{arctanGeomUnitRectangleDefiniteIdentity}; Lean proves the resulting pi
+raw real has the same stage computations as
+\code{piFromArctanIntegralRectangleUnitAtOne}.
 The Farey-prefix construction gives another verified pi computation,
 \code{piFromArctanIntegralFareyAtOne}, and Lean proves that it is equivalent
 to \(4\,\code{fareyIntegralPrefixRaw(1)}\).  Its comparison with
-\(\pi_{\mathrm{area}}\) is now reduced to the named pointwise target
+\(\pi_{\mathrm{area}}\) is now formalized as
+\code{piFromArctanIntegralFareyAtOne\_equiv\_piCircleArea}.  The finite
+rational bridge is the named pointwise target
 \code{FareyPrefixGeomAgreementAtOne}, equivalently the cleaner full-unit mesh
 target \code{FareyUnitIntegralGeomAgreementAtOne}.  The latter says
 \[
   \code{fareyIntegralUnitRaw}\sim\code{arctanGeom(1)}.
 \]
-The theorem
-\code{piFromArctanIntegralFareyAtOne\_equiv\_piCircleArea\_of\_unit\_integral\_agreement}
-packages the resulting chain of raw-real equivalences.
+Lean proves both targets directly by the ordered-cover comparison between the
+Farey mesh and the geometric midpoint mesh.
 
 The same pi benchmark can also be closed through calculus.  If a
 definite-integral identity proves that the arctangent kernel integral over
@@ -533,6 +655,23 @@ closes the pi equivalence.  The more explicit
 an \code{EffectiveFTC} certificate and a matching integral schedule.  These are
 supporting bridge theorems for the arctangent-integral rows, not additional
 rows in the pi scoreboard.
+
+The same bridge is now available for the newer domain-aware
+\code{ConstructionFor} interface.  More concretely, any unit-branch integral
+arctangent data whose function representation agrees with \code{arctanGeom}
+gives
+\[
+  4\,\code{arctanIntegralUnit(1)}\sim\pi_{\mathrm{area}}.
+\]
+In particular,
+\code{arctanGeomUnitFareyDefiniteIdentity} specializes to
+\code{piFromArctanGeomUnitFareyDefiniteIdentity\_equiv\_piCircleArea}.
+Lean also proves this raw real has the same stage computations as the existing
+Farey-at-one row \code{piFromArctanIntegralFareyAtOne}, so the calculus
+certificate and the table-facing Farey computation are not separate numerical
+objects.  The rectangle and Farey unit computations are now connected directly
+by \code{piFromArctanIntegralFareyAtOne\_equiv\_rectangleUnitAtOne}, and their
+\code{DefiniteIdentityFor} packages are likewise directly equivalent.
 \end{theorem}
 
 \section{A Projective-Line Test Integral}

@@ -1,0 +1,107 @@
+Definition-complete: valid raw real.  Equivalence-complete: a formal chain of
+\code{RealRaw.Equiv} theorems to \code{piCircleArea}.
+
+The current score is:
+\[
+  \#\mathrm{Def}=7/17,\qquad
+  \#\mathrm{Equiv}_{\pi_{\mathrm{area}}}=3/16.
+\]
+
+\begin{center}
+\begin{tabular}{p{0.22\textwidth}p{0.14\textwidth}p{0.34\textwidth}cc}
+\textbf{Computation} & \textbf{Blueprint} & \textbf{Formula} &
+\textbf{Definition} & \textbf{Equiv.}\\
+\hline
+\code{piCircleArea} &
+\cref{def:circle-area-stage-algorithm}; \cref{thm:geometric-pi-validity} &
+\(a_{n+1}=a_n+\Delta_n,\ b_{n+1}=b_n-\nabla_n,\ \pi\in[4a_n,4b_n]\) &
+\(\checkmark\) & N/A\\
+\code{piCircumference} &
+\cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
+\(\pi\in[L_n,U_n],\ U_n-L_n\to0\) &
+\(\times\) & \(\times\)\\
+\multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
+\cref{def:arctan-area-stage-algorithm},
+\cref{def:arctan-integral}, \cref{def:arctan-series},
+\cref{thm:power-series-arctan-area-pi}, \cref{thm:leibniz-machin}:
+\(\pi=4\arctan(1)=4\int_0^1\frac{dt}{1+t^2}
+=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}\)}\\
+\code{4 * arctanGeom(1)} &
+\cref{def:arctan-area-stage-algorithm};
+\cref{thm:geometric-arctan-one-area-pi} &
+\(\pi=4\arctan_{\mathrm{geom}}(1)\) &
+\(\checkmark\) & \(\checkmark\)\\
+\code{4 * arctanIntegralRectangleForAtOne} &
+\cref{thm:finite-arctan-integral-comparison};
+\cref{thm:arctan-integral-pi} &
+\(\pi=4\int_0^1 \frac{dt}{1+t^2}\) &
+\(\checkmark\) & \(\checkmark\)\\
+\code{4 * arctanIntegralFareyFor(1)} &
+\cref{thm:finite-arctan-integral-comparison};
+\cref{thm:arctan-integral-pi} &
+\(\pi=4I_F(0,1)\) &
+\(\checkmark\) & \(\checkmark\)\\
+\code{4 * arctanIntegral(1)} &
+\cref{def:arctan-integral}; \cref{thm:arctan-integral-pi} &
+\(\pi=4\int_0^1 \frac{dt}{1+t^2}\) &
+\(\times\) & \(\times\)\\
+\code{4 * arctanSeries(1)} &
+\cref{def:arctan-series};
+\cref{thm:leibniz-arctan};
+\cref{thm:power-series-arctan-area-pi} &
+\(\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}\) &
+\(\checkmark\) & \(\times\)\\
+\code{piMachin} &
+\cref{def:arctan-series};
+\cref{thm:machin-tangent}; \cref{thm:leibniz-machin} &
+\(\pi=4(4\arctan_{\mathrm{series}}(1/5)-
+\arctan_{\mathrm{series}}(1/239))\) &
+\(\checkmark\) & \(\times\)\\
+\code{6 * arcsinIntegral(1/2)} &
+\cref{def:inverse-elementary-integral-identities} &
+\(\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}\) &
+\(\times\) & \(\times\)\\
+\code{NewtonSegmentPi} &
+\cref{rem:sources-of-raw-reals} &
+\(\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)\) &
+\(\times\) & \(\times\)\\
+\code{GaussianPi} &
+\cref{rem:sources-of-raw-reals} &
+\(\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2\) &
+\(\times\) & \(\times\)\\
+\code{reciprocalQuarticMinusOneProjectiveRoute} &
+\cref{def:reciprocal-quartic-test-kernel};
+\cref{thm:reciprocal-quartic-route-package} &
+\(\pi=\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}\) &
+\(\times\) & \(\times\)\\
+\code{baselSeriesRaw} / \(\pi^2/6\) &
+\cref{def:zeta-two-raw};
+\cref{thm:basel-geometric-rhs-valid} &
+\(\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6\) &
+\(\checkmark\) & \(\times\)\\
+\code{Brouncker(4/pi)} &
+\cref{rem:sources-of-raw-reals} &
+\(\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}\) &
+\(\times\) & \(\times\)\\
+\multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
+\cref{thm:log-at-i-pi-routes}, \cref{def:complex-log-series-at-i},
+\cref{def:complex-log-path-integral-at-i},
+\cref{def:complex-log-inv-exp-at-i}, \cref{thm:euler-identity}:
+\(\exp(i\pi/2)=i,\ \log(i)=i\pi/2,\ \pi=-2i\log(i)\)}\\
+\code{-2i * logSeries(i)} &
+\cref{def:complex-log-series-at-i};
+\cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
+\(\pi=-2i\,\log_{\mathrm{series}}(i)\) &
+\(\times\) & \(\times\)\\
+\code{-2i * logPathIntegral(i)} &
+\cref{def:complex-log-path-integral-at-i};
+\cref{thm:log-at-i-pi-routes} &
+\(\pi=-2i\int_{\gamma:1\to i}\frac{dz}{z}\) &
+\(\times\) & \(\times\)\\
+\code{-2i * logInvExp(i)} &
+\cref{def:complex-log-inv-exp-at-i};
+\cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
+\(\pi=-2i\,\log_{\exp^{-1}}(i)\) &
+\(\times\) & \(\times\)
+\end{tabular}
+\end{center}

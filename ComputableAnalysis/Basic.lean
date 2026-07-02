@@ -565,6 +565,57 @@ theorem interval_order_of_valid (x : RealRaw) (hx : x.Valid) (n : Nat) :
   have hwidth := hx.1 n
   grind [QInterval.width, Rat.sub_eq_add_neg]
 
+theorem validCompute_stage_eq_of_zero_width
+    {compute : Nat -> QInterval}
+    (hvalid : RealRaw.ValidCompute compute)
+    (hzero : forall n, (compute n).width = 0)
+    (n m : Nat) :
+    compute n = compute m := by
+  have hpoint : forall k, (compute k).lo = (compute k).hi := by
+    intro k
+    have hwidth := hzero k
+    have hordered : (compute k).lo <= (compute k).hi := by
+      have hnonneg := hvalid.1 k
+      grind [QInterval.width, Rat.sub_eq_add_neg]
+    exact Rat.le_antisymm hordered (by
+      grind [QInterval.width, Rat.sub_eq_add_neg])
+  rcases Nat.le_total n m with hnm | hmn
+  · have hnest := hvalid.2.1 n m hnm
+    have hlo : (compute n).lo = (compute m).lo := by
+      exact Rat.le_antisymm hnest.1 (by
+        have hn := hpoint n
+        have hm := hpoint m
+        grind)
+    have hhi : (compute n).hi = (compute m).hi := by
+      have hn := hpoint n
+      have hm := hpoint m
+      grind
+    cases hnI : compute n
+    cases hmI : compute m
+    simp [hnI, hmI] at hlo hhi ⊢
+    exact ⟨hlo, hhi⟩
+  · have hnest := hvalid.2.1 m n hmn
+    have hlo : (compute n).lo = (compute m).lo := by
+      exact Rat.le_antisymm (by
+        have hn := hpoint n
+        have hm := hpoint m
+        grind) hnest.1
+    have hhi : (compute n).hi = (compute m).hi := by
+      have hn := hpoint n
+      have hm := hpoint m
+      grind
+    cases hnI : compute n
+    cases hmI : compute m
+    simp [hnI, hmI] at hlo hhi ⊢
+    exact ⟨hlo, hhi⟩
+
+theorem stage_eq_of_valid_zero_width
+    (x : RealRaw) (hx : x.Valid)
+    (hzero : forall n, (x.compute n).width = 0)
+    (n m : Nat) :
+    x.compute n = x.compute m :=
+  validCompute_stage_eq_of_zero_width hx hzero n m
+
 theorem sameStageOverlap_refl (x : RealRaw) (hx : x.Valid) :
     x.SameStageOverlap x := by
   intro n
@@ -1827,6 +1878,19 @@ def mulRealInterval (a b c d : Rat) : QInterval :=
   let p4 := b * d
   { lo := min4 p1 p2 p3 p4, hi := max4 p1 p2 p3 p4 }
 
+theorem mulRealInterval_self_of_nonneg {a b : Rat}
+    (ha0 : 0 <= a) (hab : a <= b) :
+    mulRealInterval a b a b = { lo := a * a, hi := b * b } := by
+  have hb0 : 0 <= b := by grind
+  have h12 : a * a <= a * b := Rat.mul_le_mul_of_nonneg_left hab ha0
+  have h13 : a * a <= b * a := by
+    simpa [Rat.mul_comm] using Rat.mul_le_mul_of_nonneg_left hab ha0
+  have h34 : b * a <= b * b := by
+    simpa [Rat.mul_comm] using Rat.mul_le_mul_of_nonneg_left hab hb0
+  have h24 : a * b <= b * b := Rat.mul_le_mul_of_nonneg_right hab hb0
+  unfold mulRealInterval min4 max4 minRat maxRat2
+  simp [h12, h13, h34, h24]
+
 def mul (A B : QBox) : QBox :=
   let rr := mulRealInterval A.lo.re A.hi.re B.lo.re B.hi.re
   let ii := mulRealInterval A.lo.im A.hi.im B.lo.im B.hi.im
@@ -2162,6 +2226,109 @@ theorem scaleRat_valid_of_nonneg {r : Rat} {x : RealRaw}
     (hr : 0 <= r) (hx : x.Valid) : (scaleRat r x).Valid :=
   scaleRatCompute_valid_of_nonneg hr hx
 
+private theorem square_mono_nonneg {a b : Rat}
+    (ha0 : 0 <= a) (hab : a <= b) : a * a <= b * b := by
+  have hb0 : 0 <= b := by grind
+  have h1 : a * a <= a * b := Rat.mul_le_mul_of_nonneg_left hab ha0
+  have h2 : a * b <= b * b := Rat.mul_le_mul_of_nonneg_right hab hb0
+  exact Rat.le_trans h1 h2
+
+theorem mulSelf_valid_of_nonneg_bounded {x : RealRaw}
+    (hx : x.Valid) {B : Rat} (hB : 0 < B)
+    (hbounds : forall n, 0 <= (x.compute n).lo ∧ (x.compute n).hi <= B) :
+    (x * x).Valid := by
+  constructor
+  · intro n
+    have horder := RealRaw.interval_order_of_valid x hx n
+    have hnonneg := (hbounds n).1
+    have hcompute : ((x * x).compute n) =
+        { lo := (x.compute n).lo * (x.compute n).lo,
+          hi := (x.compute n).hi * (x.compute n).hi } := by
+      change QBox.mulRealInterval
+          (x.compute n).lo (x.compute n).hi
+          (x.compute n).lo (x.compute n).hi = _
+      exact QBox.mulRealInterval_self_of_nonneg hnonneg horder
+    rw [hcompute]
+    unfold QInterval.width
+    have hsquare :
+        (x.compute n).lo * (x.compute n).lo <=
+          (x.compute n).hi * (x.compute n).hi :=
+      square_mono_nonneg hnonneg horder
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      have horderN := RealRaw.interval_order_of_valid x hx n
+      have horderM := RealRaw.interval_order_of_valid x hx m
+      have hnonnegN := (hbounds n).1
+      have hnonnegM := (hbounds m).1
+      have hnested := hx.2.1 n m hnm
+      have hcomputeN : ((x * x).compute n) =
+          { lo := (x.compute n).lo * (x.compute n).lo,
+            hi := (x.compute n).hi * (x.compute n).hi } := by
+        change QBox.mulRealInterval
+            (x.compute n).lo (x.compute n).hi
+            (x.compute n).lo (x.compute n).hi = _
+        exact QBox.mulRealInterval_self_of_nonneg hnonnegN horderN
+      have hcomputeM : ((x * x).compute m) =
+          { lo := (x.compute m).lo * (x.compute m).lo,
+            hi := (x.compute m).hi * (x.compute m).hi } := by
+        change QBox.mulRealInterval
+            (x.compute m).lo (x.compute m).hi
+            (x.compute m).lo (x.compute m).hi = _
+        exact QBox.mulRealInterval_self_of_nonneg hnonnegM horderM
+      rw [hcomputeN, hcomputeM]
+      constructor
+      · exact square_mono_nonneg hnonnegN hnested.1
+      · constructor
+        · exact square_mono_nonneg hnonnegM horderM
+        · exact square_mono_nonneg (by grind) hnested.2.2
+    · intro eps
+      have hdenPos : 0 < (2 : Rat) * B := by
+        exact Rat.mul_pos (by native_decide : (0 : Rat) < 2) hB
+      let scaled : QPos :=
+        ⟨eps.val / ((2 : Rat) * B), by
+          rw [Rat.div_def]
+          exact Rat.mul_pos eps.property ((Rat.inv_pos).2 hdenPos)⟩
+      obtain ⟨N, hN⟩ := hx.2.2 scaled
+      refine ⟨N, ?_⟩
+      intro n hn
+      have horder := RealRaw.interval_order_of_valid x hx n
+      have hnonneg := (hbounds n).1
+      have hcompute : ((x * x).compute n) =
+          { lo := (x.compute n).lo * (x.compute n).lo,
+            hi := (x.compute n).hi * (x.compute n).hi } := by
+        change QBox.mulRealInterval
+            (x.compute n).lo (x.compute n).hi
+            (x.compute n).lo (x.compute n).hi = _
+        exact QBox.mulRealInterval_self_of_nonneg hnonneg horder
+      have hw := hN n hn
+      rw [hcompute]
+      unfold QInterval.width
+      have hw' : (x.compute n).hi - (x.compute n).lo <= scaled.val := by
+        simpa [QInterval.width] using hw
+      have hsumBound :
+          (x.compute n).hi + (x.compute n).lo <= (2 : Rat) * B := by
+        have hhiB := (hbounds n).2
+        grind
+      have hgapNonneg : 0 <= (x.compute n).hi - (x.compute n).lo := by
+        grind [Rat.sub_eq_add_neg]
+      calc
+        (x.compute n).hi * (x.compute n).hi -
+            (x.compute n).lo * (x.compute n).lo
+            = ((x.compute n).hi - (x.compute n).lo) *
+                ((x.compute n).hi + (x.compute n).lo) := by
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+                Rat.mul_assoc, Rat.mul_comm]
+        _ <= ((x.compute n).hi - (x.compute n).lo) * ((2 : Rat) * B) := by
+              exact Rat.mul_le_mul_of_nonneg_left hsumBound hgapNonneg
+        _ <= scaled.val * ((2 : Rat) * B) := by
+              exact Rat.mul_le_mul_of_nonneg_right hw' (Rat.le_of_lt hdenPos)
+        _ = eps.val := by
+              dsimp [scaled]
+              rw [Rat.div_def]
+              have hne : (2 : Rat) * B ≠ 0 := Rat.ne_of_gt hdenPos
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 private theorem le_of_mul_le_mul_pos_left {r a b : Rat}
     (hr : 0 < r) (h : r * a <= r * b) : a <= b := by
   apply Rat.le_of_mul_le_mul_right (c := r)
@@ -2292,6 +2459,36 @@ theorem sub_equiv {x x' y y' : RealRaw}
   unfold QInterval.Overlaps at hxSame hySame
   change QInterval.Overlaps (subCompute x y n) (subCompute x' y' n)
   unfold subCompute QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem add_sub_cancel_left_equiv {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) :
+    ((x + y) - x).Equiv y := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hxord := RealRaw.interval_order_of_valid x hx n
+  have hyord := RealRaw.interval_order_of_valid y hy n
+  apply (RealRaw.compareAt_overlap_iff ((x + y) - x) y n n).2
+  change QInterval.Overlaps
+    { lo := ((x.compute n).lo + (y.compute n).lo) - (x.compute n).hi,
+      hi := ((x.compute n).hi + (y.compute n).hi) - (x.compute n).lo }
+    (y.compute n)
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem add_sub_cancel_right_equiv {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) :
+    ((x + y) - y).Equiv x := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hxord := RealRaw.interval_order_of_valid x hx n
+  have hyord := RealRaw.interval_order_of_valid y hy n
+  apply (RealRaw.compareAt_overlap_iff ((x + y) - y) x n n).2
+  change QInterval.Overlaps
+    { lo := ((x.compute n).lo + (y.compute n).lo) - (y.compute n).hi,
+      hi := ((x.compute n).hi + (y.compute n).hi) - (y.compute n).lo }
+    (x.compute n)
+  unfold QInterval.Overlaps
   constructor <;> grind [Rat.sub_eq_add_neg]
 
 def Pos (x : RealRaw) : Prop :=

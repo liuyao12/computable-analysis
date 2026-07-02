@@ -130,6 +130,45 @@ theorem endpoint_formula
 
 end DefiniteIdentityOnInterval
 
+/-- A definite-integral identity for the domain-aware `ConstructionFor`
+interface.  This is the version used by hand-built interval constructions such
+as the Farey arctangent integral, where the raw computation is already a valid
+integral on the whole `FunctionOnInterval` but is not necessarily presented as
+the generic left-Riemann `Integral.Construction` plan. -/
+structure DefiniteIdentityFor
+    (integrand primitive : FunctionOnInterval) where
+  same_lower : primitive.lower = integrand.lower
+  same_upper : primitive.upper = integrand.upper
+  construction : Integral.ConstructionFor integrand
+  endpoint_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute
+        primitive.toRealFunRaw integrand.lower integrand.upper)
+  equivalent :
+    (Integral.integralFor integrand construction).Equiv
+      (endpointDifferenceRaw
+        primitive.toRealFunRaw integrand.lower integrand.upper
+        endpoint_valid)
+
+namespace DefiniteIdentityFor
+
+theorem integral_valid
+    {integrand primitive : FunctionOnInterval}
+    (I : DefiniteIdentityFor integrand primitive) :
+    (Integral.integralFor integrand I.construction).Valid :=
+  Integral.integralFor_valid integrand I.construction
+
+theorem endpoint_formula
+    {integrand primitive : FunctionOnInterval}
+    (I : DefiniteIdentityFor integrand primitive) :
+    (Integral.integralFor integrand I.construction).Equiv
+      (endpointDifferenceRaw
+        primitive.toRealFunRaw integrand.lower integrand.upper
+        I.endpoint_valid) :=
+  I.equivalent
+
+end DefiniteIdentityFor
+
 def definiteIdentity_of_effectiveFTC
     {primitive integrand : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC primitive integrand a b)
@@ -220,6 +259,20 @@ theorem oneOverOnePlusSquareOnInterval_valid (a b : Rat) :
     (oneOverOnePlusSquareOnInterval a b).toRealFunRaw.Valid :=
   FunctionOnInterval.toRealFunRaw_valid _
 
+theorem oneOverOnePlusSquareOnInterval_toRealFunRaw_point
+    (a b x : Rat) (n : Nat) :
+    ((oneOverOnePlusSquareOnInterval a b).toRealFunRaw.compute x n).lo =
+      ((oneOverOnePlusSquareOnInterval a b).toRealFunRaw.compute x n).hi := by
+  by_cases hleft : a <= x
+  · by_cases hright : x <= b
+    · simp [FunctionOnInterval.toRealFunRaw, FunctionOnInterval.compute,
+        oneOverOnePlusSquareOnInterval, oneOverOnePlusSquareRaw,
+        hleft, hright]
+    · simp [FunctionOnInterval.toRealFunRaw, oneOverOnePlusSquareOnInterval,
+        hleft, hright]
+  · simp [FunctionOnInterval.toRealFunRaw, oneOverOnePlusSquareOnInterval,
+      hleft]
+
 theorem oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity
     (u : Rat) (h : oneOverOnePlusSquareRaw.definedAt u) (n : Nat) :
     oneOverOnePlusSquareRaw.compute u h n =
@@ -255,10 +308,9 @@ def arctanIntegralRectangleFor
 
 theorem arctanIntegralRectangleFor_valid
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
-    (arctanIntegralRectangleFor x hx0 hx1).Valid := by
-  change RealRaw.ValidCompute
-    (ArctanGeometry.arctanIntegralRectangleCompute x)
-  exact (arctanIntegralRectangleConstruction x hx0 hx1).certificate
+    (arctanIntegralRectangleFor x hx0 hx1).Valid :=
+  Integral.integralFor_valid (arctanKernelInterval x)
+    (arctanIntegralRectangleConstruction x hx0 hx1)
 
 theorem arctanIntegralRectangleFor_compute_eq
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
@@ -368,6 +420,15 @@ def arctanIntegralUnitRepresentation
   name := "arctan.integral.unit"
   raw := arctanIntegralUnitFunctionRaw data
 
+theorem arctanIntegralUnitFunctionRaw_valid
+    (data : ArctanIntegralUnitData) :
+    forall x h, RealRaw.ValidCompute
+      ((arctanIntegralUnitFunctionRaw data).compute x h) := by
+  intro x hx
+  simpa [arctanIntegralUnitFunctionRaw, arctanIntegralUnit] using
+    Integral.integralFor_valid (arctanKernelInterval x)
+      (data.constructionAt x hx.1 hx.2)
+
 def ArctanIntegralUnitGeomFunctionAgreement
     (data : ArctanIntegralUnitData) : Prop :=
   Elementary.Arctan.Equivalent
@@ -388,6 +449,25 @@ theorem arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement
     ArctanGeometry.representation, ArctanGeometry.functionRaw,
     PartialRealFunRaw.evalRaw] using
     h x ⟨hx0, hx1⟩ hgeom
+
+theorem arctanIntegralUnitComputes_arctanGeom_of_functionAgreement
+    (data : ArctanIntegralUnitData)
+    (h : ArctanIntegralUnitGeomFunctionAgreement data)
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    ArctanIntegralUnitComputes x hx0 hx1
+      (ArctanGeometry.arctanGeom x) :=
+  ⟨data.constructionAt x hx0 hx1,
+    arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement
+      data h hx0 hx1⟩
+
+theorem arctanIntegralUnitGeomAgreement_one_of_functionAgreement
+    (data : ArctanIntegralUnitData)
+    (h : ArctanIntegralUnitGeomFunctionAgreement data) :
+    ArctanIntegralUnitComputes (1 : Rat)
+      (by native_decide) (by native_decide)
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+  arctanIntegralUnitComputes_arctanGeom_of_functionAgreement
+    data h (1 : Rat) (by native_decide) (by native_decide)
 
 /-- The rectangle construction supplies the verified unit-branch integral
 arctangent data. -/
@@ -443,15 +523,21 @@ def oneOverOnePlusSquareFareyIntegral (a b : Rat) : RealRaw :=
     (oneOverOnePlusSquareFareyConstruction a b)
 
 theorem oneOverOnePlusSquareFareyIntegral_valid (a b : Rat) :
-    (oneOverOnePlusSquareFareyIntegral a b).Valid := by
-  change RealRaw.ValidCompute
-    ((ArctanGeometry.fareyIntegralBetweenRaw a b).compute)
-  exact ArctanGeometry.fareyIntegralBetweenRaw_valid a b
+    (oneOverOnePlusSquareFareyIntegral a b).Valid :=
+  Integral.integralFor_valid (oneOverOnePlusSquareOnInterval a b)
+    (oneOverOnePlusSquareFareyConstruction a b)
 
 theorem oneOverOnePlusSquareFareyIntegral_compute_eq
     (a b : Rat) (n : Nat) :
     (oneOverOnePlusSquareFareyIntegral a b).compute n =
       (ArctanGeometry.fareyIntegralBetweenRaw a b).compute n := rfl
+
+theorem oneOverOnePlusSquareFareyIntegral_width_le_six_div_succ
+    (a b : Rat) (n : Nat) :
+    ((oneOverOnePlusSquareFareyIntegral a b).compute n).width <=
+      (6 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  rw [oneOverOnePlusSquareFareyIntegral_compute_eq]
+  exact ArctanGeometry.fareyIntegralBetweenRaw_width_le_six_div_succ a b n
 
 theorem oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw
     (a b : Rat) :
@@ -615,14 +701,30 @@ def arctanIntegralFareyFor (x : Rat) : RealRaw :=
     (arctanIntegralFareyConstruction x)
 
 theorem arctanIntegralFareyFor_valid (x : Rat) :
-    (arctanIntegralFareyFor x).Valid := by
-  change RealRaw.ValidCompute
-    ((oneOverOnePlusSquareFareyIntegral 0 x).compute)
-  exact oneOverOnePlusSquareFareyIntegral_valid 0 x
+    (arctanIntegralFareyFor x).Valid :=
+  Integral.integralFor_valid (arctanKernelInterval x)
+    (arctanIntegralFareyConstruction x)
 
 theorem arctanIntegralFareyFor_compute_eq (x : Rat) (n : Nat) :
     (arctanIntegralFareyFor x).compute n =
       (oneOverOnePlusSquareFareyIntegral 0 x).compute n := rfl
+
+theorem arctanIntegralFareyFor_equiv_fareyIntegral (x : Rat) :
+    (arctanIntegralFareyFor x).Equiv
+      (oneOverOnePlusSquareFareyIntegral 0 x) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanIntegralFareyFor x)
+    (oneOverOnePlusSquareFareyIntegral 0 x) n n).2
+  rw [arctanIntegralFareyFor_compute_eq]
+  have hordered :=
+    (oneOverOnePlusSquareFareyIntegral_valid 0 x).1 n
+  have hle :
+      ((oneOverOnePlusSquareFareyIntegral 0 x).compute n).lo <=
+        ((oneOverOnePlusSquareFareyIntegral 0 x).compute n).hi := by
+    unfold QInterval.width at hordered
+    grind [Rat.sub_eq_add_neg]
+  exact ⟨hle, hle⟩
 
 theorem arctanIntegralFareyFor_equiv_betweenRaw (x : Rat) :
     (arctanIntegralFareyFor x).Equiv
@@ -631,20 +733,7 @@ theorem arctanIntegralFareyFor_equiv_betweenRaw (x : Rat) :
     (arctanIntegralFareyFor_valid x)
     (oneOverOnePlusSquareFareyIntegral_valid 0 x)
     (ArctanGeometry.fareyIntegralBetweenRaw_valid 0 x)
-    (by
-      intro n
-      apply (RealRaw.compareAt_overlap_iff
-        (arctanIntegralFareyFor x)
-        (oneOverOnePlusSquareFareyIntegral 0 x) n n).2
-      rw [arctanIntegralFareyFor_compute_eq]
-      have hordered :=
-        (oneOverOnePlusSquareFareyIntegral_valid 0 x).1 n
-      have hle :
-          ((oneOverOnePlusSquareFareyIntegral 0 x).compute n).lo <=
-            ((oneOverOnePlusSquareFareyIntegral 0 x).compute n).hi := by
-        unfold QInterval.width at hordered
-        grind [Rat.sub_eq_add_neg]
-      exact ⟨hle, hle⟩)
+    (arctanIntegralFareyFor_equiv_fareyIntegral x)
     (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw 0 x)
 
 theorem arctanIntegralFareyFor_equiv_prefix (x : Rat) :
@@ -657,6 +746,18 @@ theorem arctanIntegralFareyFor_equiv_prefix (x : Rat) :
     (arctanIntegralFareyFor_equiv_betweenRaw x)
     (ArctanGeometry.fareyIntegralBetweenRaw_zero_left_equiv_prefix x)
 
+theorem arctanIntegralFareyFor_equiv_arctanGeom
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralFareyFor x).Equiv
+      (ArctanGeometry.arctanGeom x) :=
+  RealRaw.equiv_trans
+    (arctanIntegralFareyFor_valid x)
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid x)
+    (ArctanGeometry.arctanGeom_valid_on_unit hx0 hx1)
+    (arctanIntegralFareyFor_equiv_prefix x)
+    (ArctanGeometry.fareyIntegralPrefixRaw_equiv_arctanGeom_on_unit
+      hx0 hx1)
+
 theorem arctanIntegralFareyFor_zero_equiv_zero :
     (arctanIntegralFareyFor 0).Equiv (RealRaw.ofRat 0) := by
   exact RealRaw.equiv_trans
@@ -665,6 +766,513 @@ theorem arctanIntegralFareyFor_zero_equiv_zero :
     (RealRaw.ofRat_valid 0)
     (arctanIntegralFareyFor_equiv_prefix 0)
     ArctanGeometry.fareyIntegralPrefixRaw_zero_equiv_zero
+
+theorem arctanIntegralFareyFor_add_interval
+    (a b : Rat) :
+    (arctanIntegralFareyFor a +
+      oneOverOnePlusSquareFareyIntegral a b).Equiv
+        (arctanIntegralFareyFor b) := by
+  have hleftValid :
+      (arctanIntegralFareyFor a +
+        oneOverOnePlusSquareFareyIntegral a b).Valid :=
+    RealRaw.add_valid
+      (arctanIntegralFareyFor_valid a)
+      (oneOverOnePlusSquareFareyIntegral_valid a b)
+  have hkernelLeftValid :
+      (oneOverOnePlusSquareFareyIntegral 0 a +
+        oneOverOnePlusSquareFareyIntegral a b).Valid :=
+    RealRaw.add_valid
+      (oneOverOnePlusSquareFareyIntegral_valid 0 a)
+      (oneOverOnePlusSquareFareyIntegral_valid a b)
+  have hkernelRightValid :
+      (oneOverOnePlusSquareFareyIntegral 0 b).Valid :=
+    oneOverOnePlusSquareFareyIntegral_valid 0 b
+  have hrightValid :
+      (arctanIntegralFareyFor b).Valid :=
+    arctanIntegralFareyFor_valid b
+  have hleftToKernel :
+      (arctanIntegralFareyFor a +
+        oneOverOnePlusSquareFareyIntegral a b).Equiv
+          (oneOverOnePlusSquareFareyIntegral 0 a +
+            oneOverOnePlusSquareFareyIntegral a b) :=
+    RealRaw.add_equiv
+      (arctanIntegralFareyFor_valid a)
+      (oneOverOnePlusSquareFareyIntegral_valid 0 a)
+      (oneOverOnePlusSquareFareyIntegral_valid a b)
+      (oneOverOnePlusSquareFareyIntegral_valid a b)
+      (arctanIntegralFareyFor_equiv_fareyIntegral a)
+      (RealRaw.equiv_refl
+        (oneOverOnePlusSquareFareyIntegral a b)
+        (oneOverOnePlusSquareFareyIntegral_valid a b))
+  have hkernelToRight :
+      (oneOverOnePlusSquareFareyIntegral 0 a +
+        oneOverOnePlusSquareFareyIntegral a b).Equiv
+          (arctanIntegralFareyFor b) :=
+    RealRaw.equiv_trans hkernelLeftValid hkernelRightValid hrightValid
+      (oneOverOnePlusSquareFareyIntegral_additive 0 a b)
+      (RealRaw.equiv_symm
+        (arctanIntegralFareyFor_equiv_fareyIntegral b))
+  exact RealRaw.equiv_trans hleftValid hkernelLeftValid hrightValid
+    hleftToKernel hkernelToRight
+
+theorem arctanIntegralFareyFor_equiv_add_interval
+    (a b : Rat) :
+    (arctanIntegralFareyFor b).Equiv
+      (arctanIntegralFareyFor a +
+        oneOverOnePlusSquareFareyIntegral a b) :=
+  RealRaw.equiv_symm (arctanIntegralFareyFor_add_interval a b)
+
+theorem arctanIntegralFareyFor_sub_interval
+    (a b : Rat) :
+    (arctanIntegralFareyFor b - arctanIntegralFareyFor a).Equiv
+      (oneOverOnePlusSquareFareyIntegral a b) := by
+  let A := arctanIntegralFareyFor a
+  let B := arctanIntegralFareyFor b
+  let J := oneOverOnePlusSquareFareyIntegral a b
+  have hA : A.Valid := by
+    dsimp [A]
+    exact arctanIntegralFareyFor_valid a
+  have hB : B.Valid := by
+    dsimp [B]
+    exact arctanIntegralFareyFor_valid b
+  have hJ : J.Valid := by
+    dsimp [J]
+    exact oneOverOnePlusSquareFareyIntegral_valid a b
+  have hsum : (A + J).Valid :=
+    RealRaw.add_valid hA hJ
+  have hsub : (B - A).Valid :=
+    RealRaw.sub_valid hB hA
+  have hcancelValid : ((A + J) - A).Valid :=
+    RealRaw.sub_valid hsum hA
+  have hBsum : B.Equiv (A + J) := by
+    dsimp [A, B, J]
+    exact arctanIntegralFareyFor_equiv_add_interval a b
+  have hsubToCancel : (B - A).Equiv ((A + J) - A) :=
+    RealRaw.sub_equiv hB hsum hA hA hBsum
+      (RealRaw.equiv_refl A hA)
+  have hcancel : ((A + J) - A).Equiv J :=
+    RealRaw.add_sub_cancel_left_equiv hA hJ
+  exact RealRaw.equiv_trans hsub hcancelValid hJ hsubToCancel hcancel
+
+theorem oneOverOnePlusSquareFareyIntegral_equiv_arctanIntegralFareyFor_sub
+    (a b : Rat) :
+    (oneOverOnePlusSquareFareyIntegral a b).Equiv
+      (arctanIntegralFareyFor b - arctanIntegralFareyFor a) :=
+  RealRaw.equiv_symm (arctanIntegralFareyFor_sub_interval a b)
+
+theorem arctanIntegralFareyFor_sub_interval_equiv_betweenRaw
+    (a b : Rat) :
+    (arctanIntegralFareyFor b - arctanIntegralFareyFor a).Equiv
+      (ArctanGeometry.fareyIntegralBetweenRaw a b) := by
+  exact RealRaw.equiv_trans
+    (RealRaw.sub_valid
+      (arctanIntegralFareyFor_valid b)
+      (arctanIntegralFareyFor_valid a))
+    (oneOverOnePlusSquareFareyIntegral_valid a b)
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid a b)
+    (arctanIntegralFareyFor_sub_interval a b)
+    (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw a b)
+
+theorem fareyIntegralBetweenRaw_equiv_arctanIntegralFareyFor_sub
+    (a b : Rat) :
+    (ArctanGeometry.fareyIntegralBetweenRaw a b).Equiv
+      (arctanIntegralFareyFor b - arctanIntegralFareyFor a) :=
+  RealRaw.equiv_symm
+    (arctanIntegralFareyFor_sub_interval_equiv_betweenRaw a b)
+
+/-- The Farey arctangent primitive is additive by finite interval
+subtraction:
+
+`(F(b)-F(a)) + (F(c)-F(b)) = F(c)-F(a)`.
+
+This is the primitive-difference form of additivity that later FTC-style pi
+routes need.  The proof reduces both differences to the shared-Farey integral
+on the corresponding interval and then uses the raw Farey additivity theorem. -/
+theorem arctanIntegralFareyFor_sub_interval_additive
+    (a b c : Rat) :
+    ((arctanIntegralFareyFor b - arctanIntegralFareyFor a) +
+      (arctanIntegralFareyFor c - arctanIntegralFareyFor b)).Equiv
+        (arctanIntegralFareyFor c - arctanIntegralFareyFor a) := by
+  let Fab := arctanIntegralFareyFor b - arctanIntegralFareyFor a
+  let Fbc := arctanIntegralFareyFor c - arctanIntegralFareyFor b
+  let Fac := arctanIntegralFareyFor c - arctanIntegralFareyFor a
+  let Jab := oneOverOnePlusSquareFareyIntegral a b
+  let Jbc := oneOverOnePlusSquareFareyIntegral b c
+  let Jac := oneOverOnePlusSquareFareyIntegral a c
+  have hFab : Fab.Valid := by
+    dsimp [Fab]
+    exact RealRaw.sub_valid
+      (arctanIntegralFareyFor_valid b)
+      (arctanIntegralFareyFor_valid a)
+  have hFbc : Fbc.Valid := by
+    dsimp [Fbc]
+    exact RealRaw.sub_valid
+      (arctanIntegralFareyFor_valid c)
+      (arctanIntegralFareyFor_valid b)
+  have hFac : Fac.Valid := by
+    dsimp [Fac]
+    exact RealRaw.sub_valid
+      (arctanIntegralFareyFor_valid c)
+      (arctanIntegralFareyFor_valid a)
+  have hJab : Jab.Valid := by
+    dsimp [Jab]
+    exact oneOverOnePlusSquareFareyIntegral_valid a b
+  have hJbc : Jbc.Valid := by
+    dsimp [Jbc]
+    exact oneOverOnePlusSquareFareyIntegral_valid b c
+  have hJac : Jac.Valid := by
+    dsimp [Jac]
+    exact oneOverOnePlusSquareFareyIntegral_valid a c
+  have hleftValid : (Fab + Fbc).Valid :=
+    RealRaw.add_valid hFab hFbc
+  have hkernelValid : (Jab + Jbc).Valid :=
+    RealRaw.add_valid hJab hJbc
+  have hleftToKernel : (Fab + Fbc).Equiv (Jab + Jbc) :=
+    RealRaw.add_equiv hFab hJab hFbc hJbc
+      (by
+        dsimp [Fab, Jab]
+        exact arctanIntegralFareyFor_sub_interval a b)
+      (by
+        dsimp [Fbc, Jbc]
+        exact arctanIntegralFareyFor_sub_interval b c)
+  have hkernelToRight : (Jab + Jbc).Equiv Fac :=
+    RealRaw.equiv_trans hkernelValid hJac hFac
+      (by
+        dsimp [Jab, Jbc, Jac]
+        exact oneOverOnePlusSquareFareyIntegral_additive a b c)
+      (by
+        dsimp [Jac, Fac]
+        exact RealRaw.equiv_symm
+          (arctanIntegralFareyFor_sub_interval a c))
+  simpa [Fab, Fbc, Fac] using
+    RealRaw.equiv_trans hleftValid hkernelValid hFac
+      hleftToKernel hkernelToRight
+
+/-- On the rational unit branch, the shared-Farey integral over `[a,b]`
+computes the endpoint difference of geometric arctangent. -/
+theorem arctanGeom_sub_equiv_fareyIntegralBetweenRaw_on_unit
+    (a b : Rat) (ha0 : 0 <= a) (ha1 : a <= 1)
+    (hb0 : 0 <= b) (hb1 : b <= 1) :
+    (ArctanGeometry.arctanGeom b -
+      ArctanGeometry.arctanGeom a).Equiv
+        (ArctanGeometry.fareyIntegralBetweenRaw a b) := by
+  have hgB : (ArctanGeometry.arctanGeom b).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hb0 hb1
+  have hgA : (ArctanGeometry.arctanGeom a).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit ha0 ha1
+  have hFB : (arctanIntegralFareyFor b).Valid :=
+    arctanIntegralFareyFor_valid b
+  have hFA : (arctanIntegralFareyFor a).Valid :=
+    arctanIntegralFareyFor_valid a
+  have hsubGeomValid :
+      (ArctanGeometry.arctanGeom b -
+        ArctanGeometry.arctanGeom a).Valid :=
+    RealRaw.sub_valid hgB hgA
+  have hsubFareyValid :
+      (arctanIntegralFareyFor b - arctanIntegralFareyFor a).Valid :=
+    RealRaw.sub_valid hFB hFA
+  have htoFareySub :
+      (ArctanGeometry.arctanGeom b -
+        ArctanGeometry.arctanGeom a).Equiv
+          (arctanIntegralFareyFor b - arctanIntegralFareyFor a) :=
+    RealRaw.sub_equiv hgB hFB hgA hFA
+      (RealRaw.equiv_symm
+        (arctanIntegralFareyFor_equiv_arctanGeom b hb0 hb1))
+      (RealRaw.equiv_symm
+        (arctanIntegralFareyFor_equiv_arctanGeom a ha0 ha1))
+  exact RealRaw.equiv_trans
+    hsubGeomValid hsubFareyValid
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid a b)
+    htoFareySub
+    (arctanIntegralFareyFor_sub_interval_equiv_betweenRaw a b)
+
+theorem fareyIntegralBetweenRaw_equiv_arctanGeom_sub_on_unit
+    (a b : Rat) (ha0 : 0 <= a) (ha1 : a <= 1)
+    (hb0 : 0 <= b) (hb1 : b <= 1) :
+    (ArctanGeometry.fareyIntegralBetweenRaw a b).Equiv
+      (ArctanGeometry.arctanGeom b -
+        ArctanGeometry.arctanGeom a) :=
+  RealRaw.equiv_symm
+    (arctanGeom_sub_equiv_fareyIntegralBetweenRaw_on_unit
+      a b ha0 ha1 hb0 hb1)
+
+/-- Domain-aware wrapper version of the same endpoint-difference theorem:
+the packaged Farey integral of `1/(1+x^2)` over `[a,b]` computes
+`arctanGeom(b)-arctanGeom(a)` on the rational unit branch. -/
+theorem arctanGeom_sub_equiv_oneOverOnePlusSquareFareyIntegral_on_unit
+    (a b : Rat) (ha0 : 0 <= a) (ha1 : a <= 1)
+    (hb0 : 0 <= b) (hb1 : b <= 1) :
+    (ArctanGeometry.arctanGeom b -
+      ArctanGeometry.arctanGeom a).Equiv
+        (oneOverOnePlusSquareFareyIntegral a b) := by
+  have hgeomSubValid :
+      (ArctanGeometry.arctanGeom b -
+        ArctanGeometry.arctanGeom a).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit hb0 hb1)
+      (ArctanGeometry.arctanGeom_valid_on_unit ha0 ha1)
+  exact RealRaw.equiv_trans
+    hgeomSubValid
+    (ArctanGeometry.fareyIntegralBetweenRaw_valid a b)
+    (oneOverOnePlusSquareFareyIntegral_valid a b)
+    (arctanGeom_sub_equiv_fareyIntegralBetweenRaw_on_unit
+      a b ha0 ha1 hb0 hb1)
+    (RealRaw.equiv_symm
+      (oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw a b))
+
+theorem oneOverOnePlusSquareFareyIntegral_equiv_arctanGeom_sub_on_unit
+    (a b : Rat) (ha0 : 0 <= a) (ha1 : a <= 1)
+    (hb0 : 0 <= b) (hb1 : b <= 1) :
+    (oneOverOnePlusSquareFareyIntegral a b).Equiv
+      (ArctanGeometry.arctanGeom b -
+        ArctanGeometry.arctanGeom a) :=
+  RealRaw.equiv_symm
+    (arctanGeom_sub_equiv_oneOverOnePlusSquareFareyIntegral_on_unit
+      a b ha0 ha1 hb0 hb1)
+
+/-- Additivity of geometric arctangent endpoint differences on the rational
+unit branch.  The proof goes through the shared-Farey integral, so the
+calculus identity is certified by finite rational interval sums. -/
+theorem arctanGeom_sub_additive_on_unit
+    (a b c : Rat)
+    (ha0 : 0 <= a) (ha1 : a <= 1)
+    (hb0 : 0 <= b) (hb1 : b <= 1)
+    (hc0 : 0 <= c) (hc1 : c <= 1) :
+    ((ArctanGeometry.arctanGeom b - ArctanGeometry.arctanGeom a) +
+      (ArctanGeometry.arctanGeom c - ArctanGeometry.arctanGeom b)).Equiv
+        (ArctanGeometry.arctanGeom c -
+          ArctanGeometry.arctanGeom a) := by
+  let Gab := ArctanGeometry.arctanGeom b - ArctanGeometry.arctanGeom a
+  let Gbc := ArctanGeometry.arctanGeom c - ArctanGeometry.arctanGeom b
+  let Gac := ArctanGeometry.arctanGeom c - ArctanGeometry.arctanGeom a
+  let Jab := oneOverOnePlusSquareFareyIntegral a b
+  let Jbc := oneOverOnePlusSquareFareyIntegral b c
+  let Jac := oneOverOnePlusSquareFareyIntegral a c
+  have hgA : (ArctanGeometry.arctanGeom a).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit ha0 ha1
+  have hgB : (ArctanGeometry.arctanGeom b).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hb0 hb1
+  have hgC : (ArctanGeometry.arctanGeom c).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hc0 hc1
+  have hGab : Gab.Valid := by
+    dsimp [Gab]
+    exact RealRaw.sub_valid hgB hgA
+  have hGbc : Gbc.Valid := by
+    dsimp [Gbc]
+    exact RealRaw.sub_valid hgC hgB
+  have hGac : Gac.Valid := by
+    dsimp [Gac]
+    exact RealRaw.sub_valid hgC hgA
+  have hJab : Jab.Valid := by
+    dsimp [Jab]
+    exact oneOverOnePlusSquareFareyIntegral_valid a b
+  have hJbc : Jbc.Valid := by
+    dsimp [Jbc]
+    exact oneOverOnePlusSquareFareyIntegral_valid b c
+  have hJac : Jac.Valid := by
+    dsimp [Jac]
+    exact oneOverOnePlusSquareFareyIntegral_valid a c
+  have hleftValid : (Gab + Gbc).Valid :=
+    RealRaw.add_valid hGab hGbc
+  have hkernelValid : (Jab + Jbc).Valid :=
+    RealRaw.add_valid hJab hJbc
+  have hleftToKernel : (Gab + Gbc).Equiv (Jab + Jbc) :=
+    RealRaw.add_equiv hGab hJab hGbc hJbc
+      (by
+        dsimp [Gab, Jab]
+        exact arctanGeom_sub_equiv_oneOverOnePlusSquareFareyIntegral_on_unit
+          a b ha0 ha1 hb0 hb1)
+      (by
+        dsimp [Gbc, Jbc]
+        exact arctanGeom_sub_equiv_oneOverOnePlusSquareFareyIntegral_on_unit
+          b c hb0 hb1 hc0 hc1)
+  have hkernelToRight : (Jab + Jbc).Equiv Gac :=
+    RealRaw.equiv_trans hkernelValid hJac hGac
+      (by
+        dsimp [Jab, Jbc, Jac]
+        exact oneOverOnePlusSquareFareyIntegral_additive a b c)
+      (by
+        dsimp [Jac, Gac]
+        exact RealRaw.equiv_symm
+          (arctanGeom_sub_equiv_oneOverOnePlusSquareFareyIntegral_on_unit
+            a c ha0 ha1 hc0 hc1))
+  simpa [Gab, Gbc, Gac] using
+    RealRaw.equiv_trans hleftValid hkernelValid hGac
+      hleftToKernel hkernelToRight
+
+/-- The geometric arctangent algorithm, restricted to the rational unit
+interval as a `FunctionOnInterval`. -/
+def arctanGeomOnUnit : FunctionOnInterval where
+  raw := {
+    definedAt := fun x => 0 <= x ∧ x <= 1
+    compute := fun x _hx => (ArctanGeometry.arctanGeom x).compute
+    rate := fun x _hx => (ArctanGeometry.arctanGeom x).rate
+  }
+  lower := 0
+  upper := 1
+  defined_on := fun _ hx => hx
+  valid_on := by
+    intro x hx
+    exact ArctanGeometry.arctanGeom_valid_on_unit hx.1 hx.2
+
+theorem arctanGeomOnUnit_toRealFunRaw_compute_zero (n : Nat) :
+    arctanGeomOnUnit.toRealFunRaw.compute 0 n =
+      (ArctanGeometry.arctanGeom (0 : Rat)).compute n := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    arctanGeomOnUnit (x := 0)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  rfl
+
+theorem arctanGeomOnUnit_toRealFunRaw_compute_one (n : Nat) :
+    arctanGeomOnUnit.toRealFunRaw.compute 1 n =
+      (ArctanGeometry.arctanGeom (1 : Rat)).compute n := by
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    arctanGeomOnUnit (x := 1)
+      (hx := ⟨by native_decide, by native_decide⟩) n]
+  rfl
+
+theorem arctanGeomOnUnit_endpointDifference_compute_eq (n : Nat) :
+    endpointDifferenceCompute arctanGeomOnUnit.toRealFunRaw 0 1 n =
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).compute n := by
+  unfold endpointDifferenceCompute endpointDifferenceInterval
+  rw [arctanGeomOnUnit_toRealFunRaw_compute_one n,
+    arctanGeomOnUnit_toRealFunRaw_compute_zero n]
+  rfl
+
+theorem arctanGeomOnUnit_endpointDifference_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute arctanGeomOnUnit.toRealFunRaw 0 1) := by
+  have hsub :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (0 : Rat)) (by native_decide) (by native_decide))
+  have hcompute :
+      endpointDifferenceCompute arctanGeomOnUnit.toRealFunRaw 0 1 =
+        (ArctanGeometry.arctanGeom (1 : Rat) -
+          ArctanGeometry.arctanGeom (0 : Rat)).compute := by
+    funext n
+    exact arctanGeomOnUnit_endpointDifference_compute_eq n
+  rw [hcompute]
+  exact hsub
+
+theorem arctanGeomOnUnit_endpointDifference_equiv_sub :
+    (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+      arctanGeomOnUnit_endpointDifference_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat) -
+          ArctanGeometry.arctanGeom (0 : Rat)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+      arctanGeomOnUnit_endpointDifference_valid)
+    (ArctanGeometry.arctanGeom (1 : Rat) -
+      ArctanGeometry.arctanGeom (0 : Rat)) n n).2
+  change QInterval.Overlaps
+    (endpointDifferenceCompute arctanGeomOnUnit.toRealFunRaw 0 1 n)
+    ((ArctanGeometry.arctanGeom (1 : Rat) -
+      ArctanGeometry.arctanGeom (0 : Rat)).compute n)
+  rw [arctanGeomOnUnit_endpointDifference_compute_eq n]
+  have hvalid :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (0 : Rat)) (by native_decide) (by native_decide))
+  have horder := RealRaw.interval_order_of_valid
+    (ArctanGeometry.arctanGeom (1 : Rat) -
+      ArctanGeometry.arctanGeom (0 : Rat)) hvalid n
+  exact ⟨horder, horder⟩
+
+theorem arctanGeom_one_sub_zero_equiv :
+    (ArctanGeometry.arctanGeom (1 : Rat) -
+      ArctanGeometry.arctanGeom (0 : Rat)).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) := by
+  rw [ArctanGeometry.arctanGeom_zero]
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (ArctanGeometry.arctanGeom (1 : Rat) - RealRaw.ofRat 0)
+    (ArctanGeometry.arctanGeom (1 : Rat)) n n).2
+  change QInterval.Overlaps
+    { lo := ((ArctanGeometry.arctanGeom (1 : Rat)).compute n).lo - 0,
+      hi := ((ArctanGeometry.arctanGeom (1 : Rat)).compute n).hi - 0 }
+    ((ArctanGeometry.arctanGeom (1 : Rat)).compute n)
+  have horder := RealRaw.interval_order_of_valid
+    (ArctanGeometry.arctanGeom (1 : Rat))
+    (ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide)) n
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one :
+    (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+      arctanGeomOnUnit_endpointDifference_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) := by
+  have hendpoint :
+      (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+        arctanGeomOnUnit_endpointDifference_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      arctanGeomOnUnit_endpointDifference_valid
+  have hsub :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (0 : Rat)) (by native_decide) (by native_decide))
+  exact RealRaw.equiv_trans
+    hendpoint
+    hsub
+    (ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide))
+    arctanGeomOnUnit_endpointDifference_equiv_sub
+    arctanGeom_one_sub_zero_equiv
+
+/-- Farey unit arctangent as a definite-integral identity: the verified
+shared-Farey construction of `∫_0^1 dx/(1+x^2)` computes the endpoint
+difference of the geometric arctangent primitive. -/
+def arctanGeomUnitFareyDefiniteIdentity :
+    Integral.DefiniteIdentityFor
+      (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit where
+  same_lower := rfl
+  same_upper := rfl
+  construction := oneOverOnePlusSquareFareyConstruction 0 1
+  endpoint_valid := arctanGeomOnUnit_endpointDifference_valid
+  equivalent := by
+    have hintegral :
+        (oneOverOnePlusSquareFareyIntegral 0 1).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat) -
+            ArctanGeometry.arctanGeom (0 : Rat)) :=
+      oneOverOnePlusSquareFareyIntegral_equiv_arctanGeom_sub_on_unit
+        (0 : Rat) (1 : Rat)
+        (by native_decide) (by native_decide)
+        (by native_decide) (by native_decide)
+    have hleft :
+        (oneOverOnePlusSquareFareyIntegral 0 1).Valid :=
+      oneOverOnePlusSquareFareyIntegral_valid 0 1
+    have hmid :
+        (ArctanGeometry.arctanGeom (1 : Rat) -
+          ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+      RealRaw.sub_valid
+        (ArctanGeometry.arctanGeom_valid_on_unit
+          (x := (1 : Rat)) (by native_decide) (by native_decide))
+        (ArctanGeometry.arctanGeom_valid_on_unit
+          (x := (0 : Rat)) (by native_decide) (by native_decide))
+    have hright :
+        (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+          arctanGeomOnUnit_endpointDifference_valid).Valid := by
+      simpa [endpointDifferenceRaw, RealRaw.Valid] using
+        arctanGeomOnUnit_endpointDifference_valid
+    simpa [oneOverOnePlusSquareFareyIntegral] using
+      RealRaw.equiv_trans hleft hmid hright hintegral
+        (RealRaw.equiv_symm arctanGeomOnUnit_endpointDifference_equiv_sub)
 
 def arctanIntegralFareyUnitData : ArctanIntegralUnitData where
   constructionAt := fun x _hx0 _hx1 => arctanIntegralFareyConstruction x
@@ -678,6 +1286,25 @@ theorem arctanIntegralFareyUnit_equiv_prefix
     arctanIntegralFareyFor] using
     arctanIntegralFareyFor_equiv_prefix x
 
+theorem arctanIntegralFareyUnit_equiv_arctanGeom
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralUnit x
+      (arctanIntegralFareyUnitData.constructionAt x hx0 hx1)).Equiv
+        (ArctanGeometry.arctanGeom x) := by
+  have hleft :
+      (arctanIntegralUnit x
+        (arctanIntegralFareyUnitData.constructionAt x hx0 hx1)).Valid := by
+    simpa [arctanIntegralUnit, arctanIntegralFareyUnitData,
+      arctanIntegralFareyFor] using
+      arctanIntegralFareyFor_valid x
+  exact RealRaw.equiv_trans
+    hleft
+    (ArctanGeometry.fareyIntegralPrefixRaw_valid x)
+    (ArctanGeometry.arctanGeom_valid_on_unit hx0 hx1)
+    (arctanIntegralFareyUnit_equiv_prefix x hx0 hx1)
+    (ArctanGeometry.fareyIntegralPrefixRaw_equiv_arctanGeom_on_unit
+      hx0 hx1)
+
 theorem arctanIntegralFareyUnitComputes_prefix
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
     ArctanIntegralUnitComputes x hx0 hx1
@@ -685,11 +1312,36 @@ theorem arctanIntegralFareyUnitComputes_prefix
   ⟨arctanIntegralFareyUnitData.constructionAt x hx0 hx1,
     arctanIntegralFareyUnit_equiv_prefix x hx0 hx1⟩
 
+theorem arctanIntegralFareyUnitComputes_arctanGeom
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    ArctanIntegralUnitComputes x hx0 hx1
+      (ArctanGeometry.arctanGeom x) :=
+  ⟨arctanIntegralFareyUnitData.constructionAt x hx0 hx1,
+    arctanIntegralFareyUnit_equiv_arctanGeom x hx0 hx1⟩
+
+theorem arctanIntegralFareyUnitFunctionAgreement :
+    ArctanIntegralUnitGeomFunctionAgreement
+      arctanIntegralFareyUnitData := by
+  intro x hx _hgeom
+  simpa [ArctanIntegralUnitGeomFunctionAgreement,
+    arctanIntegralUnitRepresentation, arctanIntegralUnitFunctionRaw,
+    arctanIntegralUnit, arctanIntegralFareyUnitData,
+    arctanIntegralFareyFor, ArctanGeometry.representation,
+    ArctanGeometry.functionRaw, PartialRealFunRaw.evalRaw] using
+    arctanIntegralFareyUnit_equiv_arctanGeom x hx.1 hx.2
+
 theorem arctanIntegralFareyUnitComputes_one :
     ArctanIntegralUnitComputes (1 : Rat)
       (by native_decide) (by native_decide)
       (ArctanGeometry.fareyIntegralPrefixRaw (1 : Rat)) :=
   arctanIntegralFareyUnitComputes_prefix
+    (1 : Rat) (by native_decide) (by native_decide)
+
+theorem arctanIntegralFareyUnitComputes_arctanGeom_one :
+    ArctanIntegralUnitComputes (1 : Rat)
+      (by native_decide) (by native_decide)
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+  arctanIntegralFareyUnitComputes_arctanGeom
     (1 : Rat) (by native_decide) (by native_decide)
 
 /-- The verified rectangle-sum construction for
@@ -709,10 +1361,9 @@ def arctanIntegralRectangleForAtOne : RealRaw :=
     arctanIntegralRectangleConstructionAtOne
 
 theorem arctanIntegralRectangleForAtOne_valid :
-    arctanIntegralRectangleForAtOne.Valid := by
-  change RealRaw.ValidCompute
-    ArctanGeometry.arctanIntegralRectangleComputeAtOne
-  exact arctanIntegralRectangleConstructionAtOne.certificate
+    arctanIntegralRectangleForAtOne.Valid :=
+  Integral.integralFor_valid arctanKernelIntervalAtOne
+    arctanIntegralRectangleConstructionAtOne
 
 theorem arctanIntegralRectangleForAtOne_compute_eq (n : Nat) :
     arctanIntegralRectangleForAtOne.compute n =
@@ -754,6 +1405,33 @@ theorem arctanIntegralRectangleForAtOne_equiv_arctanGeom_one :
       arctanIntegralRectangleConstructionAtOne,
       ArctanGeometry.arctanIntegralRectangleRawAtOne] using hover
 
+/-- Rectangle-sum unit arctangent as a definite-integral identity: the
+verified midpoint construction of `∫_0^1 dx/(1+x^2)` computes the endpoint
+difference of the geometric arctangent primitive. -/
+def arctanGeomUnitRectangleDefiniteIdentity :
+    Integral.DefiniteIdentityFor
+      (oneOverOnePlusSquareOnInterval 0 1) arctanGeomOnUnit where
+  same_lower := rfl
+  same_upper := rfl
+  construction := arctanIntegralRectangleConstructionAtOne
+  endpoint_valid := arctanGeomOnUnit_endpointDifference_valid
+  equivalent := by
+    have hleft : arctanIntegralRectangleForAtOne.Valid :=
+      arctanIntegralRectangleForAtOne_valid
+    have hmid : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+      ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide)
+    have hright :
+        (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+          arctanGeomOnUnit_endpointDifference_valid).Valid := by
+      simpa [endpointDifferenceRaw, RealRaw.Valid] using
+        arctanGeomOnUnit_endpointDifference_valid
+    simpa [arctanIntegralRectangleForAtOne] using
+      RealRaw.equiv_trans hleft hmid hright
+        arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
+        (RealRaw.equiv_symm
+          arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one)
+
 /-- The theorem target for the integral arctangent comparison on `[0, x]`.
 It says that the integral of `1 / (1 + t^2)` computes the chosen arctangent
 branch. -/
@@ -771,6 +1449,34 @@ theorem arctanIntegral_valid (x : Rat)
     (arctanIntegral x c).Valid :=
   by
     simpa [arctanIntegral] using FTC.integral_valid_of_construction c
+
+/-- The legacy `Integral.Construction` wrapper uses exact point evaluations of
+`1/(1+x^2)`.  Hence every scheduled left-Riemann sum is a point interval. -/
+theorem arctanIntegral_compute_width_zero (x : Rat)
+    (c : ArctanIntegralConstruction x) (n : Nat) :
+    ((arctanIntegral x c).compute n).width = 0 := by
+  simpa [arctanIntegral, Integral.integral, Integral.Certificate.realRaw,
+    Integral.Raw.toRealRaw, Integral.Raw.compute, Integral.algorithm] using
+    riemannLeftInterval_point_width_zero
+      (oneOverOnePlusSquareOnInterval 0 x).toRealFunRaw
+      0 x (c.plan n).subdivisions (c.plan n).evalPrecision
+      (fun y =>
+        oneOverOnePlusSquareOnInterval_toRealFunRaw_point
+          0 x y (c.plan n).evalPrecision)
+
+/-- Consequently, a valid old-style `arctanIntegral` construction has no
+stage-to-stage refinement: all of its intervals are equal.  This records why
+the newer `ConstructionFor` interface is the meaningful arctangent-integral
+route in the scoreboard. -/
+theorem arctanIntegral_stages_constant (x : Rat)
+    (c : ArctanIntegralConstruction x) (n m : Nat) :
+    (arctanIntegral x c).compute n =
+      (arctanIntegral x c).compute m :=
+  RealRaw.stage_eq_of_valid_zero_width
+    (arctanIntegral x c)
+    (arctanIntegral_valid x c)
+    (arctanIntegral_compute_width_zero x c)
+    n m
 
 def ArctanIntegralComputes (x : Rat) (arctanBranch : RealRaw) : Prop :=
   Exists fun c : ArctanIntegralConstruction x =>

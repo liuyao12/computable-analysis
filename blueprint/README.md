@@ -1,4 +1,4 @@
-# ComputableAnalysis Blueprint
+# Computable Analysis Blueprint
 
 This directory is a Lean blueprint for the `ComputableAnalysis` package.
 It records the mathematical plan in LaTeX and attaches Lean declaration names

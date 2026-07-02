@@ -26,6 +26,27 @@ The existing Lean raw representative is \code{ePowerSeries}.
 \label{def:e-compound-interest}
 \lean{ComputableAnalysis.eCompoundInterest}
 \lean{ComputableAnalysis.ExpProofs.eCompoundInterest_compute_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_width_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_ordered}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_ordered}
+\lean{ComputableAnalysis.ExpProofs.ECompoundInterestStageBound}
+\lean{ComputableAnalysis.ExpProofs.ECompoundInterestNested}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_antitone_succ}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_le_four}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_mono_succ}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_le_hi}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_mono}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_antitone}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_nested}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStageBound_four}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_width_le_of_stageBound}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_widths_shrink_of_stageBound}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_widths_shrink}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid_of_nested_and_stageBound}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid_of_nested}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid}
 \uses{def:raw-real}
 The second definition uses the classical limit
 \[
@@ -41,9 +62,18 @@ The finite interval is
 \[
   [a_m,b_m].
 \]
-This is the standard rational enclosure: \(a_m\) is increasing, \(b_m\) is
-decreasing, and the width is exactly \(b_m-a_m=a_m/m\).  This gives the
-correct interval output for the compound-interest computation of \(e\).
+Lean verifies
+\[
+  b_m-a_m=\frac{a_m}{m}\ge0.
+\]
+\[
+  a_m\le a_{m+1}\le b_{m+1}\le b_m,\qquad
+  b_m\le4,\qquad a_m\le4.
+\]
+\[
+  b_m-a_m\le \frac4m\longrightarrow0.
+\]
+\code{eCompoundInterest} is a valid raw real.
 \end{definition}
 
 \begin{definition}[\texorpdfstring{$e$}{e} from the inverse logarithmic integral]
@@ -85,6 +115,37 @@ monotone integral of \(1/x\).  Lean records the remaining estimates in
 \lean{ComputableAnalysis.exp.expFromLogIntegral}
 \lean{ComputableAnalysis.exp.representationsAgree}
 \lean{ComputableAnalysis.exp.representationsAgree_of_estimates}
+\lean{ComputableAnalysis.ExpProofs.EPowerSeriesRatioBound}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_ratio_bound}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_ratio_bound}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_tailRadius_nonneg}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_intervals_ordered}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_tailRadius_nonneg}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_ordered}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_valid_of_nested_and_shrinking_autoRatio}
+\lean{ComputableAnalysis.ExpProofs.powerSeriesNested_of_centerMovement_autoRatio}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid_of_nested}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid_of_centerMovement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid_of_centerStepMovement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_center_step_movement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_widths_shrink}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid}
+\lean{ComputableAnalysis.ExpProofs.EEulerEqCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eulerCenter_one_eq_compoundInterestStage_lo_square}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenter_mono}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenter_step_mono}
+\lean{ComputableAnalysis.ExpProofs.EEulerCenterForwardStepMovement}
+\lean{ComputableAnalysis.ExpProofs.EEulerCenterForwardStepMovementUpTo}
+\lean{ComputableAnalysis.ExpProofs.EEulerCenterStepMovementUpTo}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenter_reverse_step_bound}
+\lean{ComputableAnalysis.ExpProofs.eEuler_center_step_movement_of_forward_bound}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenterForwardStepMovementUpToFifty}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenterStepMovementUpTo_of_forward}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenterStepMovementUpToFifty}
+\lean{ComputableAnalysis.ExpProofs.eEuler_eq_eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_eq_eEuler}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_eq_eCompoundInterest_of_complete}
+\lean{ComputableAnalysis.ExpProofs.ExpProofRemainders}
 \uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:real-fun-raw}
 For general rational input, exponential has three representations: power
 series, Euler/compound-interest limit, and inverse logarithmic integral.  Each
@@ -92,6 +153,36 @@ is an instance of \cref{def:real-fun-raw}: the stage algorithm sends \((x,n)\)
 to an interval or box enclosing the value of \(\exp(x)\), and for every fixed
 rational input in the representation domain the stages form a raw real.  The
 formal interface records agreement of these representations on common domains.
+\[
+  \frac{|x|}{N_n(x)+1}<1,\qquad
+  N_n(x)=n+8+2|\operatorname{num}(x)|.
+\]
+Thus the power-series ratio and order obligations are no longer remainder
+data.  Lean now also proves, for \(e_{\mathrm{series}}\), the center-step
+movement and shrinkage estimates, hence the power-series definition of \(e\)
+is a valid raw real:
+\[
+  e_{\mathrm{series}}.\Valid .
+\]
+Lean also proves that the Euler repeated-multiplication algorithm for \(e\)
+agrees with the verified compound-interest representative:
+\[
+  e_{\mathrm{Euler}}\Equiv e_{\mathrm{compound}}.
+\]
+The center at stage \(n\) is the lower endpoint of the compound-interest
+interval at stage \((n+1)^2-1\), and compound-interest nesting supplies the
+same-stage overlap.  Lean also proves that these Euler centers are monotone, so
+the reverse half of the center-step movement estimate is automatic.  Thus
+Euler validity is reduced to the single forward estimate
+\[
+  c_{n+1}-c_n\le r_n-r_{n+1},
+\]
+and this forward estimate is checked through stage \(50\).  Therefore an
+\code{ExpProofsComplete} package, once it contains the remaining Euler
+validity and power-series/Euler overlap estimates, also yields
+\(e_{\mathrm{series}}\Equiv e_{\mathrm{compound}}\).  The remaining comparison
+data are the overlap estimates with the power-series and log-integral
+representatives.
 \end{definition}
 
 \begin{definition}[Logarithm]

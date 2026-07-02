@@ -1,4 +1,6 @@
-# ComputableAnalysis
+# Computable Analysis
+
+*calculus without the completeness of the real numbers*
 
 This project is about proof-facing computable analysis, not building a
 general floating-point or numerical-functions library. Existing numerical
@@ -15,209 +17,120 @@ definitions/proved bridge theorems.
 
 ## Pi formalization scoreboard
 
-A pi computation counts as completed only after its interval sequence is
-verified as a valid `RealRaw`: ordered intervals, nested sequence, and widths
-shrinking to zero.  Equivalence counts when there is a formalized chain of
-`RealRaw.Equiv` theorems connecting the computation to `piCircleArea`.
-For formula rows that compute a related quantity first, such as `zeta(2)` or
-`sqrt(2*pi)`, the definition column records whether that displayed interval
-algorithm is verified, while the equivalence column records whether the pi
-formula has been connected back to `piCircleArea`.
+A row counts as definition-complete only after its interval sequence is a valid
+`RealRaw`.  A row counts as equivalent after a formalized chain of
+`RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions completed `7/17`; equivalences to `piCircleArea`
-formalized `2/16` applicable rows.  The baseline row `piCircleArea` is `N/A`
-for equivalence scorekeeping.  The rendered scoreboard is in
-[Ch. 8: pi scoreboard](https://liuyao12.github.io/computable-analysis/sect0005.html#sec:pi-scoreboard),
-and the blueprint-links column points to the relevant generated blueprint
-anchors for each computation.
+Current count: definitions `7/17`; equivalences `3/16` applicable rows.
+Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
+[front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
-| Computation | Blueprint links | Description | Definition verified | Equivalent to `piCircleArea` |
+| Computation | Blueprint | Formula | Def. | Equiv. |
 | --- | --- | --- | --- | --- |
-| `piCircleArea` | [Ch. 2: circle-area algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [validity package](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-pi-validity) | \(\pi\in[4a_n,4b_n]\). | ✓ | N/A |
-| `piCircumference` | [Ch. 2: circumference algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [finite Archimedes comparison](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | \(L_n\le \pi\le U_n\). | ✗ | ✗ |
-| **Arctangent routes** | [geometric `arctanGeom`](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral arctangent](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [`arctanSeries`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [`arctanSeries(1)` area bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [`piMachin` agreement](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | \(\pi=4\arctan(1)\); \(\pi=4(4\arctan(1/5)-\arctan(1/239))\). |  |  |
-| `4 * arctanGeom(1)` | [geometric arctangent](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [`4 * arctanGeom(1)` to area pi](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | \(\pi=4\,\arctan_{\mathrm{geom}}(1)\). | ✓ | ✓ |
-| `4 * arctanIntegralRectangleForAtOne` | [finite rectangle comparison](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [integral pi target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | \(\pi=4\int_0^1 \frac{dt}{1+t^2}\). | ✓ | ✓ |
-| `4 * arctanIntegralFareyFor(1)` | [finite Farey-prefix comparison](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [integral pi target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | \(\pi=4I_{\mathrm{Farey}}(0,1)\). | ✓ | ✗ |
-| `4 * arctanIntegral(1)` | [arctangent integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [integral pi target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | \(\pi=4\int_0^1 \frac{dt}{1+t^2}\). | ✗ | ✗ |
-| `4 * arctanSeries(1)` | [`arctanSeries`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [`arctanSeries(1)` endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [area comparison target](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | \(\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}\). | ✓ | ✗ |
-| `piMachin` | [`arctanSeries`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [Machin tangent identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [`piMachin` to `4 * arctanSeries(1)`](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | \(\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))\). | ✓ | ✗ |
-| `6 * arcsinIntegral(1/2)` | [Ch. 3: inverse elementary integrals](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | \(\pi=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}\). | ✗ | ✗ |
-| `NewtonSegmentPi` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | \(\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)\). | ✗ | ✗ |
-| `GaussianPi` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | \(\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2\). | ✗ | ✗ |
-| `reciprocalQuarticMinusOneProjectiveRoute` | [Ch. 3: quartic test kernel](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-quartic-test-kernel), [route package](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:reciprocal-quartic-route-package) | \(\pi=\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}\). | ✗ | ✗ |
-| `baselSeriesRaw` / `pi^2/6` | [Ch. 4: zeta-two intervals](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw) | \(\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6\). | ✓ | ✗ |
-| `Brouncker(4/pi)` | [Ch. 1: sources of raw reals](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | \(\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}\). | ✗ | ✗ |
-| **Logarithm-at-i routes** | [route overview](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [series continuation](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-series-at-i), [path integral](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-path-integral-at-i), [inverse exp](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-inv-exp-at-i), [Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | \(\pi=-2i\log(i)\). |  |  |
-| `-2i * logSeries(i)` | [series-continuation log](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-series-at-i), [log-at-`i` route](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | \(\pi=-2i\,\log_{\mathrm{series}}(i)\). | ✗ | ✗ |
-| `-2i * logPathIntegral(i)` | [path-integral log](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-path-integral-at-i), [log-at-`i` route](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes) | \(\pi=-2i\int_1^i dz/z\). | ✗ | ✗ |
-| `-2i * logInvExp(i)` | [inverse-exp log](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-inv-exp-at-i), [log-at-`i` route](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [Euler identity](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | \(\pi=-2i\,\log_{\exp^{-1}}(i)\). | ✗ | ✗ |
+| `piCircleArea` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [validity](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-pi-validity) | $a_{n+1}=a_n+\Delta_n,\ b_{n+1}=b_n-\nabla_n,\ \pi\in[4a_n,4b_n]$ | ✓ | N/A |
+| `piCircumference` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [comparison](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | $\pi\in[L_n,U_n],\quad U_n-L_n\to0$ | ✗ | ✗ |
+| **Arctangent routes** | [geom](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4\arctan(1)=4\int_0^1\frac{dt}{1+t^2}=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ |  |  |
+| `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\arctan_{\mathrm{geom}}(1)$ | ✓ | ✓ |
+| `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
+| `4 * arctanIntegralFareyFor(1)` | [Farey](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4I_F(0,1)$ | ✓ | ✓ |
+| `4 * arctanIntegral(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✗ | ✗ |
+| `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✗ |
+| `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✗ |
+| `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
+| `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
+| `GaussianPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2$ | ✗ | ✗ |
+| `reciprocalQuarticMinusOneProjectiveRoute` | [kernel](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-quartic-test-kernel), [route](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:reciprocal-quartic-route-package) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}$ | ✗ | ✗ |
+| `baselSeriesRaw` / `pi^2/6` | [definition](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw), [RHS valid](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:basel-geometric-rhs-valid) | $\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6$ | ✓ | ✗ |
+| `Brouncker(4/pi)` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}$ | ✗ | ✗ |
+| **Logarithm-at-i routes** | [overview](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [series](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-series-at-i), [path](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-path-integral-at-i), [inverse](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-inv-exp-at-i), [Euler](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | $\exp(i\pi/2)=i,\quad \log(i)=i\pi/2,\quad \pi=-2i\log(i)$ |  |  |
+| `-2i * logSeries(i)` | [series](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-series-at-i), [route](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [Euler](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | $\pi=-2i\,\log_{\mathrm{series}}(i)$ | ✗ | ✗ |
+| `-2i * logPathIntegral(i)` | [path](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-path-integral-at-i), [route](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes) | $\pi=-2i\int_{\gamma:1\to i}\frac{dz}{z}$ | ✗ | ✗ |
+| `-2i * logInvExp(i)` | [inverse](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-inv-exp-at-i), [route](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [Euler](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | $\pi=-2i\,\log_{\exp^{-1}}(i)$ | ✗ | ✗ |
 
-The area loop validity package is now formalized as
-`PiProofs.AreaLoopValidity.areaValid`, and it transports directly to
-`PiProofs.fourArctanGeomOneValid` and
-`PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
-The geometric arctangent algorithm is also verified on the unit branch as
-`ArctanGeometry.arctanGeom_valid_on_unit`, by direct ordered/nested/shrinking
-proofs for the increment/decrement loop.  The same validity is packaged on the
-power-series domain `|x| <= 1` as
-`ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`, so the kernel-comparison
-route no longer needs to assume global validity of the geometric arctangent.
-The concrete rectangle-sum arctangent route is also completed through the
-domain-aware theorem
-`PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`; equivalently,
-the unit-branch construction is now named by
-`PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea`.  The more
-general older `arctanIntegral(1)` row remains pending because that nonnegative
-point-Riemann construction wrapper has not yet been identified with this
-domain-aware schedule.  As an indication of the calculus that can enter this
-row, Lean also records:
-`PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_definite_identity` and
-`PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC` say that a
-definite-integral identity, respectively an effective FTC certificate, for the
-arctangent primitive and kernel closes the pi equivalence.  These support the
-existing table entries rather than adding new pi computations.  The
-rectangle schedule itself is now verified more
-generally as `ArctanGeometry.arctanIntegralRectangleRaw_valid` and
-`IntegralIdentities.arctanIntegralRectangleFor_valid` for rational
-`0 <= x <= 1`, and it is now proved equivalent to `arctanGeom x` on that
-unit branch.  The same fact is packaged as the function-level agreements
-`IntegralIdentities.arctanIntegralRectangleFunctionAgreement` and
-`IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement`.  The
-scoreboard row records the specialization needed for pi.  The Farey-prefix
-integral route is now also definition-complete as
-`PiProofs.piFromArctanIntegralFareyAtOne_valid`, and Lean identifies it with
-`4 * fareyIntegralPrefixRaw(1)` via
-`PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one`; its
-equivalence to `piCircleArea` is now reduced to the cleaner full-unit mesh target
-`PiProofs.FareyUnitIntegralGeomAgreementAtOne`, using the normalization
-`ArctanGeometry.fareyIntegralPrefixRaw_one_equiv_unitRaw` and the conditional
-bridge
-`PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement`.
-The supporting
-`oneOverOnePlusSquareFareyIntegral(a,b)` construction is verified and now has
-formal additivity, zero-length, reversal, add-reverse-zero, and endpoint-prefix
-normalization laws.  The Farey arctangent wrapper also records the zero
-endpoint and the unit-branch `ArctanIntegralUnitComputes` package against the
-prefix raw.
-The next projective-line integral benchmark is now named in Chapter 3:
-the reciprocal quartic
-`integral_(-infty)^infty dx/(x^4 + a*x^2 + 1)`.  Lean formalizes the exact
-folding and substitution algebra for `x ↦ 1/x` and `u = x - 1/x` as
-`IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
-the `a = -1` denominator side conditions are discharged in
-`IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy`.
-Lean also identifies that target kernel with the existing arctangent kernel via
-`IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
-The expected value package is now formalized as
-`IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, with
-`PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`; this is not
-counted in the scoreboard until an actual improper Farey construction supplies a
-`ReciprocalQuarticMinusOneProjectiveRoute`.
+Lean hooks:
 
-The baseline self theorem `piCircleArea_equiv_self` exists but is not counted
-as an equivalence target.  The series-arctangent-to-area route is now reduced
-to `PiProofs.LeibnizEqualsRectangleRawAtOne`: Lean now supplies the
-Taylor-kernel rectangle construction, the geometric-kernel comparison, and the
-transport between the power-series statement and the concrete comparison of
-Leibniz intervals with the rectangle-sum integral at `1`.  The scoreboard
-counts the Leibniz alternating series only once, under the explicit name
-`4 * arctanSeries(1)`.  Lean also proves the finite arctangent-kernel
-bracketing lemmas
-`Taylor.ArctanKernel.kernelPartial_odd_le_kernel` and
-`Taylor.ArctanKernel.kernel_le_kernelPartial_even`, which are the pointwise
-rational inequalities needed for that comparison route.  The older
-unit-interval agreement theorem still feeds this pointwise bridge when broader
-arctangent comparison data is available.
-Lean now also identifies the Leibniz endpoints with the integrated odd/even
-finite kernel truncations over `[0,1]` via
-`PiProofs.LeibnizValidity.endpoints_eq_kernelPartialIntegral`.  The concrete
-remaining finite target has been sharpened to
-`PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne`:
-prove the even/odd finite kernel-truncation inequalities on each cell of the
-midpoint partition.  Lean sums those cell inequalities to
-`PiProofs.LeibnizRectangleKernelBoundsAtOne`, and the wrapper
-`PiProofs.leibnizEqualsRectangleRawAtOne_of_kernelBounds` then gives the
-raw-real equivalence needed by the table route.
-The preferred mathematical target is now the one-cell version
-`PiProofs.LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne`: prove
-the even lower-cell inequality on every rational unit cell and the odd
-upper-cell inequality on every nonnegative ordered rational cell.  Lean proves
-`PiProofs.LeibnizRectangleBridge.cellBounds_of_uniformCellBounds` and the
-table-facing wrapper
-`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds`, so
-that uniform one-cell result is sufficient to complete the `4 * arctanSeries(1)`
-equivalence row.
-Lean now also proves the pointwise finite-division bounds behind this target as
-`PiProofs.LeibnizRectangleBridge.leibnizRectanglePointwiseCellBoundsAtOne`.  The
-remaining analytic/combinatorial bridge has been isolated as
-`PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne`:
-turn those pointwise bounds into the corresponding finite polynomial integral
-cell bounds.  The wrapper
-`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge`
-then completes the table row from that bridge.
-The base package
-`PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneBase`
-is formalized: the even `m = 0` lower-cell inequality holds on every unit
-partition, and the first odd `m = 1` upper-cell inequality is proved on every
-nonnegative ordered partition.
-As a computational regression check on the full cellwise target, Lean now also
-certifies the concrete midpoint partitions through stage `n <= 12` as
-`PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToTwelve`.
-The bridge theorems
-`PiProofs.LeibnizRectangleBridge.cellBoundsUpTo_of_cellBounds` and
-`PiProofs.LeibnizRectangleBridge.cellBounds_of_cellBoundsUpToAll` record that
-the full cellwise theorem is exactly the same target as proving every finite
-prefix.
-For Machin, Lean now proves
-`PiProofs.leibnizEqMachin_iff_machinBranchIdentity`: the remaining branch
-identity is exactly the remaining raw-real agreement target, after cancelling
-the common outer factor `4`.  The bridge from a geometric Machin branch law now
-uses `PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs`
-through `PiProofs.leibnizEqMachin_of_powerSeriesRectangleKernelAtMachinInputs`;
-this isolates the remaining analytic checks to the power-series/rectangle
-kernel equalities at `1/5`, `1/239`, and `1`, plus the geometric branch law.
-The table-facing bridge
-`PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs`
-then connects Machin to the area baseline once those inputs are supplied.
+- `piCircleArea`: `PiProofs.AreaLoopValidity.areaValid`,
+  `PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
+- Unit arctangent: `ArctanGeometry.arctanGeom_valid_on_unit`,
+  `ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`.
+- Rectangle arctangent:
+  `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`,
+  `IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement`.
+- Old point-Riemann arctangent:
+  `IntegralIdentities.arctanIntegral_compute_width_zero`,
+  `IntegralIdentities.arctanIntegral_stages_constant`.
+  This explains why the unchecked `arctanIntegral(1)` row is not counted as a
+  completed refining computation under the current legacy API.
+- Farey arctangent:
+  `PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea`,
+  `ArctanGeometry.fareyIntegralPrefixRaw_equiv_arctanGeom_on_unit`.
 
-The public `piCircleArea` is the increment/decrement loop.  Polygon-boundary
-code that remains in Lean is internal scaffolding for circumference and finite
-Archimedes estimates, not another pi computation to count.
-For the circumference row, the remaining certification target is now isolated
-as `PiProofs.CircumferenceLinearRemainders`: prove dyadic one-step refinement
-for `piCircumference` and any explicit linear width bound.  The public area
-validity is already reused by
-`PiProofs.piProofsComplete_of_circumferenceRemainders`.
-Lean now reduces the path-width part of that width-bound target to exact finite
-data: each segment interval has the power-of-two square-root bisection width
-recorded by `PiProofs.pointSegmentLengthInterval_width_eq`, and a whole
-rational polygonal path has width equal to the sum of those segment budgets via
-`PiProofs.rationalPointPathLength_width_eq_segmentBudget`.  The public
-circumference width is also reduced to the quarter-gap target by
-`PiProofs.piCircumference_compute_width_eq`; it is enough to prove
-`PiProofs.CircumferenceQuarterGapLinearBound`, i.e. an explicit linear bound
-on twice the gap between the outer path upper endpoint and the inner path lower
-endpoint.  The outer tangent fan is now certified to lie inside the outer path
-interval by `PiProofs.outerFanPerimeter_mem_outerQuarterLength`.  Lean further
-reduces the quarter-gap bound to
-`PiProofs.CircumferenceFanGapPathBudgetLinearBound`: the quarter gap is bounded
-by the rational outer-minus-inner fan perimeter gap plus the two path-width
-budgets, via
-`PiProofs.circumferenceQuarterGap_le_fanGap_add_pathWidthBudget`.  The combined
-linear target now splits into independent fan-gap and path-budget linear
-bounds by `PiProofs.fanGapPathBudgetLinearBound_of_parts`; the path-budget side
-has the segment-count reduction
-`PiProofs.circumferencePathWidthBudget_le_three_stage_mul` and is now reduced
-to the finite-stage explicit inner-chord and outer-tangent formulas by
-`PiProofs.circumferencePathWidthBudgetLinearBound_of_finiteFormulaSegmentUniformLinearBound`.
-The stronger unbounded convenience predicate still implies this finite target
-through `PiProofs.finiteFormulaSegmentUniformLinearBound_of_formulaSegmentUniformLinearBound`.
-The tangent entry and exit cross terms are now both identified with the same
-rational expression `(v - u) / (1 + u * v)`, and Lean records positivity for
-the chord and tangent formulas.
-The remaining finite rational predicate is
-`PiProofs.CircumferenceFiniteFormulaSegmentUniformLinearBound`.
+$$
+I^F_n(0,x)\cap A^M_m(x)\ne\varnothing\qquad(0\le x\le1).
+$$
+
+Series target:
+
+$$
+\forall\,0\le p\le r\le1,\qquad
+\frac{r-p}{1+r^2}\le
+\int_p^r\sum_{j=0}^{2N}(-1)^jx^{2j}\,dx,\qquad
+\int_p^r\sum_{j=0}^{2N+1}(-1)^jx^{2j}\,dx
+\le
+\frac{r-p}{1+p^2}.
+$$
+
+Uniform cell certificates through
+$1-x^2+\cdots+x^{20}$,
+$1-x^2+\cdots-x^{22}$:
+`PiProofs.LeibnizRectangleBridge.evenKernelCellBound_ten`,
+`PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_eleven`.
+Finite unit-cell package through the same prefix:
+`PiProofs.LeibnizRectangleBridge.leibnizRectangleUniformUnitCellBoundsAtOneUpToFive`,
+with transport to finite cell, kernel, raw-overlap, and scaled-route overlap targets.
+Finite stage regression:
+`PiProofs.LeibnizRectangleBridge.leibnizRectangleKernelCellBoundsAtOneUpToFifteen`,
+`PiProofs.leibnizRectangleRawAtOneOverlapsUpToFifteen`,
+`PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToFifteen`.
+Unit-cell scaled-route corollary:
+`PiProofs.fourArctanSeriesRectangleRouteOverlapsUpToFive_of_unitUniform`.
+All finite unit-cell prefixes now feed the full table route through
+`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBoundsUpToAll`
+and `PiProofs.leibnizEqArea_of_unitUniformCellBoundsUpToAll`.
+The all-prefix conditions are named and reversible for the unit-cell, cell,
+kernel, raw-overlap, and scaled-route layers, so future certificates can enter
+the proof chain at the most convenient finite expression.
+Sharper unit-cell bridge:
+`PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne`,
+`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge`.
+
+Circumference target:
+
+$$
+L_n\le L_{n+1}\le U_{n+1}\le U_n,\qquad U_n-L_n\to0.
+$$
+
+Shrinkage: `PiProofs.circumferenceWidthsShrink`.
+Comparison target: `PiProofs.CircumferenceQuarterLengthRemainders`.
+All finite refinement prefixes now feed validity through
+`PiProofs.circumferenceValid_of_quarterLengthStepRefinesUpToAll`.
+The finite-prefix and global refinement predicates are linked by
+`PiProofs.circumferenceQuarterLengthStepRefines_iff_upToAll` and
+`PiProofs.circumferenceStepRefines_iff_upToAll`, with a direct completion
+package `PiProofs.CompletionCircumferenceQuarterLengthUpToAllRemainders`.
+
+Reciprocal quartic algebra:
+
+$$
+\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}
+=
+\int_{-\infty}^{\infty}\frac{du}{1+u^2}
+=\pi.
+$$
+
+Expected-value route:
+`PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.
+Scoreboard target: `ReciprocalQuarticMinusOneProjectiveRoute`.
 
 When asked for the pi score, reproduce this table and update the counts if the
 Lean formalization has moved.

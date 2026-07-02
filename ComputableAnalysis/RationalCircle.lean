@@ -995,6 +995,32 @@ theorem tanAdd_infinity_infinity :
     tanAdd infinity infinity = finite 0 := by
   native_decide
 
+theorem tanSub_finite_finite (x y : Rat) :
+    tanSub (finite x) (finite y) = ofHom (x - y) (1 + x * y) := by
+  unfold tanSub
+  rw [neg_finite, tanAdd_finite_finite]
+  have hnum : x + -y = x - y := by grind [Rat.sub_eq_add_neg]
+  have hden : 1 - x * (-y) = 1 + x * y := by
+    grind [Rat.mul_neg, Rat.neg_mul, Rat.sub_eq_add_neg]
+  rw [hnum, hden]
+
+theorem tanSub_finite_infinity (x : Rat) :
+    tanSub (finite x) infinity = ofHom 1 (-x) := by
+  unfold tanSub
+  rw [neg_infinity, tanAdd_finite_infinity]
+
+theorem tanSub_infinity_finite (x : Rat) :
+    tanSub infinity (finite x) = ofHom 1 x := by
+  unfold tanSub
+  rw [neg_finite, tanAdd_infinity_finite]
+  have hneg : -(-x) = x := by grind
+  rw [hneg]
+
+theorem tanSub_infinity_infinity :
+    tanSub infinity infinity = finite 0 := by
+  unfold tanSub
+  rw [neg_infinity, tanAdd_infinity_infinity]
+
 theorem tanDouble_finite (x : Rat) :
     tanDouble (finite x) = ofHom (2 * x) (1 - x * x) := by
   unfold tanDouble
@@ -1011,6 +1037,104 @@ theorem tanDouble_finite (x : Rat) :
 theorem tanDouble_infinity :
     tanDouble infinity = finite 0 := by
   native_decide
+
+theorem num_den_nonzero (x : ProjectiveRat) :
+    x.num ≠ 0 ∨ x.den ≠ 0 := by
+  cases x with
+  | finite q =>
+      right
+      simp [den]
+  | infinity =>
+      left
+      simp [num]
+
+theorem ofHom_num_den (x : ProjectiveRat) :
+    ofHom x.num x.den = x := by
+  cases x with
+  | finite q =>
+      have hden : (finite q).den ≠ 0 := by
+        simp [den]
+      rw [ofHom_den_ne_zero hden]
+      unfold num den
+      rw [Rat.div_def]
+      grind
+  | infinity =>
+      rw [ofHom_den_zero]
+      rfl
+
+theorem neg_neg (x : ProjectiveRat) :
+    x.neg.neg = x := by
+  cases x <;> simp [neg]
+
+theorem inv_inv (x : ProjectiveRat) :
+    x.inv.inv = x := by
+  cases x with
+  | finite q =>
+      unfold inv
+      by_cases hq : q = 0
+      · simp [hq]
+      · simp [hq]
+        rw [Rat.div_def]
+        grind [Rat.mul_inv_cancel]
+  | infinity => rfl
+
+theorem tanAdd_zero_left (x : ProjectiveRat) :
+    tanAdd (finite 0) x = x := by
+  cases x with
+  | finite q =>
+      rw [tanAdd_finite_finite]
+      have hden : (1 : Rat) - 0 * q ≠ 0 := by grind
+      rw [ofHom_den_ne_zero hden]
+      grind [Rat.sub_eq_add_neg]
+  | infinity =>
+      rw [tanAdd_finite_infinity]
+      native_decide
+
+theorem tanAdd_zero_right (x : ProjectiveRat) :
+    tanAdd x (finite 0) = x := by
+  cases x with
+  | finite q =>
+      rw [tanAdd_finite_finite]
+      have hden : (1 : Rat) - q * 0 ≠ 0 := by grind
+      rw [ofHom_den_ne_zero hden]
+      grind [Rat.sub_eq_add_neg]
+  | infinity =>
+      rw [tanAdd_infinity_finite]
+      native_decide
+
+theorem tanAdd_comm (x y : ProjectiveRat) :
+    tanAdd x y = tanAdd y x := by
+  cases x <;> cases y
+  · rename_i q r
+    rw [tanAdd_finite_finite, tanAdd_finite_finite]
+    have hnum : q + r = r + q := by grind
+    have hden : 1 - q * r = 1 - r * q := by grind [Rat.mul_comm]
+    rw [hnum, hden]
+  · rename_i q
+    exact (tanAdd_finite_infinity q).trans
+      (Eq.symm (tanAdd_infinity_finite q))
+  · rename_i q
+    exact (tanAdd_infinity_finite q).trans
+      (Eq.symm (tanAdd_finite_infinity q))
+  · rfl
+
+theorem tanAdd_neg_self (x : ProjectiveRat) :
+    tanAdd x x.neg = finite 0 := by
+  cases x with
+  | finite q =>
+      rw [neg_finite, tanAdd_finite_finite]
+      have hden : (1 : Rat) - q * (-q) ≠ 0 := by
+        have hpos : 0 < 1 + q * q := Stage.one_add_square_pos q
+        grind [Rat.sub_eq_add_neg]
+      rw [ofHom_den_ne_zero hden]
+      grind [Rat.sub_eq_add_neg]
+  | infinity =>
+      rw [neg_infinity, tanAdd_infinity_infinity]
+
+theorem tanSub_self (x : ProjectiveRat) :
+    tanSub x x = finite 0 := by
+  unfold tanSub
+  exact tanAdd_neg_self x
 
 theorem ofHom_neg_num (n d : Rat) :
     ofHom (-n) d = (ofHom n d).neg := by
@@ -1041,6 +1165,319 @@ theorem ofHom_swap_eq_inv {n d : Rat} (hnd : n ≠ 0 ∨ d ≠ 0) :
       rw [Rat.div_def, Rat.div_def, Rat.div_def]
       grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm,
         Rat.mul_inv_cancel]
+
+theorem ofHom_one_neg_den (q : Rat) :
+    ofHom 1 q = (ofHom 1 (-q)).neg := by
+  have hleft : ofHom 1 q = ofHom (-1) (-q) := by
+    unfold ofHom
+    by_cases hq : q = 0
+    · simp [hq]
+    · have hnq : -q ≠ 0 := by grind
+      simp [hq, hnq]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.neg_mul, Rat.mul_neg, Rat.mul_assoc, Rat.mul_comm]
+  rw [hleft]
+  exact ofHom_neg_num 1 (-q)
+
+theorem inv_neg (x : ProjectiveRat) :
+    x.neg.inv = x.inv.neg := by
+  cases x with
+  | finite q =>
+      by_cases hq : q = 0
+      · simp [neg_finite, inv_zero, hq, neg_infinity]
+      · have hnq : -q ≠ 0 := by grind
+        rw [neg_finite, inv_finite_ne_zero hnq,
+          inv_finite_ne_zero hq, neg_finite]
+        have h := ofHom_one_neg_den (-q)
+        have hnn : -(-q) = q := by grind
+        rw [hnn] at h
+        simpa [ofHom_den_ne_zero hnq, ofHom_den_ne_zero hq,
+          neg_finite] using h
+  | infinity =>
+      simp [neg_infinity, inv_infinity, neg_finite]
+
+theorem ofHom_scale {k n d : Rat} (hk : k ≠ 0) :
+    ofHom (k * n) (k * d) = ofHom n d := by
+  unfold ofHom
+  by_cases hd : d = 0
+  · have hkd : k * d = 0 := by grind
+    simp [hd]
+  · have hkd : k * d ≠ 0 := by grind
+    simp [hd, hkd]
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+
+theorem tanAdd_pair_nonzero (x y : ProjectiveRat) :
+    x.num * y.den + x.den * y.num ≠ 0 ∨
+      x.den * y.den - x.num * y.num ≠ 0 := by
+  cases x <;> cases y
+  · rename_i q r
+    by_cases hsum : q + r = 0
+    · right
+      intro hdenRaw
+      have hden : 1 - q * r = 0 := by simpa [num, den] using hdenRaw
+      have hq : q = -r := by grind
+      have hz : 1 + r * r = 0 := by
+        rw [hq] at hden
+        grind [Rat.neg_mul, Rat.mul_neg, Rat.sub_eq_add_neg]
+      have hpos : 0 < 1 + r * r := Stage.one_add_square_pos r
+      rw [hz] at hpos
+      exact Rat.lt_irrefl hpos
+    · left
+      simpa [num, den] using hsum
+  · left
+    intro h
+    simp [num, den] at h
+    have h' : (1 : Rat) = 0 := by grind
+    exact (by native_decide : (1 : Rat) ≠ 0) h'
+  · left
+    intro h
+    simp [num, den] at h
+    have h' : (1 : Rat) = 0 := by grind
+    exact (by native_decide : (1 : Rat) ≠ 0) h'
+  · right
+    intro h
+    simp [num, den, Rat.sub_eq_add_neg] at h
+    have h' : (-(1 : Rat)) = 0 := by grind
+    exact (by native_decide : (-(1 : Rat)) ≠ 0) h'
+
+theorem tanAdd_ofHom_left {n d : Rat}
+    (hnd : n ≠ 0 ∨ d ≠ 0) (z : ProjectiveRat) :
+    tanAdd (ofHom n d) z =
+      ofHom (n * z.den + d * z.num) (d * z.den - n * z.num) := by
+  cases z with
+  | finite q =>
+      by_cases hd : d = 0
+      · have hn : n ≠ 0 := by
+          cases hnd with
+          | inl hn => exact hn
+          | inr hd' => exact False.elim (hd' hd)
+        rw [ofHom_den_zero hd, tanAdd_infinity_finite]
+        have hnum : n * (finite q).den + d * (finite q).num = n := by
+          simp [num, den, hd]
+          grind
+        have hden :
+            d * (finite q).den - n * (finite q).num = n * (-q) := by
+          simp [num, den, hd]
+          grind [Rat.sub_eq_add_neg]
+        rw [hnum, hden]
+        simpa using (ofHom_scale (k := n) (n := 1) (d := -q) hn).symm
+      · rw [ofHom_den_ne_zero hd, tanAdd_finite_finite]
+        calc
+          ofHom (n / d + q) (1 - (n / d) * q)
+              =
+            ofHom (d * (n / d + q))
+              (d * (1 - (n / d) * q)) := by
+              exact (ofHom_scale
+                (k := d) (n := n / d + q)
+                (d := 1 - (n / d) * q) hd).symm
+          _ =
+            ofHom (n * (finite q).den + d * (finite q).num)
+              (d * (finite q).den - n * (finite q).num) := by
+              congr <;>
+                simp [num, den, Rat.div_def] <;>
+                grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+                  Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+  | infinity =>
+      by_cases hd : d = 0
+      · have hn : n ≠ 0 := by
+          cases hnd with
+          | inl hn => exact hn
+          | inr hd' => exact False.elim (hd' hd)
+        rw [ofHom_den_zero hd, tanAdd_infinity_infinity]
+        have hnum : n * infinity.den + d * infinity.num = 0 := by
+          simp [num, den, hd]
+          grind
+        have hden : d * infinity.den - n * infinity.num = -n := by
+          simp [num, den, hd, Rat.sub_eq_add_neg]
+          grind
+        rw [hnum, hden]
+        have hneg : -n ≠ 0 := by grind
+        rw [ofHom_den_ne_zero hneg]
+        grind [Rat.div_def, Rat.mul_inv_cancel]
+      · rw [ofHom_den_ne_zero hd, tanAdd_finite_infinity]
+        calc
+          ofHom 1 (-(n / d))
+              =
+            ofHom (d * 1) (d * (-(n / d))) := by
+              exact (ofHom_scale
+                (k := d) (n := 1) (d := -(n / d)) hd).symm
+          _ =
+            ofHom (n * infinity.den + d * infinity.num)
+              (d * infinity.den - n * infinity.num) := by
+              congr <;>
+                simp [num, den, Rat.div_def] <;>
+                grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+                  Rat.sub_eq_add_neg, Rat.neg_mul, Rat.mul_neg]
+
+theorem tanAdd_ofHom_ofHom {a b c d : Rat}
+    (hab : a ≠ 0 ∨ b ≠ 0) (hcd : c ≠ 0 ∨ d ≠ 0) :
+    tanAdd (ofHom a b) (ofHom c d) =
+      ofHom (a * d + b * c) (b * d - a * c) := by
+  rw [tanAdd_ofHom_left hab (ofHom c d)]
+  by_cases hd : d = 0
+  · have hc : c ≠ 0 := by
+      cases hcd with
+      | inl hc => exact hc
+      | inr hd' => exact False.elim (hd' hd)
+    rw [ofHom_den_zero hd]
+    simp [num, den]
+    have hleft : ofHom ((0 : Rat) + b) (0 - a) = ofHom b (-a) := by
+      congr <;> grind [Rat.sub_eq_add_neg]
+    rw [hleft]
+    calc
+      ofHom b (-a) = ofHom (c * b) (c * (-a)) := by
+        exact (ofHom_scale (k := c) (n := b) (d := -a) hc).symm
+      _ = ofHom (a * d + b * c) (b * d - a * c) := by
+        congr <;>
+          grind [Rat.sub_eq_add_neg, Rat.mul_comm, Rat.mul_neg,
+            Rat.neg_mul]
+  · rw [ofHom_den_ne_zero hd]
+    simp [num, den]
+    calc
+      ofHom (a + b * (c / d)) (b - a * (c / d)) =
+          ofHom (d * (a + b * (c / d)))
+            (d * (b - a * (c / d))) := by
+        exact (ofHom_scale
+          (k := d) (n := a + b * (c / d))
+          (d := b - a * (c / d)) hd).symm
+      _ = ofHom (a * d + b * c) (b * d - a * c) := by
+        congr <;>
+          simp [Rat.div_def] <;>
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel]
+
+theorem tanAdd_assoc (x y z : ProjectiveRat) :
+    tanAdd (tanAdd x y) z = tanAdd x (tanAdd y z) := by
+  change
+    tanAdd
+      (ofHom (x.num * y.den + x.den * y.num)
+        (x.den * y.den - x.num * y.num)) z =
+      tanAdd x
+        (ofHom (y.num * z.den + y.den * z.num)
+          (y.den * z.den - y.num * z.num))
+  rw [tanAdd_ofHom_left (tanAdd_pair_nonzero x y) z]
+  rw [tanAdd_comm x
+    (ofHom (y.num * z.den + y.den * z.num)
+      (y.den * z.den - y.num * z.num))]
+  rw [tanAdd_ofHom_left (tanAdd_pair_nonzero y z) x]
+  have hnum :
+      (x.num * y.den + x.den * y.num) * z.den +
+          (x.den * y.den - x.num * y.num) * z.num =
+        (y.num * z.den + y.den * z.num) * x.den +
+          (y.den * z.den - y.num * z.num) * x.num := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hden :
+      (x.den * y.den - x.num * y.num) * z.den -
+          (x.num * y.den + x.den * y.num) * z.num =
+        (y.den * z.den - y.num * z.num) * x.den -
+          (y.num * z.den + y.den * z.num) * x.num := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  rw [hnum, hden]
+
+theorem tanAdd_neg_left_self (x : ProjectiveRat) :
+    tanAdd x.neg x = finite 0 := by
+  rw [tanAdd_comm]
+  exact tanAdd_neg_self x
+
+theorem tanSub_zero_right (x : ProjectiveRat) :
+    tanSub x (finite 0) = x := by
+  unfold tanSub
+  rw [neg_finite]
+  simpa using tanAdd_zero_right x
+
+theorem tanSub_zero_left (x : ProjectiveRat) :
+    tanSub (finite 0) x = x.neg := by
+  unfold tanSub
+  exact tanAdd_zero_left x.neg
+
+theorem tanSub_neg_right (x y : ProjectiveRat) :
+    tanSub x y.neg = tanAdd x y := by
+  unfold tanSub
+  rw [neg_neg]
+
+theorem tanAdd_neg_cancel_right (x y : ProjectiveRat) :
+    tanAdd (tanAdd x y) y.neg = x := by
+  rw [tanAdd_assoc, tanAdd_neg_self, tanAdd_zero_right]
+
+theorem tanAdd_neg_cancel_left (x y : ProjectiveRat) :
+    tanAdd x.neg (tanAdd x y) = y := by
+  rw [← tanAdd_assoc, tanAdd_neg_left_self, tanAdd_zero_left]
+
+theorem tanSub_add_cancel (x y : ProjectiveRat) :
+    tanAdd (tanSub x y) y = x := by
+  unfold tanSub
+  rw [tanAdd_assoc, tanAdd_neg_left_self, tanAdd_zero_right]
+
+theorem tanAdd_sub_cancel (x y : ProjectiveRat) :
+    tanSub (tanAdd x y) y = x := by
+  unfold tanSub
+  exact tanAdd_neg_cancel_right x y
+
+theorem tanDouble_zero :
+    tanDouble (finite 0) = finite 0 := by
+  unfold tanDouble
+  exact tanAdd_zero_left (finite 0)
+
+theorem tanDouble_neg (x : ProjectiveRat) :
+    tanDouble x.neg = (tanDouble x).neg := by
+  cases x with
+  | finite q =>
+      rw [neg_finite, tanDouble_finite, tanDouble_finite]
+      have hnum : 2 * (-q) = -(2 * q) := by grind
+      have hden : 1 - (-q) * (-q) = 1 - q * q := by
+        grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+      rw [hnum, hden]
+      exact ofHom_neg_num (2 * q) (1 - q * q)
+  | infinity =>
+      rw [neg_infinity, tanDouble_infinity]
+      native_decide
+
+theorem tanAdd_neg_neg (x y : ProjectiveRat) :
+    tanAdd x.neg y.neg = (tanAdd x y).neg := by
+  cases x <;> cases y
+  · rename_i q r
+    rw [neg_finite, neg_finite, tanAdd_finite_finite,
+      tanAdd_finite_finite]
+    have hnum : (-q) + (-r) = -(q + r) := by grind
+    have hden : 1 - (-q) * (-r) = 1 - q * r := by
+      grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+    rw [hnum, hden]
+    exact ofHom_neg_num (q + r) (1 - q * r)
+  · rename_i q
+    rw [neg_finite, neg_infinity, tanAdd_finite_infinity,
+      tanAdd_finite_infinity]
+    have hnn : - -q = q := by grind
+    rw [hnn]
+    exact ofHom_one_neg_den q
+  · rename_i q
+    rw [neg_infinity, neg_finite, tanAdd_infinity_finite,
+      tanAdd_infinity_finite]
+    have hnn : - -q = q := by grind
+    rw [hnn]
+    exact ofHom_one_neg_den q
+  · rw [neg_infinity, tanAdd_infinity_infinity]
+    native_decide
+
+theorem tanSub_neg_left (x y : ProjectiveRat) :
+    tanSub x.neg y = (tanAdd x y).neg := by
+  unfold tanSub
+  exact tanAdd_neg_neg x y
+
+theorem tanSub_neg_neg (x y : ProjectiveRat) :
+    tanSub x.neg y.neg = (tanSub x y).neg := by
+  unfold tanSub
+  simpa [neg_neg] using tanAdd_neg_neg x y.neg
+
+theorem tanSub_anti_comm (x y : ProjectiveRat) :
+    tanSub y x = (tanSub x y).neg := by
+  unfold tanSub
+  rw [tanAdd_comm y x.neg]
+  simpa [neg_neg] using tanAdd_neg_neg x y.neg
 
 end ProjectiveRat
 
@@ -1952,17 +2389,19 @@ theorem fareyUnitStage_widthSum (n : Nat) :
   rw [hconnect]
   native_decide
 
+theorem fareyUnitStage_widthListAtMost_one_div_succ (n : Nat) :
+    FareyCell.WidthListAtMost
+      (1 / (((n + 1 : Nat) : Rat))) (fareyUnitStage n) :=
+  FareyCell.widthListAtMost_one_div_succ_of_adjacent_denSum
+    (fareyUnitStage_adjacent n) (fareyUnitStage_denSum_ge n)
+
 theorem fareyUnitStage_widthSquareSum_le_one_div_succ (n : Nat) :
     FareyCell.widthSquareSum (fareyUnitStage n) <=
       1 / (((n + 1 : Nat) : Rat)) := by
-  have hbound :
-      FareyCell.WidthListAtMost
-        (1 / (((n + 1 : Nat) : Rat))) (fareyUnitStage n) :=
-    FareyCell.widthListAtMost_one_div_succ_of_adjacent_denSum
-      (fareyUnitStage_adjacent n) (fareyUnitStage_denSum_ge n)
   have hsquares :=
     FareyCell.widthSquareSum_le_bound_mul_widthSum
-      (fareyUnitStage_unit n) hbound
+      (fareyUnitStage_unit n)
+      (fareyUnitStage_widthListAtMost_one_div_succ n)
   rw [fareyUnitStage_widthSum n] at hsquares
   simpa using hsquares
 
@@ -2099,6 +2538,19 @@ def doubleCos (u : Rat) : Rat :=
 
 def doubleSin (u : Rat) : Rat :=
   (doublePoint u).y
+
+theorem projectiveSlope_pointMul
+    {p q : PiCirclePoint}
+    (hp : p.y ≠ 0 ∨ p.x ≠ 0)
+    (hq : q.y ≠ 0 ∨ q.x ≠ 0) :
+    projectiveSlope (pointMul p q) =
+      ProjectiveRat.tanAdd (projectiveSlope p) (projectiveSlope q) := by
+  unfold projectiveSlope pointMul
+  rw [ProjectiveRat.tanAdd_ofHom_ofHom hp hq]
+  have hnum :
+      p.x * q.y + p.y * q.x = p.y * q.x + p.x * q.y := by
+    grind [Rat.add_comm]
+  rw [hnum]
 
 def quarterComplementParameter (u : Rat) : Rat :=
   (1 - u) / (1 + u)
@@ -2609,6 +3061,50 @@ theorem tan_neg (u : Rat) :
   rw [sin_neg, cos_neg]
   exact ProjectiveRat.ofHom_neg_num (sin u) (cos u)
 
+theorem tan_composedPoint_eq_tanAdd (u v : Rat) :
+    projectiveSlope (composedPoint u v) =
+      ProjectiveRat.tanAdd (tan u) (tan v) := by
+  unfold composedPoint tan
+  exact projectiveSlope_pointMul
+    (p := point u) (q := point v)
+    (sin_ne_zero_or_cos_ne_zero u)
+    (sin_ne_zero_or_cos_ne_zero v)
+
+theorem tan_chartAddParameter_eq_tanAdd {u v : Rat}
+    (hden : Ne (chartAddDen u v) 0) :
+    tan (chartAddParameter u v) =
+      ProjectiveRat.tanAdd (tan u) (tan v) := by
+  calc
+    tan (chartAddParameter u v) =
+        projectiveSlope (point (chartAddParameter u v)) := rfl
+    _ = projectiveSlope (composedPoint u v) := by
+        exact (congrArg projectiveSlope
+          (composedPoint_eq_point_chartAdd hden)).symm
+    _ = ProjectiveRat.tanAdd (tan u) (tan v) :=
+        tan_composedPoint_eq_tanAdd u v
+
+theorem tan_chartSubParameter_eq_tanSub {u v : Rat}
+    (hden : Ne (chartAddDen u (-v)) 0) :
+    tan (chartAddParameter u (-v)) =
+      ProjectiveRat.tanSub (tan u) (tan v) := by
+  calc
+    tan (chartAddParameter u (-v)) =
+        ProjectiveRat.tanAdd (tan u) (tan (-v)) :=
+      tan_chartAddParameter_eq_tanAdd hden
+    _ = ProjectiveRat.tanSub (tan u) (tan v) := by
+      unfold ProjectiveRat.tanSub
+      rw [tan_neg]
+
+theorem tan_chartDoubleParameter_eq_tanDouble {u : Rat}
+    (hden : Ne (chartAddDen u u) 0) :
+    tan (chartAddParameter u u) =
+      ProjectiveRat.tanDouble (tan u) := by
+  calc
+    tan (chartAddParameter u u) =
+        ProjectiveRat.tanAdd (tan u) (tan u) :=
+      tan_chartAddParameter_eq_tanAdd hden
+    _ = ProjectiveRat.tanDouble (tan u) := rfl
+
 theorem cot_neg (u : Rat) :
     cot (-u) = -cot u := by
   unfold cot
@@ -3036,6 +3532,120 @@ structure BasicIdentityPackage : Prop where
   sin_at_one : sin 1 = 1
   projective_tan_at_zero : tan 0 = ProjectiveRat.finite 0
   projective_tan_at_one : tan 1 = ProjectiveRat.infinity
+  projective_neg_involutive :
+    forall x : ProjectiveRat, x.neg.neg = x
+  projective_inv_involutive :
+    forall x : ProjectiveRat, x.inv.inv = x
+  projective_inv_neg :
+    forall x : ProjectiveRat, x.neg.inv = x.inv.neg
+  projective_tan_add_finite_finite :
+    forall x y : Rat,
+      ProjectiveRat.tanAdd (ProjectiveRat.finite x) (ProjectiveRat.finite y) =
+        ProjectiveRat.ofHom (x + y) (1 - x * y)
+  projective_tan_add_finite_infinity :
+    forall x : Rat,
+      ProjectiveRat.tanAdd (ProjectiveRat.finite x) ProjectiveRat.infinity =
+        ProjectiveRat.ofHom 1 (-x)
+  projective_tan_add_infinity_finite :
+    forall x : Rat,
+      ProjectiveRat.tanAdd ProjectiveRat.infinity (ProjectiveRat.finite x) =
+        ProjectiveRat.ofHom 1 (-x)
+  projective_tan_add_infinity_infinity :
+    ProjectiveRat.tanAdd ProjectiveRat.infinity ProjectiveRat.infinity =
+      ProjectiveRat.finite 0
+  projective_tan_sub_finite_finite :
+    forall x y : Rat,
+      ProjectiveRat.tanSub (ProjectiveRat.finite x) (ProjectiveRat.finite y) =
+        ProjectiveRat.ofHom (x - y) (1 + x * y)
+  projective_tan_sub_finite_infinity :
+    forall x : Rat,
+      ProjectiveRat.tanSub (ProjectiveRat.finite x) ProjectiveRat.infinity =
+        ProjectiveRat.ofHom 1 (-x)
+  projective_tan_sub_infinity_finite :
+    forall x : Rat,
+      ProjectiveRat.tanSub ProjectiveRat.infinity (ProjectiveRat.finite x) =
+        ProjectiveRat.ofHom 1 x
+  projective_tan_sub_infinity_infinity :
+    ProjectiveRat.tanSub ProjectiveRat.infinity ProjectiveRat.infinity =
+      ProjectiveRat.finite 0
+  projective_tan_add_zero_left :
+    forall x : ProjectiveRat, ProjectiveRat.tanAdd (ProjectiveRat.finite 0) x = x
+  projective_tan_add_zero_right :
+    forall x : ProjectiveRat, ProjectiveRat.tanAdd x (ProjectiveRat.finite 0) = x
+  projective_tan_add_comm :
+    forall x y : ProjectiveRat, ProjectiveRat.tanAdd x y = ProjectiveRat.tanAdd y x
+  projective_tan_add_assoc :
+    forall x y z : ProjectiveRat,
+      ProjectiveRat.tanAdd (ProjectiveRat.tanAdd x y) z =
+        ProjectiveRat.tanAdd x (ProjectiveRat.tanAdd y z)
+  projective_tan_add_neg_self :
+    forall x : ProjectiveRat, ProjectiveRat.tanAdd x x.neg = ProjectiveRat.finite 0
+  projective_tan_add_neg_left_self :
+    forall x : ProjectiveRat, ProjectiveRat.tanAdd x.neg x = ProjectiveRat.finite 0
+  projective_tan_add_neg_cancel_right :
+    forall x y : ProjectiveRat,
+      ProjectiveRat.tanAdd (ProjectiveRat.tanAdd x y) y.neg = x
+  projective_tan_add_neg_cancel_left :
+    forall x y : ProjectiveRat,
+      ProjectiveRat.tanAdd x.neg (ProjectiveRat.tanAdd x y) = y
+  projective_tan_sub_self :
+    forall x : ProjectiveRat, ProjectiveRat.tanSub x x = ProjectiveRat.finite 0
+  projective_tan_sub_zero_right :
+    forall x : ProjectiveRat, ProjectiveRat.tanSub x (ProjectiveRat.finite 0) = x
+  projective_tan_sub_zero_left :
+    forall x : ProjectiveRat, ProjectiveRat.tanSub (ProjectiveRat.finite 0) x = x.neg
+  projective_tan_sub_neg_right :
+    forall x y : ProjectiveRat, ProjectiveRat.tanSub x y.neg =
+      ProjectiveRat.tanAdd x y
+  projective_tan_sub_neg_left :
+    forall x y : ProjectiveRat, ProjectiveRat.tanSub x.neg y =
+      (ProjectiveRat.tanAdd x y).neg
+  projective_tan_sub_neg_neg :
+    forall x y : ProjectiveRat,
+      ProjectiveRat.tanSub x.neg y.neg = (ProjectiveRat.tanSub x y).neg
+  projective_tan_sub_anti_comm :
+    forall x y : ProjectiveRat,
+      ProjectiveRat.tanSub y x = (ProjectiveRat.tanSub x y).neg
+  projective_tan_sub_add_cancel :
+    forall x y : ProjectiveRat, ProjectiveRat.tanAdd (ProjectiveRat.tanSub x y) y = x
+  projective_tan_add_sub_cancel :
+    forall x y : ProjectiveRat, ProjectiveRat.tanSub (ProjectiveRat.tanAdd x y) y = x
+  projective_tan_double_finite :
+    forall x : Rat,
+      ProjectiveRat.tanDouble (ProjectiveRat.finite x) =
+        ProjectiveRat.ofHom (2 * x) (1 - x * x)
+  projective_tan_double_infinity :
+    ProjectiveRat.tanDouble ProjectiveRat.infinity = ProjectiveRat.finite 0
+  projective_tan_double_zero :
+    ProjectiveRat.tanDouble (ProjectiveRat.finite 0) = ProjectiveRat.finite 0
+  projective_tan_double_neg :
+    forall x : ProjectiveRat,
+      ProjectiveRat.tanDouble x.neg = (ProjectiveRat.tanDouble x).neg
+  projective_tan_add_neg_neg :
+    forall x y : ProjectiveRat,
+      ProjectiveRat.tanAdd x.neg y.neg = (ProjectiveRat.tanAdd x y).neg
+  projective_slope_point_mul :
+    forall p q : PiCirclePoint,
+      p.y ≠ 0 ∨ p.x ≠ 0 ->
+      q.y ≠ 0 ∨ q.x ≠ 0 ->
+      projectiveSlope (pointMul p q) =
+        ProjectiveRat.tanAdd (projectiveSlope p) (projectiveSlope q)
+  projective_tan_composed_point :
+    forall u v : Rat,
+      projectiveSlope (composedPoint u v) =
+        ProjectiveRat.tanAdd (tan u) (tan v)
+  projective_tan_chart_add :
+    forall u v : Rat, Ne (chartAddDen u v) 0 ->
+      tan (chartAddParameter u v) =
+        ProjectiveRat.tanAdd (tan u) (tan v)
+  projective_tan_chart_sub :
+    forall u v : Rat, Ne (chartAddDen u (-v)) 0 ->
+      tan (chartAddParameter u (-v)) =
+        ProjectiveRat.tanSub (tan u) (tan v)
+  projective_tan_chart_double :
+    forall u : Rat, Ne (chartAddDen u u) 0 ->
+      tan (chartAddParameter u u) =
+        ProjectiveRat.tanDouble (tan u)
   projective_tan_finite :
     forall u : Rat, Ne (cos u) 0 -> tan u = ProjectiveRat.finite (finiteTan u)
   projective_tan_odd : forall u : Rat, tan (-u) = (tan u).neg
@@ -3152,6 +3762,48 @@ theorem basicIdentityPackage : BasicIdentityPackage where
   sin_at_one := sin_one
   projective_tan_at_zero := tan_zero
   projective_tan_at_one := tan_one
+  projective_neg_involutive := ProjectiveRat.neg_neg
+  projective_inv_involutive := ProjectiveRat.inv_inv
+  projective_inv_neg := ProjectiveRat.inv_neg
+  projective_tan_add_finite_finite := ProjectiveRat.tanAdd_finite_finite
+  projective_tan_add_finite_infinity := ProjectiveRat.tanAdd_finite_infinity
+  projective_tan_add_infinity_finite := ProjectiveRat.tanAdd_infinity_finite
+  projective_tan_add_infinity_infinity := ProjectiveRat.tanAdd_infinity_infinity
+  projective_tan_sub_finite_finite := ProjectiveRat.tanSub_finite_finite
+  projective_tan_sub_finite_infinity := ProjectiveRat.tanSub_finite_infinity
+  projective_tan_sub_infinity_finite := ProjectiveRat.tanSub_infinity_finite
+  projective_tan_sub_infinity_infinity := ProjectiveRat.tanSub_infinity_infinity
+  projective_tan_add_zero_left := ProjectiveRat.tanAdd_zero_left
+  projective_tan_add_zero_right := ProjectiveRat.tanAdd_zero_right
+  projective_tan_add_comm := ProjectiveRat.tanAdd_comm
+  projective_tan_add_assoc := ProjectiveRat.tanAdd_assoc
+  projective_tan_add_neg_self := ProjectiveRat.tanAdd_neg_self
+  projective_tan_add_neg_left_self := ProjectiveRat.tanAdd_neg_left_self
+  projective_tan_add_neg_cancel_right := ProjectiveRat.tanAdd_neg_cancel_right
+  projective_tan_add_neg_cancel_left := ProjectiveRat.tanAdd_neg_cancel_left
+  projective_tan_sub_self := ProjectiveRat.tanSub_self
+  projective_tan_sub_zero_right := ProjectiveRat.tanSub_zero_right
+  projective_tan_sub_zero_left := ProjectiveRat.tanSub_zero_left
+  projective_tan_sub_neg_right := ProjectiveRat.tanSub_neg_right
+  projective_tan_sub_neg_left := ProjectiveRat.tanSub_neg_left
+  projective_tan_sub_neg_neg := ProjectiveRat.tanSub_neg_neg
+  projective_tan_sub_anti_comm := ProjectiveRat.tanSub_anti_comm
+  projective_tan_sub_add_cancel := ProjectiveRat.tanSub_add_cancel
+  projective_tan_add_sub_cancel := ProjectiveRat.tanAdd_sub_cancel
+  projective_tan_double_finite := ProjectiveRat.tanDouble_finite
+  projective_tan_double_infinity := ProjectiveRat.tanDouble_infinity
+  projective_tan_double_zero := ProjectiveRat.tanDouble_zero
+  projective_tan_double_neg := ProjectiveRat.tanDouble_neg
+  projective_tan_add_neg_neg := ProjectiveRat.tanAdd_neg_neg
+  projective_slope_point_mul := fun _ _ hp hq =>
+    projectiveSlope_pointMul hp hq
+  projective_tan_composed_point := tan_composedPoint_eq_tanAdd
+  projective_tan_chart_add := fun _ _ h =>
+    tan_chartAddParameter_eq_tanAdd h
+  projective_tan_chart_sub := fun _ _ h =>
+    tan_chartSubParameter_eq_tanSub h
+  projective_tan_chart_double := fun _ h =>
+    tan_chartDoubleParameter_eq_tanDouble h
   projective_tan_finite := fun _ h => tan_finite_of_cos_ne_zero h
   projective_tan_odd := tan_neg
   projective_tan_complement := fun _ h => tan_quarterComplementParameter h

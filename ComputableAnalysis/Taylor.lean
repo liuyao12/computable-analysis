@@ -228,6 +228,92 @@ theorem kernelPartialIntegralBetween_split (p q r : Rat) (n : Nat) :
       rw [ih, kernelTermIntegralBetween_split p q r (n + 1)]
       grind [Rat.add_assoc, Rat.add_comm]
 
+theorem pow_mono_nonneg
+    {p r : Rat} (hp : 0 <= p) (hpr : p <= r) (n : Nat) :
+    p ^ n <= r ^ n := by
+  induction n with
+  | zero =>
+      simp
+  | succ n ih =>
+      rw [Rat.pow_succ, Rat.pow_succ]
+      have hr : 0 <= r := Rat.le_trans hp hpr
+      calc
+        p ^ n * p <= r ^ n * p :=
+          Rat.mul_le_mul_of_nonneg_right ih hp
+        _ <= r ^ n * r :=
+          Rat.mul_le_mul_of_nonneg_left hpr (Rat.pow_nonneg hr)
+
+private theorem kernelTermDen_pos (j : Nat) :
+    0 < 2 * (j : Rat) + 1 := by
+  have hj : 0 <= (j : Rat) := Rat.natCast_nonneg
+  grind
+
+theorem kernelTermIntegralBetween_nonneg_even
+    {p r : Rat} (hp : 0 <= p) (hpr : p <= r) (n : Nat) :
+    0 <= kernelTermIntegralBetween p r (2 * n) := by
+  have hpow :
+      p ^ (2 * (2 * n) + 1) <= r ^ (2 * (2 * n) + 1) :=
+    pow_mono_nonneg hp hpr _
+  have hdiff :
+      0 <= r ^ (2 * (2 * n) + 1) - p ^ (2 * (2 * n) + 1) := by
+    grind [Rat.sub_eq_add_neg]
+  have hdenpos : 0 < 2 * ((2 * n : Nat) : Rat) + 1 :=
+    kernelTermDen_pos (2 * n)
+  unfold kernelTermIntegralBetween
+  rw [neg_one_pow_even]
+  rw [Rat.div_def]
+  simpa [Rat.mul_assoc, Rat.mul_comm] using
+    Rat.mul_nonneg hdiff (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+
+private theorem rat_mul_nonpos_of_nonpos_of_nonneg'
+    {a b : Rat} (ha : a <= 0) (hb : 0 <= b) :
+    a * b <= 0 := by
+  have h := Rat.mul_nonneg (by grind : 0 <= -a) hb
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem kernelTermIntegralBetween_nonpos_odd
+    {p r : Rat} (hp : 0 <= p) (hpr : p <= r) (n : Nat) :
+    kernelTermIntegralBetween p r (2 * n + 1) <= 0 := by
+  have hpow :
+      p ^ (2 * (2 * n + 1) + 1) <=
+        r ^ (2 * (2 * n + 1) + 1) :=
+    pow_mono_nonneg hp hpr _
+  have hdiff :
+      0 <= r ^ (2 * (2 * n + 1) + 1) -
+        p ^ (2 * (2 * n + 1) + 1) := by
+    grind [Rat.sub_eq_add_neg]
+  have hdenpos : 0 < 2 * ((2 * n + 1 : Nat) : Rat) + 1 :=
+    kernelTermDen_pos (2 * n + 1)
+  have hnum :
+      (-1 : Rat) *
+          (r ^ (2 * (2 * n + 1) + 1) -
+            p ^ (2 * (2 * n + 1) + 1)) <= 0 := by
+    have h := Rat.mul_nonneg (by native_decide : (0 : Rat) <= 1) hdiff
+    grind
+  unfold kernelTermIntegralBetween
+  rw [neg_one_pow_odd]
+  rw [Rat.div_def]
+  exact rat_mul_nonpos_of_nonpos_of_nonneg'
+    hnum (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+
+theorem kernelPartialIntegralBetween_odd_succ_le_even
+    {p r : Rat} (hp : 0 <= p) (hpr : p <= r) (n : Nat) :
+    kernelPartialIntegralBetween p r (2 * n + 1) <=
+      kernelPartialIntegralBetween p r (2 * n) := by
+  rw [show 2 * n + 1 = 2 * n + 1 by omega]
+  simp [kernelPartialIntegralBetween]
+  have hterm := kernelTermIntegralBetween_nonpos_odd hp hpr n
+  grind
+
+theorem kernelPartialIntegralBetween_odd_le_even_succ
+    {p r : Rat} (hp : 0 <= p) (hpr : p <= r) (n : Nat) :
+    kernelPartialIntegralBetween p r (2 * n + 1) <=
+      kernelPartialIntegralBetween p r (2 * n + 2) := by
+  rw [show 2 * n + 2 = 2 * n + 1 + 1 by omega]
+  simp [kernelPartialIntegralBetween]
+  have hterm := kernelTermIntegralBetween_nonneg_even hp hpr (n + 1)
+  grind
+
 theorem qabs_le_of_between {r b : Rat}
     (hlo : -b <= r) (hhi : r <= b) :
     qabs r <= b := by
@@ -521,11 +607,8 @@ def kernelIntegralRaw (x : Rat) (c : KernelIntegralAt x) : RealRaw :=
 
 theorem positiveKernelIntegralRaw_valid
     (x : Rat) (c : KernelIntegralAt x) :
-    (positiveKernelIntegralRaw x c).Valid := by
-  change RealRaw.ValidCompute
-    (Integral.integralFor (orientedKernelInterval x) c.construction).compute
-  unfold Integral.integralFor
-  exact c.construction.certificate
+    (positiveKernelIntegralRaw x c).Valid :=
+  Integral.integralFor_valid (orientedKernelInterval x) c.construction
 
 theorem kernelIntegralRaw_valid
     (x : Rat) (c : KernelIntegralAt x) :

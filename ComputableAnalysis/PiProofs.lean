@@ -1008,6 +1008,11 @@ def OddKernelCellBound (m : Nat) : Prop :=
     Taylor.ArctanKernel.kernelPartialIntegralBetween p r m <=
       ArctanGeometry.integralUpperStep p r
 
+def OddKernelUnitCellBound (m : Nat) : Prop :=
+  forall {p r : Rat}, 0 <= p -> p <= r -> r <= 1 ->
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r m <=
+      ArctanGeometry.integralUpperStep p r
+
 def EvenKernelPointwiseCellBound (m : Nat) : Prop :=
   forall {p x r : Rat}, 0 <= p -> p <= x -> x <= r ->
     ArctanGeometry.integralKernel r <=
@@ -1046,6 +1051,17 @@ def LeibnizRectangleUniformCellBoundsAtOne : Prop :=
   (forall n, EvenKernelCellBound (2 * n)) /\
   (forall n, OddKernelCellBound (2 * n + 1))
 
+def LeibnizRectangleUniformUnitCellBoundsAtOne : Prop :=
+  (forall n, EvenKernelCellBound (2 * n)) /\
+  (forall n, OddKernelUnitCellBound (2 * n + 1))
+
+def LeibnizRectangleUniformUnitCellBoundsAtOneUpTo (N : Nat) : Prop :=
+  (forall n, n <= N -> EvenKernelCellBound (2 * n)) /\
+  (forall n, n <= N -> OddKernelUnitCellBound (2 * n + 1))
+
+def LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll : Prop :=
+  forall N, LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N
+
 def LeibnizRectanglePointwiseCellBoundsAtOne : Prop :=
   (forall n, EvenKernelPointwiseCellBound (2 * n)) /\
   (forall n, OddKernelPointwiseCellBound (2 * n + 1))
@@ -1053,6 +1069,10 @@ def LeibnizRectanglePointwiseCellBoundsAtOne : Prop :=
 def LeibnizRectanglePointwiseIntegralBridgeAtOne : Prop :=
   LeibnizRectanglePointwiseCellBoundsAtOne ->
     LeibnizRectangleUniformCellBoundsAtOne
+
+def LeibnizRectanglePointwiseUnitIntegralBridgeAtOne : Prop :=
+  LeibnizRectanglePointwiseCellBoundsAtOne ->
+    LeibnizRectangleUniformUnitCellBoundsAtOne
 
 theorem evenKernelCellBounds_of_cellBound
     {m : Nat} {intervals : List (Rat × Rat)}
@@ -1081,6 +1101,20 @@ theorem oddKernelCellBounds_of_cellBound
       rcases h with ⟨hp0, hpr, hrest⟩
       simp [OddKernelCellBounds]
       exact ⟨hcell hp0 hpr, ih hrest⟩
+
+theorem oddKernelCellBounds_of_unitCellBound
+    {m : Nat} {intervals : List (Rat × Rat)}
+    (hcell : OddKernelUnitCellBound m)
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    OddKernelCellBounds m intervals := by
+  induction intervals with
+  | nil =>
+      simp [OddKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp0, hpr, hr1, hrest⟩
+      simp [OddKernelCellBounds]
+      exact ⟨hcell hp0 hpr hr1, ih hrest⟩
 
 theorem evenKernelPointwiseCellBound_even (n : Nat) :
     EvenKernelPointwiseCellBound (2 * n) := by
@@ -1116,6 +1150,11 @@ theorem leibnizRectanglePointwiseCellBoundsAtOne :
 theorem uniformCellBounds_of_pointwiseIntegralBridge
     (h : LeibnizRectanglePointwiseIntegralBridgeAtOne) :
     LeibnizRectangleUniformCellBoundsAtOne :=
+  h leibnizRectanglePointwiseCellBoundsAtOne
+
+theorem unitUniformCellBounds_of_pointwiseUnitIntegralBridge
+    (h : LeibnizRectanglePointwiseUnitIntegralBridgeAtOne) :
+    LeibnizRectangleUniformUnitCellBoundsAtOne :=
   h leibnizRectanglePointwiseCellBoundsAtOne
 
 theorem integralKernel_le_one (r : Rat) :
@@ -1154,6 +1193,122 @@ theorem integralLowerStep_le_kernelPartialIntegralBetween_zero
 theorem evenKernelCellBound_zero : EvenKernelCellBound 0 := by
   intro p r _hp0 hpr _hr1
   exact integralLowerStep_le_kernelPartialIntegralBetween_zero hpr
+
+theorem kernelPartialIntegralBetween_two_lowerStep
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    ArctanGeometry.integralLowerStep p r <=
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 2 := by
+  let L : Rat := r - p
+  let D : Rat := 1 + r * r
+  let S3 : Rat := r * r + r * p + p * p
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have h15Dpos : 0 < 15 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 15) hDpos
+  have hrr_le_one : r * r <= 1 := by
+    calc
+      r * r <= 1 * r := Rat.mul_le_mul_of_nonneg_right hr1 hr0
+      _ = r := by grind
+      _ <= 1 := hr1
+  have hone_sub_rr : 0 <= 1 - r * r := by
+    grind [Rat.sub_eq_add_neg]
+  have htwor_add_p : 0 <= 2 * r + p := by grind
+  have hs5_nonneg : 0 <= S5 := by
+    dsimp [S5]
+    have hr2 : 0 <= r ^ 2 := Rat.pow_nonneg hr0
+    have hr3 : 0 <= r ^ 3 := Rat.pow_nonneg hr0
+    have hr4 : 0 <= r ^ 4 := Rat.pow_nonneg hr0
+    have hp2 : 0 <= p ^ 2 := Rat.pow_nonneg hp0
+    have hp3 : 0 <= p ^ 3 := Rat.pow_nonneg hp0
+    have hp4 : 0 <= p ^ 4 := Rat.pow_nonneg hp0
+    exact Rat.add_nonneg
+      (Rat.add_nonneg
+        (Rat.add_nonneg
+          (Rat.add_nonneg hr4 (Rat.mul_nonneg hr3 hp0))
+          (Rat.mul_nonneg hr2 hp2))
+        (Rat.mul_nonneg hr0 hp3))
+      hp4
+  have hquad_nonneg : 0 <= 3 * p * p + 9 * p * r + 8 * r * r := by
+    have hpp : 0 <= p * p := Rat.mul_nonneg hp0 hp0
+    have hpr0 : 0 <= p * r := Rat.mul_nonneg hp0 hr0
+    have hrr : 0 <= r * r := Rat.mul_nonneg hr0 hr0
+    grind
+  have hfactor :
+      D * (15 - 5 * S3 + 3 * S5) - 15 =
+        5 * (1 - r * r) * (r - p) * (2 * r + p) +
+          (r - p) * (r - p) *
+            (3 * p * p + 9 * p * r + 8 * r * r) +
+            3 * (r * r) * S5 := by
+    dsimp [D, S3, S5]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.pow_succ]
+  have hgap_nonneg : 0 <= D * (15 - 5 * S3 + 3 * S5) - 15 := by
+    rw [hfactor]
+    have hterm1 : 0 <= 5 * (1 - r * r) * (r - p) * (2 * r + p) := by
+      have h5 : 0 <= (5 : Rat) := by native_decide
+      have hrp : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+      exact Rat.mul_nonneg
+        (Rat.mul_nonneg (Rat.mul_nonneg h5 hone_sub_rr) hrp) htwor_add_p
+    have hterm2 :
+        0 <= (r - p) * (r - p) *
+          (3 * p * p + 9 * p * r + 8 * r * r) := by
+      have hrp : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+      exact Rat.mul_nonneg (Rat.mul_nonneg hrp hrp) hquad_nonneg
+    have hterm3 : 0 <= 3 * (r * r) * S5 := by
+      have h3 : 0 <= (3 : Rat) := by native_decide
+      have hrr : 0 <= r * r := Rat.mul_nonneg hr0 hr0
+      exact Rat.mul_nonneg (Rat.mul_nonneg h3 hrr) hs5_nonneg
+    exact Rat.add_nonneg (Rat.add_nonneg hterm1 hterm2) hterm3
+  have hscalar : 15 <= D * (15 - 5 * S3 + 3 * S5) := by
+    grind [Rat.sub_eq_add_neg]
+  have hlower_mul :
+      ArctanGeometry.integralLowerStep p r * (15 * D) = L * 15 := by
+    unfold ArctanGeometry.integralLowerStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 2 * (15 * D) =
+        L * (D * (15 - 5 * S3 + 3 * S5)) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 2 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 +
+            (r ^ 5 - p ^ 5) / 5 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth]
+    dsimp [L, D, S3, S5]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 15 * D)
+  · rw [hlower_mul, hkernel_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h15Dpos
+
+theorem evenKernelCellBound_two : EvenKernelCellBound 2 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_two_lowerStep hp0 hpr hr1
 
 theorem kernelPartialIntegralBetween_one_le_integralUpperStep
     {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
@@ -1251,6 +1406,2993 @@ theorem oddKernelCellBound_one : OddKernelCellBound 1 := by
   intro p r hp0 hpr
   exact kernelPartialIntegralBetween_one_le_integralUpperStep hp0 hpr
 
+theorem oddKernelUnitCellBound_one : OddKernelUnitCellBound 1 := by
+  intro p r hp0 hpr _hr1
+  exact oddKernelCellBound_one hp0 hpr
+
+private structure SimplexCertTerm where
+  c : Rat
+  i : Nat
+  j : Nat
+  k : Nat
+
+private def simplexCertTermEval (p q s : Rat) (t : SimplexCertTerm) : Rat :=
+  t.c * p ^ t.i * q ^ t.j * s ^ t.k
+
+private def simplexCertEval (terms : List SimplexCertTerm) (p q s : Rat) : Rat :=
+  match terms with
+  | [] => 0
+  | t :: rest => simplexCertTermEval p q s t + simplexCertEval rest p q s
+
+private def simplexCertCoeffsNonneg : List SimplexCertTerm -> Prop
+  | [] => True
+  | t :: rest => 0 <= t.c /\ simplexCertCoeffsNonneg rest
+
+private instance simplexCertCoeffsNonnegDecidable :
+    (terms : List SimplexCertTerm) -> Decidable (simplexCertCoeffsNonneg terms)
+  | [] => isTrue trivial
+  | t :: rest => by
+      dsimp [simplexCertCoeffsNonneg]
+      exact @instDecidableAnd (0 <= t.c) (simplexCertCoeffsNonneg rest)
+        inferInstance (simplexCertCoeffsNonnegDecidable rest)
+
+private theorem simplexCertTermEval_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s)
+    {t : SimplexCertTerm} (hc : 0 <= t.c) :
+    0 <= simplexCertTermEval p q s t := by
+  unfold simplexCertTermEval
+  exact Rat.mul_nonneg
+    (Rat.mul_nonneg
+      (Rat.mul_nonneg hc (Rat.pow_nonneg hp))
+      (Rat.pow_nonneg hq))
+    (Rat.pow_nonneg hs)
+
+private theorem simplexCertEval_nonneg
+    {terms : List SimplexCertTerm} {p q s : Rat}
+    (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s)
+    (hterms : simplexCertCoeffsNonneg terms) :
+    0 <= simplexCertEval terms p q s := by
+  induction terms with
+  | nil =>
+      simp [simplexCertEval]
+  | cons t rest ih =>
+      rcases hterms with ⟨hc, hrest⟩
+      simp [simplexCertEval]
+      exact Rat.add_nonneg
+        (simplexCertTermEval_nonneg hp hq hs hc)
+        (ih hrest)
+
+private def oddKernelThreeUnitGapTerms : List SimplexCertTerm := [
+  ⟨105, 8, 0, 0⟩,
+  ⟨420, 7, 1, 0⟩,
+  ⟨1120, 6, 2, 0⟩,
+  ⟨2030, 5, 3, 0⟩,
+  ⟨2478, 4, 4, 0⟩,
+  ⟨1974, 3, 5, 0⟩,
+  ⟨968, 2, 6, 0⟩,
+  ⟨261, 1, 7, 0⟩,
+  ⟨29, 0, 8, 0⟩,
+  ⟨420, 6, 1, 1⟩,
+  ⟨2240, 5, 2, 1⟩,
+  ⟨5040, 4, 3, 1⟩,
+  ⟨5964, 3, 4, 1⟩,
+  ⟨3836, 2, 5, 1⟩,
+  ⟨1248, 1, 6, 1⟩,
+  ⟨156, 0, 7, 1⟩,
+  ⟨1050, 5, 1, 2⟩,
+  ⟨4830, 4, 2, 2⟩,
+  ⟨8610, 3, 3, 2⟩,
+  ⟨7308, 2, 4, 2⟩,
+  ⟨2898, 1, 5, 2⟩,
+  ⟨414, 0, 6, 2⟩,
+  ⟨1680, 4, 1, 3⟩,
+  ⟨5880, 3, 2, 3⟩,
+  ⟨7280, 2, 3, 3⟩,
+  ⟨3696, 1, 4, 3⟩,
+  ⟨616, 0, 5, 3⟩,
+  ⟨1470, 3, 1, 4⟩,
+  ⟨3500, 2, 2, 4⟩,
+  ⟨2520, 1, 3, 4⟩,
+  ⟨504, 0, 4, 4⟩,
+  ⟨630, 2, 1, 5⟩,
+  ⟨840, 1, 2, 5⟩,
+  ⟨210, 0, 3, 5⟩,
+  ⟨105, 1, 1, 6⟩,
+  ⟨35, 0, 2, 6⟩]
+
+private def oddKernelThreeUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval oddKernelThreeUnitGapTerms p q s
+
+private theorem oddKernelThreeUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg oddKernelThreeUnitGapTerms := by
+  native_decide
+
+private theorem oddKernelThreeUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= oddKernelThreeUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs oddKernelThreeUnitGapTerms_nonneg
+
+private theorem oddKernelThreeUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    105 - (1 + p * p) *
+        (105 - 35 * (r * r + r * p + p * p) +
+          21 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4) -
+          15 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+            r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6)) =
+      oddKernelThreeUnitGapCertificate p q s := by
+  intro q s
+  unfold oddKernelThreeUnitGapCertificate oddKernelThreeUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_three_le_integralUpperStep_on_unit
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 3 <=
+      ArctanGeometry.integralUpperStep p r := by
+  let L : Rat := r - p
+  let D : Rat := 1 + p * p
+  let S3 : Rat := r * r + r * p + p * p
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+      r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have h105Dpos : 0 < 105 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 105) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := oddKernelThreeUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <= 105 - D * (105 - 35 * S3 + 21 * S5 - 15 * S7) := by
+    dsimp [D, S3, S5, S7]
+    rw [hgap_cert]
+    exact oddKernelThreeUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar : D * (105 - 35 * S3 + 21 * S5 - 15 * S7) <= 105 := by
+    grind [Rat.sub_eq_add_neg]
+  have hupper_mul :
+      ArctanGeometry.integralUpperStep p r * (105 * D) = L * 105 := by
+    unfold ArctanGeometry.integralUpperStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 3 * (105 * D) =
+        L * (D * (105 - 35 * S3 + 21 * S5 - 15 * S7)) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 3 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 +
+            (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventh : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth, hseventh]
+    dsimp [L, D, S3, S5, S7]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 105 * D)
+  · rw [hkernel_mul, hupper_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h105Dpos
+
+theorem oddKernelUnitCellBound_three : OddKernelUnitCellBound 3 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_three_le_integralUpperStep_on_unit hp0 hpr hr1
+
+private def evenKernelFourUnitGapTerms : List SimplexCertTerm := [
+  ⟨945, 10, 0, 0⟩,
+  ⟨5670, 9, 1, 0⟩,
+  ⟨19845, 8, 2, 0⟩,
+  ⟨49140, 7, 3, 0⟩,
+  ⟨87318, 6, 4, 0⟩,
+  ⟨111258, 5, 5, 0⟩,
+  ⟨100530, 4, 6, 0⟩,
+  ⟨62550, 3, 7, 0⟩,
+  ⟨25365, 2, 8, 0⟩,
+  ⟨6018, 1, 9, 0⟩,
+  ⟨633, 0, 10, 0⟩,
+  ⟨3780, 8, 1, 1⟩,
+  ⟨34020, 7, 2, 1⟩,
+  ⟨124740, 6, 3, 1⟩,
+  ⟨257040, 5, 4, 1⟩,
+  ⟨328230, 4, 5, 1⟩,
+  ⟨265050, 3, 6, 1⟩,
+  ⟨131760, 2, 7, 1⟩,
+  ⟨36840, 1, 8, 1⟩,
+  ⟨4440, 0, 9, 1⟩,
+  ⟨17010, 7, 1, 2⟩,
+  ⟨120960, 6, 2, 2⟩,
+  ⟨368550, 5, 3, 2⟩,
+  ⟨621054, 4, 4, 2⟩,
+  ⟨620361, 3, 5, 2⟩,
+  ⟨365904, 2, 6, 2⟩,
+  ⟨117936, 1, 7, 2⟩,
+  ⟨16044, 0, 8, 2⟩,
+  ⟨37800, 6, 1, 3⟩,
+  ⟨229320, 5, 2, 3⟩,
+  ⟨575820, 4, 3, 3⟩,
+  ⟨759276, 3, 4, 3⟩,
+  ⟨552888, 2, 5, 3⟩,
+  ⟨210888, 1, 6, 3⟩,
+  ⟨32976, 0, 7, 3⟩,
+  ⟨52920, 5, 1, 4⟩,
+  ⟨263340, 4, 2, 4⟩,
+  ⟨513765, 3, 3, 4⟩,
+  ⟨490644, 2, 4, 4⟩,
+  ⟨229698, 1, 5, 4⟩,
+  ⟨42264, 0, 6, 4⟩,
+  ⟨47250, 4, 1, 5⟩,
+  ⟨180810, 3, 2, 5⟩,
+  ⟨253260, 2, 3, 5⟩,
+  ⟨154224, 1, 4, 5⟩,
+  ⟨34524, 0, 5, 5⟩,
+  ⟨25515, 3, 1, 6⟩,
+  ⟨69300, 2, 2, 6⟩,
+  ⟨61110, 1, 3, 6⟩,
+  ⟨17514, 0, 4, 6⟩,
+  ⟨7560, 2, 1, 7⟩,
+  ⟨12600, 1, 2, 7⟩,
+  ⟨5040, 0, 3, 7⟩,
+  ⟨945, 1, 1, 8⟩,
+  ⟨630, 0, 2, 8⟩]
+
+private def evenKernelFourUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval evenKernelFourUnitGapTerms p q s
+
+private theorem evenKernelFourUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg evenKernelFourUnitGapTerms := by
+  native_decide
+
+private theorem evenKernelFourUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= evenKernelFourUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs evenKernelFourUnitGapTerms_nonneg
+
+private theorem evenKernelFourUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    (1 + r * r) *
+        (945 - 315 * (r * r + r * p + p * p) +
+          189 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4) -
+          135 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+            r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6) +
+          105 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+            r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+            r * p ^ 7 + p ^ 8)) - 945 =
+      evenKernelFourUnitGapCertificate p q s := by
+  intro q s
+  unfold evenKernelFourUnitGapCertificate evenKernelFourUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_four_lowerStep
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    ArctanGeometry.integralLowerStep p r <=
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 4 := by
+  let L : Rat := r - p
+  let D : Rat := 1 + r * r
+  let S3 : Rat := r * r + r * p + p * p
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+      r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+      r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+      r * p ^ 7 + p ^ 8
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have h945Dpos : 0 < 945 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 945) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := evenKernelFourUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <= D * (945 - 315 * S3 + 189 * S5 - 135 * S7 + 105 * S9) - 945 := by
+    dsimp [D, S3, S5, S7, S9]
+    rw [hgap_cert]
+    exact evenKernelFourUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar : 945 <= D * (945 - 315 * S3 + 189 * S5 - 135 * S7 + 105 * S9) := by
+    grind [Rat.sub_eq_add_neg]
+  have hlower_mul :
+      ArctanGeometry.integralLowerStep p r * (945 * D) = L * 945 := by
+    unfold ArctanGeometry.integralLowerStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 4 * (945 * D) =
+        L * (D * (945 - 315 * S3 + 189 * S5 - 135 * S7 + 105 * S9)) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 4 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 +
+            (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7 +
+            (r ^ 9 - p ^ 9) / 9 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventh : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hninth : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth, hseventh, hninth]
+    dsimp [L, D, S3, S5, S7, S9]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 945 * D)
+  · rw [hlower_mul, hkernel_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h945Dpos
+
+theorem evenKernelCellBound_four : EvenKernelCellBound 4 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_four_lowerStep hp0 hpr hr1
+
+private def oddKernelFiveUnitGapTerms : List SimplexCertTerm := [
+  ⟨10395, 12, 0, 0⟩,
+  ⟨62370, 11, 1, 0⟩,
+  ⟨249480, 10, 2, 0⟩,
+  ⟨717255, 9, 3, 0⟩,
+  ⟨1523907, 8, 4, 0⟩,
+  ⟨2410254, 7, 5, 0⟩,
+  ⟨2834568, 6, 6, 0⟩,
+  ⟨2459061, 5, 7, 0⟩,
+  ⟨1546545, 4, 8, 0⟩,
+  ⟨682902, 3, 9, 0⟩,
+  ⟨199824, 2, 10, 0⟩,
+  ⟨34593, 1, 11, 0⟩,
+  ⟨2661, 0, 12, 0⟩,
+  ⟨62370, 10, 1, 1⟩,
+  ⟨582120, 9, 2, 1⟩,
+  ⟨2474010, 8, 3, 1⟩,
+  ⟨6228684, 7, 4, 1⟩,
+  ⟨10236996, 6, 5, 1⟩,
+  ⟨11439648, 5, 6, 1⟩,
+  ⟨8773380, 4, 7, 1⟩,
+  ⟨4542120, 3, 8, 1⟩,
+  ⟨1511994, 2, 9, 1⟩,
+  ⟨290376, 1, 10, 1⟩,
+  ⟨24198, 0, 11, 1⟩,
+  ⟨280665, 9, 1, 2⟩,
+  ⟨2422035, 8, 2, 2⟩,
+  ⟨9209970, 7, 3, 2⟩,
+  ⟨20232828, 6, 4, 2⟩,
+  ⟨28250838, 5, 5, 2⟩,
+  ⟨25925130, 4, 6, 2⟩,
+  ⟨15574680, 3, 7, 2⟩,
+  ⟨5875980, 2, 8, 2⟩,
+  ⟨1254033, 1, 9, 2⟩,
+  ⟨114003, 0, 10, 2⟩,
+  ⟨831600, 8, 1, 3⟩,
+  ⟨6292440, 7, 2, 3⟩,
+  ⟨20623680, 6, 3, 3⟩,
+  ⟨38164896, 5, 4, 3⟩,
+  ⟨43464960, 4, 5, 3⟩,
+  ⟨31054320, 3, 6, 3⟩,
+  ⟨13511520, 2, 7, 3⟩,
+  ⟨3244560, 1, 8, 3⟩,
+  ⟨324456, 0, 9, 3⟩,
+  ⟨1600830, 7, 1, 4⟩,
+  ⟨10436580, 6, 2, 4⟩,
+  ⟨28787220, 5, 3, 4⟩,
+  ⟨43367940, 4, 4, 4⟩,
+  ⟨38336760, 3, 5, 4⟩,
+  ⟨19746540, 2, 6, 4⟩,
+  ⟨5429160, 1, 7, 4⟩,
+  ⟨603240, 0, 8, 4⟩,
+  ⟨2099790, 6, 1, 5⟩,
+  ⟨11503800, 5, 2, 5⟩,
+  ⟨25758810, 4, 3, 5⟩,
+  ⟨29995812, 3, 4, 5⟩,
+  ⟨19000674, 2, 5, 5⟩,
+  ⟨6125328, 1, 6, 5⟩,
+  ⟨765666, 0, 7, 5⟩,
+  ⟨1902285, 5, 1, 6⟩,
+  ⟨8423415, 4, 2, 6⟩,
+  ⟨14497560, 3, 3, 6⟩,
+  ⟨12001374, 2, 4, 6⟩,
+  ⟨4696461, 1, 5, 6⟩,
+  ⟨670923, 0, 6, 6⟩,
+  ⟨1164240, 4, 1, 7⟩,
+  ⟨3936240, 3, 2, 7⟩,
+  ⟨4767840, 2, 3, 7⟩,
+  ⟨2395008, 1, 4, 7⟩,
+  ⟨399168, 0, 5, 7⟩,
+  ⟨457380, 3, 1, 8⟩,
+  ⟨1074150, 2, 2, 8⟩,
+  ⟨769230, 1, 3, 8⟩,
+  ⟨153846, 0, 4, 8⟩,
+  ⟨103950, 2, 1, 9⟩,
+  ⟨138600, 1, 2, 9⟩,
+  ⟨34650, 0, 3, 9⟩,
+  ⟨10395, 1, 1, 10⟩,
+  ⟨3465, 0, 2, 10⟩]
+
+private def oddKernelFiveUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval oddKernelFiveUnitGapTerms p q s
+
+private theorem oddKernelFiveUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg oddKernelFiveUnitGapTerms := by
+  native_decide
+
+private theorem oddKernelFiveUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= oddKernelFiveUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs oddKernelFiveUnitGapTerms_nonneg
+
+private theorem oddKernelFiveUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    10395 - (1 + p * p) *
+        (10395 - 3465 * (r * r + r * p + p * p) +
+          2079 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4) -
+          1485 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+            r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6) +
+          1155 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+            r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+            r * p ^ 7 + p ^ 8) -
+          945 * (r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 +
+            r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 +
+            r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10)) =
+      oddKernelFiveUnitGapCertificate p q s := by
+  intro q s
+  unfold oddKernelFiveUnitGapCertificate oddKernelFiveUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_five_le_integralUpperStep_on_unit
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 5 <=
+      ArctanGeometry.integralUpperStep p r := by
+  let L : Rat := r - p
+  let D : Rat := 1 + p * p
+  let S3 : Rat := r * r + r * p + p * p
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+      r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+      r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+      r * p ^ 7 + p ^ 8
+  let S11 : Rat :=
+    r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 +
+      r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 +
+      r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have h10395Dpos : 0 < 10395 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 10395) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := oddKernelFiveUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <=
+        10395 - D * (10395 - 3465 * S3 + 2079 * S5 -
+          1485 * S7 + 1155 * S9 - 945 * S11) := by
+    dsimp [D, S3, S5, S7, S9, S11]
+    rw [hgap_cert]
+    exact oddKernelFiveUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar :
+      D * (10395 - 3465 * S3 + 2079 * S5 -
+          1485 * S7 + 1155 * S9 - 945 * S11) <= 10395 := by
+    grind [Rat.sub_eq_add_neg]
+  have hupper_mul :
+      ArctanGeometry.integralUpperStep p r * (10395 * D) = L * 10395 := by
+    unfold ArctanGeometry.integralUpperStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 5 * (10395 * D) =
+        L * (D * (10395 - 3465 * S3 + 2079 * S5 -
+          1485 * S7 + 1155 * S9 - 945 * S11)) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 5 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 +
+            (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7 +
+            (r ^ 9 - p ^ 9) / 9 - (r ^ 11 - p ^ 11) / 11 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventh : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hninth : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have heleventh : r ^ 11 - p ^ 11 = L * S11 := by
+      dsimp [L, S11]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth, hseventh, hninth, heleventh]
+    dsimp [L, D, S3, S5, S7, S9, S11]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 10395 * D)
+  · rw [hkernel_mul, hupper_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h10395Dpos
+
+theorem oddKernelUnitCellBound_five : OddKernelUnitCellBound 5 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_five_le_integralUpperStep_on_unit hp0 hpr hr1
+
+private def evenKernelSixUnitGapTerms : List SimplexCertTerm := [
+  ⟨45045, 14, 0, 0⟩,
+  ⟨360360, 13, 1, 0⟩,
+  ⟨1756755, 12, 2, 0⟩,
+  ⟨6216210, 11, 3, 0⟩,
+  ⟨16549533, 10, 4, 0⟩,
+  ⟨33753720, 9, 5, 0⟩,
+  ⟨53185275, 8, 6, 0⟩,
+  ⟨64851930, 7, 7, 0⟩,
+  ⟨60955895, 6, 8, 0⟩,
+  ⟨43699656, 5, 9, 0⟩,
+  ⟨23430225, 4, 10, 0⟩,
+  ⟨9086350, 3, 11, 0⟩,
+  ⟨2405235, 2, 12, 0⟩,
+  ⟨388650, 1, 13, 0⟩,
+  ⟨28913, 0, 14, 0⟩,
+  ⟨270270, 12, 1, 1⟩,
+  ⟨3513510, 11, 2, 1⟩,
+  ⟨19999980, 10, 3, 1⟩,
+  ⟨68360292, 9, 4, 1⟩,
+  ⟨157074918, 8, 5, 1⟩,
+  ⟨255717462, 7, 6, 1⟩,
+  ⟨302390088, 6, 7, 1⟩,
+  ⟨261533272, 5, 8, 1⟩,
+  ⟨164045882, 4, 9, 1⟩,
+  ⟨72716098, 3, 10, 1⟩,
+  ⟨21609952, 2, 11, 1⟩,
+  ⟨3865148, 1, 12, 1⟩,
+  ⟨314692, 0, 13, 1⟩,
+  ⟨1756755, 11, 1, 2⟩,
+  ⟨19639620, 10, 2, 2⟩,
+  ⟨99909810, 9, 3, 2⟩,
+  ⟨304576272, 8, 4, 2⟩,
+  ⟨617287671, 7, 5, 2⟩,
+  ⟨872596296, 6, 6, 2⟩,
+  ⟨877059612, 5, 7, 2⟩,
+  ⟨626134080, 4, 8, 2⟩,
+  ⟨310858977, 3, 9, 2⟩,
+  ⟨102162996, 2, 10, 2⟩,
+  ⟨20000136, 1, 11, 2⟩,
+  ⟨1767162, 0, 12, 2⟩,
+  ⟨6306300, 10, 1, 3⟩,
+  ⟨64084020, 9, 2, 3⟩,
+  ⟨292432140, 8, 3, 3⟩,
+  ⟨788071284, 7, 4, 3⟩,
+  ⟨1388034648, 6, 5, 3⟩,
+  ⟨1667941704, 5, 6, 3⟩,
+  ⟨1383319080, 4, 7, 3⟩,
+  ⟨781174680, 3, 8, 3⟩,
+  ⟨287325324, 2, 9, 3⟩,
+  ⟨62150868, 1, 10, 3⟩,
+  ⟨6005064, 0, 11, 3⟩,
+  ⟨15360345, 9, 1, 4⟩,
+  ⟨139789650, 8, 2, 4⟩,
+  ⟨563137575, 7, 3, 4⟩,
+  ⟨1317356040, 6, 4, 4⟩,
+  ⟨1970058090, 5, 5, 4⟩,
+  ⟨1950877500, 4, 6, 4⟩,
+  ⟨1278141150, 3, 7, 4⟩,
+  ⟨534004900, 2, 8, 4⟩,
+  ⟨129098255, 1, 9, 4⟩,
+  ⟨13763230, 0, 10, 4⟩,
+  ⟨26576550, 8, 1, 5⟩,
+  ⟨213243030, 7, 2, 5⟩,
+  ⟨744864120, 6, 3, 5⟩,
+  ⟨1477548072, 5, 4, 5⟩,
+  ⟨1818196380, 4, 5, 5⟩,
+  ⟨1420050060, 3, 6, 5⟩,
+  ⟨687180780, 2, 7, 5⟩,
+  ⟨188382480, 1, 8, 5⟩,
+  ⟨22405812, 0, 9, 5⟩,
+  ⟨33378345, 7, 1, 6⟩,
+  ⟨231951720, 6, 2, 6⟩,
+  ⟨685945260, 5, 3, 6⟩,
+  ⟨1117548432, 4, 4, 6⟩,
+  ⟨1082419338, 3, 5, 6⟩,
+  ⟨623083032, 2, 6, 6⟩,
+  ⟨197392338, 1, 7, 6⟩,
+  ⟨26557102, 0, 8, 6⟩,
+  ⟨30630600, 6, 1, 7⟩,
+  ⟨179819640, 5, 2, 7⟩,
+  ⟨435675240, 4, 3, 7⟩,
+  ⟨557188632, 3, 4, 7⟩,
+  ⟨396612216, 2, 5, 7⟩,
+  ⟨148993416, 1, 6, 7⟩,
+  ⟨23083632, 0, 7, 7⟩,
+  ⟨20315295, 5, 1, 8⟩,
+  ⟨97387290, 4, 2, 8⟩,
+  ⟨184549365, 3, 3, 8⟩,
+  ⟨172756584, 2, 4, 8⟩,
+  ⟨79882803, 1, 5, 8⟩,
+  ⟨14597154, 0, 6, 8⟩,
+  ⟨9459450, 4, 1, 9⟩,
+  ⟨35285250, 3, 2, 9⟩,
+  ⟨48648600, 2, 3, 9⟩,
+  ⟨29369340, 1, 4, 9⟩,
+  ⟨6546540, 0, 5, 9⟩,
+  ⟨2927925, 3, 1, 10⟩,
+  ⟨7867860, 2, 2, 10⟩,
+  ⟨6906900, 1, 3, 10⟩,
+  ⟨1975974, 0, 4, 10⟩,
+  ⟨540540, 2, 1, 11⟩,
+  ⟨900900, 1, 2, 11⟩,
+  ⟨360360, 0, 3, 11⟩,
+  ⟨45045, 1, 1, 12⟩,
+  ⟨30030, 0, 2, 12⟩]
+
+private def evenKernelSixUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval evenKernelSixUnitGapTerms p q s
+
+private theorem evenKernelSixUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg evenKernelSixUnitGapTerms := by
+  native_decide
+
+private theorem evenKernelSixUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= evenKernelSixUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs evenKernelSixUnitGapTerms_nonneg
+
+private theorem evenKernelSixUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    (1 + r * r) *
+        (45045 - 15015 * (r * r + r * p + p * p) +
+          9009 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4) -
+          6435 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+            r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6) +
+          5005 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+            r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+            r * p ^ 7 + p ^ 8) -
+          4095 * (r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 +
+            r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 +
+            r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10) +
+          3465 * (r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 +
+            r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 +
+            r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 +
+            r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12)) - 45045 =
+      evenKernelSixUnitGapCertificate p q s := by
+  intro q s
+  unfold evenKernelSixUnitGapCertificate evenKernelSixUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_six_lowerStep
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    ArctanGeometry.integralLowerStep p r <=
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 6 := by
+  let L : Rat := r - p
+  let D : Rat := 1 + r * r
+  let S3 : Rat := r * r + r * p + p * p
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+      r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+      r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+      r * p ^ 7 + p ^ 8
+  let S11 : Rat :=
+    r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 +
+      r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 +
+      r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10
+  let S13 : Rat :=
+    r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 +
+      r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 +
+      r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 +
+      r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have h45045Dpos : 0 < 45045 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 45045) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := evenKernelSixUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <=
+        D * (45045 - 15015 * S3 + 9009 * S5 -
+          6435 * S7 + 5005 * S9 - 4095 * S11 + 3465 * S13) -
+          45045 := by
+    dsimp [D, S3, S5, S7, S9, S11, S13]
+    rw [hgap_cert]
+    exact evenKernelSixUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar :
+      45045 <=
+        D * (45045 - 15015 * S3 + 9009 * S5 -
+          6435 * S7 + 5005 * S9 - 4095 * S11 + 3465 * S13) := by
+    grind [Rat.sub_eq_add_neg]
+  have hlower_mul :
+      ArctanGeometry.integralLowerStep p r * (45045 * D) = L * 45045 := by
+    unfold ArctanGeometry.integralLowerStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 6 * (45045 * D) =
+        L * (D * (45045 - 15015 * S3 + 9009 * S5 -
+          6435 * S7 + 5005 * S9 - 4095 * S11 + 3465 * S13)) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 6 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 +
+            (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7 +
+            (r ^ 9 - p ^ 9) / 9 - (r ^ 11 - p ^ 11) / 11 +
+            (r ^ 13 - p ^ 13) / 13 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventh : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hninth : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have heleventh : r ^ 11 - p ^ 11 = L * S11 := by
+      dsimp [L, S11]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hthirteenth : r ^ 13 - p ^ 13 = L * S13 := by
+      dsimp [L, S13]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth, hseventh, hninth, heleventh,
+      hthirteenth]
+    dsimp [L, D, S3, S5, S7, S9, S11, S13]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 45045 * D)
+  · rw [hlower_mul, hkernel_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h45045Dpos
+
+theorem evenKernelCellBound_six : EvenKernelCellBound 6 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_six_lowerStep hp0 hpr hr1
+
+private def oddKernelSevenUnitGapTerms : List SimplexCertTerm := [
+  ⟨45045, 16, 0, 0⟩,
+  ⟨360360, 15, 1, 0⟩,
+  ⟨1921920, 14, 2, 0⟩,
+  ⟨7507500, 13, 3, 0⟩,
+  ⟨22402380, 12, 4, 0⟩,
+  ⟨52072020, 11, 5, 0⟩,
+  ⟨95238000, 10, 6, 0⟩,
+  ⟨137773350, 9, 7, 0⟩,
+  ⟨157861990, 8, 8, 0⟩,
+  ⟨142906192, 7, 9, 0⟩,
+  ⟨101471552, 6, 10, 0⟩,
+  ⟨55762616, 5, 11, 0⟩,
+  ⟨23197160, 4, 12, 0⟩,
+  ⟨7047310, 3, 13, 0⟩,
+  ⟨1471408, 2, 14, 0⟩,
+  ⟨188173, 1, 15, 0⟩,
+  ⟨11069, 0, 16, 0⟩,
+  ⟨360360, 14, 1, 1⟩,
+  ⟨4804800, 13, 2, 1⟩,
+  ⟨30030000, 12, 3, 1⟩,
+  ⟨115675560, 11, 4, 1⟩,
+  ⟨305945640, 10, 5, 1⟩,
+  ⟨586872000, 9, 6, 1⟩,
+  ⟨841028760, 8, 7, 1⟩,
+  ⟨913747120, 7, 8, 1⟩,
+  ⟨755466712, 6, 9, 1⟩,
+  ⟨472394832, 5, 10, 1⟩,
+  ⟨219581180, 4, 11, 1⟩,
+  ⟨73437140, 3, 12, 1⟩,
+  ⟨16665720, 2, 13, 1⟩,
+  ⟨2290048, 1, 14, 1⟩,
+  ⟨143128, 0, 15, 1⟩,
+  ⟨2342340, 13, 1, 2⟩,
+  ⟨29609580, 12, 2, 2⟩,
+  ⟨172071900, 11, 3, 2⟩,
+  ⟨608648040, 10, 4, 2⟩,
+  ⟨1461439980, 9, 5, 2⟩,
+  ⟨2513845620, 8, 6, 2⟩,
+  ⟨3184295400, 7, 7, 2⟩,
+  ⟨3004361360, 6, 8, 2⟩,
+  ⟨2108622516, 5, 9, 2⟩,
+  ⟨1085595420, 4, 10, 2⟩,
+  ⟨397701850, 3, 11, 2⟩,
+  ⟨97921320, 2, 12, 2⟩,
+  ⟨14472660, 1, 13, 2⟩,
+  ⟨964844, 0, 14, 2⟩,
+  ⟨10090080, 12, 1, 3⟩,
+  ⟨116996880, 11, 2, 3⟩,
+  ⟨619338720, 10, 3, 3⟩,
+  ⟨1978136160, 9, 4, 3⟩,
+  ⟨4242398160, 8, 5, 3⟩,
+  ⟨6430195200, 7, 6, 3⟩,
+  ⟨7054887840, 6, 7, 3⟩,
+  ⟨5637391760, 5, 8, 3⟩,
+  ⟨3250487240, 4, 9, 3⟩,
+  ⟨1315972840, 3, 10, 3⟩,
+  ⟨354055520, 2, 11, 3⟩,
+  ⟨56608160, 1, 12, 3⟩,
+  ⟨4043440, 0, 13, 3⟩,
+  ⟨29729700, 11, 1, 4⟩,
+  ⟨314113800, 10, 2, 4⟩,
+  ⟨1501500000, 9, 3, 4⟩,
+  ⟨4282518240, 8, 4, 4⟩,
+  ⟨8089601520, 7, 5, 4⟩,
+  ⟨10613562960, 6, 6, 4⟩,
+  ⟨9853864020, 5, 7, 4⟩,
+  ⟨6461354900, 4, 8, 4⟩,
+  ⟨2925232310, 3, 9, 4⟩,
+  ⟨867932520, 2, 10, 4⟩,
+  ⟨151183760, 1, 11, 4⟩,
+  ⟨11629520, 0, 12, 4⟩,
+  ⟨63603540, 10, 1, 5⟩,
+  ⟨606606000, 9, 2, 5⟩,
+  ⟨2587925340, 8, 3, 5⟩,
+  ⟨6496714224, 7, 4, 5⟩,
+  ⟨10613586984, 6, 5, 5⟩,
+  ⟨11770510752, 5, 6, 5⟩,
+  ⟨8954765820, 4, 7, 5⟩,
+  ⟨4601817220, 3, 8, 5⟩,
+  ⟨1522965444, 2, 9, 5⟩,
+  ⟨291489744, 1, 10, 5⟩,
+  ⟨24290812, 0, 11, 5⟩,
+  ⟨101891790, 9, 1, 6⟩,
+  ⟨866635770, 8, 2, 6⟩,
+  ⟨3251408160, 7, 3, 6⟩,
+  ⟨7051788744, 6, 4, 6⟩,
+  ⟨9725239524, 5, 5, 6⟩,
+  ⟨8823114300, 4, 6, 6⟩,
+  ⟨5249033790, 3, 7, 6⟩,
+  ⟨1965843880, 2, 8, 6⟩,
+  ⟨417791374, 1, 9, 6⟩,
+  ⟨37981034, 0, 10, 6⟩,
+  ⟨123963840, 8, 1, 7⟩,
+  ⟨926365440, 7, 2, 7⟩,
+  ⟨2999156160, 6, 3, 7⟩,
+  ⟨5482949472, 5, 4, 7⟩,
+  ⟨6173927760, 4, 5, 7⟩,
+  ⟨4368627120, 3, 6, 7⟩,
+  ⟨1887050880, 2, 7, 7⟩,
+  ⟨451285120, 1, 8, 7⟩,
+  ⟨45128512, 0, 9, 7⟩,
+  ⟨114954840, 7, 1, 8⟩,
+  ⟨740299560, 6, 2, 8⟩,
+  ⟨2016754740, 5, 3, 8⟩,
+  ⟨3003420420, 4, 4, 8⟩,
+  ⟨2629396770, 3, 5, 8⟩,
+  ⟨1344709080, 2, 6, 8⟩,
+  ⟨368236440, 1, 7, 8⟩,
+  ⟨40915160, 0, 8, 8⟩,
+  ⟨80720640, 6, 1, 9⟩,
+  ⟨436516080, 5, 2, 9⟩,
+  ⟨966065100, 4, 3, 9⟩,
+  ⟨1114293180, 3, 4, 9⟩,
+  ⟨701020320, 2, 5, 9⟩,
+  ⟨225139200, 1, 6, 9⟩,
+  ⟨28142400, 0, 7, 9⟩,
+  ⟨42162120, 5, 1, 10⟩,
+  ⟨184624440, 4, 2, 10⟩,
+  ⟨314984670, 3, 3, 10⟩,
+  ⟨259170912, 2, 4, 10⟩,
+  ⟨101092992, 1, 5, 10⟩,
+  ⟨14441856, 0, 6, 10⟩,
+  ⟨15855840, 4, 1, 11⟩,
+  ⟨53213160, 3, 2, 11⟩,
+  ⟨64144080, 2, 3, 11⟩,
+  ⟨32144112, 1, 4, 11⟩,
+  ⟨5357352, 0, 5, 11⟩,
+  ⟨4054050, 3, 1, 12⟩,
+  ⟨9489480, 2, 2, 12⟩,
+  ⟨6786780, 1, 3, 12⟩,
+  ⟨1357356, 0, 4, 12⟩,
+  ⟨630630, 2, 1, 13⟩,
+  ⟨840840, 1, 2, 13⟩,
+  ⟨210210, 0, 3, 13⟩,
+  ⟨45045, 1, 1, 14⟩,
+  ⟨15015, 0, 2, 14⟩]
+
+private def oddKernelSevenUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval oddKernelSevenUnitGapTerms p q s
+
+private theorem oddKernelSevenUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg oddKernelSevenUnitGapTerms := by
+  native_decide
+
+private theorem oddKernelSevenUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= oddKernelSevenUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs oddKernelSevenUnitGapTerms_nonneg
+
+private theorem oddKernelSevenUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    45045 - (1 + p * p) *
+        (45045 - 15015 * (r * r + r * p + p * p) +
+          9009 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4) -
+          6435 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+            r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6) +
+          5005 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+            r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+            r * p ^ 7 + p ^ 8) -
+          4095 * (r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 +
+            r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 +
+            r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10) +
+          3465 * (r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 +
+            r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 +
+            r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 +
+            r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12) -
+          3003 * (r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 +
+            r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 +
+            r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 +
+            r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 +
+            r * p ^ 13 + p ^ 14)) =
+      oddKernelSevenUnitGapCertificate p q s := by
+  intro q s
+  unfold oddKernelSevenUnitGapCertificate oddKernelSevenUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_seven_le_integralUpperStep_on_unit
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 7 <=
+      ArctanGeometry.integralUpperStep p r := by
+  let L : Rat := r - p
+  let D : Rat := 1 + p * p
+  let S3 : Rat := r * r + r * p + p * p
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 +
+      r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 +
+      r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 +
+      r * p ^ 7 + p ^ 8
+  let S11 : Rat :=
+    r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 +
+      r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 +
+      r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10
+  let S13 : Rat :=
+    r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 +
+      r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 +
+      r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 +
+      r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12
+  let S15 : Rat :=
+    r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 +
+      r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 +
+      r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 +
+      r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 +
+      r * p ^ 13 + p ^ 14
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have h45045Dpos : 0 < 45045 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 45045) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := oddKernelSevenUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <=
+        45045 - D * (45045 - 15015 * S3 + 9009 * S5 -
+          6435 * S7 + 5005 * S9 - 4095 * S11 + 3465 * S13 -
+          3003 * S15) := by
+    dsimp [D, S3, S5, S7, S9, S11, S13, S15]
+    rw [hgap_cert]
+    exact oddKernelSevenUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar :
+      D * (45045 - 15015 * S3 + 9009 * S5 -
+          6435 * S7 + 5005 * S9 - 4095 * S11 + 3465 * S13 -
+          3003 * S15) <= 45045 := by
+    grind [Rat.sub_eq_add_neg]
+  have hupper_mul :
+      ArctanGeometry.integralUpperStep p r * (45045 * D) = L * 45045 := by
+    unfold ArctanGeometry.integralUpperStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 7 * (45045 * D) =
+        L * (D * (45045 - 15015 * S3 + 9009 * S5 -
+          6435 * S7 + 5005 * S9 - 4095 * S11 + 3465 * S13 -
+          3003 * S15)) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 7 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 +
+            (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7 +
+            (r ^ 9 - p ^ 9) / 9 - (r ^ 11 - p ^ 11) / 11 +
+            (r ^ 13 - p ^ 13) / 13 - (r ^ 15 - p ^ 15) / 15 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventh : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hninth : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have heleventh : r ^ 11 - p ^ 11 = L * S11 := by
+      dsimp [L, S11]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hthirteenth : r ^ 13 - p ^ 13 = L * S13 := by
+      dsimp [L, S13]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifteenth : r ^ 15 - p ^ 15 = L * S15 := by
+      dsimp [L, S15]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth, hseventh, hninth, heleventh,
+      hthirteenth, hfifteenth]
+    dsimp [L, D, S3, S5, S7, S9, S11, S13, S15]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 45045 * D)
+  · rw [hkernel_mul, hupper_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h45045Dpos
+
+theorem oddKernelUnitCellBound_seven : OddKernelUnitCellBound 7 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_seven_le_integralUpperStep_on_unit hp0 hpr hr1
+
+private def evenKernelEightUnitGapTerms : List SimplexCertTerm := [
+  ⟨765765, 18, 0, 0⟩,
+  ⟨7657650, 17, 1, 0⟩,
+  ⟨47732685, 16, 2, 0⟩,
+  ⟨218498280, 15, 3, 0⟩,
+  ⟨768828060, 14, 4, 0⟩,
+  ⟨2132910780, 13, 5, 0⟩,
+  ⟨4734761460, 12, 6, 0⟩,
+  ⟨8485113780, 11, 7, 0⟩,
+  ⟨12338029990, 10, 8, 0⟩,
+  ⟨14583559276, 9, 9, 0⟩,
+  ⟨13993581654, 8, 10, 0⟩,
+  ⟨10847311176, 7, 11, 0⟩,
+  ⟨6730560984, 6, 12, 0⟩,
+  ⟨3293444646, 5, 13, 0⟩,
+  ⟨1241880804, 4, 14, 0⟩,
+  ⟨347992686, 3, 15, 0⟩,
+  ⟨68212269, 2, 16, 0⟩,
+  ⟨8344906, 1, 17, 0⟩,
+  ⟨479509, 0, 18, 0⟩,
+  ⟨6126120, 16, 1, 1⟩,
+  ⟨104144040, 15, 2, 1⟩,
+  ⟨802521720, 14, 3, 1⟩,
+  ⟨3822698880, 13, 4, 1⟩,
+  ⟨12647374740, 12, 5, 1⟩,
+  ⟨30841075980, 11, 6, 1⟩,
+  ⟨57349234800, 10, 7, 1⟩,
+  ⟨82942413840, 9, 8, 1⟩,
+  ⟨94267684368, 8, 9, 1⟩,
+  ⟨84449471184, 7, 10, 1⟩,
+  ⟨59413172364, 6, 11, 1⟩,
+  ⟨32469387048, 5, 12, 1⟩,
+  ⟨13508215470, 4, 13, 1⟩,
+  ⟨4134652722, 3, 14, 1⟩,
+  ⟨877955616, 2, 15, 1⟩,
+  ⟨115541136, 1, 16, 1⟩,
+  ⟨7099632, 0, 17, 1⟩,
+  ⟨52072020, 15, 1, 2⟩,
+  ⟨792311520, 14, 2, 2⟩,
+  ⟨5630925300, 13, 3, 2⟩,
+  ⟨24760756020, 12, 4, 2⟩,
+  ⟨75294609390, 11, 5, 2⟩,
+  ⟨167666653440, 10, 6, 2⟩,
+  ⟨282355496280, 9, 7, 2⟩,
+  ⟨366041698880, 8, 8, 2⟩,
+  ⟨368169932416, 7, 9, 2⟩,
+  ⟨287197356992, 6, 10, 2⟩,
+  ⟨172266367546, 5, 11, 2⟩,
+  ⟨77999360390, 4, 12, 2⟩,
+  ⟨25799627125, 3, 13, 2⟩,
+  ⟨5884288064, 2, 14, 2⟩,
+  ⟨827427808, 1, 15, 2⟩,
+  ⟨54077624, 0, 16, 2⟩,
+  ⟨257297040, 14, 1, 3⟩,
+  ⟨3655251600, 13, 2, 3⟩,
+  ⟨24085861800, 12, 3, 3⟩,
+  ⟨97533956520, 11, 4, 3⟩,
+  ⟨271097146320, 10, 5, 3⟩,
+  ⟨546965081520, 9, 6, 3⟩,
+  ⟨825793974720, 8, 7, 3⟩,
+  ⟨947407764160, 7, 8, 3⟩,
+  ⟨829656619792, 6, 9, 3⟩,
+  ⟨551660596032, 5, 10, 3⟩,
+  ⟨274075894820, 4, 11, 3⟩,
+  ⟨98632471700, 3, 12, 3⟩,
+  ⟨24301202160, 2, 13, 3⟩,
+  ⟨3668988688, 1, 14, 3⟩,
+  ⟨256113568, 0, 15, 3⟩,
+  ⟨888287400, 13, 1, 4⟩,
+  ⟨11690679000, 12, 2, 4⟩,
+  ⟨70902181350, 11, 3, 4⟩,
+  ⟨262326584520, 10, 4, 4⟩,
+  ⟨660380420700, 9, 5, 4⟩,
+  ⟨1194043799520, 8, 6, 4⟩,
+  ⟨1594719615060, 7, 7, 4⟩,
+  ⟨1592221811180, 6, 8, 4⟩,
+  ⟨1187970962178, 5, 9, 4⟩,
+  ⟨653955605940, 4, 10, 4⟩,
+  ⟨258100312015, 3, 11, 4⟩,
+  ⟨69151285560, 2, 12, 4⟩,
+  ⟨11272447380, 1, 13, 4⟩,
+  ⟨844409312, 0, 14, 4⟩,
+  ⟨2263601340, 12, 1, 5⟩,
+  ⟨27409281900, 11, 2, 5⟩,
+  ⟨151831800120, 10, 3, 5⟩,
+  ⟨508592116032, 9, 4, 5⟩,
+  ⟨1146932594808, 8, 5, 5⟩,
+  ⟨1833681207072, 7, 6, 5⟩,
+  ⟨2130257557428, 6, 7, 5⟩,
+  ⟨1811197860472, 5, 8, 5⟩,
+  ⟨1118141906882, 4, 9, 5⟩,
+  ⟨488685533518, 3, 10, 5⟩,
+  ⟨143506489672, 2, 11, 5⟩,
+  ⟨25422783008, 1, 12, 5⟩,
+  ⟨2054831752, 0, 13, 5⟩,
+  ⟨4400085690, 11, 1, 6⟩,
+  ⟨48647518920, 10, 2, 6⟩,
+  ⟨243877774140, 9, 3, 6⟩,
+  ⟨731466691956, 8, 4, 6⟩,
+  ⟨1457806638288, 7, 5, 6⟩,
+  ⟨2026212556368, 6, 6, 6⟩,
+  ⟨2003281366086, 5, 7, 6⟩,
+  ⟨1408382565590, 4, 8, 6⟩,
+  ⟨689830602461, 3, 9, 6⟩,
+  ⟨224162564808, 2, 10, 6⟩,
+  ⟨43492673588, 1, 11, 6⟩,
+  ⟨3817301516, 0, 12, 6⟩,
+  ⟨6652966320, 10, 1, 7⟩,
+  ⟨66533747280, 9, 2, 7⟩,
+  ⟨298489070880, 8, 3, 7⟩,
+  ⟨790720362432, 7, 4, 7⟩,
+  ⟨1369101237504, 6, 5, 7⟩,
+  ⟨1618271658432, 5, 6, 7⟩,
+  ⟨1321940557080, 4, 7, 7⟩,
+  ⟨736747125400, 3, 8, 7⟩,
+  ⟨268067225712, 2, 9, 7⟩,
+  ⟨57499847184, 1, 10, 7⟩,
+  ⟨5521683232, 0, 11, 7⟩,
+  ⟨7901163270, 9, 1, 8⟩,
+  ⟨70665815220, 8, 2, 8⟩,
+  ⟨279803383860, 7, 3, 8⟩,
+  ⟨643434755964, 6, 4, 8⟩,
+  ⟨946593461814, 5, 5, 8⟩,
+  ⟨923562765840, 4, 6, 8⟩,
+  ⟨597457328325, 3, 7, 8⟩,
+  ⟨247078866320, 2, 8, 8⟩,
+  ⟨59271168814, 1, 9, 8⟩,
+  ⟨6284233124, 0, 10, 8⟩,
+  ⟨7388100720, 8, 1, 9⟩,
+  ⟨58267569360, 7, 2, 9⟩,
+  ⟨200078058180, 6, 3, 9⟩,
+  ⟨390502168056, 5, 4, 9⟩,
+  ⟨473642499330, 4, 5, 9⟩,
+  ⟨365483662830, 3, 6, 9⟩,
+  ⟨175191279120, 2, 7, 9⟩,
+  ⟨47691746960, 1, 8, 9⟩,
+  ⟨5645209856, 0, 9, 9⟩,
+  ⟨5415490080, 7, 1, 10⟩,
+  ⟨36993596640, 6, 2, 10⟩,
+  ⟨107665027470, 5, 3, 10⟩,
+  ⟨172983556746, 4, 4, 10⟩,
+  ⟨165657891399, 3, 5, 10⟩,
+  ⟨94539684096, 2, 6, 10⟩,
+  ⟨29767167144, 1, 7, 10⟩,
+  ⟨3988823696, 0, 8, 10⟩,
+  ⟨3075312240, 6, 1, 11⟩,
+  ⟨17773916160, 5, 2, 11⟩,
+  ⟨42497915460, 4, 3, 11⟩,
+  ⟨53788763028, 3, 4, 11⟩,
+  ⟨37997463504, 2, 5, 11⟩,
+  ⟨14201279664, 1, 6, 11⟩,
+  ⟨2193267648, 0, 7, 11⟩,
+  ⟨1324773450, 5, 1, 12⟩,
+  ⟨6273146880, 4, 2, 12⟩,
+  ⟨11778231465, 3, 3, 12⟩,
+  ⟨10955340396, 2, 4, 12⟩,
+  ⟨5045472432, 1, 5, 12⟩,
+  ⟨919880676, 0, 6, 12⟩,
+  ⟨418107690, 4, 1, 13⟩,
+  ⟨1547355810, 3, 2, 13⟩,
+  ⟨2122700580, 2, 3, 13⟩,
+  ⟨1277908632, 1, 4, 13⟩,
+  ⟨284456172, 0, 5, 13⟩,
+  ⟨91126035, 3, 1, 14⟩,
+  ⟨244023780, 2, 2, 14⟩,
+  ⟨213903690, 1, 3, 14⟩,
+  ⟨61159098, 0, 4, 14⟩,
+  ⟨12252240, 2, 1, 15⟩,
+  ⟨20420400, 1, 2, 15⟩,
+  ⟨8168160, 0, 3, 15⟩,
+  ⟨765765, 1, 1, 16⟩,
+  ⟨510510, 0, 2, 16⟩]
+
+private def evenKernelEightUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval evenKernelEightUnitGapTerms p q s
+
+private theorem evenKernelEightUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg evenKernelEightUnitGapTerms := by
+  native_decide
+
+private theorem evenKernelEightUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= evenKernelEightUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs evenKernelEightUnitGapTerms_nonneg
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 10000 in
+private theorem evenKernelEightUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    (1 + r * r) *
+      (765765 - 255255 * (r ^ 2 + r * p + p ^ 2)
+        + 153153 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4)
+        - 109395 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6)
+        + 85085 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8)
+        - 69615 * (r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10)
+        + 58905 * (r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12)
+        - 51051 * (r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 + r * p ^ 13 + p ^ 14)
+        + 45045 * (r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4 + r ^ 11 * p ^ 5 + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8 + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10 + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12 + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16)
+          ) - 765765 =
+      evenKernelEightUnitGapCertificate p q s := by
+  intro q s
+  unfold evenKernelEightUnitGapCertificate evenKernelEightUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_eight_lowerStep
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    ArctanGeometry.integralLowerStep p r <=
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 8 := by
+  let L : Rat := r - p
+  let D : Rat := 1 + r * r
+  let S3 : Rat :=
+    r ^ 2 + r * p + p ^ 2
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4
+      + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4
+      + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8
+  let S11 : Rat :=
+    r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4
+      + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8
+      + r * p ^ 9 + p ^ 10
+  let S13 : Rat :=
+    r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4
+      + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8
+      + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12
+  let S15 : Rat :=
+    r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4
+      + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8
+      + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12
+      + r * p ^ 13 + p ^ 14
+  let S17 : Rat :=
+    r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4
+      + r ^ 11 * p ^ 5 + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8
+      + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10 + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12
+      + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have h765765Dpos : 0 < 765765 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 765765) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := evenKernelEightUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <=
+        D * (765765 - 255255 * S3 + 153153 * S5 - 109395 * S7 + 85085 * S9 - 69615 * S11 + 58905 * S13
+          - 51051 * S15 + 45045 * S17
+          ) - 765765 := by
+    dsimp [D, S3, S5, S7, S9, S11, S13, S15, S17]
+    rw [hgap_cert]
+    exact evenKernelEightUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar :
+      765765 <=
+        D * (765765 - 255255 * S3 + 153153 * S5 - 109395 * S7 + 85085 * S9 - 69615 * S11 + 58905 * S13
+          - 51051 * S15 + 45045 * S17
+          ) := by
+    grind [Rat.sub_eq_add_neg]
+  have hlower_mul :
+      ArctanGeometry.integralLowerStep p r * (765765 * D) = L * 765765 := by
+    unfold ArctanGeometry.integralLowerStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 8 * (765765 * D) =
+        L * (D * (765765 - 255255 * S3 + 153153 * S5 - 109395 * S7 + 85085 * S9 - 69615 * S11 + 58905 * S13
+          - 51051 * S15 + 45045 * S17
+          )) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 8 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 + (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7
+          + (r ^ 9 - p ^ 9) / 9 - (r ^ 11 - p ^ 11) / 11 + (r ^ 13 - p ^ 13) / 13
+          - (r ^ 15 - p ^ 15) / 15 + (r ^ 17 - p ^ 17) / 17 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventh : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hninth : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have heleventh : r ^ 11 - p ^ 11 = L * S11 := by
+      dsimp [L, S11]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hthirteenth : r ^ 13 - p ^ 13 = L * S13 := by
+      dsimp [L, S13]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifteenth : r ^ 15 - p ^ 15 = L * S15 := by
+      dsimp [L, S15]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventeenth : r ^ 17 - p ^ 17 = L * S17 := by
+      dsimp [L, S17]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth, hseventh, hninth,
+      heleventh, hthirteenth, hfifteenth, hseventeenth]
+    dsimp [L, D, S3, S5, S7, S9, S11, S13, S15, S17]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 765765 * D)
+  · rw [hlower_mul, hkernel_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h765765Dpos
+
+theorem evenKernelCellBound_eight : EvenKernelCellBound 8 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_eight_lowerStep hp0 hpr hr1
+
+private def oddKernelNineUnitGapTerms : List SimplexCertTerm := [
+  ⟨14549535, 20, 0, 0⟩,
+  ⟨145495350, 19, 1, 0⟩,
+  ⟨969969000, 18, 2, 0⟩,
+  ⟨4777097325, 17, 3, 0⟩,
+  ⟨18259666425, 16, 4, 0⟩,
+  ⟨55579223700, 15, 5, 0⟩,
+  ⟨136760086320, 14, 6, 0⟩,
+  ⟨274691063790, 13, 7, 0⟩,
+  ⟨453274365830, 12, 8, 0⟩,
+  ⟨616889383396, 11, 9, 0⟩,
+  ⟨693526323360, 10, 10, 0⟩,
+  ⟨643503644758, 9, 11, 0⟩,
+  ⟨491037337182, 8, 12, 0⟩,
+  ⟨306051675138, 7, 13, 0⟩,
+  ⟨154119263952, 6, 14, 0⟩,
+  ⟨61681042863, 5, 15, 0⟩,
+  ⟨19141496667, 4, 16, 0⟩,
+  ⟨4434789278, 3, 17, 0⟩,
+  ⟨720827032, 2, 18, 0⟩,
+  ⟨73189137, 1, 19, 0⟩,
+  ⟨3485197, 0, 20, 0⟩,
+  ⟨145495350, 18, 1, 1⟩,
+  ⟨2521919400, 17, 2, 1⟩,
+  ⟨20805835050, 16, 3, 1⟩,
+  ⟨107899351560, 15, 4, 1⟩,
+  ⟨393380627640, 14, 5, 1⟩,
+  ⟨1069648557120, 13, 6, 1⟩,
+  ⟨2246664368520, 12, 7, 1⟩,
+  ⟨3725153935360, 11, 8, 1⟩,
+  ⟨4940675668500, 10, 9, 1⟩,
+  ⟨5278303838496, 9, 10, 1⟩,
+  ⟨4550680459416, 8, 11, 1⟩,
+  ⟨3156843498732, 7, 12, 1⟩,
+  ⟨1747848982680, 6, 13, 1⟩,
+  ⟨761320695168, 5, 14, 1⟩,
+  ⟨254912946264, 4, 15, 1⟩,
+  ⟨63239737104, 3, 16, 1⟩,
+  ⟨10931301958, 2, 17, 1⟩,
+  ⟨1172792040, 1, 18, 1⟩,
+  ⟨58639602, 0, 19, 1⟩,
+  ⟨1236710475, 17, 1, 2⟩,
+  ⟨20587592025, 16, 2, 2⟩,
+  ⟨160917857100, 15, 3, 2⟩,
+  ⟨784394530920, 14, 4, 2⟩,
+  ⟨2670305257620, 13, 5, 2⟩,
+  ⟨6735844409580, 12, 6, 2⟩,
+  ⟨13033273916520, 11, 7, 2⟩,
+  ⟨19751589600600, 10, 8, 2⟩,
+  ⟨23725183173978, 9, 9, 2⟩,
+  ⟨22705993210446, 8, 10, 2⟩,
+  ⟨17304035506758, 7, 11, 2⟩,
+  ⟨10434292427160, 6, 12, 2⟩,
+  ⟨4913463667860, 5, 13, 2⟩,
+  ⟨1767227265612, 4, 14, 2⟩,
+  ⟨468281978784, 3, 15, 2⟩,
+  ⟨86014612872, 2, 16, 2⟩,
+  ⟨9759318555, 1, 17, 2⟩,
+  ⟨513648345, 0, 18, 2⟩,
+  ⟨6983776800, 16, 1, 3⟩,
+  ⟨109024515600, 15, 2, 3⟩,
+  ⟨796150555200, 14, 3, 3⟩,
+  ⟨3609215850240, 13, 4, 3⟩,
+  ⟨11365398364320, 12, 5, 3⟩,
+  ⟨26352361669920, 11, 6, 3⟩,
+  ⟨46521597751200, 10, 7, 3⟩,
+  ⟨63756978759760, 9, 8, 3⟩,
+  ⟨68517841944552, 8, 9, 3⟩,
+  ⟨57897767759832, 7, 10, 3⟩,
+  ⟨38312773786560, 6, 11, 3⟩,
+  ⟨19628304622080, 5, 12, 3⟩,
+  ⟨7624160062560, 4, 13, 3⟩,
+  ⟨2167714426848, 3, 14, 3⟩,
+  ⟨424756142208, 2, 15, 3⟩,
+  ⟨51135648480, 1, 16, 3⟩,
+  ⟨2840869360, 0, 17, 3⟩,
+  ⟨27644116500, 15, 1, 4⟩,
+  ⟨403313110200, 14, 2, 4⟩,
+  ⟨2739386449800, 13, 3, 4⟩,
+  ⟨11487265269480, 12, 4, 4⟩,
+  ⟨33247278224160, 11, 5, 4⟩,
+  ⟨70323223627800, 10, 6, 4⟩,
+  ⟨112244449634460, 9, 7, 4⟩,
+  ⟨137589152080380, 8, 8, 4⟩,
+  ⟨130506808970538, 7, 9, 4⟩,
+  ⟨95713729773480, 6, 10, 4⟩,
+  ⟨53782491923160, 5, 11, 4⟩,
+  ⟨22712537163960, 4, 12, 4⟩,
+  ⟨6967876207680, 3, 13, 4⟩,
+  ⟨1463322101832, 2, 14, 4⟩,
+  ⟨187645454640, 1, 15, 4⟩,
+  ⟨11037967920, 0, 16, 4⟩,
+  ⟨81651990420, 14, 1, 5⟩,
+  ⟨1107859793040, 13, 2, 5⟩,
+  ⟨6959158986780, 12, 3, 5⟩,
+  ⟨26815537941192, 11, 4, 5⟩,
+  ⟨70780752462420, 10, 5, 5⟩,
+  ⟨135316302428736, 9, 6, 5⟩,
+  ⟨193107574243584, 8, 7, 5⟩,
+  ⟨208832583635676, 7, 8, 5⟩,
+  ⟨171829740638556, 6, 9, 5⟩,
+  ⟨106940572122384, 5, 10, 5⟩,
+  ⟨49493261140596, 4, 11, 5⟩,
+  ⟨16491315859704, 3, 12, 5⟩,
+  ⟨3732036332796, 2, 13, 5⟩,
+  ⟨512004282048, 1, 14, 5⟩,
+  ⟨32000267628, 0, 15, 5⟩,
+  ⟨186495939630, 13, 1, 6⟩,
+  ⟨2339574927690, 12, 2, 6⟩,
+  ⟨13500649322160, 11, 3, 6⟩,
+  ⟨47428283202300, 10, 4, 6⟩,
+  ⟨113110120084962, 9, 5, 6⟩,
+  ⟨193257475192782, 8, 6, 6⟩,
+  ⟨243191467673154, 7, 7, 6⟩,
+  ⟨228001727913960, 6, 8, 6⟩,
+  ⟨159082972562514, 5, 9, 6⟩,
+  ⟨81472170336102, 4, 10, 6⟩,
+  ⟨29716154401752, 3, 11, 6⟩,
+  ⟨7292783609244, 2, 12, 6⟩,
+  ⟨1075880729070, 1, 13, 6⟩,
+  ⟨71725381938, 0, 14, 6⟩,
+  ⟨336618041760, 12, 1, 7⟩,
+  ⟨3878168854560, 11, 2, 7⟩,
+  ⟨20396352936960, 10, 3, 7⟩,
+  ⟨64714376222496, 9, 4, 7⟩,
+  ⟨137868181122672, 8, 5, 7⟩,
+  ⟨207597494394576, 7, 6, 7⟩,
+  ⟨226326247804800, 6, 7, 7⟩,
+  ⟨179784851600640, 5, 8, 7⟩,
+  ⟨103117167163296, 4, 9, 7⟩,
+  ⟨41563897438752, 3, 10, 7⟩,
+  ⟨11145936050496, 2, 11, 7⟩,
+  ⟨1778769578880, 1, 12, 7⟩,
+  ⟨127054969920, 0, 13, 7⟩,
+  ⟨486536450400, 11, 1, 8⟩,
+  ⟨5106828586860, 10, 2, 8⟩,
+  ⟨24246741879360, 9, 3, 8⟩,
+  ⟨68687400285504, 8, 4, 8⟩,
+  ⟨128882929549374, 7, 5, 8⟩,
+  ⟨168007172069880, 6, 6, 8⟩,
+  ⟨155047277693880, 5, 7, 8⟩,
+  ⟨101125470508920, 4, 8, 8⟩,
+  ⟨45579113792784, 3, 9, 8⟩,
+  ⟨13478955423804, 2, 10, 8⟩,
+  ⟨2343496247820, 1, 11, 8⟩,
+  ⟨180268942140, 0, 12, 8⟩,
+  ⟨567024478020, 10, 1, 9⟩,
+  ⟨5370369164160, 9, 2, 9⟩,
+  ⟨22752679229280, 8, 3, 9⟩,
+  ⟨56729766008916, 7, 4, 9⟩,
+  ⟨92073686544840, 6, 5, 9⟩,
+  ⟨101491747431360, 5, 6, 9⟩,
+  ⟨76798647988920, 4, 7, 9⟩,
+  ⟨39290942593760, 3, 8, 9⟩,
+  ⟨12960404487316, 2, 9, 9⟩,
+  ⟨2475946396560, 1, 10, 9⟩,
+  ⟨206328866380, 0, 11, 9⟩,
+  ⟨533764241010, 9, 1, 10⟩,
+  ⟨4508173419750, 8, 2, 10⟩,
+  ⟨16797583652850, 7, 3, 10⟩,
+  ⟨36192189465432, 6, 4, 10⟩,
+  ⟨49610697932796, 5, 5, 10⟩,
+  ⟨44768398737348, 4, 6, 10⟩,
+  ⟨26516266477272, 3, 7, 10⟩,
+  ⟨9898472306008, 2, 8, 10⟩,
+  ⟨2099814110394, 1, 9, 10⟩,
+  ⟨190892191854, 0, 10, 10⟩,
+  ⟨404593469280, 8, 1, 11⟩,
+  ⟨3002674835160, 7, 2, 11⟩,
+  ⟨9657632144160, 6, 3, 11⟩,
+  ⟨17549672396256, 5, 4, 11⟩,
+  ⟨19657609027056, 4, 5, 11⟩,
+  ⟨13849866984096, 3, 6, 11⟩,
+  ⟨5963693104512, 2, 7, 11⟩,
+  ⟨1423681699440, 1, 8, 11⟩,
+  ⟨142368169944, 0, 9, 11⟩,
+  ⟨244926872190, 7, 1, 12⟩,
+  ⟨1567120715160, 6, 2, 12⟩,
+  ⟨4244196356400, 5, 3, 12⟩,
+  ⟨6288611657328, 4, 4, 12⟩,
+  ⟨5482947646176, 3, 5, 12⟩,
+  ⟨2795731117608, 2, 6, 12⟩,
+  ⟨764316172620, 1, 7, 12⟩,
+  ⟨84924019180, 0, 8, 12⟩,
+  ⟨116716369770, 6, 1, 13⟩,
+  ⟨627647540520, 5, 2, 13⟩,
+  ⟨1382467716630, 4, 3, 13⟩,
+  ⟨1588564789812, 3, 4, 13⟩,
+  ⟨996699405702, 2, 5, 13⟩,
+  ⟨319624184880, 1, 6, 13⟩,
+  ⟨39953023110, 0, 7, 13⟩,
+  ⟨42790182435, 5, 1, 14⟩,
+  ⟨186568687305, 4, 2, 14⟩,
+  ⟨317238061140, 3, 3, 14⟩,
+  ⟨260419217058, 2, 4, 14⟩,
+  ⟨101453907555, 1, 5, 14⟩,
+  ⟨14493415365, 0, 6, 14⟩,
+  ⟨11639628000, 4, 1, 15⟩,
+  ⟨38953955040, 3, 2, 15⟩,
+  ⟨46868902080, 2, 3, 15⟩,
+  ⟨23465490048, 1, 4, 15⟩,
+  ⟨3910915008, 0, 5, 15⟩,
+  ⟨2211529320, 3, 1, 16⟩,
+  ⟨5169934770, 2, 2, 16⟩,
+  ⟨3695581890, 1, 3, 16⟩,
+  ⟨739116378, 0, 4, 16⟩,
+  ⟨261891630, 2, 1, 17⟩,
+  ⟨349188840, 1, 2, 17⟩,
+  ⟨87297210, 0, 3, 17⟩,
+  ⟨14549535, 1, 1, 18⟩,
+  ⟨4849845, 0, 2, 18⟩]
+
+private def oddKernelNineUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval oddKernelNineUnitGapTerms p q s
+
+private theorem oddKernelNineUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg oddKernelNineUnitGapTerms := by
+  native_decide
+
+private theorem oddKernelNineUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= oddKernelNineUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs oddKernelNineUnitGapTerms_nonneg
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 10000 in
+private theorem oddKernelNineUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    14549535 - (1 + p * p) *
+      (14549535 - 4849845 * (r ^ 2 + r * p + p ^ 2)
+        + 2909907 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4)
+        - 2078505 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6)
+        + 1616615 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8)
+        - 1322685 * (r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10)
+        + 1119195 * (r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12)
+        - 969969 * (r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 + r * p ^ 13 + p ^ 14)
+        + 855855 * (r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4 + r ^ 11 * p ^ 5 + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8 + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10 + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12 + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16)
+        - 765765 * (r ^ 18 + r ^ 17 * p + r ^ 16 * p ^ 2 + r ^ 15 * p ^ 3 + r ^ 14 * p ^ 4 + r ^ 13 * p ^ 5 + r ^ 12 * p ^ 6 + r ^ 11 * p ^ 7 + r ^ 10 * p ^ 8 + r ^ 9 * p ^ 9 + r ^ 8 * p ^ 10 + r ^ 7 * p ^ 11 + r ^ 6 * p ^ 12 + r ^ 5 * p ^ 13 + r ^ 4 * p ^ 14 + r ^ 3 * p ^ 15 + r ^ 2 * p ^ 16 + r * p ^ 17 + p ^ 18)
+          ) =
+      oddKernelNineUnitGapCertificate p q s := by
+  intro q s
+  unfold oddKernelNineUnitGapCertificate oddKernelNineUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_nine_le_integralUpperStep_on_unit
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 9 <=
+      ArctanGeometry.integralUpperStep p r := by
+  let L : Rat := r - p
+  let D : Rat := 1 + p * p
+  let S3 : Rat :=
+    r ^ 2 + r * p + p ^ 2
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4
+      + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4
+      + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8
+  let S11 : Rat :=
+    r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4
+      + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8
+      + r * p ^ 9 + p ^ 10
+  let S13 : Rat :=
+    r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4
+      + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8
+      + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12
+  let S15 : Rat :=
+    r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4
+      + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8
+      + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12
+      + r * p ^ 13 + p ^ 14
+  let S17 : Rat :=
+    r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4
+      + r ^ 11 * p ^ 5 + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8
+      + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10 + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12
+      + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16
+  let S19 : Rat :=
+    r ^ 18 + r ^ 17 * p + r ^ 16 * p ^ 2 + r ^ 15 * p ^ 3 + r ^ 14 * p ^ 4
+      + r ^ 13 * p ^ 5 + r ^ 12 * p ^ 6 + r ^ 11 * p ^ 7 + r ^ 10 * p ^ 8
+      + r ^ 9 * p ^ 9 + r ^ 8 * p ^ 10 + r ^ 7 * p ^ 11 + r ^ 6 * p ^ 12
+      + r ^ 5 * p ^ 13 + r ^ 4 * p ^ 14 + r ^ 3 * p ^ 15 + r ^ 2 * p ^ 16
+      + r * p ^ 17 + p ^ 18
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have h14549535Dpos : 0 < 14549535 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 14549535) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := oddKernelNineUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <=
+        14549535 - D * (14549535 - 4849845 * S3 + 2909907 * S5 - 2078505 * S7 + 1616615 * S9 - 1322685 * S11
+          + 1119195 * S13 - 969969 * S15 + 855855 * S17 - 765765 * S19
+          ) := by
+    dsimp [D, S3, S5, S7, S9, S11, S13, S15, S17, S19]
+    rw [hgap_cert]
+    exact oddKernelNineUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar :
+      D * (14549535 - 4849845 * S3 + 2909907 * S5 - 2078505 * S7 + 1616615 * S9 - 1322685 * S11
+          + 1119195 * S13 - 969969 * S15 + 855855 * S17 - 765765 * S19
+          ) <= 14549535 := by
+    grind [Rat.sub_eq_add_neg]
+  have hupper_mul :
+      ArctanGeometry.integralUpperStep p r * (14549535 * D) = L * 14549535 := by
+    unfold ArctanGeometry.integralUpperStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 9 * (14549535 * D) =
+        L * (D * (14549535 - 4849845 * S3 + 2909907 * S5 - 2078505 * S7 + 1616615 * S9 - 1322685 * S11
+          + 1119195 * S13 - 969969 * S15 + 855855 * S17 - 765765 * S19
+          )) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 9 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 + (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7
+          + (r ^ 9 - p ^ 9) / 9 - (r ^ 11 - p ^ 11) / 11 + (r ^ 13 - p ^ 13) / 13
+          - (r ^ 15 - p ^ 15) / 15 + (r ^ 17 - p ^ 17) / 17 - (r ^ 19 - p ^ 19) / 19 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifth : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventh : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hninth : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have heleventh : r ^ 11 - p ^ 11 = L * S11 := by
+      dsimp [L, S11]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hthirteenth : r ^ 13 - p ^ 13 = L * S13 := by
+      dsimp [L, S13]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hfifteenth : r ^ 15 - p ^ 15 = L * S15 := by
+      dsimp [L, S15]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hseventeenth : r ^ 17 - p ^ 17 = L * S17 := by
+      dsimp [L, S17]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hnineteenth : r ^ 19 - p ^ 19 = L * S19 := by
+      dsimp [L, S19]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hcube, hfifth, hseventh, hninth,
+      heleventh, hthirteenth, hfifteenth, hseventeenth, hnineteenth]
+    dsimp [L, D, S3, S5, S7, S9, S11, S13, S15, S17, S19]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 14549535 * D)
+  · rw [hkernel_mul, hupper_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h14549535Dpos
+
+theorem oddKernelUnitCellBound_nine : OddKernelUnitCellBound 9 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_nine_le_integralUpperStep_on_unit hp0 hpr hr1
+
+private def evenKernelTenUnitGapTerms : List SimplexCertTerm := [
+  ⟨14549535, 22, 0, 0⟩,
+  ⟨174594420, 21, 1, 0⟩,
+  ⟨1324007685, 20, 2, 0⟩,
+  ⟨7420262850, 19, 3, 0⟩,
+  ⟨32343616305, 18, 4, 0⟩,
+  ⟨112914091290, 17, 5, 0⟩,
+  ⟨321462276135, 16, 6, 0⟩,
+  ⟨755276061540, 15, 7, 0⟩,
+  ⟨1476567642550, 14, 8, 0⟩,
+  ⟨2415574585424, 13, 9, 0⟩,
+  ⟨3318378993202, 12, 10, 0⟩,
+  ⟨3833830219492, 11, 11, 0⟩,
+  ⟨3723444224654, 10, 12, 0⟩,
+  ⟨3032096055670, 9, 13, 0⟩,
+  ⟨2059937981310, 8, 14, 0⟩,
+  ⟨1158310438890, 7, 15, 0⟩,
+  ⟨532776211275, 6, 16, 0⟩,
+  ⟨197064198100, 5, 17, 0⟩,
+  ⟨57171111305, 4, 18, 0⟩,
+  ⟨12525437386, 3, 19, 0⟩,
+  ⟨1948007413, 2, 20, 0⟩,
+  ⟨191641118, 1, 21, 0⟩,
+  ⟨8964811, 0, 22, 0⟩,
+  ⟨145495350, 20, 1, 1⟩,
+  ⟨3055402350, 19, 2, 1⟩,
+  ⟨29681051400, 18, 3, 1⟩,
+  ⟨181170809820, 17, 4, 1⟩,
+  ⟨781756215240, 16, 5, 1⟩,
+  ⟨2536721126940, 15, 6, 1⟩,
+  ⟨6424143485760, 14, 7, 1⟩,
+  ⟨13001904195280, 13, 8, 1⟩,
+  ⟨21357577989748, 12, 9, 1⟩,
+  ⟨28751669782836, 11, 10, 1⟩,
+  ⟨31889423794228, 10, 11, 1⟩,
+  ⟨29187224762080, 9, 12, 1⟩,
+  ⟨22002129474930, 8, 13, 1⟩,
+  ⟨13583623774710, 7, 14, 1⟩,
+  ⟨6799972151280, 6, 15, 1⟩,
+  ⟨2717286430320, 5, 16, 1⟩,
+  ⟨846331294270, 4, 17, 1⟩,
+  ⟨197991475990, 3, 18, 1⟩,
+  ⟨32726479632, 2, 19, 1⟩,
+  ⟨3407798284, 1, 20, 1⟩,
+  ⟨168126772, 0, 21, 1⟩,
+  ⟨1527701175, 19, 1, 2⟩,
+  ⟨29390060700, 18, 2, 2⟩,
+  ⟨268002434700, 17, 3, 2⟩,
+  ⟨1538322335550, 16, 4, 2⟩,
+  ⟨6229286413350, 15, 5, 2⟩,
+  ⟨18904851005040, 14, 6, 2⟩,
+  ⟨44584431091200, 13, 7, 2⟩,
+  ⟨83601847969640, 12, 8, 2⟩,
+  ⟨126467539904706, 11, 9, 2⟩,
+  ⟨155672252755656, 10, 10, 2⟩,
+  ⟨156539623666790, 9, 11, 2⟩,
+  ⟨128569083340950, 8, 12, 2⟩,
+  ⟨85876620626655, 7, 13, 2⟩,
+  ⟨46232507454000, 6, 14, 2⟩,
+  ⟨19765362191400, 5, 15, 2⟩,
+  ⟨6556518375120, 4, 16, 2⟩,
+  ⟨1627092997355, 3, 17, 2⟩,
+  ⟨284290879740, 2, 18, 2⟩,
+  ⟨31193499624, 1, 19, 2⟩,
+  ⟨1617043394, 0, 20, 2⟩,
+  ⟨9602693100, 18, 1, 3⟩,
+  ⟨175079404500, 17, 2, 3⟩,
+  ⟨1506555850800, 16, 3, 3⟩,
+  ⟨8128379018760, 15, 4, 3⟩,
+  ⟨30810483303600, 14, 5, 3⟩,
+  ⟨87117571741200, 13, 6, 3⟩,
+  ⟨190400957226480, 12, 7, 3⟩,
+  ⟨328833277492720, 11, 8, 3⟩,
+  ⟨454860633178952, 10, 9, 3⟩,
+  ⟨507611985036520, 9, 10, 3⟩,
+  ⟨458018883869820, 8, 11, 3⟩,
+  ⟨333287761997820, 7, 12, 3⟩,
+  ⟨194099639218800, 6, 13, 3⟩,
+  ⟨89227570946640, 5, 14, 3⟩,
+  ⟨31661038945200, 4, 15, 3⟩,
+  ⟨8366626116240, 3, 16, 3⟩,
+  ⟨1550428100620, 2, 17, 3⟩,
+  ⟨179789427860, 1, 18, 3⟩,
+  ⟨9818794888, 0, 19, 3⟩,
+  ⟨42848380575, 17, 1, 4⟩,
+  ⟨736836950850, 16, 2, 4⟩,
+  ⟨5958083080950, 15, 3, 4⟩,
+  ⟨30084248113920, 14, 4, 4⟩,
+  ⟨106225204465380, 13, 5, 4⟩,
+  ⟨278299819597800, 12, 6, 4⟩,
+  ⟨560111353761960, 11, 7, 4⟩,
+  ⟨884386106744140, 10, 8, 4⟩,
+  ⟨1108877866035940, 9, 9, 4⟩,
+  ⟨1110169486749960, 8, 10, 4⟩,
+  ⟨887306645339205, 7, 11, 4⟩,
+  ⟨562835671641600, 6, 12, 4⟩,
+  ⟨279827134820100, 5, 13, 4⟩,
+  ⟨106740801865320, 4, 14, 4⟩,
+  ⟨30165303742980, 3, 15, 4⟩,
+  ⟨5950955835720, 2, 16, 4⟩,
+  ⟨731709812155, 1, 17, 4⟩,
+  ⟨42221174170, 0, 18, 4⟩,
+  ⟨143924000220, 16, 1, 5⟩,
+  ⟨2325345482460, 15, 2, 5⟩,
+  ⟨17594461684800, 14, 3, 5⟩,
+  ⟨82744206553008, 13, 4, 5⟩,
+  ⟨270666334282344, 12, 5, 5⟩,
+  ⟨652893482385144, 11, 6, 5⟩,
+  ⟨1201111964760708, 10, 7, 5⟩,
+  ⟨1718711570215640, 9, 8, 5⟩,
+  ⟨1932873861268350, 8, 9, 5⟩,
+  ⟨1713731108896170, 7, 10, 5⟩,
+  ⟨1193696787017280, 6, 11, 5⟩,
+  ⟨646241088724560, 5, 12, 5⟩,
+  ⟨266534977960440, 4, 13, 5⟩,
+  ⟨80951869291944, 3, 14, 5⟩,
+  ⟨17073981637272, 2, 15, 5⟩,
+  ⟨2234279712672, 1, 16, 5⟩,
+  ⟨136658650184, 0, 17, 5⟩,
+  ⟨377444036970, 15, 1, 6⟩,
+  ⟨5705590450560, 14, 2, 6⟩,
+  ⟨40202033551680, 13, 3, 6⟩,
+  ⟨175122028817736, 12, 4, 6⟩,
+  ⟨527322548845092, 11, 5, 6⟩,
+  ⟨1162447537707456, 10, 6, 6⟩,
+  ⟨1937619958384110, 9, 7, 6⟩,
+  ⟨2486232484846110, 8, 8, 6⟩,
+  ⟨2475504225168975, 7, 9, 6⟩,
+  ⟨1912276854371520, 6, 10, 6⟩,
+  ⟨1136500050067200, 5, 11, 6⟩,
+  ⟨510258477035160, 4, 12, 6⟩,
+  ⟨167511697815420, 3, 13, 6⟩,
+  ⟨37958256872928, 2, 14, 6⟩,
+  ⟨5308722085716, 1, 15, 6⟩,
+  ⟨345450709548, 0, 16, 6⟩,
+  ⟨791261911440, 14, 1, 7⟩,
+  ⟨11136408082800, 13, 2, 7⟩,
+  ⟨72666740786640, 12, 3, 7⟩,
+  ⟨291321311993712, 11, 4, 7⟩,
+  ⟨801482172162672, 10, 5, 7⟩,
+  ⟨1600419839612880, 9, 6, 7⟩,
+  ⟨2391461423980200, 8, 7, 7⟩,
+  ⟨2716002254239560, 7, 8, 7⟩,
+  ⟨2355396286042800, 6, 9, 7⟩,
+  ⟨1551938795643600, 5, 10, 7⟩,
+  ⟨764649087143760, 4, 11, 7⟩,
+  ⟨273161536205040, 3, 12, 7⟩,
+  ⟨66880078524720, 2, 13, 7⟩,
+  ⟨10045223756496, 1, 14, 7⟩,
+  ⟨698318981856, 0, 15, 7⟩,
+  ⟨1346268473550, 13, 1, 8⟩,
+  ⟨17542878733380, 12, 2, 8⟩,
+  ⟨105324112964070, 11, 3, 8⟩,
+  ⟨385685859683124, 10, 4, 8⟩,
+  ⟨960886171485240, 9, 5, 8⟩,
+  ⟨1719530034676740, 8, 6, 8⟩,
+  ⟨2273454184130415, 7, 7, 8⟩,
+  ⟨2248061456440800, 6, 8, 8⟩,
+  ⟨1662260134224690, 5, 9, 8⟩,
+  ⟨907616156510700, 4, 10, 8⟩,
+  ⟨355664338053570, 3, 11, 8⟩,
+  ⟨94716061443360, 2, 12, 8⟩,
+  ⟨15363670844430, 1, 13, 8⟩,
+  ⟨1146431717892, 0, 14, 8⟩,
+  ⟨1876715420580, 12, 1, 9⟩,
+  ⟨22494764472180, 11, 2, 9⟩,
+  ⟨123323003223420, 10, 3, 9⟩,
+  ⟨408809885724240, 9, 4, 9⟩,
+  ⟨912431011201710, 8, 5, 9⟩,
+  ⟨1444159118228970, 7, 6, 9⟩,
+  ⟨1661744838193440, 6, 7, 9⟩,
+  ⟨1400387674045360, 5, 8, 9⟩,
+  ⟨857677363683140, 4, 9, 9⟩,
+  ⟨372268776776260, 3, 10, 9⟩,
+  ⟨108688908677440, 2, 11, 9⟩,
+  ⟨19165110464360, 1, 12, 9⟩,
+  ⟨1543489311640, 0, 13, 9⟩,
+  ⟨2154349647450, 11, 1, 10⟩,
+  ⟨23571139071480, 10, 2, 10⟩,
+  ⟨116935476067410, 9, 3, 10⟩,
+  ⟨347120961148962, 8, 4, 10⟩,
+  ⟨684917060328501, 7, 5, 10⟩,
+  ⟨942998880039216, 6, 6, 10⟩,
+  ⟨924254019600912, 5, 7, 10⟩,
+  ⟨644780542686280, 4, 8, 10⟩,
+  ⟨313725950179642, 3, 9, 10⟩,
+  ⟨101388054066936, 2, 10, 10⟩,
+  ⟨19586122899616, 1, 11, 10⟩,
+  ⟨1713402829852, 0, 12, 10⟩,
+  ⟨2039146429320, 10, 1, 11⟩,
+  ⟨20179894654920, 9, 2, 11⟩,
+  ⟨89603776882620, 8, 3, 11⟩,
+  ⟨235019604944124, 7, 4, 11⟩,
+  ⟨403147004948688, 6, 5, 11⟩,
+  ⟨472486814143344, 5, 6, 11⟩,
+  ⟨383093912401200, 4, 7, 11⟩,
+  ⟨212159094907760, 3, 8, 11⟩,
+  ⟨76797621484584, 2, 9, 11⟩,
+  ⟨16406943804888, 1, 10, 11⟩,
+  ⟨1570890308624, 0, 11, 11⟩,
+  ⟨1587878051760, 9, 1, 12⟩,
+  ⟨14056344562260, 8, 2, 12⟩,
+  ⟨55111286405175, 7, 3, 12⟩,
+  ⟨125577145221528, 6, 4, 12⟩,
+  ⟨183224439826428, 5, 5, 12⟩,
+  ⟨177489505873680, 4, 6, 12⟩,
+  ⟨114133924304400, 3, 7, 12⟩,
+  ⟨46975010222140, 2, 8, 12⟩,
+  ⟨11227806968378, 1, 9, 12⟩,
+  ⟨1187328353848, 0, 10, 12⟩,
+  ⟨1011163583430, 8, 1, 13⟩,
+  ⟨7897555495830, 7, 2, 13⟩,
+  ⟨26876405435880, 6, 3, 13⟩,
+  ⟨52039286915616, 5, 4, 13⟩,
+  ⟨62689794847680, 4, 5, 13⟩,
+  ⟨48104758982280, 3, 6, 13⟩,
+  ⟨22958176861620, 2, 7, 13⟩,
+  ⟨6229697033560, 1, 8, 13⟩,
+  ⟨735757698676, 0, 9, 13⟩,
+  ⟨521149794165, 7, 1, 14⟩,
+  ⟨3529096410840, 6, 2, 14⟩,
+  ⟨10192764041460, 5, 3, 14⟩,
+  ⟨16271792557020, 4, 4, 14⟩,
+  ⟨15502839932580, 3, 5, 14⟩,
+  ⟨8812911084120, 2, 6, 14⟩,
+  ⟨2767167747630, 1, 7, 14⟩,
+  ⟨370123080470, 0, 8, 14⟩,
+  ⟨213936362640, 6, 1, 15⟩,
+  ⟨1227515168880, 5, 2, 15⟩,
+  ⟨2917589154480, 4, 3, 15⟩,
+  ⟨3675654846864, 3, 4, 15⟩,
+  ⟨2587768655472, 2, 5, 15⟩,
+  ⟨964938463632, 1, 6, 15⟩,
+  ⟨148814306784, 0, 7, 15⟩,
+  ⟨68280967755, 5, 1, 16⟩,
+  ⟨321573822570, 4, 2, 16⟩,
+  ⟨601317732015, 3, 3, 16⟩,
+  ⟨557724415248, 2, 4, 16⟩,
+  ⟨256400635491, 1, 5, 16⟩,
+  ⟨46699018938, 0, 6, 16⟩,
+  ⟨16324578270, 4, 1, 17⟩,
+  ⟨60205975830, 3, 2, 17⟩,
+  ⟨82408566240, 2, 3, 17⟩,
+  ⟨49549896396, 1, 4, 17⟩,
+  ⟨11022727716, 0, 5, 17⟩,
+  ⟨2749862115, 3, 1, 18⟩,
+  ⟨7352365020, 2, 2, 18⟩,
+  ⟨6440594160, 1, 3, 18⟩,
+  ⟨1841001162, 0, 4, 18⟩,
+  ⟨290990700, 2, 1, 19⟩,
+  ⟨484984500, 1, 2, 19⟩,
+  ⟨193993800, 0, 3, 19⟩,
+  ⟨14549535, 1, 1, 20⟩,
+  ⟨9699690, 0, 2, 20⟩]
+
+private def evenKernelTenUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval evenKernelTenUnitGapTerms p q s
+
+private theorem evenKernelTenUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg evenKernelTenUnitGapTerms := by
+  native_decide
+
+private theorem evenKernelTenUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= evenKernelTenUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs evenKernelTenUnitGapTerms_nonneg
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 10000 in
+private theorem evenKernelTenUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    (1 + r * r) *
+      (14549535 - 4849845 * (r ^ 2 + r * p + p ^ 2)
+        + 2909907 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4)
+        - 2078505 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6)
+        + 1616615 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8)
+        - 1322685 * (r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10)
+        + 1119195 * (r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12)
+        - 969969 * (r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 + r * p ^ 13 + p ^ 14)
+        + 855855 * (r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4 + r ^ 11 * p ^ 5 + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8 + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10 + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12 + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16)
+        - 765765 * (r ^ 18 + r ^ 17 * p + r ^ 16 * p ^ 2 + r ^ 15 * p ^ 3 + r ^ 14 * p ^ 4 + r ^ 13 * p ^ 5 + r ^ 12 * p ^ 6 + r ^ 11 * p ^ 7 + r ^ 10 * p ^ 8 + r ^ 9 * p ^ 9 + r ^ 8 * p ^ 10 + r ^ 7 * p ^ 11 + r ^ 6 * p ^ 12 + r ^ 5 * p ^ 13 + r ^ 4 * p ^ 14 + r ^ 3 * p ^ 15 + r ^ 2 * p ^ 16 + r * p ^ 17 + p ^ 18)
+        + 692835 * (r ^ 20 + r ^ 19 * p + r ^ 18 * p ^ 2 + r ^ 17 * p ^ 3 + r ^ 16 * p ^ 4 + r ^ 15 * p ^ 5 + r ^ 14 * p ^ 6 + r ^ 13 * p ^ 7 + r ^ 12 * p ^ 8 + r ^ 11 * p ^ 9 + r ^ 10 * p ^ 10 + r ^ 9 * p ^ 11 + r ^ 8 * p ^ 12 + r ^ 7 * p ^ 13 + r ^ 6 * p ^ 14 + r ^ 5 * p ^ 15 + r ^ 4 * p ^ 16 + r ^ 3 * p ^ 17 + r ^ 2 * p ^ 18 + r * p ^ 19 + p ^ 20)
+          ) - 14549535 =
+      evenKernelTenUnitGapCertificate p q s := by
+  intro q s
+  unfold evenKernelTenUnitGapCertificate evenKernelTenUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_ten_lowerStep
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    ArctanGeometry.integralLowerStep p r <=
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 10 := by
+  let L : Rat := r - p
+  let D : Rat := 1 + r * r
+  let S3 : Rat :=
+    r ^ 2 + r * p + p ^ 2
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5
+    + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8
+  let S11 : Rat :=
+    r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5
+    + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10
+  let S13 : Rat :=
+    r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5
+    + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10
+    + r * p ^ 11 + p ^ 12
+  let S15 : Rat :=
+    r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5
+    + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10
+    + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 + r * p ^ 13 + p ^ 14
+  let S17 : Rat :=
+    r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4 + r ^ 11 * p ^ 5
+    + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8 + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10
+    + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12 + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16
+  let S19 : Rat :=
+    r ^ 18 + r ^ 17 * p + r ^ 16 * p ^ 2 + r ^ 15 * p ^ 3 + r ^ 14 * p ^ 4 + r ^ 13 * p ^ 5
+    + r ^ 12 * p ^ 6 + r ^ 11 * p ^ 7 + r ^ 10 * p ^ 8 + r ^ 9 * p ^ 9 + r ^ 8 * p ^ 10
+    + r ^ 7 * p ^ 11 + r ^ 6 * p ^ 12 + r ^ 5 * p ^ 13 + r ^ 4 * p ^ 14 + r ^ 3 * p ^ 15
+    + r ^ 2 * p ^ 16 + r * p ^ 17 + p ^ 18
+  let S21 : Rat :=
+    r ^ 20 + r ^ 19 * p + r ^ 18 * p ^ 2 + r ^ 17 * p ^ 3 + r ^ 16 * p ^ 4 + r ^ 15 * p ^ 5
+    + r ^ 14 * p ^ 6 + r ^ 13 * p ^ 7 + r ^ 12 * p ^ 8 + r ^ 11 * p ^ 9 + r ^ 10 * p ^ 10
+    + r ^ 9 * p ^ 11 + r ^ 8 * p ^ 12 + r ^ 7 * p ^ 13 + r ^ 6 * p ^ 14 + r ^ 5 * p ^ 15
+    + r ^ 4 * p ^ 16 + r ^ 3 * p ^ 17 + r ^ 2 * p ^ 18 + r * p ^ 19 + p ^ 20
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos r
+  have h14549535Dpos : 0 < 14549535 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 14549535) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := evenKernelTenUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <=
+        D * (14549535 - 4849845 * S3 + 2909907 * S5 - 2078505 * S7 + 1616615 * S9 - 1322685 * S11 + 1119195 * S13 - 969969 * S15 + 855855 * S17 - 765765 * S19 + 692835 * S21)
+        - 14549535 := by
+    dsimp [D, S3, S5, S7, S9, S11, S13, S15, S17, S19, S21]
+    rw [hgap_cert]
+    exact evenKernelTenUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar :
+      14549535 <=
+        D * (14549535 - 4849845 * S3 + 2909907 * S5 - 2078505 * S7 + 1616615 * S9 - 1322685 * S11 + 1119195 * S13 - 969969 * S15 + 855855 * S17 - 765765 * S19 + 692835 * S21
+          ) := by
+    grind [Rat.sub_eq_add_neg]
+  have hlower_mul :
+      ArctanGeometry.integralLowerStep p r * (14549535 * D) = L * 14549535 := by
+    unfold ArctanGeometry.integralLowerStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 10 * (14549535 * D) =
+        L * (D * (14549535 - 4849845 * S3 + 2909907 * S5 - 2078505 * S7 + 1616615 * S9 - 1322685 * S11 + 1119195 * S13 - 969969 * S15 + 855855 * S17 - 765765 * S19 + 692835 * S21
+          )) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 10 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 + (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7
+          + (r ^ 9 - p ^ 9) / 9 - (r ^ 11 - p ^ 11) / 11 + (r ^ 13 - p ^ 13) / 13
+          - (r ^ 15 - p ^ 15) / 15 + (r ^ 17 - p ^ 17) / 17 - (r ^ 19 - p ^ 19) / 19
+          + (r ^ 21 - p ^ 21) / 21
+          := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hS3 : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS5 : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS7 : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS9 : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS11 : r ^ 11 - p ^ 11 = L * S11 := by
+      dsimp [L, S11]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS13 : r ^ 13 - p ^ 13 = L * S13 := by
+      dsimp [L, S13]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS15 : r ^ 15 - p ^ 15 = L * S15 := by
+      dsimp [L, S15]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS17 : r ^ 17 - p ^ 17 = L * S17 := by
+      dsimp [L, S17]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS19 : r ^ 19 - p ^ 19 = L * S19 := by
+      dsimp [L, S19]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS21 : r ^ 21 - p ^ 21 = L * S21 := by
+      dsimp [L, S21]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hS3, hS5, hS7, hS9, hS11, hS13, hS15, hS17, hS19, hS21]
+    dsimp [D, S3, S5, S7, S9, S11, S13, S15, S17, S19, S21]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 14549535 * D)
+  · rw [hlower_mul, hkernel_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h14549535Dpos
+
+theorem evenKernelCellBound_ten : EvenKernelCellBound 10 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_ten_lowerStep hp0 hpr hr1
+
+private def oddKernelElevenUnitGapTerms : List SimplexCertTerm := [
+  ⟨334639305, 24, 0, 0⟩,
+  ⟨4015671660, 23, 1, 0⟩,
+  ⟨32125373280, 22, 2, 0⟩,
+  ⟨190744403850, 21, 3, 0⟩,
+  ⟨886794158250, 20, 4, 0⟩,
+  ⟨3324753041610, 19, 5, 0⟩,
+  ⟨10234608504120, 18, 6, 0⟩,
+  ⟨26181398398155, 17, 7, 0⟩,
+  ⟨56139796267555, 16, 8, 0⟩,
+  ⟨101542593760608, 15, 9, 0⟩,
+  ⟨155623831668032, 14, 10, 0⟩,
+  ⟨202675442987472, 13, 11, 0⟩,
+  ⟨224590762747904, 12, 12, 0⟩,
+  ⟨211702162967450, 11, 13, 0⟩,
+  ⟨169409254400144, 10, 14, 0⟩,
+  ⟨114638190420215, 9, 15, 0⟩,
+  ⟨65195396400255, 8, 16, 0⟩,
+  ⟨30880444594780, 7, 17, 0⟩,
+  ⟨12027832924800, 6, 18, 0⟩,
+  ⟨3783607368002, 5, 19, 0⟩,
+  ⟨936663427458, 4, 20, 0⟩,
+  ⟨175518067958, 3, 21, 0⟩,
+  ⟨23376292856, 2, 22, 0⟩,
+  ⟨1969346525, 1, 23, 0⟩,
+  ⟨78773861, 0, 24, 0⟩,
+  ⟨4015671660, 22, 1, 1⟩,
+  ⟨85667662080, 21, 2, 1⟩,
+  ⟨878093536320, 20, 3, 1⟩,
+  ⟨5725009229940, 19, 4, 1⟩,
+  ⟨26601147633060, 18, 5, 1⟩,
+  ⟨93631185167520, 17, 6, 1⟩,
+  ⟨259140662120340, 16, 7, 1⟩,
+  ⟨577883707761360, 15, 8, 1⟩,
+  ⟨1055548803581272, 14, 9, 1⟩,
+  ⟨1596797422509744, 13, 10, 1⟩,
+  ⟨2014763031271172, 12, 11, 1⟩,
+  ⟨2128522388204380, 11, 12, 1⟩,
+  ⟨1884825471235080, 10, 13, 1⟩,
+  ⟨1396668816878720, 9, 14, 1⟩,
+  ⟨862204234516680, 8, 15, 1⟩,
+  ⟨440028000688320, 7, 16, 1⟩,
+  ⟨183487713675420, 6, 17, 1⟩,
+  ⟨61448638340320, 5, 18, 1⟩,
+  ⟨16114054721688, 4, 19, 1⟩,
+  ⟨3184087541756, 3, 20, 1⟩,
+  ⟨445294287508, 2, 21, 1⟩,
+  ⟨39232973280, 1, 22, 1⟩,
+  ⟨1634707220, 0, 23, 1⟩,
+  ⟨42164552430, 21, 1, 2⟩,
+  ⟨870731471610, 20, 2, 2⟩,
+  ⟨8550034242750, 19, 3, 2⟩,
+  ⟨53099226360180, 18, 4, 2⟩,
+  ⟨233977348034430, 17, 5, 2⟩,
+  ⟨777798790218450, 16, 6, 2⟩,
+  ⟨2024581180822200, 15, 7, 2⟩,
+  ⟨4227123841500560, 14, 8, 2⟩,
+  ⟨7193484939733092, 13, 9, 2⟩,
+  ⟨10082023356886572, 12, 10, 2⟩,
+  ⟨11710808055485630, 11, 11, 2⟩,
+  ⟨11305256105007480, 10, 12, 2⟩,
+  ⟨9067703914985100, 9, 13, 2⟩,
+  ⟨6022117062461940, 8, 14, 2⟩,
+  ⟨3288860448580080, 7, 15, 2⟩,
+  ⟨1460721316990320, 6, 16, 2⟩,
+  ⟨518870818043270, 5, 17, 2⟩,
+  ⟨143782806466530, 4, 18, 2⟩,
+  ⟨29919206485938, 3, 19, 2⟩,
+  ⟨4392262533428, 2, 20, 2⟩,
+  ⟨404998968630, 1, 21, 2⟩,
+  ⟨17608650810, 0, 22, 2⟩,
+  ⟨294482588400, 20, 1, 3⟩,
+  ⟨5778105333000, 19, 2, 3⟩,
+  ⟨53783229099600, 18, 3, 3⟩,
+  ⟨315740661796560, 17, 4, 3⟩,
+  ⟨1310955277752120, 16, 5, 3⟩,
+  ⟨4091444707109760, 15, 6, 3⟩,
+  ⟨9957541437523680, 14, 7, 3⟩,
+  ⟨19347771984581040, 13, 8, 3⟩,
+  ⟨30475623934619864, 12, 9, 3⟩,
+  ⟨39289143447390200, 11, 10, 3⟩,
+  ⟨41671419621351520, 10, 11, 3⟩,
+  ⟨36414319748144800, 9, 12, 3⟩,
+  ⟨26161031686191600, 8, 13, 3⟩,
+  ⟨15361524989511360, 7, 14, 3⟩,
+  ⟨7296841964966400, 6, 15, 3⟩,
+  ⟨2759126996952480, 5, 16, 3⟩,
+  ⟨810483628933440, 4, 17, 3⟩,
+  ⟨178098003341720, 3, 18, 3⟩,
+  ⟨27513222047696, 2, 19, 3⟩,
+  ⟨2660785718800, 1, 20, 3⟩,
+  ⟨120944805400, 0, 21, 3⟩,
+  ⟨1462373762850, 19, 1, 4⟩,
+  ⟨27206175496500, 18, 2, 4⟩,
+  ⟨239409882511800, 17, 3, 4⟩,
+  ⟨1324387253269080, 16, 4, 4⟩,
+  ⟨5162552840324880, 15, 5, 4⟩,
+  ⟨15064071196334160, 14, 6, 4⟩,
+  ⟨34115817236040540, 13, 7, 4⟩,
+  ⟨61350671172250460, 12, 8, 4⟩,
+  ⟨88878892455603250, 11, 9, 4⟩,
+  ⟨104611474450643160, 10, 10, 4⟩,
+  ⟨100416819545442400, 9, 11, 4⟩,
+  ⟨78580020820408800, 8, 12, 4⟩,
+  ⟨49901170750358400, 7, 13, 4⟩,
+  ⟨25477770693790800, 6, 14, 4⟩,
+  ⟨10299521596250040, 5, 15, 4⟩,
+  ⟨3219145887961080, 4, 16, 4⟩,
+  ⟨749448847525070, 3, 17, 4⟩,
+  ⟨122179394994580, 2, 18, 4⟩,
+  ⟨12423091434600, 1, 19, 4⟩,
+  ⟨591575782600, 0, 20, 4⟩,
+  ⟨5502139452810, 18, 1, 5⟩,
+  ⟨96766086176760, 17, 2, 5⟩,
+  ⟨802319819931630, 16, 3, 5⟩,
+  ⟨4166458524564336, 15, 4, 5⟩,
+  ⟨15182879571964104, 14, 5, 5⟩,
+  ⟨41220381284226144, 13, 6, 5⟩,
+  ⟨86386273751765988, 12, 7, 5⟩,
+  ⟨142853847939502700, 11, 8, 5⟩,
+  ⟨188906888628550092, 10, 9, 5⟩,
+  ⟨201184023993192240, 9, 10, 5⟩,
+  ⟨172894510858529460, 8, 11, 5⟩,
+  ⟨119556558961796880, 7, 12, 5⟩,
+  ⟨65991963414623400, 6, 13, 5⟩,
+  ⟨28662599942251968, 5, 14, 5⟩,
+  ⟨9572804480009232, 4, 15, 5⟩,
+  ⟨2369859178706712, 3, 16, 5⟩,
+  ⟨409003972743674, 2, 17, 5⟩,
+  ⟨43842870687000, 1, 18, 5⟩,
+  ⟨2192143534350, 0, 19, 5⟩,
+  ⟨16287229613655, 17, 1, 6⟩,
+  ⟨269860162977405, 16, 2, 6⟩,
+  ⟨2100182000236320, 15, 3, 6⟩,
+  ⟨10194273134749704, 14, 4, 6⟩,
+  ⟨34558849870653108, 13, 5, 6⟩,
+  ⟨86808999224031084, 12, 6, 6⟩,
+  ⟨167263156238508330, 11, 7, 6⟩,
+  ⟨252424876335271640, 10, 8, 6⟩,
+  ⟨301958872271946890, 9, 9, 6⟩,
+  ⟨287827650674674110, 8, 10, 6⟩,
+  ⟨218506783781526240, 7, 11, 6⟩,
+  ⟨131283088678129080, 6, 12, 6⟩,
+  ⟨61616929400735940, 5, 13, 6⟩,
+  ⟨22097811687773052, 4, 14, 6⟩,
+  ⟨5841594879823164, 3, 15, 6⟩,
+  ⟨1071117967068072, 2, 16, 6⟩,
+  ⟨121412315574935, 1, 17, 6⟩,
+  ⟨6390121872365, 0, 18, 6⟩,
+  ⟨38871701668800, 16, 1, 7⟩,
+  ⟨604456745692800, 15, 2, 7⟩,
+  ⟨4396457278973760, 14, 3, 7⟩,
+  ⟨19849533549509664, 13, 4, 7⟩,
+  ⟨62247856966639344, 12, 5, 7⟩,
+  ⟨143729480209046160, 11, 6, 7⟩,
+  ⟨252677705530124160, 10, 7, 7⟩,
+  ⟨344861360811968000, 9, 8, 7⟩,
+  ⟨369119385533321280, 8, 9, 7⟩,
+  ⟨310699889872257600, 7, 10, 7⟩,
+  ⟨204852397166376960, 6, 11, 7⟩,
+  ⟨104601268123450560, 5, 12, 7⟩,
+  ⟨40511817178921440, 4, 13, 7⟩,
+  ⟨11490819198035232, 3, 14, 7⟩,
+  ⟨2247620934125952, 2, 15, 7⟩,
+  ⟨270321649614720, 1, 16, 7⟩,
+  ⟨15017869423040, 0, 17, 7⟩,
+  ⟨76043435668200, 15, 1, 8⟩,
+  ⟨1104962030051880, 14, 2, 8⟩,
+  ⟨7474111319214540, 13, 3, 8⟩,
+  ⟨31210096498088508, 12, 4, 8⟩,
+  ⟨89947881057824790, 11, 5, 8⟩,
+  ⟨189448023803112360, 10, 6, 8⟩,
+  ⟨301115072497239000, 9, 7, 8⟩,
+  ⟨367596956827128600, 8, 8, 8⟩,
+  ⟨347306706831427200, 7, 9, 8⟩,
+  ⟨253776557365170840, 6, 10, 8⟩,
+  ⟨142120627492203360, 5, 11, 8⟩,
+  ⟨59841539901047520, 4, 12, 8⟩,
+  ⟨18314075795097060, 3, 13, 8⟩,
+  ⟨3839281902590904, 2, 14, 8⟩,
+  ⟨491831139385080, 1, 15, 8⟩,
+  ⟨28931243493240, 0, 16, 8⟩,
+  ⟨123291828419760, 14, 1, 9⟩,
+  ⟨1665770209543440, 13, 2, 9⟩,
+  ⟨10418989853131860, 12, 3, 9⟩,
+  ⟨39974279728443060, 11, 4, 9⟩,
+  ⟨105059863455827280, 10, 5, 9⟩,
+  ⟨199996083016329600, 9, 6, 9⟩,
+  ⟨284228003522892000, 8, 7, 9⟩,
+  ⟨306152124719755600, 7, 8, 9⟩,
+  ⟨250967308587755760, 6, 9, 9⟩,
+  ⟨155663290387885280, 5, 10, 9⟩,
+  ⟨71828990938144440, 4, 11, 9⟩,
+  ⟨23875260584057960, 3, 12, 9⟩,
+  ⟨5393339966038640, 2, 13, 9⟩,
+  ⟨739178139941120, 1, 14, 9⟩,
+  ⟨46198633746320, 0, 15, 9⟩,
+  ⟨166843126129680, 13, 1, 10⟩,
+  ⟨2083964040958800, 12, 2, 10⟩,
+  ⟨11973171016937130, 11, 3, 10⟩,
+  ⟨41879040316665552, 10, 4, 10⟩,
+  ⟨99446575744171656, 9, 5, 10⟩,
+  ⟨169200988987028856, 8, 6, 10⟩,
+  ⟨212066278977287592, 7, 7, 10⟩,
+  ⟨198075114195678720, 6, 8, 10⟩,
+  ⟨137731229645025016, 5, 9, 10⟩,
+  ⟨70327130808150216, 4, 10, 10⟩,
+  ⟨25588339943121956, 3, 11, 10⟩,
+  ⟨6268440936888592, 2, 12, 10⟩,
+  ⟨923829467282040, 1, 13, 10⟩,
+  ⟨61588631152136, 0, 14, 10⟩,
+  ⟨189164906330400, 12, 1, 11⟩,
+  ⟨2169752173188600, 11, 2, 11⟩,
+  ⟨11361143614700880, 10, 3, 11⟩,
+  ⟨35890842895283376, 9, 4, 11⟩,
+  ⟨76140005789599752, 8, 5, 11⟩,
+  ⟨114187670803267776, 7, 6, 11⟩,
+  ⟨124021224311624640, 6, 7, 11⟩,
+  ⟨98181622335196400, 5, 8, 11⟩,
+  ⟨56145465087127416, 4, 9, 11⟩,
+  ⟨22575572629074192, 3, 10, 11⟩,
+  ⟨6043077347989136, 2, 11, 11⟩,
+  ⟨963437161466640, 1, 12, 11⟩,
+  ⟨68816940104760, 0, 13, 11⟩,
+  ⟨179871972830550, 11, 1, 12⟩,
+  ⟨1879635066068760, 10, 2, 12⟩,
+  ⟨8885477128267740, 9, 3, 12⟩,
+  ⟨25064915584584876, 8, 4, 12⟩,
+  ⟨46841741923712736, 7, 5, 12⟩,
+  ⟨60832269526588560, 6, 6, 12⟩,
+  ⟨55949298009504900, 5, 7, 12⟩,
+  ⟨36383817724434180, 4, 8, 12⟩,
+  ⟨16359245806579676, 3, 9, 12⟩,
+  ⟨4829269199035736, 2, 10, 12⟩,
+  ⟨838794943064260, 1, 11, 12⟩,
+  ⟨64522687928020, 0, 12, 12⟩,
+  ⟨143199520674210, 10, 1, 13⟩,
+  ⟨1350362402308920, 9, 2, 13⟩,
+  ⟨5697005051247510, 8, 3, 13⟩,
+  ⟨14147660477983032, 7, 4, 13⟩,
+  ⟨22876715237315940, 6, 5, 13⟩,
+  ⟨25132339871839200, 5, 6, 13⟩,
+  ⟨18962459365089240, 4, 7, 13⟩,
+  ⟨9678411059337020, 3, 8, 13⟩,
+  ⟨3186944842723642, 2, 9, 13⟩,
+  ⟨608236587908040, 1, 10, 13⟩,
+  ⟨50686382325670, 0, 11, 13⟩,
+  ⟨95021165294055, 9, 1, 14⟩,
+  ⟨799204216455645, 8, 2, 14⟩,
+  ⟨2966114298026880, 7, 3, 14⟩,
+  ⟨6367518034097220, 6, 4, 14⟩,
+  ⟨8699782877715930, 5, 5, 14⟩,
+  ⟨7828501131606870, 4, 6, 14⟩,
+  ⟨4626183879204030, 3, 7, 14⟩,
+  ⟨1724048165059220, 2, 8, 14⟩,
+  ⟨365386267112295, 1, 9, 14⟩,
+  ⟨33216933373845, 0, 10, 14⟩,
+  ⟨52150189291200, 8, 1, 15⟩,
+  ⟨385540174219200, 7, 2, 15⟩,
+  ⟨1235641801954560, 6, 3, 15⟩,
+  ⟨2238303257910720, 5, 4, 15⟩,
+  ⟨2500377055848672, 4, 5, 15⟩,
+  ⟨1757806701379872, 3, 6, 15⟩,
+  ⟨755700147506304, 2, 7, 15⟩,
+  ⟨180243401212160, 1, 8, 15⟩,
+  ⟨18024340121216, 0, 9, 15⟩,
+  ⟨23397980205600, 7, 1, 16⟩,
+  ⟨149200495784340, 6, 2, 16⟩,
+  ⟨402865566503400, 5, 3, 16⟩,
+  ⟨595405778719752, 4, 4, 16⟩,
+  ⟨518067645889794, 3, 5, 16⟩,
+  ⟨263771534678652, 2, 6, 16⟩,
+  ⟨72052431705540, 1, 7, 16⟩,
+  ⟨8005825745060, 0, 8, 16⟩,
+  ⟨8436926157660, 6, 1, 17⟩,
+  ⟨45243234036000, 5, 2, 17⟩,
+  ⟨99419998958280, 4, 3, 17⟩,
+  ⟨114029815591692, 3, 4, 17⟩,
+  ⟨71450310423492, 2, 5, 17⟩,
+  ⟨22896212470560, 1, 6, 17⟩,
+  ⟨2862026558820, 0, 7, 17⟩,
+  ⟨2384639687430, 5, 1, 18⟩,
+  ⟨10375380105090, 4, 2, 18⟩,
+  ⟨17613405179370, 3, 3, 18⟩,
+  ⟨14442407743764, 2, 4, 18⟩,
+  ⟨5623055788350, 1, 5, 18⟩,
+  ⟨803293684050, 0, 6, 18⟩,
+  ⟨508651743600, 4, 1, 19⟩,
+  ⟨1699967669400, 3, 2, 19⟩,
+  ⟨2043530689200, 2, 3, 19⟩,
+  ⟨1022657716080, 1, 4, 19⟩,
+  ⟨170442952680, 0, 5, 19⟩,
+  ⟨76967040150, 3, 1, 20⟩,
+  ⟨179812853220, 2, 2, 20⟩,
+  ⟨128501493120, 1, 3, 20⟩,
+  ⟨25700298624, 0, 4, 20⟩,
+  ⟨7362064710, 2, 1, 21⟩,
+  ⟨9816086280, 1, 2, 21⟩,
+  ⟨2454021570, 0, 3, 21⟩,
+  ⟨334639305, 1, 1, 22⟩,
+  ⟨111546435, 0, 2, 22⟩]
+
+private def oddKernelElevenUnitGapCertificate (p q s : Rat) : Rat :=
+  simplexCertEval oddKernelElevenUnitGapTerms p q s
+
+private theorem oddKernelElevenUnitGapTerms_nonneg :
+    simplexCertCoeffsNonneg oddKernelElevenUnitGapTerms := by
+  native_decide
+
+private theorem oddKernelElevenUnitGapCertificate_nonneg
+    {p q s : Rat} (hp : 0 <= p) (hq : 0 <= q) (hs : 0 <= s) :
+    0 <= oddKernelElevenUnitGapCertificate p q s :=
+  simplexCertEval_nonneg hp hq hs oddKernelElevenUnitGapTerms_nonneg
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 10000 in
+private theorem oddKernelElevenUnitGap_eq_certificate (p r : Rat) :
+    let q : Rat := r - p
+    let s : Rat := 1 - r
+    334639305 - (1 + p * p) *
+      (334639305 - 111546435 * (r ^ 2 + r * p + p ^ 2)
+        + 66927861 * (r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4)
+        - 47805615 * (r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6)
+        + 37182145 * (r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5 + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8)
+        - 30421755 * (r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5 + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10)
+        + 25741485 * (r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5 + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10 + r * p ^ 11 + p ^ 12)
+        - 22309287 * (r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5 + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10 + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 + r * p ^ 13 + p ^ 14)
+        + 19684665 * (r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4 + r ^ 11 * p ^ 5 + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8 + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10 + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12 + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16)
+        - 17612595 * (r ^ 18 + r ^ 17 * p + r ^ 16 * p ^ 2 + r ^ 15 * p ^ 3 + r ^ 14 * p ^ 4 + r ^ 13 * p ^ 5 + r ^ 12 * p ^ 6 + r ^ 11 * p ^ 7 + r ^ 10 * p ^ 8 + r ^ 9 * p ^ 9 + r ^ 8 * p ^ 10 + r ^ 7 * p ^ 11 + r ^ 6 * p ^ 12 + r ^ 5 * p ^ 13 + r ^ 4 * p ^ 14 + r ^ 3 * p ^ 15 + r ^ 2 * p ^ 16 + r * p ^ 17 + p ^ 18)
+        + 15935205 * (r ^ 20 + r ^ 19 * p + r ^ 18 * p ^ 2 + r ^ 17 * p ^ 3 + r ^ 16 * p ^ 4 + r ^ 15 * p ^ 5 + r ^ 14 * p ^ 6 + r ^ 13 * p ^ 7 + r ^ 12 * p ^ 8 + r ^ 11 * p ^ 9 + r ^ 10 * p ^ 10 + r ^ 9 * p ^ 11 + r ^ 8 * p ^ 12 + r ^ 7 * p ^ 13 + r ^ 6 * p ^ 14 + r ^ 5 * p ^ 15 + r ^ 4 * p ^ 16 + r ^ 3 * p ^ 17 + r ^ 2 * p ^ 18 + r * p ^ 19 + p ^ 20)
+        - 14549535 * (r ^ 22 + r ^ 21 * p + r ^ 20 * p ^ 2 + r ^ 19 * p ^ 3 + r ^ 18 * p ^ 4 + r ^ 17 * p ^ 5 + r ^ 16 * p ^ 6 + r ^ 15 * p ^ 7 + r ^ 14 * p ^ 8 + r ^ 13 * p ^ 9 + r ^ 12 * p ^ 10 + r ^ 11 * p ^ 11 + r ^ 10 * p ^ 12 + r ^ 9 * p ^ 13 + r ^ 8 * p ^ 14 + r ^ 7 * p ^ 15 + r ^ 6 * p ^ 16 + r ^ 5 * p ^ 17 + r ^ 4 * p ^ 18 + r ^ 3 * p ^ 19 + r ^ 2 * p ^ 20 + r * p ^ 21 + p ^ 22)
+          ) =
+      oddKernelElevenUnitGapCertificate p q s := by
+  intro q s
+  unfold oddKernelElevenUnitGapCertificate oddKernelElevenUnitGapTerms
+  simp [simplexCertEval, simplexCertTermEval]
+  dsimp [q, s]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem kernelPartialIntegralBetween_eleven_le_integralUpperStep_on_unit
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 11 <=
+      ArctanGeometry.integralUpperStep p r := by
+  let L : Rat := r - p
+  let D : Rat := 1 + p * p
+  let S3 : Rat :=
+    r ^ 2 + r * p + p ^ 2
+  let S5 : Rat :=
+    r ^ 4 + r ^ 3 * p + r ^ 2 * p ^ 2 + r * p ^ 3 + p ^ 4
+  let S7 : Rat :=
+    r ^ 6 + r ^ 5 * p + r ^ 4 * p ^ 2 + r ^ 3 * p ^ 3 + r ^ 2 * p ^ 4 + r * p ^ 5 + p ^ 6
+  let S9 : Rat :=
+    r ^ 8 + r ^ 7 * p + r ^ 6 * p ^ 2 + r ^ 5 * p ^ 3 + r ^ 4 * p ^ 4 + r ^ 3 * p ^ 5
+    + r ^ 2 * p ^ 6 + r * p ^ 7 + p ^ 8
+  let S11 : Rat :=
+    r ^ 10 + r ^ 9 * p + r ^ 8 * p ^ 2 + r ^ 7 * p ^ 3 + r ^ 6 * p ^ 4 + r ^ 5 * p ^ 5
+    + r ^ 4 * p ^ 6 + r ^ 3 * p ^ 7 + r ^ 2 * p ^ 8 + r * p ^ 9 + p ^ 10
+  let S13 : Rat :=
+    r ^ 12 + r ^ 11 * p + r ^ 10 * p ^ 2 + r ^ 9 * p ^ 3 + r ^ 8 * p ^ 4 + r ^ 7 * p ^ 5
+    + r ^ 6 * p ^ 6 + r ^ 5 * p ^ 7 + r ^ 4 * p ^ 8 + r ^ 3 * p ^ 9 + r ^ 2 * p ^ 10
+    + r * p ^ 11 + p ^ 12
+  let S15 : Rat :=
+    r ^ 14 + r ^ 13 * p + r ^ 12 * p ^ 2 + r ^ 11 * p ^ 3 + r ^ 10 * p ^ 4 + r ^ 9 * p ^ 5
+    + r ^ 8 * p ^ 6 + r ^ 7 * p ^ 7 + r ^ 6 * p ^ 8 + r ^ 5 * p ^ 9 + r ^ 4 * p ^ 10
+    + r ^ 3 * p ^ 11 + r ^ 2 * p ^ 12 + r * p ^ 13 + p ^ 14
+  let S17 : Rat :=
+    r ^ 16 + r ^ 15 * p + r ^ 14 * p ^ 2 + r ^ 13 * p ^ 3 + r ^ 12 * p ^ 4 + r ^ 11 * p ^ 5
+    + r ^ 10 * p ^ 6 + r ^ 9 * p ^ 7 + r ^ 8 * p ^ 8 + r ^ 7 * p ^ 9 + r ^ 6 * p ^ 10
+    + r ^ 5 * p ^ 11 + r ^ 4 * p ^ 12 + r ^ 3 * p ^ 13 + r ^ 2 * p ^ 14 + r * p ^ 15 + p ^ 16
+  let S19 : Rat :=
+    r ^ 18 + r ^ 17 * p + r ^ 16 * p ^ 2 + r ^ 15 * p ^ 3 + r ^ 14 * p ^ 4 + r ^ 13 * p ^ 5
+    + r ^ 12 * p ^ 6 + r ^ 11 * p ^ 7 + r ^ 10 * p ^ 8 + r ^ 9 * p ^ 9 + r ^ 8 * p ^ 10
+    + r ^ 7 * p ^ 11 + r ^ 6 * p ^ 12 + r ^ 5 * p ^ 13 + r ^ 4 * p ^ 14 + r ^ 3 * p ^ 15
+    + r ^ 2 * p ^ 16 + r * p ^ 17 + p ^ 18
+  let S21 : Rat :=
+    r ^ 20 + r ^ 19 * p + r ^ 18 * p ^ 2 + r ^ 17 * p ^ 3 + r ^ 16 * p ^ 4 + r ^ 15 * p ^ 5
+    + r ^ 14 * p ^ 6 + r ^ 13 * p ^ 7 + r ^ 12 * p ^ 8 + r ^ 11 * p ^ 9 + r ^ 10 * p ^ 10
+    + r ^ 9 * p ^ 11 + r ^ 8 * p ^ 12 + r ^ 7 * p ^ 13 + r ^ 6 * p ^ 14 + r ^ 5 * p ^ 15
+    + r ^ 4 * p ^ 16 + r ^ 3 * p ^ 17 + r ^ 2 * p ^ 18 + r * p ^ 19 + p ^ 20
+  let S23 : Rat :=
+    r ^ 22 + r ^ 21 * p + r ^ 20 * p ^ 2 + r ^ 19 * p ^ 3 + r ^ 18 * p ^ 4 + r ^ 17 * p ^ 5
+    + r ^ 16 * p ^ 6 + r ^ 15 * p ^ 7 + r ^ 14 * p ^ 8 + r ^ 13 * p ^ 9 + r ^ 12 * p ^ 10
+    + r ^ 11 * p ^ 11 + r ^ 10 * p ^ 12 + r ^ 9 * p ^ 13 + r ^ 8 * p ^ 14 + r ^ 7 * p ^ 15
+    + r ^ 6 * p ^ 16 + r ^ 5 * p ^ 17 + r ^ 4 * p ^ 18 + r ^ 3 * p ^ 19 + r ^ 2 * p ^ 20
+    + r * p ^ 21 + p ^ 22
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact RationalCircle.Stage.one_add_square_pos p
+  have h334639305Dpos : 0 < 334639305 * D :=
+    Rat.mul_pos (by native_decide : (0 : Rat) < 334639305) hDpos
+  let q : Rat := r - p
+  let s : Rat := 1 - r
+  have hq0 : 0 <= q := by
+    dsimp [q]
+    grind [Rat.sub_eq_add_neg]
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    grind [Rat.sub_eq_add_neg]
+  have hgap_cert := oddKernelElevenUnitGap_eq_certificate p r
+  have hgap_nonneg :
+      0 <=
+        334639305
+        - D * (334639305 - 111546435 * S3 + 66927861 * S5 - 47805615 * S7 + 37182145 * S9 - 30421755 * S11 + 25741485 * S13 - 22309287 * S15 + 19684665 * S17 - 17612595 * S19 + 15935205 * S21 - 14549535 * S23
+          ) := by
+    dsimp [D, S3, S5, S7, S9, S11, S13, S15, S17, S19, S21, S23]
+    rw [hgap_cert]
+    exact oddKernelElevenUnitGapCertificate_nonneg hp0 hq0 hs0
+  have hscalar :
+      D * (334639305 - 111546435 * S3 + 66927861 * S5 - 47805615 * S7 + 37182145 * S9 - 30421755 * S11 + 25741485 * S13 - 22309287 * S15 + 19684665 * S17 - 17612595 * S19 + 15935205 * S21 - 14549535 * S23
+          ) <= 334639305 := by
+    grind [Rat.sub_eq_add_neg]
+  have hupper_mul :
+      ArctanGeometry.integralUpperStep p r * (334639305 * D) = L * 334639305 := by
+    unfold ArctanGeometry.integralUpperStep ArctanGeometry.integralKernel
+    rw [Rat.div_def]
+    have hne : D ≠ 0 := Rat.ne_of_gt hDpos
+    dsimp [L, D] at hne ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hkernel_mul :
+      Taylor.ArctanKernel.kernelPartialIntegralBetween p r 11 * (334639305 * D) =
+        L * (D * (334639305 - 111546435 * S3 + 66927861 * S5 - 47805615 * S7 + 37182145 * S9 - 30421755 * S11 + 25741485 * S13 - 22309287 * S15 + 19684665 * S17 - 17612595 * S19 + 15935205 * S21 - 14549535 * S23
+          )) := by
+    have hkernel_formula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 11 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 + (r ^ 5 - p ^ 5) / 5 - (r ^ 7 - p ^ 7) / 7
+          + (r ^ 9 - p ^ 9) / 9 - (r ^ 11 - p ^ 11) / 11 + (r ^ 13 - p ^ 13) / 13
+          - (r ^ 15 - p ^ 15) / 15 + (r ^ 17 - p ^ 17) / 17 - (r ^ 19 - p ^ 19) / 19
+          + (r ^ 21 - p ^ 21) / 21 - (r ^ 23 - p ^ 23) / 23
+          := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hS3 : r ^ 3 - p ^ 3 = L * S3 := by
+      dsimp [L, S3]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS5 : r ^ 5 - p ^ 5 = L * S5 := by
+      dsimp [L, S5]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS7 : r ^ 7 - p ^ 7 = L * S7 := by
+      dsimp [L, S7]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS9 : r ^ 9 - p ^ 9 = L * S9 := by
+      dsimp [L, S9]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS11 : r ^ 11 - p ^ 11 = L * S11 := by
+      dsimp [L, S11]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS13 : r ^ 13 - p ^ 13 = L * S13 := by
+      dsimp [L, S13]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS15 : r ^ 15 - p ^ 15 = L * S15 := by
+      dsimp [L, S15]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS17 : r ^ 17 - p ^ 17 = L * S17 := by
+      dsimp [L, S17]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS19 : r ^ 19 - p ^ 19 = L * S19 := by
+      dsimp [L, S19]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS21 : r ^ 21 - p ^ 21 = L * S21 := by
+      dsimp [L, S21]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hS23 : r ^ 23 - p ^ 23 = L * S23 := by
+      dsimp [L, S23]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hkernel_formula, hS3, hS5, hS7, hS9, hS11, hS13, hS15, hS17, hS19, hS21, hS23]
+    dsimp [D, S3, S5, S7, S9, S11, S13, S15, S17, S19, S21, S23]
+    grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  apply Rat.le_of_mul_le_mul_right (c := 334639305 * D)
+  · rw [hkernel_mul, hupper_mul]
+    exact Rat.mul_le_mul_of_nonneg_left hscalar hL0
+  · exact h334639305Dpos
+
+theorem oddKernelUnitCellBound_eleven : OddKernelUnitCellBound 11 := by
+  intro p r hp0 hpr hr1
+  exact kernelPartialIntegralBetween_eleven_le_integralUpperStep_on_unit hp0 hpr hr1
+
+theorem unitUniformCellBoundsAtOneUpTo_of_le
+    {M N : Nat} (hMN : M <= N)
+    (h : LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizRectangleUniformUnitCellBoundsAtOneUpTo M := by
+  constructor
+  · intro n hn
+    exact h.1 n (Nat.le_trans hn hMN)
+  · intro n hn
+    exact h.2 n (Nat.le_trans hn hMN)
+
+theorem unitUniformCellBoundsAtOneUpTo_of_unitUniformCellBounds
+    (h : LeibnizRectangleUniformUnitCellBoundsAtOne) (N : Nat) :
+    LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N := by
+  constructor
+  · intro n _hn
+    exact h.1 n
+  · intro n _hn
+    exact h.2 n
+
+theorem unitUniformCellBoundsAtOneUpToAll_of_unitUniformCellBounds
+    (h : LeibnizRectangleUniformUnitCellBoundsAtOne) :
+    LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll := by
+  intro N
+  exact unitUniformCellBoundsAtOneUpTo_of_unitUniformCellBounds h N
+
+theorem unitUniformCellBoundsAtOne_iff_upToAll :
+    LeibnizRectangleUniformUnitCellBoundsAtOne ↔
+      LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll := by
+  constructor
+  · exact unitUniformCellBoundsAtOneUpToAll_of_unitUniformCellBounds
+  · intro h
+    constructor
+    · intro n
+      exact (h n).1 n (Nat.le_refl n)
+    · intro n
+      exact (h n).2 n (Nat.le_refl n)
+
+theorem evenKernelCellBound_le_five
+    (n : Nat) (hn : n <= 5) :
+    EvenKernelCellBound (2 * n) := by
+  intro p r hp0 hpr hr1
+  cases n with
+  | zero =>
+      simpa using evenKernelCellBound_zero hp0 hpr hr1
+  | succ n =>
+      cases n with
+      | zero =>
+          simpa using evenKernelCellBound_two hp0 hpr hr1
+      | succ n =>
+          cases n with
+          | zero =>
+              simpa using evenKernelCellBound_four hp0 hpr hr1
+          | succ n =>
+              cases n with
+              | zero =>
+                  simpa using evenKernelCellBound_six hp0 hpr hr1
+              | succ n =>
+                  cases n with
+                  | zero =>
+                      simpa using evenKernelCellBound_eight hp0 hpr hr1
+                  | succ n =>
+                      cases n with
+                      | zero =>
+                          simpa using evenKernelCellBound_ten hp0 hpr hr1
+                      | succ n => omega
+
+theorem oddKernelUnitCellBound_le_five
+    (n : Nat) (hn : n <= 5) :
+    OddKernelUnitCellBound (2 * n + 1) := by
+  intro p r hp0 hpr hr1
+  cases n with
+  | zero =>
+      simpa using oddKernelUnitCellBound_one hp0 hpr hr1
+  | succ n =>
+      cases n with
+      | zero =>
+          simpa using oddKernelUnitCellBound_three hp0 hpr hr1
+      | succ n =>
+          cases n with
+          | zero =>
+              simpa using oddKernelUnitCellBound_five hp0 hpr hr1
+          | succ n =>
+              cases n with
+              | zero =>
+                  simpa using oddKernelUnitCellBound_seven hp0 hpr hr1
+              | succ n =>
+                  cases n with
+                  | zero =>
+                      simpa using oddKernelUnitCellBound_nine hp0 hpr hr1
+                  | succ n =>
+                      cases n with
+                      | zero =>
+                          simpa using oddKernelUnitCellBound_eleven hp0 hpr hr1
+                      | succ n => omega
+
+theorem leibnizRectangleUniformUnitCellBoundsAtOneUpToFive :
+    LeibnizRectangleUniformUnitCellBoundsAtOneUpTo 5 :=
+  ⟨evenKernelCellBound_le_five, oddKernelUnitCellBound_le_five⟩
+
 theorem evenKernelCellBounds_zero_of_unit
     {intervals : List (Rat × Rat)}
     (h : ArctanGeometry.UnitIntervals intervals) :
@@ -1262,6 +4404,101 @@ theorem oddKernelCellBounds_one_of_nonnegative
     (h : ArctanGeometry.NonnegativeIntervals intervals) :
     OddKernelCellBounds 1 intervals :=
   oddKernelCellBounds_of_cellBound oddKernelCellBound_one h
+
+theorem oddKernelCellBounds_three_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    OddKernelCellBounds 3 intervals := by
+  induction intervals with
+  | nil =>
+      simp [OddKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp0, hpr, hr1, hrest⟩
+      simp [OddKernelCellBounds]
+      exact ⟨oddKernelUnitCellBound_three hp0 hpr hr1, ih hrest⟩
+
+theorem oddKernelCellBounds_five_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    OddKernelCellBounds 5 intervals := by
+  induction intervals with
+  | nil =>
+      simp [OddKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp0, hpr, hr1, hrest⟩
+      simp [OddKernelCellBounds]
+      exact ⟨oddKernelUnitCellBound_five hp0 hpr hr1, ih hrest⟩
+
+theorem oddKernelCellBounds_seven_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    OddKernelCellBounds 7 intervals := by
+  induction intervals with
+  | nil =>
+      simp [OddKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp0, hpr, hr1, hrest⟩
+      simp [OddKernelCellBounds]
+      exact ⟨oddKernelUnitCellBound_seven hp0 hpr hr1, ih hrest⟩
+
+theorem oddKernelCellBounds_nine_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    OddKernelCellBounds 9 intervals := by
+  induction intervals with
+  | nil =>
+      simp [OddKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp0, hpr, hr1, hrest⟩
+      simp [OddKernelCellBounds]
+      exact ⟨oddKernelUnitCellBound_nine hp0 hpr hr1, ih hrest⟩
+
+theorem oddKernelCellBounds_eleven_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    OddKernelCellBounds 11 intervals := by
+  induction intervals with
+  | nil =>
+      simp [OddKernelCellBounds]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases h with ⟨hp0, hpr, hr1, hrest⟩
+      simp [OddKernelCellBounds]
+      exact ⟨oddKernelUnitCellBound_eleven hp0 hpr hr1, ih hrest⟩
+
+theorem evenKernelCellBounds_two_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    EvenKernelCellBounds 2 intervals :=
+  evenKernelCellBounds_of_cellBound evenKernelCellBound_two h
+
+theorem evenKernelCellBounds_four_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    EvenKernelCellBounds 4 intervals :=
+  evenKernelCellBounds_of_cellBound evenKernelCellBound_four h
+
+theorem evenKernelCellBounds_six_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    EvenKernelCellBounds 6 intervals :=
+  evenKernelCellBounds_of_cellBound evenKernelCellBound_six h
+
+theorem evenKernelCellBounds_eight_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    EvenKernelCellBounds 8 intervals :=
+  evenKernelCellBounds_of_cellBound evenKernelCellBound_eight h
+
+theorem evenKernelCellBounds_ten_of_unit
+    {intervals : List (Rat × Rat)}
+    (h : ArctanGeometry.UnitIntervals intervals) :
+    EvenKernelCellBounds 10 intervals :=
+  evenKernelCellBounds_of_cellBound evenKernelCellBound_ten h
 
 theorem evenKernelCellBoundsAtOne_zero :
     EvenKernelCellBounds 0
@@ -1276,6 +4513,76 @@ theorem oddKernelCellBoundsAtOne_zero :
   oddKernelCellBounds_one_of_nonnegative
     (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
       (x := (1 : Rat)) (by native_decide) 1)
+
+theorem evenKernelCellBoundsAtOne_one :
+    EvenKernelCellBounds 2
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 1).intervals :=
+  evenKernelCellBounds_two_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 1)
+
+theorem oddKernelCellBoundsAtOne_one :
+    OddKernelCellBounds 3
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 2).intervals :=
+  oddKernelCellBounds_three_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 2)
+
+theorem evenKernelCellBoundsAtOne_two :
+    EvenKernelCellBounds 4
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 2).intervals :=
+  evenKernelCellBounds_four_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 2)
+
+theorem oddKernelCellBoundsAtOne_two :
+    OddKernelCellBounds 5
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 3).intervals :=
+  oddKernelCellBounds_five_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 3)
+
+theorem evenKernelCellBoundsAtOne_three :
+    EvenKernelCellBounds 6
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 3).intervals :=
+  evenKernelCellBounds_six_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 3)
+
+theorem oddKernelCellBoundsAtOne_three :
+    OddKernelCellBounds 7
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 4).intervals :=
+  oddKernelCellBounds_seven_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 4)
+
+theorem evenKernelCellBoundsAtOne_four :
+    EvenKernelCellBounds 8
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 4).intervals :=
+  evenKernelCellBounds_eight_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 4)
+
+theorem oddKernelCellBoundsAtOne_four :
+    OddKernelCellBounds 9
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 5).intervals :=
+  oddKernelCellBounds_nine_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 5)
+
+theorem evenKernelCellBoundsAtOne_five :
+    EvenKernelCellBounds 10
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 5).intervals :=
+  evenKernelCellBounds_ten_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 5)
+
+theorem oddKernelCellBoundsAtOne_five :
+    OddKernelCellBounds 11
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) 6).intervals :=
+  oddKernelCellBounds_eleven_of_unit
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) 6)
 
 def LeibnizRectangleKernelCellBoundsAtOneBase : Prop :=
   EvenKernelCellBounds 0
@@ -1295,6 +4602,136 @@ def LeibnizRectangleKernelCellBoundsAtOneUpTo (N : Nat) : Prop :=
     OddKernelCellBounds (2 * n + 1)
       (ArctanGeometry.arctanAreaLoopState (1 : Rat) (n + 1)).intervals)
 
+def LeibnizRectangleKernelCellBoundsAtOneUpToAll : Prop :=
+  forall N, LeibnizRectangleKernelCellBoundsAtOneUpTo N
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpTo_of_le
+    {M N : Nat} (hMN : M <= N)
+    (h : LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo M := by
+  constructor
+  · intro n hn
+    exact h.1 n (Nat.le_trans hn hMN)
+  · intro n hn
+    exact h.2 n (Nat.le_trans hn hMN)
+
+theorem cellBoundsUpTo_of_unitUniformCellBoundsUpTo
+    {N : Nat} (h : LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo N := by
+  constructor
+  · intro n hn
+    exact evenKernelCellBounds_of_cellBound (h.1 n hn)
+      (ArctanGeometry.arctanAreaLoopState_intervals_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide) n)
+  · intro n hn
+    exact oddKernelCellBounds_of_unitCellBound (h.2 n hn)
+      (ArctanGeometry.arctanAreaLoopState_intervals_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide) (n + 1))
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToFive_of_unitUniform :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 5 :=
+  cellBoundsUpTo_of_unitUniformCellBoundsUpTo
+    leibnizRectangleUniformUnitCellBoundsAtOneUpToFive
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToOne :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 1 := by
+  unfold LeibnizRectangleKernelCellBoundsAtOneUpTo
+  constructor
+  · intro n hn
+    cases n with
+    | zero =>
+        simpa using evenKernelCellBoundsAtOne_zero
+    | succ n =>
+        cases n with
+        | zero =>
+            simpa using evenKernelCellBoundsAtOne_one
+        | succ n =>
+            omega
+  · intro n hn
+    cases n with
+    | zero =>
+        simpa using oddKernelCellBoundsAtOne_zero
+    | succ n =>
+        cases n with
+        | zero =>
+            simpa using oddKernelCellBoundsAtOne_one
+        | succ n =>
+            omega
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToTwo :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 2 := by
+  unfold LeibnizRectangleKernelCellBoundsAtOneUpTo
+  constructor
+  · intro n hn
+    cases n with
+    | zero =>
+        simpa using evenKernelCellBoundsAtOne_zero
+    | succ n =>
+        cases n with
+        | zero =>
+            simpa using evenKernelCellBoundsAtOne_one
+        | succ n =>
+            cases n with
+            | zero =>
+                simpa using evenKernelCellBoundsAtOne_two
+            | succ n =>
+                omega
+  · intro n hn
+    cases n with
+    | zero =>
+        simpa using oddKernelCellBoundsAtOne_zero
+    | succ n =>
+        cases n with
+        | zero =>
+            simpa using oddKernelCellBoundsAtOne_one
+        | succ n =>
+            cases n with
+            | zero =>
+                simpa using oddKernelCellBoundsAtOne_two
+            | succ n =>
+                omega
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToThree :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 3 := by
+  unfold LeibnizRectangleKernelCellBoundsAtOneUpTo
+  constructor
+  · intro n hn
+    cases n with
+    | zero =>
+        simpa using evenKernelCellBoundsAtOne_zero
+    | succ n =>
+        cases n with
+        | zero =>
+            simpa using evenKernelCellBoundsAtOne_one
+        | succ n =>
+            cases n with
+            | zero =>
+                simpa using evenKernelCellBoundsAtOne_two
+            | succ n =>
+                cases n with
+                | zero =>
+                    simpa using evenKernelCellBoundsAtOne_three
+                | succ n =>
+                    omega
+  · intro n hn
+    cases n with
+    | zero =>
+        simpa using oddKernelCellBoundsAtOne_zero
+    | succ n =>
+        cases n with
+        | zero =>
+            simpa using oddKernelCellBoundsAtOne_one
+        | succ n =>
+            cases n with
+            | zero =>
+                simpa using oddKernelCellBoundsAtOne_two
+            | succ n =>
+                cases n with
+                | zero =>
+                    simpa using oddKernelCellBoundsAtOne_three
+                | succ n =>
+                    omega
+
 theorem evenKernelCellBoundsAtOne_le_four
     (n : Nat) (hn : n <= 4) :
     EvenKernelCellBounds (2 * n)
@@ -1304,16 +4741,20 @@ theorem evenKernelCellBoundsAtOne_le_four
       simpa using evenKernelCellBoundsAtOne_zero
   | succ n =>
       cases n with
-      | zero => native_decide
+      | zero =>
+          simpa using evenKernelCellBoundsAtOne_one
       | succ n =>
           cases n with
-          | zero => native_decide
+          | zero =>
+              simpa using evenKernelCellBoundsAtOne_two
           | succ n =>
               cases n with
-              | zero => native_decide
+              | zero =>
+                  simpa using evenKernelCellBoundsAtOne_three
               | succ n =>
                   cases n with
-                  | zero => native_decide
+                  | zero =>
+                      simpa using evenKernelCellBoundsAtOne_four
                   | succ n => omega
 
 theorem oddKernelCellBoundsAtOne_le_four
@@ -1325,25 +4766,101 @@ theorem oddKernelCellBoundsAtOne_le_four
       simpa using oddKernelCellBoundsAtOne_zero
   | succ n =>
       cases n with
-      | zero => native_decide
+      | zero =>
+          simpa using oddKernelCellBoundsAtOne_one
       | succ n =>
           cases n with
-          | zero => native_decide
+          | zero =>
+              simpa using oddKernelCellBoundsAtOne_two
           | succ n =>
               cases n with
-              | zero => native_decide
+              | zero =>
+                  simpa using oddKernelCellBoundsAtOne_three
               | succ n =>
                   cases n with
-                  | zero => native_decide
+                  | zero =>
+                      simpa using oddKernelCellBoundsAtOne_four
                   | succ n => omega
 
 theorem leibnizRectangleKernelCellBoundsAtOneUpToFour :
     LeibnizRectangleKernelCellBoundsAtOneUpTo 4 :=
   ⟨evenKernelCellBoundsAtOne_le_four, oddKernelCellBoundsAtOne_le_four⟩
 
+theorem evenKernelCellBoundsAtOne_le_five
+    (n : Nat) (hn : n <= 5) :
+    EvenKernelCellBounds (2 * n)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals := by
+  cases n with
+  | zero =>
+      simpa using evenKernelCellBoundsAtOne_zero
+  | succ n =>
+      cases n with
+      | zero =>
+          simpa using evenKernelCellBoundsAtOne_one
+      | succ n =>
+          cases n with
+          | zero =>
+              simpa using evenKernelCellBoundsAtOne_two
+          | succ n =>
+              cases n with
+              | zero =>
+                  simpa using evenKernelCellBoundsAtOne_three
+              | succ n =>
+                  cases n with
+                  | zero =>
+                      simpa using evenKernelCellBoundsAtOne_four
+                  | succ n =>
+                      cases n with
+                      | zero =>
+                          simpa using evenKernelCellBoundsAtOne_five
+                      | succ n => omega
+
+theorem oddKernelCellBoundsAtOne_le_five
+    (n : Nat) (hn : n <= 5) :
+    OddKernelCellBounds (2 * n + 1)
+      (ArctanGeometry.arctanAreaLoopState (1 : Rat) (n + 1)).intervals := by
+  cases n with
+  | zero =>
+      simpa using oddKernelCellBoundsAtOne_zero
+  | succ n =>
+      cases n with
+      | zero =>
+          simpa using oddKernelCellBoundsAtOne_one
+      | succ n =>
+          cases n with
+          | zero =>
+              simpa using oddKernelCellBoundsAtOne_two
+          | succ n =>
+              cases n with
+              | zero =>
+                  simpa using oddKernelCellBoundsAtOne_three
+              | succ n =>
+                  cases n with
+                  | zero =>
+                      simpa using oddKernelCellBoundsAtOne_four
+                  | succ n =>
+                      cases n with
+                      | zero =>
+                          simpa using oddKernelCellBoundsAtOne_five
+                      | succ n => omega
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToFive :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 5 :=
+  ⟨evenKernelCellBoundsAtOne_le_five, oddKernelCellBoundsAtOne_le_five⟩
+
 theorem leibnizRectangleKernelCellBoundsAtOneUpToTwelve :
     LeibnizRectangleKernelCellBoundsAtOneUpTo 12 := by
   constructor <;> native_decide
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToFifteen :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 15 := by
+  constructor <;> native_decide
+
+theorem leibnizRectangleKernelCellBoundsAtOneUpToFourteen :
+    LeibnizRectangleKernelCellBoundsAtOneUpTo 14 :=
+  leibnizRectangleKernelCellBoundsAtOneUpTo_of_le
+    (by native_decide : 14 <= 15)
+    leibnizRectangleKernelCellBoundsAtOneUpToFifteen
 
 theorem integralLowerSum_le_kernelPartialIntegralSum
     {m : Nat} {intervals : List (Rat × Rat)}
@@ -1466,6 +4983,20 @@ theorem cellBounds_of_uniformCellBounds
       (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
         (x := (1 : Rat)) (by native_decide) (n + 1))
 
+theorem cellBounds_of_unitUniformCellBounds
+    (h : LeibnizRectangleUniformUnitCellBoundsAtOne) :
+    LeibnizRectangleKernelCellBoundsAtOne := by
+  unfold LeibnizRectangleKernelCellBoundsAtOne
+  constructor
+  · intro n
+    exact evenKernelCellBounds_of_cellBound (h.1 n)
+      (ArctanGeometry.arctanAreaLoopState_intervals_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide) n)
+  · intro n
+    exact oddKernelCellBounds_of_unitCellBound (h.2 n)
+      (ArctanGeometry.arctanAreaLoopState_intervals_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide) (n + 1))
+
 theorem cellBoundsUpTo_of_cellBounds
     (h : LeibnizRectangleKernelCellBoundsAtOne) (N : Nat) :
     LeibnizRectangleKernelCellBoundsAtOneUpTo N := by
@@ -1473,8 +5004,14 @@ theorem cellBoundsUpTo_of_cellBounds
   unfold LeibnizRectangleKernelCellBoundsAtOneUpTo
   exact ⟨fun n _hn => h.1 n, fun n _hn => h.2 n⟩
 
+theorem cellBoundsUpToAll_of_cellBounds
+    (h : LeibnizRectangleKernelCellBoundsAtOne) :
+    LeibnizRectangleKernelCellBoundsAtOneUpToAll := by
+  intro N
+  exact cellBoundsUpTo_of_cellBounds h N
+
 theorem cellBounds_of_cellBoundsUpToAll
-    (h : forall N, LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    (h : LeibnizRectangleKernelCellBoundsAtOneUpToAll) :
     LeibnizRectangleKernelCellBoundsAtOne := by
   unfold LeibnizRectangleKernelCellBoundsAtOne
   constructor
@@ -1482,6 +5019,56 @@ theorem cellBounds_of_cellBoundsUpToAll
     exact (h n).1 n (Nat.le_refl n)
   · intro n
     exact (h n).2 n (Nat.le_refl n)
+
+theorem cellBoundsAtOne_iff_upToAll :
+    LeibnizRectangleKernelCellBoundsAtOne ↔
+      LeibnizRectangleKernelCellBoundsAtOneUpToAll := by
+  constructor
+  · exact cellBoundsUpToAll_of_cellBounds
+  · exact cellBounds_of_cellBoundsUpToAll
+
+theorem unitUniformCellBounds_of_unitUniformCellBoundsUpToAll
+    (h : forall N, LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizRectangleUniformUnitCellBoundsAtOne := by
+  constructor
+  · intro n
+    exact (h n).1 n (Nat.le_refl n)
+  · intro n
+    exact (h n).2 n (Nat.le_refl n)
+
+theorem cellBounds_of_unitUniformCellBoundsUpToAll
+    (h : forall N, LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelCellBoundsAtOne :=
+  cellBounds_of_unitUniformCellBounds
+    (unitUniformCellBounds_of_unitUniformCellBoundsUpToAll h)
+
+theorem pointwiseIntegralBridgeAtOne_iff_uniformCellBounds :
+    LeibnizRectanglePointwiseIntegralBridgeAtOne ↔
+      LeibnizRectangleUniformCellBoundsAtOne := by
+  constructor
+  · exact uniformCellBounds_of_pointwiseIntegralBridge
+  · intro h _hpointwise
+    exact h
+
+theorem pointwiseUnitIntegralBridgeAtOne_iff_unitUniformCellBounds :
+    LeibnizRectanglePointwiseUnitIntegralBridgeAtOne ↔
+      LeibnizRectangleUniformUnitCellBoundsAtOne := by
+  constructor
+  · exact unitUniformCellBounds_of_pointwiseUnitIntegralBridge
+  · intro h _hpointwise
+    exact h
+
+theorem cellBounds_of_pointwiseIntegralBridge
+    (h : LeibnizRectanglePointwiseIntegralBridgeAtOne) :
+    LeibnizRectangleKernelCellBoundsAtOne :=
+  cellBounds_of_uniformCellBounds
+    (uniformCellBounds_of_pointwiseIntegralBridge h)
+
+theorem cellBounds_of_pointwiseUnitIntegralBridge
+    (h : LeibnizRectanglePointwiseUnitIntegralBridgeAtOne) :
+    LeibnizRectangleKernelCellBoundsAtOne :=
+  cellBounds_of_unitUniformCellBounds
+    (unitUniformCellBounds_of_pointwiseUnitIntegralBridge h)
 
 theorem kernelBounds_of_cellBounds
     (h : LeibnizRectangleKernelCellBoundsAtOne) :
@@ -1523,7 +5110,269 @@ theorem kernelBounds_of_cellBounds
               (ArctanGeometry.arctanAreaLoopState (1 : Rat)
                 (n + 1)).intervals := hsum
 
+def LeibnizRectangleKernelBoundsAtOneUpTo (N : Nat) : Prop :=
+  forall n, n <= N ->
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).lo <=
+      LeibnizValidity.upperKernelPartialAtStage n /\
+    LeibnizValidity.lowerKernelPartialAtStage n <=
+      (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).hi
+
+def LeibnizRectangleKernelBoundsAtOneUpToAll : Prop :=
+  forall N, LeibnizRectangleKernelBoundsAtOneUpTo N
+
+theorem kernelBoundsAtOneUpTo_of_le
+    {M N : Nat} (hMN : M <= N)
+    (h : LeibnizRectangleKernelBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelBoundsAtOneUpTo M := by
+  intro n hn
+  exact h n (Nat.le_trans hn hMN)
+
+theorem kernelBoundsUpTo_of_cellBoundsUpTo
+    {N : Nat} (h : LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelBoundsAtOneUpTo N := by
+  intro n hn
+  constructor
+  · have hcell := h.1 n hn
+    have hsum := integralLowerSum_le_kernelPartialIntegralSum hcell
+    unfold ArctanGeometry.arctanIntegralRectangleComputeAtOne
+    unfold ArctanGeometry.integralSumInterval
+    dsimp
+    calc
+      ArctanGeometry.integralLowerSum
+          (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals <=
+          kernelPartialIntegralSum (2 * n)
+            (ArctanGeometry.arctanAreaLoopState (1 : Rat) n).intervals := hsum
+      _ = Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n) :=
+          arctanAreaLoopState_one_kernelPartialIntegralSum (2 * n) n
+      _ = LeibnizValidity.upperKernelPartialAtStage n := by
+          simp [LeibnizValidity.upperKernelPartialAtStage]
+  · cases n with
+    | zero =>
+        native_decide
+    | succ n =>
+        have hn' : n <= N := by omega
+        have hcell := h.2 n hn'
+        have hsum := kernelPartialIntegralSum_le_integralUpperSum hcell
+        unfold ArctanGeometry.arctanIntegralRectangleComputeAtOne
+        unfold ArctanGeometry.integralSumInterval
+        dsimp
+        calc
+          LeibnizValidity.lowerKernelPartialAtStage (n + 1) =
+              Taylor.ArctanKernel.kernelPartialIntegralAtOne (2 * n + 1) := by
+                simp [LeibnizValidity.lowerKernelPartialAtStage]
+          _ = kernelPartialIntegralSum (2 * n + 1)
+              (ArctanGeometry.arctanAreaLoopState (1 : Rat)
+                (n + 1)).intervals := by
+                rw [arctanAreaLoopState_one_kernelPartialIntegralSum]
+          _ <= ArctanGeometry.integralUpperSum
+              (ArctanGeometry.arctanAreaLoopState (1 : Rat)
+                (n + 1)).intervals := hsum
+
+theorem kernelBoundsUpTo_of_unitUniformCellBoundsUpTo
+    {N : Nat} (h : LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelBoundsAtOneUpTo N :=
+  kernelBoundsUpTo_of_cellBoundsUpTo
+    (cellBoundsUpTo_of_unitUniformCellBoundsUpTo h)
+
+theorem leibnizRectangleKernelBoundsAtOneUpToFifteen :
+    LeibnizRectangleKernelBoundsAtOneUpTo 15 :=
+  kernelBoundsUpTo_of_cellBoundsUpTo
+    leibnizRectangleKernelCellBoundsAtOneUpToFifteen
+
+theorem leibnizRectangleKernelBoundsAtOneUpToFourteen :
+    LeibnizRectangleKernelBoundsAtOneUpTo 14 :=
+  kernelBoundsAtOneUpTo_of_le
+    (by native_decide : 14 <= 15)
+    leibnizRectangleKernelBoundsAtOneUpToFifteen
+
+theorem leibnizRectangleKernelBoundsAtOneUpToTwo :
+    LeibnizRectangleKernelBoundsAtOneUpTo 2 :=
+  kernelBoundsUpTo_of_cellBoundsUpTo
+    leibnizRectangleKernelCellBoundsAtOneUpToTwo
+
+theorem leibnizRectangleKernelBoundsAtOneUpToThree :
+    LeibnizRectangleKernelBoundsAtOneUpTo 3 :=
+  kernelBoundsUpTo_of_cellBoundsUpTo
+    leibnizRectangleKernelCellBoundsAtOneUpToThree
+
+theorem leibnizRectangleKernelBoundsAtOneUpToFour :
+    LeibnizRectangleKernelBoundsAtOneUpTo 4 :=
+  kernelBoundsUpTo_of_cellBoundsUpTo
+    leibnizRectangleKernelCellBoundsAtOneUpToFour
+
+theorem leibnizRectangleKernelBoundsAtOneUpToFive :
+    LeibnizRectangleKernelBoundsAtOneUpTo 5 :=
+  kernelBoundsUpTo_of_cellBoundsUpTo
+    leibnizRectangleKernelCellBoundsAtOneUpToFive
+
+theorem kernelBounds_of_cellBoundsUpToAll
+    (h : LeibnizRectangleKernelCellBoundsAtOneUpToAll) :
+    LeibnizRectangleKernelBoundsAtOne :=
+  kernelBounds_of_cellBounds (cellBounds_of_cellBoundsUpToAll h)
+
+theorem kernelBounds_of_unitUniformCellBoundsUpToAll
+    (h : forall N, LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizRectangleKernelBoundsAtOne :=
+  kernelBounds_of_cellBounds (cellBounds_of_unitUniformCellBoundsUpToAll h)
+
+theorem kernelBounds_of_kernelBoundsUpToAll
+    (h : LeibnizRectangleKernelBoundsAtOneUpToAll) :
+    LeibnizRectangleKernelBoundsAtOne := by
+  intro n
+  exact h n n (Nat.le_refl n)
+
+theorem kernelBoundsUpToAll_of_kernelBounds
+    (h : LeibnizRectangleKernelBoundsAtOne) :
+    LeibnizRectangleKernelBoundsAtOneUpToAll := by
+  intro N n _hn
+  exact h n
+
+theorem kernelBoundsAtOne_iff_upToAll :
+    LeibnizRectangleKernelBoundsAtOne ↔
+      LeibnizRectangleKernelBoundsAtOneUpToAll := by
+  constructor
+  · exact kernelBoundsUpToAll_of_kernelBounds
+  · exact kernelBounds_of_kernelBoundsUpToAll
+
+theorem kernelBoundsUpToAll_of_cellBoundsUpToAll
+    (h : LeibnizRectangleKernelCellBoundsAtOneUpToAll) :
+    LeibnizRectangleKernelBoundsAtOneUpToAll := by
+  intro N
+  exact kernelBoundsUpTo_of_cellBoundsUpTo (h N)
+
+theorem kernelBoundsUpToAll_of_unitUniformCellBoundsUpToAll
+    (h : LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll) :
+    LeibnizRectangleKernelBoundsAtOneUpToAll := by
+  intro N
+  exact kernelBoundsUpTo_of_unitUniformCellBoundsUpTo (h N)
+
+theorem kernelBounds_of_pointwiseIntegralBridge
+    (h : LeibnizRectanglePointwiseIntegralBridgeAtOne) :
+    LeibnizRectangleKernelBoundsAtOne :=
+  kernelBounds_of_cellBounds (cellBounds_of_pointwiseIntegralBridge h)
+
+theorem kernelBounds_of_pointwiseUnitIntegralBridge
+    (h : LeibnizRectanglePointwiseUnitIntegralBridgeAtOne) :
+    LeibnizRectangleKernelBoundsAtOne :=
+  kernelBounds_of_cellBounds (cellBounds_of_pointwiseUnitIntegralBridge h)
+
 end LeibnizRectangleBridge
+
+def LeibnizRectangleRawAtOneOverlapsUpTo (N : Nat) : Prop :=
+  forall n, n <= N ->
+    QInterval.Overlaps
+      (leibnizSeries.compute n)
+      (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n)
+
+def LeibnizRectangleRawAtOneOverlapsUpToAll : Prop :=
+  forall N, LeibnizRectangleRawAtOneOverlapsUpTo N
+
+theorem leibnizRectangleRawAtOneOverlapsUpTo_of_le
+    {M N : Nat} (hMN : M <= N)
+    (h : LeibnizRectangleRawAtOneOverlapsUpTo N) :
+    LeibnizRectangleRawAtOneOverlapsUpTo M := by
+  intro n hn
+  exact h n (Nat.le_trans hn hMN)
+
+theorem leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    {N : Nat}
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpTo N) :
+    LeibnizRectangleRawAtOneOverlapsUpTo N := by
+  intro n hn
+  rw [LeibnizValidity.leibnizSeries_compute_eq_kernelPartialIntegralInterval n]
+  change QInterval.Overlaps
+    { lo := LeibnizValidity.lowerKernelPartialAtStage n,
+      hi := LeibnizValidity.upperKernelPartialAtStage n }
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne n)
+  exact ⟨(h n hn).2, (h n hn).1⟩
+
+theorem leibnizRectangleRawAtOneOverlapsUpTo_of_cellBoundsUpTo
+    {N : Nat}
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    LeibnizRectangleRawAtOneOverlapsUpTo N :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    (LeibnizRectangleBridge.kernelBoundsUpTo_of_cellBoundsUpTo h)
+
+theorem leibnizRectangleRawAtOneOverlapsUpTo_of_unitUniformCellBoundsUpTo
+    {N : Nat}
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizRectangleRawAtOneOverlapsUpTo N :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    (LeibnizRectangleBridge.kernelBoundsUpTo_of_unitUniformCellBoundsUpTo h)
+
+theorem leibnizRectangleRawAtOneOverlapsUpToAll_of_kernelBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpToAll) :
+    LeibnizRectangleRawAtOneOverlapsUpToAll := by
+  intro N
+  exact leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo (h N)
+
+theorem leibnizRectangleRawAtOneOverlapsUpToAll_of_cellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpToAll) :
+    LeibnizRectangleRawAtOneOverlapsUpToAll :=
+  leibnizRectangleRawAtOneOverlapsUpToAll_of_kernelBoundsUpToAll
+    (LeibnizRectangleBridge.kernelBoundsUpToAll_of_cellBoundsUpToAll h)
+
+theorem leibnizRectangleRawAtOneOverlapsUpToAll_of_unitUniformCellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll) :
+    LeibnizRectangleRawAtOneOverlapsUpToAll :=
+  leibnizRectangleRawAtOneOverlapsUpToAll_of_kernelBoundsUpToAll
+    (LeibnizRectangleBridge.kernelBoundsUpToAll_of_unitUniformCellBoundsUpToAll h)
+
+theorem leibnizEqualsRectangleRawAtOneSpecial_of_rawOverlapsUpToAll
+    (h : LeibnizRectangleRawAtOneOverlapsUpToAll) :
+    LeibnizEqualsRectangleRawAtOneSpecial := by
+  unfold LeibnizEqualsRectangleRawAtOneSpecial
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    leibnizSeries ArctanGeometry.arctanIntegralRectangleRawAtOne n n).2
+  exact h n n (Nat.le_refl n)
+
+theorem rawOverlapsUpToAll_of_leibnizEqualsRectangleRawAtOneSpecial
+    (h : LeibnizEqualsRectangleRawAtOneSpecial) :
+    LeibnizRectangleRawAtOneOverlapsUpToAll := by
+  intro N n _hn
+  exact (RealRaw.compareAt_overlap_iff
+    leibnizSeries ArctanGeometry.arctanIntegralRectangleRawAtOne n n).1
+      (h n)
+
+theorem leibnizEqualsRectangleRawAtOneSpecial_iff_rawOverlapsUpToAll :
+    LeibnizEqualsRectangleRawAtOneSpecial ↔
+      LeibnizRectangleRawAtOneOverlapsUpToAll := by
+  constructor
+  · exact rawOverlapsUpToAll_of_leibnizEqualsRectangleRawAtOneSpecial
+  · exact leibnizEqualsRectangleRawAtOneSpecial_of_rawOverlapsUpToAll
+
+theorem leibnizRectangleRawAtOneOverlapsUpToFifteen :
+    LeibnizRectangleRawAtOneOverlapsUpTo 15 :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFifteen
+
+theorem leibnizRectangleRawAtOneOverlapsUpToFourteen :
+    LeibnizRectangleRawAtOneOverlapsUpTo 14 :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_le
+    (by native_decide : 14 <= 15)
+    leibnizRectangleRawAtOneOverlapsUpToFifteen
+
+theorem leibnizRectangleRawAtOneOverlapsUpToTwo :
+    LeibnizRectangleRawAtOneOverlapsUpTo 2 :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToTwo
+
+theorem leibnizRectangleRawAtOneOverlapsUpToThree :
+    LeibnizRectangleRawAtOneOverlapsUpTo 3 :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToThree
+
+theorem leibnizRectangleRawAtOneOverlapsUpToFour :
+    LeibnizRectangleRawAtOneOverlapsUpTo 4 :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFour
+
+theorem leibnizRectangleRawAtOneOverlapsUpToFive :
+    LeibnizRectangleRawAtOneOverlapsUpTo 5 :=
+  leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo
+    LeibnizRectangleBridge.leibnizRectangleKernelBoundsAtOneUpToFive
 
 theorem leibnizEqualsRectangleRawAtOneSpecial_of_kernelBounds
     (h : LeibnizRectangleKernelBoundsAtOne) :
@@ -1552,11 +5401,35 @@ theorem leibnizEqualsRectangleRawAtOne_of_special
     h
     arctanIntegralRectangleRawAtOne_equiv_raw_one
 
+theorem leibnizEqualsRectangleRawAtOne_of_rawOverlapsUpToAll
+    (h : LeibnizRectangleRawAtOneOverlapsUpToAll) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_special
+    (leibnizEqualsRectangleRawAtOneSpecial_of_rawOverlapsUpToAll h)
+
 theorem leibnizEqualsRectangleRawAtOne_of_kernelBounds
     (h : LeibnizRectangleKernelBoundsAtOne) :
     LeibnizEqualsRectangleRawAtOne :=
   leibnizEqualsRectangleRawAtOne_of_special
     (leibnizEqualsRectangleRawAtOneSpecial_of_kernelBounds h)
+
+theorem leibnizEqualsRectangleRawAtOne_of_kernelBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpToAll) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_kernelBounds
+    (LeibnizRectangleBridge.kernelBounds_of_kernelBoundsUpToAll h)
+
+theorem leibnizEqualsRectangleRawAtOne_of_cellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpToAll) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_kernelBounds
+    (LeibnizRectangleBridge.kernelBounds_of_cellBoundsUpToAll h)
+
+theorem leibnizEqualsRectangleRawAtOne_of_unitUniformCellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_kernelBounds
+    (LeibnizRectangleBridge.kernelBounds_of_unitUniformCellBoundsUpToAll h)
 
 theorem leibnizEqualsRectangleRawAtOne_of_uniformCellBounds
     (h : LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne) :
@@ -1565,11 +5438,24 @@ theorem leibnizEqualsRectangleRawAtOne_of_uniformCellBounds
     (LeibnizRectangleBridge.kernelBounds_of_cellBounds
       (LeibnizRectangleBridge.cellBounds_of_uniformCellBounds h))
 
+theorem leibnizEqualsRectangleRawAtOne_of_unitUniformCellBounds
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOne) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_kernelBounds
+    (LeibnizRectangleBridge.kernelBounds_of_cellBounds
+      (LeibnizRectangleBridge.cellBounds_of_unitUniformCellBounds h))
+
 theorem leibnizEqualsRectangleRawAtOne_of_pointwiseIntegralBridge
     (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne) :
     LeibnizEqualsRectangleRawAtOne :=
-  leibnizEqualsRectangleRawAtOne_of_uniformCellBounds
-    (LeibnizRectangleBridge.uniformCellBounds_of_pointwiseIntegralBridge h)
+  leibnizEqualsRectangleRawAtOne_of_kernelBounds
+    (LeibnizRectangleBridge.kernelBounds_of_pointwiseIntegralBridge h)
+
+theorem leibnizEqualsRectangleRawAtOne_of_pointwiseUnitIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_kernelBounds
+    (LeibnizRectangleBridge.kernelBounds_of_pointwiseUnitIntegralBridge h)
 
 theorem special_of_leibnizEqualsRectangleRawAtOne
     (h : LeibnizEqualsRectangleRawAtOne) :
@@ -1718,6 +5604,103 @@ theorem piLeibniz_compute_eq_four_arctanSeries_one (n : Nat) :
       (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).compute n) := by
   simpa [arctanSeries] using piLeibniz_compute_eq_four_arctan_one n
 
+def FourArctanSeriesRectangleRouteOverlapsUpTo (N : Nat) : Prop :=
+  forall n, n <= N ->
+    QInterval.Overlaps
+      (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).compute n)
+      (((4 : Nat) *
+        ArctanGeometry.arctanIntegralRectangleRawAtOne : RealRaw).compute n)
+
+def FourArctanSeriesRectangleRouteOverlapsUpToAll : Prop :=
+  forall N, FourArctanSeriesRectangleRouteOverlapsUpTo N
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpTo_of_le
+    {M N : Nat} (hMN : M <= N)
+    (h : FourArctanSeriesRectangleRouteOverlapsUpTo N) :
+    FourArctanSeriesRectangleRouteOverlapsUpTo M := by
+  intro n hn
+  exact h n (Nat.le_trans hn hMN)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpTo_of_leibnizRectangleRaw
+    {N : Nat} (h : LeibnizRectangleRawAtOneOverlapsUpTo N) :
+    FourArctanSeriesRectangleRouteOverlapsUpTo N := by
+  intro n hn
+  have hraw := h n hn
+  rw [← piLeibniz_compute_eq_four_arctanSeries_one n]
+  change QInterval.Overlaps
+    ((RealRaw.scaleRat (4 : Rat) leibnizSeries).compute n)
+    ((RealRaw.scaleRat (4 : Rat)
+      ArctanGeometry.arctanIntegralRectangleRawAtOne).compute n)
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp [(by native_decide : (0 : Rat) <= 4), QInterval.Overlaps]
+  exact
+    ⟨Rat.mul_le_mul_of_nonneg_left hraw.1
+        (by native_decide : (0 : Rat) <= 4),
+      Rat.mul_le_mul_of_nonneg_left hraw.2
+        (by native_decide : (0 : Rat) <= 4)⟩
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpTo_of_kernelBoundsUpTo
+    {N : Nat}
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpTo N) :
+    FourArctanSeriesRectangleRouteOverlapsUpTo N :=
+  fourArctanSeriesRectangleRouteOverlapsUpTo_of_leibnizRectangleRaw
+    (leibnizRectangleRawAtOneOverlapsUpTo_of_kernelBoundsUpTo h)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpTo_of_cellBoundsUpTo
+    {N : Nat}
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    FourArctanSeriesRectangleRouteOverlapsUpTo N :=
+  fourArctanSeriesRectangleRouteOverlapsUpTo_of_kernelBoundsUpTo
+    (LeibnizRectangleBridge.kernelBoundsUpTo_of_cellBoundsUpTo h)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpTo_of_unitUniformCellBoundsUpTo
+    {N : Nat}
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    FourArctanSeriesRectangleRouteOverlapsUpTo N :=
+  fourArctanSeriesRectangleRouteOverlapsUpTo_of_leibnizRectangleRaw
+    (leibnizRectangleRawAtOneOverlapsUpTo_of_unitUniformCellBoundsUpTo h)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpToAll_of_leibnizRectangleRaw
+    (h : LeibnizRectangleRawAtOneOverlapsUpToAll) :
+    FourArctanSeriesRectangleRouteOverlapsUpToAll := by
+  intro N
+  exact fourArctanSeriesRectangleRouteOverlapsUpTo_of_leibnizRectangleRaw
+    (h N)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpToAll_of_kernelBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpToAll) :
+    FourArctanSeriesRectangleRouteOverlapsUpToAll :=
+  fourArctanSeriesRectangleRouteOverlapsUpToAll_of_leibnizRectangleRaw
+    (leibnizRectangleRawAtOneOverlapsUpToAll_of_kernelBoundsUpToAll h)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpToAll_of_cellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpToAll) :
+    FourArctanSeriesRectangleRouteOverlapsUpToAll :=
+  fourArctanSeriesRectangleRouteOverlapsUpToAll_of_leibnizRectangleRaw
+    (leibnizRectangleRawAtOneOverlapsUpToAll_of_cellBoundsUpToAll h)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpToAll_of_unitUniformCellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll) :
+    FourArctanSeriesRectangleRouteOverlapsUpToAll :=
+  fourArctanSeriesRectangleRouteOverlapsUpToAll_of_leibnizRectangleRaw
+    (leibnizRectangleRawAtOneOverlapsUpToAll_of_unitUniformCellBoundsUpToAll h)
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpToFive_of_unitUniform :
+    FourArctanSeriesRectangleRouteOverlapsUpTo 5 :=
+  fourArctanSeriesRectangleRouteOverlapsUpTo_of_unitUniformCellBoundsUpTo
+    LeibnizRectangleBridge.leibnizRectangleUniformUnitCellBoundsAtOneUpToFive
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpToFifteen :
+    FourArctanSeriesRectangleRouteOverlapsUpTo 15 :=
+  fourArctanSeriesRectangleRouteOverlapsUpTo_of_leibnizRectangleRaw
+    leibnizRectangleRawAtOneOverlapsUpToFifteen
+
+theorem fourArctanSeriesRectangleRouteOverlapsUpToFourteen :
+    FourArctanSeriesRectangleRouteOverlapsUpTo 14 :=
+  fourArctanSeriesRectangleRouteOverlapsUpTo_of_le
+    (by native_decide : 14 <= 15)
+    fourArctanSeriesRectangleRouteOverlapsUpToFifteen
+
 namespace MachinIdentity
 
 def gaussian (re im : Rat) : QComplex :=
@@ -1796,6 +5779,22 @@ theorem turning this tangent identity into equivalence of the raw arctangent
 algorithms. -/
 theorem quarter_tangent_identity :
     tanSub (tanFour (1 / 5)) (1 / 239) = 1 := by
+  native_decide
+
+theorem projective_tanFour_one_fifth :
+    RationalCircle.ProjectiveRat.tanDouble
+      (RationalCircle.ProjectiveRat.tanDouble
+        (RationalCircle.ProjectiveRat.finite ((1 : Rat) / 5))) =
+      RationalCircle.ProjectiveRat.finite ((120 : Rat) / 119) := by
+  native_decide
+
+theorem projective_quarter_tangent_identity :
+    RationalCircle.ProjectiveRat.tanSub
+      (RationalCircle.ProjectiveRat.tanDouble
+        (RationalCircle.ProjectiveRat.tanDouble
+          (RationalCircle.ProjectiveRat.finite ((1 : Rat) / 5))))
+      (RationalCircle.ProjectiveRat.finite ((1 : Rat) / 239)) =
+      RationalCircle.ProjectiveRat.finite 1 := by
   native_decide
 
 def BranchIdentity : Prop :=
@@ -2202,6 +6201,32 @@ def outerTangentCrossSum (stage k : Nat) : Rat :=
 
 def rationalCircleStage (stage : Nat) : RationalCircle.Stage :=
   { subdivisions := stage }
+
+theorem circleParameter_double_index
+    (stage k : Nat) :
+    circleParameter (2 * stage) (2 * k) = circleParameter stage k := by
+  have href :
+      RationalCircle.Stage.RefinesByDoubling
+        (rationalCircleStage stage) (rationalCircleStage (2 * stage)) := by
+    rfl
+  simpa [rationalCircleStage, circleParameter,
+    RationalCircle.Stage.parameter, RationalCircle.Stage.refineIndex] using
+    RationalCircle.Stage.parameter_refineIndex_of_refinement href k
+
+theorem circleSamplePoint_double_index
+    (stage k : Nat) :
+    circleSamplePoint (2 * stage) (2 * k) =
+      circleSamplePoint stage k := by
+  rw [circleSamplePoint, circleSamplePoint,
+    circleParameter_double_index stage k]
+
+theorem circleSamplePoint_double_index_succ
+    (stage k : Nat) :
+    circleSamplePoint (2 * stage) (2 * k + 2) =
+      circleSamplePoint stage (k + 1) := by
+  have h := circleSamplePoint_double_index stage (k + 1)
+  rw [show 2 * (k + 1) = 2 * k + 2 by omega] at h
+  exact h
 
 theorem circleSamplePoint_eq_rationalCircleStage
     (stage k : Nat) :
@@ -3097,6 +7122,29 @@ theorem exitTangentCross_eq_formula
   unfold adjacentTangentCrossFormula
   rw [circleParameter_succ_sub]
 
+theorem adjacentChordCross_eq_formula
+    (stage : Nat) (k : Nat) :
+    pointCross (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) =
+      let u := circleParameter stage k
+      let v := circleParameter stage (k + 1)
+      let d : Rat := 1 / (stage : Rat)
+      (2 * d * (1 + u * v)) /
+        ((1 + u * u) * (1 + v * v)) := by
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  have hbase :
+      pointCross (circleSamplePoint stage k)
+          (circleSamplePoint stage (k + 1)) =
+        (2 * (v - u) * (1 + u * v)) /
+          ((1 + u * u) * (1 + v * v)) := by
+    simpa [circleSamplePoint, circlePoint, pointCross, u, v,
+      RationalCircle.Stage.point, RationalCircle.Stage.cross] using
+      RationalCircle.Stage.point_cross_formula u v
+  rw [hbase]
+  dsimp [u, v]
+  rw [circleParameter_succ_sub]
+
 theorem entryTangentSegmentNormSq_eq_formula
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
     pointSegmentNormSq
@@ -3194,6 +7242,444 @@ def OuterAdjacentTangentFormulaBudgetLeUpTo (stage : Nat) (B : Rat) : Prop :=
   forall k, k < stage ->
     FormulaBudgetLeAt stage B (entryTangentNormSqFormula stage k) /\
       FormulaBudgetLeAt stage B (exitTangentNormSqFormula stage k)
+
+private theorem sqrtUpperBound_le_two_of_le_two {q : Rat}
+    (hq : q <= 2) :
+    sqrtUpperBound q <= 2 := by
+  unfold sqrtUpperBound maxRat
+  split <;> grind
+
+private theorem one_le_one_add_square (u : Rat) :
+    (1 : Rat) <= 1 + u * u := by
+  have hs := RationalCircle.Stage.ratSquare_nonneg u
+  grind
+
+private theorem one_le_one_add_mul_of_nonneg
+    {u v : Rat} (hu : 0 <= u) (hv : 0 <= v) :
+    (1 : Rat) <= 1 + u * v := by
+  have huv : 0 <= u * v := Rat.mul_nonneg hu hv
+  grind
+
+private theorem one_le_mul_three_of_one_le
+    {A B C : Rat} (hA : (1 : Rat) <= A)
+    (hB : (1 : Rat) <= B) (hC : (1 : Rat) <= C) :
+    (1 : Rat) <= A * B * C := by
+  have hB0 : 0 <= B := by grind
+  have hC0 : 0 <= C := by grind
+  have hAB : (1 : Rat) <= A * B := by
+    calc
+      (1 : Rat) = 1 * 1 := by grind
+      _ <= A * 1 := Rat.mul_le_mul_of_nonneg_right hA
+        (by native_decide)
+      _ <= A * B := Rat.mul_le_mul_of_nonneg_left hB (by grind)
+  calc
+    (1 : Rat) = 1 * 1 := by grind
+    _ <= (A * B) * 1 := Rat.mul_le_mul_of_nonneg_right hAB
+      (by native_decide)
+    _ <= (A * B) * C := Rat.mul_le_mul_of_nonneg_left hC (by grind)
+
+private theorem tangent_chord_gap_le_two_cube
+    {u v d : Rat} (hdpos : 0 < d) (hd : d = v - u)
+    (hu0 : 0 <= u) (hv0 : 0 <= v) :
+    2 * (d / (1 + u * v)) -
+        (2 * d * (1 + u * v)) /
+          ((1 + u * u) * (1 + v * v)) <=
+      2 * d * d * d := by
+  let A : Rat := 1 + u * v
+  let B : Rat := 1 + u * u
+  let C : Rat := 1 + v * v
+  let D : Rat := A * B * C
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact RationalCircle.Stage.one_add_mul_pos_of_nonneg hu0 hv0
+  have hBpos : 0 < B := by
+    dsimp [B]
+    exact RationalCircle.Stage.one_add_square_pos u
+  have hCpos : 0 < C := by
+    dsimp [C]
+    exact RationalCircle.Stage.one_add_square_pos v
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos (Rat.mul_pos hApos hBpos) hCpos
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have hBCne : B * C ≠ 0 := Rat.ne_of_gt (Rat.mul_pos hBpos hCpos)
+  have hDge : (1 : Rat) <= D := by
+    dsimp [D, A, B, C]
+    exact one_le_mul_three_of_one_le
+      (one_le_one_add_mul_of_nonneg hu0 hv0)
+      (one_le_one_add_square u)
+      (one_le_one_add_square v)
+  have hcube_nonneg : 0 <= 2 * d * d * d := by
+    have hd0 : 0 <= d := Rat.le_of_lt hdpos
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg
+        (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hd0)
+        hd0)
+      hd0
+  have hleft :
+      (2 * (d / A) - (2 * d * A) / (B * C)) * D =
+        2 * d * (B * C - A * A) := by
+    dsimp [D]
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]
+  have hdiff : B * C - A * A = (v - u) * (v - u) := by
+    dsimp [A, B, C]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hleft_le :
+      2 * d * (B * C - A * A) <= (2 * d * d * d) * D := by
+    rw [hdiff, ← hd]
+    calc
+      2 * d * (d * d) = 2 * d * d * d := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ = (2 * d * d * d) * 1 := by grind
+      _ <= (2 * d * d * d) * D :=
+        Rat.mul_le_mul_of_nonneg_left hDge hcube_nonneg
+  apply Rat.le_of_mul_le_mul_right (c := D)
+  · dsimp [A, B, C] at hleft hleft_le
+    rw [hleft]
+    simpa [D] using hleft_le
+  · exact hDpos
+
+private theorem adjacentFanGap_le_two_step_cube
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    2 * adjacentTangentCrossFormula stage k -
+        pointCross (circleSamplePoint stage k)
+          (circleSamplePoint stage (k + 1)) <=
+      2 * (1 / (stage : Rat)) *
+        (1 / (stage : Rat)) * (1 / (stage : Rat)) := by
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  let d : Rat := 1 / (stage : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  have hd : d = v - u := by
+    dsimp [d, u, v]
+    rw [circleParameter_succ_sub]
+  have hu0 : 0 <= u := by
+    dsimp [u]
+    exact circleParameter_nonneg stage hstage k
+  have hv0 : 0 <= v := by
+    dsimp [v]
+    exact circleParameter_nonneg stage hstage (k + 1)
+  rw [adjacentChordCross_eq_formula stage k]
+  unfold adjacentTangentCrossFormula
+  dsimp [u, v, d]
+  exact tangent_chord_gap_le_two_cube hdpos hd hu0 hv0
+
+private theorem adjacentTangentCrossFormula_le_one
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    adjacentTangentCrossFormula stage k <= 1 := by
+  unfold adjacentTangentCrossFormula
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  let d : Rat := 1 / (stage : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  have hdle1 : d <= 1 := by
+    dsimp [d]
+    have hone : (1 / (1 : Rat)) = 1 := by native_decide
+    simpa [hone] using
+      (FTC.one_div_nat_antitone (n := 1) (m := stage)
+        (by omega) hstage (by omega : 1 <= stage))
+  have hu0 : 0 <= u := by
+    dsimp [u]
+    exact circleParameter_nonneg stage hstage k
+  have hv0 : 0 <= v := by
+    dsimp [v]
+    exact circleParameter_nonneg stage hstage (k + 1)
+  have hden_ge_one : (1 : Rat) <= 1 + u * v :=
+    one_le_one_add_mul_of_nonneg hu0 hv0
+  have hden_pos : 0 < 1 + u * v :=
+    RationalCircle.Stage.one_add_mul_pos_of_nonneg hu0 hv0
+  have hd_le_den : d <= 1 + u * v := Rat.le_trans hdle1 hden_ge_one
+  rw [Rat.div_def]
+  calc
+    d * (1 + u * v)⁻¹ <= (1 + u * v) * (1 + u * v)⁻¹ := by
+      exact Rat.mul_le_mul_of_nonneg_right hd_le_den
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden_pos))
+    _ = 1 := by
+      exact Rat.mul_inv_cancel (1 + u * v) (Rat.ne_of_gt hden_pos)
+
+private theorem entryTangentNormSqFormula_le_two
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    entryTangentNormSqFormula stage k <= 2 := by
+  unfold entryTangentNormSqFormula
+  have hpos := adjacentTangentCrossFormula_pos stage hstage k
+  have hle := adjacentTangentCrossFormula_le_one stage hstage k
+  have hsquare :
+      sq (adjacentTangentCrossFormula stage k) <= sq (1 : Rat) :=
+    sq_le_sq_of_nonneg_le (Rat.le_of_lt hpos) hle
+  unfold sq at hsquare
+  calc
+    adjacentTangentCrossFormula stage k *
+        adjacentTangentCrossFormula stage k <= 1 := by
+      simpa using hsquare
+    _ <= 2 := by native_decide
+
+private theorem exitTangentNormSqFormula_le_two
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    exitTangentNormSqFormula stage k <= 2 := by
+  simpa [exitTangentNormSqFormula, entryTangentNormSqFormula] using
+    entryTangentNormSqFormula_le_two stage hstage k
+
+private theorem adjacentChordNormSqFormula_le_two
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    adjacentChordNormSqFormula stage k <= 2 := by
+  unfold adjacentChordNormSqFormula
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  let d : Rat := 1 / (stage : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  have hd0 : 0 <= d := Rat.le_of_lt hdpos
+  have hdle1 : d <= 1 := by
+    dsimp [d]
+    have hone : (1 / (1 : Rat)) = 1 := by native_decide
+    simpa [hone] using
+      (FTC.one_div_nat_antitone (n := 1) (m := stage)
+        (by omega) hstage (by omega : 1 <= stage))
+  have hu0 : 0 <= u := by
+    dsimp [u]
+    exact circleParameter_nonneg stage hstage k
+  have hv0 : 0 <= v := by
+    dsimp [v]
+    exact circleParameter_nonneg stage hstage (k + 1)
+  have hd_eq : d = v - u := by
+    dsimp [d, u, v]
+    rw [circleParameter_succ_sub]
+  have hd_le_v : d <= v := by
+    rw [hd_eq]
+    grind [Rat.sub_eq_add_neg]
+  have hd_sq_le_v_sq : d * d <= v * v := by
+    have hs := sq_le_sq_of_nonneg_le hd0 hd_le_v
+    simpa [sq] using hs
+  have hden_pos :
+      0 < (1 + u * u) * (1 + v * v) := by
+    exact Rat.mul_pos
+      (RationalCircle.Stage.one_add_square_pos u)
+      (RationalCircle.Stage.one_add_square_pos v)
+  have hden_ge :
+      1 + d * d <= (1 + u * u) * (1 + v * v) := by
+    have hleft : 1 + d * d <= 1 + v * v := by
+      grind
+    have hright : 1 + v * v <= (1 + u * u) * (1 + v * v) := by
+      have honeu : 1 <= 1 + u * u := one_le_one_add_square u
+      have hvpos : 0 <= 1 + v * v :=
+        Rat.le_of_lt (RationalCircle.Stage.one_add_square_pos v)
+      calc
+        1 + v * v = 1 * (1 + v * v) := by grind
+        _ <= (1 + u * u) * (1 + v * v) :=
+          Rat.mul_le_mul_of_nonneg_right honeu hvpos
+    exact Rat.le_trans hleft hright
+  have hd_sq_le_one : d * d <= 1 := by
+    have hs := sq_le_sq_of_nonneg_le hd0 hdle1
+    simpa [sq] using hs
+  have hnum_le : 4 * d * d <= 2 * (1 + d * d) := by
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+      Rat.add_assoc, Rat.add_comm]
+  have hscaled :
+      4 * d * d <= 2 * ((1 + u * u) * (1 + v * v)) := by
+    exact Rat.le_trans hnum_le
+      (Rat.mul_le_mul_of_nonneg_left hden_ge
+        (by native_decide : (0 : Rat) <= 2))
+  apply Rat.le_of_mul_le_mul_right
+    (c := (1 + u * u) * (1 + v * v))
+  · rw [Rat.div_def]
+    have hden_ne :
+        (1 + u * u) * (1 + v * v) ≠ 0 := Rat.ne_of_gt hden_pos
+    calc
+      (4 * d * d * ((1 + u * u) * (1 + v * v))⁻¹) *
+          ((1 + u * u) * (1 + v * v)) =
+          4 * d * d := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= 2 * ((1 + u * u) * (1 + v * v)) := hscaled
+      _ = 2 * ((1 + u * u) * (1 + v * v)) := rfl
+  · exact hden_pos
+
+private theorem formulaBudgetLeAt_of_sqrtUpperBound_le_two
+    {precision : Nat} (hprecision : precision ≠ 0)
+    {B q : Rat}
+    (hub : sqrtUpperBound q <= 2)
+    (hbudget :
+      2 / (((2 ^ (precision + 9) : Nat) : Rat)) <= B) :
+    FormulaBudgetLeAt precision B q := by
+  unfold FormulaBudgetLeAt
+  let fuel : Nat := sqrtFuel q (sqrtStageEps precision)
+  have hfuel_ge : precision + 9 <= fuel := by
+    dsimp [fuel]
+    rw [sqrtFuel_sqrtStageEps_eq q precision hprecision]
+    have hden_pos : 0 < (sqrtUpperBound q).den :=
+      Nat.pos_of_ne_zero (sqrtUpperBound q).den_nz
+    omega
+  have hpow_ge : 2 ^ (precision + 9) <= 2 ^ fuel :=
+    Nat.pow_le_pow_right (by omega : 0 < 2) hfuel_ge
+  have hfuel_pos : 0 < 2 ^ fuel :=
+    Nat.pow_pos (by omega : 0 < 2)
+  have hsmall :
+      1 / (((2 ^ fuel : Nat) : Rat)) <=
+        1 / (((2 ^ (precision + 9) : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone
+      (Nat.pow_pos (by omega : 0 < 2)) hfuel_pos hpow_ge
+  have hfuel_nonneg :
+      0 <= 1 / (((2 ^ fuel : Nat) : Rat)) := by
+    exact Rat.le_of_lt
+      (one_div_nat_pos (Nat.pow_pos (by omega : 0 < 2)))
+  calc
+    sqrtUpperBound q /
+        (((2 ^ sqrtFuel q (sqrtStageEps precision) : Nat) : Rat)) =
+        sqrtUpperBound q * (1 / (((2 ^ fuel : Nat) : Rat))) := by
+      dsimp [fuel]
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= 2 * (1 / (((2 ^ fuel : Nat) : Rat))) := by
+      exact Rat.mul_le_mul_of_nonneg_right hub hfuel_nonneg
+    _ <= 2 * (1 / (((2 ^ (precision + 9) : Nat) : Rat))) := by
+      exact Rat.mul_le_mul_of_nonneg_left hsmall
+        (by native_decide : (0 : Rat) <= 2)
+    _ = 2 / (((2 ^ (precision + 9) : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= B := hbudget
+
+private theorem succ_le_two_pow_local (n : Nat) : n + 1 <= 2 ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 2 * (n + 1) := by omega
+        _ <= 2 * 2 ^ n := Nat.mul_le_mul_left 2 ih
+        _ = 2 ^ (n + 1) := by
+          rw [Nat.pow_succ]
+          omega
+
+private theorem two_mul_le_two_pow_of_four_le
+    (n : Nat) (h4 : 4 <= n) :
+    n + n <= 2 ^ n := by
+  induction n with
+  | zero =>
+      omega
+  | succ n ih =>
+      by_cases h4n : 4 <= n
+      · have hih := ih h4n
+        calc
+          n + 1 + (n + 1) = n + n + 2 := by omega
+          _ <= 2 ^ n + 2 := Nat.add_le_add_right hih 2
+          _ <= 2 ^ n + 2 ^ n := by
+            exact Nat.add_le_add_left
+              (Nat.le_trans (by native_decide : 2 <= 2 ^ 1)
+                (Nat.pow_le_pow_right (by omega : 0 < 2)
+                  (by omega : 1 <= n)))
+              (2 ^ n)
+          _ = 2 ^ (n + 1) := by
+            rw [Nat.pow_succ]
+            omega
+      · have hn3 : n = 3 := by omega
+        subst n
+        native_decide
+
+private theorem two_mul_le_two_pow_add_eight (n : Nat) :
+    n + n <= 2 ^ n + 8 := by
+  by_cases h4 : 4 <= n
+  · exact Nat.le_trans (two_mul_le_two_pow_of_four_le n h4)
+      (by omega)
+  · cases n with
+    | zero => native_decide
+    | succ n =>
+        cases n with
+        | zero => native_decide
+        | succ n =>
+            cases n with
+            | zero => native_decide
+            | succ n =>
+                cases n with
+                | zero => native_decide
+                | succ n => omega
+
+private theorem piStage_mul_succ_le_two_pow_stage_add_eight
+    (n : Nat) :
+    piStage n * (n + 1) <= 2 ^ (piStage n + 8) := by
+  have hsucc : n + 1 <= piStage n := by
+    simpa [piStage] using succ_le_two_pow_local n
+  have hsquare :
+      piStage n * piStage n = 2 ^ (n + n) := by
+    unfold piStage
+    rw [← Nat.pow_add]
+  have hexp :
+      2 ^ (n + n) <= 2 ^ (piStage n + 8) :=
+    Nat.pow_le_pow_right (by omega : 0 < 2)
+      (by
+        simpa [piStage] using two_mul_le_two_pow_add_eight n)
+  calc
+    piStage n * (n + 1) <= piStage n * piStage n :=
+      Nat.mul_le_mul_left (piStage n) hsucc
+    _ = 2 ^ (n + n) := hsquare
+    _ <= 2 ^ (piStage n + 8) := hexp
+
+private theorem two_mul_piStage_mul_succ_le_two_pow_stage_add_nine
+    (n : Nat) :
+    2 * (piStage n * (n + 1)) <= 2 ^ (piStage n + 9) := by
+  calc
+    2 * (piStage n * (n + 1)) <=
+        2 * 2 ^ (piStage n + 8) :=
+      Nat.mul_le_mul_left 2
+        (piStage_mul_succ_le_two_pow_stage_add_eight n)
+    _ = 2 ^ (piStage n + 8) * 2 := by
+      rw [Nat.mul_comm]
+    _ = 2 ^ (piStage n + 8 + 1) := by
+      exact (Nat.pow_succ 2 (piStage n + 8)).symm
+    _ = 2 ^ (piStage n + 9) := by
+      congr 1 <;> omega
+
+private theorem two_div_two_pow_stage_add_nine_le_budget
+    (n : Nat) :
+    2 / (((2 ^ (piStage n + 9) : Nat) : Rat)) <=
+      6 / (6 * ((piStage n : Nat) : Rat) *
+        (((n + 1 : Nat) : Rat))) := by
+  let A : Nat := 2 ^ (piStage n + 9)
+  let S : Nat := piStage n * (n + 1)
+  have hSpos : 0 < S := Nat.mul_pos (piStage_pos n) (Nat.succ_pos n)
+  have hApos : 0 < A := Nat.pow_pos (by omega : 0 < 2)
+  have h2SA : 2 * S <= A := by
+    dsimp [S, A]
+    exact two_mul_piStage_mul_succ_le_two_pow_stage_add_nine n
+  have hmain : 2 / (A : Rat) <= 1 / (S : Rat) := by
+    apply Rat.le_of_mul_le_mul_right (c := (A : Rat) * (S : Rat))
+    · calc
+        (2 / (A : Rat)) * ((A : Rat) * (S : Rat)) =
+            (2 : Rat) * (S : Rat) := by
+          have hAne : (A : Rat) ≠ 0 :=
+            Rat.ne_of_gt ((Rat.natCast_pos).2 hApos)
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= (A : Rat) := by exact_mod_cast h2SA
+        _ = (1 / (S : Rat)) * ((A : Rat) * (S : Rat)) := by
+          have hSne : (S : Rat) ≠ 0 :=
+            Rat.ne_of_gt ((Rat.natCast_pos).2 hSpos)
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact Rat.mul_pos ((Rat.natCast_pos).2 hApos)
+        ((Rat.natCast_pos).2 hSpos)
+  calc
+    2 / (A : Rat) <= 1 / (S : Rat) := hmain
+    _ = 6 / (6 * ((piStage n : Nat) : Rat) *
+        (((n + 1 : Nat) : Rat))) := by
+      dsimp [S]
+      rw [Rat.div_def, Rat.div_def]
+      have h6 : (6 : Rat) ≠ 0 := by native_decide
+      have hstage_ne : ((piStage n : Nat) : Rat) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 (piStage_pos n))
+      have hN_ne : (((n + 1 : Nat) : Rat)) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.succ_pos n))
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 def InnerAdjacentSegmentBudgetLe (stage : Nat) (B : Rat) : Prop :=
   forall k,
@@ -4653,17 +9139,59 @@ theorem four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtO
   four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesRectangleKernelAtOne
     (powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne h)
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_rawOverlapsUpToAll
+    (h : LeibnizRectangleRawAtOneOverlapsUpToAll) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_rawOverlapsUpToAll h)
+
+theorem four_arctanSeries_one_equiv_piCircleArea_of_kernelBounds
+    (h : LeibnizRectangleKernelBoundsAtOne) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_kernelBounds h)
+
+theorem four_arctanSeries_one_equiv_piCircleArea_of_kernelBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpToAll) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_kernelBoundsUpToAll h)
+
 theorem four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds
     (h : LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne) :
     (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
   four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
     (leibnizEqualsRectangleRawAtOne_of_uniformCellBounds h)
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBounds
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOne) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_unitUniformCellBounds h)
+
+theorem four_arctanSeries_one_equiv_piCircleArea_of_cellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpToAll) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_cellBoundsUpToAll h)
+
+theorem four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBoundsUpToAll
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpToAll) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_unitUniformCellBoundsUpToAll h)
+
 theorem four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge
     (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne) :
     (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
   four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds
     (LeibnizRectangleBridge.uniformCellBounds_of_pointwiseIntegralBridge h)
+
+theorem four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBounds
+    (LeibnizRectangleBridge.unitUniformCellBounds_of_pointwiseUnitIntegralBridge h)
 
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
@@ -4712,17 +9240,56 @@ theorem piCircleArea_equiv_four_arctanSeries_one_of_leibnizEqualsRectangleRawAtO
     (four_arctanSeries_one_equiv_piCircleArea_of_leibnizEqualsRectangleRawAtOne
       h)
 
+theorem piCircleArea_equiv_four_arctanSeries_one_of_kernelBounds
+    (h : LeibnizRectangleKernelBoundsAtOne) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_kernelBounds h)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_kernelBoundsUpToAll
+    (h : forall N,
+      LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpTo N) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_kernelBoundsUpToAll h)
+
 theorem piCircleArea_equiv_four_arctanSeries_one_of_uniformCellBounds
     (h : LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne) :
     piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
     (four_arctanSeries_one_equiv_piCircleArea_of_uniformCellBounds h)
 
+theorem piCircleArea_equiv_four_arctanSeries_one_of_unitUniformCellBounds
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOne) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBounds h)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_cellBoundsUpToAll
+    (h : forall N,
+      LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_cellBoundsUpToAll h)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_unitUniformCellBoundsUpToAll
+    (h : forall N,
+      LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBoundsUpToAll h)
+
 theorem piCircleArea_equiv_four_arctanSeries_one_of_pointwiseIntegralBridge
     (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne) :
     piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
     (four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge h)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_pointwiseUnitIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge h)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
@@ -4784,6 +9351,136 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_definite_identity
       hendpoint
   exact piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     I.construction hgeom
+
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
+    (c : Integral.ConstructionFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1))
+    (hgeom :
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c)).Equiv
+        piCircleArea := by
+  have hscaled :
+      (IntegralIdentities.PiFromArctanIntegral
+        (Integral.integralFor
+          (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c)).Equiv
+          ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    exact RealRaw.natScale_equiv 4 hgeom
+  intro n
+  have hover := (RealRaw.compareAt_overlap_iff
+      (IntegralIdentities.PiFromArctanIntegral
+        (Integral.integralFor
+          (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c))
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
+    (hscaled n)
+  apply (RealRaw.compareAt_overlap_iff
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c))
+    piCircleArea n n).2
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  exact hover
+
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    (primitive : FunctionOnInterval)
+    (I : Integral.DefiniteIdentityFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
+    (hendpoint :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction)).Equiv piCircleArea := by
+  have hintegralEndpoint :
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction).Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid) := by
+    simpa using I.equivalent
+  have hendpointValid :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
+  have hgeomValid :
+      (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom :
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      (Integral.integralFor_valid
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction)
+      hendpointValid
+      hgeomValid
+      hintegralEndpoint
+      hendpoint
+  exact piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
+    I.construction hgeom
+
+theorem piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement
+    (c : Integral.ConstructionFor
+      (IntegralIdentities.arctanKernelInterval (1 : Rat)))
+    (hgeom :
+      (IntegralIdentities.arctanIntegralUnit (1 : Rat) c).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegralUnit (1 : Rat) c)).Equiv
+        piCircleArea := by
+  have hgeom' :
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) c).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) := by
+    simpa [IntegralIdentities.arctanIntegralUnit,
+      IntegralIdentities.arctanKernelInterval] using hgeom
+  simpa [IntegralIdentities.arctanIntegralUnit,
+    IntegralIdentities.arctanKernelInterval] using
+    piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
+      c hgeom'
+
+theorem piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_functionAgreement
+    (data : IntegralIdentities.ArctanIntegralUnitData)
+    (hgeom : IntegralIdentities.ArctanIntegralUnitGeomFunctionAgreement data) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegralUnit (1 : Rat)
+        (data.constructionAt (1 : Rat)
+          (by native_decide) (by native_decide)))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement
+    (data.constructionAt (1 : Rat)
+      (by native_decide) (by native_decide))
+    (IntegralIdentities.arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement
+      data hgeom (by native_decide) (by native_decide))
+
+def piFromArctanGeomUnitFareyDefiniteIdentity : RealRaw :=
+  IntegralIdentities.PiFromArctanIntegral
+    (Integral.integralFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitFareyDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitFareyDefiniteIdentity_valid :
+    piFromArctanGeomUnitFareyDefiniteIdentity.Valid := by
+  unfold piFromArctanGeomUnitFareyDefiniteIdentity
+    IntegralIdentities.PiFromArctanIntegral
+  exact RealRaw.scaleRat_valid_of_nonneg
+    (by native_decide : (0 : Rat) <= 4)
+    (Integral.integralFor_valid
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitFareyDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitFareyDefiniteIdentity_equiv_piCircleArea :
+    piFromArctanGeomUnitFareyDefiniteIdentity.Equiv piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    IntegralIdentities.arctanGeomOnUnit
+    IntegralIdentities.arctanGeomUnitFareyDefiniteIdentity
+    IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC
     (primitive : RealFunRaw)
@@ -5877,6 +10574,268 @@ theorem circumferencePathWidthBudgetLinearBound_of_finiteFormulaSegmentUniformLi
   circumferencePathWidthBudgetLinearBound_of_segmentUniformLinearBound
     (pathSegmentUniformLinearBound_of_finiteFormulaSegmentUniformLinearBound hseg)
 
+theorem circumferenceFiniteFormulaSegmentUniformLinearBound_six :
+    CircumferenceFiniteFormulaSegmentUniformLinearBound 6 := by
+  intro n
+  let stage := piStage n
+  let B : Rat :=
+    (6 : Rat) / (6 * (stage : Rat) * (((n + 1 : Nat) : Rat)))
+  have hstage_pos : 0 < stage := piStage_pos n
+  have hbudget :
+      2 / (((2 ^ (stage + 9) : Nat) : Rat)) <= B := by
+    dsimp [stage, B]
+    exact two_div_two_pow_stage_add_nine_le_budget n
+  dsimp [stage, B]
+  constructor
+  · intro k _hk
+    exact formulaBudgetLeAt_of_sqrtUpperBound_le_two
+      (Nat.ne_of_gt hstage_pos)
+      (sqrtUpperBound_le_two_of_le_two
+        (adjacentChordNormSqFormula_le_two stage hstage_pos k))
+      hbudget
+  · intro k _hk
+    constructor
+    · exact formulaBudgetLeAt_of_sqrtUpperBound_le_two
+        (Nat.ne_of_gt hstage_pos)
+        (sqrtUpperBound_le_two_of_le_two
+          (entryTangentNormSqFormula_le_two stage hstage_pos k))
+        hbudget
+    · exact formulaBudgetLeAt_of_sqrtUpperBound_le_two
+        (Nat.ne_of_gt hstage_pos)
+        (sqrtUpperBound_le_two_of_le_two
+          (exitTangentNormSqFormula_le_two stage hstage_pos k))
+        hbudget
+
+theorem circumferencePathWidthBudgetLinearBound_six :
+    CircumferencePathWidthBudgetLinearBound 6 :=
+  circumferencePathWidthBudgetLinearBound_of_finiteFormulaSegmentUniformLinearBound
+    circumferenceFiniteFormulaSegmentUniformLinearBound_six
+
+private theorem outerInnerEdgeCrosses_gap_le
+    (stage : Nat) (hstage : 0 < stage) :
+    forall count k,
+      Fan.perimeter
+          (Fan.edgeCrossesFrom
+            (circleSamplePoint stage k)
+            (outerBoundaryFrom stage k count)) -
+        Fan.perimeter
+          (Fan.edgeCrossesFrom
+            (circleSamplePoint stage k)
+            (innerBoundaryFrom stage (k + 1) count)) <=
+        (count : Rat) *
+          (2 * (1 / (stage : Rat)) *
+            (1 / (stage : Rat)) * (1 / (stage : Rat)))
+  | 0, k => by
+      simp [innerBoundaryFrom, outerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom,
+        piCircleAreaPolygon.outerBoundaryFrom,
+        Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
+      grind
+  | count + 1, k => by
+      let B : Rat :=
+        2 * (1 / (stage : Rat)) *
+          (1 / (stage : Rat)) * (1 / (stage : Rat))
+      have hhead := adjacentFanGap_le_two_step_cube stage hstage k
+      have htail :=
+        outerInnerEdgeCrosses_gap_le stage hstage count (k + 1)
+      have htail' :
+          Fan.sumRat
+              (Fan.edgeCrossesFrom
+                (circleSamplePoint stage (k + 1))
+                (outerBoundaryFrom stage (k + 1) count)) -
+            Fan.sumRat
+              (Fan.edgeCrossesFrom
+                (circleSamplePoint stage (k + 1))
+                (innerBoundaryFrom stage (k + 2) count)) <=
+            (count : Rat) * B := by
+        dsimp [B]
+        simpa [Fan.perimeter] using htail
+      have hsplit :
+          pointCross (circleSamplePoint stage k)
+              (outerTangentPoint stage k) +
+              (pointCross (outerTangentPoint stage k)
+                (circleSamplePoint stage (k + 1)) +
+                Fan.sumRat
+                  (Fan.edgeCrossesFrom
+                    (circleSamplePoint stage (k + 1))
+                    (outerBoundaryFrom stage (k + 1) count))) -
+            (pointCross (circleSamplePoint stage k)
+                (circleSamplePoint stage (k + 1)) +
+              Fan.sumRat
+                (Fan.edgeCrossesFrom
+                  (circleSamplePoint stage (k + 1))
+                  (innerBoundaryFrom stage (k + 2) count))) =
+          (2 * adjacentTangentCrossFormula stage k -
+              pointCross (circleSamplePoint stage k)
+                (circleSamplePoint stage (k + 1))) +
+            (Fan.sumRat
+                (Fan.edgeCrossesFrom
+                  (circleSamplePoint stage (k + 1))
+                  (outerBoundaryFrom stage (k + 1) count)) -
+              Fan.sumRat
+                (Fan.edgeCrossesFrom
+                  (circleSamplePoint stage (k + 1))
+                  (innerBoundaryFrom stage (k + 2) count))) := by
+        rw [entryTangentCross_eq_formula stage hstage k,
+          exitTangentCross_eq_formula stage hstage k]
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm]
+      simp [innerBoundaryFrom, outerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom,
+        piCircleAreaPolygon.outerBoundaryFrom,
+        Fan.edgeCrossesFrom, Fan.perimeter, Fan.sumRat]
+      change
+        pointCross (circleSamplePoint stage k)
+            (outerTangentPoint stage k) +
+            (pointCross (outerTangentPoint stage k)
+              (circleSamplePoint stage (k + 1)) +
+              Fan.sumRat
+                (Fan.edgeCrossesFrom
+                  (circleSamplePoint stage (k + 1))
+                  (outerBoundaryFrom stage (k + 1) count))) -
+          (pointCross (circleSamplePoint stage k)
+              (circleSamplePoint stage (k + 1)) +
+            Fan.sumRat
+              (Fan.edgeCrossesFrom
+                (circleSamplePoint stage (k + 1))
+                (innerBoundaryFrom stage (k + 2) count))) <=
+        ((count : Rat) + 1) * B
+      rw [hsplit]
+      calc
+        (2 * adjacentTangentCrossFormula stage k -
+              pointCross (circleSamplePoint stage k)
+                (circleSamplePoint stage (k + 1))) +
+            (Fan.sumRat
+                (Fan.edgeCrossesFrom
+                  (circleSamplePoint stage (k + 1))
+                  (outerBoundaryFrom stage (k + 1) count)) -
+              Fan.sumRat
+                (Fan.edgeCrossesFrom
+                  (circleSamplePoint stage (k + 1))
+                  (innerBoundaryFrom stage (k + 2) count)))
+            <= B + (count : Rat) * B := by
+              have hhead' :
+                  2 * adjacentTangentCrossFormula stage k -
+                      pointCross (circleSamplePoint stage k)
+                        (circleSamplePoint stage (k + 1)) <= B := by
+                simpa [B] using hhead
+              exact Fan.rat_add_le_add hhead' htail'
+        _ = ((count : Rat) + 1) * B := by
+              grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc,
+                Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem circumferenceFanGap_stage_le_two_div_stage
+    (stage : Nat) (hstage : 0 < stage) :
+    circumferenceFanGap stage <= 2 / (stage : Rat) := by
+  let d : Rat := 1 / (stage : Rat)
+  let B : Rat := 2 * d * d * d
+  have hgap :=
+    outerInnerEdgeCrosses_gap_le stage hstage stage 0
+  have hfan :
+      circumferenceFanGap stage <= (stage : Rat) * B := by
+    have hgap' :
+        0 + Fan.sumRat
+            (Fan.edgeCrossesFrom (circleSamplePoint stage 0)
+              (outerBoundaryFrom stage 0 stage)) -
+          (0 + Fan.sumRat
+            (Fan.edgeCrossesFrom (circleSamplePoint stage 0)
+              (innerBoundaryFrom stage 1 stage))) <=
+          (stage : Rat) *
+            (2 * (1 / (stage : Rat)) *
+              (1 / (stage : Rat)) * (1 / (stage : Rat))) := by
+      calc
+        0 + Fan.sumRat
+            (Fan.edgeCrossesFrom (circleSamplePoint stage 0)
+              (outerBoundaryFrom stage 0 stage)) -
+          (0 + Fan.sumRat
+            (Fan.edgeCrossesFrom (circleSamplePoint stage 0)
+              (innerBoundaryFrom stage 1 stage))) =
+            Fan.perimeter
+              (Fan.edgeCrossesFrom (circleSamplePoint stage 0)
+                (outerBoundaryFrom stage 0 stage)) -
+            Fan.perimeter
+              (Fan.edgeCrossesFrom (circleSamplePoint stage 0)
+                (innerBoundaryFrom stage 1 stage)) := by
+              simp [Fan.perimeter]
+              grind [Rat.sub_eq_add_neg]
+        _ <=
+          (stage : Rat) *
+            (2 * (1 / (stage : Rat)) *
+              (1 / (stage : Rat)) * (1 / (stage : Rat))) := hgap
+    dsimp [B, d]
+    simpa [circumferenceFanGap, innerFanWidths, outerFanWidths,
+      innerBoundary, outerBoundary, Fan.sectorFanWidths, Fan.perimeter,
+      innerBoundaryFrom, outerBoundaryFrom,
+      piCircleAreaPolygon.innerBoundaryFrom,
+      piCircleAreaPolygon.outerBoundaryFrom, Fan.edgeCrossesFrom,
+      Fan.sumRat, pointCross_origin_left] using hgap'
+  have hdpos : 0 < d := by
+    dsimp [d]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  have hd0 : 0 <= d := Rat.le_of_lt hdpos
+  have hdle1 : d <= 1 := by
+    dsimp [d]
+    have hone : (1 / (1 : Rat)) = 1 := by native_decide
+    simpa [hone] using
+      (FTC.one_div_nat_antitone (n := 1) (m := stage)
+        (by omega) hstage (by omega : 1 <= stage))
+  have hBbound : (stage : Rat) * B <= 2 * d := by
+    have hstage_ne : (stage : Rat) ≠ 0 :=
+      Rat.ne_of_gt ((Rat.natCast_pos).2 hstage)
+    have hd_sq_le_d : d * d <= d := by
+      calc
+        d * d <= 1 * d := Rat.mul_le_mul_of_nonneg_right hdle1 hd0
+        _ = d := by grind
+    calc
+      (stage : Rat) * B = 2 * d * d := by
+        dsimp [B, d]
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= 2 * d := by
+        simpa [Rat.mul_assoc] using
+          Rat.mul_le_mul_of_nonneg_left hd_sq_le_d
+            (by native_decide : (0 : Rat) <= 2)
+      _ = 2 * d := rfl
+  calc
+    circumferenceFanGap stage <= (stage : Rat) * B := hfan
+    _ <= 2 * d := hBbound
+    _ = 2 / (stage : Rat) := by
+      dsimp [d]
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem circumferenceFanGapLinearBound_four :
+    CircumferenceFanGapLinearBound 4 := by
+  intro n
+  have hstage := circumferenceFanGap_stage_le_two_div_stage
+    (piStage n) (piStage_pos n)
+  have hscaled :
+      2 * circumferenceFanGap (piStage n) <=
+        2 * (2 / ((piStage n : Nat) : Rat)) :=
+    Rat.mul_le_mul_of_nonneg_left hstage
+      (by native_decide : (0 : Rat) <= 2)
+  have hsucc : n + 1 <= piStage n := by
+    simpa [piStage] using succ_le_two_pow_local n
+  have hone :
+      1 / (((piStage n : Nat) : Rat)) <=
+        1 / (((n + 1 : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone
+      (Nat.succ_pos n) (piStage_pos n) hsucc
+  have hfour :
+      4 / (((piStage n : Nat) : Rat)) <=
+        4 / (((n + 1 : Nat) : Rat)) := by
+    have hmul := Rat.mul_le_mul_of_nonneg_left hone
+      (by native_decide : (0 : Rat) <= 4)
+    simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using hmul
+  calc
+    2 * circumferenceFanGap (piStage n) <=
+        2 * (2 / ((piStage n : Nat) : Rat)) := hscaled
+    _ = 4 / (((piStage n : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= 4 / (((n + 1 : Nat) : Rat)) := hfour
+
 theorem fanGapPathBudgetLinearBound_of_parts
     {Cfan Cpath : Nat}
     (hfan : CircumferenceFanGapLinearBound Cfan)
@@ -5927,6 +10886,22 @@ theorem circumferenceWidthsShrink_of_linearBound
     {C : Nat} (hbound : CircumferenceWidthLinearBound C) :
     CircumferenceWidthsShrink :=
   widthsShrink_of_natOverSuccBound hbound
+
+theorem circumferenceFanGapPathBudgetLinearBound_ten :
+    CircumferenceFanGapPathBudgetLinearBound 10 := by
+  simpa using
+    fanGapPathBudgetLinearBound_of_parts
+      circumferenceFanGapLinearBound_four
+      circumferencePathWidthBudgetLinearBound_six
+
+theorem circumferenceWidthLinearBound_ten :
+    CircumferenceWidthLinearBound 10 :=
+  circumferenceWidthLinearBound_of_fanGapPathBudgetLinearBound
+    circumferenceFanGapPathBudgetLinearBound_ten
+
+theorem circumferenceWidthsShrink :
+    CircumferenceWidthsShrink :=
+  circumferenceWidthsShrink_of_linearBound circumferenceWidthLinearBound_ten
 
 def EndpointStepRefines (compute : Nat -> QInterval) : Prop :=
   forall n,
@@ -5989,6 +10964,147 @@ def AreaStepRefines : Prop :=
 
 def CircumferenceStepRefines : Prop :=
   EndpointStepRefines piCircumference.compute
+
+def CircumferenceQuarterLengthStepRefines : Prop :=
+  forall n,
+    (innerQuarterLength (piStage n)).lo <=
+      (innerQuarterLength (piStage (n + 1))).lo /\
+    (outerQuarterLength (piStage (n + 1))).hi <=
+      (outerQuarterLength (piStage n)).hi
+
+def CircumferenceQuarterLengthStepRefinesUpTo (N : Nat) : Prop :=
+  forall n, n <= N ->
+    (innerQuarterLength (piStage n)).lo <=
+      (innerQuarterLength (piStage (n + 1))).lo /\
+    (outerQuarterLength (piStage (n + 1))).hi <=
+      (outerQuarterLength (piStage n)).hi
+
+def CircumferenceQuarterLengthStepRefinesUpToAll : Prop :=
+  forall N, CircumferenceQuarterLengthStepRefinesUpTo N
+
+theorem circumferenceQuarterLengthStepRefinesUpTo_of_stepRefines
+    (hrefine : CircumferenceQuarterLengthStepRefines) (N : Nat) :
+    CircumferenceQuarterLengthStepRefinesUpTo N := by
+  intro n _hn
+  exact hrefine n
+
+theorem circumferenceQuarterLengthStepRefinesUpToAll_of_stepRefines
+    (hrefine : CircumferenceQuarterLengthStepRefines) :
+    CircumferenceQuarterLengthStepRefinesUpToAll := by
+  intro N
+  exact circumferenceQuarterLengthStepRefinesUpTo_of_stepRefines hrefine N
+
+theorem circumferenceQuarterLengthStepRefines_of_upToAll
+    (hrefine : CircumferenceQuarterLengthStepRefinesUpToAll) :
+    CircumferenceQuarterLengthStepRefines := by
+  intro n
+  exact hrefine n n (Nat.le_refl n)
+
+theorem circumferenceQuarterLengthStepRefines_iff_upToAll :
+    CircumferenceQuarterLengthStepRefines ↔
+      CircumferenceQuarterLengthStepRefinesUpToAll := by
+  constructor
+  · exact circumferenceQuarterLengthStepRefinesUpToAll_of_stepRefines
+  · exact circumferenceQuarterLengthStepRefines_of_upToAll
+
+theorem circumferenceQuarterLengthStepRefinesUpToNine :
+    CircumferenceQuarterLengthStepRefinesUpTo 9 := by
+  unfold CircumferenceQuarterLengthStepRefinesUpTo
+  native_decide
+
+theorem circumferenceQuarterLengthStepRefinesUpToEight :
+    CircumferenceQuarterLengthStepRefinesUpTo 8 := by
+  intro n hn
+  exact circumferenceQuarterLengthStepRefinesUpToNine n (by omega)
+
+theorem circumferenceStepRefines_of_quarterLengthStepRefines
+    (hrefine : CircumferenceQuarterLengthStepRefines) :
+    CircumferenceStepRefines := by
+  intro n
+  have h := hrefine n
+  rw [piCircumference_compute_eq,
+    piCircumference_compute_eq,
+    piCircumferenceComputeAtStage_eq_common,
+    piCircumferenceComputeAtStage_eq_common]
+  simp [piCircumferenceCommonComputeAtStage, four_div_two_eq_two_mul]
+  constructor
+  · exact Rat.mul_le_mul_of_nonneg_left h.1
+      (by native_decide : (0 : Rat) <= 2)
+  · exact Rat.mul_le_mul_of_nonneg_left h.2
+      (by native_decide : (0 : Rat) <= 2)
+
+def CircumferenceStepRefinesUpTo (N : Nat) : Prop :=
+  forall n, n <= N ->
+    (piCircumference.compute n).lo <=
+      (piCircumference.compute (n + 1)).lo /\
+    (piCircumference.compute (n + 1)).hi <=
+      (piCircumference.compute n).hi
+
+def CircumferenceStepRefinesUpToAll : Prop :=
+  forall N, CircumferenceStepRefinesUpTo N
+
+theorem circumferenceStepRefinesUpTo_of_stepRefines
+    (hrefine : CircumferenceStepRefines) (N : Nat) :
+    CircumferenceStepRefinesUpTo N := by
+  intro n _hn
+  exact hrefine n
+
+theorem circumferenceStepRefinesUpTo_of_quarterLengthStepRefinesUpTo
+    {N : Nat} (hrefine : CircumferenceQuarterLengthStepRefinesUpTo N) :
+    CircumferenceStepRefinesUpTo N := by
+  intro n hn
+  have h := hrefine n hn
+  rw [piCircumference_compute_eq,
+    piCircumference_compute_eq,
+    piCircumferenceComputeAtStage_eq_common,
+    piCircumferenceComputeAtStage_eq_common]
+  simp [piCircumferenceCommonComputeAtStage, four_div_two_eq_two_mul]
+  constructor
+  · exact Rat.mul_le_mul_of_nonneg_left h.1
+      (by native_decide : (0 : Rat) <= 2)
+  · exact Rat.mul_le_mul_of_nonneg_left h.2
+      (by native_decide : (0 : Rat) <= 2)
+
+theorem circumferenceStepRefinesUpToAll_of_stepRefines
+    (hrefine : CircumferenceStepRefines) :
+    CircumferenceStepRefinesUpToAll := by
+  intro N
+  exact circumferenceStepRefinesUpTo_of_stepRefines hrefine N
+
+theorem circumferenceStepRefinesUpToAll_of_quarterLengthStepRefinesUpToAll
+    (hrefine : CircumferenceQuarterLengthStepRefinesUpToAll) :
+    CircumferenceStepRefinesUpToAll := by
+  intro N
+  exact circumferenceStepRefinesUpTo_of_quarterLengthStepRefinesUpTo
+    (hrefine N)
+
+theorem circumferenceStepRefines_of_stepRefinesUpToAll
+    (hrefine : CircumferenceStepRefinesUpToAll) :
+    CircumferenceStepRefines := by
+  intro n
+  exact hrefine n n (Nat.le_refl n)
+
+theorem circumferenceStepRefines_iff_upToAll :
+    CircumferenceStepRefines ↔ CircumferenceStepRefinesUpToAll := by
+  constructor
+  · exact circumferenceStepRefinesUpToAll_of_stepRefines
+  · exact circumferenceStepRefines_of_stepRefinesUpToAll
+
+theorem circumferenceStepRefines_of_quarterLengthStepRefinesUpToAll
+    (hrefine : CircumferenceQuarterLengthStepRefinesUpToAll) :
+    CircumferenceStepRefines :=
+  circumferenceStepRefines_of_quarterLengthStepRefines
+    (circumferenceQuarterLengthStepRefines_of_upToAll hrefine)
+
+theorem circumferenceStepRefinesUpToEight :
+    CircumferenceStepRefinesUpTo 8 :=
+  circumferenceStepRefinesUpTo_of_quarterLengthStepRefinesUpTo
+    circumferenceQuarterLengthStepRefinesUpToEight
+
+theorem circumferenceStepRefinesUpToNine :
+    CircumferenceStepRefinesUpTo 9 :=
+  circumferenceStepRefinesUpTo_of_quarterLengthStepRefinesUpTo
+    circumferenceQuarterLengthStepRefinesUpToNine
 
 theorem areaNested_of_endpointMonotone
     (hordered : AreaOrdered)
@@ -6286,6 +11402,57 @@ theorem leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
   leibnizEqArea_of_powerSeriesRectangleKernelAtOne
     (powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne h)
 
+theorem leibnizEqArea_of_kernelBounds
+    (h : LeibnizRectangleKernelBoundsAtOne) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_kernelBounds h)
+
+theorem leibnizEqArea_of_kernelBoundsUpToAll
+    (h : forall N,
+      LeibnizRectangleBridge.LeibnizRectangleKernelBoundsAtOneUpTo N) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_kernelBoundsUpToAll h)
+
+theorem leibnizEqArea_of_uniformCellBounds
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformCellBoundsAtOne) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_uniformCellBounds h)
+
+theorem leibnizEqArea_of_unitUniformCellBounds
+    (h : LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOne) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_unitUniformCellBounds h)
+
+theorem leibnizEqArea_of_cellBoundsUpToAll
+    (h : forall N,
+      LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOneUpTo N) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_cellBoundsUpToAll h)
+
+theorem leibnizEqArea_of_unitUniformCellBoundsUpToAll
+    (h : forall N,
+      LeibnizRectangleBridge.LeibnizRectangleUniformUnitCellBoundsAtOneUpTo N) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_leibnizEqualsRectangleRawAtOne
+    (leibnizEqualsRectangleRawAtOne_of_unitUniformCellBoundsUpToAll h)
+
+theorem leibnizEqArea_of_pointwiseIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseIntegralBridgeAtOne) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_uniformCellBounds
+    (LeibnizRectangleBridge.uniformCellBounds_of_pointwiseIntegralBridge h)
+
+theorem leibnizEqArea_of_pointwiseUnitIntegralBridge
+    (h : LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_unitUniformCellBounds
+    (LeibnizRectangleBridge.unitUniformCellBounds_of_pointwiseUnitIntegralBridge h)
+
 theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
     (route : MachinIdentity.KernelComparisonAtMachinInputs)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
@@ -6335,6 +11502,32 @@ theorem piFromArctanIntegralFareyAtOne_valid :
     (by native_decide : (0 : Rat) <= 4)
     (IntegralIdentities.arctanIntegralFareyFor_valid (1 : Rat))
 
+theorem piFromArctanGeomUnitFareyDefiniteIdentity_compute_eq_fareyAtOne
+    (n : Nat) :
+    piFromArctanGeomUnitFareyDefiniteIdentity.compute n =
+      piFromArctanIntegralFareyAtOne.compute n := by
+  rfl
+
+theorem piFromArctanGeomUnitFareyDefiniteIdentity_equiv_fareyAtOne :
+    piFromArctanGeomUnitFareyDefiniteIdentity.Equiv
+      piFromArctanIntegralFareyAtOne := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    piFromArctanGeomUnitFareyDefiniteIdentity
+    piFromArctanIntegralFareyAtOne n n).2
+  rw [piFromArctanGeomUnitFareyDefiniteIdentity_compute_eq_fareyAtOne n]
+  have horder := RealRaw.interval_order_of_valid
+    piFromArctanIntegralFareyAtOne
+    piFromArctanIntegralFareyAtOne_valid n
+  exact ⟨horder, horder⟩
+
+theorem piFromArctanIntegralFareyAtOne_equiv_geomUnitDefiniteIdentity :
+    piFromArctanIntegralFareyAtOne.Equiv
+      piFromArctanGeomUnitFareyDefiniteIdentity :=
+  RealRaw.equiv_symm
+    piFromArctanGeomUnitFareyDefiniteIdentity_equiv_fareyAtOne
+
 theorem piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one :
     piFromArctanIntegralFareyAtOne.Equiv
       (((4 : Nat) *
@@ -6363,6 +11556,15 @@ def FareyUnitIntegralGeomAgreementAtOne : Prop :=
   ArctanGeometry.fareyIntegralUnitRaw.Equiv
     (ArctanGeometry.arctanGeom (1 : Rat))
 
+theorem FareyUnitIntegralGeomAgreementAtOne_of_cross_bounds
+    (h : ArctanGeometry.FareyMidpointUnitCrossBounds) :
+    FareyUnitIntegralGeomAgreementAtOne :=
+  ArctanGeometry.fareyIntegralUnitRaw_equiv_arctanGeom_one_of_crossBounds h
+
+theorem fareyUnitIntegralGeomAgreementAtOne :
+    FareyUnitIntegralGeomAgreementAtOne :=
+  ArctanGeometry.fareyIntegralUnitRaw_equiv_arctanGeom_one_direct
+
 theorem FareyPrefixGeomAgreementAtOne_of_unit_integral_agreement
     (h : FareyUnitIntegralGeomAgreementAtOne) :
     FareyPrefixGeomAgreementAtOne :=
@@ -6384,6 +11586,11 @@ theorem FareyUnitIntegralGeomAgreementAtOne_of_prefix_agreement
       ArctanGeometry.fareyIntegralPrefixRaw_one_equiv_unitRaw)
     h
 
+theorem fareyPrefixGeomAgreementAtOne :
+    FareyPrefixGeomAgreementAtOne :=
+  ArctanGeometry.fareyIntegralPrefixRaw_equiv_arctanGeom_on_unit
+    (x := (1 : Rat)) (by native_decide) (by native_decide)
+
 theorem arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement
     (h : FareyPrefixGeomAgreementAtOne) :
     (IntegralIdentities.arctanIntegralFareyFor (1 : Rat)).Equiv
@@ -6394,6 +11601,12 @@ theorem arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement
     arctanGeomOneValid
     (IntegralIdentities.arctanIntegralFareyFor_equiv_prefix (1 : Rat))
     h
+
+theorem arctanIntegralFareyFor_one_equiv_arctanGeom_one :
+    (IntegralIdentities.arctanIntegralFareyFor (1 : Rat)).Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+  IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
+    (1 : Rat) (by native_decide) (by native_decide)
 
 theorem piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement
     (h : FareyPrefixGeomAgreementAtOne) :
@@ -6435,6 +11648,27 @@ theorem piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_unit_integral_agree
     piCircleArea.Equiv piFromArctanIntegralFareyAtOne :=
   RealRaw.equiv_symm
     (piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement h)
+
+theorem piFromArctanIntegralFareyAtOne_equiv_piCircleArea :
+    piFromArctanIntegralFareyAtOne.Equiv piCircleArea :=
+  piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement
+    fareyPrefixGeomAgreementAtOne
+
+theorem piCircleArea_equiv_piFromArctanIntegralFareyAtOne :
+    piCircleArea.Equiv piFromArctanIntegralFareyAtOne :=
+  RealRaw.equiv_symm piFromArctanIntegralFareyAtOne_equiv_piCircleArea
+
+theorem piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_cross_bounds
+    (h : ArctanGeometry.FareyMidpointUnitCrossBounds) :
+    piFromArctanIntegralFareyAtOne.Equiv piCircleArea :=
+  piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement
+    (FareyUnitIntegralGeomAgreementAtOne_of_cross_bounds h)
+
+theorem piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_cross_bounds
+    (h : ArctanGeometry.FareyMidpointUnitCrossBounds) :
+    piCircleArea.Equiv piFromArctanIntegralFareyAtOne :=
+  RealRaw.equiv_symm
+    (piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_cross_bounds h)
 
 theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     (((4 : Nat) *
@@ -6478,38 +11712,134 @@ theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- The table-facing unit-branch rectangle integral computation of pi:
+`4 * ∫_0^1 dt/(1+t^2)`, using the `arctanIntegralUnit` API. -/
+def piFromArctanIntegralRectangleUnitAtOne : RealRaw :=
+  IntegralIdentities.PiFromArctanIntegral
+    (IntegralIdentities.arctanIntegralUnit (1 : Rat)
+      (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
+        (1 : Rat) (by native_decide) (by native_decide)))
+
+theorem piFromArctanIntegralRectangleUnitAtOne_valid :
+    piFromArctanIntegralRectangleUnitAtOne.Valid := by
+  unfold piFromArctanIntegralRectangleUnitAtOne
+    IntegralIdentities.PiFromArctanIntegral
+  apply RealRaw.natScale_valid
+  exact Integral.integralFor_valid
+    (IntegralIdentities.arctanKernelInterval (1 : Rat))
+    (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
+      (1 : Rat) (by native_decide) (by native_decide))
+
 theorem piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea :
-    (IntegralIdentities.PiFromArctanIntegral
-      (IntegralIdentities.arctanIntegralUnit (1 : Rat)
-        (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
-          (1 : Rat) (by native_decide) (by native_decide)))).Equiv
-        piCircleArea := by
+    piFromArctanIntegralRectangleUnitAtOne.Equiv piCircleArea := by
   have hscaled :
-      (IntegralIdentities.PiFromArctanIntegral
-        (IntegralIdentities.arctanIntegralUnit (1 : Rat)
-          (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
-            (1 : Rat) (by native_decide) (by native_decide)))).Equiv
+      piFromArctanIntegralRectangleUnitAtOne.Equiv
           ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
-    unfold IntegralIdentities.PiFromArctanIntegral
+    unfold piFromArctanIntegralRectangleUnitAtOne
+      IntegralIdentities.PiFromArctanIntegral
     exact RealRaw.natScale_equiv 4
       (IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom
         (1 : Rat) (by native_decide) (by native_decide))
-  have hleft :
-      (IntegralIdentities.PiFromArctanIntegral
-        (IntegralIdentities.arctanIntegralUnit (1 : Rat)
-          (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
-            (1 : Rat) (by native_decide) (by native_decide)))).Valid := by
-    unfold IntegralIdentities.PiFromArctanIntegral
-    apply RealRaw.natScale_valid
-    unfold IntegralIdentities.arctanIntegralUnit Integral.integralFor
-    exact (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
-      (1 : Rat) (by native_decide) (by native_decide)).certificate
   exact RealRaw.equiv_trans
-    hleft
+    piFromArctanIntegralRectangleUnitAtOne_valid
     fourArctanGeomOneValid
     (by simpa [AreaValid] using AreaLoopValidity.areaValid)
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
+
+theorem piCircleArea_equiv_piFromArctanIntegralRectangleUnitAtOne :
+    piCircleArea.Equiv piFromArctanIntegralRectangleUnitAtOne :=
+  RealRaw.equiv_symm
+    piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea
+
+def piFromArctanGeomUnitRectangleDefiniteIdentity : RealRaw :=
+  IntegralIdentities.PiFromArctanIntegral
+    (Integral.integralFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitRectangleDefiniteIdentity_valid :
+    piFromArctanGeomUnitRectangleDefiniteIdentity.Valid := by
+  unfold piFromArctanGeomUnitRectangleDefiniteIdentity
+    IntegralIdentities.PiFromArctanIntegral
+  exact RealRaw.scaleRat_valid_of_nonneg
+    (by native_decide : (0 : Rat) <= 4)
+    (Integral.integralFor_valid
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_piCircleArea :
+    piFromArctanGeomUnitRectangleDefiniteIdentity.Equiv piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    IntegralIdentities.arctanGeomOnUnit
+    IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity
+    IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one
+
+theorem piFromArctanGeomUnitRectangleDefiniteIdentity_compute_eq_rectangleUnit
+    (n : Nat) :
+    piFromArctanGeomUnitRectangleDefiniteIdentity.compute n =
+      piFromArctanIntegralRectangleUnitAtOne.compute n := by
+  rfl
+
+theorem piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_rectangleUnit :
+    piFromArctanGeomUnitRectangleDefiniteIdentity.Equiv
+      piFromArctanIntegralRectangleUnitAtOne := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    piFromArctanGeomUnitRectangleDefiniteIdentity
+    piFromArctanIntegralRectangleUnitAtOne n n).2
+  rw [piFromArctanGeomUnitRectangleDefiniteIdentity_compute_eq_rectangleUnit n]
+  have horder := RealRaw.interval_order_of_valid
+    piFromArctanIntegralRectangleUnitAtOne
+    piFromArctanIntegralRectangleUnitAtOne_valid n
+  exact ⟨horder, horder⟩
+
+theorem piFromArctanIntegralRectangleUnitAtOne_equiv_geomUnitDefiniteIdentity :
+    piFromArctanIntegralRectangleUnitAtOne.Equiv
+      piFromArctanGeomUnitRectangleDefiniteIdentity :=
+  RealRaw.equiv_symm
+    piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_rectangleUnit
+
+/-- The two completed arctangent-integral pi computations, rectangle and
+shared-Farey, are equivalent raw reals.  This is not a new scoreboard row; it
+is the transport lemma that lets later calculus arguments move between the two
+verified schedules. -/
+theorem piFromArctanIntegralFareyAtOne_equiv_rectangleUnitAtOne :
+    piFromArctanIntegralFareyAtOne.Equiv
+      piFromArctanIntegralRectangleUnitAtOne :=
+  RealRaw.equiv_trans
+    piFromArctanIntegralFareyAtOne_valid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piFromArctanIntegralRectangleUnitAtOne_valid
+    piFromArctanIntegralFareyAtOne_equiv_piCircleArea
+    (RealRaw.equiv_symm
+      piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea)
+
+theorem piFromArctanIntegralRectangleUnitAtOne_equiv_fareyAtOne :
+    piFromArctanIntegralRectangleUnitAtOne.Equiv
+      piFromArctanIntegralFareyAtOne :=
+  RealRaw.equiv_symm
+    piFromArctanIntegralFareyAtOne_equiv_rectangleUnitAtOne
+
+/-- The definite-identity certificates built from the shared-Farey and
+rectangle schedules give equivalent pi raw reals. -/
+theorem piFromArctanGeomUnitFareyDefiniteIdentity_equiv_rectangleDefiniteIdentity :
+    piFromArctanGeomUnitFareyDefiniteIdentity.Equiv
+      piFromArctanGeomUnitRectangleDefiniteIdentity :=
+  RealRaw.equiv_trans
+    piFromArctanGeomUnitFareyDefiniteIdentity_valid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piFromArctanGeomUnitRectangleDefiniteIdentity_valid
+    piFromArctanGeomUnitFareyDefiniteIdentity_equiv_piCircleArea
+    (RealRaw.equiv_symm
+      piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_piCircleArea)
+
+theorem piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_fareyDefiniteIdentity :
+    piFromArctanGeomUnitRectangleDefiniteIdentity.Equiv
+      piFromArctanGeomUnitFareyDefiniteIdentity :=
+  RealRaw.equiv_symm
+    piFromArctanGeomUnitFareyDefiniteIdentity_equiv_rectangleDefiniteIdentity
 
 /-- The expected value of the clean reciprocal quartic projective integral is a
 valid raw real, because it is just the baseline area-pi raw real scaled by `1`. -/
@@ -6578,16 +11908,80 @@ theorem circumferenceValid_of_stepRefines_and_linearBound
     (circumferenceNested_of_stepRefines hstep)
     (circumferenceWidthsShrink_of_linearBound hbound)
 
+theorem circumferenceValid_of_stepRefines
+    (hstep : CircumferenceStepRefines) :
+    CircumferenceValid :=
+  circumferenceValid_of_nested_and_shrinking
+    (circumferenceNested_of_stepRefines hstep)
+    circumferenceWidthsShrink
+
+theorem circumferenceValid_of_quarterLengthStepRefines
+    (hrefine : CircumferenceQuarterLengthStepRefines) :
+    CircumferenceValid :=
+  circumferenceValid_of_stepRefines
+    (circumferenceStepRefines_of_quarterLengthStepRefines hrefine)
+
+theorem circumferenceValid_of_stepRefinesUpToAll
+    (hrefine : forall N, CircumferenceStepRefinesUpTo N) :
+    CircumferenceValid :=
+  circumferenceValid_of_stepRefines
+    (circumferenceStepRefines_of_stepRefinesUpToAll hrefine)
+
+theorem circumferenceValid_of_quarterLengthStepRefinesUpToAll
+    (hrefine : forall N, CircumferenceQuarterLengthStepRefinesUpTo N) :
+    CircumferenceValid :=
+  circumferenceValid_of_stepRefines
+    (circumferenceStepRefines_of_quarterLengthStepRefinesUpToAll hrefine)
+
+structure CircumferenceStepRemainders where
+  step_refines : CircumferenceStepRefines
+
+structure CircumferenceQuarterLengthRemainders where
+  quarter_refines : CircumferenceQuarterLengthStepRefines
+
 structure CircumferenceLinearRemainders where
   step_refines : CircumferenceStepRefines
   width_constant : Nat
   width_bound : CircumferenceWidthLinearBound width_constant
 
+def circumferenceStepRemainders_of_stepRefinesUpToAll
+    (hrefine : CircumferenceStepRefinesUpToAll) :
+    CircumferenceStepRemainders where
+  step_refines := circumferenceStepRefines_of_stepRefinesUpToAll hrefine
+
+def circumferenceQuarterLengthRemainders_of_upToAll
+    (hrefine : CircumferenceQuarterLengthStepRefinesUpToAll) :
+    CircumferenceQuarterLengthRemainders where
+  quarter_refines := circumferenceQuarterLengthStepRefines_of_upToAll hrefine
+
+def circumferenceStepRemainders_of_quarterLengthStepRefinesUpToAll
+    (hrefine : CircumferenceQuarterLengthStepRefinesUpToAll) :
+    CircumferenceStepRemainders :=
+  circumferenceStepRemainders_of_stepRefinesUpToAll
+    (circumferenceStepRefinesUpToAll_of_quarterLengthStepRefinesUpToAll
+      hrefine)
+
+def CircumferenceQuarterLengthRemainders.toStepRemainders
+    (remainders : CircumferenceQuarterLengthRemainders) :
+    CircumferenceStepRemainders where
+  step_refines :=
+    circumferenceStepRefines_of_quarterLengthStepRefines
+      remainders.quarter_refines
+
+theorem circumferenceValid_of_quarterLengthRemainders
+    (remainders : CircumferenceQuarterLengthRemainders) :
+    CircumferenceValid :=
+  circumferenceValid_of_quarterLengthStepRefines remainders.quarter_refines
+
+theorem circumferenceValid_of_stepRemainders
+    (remainders : CircumferenceStepRemainders) :
+    CircumferenceValid :=
+  circumferenceValid_of_stepRefines remainders.step_refines
+
 theorem circumferenceValid_of_linearRemainders
     (remainders : CircumferenceLinearRemainders) :
     CircumferenceValid :=
-  circumferenceValid_of_stepRefines_and_linearBound
-    remainders.step_refines remainders.width_bound
+  circumferenceValid_of_stepRefines remainders.step_refines
 
 structure GeometricValidityRemainders where
   area_ordered : AreaOrdered
@@ -6595,6 +11989,21 @@ structure GeometricValidityRemainders where
   area_widths_shrink : AreaWidthsShrink
   circumference_nested : CircumferenceNested
   circumference_widths_shrink : CircumferenceWidthsShrink
+
+def CircumferenceStepRemainders.toGeometricValidityRemainders
+    (remainders : CircumferenceStepRemainders) :
+    GeometricValidityRemainders where
+  area_ordered := AreaLoopValidity.areaOrdered
+  area_nested := AreaLoopValidity.areaNested
+  area_widths_shrink := AreaLoopValidity.areaWidthsShrink
+  circumference_nested :=
+    circumferenceNested_of_stepRefines remainders.step_refines
+  circumference_widths_shrink := circumferenceWidthsShrink
+
+def CircumferenceQuarterLengthRemainders.toGeometricValidityRemainders
+    (remainders : CircumferenceQuarterLengthRemainders) :
+    GeometricValidityRemainders :=
+  remainders.toStepRemainders.toGeometricValidityRemainders
 
 def CircumferenceLinearRemainders.toGeometricValidityRemainders
     (remainders : CircumferenceLinearRemainders) :
@@ -6604,8 +12013,7 @@ def CircumferenceLinearRemainders.toGeometricValidityRemainders
   area_widths_shrink := AreaLoopValidity.areaWidthsShrink
   circumference_nested :=
     circumferenceNested_of_stepRefines remainders.step_refines
-  circumference_widths_shrink :=
-    circumferenceWidthsShrink_of_linearBound remainders.width_bound
+  circumference_widths_shrink := circumferenceWidthsShrink
 
 structure GeometricStepRemainders where
   area_ordered : AreaOrdered
@@ -6677,6 +12085,18 @@ theorem validityProofs_of_geometric_linear_step_remainders
     ValidityProofs :=
   validityProofs_of_geometric_step_remainders
     (geometricStepRemainders_of_linearStepRemainders remainders)
+
+theorem validityProofs_of_circumference_step_remainders
+    (remainders : CircumferenceStepRemainders) :
+    ValidityProofs :=
+  validityProofs_of_geometric_remainders
+    remainders.toGeometricValidityRemainders
+
+theorem validityProofs_of_circumference_quarter_length_remainders
+    (remainders : CircumferenceQuarterLengthRemainders) :
+    ValidityProofs :=
+  validityProofs_of_geometric_remainders
+    remainders.toGeometricValidityRemainders
 
 theorem validityProofs_of_circumference_linear_remainders
     (remainders : CircumferenceLinearRemainders) :
@@ -6772,8 +12192,8 @@ theorem PiProofsComplete.pairwiseAgreement
 The Archimedes bridge `piCircleArea = piCircumference` is already proved in
 this file, the public area loop is already valid, and the Leibniz and Machin
 algorithms are already valid.  This legacy package still accepts the full
-geometric-validity record for compatibility with the older polygon/circumference
-route. -/
+geometric-validity record for compatibility with callers that already provide
+that larger certificate. -/
 structure CompletionRemainders where
   area_polygon_agreement : PiCircleAreaPolygonAgreement
   geometric_validity : GeometricValidityRemainders
@@ -6846,13 +12266,14 @@ theorem piProofsComplete_of_linearStepRemainders
   piProofsComplete_of_stepRemainders
     remainders.toCompletionStepRemainders
 
-/-- Current public completion route.
+/-- Legacy circumference completion route.
 
 The public `piCircleArea` validity is already discharged by the
-increment/decrement loop.  To certify the circumference row it is enough to
-prove one-step dyadic refinement and a linear width bound for
-`piCircumference`, plus the polygon bridge and the analytic arctangent
-agreements. -/
+increment/decrement loop.  The circumference width shrinkage is now proved
+unconditionally, so the sharper public route below asks only for the
+quarter-path endpoint refinement.  This package is retained for callers that
+already formulate the target as step refinement plus an explicit width
+bound. -/
 structure CompletionCircumferenceRemainders where
   area_polygon_agreement : PiCircleAreaPolygonAgreement
   circumference : CircumferenceLinearRemainders
@@ -6870,6 +12291,101 @@ def CompletionCircumferenceRemainders.toCompletionRemainders
 
 theorem piProofsComplete_of_circumferenceRemainders
     (remainders : CompletionCircumferenceRemainders) :
+    PiProofsComplete :=
+  piProofsComplete_of_completionRemainders
+    remainders.toCompletionRemainders
+
+/-- Sharper public completion route: the area loop and both geometric
+width estimates are already verified, so the remaining geometric validity
+input is only the one-step dyadic refinement of `piCircumference`. -/
+structure CompletionCircumferenceStepRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
+  circumference : CircumferenceStepRemainders
+  leibniz_eq_machin : LeibnizEqMachin
+  leibniz_eq_area : LeibnizEqArea
+
+def CompletionCircumferenceStepRemainders.toCompletionRemainders
+    (remainders : CompletionCircumferenceStepRemainders) :
+    CompletionRemainders where
+  area_polygon_agreement := remainders.area_polygon_agreement
+  geometric_validity :=
+    remainders.circumference.toGeometricValidityRemainders
+  leibniz_eq_machin := remainders.leibniz_eq_machin
+  leibniz_eq_area := remainders.leibniz_eq_area
+
+theorem piProofsComplete_of_circumferenceStepRemainders
+    (remainders : CompletionCircumferenceStepRemainders) :
+    PiProofsComplete :=
+  piProofsComplete_of_completionRemainders
+    remainders.toCompletionRemainders
+
+/-- Table-facing completion route, phrased in terms of the two quarter-path
+endpoint inequalities that imply public circumference step refinement. -/
+structure CompletionCircumferenceQuarterLengthRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
+  circumference : CircumferenceQuarterLengthRemainders
+  leibniz_eq_machin : LeibnizEqMachin
+  leibniz_eq_area : LeibnizEqArea
+
+def CompletionCircumferenceQuarterLengthRemainders.toCompletionRemainders
+    (remainders : CompletionCircumferenceQuarterLengthRemainders) :
+    CompletionRemainders where
+  area_polygon_agreement := remainders.area_polygon_agreement
+  geometric_validity :=
+    remainders.circumference.toGeometricValidityRemainders
+  leibniz_eq_machin := remainders.leibniz_eq_machin
+  leibniz_eq_area := remainders.leibniz_eq_area
+
+theorem piProofsComplete_of_circumferenceQuarterLengthRemainders
+    (remainders : CompletionCircumferenceQuarterLengthRemainders) :
+    PiProofsComplete :=
+  piProofsComplete_of_completionRemainders
+    remainders.toCompletionRemainders
+
+/-- Completion route whose only circumference input is the family of all finite
+step-refinement prefixes. -/
+structure CompletionCircumferenceStepRefinesUpToAllRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
+  circumference : CircumferenceStepRefinesUpToAll
+  leibniz_eq_machin : LeibnizEqMachin
+  leibniz_eq_area : LeibnizEqArea
+
+def CompletionCircumferenceStepRefinesUpToAllRemainders.toCompletionRemainders
+    (remainders : CompletionCircumferenceStepRefinesUpToAllRemainders) :
+    CompletionRemainders where
+  area_polygon_agreement := remainders.area_polygon_agreement
+  geometric_validity :=
+    (circumferenceStepRemainders_of_stepRefinesUpToAll
+      remainders.circumference).toGeometricValidityRemainders
+  leibniz_eq_machin := remainders.leibniz_eq_machin
+  leibniz_eq_area := remainders.leibniz_eq_area
+
+theorem piProofsComplete_of_circumferenceStepRefinesUpToAllRemainders
+    (remainders : CompletionCircumferenceStepRefinesUpToAllRemainders) :
+    PiProofsComplete :=
+  piProofsComplete_of_completionRemainders
+    remainders.toCompletionRemainders
+
+/-- Completion route whose circumference input is the quarter-length version of
+all finite step-refinement prefixes. -/
+structure CompletionCircumferenceQuarterLengthUpToAllRemainders where
+  area_polygon_agreement : PiCircleAreaPolygonAgreement
+  circumference : CircumferenceQuarterLengthStepRefinesUpToAll
+  leibniz_eq_machin : LeibnizEqMachin
+  leibniz_eq_area : LeibnizEqArea
+
+def CompletionCircumferenceQuarterLengthUpToAllRemainders.toCompletionRemainders
+    (remainders : CompletionCircumferenceQuarterLengthUpToAllRemainders) :
+    CompletionRemainders where
+  area_polygon_agreement := remainders.area_polygon_agreement
+  geometric_validity :=
+    (circumferenceStepRemainders_of_quarterLengthStepRefinesUpToAll
+      remainders.circumference).toGeometricValidityRemainders
+  leibniz_eq_machin := remainders.leibniz_eq_machin
+  leibniz_eq_area := remainders.leibniz_eq_area
+
+theorem piProofsComplete_of_circumferenceQuarterLengthUpToAllRemainders
+    (remainders : CompletionCircumferenceQuarterLengthUpToAllRemainders) :
     PiProofsComplete :=
   piProofsComplete_of_completionRemainders
     remainders.toCompletionRemainders
@@ -6895,6 +12411,34 @@ theorem piProofsComplete_of_circumferenceRemainders_and_kernelComparisonRoute
     (hgeom : MachinIdentity.GeometricBranchLaw) :
     PiProofsComplete :=
   piProofsComplete_of_circumferenceRemainders
+    { area_polygon_agreement := hpoly
+      circumference := circumference
+      leibniz_eq_machin :=
+        leibnizEqMachin_of_kernelComparisonRoute route hgeom
+      leibniz_eq_area :=
+        leibnizEqArea_of_kernelComparisonRoute route }
+
+theorem piProofsComplete_of_circumferenceStepRemainders_and_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
+    (circumference : CircumferenceStepRemainders)
+    (route : Taylor.ArctanComparison.KernelComparisonRoute)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    PiProofsComplete :=
+  piProofsComplete_of_circumferenceStepRemainders
+    { area_polygon_agreement := hpoly
+      circumference := circumference
+      leibniz_eq_machin :=
+        leibnizEqMachin_of_kernelComparisonRoute route hgeom
+      leibniz_eq_area :=
+        leibnizEqArea_of_kernelComparisonRoute route }
+
+theorem piProofsComplete_of_circumferenceQuarterLengthRemainders_and_kernelComparisonRoute
+    (hpoly : PiCircleAreaPolygonAgreement)
+    (circumference : CircumferenceQuarterLengthRemainders)
+    (route : Taylor.ArctanComparison.KernelComparisonRoute)
+    (hgeom : MachinIdentity.GeometricBranchLaw) :
+    PiProofsComplete :=
+  piProofsComplete_of_circumferenceQuarterLengthRemainders
     { area_polygon_agreement := hpoly
       circumference := circumference
       leibniz_eq_machin :=
