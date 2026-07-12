@@ -13533,6 +13533,104 @@ theorem piTwoThreeIntegralFarey_equiv_piCircleArea :
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- The shared-Farey integral realization of the three-term rational formula
+pi = 4 (atan(1/2) + atan(1/5) + atan(1/8)).
+
+The proof composes two bounded chart additions.  This is a distinct
+three-integral pi computation, not a reboxing of the unit integral: the
+intermediate chart identity 1/5 plus 1/8 = 1/3 is exposed explicitly. -/
+theorem piThreeTermIntegralFarey_equiv_piCircleArea :
+    IntegralIdentities.piThreeTermIntegralFarey.Equiv piCircleArea := by
+  have hfarey2 :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2)).Valid :=
+    IntegralIdentities.arctanIntegralFareyFor_valid ((1 : Rat) / 2)
+  have hfarey5 :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 5)).Valid :=
+    IntegralIdentities.arctanIntegralFareyFor_valid ((1 : Rat) / 5)
+  have hfarey8 :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 8)).Valid :=
+    IntegralIdentities.arctanIntegralFareyFor_valid ((1 : Rat) / 8)
+  have hgeom2 : (ArctanGeometry.arctanGeom ((1 : Rat) / 2)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom5 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom8 : (ArctanGeometry.arctanGeom ((1 : Rat) / 8)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hfareySum :
+      ((IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
+        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 5)) +
+          IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 8)).Valid :=
+    RealRaw.add_valid (RealRaw.add_valid hfarey2 hfarey5) hfarey8
+  have hgeomSum :
+      ((ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+        ArctanGeometry.arctanGeom ((1 : Rat) / 5)) +
+          ArctanGeometry.arctanGeom ((1 : Rat) / 8)).Valid :=
+    RealRaw.add_valid (RealRaw.add_valid hgeom2 hgeom5) hgeom8
+  have hfareyToGeom :
+      ((IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
+        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 5)) +
+          IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 8)).Equiv
+          ((ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+            ArctanGeometry.arctanGeom ((1 : Rat) / 5)) +
+              ArctanGeometry.arctanGeom ((1 : Rat) / 8)) :=
+    RealRaw.add_equiv
+      (RealRaw.add_valid hfarey2 hfarey5)
+      (RealRaw.add_valid hgeom2 hgeom5)
+      hfarey8 hgeom8
+      (RealRaw.add_equiv hfarey2 hgeom2 hfarey5 hgeom5
+        (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
+          ((1 : Rat) / 2) (by native_decide) (by native_decide))
+        (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
+          ((1 : Rat) / 5) (by native_decide) (by native_decide)))
+      (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
+        ((1 : Rat) / 8) (by native_decide) (by native_decide))
+  have hgeomAdd :
+      ((ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+        ArctanGeometry.arctanGeom ((1 : Rat) / 5)) +
+          ArctanGeometry.arctanGeom ((1 : Rat) / 8)).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat)) := by
+    have h := ArctanGeometry.arctanGeom_chartAdd_add_three_of_half
+      (u := (1 : Rat) / 2) (v := (1 : Rat) / 5) (w := (1 : Rat) / 8)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+    have hinner :
+        RationalCircle.Trigonometry.chartAddParameter
+          ((1 : Rat) / 5) ((1 : Rat) / 8) = (1 : Rat) / 3 := by
+      native_decide
+    rw [hinner] at h
+    have houter :
+        RationalCircle.Trigonometry.chartAddParameter ((1 : Rat) / 2)
+          ((1 : Rat) / 3) = (1 : Rat) := by
+      native_decide
+    rw [houter] at h
+    exact h
+  have hfareyToOne :
+      ((IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
+        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 5)) +
+          IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 8)).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans hfareySum hgeomSum hgeom1 hfareyToGeom hgeomAdd
+  have hscaled :
+      IntegralIdentities.piThreeTermIntegralFarey.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    simpa [IntegralIdentities.piThreeTermIntegralFarey] using
+      RealRaw.natScale_equiv 4 hfareyToOne
+  exact RealRaw.equiv_trans
+    IntegralIdentities.piThreeTermIntegralFarey_valid
+    (RealRaw.natScale_valid 4 hgeom1)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanGeom_one_equiv_piCircleArea
+
 theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinSmallInputs
     (route : MachinIdentity.KernelComparisonAtMachinSmallInputs) :
   piMachin.Equiv piCircleArea :=

@@ -2481,6 +2481,80 @@ theorem piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ
     _ = (48 : Rat) / d := by
       grind [Rat.div_def, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
 
+/-- A three-term rational arctangent pi computation, evaluated using the
+shared Farey integral construction.  Its formula is
+pi = 4 (atan(1/2) + atan(1/5) + atan(1/8)).
+
+The companion proof layer derives the identity by two bounded rational
+tangent-chart additions, first 1/5 plus 1/8 = 1/3, then
+1/2 plus 1/3 = 1. -/
+def piThreeTermIntegralFarey : RealRaw :=
+  (4 : Nat) *
+    ((arctanIntegralFareyFor ((1 : Rat) / 2) +
+      arctanIntegralFareyFor ((1 : Rat) / 5)) +
+        arctanIntegralFareyFor ((1 : Rat) / 8))
+
+theorem piThreeTermIntegralFarey_valid :
+    piThreeTermIntegralFarey.Valid := by
+  unfold piThreeTermIntegralFarey
+  exact RealRaw.natScale_valid 4
+    (RealRaw.add_valid
+      (RealRaw.add_valid
+        (arctanIntegralFareyFor_valid ((1 : Rat) / 2))
+        (arctanIntegralFareyFor_valid ((1 : Rat) / 5)))
+      (arctanIntegralFareyFor_valid ((1 : Rat) / 8)))
+
+/-- The three bounded Farey integrals each contribute at most 6/(n+1) to
+the interval width.  The outer factor four therefore gives 72/(n+1). -/
+theorem piThreeTermIntegralFarey_compute_width_le_seventyTwo_div_succ
+    (n : Nat) :
+    (piThreeTermIntegralFarey.compute n).width <=
+      (72 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  let A : RealRaw := arctanIntegralFareyFor ((1 : Rat) / 2)
+  let B : RealRaw := arctanIntegralFareyFor ((1 : Rat) / 5)
+  let C : RealRaw := arctanIntegralFareyFor ((1 : Rat) / 8)
+  let d : Rat := ((n + 1 : Nat) : Rat)
+  have hA : (A.compute n).width <= (6 : Rat) / d := by
+    dsimp [A, d]
+    rw [arctanIntegralFareyFor_compute_eq]
+    exact oneOverOnePlusSquareFareyIntegral_width_le_six_div_succ 0
+      ((1 : Rat) / 2) n
+  have hB : (B.compute n).width <= (6 : Rat) / d := by
+    dsimp [B, d]
+    rw [arctanIntegralFareyFor_compute_eq]
+    exact oneOverOnePlusSquareFareyIntegral_width_le_six_div_succ 0
+      ((1 : Rat) / 5) n
+  have hC : (C.compute n).width <= (6 : Rat) / d := by
+    dsimp [C, d]
+    rw [arctanIntegralFareyFor_compute_eq]
+    exact oneOverOnePlusSquareFareyIntegral_width_le_six_div_succ 0
+      ((1 : Rat) / 8) n
+  have hsum :
+      (A.compute n).width + (B.compute n).width + (C.compute n).width <=
+        (6 : Rat) / d + (6 : Rat) / d + (6 : Rat) / d :=
+    calc
+      (A.compute n).width + (B.compute n).width + (C.compute n).width <=
+          ((6 : Rat) / d + (6 : Rat) / d) + (C.compute n).width :=
+        (Rat.add_le_add_right).2
+          (calc
+            (A.compute n).width + (B.compute n).width <=
+                (6 : Rat) / d + (B.compute n).width :=
+              (Rat.add_le_add_right).2 hA
+            _ <= (6 : Rat) / d + (6 : Rat) / d :=
+              (Rat.add_le_add_left).2 hB)
+      _ <= (6 : Rat) / d + (6 : Rat) / d + (6 : Rat) / d :=
+        (Rat.add_le_add_left).2 hC
+  change (((4 : Nat) * ((A + B) + C) : RealRaw).compute n).width <=
+    (72 : Rat) / d
+  rw [RealRaw.natScale_width, RealRaw.add_width, RealRaw.add_width]
+  calc
+    (4 : Rat) * ((A.compute n).width + (B.compute n).width +
+        (C.compute n).width) <=
+        (4 : Rat) * ((6 : Rat) / d + (6 : Rat) / d + (6 : Rat) / d) :=
+      Rat.mul_le_mul_of_nonneg_left hsum (by native_decide)
+    _ = (72 : Rat) / d := by
+      grind [Rat.div_def, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
 theorem arctanIntegralFareyFor_zero_equiv_zero :
     (arctanIntegralFareyFor 0).Equiv (RealRaw.ofRat 0) := by
   exact RealRaw.equiv_trans

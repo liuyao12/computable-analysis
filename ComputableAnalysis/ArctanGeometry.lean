@@ -5358,6 +5358,73 @@ theorem arctanGeom_chartAdd_add_of_half
     (RealRaw.equiv_trans hmiddle hright hgeomV hcomm
       (RealRaw.sub_add_cancel_equiv hgeomV hgeomU))
 
+/-- Three bounded rational chart additions compose at the level of geometric
+arctangent intervals.  This packages the reassociation needed by rational
+three-term arctangent formulae while keeping every branch and image bound
+explicit. -/
+theorem arctanGeom_chartAdd_add_three_of_half
+    {u v w : Rat}
+    (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hv0 : 0 <= v) (hvHalf : v <= (1 : Rat) / 2)
+    (hw0 : 0 <= w) (hw1 : w <= 1)
+    (hvw0 : 0 <= RationalCircle.Trigonometry.chartAddParameter v w)
+    (hvw1 : RationalCircle.Trigonometry.chartAddParameter v w <= 1)
+    (huvw0 : 0 <= RationalCircle.Trigonometry.chartAddParameter u
+      (RationalCircle.Trigonometry.chartAddParameter v w))
+    (huvw1 : RationalCircle.Trigonometry.chartAddParameter u
+      (RationalCircle.Trigonometry.chartAddParameter v w) <= 1) :
+    ((arctanGeom u + arctanGeom v) + arctanGeom w).Equiv
+      (arctanGeom (RationalCircle.Trigonometry.chartAddParameter u
+        (RationalCircle.Trigonometry.chartAddParameter v w))) := by
+  have hu1 : u <= 1 :=
+    Rat.le_trans huHalf (by native_decide : (1 : Rat) / 2 <= 1)
+  have hv1 : v <= 1 :=
+    Rat.le_trans hvHalf (by native_decide : (1 : Rat) / 2 <= 1)
+  have hU : (arctanGeom u).Valid :=
+    arctanGeom_valid_on_unit hu0 hu1
+  have hV : (arctanGeom v).Valid :=
+    arctanGeom_valid_on_unit hv0 hv1
+  have hW : (arctanGeom w).Valid :=
+    arctanGeom_valid_on_unit hw0 hw1
+  have hVW :
+      (arctanGeom (RationalCircle.Trigonometry.chartAddParameter v w)).Valid :=
+    arctanGeom_valid_on_unit hvw0 hvw1
+  have hUVW :
+      (arctanGeom (RationalCircle.Trigonometry.chartAddParameter u
+        (RationalCircle.Trigonometry.chartAddParameter v w))).Valid :=
+    arctanGeom_valid_on_unit huvw0 huvw1
+  have hVWAdd :
+      (arctanGeom v + arctanGeom w).Equiv
+        (arctanGeom (RationalCircle.Trigonometry.chartAddParameter v w)) :=
+    arctanGeom_chartAdd_add_of_half hv0 hvHalf hw0 hw1 hvw1
+  have hUVWAdd :
+      (arctanGeom u +
+        arctanGeom (RationalCircle.Trigonometry.chartAddParameter v w)).Equiv
+        (arctanGeom (RationalCircle.Trigonometry.chartAddParameter u
+          (RationalCircle.Trigonometry.chartAddParameter v w))) :=
+    arctanGeom_chartAdd_add_of_half hu0 huHalf hvw0 hvw1 huvw1
+  have hleft : ((arctanGeom u + arctanGeom v) + arctanGeom w).Valid :=
+    RealRaw.add_valid (RealRaw.add_valid hU hV) hW
+  have hassoc : (arctanGeom u + (arctanGeom v + arctanGeom w)).Valid :=
+    RealRaw.add_valid hU (RealRaw.add_valid hV hW)
+  have hmid :
+      (arctanGeom u +
+        arctanGeom (RationalCircle.Trigonometry.chartAddParameter v w)).Valid :=
+    RealRaw.add_valid hU hVW
+  have hregroup :
+      ((arctanGeom u + arctanGeom v) + arctanGeom w).Equiv
+        (arctanGeom u + (arctanGeom v + arctanGeom w)) :=
+    RealRaw.add_assoc_equiv (arctanGeom u) (arctanGeom v) (arctanGeom w)
+      hU hV hW
+  have hreplace :
+      (arctanGeom u + (arctanGeom v + arctanGeom w)).Equiv
+        (arctanGeom u +
+          arctanGeom (RationalCircle.Trigonometry.chartAddParameter v w)) :=
+    RealRaw.add_equiv hU hU (RealRaw.add_valid hV hW) hVW
+      (RealRaw.equiv_refl (arctanGeom u) hU) hVWAdd
+  exact RealRaw.equiv_trans hleft hassoc hUVW hregroup
+    (RealRaw.equiv_trans hassoc hmid hUVW hreplace hUVWAdd)
+
 theorem arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one :
     arctanIntegralRectangleRawAtOne.Equiv (arctanGeom 1) := by
   intro n

@@ -21,7 +21,7 @@ A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`.  A row counts as equivalent after a formalized chain of
 `RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions `9/18`; equivalences `5/17` applicable rows.
+Current count: definitions `10/19`; equivalences `6/18` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -35,6 +35,7 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | `piMachinIntegralRectangle` | [Machin integrals](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:machin-rectangle-integral-pi) | $\pi=4(4\int_0^{1/5}\frac{dt}{1+t^2}-\int_0^{1/239}\frac{dt}{1+t^2})$ | ✓ | ✓ |
 | `piCauchyProjectiveFarey` | [projective Cauchy integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:projective-cauchy-pi) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}=4\int_0^1\frac{dx}{1+x^2}$ | ✓ | ✓ |
 | `piTwoThreeIntegralFarey` | [two-three Farey integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:two-three-farey-pi) | $\pi=4(\int_0^{1/2}\frac{dt}{1+t^2}+\int_0^{1/3}\frac{dt}{1+t^2})$ | ✓ | ✓ |
+| <code>piThreeTermIntegralFarey</code> | [three-term Farey integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:three-term-farey-pi) | π = 4(∫₀¹⁄² dt/(1+t²) + ∫₀¹⁄⁵ dt/(1+t²) + ∫₀¹⁄⁸ dt/(1+t²)) | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✗ |
 | `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✗ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
@@ -73,6 +74,13 @@ Lean hooks:
   `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea`.
   This is separately counted because `atan(1/2) + atan(1/3) = atan(1)` is a
   distinct rational pi formula, not merely another unit-mesh evaluator.
+- Three-term Farey integral:
+  <code>IntegralIdentities.piThreeTermIntegralFarey</code>,
+  <code>IntegralIdentities.piThreeTermIntegralFarey_compute_width_le_seventyTwo_div_succ</code>,
+  <code>ArctanGeometry.arctanGeom_chartAdd_add_three_of_half</code>, and
+  <code>PiProofs.piThreeTermIntegralFarey_equiv_piCircleArea</code>.
+  This is a distinct three-term rational formula, whose two chart identities
+  are 1/5 ⊕ 1/8 = 1/3 and 1/2 ⊕ 1/3 = 1.
 - Old point-Riemann arctangent:
   `IntegralIdentities.arctanIntegral_compute_width_zero`,
   `IntegralIdentities.arctanIntegral_stages_constant`.

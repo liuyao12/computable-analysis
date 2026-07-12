@@ -331,8 +331,10 @@ students actually compute.
   are `4 * arctanGeom(1)`, `4 * arctanIntegralRectangleForAtOne`, the
   independently assembled Machin rectangle-integral computation
   `IntegralIdentities.piMachinIntegralRectangle`, and the full-line Cauchy
-  compactification `PiProofs.piCauchyProjectiveFarey`, and the two-three
-  Farey-integral formula `IntegralIdentities.piTwoThreeIntegralFarey`.
+  compactification `PiProofs.piCauchyProjectiveFarey`, the two-three
+  Farey-integral formula `IntegralIdentities.piTwoThreeIntegralFarey`, and
+  the three-term Farey-integral formula
+  `IntegralIdentities.piThreeTermIntegralFarey`.
 - The next canonical series equivalence is blocked only by the uniform
   all-partials bridge
   `PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit`.
@@ -402,6 +404,16 @@ students actually compute.
   from the already verified finite chart calculation `1/2 ⊕ 1/3 = 1`.
   This counts as a distinct formula-level computation, not as an additional
   row for merely reusing the Farey mesh.
+- The shared Farey primitive also completes the three-term rational formula
+  `pi = 4 * (atan(1/2) + atan(1/5) + atan(1/8))`.
+  `IntegralIdentities.piThreeTermIntegralFarey` has width at most
+  `72/(n+1)`, and
+  `PiProofs.piThreeTermIntegralFarey_equiv_piCircleArea` uses the reusable
+  bounded composition theorem
+  `ArctanGeometry.arctanGeom_chartAdd_add_three_of_half`.  The finite
+  rational chart identities are `1/5 ⊕ 1/8 = 1/3` and
+  `1/2 ⊕ 1/3 = 1`; this is a separately counted formula-level computation,
+  not a second name for the unit Farey mesh.
 - The exact stage bridge
   `ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute` now
   proves `PiProofs.PiCircleAreaPolygonAgreement`; with finite Archimedes this
