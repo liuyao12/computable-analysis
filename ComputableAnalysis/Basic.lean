@@ -42,6 +42,12 @@ def widthOk (I : QInterval) (eps : QPos) : Bool := decide (0 <= I.width /\ I.wid
 def hull (I J : QInterval) : QInterval :=
   { lo := min I.lo J.lo, hi := max I.hi J.hi }
 
+/-- The common part of two rational intervals.  Unlike `hull`, this is only
+ordered when the two inputs have a common subinterval; clients prove that
+fact explicitly rather than silently replacing an empty intersection. -/
+def intersection (I J : QInterval) : QInterval :=
+  { lo := max I.lo J.lo, hi := min I.hi J.hi }
+
 theorem hull_contains_left (I J : QInterval) : (hull I J).ContainsInterval I := by
   unfold ContainsInterval hull
   grind
@@ -55,6 +61,40 @@ theorem hull_least {K I J : QInterval}
     K.ContainsInterval (hull I J) := by
   unfold ContainsInterval hull at *
   grind
+
+theorem intersection_contains
+    {I J K : QInterval}
+    (hI : I.ContainsInterval K) (hJ : J.ContainsInterval K) :
+    (intersection I J).ContainsInterval K := by
+  unfold ContainsInterval intersection at *
+  grind
+
+theorem intersection_contained_left (I J : QInterval) :
+    I.lo <= (intersection I J).lo /\
+      (intersection I J).hi <= I.hi := by
+  unfold intersection
+  grind
+
+theorem intersection_contained_right (I J : QInterval) :
+    J.lo <= (intersection I J).lo /\
+      (intersection I J).hi <= J.hi := by
+  unfold intersection
+  grind
+
+theorem width_le_of_contains {outer inner : QInterval}
+    (h : outer.ContainsInterval inner) :
+    inner.width <= outer.width := by
+  change outer.lo <= inner.lo /\ inner.hi <= outer.hi at h
+  change inner.hi - inner.lo <= outer.hi - outer.lo
+  grind [Rat.sub_eq_add_neg]
+
+theorem hull_width_le_add_of_overlaps
+    {I J : QInterval}
+    (hI : 0 <= I.width) (hJ : 0 <= J.width)
+    (hover : I.Overlaps J) :
+    (hull I J).width <= I.width + J.width := by
+  unfold width hull Overlaps at *
+  grind [Rat.sub_eq_add_neg]
 
 def inv (I : QInterval) : QInterval :=
   if 0 < I.lo then
@@ -564,6 +604,190 @@ theorem interval_order_of_valid (x : RealRaw) (hx : x.Valid) (n : Nat) :
     (x.compute n).lo <= (x.compute n).hi := by
   have hwidth := hx.1 n
   grind [QInterval.width, Rat.sub_eq_add_neg]
+
+/-- Rebox a shrinking interval algorithm against a verified nested anchor.
+
+At stage `n` this takes the intersection of the first `n + 1` hulls of the
+candidate interval and the corresponding anchor interval.  Every operation is
+finite rational `min`/`max` arithmetic.  This is useful when a natural
+algorithm has a width modulus and stagewise overlap proof, but its own endpoint
+monotonicity has not yet been established. -/
+def anchorReboxCompute
+    (candidate anchor : Nat -> QInterval) : Nat -> QInterval
+  | 0 => QInterval.hull (candidate 0) (anchor 0)
+  | n + 1 => QInterval.intersection
+      (anchorReboxCompute candidate anchor n)
+      (QInterval.hull (candidate (n + 1)) (anchor (n + 1)))
+
+def anchorRebox (candidate anchor : RealRaw) : RealRaw where
+  compute := anchorReboxCompute candidate.compute anchor.compute
+
+private theorem anchorReboxCompute_contains_anchor
+    {candidate anchor : Nat -> QInterval}
+    (hanchor_nested : forall n m, n <= m ->
+      (anchor n).lo <= (anchor m).lo /\
+        (anchor m).lo <= (anchor m).hi /\
+        (anchor m).hi <= (anchor n).hi) :
+    forall n, (anchorReboxCompute candidate anchor n).ContainsInterval (anchor n) := by
+  intro n
+  induction n with
+  | zero =>
+      exact QInterval.hull_contains_right (candidate 0) (anchor 0)
+  | succ n ih =>
+      apply QInterval.intersection_contains
+      · have hnested := hanchor_nested n (n + 1) (Nat.le_succ n)
+        exact ⟨Rat.le_trans ih.1 hnested.1,
+          Rat.le_trans hnested.2.2 ih.2⟩
+      · exact QInterval.hull_contains_right
+          (candidate (n + 1)) (anchor (n + 1))
+
+private theorem anchorReboxCompute_contained_in_current_hull
+    (candidate anchor : Nat -> QInterval) :
+    forall n, (QInterval.hull (candidate n) (anchor n)).ContainsInterval
+      (anchorReboxCompute candidate anchor n) := by
+  intro n
+  induction n with
+  | zero =>
+      exact ⟨Rat.le_refl, Rat.le_refl⟩
+  | succ n _ih =>
+      exact QInterval.intersection_contained_right
+        (anchorReboxCompute candidate anchor n)
+        (QInterval.hull (candidate (n + 1)) (anchor (n + 1)))
+
+private theorem anchorReboxCompute_step_nested
+    (candidate anchor : Nat -> QInterval) (n : Nat) :
+    (anchorReboxCompute candidate anchor n).lo <=
+        (anchorReboxCompute candidate anchor (n + 1)).lo /\
+      (anchorReboxCompute candidate anchor (n + 1)).hi <=
+        (anchorReboxCompute candidate anchor n).hi :=
+  QInterval.intersection_contained_left
+    (anchorReboxCompute candidate anchor n)
+    (QInterval.hull (candidate (n + 1)) (anchor (n + 1)))
+
+theorem anchorRebox_contains_anchor
+    {candidate anchor : RealRaw}
+    (hanchor : anchor.Valid) :
+    forall n, (anchorRebox candidate anchor).compute n |>.ContainsInterval
+      (anchor.compute n) := by
+  exact anchorReboxCompute_contains_anchor hanchor.2.1
+
+theorem anchorRebox_valid
+    {candidate anchor : RealRaw}
+    (hcandidate_ordered : forall n, 0 <= (candidate.compute n).width)
+    (hcandidate_shrinks : WidthsShrinkToZero candidate.compute)
+    (hanchor : anchor.Valid)
+    (hover : candidate.Equiv anchor) :
+    (anchorRebox candidate anchor).Valid := by
+  have hcontains := anchorRebox_contains_anchor (candidate := candidate)
+    (anchor := anchor) hanchor
+  have hcurrent := anchorReboxCompute_contained_in_current_hull
+    candidate.compute anchor.compute
+  have hstep := anchorReboxCompute_step_nested
+    candidate.compute anchor.compute
+  constructor
+  · intro n
+    have hanchor_ordered := interval_order_of_valid anchor hanchor n
+    have hcontain := hcontains n
+    unfold QInterval.ContainsInterval at hcontain
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      induction hnm with
+      | refl =>
+          have hordered := interval_order_of_valid anchor hanchor n
+          have hcontain := hcontains n
+          unfold QInterval.ContainsInterval at hcontain
+          exact ⟨Rat.le_refl, by
+            have hleft :
+                ((anchorRebox candidate anchor).compute n).lo <=
+                  ((anchorRebox candidate anchor).compute n).hi := by
+              change ((anchorRebox candidate anchor).compute n).lo <=
+                (anchor.compute n).lo /\
+                (anchor.compute n).hi <=
+                  ((anchorRebox candidate anchor).compute n).hi at hcontain
+              exact Rat.le_trans hcontain.1
+                (Rat.le_trans hordered hcontain.2)
+            exact ⟨hleft, Rat.le_refl⟩⟩
+      | step hnm ih =>
+          rename_i k
+          have hnext := hstep k
+          have hordered := interval_order_of_valid anchor hanchor (k + 1)
+          have hcontain := hcontains (k + 1)
+          have hnext_ordered :
+                ((anchorRebox candidate anchor).compute (k + 1)).lo <=
+                ((anchorRebox candidate anchor).compute (k + 1)).hi := by
+            change ((anchorRebox candidate anchor).compute (k + 1)).lo <=
+              (anchor.compute (k + 1)).lo /\
+              (anchor.compute (k + 1)).hi <=
+                ((anchorRebox candidate anchor).compute (k + 1)).hi at hcontain
+            exact Rat.le_trans hcontain.1
+              (Rat.le_trans hordered hcontain.2)
+          exact ⟨Rat.le_trans ih.1 hnext.1,
+            ⟨hnext_ordered, Rat.le_trans hnext.2 ih.2.2⟩⟩
+    · intro eps
+      let half : QPos := ⟨eps.val / 2, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+      obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
+      obtain ⟨Na, hNa⟩ := hanchor.2.2 half
+      refine ⟨Nat.max Nc Na, ?_⟩
+      intro n hn
+      have hcn : Nc <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+      have han : Na <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+      have hcandidate_width := hNc n hcn
+      have hanchor_width := hNa n han
+      have hcurrent_n := hcurrent n
+      have hcurrent_width :
+          ((anchorRebox candidate anchor).compute n).width <=
+            (QInterval.hull (candidate.compute n) (anchor.compute n)).width := by
+        exact QInterval.width_le_of_contains hcurrent_n
+      have hhulled_width :
+          (QInterval.hull (candidate.compute n) (anchor.compute n)).width <=
+            (candidate.compute n).width + (anchor.compute n).width := by
+        have hover_n := (compareAt_overlap_iff candidate anchor n n).1 (hover n)
+        exact QInterval.hull_width_le_add_of_overlaps
+          (hcandidate_ordered n) (hanchor.1 n) hover_n
+      change ((anchorRebox candidate anchor).compute n).width <= eps.val
+      calc
+        ((anchorRebox candidate anchor).compute n).width <=
+            (QInterval.hull (candidate.compute n) (anchor.compute n)).width :=
+          hcurrent_width
+        _ <= (candidate.compute n).width + (anchor.compute n).width :=
+          hhulled_width
+        _ <= half.val + half.val :=
+          by grind
+        _ = eps.val := by
+          dsimp [half]
+          rw [Rat.div_def]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem anchorRebox_equiv_anchor
+    {candidate anchor : RealRaw}
+    (hanchor : anchor.Valid) :
+    (anchorRebox candidate anchor).Equiv anchor := by
+  intro n
+  apply (compareAt_overlap_iff (anchorRebox candidate anchor) anchor n n).2
+  have hcontain := anchorRebox_contains_anchor (candidate := candidate)
+    (anchor := anchor) hanchor n
+  have hordered := interval_order_of_valid anchor hanchor n
+  exact ⟨Rat.le_trans hcontain.1 hordered,
+    Rat.le_trans hordered hcontain.2⟩
+
+theorem candidate_equiv_anchorRebox
+    {candidate anchor : RealRaw}
+    (hanchor : anchor.Valid)
+    (hover : candidate.Equiv anchor) :
+    candidate.Equiv (anchorRebox candidate anchor) := by
+  intro n
+  have hcandidate_anchor :=
+    (compareAt_overlap_iff candidate anchor n n).1 (hover n)
+  have hcontains := anchorRebox_contains_anchor (candidate := candidate)
+    (anchor := anchor) hanchor n
+  apply (compareAt_overlap_iff candidate (anchorRebox candidate anchor) n n).2
+  exact ⟨Rat.le_trans hcandidate_anchor.1 hcontains.2,
+    Rat.le_trans hcontains.1 hcandidate_anchor.2⟩
 
 theorem validCompute_stage_eq_of_zero_width
     {compute : Nat -> QInterval}
@@ -2226,6 +2450,29 @@ theorem scaleRat_valid_of_nonneg {r : Rat} {x : RealRaw}
     (hr : 0 <= r) (hx : x.Valid) : (scaleRat r x).Valid :=
   scaleRatCompute_valid_of_nonneg hr hx
 
+private theorem scaleRatCompute_neg_eq_scaleRatCompute_neg
+    {r : Rat} (hr : ¬ 0 <= r) (x : RealRaw) :
+    scaleRatCompute r x = scaleRatCompute (-r) (RealRaw.neg x) := by
+  funext n
+  have hneg : 0 <= -r := by grind
+  simp [scaleRatCompute, RealRaw.neg, negCompute, hr, hneg]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem scaleRatCompute_valid {r : Rat} {x : RealRaw}
+    (hx : x.Valid) :
+    RealRaw.ValidCompute (scaleRatCompute r x) := by
+  by_cases hr : 0 <= r
+  · exact scaleRatCompute_valid_of_nonneg hr hx
+  · have hneg : 0 <= -r := by grind
+    have hvalid :=
+      scaleRatCompute_valid_of_nonneg (r := -r) (x := RealRaw.neg x) hneg
+        (neg_valid hx)
+    rwa [scaleRatCompute_neg_eq_scaleRatCompute_neg hr x]
+
+theorem scaleRat_valid {r : Rat} {x : RealRaw}
+    (hx : x.Valid) : (scaleRat r x).Valid :=
+  scaleRatCompute_valid hx
+
 private theorem square_mono_nonneg {a b : Rat}
     (ha0 : 0 <= a) (hab : a <= b) : a * a <= b * b := by
   have hb0 : 0 <= b := by grind
@@ -2342,6 +2589,32 @@ theorem scaleRat_width_of_nonneg {r : Rat} (hr : 0 <= r)
   simp [hr]
   grind [Rat.sub_eq_add_neg, Rat.mul_add]
 
+/-- Adding rational intervals adds their widths exactly. -/
+theorem add_width (x y : RealRaw) (n : Nat) :
+    ((x + y).compute n).width =
+      (x.compute n).width + (y.compute n).width := by
+  change (addCompute x y n).width =
+    (x.compute n).width + (y.compute n).width
+  unfold addCompute QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+/-- Subtracting rational intervals adds their widths exactly. -/
+theorem sub_width (x y : RealRaw) (n : Nat) :
+    ((x - y).compute n).width =
+      (x.compute n).width + (y.compute n).width := by
+  change (subCompute x y n).width =
+    (x.compute n).width + (y.compute n).width
+  unfold subCompute QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+/-- Natural scaling multiplies an interval width by that natural number. -/
+theorem natScale_width (k n : Nat) (x : RealRaw) :
+    ((k * x : RealRaw).compute n).width =
+      (k : Rat) * (x.compute n).width := by
+  change ((scaleRat (k : Rat) x).compute n).width =
+    (k : Rat) * (x.compute n).width
+  exact scaleRat_width_of_nonneg Rat.natCast_nonneg x n
+
 theorem valid_of_scaleRat_valid_of_pos {r : Rat} {x : RealRaw}
     (hr : 0 < r) (hscale : (scaleRat r x).Valid) : x.Valid := by
   have hr_nonneg : 0 <= r := Rat.le_of_lt hr
@@ -2427,6 +2700,25 @@ theorem neg_equiv {x y : RealRaw}
   unfold negCompute QInterval.Overlaps
   exact ⟨Rat.neg_le_neg h.2, Rat.neg_le_neg h.1⟩
 
+theorem scaleRat_equiv {r : Rat} {x y : RealRaw}
+    (hxy : x.Equiv y) :
+    (scaleRat r x).Equiv (scaleRat r y) := by
+  by_cases hr : 0 <= r
+  · exact scaleRat_equiv_of_nonneg hr hxy
+  · have hneg : 0 <= -r := by grind
+    have h :=
+      scaleRat_equiv_of_nonneg
+        (r := -r) (x := RealRaw.neg x) (y := RealRaw.neg y)
+        hneg (neg_equiv hxy)
+    intro n
+    change compareAt (scaleRat r x) (scaleRat r y) n = .overlap
+    change compareAt
+      { compute := scaleRatCompute r x }
+      { compute := scaleRatCompute r y } n = .overlap
+    rw [scaleRatCompute_neg_eq_scaleRatCompute_neg hr x,
+      scaleRatCompute_neg_eq_scaleRatCompute_neg hr y]
+    exact h n
+
 theorem add_equiv {x x' y y' : RealRaw}
     (hx : x.Valid) (hx' : x'.Valid)
     (hy : y.Valid) (hy' : y'.Valid)
@@ -2442,6 +2734,89 @@ theorem add_equiv {x x' y y' : RealRaw}
   unfold QInterval.Overlaps at hxSame hySame
   change QInterval.Overlaps (addCompute x y n) (addCompute x' y' n)
   unfold addCompute QInterval.Overlaps
+  constructor <;> grind
+
+/-- Addition of valid raw interval representatives is commutative up to
+equivalence. -/
+theorem add_comm_equiv (x y : RealRaw) (hx : x.Valid) (hy : y.Valid) :
+    (x + y).Equiv (y + x) := by
+  intro n
+  apply (compareAt_overlap_iff (x + y) (y + x) n n).2
+  have hxorder := interval_order_of_valid x hx n
+  have hyorder := interval_order_of_valid y hy n
+  change QInterval.Overlaps
+    { lo := (x.compute n).lo + (y.compute n).lo,
+      hi := (x.compute n).hi + (y.compute n).hi }
+    { lo := (y.compute n).lo + (x.compute n).lo,
+      hi := (y.compute n).hi + (x.compute n).hi }
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.add_comm]
+
+/-- Addition of raw interval representatives is associative up to equivalence.
+
+This permits later analytic identities to regroup certified interval
+expressions without selecting a completed-real quotient. -/
+theorem add_assoc_equiv (x y z : RealRaw)
+    (hx : x.Valid) (hy : y.Valid) (hz : z.Valid) :
+    ((x + y) + z).Equiv (x + (y + z)) := by
+  intro n
+  apply (compareAt_overlap_iff ((x + y) + z) (x + (y + z)) n n).2
+  have hxorder := interval_order_of_valid x hx n
+  have hyorder := interval_order_of_valid y hy n
+  have hzorder := interval_order_of_valid z hz n
+  change QInterval.Overlaps
+    { lo := ((x.compute n).lo + (y.compute n).lo) + (z.compute n).lo,
+      hi := ((x.compute n).hi + (y.compute n).hi) + (z.compute n).hi }
+    { lo := (x.compute n).lo + ((y.compute n).lo + (z.compute n).lo),
+      hi := (x.compute n).hi + ((y.compute n).hi + (z.compute n).hi) }
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.add_assoc]
+
+/-- Scaling a raw real by two agrees with adding it to itself. -/
+theorem two_natscale_equiv_add_self (x : RealRaw) (hx : x.Valid) :
+    ((2 : Nat) * x).Equiv (x + x) := by
+  intro n
+  apply (compareAt_overlap_iff ((2 : Nat) * x) (x + x) n n).2
+  have hxorder := interval_order_of_valid x hx n
+  change QInterval.Overlaps
+    (scaleRatCompute (2 : Rat) x n) (addCompute x x n)
+  simp [scaleRatCompute, addCompute,
+    (by native_decide : (0 : Rat) <= 2), QInterval.Overlaps]
+  constructor <;> grind [Rat.add_comm]
+
+/-- Scaling a raw real by four agrees with adding two doubled copies. -/
+theorem four_natscale_equiv_add_two_natscale (x : RealRaw) (hx : x.Valid) :
+    ((4 : Nat) * x).Equiv (((2 : Nat) * x) + ((2 : Nat) * x)) := by
+  intro n
+  apply (compareAt_overlap_iff
+    ((4 : Nat) * x) (((2 : Nat) * x) + ((2 : Nat) * x)) n n).2
+  have hxorder := interval_order_of_valid x hx n
+  change QInterval.Overlaps
+    (scaleRatCompute (4 : Rat) x n)
+    (addCompute (scaleRat (2 : Rat) x) (scaleRat (2 : Rat) x) n)
+  simp [scaleRat, scaleRatCompute, addCompute,
+    (by native_decide : (0 : Rat) <= 4),
+    (by native_decide : (0 : Rat) <= 2), QInterval.Overlaps]
+  constructor <;> grind [Rat.add_comm]
+
+theorem zero_add_equiv {x : RealRaw}
+    (hx : x.Valid) : (zero + x).Equiv x := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have horder := RealRaw.interval_order_of_valid x hx n
+  apply (RealRaw.compareAt_overlap_iff (zero + x) x n n).2
+  change QInterval.Overlaps (addCompute zero x n) (x.compute n)
+  unfold addCompute zero ofRat QInterval.Overlaps
+  constructor <;> grind
+
+theorem add_zero_equiv {x : RealRaw}
+    (hx : x.Valid) : (x + zero).Equiv x := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have horder := RealRaw.interval_order_of_valid x hx n
+  apply (RealRaw.compareAt_overlap_iff (x + zero) x n n).2
+  change QInterval.Overlaps (addCompute x zero n) (x.compute n)
+  unfold addCompute zero ofRat QInterval.Overlaps
   constructor <;> grind
 
 theorem sub_equiv {x x' y y' : RealRaw}
@@ -2488,6 +2863,44 @@ theorem add_sub_cancel_right_equiv {x y : RealRaw}
     { lo := ((x.compute n).lo + (y.compute n).lo) - (y.compute n).hi,
       hi := ((x.compute n).hi + (y.compute n).hi) - (y.compute n).lo }
     (x.compute n)
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- Adding back a subtracted valid representative recovers the original raw
+real up to interval overlap. -/
+theorem sub_add_cancel_equiv {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) :
+    ((x - y) + y).Equiv x := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hxord := RealRaw.interval_order_of_valid x hx n
+  have hyord := RealRaw.interval_order_of_valid y hy n
+  apply (RealRaw.compareAt_overlap_iff ((x - y) + y) x n n).2
+  change QInterval.Overlaps
+    { lo := ((x.compute n).lo - (y.compute n).hi) + (y.compute n).lo,
+      hi := ((x.compute n).hi - (y.compute n).lo) + (y.compute n).hi }
+    (x.compute n)
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- Telescoping for raw interval representatives:
+`(y - x) + (z - y)` is equivalent to `z - x`. -/
+theorem sub_add_sub_cancel_middle_equiv {x y z : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) (hz : z.Valid) :
+    ((y - x) + (z - y)).Equiv (z - x) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hxord := RealRaw.interval_order_of_valid x hx n
+  have hyord := RealRaw.interval_order_of_valid y hy n
+  have hzord := RealRaw.interval_order_of_valid z hz n
+  apply (RealRaw.compareAt_overlap_iff ((y - x) + (z - y)) (z - x) n n).2
+  change QInterval.Overlaps
+    { lo := ((y.compute n).lo - (x.compute n).hi) +
+        ((z.compute n).lo - (y.compute n).hi),
+      hi := ((y.compute n).hi - (x.compute n).lo) +
+        ((z.compute n).hi - (y.compute n).lo) }
+    { lo := (z.compute n).lo - (x.compute n).hi,
+      hi := (z.compute n).hi - (x.compute n).lo }
   unfold QInterval.Overlaps
   constructor <;> grind [Rat.sub_eq_add_neg]
 

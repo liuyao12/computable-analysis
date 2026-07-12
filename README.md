@@ -21,7 +21,7 @@ A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`.  A row counts as equivalent after a formalized chain of
 `RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions `7/17`; equivalences `3/16` applicable rows.
+Current count: definitions `9/18`; equivalences `5/17` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -32,8 +32,9 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | **Arctangent routes** | [geom](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4\arctan(1)=4\int_0^1\frac{dt}{1+t^2}=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ |  |  |
 | `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\arctan_{\mathrm{geom}}(1)$ | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
-| `4 * arctanIntegralFareyFor(1)` | [Farey](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4I_F(0,1)$ | ✓ | ✓ |
-| `4 * arctanIntegral(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [target](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✗ | ✗ |
+| `piMachinIntegralRectangle` | [Machin integrals](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:machin-rectangle-integral-pi) | $\pi=4(4\int_0^{1/5}\frac{dt}{1+t^2}-\int_0^{1/239}\frac{dt}{1+t^2})$ | ✓ | ✓ |
+| `piCauchyProjectiveFarey` | [projective Cauchy integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:projective-cauchy-pi) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}=4\int_0^1\frac{dx}{1+x^2}$ | ✓ | ✓ |
+| `piTwoThreeIntegralFarey` | [two-three Farey integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:two-three-farey-pi) | $\pi=4(\int_0^{1/2}\frac{dt}{1+t^2}+\int_0^{1/3}\frac{dt}{1+t^2})$ | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✗ |
 | `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✗ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
@@ -55,19 +56,158 @@ Lean hooks:
   `ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`.
 - Rectangle arctangent:
   `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`,
+  `PiProofs.four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea`,
   `IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement`.
+- Machin rectangle integral:
+  `IntegralIdentities.piMachinIntegralRectangle`,
+  `PiProofs.piMachinIntegralRectangle_equiv_piCircleArea`.
+- Projective Cauchy integral:
+  `IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel`,
+  `PiProofs.piCauchyProjectiveFarey`,
+  `PiProofs.piCauchyProjectiveFarey_equiv_piCircleArea`.
+  The bounded Farey mesh itself is not separately counted; this row is the
+  full-line Cauchy compactification that gives it a distinct calculus meaning.
+- Two-three Farey integral:
+  `IntegralIdentities.piTwoThreeIntegralFarey`,
+  `IntegralIdentities.piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ`,
+  `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea`.
+  This is separately counted because `atan(1/2) + atan(1/3) = atan(1)` is a
+  distinct rational pi formula, not merely another unit-mesh evaluator.
 - Old point-Riemann arctangent:
   `IntegralIdentities.arctanIntegral_compute_width_zero`,
   `IntegralIdentities.arctanIntegral_stages_constant`.
-  This explains why the unchecked `arctanIntegral(1)` row is not counted as a
-  completed refining computation under the current legacy API.
-- Farey arctangent:
-  `PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea`,
-  `ArctanGeometry.fareyIntegralPrefixRaw_equiv_arctanGeom_on_unit`.
-
-$$
-I^F_n(0,x)\cap A^M_m(x)\ne\varnothing\qquad(0\le x\le1).
-$$
+  This legacy wrapper is kept for conditional FTC bridge statements, but it is
+  not a separate scoreboard row because it has no canonical standalone
+  refining computation.
+- Static dyadic integral API:
+  `Integral.staticDyadicSubdivisions`, `Integral.staticDyadicPlan`,
+  `Integral.staticDyadicAlgorithm`, `StaticDyadicEffectiveFTC`,
+  `FTC.EndpointScheduleAgreement`,
+  `FTC.endpointScheduleAgreement_of_effectiveFTC_stageSchedule`,
+  `FTC.endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule`,
+  `FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint`,
+  `FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement`,
+  `Integral.definiteIdentity_of_staticDyadicEffectiveFTC`,
+  `Integral.definiteIdentity_of_staticDyadicEffectiveFTC_endpointAgreement`,
+  `PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_staticDyadicEffectiveFTC`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_staticDyadicEffectiveFTC`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_staticDyadicEffectiveFTC_stageSchedule`.
+- Constant integral sanity laws:
+  `Integral.constantIntegral_add_equiv`,
+  `Integral.constantIntegral_scaleRat_equiv`,
+  `Integral.constantIntegral_adjacent_additive`.
+- Monotone-first integral API:
+  `NondecreasingOnInterval`, `NonincreasingOnInterval`,
+  `MonotoneOnInterval`, `MonotoneOnInterval.ofNondecreasing`,
+  `MonotoneOnInterval.restrict`, `NondecreasingOnInterval.restrict`,
+  `NonincreasingOnInterval.restrict`,
+  `Integral.NondecreasingConstructionFor`,
+  `Integral.NondecreasingConstructionFor.restrict`,
+  `Integral.nondecreasingIntegralFor_valid`,
+  `Integral.MonotoneConstructionFor`, `Integral.MonotoneConstructionFor.restrict`,
+  `Integral.monotoneIntegralFor_valid`,
+  `Integral.PiecewiseMonotoneConstructionFor`,
+  `Integral.PiecewiseMonotoneConstructionFor.ofMonotone`,
+  `Integral.PiecewiseMonotoneConstructionFor.ofNondecreasing`,
+  `Integral.piecewiseMonotoneIntegralFor_valid`,
+  `Integral.piecewiseMonotoneIntegralFor_ofMonotone_equiv`,
+  `Integral.piecewiseMonotoneIntegralFor_ofNondecreasing_equiv`,
+  `Integral.GeneralConstructionFor`, `Integral.generalIntegralFor_valid`,
+  `Integral.generalIntegralFor_ofMonotone_equiv`,
+  `Integral.generalIntegralFor_ofNondecreasing_equiv`,
+  `FunctionOnInterval.PointwiseLe`,
+  `Integral.LinearFor`,
+  `Integral.CompatibleWithScaleRatFor`,
+  `Integral.AdditiveOnAdjacentIntervalsFor`, `Integral.OrderPreservingFor`,
+  `Integral.BasicPropertiesFor`,
+  `Integral.PiecewiseMonotoneLinearFor`,
+  `Integral.PiecewiseMonotoneCompatibleWithScaleRatFor`,
+  `Integral.PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor`,
+  `Integral.PiecewiseMonotoneOrderPreservingFor`,
+  `Integral.PiecewiseMonotoneBasicPropertiesFor`,
+  `Integral.GeneralOrderPreservingFor`,
+  `Integral.GeneralBasicPropertiesFor`,
+  `RealRaw.sub_add_sub_cancel_middle_equiv`,
+  `RealRaw.scaleRat_valid`, `RealRaw.scaleRat_equiv`,
+  `endpointDifferenceRaw_adjacent_additive`,
+  `FunctionOnInterval.endpointDifferenceRaw_adjacent_additive`,
+  `Integral.DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive`,
+  `Integral.MonotoneDefiniteIdentityFor.integral_add_equiv_of_endpoint_additive`,
+  `Integral.DefiniteIdentityFor.integral_equiv_add_of_endpoint_add`,
+  `Integral.MonotoneDefiniteIdentityFor.integral_equiv_add_of_endpoint_add`,
+  `Integral.DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat`,
+  `Integral.MonotoneDefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat`,
+  `Integral.DefiniteIdentityFor.integral_le_of_endpoint_le`,
+  `Integral.MonotoneDefiniteIdentityFor.integral_le_of_endpoint_le`,
+  `Integral.MonotoneDefiniteIdentityFor`,
+  `Integral.GeneralDefiniteIdentityFor`,
+  `Integral.GeneralDefiniteIdentityFor.toDefiniteIdentityFor`,
+  `Integral.GeneralDefiniteIdentityFor.transportConstruction`,
+  `Integral.GeneralDefiniteIdentityFor.ofDefiniteIdentityFor`,
+  `Integral.GeneralDefiniteIdentityFor.integral_equiv_integral`,
+  `Integral.GeneralDefiniteIdentityFor.integral_add_equiv_of_endpoint_additive`,
+  `Integral.GeneralDefiniteIdentityFor.integral_equiv_add_of_endpoint_add`,
+  `Integral.GeneralDefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat`,
+  `Integral.GeneralDefiniteIdentityFor.integral_le_of_endpoint_le`,
+  `Integral.GeneralDefiniteIdentityFor.ofMonotone`,
+  `IntegralIdentities.arctanKernelIntervalAtOne_monotone`,
+  `IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne`,
+  `IntegralIdentities.arctanIntegralRectangleMonotoneFunctionAgreement`,
+  `IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity`,
+  `IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneDefiniteIdentityFor`,
+  `PiProofs.piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIdentityFor`,
+  `PiProofs.piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_definiteIdentityFor_generalConstruction`,
+  `PiProofs.piFromArctanGeomUnitRectangleGeneralDefiniteIdentity_equiv_piCircleArea`.
+- FTC bridge to domain-aware integral identities:
+  `Integral.DefiniteIdentityFor.transportConstruction`,
+  `Integral.definiteIdentityFor_of_effectiveFTC`,
+  `Integral.definiteIdentityFor_of_effectiveFTC_endpointAgreement`,
+  `Integral.definiteIdentityFor_of_effectiveFTC_stageSchedule`,
+  `Integral.generalDefiniteIdentityFor_of_effectiveFTC_stageSchedule`,
+  `Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC`,
+  `Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_endpointAgreement`,
+  `Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule`,
+  `Integral.generalDefiniteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule`,
+  `endpointDifference_valid_of_fun_valid`,
+  `FTC.endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule`,
+  `FTC.endpointScheduleAgreement_of_candidateDerivativeFTC_stageSchedule`,
+  `FTC.endpointScheduleAgreement_of_curvatureFTC_stageSchedule`,
+  `FTC.endpointScheduleAgreement_of_convexFTC_stageSchedule`,
+  `FTC.endpointScheduleAgreement_of_concaveFTC_stageSchedule`,
+  `derivativeBoundFTC`, `candidateDerivativeFTC`,
+  `CurvatureFTCCertificate`, `curvatureFTC`,
+  `ConvexFTCCertificate`, `convexFTC`,
+  `ConcaveFTCCertificate`, `concaveFTC`,
+  `Integral.definiteIdentityFor_of_derivativeBoundFTC`,
+  `Integral.definiteIdentityFor_of_derivativeBoundFTC_endpointAgreement`,
+  `Integral.definiteIdentityFor_of_derivativeBoundFTC_stageSchedule`,
+  `Integral.generalDefiniteIdentityFor_of_derivativeBoundFTC_stageSchedule`,
+  `Integral.definiteIdentityFor_of_candidateDerivativeFTC`,
+  `Integral.definiteIdentityFor_of_candidateDerivativeFTC_endpointAgreement`,
+  `Integral.definiteIdentityFor_of_candidateDerivativeFTC_stageSchedule`,
+  `Integral.generalDefiniteIdentityFor_of_candidateDerivativeFTC_stageSchedule`,
+  `Integral.definiteIdentityFor_of_curvatureFTC`,
+  `Integral.definiteIdentityFor_of_curvatureFTC_endpointAgreement`,
+  `Integral.definiteIdentityFor_of_curvatureFTC_stageSchedule`,
+  `Integral.generalDefiniteIdentityFor_of_curvatureFTC_stageSchedule`,
+  `Integral.definiteIdentityFor_of_convexFTC`,
+  `Integral.definiteIdentityFor_of_convexFTC_endpointAgreement`,
+  `Integral.definiteIdentityFor_of_convexFTC_stageSchedule`,
+  `Integral.generalDefiniteIdentityFor_of_convexFTC_stageSchedule`,
+  `Integral.definiteIdentityFor_of_concaveFTC`,
+  `Integral.definiteIdentityFor_of_concaveFTC_endpointAgreement`,
+  `Integral.definiteIdentityFor_of_concaveFTC_stageSchedule`,
+  `Integral.generalDefiniteIdentityFor_of_concaveFTC_stageSchedule`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC_stageSchedule`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_candidateDerivativeFTC_stageSchedule`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_curvatureFTC_stageSchedule`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_convexFTC_stageSchedule`,
+  `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_concaveFTC_stageSchedule`.
+- Farey machinery supports projective/improper integrals:
+  `ArctanGeometry.fareyIntegralBetweenRaw_additive`,
+  `IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive`,
+  `IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel`.
 
 Series target:
 
@@ -103,6 +243,16 @@ the proof chain at the most convenient finite expression.
 Sharper unit-cell bridge:
 `PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne`,
 `PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge`.
+Calculus-facing order target:
+`Integral.ExactCellOrderPreservation`,
+`PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit`,
+`PiProofs.LeibnizRectangleBridge.unitCellOrderPreservation_of_kernelPartialExactCellOrderPreservation`,
+`PiProofs.LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation`,
+`PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation`,
+`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelPartialExactCellOrderPreservation`,
+`PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitCellOrderPreservation`,
+`PiProofs.leibnizEqArea_of_kernelPartialExactCellOrderPreservation`,
+`PiProofs.leibnizEqArea_of_unitCellOrderPreservation`.
 
 Circumference target:
 

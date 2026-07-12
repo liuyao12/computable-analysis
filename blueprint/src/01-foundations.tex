@@ -1,4 +1,4 @@
-\chapter{Computable Numbers and Functions}
+\chapter{Computable Numbers and Functions}\label{ch:foundations}
 
 \section{Inverval arithmetic and real numbers \humanchecked}
 
@@ -64,9 +64,10 @@ The number \(x\) is \emph{nonzero} if it is either positive or negative.
 \end{definition}
 
 \begin{definition}[Interval Arithmetic]\label{def:raw-real-arithmetic}
-\lean{ComputableAnalysis.RealRaw.add}
-\lean{ComputableAnalysis.RealRaw.sub}
-\lean{ComputableAnalysis.RealRaw.mul}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.RealRaw.add}\par
+\lean{ComputableAnalysis.RealRaw.sub}\par
+\lean{ComputableAnalysis.RealRaw.mul}\par}
 \uses{def:raw-real,def:raw-real-sign}
 Let \(x\) and \(y\) be real numbers:
 \[
@@ -101,18 +102,26 @@ Then \(y/x\) is defined as \(yx^{-1}\), when \(x\) is nonzero.
 
 
 \begin{proposition}[Arithmetic preserves real numbers]\label{prop:raw-arithmetic-valid}
-\lean{ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg}
-\lean{ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos}
-\lean{ComputableAnalysis.RealRaw.valid_of_natScale_valid}
-\lean{ComputableAnalysis.RealRaw.scaleRat_equiv_of_nonneg}
-\lean{ComputableAnalysis.RealRaw.equiv_of_scaleRat_equiv_of_pos}
-\lean{ComputableAnalysis.RealRaw.equiv_of_natScale_equiv}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg}\par
+\lean{ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos}\par
+\lean{ComputableAnalysis.RealRaw.valid_of_natScale_valid}\par
+\lean{ComputableAnalysis.RealRaw.add_width}\par
+\lean{ComputableAnalysis.RealRaw.sub_width}\par
+\lean{ComputableAnalysis.RealRaw.natScale_width}\par
+\lean{ComputableAnalysis.RealRaw.scaleRat_equiv_of_nonneg}\par
+\lean{ComputableAnalysis.RealRaw.equiv_of_scaleRat_equiv_of_pos}\par
+\lean{ComputableAnalysis.RealRaw.equiv_of_natScale_equiv}\par}
 \uses{def:raw-real,def:raw-real-arithmetic}
 The operations \(x+y\), \(x-y\), \(-x\), and \(xy\) are real numbers
 whenever \(x\) and \(y\) are.  If \(x\) is nonzero, then \(x^{-1}\)
 is also a real number.  Positive rational scaling is reversible at the level
 of validity and equivalence: if \(r>0\), then validity of \(rx\) implies
 validity of \(x\), and \(rx\sim ry\) implies \(x\sim y\).
+At each finite stage, addition and subtraction add interval widths exactly,
+and natural scaling multiplies them by the corresponding natural number; these
+finite identities support explicit precision budgets for composite
+computations.
 \end{proposition}
 
 \begin{definition}[Equivalence of real numbers]\label{def:raw-equiv}
@@ -167,39 +176,36 @@ Thus, to prove \(x\sim y\), it is enough to choose schedules
 easier to show.
 \end{proposition}
 
-\begin{definition}[Abstract real numbers]\label{def:reals-quotient}
+\begin{definition}[Certified real handles]\label{def:reals-quotient}
 \lean{ComputableAnalysis.Real}
 \uses{def:raw-real,def:raw-equiv}
-The \emph{abstract real numbers} are the equivalence classes of real numbers
-under the equivalence relation above.  We denote this quotient by \(\R\):
-\[
-  \R:=\{\text{real numbers}\}/\sim.
-\]
-After passing to the quotient, a real number in the sense above is a
-\emph{representative} of the abstract real number it determines.
+The current Lean-facing real type is a \emph{certified handle}, not a quotient
+or a completed field.  It stores one preferred valid raw interval algorithm
+and a finite list of alternative valid algorithms, each equipped with a proof
+of \(\Equiv\) to the preferred one.  This makes a chosen computation and its
+rate directly available while recording the representation changes that have
+already been proved.
 \end{definition}
 
-\begin{theorem}[\(\R\) extends \(\Q\) as an ordered field]\label{thm:raw-reals-field}
+\begin{proposition}[Raw arithmetic respects representations]\label{thm:raw-reals-field}
 \lean{ComputableAnalysis.Real.ofRat}
 \lean{ComputableAnalysis.RealRaw.add_equiv}
 \lean{ComputableAnalysis.RealRaw.sub_equiv}
 \uses{def:reals-quotient,def:raw-real-sign,def:raw-real-arithmetic,prop:raw-arithmetic-valid}
-The arithmetic operations and order on real numbers are compatible with
-equivalence, and therefore descend to equivalence classes.  With these
-descended operations and order, \(\R\) is an ordered field.
-The map \(\Q\hookrightarrow\R\) that sends \(q\) to the class of
-\( [q,q]_{n\in\N} \)
-is a (homomorphic) embedding of ordered fields.
-\end{theorem}
+Raw interval arithmetic preserves validity and is compatible with proved raw
+equivalence.  Constant rational intervals provide certified handles through
+\code{Real.ofRat}.  The development deliberately does not assert that these
+handles form a quotient, an ordered field, or a completed continuum; later
+theorems remain stated in terms of valid raw algorithms and explicit
+equivalence certificates.
+\end{proposition}
 
-\begin{remark}[Completeness]\label{rem:real-completeness}
+\begin{remark}[No ambient completeness theorem]\label{rem:real-completeness}
 \uses{thm:raw-reals-field}
-The definition above is equivalent to the standard definition by equivalence
-classes of Cauchy sequences of rational numbers, hence \(\R\) is complete.
-In this project, however, we avoid using completeness as a black box by
-working with computable numbers as much as possible.  When a proof needs
-existence or convergence, we build the relevant interval sequence and prove
-its validity directly.
+No theorem identifies the raw interval representation with classical Cauchy
+reals or derives completeness.  When a proof needs existence or convergence,
+it constructs the relevant rational interval algorithm and proves orderedness,
+nesting, and an explicit width-shrinking bound directly.
 \end{remark}
 
 \section{Examples of real numbers \humanchecked}
@@ -487,31 +493,30 @@ is nonzero as a real number.  For nonzero \(z\), define
 \]
 \end{definition}
 
-\begin{definition}[Abstract complex numbers]\label{def:complex-quotient}
+\begin{definition}[Certified complex handles]\label{def:complex-quotient}
 \lean{ComputableAnalysis.Complex}
 \uses{def:complex-raw}
-The \emph{abstract complex numbers} are the equivalence classes of complex
-numbers under the equivalence relation above.  We denote this quotient by
-\(\C\):
-\[
-  \C:=\{\text{complex numbers}\}/\sim.
-\]
-After passing to the quotient, a complex number in the sense above is a
-\emph{representative} of the abstract complex number it determines.
+The current Lean-facing complex type stores a preferred certified complex-box
+algorithm and a finite list of certified equivalent alternatives.  As for
+\code{Real}, this is a computation-oriented representation layer rather than
+a quotient construction.
 \end{definition}
 
-\begin{theorem}[\(\C\) is a field]\label{thm:complex-field}
+\begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}
 \uses{def:complex-quotient,def:complex-arithmetic,def:complex-inverse}
-The arithmetic operations above descend to abstract complex numbers, and
-\(\C\) forms a field.
-\end{theorem}
+The raw box operations carry validity and equivalence lemmas.  The project
+does not currently claim a quotient field structure for \code{Complex};
+scientific constructions use certified raw operations and their accompanying
+overlap proofs.
+\end{proposition}
 
-\begin{theorem}[\(\C\) extends \(\Q(i)\) and \(\R\)]\label{thm:rational-complex-field-square}
+\begin{proposition}[Available rational and real embeddings]\label{thm:rational-complex-field-square}
 \lean{ComputableAnalysis.ComplexRaw.ofQComplex}
 \lean{ComputableAnalysis.Complex.ofQComplex}
 \lean{ComputableAnalysis.Complex.ofReal}
 \uses{def:qcomplex,def:complex-quotient,thm:raw-reals-field,thm:complex-field}
-The natural embeddings of fields form a commutative square
+Lean provides constant rational-complex boxes and embeds certified reals on the
+real axis.  At the representation level the intended diagram is
 \[
 \begin{array}{ccc}
 \Q & \longrightarrow & \Q(i)\\
@@ -519,8 +524,8 @@ The natural embeddings of fields form a commutative square
 \R & \longrightarrow & \C
 \end{array}
 \]
-of field homomorphisms.
-\end{theorem}
+but no field-homomorphism or quotient claim is used by the present calculus.
+\end{proposition}
 
 \section{Functions and domains}
 

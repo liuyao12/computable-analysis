@@ -223,6 +223,19 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_unitUniformCellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseIntegralBridgeAtOne_iff_uniformCellBounds}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_iff_unitUniformCellBounds}
+\lean{ComputableAnalysis.Integral.ExactCellOrderPreservation}
+\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_constant}
+\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_of_positive_quadrature}
+\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_of_boole}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_one}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_two}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_three}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_four}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_of_exactCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_of_exactCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitCellOrderPreservation_of_kernelPartialExactCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_pointwiseUnitIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_cellBoundsUpToAll}
@@ -261,6 +274,8 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelPartialExactCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne}
@@ -273,6 +288,8 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_unitUniformCellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelPartialExactCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelBounds}
@@ -283,6 +300,12 @@ equivalence.
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_unitUniformCellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelPartialExactCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitUniformCellBounds_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_unitCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
@@ -291,10 +314,24 @@ equivalence.
 \[
   4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
 \]
-Missing input:
-\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}.
+The global missing input remains:
+\code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit},
+the exact rational-cell order theorem for the arctangent kernel partials on
+\([0,1]\).  It feeds the older
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation}
+target and hence the table-facing pi equivalence.
+The constant partial, \(1-x^2\), \(1-x^2+x^4\),
+\(1-x^2+x^4-x^6\), and \(1-x^2+x^4-x^6+x^8\) are now proved exact-cell
+instances.  The first nonconstant case uses explicit nonnegative endpoint-gap
+factors; the degree-four case uses Boole quadrature, while the degree-six and
+degree-eight cases use positive seven-point and eleven-point rational
+Newton--Cotes rules, respectively.  The underlying
+positive-quadrature theorem accepts any finite rational rule with nonnegative
+weights, so higher exact rules can reuse the same order argument.  What
+remains is the uniform lift to all alternating partials, not a completeness
+argument.
 Lean also records the direct finite-prefix route:
-\code{PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelBoundsUpToAll}.
+\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_kernelBoundsUpToAll}.
 Pointwise bounds:
 \code{PiProofs.LeibnizRectangleBridge.leibnizRectanglePointwiseCellBoundsAtOne};
 cell-integration target:
@@ -302,7 +339,8 @@ cell-integration target:
 Since the actual \(\arctan(1)\) partitions stay inside \([0,1]\), Lean also
 records the sharper unit-cell target
 \code{PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne},
-which is already sufficient for the table-facing pi equivalence.
+which is already sufficient for the table-facing pi equivalence.  The new
+order-preservation target implies this unit-cell bridge directly.
 \[
   \frac{r-p}{1+r^2}
   \le
@@ -438,17 +476,38 @@ tangent identity exactly.
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_of_geometricBranchIdentity_on_unit}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.GeometricUnitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.GeometricMachinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricMachinUnitAdditions_of_unitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricMachinUnitAdditions_of_chartTransport}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchIdentity_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchIdentity_of_chartTransport}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchIdentity_of_unitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchLaw_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchLaw_of_chartTransport}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchLaw_of_unitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.PowerSeriesGeometryAtMachinSmallInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.KernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.KernelComparisonAtMachinSmallInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.kernelComparisonAtMachinInputs_of_powerSeriesEqualsRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.powerSeriesGeometryAtMachinSmallInputs_of_kernelComparisonAtMachinSmallInputs}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.machinBranchIdentity_of_leibnizEqMachin}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_geometricRoute_on_unit}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_unitAdditionLaw}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinSmallInputs}
+\lean{ComputableAnalysis.PiProofs.piMachinIntegralRectangle_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs_chartTransport}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_unitAdditionLaw}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_powerSeriesRectangleKernelAtMachinInputs}
@@ -464,13 +523,37 @@ between the two rational linear combinations of arctangent values:
 Lean now proves that the raw-real agreement target \code{LeibnizEqMachin} is
 equivalent to the underlying Machin branch identity: the outer factor \(4\) can
 be cancelled by the positive-scaling cancellation theorem for raw-real
-equivalence.  The geometric route uses only pointwise data at \(1/5\),
-\(1/239\), and \(1\).  Since the rectangle-kernel/geometric half is now
-formalized, the sharper package is
-\code{MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}, together
-with the geometric branch law.  With the same pointwise package, Lean also
-supplies the table-facing bridge from \code{piMachin} to the area baseline
-\code{piCircleArea}.
+equivalence.  The remaining geometric branch condition is now the three-field
+certificate \code{MachinIdentity.GeometricMachinUnitAdditions}:
+Lean proves that exactly these three unit-chart additions suffice,
+\[
+  2\arctan\frac15=\arctan\frac5{12},\qquad
+  \arctan\frac7{17}+\arctan\frac1{239}=\arctan\frac5{12},\qquad
+  \arctan\frac5{12}+\arctan\frac7{17}=\arctan 1.
+\]
+Thus the out-of-chart slope \(120/119\) is not an argument of the geometric
+arctangent.  The stronger universal
+\code{MachinIdentity.GeometricUnitAdditionLaw} constructs this certificate.
+Chapter~\ref{ch:integrals} now proves the finite rectangle-partition transport
+under each relevant tangent-addition chart: the rational Jacobian, endpoint
+order, transformed-cell bounds, and target covers are all checked.  It also
+packages these brackets as a nested shrinking raw real, with a
+\(256/(n+1)\) width bound, and proves it equivalent to the source rectangle
+raw.  Appending the source \([0,u]\) partition to the transported
+\([u,T_u(x)]\) partition proves the target-difference comparison, and hence
+the three displayed bounded additions are now checked internally.
+The direct Machin-to-area theorem now needs only the two power-series/kernel
+comparisons at (1/5) and (1/239), the inputs actually evaluated by
+\code{piMachin}.  The endpoint comparison at (1) remains necessary only
+for the separate Leibniz-to-area and Leibniz-to-Machin routes.
+Since the rectangle-kernel/geometric half is now formalized, the
+sharper direct package is exactly this pair of small-input comparisons,
+together with the internal chart-transport theorem.  Lean combines them into
+the table-facing Machin-to-area bridge.  This is still a conditional bridge,
+so it does not yet change the canonical score.
+In contrast, the rectangle-integral Machin evaluator is now a completed
+calculus row: it uses the same finite additions after each of its two certified
+integrals has been identified with geometric arctangent.
 \end{theorem}
 
 \section{General Power Series}

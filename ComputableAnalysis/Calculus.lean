@@ -157,6 +157,16 @@ structure Plan where
   subdivisions : Nat
   evalPrecision : Nat
 
+/-- The static dyadic mesh size used by the first integral algorithms.
+Stage `n` has `2^n` equal subintervals, independent of the integrand values. -/
+def staticDyadicSubdivisions (n : Nat) : Nat :=
+  2 ^ n
+
+/-- The default static dyadic Riemann plan: stage `n` uses `2^n` equal
+subintervals and asks the integrand for precision `n`. -/
+def staticDyadicPlan : Nat -> Plan :=
+  fun n => { subdivisions := staticDyadicSubdivisions n, evalPrecision := n }
+
 /-- A raw integral algorithm on a rational interval.
 
 Given the requested output precision, choose a number of subintervals and an
@@ -212,6 +222,12 @@ def algorithm (f : RealFunRaw) (a b : Rat) (plan : Nat -> Plan) :
   lower := a
   upper := b
   plan := plan
+
+/-- The unproved static-dyadic raw Riemann algorithm.  Concrete integral
+constructions add the certificate proving that these dyadic boxes are ordered,
+nested, and shrinking for the integrand at hand. -/
+def staticDyadicAlgorithm (f : RealFunRaw) (a b : Rat) : Raw :=
+  algorithm f a b staticDyadicPlan
 
 /-- The explicit data needed to construct an integral as a computable
 real.  The public object is still `integral`; this structure just stores the
@@ -284,6 +300,85 @@ theorem constantIntegral_valid (c a b : Rat) :
     (integral (constantFunRaw c) a b (constantConstruction c a b)).Valid :=
   (constantConstruction c a b).certificate.valid
 
+/-- Constant integrals respect pointwise addition. -/
+theorem constantIntegral_add_equiv (c d a b : Rat) :
+    (integral (constantFunRaw (c + d)) a b
+      (constantConstruction (c + d) a b)).Equiv
+        { compute := RealRaw.addCompute
+            (integral (constantFunRaw c) a b
+              (constantConstruction c a b))
+            (integral (constantFunRaw d) a b
+              (constantConstruction d a b)) } := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    ((integral (constantFunRaw (c + d)) a b
+      (constantConstruction (c + d) a b)).compute n)
+    (RealRaw.addCompute
+      (integral (constantFunRaw c) a b (constantConstruction c a b))
+      (integral (constantFunRaw d) a b (constantConstruction d a b)) n)
+  rw [constantIntegral_compute]
+  unfold RealRaw.addCompute
+  rw [constantIntegral_compute c a b n, constantIntegral_compute d a b n]
+  unfold QInterval.Overlaps
+  constructor <;>
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+
+/-- Constant integrals respect rational scalar multiplication. -/
+theorem constantIntegral_scaleRat_equiv (r c a b : Rat) :
+    (integral (constantFunRaw (r * c)) a b
+      (constantConstruction (r * c) a b)).Equiv
+        { compute := RealRaw.scaleRatCompute r
+            (integral (constantFunRaw c) a b
+              (constantConstruction c a b)) } := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    ((integral (constantFunRaw (r * c)) a b
+      (constantConstruction (r * c) a b)).compute n)
+    (RealRaw.scaleRatCompute r
+      (integral (constantFunRaw c) a b (constantConstruction c a b)) n)
+  rw [constantIntegral_compute]
+  unfold RealRaw.scaleRatCompute
+  rw [constantIntegral_compute c a b n]
+  unfold QInterval.Overlaps
+  by_cases hr : 0 <= r
+  · simp [hr]
+    constructor <;>
+      grind [Rat.mul_assoc, Rat.mul_comm]
+  · simp [hr]
+    constructor <;>
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- Constant integrals are additive on adjacent rational intervals. -/
+theorem constantIntegral_adjacent_additive (k a b c : Rat) :
+    (integral (constantFunRaw k) a c
+      (constantConstruction k a c)).Equiv
+        { compute := RealRaw.addCompute
+            (integral (constantFunRaw k) a b
+              (constantConstruction k a b))
+            (integral (constantFunRaw k) b c
+              (constantConstruction k b c)) } := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  change QInterval.Overlaps
+    ((integral (constantFunRaw k) a c
+      (constantConstruction k a c)).compute n)
+    (RealRaw.addCompute
+      (integral (constantFunRaw k) a b (constantConstruction k a b))
+      (integral (constantFunRaw k) b c (constantConstruction k b c)) n)
+  rw [constantIntegral_compute]
+  unfold RealRaw.addCompute
+  rw [constantIntegral_compute k a b n, constantIntegral_compute k b c n]
+  unfold QInterval.Overlaps
+  constructor <;>
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 /-- Linearity in the first argument.  The construction data for
 the left and right sides may differ; equality is interval-overlap equivalence
 of the resulting computable reals. -/
@@ -342,6 +437,52 @@ def endpointDifferenceRaw (F : RealFunRaw) (a b : Rat)
     (_h : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) : RealRaw where
   compute := endpointDifferenceCompute F a b
 
+/-- Endpoint differences are valid whenever the primitive is valid at both
+endpoints. -/
+theorem endpointDifference_valid_of_fun_valid
+    {F : RealFunRaw} (hF : F.Valid) {a b : Rat}
+    (ha : F.domain a) (hb : F.domain b) :
+    RealRaw.ValidCompute (endpointDifferenceCompute F a b) := by
+  let A : RealRaw := F.apply hF a ha
+  let B : RealRaw := F.apply hF b hb
+  have hA : A.Valid := by
+    simpa [A, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF a ha
+  have hB : B.Valid := by
+    simpa [B, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF b hb
+  have hsub := RealRaw.subCompute_valid hB hA
+  simpa [A, B, endpointDifferenceCompute, endpointDifferenceInterval,
+    RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.subCompute] using hsub
+
+/-- Endpoint differences telescope over adjacent intervals:
+\((F(b)-F(a))+(F(c)-F(b))\sim F(c)-F(a)\). -/
+theorem endpointDifferenceRaw_adjacent_additive
+    {F : RealFunRaw} (hF : F.Valid) {a b c : Rat}
+    (ha : F.domain a) (hb : F.domain b) (hc : F.domain c)
+    (hab : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (hbc : RealRaw.ValidCompute (endpointDifferenceCompute F b c))
+    (hac : RealRaw.ValidCompute (endpointDifferenceCompute F a c)) :
+    ((endpointDifferenceRaw F a b hab) +
+      (endpointDifferenceRaw F b c hbc)).Equiv
+        (endpointDifferenceRaw F a c hac) := by
+  let A : RealRaw := F.apply hF a ha
+  let B : RealRaw := F.apply hF b hb
+  let C : RealRaw := F.apply hF c hc
+  have hA : A.Valid := by
+    simpa [A, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF a ha
+  have hB : B.Valid := by
+    simpa [B, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF b hb
+  have hC : C.Valid := by
+    simpa [C, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF c hc
+  simpa [A, B, C, endpointDifferenceRaw, endpointDifferenceCompute,
+    endpointDifferenceInterval, RealFunRaw.apply, RealFunRaw.applyCompute,
+    RealRaw.sub, RealRaw.subCompute] using
+      (RealRaw.sub_add_sub_cancel_middle_equiv hA hB hC)
+
 /-- Preferred computable-number form of the definite-integral conclusion:
 the integral of `dF` over the specific interval `[a,b]` is equal, as a
 computable real number, to `F(b)-F(a)`.
@@ -370,6 +511,36 @@ structure EffectiveFTC (F dF : RealFunRaw) (a b : Rat) where
       (riemannLeftInterval dF a b (chooseN eps) (chooseEvalPrecision eps))
       (endpointDifferenceInterval F a b (chooseEvalPrecision eps))
       eps
+
+/-- Static-dyadic specialization of `EffectiveFTC`.
+
+This is the certificate shape for the first bounded-integral algorithms:
+for each requested rational precision choose a dyadic stage `s`, use
+`2^s` equal subintervals of `[a,b]`, and compare the resulting left-Riemann
+interval with the endpoint-difference interval. -/
+structure StaticDyadicEffectiveFTC (F dF : RealFunRaw) (a b : Rat) where
+  chooseStage : QPos -> Nat
+  chooseEvalPrecision : QPos -> Nat
+  good : forall eps,
+    QInterval.CloseAt
+      (riemannLeftInterval dF a b
+        (Integral.staticDyadicSubdivisions (chooseStage eps))
+        (chooseEvalPrecision eps))
+      (endpointDifferenceInterval F a b (chooseEvalPrecision eps))
+      eps
+
+namespace StaticDyadicEffectiveFTC
+
+/-- Forget that the subdivisions were chosen by the static dyadic mesh. -/
+def toEffectiveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b) :
+    EffectiveFTC F dF a b where
+  chooseN := fun eps => Integral.staticDyadicSubdivisions (h.chooseStage eps)
+  chooseEvalPrecision := h.chooseEvalPrecision
+  good := h.good
+
+end StaticDyadicEffectiveFTC
 
 def ftcErrorExact (F dF : Rat -> Rat) (a b : Rat) (n : Nat) : Rat :=
   qabs (riemannLeftExact dF a b n - (F b - F a))
@@ -656,6 +827,18 @@ theorem equiv_endpoint
 
 end DerivativeBoundFTC
 
+/-- Top-level derivative-bound FTC bridge.
+
+This is the public theorem name for the finite cell-bound route: once the
+derivative-bound certificate supplies overlapping bounded-sum and endpoint
+intervals at every requested precision, the two raw real algorithms are
+equivalent. -/
+theorem derivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b) :
+    h.boundedIntegralRaw.Equiv h.endpointRaw :=
+  h.equiv_endpoint
+
 /-- Global finite certificate for the "candidate derivative versus computed
 secants" strategy.
 
@@ -723,6 +906,14 @@ theorem equiv_endpoint
   h.toDerivativeBoundFTC.equiv_endpoint
 
 end CandidateDerivativeFTC
+
+/-- Top-level closure theorem for the candidate-derivative strategy. -/
+theorem candidateDerivativeFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CandidateDerivativeFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.equiv_endpoint
 
 inductive MonotonicityKind where
   | nondecreasing
@@ -837,13 +1028,83 @@ def toDerivativeBound
 
 end DerivativeBoundFromCurvature
 
-/-- Legacy convexity-facing FTC data.
+/-- Curvature-facing FTC certificate.
 
-This is the older certificate-shaped route: convexity is only a method for
-obtaining the derivative bounds consumed by `DerivativeBoundFTC`.  The main
-convex FTC should no longer be stated this way; it should start from exact
-convexity and construct the one-sided derivative and its integral. -/
-structure LegacyConvexFTC (F dF : RealFunRaw) (a b : Rat) where
+This is the finite certificate-shaped route for primitives whose derivative
+bounds come from curvature on each rational partition cell.  It handles both
+convex and concave cells: the curvature kind determines whether endpoint
+derivative bounds are nondecreasing or nonincreasing, and the result fed to the
+FTC layer is still just a derivative-bound certificate. -/
+structure CurvatureFTCCertificate (F dF : RealFunRaw) (a b : Rat) where
+  primitive_domain_lower : F.domain a
+  primitive_domain_upper : F.domain b
+  choosePartition : QPos -> RationalPartition a b
+  chooseEndpointPrecision : QPos -> Nat
+  chooseBoundStage : QPos -> Nat
+  curvatureBound :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        DerivativeBoundFromCurvature F dF ((choosePartition eps).cell k hk)
+  localControl :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        LocalFTCFromDerivativeBound F dF
+          ((choosePartition eps).cell k hk)
+          ((curvatureBound eps k hk).toDerivativeBound)
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk =>
+          ((curvatureBound eps k hk).toDerivativeBound).bound (chooseBoundStage eps))).width <=
+        eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseEndpointPrecision eps)).width <=
+        eps.val
+  overlap :
+    forall eps,
+      QInterval.Overlaps
+        ((choosePartition eps).boundIntegralSum
+          (fun k hk =>
+            ((curvatureBound eps k hk).toDerivativeBound).bound (chooseBoundStage eps)))
+        (endpointDifferenceInterval F a b (chooseEndpointPrecision eps))
+
+namespace CurvatureFTCCertificate
+
+def toDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CurvatureFTCCertificate F dF a b) :
+    DerivativeBoundFTC F dF a b where
+  primitive_domain_lower := h.primitive_domain_lower
+  primitive_domain_upper := h.primitive_domain_upper
+  choosePartition := h.choosePartition
+  chooseEndpointPrecision := h.chooseEndpointPrecision
+  chooseBoundStage := h.chooseBoundStage
+  derivativeBound := fun eps k hk => (h.curvatureBound eps k hk).toDerivativeBound
+  localControl := h.localControl
+  riemann_width := h.riemann_width
+  endpoint_width := h.endpoint_width
+  overlap := h.overlap
+
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CurvatureFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.toDerivativeBoundFTC.equiv_endpoint
+
+end CurvatureFTCCertificate
+
+/-- Convexity-facing FTC certificate.
+
+This is the current finite certificate-shaped route: convexity supplies
+monotone derivative bounds on rational partition cells, and those local
+bounds feed the general `DerivativeBoundFTC` endpoint bridge.
+
+The later one-sided convex FTC should construct this certificate from exact
+convexity, one-sided derivative data, monotone integrability, and telescoping
+secant inequalities. -/
+structure ConvexFTCCertificate (F dF : RealFunRaw) (a b : Rat) where
   primitive_domain_lower : F.domain a
   primitive_domain_upper : F.domain b
   choosePartition : QPos -> RationalPartition a b
@@ -881,36 +1142,143 @@ structure LegacyConvexFTC (F dF : RealFunRaw) (a b : Rat) where
             ((convexBound eps k hk).toDerivativeBound).bound (chooseBoundStage eps)))
         (endpointDifferenceInterval F a b (chooseEndpointPrecision eps))
 
-namespace LegacyConvexFTC
+/-- Backward-compatible name for the older blueprint/API wording. -/
+abbrev LegacyConvexFTC (F dF : RealFunRaw) (a b : Rat) :=
+  ConvexFTCCertificate F dF a b
 
-def toDerivativeBoundFTC
+namespace ConvexFTCCertificate
+
+def toCurvatureFTCCertificate
     {F dF : RealFunRaw} {a b : Rat}
-    (h : LegacyConvexFTC F dF a b) :
-    DerivativeBoundFTC F dF a b where
+    (h : ConvexFTCCertificate F dF a b) :
+    CurvatureFTCCertificate F dF a b where
   primitive_domain_lower := h.primitive_domain_lower
   primitive_domain_upper := h.primitive_domain_upper
   choosePartition := h.choosePartition
   chooseEndpointPrecision := h.chooseEndpointPrecision
   chooseBoundStage := h.chooseBoundStage
-  derivativeBound := fun eps k hk => (h.convexBound eps k hk).toDerivativeBound
+  curvatureBound := h.convexBound
   localControl := h.localControl
   riemann_width := h.riemann_width
   endpoint_width := h.endpoint_width
   overlap := h.overlap
+
+def toDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConvexFTCCertificate F dF a b) :
+    DerivativeBoundFTC F dF a b :=
+  h.toCurvatureFTCCertificate.toDerivativeBoundFTC
+
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConvexFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.toDerivativeBoundFTC.equiv_endpoint
+
+end ConvexFTCCertificate
+
+/-- Concavity-facing FTC certificate.
+
+This is the mirror of `ConvexFTCCertificate`.  It is the named finite
+certificate route for primitives, such as arctangent on `[0,1]`, whose
+curvature makes the derivative nonincreasing on each rational partition cell.
+The certificate still feeds the same curvature and derivative-bound FTC
+machinery. -/
+structure ConcaveFTCCertificate (F dF : RealFunRaw) (a b : Rat) where
+  primitive_domain_lower : F.domain a
+  primitive_domain_upper : F.domain b
+  choosePartition : QPos -> RationalPartition a b
+  chooseEndpointPrecision : QPos -> Nat
+  chooseBoundStage : QPos -> Nat
+  concaveBound :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        DerivativeBoundFromCurvature F dF ((choosePartition eps).cell k hk)
+  concave_kind :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        (concaveBound eps k hk).curvature.kind = CurvatureKind.concave
+  localControl :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        LocalFTCFromDerivativeBound F dF
+          ((choosePartition eps).cell k hk)
+          ((concaveBound eps k hk).toDerivativeBound)
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk =>
+          ((concaveBound eps k hk).toDerivativeBound).bound
+            (chooseBoundStage eps))).width <=
+        eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseEndpointPrecision eps)).width <=
+        eps.val
+  overlap :
+    forall eps,
+      QInterval.Overlaps
+        ((choosePartition eps).boundIntegralSum
+          (fun k hk =>
+            ((concaveBound eps k hk).toDerivativeBound).bound
+              (chooseBoundStage eps)))
+        (endpointDifferenceInterval F a b (chooseEndpointPrecision eps))
+
+namespace ConcaveFTCCertificate
+
+def toCurvatureFTCCertificate
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConcaveFTCCertificate F dF a b) :
+    CurvatureFTCCertificate F dF a b where
+  primitive_domain_lower := h.primitive_domain_lower
+  primitive_domain_upper := h.primitive_domain_upper
+  choosePartition := h.choosePartition
+  chooseEndpointPrecision := h.chooseEndpointPrecision
+  chooseBoundStage := h.chooseBoundStage
+  curvatureBound := h.concaveBound
+  localControl := h.localControl
+  riemann_width := h.riemann_width
+  endpoint_width := h.endpoint_width
+  overlap := h.overlap
+
+def toDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConcaveFTCCertificate F dF a b) :
+    DerivativeBoundFTC F dF a b :=
+  h.toCurvatureFTCCertificate.toDerivativeBoundFTC
+
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConcaveFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.toDerivativeBoundFTC.equiv_endpoint
+
+end ConcaveFTCCertificate
+
+/- Legacy namespace aliases retained for existing references. -/
+namespace LegacyConvexFTC
+
+def toDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : LegacyConvexFTC F dF a b) :
+    DerivativeBoundFTC F dF a b :=
+  ConvexFTCCertificate.toDerivativeBoundFTC h
 
 theorem equiv_endpoint
     {F dF : RealFunRaw} {a b : Rat}
     (h : LegacyConvexFTC F dF a b) :
     h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       h.toDerivativeBoundFTC.endpointRaw :=
-  h.toDerivativeBoundFTC.equiv_endpoint
+  ConvexFTCCertificate.equiv_endpoint h
 
 end LegacyConvexFTC
 
-/-- Legacy convexity-facing FTC.
+/-- Compatibility theorem for the old convexity-facing FTC name.
 
 Once a convexity certificate has produced derivative bounds on the chosen
-rational partition cells, the old effective FTC conclusion is exactly the
+rational partition cells, the finite FTC conclusion is exactly the
 derivative-bound endpoint equivalence. -/
 theorem legacyConvexFTC
     {F dF : RealFunRaw} {a b : Rat}
@@ -926,10 +1294,29 @@ local monotone derivative bounds, and the general derivative-bound FTC returns
 endpoint equivalence for the integral raw real. -/
 theorem convexFTC
     {F dF : RealFunRaw} {a b : Rat}
-    (h : LegacyConvexFTC F dF a b) :
+    (h : ConvexFTCCertificate F dF a b) :
     h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       h.toDerivativeBoundFTC.endpointRaw :=
-  legacyConvexFTC h
+  h.equiv_endpoint
+
+/-- Completed concavity-facing FTC bridge used by the arctangent-integral
+route. -/
+theorem concaveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConcaveFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.equiv_endpoint
+
+/-- Curvature-facing FTC bridge.  This is the version useful for both convex
+and concave primitives, including the arctangent primitive on the unit
+interval. -/
+theorem curvatureFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CurvatureFTCCertificate F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.equiv_endpoint
 
 /-- A partial function together with a proof that it is defined at every
 rational point of a closed rational interval.
@@ -958,6 +1345,58 @@ def secantSlopeInterval (F : FunctionOnInterval)
     (hy : inDomainInterval F.lower F.upper y)
     (n : Nat) : QInterval :=
   QInterval.slopeBetween (F.compute y hy n) (F.compute x hx n) (y - x)
+
+/-- Restrict an interval-certified function to a smaller rational interval. -/
+def restrict (F : FunctionOnInterval) (a b : Rat)
+    (hlo : F.lower <= a) (_hab : a <= b) (hhi : b <= F.upper) :
+    FunctionOnInterval where
+  raw := F.raw
+  lower := a
+  upper := b
+  defined_on := by
+    intro x hx
+    exact F.defined_on x
+      ⟨Rat.le_trans hlo hx.1, Rat.le_trans hx.2 hhi⟩
+  valid_on := by
+    intro x hx
+    exact F.valid_on x hx
+
+/-- Pointwise sum relation for interval-certified functions on the same
+rational interval.  This is a theorem-facing relation: it records that `H`
+represents `F + G` on the common interval, without choosing a particular
+implementation of the sum evaluator. -/
+def PointwiseAdd (F G H : FunctionOnInterval) : Prop :=
+  F.lower = G.lower /\ F.upper = G.upper /\
+  F.lower = H.lower /\ F.upper = H.upper /\
+  forall x
+    (hxF : inDomainInterval F.lower F.upper x)
+    (hxG : inDomainInterval G.lower G.upper x)
+    (hxH : inDomainInterval H.lower H.upper x),
+      (H.raw.evalRaw x (H.defined_on x hxH)).Equiv
+        ((F.raw.evalRaw x (F.defined_on x hxF)) +
+          (G.raw.evalRaw x (G.defined_on x hxG)))
+
+/-- Pointwise rational-scalar relation for interval-certified functions. -/
+def PointwiseScaleRat (r : Rat) (F G : FunctionOnInterval) : Prop :=
+  F.lower = G.lower /\ F.upper = G.upper /\
+  forall x
+    (hxF : inDomainInterval F.lower F.upper x)
+    (hxG : inDomainInterval G.lower G.upper x),
+      (G.raw.evalRaw x (G.defined_on x hxG)).Equiv
+        (RealRaw.scaleRat r
+          (F.raw.evalRaw x (F.defined_on x hxF)))
+
+/-- Pointwise order relation for interval-certified functions on the same
+rational interval.  This is the order analogue of `PointwiseAdd`: it records
+the theorem-facing fact that `F(x) <= G(x)` for every rational point in the
+common interval. -/
+def PointwiseLe (F G : FunctionOnInterval) : Prop :=
+  F.lower = G.lower /\ F.upper = G.upper /\
+  forall x
+    (hxF : inDomainInterval F.lower F.upper x)
+    (hxG : inDomainInterval G.lower G.upper x),
+      (F.raw.evalRaw x (F.defined_on x hxF)).Le
+        (G.raw.evalRaw x (G.defined_on x hxG))
 
 end FunctionOnInterval
 
@@ -1049,8 +1488,9 @@ structure ContinuousFunctionOnInterval where
 
 /-- Constructive monotonicity on rational points of the interval.
 
-The proposition allows increasing or decreasing functions; this is order data,
-not yet enough to build an inverse algorithm by itself. -/
+The field `increasing` means nondecreasing; its negation selects the
+nonincreasing case.  This is order data, not yet enough to build an inverse
+algorithm by itself. -/
 structure MonotoneOnInterval (F : FunctionOnInterval) where
   increasing : Prop
   monotone_inc :
@@ -1069,6 +1509,924 @@ structure MonotoneOnInterval (F : FunctionOnInterval) where
         x <= y ->
           forall n,
             (F.compute y hy n).lo <= (F.compute x hx n).hi
+
+/-- Nondecreasing means increasing in the weak order sense used by the
+project: rational inputs with `x <= y` have compatible output intervals with
+the value at `x` no larger than the value at `y`. -/
+def NondecreasingOnInterval (F : FunctionOnInterval) : Prop :=
+  forall x y
+    (hx : inDomainInterval F.lower F.upper x)
+    (hy : inDomainInterval F.lower F.upper y),
+    x <= y ->
+      forall n,
+        (F.compute x hx n).lo <= (F.compute y hy n).hi
+
+/-- Nonincreasing is the reversed weak interval order. -/
+def NonincreasingOnInterval (F : FunctionOnInterval) : Prop :=
+  forall x y
+    (hx : inDomainInterval F.lower F.upper x)
+    (hy : inDomainInterval F.lower F.upper y),
+    x <= y ->
+      forall n,
+        (F.compute y hy n).lo <= (F.compute x hx n).hi
+
+namespace MonotoneOnInterval
+
+def ofNondecreasing {F : FunctionOnInterval}
+    (h : NondecreasingOnInterval F) :
+    MonotoneOnInterval F where
+  increasing := True
+  monotone_inc := by
+    intro _hinc
+    exact h
+  monotone_dec := by
+    intro hfalse
+    exact False.elim (hfalse trivial)
+
+def ofNonincreasing {F : FunctionOnInterval}
+    (h : NonincreasingOnInterval F) :
+    MonotoneOnInterval F where
+  increasing := False
+  monotone_inc := by
+    intro hfalse
+    cases hfalse
+  monotone_dec := by
+    intro _hdec
+    exact h
+
+theorem nondecreasing {F : FunctionOnInterval}
+    (h : MonotoneOnInterval F) (hinc : h.increasing) :
+    NondecreasingOnInterval F :=
+  h.monotone_inc hinc
+
+theorem nonincreasing {F : FunctionOnInterval}
+    (h : MonotoneOnInterval F) (hdec : ¬ h.increasing) :
+    NonincreasingOnInterval F :=
+  h.monotone_dec hdec
+
+def restrict {F : FunctionOnInterval}
+    (h : MonotoneOnInterval F)
+    {a b : Rat}
+    (hlo : F.lower <= a) (hab : a <= b) (hhi : b <= F.upper) :
+    MonotoneOnInterval (F.restrict a b hlo hab hhi) where
+  increasing := h.increasing
+  monotone_inc := by
+    intro hinc x y hx hy hxy n
+    exact h.monotone_inc hinc x y
+      ⟨Rat.le_trans hlo hx.1, Rat.le_trans hx.2 hhi⟩
+      ⟨Rat.le_trans hlo hy.1, Rat.le_trans hy.2 hhi⟩
+      hxy n
+  monotone_dec := by
+    intro hdec x y hx hy hxy n
+    exact h.monotone_dec hdec x y
+      ⟨Rat.le_trans hlo hx.1, Rat.le_trans hx.2 hhi⟩
+      ⟨Rat.le_trans hlo hy.1, Rat.le_trans hy.2 hhi⟩
+      hxy n
+
+end MonotoneOnInterval
+
+namespace NondecreasingOnInterval
+
+theorem restrict {F : FunctionOnInterval}
+    (h : NondecreasingOnInterval F)
+    {a b : Rat}
+    (hlo : F.lower <= a) (_hab : a <= b) (hhi : b <= F.upper) :
+    NondecreasingOnInterval (F.restrict a b hlo _hab hhi) := by
+  intro x y hx hy hxy n
+  exact h x y
+    ⟨Rat.le_trans hlo hx.1, Rat.le_trans hx.2 hhi⟩
+    ⟨Rat.le_trans hlo hy.1, Rat.le_trans hy.2 hhi⟩
+    hxy n
+
+end NondecreasingOnInterval
+
+namespace NonincreasingOnInterval
+
+theorem restrict {F : FunctionOnInterval}
+    (h : NonincreasingOnInterval F)
+    {a b : Rat}
+    (hlo : F.lower <= a) (_hab : a <= b) (hhi : b <= F.upper) :
+    NonincreasingOnInterval (F.restrict a b hlo _hab hhi) := by
+  intro x y hx hy hxy n
+  exact h x y
+    ⟨Rat.le_trans hlo hx.1, Rat.le_trans hx.2 hhi⟩
+    ⟨Rat.le_trans hlo hy.1, Rat.le_trans hy.2 hhi⟩
+    hxy n
+
+end NonincreasingOnInterval
+
+namespace Integral
+
+/-- The first-class integral object for monotone interval functions.
+
+The intended construction is by lower and upper endpoint sums on a static
+dyadic mesh, with width controlled by total variation times mesh size.  The
+present structure separates that monotonicity certificate from the resulting
+valid `ConstructionFor`, so later proofs can build the construction while
+downstream calculus can already use the interface. -/
+structure MonotoneConstructionFor (F : FunctionOnInterval) where
+  monotone : MonotoneOnInterval F
+  construction : ConstructionFor F
+
+namespace MonotoneConstructionFor
+
+def restrict {F : FunctionOnInterval}
+    (c : MonotoneConstructionFor F)
+    {a b : Rat}
+    (hlo : F.lower <= a) (hab : a <= b) (hhi : b <= F.upper) :
+    MonotoneConstructionFor (F.restrict a b hlo hab hhi) where
+  monotone := c.monotone.restrict hlo hab hhi
+  construction :=
+    { compute := c.construction.compute
+      certificate := c.construction.certificate }
+
+end MonotoneConstructionFor
+
+/-- The preferred first case for integrals: a certified nondecreasing
+function together with its valid integral construction. -/
+structure NondecreasingConstructionFor (F : FunctionOnInterval) where
+  nondecreasing : NondecreasingOnInterval F
+  construction : ConstructionFor F
+
+namespace NondecreasingConstructionFor
+
+def toMonotoneConstructionFor {F : FunctionOnInterval}
+    (c : NondecreasingConstructionFor F) :
+    MonotoneConstructionFor F where
+  monotone := MonotoneOnInterval.ofNondecreasing c.nondecreasing
+  construction := c.construction
+
+def restrict {F : FunctionOnInterval}
+    (c : NondecreasingConstructionFor F)
+    {a b : Rat}
+    (hlo : F.lower <= a) (hab : a <= b) (hhi : b <= F.upper) :
+    NondecreasingConstructionFor (F.restrict a b hlo hab hhi) where
+  nondecreasing := c.nondecreasing.restrict hlo hab hhi
+  construction :=
+    { compute := c.construction.compute
+      certificate := c.construction.certificate }
+
+end NondecreasingConstructionFor
+
+def monotoneIntegralFor (F : FunctionOnInterval)
+    (c : MonotoneConstructionFor F) : RealRaw :=
+  integralFor F c.construction
+
+theorem monotoneIntegralFor_valid (F : FunctionOnInterval)
+    (c : MonotoneConstructionFor F) :
+    (monotoneIntegralFor F c).Valid :=
+  integralFor_valid F c.construction
+
+def ExistsMonotoneConstructionFor (F : FunctionOnInterval) : Prop :=
+  Nonempty (MonotoneConstructionFor F)
+
+def nondecreasingIntegralFor (F : FunctionOnInterval)
+    (c : NondecreasingConstructionFor F) : RealRaw :=
+  integralFor F c.construction
+
+theorem nondecreasingIntegralFor_valid (F : FunctionOnInterval)
+    (c : NondecreasingConstructionFor F) :
+    (nondecreasingIntegralFor F c).Valid :=
+  integralFor_valid F c.construction
+
+theorem nondecreasingIntegralFor_eq_monotoneIntegralFor
+    (F : FunctionOnInterval) (c : NondecreasingConstructionFor F) :
+    nondecreasingIntegralFor F c =
+      monotoneIntegralFor F c.toMonotoneConstructionFor := rfl
+
+def ExistsNondecreasingConstructionFor (F : FunctionOnInterval) : Prop :=
+  Nonempty (NondecreasingConstructionFor F)
+
+/-- A piecewise-monotone integral plan: split an interval into finitely many
+rational subintervals and supply a monotone construction on each piece. -/
+structure PiecewiseMonotoneConstructionFor (F : FunctionOnInterval) where
+  pieces : Nat
+  positive : 0 < pieces
+  point : Nat -> Rat
+  left_endpoint : point 0 = F.lower
+  right_endpoint : point pieces = F.upper
+  point_mem :
+    forall i, i <= pieces -> inDomainInterval F.lower F.upper (point i)
+  point_mono :
+    forall i j, i <= j -> j <= pieces -> point i <= point j
+  construction :
+    forall k (hk : k < pieces),
+      MonotoneConstructionFor
+        (F.restrict (point k) (point (k + 1))
+          (point_mem k (Nat.le_of_lt hk)).1
+          (point_mono k (k + 1) (Nat.le_succ k) (Nat.succ_le_of_lt hk))
+          (point_mem (k + 1) (Nat.succ_le_of_lt hk)).2)
+
+namespace PiecewiseMonotoneConstructionFor
+
+/-- Promote one monotone integral construction to the general piecewise
+interface by using the one-cell partition `[lower, upper]`. -/
+noncomputable def ofMonotone {F : FunctionOnInterval}
+    (c : MonotoneConstructionFor F)
+    (hinterval : F.lower <= F.upper) :
+    PiecewiseMonotoneConstructionFor F where
+  pieces := 1
+  positive := by decide
+  point
+    | 0 => F.lower
+    | _ + 1 => F.upper
+  left_endpoint := rfl
+  right_endpoint := rfl
+  point_mem := by
+    intro i _hi
+    cases i with
+    | zero =>
+        exact ⟨Rat.le_refl, hinterval⟩
+    | succ _ =>
+        exact ⟨hinterval, Rat.le_refl⟩
+  point_mono := by
+    intro i j hij _hj
+    cases i with
+    | zero =>
+        cases j with
+        | zero =>
+            exact Rat.le_refl
+        | succ _ =>
+            exact hinterval
+    | succ i' =>
+        cases j with
+        | zero =>
+            exact False.elim (Nat.not_succ_le_zero i' hij)
+        | succ _ =>
+            exact Rat.le_refl
+  construction := by
+    intro k hk
+    have hk_le_zero : k <= 0 := Nat.le_of_lt_succ hk
+    have hk0 : k = 0 := Nat.eq_zero_of_le_zero hk_le_zero
+    subst k
+    simpa using
+      c.restrict
+        Rat.le_refl
+        hinterval
+        Rat.le_refl
+
+/-- Promote the preferred nondecreasing integral construction to the general
+piecewise interface. -/
+noncomputable def ofNondecreasing {F : FunctionOnInterval}
+    (c : NondecreasingConstructionFor F)
+    (hinterval : F.lower <= F.upper) :
+    PiecewiseMonotoneConstructionFor F :=
+  ofMonotone c.toMonotoneConstructionFor hinterval
+
+end PiecewiseMonotoneConstructionFor
+
+/-- The integral raw real for a single monotone piece of a piecewise-monotone
+construction. -/
+def piecewiseMonotoneCellIntegral (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (k : Nat) (hk : k < c.pieces) : RealRaw :=
+  monotoneIntegralFor _ (c.construction k hk)
+
+theorem piecewiseMonotoneCellIntegral_valid (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F)
+    (k : Nat) (hk : k < c.pieces) :
+    (piecewiseMonotoneCellIntegral F c k hk).Valid :=
+  monotoneIntegralFor_valid _ (c.construction k hk)
+
+/-- Sum the monotone-piece integrals over the finite rational partition. -/
+def piecewiseMonotoneIntegralFor (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) : RealRaw :=
+  (List.range c.pieces).foldl
+    (fun acc k =>
+      if hk : k < c.pieces then
+        acc + piecewiseMonotoneCellIntegral F c k hk
+      else
+        acc)
+    (RealRaw.ofRat 0)
+
+theorem piecewiseMonotoneIntegralFor_valid (F : FunctionOnInterval)
+    (c : PiecewiseMonotoneConstructionFor F) :
+    (piecewiseMonotoneIntegralFor F c).Valid := by
+  let step : RealRaw -> Nat -> RealRaw :=
+    fun acc k =>
+      if hk : k < c.pieces then
+        acc + piecewiseMonotoneCellIntegral F c k hk
+      else
+        acc
+  have hstep : forall acc k, acc.Valid -> (step acc k).Valid := by
+    intro acc k hacc
+    by_cases hk : k < c.pieces
+    · simp [step, hk]
+      exact RealRaw.add_valid hacc
+        (piecewiseMonotoneCellIntegral_valid F c k hk)
+    · simp [step, hk, hacc]
+  have hfold :
+      forall (xs : List Nat) (acc : RealRaw),
+        acc.Valid -> (xs.foldl step acc).Valid := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro acc hacc
+        simpa using hacc
+    | cons k ks ih =>
+        intro acc hacc
+        simpa [List.foldl] using ih (step acc k) (hstep acc k hacc)
+  simpa [piecewiseMonotoneIntegralFor, step] using
+    hfold (List.range c.pieces) (RealRaw.ofRat 0) (by
+    simpa [RealRaw.Valid, RealRaw.ofRat] using RealRaw.ofRat_valid 0)
+
+/-- A one-piece promotion from a monotone construction computes the same raw
+integral as the original monotone construction. -/
+theorem piecewiseMonotoneIntegralFor_ofMonotone_equiv
+    {F : FunctionOnInterval}
+    (c : MonotoneConstructionFor F)
+    (hinterval : F.lower <= F.upper) :
+    (piecewiseMonotoneIntegralFor F
+      (PiecewiseMonotoneConstructionFor.ofMonotone c hinterval)).Equiv
+        (monotoneIntegralFor F c) := by
+  simpa [piecewiseMonotoneIntegralFor, piecewiseMonotoneCellIntegral,
+    PiecewiseMonotoneConstructionFor.ofMonotone,
+    MonotoneConstructionFor.restrict, monotoneIntegralFor, integralFor,
+    RealRaw.zero] using
+    (RealRaw.zero_add_equiv
+      (monotoneIntegralFor_valid F c))
+
+/-- The preferred nondecreasing one-piece promotion is compatible with the
+general piecewise-monotone integral. -/
+theorem piecewiseMonotoneIntegralFor_ofNondecreasing_equiv
+    {F : FunctionOnInterval}
+    (c : NondecreasingConstructionFor F)
+    (hinterval : F.lower <= F.upper) :
+    (piecewiseMonotoneIntegralFor F
+      (PiecewiseMonotoneConstructionFor.ofNondecreasing c hinterval)).Equiv
+        (nondecreasingIntegralFor F c) := by
+  simpa [PiecewiseMonotoneConstructionFor.ofNondecreasing,
+    NondecreasingConstructionFor.toMonotoneConstructionFor,
+    nondecreasingIntegralFor, monotoneIntegralFor] using
+    (piecewiseMonotoneIntegralFor_ofMonotone_equiv
+      (F := F) c.toMonotoneConstructionFor hinterval)
+
+def ExistsPiecewiseMonotoneConstructionFor (F : FunctionOnInterval) : Prop :=
+  Nonempty (PiecewiseMonotoneConstructionFor F)
+
+/-- Project-facing name for the general definite integral interface:
+construct the integral on monotone pieces and sum over a finite rational
+partition. -/
+abbrev GeneralConstructionFor (F : FunctionOnInterval) :=
+  PiecewiseMonotoneConstructionFor F
+
+def generalIntegralFor (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) : RealRaw :=
+  piecewiseMonotoneIntegralFor F c
+
+theorem generalIntegralFor_valid (F : FunctionOnInterval)
+    (c : GeneralConstructionFor F) :
+    (generalIntegralFor F c).Valid :=
+  piecewiseMonotoneIntegralFor_valid F c
+
+/-- The public general-integral alias agrees with the original monotone
+construction on a one-piece partition. -/
+theorem generalIntegralFor_ofMonotone_equiv
+    {F : FunctionOnInterval}
+    (c : MonotoneConstructionFor F)
+    (hinterval : F.lower <= F.upper) :
+    (generalIntegralFor F
+      (PiecewiseMonotoneConstructionFor.ofMonotone c hinterval)).Equiv
+        (monotoneIntegralFor F c) := by
+  simpa [generalIntegralFor] using
+    piecewiseMonotoneIntegralFor_ofMonotone_equiv
+      (F := F) c hinterval
+
+/-- The public general-integral alias agrees with the preferred
+nondecreasing construction on a one-piece partition. -/
+theorem generalIntegralFor_ofNondecreasing_equiv
+    {F : FunctionOnInterval}
+    (c : NondecreasingConstructionFor F)
+    (hinterval : F.lower <= F.upper) :
+    (generalIntegralFor F
+      (PiecewiseMonotoneConstructionFor.ofNondecreasing c hinterval)).Equiv
+        (nondecreasingIntegralFor F c) := by
+  simpa [generalIntegralFor] using
+    piecewiseMonotoneIntegralFor_ofNondecreasing_equiv
+      (F := F) c hinterval
+
+abbrev ExistsGeneralConstructionFor (F : FunctionOnInterval) : Prop :=
+  ExistsPiecewiseMonotoneConstructionFor F
+
+/-- Domain-aware linearity target for the eventual integral operator. -/
+def LinearFor : Prop :=
+  forall (F G H : FunctionOnInterval)
+    (_hadd : F.PointwiseAdd G H)
+    (cF : ConstructionFor F)
+    (cG : ConstructionFor G)
+    (cH : ConstructionFor H)
+    (_hsum : RealRaw.ValidCompute
+      (RealRaw.addCompute (integralFor F cF) (integralFor G cG))),
+      (integralFor H cH).Equiv
+        { compute := RealRaw.addCompute (integralFor F cF) (integralFor G cG) }
+
+/-- Domain-aware rational scalar compatibility target. -/
+def CompatibleWithScaleRatFor : Prop :=
+  forall (r : Rat) (F G : FunctionOnInterval)
+    (_hscaleFun : F.PointwiseScaleRat r G)
+    (cF : ConstructionFor F)
+    (cG : ConstructionFor G)
+    (_hscale : RealRaw.ValidCompute
+      (RealRaw.scaleRatCompute r (integralFor F cF))),
+      (integralFor G cG).Equiv
+        { compute := RealRaw.scaleRatCompute r (integralFor F cF) }
+
+/-- Domain-aware adjacent-interval additivity target. -/
+def AdditiveOnAdjacentIntervalsFor : Prop :=
+  forall (F : FunctionOnInterval) (a b c : Rat)
+    (ha : F.lower <= a) (hab : a <= b) (hbc : b <= c) (hc : c <= F.upper)
+    (cab : ConstructionFor
+      (F.restrict a b ha hab (Rat.le_trans hbc hc)))
+    (cbc : ConstructionFor
+      (F.restrict b c (Rat.le_trans ha hab) hbc hc))
+    (cac : ConstructionFor
+      (F.restrict a c ha (Rat.le_trans hab hbc) hc))
+    (_hsum : RealRaw.ValidCompute
+      (RealRaw.addCompute
+        (integralFor (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
+        (integralFor (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc))),
+      (integralFor (F.restrict a c ha (Rat.le_trans hab hbc) hc) cac).Equiv
+        { compute := RealRaw.addCompute
+            (integralFor (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
+            (integralFor (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc) }
+
+/-- Domain-aware order-preservation target for the eventual integral operator:
+pointwise order of integrands should imply order of their integrals. -/
+def OrderPreservingFor : Prop :=
+  forall (F G : FunctionOnInterval)
+    (_hle : F.PointwiseLe G)
+    (cF : ConstructionFor F)
+    (cG : ConstructionFor G),
+      (integralFor F cF).Le (integralFor G cG)
+
+/-- Bundle of the basic algebra laws expected of the domain-aware integral.
+
+The individual fields stay proposition-shaped because `ConstructionFor` is an
+arbitrary valid raw algorithm.  Concrete integral constructors, such as the
+monotone and piecewise-monotone constructors, should provide this package once
+their finite-sum comparison proofs are available. -/
+structure BasicPropertiesFor where
+  linear : LinearFor
+  scaleRat : CompatibleWithScaleRatFor
+  adjacent_additive : AdditiveOnAdjacentIntervalsFor
+  order_preserving : OrderPreservingFor
+
+/-- Linearity target for the piecewise-monotone integral operator. -/
+def PiecewiseMonotoneLinearFor : Prop :=
+  forall (F G H : FunctionOnInterval)
+    (_hadd : F.PointwiseAdd G H)
+    (cF : PiecewiseMonotoneConstructionFor F)
+    (cG : PiecewiseMonotoneConstructionFor G)
+    (cH : PiecewiseMonotoneConstructionFor H)
+    (_hsum : RealRaw.ValidCompute
+      (RealRaw.addCompute
+        (piecewiseMonotoneIntegralFor F cF)
+        (piecewiseMonotoneIntegralFor G cG))),
+      (piecewiseMonotoneIntegralFor H cH).Equiv
+        { compute := RealRaw.addCompute
+            (piecewiseMonotoneIntegralFor F cF)
+            (piecewiseMonotoneIntegralFor G cG) }
+
+/-- Rational scalar compatibility target for the piecewise-monotone integral
+operator. -/
+def PiecewiseMonotoneCompatibleWithScaleRatFor : Prop :=
+  forall (r : Rat) (F G : FunctionOnInterval)
+    (_hscaleFun : F.PointwiseScaleRat r G)
+    (cF : PiecewiseMonotoneConstructionFor F)
+    (cG : PiecewiseMonotoneConstructionFor G)
+    (_hscale : RealRaw.ValidCompute
+      (RealRaw.scaleRatCompute r (piecewiseMonotoneIntegralFor F cF))),
+      (piecewiseMonotoneIntegralFor G cG).Equiv
+        { compute := RealRaw.scaleRatCompute r
+            (piecewiseMonotoneIntegralFor F cF) }
+
+/-- Adjacent-interval additivity target for the piecewise-monotone integral
+operator. -/
+def PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor : Prop :=
+  forall (F : FunctionOnInterval) (a b c : Rat)
+    (ha : F.lower <= a) (hab : a <= b) (hbc : b <= c) (hc : c <= F.upper)
+    (cab : PiecewiseMonotoneConstructionFor
+      (F.restrict a b ha hab (Rat.le_trans hbc hc)))
+    (cbc : PiecewiseMonotoneConstructionFor
+      (F.restrict b c (Rat.le_trans ha hab) hbc hc))
+    (cac : PiecewiseMonotoneConstructionFor
+      (F.restrict a c ha (Rat.le_trans hab hbc) hc))
+    (_hsum : RealRaw.ValidCompute
+      (RealRaw.addCompute
+        (piecewiseMonotoneIntegralFor
+          (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
+        (piecewiseMonotoneIntegralFor
+          (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc))),
+      (piecewiseMonotoneIntegralFor
+        (F.restrict a c ha (Rat.le_trans hab hbc) hc) cac).Equiv
+        { compute := RealRaw.addCompute
+            (piecewiseMonotoneIntegralFor
+              (F.restrict a b ha hab (Rat.le_trans hbc hc)) cab)
+            (piecewiseMonotoneIntegralFor
+              (F.restrict b c (Rat.le_trans ha hab) hbc hc) cbc) }
+
+/-- Order-preservation target for the piecewise-monotone integral operator. -/
+def PiecewiseMonotoneOrderPreservingFor : Prop :=
+  forall (F G : FunctionOnInterval)
+    (_hle : F.PointwiseLe G)
+    (cF : PiecewiseMonotoneConstructionFor F)
+    (cG : PiecewiseMonotoneConstructionFor G),
+      (piecewiseMonotoneIntegralFor F cF).Le
+        (piecewiseMonotoneIntegralFor G cG)
+
+/-- Bundle of the basic algebra laws for the intended general integral:
+define on monotone pieces, then sum over a finite rational partition. -/
+structure PiecewiseMonotoneBasicPropertiesFor where
+  linear : PiecewiseMonotoneLinearFor
+  scaleRat : PiecewiseMonotoneCompatibleWithScaleRatFor
+  adjacent_additive : PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor
+  order_preserving : PiecewiseMonotoneOrderPreservingFor
+
+abbrev GeneralLinearFor : Prop :=
+  PiecewiseMonotoneLinearFor
+
+abbrev GeneralCompatibleWithScaleRatFor : Prop :=
+  PiecewiseMonotoneCompatibleWithScaleRatFor
+
+abbrev GeneralAdditiveOnAdjacentIntervalsFor : Prop :=
+  PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor
+
+abbrev GeneralOrderPreservingFor : Prop :=
+  PiecewiseMonotoneOrderPreservingFor
+
+abbrev GeneralBasicPropertiesFor :=
+  PiecewiseMonotoneBasicPropertiesFor
+
+/-- Exact rational-cell order preservation for an integrand together with a
+closed-form integral over rational cells.
+
+This is the finite algebraic version of the order-preservation theorem for
+integrals.  If `c` is a lower bound for `eval` on every rational point of
+`[p,r]`, then `(r-p)*c` is a lower bound for the exact cell integral.  The
+upper statement is analogous. -/
+structure ExactCellOrderPreservation
+    (eval : Rat -> Rat) (integralBetween : Rat -> Rat -> Rat)
+    (a b : Rat) where
+  lower_const :
+    forall {p r c : Rat}, a <= p -> p <= r -> r <= b ->
+      (forall {x : Rat}, p <= x -> x <= r -> c <= eval x) ->
+        (r - p) * c <= integralBetween p r
+  upper_const :
+    forall {p r c : Rat}, a <= p -> p <= r -> r <= b ->
+      (forall {x : Rat}, p <= x -> x <= r -> eval x <= c) ->
+        integralBetween p r <= (r - p) * c
+
+/-- Exact rational-cell order preservation for a constant integrand.
+
+This is the base case for finite polynomial integral certificates: the exact
+integral of the constant `k` over `[p,r]` is `(r-p) * k`.  It uses only the
+order of rational multiplication, with no limiting or completeness argument.
+-/
+theorem exactCellOrderPreservation_constant (a b k : Rat) :
+    ExactCellOrderPreservation (fun _ => k) (fun p r => (r - p) * k) a b where
+  lower_const := by
+    intro p r c _hap hpr _hrb hbound
+    have hlen : 0 <= r - p := by
+      grind [Rat.sub_eq_add_neg]
+    have hck : c <= k :=
+      hbound (Rat.le_refl : p <= p) hpr
+    exact Rat.mul_le_mul_of_nonneg_left hck hlen
+  upper_const := by
+    intro p r c _hap hpr _hrb hbound
+    have hlen : 0 <= r - p := by
+      grind [Rat.sub_eq_add_neg]
+    have hkc : k <= c :=
+      hbound (Rat.le_refl : p <= p) hpr
+    exact Rat.mul_le_mul_of_nonneg_left hkc hlen
+
+/-- Sum of the weights in a finite rational quadrature rule.  A pair stores a
+relative node followed by its weight. -/
+def quadratureWeightSum : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (_, weight) :: rest => weight + quadratureWeightSum rest
+
+/-- Weighted evaluation sum for a finite rational quadrature rule on `[p,r]`.
+The first component of each pair is its relative node in `[0,1]`. -/
+def quadratureEvalSum (eval : Rat -> Rat) (p r : Rat) :
+    List (Rat × Rat) -> Rat
+  | [] => 0
+  | (node, weight) :: rest =>
+      weight * eval (p + node * (r - p)) +
+        quadratureEvalSum eval p r rest
+
+private theorem quadratureWeightSum_mul_le_quadratureEvalSum
+    {eval : Rat -> Rat} {p r c : Rat}
+    (nodes : List (Rat × Rat))
+    (hpr : p <= r)
+    (hnodes : forall node, node ∈ nodes -> 0 <= node.1 /\ node.1 <= 1)
+    (hweights : forall node, node ∈ nodes -> 0 <= node.2)
+    (hbound : forall {x : Rat}, p <= x -> x <= r -> c <= eval x) :
+    quadratureWeightSum nodes * c <= quadratureEvalSum eval p r nodes := by
+  induction nodes with
+  | nil =>
+      simp [quadratureWeightSum, quadratureEvalSum]
+  | cons pair rest ih =>
+      rcases pair with ⟨node, weight⟩
+      have hnode := hnodes (node, weight) (by simp)
+      have hweight : 0 <= weight := hweights (node, weight) (by simp)
+      have hlength : 0 <= r - p := by
+        grind [Rat.sub_eq_add_neg]
+      have hnodePointLower : p <= p + node * (r - p) := by
+        have hmul : 0 <= node * (r - p) := Rat.mul_nonneg hnode.1 hlength
+        grind
+      have hnodePointUpper : p + node * (r - p) <= r := by
+        have hmul : node * (r - p) <= 1 * (r - p) :=
+          Rat.mul_le_mul_of_nonneg_right hnode.2 hlength
+        calc
+          p + node * (r - p) <= p + 1 * (r - p) :=
+            (Rat.add_le_add_left).2 hmul
+          _ = r := by grind [Rat.sub_eq_add_neg]
+      have hpoint : c <= eval (p + node * (r - p)) :=
+        hbound hnodePointLower hnodePointUpper
+      have hhead : weight * c <= weight * eval (p + node * (r - p)) :=
+        Rat.mul_le_mul_of_nonneg_left hpoint hweight
+      have htail := ih
+        (fun other hmem => hnodes other (by simp [hmem]))
+        (fun other hmem => hweights other (by simp [hmem]))
+      simp [quadratureWeightSum, quadratureEvalSum]
+      calc
+        (weight + quadratureWeightSum rest) * c =
+            weight * c + quadratureWeightSum rest * c := by
+          grind [Rat.add_mul]
+        _ <= weight * eval (p + node * (r - p)) +
+            quadratureEvalSum eval p r rest := by
+          calc
+            weight * c + quadratureWeightSum rest * c <=
+                weight * eval (p + node * (r - p)) +
+                  quadratureWeightSum rest * c :=
+              (Rat.add_le_add_right).2 hhead
+            _ <= weight * eval (p + node * (r - p)) +
+                quadratureEvalSum eval p r rest :=
+              (Rat.add_le_add_left).2 htail
+
+private theorem quadratureEvalSum_le_quadratureWeightSum_mul
+    {eval : Rat -> Rat} {p r c : Rat}
+    (nodes : List (Rat × Rat))
+    (hpr : p <= r)
+    (hnodes : forall node, node ∈ nodes -> 0 <= node.1 /\ node.1 <= 1)
+    (hweights : forall node, node ∈ nodes -> 0 <= node.2)
+    (hbound : forall {x : Rat}, p <= x -> x <= r -> eval x <= c) :
+    quadratureEvalSum eval p r nodes <= quadratureWeightSum nodes * c := by
+  induction nodes with
+  | nil =>
+      simp [quadratureWeightSum, quadratureEvalSum]
+  | cons pair rest ih =>
+      rcases pair with ⟨node, weight⟩
+      have hnode := hnodes (node, weight) (by simp)
+      have hweight : 0 <= weight := hweights (node, weight) (by simp)
+      have hlength : 0 <= r - p := by
+        grind [Rat.sub_eq_add_neg]
+      have hnodePointLower : p <= p + node * (r - p) := by
+        have hmul : 0 <= node * (r - p) := Rat.mul_nonneg hnode.1 hlength
+        grind
+      have hnodePointUpper : p + node * (r - p) <= r := by
+        have hmul : node * (r - p) <= 1 * (r - p) :=
+          Rat.mul_le_mul_of_nonneg_right hnode.2 hlength
+        calc
+          p + node * (r - p) <= p + 1 * (r - p) :=
+            (Rat.add_le_add_left).2 hmul
+          _ = r := by grind [Rat.sub_eq_add_neg]
+      have hpoint : eval (p + node * (r - p)) <= c :=
+        hbound hnodePointLower hnodePointUpper
+      have hhead : weight * eval (p + node * (r - p)) <= weight * c :=
+        Rat.mul_le_mul_of_nonneg_left hpoint hweight
+      have htail := ih
+        (fun other hmem => hnodes other (by simp [hmem]))
+        (fun other hmem => hweights other (by simp [hmem]))
+      simp [quadratureWeightSum, quadratureEvalSum]
+      calc
+        weight * eval (p + node * (r - p)) +
+            quadratureEvalSum eval p r rest <=
+            weight * c + quadratureWeightSum rest * c := by
+          calc
+            weight * eval (p + node * (r - p)) +
+                quadratureEvalSum eval p r rest <=
+                weight * c + quadratureEvalSum eval p r rest :=
+              (Rat.add_le_add_right).2 hhead
+            _ <= weight * c + quadratureWeightSum rest * c :=
+              (Rat.add_le_add_left).2 htail
+        _ = (weight + quadratureWeightSum rest) * c := by
+          grind [Rat.add_mul]
+
+/-- A finite positive rational quadrature identity gives exact cell-order
+preservation.  It applies to any finite rule whose nodes lie in `[0,1]`, whose
+weights are nonnegative and sum to one, and whose formula is exact for the
+specified integrand. -/
+theorem exactCellOrderPreservation_of_positive_quadrature
+    {eval : Rat -> Rat} {integralBetween : Rat -> Rat -> Rat}
+    (a b : Rat) (nodes : List (Rat × Rat))
+    (hnodes : forall node, node ∈ nodes -> 0 <= node.1 /\ node.1 <= 1)
+    (hweights : forall node, node ∈ nodes -> 0 <= node.2)
+    (hsum : quadratureWeightSum nodes = 1)
+    (hformula : forall p r : Rat,
+      integralBetween p r = (r - p) * quadratureEvalSum eval p r nodes) :
+    ExactCellOrderPreservation eval integralBetween a b where
+  lower_const := by
+    intro p r c _hap hpr _hrb hbound
+    have hsumBound := quadratureWeightSum_mul_le_quadratureEvalSum
+      nodes hpr hnodes hweights hbound
+    have haverage : c <= quadratureEvalSum eval p r nodes := by
+      simpa [hsum] using hsumBound
+    have hlength : 0 <= r - p := by
+      grind [Rat.sub_eq_add_neg]
+    rw [hformula]
+    exact Rat.mul_le_mul_of_nonneg_left haverage hlength
+  upper_const := by
+    intro p r c _hap hpr _hrb hbound
+    have hsumBound := quadratureEvalSum_le_quadratureWeightSum_mul
+      nodes hpr hnodes hweights hbound
+    have haverage : quadratureEvalSum eval p r nodes <= c := by
+      simpa [hsum] using hsumBound
+    have hlength : 0 <= r - p := by
+      grind [Rat.sub_eq_add_neg]
+    rw [hformula]
+    exact Rat.mul_le_mul_of_nonneg_left haverage hlength
+
+/-- A positive Boole quadrature identity gives exact cell-order preservation.
+
+The five rational nodes are the endpoints and the quarter points of a cell.
+For a polynomial for which the displayed identity is exact, a pointwise bound
+at all rational points bounds its exact integral.  The proof is finite rational
+arithmetic; it invokes neither a limit nor real-number completeness. -/
+theorem exactCellOrderPreservation_of_boole
+    {eval : Rat -> Rat} {integralBetween : Rat -> Rat -> Rat}
+    (a b : Rat)
+    (hboole : forall p r : Rat,
+      integralBetween p r =
+        ((r - p) / 90) *
+          (7 * eval p +
+            32 * eval (p + (r - p) / 4) +
+            12 * eval (p + (r - p) / 2) +
+            32 * eval (p + 3 * (r - p) / 4) +
+            7 * eval r)) :
+    ExactCellOrderPreservation eval integralBetween a b where
+  lower_const := by
+    intro p r c _hap hpr _hrb hbound
+    let L : Rat := r - p
+    let q₁ : Rat := p + L / 4
+    let q₂ : Rat := p + L / 2
+    let q₃ : Rat := p + 3 * L / 4
+    have hL0 : 0 <= L := by
+      dsimp [L]
+      grind [Rat.sub_eq_add_neg]
+    have hq₁ : p <= q₁ /\ q₁ <= r := by
+      constructor
+      · dsimp [q₁]
+        have hdiv : 0 <= L / 4 := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg hL0 (by native_decide)
+        grind
+      · dsimp [q₁, L]
+        rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    have hq₂ : p <= q₂ /\ q₂ <= r := by
+      constructor
+      · dsimp [q₂]
+        have hdiv : 0 <= L / 2 := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg hL0 (by native_decide)
+        grind
+      · dsimp [q₂, L]
+        rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    have hq₃ : p <= q₃ /\ q₃ <= r := by
+      constructor
+      · dsimp [q₃]
+        have hthreeL : 0 <= 3 * L :=
+          Rat.mul_nonneg (by native_decide) hL0
+        have hdiv : 0 <= (3 * L) / 4 := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg hthreeL (by native_decide)
+        grind
+      · dsimp [q₃, L]
+        rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    have hp : c <= eval p := hbound (Rat.le_refl : p <= p) hpr
+    have h1 : c <= eval q₁ := hbound hq₁.1 hq₁.2
+    have h2 : c <= eval q₂ := hbound hq₂.1 hq₂.2
+    have h3 : c <= eval q₃ := hbound hq₃.1 hq₃.2
+    have hr : c <= eval r := hbound hpr (Rat.le_refl : r <= r)
+    have hsum :
+        90 * c <= 7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
+          32 * eval q₃ + 7 * eval r := by
+      have h7p := Rat.mul_le_mul_of_nonneg_left hp
+        (by native_decide : (0 : Rat) <= 7)
+      have h32q1 := Rat.mul_le_mul_of_nonneg_left h1
+        (by native_decide : (0 : Rat) <= 32)
+      have h12q2 := Rat.mul_le_mul_of_nonneg_left h2
+        (by native_decide : (0 : Rat) <= 12)
+      have h32q3 := Rat.mul_le_mul_of_nonneg_left h3
+        (by native_decide : (0 : Rat) <= 32)
+      have h7r := Rat.mul_le_mul_of_nonneg_left hr
+        (by native_decide : (0 : Rat) <= 7)
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+    have hscale : 0 <= L / 90 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg hL0 (by native_decide)
+    rw [hboole]
+    change L * c <=
+      (L / 90) *
+        (7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
+          32 * eval q₃ + 7 * eval r)
+    calc
+      L * c = (L / 90) * (90 * c) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (L / 90) *
+          (7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
+            32 * eval q₃ + 7 * eval r) :=
+        Rat.mul_le_mul_of_nonneg_left hsum hscale
+  upper_const := by
+    intro p r c _hap hpr _hrb hbound
+    let L : Rat := r - p
+    let q₁ : Rat := p + L / 4
+    let q₂ : Rat := p + L / 2
+    let q₃ : Rat := p + 3 * L / 4
+    have hL0 : 0 <= L := by
+      dsimp [L]
+      grind [Rat.sub_eq_add_neg]
+    have hq₁ : p <= q₁ /\ q₁ <= r := by
+      constructor
+      · dsimp [q₁]
+        have hdiv : 0 <= L / 4 := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg hL0 (by native_decide)
+        grind
+      · dsimp [q₁, L]
+        rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    have hq₂ : p <= q₂ /\ q₂ <= r := by
+      constructor
+      · dsimp [q₂]
+        have hdiv : 0 <= L / 2 := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg hL0 (by native_decide)
+        grind
+      · dsimp [q₂, L]
+        rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    have hq₃ : p <= q₃ /\ q₃ <= r := by
+      constructor
+      · dsimp [q₃]
+        have hthreeL : 0 <= 3 * L :=
+          Rat.mul_nonneg (by native_decide) hL0
+        have hdiv : 0 <= (3 * L) / 4 := by
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg hthreeL (by native_decide)
+        grind
+      · dsimp [q₃, L]
+        rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    have hp : eval p <= c := hbound (Rat.le_refl : p <= p) hpr
+    have h1 : eval q₁ <= c := hbound hq₁.1 hq₁.2
+    have h2 : eval q₂ <= c := hbound hq₂.1 hq₂.2
+    have h3 : eval q₃ <= c := hbound hq₃.1 hq₃.2
+    have hr : eval r <= c := hbound hpr (Rat.le_refl : r <= r)
+    have hsum :
+        7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
+          32 * eval q₃ + 7 * eval r <= 90 * c := by
+      have h7p := Rat.mul_le_mul_of_nonneg_left hp
+        (by native_decide : (0 : Rat) <= 7)
+      have h32q1 := Rat.mul_le_mul_of_nonneg_left h1
+        (by native_decide : (0 : Rat) <= 32)
+      have h12q2 := Rat.mul_le_mul_of_nonneg_left h2
+        (by native_decide : (0 : Rat) <= 12)
+      have h32q3 := Rat.mul_le_mul_of_nonneg_left h3
+        (by native_decide : (0 : Rat) <= 32)
+      have h7r := Rat.mul_le_mul_of_nonneg_left hr
+        (by native_decide : (0 : Rat) <= 7)
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+    have hscale : 0 <= L / 90 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg hL0 (by native_decide)
+    rw [hboole]
+    change (L / 90) *
+        (7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
+          32 * eval q₃ + 7 * eval r) <= L * c
+    calc
+      (L / 90) *
+          (7 * eval p + 32 * eval q₁ + 12 * eval q₂ +
+            32 * eval q₃ + 7 * eval r) <=
+          (L / 90) * (90 * c) :=
+        Rat.mul_le_mul_of_nonneg_left hsum hscale
+      _ = L * c := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+end Integral
 
 /-- Effective inverse separation.
 

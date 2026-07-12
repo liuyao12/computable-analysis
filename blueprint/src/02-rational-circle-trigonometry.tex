@@ -458,8 +458,8 @@ def circle_stage(n):
 \end{verbatim}
 \end{remark}
 
-\begin{remark}[Farey subdivision of the projective parameter line]
-\label{rem:farey-projective-circle-stages}
+\begin{remark}[Projective parameter line and tangent]
+\label{rem:projective-parameter-line}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofOption}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom}
@@ -522,96 +522,6 @@ def circle_stage(n):
 \lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan_one}
 \lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan_infinity}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.det}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.mediantOfDetNe}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.det_left_mediantOfDetNe}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.det_mediantOfDetNe_right}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.mediant}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.leftChild}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.rightChild}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.subdivideList}
-\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.subdivideList_length}
-\lean{ComputableAnalysis.RationalCircle.fullCircleFareySeed}
-\lean{ComputableAnalysis.RationalCircle.fareySubdivide}
-\lean{ComputableAnalysis.RationalCircle.fareyStages}
-\lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage}
-\lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage_length}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.value}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.zero}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.one}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.mediant}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.value_zero}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.value_one}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.value_nonneg}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.value_le_one_of_num_le_den}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.value_le_mediant_of_le}
-\lean{ComputableAnalysis.RationalCircle.FareyFraction.mediant_le_value_of_le}
-\lean{ComputableAnalysis.RationalCircle.FareyCell}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.det}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.Adjacent}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.Unit}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.denSum}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.DenSumAtLeast}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.width}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.toRatInterval}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.mediant}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.det_leftChild}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.det_rightChild}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.crossDetRat_eq_one_of_adjacent}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.width_eq_inv_den_mul_den_of_adjacent}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.unit_leftChild}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.unit_rightChild}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.AdjacentList}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.UnitList}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.DenSumListAtLeast}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.Connects}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.WidthListAtMost}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSum}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquareSum}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquareSum_nonneg}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_length}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_adjacent}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_unit}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.leftChild_denSum_ge_succ}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.rightChild_denSum_ge_succ}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_denSum_ge_succ}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_connects}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.width_nonneg_of_unit}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.child_width_sum}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_widthSum}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSum_eq_value_sub_of_connects}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquare_le_bound_mul_width}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquareSum_le_bound_mul_widthSum}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.den_product_ge_denSum_sub_one}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.den_product_ge_succ_of_denSumAtLeast}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.width_le_one_div_succ_of_adjacent_denSumAtLeast}
-\lean{ComputableAnalysis.RationalCircle.FareyCell.widthListAtMost_one_div_succ_of_adjacent_denSum}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_length}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_adjacent}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_adjacent}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_adjacent}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_unit}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_unit}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_unit}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_connects}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_connects}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_connects}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_denSum_ge_two}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_denSum_ge_succ}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_denSum_ge}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSeed_widthSum}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitSubdivide_widthSum}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_widthSum}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_widthListAtMost_one_div_succ}
-\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_widthSquareSum_le_one_div_succ}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_zero}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_one}
@@ -693,114 +603,18 @@ Likewise subtraction has the projective chart formulas
   \infty\ominus\infty=0.
 \]
 
-The Farey refinement step replaces adjacent projective parameters
-\((a:b)\) and \((c:d)\) by their mediant \((a+c:b+d)\).  Lean states this on
-projective edges whose determinant \(ad-bc\) is nonzero, and proves that both
-children inherit the same determinant.  Starting from the four edges
-\[
-  0,\quad 1,\quad \infty,\quad -1,\quad 0
-\]
-therefore gives a full-circle Farey subdivision; after \(n\) refinements the
-edge list has length \(4\cdot2^n\).
-
-A useful visual convention, familiar from pictures of the Farey tessellation,
-is to put rational parameters on the boundary line and draw an arc between
-Farey neighbors.  In the unit interval chart used below, the first few stages
-are the Stern--Brocot chain
-\[
-  0/1,\ 1/4,\ 1/3,\ 2/5,\ 1/2,\ 3/5,\ 2/3,\ 3/4,\ 1/1,
-\]
-where each new point is the mediant of its two parents.
-
-\begin{center}
-\begin{tikzpicture}[x=.86cm,y=.86cm,
-    line cap=round, line join=round,
-    every node/.style={font=\scriptsize}]
-  \path[use as bounding box] (-.65,-1.28) rectangle (10.25,4.55);
-  \draw[thick] (-.35,0) -- (8.35,0);
-
-  % Determinant-one arcs in the upper half-plane model.
-  \draw[blue!70!black, line width=.9pt] (0,0) arc (180:0:4);
-  \draw[teal!70!black, line width=.8pt] (0,0) arc (180:0:2);
-  \draw[teal!70!black, line width=.8pt] (4,0) arc (180:0:2);
-  \draw[orange!85!black, line width=.7pt] (0,0) arc (180:0:1.333);
-  \draw[orange!85!black, line width=.7pt] (2.667,0) arc (180:0:.667);
-  \draw[orange!85!black, line width=.7pt] (4,0) arc (180:0:.667);
-  \draw[orange!85!black, line width=.7pt] (5.333,0) arc (180:0:1.333);
-  \draw[black!48, line width=.55pt] (0,0) arc (180:0:1);
-  \draw[black!48, line width=.55pt] (2,0) arc (180:0:.333);
-  \draw[black!48, line width=.55pt] (2.667,0) arc (180:0:.267);
-  \draw[black!48, line width=.55pt] (3.2,0) arc (180:0:.4);
-  \draw[black!48, line width=.55pt] (4,0) arc (180:0:.4);
-  \draw[black!48, line width=.55pt] (4.8,0) arc (180:0:.267);
-  \draw[black!48, line width=.55pt] (5.333,0) arc (180:0:.333);
-  \draw[black!48, line width=.55pt] (6,0) arc (180:0:1);
-
-  % The two projective edges to infinity in the full-circle picture.
-  \draw[densely dashed, black!45] (0,0) -- (0,4.08);
-  \draw[densely dashed, black!45] (8,0) -- (8,4.08);
-  \node[black!55] at (4,4.32) {$1/0=\infty$};
-
-  % The unit-interval Farey mesh after three mediant refinements.
-  \draw[line width=1.25pt, teal!75!black] (0,-.16) -- (8,-.16);
-  \foreach \x in {0,2,2.667,3.2,4,4.8,5.333,6,8} {
-    \fill[white] (\x,0) circle (2.7pt);
-    \draw[teal!75!black, line width=.75pt] (\x,-.25) -- (\x,.25);
-    \fill[teal!75!black] (\x,0) circle (1.8pt);
-  }
-
-  \node[below] at (0,-.27) {$0/1$};
-  \node[below] at (2,-.62) {$1/4$};
-  \node[below] at (2.667,-.27) {$1/3$};
-  \node[below] at (3.2,-.62) {$2/5$};
-  \node[below] at (4,-.27) {$1/2$};
-  \node[below] at (4.8,-.62) {$3/5$};
-  \node[below] at (5.333,-.27) {$2/3$};
-  \node[below] at (6,-.62) {$3/4$};
-  \node[below] at (8,-.27) {$1/1$};
-
-  \node[blue!70!black, anchor=west] at (8.45,3.55) {stage \(0\)};
-  \node[teal!70!black, anchor=west] at (8.45,2.55) {stage \(1\)};
-  \node[orange!85!black, anchor=west] at (8.45,1.45) {stage \(2\)};
-  \node[black!55, anchor=west] at (8.45,.58) {stage \(3\)};
-\end{tikzpicture}
-
-{\small Farey points on the boundary line.  Arcs join determinant-one
-neighbors; the highlighted boundary chain is the stage-three unit mesh used
-for the rational prefix sums.}
-\end{center}
-
-For computations restricted to the quarter-circle chart, Lean also keeps a
-finite \([0,1]\) Farey mesh whose cells remember numerator and denominator
-before taking rational values.  This is the common mesh used later for prefix
-integral sums: to compute up to \(x\), take all cells with right endpoint at
-or before \(x\) for the lower sum, and include the first cell crossing \(x\)
-for the upper sum.  Lean proves that mediants stay between their endpoints,
-that subdivision preserves the unit-cell invariant \(0\le p\le r\le1\), and
-that every unit Farey stage has length \(2^n\).  Lean also proves that these
-cells form a connected partition from \(0\) to \(1\): each cell starts where
-the previous cell ended, and mediant subdivision preserves that chain.  The
-determinant-one adjacency invariant for these cells and the denominator-growth
-bound \(\operatorname{den}(p)+\operatorname{den}(r)\ge n+2\) at stage \(n\)
-are then the arithmetic inputs for the Farey mesh-size estimate.  In
-particular, Lean proves that an adjacent cell has rational width
-\[
-  r-p = \frac{1}{\operatorname{den}(p)\operatorname{den}(r)}
-\]
-and hence any stage-\(n\) unit Farey cell has width at most \(1/(n+1)\).
-The connected-partition invariant gives the exact total width of the unit
-Farey mesh, namely \(1-0=1\), while the squared-width budget satisfies
-\[
-  \sum_{[p,r]\in F_n} (r-p)^2 \le \frac{1}{n+1}.
-\]
-This is the rational mesh estimate needed to turn the later global Farey
-prefix sums into verified raw integrals.
+Farey subdivision is intentionally not part of this chapter's first circle
+algorithm.  The circle and trigonometric constructions below use the dyadic
+rational-parameter refinements already described above, while the geometric
+arctangent keeps its own dynamic sector subdivision.  Farey meshes reappear
+later only as projective-line machinery for improper integrals, where a
+single global subdivision can naturally include \(\infty\).
 \end{remark}
 
 \begin{remark}[What bisection refinement means]
 \label{rem:dyadic-rational-circle-refinement}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
-\uses{rem:dyadic-rational-circle-stages,rem:farey-projective-circle-stages}
+\uses{rem:dyadic-rational-circle-stages}
 There is no separate abstract definition of refinement being used here.  The
 concrete fact is just that one more bisection keeps every old parameter and
 inserts one midpoint between adjacent old parameters.  Thus, after mapping to
@@ -855,16 +669,23 @@ def pi(n):
 
 \begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}
 \uses{def:circle-area-stage-algorithm,def:circle-circumference-stage-algorithm,def:raw-equiv}
-At each rational sample stage, the interval for pi obtained from unit-disk
-area overlaps the interval for pi obtained from half-circumference.  After
-validity is established for both algorithms, this gives equivalence of the
-two raw reals.
+At each rational sample stage, the polygon-area scaffolding interval overlaps
+the interval obtained from half-circumference.  Lean therefore proves the raw
+same-stage equivalence
+\code{PiProofs.piCircleAreaPolygon\_equiv\_piCircumference} directly from
+the finite inequalities.  The exact dyadic-stage bridge
+\code{ArctanGeometry.piCircleArea\_compute\_eq\_piCircleAreaPolygon\_compute}
+now identifies the polygon computation with the public increment/decrement
+\code{piCircleArea} loop, yielding
+\code{PiProofs.piCircumference\_equiv\_piCircleArea\_of\_verified\_area\_polygon}.
+It also promotes the polygon computation to a valid raw real through
+\code{PiProofs.areaPolygonValid}.  Validity of \code{piCircumference} remains
+open.
 The proof reduces to finite inequalities comparing inscribed chords and
-outer tangent segments.  The current Lean proof target is
-\code{ComputableAnalysis.PiProofs.archimedesTheorem}.
+outer tangent segments.
 \end{theorem}
 
-\begin{theorem}[Geometric pi validity]\label{thm:geometric-pi-validity}
+\begin{theorem}[Geometric pi validity status]\label{thm:geometric-pi-validity}
 \lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
 \lean{ComputableAnalysis.PiProofs.circumferenceWidthsShrink}
 \lean{ComputableAnalysis.PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll}
@@ -879,17 +700,31 @@ outer tangent segments.  The current Lean proof target is
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefinesUpToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_quarterLengthStepRefinesUpToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceStepRemainders_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCertified}
 \uses{thm:finite-archimedes,def:raw-real}
-The area and circumference algorithms for pi are real numbers: their intervals
-are ordered, nested under dyadic refinement, and have widths tending to zero.
-This is the exhaustion principle in the raw-real setting, and it is the
-starting point for the later calculus constructions.  The remaining work is
-to finish the Lean proof, not to settle a mathematical uncertainty.  Lean now
-packages the circumference target in finite-prefix form: proving all
+The public area loop is a valid raw real.  The circumference computation is
+ordered and has a proved width-shrinking bound, but it is not yet certified as
+a raw real because the all-stage dyadic endpoint-refinement theorem remains
+open.  Lean packages that remaining target in finite-prefix form: proving all
 \code{CircumferenceQuarterLengthStepRefinesUpTo N} certificates is enough to
 obtain the public \code{CircumferenceValid} proof.  The all-prefix statement is
 now formalized as an iff with the global step-refinement predicate, so this is
 the same obligation in a finite-checkable presentation.
+
+There is nevertheless a separately named certified representative,
+\code{piCircumferenceReboxed}.  It takes finite prefix intersections of the
+rational hulls of the direct perimeter interval and the verified area interval.
+The finite Archimedes overlap and the two proved width moduli make this
+reboxed representative valid and equivalent to both the direct perimeter raw
+algorithm and \code{piCircleArea}.  This is a finite interval-normalization
+tool, not a proof of the direct perimeter endpoint-refinement theorem and not
+a new scoreboard row.
+The project-facing certified value \code{PiProofs.piCertified} chooses the
+area loop as its evaluator and records this reboxed perimeter route as a
+verified alternative.
 \end{theorem}
 
 \section{Trigonometric Functions}
@@ -1272,6 +1107,11 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_sin_eq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_normDen_eq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_normDen_pos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAddParameter_zero_right}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_square_chartAddParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.arctanKernel_chartAdd_jacobian}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAddParameter_sub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAddParameter_mono}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_cosNum_eq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_sinNum_eq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_chartAdd_denominator_cleared}
@@ -1397,6 +1237,22 @@ and, whenever the displayed chart denominator is nonzero,
 \[
   \tan\!\left(\frac{2u}{1-u^2}\right)=2\tan(u).
 \]
+There is also an exact finite Jacobian identity for the tangent-addition
+chart.  When \(1-uv\ne0\), writing
+\(T_u(v)=(u+v)/(1-uv)\), Lean proves
+\[
+  \frac{1+u^2}{(1-uv)^2(1+T_u(v)^2)}=\frac{1}{1+v^2}.
+\]
+For chart-admissible endpoints it also proves the finite displacement identity
+\[
+ T_u(r)-T_u(p)=
+ \frac{(1+u^2)(r-p)}{(1-up)(1-ur)}
+\]
+and therefore preserves endpoint order when the two denominators are positive.
+These are rational algebra, rather than an integral substitution theorem: they
+record the kernel and interval transformations needed to transport the
+verified Farey and rectangle constructions in the future principal-branch
+addition proof.
 The quarter-complement cofunction formulas for \(\tan,\cot,\sec,\csc\) are
 also proved.
 \end{theorem}

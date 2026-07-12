@@ -1,15 +1,23 @@
 # Computable Analysis Goalposts
 
-This file is the prose roadmap.  Lean files should contain definitions,
-certificates, and proved bridges; broad mathematical milestones live here with
-references to the relevant declarations.
+This file is the prose roadmap. Lean files contain definitions, certificates,
+and proved bridges; broad mathematical milestones live here with references to
+the relevant declarations.
+
+**Current source map.** The checked foundation is
+`ComputableAnalysis/Basic.lean`, with calculus in `Calculus.lean`/`FTC.lean`
+and the pi comparison layer in `PiProofs.lean`. There is no Mathlib import:
+the only non-project import is Lean's rational-number support
+`Init.Grind.Ordered.Rat`. Older paragraphs below that name removed files such
+as `Base.lean`, `Core.lean`, or `RealEquiv.lean` are historical planning notes,
+not a description of the current module graph. The checked blueprint
+(`blueprint/lean_decls`) and current Lean declarations take precedence.
 
 ## Ground Layer
 
-- Raw reals are interval algorithms `Nat -> QInterval`.  Certification is
-  separate: `RealCert` packages a `RealRaw` with the validity proof needed for
-  use as a higher-level `Real` representative.  See `RealRaw` and `RealCert`
-  in `ComputableAnalysis/Base.lean`.
+- Raw reals are interval algorithms `Nat -> QInterval`. `Real` packages a
+  preferred valid `RealRaw` and finite, proven-equivalent alternatives. See
+  `RealRaw` and `Real` in `ComputableAnalysis/Basic.lean`.
 - `RealRaw.ValidCompute` no longer means “width at stage `n` is at most
   `1/n`. It means: every stage is an ordered interval, later stages are
   nested inside earlier stages, and widths shrink to zero.  Any clean bound
@@ -18,34 +26,36 @@ references to the relevant declarations.
 - `RealRaw` has a single optional `rate` metadata field.  The rate is not a
   second kind of real number: it is either unknown, eventually polynomial, or
   eventually geometric.  See `RealRaw.Rate` in
-  `ComputableAnalysis/Base.lean`.
+  `ComputableAnalysis/Basic.lean`.
 - For concrete algorithms, record public rate information as eventual upper
   bounds, not necessarily exact widths.  For pi, `piLeibnizRate` records width
   `<= 4/n`, while `piMachinRate` records width `<= 20*(1/2)^n`, i.e.
   `20/2^n`.
-- Equality of raw representatives is overlap along cofinal increasing stage
-  schedules.  This is `RealRaw.Equiv`: there are two schedules `a(n)` and
-  `b(n)`, each eventually passing every requested stage, such that the two raw
-  intervals compare as `RealRaw.CompareAt.overlap` at stages `a(n)` and `b(n)`
-  for every `n`.  Same-stage overlap is the special case using the identity
-  schedule, via
-  `RealRaw.sameStageOverlap_equiv`.  The project-facing equality notion is
-  this raw-level relation.
+- Equality of raw representatives is same-stage rational-interval overlap:
+  `RealRaw.Equiv x y` means that `x.compute n` and `y.compute n` overlap for
+  every `n`. Validity makes this relation transitive. The project-facing
+  equality notion is this raw-level relation.
+- `RealRaw.anchorRebox` is a finite rational normalization construction: given
+  a shrinking, stagewise-overlapping raw algorithm and a valid nested anchor,
+  it intersects the prefix of their stagewise hulls.  The result is a valid
+  representative equivalent to both inputs, proved by
+  `RealRaw.anchorRebox_valid` without any completed-real or completeness
+  principle.
 - The stronger all-stages notion is now formalized as
   `RealRaw.AllStagesOverlap`: every interval from one algorithm compares as
-  `overlap` with every interval from the other.  For certified/nested raw algorithms it is also
-  equivalent to scheduled `RealRaw.Equiv`; see
-  `RealRaw.equiv_iff_allStagesOverlap` in `ComputableAnalysis/RealEquiv.lean`.
+  `overlap` with every interval from the other. For valid raw algorithms it is
+  equivalent to `RealRaw.Equiv`; see `RealRaw.equiv_iff_allStagesOverlap` in
+  `ComputableAnalysis/Basic.lean`.
 - For computation with a higher-level real number, use `Real`: it keeps a
   preferred certified representative for evaluation plus a list of certified
   equivalent alternatives.  The preferred representative should be the best
-  available algorithm/rate.  `Real.Named` remains a compatibility alias.
-  See `Real.compute`, `Real.rate`, `Real.computeUsing`, and
-  `Real.representation_same_real` in `ComputableAnalysis/Core.lean`.
+  available algorithm/rate. See `Real.compute`, `Real.rate`,
+  `Real.representations`, and `Real.withAlternative` in
+  `ComputableAnalysis/Basic.lean`.
 - Complex numbers mirror the same foundation: `ComplexRaw` has optional
   coordinate-rate metadata, and `Complex` keeps a preferred certified raw
-  representative with optional equivalent alternatives.  See
-  `ComplexRaw.Rate` and `Complex` in `ComputableAnalysis/Complex.lean`.
+  representative with optional equivalent alternatives. See `ComplexRaw.Rate`,
+  `ComplexCert`, and `Complex` in `ComputableAnalysis/Basic.lean`.
 - Function layers are representation/domain layers.  Real and complex function
   raws carry a domain and pointwise output-rate metadata; the rate may depend
   on the input and its domain proof.
@@ -77,17 +87,21 @@ references to the relevant declarations.
   `F b - F a`.
 - Exact convexity is now stated through `RealRaw.Le` and rational secants.
   See `RealRaw.Le`, `secantRaw`, and `ExactConvexOn`.
-- Convex derivative: for a convex function, define the right derivative as
-  the infimum of right secants `Sec_F(q,q+h)` as `h > 0` tends to zero, and
-  the left derivative as the supremum of left secants.  The full two-sided
-  derivative exists only where these agree; corners such as `abs` should not
-  block the universal one-sided FTC.
+- Convex derivative: a construction supplies a valid raw interval algorithm
+  for the right or left derivative.  `IsRightDerivative` and
+  `IsLeftDerivative` then verify it by the rational-secant lower-bound /
+  greatest-lower-bound or upper-bound / least-upper-bound laws.  These are
+  certificates for an explicit algorithm, not constructions by infimum or
+  supremum.  The full two-sided derivative exists only where the two supplied
+  one-sided algorithms agree; corners such as `abs` should not block the
+  universal one-sided FTC.
 - Convex FTC proof step: for each partition cell `[x_i,x_{i+1}]`, convexity
   gives
   `D_+F(x_i) <= Sec_F(x_i,x_{i+1}) <= D_-F(x_{i+1})`.
   Multiplying by the cell width and summing gives Darboux sums around the
-  telescoping endpoint difference `F b - F a`.  Monotonicity and completeness
-  shrink the Darboux gap.
+  telescoping endpoint difference `F b - F a`. A finite rational mesh together
+  with an explicit modulus must shrink the Darboux gap; no appeal to
+  completeness of an ambient real-number type is permitted.
 - Piecewise convexity: if a function switches convexity, split the interval at
   rational breakpoints, apply the exact convex FTC on each piece, and combine
   endpoint equalities by raw-real arithmetic and transitivity.  Do not add a
@@ -309,6 +323,112 @@ students actually compute.
   nonnegative decreasing terms, then instantiate Leibniz/arctangent series.
 
 ## Pi Representations
+
+- The canonical progress measure is the checked table in
+  `blueprint/src/pi-scoreboard-table.tex`: currently nine of eighteen named
+  computations are valid raw reals, and five of seventeen applicable rows have
+  a formal equivalence chain to `piCircleArea`. The completed canonical rows
+  are `4 * arctanGeom(1)`, `4 * arctanIntegralRectangleForAtOne`, the
+  independently assembled Machin rectangle-integral computation
+  `IntegralIdentities.piMachinIntegralRectangle`, and the full-line Cauchy
+  compactification `PiProofs.piCauchyProjectiveFarey`, and the two-three
+  Farey-integral formula `IntegralIdentities.piTwoThreeIntegralFarey`.
+- The next canonical series equivalence is blocked only by the uniform
+  all-partials bridge
+  `PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit`.
+  Pointwise kernel bounds and finite certificates through the indicated
+  prefixes are checked. Exact cell-order preservation is now proved for the
+  constant partial, `1 - x^2`, `1 - x^2 + x^4`,
+  `1 - x^2 + x^4 - x^6`, and `1 - x^2 + x^4 - x^6 + x^8`. The first
+  nonconstant case uses explicit nonnegative rational endpoint-gap factors;
+  the degree-four case uses Boole quadrature and the degree-six and
+  degree-eight cases use positive seven-point and eleven-point rational
+  Newton--Cotes identities. The remaining step is a uniform finite algebra
+  theorem, not a use of completeness.
+- `piMachin` previously needed a principal-branch addition certificate.  The
+  required three bounded rational additions are now proved:
+  `2*atanGeom(1/5) = atanGeom(5/12)`,
+  `atanGeom(7/17) + atanGeom(1/239) = atanGeom(5/12)`, and
+  `atanGeom(5/12) + atanGeom(7/17) = atanGeom(1)`.
+  `geometricMachinUnitAdditions_of_chartTransport` obtains this certificate
+  from finite rational rectangle transport, and
+  `geometricBranchIdentity_of_chartTransport` formally assembles it into
+  Machin's branch identity without the out-of-chart slope `120/119`.
+  The universal `GeometricUnitAdditionLaw` remains a useful stronger API, but
+  is no longer a prerequisite for the concrete Machin branch.
+  The finite Gaussian/rational calculation is complete.  The rational
+  kernel-Jacobian identity
+  `RationalCircle.Trigonometry.arctanKernel_chartAdd_jacobian`, its exact
+  endpoint displacement law
+  `RationalCircle.Trigonometry.chartAddParameter_sub`, and its
+  chart-admissible order-preservation law
+  `RationalCircle.Trigonometry.chartAddParameter_mono` are also proved;
+  `ArctanGeometry` now lifts this algebra to every finite rectangle partition:
+  the chart-transformed target bracket contains the source bracket and maps
+  each area-loop stage to a verified finite target cover.  On the
+  Machin-relevant half-unit chart, transformed endpoint widths are bounded by
+  eight times their source widths and squared meshes by a factor of \(64\);
+  this gives a \(128 x^2/2^n\) transported rectangle-width bound whenever the
+  image endpoint stays in the unit interval.  The transformed brackets are now
+  a valid nested shrinking raw construction with width at most \(256/(n+1)\),
+  and `arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw` proves its
+  construction-level equivalence to the source rectangle raw.  Appending the
+  source prefix partition to the transported interval partition proves the
+  canonical endpoint-difference comparison, and
+  `arctanGeom_chartAdd_add_of_half` now proves the bounded geometric addition
+  law needed at all three Machin instances.  Consequently
+  `MachinIdentity.geometricMachinUnitAdditions_of_chartTransport` and the
+  resulting geometric Machin branch identity are proved.  The remaining
+  power-series `piMachin` blocker is only the separate power-series/kernel
+  comparison at `1/5` and `1/239`; the endpoint comparison at `1` belongs to
+  the independent Leibniz route.  Separately, the certified
+  `IntegralIdentities.piMachinIntegralRectangle` now gives a completed
+  calculus Machin row; only the power-series row remains open.
+- The Cauchy kernel now has a completed projective/improper presentation:
+  `IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel`
+  proves the reciprocal-tail fold on nonzero rationals, and
+  `PiProofs.piCauchyProjectiveFarey` defines the full-line value by the
+  verified compactification `4 * ∫_[0,1] 1/(1+x^2) dx`.  It is valid and
+  equivalent to `piCircleArea`.  The underlying bounded Farey mesh is not a
+  duplicate scoreboard row; this distinct row records the explicit full-line
+  construction and provides the kernel-level substitution pattern for the
+  reciprocal-quartic target.  It is intentionally a Cauchy-specific
+  compactification, not yet a generic improper-integration API.
+- The shared Farey construction now also completes the separate rational
+  identity `pi = 4 * (atan(1/2) + atan(1/3))`.  Its evaluator
+  `IntegralIdentities.piTwoThreeIntegralFarey` has width at most
+  `48/(n+1)`, and
+  `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea` derives the result
+  from the already verified finite chart calculation `1/2 ⊕ 1/3 = 1`.
+  This counts as a distinct formula-level computation, not as an additional
+  row for merely reusing the Farey mesh.
+- The exact stage bridge
+  `ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute` now
+  proves `PiProofs.PiCircleAreaPolygonAgreement`; with finite Archimedes this
+  gives the raw equivalence
+  `PiProofs.piCircumference_equiv_piCircleArea_of_verified_area_polygon` and
+  promotes the polygon scaffolding computation to a valid raw real through
+  `PiProofs.areaPolygonValid`.  `PiProofs.piCircumferenceReboxed` is now a
+  valid finite-prefix reboxing of the direct perimeter intervals against the
+  verified area intervals, and is formally equivalent to `piCircleArea`.
+  `PiProofs.piCertified : Real` uses the area loop as its preferred evaluator
+  and retains this reboxed perimeter route as a checked alternative.
+  It is a usable alternate representative, not a substitute for the direct
+  `piCircumference` validity proof; the direct algorithm still lacks the
+  one-step refinement certificate, so the canonical row remains uncounted.
+  The direct rational endpoint condition has an executable regression proof
+  through the first nine dyadic transitions in
+  `PiProofs.circumferenceQuarterLengthStepRefinesUpToNine`; the required
+  all-stage theorem remains open.
+
+### Archived pre-refactor notes (not current source)
+
+The following notes, through the next top-level heading, describe modules and
+names from an earlier architecture (`CirclePi.lean`, `CircleArea.lean`, and
+related polygon files) that are no longer in this repository.  They are kept
+only as historical design context.  They are not a roadmap, should not be used
+to measure progress, and must not override the checked source map or the pi
+scoreboard above.
 
 - Pi should be represented by several independent computable algorithms:
   Leibniz series, Machin/arctangent formulas, geometric constructions,
@@ -659,35 +779,16 @@ students actually compute.
 
 ## Basel Problem
 
-- Euler's Basel problem now has a computable statement in
-  `ComputableAnalysis/Basel.lean`.  `Basel.zetaTwoRaw` is the raw interval
-  algorithm for `zeta(2)`: at stage `n`, the lower endpoint is
-  `sum_{k=1}^n 1/k^2`, and the upper endpoint adds the rational tail bound
-  `1/n`.  This padding is part of the raw algorithm definition; the finite
-  telescoping estimate is used to prove nesting:
-  `Basel.zetaTwoTerm_le_telescopeStep` proves
-  `1/(m+1)^2 <= 1/m - 1/(m+1)`, and
-  `Basel.zetaTwoFiniteTail_le_telescoping` proves every finite tail after
-  `n` terms is at most `1/n - 1/(n+count)`.  The theorem
-  `Basel.zetaTwoInterval_width` proves that the interval width is exactly
-  `1/n`, and `Basel.baselSeriesRaw_valid` proves that the Basel-series raw
-  algorithm is a valid `RealRaw`.
-- The right-hand side is `Basel.piSquaredOverSixRaw pi`, a raw interval
-  algorithm for `pi^2/6` from any chosen raw pi representative.  The current
-  named geometric version is `Basel.geometricPiSquaredOverSixRaw`, built from
-  `CirclePi.areaPiRawAlgorithm`.
-- Integer zeta values now have the same certified raw construction:
-  `Basel.zetaNatRaw p` computes `zeta(p)` for natural exponents, and
-  `Basel.zetaNatRaw_validCompute p hp` proves validity whenever `2 <= p`.
-  This uses the elementary comparison `1/k^p <= 1/k^2`, so the same
-  telescoping padding `1/n` works for every integer `p >= 2`.  This is the
-  clean finite layer beneath the eventual real-argument zeta function.
-- The formal Euler statement is
-  `Basel.EulerBaselStatement pi := Basel.zetaTwoRaw.Equiv
-  (Basel.piSquaredOverSixRaw pi)`.  The geometric-pi specialization is
-  `Basel.eulerBasel_geometricPi`; it is currently a proposition, not a proved
-  theorem.  Proving it constructively likely needs Euler's sine-product
-  argument, Fourier series, or later complex function theory.
+- `DirichletSeries.zetaTwoRaw` is the checked interval algorithm for
+  \(\zeta(2)\); `Basel.baselSeriesRaw` is its project-facing name, and
+  `Basel.baselSeriesRaw_valid` proves validity.
+- `Basel.piSquaredOverSixRaw pi` computes \(\pi^2/6\) from any valid bounded
+  raw pi representative.  The current geometric specialization is
+  `Basel.geometricPiSquaredOverSixRaw`, built from `piCircleArea`, with
+  validity theorem `Basel.geometricPiSquaredOverSixRaw_valid`.
+- `Basel.eulerBasel_geometricPi` is the remaining constructive theorem
+  statement relating these two valid computations.  It is not yet a proved
+  equivalence and therefore does not complete the Basel scoreboard row.
 
 ## Long-Term Theorems
 

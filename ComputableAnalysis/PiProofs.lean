@@ -33,6 +33,11 @@ def AreaPolygonValid : Prop :=
 def PiCircleAreaPolygonAgreement : Prop :=
   forall n, piCircleArea.compute n = piCircleAreaPolygon.compute n
 
+/-- The public increment/decrement area loop and the polygon-stage
+computation agree exactly at every dyadic stage. -/
+theorem piCircleAreaPolygonAgreement : PiCircleAreaPolygonAgreement :=
+  ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute
+
 def CircumferenceValid : Prop :=
   RealRaw.ValidCompute piCircumference.compute
 
@@ -1074,6 +1079,795 @@ def LeibnizRectanglePointwiseUnitIntegralBridgeAtOne : Prop :=
   LeibnizRectanglePointwiseCellBoundsAtOne ->
     LeibnizRectangleUniformUnitCellBoundsAtOne
 
+/-- Calculus-facing order target for the Leibniz/rectangle comparison.
+
+The pointwise kernel inequalities are already proved below.  What remains is
+the integral order theorem on each rational unit cell: integrating a pointwise
+lower bound gives a lower bound for the exact partial-kernel integral, and
+integrating a pointwise upper bound gives the corresponding upper rectangle
+bound. -/
+def LeibnizRectangleUnitCellOrderPreservation : Prop :=
+  (forall m, EvenKernelPointwiseCellBound m -> EvenKernelCellBound m) /\
+  (forall m, OddKernelPointwiseCellBound m -> OddKernelUnitCellBound m)
+
+/-- Exact cell-order preservation specialized to the arctangent-kernel
+polynomial partial integrals on `[0,1]`.
+
+This is the compact calculus target behind the Leibniz/rectangle comparison:
+pointwise lower and upper bounds for a finite kernel partial may be integrated
+over any rational unit cell. -/
+def KernelPartialExactCellOrderPreservationOnUnit : Prop :=
+  forall m,
+    Integral.ExactCellOrderPreservation
+      (fun x => Taylor.ArctanKernel.kernelPartial x m)
+      (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r m)
+      0 1
+
+/-- The constant zeroth kernel partial already has exact cell-order
+preservation.  This is the base case of the all-partials calculus target. -/
+theorem kernelPartialExactCellOrderPreservation_zero :
+    Integral.ExactCellOrderPreservation
+      (fun x => Taylor.ArctanKernel.kernelPartial x 0)
+      (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r 0)
+      0 1 := by
+  simpa [Taylor.ArctanKernel.kernelPartial,
+    Taylor.ArctanKernel.altGeomPartial,
+    Taylor.ArctanKernel.kernelPartialIntegralBetween] using
+    (Integral.exactCellOrderPreservation_constant
+      (0 : Rat) (1 : Rat) (1 : Rat))
+
+/-- The first nonconstant kernel partial has exact cell-order preservation on
+`[0,1]`.  Its gap from each endpoint rectangle factors into nonnegative
+rational terms. -/
+theorem kernelPartialExactCellOrderPreservation_one :
+    Integral.ExactCellOrderPreservation
+      (fun x => Taylor.ArctanKernel.kernelPartial x 1)
+      (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1)
+      0 1 := by
+  have hkernel_one (x : Rat) :
+      Taylor.ArctanKernel.kernelPartial x 1 = 1 - x * x := by
+    simp [Taylor.ArctanKernel.kernelPartial,
+      Taylor.ArctanKernel.altGeomPartial]
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · intro p r c hp0 hpr _hr1 hbound
+    let L : Rat := r - p
+    let S : Rat := r * r + r * p + p * p
+    have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+    have hL0 : 0 <= L := by
+      dsimp [L]
+      grind [Rat.sub_eq_add_neg]
+    have hformula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S := by
+      dsimp [L, S]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hmul :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 * 3 =
+          L * (3 - S) := by
+      rw [hformula, hcube, Rat.div_def]
+      dsimp [L, S]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel]
+    have hfactor : 0 <= (r - p) * (2 * r + p) := by
+      exact Rat.mul_nonneg
+        (by grind [Rat.sub_eq_add_neg])
+        (Rat.add_nonneg
+          (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hr0) hp0)
+    have hinner : 3 * (1 - r * r) <= 3 - S := by
+      have hidentity :
+          (3 - S) - 3 * (1 - r * r) = (r - p) * (2 * r + p) := by
+        dsimp [S]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      grind [Rat.sub_eq_add_neg]
+    have hrectangle :
+        L * (1 - r * r) <=
+          Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 := by
+      apply Rat.le_of_mul_le_mul_right (c := 3)
+      · calc
+          L * (1 - r * r) * 3 = L * (3 * (1 - r * r)) := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+          _ <= L * (3 - S) := Rat.mul_le_mul_of_nonneg_left hinner hL0
+          _ = Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 * 3 :=
+            hmul.symm
+      · native_decide
+    have hc : c <= 1 - r * r := by
+      simpa [hkernel_one] using hbound hpr (Rat.le_refl : r <= r)
+    exact Rat.le_trans (Rat.mul_le_mul_of_nonneg_left hc hL0) hrectangle
+  · intro p r c hp0 hpr _hr1 hbound
+    let L : Rat := r - p
+    let S : Rat := r * r + r * p + p * p
+    have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+    have hL0 : 0 <= L := by
+      dsimp [L]
+      grind [Rat.sub_eq_add_neg]
+    have hformula :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 =
+          (r - p) - (r ^ 3 - p ^ 3) / 3 := by
+      simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+        Taylor.ArctanKernel.kernelTermIntegralBetween]
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcube : r ^ 3 - p ^ 3 = L * S := by
+      dsimp [L, S]
+      repeat rw [Rat.pow_succ]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hmul :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 * 3 =
+          L * (3 - S) := by
+      rw [hformula, hcube, Rat.div_def]
+      dsimp [L, S]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel]
+    have hfactor : 0 <= (r - p) * (r + 2 * p) := by
+      exact Rat.mul_nonneg
+        (by grind [Rat.sub_eq_add_neg])
+        (Rat.add_nonneg hr0
+          (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 2) hp0))
+    have hinner : 3 - S <= 3 * (1 - p * p) := by
+      have hidentity :
+          3 * (1 - p * p) - (3 - S) = (r - p) * (r + 2 * p) := by
+        dsimp [S]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      grind [Rat.sub_eq_add_neg]
+    have hrectangle :
+        Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 <=
+          L * (1 - p * p) := by
+      apply Rat.le_of_mul_le_mul_right (c := 3)
+      · calc
+          Taylor.ArctanKernel.kernelPartialIntegralBetween p r 1 * 3 =
+              L * (3 - S) := hmul
+          _ <= L * (3 * (1 - p * p)) :=
+            Rat.mul_le_mul_of_nonneg_left hinner hL0
+          _ = L * (1 - p * p) * 3 := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      · native_decide
+    have hc : 1 - p * p <= c := by
+      simpa [hkernel_one] using hbound (Rat.le_refl : p <= p) hpr
+    exact Rat.le_trans hrectangle (Rat.mul_le_mul_of_nonneg_left hc hL0)
+
+private theorem kernelPartialIntegralBetween_two_boole
+    (p r : Rat) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 2 =
+      ((r - p) / 90) *
+        (7 * Taylor.ArctanKernel.kernelPartial p 2 +
+          32 * Taylor.ArctanKernel.kernelPartial (p + (r - p) / 4) 2 +
+          12 * Taylor.ArctanKernel.kernelPartial (p + (r - p) / 2) 2 +
+          32 * Taylor.ArctanKernel.kernelPartial
+            (p + 3 * (r - p) / 4) 2 +
+          7 * Taylor.ArctanKernel.kernelPartial r 2) := by
+  simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+    Taylor.ArctanKernel.kernelTermIntegralBetween,
+    Taylor.ArctanKernel.kernelPartial,
+    Taylor.ArctanKernel.altGeomPartial]
+  grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ, Rat.mul_inv_cancel]
+
+/-- The degree-four kernel partial has exact cell-order preservation on `[0,1]`.
+This instance is obtained from its positive rational Boole quadrature identity. -/
+theorem kernelPartialExactCellOrderPreservation_two :
+    Integral.ExactCellOrderPreservation
+      (fun x => Taylor.ArctanKernel.kernelPartial x 2)
+      (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r 2)
+      0 1 := by
+  apply Integral.exactCellOrderPreservation_of_boole (a := (0 : Rat)) (b := 1)
+  intro p r
+  exact kernelPartialIntegralBetween_two_boole p r
+
+private theorem affine_pow_two (p t L : Rat) :
+    (p + t * L) ^ 2 =
+      p ^ 2 + 2 * p * t * L + t ^ 2 * L ^ 2 := by
+  repeat rw [Rat.pow_succ]
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem affine_pow_four (p t L : Rat) :
+    (p + t * L) ^ 4 =
+      p ^ 4 + 4 * p ^ 3 * t * L + 6 * p ^ 2 * t ^ 2 * L ^ 2 +
+        4 * p * t ^ 3 * L ^ 3 + t ^ 4 * L ^ 4 := by
+  repeat rw [Rat.pow_succ]
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem affine_pow_six (p t L : Rat) :
+    (p + t * L) ^ 6 =
+      p ^ 6 + 6 * p ^ 5 * t * L + 15 * p ^ 4 * t ^ 2 * L ^ 2 +
+        20 * p ^ 3 * t ^ 3 * L ^ 3 + 15 * p ^ 2 * t ^ 4 * L ^ 4 +
+          6 * p * t ^ 5 * L ^ 5 + t ^ 6 * L ^ 6 := by
+  repeat rw [Rat.pow_succ]
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private def affineMoment : List (Rat × Rat) -> Nat -> Rat
+  | [], _ => 0
+  | (node, weight) :: rest, k => weight * node ^ k + affineMoment rest k
+
+private def affinePowerSum (p L : Rat) (k : Nat) : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (node, weight) :: rest =>
+      weight * (p + node * L) ^ k + affinePowerSum p L k rest
+
+private theorem affinePowerSum_two_eq_moments (p L : Rat) :
+    forall nodes : List (Rat × Rat),
+      affinePowerSum p L 2 nodes =
+        affineMoment nodes 0 * p ^ 2 +
+          2 * affineMoment nodes 1 * p * L +
+          affineMoment nodes 2 * L ^ 2
+  | [] => by
+      simp [affinePowerSum, affineMoment]
+      grind
+  | (node, weight) :: rest => by
+      simp only [affinePowerSum, affineMoment]
+      rw [affine_pow_two p node L]
+      rw [affinePowerSum_two_eq_moments p L rest]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+
+private theorem affinePowerSum_four_eq_moments (p L : Rat) :
+    forall nodes : List (Rat × Rat),
+      affinePowerSum p L 4 nodes =
+        affineMoment nodes 0 * p ^ 4 +
+          4 * affineMoment nodes 1 * p ^ 3 * L +
+          6 * affineMoment nodes 2 * p ^ 2 * L ^ 2 +
+          4 * affineMoment nodes 3 * p * L ^ 3 +
+          affineMoment nodes 4 * L ^ 4
+  | [] => by
+      simp [affinePowerSum, affineMoment]
+      grind
+  | (node, weight) :: rest => by
+      simp only [affinePowerSum, affineMoment]
+      rw [affine_pow_four p node L]
+      rw [affinePowerSum_four_eq_moments p L rest]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+
+private theorem affinePowerSum_six_eq_moments (p L : Rat) :
+    forall nodes : List (Rat × Rat),
+      affinePowerSum p L 6 nodes =
+        affineMoment nodes 0 * p ^ 6 +
+          6 * affineMoment nodes 1 * p ^ 5 * L +
+          15 * affineMoment nodes 2 * p ^ 4 * L ^ 2 +
+          20 * affineMoment nodes 3 * p ^ 3 * L ^ 3 +
+          15 * affineMoment nodes 4 * p ^ 2 * L ^ 4 +
+          6 * affineMoment nodes 5 * p * L ^ 5 +
+          affineMoment nodes 6 * L ^ 6
+  | [] => by
+      simp [affinePowerSum, affineMoment]
+      grind
+  | (node, weight) :: rest => by
+      simp only [affinePowerSum, affineMoment]
+      rw [affine_pow_six p node L]
+      rw [affinePowerSum_six_eq_moments p L rest]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+
+private def sevenPointNewtonCotesNodes : List (Rat × Rat) :=
+  [(0, 41 / 840), (1 / 6, 9 / 35), (1 / 3, 9 / 280),
+    (1 / 2, 34 / 105), (2 / 3, 9 / 280), (5 / 6, 9 / 35),
+    (1, 41 / 840)]
+
+private theorem sevenPointNewtonCotes_moment_zero :
+    affineMoment sevenPointNewtonCotesNodes 0 = 1 := by native_decide
+
+private theorem sevenPointNewtonCotes_moment_one :
+    affineMoment sevenPointNewtonCotesNodes 1 = 1 / 2 := by native_decide
+
+private theorem sevenPointNewtonCotes_moment_two :
+    affineMoment sevenPointNewtonCotesNodes 2 = 1 / 3 := by native_decide
+
+private theorem sevenPointNewtonCotes_moment_three :
+    affineMoment sevenPointNewtonCotesNodes 3 = 1 / 4 := by native_decide
+
+private theorem sevenPointNewtonCotes_moment_four :
+    affineMoment sevenPointNewtonCotesNodes 4 = 1 / 5 := by native_decide
+
+private theorem sevenPointNewtonCotes_moment_five :
+    affineMoment sevenPointNewtonCotesNodes 5 = 1 / 6 := by native_decide
+
+private theorem sevenPointNewtonCotes_moment_six :
+    affineMoment sevenPointNewtonCotesNodes 6 = 1 / 7 := by native_decide
+
+private theorem sevenPointNewtonCotes_zero_expansion (p L : Rat) :
+    affinePowerSum p L 0 sevenPointNewtonCotesNodes = 1 := by
+  simp [affinePowerSum, sevenPointNewtonCotesNodes]
+  native_decide
+
+private theorem sevenPointNewtonCotes_two_expansion (p L : Rat) :
+    affinePowerSum p L 2 sevenPointNewtonCotesNodes =
+      p ^ 2 + p * L + (1 / 3) * L ^ 2 := by
+  rw [affinePowerSum_two_eq_moments,
+    sevenPointNewtonCotes_moment_zero,
+    sevenPointNewtonCotes_moment_one,
+    sevenPointNewtonCotes_moment_two]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem sevenPointNewtonCotes_four_expansion (p L : Rat) :
+    affinePowerSum p L 4 sevenPointNewtonCotesNodes =
+      p ^ 4 + 2 * p ^ 3 * L + 2 * p ^ 2 * L ^ 2 +
+        p * L ^ 3 + (1 / 5) * L ^ 4 := by
+  rw [affinePowerSum_four_eq_moments,
+    sevenPointNewtonCotes_moment_zero,
+    sevenPointNewtonCotes_moment_one,
+    sevenPointNewtonCotes_moment_two,
+    sevenPointNewtonCotes_moment_three,
+    sevenPointNewtonCotes_moment_four]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem sevenPointNewtonCotes_six_expansion (p L : Rat) :
+    affinePowerSum p L 6 sevenPointNewtonCotesNodes =
+      p ^ 6 + 3 * p ^ 5 * L + 5 * p ^ 4 * L ^ 2 +
+        5 * p ^ 3 * L ^ 3 + 3 * p ^ 2 * L ^ 4 +
+          p * L ^ 5 + (1 / 7) * L ^ 6 := by
+  rw [affinePowerSum_six_eq_moments,
+    sevenPointNewtonCotes_moment_zero,
+    sevenPointNewtonCotes_moment_one,
+    sevenPointNewtonCotes_moment_two,
+    sevenPointNewtonCotes_moment_three,
+    sevenPointNewtonCotes_moment_four,
+    sevenPointNewtonCotes_moment_five,
+    sevenPointNewtonCotes_moment_six]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private def kernelThreeAverage (p L : Rat) : Rat :=
+  1 - (p ^ 2 + p * L + (1 / 3) * L ^ 2) +
+    (p ^ 4 + 2 * p ^ 3 * L + 2 * p ^ 2 * L ^ 2 +
+      p * L ^ 3 + (1 / 5) * L ^ 4) -
+      (p ^ 6 + 3 * p ^ 5 * L + 5 * p ^ 4 * L ^ 2 +
+        5 * p ^ 3 * L ^ 3 + 3 * p ^ 2 * L ^ 4 +
+          p * L ^ 5 + (1 / 7) * L ^ 6)
+
+private theorem sevenPointNewtonCotes_kernel_three_expansion (p L : Rat) :
+    affinePowerSum p L 0 sevenPointNewtonCotesNodes -
+      affinePowerSum p L 2 sevenPointNewtonCotesNodes +
+        affinePowerSum p L 4 sevenPointNewtonCotesNodes -
+          affinePowerSum p L 6 sevenPointNewtonCotesNodes =
+      kernelThreeAverage p L := by
+  rw [sevenPointNewtonCotes_zero_expansion,
+    sevenPointNewtonCotes_two_expansion,
+    sevenPointNewtonCotes_four_expansion,
+    sevenPointNewtonCotes_six_expansion]
+  rfl
+
+private theorem monomialIntegralTwo (p r : Rat) :
+    (r ^ 3 - p ^ 3) / 3 =
+      (r - p) * (p ^ 2 + p * (r - p) + (1 / 3) * (r - p) ^ 2) := by
+  let L : Rat := r - p
+  have hr : r = p + L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  rw [hr]
+  dsimp [L]
+  repeat rw [Rat.pow_succ]
+  rw [Rat.div_def]
+  have h3 : (3 : Rat) ≠ 0 := by native_decide
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+private theorem monomialIntegralFour (p r : Rat) :
+    (r ^ 5 - p ^ 5) / 5 =
+      (r - p) * (p ^ 4 + 2 * p ^ 3 * (r - p) +
+        2 * p ^ 2 * (r - p) ^ 2 + p * (r - p) ^ 3 +
+          (1 / 5) * (r - p) ^ 4) := by
+  let L : Rat := r - p
+  have hr : r = p + L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  rw [hr]
+  dsimp [L]
+  repeat rw [Rat.pow_succ]
+  rw [Rat.div_def]
+  have h5 : (5 : Rat) ≠ 0 := by native_decide
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+private theorem monomialIntegralSix (p r : Rat) :
+    (r ^ 7 - p ^ 7) / 7 =
+      (r - p) * (p ^ 6 + 3 * p ^ 5 * (r - p) +
+        5 * p ^ 4 * (r - p) ^ 2 + 5 * p ^ 3 * (r - p) ^ 3 +
+          3 * p ^ 2 * (r - p) ^ 4 + p * (r - p) ^ 5 +
+            (1 / 7) * (r - p) ^ 6) := by
+  let L : Rat := r - p
+  have hr : r = p + L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  rw [hr]
+  dsimp [L]
+  repeat rw [Rat.pow_succ]
+  rw [Rat.div_def]
+  have h7 : (7 : Rat) ≠ 0 := by native_decide
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+private theorem kernelPartialIntegralThree_eq_average (p r : Rat) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 3 =
+      (r - p) * kernelThreeAverage p (r - p) := by
+  have h2 := monomialIntegralTwo p r
+  have h4 := monomialIntegralFour p r
+  have h6 := monomialIntegralSix p r
+  simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+    Taylor.ArctanKernel.kernelTermIntegralBetween]
+  have hden1 : (2 : Rat) + 1 = 3 := by native_decide
+  have hden2 : (2 : Rat) * 2 + 1 = 5 := by native_decide
+  have hden3 : (2 : Rat) * 3 + 1 = 7 := by native_decide
+  have hneg2 : (-1 : Rat) ^ 2 = 1 := by native_decide
+  have hneg3 : (-1 : Rat) ^ 3 = -1 := by native_decide
+  have hnegmul (x : Rat) : (-1 : Rat) * x = -x := by
+    change -(1 : Rat) * x = -x
+    rw [Rat.neg_mul, Rat.one_mul]
+  have hnegdiv (x d : Rat) : -x / d = -(x / d) := by
+    rw [Rat.div_def, Rat.div_def, Rat.neg_mul]
+  rw [hden1, hden2, hden3, hneg2, hneg3]
+  rw [hnegmul, Rat.one_mul, hnegmul]
+  rw [hnegdiv, hnegdiv]
+  rw [h2, h4, h6]
+  unfold kernelThreeAverage
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem kernelPartial_three_formula (x : Rat) :
+    Taylor.ArctanKernel.kernelPartial x 3 = 1 - x ^ 2 + x ^ 4 - x ^ 6 := by
+  simp [Taylor.ArctanKernel.kernelPartial,
+    Taylor.ArctanKernel.altGeomPartial]
+  grind [Rat.sub_eq_add_neg]
+
+private theorem quadratureEvalSum_kernelPartial_three_eq_affine
+    (p r : Rat) :
+    forall nodes : List (Rat × Rat),
+      Integral.quadratureEvalSum
+          (fun x => Taylor.ArctanKernel.kernelPartial x 3) p r nodes =
+        affinePowerSum p (r - p) 0 nodes -
+          affinePowerSum p (r - p) 2 nodes +
+            affinePowerSum p (r - p) 4 nodes -
+              affinePowerSum p (r - p) 6 nodes
+  | [] => by
+      simp [Integral.quadratureEvalSum, affinePowerSum]
+      grind
+  | (node, weight) :: rest => by
+      simp only [Integral.quadratureEvalSum, affinePowerSum]
+      rw [kernelPartial_three_formula]
+      rw [quadratureEvalSum_kernelPartial_three_eq_affine p r rest]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem kernelPartialIntegralThree_newtonCotes (p r : Rat) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 3 =
+      (r - p) * Integral.quadratureEvalSum
+        (fun x => Taylor.ArctanKernel.kernelPartial x 3) p r
+        sevenPointNewtonCotesNodes := by
+  rw [kernelPartialIntegralThree_eq_average]
+  rw [← sevenPointNewtonCotes_kernel_three_expansion]
+  rw [← quadratureEvalSum_kernelPartial_three_eq_affine]
+
+/-- The degree-six kernel partial has exact cell-order preservation on `[0,1]`.
+This instance is obtained from a positive seven-point rational Newton--Cotes
+quadrature identity. -/
+theorem kernelPartialExactCellOrderPreservation_three :
+    Integral.ExactCellOrderPreservation
+      (fun x => Taylor.ArctanKernel.kernelPartial x 3)
+      (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r 3)
+      0 1 := by
+  apply Integral.exactCellOrderPreservation_of_positive_quadrature
+    (a := (0 : Rat)) (b := 1) sevenPointNewtonCotesNodes
+  · intro pair hmem
+    simp only [sevenPointNewtonCotesNodes, List.mem_cons, List.not_mem_nil] at hmem
+    rcases hmem with h | h | h | h | h | h | h | h
+    all_goals try contradiction
+    all_goals subst pair <;> constructor <;> native_decide
+  · intro pair hmem
+    simp only [sevenPointNewtonCotesNodes, List.mem_cons, List.not_mem_nil] at hmem
+    rcases hmem with h | h | h | h | h | h | h | h
+    all_goals try contradiction
+    all_goals subst pair <;> native_decide
+  · native_decide
+  · intro p r
+    exact kernelPartialIntegralThree_newtonCotes p r
+
+private theorem affine_pow_eight (p t L : Rat) :
+    (p + t * L) ^ 8 =
+      p ^ 8 + 8 * p ^ 7 * t * L + 28 * p ^ 6 * t ^ 2 * L ^ 2 +
+        56 * p ^ 5 * t ^ 3 * L ^ 3 + 70 * p ^ 4 * t ^ 4 * L ^ 4 +
+          56 * p ^ 3 * t ^ 5 * L ^ 5 + 28 * p ^ 2 * t ^ 6 * L ^ 6 +
+            8 * p * t ^ 7 * L ^ 7 + t ^ 8 * L ^ 8 := by
+  repeat rw [Rat.pow_succ]
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem affinePowerSum_eight_eq_moments (p L : Rat) :
+    forall nodes : List (Rat × Rat),
+      affinePowerSum p L 8 nodes =
+        affineMoment nodes 0 * p ^ 8 +
+          8 * affineMoment nodes 1 * p ^ 7 * L +
+          28 * affineMoment nodes 2 * p ^ 6 * L ^ 2 +
+          56 * affineMoment nodes 3 * p ^ 5 * L ^ 3 +
+          70 * affineMoment nodes 4 * p ^ 4 * L ^ 4 +
+          56 * affineMoment nodes 5 * p ^ 3 * L ^ 5 +
+          28 * affineMoment nodes 6 * p ^ 2 * L ^ 6 +
+          8 * affineMoment nodes 7 * p * L ^ 7 +
+          affineMoment nodes 8 * L ^ 8
+  | [] => by
+      simp [affinePowerSum, affineMoment]
+      grind
+  | (node, weight) :: rest => by
+      simp only [affinePowerSum, affineMoment]
+      rw [affine_pow_eight p node L]
+      rw [affinePowerSum_eight_eq_moments p L rest]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+
+private def elevenPointNewtonCotesNodes : List (Rat × Rat) :=
+  [(0, 167287 / 5715360), (1 / 10, 21887 / 142884),
+    (1 / 5, 403 / 14112), (3 / 10, 1937 / 11907),
+    (2 / 5, 2077 / 27216), (1 / 2, 1 / 10),
+    (3 / 5, 2077 / 27216), (7 / 10, 1937 / 11907),
+    (4 / 5, 403 / 14112), (9 / 10, 21887 / 142884),
+    (1, 167287 / 5715360)]
+
+private theorem elevenPointNewtonCotes_moment_zero :
+    affineMoment elevenPointNewtonCotesNodes 0 = 1 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_one :
+    affineMoment elevenPointNewtonCotesNodes 1 = 1 / 2 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_two :
+    affineMoment elevenPointNewtonCotesNodes 2 = 1 / 3 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_three :
+    affineMoment elevenPointNewtonCotesNodes 3 = 1 / 4 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_four :
+    affineMoment elevenPointNewtonCotesNodes 4 = 1 / 5 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_five :
+    affineMoment elevenPointNewtonCotesNodes 5 = 1 / 6 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_six :
+    affineMoment elevenPointNewtonCotesNodes 6 = 1 / 7 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_seven :
+    affineMoment elevenPointNewtonCotesNodes 7 = 1 / 8 := by native_decide
+
+private theorem elevenPointNewtonCotes_moment_eight :
+    affineMoment elevenPointNewtonCotesNodes 8 = 1 / 9 := by native_decide
+
+private theorem elevenPointNewtonCotes_zero_expansion (p L : Rat) :
+    affinePowerSum p L 0 elevenPointNewtonCotesNodes = 1 := by
+  simp [affinePowerSum, elevenPointNewtonCotesNodes]
+  native_decide
+
+private theorem elevenPointNewtonCotes_two_expansion (p L : Rat) :
+    affinePowerSum p L 2 elevenPointNewtonCotesNodes =
+      p ^ 2 + p * L + (1 / 3) * L ^ 2 := by
+  rw [affinePowerSum_two_eq_moments,
+    elevenPointNewtonCotes_moment_zero,
+    elevenPointNewtonCotes_moment_one,
+    elevenPointNewtonCotes_moment_two]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem elevenPointNewtonCotes_four_expansion (p L : Rat) :
+    affinePowerSum p L 4 elevenPointNewtonCotesNodes =
+      p ^ 4 + 2 * p ^ 3 * L + 2 * p ^ 2 * L ^ 2 +
+        p * L ^ 3 + (1 / 5) * L ^ 4 := by
+  rw [affinePowerSum_four_eq_moments,
+    elevenPointNewtonCotes_moment_zero,
+    elevenPointNewtonCotes_moment_one,
+    elevenPointNewtonCotes_moment_two,
+    elevenPointNewtonCotes_moment_three,
+    elevenPointNewtonCotes_moment_four]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem elevenPointNewtonCotes_six_expansion (p L : Rat) :
+    affinePowerSum p L 6 elevenPointNewtonCotesNodes =
+      p ^ 6 + 3 * p ^ 5 * L + 5 * p ^ 4 * L ^ 2 +
+        5 * p ^ 3 * L ^ 3 + 3 * p ^ 2 * L ^ 4 +
+          p * L ^ 5 + (1 / 7) * L ^ 6 := by
+  rw [affinePowerSum_six_eq_moments,
+    elevenPointNewtonCotes_moment_zero,
+    elevenPointNewtonCotes_moment_one,
+    elevenPointNewtonCotes_moment_two,
+    elevenPointNewtonCotes_moment_three,
+    elevenPointNewtonCotes_moment_four,
+    elevenPointNewtonCotes_moment_five,
+    elevenPointNewtonCotes_moment_six]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private def eighthAverage (p L : Rat) : Rat :=
+  p ^ 8 + 4 * p ^ 7 * L + (28 / 3) * p ^ 6 * L ^ 2 +
+    14 * p ^ 5 * L ^ 3 + 14 * p ^ 4 * L ^ 4 +
+      (28 / 3) * p ^ 3 * L ^ 5 + 4 * p ^ 2 * L ^ 6 +
+        p * L ^ 7 + (1 / 9) * L ^ 8
+
+private theorem elevenPointNewtonCotes_eight_expansion (p L : Rat) :
+    affinePowerSum p L 8 elevenPointNewtonCotesNodes = eighthAverage p L := by
+  rw [affinePowerSum_eight_eq_moments,
+    elevenPointNewtonCotes_moment_zero,
+    elevenPointNewtonCotes_moment_one,
+    elevenPointNewtonCotes_moment_two,
+    elevenPointNewtonCotes_moment_three,
+    elevenPointNewtonCotes_moment_four,
+    elevenPointNewtonCotes_moment_five,
+    elevenPointNewtonCotes_moment_six,
+    elevenPointNewtonCotes_moment_seven,
+    elevenPointNewtonCotes_moment_eight]
+  unfold eighthAverage
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private def kernelFourAverage (p L : Rat) : Rat :=
+  kernelThreeAverage p L + eighthAverage p L
+
+private theorem elevenPointNewtonCotes_kernel_four_expansion (p L : Rat) :
+    affinePowerSum p L 0 elevenPointNewtonCotesNodes -
+      affinePowerSum p L 2 elevenPointNewtonCotesNodes +
+        affinePowerSum p L 4 elevenPointNewtonCotesNodes -
+          affinePowerSum p L 6 elevenPointNewtonCotesNodes +
+            affinePowerSum p L 8 elevenPointNewtonCotesNodes =
+      kernelFourAverage p L := by
+  rw [elevenPointNewtonCotes_zero_expansion,
+    elevenPointNewtonCotes_two_expansion,
+    elevenPointNewtonCotes_four_expansion,
+    elevenPointNewtonCotes_six_expansion,
+    elevenPointNewtonCotes_eight_expansion]
+  rfl
+
+private theorem monomialIntegralEight (p r : Rat) :
+    (r ^ 9 - p ^ 9) / 9 = (r - p) * eighthAverage p (r - p) := by
+  let L : Rat := r - p
+  have hr : r = p + L := by
+    dsimp [L]
+    grind [Rat.sub_eq_add_neg]
+  rw [hr]
+  dsimp [L]
+  repeat rw [Rat.pow_succ]
+  rw [Rat.div_def]
+  have h3 : (3 : Rat) ≠ 0 := by native_decide
+  have h9 : (9 : Rat) ≠ 0 := by native_decide
+  unfold eighthAverage
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+private theorem kernelPartialIntegralFour_eq_average (p r : Rat) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 4 =
+      (r - p) * kernelFourAverage p (r - p) := by
+  have h2 := monomialIntegralTwo p r
+  have h4 := monomialIntegralFour p r
+  have h6 := monomialIntegralSix p r
+  have height := monomialIntegralEight p r
+  simp [Taylor.ArctanKernel.kernelPartialIntegralBetween,
+    Taylor.ArctanKernel.kernelTermIntegralBetween]
+  have hden1 : (2 : Rat) + 1 = 3 := by native_decide
+  have hden2 : (2 : Rat) * 2 + 1 = 5 := by native_decide
+  have hden3 : (2 : Rat) * 3 + 1 = 7 := by native_decide
+  have hden4 : (2 : Rat) * 4 + 1 = 9 := by native_decide
+  have hneg2 : (-1 : Rat) ^ 2 = 1 := by native_decide
+  have hneg3 : (-1 : Rat) ^ 3 = -1 := by native_decide
+  have hneg4 : (-1 : Rat) ^ 4 = 1 := by native_decide
+  have hnegmul (x : Rat) : (-1 : Rat) * x = -x := by
+    change -(1 : Rat) * x = -x
+    rw [Rat.neg_mul, Rat.one_mul]
+  have hnegdiv (x d : Rat) : -x / d = -(x / d) := by
+    rw [Rat.div_def, Rat.div_def, Rat.neg_mul]
+  rw [hden1, hden2, hden3, hden4, hneg2, hneg3, hneg4]
+  rw [hnegmul, Rat.one_mul, hnegmul, Rat.one_mul]
+  rw [hnegdiv, hnegdiv]
+  rw [h2, h4, h6, height]
+  unfold kernelFourAverage kernelThreeAverage
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem kernelPartial_four_formula (x : Rat) :
+    Taylor.ArctanKernel.kernelPartial x 4 =
+      1 - x ^ 2 + x ^ 4 - x ^ 6 + x ^ 8 := by
+  simp [Taylor.ArctanKernel.kernelPartial,
+    Taylor.ArctanKernel.altGeomPartial]
+  grind [Rat.sub_eq_add_neg]
+
+private theorem quadratureEvalSum_kernelPartial_four_eq_affine
+    (p r : Rat) :
+    forall nodes : List (Rat × Rat),
+      Integral.quadratureEvalSum
+          (fun x => Taylor.ArctanKernel.kernelPartial x 4) p r nodes =
+        affinePowerSum p (r - p) 0 nodes -
+          affinePowerSum p (r - p) 2 nodes +
+            affinePowerSum p (r - p) 4 nodes -
+              affinePowerSum p (r - p) 6 nodes +
+                affinePowerSum p (r - p) 8 nodes
+  | [] => by
+      simp [Integral.quadratureEvalSum, affinePowerSum]
+      grind
+  | (node, weight) :: rest => by
+      simp only [Integral.quadratureEvalSum, affinePowerSum]
+      rw [kernelPartial_four_formula]
+      rw [quadratureEvalSum_kernelPartial_four_eq_affine p r rest]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem kernelPartialIntegralFour_newtonCotes (p r : Rat) :
+    Taylor.ArctanKernel.kernelPartialIntegralBetween p r 4 =
+      (r - p) * Integral.quadratureEvalSum
+        (fun x => Taylor.ArctanKernel.kernelPartial x 4) p r
+        elevenPointNewtonCotesNodes := by
+  rw [kernelPartialIntegralFour_eq_average]
+  rw [← elevenPointNewtonCotes_kernel_four_expansion]
+  rw [← quadratureEvalSum_kernelPartial_four_eq_affine]
+
+/-- The degree-eight kernel partial has exact cell-order preservation on
+`[0,1]`, via a positive eleven-point rational quadrature identity. -/
+theorem kernelPartialExactCellOrderPreservation_four :
+    Integral.ExactCellOrderPreservation
+      (fun x => Taylor.ArctanKernel.kernelPartial x 4)
+      (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r 4)
+      0 1 := by
+  apply Integral.exactCellOrderPreservation_of_positive_quadrature
+    (a := (0 : Rat)) (b := 1) elevenPointNewtonCotesNodes
+  · intro pair hmem
+    simp only [elevenPointNewtonCotesNodes, List.mem_cons, List.not_mem_nil] at hmem
+    rcases hmem with h | h | h | h | h | h | h | h | h | h | h | h
+    all_goals try contradiction
+    all_goals subst pair <;> constructor <;> native_decide
+  · intro pair hmem
+    simp only [elevenPointNewtonCotesNodes, List.mem_cons, List.not_mem_nil] at hmem
+    rcases hmem with h | h | h | h | h | h | h | h | h | h | h | h
+    all_goals try contradiction
+    all_goals subst pair <;> native_decide
+  · native_decide
+  · intro p r
+    exact kernelPartialIntegralFour_newtonCotes p r
+
+theorem evenKernelCellBound_of_exactCellOrderPreservation
+    {m : Nat}
+    (horder :
+      Integral.ExactCellOrderPreservation
+        (fun x => Taylor.ArctanKernel.kernelPartial x m)
+        (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r m)
+        0 1)
+    (hpointwise : EvenKernelPointwiseCellBound m) :
+    EvenKernelCellBound m := by
+  intro p r hp0 hpr hr1
+  unfold ArctanGeometry.integralLowerStep
+  exact horder.lower_const hp0 hpr hr1 (by
+    intro x hpx hxr
+    exact hpointwise hp0 hpx hxr)
+
+theorem oddKernelUnitCellBound_of_exactCellOrderPreservation
+    {m : Nat}
+    (horder :
+      Integral.ExactCellOrderPreservation
+        (fun x => Taylor.ArctanKernel.kernelPartial x m)
+        (fun p r => Taylor.ArctanKernel.kernelPartialIntegralBetween p r m)
+        0 1)
+    (hpointwise : OddKernelPointwiseCellBound m) :
+    OddKernelUnitCellBound m := by
+  intro p r hp0 hpr hr1
+  unfold ArctanGeometry.integralUpperStep
+  exact horder.upper_const hp0 hpr hr1 (by
+    intro x hpx hxr
+    exact hpointwise hp0 hpx hxr)
+
+theorem unitCellOrderPreservation_of_kernelPartialExactCellOrderPreservation
+    (h : KernelPartialExactCellOrderPreservationOnUnit) :
+    LeibnizRectangleUnitCellOrderPreservation := by
+  constructor
+  · intro m hpointwise
+    exact evenKernelCellBound_of_exactCellOrderPreservation
+      (h m) hpointwise
+  · intro m hpointwise
+    exact oddKernelUnitCellBound_of_exactCellOrderPreservation
+      (h m) hpointwise
+
 theorem evenKernelCellBounds_of_cellBound
     {m : Nat} {intervals : List (Rat × Rat)}
     (hcell : EvenKernelCellBound m)
@@ -1191,8 +1985,10 @@ theorem integralLowerStep_le_kernelPartialIntegralBetween_zero
     _ = r - p := by rw [Rat.mul_one]
 
 theorem evenKernelCellBound_zero : EvenKernelCellBound 0 := by
-  intro p r _hp0 hpr _hr1
-  exact integralLowerStep_le_kernelPartialIntegralBetween_zero hpr
+  apply evenKernelCellBound_of_exactCellOrderPreservation
+    (m := 0) kernelPartialExactCellOrderPreservation_zero
+  intro p x r hp0 hpx hxr
+  simpa using evenKernelPointwiseCellBound_even 0 hp0 hpx hxr
 
 theorem kernelPartialIntegralBetween_two_lowerStep
     {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
@@ -1307,8 +2103,10 @@ theorem kernelPartialIntegralBetween_two_lowerStep
   · exact h15Dpos
 
 theorem evenKernelCellBound_two : EvenKernelCellBound 2 := by
-  intro p r hp0 hpr hr1
-  exact kernelPartialIntegralBetween_two_lowerStep hp0 hpr hr1
+  apply evenKernelCellBound_of_exactCellOrderPreservation
+    (m := 2) kernelPartialExactCellOrderPreservation_two
+  intro p x r hp0 hpx hxr
+  simpa using evenKernelPointwiseCellBound_even 1 hp0 hpx hxr
 
 theorem kernelPartialIntegralBetween_one_le_integralUpperStep
     {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
@@ -1407,8 +2205,10 @@ theorem oddKernelCellBound_one : OddKernelCellBound 1 := by
   exact kernelPartialIntegralBetween_one_le_integralUpperStep hp0 hpr
 
 theorem oddKernelUnitCellBound_one : OddKernelUnitCellBound 1 := by
-  intro p r hp0 hpr _hr1
-  exact oddKernelCellBound_one hp0 hpr
+  apply oddKernelUnitCellBound_of_exactCellOrderPreservation
+    (m := 1) kernelPartialExactCellOrderPreservation_one
+  intro p x r hp0 hpx hxr
+  simpa using oddKernelPointwiseCellBound_odd 0 hp0 hpx hxr
 
 private structure SimplexCertTerm where
   c : Rat
@@ -1608,8 +2408,10 @@ theorem kernelPartialIntegralBetween_three_le_integralUpperStep_on_unit
   · exact h105Dpos
 
 theorem oddKernelUnitCellBound_three : OddKernelUnitCellBound 3 := by
-  intro p r hp0 hpr hr1
-  exact kernelPartialIntegralBetween_three_le_integralUpperStep_on_unit hp0 hpr hr1
+  apply oddKernelUnitCellBound_of_exactCellOrderPreservation
+    (m := 3) kernelPartialExactCellOrderPreservation_three
+  intro p x r hp0 hpx hxr
+  simpa using oddKernelPointwiseCellBound_odd 1 hp0 hpx hxr
 
 private def evenKernelFourUnitGapTerms : List SimplexCertTerm := [
   ⟨945, 10, 0, 0⟩,
@@ -1789,8 +2591,10 @@ theorem kernelPartialIntegralBetween_four_lowerStep
   · exact h945Dpos
 
 theorem evenKernelCellBound_four : EvenKernelCellBound 4 := by
-  intro p r hp0 hpr hr1
-  exact kernelPartialIntegralBetween_four_lowerStep hp0 hpr hr1
+  apply evenKernelCellBound_of_exactCellOrderPreservation
+    (m := 4) kernelPartialExactCellOrderPreservation_four
+  intro p x r hp0 hpx hxr
+  simpa using evenKernelPointwiseCellBound_even 2 hp0 hpx hxr
 
 private def oddKernelFiveUnitGapTerms : List SimplexCertTerm := [
   ⟨10395, 12, 0, 0⟩,
@@ -5058,6 +5862,22 @@ theorem pointwiseUnitIntegralBridgeAtOne_iff_unitUniformCellBounds :
   · intro h _hpointwise
     exact h
 
+theorem pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation
+    (h : LeibnizRectangleUnitCellOrderPreservation) :
+    LeibnizRectanglePointwiseUnitIntegralBridgeAtOne := by
+  intro hpointwise
+  constructor
+  · intro n
+    exact h.1 (2 * n) (hpointwise.1 n)
+  · intro n
+    exact h.2 (2 * n + 1) (hpointwise.2 n)
+
+theorem unitUniformCellBounds_of_unitCellOrderPreservation
+    (h : LeibnizRectangleUnitCellOrderPreservation) :
+    LeibnizRectangleUniformUnitCellBoundsAtOne :=
+  unitUniformCellBounds_of_pointwiseUnitIntegralBridge
+    (pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation h)
+
 theorem cellBounds_of_pointwiseIntegralBridge
     (h : LeibnizRectanglePointwiseIntegralBridgeAtOne) :
     LeibnizRectangleKernelCellBoundsAtOne :=
@@ -5457,6 +6277,13 @@ theorem leibnizEqualsRectangleRawAtOne_of_pointwiseUnitIntegralBridge
   leibnizEqualsRectangleRawAtOne_of_kernelBounds
     (LeibnizRectangleBridge.kernelBounds_of_pointwiseUnitIntegralBridge h)
 
+theorem leibnizEqualsRectangleRawAtOne_of_unitCellOrderPreservation
+    (h : LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation) :
+    LeibnizEqualsRectangleRawAtOne :=
+  leibnizEqualsRectangleRawAtOne_of_pointwiseUnitIntegralBridge
+    (LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation
+      h)
+
 theorem special_of_leibnizEqualsRectangleRawAtOne
     (h : LeibnizEqualsRectangleRawAtOne) :
     LeibnizEqualsRectangleRawAtOneSpecial := by
@@ -5774,9 +6601,9 @@ theorem gaussian_identity_subtract_slope :
 /-- Exact rational tangent identity behind Machin's formula:
 `tan (4 atan(1/5) - atan(1/239)) = 1`.
 
-The remaining analytic step for `Leibniz = Machin` is the constructive branch
-theorem turning this tangent identity into equivalence of the raw arctangent
-algorithms. -/
+The concrete raw-arctangent branch identity is now supplied below by bounded
+rational chart transport; this tangent calculation remains its independent
+algebraic certificate. -/
 theorem quarter_tangent_identity :
     tanSub (tanFour (1 / 5)) (1 / 239) = 1 := by
   native_decide
@@ -5806,11 +6633,10 @@ def GeometricBranchIdentity : Prop :=
       ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Equiv
     (ArctanGeometry.arctanGeom (1 : Rat))
 
-/-- The remaining analytic branch theorem for Machin's formula.
+/-- Generic principal-branch API for a tangent proof.
 
-The Gaussian-integer computation above proves the rational tangent identity.
-This is the constructive arctangent fact still needed: on the principal branch,
-that tangent identity identifies the corresponding raw arctangent algorithms. -/
+The concrete Machin instance is later proved without assuming this universal
+law, by decomposing it into three bounded chart additions. -/
 def BranchLaw : Prop :=
   tanSub (tanFour (1 / 5)) (1 / 239) = 1 -> BranchIdentity
 
@@ -5819,6 +6645,96 @@ the identity for sector-area arctangent instead of the power-series
 arctangent. -/
 def GeometricBranchLaw : Prop :=
   tanSub (tanFour (1 / 5)) (1 / 239) = 1 -> GeometricBranchIdentity
+
+/-- Principal-branch addition for the geometric arctangent, restricted to
+rational unit-chart inputs whose rational tangent sum stays in that chart.
+
+This is the exact analytic input needed by the bounded Machin decomposition
+below; it is deliberately stated without any completed-real trigonometry. -/
+def GeometricUnitAdditionLaw : Prop :=
+  forall x y z : Rat,
+    0 <= x -> x <= 1 ->
+    0 <= y -> y <= 1 ->
+    0 <= z -> z <= 1 ->
+    z = addSlope x y ->
+    (ArctanGeometry.arctanGeom x + ArctanGeometry.arctanGeom y).Equiv
+      (ArctanGeometry.arctanGeom z)
+
+/-- The three bounded principal-branch additions that are exactly sufficient
+for Machin's formula. -/
+structure GeometricMachinUnitAdditions where
+  double_one_fifth :
+    (ArctanGeometry.arctanGeom ((1 : Rat) / 5) +
+      ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Equiv
+      (ArctanGeometry.arctanGeom ((5 : Rat) / 12))
+  seven_seventeenths_add_one_239 :
+    (ArctanGeometry.arctanGeom ((7 : Rat) / 17) +
+      ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Equiv
+      (ArctanGeometry.arctanGeom ((5 : Rat) / 12))
+  five_twelfths_add_seven_seventeenths :
+    (ArctanGeometry.arctanGeom ((5 : Rat) / 12) +
+      ArctanGeometry.arctanGeom ((7 : Rat) / 17)).Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat))
+
+/-- A universal bounded addition law supplies the three Machin instances. -/
+def geometricMachinUnitAdditions_of_unitAdditionLaw
+    (hadd : GeometricUnitAdditionLaw) : GeometricMachinUnitAdditions where
+  double_one_fifth :=
+    hadd ((1 : Rat) / 5) ((1 : Rat) / 5) ((5 : Rat) / 12)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide)
+  seven_seventeenths_add_one_239 :=
+    hadd ((7 : Rat) / 17) ((1 : Rat) / 239) ((5 : Rat) / 12)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide)
+  five_twelfths_add_seven_seventeenths :=
+    hadd ((5 : Rat) / 12) ((7 : Rat) / 17) (1 : Rat)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide)
+      (by native_decide)
+
+/-- The three bounded additions needed by Machin follow directly from the
+verified rational chart transport for geometric arctangent. -/
+theorem geometricMachinUnitAdditions_of_chartTransport :
+    GeometricMachinUnitAdditions where
+  double_one_fifth := by
+    have h := ArctanGeometry.arctanGeom_chartAdd_add_of_half
+      (u := (1 : Rat) / 5) (x := (1 : Rat) / 5)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide) (by native_decide)
+    have hparam :
+        RationalCircle.Trigonometry.chartAddParameter
+          ((1 : Rat) / 5) ((1 : Rat) / 5) = (5 : Rat) / 12 := by
+      native_decide
+    rw [hparam] at h
+    exact h
+  seven_seventeenths_add_one_239 := by
+    have h := ArctanGeometry.arctanGeom_chartAdd_add_of_half
+      (u := (7 : Rat) / 17) (x := (1 : Rat) / 239)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide) (by native_decide)
+    have hparam :
+        RationalCircle.Trigonometry.chartAddParameter
+          ((7 : Rat) / 17) ((1 : Rat) / 239) = (5 : Rat) / 12 := by
+      native_decide
+    rw [hparam] at h
+    exact h
+  five_twelfths_add_seven_seventeenths := by
+    have h := ArctanGeometry.arctanGeom_chartAdd_add_of_half
+      (u := (5 : Rat) / 12) (x := (7 : Rat) / 17)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide) (by native_decide)
+    have hparam :
+        RationalCircle.Trigonometry.chartAddParameter
+          ((5 : Rat) / 12) ((7 : Rat) / 17) = (1 : Rat) := by
+      native_decide
+    rw [hparam] at h
+    exact h
 
 structure PowerSeriesGeometryAtMachinInputs where
   one_fifth :
@@ -5830,10 +6746,28 @@ structure PowerSeriesGeometryAtMachinInputs where
   one :
     (arctan (1 : Rat)).Equiv (ArctanGeometry.arctanGeom (1 : Rat))
 
+/-- The two power-series/geometric agreements used by the Machin evaluator
+itself.  Unlike the separate Leibniz route, this data does not mention the
+endpoint input `1`. -/
+structure PowerSeriesGeometryAtMachinSmallInputs where
+  one_fifth :
+    (arctan ((1 : Rat) / 5)).Equiv
+      (ArctanGeometry.arctanGeom ((1 : Rat) / 5))
+  one_239 :
+    (arctan ((1 : Rat) / 239)).Equiv
+      (ArctanGeometry.arctanGeom ((1 : Rat) / 239))
+
 structure KernelComparisonAtMachinInputs where
   one_fifth : Taylor.ArctanComparison.KernelComparisonAt ((1 : Rat) / 5)
   one_239 : Taylor.ArctanComparison.KernelComparisonAt ((1 : Rat) / 239)
   one : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)
+
+/-- The two kernel comparisons needed by the direct Machin-to-area route.
+The endpoint comparison at `1` is deliberately excluded: it is only needed
+when routing Machin through Leibniz. -/
+structure KernelComparisonAtMachinSmallInputs where
+  one_fifth : Taylor.ArctanComparison.KernelComparisonAt ((1 : Rat) / 5)
+  one_239 : Taylor.ArctanComparison.KernelComparisonAt ((1 : Rat) / 239)
 
 structure PowerSeriesEqualsRectangleKernelAtMachinInputs where
   one_fifth :
@@ -5861,6 +6795,138 @@ theorem geometricBranchIdentity_of_geometricBranchLaw
     (h : GeometricBranchLaw) : GeometricBranchIdentity :=
   h quarter_tangent_identity
 
+/-- Three rational unit-chart additions suffice for Machin's principal branch.
+
+The potentially awkward intermediate slope `120/119` never appears as an
+argument of the geometric arctangent.  Instead, the proof factors the identity
+through the unit-chart values `5/12` and `7/17`:
+`2 atan(1/5) = atan(5/12)`,
+`atan(7/17) + atan(1/239) = atan(5/12)`, and
+`atan(5/12) + atan(7/17) = atan(1)`.
+All of these are bounded rational addition instances. -/
+theorem geometricBranchIdentity_of_machinUnitAdditions
+    (hadd : GeometricMachinUnitAdditions) : GeometricBranchIdentity := by
+  let A : RealRaw := ArctanGeometry.arctanGeom ((1 : Rat) / 5)
+  let B : RealRaw := ArctanGeometry.arctanGeom ((5 : Rat) / 12)
+  let C : RealRaw := ArctanGeometry.arctanGeom ((7 : Rat) / 17)
+  let D : RealRaw := ArctanGeometry.arctanGeom ((1 : Rat) / 239)
+  let E : RealRaw := ArctanGeometry.arctanGeom (1 : Rat)
+  have hA : A.Valid := by
+    dsimp [A]
+    exact ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hB : B.Valid := by
+    dsimp [B]
+    exact ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hC : C.Valid := by
+    dsimp [C]
+    exact ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hD : D.Valid := by
+    dsimp [D]
+    exact ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hE : E.Valid := by
+    dsimp [E]
+    exact ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hAA : (A + A).Equiv B := by
+    simpa [A, B] using hadd.double_one_fifth
+  have hCD : (C + D).Equiv B := by
+    simpa [B, C, D] using hadd.seven_seventeenths_add_one_239
+  have hBC : (B + C).Equiv E := by
+    simpa [B, C, E] using hadd.five_twelfths_add_seven_seventeenths
+  have hAAvalid : (A + A).Valid := RealRaw.add_valid hA hA
+  have hCDvalid : (C + D).Valid := RealRaw.add_valid hC hD
+  have hBBvalid : (B + B).Valid := RealRaw.add_valid hB hB
+  have hB_CDvalid : (B + (C + D)).Valid := RealRaw.add_valid hB hCDvalid
+  have hBCvalid : (B + C).Valid := RealRaw.add_valid hB hC
+  have hBC_Dvalid : ((B + C) + D).Valid := RealRaw.add_valid hBCvalid hD
+  have htwoA : ((2 : Nat) * A).Equiv (A + A) :=
+    RealRaw.two_natscale_equiv_add_self A hA
+  have htwoAvalid : ((2 : Nat) * A).Valid :=
+    RealRaw.natScale_valid 2 hA
+  have htwoAs :
+      (((2 : Nat) * A) + ((2 : Nat) * A)).Equiv ((A + A) + (A + A)) :=
+    RealRaw.add_equiv htwoAvalid hAAvalid htwoAvalid hAAvalid htwoA htwoA
+  have hfourA_split :
+      ((4 : Nat) * A).Equiv ((A + A) + (A + A)) :=
+    RealRaw.equiv_trans
+      (RealRaw.natScale_valid 4 hA)
+      (RealRaw.add_valid htwoAvalid htwoAvalid)
+      (RealRaw.add_valid hAAvalid hAAvalid)
+      (RealRaw.four_natscale_equiv_add_two_natscale A hA)
+      htwoAs
+  have hfourA_BB : ((4 : Nat) * A).Equiv (B + B) :=
+    RealRaw.equiv_trans
+      (RealRaw.natScale_valid 4 hA)
+      (RealRaw.add_valid hAAvalid hAAvalid) hBBvalid
+      hfourA_split
+      (RealRaw.add_equiv hAAvalid hB hAAvalid hB hAA hAA)
+  have hBB_BCD : (B + B).Equiv (B + (C + D)) :=
+    RealRaw.add_equiv hB hB hB hCDvalid
+      (RealRaw.equiv_refl B hB) (RealRaw.equiv_symm hCD)
+  have hBCD_assoc : (B + (C + D)).Equiv ((B + C) + D) :=
+    RealRaw.equiv_symm (RealRaw.add_assoc_equiv B C D hB hC hD)
+  have hDrefl : D.Equiv D := RealRaw.equiv_refl D hD
+  have hBBminus_BCDminus :
+      (B + B - D).Equiv (B + (C + D) - D) :=
+    RealRaw.sub_equiv hBBvalid hB_CDvalid hD hD hBB_BCD hDrefl
+  have hBCDminus_assocminus :
+      (B + (C + D) - D).Equiv ((B + C) + D - D) :=
+    RealRaw.sub_equiv hB_CDvalid hBC_Dvalid hD hD hBCD_assoc hDrefl
+  have hBBminus_E : (B + B - D).Equiv E :=
+    RealRaw.equiv_trans
+      (RealRaw.sub_valid hBBvalid hD)
+      (RealRaw.sub_valid hB_CDvalid hD)
+      hE hBBminus_BCDminus
+      (RealRaw.equiv_trans
+        (RealRaw.sub_valid hB_CDvalid hD)
+        (RealRaw.sub_valid hBC_Dvalid hD)
+        hE hBCDminus_assocminus
+        (RealRaw.equiv_trans
+          (RealRaw.sub_valid hBC_Dvalid hD) hBCvalid hE
+          (RealRaw.add_sub_cancel_right_equiv hBCvalid hD) hBC))
+  have hfinal :
+      ((4 : Nat) * A - D).Equiv E :=
+    RealRaw.equiv_trans
+      (RealRaw.sub_valid (RealRaw.natScale_valid 4 hA) hD)
+      (RealRaw.sub_valid hBBvalid hD) hE
+      (RealRaw.sub_equiv
+        (RealRaw.natScale_valid 4 hA) hBBvalid hD hD hfourA_BB hDrefl)
+      hBBminus_E
+  simpa [A, D, E] using hfinal
+
+/-- The universal unit-addition law proves Machin's three exact bounded
+addition instances, hence its geometric branch identity. -/
+theorem geometricBranchIdentity_of_unitAdditionLaw
+    (hadd : GeometricUnitAdditionLaw) : GeometricBranchIdentity :=
+  geometricBranchIdentity_of_machinUnitAdditions
+    (geometricMachinUnitAdditions_of_unitAdditionLaw hadd)
+
+/-- The exact three Machin unit additions imply the geometric branch law. -/
+theorem geometricBranchLaw_of_machinUnitAdditions
+    (hadd : GeometricMachinUnitAdditions) : GeometricBranchLaw :=
+  fun _ => geometricBranchIdentity_of_machinUnitAdditions hadd
+
+/-- Machin's geometric branch identity, with its three bounded additions
+discharged by the certified tangent-chart transport. -/
+theorem geometricBranchIdentity_of_chartTransport : GeometricBranchIdentity :=
+  geometricBranchIdentity_of_machinUnitAdditions
+    geometricMachinUnitAdditions_of_chartTransport
+
+theorem geometricBranchLaw_of_chartTransport : GeometricBranchLaw :=
+  geometricBranchLaw_of_machinUnitAdditions
+    geometricMachinUnitAdditions_of_chartTransport
+
+/-- The bounded unit-addition law implies the existing geometric Machin branch
+law, with the rational tangent premise discharged separately. -/
+theorem geometricBranchLaw_of_unitAdditionLaw
+    (hadd : GeometricUnitAdditionLaw) : GeometricBranchLaw :=
+  geometricBranchLaw_of_machinUnitAdditions
+    (geometricMachinUnitAdditions_of_unitAdditionLaw hadd)
+
 theorem powerSeriesGeometryAtMachinInputs_of_agreement
     (h : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     PowerSeriesGeometryAtMachinInputs where
@@ -5886,6 +6952,16 @@ theorem powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs
   one :=
     Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt
       route.one
+
+theorem powerSeriesGeometryAtMachinSmallInputs_of_kernelComparisonAtMachinSmallInputs
+    (route : KernelComparisonAtMachinSmallInputs) :
+    PowerSeriesGeometryAtMachinSmallInputs where
+  one_fifth :=
+    Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt
+      route.one_fifth
+  one_239 :=
+    Taylor.ArctanComparison.powerSeriesAgreesAt_of_kernelComparisonAt
+      route.one_239
 
 theorem branchIdentity_of_geometricBranchIdentity_at_inputs
     (hg15 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid)
@@ -6060,6 +7136,20 @@ theorem leibnizEqMachin_of_geometricRoute_on_unit
   leibnizEqMachin_of_machinBranchLaw
     (MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit
       hagree hgeom)
+
+/-- The bounded unit-addition formulation is sufficient for the geometric
+Machin route; no out-of-chart arctangent value is required. -/
+theorem leibnizEqMachin_of_machinUnitAdditions
+    (hagree : MachinIdentity.PowerSeriesGeometryAtMachinInputs)
+    (hadd : MachinIdentity.GeometricMachinUnitAdditions) : LeibnizEqMachin :=
+  leibnizEqMachin_of_geometricRoute_on_unit hagree
+    (MachinIdentity.geometricBranchLaw_of_machinUnitAdditions hadd)
+
+theorem leibnizEqMachin_of_unitAdditionLaw
+    (hagree : MachinIdentity.PowerSeriesGeometryAtMachinInputs)
+    (hadd : MachinIdentity.GeometricUnitAdditionLaw) : LeibnizEqMachin :=
+  leibnizEqMachin_of_machinUnitAdditions hagree
+    (MachinIdentity.geometricMachinUnitAdditions_of_unitAdditionLaw hadd)
 
 theorem leibnizEqMachin_of_kernelComparisonAtMachinInputs
     (route : MachinIdentity.KernelComparisonAtMachinInputs)
@@ -9193,6 +10283,21 @@ theorem four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge
   four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBounds
     (LeibnizRectangleBridge.unitUniformCellBounds_of_pointwiseUnitIntegralBridge h)
 
+theorem four_arctanSeries_one_equiv_piCircleArea_of_unitCellOrderPreservation
+    (h : LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge
+    (LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation
+      h)
+
+theorem four_arctanSeries_one_equiv_piCircleArea_of_kernelPartialExactCellOrderPreservation
+    (h :
+      LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit) :
+    (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw).Equiv piCircleArea) :=
+  four_arctanSeries_one_equiv_piCircleArea_of_unitCellOrderPreservation
+    (LeibnizRectangleBridge.unitCellOrderPreservation_of_kernelPartialExactCellOrderPreservation
+      h)
+
 theorem piCircleArea_equiv_four_arctan_one_of_powerSeriesGeometryAgreement
     (hagree : ArctanGeometry.PowerSeriesAgreesOnUnit) :
     piCircleArea.Equiv (((4 : Nat) * arctan (1 : Rat) : RealRaw)) :=
@@ -9290,6 +10395,20 @@ theorem piCircleArea_equiv_four_arctanSeries_one_of_pointwiseUnitIntegralBridge
     piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm
     (four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge h)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_unitCellOrderPreservation
+    (h : LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_unitCellOrderPreservation h)
+
+theorem piCircleArea_equiv_four_arctanSeries_one_of_kernelPartialExactCellOrderPreservation
+    (h :
+      LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit) :
+    piCircleArea.Equiv (((4 : Nat) * arctanSeries (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm
+    (four_arctanSeries_one_equiv_piCircleArea_of_kernelPartialExactCellOrderPreservation
+      h)
 
 theorem piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement
     (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
@@ -9425,6 +10544,684 @@ theorem piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
   exact piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement
     I.construction hgeom
 
+/-- Public-general-integral version of the arctangent-integral pi route.
+This consumes an endpoint identity whose integral side is `generalIntegralFor`,
+the finite sum over monotone pieces. -/
+theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIdentityFor
+    (primitive : FunctionOnInterval)
+    (I : Integral.GeneralDefiniteIdentityFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
+    (hendpoint :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.generalIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction)).Equiv piCircleArea := by
+  have hintegralEndpoint :
+      (Integral.generalIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction).Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid) := by
+    simpa using I.equivalent
+  have hendpointValid :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using I.endpoint_valid
+  have hgeomValid :
+      (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom :
+      (Integral.generalIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      (Integral.generalIntegralFor_valid
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction)
+      hendpointValid
+      hgeomValid
+      hintegralEndpoint
+      hendpoint
+  have hscaled :
+      (IntegralIdentities.PiFromArctanIntegral
+        (Integral.generalIntegralFor
+          (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+          I.construction)).Equiv
+          ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    exact RealRaw.natScale_equiv 4 hgeom
+  intro n
+  have hover := (RealRaw.compareAt_overlap_iff
+      (IntegralIdentities.PiFromArctanIntegral
+        (Integral.generalIntegralFor
+          (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+          I.construction))
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) n n).1
+    (hscaled n)
+  apply (RealRaw.compareAt_overlap_iff
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.generalIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction))
+    piCircleArea n n).2
+  rw [← four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  exact hover
+
+/-- Public-general-integral pi route obtained from an ordinary
+`DefiniteIdentityFor` plus an equivalent general construction.  This is the
+adapter used when an FTC proof first produces a domain-aware endpoint identity
+for a concrete construction, and a separate monotone-piece construction is
+known to compute the same raw integral. -/
+theorem piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_definiteIdentityFor_generalConstruction
+    (primitive : FunctionOnInterval)
+    (I : Integral.DefiniteIdentityFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
+    (construction :
+      Integral.GeneralConstructionFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1))
+    (hconstruction :
+      (Integral.generalIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        construction).Equiv
+        (Integral.integralFor
+          (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+          I.construction))
+    (hendpoint :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.generalIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        construction)).Equiv piCircleArea :=
+  piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIdentityFor
+    primitive
+    (Integral.GeneralDefiniteIdentityFor.ofDefiniteIdentityFor
+      I construction hconstruction)
+    hendpoint
+
+/-- Domain-aware monotone definite-integral route to the arctangent-integral
+pi equivalence.  This consumes a monotone-integral endpoint identity directly,
+then forgets the monotonicity certificate through
+`MonotoneDefiniteIdentityFor.toDefiniteIdentityFor`. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneDefiniteIdentityFor
+    (primitive : FunctionOnInterval)
+    (I : Integral.MonotoneDefiniteIdentityFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1) primitive)
+    (hendpoint :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 I.endpoint_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.monotoneIntegralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        I.construction)).Equiv piCircleArea := by
+  simpa [Integral.MonotoneDefiniteIdentityFor.toDefiniteIdentityFor,
+    Integral.monotoneIntegralFor] using
+    (piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+      primitive I.toDefiniteIdentityFor hendpoint)
+
+/-- Domain-aware effective-FTC route to the arctangent-integral pi
+equivalence.  The conclusion uses the `ConstructionFor` integral produced by
+the FTC certificate, not the older point-Riemann wrapper. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : EffectiveFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
+    (hscheduledEndpoint : (FTC.endpointRawOfEffectiveFTC h).Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (hendpoint_equiv :
+      (FTC.endpointRawOfEffectiveFTC h).Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_effectiveFTC h hriemann))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    primitive
+    (Integral.definiteIdentityFor_of_effectiveFTC
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_lower)
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_upper)
+      h hriemann hscheduledEndpoint hendpoint hendpoint_equiv)
+    hgeom
+
+/-- Domain-aware effective-FTC route using packaged endpoint-schedule
+agreement. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC_endpointAgreement
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : EffectiveFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
+    (endpoint :
+      FTC.EndpointScheduleAgreement primitive.toRealFunRaw 0 1
+        (FTC.endpointRawOfEffectiveFTC h))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1
+        endpoint.endpoint_valid).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_effectiveFTC h hriemann))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC
+    primitive same_lower same_upper h hriemann
+    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent hgeom
+
+/-- Effective-FTC route where the endpoint schedule is supplied as a cofinal
+monotone stage schedule. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC_stageSchedule
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : EffectiveFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h).Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n, h.chooseEvalPrecision (FTC.requestedPrecision n) =
+        sigma.stage n)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_effectiveFTC h hriemann))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC_endpointAgreement
+    primitive same_lower same_upper h hriemann
+    (FTC.endpointScheduleAgreement_of_effectiveFTC_stageSchedule
+      h hendpoint sigma hsigma)
+    hgeom
+
+/-- Static-dyadic specialization of the domain-aware effective-FTC route to
+the arctangent-integral pi equivalence. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_staticDyadicEffectiveFTC
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid)
+    (hscheduledEndpoint :
+      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC).Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (hendpoint_equiv :
+      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC).Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_staticDyadicEffectiveFTC h hriemann))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    primitive
+    (Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_lower)
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_upper)
+      h hriemann hscheduledEndpoint hendpoint hendpoint_equiv)
+    hgeom
+
+/-- Static-dyadic effective-FTC route using packaged endpoint-schedule
+agreement. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_staticDyadicEffectiveFTC_endpointAgreement
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid)
+    (endpoint :
+      FTC.EndpointScheduleAgreement primitive.toRealFunRaw 0 1
+        (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1
+        endpoint.endpoint_valid).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_staticDyadicEffectiveFTC h hriemann))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_staticDyadicEffectiveFTC
+    primitive same_lower same_upper h hriemann
+    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent hgeom
+
+/-- Static-dyadic effective-FTC route where the endpoint schedule is supplied
+as a cofinal monotone stage schedule. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_staticDyadicEffectiveFTC_stageSchedule
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : StaticDyadicEffectiveFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hriemann : (FTC.riemannRawOfEffectiveFTC h.toEffectiveFTC).Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n, h.chooseEvalPrecision (FTC.requestedPrecision n) =
+        sigma.stage n)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_staticDyadicEffectiveFTC h hriemann))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_staticDyadicEffectiveFTC_endpointAgreement
+    primitive same_lower same_upper h hriemann
+    (FTC.endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule
+      h hendpoint sigma hsigma)
+    hgeom
+
+/-- Candidate-derivative FTC route to the domain-aware arctangent-integral pi
+equivalence. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_candidateDerivativeFTC
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : CandidateDerivativeFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hscheduledEndpoint : h.toDerivativeBoundFTC.endpointRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (hendpoint_equiv :
+      h.toDerivativeBoundFTC.endpointRaw.Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_candidateDerivativeFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    primitive
+    (Integral.definiteIdentityFor_of_candidateDerivativeFTC
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_lower)
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_upper)
+      h hbounded hscheduledEndpoint hendpoint hendpoint_equiv)
+    hgeom
+
+/-- Candidate-derivative FTC route using packaged endpoint-schedule
+agreement. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_candidateDerivativeFTC_endpointAgreement
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : CandidateDerivativeFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (endpoint :
+      FTC.EndpointScheduleAgreement primitive.toRealFunRaw 0 1
+        h.toDerivativeBoundFTC.endpointRaw)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1
+        endpoint.endpoint_valid).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_candidateDerivativeFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_candidateDerivativeFTC
+    primitive same_lower same_upper h hbounded
+    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent hgeom
+
+/-- Candidate-derivative FTC route where the endpoint schedule is supplied as
+a cofinal monotone stage schedule. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_candidateDerivativeFTC_stageSchedule
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : CandidateDerivativeFTC primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision
+            (precisionAtStage n) =
+          sigma.stage n)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_candidateDerivativeFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_candidateDerivativeFTC_endpointAgreement
+    primitive same_lower same_upper h hbounded
+    (FTC.endpointScheduleAgreement_of_candidateDerivativeFTC_stageSchedule
+      h hendpoint sigma hsigma)
+    hgeom
+
+/-- Curvature FTC route to the domain-aware arctangent-integral pi
+equivalence.  Unlike the convex-only route, this also covers concave
+primitives such as the arctangent branch on `[0,1]`. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_curvatureFTC
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : CurvatureFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hscheduledEndpoint : h.toDerivativeBoundFTC.endpointRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (hendpoint_equiv :
+      h.toDerivativeBoundFTC.endpointRaw.Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_curvatureFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    primitive
+    (Integral.definiteIdentityFor_of_curvatureFTC
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_lower)
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_upper)
+      h hbounded hscheduledEndpoint hendpoint hendpoint_equiv)
+    hgeom
+
+/-- Curvature FTC route using packaged endpoint-schedule agreement. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_curvatureFTC_endpointAgreement
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : CurvatureFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (endpoint :
+      FTC.EndpointScheduleAgreement primitive.toRealFunRaw 0 1
+        h.toDerivativeBoundFTC.endpointRaw)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1
+        endpoint.endpoint_valid).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_curvatureFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_curvatureFTC
+    primitive same_lower same_upper h hbounded
+    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent hgeom
+
+/-- Curvature FTC route where the endpoint schedule is supplied as a cofinal
+monotone stage schedule. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_curvatureFTC_stageSchedule
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : CurvatureFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision
+            (precisionAtStage n) =
+          sigma.stage n)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_curvatureFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_curvatureFTC_endpointAgreement
+    primitive same_lower same_upper h hbounded
+    (FTC.endpointScheduleAgreement_of_curvatureFTC_stageSchedule
+      h hendpoint sigma hsigma)
+    hgeom
+
+/-- Convex FTC route to the domain-aware arctangent-integral pi equivalence. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_convexFTC
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : ConvexFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hscheduledEndpoint : h.toDerivativeBoundFTC.endpointRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (hendpoint_equiv :
+      h.toDerivativeBoundFTC.endpointRaw.Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_convexFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    primitive
+    (Integral.definiteIdentityFor_of_convexFTC
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_lower)
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_upper)
+      h hbounded hscheduledEndpoint hendpoint hendpoint_equiv)
+    hgeom
+
+/-- Convex FTC route using packaged endpoint-schedule agreement. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_convexFTC_endpointAgreement
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : ConvexFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (endpoint :
+      FTC.EndpointScheduleAgreement primitive.toRealFunRaw 0 1
+        h.toDerivativeBoundFTC.endpointRaw)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1
+        endpoint.endpoint_valid).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_convexFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_convexFTC
+    primitive same_lower same_upper h hbounded
+    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent hgeom
+
+/-- Convex FTC route where the endpoint schedule is supplied as a cofinal
+monotone stage schedule. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_convexFTC_stageSchedule
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : ConvexFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision
+            (precisionAtStage n) =
+          sigma.stage n)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_convexFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_convexFTC_endpointAgreement
+    primitive same_lower same_upper h hbounded
+    (FTC.endpointScheduleAgreement_of_convexFTC_stageSchedule
+      h hendpoint sigma hsigma)
+    hgeom
+
+/-- Concave FTC route to the domain-aware arctangent-integral pi
+equivalence.  This is the curvature specialization naturally matched to the
+arctangent primitive on `[0,1]`. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_concaveFTC
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : ConcaveFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hscheduledEndpoint : h.toDerivativeBoundFTC.endpointRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (hendpoint_equiv :
+      h.toDerivativeBoundFTC.endpointRaw.Equiv
+        (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint))
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_concaveFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor
+    primitive
+    (Integral.definiteIdentityFor_of_concaveFTC
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_lower)
+      (by simpa [IntegralIdentities.oneOverOnePlusSquareOnInterval] using
+        same_upper)
+      h hbounded hscheduledEndpoint hendpoint hendpoint_equiv)
+    hgeom
+
+/-- Concave FTC route using packaged endpoint-schedule agreement. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_concaveFTC_endpointAgreement
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : ConcaveFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (endpoint :
+      FTC.EndpointScheduleAgreement primitive.toRealFunRaw 0 1
+        h.toDerivativeBoundFTC.endpointRaw)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1
+        endpoint.endpoint_valid).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_concaveFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_concaveFTC
+    primitive same_lower same_upper h hbounded
+    endpoint.scheduled_valid endpoint.endpoint_valid endpoint.equivalent hgeom
+
+/-- Concave FTC route where the endpoint schedule is supplied as a cofinal
+monotone stage schedule.  This is the schedule-facing form of the route
+naturally matched to the arctangent primitive on `[0,1]`. -/
+theorem piFromArctanIntegralFor_equiv_piCircleArea_of_concaveFTC_stageSchedule
+    (primitive : FunctionOnInterval)
+    (same_lower : primitive.lower = 0)
+    (same_upper : primitive.upper = 1)
+    (h : ConcaveFTCCertificate primitive.toRealFunRaw
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (hbounded : h.toDerivativeBoundFTC.boundedIntegralRaw.Valid)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute primitive.toRealFunRaw 0 1))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision
+            (precisionAtStage n) =
+          sigma.stage n)
+    (hgeom :
+      (endpointDifferenceRaw primitive.toRealFunRaw 0 1 hendpoint).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (Integral.integralFor
+        (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+        (Integral.constructionFor_of_concaveFTC h hbounded))).Equiv
+        piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_concaveFTC_endpointAgreement
+    primitive same_lower same_upper h hbounded
+    (FTC.endpointScheduleAgreement_of_concaveFTC_stageSchedule
+      h hendpoint sigma hsigma)
+    hgeom
+
 theorem piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement
     (c : Integral.ConstructionFor
       (IntegralIdentities.arctanKernelInterval (1 : Rat)))
@@ -9501,6 +11298,47 @@ theorem piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC
         (FTC.endpointRawOfEffectiveFTC h) := by
     simpa [IntegralIdentities.arctanIntegral] using
       FTC.effectiveFTC_integral_equiv_scheduledEndpoint h c hplan
+  have hgeomValid :
+      (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom :
+      (IntegralIdentities.arctanIntegral (1 : Rat) c).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      (IntegralIdentities.arctanIntegral_valid (1 : Rat) c)
+      hscheduledEndpoint
+      hgeomValid
+      hintegralEndpoint
+      hendpoint
+  exact piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement c hgeom
+
+/-- Static-dyadic FTC route to the arctangent-integral pi equivalence.
+
+This is the version aligned with the default bounded-integral mesh of
+Chapter 3: the analytic input is a `StaticDyadicEffectiveFTC` certificate for
+the arctangent kernel, plus the endpoint identification with the geometric
+arctangent. -/
+theorem piFromArctanIntegral_equiv_piCircleArea_of_staticDyadicEffectiveFTC
+    (primitive : RealFunRaw)
+    (h : StaticDyadicEffectiveFTC primitive
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1).toRealFunRaw
+      0 1)
+    (c : IntegralIdentities.ArctanIntegralConstruction (1 : Rat))
+    (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
+    (hscheduledEndpoint :
+      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC).Valid)
+    (hendpoint :
+      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat))) :
+    (IntegralIdentities.PiFromArctanIntegral
+      (IntegralIdentities.arctanIntegral (1 : Rat) c)).Equiv
+        piCircleArea := by
+  have hintegralEndpoint :
+      (IntegralIdentities.arctanIntegral (1 : Rat) c).Equiv
+        (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC) := by
+    simpa [IntegralIdentities.arctanIntegral] using
+      FTC.staticDyadicEffectiveFTC_integral_equiv_scheduledEndpoint h c hplan
   have hgeomValid :
       (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
     ArctanGeometry.arctanGeom_valid_on_unit
@@ -9671,6 +11509,40 @@ theorem piCircumference_equiv_piCircleArea
     (hpoly : PiCircleAreaPolygonAgreement) :
     piCircumference.Equiv piCircleArea :=
   RealRaw.equiv_symm (archimedesTheorem hpoly)
+
+/-- The finite Archimedes comparison is now connected to the public area loop.
+The circumference computation still needs its separate validity proof before
+this raw equivalence can close the scoreboard row. -/
+theorem areaEqCircumference : AreaEqCircumference :=
+  archimedesTheorem piCircleAreaPolygonAgreement
+
+theorem piCircumference_equiv_piCircleArea_of_verified_area_polygon :
+    piCircumference.Equiv piCircleArea :=
+  RealRaw.equiv_symm areaEqCircumference
+
+/-- The finite Archimedes comparison already gives same-stage overlap between
+the polygon-area scaffolding computation and the circumference computation.
+
+Unlike the public `piCircleArea` loop, the polygon computation need not first
+be identified stagewise with another area representation for this finite
+geometric equivalence. -/
+theorem piCircleAreaPolygon_equiv_piCircumference :
+    piCircleAreaPolygon.Equiv piCircumference := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    piCircleAreaPolygon piCircumference n n).2
+  rw [piCircleAreaPolygon_compute_eq, piCircumference_compute_eq,
+    piCircumferenceComputeAtStage_eq_common]
+  exact ⟨
+    areaLower_le_circumferenceUpper_of_finite finiteArchimedesBounds
+      (piStage n) (piStage_pos n),
+    circumferenceLower_le_areaUpper_of_finite finiteArchimedesBounds
+      (piStage n) (piStage_pos n)⟩
+
+theorem piCircumference_equiv_piCircleAreaPolygon :
+    piCircumference.Equiv piCircleAreaPolygon :=
+  RealRaw.equiv_symm piCircleAreaPolygon_equiv_piCircumference
 
 /-- Validity certificates for the four public pi algorithms. -/
 structure ValidityProofs where
@@ -10938,6 +12810,11 @@ theorem piCircleArea_equiv_piCircleAreaPolygon_of_polygonAgreement
   unfold QInterval.width at hordered
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+theorem piCircleArea_equiv_piCircleAreaPolygon :
+    piCircleArea.Equiv piCircleAreaPolygon :=
+  piCircleArea_equiv_piCircleAreaPolygon_of_polygonAgreement
+    piCircleAreaPolygonAgreement
+
 theorem piCircleAreaPolygonValid_of_polygonAgreement_and_areaValid
     (hagree : PiCircleAreaPolygonAgreement)
     (hvalid : AreaValid) :
@@ -11345,6 +13222,76 @@ theorem areaValid : AreaValid :=
 
 end AreaLoopValidity
 
+/-- The polygonal area computation is a valid raw real because its stages are
+exactly those of the verified public area loop. -/
+theorem areaPolygonValid : AreaPolygonValid :=
+  piCircleAreaPolygonValid_of_polygonAgreement_and_areaValid
+    piCircleAreaPolygonAgreement AreaLoopValidity.areaValid
+
+theorem piCircleAreaPolygon_valid : piCircleAreaPolygon.Valid :=
+  areaPolygonValid
+
+/-- A certified representative of the Archimedean circumference computation.
+
+At every stage it intersects the finite prefix of hulls formed by the raw
+perimeter interval and the verified circle-area interval.  The construction
+uses only rational endpoint `min`/`max` arithmetic.  It is deliberately kept
+separate from `piCircumference`: the latter remains the direct polygonal
+perimeter schedule whose all-stage endpoint-refinement theorem is still an
+open geometric result. -/
+def piCircumferenceReboxed : RealRaw :=
+  RealRaw.anchorRebox piCircumference piCircleArea
+
+/-- The reboxed Archimedean perimeter representative is a valid computable
+real.  Its proof combines the existing perimeter width modulus and finite
+Archimedes overlap with the verified nested area computation; it does not
+assume a limit or completeness principle. -/
+theorem piCircumferenceReboxed_valid : piCircumferenceReboxed.Valid := by
+  unfold piCircumferenceReboxed
+  exact RealRaw.anchorRebox_valid
+    piCircumference_ordered
+    circumferenceWidthsShrink
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircumference_equiv_piCircleArea_of_verified_area_polygon
+
+/-- The direct perimeter intervals overlap their certified reboxed
+representative at every common stage. -/
+theorem piCircumference_equiv_piCircumferenceReboxed :
+    piCircumference.Equiv piCircumferenceReboxed := by
+  unfold piCircumferenceReboxed
+  exact RealRaw.candidate_equiv_anchorRebox
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircumference_equiv_piCircleArea_of_verified_area_polygon
+
+/-- The certified reboxed perimeter computation agrees with the baseline
+circle-area definition of pi. -/
+theorem piCircumferenceReboxed_equiv_piCircleArea :
+    piCircumferenceReboxed.Equiv piCircleArea := by
+  unfold piCircumferenceReboxed
+  exact RealRaw.anchorRebox_equiv_anchor
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+
+/-- The project-facing certified π value.  The public area loop is the
+preferred evaluator; the finite-rational reboxed Archimedean perimeter route is
+recorded as a verified alternative representation. -/
+def piCertified : Real :=
+  { preferred := piCircleArea
+    valid := by simpa [AreaValid] using AreaLoopValidity.areaValid
+    alternatives := [piCircumferenceReboxed]
+    alternative_valid := by
+      intro rep hrep
+      cases hrep with
+      | head => exact piCircumferenceReboxed_valid
+      | tail _ htail => cases htail
+    coherent := by
+      intro rep hrep
+      cases hrep with
+      | head => exact piCircumferenceReboxed_equiv_piCircleArea
+      | tail _ htail => cases htail }
+
+theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
+  rfl
+
 theorem fourArctanGeomOneValid :
     (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid) := by
   have hcompute :
@@ -11378,6 +13325,220 @@ theorem piCircleArea_equiv_four_arctanGeom_one :
     piCircleArea.Equiv
       (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
+
+/-- The direct Machin evaluator reaches the certified circle-area definition
+from comparisons at its two actual series inputs.  The endpoint comparison at
+`1` is not an analytic dependency of this route: the verified tangent-chart
+transport supplies the corresponding geometric value. -/
+theorem piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs
+    (hagree : MachinIdentity.PowerSeriesGeometryAtMachinSmallInputs) :
+    piMachin.Equiv piCircleArea := by
+  have hps15 : (arctan ((1 : Rat) / 5)).Valid :=
+    arctan_valid_at arctanValid arctan_one_fifth_mem_domain
+  have hps239 : (arctan ((1 : Rat) / 239)).Valid :=
+    arctan_valid_at arctanValid arctan_one_239_mem_domain
+  have hg15 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hg239 : (ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hg1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hps4_15 :
+      ((4 : Nat) * arctan ((1 : Rat) / 5) : RealRaw).Valid :=
+    RealRaw.natScale_valid 4 hps15
+  have hg4_15 :
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) : RealRaw).Valid :=
+    RealRaw.natScale_valid 4 hg15
+  have hpsExpr :
+      ((4 : Nat) * arctan ((1 : Rat) / 5) -
+        arctan ((1 : Rat) / 239) : RealRaw).Valid :=
+    RealRaw.sub_valid hps4_15 hps239
+  have hgExpr :
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
+        ArctanGeometry.arctanGeom ((1 : Rat) / 239) : RealRaw).Valid :=
+    RealRaw.sub_valid hg4_15 hg239
+  have hseries_geom :
+      ((4 : Nat) * arctan ((1 : Rat) / 5) -
+        arctan ((1 : Rat) / 239) : RealRaw).Equiv
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
+        ArctanGeometry.arctanGeom ((1 : Rat) / 239) : RealRaw) :=
+    RealRaw.sub_equiv
+      hps4_15 hg4_15 hps239 hg239
+      (RealRaw.natScale_equiv 4 hagree.one_fifth)
+      hagree.one_239
+  have htoGeomOne :
+      ((4 : Nat) * arctan ((1 : Rat) / 5) -
+        arctan ((1 : Rat) / 239) : RealRaw).Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      hpsExpr hgExpr hg1 hseries_geom
+      MachinIdentity.geometricBranchIdentity_of_chartTransport
+  have hscaled :
+      piMachin.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    simpa [piMachin] using RealRaw.natScale_equiv 4 htoGeomOne
+  exact RealRaw.equiv_trans
+    machinValid
+    (RealRaw.natScale_valid 4 hg1)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanGeom_one_equiv_piCircleArea
+
+/-- The Machin combination of the two certified rectangle integrals is already
+the circle-area pi.  This route uses finite integral constructions and the
+verified tangent-chart transport, with no power-series comparison premise. -/
+theorem piMachinIntegralRectangle_equiv_piCircleArea :
+    IntegralIdentities.piMachinIntegralRectangle.Equiv piCircleArea := by
+  have hrect15 :
+      (IntegralIdentities.arctanIntegralRectangleFor ((1 : Rat) / 5)
+        (by native_decide) (by native_decide)).Valid :=
+    IntegralIdentities.arctanIntegralRectangleFor_valid ((1 : Rat) / 5)
+      (by native_decide) (by native_decide)
+  have hrect239 :
+      (IntegralIdentities.arctanIntegralRectangleFor ((1 : Rat) / 239)
+        (by native_decide) (by native_decide)).Valid :=
+    IntegralIdentities.arctanIntegralRectangleFor_valid ((1 : Rat) / 239)
+      (by native_decide) (by native_decide)
+  have hg15 : (ArctanGeometry.arctanGeom ((1 : Rat) / 5)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hg239 : (ArctanGeometry.arctanGeom ((1 : Rat) / 239)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hg1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hrect4_15 :
+      ((4 : Nat) * IntegralIdentities.arctanIntegralRectangleFor
+        ((1 : Rat) / 5) (by native_decide) (by native_decide) : RealRaw).Valid :=
+    RealRaw.natScale_valid 4 hrect15
+  have hg4_15 :
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) : RealRaw).Valid :=
+    RealRaw.natScale_valid 4 hg15
+  have hrectExpr :
+      ((4 : Nat) * IntegralIdentities.arctanIntegralRectangleFor
+        ((1 : Rat) / 5) (by native_decide) (by native_decide) -
+        IntegralIdentities.arctanIntegralRectangleFor ((1 : Rat) / 239)
+          (by native_decide) (by native_decide) : RealRaw).Valid :=
+    RealRaw.sub_valid hrect4_15 hrect239
+  have hgExpr :
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
+        ArctanGeometry.arctanGeom ((1 : Rat) / 239) : RealRaw).Valid :=
+    RealRaw.sub_valid hg4_15 hg239
+  have hrect_geom :
+      ((4 : Nat) * IntegralIdentities.arctanIntegralRectangleFor
+        ((1 : Rat) / 5) (by native_decide) (by native_decide) -
+        IntegralIdentities.arctanIntegralRectangleFor ((1 : Rat) / 239)
+          (by native_decide) (by native_decide) : RealRaw).Equiv
+      ((4 : Nat) * ArctanGeometry.arctanGeom ((1 : Rat) / 5) -
+        ArctanGeometry.arctanGeom ((1 : Rat) / 239) : RealRaw) :=
+    RealRaw.sub_equiv
+      hrect4_15 hg4_15 hrect239 hg239
+      (RealRaw.natScale_equiv 4
+        (IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom
+          ((1 : Rat) / 5) (by native_decide) (by native_decide)))
+      (IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom
+        ((1 : Rat) / 239) (by native_decide) (by native_decide))
+  have htoGeomOne :
+      ((4 : Nat) * IntegralIdentities.arctanIntegralRectangleFor
+        ((1 : Rat) / 5) (by native_decide) (by native_decide) -
+        IntegralIdentities.arctanIntegralRectangleFor ((1 : Rat) / 239)
+          (by native_decide) (by native_decide) : RealRaw).Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      hrectExpr hgExpr hg1 hrect_geom
+      MachinIdentity.geometricBranchIdentity_of_chartTransport
+  have hscaled :
+      IntegralIdentities.piMachinIntegralRectangle.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    simpa [IntegralIdentities.piMachinIntegralRectangle] using
+      RealRaw.natScale_equiv 4 htoGeomOne
+  exact RealRaw.equiv_trans
+    IntegralIdentities.piMachinIntegralRectangle_valid
+    (RealRaw.natScale_valid 4 hg1)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanGeom_one_equiv_piCircleArea
+
+/-- The shared-Farey integral realization of
+`pi = 4 (atan(1/2) + atan(1/3))`.  Unlike the unit Farey evaluator, this is a
+distinct rational arctangent formula; its branch identity is discharged by the
+finite chart-transport proof for `1/2 ⊕ 1/3 = 1`. -/
+theorem piTwoThreeIntegralFarey_equiv_piCircleArea :
+    IntegralIdentities.piTwoThreeIntegralFarey.Equiv piCircleArea := by
+  have hfarey2 :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2)).Valid :=
+    IntegralIdentities.arctanIntegralFareyFor_valid ((1 : Rat) / 2)
+  have hfarey3 :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Valid :=
+    IntegralIdentities.arctanIntegralFareyFor_valid ((1 : Rat) / 3)
+  have hgeom2 : (ArctanGeometry.arctanGeom ((1 : Rat) / 2)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom3 : (ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hgeom1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hfareySum :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
+        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Valid :=
+    RealRaw.add_valid hfarey2 hfarey3
+  have hgeomSum :
+      (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+        ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Valid :=
+    RealRaw.add_valid hgeom2 hgeom3
+  have hfareyToGeom :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
+        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Equiv
+          (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+            ArctanGeometry.arctanGeom ((1 : Rat) / 3)) :=
+    RealRaw.add_equiv hfarey2 hgeom2 hfarey3 hgeom3
+      (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
+        ((1 : Rat) / 2) (by native_decide) (by native_decide))
+      (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
+        ((1 : Rat) / 3) (by native_decide) (by native_decide))
+  have hgeomAdd :
+      (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+        ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat)) := by
+    have h := ArctanGeometry.arctanGeom_chartAdd_add_of_half
+      (u := (1 : Rat) / 2) (x := (1 : Rat) / 3)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide) (by native_decide)
+    have hparam :
+        RationalCircle.Trigonometry.chartAddParameter
+          ((1 : Rat) / 2) ((1 : Rat) / 3) = (1 : Rat) := by
+      native_decide
+    rw [hparam] at h
+    exact h
+  have hfareyToOne :
+      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
+        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans hfareySum hgeomSum hgeom1 hfareyToGeom hgeomAdd
+  have hscaled :
+      IntegralIdentities.piTwoThreeIntegralFarey.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    simpa [IntegralIdentities.piTwoThreeIntegralFarey] using
+      RealRaw.natScale_equiv 4 hfareyToOne
+  exact RealRaw.equiv_trans
+    IntegralIdentities.piTwoThreeIntegralFarey_valid
+    (RealRaw.natScale_valid 4 hgeom1)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanGeom_one_equiv_piCircleArea
+
+theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinSmallInputs
+    (route : MachinIdentity.KernelComparisonAtMachinSmallInputs) :
+  piMachin.Equiv piCircleArea :=
+  piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs
+    (MachinIdentity.powerSeriesGeometryAtMachinSmallInputs_of_kernelComparisonAtMachinSmallInputs
+      route)
 
 theorem leibnizEqArea_of_kernelComparisonAtOne
     (route : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)) :
@@ -11453,6 +13614,21 @@ theorem leibnizEqArea_of_pointwiseUnitIntegralBridge
   leibnizEqArea_of_unitUniformCellBounds
     (LeibnizRectangleBridge.unitUniformCellBounds_of_pointwiseUnitIntegralBridge h)
 
+theorem leibnizEqArea_of_unitCellOrderPreservation
+    (h : LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_pointwiseUnitIntegralBridge
+    (LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation
+      h)
+
+theorem leibnizEqArea_of_kernelPartialExactCellOrderPreservation
+    (h :
+      LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit) :
+    LeibnizEqArea :=
+  leibnizEqArea_of_unitCellOrderPreservation
+    (LeibnizRectangleBridge.unitCellOrderPreservation_of_kernelPartialExactCellOrderPreservation
+      h)
+
 theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
     (route : MachinIdentity.KernelComparisonAtMachinInputs)
     (hgeom : MachinIdentity.GeometricBranchLaw) :
@@ -11464,6 +13640,31 @@ theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs
     (RealRaw.equiv_symm
       (leibnizEqMachin_of_kernelComparisonAtMachinInputs route hgeom))
     (leibnizEqArea_of_kernelComparisonAtOne route.one)
+
+/-- The remaining data for the canonical Machin pi equivalence are the three
+pointwise power-series/kernel comparisons.  The bounded geometric additions
+are now theorems. -/
+theorem piMachin_equiv_piCircleArea_of_machinUnitAdditions
+    (route : MachinIdentity.KernelComparisonAtMachinInputs)
+    (hadd : MachinIdentity.GeometricMachinUnitAdditions) :
+    piMachin.Equiv piCircleArea :=
+  piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs route
+    (MachinIdentity.geometricBranchLaw_of_machinUnitAdditions hadd)
+
+/-- The bounded geometric Machin additions are now internal theorems; only
+the three remaining power-series/kernel comparisons are parameters here. -/
+theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs_chartTransport
+    (route : MachinIdentity.KernelComparisonAtMachinInputs) :
+    piMachin.Equiv piCircleArea :=
+  piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs route
+    MachinIdentity.geometricBranchLaw_of_chartTransport
+
+theorem piMachin_equiv_piCircleArea_of_unitAdditionLaw
+    (route : MachinIdentity.KernelComparisonAtMachinInputs)
+    (hadd : MachinIdentity.GeometricUnitAdditionLaw) :
+    piMachin.Equiv piCircleArea :=
+  piMachin_equiv_piCircleArea_of_machinUnitAdditions route
+    (MachinIdentity.geometricMachinUnitAdditions_of_unitAdditionLaw hadd)
 
 theorem piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs
     (route : MachinIdentity.KernelComparisonAtMachinInputs)
@@ -11494,6 +13695,13 @@ def piFromArctanIntegralFareyAtOne : RealRaw :=
   IntegralIdentities.PiFromArctanIntegral
     (IntegralIdentities.arctanIntegralFareyFor (1 : Rat))
 
+/-- The full-line Cauchy integral in its projectively compactified Farey
+presentation.  Its evaluator is the fourfold unit-interval Farey integral:
+the reciprocal folding theorem for the Cauchy kernel accounts for the two
+positive-half-line pieces, and evenness accounts for the two signs. -/
+def piCauchyProjectiveFarey : RealRaw :=
+  piFromArctanIntegralFareyAtOne
+
 theorem piFromArctanIntegralFareyAtOne_valid :
     piFromArctanIntegralFareyAtOne.Valid := by
   unfold piFromArctanIntegralFareyAtOne
@@ -11501,6 +13709,11 @@ theorem piFromArctanIntegralFareyAtOne_valid :
   exact RealRaw.scaleRat_valid_of_nonneg
     (by native_decide : (0 : Rat) <= 4)
     (IntegralIdentities.arctanIntegralFareyFor_valid (1 : Rat))
+
+theorem piCauchyProjectiveFarey_valid :
+    piCauchyProjectiveFarey.Valid := by
+  simpa [piCauchyProjectiveFarey] using
+    piFromArctanIntegralFareyAtOne_valid
 
 theorem piFromArctanGeomUnitFareyDefiniteIdentity_compute_eq_fareyAtOne
     (n : Nat) :
@@ -11654,6 +13867,11 @@ theorem piFromArctanIntegralFareyAtOne_equiv_piCircleArea :
   piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement
     fareyPrefixGeomAgreementAtOne
 
+theorem piCauchyProjectiveFarey_equiv_piCircleArea :
+    piCauchyProjectiveFarey.Equiv piCircleArea := by
+  simpa [piCauchyProjectiveFarey] using
+    piFromArctanIntegralFareyAtOne_equiv_piCircleArea
+
 theorem piCircleArea_equiv_piFromArctanIntegralFareyAtOne :
     piCircleArea.Equiv piFromArctanIntegralFareyAtOne :=
   RealRaw.equiv_symm piFromArctanIntegralFareyAtOne_equiv_piCircleArea
@@ -11711,6 +13929,40 @@ theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     (by simpa [AreaValid] using AreaLoopValidity.areaValid)
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
+
+/-- The same completed rectangle-integral pi route, viewed through the
+monotone-integral interface for the decreasing kernel `1/(1+x^2)` on
+`[0,1]`. -/
+theorem four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea :
+    (IntegralIdentities.PiFromArctanIntegral
+      IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne).Equiv
+        piCircleArea := by
+  have hscaled :
+      (IntegralIdentities.PiFromArctanIntegral
+        IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne).Equiv
+          (IntegralIdentities.PiFromArctanIntegral
+            IntegralIdentities.arctanIntegralRectangleForAtOne) := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    exact RealRaw.natScale_equiv 4
+      IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_equiv_rectangleForAtOne
+  have hleft :
+      (IntegralIdentities.PiFromArctanIntegral
+        IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne).Valid := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    exact RealRaw.natScale_valid 4
+      IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_valid
+  have hrect :
+      (IntegralIdentities.PiFromArctanIntegral
+        IntegralIdentities.arctanIntegralRectangleForAtOne).Valid := by
+    unfold IntegralIdentities.PiFromArctanIntegral
+    exact RealRaw.natScale_valid 4
+      IntegralIdentities.arctanIntegralRectangleForAtOne_valid
+  exact RealRaw.equiv_trans
+    hleft
+    hrect
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanIntegralRectangleForAtOne_equiv_piCircleArea
 
 /-- The table-facing unit-branch rectangle integral computation of pi:
 `4 * ∫_0^1 dt/(1+t^2)`, using the `arctanIntegralUnit` API. -/
@@ -11800,6 +14052,77 @@ theorem piFromArctanIntegralRectangleUnitAtOne_equiv_geomUnitDefiniteIdentity :
       piFromArctanGeomUnitRectangleDefiniteIdentity :=
   RealRaw.equiv_symm
     piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_rectangleUnit
+
+/-- The pi raw real obtained from the monotone-definite endpoint identity for
+the rectangle arctangent integral. -/
+def piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity : RealRaw :=
+  IntegralIdentities.PiFromArctanIntegral
+    (Integral.monotoneIntegralFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity_valid :
+    piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity.Valid := by
+  unfold piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity
+    IntegralIdentities.PiFromArctanIntegral
+  exact RealRaw.scaleRat_valid_of_nonneg
+    (by native_decide : (0 : Rat) <= 4)
+    (Integral.monotoneIntegralFor_valid
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity_equiv_piCircleArea :
+    piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity.Equiv piCircleArea :=
+  piFromArctanIntegralFor_equiv_piCircleArea_of_monotoneDefiniteIdentityFor
+    IntegralIdentities.arctanGeomOnUnit
+    IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity
+    IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one
+
+theorem piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity_compute_eq_rectangle
+    (n : Nat) :
+    piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity.compute n =
+      piFromArctanGeomUnitRectangleDefiniteIdentity.compute n := by
+  rfl
+
+theorem piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity_equiv_rectangle :
+    piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity.Equiv
+      piFromArctanGeomUnitRectangleDefiniteIdentity := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity
+    piFromArctanGeomUnitRectangleDefiniteIdentity n n).2
+  rw [piFromArctanGeomUnitRectangleMonotoneDefiniteIdentity_compute_eq_rectangle n]
+  have horder := RealRaw.interval_order_of_valid
+    piFromArctanGeomUnitRectangleDefiniteIdentity
+    piFromArctanGeomUnitRectangleDefiniteIdentity_valid n
+  exact ⟨horder, horder⟩
+
+/-- The pi raw real obtained from the public general-integral endpoint
+identity for the rectangle arctangent integral. -/
+noncomputable def piFromArctanGeomUnitRectangleGeneralDefiniteIdentity :
+    RealRaw :=
+  IntegralIdentities.PiFromArctanIntegral
+    (Integral.generalIntegralFor
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitRectangleGeneralDefiniteIdentity_valid :
+    piFromArctanGeomUnitRectangleGeneralDefiniteIdentity.Valid := by
+  unfold piFromArctanGeomUnitRectangleGeneralDefiniteIdentity
+    IntegralIdentities.PiFromArctanIntegral
+  exact RealRaw.scaleRat_valid_of_nonneg
+    (by native_decide : (0 : Rat) <= 4)
+    (Integral.generalIntegralFor_valid
+      (IntegralIdentities.oneOverOnePlusSquareOnInterval 0 1)
+      IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity.construction)
+
+theorem piFromArctanGeomUnitRectangleGeneralDefiniteIdentity_equiv_piCircleArea :
+    piFromArctanGeomUnitRectangleGeneralDefiniteIdentity.Equiv piCircleArea :=
+  piFromArctanGeneralIntegralFor_equiv_piCircleArea_of_generalDefiniteIdentityFor
+    IntegralIdentities.arctanGeomOnUnit
+    IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity
+    IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one
 
 /-- The two completed arctangent-integral pi computations, rectangle and
 shared-Farey, are equivalent raw reals.  This is not a new scoreboard row; it

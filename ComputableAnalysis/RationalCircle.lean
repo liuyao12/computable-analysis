@@ -2564,6 +2564,12 @@ def chartAddDen (u v : Rat) : Rat :=
 def chartAddParameter (u v : Rat) : Rat :=
   chartAddNum u v / chartAddDen u v
 
+theorem chartAddParameter_zero_right (u : Rat) :
+    chartAddParameter u 0 = u := by
+  unfold chartAddParameter chartAddNum chartAddDen
+  rw [Rat.div_def]
+  grind
+
 def chartAddNormDen (u v : Rat) : Rat :=
   sq (chartAddDen u v) + sq (chartAddNum u v)
 
@@ -2662,6 +2668,105 @@ theorem chartAdd_normDen_pos (u v : Rat) :
     0 < chartAddNormDen u v := by
   rw [chartAdd_normDen_eq]
   exact Rat.mul_pos (Stage.one_add_square_pos u) (Stage.one_add_square_pos v)
+
+/-- The tangent-addition chart gives the exact rational denominator identity
+for the arctangent kernel. -/
+theorem one_add_square_chartAddParameter {u v : Rat}
+    (hden : chartAddDen u v ≠ 0) :
+    1 + chartAddParameter u v * chartAddParameter u v =
+      chartAddNormDen u v /
+        (chartAddDen u v * chartAddDen u v) := by
+  unfold chartAddParameter chartAddNormDen chartAddDen chartAddNum sq
+  rw [Rat.div_def]
+  have hsq : (1 - u * v) * (1 - u * v) ≠ 0 := by
+    intro hzero
+    rcases (Rat.mul_eq_zero.mp hzero) with hzero | hzero
+    · exact hden hzero
+    · exact hden hzero
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Under the rational tangent-addition chart, the Jacobian-scaled kernel
+`1 / (1+x^2)` is preserved exactly.  This is the finite rational change of
+variables identity needed to transport arctangent interval constructions. -/
+theorem arctanKernel_chartAdd_jacobian {u v : Rat}
+    (hden : chartAddDen u v ≠ 0) :
+    (1 + u * u) /
+        ((chartAddDen u v * chartAddDen u v) *
+          (1 + chartAddParameter u v * chartAddParameter u v)) =
+      1 / (1 + v * v) := by
+  rw [one_add_square_chartAddParameter hden]
+  have hcancel :
+      (chartAddDen u v * chartAddDen u v) *
+          (chartAddNormDen u v /
+            (chartAddDen u v * chartAddDen u v)) =
+        chartAddNormDen u v := by
+    rw [Rat.div_def]
+    have hsq : chartAddDen u v * chartAddDen u v ≠ 0 := by
+      intro hzero
+      rcases (Rat.mul_eq_zero.mp hzero) with hzero | hzero
+      · exact hden hzero
+      · exact hden hzero
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  rw [hcancel, chartAdd_normDen_eq]
+  rw [Rat.div_def, Rat.div_def]
+  have hu : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (Stage.one_add_square_pos u)
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem rat_eq_of_mul_eq_mul_ne {a b c : Rat}
+    (hc : c ≠ 0) (h : a * c = b * c) : a = b := by
+  calc
+    a = (a * c) * c⁻¹ := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact endpoint displacement under the rational tangent-addition chart.
+This is the finite interval-transport algebra paired with the kernel
+Jacobian identity above. -/
+theorem chartAddParameter_sub {u p r : Rat}
+    (hp : chartAddDen u p ≠ 0) (hr : chartAddDen u r ≠ 0) :
+    chartAddParameter u r - chartAddParameter u p =
+      ((1 + u * u) * (r - p)) /
+        (chartAddDen u p * chartAddDen u r) := by
+  change 1 - u * p ≠ 0 at hp
+  change 1 - u * r ≠ 0 at hr
+  have hprod : (1 - u * p) * (1 - u * r) ≠ 0 := by
+    intro hzero
+    rcases (Rat.mul_eq_zero.mp hzero) with hzero | hzero
+    · exact hp hzero
+    · exact hr hzero
+  apply rat_eq_of_mul_eq_mul_ne hprod
+  unfold chartAddParameter chartAddNum chartAddDen
+  simp only [Rat.div_def, Rat.inv_mul_rev]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- On cells whose chart denominators are positive, the tangent-addition
+chart preserves endpoint order. -/
+theorem chartAddParameter_mono {u p r : Rat}
+    (hp : 0 < chartAddDen u p) (hr : 0 < chartAddDen u r)
+    (hpr : p <= r) :
+    chartAddParameter u p <= chartAddParameter u r := by
+  have hpne : chartAddDen u p ≠ 0 := Rat.ne_of_gt hp
+  have hrne : chartAddDen u r ≠ 0 := Rat.ne_of_gt hr
+  have hnum : 0 <= (1 + u * u) * (r - p) :=
+    Rat.mul_nonneg
+      (Rat.le_of_lt (Stage.one_add_square_pos u))
+      (by grind [Rat.sub_eq_add_neg])
+  have hden : 0 < chartAddDen u p * chartAddDen u r :=
+    Rat.mul_pos hp hr
+  have hquot :
+      0 <= ((1 + u * u) * (r - p)) /
+        (chartAddDen u p * chartAddDen u r) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+  rw [← chartAddParameter_sub hpne hrne] at hquot
+  grind [Rat.sub_eq_add_neg]
 
 theorem ratSquare_pos_of_ne_zero {x : Rat} (hx : x ≠ 0) :
     0 < x * x := by

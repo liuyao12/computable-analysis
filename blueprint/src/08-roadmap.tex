@@ -12,9 +12,9 @@ finite conclusions:
 \]
 These are the computational substitutes for classical existence and equality.
 Whenever a classical proof says "choose a sufficiently fine partition" or
-"take a small enough neighborhood", the blueprint should say whether this is
-an exact existence step using raw-real completeness, or a later executable
-algorithm requiring an explicit modulus.
+"take a small enough neighborhood", the blueprint must replace it by an
+executable rational algorithm with an explicit modulus.  No raw-real
+completeness principle is available or planned as a proof shortcut.
 
 \section{Near-term milestones}
 
@@ -24,23 +24,29 @@ algorithm requiring an explicit modulus.
   transitivity and compatibility with raw-real arithmetic under valid
   representatives.
 
-  \item Formalize raw-real completeness:
-  construct exact raw reals from nested rational intervals, then use this to
-  define infima and suprema of bounded monotone rational families.
+  \item Strengthen explicit interval constructors:
+  package concrete nested rational stage algorithms together with their
+  orderedness and width-shrinking moduli.  Do not introduce infimum, supremum,
+  or completeness principles for bounded monotone families; applications must
+  carry the finite approximation data they use.
 
-  \item Define one-sided convex derivatives:
-  formalize \cref{def:convex-right-derivative} and
-  \cref{def:convex-left-derivative} as infimum and supremum constructions for
-  rational secants of a \cref{def:exact-convexity} function.
+  \item Construct one-sided convex derivatives:
+  supply explicit nested rational interval algorithms, then verify
+  \cref{def:convex-right-derivative} and
+  \cref{def:convex-left-derivative} by their rational-secant lower/upper-bound
+  and greatest/leastness laws.  These laws characterize a supplied algorithm;
+  they do not construct it by infimum or supremum.
 
   \item Prove monotone integrability:
   use the definite-integral construction from Chapter~\ref{ch:integrals} to
   prove \cref{thm:monotone-integrable}.
 
   \item Close the convex FTC:
-  prove \cref{thm:convex-ftc} by manufacturing the effective FTC certificates
-  of \cref{thm:effective-ftc-certificate} from convexity, one-sided
-  derivatives, monotone integrability, and telescoping secant inequalities.
+  prove \cref{thm:convex-ftc} by manufacturing the derivative-bound
+  certificates of \cref{thm:effective-ftc-certificate} from convexity,
+  one-sided derivatives, monotone integrability, and telescoping secant
+  inequalities, then promote them to the \code{DefiniteIdentityFor}
+  interface used by the pi routes.
 
   \item Prove the interval arithmetic formula-identification rules:
   sums, scalar multiples, products, and reciprocals should transform
@@ -57,7 +63,7 @@ algorithm requiring an explicit modulus.
 
   \item Finish geometric pi validity:
   the area loop now has a direct validity proof; finish circumference validity
-  and the polygon bridge needed for \cref{thm:geometric-pi-validity}.
+  through its all-stage dyadic endpoint-refinement theorem.
 
   \item Choose an FTA route:
   either develop algebraic complex numbers with isolation boxes, or develop
@@ -78,8 +84,15 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.AreaWidthsShrink}
 \lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
 \lean{ComputableAnalysis.PiProofs.PiCircleAreaPolygonAgreement}
+\lean{ComputableAnalysis.PiProofs.piCircleAreaPolygonAgreement}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piCircleAreaPolygon_of_polygonAgreement}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piCircleAreaPolygon}
+\lean{ComputableAnalysis.PiProofs.areaEqCircumference}
+\lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleArea_of_verified_area_polygon}
+\lean{ComputableAnalysis.ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute}
 \lean{ComputableAnalysis.PiProofs.piCircleAreaPolygonValid_of_polygonAgreement_and_areaValid}
+\lean{ComputableAnalysis.PiProofs.areaPolygonValid}
+\lean{ComputableAnalysis.PiProofs.piCircleAreaPolygon_valid}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_nested_and_shrinking}
 \lean{ComputableAnalysis.PiProofs.GeometricValidityRemainders}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_self}
@@ -141,81 +154,37 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.ArctanGeometry.geometricLowerSum_le_integralUpperSum_of_covers_right}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval_of_covers}
 \lean{ComputableAnalysis.ArctanGeometry.integralBracketInterval_overlaps_geometricSumInterval_of_covers}
-\lean{ComputableAnalysis.ArctanGeometry.fareyCellIntervals_covers}
-\lean{ComputableAnalysis.ArctanGeometry.fareyUnitStage_intervals_covers}
-\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_covers_prefix}
-\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo_covers_prefix}
-\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_unitStage_covers_prefix}
-\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo_unitStage_covers_prefix}
 \lean{ComputableAnalysis.ArctanGeometry.refineAreaLoopState_intervals_covers}
 \lean{ComputableAnalysis.ArctanGeometry.iterateAreaLoopState_intervals_covers}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopInitial_intervals_covers}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_covers}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_overlaps_positiveLoop}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_equiv_arctanGeom_on_unit}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitStageInterval_overlaps_rectangleAtOne}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitRaw_equiv_arctanIntegralRectangleRawAtOne}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitRaw_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.ArctanGeometry.FareyMidpointUnitCrossBounds}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitStageInterval_overlaps_positiveLoopAtOne}
-\lean{ComputableAnalysis.ArctanGeometry.fareyMidpointUnitCrossBounds}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitRaw_equiv_arctanGeom_one_of_crossBounds}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitRaw_equiv_arctanGeom_one_direct}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_valid}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_self_equiv_zero}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_add_reverse_equiv_zero}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_left_equiv_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_right_equiv_neg_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_zero_equiv_zero}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitData}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_arctanGeom}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_arctanGeom}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitFunctionAgreement}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_one}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_arctanGeom_one}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one}
-\lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne_of_cross_bounds}
-\lean{ComputableAnalysis.PiProofs.fareyUnitIntegralGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne_of_unit_integral_agreement}
-\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.fareyPrefixGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.arctanIntegralFareyFor_one_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_unit_integral_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_cross_bounds}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_cross_bounds}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_definite_identity}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.piMachinIntegralRectangle}
+\lean{ComputableAnalysis.IntegralIdentities.piMachinIntegralRectangle_valid}
+\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey}
+\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_valid}
+\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyProjectiveFoldDensity}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piMachinIntegralRectangle_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey}
+\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_valid}
+\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_valid}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralRectangleUnitAtOne}
 \lean{ComputableAnalysis.PiProofs.archimedesTheorem}
 \lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleAreaPolygon_equiv_piCircumference}
+\lean{ComputableAnalysis.PiProofs.piCircumference_equiv_piCircleAreaPolygon}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
 \lean{ComputableAnalysis.ArctanGeometry.PowerSeriesAgreesAt}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.pow_mono_nonneg}
@@ -366,6 +335,11 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_unitUniformCellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseIntegralBridgeAtOne_iff_uniformCellBounds}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_iff_unitUniformCellBounds}
+\lean{ComputableAnalysis.Integral.ExactCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.evenKernelCellBound_of_exactCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound_of_exactCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitCellOrderPreservation_of_kernelPartialExactCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.cellBounds_of_pointwiseUnitIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelBounds_of_cellBoundsUpToAll}
@@ -383,6 +357,7 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_rawOverlapsUpToAll}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_unitCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAtOne_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne}
@@ -399,6 +374,8 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitUniformCellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_kernelPartialExactCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesRectangleKernelAtOne}
@@ -411,6 +388,8 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_unitUniformCellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_pointwiseIntegralBridge}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_pointwiseUnitIntegralBridge}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_kernelPartialExactCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelComparisonAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_leibnizEqualsRectangleRawAtOne}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelBounds}
@@ -419,6 +398,11 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_unitUniformCellBounds}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_cellBoundsUpToAll}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_unitUniformCellBoundsUpToAll}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_kernelPartialExactCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne_of_unitCellOrderPreservation}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.unitUniformCellBounds_of_unitCellOrderPreservation}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
@@ -426,16 +410,36 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchLaw_of_geometricBranchLaw_on_unit}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.GeometricUnitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.GeometricMachinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricMachinUnitAdditions_of_unitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricMachinUnitAdditions_of_chartTransport}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchIdentity_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchIdentity_of_chartTransport}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchIdentity_of_unitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchLaw_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchLaw_of_chartTransport}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.geometricBranchLaw_of_unitAdditionLaw}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.PowerSeriesGeometryAtMachinSmallInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.KernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.KernelComparisonAtMachinSmallInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.kernelComparisonAtMachinInputs_of_powerSeriesEqualsRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.powerSeriesGeometryAtMachinInputs_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.MachinIdentity.powerSeriesGeometryAtMachinSmallInputs_of_kernelComparisonAtMachinSmallInputs}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_iff_machinBranchIdentity}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinBranchLaw}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_geometricRoute_on_unit}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_unitAdditionLaw}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.leibnizEqMachin_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinSmallInputs}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_machinUnitAdditions}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs_chartTransport}
+\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_unitAdditionLaw}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesRectangleKernelAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piMachin_of_powerSeriesRectangleKernelAtMachinInputs}
@@ -617,24 +621,39 @@ algorithm requiring an explicit modulus.
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_valid}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea}
 
 \input{pi-scoreboard-table.tex}
 
+The bounded Farey-prefix mesh is deliberately not a separate scoreboard row:
+the table counts canonical construction families, not every mesh used to
+evaluate the same bounded integral.  The new
+\code{PiProofs.piCauchyProjectiveFarey} row is distinct because it specifies a
+full-line Cauchy computation by reciprocal compactification:
 \[
-  I^{F}_n(0,1)\cap A^{M}_m(1)\ne\varnothing
-  \quad\Rightarrow\quad
-  4I^F(0,1)\sim\pi_{\mathrm{area}}.
+  \int_{-\infty}^{\infty}\frac{dx}{1+x^2}
+  :=4\int_0^1\frac{dx}{1+x^2}.
 \]
-\code{integralSumInterval\_overlaps\_geometricSumInterval\_of\_covers},
-\code{fareyMidpointUnitCrossBounds},
-\code{fareyIntegralUnitRaw\_equiv\_arctanGeom\_one\_direct},
-\code{piFromArctanIntegralFareyAtOne\_equiv\_piCircleArea}.
+Its exact rational fold identity is now formalized, and the resulting raw real
+is valid and equivalent to \code{piCircleArea}.  This is a concrete
+improper/projective construction for the Cauchy kernel, not a generic limit
+theory; it supplies the substitution pattern needed next for the reciprocal
+quartic.  Farey subdivision remains projective/improper-integral machinery in
+\cref{rem:farey-subdivision-projective}, where shared prefixes are useful for
+orientation reversal, adjacent additivity, and endpoints at infinity.
+
+The same shared Farey evaluator now supplies a separately counted formula-level
+row:
 \[
-  I^F_n(0,x)\cap A^M_m(x)\ne\varnothing
-  \qquad(0\le x\le1).
+  \pi=4\left(\int_0^{1/2}\frac{dt}{1+t^2}+
+    \int_0^{1/3}\frac{dt}{1+t^2}\right).
 \]
-\code{fareyIntegralPrefixRaw\_equiv\_arctanGeom\_on\_unit},
-\code{arctanIntegralFareyUnitFunctionAgreement}.
+This is not a mesh duplicate: the finite chart transport proves the distinct
+rational branch identity \(\operatorname{atan}(1/2)+\operatorname{atan}(1/3)
+=\operatorname{atan}(1)\), and the Farey computation has the explicit bound
+\(48/(n+1)\).  The theorem-facing result is
+\code{PiProofs.piTwoThreeIntegralFarey\_equiv\_piCircleArea}.
 \[
   4\arctan_{\int}(1)\sim\pi_{\mathrm{area}}
   \quad\text{pending}.
@@ -655,7 +674,11 @@ scoreboard target: \code{ReciprocalQuarticMinusOneProjectiveRoute}.
 
 Completed equivalence hooks:
 \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea},
-\code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea}.
+\code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea},
+the certified Machin rectangle-integral route, and the projectively compactified
+Cauchy route \code{PiProofs.piCauchyProjectiveFarey\_equiv\_piCircleArea},
+and the two-three Farey-integral route
+\code{PiProofs.piTwoThreeIntegralFarey\_equiv\_piCircleArea}.
 FTC hooks:
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_definite\_identity},
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC}.
@@ -664,7 +687,29 @@ Unit-branch validity:
 \code{ArctanGeometry.arctanGeom\_valid\_on\_powerSeriesDomain}.
 
 Leibniz/rectangle target:
-\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}.
+\code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}.
+\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_constant}
+\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_of_positive_quadrature}
+\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_of_boole}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_zero}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_one}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_two}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_three}
+\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialExactCellOrderPreservation_four}
+This is the exact-cell order-preservation step that integrates the already
+proved pointwise kernel inequalities for the arctangent kernel partials over
+rational unit cells, and then feeds
+\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation}.
+The constant partial, the first nonconstant partial \(1-x^2\), the degree-four
+partial \(1-x^2+x^4\), the degree-six partial \(1-x^2+x^4-x^6\), and the
+degree-eight partial \(1-x^2+x^4-x^6+x^8\) are now proved instances.  The first
+nonconstant case uses explicit nonnegative endpoint-gap factorizations; the
+degree-four case uses Boole quadrature, and the degree-six and degree-eight
+cases use positive seven-point and eleven-point rational Newton--Cotes rules,
+respectively.
+A reusable finite positive-quadrature bridge separates the order argument
+from the polynomial identity.  The outstanding task is to lift this finite
+rational algebra uniformly to every alternating partial.
 \[
   \frac{r-p}{1+r^2}
   \le
@@ -758,15 +803,16 @@ on missing hypotheses:
 \hline
 \(4\arctan_{\mathrm{series}}(1)\sim\pi_{\mathrm{area}}\) &
 \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_leibnizEqualsRectangleRawAtOne} &
-\code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleKernelCellBoundsAtOne}\\
-\(4\arctan_{\int}(1)\sim\pi_{\mathrm{area}}\) &
+\code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}\\
+\(4\arctan_{\int}(1)\sim\pi_{\mathrm{area}}\) for the legacy
+\code{Integral.Construction} wrapper &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
 \code{ArctanIntegralGeomFunctionAgreement}; equivalently an effective FTC
 certificate via
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC}\\
 \(\pi_{\mathrm{circ}}\sim\pi_{\mathrm{area}}\) &
-\code{PiProofs.PiCircleAreaPolygonAgreement} &
-the internal finite-geometry bridge used by circumference comparisons\\
+\code{PiProofs.piCircumference\_equiv\_piCircleArea\_of\_verified\_area\_polygon} &
+the all-stage circumference-validity certificate\\
 \(\sum_{n\ge1}n^{-2}=\pi_{\mathrm{area}}^2/6\) &
 \code{Basel.eulerBasel\_geometricPi} &
 Euler's Basel theorem for the geometric pi representative\\
@@ -775,8 +821,7 @@ Euler's Basel theorem for the geometric pi representative\\
 three \code{log(i)} constructions, their branch agreement, and Euler identity\\
 \(4\arctan_{\mathrm{series}}(1)\sim\pi_{\mathrm{Machin}}\) &
 \code{PiProofs.leibnizEqMachin\_of\_powerSeriesRectangleKernelAtMachinInputs} &
-\code{PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}
-and the geometric branch law\\
+\code{PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}\\
 \(\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}\sim\pi_{\mathrm{area}}\) &
 \code{PiProofs.reciprocalQuarticMinusOneProjectiveRoute\_equiv\_piCircleArea} &
 an improper Farey construction satisfying
@@ -795,23 +840,36 @@ nesting, and width shrinkage for the public baseline.  The same proof now
 verifies \code{4 * arctanGeom(1)} through
 \code{PiProofs.fourArctanGeomOneValid}; the positive-scaling converse gives
 \code{PiProofs.arctanGeomOneValid}, and same-stage equality gives
-\code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}.  The bridge
-\code{PiProofs.PiCircleAreaPolygonAgreement} remains an internal finite-geometry
-target for circumference and Archimedes estimates, not a separate pi
-computation in the scoreboard.  The sharper public completion package is
+\code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea}.  The exact
+stage bridge \code{ArctanGeometry.piCircleArea\_compute\_eq\_piCircleAreaPolygon\_compute}
+now discharges \code{PiProofs.PiCircleAreaPolygonAgreement}; together with
+the finite Archimedes comparison it gives the raw equivalence
+\code{PiProofs.piCircumference\_equiv\_piCircleArea\_of\_verified\_area\_polygon}.
+The polygon computation itself is now a valid raw real by
+\code{PiProofs.areaPolygonValid}, but it is scaffolding rather than an
+additional scoreboard row.  The circumference route is not a scoreboard
+completion until \code{piCircumference} has its public validity certificate.
+Lean now also provides \code{PiProofs.piCircumferenceReboxed}, a valid
+finite-prefix reboxing of the overlapping perimeter and area intervals, with
+\code{PiProofs.piCircumferenceReboxed\_equiv\_piCircleArea}.  This is a
+usable certified representative of the Archimedean perimeter route, but it
+does not replace the pending direct endpoint-refinement proof or change the
+scoreboard count.  The project-facing certified value
+\code{PiProofs.piCertified} keeps \code{piCircleArea} as its preferred
+evaluator and records this reboxed perimeter computation as an alternative.
+The sharper public completion package is
 \code{PiProofs.CompletionCircumferenceQuarterLengthRemainders}: it reuses the
 proved area-loop validity and the proved circumference width shrinkage, leaving
-only the two dyadic quarter-path endpoint inequalities, the polygon bridge, and
-the analytic arctangent agreements.  Lean promotes those two quarter-path
+only the two dyadic quarter-path endpoint inequalities and the analytic
+arctangent agreements.  Lean promotes those two quarter-path
 inequalities to public step refinement through
 \code{PiProofs.circumferenceStepRefines\_of\_quarterLengthStepRefines}.  The
-same exact endpoint-refinement target is now certified through \(n\le9\) as
+same exact endpoint-refinement target is certified through \(n\le9\) as
 \code{PiProofs.circumferenceQuarterLengthStepRefinesUpToNine}, and promoted
 to public compute steps by
-\code{PiProofs.circumferenceStepRefinesUpToNine}.  The older \(n\le8\)
-wrappers remain as cheap consequences.  This is a finite
-regression certificate, not the full circumference-validity row.  The dyadic
-endpoint reuse facts for the rational circle are named as
+\code{PiProofs.circumferenceStepRefinesUpToNine}; the \(n\le8\) wrapper is a
+cheap consequence.  This is a finite regression certificate, not the full
+circumference-validity row.  The dyadic endpoint reuse facts for the rational circle are named as
 \code{PiProofs.circleSamplePoint\_double\_index} and
 \code{PiProofs.circleSamplePoint\_double\_index\_succ}.
 The width-bound target has been sharpened to
@@ -861,10 +919,21 @@ chord and tangent formulas.
   \code{RealRaw.Le}, \code{secantRaw}, \code{ExactConvexOn},
   \code{ExactConcaveOn}.
   The current formal proof-route declarations are
-  \code{EffectiveFTC}, \code{FTC.effectiveFTC\_equiv\_endpoint},
+  \code{EffectiveFTC}, \code{StaticDyadicEffectiveFTC},
+  \code{FTC.effectiveFTC\_equiv\_endpoint},
   \code{FTC.effectiveFTC\_integral\_equiv\_scheduledEndpoint},
-  \code{DerivativeBoundFTC}, and \code{convexFTC}.
-  \code{LegacyConvexFTC} remains older certificate-shaped scaffolding.
+  \code{FTC.staticDyadicEffectiveFTC\_definiteIntegralEqualsEndpoint},
+  \code{DerivativeBoundFTC}, \code{derivativeBoundFTC},
+  \code{candidateDerivativeFTC},
+  \code{CurvatureFTCCertificate}, \code{curvatureFTC},
+  \code{ConvexFTCCertificate},
+  \code{Integral.definiteIdentityFor\_of\_derivativeBoundFTC},
+  \code{Integral.definiteIdentityFor\_of\_curvatureFTC},
+  \code{Integral.definiteIdentityFor\_of\_convexFTC}, and
+  \code{convexFTC}.
+  \code{CurvatureFTCCertificate} covers both convex and concave curvature
+  data; \code{ConvexFTCCertificate} is the convex-facing specialization, and
+  \code{LegacyConvexFTC} is retained only as a compatibility abbreviation.
   Blueprint targets still to receive final Lean names:
   \code{rightDerivative}, \code{leftDerivative},
   \code{monotoneIntegrable}, and the full one-sided convex FTC theorem.
@@ -884,6 +953,12 @@ chord and tangent formulas.
   \code{PiProofs.arctanGeomOneValid},
   \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea},
   \code{PiProofs.PiCircleAreaPolygonAgreement},
+  \code{PiProofs.piCircleAreaPolygonAgreement},
+  \code{PiProofs.areaEqCircumference},
+  \code{PiProofs.piCircumference\_equiv\_piCircleArea\_of\_verified\_area\_polygon},
+  \code{ArctanGeometry.piCircleArea\_compute\_eq\_piCircleAreaPolygon\_compute},
+  \code{PiProofs.areaPolygonValid},
+  \code{PiProofs.piCircleAreaPolygon\_valid},
   \code{PiProofs.areaValid\_of\_nested\_and\_shrinking},
   \code{PiProofs.piCircleArea\_equiv\_self},
   \code{ArctanGeometry.PowerSeriesAgreesAt},
@@ -976,6 +1051,14 @@ chord and tangent formulas.
   \code{PiProofs.LeibnizRectangleBridge.cellBounds\_of\_unitUniformCellBoundsUpToAll},
   \code{PiProofs.LeibnizRectangleBridge.pointwiseIntegralBridgeAtOne\_iff\_uniformCellBounds},
   \code{PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne\_iff\_unitUniformCellBounds},
+  \code{Integral.ExactCellOrderPreservation},
+  \code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit},
+  \code{PiProofs.LeibnizRectangleBridge.evenKernelCellBound\_of\_exactCellOrderPreservation},
+  \code{PiProofs.LeibnizRectangleBridge.oddKernelUnitCellBound\_of\_exactCellOrderPreservation},
+  \code{PiProofs.LeibnizRectangleBridge.unitCellOrderPreservation\_of\_kernelPartialExactCellOrderPreservation},
+  \code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation},
+  \code{PiProofs.LeibnizRectangleBridge.pointwiseUnitIntegralBridgeAtOne\_of\_unitCellOrderPreservation},
+  \code{PiProofs.LeibnizRectangleBridge.unitUniformCellBounds\_of\_unitCellOrderPreservation},
   \code{PiProofs.LeibnizRectangleBridge.cellBounds\_of\_pointwiseIntegralBridge},
   \code{PiProofs.LeibnizRectangleBridge.cellBounds\_of\_pointwiseUnitIntegralBridge},
   \code{PiProofs.LeibnizRectangleBridge.kernelBounds\_of\_cellBoundsUpToAll},
@@ -993,12 +1076,17 @@ chord and tangent formulas.
   \code{PiProofs.leibnizEqualsRectangleRawAtOne\_of\_unitUniformCellBounds},
   \code{PiProofs.leibnizEqualsRectangleRawAtOne\_of\_pointwiseIntegralBridge},
   \code{PiProofs.leibnizEqualsRectangleRawAtOne\_of\_pointwiseUnitIntegralBridge},
+  \code{PiProofs.leibnizEqualsRectangleRawAtOne\_of\_unitCellOrderPreservation},
   \code{Taylor.ArctanComparison.KernelComparisonAt},
   \code{PiProofs.PowerSeriesEqualsRectangleKernelAtOne},
   \code{PiProofs.LeibnizEqualsRectangleRawAtOne},
   \code{PiProofs.leibnizEqualsRectangleRawAtOne\_of\_cellBoundsUpToAll},
+  \code{PiProofs.MachinIdentity.PowerSeriesGeometryAtMachinSmallInputs},
   \code{PiProofs.MachinIdentity.KernelComparisonAtMachinInputs},
+  \code{PiProofs.MachinIdentity.KernelComparisonAtMachinSmallInputs},
   \code{PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs},
+  \code{PiProofs.piMachin\_equiv\_piCircleArea\_of\_powerSeriesGeometryAtMachinSmallInputs},
+  \code{PiProofs.piMachin\_equiv\_piCircleArea\_of\_kernelComparisonAtMachinSmallInputs},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_kernelComparisonAtOne},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesRectangleKernelAtOne},
@@ -1008,14 +1096,19 @@ chord and tangent formulas.
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_cellBoundsUpToAll},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_pointwiseIntegralBridge},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_pointwiseUnitIntegralBridge},
+  \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_unitCellOrderPreservation},
+  \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_kernelPartialExactCellOrderPreservation},
   \code{PiProofs.piCircleArea\_equiv\_four\_arctanSeries\_one\_of\_uniformCellBounds},
   \code{PiProofs.piCircleArea\_equiv\_four\_arctanSeries\_one\_of\_unitUniformCellBounds},
   \code{PiProofs.piCircleArea\_equiv\_four\_arctanSeries\_one\_of\_cellBoundsUpToAll},
   \code{PiProofs.piCircleArea\_equiv\_four\_arctanSeries\_one\_of\_pointwiseIntegralBridge},
   \code{PiProofs.piCircleArea\_equiv\_four\_arctanSeries\_one\_of\_pointwiseUnitIntegralBridge},
+  \code{PiProofs.piCircleArea\_equiv\_four\_arctanSeries\_one\_of\_unitCellOrderPreservation},
+  \code{PiProofs.piCircleArea\_equiv\_four\_arctanSeries\_one\_of\_kernelPartialExactCellOrderPreservation},
   \code{PiProofs.leibnizEqArea\_of\_kernelComparisonAtOne},
   \code{PiProofs.leibnizEqArea\_of\_leibnizEqualsRectangleRawAtOne},
   \code{PiProofs.leibnizEqArea\_of\_cellBoundsUpToAll},
+  \code{PiProofs.leibnizEqArea\_of\_kernelPartialExactCellOrderPreservation},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_powerSeriesGeometryAgreement},
   \code{PiProofs.leibnizEqMachin\_of\_kernelComparisonAtMachinInputs},
   \code{PiProofs.leibnizEqMachin\_of\_powerSeriesRectangleKernelAtMachinInputs},

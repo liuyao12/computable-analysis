@@ -90,6 +90,181 @@ def endpointRawOfEffectiveFTC
     (h : EffectiveFTC F dF a b) : RealRaw where
   compute := endpointComputeOfEffectiveFTC h
 
+/-- Agreement between a scheduled endpoint-difference algorithm and the
+canonical endpoint-difference raw real.
+
+An `EffectiveFTC` chooses an endpoint evaluation precision as part of its
+finite schedule.  To turn the scheduled FTC bridge into the canonical
+endpoint formula `F(b)-F(a)`, we separately prove that the scheduled endpoint
+raw real is a valid representative of the canonical endpoint-difference
+algorithm. -/
+structure EndpointScheduleAgreement
+    (F : RealFunRaw) (a b : Rat) (scheduledEndpoint : RealRaw) where
+  endpoint_valid :
+    RealRaw.ValidCompute (endpointDifferenceCompute F a b)
+  scheduled_valid : scheduledEndpoint.Valid
+  equivalent :
+    scheduledEndpoint.Equiv
+      (endpointDifferenceRaw F a b endpoint_valid)
+
+namespace EndpointScheduleAgreement
+
+theorem endpoint_raw_valid
+    {F : RealFunRaw} {a b : Rat} {scheduledEndpoint : RealRaw}
+    (h : EndpointScheduleAgreement F a b scheduledEndpoint) :
+    (endpointDifferenceRaw F a b h.endpoint_valid).Valid := by
+  simpa [endpointDifferenceRaw, RealRaw.Valid] using h.endpoint_valid
+
+end EndpointScheduleAgreement
+
+/-- Build endpoint-schedule agreement for an `EffectiveFTC` when its endpoint
+precision choices are a cofinal monotone stage schedule for the canonical
+endpoint-difference raw real. -/
+theorem endpointScheduleAgreement_of_effectiveFTC_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n, h.chooseEvalPrecision (requestedPrecision n) = sigma.stage n) :
+    EndpointScheduleAgreement F a b (endpointRawOfEffectiveFTC h) := by
+  let endpoint : RealRaw := endpointDifferenceRaw F a b hendpoint
+  have hendpointValid : endpoint.Valid := by
+    simpa [endpoint, endpointDifferenceRaw, RealRaw.Valid] using hendpoint
+  refine
+    { endpoint_valid := hendpoint
+      scheduled_valid := ?_
+      equivalent := ?_ }
+  · have hsched := RealRaw.schedule_valid endpoint hendpointValid sigma
+    have hcompute :
+        endpointComputeOfEffectiveFTC h =
+          fun n => endpointDifferenceCompute F a b (sigma.stage n) := by
+      funext n
+      simp [endpointComputeOfEffectiveFTC, endpointDifferenceCompute, hsigma]
+    simpa [endpointRawOfEffectiveFTC, RealRaw.Valid, hcompute] using hsched
+  · intro n
+    have hall := RealRaw.allStagesOverlap_refl endpoint hendpointValid
+      (sigma.stage n) n
+    have hover := (RealRaw.compareAt_overlap_iff endpoint endpoint
+      (sigma.stage n) n).1 hall
+    apply (RealRaw.compareAt_overlap_iff
+      (endpointRawOfEffectiveFTC h)
+      (endpointDifferenceRaw F a b hendpoint) n n).2
+    simpa [endpointRawOfEffectiveFTC, endpointComputeOfEffectiveFTC,
+      endpoint, endpointDifferenceRaw, hsigma] using hover
+
+/-- Static-dyadic endpoint-schedule agreement is the same endpoint schedule
+agreement after forgetting to `EffectiveFTC`. -/
+theorem endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n, h.chooseEvalPrecision (requestedPrecision n) = sigma.stage n) :
+    EndpointScheduleAgreement F a b
+      (endpointRawOfEffectiveFTC h.toEffectiveFTC) :=
+  endpointScheduleAgreement_of_effectiveFTC_stageSchedule
+    h.toEffectiveFTC hendpoint sigma hsigma
+
+/-- Build endpoint-schedule agreement for a derivative-bound FTC certificate
+when its endpoint precision choices are a cofinal monotone stage schedule for
+the canonical endpoint-difference raw real. -/
+theorem endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n, h.chooseEndpointPrecision (precisionAtStage n) = sigma.stage n) :
+    EndpointScheduleAgreement F a b h.endpointRaw := by
+  let endpoint : RealRaw := endpointDifferenceRaw F a b hendpoint
+  have hendpointValid : endpoint.Valid := by
+    simpa [endpoint, endpointDifferenceRaw, RealRaw.Valid] using hendpoint
+  refine
+    { endpoint_valid := hendpoint
+      scheduled_valid := ?_
+      equivalent := ?_ }
+  · have hsched := RealRaw.schedule_valid endpoint hendpointValid sigma
+    have hcompute :
+        h.endpointCompute =
+          fun n => endpointDifferenceCompute F a b (sigma.stage n) := by
+      funext n
+      simp [DerivativeBoundFTC.endpointCompute,
+        DerivativeBoundFTC.endpointInterval, endpointDifferenceCompute, hsigma]
+    simpa [DerivativeBoundFTC.endpointRaw, RealRaw.Valid, hcompute] using hsched
+  · intro n
+    have hall := RealRaw.allStagesOverlap_refl endpoint hendpointValid
+      (sigma.stage n) n
+    have hover := (RealRaw.compareAt_overlap_iff endpoint endpoint
+      (sigma.stage n) n).1 hall
+    apply (RealRaw.compareAt_overlap_iff
+      h.endpointRaw
+      (endpointDifferenceRaw F a b hendpoint) n n).2
+    simpa [DerivativeBoundFTC.endpointRaw, DerivativeBoundFTC.endpointCompute,
+      DerivativeBoundFTC.endpointInterval, endpoint, endpointDifferenceRaw,
+      hsigma] using hover
+
+/-- Candidate-derivative endpoint-schedule agreement, by conversion to the
+derivative-bound FTC certificate. -/
+theorem endpointScheduleAgreement_of_candidateDerivativeFTC_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CandidateDerivativeFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision (precisionAtStage n) =
+          sigma.stage n) :
+    EndpointScheduleAgreement F a b h.toDerivativeBoundFTC.endpointRaw :=
+  endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
+    h.toDerivativeBoundFTC hendpoint sigma hsigma
+
+/-- Curvature endpoint-schedule agreement, by conversion to the
+derivative-bound FTC certificate. -/
+theorem endpointScheduleAgreement_of_curvatureFTC_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : CurvatureFTCCertificate F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision (precisionAtStage n) =
+          sigma.stage n) :
+    EndpointScheduleAgreement F a b h.toDerivativeBoundFTC.endpointRaw :=
+  endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
+    h.toDerivativeBoundFTC hendpoint sigma hsigma
+
+/-- Convex endpoint-schedule agreement, by conversion to the derivative-bound
+FTC certificate. -/
+theorem endpointScheduleAgreement_of_convexFTC_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConvexFTCCertificate F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision (precisionAtStage n) =
+          sigma.stage n) :
+    EndpointScheduleAgreement F a b h.toDerivativeBoundFTC.endpointRaw :=
+  endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
+    h.toDerivativeBoundFTC hendpoint sigma hsigma
+
+/-- Concave endpoint-schedule agreement, by conversion to the derivative-bound
+FTC certificate. -/
+theorem endpointScheduleAgreement_of_concaveFTC_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : ConcaveFTCCertificate F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n,
+        h.toDerivativeBoundFTC.chooseEndpointPrecision (precisionAtStage n) =
+          sigma.stage n) :
+    EndpointScheduleAgreement F a b h.toDerivativeBoundFTC.endpointRaw :=
+  endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
+    h.toDerivativeBoundFTC hendpoint sigma hsigma
+
 def integralPlanOfEffectiveFTC
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b) : Nat -> Integral.Plan :=
@@ -97,6 +272,23 @@ def integralPlanOfEffectiveFTC
     let eps := requestedPrecision n
     { subdivisions := h.chooseN eps,
       evalPrecision := h.chooseEvalPrecision eps }
+
+def integralPlanOfStaticDyadicEffectiveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b) : Nat -> Integral.Plan :=
+  fun n =>
+    let eps := requestedPrecision n
+    { subdivisions := Integral.staticDyadicSubdivisions (h.chooseStage eps),
+      evalPrecision := h.chooseEvalPrecision eps }
+
+theorem integralPlanOfStaticDyadicEffectiveFTC_eq_toEffectiveFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b) :
+    integralPlanOfStaticDyadicEffectiveFTC h =
+      integralPlanOfEffectiveFTC h.toEffectiveFTC := by
+  funext n
+  simp [integralPlanOfStaticDyadicEffectiveFTC, integralPlanOfEffectiveFTC,
+    StaticDyadicEffectiveFTC.toEffectiveFTC]
 
 theorem riemannComputeOfEffectiveFTC_eq_integralPlan
     {F dF : RealFunRaw} {a b : Rat}
@@ -165,6 +357,26 @@ theorem effectiveFTC_integral_equiv_scheduledEndpoint
   rw [integral_compute_eq_riemannComputeOfEffectiveFTC h c hplan]
   exact hgood.1
 
+/-- Static-dyadic effective FTC, in computable-real form. -/
+theorem staticDyadicEffectiveFTC_equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b) :
+    (riemannRawOfEffectiveFTC h.toEffectiveFTC).Equiv
+      (endpointRawOfEffectiveFTC h.toEffectiveFTC) :=
+  effectiveFTC_equiv_endpoint h.toEffectiveFTC
+
+/-- FTC bridge for a construction using the static dyadic schedule. -/
+theorem staticDyadicEffectiveFTC_integral_equiv_scheduledEndpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hplan : c.plan = integralPlanOfStaticDyadicEffectiveFTC h) :
+    (Integral.integral dF a b c).Equiv
+      (endpointRawOfEffectiveFTC h.toEffectiveFTC) := by
+  apply effectiveFTC_integral_equiv_scheduledEndpoint h.toEffectiveFTC c
+  rw [← integralPlanOfStaticDyadicEffectiveFTC_eq_toEffectiveFTC h]
+  exact hplan
+
 /-- Transport the scheduled FTC bridge to the canonical endpoint-difference
 algorithm when that endpoint schedule has separately been proved equivalent to
 the canonical endpoint computation.
@@ -190,6 +402,56 @@ theorem effectiveFTC_definiteIntegralEqualsEndpoint
     hendpoint
     (effectiveFTC_integral_equiv_scheduledEndpoint h c hplan)
     hendpoint_equiv
+
+/-- Definite-integral FTC bridge using the packaged endpoint-schedule
+agreement. -/
+theorem effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hplan : c.plan = integralPlanOfEffectiveFTC h)
+    (endpoint :
+      EndpointScheduleAgreement F a b (endpointRawOfEffectiveFTC h)) :
+    DefiniteIntegralEqualsEndpointDifference
+      F dF a b c endpoint.endpoint_valid :=
+  effectiveFTC_definiteIntegralEqualsEndpoint
+    h c endpoint.endpoint_valid hplan
+    endpoint.scheduled_valid endpoint.equivalent
+
+/-- Static-dyadic specialization of the definite-integral FTC bridge. -/
+theorem staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (hplan : c.plan = integralPlanOfStaticDyadicEffectiveFTC h)
+    (hscheduledEndpoint : (endpointRawOfEffectiveFTC h.toEffectiveFTC).Valid)
+    (hendpoint_equiv :
+      (endpointRawOfEffectiveFTC h.toEffectiveFTC).Equiv
+        (endpointDifferenceRaw F a b hendpoint)) :
+    DefiniteIntegralEqualsEndpointDifference F dF a b c hendpoint := by
+  exact RealRaw.equiv_trans
+    (integral_valid_of_construction c)
+    hscheduledEndpoint
+    hendpoint
+    (staticDyadicEffectiveFTC_integral_equiv_scheduledEndpoint h c hplan)
+    hendpoint_equiv
+
+/-- Static-dyadic specialization using the packaged endpoint-schedule
+agreement. -/
+theorem staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : StaticDyadicEffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hplan : c.plan = integralPlanOfStaticDyadicEffectiveFTC h)
+    (endpoint :
+      EndpointScheduleAgreement F a b
+        (endpointRawOfEffectiveFTC h.toEffectiveFTC)) :
+    DefiniteIntegralEqualsEndpointDifference
+      F dF a b c endpoint.endpoint_valid :=
+  staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint
+    h c endpoint.endpoint_valid hplan
+    endpoint.scheduled_valid endpoint.equivalent
 
 end FTC
 

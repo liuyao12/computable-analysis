@@ -87,8 +87,13 @@ def rightSecantRaw (F : RealFunRaw) (q h : Rat) : RealRaw :=
 def leftSecantRaw (F : RealFunRaw) (q h : Rat) : RealRaw :=
   secantRaw F (q - h) q
 
-/-- Exact statement that `D` is the right derivative of a convex function at
-`q`: it is the greatest lower bound of the right secants based at `q`. -/
+/-- Exact certificate that a supplied raw interval algorithm `D` is the right
+derivative of a convex function at `q`: it is the greatest lower bound of the
+right secants based at `q`.
+
+This characterizes a concrete `D`; it does not obtain `D` from a completeness
+principle.  A derivative construction must separately supply `D` and its
+validity certificate through `RightDerivativeAt`. -/
 structure IsRightDerivative
     {F : RealFunRaw} {a b q : Rat}
     (hF : ExactConvexOn F a b) (D : RealRaw) where
@@ -105,8 +110,12 @@ structure IsRightDerivative
         Y.Le (rightSecantRaw F q h)) ->
           Y.Le D
 
-/-- Exact statement that `D` is the left derivative of a convex function at
-`q`: it is the least upper bound of the left secants ending at `q`. -/
+/-- Exact certificate that a supplied raw interval algorithm `D` is the left
+derivative of a convex function at `q`: it is the least upper bound of the
+left secants ending at `q`.
+
+This is a verification interface for an explicit `D`, not an appeal to a
+completed real-number supremum construction. -/
 structure IsLeftDerivative
     {F : RealFunRaw} {a b q : Rat}
     (hF : ExactConvexOn F a b) (D : RealRaw) where

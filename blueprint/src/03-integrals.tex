@@ -30,12 +30,38 @@ evaluations are used.
 \lean{ComputableAnalysis.Integral.integralFor_valid}
 \lean{ComputableAnalysis.riemannLeftInterval_point_eq}
 \lean{ComputableAnalysis.riemannLeftInterval_point_width_zero}
+\lean{ComputableAnalysis.Integral.staticDyadicSubdivisions}
+\lean{ComputableAnalysis.Integral.staticDyadicPlan}
+\lean{ComputableAnalysis.Integral.staticDyadicAlgorithm}
 \lean{ComputableAnalysis.Integral.DefiniteIdentity}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityOnInterval}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityFor}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_valid}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityFor.endpoint_formula}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.endpoint_raw_valid}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.transportConstruction}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_equiv_integral}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.toDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_valid}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.endpoint_formula}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_valid}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.endpoint_raw_valid}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.endpoint_formula}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.toDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.transportConstruction}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.ofDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_equiv_integral}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_le_of_endpoint_le}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.ofMonotone}
 \lean{ComputableAnalysis.Integral.definiteIdentity_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_effectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_staticDyadicEffectiveFTC_endpointAgreement}
 \uses{def:endpoint-diff}
 \leanok
 For raw functions \(f\) and \(F\), a definite integral identity over
@@ -49,8 +75,29 @@ For raw functions \(f\) and \(F\), a definite integral identity over
 The interval version packages the same statement when \(f\) and \(F\) are
 already certified as \code{FunctionOnInterval}s.  The
 \code{DefiniteIdentityFor} variant is the same endpoint-difference interface
-for newer domain-aware \code{ConstructionFor} algorithms, such as the Farey
-constructions below.
+for newer domain-aware \code{ConstructionFor} algorithms.  It is stable under
+replacing the construction by an equivalent integral computation, via
+\code{transportConstruction}, and two endpoint identities for the same
+integrand and primitive have equivalent integral raw reals.  The
+\code{MonotoneDefiniteIdentityFor} variant records the same endpoint identity
+when the integral side is explicitly supplied by a monotone construction, and
+forgets back to \code{DefiniteIdentityFor}.  The
+\code{GeneralDefiniteIdentityFor} variant records the endpoint identity for
+the public piecewise-monotone integral \code{generalIntegralFor}; a one-piece
+monotone endpoint identity promotes to it by \code{ofMonotone}.  It can also
+be transported across equivalent general constructions, forgotten back to the
+ordinary endpoint-identity interface, or built from an ordinary
+\code{DefiniteIdentityFor} together with an equivalent general construction.
+The endpoint-additivity, linearity, scalar, and order-transfer laws are
+available at the ordinary, monotone, and general-integral levels.
+
+The default finite mesh for ordinary definite integrals is static dyadic:
+stage \(n\) uses the equal subdivision of \([a,b]\) into \(2^n\) intervals.
+This is deliberately different from the dynamic subdivision in
+\(\arctan_{\mathrm{geom}}\), where the next partition is chosen by repeatedly
+refining the rational circle parameters already present in the sector
+algorithm.  When an FTC proof uses this default mesh, the bridge to endpoint
+identities is \code{definiteIdentity\_of\_staticDyadicEffectiveFTC}.
 \end{definition}
 
 \begin{definition}[The constant-integrand algorithm]
@@ -78,12 +125,15 @@ immediately.  Lean packages this as a certified
 \code{Integral.Construction} for every rational \(a,b,c\).
 \end{definition}
 
-\begin{theorem}[Constant-integrand endpoint identity]
+\begin{theorem}[Constant-integrand endpoint identity and algebra laws]
 \label{thm:constant-integral-endpoint-identity}
 \lean{ComputableAnalysis.Integral.endpointDifference_linearPrimitive_compute}
 \lean{ComputableAnalysis.Integral.constantPrimitiveEndpoint_valid}
 \lean{ComputableAnalysis.Integral.constant_integral_equiv_endpoint}
 \lean{ComputableAnalysis.Integral.constantDefiniteIdentity}
+\lean{ComputableAnalysis.Integral.constantIntegral_add_equiv}
+\lean{ComputableAnalysis.Integral.constantIntegral_scaleRat_equiv}
+\lean{ComputableAnalysis.Integral.constantIntegral_adjacent_additive}
 \uses{def:constant-integral-construction,def:definite-integral-identity}
 \leanok
 For the primitive \(F(x)=cx\), the endpoint-difference raw real computes
@@ -96,26 +146,217 @@ two exact rational intervals overlap at every stage.  Thus the first
 \[
   \int_a^b c\,\dd x \Equiv cb-ca.
 \]
+The same exact computation checks the first algebra laws: constant integrals
+respect addition, rational scalar multiplication, and adjacent-interval
+additivity.
 \end{theorem}
 
-\section{Monotone integrands and convex FTC}
+\section{Nondecreasing integrands and piecewise monotone integrals}
 
-The first integral theorem should be for monotone functions on rational
-intervals.  A monotone integrand has upper and lower Riemann sums whose gap is
+The first integral theorem should be for nondecreasing functions on rational
+intervals.  Their lower and upper Riemann sums are endpoint sums whose gap is
 controlled by endpoint variation times the mesh size, so the finite proof is
-especially transparent.
+especially transparent.  Nonincreasing functions are the signed/order-reversed
+variant, and the general integral is then a finite sum over monotone pieces.
 
 \begin{theorem}[Monotone integral construction]
 \label{thm:monotone-integral-construction}
+\lean{ComputableAnalysis.FunctionOnInterval.restrict}
+\lean{ComputableAnalysis.NondecreasingOnInterval}
+\lean{ComputableAnalysis.NonincreasingOnInterval}
+\lean{ComputableAnalysis.MonotoneOnInterval}
+\lean{ComputableAnalysis.MonotoneOnInterval.ofNondecreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.ofNonincreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.nondecreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.nonincreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.restrict}
+\lean{ComputableAnalysis.NondecreasingOnInterval.restrict}
+\lean{ComputableAnalysis.NonincreasingOnInterval.restrict}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor.toMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor.restrict}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor_eq_monotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.ExistsNondecreasingConstructionFor}
+\lean{ComputableAnalysis.Integral.MonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.MonotoneConstructionFor.restrict}
+\lean{ComputableAnalysis.Integral.monotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.monotoneIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.ExistsMonotoneConstructionFor}
 \uses{def:constant-integral-construction,def:definite-integral-identity}
 A function with certified monotonicity on \([a,b]\) has a valid rational
 Riemann-sum integral.  The construction uses left and right sums, or equivalent
 interval sums, and the width estimate is the finite monotone-variation bound.
+Lean now exposes the theorem-facing monotone integral interface:
+\code{NondecreasingOnInterval} is the preferred first case, with a dedicated
+\code{NondecreasingConstructionFor}.  These certificates are stable under
+restriction to rational subintervals.  The nondecreasing construction forgets
+to the broader
+\code{MonotoneOnInterval} interface, which records either the nondecreasing or
+nonincreasing case.  \code{MonotoneConstructionFor} packages this certificate
+together with a valid \code{ConstructionFor}, and
+\code{monotoneIntegralFor\_valid} proves that the packaged raw real is valid.
+The remaining task is the Darboux endpoint-sum constructor that turns
+monotonicity alone into such a package.
+\end{theorem}
+
+\begin{theorem}[Piecewise monotone integrals and algebra laws]
+\label{thm:piecewise-monotone-integral-laws}
+\lean{ComputableAnalysis.RealRaw.sub_add_sub_cancel_middle_equiv}
+\lean{ComputableAnalysis.RealRaw.scaleRat_valid}
+\lean{ComputableAnalysis.RealRaw.scaleRat_equiv}
+\lean{ComputableAnalysis.endpointDifference_valid_of_fun_valid}
+\lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.FunctionOnInterval.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_le_of_endpoint_le}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_le_of_endpoint_le}
+\lean{ComputableAnalysis.FunctionOnInterval.PointwiseAdd}
+\lean{ComputableAnalysis.FunctionOnInterval.PointwiseScaleRat}
+\lean{ComputableAnalysis.FunctionOnInterval.PointwiseLe}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor.ofMonotone}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor.ofNondecreasing}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellIntegral}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellIntegral_valid}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_ofMonotone_equiv}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_ofNondecreasing_equiv}
+\lean{ComputableAnalysis.Integral.ExistsPiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.GeneralConstructionFor}
+\lean{ComputableAnalysis.Integral.generalIntegralFor}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_ofMonotone_equiv}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_ofNondecreasing_equiv}
+\lean{ComputableAnalysis.Integral.ExistsGeneralConstructionFor}
+\lean{ComputableAnalysis.Integral.LinearFor}
+\lean{ComputableAnalysis.Integral.CompatibleWithScaleRatFor}
+\lean{ComputableAnalysis.Integral.AdditiveOnAdjacentIntervalsFor}
+\lean{ComputableAnalysis.Integral.OrderPreservingFor}
+\lean{ComputableAnalysis.Integral.BasicPropertiesFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneLinearFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneCompatibleWithScaleRatFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneOrderPreservingFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneBasicPropertiesFor}
+\lean{ComputableAnalysis.Integral.GeneralLinearFor}
+\lean{ComputableAnalysis.Integral.GeneralCompatibleWithScaleRatFor}
+\lean{ComputableAnalysis.Integral.GeneralAdditiveOnAdjacentIntervalsFor}
+\lean{ComputableAnalysis.Integral.GeneralOrderPreservingFor}
+\lean{ComputableAnalysis.Integral.GeneralBasicPropertiesFor}
+\lean{ComputableAnalysis.Integral.ExactCellOrderPreservation}
+\uses{thm:monotone-integral-construction}
+The general definite integral is first defined on monotone pieces and then
+assembled by a finite rational partition.  A one-cell partition promotes any
+monotone construction, and in particular the preferred nondecreasing
+construction, to this piecewise interface.  The project-facing name
+\code{generalIntegralFor} is this finite sum of monotone-piece integrals.
+Lean proves that in the one-piece case this promotion is equivalent to the
+original monotone integral, and similarly for the preferred nondecreasing
+interface.
+
+The basic laws needed for calculus are additivity on adjacent intervals,
+rational scalar compatibility, linearity for pointwise sums on the common
+domain, and order preservation for pointwise inequalities.  The last property
+is the calculus input needed to turn the pointwise arctangent-kernel bounds in
+Chapter~\ref{ch:infinite-series} into cell-integral inequalities.  Lean records
+these laws both as generic domain-aware theorem targets and as a dedicated
+\code{PiecewiseMonotoneBasicPropertiesFor} package for the intended general
+integral operator, with \code{GeneralBasicPropertiesFor} as the public alias
+for this piecewise definition.  The finite sum of valid monotone-piece raw
+reals is already formalized as \code{piecewiseMonotoneIntegralFor}, with
+validity proved by \code{piecewiseMonotoneIntegralFor\_valid}; the corresponding
+public validity theorem is \code{generalIntegralFor\_valid}.  Lean also names
+\code{ExactCellOrderPreservation}, the finite rational-cell version of
+``pointwise bounds integrate to cell bounds'' used by the arctangent-series
+comparison.  On the FTC side,
+Lean now also
+has the raw telescoping identity
+\[
+  (F(b)-F(a))+(F(c)-F(b))\sim F(c)-F(a),
+\]
+both for total raw functions and for interval-certified primitives.  This is
+the endpoint algebra behind adjacent-interval additivity whenever the integral
+has already been identified with a primitive endpoint difference.  The
+\code{DefiniteIdentityFor} and \code{MonotoneDefiniteIdentityFor} bridge
+theorems now perform this transfer directly: endpoint telescoping implies
+additivity for the corresponding integral raw reals, while the
+\code{integral\_equiv\_add\_of\_endpoint\_add} orientation matches the
+linearity target for pointwise sums.  The same transfer is available for
+arbitrary rational scaling, using the signed raw-real scaling validity and
+equivalence theorems.  Order also transfers through FTC endpoint identities:
+once two integrals are identified with primitive endpoint differences,
+\code{integral\_le\_of\_endpoint\_le} reduces integral order to order between
+the endpoint differences.
 \end{theorem}
 
 \begin{theorem}[Derivative-bound FTC package]
 \label{thm:derivative-bound-ftc-package}
+\lean{ComputableAnalysis.derivativeBoundFTC}
+\lean{ComputableAnalysis.candidateDerivativeFTC}
+\lean{ComputableAnalysis.CurvatureFTCCertificate}
+\lean{ComputableAnalysis.CurvatureFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.CurvatureFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.curvatureFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.ConcaveFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.Integral.constructionFor_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_derivativeBoundFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_concaveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_candidateDerivativeFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_curvatureFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_convexFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_concaveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_concaveFTC_stageSchedule}
 \lean{ComputableAnalysis.convexFTC}
+\lean{ComputableAnalysis.concaveFTC}
 \uses{thm:monotone-integral-construction}
 \leanok
 Monotone integrability supplies a valid integral algorithm.  The fundamental
@@ -124,8 +365,34 @@ for that integral algorithm.  The current Lean theorem packages the completed
 derivative-bound route: once finite local derivative bounds on rational
 partition cells enclose both candidate derivative values and primitive endpoint
 differences, the integral raw real is equivalent to the endpoint-difference raw
-real.  This is one way an integral row in the pi scoreboard can measure genuine
-calculus content, while still counting only the underlying pi computation.
+real.  Lean also packages the derivative-bound cell-sum algorithm as a
+\code{ConstructionFor} and, once the remaining validity and endpoint-schedule
+bookkeeping is supplied, turns the certificate into a
+\code{DefiniteIdentityFor}.  Endpoint-agreement variants package the scheduled
+endpoint validity and comparison with the canonical endpoint difference.  The
+stage-schedule variants construct this agreement directly from a cofinal
+monotone endpoint precision schedule.  The corresponding
+\code{definiteIdentityFor} constructors whose names end in
+\code{stageSchedule} are the
+domain-aware bridge used by FTC pi routes when the schedule is explicit.
+When an equivalent public \code{generalIntegralFor} construction is also
+available, the matching
+\code{generalDefiniteIdentityFor} constructors whose names end in
+\code{stageSchedule}
+move the same FTC certificate directly into the public general-integral
+interface.
+The
+same domain-aware interface is now available directly for \code{EffectiveFTC},
+its static-dyadic specialization, and the candidate-derivative certificate.
+The curvature certificate
+\code{CurvatureFTCCertificate} is the version needed for both convex and
+concave primitives; the public convex and concave certificates
+\code{ConvexFTCCertificate} and \code{ConcaveFTCCertificate} are
+specializations that convert through it.  The concave specialization is the
+one naturally matched to the arctangent primitive on \([0,1]\).  This is the
+calculus-facing interface needed by the pi routes: an integral row in the
+scoreboard can measure genuine FTC content while still counting only the
+underlying pi computation.
 \end{theorem}
 
 \section{The arctangent integral}
@@ -205,8 +472,14 @@ below.
 \begin{theorem}[Finite arctangent--integral comparison]
 \label{thm:finite-arctan-integral-comparison}
 \lean{ComputableAnalysis.ArctanGeometry.integralKernel}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel_chartAddParameter}
 \lean{ComputableAnalysis.ArctanGeometry.integralLowerStep}
 \lean{ComputableAnalysis.ArctanGeometry.integralUpperStep}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep_chartAddParameter_eq}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_chartAddParameter_eq}
+\lean{ComputableAnalysis.ArctanGeometry.chartAdd_integralLowerStep_le}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_le_chartAdd}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddParameter_width_le_eight_mul}
 \lean{ComputableAnalysis.ArctanGeometry.geometricLowerStep}
 \lean{ComputableAnalysis.ArctanGeometry.geometricUpperStep}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellInterval}
@@ -222,6 +495,16 @@ below.
 \lean{ComputableAnalysis.ArctanGeometry.NonnegativeIntervals}
 \lean{ComputableAnalysis.ArctanGeometry.UnitIntervals}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.ChartAddPositiveDenominators}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_lowerSum_le}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperSum_le_chartAddIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_integralSum_contains}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_nonnegative}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_covers}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddDen_pos_of_unit}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddPositiveDenominators_of_unitIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_squareSum_le_sixtyFour}
 \lean{ComputableAnalysis.ArctanGeometry.geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.intervalSquareSum}
 \lean{ComputableAnalysis.ArctanGeometry.integralKernel_pos}
@@ -229,62 +512,9 @@ below.
 \lean{ComputableAnalysis.ArctanGeometry.integralLowerStep_nonneg}
 \lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_left_subcell_le}
 \lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_le_width}
-\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo}
-\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUpperPrefix}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralStageInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenInterval_add}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralStageInterval_add}
-\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_unit}
-\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo_unit}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_le_upperPrefix}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_ordered}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_ordered}
-\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_eq_nil_of_connects_left_gt}
-\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo_eq_nil_of_connects_left_gt}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_eq_zero_of_connects_left_gt}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUpperPrefix_eq_zero_of_connects_left_gt}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_subdivide_mono}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUpperPrefix_subdivide_anti}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_subdivide_refines}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_step_refines}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_nested}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.integralCellWidth_le_two_square}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_width_le_two_squareSum}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_width_le_two_squareSum_add_bound}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_width_le_three_div_succ}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixStageInterval_widthsShrink}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_valid}
-\lean{ComputableAnalysis.ArctanGeometry.fareyCellIntervals}
-\lean{ComputableAnalysis.ArctanGeometry.fareyCellIntervals_unit}
-\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_one_eq_intervals}
-\lean{ComputableAnalysis.ArctanGeometry.fareyUpperCellsUpTo_one_eq_intervals}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixInterval_one_eq_integralSumInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitStageInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitRaw}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralUnitRaw_valid}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_one_equiv_unitRaw}
-\lean{ComputableAnalysis.ArctanGeometry.fareyLowerCellsUpTo_zero_eq_nil_of_unit_adjacent}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralLowerPrefix_zero_unitStage}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_zero_equiv_zero}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_valid}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_compute_eq_subInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_compute_contains_stageInterval}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_width_le_six_div_succ}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_additive}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_self_equiv_zero}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_zero_left_equiv_prefix}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_reverse_compute}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_reverse_equiv_neg}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_add_reverse_equiv_zero}
-\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_zero_right_equiv_neg_prefix}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
@@ -303,10 +533,26 @@ below.
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_step_refines}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_refines_add}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_covers}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_intervals_unit}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_squareSum_le_sixtyFour}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_integralSum_width_le}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_integralSum_contains}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_nested}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_overlaps_rectangleSub}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_equiv_rectangleSub}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_chartAdd_add_of_half}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_nested}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangle_dyadicSquareMesh}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_widthsShrink}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_valid}
@@ -315,6 +561,7 @@ below.
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_ordered}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_nested}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleAtOne_dyadicSquareMesh}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_widthsShrink}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_valid}
@@ -326,6 +573,8 @@ below.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_compute_eq}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_raw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.piMachinIntegralRectangle}
+\lean{ComputableAnalysis.IntegralIdentities.piMachinIntegralRectangle_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleRepresentation}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw_valid}
@@ -345,56 +594,45 @@ below.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyConstruction}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_valid}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_compute_eq}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_width_le_six_div_succ}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_equiv_betweenRaw}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_self_equiv_zero}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_reverse_equiv_neg}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_add_reverse_equiv_zero}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_left_equiv_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_zero_right_equiv_neg_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyConstruction}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_compute_eq}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_fareyIntegral}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_betweenRaw}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_zero_equiv_zero}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_add_interval}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_equiv_add_interval}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_sub_interval}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_equiv_arctanIntegralFareyFor_sub}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_sub_interval_equiv_betweenRaw}
-\lean{ComputableAnalysis.IntegralIdentities.fareyIntegralBetweenRaw_equiv_arctanIntegralFareyFor_sub}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_sub_interval_additive}
-\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_sub_equiv_fareyIntegralBetweenRaw_on_unit}
-\lean{ComputableAnalysis.IntegralIdentities.fareyIntegralBetweenRaw_equiv_arctanGeom_sub_on_unit}
-\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_sub_equiv_oneOverOnePlusSquareFareyIntegral_on_unit}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_equiv_arctanGeom_sub_on_unit}
-\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_sub_additive_on_unit}
 \lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit}
 \lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_sub}
 \lean{ComputableAnalysis.IntegralIdentities.arctanGeom_one_sub_zero_equiv}
 \lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitFareyDefiniteIdentity}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitData}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnit_equiv_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_prefix}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyUnitComputes_one}
 \lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelInterval_monotone}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne_monotone}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_compute_eq}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_raw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_equiv_rectangleFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFunctionRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneConstructionAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_equiv_rectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnit_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitComputes_one}
 \lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentityFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneTransportedDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity_equiv_rectangle}
 \uses{def:one-over-one-plus-square-kernel,def:geometric-arctan}
 \leanok
 On a nonnegative cell \(0\le p\le r\), let
@@ -425,6 +663,65 @@ comparison inequalities
   L_{p,r}\le U_{p,r},\qquad
   G_{p,r}\le R_{p,r}.
 \]
+The tangent-addition chart now has the corresponding finite transport layer.
+For \(T_u(t)=(u+t)/(1-ut)\), the kernel and the endpoint rectangles satisfy
+\[
+  \frac{1}{1+T_u(t)^2}
+  =
+  \frac{(1-ut)^2}{(1+u^2)(1+t^2)},
+\]
+\[
+  L_{T_u(p),T_u(r)}
+   =L_{p,r}\frac{1-ur}{1-up},
+  \qquad
+  R_{T_u(p),T_u(r)}
+   =R_{p,r}\frac{1-up}{1-ur}.
+\]
+Thus, on a nonnegative cell with positive chart denominators, the transported
+lower rectangle is no larger than the source lower rectangle, while the
+transported upper rectangle is no smaller.  Lean lifts these inequalities to
+finite partitions: the transported target bracket contains the source bracket,
+the transported endpoints remain ordered, and a midpoint-refinement partition
+of \([0,x]\) becomes an explicit cover of
+\([T_u(0),T_u(x)]\).  For \(0\le u<1\), positivity of all chart denominators
+on a source unit partition is also proved.
+For the Machin-relevant range \(0\le u\le1/2\), Lean additionally proves
+\[
+  T_u(r)-T_u(p)\le 8(r-p),
+\]
+so the transported squared mesh is at most \(64\) times the source squared
+mesh.  When the chart image endpoint remains in the unit interval, the
+transported rectangle width therefore has an explicit dyadic bound
+\[
+  128\,\frac{x^2}{2^n}.
+\]
+This supplies the required mesh-decay estimate for the transported raw
+construction.  Lean now packages the charted brackets as
+\code{chartAddAreaLoopRaw}: the image of each source refinement is proved to
+refine the target rectangle bracket even though its image split point need not
+be a target midpoint.  Its stages are therefore ordered and nested, have the
+coarse explicit bound \(256/(n+1)\), and form a valid shrinking raw real.
+Moreover, this raw real is proved equivalent to the source midpoint rectangle
+raw, giving a construction-level rational change-of-variables certificate.
+
+The endpoint-difference comparison is now also formalized.  Lean appends the
+canonical midpoint partition of \([0,u]\) to the transported partition of
+\([u,T_u(x)]\), giving a second finite cover of \([0,T_u(x)]\).  The universal
+finite-cover inequalities then show that the transported raw overlaps the
+difference of the canonical \([0,T_u(x)]\) and \([0,u]\) rectangle raws.
+Together with the rectangle--geometric comparison, this proves
+\[
+  \operatorname{atanGeom}(u)+\operatorname{atanGeom}(x)
+    \sim \operatorname{atanGeom}(T_u(x))
+\]
+when \(0\le u\le 1/2\), \(0\le x\le1\), and the chart image remains in the
+unit interval.  This discharges all three bounded geometric Machin additions.
+It does not yet identify the power-series \code{piMachin} with area pi: the
+independent power-series/kernel comparisons at its two actual inputs (1/5)
+and (1/239) are still required.  The endpoint input (1) belongs to the
+separate Leibniz route.  It does, however, already certify the distinct Machin
+rectangle-integral computation recorded below.
+
 Consequently, for every finite nonnegative ordered partition, the rectangle
 sum interval contains the geometric sector-sum interval, and in particular the
 two finite intervals overlap.  Lean also proves that every nonnegative
@@ -432,52 +729,20 @@ two finite intervals overlap.  Lean also proves that every nonnegative
 lower and upper bounds are exactly the corresponding geometric sums.  Thus the
 rectangle-sum interval contains, and overlaps, the actual \code{arctanGeom}
 stage interval.  The rectangle-sum intervals are themselves ordered and nested
-along the actual arctangent loop.
-
-Lean now also has the global Farey-prefix version of the same finite
-rectangle sums.  At a fixed Farey stage, the lower prefix up to \(x\) uses the
-cells whose right endpoint is \(\le x\), while the upper prefix uses the cells
-whose left endpoint is \(\le x\), thereby including the first cell that crosses
-\(x\).  The approximation to \(\int_a^b du/(1+u^2)\) is then defined as a
-difference of two prefixes.  This makes finite adjacent additivity exact:
-the theorem \code{fareyIntegralStageInterval\_add} proves that the stage
-interval for \([a,c]\) is the interval sum of the stages for \([a,b]\) and
-\([b,c]\).  Lean also proves that the selected lower and upper Farey cells
-are unit intervals, and that the prefix interval itself is ordered at every
-Farey unit stage.  Refining the global Farey mesh increases the lower prefix
-and decreases the upper prefix, so the prefix intervals are nested from one
-stage to the next and hence for all \(n\le m\).  Lean also proves the
-one-crossing bookkeeping lemma for connected Farey lists: once the left
-endpoint of the remaining chain is already past \(x\), no later lower or
-upper prefix cells are selected.  Combining that with the cell gap estimate
-gives the concrete bound
-\[
-  \operatorname{width}(F_n(x))\le \frac{3}{n+1}
-\]
-for the Farey prefix interval \(F_n(x)\), and therefore the raw prefix
-algorithm \code{fareyIntegralPrefixRaw(x)} is now verified.  Lean then wraps
-the interval \([a,b]\) as
-\code{fareyIntegralBetweenRaw(a,b)=fareyIntegralPrefixRaw(b)-
-fareyIntegralPrefixRaw(a)}.  This verified raw interval contains the exact
-same-stage prefix-difference interval, has width at most \(6/(n+1)\), and
-satisfies adjacent additivity up to raw-real equivalence:
-\[
-  I(a,b)+I(b,c)\sim I(a,c),\qquad
-  I(a,a)\sim0,\qquad
-  I(a,b)\sim -I(b,a).
-\]
-At the left endpoint, Lean proves that the lower Farey prefix at \(0\)
-selects no cells, hence \(F(0)\sim0\).  Consequently
-\(I(0,x)\sim F(x)\) and \(I(x,0)\sim -F(x)\).  These endpoint-normalization
-laws make the prefix construction line up with the usual notation
-\(\int_0^x du/(1+u^2)\).
+along the actual arctangent loop.  The same kernel is also certified
+nonincreasing on every interval \([0,x]\), so the rectangle computation is now
+packaged as a concrete instance of the monotone-integral interface throughout
+the rational unit branch.
 
 For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
 estimate needed for validity.  The sum of squared cell lengths is exactly
 \(x^2/2^n\) after \(n\) midpoint refinements, hence is bounded by \(2^{-n}\),
-and each rectangle gap is bounded by \(2(r-p)^2\).  Therefore the concrete
-rectangle-sum raw real \code{arctanIntegralRectangleRaw x} is valid on the
-unit branch.  Lean packages the same schedule as
+and each rectangle gap is bounded by \(2(r-p)^2\).  This is the
+midpoint-dyadic mesh budget recorded by
+\code{arctanIntegralRectangle\_dyadicSquareMesh}; at \(x=1\) the specialized
+statement is \code{arctanIntegralRectangleAtOne\_dyadicSquareMesh}.  Therefore
+the concrete rectangle-sum raw real \code{arctanIntegralRectangleRaw x} is
+valid on the unit branch.  Lean packages the same schedule as
 \code{arctanIntegralRectangleFor x}, an \code{Integral.ConstructionFor} for
 the kernel on \([0,x]\), and proves this domain-aware construction equivalent
 to \code{arctanGeom x} throughout the rational unit branch.  The zero endpoint
@@ -491,121 +756,103 @@ also packages the same construction as the unit-branch integral arctangent
 \code{arctanIntegralUnit}; the theorem
 \code{arctanIntegralRectangleUnitFunctionAgreement} proves the expected
 agreement on \(0\le x\le1\).  The older nonnegative point-Riemann
-\code{arctanIntegral(1)} API is deliberately left out of the completed
-scoreboard count: Lean proves
-\code{arctanIntegral\_stages\_constant}, so that exact-evaluation wrapper
-does not express the refining lower/upper-sum schedule used by the verified
-integral computations.
+\code{arctanIntegral(1)} API is kept only for conditional FTC bridge
+statements: Lean proves \code{arctanIntegral\_stages\_constant}, so that
+exact-evaluation wrapper has no canonical standalone refining lower/upper-sum
+schedule.  It is therefore not a separate scoreboard row.
 
-The global Farey-prefix algorithm is also packaged as a
-\code{ConstructionFor}: first
-\code{oneOverOnePlusSquareFareyIntegral(a,b)} wraps
-\code{fareyIntegralBetweenRaw(a,b)} as the integral of the kernel on
-\([a,b]\).  Lean proves the domain-aware laws
+This midpoint-dyadic rectangle construction is not the foundational
+left-Riemann mesh of the chapter.  It is a comparison schedule deliberately
+synchronized with the dynamic subdivision already used by
+\(\arctan_{\mathrm{geom}}\).  The general integral interface above starts
+instead from the static dyadic mesh
+\([a+k(b-a)/2^n,a+(k+1)(b-a)/2^n]\).
+\end{theorem}
+
+\begin{theorem}[Machin rectangle-integral pi]
+\label{thm:machin-rectangle-integral-pi}
+\uses{thm:finite-arctan-integral-comparison,thm:geometric-arctan-one-area-pi}
+\leanok
+The independent Machin integral computation is now fully certified:
 \[
-  J(a,b)+J(b,c)\sim J(a,c),\qquad
-  J(a,a)\sim0,\qquad
-  J(a,b)\sim -J(b,a),\qquad
-  J(a,b)+J(b,a)\sim0.
+  4\left(
+    4\int_0^{1/5}\frac{dt}{1+t^2}
+    -\int_0^{1/239}\frac{dt}{1+t^2}
+  \right)\sim\pi_{\mathrm{area}}.
 \]
-The endpoint normalizations \(J(0,x)\sim F(x)\) and
-\(J(x,0)\sim-F(x)\) are also formalized at this domain-aware layer.
-The arctangent specialization \(A_F(x)=J(0,x)\) satisfies
+Both integrals use the explicit midpoint-rectangle
+\code{Integral.ConstructionFor} schedule.  Their connection is not assumed as
+an arctangent branch law: the verified chart transport proves the three finite
+tangent additions needed to reduce the displayed combination to
+\(4\operatorname{atanGeom}(1)\).  Thus this row exercises the integral
+construction, finite substitution, and geometric area definitions together,
+without a power-series/kernel comparison.  At public stage (n), its
+certified interval width is at most (80/(n+1)), supplying an explicit
+rational precision budget.
+\end{theorem}
+
+\begin{theorem}[Projectively compactified Cauchy pi]
+\label{thm:projective-cauchy-pi}
+\uses{rem:farey-subdivision-projective,thm:geometric-arctan-one-area-pi}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.IntegralIdentities.cauchyProjectiveFoldDensity}\par
+\lean{ComputableAnalysis.IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel}\par
+\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey}\par
+\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_valid}\par
+\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_equiv_piCircleArea}\par}
+\leanok
+The first completed improper-integral presentation is the projectively
+compactified Cauchy kernel:
 \[
-  A_F(a)+J(a,b)\sim A_F(b),\qquad
-  A_F(b)-A_F(a)\sim J(a,b),\qquad
-  A_F(0)\sim0,\qquad A_F(x)\sim F(x).
+  \pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}
+      =4\int_0^1\frac{dx}{1+x^2}
+      \sim\pi_{\mathrm{area}}.
 \]
-Composing with the wrapper theorem gives the cleaner primitive-difference
-form \(A_F(b)-A_F(a)\sim \code{fareyIntegralBetweenRaw(a,b)}\).  Lean also
-proves the corresponding primitive additivity law
+\code{piCauchyProjectiveFarey} defines the verified evaluator by the right-hand
+fourfold unit-interval Farey computation, rather than by an unproved limit.
+For every nonzero rational \(x\), Lean proves that adding the reciprocal-tail
+density to the unit density gives \(2/(1+x^2)\).  This is the exact rational
+folding algebra for the positive half-line; evenness gives the other factor of
+two.  The result is deliberately a concrete compactification for this kernel,
+not yet a general improper-integral interface.  In particular, the bounded
+Farey mesh by itself remains only a mesh, while this row supplies its distinct
+full-line Cauchy meaning and the substitution machinery needed by the
+reciprocal-quartic route.
+\end{theorem}
+
+\newpage
+\begin{theorem}[Two-three Farey-integral pi]
+\label{thm:two-three-farey-pi}
+\uses{rem:farey-subdivision-projective,thm:geometric-arctan-one-area-pi}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey}\par
+\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_valid}\par
+\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ}\par
+\lean{ComputableAnalysis.PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea}\par}
+\leanok
+The shared Farey construction also completes the distinct rational formula
 \[
-  (A_F(b)-A_F(a))+(A_F(c)-A_F(b))\sim A_F(c)-A_F(a).
+  \pi=4\left(
+    \int_0^{1/2}\frac{dt}{1+t^2}+
+    \int_0^{1/3}\frac{dt}{1+t^2}
+  \right)\sim\pi_{\mathrm{area}}.
 \]
-On the rational unit branch \(0\le a,b\le1\), Lean further composes the
-primitive comparison with the geometric arctangent comparison:
-\[
-  \int_a^b\frac{du}{1+u^2}\ \sim\
-  \arctan_{\mathrm{geom}}(b)-\arctan_{\mathrm{geom}}(a).
-\]
-The unit-interval specialization is also packaged as a
-\code{DefiniteIdentityFor}: the Farey integral construction on \([0,1]\)
-computes the endpoint difference of the geometric arctangent restricted to the
-unit branch.  Lean also proves that this endpoint difference is equivalent to
-\(\arctan_{\mathrm{geom}}(1)\), since the value at \(0\) is zero.
-This gives a second verified integral-style arctangent computation.  At
-\(x=1\), Lean proves that the prefix lower and upper
-cell selections are simply all cells of the unit Farey mesh, packages this full
-unit mesh as \code{fareyIntegralUnitRaw}, and proves
-\[
-  \code{fareyIntegralPrefixRaw(1)}\sim\code{fareyIntegralUnitRaw}.
-\]
-Since the shared-Farey sums are additive on adjacent intervals, Lean also
-transports additivity to the geometric arctangent endpoint differences:
-\[
-  (\arctan_{\mathrm{geom}}(b)-\arctan_{\mathrm{geom}}(a))+
-  (\arctan_{\mathrm{geom}}(c)-\arctan_{\mathrm{geom}}(b))
-  \sim
-  \arctan_{\mathrm{geom}}(c)-\arctan_{\mathrm{geom}}(a)
-\]
-for rational \(a,b,c\in[0,1]\).
+This row is not a second count for the unit Farey mesh: its two-term
+\(1/2,1/3\) formula is a separate pi computation.  Each integral is evaluated
+by the shared rational Farey subdivision, then Lean transports both values to
+geometric arctangents.  The finite rational chart calculation
+\(T_{1/2}(1/3)=1\) proves the required branch identity.  The public width is
+at most \(48/(n+1)\), so this supplies a direct certified precision budget as
+well as exercising the projective integral API away from the unit endpoint.
 \end{theorem}
 
 \begin{theorem}[Integral arctangent gives another pi computation]
 \label{thm:arctan-integral-pi}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement}
-\lean{ComputableAnalysis.PiProofs.exists_piFromArctanIntegral_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_geom_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_function_agreement}
-\lean{ComputableAnalysis.PiProofs.arctanIntegralPiRoute_of_function_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_geom_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_definiteIdentityFor}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_valid}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_compute_eq_fareyAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_equiv_fareyAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_geomUnitDefiniteIdentity}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_four_fareyPrefix_one}
-\lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne_of_cross_bounds}
-\lean{ComputableAnalysis.PiProofs.fareyUnitIntegralGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.FareyPrefixGeomAgreementAtOne_of_unit_integral_agreement}
-\lean{ComputableAnalysis.PiProofs.FareyUnitIntegralGeomAgreementAtOne_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.fareyPrefixGeomAgreementAtOne}
-\lean{ComputableAnalysis.PiProofs.arctanIntegralFareyFor_one_equiv_arctanGeom_one_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.arctanIntegralFareyFor_one_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_prefix_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_unit_integral_agreement}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_unit_integral_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea_of_cross_bounds}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralFareyAtOne_of_cross_bounds}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_definite_identity}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_effectiveFTC}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_geom_agreement}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralUnitAtOne_equiv_piCircleArea_of_functionAgreement}
-\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_valid}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_piFromArctanIntegralRectangleUnitAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_valid}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_compute_eq_rectangleUnit}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_rectangleUnit}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_geomUnitDefiniteIdentity}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_rectangleUnitAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_fareyAtOne}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitFareyDefiniteIdentity_equiv_rectangleDefiniteIdentity}
-\lean{ComputableAnalysis.PiProofs.piFromArctanGeomUnitRectangleDefiniteIdentity_equiv_fareyDefiniteIdentity}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement}\par
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC}\par
+\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}\par
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}\par}
 \uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
 Any certified integral construction for
 \[
@@ -623,6 +870,12 @@ integral-style pi route:
 \[
   4\,\code{arctanIntegralRectangleForAtOne}\sim \pi_{\mathrm{area}}.
 \]
+Because the kernel is nonincreasing on \([0,1]\), the same schedule is also
+available through the monotone-integral interface:
+\[
+  4\,\code{arctanIntegralRectangleMonotoneForAtOne}
+    \sim \pi_{\mathrm{area}}.
+\]
 Equivalently, the unit-branch construction
 \code{arctanIntegralRectangleUnitData} gives the table-facing raw real
 \code{piFromArctanIntegralRectangleUnitAtOne} and theorem
@@ -630,55 +883,128 @@ Equivalently, the unit-branch construction
 rectangle schedule is also packaged as a \code{DefiniteIdentityFor} certificate
 \code{arctanGeomUnitRectangleDefiniteIdentity}; Lean proves the resulting pi
 raw real has the same stage computations as
-\code{piFromArctanIntegralRectangleUnitAtOne}.
-The Farey-prefix construction gives another verified pi computation,
-\code{piFromArctanIntegralFareyAtOne}, and Lean proves that it is equivalent
-to \(4\,\code{fareyIntegralPrefixRaw(1)}\).  Its comparison with
-\(\pi_{\mathrm{area}}\) is now formalized as
-\code{piFromArctanIntegralFareyAtOne\_equiv\_piCircleArea}.  The finite
-rational bridge is the named pointwise target
-\code{FareyPrefixGeomAgreementAtOne}, equivalently the cleaner full-unit mesh
-target \code{FareyUnitIntegralGeomAgreementAtOne}.  The latter says
-\[
-  \code{fareyIntegralUnitRaw}\sim\code{arctanGeom(1)}.
-\]
-Lean proves both targets directly by the ordered-cover comparison between the
-Farey mesh and the geometric midpoint mesh.
+\code{piFromArctanIntegralRectangleUnitAtOne}.  The monotone-packaged version
+\code{arctanGeomUnitRectangleMonotoneDefiniteIdentity} records the same
+endpoint identity as a \code{MonotoneDefiniteIdentityFor}, and Lean checks
+that forgetting monotonicity, or transporting the construction by equivalence,
+lands back in the ordinary endpoint-identity interface.  The theorem
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_monotoneDefiniteIdentityFor}
+closes the pi equivalence directly from this monotone endpoint-identity
+interface.  Promoting this one-piece monotone identity to
+\code{GeneralDefiniteIdentityFor} gives the public \code{generalIntegralFor}
+version \code{piFromArctanGeomUnitRectangleGeneralDefiniteIdentity}, again
+with a completed equivalence to \(\pi_{\mathrm{area}}\).  More generally, an
+ordinary \code{DefiniteIdentityFor} can now feed this public general-integral
+pi route as soon as its construction is proved equivalent to a
+\code{generalIntegralFor} construction.
 
 The same pi benchmark can also be closed through calculus.  If a
 definite-integral identity proves that the arctangent kernel integral over
 \([0,1]\) is the endpoint difference of a primitive equivalent to
 \code{arctanGeom(1)}, then
-\code{piFromArctanIntegral\_equiv\_piCircleArea\_of\_definite\_identity}
-closes the pi equivalence.  The more explicit
-\code{piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC} version uses
-an \code{EffectiveFTC} certificate and a matching integral schedule.  These are
-supporting bridge theorems for the arctangent-integral rows, not additional
-rows in the pi scoreboard.
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_definiteIdentityFor}
+closes the pi equivalence for the domain-aware \code{ConstructionFor}
+interface.  The more explicit
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_effectiveFTC} version
+uses an \code{EffectiveFTC} certificate, and
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_staticDyadicEffectiveFTC}
+is the same bridge specialized to the static dyadic mesh used by the ordinary
+bounded-integral interface.  Both have endpoint-agreement variants that
+package scheduled endpoint validity and equivalence to the canonical endpoint
+difference, and stage-schedule variants that construct this agreement from an
+explicit cofinal monotone endpoint precision schedule.  The
+candidate-derivative, curvature, and convex certificate routes now have the
+analogous direct pi bridges, endpoint-agreement variants, and stage-schedule
+variants.  The
+curvature route is the one suited to concave primitives such as arctangent on
+the unit interval.  These are supporting bridge theorems for the
+arctangent-integral rows, not additional rows in the pi scoreboard.  The older
+\code{piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC} theorem is
+kept for the legacy \code{Integral.Construction} wrapper.
 
-The same bridge is now available for the newer domain-aware
-\code{ConstructionFor} interface.  More concretely, any unit-branch integral
+More concretely, any unit-branch integral
 arctangent data whose function representation agrees with \code{arctanGeom}
 gives
 \[
   4\,\code{arctanIntegralUnit(1)}\sim\pi_{\mathrm{area}}.
 \]
-In particular,
-\code{arctanGeomUnitFareyDefiniteIdentity} specializes to
-\code{piFromArctanGeomUnitFareyDefiniteIdentity\_equiv\_piCircleArea}.
-Lean also proves this raw real has the same stage computations as the existing
-Farey-at-one row \code{piFromArctanIntegralFareyAtOne}, so the calculus
-certificate and the table-facing Farey computation are not separate numerical
-objects.  The rectangle and Farey unit computations are now connected directly
-by \code{piFromArctanIntegralFareyAtOne\_equiv\_rectangleUnitAtOne}, and their
-\code{DefiniteIdentityFor} packages are likewise directly equivalent.
+The completed table-facing instance is the rectangle one above.
 \end{theorem}
 
-\section{A Projective-Line Test Integral}
+\section{Projective and Improper Test Integrals}
 
-The Farey subdivision is meant to work uniformly on the projective line, not
-only on bounded intervals.  A useful test, simpler than the Gaussian integral
-but still genuinely projective, is
+\begin{remark}[Farey subdivision is parked for projective integrals]
+\label{rem:farey-subdivision-projective}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.det}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.mediantOfDetNe}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveEdge.subdivideList}
+\lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage}
+\lean{ComputableAnalysis.RationalCircle.fullCircleFareyStage_length}
+\lean{ComputableAnalysis.RationalCircle.FareyFraction.mediant}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.subdivideList_widthSum}
+\lean{ComputableAnalysis.RationalCircle.FareyCell.widthSquareSum_le_bound_mul_widthSum}
+\lean{ComputableAnalysis.RationalCircle.fareyUnitStage_widthSquareSum_le_one_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralPrefixRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_additive}
+\lean{ComputableAnalysis.ArctanGeometry.fareyIntegralBetweenRaw_reverse_equiv_neg}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFareyFor_sub_interval}
+\lean{ComputableAnalysis.IntegralIdentities.fareyIntegralBetweenRaw_equiv_arctanIntegralFareyFor_sub}
+\leanok
+Farey subdivision is no longer part of the first bounded-integral definition.
+For ordinary definite integrals we use the static dyadic mesh from
+\cref{def:definite-integral-identity}.  The existing Farey-prefix code is kept
+as projective-line machinery: a shared mesh on the extended rational line can
+subtract prefixes, reverse orientation, and express adjacent additivity without
+choosing a new partition for each finite interval.  That is exactly the shape
+needed for improper integrals involving \(\infty\), such as projective
+substitutions and whole-line Cauchy kernels.
+
+\begin{center}
+\begin{tikzpicture}[x=1.05cm,y=1.05cm,
+    line cap=round, line join=round,
+    every node/.style={font=\scriptsize}]
+  \path[use as bounding box] (-.45,-.85) rectangle (8.75,3.2);
+  \draw[thick] (0,0) -- (8,0);
+
+  \draw[blue!70!black, line width=.9pt] (0,0) arc (180:0:4);
+  \draw[teal!70!black, line width=.8pt] (0,0) arc (180:0:2);
+  \draw[teal!70!black, line width=.8pt] (4,0) arc (180:0:2);
+  \draw[orange!85!black, line width=.7pt] (0,0) arc (180:0:1.333);
+  \draw[orange!85!black, line width=.7pt] (2.667,0) arc (180:0:.667);
+  \draw[orange!85!black, line width=.7pt] (4,0) arc (180:0:.667);
+  \draw[orange!85!black, line width=.7pt] (5.333,0) arc (180:0:1.333);
+
+  \draw[densely dashed, black!45] (0,0) -- (0,3.05);
+  \draw[densely dashed, black!45] (8,0) -- (8,3.05);
+  \node[black!55] at (4,3.05) {$1/0=\infty$};
+
+  \foreach \x in {0,2.667,4,5.333,8} {
+    \draw[teal!75!black, line width=.75pt] (\x,-.18) -- (\x,.18);
+    \fill[white] (\x,0) circle (2.4pt);
+    \fill[teal!75!black] (\x,0) circle (1.6pt);
+  }
+  \node[below] at (0,-.18) {$0/1$};
+  \node[below] at (2.667,-.18) {$1/3$};
+  \node[below] at (4,-.18) {$1/2$};
+  \node[below] at (5.333,-.18) {$2/3$};
+  \node[below] at (8,-.18) {$1/1$};
+\end{tikzpicture}
+
+{\small A projective Farey mesh belongs here: useful for shared prefixes and
+endpoints at \(\infty\), not for the first bounded-integral definition.}
+\end{center}
+\end{remark}
+
+The first useful test, simpler than the Gaussian integral but still genuinely
+projective, is
 \[
   \int_{-\infty}^{\infty}\frac{\dd x}{x^4+a x^2+1}.
 \]
@@ -793,7 +1119,7 @@ extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \]
 with the existing arctangent kernel \(\code{ArctanGeometry.integralKernel}(u)\),
 so the pi-case quartic test now lands directly in the same rational kernel used
-by the verified rectangle and Farey arctangent constructions.
+by the verified rectangle arctangent construction.
 \end{theorem}
 
 \begin{theorem}[Route package for the clean reciprocal quartic test]

@@ -3,8 +3,8 @@ Definition-complete: valid raw real.  Equivalence-complete: a formal chain of
 
 The current score is:
 \[
-  \#\mathrm{Def}=7/17,\qquad
-  \#\mathrm{Equiv}_{\pi_{\mathrm{area}}}=3/16.
+  \#\mathrm{Def}=9/18,\qquad
+  \#\mathrm{Equiv}_{\pi_{\mathrm{area}}}=5/17.
 \]
 
 \begin{center}
@@ -31,20 +31,26 @@ The current score is:
 \cref{thm:geometric-arctan-one-area-pi} &
 \(\pi=4\arctan_{\mathrm{geom}}(1)\) &
 \(\checkmark\) & \(\checkmark\)\\
-\code{4 * arctanIntegralRectangleForAtOne} &
+Rectangle integral at 1 &
 \cref{thm:finite-arctan-integral-comparison};
 \cref{thm:arctan-integral-pi} &
 \(\pi=4\int_0^1 \frac{dt}{1+t^2}\) &
 \(\checkmark\) & \(\checkmark\)\\
-\code{4 * arctanIntegralFareyFor(1)} &
-\cref{thm:finite-arctan-integral-comparison};
-\cref{thm:arctan-integral-pi} &
-\(\pi=4I_F(0,1)\) &
+Machin rectangle integral &
+\cref{thm:machin-rectangle-integral-pi} &
+\(\pi=4(4\int_0^{1/5}\frac{dt}{1+t^2}-
+\int_0^{1/239}\frac{dt}{1+t^2})\) &
 \(\checkmark\) & \(\checkmark\)\\
-\code{4 * arctanIntegral(1)} &
-\cref{def:arctan-integral}; \cref{thm:arctan-integral-pi} &
-\(\pi=4\int_0^1 \frac{dt}{1+t^2}\) &
-\(\times\) & \(\times\)\\
+Cauchy projective Farey &
+\cref{thm:projective-cauchy-pi} &
+\(\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}
+=4\int_0^1\frac{dx}{1+x^2}\) &
+\(\checkmark\) & \(\checkmark\)\\
+Two-three Farey integral &
+\cref{thm:two-three-farey-pi} &
+\(\pi=4(\int_0^{1/2}\frac{dt}{1+t^2}+
+\int_0^{1/3}\frac{dt}{1+t^2})\) &
+\(\checkmark\) & \(\checkmark\)\\
 \code{4 * arctanSeries(1)} &
 \cref{def:arctan-series};
 \cref{thm:leibniz-arctan};
@@ -69,7 +75,7 @@ The current score is:
 \cref{rem:sources-of-raw-reals} &
 \(\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2\) &
 \(\times\) & \(\times\)\\
-\code{reciprocalQuarticMinusOneProjectiveRoute} &
+Reciprocal quartic projective &
 \cref{def:reciprocal-quartic-test-kernel};
 \cref{thm:reciprocal-quartic-route-package} &
 \(\pi=\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}\) &

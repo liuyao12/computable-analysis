@@ -81,26 +81,29 @@ secants
   \Sec_F(q,q+h),\qquad h>0,\quad q+h\le b,
 \]
 are monotone as \(h\downarrow 0\) and bounded below by any left secant ending
-at \(q\).  The right derivative \(D_+F(q)\) is represented by the infimum of
-these right secants:
+at \(q\).  Lean does not obtain a derivative by an infimum.  Instead,
+\code{RightDerivativeAt} supplies an explicit valid raw interval algorithm
+\(D_+F(q)\), and \code{IsRightDerivative} certifies two finite-order laws:
 \[
-  D_+F(q)=\inf_{0<h,\ q+h\le b}\Sec_F(q,q+h).
+  D_+F(q)\le\Sec_F(q,q+h)
 \]
-Equivalently, it is the limit of any rational sequence \(h_n\downarrow0\)
-with \(q+h_n\le b\).
+for every admissible rational \(h\), and every raw real with the same
+lower-bound property is \(\le D_+F(q)\).  Thus ``greatest lower bound'' is a
+specification checked against a supplied algorithm, not an invocation of a
+completed-real infimum or a limit theorem.
 \end{definition}
 
 \begin{definition}[Left derivative of a convex function]
 \label{def:convex-left-derivative}
 \lean{ComputableAnalysis.LeftDerivativeAt}
 \uses{def:exact-convexity}
-For \(a<q\), the left derivative is
-\[
-  D_-F(q)=\sup_{0<h,\ a\le q-h}\Sec_F(q-h,q).
-\]
-For convex \(F\), \(D_-F(q)\le D_+F(q)\).  The ordinary two-sided derivative
-exists exactly at the rational points where these two one-sided derivatives
-are equivalent.
+For \(a<q\), \code{LeftDerivativeAt} likewise supplies a valid raw interval
+algorithm \(D_-F(q)\).  \code{IsLeftDerivative} proves that every admissible
+left secant is \(\le D_-F(q)\), and that \(D_-F(q)\) is below every raw upper
+bound for those secants.  This least-upper-bound characterization is again a
+certificate, not a supremum construction.  For convex \(F\),
+\(D_-F(q)\le D_+F(q)\).  The ordinary two-sided derivative exists exactly at
+the rational points where these two one-sided derivatives are equivalent.
 \end{definition}
 
 \begin{theorem}[Right derivative is monotone]
@@ -118,24 +121,19 @@ for rational \(q_1,q_2<b\).
 \end{theorem}
 
 \begin{proof}
-Choose rational \(h_1,h_2>0\) so small that
-\[
-  q_1+h_1\le q_2\le q_2+h_2.
-\]
-Convexity gives
-\[
-  \Sec_F(q_1,q_1+h_1)\le \Sec_F(q_2,q_2+h_2).
-\]
-Taking the infimum over right secants on both sides gives the claim.
+Apply the greatest-lower-bound certificate for \(D_+F(q_2)\).  It remains to
+show that \(D_+F(q_1)\) is below every admissible right secant at \(q_2\).
+The lower-bound certificate for \(D_+F(q_1)\), together with rational secant
+monotonicity from convexity, gives exactly that finite order statement.
 \end{proof}
 
 \begin{definition}[Derivative formula identification]\label{def:formula-identification}
 \uses{def:convex-right-derivative}
 Let \(g\) be a proposed raw function formula.  On a rational interval,
 \(g\) is identified with \(D_+F\) when it is equivalent to the right-secant
-infimum defining \(D_+F\).  The formula is not a guess: it is proved from
-finite secant inequalities or algebraic identities for the particular
-function.
+algorithm supplied by \code{RightDerivativeAt} and satisfies its secant-bound
+certificate.  The formula is not a guess: it is proved from finite secant
+inequalities or algebraic identities for the particular function.
 \end{definition}
 
 \begin{example}[Trigonometric functions]\label{ex:trig-derivatives}
@@ -210,31 +208,168 @@ identities.
 
 \begin{theorem}[Monotone functions are integrable]
 \label{thm:monotone-integrable}
+\lean{ComputableAnalysis.NondecreasingOnInterval}
+\lean{ComputableAnalysis.NonincreasingOnInterval}
+\lean{ComputableAnalysis.MonotoneOnInterval}
+\lean{ComputableAnalysis.MonotoneOnInterval.ofNondecreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.ofNonincreasing}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.ExistsNondecreasingConstructionFor}
+\lean{ComputableAnalysis.Integral.MonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.monotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.monotoneIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.ExistsMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.ExistsPiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneLinearFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneCompatibleWithScaleRatFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneOrderPreservingFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneBasicPropertiesFor}
 \uses{def:definite-integral-identity,def:raw-real-order}
-Every monotone rational-input raw real-valued function on a rational interval
-has a constructive definite integral.  Monotonicity supplies the lower and
-upper cell values from endpoint evaluations, and Darboux sums converge under
-rational refinement.  This theorem constructs a valid raw integral; by itself
-it does not identify that integral with a primitive endpoint difference.
+Every nondecreasing or nonincreasing rational-input raw real-valued function
+on a rational interval has a constructive definite integral.  Monotonicity
+supplies the lower and upper cell values from endpoint evaluations, and
+Darboux sums converge under rational refinement.  This theorem constructs a
+valid raw integral; by itself
+it does not identify that integral with a primitive endpoint difference.  Lean
+currently has the public monotone-construction interface and the finite
+piecewise-monotone wrapper, including the valid sum of monotone-piece raw
+integrals.  The basic linearity, scalar, and adjacent-additivity laws are now
+named for the piecewise-monotone operator; the finite-sum comparison proofs
+for an arbitrary monotone integrand remain the next formal step.
 \end{theorem}
 
 \begin{theorem}[Effective FTC certificate]
 \label{thm:effective-ftc-certificate}
 \lean{ComputableAnalysis.EffectiveFTC}
+\lean{ComputableAnalysis.StaticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.StaticDyadicEffectiveFTC.toEffectiveFTC}
+\lean{ComputableAnalysis.FTC.EndpointScheduleAgreement}
+\lean{ComputableAnalysis.FTC.EndpointScheduleAgreement.endpoint_raw_valid}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_concaveFTC_stageSchedule}
 \lean{ComputableAnalysis.FTC.effectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.FTC.effectiveFTC_integral_equiv_scheduledEndpoint}
+\lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement}
+\lean{ComputableAnalysis.FTC.integralPlanOfStaticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.FTC.integralPlanOfStaticDyadicEffectiveFTC_eq_toEffectiveFTC}
+\lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_equiv_endpoint}
+\lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_integral_equiv_scheduledEndpoint}
+\lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint}
+\lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement}
+\lean{ComputableAnalysis.endpointDifference_valid_of_fun_valid}
+\lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.FunctionOnInterval.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.Integral.constructionFor_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule}
 \lean{ComputableAnalysis.DerivativeBoundFTC.equiv_endpoint}
+\lean{ComputableAnalysis.derivativeBoundFTC}
+\lean{ComputableAnalysis.candidateDerivativeFTC}
+\lean{ComputableAnalysis.CurvatureFTCCertificate}
+\lean{ComputableAnalysis.CurvatureFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.CurvatureFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.curvatureFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.ConcaveFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.Integral.constructionFor_of_derivativeBoundFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_candidateDerivativeFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_curvatureFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_convexFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_concaveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_concaveFTC_stageSchedule}
 \lean{ComputableAnalysis.convexFTC}
+\lean{ComputableAnalysis.concaveFTC}
 \uses{def:definite-integral-identity}
 \leanok
 An \code{EffectiveFTC} certificate is a finite schedule saying that, at every
 requested rational precision, a chosen Riemann-sum interval overlaps the
 endpoint-difference interval \(F(b)-F(a)\).  Lean proves that such a certificate
 gives raw-real equivalence between the scheduled integral and the scheduled
-endpoint raw real.  The derivative-bound version is the current reusable
-calculus interface: local derivative bounds on rational partition cells are
-summed and compared with endpoint differences.  This is the formal proof-route
-object that can support arctangent-integral pi equivalence targets.
+endpoint raw real.  \code{StaticDyadicEffectiveFTC} is the specialization used
+by the first bounded-integral algorithms: the chosen subdivision count has the
+form \(2^s\), so the FTC schedule is the static dyadic mesh from
+Chapter~\ref{ch:integrals}.  It forgets to a general \code{EffectiveFTC}, but
+also has its own bridge
+\code{staticDyadicEffectiveFTC\_definiteIntegralEqualsEndpoint}.  Both
+\code{EffectiveFTC} and the static-dyadic specialization now also accept the
+packaged endpoint-schedule agreement certificate and produce the domain-aware
+\code{ConstructionFor} and \code{DefiniteIdentityFor} interfaces used by
+Chapter~\ref{ch:integrals}.  When the endpoint precision choices are already
+a cofinal monotone raw-real stage schedule, Lean now constructs this
+endpoint-agreement certificate automatically; the same schedule-facing bridge
+is available for the derivative-bound, candidate-derivative, curvature,
+convex, and concave FTC packages.  The integral chapter exposes matching
+\code{DefiniteIdentityFor} constructors, so this schedule data now feeds the
+domain-aware integral identity interface directly.  When the same integral
+algorithm is represented through the public \code{generalIntegralFor} operator,
+the corresponding \code{GeneralDefiniteIdentityFor} constructors record that
+FTC endpoint identity at the public general-integral level.
+
+The derivative-bound version is the current reusable finite-cell interface:
+local derivative bounds on rational partition cells are summed and compared
+with endpoint differences.  Lean packages this route as a domain-aware
+\code{ConstructionFor}, and the bridge
+\code{definiteIdentityFor\_of\_derivativeBoundFTC} turns the certificate into
+the endpoint-identity interface used by Chapter~\ref{ch:integrals}.  The
+candidate-derivative and curvature certificates now have the same direct
+\code{ConstructionFor}/\code{DefiniteIdentityFor} packaging, with
+endpoint-agreement variants matching the \code{EffectiveFTC} route.  Curvature
+covers both convex and concave cells.  Thus formula-specific calculus can
+close pi equivalences by proving validity and endpoint-schedule bookkeeping
+for the relevant construction.  The public convexity-facing certificate is
+\code{ConvexFTCCertificate}, and the matching concavity-facing certificate is
+\code{ConcaveFTCCertificate}; both convert through
+\code{CurvatureFTCCertificate}.  The theorems \code{convexFTC} and
+\code{concaveFTC} are their endpoint equivalence theorems, and
+\code{definiteIdentityFor\_of\_convexFTC} and
+\code{definiteIdentityFor\_of\_concaveFTC} are the bridges to the integral
+identity package.  Endpoint-difference validity and adjacent telescoping are
+also formalized, so once two adjacent integrals have been converted to
+endpoint differences, their sum reduces to the endpoint difference over the
+combined interval.
 \end{theorem}
 
 \begin{theorem}[Fundamental theorem of calculus]\label{thm:convex-ftc}
@@ -245,8 +380,11 @@ derivative \(D_+F\) is integrable and
   \int_a^b D_+F(x)\,\dd x \sim F(b)-F(a).
 \]
 Equivalently, the same conclusion holds with the left derivative \(D_-F\).
-The intended Lean proof should manufacture the effective FTC certificate from
-the one-sided derivative inequalities below.
+The intended Lean proof should manufacture the derivative-bound certificate
+from the one-sided derivative inequalities below, then feed it through
+\code{definiteIdentityFor\_of\_derivativeBoundFTC}.  In cases where the
+chosen algorithm is literally a scheduled left-Riemann sum, the same endpoint
+comparison can also be exposed through \code{EffectiveFTC}.
 \end{theorem}
 
 \begin{proof}

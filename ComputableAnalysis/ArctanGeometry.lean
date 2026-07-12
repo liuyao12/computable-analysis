@@ -89,6 +89,19 @@ arctangent. -/
 def integralKernel (u : Rat) : Rat :=
   1 / (1 + u * u)
 
+/-- Exact arctangent-kernel value after a rational tangent-addition chart
+change.  This is the pointwise finite algebra behind transport of rectangle
+cells. -/
+theorem integralKernel_chartAddParameter {u v : Rat}
+    (hden : RationalCircle.Trigonometry.chartAddDen u v ≠ 0) :
+    integralKernel (RationalCircle.Trigonometry.chartAddParameter u v) =
+      (RationalCircle.Trigonometry.chartAddDen u v *
+        RationalCircle.Trigonometry.chartAddDen u v) /
+        RationalCircle.Trigonometry.chartAddNormDen u v := by
+  unfold integralKernel
+  rw [RationalCircle.Trigonometry.one_add_square_chartAddParameter hden]
+  simp only [Rat.div_def, Rat.inv_mul_rev, Rat.inv_inv, Rat.one_mul]
+
 /-- Lower rectangle on `[p,r]` for `1/(1+u^2)`, valid on nonnegative cells. -/
 def integralLowerStep (p r : Rat) : Rat :=
   (r - p) * integralKernel r
@@ -96,6 +109,264 @@ def integralLowerStep (p r : Rat) : Rat :=
 /-- Upper rectangle on `[p,r]` for `1/(1+u^2)`, valid on nonnegative cells. -/
 def integralUpperStep (p r : Rat) : Rat :=
   (r - p) * integralKernel p
+
+/-- The lower kernel rectangle on a chart-transformed cell is the source
+lower rectangle multiplied by the exact endpoint denominator ratio. -/
+theorem integralLowerStep_chartAddParameter_eq {u p r : Rat}
+    (hp : RationalCircle.Trigonometry.chartAddDen u p ≠ 0)
+    (hr : RationalCircle.Trigonometry.chartAddDen u r ≠ 0) :
+    integralLowerStep
+      (RationalCircle.Trigonometry.chartAddParameter u p)
+      (RationalCircle.Trigonometry.chartAddParameter u r) =
+      integralLowerStep p r *
+        (RationalCircle.Trigonometry.chartAddDen u r /
+          RationalCircle.Trigonometry.chartAddDen u p) := by
+  unfold integralLowerStep
+  rw [RationalCircle.Trigonometry.chartAddParameter_sub hp hr]
+  rw [integralKernel_chartAddParameter hr]
+  rw [RationalCircle.Trigonometry.chartAdd_normDen_eq]
+  unfold integralKernel
+  simp only [Rat.div_def, Rat.inv_mul_rev]
+  have hp' : 1 - u * p ≠ 0 := hp
+  have hr' : 1 - u * r ≠ 0 := hr
+  have hu : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+  have hrSquare : 1 + r * r ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos r)
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The upper kernel rectangle on a chart-transformed cell is the source
+upper rectangle multiplied by the reciprocal endpoint denominator ratio. -/
+theorem integralUpperStep_chartAddParameter_eq {u p r : Rat}
+    (hp : RationalCircle.Trigonometry.chartAddDen u p ≠ 0)
+    (hr : RationalCircle.Trigonometry.chartAddDen u r ≠ 0) :
+    integralUpperStep
+      (RationalCircle.Trigonometry.chartAddParameter u p)
+      (RationalCircle.Trigonometry.chartAddParameter u r) =
+      integralUpperStep p r *
+        (RationalCircle.Trigonometry.chartAddDen u p /
+          RationalCircle.Trigonometry.chartAddDen u r) := by
+  unfold integralUpperStep
+  rw [RationalCircle.Trigonometry.chartAddParameter_sub hp hr]
+  rw [integralKernel_chartAddParameter hp]
+  rw [RationalCircle.Trigonometry.chartAdd_normDen_eq]
+  unfold integralKernel
+  simp only [Rat.div_def, Rat.inv_mul_rev]
+  have hp' : 1 - u * p ≠ 0 := hp
+  have hr' : 1 - u * r ≠ 0 := hr
+  have hu : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+  have hpSquare : 1 + p * p ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos p)
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- On a nonnegative source cell with positive chart denominators, the lower
+rectangle after chart transport is no larger than the source lower rectangle. -/
+theorem chartAdd_integralLowerStep_le {u p r : Rat}
+    (hu : 0 <= u) (hpr : p <= r)
+    (hp : 0 < RationalCircle.Trigonometry.chartAddDen u p)
+    (hr : 0 < RationalCircle.Trigonometry.chartAddDen u r) :
+    integralLowerStep
+      (RationalCircle.Trigonometry.chartAddParameter u p)
+      (RationalCircle.Trigonometry.chartAddParameter u r) <=
+        integralLowerStep p r := by
+  have hpne : RationalCircle.Trigonometry.chartAddDen u p ≠ 0 :=
+    Rat.ne_of_gt hp
+  have hrne : RationalCircle.Trigonometry.chartAddDen u r ≠ 0 :=
+    Rat.ne_of_gt hr
+  have hden :
+      RationalCircle.Trigonometry.chartAddDen u r <=
+        RationalCircle.Trigonometry.chartAddDen u p := by
+    unfold RationalCircle.Trigonometry.chartAddDen
+    have hmul : u * p <= u * r :=
+      Rat.mul_le_mul_of_nonneg_left hpr hu
+    grind [Rat.sub_eq_add_neg]
+  have hratio :
+      RationalCircle.Trigonometry.chartAddDen u r /
+        RationalCircle.Trigonometry.chartAddDen u p <= 1 := by
+    apply Rat.le_of_mul_le_mul_right
+      (c := RationalCircle.Trigonometry.chartAddDen u p)
+    · rw [Rat.div_def]
+      calc
+        (RationalCircle.Trigonometry.chartAddDen u r *
+            (RationalCircle.Trigonometry.chartAddDen u p)⁻¹) *
+            RationalCircle.Trigonometry.chartAddDen u p =
+            RationalCircle.Trigonometry.chartAddDen u r := by
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= RationalCircle.Trigonometry.chartAddDen u p := hden
+        _ = 1 * RationalCircle.Trigonometry.chartAddDen u p := by
+              grind
+    · exact hp
+  rw [integralLowerStep_chartAddParameter_eq hpne hrne]
+  have hsource : 0 <= integralLowerStep p r := by
+    have hlen : 0 <= r - p := by
+      grind [Rat.sub_eq_add_neg]
+    have hkernel : 0 <= integralKernel r := by
+      unfold integralKernel
+      rw [Rat.div_def]
+      simpa using Rat.le_of_lt ((Rat.inv_pos).2
+        (RationalCircle.Stage.one_add_square_pos r))
+    exact Rat.mul_nonneg hlen hkernel
+  calc
+    integralLowerStep p r *
+        (RationalCircle.Trigonometry.chartAddDen u r /
+          RationalCircle.Trigonometry.chartAddDen u p) <=
+        integralLowerStep p r * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hratio hsource
+    _ = integralLowerStep p r := by grind
+
+/-- On a nonnegative source cell with positive chart denominators, the upper
+rectangle after chart transport is no smaller than the source upper rectangle. -/
+theorem integralUpperStep_le_chartAdd {u p r : Rat}
+    (hu : 0 <= u) (hpr : p <= r)
+    (hp : 0 < RationalCircle.Trigonometry.chartAddDen u p)
+    (hr : 0 < RationalCircle.Trigonometry.chartAddDen u r) :
+    integralUpperStep p r <=
+      integralUpperStep
+        (RationalCircle.Trigonometry.chartAddParameter u p)
+        (RationalCircle.Trigonometry.chartAddParameter u r) := by
+  have hpne : RationalCircle.Trigonometry.chartAddDen u p ≠ 0 :=
+    Rat.ne_of_gt hp
+  have hrne : RationalCircle.Trigonometry.chartAddDen u r ≠ 0 :=
+    Rat.ne_of_gt hr
+  have hden :
+      RationalCircle.Trigonometry.chartAddDen u r <=
+        RationalCircle.Trigonometry.chartAddDen u p := by
+    unfold RationalCircle.Trigonometry.chartAddDen
+    have hmul : u * p <= u * r :=
+      Rat.mul_le_mul_of_nonneg_left hpr hu
+    grind [Rat.sub_eq_add_neg]
+  have hratio :
+      1 <= RationalCircle.Trigonometry.chartAddDen u p /
+        RationalCircle.Trigonometry.chartAddDen u r := by
+    apply Rat.le_of_mul_le_mul_right
+      (c := RationalCircle.Trigonometry.chartAddDen u r)
+    · rw [Rat.div_def]
+      calc
+        1 * RationalCircle.Trigonometry.chartAddDen u r =
+            RationalCircle.Trigonometry.chartAddDen u r := by grind
+        _ <= RationalCircle.Trigonometry.chartAddDen u p := hden
+        _ =
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              (RationalCircle.Trigonometry.chartAddDen u r)⁻¹) *
+              RationalCircle.Trigonometry.chartAddDen u r := by
+                grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hr
+  rw [integralUpperStep_chartAddParameter_eq hpne hrne]
+  have hsource : 0 <= integralUpperStep p r := by
+    have hlen : 0 <= r - p := by
+      grind [Rat.sub_eq_add_neg]
+    have hkernel : 0 <= integralKernel p := by
+      unfold integralKernel
+      rw [Rat.div_def]
+      simpa using Rat.le_of_lt ((Rat.inv_pos).2
+        (RationalCircle.Stage.one_add_square_pos p))
+    exact Rat.mul_nonneg hlen hkernel
+  calc
+    integralUpperStep p r = integralUpperStep p r * 1 := by grind
+    _ <= integralUpperStep p r *
+        (RationalCircle.Trigonometry.chartAddDen u p /
+          RationalCircle.Trigonometry.chartAddDen u r) :=
+      Rat.mul_le_mul_of_nonneg_left hratio hsource
+
+/-- On the Machin-relevant half-unit chart, every unit-cell endpoint
+displacement grows by at most a factor of eight. -/
+theorem chartAddParameter_width_le_eight_mul {u p r : Rat}
+    (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hpr : p <= r) (hr1 : r <= 1) :
+    RationalCircle.Trigonometry.chartAddParameter u r -
+      RationalCircle.Trigonometry.chartAddParameter u p <=
+        8 * (r - p) := by
+  have hp1 : p <= 1 := Rat.le_trans hpr hr1
+  have hdenP :
+      (1 : Rat) / 2 <= RationalCircle.Trigonometry.chartAddDen u p := by
+    unfold RationalCircle.Trigonometry.chartAddDen
+    have hmul : u * p <= (1 : Rat) / 2 := by
+      calc
+        u * p <= u * 1 := Rat.mul_le_mul_of_nonneg_left hp1 hu0
+        _ = u := by grind
+        _ <= (1 : Rat) / 2 := huHalf
+    grind [Rat.sub_eq_add_neg]
+  have hdenR :
+      (1 : Rat) / 2 <= RationalCircle.Trigonometry.chartAddDen u r := by
+    unfold RationalCircle.Trigonometry.chartAddDen
+    have hmul : u * r <= (1 : Rat) / 2 := by
+      calc
+        u * r <= u * 1 := Rat.mul_le_mul_of_nonneg_left hr1 hu0
+        _ = u := by grind
+        _ <= (1 : Rat) / 2 := huHalf
+    grind [Rat.sub_eq_add_neg]
+  have hdenPpos : 0 < RationalCircle.Trigonometry.chartAddDen u p := by
+    have : (0 : Rat) < 1 / 2 := by native_decide
+    grind
+  have hdenRpos : 0 < RationalCircle.Trigonometry.chartAddDen u r := by
+    have : (0 : Rat) < 1 / 2 := by native_decide
+    grind
+  have hdenProduct :
+      (1 : Rat) / 2 * ((1 : Rat) / 2) <=
+        RationalCircle.Trigonometry.chartAddDen u p *
+          RationalCircle.Trigonometry.chartAddDen u r := by
+    calc
+      (1 : Rat) / 2 * ((1 : Rat) / 2) <=
+          RationalCircle.Trigonometry.chartAddDen u p * ((1 : Rat) / 2) :=
+        Rat.mul_le_mul_of_nonneg_right hdenP (by native_decide)
+      _ <=
+          RationalCircle.Trigonometry.chartAddDen u p *
+            RationalCircle.Trigonometry.chartAddDen u r :=
+        Rat.mul_le_mul_of_nonneg_left hdenR
+          (Rat.le_trans (by native_decide : (0 : Rat) <= 1 / 2) hdenP)
+  have hSquare : u * u <= 1 := by
+    calc
+      u * u <= u * 1 := Rat.mul_le_mul_of_nonneg_left
+        (Rat.le_trans huHalf (by native_decide : (1 : Rat) / 2 <= 1)) hu0
+      _ = u := by grind
+      _ <= 1 := Rat.le_trans huHalf (by native_decide)
+  have hNorm : 1 + u * u <= 2 := by grind
+  have hproductPos :
+      0 < RationalCircle.Trigonometry.chartAddDen u p *
+        RationalCircle.Trigonometry.chartAddDen u r :=
+    Rat.mul_pos hdenPpos hdenRpos
+  have hratio :
+      (1 + u * u) /
+        (RationalCircle.Trigonometry.chartAddDen u p *
+          RationalCircle.Trigonometry.chartAddDen u r) <= 8 := by
+    apply Rat.le_of_mul_le_mul_right
+      (c := RationalCircle.Trigonometry.chartAddDen u p *
+        RationalCircle.Trigonometry.chartAddDen u r)
+    · rw [Rat.div_def]
+      calc
+        ((1 + u * u) *
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r)⁻¹) *
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r) =
+            1 + u * u := by
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= 2 := hNorm
+        _ = 8 * ((1 : Rat) / 2 * ((1 : Rat) / 2)) := by native_decide
+        _ <= 8 *
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r) :=
+          Rat.mul_le_mul_of_nonneg_left hdenProduct
+            (by native_decide : (0 : Rat) <= 8)
+    · exact hproductPos
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hdiff :=
+    RationalCircle.Trigonometry.chartAddParameter_sub
+      (u := u) (p := p) (r := r)
+      (Rat.ne_of_gt hdenPpos) (Rat.ne_of_gt hdenRpos)
+  calc
+    RationalCircle.Trigonometry.chartAddParameter u r -
+        RationalCircle.Trigonometry.chartAddParameter u p =
+        (r - p) *
+          ((1 + u * u) /
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r)) := by
+          rw [hdiff]
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= (r - p) * 8 :=
+      Rat.mul_le_mul_of_nonneg_left hratio hlen
+    _ = 8 * (r - p) := by grind [Rat.mul_comm]
 
 /-- Inscribed geometric sector cell between rational parameters `p` and `r`. -/
 def geometricLowerStep (p r : Rat) : Rat :=
@@ -757,6 +1028,250 @@ def intervalSquareSum : List (Rat × Rat) -> Rat
 
 def integralSumInterval (intervals : List (Rat × Rat)) : QInterval :=
   { lo := integralLowerSum intervals, hi := integralUpperSum intervals }
+
+/-- Apply the rational tangent-addition chart to every endpoint of a finite
+interval partition. -/
+def chartAddIntervals (u : Rat) : List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (RationalCircle.Trigonometry.chartAddParameter u p,
+        RationalCircle.Trigonometry.chartAddParameter u r) ::
+        chartAddIntervals u rest
+
+/-- Positivity of the two chart denominators on each cell of a finite
+partition.  It is the finite admissibility condition for chart transport. -/
+def ChartAddPositiveDenominators (u : Rat) : List (Rat × Rat) -> Prop
+  | [] => True
+  | (p, r) :: rest =>
+      0 < RationalCircle.Trigonometry.chartAddDen u p /\
+        0 < RationalCircle.Trigonometry.chartAddDen u r /\
+          ChartAddPositiveDenominators u rest
+
+/-- Summed lower rectangles decrease under an admissible nonnegative
+tangent-addition chart transport. -/
+theorem chartAddIntervals_lowerSum_le
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu : 0 <= u)
+    (hintervals : NonnegativeIntervals intervals)
+    (hden : ChartAddPositiveDenominators u intervals) :
+    integralLowerSum (chartAddIntervals u intervals) <=
+      integralLowerSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [chartAddIntervals, integralLowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hintervals with ⟨hp0, hpr, hrest⟩
+      rcases hden with ⟨hpden, hrden, hdenrest⟩
+      simp only [chartAddIntervals, integralLowerSum]
+      exact rat_add_le_add
+        (chartAdd_integralLowerStep_le hu hpr hpden hrden)
+        (ih hrest hdenrest)
+
+/-- Summed upper rectangles increase under an admissible nonnegative
+tangent-addition chart transport. -/
+theorem integralUpperSum_le_chartAddIntervals
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu : 0 <= u)
+    (hintervals : NonnegativeIntervals intervals)
+    (hden : ChartAddPositiveDenominators u intervals) :
+    integralUpperSum intervals <=
+      integralUpperSum (chartAddIntervals u intervals) := by
+  induction intervals with
+  | nil =>
+      simp [chartAddIntervals, integralUpperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hintervals with ⟨hp0, hpr, hrest⟩
+      rcases hden with ⟨hpden, hrden, hdenrest⟩
+      simp only [chartAddIntervals, integralUpperSum]
+      exact rat_add_le_add
+        (integralUpperStep_le_chartAdd hu hpr hpden hrden)
+        (ih hrest hdenrest)
+
+/-- The transported rectangle bracket contains the source rectangle bracket
+cell-for-cell. -/
+theorem chartAddIntervals_integralSum_contains
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu : 0 <= u)
+    (hintervals : NonnegativeIntervals intervals)
+    (hden : ChartAddPositiveDenominators u intervals) :
+    (integralSumInterval (chartAddIntervals u intervals)).ContainsInterval
+      (integralSumInterval intervals) := by
+  unfold QInterval.ContainsInterval integralSumInterval
+  exact ⟨chartAddIntervals_lowerSum_le u intervals hu hintervals hden,
+    integralUpperSum_le_chartAddIntervals u intervals hu hintervals hden⟩
+
+/-- An admissible nonnegative partition remains a nonnegative partition after
+the tangent-addition chart is applied to all endpoints. -/
+theorem chartAddIntervals_nonnegative
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu : 0 <= u)
+    (hintervals : NonnegativeIntervals intervals)
+    (hden : ChartAddPositiveDenominators u intervals) :
+    NonnegativeIntervals (chartAddIntervals u intervals) := by
+  induction intervals with
+  | nil =>
+      simp [chartAddIntervals, NonnegativeIntervals]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hintervals with ⟨hp0, hpr, hrest⟩
+      rcases hden with ⟨hpden, hrden, hdenrest⟩
+      have hleft :
+          0 <= RationalCircle.Trigonometry.chartAddParameter u p := by
+        unfold RationalCircle.Trigonometry.chartAddParameter
+          RationalCircle.Trigonometry.chartAddNum
+          RationalCircle.Trigonometry.chartAddDen
+        rw [Rat.div_def]
+        exact Rat.mul_nonneg
+          (Rat.add_nonneg hu hp0)
+          (Rat.le_of_lt ((Rat.inv_pos).2 hpden))
+      have horder :
+          RationalCircle.Trigonometry.chartAddParameter u p <=
+            RationalCircle.Trigonometry.chartAddParameter u r :=
+        RationalCircle.Trigonometry.chartAddParameter_mono hpden hrden hpr
+      simp [chartAddIntervals, NonnegativeIntervals, hleft, horder,
+        ih hrest hdenrest]
+
+/-- Applying the chart endpointwise transports an ordered finite cover of
+`[a,b]` to an ordered cover of the chart image interval. -/
+theorem chartAddIntervals_covers
+    (u a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : CoversInterval a b intervals)
+    (hden : ChartAddPositiveDenominators u intervals) :
+    CoversInterval
+      (RationalCircle.Trigonometry.chartAddParameter u a)
+      (RationalCircle.Trigonometry.chartAddParameter u b)
+      (chartAddIntervals u intervals) := by
+  induction intervals generalizing a with
+  | nil =>
+      simp [chartAddIntervals, CoversInterval] at hcover ⊢
+      exact congrArg (RationalCircle.Trigonometry.chartAddParameter u) hcover
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hcover with ⟨hpa, hpr, hrest⟩
+      rcases hden with ⟨hpden, hrden, hdenrest⟩
+      subst p
+      simp only [chartAddIntervals, CoversInterval]
+      exact ⟨True.intro,
+        RationalCircle.Trigonometry.chartAddParameter_mono
+          hpden hrden hpr,
+        ih r hrest hdenrest⟩
+
+/-- A unit source endpoint has a positive tangent-chart denominator whenever
+the chart parameter is nonnegative and strictly below one. -/
+theorem chartAddDen_pos_of_unit
+    {u t : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (ht1 : t <= 1) :
+    0 < RationalCircle.Trigonometry.chartAddDen u t := by
+  unfold RationalCircle.Trigonometry.chartAddDen
+  have hmul : u * t <= u := by
+    calc
+      u * t <= u * 1 := Rat.mul_le_mul_of_nonneg_left ht1 hu0
+      _ = u := by grind
+  grind [Rat.sub_eq_add_neg]
+
+/-- A chart parameter from zero up to, but not including, one has positive
+chart denominators on every cell of a unit-interval partition. -/
+theorem chartAddPositiveDenominators_of_unitIntervals
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu0 : 0 <= u) (hu1 : u < 1)
+    (hintervals : UnitIntervals intervals) :
+    ChartAddPositiveDenominators u intervals := by
+  induction intervals with
+  | nil =>
+      simp [ChartAddPositiveDenominators]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hintervals with ⟨hp0, hpr, hr1, hrest⟩
+      have hp1 : p <= 1 := Rat.le_trans hpr hr1
+      have hmulP : u * p <= u := by
+        calc
+          u * p <= u * 1 := Rat.mul_le_mul_of_nonneg_left hp1 hu0
+          _ = u := by grind
+      have hmulR : u * r <= u := by
+        calc
+          u * r <= u * 1 := Rat.mul_le_mul_of_nonneg_left hr1 hu0
+          _ = u := by grind
+      have hdenP : 0 < RationalCircle.Trigonometry.chartAddDen u p := by
+        unfold RationalCircle.Trigonometry.chartAddDen
+        grind [Rat.sub_eq_add_neg]
+      have hdenR : 0 < RationalCircle.Trigonometry.chartAddDen u r := by
+        unfold RationalCircle.Trigonometry.chartAddDen
+        grind [Rat.sub_eq_add_neg]
+      exact ⟨hdenP, hdenR, ih hrest⟩
+
+/-- On the Machin-relevant half-unit chart, endpointwise transport multiplies
+the squared mesh budget by at most sixty-four. -/
+theorem chartAddIntervals_squareSum_le_sixtyFour
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hintervals : UnitIntervals intervals) :
+    intervalSquareSum (chartAddIntervals u intervals) <=
+      64 * intervalSquareSum intervals := by
+  have hu1 : u < 1 := by
+    have hhalf : (1 : Rat) / 2 < 1 := by native_decide
+    grind
+  induction intervals with
+  | nil =>
+      simp [chartAddIntervals, intervalSquareSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hintervals with ⟨hp0, hpr, hr1, hrest⟩
+      have hp1 : p <= 1 := Rat.le_trans hpr hr1
+      have hdenP :=
+        chartAddDen_pos_of_unit hu0 hu1 hp1
+      have hdenR :=
+        chartAddDen_pos_of_unit hu0 hu1 hr1
+      have horder :
+          RationalCircle.Trigonometry.chartAddParameter u p <=
+            RationalCircle.Trigonometry.chartAddParameter u r :=
+        RationalCircle.Trigonometry.chartAddParameter_mono hdenP hdenR hpr
+      have himageNonneg :
+          0 <= RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p := by
+        grind [Rat.sub_eq_add_neg]
+      have hsourceNonneg : 0 <= r - p := by
+        grind [Rat.sub_eq_add_neg]
+      have himage :
+          RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p <=
+              8 * (r - p) :=
+        chartAddParameter_width_le_eight_mul hu0 huHalf hpr hr1
+      have hscaledNonneg : 0 <= 8 * (r - p) :=
+        Rat.mul_nonneg (by native_decide) hsourceNonneg
+      have hcellSquare :
+          (RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p) *
+              (RationalCircle.Trigonometry.chartAddParameter u r -
+                RationalCircle.Trigonometry.chartAddParameter u p) <=
+            64 * ((r - p) * (r - p)) := by
+        calc
+          (RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p) *
+              (RationalCircle.Trigonometry.chartAddParameter u r -
+                RationalCircle.Trigonometry.chartAddParameter u p) <=
+            (8 * (r - p)) *
+              (RationalCircle.Trigonometry.chartAddParameter u r -
+                RationalCircle.Trigonometry.chartAddParameter u p) :=
+              Rat.mul_le_mul_of_nonneg_right himage himageNonneg
+          _ <= (8 * (r - p)) * (8 * (r - p)) :=
+              Rat.mul_le_mul_of_nonneg_left himage hscaledNonneg
+          _ = 64 * ((r - p) * (r - p)) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+      have htail := ih hrest
+      simp only [chartAddIntervals, intervalSquareSum]
+      calc
+        (RationalCircle.Trigonometry.chartAddParameter u r -
+          RationalCircle.Trigonometry.chartAddParameter u p) *
+            (RationalCircle.Trigonometry.chartAddParameter u r -
+              RationalCircle.Trigonometry.chartAddParameter u p) +
+            intervalSquareSum (chartAddIntervals u rest) <=
+          64 * ((r - p) * (r - p)) +
+            64 * intervalSquareSum rest :=
+              rat_add_le_add hcellSquare htail
+        _ = 64 * ((r - p) * (r - p) + intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
 def geometricSumInterval (intervals : List (Rat × Rat)) : QInterval :=
   { lo := geometricLowerSum intervals, hi := geometricUpperSum intervals }
@@ -3403,6 +3918,42 @@ theorem arctanAreaLoopState_intervals_covers
     (arctanAreaLoopInitial x)
     (arctanAreaLoopInitial_intervals_covers hx)
 
+/-- The stagewise chart image of a unit source partition gives an explicit
+finite cover of the image interval. -/
+theorem chartAddAreaLoop_covers
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    CoversInterval
+      (RationalCircle.Trigonometry.chartAddParameter u 0)
+      (RationalCircle.Trigonometry.chartAddParameter u x)
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals) := by
+  apply chartAddIntervals_covers
+  · exact arctanAreaLoopState_intervals_covers hx0 n
+  · exact chartAddPositiveDenominators_of_unitIntervals u
+      (arctanAreaLoopState x n).intervals hu0 hu1
+      (arctanAreaLoopState_intervals_unit hx0 hx1 n)
+
+/-- If the chart image endpoint stays in the unit interval, every transported
+area-loop cell stays there as well. -/
+theorem chartAddAreaLoop_intervals_unit
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage :
+      RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (n : Nat) :
+    UnitIntervals
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals) := by
+  have hu1 : u < 1 := by
+    have hhalf : (1 : Rat) / 2 < 1 := by native_decide
+    grind
+  have hcover :=
+    chartAddAreaLoop_covers hu0 hu1 hx0 hx1 n
+  have hstart :
+      0 <= RationalCircle.Trigonometry.chartAddParameter u 0 := by
+    rw [RationalCircle.Trigonometry.chartAddParameter_zero_right]
+    exact hu0
+  exact CoversInterval.unit hstart himage hcover
+
 private theorem div_two_pow_succ (a : Rat) (n : Nat) :
     (a / (((2 ^ n : Nat) : Rat))) / 2 =
       a / (((2 ^ (n + 1) : Nat) : Rat)) := by
@@ -3451,6 +4002,203 @@ theorem arctanAreaLoopState_one_squareSum (n : Nat) :
     intervalSquareSum (arctanAreaLoopState 1 n).intervals =
       1 / (((2 ^ n : Nat) : Rat)) := by
   simpa using arctanAreaLoopState_squareSum (1 : Rat) n
+
+/-- Mesh-budget form for the midpoint-rectangle arctangent schedule.
+
+After `n` midpoint refinements of `[0,x]`, the sum of squared cell lengths is
+exactly `x^2 / 2^n`.  This is the dyadic estimate used by the rectangle
+integral validity proof. -/
+theorem arctanIntegralRectangle_dyadicSquareMesh (x : Rat) (n : Nat) :
+    intervalSquareSum (arctanAreaLoopState x n).intervals =
+      (x * x) / (((2 ^ n : Nat) : Rat)) :=
+  arctanAreaLoopState_squareSum x n
+
+/-- Unit-endpoint specialization of `arctanIntegralRectangle_dyadicSquareMesh`. -/
+theorem arctanIntegralRectangleAtOne_dyadicSquareMesh (n : Nat) :
+    intervalSquareSum (arctanAreaLoopState 1 n).intervals =
+      1 / (((2 ^ n : Nat) : Rat)) :=
+  arctanAreaLoopState_one_squareSum n
+
+/-- The transported midpoint partition has a squared mesh budget at most
+sixty-four times that of its source on the half-unit chart. -/
+theorem chartAddAreaLoop_squareSum_le_sixtyFour
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    intervalSquareSum
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals) <=
+        64 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+  calc
+    intervalSquareSum
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals) <=
+        64 * intervalSquareSum (arctanAreaLoopState x n).intervals :=
+      chartAddIntervals_squareSum_le_sixtyFour u
+        (arctanAreaLoopState x n).intervals hu0 huHalf
+        (arctanAreaLoopState_intervals_unit hx0 hx1 n)
+    _ = 64 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+      rw [arctanAreaLoopState_squareSum]
+
+/-- The interval width of a transported midpoint rectangle bracket has the
+same dyadic decay, with an explicit rational factor. -/
+theorem chartAddAreaLoop_integralSum_width_le
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (n : Nat) :
+    (integralSumInterval
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals)).width <=
+        128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+  calc
+    (integralSumInterval
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals)).width <=
+        2 * intervalSquareSum
+          (chartAddIntervals u (arctanAreaLoopState x n).intervals) :=
+      integralSumInterval_width_le_two_squareSum
+        (chartAddIntervals u (arctanAreaLoopState x n).intervals)
+        (chartAddAreaLoop_intervals_unit hu0 huHalf hx0 hx1 himage n)
+    _ <= 2 * (64 * ((x * x) / (((2 ^ n : Nat) : Rat)))) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (chartAddAreaLoop_squareSum_le_sixtyFour hu0 huHalf hx0 hx1 n)
+        (by native_decide : (0 : Rat) <= 2)
+    _ = 128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- Endpointwise chart transport commutes with the *refinement order* needed
+for rectangle sums.  The charted split point need not be the midpoint of its
+image cell: monotonicity of lower and upper rectangles is enough. -/
+private theorem chartAdd_refineAux_integralSum_refines
+    (u lo hi : Rat) (intervals : List (Rat × Rat))
+    (hu0 : 0 <= u) (hu1 : u < 1)
+    (hintervals : UnitIntervals intervals) :
+    (integralSumInterval (chartAddIntervals u intervals)).ContainsInterval
+      (integralSumInterval
+        (chartAddIntervals u
+          (AreaLoopState.refineAux lo hi intervals).intervals)) := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [AreaLoopState.refineAux, chartAddIntervals, integralSumInterval,
+        QInterval.ContainsInterval]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hintervals with ⟨hp0, hpr, hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hpq : p <= q := by
+        dsimp [q]
+        exact left_le_midpoint hpr
+      have hqr : q <= r := by
+        dsimp [q]
+        exact midpoint_le_right hpr
+      have hq1 : q <= 1 := Rat.le_trans hqr hr1
+      have hp1 : p <= 1 := Rat.le_trans hpq hq1
+      have hdenP : 0 < RationalCircle.Trigonometry.chartAddDen u p :=
+        chartAddDen_pos_of_unit hu0 hu1 hp1
+      have hdenQ : 0 < RationalCircle.Trigonometry.chartAddDen u q :=
+        chartAddDen_pos_of_unit hu0 hu1 hq1
+      have hdenR : 0 < RationalCircle.Trigonometry.chartAddDen u r :=
+        chartAddDen_pos_of_unit hu0 hu1 hr1
+      have himageP : 0 <= RationalCircle.Trigonometry.chartAddParameter u p := by
+        unfold RationalCircle.Trigonometry.chartAddParameter
+          RationalCircle.Trigonometry.chartAddNum
+          RationalCircle.Trigonometry.chartAddDen
+        rw [Rat.div_def]
+        exact Rat.mul_nonneg (Rat.add_nonneg hu0 hp0)
+          (Rat.le_of_lt ((Rat.inv_pos).2 hdenP))
+      have himagePQ :
+          RationalCircle.Trigonometry.chartAddParameter u p <=
+            RationalCircle.Trigonometry.chartAddParameter u q :=
+        RationalCircle.Trigonometry.chartAddParameter_mono hdenP hdenQ hpq
+      have himageQR :
+          RationalCircle.Trigonometry.chartAddParameter u q <=
+            RationalCircle.Trigonometry.chartAddParameter u r :=
+        RationalCircle.Trigonometry.chartAddParameter_mono hdenQ hdenR hqr
+      have htail :=
+        ih (lo + arctanAreaIncrement p q r)
+          (hi - arctanAreaDecrement p q r) hrest
+      have hlower := integralLowerStep_refine himageP himagePQ himageQR
+      have hupper := integralUpperStep_refine himageP himagePQ himageQR
+      unfold QInterval.ContainsInterval integralSumInterval at htail ⊢
+      simp only [AreaLoopState.refineAux, chartAddIntervals,
+        integralLowerSum, integralUpperSum]
+      constructor
+      · calc
+          integralLowerStep
+              (RationalCircle.Trigonometry.chartAddParameter u p)
+              (RationalCircle.Trigonometry.chartAddParameter u r) +
+              integralLowerSum (chartAddIntervals u rest)
+              <=
+              (integralLowerStep
+                (RationalCircle.Trigonometry.chartAddParameter u p)
+                (RationalCircle.Trigonometry.chartAddParameter u q) +
+                integralLowerStep
+                  (RationalCircle.Trigonometry.chartAddParameter u q)
+                  (RationalCircle.Trigonometry.chartAddParameter u r)) +
+                integralLowerSum (chartAddIntervals u rest) :=
+                rat_add_le_add hlower (Rat.le_refl)
+          _ <=
+              (integralLowerStep
+                (RationalCircle.Trigonometry.chartAddParameter u p)
+                (RationalCircle.Trigonometry.chartAddParameter u q) +
+                integralLowerStep
+                  (RationalCircle.Trigonometry.chartAddParameter u q)
+                  (RationalCircle.Trigonometry.chartAddParameter u r)) +
+                integralLowerSum
+                  (chartAddIntervals u
+                    (AreaLoopState.refineAux
+                      (lo + arctanAreaIncrement p q r)
+                      (hi - arctanAreaDecrement p q r) rest).intervals) :=
+                rat_add_le_add (Rat.le_refl) htail.1
+          _ =
+              integralLowerStep
+                (RationalCircle.Trigonometry.chartAddParameter u p)
+                (RationalCircle.Trigonometry.chartAddParameter u q) +
+              (integralLowerStep
+                (RationalCircle.Trigonometry.chartAddParameter u q)
+                (RationalCircle.Trigonometry.chartAddParameter u r) +
+                integralLowerSum
+                  (chartAddIntervals u
+                    (AreaLoopState.refineAux
+                      (lo + arctanAreaIncrement p q r)
+                      (hi - arctanAreaDecrement p q r) rest).intervals)) := by
+                grind [Rat.add_assoc, Rat.add_comm]
+      · calc
+          integralUpperStep
+              (RationalCircle.Trigonometry.chartAddParameter u p)
+              (RationalCircle.Trigonometry.chartAddParameter u q) +
+            (integralUpperStep
+              (RationalCircle.Trigonometry.chartAddParameter u q)
+              (RationalCircle.Trigonometry.chartAddParameter u r) +
+              integralUpperSum
+                (chartAddIntervals u
+                  (AreaLoopState.refineAux
+                    (lo + arctanAreaIncrement p q r)
+                    (hi - arctanAreaDecrement p q r) rest).intervals))
+              =
+              (integralUpperStep
+                (RationalCircle.Trigonometry.chartAddParameter u p)
+                (RationalCircle.Trigonometry.chartAddParameter u q) +
+                integralUpperStep
+                  (RationalCircle.Trigonometry.chartAddParameter u q)
+                  (RationalCircle.Trigonometry.chartAddParameter u r)) +
+                integralUpperSum
+                  (chartAddIntervals u
+                    (AreaLoopState.refineAux
+                      (lo + arctanAreaIncrement p q r)
+                      (hi - arctanAreaDecrement p q r) rest).intervals) := by
+                grind [Rat.add_assoc, Rat.add_comm]
+          _ <=
+              (integralUpperStep
+                (RationalCircle.Trigonometry.chartAddParameter u p)
+                (RationalCircle.Trigonometry.chartAddParameter u q) +
+                integralUpperStep
+                  (RationalCircle.Trigonometry.chartAddParameter u q)
+                  (RationalCircle.Trigonometry.chartAddParameter u r)) +
+                integralUpperSum (chartAddIntervals u rest) :=
+                rat_add_le_add (Rat.le_refl) htail.2
+          _ <=
+              integralUpperStep
+                (RationalCircle.Trigonometry.chartAddParameter u p)
+                (RationalCircle.Trigonometry.chartAddParameter u r) +
+                integralUpperSum (chartAddIntervals u rest) :=
+                rat_add_le_add hupper (Rat.le_refl)
 
 theorem arctanAreaLoop_integralSum_contains_geometricSum
     {x : Rat} (hx : 0 <= x) (n : Nat) :
@@ -3640,6 +4388,89 @@ theorem positiveLoopComputeAtStage_nested
 same midpoint partition schedule as `arctanGeom x`. -/
 def arctanIntegralRectangleCompute (x : Rat) (n : Nat) : QInterval :=
   integralSumInterval (arctanAreaLoopState x n).intervals
+
+/-- At every midpoint-refinement stage, the endpointwise chart image of a
+unit source partition has a target rectangle bracket containing the source
+bracket. -/
+theorem chartAddAreaLoop_integralSum_contains
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    (integralSumInterval
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals)).ContainsInterval
+        (arctanIntegralRectangleCompute x n) := by
+  unfold arctanIntegralRectangleCompute
+  apply chartAddIntervals_integralSum_contains
+  · exact hu0
+  · exact unitIntervals_nonnegative _
+      (arctanAreaLoopState_intervals_unit hx0 hx1 n)
+  · exact chartAddPositiveDenominators_of_unitIntervals u
+      (arctanAreaLoopState x n).intervals hu0 hu1
+      (arctanAreaLoopState_intervals_unit hx0 hx1 n)
+
+/-- A raw stage for the finite rectangle bracket obtained by transporting the
+midpoint partition through the rational tangent-addition chart. -/
+def chartAddAreaLoopCompute (u x : Rat) (n : Nat) : QInterval :=
+  integralSumInterval
+    (chartAddIntervals u (arctanAreaLoopState x n).intervals)
+
+def chartAddAreaLoopRaw (u x : Rat) : RealRaw where
+  compute := chartAddAreaLoopCompute u x
+
+theorem chartAddAreaLoopCompute_ordered
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    0 <= (chartAddAreaLoopCompute u x n).width := by
+  unfold chartAddAreaLoopCompute
+  exact integralSumInterval_ordered
+    (chartAddIntervals u (arctanAreaLoopState x n).intervals)
+    (chartAddIntervals_nonnegative u
+      (arctanAreaLoopState x n).intervals hu0
+      (arctanAreaLoopState_intervals_nonnegative hx0 n)
+      (chartAddPositiveDenominators_of_unitIntervals u
+        (arctanAreaLoopState x n).intervals hu0 hu1
+        (arctanAreaLoopState_intervals_unit hx0 hx1 n)))
+
+private theorem chartAddAreaLoopCompute_step_refines
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    (chartAddAreaLoopCompute u x n).ContainsInterval
+      (chartAddAreaLoopCompute u x (n + 1)) := by
+  unfold chartAddAreaLoopCompute
+  rw [arctanAreaLoopState_succ]
+  exact chartAdd_refineAux_integralSum_refines u
+    (arctanAreaLoopState x n).lo (arctanAreaLoopState x n).hi
+    (arctanAreaLoopState x n).intervals hu0 hu1
+    (arctanAreaLoopState_intervals_unit hx0 hx1 n)
+
+theorem chartAddAreaLoopCompute_nested
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1) :
+    forall n m, n <= m ->
+      (chartAddAreaLoopCompute u x n).lo <=
+        (chartAddAreaLoopCompute u x m).lo /\
+      (chartAddAreaLoopCompute u x m).lo <=
+        (chartAddAreaLoopCompute u x m).hi /\
+      (chartAddAreaLoopCompute u x m).hi <=
+        (chartAddAreaLoopCompute u x n).hi := by
+  intro n m hnm
+  induction hnm with
+  | refl =>
+      have hordered := chartAddAreaLoopCompute_ordered hu0 hu1 hx0 hx1 n
+      constructor
+      · exact Rat.le_refl
+      · constructor
+        · grind [QInterval.width, Rat.sub_eq_add_neg]
+        · exact Rat.le_refl
+  | step hnk ih =>
+      rename_i k
+      have hstep := chartAddAreaLoopCompute_step_refines hu0 hu1 hx0 hx1 k
+      unfold QInterval.ContainsInterval at hstep
+      have hordered := chartAddAreaLoopCompute_ordered hu0 hu1 hx0 hx1 (k + 1)
+      constructor
+      · exact Rat.le_trans ih.1 hstep.1
+      · constructor
+        · grind [QInterval.width, Rat.sub_eq_add_neg]
+        · exact Rat.le_trans hstep.2 ih.2.2
 
 def arctanIntegralRectangleRaw (x : Rat) : RealRaw where
   compute := arctanIntegralRectangleCompute x
@@ -3837,6 +4668,103 @@ theorem arctanIntegralRectangleCompute_width_le_four_div_succ
     _ = 4 / (((n + 1 : Nat) : Rat)) := by
           exact four_mul_one_div_eq_div (n + 1)
 
+/-- Any rational interval algorithm with an explicit `C / (n + 1)` width
+bound is a shrinking raw-real representative.  Kept local because it is the
+rational convergence bridge used by the two midpoint rectangle schedules. -/
+private theorem widthsShrink_of_natOverSuccBound
+    {compute : Nat -> QInterval} {C : Nat}
+    (hbound : forall n,
+      (compute n).width <= (C : Rat) / (((n + 1 : Nat) : Rat))) :
+    RealRaw.WidthsShrinkToZero compute := by
+  intro eps
+  refine ⟨C * (eps.val.den + 1), ?_⟩
+  intro n hn
+  have hmain :
+      (C : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (C : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+    have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega :
+        C * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hABpos
+  exact Rat.le_trans (hbound n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
+private theorem twoFiveSix_mul_one_div_eq_div (N : Nat) :
+    256 * (1 / (N : Rat)) = 256 / (N : Rat) := by
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
+
+/-- The transported schedule has an explicit `256 / (n+1)` width bound.
+The constant is intentionally coarse: it exposes exactly the factor-eight
+chart distortion, squared into the mesh, and the two rectangle endpoints. -/
+theorem chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (n : Nat) :
+    (chartAddAreaLoopCompute u x n).width <=
+      (256 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  have hmesh :
+      (chartAddAreaLoopCompute u x n).width <=
+        128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+    exact chartAddAreaLoop_integralSum_width_le hu0 huHalf hx0 hx1 himage n
+  calc
+    (chartAddAreaLoopCompute u x n).width
+        <= 128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := hmesh
+    _ <= 128 * (1 / (((2 ^ n : Nat) : Rat))) := by
+      exact Rat.mul_le_mul_of_nonneg_left
+        (square_div_two_pow_le_one_div_two_pow hx0 hx1 n)
+        (by native_decide : (0 : Rat) <= 128)
+    _ = 64 * (2 * (1 / (((2 ^ n : Nat) : Rat)))) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = 64 * (4 * (1 / (((2 ^ (n + 1) : Nat) : Rat)))) := by
+      rw [two_mul_one_div_two_pow_eq_four_mul_one_div_two_pow_succ n]
+    _ = 256 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= 256 * (1 / (((n + 1 : Nat) : Rat))) := by
+      have hone :
+          1 / (((2 ^ (n + 1) : Nat) : Rat)) <=
+            1 / (((n + 1 : Nat) : Rat)) :=
+        FTC.one_div_nat_antitone (Nat.succ_pos n)
+          (Nat.pow_pos (by omega : 0 < 2))
+          (succ_le_two_pow_succ n)
+      exact Rat.mul_le_mul_of_nonneg_left hone
+        (by native_decide : (0 : Rat) <= 256)
+    _ = 256 / (((n + 1 : Nat) : Rat)) := by
+      exact twoFiveSix_mul_one_div_eq_div (n + 1)
+
+theorem chartAddAreaLoopCompute_widthsShrink
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1) :
+    RealRaw.WidthsShrinkToZero (chartAddAreaLoopCompute u x) :=
+  widthsShrink_of_natOverSuccBound
+    (chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ
+      hu0 huHalf hx0 hx1 himage)
+
 theorem arctanIntegralRectangleCompute_widthsShrink
     {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
     RealRaw.WidthsShrinkToZero (arctanIntegralRectangleCompute x) := by
@@ -3920,6 +4848,121 @@ theorem arctanIntegralRectangleRaw_valid
   · constructor
     · exact arctanIntegralRectangleCompute_nested hx0
     · exact arctanIntegralRectangleCompute_widthsShrink hx0 hx1
+
+/-- The transported midpoint rectangle schedule is a valid raw real whenever
+the source and its chart image both remain in the unit interval. -/
+theorem chartAddAreaLoopRaw_valid
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1) :
+    (chartAddAreaLoopRaw u x).Valid := by
+  have hu1 : u < 1 := by
+    have hhalf : (1 : Rat) / 2 < 1 := by native_decide
+    grind
+  change RealRaw.ValidCompute (chartAddAreaLoopCompute u x)
+  constructor
+  · exact chartAddAreaLoopCompute_ordered hu0 hu1 hx0 hx1
+  · constructor
+    · exact chartAddAreaLoopCompute_nested hu0 hu1 hx0 hx1
+    · exact chartAddAreaLoopCompute_widthsShrink hu0 huHalf hx0 hx1 himage
+
+/-- At every common stage the source midpoint rectangle bracket is enclosed
+by its transported bracket.  Consequently the two valid raw constructions
+are equivalent; this is the construction-level substitution half of the
+arctangent addition argument. -/
+theorem arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanIntegralRectangleRaw x).Equiv (chartAddAreaLoopRaw u x) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanIntegralRectangleRaw x) (chartAddAreaLoopRaw u x) n n).2
+  change QInterval.Overlaps (arctanIntegralRectangleCompute x n)
+    (integralSumInterval
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals))
+  have hcontains := chartAddAreaLoop_integralSum_contains
+    hu0 hu1 hx0 hx1 n
+  have hordered := arctanIntegralRectangleCompute_ordered hx0 n
+  unfold QInterval.ContainsInterval at hcontains
+  unfold QInterval.width at hordered
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The transported bracket for `[u,T_u(x)]` overlaps the difference of the
+canonical midpoint brackets for `[0,T_u(x)]` and `[0,u]`.
+
+This is a purely finite statement: append the `[0,u]` source partition to the
+charted target partition, and compare the resulting two covers of
+`[0,T_u(x)]`. -/
+theorem chartAddAreaLoopCompute_overlaps_rectangleSub
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (n : Nat) :
+    QInterval.Overlaps (chartAddAreaLoopCompute u x n)
+      (QInterval.subInterval
+        (arctanIntegralRectangleCompute
+          (RationalCircle.Trigonometry.chartAddParameter u x) n)
+        (arctanIntegralRectangleCompute u n)) := by
+  have hu1 : u < 1 := by
+    have hhalf : (1 : Rat) / 2 < 1 := by native_decide
+    grind
+  have huUnit : u <= 1 := by
+    exact Rat.le_trans huHalf (by native_decide : (1 : Rat) / 2 <= 1)
+  let v : Rat := RationalCircle.Trigonometry.chartAddParameter u x
+  let A : List (Rat × Rat) := (arctanAreaLoopState u n).intervals
+  let B : List (Rat × Rat) := (arctanAreaLoopState v n).intervals
+  let C : List (Rat × Rat) :=
+    chartAddIntervals u (arctanAreaLoopState x n).intervals
+  have hcoverC : CoversInterval u v C := by
+    dsimp [v, C]
+    simpa only [RationalCircle.Trigonometry.chartAddParameter_zero_right] using
+      (chartAddAreaLoop_covers hu0 hu1 hx0 hx1 n)
+  have huv : u <= v := CoversInterval.start_le_end hcoverC
+  have hv0 : 0 <= v := Rat.le_trans hu0 huv
+  have hcoverA : CoversInterval 0 u A := by
+    dsimp [A]
+    exact arctanAreaLoopState_intervals_covers hu0 n
+  have hcoverB : CoversInterval 0 v B := by
+    dsimp [B]
+    exact arctanAreaLoopState_intervals_covers hv0 n
+  have hcoverAppend : CoversInterval 0 v (A ++ C) :=
+    CoversInterval.append hcoverA hcoverC
+  have hlower :
+      integralLowerSum (A ++ C) <= integralUpperSum B :=
+    integralLowerSum_le_integralUpperSum_of_covers
+      (a := 0) (b := v) (by native_decide) (A ++ C) B
+      hcoverAppend hcoverB
+  have hupper :
+      integralLowerSum B <= integralUpperSum (A ++ C) :=
+    integralLowerSum_le_integralUpperSum_of_covers
+      (a := 0) (b := v) (by native_decide) B (A ++ C)
+      hcoverB hcoverAppend
+  rw [integralLowerSum_append] at hlower
+  rw [integralUpperSum_append] at hupper
+  change QInterval.Overlaps (integralSumInterval C)
+    (QInterval.subInterval (integralSumInterval B) (integralSumInterval A))
+  unfold QInterval.Overlaps QInterval.subInterval integralSumInterval
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The finite overlap above is promoted to a raw equivalence between the
+transported interval construction and the difference of canonical midpoint
+rectangle constructions. -/
+theorem chartAddAreaLoopRaw_equiv_rectangleSub
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (chartAddAreaLoopRaw u x).Equiv
+      (arctanIntegralRectangleRaw
+        (RationalCircle.Trigonometry.chartAddParameter u x) -
+        arctanIntegralRectangleRaw u) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (chartAddAreaLoopRaw u x)
+    (arctanIntegralRectangleRaw
+      (RationalCircle.Trigonometry.chartAddParameter u x) -
+      arctanIntegralRectangleRaw u) n n).2
+  exact chartAddAreaLoopCompute_overlaps_rectangleSub hu0 huHalf hx0 hx1 n
 
 theorem arctanIntegralRectangleComputeAtOne_width_le_four_div_succ
     (n : Nat) :
@@ -4221,6 +5264,100 @@ theorem arctanIntegralRectangleRaw_equiv_arctanGeom
     rw [arctanGeom_nonneg_compute_eq hzero hx n]
     exact arctanAreaLoop_integralSum_overlaps_positiveLoop hx n
 
+/-- Bounded rational tangent addition for the geometric arctangent.
+
+The proof is wholly at the raw-interval level.  It transports the midpoint
+rectangle construction across the chart, identifies the transported bracket
+with the difference of the two canonical endpoint brackets by finite covers,
+and then uses the already verified rectangle--geometric comparisons. -/
+theorem arctanGeom_chartAdd_add_of_half
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1) :
+    (arctanGeom u + arctanGeom x).Equiv
+      (arctanGeom (RationalCircle.Trigonometry.chartAddParameter u x)) := by
+  have hu1 : u < 1 := by
+    have hhalf : (1 : Rat) / 2 < 1 := by native_decide
+    grind
+  have huUnit : u <= 1 :=
+    Rat.le_trans huHalf (by native_decide : (1 : Rat) / 2 <= 1)
+  let v : Rat := RationalCircle.Trigonometry.chartAddParameter u x
+  have hcover : CoversInterval u v
+      (chartAddIntervals u (arctanAreaLoopState x 0).intervals) := by
+    dsimp [v]
+    simpa only [RationalCircle.Trigonometry.chartAddParameter_zero_right] using
+      (chartAddAreaLoop_covers hu0 hu1 hx0 hx1 0)
+  have huv : u <= v := CoversInterval.start_le_end hcover
+  have hv0 : 0 <= v := Rat.le_trans hu0 huv
+  have hgeomU : (arctanGeom u).Valid :=
+    arctanGeom_valid_on_unit hu0 huUnit
+  have hgeomX : (arctanGeom x).Valid :=
+    arctanGeom_valid_on_unit hx0 hx1
+  have hgeomV : (arctanGeom v).Valid := by
+    dsimp [v]
+    exact arctanGeom_valid_on_unit hv0 himage
+  have hrectU : (arctanIntegralRectangleRaw u).Valid :=
+    arctanIntegralRectangleRaw_valid hu0 huUnit
+  have hrectX : (arctanIntegralRectangleRaw x).Valid :=
+    arctanIntegralRectangleRaw_valid hx0 hx1
+  have hrectV : (arctanIntegralRectangleRaw v).Valid := by
+    dsimp [v]
+    exact arctanIntegralRectangleRaw_valid hv0 himage
+  have hchart : (chartAddAreaLoopRaw u x).Valid :=
+    chartAddAreaLoopRaw_valid hu0 huHalf hx0 hx1 himage
+  have hrectSub :
+      (arctanIntegralRectangleRaw v - arctanIntegralRectangleRaw u).Valid :=
+    RealRaw.sub_valid hrectV hrectU
+  have hgeomSub : (arctanGeom v - arctanGeom u).Valid :=
+    RealRaw.sub_valid hgeomV hgeomU
+  have hrectXChart :
+      (arctanIntegralRectangleRaw x).Equiv (chartAddAreaLoopRaw u x) :=
+    arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw hu0 hu1 hx0 hx1
+  have hchartRectSub :
+      (chartAddAreaLoopRaw u x).Equiv
+        (arctanIntegralRectangleRaw v - arctanIntegralRectangleRaw u) := by
+    dsimp [v]
+    exact chartAddAreaLoopRaw_equiv_rectangleSub hu0 huHalf hx0 hx1
+  have hrectSubGeomSub :
+      (arctanIntegralRectangleRaw v - arctanIntegralRectangleRaw u).Equiv
+        (arctanGeom v - arctanGeom u) :=
+    RealRaw.sub_equiv hrectV hgeomV hrectU hgeomU
+      (arctanIntegralRectangleRaw_equiv_arctanGeom hv0)
+      (arctanIntegralRectangleRaw_equiv_arctanGeom hu0)
+  have hrectXSub :
+      (arctanIntegralRectangleRaw x).Equiv
+        (arctanIntegralRectangleRaw v - arctanIntegralRectangleRaw u) :=
+    RealRaw.equiv_trans hrectX hchart hrectSub hrectXChart hchartRectSub
+  have hgeomXRectSub :
+      (arctanGeom x).Equiv
+        (arctanIntegralRectangleRaw v - arctanIntegralRectangleRaw u) :=
+    RealRaw.equiv_trans hgeomX hrectX hrectSub
+      (RealRaw.equiv_symm (arctanIntegralRectangleRaw_equiv_arctanGeom hx0))
+      hrectXSub
+  have hgeomXSub :
+      (arctanGeom x).Equiv (arctanGeom v - arctanGeom u) :=
+    RealRaw.equiv_trans hgeomX hrectSub hgeomSub
+      hgeomXRectSub hrectSubGeomSub
+  have hleft : (arctanGeom u + arctanGeom x).Valid :=
+    RealRaw.add_valid hgeomU hgeomX
+  have hmiddle : (arctanGeom u + (arctanGeom v - arctanGeom u)).Valid :=
+    RealRaw.add_valid hgeomU hgeomSub
+  have hright : ((arctanGeom v - arctanGeom u) + arctanGeom u).Valid :=
+    RealRaw.add_valid hgeomSub hgeomU
+  have hreplace :
+      (arctanGeom u + arctanGeom x).Equiv
+        (arctanGeom u + (arctanGeom v - arctanGeom u)) :=
+    RealRaw.add_equiv hgeomU hgeomU hgeomX hgeomSub
+      (RealRaw.equiv_refl (arctanGeom u) hgeomU) hgeomXSub
+  have hcomm :
+      (arctanGeom u + (arctanGeom v - arctanGeom u)).Equiv
+        ((arctanGeom v - arctanGeom u) + arctanGeom u) :=
+    RealRaw.add_comm_equiv (arctanGeom u) (arctanGeom v - arctanGeom u)
+      hgeomU hgeomSub
+  exact RealRaw.equiv_trans hleft hmiddle hgeomV hreplace
+    (RealRaw.equiv_trans hmiddle hright hgeomV hcomm
+      (RealRaw.sub_add_cancel_equiv hgeomV hgeomU))
+
 theorem arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one :
     arctanIntegralRectangleRawAtOne.Equiv (arctanGeom 1) := by
   intro n
@@ -4297,6 +5434,409 @@ theorem piCircleAreaState_eq_arctanAreaLoopState_one
   unfold piCircleAreaState arctanAreaLoopState
   rw [piCircleAreaInitial_eq_arctanAreaLoopInitial_one]
   exact iterateAreaBounds_toPiAreaLoopState n (arctanAreaLoopInitial 1)
+
+/-!
+The public area loop and the polygon-stage computation use the same dyadic
+parameter mesh.  The following finite bridge identifies their endpoints
+exactly: chord and tangent polygon cross sums are the same geometric cell sums
+carried by the update loop.  This is all rational finite algebra, not a limit
+or a completeness argument.
+-/
+
+private theorem geometricLower_eq_cross_half (u v : Rat) :
+    geometricLowerStep u v =
+      RationalCircle.Stage.cross
+        (RationalCircle.Stage.point u) (RationalCircle.Stage.point v) / 2 := by
+  rw [RationalCircle.Stage.point_cross_formula]
+  unfold geometricLowerStep
+  rw [Rat.div_def, Rat.div_def]
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem repeated_ratio (d h D : Rat)
+    (hd : d ≠ 0) (hD : D ≠ 0) :
+    (2 * d * d / D) / (2 * d * h / D) = d / h := by
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  rw [Rat.inv_mul_rev]
+  rw [Rat.inv_mul_rev]
+  rw [Rat.inv_mul_rev]
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private def innerCrossSum (S : RationalCircle.Stage) (k : Nat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 =>
+      RationalCircle.Stage.cross (S.samplePoint k) (S.samplePoint (k + 1)) +
+        innerCrossSum S (k + 1) count
+
+private theorem innerCrossSum_nonneg (S : RationalCircle.Stage)
+    (hS : 0 < S.subdivisions) (k count : Nat) :
+    0 <= innerCrossSum S k count := by
+  induction count generalizing k with
+  | zero => simp [innerCrossSum]
+  | succ count ih =>
+      simp only [innerCrossSum]
+      exact Rat.add_nonneg
+        (Rat.le_of_lt (RationalCircle.Stage.samplePoint_cross_pos_adjacent S hS k))
+        (ih (k + 1))
+
+private theorem inner_boundary_aux (S : RationalCircle.Stage)
+    (k count : Nat) :
+    piCircleAreaPolygon.twiceSignedAreaAux RationalCircle.Stage.cross
+      RationalCircle.Stage.origin (S.samplePoint k)
+      (S.innerBoundaryFrom (k + 1) count) =
+      innerCrossSum S k count := by
+  induction count generalizing k with
+  | zero =>
+      change RationalCircle.Stage.cross (S.samplePoint k)
+        RationalCircle.Stage.origin = 0
+      exact RationalCircle.Stage.cross_origin_right _
+  | succ count ih =>
+      change RationalCircle.Stage.cross (S.samplePoint k) (S.samplePoint (k + 1)) +
+          piCircleAreaPolygon.twiceSignedAreaAux RationalCircle.Stage.cross
+            RationalCircle.Stage.origin (S.samplePoint (k + 1))
+            (S.innerBoundaryFrom (k + 1 + 1) count) =
+          RationalCircle.Stage.cross (S.samplePoint k) (S.samplePoint (k + 1)) +
+            innerCrossSum S (k + 1) count
+      rw [ih (k + 1)]
+
+private theorem inner_twiceSignedArea (S : RationalCircle.Stage) :
+    RationalCircle.Stage.twiceSignedArea
+      (RationalCircle.Stage.origin :: S.innerBoundary) =
+      innerCrossSum S 0 S.subdivisions := by
+  change piCircleAreaPolygon.twiceSignedAreaAux RationalCircle.Stage.cross
+    RationalCircle.Stage.origin RationalCircle.Stage.origin
+    (S.samplePoint 0 :: S.innerBoundaryFrom 1 S.subdivisions) = _
+  simp only [piCircleAreaPolygon.twiceSignedAreaAux]
+  rw [RationalCircle.Stage.cross_origin_left]
+  rw [Rat.zero_add]
+  simpa [innerCrossSum] using inner_boundary_aux S 0 S.subdivisions
+
+private theorem innerQuarterArea_eq_innerCrossSum_half
+    (S : RationalCircle.Stage) (hS : 0 < S.subdivisions) :
+    S.innerQuarterArea = innerCrossSum S 0 S.subdivisions / 2 := by
+  unfold RationalCircle.Stage.innerQuarterArea
+  rw [RationalCircle.Stage.polygonArea]
+  rw [inner_twiceSignedArea S]
+  unfold qabs
+  by_cases hneg : innerCrossSum S 0 S.subdivisions / 2 < 0
+  · have hnonneg : 0 <= innerCrossSum S 0 S.subdivisions / 2 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (innerCrossSum_nonneg S hS 0 S.subdivisions)
+        (by native_decide)
+    grind
+  · simp [hneg]
+
+private def outerCrossSum (S : RationalCircle.Stage) (k : Nat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 =>
+      RationalCircle.Stage.cross (S.samplePoint k) (S.tangentPoint k) +
+        RationalCircle.Stage.cross (S.tangentPoint k) (S.samplePoint (k + 1)) +
+          outerCrossSum S (k + 1) count
+
+private theorem outerCrossSum_nonneg (S : RationalCircle.Stage)
+    (hS : 0 < S.subdivisions) (k count : Nat) :
+    0 <= outerCrossSum S k count := by
+  induction count generalizing k with
+  | zero => simp [outerCrossSum]
+  | succ count ih =>
+      simp only [outerCrossSum]
+      exact Rat.add_nonneg
+        (Rat.add_nonneg
+          (RationalCircle.Stage.adjacentEntryTangentCross_nonneg S hS k)
+          (RationalCircle.Stage.adjacentExitTangentCross_nonneg S hS k)
+        ) (ih (k + 1))
+
+private theorem outer_boundary_aux (S : RationalCircle.Stage)
+    (k count : Nat) :
+    piCircleAreaPolygon.twiceSignedAreaAux RationalCircle.Stage.cross
+      RationalCircle.Stage.origin (S.samplePoint k)
+      (S.outerBoundaryFrom k count) =
+      outerCrossSum S k count := by
+  induction count generalizing k with
+  | zero =>
+      change RationalCircle.Stage.cross (S.samplePoint k)
+        RationalCircle.Stage.origin = 0
+      exact RationalCircle.Stage.cross_origin_right _
+  | succ count ih =>
+      simp only [RationalCircle.Stage.outerBoundaryFrom,
+        piCircleAreaPolygon.outerBoundaryFrom, outerCrossSum,
+        piCircleAreaPolygon.twiceSignedAreaAux]
+      change RationalCircle.Stage.cross (S.samplePoint k) (S.tangentPoint k) +
+          (RationalCircle.Stage.cross (S.tangentPoint k) (S.samplePoint (k + 1)) +
+            piCircleAreaPolygon.twiceSignedAreaAux RationalCircle.Stage.cross
+              RationalCircle.Stage.origin (S.samplePoint (k + 1))
+              (S.outerBoundaryFrom (k + 1) count)) =
+          RationalCircle.Stage.cross (S.samplePoint k) (S.tangentPoint k) +
+            RationalCircle.Stage.cross (S.tangentPoint k) (S.samplePoint (k + 1)) +
+              outerCrossSum S (k + 1) count
+      rw [ih (k + 1)]
+      grind [Rat.add_assoc]
+
+private theorem outer_twiceSignedArea (S : RationalCircle.Stage) :
+    RationalCircle.Stage.twiceSignedArea
+      (RationalCircle.Stage.origin :: S.outerBoundary) =
+      outerCrossSum S 0 S.subdivisions := by
+  change piCircleAreaPolygon.twiceSignedAreaAux RationalCircle.Stage.cross
+    RationalCircle.Stage.origin RationalCircle.Stage.origin
+    (S.samplePoint 0 :: S.outerBoundaryFrom 0 S.subdivisions) = _
+  simp only [piCircleAreaPolygon.twiceSignedAreaAux]
+  rw [RationalCircle.Stage.cross_origin_left, Rat.zero_add]
+  exact outer_boundary_aux S 0 S.subdivisions
+
+private theorem outerQuarterArea_eq_outerCrossSum_half
+    (S : RationalCircle.Stage) (hS : 0 < S.subdivisions) :
+    S.outerQuarterArea = outerCrossSum S 0 S.subdivisions / 2 := by
+  unfold RationalCircle.Stage.outerQuarterArea
+  rw [RationalCircle.Stage.polygonArea]
+  rw [outer_twiceSignedArea S]
+  unfold qabs
+  by_cases hneg : outerCrossSum S 0 S.subdivisions / 2 < 0
+  · have hnonneg : 0 <= outerCrossSum S 0 S.subdivisions / 2 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (outerCrossSum_nonneg S hS 0 S.subdivisions)
+        (by native_decide)
+    grind
+  · simp [hneg]
+
+private theorem geometricUpper_eq_tangentCross_half (u v : Rat) :
+    geometricUpperStep u v =
+      (RationalCircle.Stage.cross
+        (RationalCircle.Stage.point u)
+        (RationalCircle.Stage.tangentIntersection
+          (RationalCircle.Stage.point u) (RationalCircle.Stage.point v)) +
+        RationalCircle.Stage.cross
+          (RationalCircle.Stage.tangentIntersection
+            (RationalCircle.Stage.point u) (RationalCircle.Stage.point v))
+          (RationalCircle.Stage.point v)) / 2 := by
+  rw [RationalCircle.Stage.cross_left_tangentIntersection
+    (RationalCircle.Stage.point_normSq_unit u)]
+  rw [RationalCircle.Stage.cross_tangentIntersection_right
+    (RationalCircle.Stage.point_normSq_unit v)]
+  rw [RationalCircle.Stage.one_sub_point_dot_formula,
+    RationalCircle.Stage.point_cross_formula]
+  unfold geometricUpperStep
+  by_cases hdiff : v - u = 0
+  · have huv : v = u := by grind [Rat.sub_eq_add_neg]
+    subst v
+    simp [Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  · by_cases huv : 1 + u * v = 0
+    · simp [huv, Rat.div_def]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    · have hD : (1 + u * u) * (1 + v * v) ≠ 0 := by
+        exact Rat.ne_of_gt (Rat.mul_pos
+          (RationalCircle.Stage.one_add_square_pos u)
+          (RationalCircle.Stage.one_add_square_pos v))
+      have hratio := repeated_ratio (v - u) (1 + u * v)
+        ((1 + u * u) * (1 + v * v)) hdiff hD
+      rw [hratio]
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private def stageIntervals (S : RationalCircle.Stage) (k : Nat) : Nat ->
+    List (Rat × Rat)
+  | 0 => []
+  | count + 1 =>
+      (S.parameter k, S.parameter (k + 1)) :: stageIntervals S (k + 1) count
+
+private theorem innerCrossSum_half_eq_geometricLowerSum
+    (S : RationalCircle.Stage) (k count : Nat) :
+    innerCrossSum S k count / 2 =
+      geometricLowerSum (stageIntervals S k count) := by
+  induction count generalizing k with
+  | zero =>
+      simp [innerCrossSum, stageIntervals,
+        geometricLowerSum, Rat.div_def]
+  | succ count ih =>
+      rw [show innerCrossSum S k (count + 1) =
+        RationalCircle.Stage.cross (S.samplePoint k) (S.samplePoint (k + 1)) +
+          innerCrossSum S (k + 1) count by rfl]
+      rw [show stageIntervals S k (count + 1) =
+        (S.parameter k, S.parameter (k + 1)) ::
+          stageIntervals S (k + 1) count by rfl]
+      rw [geometricLowerSum]
+      rw [← ih (k + 1)]
+      calc
+        (RationalCircle.Stage.cross (S.samplePoint k) (S.samplePoint (k + 1)) +
+            innerCrossSum S (k + 1) count) / 2 =
+            RationalCircle.Stage.cross (S.samplePoint k) (S.samplePoint (k + 1)) / 2 +
+              innerCrossSum S (k + 1) count / 2 := by
+              rw [Rat.div_def]
+              grind [Rat.add_mul]
+        _ = geometricLowerStep
+              (S.parameter k) (S.parameter (k + 1)) +
+              innerCrossSum S (k + 1) count / 2 := by
+              change RationalCircle.Stage.cross
+                    (RationalCircle.Stage.point (S.parameter k))
+                    (RationalCircle.Stage.point (S.parameter (k + 1))) / 2 +
+                  innerCrossSum S (k + 1) count / 2 = _
+              rw [← geometricLower_eq_cross_half]
+
+private theorem outerCrossSum_half_eq_geometricUpperSum
+    (S : RationalCircle.Stage) (k count : Nat) :
+    outerCrossSum S k count / 2 =
+      geometricUpperSum (stageIntervals S k count) := by
+  induction count generalizing k with
+  | zero =>
+      simp [outerCrossSum, stageIntervals,
+        geometricUpperSum, Rat.div_def]
+  | succ count ih =>
+      rw [show outerCrossSum S k (count + 1) =
+        RationalCircle.Stage.cross (S.samplePoint k) (S.tangentPoint k) +
+          RationalCircle.Stage.cross (S.tangentPoint k) (S.samplePoint (k + 1)) +
+            outerCrossSum S (k + 1) count by rfl]
+      rw [show stageIntervals S k (count + 1) =
+        (S.parameter k, S.parameter (k + 1)) ::
+          stageIntervals S (k + 1) count by rfl]
+      rw [geometricUpperSum]
+      rw [← ih (k + 1)]
+      calc
+        (RationalCircle.Stage.cross (S.samplePoint k) (S.tangentPoint k) +
+            RationalCircle.Stage.cross (S.tangentPoint k) (S.samplePoint (k + 1)) +
+              outerCrossSum S (k + 1) count) / 2 =
+            (RationalCircle.Stage.cross (S.samplePoint k) (S.tangentPoint k) +
+              RationalCircle.Stage.cross (S.tangentPoint k) (S.samplePoint (k + 1))) / 2 +
+              outerCrossSum S (k + 1) count / 2 := by
+              rw [Rat.div_def]
+              grind [Rat.add_mul]
+        _ = geometricUpperStep
+              (S.parameter k) (S.parameter (k + 1)) +
+              outerCrossSum S (k + 1) count / 2 := by
+              change (RationalCircle.Stage.cross
+                    (RationalCircle.Stage.point (S.parameter k))
+                    (RationalCircle.Stage.tangentIntersection
+                      (RationalCircle.Stage.point (S.parameter k))
+                      (RationalCircle.Stage.point (S.parameter (k + 1))) ) +
+                  RationalCircle.Stage.cross
+                    (RationalCircle.Stage.tangentIntersection
+                      (RationalCircle.Stage.point (S.parameter k))
+                      (RationalCircle.Stage.point (S.parameter (k + 1))))
+                    (RationalCircle.Stage.point (S.parameter (k + 1)))) / 2 +
+                  outerCrossSum S (k + 1) count / 2 = _
+              rw [← geometricUpper_eq_tangentCross_half]
+
+private def midpointRefineIntervals : List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (p, (p + r) / 2) :: ((p + r) / 2, r) :: midpointRefineIntervals rest
+
+private theorem areaLoop_refineAux_intervals_eq_midpoint
+    (lo hi : Rat) (intervals : List (Rat × Rat)) :
+    (AreaLoopState.refineAux lo hi intervals).intervals =
+      midpointRefineIntervals intervals := by
+  induction intervals generalizing lo hi with
+  | nil => rfl
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      simp [AreaLoopState.refineAux, midpointRefineIntervals, ih]
+
+private theorem refineAreaLoopState_intervals_eq_midpoint
+    (state : AreaLoopState) :
+    (refineAreaLoopState state).intervals =
+      midpointRefineIntervals state.intervals := by
+  cases state with
+  | mk lo hi intervals =>
+      exact areaLoop_refineAux_intervals_eq_midpoint lo hi intervals
+
+private theorem parameter_insertedIndex_of_refinement
+    {coarse fine : RationalCircle.Stage}
+    (href : RationalCircle.Stage.RefinesByDoubling coarse fine) (k : Nat) :
+    fine.parameter (RationalCircle.Stage.insertedIndex k) =
+      (coarse.parameter k + coarse.parameter (k + 1)) / 2 := by
+  unfold RationalCircle.Stage.parameter RationalCircle.Stage.insertedIndex
+    RationalCircle.Stage.RefinesByDoubling at *
+  rw [href]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.inv_mul_rev, Rat.add_mul, Rat.mul_add, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem stageIntervals_refineByDoubling
+    {coarse fine : RationalCircle.Stage}
+    (href : RationalCircle.Stage.RefinesByDoubling coarse fine)
+    (k count : Nat) :
+    stageIntervals fine (RationalCircle.Stage.refineIndex k) (2 * count) =
+      midpointRefineIntervals (stageIntervals coarse k count) := by
+  induction count generalizing k with
+  | zero => rfl
+  | succ count ih =>
+      have heven0 := RationalCircle.Stage.parameter_refineIndex_of_refinement
+        href k
+      have hodd := parameter_insertedIndex_of_refinement href k
+      have heven1 := RationalCircle.Stage.parameter_refineIndex_of_refinement
+        href (k + 1)
+      simp only [stageIntervals, midpointRefineIntervals]
+      change
+        (fine.parameter (2 * k), fine.parameter (2 * k + 1)) ::
+            (fine.parameter (2 * k + 1), fine.parameter (2 * k + 1 + 1)) ::
+              stageIntervals fine (2 * k + 1 + 1) (2 * count) =
+          (coarse.parameter k, (coarse.parameter k + coarse.parameter (k + 1)) / 2) ::
+            ((coarse.parameter k + coarse.parameter (k + 1)) / 2,
+              coarse.parameter (k + 1)) ::
+              midpointRefineIntervals (stageIntervals coarse (k + 1) count)
+      simp only [RationalCircle.Stage.refineIndex,
+        RationalCircle.Stage.insertedIndex] at heven0 heven1 hodd
+      rw [heven0, hodd]
+      have hindex : 2 * k + 1 + 1 = 2 * (k + 1) := by omega
+      rw [hindex, heven1]
+      have hnext := ih (k + 1)
+      simpa [RationalCircle.Stage.refineIndex, Nat.mul_add, Nat.add_assoc,
+        Nat.add_comm, Nat.mul_comm] using hnext
+
+private theorem arctanAreaLoopIntervals_one_eq_stageIntervals (n : Nat) :
+    (arctanAreaLoopState (1 : Rat) n).intervals =
+      stageIntervals (RationalCircle.dyadicStage n) 0
+        (RationalCircle.dyadicStage n).subdivisions := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [arctanAreaLoopState_succ,
+        refineAreaLoopState_intervals_eq_midpoint, ih]
+      have href := RationalCircle.dyadicStage_refinesByDoubling n
+      have hsub : (RationalCircle.dyadicStage (n + 1)).subdivisions =
+          2 * (RationalCircle.dyadicStage n).subdivisions := href
+      rw [hsub]
+      simpa [RationalCircle.Stage.refineIndex] using
+        (stageIntervals_refineByDoubling href 0
+          (RationalCircle.dyadicStage n).subdivisions).symm
+
+private theorem stage_innerQuarterArea_eq_geometricLowerSum (n : Nat) :
+    (RationalCircle.dyadicStage n).innerQuarterArea =
+      geometricLowerSum
+        (arctanAreaLoopState (1 : Rat) n).intervals := by
+  rw [innerQuarterArea_eq_innerCrossSum_half
+    (RationalCircle.dyadicStage n) (RationalCircle.dyadicStage_positive n)]
+  rw [innerCrossSum_half_eq_geometricLowerSum]
+  rw [← arctanAreaLoopIntervals_one_eq_stageIntervals n]
+
+private theorem stage_outerQuarterArea_eq_geometricUpperSum (n : Nat) :
+    (RationalCircle.dyadicStage n).outerQuarterArea =
+      geometricUpperSum
+        (arctanAreaLoopState (1 : Rat) n).intervals := by
+  rw [outerQuarterArea_eq_outerCrossSum_half
+    (RationalCircle.dyadicStage n) (RationalCircle.dyadicStage_positive n)]
+  rw [outerCrossSum_half_eq_geometricUpperSum]
+  rw [← arctanAreaLoopIntervals_one_eq_stageIntervals n]
+
+/-- The public area update loop and the polygonal area computation have exactly
+the same rational interval at every dyadic stage. -/
+theorem piCircleArea_compute_eq_piCircleAreaPolygon_compute (n : Nat) :
+    piCircleArea.compute n = piCircleAreaPolygon.compute n := by
+  rw [piCircleArea_compute_eq,
+    RationalCircle.piCircleAreaPolygon_compute_eq_stage]
+  change piCircleAreaCompute n = RationalCircle.areaIntervalAt n
+  unfold piCircleAreaCompute RationalCircle.areaIntervalAt
+    RationalCircle.Stage.areaInterval
+  dsimp
+  rw [piCircleAreaState_eq_arctanAreaLoopState_one]
+  simp only [toPiAreaLoopState]
+  rw [arctanAreaLoopState_hi_eq_geometricUpperSum
+    (x := (1 : Rat)) (by native_decide) n]
+  simp [arctanAreaLoopState_lo_eq_geometricLowerSum,
+    stage_innerQuarterArea_eq_geometricLowerSum,
+    stage_outerQuarterArea_eq_geometricUpperSum]
 
 /-- The comparison target saying that the loop definition of pi agrees stage by
 stage with four times the geometric arctangent at `1`. -/
