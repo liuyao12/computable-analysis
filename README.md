@@ -71,7 +71,8 @@ Lean hooks:
 - Two-three Farey integral:
   `IntegralIdentities.piTwoThreeIntegralFarey`,
   `IntegralIdentities.piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ`,
-  `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea`.
+  `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea`, as an instance of
+  `PiProofs.piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd`.
   This is separately counted because `atan(1/2) + atan(1/3) = atan(1)` is a
   distinct rational pi formula, not merely another unit-mesh evaluator.
 - Three-term Farey integral:

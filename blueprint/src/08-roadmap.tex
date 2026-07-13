@@ -179,6 +179,7 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey}
 \lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_valid}
 \lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd}
 \lean{ComputableAnalysis.PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piThreeTermIntegralFarey_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne}
@@ -658,6 +659,10 @@ rational branch identity \(\operatorname{atan}(1/2)+\operatorname{atan}(1/3)
 =\operatorname{atan}(1)\), and the Farey computation has the explicit bound
 \(48/(n+1)\).  The theorem-facing result is
 \code{PiProofs.piTwoThreeIntegralFarey\_equiv\_piCircleArea}.
+The reusable two-term formula theorem
+\code{PiProofs.piFareyTwoTermFormula\_equiv\_piCircleArea\_of\_chartAdd}
+now supplies the same conclusion for every bounded rational pair satisfying
+the displayed chart equation.
 The same primitive also supports the separately counted three-term formula
 \[
   \pi=4\left(\int_0^{1/2}\frac{dt}{1+t^2}+

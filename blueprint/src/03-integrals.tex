@@ -829,6 +829,7 @@ reciprocal-quartic route.
 \lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey}\par
 \lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_valid}\par
 \lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ}\par
+\lean{ComputableAnalysis.PiProofs.piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd}\par
 \lean{ComputableAnalysis.PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea}\par}
 \leanok
 The shared Farey construction also completes the distinct rational formula
@@ -845,6 +846,10 @@ geometric arctangents.  The finite rational chart calculation
 \(T_{1/2}(1/3)=1\) proves the required branch identity.  The public width is
 at most \(48/(n+1)\), so this supplies a direct certified precision budget as
 well as exercising the projective integral API away from the unit endpoint.
+More generally,
+\code{piFareyTwoTermFormula\_equiv\_piCircleArea\_of\_chartAdd} proves this
+conclusion for any bounded rational pair whose chart sum is \(1\); the
+two-three formula is its first concrete instance.
 \end{theorem}
 
 \newpage

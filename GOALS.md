@@ -403,7 +403,10 @@ students actually compute.
   `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea` derives the result
   from the already verified finite chart calculation `1/2 ⊕ 1/3 = 1`.
   This counts as a distinct formula-level computation, not as an additional
-  row for merely reusing the Farey mesh.
+  row for merely reusing the Farey mesh.  The proof is an instance of the
+  reusable theorem
+  `PiProofs.piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd`, which
+  covers every bounded rational pair with chart sum one.
 - The shared Farey primitive also completes the three-term rational formula
   `pi = 4 * (atan(1/2) + atan(1/5) + atan(1/8))`.
   `IntegralIdentities.piThreeTermIntegralFarey` has width at most

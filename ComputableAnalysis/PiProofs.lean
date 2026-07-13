@@ -13463,75 +13463,92 @@ theorem piMachinIntegralRectangle_equiv_piCircleArea :
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- Every bounded two-term rational chart identity ending at the unit slope
+gives a certified Farey-integral pi formula.  This is the reusable bridge
+behind the concrete rational arctangent formulae below. -/
+theorem piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd
+    {u v : Rat}
+    (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hv0 : 0 <= v) (hv1 : v <= 1)
+    (hparam :
+      RationalCircle.Trigonometry.chartAddParameter u v = (1 : Rat)) :
+    ((4 : Nat) *
+      (IntegralIdentities.arctanIntegralFareyFor u +
+        IntegralIdentities.arctanIntegralFareyFor v) : RealRaw).Equiv
+        piCircleArea := by
+  have hu1 : u <= 1 :=
+    Rat.le_trans huHalf (by native_decide : (1 : Rat) / 2 <= 1)
+  have hfareyU : (IntegralIdentities.arctanIntegralFareyFor u).Valid :=
+    IntegralIdentities.arctanIntegralFareyFor_valid u
+  have hfareyV : (IntegralIdentities.arctanIntegralFareyFor v).Valid :=
+    IntegralIdentities.arctanIntegralFareyFor_valid v
+  have hgeomU : (ArctanGeometry.arctanGeom u).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hu0 hu1
+  have hgeomV : (ArctanGeometry.arctanGeom v).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hv0 hv1
+  have hgeom1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (by native_decide) (by native_decide)
+  have hfareySum :
+      (IntegralIdentities.arctanIntegralFareyFor u +
+        IntegralIdentities.arctanIntegralFareyFor v).Valid :=
+    RealRaw.add_valid hfareyU hfareyV
+  have hgeomSum :
+      (ArctanGeometry.arctanGeom u +
+        ArctanGeometry.arctanGeom v).Valid :=
+    RealRaw.add_valid hgeomU hgeomV
+  have hfareyToGeom :
+      (IntegralIdentities.arctanIntegralFareyFor u +
+        IntegralIdentities.arctanIntegralFareyFor v).Equiv
+          (ArctanGeometry.arctanGeom u +
+            ArctanGeometry.arctanGeom v) :=
+    RealRaw.add_equiv hfareyU hgeomU hfareyV hgeomV
+      (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom u hu0 hu1)
+      (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom v hv0 hv1)
+  have himage :
+      RationalCircle.Trigonometry.chartAddParameter u v <= (1 : Rat) := by
+    simp [hparam]
+  have hgeomAdd :
+      (ArctanGeometry.arctanGeom u +
+        ArctanGeometry.arctanGeom v).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat)) := by
+    have h := ArctanGeometry.arctanGeom_chartAdd_add_of_half
+      (u := u) (x := v) hu0 huHalf hv0 hv1 himage
+    rw [hparam] at h
+    exact h
+  have hfareyToOne :
+      (IntegralIdentities.arctanIntegralFareyFor u +
+        IntegralIdentities.arctanIntegralFareyFor v).Equiv
+          (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans hfareySum hgeomSum hgeom1 hfareyToGeom hgeomAdd
+  have hscaled :
+      ((4 : Nat) *
+        (IntegralIdentities.arctanIntegralFareyFor u +
+          IntegralIdentities.arctanIntegralFareyFor v) : RealRaw).Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
+    RealRaw.natScale_equiv 4 hfareyToOne
+  exact RealRaw.equiv_trans
+    (RealRaw.natScale_valid 4 hfareySum)
+    (RealRaw.natScale_valid 4 hgeom1)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled
+    four_arctanGeom_one_equiv_piCircleArea
+
 /-- The shared-Farey integral realization of
 `pi = 4 (atan(1/2) + atan(1/3))`.  Unlike the unit Farey evaluator, this is a
 distinct rational arctangent formula; its branch identity is discharged by the
 finite chart-transport proof for `1/2 ⊕ 1/3 = 1`. -/
 theorem piTwoThreeIntegralFarey_equiv_piCircleArea :
     IntegralIdentities.piTwoThreeIntegralFarey.Equiv piCircleArea := by
-  have hfarey2 :
-      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2)).Valid :=
-    IntegralIdentities.arctanIntegralFareyFor_valid ((1 : Rat) / 2)
-  have hfarey3 :
-      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Valid :=
-    IntegralIdentities.arctanIntegralFareyFor_valid ((1 : Rat) / 3)
-  have hgeom2 : (ArctanGeometry.arctanGeom ((1 : Rat) / 2)).Valid :=
-    ArctanGeometry.arctanGeom_valid_on_unit
+  have hparam :
+      RationalCircle.Trigonometry.chartAddParameter
+        ((1 : Rat) / 2) ((1 : Rat) / 3) = (1 : Rat) := by
+    native_decide
+  simpa [IntegralIdentities.piTwoThreeIntegralFarey] using
+    (piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd
+      (u := (1 : Rat) / 2) (v := (1 : Rat) / 3)
       (by native_decide) (by native_decide)
-  have hgeom3 : (ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Valid :=
-    ArctanGeometry.arctanGeom_valid_on_unit
-      (by native_decide) (by native_decide)
-  have hgeom1 : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
-    ArctanGeometry.arctanGeom_valid_on_unit
-      (by native_decide) (by native_decide)
-  have hfareySum :
-      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
-        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Valid :=
-    RealRaw.add_valid hfarey2 hfarey3
-  have hgeomSum :
-      (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
-        ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Valid :=
-    RealRaw.add_valid hgeom2 hgeom3
-  have hfareyToGeom :
-      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
-        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Equiv
-          (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
-            ArctanGeometry.arctanGeom ((1 : Rat) / 3)) :=
-    RealRaw.add_equiv hfarey2 hgeom2 hfarey3 hgeom3
-      (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
-        ((1 : Rat) / 2) (by native_decide) (by native_decide))
-      (IntegralIdentities.arctanIntegralFareyFor_equiv_arctanGeom
-        ((1 : Rat) / 3) (by native_decide) (by native_decide))
-  have hgeomAdd :
-      (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
-        ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Equiv
-          (ArctanGeometry.arctanGeom (1 : Rat)) := by
-    have h := ArctanGeometry.arctanGeom_chartAdd_add_of_half
-      (u := (1 : Rat) / 2) (x := (1 : Rat) / 3)
-      (by native_decide) (by native_decide)
-      (by native_decide) (by native_decide) (by native_decide)
-    have hparam :
-        RationalCircle.Trigonometry.chartAddParameter
-          ((1 : Rat) / 2) ((1 : Rat) / 3) = (1 : Rat) := by
-      native_decide
-    rw [hparam] at h
-    exact h
-  have hfareyToOne :
-      (IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 2) +
-        IntegralIdentities.arctanIntegralFareyFor ((1 : Rat) / 3)).Equiv
-          (ArctanGeometry.arctanGeom (1 : Rat)) :=
-    RealRaw.equiv_trans hfareySum hgeomSum hgeom1 hfareyToGeom hgeomAdd
-  have hscaled :
-      IntegralIdentities.piTwoThreeIntegralFarey.Equiv
-        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
-    simpa [IntegralIdentities.piTwoThreeIntegralFarey] using
-      RealRaw.natScale_equiv 4 hfareyToOne
-  exact RealRaw.equiv_trans
-    IntegralIdentities.piTwoThreeIntegralFarey_valid
-    (RealRaw.natScale_valid 4 hgeom1)
-    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
-    hscaled
-    four_arctanGeom_one_equiv_piCircleArea
+      (by native_decide) (by native_decide) hparam)
 
 /-- The shared-Farey integral realization of the three-term rational formula
 pi = 4 (atan(1/2) + atan(1/5) + atan(1/8)).
