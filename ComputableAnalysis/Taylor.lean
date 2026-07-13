@@ -605,6 +605,135 @@ theorem neg_pow_between_pow {u : Rat} (hu : 0 <= u) (m : Nat) :
         grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg,
           Rat.mul_assoc, Rat.mul_comm]
 
+private theorem neg_square_pow_eq_sign_mul_even_pow (r : Rat) (j : Nat) :
+    (- (r * r)) ^ j = (-1 : Rat) ^ j * r ^ (2 * j) := by
+  induction j with
+  | zero => simp
+  | succ j ih =>
+      rw [Rat.pow_succ, ih, Rat.pow_succ]
+      rw [show 2 * (j + 1) = 2 * j + 1 + 1 by omega]
+      rw [Rat.pow_succ, Rat.pow_succ]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem rat_add_le_add {a b c d : Rat}
+    (hab : a <= b) (hcd : c <= d) : a + c <= b + d := by
+  grind
+
+/-- The signed right-endpoint error of one arctangent-kernel monomial is
+bounded in magnitude by its unsigned monomial error. -/
+theorem signed_kernelTerm_rightRectangle_error_bound
+    {p r : Rat}
+    (hp0 : 0 <= p) (hp1 : p <= 1)
+    (hpr : p <= r) (hr1 : r <= 1)
+    (j : Nat) :
+    -((2 * (j : Rat)) * (r - p) * (r - p)) <=
+        (r - p) * (- (r * r)) ^ j - kernelTermIntegralBetween p r j /\
+      (r - p) * (- (r * r)) ^ j - kernelTermIntegralBetween p r j <=
+        (2 * (j : Rat)) * (r - p) * (r - p) := by
+  have hmono := monomialIntegralBetween_endpoint_error_le hp0 hp1 hpr hr1 (2 * j)
+  let D : Rat := (r - p) * r ^ (2 * j) -
+    (r ^ (2 * j + 1) - p ^ (2 * j + 1)) / (((2 * j + 1 : Nat) : Rat))
+  let E : Rat := (2 * (j : Rat)) * (r - p) * (r - p)
+  have hD0 : 0 <= D := by
+    dsimp [D]
+    exact hmono.1
+  have hDE : D <= E := by
+    dsimp [D, E]
+    simpa using hmono.2.1
+  have hsign := neg_pow_between_pow (u := (1 : Rat)) (by native_decide) j
+  have hsign' : -1 <= (-1 : Rat) ^ j /\ (-1 : Rat) ^ j <= 1 := by
+    constructor
+    · change -(1 : Rat) <= (-1 : Rat) ^ j
+      calc
+        -(1 : Rat) = -((1 : Rat) ^ j) := by rw [one_pow_rat]
+        _ <= (-1 : Rat) ^ j := hsign.1
+    · change (-1 : Rat) ^ j <= (1 : Rat)
+      calc
+        (-1 : Rat) ^ j <= (1 : Rat) ^ j := hsign.2
+        _ = (1 : Rat) := one_pow_rat j
+  have hnegD : -D <= (-1 : Rat) ^ j * D := by
+    have h := Rat.mul_le_mul_of_nonneg_right hsign'.1 hD0
+    simpa [Rat.neg_mul] using h
+  have hsignD : (-1 : Rat) ^ j * D <= D := by
+    simpa using Rat.mul_le_mul_of_nonneg_right hsign'.2 hD0
+  have hterm :
+      (r - p) * (- (r * r)) ^ j - kernelTermIntegralBetween p r j =
+        (-1 : Rat) ^ j * D := by
+    unfold kernelTermIntegralBetween
+    rw [neg_square_pow_eq_sign_mul_even_pow]
+    dsimp [D]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  rw [hterm]
+  constructor
+  · calc
+      -((2 * (j : Rat)) * (r - p) * (r - p)) = -E := by rfl
+      _ <= -D := by grind
+      _ <= (-1 : Rat) ^ j * D := hnegD
+  · calc
+      (-1 : Rat) ^ j * D <= D := hsignD
+      _ <= E := hDE
+      _ = (2 * (j : Rat)) * (r - p) * (r - p) := by rfl
+
+/-- A finite arctangent-kernel polynomial has a right-endpoint Riemann error
+at most `n(n+1)` times the squared length of a unit cell.  This is a wholly
+finite rational estimate: it sums the signed monomial bounds above. -/
+theorem kernelPartial_rightRectangle_error_bound
+    {p r : Rat}
+    (hp0 : 0 <= p) (hp1 : p <= 1)
+    (hpr : p <= r) (hr1 : r <= 1)
+    (n : Nat) :
+    -((n : Rat) * ((n + 1 : Nat) : Rat) * (r - p) * (r - p)) <=
+        (r - p) * kernelPartial r n - kernelPartialIntegralBetween p r n /\
+      (r - p) * kernelPartial r n - kernelPartialIntegralBetween p r n <=
+        (n : Rat) * ((n + 1 : Nat) : Rat) * (r - p) * (r - p) := by
+  induction n with
+  | zero =>
+      constructor <;>
+        simp [kernelPartial, altGeomPartial, kernelPartialIntegralBetween] <;>
+        grind [Rat.sub_eq_add_neg]
+  | succ n ih =>
+      have hterm := signed_kernelTerm_rightRectangle_error_bound
+        hp0 hp1 hpr hr1 (n + 1)
+      have hrec :
+          (r - p) * kernelPartial r (n + 1) -
+              kernelPartialIntegralBetween p r (n + 1) =
+            ((r - p) * kernelPartial r n -
+              kernelPartialIntegralBetween p r n) +
+            ((r - p) * (- (r * r)) ^ (n + 1) -
+              kernelTermIntegralBetween p r (n + 1)) := by
+        simp only [kernelPartial, altGeomPartial, kernelPartialIntegralBetween]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      rw [hrec]
+      constructor
+      · calc
+          -(((n + 1 : Nat) : Rat) * ((n +1 + 1 : Nat) : Rat) *
+              (r - p) * (r - p)) =
+              -((n : Rat) * ((n + 1 : Nat) : Rat) * (r - p) * (r - p)) +
+                -((2 * ((n + 1 : Nat) : Rat)) * (r - p) * (r - p)) := by
+                  push_cast
+                  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+          _ <= ((r - p) * kernelPartial r n -
+              kernelPartialIntegralBetween p r n) +
+              ((r - p) * (- (r * r)) ^ (n + 1) -
+                kernelTermIntegralBetween p r (n + 1)) :=
+              rat_add_le_add ih.1 hterm.1
+      · calc
+          ((r - p) * kernelPartial r n -
+              kernelPartialIntegralBetween p r n) +
+              ((r - p) * (- (r * r)) ^ (n + 1) -
+                kernelTermIntegralBetween p r (n + 1)) <=
+              (n : Rat) * ((n + 1 : Nat) : Rat) * (r - p) * (r - p) +
+                (2 * ((n + 1 : Nat) : Rat)) * (r - p) * (r - p) :=
+              rat_add_le_add ih.2 hterm.2
+          _ = ((n + 1 : Nat) : Rat) * ((n + 1 + 1 : Nat) : Rat) *
+              (r - p) * (r - p) := by
+                push_cast
+                grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                  Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 theorem div_between_of_between {a p d : Rat}
     (hp : 0 <= p) (hd : 1 <= d)
     (hlo : -p <= a) (hhi : a <= p) :
