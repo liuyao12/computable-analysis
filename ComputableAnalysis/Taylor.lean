@@ -243,6 +243,269 @@ theorem pow_mono_nonneg
         _ <= r ^ n * r :=
           Rat.mul_le_mul_of_nonneg_left hpr (Rat.pow_nonneg hr)
 
+/-- The finite geometric factor in the difference of two powers.
+
+It is defined by a recurrence instead of importing a polynomial factorization.
+This is the algebraic core of the rational Riemann-error estimates used for
+finite kernel polynomials. -/
+def powDifferenceFactor (p r : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => r ^ n + p * powDifferenceFactor p r n
+
+/-- Difference of powers factored into a cell length and a finite rational
+geometric sum. -/
+theorem pow_sub_pow_eq_sub_mul_powDifferenceFactor
+    (p r : Rat) (n : Nat) :
+    r ^ n - p ^ n = (r - p) * powDifferenceFactor p r n := by
+  induction n with
+  | zero =>
+      simp [powDifferenceFactor]
+      grind [Rat.sub_eq_add_neg]
+  | succ n ih =>
+      rw [Rat.pow_succ, Rat.pow_succ, powDifferenceFactor]
+      calc
+        r ^ n * r - p ^ n * p =
+            (r - p) * r ^ n + p * (r ^ n - p ^ n) := by
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+        _ = (r - p) * r ^ n +
+              p * ((r - p) * powDifferenceFactor p r n) := by
+              rw [ih]
+        _ = (r - p) * (r ^ n + p * powDifferenceFactor p r n) := by
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- A nonnegative rational in the unit interval stays below one under every
+natural power. -/
+theorem pow_le_one_of_unit
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    x ^ n <= 1 := by
+  induction n with
+  | zero =>
+      simp
+  | succ n ih =>
+      rw [Rat.pow_succ]
+      calc
+        x ^ n * x <= x ^ n * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hx1 (Rat.pow_nonneg hx0)
+        _ = x ^ n := by rw [Rat.mul_one]
+        _ <= 1 := ih
+
+/-- The finite difference factor is nonnegative when both endpoints are. -/
+theorem powDifferenceFactor_nonneg
+    {p r : Rat} (hp0 : 0 <= p) (hr0 : 0 <= r) (n : Nat) :
+    0 <= powDifferenceFactor p r n := by
+  induction n with
+  | zero =>
+      simp [powDifferenceFactor]
+  | succ n ih =>
+      rw [powDifferenceFactor]
+      exact Rat.add_nonneg (Rat.pow_nonneg hr0) (Rat.mul_nonneg hp0 ih)
+
+/-- On the unit interval, the finite difference factor for the n-th power is
+at most n.  This deliberately elementary estimate is enough to make all
+finite Riemann-error constants explicit. -/
+theorem powDifferenceFactor_le_nat_of_unit
+    {p r : Rat}
+    (hp0 : 0 <= p) (hp1 : p <= 1)
+    (hr0 : 0 <= r) (hr1 : r <= 1)
+    (n : Nat) :
+    powDifferenceFactor p r n <= (n : Rat) := by
+  induction n with
+  | zero =>
+      simp [powDifferenceFactor]
+  | succ n ih =>
+      rw [powDifferenceFactor]
+      calc
+        r ^ n + p * powDifferenceFactor p r n
+            <= 1 + p * powDifferenceFactor p r n :=
+          (Rat.add_le_add_right).2
+            (pow_le_one_of_unit hr0 hr1 n)
+        _ <= 1 + 1 * powDifferenceFactor p r n :=
+          (Rat.add_le_add_left).2
+            (Rat.mul_le_mul_of_nonneg_right hp1
+              (powDifferenceFactor_nonneg hp0 hr0 n))
+        _ = 1 + powDifferenceFactor p r n := by
+          rw [Rat.one_mul]
+        _ <= 1 + (n : Rat) := (Rat.add_le_add_left).2 ih
+        _ = ((n + 1 : Nat) : Rat) := by
+          exact_mod_cast (by omega : 1 + n = n + 1)
+
+/-- The geometric difference factor is bracketed by its endpoint powers.
+Equivalently, its average lies between the endpoint values of the monomial.
+This is the exact finite substitute for monotonicity of a monomial integral. -/
+theorem powDifferenceFactor_average_bounds
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (n : Nat) :
+    ((n + 1 : Nat) : Rat) * p ^ n <= powDifferenceFactor p r (n + 1) /\
+      powDifferenceFactor p r (n + 1) <= ((n + 1 : Nat) : Rat) * r ^ n := by
+  induction n with
+  | zero =>
+      constructor <;> simp [powDifferenceFactor] <;>
+        grind [Rat.add_zero, Rat.zero_add]
+  | succ n ih =>
+      rcases ih with ⟨ihlow, ihhigh⟩
+      have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+      have hfactor0 :
+          0 <= powDifferenceFactor p r (n + 1) :=
+        powDifferenceFactor_nonneg hp0 hr0 (n + 1)
+      have hpowlow : p ^ (n + 1) <= r ^ (n + 1) :=
+        pow_mono_nonneg hp0 hpr (n + 1)
+      have hmul_low :
+          p * (((n + 1 : Nat) : Rat) * p ^ n) <=
+            p * powDifferenceFactor p r (n + 1) :=
+        Rat.mul_le_mul_of_nonneg_left ihlow hp0
+      have hmul_middle :
+          p * powDifferenceFactor p r (n + 1) <=
+            r * powDifferenceFactor p r (n + 1) :=
+        Rat.mul_le_mul_of_nonneg_right hpr hfactor0
+      have hmul_high :
+          r * powDifferenceFactor p r (n + 1) <=
+            r * (((n + 1 : Nat) : Rat) * r ^ n) :=
+        Rat.mul_le_mul_of_nonneg_left ihhigh hr0
+      constructor
+      · change
+          ((n + 1 + 1 : Nat) : Rat) * p ^ (n + 1) <=
+            r ^ (n + 1) + p * powDifferenceFactor p r (n + 1)
+        calc
+          ((n + 1 + 1 : Nat) : Rat) * p ^ (n + 1)
+              = p ^ (n + 1) +
+                  p * (((n + 1 : Nat) : Rat) * p ^ n) := by
+                    rw [Rat.pow_succ]
+                    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+                      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+          _ <= r ^ (n + 1) +
+                p * (((n + 1 : Nat) : Rat) * p ^ n) :=
+              (Rat.add_le_add_right).2 hpowlow
+          _ <= r ^ (n + 1) +
+                p * powDifferenceFactor p r (n + 1) :=
+              (Rat.add_le_add_left).2 hmul_low
+      · change
+          r ^ (n + 1) + p * powDifferenceFactor p r (n + 1) <=
+            ((n + 1 + 1 : Nat) : Rat) * r ^ (n + 1)
+        calc
+          r ^ (n + 1) + p * powDifferenceFactor p r (n + 1)
+              <= r ^ (n + 1) +
+                  r * powDifferenceFactor p r (n + 1) :=
+              (Rat.add_le_add_left).2 hmul_middle
+          _ <= r ^ (n + 1) +
+                r * (((n + 1 : Nat) : Rat) * r ^ n) :=
+              (Rat.add_le_add_left).2 hmul_high
+          _ = ((n + 1 + 1 : Nat) : Rat) * r ^ (n + 1) := by
+              rw [Rat.pow_succ]
+              grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+                Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-- The exact rational primitive of a nonnegative monomial lies between its
+left and right endpoint rectangles.  This is proved only from the finite
+difference-of-powers identity, with no appeal to completed-real integration. -/
+theorem monomialIntegralBetween_endpoint_bounds
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (k : Nat) :
+    (r - p) * p ^ k <=
+        (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat)) /\
+      (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat)) <=
+        (r - p) * r ^ k := by
+  let N : Rat := ((k + 1 : Nat) : Rat)
+  have hNpos : 0 < N := by
+    dsimp [N]
+    exact (Rat.natCast_pos).2 (by omega : 0 < k + 1)
+  have hd0 : 0 <= r - p := by
+    grind [Rat.sub_eq_add_neg]
+  have hfactor := powDifferenceFactor_average_bounds hp0 hpr k
+  have hpow := pow_sub_pow_eq_sub_mul_powDifferenceFactor p r (k + 1)
+  change
+    (r - p) * p ^ k <= (r ^ (k + 1) - p ^ (k + 1)) / N /\
+      (r ^ (k + 1) - p ^ (k + 1)) / N <= (r - p) * r ^ k
+  constructor
+  · apply Rat.le_of_mul_le_mul_right (c := N)
+    · calc
+        ((r - p) * p ^ k) * N =
+            (r - p) * (N * p ^ k) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= (r - p) * powDifferenceFactor p r (k + 1) :=
+            Rat.mul_le_mul_of_nonneg_left hfactor.1 hd0
+        _ = r ^ (k + 1) - p ^ (k + 1) := by
+            rw [← hpow]
+        _ = ((r ^ (k + 1) - p ^ (k + 1)) / N) * N := by
+            rw [Rat.div_def]
+            have hNne : N ≠ 0 := Rat.ne_of_gt hNpos
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hNpos
+  · apply Rat.le_of_mul_le_mul_right (c := N)
+    · calc
+        ((r ^ (k + 1) - p ^ (k + 1)) / N) * N =
+            r ^ (k + 1) - p ^ (k + 1) := by
+              rw [Rat.div_def]
+              have hNne : N ≠ 0 := Rat.ne_of_gt hNpos
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ = (r - p) * powDifferenceFactor p r (k + 1) := hpow
+        _ <= (r - p) * (N * r ^ k) :=
+            Rat.mul_le_mul_of_nonneg_left hfactor.2 hd0
+        _ = ((r - p) * r ^ k) * N := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hNpos
+
+/-- On a rational cell in the unit interval, each endpoint rectangle for the
+monomial x^k differs from its exact primitive by at most
+k times the squared cell length. -/
+theorem monomialIntegralBetween_endpoint_error_le
+    {p r : Rat}
+    (hp0 : 0 <= p) (hp1 : p <= 1)
+    (hpr : p <= r) (hr1 : r <= 1)
+    (k : Nat) :
+    0 <= (r - p) * r ^ k -
+          (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat)) /\
+      (r - p) * r ^ k -
+          (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat)) <=
+        (k : Rat) * (r - p) * (r - p) /\
+      0 <= (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat)) -
+          (r - p) * p ^ k /\
+      (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat)) -
+          (r - p) * p ^ k <=
+        (k : Rat) * (r - p) * (r - p) := by
+  have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+  have hd0 : 0 <= r - p := by
+    grind [Rat.sub_eq_add_neg]
+  have hbracket := monomialIntegralBetween_endpoint_bounds hp0 hpr k
+  have hfactor := powDifferenceFactor_le_nat_of_unit hp0 hp1 hr0 hr1 k
+  have hpow := pow_sub_pow_eq_sub_mul_powDifferenceFactor p r k
+  have hpowerGap :
+      r ^ k - p ^ k <= (r - p) * (k : Rat) := by
+    calc
+      r ^ k - p ^ k =
+          (r - p) * powDifferenceFactor p r k := hpow
+      _ <= (r - p) * (k : Rat) :=
+          Rat.mul_le_mul_of_nonneg_left hfactor hd0
+  have hcellGap :
+      (r - p) * (r ^ k - p ^ k) <=
+        (k : Rat) * (r - p) * (r - p) := by
+    calc
+      (r - p) * (r ^ k - p ^ k)
+          <= (r - p) * ((r - p) * (k : Rat)) :=
+        Rat.mul_le_mul_of_nonneg_left hpowerGap hd0
+      _ = (k : Rat) * (r - p) * (r - p) := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor
+  · calc
+      (r - p) * r ^ k -
+          (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat))
+          <= (r - p) * r ^ k - (r - p) * p ^ k := by
+            grind [Rat.sub_eq_add_neg]
+      _ = (r - p) * (r ^ k - p ^ k) := by
+            grind [Rat.sub_eq_add_neg, Rat.mul_add]
+      _ <= (k : Rat) * (r - p) * (r - p) := hcellGap
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  · calc
+      (r ^ (k + 1) - p ^ (k + 1)) / (((k + 1 : Nat) : Rat)) -
+          (r - p) * p ^ k
+          <= (r - p) * r ^ k - (r - p) * p ^ k := by
+            grind [Rat.sub_eq_add_neg]
+      _ = (r - p) * (r ^ k - p ^ k) := by
+            grind [Rat.sub_eq_add_neg, Rat.mul_add]
+      _ <= (k : Rat) * (r - p) * (r - p) := hcellGap
+
 private theorem kernelTermDen_pos (j : Nat) :
     0 < 2 * (j : Rat) + 1 := by
   have hj : 0 <= (j : Rat) := Rat.natCast_nonneg

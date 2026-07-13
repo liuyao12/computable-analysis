@@ -21,7 +21,7 @@ A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`.  A row counts as equivalent after a formalized chain of
 `RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions `10/19`; equivalences `6/18` applicable rows.
+Current count: definitions `6/15`; equivalences `2/14` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -32,10 +32,6 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | **Arctangent routes** | [geom](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4\arctan(1)=4\int_0^1\frac{dt}{1+t^2}=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ |  |  |
 | `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\arctan_{\mathrm{geom}}(1)$ | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
-| `piMachinIntegralRectangle` | [Machin integrals](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:machin-rectangle-integral-pi) | $\pi=4(4\int_0^{1/5}\frac{dt}{1+t^2}-\int_0^{1/239}\frac{dt}{1+t^2})$ | ✓ | ✓ |
-| `piCauchyProjectiveFarey` | [projective Cauchy integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:projective-cauchy-pi) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}=4\int_0^1\frac{dx}{1+x^2}$ | ✓ | ✓ |
-| `piTwoThreeIntegralFarey` | [two-three Farey integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:two-three-farey-pi) | $\pi=4(\int_0^{1/2}\frac{dt}{1+t^2}+\int_0^{1/3}\frac{dt}{1+t^2})$ | ✓ | ✓ |
-| <code>piThreeTermIntegralFarey</code> | [three-term Farey integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:three-term-farey-pi) | π = 4(∫₀¹⁄² dt/(1+t²) + ∫₀¹⁄⁵ dt/(1+t²) + ∫₀¹⁄⁸ dt/(1+t²)) | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✗ |
 | `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✗ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
@@ -59,29 +55,6 @@ Lean hooks:
   `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`,
   `PiProofs.four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea`,
   `IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement`.
-- Machin rectangle integral:
-  `IntegralIdentities.piMachinIntegralRectangle`,
-  `PiProofs.piMachinIntegralRectangle_equiv_piCircleArea`.
-- Projective Cauchy integral:
-  `IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel`,
-  `PiProofs.piCauchyProjectiveFarey`,
-  `PiProofs.piCauchyProjectiveFarey_equiv_piCircleArea`.
-  The bounded Farey mesh itself is not separately counted; this row is the
-  full-line Cauchy compactification that gives it a distinct calculus meaning.
-- Two-three Farey integral:
-  `IntegralIdentities.piTwoThreeIntegralFarey`,
-  `IntegralIdentities.piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ`,
-  `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea`, as an instance of
-  `PiProofs.piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd`.
-  This is separately counted because `atan(1/2) + atan(1/3) = atan(1)` is a
-  distinct rational pi formula, not merely another unit-mesh evaluator.
-- Three-term Farey integral:
-  <code>IntegralIdentities.piThreeTermIntegralFarey</code>,
-  <code>IntegralIdentities.piThreeTermIntegralFarey_compute_width_le_seventyTwo_div_succ</code>,
-  <code>ArctanGeometry.arctanGeom_chartAdd_add_three_of_half</code>, and
-  <code>PiProofs.piThreeTermIntegralFarey_equiv_piCircleArea</code>.
-  This is a distinct three-term rational formula, whose two chart identities
-  are 1/5 ⊕ 1/8 = 1/3 and 1/2 ⊕ 1/3 = 1.
 - Old point-Riemann arctangent:
   `IntegralIdentities.arctanIntegral_compute_width_zero`,
   `IntegralIdentities.arctanIntegral_stages_constant`.
@@ -213,11 +186,6 @@ Lean hooks:
   `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_curvatureFTC_stageSchedule`,
   `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_convexFTC_stageSchedule`,
   `PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_concaveFTC_stageSchedule`.
-- Farey machinery supports projective/improper integrals:
-  `ArctanGeometry.fareyIntegralBetweenRaw_additive`,
-  `IntegralIdentities.oneOverOnePlusSquareFareyIntegral_additive`,
-  `IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel`.
-
 Series target:
 
 $$
@@ -262,6 +230,16 @@ Calculus-facing order target:
 `PiProofs.four_arctanSeries_one_equiv_piCircleArea_of_unitCellOrderPreservation`,
 `PiProofs.leibnizEqArea_of_kernelPartialExactCellOrderPreservation`,
 `PiProofs.leibnizEqArea_of_unitCellOrderPreservation`.
+
+A complementary all-degree route now begins with exact rational Riemann
+algebra in `Taylor.ArctanKernel`: `powDifferenceFactor` proves the
+finite factorization of `r^n-p^n`,
+`monomialIntegralBetween_endpoint_bounds` brackets each exact monomial
+primitive by its endpoint rectangles, and
+`monomialIntegralBetween_endpoint_error_le` bounds either endpoint error by
+`k * (r-p)^2` on a unit cell.  This does not yet establish the Leibniz
+equivalence; the remaining work is finite alternating-polynomial summation
+over the existing dyadic square-mesh budget.
 
 Circumference target:
 

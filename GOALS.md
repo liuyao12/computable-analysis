@@ -123,7 +123,7 @@ not a description of the current module graph. The checked blueprint
   The expected-value side is packaged as
   `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, and Lean proves
   `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The
-  remaining work is the improper/Farey integral construction that supplies a
+  remaining work is an improper rational-integral construction that supplies a
   `ReciprocalQuarticMinusOneProjectiveRoute` and turns the `a=-1` case into
   another counted computation of `piCircleArea`.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
@@ -311,6 +311,13 @@ students actually compute.
   `1/(1+x^2) = kernelPartial x n + kernelRemainder x n`, with
   `|kernelRemainder x n| <= (x*x)^(n+1)`.  This is the exact theorem that
   should feed the later definite-integral remainder estimate.
+- The finite Riemann-error core is now formalized without a completeness
+  principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
+  its endpoint-average bounds bracket each monomial primitive, and
+  `monomialIntegralBetween_endpoint_error_le` gives each left/right
+  rectangle an explicit `k * (r-p)^2` error on the unit interval.  The
+  remaining series bridge work is to sum these finite polynomial bounds over
+  the dyadic area mesh and combine that schedule with the Taylor remainder.
 
 ## Iteration-Based Construction Layers
 
@@ -325,18 +332,14 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently nine of eighteen named
-  computations are valid raw reals, and five of seventeen applicable rows have
-  a formal equivalence chain to `piCircleArea`. The completed canonical rows
-  are `4 * arctanGeom(1)`, `4 * arctanIntegralRectangleForAtOne`, the
-  independently assembled Machin rectangle-integral computation
-  `IntegralIdentities.piMachinIntegralRectangle`, and the full-line Cauchy
-  compactification `PiProofs.piCauchyProjectiveFarey`, the two-three
-  Farey-integral formula `IntegralIdentities.piTwoThreeIntegralFarey`, and
-  the three-term Farey-integral formula
-  `IntegralIdentities.piThreeTermIntegralFarey`.
-- The next canonical series equivalence is blocked only by the uniform
-  all-partials bridge
+  `blueprint/src/pi-scoreboard-table.tex`: currently six of fifteen named
+  computations are valid raw reals, and two of fourteen applicable rows have
+  a formal equivalence chain to `piCircleArea`.  The completed canonical
+  rows are the geometric quarter-turn computation
+  `4 * arctanGeom(1)` and its single rectangle-integral formulation
+  `4 * arctanIntegralRectangleForAtOne`.
+- The next canonical series equivalence has two constructive routes.  The
+  exact-order route needs the uniform all-partials bridge
   `PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit`.
   Pointwise kernel bounds and finite certificates through the indicated
   prefixes are checked. Exact cell-order preservation is now proved for the
@@ -345,8 +348,10 @@ students actually compute.
   nonconstant case uses explicit nonnegative rational endpoint-gap factors;
   the degree-four case uses Boole quadrature and the degree-six and
   degree-eight cases use positive seven-point and eleven-point rational
-  Newton--Cotes identities. The remaining step is a uniform finite algebra
-  theorem, not a use of completeness.
+  Newton--Cotes identities.  In parallel, the all-degree endpoint-error
+  route now has its exact monomial primitive bound; its remaining step is a
+  finite alternating-polynomial summation and mesh-budget theorem.  Neither
+  route uses completeness.
 - `piMachin` previously needed a principal-branch addition certificate.  The
   required three bounded rational additions are now proved:
   `2*atanGeom(1/5) = atanGeom(5/12)`,
@@ -383,40 +388,8 @@ students actually compute.
   resulting geometric Machin branch identity are proved.  The remaining
   power-series `piMachin` blocker is only the separate power-series/kernel
   comparison at `1/5` and `1/239`; the endpoint comparison at `1` belongs to
-  the independent Leibniz route.  Separately, the certified
-  `IntegralIdentities.piMachinIntegralRectangle` now gives a completed
-  calculus Machin row; only the power-series row remains open.
-- The Cauchy kernel now has a completed projective/improper presentation:
-  `IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel`
-  proves the reciprocal-tail fold on nonzero rationals, and
-  `PiProofs.piCauchyProjectiveFarey` defines the full-line value by the
-  verified compactification `4 * ∫_[0,1] 1/(1+x^2) dx`.  It is valid and
-  equivalent to `piCircleArea`.  The underlying bounded Farey mesh is not a
-  duplicate scoreboard row; this distinct row records the explicit full-line
-  construction and provides the kernel-level substitution pattern for the
-  reciprocal-quartic target.  It is intentionally a Cauchy-specific
-  compactification, not yet a generic improper-integration API.
-- The shared Farey construction now also completes the separate rational
-  identity `pi = 4 * (atan(1/2) + atan(1/3))`.  Its evaluator
-  `IntegralIdentities.piTwoThreeIntegralFarey` has width at most
-  `48/(n+1)`, and
-  `PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea` derives the result
-  from the already verified finite chart calculation `1/2 ⊕ 1/3 = 1`.
-  This counts as a distinct formula-level computation, not as an additional
-  row for merely reusing the Farey mesh.  The proof is an instance of the
-  reusable theorem
-  `PiProofs.piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd`, which
-  covers every bounded rational pair with chart sum one.
-- The shared Farey primitive also completes the three-term rational formula
-  `pi = 4 * (atan(1/2) + atan(1/5) + atan(1/8))`.
-  `IntegralIdentities.piThreeTermIntegralFarey` has width at most
-  `72/(n+1)`, and
-  `PiProofs.piThreeTermIntegralFarey_equiv_piCircleArea` uses the reusable
-  bounded composition theorem
-  `ArctanGeometry.arctanGeom_chartAdd_add_three_of_half`.  The finite
-  rational chart identities are `1/5 ⊕ 1/8 = 1/3` and
-  `1/2 ⊕ 1/3 = 1`; this is a separately counted formula-level computation,
-  not a second name for the unit Farey mesh.
+  the independent Leibniz route.  Machin is therefore kept solely as a
+  power-series computation, not as a second integral-based pi representation.
 - The exact stage bridge
   `ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute` now
   proves `PiProofs.PiCircleAreaPolygonAgreement`; with finite Archimedes this

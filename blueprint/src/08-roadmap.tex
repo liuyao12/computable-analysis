@@ -163,25 +163,10 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.IntegralIdentities.piMachinIntegralRectangle}
-\lean{ComputableAnalysis.IntegralIdentities.piMachinIntegralRectangle_valid}
-\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey}
-\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_valid}
-\lean{ComputableAnalysis.IntegralIdentities.piTwoThreeIntegralFarey_compute_width_le_fortyEight_div_succ}
-\lean{ComputableAnalysis.IntegralIdentities.piThreeTermIntegralFarey}
-\lean{ComputableAnalysis.IntegralIdentities.piThreeTermIntegralFarey_valid}
-\lean{ComputableAnalysis.IntegralIdentities.piThreeTermIntegralFarey_compute_width_le_seventyTwo_div_succ}
 \lean{ComputableAnalysis.IntegralIdentities.cauchyProjectiveFoldDensity}
 \lean{ComputableAnalysis.IntegralIdentities.cauchyProjectiveFoldDensity_eq_two_integralKernel}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piMachinIntegralRectangle_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey}
-\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_valid}
-\lean{ComputableAnalysis.PiProofs.piCauchyProjectiveFarey_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piFareyTwoTermFormula_equiv_piCircleArea_of_chartAdd}
-\lean{ComputableAnalysis.PiProofs.piTwoThreeIntegralFarey_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piThreeTermIntegralFarey_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_valid}
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}
@@ -626,56 +611,9 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_valid}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_valid}
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFareyAtOne_equiv_piCircleArea}
 
 \input{pi-scoreboard-table.tex}
 
-The bounded Farey-prefix mesh is deliberately not a separate scoreboard row:
-the table counts canonical construction families, not every mesh used to
-evaluate the same bounded integral.  The new
-\code{PiProofs.piCauchyProjectiveFarey} row is distinct because it specifies a
-full-line Cauchy computation by reciprocal compactification:
-\[
-  \int_{-\infty}^{\infty}\frac{dx}{1+x^2}
-  :=4\int_0^1\frac{dx}{1+x^2}.
-\]
-Its exact rational fold identity is now formalized, and the resulting raw real
-is valid and equivalent to \code{piCircleArea}.  This is a concrete
-improper/projective construction for the Cauchy kernel, not a generic limit
-theory; it supplies the substitution pattern needed next for the reciprocal
-quartic.  Farey subdivision remains projective/improper-integral machinery in
-\cref{rem:farey-subdivision-projective}, where shared prefixes are useful for
-orientation reversal, adjacent additivity, and endpoints at infinity.
-
-The same shared Farey evaluator now supplies a separately counted formula-level
-row:
-\[
-  \pi=4\left(\int_0^{1/2}\frac{dt}{1+t^2}+
-    \int_0^{1/3}\frac{dt}{1+t^2}\right).
-\]
-This is not a mesh duplicate: the finite chart transport proves the distinct
-rational branch identity \(\operatorname{atan}(1/2)+\operatorname{atan}(1/3)
-=\operatorname{atan}(1)\), and the Farey computation has the explicit bound
-\(48/(n+1)\).  The theorem-facing result is
-\code{PiProofs.piTwoThreeIntegralFarey\_equiv\_piCircleArea}.
-The reusable two-term formula theorem
-\code{PiProofs.piFareyTwoTermFormula\_equiv\_piCircleArea\_of\_chartAdd}
-now supplies the same conclusion for every bounded rational pair satisfying
-the displayed chart equation.
-The same primitive also supports the separately counted three-term formula
-\[
-  \pi=4\left(\int_0^{1/2}\frac{dt}{1+t^2}+
-    \int_0^{1/5}\frac{dt}{1+t^2}+
-    \int_0^{1/8}\frac{dt}{1+t^2}\right).
-\]
-Its two finite chart identities are \(T_{1/5}(1/8)=1/3\) and
-\(T_{1/2}(1/3)=1\).  The reusable Lean composition theorem is
-\code{ArctanGeometry.arctanGeom\_chartAdd\_add\_three\_of\_half}; the
-certified evaluator and equivalence are
-\code{IntegralIdentities.piThreeTermIntegralFarey} and
-\code{PiProofs.piThreeTermIntegralFarey\_equiv\_piCircleArea}, with public
-width bound \(72/(n+1)\).
 \[
   4\arctan_{\int}(1)\sim\pi_{\mathrm{area}}
   \quad\text{pending}.
@@ -696,13 +634,7 @@ scoreboard target: \code{ReciprocalQuarticMinusOneProjectiveRoute}.
 
 Completed equivalence hooks:
 \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea},
-\code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea},
-the certified Machin rectangle-integral route, and the projectively compactified
-Cauchy route \code{PiProofs.piCauchyProjectiveFarey\_equiv\_piCircleArea},
-and the two-three Farey-integral route
-\code{PiProofs.piTwoThreeIntegralFarey\_equiv\_piCircleArea}, and the
-three-term Farey-integral route
-\code{PiProofs.piThreeTermIntegralFarey\_equiv\_piCircleArea}.
+\code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea}.
 FTC hooks:
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_definite\_identity},
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC}.
@@ -734,6 +666,29 @@ respectively.
 A reusable finite positive-quadrature bridge separates the order argument
 from the polynomial identity.  The outstanding task is to lift this finite
 rational algebra uniformly to every alternating partial.
+
+A complementary all-degree route now starts from exact finite Riemann algebra,
+rather than requiring an all-degree positive quadrature identity.  For
+\(0\le p\le r\le1\), the formal factorization
+\[
+  r^k-p^k=(r-p)F_k(p,r)
+\]
+has endpoint-average bounds for \(F_{k+1}\), so the exact rational monomial
+primitive lies between its left and right endpoint rectangles.  Moreover,
+either endpoint error is at most
+\[
+  k(r-p)^2.
+\]
+The checked theorems are
+\lean{ComputableAnalysis.Taylor.ArctanKernel.powDifferenceFactor}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.pow_sub_pow_eq_sub_mul_powDifferenceFactor}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.powDifferenceFactor_average_bounds}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.monomialIntegralBetween_endpoint_bounds}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.monomialIntegralBetween_endpoint_error_le}
+The remaining bridge is explicitly finite: sum these polynomial errors over
+the established dyadic square-mesh budget, then combine that schedule with
+the already checked finite Taylor remainder.  No completed-real limit or
+completeness axiom is involved.
 \[
   \frac{r-p}{1+r^2}
   \le
@@ -848,7 +803,7 @@ three \code{log(i)} constructions, their branch agreement, and Euler identity\\
 \code{PiProofs.MachinIdentity.PowerSeriesEqualsRectangleKernelAtMachinInputs}\\
 \(\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}\sim\pi_{\mathrm{area}}\) &
 \code{PiProofs.reciprocalQuarticMinusOneProjectiveRoute\_equiv\_piCircleArea} &
-an improper Farey construction satisfying
+an improper rational construction satisfying
 \code{ReciprocalQuarticMinusOneProjectiveAgreement}\\
 \(L_n\le L_{n+1}\le U_{n+1}\le U_n\) &
 \code{PiProofs.CircumferenceQuarterLengthRemainders} &
