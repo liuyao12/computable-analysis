@@ -436,6 +436,7 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAt_finiteRiemannBridge}
 \lean{ComputableAnalysis.PiProofs.arctan_equiv_arctanGeom_finiteRiemannBridge}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_finiteRiemannBridge}
+\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_finiteRiemannBridge}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_machinUnitAdditions}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs_chartTransport}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_unitAdditionLaw}
@@ -709,7 +710,9 @@ the positive series endpoints are exact finite primitives on \([0,x]\), and
 the mesh error gains the factor \(x^2\).  At \(x=1/5\) and \(x=1/239\) this
 gives the two agreements required by Machin, so
 \code{PiProofs.piMachin\_equiv\_piCircleArea\_finiteRiemannBridge} closes the
-direct series row using the already verified bounded chart additions.
+direct series row using the already verified bounded chart additions.  The
+same three agreements also yield
+\code{PiProofs.leibnizEqMachin\_finiteRiemannBridge}.
 \lean{ComputableAnalysis.Taylor.ArctanKernel.signed_kernelTerm_rightRectangle_error_bound}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartial_rightRectangle_error_bound}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialRightRectangleSum_error_bound}
