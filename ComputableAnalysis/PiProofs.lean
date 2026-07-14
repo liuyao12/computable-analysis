@@ -14295,23 +14295,6 @@ theorem piMachin_equiv_piCircleArea_finiteRiemannBridge :
         arctan_equiv_arctanGeom_finiteRiemannBridge
           ((1 : Rat) / 239) (by native_decide) (by native_decide) }
 
-/-- The two series-defined pi evaluators agree directly.  The finite Riemann
-bridge supplies all three power-series/geometric arctangent agreements, while
-the bounded chart transport supplies Machin's rational branch identity. -/
-theorem leibnizEqMachin_finiteRiemannBridge : LeibnizEqMachin :=
-  leibnizEqMachin_of_machinBranchIdentity
-    (MachinIdentity.branchIdentity_of_geometricBranchIdentity_on_unit
-      { one_fifth :=
-          arctan_equiv_arctanGeom_finiteRiemannBridge
-            ((1 : Rat) / 5) (by native_decide) (by native_decide)
-        one_239 :=
-          arctan_equiv_arctanGeom_finiteRiemannBridge
-            ((1 : Rat) / 239) (by native_decide) (by native_decide)
-        one :=
-          arctan_equiv_arctanGeom_finiteRiemannBridge
-            (1 : Rat) (by native_decide) (by native_decide) }
-      MachinIdentity.geometricBranchIdentity_of_chartTransport)
-
 theorem leibnizEqArea_of_kernelComparisonAtOne
     (route : Taylor.ArctanComparison.KernelComparisonAt (1 : Rat)) :
     LeibnizEqArea :=

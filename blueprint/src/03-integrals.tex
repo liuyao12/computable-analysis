@@ -684,7 +684,7 @@ the transported endpoints remain ordered, and a midpoint-refinement partition
 of \([0,x]\) becomes an explicit cover of
 \([T_u(0),T_u(x)]\).  For \(0\le u<1\), positivity of all chart denominators
 on a source unit partition is also proved.
-For the half-unit chart range \(0\le u\le1/2\), Lean additionally proves
+For the Machin-relevant range \(0\le u\le1/2\), Lean additionally proves
 \[
   T_u(r)-T_u(p)\le 8(r-p),
 \]
@@ -714,13 +714,12 @@ Together with the rectangle--geometric comparison, this proves
     \sim \operatorname{atanGeom}(T_u(x))
 \]
 when \(0\le u\le 1/2\), \(0\le x\le1\), and the chart image remains in the
-unit interval.  This discharges the three bounded geometric additions later
-used by the series proof.
+unit interval.  This discharges all three bounded geometric Machin additions.
 It does not yet identify the power-series \code{piMachin} with area pi: the
 independent power-series/kernel comparisons at its two actual inputs (1/5)
 and (1/239) are still required.  The endpoint input (1) belongs to the
-separate Leibniz route.  This is supporting arctangent infrastructure only;
-it introduces no additional Machin pi computation.
+separate Leibniz route.  It does, however, already certify the distinct Machin
+rectangle-integral computation recorded below.
 
 Consequently, for every finite nonnegative ordered partition, the rectangle
 sum interval contains the geometric sector-sum interval, and in particular the

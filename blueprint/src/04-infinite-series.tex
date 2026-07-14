@@ -516,7 +516,6 @@ tangent identity exactly.
 \lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAt_finiteRiemannBridge}
 \lean{ComputableAnalysis.PiProofs.arctan_equiv_arctanGeom_finiteRiemannBridge}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_finiteRiemannBridge}
-\lean{ComputableAnalysis.PiProofs.leibnizEqMachin_finiteRiemannBridge}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_machinUnitAdditions}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs_chartTransport}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_unitAdditionLaw}
@@ -565,10 +564,9 @@ small-input agreements, and
 unconditional table-facing theorem.  The canonical score therefore includes
 the power-series \code{piMachin} row; no completed-real limit or separate
 integral definition is introduced.
-The same three finite agreements also discharge
-\code{PiProofs.leibnizEqMachin\_finiteRiemannBridge}, so the Leibniz and
-Machin series computations are now directly equivalent as well as each being
-equivalent to the circle-area definition.
+In contrast, the rectangle-integral Machin evaluator is now a completed
+calculus row: it uses the same finite additions after each of its two certified
+integrals has been identified with geometric arctangent.
 \end{theorem}
 
 \section{General Power Series}
