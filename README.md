@@ -21,7 +21,7 @@ A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`.  A row counts as equivalent after a formalized chain of
 `RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions `7/16`; equivalences `4/15` applicable rows.
+Current count: definitions `7/16`; equivalences `5/15` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -34,7 +34,7 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\arctan_{\mathrm{geom}}(1)$ | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [finite Riemann bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✓ |
-| `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✗ |
+| `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [finite bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✓ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
 | `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
 | `GaussianPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2$ | ✗ | ✗ |

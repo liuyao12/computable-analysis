@@ -277,6 +277,93 @@ theorem powState_eq (y : Rat) (n : Nat) :
         (((4 * n + 3) + 1) + 1) + 1 + 1 by omega]
       repeat rw [Rat.pow_succ]
 
+/-- The alternating power-series endpoints are finite integrals of the
+corresponding odd and even arctangent-kernel polynomials over `[0,y]`.
+This is a finite rational identity, before any limiting argument. -/
+theorem endpoints_eq_kernelPartialIntegralBetween (y : Rat) (n : Nat) :
+    hi y n = Taylor.ArctanKernel.kernelPartialIntegralBetween 0 y (2 * n) /\
+      lo y (n + 1) =
+        Taylor.ArctanKernel.kernelPartialIntegralBetween 0 y (2 * n + 1) := by
+  induction n with
+  | zero =>
+      constructor
+      · simp [hi, state, Taylor.ArctanKernel.kernelPartialIntegralBetween]
+        grind [Rat.sub_eq_add_neg]
+      · rw [lo, state_succ]
+        simp [state, Taylor.ArctanKernel.kernelPartialIntegralBetween,
+          Taylor.ArctanKernel.kernelTermIntegralBetween]
+        grind [Rat.sub_eq_add_neg]
+  | succ n ih =>
+      have hloAsStep :
+          hi y n - y ^ (4 * n + 3) / (4 * (n : Rat) + 3) =
+            Taylor.ArctanKernel.kernelPartialIntegralBetween 0 y
+              (2 * n + 1) := by
+        rw [← ih.2]
+        rw [lo, state_succ]
+        simp
+        rw [show (state y n).2.1 = hi y n by rfl]
+        rw [show (state y n).2.2 = powState y n by rfl, powState_eq]
+      have hhiSucc : hi y (n + 1) =
+          Taylor.ArctanKernel.kernelPartialIntegralBetween 0 y
+            (2 * (n + 1)) := by
+        rw [hi, state_succ]
+        simp
+        rw [show (state y n).2.1 = hi y n by rfl]
+        rw [show (state y n).2.2 = powState y n by rfl, powState_eq]
+        rw [hloAsStep]
+        have hpow : y ^ (4 * n + 3) * y * y = y ^ (4 * n + 5) := by
+          rw [show 4 * n + 5 = ((4 * n + 3) + 1) + 1 by omega]
+          repeat rw [Rat.pow_succ]
+        rw [hpow]
+        rw [show 2 * (n + 1) = 2 * n + 2 by omega]
+        rw [Taylor.ArctanKernel.kernelPartialIntegralBetween_zero_even_succ]
+      constructor
+      · exact hhiSucc
+      · rw [lo, state_succ]
+        simp
+        rw [show (state y (n + 1)).2.1 = hi y (n + 1) by rfl]
+        rw [show (state y (n + 1)).2.2 = powState y (n + 1) by rfl,
+          powState_eq]
+        have hpow : y ^ (4 * (n + 1) + 3) = y ^ (4 * n + 7) := by
+          congr 1 <;> omega
+        rw [hpow]
+        rw [hhiSucc]
+        rw [Taylor.ArctanKernel.kernelPartialIntegralBetween_zero_odd_succ]
+        grind
+
+/-- The lower finite kernel primitive represented by a power-series stage. -/
+def lowerKernelPartialAtStage (y : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 =>
+      Taylor.ArctanKernel.kernelPartialIntegralBetween 0 y (2 * n + 1)
+
+/-- The upper finite kernel primitive represented by a power-series stage. -/
+def upperKernelPartialAtStage (y : Rat) (n : Nat) : Rat :=
+  Taylor.ArctanKernel.kernelPartialIntegralBetween 0 y (2 * n)
+
+theorem lo_eq_lowerKernelPartialAtStage (y : Rat) (n : Nat) :
+    lo y n = lowerKernelPartialAtStage y n := by
+  cases n with
+  | zero =>
+      simp [lo, state, lowerKernelPartialAtStage]
+  | succ n =>
+      simp [lowerKernelPartialAtStage,
+        (endpoints_eq_kernelPartialIntegralBetween y n).2]
+
+theorem hi_eq_upperKernelPartialAtStage (y : Rat) (n : Nat) :
+    hi y n = upperKernelPartialAtStage y n := by
+  simp [upperKernelPartialAtStage,
+    (endpoints_eq_kernelPartialIntegralBetween y n).1]
+
+theorem positiveRaw_compute_eq_kernelPartialIntegralInterval
+    (y : Rat) (n : Nat) :
+    (positiveRaw y).compute n =
+      { lo := lowerKernelPartialAtStage y n,
+        hi := upperKernelPartialAtStage y n } := by
+  unfold positiveRaw
+  simp [lo_eq_lowerKernelPartialAtStage,
+    hi_eq_upperKernelPartialAtStage]
+
 theorem width_eq (y : Rat) (n : Nat) :
     hi y n - lo y n = y ^ (4 * n + 1) / (4 * (n : Rat) + 1) := by
   induction n with
@@ -516,6 +603,19 @@ theorem arctan_compute_nonneg (x : Rat) (hx : 0 <= x) (n : Nat) :
     (arctan x).compute n = (positiveRaw (qabs x)).compute n := by
   unfold arctan positiveRaw lo hi state
   simp [hx]
+
+theorem arctan_compute_nonnegative_eq_kernelPartialIntegralInterval
+    (x : Rat) (hx : 0 <= x) (n : Nat) :
+    (arctan x).compute n =
+      { lo := lowerKernelPartialAtStage x n,
+        hi := upperKernelPartialAtStage x n } := by
+  rw [arctan_compute_nonneg x hx n]
+  have habs : qabs x = x := by
+    unfold qabs
+    have hnot : ¬x < 0 := by grind
+    simp [hnot]
+  rw [habs]
+  exact positiveRaw_compute_eq_kernelPartialIntegralInterval x n
 
 theorem arctan_compute_neg (x : Rat) (hx : Not (0 <= x)) (n : Nat) :
     (arctan x).compute n =
@@ -5838,6 +5938,18 @@ theorem arctanAreaLoopState_one_kernelPartialIntegralSum
   rw [Taylor.ArctanKernel.kernelPartialIntegralBetween_zero_one]
   grind
 
+/-- On the midpoint partition of `[0,x]`, finite kernel-polynomial integrals
+add exactly to the corresponding rational primitive over the whole interval. -/
+theorem arctanAreaLoopState_kernelPartialIntegralSum
+    (x : Rat) (m n : Nat) :
+    kernelPartialIntegralSum m
+      (ArctanGeometry.arctanAreaLoopState x n).intervals =
+        Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x m := by
+  unfold ArctanGeometry.arctanAreaLoopState
+  rw [iterateAreaLoopState_kernelPartialIntegralSum]
+  simp [ArctanGeometry.arctanAreaLoopInitial, kernelPartialIntegralSum]
+  grind
+
 /-- On the project’s dyadic mesh at `1`, the finite kernel polynomial differs
 from its exact rational primitive by at most `m(m+1) / 2^n`.  The denominator
 comes from the already verified sum of squared dyadic cell lengths. -/
@@ -5860,6 +5972,28 @@ theorem arctanAreaLoopState_one_kernelPartialRightRectangle_error_bound
   have hsum := kernelPartialRightRectangleSum_error_bound (m := m) hunit
   rw [arctanAreaLoopState_one_kernelPartialIntegralSum] at hsum
   rw [ArctanGeometry.arctanAreaLoopState_one_squareSum] at hsum
+  exact hsum
+
+/-- Finite quadrature error for a kernel polynomial on the midpoint mesh of
+`[0,x]`.  The exact squared-mesh budget is `x^2 / 2^n`. -/
+theorem arctanAreaLoopState_kernelPartialRightRectangle_error_bound
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (m n : Nat) :
+    -((m : Rat) * ((m + 1 : Nat) : Rat) *
+        ((x * x) / (((2 ^ n : Nat) : Rat)))) <=
+        kernelPartialRightRectangleSum m
+          (ArctanGeometry.arctanAreaLoopState x n).intervals -
+          Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x m /\
+      kernelPartialRightRectangleSum m
+          (ArctanGeometry.arctanAreaLoopState x n).intervals -
+          Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x m <=
+        (m : Rat) * ((m + 1 : Nat) : Rat) *
+          ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+  have hunit : ArctanGeometry.UnitIntervals
+      (ArctanGeometry.arctanAreaLoopState x n).intervals :=
+    ArctanGeometry.arctanAreaLoopState_intervals_unit hx0 hx1 n
+  have hsum := kernelPartialRightRectangleSum_error_bound (m := m) hunit
+  rw [arctanAreaLoopState_kernelPartialIntegralSum] at hsum
+  rw [ArctanGeometry.arctanAreaLoopState_squareSum] at hsum
   exact hsum
 
 /-- The even Taylor kernel polynomial dominates the lower geometric rectangle
@@ -9070,6 +9204,71 @@ private theorem leibniz_bridge_odd_error_le_radius (n : Nat) :
     _ <= 1 / (((2 ^ (n + 1) : Nat) : Rat)) :=
       leibniz_bridge_even_error_le_radius (n + 1)
 
+private theorem arctan_square_le_one
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    x * x <= 1 := by
+  calc
+    x * x <= 1 * x := Rat.mul_le_mul_of_nonneg_right hx1 hx0
+    _ = x := by rw [Rat.one_mul]
+    _ <= 1 := hx1
+
+private theorem arctan_bridge_mesh_factor_le_one
+    {x C : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (hC : 0 <= C)
+    (stage : Nat) :
+    C * (x * x / (((2 ^ stage : Nat) : Rat))) <=
+      C * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  have hxx := arctan_square_le_one hx0 hx1
+  have hdenpos : 0 < ((2 ^ stage : Nat) : Rat) :=
+    (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hinv : 0 <= (((2 ^ stage : Nat) : Rat))⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+  rw [Rat.div_def, Rat.div_def]
+  calc
+    C * (x * x * (((2 ^ stage : Nat) : Rat))⁻¹) =
+        (x * x) * (C * (((2 ^ stage : Nat) : Rat))⁻¹) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= 1 * (C * (((2 ^ stage : Nat) : Rat))⁻¹) :=
+      Rat.mul_le_mul_of_nonneg_right hxx (Rat.mul_nonneg hC hinv)
+    _ = C * (1 * (((2 ^ stage : Nat) : Rat))⁻¹) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem arctan_bridge_even_error_le_radius
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    (2 * (n : Rat)) * ((2 * n + 1 : Nat) : Rat) *
+        (x * x / (((2 ^ leibnizRectangleBridgeMeshStage n : Nat) : Rat))) <=
+      1 / (((2 ^ n : Nat) : Rat)) := by
+  have hC : 0 <= (2 * (n : Rat)) * ((2 * n + 1 : Nat) : Rat) :=
+    Rat.mul_nonneg
+      (Rat.mul_nonneg (by native_decide) Rat.natCast_nonneg)
+      Rat.natCast_nonneg
+  calc
+    (2 * (n : Rat)) * ((2 * n + 1 : Nat) : Rat) *
+        (x * x / (((2 ^ leibnizRectangleBridgeMeshStage n : Nat) : Rat))) <=
+        (2 * (n : Rat)) * ((2 * n + 1 : Nat) : Rat) *
+          (1 / (((2 ^ leibnizRectangleBridgeMeshStage n : Nat) : Rat))) :=
+      arctan_bridge_mesh_factor_le_one hx0 hx1 hC
+        (leibnizRectangleBridgeMeshStage n)
+    _ <= 1 / (((2 ^ n : Nat) : Rat)) :=
+      leibniz_bridge_even_error_le_radius n
+
+private theorem arctan_bridge_odd_error_le_radius
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    ((2 * n + 1 : Nat) : Rat) * ((2 * n + 2 : Nat) : Rat) *
+        (x * x /
+          (((2 ^ leibnizRectangleBridgeMeshStage (n + 1) : Nat) : Rat))) <=
+      1 / (((2 ^ (n + 1) : Nat) : Rat)) := by
+  have hC : 0 <= ((2 * n + 1 : Nat) : Rat) * ((2 * n + 2 : Nat) : Rat) :=
+    Rat.mul_nonneg Rat.natCast_nonneg Rat.natCast_nonneg
+  calc
+    ((2 * n + 1 : Nat) : Rat) * ((2 * n + 2 : Nat) : Rat) *
+        (x * x / (((2 ^ leibnizRectangleBridgeMeshStage (n + 1) : Nat) : Rat))) <=
+        ((2 * n + 1 : Nat) : Rat) * ((2 * n + 2 : Nat) : Rat) *
+          (1 / (((2 ^ leibnizRectangleBridgeMeshStage (n + 1) : Nat) : Rat))) :=
+      arctan_bridge_mesh_factor_le_one hx0 hx1 hC
+        (leibnizRectangleBridgeMeshStage (n + 1))
+    _ <= 1 / (((2 ^ (n + 1) : Nat) : Rat)) :=
+      leibniz_bridge_odd_error_le_radius n
+
 private theorem scheduledRectangle_lower_le_leibniz_upper_plus_radius
     (n : Nat) :
     (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute
@@ -9279,6 +9478,243 @@ theorem leibnizEqualsRectangleRawAtOne_finiteRiemannBridge :
   exact RealRaw.equiv_trans leibnizSeriesValid hscheduleValid
     ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
     htoScheduled hscheduled
+
+private theorem scheduledRectangle_lower_le_arctan_upper_plus_radius
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    ((ArctanGeometry.arctanIntegralRectangleRaw x).compute
+        (leibnizRectangleBridgeMeshStage n)).lo <=
+      ((arctan x).compute n).hi + 1 / (((2 ^ n : Nat) : Rat)) := by
+  let stage := leibnizRectangleBridgeMeshStage n
+  let intervals := (ArctanGeometry.arctanAreaLoopState x stage).intervals
+  have hunit : ArctanGeometry.UnitIntervals intervals := by
+    dsimp [intervals]
+    exact ArctanGeometry.arctanAreaLoopState_intervals_unit hx0 hx1 stage
+  have hlower :=
+    LeibnizRectangleBridge.integralLowerSum_le_kernelPartialRightRectangleSum_even
+      n hunit
+  have herr :=
+    LeibnizRectangleBridge.arctanAreaLoopState_kernelPartialRightRectangle_error_bound
+      hx0 hx1 (2 * n) stage
+  have hradius := arctan_bridge_even_error_le_radius hx0 hx1 n
+  rw [ArctanValidity.arctan_compute_nonnegative_eq_kernelPartialIntegralInterval
+    x hx0 n]
+  change (ArctanGeometry.arctanIntegralRectangleCompute x stage).lo <=
+    ArctanValidity.upperKernelPartialAtStage x n +
+      1 / (((2 ^ n : Nat) : Rat))
+  change ArctanGeometry.integralLowerSum intervals <=
+    ArctanValidity.upperKernelPartialAtStage x n +
+      1 / (((2 ^ n : Nat) : Rat))
+  have herr' :
+      LeibnizRectangleBridge.kernelPartialRightRectangleSum (2 * n) intervals -
+          Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x (2 * n) <=
+        ((2 * n : Nat) : Rat) * ((2 * n + 1 : Nat) : Rat) *
+          (x * x / (((2 ^ stage : Nat) : Rat))) := by
+    simpa [intervals] using herr.2
+  have hright : LeibnizRectangleBridge.kernelPartialRightRectangleSum (2 * n)
+      intervals <= Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x (2 * n) +
+        (2 * (n : Rat)) * ((2 * n + 1 : Nat) : Rat) *
+          (x * x / (((2 ^ stage : Nat) : Rat))) := by
+    have hcast : ((2 * n : Nat) : Rat) = 2 * (n : Rat) := by
+      exact_mod_cast (by rfl : 2 * n = 2 * n)
+    rw [hcast] at herr'
+    grind [Rat.sub_eq_add_neg]
+  calc
+    ArctanGeometry.integralLowerSum intervals <=
+        LeibnizRectangleBridge.kernelPartialRightRectangleSum (2 * n) intervals := hlower
+    _ <= Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x (2 * n) +
+        (2 * (n : Rat)) * ((2 * n + 1 : Nat) : Rat) *
+          (x * x / (((2 ^ stage : Nat) : Rat))) := hright
+    _ <= Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x (2 * n) +
+        1 / (((2 ^ n : Nat) : Rat)) :=
+      (Rat.add_le_add_left).2 hradius
+    _ = ArctanValidity.upperKernelPartialAtStage x n +
+        1 / (((2 ^ n : Nat) : Rat)) := by
+          simp [ArctanValidity.upperKernelPartialAtStage]
+
+private theorem arctan_lower_le_scheduledRectangle_upper_plus_radius
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    ((arctan x).compute n).lo <=
+      ((ArctanGeometry.arctanIntegralRectangleRaw x).compute
+        (leibnizRectangleBridgeMeshStage n)).hi +
+        1 / (((2 ^ n : Nat) : Rat)) := by
+  cases n with
+  | zero =>
+      let stage := leibnizRectangleBridgeMeshStage 0
+      let intervals := (ArctanGeometry.arctanAreaLoopState x stage).intervals
+      have hunit : ArctanGeometry.UnitIntervals intervals := by
+        dsimp [intervals]
+        exact ArctanGeometry.arctanAreaLoopState_intervals_unit hx0 hx1 stage
+      have hnonneg := ArctanGeometry.integralUpperSum_nonneg intervals
+        (ArctanGeometry.unitIntervals_nonnegative intervals hunit)
+      rw [ArctanValidity.arctan_compute_nonnegative_eq_kernelPartialIntegralInterval
+        x hx0 0]
+      change 0 <= ArctanGeometry.integralUpperSum intervals +
+        1 / (((2 ^ 0 : Nat) : Rat))
+      have hrad : 0 <= 1 / (((2 ^ 0 : Nat) : Rat)) := by native_decide
+      grind
+  | succ n =>
+      let stage := leibnizRectangleBridgeMeshStage (n + 1)
+      let intervals := (ArctanGeometry.arctanAreaLoopState x stage).intervals
+      have hunit : ArctanGeometry.UnitIntervals intervals := by
+        dsimp [intervals]
+        exact ArctanGeometry.arctanAreaLoopState_intervals_unit hx0 hx1 stage
+      have hupper :=
+        LeibnizRectangleBridge.kernelPartialRightRectangleSum_odd_le_integralUpperSum
+          n hunit
+      have herr :=
+        LeibnizRectangleBridge.arctanAreaLoopState_kernelPartialRightRectangle_error_bound
+          hx0 hx1 (2 * n + 1) stage
+      have hradius := arctan_bridge_odd_error_le_radius hx0 hx1 n
+      rw [ArctanValidity.arctan_compute_nonnegative_eq_kernelPartialIntegralInterval
+        x hx0 (n + 1)]
+      change ArctanValidity.lowerKernelPartialAtStage x (n + 1) <=
+        (ArctanGeometry.arctanIntegralRectangleCompute x stage).hi +
+          1 / (((2 ^ (n + 1) : Nat) : Rat))
+      change ArctanValidity.lowerKernelPartialAtStage x (n + 1) <=
+        ArctanGeometry.integralUpperSum intervals +
+          1 / (((2 ^ (n + 1) : Nat) : Rat))
+      have herr' :
+          -(((2 * n + 1 : Nat) : Rat) * ((2 * n + 2 : Nat) : Rat) *
+              (x * x / (((2 ^ stage : Nat) : Rat)))) <=
+            LeibnizRectangleBridge.kernelPartialRightRectangleSum (2 * n + 1)
+              intervals -
+              Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x (2 * n + 1) := by
+        have hsucc : ((2 * n + 1 + 1 : Nat) : Rat) =
+            ((2 * n + 2 : Nat) : Rat) := by
+          exact_mod_cast (by omega : 2 * n + 1 + 1 = 2 * n + 2)
+        rw [hsucc] at herr
+        simpa [intervals] using herr.1
+      have hleft : Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x
+          (2 * n + 1) <=
+          LeibnizRectangleBridge.kernelPartialRightRectangleSum (2 * n + 1)
+            intervals + ((2 * n + 1 : Nat) : Rat) *
+              ((2 * n + 2 : Nat) : Rat) *
+              (x * x / (((2 ^ stage : Nat) : Rat))) := by
+        grind [Rat.sub_eq_add_neg]
+      calc
+        ArctanValidity.lowerKernelPartialAtStage x (n + 1) =
+            Taylor.ArctanKernel.kernelPartialIntegralBetween 0 x (2 * n + 1) := by
+              simp [ArctanValidity.lowerKernelPartialAtStage]
+        _ <= LeibnizRectangleBridge.kernelPartialRightRectangleSum (2 * n + 1)
+            intervals + ((2 * n + 1 : Nat) : Rat) *
+              ((2 * n + 2 : Nat) : Rat) *
+              (x * x / (((2 ^ stage : Nat) : Rat))) := hleft
+        _ <= ArctanGeometry.integralUpperSum intervals +
+            ((2 * n + 1 : Nat) : Rat) * ((2 * n + 2 : Nat) : Rat) *
+              (x * x / (((2 ^ stage : Nat) : Rat))) :=
+          (Rat.add_le_add_right).2 hupper
+        _ <= ArctanGeometry.integralUpperSum intervals +
+            1 / (((2 ^ (n + 1) : Nat) : Rat)) :=
+          (Rat.add_le_add_left).2 hradius
+
+private def arctanRectangleBridgePaddedRaw (x : Rat) : RealRaw :=
+  (RealRaw.schedule leibnizRectangleBridgeMeshSchedule
+    (ArctanGeometry.arctanIntegralRectangleRaw x) -
+      leibnizBridgeDyadicZero) + leibnizBridgeDyadicZero
+
+private theorem arctanRectangleBridgePaddedRaw_valid
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanRectangleBridgePaddedRaw x).Valid := by
+  unfold arctanRectangleBridgePaddedRaw
+  exact RealRaw.add_valid
+    (RealRaw.sub_valid
+      (RealRaw.schedule_valid (ArctanGeometry.arctanIntegralRectangleRaw x)
+        (ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1)
+        leibnizRectangleBridgeMeshSchedule)
+      leibnizBridgeDyadicZero_valid)
+    leibnizBridgeDyadicZero_valid
+
+private theorem arctan_equiv_arctanRectangleBridgePaddedRaw
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctan x).Equiv (arctanRectangleBridgePaddedRaw x) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff (arctan x)
+    (arctanRectangleBridgePaddedRaw x) n n).2
+  rw [ArctanValidity.arctan_compute_nonnegative_eq_kernelPartialIntegralInterval
+    x hx0 n]
+  change QInterval.Overlaps
+    { lo := ArctanValidity.lowerKernelPartialAtStage x n,
+      hi := ArctanValidity.upperKernelPartialAtStage x n }
+    { lo := ((ArctanGeometry.arctanIntegralRectangleRaw x).compute
+          (leibnizRectangleBridgeMeshStage n)).lo -
+          (1 / (((2 ^ n : Nat) : Rat))) + 0,
+      hi := ((ArctanGeometry.arctanIntegralRectangleRaw x).compute
+          (leibnizRectangleBridgeMeshStage n)).hi - 0 +
+          (1 / (((2 ^ n : Nat) : Rat))) }
+  unfold QInterval.Overlaps
+  have hlower := arctan_lower_le_scheduledRectangle_upper_plus_radius hx0 hx1 n
+  have hupper := scheduledRectangle_lower_le_arctan_upper_plus_radius hx0 hx1 n
+  rw [ArctanValidity.arctan_compute_nonnegative_eq_kernelPartialIntegralInterval
+    x hx0 n] at hlower hupper
+  generalize hradius : 1 / (((2 ^ n : Nat) : Rat)) = radius at hlower hupper ⊢
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+private theorem arctanRectangleBridgePaddedRaw_equiv_scheduledRectangle
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctanRectangleBridgePaddedRaw x).Equiv
+      (RealRaw.schedule leibnizRectangleBridgeMeshSchedule
+        (ArctanGeometry.arctanIntegralRectangleRaw x)) := by
+  unfold arctanRectangleBridgePaddedRaw
+  exact RealRaw.sub_add_cancel_equiv
+    (RealRaw.schedule_valid (ArctanGeometry.arctanIntegralRectangleRaw x)
+      (ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1)
+      leibnizRectangleBridgeMeshSchedule)
+    leibnizBridgeDyadicZero_valid
+
+/-- The alternating arctangent power series agrees with the geometric
+rectangle construction on every nonnegative rational input in `[0,1]`.
+The proof uses only finite rational kernel-polynomial estimates and a
+scheduled vanishing dyadic enclosure; it assumes no completed-real axiom. -/
+theorem arctanEqualsRectangleRaw_finiteRiemannBridge
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctan x).Equiv (ArctanGeometry.arctanIntegralRectangleRaw x) := by
+  have hArctanValid : (arctan x).Valid :=
+    arctan_valid_at arctanValid (arctanDomain_of_nonnegativeUnit hx0 hx1)
+  have hScheduledValid :
+      (RealRaw.schedule leibnizRectangleBridgeMeshSchedule
+        (ArctanGeometry.arctanIntegralRectangleRaw x)).Valid :=
+    RealRaw.schedule_valid (ArctanGeometry.arctanIntegralRectangleRaw x)
+      (ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1)
+      leibnizRectangleBridgeMeshSchedule
+  have htoScheduled : (arctan x).Equiv
+      (RealRaw.schedule leibnizRectangleBridgeMeshSchedule
+        (ArctanGeometry.arctanIntegralRectangleRaw x)) :=
+    RealRaw.equiv_trans hArctanValid
+      (arctanRectangleBridgePaddedRaw_valid hx0 hx1) hScheduledValid
+      (arctan_equiv_arctanRectangleBridgePaddedRaw hx0 hx1)
+      (arctanRectangleBridgePaddedRaw_equiv_scheduledRectangle hx0 hx1)
+  have hscheduled :
+      (RealRaw.schedule leibnizRectangleBridgeMeshSchedule
+        (ArctanGeometry.arctanIntegralRectangleRaw x)).Equiv
+        (ArctanGeometry.arctanIntegralRectangleRaw x) :=
+    RealRaw.equiv_symm
+      (RealRaw.schedule_equiv (ArctanGeometry.arctanIntegralRectangleRaw x)
+        (ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1)
+        leibnizRectangleBridgeMeshSchedule)
+  exact RealRaw.equiv_trans hArctanValid hScheduledValid
+    (ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1)
+    htoScheduled hscheduled
+
+/-- The series/kernal-integral comparison obtained from the finite Riemann
+bridge.  This is the analytic input used at the two arguments in Machin's
+single formula. -/
+theorem powerSeriesEqualsRectangleKernelAt_finiteRiemannBridge
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    PowerSeriesEqualsRectangleKernelAt x hx0 hx1 := by
+  unfold PowerSeriesEqualsRectangleKernelAt
+  have hArctanValid : (arctan x).Valid :=
+    arctan_valid_at arctanValid (arctanDomain_of_nonnegativeUnit hx0 hx1)
+  have hRectValid : (ArctanGeometry.arctanIntegralRectangleRaw x).Valid :=
+    ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1
+  have hKernelValid :
+      (Taylor.ArctanComparison.kernelIntegralRaw x
+        (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)).Valid :=
+    Taylor.ArctanComparison.kernelIntegralRaw_valid x
+      (rectangleKernelIntegralAtNonnegativeUnit x hx0 hx1)
+  exact RealRaw.equiv_trans hArctanValid hRectValid hKernelValid
+    (arctanEqualsRectangleRaw_finiteRiemannBridge hx0 hx1)
+    (rectangleKernelIntegralRaw_equiv_rectangleRaw_nonnegativeUnit x hx0 hx1)
 
 private theorem two_div_two_pow_stage_add_nine_le_budget
     (n : Nat) :
@@ -13923,6 +14359,23 @@ theorem piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs
     (by simpa [AreaValid] using AreaLoopValidity.areaValid)
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
+
+/-- Machin's classical single formula is a verified pi computation using its
+two alternating arctangent power series.  The only analytic comparison is the
+finite-rational series/rectangle bridge at `1/5` and `1/239`; the bounded
+tangent-chart additions provide the geometric identity. -/
+theorem piMachin_equiv_piCircleArea_finiteRiemannBridge :
+    piMachin.Equiv piCircleArea :=
+  piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs
+    (MachinIdentity.powerSeriesGeometryAtMachinSmallInputs_of_kernelComparisonAtMachinSmallInputs
+      { one_fifth :=
+          kernelComparisonAt_of_powerSeriesEqualsRectangleKernelAt
+            (powerSeriesEqualsRectangleKernelAt_finiteRiemannBridge
+              (x := (1 : Rat) / 5) (by native_decide) (by native_decide))
+        one_239 :=
+          kernelComparisonAt_of_powerSeriesEqualsRectangleKernelAt
+            (powerSeriesEqualsRectangleKernelAt_finiteRiemannBridge
+              (x := (1 : Rat) / 239) (by native_decide) (by native_decide)) })
 
 theorem piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinSmallInputs
     (route : MachinIdentity.KernelComparisonAtMachinSmallInputs) :
