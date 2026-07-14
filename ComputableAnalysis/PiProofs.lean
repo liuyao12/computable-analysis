@@ -216,6 +216,18 @@ theorem machinValid_of_arctanValid
       (RealRaw.natScale_valid 4 h15)
       h239)
 
+/-- The bounded two-term arctangent computation is a valid raw real whenever
+the arctangent series is valid on its stated unit domain. -/
+theorem piArctanHalfThirdValid : piArctanHalfThird.Valid := by
+  have hhalf : (arctan ((1 : Rat) / 2)).Valid :=
+    arctan_valid_at arctanValid
+      (arctanDomain_of_nonnegativeUnit (by native_decide) (by native_decide))
+  have hthird : (arctan ((1 : Rat) / 3)).Valid :=
+    arctan_valid_at arctanValid
+      (arctanDomain_of_nonnegativeUnit (by native_decide) (by native_decide))
+  unfold piArctanHalfThird
+  exact RealRaw.natScale_valid 4 (RealRaw.add_valid hhalf hthird)
+
 namespace ArctanValidity
 
 abbrev State := Prod Rat (Prod Rat Rat)
@@ -9696,6 +9708,23 @@ theorem arctanEqualsRectangleRaw_finiteRiemannBridge
     (ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1)
     htoScheduled hscheduled
 
+/-- The alternating arctangent power series agrees directly with the
+geometric arctangent on every nonnegative rational input in `[0,1]`.
+This packages the finite-Riemann series bridge with the finite rectangle-to-
+geometry comparison, without invoking a completed-real limit theorem. -/
+theorem arctanEqualsGeom_finiteRiemannBridge
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctan x).Equiv (ArctanGeometry.arctanGeom x) := by
+  have hArctanValid : (arctan x).Valid :=
+    arctan_valid_at arctanValid (arctanDomain_of_nonnegativeUnit hx0 hx1)
+  have hRectValid : (ArctanGeometry.arctanIntegralRectangleRaw x).Valid :=
+    ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1
+  have hGeomValid : (ArctanGeometry.arctanGeom x).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit hx0 hx1
+  exact RealRaw.equiv_trans hArctanValid hRectValid hGeomValid
+    (arctanEqualsRectangleRaw_finiteRiemannBridge hx0 hx1)
+    (ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom hx0)
+
 /-- The series/kernal-integral comparison obtained from the finite Riemann
 bridge.  This is the analytic input used at the two arguments in Machin's
 single formula. -/
@@ -14298,6 +14327,75 @@ theorem piCircleArea_equiv_four_arctanGeom_one :
     piCircleArea.Equiv
       (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw)) :=
   RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
+
+/-- The two bounded alternating arctangent series at `1/2` and `1/3` compute
+pi.  Their geometric images add inside the unit tangent chart, since the
+rational chart-addition parameter is exactly `1`. -/
+theorem piArctanHalfThird_equiv_piCircleArea_finiteRiemannBridge :
+    piArctanHalfThird.Equiv piCircleArea := by
+  have hpsHalf : (arctan ((1 : Rat) / 2)).Valid :=
+    arctan_valid_at arctanValid
+      (arctanDomain_of_nonnegativeUnit (by native_decide) (by native_decide))
+  have hpsThird : (arctan ((1 : Rat) / 3)).Valid :=
+    arctan_valid_at arctanValid
+      (arctanDomain_of_nonnegativeUnit (by native_decide) (by native_decide))
+  have hgeomHalf : (ArctanGeometry.arctanGeom ((1 : Rat) / 2)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have hgeomThird : (ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have hgeomOne : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have hseriesGeomHalf :
+      (arctan ((1 : Rat) / 2)).Equiv
+        (ArctanGeometry.arctanGeom ((1 : Rat) / 2)) :=
+    arctanEqualsGeom_finiteRiemannBridge (by native_decide) (by native_decide)
+  have hseriesGeomThird :
+      (arctan ((1 : Rat) / 3)).Equiv
+        (ArctanGeometry.arctanGeom ((1 : Rat) / 3)) :=
+    arctanEqualsGeom_finiteRiemannBridge (by native_decide) (by native_decide)
+  have hseriesSumGeomSum :
+      (arctan ((1 : Rat) / 2) + arctan ((1 : Rat) / 3)).Equiv
+        (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+          ArctanGeometry.arctanGeom ((1 : Rat) / 3)) :=
+    RealRaw.add_equiv hpsHalf hgeomHalf hpsThird hgeomThird
+      hseriesGeomHalf hseriesGeomThird
+  have hgeomSumOne :
+      (ArctanGeometry.arctanGeom ((1 : Rat) / 2) +
+        ArctanGeometry.arctanGeom ((1 : Rat) / 3)).Equiv
+        ArctanGeometry.arctanGeom (1 : Rat) := by
+    have h := ArctanGeometry.arctanGeom_chartAdd_add_of_half
+      (u := (1 : Rat) / 2) (x := (1 : Rat) / 3)
+      (by native_decide) (by native_decide)
+      (by native_decide) (by native_decide) (by native_decide)
+    have hparam :
+        RationalCircle.Trigonometry.chartAddParameter
+          ((1 : Rat) / 2) ((1 : Rat) / 3) = (1 : Rat) := by
+      native_decide
+    rw [hparam] at h
+    exact h
+  have hsumOne :
+      (arctan ((1 : Rat) / 2) + arctan ((1 : Rat) / 3)).Equiv
+        ArctanGeometry.arctanGeom (1 : Rat) :=
+    RealRaw.equiv_trans
+      (RealRaw.add_valid hpsHalf hpsThird)
+      (RealRaw.add_valid hgeomHalf hgeomThird)
+      hgeomOne hseriesSumGeomSum hgeomSumOne
+  have hscaled :
+      piArctanHalfThird.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+    simpa [piArctanHalfThird] using RealRaw.natScale_equiv 4 hsumOne
+  exact RealRaw.equiv_trans
+    piArctanHalfThirdValid
+    (RealRaw.natScale_valid 4 hgeomOne)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscaled four_arctanGeom_one_equiv_piCircleArea
+
+/-- Public canonical equivalence for the bounded two-term arctangent
+computation.  Its finite-rational proof is
+`piArctanHalfThird_equiv_piCircleArea_finiteRiemannBridge`. -/
+theorem piHalfThird_equiv_area :
+    piArctanHalfThird.Equiv piCircleArea :=
+  piArctanHalfThird_equiv_piCircleArea_finiteRiemannBridge
 
 /-- The direct Machin evaluator reaches the certified circle-area definition
 from comparisons at its two actual series inputs.  The endpoint comparison at
