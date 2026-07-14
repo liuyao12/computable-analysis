@@ -332,10 +332,11 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently six of fifteen named
-  computations are valid raw reals, and two of fourteen applicable rows have
+  `blueprint/src/pi-scoreboard-table.tex`: currently seven of sixteen named
+  computations are valid raw reals, and three of fifteen applicable rows have
   a formal equivalence chain to `piCircleArea`.  The completed canonical
-  rows are the geometric quarter-turn computation
+  rows are the direct area-loop computation, its independently evaluated
+  rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn computation
   `4 * arctanGeom(1)` and its single rectangle-integral formulation
   `4 * arctanIntegralRectangleForAtOne`.
 - The next canonical series equivalence has two constructive routes.  The
