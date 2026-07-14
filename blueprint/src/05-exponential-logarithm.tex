@@ -8,6 +8,84 @@ power-series representation depends on Chapter~\ref{ch:infinite-series}.
 The guiding sanity check is the same as for \(\pi\): independent computations
 of the same constant or function should be proved equivalent as raw reals.
 
+\section{Positive-base powers and the Euler base}
+
+\begin{definition}[Positive base and repeated multiplication]
+\label{def:positive-base-natural-powers}
+\lean{ComputableAnalysis.exp.PositiveRealRaw.natPow}
+\uses{def:raw-real}
+A positive computable real is represented by a valid raw real together with
+one positive rational lower bound that holds for every interval stage.  This
+is the constructive positivity condition needed to make powers meaningful;
+it does not appeal to an unrepresented completed real line.
+
+For any such base \(b\), natural powers are defined by repeated
+multiplication:
+\[
+ b^0=1,\qquad b^{n+1}=b^n b.
+\]
+The raw interval multiplication is the same finite rational interval
+arithmetic used throughout the foundation.  Thus this definition works for
+an arbitrary positive computable real base, not merely for a rational base.
+\end{definition}
+
+\begin{definition}[Rational powers]
+\label{def:rational-powers}
+\lean{ComputableAnalysis.exp.RationalPowerExtension}
+\uses{def:positive-base-natural-powers}
+A rational-power extension for \(b\) supplies a valid positive raw real
+\(b^q\) for every \(q\in\mathbb Q\), with a certified positive rational
+lower bound at every interval stage; it agrees with repeated multiplication
+at natural exponents and satisfies
+\[
+ b^{p+q}=b^p b^q.
+\]
+For \(p\in\mathbb N\) and \(q>0\), its denominator law is the certified
+root equation
+\[
+ \left(b^{p/q}\right)^q=b^p.
+\]
+Negative rational exponents are then governed by the additive law.  This is
+an interface for a computation and its proof obligations: constructing the
+positive root algorithms and proving their validity remains explicit work,
+rather than being hidden in a completeness axiom.
+\end{definition}
+
+\begin{definition}[Euler base from an exponential]
+\label{def:e-from-exponential-at-one}
+\lean{ComputableAnalysis.exp.ExponentialFunction.eAtOne}
+\uses{def:rational-powers}
+An exponential representation is a total rational-input raw function that
+agrees with one rational-power extension.  Its Euler base is, by definition,
+its value at one:
+\[
+ e_E=E(1).
+\]
+This single definition applies to every eventual construction of the
+exponential function.  The power-series, compound-interest, and inverse-log
+constructions below are therefore intended to be compared as representatives
+of the same \(e_E\), not as unrelated constants.
+\end{definition}
+
+\begin{theorem}[Derivative characterizations of the Euler base]
+\label{thm:e-self-derivative-and-unit-slope}
+\uses{def:rational-powers,def:e-from-exponential-at-one}
+There are two complementary characterizations to prove constructively:
+\[
+ \frac{d}{dx}e^x=e^x,
+ \qquad
+ \left.\frac{d}{dx}b^x\right|_{x=0}=1
+ \Longleftrightarrow b=e.
+\]
+The first statement is represented by an interval-valued derivative
+certificate on each rational interval; the second uses rational difference
+quotients at zero.  Lean already proves the formal coefficient identity
+\(\exp' = \exp\).  The remaining analytic theorem is to turn the certified
+power-series tail bounds into the corresponding derivative certificate and
+then establish the displayed uniqueness statement by finite rational
+estimates.
+\end{theorem}
+
 \section{Three definitions of \texorpdfstring{$e$}{e}}
 
 \begin{definition}[Power-series \texorpdfstring{$e$}{e}]

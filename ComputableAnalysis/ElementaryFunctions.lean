@@ -27,6 +27,153 @@ theorem qcomplex_one_pow (n : Nat) :
       rw [QComplex.pow, ih]
       grind [QComplex.mul, QComplex.one]
 
+/-- A positive computable real, witnessed by one rational lower bound that
+holds at every stage.  This constructive positivity is the domain condition
+for arbitrary-base powers. -/
+structure PositiveRealRaw where
+  value : RealRaw
+  valid : value.Valid
+  lower_bound : Rat
+  lower_bound_pos : 0 < lower_bound
+  lower_bound_le : forall n, lower_bound <= (value.compute n).lo
+
+namespace PositiveRealRaw
+
+/-- Natural powers of a positive raw real, defined by repeated
+multiplication. -/
+def natPowRaw (value : RealRaw) : Nat -> RealRaw
+  | 0 => RealRaw.one
+  | n + 1 => natPowRaw value n * value
+
+def natPow (base : PositiveRealRaw) : Nat -> RealRaw :=
+  natPowRaw base.value
+
+end PositiveRealRaw
+
+/-- A verified extension of repeated multiplication from natural to rational
+exponents for one positive base.
+
+The `denominator_power` field says that the supplied rational power is the
+positive `q`th root of the corresponding natural power.  Negative exponents
+are governed by the additive law, so this interface does not conceal a
+choice of logarithm or a real-completeness argument. -/
+structure RationalPowerExtension (base : PositiveRealRaw) where
+  power : Rat -> RealRaw
+  power_valid : forall q, (power q).Valid
+  power_lower_bound : Rat -> Rat
+  power_lower_bound_pos : forall q, 0 < power_lower_bound q
+  power_lower_bound_le : forall q n,
+    power_lower_bound q <= ((power q).compute n).lo
+  zero_equiv_one : (power 0).Equiv RealRaw.one
+  natural_equiv_natPow : forall n : Nat,
+    (power (n : Rat)).Equiv (PositiveRealRaw.natPow base n)
+  add_equiv_mul : forall p q, (power (p + q)).Equiv (power p * power q)
+  denominator_power : forall p q : Nat, 0 < q ->
+    (PositiveRealRaw.natPowRaw (power ((p : Rat) / (q : Rat))) q).Equiv
+      (PositiveRealRaw.natPow base p)
+
+namespace RationalPowerExtension
+
+/-- The rational-input exponential function induced by a rational-power
+extension.  It is total on rational inputs and is the representation that
+later extends continuously to arbitrary computable-real exponents. -/
+def toPartialRealFunRaw {base : PositiveRealRaw}
+    (powers : RationalPowerExtension base) : PartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x _ => (powers.power x).compute
+
+theorem toPartialRealFunRaw_valid {base : PositiveRealRaw}
+    (powers : RationalPowerExtension base) :
+    forall x h, RealRaw.ValidCompute (powers.toPartialRealFunRaw.compute x h) := by
+  intro x _h
+  exact powers.power_valid x
+
+/-- Restrict rational powers to a rational interval for the derivative and
+FTC interfaces. -/
+def onInterval {base : PositiveRealRaw} (powers : RationalPowerExtension base)
+    (a b : Rat) : FunctionOnInterval where
+  raw := powers.toPartialRealFunRaw
+  lower := a
+  upper := b
+  defined_on := by
+    intro _ _
+    trivial
+  valid_on := by
+    intro x h
+    exact powers.toPartialRealFunRaw_valid x h
+
+/-- A direct, rational-step derivative certificate at one rational input.
+This is deliberately the pointwise form needed for the characterization of
+Euler's number, rather than a hidden appeal to an ambient completed real line. -/
+structure HasDerivativeAt (powers : RationalPowerExtension base)
+    (x : Rat) (derivative : RealRaw) where
+  derivative_valid : derivative.Valid
+  stepPrecision : Nat -> Nat
+  evalPrecision : Nat -> Nat
+  close :
+    forall h n, h ≠ 0 ->
+      qabs h <= (1 / ((stepPrecision n : Nat) : Rat)) ->
+      intervalCloseAtPrecision
+        (QInterval.differenceQuotient
+          ((powers.power (x + h)).compute (evalPrecision n))
+          ((powers.power x).compute (evalPrecision n)) h)
+        (derivative.compute (evalPrecision n)) n
+
+/-- The alternative characterization of the Euler base: its rational powers
+have derivative `1` at exponent zero. -/
+def HasUnitDerivativeAtZero {base : PositiveRealRaw}
+    (powers : RationalPowerExtension base) : Prop :=
+  Nonempty (HasDerivativeAt powers 0 RealRaw.one)
+
+end RationalPowerExtension
+
+/-- A rational-input exponential representation attached to a positive-base
+rational-power extension. -/
+structure ExponentialFunction {base : PositiveRealRaw}
+    (powers : RationalPowerExtension base) where
+  raw : PartialRealFunRaw
+  defined_everywhere : forall x, raw.definedAt x
+  valid : forall x h, RealRaw.ValidCompute (raw.compute x h)
+  agrees_with_rational_powers : forall q,
+    (raw.evalRaw q (defined_everywhere q)).Equiv (powers.power q)
+
+namespace ExponentialFunction
+
+/-- Euler's number as the value at `1` of any chosen exponential
+representation. -/
+def eAtOne {base : PositiveRealRaw} {powers : RationalPowerExtension base}
+    (E : ExponentialFunction powers) : RealRaw :=
+  E.raw.evalRaw 1 (E.defined_everywhere 1)
+
+/-- The exponential representation on a finite rational interval. -/
+def onInterval {base : PositiveRealRaw} {powers : RationalPowerExtension base}
+    (E : ExponentialFunction powers) (a b : Rat) : FunctionOnInterval where
+  raw := E.raw
+  lower := a
+  upper := b
+  defined_on := by
+    intro x _hx
+    exact E.defined_everywhere x
+  valid_on := E.valid
+
+/-- The analytic milestone `d/dx exp(x) = exp(x)` on a chosen interval. -/
+def SolvesSelfDerivativeOn {base : PositiveRealRaw}
+    {powers : RationalPowerExtension base} (E : ExponentialFunction powers)
+    (a b : Rat) : Prop :=
+  Nonempty (SolvesSelfDerivativeOnInterval (E.onInterval a b))
+
+/-- The uniqueness statement connecting the two definitions of `e`: a
+positive base whose rational powers have unit derivative at zero must equal
+the value at `1` of the chosen exponential. -/
+def UnitDerivativeCharacterizesE {base : PositiveRealRaw}
+    {powers : RationalPowerExtension base} (E : ExponentialFunction powers) : Prop :=
+  forall {candidateBase : PositiveRealRaw}
+      (candidate : RationalPowerExtension candidateBase),
+    candidate.HasUnitDerivativeAtZero ->
+      candidateBase.value.Equiv E.eAtOne
+
+end ExponentialFunction
+
 /-- The power-series representation of exponential, defined on all rational
 complex inputs. -/
 def ps : FunctionRaw where

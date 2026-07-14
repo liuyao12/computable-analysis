@@ -152,6 +152,24 @@ not a description of the current module graph. The checked blueprint
 
 ## Elementary Functions
 
+- Positive-base powers now have a constructive interface: a positive raw base
+  has a uniform positive rational lower bound; natural powers are repeated
+  interval multiplication; and a rational-power extension supplies valid
+  values, the additive law, and certified denominator/root equations.
+  `exp.ExponentialFunction.eAtOne` defines the Euler base as the value at `1`
+  of any exponential representation.  See `PositiveRealRaw`,
+  `PositiveRealRaw.natPow`, `RationalPowerExtension`, and
+  `ExponentialFunction.eAtOne` in
+  `ComputableAnalysis/ElementaryFunctions.lean`.
+- The two intended characterizations of the Euler base are now explicit
+  obligations: the exponential solves `f' = f` on rational intervals, and a
+  positive base is Euler exactly when its rational powers have derivative `1`
+  at exponent zero.  `RationalPowerExtension.HasDerivativeAt`,
+  `RationalPowerExtension.HasUnitDerivativeAtZero`,
+  `ExponentialFunction.SolvesSelfDerivativeOn`, and
+  `ExponentialFunction.UnitDerivativeCharacterizesE` record the
+  rational-interval statements.  Their analytic proof remains to be supplied;
+  only the formal coefficient identity is proved so far.
 - Exponential has three constructive representations to compare: power series
   `exp.ps`, Euler limit `exp.euler`, and inverse to the logarithmic integral
   `int_1^x dt/t`.  The first two are concrete `FunctionRaw`s now.  The
@@ -200,11 +218,14 @@ not a description of the current module graph. The checked blueprint
   `FormalPowerSeries.coshCoeff_derivative`.
 - Next theorem for `exp.ps`: turn the formal coefficient identity plus
   rational tail bounds into an effective derivative certificate for the boxed
-  algorithm.  This can be specialized to exponential first; a general
-  term-by-term differentiation theorem can come later.
+  algorithm, hence a witness for
+  `exp.ExponentialFunction.SolvesSelfDerivativeOn`.  This can be specialized
+  to exponential first; a general term-by-term differentiation theorem can
+  come later.
 - To prove equality of the three exponential representations by calculus
   rather than by ad hoc estimates, prove a constructive uniqueness principle
-  for `f' = f` with `f(0) = 1`.  See
+  for `f' = f` with `f(0) = 1`, then prove the equivalent unit-slope
+  characterization of the base at zero.  See
   `SolvesSelfDerivativeOnInterval` and `SelfDerivativeInitialValueUnique` in
   `ComputableAnalysis/Differential.lean`.
 
@@ -333,14 +354,20 @@ students actually compute.
 
 - The canonical progress measure is the checked table in
   `blueprint/src/pi-scoreboard-table.tex`: currently seven of sixteen named
-  computations are valid raw reals, and three of fifteen applicable rows have
+  computations are valid raw reals, and four of fifteen applicable rows have
   a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
   rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn computation
   `4 * arctanGeom(1)` and its single rectangle-integral formulation
-  `4 * arctanIntegralRectangleForAtOne`.
-- The next canonical series equivalence has two constructive routes.  The
-  exact-order route needs the uniform all-partials bridge
+  `4 * arctanIntegralRectangleForAtOne`, and the series computation
+  `4 * arctanSeries(1)`.
+- The canonical Leibniz series equivalence is proved by the finite Riemann
+  bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
+  a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
+  shrinking dyadic-zero interval, and cancels the padding in raw-real
+  arithmetic.  Its public consequence is
+  `four_arctanSeries_one_equiv_piCircleArea`.  The exact-order route remains
+  an independent stronger quadrature API and needs the uniform all-partials bridge
   `PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit`.
   Pointwise kernel bounds and finite certificates through the indicated
   prefixes are checked. Exact cell-order preservation is now proved for the
@@ -349,10 +376,7 @@ students actually compute.
   nonconstant case uses explicit nonnegative rational endpoint-gap factors;
   the degree-four case uses Boole quadrature and the degree-six and
   degree-eight cases use positive seven-point and eleven-point rational
-  Newton--Cotes identities.  In parallel, the all-degree endpoint-error
-  route now has its exact monomial primitive bound; its remaining step is a
-  finite alternating-polynomial summation and mesh-budget theorem.  Neither
-  route uses completeness.
+  Newton--Cotes identities.  Neither route uses completeness.
 - `piMachin` previously needed a principal-branch addition certificate.  The
   required three bounded rational additions are now proved:
   `2*atanGeom(1/5) = atanGeom(5/12)`,
