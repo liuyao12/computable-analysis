@@ -314,19 +314,12 @@ equivalence.
 \[
   4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
 \]
-The table-facing equivalence is now discharged by
-\code{PiProofs.leibnizEqualsRectangleRawAtOne\_finiteRiemannBridge} and
-\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea}.  For the
-series stage (n), Lean schedules a substantially finer dyadic rectangle
-mesh, proves that the signed finite-polynomial endpoint error lies inside a
-vanishing dyadic-zero interval, and cancels that interval using raw-real
-arithmetic.  Every estimate is a finite rational identity or inequality.
-
-The exact rational-cell order theorem
-\code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}
-remains a useful stronger quadrature API.  It feeds the older
+The global missing input remains:
+\code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit},
+the exact rational-cell order theorem for the arctangent kernel partials on
+\([0,1]\).  It feeds the older
 \code{PiProofs.LeibnizRectangleBridge.LeibnizRectangleUnitCellOrderPreservation}
-target, but is no longer required for the canonical series row.
+target and hence the table-facing pi equivalence.
 The constant partial, \(1-x^2\), \(1-x^2+x^4\),
 \(1-x^2+x^4-x^6\), and \(1-x^2+x^4-x^6+x^8\) are now proved exact-cell
 instances.  The first nonconstant case uses explicit nonnegative endpoint-gap
@@ -334,7 +327,9 @@ factors; the degree-four case uses Boole quadrature, while the degree-six and
 degree-eight cases use positive seven-point and eleven-point rational
 Newton--Cotes rules, respectively.  The underlying
 positive-quadrature theorem accepts any finite rational rule with nonnegative
-weights, so higher exact rules can reuse the same order argument.
+weights, so higher exact rules can reuse the same order argument.  What
+remains is the uniform lift to all alternating partials, not a completeness
+argument.
 Lean also records the direct finite-prefix route:
 \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_kernelBoundsUpToAll}.
 Pointwise bounds:
@@ -344,8 +339,8 @@ cell-integration target:
 Since the actual \(\arctan(1)\) partitions stay inside \([0,1]\), Lean also
 records the sharper unit-cell target
 \code{PiProofs.LeibnizRectangleBridge.LeibnizRectanglePointwiseUnitIntegralBridgeAtOne},
-which supplies a separate exact-cell proof route.  The order-preservation
-target implies this unit-cell bridge directly.
+which is already sufficient for the table-facing pi equivalence.  The new
+order-preservation target implies this unit-cell bridge directly.
 \[
   \frac{r-p}{1+r^2}
   \le

@@ -188,8 +188,6 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.arctanGeom_equiv_rectangleKernelIntegral_nonnegativeUnit}
 \lean{ComputableAnalysis.PiProofs.PowerSeriesEqualsRectangleKernelAtOne}
 \lean{ComputableAnalysis.PiProofs.LeibnizEqualsRectangleRawAtOne}
-\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_finiteRiemannBridge}
-\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.EvenKernelCellBound}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.OddKernelCellBound}
 \lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.OddKernelUnitCellBound}
@@ -644,7 +642,7 @@ Unit-branch validity:
 \code{ArctanGeometry.arctanGeom\_valid\_on\_unit},
 \code{ArctanGeometry.arctanGeom\_valid\_on\_powerSeriesDomain}.
 
-Optional exact-cell Leibniz/rectangle target:
+Leibniz/rectangle target:
 \code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}.
 \lean{ComputableAnalysis.Integral.exactCellOrderPreservation_constant}
 \lean{ComputableAnalysis.Integral.exactCellOrderPreservation_of_positive_quadrature}
@@ -666,9 +664,8 @@ degree-four case uses Boole quadrature, and the degree-six and degree-eight
 cases use positive seven-point and eleven-point rational Newton--Cotes rules,
 respectively.
 A reusable finite positive-quadrature bridge separates the order argument
-from the polynomial identity.  This remains a useful stronger API for exact
-cell certification, but it is no longer an outstanding prerequisite for the
-canonical Leibniz equivalence.
+from the polynomial identity.  The outstanding task is to lift this finite
+rational algebra uniformly to every alternating partial.
 
 A complementary all-degree route now starts from exact finite Riemann algebra,
 rather than requiring an all-degree positive quadrature identity.  For
@@ -688,21 +685,10 @@ The checked theorems are
 \lean{ComputableAnalysis.Taylor.ArctanKernel.powDifferenceFactor_average_bounds}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.monomialIntegralBetween_endpoint_bounds}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.monomialIntegralBetween_endpoint_error_le}
-This all-degree route is complete.  Lean sums the signed polynomial errors
-over the established dyadic square-mesh budget, schedules a sufficiently fine
-mesh for each Leibniz stage, and widens the geometric rectangle interval by a
-vanishing dyadic-zero interval.  The resulting raw interval overlaps the
-Leibniz interval at every stage, and raw-real subtraction/addition cancels
-the padding.  The checked public bridge is
-\code{PiProofs.leibnizEqualsRectangleRawAtOne\_finiteRiemannBridge}, yielding
-\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea}.  No
-completed-real limit or completeness axiom is involved.
-\lean{ComputableAnalysis.Taylor.ArctanKernel.signed_kernelTerm_rightRectangle_error_bound}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartial_rightRectangle_error_bound}
-\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.kernelPartialRightRectangleSum_error_bound}
-\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.arctanAreaLoopState_one_kernelPartialRightRectangle_error_bound}
-\lean{ComputableAnalysis.PiProofs.leibnizEqualsRectangleRawAtOne_finiteRiemannBridge}
-\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea}
+The remaining bridge is explicitly finite: sum these polynomial errors over
+the established dyadic square-mesh budget, then combine that schedule with
+the already checked finite Taylor remainder.  No completed-real limit or
+completeness axiom is involved.
 \[
   \frac{r-p}{1+r^2}
   \le

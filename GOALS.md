@@ -333,15 +333,13 @@ students actually compute.
 
 - The canonical progress measure is the checked table in
   `blueprint/src/pi-scoreboard-table.tex`: currently six of fifteen named
-  computations are valid raw reals, and three of fourteen applicable rows have
+  computations are valid raw reals, and two of fourteen applicable rows have
   a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the geometric quarter-turn computation
-  `4 * arctanGeom(1)`, its single rectangle-integral formulation
-  `4 * arctanIntegralRectangleForAtOne`, and
-  `4 * arctanSeries(1)`.
-- The exact-order route for the canonical series equivalence remains useful
-  as a reusable quadrature certificate.  It needs the uniform all-partials
-  bridge
+  `4 * arctanGeom(1)` and its single rectangle-integral formulation
+  `4 * arctanIntegralRectangleForAtOne`.
+- The next canonical series equivalence has two constructive routes.  The
+  exact-order route needs the uniform all-partials bridge
   `PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit`.
   Pointwise kernel bounds and finite certificates through the indicated
   prefixes are checked. Exact cell-order preservation is now proved for the
@@ -350,11 +348,10 @@ students actually compute.
   nonconstant case uses explicit nonnegative rational endpoint-gap factors;
   the degree-four case uses Boole quadrature and the degree-six and
   degree-eight cases use positive seven-point and eleven-point rational
-  Newton--Cotes identities.  Independently, the all-degree endpoint-error
-  route now sums the signed finite polynomial errors over the existing
-  dyadic square mesh.  Its scheduled, dyadically padded rectangle bracket is
-  equivalent to the Leibniz series, yielding
-  `PiProofs.four_arctanSeries_one_equiv_piCircleArea` without completeness.
+  Newton--Cotes identities.  In parallel, the all-degree endpoint-error
+  route now has its exact monomial primitive bound; its remaining step is a
+  finite alternating-polynomial summation and mesh-budget theorem.  Neither
+  route uses completeness.
 - `piMachin` previously needed a principal-branch addition certificate.  The
   required three bounded rational additions are now proved:
   `2*atanGeom(1/5) = atanGeom(5/12)`,
