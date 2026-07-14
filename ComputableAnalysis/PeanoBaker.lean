@@ -99,10 +99,50 @@ def matrixApply {dimension : Nat} (A : RatMatrix dimension) (x : RatVector dimen
     RatVector dimension :=
   fun i => finiteSum (fun j => A i j * x j)
 
+theorem vectorAdd_zero_right {dimension : Nat} (x : RatVector dimension) :
+    vectorAdd x (vectorZero dimension) = x := by
+  funext i
+  exact Rat.add_zero _
+
+theorem vectorAdd_assoc {dimension : Nat} (x y z : RatVector dimension) :
+    vectorAdd (vectorAdd x y) z = vectorAdd x (vectorAdd y z) := by
+  funext i
+  exact Rat.add_assoc _ _ _
+
+theorem matrixApply_zero {dimension : Nat} (A : RatMatrix dimension) :
+    matrixApply A (vectorZero dimension) = vectorZero dimension := by
+  funext i
+  unfold matrixApply vectorZero
+  rw [show (fun j => A i j * 0) = (fun _ => 0) by
+    funext j
+    exact Rat.mul_zero _]
+  exact finiteSum_zero dimension
+
+theorem matrixApply_vectorAdd {dimension : Nat}
+    (A : RatMatrix dimension) (x y : RatVector dimension) :
+    matrixApply A (vectorAdd x y) =
+      vectorAdd (matrixApply A x) (matrixApply A y) := by
+  funext i
+  unfold matrixApply vectorAdd
+  calc
+    finiteSum (fun j => A i j * (x j + y j)) =
+        finiteSum (fun j => A i j * x j + A i j * y j) := by
+          congr 1
+          funext j
+          exact Rat.mul_add _ _ _
+    _ = finiteSum (fun j => A i j * x j) +
+        finiteSum (fun j => A i j * y j) :=
+      finiteSum_add _ _
+
 theorem matrixAdd_zero_left {dimension : Nat} (A : RatMatrix dimension) :
     matrixAdd (matrixZero dimension) A = A := by
   funext i j
   exact Rat.zero_add _
+
+theorem matrixAdd_zero_right {dimension : Nat} (A : RatMatrix dimension) :
+    matrixAdd A (matrixZero dimension) = A := by
+  funext i j
+  exact Rat.add_zero _
 
 theorem matrixAdd_assoc {dimension : Nat} (A B C : RatMatrix dimension) :
     matrixAdd (matrixAdd A B) C = matrixAdd A (matrixAdd B C) := by
@@ -208,6 +248,81 @@ theorem trajectory_succ (system : DiscreteLinearSystem dimension)
       vectorAdd (matrixApply (system.step n) (system.trajectory initial n))
         (system.forcing n) := rfl
 
+/-- The homogeneous part of a sampled linear system, retaining the literal
+time order of the successive matrix actions. -/
+def homogeneousTrajectory (system : DiscreteLinearSystem dimension)
+    (initial : RatVector dimension) : Nat -> RatVector dimension
+  | 0 => initial
+  | n + 1 => matrixApply (system.step n)
+      (homogeneousTrajectory system initial n)
+
+theorem homogeneousTrajectory_zero (system : DiscreteLinearSystem dimension)
+    (initial : RatVector dimension) :
+    system.homogeneousTrajectory initial 0 = initial := rfl
+
+theorem homogeneousTrajectory_succ (system : DiscreteLinearSystem dimension)
+    (initial : RatVector dimension) (n : Nat) :
+    system.homogeneousTrajectory initial (n + 1) =
+      matrixApply (system.step n) (system.homogeneousTrajectory initial n) := rfl
+
+/-- Exact finite variation of constants for a sampled linear system.
+
+The second summand is the trajectory from zero initial data, so its recursion
+is the chronological finite Duhamel sum of the forcing samples.  This proof
+uses only finite rational matrix actions; no limiting ODE theorem is hidden in
+the statement. -/
+theorem trajectory_eq_homogeneous_add_zeroInitial
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension) :
+    forall n,
+      system.trajectory initial n =
+        vectorAdd (system.homogeneousTrajectory initial n)
+          (system.trajectory (vectorZero dimension) n)
+  | 0 => by
+      unfold trajectory homogeneousTrajectory vectorAdd vectorZero
+      funext i
+      exact (Rat.add_zero _).symm
+  | n + 1 => by
+      change
+        vectorAdd (matrixApply (system.step n) (system.trajectory initial n))
+            (system.forcing n) =
+          vectorAdd
+            (matrixApply (system.step n)
+              (system.homogeneousTrajectory initial n))
+            (vectorAdd
+              (matrixApply (system.step n)
+                (system.trajectory (vectorZero dimension) n))
+              (system.forcing n))
+      rw [trajectory_eq_homogeneous_add_zeroInitial system initial n]
+      rw [matrixApply_vectorAdd]
+      exact vectorAdd_assoc _ _ _
+
+/-- A sampled system has no inhomogeneous contribution when every forcing
+sample is the zero vector. -/
+def ForcingZero (system : DiscreteLinearSystem dimension) : Prop :=
+  forall k, system.forcing k = vectorZero dimension
+
+theorem trajectory_zeroInitial_of_forcingZero
+    (system : DiscreteLinearSystem dimension) (hzero : system.ForcingZero) :
+    forall n, system.trajectory (vectorZero dimension) n = vectorZero dimension
+  | 0 => rfl
+  | n + 1 => by
+      change
+        vectorAdd (matrixApply (system.step n)
+            (system.trajectory (vectorZero dimension) n))
+          (system.forcing n) = vectorZero dimension
+      rw [trajectory_zeroInitial_of_forcingZero system hzero n, hzero n,
+        matrixApply_zero]
+      funext i
+      exact Rat.zero_add _
+
+theorem trajectory_eq_homogeneous_of_forcingZero
+    (system : DiscreteLinearSystem dimension) (hzero : system.ForcingZero)
+    (initial : RatVector dimension) (n : Nat) :
+    system.trajectory initial n = system.homogeneousTrajectory initial n := by
+  rw [trajectory_eq_homogeneous_add_zeroInitial]
+  rw [trajectory_zeroInitial_of_forcingZero system hzero n]
+  exact vectorAdd_zero_right _
+
 /-- The constant-coefficient discrete specialization. -/
 def ConstantStep (system : DiscreteLinearSystem dimension) : Prop :=
   forall k, system.step k = system.step 0
@@ -277,6 +392,33 @@ def chronologicalProduct {dimension : Nat} (B : Nat -> RatMatrix dimension) : Na
   | n + 1 => matrixMul (matrixAdd (matrixIdentity dimension) (B n))
       (chronologicalProduct B n)
 
+/-- Natural powers of a matrix, with the newest factor on the left.  This is
+the exact constant-step specialization of a chronological product. -/
+def matrixPow {dimension : Nat} (A : RatMatrix dimension) : Nat -> RatMatrix dimension
+  | 0 => matrixIdentity dimension
+  | n + 1 => matrixMul A (matrixPow A n)
+
+theorem matrixPow_identity {dimension : Nat} :
+    forall n, matrixPow (matrixIdentity dimension) n = matrixIdentity dimension
+  | 0 => rfl
+  | n + 1 => by
+      rw [matrixPow, matrixPow_identity n, matrixMul_identity_left]
+
+/-- When all Euler increments are the same matrix `B`, time ordering reduces
+to the finite power `(I + B)^N`. -/
+theorem chronologicalProduct_constant {dimension : Nat} (B : RatMatrix dimension) :
+    forall steps,
+      chronologicalProduct (fun _ => B) steps =
+        matrixPow (matrixAdd (matrixIdentity dimension) B) steps
+  | 0 => rfl
+  | steps + 1 => by
+      change
+        matrixMul (matrixAdd (matrixIdentity dimension) B)
+            (chronologicalProduct (fun _ => B) steps) =
+          matrixMul (matrixAdd (matrixIdentity dimension) B)
+            (matrixPow (matrixAdd (matrixIdentity dimension) B) steps)
+      rw [chronologicalProduct_constant B steps]
+
 theorem peanoBakerDiscreteSum_succ {dimension : Nat} (B : Nat -> RatMatrix dimension)
     (steps : Nat) :
     peanoBakerDiscreteSum B (steps + 1) =
@@ -316,6 +458,23 @@ theorem discretePeanoBakerExpansion {dimension : Nat} (B : Nat -> RatMatrix dime
       exact (Rat.add_zero _).symm
   | succ steps ih =>
       rw [chronologicalProduct_succ, ih, peanoBakerDiscreteSum_succ]
+
+/-- Constant Euler increments give the familiar finite constant-coefficient
+Peano--Baker formula `(I + B)^N`. -/
+theorem peanoBakerDiscreteSum_constant {dimension : Nat} (B : RatMatrix dimension)
+    (steps : Nat) :
+    peanoBakerDiscreteSum (fun _ => B) steps =
+      matrixPow (matrixAdd (matrixIdentity dimension) B) steps := by
+  rw [← discretePeanoBakerExpansion]
+  exact chronologicalProduct_constant B steps
+
+/-- The zero coefficient has the identity as its finite Peano--Baker state
+transition at every number of sample steps. -/
+theorem peanoBakerDiscreteSum_zeroCoefficient {dimension : Nat} (steps : Nat) :
+    peanoBakerDiscreteSum (fun _ => matrixZero dimension) steps =
+      matrixIdentity dimension := by
+  rw [peanoBakerDiscreteSum_constant]
+  rw [matrixAdd_zero_right, matrixPow_identity]
 
 @[simp] theorem orderedIndexWords_zero : orderedIndexWords 0 = [[]] := rfl
 

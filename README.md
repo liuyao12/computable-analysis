@@ -20,8 +20,10 @@ definitions/proved bridge theorems.
 The foundation now has a finite Peano--Baker entry point in
 `ComputableAnalysis/PeanoBaker.lean`: rational matrices, sampled linear
 systems, and an executable noncommutative ordered-word expansion. The finite
-identity between that expansion and the chronological Euler product is proved.
-Its
+identity between that expansion and the chronological Euler product is proved,
+as is a discrete variation-of-constants decomposition for the inhomogeneous
+recurrence. Constant increments reduce exactly to `(I + B)^N`, while the zero
+coefficient case is the identity. Its
 continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
 integrals and factorial tail bounds, beginning with constant, commuting,
 scalar, piecewise-constant, and triangular cases. This broadens the calculus

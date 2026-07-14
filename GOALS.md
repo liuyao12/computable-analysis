@@ -242,6 +242,14 @@ not a description of the current module graph. The checked blueprint
   algebra theorem equating that word sum with
   `(I + B_(N-1)) * ... * (I + B_0)`. Its proof establishes the local matrix
   identity, distributivity, and finite induction before touching convergence.
+- The same finite layer now proves a sampled variation-of-constants formula:
+  `DiscreteLinearSystem.trajectory_eq_homogeneous_add_zeroInitial` splits any
+  inhomogeneous trajectory into its time-ordered homogeneous action and the
+  zero-initial forcing response. `ForcingZero` makes that response vanish.
+  Constant increments are checked exactly by
+  `chronologicalProduct_constant` and `peanoBakerDiscreteSum_constant`, giving
+  `(I + B)^N`; `peanoBakerDiscreteSum_zeroCoefficient` supplies the zero
+  coefficient identity case.
 - The continuous input is `LinearODE.IntervalLinearSystem`, whose scalar
   entries are existing `FunctionOnInterval`s on a common rational time
   interval. `CoefficientsRegular` asks for supplied componentwise

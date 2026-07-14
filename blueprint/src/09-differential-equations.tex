@@ -40,6 +40,7 @@ rational matrix definitions, not an imported matrix or analysis library.
 \lean{ComputableAnalysis.LinearODE.timeOrderedProduct}
 \lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct}
+\lean{ComputableAnalysis.LinearODE.matrixPow}
 \lean{ComputableAnalysis.LinearODE.DiscretePeanoBakerExpansion}
 \lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
 \uses{def:rational-linear-system}
@@ -80,6 +81,32 @@ Its first three word lists are
 Thus the two-step expression has the required ordered term \(B_1B_0\), not
 the generally incorrect \(B_0B_1\). These are finite rational computations;
 they do not yet assert convergence as the mesh tends to zero.
+\end{theorem}
+
+\section{Exact finite variation of constants}
+
+\begin{theorem}[Discrete variation of constants]
+\label{thm:discrete-variation-of-constants}
+\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem}
+\uses{def:rational-linear-system}
+\leanok
+For the sampled system \(x_{k+1}=S_kx_k+g_k\), let the homogeneous
+chronological action be
+\[
+ H_0(x)=x,\qquad H_{k+1}(x)=S_kH_k(x).
+\]
+Lean proves the exact finite decomposition
+\[
+ x_N=H_N(x_0)+v_N,\qquad
+ v_0=0,\quad v_{k+1}=S_kv_k+g_k.
+\]
+Thus \(v_N\) is the finite, time-ordered Duhamel contribution of the forcing
+samples. The checked lemma \code{trajectory\_eq\_homogeneous\_add\_zeroInitial}
+deliberately keeps the matrix actions recursive, so it needs only the
+distributivity of finite rational matrix action; the future matrix-simplex
+integral formula will use the same time order. The \code{ForcingZero} condition
+and its two theorems prove that, when every \(g_k=0\), the second summand
+vanishes and the trajectory is exactly the homogeneous action.
 \end{theorem}
 
 \section{The continuous Peano--Baker target}
@@ -150,7 +177,22 @@ since a generic linear system has neither property.
 
 \begin{theorem}[Peano--Baker specializations: construction targets]
 \label{thm:peano-baker-specializations}
+\lean{ComputableAnalysis.LinearODE.matrixPow}
 \uses{thm:peano-baker-state-transition,def:constant-commuting-samples}
+\leanok
+Two finite specializations are already theorems. For a constant Euler
+increment \(B\),
+\[
+ (I+B)\cdots(I+B)=(I+B)^N
+   =\sum_{N>i_1>\cdots>i_r\ge0}B\cdots B,
+\]
+where the right side is the checked finite Peano--Baker word sum. For
+\(B=0\), it is exactly \(I\) at every stage. These statements are the
+constant and zero-coefficient regression cases for the eventual continuous
+theorem, proved by \code{chronologicalProduct\_constant},
+\code{peanoBakerDiscreteSum\_constant}, and
+\code{peanoBakerDiscreteSum\_zeroCoefficient}.
+
 The continuous construction should yield the familiar special cases
 \[
  \begin{array}{rcl}
