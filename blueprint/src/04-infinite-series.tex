@@ -509,13 +509,6 @@ tangent identity exactly.
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_powerSeriesGeometryAtMachinSmallInputs}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinSmallInputs}
-\lean{ComputableAnalysis.PiProofs.ArctanValidity.endpoints_eq_kernelPartialIntegralBetween}
-\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.arctanAreaLoopState_kernelPartialIntegralSum}
-\lean{ComputableAnalysis.PiProofs.LeibnizRectangleBridge.arctanAreaLoopState_kernelPartialRightRectangle_error_bound}
-\lean{ComputableAnalysis.PiProofs.arctanEqualsRectangleRaw_finiteRiemannBridge}
-\lean{ComputableAnalysis.PiProofs.powerSeriesEqualsRectangleKernelAt_finiteRiemannBridge}
-\lean{ComputableAnalysis.PiProofs.arctan_equiv_arctanGeom_finiteRiemannBridge}
-\lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_finiteRiemannBridge}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_machinUnitAdditions}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_kernelComparisonAtMachinInputs_chartTransport}
 \lean{ComputableAnalysis.PiProofs.piMachin_equiv_piCircleArea_of_unitAdditionLaw}
@@ -553,17 +546,15 @@ packages these brackets as a nested shrinking raw real, with a
 raw.  Appending the source \([0,u]\) partition to the transported
 \([u,T_u(x)]\) partition proves the target-difference comparison, and hence
 the three displayed bounded additions are now checked internally.
-The direct Machin-to-area theorem uses only the two power-series inputs
-\(1/5\) and \(1/239\), not the endpoint input \(1\).  Lean identifies the
-finite series endpoints with the finite kernel primitives on \([0,x]\), sums
-the all-degree finite Riemann error on the dyadic mesh, and uses
-\(x^2\le1\) to reuse the scheduled dyadic padding argument.  Hence
-\code{PiProofs.arctan\_equiv\_arctanGeom\_finiteRiemannBridge} supplies both
-small-input agreements, and
-\code{PiProofs.piMachin\_equiv\_piCircleArea\_finiteRiemannBridge} is the
-unconditional table-facing theorem.  The canonical score therefore includes
-the power-series \code{piMachin} row; no completed-real limit or separate
-integral definition is introduced.
+The direct Machin-to-area theorem now needs only the two power-series/kernel
+comparisons at (1/5) and (1/239), the inputs actually evaluated by
+\code{piMachin}.  The endpoint comparison at (1) remains necessary only
+for the separate Leibniz-to-area and Leibniz-to-Machin routes.
+Since the rectangle-kernel/geometric half is now formalized, the
+sharper direct package is exactly this pair of small-input comparisons,
+together with the internal chart-transport theorem.  Lean combines them into
+the table-facing Machin-to-area bridge.  This is still a conditional bridge,
+so it does not yet change the canonical score.
 In contrast, the rectangle-integral Machin evaluator is now a completed
 calculus row: it uses the same finite additions after each of its two certified
 integrals has been identified with geometric arctangent.

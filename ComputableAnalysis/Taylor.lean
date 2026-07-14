@@ -175,37 +175,6 @@ theorem kernelPartialIntegralAtOne_even_succ (n : Nat) :
     grind
   rw [hden]
 
-/-- Advancing from an even kernel truncation on `[0,x]` to the next odd one
-subtracts the next finite arctangent monomial integral.  This is the
-small-input counterpart of `kernelPartialIntegralAtOne_odd_succ`. -/
-theorem kernelPartialIntegralBetween_zero_odd_succ (x : Rat) (n : Nat) :
-    kernelPartialIntegralBetween 0 x (2 * n + 1) =
-      kernelPartialIntegralBetween 0 x (2 * n) -
-        x ^ (4 * n + 3) / (4 * (n : Rat) + 3) := by
-  rw [show 2 * n + 1 = 2 * n + 1 by omega]
-  simp [kernelPartialIntegralBetween, kernelTermIntegralBetween]
-  rw [neg_one_pow_odd]
-  have hpow : 2 * (2 * n + 1) + 1 = 4 * n + 3 := by omega
-  rw [hpow]
-  grind [Rat.sub_eq_add_neg]
-
-/-- Advancing from an odd kernel truncation on `[0,x]` to the next even one
-adds the next finite arctangent monomial integral. -/
-theorem kernelPartialIntegralBetween_zero_even_succ (x : Rat) (n : Nat) :
-    kernelPartialIntegralBetween 0 x (2 * n + 2) =
-      kernelPartialIntegralBetween 0 x (2 * n + 1) +
-        x ^ (4 * n + 5) / (4 * (n : Rat) + 5) := by
-  rw [show 2 * n + 2 = (2 * n + 1) + 1 by omega]
-  simp [kernelPartialIntegralBetween, kernelTermIntegralBetween]
-  rw [show 2 * n + 1 + 1 = 2 * (n + 1) by omega]
-  rw [neg_one_pow_even]
-  have hpow : 2 * (2 * (n + 1)) + 1 = 4 * n + 5 := by omega
-  rw [hpow]
-  have hden : 2 * (2 * (n : Rat) + 1 + 1) + 1 = 4 * (n : Rat) + 5 := by
-    grind
-  rw [hden]
-  grind [Rat.sub_eq_add_neg]
-
 private theorem one_pow_rat (m : Nat) : (1 : Rat) ^ m = 1 := by
   induction m with
   | zero => simp

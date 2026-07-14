@@ -333,12 +333,12 @@ students actually compute.
 
 - The canonical progress measure is the checked table in
   `blueprint/src/pi-scoreboard-table.tex`: currently six of fifteen named
-  computations are valid raw reals, and four of fourteen applicable rows have
+  computations are valid raw reals, and three of fourteen applicable rows have
   a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the geometric quarter-turn computation
   `4 * arctanGeom(1)`, its single rectangle-integral formulation
   `4 * arctanIntegralRectangleForAtOne`, and
-  `4 * arctanSeries(1)`, and the direct power-series computation `piMachin`.
+  `4 * arctanSeries(1)`.
 - The exact-order route for the canonical series equivalence remains useful
   as a reusable quadrature certificate.  It needs the uniform all-partials
   bridge
@@ -388,15 +388,11 @@ students actually compute.
   `arctanGeom_chartAdd_add_of_half` now proves the bounded geometric addition
   law needed at all three Machin instances.  Consequently
   `MachinIdentity.geometricMachinUnitAdditions_of_chartTransport` and the
-  resulting geometric Machin branch identity are proved.  The finite Riemann
-  bridge now identifies the two actual power-series inputs `1/5` and `1/239`
-  with their rectangle/geometric arctangents, using the same all-degree finite
-  kernel-error estimate as the Leibniz route and the additional factor
-  `x^2 <= 1`.  Thus
-  `PiProofs.piMachin_equiv_piCircleArea_finiteRiemannBridge` completes the
-  canonical `piMachin` row without an endpoint comparison at `1`.  Machin
-  remains solely a power-series computation, not a second integral-based pi
-  representation.
+  resulting geometric Machin branch identity are proved.  The remaining
+  power-series `piMachin` blocker is only the separate power-series/kernel
+  comparison at `1/5` and `1/239`; the endpoint comparison at `1` belongs to
+  the independent Leibniz route.  Machin is therefore kept solely as a
+  power-series computation, not as a second integral-based pi representation.
 - The exact stage bridge
   `ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute` now
   proves `PiProofs.PiCircleAreaPolygonAgreement`; with finite Archimedes this
