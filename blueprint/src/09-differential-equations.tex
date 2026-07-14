@@ -1,0 +1,180 @@
+\chapter{Linear Differential Equations}
+\label{ch:differential-equations}
+
+Differential equations belong to the same finite-estimate programme as the
+integral and derivative chapters. A solution is an interval algorithm with
+rational mesh, enclosure, and tail estimates giving nested boxes of shrinking
+width, not a limit in a complete function space. The central target is
+\begin{equation}\label{eq:linear-ode}
+  x'(t)=A(t)x(t)+b(t),\qquad x(s)=x_s,
+\end{equation}
+where \(A(t)\) is a finite square matrix and \(x(t),b(t)\) are finite vectors.
+
+\section{Finite time ordering before analysis}
+
+\begin{definition}[Rational matrices and sampled systems]
+\label{def:rational-linear-system}
+\lean{ComputableAnalysis.LinearODE.RatVector}
+\lean{ComputableAnalysis.LinearODE.RatMatrix}
+\lean{ComputableAnalysis.LinearODE.finiteSum}
+\lean{ComputableAnalysis.LinearODE.matrixMul}
+\lean{ComputableAnalysis.LinearODE.matrixApply}
+\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem}
+\leanok
+For a fixed dimension \(d\), a rational vector is a function
+\(\{0,\ldots,d-1\}\to\Q\), and a rational matrix is a function
+\(\{0,\ldots,d-1\}^2\to\Q\). Matrix multiplication is the literal finite
+rational sum
+\[
+ (CD)_{ij}=\sum_{k=0}^{d-1}C_{ik}D_{kj}.
+\]
+The sampled recurrence is \(x_{k+1}=S_kx_k+g_k\). For the Euler sampling of
+\eqref{eq:linear-ode} with rational step \(h\), take
+\(S_k=I+hA(t_k)\) and \(g_k=hb(t_k)\). The implementation uses local
+rational matrix definitions, not an imported matrix or analysis library.
+\end{definition}
+
+\begin{definition}[Finite Peano--Baker word sum]
+\label{def:finite-peano-baker-word-sum}
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords}
+\lean{ComputableAnalysis.LinearODE.timeOrderedProduct}
+\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
+\lean{ComputableAnalysis.LinearODE.chronologicalProduct}
+\lean{ComputableAnalysis.LinearODE.DiscretePeanoBakerExpansion}
+\lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
+\uses{def:rational-linear-system}
+\leanok
+For matrices \(B_0,\ldots,B_{N-1}\), the discrete Peano--Baker sum is
+\[
+ \sum_{N>i_1>\cdots>i_r\ge0}B_{i_1}\cdots B_{i_r},
+\]
+including the empty word \(I\). Newer sample times occur on the left, because
+generally \(B_iB_j\ne B_jB_i\). Lean proves the finite algebra theorem
+\[
+ (I+B_{N-1})\cdots(I+B_0)
+ =\sum_{N>i_1>\cdots>i_r\ge0}B_{i_1}\cdots B_{i_r}.
+\]
+by \code{discretePeanoBakerExpansion}; \code{DiscretePeanoBakerExpansion}
+is its reusable proposition form. Separating this rational identity from
+analytic convergence prevents a continuous ODE theorem from concealing either
+issue.
+\end{definition}
+
+\begin{theorem}[Finite Peano--Baker enumeration]
+\label{thm:finite-peano-baker-enumeration}
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords_length}
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords_zero}
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords_one}
+\lean{ComputableAnalysis.LinearODE.orderedIndexWords_two}
+\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_zero}
+\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_one}
+\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_two}
+\uses{def:finite-peano-baker-word-sum}
+\leanok
+The checked enumerator contains exactly \(2^N\) words after \(N\) samples.
+Its first three word lists are
+\[
+ [\,[]\,],\qquad [\,[],[0]\,],\qquad
+ [\,[],[0],[1],[1,0]\,].
+\]
+Thus the two-step expression has the required ordered term \(B_1B_0\), not
+the generally incorrect \(B_0B_1\). These are finite rational computations;
+they do not yet assert convergence as the mesh tends to zero.
+\end{theorem}
+
+\section{The continuous Peano--Baker target}
+
+\begin{definition}[Interval-certified linear-system input]
+\label{def:interval-linear-system}
+\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem}
+\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem.CoefficientsRegular}
+\uses{def:finite-peano-baker-word-sum}
+\leanok
+On a rational time interval \([s,t]\), each entry of \(A\) and \(b\) is an
+existing \code{FunctionOnInterval} with the same domain. The regularity
+obligation requires a supplied \code{IntervalRegularOn} witness for each
+entry. The ODE layer therefore consumes interval algorithms and moduli, not a
+classical assumption that coefficients live on a completed real interval.
+\end{definition}
+
+\begin{theorem}[Peano--Baker state transition: construction target]
+\label{thm:peano-baker-state-transition}
+\uses{def:interval-linear-system,thm:effective-ftc-certificate}
+For interval-regular coefficients, construct a matrix of raw reals
+\(\Phi(t,s)\) by the ordered-simplex series
+\begin{align*}
+ \Phi(t,s)={}&I+\int_s^t A(u_1)\,du_1\\
+ &+\int_s^t A(u_1)\int_s^{u_1}A(u_2)\,du_2\,du_1+\cdots.
+\end{align*}
+The order of factors follows the nested integration order. The certificate
+consists of finite interval boxes for truncated simplex integrals and a
+rational submultiplicative matrix-norm bound for the tail. A bound
+\(\lVert A(u)\rVert\le M\) on an interval of length \(T\) should yield the
+factorial tail \(\sum_{r>N}(MT)^r/r!\). The proof must obtain nested,
+shrinking raw-matrix boxes and verify
+\[
+ \partial_t\Phi(t,s)=A(t)\Phi(t,s),\qquad \Phi(s,s)=I,
+\qquad \Phi(t,r)\Phi(r,s)=\Phi(t,s).
+\]
+This is a target, not a completed Lean theorem: componentwise matrix interval
+arithmetic, iterated-simplex integral constructors, and the factorial-tail
+certificate remain to be formalized.
+\end{theorem}
+
+\begin{theorem}[Variation of constants: construction target]
+\label{thm:variation-of-constants}
+\uses{thm:peano-baker-state-transition}
+Once the state transition has the preceding certificate, the solution of
+\eqref{eq:linear-ode} should be the interval-certified raw vector
+\[
+ x(t)=\Phi(t,s)x_s+\int_s^t\Phi(t,u)b(u)\,du.
+\]
+The derivative identity is checked by finite product and integral rules, and
+the initial value follows from the zero-length integral certificate. This is
+the general linear ODE result needed by most applications; nonlinear
+existence theorems are deliberately outside this first layer.
+\end{theorem}
+
+\section{Special cases and computational uses}
+
+\begin{definition}[Constant and commuting samples]
+\label{def:constant-commuting-samples}
+\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem.ConstantStep}
+\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem.PairwiseCommutingSteps}
+\uses{def:rational-linear-system}
+\leanok
+The finite layer records when time ordering simplifies: all step matrices
+equal, or all sampled steps commute pairwise. These are explicit propositions,
+since a generic linear system has neither property.
+\end{definition}
+
+\begin{theorem}[Peano--Baker specializations: construction targets]
+\label{thm:peano-baker-specializations}
+\uses{thm:peano-baker-state-transition,def:constant-commuting-samples}
+The continuous construction should yield the familiar special cases
+\[
+ \begin{array}{rcl}
+ A(u)=A_0&:&\Phi(t,s)=\exp((t-s)A_0),\\[2mm]
+ A(u)A(v)=A(v)A(u)&:&
+ \Phi(t,s)=\exp\!\left(\int_s^tA(u)\,du\right),\\[2mm]
+ x'=a(t)x+b(t)&:&
+ x(t)=e^{\int_s^t a}\,x_s+\int_s^t e^{\int_u^t a}\,b(u)\,du.
+ \end{array}
+\]
+For piecewise-constant coefficients, the direct finite answer is the
+chronological product of constant-step exponentials. For strictly triangular
+or nilpotent coefficient algebras, sufficiently long ordered products vanish,
+so the series is a finite certified calculation.
+\end{theorem}
+
+\begin{remark}[Engineering-facing error certificates]
+\label{rem:ode-error-certificates}
+\uses{thm:peano-baker-state-transition,thm:variation-of-constants}
+A practical result should return a rational enclosure for each component and
+an error budget split between mesh error, coefficient-evaluation error, and
+the Peano--Baker tail. Piecewise-constant dynamics, constant-coefficient
+circuits and control models, triangular reaction chains, and small coupled
+linearizations are natural first regression examples. Stiffness, adaptive
+step choice, and nonlinear Picard--Lindel\"of theory should follow only after
+these finite certificates are in place.
+\end{remark}

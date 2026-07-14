@@ -229,6 +229,32 @@ not a description of the current module graph. The checked blueprint
   `SolvesSelfDerivativeOnInterval` and `SelfDerivativeInitialValueUnique` in
   `ComputableAnalysis/Differential.lean`.
 
+## Linear Differential Equations
+
+- The finite noncommutative core for Peano--Baker is now checked in
+  `ComputableAnalysis/PeanoBaker.lean`, without Mathlib. It defines local
+  rational vectors/matrices, explicit finite matrix sums/products, sampled
+  linear recurrences, and the ordered-word enumerator
+  `LinearODE.peanoBakerDiscreteSum`. The enumerator has exactly `2^N` terms
+  after `N` samples (`LinearODE.orderedIndexWords_length`); its two-step
+  expansion contains `B_1 * B_0`, preserving chronology.
+- `LinearODE.discretePeanoBakerExpansion` now proves the purely rational
+  algebra theorem equating that word sum with
+  `(I + B_(N-1)) * ... * (I + B_0)`. Its proof establishes the local matrix
+  identity, distributivity, and finite induction before touching convergence.
+- The continuous input is `LinearODE.IntervalLinearSystem`, whose scalar
+  entries are existing `FunctionOnInterval`s on a common rational time
+  interval. `CoefficientsRegular` asks for supplied componentwise
+  `IntervalRegularOn` witnesses; it does not assume a completed-real
+  function space.
+- Next analytic target: build interval matrices for ordered-simplex
+  Peano--Baker terms, prove a factorial tail enclosure from a rational
+  coefficient bound, and obtain state-transition and variation-of-constants
+  formulas for `x' = A(t)x + b(t)`. The first specializations are constant,
+  pairwise commuting, scalar, piecewise-constant, and nilpotent/triangular
+  systems. Chapter `Linear Differential Equations` gives the certificate
+  plan.
+
 ## Elementary Function Coverage
 
 The library should use familiar functions as examples and regression tests for

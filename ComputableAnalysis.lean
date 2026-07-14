@@ -26,6 +26,7 @@ import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.Pi
 import ComputableAnalysis.PiProofs
+import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.Polynomial
 import ComputableAnalysis.PowerSeries

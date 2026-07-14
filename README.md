@@ -15,6 +15,19 @@ being as fast as possible.
 See `GOALS.md` for the current mathematical roadmap and links to the Lean
 definitions/proved bridge theorems.
 
+## Linear differential equations
+
+The foundation now has a finite Peano--Baker entry point in
+`ComputableAnalysis/PeanoBaker.lean`: rational matrices, sampled linear
+systems, and an executable noncommutative ordered-word expansion. The finite
+identity between that expansion and the chronological Euler product is proved.
+Its
+continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
+integrals and factorial tail bounds, beginning with constant, commuting,
+scalar, piecewise-constant, and triangular cases. This broadens the calculus
+foundation without changing the pi scoreboard's current `7/16` definition
+and `5/15` equivalence counts.
+
 ## Pi formalization scoreboard
 
 A row counts as definition-complete only after its interval sequence is a valid
