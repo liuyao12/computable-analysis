@@ -455,6 +455,22 @@ theorem qabs_sub_midpoint_le_width {I : QInterval} {x : Rat}
   · unfold midpoint width
     grind [Rat.div_def]
 
+/-- The width of the smallest rational interval containing two rational
+points is their rational absolute difference. -/
+theorem endpointHull_width (x y : Rat) :
+    ({ lo := min x y, hi := max x y } : QInterval).width = qabs (y - x) := by
+  by_cases hxy : x <= y
+  · have hdiff : 0 <= y - x := by grind [Rat.sub_eq_add_neg]
+    rw [show min x y = x by grind, show max x y = y by grind,
+      qabs_eq_self_of_nonneg hdiff]
+    rfl
+  · have hyx : y <= x := by grind
+    have hdiff : y - x <= 0 := by grind [Rat.sub_eq_add_neg]
+    rw [show min x y = y by grind, show max x y = x by grind,
+      qabs_eq_neg_of_nonpos hdiff]
+    unfold width
+    grind [Rat.sub_eq_add_neg]
+
 end QInterval
 
 theorem qabs_sub_le_of_common_bounds {lo hi a b : Rat}
@@ -519,6 +535,37 @@ theorem rat_num_pos_of_pos {q : Rat} (hq : 0 < q) : 0 < q.num := by
   · by_cases hneg : q.num < 0
     · omega
     · omega
+
+/-- A denominator-based natural precision always suffices for a positive
+rational tolerance.  This is finite rational arithmetic, not an appeal to
+Archimedean completeness. -/
+theorem one_div_den_succ_le_of_pos {q : Rat} (hq : 0 < q) :
+    1 / (((q.den + 1 : Nat) : Rat)) <= q := by
+  let d : Rat := ((q.den + 1 : Nat) : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos q.den)
+  have hnumpos : 0 < q.num := rat_num_pos_of_pos hq
+  have hnumgeInt : (1 : Int) <= q.num := by omega
+  have hnumge : (1 : Rat) <= (q.num : Rat) := by
+    exact_mod_cast hnumgeInt
+  have hqd :
+      q * d = (q.num : Rat) + q := by
+    dsimp [d]
+    have hden := rat_den_mul_self q
+    grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+  have hqd_ge_one : 1 <= q * d := by
+    rw [hqd]
+    have hqnonneg : 0 <= q := Rat.le_of_lt hq
+    exact Rat.le_trans hnumge (by grind)
+  apply Rat.le_of_mul_le_mul_right (c := d)
+  · calc
+      (1 / d) * d = 1 := by
+        rw [Rat.div_def]
+        have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= q * d := hqd_ge_one
+  · exact hdpos
 
 def ShrinksToZero (width : Nat -> Rat) : Prop :=
   forall eps : QPos, Exists fun N : Nat =>

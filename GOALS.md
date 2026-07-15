@@ -64,7 +64,10 @@ not a description of the current module graph. The checked blueprint
 
 - Replace pointwise continuity on an interval by interval regularity:
   every small rational subinterval has a computable narrow output interval
-  containing all point-values.
+  containing all point-value intervals, with a positive modulus at every
+  positive requested precision.  The checked bridge
+  `IntervalRegularOn.epsilonDeltaContinuous` derives the literal rational
+  epsilon-delta predicate from this enclosure data.
   See `IntervalRegularOn` in `ComputableAnalysis/Calculus.lean`.
 - Rational-function denominator apartness is only a sufficient certificate,
   not the general definition.

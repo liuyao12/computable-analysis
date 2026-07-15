@@ -3297,6 +3297,9 @@ def reciprocalQuarticMinusOneCompact_intervalRegular :
   refine
     { evalInterval := fun I _ _ => reciprocalQuarticMinusOneCompact_evalInterval I
       inputPrecision := fun n => 16 * n
+      inputPrecision_pos := by
+        intro n hn
+        omega
       output_width := ?_
       contains_point_values := ?_ }
   · intro I hI n hwidth
@@ -3350,11 +3353,11 @@ def reciprocalQuarticMinusOneCompact_intervalRegular :
         _ = qabs (reciprocalQuarticSymmetricDensity (-1) x -
               reciprocalQuarticSymmetricDensity (-1) I.midpoint) := qabs_neg _
         _ <= 8 * I.width := hdiff
-    unfold QInterval.Overlaps
-    change reciprocalQuarticSymmetricDensity (-1) x <=
-        reciprocalQuarticSymmetricDensity (-1) I.midpoint + 8 * I.width /\
-      reciprocalQuarticSymmetricDensity (-1) I.midpoint - 8 * I.width <=
-        reciprocalQuarticSymmetricDensity (-1) x
+    unfold QInterval.ContainsInterval
+    change reciprocalQuarticSymmetricDensity (-1) I.midpoint - 8 * I.width <=
+        reciprocalQuarticSymmetricDensity (-1) x /\
+      reciprocalQuarticSymmetricDensity (-1) x <=
+        reciprocalQuarticSymmetricDensity (-1) I.midpoint + 8 * I.width
     constructor <;> grind [Rat.sub_eq_add_neg]
 
 /-- The compact reciprocal-quartic density packaged for theorem-facing
@@ -3362,6 +3365,13 @@ calculus consumers. -/
 def reciprocalQuarticMinusOneCompact_continuous : ContinuousFunctionOnInterval where
   function := reciprocalQuarticMinusOneCompactOnInterval (-1) 1
   regular := reciprocalQuarticMinusOneCompact_intervalRegular
+
+/-- The generic interval-regularity bridge reproduces rational
+epsilon-delta continuity for the compact reciprocal-quartic density. -/
+theorem reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous_from_intervalRegular :
+    EpsilonDeltaContinuousOn
+      (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) :=
+  reciprocalQuarticMinusOneCompact_intervalRegular.epsilonDeltaContinuous
 
 /-- Folding the positive half-line by the reciprocal map produces the symmetric
 density \((1+x^2)/(x^4+a x^2+1)\) on the unit interval. -/

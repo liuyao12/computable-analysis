@@ -1492,6 +1492,7 @@ small rational subintervals can straddle the irrational pole. -/
 structure IntervalRegularOn (F : FunctionOnInterval) where
   evalInterval : (I : QInterval) -> subintervalOf I F.lower F.upper -> Nat -> QInterval
   inputPrecision : Nat -> Nat
+  inputPrecision_pos : forall n, 0 < n -> 0 < inputPrecision n
   output_width :
     forall I hI n,
       I.width <= (1 / ((inputPrecision n) : Rat)) ->
@@ -1501,9 +1502,85 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
     forall I hI x hx n,
       I.lo <= x ->
       x <= I.hi ->
-      QInterval.Overlaps
-        (F.compute x hx n)
+      QInterval.ContainsInterval
         (evalInterval I hI n)
+        (F.compute x hx n)
+
+/-- An interval-regular evaluator supplies literal rational
+epsilon-delta continuity.  The proof uses the finite denominator-derived
+stage `eps.den + 1`, encloses both point evaluations in one narrow image
+interval, and never invokes topology or a completed real line. -/
+theorem IntervalRegularOn.epsilonDeltaContinuous
+    {F : FunctionOnInterval} (h : IntervalRegularOn F) :
+    EpsilonDeltaContinuousOn F := by
+  intro eps
+  let n : Nat := eps.val.den + 1
+  have hnpos : 0 < n := by
+    dsimp [n]
+    exact Nat.succ_pos _
+  let delta : QPos :=
+    { val := 1 / ((h.inputPrecision n : Nat) : Rat)
+      property := one_div_nat_pos (h.inputPrecision_pos n hnpos) }
+  refine ⟨delta, n, ?_⟩
+  intro x y hx hy hxy
+  let I : QInterval := { lo := min x y, hi := max x y }
+  have hI : subintervalOf I F.lower F.upper := by
+    rcases hx with ⟨hxlo, hxhi⟩
+    rcases hy with ⟨hylo, hyhi⟩
+    dsimp [I]
+    constructor
+    · grind
+    constructor <;> grind
+  have hIwidth : I.width = qabs (y - x) := by
+    dsimp [I]
+    exact QInterval.endpointHull_width x y
+  have hsmall : I.width <= 1 / ((h.inputPrecision n : Nat) : Rat) := by
+    rw [hIwidth]
+    simpa [delta] using hxy
+  have houtput := h.output_width I hI n hsmall
+  have htarget : 1 / (n : Rat) <= eps.val := by
+    dsimp [n]
+    exact one_div_den_succ_le_of_pos eps.property
+  have hYwidth : (h.evalInterval I hI n).width <= eps.val :=
+    Rat.le_trans houtput.2 htarget
+  have hxlo : I.lo <= x := by
+    dsimp [I]
+    grind
+  have hxhi : x <= I.hi := by
+    dsimp [I]
+    grind
+  have hylo : I.lo <= y := by
+    dsimp [I]
+    grind
+  have hyhi : y <= I.hi := by
+    dsimp [I]
+    grind
+  have hcontainsX := h.contains_point_values I hI x hx n hxlo hxhi
+  have hcontainsY := h.contains_point_values I hI y hy n hylo hyhi
+  have hXwidth_nonneg := (F.valid_on x (F.defined_on x hx)).1 n
+  have hYwidth_nonneg := (F.valid_on y (F.defined_on y hy)).1 n
+  have hXordered : (F.compute x hx n).lo <= (F.compute x hx n).hi := by
+    change 0 <= (F.compute x hx n).hi - (F.compute x hx n).lo at hXwidth_nonneg
+    grind [Rat.sub_eq_add_neg]
+  have hYordered : (F.compute y hy n).lo <= (F.compute y hy n).hi := by
+    change 0 <= (F.compute y hy n).hi - (F.compute y hy n).lo at hYwidth_nonneg
+    grind [Rat.sub_eq_add_neg]
+  have hwidthX : (F.compute x hx n).width <= eps.val :=
+    Rat.le_trans (QInterval.width_le_of_contains hcontainsX) hYwidth
+  have hwidthY : (F.compute y hy n).width <= eps.val :=
+    Rat.le_trans (QInterval.width_le_of_contains hcontainsY) hYwidth
+  unfold QInterval.NearAt
+  constructor
+  · change (F.compute x hx n).lo <= (F.compute y hy n).hi + eps.val
+    unfold QInterval.ContainsInterval at hcontainsX hcontainsY
+    unfold QInterval.width at hYwidth
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · change (F.compute y hy n).lo <= (F.compute x hx n).hi + eps.val
+    unfold QInterval.ContainsInterval at hcontainsX hcontainsY
+    unfold QInterval.width at hYwidth
+    grind [Rat.sub_eq_add_neg]
+  exact ⟨hwidthX, hwidthY⟩
 
 /-- A certified continuous function on a rational interval.
 

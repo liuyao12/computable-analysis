@@ -935,6 +935,7 @@ the improper integral together with agreement with that expected value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_evalInterval_width}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_continuous}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous_from_intervalRegular}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
 \uses{def:reciprocal-quartic-test-kernel}
@@ -1026,8 +1027,10 @@ This interval contains every rational point-value over \(I\), has width
 \(16\operatorname{width}(I)\), and therefore meets output precision
 \(1/n\) when the input width is at most \(1/(16n)\).  Thus the density is
 now a \code{ContinuousFunctionOnInterval}, with no appeal to topology or
-completed reals.  The projective change-of-variables theorem and the actual
-integral construction remain unchecked.
+completed reals.  The generic checked bridge from interval regularity to
+rational \(\varepsilon\)-\(\delta\) continuity also recovers the stated
+continuity certificate.  The projective change-of-variables theorem and the
+actual integral construction remain unchecked.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \[

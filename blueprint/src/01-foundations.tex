@@ -678,7 +678,7 @@ certificate assigns to each rational subinterval
   K=[r,s]\subseteq [a,b]
 \]
 and each stage \(n\) a rational output interval \(Y(K,n)\).  It supplies a
-modulus \(M:\N\to\N\) such that whenever
+modulus \(M:\N\to\N\), positive whenever \(n>0\), such that whenever
 \[
   s-r\le \frac{1}{M(n)},
 \]
@@ -687,8 +687,27 @@ and \(Y(K,n)=[u,v]\), we have
   0\le v-u\le \frac{1}{n},
 \]
 and for every rational point \(x\in K\), the point-value interval
-\(F(x,n)\) overlaps \(Y(K,n)\).
+\(F(x,n)\) is enclosed by \(Y(K,n)\).  Thus this is genuinely
+interval-valued continuity: it controls both the separation of values and
+the widths of their rational enclosures.
 \end{definition}
+
+\begin{theorem}[Interval regularity implies rational continuity]
+\label{thm:interval-regular-implies-epsilon-delta}
+\lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
+\uses{def:interval-regular}
+\leanok
+Every interval-regular function satisfies the literal rational
+\(\varepsilon\)-\(\delta\) predicate used elsewhere in the project.  For a
+positive rational \(\varepsilon\), Lean takes the finite stage
+\(n=\operatorname{den}(\varepsilon)+1\), so \(1/n\le\varepsilon\), and
+uses \(\delta=1/M(n)\).  The smallest rational interval containing two
+inputs within \(\delta\) has an image enclosure of width at most
+\(1/n\).  Since both point-value boxes are contained in that one enclosure,
+they are \code{NearAt} within \(\varepsilon\), including their individual
+width bounds.  This is a direct finite rational proof, with no topology or
+real-number completeness principle.
+\end{theorem}
 
 \begin{remark}[Holomorphic branch equivalence]\label{rem:holomorphic-branch-equivalence}
 \uses{def:function-agrees-on-overlap}
@@ -703,5 +722,5 @@ overlap into a transitive branch-equivalence relation.
 \uses{def:interval-regular}
 Classical compactness, uniform continuity, and existence of suprema are not
 used as black boxes.  The project records the finite data that those theorems
-usually hide: interval images, rates, nesting, and overlap proofs.
+usually hide: interval images, rates, nesting, and enclosure proofs.
 \end{remark}
