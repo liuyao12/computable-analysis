@@ -23,12 +23,14 @@ systems, and an executable noncommutative ordered-word expansion. The finite
 identity between that expansion and the chronological Euler product is proved,
 as is a discrete variation-of-constants decomposition for the inhomogeneous
 recurrence. Constant increments reduce exactly to `(I + B)^N`, while the zero
-coefficient case is the identity. Its
+coefficient case is the identity. A square-zero sampled coefficient family
+reduces exactly to `I + sum B_k`, so the finite word series already covers a
+nontrivial nilpotent case. Its
 continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
 integrals and factorial tail bounds, beginning with constant, commuting,
-scalar, piecewise-constant, and triangular cases. This broadens the calculus
-foundation; the independently updated pi scoreboard is now `8/17` for
-definitions and `6/16` for applicable equivalences.
+scalar, piecewise-constant, and higher-order triangular cases. This broadens
+the calculus foundation; the independently updated pi scoreboard is now
+`8/17` for definitions and `6/16` for applicable equivalences.
 
 ## Pi formalization scoreboard
 

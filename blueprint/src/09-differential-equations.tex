@@ -14,12 +14,6 @@ where \(A(t)\) is a finite square matrix and \(x(t),b(t)\) are finite vectors.
 
 \begin{definition}[Rational matrices and sampled systems]
 \label{def:rational-linear-system}
-\lean{ComputableAnalysis.LinearODE.RatVector}
-\lean{ComputableAnalysis.LinearODE.RatMatrix}
-\lean{ComputableAnalysis.LinearODE.finiteSum}
-\lean{ComputableAnalysis.LinearODE.matrixMul}
-\lean{ComputableAnalysis.LinearODE.matrixApply}
-\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem}
 \leanok
 For a fixed dimension \(d\), a rational vector is a function
 \(\{0,\ldots,d-1\}\to\Q\), and a rational matrix is a function
@@ -36,13 +30,6 @@ rational matrix definitions, not an imported matrix or analysis library.
 
 \begin{definition}[Finite Peano--Baker word sum]
 \label{def:finite-peano-baker-word-sum}
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords}
-\lean{ComputableAnalysis.LinearODE.timeOrderedProduct}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct}
-\lean{ComputableAnalysis.LinearODE.matrixPow}
-\lean{ComputableAnalysis.LinearODE.DiscretePeanoBakerExpansion}
-\lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
 \uses{def:rational-linear-system}
 \leanok
 For matrices \(B_0,\ldots,B_{N-1}\), the discrete Peano--Baker sum is
@@ -63,13 +50,6 @@ issue.
 
 \begin{theorem}[Finite Peano--Baker enumeration]
 \label{thm:finite-peano-baker-enumeration}
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords_length}
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords_zero}
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords_one}
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords_two}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_zero}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_one}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_two}
 \uses{def:finite-peano-baker-word-sum}
 \leanok
 The checked enumerator contains exactly \(2^N\) words after \(N\) samples.
@@ -87,7 +67,6 @@ they do not yet assert convergence as the mesh tends to zero.
 
 \begin{theorem}[Discrete variation of constants]
 \label{thm:discrete-variation-of-constants}
-\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem}
 \uses{def:rational-linear-system}
 \leanok
 For the sampled system \(x_{k+1}=S_kx_k+g_k\), let the homogeneous
@@ -113,8 +92,6 @@ vanishes and the trajectory is exactly the homogeneous action.
 
 \begin{definition}[Interval-certified linear-system input]
 \label{def:interval-linear-system}
-\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem}
-\lean{ComputableAnalysis.LinearODE.IntervalLinearSystem.CoefficientsRegular}
 \uses{def:finite-peano-baker-word-sum}
 \leanok
 On a rational time interval \([s,t]\), each entry of \(A\) and \(b\) is an
@@ -166,21 +143,23 @@ existence theorems are deliberately outside this first layer.
 
 \begin{definition}[Constant and commuting samples]
 \label{def:constant-commuting-samples}
-\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem.ConstantStep}
-\lean{ComputableAnalysis.LinearODE.DiscreteLinearSystem.PairwiseCommutingSteps}
 \uses{def:rational-linear-system}
 \leanok
 The finite layer records when time ordering simplifies: all step matrices
 equal, or all sampled steps commute pairwise. These are explicit propositions,
 since a generic linear system has neither property.
+
+A stronger finite nilpotence condition is also useful: a sampled family is
+square-zero when \(B_iB_j=0\) for every pair of sample times. This is more
+than commutation, but it makes the first nontrivial truncation of the
+Peano--Baker series exact.
 \end{definition}
 
-\begin{theorem}[Peano--Baker specializations: construction targets]
+\begin{theorem}[Finite Peano--Baker specializations]
 \label{thm:peano-baker-specializations}
-\lean{ComputableAnalysis.LinearODE.matrixPow}
 \uses{thm:peano-baker-state-transition,def:constant-commuting-samples}
 \leanok
-Two finite specializations are already theorems. For a constant Euler
+Three finite specializations are already theorems. For a constant Euler
 increment \(B\),
 \[
  (I+B)\cdots(I+B)=(I+B)^N
@@ -193,6 +172,18 @@ theorem, proved by \code{chronologicalProduct\_constant},
 \code{peanoBakerDiscreteSum\_constant}, and
 \code{peanoBakerDiscreteSum\_zeroCoefficient}.
 
+For a square-zero sampled family, every selected word with two or more
+factors is zero. Therefore Lean proves the exact finite collapse
+\[
+ (I+B_{N-1})\cdots(I+B_0)
+ = I+\sum_{k=0}^{N-1}B_k.
+\]
+The right-hand side is the executable recursive matrix sum
+\code{matrixSequenceSum}; the two checked theorems above establish the
+formula both for the chronological product and for the ordered-word
+Peano--Baker sum. This is a genuine nilpotent regression case, not a
+continuous limiting argument.
+
 The continuous construction should yield the familiar special cases
 \[
  \begin{array}{rcl}
@@ -204,9 +195,10 @@ The continuous construction should yield the familiar special cases
  \end{array}
 \]
 For piecewise-constant coefficients, the direct finite answer is the
-chronological product of constant-step exponentials. For strictly triangular
-or nilpotent coefficient algebras, sufficiently long ordered products vanish,
-so the series is a finite certified calculation.
+chronological product of constant-step exponentials. General pairwise
+commuting, strictly triangular, and higher-order nilpotent coefficient
+algebras remain the next finite algebra cases; sufficiently long ordered
+products should then vanish, making the series a finite certified calculation.
 \end{theorem}
 
 \begin{remark}[Engineering-facing error certificates]

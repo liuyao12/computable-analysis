@@ -249,7 +249,11 @@ not a description of the current module graph. The checked blueprint
   Constant increments are checked exactly by
   `chronologicalProduct_constant` and `peanoBakerDiscreteSum_constant`, giving
   `(I + B)^N`; `peanoBakerDiscreteSum_zeroCoefficient` supplies the zero
-  coefficient identity case.
+  coefficient identity case. The new `PairwiseProductZero` specialization is
+  a proved finite nilpotent case: when every `B_i * B_j` is zero,
+  `chronologicalProduct_pairwiseProductZero` and
+  `peanoBakerDiscreteSum_pairwiseProductZero` collapse the exact transition
+  to `I + matrixSequenceSum B N`.
 - The continuous input is `LinearODE.IntervalLinearSystem`, whose scalar
   entries are existing `FunctionOnInterval`s on a common rational time
   interval. `CoefficientsRegular` asks for supplied componentwise
@@ -258,10 +262,10 @@ not a description of the current module graph. The checked blueprint
 - Next analytic target: build interval matrices for ordered-simplex
   Peano--Baker terms, prove a factorial tail enclosure from a rational
   coefficient bound, and obtain state-transition and variation-of-constants
-  formulas for `x' = A(t)x + b(t)`. The first specializations are constant,
-  pairwise commuting, scalar, piecewise-constant, and nilpotent/triangular
-  systems. Chapter `Linear Differential Equations` gives the certificate
-  plan.
+  formulas for `x' = A(t)x + b(t)`. The next specializations are general
+  pairwise commuting, scalar, piecewise-constant, and higher-order
+  nilpotent/triangular systems. Chapter `Linear Differential Equations` gives
+  the certificate plan.
 
 ## Elementary Function Coverage
 

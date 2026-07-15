@@ -221,6 +221,31 @@ theorem matrixMul_identity_left {dimension : Nat} (A : RatMatrix dimension) :
             exact Rat.zero_mul _
     _ = A i j := finiteSum_ite_eq_left i (fun k => A k j)
 
+theorem matrixMul_identity_right {dimension : Nat} (A : RatMatrix dimension) :
+    matrixMul A (matrixIdentity dimension) = A := by
+  funext i j
+  unfold matrixMul matrixIdentity
+  calc
+    finiteSum (fun k => A i k * (if k = j then 1 else 0)) =
+        finiteSum (fun k => if k = j then A i k else 0) := by
+          congr 1
+          funext k
+          split
+          · rename_i h
+            exact Rat.mul_one _
+          · rename_i h
+            exact Rat.mul_zero _
+    _ = A i j := finiteSum_ite_eq j (fun k => A i k)
+
+theorem matrixMul_zero_left {dimension : Nat} (A : RatMatrix dimension) :
+    matrixMul (matrixZero dimension) A = matrixZero dimension := by
+  funext i j
+  unfold matrixMul matrixZero
+  rw [show (fun k => 0 * A k j) = (fun _ => 0) by
+    funext k
+    exact Rat.zero_mul _]
+  exact finiteSum_zero dimension
+
 /-- A sampled, possibly inhomogeneous, linear recurrence
 `x_(k+1) = step(k) * x_k + forcing(k)`.  For an Euler discretization of
 `x' = A(t)x+b(t)`, use `step(k) = I + h A(t_k)` and
@@ -404,6 +429,40 @@ theorem matrixPow_identity {dimension : Nat} :
   | n + 1 => by
       rw [matrixPow, matrixPow_identity n, matrixMul_identity_left]
 
+/-- The finite sum of a sampled matrix family over the first `steps` times. -/
+def matrixSequenceSum {dimension : Nat} (B : Nat -> RatMatrix dimension) : Nat ->
+    RatMatrix dimension
+  | 0 => matrixZero dimension
+  | n + 1 => matrixAdd (matrixSequenceSum B n) (B n)
+
+theorem matrixSequenceSum_zero {dimension : Nat} (B : Nat -> RatMatrix dimension) :
+    matrixSequenceSum B 0 = matrixZero dimension := rfl
+
+theorem matrixSequenceSum_succ {dimension : Nat} (B : Nat -> RatMatrix dimension)
+    (steps : Nat) :
+    matrixSequenceSum B (steps + 1) =
+      matrixAdd (matrixSequenceSum B steps) (B steps) := rfl
+
+/-- A sampled coefficient family whose every product of two samples vanishes.
+
+This is the finite square-zero (and hence nilpotent) special case of the
+Peano--Baker expansion.  It is intentionally stronger than mere pairwise
+commutation: the strength makes all words of length at least two vanish by a
+direct finite calculation. -/
+def PairwiseProductZero {dimension : Nat} (B : Nat -> RatMatrix dimension) : Prop :=
+  forall i j, matrixMul (B i) (B j) = matrixZero dimension
+
+theorem matrixMul_sequenceSum_eq_zero {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (hzero : PairwiseProductZero B) :
+    forall i steps,
+      matrixMul (B i) (matrixSequenceSum B steps) = matrixZero dimension
+  | i, 0 => by
+      rw [matrixSequenceSum_zero, matrixMul_zero_right]
+  | i, steps + 1 => by
+      rw [matrixSequenceSum_succ, matrixMul_add_right,
+        matrixMul_sequenceSum_eq_zero B hzero i steps, hzero i steps,
+        matrixAdd_zero_right]
+
 /-- When all Euler increments are the same matrix `B`, time ordering reduces
 to the finite power `(I + B)^N`. -/
 theorem chronologicalProduct_constant {dimension : Nat} (B : RatMatrix dimension) :
@@ -475,6 +534,31 @@ theorem peanoBakerDiscreteSum_zeroCoefficient {dimension : Nat} (steps : Nat) :
       matrixIdentity dimension := by
   rw [peanoBakerDiscreteSum_constant]
   rw [matrixAdd_zero_right, matrixPow_identity]
+
+/-- In the square-zero specialization, every Peano--Baker word of length at
+least two is zero, so the finite state transition is exactly the identity plus
+the finite sum of the sampled increments. -/
+theorem chronologicalProduct_pairwiseProductZero {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (hzero : PairwiseProductZero B) :
+    forall steps,
+      chronologicalProduct B steps =
+        matrixAdd (matrixIdentity dimension) (matrixSequenceSum B steps)
+  | 0 => by
+      exact (matrixAdd_zero_right _).symm
+  | steps + 1 => by
+      rw [chronologicalProduct_succ,
+        chronologicalProduct_pairwiseProductZero B hzero steps,
+        matrixMul_add_right, matrixMul_identity_right,
+        matrixMul_sequenceSum_eq_zero B hzero, matrixAdd_zero_right]
+      exact matrixAdd_assoc _ _ _
+
+theorem peanoBakerDiscreteSum_pairwiseProductZero {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (hzero : PairwiseProductZero B)
+    (steps : Nat) :
+    peanoBakerDiscreteSum B steps =
+      matrixAdd (matrixIdentity dimension) (matrixSequenceSum B steps) := by
+  rw [← discretePeanoBakerExpansion]
+  exact chronologicalProduct_pairwiseProductZero B hzero steps
 
 @[simp] theorem orderedIndexWords_zero : orderedIndexWords 0 = [[]] := rfl
 
