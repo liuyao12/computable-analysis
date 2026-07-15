@@ -2911,6 +2911,179 @@ theorem reciprocalQuarticSymmetricDensity_minus_one_sub (x y : Rat) :
           (x * x + y * y + (x * x) * (y * y) - 2)) := by
             rw [Rat.mul_one]
 
+private theorem square_le_one_of_between {x : Rat}
+    (hxlo : -1 <= x) (hxhi : x <= 1) : x * x <= 1 := by
+  by_cases hx : 0 <= x
+  · calc
+      x * x <= 1 * x := Rat.mul_le_mul_of_nonneg_right hxhi hx
+      _ = x := by rw [Rat.one_mul]
+      _ <= 1 := hxhi
+  · have hxl : x <= 0 := by grind
+    have hnx : 0 <= -x := by grind
+    have hnhi : -x <= 1 := by grind
+    have hs : (-x) * (-x) <= 1 := by
+      calc
+        (-x) * (-x) <= 1 * (-x) := Rat.mul_le_mul_of_nonneg_right hnhi hnx
+        _ = -x := by rw [Rat.one_mul]
+        _ <= 1 := hnhi
+    grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+private theorem sum_abs_le_two {x y : Rat}
+    (hxlo : -1 <= x) (hxhi : x <= 1)
+    (hylo : -1 <= y) (hyhi : y <= 1) : qabs (y + x) <= 2 := by
+  apply qabs_le_of_neg_le_le
+  · grind
+  · grind
+
+private theorem reciprocalQuarticLipschitzFactor_abs_le_two {x y : Rat}
+    (hxlo : -1 <= x) (hxhi : x <= 1)
+    (hylo : -1 <= y) (hyhi : y <= 1) :
+    qabs (x * x + y * y + (x * x) * (y * y) - 2) <= 2 := by
+  have hxx0 := rat_square_nonneg x
+  have hyy0 := rat_square_nonneg y
+  have hxx1 := square_le_one_of_between hxlo hxhi
+  have hyy1 := square_le_one_of_between hylo hyhi
+  have hprod0 : 0 <= (x * x) * (y * y) := Rat.mul_nonneg hxx0 hyy0
+  have hprod1 : (x * x) * (y * y) <= 1 := by
+    calc
+      (x * x) * (y * y) <= 1 * (y * y) :=
+        Rat.mul_le_mul_of_nonneg_right hxx1 hyy0
+      _ <= 1 * 1 := Rat.mul_le_mul_of_nonneg_left hyy1
+        (by native_decide : (0 : Rat) <= 1)
+      _ = 1 := by native_decide
+  apply qabs_le_of_neg_le_le
+  · grind [Rat.sub_eq_add_neg]
+  · have hsum : x * x + y * y <= 2 := by
+      calc
+        x * x + y * y <= 1 + y * y :=
+          (Rat.add_le_add_right).2 hxx1
+        _ <= 1 + 1 := (Rat.add_le_add_left).2 hyy1
+        _ = 2 := by native_decide
+    have hall : x * x + y * y + (x * x) * (y * y) <= 3 := by
+      calc
+        x * x + y * y + (x * x) * (y * y) <= 2 + (x * x) * (y * y) :=
+          (Rat.add_le_add_right).2 hsum
+        _ <= 2 + 1 := (Rat.add_le_add_left).2 hprod1
+        _ = 3 := by native_decide
+    grind [Rat.sub_eq_add_neg]
+
+private theorem reciprocalQuarticSquareDifference_abs_le_two_mul {x y : Rat}
+    (hxlo : -1 <= x) (hxhi : x <= 1)
+    (hylo : -1 <= y) (hyhi : y <= 1) :
+    qabs (y * y - x * x) <= 2 * qabs (y - x) := by
+  have hsum := sum_abs_le_two hxlo hxhi hylo hyhi
+  calc
+    qabs (y * y - x * x) = qabs ((y - x) * (y + x)) := by
+      congr 1
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ = qabs (y - x) * qabs (y + x) := qabs_mul _ _
+    _ <= qabs (y - x) * 2 := Rat.mul_le_mul_of_nonneg_left hsum
+      (qabs_nonneg _)
+    _ = 2 * qabs (y - x) := by rw [Rat.mul_comm]
+
+/-- The reciprocal of the two compact denominator factors has a uniform
+rational upper bound. -/
+theorem reciprocalQuarticDenominatorProduct_minus_one_inv_le_sixteen_ninths
+    (x y : Rat) :
+    (reciprocalQuarticDenominator (-1) x *
+      reciprocalQuarticDenominator (-1) y)⁻¹ <= (16 : Rat) / 9 := by
+  let qx := reciprocalQuarticDenominator (-1) x
+  let qy := reciprocalQuarticDenominator (-1) y
+  change (qx * qy)⁻¹ <= (16 : Rat) / 9
+  have hqx : (3 : Rat) / 4 <= qx := by
+    simpa [qx] using reciprocalQuarticDenominator_minus_one_ge_three_quarters x
+  have hqy : (3 : Rat) / 4 <= qy := by
+    simpa [qy] using reciprocalQuarticDenominator_minus_one_ge_three_quarters y
+  have hqx0 : 0 <= qx := Rat.le_trans (by native_decide) hqx
+  have hqprod : (9 : Rat) / 16 <= qx * qy := by
+    calc
+      (9 : Rat) / 16 = ((3 : Rat) / 4) * ((3 : Rat) / 4) := by native_decide
+      _ <= qx * ((3 : Rat) / 4) := Rat.mul_le_mul_of_nonneg_right hqx
+        (by native_decide)
+      _ <= qx * qy := Rat.mul_le_mul_of_nonneg_left hqy hqx0
+  have hprodpos : 0 < qx * qy := Rat.mul_pos (by grind) (by grind)
+  have hprodne : qx * qy ≠ 0 := Rat.ne_of_gt hprodpos
+  have hinvnonneg : 0 <= (qx * qy)⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hprodpos)
+  have hscale : 1 <= ((16 : Rat) / 9) * (qx * qy) := by
+    have h := Rat.mul_le_mul_of_nonneg_left hqprod
+      (by native_decide : (0 : Rat) <= (16 : Rat) / 9)
+    have hconst : ((16 : Rat) / 9) * ((9 : Rat) / 16) = 1 := by
+      native_decide
+    rw [hconst] at h
+    exact h
+  calc
+    (qx * qy)⁻¹ = 1 * (qx * qy)⁻¹ := by rw [Rat.one_mul]
+    _ <= (((16 : Rat) / 9) * (qx * qy)) * (qx * qy)⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_right hscale hinvnonneg
+    _ = (16 : Rat) / 9 := by
+      have hcancel : (qx * qy) * (qx * qy)⁻¹ = 1 :=
+        Rat.mul_inv_cancel _ hprodne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The compact reciprocal-quartic density has an explicit rational
+Lipschitz bound on the closed unit interval. -/
+theorem reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit (x y : Rat)
+    (hxlo : -1 <= x) (hxhi : x <= 1)
+    (hylo : -1 <= y) (hyhi : y <= 1) :
+    qabs (reciprocalQuarticSymmetricDensity (-1) x -
+      reciprocalQuarticSymmetricDensity (-1) y) <= 8 * qabs (y - x) := by
+  rw [reciprocalQuarticSymmetricDensity_minus_one_sub]
+  have hsq := reciprocalQuarticSquareDifference_abs_le_two_mul hxlo hxhi hylo hyhi
+  have hfactor := reciprocalQuarticLipschitzFactor_abs_le_two hxlo hxhi hylo hyhi
+  have hnum :
+      qabs ((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) <=
+        4 * qabs (y - x) := by
+    calc
+      qabs ((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) =
+          qabs (y * y - x * x) *
+            qabs (x * x + y * y + (x * x) * (y * y) - 2) := qabs_mul _ _
+      _ <= (2 * qabs (y - x)) *
+          qabs (x * x + y * y + (x * x) * (y * y) - 2) :=
+            Rat.mul_le_mul_of_nonneg_right hsq (qabs_nonneg _)
+      _ <= (2 * qabs (y - x)) * 2 :=
+            Rat.mul_le_mul_of_nonneg_left hfactor
+              (Rat.mul_nonneg (by native_decide) (qabs_nonneg _))
+      _ = 4 * qabs (y - x) := by grind [Rat.mul_assoc, Rat.mul_comm]
+  have hinv :=
+    reciprocalQuarticDenominatorProduct_minus_one_inv_le_sixteen_ninths x y
+  have hinv0 : 0 <=
+      (reciprocalQuarticDenominator (-1) x *
+        reciprocalQuarticDenominator (-1) y)⁻¹ := by
+    apply Rat.le_of_lt
+    apply (Rat.inv_pos).2
+    exact Rat.mul_pos (reciprocalQuarticDenominator_minus_one_pos x)
+      (reciprocalQuarticDenominator_minus_one_pos y)
+  calc
+    qabs
+        (((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) /
+          (reciprocalQuarticDenominator (-1) x *
+            reciprocalQuarticDenominator (-1) y)) =
+        qabs ((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) *
+          (reciprocalQuarticDenominator (-1) x *
+            reciprocalQuarticDenominator (-1) y)⁻¹ := by
+          rw [Rat.div_def, qabs_mul, qabs_eq_self_of_nonneg hinv0]
+    _ <= (4 * qabs (y - x)) *
+          (reciprocalQuarticDenominator (-1) x *
+            reciprocalQuarticDenominator (-1) y)⁻¹ :=
+          Rat.mul_le_mul_of_nonneg_right hnum hinv0
+    _ <= (4 * qabs (y - x)) * ((16 : Rat) / 9) :=
+          Rat.mul_le_mul_of_nonneg_left hinv
+            (Rat.mul_nonneg (by native_decide) (qabs_nonneg _))
+    _ <= 8 * qabs (y - x) := by
+          have h64 : (4 : Rat) * ((16 : Rat) / 9) <= 8 := by native_decide
+          calc
+            (4 * qabs (y - x)) * ((16 : Rat) / 9) =
+                ((4 : Rat) * ((16 : Rat) / 9)) * qabs (y - x) := by
+                grind [Rat.mul_assoc, Rat.mul_comm]
+            _ <= 8 * qabs (y - x) := Rat.mul_le_mul_of_nonneg_right h64
+              (qabs_nonneg _)
+
 /-- The projective coordinate compactifying the real line to the open interval
 `(-1,1)`.  Its apparent poles at the endpoints disappear after multiplication
 by the Cauchy kernel; the resulting density is the everywhere-defined reciprocal-quartic
@@ -3015,6 +3188,70 @@ theorem reciprocalQuarticMinusOneCompactRaw_compute_eq_density
       { lo := reciprocalQuarticSymmetricDensity (-1) x,
         hi := reciprocalQuarticSymmetricDensity (-1) x } := by
   simp [reciprocalQuarticMinusOneCompactRaw]
+
+/-- The exact compact-density evaluator is rational epsilon-delta continuous
+on `[-1,1]`.  The modulus uses the explicit Lipschitz constant `8`. -/
+theorem reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn
+      (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) := by
+  intro eps
+  let delta : QPos :=
+    { val := eps.val / 8
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide)) }
+  refine ⟨delta, 0, ?_⟩
+  intro x y hx hy hxy
+  rcases hx with ⟨hxlo, hxhi⟩
+  rcases hy with ⟨hylo, hyhi⟩
+  have hlip := reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit
+    x y hxlo hxhi hylo hyhi
+  have hdist :
+      qabs (reciprocalQuarticSymmetricDensity (-1) x -
+        reciprocalQuarticSymmetricDensity (-1) y) <= eps.val := by
+    calc
+      qabs (reciprocalQuarticSymmetricDensity (-1) x -
+        reciprocalQuarticSymmetricDensity (-1) y) <= 8 * qabs (y - x) := hlip
+      _ <= 8 * (eps.val / 8) := Rat.mul_le_mul_of_nonneg_left (by
+        simpa [delta] using hxy)
+        (by native_decide)
+      _ = eps.val := by
+        rw [Rat.div_def]
+        have hcancel : (8 : Rat) * (8 : Rat)⁻¹ = 1 := by native_decide
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hreverse :
+      reciprocalQuarticSymmetricDensity (-1) y -
+        reciprocalQuarticSymmetricDensity (-1) x <= eps.val := by
+    calc
+      reciprocalQuarticSymmetricDensity (-1) y -
+          reciprocalQuarticSymmetricDensity (-1) x =
+          -(reciprocalQuarticSymmetricDensity (-1) x -
+            reciprocalQuarticSymmetricDensity (-1) y) := by
+            grind [Rat.sub_eq_add_neg]
+      _ <= qabs (-(reciprocalQuarticSymmetricDensity (-1) x -
+            reciprocalQuarticSymmetricDensity (-1) y)) := self_le_qabs _
+      _ = qabs (reciprocalQuarticSymmetricDensity (-1) x -
+            reciprocalQuarticSymmetricDensity (-1) y) := qabs_neg _
+      _ <= eps.val := hdist
+  have hforward :
+      reciprocalQuarticSymmetricDensity (-1) x -
+        reciprocalQuarticSymmetricDensity (-1) y <= eps.val := by
+    exact Rat.le_trans (self_le_qabs _) hdist
+  unfold QInterval.NearAt
+  change
+    reciprocalQuarticSymmetricDensity (-1) x <=
+        reciprocalQuarticSymmetricDensity (-1) y + eps.val /\
+      reciprocalQuarticSymmetricDensity (-1) y <=
+        reciprocalQuarticSymmetricDensity (-1) x + eps.val /\
+      reciprocalQuarticSymmetricDensity (-1) x -
+          reciprocalQuarticSymmetricDensity (-1) x <= eps.val /\
+      reciprocalQuarticSymmetricDensity (-1) y -
+          reciprocalQuarticSymmetricDensity (-1) y <= eps.val
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor <;> grind
 
 /-- Folding the positive half-line by the reciprocal map produces the symmetric
 density \((1+x^2)/(x^4+a x^2+1)\) on the unit interval. -/

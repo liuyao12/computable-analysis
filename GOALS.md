@@ -130,8 +130,12 @@ not a description of the current module graph. The checked blueprint
   proves `3/4 ≤ x^4-x^2+1` for every rational `x`, and the compact density is
   proved nonnegative.  Its checked finite-difference factorization is
   `IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub`.
-  These are the denominator-apartness, range, and Lipschitz-modulus inputs for
-  its interval-regularity certificate.
+  Lean now proves the resulting `8`-Lipschitz estimate on `[-1,1]` and the
+  literal epsilon-delta theorem
+  `IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous`,
+  using `delta = epsilon/8`.  These are the denominator-apartness, range,
+  continuity, and Lipschitz-modulus inputs for its interval-regularity
+  certificate.
   This turns the next analytic obligation into a finite-interval regularity
   and substitution certificate rather than an unstructured tail limit.
   The expected-value side is packaged as

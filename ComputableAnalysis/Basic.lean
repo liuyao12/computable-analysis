@@ -334,6 +334,107 @@ theorem qabs_pos_of_ne {x : Rat} (hx : Not (x = 0)) :
   · simp [hneg]
     grind
 
+/-- Absolute value preserves a nonnegative rational. -/
+theorem qabs_eq_self_of_nonneg {x : Rat} (hx : 0 <= x) :
+    qabs x = x := by
+  unfold qabs
+  by_cases hneg : x < 0
+  · simp [hneg]
+    grind
+  · simp [hneg]
+
+/-- Absolute value negates a nonpositive rational. -/
+theorem qabs_eq_neg_of_nonpos {x : Rat} (hx : x <= 0) :
+    qabs x = -x := by
+  unfold qabs
+  by_cases hneg : x < 0
+  · simp [hneg]
+  · have hzero : x = 0 := by grind
+    simp [hzero]
+
+theorem qabs_neg (x : Rat) : qabs (-x) = qabs x := by
+  by_cases hx : 0 <= x
+  · have hnx : -x <= 0 := by grind
+    rw [qabs_eq_neg_of_nonpos hnx, qabs_eq_self_of_nonneg hx]
+    grind
+  · have hxl : x <= 0 := by grind
+    have hnx : 0 <= -x := by grind
+    rw [qabs_eq_self_of_nonneg hnx, qabs_eq_neg_of_nonpos hxl]
+
+theorem qabs_mul (x y : Rat) : qabs (x * y) = qabs x * qabs y := by
+  by_cases hx : 0 <= x
+  · by_cases hy : 0 <= y
+    · rw [qabs_eq_self_of_nonneg (Rat.mul_nonneg hx hy),
+        qabs_eq_self_of_nonneg hx, qabs_eq_self_of_nonneg hy]
+    · have hyl : y <= 0 := by grind
+      have hny : 0 <= -y := by grind
+      have hxy : x * y <= 0 := by
+        have h : 0 <= x * (-y) := Rat.mul_nonneg hx hny
+        grind [Rat.mul_neg]
+      rw [qabs_eq_neg_of_nonpos hxy,
+        qabs_eq_self_of_nonneg hx, qabs_eq_neg_of_nonpos hyl]
+      grind [Rat.mul_neg]
+  · have hxl : x <= 0 := by grind
+    have hnx : 0 <= -x := by grind
+    by_cases hy : 0 <= y
+    · have hxy : x * y <= 0 := by
+        have h : 0 <= (-x) * y := Rat.mul_nonneg hnx hy
+        grind [Rat.neg_mul]
+      rw [qabs_eq_neg_of_nonpos hxy,
+        qabs_eq_neg_of_nonpos hxl, qabs_eq_self_of_nonneg hy]
+      grind [Rat.neg_mul]
+    · have hyl : y <= 0 := by grind
+      have hny : 0 <= -y := by grind
+      have hxy : 0 <= x * y := by
+        calc
+          0 <= (-x) * (-y) := Rat.mul_nonneg hnx hny
+          _ = x * y := by grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+      rw [qabs_eq_self_of_nonneg hxy,
+        qabs_eq_neg_of_nonpos hxl, qabs_eq_neg_of_nonpos hyl]
+      grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem rat_add_le_add {a b c d : Rat}
+    (hab : a <= b) (hcd : c <= d) : a + c <= b + d := by
+  calc
+    a + c <= b + c := (Rat.add_le_add_right).2 hab
+    _ <= b + d := (Rat.add_le_add_left).2 hcd
+
+theorem self_le_qabs (x : Rat) : x <= qabs x := by
+  unfold qabs
+  by_cases hneg : x < 0
+  · simp [hneg]
+    grind
+  · simp [hneg]
+
+theorem neg_qabs_le_self (x : Rat) : -qabs x <= x := by
+  unfold qabs
+  by_cases hneg : x < 0
+  · simp [hneg]
+  · simp [hneg]
+    grind
+
+theorem qabs_le_of_neg_le_le {x b : Rat}
+    (hlo : -b <= x) (hhi : x <= b) : qabs x <= b := by
+  unfold qabs
+  by_cases hneg : x < 0
+  · simp [hneg]
+    grind
+  · simp [hneg]
+    exact hhi
+
+theorem qabs_add_le (x y : Rat) : qabs (x + y) <= qabs x + qabs y := by
+  apply qabs_le_of_neg_le_le
+  · calc
+      -(qabs x + qabs y) = -qabs x + -qabs y := by grind
+      _ <= x + y := rat_add_le_add (neg_qabs_le_self x) (neg_qabs_le_self y)
+  · exact rat_add_le_add (self_le_qabs x) (self_le_qabs y)
+
+theorem qabs_sub_le (x y : Rat) : qabs (x - y) <= qabs x + qabs y := by
+  rw [show x - y = x + (-y) by grind [Rat.sub_eq_add_neg]]
+  calc
+    qabs (x + -y) <= qabs x + qabs (-y) := qabs_add_le x (-y)
+    _ = qabs x + qabs y := by rw [qabs_neg]
+
 theorem qabs_sub_le_of_common_bounds {lo hi a b : Rat}
     (ha_lo : lo <= a) (ha_hi : a <= hi)
     (hb_lo : lo <= b) (hb_hi : b <= hi) :

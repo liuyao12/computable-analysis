@@ -998,9 +998,17 @@ The finite-difference identity
  {(x^4-x^2+1)(y^4-y^2+1)},
  \qquad f(x)=\frac{1+x^2}{x^4-x^2+1},
 \]
-is formalized as well.  On the compact interval its factors provide the
-direct rational route to a Lipschitz modulus; turning those elementary bounds
-into the required interval evaluator is the next unchecked analytic step.
+is formalized as well.  On the compact interval its factors now give the
+checked rational bound
+\[
+  |f(x)-f(y)|\le 8|x-y|\qquad(-1\le x,y\le1).
+\]
+Consequently the total compact-density evaluator has a literal rational
+\(\varepsilon\)-\(\delta\) certificate on \([-1,1]\), with
+\(\delta=\varepsilon/8\).  This supplies pointwise continuity and
+denominator-apartness for the forthcoming interval-level regularity and
+integral certificate; the projective change-of-variables theorem and the
+integral construction remain unchecked.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \[
