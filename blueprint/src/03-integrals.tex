@@ -982,10 +982,25 @@ projective change-of-variables theorem, so this is not yet a completed
 scoreboard computation.  The compact density itself is already a total
 rational-name interval function on every rational interval; only its
 interval-level regularity and integral certificate are pending.
-For the pi case \(a=-1\), Lean also proves the needed denominator positivity:
+For the pi case \(a=-1\), Lean proves the stronger uniform separation
+\[
+  \frac34\le x^4-x^2+1,
+\]
+as well as nonnegativity of the compact density.  In particular it proves the
+needed denominator positivity:
 \[
   u^2+1>0,\qquad x^4-x^2+1>0.
 \]
+The finite-difference identity
+\[
+ f(x)-f(y)=
+ \frac{(y^2-x^2)\bigl(x^2+y^2+x^2y^2-2\bigr)}
+ {(x^4-x^2+1)(y^4-y^2+1)},
+ \qquad f(x)=\frac{1+x^2}{x^4-x^2+1},
+\]
+is formalized as well.  On the compact interval its factors provide the
+direct rational route to a Lipschitz modulus; turning those elementary bounds
+into the required interval evaluator is the next unchecked analytic step.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \[

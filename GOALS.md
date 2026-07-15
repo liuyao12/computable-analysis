@@ -125,6 +125,13 @@ not a description of the current module graph. The checked blueprint
   `reciprocalQuarticSymmetricDensity_minus_one_eq_projectiveCompactPullback`
   identifies its Cauchy pullback with the everywhere-defined density
   `(1+x^2)/(x^4-x^2+1)`, whose two endpoint values are exactly `2`.
+  The uniform rational estimate
+  `IntegralIdentities.reciprocalQuarticDenominator_minus_one_ge_three_quarters`
+  proves `3/4 ≤ x^4-x^2+1` for every rational `x`, and the compact density is
+  proved nonnegative.  Its checked finite-difference factorization is
+  `IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub`.
+  These are the denominator-apartness, range, and Lipschitz-modulus inputs for
+  its interval-regularity certificate.
   This turns the next analytic obligation into a finite-interval regularity
   and substitution certificate rather than an unstructured tail limit.
   The expected-value side is packaged as

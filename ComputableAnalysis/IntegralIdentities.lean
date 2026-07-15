@@ -2805,6 +2805,112 @@ theorem reciprocalQuarticDenominator_minus_one_pos (x : Rat) :
     rw [hden] at hprod
     exact hprod
 
+/-- The clean reciprocal-quartic denominator is uniformly separated from
+zero by a rational constant.  This is the denominator estimate needed for a
+future compact-interval regularity certificate. -/
+theorem reciprocalQuarticDenominator_minus_one_ge_three_quarters (x : Rat) :
+    (3 : Rat) / 4 <= reciprocalQuarticDenominator (-1) x := by
+  have hsq : 0 <= (2 * x * x - 1) * (2 * x * x - 1) :=
+    rat_square_nonneg (2 * x * x - 1)
+  have hid :
+      4 * reciprocalQuarticDenominator (-1) x - 3 =
+        (2 * x * x - 1) * (2 * x * x - 1) := by
+    unfold reciprocalQuarticDenominator
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hfour : 3 <= 4 * reciprocalQuarticDenominator (-1) x := by
+    have hnonneg : 0 <= 4 * reciprocalQuarticDenominator (-1) x - 3 := by
+      rw [hid]
+      exact hsq
+    grind [Rat.sub_eq_add_neg]
+  have hscaled := Rat.mul_le_mul_of_nonneg_right hfour
+    (by native_decide : (0 : Rat) <= 1 / 4)
+  calc
+    (3 : Rat) / 4 = 3 * (1 / 4) := by
+      rw [Rat.div_def, Rat.div_def, Rat.one_mul]
+    _ <= (4 * reciprocalQuarticDenominator (-1) x) * (1 / 4) := hscaled
+    _ = reciprocalQuarticDenominator (-1) x := by
+      rw [Rat.div_def]
+      have hcancel : (4 : Rat) * (4 : Rat)⁻¹ = 1 := by native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The compact reciprocal-quartic density is nonnegative at every rational
+point.  Together with the uniform denominator bound, this supplies the basic
+range information for its forthcoming interval-regularity certificate. -/
+theorem reciprocalQuarticSymmetricDensity_minus_one_nonneg (x : Rat) :
+    0 <= reciprocalQuarticSymmetricDensity (-1) x := by
+  unfold reciprocalQuarticSymmetricDensity reciprocalQuarticKernel
+  apply Rat.mul_nonneg
+  · have hsq : 0 <= x * x := rat_square_nonneg x
+    grind
+  · rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      (reciprocalQuarticDenominator_minus_one_pos x))
+
+/-- Exact finite-difference factorization for the compact reciprocal-quartic
+density.  It exposes the denominator and polynomial factors from which a
+finite-interval Lipschitz modulus will be derived. -/
+theorem reciprocalQuarticSymmetricDensity_minus_one_sub (x y : Rat) :
+    reciprocalQuarticSymmetricDensity (-1) x -
+        reciprocalQuarticSymmetricDensity (-1) y =
+      ((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) /
+        (reciprocalQuarticDenominator (-1) x *
+          reciprocalQuarticDenominator (-1) y) := by
+  let qx := reciprocalQuarticDenominator (-1) x
+  let qy := reciprocalQuarticDenominator (-1) y
+  have hqx : qx ≠ 0 := by
+    simpa [qx] using Rat.ne_of_gt (reciprocalQuarticDenominator_minus_one_pos x)
+  have hqy : qy ≠ 0 := by
+    simpa [qy] using Rat.ne_of_gt (reciprocalQuarticDenominator_minus_one_pos y)
+  have hprod : qx * qy ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · exact hqx hzero
+    · exact hqy hzero
+  apply rat_eq_of_mul_eq_mul_ne (c := qx * qy) hprod
+  calc
+    (reciprocalQuarticSymmetricDensity (-1) x -
+        reciprocalQuarticSymmetricDensity (-1) y) * (qx * qy) =
+        (1 + x * x) * qy - (1 + y * y) * qx := by
+      change
+        ((1 + x * x) * (1 / qx) - (1 + y * y) * (1 / qy)) * (qx * qy) =
+          (1 + x * x) * qy - (1 + y * y) * qx
+      rw [Rat.div_def, Rat.div_def]
+      have hix : qx⁻¹ * qx = 1 := by
+        rw [Rat.mul_comm]
+        exact Rat.mul_inv_cancel qx hqx
+      have hiy : qy⁻¹ * qy = 1 := by
+        rw [Rat.mul_comm]
+        exact Rat.mul_inv_cancel qy hqy
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ = ((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) := by
+      dsimp [qx, qy]
+      unfold reciprocalQuarticDenominator
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ = (((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) /
+        (qx * qy)) * (qx * qy) := by
+      rw [Rat.div_def]
+      symm
+      calc
+        (((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) * (qx * qy)⁻¹) *
+            (qx * qy) =
+            ((y * y - x * x) *
+              (x * x + y * y + (x * x) * (y * y) - 2)) *
+                ((qx * qy)⁻¹ * (qx * qy)) := by
+              rw [Rat.mul_assoc]
+        _ = ((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) * 1 := by
+            rw [Rat.inv_mul_cancel (qx * qy) hprod]
+        _ = ((y * y - x * x) *
+          (x * x + y * y + (x * x) * (y * y) - 2)) := by
+            rw [Rat.mul_one]
+
 /-- The projective coordinate compactifying the real line to the open interval
 `(-1,1)`.  Its apparent poles at the endpoints disappear after multiplication
 by the Cauchy kernel; the resulting density is the everywhere-defined reciprocal-quartic
