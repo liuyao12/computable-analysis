@@ -135,7 +135,8 @@ Given an output precision `n`, it supplies:
 
 * an input precision saying how close rational inputs must be;
 * an evaluation precision saying how accurately to compute the function;
-* a proof that sufficiently close inputs produce close output intervals.
+* a proof that sufficiently close inputs produce output intervals within the
+  requested tolerance.
 
 This is intentionally interval-based rather than topological. -/
 structure EffectiveModulusOn (f : RealFunRaw) (a b : Rat) where
@@ -149,7 +150,7 @@ structure EffectiveModulusOn (f : RealFunRaw) (a b : Rat) where
       a <= y ->
       y <= b ->
       qabs (y - x) <= (1 / ((inputPrecision n) : Rat)) ->
-        intervalCloseAtPrecision
+        intervalNearAtPrecision
           (f.compute x (evalPrecision n))
           (f.compute y (evalPrecision n))
           n

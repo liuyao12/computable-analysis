@@ -120,7 +120,9 @@ def FunctionOnInterval.Equivalent (f g : FunctionOnInterval) : Prop :=
 /-- Effective derivative on a rational interval.
 
 For every requested output precision, small enough rational steps make the
-finite-difference interval overlap the derivative interval. -/
+finite-difference interval lie within the derivative interval's requested
+tolerance.  Literal overlap would incorrectly demand equality at every finite
+nonzero step. -/
 structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
   same_lower : df.lower = f.lower
   same_upper : df.upper = f.upper
@@ -133,7 +135,7 @@ structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
       (hdx : inDomainInterval df.lower df.upper x),
       h ≠ 0 ->
       qabs h <= (1 / ((stepPrecision n : Nat) : Rat)) ->
-        intervalCloseAtPrecision
+        intervalNearAtPrecision
           (QInterval.differenceQuotient
             (f.compute (x + h) hxh (evalPrecision n))
             (f.compute x hx (evalPrecision n))

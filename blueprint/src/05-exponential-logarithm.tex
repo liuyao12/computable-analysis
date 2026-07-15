@@ -104,8 +104,10 @@ The first statement is represented by an interval-valued derivative
 certificate on each rational interval; the second uses rational difference
 quotients at zero.  Lean already proves the formal coefficient identity
 \(\exp' = \exp\).  The remaining analytic theorem is to turn the certified
-power-series tail bounds into the corresponding derivative certificate and
-then establish the displayed uniqueness statement by finite rational
+power-series tail bounds into the corresponding derivative certificate, whose
+finite-difference and derivative boxes are within the requested tolerance
+rather than required to overlap exactly, and then establish the displayed
+uniqueness statement by finite rational
 estimates.
 \end{theorem}
 

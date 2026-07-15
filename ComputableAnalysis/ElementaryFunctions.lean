@@ -121,7 +121,7 @@ structure HasDerivativeAt (powers : RationalPowerExtension base)
   close :
     forall h n, h ≠ 0 ->
       qabs h <= (1 / ((stepPrecision n : Nat) : Rat)) ->
-      intervalCloseAtPrecision
+      intervalNearAtPrecision
         (QInterval.differenceQuotient
           ((powers.power (x + h)).compute (evalPrecision n))
           ((powers.power x).compute (evalPrecision n)) h)
