@@ -2805,6 +2805,111 @@ theorem reciprocalQuarticDenominator_minus_one_pos (x : Rat) :
     rw [hden] at hprod
     exact hprod
 
+/-- The projective coordinate compactifying the real line to the open interval
+`(-1,1)`.  Its apparent poles at the endpoints disappear after multiplication
+by the Cauchy kernel; the resulting density is the everywhere-defined reciprocal-quartic
+kernel below. -/
+def projectiveCompactCoordinate (x : Rat) : Rat :=
+  x / (1 - x * x)
+
+/-- Formal Jacobian of `projectiveCompactCoordinate`. -/
+def projectiveCompactJacobian (x : Rat) : Rat :=
+  (1 + x * x) / ((1 - x * x) * (1 - x * x))
+
+/-- Exact rational compactification of the Cauchy density.  Away from the
+two chart endpoints, the pullback of `1 / (1 + u^2)` under
+`u = x / (1 - x^2)` is the everywhere-defined density
+`(1 + x^2) / (x^4 - x^2 + 1)`.  This is the finite algebraic core of the
+reciprocal-quartic pi route; endpoint and integral certificates remain
+separate analytic work. -/
+theorem reciprocalQuarticSymmetricDensity_minus_one_eq_projectiveCompactPullback
+    (x : Rat) (hx : 1 - x * x ≠ 0) :
+    reciprocalQuarticSymmetricDensity (-1) x =
+      projectiveCompactJacobian x *
+        ArctanGeometry.integralKernel (projectiveCompactCoordinate x) := by
+  let d : Rat := 1 - x * x
+  let q : Rat := reciprocalQuarticDenominator (-1) x
+  have hd : d ≠ 0 := by simpa [d] using hx
+  have hd2 : d * d ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · exact hd hzero
+    · exact hd hzero
+  have hden : 1 + (x / d) * (x / d) = q / (d * d) := by
+    apply rat_eq_of_mul_eq_mul_ne (c := d * d) hd2
+    rw [Rat.div_def]
+    calc
+      (1 + (x / d) * (x / d)) * (d * d) = d * d + x * x := by
+        have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hd
+        grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ = q := by
+        dsimp [d, q, reciprocalQuarticDenominator]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+          Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      _ = q * (d * d)⁻¹ * (d * d) := by
+        have hcancel : (d * d) * (d * d)⁻¹ = 1 :=
+          Rat.mul_inv_cancel (d * d) hd2
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hkernel : ArctanGeometry.integralKernel (x / d) = (d * d) / q := by
+    unfold ArctanGeometry.integralKernel
+    rw [hden]
+    simp only [Rat.div_def, Rat.inv_mul_rev, Rat.inv_inv, Rat.one_mul]
+  have hkernel' :
+      ArctanGeometry.integralKernel (x / (1 - x * x)) =
+        ((1 - x * x) * (1 - x * x)) /
+          reciprocalQuarticDenominator (-1) x := by
+    simpa [d, q] using hkernel
+  unfold reciprocalQuarticSymmetricDensity reciprocalQuarticKernel
+    projectiveCompactJacobian projectiveCompactCoordinate
+  rw [hkernel']
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hcancel : (d * d)⁻¹ * (d * d) = 1 := by
+    rw [Rat.mul_comm]
+    exact Rat.mul_inv_cancel (d * d) hd2
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The compactified density has finite rational endpoint values, so the
+projective chart's poles are removable at the level of the intended integrand. -/
+theorem reciprocalQuarticSymmetricDensity_minus_one_at_one :
+    reciprocalQuarticSymmetricDensity (-1) 1 = 2 := by
+  native_decide
+
+theorem reciprocalQuarticSymmetricDensity_minus_one_at_neg_one :
+    reciprocalQuarticSymmetricDensity (-1) (-1) = 2 := by
+  native_decide
+
+/-- Exact rational-name evaluator for the compactified clean quartic density.
+It is defined on every rational input; later interval regularity will certify
+its finite-interval integral. -/
+def reciprocalQuarticMinusOneCompactRaw : PartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x _ _ =>
+    let y := reciprocalQuarticSymmetricDensity (-1) x
+    { lo := y, hi := y }
+
+/-- The compact reciprocal-quartic density restricted to a rational interval. -/
+def reciprocalQuarticMinusOneCompactOnInterval (a b : Rat) : FunctionOnInterval where
+  raw := reciprocalQuarticMinusOneCompactRaw
+  lower := a
+  upper := b
+  defined_on := fun _ _ => trivial
+  valid_on := by
+    intro x _hx
+    simpa [reciprocalQuarticMinusOneCompactRaw] using
+      RealRaw.ofRat_valid (reciprocalQuarticSymmetricDensity (-1) x)
+
+theorem reciprocalQuarticMinusOneCompactOnInterval_valid (a b : Rat) :
+    (reciprocalQuarticMinusOneCompactOnInterval a b).toRealFunRaw.Valid :=
+  FunctionOnInterval.toRealFunRaw_valid _
+
+theorem reciprocalQuarticMinusOneCompactRaw_compute_eq_density
+    (x : Rat) (h : reciprocalQuarticMinusOneCompactRaw.definedAt x) (n : Nat) :
+    reciprocalQuarticMinusOneCompactRaw.compute x h n =
+      { lo := reciprocalQuarticSymmetricDensity (-1) x,
+        hi := reciprocalQuarticSymmetricDensity (-1) x } := by
+  simp [reciprocalQuarticMinusOneCompactRaw]
+
 /-- Folding the positive half-line by the reciprocal map produces the symmetric
 density \((1+x^2)/(x^4+a x^2+1)\) on the unit interval. -/
 theorem reciprocalQuarticUnitFoldDensity_eq_symmetric

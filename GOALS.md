@@ -120,6 +120,13 @@ not a description of the current module graph. The checked blueprint
   Lean also identifies that shifted Cauchy kernel with the existing arctangent
   kernel through
   `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
+  A second finite bridge now compactifies the line by
+  `x ↦ x/(1-x^2)`: the checked theorem
+  `reciprocalQuarticSymmetricDensity_minus_one_eq_projectiveCompactPullback`
+  identifies its Cauchy pullback with the everywhere-defined density
+  `(1+x^2)/(x^4-x^2+1)`, whose two endpoint values are exactly `2`.
+  This turns the next analytic obligation into a finite-interval regularity
+  and substitution certificate rather than an unstructured tail limit.
   The expected-value side is packaged as
   `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, and Lean proves
   `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The

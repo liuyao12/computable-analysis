@@ -961,6 +961,27 @@ integral bookkeeping over the full projective line:
 \[
   \frac12\int_{-\infty}^{\infty}\frac{\dd u}{u^2+a+2}.
 \]
+There is also a compact chart for the clean case that avoids carrying an
+infinite endpoint through the finite algebra.  On \(-1<x<1\), put
+\[
+  u=\frac{x}{1-x^2},\qquad
+  \frac{\dd u}{\dd x}=\frac{1+x^2}{(1-x^2)^2}.
+\]
+Lean now proves directly that its Cauchy pullback is the everywhere-defined rational
+density
+\[
+  \frac{1+x^2}{x^4-x^2+1}
+  =\frac{1+x^2}{(1-x^2)^2}
+    \frac{1}{1+\bigl(x/(1-x^2)\bigr)^2}.
+\]
+The left side has the exact rational value \(2\) at each compact-chart
+endpoint \(x=\pm1\).  Thus the remaining analytic construction can use a
+finite interval with a removable-endpoint certificate, rather than treating a
+tail limit as primitive.  It still must prove interval regularity and the
+projective change-of-variables theorem, so this is not yet a completed
+scoreboard computation.  The compact density itself is already a total
+rational-name interval function on every rational interval; only its
+interval-level regularity and integral certificate are pending.
 For the pi case \(a=-1\), Lean also proves the needed denominator positivity:
 \[
   u^2+1>0,\qquad x^4-x^2+1>0.
