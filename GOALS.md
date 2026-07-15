@@ -467,7 +467,6 @@ students actually compute.
   `geometricMachinUnitAdditions_of_chartTransport` obtains this certificate
   from finite rational rectangle transport, and
   `geometricBranchIdentity_of_chartTransport` formally assembles it into
-  Machin's branch identity without the out-of-chart slope `120/119`.
   The universal `GeometricUnitAdditionLaw` remains a useful stronger API, but
   is no longer a prerequisite for the concrete Machin branch.
   The finite Gaussian/rational calculation is complete.  The rational

@@ -616,12 +616,14 @@ completeness principle is available or planned as a proof shortcut.
 
 \input{pi-scoreboard-table.tex}
 
+The selected rectangle-integral computation is complete:
 \[
-  4\arctan_{\int}(1)\sim\pi_{\mathrm{area}}
-  \quad\text{pending}.
+  4\arctan_{\int,\mathrm{rect}}(1)\sim\pi_{\mathrm{area}}.
 \]
-\code{ArctanIntegralGeomFunctionAgreement}.
-\code{PiProofs.piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.
+Lean proves this using the certified rectangle construction and its equivalent
+unit-branch presentation.  The older generic \code{Integral.Construction}
+wrapper remains conditional on a function-agreement certificate; it is not the
+scorecard's rectangle-integral computation.
 \[
   \log(i)=i\pi/2,\qquad \pi=-2i\log(i).
 \]
@@ -789,16 +791,14 @@ scoreboard-scaled version
 Lean name:
 \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_cellBoundsUpToAll}.
 The theorem \code{PiProofs.piCircleArea\_equiv\_self} exists for transport,
-but the baseline row is not counted as a comparison target.  The following
-routes are formalized, or at least named as project targets, but still depend
-on missing hypotheses:
+but the baseline row is not counted as a comparison target.  The finite-Riemann
+bridge has discharged the canonical Leibniz series row.  The following
+uncompleted routes, together with one legacy non-scoreboard wrapper, still
+depend on missing hypotheses:
 \begin{center}
 \begin{tabular}{lll}
 \textbf{Pending fact} & \textbf{Lean theorem or target} & \textbf{Missing input}\\
 \hline
-\(4\arctan_{\mathrm{series}}(1)\sim\pi_{\mathrm{area}}\) &
-\code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_leibnizEqualsRectangleRawAtOne} &
-\code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}\\
 \(4\arctan_{\int}(1)\sim\pi_{\mathrm{area}}\) for the legacy
 \code{Integral.Construction} wrapper &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
