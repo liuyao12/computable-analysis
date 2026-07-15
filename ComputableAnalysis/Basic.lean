@@ -435,6 +435,28 @@ theorem qabs_sub_le (x y : Rat) : qabs (x - y) <= qabs x + qabs y := by
     qabs (x + -y) <= qabs x + qabs (-y) := qabs_add_le x (-y)
     _ = qabs x + qabs y := by rw [qabs_neg]
 
+namespace QInterval
+
+/-- The rational midpoint of an ordered interval stays in that interval. -/
+theorem midpoint_mem {I : QInterval} (hI : I.lo <= I.hi) :
+    I.lo <= I.midpoint /\ I.midpoint <= I.hi := by
+  unfold midpoint
+  constructor <;> grind [Rat.div_def]
+
+/-- A point in an ordered interval lies within one interval width of its
+rational midpoint.  The deliberately loose bound avoids any hidden division
+or completed-real argument and is convenient for interval Lipschitz bounds. -/
+theorem qabs_sub_midpoint_le_width {I : QInterval} {x : Rat}
+    (hI : I.lo <= I.hi) (hxlo : I.lo <= x) (hxhi : x <= I.hi) :
+    qabs (x - I.midpoint) <= I.width := by
+  apply qabs_le_of_neg_le_le
+  · unfold midpoint width
+    grind [Rat.div_def]
+  · unfold midpoint width
+    grind [Rat.div_def]
+
+end QInterval
+
 theorem qabs_sub_le_of_common_bounds {lo hi a b : Rat}
     (ha_lo : lo <= a) (ha_hi : a <= hi)
     (hb_lo : lo <= b) (hb_hi : b <= hi) :

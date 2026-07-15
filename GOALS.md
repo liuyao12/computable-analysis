@@ -133,11 +133,16 @@ not a description of the current module graph. The checked blueprint
   Lean now proves the resulting `8`-Lipschitz estimate on `[-1,1]` and the
   literal epsilon-delta theorem
   `IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous`,
-  using `delta = epsilon/8`.  These are the denominator-apartness, range,
-  continuity, and Lipschitz-modulus inputs for its interval-regularity
-  certificate.
-  This turns the next analytic obligation into a finite-interval regularity
-  and substitution certificate rather than an unstructured tail limit.
+  using `delta = epsilon/8`.  It now also has a completed
+  `IntervalRegularOn` witness,
+  `IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular`:
+  midpoint evaluation widened by `8 * width(I)` contains every point value,
+  and an input width of `1/(16*n)` gives output width at most `1/n`.
+  The theorem-facing package
+  `reciprocalQuarticMinusOneCompact_continuous` can therefore be consumed by
+  the finite-interval calculus and ODE interfaces.  The next analytic
+  obligation is now the finite integral and projective substitution
+  certificate rather than interval regularity or an unstructured tail limit.
   The expected-value side is packaged as
   `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, and Lean proves
   `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The

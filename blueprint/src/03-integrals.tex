@@ -925,6 +925,16 @@ the improper integral together with agreement with that expected value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator_minus_one_pos}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_pos}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_ge_three_quarters}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_nonneg}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominatorProduct_minus_one_inv_le_sixteen_ninths}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_evalInterval}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_evalInterval_width}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_continuous}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
 \uses{def:reciprocal-quartic-test-kernel}
@@ -977,11 +987,11 @@ density
 The left side has the exact rational value \(2\) at each compact-chart
 endpoint \(x=\pm1\).  Thus the remaining analytic construction can use a
 finite interval with a removable-endpoint certificate, rather than treating a
-tail limit as primitive.  It still must prove interval regularity and the
-projective change-of-variables theorem, so this is not yet a completed
-scoreboard computation.  The compact density itself is already a total
-rational-name interval function on every rational interval; only its
-interval-level regularity and integral certificate are pending.
+tail limit as primitive.  It still must prove the projective
+change-of-variables theorem and build the integral, so this is not yet a
+completed scoreboard computation.  The compact density itself is already a
+total rational-name interval function on every rational interval; its
+interval-level regularity is proved below.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,
@@ -1005,9 +1015,18 @@ checked rational bound
 \]
 Consequently the total compact-density evaluator has a literal rational
 \(\varepsilon\)-\(\delta\) certificate on \([-1,1]\), with
-\(\delta=\varepsilon/8\).  This supplies pointwise continuity and
-denominator-apartness for the forthcoming interval-level regularity and
-integral certificate; the projective change-of-variables theorem and the
+\(\delta=\varepsilon/8\).  More strongly, it now has the checked
+interval-regular evaluator required by the general calculus interfaces: for
+an input interval \(I\), evaluate \(f\) at its rational midpoint \(m\) and
+return
+\[
+  [f(m)-8\operatorname{width}(I),\ f(m)+8\operatorname{width}(I)].
+\]
+This interval contains every rational point-value over \(I\), has width
+\(16\operatorname{width}(I)\), and therefore meets output precision
+\(1/n\) when the input width is at most \(1/(16n)\).  Thus the density is
+now a \code{ContinuousFunctionOnInterval}, with no appeal to topology or
+completed reals.  The projective change-of-variables theorem and the actual
 integral construction remain unchecked.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies

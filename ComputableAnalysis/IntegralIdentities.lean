@@ -3253,6 +3253,116 @@ theorem reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous :
   · grind [Rat.sub_eq_add_neg]
   constructor <;> grind
 
+/-- A finite rational scaling fact used by the compact-density interval
+evaluator.  Splitting the zero stage is intentional: raw interval algorithms
+allow stage `0`, whose target width is exactly zero. -/
+private theorem reciprocalQuartic_interval_width_scale (w : Rat) (n : Nat)
+    (hn : n ≠ 0)
+    (hw : w <= 1 / ((16 * n : Nat) : Rat)) :
+    16 * w <= 1 / (n : Rat) := by
+  calc
+    16 * w <= 16 * (1 / ((16 * n : Nat) : Rat)) :=
+      Rat.mul_le_mul_of_nonneg_left hw (by native_decide)
+    _ = 1 / (n : Rat) := by
+      rw [Rat.div_def]
+      rw [show ((16 * n : Nat) : Rat) = (16 : Rat) * (n : Rat) by
+        exact Rat.natCast_mul 16 n]
+      have h16 : (16 : Rat) ≠ 0 := by native_decide
+      have hn' : (n : Rat) ≠ 0 := by
+        exact Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn))
+      rw [Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Interval evaluator for the compact reciprocal-quartic density on
+`[-1,1]`.  It evaluates the exact rational formula at the input midpoint and
+enlarges by the proved `8`-Lipschitz error. -/
+def reciprocalQuarticMinusOneCompact_evalInterval (I : QInterval) : QInterval :=
+  let v := reciprocalQuarticSymmetricDensity (-1) I.midpoint
+  { lo := v - 8 * I.width, hi := v + 8 * I.width }
+
+theorem reciprocalQuarticMinusOneCompact_evalInterval_width (I : QInterval) :
+    (reciprocalQuarticMinusOneCompact_evalInterval I).width = 16 * I.width := by
+  simp [reciprocalQuarticMinusOneCompact_evalInterval, QInterval.width]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The compact reciprocal-quartic density is interval-regular on `[-1,1]`.
+
+Every rational input box is enclosed by midpoint evaluation widened using the
+checked `8`-Lipschitz bound.  This supplies the interval-level continuity data
+needed by the integral, inverse, and ODE interfaces without importing a
+topology or a completed real line. -/
+def reciprocalQuarticMinusOneCompact_intervalRegular :
+    IntervalRegularOn (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) := by
+  refine
+    { evalInterval := fun I _ _ => reciprocalQuarticMinusOneCompact_evalInterval I
+      inputPrecision := fun n => 16 * n
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hwidth
+    rcases hI with ⟨hlo, hord, hhi⟩
+    have hwidth_nonneg : 0 <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    constructor
+    · rw [reciprocalQuarticMinusOneCompact_evalInterval_width]
+      exact Rat.mul_nonneg (by native_decide) hwidth_nonneg
+    · rw [reciprocalQuarticMinusOneCompact_evalInterval_width]
+      by_cases hn : n = 0
+      · subst n
+        have hinvzero : 1 / ((16 * (0 : Nat) : Nat) : Rat) = 0 := by
+          native_decide
+        rw [hinvzero] at hwidth
+        have hzero : I.width = 0 := Rat.le_antisymm hwidth hwidth_nonneg
+        rw [hzero]
+        native_decide
+      · exact reciprocalQuartic_interval_width_scale I.width n hn hwidth
+  · intro I hI x hx n hxlo hxhi
+    rcases hI with ⟨hIlo, hordered, hIhi⟩
+    have hmid := QInterval.midpoint_mem hordered
+    have hmid_domain : inDomainInterval (-1) 1 I.midpoint :=
+      ⟨Rat.le_trans hIlo hmid.1, Rat.le_trans hmid.2 hIhi⟩
+    have hxdomain : inDomainInterval (-1) 1 x := hx
+    have hdist : qabs (I.midpoint - x) <= I.width := by
+      rw [show I.midpoint - x = -(x - I.midpoint) by
+        grind [Rat.sub_eq_add_neg], qabs_neg]
+      exact QInterval.qabs_sub_midpoint_le_width hordered hxlo hxhi
+    have hlip := reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit
+      x I.midpoint hxdomain.1 hxdomain.2 hmid_domain.1 hmid_domain.2
+    have hdiff :
+        qabs (reciprocalQuarticSymmetricDensity (-1) x -
+          reciprocalQuarticSymmetricDensity (-1) I.midpoint) <= 8 * I.width := by
+      exact Rat.le_trans hlip
+        (Rat.mul_le_mul_of_nonneg_left hdist (by native_decide))
+    have hupper : reciprocalQuarticSymmetricDensity (-1) x -
+        reciprocalQuarticSymmetricDensity (-1) I.midpoint <= 8 * I.width :=
+      Rat.le_trans (self_le_qabs _) hdiff
+    have hlower : reciprocalQuarticSymmetricDensity (-1) I.midpoint -
+        reciprocalQuarticSymmetricDensity (-1) x <= 8 * I.width := by
+      calc
+        reciprocalQuarticSymmetricDensity (-1) I.midpoint -
+            reciprocalQuarticSymmetricDensity (-1) x =
+            -(reciprocalQuarticSymmetricDensity (-1) x -
+              reciprocalQuarticSymmetricDensity (-1) I.midpoint) := by
+              grind [Rat.sub_eq_add_neg]
+        _ <= qabs (-(reciprocalQuarticSymmetricDensity (-1) x -
+              reciprocalQuarticSymmetricDensity (-1) I.midpoint)) := self_le_qabs _
+        _ = qabs (reciprocalQuarticSymmetricDensity (-1) x -
+              reciprocalQuarticSymmetricDensity (-1) I.midpoint) := qabs_neg _
+        _ <= 8 * I.width := hdiff
+    unfold QInterval.Overlaps
+    change reciprocalQuarticSymmetricDensity (-1) x <=
+        reciprocalQuarticSymmetricDensity (-1) I.midpoint + 8 * I.width /\
+      reciprocalQuarticSymmetricDensity (-1) I.midpoint - 8 * I.width <=
+        reciprocalQuarticSymmetricDensity (-1) x
+    constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The compact reciprocal-quartic density packaged for theorem-facing
+calculus consumers. -/
+def reciprocalQuarticMinusOneCompact_continuous : ContinuousFunctionOnInterval where
+  function := reciprocalQuarticMinusOneCompactOnInterval (-1) 1
+  regular := reciprocalQuarticMinusOneCompact_intervalRegular
+
 /-- Folding the positive half-line by the reciprocal map produces the symmetric
 density \((1+x^2)/(x^4+a x^2+1)\) on the unit interval. -/
 theorem reciprocalQuarticUnitFoldDensity_eq_symmetric
