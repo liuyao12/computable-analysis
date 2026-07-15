@@ -1,5 +1,6 @@
 ComputableAnalysis.QInterval
 ComputableAnalysis.EpsilonDeltaContinuousOn
+ComputableAnalysis.QInterval.NearAt
 ComputableAnalysis.exp.RationalPowerExtension.ContinuousInExponent
 ComputableAnalysis.EffectiveInverseSeparation
 ComputableAnalysis.InvertibleFunctionOnInterval

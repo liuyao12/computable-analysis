@@ -172,7 +172,10 @@ not a description of the current module graph. The checked blueprint
   values, the additive law, and certified denominator/root equations. An
   exponential representation also requires `ContinuousInExponent`: the
   explicit rational epsilon-delta predicate
-  `EpsilonDeltaContinuousOn` on every rational interval. This certificate is
+  `EpsilonDeltaContinuousOn` on every rational interval. Its output condition
+  is `QInterval.NearAt`, not literal overlap: it bounds the rational
+  separation of two evaluation boxes by epsilon while bounding each box's
+  width. This certificate is
   the intended gateway for extending continuous functions from rational names
   to computable-real or open complex domains; the extension theorem itself
   remains future work.

@@ -87,6 +87,11 @@ def precisionAtStage (n : Nat) : QPos :=
 def intervalCloseAtPrecision (I J : QInterval) (n : Nat) : Prop :=
   QInterval.CloseAt I J (precisionAtStage n)
 
+/-- Precision-indexed quantitative closeness for enclosures of possibly
+distinct nearby values. -/
+def intervalNearAtPrecision (I J : QInterval) (n : Nat) : Prop :=
+  QInterval.NearAt I J (precisionAtStage n)
+
 namespace QInterval
 
 /-- A weak interval order: the two interval enclosures are compatible with
@@ -1442,8 +1447,11 @@ theorem integral_construction_proves_well_defined_for
 For a requested positive rational output tolerance `eps`, the certificate
 chooses a positive rational input tolerance and one evaluation precision. Any
 two rational points of the stated interval within that tolerance then have
-overlapping output boxes of width at most `eps`.  No topology, completed
-real-valued function space, or implicit exact-value evaluation occurs here.
+output boxes within `eps` of one another, each of width at most `eps`.  This
+is quantitative proximity, not literal overlap: a nonconstant function can
+send nearby rational inputs to distinct exact rational values.  No topology,
+completed real-valued function space, or implicit exact-value evaluation
+occurs here.
 `EffectiveModulusFor` below is the stronger computable-modulus presentation
 used by the current calculus constructors. -/
 def EpsilonDeltaContinuousOn (F : FunctionOnInterval) : Prop :=
@@ -1452,7 +1460,7 @@ def EpsilonDeltaContinuousOn (F : FunctionOnInterval) : Prop :=
       (hx : inDomainInterval F.lower F.upper x)
       (hy : inDomainInterval F.lower F.upper y),
       qabs (y - x) <= delta.val ->
-        QInterval.CloseAt
+        QInterval.NearAt
           (F.compute x hx evalPrecision)
           (F.compute y hy evalPrecision) eps
 
@@ -1467,7 +1475,7 @@ structure EffectiveModulusFor (F : FunctionOnInterval) where
       (hx : inDomainInterval F.lower F.upper x)
       (hy : inDomainInterval F.lower F.upper y),
       qabs (y - x) <= (1 / ((inputPrecision n) : Rat)) ->
-        intervalCloseAtPrecision
+        intervalNearAtPrecision
           (F.compute x hx (evalPrecision n))
           (F.compute y hy (evalPrecision n))
           n

@@ -29,6 +29,13 @@ def midpoint (I : QInterval) : Rat := (I.lo + I.hi) / 2
 def Overlaps (I J : QInterval) : Prop := I.lo <= J.hi /\ J.lo <= I.hi
 def CloseAt (I J : QInterval) (eps : QPos) : Prop :=
   Overlaps I J /\ I.width <= eps.val /\ J.width <= eps.val
+/-- Two interval enclosures are within a requested tolerance.  Unlike
+`CloseAt`, this permits distinct nearby values: the gap between either lower
+endpoint and the other upper endpoint is at most `eps`, while both evaluation
+boxes themselves have width at most `eps`. -/
+def NearAt (I J : QInterval) (eps : QPos) : Prop :=
+  I.lo <= J.hi + eps.val /\ J.lo <= I.hi + eps.val /\
+    I.width <= eps.val /\ J.width <= eps.val
 /-- `outer.ContainsInterval inner` says the rational interval `outer` encloses
 the whole rational interval `inner`. -/
 def ContainsInterval (outer inner : QInterval) : Prop :=

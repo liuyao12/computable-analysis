@@ -59,8 +59,10 @@ separate predicate
 \code{EpsilonDeltaContinuousOn} is the literal rational
 \(\varepsilon\)-\(\delta\) obligation: for every positive rational
 \(\varepsilon\), it supplies a positive rational \(\delta\) and an evaluation
-precision such that rational inputs within \(\delta\) have overlapping output
-boxes of width at most \(\varepsilon\).  A rational-power exponential must
+precision such that rational inputs within \(\delta\) have output boxes within
+\(\varepsilon\) of each other, each of width at most \(\varepsilon\).  The
+boxes need not overlap: nearby inputs of a nonconstant function can have
+distinct exact rational output values.  A rational-power exponential must
 carry this certificate on every rational interval.
 
 This is the data from which a later completion theorem may extend a continuous
