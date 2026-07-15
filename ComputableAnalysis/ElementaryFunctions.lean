@@ -102,6 +102,14 @@ def onInterval {base : PositiveRealRaw} (powers : RationalPowerExtension base)
     intro x h
     exact powers.toPartialRealFunRaw_valid x h
 
+/-- The topology-free continuity obligation for rational powers as the
+exponent varies over a rational interval.  This is deliberately separate from
+the root and additive-law fields: a root construction must still prove that
+nearby rational exponents give arbitrarily close interval values. -/
+def ContinuousInExponent {base : PositiveRealRaw}
+    (powers : RationalPowerExtension base) : Prop :=
+  forall a b, EpsilonDeltaContinuousOn (powers.onInterval a b)
+
 /-- A direct, rational-step derivative certificate at one rational input.
 This is deliberately the pointwise form needed for the characterization of
 Euler's number, rather than a hidden appeal to an ambient completed real line. -/
@@ -136,6 +144,7 @@ structure ExponentialFunction {base : PositiveRealRaw}
   valid : forall x h, RealRaw.ValidCompute (raw.compute x h)
   agrees_with_rational_powers : forall q,
     (raw.evalRaw q (defined_everywhere q)).Equiv (powers.power q)
+  continuous_in_exponent : powers.ContinuousInExponent
 
 namespace ExponentialFunction
 

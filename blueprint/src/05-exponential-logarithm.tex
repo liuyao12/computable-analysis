@@ -51,13 +51,34 @@ positive root algorithms and proving their validity remains explicit work,
 rather than being hidden in a completeness axiom.
 \end{definition}
 
+\begin{remark}[Continuity and extension from rational names]
+\label{rem:rational-power-continuity-extension}
+The Lean evaluator is presented on rational names, but this is not meant to
+restrict the mathematical domain of an exponential or power function.  The
+separate predicate
+\code{EpsilonDeltaContinuousOn} is the literal rational
+\(\varepsilon\)-\(\delta\) obligation: for every positive rational
+\(\varepsilon\), it supplies a positive rational \(\delta\) and an evaluation
+precision such that rational inputs within \(\delta\) have overlapping output
+boxes of width at most \(\varepsilon\).  A rational-power exponential must
+carry this certificate on every rational interval.
+
+This is the data from which a later completion theorem may extend a continuous
+function from rational names to all computable real inputs, or, for the
+complex theory, to a specified open computable domain.  Discontinuous partial
+functions are not entitled to such an extension.  The extension construction
+itself remains later work; no topology or completeness theorem is used in the
+finite certificate stated here.
+\end{remark}
+
 \begin{definition}[Euler base from an exponential]
 \label{def:e-from-exponential-at-one}
 \lean{ComputableAnalysis.exp.ExponentialFunction.eAtOne}
 \uses{def:rational-powers}
-An exponential representation is a total rational-input raw function that
-agrees with one rational-power extension.  Its Euler base is, by definition,
-its value at one:
+An exponential representation is a computational presentation at rational
+names that agrees with one rational-power extension and carries its
+continuity-in-exponent certificate.  Its Euler base is, by definition, its
+value at one:
 \[
  e_E=E(1).
 \]

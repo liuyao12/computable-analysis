@@ -1437,6 +1437,25 @@ theorem integral_construction_proves_well_defined_for
     Integral.ExistsConstructionFor F :=
   ⟨c⟩
 
+/-- Epsilon-delta continuity stated entirely over rational inputs.
+
+For a requested positive rational output tolerance `eps`, the certificate
+chooses a positive rational input tolerance and one evaluation precision. Any
+two rational points of the stated interval within that tolerance then have
+overlapping output boxes of width at most `eps`.  No topology, completed
+real-valued function space, or implicit exact-value evaluation occurs here.
+`EffectiveModulusFor` below is the stronger computable-modulus presentation
+used by the current calculus constructors. -/
+def EpsilonDeltaContinuousOn (F : FunctionOnInterval) : Prop :=
+  forall eps : QPos, Exists fun delta : QPos => Exists fun evalPrecision : Nat =>
+    forall x y
+      (hx : inDomainInterval F.lower F.upper x)
+      (hy : inDomainInterval F.lower F.upper y),
+      qabs (y - x) <= delta.val ->
+        QInterval.CloseAt
+          (F.compute x hx evalPrecision)
+          (F.compute y hy evalPrecision) eps
+
 /-- Effective modulus for a partial function known to be defined on the whole
 interval.  This is the continuity data used by IVT and eventually by the
 integral constructor; it includes the domain certificate. -/

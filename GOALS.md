@@ -154,8 +154,14 @@ not a description of the current module graph. The checked blueprint
 
 - Positive-base powers now have a constructive interface: a positive raw base
   has a uniform positive rational lower bound; natural powers are repeated
-  interval multiplication; and a rational-power extension supplies valid
-  values, the additive law, and certified denominator/root equations.
+  interval multiplication; and a rational-power extension records valid
+  values, the additive law, and certified denominator/root equations. An
+  exponential representation also requires `ContinuousInExponent`: the
+  explicit rational epsilon-delta predicate
+  `EpsilonDeltaContinuousOn` on every rational interval. This certificate is
+  the intended gateway for extending continuous functions from rational names
+  to computable-real or open complex domains; the extension theorem itself
+  remains future work.
   `exp.ExponentialFunction.eAtOne` defines the Euler base as the value at `1`
   of any exponential representation.  See `PositiveRealRaw`,
   `PositiveRealRaw.natPow`, `RationalPowerExtension`, and
@@ -254,6 +260,14 @@ not a description of the current module graph. The checked blueprint
   `chronologicalProduct_pairwiseProductZero` and
   `peanoBakerDiscreteSum_pairwiseProductZero` collapse the exact transition
   to `I + matrixSequenceSum B N`.
+- The local matrix product is now proved associative by a finite double-sum
+  interchange (`matrixMul_assoc`). Consequently
+  `chronologicalProduct_split` proves the exact chronological composition law
+  across adjacent sampled intervals. `PairwiseCommuting` and
+  `matrixMul_commutes_chronologicalProduct` supply the finite reordering
+  lemma for commuting samples. This is the algebraic prerequisite for the
+  later commuting-exponential formula, not a claim that the continuous
+  formula has already been constructed.
 - The continuous input is `LinearODE.IntervalLinearSystem`, whose scalar
   entries are existing `FunctionOnInterval`s on a common rational time
   interval. `CoefficientsRegular` asks for supplied componentwise
@@ -262,10 +276,10 @@ not a description of the current module graph. The checked blueprint
 - Next analytic target: build interval matrices for ordered-simplex
   Peano--Baker terms, prove a factorial tail enclosure from a rational
   coefficient bound, and obtain state-transition and variation-of-constants
-  formulas for `x' = A(t)x + b(t)`. The next specializations are general
-  pairwise commuting, scalar, piecewise-constant, and higher-order
-  nilpotent/triangular systems. Chapter `Linear Differential Equations` gives
-  the certificate plan.
+  formulas for `x' = A(t)x + b(t)`. The next specializations are the analytic
+  commuting-exponential identification, scalar and piecewise-constant
+  systems, and higher-order nilpotent/triangular systems. Chapter `Linear
+  Differential Equations` gives the certificate plan.
 
 ## Elementary Function Coverage
 
@@ -391,16 +405,15 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently eight of seventeen named
-  computations are valid raw reals, and six of sixteen applicable rows have
+  `blueprint/src/pi-scoreboard-table.tex`: currently seven of sixteen named
+  computations are valid raw reals, and five of fifteen applicable rows have
   a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
   rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn computation
   `4 * arctanGeom(1)` and its single rectangle-integral formulation
   `4 * arctanIntegralRectangleForAtOne`, and the series computation
   `4 * arctanSeries(1)`, and the single classical power-series formula
-  `piMachin`, and the separate bounded two-term series computation
-  `piArctanHalfThird`.
+  `piMachin`.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
@@ -457,14 +470,11 @@ students actually compute.
   independent Leibniz route.  Machin remains solely a power-series
   computation, not a second integral-based pi representation.
 - The generic finite-Riemann theorem
-  `arctanEqualsGeom_finiteRiemannBridge` packages the series-to-geometry
-  comparison for every nonnegative rational input in `[0,1]`.  Applying it
-  to `1/2` and `1/3`, with the exact bounded-chart identity
-  `chartAddParameter (1/2) (1/3) = 1`, proves the separately named
-  `piHalfThird_equiv_area`; its finite-rational implementation theorem is
-  `piArctanHalfThird_equiv_piCircleArea_finiteRiemannBridge`.
-  This is a second unit-chart check of the reusable calculus infrastructure,
-  not a variant of Machin's single formula.
+  `arctanEqualsGeom_finiteRiemannBridge` remains reusable series-to-geometry
+  infrastructure on nonnegative rational inputs in `[0,1]`.  The canonical
+  scoreboard deliberately uses it only for the Leibniz endpoint and the two
+  power-series inputs in the single Machin formula; auxiliary arctangent
+  addition identities are not separate pi computations.
 - The exact stage bridge
   `ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute` now
   proves `PiProofs.PiCircleAreaPolygonAgreement`; with finite Archimedes this

@@ -316,8 +316,9 @@ abbreviation \code{QuarterTurn} and by the raw representative
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.ArctanInverseConstruction}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch_zero}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch_one}
-\uses{def:geometric-arctan,def:quarter-turn-angle,def:qbox}
-The inverse-arctangent step is the bisection/search layer which, for a
+\uses{def:geometric-arctan,def:quarter-turn-angle,def:qbox,thm:constructive-inverse-function}
+The inverse-arctangent step is the first trigonometric instance of the
+constructive inverse-function theorem: its bisection/search layer, for a
 normalized rational quarter-turn input \(t\), finds the corresponding
 tangent-slope information on the unit branch \(0\le t\le1\) and supplies the
 branch-reduction data needed to recover the

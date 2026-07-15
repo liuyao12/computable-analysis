@@ -159,8 +159,8 @@ Peano--Baker series exact.
 \label{thm:peano-baker-specializations}
 \uses{thm:peano-baker-state-transition,def:constant-commuting-samples}
 \leanok
-Three finite specializations are already theorems. For a constant Euler
-increment \(B\),
+The finite layer already proves constant, zero, square-zero, and
+pairwise-commuting specializations. For a constant Euler increment \(B\),
 \[
  (I+B)\cdots(I+B)=(I+B)^N
    =\sum_{N>i_1>\cdots>i_r\ge0}B\cdots B,
@@ -184,6 +184,22 @@ formula both for the chronological product and for the ordered-word
 Peano--Baker sum. This is a genuine nilpotent regression case, not a
 continuous limiting argument.
 
+For arbitrary pairwise-commuting sampled increments, Lean now proves the
+finite algebra needed before an exponential collapse: every \(B_i\) commutes
+with the accumulated chronological transition
+\[
+ B_i (I+B_{N-1})\cdots(I+B_0)
+ =
+ (I+B_{N-1})\cdots(I+B_0) B_i.
+\]
+The checked lemmas \code{PairwiseCommuting} and
+\code{matrixMul\_commutes\_chronologicalProduct} establish precisely this
+reordering fact, while \code{chronologicalProduct\_split} gives the
+time-interval composition law with later increments on the left. Identifying
+the continuous commuting case with
+\(\exp(\int_s^t A(u)\,du)\) still requires the analytic construction and is
+not asserted by these finite lemmas.
+
 The continuous construction should yield the familiar special cases
 \[
  \begin{array}{rcl}
@@ -195,10 +211,11 @@ The continuous construction should yield the familiar special cases
  \end{array}
 \]
 For piecewise-constant coefficients, the direct finite answer is the
-chronological product of constant-step exponentials. General pairwise
-commuting, strictly triangular, and higher-order nilpotent coefficient
-algebras remain the next finite algebra cases; sufficiently long ordered
-products should then vanish, making the series a finite certified calculation.
+chronological product of constant-step exponentials. The remaining
+specializations are the analytic commuting-exponential identification and
+finite algebra for strictly triangular and higher-order nilpotent coefficient
+algebras; sufficiently long ordered products should then vanish, making the
+series a finite certified calculation.
 \end{theorem}
 
 \begin{remark}[Engineering-facing error certificates]

@@ -543,11 +543,10 @@ for every fixed rational input \(z\in D_f\), the sequence
 \[
   n\longmapsto B_f(z,n)
 \]
-is a complex number in the sense of \cref{def:complex-raw}.  Thus a function is
-not a map from all real or complex inputs to completed values; it is a rational
-input, stage-indexed box algorithm whose fixed-input stages form computable
-numbers.  The domain may be all rational points in a region, or only the
-rational points of a branch domain, but every use of the function carries the
+is a complex number in the sense of \cref{def:complex-raw}.  At the
+computational layer, an input is supplied by a rational name and evaluation is
+a stage-indexed box algorithm.  The domain may be all rational names in a
+region, or only names in a branch domain, and every evaluation carries the
 domain proof.
 \end{definition}
 
@@ -611,20 +610,63 @@ the preceding setup: the interval is the rational segment from \(a+i0\) to
 the pointwise outputs are real numbers.
 \end{definition}
 
+\begin{theorem}[Constructive inverse-function theorem]
+\label{thm:constructive-inverse-function}
+\uses{def:function-on-interval,def:interval-regular}
+Let \(F\) be interval-regular and monotone on a rational interval.  In
+addition to monotonicity, supply an effective inverse-separation certificate:
+at every requested scale, inputs separated by a stated positive rational
+amount have disjointly ordered output boxes.  For every computable target
+with a certified range witness, a bisection/search procedure returns a nested
+raw interval for its preimage.  Lean proves the assembly theorem
+\[
+  \bigl(\text{certified bisection search for every target}\bigr)
+  \Longrightarrow \code{HasInverse}.
+\]
+Thus the inverse is another interval algorithm, not a choice of a point from
+a completed continuum.  Effective separation is essential: monotonicity alone
+does not give a usable finite inverse search for a function that may be
+arbitrarily flat.
+\end{theorem}
+
+\begin{example}[Algebraic branches]
+\label{ex:algebraic-inverse-branches}
+\lean{ComputableAnalysis.sqrtRaw_spec}
+\uses{thm:constructive-inverse-function}
+The nonnegative square-root branch is the first concrete model: its rational
+bisection intervals isolate the nonnegative solution of \(w^2=q\), are valid
+raw reals, and satisfy the algebraic specification.  On a bounded positive
+branch it is the inverse of squaring, so it has the same certified-bracketing
+shape as the theorem.  General algebraic functions will use isolating boxes,
+separation, and bisection or subdivision to construct selected branches.
+\end{example}
+
+\begin{remark}[Continuous extension of represented functions]
+\label{rem:continuous-extension-of-function-representations}
+Rational names are the finite interface of the representation, not the
+intended mathematical domain.  A continuous representation with an effective
+modulus can later be extended from rational names to all computable real
+inputs; the complex analogue extends it to a specified open computable domain.
+Only functions equipped with the necessary continuity and domain certificates
+admit this extension.  The present chapters use the rational-name interface
+until that extension theorem is constructed.
+\end{remark}
+
 
 \begin{remark}[How the later elementary functions fit]
 \label{rem:elementary-functions-are-function-representations}
 \uses{def:real-fun-raw,def:function-on-interval}
 The elementary functions constructed later all use this same shape.
 Power-series arctangent has domain \([-1,1]\) and sends \((x,n)\) to an
-alternating-series interval.  Geometric sine and cosine have rational
-normalized-quarter-turn input \(t\) and stage \(n\) obtained by projecting the
-stage-\(n\) circle-point box.  Exponential is represented by power-series,
-compound-interest, and inverse-log-integral stage algorithms.  Logarithm is a
-\code{FunctionOnInterval} on positive rational branches, defined by the
-integral of \(1/x\).  In every case, fixing a rational input in the stated
-domain leaves an interval sequence in the stage variable, and the validity
-proof is precisely the proof that this sequence is a raw real.
+alternating-series interval.  The next chapter obtains the first sine and
+cosine branch by applying the preceding inverse theorem to geometric
+arctangent, then projecting the rational circle chart.  Exponential is
+represented by power-series, compound-interest, and inverse-log-integral
+stage algorithms.  Logarithm is a \code{FunctionOnInterval} on positive
+branches, defined by the integral of \(1/x\).  In every case, fixing a
+rational name in the stated domain leaves an interval sequence in the stage
+variable, and the validity proof is precisely the proof that this sequence is
+a raw real.
 \end{remark}
 
 \begin{definition}[Interval regularity]\label{def:interval-regular}

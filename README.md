@@ -25,12 +25,14 @@ as is a discrete variation-of-constants decomposition for the inhomogeneous
 recurrence. Constant increments reduce exactly to `(I + B)^N`, while the zero
 coefficient case is the identity. A square-zero sampled coefficient family
 reduces exactly to `I + sum B_k`, so the finite word series already covers a
-nontrivial nilpotent case. Its
+nontrivial nilpotent case. Local matrix associativity and a chronological
+product-splitting law are proved; pairwise-commuting increments now commute
+with their accumulated finite transition. Its
 continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
 integrals and factorial tail bounds, beginning with constant, commuting,
 scalar, piecewise-constant, and higher-order triangular cases. This broadens
-the calculus foundation; the independently updated pi scoreboard is now
-`8/17` for definitions and `6/16` for applicable equivalences.
+the calculus foundation; the intentionally selective pi scoreboard is now
+`7/16` for definitions and `5/15` for applicable equivalences.
 
 ## Pi formalization scoreboard
 
@@ -38,7 +40,7 @@ A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`.  A row counts as equivalent after a formalized chain of
 `RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions `8/17`; equivalences `6/16` applicable rows.
+Current count: definitions `7/16`; equivalences `5/15` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -52,7 +54,6 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [finite Riemann bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✓ |
 | `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [finite bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✓ |
-| `piArctanHalfThird` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [two-term unit-chart bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:two-term-arctan-pi) | $\pi=4(\arctan_{\mathrm{series}}(1/2)+\arctan_{\mathrm{series}}(1/3))$ | ✓ | ✓ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
 | `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
 | `GaussianPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2$ | ✗ | ✗ |
@@ -70,9 +71,8 @@ Lean hooks:
   `PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
 - Unit arctangent: `ArctanGeometry.arctanGeom_valid_on_unit`,
   `ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`.
-- Two-term power-series arctangent: `piArctanHalfThird`,
-  `PiProofs.arctanEqualsGeom_finiteRiemannBridge`,
-  `PiProofs.piHalfThird_equiv_area`.
+- Generic arctangent bridge: `PiProofs.arctanEqualsGeom_finiteRiemannBridge`.
+  It supports the series-to-geometry comparison but is not a separate pi-scoreboard route.
 - Rectangle arctangent:
   `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`,
   `PiProofs.four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea`,

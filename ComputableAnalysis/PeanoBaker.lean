@@ -67,6 +67,37 @@ theorem finiteSum_add {dimension : Nat} (f g : Fin dimension -> Rat) :
       simp [finiteSum, ih]
       grind [Rat.add_assoc, Rat.add_comm]
 
+theorem finiteSum_mul_left {dimension : Nat} (a : Rat) (f : Fin dimension -> Rat) :
+    a * finiteSum f = finiteSum (fun i => a * f i) := by
+  induction dimension with
+  | zero =>
+      simp [finiteSum]
+  | succ dimension ih =>
+      simp [finiteSum, ih, Rat.mul_add]
+
+theorem finiteSum_mul_right {dimension : Nat} (a : Rat) (f : Fin dimension -> Rat) :
+    finiteSum f * a = finiteSum (fun i => f i * a) := by
+  induction dimension with
+  | zero =>
+      simp [finiteSum]
+  | succ dimension ih =>
+      simp [finiteSum, ih, Rat.add_mul]
+
+/-- Finite rational sums may be enumerated in either order.  This is the
+local Fubini calculation used to prove associativity of the project-local
+matrix product; it is only a double traversal of finite index types. -/
+theorem finiteSum_swap :
+    forall (m n : Nat) (f : Fin m -> Fin n -> Rat),
+      finiteSum (fun i => finiteSum (f i)) =
+        finiteSum (fun j => finiteSum (fun i => f i j))
+  | 0, n, _ => by
+      change 0 = finiteSum (fun _ : Fin n => 0)
+      exact (finiteSum_zero n).symm
+  | m + 1, n, f => by
+      simp only [finiteSum]
+      rw [finiteSum_swap m n (fun i j => f i.succ j)]
+      rw [← finiteSum_add]
+
 theorem finiteSum_ite_eq {dimension : Nat} (j : Fin dimension) (f : Fin dimension -> Rat) :
     finiteSum (fun i => if i = j then f i else 0) = f j := by
   induction dimension with
@@ -94,6 +125,38 @@ theorem finiteSum_ite_eq {dimension : Nat} (j : Fin dimension) (f : Fin dimensio
 
 def matrixMul {dimension : Nat} (A B : RatMatrix dimension) : RatMatrix dimension :=
   fun i j => finiteSum (fun k => A i k * B k j)
+
+/-- Associativity of the local rational matrix product.  This is proved from
+finite distributivity and the finite-sum interchange above, without importing
+a general matrix library. -/
+theorem matrixMul_assoc {dimension : Nat} (A B C : RatMatrix dimension) :
+    matrixMul (matrixMul A B) C = matrixMul A (matrixMul B C) := by
+  funext i j
+  unfold matrixMul
+  calc
+    finiteSum (fun k =>
+        finiteSum (fun l => A i l * B l k) * C k j) =
+        finiteSum (fun k =>
+          finiteSum (fun l => (A i l * B l k) * C k j)) := by
+            congr 1
+            funext k
+            exact finiteSum_mul_right (C k j) (fun l => A i l * B l k)
+    _ = finiteSum (fun l =>
+          finiteSum (fun k => (A i l * B l k) * C k j)) :=
+        finiteSum_swap dimension dimension
+          (fun k l => (A i l * B l k) * C k j)
+    _ = finiteSum (fun k =>
+          A i k * finiteSum (fun l => B k l * C l j)) := by
+            congr 1
+            funext k
+            calc
+              finiteSum (fun l => (A i k * B k l) * C l j) =
+                  finiteSum (fun l => A i k * (B k l * C l j)) := by
+                    congr 1
+                    funext l
+                    exact Rat.mul_assoc _ _ _
+              _ = A i k * finiteSum (fun l => B k l * C l j) :=
+                (finiteSum_mul_left (A i k) (fun l => B k l * C l j)).symm
 
 def matrixApply {dimension : Nat} (A : RatMatrix dimension) (x : RatVector dimension) :
     RatVector dimension :=
@@ -417,6 +480,28 @@ def chronologicalProduct {dimension : Nat} (B : Nat -> RatMatrix dimension) : Na
   | n + 1 => matrixMul (matrixAdd (matrixIdentity dimension) (B n))
       (chronologicalProduct B n)
 
+/-- Splitting a sampled time interval preserves chronological order: increments
+from the later subinterval occur on the left of the earlier transition. -/
+theorem chronologicalProduct_split {dimension : Nat} (B : Nat -> RatMatrix dimension)
+    (first second : Nat) :
+    chronologicalProduct B (first + second) =
+      matrixMul (chronologicalProduct (fun k => B (first + k)) second)
+        (chronologicalProduct B first) := by
+  induction second with
+  | zero =>
+      simp [chronologicalProduct, matrixMul_identity_left]
+  | succ second ih =>
+      rw [show first + (second + 1) = (first + second) + 1 by omega]
+      rw [chronologicalProduct, ih]
+      change matrixMul (matrixAdd (matrixIdentity dimension) (B (first + second)))
+          (matrixMul (chronologicalProduct (fun k => B (first + k)) second)
+            (chronologicalProduct B first)) =
+        matrixMul
+          (matrixMul (matrixAdd (matrixIdentity dimension) (B (first + second)))
+            (chronologicalProduct (fun k => B (first + k)) second))
+          (chronologicalProduct B first)
+      exact (matrixMul_assoc _ _ _).symm
+
 /-- Natural powers of a matrix, with the newest factor on the left.  This is
 the exact constant-step specialization of a chronological product. -/
 def matrixPow {dimension : Nat} (A : RatMatrix dimension) : Nat -> RatMatrix dimension
@@ -451,6 +536,35 @@ commutation: the strength makes all words of length at least two vanish by a
 direct finite calculation. -/
 def PairwiseProductZero {dimension : Nat} (B : Nat -> RatMatrix dimension) : Prop :=
   forall i j, matrixMul (B i) (B j) = matrixZero dimension
+
+/-- Pairwise commutation of the sampled increments.  Unlike the square-zero
+condition, this does not make higher Peano--Baker words vanish; it is the
+finite algebra hypothesis behind the later commuting-coefficient formula. -/
+def PairwiseCommuting {dimension : Nat} (B : Nat -> RatMatrix dimension) : Prop :=
+  forall i j, matrixMul (B i) (B j) = matrixMul (B j) (B i)
+
+theorem matrixMul_commutes_identity_add {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (hcomm : PairwiseCommuting B) (i j : Nat) :
+    matrixMul (B i) (matrixAdd (matrixIdentity dimension) (B j)) =
+      matrixMul (matrixAdd (matrixIdentity dimension) (B j)) (B i) := by
+  rw [matrixMul_add_right, matrixMul_add_left, matrixMul_identity_right,
+    matrixMul_identity_left, hcomm]
+
+/-- Under pairwise commuting increments, each sample commutes with the finite
+chronological transition accumulated from any number of earlier samples. -/
+theorem matrixMul_commutes_chronologicalProduct {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) (hcomm : PairwiseCommuting B) (i : Nat) :
+    forall steps,
+      matrixMul (B i) (chronologicalProduct B steps) =
+        matrixMul (chronologicalProduct B steps) (B i)
+  | 0 => by
+      rw [chronologicalProduct, matrixMul_identity_right, matrixMul_identity_left]
+  | steps + 1 => by
+      rw [chronologicalProduct]
+      rw [← matrixMul_assoc, matrixMul_commutes_identity_add B hcomm]
+      rw [matrixMul_assoc]
+      rw [matrixMul_commutes_chronologicalProduct B hcomm i steps]
+      rw [← matrixMul_assoc]
 
 theorem matrixMul_sequenceSum_eq_zero {dimension : Nat}
     (B : Nat -> RatMatrix dimension) (hzero : PairwiseProductZero B) :

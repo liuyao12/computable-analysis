@@ -564,30 +564,6 @@ The finite rectangle identities here are supporting arctangent infrastructure
 for the series proof; they introduce no additional Machin pi computation.
 \end{theorem}
 
-\begin{theorem}[Two-term unit-chart arctangent pi]
-\label{thm:two-term-arctan-pi}
-\lean{ComputableAnalysis.PiProofs.piHalfThird_equiv_area}
-\uses{thm:leibniz-arctan,def:arctan-area-stage-algorithm,def:raw-equiv}
-The completed finite-Riemann bridge applies uniformly to every nonnegative
-rational input in the unit interval.  A separate two-term power-series
-computation therefore gives
-\[
-  \pi = 4\left(
-    \arctan_{\mathrm{series}}\frac12+
-    \arctan_{\mathrm{series}}\frac13\right).
-\]
-Lean first identifies each alternating series with its geometric arctangent
-through its finite rectangle construction.  The bounded rational chart
-addition then has the exact parameter identity
-\[
-  \frac12\mathbin\oplus\frac13
-  = \frac{\frac12+\frac13}{1-\frac12\frac13}=1,
-\]
-so the geometric sum is the unit quarter turn.  Scaling by four reaches the
-canonical circle-area computation.  This is a separate unit-chart test of the
-general series bridge, not an additional Machin formula.
-\end{theorem}
-
 \section{General Power Series}
 
 \begin{definition}[Formal power series]

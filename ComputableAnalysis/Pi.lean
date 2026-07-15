@@ -25,11 +25,6 @@ def piLeibniz : RealRaw :=
 def piMachin : RealRaw :=
   (4 : Nat) * ((4 : Nat) * arctan (1 / 5) - arctan (1 / 239))
 
-/-- Pi from the bounded two-term arctangent addition
-`arctan (1 / 2) + arctan (1 / 3) = arctan 1`. -/
-def piArctanHalfThird : RealRaw :=
-  (4 : Nat) * (arctan (1 / 2) + arctan (1 / 3))
-
 structure PiCirclePoint where
   x : Rat
   y : Rat
@@ -228,7 +223,6 @@ namespace PiExamples
 
 #eval! (piLeibniz.compute 10).display
 #eval! (piMachin.compute 10).display
-#eval! (piArctanHalfThird.compute 10).display
 #eval! (piCircleArea.compute 10).display
 #eval! (piCircumference.compute 10).display
 
