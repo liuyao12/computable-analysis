@@ -162,6 +162,19 @@ not a description of the current module graph. The checked blueprint
   interval-regular, monotone, and effectively separated.
   See `InvertibleFunctionOnInterval`, `InRangeRaw`, `InverseRaw.apply`, and
   `HasInverse` in `ComputableAnalysis/Calculus.lean`.
+- The separation certificate now chooses exactly one orientation
+  (`nondecreasing` or `nonincreasing`), and `InvertibleFunctionOnInterval`
+  requires it to match the monotonicity witness.  A certificate must not
+  prove both opposing strict endpoint-separation inequalities for the same nonconstant
+  function.
+- Concrete forward data: `squareOnUnit` on `[0,1]` has exact rational point
+  boxes, an interval-regularity modulus (hence an explicit rational
+  epsilon--delta certificate), nondecreasing order, and nondecreasing
+  effective separation.  `squareOnUnit_epsilonDeltaContinuous` and
+  `squareOnUnit_invertible` expose these facts.
+  The existing `sqrtRaw` bisection has its algebraic raw-real specification;
+  connecting it to `InverseBisectionSearch` for all represented unit-range
+  targets remains future work.
 - Proved bridge: a bisection/search construction for every target value gives
   the inverse-function theorem.
   See `InverseBisectionSearch` and `inverse_function_from_bisection_search` in

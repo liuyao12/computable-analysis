@@ -2541,24 +2541,26 @@ values are separated enough to locate the inverse at the requested precision.
 Without this, a monotone function can be too flat for an effective inverse
 algorithm. -/
 structure EffectiveInverseSeparation (F : FunctionOnInterval) where
+  /-- The one monotone orientation for which the separation certificate is
+  supplied.  Requiring both orientations would make every nonconstant
+  function fail the interface. -/
+  kind : MonotonicityKind
   inputPrecision : Nat -> Nat
+  inputPrecision_pos : forall n, 0 < inputPrecision n
   outputPrecision : Nat -> Nat
-  separated_inc :
+  separated :
     forall x y
       (hx : inDomainInterval F.lower F.upper x)
       (hy : inDomainInterval F.lower F.upper y)
       n,
       x + (1 / ((inputPrecision n) : Rat)) <= y ->
-        (F.compute x hx (outputPrecision n)).hi <=
-          (F.compute y hy (outputPrecision n)).lo
-  separated_dec :
-    forall x y
-      (hx : inDomainInterval F.lower F.upper x)
-      (hy : inDomainInterval F.lower F.upper y)
-      n,
-      x + (1 / ((inputPrecision n) : Rat)) <= y ->
-        (F.compute y hy (outputPrecision n)).hi <=
-          (F.compute x hx (outputPrecision n)).lo
+        match kind with
+        | .nondecreasing =>
+            (F.compute x hx (outputPrecision n)).hi <
+              (F.compute y hy (outputPrecision n)).lo
+        | .nonincreasing =>
+            (F.compute y hy (outputPrecision n)).hi <
+              (F.compute x hx (outputPrecision n)).lo
 
 /-- The input data from which an inverse-function algorithm should be
 constructible. -/
@@ -2566,6 +2568,12 @@ structure InvertibleFunctionOnInterval where
   continuous : ContinuousFunctionOnInterval
   monotone : MonotoneOnInterval continuous.function
   separation : EffectiveInverseSeparation continuous.function
+  /-- The strict separation certificate has the same orientation as the weak
+  monotonicity certificate. -/
+  orientation :
+    match separation.kind with
+    | .nondecreasing => monotone.increasing
+    | .nonincreasing => ¬ monotone.increasing
 
 namespace InvertibleFunctionOnInterval
 

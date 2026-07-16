@@ -612,17 +612,23 @@ the pointwise outputs are real numbers.
 
 \begin{theorem}[Constructive inverse-function theorem]
 \label{thm:constructive-inverse-function}
+\lean{ComputableAnalysis.HasInverse}
 \uses{def:function-on-interval,def:interval-regular}
 Let \(F\) be interval-regular and monotone on a rational interval.  In
 addition to monotonicity, supply an effective inverse-separation certificate:
 at every requested scale, inputs separated by a stated positive rational
-amount have disjointly ordered output boxes.  For every computable target
-with a certified range witness, a bisection/search procedure returns a nested
-raw interval for its preimage.  Lean proves the assembly theorem
+amount have disjointly ordered output boxes, in the one orientation (nondecreasing or
+nonincreasing) chosen for the branch.  The certificate's
+orientation is required to agree with the monotonicity witness.  Lean proves
+the following assembly theorem:
 \[
   \bigl(\text{certified bisection search for every target}\bigr)
   \Longrightarrow \code{HasInverse}.
 \]
+Thus, once a particular bisection/search is supplied for each computable
+target with a certified range witness, it gives a raw interval algorithm for
+the preimage.  The theorem does not obtain that finite search by a choice
+principle.
 Thus the inverse is another interval algorithm, not a choice of a point from
 a completed continuum.  Effective separation is essential: monotonicity alone
 does not give a usable finite inverse search for a function that may be
@@ -633,12 +639,17 @@ arbitrarily flat.
 \label{ex:algebraic-inverse-branches}
 \lean{ComputableAnalysis.sqrtRaw_spec}
 \uses{thm:constructive-inverse-function}
-The nonnegative square-root branch is the first concrete model: its rational
-bisection intervals isolate the nonnegative solution of \(w^2=q\), are valid
-raw reals, and satisfy the algebraic specification.  On a bounded positive
-branch it is the inverse of squaring, so it has the same certified-bracketing
-shape as the theorem.  General algebraic functions will use isolating boxes,
-separation, and bisection or subdivision to construct selected branches.
+The first concrete forward package is squaring on \([0,1]\): its evaluator is
+the exact rational box \([r^2,r^2]\), it has a direct rational interval
+modulus, is nondecreasing, and has a nondecreasing effective-separation
+certificate.  Lean's \code{squareOnUnit\_invertible} packages these data.
+The existing nonnegative square-root bisection intervals
+isolate the solution of \(w^2=q\), are valid raw reals, and satisfy the
+algebraic specification.  Packaging that bisection as the full
+\code{InverseBisectionSearch} for every represented target on the unit range
+is the next formal step; no inverse is asserted merely from monotonicity.
+General algebraic functions will use isolating boxes, separation, and
+bisection or subdivision to construct selected branches.
 \end{example}
 
 \begin{remark}[Continuous extension of represented functions]
@@ -658,8 +669,8 @@ until that extension theorem is constructed.
 \uses{def:real-fun-raw,def:function-on-interval}
 The elementary functions constructed later all use this same shape.
 Power-series arctangent has domain \([-1,1]\) and sends \((x,n)\) to an
-alternating-series interval.  The next chapter obtains the first sine and
-cosine branch by applying the preceding inverse theorem to geometric
+alternating-series interval.  The next chapter is planned to obtain the first
+sine and cosine branch by applying the preceding inverse theorem to geometric
 arctangent, then projecting the rational circle chart.  Exponential is
 represented by power-series, compound-interest, and inverse-log-integral
 stage algorithms.  Logarithm is a \code{FunctionOnInterval} on positive

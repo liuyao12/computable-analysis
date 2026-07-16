@@ -721,6 +721,13 @@ theorem sq_sub_factor (lo hi : Rat) :
   grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.sub_eq_add_neg]
 
+theorem sq_lt_sq_of_nonneg_lt {a b : Rat} (ha : 0 <= a) (hab : a < b) :
+    sq a < sq b := by
+  have hdiff : 0 < sq b - sq a := by
+    rw [sq_sub_factor]
+    exact Rat.mul_pos (by grind) (by grind)
+  grind
+
 theorem sqrt_spec_sq_gap_le_stage_bound {q r : Rat} {x : RealRaw}
     (hx : SqrtRealRawSpec q x)
     (hover : x.SameStageOverlap (RealRaw.ofRat r))
@@ -825,6 +832,158 @@ theorem sq_eq_of_sqrt_spec_equiv_rat {q r : Rat} {x : RealRaw}
     intro n
     dsimp [C]
     exact sqrt_spec_sq_gap_le_stage_bound hx hover n)
+
+/-- Squaring as an exact rational interval function.  This is the forward map
+for the first concrete inverse-function example: its inverse on the
+nonnegative unit interval is the existing square-root bisection algorithm. -/
+def squareRaw : PartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x _ _ => { lo := sq x, hi := sq x }
+
+theorem squareRaw_valid (x : Rat) (hx : squareRaw.definedAt x) :
+    RealRaw.ValidCompute (squareRaw.compute x hx) := by
+  simpa [squareRaw] using RealRaw.ofRat_valid (sq x)
+
+/-- The exact squaring function restricted to the nonnegative unit interval. -/
+def squareOnUnit : FunctionOnInterval where
+  raw := squareRaw
+  lower := 0
+  upper := 1
+  defined_on := by
+    intro _ _
+    trivial
+  valid_on := by
+    intro x hx
+    exact squareRaw_valid x hx
+
+/-- Endpoint evaluation is an enclosure for squaring on a nonnegative input
+interval. -/
+def squareUnitEvalInterval (I : QInterval) : QInterval :=
+  { lo := sq I.lo, hi := sq I.hi }
+
+theorem squareUnitEvalInterval_width (I : QInterval) :
+    (squareUnitEvalInterval I).width = I.width * (I.hi + I.lo) := by
+  unfold squareUnitEvalInterval QInterval.width sq
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem squareUnit_interval_width_scale (w : Rat) (n : Nat)
+    (hn : n ≠ 0)
+    (hw : w <= 1 / ((2 * n : Nat) : Rat)) :
+    2 * w <= 1 / (n : Rat) := by
+  calc
+    2 * w <= 2 * (1 / ((2 * n : Nat) : Rat)) :=
+      Rat.mul_le_mul_of_nonneg_left hw (by native_decide)
+    _ = 1 / (n : Rat) := by
+      rw [Rat.div_def]
+      rw [show ((2 * n : Nat) : Rat) = (2 : Rat) * (n : Rat) by
+        exact Rat.natCast_mul 2 n]
+      have htwo : (2 : Rat) ≠ 0 := by native_decide
+      have hn' : (n : Rat) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn))
+      rw [Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Squaring is interval-regular on `[0,1]`, with a direct rational modulus.
+The zero stage is exact on zero-width input boxes, matching the raw-real
+precision convention. -/
+def squareOnUnit_intervalRegular : IntervalRegularOn squareOnUnit := by
+  refine
+    { evalInterval := fun I _ _ => squareUnitEvalInterval I
+      inputPrecision := fun n => 2 * n
+      inputPrecision_pos := by
+        intro n hn
+        omega
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hwidth
+    rcases hI with ⟨hlo, hord, hhi⟩
+    have hwidth_nonneg : 0 <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hsum_nonneg : 0 <= I.hi + I.lo := by
+      have hhi_nonneg : 0 <= I.hi := Rat.le_trans hlo hord
+      exact Rat.add_nonneg hhi_nonneg hlo
+    have hsum_le_two : I.hi + I.lo <= 2 := by
+      change (0 : Rat) <= I.lo at hlo
+      change I.hi <= 1 at hhi
+      grind
+    constructor
+    · rw [squareUnitEvalInterval_width]
+      exact Rat.mul_nonneg hwidth_nonneg hsum_nonneg
+    · rw [squareUnitEvalInterval_width]
+      calc
+        I.width * (I.hi + I.lo) <= I.width * 2 :=
+          Rat.mul_le_mul_of_nonneg_left hsum_le_two hwidth_nonneg
+        _ = 2 * I.width := by grind [Rat.mul_comm]
+        _ <= 1 / (n : Rat) := by
+          by_cases hn : n = 0
+          · subst n
+            have hinvzero : 1 / ((2 * (0 : Nat) : Nat) : Rat) = 0 := by
+              native_decide
+            rw [hinvzero] at hwidth
+            have hzero : I.width = 0 := Rat.le_antisymm hwidth hwidth_nonneg
+            rw [hzero]
+            native_decide
+          · exact squareUnit_interval_width_scale I.width n hn hwidth
+  · intro I hI x hx n hxlo hxhi
+    rcases hI with ⟨hIlo, hord, hIhi⟩
+    change (0 : Rat) <= I.lo at hIlo
+    have hlo_nonneg : 0 <= I.lo := hIlo
+    have hx_nonneg : 0 <= x := Rat.le_trans hlo_nonneg hxlo
+    have hlo_sq : sq I.lo <= sq x :=
+      sq_le_sq_of_nonneg_le hlo_nonneg hxlo
+    have hhi_sq : sq x <= sq I.hi :=
+      sq_le_sq_of_nonneg_le hx_nonneg hxhi
+    change squareUnitEvalInterval I |>.ContainsInterval
+      (squareOnUnit.compute x hx n)
+    simpa [squareUnitEvalInterval, squareOnUnit, squareRaw] using
+      And.intro hlo_sq hhi_sq
+
+/-- The concrete continuous squaring map used by the unit square-root
+inverse example. -/
+def squareOnUnit_continuous : ContinuousFunctionOnInterval where
+  function := squareOnUnit
+  regular := squareOnUnit_intervalRegular
+
+/-- The square map on the unit interval satisfies the project's literal
+rational epsilon--delta continuity predicate, without a topology import. -/
+theorem squareOnUnit_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn squareOnUnit :=
+  squareOnUnit_intervalRegular.epsilonDeltaContinuous
+
+theorem squareOnUnit_nondecreasing : NondecreasingOnInterval squareOnUnit := by
+  intro x y hx hy hxy _
+  have hx_nonneg : 0 <= x := hx.1
+  have hsq : sq x <= sq y := sq_le_sq_of_nonneg_le hx_nonneg hxy
+  simpa [squareOnUnit, squareRaw] using hsq
+
+/-- On `[0,1]`, a separation of `1/(n+1)` in the input strictly separates the
+exact output boxes after squaring.  This is the nondecreasing effective
+inverse-separation certificate. -/
+def squareOnUnit_effectiveInverseSeparation :
+    EffectiveInverseSeparation squareOnUnit where
+  kind := .nondecreasing
+  inputPrecision := fun n => n + 1
+  inputPrecision_pos := fun n => Nat.succ_pos n
+  outputPrecision := fun _ => 0
+  separated := by
+    intro x y hx hy n hsep
+    have hx_nonneg : 0 <= x := hx.1
+    have hstep_pos : 0 < (1 / (((n + 1 : Nat) : Rat))) :=
+      one_div_nat_pos (Nat.succ_pos n)
+    have hxy : x < y := by
+      grind
+    have hsq : sq x < sq y := sq_lt_sq_of_nonneg_lt hx_nonneg hxy
+    simpa [squareOnUnit, squareRaw] using hsq
+
+/-- The unit-interval square map supplies the constructive data required by
+the monotone inverse-function interface. -/
+def squareOnUnit_invertible : InvertibleFunctionOnInterval where
+  continuous := squareOnUnit_continuous
+  monotone := MonotoneOnInterval.ofNondecreasing squareOnUnit_nondecreasing
+  separation := squareOnUnit_effectiveInverseSeparation
+  orientation := trivial
 
 namespace Rat
 
