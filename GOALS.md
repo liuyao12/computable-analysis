@@ -151,7 +151,11 @@ not a description of the current module graph. The checked blueprint
   `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The
   remaining work is an improper rational-integral construction that supplies a
   `ReciprocalQuarticMinusOneProjectiveRoute` and turns the `a=-1` case into
-  another counted computation of `piCircleArea`.
+  another counted computation of `piCircleArea`.  That route is now typed by
+  an `Integral.ConstructionFor` for the concrete compact density on `[-1,1]`;
+  its `projectiveIntegral` is definitionally that integral, rather than an
+  unconstrained raw real.  The remaining agreement is therefore precisely the
+  finite compact-integration and projective-substitution proof.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

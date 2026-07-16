@@ -887,6 +887,7 @@ rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticExpectedPiMultiple}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneExpectedPi}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveRoute}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticPiParameter}
@@ -1055,12 +1056,13 @@ The clean benchmark
 now has a theorem-facing package.  Lean proves that the expected raw value
 \code{reciprocalQuarticMinusOneExpectedPi} is valid and equivalent to the
 baseline \code{piCircleArea}.  Consequently, once the projective-line
-construction itself is verified and shown to satisfy
+construction itself supplies an integral construction for the compactified
+rational density on \([-1,1]\), and is shown to satisfy
 \code{ReciprocalQuarticMinusOneProjectiveAgreement}, the resulting
 \code{ReciprocalQuarticMinusOneProjectiveRoute} immediately gives a formal
 \(\pi\)-computation equivalent to \code{piCircleArea}.  This route package is
-not counted as a completed scoreboard row until that improper-integral raw real
-is supplied.
+not counted as a completed scoreboard row until that compact integral and its
+projective substitution certificate are supplied.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}

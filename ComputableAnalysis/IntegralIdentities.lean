@@ -2675,23 +2675,6 @@ the projective integral construction still has to be supplied separately. -/
 def reciprocalQuarticMinusOneExpectedPi : RealRaw :=
   reciprocalQuarticExpectedPiMultiple 1
 
-/-- The theorem-facing obligation for a future projective-line
-construction of the clean reciprocal quartic integral: its produced raw real
-must agree with the expected pi value. -/
-def ReciprocalQuarticMinusOneProjectiveAgreement
-    (projectiveIntegral : RealRaw) : Prop :=
-  projectiveIntegral.Equiv reciprocalQuarticMinusOneExpectedPi
-
-/-- Data for the clean reciprocal quartic pi route.  The finite algebraic
-pullback is already formalized above; this structure isolates the remaining
-analytic/improper-integral construction as a verified raw real equivalent to the
-expected value. -/
-structure ReciprocalQuarticMinusOneProjectiveRoute where
-  projectiveIntegral : RealRaw
-  projectiveIntegral_valid : projectiveIntegral.Valid
-  computes_expected :
-    ReciprocalQuarticMinusOneProjectiveAgreement projectiveIntegral
-
 /-- The rational parameter condition under which the reciprocal quartic integral
 is expected to reduce to a rational multiple of pi. -/
 def ReciprocalQuarticPiParameter (a b : Rat) : Prop :=
@@ -3372,6 +3355,55 @@ theorem reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous_from_intervalReg
     EpsilonDeltaContinuousOn
       (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) :=
   reciprocalQuarticMinusOneCompact_intervalRegular.epsilonDeltaContinuous
+
+/-- The finite compact interval integral that represents the clean
+projective-line quartic route.  Its integrand is the explicit density obtained
+after the rational compactification of the line; a future route must therefore
+provide an integral construction for this particular function, rather than an
+unconstrained raw real. -/
+def reciprocalQuarticMinusOneCompactIntegral
+    (construction : Integral.ConstructionFor
+      (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)) : RealRaw :=
+  Integral.integralFor (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
+    construction
+
+theorem reciprocalQuarticMinusOneCompactIntegral_valid
+    (construction : Integral.ConstructionFor
+      (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)) :
+    (reciprocalQuarticMinusOneCompactIntegral construction).Valid :=
+  Integral.integralFor_valid _ construction
+
+/-- The theorem-facing obligation for the compactified clean reciprocal
+quartic integral.  The required equality is now tied to a construction for
+the actual compact density on `[-1,1]`. -/
+def ReciprocalQuarticMinusOneProjectiveAgreement
+    (construction : Integral.ConstructionFor
+      (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)) : Prop :=
+  (reciprocalQuarticMinusOneCompactIntegral construction).Equiv
+    reciprocalQuarticMinusOneExpectedPi
+
+/-- Data for the clean reciprocal quartic pi route.  The finite algebraic
+pullback and compact interval integrand are formalized above.  What remains is
+an analytic certificate that a concrete integral construction for that density
+computes the expected pi value. -/
+structure ReciprocalQuarticMinusOneProjectiveRoute where
+  compactConstruction : Integral.ConstructionFor
+    (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
+  computes_expected :
+    ReciprocalQuarticMinusOneProjectiveAgreement compactConstruction
+
+namespace ReciprocalQuarticMinusOneProjectiveRoute
+
+/-- The projective-line integral is definitionally the finite integral of the
+compactified rational density. -/
+def projectiveIntegral (R : ReciprocalQuarticMinusOneProjectiveRoute) : RealRaw :=
+  reciprocalQuarticMinusOneCompactIntegral R.compactConstruction
+
+theorem projectiveIntegral_valid (R : ReciprocalQuarticMinusOneProjectiveRoute) :
+    R.projectiveIntegral.Valid :=
+  reciprocalQuarticMinusOneCompactIntegral_valid R.compactConstruction
+
+end ReciprocalQuarticMinusOneProjectiveRoute
 
 /-- Folding the positive half-line by the reciprocal map produces the symmetric
 density \((1+x^2)/(x^4+a x^2+1)\) on the unit interval. -/
