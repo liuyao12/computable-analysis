@@ -180,6 +180,11 @@ not a description of the current module graph. The checked blueprint
   the inverse-function theorem.
   See `InverseBisectionSearch` and `inverse_function_from_bisection_search` in
   `ComputableAnalysis/Calculus.lean`.
+- The sine/cosine route is intentionally next: the geometric-trigonometry
+  chapter currently records `ArctanInverseConstruction` as an independent
+  downstream contract.  It must be connected to
+  `InvertibleFunctionOnInterval` and `InverseBisectionSearch` before it is
+  counted as a concrete inverse-arctangent construction.
 - `asin` is the inverse of sine on a chosen monotone branch, and `log` is the
   inverse of exponential on a chosen monotone branch.
   See `Elementary.ArcsinFromMonotoneSin`, `Elementary.LogFromMonotoneExp`,
