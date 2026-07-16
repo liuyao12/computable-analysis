@@ -645,11 +645,13 @@ modulus, is nondecreasing, and has a nondecreasing effective-separation
 certificate.  Lean's \code{squareOnUnit\_invertible} packages these data.
 The existing nonnegative square-root bisection intervals
 isolate the solution of \(w^2=q\), are valid raw reals, and satisfy the
-algebraic specification.  Packaging that bisection as the full
-\code{InverseBisectionSearch} for every represented target on the unit range
-is the next formal step; no inverse is asserted merely from monotonicity.
-General algebraic functions will use isolating boxes, separation, and
-bisection or subdivision to construct selected branches.
+algebraic specification.  For every exact rational target \(q\in[0,1]\),
+Lean packages this bisection as \code{sqrtOnUnitBisectionSearch}: it remains
+inside the source interval and its squared interval overlaps the target box.
+Extending that search to every represented target on the unit range is the
+next formal step; no inverse is asserted merely from monotonicity.  General
+algebraic functions will use isolating boxes, separation, and bisection or
+subdivision to construct selected branches.
 \end{example}
 
 \begin{remark}[Continuous extension of represented functions]

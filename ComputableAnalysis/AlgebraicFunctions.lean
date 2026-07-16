@@ -149,6 +149,14 @@ def sq (x : Rat) : Rat := x * x
 def maxRat (a b : Rat) : Rat := if a <= b then b else a
 def sqrtUpperBound (q : Rat) : Rat := maxRat 1 q
 
+theorem sqrtUpperBound_eq_one {q : Rat} (hq : q <= 1) :
+    sqrtUpperBound q = 1 := by
+  unfold sqrtUpperBound maxRat
+  by_cases hle : (1 : Rat) <= q
+  · have hqeq : q = 1 := Rat.le_antisymm hq hle
+    simp [hqeq]
+  · simp [hle]
+
 def sqrtBisectStep (q : Rat) (I : QInterval) : QInterval :=
   let m := I.midpoint
   if sq m <= q then { lo := m, hi := I.hi } else { lo := I.lo, hi := m }
@@ -984,6 +992,49 @@ def squareOnUnit_invertible : InvertibleFunctionOnInterval where
   monotone := MonotoneOnInterval.ofNondecreasing squareOnUnit_nondecreasing
   separation := squareOnUnit_effectiveInverseSeparation
   orientation := trivial
+
+/-- A rational target in the unit range of squaring, represented by its exact
+rational point box. -/
+def squareOnUnitRationalTarget (q : Rat) :
+    InRangeRaw squareOnUnit_invertible where
+  value := RealRaw.ofRat q
+  in_range := inDomainInterval 0 1 q
+
+private theorem sqrtDomain_of_unit {q : Rat} (hq : inDomainInterval 0 1 q) :
+    sqrtDomain q := by
+  unfold sqrtDomain
+  change 0 <= q /\ q <= 1 at hq
+  grind
+
+/-- The rational square-root bisection never leaves `[0,1]` for a rational
+target in `[0,1]`. -/
+theorem sqrtApproxOnUnit_subinterval (q : Rat) (hq : inDomainInterval 0 1 q)
+    (n : Nat) :
+    subintervalOf (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n) 0 1 := by
+  have hcontains :
+      ({ lo := 0, hi := sqrtUpperBound q } : QInterval).ContainsInterval
+        (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n) := by
+    unfold sqrtApproxOnDomain
+    exact sqrtBisect_contains_of_le_fuel (sqrtInitialSpec hq.1) (Nat.zero_le _)
+  have hspec := sqrtApproxOnDomain_spec q (sqrtDomain_of_unit hq) n
+  unfold QInterval.ContainsInterval at hcontains
+  refine ⟨hcontains.1, hspec.2.1, ?_⟩
+  simpa [sqrtUpperBound_eq_one hq.2] using hcontains.2
+
+/-- The existing rational square-root bisection is a concrete inverse search
+for each exact rational target in the unit range of squaring. -/
+def sqrtOnUnitBisectionSearch (q : Rat) (hq : inDomainInterval 0 1 q) :
+    InverseBisectionSearch squareOnUnit_invertible
+      (squareOnUnitRationalTarget q) where
+  compute_preimage := sqrtApproxOnDomain q (sqrtDomain_of_unit hq)
+  valid_preimage := sqrtApproxOnDomain_valid q (sqrtDomain_of_unit hq)
+  preimage_subinterval := sqrtApproxOnUnit_subinterval q hq
+  value_overlaps := by
+    intro n
+    have hspec := sqrtApproxOnDomain_spec q (sqrtDomain_of_unit hq) n
+    change sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).lo <= q /\
+      q <= sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).hi
+    exact ⟨hspec.2.2.1, hspec.2.2.2⟩
 
 namespace Rat
 

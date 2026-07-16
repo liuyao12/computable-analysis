@@ -172,9 +172,10 @@ not a description of the current module graph. The checked blueprint
   epsilon--delta certificate), nondecreasing order, and nondecreasing
   effective separation.  `squareOnUnit_epsilonDeltaContinuous` and
   `squareOnUnit_invertible` expose these facts.
-  The existing `sqrtRaw` bisection has its algebraic raw-real specification;
-  connecting it to `InverseBisectionSearch` for all represented unit-range
-  targets remains future work.
+  The existing `sqrtRaw` bisection has its algebraic raw-real specification,
+  and `sqrtOnUnitBisectionSearch` packages it as an `InverseBisectionSearch`
+  for every exact rational target in `[0,1]`.  Extending this to all
+  represented unit-range targets remains future work.
 - Proved bridge: a bisection/search construction for every target value gives
   the inverse-function theorem.
   See `InverseBisectionSearch` and `inverse_function_from_bisection_search` in
