@@ -2566,6 +2566,8 @@ structure EffectiveInverseSeparation (F : FunctionOnInterval) where
 constructible. -/
 structure InvertibleFunctionOnInterval where
   continuous : ContinuousFunctionOnInterval
+  /-- An inverse branch is carried on an actual closed source interval. -/
+  source_ordered : continuous.function.lower <= continuous.function.upper
   monotone : MonotoneOnInterval continuous.function
   separation : EffectiveInverseSeparation continuous.function
   /-- The strict separation certificate has the same orientation as the weak
@@ -2582,14 +2584,43 @@ def function (I : InvertibleFunctionOnInterval) : FunctionOnInterval :=
 
 end InvertibleFunctionOnInterval
 
+/-- The endpoint-value box at the lower end of an invertible interval branch. -/
+def InvertibleFunctionOnInterval.lowerValueBox
+    (I : InvertibleFunctionOnInterval) (n : Nat) : QInterval :=
+  I.function.compute I.function.lower
+    ⟨Rat.le_refl, I.source_ordered⟩ n
+
+/-- The endpoint-value box at the upper end of an invertible interval branch. -/
+def InvertibleFunctionOnInterval.upperValueBox
+    (I : InvertibleFunctionOnInterval) (n : Nat) : QInterval :=
+  I.function.compute I.function.upper
+    ⟨I.source_ordered, Rat.le_refl⟩ n
+
+/-- An interval box lies in the oriented endpoint range of an invertible
+branch.  The endpoint precision is explicit because a target algorithm and a
+forward evaluator need not use the same stage schedule. -/
+def InvertibleFunctionOnInterval.EndpointRangeContains
+    (I : InvertibleFunctionOnInterval) (n : Nat) (Y : QInterval) : Prop :=
+  match I.separation.kind with
+  | .nondecreasing =>
+      (I.lowerValueBox n).lo <= Y.lo /\
+        Y.hi <= (I.upperValueBox n).hi
+  | .nonincreasing =>
+      (I.upperValueBox n).lo <= Y.lo /\
+        Y.hi <= (I.lowerValueBox n).hi
+
 /-- A computable target value in the range of an interval function.
 
-The range certificate is intentionally interval-valued.  It says every target
-approximation lies between the endpoint value boxes at the chosen precision,
-with orientation handled by the inverse construction. -/
+The target carries its own raw-real validity certificate and an explicit
+endpoint-range enclosure at every target stage.  This is the finite data a
+bisection implementation may inspect; a bare proposition saying that a value
+is ``in range'' would not support a constructive inverse search. -/
 structure InRangeRaw (I : InvertibleFunctionOnInterval) where
   value : RealRaw
-  in_range : Prop
+  value_valid : value.Valid
+  rangePrecision : Nat -> Nat
+  in_range : forall n,
+    I.EndpointRangeContains (rangePrecision n) (value.compute n)
 
 /-- A raw inverse evaluator on computable real target values.
 

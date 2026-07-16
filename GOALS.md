@@ -162,6 +162,12 @@ not a description of the current module graph. The checked blueprint
   interval-regular, monotone, and effectively separated.
   See `InvertibleFunctionOnInterval`, `InRangeRaw`, `InverseRaw.apply`, and
   `HasInverse` in `ComputableAnalysis/Calculus.lean`.
+- `InRangeRaw` now has computational range content: it carries a validity
+  proof for the target raw real and, at every target stage, a named endpoint
+  precision whose oriented endpoint boxes enclose the target box.  An
+  invertible branch also records that its source endpoints are ordered.  This
+  replaces the former unconstrained `in_range : Prop`, which could not guide a
+  finite bisection search.
 - The separation certificate now chooses exactly one orientation
   (`nondecreasing` or `nonincreasing`), and `InvertibleFunctionOnInterval`
   requires it to match the monotonicity witness.  A certificate must not
@@ -174,7 +180,8 @@ not a description of the current module graph. The checked blueprint
   `squareOnUnit_invertible` expose these facts.
   The existing `sqrtRaw` bisection has its algebraic raw-real specification,
   and `sqrtOnUnitBisectionSearch` packages it as an `InverseBisectionSearch`
-  for every exact rational target in `[0,1]`.  Extending this to all
+  for every exact rational target in `[0,1]`, including the explicit
+  endpoint-range enclosure for that target.  Extending this to all
   represented unit-range targets remains future work.
 - Proved bridge: a bisection/search construction for every target value gives
   the inverse-function theorem.

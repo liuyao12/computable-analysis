@@ -627,8 +627,10 @@ the following assembly theorem:
 \]
 Thus, once a particular bisection/search is supplied for each computable
 target with a certified range witness, it gives a raw interval algorithm for
-the preimage.  The theorem does not obtain that finite search by a choice
-principle.
+the preimage.  Such a target is itself a valid raw real, and for every target
+stage it carries an explicit precision at which its output box lies between
+the correctly oriented endpoint-value boxes of \(F\).  The theorem does not
+obtain that finite search by a choice principle.
 Thus the inverse is another interval algorithm, not a choice of a point from
 a completed continuum.  Effective separation is essential: monotonicity alone
 does not give a usable finite inverse search for a function that may be
@@ -648,6 +650,9 @@ isolate the solution of \(w^2=q\), are valid raw reals, and satisfy the
 algebraic specification.  For every exact rational target \(q\in[0,1]\),
 Lean packages this bisection as \code{sqrtOnUnitBisectionSearch}: it remains
 inside the source interval and its squared interval overlaps the target box.
+The exact target box is also formally enclosed by the square map's endpoint
+boxes at every stage, so it is a genuine certified range input to the inverse
+interface.
 Extending that search to every represented target on the unit range is the
 next formal step; no inverse is asserted merely from monotonicity.  General
 algebraic functions will use isolating boxes, separation, and bisection or

@@ -989,16 +989,30 @@ def squareOnUnit_effectiveInverseSeparation :
 the monotone inverse-function interface. -/
 def squareOnUnit_invertible : InvertibleFunctionOnInterval where
   continuous := squareOnUnit_continuous
+  source_ordered := by native_decide
   monotone := MonotoneOnInterval.ofNondecreasing squareOnUnit_nondecreasing
   separation := squareOnUnit_effectiveInverseSeparation
   orientation := trivial
 
 /-- A rational target in the unit range of squaring, represented by its exact
-rational point box. -/
-def squareOnUnitRationalTarget (q : Rat) :
+rational point box and enclosed by the exact endpoint values of the square
+branch. -/
+def squareOnUnitRationalTarget (q : Rat) (hq : inDomainInterval 0 1 q) :
     InRangeRaw squareOnUnit_invertible where
   value := RealRaw.ofRat q
-  in_range := inDomainInterval 0 1 q
+  value_valid := by
+    simpa [RealRaw.ofRat] using RealRaw.ofRat_valid q
+  rangePrecision := fun _ => 0
+  in_range := by
+    intro n
+    simpa [InvertibleFunctionOnInterval.EndpointRangeContains,
+      InvertibleFunctionOnInterval.function,
+      InvertibleFunctionOnInterval.lowerValueBox,
+      InvertibleFunctionOnInterval.upperValueBox,
+      FunctionOnInterval.compute,
+      squareOnUnit_invertible, squareOnUnit_continuous,
+      squareOnUnit_effectiveInverseSeparation,
+      squareOnUnit, squareRaw, sq, RealRaw.ofRat] using hq
 
 private theorem sqrtDomain_of_unit {q : Rat} (hq : inDomainInterval 0 1 q) :
     sqrtDomain q := by
@@ -1025,7 +1039,7 @@ theorem sqrtApproxOnUnit_subinterval (q : Rat) (hq : inDomainInterval 0 1 q)
 for each exact rational target in the unit range of squaring. -/
 def sqrtOnUnitBisectionSearch (q : Rat) (hq : inDomainInterval 0 1 q) :
     InverseBisectionSearch squareOnUnit_invertible
-      (squareOnUnitRationalTarget q) where
+      (squareOnUnitRationalTarget q hq) where
   compute_preimage := sqrtApproxOnDomain q (sqrtDomain_of_unit hq)
   valid_preimage := sqrtApproxOnDomain_valid q (sqrtDomain_of_unit hq)
   preimage_subinterval := sqrtApproxOnUnit_subinterval q hq
