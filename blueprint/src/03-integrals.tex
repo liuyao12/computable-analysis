@@ -941,6 +941,18 @@ the improper integral together with agreement with that expected value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_step_refines}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_ordered}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_width}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_nested}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_widthsShrink}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicRaw}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicIntegral_valid}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
 \uses{def:reciprocal-quartic-test-kernel}
@@ -1034,19 +1046,28 @@ This interval contains every rational point-value over \(I\), has width
 now a \code{ContinuousFunctionOnInterval}, with no appeal to topology or
 completed reals.  The generic checked bridge from interval regularity to
 rational \(\varepsilon\)-\(\delta\) continuity also recovers the stated
-continuity certificate.  The projective change-of-variables theorem and the
-actual integral construction remain unchecked.
-There is now, however, a fixed finite rational target for that construction:
+continuity certificate.  The projective change-of-variables theorem remains
+unchecked.  The affine compact integral construction itself is now concrete:
 the affine chart \(x=2t-1\) turns the compact density into
 \[
   g(t)=2\frac{1+(2t-1)^2}{(2t-1)^4-(2t-1)^2+1},\qquad 0\le t\le1.
 \]
 Lean proves directly that \(g\) is \(32\)-Lipschitz on rational unit inputs
-and names its exact left sums on the ordinary \(2^n\)-cell static-dyadic mesh.
-Thus the remaining construction is specifically a shrinking enclosure of
-these displayed finite sums (with the usual Lipschitz mesh error), rather
-than an unconstrained raw-real witness.  This is progress toward, but not
-yet, the missing projective substitution and scoreboard equality.
+and names its exact left sums on the ordinary \(2^n\)-cell dyadic mesh.  On
+each rational cell \([p,r]\), it takes the left value \(g(p)\) and brackets
+the cell contribution using the proved oscillation bound
+\[
+ (r-p)\bigl(g(p)-32(r-p)\bigr)
+ \ \le\ \text{cell value}\ \le\
+ (r-p)\bigl(g(p)+32(r-p)\bigr).
+\]
+Lean proves that midpoint splitting raises the lower sum and lowers the upper
+sum.  The resulting raw boxes are nested and have exact width
+\(64/2^n\), hence shrink to zero using rational arithmetic alone.  This is a
+genuine domain-aware integral construction for the affine compact density,
+rather than an unconstrained raw-real witness.  What remains is to prove its
+affine agreement with the compact \([-1,1]\) presentation and then the
+projective substitution; it is therefore still not a scoreboard equality.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \[

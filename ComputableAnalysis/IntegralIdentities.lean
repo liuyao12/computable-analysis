@@ -3505,6 +3505,568 @@ theorem reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum (stage : Nat) :
       riemannLeftExact reciprocalQuarticMinusOneUnitDensity 0 1 (2 ^ stage) :=
   rfl
 
+/-- A Lipschitz lower rectangle at the left endpoint of a unit cell.  The
+subtracted term is the certified 32-Lipschitz oscillation bound over that
+cell. -/
+private def reciprocalQuarticMinusOneUnitLowerCell (p r : Rat) : Rat :=
+  (r - p) * (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p))
+
+/-- The matching Lipschitz upper rectangle at the left endpoint of a unit
+cell. -/
+private def reciprocalQuarticMinusOneUnitUpperCell (p r : Rat) : Rat :=
+  (r - p) * (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p))
+
+private def reciprocalQuarticMinusOneUnitLowerSum :
+    List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      reciprocalQuarticMinusOneUnitLowerCell p r +
+        reciprocalQuarticMinusOneUnitLowerSum rest
+
+private def reciprocalQuarticMinusOneUnitUpperSum :
+    List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      reciprocalQuarticMinusOneUnitUpperCell p r +
+        reciprocalQuarticMinusOneUnitUpperSum rest
+
+/-- The explicit two-sided dyadic bracket for the affine compact quartic
+density.  Its centre is the ordinary left Riemann sum; its radius is supplied
+cellwise from the proved rational Lipschitz estimate. -/
+def reciprocalQuarticMinusOneUnitDyadicCompute (stage : Nat) : QInterval :=
+  let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  { lo := reciprocalQuarticMinusOneUnitLowerSum cells
+    hi := reciprocalQuarticMinusOneUnitUpperSum cells }
+
+private theorem reciprocalQuarticMinusOneUnit_midpoint_left
+    {p r : Rat} (hpr : p <= r) :
+    p <= (p + r) / 2 := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    calc
+      p * 2 <= p + r := by grind
+      _ = ((p + r) * (2 : Rat)⁻¹) * 2 := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · native_decide
+
+private theorem reciprocalQuarticMinusOneUnit_midpoint_right
+    {p r : Rat} (hpr : p <= r) :
+    (p + r) / 2 <= r := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    have h2 : (2 : Rat) ≠ 0 := by native_decide
+    calc
+      ((p + r) * (2 : Rat)⁻¹) * 2 = p + r := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= r * 2 := by grind
+  · native_decide
+
+private theorem reciprocalQuarticMinusOneUnit_midpoint_left_width
+    (p r : Rat) :
+    (p + r) / 2 - p = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem reciprocalQuarticMinusOneUnit_midpoint_right_width
+    (p r : Rat) :
+    r - (p + r) / 2 = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Splitting one unit cell at its rational midpoint tightens the elementary
+Lipschitz rectangle.  This is the finite refinement inequality from which the
+raw interval algorithm will obtain nestedness. -/
+private theorem reciprocalQuarticMinusOneUnit_cells_refine
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    let q := (p + r) / 2
+    reciprocalQuarticMinusOneUnitLowerCell p r <=
+      reciprocalQuarticMinusOneUnitLowerCell p q +
+        reciprocalQuarticMinusOneUnitLowerCell q r /\
+    reciprocalQuarticMinusOneUnitUpperCell p q +
+        reciprocalQuarticMinusOneUnitUpperCell q r <=
+      reciprocalQuarticMinusOneUnitUpperCell p r := by
+  intro q
+  have hpq : p <= q := by
+    dsimp [q]
+    exact reciprocalQuarticMinusOneUnit_midpoint_left hpr
+  have hqr : q <= r := by
+    dsimp [q]
+    exact reciprocalQuarticMinusOneUnit_midpoint_right hpr
+  have hq0 : 0 <= q := Rat.le_trans hp0 hpq
+  have hq1 : q <= 1 := Rat.le_trans hqr hr1
+  have hpq_nonneg : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hqr_nonneg : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hpr_nonneg : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hqdist : qabs (q - p) = q - p :=
+    qabs_eq_self_of_nonneg hpq_nonneg
+  have hlip :=
+    reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit
+      p q hp0 (Rat.le_trans hpr hr1) hq0 hq1
+  have hforward :
+      reciprocalQuarticMinusOneUnitDensity p -
+          reciprocalQuarticMinusOneUnitDensity q <= 32 * (q - p) := by
+    calc
+      reciprocalQuarticMinusOneUnitDensity p -
+          reciprocalQuarticMinusOneUnitDensity q <=
+          qabs (reciprocalQuarticMinusOneUnitDensity p -
+            reciprocalQuarticMinusOneUnitDensity q) := self_le_qabs _
+      _ <= 32 * qabs (q - p) := hlip
+      _ = 32 * (q - p) := by rw [hqdist]
+  have hreverse :
+      reciprocalQuarticMinusOneUnitDensity q -
+          reciprocalQuarticMinusOneUnitDensity p <= 32 * (q - p) := by
+    calc
+      reciprocalQuarticMinusOneUnitDensity q -
+          reciprocalQuarticMinusOneUnitDensity p =
+          -(reciprocalQuarticMinusOneUnitDensity p -
+            reciprocalQuarticMinusOneUnitDensity q) := by
+            grind [Rat.sub_eq_add_neg]
+      _ <= qabs (-(reciprocalQuarticMinusOneUnitDensity p -
+            reciprocalQuarticMinusOneUnitDensity q)) := self_le_qabs _
+      _ = qabs (reciprocalQuarticMinusOneUnitDensity p -
+            reciprocalQuarticMinusOneUnitDensity q) := qabs_neg _
+      _ <= 32 * (q - p) := by simpa [hqdist] using hlip
+  have hleft_lower :
+      reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p) <=
+        reciprocalQuarticMinusOneUnitDensity p - 32 * (q - p) := by
+    grind [Rat.sub_eq_add_neg]
+  have hright_lower :
+      reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p) <=
+        reciprocalQuarticMinusOneUnitDensity q - 32 * (r - q) := by
+    dsimp [q] at hforward ⊢
+    rw [reciprocalQuarticMinusOneUnit_midpoint_right_width]
+    grind [Rat.sub_eq_add_neg]
+  have hleft_upper :
+      reciprocalQuarticMinusOneUnitDensity p + 32 * (q - p) <=
+        reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p) := by
+    grind [Rat.sub_eq_add_neg]
+  have hright_upper :
+      reciprocalQuarticMinusOneUnitDensity q + 32 * (r - q) <=
+        reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p) := by
+    dsimp [q] at hreverse ⊢
+    rw [reciprocalQuarticMinusOneUnit_midpoint_right_width]
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · have hleft := Rat.mul_le_mul_of_nonneg_left hleft_lower hpq_nonneg
+    have hright := Rat.mul_le_mul_of_nonneg_left hright_lower hqr_nonneg
+    unfold reciprocalQuarticMinusOneUnitLowerCell
+    calc
+      (r - p) *
+          (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p)) =
+          (q - p) *
+            (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p)) +
+          (r - q) *
+            (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p)) := by
+            grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+              Rat.add_assoc, Rat.add_comm]
+      _ <= (q - p) *
+            (reciprocalQuarticMinusOneUnitDensity p - 32 * (q - p)) +
+          (r - q) *
+            (reciprocalQuarticMinusOneUnitDensity q - 32 * (r - q)) :=
+            rat_add_le_add hleft hright
+  · have hleft := Rat.mul_le_mul_of_nonneg_left hleft_upper hpq_nonneg
+    have hright := Rat.mul_le_mul_of_nonneg_left hright_upper hqr_nonneg
+    unfold reciprocalQuarticMinusOneUnitUpperCell
+    calc
+      (q - p) *
+          (reciprocalQuarticMinusOneUnitDensity p + 32 * (q - p)) +
+        (r - q) *
+          (reciprocalQuarticMinusOneUnitDensity q + 32 * (r - q)) <=
+          (q - p) *
+            (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p)) +
+          (r - q) *
+            (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p)) :=
+            rat_add_le_add hleft hright
+      _ = (r - p) *
+          (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p)) := by
+          grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+            Rat.add_assoc, Rat.add_comm]
+
+private theorem reciprocalQuarticMinusOneUnit_lowerSum_refineAux
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    reciprocalQuarticMinusOneUnitLowerSum intervals <=
+      reciprocalQuarticMinusOneUnitLowerSum
+        (ArctanGeometry.AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [ArctanGeometry.AreaLoopState.refineAux,
+        reciprocalQuarticMinusOneUnitLowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨hp0, hpr, hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hcell := reciprocalQuarticMinusOneUnit_cells_refine hp0 hpr hr1
+      have htail := ih
+        (lo + ArctanGeometry.arctanAreaIncrement p q r)
+        (hi - ArctanGeometry.arctanAreaDecrement p q r) hrest
+      dsimp [q] at hcell
+      dsimp [q] at htail ⊢
+      simp [ArctanGeometry.AreaLoopState.refineAux,
+        reciprocalQuarticMinusOneUnitLowerSum] at htail ⊢
+      calc
+        reciprocalQuarticMinusOneUnitLowerCell p r +
+            reciprocalQuarticMinusOneUnitLowerSum rest <=
+            (reciprocalQuarticMinusOneUnitLowerCell p ((p + r) / 2) +
+              reciprocalQuarticMinusOneUnitLowerCell ((p + r) / 2) r) +
+              reciprocalQuarticMinusOneUnitLowerSum rest :=
+          rat_add_le_add hcell.1 Rat.le_refl
+        _ <= (reciprocalQuarticMinusOneUnitLowerCell p ((p + r) / 2) +
+              reciprocalQuarticMinusOneUnitLowerCell ((p + r) / 2) r) +
+              reciprocalQuarticMinusOneUnitLowerSum
+                (ArctanGeometry.AreaLoopState.refineAux
+                  (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                  (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                  rest).intervals :=
+          by
+            have hsum :
+                (reciprocalQuarticMinusOneUnitLowerCell p ((p + r) / 2) +
+                  reciprocalQuarticMinusOneUnitLowerCell ((p + r) / 2) r) +
+                    reciprocalQuarticMinusOneUnitLowerSum rest <=
+                (reciprocalQuarticMinusOneUnitLowerCell p ((p + r) / 2) +
+                  reciprocalQuarticMinusOneUnitLowerCell ((p + r) / 2) r) +
+                    reciprocalQuarticMinusOneUnitLowerSum
+                      (ArctanGeometry.AreaLoopState.refineAux
+                        (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                        (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                        rest).intervals :=
+              rat_add_le_add Rat.le_refl htail
+            grind [Rat.add_assoc]
+        _ = reciprocalQuarticMinusOneUnitLowerCell p ((p + r) / 2) +
+              (reciprocalQuarticMinusOneUnitLowerCell ((p + r) / 2) r +
+                reciprocalQuarticMinusOneUnitLowerSum
+                  (ArctanGeometry.AreaLoopState.refineAux
+                    (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                    (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                    rest).intervals) := by
+            grind [Rat.add_assoc]
+
+private theorem reciprocalQuarticMinusOneUnit_upperSum_refineAux
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    reciprocalQuarticMinusOneUnitUpperSum
+        (ArctanGeometry.AreaLoopState.refineAux lo hi intervals).intervals <=
+      reciprocalQuarticMinusOneUnitUpperSum intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [ArctanGeometry.AreaLoopState.refineAux,
+        reciprocalQuarticMinusOneUnitUpperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨hp0, hpr, hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hcell := reciprocalQuarticMinusOneUnit_cells_refine hp0 hpr hr1
+      have htail := ih
+        (lo + ArctanGeometry.arctanAreaIncrement p q r)
+        (hi - ArctanGeometry.arctanAreaDecrement p q r) hrest
+      dsimp [q] at hcell
+      dsimp [q] at htail ⊢
+      simp [ArctanGeometry.AreaLoopState.refineAux,
+        reciprocalQuarticMinusOneUnitUpperSum] at htail ⊢
+      calc
+        reciprocalQuarticMinusOneUnitUpperCell p ((p + r) / 2) +
+            (reciprocalQuarticMinusOneUnitUpperCell ((p + r) / 2) r +
+              reciprocalQuarticMinusOneUnitUpperSum
+                (ArctanGeometry.AreaLoopState.refineAux
+                  (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                  (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                  rest).intervals) =
+            reciprocalQuarticMinusOneUnitUpperCell p ((p + r) / 2) +
+              reciprocalQuarticMinusOneUnitUpperCell ((p + r) / 2) r +
+                reciprocalQuarticMinusOneUnitUpperSum
+                  (ArctanGeometry.AreaLoopState.refineAux
+                    (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                    (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                    rest).intervals := by
+              grind [Rat.add_assoc]
+        _ <= reciprocalQuarticMinusOneUnitUpperCell p ((p + r) / 2) +
+              reciprocalQuarticMinusOneUnitUpperCell ((p + r) / 2) r +
+                reciprocalQuarticMinusOneUnitUpperSum rest :=
+          rat_add_le_add Rat.le_refl htail
+        _ <= reciprocalQuarticMinusOneUnitUpperCell p r +
+              reciprocalQuarticMinusOneUnitUpperSum rest :=
+          rat_add_le_add hcell.2 Rat.le_refl
+
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_step_refines (stage : Nat) :
+    (reciprocalQuarticMinusOneUnitDyadicCompute stage).lo <=
+      (reciprocalQuarticMinusOneUnitDyadicCompute (stage + 1)).lo /\
+    (reciprocalQuarticMinusOneUnitDyadicCompute (stage + 1)).hi <=
+      (reciprocalQuarticMinusOneUnitDyadicCompute stage).hi := by
+  unfold reciprocalQuarticMinusOneUnitDyadicCompute
+  rw [show stage + 1 = Nat.succ stage by omega,
+    ArctanGeometry.arctanAreaLoopState_succ]
+  dsimp
+  let state := ArctanGeometry.arctanAreaLoopState 1 stage
+  have hunit : ArctanGeometry.UnitIntervals state.intervals :=
+    ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := 1) (by native_decide) (by native_decide) stage
+  constructor
+  · exact reciprocalQuarticMinusOneUnit_lowerSum_refineAux
+      state.lo state.hi state.intervals hunit
+  · exact reciprocalQuarticMinusOneUnit_upperSum_refineAux
+      state.lo state.hi state.intervals hunit
+
+private theorem reciprocalQuarticMinusOneUnit_lowerCell_le_upperCell
+    {p r : Rat} (hpr : p <= r) :
+    reciprocalQuarticMinusOneUnitLowerCell p r <=
+      reciprocalQuarticMinusOneUnitUpperCell p r := by
+  have hwidth : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hinner :
+      reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p) <=
+        reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p) := by
+    have hterm : 0 <= 32 * (r - p) :=
+      Rat.mul_nonneg (by native_decide) hwidth
+    grind [Rat.sub_eq_add_neg]
+  unfold reciprocalQuarticMinusOneUnitLowerCell
+    reciprocalQuarticMinusOneUnitUpperCell
+  exact Rat.mul_le_mul_of_nonneg_left hinner hwidth
+
+private theorem reciprocalQuarticMinusOneUnit_lowerSum_le_upperSum
+    (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    reciprocalQuarticMinusOneUnitLowerSum intervals <=
+      reciprocalQuarticMinusOneUnitUpperSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [reciprocalQuarticMinusOneUnitLowerSum,
+        reciprocalQuarticMinusOneUnitUpperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨_hp0, hpr, _hr1, hrest⟩
+      simp [reciprocalQuarticMinusOneUnitLowerSum,
+        reciprocalQuarticMinusOneUnitUpperSum]
+      exact rat_add_le_add
+        (reciprocalQuarticMinusOneUnit_lowerCell_le_upperCell hpr)
+        (ih hrest)
+
+private theorem reciprocalQuarticMinusOneUnit_cell_width
+    (p r : Rat) :
+    reciprocalQuarticMinusOneUnitUpperCell p r -
+        reciprocalQuarticMinusOneUnitLowerCell p r =
+      64 * ((r - p) * (r - p)) := by
+  unfold reciprocalQuarticMinusOneUnitLowerCell
+    reciprocalQuarticMinusOneUnitUpperCell
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem reciprocalQuarticMinusOneUnit_sum_width
+    (intervals : List (Rat × Rat)) :
+    reciprocalQuarticMinusOneUnitUpperSum intervals -
+        reciprocalQuarticMinusOneUnitLowerSum intervals =
+      64 * ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [reciprocalQuarticMinusOneUnitLowerSum,
+        reciprocalQuarticMinusOneUnitUpperSum,
+        ArctanGeometry.intervalSquareSum]
+      native_decide
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      have hcell := reciprocalQuarticMinusOneUnit_cell_width p r
+      simp [reciprocalQuarticMinusOneUnitLowerSum,
+        reciprocalQuarticMinusOneUnitUpperSum,
+        ArctanGeometry.intervalSquareSum]
+      calc
+        reciprocalQuarticMinusOneUnitUpperCell p r +
+              reciprocalQuarticMinusOneUnitUpperSum rest -
+            (reciprocalQuarticMinusOneUnitLowerCell p r +
+              reciprocalQuarticMinusOneUnitLowerSum rest) =
+            (reciprocalQuarticMinusOneUnitUpperCell p r -
+              reciprocalQuarticMinusOneUnitLowerCell p r) +
+              (reciprocalQuarticMinusOneUnitUpperSum rest -
+                reciprocalQuarticMinusOneUnitLowerSum rest) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+        _ = 64 * ((r - p) * (r - p)) +
+              64 * ArctanGeometry.intervalSquareSum rest := by
+              rw [hcell, ih]
+        _ = 64 * ((r - p) * (r - p) +
+              ArctanGeometry.intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_ordered (stage : Nat) :
+    0 <= (reciprocalQuarticMinusOneUnitDyadicCompute stage).width := by
+  unfold reciprocalQuarticMinusOneUnitDyadicCompute QInterval.width
+  dsimp
+  let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  have hunit : ArctanGeometry.UnitIntervals cells :=
+    ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := 1) (by native_decide) (by native_decide) stage
+  have hsum := reciprocalQuarticMinusOneUnit_lowerSum_le_upperSum cells hunit
+  grind [Rat.sub_eq_add_neg]
+
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_width (stage : Nat) :
+    (reciprocalQuarticMinusOneUnitDyadicCompute stage).width =
+      64 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  unfold reciprocalQuarticMinusOneUnitDyadicCompute QInterval.width
+  dsimp
+  rw [reciprocalQuarticMinusOneUnit_sum_width,
+    ArctanGeometry.arctanAreaLoopState_one_squareSum]
+
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_nested
+    (n m : Nat) (hnm : n <= m) :
+    (reciprocalQuarticMinusOneUnitDyadicCompute n).lo <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute m).lo /\
+      (reciprocalQuarticMinusOneUnitDyadicCompute m).lo <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute m).hi /\
+      (reciprocalQuarticMinusOneUnitDyadicCompute m).hi <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute n).hi := by
+  induction hnm with
+  | refl =>
+      have hordered := reciprocalQuarticMinusOneUnitDyadicCompute_ordered n
+      unfold QInterval.width at hordered
+      have hmid :
+          (reciprocalQuarticMinusOneUnitDyadicCompute n).lo <=
+            (reciprocalQuarticMinusOneUnitDyadicCompute n).hi := by
+        grind [Rat.sub_eq_add_neg]
+      exact ⟨Rat.le_refl, hmid, Rat.le_refl⟩
+  | step hnm ih =>
+      rename_i k
+      have hstep := reciprocalQuarticMinusOneUnitDyadicCompute_step_refines k
+      have hordered :=
+        reciprocalQuarticMinusOneUnitDyadicCompute_ordered (k + 1)
+      unfold QInterval.width at hordered
+      have hmid :
+          (reciprocalQuarticMinusOneUnitDyadicCompute (k + 1)).lo <=
+            (reciprocalQuarticMinusOneUnitDyadicCompute (k + 1)).hi := by
+        grind [Rat.sub_eq_add_neg]
+      exact ⟨Rat.le_trans ih.1 hstep.1, hmid,
+        Rat.le_trans hstep.2 ih.2.2⟩
+
+private theorem reciprocalQuarticMinusOneUnit_succ_le_two_pow (n : Nat) :
+    n + 1 <= 2 ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 2 * (n + 1) := by omega
+        _ <= 2 * 2 ^ n := Nat.mul_le_mul_left 2 ih
+        _ = 2 ^ (n + 1) := by
+          rw [Nat.pow_succ]
+          omega
+
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_width_le_nat_over_succ
+    (stage : Nat) :
+    (reciprocalQuarticMinusOneUnitDyadicCompute stage).width <=
+      (64 : Rat) / (((stage + 1 : Nat) : Rat)) := by
+  rw [reciprocalQuarticMinusOneUnitDyadicCompute_width]
+  have hpow : stage + 1 <= 2 ^ stage :=
+    reciprocalQuarticMinusOneUnit_succ_le_two_pow stage
+  have hinv :
+      1 / (((2 ^ stage : Nat) : Rat)) <=
+        1 / (((stage + 1 : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone (Nat.succ_pos stage)
+      (Nat.pow_pos (by omega : 0 < 2)) hpow
+  calc
+    64 * (1 / (((2 ^ stage : Nat) : Rat))) <=
+      64 * (1 / (((stage + 1 : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left hinv (by native_decide)
+    _ = (64 : Rat) / (((stage + 1 : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc]
+
+private theorem reciprocalQuarticMinusOneUnit_widthsShrink_of_natOverSuccBound
+    {compute : Nat -> QInterval} {C : Nat}
+    (hbound : forall n,
+      (compute n).width <= (C : Rat) / (((n + 1 : Nat) : Rat))) :
+    RealRaw.WidthsShrinkToZero compute := by
+  intro eps
+  refine ⟨C * (eps.val.den + 1), ?_⟩
+  intro n hn
+  have hmain :
+      (C : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (C : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+    have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega :
+        C * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hABpos
+  exact Rat.le_trans (hbound n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_widthsShrink :
+    RealRaw.WidthsShrinkToZero reciprocalQuarticMinusOneUnitDyadicCompute :=
+  reciprocalQuarticMinusOneUnit_widthsShrink_of_natOverSuccBound
+    reciprocalQuarticMinusOneUnitDyadicCompute_width_le_nat_over_succ
+
+/-- The completed raw interval algorithm obtained from the dyadic Lipschitz
+brackets.  At stage n its width is exactly 64 divided by 2^n; its nestedness
+comes from the finite midpoint-refinement inequalities above. -/
+def reciprocalQuarticMinusOneUnitDyadicRaw : RealRaw where
+  compute := reciprocalQuarticMinusOneUnitDyadicCompute
+
+theorem reciprocalQuarticMinusOneUnitDyadicRaw_valid :
+    reciprocalQuarticMinusOneUnitDyadicRaw.Valid := by
+  change RealRaw.ValidCompute reciprocalQuarticMinusOneUnitDyadicCompute
+  exact ⟨reciprocalQuarticMinusOneUnitDyadicCompute_ordered,
+    reciprocalQuarticMinusOneUnitDyadicCompute_nested,
+    reciprocalQuarticMinusOneUnitDyadicCompute_widthsShrink⟩
+
+/-- The exact rational-name evaluator for the affine compact density. -/
+def reciprocalQuarticMinusOneUnitRaw : PartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun t _ _ =>
+    let y := reciprocalQuarticMinusOneUnitDensity t
+    { lo := y, hi := y }
+
+/-- The affine compact quartic density as a total interval function on
+[0,1]. -/
+def reciprocalQuarticMinusOneUnitOnInterval : FunctionOnInterval where
+  raw := reciprocalQuarticMinusOneUnitRaw
+  lower := 0
+  upper := 1
+  defined_on := fun _ _ => trivial
+  valid_on := by
+    intro t _ht
+    simpa [reciprocalQuarticMinusOneUnitRaw] using
+      RealRaw.ofRat_valid (reciprocalQuarticMinusOneUnitDensity t)
+
+/-- The concrete domain-aware integral construction for the affine compact
+quartic density.  Unlike the earlier unconstrained placeholder interface, its
+computation is visibly the finite left-cell Lipschitz bracket defined above. -/
+def reciprocalQuarticMinusOneUnitDyadicConstruction :
+    Integral.ConstructionFor reciprocalQuarticMinusOneUnitOnInterval where
+  compute := reciprocalQuarticMinusOneUnitDyadicCompute
+  certificate := reciprocalQuarticMinusOneUnitDyadicRaw_valid
+
+def reciprocalQuarticMinusOneUnitDyadicIntegral : RealRaw :=
+  Integral.integralFor reciprocalQuarticMinusOneUnitOnInterval
+    reciprocalQuarticMinusOneUnitDyadicConstruction
+
+theorem reciprocalQuarticMinusOneUnitDyadicIntegral_valid :
+    reciprocalQuarticMinusOneUnitDyadicIntegral.Valid :=
+  Integral.integralFor_valid reciprocalQuarticMinusOneUnitOnInterval
+    reciprocalQuarticMinusOneUnitDyadicConstruction
+
+theorem reciprocalQuarticMinusOneUnitDyadicIntegral_compute_eq (stage : Nat) :
+    reciprocalQuarticMinusOneUnitDyadicIntegral.compute stage =
+      reciprocalQuarticMinusOneUnitDyadicCompute stage :=
+  rfl
+
 /-- The finite compact interval integral that represents the clean
 projective-line quartic route.  Its integrand is the explicit density obtained
 after the rational compactification of the line; a future route must therefore
