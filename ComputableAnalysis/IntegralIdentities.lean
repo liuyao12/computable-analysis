@@ -2695,6 +2695,122 @@ theorem cauchyProjectiveFoldDensity_eq_two_integralKernel
   grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+/-- A rational compactification of an even full-line integral by folding the
+positive reciprocal tail back onto the unit interval.
+
+For an even kernel `kernel`, the intended value is
+\[
+  2\int_0^1\left(k(x)+x^{-2}k(1/x)\right)\,dx.
+\]
+The compact density includes its removable value at zero, so the construction
+is an ordinary finite interval integral.  The `fold_agrees` field is the
+finite rational identity on the punctured unit interval; no improper limit or
+completed-real endpoint is built into this definition. -/
+structure ReciprocalTailCompactification
+    (kernel compactDensity : Rat -> Rat) where
+  even : forall x, kernel (-x) = kernel x
+  fold_agrees : forall x, 0 < x -> x <= 1 ->
+    compactDensity x = kernel x +
+      (1 / (x * x)) * kernel (1 / x)
+  construction : Integral.ConstructionFor
+    (FunctionOnInterval.exactRat compactDensity 0 1)
+
+namespace ReciprocalTailCompactification
+
+/-- The finite compact integral representing the folded positive half of the
+even full-line integral. -/
+def compactIntegral
+    {kernel compactDensity : Rat -> Rat}
+    (C : ReciprocalTailCompactification kernel compactDensity) : RealRaw :=
+  Integral.integralFor (FunctionOnInterval.exactRat compactDensity 0 1)
+    C.construction
+
+theorem compactIntegral_valid
+    {kernel compactDensity : Rat -> Rat}
+    (C : ReciprocalTailCompactification kernel compactDensity) :
+    C.compactIntegral.Valid :=
+  Integral.integralFor_valid _ C.construction
+
+/-- The projective full-line integral defined by reciprocal-tail folding. -/
+def fullLineIntegral
+    {kernel compactDensity : Rat -> Rat}
+    (C : ReciprocalTailCompactification kernel compactDensity) : RealRaw :=
+  RealRaw.scaleRat 2 C.compactIntegral
+
+theorem fullLineIntegral_valid
+    {kernel compactDensity : Rat -> Rat}
+    (C : ReciprocalTailCompactification kernel compactDensity) :
+    C.fullLineIntegral.Valid :=
+  RealRaw.scaleRat_valid C.compactIntegral_valid
+
+end ReciprocalTailCompactification
+
+/-- The removable compact density for the Cauchy kernel.  On the punctured
+unit interval it is exactly the kernel plus its reciprocal tail. -/
+def cauchyReciprocalTailDensity (x : Rat) : Rat :=
+  2 * ArctanGeometry.integralKernel x
+
+theorem cauchyReciprocalTailDensity_even (x : Rat) :
+    cauchyReciprocalTailDensity (-x) = cauchyReciprocalTailDensity x := by
+  unfold cauchyReciprocalTailDensity ArctanGeometry.integralKernel
+  congr 2
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem integralKernel_even (x : Rat) :
+    ArctanGeometry.integralKernel (-x) = ArctanGeometry.integralKernel x := by
+  unfold ArctanGeometry.integralKernel
+  congr 1
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem cauchyReciprocalTailDensity_fold_agrees
+    (x : Rat) (hx : 0 < x) (_hx1 : x <= 1) :
+    cauchyReciprocalTailDensity x = ArctanGeometry.integralKernel x +
+      (1 / (x * x)) * ArctanGeometry.integralKernel (1 / x) := by
+  have hxne : x ≠ 0 := Rat.ne_of_gt hx
+  unfold cauchyReciprocalTailDensity
+  exact (cauchyProjectiveFoldDensity_eq_two_integralKernel x hxne).symm
+
+/-- The Cauchy compact density is computed by exactly twice the verified
+rectangle bracket for `1 / (1+x^2)`.  This is a cellwise rational scaling,
+not a new arctangent representation. -/
+def cauchyReciprocalTailConstruction :
+    Integral.ConstructionFor
+      (FunctionOnInterval.exactRat cauchyReciprocalTailDensity 0 1) where
+  compute := RealRaw.scaleRatCompute 2 arctanIntegralRectangleForAtOne
+  certificate := by
+    simpa [RealRaw.scaleRat] using
+      (RealRaw.scaleRat_valid (r := (2 : Rat))
+        arctanIntegralRectangleForAtOne_valid)
+
+/-- The completed rational compactification of the Cauchy full-line integral.
+Its outer factor accounts for the negative half-line, and its density's inner
+factor accounts for the reciprocal positive tail. -/
+def cauchyReciprocalTailCompactification :
+    ReciprocalTailCompactification
+      ArctanGeometry.integralKernel cauchyReciprocalTailDensity where
+  even := integralKernel_even
+  fold_agrees := cauchyReciprocalTailDensity_fold_agrees
+  construction := cauchyReciprocalTailConstruction
+
+/-- The full-line Cauchy integral, defined entirely by the rational
+reciprocal-tail compactification. -/
+def cauchyFullLineIntegral : RealRaw :=
+  cauchyReciprocalTailCompactification.fullLineIntegral
+
+theorem cauchyFullLineIntegral_valid : cauchyFullLineIntegral.Valid :=
+  cauchyReciprocalTailCompactification.fullLineIntegral_valid
+
+theorem cauchyFullLineIntegral_compute_eq_four_rectangle (n : Nat) :
+    cauchyFullLineIntegral.compute n =
+      (RealRaw.scaleRat 4 arctanIntegralRectangleForAtOne).compute n := by
+  simp [cauchyFullLineIntegral,
+    ReciprocalTailCompactification.fullLineIntegral,
+    ReciprocalTailCompactification.compactIntegral,
+    cauchyReciprocalTailCompactification,
+    cauchyReciprocalTailConstruction, Integral.integralFor,
+    RealRaw.scaleRat, RealRaw.scaleRatCompute]
+  grind [Rat.mul_assoc]
+
 /-- The denominator of the reciprocal quartic test integrand. -/
 def reciprocalQuarticDenominator (a x : Rat) : Rat :=
   x * x * x * x + a * (x * x) + 1
@@ -3721,8 +3837,10 @@ private theorem reciprocalQuarticMinusOneUnit_cell_width
     reciprocalQuarticMinusOneUnitUpperCell p r -
         reciprocalQuarticMinusOneUnitLowerCell p r =
       64 * ((r - p) * (r - p)) := by
-  unfold reciprocalQuarticMinusOneUnitLowerCell
-    reciprocalQuarticMinusOneUnitUpperCell
+  change
+    (r - p) * (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p)) -
+        (r - p) * (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p)) =
+      64 * ((r - p) * (r - p))
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
     Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 

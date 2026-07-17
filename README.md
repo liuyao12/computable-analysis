@@ -32,7 +32,7 @@ continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
 integrals and factorial tail bounds, beginning with constant, commuting,
 scalar, piecewise-constant, and higher-order triangular cases. This broadens
 the calculus foundation; the intentionally selective pi scoreboard is now
-`7/16` for definitions and `5/15` for applicable equivalences.
+`8/17` for definitions and `6/16` for applicable equivalences.
 
 ## Pi formalization scoreboard
 
@@ -40,7 +40,7 @@ A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`.  A row counts as equivalent after a formalized chain of
 `RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions `7/16`; equivalences `5/15` applicable rows.
+Current count: definitions `8/17`; equivalences `6/16` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -57,6 +57,7 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
 | `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
 | `GaussianPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2$ | ✗ | ✗ |
+| `cauchyFullLineIntegral` | [reciprocal-tail compactification](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-tail-compactification) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}$, represented by a finite reciprocal-tail chart | ✓ | ✓ |
 | `reciprocalQuarticMinusOneProjectiveRoute` | [kernel](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-quartic-test-kernel), [route](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:reciprocal-quartic-route-package) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}$ | ✗ | ✗ |
 | `baselSeriesRaw` / `pi^2/6` | [definition](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw), [RHS valid](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:basel-geometric-rhs-valid) | $\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6$ | ✓ | ✗ |
 | `Brouncker(4/pi)` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}$ | ✗ | ✗ |
@@ -77,6 +78,10 @@ Lean hooks:
   `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`,
   `PiProofs.four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea`,
   `IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement`.
+- Reciprocal-tail Cauchy integral:
+  `IntegralIdentities.ReciprocalTailCompactification`,
+  `IntegralIdentities.cauchyFullLineIntegral_valid`,
+  `PiProofs.cauchyFullLineIntegral_equiv_piCircleArea`.
 - Old point-Riemann arctangent:
   `IntegralIdentities.arctanIntegral_compute_width_zero`,
   `IntegralIdentities.arctanIntegral_stages_constant`.

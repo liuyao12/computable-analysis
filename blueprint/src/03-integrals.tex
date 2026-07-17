@@ -890,6 +890,37 @@ rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
   \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}=\pi.
 \]
 
+\begin{definition}[Reciprocal-tail compactification]
+\label{def:reciprocal-tail-compactification}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalTailCompactification}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_valid}
+\lean{ComputableAnalysis.PiProofs.cauchyFullLineIntegral_equiv_piCircleArea}
+\uses{def:arctan-integral}
+\leanok
+For an even rational kernel \(k\), reciprocal folding gives the finite
+unit-interval density
+\[
+  k(x)+\frac{1}{x^2}k(1/x),\qquad 0<x\leq1.
+\]
+When this expression has a rational removable value at zero and a certified
+finite integral construction, we \emph{define} its full-line integral by
+\[
+  2\int_0^1\left(k(x)+\frac{1}{x^2}k(1/x)\right)\,\dd x.
+\]
+This is an explicit rational compactification, not an appeal to an improper
+limit.  The first completed instance is the Cauchy kernel
+\(k(x)=1/(1+x^2)\): its folded density is exactly \(2/(1+x^2)\), including at
+zero.  Lean scales the verified rectangle bracket cellwise and obtains
+\[
+  \code{cauchyFullLineIntegral}
+    =4\int_0^1\frac{\dd x}{1+x^2}
+    \sim\pi_{\mathrm{area}}.
+\]
+The construction supplies the full-line target needed by the quartic route,
+without counting a tail limit as a primitive operation.
+\end{definition}
+
 \begin{definition}[The reciprocal quartic test kernel]
 \label{def:reciprocal-quartic-test-kernel}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator}
@@ -1010,8 +1041,10 @@ Pairing the positive half-line point \(x\) with its reciprocal \(1/x\) gives
       \frac{1+x^2}{x^4+a x^2+1}\,\dd x.
 \]
 With \(u=x-1/x\), the preceding identities convert the symmetrized density to
-\(\dd u/(u^2+a+2)\), so the remaining formal work is the improper rational
-integral bookkeeping over the full projective line:
+\(\dd u/(u^2+a+2)\).  The reciprocal-tail compactification above now supplies
+the finite full-line Cauchy target in the pi case; the remaining work is to
+prove that this particular projective chart transports the quartic compact
+construction to that target:
 \[
   \frac12\int_{-\infty}^{\infty}\frac{\dd u}{u^2+a+2}.
 \]
@@ -1031,11 +1064,12 @@ density
 The left side has the exact rational value \(2\) at each compact-chart
 endpoint \(x=\pm1\).  Thus the remaining analytic construction can use a
 finite interval with a removable-endpoint certificate, rather than treating a
-tail limit as primitive.  It still must prove the projective
-change-of-variables theorem and build the integral, so this is not yet a
-completed scoreboard computation.  The compact density itself is already a
-total rational-name interval function on every rational interval; its
-interval-level regularity is proved below.
+tail limit as primitive.  Its direct compact dyadic integral construction is
+now already complete; the still-missing theorem is the projective
+change-of-variables comparison with the completed Cauchy compactification, so
+the reciprocal-quartic row is not yet a completed scoreboard computation.  The
+compact density itself is a total rational-name interval function on every
+rational interval; its interval-level regularity is proved below.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

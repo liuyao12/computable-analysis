@@ -14594,6 +14594,18 @@ theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     hscaled
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- The reciprocal-tail compactification of the full-line Cauchy integral is
+another completed pi computation.  Its construction is finite: evenness and
+the reciprocal substitution turn the two tails into the compact density
+`2 / (1+x^2)` on `[0,1]`, whose rectangle bracket is exactly twice the
+verified arctangent rectangle bracket. -/
+theorem cauchyFullLineIntegral_equiv_piCircleArea :
+    IntegralIdentities.cauchyFullLineIntegral.Equiv piCircleArea := by
+  intro n
+  rw [IntegralIdentities.cauchyFullLineIntegral_compute_eq_four_rectangle n]
+  simpa [IntegralIdentities.PiFromArctanIntegral] using
+    (four_arctanIntegralRectangleForAtOne_equiv_piCircleArea n)
+
 /-- The same completed rectangle-integral pi route, viewed through the
 monotone-integral interface for the decreasing kernel `1/(1+x^2)` on
 `[0,1]`. -/

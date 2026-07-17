@@ -607,6 +607,12 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw_valid}
 \lean{ComputableAnalysis.Basel.eulerBasel_geometricPi}
 \lean{ComputableAnalysis.exp.logFromIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalTailCompactification}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyReciprocalTailCompactification}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_compute_eq_four_rectangle}
+\lean{ComputableAnalysis.PiProofs.cauchyFullLineIntegral_equiv_piCircleArea}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneExpectedPi}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveRoute}
@@ -624,14 +630,28 @@ Lean proves this using the certified rectangle construction and its equivalent
 unit-branch presentation.  The older generic \code{Integral.Construction}
 wrapper remains conditional on a function-agreement certificate; it is not the
 scorecard's rectangle-integral computation.
+
+The projective full-line Cauchy computation is now also complete:
+\[
+  \code{cauchyFullLineIntegral}
+   =2\int_0^1\left(
+     \frac{1}{1+x^2}+
+     \frac{1}{x^2}\frac{1}{1+(1/x)^2}
+   \right)\,dx
+   =4\int_0^1\frac{dx}{1+x^2}
+   \sim\pi_{\mathrm{area}}.
+\]
+This is the finite reciprocal-tail compactification used as the target of the
+reciprocal-quartic projective substitution, not an additional arctangent
+series or a limit axiom.
 \[
   \log(i)=i\pi/2,\qquad \pi=-2i\log(i).
 \]
 \[
   \int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}
-  =
-  \int_{-\infty}^{\infty}\frac{du}{1+u^2}
-  =\pi.
+  \stackrel{\mathrm{target}}{=}
+  \code{cauchyFullLineIntegral}
+  \sim\pi.
 \]
 \code{PiProofs.reciprocalQuarticMinusOneExpectedPi\_equiv\_piCircleArea};
 scoreboard target: \code{ReciprocalQuarticMinusOneProjectiveRoute}.
@@ -639,6 +659,7 @@ scoreboard target: \code{ReciprocalQuarticMinusOneProjectiveRoute}.
 Completed equivalence hooks:
 \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea},
 \code{PiProofs.four\_arctanIntegralRectangleForAtOne\_equiv\_piCircleArea},
+\code{PiProofs.cauchyFullLineIntegral\_equiv\_piCircleArea},
 \code{PiProofs.piMachin\_equiv\_piCircleArea\_finiteRiemannBridge},
   \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea}.
 FTC hooks:

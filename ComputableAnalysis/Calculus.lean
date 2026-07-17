@@ -1479,6 +1479,28 @@ def compute (F : FunctionOnInterval) (x : Rat) (hx : inDomainInterval F.lower F.
     (n : Nat) : QInterval :=
   F.raw.compute x (F.defined_on x hx) n
 
+/-- A rational-valued formula, viewed as an exact interval function on a
+closed rational interval.
+
+This is the standard wrapper for compactified rational densities.  It only
+certifies the pointwise evaluator: continuity and integral constructions
+remain separate finite obligations. -/
+def exactRat (f : Rat -> Rat) (a b : Rat) : FunctionOnInterval where
+  raw :=
+    { definedAt := fun _ => True
+      compute := fun x _ _ => { lo := f x, hi := f x } }
+  lower := a
+  upper := b
+  defined_on := fun _ _ => trivial
+  valid_on := by
+    intro x _hx
+    simpa using RealRaw.ofRat_valid (f x)
+
+theorem exactRat_compute (f : Rat -> Rat) (a b x : Rat)
+    (hx : inDomainInterval a b x) (n : Nat) :
+    (exactRat f a b).compute x hx n = { lo := f x, hi := f x } :=
+  rfl
+
 def secantSlopeInterval (F : FunctionOnInterval)
     (x y : Rat)
     (hx : inDomainInterval F.lower F.upper x)
