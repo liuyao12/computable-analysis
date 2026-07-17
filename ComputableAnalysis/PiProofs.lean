@@ -13880,6 +13880,15 @@ theorem circumferenceQuarterLengthStepRefinesUpToNine :
   unfold CircumferenceQuarterLengthStepRefinesUpTo
   native_decide
 
+/-- Exhaustive rational regression of the two direct perimeter endpoint
+inequalities through twelve dyadic refinement transitions.  This is evidence
+for, but deliberately not a replacement for, the symbolic all-stage
+refinement theorem needed to validate `piCircumference`. -/
+theorem circumferenceQuarterLengthStepRefinesUpToTwelve :
+    CircumferenceQuarterLengthStepRefinesUpTo 12 := by
+  unfold CircumferenceQuarterLengthStepRefinesUpTo
+  native_decide
+
 theorem circumferenceQuarterLengthStepRefinesUpToEight :
     CircumferenceQuarterLengthStepRefinesUpTo 8 := by
   intro n hn
@@ -13973,6 +13982,13 @@ theorem circumferenceStepRefinesUpToNine :
     CircumferenceStepRefinesUpTo 9 :=
   circumferenceStepRefinesUpTo_of_quarterLengthStepRefinesUpTo
     circumferenceQuarterLengthStepRefinesUpToNine
+
+/-- The public perimeter endpoint inequalities through twelve transitions,
+promoted from the direct quarter-path regression above. -/
+theorem circumferenceStepRefinesUpToTwelve :
+    CircumferenceStepRefinesUpTo 12 :=
+  circumferenceStepRefinesUpTo_of_quarterLengthStepRefinesUpTo
+    circumferenceQuarterLengthStepRefinesUpToTwelve
 
 theorem areaNested_of_endpointMonotone
     (hordered : AreaOrdered)

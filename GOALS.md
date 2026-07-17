@@ -557,8 +557,8 @@ students actually compute.
   `piCircumference` validity proof; the direct algorithm still lacks the
   one-step refinement certificate, so the canonical row remains uncounted.
   The direct rational endpoint condition has an executable regression proof
-  through the first nine dyadic transitions in
-  `PiProofs.circumferenceQuarterLengthStepRefinesUpToNine`; the required
+  through the first twelve dyadic transitions in
+  `PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve`; the required
   all-stage theorem remains open.
 
 ### Archived pre-refactor notes (not current source)

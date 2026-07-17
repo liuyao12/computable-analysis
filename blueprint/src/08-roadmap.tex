@@ -556,6 +556,7 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_of_upToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_iff_upToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefinesUpToNine}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefinesUpToEight}
 \lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_quarterLengthStepRefines}
 \lean{ComputableAnalysis.PiProofs.CircumferenceStepRefinesUpTo}
@@ -568,6 +569,7 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_iff_upToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_quarterLengthStepRefinesUpToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToNine}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToTwelve}
 \lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToEight}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines_and_linearBound}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefines}
@@ -878,10 +880,10 @@ only the two dyadic quarter-path endpoint inequalities and the analytic
 arctangent agreements.  Lean promotes those two quarter-path
 inequalities to public step refinement through
 \code{PiProofs.circumferenceStepRefines\_of\_quarterLengthStepRefines}.  The
-same exact endpoint-refinement target is certified through \(n\le9\) as
-\code{PiProofs.circumferenceQuarterLengthStepRefinesUpToNine}, and promoted
+same exact endpoint-refinement target is certified through \(n\le12\) as
+\code{PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve}, and promoted
 to public compute steps by
-\code{PiProofs.circumferenceStepRefinesUpToNine}; the \(n\le8\) wrapper is a
+\code{PiProofs.circumferenceStepRefinesUpToTwelve}; the \(n\le8\) wrapper is a
 cheap consequence.  This is a finite regression certificate, not the full
 circumference-validity row.  The dyadic endpoint reuse facts for the rational circle are named as
 \code{PiProofs.circleSamplePoint\_double\_index} and
@@ -1150,6 +1152,7 @@ chord and tangent formulas.
   \code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_upToAll},
   \code{PiProofs.circumferenceQuarterLengthStepRefines\_iff\_upToAll},
   \code{PiProofs.circumferenceQuarterLengthStepRefinesUpToNine},
+  \code{PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve},
   \code{PiProofs.circumferenceQuarterLengthStepRefinesUpToEight},
   \code{PiProofs.circumferenceStepRefines\_of\_quarterLengthStepRefines},
   \code{PiProofs.CircumferenceStepRefinesUpTo},
@@ -1162,6 +1165,7 @@ chord and tangent formulas.
   \code{PiProofs.circumferenceStepRefines\_iff\_upToAll},
   \code{PiProofs.circumferenceStepRefines\_of\_quarterLengthStepRefinesUpToAll},
   \code{PiProofs.circumferenceStepRefinesUpToNine},
+  \code{PiProofs.circumferenceStepRefinesUpToTwelve},
   \code{PiProofs.circumferenceStepRefinesUpToEight},
   \code{PiProofs.circumferenceValid\_of\_stepRefinesUpToAll},
   \code{PiProofs.circumferenceValid\_of\_quarterLengthStepRefinesUpToAll},
