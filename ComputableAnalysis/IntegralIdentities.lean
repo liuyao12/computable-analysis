@@ -4067,6 +4067,44 @@ theorem reciprocalQuarticMinusOneUnitDyadicIntegral_compute_eq (stage : Nat) :
       reciprocalQuarticMinusOneUnitDyadicCompute stage :=
   rfl
 
+/-- The affine unit density is the compact density composed with
+x = 2t - 1, multiplied by its rational Jacobian. -/
+theorem reciprocalQuarticMinusOneUnitDensity_eq_affineCompact (t : Rat) :
+    reciprocalQuarticMinusOneUnitDensity t =
+      2 * reciprocalQuarticSymmetricDensity (-1) (2 * t - 1) :=
+  rfl
+
+/-- The same dyadic bracket, now packaged for the actual compact density on
+[-1,1].  Its finite cell expression is the affine unit construction above,
+with the exact rational Jacobian already included in the integrand. -/
+def reciprocalQuarticMinusOneCompactDyadicConstruction :
+    Integral.ConstructionFor
+      (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) where
+  compute := reciprocalQuarticMinusOneUnitDyadicCompute
+  certificate := reciprocalQuarticMinusOneUnitDyadicRaw_valid
+
+def reciprocalQuarticMinusOneCompactDyadicIntegral : RealRaw :=
+  Integral.integralFor
+    (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
+    reciprocalQuarticMinusOneCompactDyadicConstruction
+
+theorem reciprocalQuarticMinusOneCompactDyadicIntegral_valid :
+    reciprocalQuarticMinusOneCompactDyadicIntegral.Valid :=
+  Integral.integralFor_valid
+    (reciprocalQuarticMinusOneCompactOnInterval (-1) 1)
+    reciprocalQuarticMinusOneCompactDyadicConstruction
+
+theorem reciprocalQuarticMinusOneCompactDyadicIntegral_compute_eq
+    (stage : Nat) :
+    reciprocalQuarticMinusOneCompactDyadicIntegral.compute stage =
+      reciprocalQuarticMinusOneUnitDyadicCompute stage :=
+  rfl
+
+theorem reciprocalQuarticMinusOneCompact_existsConstruction :
+    Integral.ExistsConstructionFor
+      (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) :=
+  ⟨reciprocalQuarticMinusOneCompactDyadicConstruction⟩
+
 /-- The finite compact interval integral that represents the clean
 projective-line quartic route.  Its integrand is the explicit density obtained
 after the rational compactification of the line; a future route must therefore

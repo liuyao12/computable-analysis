@@ -910,9 +910,10 @@ The parameter predicate \code{ReciprocalQuarticPiParameter(a,b)} records the
 rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
 \((a,b)=(-1,1)\).  For this clean case Lean also names the expected raw value
 \code{reciprocalQuarticMinusOneExpectedPi}.  A future full projective
-construction is expected to supply a
-\code{ReciprocalQuarticMinusOneProjectiveRoute}, namely a verified raw real for
-the improper integral together with agreement with that expected value.
+comparison is expected to supply a
+\code{ReciprocalQuarticMinusOneProjectiveRoute}, namely the already-available
+compact rational construction together with agreement with that expected
+value.
 \end{definition}
 
 \begin{theorem}[Projective substitution for the quartic test]
@@ -953,6 +954,11 @@ the improper integral together with agreement with that expected value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity_eq_affineCompact}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_existsConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
 \uses{def:reciprocal-quartic-test-kernel}
@@ -1065,9 +1071,12 @@ Lean proves that midpoint splitting raises the lower sum and lowers the upper
 sum.  The resulting raw boxes are nested and have exact width
 \(64/2^n\), hence shrink to zero using rational arithmetic alone.  This is a
 genuine domain-aware integral construction for the affine compact density,
-rather than an unconstrained raw-real witness.  What remains is to prove its
-affine agreement with the compact \([-1,1]\) presentation and then the
-projective substitution; it is therefore still not a scoreboard equality.
+rather than an unconstrained raw-real witness.  Since Lean also proves
+\(g(t)=2f(2t-1)\) by rational algebra, the identical computation now packages
+an actual \code{ConstructionFor} for the compact density \(f\) on
+\([-1,1]\).  What remains is the projective substitution to the arctangent
+kernel and its resulting Pi agreement; the route is therefore still not a
+scoreboard equality.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \[
@@ -1092,13 +1101,15 @@ The clean benchmark
 now has a theorem-facing package.  Lean proves that the expected raw value
 \code{reciprocalQuarticMinusOneExpectedPi} is valid and equivalent to the
 baseline \code{piCircleArea}.  Consequently, once the projective-line
-construction itself supplies an integral construction for the compactified
-rational density on \([-1,1]\), and is shown to satisfy
-\code{ReciprocalQuarticMinusOneProjectiveAgreement}, the resulting
+construction is shown to satisfy
+\code{ReciprocalQuarticMinusOneProjectiveAgreement}, the concrete
+\code{reciprocalQuarticMinusOneCompactDyadicConstruction} supplies the
+required compactified rational-density computation on \([-1,1]\), and the
+resulting
 \code{ReciprocalQuarticMinusOneProjectiveRoute} immediately gives a formal
 \(\pi\)-computation equivalent to \code{piCircleArea}.  This route package is
-not counted as a completed scoreboard row until that compact integral and its
-projective substitution certificate are supplied.
+not counted as a completed scoreboard row until its projective substitution
+certificate is supplied.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}
