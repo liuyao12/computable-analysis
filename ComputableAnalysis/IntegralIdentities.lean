@@ -2119,6 +2119,98 @@ def arctanGeomOnUnit : FunctionOnInterval where
     intro x hx
     exact ArctanGeometry.arctanGeom_valid_on_unit hx.1 hx.2
 
+/-- Checked data for the first-octant inverse-arctangent step.
+
+The forward branch is required to be the actual geometric arctangent on the
+unit slope interval, and every normalized quarter-turn target is required to
+be a valid, explicitly range-enclosed target for that branch.  The bisection
+field is consequently an `InverseBisectionSearch`, not a pair of opaque
+inverse-law propositions.  A concrete inhabitant still requires the pending
+interval-regularity and effective-separation proofs for `arctanGeomOnUnit`.
+-/
+structure ArctanInverseBisection where
+  branch : InvertibleFunctionOnInterval
+  branch_is_geometric : branch.function = arctanGeomOnUnit
+  targetAt : forall t : RationalCircle.GeometricTrig.QuarterTurn,
+    RationalCircle.GeometricTrig.firstOctantBranch t -> InRangeRaw branch
+  targetAt_equiv_quarterTurn :
+    forall t ht, (targetAt t ht).value.Equiv
+      (RationalCircle.GeometricTrig.quarterTurnRaw t)
+  bisectionAt : forall y : InRangeRaw branch,
+    InverseBisectionSearch branch y
+
+namespace ArctanInverseBisection
+
+/-- The inverse evaluator obtained from the supplied certified bisection
+searches. -/
+def inverseRaw (B : ArctanInverseBisection) : InverseRaw B.branch :=
+  inverseRawOfSearch B.bisectionAt
+
+/-- The tangent/slope raw real at a normalized first-octant angle. -/
+def tangentAt (B : ArctanInverseBisection)
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstOctantBranch t) : RealRaw :=
+  (B.inverseRaw).apply (B.targetAt t ht)
+
+/-- The first-octant tangent function produced by the constructive inverse
+theorem.  Its outputs are rational boxes for the slope in `[0,1]`; the circle
+coordinates can therefore be evaluated from the rational parametrization. -/
+def tangentRaw (B : ArctanInverseBisection) : PartialRealFunRaw where
+  definedAt := RationalCircle.GeometricTrig.firstOctantBranch
+  compute := fun t ht => (B.tangentAt t ht).compute
+
+theorem tangentAt_valid (B : ArctanInverseBisection)
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstOctantBranch t) :
+    (B.tangentAt t ht).Valid :=
+  (B.inverseRaw).apply_valid (B.targetAt t ht)
+
+theorem tangentRaw_valid (B : ArctanInverseBisection) :
+    forall t ht, RealRaw.ValidCompute (B.tangentRaw.compute t ht) := by
+  intro t ht
+  simpa [tangentRaw] using B.tangentAt_valid t ht
+
+theorem tangentAt_stays_in_source (B : ArctanInverseBisection)
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstOctantBranch t) :
+    forall n, subintervalOf ((B.tangentAt t ht).compute n)
+      B.branch.function.lower B.branch.function.upper :=
+  (B.inverseRaw).apply_stays_in_source (B.targetAt t ht)
+
+/-- The first-octant inverse output lies in the actual unit slope interval,
+because its forward branch is certified equal to `arctanGeomOnUnit`. -/
+theorem tangentAt_stays_in_unitSlope (B : ArctanInverseBisection)
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstOctantBranch t) :
+    forall n, subintervalOf ((B.tangentAt t ht).compute n) 0 1 := by
+  simpa [B.branch_is_geometric, arctanGeomOnUnit] using
+    B.tangentAt_stays_in_source t ht
+
+/-- The forward interval evaluator overlaps the certified target box at each
+stage.  Together with `targetAt_equiv_quarterTurn`, this is the computable
+inverse law relating the recovered slope to the requested quarter-turn angle.
+-/
+theorem tangentAt_forward_overlaps_target
+    (B : ArctanInverseBisection)
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstOctantBranch t) :
+    forall n, QInterval.Overlaps
+      (B.branch.continuous.regular.evalInterval
+        ((B.tangentAt t ht).compute n)
+        (B.tangentAt_stays_in_source t ht n) n)
+      ((B.targetAt t ht).value.compute n) :=
+  (B.inverseRaw).apply_value_overlaps_target (B.targetAt t ht)
+
+theorem targetAt_quarterTurn_equiv
+    (B : ArctanInverseBisection)
+    (t : RationalCircle.GeometricTrig.QuarterTurn)
+    (ht : RationalCircle.GeometricTrig.firstOctantBranch t) :
+    (B.targetAt t ht).value.Equiv
+      (RationalCircle.GeometricTrig.quarterTurnRaw t) :=
+  B.targetAt_equiv_quarterTurn t ht
+
+end ArctanInverseBisection
+
 theorem arctanGeomOnUnit_toRealFunRaw_compute_zero (n : Nat) :
     arctanGeomOnUnit.toRealFunRaw.compute 0 n =
       (ArctanGeometry.arctanGeom (0 : Rat)).compute n := by

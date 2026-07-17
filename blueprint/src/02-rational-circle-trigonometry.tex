@@ -313,25 +313,37 @@ abbreviation \code{QuarterTurn} and by the raw representative
 
 \begin{definition}[Monotone inverse arctangent interface]
 \label{def:inverse-arctan-interface}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.ArctanInverseConstruction}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch_zero}
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch_one}
+{\scriptsize
+\par\noindent
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.firstOctantBranch}\par
+\lean{ComputableAnalysis.IntegralIdentities.ArctanInverseBisection}\par
+\lean{ComputableAnalysis.IntegralIdentities.ArctanInverseBisection.tangentRaw}
+}
 \uses{def:geometric-arctan,def:quarter-turn-angle,def:qbox,thm:constructive-inverse-function}
-The inverse-arctangent step is the planned first trigonometric instance of the
-constructive inverse-function theorem: its bisection/search layer, for a
-normalized rational quarter-turn input \(t\), should find the corresponding
-tangent-slope information on the unit branch \(0\le t\le1\) and supply the
-branch-reduction data needed to recover the point on the oriented unit circle.
-At present Lean records a downstream-facing
-\code{ArctanInverseConstruction} contract rather than an
-\code{InvertibleFunctionOnInterval} instance and an
-\code{InverseBisectionSearch}; connecting those two interfaces is the next
-formal step.  The stable contract asks for:
+The inverse-arctangent step is the first trigonometric consumer of the
+constructive inverse-function theorem.  The bounded slope branch is the first
+octant \(0\le t\le1/2\), whose angles lie in \([0,\pi/4]\); the second octant
+is then obtained by reciprocal/complement reduction.  Thus the search never
+pretends that tangent is bounded at a quarter turn.
+
+Lean now has a checked bridge \code{ArctanInverseBisection}.  It requires an
+\code{InvertibleFunctionOnInterval} whose forward function is certified equal
+to \code{arctanGeomOnUnit}, a valid range-enclosed target for every first-octant
+quarter turn, and an \code{InverseBisectionSearch} for each target.  From this
+data it constructs the actual partial raw tangent function
+\code{tangentRaw}; its output boxes are valid, remain in the unit slope
+interval, and their forward interval evaluations overlap the target boxes at
+every stage.  The still-open analytic work is to construct this package for
+the geometric arctangent, not to postulate inverse laws.  The older
+\code{ArctanInverseConstruction} remains a downstream special-value contract.
+The checked bridge asks for:
 \begin{enumerate}
-\item a raw tangent/inverse-arctangent function on quarter-turn inputs,
-\item validity of that raw function on its stated branch,
-\item the left and right inverse laws against geometric arctangent, and
-\item compatibility with the chosen \(\pi\)-representative.
+\item the actual geometric arctangent branch and its interval inverse data,
+\item a valid target, with explicit endpoint range enclosure, for each angle,
+\item a bisection search whose output remains in the source interval and
+  overlaps the forward target evaluation, and
+\item an equivalence between each target and the selected quarter-turn
+  representative \(t\pi/2\).
 \end{enumerate}
 This is the bridge between the geometric area definition of \(\pi\) and the
 coordinate algorithms for sine and cosine.

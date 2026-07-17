@@ -191,11 +191,18 @@ not a description of the current module graph. The checked blueprint
   the inverse-function theorem.
   See `InverseBisectionSearch` and `inverse_function_from_bisection_search` in
   `ComputableAnalysis/Calculus.lean`.
-- The sine/cosine route is intentionally next: the geometric-trigonometry
-  chapter currently records `ArctanInverseConstruction` as an independent
-  downstream contract.  It must be connected to
-  `InvertibleFunctionOnInterval` and `InverseBisectionSearch` before it is
-  counted as a concrete inverse-arctangent construction.
+- The sine/cosine route is intentionally next.  The first-octant bridge
+  `IntegralIdentities.ArctanInverseBisection` now ties the geometric
+  trigonometry chapter to the actual inverse-function interfaces: it requires
+  a branch certified equal to `arctanGeomOnUnit`, certified
+  `InRangeRaw` quarter-turn targets, and an `InverseBisectionSearch` for each
+  target.  It produces `tangentRaw`, a valid partial slope function whose
+  outputs stay in `[0,1]` and whose forward evaluator overlaps each target.
+  The old `ArctanInverseConstruction` remains only the downstream
+  special-value contract.  The next analytic task is to construct the new
+  bridge by proving interval regularity, monotonicity, and effective
+  separation for `arctanGeomOnUnit`; no inverse law is assumed as a bare
+  proposition.
 - `asin` is the inverse of sine on a chosen monotone branch, and `log` is the
   inverse of exponential on a chosen monotone branch.
   See `Elementary.ArcsinFromMonotoneSin`, `Elementary.LogFromMonotoneExp`,

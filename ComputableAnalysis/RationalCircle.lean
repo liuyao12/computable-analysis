@@ -3283,6 +3283,17 @@ quarter-turns.  This is the interval `[0, 1]`, corresponding to
 def unitIntervalBranch (t : QuarterTurn) : Prop :=
   0 <= t /\ t <= 1
 
+/-- The first octant of the normalized quarter-turn coordinate.
+
+On this branch the angle is in `[0, π/4]`, exactly the image of the unit
+arctangent-slope interval.  It is therefore the branch on which the
+constructive inverse-arctangent search has a bounded slope target in `[0,1]`.
+The remaining half of the first quadrant is obtained by the reciprocal and
+complement reductions, rather than by pretending that the tangent is bounded
+at a quarter turn. -/
+def firstOctantBranch (t : QuarterTurn) : Prop :=
+  0 <= t /\ t <= (1 : Rat) / 2
+
 theorem unitIntervalBranch_zero : unitIntervalBranch 0 := by
   unfold unitIntervalBranch
   constructor <;> native_decide
@@ -3295,6 +3306,23 @@ theorem unitIntervalBranch_half :
     unitIntervalBranch ((1 : Rat) / 2) := by
   unfold unitIntervalBranch
   constructor <;> native_decide
+
+theorem firstOctantBranch_zero : firstOctantBranch 0 := by
+  unfold firstOctantBranch
+  constructor <;> native_decide
+
+theorem firstOctantBranch_half : firstOctantBranch ((1 : Rat) / 2) := by
+  unfold firstOctantBranch
+  constructor <;> native_decide
+
+theorem firstOctantBranch_subset_unitInterval
+    {t : QuarterTurn} (ht : firstOctantBranch t) :
+    unitIntervalBranch t := by
+  unfold firstOctantBranch at ht
+  unfold unitIntervalBranch
+  constructor
+  · exact ht.1
+  · exact Rat.le_trans ht.2 (by native_decide)
 
 /-- Stable interface for the monotone inverse-arctangent step.
 
