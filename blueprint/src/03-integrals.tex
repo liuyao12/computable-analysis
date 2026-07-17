@@ -33,6 +33,10 @@ evaluations are used.
 \lean{ComputableAnalysis.Integral.staticDyadicSubdivisions}
 \lean{ComputableAnalysis.Integral.staticDyadicPlan}
 \lean{ComputableAnalysis.Integral.staticDyadicAlgorithm}
+\lean{ComputableAnalysis.Integral.LipschitzOnUnit}
+\lean{ComputableAnalysis.Integral.lipschitzLowerCell}
+\lean{ComputableAnalysis.Integral.lipschitzUpperCell}
+\lean{ComputableAnalysis.Integral.lipschitzCells_refine}
 \lean{ComputableAnalysis.Integral.DefiniteIdentity}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityOnInterval}
 \lean{ComputableAnalysis.Integral.DefiniteIdentityFor}
@@ -98,6 +102,20 @@ This is deliberately different from the dynamic subdivision in
 refining the rational circle parameters already present in the sector
 algorithm.  When an FTC proof uses this default mesh, the bridge to endpoint
 identities is \code{definiteIdentity\_of\_staticDyadicEffectiveFTC}.
+
+For an exact rational density \(f\) on \([0,1]\), a nonnegative rational
+constant \(L\), and the finite estimate
+\(\lvert f(s)-f(t)\rvert\le L\lvert t-s\rvert\), the elementary cell
+brackets are
+\[
+ (r-p)\bigl(f(p)-L(r-p)\bigr),\qquad
+ (r-p)\bigl(f(p)+L(r-p)\bigr).
+\]
+Lean now proves once and for all that splitting \([p,r]\) at its rational
+midpoint raises the lower bracket and lowers the upper bracket.  This
+\code{lipschitzCells\_refine} theorem is finite rational algebra; concrete
+dyadic-integral constructions supply only their density-specific Lipschitz
+estimate and their partition bookkeeping.
 \end{definition}
 
 \begin{definition}[The constant-integrand algorithm]
@@ -940,6 +958,8 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous_from_intervalRegular}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.LipschitzOnUnit}
+\lean{ComputableAnalysis.Integral.lipschitzCells_refine}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute}
@@ -1067,8 +1087,10 @@ the cell contribution using the proved oscillation bound
  \ \le\ \text{cell value}\ \le\
  (r-p)\bigl(g(p)+32(r-p)\bigr).
 \]
-Lean proves that midpoint splitting raises the lower sum and lowers the upper
-sum.  The resulting raw boxes are nested and have exact width
+The density-specific estimate is passed to the generic finite theorem
+\code{Integral.lipschitzCells\_refine}, which proves that midpoint splitting
+raises the lower sum and lowers the upper sum.  The resulting raw boxes are
+nested and have exact width
 \(64/2^n\), hence shrink to zero using rational arithmetic alone.  This is a
 genuine domain-aware integral construction for the affine compact density,
 rather than an unconstrained raw-real witness.  Since Lean also proves

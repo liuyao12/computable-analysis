@@ -173,6 +173,140 @@ subintervals and asks the integrand for precision `n`. -/
 def staticDyadicPlan : Nat -> Plan :=
   fun n => { subdivisions := staticDyadicSubdivisions n, evalPrecision := n }
 
+/-- A rational Lipschitz estimate on the unit interval.  This is the finite
+metric datum used by the elementary dyadic Riemann constructor below; it is
+not a topological continuity assumption. -/
+def LipschitzOnUnit (f : Rat -> Rat) (L : Rat) : Prop :=
+  0 <= L /\
+  forall s t : Rat,
+    0 <= s -> s <= 1 -> 0 <= t -> t <= 1 ->
+      qabs (f s - f t) <= L * qabs (t - s)
+
+/-- A lower rectangle certified by a rational Lipschitz constant. -/
+def lipschitzLowerCell (f : Rat -> Rat) (L p r : Rat) : Rat :=
+  (r - p) * (f p - L * (r - p))
+
+/-- The matching upper rectangle certified by a rational Lipschitz constant. -/
+def lipschitzUpperCell (f : Rat -> Rat) (L p r : Rat) : Rat :=
+  (r - p) * (f p + L * (r - p))
+
+private theorem midpoint_left {p r : Rat} (hpr : p <= r) :
+    p <= (p + r) / 2 := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    calc
+      p * 2 <= p + r := by grind
+      _ = ((p + r) * (2 : Rat)⁻¹) * 2 := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · native_decide
+
+private theorem midpoint_right {p r : Rat} (hpr : p <= r) :
+    (p + r) / 2 <= r := by
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · rw [Rat.div_def]
+    calc
+      ((p + r) * (2 : Rat)⁻¹) * 2 = p + r := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= r * 2 := by grind
+  · native_decide
+
+private theorem midpoint_left_width (p r : Rat) :
+    (p + r) / 2 - p = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem midpoint_right_width (p r : Rat) :
+    r - (p + r) / 2 = (r - p) / 2 := by
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Splitting a unit-interval cell at its rational midpoint tightens the
+Lipschitz bracket.  This is a purely finite inequality over rationals and is
+the local refinement rule used by dyadic Riemann constructions. -/
+theorem lipschitzCells_refine
+    {f : Rat -> Rat} {L p r : Rat}
+    (hlip : LipschitzOnUnit f L)
+    (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    let q := (p + r) / 2
+    lipschitzLowerCell f L p r <=
+      lipschitzLowerCell f L p q + lipschitzLowerCell f L q r /\
+    lipschitzUpperCell f L p q + lipschitzUpperCell f L q r <=
+      lipschitzUpperCell f L p r := by
+  intro q
+  have hL0 := hlip.1
+  have hpq : p <= q := by
+    dsimp [q]
+    exact midpoint_left hpr
+  have hqr : q <= r := by
+    dsimp [q]
+    exact midpoint_right hpr
+  have hq0 : 0 <= q := Rat.le_trans hp0 hpq
+  have hq1 : q <= 1 := Rat.le_trans hqr hr1
+  have hpq_nonneg : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hqr_nonneg : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hqdist : qabs (q - p) = q - p :=
+    qabs_eq_self_of_nonneg hpq_nonneg
+  have hlip_pq := hlip.2 p q hp0 (Rat.le_trans hpr hr1) hq0 hq1
+  have hforward : f p - f q <= L * (q - p) := by
+    calc
+      f p - f q <= qabs (f p - f q) := self_le_qabs _
+      _ <= L * qabs (q - p) := hlip_pq
+      _ = L * (q - p) := by rw [hqdist]
+  have hreverse : f q - f p <= L * (q - p) := by
+    calc
+      f q - f p = -(f p - f q) := by
+        grind [Rat.sub_eq_add_neg]
+      _ <= qabs (-(f p - f q)) := self_le_qabs _
+      _ = qabs (f p - f q) := qabs_neg _
+      _ <= L * (q - p) := by simpa [hqdist] using hlip_pq
+  have hleft_lower :
+      f p - L * (r - p) <= f p - L * (q - p) := by
+    have hwidth : q - p <= r - p := by grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hwidth hL0
+    grind [Rat.sub_eq_add_neg]
+  have hright_lower :
+      f p - L * (r - p) <= f q - L * (r - q) := by
+    dsimp [q] at hforward ⊢
+    rw [midpoint_right_width]
+    grind [Rat.sub_eq_add_neg]
+  have hleft_upper :
+      f p + L * (q - p) <= f p + L * (r - p) := by
+    have hwidth : q - p <= r - p := by grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hwidth hL0
+    grind [Rat.sub_eq_add_neg]
+  have hright_upper :
+      f q + L * (r - q) <= f p + L * (r - p) := by
+    dsimp [q] at hreverse ⊢
+    rw [midpoint_right_width]
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · have hleft := Rat.mul_le_mul_of_nonneg_left hleft_lower hpq_nonneg
+    have hright := Rat.mul_le_mul_of_nonneg_left hright_lower hqr_nonneg
+    unfold lipschitzLowerCell
+    calc
+      (r - p) * (f p - L * (r - p)) =
+          (q - p) * (f p - L * (r - p)) +
+          (r - q) * (f p - L * (r - p)) := by
+            grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+              Rat.add_assoc, Rat.add_comm]
+      _ <= (q - p) * (f p - L * (q - p)) +
+          (r - q) * (f q - L * (r - q)) :=
+        rat_add_le_add hleft hright
+  · have hleft := Rat.mul_le_mul_of_nonneg_left hleft_upper hpq_nonneg
+    have hright := Rat.mul_le_mul_of_nonneg_left hright_upper hqr_nonneg
+    unfold lipschitzUpperCell
+    calc
+      (q - p) * (f p + L * (q - p)) +
+          (r - q) * (f q + L * (r - q)) <=
+          (q - p) * (f p + L * (r - p)) +
+          (r - q) * (f p + L * (r - p)) :=
+        rat_add_le_add hleft hright
+      _ = (r - p) * (f p + L * (r - p)) := by
+        grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+          Rat.add_assoc, Rat.add_comm]
+
 /-- A raw integral algorithm on a rational interval.
 
 Given the requested output precision, choose a number of subintervals and an

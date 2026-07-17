@@ -3509,12 +3509,12 @@ theorem reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum (stage : Nat) :
 subtracted term is the certified 32-Lipschitz oscillation bound over that
 cell. -/
 private def reciprocalQuarticMinusOneUnitLowerCell (p r : Rat) : Rat :=
-  (r - p) * (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p))
+  Integral.lipschitzLowerCell reciprocalQuarticMinusOneUnitDensity 32 p r
 
 /-- The matching Lipschitz upper rectangle at the left endpoint of a unit
 cell. -/
 private def reciprocalQuarticMinusOneUnitUpperCell (p r : Rat) : Rat :=
-  (r - p) * (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p))
+  Integral.lipschitzUpperCell reciprocalQuarticMinusOneUnitDensity 32 p r
 
 private def reciprocalQuarticMinusOneUnitLowerSum :
     List (Rat × Rat) -> Rat
@@ -3538,44 +3538,6 @@ def reciprocalQuarticMinusOneUnitDyadicCompute (stage : Nat) : QInterval :=
   { lo := reciprocalQuarticMinusOneUnitLowerSum cells
     hi := reciprocalQuarticMinusOneUnitUpperSum cells }
 
-private theorem reciprocalQuarticMinusOneUnit_midpoint_left
-    {p r : Rat} (hpr : p <= r) :
-    p <= (p + r) / 2 := by
-  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
-  · rw [Rat.div_def]
-    have h2 : (2 : Rat) ≠ 0 := by native_decide
-    calc
-      p * 2 <= p + r := by grind
-      _ = ((p + r) * (2 : Rat)⁻¹) * 2 := by
-        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-  · native_decide
-
-private theorem reciprocalQuarticMinusOneUnit_midpoint_right
-    {p r : Rat} (hpr : p <= r) :
-    (p + r) / 2 <= r := by
-  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
-  · rw [Rat.div_def]
-    have h2 : (2 : Rat) ≠ 0 := by native_decide
-    calc
-      ((p + r) * (2 : Rat)⁻¹) * 2 = p + r := by
-        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-      _ <= r * 2 := by grind
-  · native_decide
-
-private theorem reciprocalQuarticMinusOneUnit_midpoint_left_width
-    (p r : Rat) :
-    (p + r) / 2 - p = (r - p) / 2 := by
-  rw [Rat.div_def, Rat.div_def]
-  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
-private theorem reciprocalQuarticMinusOneUnit_midpoint_right_width
-    (p r : Rat) :
-    r - (p + r) / 2 = (r - p) / 2 := by
-  rw [Rat.div_def, Rat.div_def]
-  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
-
 /-- Splitting one unit cell at its rational midpoint tightens the elementary
 Lipschitz rectangle.  This is the finite refinement inequality from which the
 raw interval algorithm will obtain nestedness. -/
@@ -3588,102 +3550,14 @@ private theorem reciprocalQuarticMinusOneUnit_cells_refine
     reciprocalQuarticMinusOneUnitUpperCell p q +
         reciprocalQuarticMinusOneUnitUpperCell q r <=
       reciprocalQuarticMinusOneUnitUpperCell p r := by
-  intro q
-  have hpq : p <= q := by
-    dsimp [q]
-    exact reciprocalQuarticMinusOneUnit_midpoint_left hpr
-  have hqr : q <= r := by
-    dsimp [q]
-    exact reciprocalQuarticMinusOneUnit_midpoint_right hpr
-  have hq0 : 0 <= q := Rat.le_trans hp0 hpq
-  have hq1 : q <= 1 := Rat.le_trans hqr hr1
-  have hpq_nonneg : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
-  have hqr_nonneg : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
-  have hpr_nonneg : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
-  have hqdist : qabs (q - p) = q - p :=
-    qabs_eq_self_of_nonneg hpq_nonneg
-  have hlip :=
-    reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit
-      p q hp0 (Rat.le_trans hpr hr1) hq0 hq1
-  have hforward :
-      reciprocalQuarticMinusOneUnitDensity p -
-          reciprocalQuarticMinusOneUnitDensity q <= 32 * (q - p) := by
-    calc
-      reciprocalQuarticMinusOneUnitDensity p -
-          reciprocalQuarticMinusOneUnitDensity q <=
-          qabs (reciprocalQuarticMinusOneUnitDensity p -
-            reciprocalQuarticMinusOneUnitDensity q) := self_le_qabs _
-      _ <= 32 * qabs (q - p) := hlip
-      _ = 32 * (q - p) := by rw [hqdist]
-  have hreverse :
-      reciprocalQuarticMinusOneUnitDensity q -
-          reciprocalQuarticMinusOneUnitDensity p <= 32 * (q - p) := by
-    calc
-      reciprocalQuarticMinusOneUnitDensity q -
-          reciprocalQuarticMinusOneUnitDensity p =
-          -(reciprocalQuarticMinusOneUnitDensity p -
-            reciprocalQuarticMinusOneUnitDensity q) := by
-            grind [Rat.sub_eq_add_neg]
-      _ <= qabs (-(reciprocalQuarticMinusOneUnitDensity p -
-            reciprocalQuarticMinusOneUnitDensity q)) := self_le_qabs _
-      _ = qabs (reciprocalQuarticMinusOneUnitDensity p -
-            reciprocalQuarticMinusOneUnitDensity q) := qabs_neg _
-      _ <= 32 * (q - p) := by simpa [hqdist] using hlip
-  have hleft_lower :
-      reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p) <=
-        reciprocalQuarticMinusOneUnitDensity p - 32 * (q - p) := by
-    grind [Rat.sub_eq_add_neg]
-  have hright_lower :
-      reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p) <=
-        reciprocalQuarticMinusOneUnitDensity q - 32 * (r - q) := by
-    dsimp [q] at hforward ⊢
-    rw [reciprocalQuarticMinusOneUnit_midpoint_right_width]
-    grind [Rat.sub_eq_add_neg]
-  have hleft_upper :
-      reciprocalQuarticMinusOneUnitDensity p + 32 * (q - p) <=
-        reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p) := by
-    grind [Rat.sub_eq_add_neg]
-  have hright_upper :
-      reciprocalQuarticMinusOneUnitDensity q + 32 * (r - q) <=
-        reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p) := by
-    dsimp [q] at hreverse ⊢
-    rw [reciprocalQuarticMinusOneUnit_midpoint_right_width]
-    grind [Rat.sub_eq_add_neg]
-  constructor
-  · have hleft := Rat.mul_le_mul_of_nonneg_left hleft_lower hpq_nonneg
-    have hright := Rat.mul_le_mul_of_nonneg_left hright_lower hqr_nonneg
-    unfold reciprocalQuarticMinusOneUnitLowerCell
-    calc
-      (r - p) *
-          (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p)) =
-          (q - p) *
-            (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p)) +
-          (r - q) *
-            (reciprocalQuarticMinusOneUnitDensity p - 32 * (r - p)) := by
-            grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
-              Rat.add_assoc, Rat.add_comm]
-      _ <= (q - p) *
-            (reciprocalQuarticMinusOneUnitDensity p - 32 * (q - p)) +
-          (r - q) *
-            (reciprocalQuarticMinusOneUnitDensity q - 32 * (r - q)) :=
-            rat_add_le_add hleft hright
-  · have hleft := Rat.mul_le_mul_of_nonneg_left hleft_upper hpq_nonneg
-    have hright := Rat.mul_le_mul_of_nonneg_left hright_upper hqr_nonneg
-    unfold reciprocalQuarticMinusOneUnitUpperCell
-    calc
-      (q - p) *
-          (reciprocalQuarticMinusOneUnitDensity p + 32 * (q - p)) +
-        (r - q) *
-          (reciprocalQuarticMinusOneUnitDensity q + 32 * (r - q)) <=
-          (q - p) *
-            (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p)) +
-          (r - q) *
-            (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p)) :=
-            rat_add_le_add hleft hright
-      _ = (r - p) *
-          (reciprocalQuarticMinusOneUnitDensity p + 32 * (r - p)) := by
-          grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
-            Rat.add_assoc, Rat.add_comm]
+  have hlip : Integral.LipschitzOnUnit reciprocalQuarticMinusOneUnitDensity 32 :=
+    ⟨by native_decide,
+      fun s t hs0 hs1 ht0 ht1 =>
+        reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit
+          s t hs0 hs1 ht0 ht1⟩
+  simpa [reciprocalQuarticMinusOneUnitLowerCell,
+    reciprocalQuarticMinusOneUnitUpperCell] using
+    (Integral.lipschitzCells_refine hlip hp0 hpr hr1)
 
 private theorem reciprocalQuarticMinusOneUnit_lowerSum_refineAux
     (lo hi : Rat) (intervals : List (Rat × Rat))
