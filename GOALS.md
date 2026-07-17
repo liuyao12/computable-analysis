@@ -471,15 +471,17 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently seven of sixteen named
-  computations are valid raw reals, and five of fifteen applicable rows have
-  a formal equivalence chain to `piCircleArea`.  The completed canonical
+  `blueprint/src/pi-scoreboard-table.tex`: currently nine of eighteen named
+  computations are valid raw reals, and seven of seventeen applicable rows
+  have a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
-  rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn computation
-  `4 * arctanGeom(1)` and its single rectangle-integral formulation
-  `4 * arctanIntegralRectangleForAtOne`, and the series computation
-  `4 * arctanSeries(1)`, and the single classical power-series formula
-  `piMachin`.
+  rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn
+  computation `4 * arctanGeom(1)` and its single rectangle-integral
+  formulation `4 * arctanIntegralRectangleForAtOne`, the series computation
+  `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
+  the reciprocal-tail full-line Cauchy integral, and Nilakantha's accelerated
+  rational series.  The valid-but-not-yet-equivalent Basel row accounts for
+  the remaining definition-only completion.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
