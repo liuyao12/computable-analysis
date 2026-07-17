@@ -32,7 +32,7 @@ continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
 integrals and factorial tail bounds, beginning with constant, commuting,
 scalar, piecewise-constant, and higher-order triangular cases. This broadens
 the calculus foundation; the intentionally selective pi scoreboard is now
-`8/17` for definitions and `6/16` for applicable equivalences.
+`9/18` for definitions and `7/17` for applicable equivalences.
 
 ## Pi formalization scoreboard
 
@@ -40,7 +40,7 @@ A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`.  A row counts as equivalent after a formalized chain of
 `RealRaw.Equiv` theorems connects it to `piCircleArea`.
 
-Current count: definitions `8/17`; equivalences `6/16` applicable rows.
+Current count: definitions `9/18`; equivalences `7/17` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -53,6 +53,7 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\arctan_{\mathrm{geom}}(1)$ | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [finite Riemann bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✓ |
+| `piNilakantha` | [finite series transformation](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:nilakantha-pi) | $\pi=3+\frac4{2\cdot3\cdot4}-\frac4{4\cdot5\cdot6}+\frac4{6\cdot7\cdot8}-\cdots$ | ✓ | ✓ |
 | `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [finite bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✓ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
 | `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
@@ -74,6 +75,11 @@ Lean hooks:
   `ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`.
 - Generic arctangent bridge: `PiProofs.arctanEqualsGeom_finiteRiemannBridge`.
   It supports the series-to-geometry comparison but is not a separate pi-scoreboard route.
+- Nilakantha series: `piNilakantha`, `Nilakantha.compute_width_eq`,
+  `Nilakantha.valid`, `Nilakantha.equiv_piLeibniz`, and
+  `PiProofs.piNilakantha_equiv_piCircleArea`.  This is a direct rational
+  series row; its finite summation transform uses the Leibniz endpoints only
+  to identify the value, rather than treating it as a second Machin formula.
 - Rectangle arctangent:
   `PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea`,
   `PiProofs.four_arctanIntegralRectangleMonotoneForAtOne_equiv_piCircleArea`,

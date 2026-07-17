@@ -24,6 +24,7 @@ import ComputableAnalysis.FTA
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.MonotonicityConvexity
+import ComputableAnalysis.Nilakantha
 import ComputableAnalysis.Pi
 import ComputableAnalysis.PiProofs
 import ComputableAnalysis.PeanoBaker

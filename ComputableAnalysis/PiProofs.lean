@@ -3,6 +3,7 @@ import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.Basic
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.Nilakantha
 import ComputableAnalysis.Taylor
 
 /-!
@@ -14221,6 +14222,23 @@ theorem areaPolygonValid : AreaPolygonValid :=
 theorem piCircleAreaPolygon_valid : piCircleAreaPolygon.Valid :=
   areaPolygonValid
 
+/-- Nilakantha's cubically convergent rational series is the same pi
+computation as the verified circle-area construction.  The only new series
+step is the finite endpoint transformation in `Nilakantha.equiv_piLeibniz`. -/
+theorem piNilakantha_equiv_piCircleArea :
+    piNilakantha.Equiv piCircleArea :=
+  RealRaw.equiv_trans
+    Nilakantha.valid
+    leibnizValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    Nilakantha.equiv_piLeibniz
+    (RealRaw.equiv_trans
+      leibnizValid
+      fourArctanSeriesOneValid
+      (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+      piLeibniz_equiv_four_arctanSeries_one
+      four_arctanSeries_one_equiv_piCircleArea)
+
 /-- A certified representative of the Archimedean circumference computation.
 
 At every stage it intersects the finite prefix of hulls formed by the raw
@@ -14602,9 +14620,15 @@ verified arctangent rectangle bracket. -/
 theorem cauchyFullLineIntegral_equiv_piCircleArea :
     IntegralIdentities.cauchyFullLineIntegral.Equiv piCircleArea := by
   intro n
+  apply (RealRaw.compareAt_overlap_iff
+    IntegralIdentities.cauchyFullLineIntegral piCircleArea n n).2
   rw [IntegralIdentities.cauchyFullLineIntegral_compute_eq_four_rectangle n]
   simpa [IntegralIdentities.PiFromArctanIntegral] using
-    (four_arctanIntegralRectangleForAtOne_equiv_piCircleArea n)
+    (RealRaw.compareAt_overlap_iff
+      (IntegralIdentities.PiFromArctanIntegral
+        IntegralIdentities.arctanIntegralRectangleForAtOne)
+      piCircleArea n n).1
+      (four_arctanIntegralRectangleForAtOne_equiv_piCircleArea n)
 
 /-- The same completed rectangle-integral pi route, viewed through the
 monotone-integral interface for the decreasing kernel `1/(1+x^2)` on

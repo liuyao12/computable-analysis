@@ -21,6 +21,32 @@ def leibnizSeries : RealRaw where
 def piLeibniz : RealRaw :=
   (4 : Nat) * leibnizSeries
 
+/-- The kth positive magnitude in Nilakantha's rational pi series.
+
+The first used term is `nilakanthaTerm 1 = 1 / 6`; the value at zero is
+harmless but is not part of the series. -/
+def nilakanthaTerm (k : Nat) : Rat :=
+  4 / ((2 * (k : Rat)) * (2 * (k : Rat) + 1) * (2 * (k : Rat) + 2))
+
+/-- Finite partial sums of Nilakantha's alternating rational pi series.
+
+Each summand is rational and the alternating sign is attached to the
+zero-based recursion index. -/
+def nilakanthaPartial : Nat -> Rat
+  | 0 => 3
+  | n + 1 =>
+      nilakanthaPartial n + (-1 : Rat) ^ n * nilakanthaTerm (n + 1)
+
+/-- Pi from Nilakantha's accelerated rational alternating series.
+
+Even partial sums are lower bounds and the next odd partial sum is an upper
+bound.  Validity and agreement with the geometric pi computation are proved
+from a finite termwise transformation to the verified Leibniz series. -/
+def piNilakantha : RealRaw where
+  compute := fun n =>
+    { lo := nilakanthaPartial (2 * n),
+      hi := nilakanthaPartial (2 * n + 1) }
+
 /-- Pi from Machin's formula. -/
 def piMachin : RealRaw :=
   (4 : Nat) * ((4 : Nat) * arctan (1 / 5) - arctan (1 / 239))

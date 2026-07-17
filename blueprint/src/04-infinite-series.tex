@@ -9,6 +9,9 @@ unrelated value of \(\pi\), but to prove that the classical series
 computations land on the same value.  The running examples are the Leibniz
 series for \(4\arctan_{\mathrm{series}}(1)\) and Machin's faster combination
 \(16\arctan_{\mathrm{series}}(1/5)-4\arctan_{\mathrm{series}}(1/239)\).
+Nilakantha's rational series is included as a separate accelerated series
+algorithm, connected by a finite summation transformation rather than by a
+second trigonometric identity.
 The sanity check for the chapter is that these series algorithms become
 equivalent to the geometric and integral \(\pi\) algorithms from
 Chapters~\ref{ch:rational-circle-trigonometry} and \ref{ch:integrals}.
@@ -69,6 +72,37 @@ Equivalently, this algorithm is the alternating series
 as an equivalence of real numbers.
 Lean verifies the underlying \(\pi/4\) equality stagewise and as a raw-real
 equivalence.
+\end{theorem}
+
+\begin{theorem}[Nilakantha's rational pi series]
+\label{thm:nilakantha-pi}
+\lean{ComputableAnalysis.piNilakantha}
+\lean{ComputableAnalysis.Nilakantha.compute_eq}
+\lean{ComputableAnalysis.Nilakantha.compute_width_eq}
+\lean{ComputableAnalysis.Nilakantha.valid}
+\lean{ComputableAnalysis.Nilakantha.equiv_piLeibniz}
+\lean{ComputableAnalysis.PiProofs.piNilakantha_equiv_piCircleArea}
+\uses{def:alternating-series-intervals,thm:leibniz-arctan,thm:power-series-arctan-area-pi}
+The Nilakantha computation is the alternating rational series
+\[
+  \pi = 3 + \frac4{2\cdot3\cdot4}
+    - \frac4{4\cdot5\cdot6}
+    + \frac4{6\cdot7\cdot8}-\cdots.
+\]
+At stage \(n\), its certified interval is between partial sums \(S_{2n}\)
+and \(S_{2n+1}\); its width is exactly
+\[
+  \frac4{(4n+2)(4n+3)(4n+4)}.
+\]
+The comparison is entirely finite rational arithmetic.  If \(B_j\) is the
+Leibniz partial sum through \(4(-1)^j/(2j+1)\), Lean proves
+\[
+  S_j = B_j + \frac{(-1)^{j+1}}{j+1}.
+\]
+Consequently the Nilakantha endpoints lie between adjacent Leibniz endpoints
+at every stage.  This proves its raw-real validity and its equivalence to the
+circle-area computation through the already verified finite Riemann bridge.
+It is deliberately not a Machin row: no arctangent addition formula is used.
 \end{theorem}
 
 \begin{theorem}[Power-series arctangent agrees with area pi]
