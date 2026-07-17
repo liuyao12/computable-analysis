@@ -8500,6 +8500,251 @@ theorem exitTangentCross_eq_formula
   unfold adjacentTangentCrossFormula
   rw [circleParameter_succ_sub]
 
+/-- The two tangent edges in one outer-polygon cell have the same exact
+rational length. -/
+theorem outerTangentCrossSum_eq_two_adjacentTangentCrossFormula
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    outerTangentCrossSum stage k =
+      2 * adjacentTangentCrossFormula stage k := by
+  unfold outerTangentCrossSum
+  rw [entryTangentCross_eq_formula stage hstage k,
+    exitTangentCross_eq_formula stage hstage k]
+  grind
+
+/-- The tangent-edge length for the adjacent parameters `k/stage` and
+`(k+1)/stage`, in a denominator-cleared rational form. -/
+def adjacentTangentCrossClosedForm (stage k : Nat) : Rat :=
+  (stage : Rat) /
+    ((stage : Rat) * (stage : Rat) + (k : Rat) * ((k + 1 : Nat) : Rat))
+
+private theorem tangentRefinement_cancel_mul_right {a b c : Rat} (hc : c ≠ 0) :
+    a * c = b * c -> a = b := by
+  intro h
+  have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+  calc
+    a = a * 1 := by grind
+    _ = a * (c * c⁻¹) := by rw [hcancel]
+    _ = (a * c) * c⁻¹ := by grind [Rat.mul_assoc]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b * (c * c⁻¹) := by grind [Rat.mul_assoc]
+    _ = b * 1 := by rw [hcancel]
+    _ = b := by grind
+
+private theorem tangentRefinement_div_two_cancel (a b : Rat) :
+    (2 * a) / (2 * b) = a / b := by
+  rw [Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem adjacentTangentCrossFormula_eq_closedForm
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    adjacentTangentCrossFormula stage k =
+      adjacentTangentCrossClosedForm stage k := by
+  unfold adjacentTangentCrossFormula adjacentTangentCrossClosedForm
+  simp only
+  rw [show circleParameter stage k = (k : Rat) / (stage : Rat) by rfl]
+  rw [show circleParameter stage (k + 1) =
+    ((k + 1 : Nat) : Rat) / (stage : Rat) by rfl]
+  have hs : (stage : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hstage)
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  have hsq : (stage : Rat) * (stage : Rat) ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.mul_pos ((Rat.natCast_pos).2 hstage)
+      ((Rat.natCast_pos).2 hstage))
+  apply tangentRefinement_cancel_mul_right hsq
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem adjacentTangentCrossClosedForm_double_left
+    (stage k : Nat) :
+    adjacentTangentCrossClosedForm (2 * stage) (2 * k) =
+      (stage : Rat) /
+        (2 * (stage : Rat) * (stage : Rat) +
+          2 * (k : Rat) * (k : Rat) + (k : Rat)) := by
+  unfold adjacentTangentCrossClosedForm
+  simp only [Rat.natCast_mul, Rat.natCast_add, Rat.natCast_one]
+  have hden :
+      (2 * (stage : Rat)) * (2 * (stage : Rat)) +
+          (2 * (k : Rat)) * (2 * (k : Rat) + 1) =
+        2 * (2 * (stage : Rat) * (stage : Rat) +
+          2 * (k : Rat) * (k : Rat) + (k : Rat)) := by
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  rw [hden]
+  exact tangentRefinement_div_two_cancel _ _
+
+private theorem adjacentTangentCrossClosedForm_double_right
+    (stage k : Nat) :
+    adjacentTangentCrossClosedForm (2 * stage) (2 * k + 1) =
+      (stage : Rat) /
+        (2 * (stage : Rat) * (stage : Rat) +
+          2 * (k : Rat) * (k : Rat) + 3 * (k : Rat) + 1) := by
+  unfold adjacentTangentCrossClosedForm
+  simp only [Rat.natCast_mul, Rat.natCast_add, Rat.natCast_one]
+  have hden :
+      (2 * (stage : Rat)) * (2 * (stage : Rat)) +
+          (2 * (k : Rat) + 1) * (2 * (k : Rat) + 1 + 1) =
+        2 * (2 * (stage : Rat) * (stage : Rat) +
+          2 * (k : Rat) * (k : Rat) + 3 * (k : Rat) + 1) := by
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  rw [hden]
+  exact tangentRefinement_div_two_cancel _ _
+
+private theorem tangentCrossClosedForm_refinement_algebra
+    (N K : Rat) (hN : 0 < N) (hK : 0 <= K) :
+    let A := N * N + K * K + K
+    let B := 2 * N * N + 2 * K * K + K
+    let D := 2 * N * N + 2 * K * K + 3 * K + 1
+    N / B + N / D <= N / A := by
+  dsimp
+  let A : Rat := N * N + K * K + K
+  let B : Rat := 2 * N * N + 2 * K * K + K
+  let D : Rat := 2 * N * N + 2 * K * K + 3 * K + 1
+  have hN0 : 0 <= N := Rat.le_of_lt hN
+  have hNN : 0 < N * N := Rat.mul_pos hN hN
+  have hK2 : 0 <= K * K := Rat.mul_nonneg hK hK
+  have hApos : 0 < A := by
+    dsimp [A]
+    have hrest : 0 <= K * K + K := Rat.add_nonneg hK2 hK
+    grind
+  have hBpos : 0 < B := by
+    dsimp [B]
+    have htwoNN : 0 < 2 * N * N := by
+      exact Rat.mul_pos (Rat.mul_pos (by native_decide) hN) hN
+    have htwoK2 : 0 <= 2 * K * K := by
+      calc
+        0 <= 2 * (K * K) := Rat.mul_nonneg (by native_decide) hK2
+        _ = 2 * K * K := by grind [Rat.mul_assoc]
+    have hrest : 0 <= 2 * K * K + K := Rat.add_nonneg htwoK2 hK
+    grind
+  have hDpos : 0 < D := by
+    dsimp [D]
+    have htwoNN : 0 < 2 * N * N := by
+      exact Rat.mul_pos (Rat.mul_pos (by native_decide) hN) hN
+    have hrest : 0 <= 2 * K * K + 3 * K + 1 := by
+      have hfirst : 0 <= 2 * K * K := by
+        calc
+          0 <= 2 * (K * K) := Rat.mul_nonneg (by native_decide) hK2
+          _ = 2 * K * K := by grind [Rat.mul_assoc]
+      have hsecond : 0 <= 3 * K :=
+        Rat.mul_nonneg (by native_decide) hK
+      grind
+    grind
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  have hidentity : B * D - A * (B + D) = N * N := by
+    dsimp [A, B, D]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hcore : A * (B + D) <= B * D := by
+    have hnonneg : 0 <= N * N := Rat.mul_nonneg hN0 hN0
+    rw [show A * (B + D) = B * D - (N * N) by
+      rw [← hidentity]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]]
+    grind [Rat.sub_eq_add_neg]
+  have hscaled : N * (A * (B + D)) <= N * (B * D) :=
+    Rat.mul_le_mul_of_nonneg_left hcore hN0
+  have hprodpos : 0 < A * B * D :=
+    Rat.mul_pos (Rat.mul_pos hApos hBpos) hDpos
+  apply Rat.le_of_mul_le_mul_right (c := A * B * D)
+  · rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    have hAcancel : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
+    have hBcancel : B * B⁻¹ = 1 := Rat.mul_inv_cancel B hBne
+    have hDcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hDne
+    calc
+      (N * B⁻¹ + N * D⁻¹) * (A * B * D) =
+          N * (A * (B + D)) := by
+            grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+              Rat.mul_assoc, Rat.mul_comm]
+      _ <= N * (B * D) := hscaled
+      _ = (N * A⁻¹) * (A * B * D) := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hprodpos
+
+/-- Splitting an adjacent tangent edge at the dyadic midpoint lowers its
+exact rational tangent-length bound.  This is the symbolic geometric half of
+the upper-endpoint refinement for the direct circumference algorithm. -/
+theorem adjacentTangentCrossClosedForm_refinesByDoubling
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    adjacentTangentCrossClosedForm (2 * stage) (2 * k) +
+      adjacentTangentCrossClosedForm (2 * stage) (2 * k + 1) <=
+      adjacentTangentCrossClosedForm stage k := by
+  have h := tangentCrossClosedForm_refinement_algebra (stage : Rat) (k : Rat)
+    ((Rat.natCast_pos).2 hstage) Rat.natCast_nonneg
+  rw [adjacentTangentCrossClosedForm_double_left,
+    adjacentTangentCrossClosedForm_double_right]
+  simpa [adjacentTangentCrossClosedForm] using h
+
+theorem outerTangentCrossSum_refinesByDoubling
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    outerTangentCrossSum (2 * stage) (2 * k) +
+      outerTangentCrossSum (2 * stage) (2 * k + 1) <=
+      outerTangentCrossSum stage k := by
+  have hfine : 0 < 2 * stage := by omega
+  rw [outerTangentCrossSum_eq_two_adjacentTangentCrossFormula (2 * stage)
+      hfine (2 * k),
+    outerTangentCrossSum_eq_two_adjacentTangentCrossFormula (2 * stage)
+      hfine (2 * k + 1),
+    outerTangentCrossSum_eq_two_adjacentTangentCrossFormula stage hstage k,
+    adjacentTangentCrossFormula_eq_closedForm (2 * stage) hfine (2 * k),
+    adjacentTangentCrossFormula_eq_closedForm (2 * stage) hfine (2 * k + 1),
+    adjacentTangentCrossFormula_eq_closedForm stage hstage k]
+  have h := adjacentTangentCrossClosedForm_refinesByDoubling stage hstage k
+  calc
+    2 * adjacentTangentCrossClosedForm (2 * stage) (2 * k) +
+          2 * adjacentTangentCrossClosedForm (2 * stage) (2 * k + 1) =
+        2 * (adjacentTangentCrossClosedForm (2 * stage) (2 * k) +
+          adjacentTangentCrossClosedForm (2 * stage) (2 * k + 1)) := by
+          grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+    _ <= 2 * adjacentTangentCrossClosedForm stage k :=
+      Rat.mul_le_mul_of_nonneg_left h (by native_decide)
+
+/-- The exact rational perimeter of a consecutive block of outer tangent
+cells.  Unlike the square-root path evaluator, this records the tangent
+segment lengths directly through their rational cross-product formulas. -/
+def outerTangentCrossSumFrom (stage k : Nat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 =>
+      outerTangentCrossSum stage k +
+        outerTangentCrossSumFrom stage (k + 1) count
+
+private theorem outerTangentCrossSumFrom_refinesByDoubling_aux
+    (stage : Nat) (hstage : 0 < stage) (count k : Nat) :
+    outerTangentCrossSumFrom (2 * stage) (2 * k) (2 * count) <=
+      outerTangentCrossSumFrom stage k count := by
+  induction count generalizing k with
+  | zero =>
+      simp [outerTangentCrossSumFrom]
+  | succ count ih =>
+      have hlocal := outerTangentCrossSum_refinesByDoubling stage hstage k
+      have htail := ih (k + 1)
+      rw [show 2 * (count + 1) = 2 * count + 2 by omega]
+      simp only [outerTangentCrossSumFrom]
+      have hindex : 2 * (k + 1) = 2 * k + 2 := by omega
+      rw [← hindex] at htail
+      calc
+        outerTangentCrossSum (2 * stage) (2 * k) +
+              (outerTangentCrossSum (2 * stage) (2 * k + 1) +
+                outerTangentCrossSumFrom (2 * stage) (2 * k + 2)
+                  (2 * count)) =
+            (outerTangentCrossSum (2 * stage) (2 * k) +
+              outerTangentCrossSum (2 * stage) (2 * k + 1)) +
+                outerTangentCrossSumFrom (2 * stage) (2 * k + 2)
+                  (2 * count) := by
+              grind [Rat.add_assoc, Rat.add_comm]
+        _ <= outerTangentCrossSum stage k +
+              outerTangentCrossSumFrom stage (k + 1) count := by
+              grind
+
+/-- Exact rational tangent perimeter decreases under dyadic subdivision. -/
+theorem outerTangentCrossSumFrom_refinesByDoubling
+    (stage : Nat) (hstage : 0 < stage) (count k : Nat) :
+    outerTangentCrossSumFrom (2 * stage) (2 * k) (2 * count) <=
+      outerTangentCrossSumFrom stage k count :=
+  outerTangentCrossSumFrom_refinesByDoubling_aux stage hstage count k
+
 theorem adjacentChordCross_eq_formula
     (stage : Nat) (k : Nat) :
     pointCross (circleSamplePoint stage k)
@@ -10457,6 +10702,44 @@ def innerFanWidths (stage : Nat) : List Rat :=
 
 def outerFanWidths (stage : Nat) : List Rat :=
   Fan.sectorFanWidths (outerBoundary stage)
+
+private theorem outerTangentCrossSumFrom_eq_edgeCrossPerimeter
+    (stage count k : Nat) :
+    outerTangentCrossSumFrom stage k count =
+      Fan.perimeter
+        (Fan.edgeCrossesFrom (circleSamplePoint stage k)
+          (outerBoundaryFrom stage k count)) := by
+  induction count generalizing k with
+  | zero =>
+      simp [outerTangentCrossSumFrom, outerBoundaryFrom,
+        piCircleAreaPolygon.outerBoundaryFrom, Fan.perimeter,
+        Fan.edgeCrossesFrom, Fan.sumRat]
+  | succ count ih =>
+      simp [outerTangentCrossSumFrom, outerTangentCrossSum,
+        outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
+        Fan.perimeter, Fan.edgeCrossesFrom, Fan.sumRat, ih]
+
+/-- The rational tangent-cell sum is exactly the outer fan perimeter used by
+the finite Archimedes comparison. -/
+theorem outerFanPerimeter_eq_outerTangentCrossSumFrom (stage : Nat) :
+    Fan.perimeter (outerFanWidths stage) =
+      outerTangentCrossSumFrom stage 0 stage := by
+  have h := outerTangentCrossSumFrom_eq_edgeCrossPerimeter stage stage 0
+  symm
+  simpa [outerFanWidths, outerBoundary, Fan.sectorFanWidths,
+    Fan.perimeter, Fan.edgeCrossesFrom, Fan.sumRat, pointCross_origin_left]
+    using h
+
+/-- The exact outer tangent fan is antitone under the dyadic refinement of
+the rational-circle parameter mesh. -/
+theorem outerFanPerimeter_refinesByDoubling
+    (stage : Nat) (hstage : 0 < stage) :
+    Fan.perimeter (outerFanWidths (2 * stage)) <=
+      Fan.perimeter (outerFanWidths stage) := by
+  rw [outerFanPerimeter_eq_outerTangentCrossSumFrom,
+    outerFanPerimeter_eq_outerTangentCrossSumFrom]
+  simpa using
+    (outerTangentCrossSumFrom_refinesByDoubling stage hstage stage 0)
 
 def innerFanPieces (stage : Nat) : List (Prod Rat Rat) :=
   Fan.unitPieces (innerFanWidths stage)

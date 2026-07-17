@@ -559,7 +559,13 @@ students actually compute.
   The direct rational endpoint condition has an executable regression proof
   through the first twelve dyadic transitions in
   `PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve`; the required
-  all-stage theorem remains open.
+  all-stage theorem remains open.  The exact tangent-geometry half is now
+  symbolic rather than experimental: `adjacentTangentCrossClosedForm` gives
+  each outer tangent cell a denominator-cleared rational length, and
+  `outerFanPerimeter_refinesByDoubling` proves that the exact outer tangent
+  fan decreases under every dyadic subdivision.  The remaining endpoint work
+  is to control the square-root enclosure schedule, especially on the
+  inscribed lower path, against those exact geometric refinements.
 
 ### Archived pre-refactor notes (not current source)
 

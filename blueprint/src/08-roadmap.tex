@@ -488,6 +488,14 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.circleSamplePoint_double_index_succ}
 \lean{ComputableAnalysis.PiProofs.adjacentChordNormSqFormula}
 \lean{ComputableAnalysis.PiProofs.adjacentTangentCrossFormula}
+\lean{ComputableAnalysis.PiProofs.adjacentTangentCrossClosedForm}
+\lean{ComputableAnalysis.PiProofs.adjacentTangentCrossFormula_eq_closedForm}
+\lean{ComputableAnalysis.PiProofs.adjacentTangentCrossClosedForm_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.outerTangentCrossSum_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.outerTangentCrossSumFrom}
+\lean{ComputableAnalysis.PiProofs.outerTangentCrossSumFrom_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.outerFanPerimeter_eq_outerTangentCrossSumFrom}
+\lean{ComputableAnalysis.PiProofs.outerFanPerimeter_refinesByDoubling}
 \lean{ComputableAnalysis.PiProofs.entryTangentNormSqFormula}
 \lean{ComputableAnalysis.PiProofs.exitTangentNormSqFormula}
 \lean{ComputableAnalysis.PiProofs.adjacentChordSegmentNormSq_eq_formula}
@@ -888,6 +896,14 @@ cheap consequence.  This is a finite regression certificate, not the full
 circumference-validity row.  The dyadic endpoint reuse facts for the rational circle are named as
 \code{PiProofs.circleSamplePoint\_double\_index} and
 \code{PiProofs.circleSamplePoint\_double\_index\_succ}.
+The outer tangent geometry itself is now settled symbolically: the exact
+rational cell length is \code{PiProofs.adjacentTangentCrossClosedForm}, and
+\code{PiProofs.outerFanPerimeter\_refinesByDoubling} proves that its full
+outer fan decreases under every dyadic subdivision.  Thus the remaining
+all-stage endpoint proof concerns transport from these exact tangent lengths
+to the square-root path enclosures, together with the corresponding
+inscribed lower-path estimate; no unproved geometric monotonicity is hidden
+in the target.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
@@ -1144,6 +1160,14 @@ chord and tangent formulas.
   \code{PiProofs.circleParameter\_double\_index},
   \code{PiProofs.circleSamplePoint\_double\_index},
   \code{PiProofs.circleSamplePoint\_double\_index\_succ},
+  \code{PiProofs.adjacentTangentCrossClosedForm},
+  \code{PiProofs.adjacentTangentCrossFormula\_eq\_closedForm},
+  \code{PiProofs.adjacentTangentCrossClosedForm\_refinesByDoubling},
+  \code{PiProofs.outerTangentCrossSum\_refinesByDoubling},
+  \code{PiProofs.outerTangentCrossSumFrom},
+  \code{PiProofs.outerTangentCrossSumFrom\_refinesByDoubling},
+  \code{PiProofs.outerFanPerimeter\_eq\_outerTangentCrossSumFrom},
+  \code{PiProofs.outerFanPerimeter\_refinesByDoubling},
   \code{PiProofs.CircumferenceQuarterLengthStepRefines},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpTo},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll},
