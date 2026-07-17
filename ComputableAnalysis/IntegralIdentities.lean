@@ -3448,6 +3448,63 @@ theorem reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous_from_intervalReg
       (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) :=
   reciprocalQuarticMinusOneCompact_intervalRegular.epsilonDeltaContinuous
 
+/-- The affine unit-interval presentation of the compact reciprocal-quartic
+density.  It is exactly the change of variables `x = 2t - 1`, including the
+Jacobian `2`; hence it is the form on which the ordinary midpoint-dyadic
+Riemann mesh operates.  This is a finite rational function at every rational
+sample point--not an appeal to a completed interval integral. -/
+def reciprocalQuarticMinusOneUnitDensity (t : Rat) : Rat :=
+  2 * reciprocalQuarticSymmetricDensity (-1) (2 * t - 1)
+
+/-- The affine unit density is `32`-Lipschitz on `[0,1]`.  The factor is the
+product of the compact-density constant `8`, the affine-coordinate stretch
+`2`, and the Jacobian factor `2`. -/
+theorem reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit
+    (s t : Rat)
+    (hs0 : 0 <= s) (hs1 : s <= 1)
+    (ht0 : 0 <= t) (ht1 : t <= 1) :
+    qabs (reciprocalQuarticMinusOneUnitDensity s -
+      reciprocalQuarticMinusOneUnitDensity t) <= 32 * qabs (t - s) := by
+  have hslo : -1 <= 2 * s - 1 := by grind
+  have hshi : 2 * s - 1 <= 1 := by grind
+  have htlo : -1 <= 2 * t - 1 := by grind
+  have hthi : 2 * t - 1 <= 1 := by grind
+  have hcompact := reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit
+    (2 * s - 1) (2 * t - 1) hslo hshi htlo hthi
+  have hstretch : qabs ((2 * t - 1) - (2 * s - 1)) = 2 * qabs (t - s) := by
+    rw [show (2 * t - 1) - (2 * s - 1) = 2 * (t - s) by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm]]
+    rw [qabs_mul, qabs_eq_self_of_nonneg (by native_decide : (0 : Rat) <= 2)]
+  have hscaled :
+      qabs (2 * (reciprocalQuarticSymmetricDensity (-1) (2 * s - 1) -
+        reciprocalQuarticSymmetricDensity (-1) (2 * t - 1))) <=
+        2 * (8 * qabs ((2 * t - 1) - (2 * s - 1))) := by
+    rw [qabs_mul, qabs_eq_self_of_nonneg (by native_decide : (0 : Rat) <= 2)]
+    exact Rat.mul_le_mul_of_nonneg_left hcompact (by native_decide)
+  calc
+    qabs (reciprocalQuarticMinusOneUnitDensity s -
+        reciprocalQuarticMinusOneUnitDensity t) =
+        qabs (2 * (reciprocalQuarticSymmetricDensity (-1) (2 * s - 1) -
+          reciprocalQuarticSymmetricDensity (-1) (2 * t - 1))) := by
+          simp only [reciprocalQuarticMinusOneUnitDensity]
+          congr 1
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm]
+    _ <= 2 * (8 * qabs ((2 * t - 1) - (2 * s - 1))) := hscaled
+    _ = 32 * qabs (t - s) := by rw [hstretch]; grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The exact left Riemann sum of the affine compact density on the ordinary
+static dyadic mesh.  The stage is visibly a finite rational computation: no
+limit, topology, or real-number completeness is hidden in this definition. -/
+def reciprocalQuarticMinusOneUnitLeftRiemann (stage : Nat) : Rat :=
+  riemannLeftExact reciprocalQuarticMinusOneUnitDensity 0 1 (2 ^ stage)
+
+theorem reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum (stage : Nat) :
+    reciprocalQuarticMinusOneUnitLeftRiemann stage =
+      riemannLeftExact reciprocalQuarticMinusOneUnitDensity 0 1 (2 ^ stage) :=
+  rfl
+
 /-- The finite compact interval integral that represents the clean
 projective-line quartic route.  Its integrand is the explicit density obtained
 after the rational compactification of the line; a future route must therefore

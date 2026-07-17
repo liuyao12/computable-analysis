@@ -937,6 +937,10 @@ the improper integral together with agreement with that expected value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_continuous}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous_from_intervalRegular}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
 \uses{def:reciprocal-quartic-test-kernel}
@@ -1032,6 +1036,17 @@ completed reals.  The generic checked bridge from interval regularity to
 rational \(\varepsilon\)-\(\delta\) continuity also recovers the stated
 continuity certificate.  The projective change-of-variables theorem and the
 actual integral construction remain unchecked.
+There is now, however, a fixed finite rational target for that construction:
+the affine chart \(x=2t-1\) turns the compact density into
+\[
+  g(t)=2\frac{1+(2t-1)^2}{(2t-1)^4-(2t-1)^2+1},\qquad 0\le t\le1.
+\]
+Lean proves directly that \(g\) is \(32\)-Lipschitz on rational unit inputs
+and names its exact left sums on the ordinary \(2^n\)-cell static-dyadic mesh.
+Thus the remaining construction is specifically a shrinking enclosure of
+these displayed finite sums (with the usual Lipschitz mesh error), rather
+than an unconstrained raw-real witness.  This is progress toward, but not
+yet, the missing projective substitution and scoreboard equality.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \[
