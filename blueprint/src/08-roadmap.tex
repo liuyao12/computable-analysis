@@ -451,6 +451,11 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.outerQuarterLength_width_le_sharp}
 \lean{ComputableAnalysis.PiProofs.outerFanPerimeter_refinesByDoubling_withZeroGap}
 \lean{ComputableAnalysis.PiProofs.outerQuarterLength_hi_refinesByDyadicStage}
+\lean{ComputableAnalysis.PiProofs.adjacentChordCross_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.innerChordCrossSumFrom}
+\lean{ComputableAnalysis.PiProofs.innerChordCrossSumFrom_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.innerFanPerimeter_eq_innerChordCrossSumFrom}
+\lean{ComputableAnalysis.PiProofs.innerFanPerimeter_refinesByDoubling}
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_innerQuarterLength_hi}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_contains_of_le_precision}
@@ -908,9 +913,14 @@ every dyadic subdivision.  The sharper certified bisection-width budget
 each public stage, so
 \code{PiProofs.outerQuarterLength\_hi\_refinesByDyadicStage} proves the
 circumscribed upper endpoint outright.  Thus the sole remaining all-stage
-endpoint proof is the corresponding inscribed lower-path estimate; no
-unproved outer geometric monotonicity or square-root-error transport remains
-in the target.
+endpoint proof is the corresponding inscribed lower-path estimate.  Its
+rational geometric half is now explicit too:
+\code{PiProofs.adjacentChordCross\_refinesByDoubling} proves the local
+chord-cross inequality and
+\code{PiProofs.innerFanPerimeter\_refinesByDoubling} lifts it to the whole
+fan.  What remains is only the transport of this inner fan gain through the
+square-root lower enclosures; no unproved fan monotonicity or outer
+square-root-error transport remains in the target.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
@@ -1178,6 +1188,11 @@ chord and tangent formulas.
   \code{PiProofs.outerFanPerimeter\_refinesByDoubling\_withZeroGap},
   \code{PiProofs.outerQuarterLength\_width\_le\_sharp},
   \code{PiProofs.outerQuarterLength\_hi\_refinesByDyadicStage},
+  \code{PiProofs.adjacentChordCross\_refinesByDoubling},
+  \code{PiProofs.innerChordCrossSumFrom},
+  \code{PiProofs.innerChordCrossSumFrom\_refinesByDoubling},
+  \code{PiProofs.innerFanPerimeter\_eq\_innerChordCrossSumFrom},
+  \code{PiProofs.innerFanPerimeter\_refinesByDoubling},
   \code{PiProofs.CircumferenceQuarterLengthStepRefines},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpTo},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll},

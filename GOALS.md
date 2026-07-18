@@ -566,8 +566,12 @@ students actually compute.
   outer tangent fan decreases by an explicit positive first-cell gap under
   every dyadic subdivision.  The certified bisection-width schedule is below
   that gap, so `outerQuarterLength_hi_refinesByDyadicStage` proves the outer
-  (circumscribed) endpoint at every public stage.  The remaining direct
-  endpoint work is the corresponding inscribed lower-path refinement.
+  (circumscribed) endpoint at every public stage.  The complementary exact
+  inner geometry is now also symbolic:
+  `innerFanPerimeter_refinesByDoubling` proves that the rational inscribed
+  chord cross-product fan increases under every dyadic subdivision.  The
+  remaining direct endpoint work is precisely to transport that inner fan
+  refinement through the square-root lower enclosures.
 
 ### Archived pre-refactor notes (not current source)
 

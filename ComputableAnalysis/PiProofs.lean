@@ -16194,6 +16194,187 @@ theorem outerQuarterLength_hi_refinesByDyadicStage (n : Nat) :
     _ <= (outerQuarterLength stage).hi :=
       outerFanPerimeter_le_outerQuarterLength_hi stage hstage
 
+/-- Splitting a directed chord through a unit point gives the usual
+angle-addition identity for rational cross products. -/
+private theorem pointCross_split_through_unit
+    (p mid q : PiCirclePoint)
+    (hmid : RationalCircle.Stage.normSq mid = 1) :
+    pointCross p q =
+      pointCross p mid * RationalCircle.Stage.dot mid q +
+        RationalCircle.Stage.dot p mid * pointCross mid q := by
+  unfold pointCross RationalCircle.Stage.dot
+    RationalCircle.Stage.normSq at *
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem circleSamplePoint_dot_le_one
+    (stage i j : Nat) :
+    RationalCircle.Stage.dot (circleSamplePoint stage i)
+      (circleSamplePoint stage j) <= 1 := by
+  have h := RationalCircle.Stage.one_sub_point_dot_nonneg
+    (circleParameter stage i) (circleParameter stage j)
+  change RationalCircle.Stage.dot (RationalCircle.Stage.point
+      (circleParameter stage i)) (RationalCircle.Stage.point
+      (circleParameter stage j)) <= 1
+  grind [Rat.sub_eq_add_neg]
+
+/-- The rational cross-product fan of the inscribed chords increases when an
+adjacent chord is split at the dyadic parameter midpoint. -/
+theorem adjacentChordCross_refinesByDoubling
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    pointCross (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) <=
+      pointCross (circleSamplePoint (2 * stage) (2 * k))
+        (circleSamplePoint (2 * stage) (2 * k + 1)) +
+      pointCross (circleSamplePoint (2 * stage) (2 * k + 1))
+        (circleSamplePoint (2 * stage) (2 * k + 2)) := by
+  let fine := 2 * stage
+  let p := circleSamplePoint fine (2 * k)
+  let mid := circleSamplePoint fine (2 * k + 1)
+  let q := circleSamplePoint fine (2 * k + 2)
+  have hfine : 0 < fine := by
+    dsimp [fine]
+    omega
+  have hpm : 0 <= pointCross p mid := by
+    dsimp [p, mid]
+    exact circleSamplePoint_cross_nonneg_of_order fine hfine (by omega)
+  have hmq : 0 <= pointCross mid q := by
+    dsimp [mid, q]
+    exact circleSamplePoint_cross_nonneg_of_order fine hfine (by omega)
+  have hmid : RationalCircle.Stage.normSq mid = 1 := by
+    dsimp [mid]
+    exact RationalCircle.Stage.samplePoint_normSq_unit
+      (rationalCircleStage fine) (2 * k + 1)
+  have hdot_right : RationalCircle.Stage.dot mid q <= 1 := by
+    dsimp [mid, q]
+    exact circleSamplePoint_dot_le_one fine (2 * k + 1) (2 * k + 2)
+  have hdot_left : RationalCircle.Stage.dot p mid <= 1 := by
+    dsimp [p, mid]
+    exact circleSamplePoint_dot_le_one fine (2 * k) (2 * k + 1)
+  have hsplit := pointCross_split_through_unit p mid q hmid
+  have hcoarse :
+      pointCross (circleSamplePoint stage k)
+          (circleSamplePoint stage (k + 1)) = pointCross p q := by
+    dsimp [p, q, fine]
+    rw [circleSamplePoint_double_index,
+      circleSamplePoint_double_index_succ]
+  rw [hcoarse, hsplit]
+  calc
+    pointCross p mid * RationalCircle.Stage.dot mid q +
+        RationalCircle.Stage.dot p mid * pointCross mid q <=
+      pointCross p mid * 1 + 1 * pointCross mid q := by
+        calc
+          pointCross p mid * RationalCircle.Stage.dot mid q +
+              RationalCircle.Stage.dot p mid * pointCross mid q <=
+            pointCross p mid * 1 +
+              RationalCircle.Stage.dot p mid * pointCross mid q :=
+              Rat.add_le_add_right.mpr
+                (Rat.mul_le_mul_of_nonneg_left hdot_right hpm)
+          _ <= pointCross p mid * 1 + 1 * pointCross mid q :=
+              Rat.add_le_add_left.mpr
+                (Rat.mul_le_mul_of_nonneg_right hdot_left hmq)
+    _ = pointCross p mid + pointCross mid q := by grind
+
+/-- The exact rational cross-product perimeter of a consecutive block of
+inscribed chord cells. -/
+def innerChordCrossSumFrom (stage k : Nat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 =>
+      pointCross (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) +
+      innerChordCrossSumFrom stage (k + 1) count
+
+private theorem innerChordCrossSumFrom_refinesByDoubling_aux
+    (stage : Nat) (hstage : 0 < stage) (count k : Nat) :
+    innerChordCrossSumFrom stage k count <=
+      innerChordCrossSumFrom (2 * stage) (2 * k) (2 * count) := by
+  induction count generalizing k with
+  | zero =>
+      simp [innerChordCrossSumFrom]
+  | succ count ih =>
+      have hlocal := adjacentChordCross_refinesByDoubling stage hstage k
+      have htail := ih (k + 1)
+      rw [show 2 * (count + 1) = 2 * count + 2 by omega]
+      simp only [innerChordCrossSumFrom]
+      have htail' :
+          innerChordCrossSumFrom stage (k + 1) count <=
+            innerChordCrossSumFrom (2 * stage) (2 * k + 1 + 1)
+              (2 * count) := by
+        have hindex : 2 * (k + 1) = 2 * k + 1 + 1 := by omega
+        rw [hindex] at htail
+        exact htail
+      calc
+        pointCross (circleSamplePoint stage k)
+            (circleSamplePoint stage (k + 1)) +
+            innerChordCrossSumFrom stage (k + 1) count <=
+          (pointCross (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1)) +
+            pointCross (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2))) +
+            innerChordCrossSumFrom stage (k + 1) count :=
+          Rat.add_le_add_right.mpr hlocal
+        _ <=
+          (pointCross (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1)) +
+            pointCross (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2))) +
+            innerChordCrossSumFrom (2 * stage) (2 * k + 1 + 1)
+              (2 * count) :=
+          Rat.add_le_add_left.mpr htail'
+        _ =
+          pointCross (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1)) +
+            (pointCross (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2)) +
+              innerChordCrossSumFrom (2 * stage) (2 * k + 2)
+                (2 * count)) := by
+          rw [show 2 * k + 1 + 1 = 2 * k + 2 by omega]
+          grind [Rat.add_assoc, Rat.add_comm]
+
+theorem innerChordCrossSumFrom_refinesByDoubling
+    (stage : Nat) (hstage : 0 < stage) (count k : Nat) :
+    innerChordCrossSumFrom stage k count <=
+      innerChordCrossSumFrom (2 * stage) (2 * k) (2 * count) :=
+  innerChordCrossSumFrom_refinesByDoubling_aux stage hstage count k
+
+private theorem innerChordCrossSumFrom_eq_edgeCrossPerimeter
+    (stage count k : Nat) :
+    innerChordCrossSumFrom stage k count =
+      Fan.perimeter
+        (Fan.edgeCrossesFrom (circleSamplePoint stage k)
+          (innerBoundaryFrom stage (k + 1) count)) := by
+  induction count generalizing k with
+  | zero =>
+      simp [innerChordCrossSumFrom, innerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom, Fan.perimeter,
+        Fan.edgeCrossesFrom, Fan.sumRat]
+  | succ count ih =>
+      simp [innerChordCrossSumFrom, innerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom, Fan.perimeter,
+        Fan.edgeCrossesFrom, Fan.sumRat, ih]
+
+/-- The rational inscribed chord fan is exactly the sum of its adjacent
+cross-product cells. -/
+theorem innerFanPerimeter_eq_innerChordCrossSumFrom (stage : Nat) :
+    Fan.perimeter (innerFanWidths stage) =
+      innerChordCrossSumFrom stage 0 stage := by
+  have h := innerChordCrossSumFrom_eq_edgeCrossPerimeter stage stage 0
+  symm
+  simpa [innerFanWidths, innerBoundary, Fan.sectorFanWidths,
+    Fan.perimeter, Fan.edgeCrossesFrom, Fan.sumRat, innerBoundaryFrom,
+    piCircleAreaPolygon.innerBoundaryFrom, pointCross_origin_left,
+    Rat.zero_add] using h
+
+/-- Exact rational inscribed chord fan increases under dyadic subdivision. -/
+theorem innerFanPerimeter_refinesByDoubling
+    (stage : Nat) (hstage : 0 < stage) :
+    Fan.perimeter (innerFanWidths stage) <=
+      Fan.perimeter (innerFanWidths (2 * stage)) := by
+  rw [innerFanPerimeter_eq_innerChordCrossSumFrom,
+    innerFanPerimeter_eq_innerChordCrossSumFrom]
+  simpa using
+    (innerChordCrossSumFrom_refinesByDoubling stage hstage stage 0)
+
 end PiProofs
 
 end ComputableAnalysis
