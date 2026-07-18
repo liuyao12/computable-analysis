@@ -471,17 +471,18 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently nine of eighteen named
-  computations are valid raw reals, and seven of seventeen applicable rows
+  `blueprint/src/pi-scoreboard-table.tex`: currently ten of nineteen named
+  computations are valid raw reals, and eight of eighteen applicable rows
   have a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
   rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn
   computation `4 * arctanGeom(1)` and its single rectangle-integral
   formulation `4 * arctanIntegralRectangleForAtOne`, the series computation
   `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
-  the reciprocal-tail full-line Cauchy integral, and Nilakantha's accelerated
-  rational series.  The valid-but-not-yet-equivalent Basel row accounts for
-  the remaining definition-only completion.
+  the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
+  rational series, and the direct cross-fan circumference computation
+  `piCircumferenceFan`.  The valid-but-not-yet-equivalent Basel row accounts
+  for the remaining definition-only completion.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
@@ -572,7 +573,16 @@ students actually compute.
   chord cross-product fan increases under every dyadic subdivision.  This is
   an exact sector-area fan, not the chord-path length: it improves the
   Archimedes geometry but cannot on its own transport the direct lower
-  circumference endpoint.  The remaining endpoint work is now isolated as
+  endpoint of the original `piCircumference` evaluator.  It does, however,
+  give a separate direct raw computation: `piCircumferenceFan` uses this
+  exact rational cross-fan as its lower endpoint and the original
+  circumscribed path-length upper endpoint.  Lean proves its ordered nested
+  brackets and explicit `10/(n+1)` width modulus in
+  `piCircumferenceFan_valid`, then proves
+  `piCircumferenceFan_equiv_piCircleArea` from the common inscribed-polygon
+  lower endpoint.  This is neither a reboxing nor a replacement for the
+  original chord-length lower path, whose remaining endpoint work is isolated
+  as
   `AdjacentChordLowerRefinesByDoubling`: a local comparison between the
   bisection lower enclosure of each coarse chord and the two lower enclosures
   of its refined chords.  Lean proves that this finite local condition lifts

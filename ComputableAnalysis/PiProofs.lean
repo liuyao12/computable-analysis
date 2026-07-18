@@ -16531,6 +16531,211 @@ theorem circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement
       hlocal n,
     outerQuarterLength_hi_refinesByDyadicStage n⟩
 
+/-- A direct Archimedean pi algorithm with an exact rational inscribed
+cross-product lower endpoint and the original circumscribed polygonal
+path-length upper endpoint.  The cross product is a certified lower bound for
+each positive chord on the unit circle, so this remains a geometric
+circumference enclosure; unlike `piCircumference`, its lower endpoint is
+monotone under dyadic subdivision by finite rational algebra. -/
+def piCircumferenceFanComputeAtStage (stage : Nat) : QInterval :=
+  { lo := (4 * Fan.perimeter (innerFanWidths stage)) / 2,
+    hi := (4 * (outerQuarterLength stage).hi) / 2 }
+
+/-- The cross-fan Archimedean circumference pi computation.  This is not an
+anchor reboxing: every endpoint is evaluated from the displayed finite
+rational circle polygon at the requested dyadic stage. -/
+def piCircumferenceFan : RealRaw where
+  compute := fun n => piCircumferenceFanComputeAtStage (piStage n)
+
+theorem piCircumferenceFan_compute_eq (n : Nat) :
+    piCircumferenceFan.compute n =
+      piCircumferenceFanComputeAtStage (piStage n) :=
+  rfl
+
+/-- The finite cross-fan circumference bracket is ordered at every positive
+circle stage. -/
+theorem piCircumferenceFanComputeAtStage_ordered
+    (stage : Nat) (hstage : 0 < stage) :
+    0 <= (piCircumferenceFanComputeAtStage stage).width := by
+  have hfan :
+      Fan.perimeter (innerFanWidths stage) <=
+        Fan.perimeter (outerFanWidths stage) :=
+    innerFanPerimeter_le_outerFanPerimeter stage hstage
+  have houter :
+      Fan.perimeter (outerFanWidths stage) <=
+        (outerQuarterLength stage).hi :=
+    outerFanPerimeter_le_outerQuarterLength_hi stage hstage
+  have hscaled :
+      (4 * Fan.perimeter (innerFanWidths stage)) / 2 <=
+        (4 * (outerQuarterLength stage).hi) / 2 :=
+    div_two_le_div_two
+      (four_mul_le_four_mul (Rat.le_trans hfan houter))
+  unfold piCircumferenceFanComputeAtStage QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+theorem piCircumferenceFan_ordered (n : Nat) :
+    0 <= (piCircumferenceFan.compute n).width := by
+  rw [piCircumferenceFan_compute_eq]
+  exact piCircumferenceFanComputeAtStage_ordered (piStage n) (piStage_pos n)
+
+/-- The cross-fan lower endpoint and polygonal upper endpoint both refine
+under each dyadic stage doubling. -/
+theorem piCircumferenceFan_step_refines :
+    EndpointStepRefines piCircumferenceFan.compute := by
+  intro n
+  have hstage : piStage (n + 1) = 2 * piStage n := by
+    unfold piStage
+    rw [Nat.pow_succ]
+    omega
+  have houter := outerQuarterLength_hi_refinesByDyadicStage n
+  rw [hstage] at houter
+  rw [piCircumferenceFan_compute_eq,
+    piCircumferenceFan_compute_eq, hstage]
+  unfold piCircumferenceFanComputeAtStage
+  constructor
+  · exact div_two_le_div_two
+      (four_mul_le_four_mul
+        (innerFanPerimeter_refinesByDoubling (piStage n) (piStage_pos n)))
+  · exact div_two_le_div_two
+      (four_mul_le_four_mul
+        houter)
+
+/-- The quarter-gap of the cross-fan circumference enclosure. -/
+def circumferenceFanQuarterGap (stage : Nat) : Rat :=
+  (outerQuarterLength stage).hi - Fan.perimeter (innerFanWidths stage)
+
+/-- The remaining cross-fan gap is controlled by the already certified fan
+gap plus the upper polygonal path's square-root enclosure budget. -/
+theorem circumferenceFanQuarterGap_le_fanGap_add_pathWidthBudget
+    (stage : Nat) (hstage : 0 < stage) :
+    circumferenceFanQuarterGap stage <=
+      circumferenceFanGap stage + circumferencePathWidthBudget stage := by
+  let Fi := Fan.perimeter (innerFanWidths stage)
+  let Fo := Fan.perimeter (outerFanWidths stage)
+  let O := outerQuarterLength stage
+  have houterLo : O.lo <= Fo := by
+    dsimp [O, Fo]
+    exact outerQuarterLength_lo_le_outerFanPerimeter stage hstage
+  have houterWidth : O.hi - Fo <= O.width := by
+    dsimp [O]
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hpath : O.width <= circumferencePathWidthBudget stage := by
+    change (rationalPointPathLength (outerBoundary stage) stage).width <=
+      circumferencePathWidthBudget stage
+    rw [rationalPointPathLength_width_eq_segmentBudget]
+    unfold circumferencePathWidthBudget
+    have hinner := pathSegmentWidthBudget_nonneg (innerBoundary stage) stage
+    grind
+  unfold circumferenceFanQuarterGap circumferenceFanGap
+  dsimp [Fi, Fo, O] at houterWidth hpath ⊢
+  calc
+    (outerQuarterLength stage).hi - Fan.perimeter (innerFanWidths stage) =
+        ((outerQuarterLength stage).hi - Fan.perimeter (outerFanWidths stage)) +
+          (Fan.perimeter (outerFanWidths stage) -
+            Fan.perimeter (innerFanWidths stage)) := by
+          grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+    _ <= (outerQuarterLength stage).width +
+          (Fan.perimeter (outerFanWidths stage) -
+            Fan.perimeter (innerFanWidths stage)) :=
+          Rat.add_le_add_right.mpr houterWidth
+    _ <= circumferencePathWidthBudget stage +
+          (Fan.perimeter (outerFanWidths stage) -
+            Fan.perimeter (innerFanWidths stage)) :=
+          Rat.add_le_add_right.mpr hpath
+    _ = (Fan.perimeter (outerFanWidths stage) -
+          Fan.perimeter (innerFanWidths stage)) +
+          circumferencePathWidthBudget stage := by
+          grind [Rat.add_comm]
+
+theorem piCircumferenceFanComputeAtStage_width_eq (stage : Nat) :
+    (piCircumferenceFanComputeAtStage stage).width =
+      2 * circumferenceFanQuarterGap stage := by
+  simp [piCircumferenceFanComputeAtStage, circumferenceFanQuarterGap,
+    QInterval.width, four_div_two_eq_two_mul]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem piCircumferenceFan_compute_width_eq (n : Nat) :
+    (piCircumferenceFan.compute n).width =
+      2 * circumferenceFanQuarterGap (piStage n) := by
+  rw [piCircumferenceFan_compute_eq]
+  exact piCircumferenceFanComputeAtStage_width_eq (piStage n)
+
+theorem piCircumferenceFan_width_linear_bound_ten :
+    forall n,
+      (piCircumferenceFan.compute n).width <=
+        (10 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  intro n
+  rw [piCircumferenceFan_compute_width_eq]
+  have hgap := circumferenceFanQuarterGap_le_fanGap_add_pathWidthBudget
+    (piStage n) (piStage_pos n)
+  have hscaled :
+      2 * circumferenceFanQuarterGap (piStage n) <=
+        2 * (circumferenceFanGap (piStage n) +
+          circumferencePathWidthBudget (piStage n)) :=
+    Rat.mul_le_mul_of_nonneg_left hgap
+      (by native_decide : (0 : Rat) <= 2)
+  exact Rat.le_trans hscaled (circumferenceFanGapPathBudgetLinearBound_ten n)
+
+theorem piCircumferenceFan_widthsShrink :
+    RealRaw.WidthsShrinkToZero piCircumferenceFan.compute :=
+  widthsShrink_of_natOverSuccBound piCircumferenceFan_width_linear_bound_ten
+
+private theorem innerQuarterArea_eq_half_innerFanPerimeter
+    (stage : Nat) (hstage : 0 < stage) :
+    innerQuarterArea stage = Fan.perimeter (innerFanWidths stage) / 2 := by
+  rw [innerQuarterArea_eq_variable_unit_fan stage]
+  · unfold innerFanPieces
+    rw [Fan.variableArea_unitPieces_eq_area, Fan.area_one_eq_half_perimeter]
+  · exact Fan.sumRat_nonneg (innerFanWidths stage)
+      (Fan.sectorFanWidths_mem_nonneg (innerBoundary stage)
+        (innerBoundary_consecutiveCrossNonneg stage hstage))
+
+/-- The cross-fan lower endpoint is exactly the inscribed polygon-area lower
+endpoint for the baseline circle-area pi computation. -/
+theorem piCircumferenceFan_compute_lo_eq_piCircleArea_compute_lo (n : Nat) :
+    (piCircumferenceFan.compute n).lo = (piCircleArea.compute n).lo := by
+  rw [piCircumferenceFan_compute_eq, piCircleAreaPolygonAgreement n,
+    piCircleAreaPolygon_compute_eq]
+  unfold piCircumferenceFanComputeAtStage piCircleAreaPolygonComputeAtStage
+  rw [innerQuarterArea_eq_half_innerFanPerimeter
+    (piStage n) (piStage_pos n)]
+  rw [four_div_two_eq_two_mul]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The cross-fan circumference computation is a valid rational raw real:
+ordered brackets, symbolic dyadic endpoint refinement, and an explicit
+`10/(n+1)` width modulus. -/
+theorem piCircumferenceFan_valid : piCircumferenceFan.Valid := by
+  change RealRaw.ValidCompute piCircumferenceFan.compute
+  refine ⟨piCircumferenceFan_ordered, ?_, piCircumferenceFan_widthsShrink⟩
+  intro n m hnm
+  have hmono := endpointMonotone_of_stepRefines piCircumferenceFan_step_refines
+    n m hnm
+  have hordered := piCircumferenceFan_ordered m
+  unfold QInterval.width at hordered
+  exact ⟨hmono.1, by grind [Rat.sub_eq_add_neg], hmono.2⟩
+
+/-- The direct cross-fan circumference computation agrees with the baseline
+circle-area pi at every stage.  The common lower endpoint is the inscribed
+sector-polygon area, while both independently certified upper endpoints lie
+above it. -/
+theorem piCircumferenceFan_equiv_piCircleArea :
+    piCircumferenceFan.Equiv piCircleArea := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff piCircumferenceFan piCircleArea n n).2
+  have hsame := piCircumferenceFan_compute_lo_eq_piCircleArea_compute_lo n
+  have hfan := piCircumferenceFan_ordered n
+  have harea := AreaLoopValidity.areaOrdered n
+  unfold QInterval.width at hfan harea
+  constructor
+  · rw [hsame]
+    grind [Rat.sub_eq_add_neg]
+  · rw [← hsame]
+    grind [Rat.sub_eq_add_neg]
+
 end PiProofs
 
 end ComputableAnalysis

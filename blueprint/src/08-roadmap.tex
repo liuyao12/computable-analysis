@@ -462,6 +462,21 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.InnerChordLowerRefinement}
 \lean{ComputableAnalysis.PiProofs.innerQuarterLength_lo_refinesByDyadicStage_of_adjacentChordLowerRefinement}
 \lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFanComputeAtStage}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_compute_eq}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFanComputeAtStage_ordered}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_ordered}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_step_refines}
+\lean{ComputableAnalysis.PiProofs.circumferenceFanQuarterGap}
+\lean{ComputableAnalysis.PiProofs.circumferenceFanQuarterGap_le_fanGap_add_pathWidthBudget}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFanComputeAtStage_width_eq}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_compute_width_eq}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_width_linear_bound_ten}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_widthsShrink}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_compute_lo_eq_piCircleArea_compute_lo}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceFan_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_contains_of_le_precision}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_lo_mono_precision}
@@ -937,8 +952,18 @@ The all-stage package \code{PiProofs.InnerChordLowerRefinement}, combined
 with the already proved outer inequality, gives the direct refinement target
 through
 \code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_adjacentChordLowerRefinement}.
-Proving the local bisection comparison remains necessary; the scoreboard is
-unchanged.
+Proving the local bisection comparison remains necessary for the original
+chord-length evaluator \code{piCircumference}.  The exact cross fan does now
+complete a distinct direct Archimedean representative:
+\code{PiProofs.piCircumferenceFan} evaluates the rational inscribed
+cross-product fan as its lower endpoint and the original circumscribed
+polygonal path as its upper endpoint.  It is not an anchor reboxing.  Lean
+proves ordered dyadic brackets in
+\code{PiProofs.piCircumferenceFan\_valid}, with width at most
+\(10/(n+1)\), and proves its exact agreement with the area-loop baseline in
+\code{PiProofs.piCircumferenceFan\_equiv\_piCircleArea}.  Consequently this
+new row counts on the scoreboard, while the original circumference row remains
+pending.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
@@ -1216,6 +1241,21 @@ chord and tangent formulas.
   \code{PiProofs.InnerChordLowerRefinement},
   \code{PiProofs.innerQuarterLength\_lo\_refinesByDyadicStage\_of\_adjacentChordLowerRefinement},
   \code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_adjacentChordLowerRefinement},
+  \code{PiProofs.piCircumferenceFanComputeAtStage},
+  \code{PiProofs.piCircumferenceFan},
+  \code{PiProofs.piCircumferenceFan\_compute\_eq},
+  \code{PiProofs.piCircumferenceFanComputeAtStage\_ordered},
+  \code{PiProofs.piCircumferenceFan\_ordered},
+  \code{PiProofs.piCircumferenceFan\_step\_refines},
+  \code{PiProofs.circumferenceFanQuarterGap},
+  \code{PiProofs.circumferenceFanQuarterGap\_le\_fanGap\_add\_pathWidthBudget},
+  \code{PiProofs.piCircumferenceFanComputeAtStage\_width\_eq},
+  \code{PiProofs.piCircumferenceFan\_compute\_width\_eq},
+  \code{PiProofs.piCircumferenceFan\_width\_linear\_bound\_ten},
+  \code{PiProofs.piCircumferenceFan\_widthsShrink},
+  \code{PiProofs.piCircumferenceFan\_compute\_lo\_eq\_piCircleArea\_compute\_lo},
+  \code{PiProofs.piCircumferenceFan\_valid},
+  \code{PiProofs.piCircumferenceFan\_equiv\_piCircleArea},
   \code{PiProofs.CircumferenceQuarterLengthStepRefines},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpTo},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll},
