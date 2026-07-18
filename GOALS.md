@@ -569,9 +569,17 @@ students actually compute.
   (circumscribed) endpoint at every public stage.  The complementary exact
   inner geometry is now also symbolic:
   `innerFanPerimeter_refinesByDoubling` proves that the rational inscribed
-  chord cross-product fan increases under every dyadic subdivision.  The
-  remaining direct endpoint work is precisely to transport that inner fan
-  refinement through the square-root lower enclosures.
+  chord cross-product fan increases under every dyadic subdivision.  Lean now
+  reduces the remaining square-root transport to the one explicit estimate
+  `InnerQuarterLengthDyadicFanBudget`: the coarse lower endpoint plus the
+  next-stage enclosure width lies below the coarse exact fan.  The proved
+  `innerFanPerimeter_sub_width_le_innerQuarterLength_lo` and exact fan
+  refinement turn that estimate into the all-stage inner endpoint inequality
+  via `innerQuarterLength_lo_refinesByDyadicStage_of_fanBudget`; combined with
+  the proved outer endpoint,
+  `circumferenceQuarterLengthStepRefines_of_innerFanBudget` yields the full
+  direct circumference step refinement.  The score remains unchanged until
+  that budget itself is proved.
 
 ### Archived pre-refactor notes (not current source)
 
