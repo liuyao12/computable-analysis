@@ -16375,6 +16375,162 @@ theorem innerFanPerimeter_refinesByDoubling
   simpa using
     (innerChordCrossSumFrom_refinesByDoubling stage hstage stage 0)
 
+/-- A local, same-units refinement certificate for the inscribed path: the
+certified lower bound for one chord is no greater than the sum of the lower
+bounds for its two dyadic subchords. -/
+def AdjacentChordLowerRefinesByDoubling (stage : Nat) : Prop :=
+  forall k : Fin stage,
+    (pointSegmentLengthInterval
+      (circleSamplePoint stage k.1)
+      (circleSamplePoint stage (k.1 + 1)) stage).lo <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k.1))
+        (circleSamplePoint (2 * stage) (2 * k.1 + 1)) (2 * stage)).lo +
+        (pointSegmentLengthInterval
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).lo
+
+private def innerChordLowerSumFrom
+    (stage precision k : Nat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 =>
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) precision).lo +
+        innerChordLowerSumFrom stage precision (k + 1) count
+
+private theorem innerChordLowerSumFrom_eq_pathLo
+    (stage precision count k : Nat) :
+    innerChordLowerSumFrom stage precision k count =
+      (rationalPointPathLength
+        (circleSamplePoint stage k ::
+          innerBoundaryFrom stage (k + 1) count) precision).lo := by
+  induction count generalizing k with
+  | zero =>
+      rfl
+  | succ count ih =>
+      simp [innerChordLowerSumFrom, rationalPointPathLength,
+        rationalPointPathLength.totalLength, innerBoundaryFrom,
+        piCircleAreaPolygon.innerBoundaryFrom, pointSegmentLengthInterval,
+        pointSegmentNormSq, ih]
+
+private theorem innerChordLowerSumFrom_refinesByDoubling_aux
+    (stage : Nat) (hlocal : AdjacentChordLowerRefinesByDoubling stage) :
+    forall count k, k + count <= stage ->
+      innerChordLowerSumFrom stage stage k count <=
+        innerChordLowerSumFrom (2 * stage) (2 * stage) (2 * k) (2 * count)
+  | 0, _k, _hbound => by
+      simp [innerChordLowerSumFrom]
+  | count + 1, k, hbound => by
+      have hhead :
+          (pointSegmentLengthInterval
+            (circleSamplePoint stage k)
+            (circleSamplePoint stage (k + 1)) stage).lo <=
+            (pointSegmentLengthInterval
+              (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1)) (2 * stage)).lo +
+              (pointSegmentLengthInterval
+                (circleSamplePoint (2 * stage) (2 * k + 1))
+                (circleSamplePoint (2 * stage) (2 * k + 2))
+                (2 * stage)).lo :=
+        hlocal ⟨k, by omega⟩
+      have htail :=
+        innerChordLowerSumFrom_refinesByDoubling_aux stage hlocal count
+          (k + 1) (by omega)
+      have htail' :
+          innerChordLowerSumFrom stage stage (k + 1) count <=
+            innerChordLowerSumFrom (2 * stage) (2 * stage)
+              (2 * k + 1 + 1) (2 * count) := by
+        have hindex : 2 * (k + 1) = 2 * k + 1 + 1 := by omega
+        rw [hindex] at htail
+        exact htail
+      rw [show 2 * (count + 1) = 2 * count + 2 by omega]
+      simp only [innerChordLowerSumFrom]
+      calc
+        (pointSegmentLengthInterval
+            (circleSamplePoint stage k)
+            (circleSamplePoint stage (k + 1)) stage).lo +
+            innerChordLowerSumFrom stage stage (k + 1) count <=
+          ((pointSegmentLengthInterval
+              (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1))
+              (2 * stage)).lo +
+            (pointSegmentLengthInterval
+              (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2))
+              (2 * stage)).lo) +
+            innerChordLowerSumFrom stage stage (k + 1) count :=
+          Rat.add_le_add_right.mpr hhead
+        _ <=
+          ((pointSegmentLengthInterval
+              (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1))
+              (2 * stage)).lo +
+            (pointSegmentLengthInterval
+              (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2))
+              (2 * stage)).lo) +
+            innerChordLowerSumFrom (2 * stage) (2 * stage)
+              (2 * k + 1 + 1) (2 * count) :=
+          Rat.add_le_add_left.mpr htail'
+        _ =
+          (pointSegmentLengthInterval
+              (circleSamplePoint (2 * stage) (2 * k))
+              (circleSamplePoint (2 * stage) (2 * k + 1))
+              (2 * stage)).lo +
+            ((pointSegmentLengthInterval
+              (circleSamplePoint (2 * stage) (2 * k + 1))
+              (circleSamplePoint (2 * stage) (2 * k + 2))
+              (2 * stage)).lo +
+              innerChordLowerSumFrom (2 * stage) (2 * stage)
+                (2 * k + 1 + 1) (2 * count)) := by
+          grind [Rat.add_assoc, Rat.add_comm]
+
+/-- Local lower-chord refinement lifts by finite recursion to the full
+inscribed quarter-path endpoint. -/
+theorem innerQuarterLength_lo_refinesByDoubling_of_adjacentChordLowerRefines
+    (stage : Nat) (hlocal : AdjacentChordLowerRefinesByDoubling stage) :
+    (innerQuarterLength stage).lo <=
+      (innerQuarterLength (2 * stage)).lo := by
+  rw [show (innerQuarterLength stage).lo =
+      innerChordLowerSumFrom stage stage 0 stage by
+        simpa [innerQuarterLength, innerBoundary] using
+          (innerChordLowerSumFrom_eq_pathLo stage stage stage 0).symm,
+    show (innerQuarterLength (2 * stage)).lo =
+      innerChordLowerSumFrom (2 * stage) (2 * stage) 0 (2 * stage) by
+        simpa [innerQuarterLength, innerBoundary] using
+          (innerChordLowerSumFrom_eq_pathLo (2 * stage) (2 * stage)
+            (2 * stage) 0).symm]
+  exact innerChordLowerSumFrom_refinesByDoubling_aux stage hlocal stage 0
+    (by omega)
+
+/-- The remaining direct lower-endpoint condition, expressed as finite local
+rational comparisons at every public dyadic stage. -/
+def InnerChordLowerRefinement : Prop :=
+  forall n, AdjacentChordLowerRefinesByDoubling (piStage n)
+
+theorem innerQuarterLength_lo_refinesByDyadicStage_of_adjacentChordLowerRefinement
+    (hlocal : InnerChordLowerRefinement) (n : Nat) :
+    (innerQuarterLength (piStage n)).lo <=
+      (innerQuarterLength (piStage (n + 1))).lo := by
+  have hstage : piStage (n + 1) = 2 * piStage n := by
+    unfold piStage
+    rw [Nat.pow_succ]
+    omega
+  rw [hstage]
+  exact innerQuarterLength_lo_refinesByDoubling_of_adjacentChordLowerRefines
+    (piStage n) (hlocal n)
+
+/-- The local lower-chord refinement condition, together with the proved
+outer endpoint inequality, suffices for direct circumference refinement. -/
+theorem circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement
+    (hlocal : InnerChordLowerRefinement) :
+    CircumferenceQuarterLengthStepRefines := by
+  intro n
+  exact ⟨innerQuarterLength_lo_refinesByDyadicStage_of_adjacentChordLowerRefinement
+      hlocal n,
+    outerQuarterLength_hi_refinesByDyadicStage n⟩
+
 end PiProofs
 
 end ComputableAnalysis

@@ -572,9 +572,15 @@ students actually compute.
   chord cross-product fan increases under every dyadic subdivision.  This is
   an exact sector-area fan, not the chord-path length: it improves the
   Archimedes geometry but cannot on its own transport the direct lower
-  circumference endpoint.  The remaining endpoint work is a local comparison
-  between the bisection lower enclosure of each coarse chord and the two
-  lower enclosures of its refined chords.  The score remains unchanged.
+  circumference endpoint.  The remaining endpoint work is now isolated as
+  `AdjacentChordLowerRefinesByDoubling`: a local comparison between the
+  bisection lower enclosure of each coarse chord and the two lower enclosures
+  of its refined chords.  Lean proves that this finite local condition lifts
+  to the entire quarter path through
+  `innerQuarterLength_lo_refinesByDoubling_of_adjacentChordLowerRefines`, and
+  `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
+  combines its all-stage form with the proved outer endpoint.  The score
+  remains unchanged until the local bisection comparison is proved.
 
 ### Archived pre-refactor notes (not current source)
 

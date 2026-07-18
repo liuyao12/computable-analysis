@@ -457,6 +457,11 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_eq_innerChordCrossSumFrom}
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_refinesByDoubling}
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_innerQuarterLength_hi}
+\lean{ComputableAnalysis.PiProofs.AdjacentChordLowerRefinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.innerQuarterLength_lo_refinesByDoubling_of_adjacentChordLowerRefines}
+\lean{ComputableAnalysis.PiProofs.InnerChordLowerRefinement}
+\lean{ComputableAnalysis.PiProofs.innerQuarterLength_lo_refinesByDyadicStage_of_adjacentChordLowerRefinement}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_contains_of_le_precision}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_lo_mono_precision}
@@ -922,9 +927,18 @@ fan.  This fan is a sum of rational cross-products, hence has the sector-area
 normalization used by the Archimedes comparison; it is not the chord-path
 length itself.  Its refinement is therefore useful geometry, but it cannot
 by itself transport the inscribed lower endpoint.  The remaining direct
-endpoint proof must compare the bisection lower enclosures of a coarse chord
-with those of its two refined chords, using the chord-length geometry rather
-than the cross-product fan.
+endpoint proof has now been reduced to those local same-units comparisons:
+\code{PiProofs.AdjacentChordLowerRefinesByDoubling} says that the bisection
+lower enclosure of a coarse chord is bounded by the sum of the lower
+enclosures of its two refined chords.  Lean lifts this finite condition across
+the whole quarter path through
+\code{PiProofs.innerQuarterLength\_lo\_refinesByDoubling\_of\_adjacentChordLowerRefines}.
+The all-stage package \code{PiProofs.InnerChordLowerRefinement}, combined
+with the already proved outer inequality, gives the direct refinement target
+through
+\code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_adjacentChordLowerRefinement}.
+Proving the local bisection comparison remains necessary; the scoreboard is
+unchanged.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
@@ -1197,6 +1211,11 @@ chord and tangent formulas.
   \code{PiProofs.innerChordCrossSumFrom\_refinesByDoubling},
   \code{PiProofs.innerFanPerimeter\_eq\_innerChordCrossSumFrom},
   \code{PiProofs.innerFanPerimeter\_refinesByDoubling},
+  \code{PiProofs.AdjacentChordLowerRefinesByDoubling},
+  \code{PiProofs.innerQuarterLength\_lo\_refinesByDoubling\_of\_adjacentChordLowerRefines},
+  \code{PiProofs.InnerChordLowerRefinement},
+  \code{PiProofs.innerQuarterLength\_lo\_refinesByDyadicStage\_of\_adjacentChordLowerRefinement},
+  \code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_adjacentChordLowerRefinement},
   \code{PiProofs.CircumferenceQuarterLengthStepRefines},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpTo},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll},
