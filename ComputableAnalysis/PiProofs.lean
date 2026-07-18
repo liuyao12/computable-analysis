@@ -8562,7 +8562,13 @@ private theorem adjacentTangentCrossClosedForm_double_left
         (2 * (stage : Rat) * (stage : Rat) +
           2 * (k : Rat) * (k : Rat) + (k : Rat)) := by
   unfold adjacentTangentCrossClosedForm
-  simp only [Rat.natCast_mul, Rat.natCast_add, Rat.natCast_one]
+  simp only [Rat.natCast_mul, Rat.natCast_add]
+  change (2 * (stage : Rat)) /
+      ((2 * (stage : Rat)) * (2 * (stage : Rat)) +
+        (2 * (k : Rat)) * (2 * (k : Rat) + 1)) =
+    (stage : Rat) /
+      (2 * (stage : Rat) * (stage : Rat) +
+        2 * (k : Rat) * (k : Rat) + (k : Rat))
   have hden :
       (2 * (stage : Rat)) * (2 * (stage : Rat)) +
           (2 * (k : Rat)) * (2 * (k : Rat) + 1) =
@@ -8580,7 +8586,13 @@ private theorem adjacentTangentCrossClosedForm_double_right
         (2 * (stage : Rat) * (stage : Rat) +
           2 * (k : Rat) * (k : Rat) + 3 * (k : Rat) + 1) := by
   unfold adjacentTangentCrossClosedForm
-  simp only [Rat.natCast_mul, Rat.natCast_add, Rat.natCast_one]
+  simp only [Rat.natCast_mul, Rat.natCast_add]
+  change (2 * (stage : Rat)) /
+      ((2 * (stage : Rat)) * (2 * (stage : Rat)) +
+        (2 * (k : Rat) + 1) * (2 * (k : Rat) + 1 + 1)) =
+    (stage : Rat) /
+      (2 * (stage : Rat) * (stage : Rat) +
+        2 * (k : Rat) * (k : Rat) + 3 * (k : Rat) + 1)
   have hden :
       (2 * (stage : Rat)) * (2 * (stage : Rat)) +
           (2 * (k : Rat) + 1) * (2 * (k : Rat) + 1 + 1) =
@@ -8675,7 +8687,24 @@ theorem adjacentTangentCrossClosedForm_refinesByDoubling
     ((Rat.natCast_pos).2 hstage) Rat.natCast_nonneg
   rw [adjacentTangentCrossClosedForm_double_left,
     adjacentTangentCrossClosedForm_double_right]
-  simpa [adjacentTangentCrossClosedForm] using h
+  unfold adjacentTangentCrossClosedForm
+  have hksucc : ((k + 1 : Nat) : Rat) = (k : Rat) + 1 := by
+    rw [Rat.natCast_add]
+    rfl
+  calc
+    (stage : Rat) /
+          (2 * (stage : Rat) * (stage : Rat) +
+            2 * (k : Rat) * (k : Rat) + (k : Rat)) +
+        (stage : Rat) /
+          (2 * (stage : Rat) * (stage : Rat) +
+            2 * (k : Rat) * (k : Rat) + 3 * (k : Rat) + 1) <=
+      (stage : Rat) /
+        ((stage : Rat) * (stage : Rat) + (k : Rat) * (k : Rat) + (k : Rat)) := h
+    _ = (stage : Rat) /
+        ((stage : Rat) * (stage : Rat) + (k : Rat) * ((k + 1 : Nat) : Rat)) := by
+      rw [hksucc]
+      congr 1
+      grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
 theorem outerTangentCrossSum_refinesByDoubling
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
@@ -8722,8 +8751,13 @@ private theorem outerTangentCrossSumFrom_refinesByDoubling_aux
       have htail := ih (k + 1)
       rw [show 2 * (count + 1) = 2 * count + 2 by omega]
       simp only [outerTangentCrossSumFrom]
-      have hindex : 2 * (k + 1) = 2 * k + 2 := by omega
-      rw [← hindex] at htail
+      have htail' :
+          outerTangentCrossSumFrom (2 * stage) (2 * k + 1 + 1)
+              (2 * count) <=
+            outerTangentCrossSumFrom stage (k + 1) count := by
+        have hindex : 2 * (k + 1) = 2 * k + 1 + 1 := by omega
+        rw [hindex] at htail
+        exact htail
       calc
         outerTangentCrossSum (2 * stage) (2 * k) +
               (outerTangentCrossSum (2 * stage) (2 * k + 1) +
@@ -8736,7 +8770,20 @@ private theorem outerTangentCrossSumFrom_refinesByDoubling_aux
               grind [Rat.add_assoc, Rat.add_comm]
         _ <= outerTangentCrossSum stage k +
               outerTangentCrossSumFrom stage (k + 1) count := by
-              grind
+              calc
+                (outerTangentCrossSum (2 * stage) (2 * k) +
+                    outerTangentCrossSum (2 * stage) (2 * k + 1)) +
+                    outerTangentCrossSumFrom (2 * stage) (2 * k + 1 + 1)
+                      (2 * count) <=
+                  outerTangentCrossSum stage k +
+                    outerTangentCrossSumFrom (2 * stage) (2 * k + 1 + 1)
+                      (2 * count) :=
+                    Rat.add_le_add_right.mpr hlocal
+                _ <= outerTangentCrossSum stage k +
+                    outerTangentCrossSumFrom stage (k + 1) count :=
+                    by
+                      rw [Rat.add_le_add_left]
+                      exact htail'
 
 /-- Exact rational tangent perimeter decreases under dyadic subdivision. -/
 theorem outerTangentCrossSumFrom_refinesByDoubling
@@ -10717,7 +10764,7 @@ private theorem outerTangentCrossSumFrom_eq_edgeCrossPerimeter
   | succ count ih =>
       simp [outerTangentCrossSumFrom, outerTangentCrossSum,
         outerBoundaryFrom, piCircleAreaPolygon.outerBoundaryFrom,
-        Fan.perimeter, Fan.edgeCrossesFrom, Fan.sumRat, ih]
+        Fan.perimeter, Fan.edgeCrossesFrom, Fan.sumRat, ih, Rat.add_assoc]
 
 /-- The rational tangent-cell sum is exactly the outer fan perimeter used by
 the finite Archimedes comparison. -/
@@ -10727,7 +10774,8 @@ theorem outerFanPerimeter_eq_outerTangentCrossSumFrom (stage : Nat) :
   have h := outerTangentCrossSumFrom_eq_edgeCrossPerimeter stage stage 0
   symm
   simpa [outerFanWidths, outerBoundary, Fan.sectorFanWidths,
-    Fan.perimeter, Fan.edgeCrossesFrom, Fan.sumRat, pointCross_origin_left]
+    Fan.perimeter, Fan.edgeCrossesFrom, Fan.sumRat, pointCross_origin_left,
+    Rat.zero_add]
     using h
 
 /-- The exact outer tangent fan is antitone under the dyadic refinement of
@@ -15800,6 +15848,351 @@ theorem pairwiseAgreementProofs_of_linearStepRemainders_and_kernelComparisonRout
   PiProofsComplete.pairwiseAgreement
     (piProofsComplete_of_linearStepRemainders_and_kernelComparisonRoute
       hpoly geometric_linear_steps route hgeom)
+
+/-- Each tangent edge at a positive stage has a bisection-width budget of
+`2 / 2^(stage + 9)`.  This sharper local bound is used to compare the
+square-root enclosure error with the strict dyadic decrease of the exact
+outer tangent fan. -/
+private theorem outerAdjacentTangentFormulaBudgetLe_sharp
+    (stage : Nat) (hstage : 0 < stage) :
+    OuterAdjacentTangentFormulaBudgetLe stage
+      (2 / (((2 ^ (stage + 9) : Nat) : Rat)) ) := by
+  intro k
+  constructor
+  · exact formulaBudgetLeAt_of_sqrtUpperBound_le_two
+      (Nat.ne_of_gt hstage)
+      (sqrtUpperBound_le_two_of_le_two
+        (entryTangentNormSqFormula_le_two stage hstage k))
+      Rat.le_refl
+  · exact formulaBudgetLeAt_of_sqrtUpperBound_le_two
+      (Nat.ne_of_gt hstage)
+      (sqrtUpperBound_le_two_of_le_two
+        (exitTangentNormSqFormula_le_two stage hstage k))
+      Rat.le_refl
+
+/-- The whole outer tangent path at stage `stage` has at most twice as many
+segment-width budgets as tangent cells. -/
+theorem outerQuarterLength_width_le_sharp
+    (stage : Nat) (hstage : 0 < stage) :
+    (outerQuarterLength stage).width <=
+      ((2 * stage : Nat) : Rat) *
+        (2 / (((2 ^ (stage + 9) : Nat) : Rat))) := by
+  let B : Rat := 2 / (((2 ^ (stage + 9) : Nat) : Rat))
+  have hadj : OuterAdjacentSegmentBudgetLe stage B :=
+    outerAdjacentSegmentBudgetLe_of_tangentFormulaBudget hstage
+      (outerAdjacentTangentFormulaBudgetLe_sharp stage hstage)
+  have hboundary : OuterBoundarySegmentBudgetLe stage B :=
+    outerBoundarySegmentBudgetLe_of_adjacent hadj
+  have hbudget := pathSegmentWidthBudget_le_count_mul stage B
+    (outerBoundary stage) hboundary
+  rw [pathSegmentCount_outerBoundary] at hbudget
+  change (rationalPointPathLength (outerBoundary stage) stage).width <= _
+  rw [rationalPointPathLength_width_eq_segmentBudget]
+  exact hbudget
+
+private theorem outerTangentZeroGapAlgebra
+    (N : Rat) (hN : 0 < N) :
+    2 * (N / (2 * N * N)) +
+        2 * (N / (2 * N * N + 1)) +
+        1 / (N * (2 * N * N + 1)) =
+      2 * (N / (N * N)) := by
+  have hNne : N ≠ 0 := Rat.ne_of_gt hN
+  have hfirst : 2 * (N / (2 * N * N)) = 1 / N := by
+    rw [Rat.div_def, Rat.div_def, Rat.inv_mul_rev, Rat.inv_mul_rev]
+    have hNcancel : N * N⁻¹ = 1 := Rat.mul_inv_cancel N hNne
+    have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  let D : Rat := 2 * N * N + 1
+  have hDpos : 0 < D := by
+    dsimp [D]
+    have hNN : 0 <= N * N :=
+      Rat.mul_nonneg (Rat.le_of_lt hN) (Rat.le_of_lt hN)
+    grind
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  rw [hfirst]
+  change 1 / N + 2 * (N / D) + 1 / (N * D) =
+    2 * (N / (N * N))
+  apply tangentRefinement_cancel_mul_right
+    (Rat.ne_of_gt (Rat.mul_pos hN hDpos))
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  rw [Rat.inv_mul_rev, Rat.inv_mul_rev]
+  have hNcancel : N * N⁻¹ = 1 := Rat.mul_inv_cancel N hNne
+  have hDcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hDne
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+/-- The first outer tangent cell decreases by an explicit positive rational
+amount under dyadic subdivision. -/
+theorem outerTangentCrossSum_zero_refinesByDoubling_withGap
+    (stage : Nat) (hstage : 0 < stage) :
+    outerTangentCrossSum (2 * stage) 0 +
+        outerTangentCrossSum (2 * stage) 1 +
+        1 / ((stage : Rat) *
+          (2 * (stage : Rat) * (stage : Rat) + 1)) =
+      outerTangentCrossSum stage 0 := by
+  have hfine : 0 < 2 * stage := by omega
+  rw [outerTangentCrossSum_eq_two_adjacentTangentCrossFormula (2 * stage)
+      hfine 0,
+    outerTangentCrossSum_eq_two_adjacentTangentCrossFormula (2 * stage)
+      hfine 1,
+    outerTangentCrossSum_eq_two_adjacentTangentCrossFormula stage hstage 0,
+    adjacentTangentCrossFormula_eq_closedForm (2 * stage) hfine 0,
+    adjacentTangentCrossFormula_eq_closedForm (2 * stage) hfine 1,
+    adjacentTangentCrossFormula_eq_closedForm stage hstage 0,
+    adjacentTangentCrossClosedForm_double_left stage 0,
+    adjacentTangentCrossClosedForm_double_right stage 0]
+  simpa [adjacentTangentCrossClosedForm, Rat.natCast_mul,
+    Rat.natCast_add, Rat.add_zero, Rat.zero_add, Rat.mul_zero, Rat.zero_mul] using
+    outerTangentZeroGapAlgebra (stage : Rat)
+      ((Rat.natCast_pos).2 hstage)
+
+private theorem outerTangentCrossSumFrom_refinesByDoubling_withZeroGap
+    (stage : Nat) (hstage : 0 < stage) :
+    outerTangentCrossSumFrom (2 * stage) 0 (2 * stage) +
+        1 / ((stage : Rat) *
+          (2 * (stage : Rat) * (stage : Rat) + 1)) <=
+      outerTangentCrossSumFrom stage 0 stage := by
+  have hfirst := outerTangentCrossSum_zero_refinesByDoubling_withGap
+    stage hstage
+  have htail := outerTangentCrossSumFrom_refinesByDoubling_aux
+    stage hstage (stage - 1) 1
+  have hfine :
+      outerTangentCrossSumFrom (2 * stage) 0 (2 * stage) =
+        outerTangentCrossSum (2 * stage) 0 +
+          (outerTangentCrossSum (2 * stage) 1 +
+            outerTangentCrossSumFrom (2 * stage) 2 (2 * (stage - 1))) := by
+    calc
+      outerTangentCrossSumFrom (2 * stage) 0 (2 * stage) =
+          outerTangentCrossSumFrom (2 * stage) 0
+            (Nat.succ (Nat.succ (2 * (stage - 1)))) := by
+              exact congrArg
+                (fun count => outerTangentCrossSumFrom (2 * stage) 0 count)
+                (by omega)
+      _ = outerTangentCrossSum (2 * stage) 0 +
+            (outerTangentCrossSum (2 * stage) 1 +
+              outerTangentCrossSumFrom (2 * stage) 2 (2 * (stage - 1))) := by
+              simp [outerTangentCrossSumFrom]
+  have hcoarse :
+      outerTangentCrossSumFrom stage 0 stage =
+        outerTangentCrossSum stage 0 +
+          outerTangentCrossSumFrom stage 1 (stage - 1) := by
+    calc
+      outerTangentCrossSumFrom stage 0 stage =
+          outerTangentCrossSumFrom stage 0 (Nat.succ (stage - 1)) := by
+            exact congrArg (fun count => outerTangentCrossSumFrom stage 0 count)
+              (by omega)
+      _ = outerTangentCrossSum stage 0 +
+            outerTangentCrossSumFrom stage 1 (stage - 1) := by
+            simp [outerTangentCrossSumFrom]
+  calc
+    outerTangentCrossSumFrom (2 * stage) 0 (2 * stage) +
+          1 / ((stage : Rat) *
+            (2 * (stage : Rat) * (stage : Rat) + 1)) =
+        (outerTangentCrossSum (2 * stage) 0 +
+          outerTangentCrossSum (2 * stage) 1 +
+          1 / ((stage : Rat) *
+            (2 * (stage : Rat) * (stage : Rat) + 1))) +
+          outerTangentCrossSumFrom (2 * stage) 2 (2 * (stage - 1)) := by
+          rw [hfine]
+          grind [Rat.add_assoc, Rat.add_comm]
+    _ = outerTangentCrossSum stage 0 +
+          outerTangentCrossSumFrom (2 * stage) 2 (2 * (stage - 1)) := by
+          rw [hfirst]
+    _ <= outerTangentCrossSum stage 0 +
+          outerTangentCrossSumFrom stage 1 (stage - 1) := by
+          rw [Rat.add_le_add_left]
+          exact htail
+    _ = outerTangentCrossSumFrom stage 0 stage := hcoarse.symm
+
+/-- The exact outer tangent fan decreases by a positive, explicit first-cell
+gap at every positive dyadic stage. -/
+theorem outerFanPerimeter_refinesByDoubling_withZeroGap
+    (stage : Nat) (hstage : 0 < stage) :
+    Fan.perimeter (outerFanWidths (2 * stage)) +
+        1 / ((stage : Rat) *
+          (2 * (stage : Rat) * (stage : Rat) + 1)) <=
+      Fan.perimeter (outerFanWidths stage) := by
+  rw [outerFanPerimeter_eq_outerTangentCrossSumFrom,
+    outerFanPerimeter_eq_outerTangentCrossSumFrom]
+  exact outerTangentCrossSumFrom_refinesByDoubling_withZeroGap stage hstage
+
+private theorem two_mul_le_piStage_add_two (n : Nat) :
+    2 * n <= piStage n + 2 := by
+  unfold piStage
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          have hpow : 2 <= 2 ^ (n + 1) := by
+            rw [Nat.pow_succ]
+            have hpos : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+            omega
+          calc
+            2 * (n + 1 + 1) = 2 * (n + 1) + 2 := by omega
+            _ <= (2 ^ (n + 1) + 2) + 2 := Nat.add_le_add_right ih 2
+            _ <= 2 * (2 ^ (n + 1)) + 2 := by omega
+            _ = 2 ^ (n + 1 + 1) + 2 := by
+              rw [Nat.pow_succ]
+              omega
+
+private theorem outerWidthNumerator_le_dyadicMesh (n : Nat) :
+    8 * piStage n * piStage n *
+        (2 * piStage n * piStage n + 1) <=
+      2 ^ (2 * piStage n + 9) := by
+  let S := piStage n
+  have hSpos : 0 < S := piStage_pos n
+  have hSSpos : 0 < S * S := Nat.mul_pos hSpos hSpos
+  have hone : 1 <= S * S := hSSpos
+  have hfactor : 2 * S * S + 1 <= 3 * S * S := by
+    calc
+      2 * S * S + 1 <= 2 * S * S + S * S :=
+        Nat.add_le_add_left hone _
+      _ = 2 * (S * S) + S * S := by simp [Nat.mul_assoc]
+      _ = 3 * (S * S) := by omega
+      _ = 3 * S * S := by simp [Nat.mul_assoc]
+  have hpoly :
+      8 * S * S * (2 * S * S + 1) <= 24 * (S * S * S * S) := by
+    calc
+      8 * S * S * (2 * S * S + 1) <=
+          8 * S * S * (3 * S * S) :=
+        Nat.mul_le_mul_left (8 * S * S) hfactor
+      _ = (8 * 3) * (S * S * S * S) := by ac_rfl
+      _ = 24 * (S * S * S * S) := rfl
+  have hSfour : S * S * S * S = 2 ^ (4 * n) := by
+    dsimp [S, piStage]
+    calc
+      2 ^ n * 2 ^ n * 2 ^ n * 2 ^ n =
+          (2 ^ n * 2 ^ n) * (2 ^ n * 2 ^ n) := by ac_rfl
+      _ = 2 ^ (n + n) * 2 ^ (n + n) := by
+            rw [Nat.pow_add]
+      _ = 2 ^ ((n + n) + (n + n)) := by
+            exact (Nat.pow_add 2 (n + n) (n + n)).symm
+      _ = 2 ^ (4 * n) := by congr 1 <;> omega
+  have hconst : 24 * (2 ^ (4 * n)) <= 2 ^ (4 * n + 5) := by
+    calc
+      24 * (2 ^ (4 * n)) <= 32 * (2 ^ (4 * n)) :=
+        Nat.mul_le_mul_right _ (by native_decide)
+      _ = 2 ^ (4 * n) * 2 ^ 5 := by
+        have hfive : 2 ^ 5 = 32 := by native_decide
+        rw [hfive]
+        ac_rfl
+      _ = 2 ^ (4 * n + 5) := by rw [← Nat.pow_add]
+  have hexp : 4 * n + 5 <= 2 * S + 9 := by
+    have htwo := two_mul_le_piStage_add_two n
+    omega
+  change 8 * S * S * (2 * S * S + 1) <= 2 ^ (2 * S + 9)
+  calc
+    8 * S * S * (2 * S * S + 1) <= 24 * (S * S * S * S) := hpoly
+    _ = 24 * (2 ^ (4 * n)) := by rw [hSfour]
+    _ <= 2 ^ (4 * n + 5) := hconst
+    _ <= 2 ^ (2 * S + 9) :=
+      Nat.pow_le_pow_right (by omega : 0 < 2) hexp
+
+private theorem outerWidthBudget_le_outerFanZeroGap (n : Nat) :
+    (((4 * piStage n : Nat) : Rat) *
+      (2 / (((2 ^ (2 * piStage n + 9) : Nat) : Rat)))) <=
+      1 / (((piStage n : Nat) : Rat) *
+        (2 * ((piStage n : Nat) : Rat) * ((piStage n : Nat) : Rat) + 1)) := by
+  let S := piStage n
+  let A : Nat := 2 ^ (2 * S + 9)
+  let B : Rat := (S : Rat) *
+    (2 * (S : Rat) * (S : Rat) + 1)
+  have hSpos : 0 < S := piStage_pos n
+  have hApos : 0 < A := Nat.pow_pos (by omega : 0 < 2)
+  have hBpos : 0 < B := by
+    dsimp [B]
+    have hSnonneg : 0 <= (S : Rat) :=
+      Rat.le_of_lt ((Rat.natCast_pos).2 hSpos)
+    have hsq : 0 <= (S : Rat) * (S : Rat) :=
+      Rat.mul_nonneg hSnonneg hSnonneg
+    have hterm : 0 < 2 * (S : Rat) * (S : Rat) + 1 := by
+      have hscaled : 0 <= 2 * ((S : Rat) * (S : Rat)) :=
+        Rat.mul_nonneg (by native_decide) hsq
+      have hnonneg : 0 <= 2 * (S : Rat) * (S : Rat) := by
+        simpa [Rat.mul_assoc] using hscaled
+      grind
+    exact Rat.mul_pos ((Rat.natCast_pos).2 hSpos) hterm
+  have hnum : 8 * S * S * (2 * S * S + 1) <= A := by
+    dsimp [A]
+    simpa [S] using outerWidthNumerator_le_dyadicMesh n
+  change ((4 * S : Nat) : Rat) * (2 / (A : Rat)) <= 1 / B
+  apply Rat.le_of_mul_le_mul_right (c := (A : Rat) * B)
+  · rw [Rat.div_def, Rat.div_def]
+    have hAne : (A : Rat) ≠ 0 :=
+      Rat.ne_of_gt ((Rat.natCast_pos).2 hApos)
+    have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+    calc
+      (((4 * S : Nat) : Rat) * (2 * (A : Rat)⁻¹)) *
+          ((A : Rat) * B) =
+        ((8 * S * S * (2 * S * S + 1) : Nat) : Rat) := by
+          simp only [B, Rat.natCast_mul, Rat.natCast_add]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (A : Rat) := by exact_mod_cast hnum
+      _ = (1 * B⁻¹) * ((A : Rat) * B) := by
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos ((Rat.natCast_pos).2 hApos) hBpos
+
+private theorem piStage_succ_eq_two_mul (n : Nat) :
+    piStage (n + 1) = 2 * piStage n := by
+  unfold piStage
+  rw [Nat.pow_succ]
+  omega
+
+private theorem outerQuarterLength_hi_le_outerFan_add_width
+    (stage : Nat) (hstage : 0 < stage) :
+    (outerQuarterLength stage).hi <=
+      Fan.perimeter (outerFanWidths stage) +
+        (outerQuarterLength stage).width := by
+  have hlo := outerQuarterLength_lo_le_outerFanPerimeter stage hstage
+  unfold QInterval.width
+  change (outerQuarterLength stage).hi <=
+    Fan.perimeter (outerFanWidths stage) +
+      ((outerQuarterLength stage).hi - (outerQuarterLength stage).lo)
+  grind [Rat.sub_eq_add_neg]
+
+/-- The upper endpoint of the direct circumscribed perimeter path is antitone
+at every public dyadic stage.  The proof combines the strict rational tangent
+fan decrease with a certified exponential square-root enclosure budget. -/
+theorem outerQuarterLength_hi_refinesByDyadicStage (n : Nat) :
+    (outerQuarterLength (piStage (n + 1))).hi <=
+      (outerQuarterLength (piStage n)).hi := by
+  let stage := piStage n
+  have hstage : 0 < stage := piStage_pos n
+  have hstage_next : piStage (n + 1) = 2 * stage := by
+    dsimp [stage]
+    exact piStage_succ_eq_two_mul n
+  rw [hstage_next]
+  have hwidth := outerQuarterLength_width_le_sharp (2 * stage) (by omega)
+  have hbudget := outerWidthBudget_le_outerFanZeroGap n
+  have hwidth_gap :
+      (outerQuarterLength (2 * stage)).width <=
+        1 / ((stage : Rat) *
+          (2 * (stage : Rat) * (stage : Rat) + 1)) := by
+    calc
+      (outerQuarterLength (2 * stage)).width <=
+          ((2 * (2 * stage) : Nat) : Rat) *
+            (2 / (((2 ^ (2 * stage + 9) : Nat) : Rat))) := hwidth
+      _ = ((4 * stage : Nat) : Rat) *
+            (2 / (((2 ^ (2 * stage + 9) : Nat) : Rat))) := by
+            congr 2 <;> omega
+      _ <= 1 / ((stage : Rat) *
+          (2 * (stage : Rat) * (stage : Rat) + 1)) := by
+            simpa [stage] using hbudget
+  have hfan := outerFanPerimeter_refinesByDoubling_withZeroGap stage hstage
+  calc
+    (outerQuarterLength (2 * stage)).hi <=
+        Fan.perimeter (outerFanWidths (2 * stage)) +
+          (outerQuarterLength (2 * stage)).width :=
+      outerQuarterLength_hi_le_outerFan_add_width (2 * stage) (by omega)
+    _ <= Fan.perimeter (outerFanWidths (2 * stage)) +
+        1 / ((stage : Rat) *
+          (2 * (stage : Rat) * (stage : Rat) + 1)) :=
+      (Rat.add_le_add_left).2 hwidth_gap
+    _ <= Fan.perimeter (outerFanWidths stage) := hfan
+    _ <= (outerQuarterLength stage).hi :=
+      outerFanPerimeter_le_outerQuarterLength_hi stage hstage
 
 end PiProofs
 

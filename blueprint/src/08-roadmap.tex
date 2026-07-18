@@ -448,6 +448,9 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.outerQuarterLength_lo_le_outerFanPerimeter}
 \lean{ComputableAnalysis.PiProofs.outerFanPerimeter_le_outerQuarterLength_hi}
 \lean{ComputableAnalysis.PiProofs.outerFanPerimeter_mem_outerQuarterLength}
+\lean{ComputableAnalysis.PiProofs.outerQuarterLength_width_le_sharp}
+\lean{ComputableAnalysis.PiProofs.outerFanPerimeter_refinesByDoubling_withZeroGap}
+\lean{ComputableAnalysis.PiProofs.outerQuarterLength_hi_refinesByDyadicStage}
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_innerQuarterLength_hi}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_contains_of_le_precision}
@@ -898,11 +901,15 @@ circumference-validity row.  The dyadic endpoint reuse facts for the rational ci
 \code{PiProofs.circleSamplePoint\_double\_index\_succ}.
 The outer tangent geometry itself is now settled symbolically: the exact
 rational cell length is \code{PiProofs.adjacentTangentCrossClosedForm}, and
-\code{PiProofs.outerFanPerimeter\_refinesByDoubling} proves that its full
-outer fan decreases under every dyadic subdivision.  Thus the remaining
-all-stage endpoint proof concerns transport from these exact tangent lengths
-to the square-root path enclosures, together with the corresponding
-inscribed lower-path estimate; no unproved geometric monotonicity is hidden
+\code{PiProofs.outerFanPerimeter\_refinesByDoubling\_withZeroGap} proves
+that its full outer fan decreases by an explicit positive first-cell gap under
+every dyadic subdivision.  The sharper certified bisection-width budget
+\code{PiProofs.outerQuarterLength\_width\_le\_sharp} is below that gap at
+each public stage, so
+\code{PiProofs.outerQuarterLength\_hi\_refinesByDyadicStage} proves the
+circumscribed upper endpoint outright.  Thus the sole remaining all-stage
+endpoint proof is the corresponding inscribed lower-path estimate; no
+unproved outer geometric monotonicity or square-root-error transport remains
 in the target.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
@@ -1168,6 +1175,9 @@ chord and tangent formulas.
   \code{PiProofs.outerTangentCrossSumFrom\_refinesByDoubling},
   \code{PiProofs.outerFanPerimeter\_eq\_outerTangentCrossSumFrom},
   \code{PiProofs.outerFanPerimeter\_refinesByDoubling},
+  \code{PiProofs.outerFanPerimeter\_refinesByDoubling\_withZeroGap},
+  \code{PiProofs.outerQuarterLength\_width\_le\_sharp},
+  \code{PiProofs.outerQuarterLength\_hi\_refinesByDyadicStage},
   \code{PiProofs.CircumferenceQuarterLengthStepRefines},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpTo},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll},

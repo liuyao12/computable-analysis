@@ -562,10 +562,12 @@ students actually compute.
   all-stage theorem remains open.  The exact tangent-geometry half is now
   symbolic rather than experimental: `adjacentTangentCrossClosedForm` gives
   each outer tangent cell a denominator-cleared rational length, and
-  `outerFanPerimeter_refinesByDoubling` proves that the exact outer tangent
-  fan decreases under every dyadic subdivision.  The remaining endpoint work
-  is to control the square-root enclosure schedule, especially on the
-  inscribed lower path, against those exact geometric refinements.
+  `outerFanPerimeter_refinesByDoubling_withZeroGap` proves that the exact
+  outer tangent fan decreases by an explicit positive first-cell gap under
+  every dyadic subdivision.  The certified bisection-width schedule is below
+  that gap, so `outerQuarterLength_hi_refinesByDyadicStage` proves the outer
+  (circumscribed) endpoint at every public stage.  The remaining direct
+  endpoint work is the corresponding inscribed lower-path refinement.
 
 ### Archived pre-refactor notes (not current source)
 
