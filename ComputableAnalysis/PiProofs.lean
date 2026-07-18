@@ -16375,58 +16375,6 @@ theorem innerFanPerimeter_refinesByDoubling
   simpa using
     (innerChordCrossSumFrom_refinesByDoubling stage hstage stage 0)
 
-/-- The certified lower chord-path endpoint is at most its own enclosure
-width below the exact rational chord cross-product fan. -/
-theorem innerFanPerimeter_sub_width_le_innerQuarterLength_lo
-    (stage : Nat) :
-    Fan.perimeter (innerFanWidths stage) - (innerQuarterLength stage).width <=
-      (innerQuarterLength stage).lo := by
-  have hfan := innerFanPerimeter_le_innerQuarterLength_hi stage
-  unfold QInterval.width
-  grind [Rat.sub_eq_add_neg]
-
-/-- The only remaining estimate needed to transport exact inscribed-fan
-refinement to the computed lower path endpoint. -/
-def InnerQuarterLengthDyadicFanBudget : Prop :=
-  forall n,
-    (innerQuarterLength (piStage n)).lo +
-        (innerQuarterLength (piStage (n + 1))).width <=
-      Fan.perimeter (innerFanWidths (piStage n))
-
-theorem innerQuarterLength_lo_refinesByDyadicStage_of_fanBudget
-    (hbudget : InnerQuarterLengthDyadicFanBudget) (n : Nat) :
-    (innerQuarterLength (piStage n)).lo <=
-      (innerQuarterLength (piStage (n + 1))).lo := by
-  let stage := piStage n
-  have hstage : 0 < stage := piStage_pos n
-  have hnext : piStage (n + 1) = 2 * stage := by
-    dsimp [stage, piStage]
-    rw [Nat.pow_succ]
-    omega
-  have hbudgetn := hbudget n
-  rw [hnext] at hbudgetn
-  have hfan := innerFanPerimeter_refinesByDoubling stage hstage
-  have hlower := innerFanPerimeter_sub_width_le_innerQuarterLength_lo
-    (2 * stage)
-  rw [hnext]
-  calc
-    (innerQuarterLength stage).lo <=
-        Fan.perimeter (innerFanWidths stage) -
-          (innerQuarterLength (2 * stage)).width := by
-            grind [Rat.sub_eq_add_neg]
-    _ <= Fan.perimeter (innerFanWidths (2 * stage)) -
-          (innerQuarterLength (2 * stage)).width := by
-            grind [Rat.sub_eq_add_neg]
-    _ <= (innerQuarterLength (2 * stage)).lo := hlower
-
-theorem circumferenceQuarterLengthStepRefines_of_innerFanBudget
-    (hbudget : InnerQuarterLengthDyadicFanBudget) :
-    CircumferenceQuarterLengthStepRefines := by
-  intro n
-  constructor
-  · exact innerQuarterLength_lo_refinesByDyadicStage_of_fanBudget hbudget n
-  · exact outerQuarterLength_hi_refinesByDyadicStage n
-
 end PiProofs
 
 end ComputableAnalysis

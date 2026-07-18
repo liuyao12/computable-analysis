@@ -457,10 +457,6 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_eq_innerChordCrossSumFrom}
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_refinesByDoubling}
 \lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_innerQuarterLength_hi}
-\lean{ComputableAnalysis.PiProofs.innerFanPerimeter_sub_width_le_innerQuarterLength_lo}
-\lean{ComputableAnalysis.PiProofs.InnerQuarterLengthDyadicFanBudget}
-\lean{ComputableAnalysis.PiProofs.innerQuarterLength_lo_refinesByDyadicStage_of_fanBudget}
-\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_of_innerFanBudget}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_contains_of_le_precision}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_lo_mono_precision}
@@ -922,19 +918,13 @@ rational geometric half is now explicit too:
 \code{PiProofs.adjacentChordCross\_refinesByDoubling} proves the local
 chord-cross inequality and
 \code{PiProofs.innerFanPerimeter\_refinesByDoubling} lifts it to the whole
-fan.  The square-root transport has a single named quantitative target:
-\code{PiProofs.InnerQuarterLengthDyadicFanBudget} says that the coarse lower
-endpoint plus the next-stage enclosure width lies below the coarse rational
-fan.  The proved estimate
-\code{PiProofs.innerFanPerimeter\_sub\_width\_le\_innerQuarterLength\_lo}
-and exact fan refinement show that this one bound implies the inscribed
-endpoint inequality, through
-\code{PiProofs.innerQuarterLength\_lo\_refinesByDyadicStage\_of\_fanBudget};
-together with the proved outer endpoint it yields the full direct step
-refinement via
-\code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_innerFanBudget}.
-Thus no unproved fan monotonicity or outer square-root-error transport remains
-in the target.
+fan.  This fan is a sum of rational cross-products, hence has the sector-area
+normalization used by the Archimedes comparison; it is not the chord-path
+length itself.  Its refinement is therefore useful geometry, but it cannot
+by itself transport the inscribed lower endpoint.  The remaining direct
+endpoint proof must compare the bisection lower enclosures of a coarse chord
+with those of its two refined chords, using the chord-length geometry rather
+than the cross-product fan.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
@@ -1207,10 +1197,6 @@ chord and tangent formulas.
   \code{PiProofs.innerChordCrossSumFrom\_refinesByDoubling},
   \code{PiProofs.innerFanPerimeter\_eq\_innerChordCrossSumFrom},
   \code{PiProofs.innerFanPerimeter\_refinesByDoubling},
-  \code{PiProofs.innerFanPerimeter\_sub\_width\_le\_innerQuarterLength\_lo},
-  \code{PiProofs.InnerQuarterLengthDyadicFanBudget},
-  \code{PiProofs.innerQuarterLength\_lo\_refinesByDyadicStage\_of\_fanBudget},
-  \code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_innerFanBudget},
   \code{PiProofs.CircumferenceQuarterLengthStepRefines},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpTo},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll},
