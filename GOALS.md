@@ -165,7 +165,9 @@ not a description of the current module graph. The checked blueprint
 - Main calculus route: construct inverses on intervals where the function is
   interval-regular, monotone, and effectively separated.
   See `InvertibleFunctionOnInterval`, `InRangeRaw`, `InverseRaw.apply`, and
-  `HasInverse` in `ComputableAnalysis/Calculus.lean`.
+  `HasInverse` in `ComputableAnalysis/Calculus.lean`.  `HasInverse I` is now
+  explicitly branch-local: its source interval, orientation, and certified
+  output range are all fixed by `I`.
 - `InRangeRaw` now has computational range content: it carries a validity
   proof for the target raw real and, at every target stage, a named endpoint
   precision whose oriented endpoint boxes enclose the target box.  An
@@ -187,10 +189,11 @@ not a description of the current module graph. The checked blueprint
   for every exact rational target in `[0,1]`, including the explicit
   endpoint-range enclosure for that target.  Extending this to all
   represented unit-range targets remains future work.
-- Proved bridge: a bisection/search construction for every target value gives
-  the inverse-function theorem.
-  See `InverseBisectionSearch` and `inverse_function_from_bisection_search` in
-  `ComputableAnalysis/Calculus.lean`.
+- Proved bridge: `HasBisectionSearch I` is computational data assigning a
+  certified finite bisection/search to every target in the stated range; it
+  gives `HasInverse I` by
+  `inverse_function_from_bisection_search`.  Its data-valued formulation
+  prevents a hidden choice step when assembling the inverse.
 - The sine/cosine route is intentionally next.  The first-octant bridge
   `IntegralIdentities.ArctanInverseBisection` now ties the geometric
   trigonometry chapter to the actual inverse-function interfaces: it requires
@@ -198,6 +201,9 @@ not a description of the current module graph. The checked blueprint
   `InRangeRaw` quarter-turn targets, and an `InverseBisectionSearch` for each
   target.  It produces `tangentRaw`, a valid partial slope function whose
   outputs stay in `[0,1]` and whose forward evaluator overlaps each target.
+  The intended next construction evaluates the rational circle chart
+  `((1-u^2)/(1+u^2), 2u/(1+u^2))` at that recovered slope `u`; its coordinate
+  projections are the first-octant cosine and sine functions.
   The old `ArctanInverseConstruction` remains only the downstream
   special-value contract.  The next analytic task is to construct the new
   bridge by proving interval regularity, monotonicity, and effective

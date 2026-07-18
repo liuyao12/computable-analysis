@@ -2827,9 +2827,12 @@ theorem apply_value_overlaps_target {I : InvertibleFunctionOnInterval}
 
 end InverseRaw
 
-/-- Constructive inverse function theorem on intervals. -/
-def HasInverse : Prop :=
-  forall I : InvertibleFunctionOnInterval, Nonempty (InverseRaw I)
+/-- A particular monotone interval branch has a constructive inverse when its
+certified output range admits a raw preimage evaluator.  This is deliberately
+branch-local: an inverse is only meaningful after its source interval,
+orientation, and range certificate have been fixed. -/
+def HasInverse (I : InvertibleFunctionOnInterval) : Prop :=
+  Nonempty (InverseRaw I)
 
 /-- The remaining algorithmic step for the inverse function theorem:
 construct the inverse intervals by bisection/search. -/
@@ -2847,10 +2850,11 @@ structure InverseBisectionSearch (I : InvertibleFunctionOnInterval) (y : InRange
           n)
         (y.value.compute n)
 
-def HasBisectionSearch : Prop :=
-  forall I : InvertibleFunctionOnInterval,
-    forall y : InRangeRaw I,
-      Nonempty (InverseBisectionSearch I y)
+/-- Computational data assigning a finite certified search to every target in
+the stated range.  This is data, rather than a merely nonempty proposition,
+so assembling the inverse does not invoke a choice principle. -/
+def HasBisectionSearch (I : InvertibleFunctionOnInterval) :=
+  forall y : InRangeRaw I, InverseBisectionSearch I y
 
 def inverseRawOfSearch {I : InvertibleFunctionOnInterval}
     (search : forall y : InRangeRaw I, InverseBisectionSearch I y) :
@@ -2861,9 +2865,8 @@ def inverseRawOfSearch {I : InvertibleFunctionOnInterval}
   value_overlaps := fun y => (search y).value_overlaps
 
 theorem inverse_function_from_bisection_search
-    (hsearch : forall I : InvertibleFunctionOnInterval,
-      forall y : InRangeRaw I, InverseBisectionSearch I y) :
-    HasInverse := by
-  intro I
-  exact ⟨inverseRawOfSearch (hsearch I)⟩
+    {I : InvertibleFunctionOnInterval}
+    (hsearch : HasBisectionSearch I) :
+    HasInverse I := by
+  exact ⟨inverseRawOfSearch hsearch⟩
 end ComputableAnalysis

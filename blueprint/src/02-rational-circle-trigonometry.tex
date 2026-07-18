@@ -326,6 +326,16 @@ octant \(0\le t\le1/2\), whose angles lie in \([0,\pi/4]\); the second octant
 is then obtained by reciprocal/complement reduction.  Thus the search never
 pretends that tangent is bounded at a quarter turn.
 
+For a recovered slope \(u\in[0,1]\), the rational circle chart
+\[
+  P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right)
+\]
+supplies the intended first-octant point.  The two coordinate projections are
+therefore the planned definitions of \(\cos(t\pi/2)\) and
+\(\sin(t\pi/2)\).  This keeps the dependency direction explicit: geometric
+arctangent is inverted first, then the same rational chart that drove the
+circle exhaustion defines sine and cosine.
+
 Lean now has a checked bridge \code{ArctanInverseBisection}.  It requires an
 \code{InvertibleFunctionOnInterval} whose forward function is certified equal
 to \code{arctanGeomOnUnit}, a valid range-enclosed target for every first-octant
@@ -345,8 +355,10 @@ The checked bridge asks for:
 \item an equivalence between each target and the selected quarter-turn
   representative \(t\pi/2\).
 \end{enumerate}
-This is the bridge between the geometric area definition of \(\pi\) and the
-coordinate algorithms for sine and cosine.
+Constructing the interval evaluation of \(P(u)\) for the recovered raw slope,
+and then extending from the first octant by the stated reductions, is the next
+formal trigonometric step.  The bridge already fixes its required inverse data
+rather than assuming trigonometric inverse laws.
 \end{definition}
 
 \begin{definition}[Inverse arctangent search]
