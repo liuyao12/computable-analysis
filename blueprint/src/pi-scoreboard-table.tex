@@ -3,8 +3,8 @@ Definition-complete: valid raw real.  Equivalence-complete: a formal chain of
 
 The current score is:
 \[
-  \#\mathrm{Def}=10/19,\qquad
-  \#\mathrm{Equiv}_{\pi_{\mathrm{area}}}=8/18.
+  \#\mathrm{Def}=11/20,\qquad
+  \#\mathrm{Equiv}_{\pi_{\mathrm{area}}}=9/19.
 \]
 
 \begin{center}
@@ -27,6 +27,11 @@ Archimedes' method of exhaustion &
 \code{piCircumferenceFan} &
 \cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
 exact inscribed cross-fan lower bound with circumscribed polygonal upper bound &
+\(\checkmark\) & \(\checkmark\)\\
+\code{piCircumferenceCurvatureFan} &
+\cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
+cross fan plus the rational chord correction
+\(\bigl(1-\langle p,q\rangle\bigr)^2/64\), with the same circumscribed upper path &
 \(\checkmark\) & \(\checkmark\)\\
 \multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
 \cref{def:arctan-area-stage-algorithm},

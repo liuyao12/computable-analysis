@@ -477,6 +477,25 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.PiProofs.piCircumferenceFan_compute_lo_eq_piCircleArea_compute_lo}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceFan_valid}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceFan_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.stableCurvatureChordLower}
+\lean{ComputableAnalysis.PiProofs.stableCurvatureChordLower_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.stableCurvatureChordFanPerimeter}
+\lean{ComputableAnalysis.PiProofs.stableCurvatureChordFanPerimeter_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.innerFanPerimeter_le_stableCurvatureChordFanPerimeter}
+\lean{ComputableAnalysis.PiProofs.stableCurvatureChordFanPerimeter_le_outerFanPerimeter}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFanComputeAtStage}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_compute_eq}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFanComputeAtStage_ordered}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_ordered}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_step_refines}
+\lean{ComputableAnalysis.PiProofs.stableCurvatureFanQuarterGap}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFanComputeAtStage_width_eq}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_compute_width_eq}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_width_linear_bound_ten}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_widthsShrink}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_width_eq}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_contains_of_le_precision}
 \lean{ComputableAnalysis.PiProofs.pointSegmentLengthInterval_lo_mono_precision}
@@ -963,7 +982,16 @@ proves ordered dyadic brackets in
 \(10/(n+1)\), and proves its exact agreement with the area-loop baseline in
 \code{PiProofs.piCircumferenceFan\_equiv\_piCircleArea}.  Consequently this
 new row counts on the scoreboard, while the original circumference row remains
-pending.
+pending.  Lean now also verifies a sharper independent circumference fan,
+\code{PiProofs.piCircumferenceCurvatureFan}.  Each lower chord certificate is
+the rational cross product plus the conservative second-order correction
+\((1-\langle p,q\rangle)^2/64\).  The exact split-gain formula leaves enough
+rational surplus to prove its dyadic lower-endpoint refinement directly;
+\code{PiProofs.piCircumferenceCurvatureFan\_valid} supplies ordered nested
+brackets with the same \(10/(n+1)\) modulus and
+\code{PiProofs.piCircumferenceCurvatureFan\_equiv\_piCircleArea} proves the
+baseline equivalence.  This is a second certified Archimedean computation,
+not an arctangent re-presentation and not a reboxing of the original path.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public

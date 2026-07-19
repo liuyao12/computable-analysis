@@ -752,6 +752,34 @@ area loop as its evaluator and records this reboxed perimeter route as a
 verified alternative.
 \end{theorem}
 
+\begin{theorem}[Curvature-corrected Archimedean fan]
+\lean{ComputableAnalysis.PiProofs.stableCurvatureChordLower}
+\lean{ComputableAnalysis.PiProofs.stableCurvatureChordLower_refinesByDoubling}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_equiv_piCircleArea}
+\uses{thm:finite-archimedes,def:raw-real}
+For an oriented rational unit-circle chord from \(p\) to \(q\), let
+\(c=\operatorname{cross}(p,q)\) and
+\(d=1-\langle p,q\rangle\).  The rational certificate
+
+\[
+  c+\frac{d^2}{64}
+\]
+
+lies below the chord and above the uncorrected cross-product certificate on
+every quarter-circle cell.  The deliberately conservative denominator \(64\)
+is chosen so that the exact rational gain in the two cross products after a
+dyadic split dominates the coarse correction.  Hence the finite corrected fan
+increases under refinement, remains below the circumscribed tangent fan, and
+defines the valid raw computation
+\code{PiProofs.piCircumferenceCurvatureFan}.  Its brackets have the explicit
+width bound \(10/(n+1)\), and Lean proves a same-stage overlap with
+\code{piCircleArea}.  This is a distinct rational Archimedean computation; it
+does not settle the still-open refinement proof for the square-root lower
+path in \code{piCircumference}.
+\end{theorem}
+
 \section{Trigonometric Functions}
 
 \begin{definition}[Rational-circle coordinates]
