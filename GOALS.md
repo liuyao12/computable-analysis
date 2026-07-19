@@ -608,7 +608,14 @@ students actually compute.
   `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
   combines its all-stage form with the proved outer endpoint.  The original
   direct circumference row remains uncounted until that local bisection
-  comparison is proved.
+  comparison is proved.  The new rational bridge
+  `AdjacentChordCurvatureMarginCoversFineWidths` reduces that comparison to a
+  completely finite condition: the two sharp curvature certificates, less
+  their certified fine square-root widths, must still bound the coarse chord
+  in squared length.  Lean proves
+  `adjacentChordLowerRefinesByDoubling_of_curvatureMargin`, so the remaining
+  task is now an explicit rational margin inequality rather than an
+  unstructured square-root comparison.
 
 ### Archived pre-refactor notes (not current source)
 

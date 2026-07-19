@@ -17643,6 +17643,125 @@ theorem curvatureChordFanPerimeter_le_outerFanPerimeter
   exact curvatureChordLowerSumFrom_le_outerTangentCrossSumFrom
     stage hstage stage 0
 
+/-- The rational curvature certificate lies below the certified upper
+square-root endpoint of every adjacent rational-circle chord. -/
+theorem curvatureChordLower_le_adjacentChordLength_hi
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    curvatureChordLower (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) stage).hi := by
+  let p := circleSamplePoint stage k
+  let q := circleSamplePoint stage (k + 1)
+  have hp : RationalCircle.Stage.normSq p = 1 := by
+    dsimp [p]
+    simpa [RationalCircle.Stage.normSq] using circleSamplePoint_normSq stage k
+  have hq : RationalCircle.Stage.normSq q = 1 := by
+    dsimp [q]
+    simpa [RationalCircle.Stage.normSq] using
+      circleSamplePoint_normSq stage (k + 1)
+  have hcross : 0 <= pointCross p q := by
+    dsimp [p, q]
+    exact circleSamplePoint_cross_nonneg_of_order stage hstage (by omega)
+  have hdot : 0 <= RationalCircle.Stage.dot p q := by
+    dsimp [p, q]
+    exact circleSamplePoint_dot_nonneg_adjacent stage hstage k
+  have hdeficit : 0 <= 1 - RationalCircle.Stage.dot p q := by
+    dsimp [p, q]
+    have h := circleSamplePoint_dot_le_one stage k (k + 1)
+    grind [Rat.sub_eq_add_neg]
+  have hsq : sq (curvatureChordLower p q) <= pointSegmentNormSq p q :=
+    curvatureChordLower_sq_le_segmentNormSq_of_unit hp hq hcross hdot hdeficit
+  exact pointSegmentLengthInterval_le_hi_of_sq_le p q stage hsq
+
+/-- A lower square-root endpoint is within its interval width of the rational
+curvature chord certificate. -/
+theorem curvatureChordLower_sub_adjacentChordLength_width_le_lo
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    curvatureChordLower (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) -
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) stage).width <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) stage).lo := by
+  have h := curvatureChordLower_le_adjacentChordLength_hi stage hstage k
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+/-- A finite rational margin condition sufficient to transfer the
+curvature-corrected dyadic chord gain to the actual bisection lower endpoints
+of the original circumference algorithm.  It contains only rational
+coordinates, interval widths, and squared comparisons. -/
+def AdjacentChordCurvatureMarginCoversFineWidths (stage : Nat) : Prop :=
+  forall k : Fin stage,
+    let p := circleSamplePoint stage k.1
+    let q := circleSamplePoint stage (k.1 + 1)
+    let p' := circleSamplePoint (2 * stage) (2 * k.1)
+    let m := circleSamplePoint (2 * stage) (2 * k.1 + 1)
+    let q' := circleSamplePoint (2 * stage) (2 * k.1 + 2)
+    let left := pointSegmentLengthInterval p' m (2 * stage)
+    let right := pointSegmentLengthInterval m q' (2 * stage)
+    let r := curvatureChordLower p' m + curvatureChordLower m q' -
+      left.width - right.width
+    0 <= r /\ pointSegmentNormSq p q <= sq r
+
+/-- The curvature-margin condition is a sufficient finite certificate for
+the unresolved local bisection-chord refinement of `piCircumference`. -/
+theorem adjacentChordLowerRefinesByDoubling_of_curvatureMargin
+    (stage : Nat) (hstage : 0 < stage)
+    (hmargin : AdjacentChordCurvatureMarginCoversFineWidths stage) :
+    AdjacentChordLowerRefinesByDoubling stage := by
+  intro k
+  have h := hmargin k
+  dsimp at h
+  let p := circleSamplePoint stage k.1
+  let q := circleSamplePoint stage (k.1 + 1)
+  let p' := circleSamplePoint (2 * stage) (2 * k.1)
+  let m := circleSamplePoint (2 * stage) (2 * k.1 + 1)
+  let q' := circleSamplePoint (2 * stage) (2 * k.1 + 2)
+  let left := pointSegmentLengthInterval p' m (2 * stage)
+  let right := pointSegmentLengthInterval m q' (2 * stage)
+  let r := curvatureChordLower p' m + curvatureChordLower m q' -
+    left.width - right.width
+  have hcoarse :
+      (pointSegmentLengthInterval p q stage).lo <= r :=
+    pointSegmentLengthInterval_lo_le_of_sq_le p q stage h.1 h.2
+  have hleft : curvatureChordLower p' m - left.width <= left.lo := by
+    dsimp [p', m, left]
+    exact curvatureChordLower_sub_adjacentChordLength_width_le_lo
+      (2 * stage) (by omega) (2 * k.1)
+  have hright : curvatureChordLower m q' - right.width <= right.lo := by
+    dsimp [m, q', right]
+    exact curvatureChordLower_sub_adjacentChordLength_width_le_lo
+      (2 * stage) (by omega) (2 * k.1 + 1)
+  dsimp [p, q, p', m, q', left, right, r] at hcoarse hleft hright ⊢
+  calc
+    (pointSegmentLengthInterval
+        (circleSamplePoint stage k.1)
+        (circleSamplePoint stage (k.1 + 1)) stage).lo <=
+      curvatureChordLower (circleSamplePoint (2 * stage) (2 * k.1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1)) +
+        curvatureChordLower (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) -
+        (pointSegmentLengthInterval
+          (circleSamplePoint (2 * stage) (2 * k.1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1)) (2 * stage)).width -
+        (pointSegmentLengthInterval
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).width :=
+      hcoarse
+    _ <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k.1))
+        (circleSamplePoint (2 * stage) (2 * k.1 + 1)) (2 * stage)).lo +
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+        (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).lo := by
+      grind [Rat.sub_eq_add_neg]
+
 end PiProofs
 
 end ComputableAnalysis
