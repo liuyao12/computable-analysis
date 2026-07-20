@@ -729,8 +729,6 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_valid}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCertified}
-\lean{ComputableAnalysis.PiProofs.AdjacentChordCurvatureMarginCoversFineWidths}
-\lean{ComputableAnalysis.PiProofs.adjacentChordLowerRefinesByDoubling_of_curvatureMargin}
 \uses{thm:finite-archimedes,def:raw-real}
 The public area loop is a valid raw real.  The circumference computation is
 ordered and has a proved width-shrinking bound, but it is not yet certified as
@@ -740,15 +738,6 @@ open.  Lean packages that remaining target in finite-prefix form: proving all
 obtain the public \code{CircumferenceValid} proof.  The all-prefix statement is
 now formalized as an iff with the global step-refinement predicate, so this is
 the same obligation in a finite-checkable presentation.
-
-A sharper sufficient finite target is now available.  On every adjacent
-coarse chord, the sum of the two rational curvature certificates at the
-refined stage, after subtracting their certified square-root interval widths,
-is required to dominate the coarse squared chord length.  Lean packages this
-as \code{AdjacentChordCurvatureMarginCoversFineWidths} and proves that it
-implies the local bisection refinement condition.  Thus the outstanding direct
-perimeter proof is reduced to an explicit rational margin inequality, without
-changing or reboxing the public \code{piCircumference} evaluator.
 
 There is nevertheless a separately named certified representative,
 \code{piCircumferenceReboxed}.  It takes finite prefix intersections of the
@@ -761,34 +750,6 @@ a new scoreboard row.
 The project-facing certified value \code{PiProofs.piCertified} chooses the
 area loop as its evaluator and records this reboxed perimeter route as a
 verified alternative.
-\end{theorem}
-
-\begin{theorem}[Curvature-corrected Archimedean fan]
-\lean{ComputableAnalysis.PiProofs.stableCurvatureChordLower}
-\lean{ComputableAnalysis.PiProofs.stableCurvatureChordLower_refinesByDoubling}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_equiv_piCircleArea}
-\uses{thm:finite-archimedes,def:raw-real}
-For an oriented rational unit-circle chord from \(p\) to \(q\), let
-\(c=\operatorname{cross}(p,q)\) and
-\(d=1-\langle p,q\rangle\).  The rational certificate
-
-\[
-  c+\frac{d^2}{64}
-\]
-
-lies below the chord and above the uncorrected cross-product certificate on
-every quarter-circle cell.  The deliberately conservative denominator \(64\)
-is chosen so that the exact rational gain in the two cross products after a
-dyadic split dominates the coarse correction.  Hence the finite corrected fan
-increases under refinement, remains below the circumscribed tangent fan, and
-defines the valid raw computation
-\code{PiProofs.piCircumferenceCurvatureFan}.  Its brackets have the explicit
-width bound \(10/(n+1)\), and Lean proves a same-stage overlap with
-\code{piCircleArea}.  This is a distinct rational Archimedean computation; it
-does not settle the still-open refinement proof for the square-root lower
-path in \code{piCircumference}.
 \end{theorem}
 
 \section{Trigonometric Functions}

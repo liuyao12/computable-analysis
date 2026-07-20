@@ -477,8 +477,8 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently eleven of twenty named
-  computations are valid raw reals, and nine of nineteen applicable rows
+  `blueprint/src/pi-scoreboard-table.tex`: currently ten of nineteen named
+  computations are valid raw reals, and eight of eighteen applicable rows
   have a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
   rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn
@@ -486,10 +486,9 @@ students actually compute.
   formulation `4 * arctanIntegralRectangleForAtOne`, the series computation
   `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
   the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
-  rational series, the direct cross-fan circumference computation
-  `piCircumferenceFan`, and its conservative curvature-corrected refinement
-  `piCircumferenceCurvatureFan`.  The valid-but-not-yet-equivalent Basel row
-  accounts for the remaining definition-only completion.
+  rational series, and the direct cross-fan circumference computation
+  `piCircumferenceFan`.  The valid-but-not-yet-equivalent Basel row accounts
+  for the remaining definition-only completion.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
@@ -587,19 +586,7 @@ students actually compute.
   brackets and explicit `10/(n+1)` width modulus in
   `piCircumferenceFan_valid`, then proves
   `piCircumferenceFan_equiv_piCircleArea` from the common inscribed-polygon
-  lower endpoint.  A second, genuinely sharper fan is now also complete:
-  `piCircumferenceCurvatureFan` adds
-  `(1 - dot p q)^2 / 64` to every rational cross-product chord certificate.
-  Its local dyadic refinement is proved by the exact rational cross-gain
-  identity `stableCurvatureChordLower_refinesByDoubling`; no square-root
-  approximation or real completeness is involved.  Lean proves its ordered
-  nested brackets, the same explicit `10/(n+1)` width modulus, and its
-  same-stage equivalence to the circle-area baseline in
-  `piCircumferenceCurvatureFan_valid` and
-  `piCircumferenceCurvatureFan_equiv_piCircleArea`.  This is neither a
-  reboxing nor a replacement for the
-  original chord-length lower path, whose remaining endpoint work is isolated
-  as
+  lower endpoint.  The original chord-length lower path remains isolated as
   `AdjacentChordLowerRefinesByDoubling`: a local comparison between the
   bisection lower enclosure of each coarse chord and the two lower enclosures
   of its refined chords.  Lean proves that this finite local condition lifts
@@ -608,14 +595,9 @@ students actually compute.
   `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
   combines its all-stage form with the proved outer endpoint.  The original
   direct circumference row remains uncounted until that local bisection
-  comparison is proved.  The new rational bridge
-  `AdjacentChordCurvatureMarginCoversFineWidths` reduces that comparison to a
-  completely finite condition: the two sharp curvature certificates, less
-  their certified fine square-root widths, must still bound the coarse chord
-  in squared length.  Lean proves
-  `adjacentChordLowerRefinesByDoubling_of_curvatureMargin`, so the remaining
-  task is now an explicit rational margin inequality rather than an
-  unstructured square-root comparison.
+  comparison is proved.  A curvature-corrected refinement and its squared
+  margin reduction remain design notes until their dependency order is
+  reconstructed as a portable Lean proof; they are not scorecard rows.
 
 ### Archived pre-refactor notes (not current source)
 

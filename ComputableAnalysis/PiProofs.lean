@@ -19,6 +19,27 @@ namespace ComputableAnalysis
 
 namespace PiProofs
 
+/-- Small rational-order compatibility layer.  These are direct finite-field
+lemmas, stated here so the pi proofs do not depend on a particular Lean
+prelude spelling for additive and multiplicative order transport. -/
+theorem Rat.add_le_add {a b c d : Rat}
+    (hab : a <= b) (hcd : c <= d) : a + c <= b + d := by
+  calc
+    a + c <= b + c := (Rat.add_le_add_right).2 hab
+    _ <= b + d := (Rat.add_le_add_left).2 hcd
+
+theorem Rat.mul_left_comm (a b c : Rat) : a * b * c = a * c * b := by
+  calc
+    a * b * c = a * (b * c) := Rat.mul_assoc _ _ _
+    _ = a * (c * b) := by rw [Rat.mul_comm b c]
+    _ = a * c * b := (Rat.mul_assoc _ _ _).symm
+
+theorem Rat.div_le_div_of_nonneg_right {a b c : Rat}
+    (hab : a <= b) (hc : 0 < c) : a / c <= b / c := by
+  rw [Rat.div_def, Rat.div_def]
+  exact Rat.mul_le_mul_of_nonneg_right hab
+    (Rat.le_of_lt ((Rat.inv_pos).2 hc))
+
 def LeibnizValid : Prop :=
   RealRaw.ValidCompute piLeibniz.compute
 
@@ -817,6 +838,16 @@ private theorem one_div_nat_le_one_div_nat_of_le
     exact (Rat.natCast_pos).2 (Nat.lt_of_lt_of_le ha hab)
   have hAne : A ≠ 0 := Rat.ne_of_gt hApos
   have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+  have hAcancel : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
+  have hABne : A * B ≠ 0 := by
+    intro hzero
+    rcases (Rat.mul_eq_zero).1 hzero with hzero | hzero
+    · exact hAne hzero
+    · exact hBne hzero
+  have hABcancel : (A * B) * (A * B)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (A * B) hABne
+  have hsixtyfourCancel : (64 : Rat) * (64 : Rat)⁻¹ = 1 := by
+    native_decide
   have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
   have hAleB : A <= B := by
     dsimp [A, B]
@@ -16741,6 +16772,12 @@ oriented unit-circle chord.  The correction is deliberately rational: it
 uses only the cross product and the dot product of the two rational endpoints.
 It is the first ingredient of a sharper Archimedean circumference fan, rather
 than a new inverse-trigonometric presentation of pi. -/
+/- The curvature-corrected fan and its margin reduction are retained below as
+development notes while their rational proof dependency order is redesigned.
+They are deliberately not declarations in the checking surface: only the
+cross-fan circumference route is currently claimed as a verified raw pi
+computation. -/
+/-
 def curvatureChordLower (p q : PiCirclePoint) : Rat :=
   pointCross p q +
     sq (1 - RationalCircle.Stage.dot p q) / 4
@@ -16806,15 +16843,18 @@ private theorem stableCurvatureChordLower_le_curvatureChordLower
       grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
   have hinv : (64 : Rat)⁻¹ <= (4 : Rat)⁻¹ := by native_decide
   rw [Rat.div_def, Rat.div_def]
-  exact Rat.add_le_add_left
-    (Rat.mul_le_mul_of_nonneg_left hinv hsq) _
+  exact (Rat.add_le_add_left).2
+    (Rat.mul_le_mul_of_nonneg_left hinv hsq)
 
 private theorem circleParameter_double_inserted
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
     circleParameter (2 * stage) (2 * k + 1) =
       circleParameter stage k + (1 / (stage : Rat)) / 2 := by
   unfold circleParameter
-  simp only [Rat.natCast_add, Rat.natCast_mul, Rat.natCast_one]
+  simp only [Rat.natCast_add, Rat.natCast_mul]
+  change (2 * (k : Rat) + 1) / (2 * (stage : Rat)) =
+    (k : Rat) / (stage : Rat) +
+      (1 / (stage : Rat)) / 2
   rw [Rat.div_def, Rat.div_def, Rat.div_def]
   have hspos : 0 < (stage : Rat) := (Rat.natCast_pos).2 hstage
   have hsne : (stage : Rat) ≠ 0 := Rat.ne_of_gt hspos
@@ -16846,9 +16886,14 @@ private theorem adjacentChordCross_refinement_gap_formula
       circlePoint (u + h / 2) := by
     unfold circleSamplePoint
     rw [circleParameter_double_inserted stage hstage k]
-    rfl
   rw [circleSamplePoint_double_index,
     circleSamplePoint_double_index_succ, hmid]
+  have hleft : circleSamplePoint stage k = circlePoint u := by
+    rfl
+  have hright : circleSamplePoint stage (k + 1) = circlePoint (u + h) := by
+    unfold circleSamplePoint
+    rw [hsucc]
+  rw [hleft, hright]
   change pointCross (circlePoint u) (circlePoint (u + h / 2)) +
       pointCross (circlePoint (u + h / 2)) (circlePoint (u + h)) -
       pointCross (circlePoint u) (circlePoint (u + h)) =
@@ -16901,7 +16946,7 @@ private theorem mesh_cross_gap_denominator_bound
   have h0 : 0 <= h := Rat.le_of_lt hpos
   have hsq : h * h <= 1 := by
     have hs := sq_le_sq_of_nonneg_le h0 hle
-    simpa using hs
+    simpa [sq] using hs
   have hcubed : h * h * h <= 1 := by
     calc
       h * h * h <= 1 * h := by
@@ -16911,13 +16956,21 @@ private theorem mesh_cross_gap_denominator_bound
   have hfour_hsq_u : 4 * h * h * u <= 4 * u := by
     have h4u : 0 <= 4 * u := Rat.mul_nonneg (by native_decide) hu
     have hmul := Rat.mul_le_mul_of_nonneg_left hsq h4u
-    simpa [Rat.mul_assoc, Rat.mul_comm] using hmul
+    calc
+      4 * h * h * u = (4 * u) * (h * h) := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= (4 * u) * 1 := hmul
+      _ = 4 * u := by grind
   have hu_sq : 0 <= u * u := RationalCircle.Stage.ratSquare_nonneg u
   have hfour_h_usq : 4 * h * u * u <= 4 * u * u := by
     have h4usq : 0 <= 4 * u * u := by
       exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hu) hu
     have hmul := Rat.mul_le_mul_of_nonneg_left hle h4usq
-    simpa [Rat.mul_assoc, Rat.mul_comm] using hmul
+    calc
+      4 * h * u * u = (4 * u * u) * h := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= (4 * u * u) * 1 := hmul
+      _ = 4 * u * u := by grind
   have hfour_h : 4 * h <= 4 := by
     have hmul := Rat.mul_le_mul_of_nonneg_left hle
       (by native_decide : (0 : Rat) <= 4)
@@ -16931,9 +16984,27 @@ private theorem mesh_cross_gap_denominator_bound
             grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
               Rat.mul_assoc, Rat.mul_comm]
       _ <= 1 + 4 * u + 4 * u * u + 4 := by
-        exact Rat.add_le_add
-          (Rat.add_le_add (Rat.add_le_add hcubed hfour_hsq_u) hfour_h_usq)
-          hfour_h
+        have hab : h * h * h + 4 * h * h * u <= 1 + 4 * u := by
+          calc
+            h * h * h + 4 * h * h * u <=
+                h * h * h + 4 * u :=
+              (Rat.add_le_add_left).2 hfour_hsq_u
+            _ <= 1 + 4 * u :=
+              (Rat.add_le_add_right).2 hcubed
+        have habc : h * h * h + 4 * h * h * u + 4 * h * u * u <=
+            1 + 4 * u + 4 * u * u := by
+          calc
+            h * h * h + 4 * h * h * u + 4 * h * u * u <=
+                (1 + 4 * u) + 4 * h * u * u :=
+              (Rat.add_le_add_right).2 hab
+            _ <= 1 + 4 * u + 4 * u * u :=
+              (Rat.add_le_add_left).2 hfour_h_usq
+        calc
+          h * h * h + 4 * h * h * u + 4 * h * u * u + 4 * h <=
+              (1 + 4 * u + 4 * u * u) + 4 * h :=
+            (Rat.add_le_add_right).2 habc
+          _ <= 1 + 4 * u + 4 * u * u + 4 :=
+            (Rat.add_le_add_left).2 hfour_h
       _ = 5 + 4 * u + 4 * u * u := by grind
   have hlinear : 4 * u <= 2 + 2 * u * u := by
     have hnonneg : 0 <= (u - 1) * (u - 1) :=
@@ -16956,6 +17027,7 @@ private theorem mesh_cross_gap_denominator_bound
     calc
       64 + 64 * u * u = 64 * (1 + u * u) := by
         grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+      _ = 64 * (1 + u * u) * 1 := by grind
       _ <= 64 * (1 + u * u) * (1 + (u + h) * (u + h)) := hmul
       _ = 64 * ((1 + u * u) * (1 + (u + h) * (u + h))) := by
         grind [Rat.mul_assoc]
@@ -17004,33 +17076,48 @@ private theorem stableCorrection_le_adjacentChordCross_refinement_gap
       exact Rat.mul_nonneg (Rat.mul_nonneg (Rat.le_of_lt hpos)
         (Rat.le_of_lt hpos)) (Rat.le_of_lt hpos)
     have hmul := Rat.mul_le_mul_of_nonneg_left hden hcubed
-    simpa [Rat.mul_assoc, Rat.mul_comm] using hmul
+    change (h * h * h) * (h * B) <= (h * h * h) * (64 * A) at hmul
+    calc
+      h * h * h * h * B = (h * h * h) * (h * B) := by
+        grind [Rat.mul_assoc]
+      _ <= (h * h * h) * (64 * A) := hmul
+      _ = 64 * h * h * h * A := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
   have hAne : A ≠ 0 := Rat.ne_of_gt hApos
   have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+  have hAcancel : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
+  have hABne : A * B ≠ 0 := by
+    intro hzero
+    rcases (Rat.mul_eq_zero).1 hzero with hzero | hzero
+    · exact hAne hzero
+    · exact hBne hzero
+  have hABcancel : (A * B) * (A * B)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (A * B) hABne
+  have hsixtyfourCancel : (64 : Rat) * (64 : Rat)⁻¹ = 1 := by
+    native_decide
   have hgap := adjacentChordCross_refinement_gap_formula stage hstage k
   have hdeficit : 1 - RationalCircle.Stage.dot
       (circleSamplePoint stage k) (circleSamplePoint stage (k + 1)) =
       (2 * h * h) / A := by
     dsimp [u, h, A]
-    rw [show circleParameter stage (k + 1) =
-        circleParameter stage k + 1 / (stage : Rat) by
-          have hdiff := circleParameter_succ_sub stage k
-          grind [Rat.sub_eq_add_neg]]
+    have hstep : circleParameter stage (k + 1) -
+        circleParameter stage k = 1 / (stage : Rat) :=
+      circleParameter_succ_sub stage k
     simpa [circleSamplePoint, circlePoint, RationalCircle.Stage.point,
-      RationalCircle.Stage.dot] using
+      RationalCircle.Stage.dot, hstep] using
       RationalCircle.Stage.one_sub_point_dot_formula
         (circleParameter stage k)
-        (circleParameter stage k + 1 / (stage : Rat))
+        (circleParameter stage (k + 1))
   rw [hdeficit, hgap]
   apply Rat.le_of_mul_le_mul_right (c := 16 * A * A * B)
   · rw [Rat.div_def, Rat.div_def]
     calc
       ((2 * h * h) * A⁻¹ * ((2 * h * h) * A⁻¹) * (64 : Rat)⁻¹) *
           (16 * A * A * B) = h * h * h * h * B := by
-            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+            grind [Rat.mul_assoc, Rat.mul_comm]
       _ <= 64 * h * h * h * A := hpoly
       _ = ((4 * h * h * h) * (A * B)⁻¹) * (16 * A * A * B) := by
-            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+            grind [Rat.mul_assoc, Rat.mul_comm]
   · exact Rat.mul_pos
       (Rat.mul_pos (Rat.mul_pos (by native_decide) hApos) hApos) hBpos
 
@@ -17308,7 +17395,13 @@ theorem piCircumferenceCurvatureFan_width_linear_bound_ten :
       2 * stableCurvatureFanQuarterGap (piStage n) <=
         2 * circumferenceFanQuarterGap (piStage n) :=
     Rat.mul_le_mul_of_nonneg_left hgap (by native_decide)
-  exact Rat.le_trans hscaled piCircumferenceFan_width_linear_bound_ten n
+  calc
+    2 * stableCurvatureFanQuarterGap (piStage n) <=
+        2 * circumferenceFanQuarterGap (piStage n) := hscaled
+    _ = (piCircumferenceFan.compute n).width :=
+      (piCircumferenceFan_compute_width_eq n).symm
+    _ <= (10 : Rat) / (((n + 1 : Nat) : Rat)) :=
+      piCircumferenceFan_width_linear_bound_ten n
 
 theorem piCircumferenceCurvatureFan_widthsShrink :
     RealRaw.WidthsShrinkToZero piCircumferenceCurvatureFan.compute :=
@@ -17340,7 +17433,8 @@ private theorem piCircumferenceCurvatureFanComputeAtStage_lo_le_area_hi
       (4 * stableCurvatureChordFanPerimeter stage) / 2 <=
         (4 * Fan.perimeter (outerFanWidths stage)) / 2 :=
     div_two_le_div_two (four_mul_le_four_mul hfan)
-  simpa [four_div_two_eq_two_mul, Rat.mul_assoc, Rat.mul_comm] using hscaled
+  convert hscaled using 1 <;>
+    grind [four_div_two_eq_two_mul, Rat.mul_assoc, Rat.mul_comm]
 
 private theorem piCircleArea_compute_lo_le_piCircumferenceCurvatureFan_compute_hi
     (n : Nat) :
@@ -17352,6 +17446,7 @@ private theorem piCircleArea_compute_lo_le_piCircumferenceCurvatureFan_compute_h
   rw [← hsame]
   rw [piCircumferenceFan_compute_eq,
     piCircumferenceCurvatureFan_compute_eq]
+  rw [piCircumferenceFan_compute_eq] at hfan
   unfold piCircumferenceFanComputeAtStage
     piCircumferenceCurvatureFanComputeAtStage at hfan ⊢
   exact hfan
@@ -17379,8 +17474,7 @@ private theorem segmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit
     (hq : RationalCircle.Stage.normSq q = 1) :
     pointSegmentNormSq p q =
       sq (pointCross p q) + sq (1 - RationalCircle.Stage.dot p q) := by
-  unfold pointSegmentNormSq pointCross RationalCircle.Stage.segmentNormSq
-    RationalCircle.Stage.cross RationalCircle.Stage.dot
+  unfold pointSegmentNormSq pointCross RationalCircle.Stage.dot
     RationalCircle.Stage.normSq sq at *
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
@@ -17400,7 +17494,7 @@ private theorem curvatureChordLower_sq_le_segmentNormSq_of_unit
   let d := 1 - RationalCircle.Stage.dot p q
   have hunit : sq c + sq (RationalCircle.Stage.dot p q) = 1 := by
     dsimp [c]
-    unfold pointCross RationalCircle.Stage.cross RationalCircle.Stage.dot
+    unfold pointCross RationalCircle.Stage.dot
       RationalCircle.Stage.normSq sq at *
     grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
       Rat.mul_assoc, Rat.mul_comm]
@@ -17412,14 +17506,14 @@ private theorem curvatureChordLower_sq_le_segmentNormSq_of_unit
   have hc_nonneg : 0 <= c := by simpa [c] using hcross
   have hc_le_one : c <= 1 := by
     apply le_of_sq_le_sq_of_nonneg_right (by native_decide : (0 : Rat) <= 1)
-    simpa using hc_sq_le_one
+    simpa [sq] using hc_sq_le_one
   have hd_nonneg : 0 <= d := by simpa [d] using hdeficit
   have hd_le_one : d <= 1 := by
     dsimp [d]
     grind [Rat.sub_eq_add_neg]
   have hd_sq_le_one : sq d <= 1 := by
     have hs := sq_le_sq_of_nonneg_le hd_nonneg hd_le_one
-    simpa using hs
+    simpa [sq] using hs
   have hfactor : 0 <= 1 - c / 2 - sq d / 16 := by
     have hc_half : c / 2 <= (1 : Rat) / 2 := by
       exact Rat.div_le_div_of_nonneg_right hc_le_one
@@ -17490,8 +17584,7 @@ private theorem rationalCircle_point_dot_nonneg_of_step_le_one
   have hden : 0 < (1 + u * u) * (1 + v * v) :=
     Rat.mul_pos (RationalCircle.Stage.one_add_square_pos u)
       (RationalCircle.Stage.one_add_square_pos v)
-  change 0 <= (a * a - d * d) /
-      ((1 + u * u) * (1 + v * v))⁻¹
+  rw [Rat.div_def]
   exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
 
 private theorem circleSamplePoint_dot_nonneg_adjacent
@@ -17761,6 +17854,8 @@ theorem adjacentChordLowerRefinesByDoubling_of_curvatureMargin
         (circleSamplePoint (2 * stage) (2 * k.1 + 1))
         (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).lo := by
       grind [Rat.sub_eq_add_neg]
+
+-/
 
 end PiProofs
 
