@@ -1017,7 +1017,9 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_cleared}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_strictMono}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_nonnegative}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_covers}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_nonnegative}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -1092,8 +1094,10 @@ if \(-1<x<y<1\), then
 The positive-denominator and \(1+xy>0\) lemmas used in that proof are also
 checked.  Consequently, endpointwise transport carries every finite ordered
 rational cover of a compact subinterval of \((-1,1)\) to an ordered cover of
-its projective image.  This still does not assert the quadrature or integral
-substitution theorem.
+its projective image.  On the nonnegative branch, the transported cover is
+also certified nonnegative, so it meets the admissibility condition of the
+existing Cauchy-kernel rectangle and geometric quadrature bounds.  This still
+does not assert the quadrature or integral substitution theorem.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

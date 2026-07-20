@@ -3390,6 +3390,17 @@ def projectiveCompactIntervals : List (Rat × Rat) -> List (Rat × Rat)
       (projectiveCompactCoordinate p, projectiveCompactCoordinate r) ::
         projectiveCompactIntervals rest
 
+/-- The compact projective chart is nonnegative on its nonnegative rational
+source branch. -/
+theorem projectiveCompactCoordinate_nonnegative {x : Rat}
+    (hx0 : 0 <= x) (hx1 : x < 1) :
+    0 <= projectiveCompactCoordinate x := by
+  have hxlo : -1 < x := by grind
+  have hden : 0 < 1 - x * x := projectiveCompactDenominator_pos hxlo hx1
+  unfold projectiveCompactCoordinate
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg hx0 (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
 /-- An ordered finite cover of a compact rational subinterval of `(-1,1)`
 remains an ordered cover after applying the compact projective chart to every
 endpoint.  This is the finite partition transport needed before comparing
@@ -3420,6 +3431,37 @@ theorem projectiveCompactIntervals_covers
             (projectiveCompactCoordinate_strictMono ha (by grind) hrhi)
       simp only [projectiveCompactIntervals, ArctanGeometry.CoversInterval]
       exact ⟨trivial, hmap, ih r b hrlo hb hrest⟩
+
+/-- A nonnegative finite source partition transports to a nonnegative
+partition on the positive branch of the compact projective chart.  This is
+the admissibility condition for the existing Cauchy-kernel quadrature bounds.
+-/
+theorem projectiveCompactIntervals_nonnegative
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (ha : 0 <= a) (hb : b < 1)
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.NonnegativeIntervals (projectiveCompactIntervals intervals) := by
+  induction intervals generalizing a b with
+  | nil =>
+      simp [projectiveCompactIntervals, ArctanGeometry.NonnegativeIntervals]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hr0 : 0 <= r := Rat.le_trans ha hpr
+      have hrle : r <= b := ArctanGeometry.CoversInterval.start_le_end hrest
+      have hrhi : r < 1 := by grind
+      have hleft : 0 <= projectiveCompactCoordinate a :=
+        projectiveCompactCoordinate_nonnegative ha (by grind)
+      have horder : projectiveCompactCoordinate a <= projectiveCompactCoordinate r := by
+        by_cases har : a = r
+        · subst r
+          exact Rat.le_refl
+        · have halo : -1 < a := by grind
+          exact Rat.le_of_lt
+            (projectiveCompactCoordinate_strictMono halo (by grind) hrhi)
+      simp only [projectiveCompactIntervals, ArctanGeometry.NonnegativeIntervals]
+      exact ⟨hleft, horder, ih r b hr0 hb hrest⟩
 
 /-- Exact rational compactification of the Cauchy density.  Away from the
 two chart endpoints, the pullback of `1 / (1 + u^2)` under
