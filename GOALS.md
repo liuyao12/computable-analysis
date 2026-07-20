@@ -212,9 +212,15 @@ not a description of the current module graph. The checked blueprint
   ordered symmetric cover, while the two
   `projectiveCompactLipschitz*Sum_reflected_append_eq_right_add_left` theorems
   identify its complete left-endpoint sums with the positive right- plus
-  left-endpoint sums.  The remaining finite identity is therefore specifically
-  the split of the candidate's concrete affine dyadic mesh into this oriented
-  core and the two endpoint cells.
+  left-endpoint sums.  The remaining finite identity is now proved too:
+  `reciprocalQuarticMinusOneCompactAffineDyadicIntervals_succ_eq_reflected_append`
+  shows that the literal affine image of stage `n + 1` is the reflected
+  stage-`n` mesh followed by that mesh, and
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_eq_orientedSymmetric`
+  identifies the actual candidate box with the resulting oriented symmetric
+  bracket.  The only remaining analytic assembly is to trim its two cells
+  touching `±1`, couple the interior bracket to the scheduled projective
+  Cauchy bracket, and absorb them using the already-valid dyadic tail raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

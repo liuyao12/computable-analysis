@@ -4672,6 +4672,17 @@ def projectiveCompactLipschitzRightUpperSum : List (Rat × Rat) -> Rat
         (reciprocalQuarticSymmetricDensity (-1) r + 8 * (r - p)) +
         projectiveCompactLipschitzRightUpperSum rest
 
+/-- The correctly oriented symmetric compact bracket: after reflection, the
+negative half uses positive right endpoints while the positive half uses left
+endpoints.  Unlike the auxiliary factor-two bracket, this is a literal
+left-endpoint bracket on the reflected appended partition. -/
+def projectiveCompactOrientedSymmetricLipschitzSum
+    (intervals : List (Rat × Rat)) : QInterval :=
+  { lo := projectiveCompactLipschitzRightLowerSum intervals +
+      projectiveCompactLipschitzLowerSum intervals,
+    hi := projectiveCompactLipschitzRightUpperSum intervals +
+      projectiveCompactLipschitzUpperSum intervals }
+
 private theorem projectiveCompactLipschitzLowerSum_append
     (left right : List (Rat × Rat)) :
     projectiveCompactLipschitzLowerSum (left ++ right) =
@@ -5162,6 +5173,324 @@ theorem reciprocalQuarticMinusOneCompactAffineDyadicIntervals_covers
   rw [hleft, hright] at h
   exact h
 
+/-- The list-level midpoint refinement used only to expose the exact symmetry
+of the concrete unit dyadic mesh. -/
+private def reciprocalQuarticUnitMidpointRefine : List (Rat × Rat) ->
+    List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (p, (p + r) / 2) :: ((p + r) / 2, r) ::
+        reciprocalQuarticUnitMidpointRefine rest
+
+/-- Scale a unit partition into its left half. -/
+private def reciprocalQuarticUnitLeftHalf : List (Rat × Rat) ->
+    List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (p / 2, r / 2) :: reciprocalQuarticUnitLeftHalf rest
+
+/-- Scale a unit partition into its right half. -/
+private def reciprocalQuarticUnitRightHalf : List (Rat × Rat) ->
+    List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      ((p + 1) / 2, (r + 1) / 2) :: reciprocalQuarticUnitRightHalf rest
+
+/-- Reverse a unit partition through the midpoint of the unit interval. -/
+private def reciprocalQuarticUnitReflectedIntervals : List (Rat × Rat) ->
+    List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      reciprocalQuarticUnitReflectedIntervals rest ++ [(1 - r, 1 - p)]
+
+private theorem reciprocalQuarticUnitMidpointRefine_eq_refineAux_intervals
+    (lo hi : Rat) (intervals : List (Rat × Rat)) :
+    reciprocalQuarticUnitMidpointRefine intervals =
+      (ArctanGeometry.AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticUnitMidpointRefine,
+        ArctanGeometry.AreaLoopState.refineAux]
+      rw [ih (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+        (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)]
+
+private theorem reciprocalQuarticUnitDyadicIntervals_succ
+    (stage : Nat) :
+    (ArctanGeometry.arctanAreaLoopState 1 (stage + 1)).intervals =
+      reciprocalQuarticUnitMidpointRefine
+        (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+  rw [ArctanGeometry.arctanAreaLoopState_succ]
+  change (ArctanGeometry.AreaLoopState.refineAux _ _ _).intervals = _
+  exact (reciprocalQuarticUnitMidpointRefine_eq_refineAux_intervals _ _ _).symm
+
+private theorem reciprocalQuarticUnitMidpointRefine_append
+    (left right : List (Rat × Rat)) :
+    reciprocalQuarticUnitMidpointRefine (left ++ right) =
+      reciprocalQuarticUnitMidpointRefine left ++
+        reciprocalQuarticUnitMidpointRefine right := by
+  induction left with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, reciprocalQuarticUnitMidpointRefine]
+      rw [ih]
+
+private theorem reciprocalQuarticUnitLeftHalf_append
+    (left right : List (Rat × Rat)) :
+    reciprocalQuarticUnitLeftHalf (left ++ right) =
+      reciprocalQuarticUnitLeftHalf left ++ reciprocalQuarticUnitLeftHalf right := by
+  induction left with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, reciprocalQuarticUnitLeftHalf]
+      rw [ih]
+
+private theorem reciprocalQuarticUnitRightHalf_append
+    (left right : List (Rat × Rat)) :
+    reciprocalQuarticUnitRightHalf (left ++ right) =
+      reciprocalQuarticUnitRightHalf left ++ reciprocalQuarticUnitRightHalf right := by
+  induction left with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, reciprocalQuarticUnitRightHalf]
+      rw [ih]
+
+private theorem reciprocalQuarticUnitMidpointRefine_leftHalf
+    (intervals : List (Rat × Rat)) :
+    reciprocalQuarticUnitMidpointRefine
+        (reciprocalQuarticUnitLeftHalf intervals) =
+      reciprocalQuarticUnitLeftHalf
+        (reciprocalQuarticUnitMidpointRefine intervals) := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticUnitLeftHalf,
+        reciprocalQuarticUnitMidpointRefine]
+      rw [ih]
+      congr 3 <;>
+        grind [Rat.div_def, Rat.add_mul, Rat.mul_add, Rat.mul_assoc,
+          Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem reciprocalQuarticUnitMidpointRefine_rightHalf
+    (intervals : List (Rat × Rat)) :
+    reciprocalQuarticUnitMidpointRefine
+        (reciprocalQuarticUnitRightHalf intervals) =
+      reciprocalQuarticUnitRightHalf
+        (reciprocalQuarticUnitMidpointRefine intervals) := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticUnitRightHalf,
+        reciprocalQuarticUnitMidpointRefine]
+      rw [ih]
+      congr 3 <;>
+        grind [Rat.div_def, Rat.add_mul, Rat.mul_add, Rat.mul_assoc,
+          Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem reciprocalQuarticUnitDyadicIntervals_succ_split
+    (stage : Nat) :
+    (ArctanGeometry.arctanAreaLoopState 1 (stage + 1)).intervals =
+      reciprocalQuarticUnitLeftHalf
+        (ArctanGeometry.arctanAreaLoopState 1 stage).intervals ++
+        reciprocalQuarticUnitRightHalf
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+  induction stage with
+  | zero =>
+      native_decide
+  | succ stage ih =>
+      calc
+        (ArctanGeometry.arctanAreaLoopState 1 (stage.succ + 1)).intervals =
+            reciprocalQuarticUnitMidpointRefine
+              (ArctanGeometry.arctanAreaLoopState 1 stage.succ).intervals :=
+          reciprocalQuarticUnitDyadicIntervals_succ stage.succ
+        _ = reciprocalQuarticUnitMidpointRefine
+              (reciprocalQuarticUnitLeftHalf
+                (ArctanGeometry.arctanAreaLoopState 1 stage).intervals ++
+                reciprocalQuarticUnitRightHalf
+                  (ArctanGeometry.arctanAreaLoopState 1 stage).intervals) := by
+            rw [ih]
+        _ = reciprocalQuarticUnitLeftHalf
+              (reciprocalQuarticUnitMidpointRefine
+                (ArctanGeometry.arctanAreaLoopState 1 stage).intervals) ++
+              reciprocalQuarticUnitRightHalf
+                (reciprocalQuarticUnitMidpointRefine
+                  (ArctanGeometry.arctanAreaLoopState 1 stage).intervals) := by
+            rw [reciprocalQuarticUnitMidpointRefine_append,
+              reciprocalQuarticUnitMidpointRefine_leftHalf,
+              reciprocalQuarticUnitMidpointRefine_rightHalf]
+        _ = reciprocalQuarticUnitLeftHalf
+              (ArctanGeometry.arctanAreaLoopState 1 stage.succ).intervals ++
+              reciprocalQuarticUnitRightHalf
+                (ArctanGeometry.arctanAreaLoopState 1 stage.succ).intervals := by
+            rw [← reciprocalQuarticUnitDyadicIntervals_succ stage]
+
+private theorem reciprocalQuarticUnitReflected_append
+    (left right : List (Rat × Rat)) :
+    reciprocalQuarticUnitReflectedIntervals (left ++ right) =
+      reciprocalQuarticUnitReflectedIntervals right ++
+        reciprocalQuarticUnitReflectedIntervals left := by
+  induction left with
+  | nil =>
+      simp [reciprocalQuarticUnitReflectedIntervals]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, reciprocalQuarticUnitReflectedIntervals]
+      rw [ih]
+      exact List.append_assoc _ _ _
+
+private theorem reciprocalQuarticUnitReflected_leftHalf
+    (intervals : List (Rat × Rat)) :
+    reciprocalQuarticUnitReflectedIntervals
+        (reciprocalQuarticUnitLeftHalf intervals) =
+      reciprocalQuarticUnitRightHalf
+        (reciprocalQuarticUnitReflectedIntervals intervals) := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticUnitLeftHalf,
+        reciprocalQuarticUnitReflectedIntervals]
+      rw [ih]
+      rw [reciprocalQuarticUnitRightHalf_append]
+      simp only [reciprocalQuarticUnitRightHalf]
+      congr 2 <;>
+        grind [Rat.div_def, Rat.add_mul, Rat.mul_add, Rat.mul_assoc,
+          Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem reciprocalQuarticUnitReflected_rightHalf
+    (intervals : List (Rat × Rat)) :
+    reciprocalQuarticUnitReflectedIntervals
+        (reciprocalQuarticUnitRightHalf intervals) =
+      reciprocalQuarticUnitLeftHalf
+        (reciprocalQuarticUnitReflectedIntervals intervals) := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticUnitRightHalf,
+        reciprocalQuarticUnitReflectedIntervals]
+      rw [ih]
+      rw [reciprocalQuarticUnitLeftHalf_append]
+      simp only [reciprocalQuarticUnitLeftHalf]
+      congr 2 <;>
+        grind [Rat.div_def, Rat.add_mul, Rat.mul_add, Rat.mul_assoc,
+          Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem reciprocalQuarticUnitDyadicIntervals_reflected
+    (stage : Nat) :
+    reciprocalQuarticUnitReflectedIntervals
+      (ArctanGeometry.arctanAreaLoopState 1 stage).intervals =
+      (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+  induction stage with
+  | zero =>
+      native_decide
+  | succ stage ih =>
+      rw [reciprocalQuarticUnitDyadicIntervals_succ_split,
+        reciprocalQuarticUnitReflected_append,
+        reciprocalQuarticUnitReflected_rightHalf,
+        reciprocalQuarticUnitReflected_leftHalf, ih]
+
+private theorem reciprocalQuarticMinusOneCompactAffineIntervals_append
+    (left right : List (Rat × Rat)) :
+    reciprocalQuarticMinusOneCompactAffineIntervals (left ++ right) =
+      reciprocalQuarticMinusOneCompactAffineIntervals left ++
+        reciprocalQuarticMinusOneCompactAffineIntervals right := by
+  induction left with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append,
+        reciprocalQuarticMinusOneCompactAffineIntervals]
+      rw [ih]
+
+private theorem reciprocalQuarticMinusOneCompactAffineIntervals_rightHalf
+    (intervals : List (Rat × Rat)) :
+    reciprocalQuarticMinusOneCompactAffineIntervals
+      (reciprocalQuarticUnitRightHalf intervals) = intervals := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticUnitRightHalf,
+        reciprocalQuarticMinusOneCompactAffineIntervals]
+      rw [ih]
+      congr 1 <;>
+        grind [Rat.div_def, Rat.add_mul, Rat.mul_add, Rat.mul_assoc,
+          Rat.mul_comm, Rat.mul_inv_cancel]
+
+private theorem reciprocalQuarticMinusOneCompactAffineIntervals_leftHalf_reflected
+    (intervals : List (Rat × Rat)) :
+    reciprocalQuarticMinusOneCompactAffineIntervals
+      (reciprocalQuarticUnitLeftHalf
+        (reciprocalQuarticUnitReflectedIntervals intervals)) =
+      projectiveCompactReflectedIntervals intervals := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticUnitReflectedIntervals,
+        reciprocalQuarticUnitLeftHalf_append,
+        reciprocalQuarticMinusOneCompactAffineIntervals_append,
+        projectiveCompactReflectedIntervals]
+      rw [ih]
+      simp only [reciprocalQuarticUnitLeftHalf,
+        reciprocalQuarticMinusOneCompactAffineIntervals]
+      congr 2 <;>
+        grind [Rat.div_def, Rat.add_mul, Rat.mul_add, Rat.mul_assoc,
+          Rat.mul_comm, Rat.mul_inv_cancel, Rat.sub_eq_add_neg]
+
+/-- The affine image of each concrete dyadic mesh after its first refinement
+is literally a reflected copy of the preceding positive mesh followed by that
+positive mesh.  This is the exact finite partition split needed to connect the
+candidate's left-endpoint bracket to the oriented symmetric projective core. -/
+theorem reciprocalQuarticMinusOneCompactAffineDyadicIntervals_succ_eq_reflected_append
+    (stage : Nat) :
+    reciprocalQuarticMinusOneCompactAffineIntervals
+      (ArctanGeometry.arctanAreaLoopState 1 (stage + 1)).intervals =
+      projectiveCompactReflectedIntervals
+        (ArctanGeometry.arctanAreaLoopState 1 stage).intervals ++
+        (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+  rw [reciprocalQuarticUnitDyadicIntervals_succ_split,
+    reciprocalQuarticMinusOneCompactAffineIntervals_append,
+    reciprocalQuarticMinusOneCompactAffineIntervals_rightHalf]
+  have hmirror := reciprocalQuarticUnitDyadicIntervals_reflected stage
+  have hleft :
+      reciprocalQuarticMinusOneCompactAffineIntervals
+        (reciprocalQuarticUnitLeftHalf
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals) =
+        projectiveCompactReflectedIntervals
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+    calc
+      reciprocalQuarticMinusOneCompactAffineIntervals
+          (reciprocalQuarticUnitLeftHalf
+            (ArctanGeometry.arctanAreaLoopState 1 stage).intervals) =
+          reciprocalQuarticMinusOneCompactAffineIntervals
+            (reciprocalQuarticUnitLeftHalf
+              (reciprocalQuarticUnitReflectedIntervals
+                (ArctanGeometry.arctanAreaLoopState 1 stage).intervals)) := by
+              rw [hmirror]
+      _ = projectiveCompactReflectedIntervals
+            (ArctanGeometry.arctanAreaLoopState 1 stage).intervals :=
+        reciprocalQuarticMinusOneCompactAffineIntervals_leftHalf_reflected _
+  rw [hleft]
+
 private theorem reciprocalQuarticMinusOneUnit_lowerCell_eq_compact
     (p r : Rat) :
     reciprocalQuarticMinusOneUnitLowerCell p r =
@@ -5238,6 +5567,22 @@ theorem reciprocalQuarticMinusOneUnitDyadicCompute_eq_affineCompact
   dsimp [reciprocalQuarticMinusOneUnitDyadicCompute]
   rw [projectiveCompactLipschitzLowerSum_affine_eq_unitLowerSum,
     projectiveCompactLipschitzUpperSum_affine_eq_unitUpperSum]
+
+/-- After the initial dyadic refinement, the concrete compact candidate is
+exactly the oriented symmetric bracket of the preceding positive unit mesh.
+This is an equality of its actual rational interval computations, not an
+auxiliary symmetric estimate. -/
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_eq_orientedSymmetric
+    (stage : Nat) :
+    reciprocalQuarticMinusOneUnitDyadicCompute (stage + 1) =
+      projectiveCompactOrientedSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState 1 stage).intervals := by
+  rw [reciprocalQuarticMinusOneUnitDyadicCompute_eq_affineCompact]
+  dsimp
+  rw [reciprocalQuarticMinusOneCompactAffineDyadicIntervals_succ_eq_reflected_append,
+    projectiveCompactLipschitzLowerSum_reflected_append_eq_right_add_left,
+    projectiveCompactLipschitzUpperSum_reflected_append_eq_right_add_left]
+  rfl
 
 /-- Splitting one unit cell at its rational midpoint tightens the elementary
 Lipschitz rectangle.  This is the finite refinement inequality from which the
