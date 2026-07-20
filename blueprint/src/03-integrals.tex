@@ -1048,6 +1048,8 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzSum_overlaps_integralSum}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricLipschitzSum}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricIntegralSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompact_reflectedLowerCell_eq_rightCell}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompact_reflectedUpperCell_eq_rightCell}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricLipschitzSum_overlaps_integralSum}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
@@ -1184,11 +1186,15 @@ compact-density \(8\)-Lipschitz cell; it lifts this identity to the entire
 finite lower and upper sums.  Hence the concrete candidate raw is literally
 the compact Lipschitz bracket of the affine dyadic partition.  The remaining
 finite task is to split that partition into its symmetric positive core and
-the two endpoint cells, then apply the checked projective bridge and tail
-error bounds.  Its affine transport is itself now proved to be an ordered
-rational cover of the full compact interval \([-1,1]\), so this split is a
-finite partition identity rather than an appeal to a limiting change of
-variables.
+the two endpoint cells, while matching the reflected cells' right-endpoint
+convention, then apply the checked projective bridge and tail error bounds.
+Its affine transport is itself now proved to be an ordered rational cover of
+the full compact interval \([-1,1]\), so this is a finite partition identity
+rather than an appeal to a limiting change of variables.
+The endpoint convention is now explicit in Lean: reflecting a negative
+left-endpoint Lipschitz cell gives the positive right-endpoint cell, for both
+the lower and upper brackets.  This removes the last ambiguity in how the
+concrete affine dyadic bracket must be decomposed.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

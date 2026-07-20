@@ -4609,9 +4609,10 @@ theorem projectiveCompactLipschitzSum_overlaps_integralSum
     projectiveCompactIntegralLowerSum_le_lipschitzUpperSum a s intervals
       ha hs hcover⟩
 
-/-- The two-branch compact quadrature bracket obtained by reflecting the
-positive source branch through zero.  Evenness of the compact density makes
-this an exact finite reparameterization of the symmetric compact core. -/
+/-- A factor-two symmetric core bracket obtained from the positive source
+branch.  It is a convenient finite bridge for an even density; identifying it
+with a particular left- or right-endpoint partition remains a separate
+cell-orientation calculation. -/
 def projectiveCompactSymmetricLipschitzSum
     (intervals : List (Rat × Rat)) : QInterval :=
   { lo := 2 * projectiveCompactLipschitzLowerSum intervals,
@@ -4625,6 +4626,29 @@ def projectiveCompactSymmetricIntegralSum
       (projectiveCompactIntervals intervals),
     hi := 2 * ArctanGeometry.integralUpperSum
       (projectiveCompactIntervals intervals) }
+
+/-- Reflecting a compact lower left-endpoint cell through zero produces the
+corresponding positive right-endpoint cell.  This is the finite orientation
+identity needed to match the affine dyadic candidate to a symmetric positive
+partition. -/
+theorem projectiveCompact_reflectedLowerCell_eq_rightCell (p r : Rat) :
+    ((-p) - (-r)) *
+        (reciprocalQuarticSymmetricDensity (-1) (-r) -
+          8 * ((-p) - (-r))) =
+      (r - p) *
+        (reciprocalQuarticSymmetricDensity (-1) r - 8 * (r - p)) := by
+  rw [reciprocalQuarticSymmetricDensity_minus_one_even]
+  grind [Rat.neg_sub, Rat.sub_eq_add_neg]
+
+/-- The analogous reflected-cell identity for upper Lipschitz rectangles. -/
+theorem projectiveCompact_reflectedUpperCell_eq_rightCell (p r : Rat) :
+    ((-p) - (-r)) *
+        (reciprocalQuarticSymmetricDensity (-1) (-r) +
+          8 * ((-p) - (-r))) =
+      (r - p) *
+        (reciprocalQuarticSymmetricDensity (-1) r + 8 * (r - p)) := by
+  rw [reciprocalQuarticSymmetricDensity_minus_one_even]
+  grind [Rat.neg_sub, Rat.sub_eq_add_neg]
 
 /-- The two symmetric finite quadrature cores overlap after the projective
 transport.  The proof is just positive rational scaling of the verified

@@ -201,9 +201,12 @@ not a description of the current module graph. The checked blueprint
   every concrete unit-dyadic lower and upper cell exactly to the compact
   density's 8-Lipschitz cell, and the two sum identities package this for the
   whole stage.  The next finite task is to split these affine dyadic
-  partitions into their symmetric positive cores and two endpoint cells.  The
+  partitions into their symmetric positive cores and two endpoint cells,
+  while accounting for the reflected cells' right-endpoint convention.  The
   affine transport is now formally an ordered cover of `[-1, 1]`, so that
-  remaining split is a finite partition calculation.
+  remaining split is a finite partition calculation.  The orientation itself
+  is now checked cellwise: a reflected negative left-endpoint cell is exactly
+  the positive right-endpoint cell, for both compact Lipschitz brackets.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
