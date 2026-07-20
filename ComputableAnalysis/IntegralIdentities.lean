@@ -4167,8 +4167,26 @@ theorem projectiveCompactCoordinate_sub_eq_leftJacobian_add
         ((r - p) * (r - p) * E) / (dp * dp * dr)) * (dp * dp * dr) =
         ((1 + p * p) * dr) * (r - p) + (r - p) * (r - p) * E := by
     simp only [Rat.div_def]
-    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
-      Rat.mul_assoc, Rat.mul_comm]
+    rw [Rat.add_mul]
+    have hdp2_inv : (dp * dp)⁻¹ * (dp * dp) = 1 :=
+      Rat.inv_mul_cancel _ hdp2
+    have hden_inv : (dp * dp * dr)⁻¹ * (dp * dp * dr) = 1 :=
+      Rat.inv_mul_cancel _ hden
+    congr 1
+    · calc
+        (((1 + p * p) * (dp * dp)⁻¹) * (r - p)) * (dp * dp * dr) =
+            ((1 + p * p) * (r - p)) * ((dp * dp)⁻¹ * (dp * dp) * dr) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = ((1 + p * p) * dr) * (r - p) := by
+              rw [hdp2_inv]
+              simp
+              grind [Rat.mul_assoc, Rat.mul_comm]
+    · calc
+        ((r - p) * (r - p) * E * (dp * dp * dr)⁻¹) * (dp * dp * dr) =
+            (r - p) * (r - p) * E *
+              ((dp * dp * dr)⁻¹ * (dp * dp * dr)) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = (r - p) * (r - p) * E := by rw [hden_inv, Rat.mul_one]
   unfold projectiveCompactCoordinate projectiveCompactJacobian
   change r / dr - p / dp =
     ((1 + p * p) / (dp * dp)) * (r - p) +
@@ -4268,9 +4286,28 @@ theorem projectiveCompactCoordinate_sub_eq_rightJacobian_sub
       (((1 + r * r) / (dr * dr)) * (r - p) -
         ((r - p) * (r - p) * E) / (dp * dr * dr)) * (dp * dr * dr) =
         ((1 + r * r) * dp) * (r - p) - (r - p) * (r - p) * E := by
-    simp only [Rat.div_def]
-    grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg, Rat.add_assoc,
-      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    simp only [Rat.div_def, Rat.sub_eq_add_neg]
+    rw [Rat.add_mul, Rat.neg_mul]
+    have hdr2_inv : (dr * dr)⁻¹ * (dr * dr) = 1 :=
+      Rat.inv_mul_cancel _ hdr2
+    have hden_inv : (dp * dr * dr)⁻¹ * (dp * dr * dr) = 1 :=
+      Rat.inv_mul_cancel _ hden
+    congr 1
+    · calc
+        (((1 + r * r) * (dr * dr)⁻¹) * (r + -p)) * (dp * dr * dr) =
+            ((1 + r * r) * (r + -p)) * ((dr * dr)⁻¹ * (dr * dr) * dp) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = ((1 + r * r) * dp) * (r + -p) := by
+              rw [hdr2_inv]
+              simp
+              grind [Rat.mul_assoc, Rat.mul_comm]
+    · congr 1
+      calc
+        ((r + -p) * (r + -p) * E * (dp * dr * dr)⁻¹) * (dp * dr * dr) =
+            (r + -p) * (r + -p) * E *
+              ((dp * dr * dr)⁻¹ * (dp * dr * dr)) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = (r + -p) * (r + -p) * E := by rw [hden_inv, Rat.mul_one]
   unfold projectiveCompactCoordinate projectiveCompactJacobian
   change r / dr - p / dp =
     ((1 + r * r) / (dr * dr)) * (r - p) -
