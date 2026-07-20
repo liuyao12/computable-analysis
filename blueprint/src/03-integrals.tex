@@ -1027,6 +1027,11 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicEndpoint_denominator_ge}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_lipschitzFactor_le}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_schedule_squareSum_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_leftJacobian_add}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_rightJacobian_sub}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactJacobian_left_mul_le_coordinate_sub}
+\lean{ComputableAnalysis.IntegralIdentities.coordinate_sub_le_projectiveCompactJacobian_right_mul}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzSum_overlaps_integralSum}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -1128,8 +1133,21 @@ squared-mesh estimate
 \[
   \operatorname{mesh}_2\le \frac4{2^{2m}}.
 \]
-Thus only the finite cellwise quadrature comparison (and its assembly across
-the two compact branches) remains in this projective substitution route; no
+The finite cellwise comparison is now checked too.  If
+\(0\le p\le r<1\), the projective secant is squeezed between its two
+endpoint Jacobian evaluations,
+\[
+ J(p)(r-p)\le
+ \frac r{1-r^2}-\frac p{1-p^2}
+ \le J(r)(r-p).
+\]
+Together with the exact pullback identity and the checked \(8\)-Lipschitz
+bound for the compact density, Lean proves that the compact-density
+Lipschitz rectangle sum overlaps the Cauchy-kernel rectangle sum on the
+endpointwise projective image of every finite positive-branch partition.
+Thus the remaining task is global assembly: join the two symmetric compact
+branches, account for the endpoint/tail schedule, and identify that assembled
+construction with the existing compact dyadic integral raw.  No general
 integral substitution theorem is asserted yet.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[

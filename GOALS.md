@@ -175,8 +175,20 @@ not a description of the current module graph. The checked blueprint
   distortion, and
   `projectiveCompactDyadic_schedule_squareSum_le` proves that `6*n` source
   refinements give transported squared mesh at most `4 / 2^(2*n)`.  The
-  remaining quadrature-substitution proof is therefore the finite cellwise
-  comparison and its assembly across the two compact branches.
+  quadrature-substitution proof was thereby reduced to a finite cellwise
+  comparison and its assembly across the two compact branches.  The cellwise
+  comparison is now checked: the exact left and right secant expansions
+  'projectiveCompactCoordinate_sub_eq_leftJacobian_add' and
+  'projectiveCompactCoordinate_sub_eq_rightJacobian_sub' give the endpoint
+  Jacobian bounds on every '0 <= p <= r < 1' source cell.  With the projective
+  pullback identity and the compact density's 8-Lipschitz bound, Lean proves
+  both cross inequalities between a compact Lipschitz cell and its transported
+  Cauchy rectangle.  The finite induction
+  'projectiveCompactLipschitzSum_overlaps_integralSum' packages these into
+  interval overlap for every positive-branch cover.  What remains is global:
+  join the symmetric branches, handle the endpoint/tail schedule, and compare
+  the assembled projective quadrature construction to the existing compact
+  dyadic integral raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
