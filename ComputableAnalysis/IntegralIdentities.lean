@@ -4650,6 +4650,146 @@ theorem projectiveCompact_reflectedUpperCell_eq_rightCell (p r : Rat) :
   rw [reciprocalQuarticSymmetricDensity_minus_one_even]
   grind [Rat.neg_sub, Rat.sub_eq_add_neg]
 
+/-- Reverse an ordered positive partition through the origin. -/
+def projectiveCompactReflectedIntervals : List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      projectiveCompactReflectedIntervals rest ++ [(-r, -p)]
+
+/-- Right-endpoint lower Lipschitz sum on a positive compact partition. -/
+def projectiveCompactLipschitzRightLowerSum : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      (r - p) *
+        (reciprocalQuarticSymmetricDensity (-1) r - 8 * (r - p)) +
+        projectiveCompactLipschitzRightLowerSum rest
+
+/-- Right-endpoint upper Lipschitz sum on a positive compact partition. -/
+def projectiveCompactLipschitzRightUpperSum : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      (r - p) *
+        (reciprocalQuarticSymmetricDensity (-1) r + 8 * (r - p)) +
+        projectiveCompactLipschitzRightUpperSum rest
+
+private theorem projectiveCompactLipschitzLowerSum_append
+    (left right : List (Rat × Rat)) :
+    projectiveCompactLipschitzLowerSum (left ++ right) =
+      projectiveCompactLipschitzLowerSum left +
+        projectiveCompactLipschitzLowerSum right := by
+  induction left with
+  | nil =>
+      exact (Rat.zero_add _).symm
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, projectiveCompactLipschitzLowerSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+private theorem projectiveCompactLipschitzUpperSum_append
+    (left right : List (Rat × Rat)) :
+    projectiveCompactLipschitzUpperSum (left ++ right) =
+      projectiveCompactLipschitzUpperSum left +
+        projectiveCompactLipschitzUpperSum right := by
+  induction left with
+  | nil =>
+      exact (Rat.zero_add _).symm
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, projectiveCompactLipschitzUpperSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+/-- The reflected lower sum is exactly the positive right-endpoint lower sum. -/
+theorem projectiveCompactLipschitzLowerSum_reflected_eq_right
+    (intervals : List (Rat × Rat)) :
+    projectiveCompactLipschitzLowerSum
+      (projectiveCompactReflectedIntervals intervals) =
+      projectiveCompactLipschitzRightLowerSum intervals := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [projectiveCompactReflectedIntervals,
+        projectiveCompactLipschitzRightLowerSum]
+      rw [projectiveCompactLipschitzLowerSum_append, ih]
+      simp only [projectiveCompactLipschitzLowerSum]
+      rw [projectiveCompact_reflectedLowerCell_eq_rightCell]
+      grind [Rat.add_assoc, Rat.add_comm]
+
+/-- The reflected upper sum is exactly the positive right-endpoint upper sum. -/
+theorem projectiveCompactLipschitzUpperSum_reflected_eq_right
+    (intervals : List (Rat × Rat)) :
+    projectiveCompactLipschitzUpperSum
+      (projectiveCompactReflectedIntervals intervals) =
+      projectiveCompactLipschitzRightUpperSum intervals := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [projectiveCompactReflectedIntervals,
+        projectiveCompactLipschitzRightUpperSum]
+      rw [projectiveCompactLipschitzUpperSum_append, ih]
+      simp only [projectiveCompactLipschitzUpperSum]
+      rw [projectiveCompact_reflectedUpperCell_eq_rightCell]
+      grind [Rat.add_assoc, Rat.add_comm]
+
+/-- The left-endpoint compact bracket on a symmetric reflected partition is
+the sum of the positive right- and left-endpoint brackets.  This is the exact
+orientation formula for the candidate's negative and positive halves. -/
+theorem projectiveCompactLipschitzLowerSum_reflected_append_eq_right_add_left
+    (intervals : List (Rat × Rat)) :
+    projectiveCompactLipschitzLowerSum
+      (projectiveCompactReflectedIntervals intervals ++ intervals) =
+      projectiveCompactLipschitzRightLowerSum intervals +
+        projectiveCompactLipschitzLowerSum intervals := by
+  rw [projectiveCompactLipschitzLowerSum_append,
+    projectiveCompactLipschitzLowerSum_reflected_eq_right]
+
+/-- The upper counterpart of the exact reflected-partition orientation
+formula. -/
+theorem projectiveCompactLipschitzUpperSum_reflected_append_eq_right_add_left
+    (intervals : List (Rat × Rat)) :
+    projectiveCompactLipschitzUpperSum
+      (projectiveCompactReflectedIntervals intervals ++ intervals) =
+      projectiveCompactLipschitzRightUpperSum intervals +
+        projectiveCompactLipschitzUpperSum intervals := by
+  rw [projectiveCompactLipschitzUpperSum_append,
+    projectiveCompactLipschitzUpperSum_reflected_eq_right]
+
+/-- Reflection turns an ordered cover of `[a,b]` into an ordered cover of
+`[-b,-a]`. -/
+theorem projectiveCompactReflectedIntervals_covers
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.CoversInterval (-b) (-a)
+      (projectiveCompactReflectedIntervals intervals) := by
+  induction intervals generalizing a with
+  | nil =>
+      simp only [projectiveCompactReflectedIntervals,
+        ArctanGeometry.CoversInterval] at hcover ⊢
+      grind
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      simp only [projectiveCompactReflectedIntervals]
+      exact ArctanGeometry.CoversInterval.extend_right
+        (ih r hrest) (by grind [Rat.neg_le_neg_iff])
+
+/-- Joining a positive cover with its reflection covers the symmetric compact
+core. -/
+theorem projectiveCompactReflected_append_covers
+    (s : Rat) (intervals : List (Rat × Rat))
+    (hcover : ArctanGeometry.CoversInterval 0 s intervals) :
+    ArctanGeometry.CoversInterval (-s) s
+      (projectiveCompactReflectedIntervals intervals ++ intervals) := by
+  exact ArctanGeometry.CoversInterval.append
+    (projectiveCompactReflectedIntervals_covers 0 s intervals hcover)
+    hcover
+
 /-- The two symmetric finite quadrature cores overlap after the projective
 transport.  The proof is just positive rational scaling of the verified
 one-branch cellwise bridge; the evenness lemmas above justify its intended

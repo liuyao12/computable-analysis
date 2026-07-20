@@ -1193,8 +1193,15 @@ the full compact interval \([-1,1]\), so this is a finite partition identity
 rather than an appeal to a limiting change of variables.
 The endpoint convention is now explicit in Lean: reflecting a negative
 left-endpoint Lipschitz cell gives the positive right-endpoint cell, for both
-the lower and upper brackets.  This removes the last ambiguity in how the
-concrete affine dyadic bracket must be decomposed.
+the lower and upper brackets.  Lean also sums this identity over a reversed
+partition: the ordinary left-endpoint bracket on
+(operatorname{reflect}(P)mathbin{+!!+}P) is exactly the sum of the
+positive right- and left-endpoint brackets.  Reflection is independently
+proved to turn a cover of ([0,s]) into a cover of ([-s,0]), so the appended
+partition is an ordered cover of ([-s,s]).  This removes the last ambiguity
+in how the concrete affine dyadic bracket must be decomposed; what remains is
+to identify its particular dyadic positive half with the scheduled projective
+core and absorb the endpoint cells.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

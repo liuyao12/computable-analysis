@@ -207,6 +207,14 @@ not a description of the current module graph. The checked blueprint
   remaining split is a finite partition calculation.  The orientation itself
   is now checked cellwise: a reflected negative left-endpoint cell is exactly
   the positive right-endpoint cell, for both compact Lipschitz brackets.
+  `projectiveCompactReflectedIntervals_covers` and
+  `projectiveCompactReflected_append_covers` now certify the corresponding
+  ordered symmetric cover, while the two
+  `projectiveCompactLipschitz*Sum_reflected_append_eq_right_add_left` theorems
+  identify its complete left-endpoint sums with the positive right- plus
+  left-endpoint sums.  The remaining finite identity is therefore specifically
+  the split of the candidate's concrete affine dyadic mesh into this oriented
+  core and the two endpoint cells.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
