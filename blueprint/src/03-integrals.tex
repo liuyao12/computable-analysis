@@ -1005,6 +1005,10 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_widthsShrink}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicRaw}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactAffineIntervals}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzLowerSum_affine_eq_unitLowerSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzUpperSum_affine_eq_unitUpperSum}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_eq_affineCompact}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitOnInterval}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicIntegral}
@@ -1171,6 +1175,15 @@ by certified raw-real arithmetic.  What remains is to add that error to the
 finite projective cores in a single nested construction and identify it with
 the existing compact dyadic integral raw.  No general integral substitution
 theorem is asserted yet.
+That final identification is now tied directly to the existing candidate
+rather than to an abstract integral placeholder.  Lean proves that every
+cell of its affine dyadic bracket, under (x=2t-1), is exactly the
+compact-density (8)-Lipschitz cell; it lifts this identity to the entire
+finite lower and upper sums.  Hence the concrete candidate raw is literally
+the compact Lipschitz bracket of the affine dyadic partition.  The remaining
+finite task is to split that partition into its symmetric positive core and
+the two endpoint cells, then apply the checked projective bridge and tail
+error bounds.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

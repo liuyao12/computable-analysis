@@ -196,7 +196,12 @@ not a description of the current module graph. The checked blueprint
   stagewise absorption theorem
   'projectiveCompactDyadicSymmetricTailUpper_le'.  What remains is one nested
   raw construction that combines these finite core and tail boxes and agrees
-  with the existing compact dyadic integral raw.
+  with the existing compact dyadic integral raw.  That agreement is now tied
+  to the actual candidate brackets: the affine map `x = 2*t - 1` carries
+  every concrete unit-dyadic lower and upper cell exactly to the compact
+  density's 8-Lipschitz cell, and the two sum identities package this for the
+  whole stage.  The next finite task is to split these affine dyadic
+  partitions into their symmetric positive cores and two endpoint cells.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

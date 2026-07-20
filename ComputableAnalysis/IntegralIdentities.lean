@@ -4914,6 +4914,70 @@ private def reciprocalQuarticMinusOneUnitUpperSum :
       reciprocalQuarticMinusOneUnitUpperCell p r +
         reciprocalQuarticMinusOneUnitUpperSum rest
 
+/-- The affine transport of a unit partition to the compact quartic interval
+via `x = 2t - 1`. -/
+def reciprocalQuarticMinusOneCompactAffineIntervals :
+    List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (2 * p - 1, 2 * r - 1) ::
+        reciprocalQuarticMinusOneCompactAffineIntervals rest
+
+private theorem reciprocalQuarticMinusOneUnit_lowerCell_eq_compact
+    (p r : Rat) :
+    reciprocalQuarticMinusOneUnitLowerCell p r =
+      (2 * r - 1 - (2 * p - 1)) *
+        (reciprocalQuarticSymmetricDensity (-1) (2 * p - 1) -
+          8 * (2 * r - 1 - (2 * p - 1))) := by
+  unfold reciprocalQuarticMinusOneUnitLowerCell Integral.lipschitzLowerCell
+    reciprocalQuarticMinusOneUnitDensity
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem reciprocalQuarticMinusOneUnit_upperCell_eq_compact
+    (p r : Rat) :
+    reciprocalQuarticMinusOneUnitUpperCell p r =
+      (2 * r - 1 - (2 * p - 1)) *
+        (reciprocalQuarticSymmetricDensity (-1) (2 * p - 1) +
+          8 * (2 * r - 1 - (2 * p - 1))) := by
+  unfold reciprocalQuarticMinusOneUnitUpperCell Integral.lipschitzUpperCell
+    reciprocalQuarticMinusOneUnitDensity
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Under the affine compactification, the concrete dyadic lower bracket is
+exactly the compact density's 8-Lipschitz lower bracket. -/
+theorem projectiveCompactLipschitzLowerSum_affine_eq_unitLowerSum
+    (intervals : List (Rat × Rat)) :
+    projectiveCompactLipschitzLowerSum
+        (reciprocalQuarticMinusOneCompactAffineIntervals intervals) =
+      reciprocalQuarticMinusOneUnitLowerSum intervals := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticMinusOneCompactAffineIntervals,
+        projectiveCompactLipschitzLowerSum,
+        reciprocalQuarticMinusOneUnitLowerSum]
+      rw [reciprocalQuarticMinusOneUnit_lowerCell_eq_compact, ih]
+
+/-- The analogous affine identity for the concrete dyadic upper bracket. -/
+theorem projectiveCompactLipschitzUpperSum_affine_eq_unitUpperSum
+    (intervals : List (Rat × Rat)) :
+    projectiveCompactLipschitzUpperSum
+        (reciprocalQuarticMinusOneCompactAffineIntervals intervals) =
+      reciprocalQuarticMinusOneUnitUpperSum intervals := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [reciprocalQuarticMinusOneCompactAffineIntervals,
+        projectiveCompactLipschitzUpperSum,
+        reciprocalQuarticMinusOneUnitUpperSum]
+      rw [reciprocalQuarticMinusOneUnit_upperCell_eq_compact, ih]
+
 /-- The explicit two-sided dyadic bracket for the affine compact quartic
 density.  Its centre is the ordinary left Riemann sum; its radius is supplied
 cellwise from the proved rational Lipschitz estimate. -/
@@ -4921,6 +4985,20 @@ def reciprocalQuarticMinusOneUnitDyadicCompute (stage : Nat) : QInterval :=
   let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
   { lo := reciprocalQuarticMinusOneUnitLowerSum cells
     hi := reciprocalQuarticMinusOneUnitUpperSum cells }
+
+/-- The actual compact dyadic bracket is exactly a compact-density Lipschitz
+bracket on the affine image of its unit partition. -/
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_eq_affineCompact
+    (stage : Nat) :
+    reciprocalQuarticMinusOneUnitDyadicCompute stage =
+      let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+      { lo := projectiveCompactLipschitzLowerSum
+          (reciprocalQuarticMinusOneCompactAffineIntervals cells),
+        hi := projectiveCompactLipschitzUpperSum
+          (reciprocalQuarticMinusOneCompactAffineIntervals cells) } := by
+  dsimp [reciprocalQuarticMinusOneUnitDyadicCompute]
+  rw [projectiveCompactLipschitzLowerSum_affine_eq_unitLowerSum,
+    projectiveCompactLipschitzUpperSum_affine_eq_unitUpperSum]
 
 /-- Splitting one unit cell at its rational midpoint tightens the elementary
 Lipschitz rectangle.  This is the finite refinement inequality from which the
