@@ -1020,6 +1020,9 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_nonnegative}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_covers}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_nonnegative}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_le_lipschitz}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_squareSum_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactAreaLoop_squareSum_le}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -1096,8 +1099,22 @@ checked.  Consequently, endpointwise transport carries every finite ordered
 rational cover of a compact subinterval of \((-1,1)\) to an ordered cover of
 its projective image.  On the nonnegative branch, the transported cover is
 also certified nonnegative, so it meets the admissibility condition of the
-existing Cauchy-kernel rectangle and geometric quadrature bounds.  This still
-does not assert the quadrature or integral substitution theorem.
+existing Cauchy-kernel rectangle and geometric quadrature bounds.
+More precisely, for \(0\le x\le y\le s<1\), Lean proves the finite
+Lipschitz estimate
+\[
+  0\le \frac{y}{1-y^2}-\frac{x}{1-x^2}
+  \le \frac{2(y-x)}{(1-s^2)^2}.
+\]
+It lifts this to the squared mesh of every finite partition.  In particular,
+the midpoint-dyadic source partition of \([0,s]\) after \(n\) refinements has
+projective image mesh bounded by
+\[
+ \left(\frac{2}{(1-s^2)^2}\right)^2\frac{s^2}{2^n}.
+\]
+Thus the remaining step is now the cellwise quadrature comparison together
+with a schedule that approaches the removable endpoint; no integral
+substitution theorem is asserted yet.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

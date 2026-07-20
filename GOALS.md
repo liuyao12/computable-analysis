@@ -165,7 +165,11 @@ not a description of the current module graph. The checked blueprint
   lifts that fact to finite rational partitions of every compact source
   subinterval, and `projectiveCompactIntervals_nonnegative` gives the
   nonnegative-branch admissibility needed for the Cauchy quadrature bounds.
-  The quadrature-substitution consequence remains to be proved.
+  The new pointwise and squared-mesh bounds
+  `projectiveCompactCoordinate_sub_le_lipschitz` and
+  `projectiveCompactAreaLoop_squareSum_le` quantify the distortion on every
+  source branch `[0,s]` with `s < 1`.  The remaining quadrature-substitution
+  proof must supply a cellwise comparison and an endpoint/refinement schedule.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

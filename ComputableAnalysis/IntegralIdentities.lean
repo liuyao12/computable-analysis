@@ -3463,6 +3463,208 @@ theorem projectiveCompactIntervals_nonnegative
       simp only [projectiveCompactIntervals, ArctanGeometry.NonnegativeIntervals]
       exact ⟨hleft, horder, ih r b hr0 hb hrest⟩
 
+/-- On a nonnegative compact source branch, the projective chart has the
+explicit rational Lipschitz bound
+`2 / (1 - s^2)^2` up to a rational endpoint `s < 1`. -/
+theorem projectiveCompactCoordinate_sub_le_lipschitz
+    {x y s : Rat}
+    (hx0 : 0 <= x) (hxy : x <= y) (hys : y <= s) (hs : s < 1) :
+    projectiveCompactCoordinate y - projectiveCompactCoordinate x <=
+      (2 * (y - x)) / ((1 - s * s) * (1 - s * s)) := by
+  let dx : Rat := 1 - x * x
+  let dy : Rat := 1 - y * y
+  let ds : Rat := 1 - s * s
+  have hs0 : 0 <= s := Rat.le_trans (Rat.le_trans hx0 hxy) hys
+  have hx1 : x < 1 := by grind
+  have hy1 : y < 1 := by grind
+  have hxlo : -1 < x := by grind
+  have hylo : -1 < y := by grind
+  have hslo : -1 < s := by grind
+  have hdx : 0 < dx := by
+    simpa [dx] using projectiveCompactDenominator_pos hxlo hx1
+  have hdy : 0 < dy := by
+    simpa [dy] using projectiveCompactDenominator_pos hylo hy1
+  have hds : 0 < ds := by
+    simpa [ds] using projectiveCompactDenominator_pos hslo hs
+  have hxle : x <= s := Rat.le_trans hxy hys
+  have hxx : x * x <= s * s := by
+    calc
+      x * x <= s * x := Rat.mul_le_mul_of_nonneg_right hxle hx0
+      _ <= s * s := Rat.mul_le_mul_of_nonneg_left hxle hs0
+  have hyy : y * y <= s * s := by
+    calc
+      y * y <= s * y :=
+        Rat.mul_le_mul_of_nonneg_right hys (Rat.le_trans hx0 hxy)
+      _ <= s * s := Rat.mul_le_mul_of_nonneg_left hys hs0
+  have hdsdx : ds <= dx := by
+    dsimp [ds, dx]
+    grind
+  have hdsdy : ds <= dy := by
+    dsimp [ds, dy]
+    grind
+  have hden : ds * ds <= dy * dx := by
+    calc
+      ds * ds <= dy * ds :=
+        Rat.mul_le_mul_of_nonneg_right hdsdy (Rat.le_of_lt hds)
+      _ <= dy * dx := Rat.mul_le_mul_of_nonneg_left hdsdx (Rat.le_of_lt hdy)
+  have hfactor : 1 + x * y <= 2 := by
+    have hxle1 : x <= 1 := by grind
+    have hxy_le_y : x * y <= 1 * y :=
+      Rat.mul_le_mul_of_nonneg_right hxle1 (Rat.le_trans hx0 hxy)
+    have hy1le : y <= 1 := by grind
+    grind
+  have hdiff : 0 <= y - x := by grind
+  have hclear := projectiveCompactCoordinate_sub_cleared x y
+    (Rat.ne_of_gt hdx) (Rat.ne_of_gt hdy)
+  have hdenpos : 0 < dy * dx := Rat.mul_pos hdy hdx
+  have hdelta : projectiveCompactCoordinate y - projectiveCompactCoordinate x =
+      ((y - x) * (1 + x * y)) / (dy * dx) := by
+    apply rat_eq_of_mul_eq_mul_ne (c := dy * dx) (Rat.ne_of_gt hdenpos)
+    rw [Rat.div_def]
+    have hcancel : (dy * dx)⁻¹ * (dy * dx) = 1 :=
+      Rat.inv_mul_cancel _ (Rat.ne_of_gt hdenpos)
+    calc
+      (projectiveCompactCoordinate y - projectiveCompactCoordinate x) *
+          (dy * dx) = (y - x) * (1 + x * y) := by
+            simpa [dx, dy] using hclear
+      _ = ((y - x) * (1 + x * y) * (dy * dx)⁻¹) * (dy * dx) := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+  have hinv : (dy * dx)⁻¹ <= (ds * ds)⁻¹ := by
+    apply Rat.le_of_mul_le_mul_right (c := (ds * ds) * (dy * dx))
+    · calc
+        (dy * dx)⁻¹ * ((ds * ds) * (dy * dx)) = ds * ds := by
+          have hcancel : (dy * dx)⁻¹ * (dy * dx) = 1 :=
+            Rat.inv_mul_cancel _ (Rat.ne_of_gt hdenpos)
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= dy * dx := hden
+        _ = (ds * ds)⁻¹ * ((ds * ds) * (dy * dx)) := by
+          have hss : ds * ds ≠ 0 := Rat.ne_of_gt (Rat.mul_pos hds hds)
+          have hcancel : (ds * ds)⁻¹ * (ds * ds) = 1 :=
+            Rat.inv_mul_cancel _ hss
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact Rat.mul_pos (Rat.mul_pos hds hds) hdenpos
+  rw [hdelta]
+  rw [Rat.div_def]
+  calc
+    (y - x) * (1 + x * y) * (dy * dx)⁻¹ <=
+        (y - x) * 2 * (dy * dx)⁻¹ := by
+      apply Rat.mul_le_mul_of_nonneg_right
+        (Rat.mul_le_mul_of_nonneg_left hfactor hdiff)
+      exact Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+    _ <= (y - x) * 2 * (ds * ds)⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_left hinv
+        (Rat.mul_nonneg hdiff (by native_decide))
+    _ = 2 * (y - x) * (ds * ds)⁻¹ := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The projective image of a nonnegative finite partition has a controlled
+squared mesh.  The explicit factor is the square of the compact-branch
+Lipschitz bound and is the finite estimate needed for transported quadrature
+errors. -/
+theorem projectiveCompactIntervals_squareSum_le
+    (a s : Rat) (intervals : List (Rat × Rat))
+    (ha : 0 <= a) (hs : s < 1)
+    (hcover : ArctanGeometry.CoversInterval a s intervals) :
+    ArctanGeometry.intervalSquareSum (projectiveCompactIntervals intervals) <=
+      (2 / ((1 - s * s) * (1 - s * s))) *
+        (2 / ((1 - s * s) * (1 - s * s))) *
+          ArctanGeometry.intervalSquareSum intervals := by
+  let L : Rat := 2 / ((1 - s * s) * (1 - s * s))
+  have hs0 : 0 <= s :=
+    Rat.le_trans ha (ArctanGeometry.CoversInterval.start_le_end hcover)
+  have hslo : -1 < s := by grind
+  have hds : 0 < 1 - s * s := projectiveCompactDenominator_pos hslo hs
+  have hL : 0 <= L := by
+    dsimp [L]
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos hds hds)))
+  change ArctanGeometry.intervalSquareSum (projectiveCompactIntervals intervals) <=
+    L * L * ArctanGeometry.intervalSquareSum intervals
+  induction intervals generalizing a with
+  | nil =>
+      simp [projectiveCompactIntervals, ArctanGeometry.intervalSquareSum]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hr0 : 0 <= r := Rat.le_trans ha hpr
+      have hrs : r <= s := ArctanGeometry.CoversInterval.start_le_end hrest
+      have hwidth :
+          projectiveCompactCoordinate r - projectiveCompactCoordinate a <=
+            L * (r - a) := by
+        calc
+          projectiveCompactCoordinate r - projectiveCompactCoordinate a <=
+              (2 * (r - a)) / ((1 - s * s) * (1 - s * s)) :=
+            projectiveCompactCoordinate_sub_le_lipschitz ha hpr hrs hs
+          _ = L * (r - a) := by
+            dsimp [L]
+            rw [Rat.div_def]
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      have hsource : 0 <= r - a := by grind
+      have horder : projectiveCompactCoordinate a <= projectiveCompactCoordinate r := by
+        by_cases har : a = r
+        · subst r
+          exact Rat.le_refl
+        · have halo : -1 < a := by grind
+          have hr1 : r < 1 := by grind
+          exact Rat.le_of_lt
+            (projectiveCompactCoordinate_strictMono halo (by grind) hr1)
+      have himage : 0 <=
+          projectiveCompactCoordinate r - projectiveCompactCoordinate a := by grind
+      have hscaled : 0 <= L * (r - a) := Rat.mul_nonneg hL hsource
+      have hcell :
+          (projectiveCompactCoordinate r - projectiveCompactCoordinate a) *
+              (projectiveCompactCoordinate r - projectiveCompactCoordinate a) <=
+            L * L * ((r - a) * (r - a)) := by
+        calc
+          (projectiveCompactCoordinate r - projectiveCompactCoordinate a) *
+              (projectiveCompactCoordinate r - projectiveCompactCoordinate a) <=
+            (L * (r - a)) *
+              (projectiveCompactCoordinate r - projectiveCompactCoordinate a) := by
+              exact Rat.mul_le_mul_of_nonneg_right hwidth himage
+          _ <= (L * (r - a)) * (L * (r - a)) := by
+              exact Rat.mul_le_mul_of_nonneg_left hwidth hscaled
+          _ = L * L * ((r - a) * (r - a)) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+      have htail := ih r hr0 hrest
+      simp only [projectiveCompactIntervals, ArctanGeometry.intervalSquareSum]
+      calc
+        (projectiveCompactCoordinate r - projectiveCompactCoordinate a) *
+              (projectiveCompactCoordinate r - projectiveCompactCoordinate a) +
+            ArctanGeometry.intervalSquareSum (projectiveCompactIntervals rest) <=
+          L * L * ((r - a) * (r - a)) +
+            L * L * ArctanGeometry.intervalSquareSum rest := by grind
+        _ = L * L * ((r - a) * (r - a) +
+              ArctanGeometry.intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.mul_assoc]
+
+/-- The standard midpoint-dyadic partition of a compact positive source
+branch has an explicit transported squared-mesh bound. -/
+theorem projectiveCompactAreaLoop_squareSum_le
+    {s : Rat} (hs0 : 0 <= s) (hs : s < 1) (n : Nat) :
+    ArctanGeometry.intervalSquareSum
+      (projectiveCompactIntervals
+        (ArctanGeometry.arctanAreaLoopState s n).intervals) <=
+      (2 / ((1 - s * s) * (1 - s * s))) *
+        (2 / ((1 - s * s) * (1 - s * s))) *
+          (s * s / (((2 ^ n : Nat) : Rat))) := by
+  calc
+    ArctanGeometry.intervalSquareSum
+        (projectiveCompactIntervals
+          (ArctanGeometry.arctanAreaLoopState s n).intervals) <=
+        (2 / ((1 - s * s) * (1 - s * s))) *
+          (2 / ((1 - s * s) * (1 - s * s))) *
+            ArctanGeometry.intervalSquareSum
+              (ArctanGeometry.arctanAreaLoopState s n).intervals :=
+      projectiveCompactIntervals_squareSum_le 0 s
+        (ArctanGeometry.arctanAreaLoopState s n).intervals (by native_decide) hs
+        (ArctanGeometry.arctanAreaLoopState_intervals_covers hs0 n)
+    _ = (2 / ((1 - s * s) * (1 - s * s))) *
+          (2 / ((1 - s * s) * (1 - s * s))) *
+            (s * s / (((2 ^ n : Nat) : Rat))) := by
+      rw [ArctanGeometry.arctanAreaLoopState_squareSum]
+
 /-- Exact rational compactification of the Cauchy density.  Away from the
 two chart endpoints, the pullback of `1 / (1 + u^2)` under
 `u = x / (1 - x^2)` is the everywhere-defined density
