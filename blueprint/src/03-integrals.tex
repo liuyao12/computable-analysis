@@ -1012,6 +1012,10 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_existsConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDenominator_pos}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactOneAddMul_pos}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_cleared}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_strictMono}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -1071,6 +1075,20 @@ the reciprocal-quartic candidate is definition-complete but not yet an
 equivalence-complete scoreboard computation.  The compact density itself is a
 total rational-name interval function on every rational interval; its
 interval-level regularity is proved below.
+For rational chart endpoints away from \(\pm1\), Lean now also proves the
+denominator-cleared displacement identity
+\[
+ \left(\frac{y}{1-y^2}-\frac{x}{1-x^2}\right)
+ (1-y^2)(1-x^2)=(y-x)(1+xy).
+\]
+This is the finite algebra needed to prove that source partitions transport in
+the correct order.  Lean now proves the needed strict-order statement directly:
+if (-1<x<y<1), then
+\[
+  \frac{x}{1-x^2}<\frac{y}{1-y^2}.
+\]
+The positive-denominator and (1+xy>0) lemmas used in that proof are also
+checked.  This still does not assert the integral substitution theorem.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

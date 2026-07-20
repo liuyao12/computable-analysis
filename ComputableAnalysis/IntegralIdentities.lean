@@ -3286,6 +3286,102 @@ def projectiveCompactCoordinate (x : Rat) : Rat :=
 def projectiveCompactJacobian (x : Rat) : Rat :=
   (1 + x * x) / ((1 - x * x) * (1 - x * x))
 
+/-- The denominator of the compact projective chart is positive on its
+open rational source interval. -/
+theorem projectiveCompactDenominator_pos {x : Rat}
+    (hxlo : -1 < x) (hxhi : x < 1) :
+    0 < 1 - x * x := by
+  have hleft : 0 < 1 - x := by grind
+  have hright : 0 < 1 + x := by grind
+  calc
+    0 < (1 - x) * (1 + x) := Rat.mul_pos hleft hright
+    _ = 1 - x * x := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The numerator controlling projective endpoint displacement is positive
+when both rational endpoints lie in the open compact chart. -/
+theorem projectiveCompactOneAddMul_pos {x y : Rat}
+    (hxlo : -1 < x) (hxhi : x < 1)
+    (hylo : -1 < y) (hyhi : y < 1) :
+    0 < 1 + x * y := by
+  by_cases hx0 : 0 <= x
+  · by_cases hy0 : 0 <= y
+    · have hxy : 0 <= x * y := Rat.mul_nonneg hx0 hy0
+      grind
+    · have hyneg : y < 0 := by grind
+      have hypos : 0 < -y := by grind
+      have hmul : x * (-y) < 1 * (-y) :=
+        Rat.mul_lt_mul_of_pos_right hxhi hypos
+      have hlt : y < x * y := by
+        grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg, Rat.mul_comm]
+      grind
+  · have hxneg : x < 0 := by grind
+    by_cases hy0 : 0 <= y
+    · have hxpos : 0 < -x := by grind
+      have hmul : y * (-x) < 1 * (-x) :=
+        Rat.mul_lt_mul_of_pos_right hyhi hxpos
+      have hlt : x < x * y := by
+        grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg, Rat.mul_comm]
+      grind
+    · have hyneg : y < 0 := by grind
+      have hxpos : 0 < -x := by grind
+      have hypos : 0 < -y := by grind
+      have hmul : 0 < (-x) * (-y) := Rat.mul_pos hxpos hypos
+      have hxy : 0 < x * y := by
+        grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg]
+      grind
+
+/-- Denominator-cleared endpoint displacement for the compact projective
+chart.  This is the finite rational identity used to transport an ordered
+source partition through `x / (1 - x^2)`; the analytic change-of-variables
+theorem still has to account for the removable chart endpoints. -/
+theorem projectiveCompactCoordinate_sub_cleared
+    (x y : Rat) (hx : 1 - x * x ≠ 0) (hy : 1 - y * y ≠ 0) :
+    (projectiveCompactCoordinate y - projectiveCompactCoordinate x) *
+        ((1 - y * y) * (1 - x * x)) =
+      (y - x) * (1 + x * y) := by
+  let dx : Rat := 1 - x * x
+  let dy : Rat := 1 - y * y
+  have hdx : dx ≠ 0 := by simpa [dx] using hx
+  have hdy : dy ≠ 0 := by simpa [dy] using hy
+  have hdx_cancel : dx * dx⁻¹ = 1 := Rat.mul_inv_cancel dx hdx
+  have hdy_cancel : dy * dy⁻¹ = 1 := Rat.mul_inv_cancel dy hdy
+  unfold projectiveCompactCoordinate
+  change (y / dy - x / dx) * (dy * dx) = (y - x) * (1 + x * y)
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The compact projective chart preserves the order of rational endpoints
+in `(-1,1)`.  This finite theorem is the partition-order half of the
+projective substitution route. -/
+theorem projectiveCompactCoordinate_strictMono {x y : Rat}
+    (hxlo : -1 < x) (hxy : x < y) (hyhi : y < 1) :
+    projectiveCompactCoordinate x < projectiveCompactCoordinate y := by
+  have hxhi : x < 1 := by grind
+  have hylo : -1 < y := by grind
+  have hdx : 0 < 1 - x * x := projectiveCompactDenominator_pos hxlo hxhi
+  have hdy : 0 < 1 - y * y := projectiveCompactDenominator_pos hylo hyhi
+  have hfactor : 0 < 1 + x * y :=
+    projectiveCompactOneAddMul_pos hxlo hxhi hylo hyhi
+  have hcleared := projectiveCompactCoordinate_sub_cleared x y
+    (Rat.ne_of_gt hdx) (Rat.ne_of_gt hdy)
+  have hright : 0 <
+      (projectiveCompactCoordinate y - projectiveCompactCoordinate x) *
+        ((1 - y * y) * (1 - x * x)) := by
+    rw [hcleared]
+    exact Rat.mul_pos (by grind) hfactor
+  have hden : 0 < (1 - y * y) * (1 - x * x) := Rat.mul_pos hdy hdx
+  have hlt : 0 < projectiveCompactCoordinate y - projectiveCompactCoordinate x := by
+    apply Rat.lt_of_mul_lt_mul_right (c := (1 - y * y) * (1 - x * x))
+      (hc := Rat.le_of_lt hden)
+    calc
+      0 * ((1 - y * y) * (1 - x * x)) = 0 := by rw [Rat.zero_mul]
+      _ < (projectiveCompactCoordinate y - projectiveCompactCoordinate x) *
+          ((1 - y * y) * (1 - x * x)) := hright
+  grind
+
 /-- Exact rational compactification of the Cauchy density.  Away from the
 two chart endpoints, the pullback of `1 / (1 + u^2)` under
 `u = x / (1 - x^2)` is the everywhere-defined density

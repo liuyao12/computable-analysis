@@ -156,6 +156,13 @@ not a description of the current module graph. The checked blueprint
   its `projectiveIntegral` is definitionally that integral, rather than an
   unconstrained raw real.  The remaining agreement is therefore precisely the
   finite compact-integration and projective-substitution proof.
+  The new denominator-cleared endpoint identity
+  `projectiveCompactCoordinate_sub_cleared` supplies the finite rational
+  displacement calculation for transporting a partition through
+  `x / (1 - x^2)`.  The checked positivity lemmas and
+  `projectiveCompactCoordinate_strictMono` now prove that this chart preserves
+  strict rational order on `(-1,1)`; the quadrature-substitution consequence
+  remains to be proved.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
