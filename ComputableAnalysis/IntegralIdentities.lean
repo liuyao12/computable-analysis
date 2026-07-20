@@ -3871,6 +3871,100 @@ theorem projectiveCompactDyadicTailUpperCell_le (n : Nat) :
       dsimp [projectiveCompactDyadicEndpoint]
       grind [Rat.sub_eq_add_neg]
 
+/-- A nested rational zero enclosure at the dyadic rate.  It is used only as
+an explicitly certified error budget for the two projective endpoint cells. -/
+def projectiveCompactDyadicZero : RealRaw where
+  compute := fun n => { lo := 0, hi := 1 / (((2 ^ n : Nat) : Rat)) }
+
+private theorem projectiveCompactDyadic_succ_le_two_pow (n : Nat) :
+    n + 1 <= 2 ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 2 * (n + 1) := by omega
+        _ <= 2 * 2 ^ n := Nat.mul_le_mul_left 2 ih
+        _ = 2 ^ (n + 1) := by
+          rw [Nat.pow_succ]
+          omega
+
+private theorem projectiveCompactDyadicZero_valid :
+    projectiveCompactDyadicZero.Valid := by
+  constructor
+  · intro n
+    change 0 <= 1 / (((2 ^ n : Nat) : Rat)) - 0
+    have hpos : 0 < 1 / (((2 ^ n : Nat) : Rat)) :=
+      one_div_nat_pos (Nat.pow_pos (by omega : 0 < 2))
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      change 0 <= 0 /\ 0 <= 1 / (((2 ^ m : Nat) : Rat)) /\
+        1 / (((2 ^ m : Nat) : Rat)) <= 1 / (((2 ^ n : Nat) : Rat))
+      have hpow : 2 ^ n <= 2 ^ m :=
+        Nat.pow_le_pow_right (by omega : 0 < 2) hnm
+      have hnpos : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+      have hmpos : 0 < 2 ^ m := Nat.pow_pos (by omega : 0 < 2)
+      constructor
+      · exact Rat.le_refl
+      constructor
+      · exact Rat.le_of_lt (one_div_nat_pos hmpos)
+      · exact FTC.one_div_nat_antitone hnpos hmpos hpow
+    · intro eps
+      refine ⟨eps.val.den, ?_⟩
+      intro n hn
+      change 1 / (((2 ^ n : Nat) : Rat)) - 0 <= eps.val
+      have hpow : n + 1 <= 2 ^ n := projectiveCompactDyadic_succ_le_two_pow n
+      have hpowpos : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+      have hsmall :
+          1 / (((2 ^ n : Nat) : Rat)) <=
+            1 / (((n + 1 : Nat) : Rat)) :=
+        FTC.one_div_nat_antitone (Nat.succ_pos n) hpowpos hpow
+      have hstage : eps.val.den + 1 <= n + 1 := by omega
+      have hdenpos : 0 < eps.val.den + 1 := Nat.succ_pos _
+      have hnatpos : 0 < n + 1 := Nat.succ_pos _
+      have hbound :
+          1 / (((n + 1 : Nat) : Rat)) <=
+            1 / (((eps.val.den + 1 : Nat) : Rat)) :=
+        FTC.one_div_nat_antitone hdenpos hnatpos hstage
+      calc
+        1 / (((2 ^ n : Nat) : Rat)) - 0 =
+            1 / (((2 ^ n : Nat) : Rat)) := by grind [Rat.sub_eq_add_neg]
+        _ <= 1 / (((n + 1 : Nat) : Rat)) := hsmall
+        _ <= 1 / (((eps.val.den + 1 : Nat) : Rat)) := hbound
+        _ <= eps.val := FTC.one_div_den_succ_le_of_pos eps.property
+
+/-- A certified vanishing error raw for the two symmetric endpoint cells of
+the dyadic projective schedule. -/
+def projectiveCompactDyadicSymmetricTailError : RealRaw :=
+  RealRaw.scaleRat ((64 : Rat) / 3) projectiveCompactDyadicZero
+
+theorem projectiveCompactDyadicSymmetricTailError_valid :
+    projectiveCompactDyadicSymmetricTailError.Valid :=
+  RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+    projectiveCompactDyadicZero_valid
+
+theorem projectiveCompactDyadicSymmetricTailError_compute (n : Nat) :
+    projectiveCompactDyadicSymmetricTailError.compute n =
+      { lo := 0,
+        hi := ((64 : Rat) / 3) * (1 / (((2 ^ n : Nat) : Rat))) } := by
+  have hnonneg : (0 : Rat) <= (64 : Rat) / 3 := by native_decide
+  simp [projectiveCompactDyadicSymmetricTailError, projectiveCompactDyadicZero,
+    RealRaw.scaleRat, RealRaw.scaleRatCompute, hnonneg]
+
+/-- The two compact endpoint-cell budgets are absorbed by the certified
+vanishing tail raw at every dyadic stage. -/
+theorem projectiveCompactDyadicSymmetricTailUpper_le (n : Nat) :
+    2 * projectiveCompactTailUpperCell (projectiveCompactDyadicEndpoint n) <=
+      (projectiveCompactDyadicSymmetricTailError.compute n).hi := by
+  rw [projectiveCompactDyadicSymmetricTailError_compute]
+  have htail := projectiveCompactDyadicTailUpperCell_le n
+  calc
+    2 * projectiveCompactTailUpperCell (projectiveCompactDyadicEndpoint n) <=
+        2 * (((32 : Rat) / 3) * (1 / (((2 ^ n : Nat) : Rat)))) :=
+      Rat.mul_le_mul_of_nonneg_left htail (by native_decide)
+    _ = ((64 : Rat) / 3) * (1 / (((2 ^ n : Nat) : Rat))) := by
+      grind [Rat.mul_assoc]
+
 private theorem projectiveCompact_one_div_le_one_div_of_pos_of_le {a b : Rat}
     (ha : 0 < a) (hab : a <= b) :
     1 / b <= 1 / a := by

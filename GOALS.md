@@ -191,9 +191,12 @@ not a description of the current module graph. The checked blueprint
   positive branch to a symmetric finite-core overlap.  The endpoint cell is
   bounded by 'projectiveCompactTailUpperCell_le'; at the dyadic endpoint,
   'projectiveCompactDyadicTailUpperCell_le' makes this at most
-  '(32 / 3) * 2^(-n)'.  What remains is one nested raw construction that
-  combines these finite core and tail boxes and agrees with the existing
-  compact dyadic integral raw.
+  '(32 / 3) * 2^(-n)'.  Twice that endpoint budget is now packaged as the
+  valid shrinking raw 'projectiveCompactDyadicSymmetricTailError', with the
+  stagewise absorption theorem
+  'projectiveCompactDyadicSymmetricTailUpper_le'.  What remains is one nested
+  raw construction that combines these finite core and tail boxes and agrees
+  with the existing compact dyadic integral raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

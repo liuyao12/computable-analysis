@@ -1032,6 +1032,9 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_lipschitzFactor_le}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_schedule_squareSum_le}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicTailUpperCell_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicSymmetricTailError}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicSymmetricTailError_valid}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicSymmetricTailUpper_le}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_leftJacobian_add}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_rightJacobian_sub}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactJacobian_left_mul_le_coordinate_sub}
@@ -1162,9 +1165,11 @@ compact endpoint cell has the explicit enclosure
 \]
 so at (s_m=1-2^{-m}) it is at most
 \(\frac{32}{3}2^{-m}\).  This is a rational vanishing tail budget, not an
-improper-limit primitive.  What remains is to assemble these checked finite
-cores and tail boxes into one nested raw construction and identify it with the
-existing compact dyadic integral raw.  No general integral substitution
+improper-limit primitive.  Lean now packages twice this dyadic budget as a
+valid shrinking raw error interval, so the two endpoint cells can be carried
+by certified raw-real arithmetic.  What remains is to add that error to the
+finite projective cores in a single nested construction and identify it with
+the existing compact dyadic integral raw.  No general integral substitution
 theorem is asserted yet.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
