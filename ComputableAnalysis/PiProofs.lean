@@ -16778,7 +16778,7 @@ theorem piCircumferenceFan_equiv_piCircleArea :
   · rw [← hsame]
     grind [Rat.sub_eq_add_neg]
 
-/-- A second-order rational lower certificate for the length of a positively
+/- A second-order rational lower certificate for the length of a positively
 oriented unit-circle chord.  The correction is deliberately rational: it
 uses only the cross product and the dot product of the two rational endpoints.
 It is the first ingredient of a sharper Archimedean circumference fan, rather
