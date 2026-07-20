@@ -1067,9 +1067,10 @@ finite interval with a removable-endpoint certificate, rather than treating a
 tail limit as primitive.  Its direct compact dyadic integral construction is
 now already complete; the still-missing theorem is the projective
 change-of-variables comparison with the completed Cauchy compactification, so
-the reciprocal-quartic row is not yet a completed scoreboard computation.  The
-compact density itself is a total rational-name interval function on every
-rational interval; its interval-level regularity is proved below.
+the reciprocal-quartic candidate is definition-complete but not yet an
+equivalence-complete scoreboard computation.  The compact density itself is a
+total rational-name interval function on every rational interval; its
+interval-level regularity is proved below.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,
@@ -1145,12 +1146,16 @@ by the verified rectangle arctangent construction.
 
 \begin{theorem}[Route package for the clean reciprocal quartic test]
 \label{thm:reciprocal-quartic-route-package}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_valid}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_valid}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
 \uses{def:reciprocal-quartic-test-kernel,thm:reciprocal-quartic-projective-substitution,thm:geometric-pi-validity}
 \leanok
-The clean benchmark
+The compact candidate
+\code{piReciprocalQuarticCompact} is already a valid raw real, computed by
+the displayed dyadic finite integral on \([-1,1]\).  The clean benchmark
 \[
   \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}=\pi
 \]
@@ -1164,8 +1169,8 @@ required compactified rational-density computation on \([-1,1]\), and the
 resulting
 \code{ReciprocalQuarticMinusOneProjectiveRoute} immediately gives a formal
 \(\pi\)-computation equivalent to \code{piCircleArea}.  This route package is
-not counted as a completed scoreboard row until its projective substitution
-certificate is supplied.
+therefore counted for definition completeness only; its equivalence column
+remains open until the projective substitution certificate is supplied.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}

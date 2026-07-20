@@ -477,7 +477,7 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently ten of nineteen named
+  `blueprint/src/pi-scoreboard-table.tex`: currently eleven of nineteen named
   computations are valid raw reals, and eight of eighteen applicable rows
   have a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
@@ -487,8 +487,12 @@ students actually compute.
   `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
   the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
   rational series, and the direct cross-fan circumference computation
-  `piCircumferenceFan`.  The valid-but-not-yet-equivalent Basel row accounts
-  for the remaining definition-only completion.
+  `piCircumferenceFan`.  The valid-but-not-yet-equivalent Basel row and the
+  concrete compact reciprocal-quartic candidate
+  `PiProofs.piReciprocalQuarticCompact` account for the two definition-only
+  completions.  The latter is the verified dyadic integral of
+  `(1+x^2)/(x^4-x^2+1)` on `[-1,1]`; its projective-substitution equivalence
+  to `piCircleArea` remains the next analytic obligation.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
