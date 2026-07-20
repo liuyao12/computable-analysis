@@ -3382,6 +3382,45 @@ theorem projectiveCompactCoordinate_strictMono {x y : Rat}
           ((1 - y * y) * (1 - x * x)) := hright
   grind
 
+/-- Transport every endpoint of a finite rational partition through the
+compact projective chart. -/
+def projectiveCompactIntervals : List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (projectiveCompactCoordinate p, projectiveCompactCoordinate r) ::
+        projectiveCompactIntervals rest
+
+/-- An ordered finite cover of a compact rational subinterval of `(-1,1)`
+remains an ordered cover after applying the compact projective chart to every
+endpoint.  This is the finite partition transport needed before comparing
+quadrature sums. -/
+theorem projectiveCompactIntervals_covers
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (ha : -1 < a) (hb : b < 1)
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.CoversInterval
+      (projectiveCompactCoordinate a) (projectiveCompactCoordinate b)
+      (projectiveCompactIntervals intervals) := by
+  induction intervals generalizing a b with
+  | nil =>
+      simp [projectiveCompactIntervals, ArctanGeometry.CoversInterval] at hcover ⊢
+      rw [hcover]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hrlo : -1 < r := by grind
+      have hrle : r <= b := ArctanGeometry.CoversInterval.start_le_end hrest
+      have hrhi : r < 1 := by grind
+      have hmap : projectiveCompactCoordinate a <= projectiveCompactCoordinate r := by
+        by_cases har : a = r
+        · subst r
+          exact Rat.le_refl
+        · exact Rat.le_of_lt
+            (projectiveCompactCoordinate_strictMono ha (by grind) hrhi)
+      simp only [projectiveCompactIntervals, ArctanGeometry.CoversInterval]
+      exact ⟨trivial, hmap, ih r b hrlo hb hrest⟩
+
 /-- Exact rational compactification of the Cauchy density.  Away from the
 two chart endpoints, the pullback of `1 / (1 + u^2)` under
 `u = x / (1 - x^2)` is the everywhere-defined density

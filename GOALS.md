@@ -161,8 +161,9 @@ not a description of the current module graph. The checked blueprint
   displacement calculation for transporting a partition through
   `x / (1 - x^2)`.  The checked positivity lemmas and
   `projectiveCompactCoordinate_strictMono` now prove that this chart preserves
-  strict rational order on `(-1,1)`; the quadrature-substitution consequence
-  remains to be proved.
+  strict rational order on `(-1,1)`.  `projectiveCompactIntervals_covers`
+  lifts that fact to finite rational partitions of every compact source
+  subinterval; the quadrature-substitution consequence remains to be proved.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

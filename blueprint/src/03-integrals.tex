@@ -1016,6 +1016,8 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactOneAddMul_pos}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_cleared}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_strictMono}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_covers}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -1083,12 +1085,15 @@ denominator-cleared displacement identity
 \]
 This is the finite algebra needed to prove that source partitions transport in
 the correct order.  Lean now proves the needed strict-order statement directly:
-if (-1<x<y<1), then
+if \(-1<x<y<1\), then
 \[
   \frac{x}{1-x^2}<\frac{y}{1-y^2}.
 \]
-The positive-denominator and (1+xy>0) lemmas used in that proof are also
-checked.  This still does not assert the integral substitution theorem.
+The positive-denominator and \(1+xy>0\) lemmas used in that proof are also
+checked.  Consequently, endpointwise transport carries every finite ordered
+rational cover of a compact subinterval of \((-1,1)\) to an ordered cover of
+its projective image.  This still does not assert the quadrature or integral
+substitution theorem.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,
