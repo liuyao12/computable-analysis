@@ -4960,6 +4960,44 @@ def reciprocalQuarticMinusOneCompactAffineIntervals :
       (2 * p - 1, 2 * r - 1) ::
         reciprocalQuarticMinusOneCompactAffineIntervals rest
 
+/-- Affine transport preserves the finite ordered-cover invariant. -/
+theorem reciprocalQuarticMinusOneCompactAffineIntervals_covers
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.CoversInterval (2 * a - 1) (2 * b - 1)
+      (reciprocalQuarticMinusOneCompactAffineIntervals intervals) := by
+  induction intervals generalizing a with
+  | nil =>
+      simp only [reciprocalQuarticMinusOneCompactAffineIntervals,
+        ArctanGeometry.CoversInterval] at hcover ⊢
+      grind
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      simp only [reciprocalQuarticMinusOneCompactAffineIntervals,
+        ArctanGeometry.CoversInterval]
+      refine ⟨by grind, ?_, ih r hrest⟩
+      rw [Rat.sub_eq_add_neg, Rat.sub_eq_add_neg]
+      exact (Rat.add_le_add_right (c := (-1 : Rat))).2
+        (Rat.mul_le_mul_of_nonneg_left hpr
+          (show (0 : Rat) <= 2 by native_decide))
+
+/-- The affine image of the concrete unit dyadic partition is an ordered
+rational cover of the whole compact projective interval. -/
+theorem reciprocalQuarticMinusOneCompactAffineDyadicIntervals_covers
+    (stage : Nat) :
+    ArctanGeometry.CoversInterval (-1) 1
+      (reciprocalQuarticMinusOneCompactAffineIntervals
+        (ArctanGeometry.arctanAreaLoopState 1 stage).intervals) := by
+  have hcover := ArctanGeometry.arctanAreaLoopState_intervals_covers
+    (x := (1 : Rat)) (by native_decide) stage
+  have h := reciprocalQuarticMinusOneCompactAffineIntervals_covers 0 1
+    (ArctanGeometry.arctanAreaLoopState 1 stage).intervals hcover
+  have hleft : (2 : Rat) * 0 - 1 = -1 := by native_decide
+  have hright : (2 : Rat) * 1 - 1 = 1 := by native_decide
+  rw [hleft, hright] at h
+  exact h
+
 private theorem reciprocalQuarticMinusOneUnit_lowerCell_eq_compact
     (p r : Rat) :
     reciprocalQuarticMinusOneUnitLowerCell p r =
