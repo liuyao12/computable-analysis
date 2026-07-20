@@ -168,8 +168,15 @@ not a description of the current module graph. The checked blueprint
   The new pointwise and squared-mesh bounds
   `projectiveCompactCoordinate_sub_le_lipschitz` and
   `projectiveCompactAreaLoop_squareSum_le` quantify the distortion on every
-  source branch `[0,s]` with `s < 1`.  The remaining quadrature-substitution
-  proof must supply a cellwise comparison and an endpoint/refinement schedule.
+  source branch `[0,s]` with `s < 1`.  The endpoint/refinement schedule is now
+  checked too: `projectiveCompactDyadicEndpoint n = 1 - 1/2^n` stays in the
+  positive compact chart and has `1 / 2^n <= 1 - s_n^2`;
+  `projectiveCompactDyadic_lipschitzFactor_le` bounds the resulting chart
+  distortion, and
+  `projectiveCompactDyadic_schedule_squareSum_le` proves that `6*n` source
+  refinements give transported squared mesh at most `4 / 2^(2*n)`.  The
+  remaining quadrature-substitution proof is therefore the finite cellwise
+  comparison and its assembly across the two compact branches.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

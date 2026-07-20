@@ -1023,6 +1023,10 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_le_lipschitz}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_squareSum_le}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactAreaLoop_squareSum_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicEndpoint}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicEndpoint_denominator_ge}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_lipschitzFactor_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_schedule_squareSum_le}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -1112,9 +1116,21 @@ projective image mesh bounded by
 \[
  \left(\frac{2}{(1-s^2)^2}\right)^2\frac{s^2}{2^n}.
 \]
-Thus the remaining step is now the cellwise quadrature comparison together
-with a schedule that approaches the removable endpoint; no integral
-substitution theorem is asserted yet.
+The endpoint/refinement part is now also explicit.  At outer stage \(m\),
+take
+\[
+  s_m=1-\frac1{2^m}
+  \quad\hbox{and}\quad 6m
+  \text{ midpoint refinements}.
+\]
+Lean proves both \(2^{-m}\le 1-s_m^2\) and the resulting transported
+squared-mesh estimate
+\[
+  \operatorname{mesh}_2\le \frac4{2^{2m}}.
+\]
+Thus only the finite cellwise quadrature comparison (and its assembly across
+the two compact branches) remains in this projective substitution route; no
+integral substitution theorem is asserted yet.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

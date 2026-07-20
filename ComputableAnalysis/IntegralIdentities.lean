@@ -3665,6 +3665,240 @@ theorem projectiveCompactAreaLoop_squareSum_le
             (s * s / (((2 ^ n : Nat) : Rat))) := by
       rw [ArctanGeometry.arctanAreaLoopState_squareSum]
 
+/-- The compact source endpoint used by the projective quadrature schedule.
+At stage `n` it stops one dyadic unit short of the chart pole. -/
+def projectiveCompactDyadicEndpoint (n : Nat) : Rat :=
+  1 - 1 / (((2 ^ n : Nat) : Rat))
+
+/-- The dyadic projective schedule remains on the nonnegative compact branch. -/
+theorem projectiveCompactDyadicEndpoint_nonnegative (n : Nat) :
+    0 <= projectiveCompactDyadicEndpoint n := by
+  let D : Rat := ((2 ^ n : Nat) : Rat)
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hDge : 1 <= D := by
+    dsimp [D]
+    exact_mod_cast (Nat.one_le_iff_ne_zero.mpr
+      (Nat.ne_of_gt (Nat.pow_pos (by omega : 0 < 2))))
+  have hinv : D⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := D)
+    · calc
+        D⁻¹ * D = 1 := Rat.inv_mul_cancel _ (Rat.ne_of_gt hDpos)
+        _ <= 1 * D := by simpa using hDge
+    · exact hDpos
+  unfold projectiveCompactDyadicEndpoint
+  rw [Rat.div_def]
+  dsimp [D] at hinv
+  grind [Rat.sub_eq_add_neg]
+
+/-- The dyadic projective schedule stays strictly below the chart pole. -/
+theorem projectiveCompactDyadicEndpoint_lt_one (n : Nat) :
+    projectiveCompactDyadicEndpoint n < 1 := by
+  let D : Rat := ((2 ^ n : Nat) : Rat)
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  unfold projectiveCompactDyadicEndpoint
+  rw [Rat.div_def]
+  have hinv : 0 < D⁻¹ := (Rat.inv_pos).2 hDpos
+  dsimp [D] at hinv
+  grind [Rat.sub_eq_add_neg]
+
+/-- At the dyadic endpoint, the projective denominator retains at least one
+dyadic unit of clearance from zero. -/
+theorem projectiveCompactDyadicEndpoint_denominator_ge (n : Nat) :
+    1 / (((2 ^ n : Nat) : Rat)) <=
+      1 - projectiveCompactDyadicEndpoint n * projectiveCompactDyadicEndpoint n := by
+  let t : Rat := 1 / (((2 ^ n : Nat) : Rat))
+  have htpos : 0 < t := by
+    dsimp [t]
+    rw [Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))))
+  have htone : t <= 1 := by
+    change 1 / (((2 ^ n : Nat) : Rat)) <= 1
+    let D : Rat := ((2 ^ n : Nat) : Rat)
+    have hDpos : 0 < D := by
+      dsimp [D]
+      exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+    have hDge : 1 <= D := by
+      dsimp [D]
+      exact_mod_cast (Nat.one_le_iff_ne_zero.mpr
+        (Nat.ne_of_gt (Nat.pow_pos (by omega : 0 < 2))))
+    rw [Rat.div_def]
+    apply Rat.le_of_mul_le_mul_right (c := D)
+    · calc
+        (1 * D⁻¹) * D = 1 := by
+          rw [Rat.mul_assoc, Rat.inv_mul_cancel _ (Rat.ne_of_gt hDpos), Rat.mul_one]
+        _ <= 1 * D := by simpa using hDge
+    · exact hDpos
+  have hfactor : 1 <= 2 - t := by grind
+  have hmul : t * 1 <= t * (2 - t) :=
+    Rat.mul_le_mul_of_nonneg_left hfactor (Rat.le_of_lt htpos)
+  change t <= 1 - (1 - t) * (1 - t)
+  calc
+    t = t * 1 := by grind
+    _ <= t * (2 - t) := hmul
+    _ = 1 - (1 - t) * (1 - t) := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+        Rat.mul_comm]
+
+private theorem projectiveCompact_one_div_le_one_div_of_pos_of_le {a b : Rat}
+    (ha : 0 < a) (hab : a <= b) :
+    1 / b <= 1 / a := by
+  have hb : 0 < b := by grind
+  have hane : a ≠ 0 := Rat.ne_of_gt ha
+  have hbne : b ≠ 0 := Rat.ne_of_gt hb
+  have hprod : 0 < a * b := Rat.mul_pos ha hb
+  apply Rat.le_of_mul_le_mul_right (c := a * b)
+  · calc
+      (1 / b) * (a * b) = a := by
+        rw [Rat.div_def]
+        have hcancel : b * b⁻¹ = 1 := Rat.mul_inv_cancel b hbne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= b := hab
+      _ = (1 / a) * (a * b) := by
+        rw [Rat.div_def]
+        have hcancel : a * a⁻¹ = 1 := Rat.mul_inv_cancel a hane
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hprod
+
+/-- The projective Lipschitz coefficient along the dyadic endpoint schedule
+has a purely dyadic upper bound. -/
+theorem projectiveCompactDyadic_lipschitzFactor_le (n : Nat) :
+    2 / ((1 - projectiveCompactDyadicEndpoint n *
+      projectiveCompactDyadicEndpoint n) *
+        (1 - projectiveCompactDyadicEndpoint n *
+          projectiveCompactDyadicEndpoint n)) <=
+      2 * (((2 ^ n : Nat) : Rat)) * (((2 ^ n : Nat) : Rat)) := by
+  let D : Rat := ((2 ^ n : Nat) : Rat)
+  let t : Rat := 1 / D
+  let d : Rat := 1 - projectiveCompactDyadicEndpoint n *
+    projectiveCompactDyadicEndpoint n
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have htpos : 0 < t := by
+    dsimp [t]
+    rw [Rat.div_def]
+    exact Rat.mul_pos (by native_decide) ((Rat.inv_pos).2 hDpos)
+  have htd : t <= d := by
+    simpa [t, d, D] using projectiveCompactDyadicEndpoint_denominator_ge n
+  have hdpos : 0 < d := by grind
+  have hsq : t * t <= d * d := by
+    calc
+      t * t <= d * t := Rat.mul_le_mul_of_nonneg_right htd (Rat.le_of_lt htpos)
+      _ <= d * d := Rat.mul_le_mul_of_nonneg_left htd (Rat.le_of_lt hdpos)
+  have hsqpos : 0 < t * t := Rat.mul_pos htpos htpos
+  have hinv : 1 / (d * d) <= 1 / (t * t) :=
+    projectiveCompact_one_div_le_one_div_of_pos_of_le hsqpos hsq
+  have htinv : 1 / (t * t) = D * D := by
+    dsimp [t]
+    rw [Rat.div_def, Rat.div_def]
+    have hcancel : D⁻¹ * D = 1 := Rat.inv_mul_cancel _ (Rat.ne_of_gt hDpos)
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  change 2 / (d * d) <= 2 * D * D
+  rw [Rat.div_def]
+  calc
+    2 * (d * d)⁻¹ = 2 * (1 / (d * d)) := by
+      simp [Rat.div_def]
+    _ <= 2 * (1 / (t * t)) :=
+      Rat.mul_le_mul_of_nonneg_left hinv (by native_decide)
+    _ = 2 * D * D := by
+      rw [htinv]
+      grind [Rat.mul_assoc]
+
+private theorem projectiveCompact_dyadic_mesh_algebra
+    (D : Rat) (hD : D ≠ 0) :
+    (2 * D * D) * (2 * D * D) * (1 / (D ^ 6)) = 4 / (D ^ 2) := by
+  have hcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hD
+  simp only [Rat.pow_succ, Rat.pow_zero, Rat.div_def, Rat.inv_mul_rev, Rat.one_mul]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- An explicit projective quadrature schedule whose transported squared mesh
+shrinks at the dyadic rate `4 / 2^(2n)`.  The source endpoint is
+`1 - 2^(-n)` and the source partition receives `6n` midpoint refinements,
+which absorbs the fourth-order blowup of the chart derivative near its pole. -/
+theorem projectiveCompactDyadic_schedule_squareSum_le (n : Nat) :
+    ArctanGeometry.intervalSquareSum
+      (projectiveCompactIntervals
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint n) (n * 6)).intervals) <=
+      4 / (((2 ^ (n * 2) : Nat) : Rat)) := by
+  let s : Rat := projectiveCompactDyadicEndpoint n
+  let D : Rat := ((2 ^ n : Nat) : Rat)
+  let d : Rat := 1 - s * s
+  let L : Rat := 2 / (d * d)
+  let R : Rat := 2 * D * D
+  let Q : Rat := ((2 ^ (n * 6) : Nat) : Rat)
+  have hs0 : 0 <= s := by
+    simpa [s] using projectiveCompactDyadicEndpoint_nonnegative n
+  have hslt : s < 1 := by
+    simpa [s] using projectiveCompactDyadicEndpoint_lt_one n
+  have hsone : s <= 1 := Rat.le_of_lt hslt
+  have hd : 0 < d := by
+    dsimp [d, s]
+    exact projectiveCompactDenominator_pos (by grind) hslt
+  have hL0 : 0 <= L := by
+    dsimp [L]
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos hd hd)))
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hR0 : 0 <= R := by
+    dsimp [R]
+    exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) (Rat.le_of_lt hDpos))
+      (Rat.le_of_lt hDpos)
+  have hLle : L <= R := by
+    simpa [L, d, s, R, D] using projectiveCompactDyadic_lipschitzFactor_le n
+  have hLL : L * L <= R * R := by
+    calc
+      L * L <= R * L := Rat.mul_le_mul_of_nonneg_right hLle hL0
+      _ <= R * R := Rat.mul_le_mul_of_nonneg_left hLle hR0
+  have hsq0 : 0 <= s * s := Rat.mul_nonneg hs0 hs0
+  have hsqle : s * s <= 1 := by
+    calc
+      s * s <= 1 * s := Rat.mul_le_mul_of_nonneg_right hsone hs0
+      _ <= 1 := by grind
+  have hQpos : 0 < Q := by
+    dsimp [Q]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hsource : 0 <= s * s / Q := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hsq0 (Rat.le_of_lt ((Rat.inv_pos).2 hQpos))
+  have hquot : s * s / Q <= 1 / Q := by
+    rw [Rat.div_def, Rat.div_def]
+    exact Rat.mul_le_mul_of_nonneg_right hsqle
+      (Rat.le_of_lt ((Rat.inv_pos).2 hQpos))
+  have hpow6 : Q = D ^ 6 := by
+    dsimp [Q, D]
+    exact_mod_cast (Nat.pow_mul 2 n 6)
+  have hpow2 : (((2 ^ (n * 2) : Nat) : Rat)) = D ^ 2 := by
+    dsimp [D]
+    exact_mod_cast (Nat.pow_mul 2 n 2)
+  have hbase := projectiveCompactAreaLoop_squareSum_le hs0 hslt (n * 6)
+  calc
+    ArctanGeometry.intervalSquareSum
+        (projectiveCompactIntervals
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint n) (n * 6)).intervals) =
+        ArctanGeometry.intervalSquareSum
+          (projectiveCompactIntervals
+            (ArctanGeometry.arctanAreaLoopState s (n * 6)).intervals) := by
+          rfl
+    _ <= L * L * (s * s / Q) := by
+      simpa [L, d, Q] using hbase
+    _ <= R * R * (s * s / Q) :=
+      Rat.mul_le_mul_of_nonneg_right hLL hsource
+    _ <= R * R * (1 / Q) :=
+      Rat.mul_le_mul_of_nonneg_left hquot (Rat.mul_nonneg hR0 hR0)
+    _ = 4 / (((2 ^ (n * 2) : Nat) : Rat)) := by
+      rw [hpow6, hpow2]
+      exact projectiveCompact_dyadic_mesh_algebra D (Rat.ne_of_gt hDpos)
+
 /-- Exact rational compactification of the Cauchy density.  Away from the
 two chart endpoints, the pullback of `1 / (1 + u^2)` under
 `u = x / (1 - x^2)` is the everywhere-defined density
