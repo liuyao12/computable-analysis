@@ -978,6 +978,10 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_pos}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_ge_three_quarters}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_nonneg}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_le_eight_thirds_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_even}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactTailUpperCell}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactTailUpperCell_le}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominatorProduct_minus_one_inv_le_sixteen_ninths}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit}
@@ -1027,11 +1031,15 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicEndpoint_denominator_ge}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_lipschitzFactor_le}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_schedule_squareSum_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicTailUpperCell_le}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_leftJacobian_add}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_rightJacobian_sub}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactJacobian_left_mul_le_coordinate_sub}
 \lean{ComputableAnalysis.IntegralIdentities.coordinate_sub_le_projectiveCompactJacobian_right_mul}
 \lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzSum_overlaps_integralSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricLipschitzSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricIntegralSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricLipschitzSum_overlaps_integralSum}
 \uses{def:reciprocal-quartic-test-kernel}
 \leanok
 The rational algebra behind the test integral is already formalized.  First,
@@ -1145,10 +1153,19 @@ Together with the exact pullback identity and the checked \(8\)-Lipschitz
 bound for the compact density, Lean proves that the compact-density
 Lipschitz rectangle sum overlaps the Cauchy-kernel rectangle sum on the
 endpointwise projective image of every finite positive-branch partition.
-Thus the remaining task is global assembly: join the two symmetric compact
-branches, account for the endpoint/tail schedule, and identify that assembled
-construction with the existing compact dyadic integral raw.  No general
-integral substitution theorem is asserted yet.
+The new finite global ingredients are checked too.  The compact density is
+even, and Lean scales the positive-branch brackets by (2) to obtain a
+symmetric finite-core overlap.  Separately, on (0\le s\le1), the remaining
+compact endpoint cell has the explicit enclosure
+\[
+ (1-s)\bigl(f(s)+8(1-s)\bigr)\le \frac{32}{3}(1-s),
+\]
+so at (s_m=1-2^{-m}) it is at most
+\(\frac{32}{3}2^{-m}\).  This is a rational vanishing tail budget, not an
+improper-limit primitive.  What remains is to assemble these checked finite
+cores and tail boxes into one nested raw construction and identify it with the
+existing compact dyadic integral raw.  No general integral substitution
+theorem is asserted yet.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

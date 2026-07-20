@@ -3038,6 +3038,92 @@ theorem reciprocalQuarticSymmetricDensity_minus_one_nonneg (x : Rat) :
     exact Rat.le_of_lt ((Rat.inv_pos).2
       (reciprocalQuarticDenominator_minus_one_pos x))
 
+/-- A uniform rational upper bound for the clean compact density on its
+closed chart interval.  It supplies the explicit removable-endpoint tail
+budget for the projective quadrature schedule. -/
+theorem reciprocalQuarticSymmetricDensity_minus_one_le_eight_thirds_on_unit
+    {x : Rat} (hxlo : -1 <= x) (hxhi : x <= 1) :
+    reciprocalQuarticSymmetricDensity (-1) x <= (8 : Rat) / 3 := by
+  let q : Rat := reciprocalQuarticDenominator (-1) x
+  have hx0sq : 0 <= x * x := rat_square_nonneg x
+  have hx2le : x * x <= 1 := by
+    by_cases hx0 : 0 <= x
+    · calc
+        x * x <= 1 * x := Rat.mul_le_mul_of_nonneg_right hxhi hx0
+        _ <= 1 * 1 := Rat.mul_le_mul_of_nonneg_left hxhi (by native_decide)
+        _ = 1 := by native_decide
+    · have hxneg : x < 0 := by grind
+      have hxneg0 : 0 <= -x := by grind
+      have hnegx : -x <= 1 := by grind
+      have hsq : (-x) * (-x) <= 1 * 1 := by
+        calc
+          (-x) * (-x) <= 1 * (-x) :=
+            Rat.mul_le_mul_of_nonneg_right hnegx hxneg0
+          _ <= 1 * 1 := Rat.mul_le_mul_of_nonneg_left hnegx (by native_decide)
+      calc
+        x * x = (-x) * (-x) := by
+          grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+        _ <= 1 * 1 := hsq
+        _ = 1 := by native_decide
+  have hnum : 1 + x * x <= 2 := by grind
+  have hq : (3 : Rat) / 4 <= q := by
+    simpa [q] using reciprocalQuarticDenominator_minus_one_ge_three_quarters x
+  have hqpos : 0 < q := by grind
+  have hqinv0 : 0 <= q⁻¹ := Rat.le_of_lt ((Rat.inv_pos).2 hqpos)
+  have hscale : 1 <= ((4 : Rat) / 3) * q := by
+    have h := Rat.mul_le_mul_of_nonneg_left hq
+      (by native_decide : (0 : Rat) <= (4 : Rat) / 3)
+    have hconst : ((4 : Rat) / 3) * ((3 : Rat) / 4) = 1 := by
+      native_decide
+    rw [hconst] at h
+    exact h
+  have hqinv : q⁻¹ <= (4 : Rat) / 3 := by
+    calc
+      q⁻¹ = 1 * q⁻¹ := by grind
+      _ <= (((4 : Rat) / 3) * q) * q⁻¹ :=
+        Rat.mul_le_mul_of_nonneg_right hscale hqinv0
+      _ = (4 : Rat) / 3 := by
+        have hcancel : q * q⁻¹ = 1 := Rat.mul_inv_cancel q (Rat.ne_of_gt hqpos)
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  unfold reciprocalQuarticSymmetricDensity reciprocalQuarticKernel
+  change (1 + x * x) * (1 / q) <= (8 : Rat) / 3
+  rw [Rat.div_def]
+  simp only [Rat.one_mul]
+  calc
+    (1 + x * x) * q⁻¹ <= 2 * q⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_right hnum hqinv0
+    _ <= 2 * ((4 : Rat) / 3) :=
+      Rat.mul_le_mul_of_nonneg_left hqinv (by native_decide)
+    _ = (8 : Rat) / 3 := by native_decide
+
+/-- The one-cell Lipschitz upper enclosure of the compact density on the
+remaining interval from s to 1. -/
+def projectiveCompactTailUpperCell (s : Rat) : Rat :=
+  (1 - s) *
+    (reciprocalQuarticSymmetricDensity (-1) s + 8 * (1 - s))
+
+/-- The endpoint cell of the compact projective schedule has a rational tail
+budget that is linear in its distance to the chart endpoint. -/
+theorem projectiveCompactTailUpperCell_le
+    {s : Rat} (hs0 : 0 <= s) (hs1 : s <= 1) :
+    projectiveCompactTailUpperCell s <= ((32 : Rat) / 3) * (1 - s) := by
+  have hwidth : 0 <= 1 - s := by grind
+  have hwidth_le_one : 1 - s <= 1 := by grind
+  have hvalue : reciprocalQuarticSymmetricDensity (-1) s <= (8 : Rat) / 3 :=
+    reciprocalQuarticSymmetricDensity_minus_one_le_eight_thirds_on_unit
+      (by grind) hs1
+  unfold projectiveCompactTailUpperCell
+  calc
+    (1 - s) * (reciprocalQuarticSymmetricDensity (-1) s + 8 * (1 - s)) <=
+        (1 - s) * ((8 : Rat) / 3 + 8 * (1 - s)) :=
+      Rat.mul_le_mul_of_nonneg_left ((Rat.add_le_add_right).2 hvalue) hwidth
+    _ <= (1 - s) * ((8 : Rat) / 3 + 8 * 1) :=
+      Rat.mul_le_mul_of_nonneg_left
+        ((Rat.add_le_add_left).2
+          (Rat.mul_le_mul_of_nonneg_left hwidth_le_one (by native_decide))) hwidth
+    _ = ((32 : Rat) / 3) * (1 - s) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- Exact finite-difference factorization for the compact reciprocal-quartic
 density.  It exposes the denominator and polynomial factors from which a
 finite-interval Lipschitz modulus will be derived. -/
@@ -3285,6 +3371,30 @@ def projectiveCompactCoordinate (x : Rat) : Rat :=
 /-- Formal Jacobian of `projectiveCompactCoordinate`. -/
 def projectiveCompactJacobian (x : Rat) : Rat :=
   (1 + x * x) / ((1 - x * x) * (1 - x * x))
+
+/-- The compact projective coordinate is odd. -/
+theorem projectiveCompactCoordinate_neg (x : Rat) :
+    projectiveCompactCoordinate (-x) = -projectiveCompactCoordinate x := by
+  unfold projectiveCompactCoordinate
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The rational Jacobian of the compact projective coordinate is even. -/
+theorem projectiveCompactJacobian_neg (x : Rat) :
+    projectiveCompactJacobian (-x) = projectiveCompactJacobian x := by
+  unfold projectiveCompactJacobian
+  congr 2 <;>
+    grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The clean compact reciprocal-quartic density is even.  This is the
+finite symmetry needed to assemble the two projective chart branches. -/
+theorem reciprocalQuarticSymmetricDensity_minus_one_even (x : Rat) :
+    reciprocalQuarticSymmetricDensity (-1) (-x) =
+      reciprocalQuarticSymmetricDensity (-1) x := by
+  unfold reciprocalQuarticSymmetricDensity reciprocalQuarticKernel
+    reciprocalQuarticDenominator
+  congr 2 <;>
+    grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg, Rat.mul_assoc, Rat.mul_comm]
 
 /-- The denominator of the compact projective chart is positive on its
 open rational source interval. -/
@@ -3744,6 +3854,23 @@ theorem projectiveCompactDyadicEndpoint_denominator_ge (n : Nat) :
       grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
         Rat.mul_comm]
 
+/-- The remaining endpoint cell in the dyadic projective schedule has an
+explicit vanishing compact-density tail budget. -/
+theorem projectiveCompactDyadicTailUpperCell_le (n : Nat) :
+    projectiveCompactTailUpperCell (projectiveCompactDyadicEndpoint n) <=
+      ((32 : Rat) / 3) * (1 / (((2 ^ n : Nat) : Rat))) := by
+  have hs0 : 0 <= projectiveCompactDyadicEndpoint n :=
+    projectiveCompactDyadicEndpoint_nonnegative n
+  have hs1 : projectiveCompactDyadicEndpoint n <= 1 :=
+    Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one n)
+  have htail := projectiveCompactTailUpperCell_le hs0 hs1
+  calc
+    projectiveCompactTailUpperCell (projectiveCompactDyadicEndpoint n) <=
+        ((32 : Rat) / 3) * (1 - projectiveCompactDyadicEndpoint n) := htail
+    _ = ((32 : Rat) / 3) * (1 / (((2 ^ n : Nat) : Rat))) := by
+      dsimp [projectiveCompactDyadicEndpoint]
+      grind [Rat.sub_eq_add_neg]
+
 private theorem projectiveCompact_one_div_le_one_div_of_pos_of_le {a b : Rat}
     (ha : 0 < a) (hab : a <= b) :
     1 / b <= 1 / a := by
@@ -3912,8 +4039,14 @@ theorem projectiveCompactCoordinate_sub_eq_leftJacobian_add
           (((1 - p * p) * (1 - p * p)) * (1 - r * r)) := by
   let dp : Rat := 1 - p * p
   let dr : Rat := 1 - r * r
+  let E : Rat := 3 * p + p * p * p + (r - p) * (1 + p * p)
   have hdp : dp ≠ 0 := by simpa [dp] using hp
   have hdr : dr ≠ 0 := by simpa [dr] using hr
+  have hdp2 : dp * dp ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · exact hdp hzero
+    · exact hdp hzero
   have hden : dp * dp * dr ≠ 0 := by
     intro hzero
     rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
@@ -3923,16 +4056,44 @@ theorem projectiveCompactCoordinate_sub_eq_leftJacobian_add
     · exact hdr hzero
   have hdp_cancel : dp * dp⁻¹ = 1 := Rat.mul_inv_cancel dp hdp
   have hdr_cancel : dr * dr⁻¹ = 1 := Rat.mul_inv_cancel dr hdr
+  have hdp2_cancel : (dp * dp) * (dp * dp)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hdp2
+  have hden_cancel : (dp * dp * dr) * (dp * dp * dr)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hden
+  have hcleared : (r / dr - p / dp) * (dr * dp) =
+      (r - p) * (1 + p * r) := by
+    simpa [projectiveCompactCoordinate, dp, dr] using
+      projectiveCompactCoordinate_sub_cleared p r hp hr
+  have hpoly : (1 + p * r) * dp = (1 + p * p) * dr + (r - p) * E := by
+    dsimp [dp, dr, E]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hright :
+      (((1 + p * p) / (dp * dp)) * (r - p) +
+        ((r - p) * (r - p) * E) / (dp * dp * dr)) * (dp * dp * dr) =
+        ((1 + p * p) * dr) * (r - p) + (r - p) * (r - p) * E := by
+    simp only [Rat.div_def]
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
   unfold projectiveCompactCoordinate projectiveCompactJacobian
   change r / dr - p / dp =
     ((1 + p * p) / (dp * dp)) * (r - p) +
-      ((r - p) * (r - p) *
-        (3 * p + p * p * p + (r - p) * (1 + p * p))) /
+      ((r - p) * (r - p) * E) /
         (dp * dp * dr)
   apply rat_eq_of_mul_eq_mul_ne (c := dp * dp * dr) hden
-  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
-  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  calc
+    (r / dr - p / dp) * (dp * dp * dr) =
+        ((r / dr - p / dp) * (dr * dp)) * dp := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = ((r - p) * (1 + p * r)) * dp := by rw [hcleared]
+    _ = (r - p) * ((1 + p * r) * dp) := by rw [Rat.mul_assoc]
+    _ = (r - p) * ((1 + p * p) * dr + (r - p) * E) := by rw [hpoly]
+    _ = ((1 + p * p) * dr) * (r - p) + (r - p) * (r - p) * E := by
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+    _ = (((1 + p * p) / (dp * dp)) * (r - p) +
+        ((r - p) * (r - p) * E) / (dp * dp * dr)) * (dp * dp * dr) :=
+      hright.symm
 
 /-- On the nonnegative compact chart branch, the projective secant is at
 least its left endpoint Jacobian times the source-cell width. -/
@@ -3980,27 +4141,61 @@ theorem projectiveCompactCoordinate_sub_eq_rightJacobian_sub
           (((1 - p * p) * (1 - r * r)) * (1 - r * r)) := by
   let dp : Rat := 1 - p * p
   let dr : Rat := 1 - r * r
+  let E : Rat := 3 * r + r * r * r - (r - p) * (1 + r * r)
   have hdp : dp ≠ 0 := by simpa [dp] using hp
   have hdr : dr ≠ 0 := by simpa [dr] using hr
+  have hdr2 : dr * dr ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · exact hdr hzero
+    · exact hdr hzero
   have hden : dp * dr * dr ≠ 0 := by
     intro hzero
     rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
-    · exact hdp hzero
     · rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hdp hzero
       · exact hdr hzero
-      · exact hdr hzero
+    · exact hdr hzero
   have hdp_cancel : dp * dp⁻¹ = 1 := Rat.mul_inv_cancel dp hdp
   have hdr_cancel : dr * dr⁻¹ = 1 := Rat.mul_inv_cancel dr hdr
+  have hdr2_cancel : (dr * dr) * (dr * dr)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hdr2
+  have hden_cancel : (dp * dr * dr) * (dp * dr * dr)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hden
+  have hcleared : (r / dr - p / dp) * (dr * dp) =
+      (r - p) * (1 + p * r) := by
+    simpa [projectiveCompactCoordinate, dp, dr] using
+      projectiveCompactCoordinate_sub_cleared p r hp hr
+  have hpoly : (1 + p * r) * dr = (1 + r * r) * dp - (r - p) * E := by
+    dsimp [dp, dr, E]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hright :
+      (((1 + r * r) / (dr * dr)) * (r - p) -
+        ((r - p) * (r - p) * E) / (dp * dr * dr)) * (dp * dr * dr) =
+        ((1 + r * r) * dp) * (r - p) - (r - p) * (r - p) * E := by
+    simp only [Rat.div_def]
+    grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
   unfold projectiveCompactCoordinate projectiveCompactJacobian
   change r / dr - p / dp =
     ((1 + r * r) / (dr * dr)) * (r - p) -
-      ((r - p) * (r - p) *
-        (3 * r + r * r * r - (r - p) * (1 + r * r))) /
+      ((r - p) * (r - p) * E) /
         (dp * dr * dr)
   apply rat_eq_of_mul_eq_mul_ne (c := dp * dr * dr) hden
-  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
-  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  calc
+    (r / dr - p / dp) * (dp * dr * dr) =
+        ((r / dr - p / dp) * (dr * dp)) * dr := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = ((r - p) * (1 + p * r)) * dr := by rw [hcleared]
+    _ = (r - p) * ((1 + p * r) * dr) := by rw [Rat.mul_assoc]
+    _ = (r - p) * ((1 + r * r) * dp - (r - p) * E) := by rw [hpoly]
+    _ = ((1 + r * r) * dp) * (r - p) - (r - p) * (r - p) * E := by
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    _ = (((1 + r * r) / (dr * dr)) * (r - p) -
+        ((r - p) * (r - p) * E) / (dp * dr * dr)) * (dp * dr * dr) :=
+      hright.symm
 
 /-- On the nonnegative compact chart branch, the projective secant is at
 most its right endpoint Jacobian times the source-cell width. -/
@@ -4163,8 +4358,8 @@ theorem projectiveCompact_integralLowerStep_le_lipschitzUpperCell
       (Rat.ne_of_gt hdr)
   have hlip := reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit
     p r (by grind) (by grind) (by grind) (by grind)
-  have hpoint : reciprocalQuarticSymmetricDensity (-1) r <=
-      reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p) := by
+  have hdiff : reciprocalQuarticSymmetricDensity (-1) r -
+      reciprocalQuarticSymmetricDensity (-1) p <= 8 * (r - p) := by
     calc
       reciprocalQuarticSymmetricDensity (-1) r -
           reciprocalQuarticSymmetricDensity (-1) p <=
@@ -4180,6 +4375,8 @@ theorem projectiveCompact_integralLowerStep_le_lipschitzUpperCell
       _ <= 8 * qabs (r - p) := hlip
       _ = 8 * (r - p) := by
           rw [qabs_eq_self_of_nonneg hwidth]
+  have hpoint : reciprocalQuarticSymmetricDensity (-1) r <=
+      reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p) := by
     grind [Rat.sub_eq_add_neg]
   unfold ArctanGeometry.integralLowerStep
   calc
@@ -4235,7 +4432,7 @@ theorem projectiveCompactLipschitzLowerSum_le_integralUpperSum
       have htail := ih r hr0 hrest
       simp only [projectiveCompactLipschitzLowerSum, projectiveCompactIntervals,
         ArctanGeometry.integralUpperSum]
-      exact Rat.add_le_add hcell htail
+      exact rat_add_le_add hcell htail
 
 /-- The transported Cauchy lower sum lies below the compact upper Lipschitz
 sum on every finite positive branch cover. -/
@@ -4261,7 +4458,7 @@ theorem projectiveCompactIntegralLowerSum_le_lipschitzUpperSum
       have htail := ih r hr0 hrest
       simp only [projectiveCompactLipschitzUpperSum, projectiveCompactIntervals,
         ArctanGeometry.integralLowerSum]
-      exact Rat.add_le_add hcell htail
+      exact rat_add_le_add hcell htail
 
 /-- The finite compact-density Lipschitz bracket overlaps the ordinary Cauchy
 rectangle bracket after projective transport of the same source partition.
@@ -4280,6 +4477,41 @@ theorem projectiveCompactLipschitzSum_overlaps_integralSum
       ha hs hcover,
     projectiveCompactIntegralLowerSum_le_lipschitzUpperSum a s intervals
       ha hs hcover⟩
+
+/-- The two-branch compact quadrature bracket obtained by reflecting the
+positive source branch through zero.  Evenness of the compact density makes
+this an exact finite reparameterization of the symmetric compact core. -/
+def projectiveCompactSymmetricLipschitzSum
+    (intervals : List (Rat × Rat)) : QInterval :=
+  { lo := 2 * projectiveCompactLipschitzLowerSum intervals,
+    hi := 2 * projectiveCompactLipschitzUpperSum intervals }
+
+/-- The matching two-branch Cauchy rectangle bracket for the projective image
+of a positive source partition. -/
+def projectiveCompactSymmetricIntegralSum
+    (intervals : List (Rat × Rat)) : QInterval :=
+  { lo := 2 * ArctanGeometry.integralLowerSum
+      (projectiveCompactIntervals intervals),
+    hi := 2 * ArctanGeometry.integralUpperSum
+      (projectiveCompactIntervals intervals) }
+
+/-- The two symmetric finite quadrature cores overlap after the projective
+transport.  The proof is just positive rational scaling of the verified
+one-branch cellwise bridge; the evenness lemmas above justify its intended
+two-branch interpretation. -/
+theorem projectiveCompactSymmetricLipschitzSum_overlaps_integralSum
+    (a s : Rat) (intervals : List (Rat × Rat))
+    (ha : 0 <= a) (hs : s < 1)
+    (hcover : ArctanGeometry.CoversInterval a s intervals) :
+    QInterval.Overlaps
+      (projectiveCompactSymmetricLipschitzSum intervals)
+      (projectiveCompactSymmetricIntegralSum intervals) := by
+  have h := projectiveCompactLipschitzSum_overlaps_integralSum
+    a s intervals ha hs hcover
+  unfold QInterval.Overlaps projectiveCompactSymmetricLipschitzSum
+    projectiveCompactSymmetricIntegralSum at *
+  exact ⟨Rat.mul_le_mul_of_nonneg_left h.1 (by native_decide),
+    Rat.mul_le_mul_of_nonneg_left h.2 (by native_decide)⟩
 
 /-- The compactified density has finite rational endpoint values, so the
 projective chart's poles are removable at the level of the intended integrand. -/

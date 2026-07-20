@@ -185,10 +185,15 @@ not a description of the current module graph. The checked blueprint
   both cross inequalities between a compact Lipschitz cell and its transported
   Cauchy rectangle.  The finite induction
   'projectiveCompactLipschitzSum_overlaps_integralSum' packages these into
-  interval overlap for every positive-branch cover.  What remains is global:
-  join the symmetric branches, handle the endpoint/tail schedule, and compare
-  the assembled projective quadrature construction to the existing compact
-  dyadic integral raw.
+  interval overlap for every positive-branch cover.  The finite global
+  ingredients are checked too: the compact density is even, and
+  'projectiveCompactSymmetricLipschitzSum_overlaps_integralSum' scales the
+  positive branch to a symmetric finite-core overlap.  The endpoint cell is
+  bounded by 'projectiveCompactTailUpperCell_le'; at the dyadic endpoint,
+  'projectiveCompactDyadicTailUpperCell_le' makes this at most
+  '(32 / 3) * 2^(-n)'.  What remains is one nested raw construction that
+  combines these finite core and tail boxes and agrees with the existing
+  compact dyadic integral raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
