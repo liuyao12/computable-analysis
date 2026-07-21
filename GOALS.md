@@ -241,7 +241,14 @@ not a description of the current module graph. The checked blueprint
   that the actual candidate box at stage `n+1` overlaps the literal trimmed
   core bracket enlarged by that error budget.  What remains is the raw-level
   nesting/shrinkage construction that joins these core-and-tail boxes to the
-  existing full-line Cauchy raw; this is not yet a Pi equivalence.
+  existing full-line Cauchy raw; this is not yet a Pi equivalence.  The next
+  transfer is now direct rather than an invalid transitive use of interval
+  overlap: the compact symmetric core has exact width at most `32 * 2^(-n)`,
+  and `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_projectiveCauchyCoreTail`
+  proves that the literal candidate overlaps the projective Cauchy core after
+  widening both compact-core sides by that proved width and the upper side by
+  the endpoint budget.  The remaining analytic task is specifically to join
+  this shrinking envelope to the completed full-line Cauchy raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

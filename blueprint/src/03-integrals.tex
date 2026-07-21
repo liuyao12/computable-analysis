@@ -1219,6 +1219,14 @@ certified tail enclosure.  What remains is a single valid nested raw
 construction joining these core-and-tail brackets to the existing full-line
 Cauchy raw; no general integral substitution theorem or Pi equivalence is
 asserted.
+There is now also a direct finite transfer to the projective Cauchy core.
+It does not incorrectly treat interval overlap as transitive: Lean proves that
+the symmetric compact core has width at most \(32\,2^{-n}\), then widens the
+lower and upper Cauchy-core endpoints by that certified width (and the upper
+endpoint also by the removable-endpoint budget).  The actual compact candidate
+at stage \(n+1\) overlaps this widened projective-Cauchy envelope.  Thus the
+only missing assembly is between a fully explicit shrinking envelope and the
+completed full-line Cauchy raw itself.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

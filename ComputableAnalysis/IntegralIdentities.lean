@@ -4539,6 +4539,37 @@ def projectiveCompactLipschitzUpperSum : List (Rat × Rat) -> Rat
       (r - p) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p)) +
         projectiveCompactLipschitzUpperSum rest
 
+/-- The width of a compact Lipschitz bracket is exactly the accumulated
+Lipschitz uncertainty of its finite cells. -/
+theorem projectiveCompactLipschitzSum_width_eq_sixteen_squareSum
+    (intervals : List (Rat × Rat)) :
+    projectiveCompactLipschitzUpperSum intervals -
+        projectiveCompactLipschitzLowerSum intervals =
+      16 * ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      native_decide
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [projectiveCompactLipschitzLowerSum,
+        projectiveCompactLipschitzUpperSum,
+        ArctanGeometry.intervalSquareSum]
+      calc
+        (r - p) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p)) +
+              projectiveCompactLipschitzUpperSum rest -
+            ((r - p) * (reciprocalQuarticSymmetricDensity (-1) p -
+                8 * (r - p)) + projectiveCompactLipschitzLowerSum rest) =
+            16 * ((r - p) * (r - p)) +
+              (projectiveCompactLipschitzUpperSum rest -
+                projectiveCompactLipschitzLowerSum rest) := by
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+        _ = 16 * ((r - p) * (r - p)) +
+              16 * ArctanGeometry.intervalSquareSum rest := by rw [ih]
+        _ = 16 * ((r - p) * (r - p) +
+              ArctanGeometry.intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
 /-- The compact lower Lipschitz sum lies below the transported Cauchy upper
 sum on every finite positive branch cover. -/
 theorem projectiveCompactLipschitzLowerSum_le_integralUpperSum
@@ -4626,6 +4657,27 @@ def projectiveCompactSymmetricIntegralSum
       (projectiveCompactIntervals intervals),
     hi := 2 * ArctanGeometry.integralUpperSum
       (projectiveCompactIntervals intervals) }
+
+/-- The factor-two symmetric compact bracket has twice the positive-branch
+Lipschitz uncertainty. -/
+theorem projectiveCompactSymmetricLipschitzSum_width_eq_thirtytwo_squareSum
+    (intervals : List (Rat × Rat)) :
+    (projectiveCompactSymmetricLipschitzSum intervals).width =
+      32 * ArctanGeometry.intervalSquareSum intervals := by
+  unfold projectiveCompactSymmetricLipschitzSum QInterval.width
+  change 2 * projectiveCompactLipschitzUpperSum intervals -
+      2 * projectiveCompactLipschitzLowerSum intervals =
+        32 * ArctanGeometry.intervalSquareSum intervals
+  calc
+    2 * projectiveCompactLipschitzUpperSum intervals -
+        2 * projectiveCompactLipschitzLowerSum intervals =
+        2 * (projectiveCompactLipschitzUpperSum intervals -
+          projectiveCompactLipschitzLowerSum intervals) := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+    _ = 2 * (16 * ArctanGeometry.intervalSquareSum intervals) := by
+          rw [projectiveCompactLipschitzSum_width_eq_sixteen_squareSum]
+    _ = 32 * ArctanGeometry.intervalSquareSum intervals := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
 
 /-- Reflecting a compact lower left-endpoint cell through zero produces the
 corresponding positive right-endpoint cell.  This is the finite orientation
@@ -5841,6 +5893,21 @@ def projectiveCompactDyadicCoreTailBracket (n : Nat) : QInterval :=
       (reciprocalQuarticUnitDyadicCoreIntervals n)).hi +
         (projectiveCompactDyadicSymmetricTailError.compute n).hi }
 
+/-- A projective Cauchy-core enclosure for the literal compact candidate.
+Its additional lower and upper compact-core widths make the transfer from the
+compact bracket sound using only finite interval overlap; the final summand is
+the independently certified removable-endpoint budget. -/
+def projectiveCauchyDyadicCoreTailEnvelope (n : Nat) : QInterval :=
+  { lo := (projectiveCompactSymmetricIntegralSum
+      (reciprocalQuarticUnitDyadicCoreIntervals n)).lo -
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).width,
+    hi := (projectiveCompactSymmetricIntegralSum
+      (reciprocalQuarticUnitDyadicCoreIntervals n)).hi +
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).width +
+        (projectiveCompactDyadicSymmetricTailError.compute n).hi }
+
 /-- The full positive dyadic mesh is its trimmed core followed by the one
 cell that touches the removable chart endpoint. -/
 theorem reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail
@@ -5874,6 +5941,58 @@ theorem reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail
             have hone : ((1 : Rat) + 1) / 2 = 1 := by native_decide
             rw [hone]
             simp [reciprocalQuarticUnitDyadicCoreIntervals, List.append_assoc]
+
+private theorem intervalSquareSum_append
+    (left right : List (Rat × Rat)) :
+    ArctanGeometry.intervalSquareSum (left ++ right) =
+      ArctanGeometry.intervalSquareSum left +
+        ArctanGeometry.intervalSquareSum right := by
+  induction left with
+  | nil =>
+      exact (Rat.zero_add _).symm
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, ArctanGeometry.intervalSquareSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+/-- Omitting the final dyadic cell cannot increase the squared mesh of the
+literal positive partition. -/
+theorem reciprocalQuarticUnitDyadicCore_squareSum_le
+    (n : Nat) :
+    ArctanGeometry.intervalSquareSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n) <=
+      1 / (((2 ^ n : Nat) : Rat)) := by
+  have hsum := ArctanGeometry.arctanAreaLoopState_one_squareSum n
+  rw [reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail,
+    intervalSquareSum_append] at hsum
+  simp only [ArctanGeometry.intervalSquareSum, Rat.add_zero] at hsum
+  have hwidth : 0 <= 1 - projectiveCompactDyadicEndpoint n := by
+    have hendpoint := projectiveCompactDyadicEndpoint_lt_one n
+    grind [Rat.sub_eq_add_neg]
+  have htail : 0 <= (1 - projectiveCompactDyadicEndpoint n) *
+      (1 - projectiveCompactDyadicEndpoint n) :=
+    Rat.mul_nonneg hwidth hwidth
+  calc
+    ArctanGeometry.intervalSquareSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n) <=
+        ArctanGeometry.intervalSquareSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n) +
+          (1 - projectiveCompactDyadicEndpoint n) *
+            (1 - projectiveCompactDyadicEndpoint n) := by
+              grind
+    _ = 1 / (((2 ^ n : Nat) : Rat)) := hsum
+
+/-- The width lost when replacing the literal compact core by its projective
+rectangle bracket decays at the same dyadic rate. -/
+theorem reciprocalQuarticUnitDyadicCore_symmetric_width_le
+    (n : Nat) :
+    (projectiveCompactSymmetricLipschitzSum
+      (reciprocalQuarticUnitDyadicCoreIntervals n)).width <=
+      32 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  rw [projectiveCompactSymmetricLipschitzSum_width_eq_thirtytwo_squareSum]
+  exact Rat.mul_le_mul_of_nonneg_left
+    (reciprocalQuarticUnitDyadicCore_squareSum_le n) (by native_decide)
 
 private theorem reciprocalQuarticMinusOneCompactAffineIntervals_append
     (left right : List (Rat × Rat)) :
@@ -6131,6 +6250,59 @@ theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_coreTail
   rw [reciprocalQuarticMinusOneUnitDyadicCompute_succ_eq_orientedSymmetric,
     reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail]
   simpa [core, tail, projectiveCompactDyadicCoreTailBracket] using h
+
+/-- The actual compact candidate reaches the projective Cauchy core at every
+dyadic stage.  The compact-core width is included explicitly: interval
+overlap alone is not transitively composable for arbitrary finite boxes. -/
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_projectiveCauchyCoreTail
+    (n : Nat) :
+    QInterval.Overlaps
+      (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1))
+      (projectiveCauchyDyadicCoreTailEnvelope n) := by
+  have hcandidate := reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_coreTail n
+  have hcore := reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective n
+  unfold QInterval.Overlaps at hcandidate hcore ⊢
+  change
+    (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).lo <=
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).hi +
+          (projectiveCompactDyadicSymmetricTailError.compute n).hi /\
+      (projectiveCompactSymmetricLipschitzSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n)).lo <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).hi at hcandidate
+  change
+    (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).lo <=
+        (projectiveCompactSymmetricIntegralSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).hi +
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).width +
+          (projectiveCompactDyadicSymmetricTailError.compute n).hi /\
+      (projectiveCompactSymmetricIntegralSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).lo -
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).width <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).hi
+  constructor
+  · have hwidth :
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).hi <=
+          (projectiveCompactSymmetricIntegralSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).hi +
+            (projectiveCompactSymmetricLipschitzSum
+              (reciprocalQuarticUnitDyadicCoreIntervals n)).width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg]
+    exact Rat.le_trans hcandidate.1 (by grind)
+  · have hwidth :
+        (projectiveCompactSymmetricIntegralSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).lo -
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).width <=
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).lo := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg]
+    exact Rat.le_trans hwidth hcandidate.2
 
 /-- Splitting one unit cell at its rational midpoint tightens the elementary
 Lipschitz rectangle.  This is the finite refinement inequality from which the
