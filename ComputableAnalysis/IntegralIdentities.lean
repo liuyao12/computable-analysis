@@ -4247,6 +4247,90 @@ theorem projectiveCompactDyadicCauchyTailRadius_le (n : Nat) :
       Rat.mul_le_mul_of_nonneg_right hden (by native_decide)
     _ = 2 * (1 / D) := by grind [Rat.mul_comm]
 
+/-- The compact-side coordinate at stage `n+2`, inverted back to the unit
+interval.  Starting two stages in makes this a genuine rational tail start in
+`(0,1]`, while retaining the dyadic tail-radius estimate. -/
+def projectiveCompactDyadicCauchyTailStart (n : Nat) : Rat :=
+  1 / projectiveCompactCoordinate
+    (projectiveCompactDyadicEndpoint (n + 2))
+
+theorem projectiveCompactDyadicCauchyTailStart_pos (n : Nat) :
+    0 < projectiveCompactDyadicCauchyTailStart n := by
+  have hhalf : (1 : Rat) / 2 <= projectiveCompactDyadicEndpoint (n + 2) := by
+    simpa [Nat.add_assoc] using
+      projectiveCompactDyadicEndpoint_succ_ge_half (n + 1)
+  have hs : 0 < projectiveCompactDyadicEndpoint (n + 2) := by
+    have hhalfpos : (0 : Rat) < 1 / 2 := by native_decide
+    grind
+  have hden : 0 < 1 - projectiveCompactDyadicEndpoint (n + 2) *
+      projectiveCompactDyadicEndpoint (n + 2) := by
+    apply projectiveCompactDenominator_pos
+    · grind
+    · exact projectiveCompactDyadicEndpoint_lt_one _
+  unfold projectiveCompactDyadicCauchyTailStart
+  rw [projectiveCompactCoordinate_reciprocal]
+  rw [Rat.div_def]
+  exact Rat.mul_pos hden ((Rat.inv_pos).2 hs)
+
+theorem projectiveCompactDyadicCauchyTailStart_le_one (n : Nat) :
+    projectiveCompactDyadicCauchyTailStart n <= 1 := by
+  have htail : projectiveCompactDyadicCauchyTailStart n <=
+      2 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) := by
+    simpa [projectiveCompactDyadicCauchyTailStart, Nat.add_assoc] using
+      projectiveCompactDyadicCauchyTailRadius_le (n + 1)
+  have hpow : 2 <= 2 ^ (n + 1) := by
+    calc
+      2 = 1 * 2 := by omega
+      _ <= 2 ^ n * 2 :=
+        Nat.mul_le_mul_right 2 (Nat.one_le_iff_ne_zero.mpr
+          (Nat.ne_of_gt (Nat.pow_pos (by omega : 0 < 2))))
+      _ = 2 ^ (n + 1) := by rw [Nat.pow_succ]
+  have hinv : 1 / (((2 ^ (n + 1) : Nat) : Rat)) <= (1 : Rat) / 2 :=
+    FTC.one_div_nat_antitone (by omega : 0 < 2)
+      (Nat.pow_pos (by omega : 0 < 2)) hpow
+  calc
+    projectiveCompactDyadicCauchyTailStart n <=
+        2 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) := htail
+    _ <= 2 * ((1 : Rat) / 2) :=
+      Rat.mul_le_mul_of_nonneg_left hinv (by native_decide)
+    _ = 1 := by native_decide
+
+/-- The refined reciprocal tail mesh reaches exactly from `1` to the finite
+projective coordinate of the dyadic compact endpoint. -/
+theorem projectiveCompactDyadicCauchyTailIntervals_covers
+    (n mesh : Nat) :
+    ArctanGeometry.CoversInterval 1
+      (projectiveCompactCoordinate (projectiveCompactDyadicEndpoint (n + 2)))
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals (projectiveCompactDyadicCauchyTailStart n)
+          mesh)) := by
+  have h := cauchyReciprocalTailDyadicIntervals_covers
+    (projectiveCompactDyadicCauchyTailStart_pos n)
+    (projectiveCompactDyadicCauchyTailStart_le_one n) mesh
+  have hrecip : 1 / projectiveCompactDyadicCauchyTailStart n =
+      projectiveCompactCoordinate (projectiveCompactDyadicEndpoint (n + 2)) := by
+    unfold projectiveCompactDyadicCauchyTailStart
+    simp only [Rat.div_def, Rat.one_mul, Rat.inv_inv]
+  rw [hrecip] at h
+  exact h
+
+/-- The projective dyadic reciprocal tail has the same finite Cauchy
+rectangle value, up to its certified overlapping lower/upper brackets, as
+its compact-side source tail. -/
+theorem projectiveCompactDyadicCauchyTailIntervals_overlaps
+    (n mesh : Nat) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval
+        (cauchyReciprocalReversedIntervals
+          (cauchyTailDyadicIntervals
+            (projectiveCompactDyadicCauchyTailStart n) mesh)))
+      (ArctanGeometry.integralSumInterval
+        (cauchyTailDyadicIntervals
+          (projectiveCompactDyadicCauchyTailStart n) mesh)) := by
+  exact cauchyReciprocalTailDyadicIntervals_overlaps
+    (projectiveCompactDyadicCauchyTailStart_pos n)
+    (projectiveCompactDyadicCauchyTailStart_le_one n) mesh
+
 /-- At the dyadic endpoint, the projective denominator retains at least one
 dyadic unit of clearance from zero. -/
 theorem projectiveCompactDyadicEndpoint_denominator_ge (n : Nat) :

@@ -1247,9 +1247,13 @@ is now a concrete object: Lean affinely transports the midpoint mesh to every
 rational interval \([a,1]\), proves its ordered cover and strict positivity,
 then reverses the reciprocals into an ordered cover of \([1,1/a]\).  The two
 finite Cauchy rectangle brackets are proved to overlap.  The remaining step
-is therefore to choose \(a\) as the reciprocal projective endpoint, join this
-tail mesh to the projective core, and package the certified shrinking boxes as
-a valid comparison with the existing full-line Cauchy raw.
+is therefore to join this tail mesh to the projective core, and package the
+certified shrinking boxes as a valid comparison with the existing full-line
+Cauchy raw.  The endpoint choice itself is now formal: using the compact
+endpoint at stage \(n+2\), its reciprocal projective coordinate is positive
+and at most one.  Inverting the resulting tail mesh produces an ordered cover
+from \(1\) exactly to that finite projective coordinate, with overlapping
+finite Cauchy rectangle brackets on its two sides.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

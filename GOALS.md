@@ -270,10 +270,15 @@ not a description of the current module graph. The checked blueprint
   midpoint mesh to `[a,1]`; Lean proves its cover and strict positivity, and
   `cauchyReciprocalTailDyadicIntervals_covers` reverses it into the ordered
   far-side cover `[1,1/a]`.  Its two finite Cauchy brackets overlap by
-  `cauchyReciprocalTailDyadicIntervals_overlaps`.  What remains is to select
-  the projective endpoint as `1/a`, combine this tail with the core mesh, and
-  turn the resulting shrinking finite envelopes into a raw-level comparison
-  with the existing full-line Cauchy raw.
+  `cauchyReciprocalTailDyadicIntervals_overlaps`.  The projective endpoint
+  selection is now checked as well: at compact stage `n+2`,
+  `projectiveCompactDyadicCauchyTailStart n` is positive and at most one;
+  its reciprocal is exactly the finite projective coordinate.  Consequently
+  `projectiveCompactDyadicCauchyTailIntervals_covers` supplies an explicit
+  ordered mesh from `1` to that coordinate, and its finite brackets overlap
+  the compact-side tail.  What remains is to combine this tail with the core
+  mesh, then turn the resulting shrinking finite envelopes into a raw-level
+  comparison with the existing full-line Cauchy raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
