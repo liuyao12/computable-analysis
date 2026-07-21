@@ -778,8 +778,12 @@ students actually compute.
   radius. It is formally equivalent to both `piCircumference` and
   `piCircleArea`. `PiProofs.piCircumferenceReboxed` remains the older
   area-reading normalization. `PiProofs.piCertified : Real` uses the area loop
-  as its preferred evaluator and retains both checked representatives as
-  alternatives. This is a reusable interval-normalization bridge, not a
+  as its preferred evaluator and records every canonical completed Pi route as
+  a checked alternative. `PiProofs.PiPresentation` gives those routes stable
+  names, and `PiProofs.piCertifiedPresentation` retrieves a certified raw
+  representative without depending on a list position. This turns the Pi
+  suite into an integration registry rather than a progress percentage. The
+  stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical
   row remains uncounted.

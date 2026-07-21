@@ -14712,10 +14712,11 @@ theorem piCircumferenceReboxed_equiv_piCircleArea :
   exact RealRaw.anchorRebox_equiv_anchor
     (by simpa [AreaValid] using AreaLoopValidity.areaValid)
 
-/-- The project-facing certified π value.  The public area loop is the
-preferred evaluator; both finite-rational Archimedean perimeter
-representatives are retained as verified alternatives. -/
-def piCertified : Real :=
+/-- The initial certified π handle, retaining the two perimeter
+normalizations available before the remaining independent routes have been
+assembled below.  `piCertified` is the full presentation registry declared at
+the end of this file. -/
+def piCertifiedPerimeter : Real :=
   { preferred := piCircleArea
     valid := by simpa [AreaValid] using AreaLoopValidity.areaValid
     alternatives := [piCircumferenceStabilized, piCircumferenceReboxed]
@@ -14736,7 +14737,8 @@ def piCertified : Real :=
           | head => exact piCircumferenceReboxed_equiv_piCircleArea
           | tail _ htail => cases htail }
 
-theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
+theorem piCertifiedPerimeter_preferred :
+    piCertifiedPerimeter.preferred = piCircleArea :=
   rfl
 
 theorem fourArctanGeomOneValid :
@@ -16851,6 +16853,175 @@ theorem piCircumferenceFan_equiv_piCircleArea :
     grind [Rat.sub_eq_add_neg]
   · rw [← hsame]
     grind [Rat.sub_eq_add_neg]
+
+/-- The polygonal area presentation agrees directly with the increment and
+decrement area loop.  The two computations have equal stage boxes, so this is
+the representation-level bridge used by the certified π registry below. -/
+theorem piCircleAreaPolygon_equiv_piCircleArea :
+    piCircleAreaPolygon.Equiv piCircleArea := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    piCircleAreaPolygon piCircleArea n n).2
+  rw [piCircleAreaPolygonAgreement n]
+  have hordered := piCircleAreaPolygon_ordered n
+  unfold QInterval.width at hordered
+  exact ⟨hordered, hordered⟩
+
+/-- Canonical checked presentations of π.
+
+These constructors are deliberately presentations, rather than a second
+scoreboard: each one is a completed finite rational computation, or an
+essential certified normalization of one, with a validity proof and an
+equivalence proof to the preferred area evaluator. -/
+inductive PiPresentation where
+  | area
+  | areaPolygon
+  | circumferenceStabilized
+  | circumferenceReboxed
+  | circumferenceFan
+  | arctanGeometry
+  | arctanRectangleIntegral
+  | leibnizSeries
+  | nilakanthaSeries
+  | machinSeries
+  | cauchyIntegral
+  | reciprocalQuarticIntegral
+deriving DecidableEq, Repr
+
+/-- The raw interval algorithm behind each canonical checked presentation. -/
+def piPresentationRaw : PiPresentation -> RealRaw
+  | .area => piCircleArea
+  | .areaPolygon => piCircleAreaPolygon
+  | .circumferenceStabilized => piCircumferenceStabilized
+  | .circumferenceReboxed => piCircumferenceReboxed
+  | .circumferenceFan => piCircumferenceFan
+  | .arctanGeometry => (4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat)
+  | .arctanRectangleIntegral => piFromArctanIntegralRectangleUnitAtOne
+  | .leibnizSeries => piLeibniz
+  | .nilakanthaSeries => piNilakantha
+  | .machinSeries => piMachin
+  | .cauchyIntegral => IntegralIdentities.cauchyFullLineIntegral
+  | .reciprocalQuarticIntegral => piReciprocalQuarticCompact
+
+/-- Every canonical presentation has a checked nested, shrinking interval
+algorithm. -/
+theorem piPresentation_valid (presentation : PiPresentation) :
+    (piPresentationRaw presentation).Valid := by
+  cases presentation with
+  | area => simpa [piPresentationRaw, AreaValid, RealRaw.Valid] using
+      AreaLoopValidity.areaValid
+  | areaPolygon => simpa [piPresentationRaw] using piCircleAreaPolygon_valid
+  | circumferenceStabilized =>
+      simpa [piPresentationRaw] using piCircumferenceStabilized_valid
+  | circumferenceReboxed =>
+      simpa [piPresentationRaw] using piCircumferenceReboxed_valid
+  | circumferenceFan => simpa [piPresentationRaw] using piCircumferenceFan_valid
+  | arctanGeometry => simpa [piPresentationRaw] using fourArctanGeomOneValid
+  | arctanRectangleIntegral =>
+      simpa [piPresentationRaw] using piFromArctanIntegralRectangleUnitAtOne_valid
+  | leibnizSeries => simpa [piPresentationRaw, LeibnizValid, RealRaw.Valid] using
+      leibnizValid
+  | nilakanthaSeries => simpa [piPresentationRaw] using Nilakantha.valid
+  | machinSeries => simpa [piPresentationRaw, MachinValid, RealRaw.Valid] using
+      machinValid
+  | cauchyIntegral =>
+      simpa [piPresentationRaw] using IntegralIdentities.cauchyFullLineIntegral_valid
+  | reciprocalQuarticIntegral =>
+      simpa [piPresentationRaw] using piReciprocalQuarticCompact_valid
+
+/-- Every canonical presentation agrees with the preferred circle-area
+evaluator.  This is the useful outcome of the Pi integration suite: a named
+collection of interchangeable, certified rational algorithms. -/
+theorem piPresentation_equiv_piCircleArea (presentation : PiPresentation) :
+    (piPresentationRaw presentation).Equiv piCircleArea := by
+  cases presentation with
+  | area => exact RealRaw.equiv_refl piCircleArea (piPresentation_valid .area)
+  | areaPolygon =>
+      simpa [piPresentationRaw] using piCircleAreaPolygon_equiv_piCircleArea
+  | circumferenceStabilized => simpa [piPresentationRaw] using
+      piCircumferenceStabilized_equiv_piCircleArea
+  | circumferenceReboxed => simpa [piPresentationRaw] using
+      piCircumferenceReboxed_equiv_piCircleArea
+  | circumferenceFan => simpa [piPresentationRaw] using
+      piCircumferenceFan_equiv_piCircleArea
+  | arctanGeometry => simpa [piPresentationRaw] using
+      four_arctanGeom_one_equiv_piCircleArea
+  | arctanRectangleIntegral => simpa [piPresentationRaw] using
+      piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea
+  | leibnizSeries =>
+      exact RealRaw.equiv_trans
+        (piPresentation_valid .leibnizSeries)
+        fourArctanSeriesOneValid
+        (piPresentation_valid .area)
+        piLeibniz_equiv_four_arctanSeries_one
+        four_arctanSeries_one_equiv_piCircleArea
+  | nilakanthaSeries => simpa [piPresentationRaw] using
+      piNilakantha_equiv_piCircleArea
+  | machinSeries => simpa [piPresentationRaw] using
+      piMachin_equiv_piCircleArea_finiteRiemannBridge
+  | cauchyIntegral => simpa [piPresentationRaw] using
+      cauchyFullLineIntegral_equiv_piCircleArea
+  | reciprocalQuarticIntegral => simpa [piPresentationRaw] using
+      piReciprocalQuarticCompact_equiv_piCircleArea
+
+/-- The project-facing certified π value.  It keeps the fast public area loop
+as its preferred evaluator and points to every canonical completed route as a
+valid, equivalent alternative. -/
+def piCertified : Real :=
+  { preferred := piCircleArea
+    valid := piPresentation_valid .area
+    alternatives := [piCircleAreaPolygon, piCircumferenceStabilized,
+      piCircumferenceReboxed, piCircumferenceFan,
+      (4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat),
+      piFromArctanIntegralRectangleUnitAtOne, piLeibniz, piNilakantha,
+      piMachin, IntegralIdentities.cauchyFullLineIntegral,
+      piReciprocalQuarticCompact]
+    alternative_valid := by
+      intro rep hrep
+      simp only [List.mem_cons, List.not_mem_nil] at hrep
+      rcases hrep with h | h | h | h | h | h | h | h | h | h | h
+      all_goals subst rep
+      all_goals first
+        | exact piPresentation_valid .areaPolygon
+        | exact piPresentation_valid .circumferenceStabilized
+        | exact piPresentation_valid .circumferenceReboxed
+        | exact piPresentation_valid .circumferenceFan
+        | exact piPresentation_valid .arctanGeometry
+        | exact piPresentation_valid .arctanRectangleIntegral
+        | exact piPresentation_valid .leibnizSeries
+        | exact piPresentation_valid .nilakanthaSeries
+        | exact piPresentation_valid .machinSeries
+        | exact piPresentation_valid .cauchyIntegral
+        | exact piPresentation_valid .reciprocalQuarticIntegral
+    coherent := by
+      intro rep hrep
+      simp only [List.mem_cons, List.not_mem_nil] at hrep
+      rcases hrep with h | h | h | h | h | h | h | h | h | h | h
+      all_goals subst rep
+      all_goals first
+        | exact piPresentation_equiv_piCircleArea .areaPolygon
+        | exact piPresentation_equiv_piCircleArea .circumferenceStabilized
+        | exact piPresentation_equiv_piCircleArea .circumferenceReboxed
+        | exact piPresentation_equiv_piCircleArea .circumferenceFan
+        | exact piPresentation_equiv_piCircleArea .arctanGeometry
+        | exact piPresentation_equiv_piCircleArea .arctanRectangleIntegral
+        | exact piPresentation_equiv_piCircleArea .leibnizSeries
+        | exact piPresentation_equiv_piCircleArea .nilakanthaSeries
+        | exact piPresentation_equiv_piCircleArea .machinSeries
+        | exact piPresentation_equiv_piCircleArea .cauchyIntegral
+        | exact piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral }
+
+theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
+  rfl
+
+/-- Retrieve a named certified representation from the π registry without
+depending on its position in the implementation list. -/
+def piCertifiedPresentation (presentation : PiPresentation) :
+    Real.Representation piCertified where
+  raw := piPresentationRaw presentation
+  valid := piPresentation_valid presentation
+  agrees := piPresentation_equiv_piCircleArea presentation
 
 /- A second-order rational lower certificate for the length of a positively
 oriented unit-circle chord.  The correction is deliberately rational: it

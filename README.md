@@ -84,6 +84,16 @@ useful general interval-normalization bridge, but deliberately not a new
 scoreboard row: it does not prove the original `piCircumference` endpoints
 refine stage by stage.
 
+The useful output of the completed rows is now formalized as a registry rather
+than another percentage. `PiProofs.piCertified : Real` uses `piCircleArea` as
+its preferred evaluator and retains each canonical completed route as a
+certified equivalent alternative. `PiProofs.PiPresentation` gives those
+routes stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
+`Real.Representation`. This includes the geometry, stabilized circumference,
+single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
+routes, together with the two certified perimeter normalizations; it excludes
+unproved rows and arbitrary presentation variants.
+
 | Computation | Blueprint | Formula | Def. | Equiv. |
 | --- | --- | --- | --- | --- |
 | `piCircleArea` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [validity](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-pi-validity) | $a_{n+1}=a_n+\Delta_n,\ b_{n+1}=b_n-\nabla_n,\ \pi\in[4a_n,4b_n]$ | ✓ | N/A |

@@ -732,7 +732,12 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_valid}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.PiPresentation}
+\lean{ComputableAnalysis.PiProofs.piPresentationRaw}
+\lean{ComputableAnalysis.PiProofs.piPresentation_valid}
+\lean{ComputableAnalysis.PiProofs.piPresentation_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCertified}
+\lean{ComputableAnalysis.PiProofs.piCertifiedPresentation}
 \uses{thm:finite-archimedes,def:raw-real}
 The public area loop is a valid raw real.  The circumference computation is
 ordered and has a proved width-shrinking bound, but it is not yet certified as
@@ -760,8 +765,16 @@ note.  It is not a checked representative or a scoreboard row: its proposed
 second-order correction still needs a self-contained finite proof that it
 stays below the outer envelope and refines under dyadic subdivision.
 The project-facing certified value \code{PiProofs.piCertified} chooses the
-area loop as its evaluator and records both perimeter representatives as
-verified alternatives.
+area loop as its evaluator and records the checked completed presentations
+as verified alternatives: the polygon area and cross-fan routes, the two
+perimeter normalizations, geometric and rectangle-integral arctangent, the
+Leibniz, Nilakantha, and single Machin series, and the Cauchy and compact
+reciprocal-quartic integrals.  The finite type \code{PiProofs.PiPresentation}
+gives these presentations stable names, while
+\code{PiProofs.piCertifiedPresentation} retrieves the corresponding certified
+raw representative.  This is a representation registry, not a score increase:
+the table still counts only independent published computations and retains the
+unfinished direct perimeter row.
 \end{theorem}
 
 \section{Trigonometric Functions}

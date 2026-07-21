@@ -958,7 +958,11 @@ but it does not replace the pending direct endpoint-refinement proof or change
 the scoreboard count. \code{PiProofs.piCircumferenceReboxed} remains the
 older area-reading normalization. The project-facing certified value
 \code{PiProofs.piCertified} keeps \code{piCircleArea} as its preferred
-evaluator and records both certified perimeter representatives as alternatives.
+evaluator and records every checked completed presentation as a named
+certified alternative through \code{PiProofs.PiPresentation} and
+\code{PiProofs.piCertifiedPresentation}.  This gives the scoreboard a useful
+integration output---interchangeable checked computations---without treating
+its numerator as a measure of calculus completeness.
 The sharper public completion package is
 \code{PiProofs.CompletionCircumferenceQuarterLengthRemainders}: it reuses the
 proved area-loop validity and the proved circumference width shrinkage, leaving
