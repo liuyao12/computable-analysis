@@ -16796,12 +16796,10 @@ oriented unit-circle chord.  The correction is deliberately rational: it
 uses only the cross product and the dot product of the two rational endpoints.
 It is the first ingredient of a sharper Archimedean circumference fan, rather
 than a new inverse-trigonometric presentation of pi. -/
-/- The curvature-corrected fan and its margin reduction are retained below as
-development notes while their rational proof dependency order is redesigned.
-They are deliberately not declarations in the checking surface: only the
-cross-fan circumference route is currently claimed as a verified raw pi
-computation. -/
-/-
+/-- The curvature-corrected fan is a second, independently evaluated
+Archimedean raw computation.  Its lower endpoint uses only rational
+cross-products and dot deficits; the separate margin development below is
+not needed for its validity or equivalence proof. -/
 def curvatureChordLower (p q : PiCirclePoint) : Rat :=
   pointCross p q +
     sq (1 - RationalCircle.Stage.dot p q) / 4
@@ -17490,6 +17488,10 @@ theorem piCircumferenceCurvatureFan_equiv_piCircleArea :
       (piStage n) (piStage_pos n)
   · exact piCircleArea_compute_lo_le_piCircumferenceCurvatureFan_compute_hi n
 
+/- The remaining curvature-margin development is retained as a separate
+design note.  The certified curvature-fan computation above is independent
+of this unfinished route to the original chord-path evaluator. -/
+/-
 /-- Algebraic Pythagoras for two rational unit-circle points, expressed with
 their cross product and their dot-product deficit. -/
 private theorem segmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit
