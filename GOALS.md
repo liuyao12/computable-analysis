@@ -248,7 +248,12 @@ not a description of the current module graph. The checked blueprint
   proves that the literal candidate overlaps the projective Cauchy core after
   widening both compact-core sides by that proved width and the upper side by
   the endpoint budget.  The remaining analytic task is specifically to join
-  this shrinking envelope to the completed full-line Cauchy raw.
+  this shrinking envelope to the completed full-line Cauchy raw.  The
+  separately proved `6*n` midpoint-refinement schedule for the projective
+  chart is not silently identified with this literal uniform candidate mesh:
+  the latter has only `n` source refinements at its stage `n`.  The former is
+  available for the eventual Cauchy quadrature assembly, but no candidate
+  equivalence is claimed from it until a checked comparison is supplied.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
