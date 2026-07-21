@@ -218,7 +218,10 @@ not a description of the current module graph. The checked blueprint
   stage-`n` mesh followed by that mesh, and
   `reciprocalQuarticMinusOneUnitDyadicCompute_succ_eq_orientedSymmetric`
   identifies the actual candidate box with the resulting oriented symmetric
-  bracket.  The only remaining analytic assembly is to trim its two cells
+  bracket, and
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_symmetric`
+  connects that literal box to the existing factor-two projective core at the
+  same finite stage.  The only remaining analytic assembly is to trim its two cells
   touching `±1`, couple the interior bracket to the scheduled projective
   Cauchy bracket, and absorb them using the already-valid dyadic tail raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.

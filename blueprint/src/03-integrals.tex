@@ -1194,7 +1194,11 @@ auxiliary factor-two bracket.  Reflection is independently proved to turn a
 cover of \([0,s]\) into a cover of \([-s,0]\), so the appended partition covers
 \([-s,s]\).  In particular Lean identifies the actual candidate computation
 at stage \(n+1\), not merely a proxy, with this oriented symmetric bracket on
-the preceding positive mesh.
+the preceding positive mesh.  It also proves that this literal bracket
+overlaps the earlier factor-two symmetric bracket on every dyadic stage.  Thus
+the already-checked positive-branch projective comparison is now connected to
+the actual candidate's finite boxes, rather than only to an auxiliary
+orientation convention.
 
 The remaining issue is now sharply localized at the two mesh cells touching
 \(\pm1\): the projective coordinate is used only on a trimmed core with
