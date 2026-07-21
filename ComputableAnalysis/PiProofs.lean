@@ -15202,10 +15202,10 @@ theorem piFromArctanGeomUnitRectangleGeneralDefiniteIdentity_equiv_piCircleArea 
     IntegralIdentities.arctanGeomUnitRectangleGeneralDefiniteIdentity
     IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one
 
-/-- The finite compact reciprocal-quartic pi candidate.  This is the explicit
-dyadic integral of `(1 + x^2) / (x^4 - x^2 + 1)` on `[-1,1]`, not a reboxing
-of an existing pi raw real.  Its equivalence to `piCircleArea` is deliberately
-left to the projective-substitution route below. -/
+/-- The finite compact reciprocal-quartic pi computation.  This is the
+explicit dyadic integral of `(1 + x^2) / (x^4 - x^2 + 1)` on `[-1,1]`, not a
+reboxing of an existing pi raw real.  Its equivalence to `piCircleArea` is
+proved below through a finite projective/Cauchy bridge. -/
 def piReciprocalQuarticCompact : RealRaw :=
   IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral
 

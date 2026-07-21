@@ -1336,8 +1336,8 @@ This interval contains every rational point-value over \(I\), has width
 now a \code{ContinuousFunctionOnInterval}, with no appeal to topology or
 completed reals.  The generic checked bridge from interval regularity to
 rational \(\varepsilon\)-\(\delta\) continuity also recovers the stated
-continuity certificate.  The projective change-of-variables theorem remains
-unchecked.  The affine compact integral construction itself is now concrete:
+continuity certificate.  The affine compact integral construction itself is
+now concrete:
 the affine chart \(x=2t-1\) turns the compact density into
 \[
   g(t)=2\frac{1+(2t-1)^2}{(2t-1)^4-(2t-1)^2+1},\qquad 0\le t\le1.
@@ -1360,9 +1360,11 @@ genuine domain-aware integral construction for the affine compact density,
 rather than an unconstrained raw-real witness.  Since Lean also proves
 \(g(t)=2f(2t-1)\) by rational algebra, the identical computation now packages
 an actual \code{ConstructionFor} for the compact density \(f\) on
-\([-1,1]\).  What remains is the projective substitution to the arctangent
-kernel and its resulting Pi agreement; the route is therefore still not a
-scoreboard equality.
+\([-1,1]\).  The finite projective/Cauchy comparison is now also checked:
+the literal compact dyadic boxes and scheduled full-line Cauchy boxes lie in
+an explicit shrinking rational envelope.  This proves the concrete compact
+integral equivalent to the area-loop \(\pi\), without an improper-integral
+limit or a completeness principle.
 Thus the full finite pullback identity for \(a=-1\) is now available without
 extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
 \[
@@ -1383,7 +1385,7 @@ by the verified rectangle arctangent construction.
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
 \uses{def:reciprocal-quartic-test-kernel,thm:reciprocal-quartic-projective-substitution,thm:geometric-pi-validity}
 \leanok
-The compact candidate \code{piReciprocalQuarticCompact} is a valid raw real,
+The compact computation \code{piReciprocalQuarticCompact} is a valid raw real,
 computed by the displayed dyadic finite integral on \([-1,1]\), and Lean now
 proves it equivalent to \code{piCircleArea}.  The proof first compares its
 literal finite box with the completed full-line Cauchy raw in a common rational

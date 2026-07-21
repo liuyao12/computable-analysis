@@ -651,6 +651,12 @@ completeness principle is available or planned as a proof shortcut.
 \lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_valid}
 \lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_compute_eq_four_rectangle}
 \lean{ComputableAnalysis.PiProofs.cauchyFullLineIntegral_equiv_piCircleArea}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_equiv_cauchyFullLine}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_valid}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneExpectedPi}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveRoute}
@@ -687,12 +693,13 @@ series or a limit axiom.
 \]
 \[
   \int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}
-  \stackrel{\mathrm{target}}{=}
-  \code{cauchyFullLineIntegral}
+  =\int_{-1}^{1}\frac{1+x^2}{x^4-x^2+1}\,dx
   \sim\pi.
 \]
-\code{PiProofs.reciprocalQuarticMinusOneExpectedPi\_equiv\_piCircleArea};
-scoreboard target: \code{ReciprocalQuarticMinusOneProjectiveRoute}.
+The literal compact dyadic computation is complete through
+\code{PiProofs.piReciprocalQuarticCompact\_equiv\_piCircleArea}.  The
+parameterized \code{ReciprocalQuarticMinusOneProjectiveRoute} remains a
+reusable interface, rather than a pending scoreboard target.
 
 Completed equivalence hooks:
 \code{PiProofs.four\_arctanGeom\_one\_equiv\_piCircleArea},
@@ -873,11 +880,6 @@ Euler's Basel theorem for the geometric pi representative\\
 \(\log(i)=i\pi/2\) &
 \code{exp.logFromIntegral} and future complex \code{log} representations &
 three \code{log(i)} constructions, their branch agreement, and Euler identity\\
-\(\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}\sim\pi_{\mathrm{area}}\) &
-\code{PiProofs.reciprocalQuarticMinusOneProjectiveRoute\_equiv\_piCircleArea} &
-the projective substitution certificate
-\code{ReciprocalQuarticMinusOneProjectiveAgreement} for the completed
-compact dyadic construction\\
 \(L_n\le L_{n+1}\le U_{n+1}\le U_n\) &
 \code{PiProofs.CircumferenceQuarterLengthRemainders} &
 dyadic endpoint inequalities for \code{innerQuarterLength} and

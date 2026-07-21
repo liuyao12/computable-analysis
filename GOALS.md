@@ -143,19 +143,18 @@ not a description of the current module graph. The checked blueprint
   and an input width of `1/(16*n)` gives output width at most `1/n`.
   The theorem-facing package
   `reciprocalQuarticMinusOneCompact_continuous` can therefore be consumed by
-  the finite-interval calculus and ODE interfaces.  The next analytic
-  obligation is now the finite integral and projective substitution
-  certificate rather than interval regularity or an unstructured tail limit.
-  The expected-value side is packaged as
-  `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, and Lean proves
+  the finite-interval calculus and ODE interfaces.  The concrete finite
+  integral and projective/Cauchy comparison are now complete: the literal
+  dyadic raw `reciprocalQuarticMinusOneCompactDyadicIntegral` is valid and
+  equivalent to `cauchyFullLineIntegral`, and therefore
+  `PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea` makes the `a=-1`
+  case another counted computation of `piCircleArea`.  The expected-value
+  side remains packaged as
+  `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, with theorem
   `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The
-  remaining work is an improper rational-integral construction that supplies a
-  `ReciprocalQuarticMinusOneProjectiveRoute` and turns the `a=-1` case into
-  another counted computation of `piCircleArea`.  That route is now typed by
-  an `Integral.ConstructionFor` for the concrete compact density on `[-1,1]`;
-  its `projectiveIntegral` is definitionally that integral, rather than an
-  unconstrained raw real.  The remaining agreement is therefore precisely the
-  finite compact-integration and projective-substitution proof.
+  general `ReciprocalQuarticMinusOneProjectiveRoute` is still useful as a
+  parameterized interface for future projective constructions, but it is no
+  longer a prerequisite for the concrete route or its scoreboard equality.
   The new denominator-cleared endpoint identity
   `projectiveCompactCoordinate_sub_cleared` supplies the finite rational
   displacement calculation for transporting a partition through
@@ -655,8 +654,8 @@ students actually compute.
   the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
   rational series, the direct cross-fan circumference computation
   `piCircumferenceFan`, and the concrete compact reciprocal-quartic
-  candidate `PiProofs.piReciprocalQuarticCompact`.  The one definition-only
-  completion is now the Basel row.  The quartic candidate is the verified dyadic integral
+  computation `PiProofs.piReciprocalQuarticCompact`.  The one definition-only
+  completion is now the Basel row.  The quartic computation is the verified dyadic integral
   of `(1+x^2)/(x^4-x^2+1)` on `[-1,1]`; its finite projective/Cauchy bridge is
   an explicit rational envelope of width at most `224 * 2^-n`.  The enclosure
   contains the scheduled full-line Cauchy computation, meets the quartic box,
