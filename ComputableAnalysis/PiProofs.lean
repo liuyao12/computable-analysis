@@ -16873,7 +16873,10 @@ theorem piCircleAreaPolygon_equiv_piCircleArea :
 These constructors are deliberately presentations, rather than a second
 scoreboard: each one is a completed finite rational computation, or an
 essential certified normalization of one, with a validity proof and an
-equivalence proof to the preferred area evaluator. -/
+equivalence proof to the preferred area evaluator.  Several presentations
+exercise the same underlying calculus capability; `PiIntegrationFamily` below
+records that distinction so a count of constructors is never mistaken for a
+measure of calculus readiness. -/
 inductive PiPresentation where
   | area
   | areaPolygon
@@ -16888,6 +16891,34 @@ inductive PiPresentation where
   | cauchyIntegral
   | reciprocalQuarticIntegral
 deriving DecidableEq, Repr
+
+/-- The distinct constructive capabilities exercised by the checked π
+presentations.
+
+This is release-test metadata, not mathematical data about π.  In particular,
+the three arctangent presentations and the accelerated series formulas are
+kept as separate certified evaluators, while their shared dependencies are
+recorded by one family.  The project measures readiness for calculus through
+the calculus gates, not by counting values of this type. -/
+inductive PiIntegrationFamily where
+  | finiteGeometry
+  | arctangentGeometry
+  | finiteIntegral
+  | alternatingSeries
+  | compactifiedImproperIntegral
+deriving DecidableEq, Repr
+
+/-- The primary constructive capability exercised by a checked π
+presentation.  This deliberately groups presentation variants that share the
+same bridge, while retaining all variants as independently executable
+regression tests. -/
+def PiPresentation.integrationFamily : PiPresentation -> PiIntegrationFamily
+  | .area | .areaPolygon | .circumferenceStabilized | .circumferenceReboxed |
+      .circumferenceFan => .finiteGeometry
+  | .arctanGeometry => .arctangentGeometry
+  | .arctanRectangleIntegral | .reciprocalQuarticIntegral => .finiteIntegral
+  | .leibnizSeries | .nilakanthaSeries | .machinSeries => .alternatingSeries
+  | .cauchyIntegral => .compactifiedImproperIntegral
 
 /-- The raw interval algorithm behind each canonical checked presentation. -/
 def piPresentationRaw : PiPresentation -> RealRaw

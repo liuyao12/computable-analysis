@@ -680,14 +680,18 @@ students actually compute.
 ## Pi Representations
 
 - The pi table in `blueprint/src/pi-scoreboard-table.tex` is an integration
-  suite, not a completion percentage for calculus.  It currently has eleven
-  valid raw computations among nineteen named routes, and nine formal
-  equivalence chains to `piCircleArea` among eighteen applicable rows.  Its
-  purpose is to exercise distinct foundations---finite geometry, integration,
-  power series, inverse functions, and compactified improper integrals---not
-  to reward many variants of a single construction.  The primary calculus
-  gates are the no-completeness audit, epsilon--delta continuity and extension
-  interfaces, finite integration/FTC, inverse elementary functions,
+  suite, not a completion percentage for calculus.  Lean records the checked
+  representations' primary capability with
+  `PiProofs.PiPresentation.integrationFamily`: finite geometry, geometric
+  arctangent, finite integrals, alternating series, or compactified improper
+  integrals.  This keeps independently executable presentation variants as
+  regressions without treating their count as independent calculus progress.
+  The unchecked named formulas are capability probes rather than a denominator:
+  arcsine/Newton require inverse and square-root-integral machinery, Gaussian
+  requires analytic exponential and full-line integration, while Basel,
+  Brouncker, and logarithm-at-`i` are deferred advanced analysis.  The primary
+  calculus gates are the no-completeness audit, epsilon--delta continuity and
+  extension interfaces, finite integration/FTC, inverse elementary functions,
   exponential/logarithmic differentiation, and ODE solution operators.
   The completed integration-suite
   rows are the direct area-loop computation, its independently evaluated

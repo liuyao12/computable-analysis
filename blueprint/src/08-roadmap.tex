@@ -74,7 +74,7 @@ completeness principle is available or planned as a proof shortcut.
 
 \section{Calculus readiness ledger}\label{sec:calculus-readiness}
 
-The pi scoreboard below is a release-style integration suite, not a percentage
+The pi integration suite below is a release-style integration suite, not a percentage
 of readiness for scientific or engineering calculus.  It is useful because it
 forces independently constructed finite geometry, series, integration, and
 inverse-function routes to agree on a demanding constant.  It is an incomplete
@@ -113,11 +113,17 @@ continuous variation of constants
 
 There is intentionally no aggregate percentage: these gates have distinct
 dependencies, and success in one does not compensate for a missing theorem in
-another.  The pi table remains valuable as secondary coverage.  Add a row only
-when it exercises a genuinely new foundation or end-to-end bridge; do not
-inflate it with presentation variants of the same arctangent construction.
+another.  The pi table remains valuable as secondary coverage.  Lean groups
+the checked representations by their primary exercised capability (finite
+geometry, geometric arctangent, finite integrals, alternating series, or a
+compactified improper integral).  Add a row only when it exercises a genuinely
+new foundation or end-to-end bridge; do not inflate it with presentation
+variants of the same arctangent construction.  The unchecked formulae are
+capability probes, not a denominator for this ledger.
 
-\section{Pi scoreboard}\label{sec:pi-scoreboard}
+\section{Pi integration suite}\label{sec:pi-scoreboard}
+\lean{ComputableAnalysis.PiProofs.PiIntegrationFamily}
+\lean{ComputableAnalysis.PiProofs.PiPresentation.integrationFamily}
 \lean{ComputableAnalysis.piMachin}
 \lean{ComputableAnalysis.piCircleArea}
 \lean{ComputableAnalysis.piCircumference}

@@ -31,9 +31,9 @@ with their accumulated finite transition. Its
 continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
 integrals and factorial tail bounds, beginning with constant, commuting,
 scalar, piecewise-constant, and higher-order triangular cases. This broadens
-the calculus foundation. The Pi integration suite currently has `11/19` valid
-definitions and `9/18` applicable equivalence bridges; it is not a percentage
-of calculus completeness.
+the calculus foundation. The Pi integration suite records which independent
+capabilities its checked routes exercise; it intentionally has no completion
+fraction for calculus.
 
 ## Calculus readiness ledger
 
@@ -59,11 +59,15 @@ the gates have different dependencies and none can substitute for another.
 | Differentiated elementary functions | Formal power-series derivative table and finite-difference affine/square examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, and discrete variation of constants are checked | Interval-matrix simplex integrals, factorial tails, and continuous variation of constants |
 
-The Pi score remains useful as a secondary release test: add a row only when
+The Pi suite remains useful as a secondary release test: add a row only when
 it exercises a genuinely new foundation or a new end-to-end bridge.  Do not
 inflate it with presentation variants of the same arctangent construction.
+The checked registry records its primary coverage family in Lean as
+`PiProofs.PiPresentation.integrationFamily`; that makes the shared
+dependencies explicit instead of turning the number of presentation variants
+into a progress percentage.
 
-## Pi formalization scoreboard
+## Pi integration suite
 
 A row counts as definition-complete only after its interval sequence is a valid
 `RealRaw`. A row counts as equivalent after a formalized chain of
@@ -72,9 +76,21 @@ suite across geometry, integration, power series, inverse functions, and
 compactified improper integrals---not the primary measure of readiness for
 science and engineering.
 
-Current count: definitions `11/19`; equivalences `9/18` applicable rows.
+There is intentionally no completion fraction.  The checked registry covers
+finite geometry, geometric arctangent, finite integrals, alternating series,
+and compactified improper integrals.  The unchecked rows below are retained
+as capability probes, not as missing units of a calculus percentage:
+
+- `piCircumference` isolates a square-root enclosure-refinement issue.
+- arcsine and Newton's segment require a represented inverse branch and a
+  reusable square-root integral.
+- Gaussian pi requires the analytic exponential layer and a full-line
+  integral.
+- Basel, Brouncker, and the logarithm-at-`i` routes are deliberately deferred
+  advanced analysis, not prerequisites for the scientific-calculus core.
+
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
-[front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
+[front page: pi integration suite](https://liuyao12.github.io/computable-analysis/).
 
 The direct chord-path route now also has a checked
 `piCircumferenceStabilized` representative. It evaluates only a finite prefix

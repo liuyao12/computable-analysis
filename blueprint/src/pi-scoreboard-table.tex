@@ -1,20 +1,25 @@
-Definition-complete: valid raw real.  Equivalence-complete: a formal chain of
-\code{RealRaw.Equiv} theorems to \code{piCircleArea}.
+Definition-complete means a valid raw real; equivalence-complete means a
+formal chain of \code{RealRaw.Equiv} theorems to \code{piCircleArea}.  These
+columns are evidence in a release-style integration suite, not numerators in a
+calculus-completeness percentage.
 
-This is a coverage suite, not a calculus-completeness percentage.  Its rows
-exercise independent foundations (finite geometry, integration, power series,
-inverse functions, and compactified improper integrals); additional variants
-within one family do not by themselves measure broader scientific or
-engineering readiness.
+The checked registry is grouped in Lean by its primary exercised capability:
+finite geometry, geometric arctangent, finite integrals, alternating series,
+and compactified improper integrals.  Several rows within a group remain
+valuable as independently executable regression tests, but do not constitute
+independent progress toward solving a new scientific model.  Conversely, the
+continuous Peano--Baker theorem and the analytic proof that \(e^x{}'=e^x\)
+would be major calculus advances even if they add no row here.
 
-The current score is:
-\[
-  \#\mathrm{Def}=11/19,\qquad
-  \#\mathrm{Equiv}_{\pi_{\mathrm{area}}}=9/18.
-\]
-\emph{Not scored:} the checked direct-only chord-path stabilizer is
-interval-normalization infrastructure; it does not establish stagewise
-refinement of the original circumference endpoints.
+The unchecked rows are capability probes rather than a denominator: the
+original circumference path isolates lower square-root-enclosure refinement;
+arcsine and Newton's segment require an inverse branch and a square-root
+integral; Gaussian pi requires the exponential and full-line integral layers.
+Basel, Brouncker, and the logarithm-at-\(i\) entries are deferred advanced
+analysis, not prerequisites for the scientific-calculus core.  The checked
+direct-only chord-path stabilizer is interval-normalization infrastructure; it
+does not establish stagewise refinement of the original circumference
+endpoints.
 
 \begin{center}
 \begin{tabular}{p{0.22\textwidth}p{0.14\textwidth}p{0.34\textwidth}cc}
