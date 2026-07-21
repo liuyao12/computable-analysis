@@ -7727,6 +7727,39 @@ theorem reciprocalQuarticUnitDyadicCore_symmetric_overlaps_scheduled
   exact ⟨Rat.mul_le_mul_of_nonneg_left h.1 (by native_decide),
     Rat.mul_le_mul_of_nonneg_left h.2 (by native_decide)⟩
 
+/-- The factor-two compact bracket on the rapidly refined projective schedule
+has an explicit source-mesh width bound. -/
+theorem projectiveCompactDyadicScheduledCore_symmetric_width_le
+    (n : Nat) :
+    (projectiveCompactSymmetricLipschitzSum
+      (ArctanGeometry.arctanAreaLoopState
+        (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).width <=
+      32 * (1 / (((2 ^ (n * 6) : Nat) : Rat))) := by
+  rw [projectiveCompactSymmetricLipschitzSum_width_eq_thirtytwo_squareSum,
+    ArctanGeometry.arctanAreaLoopState_squareSum]
+  have hs0 : 0 <= projectiveCompactDyadicEndpoint n :=
+    projectiveCompactDyadicEndpoint_nonnegative n
+  have hs1 : projectiveCompactDyadicEndpoint n <= 1 :=
+    Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one n)
+  have hsquare : projectiveCompactDyadicEndpoint n *
+      projectiveCompactDyadicEndpoint n <= 1 := by
+    calc
+      projectiveCompactDyadicEndpoint n * projectiveCompactDyadicEndpoint n <=
+          1 * projectiveCompactDyadicEndpoint n :=
+        Rat.mul_le_mul_of_nonneg_right hs1 hs0
+      _ <= 1 * 1 := Rat.mul_le_mul_of_nonneg_left hs1 (by native_decide)
+      _ = 1 := by native_decide
+  have hDpos : 0 < (((2 ^ (n * 6) : Nat) : Rat)) :=
+    (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hsmall : (projectiveCompactDyadicEndpoint n *
+      projectiveCompactDyadicEndpoint n) /
+        (((2 ^ (n * 6) : Nat) : Rat)) <=
+      1 / (((2 ^ (n * 6) : Nat) : Rat)) := by
+    rw [Rat.div_def, Rat.div_def]
+    exact Rat.mul_le_mul_of_nonneg_right hsquare
+      (Rat.le_of_lt ((Rat.inv_pos).2 hDpos))
+  exact Rat.mul_le_mul_of_nonneg_left hsmall (by native_decide)
+
 /-- The literal trimmed dyadic core is now within the proved projective
 quadrature bridge: its factor-two compact bracket overlaps the matching
 two-branch Cauchy rectangle bracket. -/
@@ -8162,6 +8195,233 @@ theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_projectiveCauch
         unfold QInterval.width
         grind [Rat.sub_eq_add_neg]
     exact Rat.le_trans hwidth hcandidate.2
+
+/-- A common compact enclosure for the literal dyadic candidate and the
+rapidly refined projective schedule.  The literal core width is spent on both
+sides of the finite cover comparison, while the removable endpoint budget is
+needed only above. -/
+def projectiveCompactDyadicScheduledCompactTailEnvelope (n : Nat) : QInterval :=
+  { lo := (projectiveCompactSymmetricLipschitzSum
+      (ArctanGeometry.arctanAreaLoopState
+        (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).lo -
+      (projectiveCompactSymmetricLipschitzSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n)).width,
+    hi := (projectiveCompactSymmetricLipschitzSum
+      (ArctanGeometry.arctanAreaLoopState
+        (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).hi +
+      (projectiveCompactSymmetricLipschitzSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n)).width +
+      (projectiveCompactDyadicSymmetricTailError.compute n).hi }
+
+/-- The actual compact dyadic box is enclosed by the fast compact schedule
+after paying only the checked literal-core width and endpoint-cell budget. -/
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_scheduledCompactTail
+    (n : Nat) :
+    QInterval.Overlaps
+      (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1))
+      (projectiveCompactDyadicScheduledCompactTailEnvelope n) := by
+  have hcandidate := reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_coreTail n
+  have hcore := reciprocalQuarticUnitDyadicCore_symmetric_overlaps_scheduled n
+  change
+    (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).lo <=
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).hi +
+          (projectiveCompactDyadicSymmetricTailError.compute n).hi /\
+      (projectiveCompactSymmetricLipschitzSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n)).lo <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).hi at hcandidate
+  change
+    (projectiveCompactSymmetricLipschitzSum
+      (reciprocalQuarticUnitDyadicCoreIntervals n)).lo <=
+        (projectiveCompactSymmetricLipschitzSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).hi /\
+      (projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).lo <=
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).hi at hcore
+  change
+    (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).lo <=
+        (projectiveCompactSymmetricLipschitzSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).hi +
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).width +
+          (projectiveCompactDyadicSymmetricTailError.compute n).hi /\
+      (projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).lo -
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).width <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1)).hi
+  have hupper :
+      (projectiveCompactSymmetricLipschitzSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n)).hi <=
+        (projectiveCompactSymmetricLipschitzSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).hi +
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).width := by
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hlower :
+      (projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint n) (n * 6)).intervals).lo -
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals n)).width <=
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)).lo := by
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · exact Rat.le_trans hcandidate.1 (by grind)
+  · exact Rat.le_trans hlower hcandidate.2
+
+/-- A symmetric Cauchy envelope for the literal compact candidate.  The
+positive scheduled Cauchy bridge is scaled by two for the two compact chart
+branches; the two finite compact bracket widths are recorded explicitly. -/
+def projectiveCompactDyadicScheduledCauchyCandidateEnvelope (n : Nat) : QInterval :=
+  { lo := 2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).lo -
+      ((projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).width +
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))).width),
+    hi := 2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).hi +
+      (projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).width +
+        (projectiveCompactSymmetricLipschitzSum
+          (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))).width +
+        (projectiveCompactDyadicSymmetricTailError.compute (n + 2)).hi }
+
+/-- The actual compact candidate meets the two-branch scheduled Cauchy
+envelope.  Every widening in this finite transfer is a separately proved
+compact bracket width or removable-endpoint error. -/
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_scheduledCauchy
+    (n : Nat) :
+    QInterval.Overlaps
+      (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1))
+      (projectiveCompactDyadicScheduledCauchyCandidateEnvelope n) := by
+  have hcandidate :=
+    reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_scheduledCompactTail (n + 2)
+  have hsource := ArctanGeometry.arctanAreaLoopState_intervals_covers
+    (projectiveCompactDyadicEndpoint_nonnegative (n + 2)) ((n + 2) * 6)
+  have hquad := projectiveCompactSymmetricLipschitzSum_overlaps_integralSum
+    0 (projectiveCompactDyadicEndpoint (n + 2))
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals
+    (by native_decide) (projectiveCompactDyadicEndpoint_lt_one _) hsource
+  have hbridge := projectiveCompactDyadicScheduledCauchyBridgeEnvelope_contains_core n
+  change
+    (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1)).lo <=
+        (projectiveCompactSymmetricLipschitzSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).hi +
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))).width +
+          (projectiveCompactDyadicSymmetricTailError.compute (n + 2)).hi /\
+      (projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).lo -
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))).width <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1)).hi at hcandidate
+  change
+    (projectiveCompactSymmetricLipschitzSum
+      (ArctanGeometry.arctanAreaLoopState
+        (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).lo <=
+        (projectiveCompactSymmetricIntegralSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).hi /\
+      (projectiveCompactSymmetricIntegralSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).lo <=
+        (projectiveCompactSymmetricLipschitzSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).hi at hquad
+  change
+    (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).lo <=
+      (ArctanGeometry.integralSumInterval
+        (projectiveCompactIntervals
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals)).lo /\
+    (ArctanGeometry.integralSumInterval
+      (projectiveCompactIntervals
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals)).hi <=
+      (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).hi at hbridge
+  change
+    (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1)).lo <=
+        2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).hi +
+          (projectiveCompactSymmetricLipschitzSum
+            (ArctanGeometry.arctanAreaLoopState
+              (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).width +
+          (projectiveCompactSymmetricLipschitzSum
+            (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))).width +
+          (projectiveCompactDyadicSymmetricTailError.compute (n + 2)).hi /\
+      2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).lo -
+          ((projectiveCompactSymmetricLipschitzSum
+            (ArctanGeometry.arctanAreaLoopState
+              (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).width +
+            (projectiveCompactSymmetricLipschitzSum
+              (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))).width) <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1)).hi
+  have hbridgeHi :
+      2 * (ArctanGeometry.integralSumInterval
+        (projectiveCompactIntervals
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals)).hi <=
+        2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).hi :=
+    Rat.mul_le_mul_of_nonneg_left hbridge.2 (by native_decide)
+  have hbridgeLo :
+      2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).lo <=
+        2 * (ArctanGeometry.integralSumInterval
+          (projectiveCompactIntervals
+            (ArctanGeometry.arctanAreaLoopState
+              (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals)).lo :=
+    Rat.mul_le_mul_of_nonneg_left hbridge.1 (by native_decide)
+  have hupper :
+      (projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).hi <=
+        2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).hi +
+          (projectiveCompactSymmetricLipschitzSum
+            (ArctanGeometry.arctanAreaLoopState
+              (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).width := by
+    unfold projectiveCompactSymmetricIntegralSum at hquad
+    have hbridgeHi' :
+        2 * ArctanGeometry.integralUpperSum
+          (projectiveCompactIntervals
+            (ArctanGeometry.arctanAreaLoopState
+              (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals) <=
+          2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).hi := by
+      simpa [ArctanGeometry.integralSumInterval] using hbridgeHi
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hlower :
+      2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).lo -
+          (projectiveCompactSymmetricLipschitzSum
+            (ArctanGeometry.arctanAreaLoopState
+              (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).width <=
+        (projectiveCompactSymmetricLipschitzSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals).lo := by
+    unfold projectiveCompactSymmetricIntegralSum at hquad
+    have hbridgeLo' :
+        2 * (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).lo <=
+          2 * ArctanGeometry.integralLowerSum
+            (projectiveCompactIntervals
+              (ArctanGeometry.arctanAreaLoopState
+                (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals) := by
+      simpa [ArctanGeometry.integralSumInterval] using hbridgeLo
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · exact Rat.le_trans hcandidate.1 (by grind)
+  · exact Rat.le_trans (by grind) hcandidate.2
 
 /-- Splitting one unit cell at its rational midpoint tightens the elementary
 Lipschitz rectangle.  This is the finite refinement inequality from which the

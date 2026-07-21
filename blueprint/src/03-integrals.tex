@@ -1276,10 +1276,12 @@ comparison has now been reduced to explicit width accounting.  Lean proves
 that the literal trimmed compact core and the fast \(6n\)-refinement schedule
 overlap by applying the finite rational Lipschitz-partition comparison to
 their two covers of the same interval.  This is not an invalid transitive use
-of interval overlap.  It remains to spend the two compact bracket widths and
-the removable-endpoint budget to connect the actual candidate envelope to
-this fast scheduled bridge, after which the raw-level equivalence can be
-packaged.
+of interval overlap.  Lean now spends both compact bracket widths and the
+removable-endpoint budget explicitly, scales the positive bridge by two for
+the two compact chart branches, and proves that the actual dyadic candidate
+overlaps that two-branch scheduled Cauchy envelope.  The remaining finite
+comparison is between this shrinking envelope and the completed full-line
+Cauchy raw; only then can the raw-level equivalence be packaged.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

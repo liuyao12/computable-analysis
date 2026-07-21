@@ -254,9 +254,11 @@ not a description of the current module graph. The checked blueprint
   comparison: `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_scheduled`
   applies a general rational Lipschitz-partition comparison to the two ordered
   covers of the same compact interval.  This is deliberately not transitivity
-  of interval overlap.  The remaining bridge step is to spend the two proven
-  compact bracket widths and the endpoint budget when passing from that
-  comparison to the scheduled Cauchy hull.
+  of interval overlap.  That bridge step is now proved: the actual candidate
+  reaches the two-branch scheduled Cauchy hull after adding the literal-core
+  width, the scheduled-core width, and the removable-endpoint budget.  The
+  remaining task is the separate finite comparison between that hull and the
+  completed full-line Cauchy raw.
   The rational endpoint side of that assembly is now explicit too:
   `projectiveCompactDyadicCauchyTailRadius_le` proves that the reciprocal
   projective endpoint at compact stage `n + 1` is at most `2 * 2^(-n)`.
@@ -297,11 +299,12 @@ not a description of the current module graph. The checked blueprint
   combined: `projectiveCompactDyadicCauchyCore_integral_width_le` gives the
   former an `8 * 2^(-2n)` Cauchy width bound, the assembly has width at most
   `4 * 2^(-n)`, and their `QInterval.hull` is a common bridge envelope with
-  width at most `12 * 2^(-n)`.  The literal trimmed compact core is now also
-  proved to overlap the fast schedule by a finite cover comparison; what
-  remains is to spend the explicit compact widths and endpoint budget to join
-  the actual candidate to this bridge, then package the comparison at raw
-  level.
+  width at most `12 * 2^(-n)`.  Lean now scales that positive bridge for the
+  two chart branches and proves
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_scheduledCauchy`:
+  the actual candidate reaches it after paying the literal-core width, the
+  scheduled-core width, and the endpoint budget.  The remaining comparison is
+  between this two-branch finite Cauchy hull and the completed full-line raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
