@@ -728,6 +728,9 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_valid}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCertified}
 \uses{thm:finite-archimedes,def:raw-real}
 The public area loop is a valid raw real.  The circumference computation is
@@ -747,6 +750,17 @@ reboxed representative valid and equivalent to both the direct perimeter raw
 algorithm and \code{piCircleArea}.  This is a finite interval-normalization
 tool, not a proof of the direct perimeter endpoint-refinement theorem and not
 a new scoreboard row.
+There is also a distinct, counted Archimedean computation,
+\code{piCircumferenceCurvatureFan}.  It replaces the bare inscribed
+cross-product fan by a finite rational lower bound with a certified
+second-order dot-deficit correction, while retaining the independently
+certified circumscribed path as its upper endpoint.  Lean proves its nested
+brackets and a width bound of \(10/(n+1)\) in
+\code{piCircumferenceCurvatureFan\_valid}, then proves same-stage overlap
+with the area loop in
+\code{piCircumferenceCurvatureFan\_equiv\_piCircleArea}.  This is neither
+an anchor reboxing nor a proof obligation for the original chord-length
+evaluator.
 The project-facing certified value \code{PiProofs.piCertified} chooses the
 area loop as its evaluator and records this reboxed perimeter route as a
 verified alternative.

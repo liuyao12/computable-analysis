@@ -637,8 +637,8 @@ students actually compute.
 ## Pi Representations
 
 - The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently eleven of nineteen named
-  computations are valid raw reals, and nine of eighteen applicable rows
+  `blueprint/src/pi-scoreboard-table.tex`: currently twelve of twenty named
+  computations are valid raw reals, and ten of nineteen applicable rows
   have a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
   rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn
@@ -646,10 +646,11 @@ students actually compute.
   formulation `4 * arctanIntegralRectangleForAtOne`, the series computation
   `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
   the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
-  rational series, and the direct cross-fan circumference computation
-  `piCircumferenceFan`, and the concrete compact reciprocal-quartic candidate
-  `PiProofs.piReciprocalQuarticCompact`.  The one definition-only completion
-  is now the Basel row.  The quartic candidate is the verified dyadic integral
+  rational series, the direct cross-fan circumference computation
+  `piCircumferenceFan`, its curvature-corrected direct refinement
+  `piCircumferenceCurvatureFan`, and the concrete compact reciprocal-quartic
+  candidate `PiProofs.piReciprocalQuarticCompact`.  The one definition-only
+  completion is now the Basel row.  The quartic candidate is the verified dyadic integral
   of `(1+x^2)/(x^4-x^2+1)` on `[-1,1]`; its finite projective/Cauchy bridge is
   an explicit rational envelope of width at most `224 * 2^-n`.  The enclosure
   contains the scheduled full-line Cauchy computation, meets the quartic box,
@@ -761,9 +762,15 @@ students actually compute.
   `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
   combines its all-stage form with the proved outer endpoint.  The original
   direct circumference row remains uncounted until that local bisection
-  comparison is proved.  A curvature-corrected refinement and its squared
-  margin reduction remain design notes until their dependency order is
-  reconstructed as a portable Lean proof; they are not scorecard rows.
+  comparison is proved.  The curvature-corrected fan is now a second, direct
+  certified representative: `piCircumferenceCurvatureFan` raises the
+  cross-product lower endpoint by a finite rational dot-deficit correction,
+  retains the independently certified outer path endpoint, and refines under
+  dyadic subdivision.  `piCircumferenceCurvatureFan_valid` proves its nested
+  brackets with the explicit `10/(n+1)` width modulus, and
+  `piCircumferenceCurvatureFan_equiv_piCircleArea` proves its same-stage
+  overlap with the area-loop baseline.  It is a scoreboard row, but it does
+  not discharge the original chord-path refinement obligation.
 
 ### Archived pre-refactor notes (not current source)
 

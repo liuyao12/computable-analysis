@@ -964,6 +964,16 @@ proves ordered dyadic brackets in
 \code{PiProofs.piCircumferenceFan\_equiv\_piCircleArea}.  Consequently this
 new row counts on the scoreboard, while the original circumference row remains
 pending.
+The curvature-corrected fan now gives a second direct representative:
+\code{PiProofs.piCircumferenceCurvatureFan} adds a certified rational
+second-order dot-deficit correction to the inscribed cross-fan lower endpoint
+and retains the independently certified outer path upper endpoint.  Lean
+proves its nested brackets and the same \(10/(n+1)\) width modulus in
+\code{PiProofs.piCircumferenceCurvatureFan\_valid}, and proves its
+same-stage equivalence to the area-loop baseline in
+\code{PiProofs.piCircumferenceCurvatureFan\_equiv\_piCircleArea}.  It is a
+separate scoreboard computation, not a reboxing and not a substitute for the
+remaining chord-path refinement proof.
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
@@ -1256,6 +1266,9 @@ chord and tangent formulas.
   \code{PiProofs.piCircumferenceFan\_compute\_lo\_eq\_piCircleArea\_compute\_lo},
   \code{PiProofs.piCircumferenceFan\_valid},
   \code{PiProofs.piCircumferenceFan\_equiv\_piCircleArea},
+  \code{PiProofs.piCircumferenceCurvatureFan},
+  \code{PiProofs.piCircumferenceCurvatureFan\_valid},
+  \code{PiProofs.piCircumferenceCurvatureFan\_equiv\_piCircleArea},
   \code{PiProofs.CircumferenceQuarterLengthStepRefines},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpTo},
   \code{PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll},
