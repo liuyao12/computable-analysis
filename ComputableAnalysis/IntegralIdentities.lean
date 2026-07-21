@@ -2816,6 +2816,106 @@ theorem cauchyReciprocalIntegralSum_overlaps
           (cauchyReciprocal_lowerStep_le_upperStep_reverse hhead.1 hhead.2)
           htail.2⟩
 
+private theorem cauchy_one_div_le_one_div_of_pos_of_le {a b : Rat}
+    (ha : 0 < a) (hab : a <= b) :
+    1 / b <= 1 / a := by
+  have hb : 0 < b := by grind
+  have hane : a ≠ 0 := Rat.ne_of_gt ha
+  have hbne : b ≠ 0 := Rat.ne_of_gt hb
+  have hprod : 0 < a * b := Rat.mul_pos ha hb
+  apply Rat.le_of_mul_le_mul_right (c := a * b)
+  · calc
+      (1 / b) * (a * b) = a := by
+        rw [Rat.div_def]
+        have hcancel : b * b⁻¹ = 1 := Rat.mul_inv_cancel b hbne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= b := hab
+      _ = (1 / a) * (a * b) := by
+        rw [Rat.div_def]
+        have hcancel : a * a⁻¹ = 1 := Rat.mul_inv_cancel a hane
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hprod
+
+/-- Reverse a positive finite partition while sending each endpoint through
+reciprocal inversion, producing the natural increasing cover on the far side
+of `1`. -/
+def cauchyReciprocalReversedIntervals : List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      cauchyReciprocalReversedIntervals rest ++ [(1 / r, 1 / p)]
+
+/-- Reciprocal inversion sends an ordered positive rational cover of `[a,b]`
+to an ordered cover of `[1/b,1/a]`. -/
+theorem cauchyReciprocalReversedIntervals_covers
+    (a b : Rat) (intervals : List (Rat × Rat)) (ha : 0 < a)
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.CoversInterval (1 / b) (1 / a)
+      (cauchyReciprocalReversedIntervals intervals) := by
+  induction intervals generalizing a b with
+  | nil =>
+      simp only [cauchyReciprocalReversedIntervals,
+        ArctanGeometry.CoversInterval] at hcover ⊢
+      rw [hcover]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hr : 0 < r := by grind
+      have hrec := ih r b hr hrest
+      have horder : 1 / r <= 1 / a :=
+        cauchy_one_div_le_one_div_of_pos_of_le ha hpr
+      exact ArctanGeometry.CoversInterval.append hrec
+        ⟨rfl, horder, rfl⟩
+
+/-- Reversing the reciprocal cells changes their cover order but not either
+finite Cauchy rectangle sum. -/
+theorem cauchyReciprocalReversedIntegralSum_eq
+    (intervals : List (Rat × Rat)) :
+    ArctanGeometry.integralSumInterval
+        (cauchyReciprocalReversedIntervals intervals) =
+      ArctanGeometry.integralSumInterval (cauchyReciprocalIntervals intervals) := by
+  induction intervals with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      have ihlo := congrArg QInterval.lo ih
+      have ihhi := congrArg QInterval.hi ih
+      change ArctanGeometry.integralLowerSum
+          (cauchyReciprocalReversedIntervals rest) =
+        ArctanGeometry.integralLowerSum (cauchyReciprocalIntervals rest) at ihlo
+      change ArctanGeometry.integralUpperSum
+          (cauchyReciprocalReversedIntervals rest) =
+        ArctanGeometry.integralUpperSum (cauchyReciprocalIntervals rest) at ihhi
+      apply (QInterval.mk.injEq _ _ _ _).mpr
+      constructor
+      · change ArctanGeometry.integralLowerSum
+            (cauchyReciprocalReversedIntervals rest ++ [(1 / r, 1 / p)]) =
+          ArctanGeometry.integralLowerSum
+            ((1 / r, 1 / p) :: cauchyReciprocalIntervals rest)
+        rw [ArctanGeometry.integralLowerSum_append, ihlo]
+        simp [ArctanGeometry.integralLowerSum, Rat.add_comm]
+        rw [Rat.zero_add]
+      · change ArctanGeometry.integralUpperSum
+            (cauchyReciprocalReversedIntervals rest ++ [(1 / r, 1 / p)]) =
+          ArctanGeometry.integralUpperSum
+            ((1 / r, 1 / p) :: cauchyReciprocalIntervals rest)
+        rw [ArctanGeometry.integralUpperSum_append, ihhi]
+        simp [ArctanGeometry.integralUpperSum, Rat.add_comm]
+        rw [Rat.zero_add]
+
+/-- The ordered reciprocal cover has the same finite Cauchy overlap as the
+unreversed cell list. -/
+theorem cauchyReciprocalReversedIntegralSum_overlaps
+    (intervals : List (Rat × Rat))
+    (hpositive : forall p r, (p, r) ∈ intervals -> 0 < p /\ p <= r) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval
+        (cauchyReciprocalReversedIntervals intervals))
+      (ArctanGeometry.integralSumInterval intervals) := by
+  rw [cauchyReciprocalReversedIntegralSum_eq]
+  exact cauchyReciprocalIntegralSum_overlaps intervals hpositive
+
 /-- A rational compactification of an even full-line integral by folding the
 positive reciprocal tail back onto the unit interval.
 

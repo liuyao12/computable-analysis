@@ -261,9 +261,12 @@ not a description of the current module graph. The checked blueprint
   Cauchy-tail scale.  Its finite reciprocal rectangle transport is now
   checked cellwise and for arbitrary finite lists of strictly positive cells:
   `cauchyReciprocalIntegralSum_overlaps` compares the original and inverted
-  rectangle brackets without invoking a completed integral.  What remains is
-  the ordered, refined tail-partition assembly connecting that list theorem
-  to the existing full-line Cauchy raw.
+  rectangle brackets without invoking a completed integral.  The necessary
+  order bookkeeping is now checked too:
+  `cauchyReciprocalReversedIntervals_covers` sends a positive ordered cover
+  of `[a,b]` to one of `[1/b,1/a]`, and its reordered sum has the same
+  overlap.  What remains is the refined tail-partition assembly connecting
+  those finite results to the existing full-line Cauchy raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
