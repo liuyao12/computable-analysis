@@ -224,6 +224,14 @@ not a description of the current module graph. The checked blueprint
   same finite stage.  The only remaining analytic assembly is to trim its two cells
   touching `±1`, couple the interior bracket to the scheduled projective
   Cauchy bracket, and absorb them using the already-valid dyadic tail raw.
+  That trim is now literal rather than schematic:
+  `reciprocalQuarticUnitDyadicCoreIntervals` deletes the final cell of the
+  actual positive mesh, `reciprocalQuarticUnitDyadicCoreIntervals_covers`
+  proves it covers `[0, 1 - 2^(-n)]`, and
+  `reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail` recovers the full
+  mesh by appending exactly the endpoint cell.  Its factor-two compact bracket
+  already overlaps the two-branch projective Cauchy bracket by
+  `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective`.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

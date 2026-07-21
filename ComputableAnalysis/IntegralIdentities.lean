@@ -5559,6 +5559,144 @@ private theorem reciprocalQuarticUnitDyadicIntervals_reflected
         reciprocalQuarticUnitReflected_rightHalf,
         reciprocalQuarticUnitReflected_leftHalf, ih]
 
+private theorem reciprocalQuarticUnitLeftHalf_covers
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.CoversInterval (a / 2) (b / 2)
+      (reciprocalQuarticUnitLeftHalf intervals) := by
+  induction intervals generalizing a with
+  | nil =>
+      simp only [reciprocalQuarticUnitLeftHalf,
+        ArctanGeometry.CoversInterval] at hcover ⊢
+      rw [hcover]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      simp only [reciprocalQuarticUnitLeftHalf,
+        ArctanGeometry.CoversInterval]
+      refine ⟨trivial, ?_, ih r hrest⟩
+      rw [Rat.div_def, Rat.div_def]
+      exact Rat.mul_le_mul_of_nonneg_right hpr (by native_decide)
+
+private theorem reciprocalQuarticUnitRightHalf_covers
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.CoversInterval ((a + 1) / 2) ((b + 1) / 2)
+      (reciprocalQuarticUnitRightHalf intervals) := by
+  induction intervals generalizing a with
+  | nil =>
+      simp only [reciprocalQuarticUnitRightHalf,
+        ArctanGeometry.CoversInterval] at hcover ⊢
+      rw [hcover]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      simp only [reciprocalQuarticUnitRightHalf,
+        ArctanGeometry.CoversInterval]
+      refine ⟨trivial, ?_, ih r hrest⟩
+      rw [Rat.div_def, Rat.div_def]
+      exact Rat.mul_le_mul_of_nonneg_right
+        ((Rat.add_le_add_right (c := (1 : Rat))).2 hpr) (by native_decide)
+
+private theorem projectiveCompactDyadicEndpoint_succ (n : Nat) :
+    (projectiveCompactDyadicEndpoint n + 1) / 2 =
+      projectiveCompactDyadicEndpoint (n + 1) := by
+  unfold projectiveCompactDyadicEndpoint
+  have hpow : (((2 ^ (n + 1) : Nat) : Rat)) =
+      (((2 ^ n : Nat) : Rat)) * 2 := by
+    exact_mod_cast (by simpa [Nat.mul_comm] using (Nat.pow_succ 2 n))
+  rw [hpow, Rat.div_def, Rat.div_def]
+  have hne : (((2 ^ n : Nat) : Rat)) ≠ 0 := by
+    exact Rat.ne_of_gt ((Rat.natCast_pos).2
+      (Nat.pow_pos (by omega : 0 < 2)))
+  grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add, Rat.mul_assoc,
+    Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The positive dyadic mesh with its final endpoint cell removed.  This is
+the literal trimmed core on which the projective coordinate is defined. -/
+def reciprocalQuarticUnitDyadicCoreIntervals : Nat -> List (Rat × Rat)
+  | 0 => []
+  | n + 1 =>
+      reciprocalQuarticUnitLeftHalf
+        (ArctanGeometry.arctanAreaLoopState 1 n).intervals ++
+      reciprocalQuarticUnitRightHalf
+        (reciprocalQuarticUnitDyadicCoreIntervals n)
+
+theorem reciprocalQuarticUnitDyadicCoreIntervals_covers
+    (n : Nat) :
+    ArctanGeometry.CoversInterval 0 (projectiveCompactDyadicEndpoint n)
+      (reciprocalQuarticUnitDyadicCoreIntervals n) := by
+  induction n with
+  | zero =>
+      change 0 = projectiveCompactDyadicEndpoint 0
+      native_decide
+  | succ n ih =>
+      have hfull := ArctanGeometry.arctanAreaLoopState_intervals_covers
+        (x := (1 : Rat)) (by native_decide) n
+      have hleft := reciprocalQuarticUnitLeftHalf_covers 0 1
+        (ArctanGeometry.arctanAreaLoopState 1 n).intervals hfull
+      have hright := reciprocalQuarticUnitRightHalf_covers 0
+        (projectiveCompactDyadicEndpoint n)
+        (reciprocalQuarticUnitDyadicCoreIntervals n) ih
+      have hzero : (0 : Rat) / 2 = 0 := by native_decide
+      have hmid : (1 : Rat) / 2 = (0 + 1) / 2 := by native_decide
+      rw [← hmid] at hright
+      have hjoin := ArctanGeometry.CoversInterval.append hleft hright
+      rw [hzero, projectiveCompactDyadicEndpoint_succ] at hjoin
+      simpa [reciprocalQuarticUnitDyadicCoreIntervals] using hjoin
+
+/-- The literal trimmed dyadic core is now within the proved projective
+quadrature bridge: its factor-two compact bracket overlaps the matching
+two-branch Cauchy rectangle bracket. -/
+theorem reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective
+    (n : Nat) :
+    QInterval.Overlaps
+      (projectiveCompactSymmetricLipschitzSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n))
+      (projectiveCompactSymmetricIntegralSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n)) := by
+  exact projectiveCompactSymmetricLipschitzSum_overlaps_integralSum
+    0 (projectiveCompactDyadicEndpoint n)
+    (reciprocalQuarticUnitDyadicCoreIntervals n)
+    (by native_decide) (projectiveCompactDyadicEndpoint_lt_one n)
+    (reciprocalQuarticUnitDyadicCoreIntervals_covers n)
+
+/-- The full positive dyadic mesh is its trimmed core followed by the one
+cell that touches the removable chart endpoint. -/
+theorem reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail
+    (n : Nat) :
+    (ArctanGeometry.arctanAreaLoopState 1 n).intervals =
+      reciprocalQuarticUnitDyadicCoreIntervals n ++
+        [(projectiveCompactDyadicEndpoint n, 1)] := by
+  induction n with
+  | zero =>
+      native_decide
+  | succ n ih =>
+      calc
+        (ArctanGeometry.arctanAreaLoopState 1 (n.succ)).intervals =
+            reciprocalQuarticUnitLeftHalf
+              (ArctanGeometry.arctanAreaLoopState 1 n).intervals ++
+              reciprocalQuarticUnitRightHalf
+                (ArctanGeometry.arctanAreaLoopState 1 n).intervals := by
+          simpa [Nat.succ_eq_add_one] using
+            reciprocalQuarticUnitDyadicIntervals_succ_split n
+        _ = reciprocalQuarticUnitLeftHalf
+              (ArctanGeometry.arctanAreaLoopState 1 n).intervals ++
+              reciprocalQuarticUnitRightHalf
+                (reciprocalQuarticUnitDyadicCoreIntervals n ++
+                  [(projectiveCompactDyadicEndpoint n, 1)]) := by
+            rw [ih]
+        _ = reciprocalQuarticUnitDyadicCoreIntervals n.succ ++
+              [(projectiveCompactDyadicEndpoint n.succ, 1)] := by
+            rw [reciprocalQuarticUnitRightHalf_append]
+            simp only [reciprocalQuarticUnitRightHalf]
+            rw [projectiveCompactDyadicEndpoint_succ]
+            have hone : ((1 : Rat) + 1) / 2 = 1 := by native_decide
+            rw [hone]
+            simp [reciprocalQuarticUnitDyadicCoreIntervals, List.append_assoc]
+
 private theorem reciprocalQuarticMinusOneCompactAffineIntervals_append
     (left right : List (Rat × Rat)) :
     reciprocalQuarticMinusOneCompactAffineIntervals (left ++ right) =

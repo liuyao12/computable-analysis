@@ -1203,10 +1203,15 @@ orientation convention.
 The remaining issue is now sharply localized at the two mesh cells touching
 \(\pm1\): the projective coordinate is used only on a trimmed core with
 \(s<1\), whereas the actual compact mesh includes its removable endpoint
-cells.  The checked dyadic tail raw bounds exactly these cells.  What remains
-is a single valid nested raw construction that couples the trimmed oriented
-core, its projective Cauchy bracket, and that tail error; no general integral
-substitution theorem is asserted.
+cells.  Lean now defines that core by deleting the last cell of the actual
+positive dyadic mesh.  It proves both that it covers
+\([0,1-2^{-n}]\) and that the full positive mesh is exactly this core followed
+by the single cell \([1-2^{-n},1]\).  The factor-two compact bracket of the
+literal trimmed core already overlaps its projective two-branch Cauchy
+rectangle bracket.  The checked dyadic tail raw bounds the two removed cells.
+What remains is a single valid nested raw construction that combines this
+core comparison, the candidate's oriented endpoint cells, and that tail
+error; no general integral substitution theorem is asserted.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,
