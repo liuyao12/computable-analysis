@@ -2695,6 +2695,127 @@ theorem cauchyProjectiveFoldDensity_eq_two_integralKernel
   grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+/-- The reciprocal Cauchy pullback, isolated from the two-tail folding
+identity for use in finite rectangle transports. -/
+theorem cauchyIntegralKernel_reciprocal_pullback
+    (x : Rat) (hx : x ≠ 0) :
+    (1 / (x * x)) * ArctanGeometry.integralKernel (1 / x) =
+      ArctanGeometry.integralKernel x := by
+  have h := cauchyProjectiveFoldDensity_eq_two_integralKernel x hx
+  unfold cauchyProjectiveFoldDensity at h
+  grind [Rat.add_assoc]
+
+/-- Reversing a positive Cauchy rectangle cell through reciprocal inversion
+places its lower rectangle below the original cell's upper rectangle. -/
+theorem cauchyReciprocal_lowerStep_le_upperStep
+    {p r : Rat} (hp : 0 < p) (hpr : p <= r) :
+    ArctanGeometry.integralLowerStep (1 / r) (1 / p) <=
+      ArctanGeometry.integralUpperStep p r := by
+  have hr : 0 < r := by grind
+  have hpne : p ≠ 0 := Rat.ne_of_gt hp
+  have hrne : r ≠ 0 := Rat.ne_of_gt hr
+  have hkernel := cauchyIntegralKernel_reciprocal_pullback p hpne
+  have hlength : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hratio : p / r <= 1 := by
+    rw [Rat.div_def]
+    apply Rat.le_of_mul_le_mul_right (c := r)
+    · calc
+        (p * r⁻¹) * r = p := by
+          rw [Rat.mul_assoc, Rat.inv_mul_cancel _ hrne, Rat.mul_one]
+        _ <= 1 * r := by simpa using hpr
+    · exact hr
+  have hfactor : (r - p) * (p / r) <= r - p := by
+    calc
+      (r - p) * (p / r) <= (r - p) * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hratio hlength
+      _ = r - p := by grind
+  have hpullback :
+      (1 / p - 1 / r) * ArctanGeometry.integralKernel (1 / p) =
+        ((r - p) * (p / r)) *
+          ((1 / (p * p)) * ArctanGeometry.integralKernel (1 / p)) := by
+    repeat rw [Rat.div_def]
+    rw [Rat.inv_mul_rev]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  unfold ArctanGeometry.integralLowerStep ArctanGeometry.integralUpperStep
+  rw [hpullback, hkernel]
+  exact Rat.mul_le_mul_of_nonneg_right hfactor
+    (Rat.le_of_lt (ArctanGeometry.integralKernel_pos p))
+
+/-- The upper rectangle of the same reciprocal cell lies above the original
+positive cell's lower rectangle. -/
+theorem cauchyReciprocal_lowerStep_le_upperStep_reverse
+    {p r : Rat} (hp : 0 < p) (hpr : p <= r) :
+    ArctanGeometry.integralLowerStep p r <=
+      ArctanGeometry.integralUpperStep (1 / r) (1 / p) := by
+  have hr : 0 < r := by grind
+  have hpne : p ≠ 0 := Rat.ne_of_gt hp
+  have hrne : r ≠ 0 := Rat.ne_of_gt hr
+  have hkernel := cauchyIntegralKernel_reciprocal_pullback r hrne
+  have hlength : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hratio : 1 <= r / p := by
+    rw [Rat.div_def]
+    apply Rat.le_of_mul_le_mul_right (c := p)
+    · calc
+        1 * p = p := by grind
+        _ <= r := hpr
+        _ = (r * p⁻¹) * p := by
+          rw [Rat.mul_assoc, Rat.inv_mul_cancel _ hpne, Rat.mul_one]
+    · exact hp
+  have hfactor : r - p <= (r - p) * (r / p) := by
+    calc
+      r - p = (r - p) * 1 := by grind
+      _ <= (r - p) * (r / p) :=
+        Rat.mul_le_mul_of_nonneg_left hratio hlength
+  have hpullback :
+      (1 / p - 1 / r) * ArctanGeometry.integralKernel (1 / r) =
+        ((r - p) * (r / p)) *
+          ((1 / (r * r)) * ArctanGeometry.integralKernel (1 / r)) := by
+    repeat rw [Rat.div_def]
+    rw [Rat.inv_mul_rev]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  unfold ArctanGeometry.integralLowerStep ArctanGeometry.integralUpperStep
+  rw [hpullback, hkernel]
+  exact Rat.mul_le_mul_of_nonneg_right hfactor
+    (Rat.le_of_lt (ArctanGeometry.integralKernel_pos r))
+
+/-- Apply reciprocal inversion to each positive Cauchy cell.  The list order
+is retained here because finite rectangle sums are commutative; the ordered
+cover reversal is supplied separately when the cells are used as a partition.
+-/
+def cauchyReciprocalIntervals : List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (1 / r, 1 / p) :: cauchyReciprocalIntervals rest
+
+/-- Finite Cauchy rectangle sums survive reciprocal inversion on every
+strictly positive source cell. -/
+theorem cauchyReciprocalIntegralSum_overlaps
+    (intervals : List (Rat × Rat))
+    (hpositive : forall p r, (p, r) ∈ intervals -> 0 < p /\ p <= r) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval (cauchyReciprocalIntervals intervals))
+      (ArctanGeometry.integralSumInterval intervals) := by
+  induction intervals with
+  | nil =>
+      exact ⟨Rat.le_refl, Rat.le_refl⟩
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      have hhead : 0 < p /\ p <= r := hpositive p r (by simp)
+      have hrest : forall p r, (p, r) ∈ rest -> 0 < p /\ p <= r := by
+        intro p' r' hmem
+        exact hpositive p' r' (by simp [hmem])
+      have htail := ih hrest
+      unfold QInterval.Overlaps ArctanGeometry.integralSumInterval
+      simp only [cauchyReciprocalIntervals, ArctanGeometry.integralLowerSum,
+        ArctanGeometry.integralUpperSum]
+      exact ⟨rat_add_le_add
+          (cauchyReciprocal_lowerStep_le_upperStep hhead.1 hhead.2) htail.1,
+        rat_add_le_add
+          (cauchyReciprocal_lowerStep_le_upperStep_reverse hhead.1 hhead.2)
+          htail.2⟩
+
 /-- A rational compactification of an even full-line integral by folding the
 positive reciprocal tail back onto the unit interval.
 

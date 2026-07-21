@@ -1235,9 +1235,12 @@ to one another.
 The rational Cauchy-tail radius is now available independently: at compact
 stage \(n+1\), the reciprocal of the projective endpoint is at most
 \(2\,2^{-n}\).  Including the two symmetric branches gives a vanishing
-dyadic tail scale.  The remaining theorem must still transport finite Cauchy
-rectangles through that reciprocal tail to the already completed full-line
-Cauchy raw.
+dyadic tail scale.  Lean now proves the finite reciprocal rectangle transport
+itself: on every positive cell \([p,r]\), the Cauchy rectangle on
+\([1/r,1/p]\) overlaps the original rectangle, and this lifts by rational
+sum algebra to every finite list of positive cells.  The remaining theorem is
+the ordered, sufficiently refined tail-partition assembly connecting that
+finite-list result to the already completed full-line Cauchy raw.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,
