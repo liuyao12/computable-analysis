@@ -2944,10 +2944,37 @@ theorem cauchyAffineIntervals_covers
       exact (Rat.add_le_add_left (c := offset)).2
         (Rat.mul_le_mul_of_nonneg_left hpr hscale)
 
+private theorem cauchyAffineIntervals_squareSum
+    (offset scale : Rat) (intervals : List (Rat × Rat)) :
+    ArctanGeometry.intervalSquareSum
+        (cauchyAffineIntervals offset scale intervals) =
+      scale * scale * ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [cauchyAffineIntervals, ArctanGeometry.intervalSquareSum]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [cauchyAffineIntervals, ArctanGeometry.intervalSquareSum]
+      rw [ih]
+      have hdiff : offset + scale * r - (offset + scale * p) =
+          scale * (r - p) := by
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+      rw [hdiff]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 /-- The dyadic midpoint partition of a rational tail interval `[a,1]`. -/
 def cauchyTailDyadicIntervals (a : Rat) (n : Nat) : List (Rat × Rat) :=
   cauchyAffineIntervals a (1 - a)
     (ArctanGeometry.arctanAreaLoopState 1 n).intervals
+
+theorem cauchyTailDyadicIntervals_squareSum (a : Rat) (n : Nat) :
+    ArctanGeometry.intervalSquareSum (cauchyTailDyadicIntervals a n) =
+      (1 - a) * (1 - a) / (((2 ^ n : Nat) : Rat)) := by
+  unfold cauchyTailDyadicIntervals
+  rw [cauchyAffineIntervals_squareSum,
+    ArctanGeometry.arctanAreaLoopState_squareSum]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc]
 
 /-- The explicit tail mesh covers exactly its intended rational interval. -/
 theorem cauchyTailDyadicIntervals_covers
@@ -3024,6 +3051,123 @@ theorem cauchyReciprocalTailDyadicIntervals_overlaps
         (cauchyTailDyadicIntervals a n)) := by
   exact cauchyReciprocalReversedIntegralSum_overlaps _
     (cauchyTailDyadicIntervals_positive ha0 ha1 n)
+
+/-- A split dyadic mesh of the unit interval: a midpoint mesh on `[0,a]`
+followed by the affine midpoint mesh on `[a,1]`. -/
+def cauchySplitDyadicIntervals (a : Rat) (n : Nat) : List (Rat × Rat) :=
+  (ArctanGeometry.arctanAreaLoopState a n).intervals ++
+    cauchyTailDyadicIntervals a n
+
+private theorem cauchyIntervalSquareSum_append
+    (left right : List (Rat × Rat)) :
+    ArctanGeometry.intervalSquareSum (left ++ right) =
+      ArctanGeometry.intervalSquareSum left +
+        ArctanGeometry.intervalSquareSum right := by
+  induction left with
+  | nil =>
+      simp only [List.nil_append, ArctanGeometry.intervalSquareSum]
+      rw [Rat.zero_add]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, ArctanGeometry.intervalSquareSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+/-- The split unit mesh retains the usual dyadic squared-mesh bound, uniformly
+in the rational split point. -/
+theorem cauchySplitDyadicIntervals_squareSum
+    (a : Rat) (n : Nat) :
+    ArctanGeometry.intervalSquareSum (cauchySplitDyadicIntervals a n) =
+      (a * a + (1 - a) * (1 - a)) / (((2 ^ n : Nat) : Rat)) := by
+  unfold cauchySplitDyadicIntervals
+  rw [cauchyIntervalSquareSum_append,
+    ArctanGeometry.arctanAreaLoopState_squareSum,
+    cauchyTailDyadicIntervals_squareSum]
+  rw [Rat.div_def]
+  grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem cauchySplitDyadicIntervals_squareSum_le
+    {a : Rat} (ha0 : 0 <= a) (ha1 : a <= 1) (n : Nat) :
+    ArctanGeometry.intervalSquareSum (cauchySplitDyadicIntervals a n) <=
+      1 / (((2 ^ n : Nat) : Rat)) := by
+  have hprod : 0 <= a * (1 - a) := by
+    apply Rat.mul_nonneg ha0
+    grind [Rat.sub_eq_add_neg]
+  have hsum : a * a + (1 - a) * (1 - a) <= 1 := by
+    calc
+      a * a + (1 - a) * (1 - a) = 1 - 2 * (a * (1 - a)) := by
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+          Rat.mul_comm]
+      _ <= 1 := by grind [Rat.sub_eq_add_neg]
+  have hDpos : 0 < (((2 ^ n : Nat) : Rat)) :=
+    (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  rw [cauchySplitDyadicIntervals_squareSum, Rat.div_def, Rat.div_def]
+  exact Rat.mul_le_mul_of_nonneg_right hsum
+    (Rat.le_of_lt ((Rat.inv_pos).2 hDpos))
+
+/-- The split mesh is an ordered rational cover of the full unit interval. -/
+theorem cauchySplitDyadicIntervals_covers
+    {a : Rat} (ha0 : 0 <= a) (ha1 : a <= 1) (n : Nat) :
+    ArctanGeometry.CoversInterval 0 1 (cauchySplitDyadicIntervals a n) := by
+  exact ArctanGeometry.CoversInterval.append
+    (ArctanGeometry.arctanAreaLoopState_intervals_covers ha0 n)
+    (cauchyTailDyadicIntervals_covers ha0 ha1 n)
+
+theorem cauchySplitDyadicIntervals_unit
+    {a : Rat} (ha0 : 0 <= a) (ha1 : a <= 1) (n : Nat) :
+    ArctanGeometry.UnitIntervals (cauchySplitDyadicIntervals a n) := by
+  exact ArctanGeometry.CoversInterval.unit
+    (a := (0 : Rat)) (b := 1) (by native_decide) (by native_decide)
+    (cauchySplitDyadicIntervals_covers ha0 ha1 n)
+
+theorem cauchySplitDyadicIntervals_integral_width_le
+    {a : Rat} (ha0 : 0 <= a) (ha1 : a <= 1) (n : Nat) :
+    (ArctanGeometry.integralSumInterval
+      (cauchySplitDyadicIntervals a n)).width <=
+      2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  calc
+    (ArctanGeometry.integralSumInterval
+      (cauchySplitDyadicIntervals a n)).width <=
+        2 * ArctanGeometry.intervalSquareSum
+          (cauchySplitDyadicIntervals a n) :=
+      ArctanGeometry.integralSumInterval_width_le_two_squareSum _
+        (cauchySplitDyadicIntervals_unit ha0 ha1 n)
+    _ <= 2 * (1 / (((2 ^ n : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (cauchySplitDyadicIntervals_squareSum_le ha0 ha1 n)
+        (by native_decide)
+
+/-- Any split unit mesh has an overlapping Cauchy rectangle bracket with the
+standard midpoint mesh.  This is a finite cover comparison, not an appeal to
+an integral uniqueness principle. -/
+theorem cauchySplitDyadicIntervals_overlaps_standard
+    {a : Rat} (ha0 : 0 <= a) (ha1 : a <= 1) (splitStage standardStage : Nat) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval
+        (cauchySplitDyadicIntervals a splitStage))
+      (ArctanGeometry.integralSumInterval
+        (ArctanGeometry.arctanAreaLoopState 1 standardStage).intervals) := by
+  exact ArctanGeometry.integralSumInterval_overlaps_of_covers
+    (by native_decide) _ _
+    (cauchySplitDyadicIntervals_covers ha0 ha1 splitStage)
+    (ArctanGeometry.arctanAreaLoopState_intervals_covers
+      (x := (1 : Rat)) (by native_decide) standardStage)
+
+/-- The standard unit mesh followed by the reversed reciprocal tail mesh. -/
+def cauchyUnitReciprocalTailDyadicIntervals (a : Rat) (n : Nat) :
+    List (Rat × Rat) :=
+  (ArctanGeometry.arctanAreaLoopState 1 n).intervals ++
+    cauchyReciprocalReversedIntervals (cauchyTailDyadicIntervals a n)
+
+/-- This concatenated mesh reaches from `0` to the reciprocal tail endpoint. -/
+theorem cauchyUnitReciprocalTailDyadicIntervals_covers
+    {a : Rat} (ha0 : 0 < a) (ha1 : a <= 1) (n : Nat) :
+    ArctanGeometry.CoversInterval 0 (1 / a)
+      (cauchyUnitReciprocalTailDyadicIntervals a n) := by
+  exact ArctanGeometry.CoversInterval.append
+    (ArctanGeometry.arctanAreaLoopState_intervals_covers
+      (x := (1 : Rat)) (by native_decide) n)
+    (cauchyReciprocalTailDyadicIntervals_covers ha0 ha1 n)
 
 /-- A rational compactification of an even full-line integral by folding the
 positive reciprocal tail back onto the unit interval.
@@ -4331,6 +4475,25 @@ theorem projectiveCompactDyadicCauchyTailIntervals_overlaps
     (projectiveCompactDyadicCauchyTailStart_pos n)
     (projectiveCompactDyadicCauchyTailStart_le_one n) mesh
 
+/-- Appending the unit Cauchy mesh to the projective reciprocal tail gives a
+single explicit positive-side Cauchy cover from `0` to the compact chart's
+finite endpoint. -/
+theorem projectiveCompactDyadicCauchyAssemblyIntervals_covers
+    (n mesh : Nat) :
+    ArctanGeometry.CoversInterval 0
+      (projectiveCompactCoordinate (projectiveCompactDyadicEndpoint (n + 2)))
+      (cauchyUnitReciprocalTailDyadicIntervals
+        (projectiveCompactDyadicCauchyTailStart n) mesh) := by
+  have h := cauchyUnitReciprocalTailDyadicIntervals_covers
+    (projectiveCompactDyadicCauchyTailStart_pos n)
+    (projectiveCompactDyadicCauchyTailStart_le_one n) mesh
+  have hrecip : 1 / projectiveCompactDyadicCauchyTailStart n =
+      projectiveCompactCoordinate (projectiveCompactDyadicEndpoint (n + 2)) := by
+    unfold projectiveCompactDyadicCauchyTailStart
+    simp only [Rat.div_def, Rat.one_mul, Rat.inv_inv]
+  rw [hrecip] at h
+  exact h
+
 /-- At the dyadic endpoint, the projective denominator retains at least one
 dyadic unit of clearance from zero. -/
 theorem projectiveCompactDyadicEndpoint_denominator_ge (n : Nat) :
@@ -4369,6 +4532,50 @@ theorem projectiveCompactDyadicEndpoint_denominator_ge (n : Nat) :
     _ = 1 - (1 - t) * (1 - t) := by
       grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
         Rat.mul_comm]
+
+/-- The reciprocal projective tail start is not merely positive: its dyadic
+size is bounded below as well.  This makes it possible to refine the
+reciprocal tail fast enough to control the large-coordinate cells. -/
+theorem projectiveCompactDyadicCauchyTailStart_ge
+    (n : Nat) :
+    1 / (((2 ^ (n + 2) : Nat) : Rat)) <=
+      projectiveCompactDyadicCauchyTailStart n := by
+  let s : Rat := projectiveCompactDyadicEndpoint (n + 2)
+  let d : Rat := 1 - s * s
+  let t : Rat := 1 / (((2 ^ (n + 2) : Nat) : Rat))
+  have hspos : 0 < s := by
+    dsimp [s]
+    have hhalf := projectiveCompactDyadicEndpoint_succ_ge_half (n + 1)
+    have hhalfpos : (0 : Rat) < 1 / 2 := by native_decide
+    simpa [Nat.add_assoc] using (by grind :
+      (0 : Rat) < projectiveCompactDyadicEndpoint ((n + 1) + 1))
+  have hsone : s <= 1 := by
+    dsimp [s]
+    exact Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one _)
+  have hdin : t <= d := by
+    simpa [t, d, s] using projectiveCompactDyadicEndpoint_denominator_ge (n + 2)
+  have htpos : 0 < t := by
+    dsimp [t]
+    rw [Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2
+        (Nat.pow_pos (by omega : 0 < 2))))
+  have hdinv : 1 <= s⁻¹ := by
+    apply Rat.le_of_mul_le_mul_right (c := s)
+    · calc
+        1 * s = s := by grind
+        _ <= 1 := hsone
+        _ = s⁻¹ * s := by
+          rw [Rat.inv_mul_cancel _ (Rat.ne_of_gt hspos)]
+    · exact hspos
+  unfold projectiveCompactDyadicCauchyTailStart
+  rw [projectiveCompactCoordinate_reciprocal, Rat.div_def]
+  change t <= d * s⁻¹
+  calc
+    t <= d := hdin
+    _ = d * 1 := by grind
+    _ <= d * s⁻¹ := Rat.mul_le_mul_of_nonneg_left hdinv
+      (Rat.le_trans (Rat.le_of_lt htpos) hdin)
 
 /-- The remaining endpoint cell in the dyadic projective schedule has an
 explicit vanishing compact-density tail budget. -/
@@ -6383,6 +6590,30 @@ theorem reciprocalQuarticUnitDyadicCoreIntervals_covers
       have hjoin := ArctanGeometry.CoversInterval.append hleft hright
       rw [hzero, projectiveCompactDyadicEndpoint_succ] at hjoin
       simpa [reciprocalQuarticUnitDyadicCoreIntervals] using hjoin
+
+/-- The projective image of the literal trimmed compact core and the explicit
+unit-plus-reciprocal-tail mesh are two finite Cauchy rectangle covers of the
+same positive interval. -/
+theorem projectiveCompactDyadicCoreIntervals_overlaps_cauchyAssembly
+    (n mesh : Nat) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval
+        (projectiveCompactIntervals
+          (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))))
+      (ArctanGeometry.integralSumInterval
+        (cauchyUnitReciprocalTailDyadicIntervals
+          (projectiveCompactDyadicCauchyTailStart n) mesh)) := by
+  have hcore := projectiveCompactIntervals_covers 0
+    (projectiveCompactDyadicEndpoint (n + 2))
+    (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))
+    (by native_decide) (projectiveCompactDyadicEndpoint_lt_one _)
+    (reciprocalQuarticUnitDyadicCoreIntervals_covers (n + 2))
+  have hzero : projectiveCompactCoordinate (0 : Rat) = 0 := by
+    native_decide
+  rw [hzero] at hcore
+  exact ArctanGeometry.integralSumInterval_overlaps_of_covers
+    (by native_decide) _ _ hcore
+    (projectiveCompactDyadicCauchyAssemblyIntervals_covers n mesh)
 
 /-- The literal trimmed dyadic core is now within the proved projective
 quadrature bridge: its factor-two compact bracket overlaps the matching

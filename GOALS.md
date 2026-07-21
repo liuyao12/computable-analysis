@@ -276,9 +276,19 @@ not a description of the current module graph. The checked blueprint
   its reciprocal is exactly the finite projective coordinate.  Consequently
   `projectiveCompactDyadicCauchyTailIntervals_covers` supplies an explicit
   ordered mesh from `1` to that coordinate, and its finite brackets overlap
-  the compact-side tail.  What remains is to combine this tail with the core
-  mesh, then turn the resulting shrinking finite envelopes into a raw-level
-  comparison with the existing full-line Cauchy raw.
+  the compact-side tail.  The two finite assembly covers are now formalized:
+  `cauchySplitDyadicIntervals` partitions `[0,1]` at any rational tail start
+  and has a Cauchy bracket overlapping the canonical unit mesh; meanwhile
+  `cauchyUnitReciprocalTailDyadicIntervals` joins that canonical unit mesh to
+  the ordered reciprocal tail.  At compact stage `n+2`,
+  `projectiveCompactDyadicCoreIntervals_overlaps_cauchyAssembly` proves that
+  this latter mesh and the literal projective core cover exactly the same
+  Cauchy interval.  The split source mesh has squared mesh at most `2^(-n)`
+  and integral-box width at most `2 * 2^(-n)`.  Finally the tail start has a
+  matching lower dyadic bound `2^(-(n+2))`, which is the remaining input for
+  choosing a sufficiently fast reciprocal-tail refinement schedule.  What
+  remains is to prove the corresponding far-tail width bound, combine the
+  shrinking finite envelopes, and then package that comparison at raw level.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
