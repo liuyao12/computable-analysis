@@ -924,14 +924,14 @@ private theorem squareUnit_interval_width_scale (w : Rat) (n : Nat)
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 /-- Squaring is interval-regular on `[0,1]`, with a direct rational modulus.
-The zero stage is exact on zero-width input boxes, matching the raw-real
-precision convention. -/
+The `n + 1` target convention lets stage zero retain a positive finite error
+budget, as required for non-exact interval functions such as square root. -/
 def squareOnUnit_intervalRegular : IntervalRegularOn squareOnUnit := by
   refine
     { evalInterval := fun I _ _ => squareUnitEvalInterval I
-      inputPrecision := fun n => 2 * n
+      inputPrecision := fun n => 2 * (n + 1)
       inputPrecision_pos := by
-        intro n hn
+        intro n
         omega
       output_width := ?_
       contains_point_values := ?_ }
@@ -955,16 +955,9 @@ def squareOnUnit_intervalRegular : IntervalRegularOn squareOnUnit := by
         I.width * (I.hi + I.lo) <= I.width * 2 :=
           Rat.mul_le_mul_of_nonneg_left hsum_le_two hwidth_nonneg
         _ = 2 * I.width := by grind [Rat.mul_comm]
-        _ <= 1 / (n : Rat) := by
-          by_cases hn : n = 0
-          · subst n
-            have hinvzero : 1 / ((2 * (0 : Nat) : Nat) : Rat) = 0 := by
-              native_decide
-            rw [hinvzero] at hwidth
-            have hzero : I.width = 0 := Rat.le_antisymm hwidth hwidth_nonneg
-            rw [hzero]
-            native_decide
-          · exact squareUnit_interval_width_scale I.width n hn hwidth
+        _ <= 1 / (((n + 1 : Nat) : Rat)) :=
+          squareUnit_interval_width_scale I.width (n + 1)
+            (Nat.succ_ne_zero n) hwidth
   · intro I hI x hx n hxlo hxhi
     rcases hI with ⟨hIlo, hord, hIhi⟩
     change (0 : Rat) <= I.lo at hIlo
@@ -1080,6 +1073,421 @@ def sqrtOnUnitBisectionSearch (q : Rat) (hq : inDomainInterval 0 1 q) :
     change sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).lo <= q /\
       q <= sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).hi
     exact ⟨hspec.2.2.1, hspec.2.2.2⟩
+
+/-- The square-root branch uses a fixed, cofinal fast schedule.  The extra
+factor is not a change of mathematical value: it leaves enough rational error
+budget to turn the pointwise bisection boxes into a uniform interval evaluator
+on `[0,1]`. -/
+def sqrtOnUnitSchedule : RealRaw.StageSchedule where
+  stage := fun n => 64 * (n + 1)
+  monotone := by
+    intro i j hij
+    omega
+  cofinal := by
+    intro target
+    refine ⟨target, ?_⟩
+    omega
+
+/-- Square root as a represented rational-domain function on `[0,1]`.  At a
+point it is the existing certified rational bisection algorithm, merely read
+through `sqrtOnUnitSchedule`; hence it introduces neither an ambient real
+number nor a completeness principle. -/
+def sqrtOnUnit : FunctionOnInterval where
+  raw :=
+    { definedAt := sqrtDomain
+      compute := fun q h n =>
+        (sqrtApproxOnDomain q h (sqrtOnUnitSchedule.stage n)) }
+  lower := 0
+  upper := 1
+  defined_on := by
+    intro q hq
+    exact sqrtDomain_of_unit hq
+  valid_on := by
+    intro q hq
+    have hscheduled := RealRaw.schedule_valid
+      (sqrtRaw q hq) (sqrtRaw_valid q hq) sqrtOnUnitSchedule
+    simpa [sqrtRaw, RealRaw.schedule] using hscheduled
+
+/-- Point evaluation of the unit square-root branch is exactly the scheduled
+rational bisection box. -/
+theorem sqrtOnUnit_compute (q : Rat) (hq : inDomainInterval 0 1 q) (n : Nat) :
+    sqrtOnUnit.compute q hq n =
+      sqrtApproxOnDomain q (sqrtDomain_of_unit hq) (sqrtOnUnitSchedule.stage n) :=
+  rfl
+
+/-- On the unit input range the generic bisection width constant is the
+literal finite constant two. -/
+private theorem sqrtWidthConstant_eq_two_on_unit
+    {q : Rat} (hq : inDomainInterval 0 1 q) :
+    sqrtWidthConstant q = 2 := by
+  simp [sqrtWidthConstant, sqrtUpperBound_eq_one hq.2]
+
+/-- A unit-range bisection box at stage `m` has width at most `2/(m+1)`.
+This is the uniform quantitative fact used by the interval evaluator below. -/
+private theorem sqrtApproxOnUnit_width_le_two_over_succ
+    (q : Rat) (hq : inDomainInterval 0 1 q) (m : Nat) :
+    (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) m).width <=
+      2 / (((m + 1 : Nat) : Rat)) := by
+  have h := sqrtApproxOnDomain_width_le_nat_over_succ q
+    (sqrtDomain_of_unit hq) m
+  rw [sqrtWidthConstant_eq_two_on_unit hq] at h
+  exact h
+
+/-- The scheduled unit square-root point boxes fit within the explicit
+`1/(32(n+1))` local error budget. -/
+private theorem sqrtOnUnit_width_le_errorBudget
+    (q : Rat) (hq : inDomainInterval 0 1 q) (n : Nat) :
+    (sqrtOnUnit.compute q hq n).width <=
+      1 / ((32 * (n + 1 : Nat) : Nat) : Rat) := by
+  rw [sqrtOnUnit_compute]
+  have hwidth := sqrtApproxOnUnit_width_le_two_over_succ q hq
+    (sqrtOnUnitSchedule.stage n)
+  have hden_le : 64 * (n + 1) <= 64 * (n + 1) + 1 := Nat.le_succ _
+  have hrecip :
+      1 / (((64 * (n + 1) + 1 : Nat) : Rat)) <=
+        1 / (((64 * (n + 1) : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone
+      (by omega : 0 < 64 * (n + 1))
+      (by omega : 0 < 64 * (n + 1) + 1) hden_le
+  calc
+    (sqrtApproxOnDomain q (sqrtDomain_of_unit hq)
+        (sqrtOnUnitSchedule.stage n)).width <=
+        2 / (((sqrtOnUnitSchedule.stage n + 1 : Nat) : Rat)) := hwidth
+    _ = 2 * (1 / (((64 * (n + 1) + 1 : Nat) : Rat))) := by
+      change 2 / (((64 * (n + 1) + 1 : Nat) : Rat)) = _
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc]
+    _ <= 2 * (1 / (((64 * (n + 1) : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left hrecip (by native_decide)
+    _ = 1 / ((32 * (n + 1 : Nat) : Nat) : Rat) := by
+      repeat rw [Rat.div_def]
+      have hcast64 : ((64 * (n + 1) : Nat) : Rat) =
+          (64 : Rat) * ((n + 1 : Nat) : Rat) :=
+        Rat.natCast_mul 64 (n + 1)
+      have hcast32 : ((32 * (n + 1) : Nat) : Rat) =
+          (32 : Rat) * ((n + 1 : Nat) : Rat) :=
+        Rat.natCast_mul 32 (n + 1)
+      rw [hcast64, hcast32, Rat.inv_mul_rev, Rat.inv_mul_rev]
+      have hscale : (2 : Rat) * (64 : Rat)⁻¹ = (32 : Rat)⁻¹ := by
+        native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The explicit pointwise error budget for the scheduled unit square-root
+branch. -/
+private def sqrtUnitErrorBudget (n : Nat) : Rat :=
+  1 / ((32 * (n + 1 : Nat) : Nat) : Rat)
+
+/-- The input modulus used by the square-root interval evaluator.  The square
+is essential near zero: square root is uniformly continuous on `[0,1]`, but
+does not have a global linear modulus there. -/
+private def sqrtUnitInputPrecision (n : Nat) : Nat :=
+  16 * (n + 1) * (n + 1)
+
+/-- An interval enclosure for all scheduled square-root point boxes over a
+subinterval of `[0,1]`.  The endpoint bisections provide the main bracket;
+the explicit pointwise budget makes it an enclosure for every rational point
+between them. -/
+private def sqrtUnitEvalInterval (I : QInterval)
+    (hI : subintervalOf I 0 1) (n : Nat) : QInterval :=
+  let hlo : inDomainInterval 0 1 I.lo := ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+  let hhi : inDomainInterval 0 1 I.hi := ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩
+  { lo := (sqrtOnUnit.compute I.lo hlo n).lo - sqrtUnitErrorBudget n
+    hi := (sqrtOnUnit.compute I.hi hhi n).hi + sqrtUnitErrorBudget n }
+
+/-- The endpoint-expanded square-root interval contains every scheduled
+pointwise bisection box in its input interval. -/
+private theorem sqrtUnitEvalInterval_contains_point
+    (I : QInterval) (hI : subintervalOf I 0 1)
+    (x : Rat) (hx : inDomainInterval 0 1 x)
+    (n : Nat) (hxlo : I.lo <= x) (hxhi : x <= I.hi) :
+    (sqrtUnitEvalInterval I hI n).ContainsInterval
+      (sqrtOnUnit.compute x hx n) := by
+  let hlo : inDomainInterval 0 1 I.lo :=
+    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+  let hhi : inDomainInterval 0 1 I.hi :=
+    ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩
+  let A := sqrtOnUnit.compute I.lo hlo n
+  let B := sqrtOnUnit.compute I.hi hhi n
+  let Y := sqrtOnUnit.compute x hx n
+  let D := sqrtUnitErrorBudget n
+  have hA : SqrtIntervalSpec I.lo A := by
+    dsimp [A]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec I.lo (sqrtDomain_of_unit hlo)
+      (sqrtOnUnitSchedule.stage n)
+  have hB : SqrtIntervalSpec I.hi B := by
+    dsimp [B]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec I.hi (sqrtDomain_of_unit hhi)
+      (sqrtOnUnitSchedule.stage n)
+  have hY : SqrtIntervalSpec x Y := by
+    dsimp [Y]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec x (sqrtDomain_of_unit hx)
+      (sqrtOnUnitSchedule.stage n)
+  have hYwidth : Y.width <= D := by
+    dsimp [Y, D, sqrtUnitErrorBudget]
+    exact sqrtOnUnit_width_le_errorBudget x hx n
+  have hAlo_le_Yhi : A.lo <= Y.hi := by
+    have hYhi_nonneg : 0 <= Y.hi := Rat.le_trans hY.1 hY.2.1
+    apply le_of_sq_le_sq_of_nonneg_right hYhi_nonneg
+    exact Rat.le_trans hA.2.2.1
+      (Rat.le_trans hxlo hY.2.2.2)
+  have hYlo_le_Bhi : Y.lo <= B.hi := by
+    have hBhi_nonneg : 0 <= B.hi := Rat.le_trans hB.1 hB.2.1
+    apply le_of_sq_le_sq_of_nonneg_right hBhi_nonneg
+    exact Rat.le_trans hY.2.2.1
+      (Rat.le_trans hxhi hB.2.2.2)
+  have hlo : A.lo - D <= Y.lo := by
+    unfold QInterval.width at hYwidth
+    grind [Rat.sub_eq_add_neg]
+  have hhi : Y.hi <= B.hi + D := by
+    unfold QInterval.width at hYwidth
+    grind [Rat.sub_eq_add_neg]
+  unfold QInterval.ContainsInterval
+  simp [sqrtUnitEvalInterval, A, B, Y, D, hlo, hhi]
+
+private theorem sqrtUnitErrorBudget_pos (n : Nat) :
+    0 < sqrtUnitErrorBudget n := by
+  unfold sqrtUnitErrorBudget
+  exact one_div_nat_pos (by omega)
+
+private theorem sqrtUnitInputPrecision_pos (n : Nat) :
+    0 < sqrtUnitInputPrecision n := by
+  unfold sqrtUnitInputPrecision
+  exact Nat.mul_pos
+    (Nat.mul_pos (by omega) (Nat.succ_pos n))
+    (Nat.succ_pos n)
+
+/-- The quadratic input modulus is exactly the square of the radius used in
+the elementary square-root gap estimate. -/
+private theorem sqrtUnitInputPrecision_inverse_eq_radius_sq (n : Nat) :
+    1 / ((sqrtUnitInputPrecision n : Nat) : Rat) =
+      sq (1 / ((4 * (n + 1 : Nat) : Nat) : Rat)) := by
+  let T : Rat := ((n + 1 : Nat) : Rat)
+  have hcast16 : ((16 * (n + 1) * (n + 1) : Nat) : Rat) =
+      (16 : Rat) * T * T := by
+    dsimp [T]
+    repeat rw [Rat.natCast_mul]
+    have h16 : ((16 : Nat) : Rat) = (16 : Rat) := by
+      native_decide
+    rw [h16]
+  have hcast4 : ((4 * (n + 1) : Nat) : Rat) = (4 : Rat) * T := by
+    dsimp [T]
+    exact Rat.natCast_mul 4 (n + 1)
+  have hnum : (16 : Rat)⁻¹ = (4 : Rat)⁻¹ * (4 : Rat)⁻¹ := by
+    native_decide
+  unfold sqrtUnitInputPrecision sq
+  repeat rw [Rat.div_def]
+  rw [hcast16, hcast4]
+  repeat rw [Rat.inv_mul_rev]
+  rw [hnum]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The radius `1/(4(n+1))` is eight of the scheduled pointwise error
+budgets. -/
+private theorem sqrtUnitRadius_eq_eight_errorBudget (n : Nat) :
+    1 / ((4 * (n + 1 : Nat) : Nat) : Rat) =
+      8 * sqrtUnitErrorBudget n := by
+  let T : Rat := ((n + 1 : Nat) : Rat)
+  have hcast4 : ((4 * (n + 1) : Nat) : Rat) = (4 : Rat) * T := by
+    dsimp [T]
+    exact Rat.natCast_mul 4 (n + 1)
+  have hcast32 : ((32 * (n + 1) : Nat) : Rat) = (32 : Rat) * T := by
+    dsimp [T]
+    exact Rat.natCast_mul 32 (n + 1)
+  have hnum : (4 : Rat)⁻¹ = 8 * (32 : Rat)⁻¹ := by
+    native_decide
+  unfold sqrtUnitErrorBudget
+  repeat rw [Rat.div_def]
+  rw [hcast4, hcast32]
+  repeat rw [Rat.inv_mul_rev]
+  rw [hnum]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem sqrtUnit_thirteen_errorBudget_le_target (n : Nat) :
+    13 * sqrtUnitErrorBudget n <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  let T : Rat := ((n + 1 : Nat) : Rat)
+  have hTpos : 0 < T := by
+    dsimp [T]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hTne : T ≠ 0 := Rat.ne_of_gt hTpos
+  have hprodpos : 0 < (32 : Rat) * T :=
+    Rat.mul_pos (by native_decide) hTpos
+  have hcast32 : ((32 * (n + 1) : Nat) : Rat) = (32 : Rat) * T := by
+    dsimp [T]
+    exact Rat.natCast_mul 32 (n + 1)
+  apply Rat.le_of_mul_le_mul_right (c := (32 : Rat) * T)
+  · unfold sqrtUnitErrorBudget
+    repeat rw [Rat.div_def]
+    rw [hcast32]
+    calc
+      (13 * (1 * ((32 : Rat) * T)⁻¹)) * ((32 : Rat) * T) = 13 := by
+        calc
+          (13 * (1 * ((32 : Rat) * T)⁻¹)) * ((32 : Rat) * T) =
+              13 * (((32 : Rat) * T)⁻¹ * ((32 : Rat) * T)) := by
+                grind [Rat.mul_assoc, Rat.mul_comm]
+          _ = 13 := by
+            rw [Rat.inv_mul_cancel _ (Rat.ne_of_gt hprodpos)]
+            grind
+      _ <= 32 := by native_decide
+      _ = (1 * T⁻¹) * ((32 : Rat) * T) := by
+        calc
+          (32 : Rat) = 32 * (T⁻¹ * T) := by
+            rw [Rat.inv_mul_cancel _ hTne]
+            grind
+          _ = (1 * T⁻¹) * ((32 : Rat) * T) := by
+            grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hprodpos
+
+/-- The square-root interval enclosure has the literal `1/(n+1)` output
+width required by `IntervalRegularOn`, provided the input box has the
+quadratic modulus `1/(16(n+1)^2)`. -/
+private theorem sqrtUnitEvalInterval_width_le
+    (I : QInterval) (hI : subintervalOf I 0 1) (n : Nat)
+    (hinput : I.width <= 1 / ((sqrtUnitInputPrecision n : Nat) : Rat)) :
+    (sqrtUnitEvalInterval I hI n).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  have hIlo : 0 <= I.lo := hI.1
+  have hIord : I.lo <= I.hi := hI.2.1
+  have hIhi : I.hi <= 1 := hI.2.2
+  let hlo : inDomainInterval 0 1 I.lo :=
+    ⟨hIlo, Rat.le_trans hIord hIhi⟩
+  let hhi : inDomainInterval 0 1 I.hi :=
+    ⟨Rat.le_trans hIlo hIord, hIhi⟩
+  let W : Rat := I.width
+  let hW : inDomainInterval 0 1 W := by
+    have hWnonneg : 0 <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hWle : I.width <= 1 := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    exact ⟨hWnonneg, hWle⟩
+  let A := sqrtOnUnit.compute I.lo hlo n
+  let B := sqrtOnUnit.compute I.hi hhi n
+  let S := sqrtOnUnit.compute W hW n
+  let D := sqrtUnitErrorBudget n
+  let R : Rat := 1 / ((4 * (n + 1 : Nat) : Nat) : Rat)
+  have hA : SqrtIntervalSpec I.lo A := by
+    dsimp [A]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec I.lo (sqrtDomain_of_unit hlo)
+      (sqrtOnUnitSchedule.stage n)
+  have hB : SqrtIntervalSpec I.hi B := by
+    dsimp [B]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec I.hi (sqrtDomain_of_unit hhi)
+      (sqrtOnUnitSchedule.stage n)
+  have hS : SqrtIntervalSpec W S := by
+    dsimp [S]
+    rw [sqrtOnUnit_compute]
+    exact sqrtApproxOnDomain_spec W (sqrtDomain_of_unit hW)
+      (sqrtOnUnitSchedule.stage n)
+  have hAwidth : A.width <= D := by
+    dsimp [A, D, sqrtUnitErrorBudget]
+    exact sqrtOnUnit_width_le_errorBudget I.lo hlo n
+  have hBwidth : B.width <= D := by
+    dsimp [B, D, sqrtUnitErrorBudget]
+    exact sqrtOnUnit_width_le_errorBudget I.hi hhi n
+  have hSwidth : S.width <= D := by
+    dsimp [S, D, sqrtUnitErrorBudget]
+    exact sqrtOnUnit_width_le_errorBudget W hW n
+  have hWleRsq : W <= sq R := by
+    dsimp [W, R]
+    calc
+      I.width <= 1 / ((sqrtUnitInputPrecision n : Nat) : Rat) := hinput
+      _ = sq (1 / ((4 * (n + 1 : Nat) : Nat) : Rat)) :=
+        sqrtUnitInputPrecision_inverse_eq_radius_sq n
+  have hRnonneg : 0 <= R := by
+    dsimp [R]
+    exact Rat.le_of_lt (one_div_nat_pos (by omega))
+  have hSlo_le_R : S.lo <= R :=
+    SqrtIntervalSpec.lo_le_of_sq_le hS hRnonneg hWleRsq
+  have hShi_le_R_add_D : S.hi <= R + D := by
+    unfold QInterval.width at hSwidth
+    grind [Rat.sub_eq_add_neg]
+  let C : Rat := B.lo - A.hi
+  have hC_le_Shi : C <= S.hi := by
+    by_cases hCnonpos : C <= 0
+    · exact Rat.le_trans hCnonpos (Rat.le_trans hS.1 hS.2.1)
+    · have hCnonneg : 0 <= C := Rat.le_of_lt (by grind)
+      have hC_le_sum : C <= B.lo + A.hi := by
+        dsimp [C]
+        have hAhi_nonneg : 0 <= A.hi := Rat.le_trans hA.1 hA.2.1
+        grind [Rat.sub_eq_add_neg]
+      have hdiffSq : sq B.lo - sq A.hi <= W := by
+        have hBloSq : sq B.lo <= I.hi := hB.2.2.1
+        have hAhiSq : I.lo <= sq A.hi := hA.2.2.2
+        dsimp [W]
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg]
+      have hCsq : sq C <= W := by
+        calc
+          sq C = C * C := rfl
+          _ <= C * (B.lo + A.hi) :=
+            Rat.mul_le_mul_of_nonneg_left hC_le_sum hCnonneg
+          _ = sq B.lo - sq A.hi := by
+            dsimp [C, sq]
+            grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+              Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+          _ <= W := hdiffSq
+      have hShi_nonneg : 0 <= S.hi := Rat.le_trans hS.1 hS.2.1
+      apply le_of_sq_le_sq_of_nonneg_right hShi_nonneg
+      exact Rat.le_trans hCsq hS.2.2.2
+  have hC_le_R_add_D : C <= R + D :=
+    Rat.le_trans hC_le_Shi hShi_le_R_add_D
+  have htotal : B.hi + D - (A.lo - D) <= R + 5 * D := by
+    unfold QInterval.width at hAwidth hBwidth
+    dsimp [C] at hC_le_R_add_D
+    grind [Rat.sub_eq_add_neg]
+  have htarget : R + 5 * D <= 1 / ((n + 1 : Nat) : Rat) := by
+    rw [show R = 8 * D by
+      dsimp [R, D]
+      exact sqrtUnitRadius_eq_eight_errorBudget n]
+    calc
+      8 * D + 5 * D = 13 * D := by
+        grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+      _ <= 1 / ((n + 1 : Nat) : Rat) := by
+        dsimp [D]
+        exact sqrtUnit_thirteen_errorBudget_le_target n
+  unfold QInterval.width
+  simpa [sqrtUnitEvalInterval, A, B, D] using Rat.le_trans htotal htarget
+
+/-- Square root is interval-regular on the nonnegative unit interval.  Its
+quadratic input modulus is an entirely finite rational estimate, so the
+result supplies literal epsilon--delta continuity without topology or an
+ambient completed real line. -/
+def sqrtOnUnit_intervalRegular : IntervalRegularOn sqrtOnUnit where
+  evalInterval := sqrtUnitEvalInterval
+  inputPrecision := sqrtUnitInputPrecision
+  inputPrecision_pos := sqrtUnitInputPrecision_pos
+  output_width := by
+    intro I hI n hinput
+    constructor
+    · let hx : inDomainInterval 0 1 I.lo :=
+        ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
+      have hcontains := sqrtUnitEvalInterval_contains_point I hI I.lo hx n
+        Rat.le_refl hI.2.1
+      have hpoint := sqrtOnUnit.valid_on I.lo (sqrtOnUnit.defined_on I.lo hx)
+      have hpointWidth : 0 <= (sqrtOnUnit.compute I.lo hx n).width := by
+        simpa [FunctionOnInterval.compute] using hpoint.1 n
+      unfold QInterval.ContainsInterval at hcontains
+      unfold QInterval.width at hpointWidth ⊢
+      grind [Rat.sub_eq_add_neg]
+    · exact sqrtUnitEvalInterval_width_le I hI n hinput
+  contains_point_values := sqrtUnitEvalInterval_contains_point
+
+/-- The scheduled bisection square-root branch is a continuous function in
+the project's rational epsilon--delta sense. -/
+def sqrtOnUnit_continuous : ContinuousFunctionOnInterval where
+  function := sqrtOnUnit
+  regular := sqrtOnUnit_intervalRegular
+
+theorem sqrtOnUnit_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn sqrtOnUnit :=
+  sqrtOnUnit_intervalRegular.epsilonDeltaContinuous
 
 namespace Rat
 

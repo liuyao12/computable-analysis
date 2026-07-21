@@ -297,9 +297,11 @@ now fully verified: later stages are obtained by extra bisections inside the
 same initial isolating interval, and the explicit width is bounded by a
 rational constant divided by \(n+1\).  Consequently every rational input in
 the square-root domain has a certified optional square-root computation.
-These are the small
-interval-shrinking facts needed later for square-root path lengths such as the
-circumference computation.
+On the unit interval, a cofinal scheduled version additionally has a verified
+quadratic interval modulus and hence literal rational
+\(\varepsilon\)--\(\delta\) continuity.  These are the small interval-shrinking
+facts needed later for square-root path lengths such as the circumference
+computation and for inverse-trigonometric integral branches.
 \end{remark}
 
 \begin{remark}[Pseudocode convention]\label{rem:pseudocode-convention}
@@ -647,13 +649,13 @@ certificate assigns to each rational subinterval
   K=[r,s]\subseteq [a,b]
 \]
 and each stage \(n\) a rational output interval \(Y(K,n)\).  It supplies a
-modulus \(M:\N\to\N\), positive whenever \(n>0\), such that whenever
+modulus \(M:\N\to\N\), positive at every stage, such that whenever
 \[
   s-r\le \frac{1}{M(n)},
 \]
 and \(Y(K,n)=[u,v]\), we have
 \[
-  0\le v-u\le \frac{1}{n},
+  0\le v-u\le \frac{1}{n+1},
 \]
 and for every rational point \(x\in K\), the point-value interval
 \(F(x,n)\) is enclosed by \(Y(K,n)\).  Thus this is genuinely
@@ -702,6 +704,9 @@ arbitrarily flat.
 \lean{ComputableAnalysis.squareOnUnitRationalTarget}
 \lean{ComputableAnalysis.sqrtOnUnitBisectionSearch}
 \lean{ComputableAnalysis.sqrtRaw_spec}
+\lean{ComputableAnalysis.sqrtOnUnit}
+\lean{ComputableAnalysis.sqrtOnUnit_intervalRegular}
+\lean{ComputableAnalysis.sqrtOnUnit_epsilonDeltaContinuous}
 \uses{thm:constructive-inverse-function}
 The first concrete forward package is squaring on \([0,1]\): its evaluator is
 the exact rational box \([r^2,r^2]\), it has a direct rational interval
@@ -716,9 +721,15 @@ its squared interval overlaps the target box.  The exact target box is also
 formally enclosed by the square map's endpoint boxes at every stage, so it is
 a genuine certified range input to the inverse interface.  Extending that
 finite search uniformly to every represented target on the unit range is the
-next formal step; no inverse is asserted merely from monotonicity.  General
-algebraic functions will use isolating boxes, separation, and bisection or
-subdivision to construct selected branches.
+next inverse-function step; no inverse is asserted merely from monotonicity.
+Separately, Lean now packages the scheduled bisection evaluator itself as the
+interval-regular function \code{sqrtOnUnit}.  For an input interval of width
+at most \(1/(16(n+1)^2)\), its endpoint boxes, enlarged by certified bisection
+errors, enclose every point box and have width at most \(1/(n+1)\).  Thus
+\(\sqrt{\phantom{x}}\) on \([0,1]\) already satisfies the literal rational
+\(\varepsilon\)--\(\delta\) continuity predicate, without a topology import.
+General algebraic functions will use isolating boxes, separation, and
+bisection or subdivision to construct selected branches.
 \end{example}
 
 \begin{remark}[Continuous extension of represented functions]

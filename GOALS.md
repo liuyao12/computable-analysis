@@ -75,7 +75,9 @@ gates.
   whenever this module graph changes.
 - **Continuity and extension — partly checked.** `IntervalRegularOn` and
   `IntervalRegularOn.epsilonDeltaContinuous` give the literal rational
-  epsilon--delta theorem. `UniformRealFun.CertifiedExtension` states the
+  epsilon--delta theorem. The scheduled `sqrtOnUnit` bisection branch is now
+  a concrete non-exact interval-regular function, with a quadratic rational
+  input modulus on `[0,1]`. `UniformRealFun.CertifiedExtension` states the
   representation-safe extension contract. General closure and extension
   theorems remain work, so this gate is not yet a general function-calculus
   package.

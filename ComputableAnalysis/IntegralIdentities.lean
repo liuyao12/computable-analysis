@@ -7266,8 +7266,7 @@ theorem reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous :
   constructor <;> grind
 
 /-- A finite rational scaling fact used by the compact-density interval
-evaluator.  Splitting the zero stage is intentional: raw interval algorithms
-allow stage `0`, whose target width is exactly zero. -/
+evaluator. -/
 private theorem reciprocalQuartic_interval_width_scale (w : Rat) (n : Nat)
     (hn : n ≠ 0)
     (hw : w <= 1 / ((16 * n : Nat) : Rat)) :
@@ -7308,9 +7307,9 @@ def reciprocalQuarticMinusOneCompact_intervalRegular :
     IntervalRegularOn (reciprocalQuarticMinusOneCompactOnInterval (-1) 1) := by
   refine
     { evalInterval := fun I _ _ => reciprocalQuarticMinusOneCompact_evalInterval I
-      inputPrecision := fun n => 16 * n
+      inputPrecision := fun n => 16 * (n + 1)
       inputPrecision_pos := by
-        intro n hn
+        intro n
         omega
       output_width := ?_
       contains_point_values := ?_ }
@@ -7323,15 +7322,8 @@ def reciprocalQuarticMinusOneCompact_intervalRegular :
     · rw [reciprocalQuarticMinusOneCompact_evalInterval_width]
       exact Rat.mul_nonneg (by native_decide) hwidth_nonneg
     · rw [reciprocalQuarticMinusOneCompact_evalInterval_width]
-      by_cases hn : n = 0
-      · subst n
-        have hinvzero : 1 / ((16 * (0 : Nat) : Nat) : Rat) = 0 := by
-          native_decide
-        rw [hinvzero] at hwidth
-        have hzero : I.width = 0 := Rat.le_antisymm hwidth hwidth_nonneg
-        rw [hzero]
-        native_decide
-      · exact reciprocalQuartic_interval_width_scale I.width n hn hwidth
+      exact reciprocalQuartic_interval_width_scale I.width (n + 1)
+        (Nat.succ_ne_zero n) hwidth
   · intro I hI x hx n hxlo hxhi
     rcases hI with ⟨hIlo, hordered, hIhi⟩
     have hmid := QInterval.midpoint_mem hordered

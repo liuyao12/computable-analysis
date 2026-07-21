@@ -1648,12 +1648,12 @@ small rational subintervals can straddle the irrational pole. -/
 structure IntervalRegularOn (F : FunctionOnInterval) where
   evalInterval : (I : QInterval) -> subintervalOf I F.lower F.upper -> Nat -> QInterval
   inputPrecision : Nat -> Nat
-  inputPrecision_pos : forall n, 0 < n -> 0 < inputPrecision n
+  inputPrecision_pos : forall n, 0 < inputPrecision n
   output_width :
     forall I hI n,
       I.width <= (1 / ((inputPrecision n) : Rat)) ->
         0 <= (evalInterval I hI n).width /\
-        (evalInterval I hI n).width <= (1 / (n : Rat))
+        (evalInterval I hI n).width <= 1 / ((n + 1 : Nat) : Rat)
   contains_point_values :
     forall I hI x hx n,
       I.lo <= x ->
@@ -1663,20 +1663,19 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         (F.compute x hx n)
 
 /-- An interval-regular evaluator supplies literal rational
-epsilon-delta continuity.  The proof uses the finite denominator-derived
-stage `eps.den + 1`, encloses both point evaluations in one narrow image
-interval, and never invokes topology or a completed real line. -/
+epsilon-delta continuity.  The output target at stage `n` is `1/(n+1)`, so
+stage zero is meaningful for non-exact interval algorithms.  The proof uses
+the finite denominator-derived stage `eps.den`, encloses both point evaluations
+in one narrow image interval, and never invokes topology or a completed real
+line. -/
 theorem IntervalRegularOn.epsilonDeltaContinuous
     {F : FunctionOnInterval} (h : IntervalRegularOn F) :
     EpsilonDeltaContinuousOn F := by
   intro eps
-  let n : Nat := eps.val.den + 1
-  have hnpos : 0 < n := by
-    dsimp [n]
-    exact Nat.succ_pos _
+  let n : Nat := eps.val.den
   let delta : QPos :=
     { val := 1 / ((h.inputPrecision n : Nat) : Rat)
-      property := one_div_nat_pos (h.inputPrecision_pos n hnpos) }
+      property := one_div_nat_pos (h.inputPrecision_pos n) }
   refine ⟨delta, n, ?_⟩
   intro x y hx hy hxy
   let I : QInterval := { lo := min x y, hi := max x y }
@@ -1694,7 +1693,7 @@ theorem IntervalRegularOn.epsilonDeltaContinuous
     rw [hIwidth]
     simpa [delta] using hxy
   have houtput := h.output_width I hI n hsmall
-  have htarget : 1 / (n : Rat) <= eps.val := by
+  have htarget : 1 / (((n + 1 : Nat) : Rat)) <= eps.val := by
     dsimp [n]
     exact one_div_den_succ_le_of_pos eps.property
   have hYwidth : (h.evalInterval I hI n).width <= eps.val :=
