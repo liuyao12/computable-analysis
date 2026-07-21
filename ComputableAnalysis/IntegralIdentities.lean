@@ -6496,6 +6496,293 @@ private theorem projectiveCompactLipschitzUpperSum_append
       rw [ih]
       grind [Rat.add_assoc]
 
+/-- Splitting a compact-density Lipschitz cell at any rational interior point
+tightens its lower and upper brackets.  This is the arbitrary-split form of
+the midpoint refinement theorem, needed to compare differently scheduled
+finite partitions. -/
+private theorem projectiveCompactLipschitzCells_split
+    {p q r : Rat} (hp0 : 0 <= p) (hpq : p <= q) (hqr : q <= r) (hr1 : r <= 1) :
+    (r - p) * (reciprocalQuarticSymmetricDensity (-1) p - 8 * (r - p)) <=
+      (q - p) * (reciprocalQuarticSymmetricDensity (-1) p - 8 * (q - p)) +
+        (r - q) * (reciprocalQuarticSymmetricDensity (-1) q - 8 * (r - q)) /\
+    (q - p) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (q - p)) +
+        (r - q) * (reciprocalQuarticSymmetricDensity (-1) q + 8 * (r - q)) <=
+      (r - p) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p)) := by
+  have hq0 : 0 <= q := Rat.le_trans hp0 hpq
+  have hp1 : p <= 1 := Rat.le_trans hpq (Rat.le_trans hqr hr1)
+  have hq1 : q <= 1 := Rat.le_trans hqr hr1
+  have hpq0 : 0 <= q - p := by grind [Rat.sub_eq_add_neg]
+  have hqr0 : 0 <= r - q := by grind [Rat.sub_eq_add_neg]
+  have hdist : qabs (q - p) = q - p := qabs_eq_self_of_nonneg hpq0
+  have hlip := reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit
+    p q (by grind) hp1 (by grind) hq1
+  have hforward : reciprocalQuarticSymmetricDensity (-1) p -
+      reciprocalQuarticSymmetricDensity (-1) q <= 8 * (q - p) := by
+    calc
+      reciprocalQuarticSymmetricDensity (-1) p -
+          reciprocalQuarticSymmetricDensity (-1) q <=
+          qabs (reciprocalQuarticSymmetricDensity (-1) p -
+            reciprocalQuarticSymmetricDensity (-1) q) := self_le_qabs _
+      _ <= 8 * qabs (q - p) := hlip
+      _ = 8 * (q - p) := by rw [hdist]
+  have hreverse : reciprocalQuarticSymmetricDensity (-1) q -
+      reciprocalQuarticSymmetricDensity (-1) p <= 8 * (q - p) := by
+    calc
+      reciprocalQuarticSymmetricDensity (-1) q -
+          reciprocalQuarticSymmetricDensity (-1) p =
+          -(reciprocalQuarticSymmetricDensity (-1) p -
+            reciprocalQuarticSymmetricDensity (-1) q) := by
+            grind [Rat.sub_eq_add_neg]
+      _ <= qabs (-(reciprocalQuarticSymmetricDensity (-1) p -
+            reciprocalQuarticSymmetricDensity (-1) q)) := self_le_qabs _
+      _ = qabs (reciprocalQuarticSymmetricDensity (-1) p -
+            reciprocalQuarticSymmetricDensity (-1) q) := qabs_neg _
+      _ <= 8 * (q - p) := by simpa [hdist] using hlip
+  have hleftLower : reciprocalQuarticSymmetricDensity (-1) p - 8 * (r - p) <=
+      reciprocalQuarticSymmetricDensity (-1) p - 8 * (q - p) := by
+    have hwidth : q - p <= r - p := by grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hwidth
+      (by native_decide : (0 : Rat) <= 8)
+    grind [Rat.sub_eq_add_neg]
+  have hrightLower : reciprocalQuarticSymmetricDensity (-1) p - 8 * (r - p) <=
+      reciprocalQuarticSymmetricDensity (-1) q - 8 * (r - q) := by
+    grind [Rat.sub_eq_add_neg]
+  have hleftUpper : reciprocalQuarticSymmetricDensity (-1) p + 8 * (q - p) <=
+      reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p) := by
+    have hwidth : q - p <= r - p := by grind [Rat.sub_eq_add_neg]
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hwidth
+      (by native_decide : (0 : Rat) <= 8)
+    grind [Rat.sub_eq_add_neg]
+  have hrightUpper : reciprocalQuarticSymmetricDensity (-1) q + 8 * (r - q) <=
+      reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p) := by
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · have hleft := Rat.mul_le_mul_of_nonneg_left hleftLower hpq0
+    have hright := Rat.mul_le_mul_of_nonneg_left hrightLower hqr0
+    calc
+      (r - p) * (reciprocalQuarticSymmetricDensity (-1) p - 8 * (r - p)) =
+          (q - p) * (reciprocalQuarticSymmetricDensity (-1) p - 8 * (r - p)) +
+            (r - q) * (reciprocalQuarticSymmetricDensity (-1) p - 8 * (r - p)) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+                Rat.add_assoc, Rat.add_comm]
+      _ <= (q - p) * (reciprocalQuarticSymmetricDensity (-1) p - 8 * (q - p)) +
+            (r - q) * (reciprocalQuarticSymmetricDensity (-1) q - 8 * (r - q)) :=
+            rat_add_le_add hleft hright
+  · have hleft := Rat.mul_le_mul_of_nonneg_left hleftUpper hpq0
+    have hright := Rat.mul_le_mul_of_nonneg_left hrightUpper hqr0
+    calc
+      (q - p) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (q - p)) +
+          (r - q) * (reciprocalQuarticSymmetricDensity (-1) q + 8 * (r - q)) <=
+          (q - p) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p)) +
+            (r - q) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p)) :=
+            rat_add_le_add hleft hright
+      _ = (r - p) * (reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p)) := by
+            grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+              Rat.add_assoc, Rat.add_comm]
+
+private theorem projectiveCompactLipschitzUpperSum_nonnegative
+    (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    0 <= projectiveCompactLipschitzUpperSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [projectiveCompactLipschitzUpperSum]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hunit with ⟨_hp0, hpr, _hr1, hrest⟩
+      have hwidth : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+      have hvalue : 0 <= reciprocalQuarticSymmetricDensity (-1) p +
+          8 * (r - p) :=
+        Rat.add_nonneg (reciprocalQuarticSymmetricDensity_minus_one_nonneg _)
+          (Rat.mul_nonneg (by native_decide) hwidth)
+      have hcell : 0 <= (r - p) *
+          (reciprocalQuarticSymmetricDensity (-1) p + 8 * (r - p)) :=
+        Rat.mul_nonneg hwidth hvalue
+      exact Rat.add_nonneg hcell (ih hrest)
+
+private theorem projectiveCompactLipschitzLowerSum_eq_zero_of_covers_point
+    {a : Rat} {intervals : List (Rat × Rat)}
+    (hcover : ArctanGeometry.CoversInterval a a intervals) :
+    projectiveCompactLipschitzLowerSum intervals = 0 := by
+  induction intervals generalizing a with
+  | nil =>
+      rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hra_le : r <= a := ArctanGeometry.CoversInterval.start_le_end hrest
+      have hra : r = a := by grind
+      subst r
+      have htail := ih hrest
+      simp [projectiveCompactLipschitzLowerSum, htail]
+      grind [Rat.sub_eq_add_neg]
+
+/-- Lower and upper compact-density Lipschitz sums on any two ordered covers
+of the same rational subinterval have the expected cross inequality.  The
+proof refines only finite rational cells; no completed integral is used. -/
+private theorem projectiveCompactLipschitzLowerSum_le_upperSum_of_covers
+    {a b : Rat} (ha : 0 <= a) (hb : b <= 1)
+    (lower upper : List (Rat × Rat))
+    (hlower : ArctanGeometry.CoversInterval a b lower)
+    (hupper : ArctanGeometry.CoversInterval a b upper) :
+    projectiveCompactLipschitzLowerSum lower <=
+      projectiveCompactLipschitzUpperSum upper := by
+  let N := lower.length + upper.length
+  have main :
+      forall N lower upper a b,
+        lower.length + upper.length <= N ->
+        0 <= a -> b <= 1 ->
+        ArctanGeometry.CoversInterval a b lower ->
+        ArctanGeometry.CoversInterval a b upper ->
+        projectiveCompactLipschitzLowerSum lower <=
+          projectiveCompactLipschitzUpperSum upper := by
+    intro N
+    induction N with
+    | zero =>
+        intro lower upper a b hlen ha hb hlower hupper
+        cases lower <;> cases upper <;>
+          simp [projectiveCompactLipschitzLowerSum,
+            projectiveCompactLipschitzUpperSum] at hlen ⊢
+    | succ N ih =>
+        intro lower upper a b hlen ha hb hlower hupper
+        cases lower with
+        | nil =>
+            have hupperNonnegative : 0 <= projectiveCompactLipschitzUpperSum upper :=
+              projectiveCompactLipschitzUpperSum_nonnegative upper
+                (ArctanGeometry.CoversInterval.unit ha hb hupper)
+            simpa [projectiveCompactLipschitzLowerSum] using hupperNonnegative
+        | cons lowerHead lowerRest =>
+            cases upper with
+            | nil =>
+                have hab : a = b := by
+                  simpa [ArctanGeometry.CoversInterval] using hupper
+                subst b
+                have hzero :=
+                  projectiveCompactLipschitzLowerSum_eq_zero_of_covers_point
+                    (a := a) (intervals := lowerHead :: lowerRest) hlower
+                simp [projectiveCompactLipschitzUpperSum, hzero]
+            | cons upperHead upperRest =>
+                rcases lowerHead with ⟨p, r⟩
+                rcases upperHead with ⟨p', s⟩
+                rcases hlower with ⟨hp, hpr, hlowerRest⟩
+                rcases hupper with ⟨hp', hps, hupperRest⟩
+                subst p
+                subst p'
+                by_cases hrs : r <= s
+                · have hr0 : 0 <= r := Rat.le_trans ha hpr
+                  have hsle : s <= b := ArctanGeometry.CoversInterval.start_le_end hupperRest
+                  have hsplitUpper : ArctanGeometry.CoversInterval r b
+                      ((r, s) :: upperRest) :=
+                    ⟨rfl, hrs, hupperRest⟩
+                  have hlenRec : lowerRest.length + ((r, s) :: upperRest).length <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec := ih lowerRest ((r, s) :: upperRest) r b
+                    hlenRec hr0 hb hlowerRest hsplitUpper
+                  have hheadLow :
+                      (r - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                        8 * (r - a)) <=
+                        (r - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                          8 * (r - a)) :=
+                    projectiveCompact_leftLowerCell_le_leftUpperCell hpr
+                  have hheadSplit :
+                      (r - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                        8 * (r - a)) +
+                        (s - r) * (reciprocalQuarticSymmetricDensity (-1) r +
+                          8 * (s - r)) <=
+                        (s - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                          8 * (s - a)) :=
+                    (projectiveCompactLipschitzCells_split ha hpr hrs
+                      (Rat.le_trans hsle hb)).2
+                  simp [projectiveCompactLipschitzLowerSum,
+                    projectiveCompactLipschitzUpperSum] at hrec ⊢
+                  calc
+                    (r - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                        8 * (r - a)) + projectiveCompactLipschitzLowerSum lowerRest <=
+                        (r - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                          8 * (r - a)) +
+                          ((s - r) * (reciprocalQuarticSymmetricDensity (-1) r +
+                            8 * (s - r)) +
+                            projectiveCompactLipschitzUpperSum upperRest) :=
+                      rat_add_le_add hheadLow hrec
+                    _ = ((r - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                          8 * (r - a)) +
+                          (s - r) * (reciprocalQuarticSymmetricDensity (-1) r +
+                            8 * (s - r))) +
+                          projectiveCompactLipschitzUpperSum upperRest := by
+                          grind [Rat.add_assoc, Rat.add_comm]
+                    _ <= (s - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                          8 * (s - a)) +
+                          projectiveCompactLipschitzUpperSum upperRest :=
+                      rat_add_le_add hheadSplit Rat.le_refl
+                · have hsr : s <= r := by grind
+                  have hs0 : 0 <= s := Rat.le_trans ha hps
+                  have hrle : r <= b := ArctanGeometry.CoversInterval.start_le_end hlowerRest
+                  have hsplitLower : ArctanGeometry.CoversInterval s b
+                      ((s, r) :: lowerRest) :=
+                    ⟨rfl, hsr, hlowerRest⟩
+                  have hlenRec : ((s, r) :: lowerRest).length + upperRest.length <= N := by
+                    simp at hlen ⊢
+                    omega
+                  have hrec := ih ((s, r) :: lowerRest) upperRest s b
+                    hlenRec hs0 hb hsplitLower hupperRest
+                  have hheadSplit :
+                      (r - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                        8 * (r - a)) <=
+                        (s - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                          8 * (s - a)) +
+                          (r - s) * (reciprocalQuarticSymmetricDensity (-1) s -
+                            8 * (r - s)) :=
+                    (projectiveCompactLipschitzCells_split ha hps hsr
+                      (Rat.le_trans hrle hb)).1
+                  have hheadLow :
+                      (s - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                        8 * (s - a)) <=
+                        (s - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                          8 * (s - a)) :=
+                    projectiveCompact_leftLowerCell_le_leftUpperCell hps
+                  simp [projectiveCompactLipschitzLowerSum,
+                    projectiveCompactLipschitzUpperSum] at hrec ⊢
+                  calc
+                    (r - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                        8 * (r - a)) + projectiveCompactLipschitzLowerSum lowerRest <=
+                        ((s - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                          8 * (s - a)) +
+                          (r - s) * (reciprocalQuarticSymmetricDensity (-1) s -
+                            8 * (r - s))) + projectiveCompactLipschitzLowerSum lowerRest :=
+                      rat_add_le_add hheadSplit Rat.le_refl
+                    _ = (s - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                          8 * (s - a)) +
+                          ((r - s) * (reciprocalQuarticSymmetricDensity (-1) s -
+                            8 * (r - s)) +
+                            projectiveCompactLipschitzLowerSum lowerRest) := by
+                            grind [Rat.add_assoc]
+                    _ <= (s - a) * (reciprocalQuarticSymmetricDensity (-1) a -
+                          8 * (s - a)) +
+                          projectiveCompactLipschitzUpperSum upperRest :=
+                      rat_add_le_add Rat.le_refl hrec
+                    _ <= (s - a) * (reciprocalQuarticSymmetricDensity (-1) a +
+                          8 * (s - a)) +
+                          projectiveCompactLipschitzUpperSum upperRest :=
+                      rat_add_le_add hheadLow Rat.le_refl
+  exact main N lower upper a b (Nat.le_refl N) ha hb hlower hupper
+
+private theorem projectiveCompactLipschitzSum_overlaps_of_covers
+    {a b : Rat} (ha : 0 <= a) (hb : b <= 1)
+    (left right : List (Rat × Rat))
+    (hleft : ArctanGeometry.CoversInterval a b left)
+    (hright : ArctanGeometry.CoversInterval a b right) :
+    QInterval.Overlaps
+      { lo := projectiveCompactLipschitzLowerSum left,
+        hi := projectiveCompactLipschitzUpperSum left }
+      { lo := projectiveCompactLipschitzLowerSum right,
+        hi := projectiveCompactLipschitzUpperSum right } := by
+  exact ⟨projectiveCompactLipschitzLowerSum_le_upperSum_of_covers
+      ha hb left right hleft hright,
+    projectiveCompactLipschitzLowerSum_le_upperSum_of_covers
+      ha hb right left hright hleft⟩
+
 private theorem projectiveCompactLipschitzRightLowerSum_append
     (left right : List (Rat × Rat)) :
     projectiveCompactLipschitzRightLowerSum (left ++ right) =
@@ -7406,6 +7693,39 @@ theorem projectiveCompactDyadicCoreIntervals_overlaps_cauchyAssembly
   exact ArctanGeometry.integralSumInterval_overlaps_of_covers
     (by native_decide) _ _ hcore
     (projectiveCompactDyadicCauchyAssemblyIntervals_covers n mesh)
+
+/-- The literal trimmed compact core and the fast projective schedule are
+finite Lipschitz brackets for the same compact interval. -/
+theorem reciprocalQuarticUnitDyadicCore_symmetric_overlaps_scheduled
+    (n : Nat) :
+    QInterval.Overlaps
+      (projectiveCompactSymmetricLipschitzSum
+        (reciprocalQuarticUnitDyadicCoreIntervals n))
+      (projectiveCompactSymmetricLipschitzSum
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint n) (n * 6)).intervals) := by
+  have hscheduled := ArctanGeometry.arctanAreaLoopState_intervals_covers
+    (projectiveCompactDyadicEndpoint_nonnegative n) (n * 6)
+  have h := projectiveCompactLipschitzSum_overlaps_of_covers
+    (a := 0) (b := projectiveCompactDyadicEndpoint n)
+    (by native_decide) (Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one n))
+    (reciprocalQuarticUnitDyadicCoreIntervals n)
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint n) (n * 6)).intervals
+    (reciprocalQuarticUnitDyadicCoreIntervals_covers n) hscheduled
+  change
+    2 * projectiveCompactLipschitzLowerSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n) <=
+        2 * projectiveCompactLipschitzUpperSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint n) (n * 6)).intervals ∧
+      2 * projectiveCompactLipschitzLowerSum
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint n) (n * 6)).intervals <=
+        2 * projectiveCompactLipschitzUpperSum
+          (reciprocalQuarticUnitDyadicCoreIntervals n)
+  exact ⟨Rat.mul_le_mul_of_nonneg_left h.1 (by native_decide),
+    Rat.mul_le_mul_of_nonneg_left h.2 (by native_decide)⟩
 
 /-- The literal trimmed dyadic core is now within the proved projective
 quadrature bridge: its factor-two compact bracket overlaps the matching

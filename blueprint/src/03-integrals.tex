@@ -1271,9 +1271,15 @@ them to construct the raw-level equivalence.  That Cauchy-side combination is
 now present: the rapidly refined projective core has width at most
 \(8\,2^{-2n}\), the unit-plus-tail assembly has width at most
 \(4\,2^{-n}\), and the hull of their overlapping rational brackets is a
-common bridge envelope of width at most \(12\,2^{-n}\).  The remaining
-finite comparison is between the literal compact-candidate envelope and this
-fast scheduled bridge; after that, the raw-level equivalence can be packaged.
+common bridge envelope of width at most \(12\,2^{-n}\).  The remaining finite
+comparison has now been reduced to explicit width accounting.  Lean proves
+that the literal trimmed compact core and the fast \(6n\)-refinement schedule
+overlap by applying the finite rational Lipschitz-partition comparison to
+their two covers of the same interval.  This is not an invalid transitive use
+of interval overlap.  It remains to spend the two compact bracket widths and
+the removable-endpoint budget to connect the actual candidate envelope to
+this fast scheduled bridge, after which the raw-level equivalence can be
+packaged.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

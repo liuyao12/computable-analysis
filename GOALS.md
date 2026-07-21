@@ -250,10 +250,13 @@ not a description of the current module graph. The checked blueprint
   the endpoint budget.  The remaining analytic task is specifically to join
   this shrinking envelope to the completed full-line Cauchy raw.  The
   separately proved `6*n` midpoint-refinement schedule for the projective
-  chart is not silently identified with this literal uniform candidate mesh:
-  the latter has only `n` source refinements at its stage `n`.  The former is
-  available for the eventual Cauchy quadrature assembly, but no candidate
-  equivalence is claimed from it until a checked comparison is supplied.
+  chart is now connected to the literal trimmed core by a genuine finite
+  comparison: `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_scheduled`
+  applies a general rational Lipschitz-partition comparison to the two ordered
+  covers of the same compact interval.  This is deliberately not transitivity
+  of interval overlap.  The remaining bridge step is to spend the two proven
+  compact bracket widths and the endpoint budget when passing from that
+  comparison to the scheduled Cauchy hull.
   The rational endpoint side of that assembly is now explicit too:
   `projectiveCompactDyadicCauchyTailRadius_le` proves that the reciprocal
   projective endpoint at compact stage `n + 1` is at most `2 * 2^(-n)`.
@@ -294,9 +297,11 @@ not a description of the current module graph. The checked blueprint
   combined: `projectiveCompactDyadicCauchyCore_integral_width_le` gives the
   former an `8 * 2^(-2n)` Cauchy width bound, the assembly has width at most
   `4 * 2^(-n)`, and their `QInterval.hull` is a common bridge envelope with
-  width at most `12 * 2^(-n)`.  What remains is to compare the literal
-  compact-candidate envelope to this fast scheduled bridge with explicit
-  width budgets, then package the resulting comparison at raw level.
+  width at most `12 * 2^(-n)`.  The literal trimmed compact core is now also
+  proved to overlap the fast schedule by a finite cover comparison; what
+  remains is to spend the explicit compact widths and endpoint budget to join
+  the actual candidate to this bridge, then package the comparison at raw
+  level.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
