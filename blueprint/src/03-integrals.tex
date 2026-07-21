@@ -1242,7 +1242,14 @@ sum algebra to every finite list of positive cells.  Lean also reverses these
 cells into an ordered cover of the reciprocal interval \([1/b,1/a]\), without
 changing either finite rectangle sum.  The remaining theorem is the
 sufficiently refined tail-partition assembly connecting that finite-list
-result to the already completed full-line Cauchy raw.
+result to the already completed full-line Cauchy raw.  Its source-side mesh
+is now a concrete object: Lean affinely transports the midpoint mesh to every
+rational interval \([a,1]\), proves its ordered cover and strict positivity,
+then reverses the reciprocals into an ordered cover of \([1,1/a]\).  The two
+finite Cauchy rectangle brackets are proved to overlap.  The remaining step
+is therefore to choose \(a\) as the reciprocal projective endpoint, join this
+tail mesh to the projective core, and package the certified shrinking boxes as
+a valid comparison with the existing full-line Cauchy raw.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

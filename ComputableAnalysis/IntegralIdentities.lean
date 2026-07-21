@@ -2916,6 +2916,115 @@ theorem cauchyReciprocalReversedIntegralSum_overlaps
   rw [cauchyReciprocalReversedIntegralSum_eq]
   exact cauchyReciprocalIntegralSum_overlaps intervals hpositive
 
+/-- Affinely transport every cell of a finite rational partition. -/
+def cauchyAffineIntervals (offset scale : Rat) :
+    List (Rat × Rat) -> List (Rat × Rat)
+  | [] => []
+  | (p, r) :: rest =>
+      (offset + scale * p, offset + scale * r) ::
+        cauchyAffineIntervals offset scale rest
+
+/-- Nonnegative affine endpoint maps preserve finite ordered covers. -/
+theorem cauchyAffineIntervals_covers
+    (offset scale a b : Rat) (intervals : List (Rat × Rat))
+    (hscale : 0 <= scale)
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.CoversInterval (offset + scale * a)
+      (offset + scale * b) (cauchyAffineIntervals offset scale intervals) := by
+  induction intervals generalizing a b with
+  | nil =>
+      simp only [cauchyAffineIntervals, ArctanGeometry.CoversInterval] at hcover ⊢
+      rw [hcover]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      simp only [cauchyAffineIntervals, ArctanGeometry.CoversInterval]
+      refine ⟨trivial, ?_, ih r b hrest⟩
+      exact (Rat.add_le_add_left (c := offset)).2
+        (Rat.mul_le_mul_of_nonneg_left hpr hscale)
+
+/-- The dyadic midpoint partition of a rational tail interval `[a,1]`. -/
+def cauchyTailDyadicIntervals (a : Rat) (n : Nat) : List (Rat × Rat) :=
+  cauchyAffineIntervals a (1 - a)
+    (ArctanGeometry.arctanAreaLoopState 1 n).intervals
+
+/-- The explicit tail mesh covers exactly its intended rational interval. -/
+theorem cauchyTailDyadicIntervals_covers
+    {a : Rat} (_ha0 : 0 <= a) (ha1 : a <= 1) (n : Nat) :
+    ArctanGeometry.CoversInterval a 1 (cauchyTailDyadicIntervals a n) := by
+  have hsource := ArctanGeometry.arctanAreaLoopState_intervals_covers
+    (x := (1 : Rat)) (by native_decide) n
+  have hscale : 0 <= 1 - a := by grind [Rat.sub_eq_add_neg]
+  have h := cauchyAffineIntervals_covers a (1 - a) 0 1
+    (ArctanGeometry.arctanAreaLoopState 1 n).intervals hscale hsource
+  have hleft : a + (1 - a) * 0 = a := by grind
+  have hright : a + (1 - a) * 1 = 1 := by grind [Rat.sub_eq_add_neg]
+  rw [hleft, hright] at h
+  exact h
+
+private theorem cauchyAffineIntervals_positive
+    (offset scale : Rat) (intervals : List (Rat × Rat))
+    (hoffset : 0 < offset) (hscale : 0 <= scale)
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    forall p r, (p, r) ∈ cauchyAffineIntervals offset scale intervals ->
+      0 < p /\ p <= r := by
+  induction intervals with
+  | nil =>
+      intro p r hmem
+      simp [cauchyAffineIntervals] at hmem
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hunit with ⟨hp0, hpr, _hr1, hrest⟩
+      intro p' r' hmem
+      simp only [cauchyAffineIntervals, List.mem_cons] at hmem
+      rcases hmem with hhead | htail
+      · rcases hhead with ⟨rfl, rfl⟩
+        constructor
+        · have hnonneg : 0 <= scale * p := Rat.mul_nonneg hscale hp0
+          grind
+        · exact (Rat.add_le_add_left (c := offset)).2
+            (Rat.mul_le_mul_of_nonneg_left hpr hscale)
+      · exact ih hrest p' r' htail
+
+/-- Every cell of the tail mesh is strictly positive whenever its left
+endpoint is; this is the side condition for reciprocal inversion. -/
+theorem cauchyTailDyadicIntervals_positive
+    {a : Rat} (ha0 : 0 < a) (ha1 : a <= 1) (n : Nat) :
+    forall p r, (p, r) ∈ cauchyTailDyadicIntervals a n -> 0 < p /\ p <= r := by
+  have hscale : 0 <= 1 - a := by grind [Rat.sub_eq_add_neg]
+  exact cauchyAffineIntervals_positive a (1 - a)
+    (ArctanGeometry.arctanAreaLoopState 1 n).intervals ha0 hscale
+    (ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) n)
+
+/-- Reciprocal inversion turns the explicit dyadic tail partition of
+`[a,1]` into an ordered partition of `[1,1/a]`. -/
+theorem cauchyReciprocalTailDyadicIntervals_covers
+    {a : Rat} (ha0 : 0 < a) (ha1 : a <= 1) (n : Nat) :
+    ArctanGeometry.CoversInterval 1 (1 / a)
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals a n)) := by
+  have hsource := cauchyTailDyadicIntervals_covers (Rat.le_of_lt ha0) ha1 n
+  have h := cauchyReciprocalReversedIntervals_covers a 1
+    (cauchyTailDyadicIntervals a n) ha0 hsource
+  have hone : (1 : Rat) / 1 = 1 := by native_decide
+  rw [hone] at h
+  exact h
+
+/-- The far-side reciprocal tail and its compact-side dyadic source have
+overlapping finite Cauchy rectangle brackets. -/
+theorem cauchyReciprocalTailDyadicIntervals_overlaps
+    {a : Rat} (ha0 : 0 < a) (ha1 : a <= 1) (n : Nat) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval
+        (cauchyReciprocalReversedIntervals
+          (cauchyTailDyadicIntervals a n)))
+      (ArctanGeometry.integralSumInterval
+        (cauchyTailDyadicIntervals a n)) := by
+  exact cauchyReciprocalReversedIntegralSum_overlaps _
+    (cauchyTailDyadicIntervals_positive ha0 ha1 n)
+
 /-- A rational compactification of an even full-line integral by folding the
 positive reciprocal tail back onto the unit interval.
 

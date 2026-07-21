@@ -265,8 +265,15 @@ not a description of the current module graph. The checked blueprint
   order bookkeeping is now checked too:
   `cauchyReciprocalReversedIntervals_covers` sends a positive ordered cover
   of `[a,b]` to one of `[1/b,1/a]`, and its reordered sum has the same
-  overlap.  What remains is the refined tail-partition assembly connecting
-  those finite results to the existing full-line Cauchy raw.
+  overlap.  The refined source tail is now explicit rather than an intended
+  construction: `cauchyTailDyadicIntervals a n` affinely transports the
+  midpoint mesh to `[a,1]`; Lean proves its cover and strict positivity, and
+  `cauchyReciprocalTailDyadicIntervals_covers` reverses it into the ordered
+  far-side cover `[1,1/a]`.  Its two finite Cauchy brackets overlap by
+  `cauchyReciprocalTailDyadicIntervals_overlaps`.  What remains is to select
+  the projective endpoint as `1/a`, combine this tail with the core mesh, and
+  turn the resulting shrinking finite envelopes into a raw-level comparison
+  with the existing full-line Cauchy raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
