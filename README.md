@@ -31,16 +31,20 @@ with their accumulated finite transition. Its
 continuous successor will solve `x' = A(t)x + b(t)` by certified simplex
 integrals and factorial tail bounds, beginning with constant, commuting,
 scalar, piecewise-constant, and higher-order triangular cases. This broadens
-the calculus foundation; the intentionally selective pi scoreboard is now
-`9/18` for definitions and `7/17` for applicable equivalences.
+the calculus foundation. The Pi integration suite currently has `11/19` valid
+definitions and `9/18` applicable equivalence bridges; it is not a percentage
+of calculus completeness.
 
 ## Pi formalization scoreboard
 
 A row counts as definition-complete only after its interval sequence is a valid
-`RealRaw`.  A row counts as equivalent after a formalized chain of
-`RealRaw.Equiv` theorems connects it to `piCircleArea`.
+`RealRaw`. A row counts as equivalent after a formalized chain of
+`RealRaw.Equiv` theorems connects it to `piCircleArea`. This is an integration
+suite across geometry, integration, power series, inverse functions, and
+compactified improper integrals---not the primary measure of readiness for
+science and engineering.
 
-Current count: definitions `9/18`; equivalences `7/17` applicable rows.
+Current count: definitions `11/19`; equivalences `9/18` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
@@ -49,6 +53,7 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | `piCircleArea` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [validity](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-pi-validity) | $a_{n+1}=a_n+\Delta_n,\ b_{n+1}=b_n-\nabla_n,\ \pi\in[4a_n,4b_n]$ | ✓ | N/A |
 | `piCircleAreaPolygon` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [finite Archimedes bridge](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | rational chord and tangent polygon fans | ✓ | ✓ |
 | `piCircumference` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [comparison](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | $\pi\in[L_n,U_n],\quad U_n-L_n\to0$ | ✗ | ✗ |
+| `piCircumferenceFan` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [finite Archimedes bridge](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | exact inscribed cross-fan lower bound with circumscribed polygonal upper bound | ✓ | ✓ |
 | **Arctangent routes** | [geom](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4\arctan(1)=4\int_0^1\frac{dt}{1+t^2}=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ |  |  |
 | `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\arctan_{\mathrm{geom}}(1)$ | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
@@ -59,7 +64,7 @@ Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 | `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
 | `GaussianPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2$ | ✗ | ✗ |
 | `cauchyFullLineIntegral` | [reciprocal-tail compactification](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-tail-compactification) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}$, represented by a finite reciprocal-tail chart | ✓ | ✓ |
-| `reciprocalQuarticMinusOneProjectiveRoute` | [kernel](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-quartic-test-kernel), [route](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:reciprocal-quartic-route-package) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{x^4-x^2+1}$ | ✗ | ✗ |
+| `piReciprocalQuarticCompact` | [kernel](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-quartic-test-kernel), [route](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:reciprocal-quartic-route-package) | $\pi=\int_{-1}^{1}\frac{1+x^2}{x^4-x^2+1}\,dx$ | ✓ | ✓ |
 | `baselSeriesRaw` / `pi^2/6` | [definition](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw), [RHS valid](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:basel-geometric-rhs-valid) | $\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6$ | ✓ | ✗ |
 | `Brouncker(4/pi)` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}$ | ✗ | ✗ |
 | **Logarithm-at-i routes** | [overview](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-at-i-pi-routes), [series](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-series-at-i), [path](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-path-integral-at-i), [inverse](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#def:complex-log-inv-exp-at-i), [Euler](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:euler-identity) | $\exp(i\pi/2)=i,\quad \log(i)=i\pi/2,\quad \pi=-2i\log(i)$ |  |  |

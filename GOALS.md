@@ -636,10 +636,17 @@ students actually compute.
 
 ## Pi Representations
 
-- The canonical progress measure is the checked table in
-  `blueprint/src/pi-scoreboard-table.tex`: currently twelve of twenty named
-  computations are valid raw reals, and ten of nineteen applicable rows
-  have a formal equivalence chain to `piCircleArea`.  The completed canonical
+- The pi table in `blueprint/src/pi-scoreboard-table.tex` is an integration
+  suite, not a completion percentage for calculus.  It currently has eleven
+  valid raw computations among nineteen named routes, and nine formal
+  equivalence chains to `piCircleArea` among eighteen applicable rows.  Its
+  purpose is to exercise distinct foundations---finite geometry, integration,
+  power series, inverse functions, and compactified improper integrals---not
+  to reward many variants of a single construction.  The primary calculus
+  gates are the no-completeness audit, epsilon--delta continuity and extension
+  interfaces, finite integration/FTC, inverse elementary functions,
+  exponential/logarithmic differentiation, and ODE solution operators.
+  The completed integration-suite
   rows are the direct area-loop computation, its independently evaluated
   rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn
   computation `4 * arctanGeom(1)` and its single rectangle-integral
@@ -647,8 +654,7 @@ students actually compute.
   `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
   the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
   rational series, the direct cross-fan circumference computation
-  `piCircumferenceFan`, its curvature-corrected direct refinement
-  `piCircumferenceCurvatureFan`, and the concrete compact reciprocal-quartic
+  `piCircumferenceFan`, and the concrete compact reciprocal-quartic
   candidate `PiProofs.piReciprocalQuarticCompact`.  The one definition-only
   completion is now the Basel row.  The quartic candidate is the verified dyadic integral
   of `(1+x^2)/(x^4-x^2+1)` on `[-1,1]`; its finite projective/Cauchy bridge is
@@ -762,15 +768,10 @@ students actually compute.
   `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
   combines its all-stage form with the proved outer endpoint.  The original
   direct circumference row remains uncounted until that local bisection
-  comparison is proved.  The curvature-corrected fan is now a second, direct
-  certified representative: `piCircumferenceCurvatureFan` raises the
-  cross-product lower endpoint by a finite rational dot-deficit correction,
-  retains the independently certified outer path endpoint, and refines under
-  dyadic subdivision.  `piCircumferenceCurvatureFan_valid` proves its nested
-  brackets with the explicit `10/(n+1)` width modulus, and
-  `piCircumferenceCurvatureFan_equiv_piCircleArea` proves its same-stage
-  overlap with the area-loop baseline.  It is a scoreboard row, but it does
-  not discharge the original chord-path refinement obligation.
+  comparison is proved.  A curvature-corrected fan remains a design note
+  only: it must first acquire a self-contained finite proof of its outer
+  bound and dyadic refinement before it can become a checked representative,
+  and it will not count as a primary calculus milestone.
 
 ### Archived pre-refactor notes (not current source)
 
