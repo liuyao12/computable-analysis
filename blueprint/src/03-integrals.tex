@@ -1262,8 +1262,12 @@ so their finite Cauchy brackets overlap by cover comparison.  The split unit
 mesh has squared mesh at most \(2^{-n}\) and Cauchy rectangle width at most
 \(2\,2^{-n}\).  The tail start is bounded below by \(2^{-(n+2)}\), giving the
 quantitative datum needed to select a sufficiently fine far-tail schedule.
-The remaining task is to prove that far-tail width bound and use these
-shrinking boxes to construct the raw-level equivalence.
+That estimate is now checked: source refinement at stage \(5n+8\) gives the
+reversed reciprocal Cauchy tail a rectangle width at most \(2\,2^{-n}\).
+The proof uses a global nonnegative Cauchy cell-width bound and a squared-mesh
+estimate for reciprocal cells.  The remaining task is to combine the
+shrinking core, unit, and tail envelopes with explicit width budgets and use
+them to construct the raw-level equivalence.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

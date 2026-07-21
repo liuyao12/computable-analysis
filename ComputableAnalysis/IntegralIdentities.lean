@@ -3052,6 +3052,320 @@ theorem cauchyReciprocalTailDyadicIntervals_overlaps
   exact cauchyReciprocalReversedIntegralSum_overlaps _
     (cauchyTailDyadicIntervals_positive ha0 ha1 n)
 
+private theorem cauchyKernel_ratio_le_two
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
+    (p + r) / ((1 + p * p) * (1 + r * r)) <= 2 := by
+  let D : Rat := (1 + p * p) * (1 + r * r)
+  have hr0 : 0 <= r := Rat.le_trans hp0 hpr
+  have hp2 : 0 <= p * p := Rat.mul_nonneg hp0 hp0
+  have hr2 : 0 <= r * r := Rat.mul_nonneg hr0 hr0
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos (RationalCircle.Stage.one_add_square_pos p)
+      (RationalCircle.Stage.one_add_square_pos r)
+  have hpbound : p <= 1 + p * p := by
+    by_cases hp1 : p <= 1
+    · exact Rat.le_trans hp1 (by grind)
+    · have hpge : 1 <= p := by grind
+      have hpsq : p <= p * p := by
+        calc
+          p = p * 1 := by grind
+          _ <= p * p := Rat.mul_le_mul_of_nonneg_left hpge hp0
+      exact Rat.le_trans hpsq (by grind)
+  have hrbound : r <= 1 + r * r := by
+    by_cases hr1 : r <= 1
+    · exact Rat.le_trans hr1 (by grind)
+    · have hrge : 1 <= r := by grind
+      have hrsq : r <= r * r := by
+        calc
+          r = r * 1 := by grind
+          _ <= r * r := Rat.mul_le_mul_of_nonneg_left hrge hr0
+      exact Rat.le_trans hrsq (by grind)
+  have hsum : p + r <= 2 * D := by
+    have hleft : p + r <= (1 + p * p) + (1 + r * r) :=
+      rat_add_le_add hpbound hrbound
+    have hrest : 0 <= p * p + r * r + 2 * (p * p) * (r * r) := by
+      exact Rat.add_nonneg (Rat.add_nonneg hp2 hr2)
+        (Rat.mul_nonneg
+          (Rat.mul_nonneg (by native_decide) hp2) hr2)
+    calc
+      p + r <= (1 + p * p) + (1 + r * r) := hleft
+      _ <= (1 + p * p) + (1 + r * r) +
+          (p * p + r * r + 2 * (p * p) * (r * r)) := by grind
+      _ = 2 * D := by
+        dsimp [D]
+        grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  apply Rat.le_of_mul_le_mul_right (c := D)
+  · calc
+      ((p + r) / D) * D = p + r := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= 2 * D := hsum
+  · exact hDpos
+
+private theorem cauchyKernel_diff_le_two_len
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
+    ArctanGeometry.integralKernel p - ArctanGeometry.integralKernel r <=
+      2 * (r - p) := by
+  let A : Rat := 1 + p * p
+  let B : Rat := 1 + r * r
+  let D : Rat := A * B
+  have hDpos : 0 < D := by
+    dsimp [D, A, B]
+    exact Rat.mul_pos (RationalCircle.Stage.one_add_square_pos p)
+      (RationalCircle.Stage.one_add_square_pos r)
+  have hratio : (p + r) / D <= 2 := by
+    simpa [D, A, B] using cauchyKernel_ratio_le_two hp0 hpr
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  apply Rat.le_of_mul_le_mul_right (c := D)
+  · calc
+      (ArctanGeometry.integralKernel p -
+          ArctanGeometry.integralKernel r) * D =
+          (r - p) * (p + r) := by
+        dsimp [D, A, B]
+        unfold ArctanGeometry.integralKernel
+        rw [Rat.div_def, Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+          Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ = (r - p) * ((p + r) / D) * D := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (r - p) * 2 * D := by
+        exact Rat.mul_le_mul_of_nonneg_right
+          (Rat.mul_le_mul_of_nonneg_left hratio hlen)
+          (Rat.le_of_lt hDpos)
+      _ = (2 * (r - p)) * D := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hDpos
+
+/-- The Cauchy rectangle width has the same elementary squared-cell bound on
+the entire nonnegative rational half-line, not just on the unit interval. -/
+theorem cauchyIntegralCellWidth_le_two_square
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) :
+    ArctanGeometry.integralUpperStep p r -
+        ArctanGeometry.integralLowerStep p r <=
+      2 * ((r - p) * (r - p)) := by
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hdiff := cauchyKernel_diff_le_two_len hp0 hpr
+  unfold ArctanGeometry.integralUpperStep ArctanGeometry.integralLowerStep
+  calc
+    (r - p) * ArctanGeometry.integralKernel p -
+          (r - p) * ArctanGeometry.integralKernel r =
+        (r - p) * (ArctanGeometry.integralKernel p -
+          ArctanGeometry.integralKernel r) := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add]
+    _ <= (r - p) * (2 * (r - p)) :=
+      Rat.mul_le_mul_of_nonneg_left hdiff hlen
+    _ = 2 * ((r - p) * (r - p)) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem cauchyIntegralSumInterval_width_le_two_squareSum
+    (intervals : List (Rat × Rat))
+    (hwf : ArctanGeometry.NonnegativeIntervals intervals) :
+    (ArctanGeometry.integralSumInterval intervals).width <=
+      2 * ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      change (0 : Rat) - 0 <= 2 * 0
+      native_decide
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hwf with ⟨hp0, hpr, hrest⟩
+      have hcell := cauchyIntegralCellWidth_le_two_square hp0 hpr
+      have htail := ih hrest
+      unfold ArctanGeometry.integralSumInterval QInterval.width
+      simp [ArctanGeometry.integralLowerSum,
+        ArctanGeometry.integralUpperSum,
+        ArctanGeometry.intervalSquareSum]
+      calc
+        ArctanGeometry.integralUpperStep p r +
+              ArctanGeometry.integralUpperSum rest -
+            (ArctanGeometry.integralLowerStep p r +
+              ArctanGeometry.integralLowerSum rest) =
+            (ArctanGeometry.integralUpperStep p r -
+              ArctanGeometry.integralLowerStep p r) +
+              (ArctanGeometry.integralUpperSum rest -
+                ArctanGeometry.integralLowerSum rest) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+        _ <= 2 * ((r - p) * (r - p)) +
+              2 * ArctanGeometry.intervalSquareSum rest :=
+              rat_add_le_add hcell htail
+        _ = 2 * ((r - p) * (r - p) +
+              ArctanGeometry.intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+private theorem cauchyCoversInterval_left_bound
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    forall p r, (p, r) ∈ intervals -> a <= p := by
+  induction intervals generalizing a with
+  | nil =>
+      intro p r hmem
+      simp at hmem
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      intro p' r' hmem
+      simp only [List.mem_cons] at hmem
+      rcases hmem with hhead | htail
+      · rcases hhead with ⟨rfl, rfl⟩
+        exact Rat.le_refl
+      · exact Rat.le_trans hpr (ih r hrest p' r' htail)
+
+private theorem cauchyReciprocalCell_square_le
+    {a p r : Rat} (ha : 0 < a) (hap : a <= p) (hpr : p <= r) :
+    (1 / p - 1 / r) * (1 / p - 1 / r) <=
+      (1 / (a * a)) * (1 / (a * a)) * ((r - p) * (r - p)) := by
+  have hp : 0 < p := by grind
+  have hr : 0 < r := by grind
+  have ha0 : 0 <= a := Rat.le_of_lt ha
+  have hp0 : 0 <= p := Rat.le_of_lt hp
+  have hwidth : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have har : a <= r := Rat.le_trans hap hpr
+  have hprod : a * a <= p * r := by
+    calc
+      a * a <= p * a := Rat.mul_le_mul_of_nonneg_right hap ha0
+      _ <= p * r := Rat.mul_le_mul_of_nonneg_left har hp0
+  have ha2pos : 0 < a * a := Rat.mul_pos ha ha
+  have hinv : 1 / (p * r) <= 1 / (a * a) :=
+    cauchy_one_div_le_one_div_of_pos_of_le ha2pos hprod
+  have hleft : 1 / p - 1 / r = (r - p) * (1 / (p * r)) := by
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    have hpne : p ≠ 0 := Rat.ne_of_gt hp
+    have hrne : r ≠ 0 := Rat.ne_of_gt hr
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.mul_inv_cancel]
+  have hu0 : 0 <= 1 / (p * r) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos hp hr)))
+  have hv0 : 0 <= 1 / (a * a) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 ha2pos))
+  have hsqinv : (1 / (p * r)) * (1 / (p * r)) <=
+      (1 / (a * a)) * (1 / (a * a)) := by
+    calc
+      (1 / (p * r)) * (1 / (p * r)) <=
+          (1 / (a * a)) * (1 / (p * r)) :=
+            Rat.mul_le_mul_of_nonneg_right hinv hu0
+      _ <= (1 / (a * a)) * (1 / (a * a)) :=
+            Rat.mul_le_mul_of_nonneg_left hinv hv0
+  rw [hleft]
+  calc
+    ((r - p) * (1 / (p * r))) * ((r - p) * (1 / (p * r))) =
+        ((1 / (p * r)) * (1 / (p * r))) * ((r - p) * (r - p)) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= ((1 / (a * a)) * (1 / (a * a))) *
+          ((r - p) * (r - p)) :=
+          Rat.mul_le_mul_of_nonneg_right hsqinv (Rat.mul_nonneg hwidth hwidth)
+
+private theorem cauchyReversedIntervalSquareSum_append
+    (left right : List (Rat × Rat)) :
+    ArctanGeometry.intervalSquareSum (left ++ right) =
+      ArctanGeometry.intervalSquareSum left +
+        ArctanGeometry.intervalSquareSum right := by
+  induction left with
+  | nil =>
+      simp only [List.nil_append, ArctanGeometry.intervalSquareSum]
+      rw [Rat.zero_add]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, ArctanGeometry.intervalSquareSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+private theorem cauchyReciprocalReversedIntervals_squareSum_le
+    (a : Rat) (intervals : List (Rat × Rat)) (ha : 0 < a)
+    (hbound : forall p r, (p, r) ∈ intervals -> a <= p /\ p <= r) :
+    ArctanGeometry.intervalSquareSum
+        (cauchyReciprocalReversedIntervals intervals) <=
+      (1 / (a * a)) * (1 / (a * a)) *
+        ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp only [cauchyReciprocalReversedIntervals,
+        ArctanGeometry.intervalSquareSum]
+      grind
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      have hhead := hbound p r (by simp)
+      have hrest : forall p' r', (p', r') ∈ rest -> a <= p' /\ p' <= r' := by
+        intro p' r' hmem
+        exact hbound p' r' (by simp [hmem])
+      have htail := ih hrest
+      have hcell := cauchyReciprocalCell_square_le ha hhead.1 hhead.2
+      simp only [cauchyReciprocalReversedIntervals]
+      rw [cauchyReversedIntervalSquareSum_append]
+      simp only [ArctanGeometry.intervalSquareSum, Rat.add_zero]
+      calc
+        ArctanGeometry.intervalSquareSum
+              (cauchyReciprocalReversedIntervals rest) +
+            (1 / p - 1 / r) * (1 / p - 1 / r) <=
+            ((1 / (a * a)) * (1 / (a * a)) *
+              ArctanGeometry.intervalSquareSum rest) +
+            ((1 / (a * a)) * (1 / (a * a)) * ((r - p) * (r - p))) :=
+              rat_add_le_add htail hcell
+        _ = (1 / (a * a)) * (1 / (a * a)) *
+            ((r - p) * (r - p) +
+              ArctanGeometry.intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+/-- Squared widths of the reversed reciprocal dyadic tail are controlled by
+the source mesh and the explicit rational tail start. -/
+theorem cauchyReciprocalTailDyadicIntervals_squareSum_le
+    {a : Rat} (ha : 0 < a) (ha1 : a <= 1) (n : Nat) :
+    ArctanGeometry.intervalSquareSum
+        (cauchyReciprocalReversedIntervals
+          (cauchyTailDyadicIntervals a n)) <=
+      (1 / (a * a)) * (1 / (a * a)) *
+        ((1 - a) * (1 - a) / (((2 ^ n : Nat) : Rat))) := by
+  have hcover := cauchyTailDyadicIntervals_covers (Rat.le_of_lt ha) ha1 n
+  have hleft := cauchyCoversInterval_left_bound a 1
+    (cauchyTailDyadicIntervals a n) hcover
+  have hpositive := cauchyTailDyadicIntervals_positive ha ha1 n
+  calc
+    ArctanGeometry.intervalSquareSum
+        (cauchyReciprocalReversedIntervals
+          (cauchyTailDyadicIntervals a n)) <=
+        (1 / (a * a)) * (1 / (a * a)) *
+          ArctanGeometry.intervalSquareSum (cauchyTailDyadicIntervals a n) :=
+      cauchyReciprocalReversedIntervals_squareSum_le a _ ha
+        (fun p r hmem => ⟨hleft p r hmem, (hpositive p r hmem).2⟩)
+    _ = (1 / (a * a)) * (1 / (a * a)) *
+        ((1 - a) * (1 - a) / (((2 ^ n : Nat) : Rat))) := by
+        rw [cauchyTailDyadicIntervals_squareSum]
+
+/-- The finite Cauchy rectangle width of the reciprocal tail is bounded by
+the squared reciprocal mesh.  The bound is entirely rational and remains
+valid beyond the unit interval. -/
+theorem cauchyReciprocalTailDyadicIntervals_integral_width_le
+    {a : Rat} (ha : 0 < a) (ha1 : a <= 1) (n : Nat) :
+    (ArctanGeometry.integralSumInterval
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals a n))).width <=
+      2 * ((1 / (a * a)) * (1 / (a * a)) *
+        ((1 - a) * (1 - a) / (((2 ^ n : Nat) : Rat)))) := by
+  have hcover := cauchyReciprocalTailDyadicIntervals_covers ha ha1 n
+  have hnonnegative : ArctanGeometry.NonnegativeIntervals
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals a n)) :=
+    ArctanGeometry.CoversInterval.nonnegative (by native_decide) hcover
+  calc
+    (ArctanGeometry.integralSumInterval
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals a n))).width <=
+        2 * ArctanGeometry.intervalSquareSum
+          (cauchyReciprocalReversedIntervals
+            (cauchyTailDyadicIntervals a n)) :=
+      cauchyIntegralSumInterval_width_le_two_squareSum _ hnonnegative
+    _ <= 2 * ((1 / (a * a)) * (1 / (a * a)) *
+        ((1 - a) * (1 - a) / (((2 ^ n : Nat) : Rat)))) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (cauchyReciprocalTailDyadicIntervals_squareSum_le ha ha1 n)
+        (by native_decide)
+
 /-- A split dyadic mesh of the unit interval: a midpoint mesh on `[0,a]`
 followed by the affine midpoint mesh on `[a,1]`. -/
 def cauchySplitDyadicIntervals (a : Rat) (n : Nat) : List (Rat × Rat) :=
@@ -4576,6 +4890,240 @@ theorem projectiveCompactDyadicCauchyTailStart_ge
     _ = d * 1 := by grind
     _ <= d * s⁻¹ := Rat.mul_le_mul_of_nonneg_left hdinv
       (Rat.le_trans (Rat.le_of_lt htpos) hdin)
+
+theorem projectiveCompactDyadicCauchyTailStart_inv_le
+    (n : Nat) :
+    1 / projectiveCompactDyadicCauchyTailStart n <=
+      (((2 ^ (n + 2) : Nat) : Rat)) := by
+  let D : Rat := ((2 ^ (n + 2) : Nat) : Rat)
+  let t : Rat := 1 / D
+  have htpos : 0 < t := by
+    dsimp [t, D]
+    rw [Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2
+        (Nat.pow_pos (by omega : 0 < 2))))
+  have h := cauchy_one_div_le_one_div_of_pos_of_le htpos
+    (projectiveCompactDyadicCauchyTailStart_ge n)
+  have hcancel : 1 / t = D := by
+    dsimp [t]
+    repeat rw [Rat.div_def]
+    simp only [Rat.one_mul, Rat.inv_inv]
+  rw [hcancel] at h
+  simpa [D] using h
+
+theorem projectiveCompactDyadicCauchyTailReciprocalFactor_le
+    (n : Nat) :
+    (1 / (projectiveCompactDyadicCauchyTailStart n *
+      projectiveCompactDyadicCauchyTailStart n)) *
+      (1 / (projectiveCompactDyadicCauchyTailStart n *
+        projectiveCompactDyadicCauchyTailStart n)) <=
+      (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) := by
+  let a : Rat := projectiveCompactDyadicCauchyTailStart n
+  let D : Rat := ((2 ^ (n + 2) : Nat) : Rat)
+  have hinv : 1 / a <= D := by
+    simpa [a, D] using projectiveCompactDyadicCauchyTailStart_inv_le n
+  have hinv' : a⁻¹ <= D := by
+    simpa [Rat.div_def] using hinv
+  have ha : 0 < a := by
+    dsimp [a]
+    exact projectiveCompactDyadicCauchyTailStart_pos n
+  have hinv0 : 0 <= 1 / a := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 ha))
+  have hinv0' : 0 <= a⁻¹ := by
+    simpa [Rat.div_def] using hinv0
+  have hD0 : 0 <= D := by
+    dsimp [D]
+    exact (Rat.natCast_nonneg : 0 <= ((2 ^ (n + 2) : Nat) : Rat))
+  have hfactor : 1 / (a * a) <= D * D := by
+    rw [Rat.div_def, Rat.inv_mul_rev, Rat.one_mul]
+    calc
+      a⁻¹ * a⁻¹ <= D * a⁻¹ :=
+        Rat.mul_le_mul_of_nonneg_right hinv' hinv0'
+      _ <= D * D := Rat.mul_le_mul_of_nonneg_left hinv' hD0
+  have hfactor0 : 0 <= 1 / (a * a) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos ha ha)))
+  calc
+    (1 / (a * a)) * (1 / (a * a)) <=
+        (D * D) * (1 / (a * a)) :=
+        Rat.mul_le_mul_of_nonneg_right hfactor hfactor0
+    _ <= (D * D) * (D * D) :=
+        Rat.mul_le_mul_of_nonneg_left hfactor
+          (Rat.mul_nonneg hD0 hD0)
+    _ = D * D * D * D := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- With a refinement stage growing faster than the inverse fourth power of
+the tail start, the far-side reciprocal Cauchy bracket has an explicit
+dyadically shrinking-width budget. -/
+theorem projectiveCompactDyadicCauchyTail_integral_width_le
+    (n : Nat) :
+    (ArctanGeometry.integralSumInterval
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals
+          (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8)))).width <=
+      2 * ((((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat))) *
+          (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) := by
+  let a : Rat := projectiveCompactDyadicCauchyTailStart n
+  let D : Rat := ((2 ^ (n + 2) : Nat) : Rat)
+  let E : Rat := ((2 ^ (5 * n + 8) : Nat) : Rat)
+  have ha : 0 < a := by
+    dsimp [a]
+    exact projectiveCompactDyadicCauchyTailStart_pos n
+  have ha1 : a <= 1 := by
+    dsimp [a]
+    exact projectiveCompactDyadicCauchyTailStart_le_one n
+  have hfactor : (1 / (a * a)) * (1 / (a * a)) <= D * D * D * D := by
+    simpa [a, D] using projectiveCompactDyadicCauchyTailReciprocalFactor_le n
+  have hfactor0 : 0 <= (1 / (a * a)) * (1 / (a * a)) := by
+    rw [Rat.div_def]
+    have ha2 : 0 < a * a := Rat.mul_pos ha ha
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg (by native_decide) (Rat.le_of_lt ((Rat.inv_pos).2 ha2)))
+      (Rat.mul_nonneg (by native_decide) (Rat.le_of_lt ((Rat.inv_pos).2 ha2)))
+  have hgap0 : 0 <= 1 - a := by grind [Rat.sub_eq_add_neg]
+  have hgap1 : 1 - a <= 1 := by grind [Rat.sub_eq_add_neg]
+  have hgapsq : (1 - a) * (1 - a) <= 1 := by
+    calc
+      (1 - a) * (1 - a) <= (1 - a) * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hgap1 hgap0
+      _ = 1 - a := by grind
+      _ <= 1 := hgap1
+  have hEpos : 0 < E := by
+    dsimp [E]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hterm : (1 - a) * (1 - a) / E <= 1 / E := by
+    rw [Rat.div_def, Rat.div_def]
+    exact Rat.mul_le_mul_of_nonneg_right hgapsq
+      (Rat.le_of_lt ((Rat.inv_pos).2 hEpos))
+  have hterm0 : 0 <= (1 - a) * (1 - a) / E := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (Rat.mul_nonneg hgap0 hgap0)
+      (Rat.le_of_lt ((Rat.inv_pos).2 hEpos))
+  have hD0 : 0 <= D := by
+    dsimp [D]
+    exact (Rat.natCast_nonneg : 0 <= ((2 ^ (n + 2) : Nat) : Rat))
+  have hbase := cauchyReciprocalTailDyadicIntervals_integral_width_le
+    ha ha1 (5 * n + 8)
+  change (ArctanGeometry.integralSumInterval
+      (cauchyReciprocalReversedIntervals
+      (cauchyTailDyadicIntervals a (5 * n + 8)))).width <=
+      2 * (D * D * D * D) * (1 / E)
+  have hD4 : 0 <= D * D * D * D := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg (Rat.mul_nonneg hD0 hD0) hD0) hD0
+  calc
+    (ArctanGeometry.integralSumInterval
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals a (5 * n + 8)))).width <=
+        2 * ((1 / (a * a)) * (1 / (a * a)) *
+          ((1 - a) * (1 - a) / E)) := by
+          simpa [E] using hbase
+    _ <= 2 * ((D * D * D * D) *
+          ((1 - a) * (1 - a) / E)) :=
+          Rat.mul_le_mul_of_nonneg_left
+            (Rat.mul_le_mul_of_nonneg_right hfactor
+              hterm0)
+            (by native_decide)
+    _ <= 2 * ((D * D * D * D) * (1 / E)) :=
+          Rat.mul_le_mul_of_nonneg_left
+            (Rat.mul_le_mul_of_nonneg_left hterm
+              hD4)
+            (by native_decide)
+    _ = 2 * (D * D * D * D) * (1 / E) := by
+          grind [Rat.mul_assoc]
+
+private theorem projectiveCompactDyadicCauchyTail_schedule_algebra
+    (n : Nat) :
+    (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) *
+        (((2 ^ (n + 2) : Nat) : Rat)) *
+          (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) =
+      1 / (((2 ^ n : Nat) : Rat)) := by
+  let D : Rat := ((2 ^ (n + 2) : Nat) : Rat)
+  let E : Rat := ((2 ^ (5 * n + 8) : Nat) : Rat)
+  let Q : Rat := ((2 ^ n : Nat) : Rat)
+  have hpowNat : 2 ^ (5 * n + 8) = (2 ^ (n + 2)) ^ 4 * 2 ^ n := by
+    calc
+      2 ^ (5 * n + 8) = 2 ^ ((n + 2) * 4 + n) := by
+        congr 1
+        omega
+      _ = 2 ^ ((n + 2) * 4) * 2 ^ n := Nat.pow_add _ _ _
+      _ = (2 ^ (n + 2)) ^ 4 * 2 ^ n := by
+        rw [Nat.pow_mul]
+  have hD4 : D ^ 4 = D * D * D * D := by
+    dsimp [D]
+    simp only [Rat.pow_succ, Rat.pow_zero]
+    grind [Rat.mul_assoc]
+  have hE : E = (D * D * D * D) * Q := by
+    rw [← hD4]
+    dsimp [E, D, Q]
+    exact_mod_cast hpowNat
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hD4ne : D * D * D * D ≠ 0 := by
+    exact Rat.ne_of_gt (Rat.mul_pos
+      (Rat.mul_pos (Rat.mul_pos hDpos hDpos) hDpos) hDpos)
+  change D * D * D * D * (1 / E) = 1 / Q
+  rw [hE, Rat.div_def, Rat.div_def]
+  simp only [Rat.one_mul]
+  calc
+    D * D * D * D * ((D * D * D * D * Q)⁻¹) =
+        D * D * D * D * (Q⁻¹ * (D * D * D * D)⁻¹) := by
+          rw [Rat.inv_mul_rev]
+    _ = D * D * D * D * ((D * D * D * D)⁻¹ * Q⁻¹) := by
+          grind [Rat.mul_comm]
+    _ = (D * D * D * D * (D * D * D * D)⁻¹) * Q⁻¹ := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = 1 * Q⁻¹ := by
+          rw [Rat.mul_inv_cancel _ hD4ne]
+    _ = Q⁻¹ := by grind
+
+/-- At the chosen `5*n+8` refinement schedule, the far reciprocal tail has
+the simple dyadic width bound needed for the eventual raw construction. -/
+theorem projectiveCompactDyadicCauchyTail_integral_width_le_dyadic
+    (n : Nat) :
+    (ArctanGeometry.integralSumInterval
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals
+          (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8)))).width <=
+      2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  have h := projectiveCompactDyadicCauchyTail_integral_width_le n
+  calc
+    (ArctanGeometry.integralSumInterval
+      (cauchyReciprocalReversedIntervals
+        (cauchyTailDyadicIntervals
+          (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8)))).width <=
+        2 * ((((2 ^ (n + 2) : Nat) : Rat)) *
+          (((2 ^ (n + 2) : Nat) : Rat)) *
+          (((2 ^ (n + 2) : Nat) : Rat)) *
+          (((2 ^ (n + 2) : Nat) : Rat))) *
+            (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) := h
+    _ = 2 * (1 / (((2 ^ n : Nat) : Rat)) ) := by
+      rw [show 2 * ((((2 ^ (n + 2) : Nat) : Rat)) *
+          (((2 ^ (n + 2) : Nat) : Rat)) *
+          (((2 ^ (n + 2) : Nat) : Rat)) *
+          (((2 ^ (n + 2) : Nat) : Rat))) *
+            (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) =
+          2 * (((((2 ^ (n + 2) : Nat) : Rat)) *
+            (((2 ^ (n + 2) : Nat) : Rat)) *
+            (((2 ^ (n + 2) : Nat) : Rat)) *
+            (((2 ^ (n + 2) : Nat) : Rat))) *
+              (1 / (((2 ^ (5 * n + 8) : Nat) : Rat)))) by
+          grind [Rat.mul_assoc]]
+      rw [projectiveCompactDyadicCauchyTail_schedule_algebra]
 
 /-- The remaining endpoint cell in the dyadic projective schedule has an
 explicit vanishing compact-density tail budget. -/

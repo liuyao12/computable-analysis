@@ -285,10 +285,13 @@ not a description of the current module graph. The checked blueprint
   this latter mesh and the literal projective core cover exactly the same
   Cauchy interval.  The split source mesh has squared mesh at most `2^(-n)`
   and integral-box width at most `2 * 2^(-n)`.  Finally the tail start has a
-  matching lower dyadic bound `2^(-(n+2))`, which is the remaining input for
-  choosing a sufficiently fast reciprocal-tail refinement schedule.  What
-  remains is to prove the corresponding far-tail width bound, combine the
-  shrinking finite envelopes, and then package that comparison at raw level.
+  matching lower dyadic bound `2^(-(n+2))`.  The corresponding far-tail
+  estimate is now proved as well: refining its source at stage `5*n + 8`
+  gives a reciprocal Cauchy rectangle width at most `2 * 2^(-n)`.  This uses
+  a new global nonnegative Cauchy cell-width estimate and a reciprocal mesh
+  squared-sum bound; it does not appeal to an improper integral.  What
+  remains is to combine the now-shrinking core, unit, and tail envelopes with
+  explicit width budgets, and then package that comparison at raw level.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
