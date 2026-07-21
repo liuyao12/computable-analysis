@@ -24,6 +24,8 @@ ComputableAnalysis.RealRaw.schedule_equiv
 ComputableAnalysis.RealRaw.equiv_of_schedule_equiv
 ComputableAnalysis.Real
 ComputableAnalysis.Real.ofRat
+ComputableAnalysis.arctan.geom
+ComputableAnalysis.arctan.series
 ComputableAnalysis.RealRaw.add_equiv
 ComputableAnalysis.RealRaw.sub_equiv
 ComputableAnalysis.sqrt

@@ -185,6 +185,12 @@ and a finite list of alternative valid algorithms, each equipped with a proof
 of \(\Equiv\) to the preferred one.  This makes a chosen computation and its
 rate directly available while recording the representation changes that have
 already been proved.
+For functions, the same distinction is kept at the appropriate level: the
+named presentations \code{arctan.geom} and \code{arctan.series} are explicit
+domain-aware function representations.  At a certified rational input their
+raw outputs may be packaged as \code{Real} handles, and a proved pointwise
+agreement is then recorded with \code{Real.withAlternative}; no quotient or
+unproved global identification is introduced.
 \end{definition}
 
 \begin{proposition}[Raw arithmetic respects representations]\label{thm:raw-reals-field}
