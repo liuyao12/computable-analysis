@@ -681,36 +681,26 @@ students actually compute.
 
 ## Pi Representations
 
-- The pi table in `blueprint/src/pi-scoreboard-table.tex` is an integration
-  suite, not a completion percentage for calculus.  Lean records the checked
-  representations' primary capability with
-  `PiProofs.PiPresentation.integrationFamily`: finite geometry, geometric
-  arctangent, finite integrals, alternating series, or compactified improper
-  integrals.  This keeps independently executable presentation variants as
-  regressions without treating their count as independent calculus progress.
-  The unchecked named formulas are capability probes rather than a denominator:
-  arcsine/Newton require inverse and square-root-integral machinery, Gaussian
-  requires analytic exponential and full-line integration, while Basel,
-  Brouncker, and logarithm-at-`i` are deferred advanced analysis.  The primary
-  calculus gates are the no-completeness audit, epsilon--delta continuity and
-  extension interfaces, finite integration/FTC, inverse elementary functions,
-  exponential/logarithmic differentiation, and ODE solution operators.
-  The completed integration-suite
-  rows are the direct area-loop computation, its independently evaluated
-  rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn
-  computation `4 * arctanGeom(1)` and its single rectangle-integral
-  formulation `4 * arctanIntegralRectangleForAtOne`, the series computation
-  `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
-  the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
-  rational series, the direct cross-fan circumference computation
-  `piCircumferenceFan`, and the concrete compact reciprocal-quartic
-  computation `PiProofs.piReciprocalQuarticCompact`.  The one definition-only
-  completion is now the Basel row.  The quartic computation is the verified dyadic integral
-  of `(1+x^2)/(x^4-x^2+1)` on `[-1,1]`; its finite projective/Cauchy bridge is
-  an explicit rational envelope of width at most `224 * 2^-n`.  The enclosure
-  contains the scheduled full-line Cauchy computation, meets the quartic box,
-  and shrinks to zero, giving the formal `RealRaw.Equiv` chain to
-  `piCircleArea` without a completeness argument.
+- `PiProofs.PiCoverageBridge` is the π progress measure in
+  `blueprint/src/pi-scoreboard-table.tex`.  Its five constructors have one
+  checked `RealRaw.Equiv` witness per distinct bridge: Archimedean geometry,
+  arctangent versus alternating series, finite definite integration,
+  compactified improper integration, and the nontrivial reciprocal-quartic
+  kernel.  The theorem `PiCoverageBridge.equivalent` derives each witness from
+  the certified presentation registry.  This is a coverage suite, not a
+  completion percentage: multiple implementations can share a bridge, and a
+  continuous Peano--Baker theorem or an analytic proof that `exp' = exp` would
+  be major calculus progress without adding a π row.
+  `PiPresentation.integrationFamily` and the full registry retain the
+  polygonal, stabilized, Nilakantha, and single Machin variants as executable
+  regressions.  The original direct perimeter is a square-root-enclosure
+  diagnostic; arcsine/Newton and Gaussian are future inverse/integral and
+  exponential/full-line probes.  Basel, Brouncker, and logarithm-at-`i` are
+  advanced-analysis topics, deliberately outside the scientific-calculus
+  progress board.  The primary gates remain the no-completeness audit,
+  epsilon--delta continuity and extension, finite integration/FTC, inverse
+  functions, differentiated elementary functions, and continuous ODE
+  solution operators.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a

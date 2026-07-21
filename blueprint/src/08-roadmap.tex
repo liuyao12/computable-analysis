@@ -953,8 +953,9 @@ the finite Archimedes comparison it gives the raw equivalence
 \code{PiProofs.piCircumference\_equiv\_piCircleArea\_of\_verified\_area\_polygon}.
 The polygon computation itself is now a valid raw real by
 \code{PiProofs.areaPolygonValid}, but it is scaffolding rather than an
-additional scoreboard row.  The circumference route is not a scoreboard
-completion until \code{piCircumference} has its public validity certificate.
+additional compact-coverage bridge.  The circumference route is not a
+coverage completion until \code{piCircumference} has its public validity
+certificate.
 Lean now also provides \code{PiProofs.piCircumferenceStabilized}, a valid
 finite-prefix stabilization of the overlapping direct perimeter intervals.
 Its evaluator uses only chord-path intervals and the public rational radius
@@ -962,14 +963,16 @@ Its evaluator uses only chord-path intervals and the public rational radius
 encloses the common value. It is equivalent to both \code{piCircumference}
 and \code{piCircleArea}. This is a reusable interval-normalization bridge,
 but it does not replace the pending direct endpoint-refinement proof or change
-the scoreboard count. \code{PiProofs.piCircumferenceReboxed} remains the
+the coverage suite. \code{PiProofs.piCircumferenceReboxed} remains the
 older area-reading normalization. The project-facing certified value
 \code{PiProofs.piCertified} keeps \code{piCircleArea} as its preferred
 evaluator and records every checked completed presentation as a named
 certified alternative through \code{PiProofs.PiPresentation} and
 \code{PiProofs.piCertifiedPresentation}.  This gives the scoreboard a useful
-integration output---interchangeable checked computations---without treating
-its numerator as a measure of calculus completeness.
+integration output---interchangeable checked computations.  The compact
+\code{PiProofs.PiCoverageBridge} layer selects one equivalence per distinct
+capability, without treating the number of formulas as a measure of calculus
+completeness.
 The sharper public completion package is
 \code{PiProofs.CompletionCircumferenceQuarterLengthRemainders}: it reuses the
 proved area-loop validity and the proved circumference width shrinkage, leaving

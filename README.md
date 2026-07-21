@@ -67,37 +67,34 @@ The checked registry records its primary coverage family in Lean as
 dependencies explicit instead of turning the number of presentation variants
 into a progress percentage.
 
-## Pi integration suite
+## Pi equivalence coverage suite
 
-A row counts as definition-complete only after its interval sequence is a valid
-`RealRaw`. A row counts as equivalent after a formalized chain of
-`RealRaw.Equiv` theorems connects it to `piCircleArea`. This is an integration
-suite across geometry, integration, power series, inverse functions, and
-compactified improper integrals---not the primary measure of readiness for
-science and engineering.
+`PiProofs.PiCoverageBridge` is the project-facing π measure.  It has one
+constructor for each distinct end-to-end bridge, and its `equivalent` theorem
+checks both sides as valid `RealRaw` computations and proves their
+`RealRaw.Equiv` relation.  This is evidence for a calculus capability—not a
+percentage for the whole foundation.
 
-There is intentionally no completion fraction.  The checked registry covers
-finite geometry, geometric arctangent, finite integrals, alternating series,
-and compactified improper integrals.  The unchecked rows below are retained
-as capability probes, not as missing units of a calculus percentage:
+| Capability | Checked bridge |
+| --- | --- |
+| finite Archimedean geometry | `piCircumferenceFan ≃ piCircleArea` |
+| arctangent and alternating series | `4 * arctanGeom(1) ≃ piLeibniz` |
+| finite definite integration | rectangle arctangent integral `≃ piLeibniz` |
+| compactified improper integration | `cauchyFullLineIntegral ≃ piCircleArea` |
+| algebraic-kernel integration | `piReciprocalQuarticCompact ≃ cauchyFullLineIntegral` |
 
-- `piCircumference` isolates a square-root enclosure-refinement issue.
-- arcsine and Newton's segment require a represented inverse branch and a
-  reusable square-root integral.
-- Gaussian pi requires the analytic exponential layer and a full-line
-  integral.
-- Basel, Brouncker, and the logarithm-at-`i` routes are deliberately deferred
-  advanced analysis, not prerequisites for the scientific-calculus core.
-
-Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
-[front page: pi integration suite](https://liuyao12.github.io/computable-analysis/).
+This deliberately does not measure the primary application gaps: an
+exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,
+or the continuous matrix Peano--Baker theorem would each be major progress
+without adding a π equivalence.  Rendered copy:
+[front page: π equivalence coverage](https://liuyao12.github.io/computable-analysis/).
 
 The direct chord-path route now also has a checked
 `piCircumferenceStabilized` representative. It evaluates only a finite prefix
 of widened chord-path intervals, using the public rational modulus `4/(n+1)`;
 the area loop is used only in the proof that this radius is sound. This is a
 useful general interval-normalization bridge, but deliberately not a new
-scoreboard row: it does not prove the original `piCircumference` endpoints
+coverage bridge: it does not prove the original `piCircumference` endpoints
 refine stage by stage.
 
 The useful output of the completed rows is now formalized as a registry rather
@@ -109,6 +106,15 @@ routes stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
 routes, together with the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants.
+
+### Full implementation inventory
+
+The following longer table preserves every checked implementation and future
+probe.  It is a regression inventory, not the progress board: Machin is the
+single power-series formula, while Nilakantha and the normalization variants
+are supplementary tests; the direct perimeter, arcsine/Newton, and Gaussian
+entries diagnose future calculus gates.  Basel, Brouncker, and logarithm at
+`i` are advanced-analysis entries, not scientific-calculus prerequisites.
 
 | Computation | Blueprint | Formula | Def. | Equiv. |
 | --- | --- | --- | --- | --- |

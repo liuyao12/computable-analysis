@@ -17054,6 +17054,78 @@ def piCertifiedPresentation (presentation : PiPresentation) :
   valid := piPresentation_valid presentation
   agrees := piPresentation_equiv_piCircleArea presentation
 
+/-- The small set of π equivalences that act as distinct end-to-end
+calculus-regression bridges.
+
+Unlike `PiPresentation`, this is deliberately not an inventory of every
+certified evaluator.  Each constructor is one independent bridge from a
+construction needed in effective calculus to a second checked construction.
+For example, Machin and Nilakantha remain useful series regressions in
+`PiPresentation`, but they do not add a second calculus-readiness cell beyond
+the arctangent/power-series bridge. -/
+inductive PiCoverageBridge where
+  /-- Finite Archimedean geometry: polygonal area and circumference enclosures. -/
+  | archimedeanGeometry
+  /-- Circular arctangent geometry agrees with an alternating power series. -/
+  | arctangentPowerSeries
+  /-- A finite rectangle integral agrees with the arctangent series. -/
+  | definiteIntegral
+  /-- Reciprocal-tail compactification agrees with the bounded geometry value. -/
+  | compactifiedImproperIntegral
+  /-- A nontrivial algebraic kernel agrees with the compactified Cauchy route. -/
+  | algebraicKernelIntegral
+deriving DecidableEq, Repr
+
+/-- The source implementation for a distinct π coverage bridge. -/
+def PiCoverageBridge.sourcePresentation : PiCoverageBridge -> PiPresentation
+  | .archimedeanGeometry => .circumferenceFan
+  | .arctangentPowerSeries => .arctanGeometry
+  | .definiteIntegral => .arctanRectangleIntegral
+  | .compactifiedImproperIntegral => .cauchyIntegral
+  | .algebraicKernelIntegral => .reciprocalQuarticIntegral
+
+/-- The independently constructed target implementation for a distinct π
+coverage bridge. -/
+def PiCoverageBridge.targetPresentation : PiCoverageBridge -> PiPresentation
+  | .archimedeanGeometry => .area
+  | .arctangentPowerSeries => .leibnizSeries
+  | .definiteIntegral => .leibnizSeries
+  | .compactifiedImproperIntegral => .area
+  | .algebraicKernelIntegral => .cauchyIntegral
+
+/-- The source raw computation for a coverage bridge. -/
+def PiCoverageBridge.sourceRaw (bridge : PiCoverageBridge) : RealRaw :=
+  piPresentationRaw bridge.sourcePresentation
+
+/-- The target raw computation for a coverage bridge. -/
+def PiCoverageBridge.targetRaw (bridge : PiCoverageBridge) : RealRaw :=
+  piPresentationRaw bridge.targetPresentation
+
+/-- Every source side of the compact coverage suite is a valid raw real. -/
+theorem PiCoverageBridge.source_valid (bridge : PiCoverageBridge) :
+    bridge.sourceRaw.Valid :=
+  piPresentation_valid bridge.sourcePresentation
+
+/-- Every target side of the compact coverage suite is a valid raw real. -/
+theorem PiCoverageBridge.target_valid (bridge : PiCoverageBridge) :
+    bridge.targetRaw.Valid :=
+  piPresentation_valid bridge.targetPresentation
+
+/-- The two independently constructed sides of every coverage bridge agree.
+
+This theorem is the formal measure used by the compact π regression suite;
+there is one constructor per distinct calculus capability, rather than one per
+formula or implementation variant. -/
+theorem PiCoverageBridge.equivalent (bridge : PiCoverageBridge) :
+    bridge.sourceRaw.Equiv bridge.targetRaw := by
+  exact RealRaw.equiv_trans
+    (piPresentation_valid bridge.sourcePresentation)
+    (piPresentation_valid .area)
+    (piPresentation_valid bridge.targetPresentation)
+    (piPresentation_equiv_piCircleArea bridge.sourcePresentation)
+    (RealRaw.equiv_symm
+      (piPresentation_equiv_piCircleArea bridge.targetPresentation))
+
 /- A second-order rational lower certificate for the length of a positively
 oriented unit-circle chord.  The correction is deliberately rational: it
 uses only the cross product and the dot product of the two rational endpoints.

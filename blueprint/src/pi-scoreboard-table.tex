@@ -1,131 +1,56 @@
 Definition-complete means a valid raw real; equivalence-complete means a
-formal chain of \code{RealRaw.Equiv} theorems to \code{piCircleArea}.  These
-columns are evidence in a release-style integration suite, not numerators in a
-calculus-completeness percentage.
+formal chain of \code{RealRaw.Equiv} theorems.  The table is a compact
+release-style coverage suite, not a numerator for a calculus-completeness
+percentage.  Its five rows are the deliberately distinct bridges formalized
+by the \code{PiProofs.PiCoverageBridge} type and its \code{equivalent}
+theorem.
 
-The checked registry is grouped in Lean by its primary exercised capability:
-finite geometry, geometric arctangent, finite integrals, alternating series,
-and compactified improper integrals.  Several rows within a group remain
-valuable as independently executable regression tests, but do not constitute
-independent progress toward solving a new scientific model.  Conversely, the
-continuous Peano--Baker theorem and the analytic proof that \(e^x{}'=e^x\)
-would be major calculus advances even if they add no row here.
-
-The unchecked rows are capability probes rather than a denominator: the
-original circumference path isolates lower square-root-enclosure refinement;
-arcsine and Newton's segment require an inverse branch and a square-root
-integral; Gaussian pi requires the exponential and full-line integral layers.
-Basel, Brouncker, and the logarithm-at-\(i\) entries are deferred advanced
-analysis, not prerequisites for the scientific-calculus core.  The checked
-direct-only chord-path stabilizer is interval-normalization infrastructure; it
-does not establish stagewise refinement of the original circumference
-endpoints.
+The suite asks whether a construction useful elsewhere in calculus agrees
+with an independently constructed value of the same constant.  Thus a row is
+evidence for a capability gate, rather than a claim that five successful pi
+proofs make five equal-sized contributions to scientific or engineering
+calculus.  In particular, a continuous Peano--Baker theorem and a proof that
+the selected exponential satisfies \(e^x{}'=e^x\) are major advances even
+though neither creates a new pi row.
 
 \begin{center}
-\begin{tabular}{p{0.22\textwidth}p{0.14\textwidth}p{0.34\textwidth}cc}
-\textbf{Computation} & \textbf{Blueprint} & \textbf{Formula} &
-\textbf{Definition} & \textbf{Equiv.}\\
+\begin{tabular}{p{0.21\textwidth}p{0.29\textwidth}p{0.27\textwidth}cc}
+\textbf{Capability exercised} & \textbf{Witnessed equivalence} &
+\textbf{What it regression-tests} & \textbf{Def.} & \textbf{Equiv.}\\
 \hline
-\code{piCircleArea} &
-\cref{def:circle-area-stage-algorithm}; \cref{thm:geometric-pi-validity} &
-Archimedes' method of exhaustion &
-\(\checkmark\) & N/A\\
-\code{piCircleAreaPolygon} &
-\cref{def:circle-area-stage-algorithm}; \cref{thm:finite-archimedes} &
-rational inscribed chord fan and circumscribed tangent fan &
+Finite Archimedean geometry &
+cross-fan circumference \(\sim\) area loop &
+exact rational circle fans, square-root enclosures, and nested interval bounds &
 \(\checkmark\) & \(\checkmark\)\\
-\code{piCircumference} &
-\cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
-Archimedes' method of exhaustion &
-\(\times\) & \(\times\)\\
-\code{piCircumferenceFan} &
-\cref{def:circle-circumference-stage-algorithm}; \cref{thm:finite-archimedes} &
-exact inscribed cross-fan lower bound with circumscribed polygonal upper bound &
+Arctangent and power series &
+geometric arctangent \(\sim\) Leibniz series &
+circular inverse geometry against the alternating arctangent series &
 \(\checkmark\) & \(\checkmark\)\\
-\multicolumn{5}{p{0.88\textwidth}}{\textbf{Arctangent routes}:
-\cref{def:arctan-area-stage-algorithm},
-\cref{def:arctan-integral}, \cref{def:arctan-series},
-\cref{thm:power-series-arctan-area-pi}, \cref{thm:leibniz-machin}:
-\(\pi/4=\arctan(1)\)}\\
-\code{4 * arctanGeom(1)} &
-\cref{def:arctan-area-stage-algorithm};
-\cref{thm:geometric-arctan-one-area-pi} &
-\(\arctan_{\mathrm{geom}}(x)\): circular-sector area &
+Finite definite integration &
+rectangle arctangent integral \(\sim\) Leibniz series &
+certified rectangle integration and its endpoint bridge &
 \(\checkmark\) & \(\checkmark\)\\
-Rectangle integral at 1 &
-\cref{thm:finite-arctan-integral-comparison};
-\cref{thm:arctan-integral-pi} &
-\(\displaystyle \arctan(x)=\int_0^x\frac{dt}{1+t^2}\) &
+Compactified improper integration &
+Cauchy full-line integral \(\sim\) area loop &
+reciprocal-tail transport from a full line to a finite interval &
 \(\checkmark\) & \(\checkmark\)\\
-\code{4 * arctanSeries(1)} &
-\cref{def:arctan-series};
-\cref{thm:leibniz-arctan};
-\cref{thm:power-series-arctan-area-pi} &
-\(\arctan(x)=x-\frac{x^3}{3}+\frac{x^5}{5}-\frac{x^7}{7}+\cdots\) &
+Algebraic-kernel integration &
+reciprocal-quartic integral \(\sim\) Cauchy integral &
+a nontrivial rational kernel, finite quadrature, and its integral identity &
 \(\checkmark\) & \(\checkmark\)\\
-\code{piNilakantha} &
-\cref{thm:nilakantha-pi} &
-\(\displaystyle\pi=3+\frac4{2\cdot3\cdot4}-\frac4{4\cdot5\cdot6}
-  +\frac4{6\cdot7\cdot8}-\cdots\) &
-\(\checkmark\) & \(\checkmark\)\\
-\code{piMachin} &
-\cref{def:arctan-series};
-\cref{thm:machin-tangent}; \cref{thm:leibniz-machin} &
-\(\displaystyle\pi=
-  16\arctan_{\mathrm{series}}(1/5)
-  -4\arctan_{\mathrm{series}}(1/239)\) &
-\(\checkmark\) & \(\checkmark\)\\
-\code{6 * arcsinIntegral(1/2)} &
-\cref{def:inverse-elementary-integral-identities} &
-\(\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}\) &
-\(\times\) & \(\times\)\\
-\code{NewtonSegmentPi} &
-\cref{rem:sources-of-raw-reals} &
-\(\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)\) &
-\(\times\) & \(\times\)\\
-\code{GaussianPi} &
-\cref{rem:sources-of-raw-reals} &
-\(\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2\) &
-\(\times\) & \(\times\)\\
-\code{cauchyFullLineIntegral} &
-\cref{def:reciprocal-tail-compactification} &
-\(\displaystyle\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}\)
-by reciprocal-tail compactification &
-\(\checkmark\) & \(\checkmark\)\\
-\code{piReciprocalQuarticCompact} &
-\cref{def:reciprocal-quartic-test-kernel};
-\cref{thm:reciprocal-quartic-route-package} &
-\(\displaystyle\pi=
-  \int_{-1}^{1}\frac{1+x^2}{x^4-x^2+1}\,dx\) &
-\(\checkmark\) & \(\checkmark\)\\
-\code{baselSeriesRaw} / \(\pi^2/6\) &
-\cref{def:zeta-two-raw};
-\cref{thm:basel-geometric-rhs-valid} &
-\(\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6\) &
-\(\checkmark\) & \(\times\)\\
-\code{Brouncker(4/pi)} &
-\cref{rem:sources-of-raw-reals} &
-\(\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}\) &
-\(\times\) & \(\times\)\\
-\multicolumn{5}{p{0.88\textwidth}}{\textbf{Logarithm-at-\(i\) routes}:
-\cref{thm:log-at-i-pi-routes}, \cref{def:complex-log-series-at-i},
-\cref{def:complex-log-path-integral-at-i},
-\cref{def:complex-log-inv-exp-at-i}, \cref{thm:euler-identity}:
-\(\pi=-2i\log(i)\)}\\
-\code{-2i * logSeries(i)} &
-\cref{def:complex-log-series-at-i};
-\cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
-\(\log_{\mathrm{series}}(i)\): local power-series continuation from \(1\) to \(i\) &
-\(\times\) & \(\times\)\\
-\code{-2i * logPathIntegral(i)} &
-\cref{def:complex-log-path-integral-at-i};
-\cref{thm:log-at-i-pi-routes} &
-\(\displaystyle \log_{\mathrm{path}}(i)=\int_{\gamma:1\to i}\frac{dz}{z}\) &
-\(\times\) & \(\times\)\\
-\code{-2i * logInvExp(i)} &
-\cref{def:complex-log-inv-exp-at-i};
-\cref{thm:log-at-i-pi-routes}; \cref{thm:euler-identity} &
-\(\log_{\mathrm{invexp}}(i)=\exp^{-1}(i)\), on the chosen branch &
-\(\times\) & \(\times\)
 \end{tabular}
 \end{center}
+
+The full \code{PiProofs.PiPresentation} registry retains supplementary
+checked evaluators as regression implementations: polygon area, the two
+perimeter normalizations, Nilakantha, and the single Machin power-series
+formula.  They remain useful executable comparisons, but are not additional
+readiness cells because they reuse one of the bridges above.
+
+The direct \code{piCircumference} evaluator remains a geometric diagnostic:
+its unresolved lower-endpoint refinement is a local square-root-enclosure
+problem, not a missing calculus gate.  The arcsine/Newton and Gaussian rows
+remain future probes for, respectively, inverse/square-root integration and
+the exponential/full-line layers.  Basel, Brouncker, and logarithm-at-\(i\)
+belong to advanced analysis and are intentionally omitted from this progress
+table; their chapters remain part of the broader blueprint.
