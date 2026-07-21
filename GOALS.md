@@ -638,7 +638,7 @@ students actually compute.
 
 - The canonical progress measure is the checked table in
   `blueprint/src/pi-scoreboard-table.tex`: currently eleven of nineteen named
-  computations are valid raw reals, and eight of eighteen applicable rows
+  computations are valid raw reals, and nine of eighteen applicable rows
   have a formal equivalence chain to `piCircleArea`.  The completed canonical
   rows are the direct area-loop computation, its independently evaluated
   rational polygon-fan form `piCircleAreaPolygon`, the geometric quarter-turn
@@ -647,12 +647,14 @@ students actually compute.
   `4 * arctanSeries(1)`, the single classical power-series formula `piMachin`,
   the reciprocal-tail full-line Cauchy integral, Nilakantha's accelerated
   rational series, and the direct cross-fan circumference computation
-  `piCircumferenceFan`.  The valid-but-not-yet-equivalent Basel row and the
-  concrete compact reciprocal-quartic candidate
-  `PiProofs.piReciprocalQuarticCompact` account for the two definition-only
-  completions.  The latter is the verified dyadic integral of
-  `(1+x^2)/(x^4-x^2+1)` on `[-1,1]`; its projective-substitution equivalence
-  to `piCircleArea` remains the next analytic obligation.
+  `piCircumferenceFan`, and the concrete compact reciprocal-quartic candidate
+  `PiProofs.piReciprocalQuarticCompact`.  The one definition-only completion
+  is now the Basel row.  The quartic candidate is the verified dyadic integral
+  of `(1+x^2)/(x^4-x^2+1)` on `[-1,1]`; its finite projective/Cauchy bridge is
+  an explicit rational envelope of width at most `224 * 2^-n`.  The enclosure
+  contains the scheduled full-line Cauchy computation, meets the quartic box,
+  and shrinks to zero, giving the formal `RealRaw.Equiv` chain to
+  `piCircleArea` without a completeness argument.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a

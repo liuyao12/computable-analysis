@@ -15213,6 +15213,19 @@ theorem piReciprocalQuarticCompact_valid :
     piReciprocalQuarticCompact.Valid := by
   exact IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_valid
 
+/-- The literal compact reciprocal-quartic dyadic integral is another
+fully verified pi computation.  Its route passes through the independently
+completed Cauchy full-line raw, using only the explicit shrinking rational
+projective envelope proved in `IntegralIdentities`. -/
+theorem piReciprocalQuarticCompact_equiv_piCircleArea :
+    piReciprocalQuarticCompact.Equiv piCircleArea := by
+  exact RealRaw.equiv_trans
+    piReciprocalQuarticCompact_valid
+    IntegralIdentities.cauchyFullLineIntegral_valid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_equiv_cauchyFullLine
+    cauchyFullLineIntegral_equiv_piCircleArea
+
 /-- The expected value of the clean reciprocal quartic projective integral is a
 valid raw real, because it is just the baseline area-pi raw real scaled by `1`. -/
 theorem reciprocalQuarticMinusOneExpectedPi_valid :

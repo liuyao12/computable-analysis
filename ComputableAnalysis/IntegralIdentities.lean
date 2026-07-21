@@ -8609,6 +8609,101 @@ def projectiveCompactDyadicFullCauchyEnvelope (n : Nat) : QInterval :=
       2 * (a + tail.width) + 2 * bridge.width +
         scheduled.width + literal.width + endpoint.hi }
 
+private theorem intervalSquareSum_nonnegative
+    (intervals : List (Rat × Rat)) :
+    0 <= ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [ArctanGeometry.intervalSquareSum]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [ArctanGeometry.intervalSquareSum]
+      exact Rat.add_nonneg (rat_square_nonneg (r - p)) ih
+
+/-- The full Cauchy envelope contains the completed Cauchy raw at its
+four-unit-mesh stage. -/
+theorem projectiveCompactDyadicFullCauchyEnvelope_contains_cauchyFullLine
+    (n : Nat) :
+    (projectiveCompactDyadicFullCauchyEnvelope n).ContainsInterval
+      (cauchyFullLineIntegral.compute (5 * n + 8)) := by
+  let unit : QInterval := ArctanGeometry.integralSumInterval
+    (ArctanGeometry.arctanAreaLoopState 1 (5 * n + 8)).intervals
+  let a : Rat := projectiveCompactDyadicCauchyTailStart n
+  let tail : QInterval := ArctanGeometry.integralSumInterval
+    (cauchyTailDyadicIntervals a (5 * n + 8))
+  let bridge : QInterval := projectiveCompactDyadicScheduledCauchyBridgeEnvelope n
+  let scheduled : QInterval := projectiveCompactSymmetricLipschitzSum
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals
+  let literal : QInterval := projectiveCompactSymmetricLipschitzSum
+    (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))
+  let endpoint : QInterval := projectiveCompactDyadicSymmetricTailError.compute (n + 2)
+  have ha0 : 0 <= a := Rat.le_of_lt (projectiveCompactDyadicCauchyTailStart_pos n)
+  have htail0 : 0 <= tail.width := by
+    dsimp [tail]
+    exact ArctanGeometry.integralSumInterval_ordered _
+      (ArctanGeometry.CoversInterval.nonnegative ha0
+        (cauchyTailDyadicIntervals_covers ha0
+          (projectiveCompactDyadicCauchyTailStart_le_one n) (5 * n + 8)))
+  have hbridge0 : 0 <= bridge.width := by
+    let core : QInterval := ArctanGeometry.integralSumInterval
+      (projectiveCompactIntervals
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals)
+    let assembly : QInterval := ArctanGeometry.integralSumInterval
+      (cauchyUnitReciprocalTailDyadicIntervals
+        (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8))
+    have hsource := ArctanGeometry.arctanAreaLoopState_intervals_covers
+      (projectiveCompactDyadicEndpoint_nonnegative (n + 2)) ((n + 2) * 6)
+    have hcore0 : 0 <= core.width := by
+      dsimp [core]
+      exact ArctanGeometry.integralSumInterval_ordered _
+        (projectiveCompactIntervals_nonnegative 0
+          (projectiveCompactDyadicEndpoint (n + 2)) _ (by native_decide)
+          (projectiveCompactDyadicEndpoint_lt_one _) hsource)
+    have hassembly0 : 0 <= assembly.width := by
+      dsimp [assembly]
+      exact ArctanGeometry.integralSumInterval_ordered _
+        (ArctanGeometry.CoversInterval.nonnegative (by native_decide)
+          (projectiveCompactDyadicCauchyAssemblyIntervals_covers n (5 * n + 8)))
+    change 0 <= (QInterval.hull core assembly).width
+    unfold QInterval.width QInterval.hull at *
+    have hmin : min core.lo assembly.lo <= core.lo := by grind
+    have hmax : core.hi <= max core.hi assembly.hi := by grind
+    grind [Rat.sub_eq_add_neg]
+  have hscheduled0 : 0 <= scheduled.width := by
+    dsimp [scheduled]
+    rw [projectiveCompactSymmetricLipschitzSum_width_eq_thirtytwo_squareSum]
+    exact Rat.mul_nonneg (by native_decide) (intervalSquareSum_nonnegative _)
+  have hliteral0 : 0 <= literal.width := by
+    dsimp [literal]
+    rw [projectiveCompactSymmetricLipschitzSum_width_eq_thirtytwo_squareSum]
+    exact Rat.mul_nonneg (by native_decide) (intervalSquareSum_nonnegative _)
+  have hendpoint0 : 0 <= endpoint.hi := by
+    dsimp [endpoint]
+    rw [projectiveCompactDyadicSymmetricTailError_compute]
+    exact Rat.mul_nonneg (by native_decide)
+      (by
+        have hDpos : 0 < (((2 ^ (n + 2) : Nat) : Rat)) :=
+          (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+        rw [Rat.div_def]
+        exact Rat.mul_nonneg (by native_decide)
+          (Rat.le_of_lt ((Rat.inv_pos).2 hDpos)))
+  rw [cauchyFullLineIntegral_compute_eq_four_rectangle]
+  change (projectiveCompactDyadicFullCauchyEnvelope n).ContainsInterval
+    (RealRaw.scaleRatCompute 4 arctanIntegralRectangleForAtOne (5 * n + 8))
+  unfold RealRaw.scaleRatCompute
+  rw [if_pos (by native_decide : (0 : Rat) <= 4)]
+  rw [arctanIntegralRectangleForAtOne_compute_eq]
+  change
+    4 * unit.lo -
+        (2 * (a + tail.width) + 2 * bridge.width +
+          scheduled.width + literal.width) <= 4 * unit.lo /\
+      4 * unit.hi <= 4 * unit.hi +
+        2 * (a + tail.width) + 2 * bridge.width +
+          scheduled.width + literal.width + endpoint.hi
+  grind [Rat.sub_eq_add_neg]
+
 /-- The literal compact candidate reaches the full-line Cauchy envelope at a
 finite stage.  The only bridge costs are explicit widths already certified on
 the compact and Cauchy sides. -/
@@ -9145,6 +9240,329 @@ theorem reciprocalQuarticMinusOneCompactDyadicIntegral_compute_eq
     reciprocalQuarticMinusOneCompactDyadicIntegral.compute stage =
       reciprocalQuarticMinusOneUnitDyadicCompute stage :=
   rfl
+
+/-- Any nonnegative rational multiple of the standard dyadic zero budget
+still shrinks, even after a schedule that is always at least the requested
+stage.  This is a finite rational reindexing fact, used below to account for
+the explicit widths in the projective/Cauchy bridge. -/
+private theorem scaled_dyadic_budget_widthsShrink
+    (C : Rat) (hC : 0 <= C) (stage : Nat -> Nat)
+    (hstage : forall n, n <= stage n) :
+    RealRaw.WidthsShrinkToZero (fun n : Nat =>
+      ({ lo := (0 : Rat), hi := C * (1 / (((2 ^ (stage n) : Nat) : Rat))) } : QInterval)) := by
+  let budget : RealRaw := RealRaw.scaleRat C projectiveCompactDyadicZero
+  have hbudget : budget.Valid := by
+    dsimp [budget]
+    exact RealRaw.scaleRat_valid_of_nonneg hC projectiveCompactDyadicZero_valid
+  intro eps
+  obtain ⟨N, hN⟩ := hbudget.2.2 eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hstageN : N <= stage n := Nat.le_trans hn (hstage n)
+  have hsmall := hN (stage n) hstageN
+  change C * (1 / (((2 ^ (stage n) : Nat) : Rat))) - 0 <= eps.val
+  simpa [budget, RealRaw.scaleRat, RealRaw.scaleRatCompute,
+    projectiveCompactDyadicZero, hC, QInterval.width] using hsmall
+
+/-- The finite full-line Cauchy envelope has an explicit dyadic width budget.
+The deliberately coarse constant keeps every source of error visible: the
+unit Cauchy mesh, omitted near-zero segment, tail mesh, finite bridge, two
+compact brackets, and endpoint cell. -/
+private theorem projectiveCompactDyadicFullCauchyEnvelope_width_le
+    (n : Nat) :
+    (projectiveCompactDyadicFullCauchyEnvelope n).width <=
+      224 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  let unit : QInterval := ArctanGeometry.integralSumInterval
+    (ArctanGeometry.arctanAreaLoopState 1 (5 * n + 8)).intervals
+  let a : Rat := projectiveCompactDyadicCauchyTailStart n
+  let tail : QInterval := ArctanGeometry.integralSumInterval
+    (cauchyTailDyadicIntervals a (5 * n + 8))
+  let bridge : QInterval := projectiveCompactDyadicScheduledCauchyBridgeEnvelope n
+  let scheduled : QInterval := projectiveCompactSymmetricLipschitzSum
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals
+  let literal : QInterval := projectiveCompactSymmetricLipschitzSum
+    (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))
+  let endpoint : QInterval := projectiveCompactDyadicSymmetricTailError.compute (n + 2)
+  have hdyadic_pos (k : Nat) : 0 < (1 / (((2 ^ k : Nat) : Rat))) := by
+    exact one_div_nat_pos (Nat.pow_pos (by omega : 0 < 2))
+  have hdyadic_antitone {i j : Nat} (hij : i <= j) :
+      1 / (((2 ^ j : Nat) : Rat)) <= 1 / (((2 ^ i : Nat) : Rat)) := by
+    exact FTC.one_div_nat_antitone
+      (Nat.pow_pos (by omega : 0 < 2))
+      (Nat.pow_pos (by omega : 0 < 2))
+      (Nat.pow_le_pow_right (by omega : 0 < 2) hij)
+  have hunit : unit.width <= 2 * (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) := by
+    have hunitIntervals : ArctanGeometry.UnitIntervals
+        (ArctanGeometry.arctanAreaLoopState 1 (5 * n + 8)).intervals :=
+      ArctanGeometry.arctanAreaLoopState_intervals_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide) (5 * n + 8)
+    calc
+      unit.width <= 2 * ArctanGeometry.intervalSquareSum
+          (ArctanGeometry.arctanAreaLoopState 1 (5 * n + 8)).intervals := by
+        dsimp [unit]
+        exact ArctanGeometry.integralSumInterval_width_le_two_squareSum _ hunitIntervals
+      _ = 2 * (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) := by
+        rw [ArctanGeometry.arctanAreaLoopState_squareSum]
+        simp only [Rat.one_mul]
+  have htail : tail.width <= 2 * (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) := by
+    dsimp [tail]
+    exact cauchyTailDyadicIntervals_integral_width_le_dyadic
+      (Rat.le_of_lt (projectiveCompactDyadicCauchyTailStart_pos n))
+      (projectiveCompactDyadicCauchyTailStart_le_one n) (5 * n + 8)
+  have ha : a <= 2 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) := by
+    dsimp [a]
+    exact projectiveCompactDyadicCauchyTailStart_le_dyadic n
+  have hbridge : bridge.width <= 12 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    dsimp [bridge]
+    exact projectiveCompactDyadicScheduledCauchyBridgeEnvelope_width_le n
+  have hscheduled : scheduled.width <=
+      32 * (1 / (((2 ^ ((n + 2) * 6) : Nat) : Rat))) := by
+    dsimp [scheduled]
+    exact projectiveCompactDyadicScheduledCore_symmetric_width_le (n + 2)
+  have hliteral : literal.width <=
+      32 * (1 / (((2 ^ (n + 2) : Nat) : Rat))) := by
+    dsimp [literal]
+    exact reciprocalQuarticUnitDyadicCore_symmetric_width_le (n + 2)
+  have hendpoint : endpoint.hi =
+      ((64 : Rat) / 3) * (1 / (((2 ^ (n + 2) : Nat) : Rat))) := by
+    dsimp [endpoint]
+    rw [projectiveCompactDyadicSymmetricTailError_compute]
+  have hunitSmall : 1 / (((2 ^ (5 * n + 8) : Nat) : Rat)) <=
+      1 / (((2 ^ n : Nat) : Rat)) :=
+    hdyadic_antitone (by omega)
+  have hsuccSmall : 1 / (((2 ^ (n + 1) : Nat) : Rat)) <=
+      1 / (((2 ^ n : Nat) : Rat)) :=
+    hdyadic_antitone (by omega)
+  have htwoSmall : 1 / (((2 ^ (n + 2) : Nat) : Rat)) <=
+      1 / (((2 ^ n : Nat) : Rat)) :=
+    hdyadic_antitone (by omega)
+  have hscheduledSmall : 1 / (((2 ^ ((n + 2) * 6) : Nat) : Rat)) <=
+      1 / (((2 ^ n : Nat) : Rat)) :=
+    hdyadic_antitone (by omega)
+  have hfourUnit : 4 * unit.width <= 8 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    calc
+      4 * unit.width <= 4 * (2 * (1 / (((2 ^ (5 * n + 8) : Nat) : Rat))) ) :=
+        Rat.mul_le_mul_of_nonneg_left hunit (by native_decide)
+      _ <= 4 * (2 * (1 / (((2 ^ n : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left
+          (Rat.mul_le_mul_of_nonneg_left hunitSmall (by native_decide))
+          (by native_decide)
+      _ = 8 * (1 / (((2 ^ n : Nat) : Rat))) := by grind [Rat.mul_assoc]
+  have hfourA : 4 * a <= 8 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    calc
+      4 * a <= 4 * (2 * (1 / (((2 ^ (n + 1) : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left ha (by native_decide)
+      _ <= 4 * (2 * (1 / (((2 ^ n : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left
+          (Rat.mul_le_mul_of_nonneg_left hsuccSmall (by native_decide))
+          (by native_decide)
+      _ = 8 * (1 / (((2 ^ n : Nat) : Rat))) := by grind [Rat.mul_assoc]
+  have hfourTail : 4 * tail.width <= 8 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    calc
+      4 * tail.width <= 4 * (2 * (1 / (((2 ^ (5 * n + 8) : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left htail (by native_decide)
+      _ <= 4 * (2 * (1 / (((2 ^ n : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left
+          (Rat.mul_le_mul_of_nonneg_left hunitSmall (by native_decide))
+          (by native_decide)
+      _ = 8 * (1 / (((2 ^ n : Nat) : Rat))) := by grind [Rat.mul_assoc]
+  have hfourBridge : 4 * bridge.width <= 48 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    calc
+      4 * bridge.width <= 4 * (12 * (1 / (((2 ^ n : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left hbridge (by native_decide)
+      _ = 48 * (1 / (((2 ^ n : Nat) : Rat))) := by grind [Rat.mul_assoc]
+  have htwoScheduled : 2 * scheduled.width <= 64 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    calc
+      2 * scheduled.width <=
+          2 * (32 * (1 / (((2 ^ ((n + 2) * 6) : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left hscheduled (by native_decide)
+      _ <= 2 * (32 * (1 / (((2 ^ n : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left
+          (Rat.mul_le_mul_of_nonneg_left hscheduledSmall (by native_decide))
+          (by native_decide)
+      _ = 64 * (1 / (((2 ^ n : Nat) : Rat))) := by grind [Rat.mul_assoc]
+  have htwoLiteral : 2 * literal.width <= 64 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    calc
+      2 * literal.width <= 2 * (32 * (1 / (((2 ^ (n + 2) : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left hliteral (by native_decide)
+      _ <= 2 * (32 * (1 / (((2 ^ n : Nat) : Rat)))) :=
+        Rat.mul_le_mul_of_nonneg_left
+          (Rat.mul_le_mul_of_nonneg_left htwoSmall (by native_decide))
+          (by native_decide)
+      _ = 64 * (1 / (((2 ^ n : Nat) : Rat))) := by grind [Rat.mul_assoc]
+  have hendpointSmall : endpoint.hi <= 24 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    calc
+      endpoint.hi = ((64 : Rat) / 3) * (1 / (((2 ^ (n + 2) : Nat) : Rat))) := hendpoint
+      _ <= 24 * (1 / (((2 ^ (n + 2) : Nat) : Rat))) := by
+        exact Rat.mul_le_mul_of_nonneg_right (by native_decide)
+          (Rat.le_of_lt (hdyadic_pos (n + 2)))
+      _ <= 24 * (1 / (((2 ^ n : Nat) : Rat))) :=
+        Rat.mul_le_mul_of_nonneg_left htwoSmall (by native_decide)
+  change
+    (4 * unit.hi + 2 * (a + tail.width) + 2 * bridge.width +
+        scheduled.width + literal.width + endpoint.hi) -
+      (4 * unit.lo -
+        (2 * (a + tail.width) + 2 * bridge.width +
+          scheduled.width + literal.width)) <=
+      224 * (1 / (((2 ^ n : Nat) : Rat)))
+  calc
+    (4 * unit.hi + 2 * (a + tail.width) + 2 * bridge.width +
+        scheduled.width + literal.width + endpoint.hi) -
+      (4 * unit.lo -
+        (2 * (a + tail.width) + 2 * bridge.width +
+          scheduled.width + literal.width)) =
+        4 * unit.width + 4 * a + 4 * tail.width + 4 * bridge.width +
+          2 * scheduled.width + 2 * literal.width + endpoint.hi := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.mul_assoc, Rat.add_assoc,
+          Rat.add_comm]
+    _ <= 8 * (1 / (((2 ^ n : Nat) : Rat))) +
+          8 * (1 / (((2 ^ n : Nat) : Rat))) +
+          8 * (1 / (((2 ^ n : Nat) : Rat))) +
+          48 * (1 / (((2 ^ n : Nat) : Rat))) +
+          64 * (1 / (((2 ^ n : Nat) : Rat))) +
+          64 * (1 / (((2 ^ n : Nat) : Rat))) +
+          24 * (1 / (((2 ^ n : Nat) : Rat))) := by
+        exact rat_add_le_add
+          (rat_add_le_add
+            (rat_add_le_add
+              (rat_add_le_add
+                (rat_add_le_add
+                  (rat_add_le_add hfourUnit hfourA) hfourTail)
+                hfourBridge)
+              htwoScheduled)
+            htwoLiteral)
+          hendpointSmall
+    _ = 224 * (1 / (((2 ^ n : Nat) : Rat))) := by
+      grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+private theorem projectiveCompactDyadicFullCauchyEnvelope_widthsShrink :
+    RealRaw.WidthsShrinkToZero projectiveCompactDyadicFullCauchyEnvelope := by
+  have hbudget := scaled_dyadic_budget_widthsShrink (224 : Rat)
+    (by native_decide : (0 : Rat) <= 224) (fun n => n) (fun n => Nat.le_refl n)
+  intro eps
+  obtain ⟨N, hN⟩ := hbudget eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hsmall : 224 * (1 / (((2 ^ n : Nat) : Rat))) <= eps.val := by
+    have hsmall' := hN n hn
+    change 224 * (1 / (((2 ^ n : Nat) : Rat))) - 0 <= eps.val at hsmall'
+    grind [Rat.sub_eq_add_neg]
+  exact Rat.le_trans (projectiveCompactDyadicFullCauchyEnvelope_width_le n)
+    hsmall
+
+/-- A shrinking rational enclosure proves raw-real order whenever its left
+endpoint lies below one scheduled computation and its right endpoint lies
+above the other.  The proof is the epsilon/2 gap argument, entirely over
+rationals; the schedules only need to be cofinal. -/
+private theorem realRaw_le_of_shrinking_enclosures
+    {x y : RealRaw} (hx : x.Valid) (hy : y.Valid)
+    (enclosure : Nat -> QInterval) (leftStage rightStage : Nat -> Nat)
+    (hleftStage : forall k, k <= leftStage k)
+    (hrightStage : forall k, k <= rightStage k)
+    (hleft : forall k, (x.compute (leftStage k)).lo <= (enclosure k).hi)
+    (hright : forall k, (enclosure k).lo <= (y.compute (rightStage k)).hi)
+    (hshrink : RealRaw.WidthsShrinkToZero enclosure) :
+    x.Le y := by
+  intro n m
+  by_cases hgood : (x.compute n).lo <= (y.compute m).hi
+  · exact hgood
+  · exfalso
+    have hgap : 0 < (x.compute n).lo - (y.compute m).hi := by
+      rw [← Rat.lt_iff_sub_pos]
+      simpa [Rat.not_le] using hgood
+    have htwo : (0 : Rat) < 2 := by native_decide
+    have hhalfPos : 0 < ((x.compute n).lo - (y.compute m).hi) / 2 := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos hgap ((Rat.inv_pos).2 htwo)
+    obtain ⟨N, hN⟩ := hshrink
+      { val := ((x.compute n).lo - (y.compute m).hi) / 2,
+        property := hhalfPos }
+    let k : Nat := Nat.max N (Nat.max n m)
+    have hNk : N <= k := by
+      dsimp [k]
+      exact Nat.le_max_left _ _
+    have hnk0 : n <= k := by
+      dsimp [k]
+      exact Nat.le_trans (Nat.le_max_left n m)
+        (Nat.le_max_right N (Nat.max n m))
+    have hmk0 : m <= k := by
+      dsimp [k]
+      exact Nat.le_trans (Nat.le_max_right n m)
+        (Nat.le_max_right N (Nat.max n m))
+    have hxnest := hx.2.1 n (leftStage k)
+      (Nat.le_trans hnk0 (hleftStage k))
+    have hynest := hy.2.1 m (rightStage k)
+      (Nat.le_trans hmk0 (hrightStage k))
+    have hsmall := hN k hNk
+    have hgapLe :
+        (x.compute n).lo - (y.compute m).hi <= (enclosure k).width := by
+      have hxl := hleft k
+      have hyr := hright k
+      grind [QInterval.width, Rat.sub_eq_add_neg]
+    have hhalfLt : ((x.compute n).lo - (y.compute m).hi) / 2 <
+        (x.compute n).lo - (y.compute m).hi := by
+      rw [Rat.div_lt_iff htwo]
+      grind
+    have hgapLeHalf :
+        (x.compute n).lo - (y.compute m).hi <=
+          ((x.compute n).lo - (y.compute m).hi) / 2 :=
+      Rat.le_trans hgapLe hsmall
+    have hgapLtHalf : (x.compute n).lo - (y.compute m).hi <
+        ((x.compute n).lo - (y.compute m).hi) / 2 :=
+      Rat.lt_of_le_of_ne hgapLeHalf (Rat.ne_of_gt hhalfLt)
+    exact (Rat.ne_of_gt hhalfLt)
+      (Rat.le_antisymm hgapLeHalf (Rat.le_of_lt hhalfLt))
+
+/-- The literal compact reciprocal-quartic computation and the completed
+Cauchy full-line computation determine the same raw real.  This uses their
+finite projective bridge plus the explicitly shrinking common envelope; it
+does not invoke completeness of an ambient real-number system. -/
+theorem reciprocalQuarticMinusOneCompactDyadicIntegral_equiv_cauchyFullLine :
+    reciprocalQuarticMinusOneCompactDyadicIntegral.Equiv cauchyFullLineIntegral := by
+  apply RealRaw.equiv_of_le_of_ge
+  · apply realRaw_le_of_shrinking_enclosures
+      reciprocalQuarticMinusOneCompactDyadicIntegral_valid
+      cauchyFullLineIntegral_valid projectiveCompactDyadicFullCauchyEnvelope
+      (fun k => k + 3) (fun k => 5 * k + 8)
+    · intro k
+      omega
+    · intro k
+      omega
+    · intro k
+      have hover :=
+        reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_fullCauchy k
+      change (reciprocalQuarticMinusOneUnitDyadicCompute (k + 3)).lo <=
+        (projectiveCompactDyadicFullCauchyEnvelope k).hi
+      exact hover.1
+    · intro k
+      have hcontains := projectiveCompactDyadicFullCauchyEnvelope_contains_cauchyFullLine k
+      exact Rat.le_trans hcontains.1
+        (RealRaw.interval_order_of_valid cauchyFullLineIntegral
+          cauchyFullLineIntegral_valid (5 * k + 8))
+    · exact projectiveCompactDyadicFullCauchyEnvelope_widthsShrink
+  · apply realRaw_le_of_shrinking_enclosures
+      cauchyFullLineIntegral_valid
+      reciprocalQuarticMinusOneCompactDyadicIntegral_valid
+      projectiveCompactDyadicFullCauchyEnvelope
+      (fun k => 5 * k + 8) (fun k => k + 3)
+    · intro k
+      omega
+    · intro k
+      omega
+    · intro k
+      have hcontains := projectiveCompactDyadicFullCauchyEnvelope_contains_cauchyFullLine k
+      exact Rat.le_trans
+        (RealRaw.interval_order_of_valid cauchyFullLineIntegral
+          cauchyFullLineIntegral_valid (5 * k + 8)) hcontains.2
+    · intro k
+      have hover :=
+        reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_fullCauchy k
+      change (projectiveCompactDyadicFullCauchyEnvelope k).lo <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (k + 3)).hi
+      exact hover.2
+    · exact projectiveCompactDyadicFullCauchyEnvelope_widthsShrink
 
 theorem reciprocalQuarticMinusOneCompact_existsConstruction :
     Integral.ExistsConstructionFor

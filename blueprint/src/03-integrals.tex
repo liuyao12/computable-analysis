@@ -1104,10 +1104,12 @@ The left side has the exact rational value \(2\) at each compact-chart
 endpoint \(x=\pm1\).  Thus the remaining analytic construction can use a
 finite interval with a removable-endpoint certificate, rather than treating a
 tail limit as primitive.  Its direct compact dyadic integral construction is
-now already complete; the still-missing theorem is the projective
-change-of-variables comparison with the completed Cauchy compactification, so
-the reciprocal-quartic candidate is definition-complete but not yet an
-equivalence-complete scoreboard computation.  The compact density itself is a
+now complete, and its finite projective rectangles have been compared directly
+with the completed Cauchy compactification through an explicit shrinking
+rational envelope.  Thus the reciprocal-quartic candidate is now an
+equivalence-complete scoreboard computation.  A general projective
+change-of-variables theorem remains a useful later abstraction, but is no
+longer needed for this concrete pi route.  The compact density itself is a
 total rational-name interval function on every rational interval; its
 interval-level regularity is proved below.
 For rational chart endpoints away from \(\pm1\), Lean now also proves the
@@ -1291,8 +1293,13 @@ explicit shrinking enclosures.  That finite combination is now checked:
 the literal reciprocal-quartic candidate overlaps a single rational envelope
 centred on the four-unit-mesh Cauchy calculation.  Its terms are precisely the
 near-zero and tail-mesh errors, the scheduled Cauchy bridge width, the two
-compact bracket widths, and the removable endpoint budget.  The remaining
-step is therefore raw-level shrinkage and containment bookkeeping.
+compact bracket widths, and the removable endpoint budget.  Lean bounds this
+full envelope by (224\,2^{-n}), proves that it contains the scheduled
+full-line Cauchy box, and applies the rational \(\varepsilon/2\) gap argument
+to package a \code{RealRaw.Equiv} between the literal compact dyadic integral
+and the completed Cauchy raw.  Chaining with the established Cauchy--area
+equivalence makes the reciprocal-quartic compact candidate a formal pi
+computation, without a completeness argument.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,
@@ -1370,29 +1377,32 @@ by the verified rectangle arctangent construction.
 \label{thm:reciprocal-quartic-route-package}
 \lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact}
 \lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_valid}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_valid}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
 \uses{def:reciprocal-quartic-test-kernel,thm:reciprocal-quartic-projective-substitution,thm:geometric-pi-validity}
 \leanok
-The compact candidate
-\code{piReciprocalQuarticCompact} is already a valid raw real, computed by
-the displayed dyadic finite integral on \([-1,1]\).  The clean benchmark
+The compact candidate \code{piReciprocalQuarticCompact} is a valid raw real,
+computed by the displayed dyadic finite integral on \([-1,1]\), and Lean now
+proves it equivalent to \code{piCircleArea}.  The proof first compares its
+literal finite box with the completed full-line Cauchy raw in a common rational
+envelope, then uses the existing Cauchy--area equivalence.  The clean benchmark
 \[
   \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}=\pi
 \]
-now has a theorem-facing package.  Lean proves that the expected raw value
+also has a theorem-facing package.  Lean proves that the expected raw value
 \code{reciprocalQuarticMinusOneExpectedPi} is valid and equivalent to the
-baseline \code{piCircleArea}.  Consequently, once the projective-line
+baseline \code{piCircleArea}.  Consequently, once the broader projective-line
 construction is shown to satisfy
 \code{ReciprocalQuarticMinusOneProjectiveAgreement}, the concrete
 \code{reciprocalQuarticMinusOneCompactDyadicConstruction} supplies the
 required compactified rational-density computation on \([-1,1]\), and the
 resulting
 \code{ReciprocalQuarticMinusOneProjectiveRoute} immediately gives a formal
-\(\pi\)-computation equivalent to \code{piCircleArea}.  This route package is
-therefore counted for definition completeness only; its equivalence column
-remains open until the projective substitution certificate is supplied.
+\(\pi\)-computation equivalent to \code{piCircleArea}.  That general route
+package remains useful, but its additional abstraction no longer blocks the
+concrete scoreboard equivalence.
 \end{theorem}
 
 \section{Trigonometric Functions as Integral Identities}
