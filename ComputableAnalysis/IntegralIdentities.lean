@@ -8586,6 +8586,128 @@ theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_sched
   · exact Rat.le_trans hcandidate.1 (by grind)
   · exact Rat.le_trans (by grind) hcandidate.2
 
+/-- A common full-line Cauchy enclosure for the projective quartic candidate.
+It combines the two-branch projective bridge with the standard four-unit-mesh
+representation of the completed Cauchy full-line raw. -/
+def projectiveCompactDyadicFullCauchyEnvelope (n : Nat) : QInterval :=
+  let unit := ArctanGeometry.integralSumInterval
+    (ArctanGeometry.arctanAreaLoopState 1 (5 * n + 8)).intervals
+  let a := projectiveCompactDyadicCauchyTailStart n
+  let tail := ArctanGeometry.integralSumInterval
+    (cauchyTailDyadicIntervals a (5 * n + 8))
+  let bridge := projectiveCompactDyadicScheduledCauchyBridgeEnvelope n
+  let scheduled := projectiveCompactSymmetricLipschitzSum
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals
+  let literal := projectiveCompactSymmetricLipschitzSum
+    (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))
+  let endpoint := projectiveCompactDyadicSymmetricTailError.compute (n + 2)
+  { lo := 4 * unit.lo -
+      (2 * (a + tail.width) + 2 * bridge.width +
+        scheduled.width + literal.width),
+    hi := 4 * unit.hi +
+      2 * (a + tail.width) + 2 * bridge.width +
+        scheduled.width + literal.width + endpoint.hi }
+
+/-- The literal compact candidate reaches the full-line Cauchy envelope at a
+finite stage.  The only bridge costs are explicit widths already certified on
+the compact and Cauchy sides. -/
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_fullCauchy
+    (n : Nat) :
+    QInterval.Overlaps
+      (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1))
+      (projectiveCompactDyadicFullCauchyEnvelope n) := by
+  let unit : QInterval := ArctanGeometry.integralSumInterval
+    (ArctanGeometry.arctanAreaLoopState 1 (5 * n + 8)).intervals
+  let a : Rat := projectiveCompactDyadicCauchyTailStart n
+  let tail : QInterval := ArctanGeometry.integralSumInterval
+    (cauchyTailDyadicIntervals a (5 * n + 8))
+  let assembly : QInterval := ArctanGeometry.integralSumInterval
+    (cauchyUnitReciprocalTailDyadicIntervals a (5 * n + 8))
+  let bridge : QInterval := projectiveCompactDyadicScheduledCauchyBridgeEnvelope n
+  let scheduled : QInterval := projectiveCompactSymmetricLipschitzSum
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals
+  let literal : QInterval := projectiveCompactSymmetricLipschitzSum
+    (reciprocalQuarticUnitDyadicCoreIntervals (n + 2))
+  let endpoint : QInterval := projectiveCompactDyadicSymmetricTailError.compute (n + 2)
+  have hcandidate :=
+    reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_scheduledCauchy n
+  have hassembly := cauchyUnitReciprocalTailDyadicIntervals_overlaps_twoUnitEnvelope
+    (a := a) (projectiveCompactDyadicCauchyTailStart_pos n)
+    (projectiveCompactDyadicCauchyTailStart_le_one n) (5 * n + 8)
+  have hbridge := projectiveCompactDyadicScheduledCauchyBridgeEnvelope_contains_assembly n
+  have ha0 : 0 <= a := Rat.le_of_lt (projectiveCompactDyadicCauchyTailStart_pos n)
+  have hcandidate' : QInterval.Overlaps
+      (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1))
+      { lo := 2 * bridge.lo - (scheduled.width + literal.width),
+        hi := 2 * bridge.hi + scheduled.width + literal.width + endpoint.hi } := by
+    simpa [bridge, scheduled, literal, endpoint] using hcandidate
+  have hassembly' : QInterval.Overlaps assembly
+      { lo := 2 * unit.lo - (a + tail.width),
+        hi := 2 * unit.hi + tail.width } := by
+    simpa [assembly, unit, tail,
+      cauchyUnitReciprocalTailDyadicUnitEnvelope] using hassembly
+  have hbridge' : bridge.ContainsInterval assembly := by
+    simpa [bridge, assembly, a] using hbridge
+  have hbridgeHi : bridge.hi <= assembly.lo + bridge.width := by
+    unfold QInterval.ContainsInterval at hbridge'
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hbridgeLo : assembly.hi - bridge.width <= bridge.lo := by
+    unfold QInterval.ContainsInterval at hbridge'
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  change assembly.lo <= 2 * unit.hi + tail.width /\
+      2 * unit.lo - (a + tail.width) <= assembly.hi at hassembly'
+  have hhigh : 2 * bridge.hi <=
+      4 * unit.hi + 2 * (a + tail.width) + 2 * bridge.width := by
+    have hbridgeHi2 : 2 * bridge.hi <=
+        2 * (assembly.lo + bridge.width) :=
+      Rat.mul_le_mul_of_nonneg_left hbridgeHi (by native_decide)
+    have hassemblyLo2 : 2 * assembly.lo <=
+        2 * (2 * unit.hi + tail.width) :=
+      Rat.mul_le_mul_of_nonneg_left hassembly'.1 (by native_decide)
+    calc
+      2 * bridge.hi <= 2 * (assembly.lo + bridge.width) := hbridgeHi2
+      _ = 2 * assembly.lo + 2 * bridge.width := by
+        grind [Rat.mul_add]
+      _ <= 2 * (2 * unit.hi + tail.width) + 2 * bridge.width :=
+        rat_add_le_add hassemblyLo2 Rat.le_refl
+      _ = 4 * unit.hi + 2 * tail.width + 2 * bridge.width := by
+        grind
+      _ <= 4 * unit.hi + 2 * (a + tail.width) + 2 * bridge.width := by
+        grind
+  have hlow :
+      4 * unit.lo - (2 * (a + tail.width) + 2 * bridge.width) <=
+        2 * bridge.lo := by
+    have hbridgeLo2 : 2 * (assembly.hi - bridge.width) <=
+        2 * bridge.lo :=
+      Rat.mul_le_mul_of_nonneg_left hbridgeLo (by native_decide)
+    have hassemblyHi2 : 2 * (2 * unit.lo - (a + tail.width)) <=
+        2 * assembly.hi :=
+      Rat.mul_le_mul_of_nonneg_left hassembly'.2 (by native_decide)
+    calc
+      4 * unit.lo - (2 * (a + tail.width) + 2 * bridge.width) =
+          2 * (2 * unit.lo - (a + tail.width)) - 2 * bridge.width := by
+            grind [Rat.sub_eq_add_neg]
+      _ <= 2 * assembly.hi - 2 * bridge.width := by
+        simpa [Rat.sub_eq_add_neg] using
+          (rat_add_le_add hassemblyHi2 Rat.le_refl)
+      _ = 2 * (assembly.hi - bridge.width) := by
+        grind [Rat.sub_eq_add_neg]
+      _ <= 2 * bridge.lo := hbridgeLo2
+  change
+    (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1)).lo <=
+        4 * unit.hi + 2 * (a + tail.width) + 2 * bridge.width +
+          scheduled.width + literal.width + endpoint.hi /\
+      4 * unit.lo -
+          (2 * (a + tail.width) + 2 * bridge.width +
+            scheduled.width + literal.width) <=
+        (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1)).hi
+  exact ⟨Rat.le_trans hcandidate'.1 (by grind),
+    Rat.le_trans (by grind) hcandidate'.2⟩
+
 /-- Splitting one unit cell at its rational midpoint tightens the elementary
 Lipschitz rectangle.  This is the finite refinement inequality from which the
 raw interval algorithm will obtain nestedness. -/

@@ -311,7 +311,11 @@ not a description of the current module graph. The checked blueprint
   pays only the rational near-zero length and the compact tail-mesh width;
   `projectiveCompactDyadicCauchyTailStart_le_dyadic` and
   `cauchyTailDyadicIntervals_integral_width_le_dyadic` prove that both vanish
-  at a certified dyadic rate.
+  at a certified dyadic rate.  These two sides are now combined in
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_fullCauchy`:
+  the actual candidate overlaps one explicit rational envelope centred on the
+  four-unit-mesh Cauchy calculation.  Remaining work is raw-level enclosure
+  shrinkage, not any unproved finite change-of-variables identity.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

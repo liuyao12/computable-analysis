@@ -1287,7 +1287,12 @@ the unit mesh appended to the reciprocal tail is enclosed by two standard unit
 meshes, with exactly the omitted near-zero length and the compact tail-mesh
 width as errors.  Lean proves that the relevant dyadic tail start and that
 tail-mesh width both vanish, so the remaining work is to combine these two
-explicit shrinking enclosures.
+explicit shrinking enclosures.  That finite combination is now checked:
+the literal reciprocal-quartic candidate overlaps a single rational envelope
+centred on the four-unit-mesh Cauchy calculation.  Its terms are precisely the
+near-zero and tail-mesh errors, the scheduled Cauchy bridge width, the two
+compact bracket widths, and the removable endpoint budget.  The remaining
+step is therefore raw-level shrinkage and containment bookkeeping.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,
