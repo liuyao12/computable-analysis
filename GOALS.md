@@ -254,6 +254,12 @@ not a description of the current module graph. The checked blueprint
   the latter has only `n` source refinements at its stage `n`.  The former is
   available for the eventual Cauchy quadrature assembly, but no candidate
   equivalence is claimed from it until a checked comparison is supplied.
+  The rational endpoint side of that assembly is now explicit too:
+  `projectiveCompactDyadicCauchyTailRadius_le` proves that the reciprocal
+  projective endpoint at compact stage `n + 1` is at most `2 * 2^(-n)`.
+  After the two-branch factor this gives the intended dyadically vanishing
+  Cauchy-tail scale; the still-missing theorem is its finite reciprocal
+  rectangle transport to the existing full-line Cauchy raw.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

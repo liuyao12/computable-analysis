@@ -3368,6 +3368,15 @@ kernel below. -/
 def projectiveCompactCoordinate (x : Rat) : Rat :=
   x / (1 - x * x)
 
+/-- The reciprocal of the compact projective coordinate is again a total
+rational expression.  At the removable value `x = 0` both totalized rational
+expressions are zero. -/
+theorem projectiveCompactCoordinate_reciprocal (x : Rat) :
+    1 / projectiveCompactCoordinate x = (1 - x * x) / x := by
+  unfold projectiveCompactCoordinate
+  repeat rw [Rat.div_def]
+  simp only [Rat.one_mul, Rat.inv_mul_rev, Rat.inv_inv]
+
 /-- Formal Jacobian of `projectiveCompactCoordinate`. -/
 def projectiveCompactJacobian (x : Rat) : Rat :=
   (1 + x * x) / ((1 - x * x) * (1 - x * x))
@@ -3814,6 +3823,99 @@ theorem projectiveCompactDyadicEndpoint_lt_one (n : Nat) :
   have hinv : 0 < D⁻¹ := (Rat.inv_pos).2 hDpos
   dsimp [D] at hinv
   grind [Rat.sub_eq_add_neg]
+
+/-- From the first positive dyadic stage onward, the compact projective
+endpoint is at least one half. -/
+theorem projectiveCompactDyadicEndpoint_succ_ge_half (n : Nat) :
+    (1 : Rat) / 2 <= projectiveCompactDyadicEndpoint (n + 1) := by
+  have hpow : 2 <= 2 ^ (n + 1) := by
+    calc
+      2 = 1 * 2 := by omega
+      _ <= 2 ^ n * 2 :=
+        Nat.mul_le_mul_right 2 (Nat.one_le_iff_ne_zero.mpr
+          (Nat.ne_of_gt (Nat.pow_pos (by omega : 0 < 2))))
+      _ = 2 ^ (n + 1) := by
+        rw [Nat.pow_succ]
+  have hinv : 1 / (((2 ^ (n + 1) : Nat) : Rat)) <= (1 : Rat) / 2 :=
+    FTC.one_div_nat_antitone (by omega : 0 < 2)
+      (Nat.pow_pos (by omega : 0 < 2)) hpow
+  unfold projectiveCompactDyadicEndpoint
+  grind [Rat.sub_eq_add_neg]
+
+/-- The projective denominator at a dyadic compact endpoint is at most twice
+its remaining dyadic distance to the endpoint. -/
+theorem projectiveCompactDyadicEndpoint_denominator_le (n : Nat) :
+    1 - projectiveCompactDyadicEndpoint n * projectiveCompactDyadicEndpoint n <=
+      2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  have hs1 : projectiveCompactDyadicEndpoint n <= 1 :=
+    Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one n)
+  have hwidth : 0 <= 1 - projectiveCompactDyadicEndpoint n := by
+    grind [Rat.sub_eq_add_neg]
+  have hfactor : 1 + projectiveCompactDyadicEndpoint n <= 2 := by
+    grind [Rat.sub_eq_add_neg]
+  calc
+    1 - projectiveCompactDyadicEndpoint n * projectiveCompactDyadicEndpoint n =
+        (1 - projectiveCompactDyadicEndpoint n) *
+          (1 + projectiveCompactDyadicEndpoint n) := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.mul_assoc, Rat.mul_comm]
+    _ <= (1 - projectiveCompactDyadicEndpoint n) * 2 :=
+        Rat.mul_le_mul_of_nonneg_left hfactor hwidth
+    _ = 2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+        dsimp [projectiveCompactDyadicEndpoint]
+        grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Beyond the first compact stage, the reciprocal projective endpoint is
+dyadically small.  This is the rational radius that will bound the remaining
+Cauchy tail after reciprocal folding. -/
+theorem projectiveCompactDyadicCauchyTailRadius_le (n : Nat) :
+    1 / projectiveCompactCoordinate
+        (projectiveCompactDyadicEndpoint (n + 1)) <=
+      2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  let s : Rat := projectiveCompactDyadicEndpoint (n + 1)
+  let D : Rat := ((2 ^ n : Nat) : Rat)
+  have hs_half : (1 : Rat) / 2 <= s := by
+    simpa [s] using projectiveCompactDyadicEndpoint_succ_ge_half n
+  have hspos : 0 < s := by
+    have hhalfpos : (0 : Rat) < 1 / 2 := by native_decide
+    grind
+  have hsinv : s⁻¹ <= 2 := by
+    apply Rat.le_of_mul_le_mul_right (c := s)
+    · calc
+        s⁻¹ * s = 1 := Rat.inv_mul_cancel _ (Rat.ne_of_gt hspos)
+        _ = 2 * ((1 : Rat) / 2) := by native_decide
+        _ <= 2 * s :=
+          Rat.mul_le_mul_of_nonneg_left hs_half (by native_decide)
+    · exact hspos
+  have hdenpos : 0 < 1 - s * s := by
+    dsimp [s]
+    exact projectiveCompactDenominator_pos (by grind)
+      (projectiveCompactDyadicEndpoint_lt_one _)
+  have hscale :
+      2 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) = 1 / D := by
+    have hpow : (((2 ^ (n + 1) : Nat) : Rat)) = D * 2 := by
+      dsimp [D]
+      exact_mod_cast (by simpa using (Nat.pow_succ 2 n))
+    have hDpos : 0 < D := by
+      dsimp [D]
+      exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+    rw [hpow]
+    repeat rw [Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  have hden : 1 - s * s <= 1 / D := by
+    have h := projectiveCompactDyadicEndpoint_denominator_le (n + 1)
+    dsimp [s]
+    rw [hscale] at h
+    exact h
+  rw [projectiveCompactCoordinate_reciprocal]
+  change (1 - s * s) / s <= 2 * (1 / D)
+  rw [Rat.div_def]
+  calc
+    (1 - s * s) * s⁻¹ <= (1 - s * s) * 2 :=
+      Rat.mul_le_mul_of_nonneg_left hsinv (Rat.le_of_lt hdenpos)
+    _ <= (1 / D) * 2 :=
+      Rat.mul_le_mul_of_nonneg_right hden (by native_decide)
+    _ = 2 * (1 / D) := by grind [Rat.mul_comm]
 
 /-- At the dyadic endpoint, the projective denominator retains at least one
 dyadic unit of clearance from zero. -/
