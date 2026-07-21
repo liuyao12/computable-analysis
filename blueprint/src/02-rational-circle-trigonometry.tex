@@ -748,6 +748,17 @@ obtain the public \code{CircumferenceValid} proof.  The all-prefix statement is
 now formalized as an iff with the global step-refinement predicate, so this is
 the same obligation in a finite-checkable presentation.
 
+The lower endpoint has a second, sharper finite reduction.  The rational
+curvature certificate \code{PiProofs.curvatureChordLower} is below the exact
+unit-circle chord on the first-quadrant chart, and its bisection lower endpoint
+loses only the displayed interval width.  Lean packages the remaining
+universal rational inequality as
+\code{PiProofs.AdjacentChordCurvatureMarginCoversFineWidths};
+\code{PiProofs.adjacentChordLowerRefinesByDoubling\_of\_curvatureMargin}
+proves that this one certificate would close the public direct lower-path
+refinement.  No completed-real square root or completeness principle occurs in
+this reduction.
+
 There is nevertheless a separately named certified representative,
 \code{piCircumferenceStabilized}. At stage \(n\), it takes the finite prefix
 of direct perimeter intervals, widens each by the public rational radius

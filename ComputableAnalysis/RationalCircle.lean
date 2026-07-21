@@ -385,6 +385,63 @@ theorem one_sub_point_dot_nonneg (u v : Rat) :
   exact Rat.mul_nonneg hnum'
     (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
 
+/-- A denominator-cleared dot-product formula for the rational circle chart.
+It makes the first-quadrant sign conditions used by chord refinements purely
+rational inequalities on the chart parameters. -/
+theorem point_dot_formula (u v : Rat) :
+    dot (point u) (point v) =
+      ((1 + u * v) * (1 + u * v) - (v - u) * (v - u)) /
+        ((1 + u * u) * (1 + v * v)) := by
+  unfold dot point
+  simp
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  have hdupos : 0 < 1 + u * u := one_add_square_pos u
+  have hdvpos : 0 < 1 + v * v := one_add_square_pos v
+  have hdune : 1 + u * u ≠ 0 := Rat.ne_of_gt hdupos
+  have hdvne : 1 + v * v ≠ 0 := Rat.ne_of_gt hdvpos
+  have hmulne : (1 + u * u) * (1 + v * v) ≠ 0 :=
+    Rat.ne_of_gt (Rat.mul_pos hdupos hdvpos)
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Adjacent nonnegative chart parameters at rational distance at most one
+have nonnegative dot product. -/
+theorem point_dot_nonneg_of_step_le_one
+    {u v : Rat}
+    (hu : 0 <= u) (hv : 0 <= v)
+    (hstep : 0 <= v - u) (hstep_one : v - u <= 1) :
+    0 <= dot (point u) (point v) := by
+  rw [point_dot_formula]
+  let a : Rat := 1 + u * v
+  let d : Rat := v - u
+  have huv : 0 <= u * v := Rat.mul_nonneg hu hv
+  have haone : 1 <= a := by
+    dsimp [a]
+    grind
+  have ha0 : 0 <= a := Rat.le_trans (by native_decide) haone
+  have hd0 : 0 <= d := by
+    simpa [d] using hstep
+  have hdle : d <= a := Rat.le_trans hstep_one haone
+  have hsq : sq d <= sq a := sq_le_sq_of_nonneg_le hd0 hdle
+  have hnum : 0 <= a * a - d * d := by
+    change 0 <= sq a - sq d
+    grind [Rat.sub_eq_add_neg]
+  have hden : 0 < (1 + u * u) * (1 + v * v) :=
+    Rat.mul_pos (one_add_square_pos u) (one_add_square_pos v)
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+/-- Pythagoras for two rational points on the unit circle, expressed through
+their oriented cross product and dot-product deficit.  This finite identity is
+the exact algebraic core behind rational chord-length refinements. -/
+theorem segmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit
+    {p q : PiCirclePoint}
+    (hp : normSq p = 1) (_hq : normSq q = 1) :
+    segmentNormSq p q = sq (cross p q) + sq (1 - dot p q) := by
+  unfold segmentNormSq normSq cross dot sq at *
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 theorem cross_sq_le_segmentNormSq_of_unit
     {p q : PiCirclePoint}
     (hp : normSq p = 1) (_hq : normSq q = 1) :

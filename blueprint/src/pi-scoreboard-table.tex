@@ -49,8 +49,11 @@ readiness cells because they reuse one of the bridges above.
 
 The direct \code{piCircumference} evaluator remains a geometric diagnostic:
 its unresolved lower-endpoint refinement is a local square-root-enclosure
-problem, not a missing calculus gate.  The arcsine/Newton and Gaussian rows
-remain future probes for, respectively, inverse/square-root integration and
-the exponential/full-line layers.  Basel, Brouncker, and logarithm-at-\(i\)
-belong to advanced analysis and are intentionally omitted from this progress
-table; their chapters remain part of the broader blueprint.
+problem, not a missing calculus gate.  Lean now reduces it to
+\code{AdjacentChordCurvatureMarginCoversFineWidths}: an explicit rational
+margin comparing the two fine curvature certificates, their bisection widths,
+and the coarse squared chord.  The reduction from that margin to the original
+endpoint refinement is checked; the universal margin inequality remains open.
+The arcsine/Newton and Gaussian rows remain future probes for inverse/
+square-root integration and the exponential/full-line layers; advanced routes
+are intentionally omitted from this progress table.

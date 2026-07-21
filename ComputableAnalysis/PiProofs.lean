@@ -7730,6 +7730,121 @@ theorem pointSegmentNormSq_eq_rationalCircleSegmentNormSq
       RationalCircle.Stage.segmentNormSq p q := by
   rfl
 
+/-- The rational Pythagorean decomposition of a unit-circle chord.
+
+This rewrites the squared chord length as an exact cross-product term plus a
+dot-deficit term, so the remaining direct-circumference refinement obligation
+can be reduced to finite rational inequalities rather than an appeal to real
+square roots. -/
+theorem pointSegmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit
+    {p q : PiCirclePoint}
+    (hp : RationalCircle.Stage.normSq p = 1)
+    (hq : RationalCircle.Stage.normSq q = 1) :
+    pointSegmentNormSq p q =
+      sq (pointCross p q) + sq (1 - RationalCircle.Stage.dot p q) := by
+  simpa [pointSegmentNormSq_eq_rationalCircleSegmentNormSq,
+    pointCross_eq_rationalCircleCross] using
+    RationalCircle.Stage.segmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit
+      hp hq
+
+/-- A rational lower certificate for a positively oriented unit-circle chord.
+
+The correction is second order in the dot-product deficit.  It is a finite
+rational expression, kept separate from π itself so it can be used to close
+the original chord-path enclosure-refinement proof. -/
+def curvatureChordLower (p q : PiCirclePoint) : Rat :=
+  pointCross p q +
+    sq (1 - RationalCircle.Stage.dot p q) / 4
+
+/-- The curvature chord certificate is below the exact chord length whenever
+the two rational endpoints lie on the positively oriented first-quadrant arc.
+The conclusion is stated on squared lengths, so no completed real-number
+square root is used. -/
+theorem curvatureChordLower_sq_le_segmentNormSq_of_unit
+    {p q : PiCirclePoint}
+    (hp : RationalCircle.Stage.normSq p = 1)
+    (hq : RationalCircle.Stage.normSq q = 1)
+    (hcross : 0 <= pointCross p q)
+    (hdot : 0 <= RationalCircle.Stage.dot p q)
+    (hdeficit : 0 <= 1 - RationalCircle.Stage.dot p q) :
+    sq (curvatureChordLower p q) <= pointSegmentNormSq p q := by
+  let c := pointCross p q
+  let d := 1 - RationalCircle.Stage.dot p q
+  have hunit : sq c + sq (RationalCircle.Stage.dot p q) = 1 := by
+    dsimp [c]
+    unfold pointCross RationalCircle.Stage.dot
+      RationalCircle.Stage.normSq sq at *
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  have hdot_sq : 0 <= sq (RationalCircle.Stage.dot p q) := by
+    unfold sq
+    exact Rat.mul_nonneg hdot hdot
+  have hc_sq_le_one : sq c <= 1 := by
+    grind
+  have hc_nonneg : 0 <= c := by
+    simpa [c] using hcross
+  have hc_le_one : c <= 1 := by
+    apply le_of_sq_le_sq_of_nonneg_right (by native_decide : (0 : Rat) <= 1)
+    simpa [sq] using hc_sq_le_one
+  have hd_nonneg : 0 <= d := by
+    simpa [d] using hdeficit
+  have hd_le_one : d <= 1 := by
+    dsimp [d]
+    grind [Rat.sub_eq_add_neg]
+  have hd_sq_le_one : sq d <= 1 := by
+    have hs := sq_le_sq_of_nonneg_le hd_nonneg hd_le_one
+    simpa [sq] using hs
+  have hfactor : 0 <= 1 - c / 2 - sq d / 16 := by
+    have hc_half : c / 2 <= (1 : Rat) / 2 := by
+      exact Rat.div_le_div_of_nonneg_right hc_le_one
+        (by native_decide : (0 : Rat) < 2)
+    have hd_sixteenth : sq d / 16 <= (1 : Rat) / 16 := by
+      exact Rat.div_le_div_of_nonneg_right hd_sq_le_one
+        (by native_decide : (0 : Rat) < 16)
+    have hnum : (1 : Rat) / 2 + 1 / 16 <= 1 := by
+      native_decide
+    grind [Rat.sub_eq_add_neg]
+  have hdiff :
+      (sq c + sq d) - sq (c + sq d / 4) =
+        sq d * (1 - c / 2 - sq d / 16) := by
+    unfold sq
+    grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hdiff_nonneg : 0 <= (sq c + sq d) - sq (c + sq d / 4) := by
+    rw [hdiff]
+    exact Rat.mul_nonneg
+      (by
+        unfold sq
+        exact Rat.mul_nonneg hd_nonneg hd_nonneg)
+      hfactor
+  have hbound : sq (c + sq d / 4) <= sq c + sq d := by
+    grind [Rat.sub_eq_add_neg]
+  rw [pointSegmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit hp hq]
+  change sq (c + sq d / 4) <= sq c + sq d
+  exact hbound
+
+/-- Convert the exact rational curvature certificate into a lower bound for a
+finite bisection enclosure.  The only loss is the explicitly computed width
+of that enclosure. -/
+theorem curvatureChordLower_sub_width_le_segment_lo_of_unit
+    {p q : PiCirclePoint}
+    (hp : RationalCircle.Stage.normSq p = 1)
+    (hq : RationalCircle.Stage.normSq q = 1)
+    (hcross : 0 <= pointCross p q)
+    (hdot : 0 <= RationalCircle.Stage.dot p q)
+    (hdeficit : 0 <= 1 - RationalCircle.Stage.dot p q)
+    (precision : Nat) :
+    curvatureChordLower p q -
+        (pointSegmentLengthInterval p q precision).width <=
+      (pointSegmentLengthInterval p q precision).lo := by
+  have hhi : curvatureChordLower p q <=
+      (pointSegmentLengthInterval p q precision).hi :=
+    pointSegmentLengthInterval_le_hi_of_sq_le p q precision
+      (curvatureChordLower_sq_le_segmentNormSq_of_unit hp hq hcross hdot
+        hdeficit)
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
 theorem pointSegmentNormSq_self (p : PiCirclePoint) :
     pointSegmentNormSq p p = 0 := by
   grind [pointSegmentNormSq, Rat.sub_eq_add_neg]
@@ -16336,6 +16451,60 @@ private theorem circleSamplePoint_dot_le_one
       (circleParameter stage j)) <= 1
   grind [Rat.sub_eq_add_neg]
 
+/-- Consecutive samples of a positive rational-circle stage have nonnegative
+dot product.  The proof is entirely in the rational chart: their parameter
+increment is `1 / stage`, hence at most one. -/
+theorem circleSamplePoint_dot_nonneg_adjacent
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    0 <= RationalCircle.Stage.dot
+      (circleSamplePoint stage k) (circleSamplePoint stage (k + 1)) := by
+  let u := circleParameter stage k
+  let v := circleParameter stage (k + 1)
+  have hu : 0 <= u := by
+    dsimp [u]
+    exact circleParameter_nonneg stage hstage k
+  have hv : 0 <= v := by
+    dsimp [v]
+    exact circleParameter_nonneg stage hstage (k + 1)
+  have hstep_eq : v - u = 1 / (stage : Rat) := by
+    dsimp [u, v]
+    exact circleParameter_succ_sub stage k
+  have hstep : 0 <= v - u := by
+    rw [hstep_eq, Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage))
+  have hstep_one : v - u <= 1 := by
+    rw [hstep_eq]
+    have hone : (1 / (1 : Rat)) = 1 := by
+      native_decide
+    simpa [hone] using
+      (FTC.one_div_nat_antitone (n := 1) (m := stage)
+        (by omega) hstage (by omega : 1 <= stage))
+  simpa [circleSamplePoint, circlePoint, u, v,
+    RationalCircle.Stage.point] using
+    RationalCircle.Stage.point_dot_nonneg_of_step_le_one hu hv hstep hstep_one
+
+/-- The curvature lower certificate for any consecutive rational-circle chord
+survives a finite square-root bisection with only its displayed width lost. -/
+theorem adjacentCurvatureChordLower_sub_width_le_segment_lo
+    (stage : Nat) (hstage : 0 < stage) (k precision : Nat) :
+    curvatureChordLower (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) -
+        (pointSegmentLengthInterval
+          (circleSamplePoint stage k)
+          (circleSamplePoint stage (k + 1)) precision).width <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) precision).lo := by
+  apply curvatureChordLower_sub_width_le_segment_lo_of_unit
+  · exact RationalCircle.Stage.samplePoint_normSq_unit
+      (rationalCircleStage stage) k
+  · exact RationalCircle.Stage.samplePoint_normSq_unit
+      (rationalCircleStage stage) (k + 1)
+  · exact circleSamplePoint_cross_nonneg_of_order stage hstage (by omega)
+  · exact circleSamplePoint_dot_nonneg_adjacent stage hstage k
+  · have h := circleSamplePoint_dot_le_one stage k (k + 1)
+    grind [Rat.sub_eq_add_neg]
+
 /-- The rational cross-product fan of the inscribed chords increases when an
 adjacent chord is split at the dyadic parameter midpoint. -/
 theorem adjacentChordCross_refinesByDoubling
@@ -16507,6 +16676,80 @@ def AdjacentChordLowerRefinesByDoubling (stage : Nat) : Prop :=
         (pointSegmentLengthInterval
           (circleSamplePoint (2 * stage) (2 * k.1 + 1))
           (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).lo
+
+/-- The finite rational margin whose verification closes the remaining
+lower-endpoint refinement of the original chord-path circumference algorithm.
+
+For each coarse chord, the two curvature certificates for its fine chords,
+minus the two explicit bisection widths, must dominate the coarse squared
+chord.  This is a finite statement over rational coordinates; it has no
+completeness or real-square-root premise. -/
+def AdjacentChordCurvatureMarginCoversFineWidths (stage : Nat) : Prop :=
+  forall k : Fin stage,
+    let p := circleSamplePoint stage k.1
+    let q := circleSamplePoint stage (k.1 + 1)
+    let p' := circleSamplePoint (2 * stage) (2 * k.1)
+    let m := circleSamplePoint (2 * stage) (2 * k.1 + 1)
+    let q' := circleSamplePoint (2 * stage) (2 * k.1 + 2)
+    let left := pointSegmentLengthInterval p' m (2 * stage)
+    let right := pointSegmentLengthInterval m q' (2 * stage)
+    let r := curvatureChordLower p' m + curvatureChordLower m q' -
+      left.width - right.width
+    0 <= r /\ pointSegmentNormSq p q <= sq r
+
+/-- A verified curvature margin yields the local lower-chord refinement
+needed by the original `piCircumference` computation. -/
+theorem adjacentChordLowerRefinesByDoubling_of_curvatureMargin
+    (stage : Nat) (hstage : 0 < stage)
+    (hmargin : AdjacentChordCurvatureMarginCoversFineWidths stage) :
+    AdjacentChordLowerRefinesByDoubling stage := by
+  intro k
+  have h := hmargin k
+  dsimp at h
+  let p := circleSamplePoint stage k.1
+  let q := circleSamplePoint stage (k.1 + 1)
+  let p' := circleSamplePoint (2 * stage) (2 * k.1)
+  let m := circleSamplePoint (2 * stage) (2 * k.1 + 1)
+  let q' := circleSamplePoint (2 * stage) (2 * k.1 + 2)
+  let left := pointSegmentLengthInterval p' m (2 * stage)
+  let right := pointSegmentLengthInterval m q' (2 * stage)
+  let r := curvatureChordLower p' m + curvatureChordLower m q' -
+    left.width - right.width
+  have hcoarse :
+      (pointSegmentLengthInterval p q stage).lo <= r :=
+    pointSegmentLengthInterval_lo_le_of_sq_le p q stage h.1 h.2
+  have hleft : curvatureChordLower p' m - left.width <= left.lo := by
+    dsimp [p', m, left]
+    exact adjacentCurvatureChordLower_sub_width_le_segment_lo
+      (2 * stage) (by omega) (2 * k.1) (2 * stage)
+  have hright : curvatureChordLower m q' - right.width <= right.lo := by
+    dsimp [m, q', right]
+    exact adjacentCurvatureChordLower_sub_width_le_segment_lo
+      (2 * stage) (by omega) (2 * k.1 + 1) (2 * stage)
+  dsimp [p, q, p', m, q', left, right, r] at hcoarse hleft hright ⊢
+  calc
+    (pointSegmentLengthInterval
+        (circleSamplePoint stage k.1)
+        (circleSamplePoint stage (k.1 + 1)) stage).lo <=
+      curvatureChordLower (circleSamplePoint (2 * stage) (2 * k.1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1)) +
+        curvatureChordLower (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) -
+        (pointSegmentLengthInterval
+          (circleSamplePoint (2 * stage) (2 * k.1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1)) (2 * stage)).width -
+        (pointSegmentLengthInterval
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).width :=
+      hcoarse
+    _ <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k.1))
+        (circleSamplePoint (2 * stage) (2 * k.1 + 1)) (2 * stage)).lo +
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+        (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).lo := by
+      grind [Rat.sub_eq_add_neg]
 
 private def innerChordLowerSumFrom
     (stage precision k : Nat) : Nat -> Rat

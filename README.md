@@ -97,6 +97,13 @@ useful general interval-normalization bridge, but deliberately not a new
 coverage bridge: it does not prove the original `piCircumference` endpoints
 refine stage by stage.
 
+The direct proof has a sharper checked boundary: the rational curvature chord
+certificate is converted to a bisection lower bound with its explicit width
+loss, and `AdjacentChordCurvatureMarginCoversFineWidths` states the sole
+remaining finite margin inequality.  Its implication to the original local
+endpoint-refinement condition is formalized; the universal margin proof is
+still open.
+
 The useful output of the completed rows is now formalized as a registry rather
 than another percentage. `PiProofs.piCertified : Real` uses `piCircleArea` as
 its preferred evaluator and retains each canonical completed route as a

@@ -701,6 +701,13 @@ students actually compute.
   epsilon--delta continuity and extension, finite integration/FTC, inverse
   functions, differentiated elementary functions, and continuous ODE
   solution operators.
+- The remaining direct `piCircumference` lower-endpoint step is now isolated
+  as `AdjacentChordCurvatureMarginCoversFineWidths`.  A rational curvature
+  chord certificate and its explicit bisection-width loss are checked, and
+  `adjacentChordLowerRefinesByDoubling_of_curvatureMargin` turns that one
+  finite margin inequality into the original local refinement theorem.  The
+  still-open work is the universal rational margin estimate itself, not an
+  appeal to real square roots or completeness.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
