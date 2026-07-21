@@ -290,8 +290,13 @@ not a description of the current module graph. The checked blueprint
   gives a reciprocal Cauchy rectangle width at most `2 * 2^(-n)`.  This uses
   a new global nonnegative Cauchy cell-width estimate and a reciprocal mesh
   squared-sum bound; it does not appeal to an improper integral.  What
-  remains is to combine the now-shrinking core, unit, and tail envelopes with
-  explicit width budgets, and then package that comparison at raw level.
+  now-shrinking scheduled core and the unit-plus-tail assembly have also been
+  combined: `projectiveCompactDyadicCauchyCore_integral_width_le` gives the
+  former an `8 * 2^(-2n)` Cauchy width bound, the assembly has width at most
+  `4 * 2^(-n)`, and their `QInterval.hull` is a common bridge envelope with
+  width at most `12 * 2^(-n)`.  What remains is to compare the literal
+  compact-candidate envelope to this fast scheduled bridge with explicit
+  width budgets, then package the resulting comparison at raw level.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.

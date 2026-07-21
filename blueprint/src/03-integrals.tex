@@ -1267,7 +1267,13 @@ reversed reciprocal Cauchy tail a rectangle width at most \(2\,2^{-n}\).
 The proof uses a global nonnegative Cauchy cell-width bound and a squared-mesh
 estimate for reciprocal cells.  The remaining task is to combine the
 shrinking core, unit, and tail envelopes with explicit width budgets and use
-them to construct the raw-level equivalence.
+them to construct the raw-level equivalence.  That Cauchy-side combination is
+now present: the rapidly refined projective core has width at most
+\(8\,2^{-2n}\), the unit-plus-tail assembly has width at most
+\(4\,2^{-n}\), and the hull of their overlapping rational brackets is a
+common bridge envelope of width at most \(12\,2^{-n}\).  The remaining
+finite comparison is between the literal compact-candidate envelope and this
+fast scheduled bridge; after that, the raw-level equivalence can be packaged.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

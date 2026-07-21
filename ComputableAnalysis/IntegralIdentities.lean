@@ -3194,6 +3194,16 @@ theorem cauchyIntegralSumInterval_width_le_two_squareSum
               ArctanGeometry.intervalSquareSum rest) := by
               grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
+theorem cauchyIntegralSumInterval_width_append
+    (left right : List (Rat × Rat)) :
+    (ArctanGeometry.integralSumInterval (left ++ right)).width =
+      (ArctanGeometry.integralSumInterval left).width +
+        (ArctanGeometry.integralSumInterval right).width := by
+  unfold ArctanGeometry.integralSumInterval QInterval.width
+  rw [ArctanGeometry.integralLowerSum_append,
+    ArctanGeometry.integralUpperSum_append]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 private theorem cauchyCoversInterval_left_bound
     (a b : Rat) (intervals : List (Rat × Rat))
     (hcover : ArctanGeometry.CoversInterval a b intervals) :
@@ -5390,6 +5400,240 @@ theorem projectiveCompactDyadic_schedule_squareSum_le (n : Nat) :
     _ = 4 / (((2 ^ (n * 2) : Nat) : Rat)) := by
       rw [hpow6, hpow2]
       exact projectiveCompact_dyadic_mesh_algebra D (Rat.ne_of_gt hDpos)
+
+/-- The scheduled positive projective Cauchy core has a directly certified
+shrinking Cauchy rectangle width.  Unlike the literal compact candidate mesh,
+this schedule refines fast enough near the chart endpoint. -/
+theorem projectiveCompactDyadicCauchyCore_integral_width_le (n : Nat) :
+    (ArctanGeometry.integralSumInterval
+      (projectiveCompactIntervals
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint n) (n * 6)).intervals)).width <=
+      8 / (((2 ^ (n * 2) : Nat) : Rat)) := by
+  let s : Rat := projectiveCompactDyadicEndpoint n
+  let intervals : List (Rat × Rat) :=
+    (ArctanGeometry.arctanAreaLoopState s (n * 6)).intervals
+  have hs0 : 0 <= s := by
+    dsimp [s]
+    exact projectiveCompactDyadicEndpoint_nonnegative n
+  have hslt : s < 1 := by
+    dsimp [s]
+    exact projectiveCompactDyadicEndpoint_lt_one n
+  have hcover : ArctanGeometry.CoversInterval 0 s intervals := by
+    dsimp [intervals]
+    exact ArctanGeometry.arctanAreaLoopState_intervals_covers hs0 (n * 6)
+  have hnonnegative : ArctanGeometry.NonnegativeIntervals
+      (projectiveCompactIntervals intervals) :=
+    projectiveCompactIntervals_nonnegative 0 s intervals (by native_decide)
+      hslt hcover
+  calc
+    (ArctanGeometry.integralSumInterval
+      (projectiveCompactIntervals intervals)).width <=
+        2 * ArctanGeometry.intervalSquareSum
+          (projectiveCompactIntervals intervals) :=
+      cauchyIntegralSumInterval_width_le_two_squareSum _ hnonnegative
+    _ <= 2 * (4 / (((2 ^ (n * 2) : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (by simpa [intervals, s] using
+          projectiveCompactDyadic_schedule_squareSum_le n)
+        (by native_decide)
+    _ = 8 / (((2 ^ (n * 2) : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc]
+
+/-- The rapidly refined projective Cauchy core and the explicit unit-plus-
+reciprocal-tail assembly cover the same finite positive Cauchy interval. -/
+theorem projectiveCompactDyadicScheduledCore_overlaps_cauchyAssembly
+    (n mesh : Nat) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval
+        (projectiveCompactIntervals
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals))
+      (ArctanGeometry.integralSumInterval
+        (cauchyUnitReciprocalTailDyadicIntervals
+          (projectiveCompactDyadicCauchyTailStart n) mesh)) := by
+  have hsource := ArctanGeometry.arctanAreaLoopState_intervals_covers
+    (projectiveCompactDyadicEndpoint_nonnegative (n + 2)) ((n + 2) * 6)
+  have hcore := projectiveCompactIntervals_covers 0
+    (projectiveCompactDyadicEndpoint (n + 2))
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals
+    (by native_decide) (projectiveCompactDyadicEndpoint_lt_one _) hsource
+  have hzero : projectiveCompactCoordinate (0 : Rat) = 0 := by
+    native_decide
+  rw [hzero] at hcore
+  exact ArctanGeometry.integralSumInterval_overlaps_of_covers
+    (by native_decide) _ _ hcore
+    (projectiveCompactDyadicCauchyAssemblyIntervals_covers n mesh)
+
+/-- The full positive Cauchy assembly (unit mesh plus reciprocal tail) is
+itself a shrinking rectangle bracket when the tail is refined at `5*n+8`. -/
+theorem projectiveCompactDyadicCauchyAssembly_integral_width_le
+    (n : Nat) :
+    (ArctanGeometry.integralSumInterval
+      (cauchyUnitReciprocalTailDyadicIntervals
+        (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8))).width <=
+      4 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  let stage : Nat := 5 * n + 8
+  let unit : List (Rat × Rat) :=
+    (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  let tail : List (Rat × Rat) :=
+    cauchyReciprocalReversedIntervals
+      (cauchyTailDyadicIntervals
+        (projectiveCompactDyadicCauchyTailStart n) stage)
+  have hunit : ArctanGeometry.UnitIntervals unit := by
+    dsimp [unit]
+    exact ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide) stage
+  have hunitWidth : (ArctanGeometry.integralSumInterval unit).width <=
+      2 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+    calc
+      (ArctanGeometry.integralSumInterval unit).width <=
+          2 * ArctanGeometry.intervalSquareSum unit :=
+        ArctanGeometry.integralSumInterval_width_le_two_squareSum _ hunit
+      _ = 2 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+        dsimp [unit]
+        rw [ArctanGeometry.arctanAreaLoopState_squareSum]
+        simp only [Rat.one_mul]
+  have htailWidth : (ArctanGeometry.integralSumInterval tail).width <=
+      2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    dsimp [tail, stage]
+    exact projectiveCompactDyadicCauchyTail_integral_width_le_dyadic n
+  have hstage : n <= stage := by
+    dsimp [stage]
+    omega
+  have hpow : 2 ^ n <= 2 ^ stage :=
+    Nat.pow_le_pow_right (by omega : 0 < 2) hstage
+  have hsmall : 1 / (((2 ^ stage : Nat) : Rat)) <=
+      1 / (((2 ^ n : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone (Nat.pow_pos (by omega : 0 < 2))
+      (Nat.pow_pos (by omega : 0 < 2)) hpow
+  change (ArctanGeometry.integralSumInterval (unit ++ tail)).width <=
+    4 * (1 / (((2 ^ n : Nat) : Rat)))
+  rw [cauchyIntegralSumInterval_width_append]
+  calc
+    (ArctanGeometry.integralSumInterval unit).width +
+          (ArctanGeometry.integralSumInterval tail).width <=
+        2 * (1 / (((2 ^ stage : Nat) : Rat))) +
+          2 * (1 / (((2 ^ n : Nat) : Rat))) :=
+          rat_add_le_add hunitWidth htailWidth
+    _ <= 2 * (1 / (((2 ^ n : Nat) : Rat))) +
+          2 * (1 / (((2 ^ n : Nat) : Rat))) :=
+          rat_add_le_add
+            (Rat.mul_le_mul_of_nonneg_left hsmall (by native_decide))
+            Rat.le_refl
+    _ = 4 * (1 / (((2 ^ n : Nat) : Rat))) := by
+          grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc]
+
+/-- The two finite Cauchy calculations on the scheduled projective core and
+on the unit-plus-reciprocal-tail assembly are enclosed together in one
+explicit rational interval. -/
+def projectiveCompactDyadicScheduledCauchyBridgeEnvelope (n : Nat) : QInterval :=
+  QInterval.hull
+    (ArctanGeometry.integralSumInterval
+      (projectiveCompactIntervals
+        (ArctanGeometry.arctanAreaLoopState
+          (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals))
+    (ArctanGeometry.integralSumInterval
+      (cauchyUnitReciprocalTailDyadicIntervals
+        (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8)))
+
+theorem projectiveCompactDyadicScheduledCauchyBridgeEnvelope_contains_core
+    (n : Nat) :
+    (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).ContainsInterval
+      (ArctanGeometry.integralSumInterval
+        (projectiveCompactIntervals
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals)) :=
+  QInterval.hull_contains_left _ _
+
+theorem projectiveCompactDyadicScheduledCauchyBridgeEnvelope_contains_assembly
+    (n : Nat) :
+    (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).ContainsInterval
+      (ArctanGeometry.integralSumInterval
+        (cauchyUnitReciprocalTailDyadicIntervals
+          (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8))) :=
+  QInterval.hull_contains_right _ _
+
+/-- The common scheduled Cauchy envelope has a dyadically vanishing width. -/
+theorem projectiveCompactDyadicScheduledCauchyBridgeEnvelope_width_le
+    (n : Nat) :
+    (projectiveCompactDyadicScheduledCauchyBridgeEnvelope n).width <=
+      12 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  let core : List (Rat × Rat) := projectiveCompactIntervals
+    (ArctanGeometry.arctanAreaLoopState
+      (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals
+  let assembly : List (Rat × Rat) :=
+    cauchyUnitReciprocalTailDyadicIntervals
+      (projectiveCompactDyadicCauchyTailStart n) (5 * n + 8)
+  have hsource := ArctanGeometry.arctanAreaLoopState_intervals_covers
+    (projectiveCompactDyadicEndpoint_nonnegative (n + 2)) ((n + 2) * 6)
+  have hcoreNonnegative : ArctanGeometry.NonnegativeIntervals core := by
+    dsimp [core]
+    exact projectiveCompactIntervals_nonnegative 0
+      (projectiveCompactDyadicEndpoint (n + 2)) _ (by native_decide)
+      (projectiveCompactDyadicEndpoint_lt_one _) hsource
+  have hassemblyCover := projectiveCompactDyadicCauchyAssemblyIntervals_covers
+    n (5 * n + 8)
+  have hassemblyNonnegative : ArctanGeometry.NonnegativeIntervals assembly := by
+    dsimp [assembly]
+    exact ArctanGeometry.CoversInterval.nonnegative (by native_decide)
+      hassemblyCover
+  have hcoreOrdered := ArctanGeometry.integralSumInterval_ordered core
+    hcoreNonnegative
+  have hassemblyOrdered := ArctanGeometry.integralSumInterval_ordered assembly
+    hassemblyNonnegative
+  have hover : QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval core)
+      (ArctanGeometry.integralSumInterval assembly) := by
+    dsimp [core, assembly]
+    exact projectiveCompactDyadicScheduledCore_overlaps_cauchyAssembly
+      n (5 * n + 8)
+  have hcoreWidth : (ArctanGeometry.integralSumInterval core).width <=
+      8 * (1 / (((2 ^ ((n + 2) * 2) : Nat) : Rat))) := by
+    dsimp [core]
+    calc
+      (ArctanGeometry.integralSumInterval
+        (projectiveCompactIntervals
+          (ArctanGeometry.arctanAreaLoopState
+            (projectiveCompactDyadicEndpoint (n + 2)) ((n + 2) * 6)).intervals)).width <=
+          8 / (((2 ^ ((n + 2) * 2) : Nat) : Rat)) :=
+        projectiveCompactDyadicCauchyCore_integral_width_le (n + 2)
+      _ = 8 * (1 / (((2 ^ ((n + 2) * 2) : Nat) : Rat))) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc]
+  have hassemblyWidth : (ArctanGeometry.integralSumInterval assembly).width <=
+      4 * (1 / (((2 ^ n : Nat) : Rat))) := by
+    dsimp [assembly]
+    exact projectiveCompactDyadicCauchyAssembly_integral_width_le n
+  have hstage : n <= (n + 2) * 2 := by omega
+  have hpow : 2 ^ n <= 2 ^ ((n + 2) * 2) :=
+    Nat.pow_le_pow_right (by omega : 0 < 2) hstage
+  have hsmall : 1 / (((2 ^ ((n + 2) * 2) : Nat) : Rat)) <=
+      1 / (((2 ^ n : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone (Nat.pow_pos (by omega : 0 < 2))
+      (Nat.pow_pos (by omega : 0 < 2)) hpow
+  change (QInterval.hull
+    (ArctanGeometry.integralSumInterval core)
+    (ArctanGeometry.integralSumInterval assembly)).width <=
+      12 * (1 / (((2 ^ n : Nat) : Rat)))
+  calc
+    (QInterval.hull
+      (ArctanGeometry.integralSumInterval core)
+      (ArctanGeometry.integralSumInterval assembly)).width <=
+        (ArctanGeometry.integralSumInterval core).width +
+          (ArctanGeometry.integralSumInterval assembly).width :=
+      QInterval.hull_width_le_add_of_overlaps hcoreOrdered hassemblyOrdered hover
+    _ <= 8 * (1 / (((2 ^ ((n + 2) * 2) : Nat) : Rat))) +
+          4 * (1 / (((2 ^ n : Nat) : Rat))) :=
+      rat_add_le_add hcoreWidth hassemblyWidth
+    _ <= 8 * (1 / (((2 ^ n : Nat) : Rat))) +
+          4 * (1 / (((2 ^ n : Nat) : Rat))) :=
+      rat_add_le_add
+        (Rat.mul_le_mul_of_nonneg_left hsmall (by native_decide)) Rat.le_refl
+    _ = 12 * (1 / (((2 ^ n : Nat) : Rat))) := by
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc]
 
 /-- Exact left-endpoint secant expansion for the compact projective chart.
 The displayed remainder is nonnegative on the positive compact branch, so
