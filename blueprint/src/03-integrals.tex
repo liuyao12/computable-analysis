@@ -1209,9 +1209,16 @@ positive dyadic mesh.  It proves both that it covers
 by the single cell \([1-2^{-n},1]\).  The factor-two compact bracket of the
 literal trimmed core already overlaps its projective two-branch Cauchy
 rectangle bracket.  The checked dyadic tail raw bounds the two removed cells.
-What remains is a single valid nested raw construction that combines this
-core comparison, the candidate's oriented endpoint cells, and that tail
-error; no general integral substitution theorem is asserted.
+Lean now also combines those facts at every finite stage: the differently
+oriented candidate endpoint cells are bounded by the same dyadic tail budget,
+and the actual candidate box at stage \(n+1\) overlaps the bracket whose lower
+endpoint is the factor-two trimmed-core lower sum and whose upper endpoint is
+the corresponding upper sum plus that budget.  Thus the literal candidate,
+not a proxy, has been connected through the trimmed projective core to a
+certified tail enclosure.  What remains is a single valid nested raw
+construction joining these core-and-tail brackets to the existing full-line
+Cauchy raw; no general integral substitution theorem or Pi equivalence is
+asserted.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

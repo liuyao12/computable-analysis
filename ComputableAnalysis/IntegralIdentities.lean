@@ -4838,6 +4838,69 @@ theorem projectiveCompactOrientedSymmetricLipschitzSum_overlaps_symmetric
             projectiveCompactLipschitzUpperSum intervals :=
         rat_add_le_add hleftRight hleft
 
+private theorem projectiveCompact_orientedTailUpper_le
+    {s : Rat} (hs0 : 0 <= s) (hs1 : s <= 1) :
+    projectiveCompactLipschitzRightUpperSum [(s, 1)] +
+        projectiveCompactLipschitzUpperSum [(s, 1)] <=
+      ((64 : Rat) / 3) * (1 - s) := by
+  have hwidth : 0 <= 1 - s := by grind [Rat.sub_eq_add_neg]
+  have hwidth_le_one : 1 - s <= 1 := by grind [Rat.sub_eq_add_neg]
+  have hsvalue : reciprocalQuarticSymmetricDensity (-1) s <= (8 : Rat) / 3 :=
+    reciprocalQuarticSymmetricDensity_minus_one_le_eight_thirds_on_unit
+      (by grind) hs1
+  have honevalue : reciprocalQuarticSymmetricDensity (-1) 1 <= (8 : Rat) / 3 :=
+    reciprocalQuarticSymmetricDensity_minus_one_le_eight_thirds_on_unit
+      (by native_decide) (by native_decide)
+  simp only [projectiveCompactLipschitzRightUpperSum,
+    projectiveCompactLipschitzUpperSum]
+  rw [Rat.add_zero, Rat.add_zero]
+  calc
+    (1 - s) *
+          (reciprocalQuarticSymmetricDensity (-1) 1 + 8 * (1 - s)) +
+        (1 - s) *
+          (reciprocalQuarticSymmetricDensity (-1) s + 8 * (1 - s)) <=
+        (1 - s) * ((8 : Rat) / 3 + 8 * (1 - s)) +
+          (1 - s) * ((8 : Rat) / 3 + 8 * (1 - s)) :=
+      rat_add_le_add
+        (Rat.mul_le_mul_of_nonneg_left
+          ((Rat.add_le_add_right).2 honevalue) hwidth)
+        (Rat.mul_le_mul_of_nonneg_left
+          ((Rat.add_le_add_right).2 hsvalue) hwidth)
+    _ <= (1 - s) * ((8 : Rat) / 3 + 8 * 1) +
+          (1 - s) * ((8 : Rat) / 3 + 8 * 1) :=
+      rat_add_le_add
+        (Rat.mul_le_mul_of_nonneg_left
+          ((Rat.add_le_add_left).2
+            (Rat.mul_le_mul_of_nonneg_left hwidth_le_one (by native_decide))) hwidth)
+        (Rat.mul_le_mul_of_nonneg_left
+          ((Rat.add_le_add_left).2
+            (Rat.mul_le_mul_of_nonneg_left hwidth_le_one (by native_decide))) hwidth)
+    _ = ((64 : Rat) / 3) * (1 - s) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The certified symmetric tail raw also absorbs the two differently oriented
+endpoint cells of the literal candidate mesh. -/
+theorem projectiveCompactDyadicOrientedTailUpper_le
+    (n : Nat) :
+    projectiveCompactLipschitzRightUpperSum
+        [(projectiveCompactDyadicEndpoint n, 1)] +
+      projectiveCompactLipschitzUpperSum
+        [(projectiveCompactDyadicEndpoint n, 1)] <=
+      (projectiveCompactDyadicSymmetricTailError.compute n).hi := by
+  rw [projectiveCompactDyadicSymmetricTailError_compute]
+  have htail := projectiveCompact_orientedTailUpper_le
+    (projectiveCompactDyadicEndpoint_nonnegative n)
+    (Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one n))
+  calc
+    projectiveCompactLipschitzRightUpperSum
+          [(projectiveCompactDyadicEndpoint n, 1)] +
+        projectiveCompactLipschitzUpperSum
+          [(projectiveCompactDyadicEndpoint n, 1)] <=
+        ((64 : Rat) / 3) * (1 - projectiveCompactDyadicEndpoint n) := htail
+    _ = ((64 : Rat) / 3) * (1 / (((2 ^ n : Nat) : Rat))) := by
+      dsimp [projectiveCompactDyadicEndpoint]
+      grind [Rat.sub_eq_add_neg]
+
 private theorem projectiveCompactLipschitzLowerSum_append
     (left right : List (Rat × Rat)) :
     projectiveCompactLipschitzLowerSum (left ++ right) =
@@ -4865,6 +4928,112 @@ private theorem projectiveCompactLipschitzUpperSum_append
       simp only [List.cons_append, projectiveCompactLipschitzUpperSum]
       rw [ih]
       grind [Rat.add_assoc]
+
+private theorem projectiveCompactLipschitzRightLowerSum_append
+    (left right : List (Rat × Rat)) :
+    projectiveCompactLipschitzRightLowerSum (left ++ right) =
+      projectiveCompactLipschitzRightLowerSum left +
+        projectiveCompactLipschitzRightLowerSum right := by
+  induction left with
+  | nil =>
+      exact (Rat.zero_add _).symm
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, projectiveCompactLipschitzRightLowerSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+private theorem projectiveCompactLipschitzRightUpperSum_append
+    (left right : List (Rat × Rat)) :
+    projectiveCompactLipschitzRightUpperSum (left ++ right) =
+      projectiveCompactLipschitzRightUpperSum left +
+        projectiveCompactLipschitzRightUpperSum right := by
+  induction left with
+  | nil =>
+      exact (Rat.zero_add _).symm
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp only [List.cons_append, projectiveCompactLipschitzRightUpperSum]
+      rw [ih]
+      grind [Rat.add_assoc]
+
+private theorem projectiveCompactLipschitzRightLowerSum_le_rightUpperSum
+    (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    projectiveCompactLipschitzRightLowerSum intervals <=
+      projectiveCompactLipschitzRightUpperSum intervals := by
+  induction intervals with
+  | nil =>
+      exact Rat.le_refl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hunit with ⟨_hp0, hpr, _hr1, hrest⟩
+      have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+      have hvalue : reciprocalQuarticSymmetricDensity (-1) r - 8 * (r - p) <=
+          reciprocalQuarticSymmetricDensity (-1) r + 8 * (r - p) := by
+        have hscale : 0 <= 8 * (r - p) :=
+          Rat.mul_nonneg (by native_decide) hlen
+        grind [Rat.sub_eq_add_neg]
+      simp only [projectiveCompactLipschitzRightLowerSum,
+        projectiveCompactLipschitzRightUpperSum]
+      exact rat_add_le_add
+        (Rat.mul_le_mul_of_nonneg_left hvalue hlen) (ih hrest)
+
+private theorem projectiveCompactOrientedSymmetricLipschitzSum_ordered
+    (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    (projectiveCompactOrientedSymmetricLipschitzSum intervals).lo <=
+      (projectiveCompactOrientedSymmetricLipschitzSum intervals).hi := by
+  unfold projectiveCompactOrientedSymmetricLipschitzSum
+  exact rat_add_le_add
+    (projectiveCompactLipschitzRightLowerSum_le_rightUpperSum intervals hunit)
+    (projectiveCompactLipschitzLowerSum_le_upperSum intervals hunit)
+
+private theorem projectiveCompactOrientedSymmetricLipschitzSum_append
+    (left right : List (Rat × Rat)) :
+    projectiveCompactOrientedSymmetricLipschitzSum (left ++ right) =
+      { lo := (projectiveCompactOrientedSymmetricLipschitzSum left).lo +
+          (projectiveCompactOrientedSymmetricLipschitzSum right).lo,
+        hi := (projectiveCompactOrientedSymmetricLipschitzSum left).hi +
+          (projectiveCompactOrientedSymmetricLipschitzSum right).hi } := by
+  unfold projectiveCompactOrientedSymmetricLipschitzSum
+  rw [projectiveCompactLipschitzRightLowerSum_append,
+    projectiveCompactLipschitzLowerSum_append,
+    projectiveCompactLipschitzRightUpperSum_append,
+    projectiveCompactLipschitzUpperSum_append]
+  apply (QInterval.mk.injEq _ _ _ _).mpr
+  constructor <;> dsimp <;> grind [Rat.add_assoc, Rat.add_comm]
+
+/-- Appending a nonnegative, bounded tail enclosure to an oriented compact
+core preserves overlap with the factor-two core bracket. -/
+theorem projectiveCompactOrientedSymmetric_append_overlaps_tailEnclosure
+    (core tail : List (Rat × Rat)) (tailUpper : Rat)
+    (hcore : QInterval.Overlaps
+      (projectiveCompactOrientedSymmetricLipschitzSum core)
+      (projectiveCompactSymmetricLipschitzSum core))
+    (htail_ordered :
+      (projectiveCompactOrientedSymmetricLipschitzSum tail).lo <=
+        (projectiveCompactOrientedSymmetricLipschitzSum tail).hi)
+    (htail_upper :
+      (projectiveCompactOrientedSymmetricLipschitzSum tail).hi <= tailUpper)
+    (htail_nonneg : 0 <=
+      (projectiveCompactOrientedSymmetricLipschitzSum tail).hi) :
+    QInterval.Overlaps
+      (projectiveCompactOrientedSymmetricLipschitzSum (core ++ tail))
+      { lo := (projectiveCompactSymmetricLipschitzSum core).lo,
+        hi := (projectiveCompactSymmetricLipschitzSum core).hi + tailUpper } := by
+  rw [projectiveCompactOrientedSymmetricLipschitzSum_append]
+  unfold QInterval.Overlaps at hcore
+  change
+    (projectiveCompactOrientedSymmetricLipschitzSum core).lo +
+        (projectiveCompactOrientedSymmetricLipschitzSum tail).lo <=
+      (projectiveCompactSymmetricLipschitzSum core).hi + tailUpper /\
+    (projectiveCompactSymmetricLipschitzSum core).lo <=
+      (projectiveCompactOrientedSymmetricLipschitzSum core).hi +
+        (projectiveCompactOrientedSymmetricLipschitzSum tail).hi
+  constructor
+  · exact rat_add_le_add hcore.1 (Rat.le_trans htail_ordered htail_upper)
+  · exact Rat.le_trans hcore.2 (by grind)
 
 /-- The reflected lower sum is exactly the positive right-endpoint lower sum. -/
 theorem projectiveCompactLipschitzLowerSum_reflected_eq_right
@@ -5663,6 +5832,15 @@ theorem reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective
     (by native_decide) (projectiveCompactDyadicEndpoint_lt_one n)
     (reciprocalQuarticUnitDyadicCoreIntervals_covers n)
 
+/-- The finite compact bracket consisting of the literal projective core plus
+the certified upper budget for its two omitted endpoint cells. -/
+def projectiveCompactDyadicCoreTailBracket (n : Nat) : QInterval :=
+  { lo := (projectiveCompactSymmetricLipschitzSum
+      (reciprocalQuarticUnitDyadicCoreIntervals n)).lo,
+    hi := (projectiveCompactSymmetricLipschitzSum
+      (reciprocalQuarticUnitDyadicCoreIntervals n)).hi +
+        (projectiveCompactDyadicSymmetricTailError.compute n).hi }
+
 /-- The full positive dyadic mesh is its trimmed core followed by the one
 cell that touches the removable chart endpoint. -/
 theorem reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail
@@ -5890,6 +6068,69 @@ theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_symmetric
   exact projectiveCompactOrientedSymmetricLipschitzSum_overlaps_symmetric _
     (ArctanGeometry.arctanAreaLoopState_intervals_unit
       (by native_decide) (by native_decide) stage)
+
+/-- The actual compact candidate at stage `n+1` overlaps the literal trimmed
+projective core together with the certified two-cell endpoint budget. -/
+theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_coreTail
+    (n : Nat) :
+    QInterval.Overlaps
+      (reciprocalQuarticMinusOneUnitDyadicCompute (n + 1))
+      (projectiveCompactDyadicCoreTailBracket n) := by
+  let core := reciprocalQuarticUnitDyadicCoreIntervals n
+  let tail : List (Rat × Rat) := [(projectiveCompactDyadicEndpoint n, 1)]
+  have hcore_cover := reciprocalQuarticUnitDyadicCoreIntervals_covers n
+  have hcore_unit : ArctanGeometry.UnitIntervals core := by
+    dsimp [core]
+    exact ArctanGeometry.CoversInterval.unit (by native_decide)
+      (Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one n)) hcore_cover
+  have hcore := projectiveCompactOrientedSymmetricLipschitzSum_overlaps_symmetric
+    core hcore_unit
+  have htail_unit : ArctanGeometry.UnitIntervals tail := by
+    dsimp [tail]
+    exact ⟨projectiveCompactDyadicEndpoint_nonnegative n,
+      Rat.le_of_lt (projectiveCompactDyadicEndpoint_lt_one n),
+      Rat.le_refl, trivial⟩
+  have htail_ordered :=
+    projectiveCompactOrientedSymmetricLipschitzSum_ordered tail htail_unit
+  have htail_upper :
+      (projectiveCompactOrientedSymmetricLipschitzSum tail).hi <=
+        (projectiveCompactDyadicSymmetricTailError.compute n).hi := by
+    dsimp [tail, projectiveCompactOrientedSymmetricLipschitzSum]
+    exact projectiveCompactDyadicOrientedTailUpper_le n
+  have htail_nonneg : 0 <=
+      (projectiveCompactOrientedSymmetricLipschitzSum tail).hi := by
+    dsimp [tail, projectiveCompactOrientedSymmetricLipschitzSum]
+    simp only [projectiveCompactLipschitzRightUpperSum,
+      projectiveCompactLipschitzUpperSum]
+    rw [Rat.add_zero, Rat.add_zero]
+    have hwidth : 0 <= 1 - projectiveCompactDyadicEndpoint n := by
+      exact Rat.le_of_lt (by
+        dsimp [projectiveCompactDyadicEndpoint]
+        rw [Rat.div_def]
+        have hinv : 0 < (((2 ^ n : Nat) : Rat))⁻¹ := (Rat.inv_pos).2
+          ((Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2)))
+        have hpos : 0 < (1 : Rat) * (((2 ^ n : Nat) : Rat))⁻¹ :=
+          Rat.mul_pos (by native_decide : (0 : Rat) < 1) hinv
+        grind [Rat.sub_eq_add_neg])
+    have hright : 0 <= reciprocalQuarticSymmetricDensity (-1) 1 +
+        8 * (1 - projectiveCompactDyadicEndpoint n) := by
+      exact Rat.add_nonneg
+        (reciprocalQuarticSymmetricDensity_minus_one_nonneg 1)
+        (Rat.mul_nonneg (by native_decide) hwidth)
+    have hleft : 0 <= reciprocalQuarticSymmetricDensity (-1)
+        (projectiveCompactDyadicEndpoint n) +
+          8 * (1 - projectiveCompactDyadicEndpoint n) := by
+      exact Rat.add_nonneg
+        (reciprocalQuarticSymmetricDensity_minus_one_nonneg _)
+        (Rat.mul_nonneg (by native_decide) hwidth)
+    exact Rat.add_nonneg
+      (Rat.mul_nonneg hwidth hright) (Rat.mul_nonneg hwidth hleft)
+  have h := projectiveCompactOrientedSymmetric_append_overlaps_tailEnclosure
+    core tail (projectiveCompactDyadicSymmetricTailError.compute n).hi
+    hcore htail_ordered htail_upper htail_nonneg
+  rw [reciprocalQuarticMinusOneUnitDyadicCompute_succ_eq_orientedSymmetric,
+    reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail]
+  simpa [core, tail, projectiveCompactDyadicCoreTailBracket] using h
 
 /-- Splitting one unit cell at its rational midpoint tightens the elementary
 Lipschitz rectangle.  This is the finite refinement inequality from which the

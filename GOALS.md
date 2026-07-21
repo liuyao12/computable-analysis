@@ -231,7 +231,17 @@ not a description of the current module graph. The checked blueprint
   `reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail` recovers the full
   mesh by appending exactly the endpoint cell.  Its factor-two compact bracket
   already overlaps the two-branch projective Cauchy bracket by
-  `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective`.
+  `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective`.  The
+  formerly separate endpoint assembly is now checked at each finite stage:
+  `projectiveCompactDyadicOrientedTailUpper_le` bounds the two oriented
+  candidate endpoint cells by the existing tail raw,
+  `projectiveCompactOrientedSymmetric_append_overlaps_tailEnclosure` is the
+  finite bracket-combination lemma, and
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_coreTail` proves
+  that the actual candidate box at stage `n+1` overlaps the literal trimmed
+  core bracket enlarged by that error budget.  What remains is the raw-level
+  nesting/shrinkage construction that joins these core-and-tail boxes to the
+  existing full-line Cauchy raw; this is not yet a Pi equivalence.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
