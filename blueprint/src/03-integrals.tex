@@ -1281,7 +1281,13 @@ removable-endpoint budget explicitly, scales the positive bridge by two for
 the two compact chart branches, and proves that the actual dyadic candidate
 overlaps that two-branch scheduled Cauchy envelope.  The remaining finite
 comparison is between this shrinking envelope and the completed full-line
-Cauchy raw; only then can the raw-level equivalence be packaged.
+Cauchy raw; only then can the raw-level equivalence be packaged.  The
+Cauchy-side comparison has now been separated into a finite lemma of its own:
+the unit mesh appended to the reciprocal tail is enclosed by two standard unit
+meshes, with exactly the omitted near-zero length and the compact tail-mesh
+width as errors.  Lean proves that the relevant dyadic tail start and that
+tail-mesh width both vanish, so the remaining work is to combine these two
+explicit shrinking enclosures.
 For the pi case \(a=-1\), Lean proves the stronger uniform separation
 \[
   \frac34\le x^4-x^2+1,

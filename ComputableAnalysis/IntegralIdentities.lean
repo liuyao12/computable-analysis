@@ -3194,6 +3194,43 @@ theorem cauchyIntegralSumInterval_width_le_two_squareSum
               ArctanGeometry.intervalSquareSum rest) := by
               grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
+/-- The Cauchy rectangle bracket on a dyadic mesh of a compact tail has the
+usual unit-mesh width bound, uniformly in its rational left endpoint. -/
+theorem cauchyTailDyadicIntervals_integral_width_le_dyadic
+    {a : Rat} (ha0 : 0 <= a) (ha1 : a <= 1) (n : Nat) :
+    (ArctanGeometry.integralSumInterval
+      (cauchyTailDyadicIntervals a n)).width <=
+      2 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  have hcover := cauchyTailDyadicIntervals_covers ha0 ha1 n
+  have hnonnegative : ArctanGeometry.NonnegativeIntervals
+      (cauchyTailDyadicIntervals a n) :=
+    ArctanGeometry.CoversInterval.nonnegative ha0 hcover
+  have hgap0 : 0 <= 1 - a := by grind [Rat.sub_eq_add_neg]
+  have hgap1 : 1 - a <= 1 := by grind [Rat.sub_eq_add_neg]
+  have hsq : (1 - a) * (1 - a) <= 1 := by
+    calc
+      (1 - a) * (1 - a) <= 1 * (1 - a) :=
+        Rat.mul_le_mul_of_nonneg_right hgap1 hgap0
+      _ <= 1 * 1 := Rat.mul_le_mul_of_nonneg_left hgap1 (by native_decide)
+      _ = 1 := by native_decide
+  have hDpos : 0 < (((2 ^ n : Nat) : Rat)) :=
+    (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hmesh : (1 - a) * (1 - a) / (((2 ^ n : Nat) : Rat)) <=
+      1 / (((2 ^ n : Nat) : Rat)) := by
+    rw [Rat.div_def, Rat.div_def]
+    exact Rat.mul_le_mul_of_nonneg_right hsq
+      (Rat.le_of_lt ((Rat.inv_pos).2 hDpos))
+  calc
+    (ArctanGeometry.integralSumInterval
+      (cauchyTailDyadicIntervals a n)).width <=
+        2 * ArctanGeometry.intervalSquareSum
+          (cauchyTailDyadicIntervals a n) :=
+      cauchyIntegralSumInterval_width_le_two_squareSum _ hnonnegative
+    _ = 2 * ((1 - a) * (1 - a) / (((2 ^ n : Nat) : Rat))) := by
+      rw [cauchyTailDyadicIntervals_squareSum]
+    _ <= 2 * (1 / (((2 ^ n : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left hmesh (by native_decide)
+
 theorem cauchyIntegralSumInterval_width_append
     (left right : List (Rat × Rat)) :
     (ArctanGeometry.integralSumInterval (left ++ right)).width =
@@ -3203,6 +3240,32 @@ theorem cauchyIntegralSumInterval_width_append
   rw [ArctanGeometry.integralLowerSum_append,
     ArctanGeometry.integralUpperSum_append]
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/-- On any ordered nonnegative Cauchy partition, the sum of upper rectangles
+is bounded by the rational length of the covered interval. -/
+private theorem cauchyIntegralUpperSum_le_span
+    (a b : Rat) (intervals : List (Rat × Rat))
+    (hcover : ArctanGeometry.CoversInterval a b intervals) :
+    ArctanGeometry.integralUpperSum intervals <= b - a := by
+  induction intervals generalizing a with
+  | nil =>
+      simp only [ArctanGeometry.CoversInterval] at hcover
+      rw [hcover]
+      simp only [ArctanGeometry.integralUpperSum]
+      grind [Rat.sub_eq_add_neg]
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have htail := ih r hrest
+      simp only [ArctanGeometry.integralUpperSum]
+      calc
+        ArctanGeometry.integralUpperStep a r +
+            ArctanGeometry.integralUpperSum rest <=
+          (r - a) + (b - r) :=
+            rat_add_le_add
+              (ArctanGeometry.integralUpperStep_le_width hpr) htail
+        _ = b - a := by grind [Rat.sub_eq_add_neg]
 
 private theorem cauchyCoversInterval_left_bound
     (a b : Rat) (intervals : List (Rat × Rat))
@@ -3492,6 +3555,98 @@ theorem cauchyUnitReciprocalTailDyadicIntervals_covers
     (ArctanGeometry.arctanAreaLoopState_intervals_covers
       (x := (1 : Rat)) (by native_decide) n)
     (cauchyReciprocalTailDyadicIntervals_covers ha0 ha1 n)
+
+private theorem cauchyAssembly_overlaps_twoUnitEnvelope
+    (U V T R : QInterval) (a : Rat)
+    (hU : U.lo <= U.hi)
+    (hR : QInterval.Overlaps R T)
+    (hsplit : V.lo + T.lo <= U.hi /\ U.lo <= V.hi + T.hi)
+    (hVlo : 0 <= V.lo) (hVhi : V.hi <= a) :
+    QInterval.Overlaps
+      { lo := U.lo + R.lo, hi := U.hi + R.hi }
+      { lo := 2 * U.lo - (a + T.width),
+        hi := 2 * U.hi + T.width } := by
+  unfold QInterval.Overlaps QInterval.width at *
+  grind [Rat.sub_eq_add_neg]
+
+/-- The finite unit-plus-reciprocal-tail Cauchy mesh is enclosed by two
+standard unit meshes, with only the omitted `[0,a]` contribution and the
+compact tail-mesh width as explicit rational errors. -/
+def cauchyUnitReciprocalTailDyadicUnitEnvelope (a : Rat) (n : Nat) : QInterval :=
+  let unit := ArctanGeometry.integralSumInterval
+    (ArctanGeometry.arctanAreaLoopState 1 n).intervals
+  let tail := ArctanGeometry.integralSumInterval
+    (cauchyTailDyadicIntervals a n)
+  { lo := 2 * unit.lo - (a + tail.width),
+    hi := 2 * unit.hi + tail.width }
+
+theorem cauchyUnitReciprocalTailDyadicIntervals_overlaps_twoUnitEnvelope
+    {a : Rat} (ha : 0 < a) (ha1 : a <= 1) (n : Nat) :
+    QInterval.Overlaps
+      (ArctanGeometry.integralSumInterval
+        (cauchyUnitReciprocalTailDyadicIntervals a n))
+      (cauchyUnitReciprocalTailDyadicUnitEnvelope a n) := by
+  let unit : QInterval := ArctanGeometry.integralSumInterval
+    (ArctanGeometry.arctanAreaLoopState 1 n).intervals
+  let near : QInterval := ArctanGeometry.integralSumInterval
+    (ArctanGeometry.arctanAreaLoopState a n).intervals
+  let tail : QInterval := ArctanGeometry.integralSumInterval
+    (cauchyTailDyadicIntervals a n)
+  let reciprocalTail : QInterval := ArctanGeometry.integralSumInterval
+    (cauchyReciprocalReversedIntervals (cauchyTailDyadicIntervals a n))
+  let split : QInterval := ArctanGeometry.integralSumInterval
+    (cauchySplitDyadicIntervals a n)
+  have hunit : unit.lo <= unit.hi := by
+    dsimp [unit]
+    exact ArctanGeometry.integralLowerSum_le_integralUpperSum _
+      (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
+        (by native_decide) n)
+  have hreciprocal : QInterval.Overlaps reciprocalTail tail := by
+    dsimp [reciprocalTail, tail]
+    exact cauchyReciprocalTailDyadicIntervals_overlaps ha ha1 n
+  have hsplit : QInterval.Overlaps split unit := by
+    dsimp [split, unit]
+    exact cauchySplitDyadicIntervals_overlaps_standard
+      (Rat.le_of_lt ha) ha1 n n
+  have hsplit' : near.lo + tail.lo <= unit.hi /\
+      unit.lo <= near.hi + tail.hi := by
+    unfold QInterval.Overlaps at hsplit
+    simpa [split, near, tail, ArctanGeometry.integralSumInterval,
+      cauchySplitDyadicIntervals, ArctanGeometry.integralLowerSum_append,
+      ArctanGeometry.integralUpperSum_append] using hsplit
+  have hnearLower : 0 <= near.lo := by
+    dsimp [near]
+    exact ArctanGeometry.integralLowerSum_nonneg _
+      (ArctanGeometry.CoversInterval.nonnegative (by native_decide)
+        (ArctanGeometry.arctanAreaLoopState_intervals_covers
+          (Rat.le_of_lt ha) n))
+  have hnearUpper : near.hi <= a := by
+    dsimp [near]
+    change ArctanGeometry.integralUpperSum
+      (ArctanGeometry.arctanAreaLoopState a n).intervals <= a
+    calc
+      ArctanGeometry.integralUpperSum
+          (ArctanGeometry.arctanAreaLoopState a n).intervals <= a - 0 :=
+        cauchyIntegralUpperSum_le_span 0 a _
+          (ArctanGeometry.arctanAreaLoopState_intervals_covers
+            (Rat.le_of_lt ha) n)
+      _ = a := by grind [Rat.sub_eq_add_neg]
+  have hassembly :
+      ArctanGeometry.integralSumInterval
+          (cauchyUnitReciprocalTailDyadicIntervals a n) =
+        { lo := unit.lo + reciprocalTail.lo,
+          hi := unit.hi + reciprocalTail.hi } := by
+    apply (QInterval.mk.injEq _ _ _ _).mpr
+    constructor <;>
+      simp [unit, reciprocalTail, cauchyUnitReciprocalTailDyadicIntervals,
+        ArctanGeometry.integralSumInterval,
+        ArctanGeometry.integralLowerSum_append,
+        ArctanGeometry.integralUpperSum_append]
+  have h := cauchyAssembly_overlaps_twoUnitEnvelope
+    unit near tail reciprocalTail a hunit hreciprocal hsplit'
+    hnearLower hnearUpper
+  rw [hassembly]
+  simpa [cauchyUnitReciprocalTailDyadicUnitEnvelope, unit, tail] using h
 
 /-- A rational compactification of an even full-line integral by folding the
 positive reciprocal tail back onto the unit interval.
@@ -4762,6 +4917,14 @@ theorem projectiveCompactDyadicCauchyTailStart_le_one (n : Nat) :
     _ <= 2 * ((1 : Rat) / 2) :=
       Rat.mul_le_mul_of_nonneg_left hinv (by native_decide)
     _ = 1 := by native_decide
+
+/-- The compact tail start itself decays at the dyadic rate needed to recover
+the omitted near-zero unit interval in the full Cauchy comparison. -/
+theorem projectiveCompactDyadicCauchyTailStart_le_dyadic (n : Nat) :
+    projectiveCompactDyadicCauchyTailStart n <=
+      2 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) := by
+  simpa [projectiveCompactDyadicCauchyTailStart, Nat.add_assoc] using
+    projectiveCompactDyadicCauchyTailRadius_le (n + 1)
 
 /-- The refined reciprocal tail mesh reaches exactly from `1` to the finite
 projective coordinate of the dyadic compact endpoint. -/

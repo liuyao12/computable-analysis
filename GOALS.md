@@ -305,6 +305,13 @@ not a description of the current module graph. The checked blueprint
   the actual candidate reaches it after paying the literal-core width, the
   scheduled-core width, and the endpoint budget.  The remaining comparison is
   between this two-branch finite Cauchy hull and the completed full-line raw.
+  The first half of that comparison is now formalized independently:
+  `cauchyUnitReciprocalTailDyadicIntervals_overlaps_twoUnitEnvelope` encloses
+  the positive unit-plus-reciprocal-tail mesh by two standard unit meshes.  It
+  pays only the rational near-zero length and the compact tail-mesh width;
+  `projectiveCompactDyadicCauchyTailStart_le_dyadic` and
+  `cauchyTailDyadicIntervals_integral_width_le_dyadic` prove that both vanish
+  at a certified dyadic rate.
 - Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
   They are handled before calculus by denominator-apartness or
   interval-regularity certificates on the rational interval.
