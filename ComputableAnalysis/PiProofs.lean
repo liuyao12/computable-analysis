@@ -14617,6 +14617,61 @@ theorem piNilakantha_equiv_piCircleArea :
       piLeibniz_equiv_four_arctanSeries_one
       four_arctanSeries_one_equiv_piCircleArea)
 
+/-- Public rational error radius for the direct Archimedean chord-path
+schedule.  Its proof is supplied by the verified area-loop width modulus, but
+evaluating this function uses no area intervals. -/
+def circumferenceStabilizationRadius (n : Nat) : Rat :=
+  4 / (((n + 1 : Nat) : Rat))
+
+theorem circumferenceStabilizationRadius_covers_area (n : Nat) :
+    (piCircleArea.compute n).width <= circumferenceStabilizationRadius n := by
+  simpa [circumferenceStabilizationRadius] using
+    AreaLoopValidity.areaWidthLinearBound_four n
+
+theorem circumferenceStabilizationRadius_shrinks :
+    ShrinksToZero circumferenceStabilizationRadius := by
+  apply shrinksToZero_of_natOverSuccBound (C := 4)
+  intro n
+  exact Rat.le_refl
+
+/-- A valid direct-only Archimedean perimeter representative.
+
+At stage `n`, evaluation widens the first `n + 1` direct chord-path intervals
+by the rational schedule `4 / (n + 1)` and intersects that finite prefix.  It
+does not call the circle-area evaluator.  The latter occurs only in the proof
+that this public radius encloses the common value. -/
+def piCircumferenceStabilized : RealRaw :=
+  RealRaw.prefixStabilize piCircumference circumferenceStabilizationRadius
+
+theorem piCircumferenceStabilized_valid : piCircumferenceStabilized.Valid := by
+  unfold piCircumferenceStabilized
+  exact RealRaw.prefixStabilize_valid
+    circumferenceWidthsShrink
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircumference_equiv_piCircleArea_of_verified_area_polygon
+    circumferenceStabilizationRadius_covers_area
+    circumferenceStabilizationRadius_shrinks
+
+/-- The original direct chord-path intervals remain equivalent to their
+finite-prefix stabilized representative. -/
+theorem piCircumference_equiv_piCircumferenceStabilized :
+    piCircumference.Equiv piCircumferenceStabilized := by
+  unfold piCircumferenceStabilized
+  exact RealRaw.candidate_equiv_prefixStabilize
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircumference_equiv_piCircleArea_of_verified_area_polygon
+    circumferenceStabilizationRadius_covers_area
+
+/-- The stabilized direct Archimedean chord-path computation agrees with the
+baseline circle-area definition of pi. -/
+theorem piCircumferenceStabilized_equiv_piCircleArea :
+    piCircumferenceStabilized.Equiv piCircleArea := by
+  unfold piCircumferenceStabilized
+  exact RealRaw.prefixStabilize_equiv_anchor
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircumference_equiv_piCircleArea_of_verified_area_polygon
+    circumferenceStabilizationRadius_covers_area
+
 /-- A certified representative of the Archimedean circumference computation.
 
 At every stage it intersects the finite prefix of hulls formed by the raw
@@ -14658,22 +14713,28 @@ theorem piCircumferenceReboxed_equiv_piCircleArea :
     (by simpa [AreaValid] using AreaLoopValidity.areaValid)
 
 /-- The project-facing certified π value.  The public area loop is the
-preferred evaluator; the finite-rational reboxed Archimedean perimeter route is
-recorded as a verified alternative representation. -/
+preferred evaluator; both finite-rational Archimedean perimeter
+representatives are retained as verified alternatives. -/
 def piCertified : Real :=
   { preferred := piCircleArea
     valid := by simpa [AreaValid] using AreaLoopValidity.areaValid
-    alternatives := [piCircumferenceReboxed]
+    alternatives := [piCircumferenceStabilized, piCircumferenceReboxed]
     alternative_valid := by
       intro rep hrep
       cases hrep with
-      | head => exact piCircumferenceReboxed_valid
-      | tail _ htail => cases htail
+      | head => exact piCircumferenceStabilized_valid
+      | tail _ htail =>
+          cases htail with
+          | head => exact piCircumferenceReboxed_valid
+          | tail _ htail => cases htail
     coherent := by
       intro rep hrep
       cases hrep with
-      | head => exact piCircumferenceReboxed_equiv_piCircleArea
-      | tail _ htail => cases htail }
+      | head => exact piCircumferenceStabilized_equiv_piCircleArea
+      | tail _ htail =>
+          cases htail with
+          | head => exact piCircumferenceReboxed_equiv_piCircleArea
+          | tail _ htail => cases htail }
 
 theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
   rfl

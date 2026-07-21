@@ -725,6 +725,10 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefinesUpToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceValid_of_quarterLengthStepRefinesUpToAll}
 \lean{ComputableAnalysis.PiProofs.circumferenceStepRemainders_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStabilizationRadius}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_valid}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_equiv_piCircleArea}
@@ -740,20 +744,24 @@ now formalized as an iff with the global step-refinement predicate, so this is
 the same obligation in a finite-checkable presentation.
 
 There is nevertheless a separately named certified representative,
-\code{piCircumferenceReboxed}.  It takes finite prefix intersections of the
-rational hulls of the direct perimeter interval and the verified area interval.
-The finite Archimedes overlap and the two proved width moduli make this
-reboxed representative valid and equivalent to both the direct perimeter raw
-algorithm and \code{piCircleArea}.  This is a finite interval-normalization
-tool, not a proof of the direct perimeter endpoint-refinement theorem and not
-a new scoreboard row.
+\code{piCircumferenceStabilized}. At stage \(n\), it takes the finite prefix
+of direct perimeter intervals, widens each by the public rational radius
+\(4/(n+1)\), and intersects them. Its evaluator never reads an area interval;
+the verified area loop is used only to prove that this radius contains the
+common value. The finite Archimedes overlap and the two proved width moduli
+make this stabilized representative valid and equivalent to both the direct
+perimeter raw algorithm and \code{piCircleArea}. It is a finite
+interval-normalization tool, not a proof of the direct perimeter
+endpoint-refinement theorem and not a new scoreboard row. The older
+\code{piCircumferenceReboxed} reads area intervals at evaluation time and is
+retained as a second certified alternative.
 The curvature-corrected cross-fan is retained only as an internal design
 note.  It is not a checked representative or a scoreboard row: its proposed
 second-order correction still needs a self-contained finite proof that it
 stays below the outer envelope and refines under dyadic subdivision.
 The project-facing certified value \code{PiProofs.piCertified} chooses the
-area loop as its evaluator and records this reboxed perimeter route as a
-verified alternative.
+area loop as its evaluator and records both perimeter representatives as
+verified alternatives.
 \end{theorem}
 
 \section{Trigonometric Functions}

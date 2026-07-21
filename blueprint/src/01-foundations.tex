@@ -146,6 +146,28 @@ are \emph{equivalent} if they overlap at every stage, i.e.,
 Equivalence of real numbers is an equivalence relation.
 \end{proposition}
 
+\begin{proposition}[Finite-prefix interval stabilization]
+\label{prop:raw-prefix-stabilization}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.RealRaw.prefixStabilize}\par
+\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid}\par}
+\uses{def:raw-real,def:raw-equiv}
+Suppose a direct interval algorithm $C_n$ overlaps a valid anchor algorithm
+$A_n$ at every stage, both have explicit rational width moduli, and a public
+rational radius $r_n$ satisfies $\operatorname{width}(A_n)\le r_n$ and
+$r_n\to0$.  The stabilized algorithm takes the finite intersection
+
+\[
+  \bigcap_{k=0}^{n} [C_k^- - r_k,\;C_k^+ + r_k].
+\]
+
+It is a valid raw real and overlaps both $C$ and $A$.  Evaluation reads
+only the direct intervals and the public radii; the anchor appears only in the
+finite rational proof of the enclosure.  Thus this construction packages a
+known error bound into a nested evaluator without invoking a limit theorem or
+completeness.
+\end{proposition}
+
 \begin{definition}[Stage schedules]\label{def:stage-schedule}
 \lean{ComputableAnalysis.RealRaw.StageSchedule}
 \lean{ComputableAnalysis.RealRaw.schedule}

@@ -103,6 +103,24 @@ theorem hull_width_le_add_of_overlaps
   unfold width hull Overlaps at *
   grind [Rat.sub_eq_add_neg]
 
+/-- Widen an interval by a rational radius on both sides. -/
+def expand (I : QInterval) (radius : Rat) : QInterval :=
+  { lo := I.lo - radius, hi := I.hi + radius }
+
+theorem expand_width (I : QInterval) (radius : Rat) :
+    (expand I radius).width = I.width + 2 * radius := by
+  unfold expand width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/-- If two intervals overlap, widening the first by at least the width of the
+second contains the entire second interval. -/
+theorem expand_contains_right_of_overlaps
+    {I J : QInterval} {radius : Rat}
+    (hover : I.Overlaps J) (hradius : J.width <= radius) :
+    (expand I radius).ContainsInterval J := by
+  unfold expand ContainsInterval width Overlaps at *
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 def inv (I : QInterval) : QInterval :=
   if 0 < I.lo then
     { lo := 1 / I.hi, hi := 1 / I.lo }
@@ -571,6 +589,50 @@ def ShrinksToZero (width : Nat -> Rat) : Prop :=
   forall eps : QPos, Exists fun N : Nat =>
     forall n, N <= n -> width n <= eps.val
 
+/-- A rational `C / (n + 1)` modulus is enough for epsilon--delta
+convergence.  This is the finite denominator argument used throughout the
+development; it establishes no completeness property. -/
+theorem shrinksToZero_of_natOverSuccBound
+    {width : Nat -> Rat} {C : Nat}
+    (hbound : forall n, width n <= (C : Rat) / (((n + 1 : Nat) : Rat))) :
+    ShrinksToZero width := by
+  intro eps
+  refine ⟨C * (eps.val.den + 1), ?_⟩
+  intro n hn
+  have hmain :
+      (C : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (C : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+    have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega :
+        C * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          have hcancel : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          have hcancel : B * B⁻¹ = 1 := Rat.mul_inv_cancel B hBne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hABpos
+  exact Rat.le_trans (hbound n)
+    (Rat.le_trans hmain (one_div_den_succ_le_of_pos eps.property))
+
 namespace RealRaw
 
 def WidthsShrinkToZero (compute : Nat -> QInterval) : Prop :=
@@ -963,6 +1025,200 @@ theorem candidate_equiv_anchorRebox
   have hcontains := anchorRebox_contains_anchor (candidate := candidate)
     (anchor := anchor) hanchor n
   apply (compareAt_overlap_iff candidate (anchorRebox candidate anchor) n n).2
+  exact ⟨Rat.le_trans hcandidate_anchor.1 hcontains.2,
+    Rat.le_trans hcontains.1 hcandidate_anchor.2⟩
+
+/-- Finite prefix stabilization of an interval algorithm.  Unlike
+`anchorReboxCompute`, this computation reads only the candidate intervals and
+a rational error-radius schedule: at each stage it intersects all widened
+candidate intervals seen so far. -/
+def prefixStabilizeCompute
+    (candidate : Nat -> QInterval) (radius : Nat -> Rat) : Nat -> QInterval
+  | 0 => QInterval.expand (candidate 0) (radius 0)
+  | n + 1 => QInterval.intersection
+      (prefixStabilizeCompute candidate radius n)
+      (QInterval.expand (candidate (n + 1)) (radius (n + 1)))
+
+def prefixStabilize (candidate : RealRaw) (radius : Nat -> Rat) : RealRaw where
+  compute := prefixStabilizeCompute candidate.compute radius
+
+private theorem prefixStabilizeCompute_contains_anchor
+    {candidate anchor : RealRaw} {radius : Nat -> Rat}
+    (hanchor_nested : forall n m, n <= m ->
+      (anchor.compute n).lo <= (anchor.compute m).lo /\
+        (anchor.compute m).lo <= (anchor.compute m).hi /\
+        (anchor.compute m).hi <= (anchor.compute n).hi)
+    (hover : candidate.Equiv anchor)
+    (hradius : forall n, (anchor.compute n).width <= radius n) :
+    forall n,
+      (prefixStabilizeCompute candidate.compute radius n).ContainsInterval
+        (anchor.compute n) := by
+  intro n
+  induction n with
+  | zero =>
+      apply QInterval.expand_contains_right_of_overlaps
+      · exact (compareAt_overlap_iff candidate anchor 0 0).1 (hover 0)
+      · exact hradius 0
+  | succ n ih =>
+      apply QInterval.intersection_contains
+      · have hnest := hanchor_nested n (n + 1) (Nat.le_succ n)
+        exact ⟨Rat.le_trans ih.1 hnest.1,
+          Rat.le_trans hnest.2.2 ih.2⟩
+      · apply QInterval.expand_contains_right_of_overlaps
+        · exact (compareAt_overlap_iff candidate anchor (n + 1) (n + 1)).1
+            (hover (n + 1))
+        · exact hradius (n + 1)
+
+private theorem prefixStabilizeCompute_contained_in_current_expand
+    (candidate : Nat -> QInterval) (radius : Nat -> Rat) :
+    forall n,
+      (QInterval.expand (candidate n) (radius n)).ContainsInterval
+        (prefixStabilizeCompute candidate radius n) := by
+  intro n
+  cases n with
+  | zero => exact ⟨Rat.le_refl, Rat.le_refl⟩
+  | succ n =>
+      exact QInterval.intersection_contained_right
+        (prefixStabilizeCompute candidate radius n)
+        (QInterval.expand (candidate (n + 1)) (radius (n + 1)))
+
+private theorem prefixStabilizeCompute_step_nested
+    (candidate : Nat -> QInterval) (radius : Nat -> Rat) (n : Nat) :
+    (prefixStabilizeCompute candidate radius n).lo <=
+        (prefixStabilizeCompute candidate radius (n + 1)).lo /\
+      (prefixStabilizeCompute candidate radius (n + 1)).hi <=
+        (prefixStabilizeCompute candidate radius n).hi :=
+  QInterval.intersection_contained_left
+    (prefixStabilizeCompute candidate radius n)
+    (QInterval.expand (candidate (n + 1)) (radius (n + 1)))
+
+/-- The stabilized direct-only computation contains the anchor at every stage
+provided that the explicit radius covers the anchor's current interval width. -/
+theorem prefixStabilize_contains_anchor
+    {candidate anchor : RealRaw} {radius : Nat -> Rat}
+    (hanchor : anchor.Valid)
+    (hover : candidate.Equiv anchor)
+    (hradius : forall n, (anchor.compute n).width <= radius n) :
+    forall n,
+      (prefixStabilize candidate radius).compute n |>.ContainsInterval
+        (anchor.compute n) := by
+  exact prefixStabilizeCompute_contains_anchor hanchor.2.1 hover hradius
+
+/-- A direct interval computation can be made nested without reading its
+anchor at runtime.  The proof uses the anchor only to certify the public
+rational radius schedule; the resulting evaluator uses finite intersections
+of widened candidate intervals alone. -/
+theorem prefixStabilize_valid
+    {candidate anchor : RealRaw} {radius : Nat -> Rat}
+    (hcandidate_shrinks : WidthsShrinkToZero candidate.compute)
+    (hanchor : anchor.Valid)
+    (hover : candidate.Equiv anchor)
+    (hradius : forall n, (anchor.compute n).width <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) :
+    (prefixStabilize candidate radius).Valid := by
+  have hcontains := prefixStabilize_contains_anchor
+    (candidate := candidate) (anchor := anchor) hanchor hover hradius
+  have hcurrent := prefixStabilizeCompute_contained_in_current_expand
+    candidate.compute radius
+  have hstep := prefixStabilizeCompute_step_nested candidate.compute radius
+  constructor
+  · intro n
+    have hanchor_ordered := interval_order_of_valid anchor hanchor n
+    have hcontain := hcontains n
+    have hendpoints :
+        ((prefixStabilize candidate radius).compute n).lo <=
+          ((prefixStabilize candidate radius).compute n).hi :=
+      Rat.le_trans hcontain.1
+        (Rat.le_trans hanchor_ordered hcontain.2)
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      induction hnm with
+      | refl =>
+          have hanchor_ordered := interval_order_of_valid anchor hanchor n
+          have hcontain := hcontains n
+          exact ⟨Rat.le_refl,
+            Rat.le_trans hcontain.1
+              (Rat.le_trans hanchor_ordered hcontain.2),
+            Rat.le_refl⟩
+      | step hnm ih =>
+          rename_i k
+          have hnext := hstep k
+          have hanchor_ordered := interval_order_of_valid anchor hanchor (k + 1)
+          have hcontain := hcontains (k + 1)
+          have hnext_ordered :
+              ((prefixStabilize candidate radius).compute (k + 1)).lo <=
+                ((prefixStabilize candidate radius).compute (k + 1)).hi :=
+            Rat.le_trans hcontain.1
+              (Rat.le_trans hanchor_ordered hcontain.2)
+          exact ⟨Rat.le_trans ih.1 hnext.1,
+            hnext_ordered, Rat.le_trans hnext.2 ih.2.2⟩
+    · intro eps
+      let half : QPos := ⟨eps.val / 2, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+      let quarter : QPos := ⟨eps.val / 4, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+      obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
+      obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
+      refine ⟨Nat.max Nc Nr, ?_⟩
+      intro n hn
+      have hcn : Nc <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+      have hrn : Nr <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+      have hcandidate_width := hNc n hcn
+      have hradius_width := hNr n hrn
+      have hcurrent_width :
+          ((prefixStabilize candidate radius).compute n).width <=
+            (QInterval.expand (candidate.compute n) (radius n)).width := by
+        exact QInterval.width_le_of_contains (hcurrent n)
+      rw [QInterval.expand_width] at hcurrent_width
+      change ((prefixStabilize candidate radius).compute n).width <= eps.val
+      calc
+        ((prefixStabilize candidate radius).compute n).width <=
+            (candidate.compute n).width + 2 * radius n := hcurrent_width
+        _ <= half.val + 2 * quarter.val := by
+          exact rat_add_le_add hcandidate_width
+            (Rat.mul_le_mul_of_nonneg_left hradius_width
+              (by native_decide : (0 : Rat) <= 2))
+        _ = eps.val := by
+          dsimp [half, quarter]
+          rw [Rat.div_def, Rat.div_def]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel]
+
+theorem prefixStabilize_equiv_anchor
+    {candidate anchor : RealRaw} {radius : Nat -> Rat}
+    (hanchor : anchor.Valid)
+    (hover : candidate.Equiv anchor)
+    (hradius : forall n, (anchor.compute n).width <= radius n) :
+    (prefixStabilize candidate radius).Equiv anchor := by
+  intro n
+  apply (compareAt_overlap_iff (prefixStabilize candidate radius) anchor n n).2
+  have hcontains := prefixStabilize_contains_anchor
+    (candidate := candidate) (anchor := anchor) hanchor hover hradius n
+  have hanchor_ordered := interval_order_of_valid anchor hanchor n
+  exact ⟨Rat.le_trans hcontains.1 hanchor_ordered,
+    Rat.le_trans hanchor_ordered hcontains.2⟩
+
+/-- The original candidate and its finite-prefix stabilization overlap at
+every common stage.  As with `prefixStabilize_equiv_anchor`, the anchor is a
+proof-side certificate only; the stabilized evaluator does not read it. -/
+theorem candidate_equiv_prefixStabilize
+    {candidate anchor : RealRaw} {radius : Nat -> Rat}
+    (hanchor : anchor.Valid)
+    (hover : candidate.Equiv anchor)
+    (hradius : forall n, (anchor.compute n).width <= radius n) :
+    candidate.Equiv (prefixStabilize candidate radius) := by
+  intro n
+  have hcandidate_anchor :=
+    (compareAt_overlap_iff candidate anchor n n).1 (hover n)
+  have hcontains := prefixStabilize_contains_anchor
+    (candidate := candidate) (anchor := anchor) hanchor hover hradius n
+  apply (compareAt_overlap_iff candidate (prefixStabilize candidate radius) n n).2
   exact ⟨Rat.le_trans hcandidate_anchor.1 hcontains.2,
     Rat.le_trans hcontains.1 hcandidate_anchor.2⟩
 

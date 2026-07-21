@@ -500,6 +500,37 @@ theorem SqrtIntervalSpec.le_hi_of_sq_le
   exact le_of_sq_le_sq_of_nonneg_right hhi_nonneg
     (Rat.le_trans hrq hI.2.2.2)
 
+/-- A rational lower square certificate lies below the certified bisection
+lower endpoint after paying exactly the enclosing interval's width.  This is
+the finite replacement for appealing to an unrepresented exact square root:
+it applies directly to rational geometric lower bounds such as chord cross
+products. -/
+theorem SqrtIntervalSpec.sub_width_le_lo_of_sq_le
+    {q r : Rat} {I : QInterval}
+    (hI : SqrtIntervalSpec q I) (hrq : sq r <= q) :
+    r - I.width <= I.lo := by
+  have hrhi : r <= I.hi := hI.le_hi_of_sq_le hrq
+  unfold QInterval.width at hrhi ⊢
+  grind [Rat.sub_eq_add_neg]
+
+/-- A lower square certificate gives a quantitative lower bound for the
+finite bisection result.  Unlike a statement about an exact square root, this
+uses only the rational interval width produced by the algorithm. -/
+theorem sqrtApproxOnDomain_sub_width_le_lo_of_sq_le
+    (q : Rat) (h : sqrtDomain q) (n : Nat) {r : Rat}
+    (hrq : sq r <= q) :
+    r - (sqrtApproxOnDomain q h n).width <=
+      (sqrtApproxOnDomain q h n).lo :=
+  (sqrtApproxOnDomain_spec q h n).sub_width_le_lo_of_sq_le hrq
+
+theorem sqrtPartialRaw_sub_width_le_lo_of_sq_le
+    (q : Rat) (h : sqrtDomain q) (n : Nat) {r : Rat}
+    (hrq : sq r <= q) :
+    r - (sqrtPartialRaw.compute q h n).width <=
+      (sqrtPartialRaw.compute q h n).lo := by
+  simpa [sqrtPartialRaw] using
+    (sqrtApproxOnDomain_sub_width_le_lo_of_sq_le q h n hrq)
+
 def sqrtIntervalSpecBool (q : Rat) (I : QInterval) : Bool := decide (0 <= I.lo /\ I.lo <= I.hi /\ sq I.lo <= q /\ q <= sq I.hi)
 
 def sqrtApproxOk? (q : Rat) (eps : QPos) : Option Bool :=

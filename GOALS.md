@@ -771,14 +771,18 @@ students actually compute.
   gives the raw equivalence
   `PiProofs.piCircumference_equiv_piCircleArea_of_verified_area_polygon` and
   promotes the polygon scaffolding computation to a valid raw real through
-  `PiProofs.areaPolygonValid`.  `PiProofs.piCircumferenceReboxed` is now a
-  valid finite-prefix reboxing of the direct perimeter intervals against the
-  verified area intervals, and is formally equivalent to `piCircleArea`.
-  `PiProofs.piCertified : Real` uses the area loop as its preferred evaluator
-  and retains this reboxed perimeter route as a checked alternative.
-  It is a usable alternate representative, not a substitute for the direct
-  `piCircumference` validity proof; the direct algorithm still lacks the
-  one-step refinement certificate, so the canonical row remains uncounted.
+  `PiProofs.areaPolygonValid`.  `PiProofs.piCircumferenceStabilized` is now a
+  valid finite-prefix stabilization of the direct perimeter intervals. Its
+  evaluator sees only direct chord-path intervals and the public rational
+  radius `4/(n+1)`; `piCircleArea` is used only proof-side to certify that
+  radius. It is formally equivalent to both `piCircumference` and
+  `piCircleArea`. `PiProofs.piCircumferenceReboxed` remains the older
+  area-reading normalization. `PiProofs.piCertified : Real` uses the area loop
+  as its preferred evaluator and retains both checked representatives as
+  alternatives. This is a reusable interval-normalization bridge, not a
+  substitute for the direct `piCircumference` validity proof: the original
+  algorithm still lacks the one-step refinement certificate, so the canonical
+  row remains uncounted.
   The direct rational endpoint condition has an executable regression proof
   through the first twelve dyadic transitions in
   `PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve`; the required

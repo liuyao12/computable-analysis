@@ -76,6 +76,14 @@ Current count: definitions `11/19`; equivalences `9/18` applicable rows.
 Baseline equivalence: `piCircleArea` = N/A. Rendered copy:
 [front page: pi scoreboard](https://liuyao12.github.io/computable-analysis/).
 
+The direct chord-path route now also has a checked
+`piCircumferenceStabilized` representative. It evaluates only a finite prefix
+of widened chord-path intervals, using the public rational modulus `4/(n+1)`;
+the area loop is used only in the proof that this radius is sound. This is a
+useful general interval-normalization bridge, but deliberately not a new
+scoreboard row: it does not prove the original `piCircumference` endpoints
+refine stage by stage.
+
 | Computation | Blueprint | Formula | Def. | Equiv. |
 | --- | --- | --- | --- | --- |
 | `piCircleArea` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [validity](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-pi-validity) | $a_{n+1}=a_n+\Delta_n,\ b_{n+1}=b_n-\nabla_n,\ \pi\in[4a_n,4b_n]$ | ✓ | N/A |
