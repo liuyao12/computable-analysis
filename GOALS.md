@@ -60,6 +60,50 @@ not a description of the current module graph. The checked blueprint
   raws carry a domain and pointwise output-rate metadata; the rate may depend
   on the input and its domain proof.
 
+## Calculus Readiness Ledger
+
+The Pi table is a release-style integration suite, not a completion score for
+the scientific-calculus objective.  It catches agreement failures across
+independent finite constructions, but several rows can share one analytic
+bridge, and a major capability such as continuous Peano--Baker need not add a
+Pi representation.  Do not optimize the Pi numerator at the expense of these
+gates.
+
+- **Rational interval foundation — checked.** `RealRaw.Valid`, interval
+  overlap equivalence, and the source audit excluding Mathlib analysis and
+  completed-real completeness are the non-negotiable base.  Re-audit imports
+  whenever this module graph changes.
+- **Continuity and extension — partly checked.** `IntervalRegularOn` and
+  `IntervalRegularOn.epsilonDeltaContinuous` give the literal rational
+  epsilon--delta theorem. `UniformRealFun.CertifiedExtension` states the
+  representation-safe extension contract. General closure and extension
+  theorems remain work, so this gate is not yet a general function-calculus
+  package.
+- **Finite integration and FTC — partly checked.**
+  `Integral.ConstructionFor`, its validity bridge, and the derivative-bound
+  FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact
+  reciprocal-quartic computations exercise them concretely. What remains is
+  a broadly reusable construction from interval regularity, together with
+  derivative certificates for the standard function table.
+- **Monotone inverse functions — partly checked.** The branch-local
+  `InvertibleFunctionOnInterval`/`InverseRaw`/bisection API is checked, with
+  the unit-interval square-root search for exact rational targets. Extend it
+  to represented targets, then use it for the sine/arcsine and
+  exponential/logarithm branches.
+- **Differentiated elementary functions — partly checked.** Formal
+  power-series derivatives and finite-difference examples are checked. The
+  next end-to-end gate is a selected exponential raw that proves `f' = f`,
+  followed by uniqueness and the logarithm relation.
+- **Linear ODEs — finite core checked; analytic layer open.**
+  `PeanoBaker.lean` proves finite chronological products, the ordered-word
+  expansion, and discrete variation of constants. The scientific-calculus
+  gate is the continuous interval-matrix Peano--Baker series with simplex
+  integral boxes, factorial tail certificates, and variation of constants.
+
+There is intentionally no aggregate percentage: these gates have distinct
+dependencies, and a proof in one does not compensate for a missing proof in
+another. The Pi score stays useful only as secondary integration coverage.
+
 ## Continuity Replacement
 
 - Replace pointwise continuity on an interval by interval regularity:

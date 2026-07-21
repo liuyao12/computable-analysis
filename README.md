@@ -35,6 +35,34 @@ the calculus foundation. The Pi integration suite currently has `11/19` valid
 definitions and `9/18` applicable equivalence bridges; it is not a percentage
 of calculus completeness.
 
+## Calculus readiness ledger
+
+The Pi table below is deliberately an integration suite, not the project
+score.  It is good at detecting that independently developed finite geometry,
+series, integration, and inverse-function bridges agree on one demanding
+constant.  It is not a good proxy for the ability to formulate and solve a
+new scientific model: several Pi rows can share the same arctangent bridge,
+while a major advance such as a continuous Peano--Baker theorem need not move
+the Pi count at all.
+
+We therefore use the following gates for the actual calculus goal.  A gate is
+marked **checked** only for the stated end-to-end theorem, not merely because
+the vocabulary for it exists.  There is intentionally no single percentage:
+the gates have different dependencies and none can substitute for another.
+
+| Gate | Current checked boundary | Next boundary |
+| --- | --- | --- |
+| Rational interval foundation | `RealRaw.Valid`, equivalence by overlap, and the no-completeness/no-Mathlib-analysis audit | Continue dependency auditing as modules grow |
+| Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
+| Finite integration and FTC | Certified integral constructions and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | A broadly reusable construction from interval regularity and derivative certificates for standard functions |
+| Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
+| Differentiated elementary functions | Formal power-series derivative table and finite-difference affine/square examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
+| Linear ODEs | Finite Peano--Baker, chronological products, and discrete variation of constants are checked | Interval-matrix simplex integrals, factorial tails, and continuous variation of constants |
+
+The Pi score remains useful as a secondary release test: add a row only when
+it exercises a genuinely new foundation or a new end-to-end bridge.  Do not
+inflate it with presentation variants of the same arctangent construction.
+
 ## Pi formalization scoreboard
 
 A row counts as definition-complete only after its interval sequence is a valid

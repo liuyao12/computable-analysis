@@ -72,6 +72,51 @@ completeness principle is available or planned as a proof shortcut.
   there are no hidden theorem placeholders in that layer.
 \end{enumerate}
 
+\section{Calculus readiness ledger}\label{sec:calculus-readiness}
+
+The pi scoreboard below is a release-style integration suite, not a percentage
+of readiness for scientific or engineering calculus.  It is useful because it
+forces independently constructed finite geometry, series, integration, and
+inverse-function routes to agree on a demanding constant.  It is an incomplete
+proxy, however: several rows can depend on one arctangent bridge, while a
+major advance such as a continuous Peano--Baker theorem would add no pi row.
+We therefore judge the main objective by the following non-substitutable
+gates.  A ``checked'' boundary means an end-to-end Lean theorem for the stated
+claim, not merely that the relevant interface has been declared.
+
+\begin{center}
+\begin{tabular}{p{0.23\textwidth}p{0.36\textwidth}p{0.29\textwidth}}
+\textbf{Gate} & \textbf{Current checked boundary} & \textbf{Next boundary}\\
+\hline
+Rational interval foundation & \code{RealRaw.Valid}, overlap equivalence, and
+the audit excluding completed-real completeness and Mathlib analysis & keep the
+dependency audit current as the module graph grows\\
+Continuity and extension & interval regularity proves literal rational
+epsilon--delta continuity & general
+representation-respecting extension closure beyond the current certified
+extension interface\\
+Finite integration and FTC & certified integral constructions,
+derivative-bound endpoint bridges, and concrete rectangle/Cauchy/quartic
+routes & reusable construction from interval regularity and standard-function
+derivative certificates\\
+Monotone inverse functions & branch-local inverse and bisection interfaces;
+unit-interval square-root search for rational targets & represented targets,
+then sine/arcsine and exponential/logarithm branches\\
+Differentiated elementary functions & formal power-series derivative table and
+finite-difference affine/square examples & a selected exponential raw with
+the analytic theorem \(f'=f\), then log/exp agreement\\
+Linear ODEs & finite Peano--Baker ordered-word expansion and discrete
+variation of constants & interval-matrix simplex boxes, factorial tails, and
+continuous variation of constants
+\end{tabular}
+\end{center}
+
+There is intentionally no aggregate percentage: these gates have distinct
+dependencies, and success in one does not compensate for a missing theorem in
+another.  The pi table remains valuable as secondary coverage.  Add a row only
+when it exercises a genuinely new foundation or end-to-end bridge; do not
+inflate it with presentation variants of the same arctangent construction.
+
 \section{Pi scoreboard}\label{sec:pi-scoreboard}
 \lean{ComputableAnalysis.piMachin}
 \lean{ComputableAnalysis.piCircleArea}

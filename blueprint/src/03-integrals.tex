@@ -1168,12 +1168,12 @@ Lipschitz rectangle sum overlaps the Cauchy-kernel rectangle sum on the
 endpointwise projective image of every finite positive-branch partition.
 The new finite global ingredients are checked too.  The compact density is
 even, and Lean scales the positive-branch brackets by (2) to obtain a
-symmetric finite-core overlap.  Separately, on (0\le s\le1), the remaining
+symmetric finite-core overlap.  Separately, on \(0\le s\le1\), the remaining
 compact endpoint cell has the explicit enclosure
 \[
  (1-s)\bigl(f(s)+8(1-s)\bigr)\le \frac{32}{3}(1-s),
 \]
-so at (s_m=1-2^{-m}) it is at most
+so at \(s_m=1-2^{-m}\) it is at most
 \(\frac{32}{3}2^{-m}\).  This is a rational vanishing tail budget, not an
 improper-limit primitive.  Lean now packages twice this dyadic budget as a
 valid shrinking raw error interval, so the two endpoint cells can be carried
@@ -1294,7 +1294,7 @@ the literal reciprocal-quartic candidate overlaps a single rational envelope
 centred on the four-unit-mesh Cauchy calculation.  Its terms are precisely the
 near-zero and tail-mesh errors, the scheduled Cauchy bridge width, the two
 compact bracket widths, and the removable endpoint budget.  Lean bounds this
-full envelope by (224\,2^{-n}), proves that it contains the scheduled
+full envelope by \(224\,2^{-n}\), proves that it contains the scheduled
 full-line Cauchy box, and applies the rational \(\varepsilon/2\) gap argument
 to package a \code{RealRaw.Equiv} between the literal compact dyadic integral
 and the completed Cauchy raw.  Chaining with the established Cauchy--area
