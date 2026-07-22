@@ -155,6 +155,21 @@ another. The Pi score stays useful only as secondary integration coverage.
   rational breakpoints, apply the exact convex FTC on each piece, and combine
   endpoint equalities by raw-real arithmetic and transitivity.  Do not add a
   separate piecewise theorem unless the examples force a reusable abstraction.
+- Integration by parts should follow the same explicit-piece discipline.
+  `leftStieltjesSum`, `rightStieltjesSum`, and
+  `finiteIntegrationByParts_withVariation` now prove the exact rational
+  rectangle decomposition, including its corner-area correction.  For the
+  integral theorem, provide increasing/decreasing pieces for both factors,
+  replace them by a common rational refinement, and bound the signed variation
+  cell by cell.  Do not invoke a nonconstructive global variation or Jordan
+  decomposition.
+- A future pi coverage bridge should exercise this theorem rather than merely
+  mention it: prove
+  `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
+  It requires the product/derivative/FTC bridge, the explicit monotone-piece
+  refinement, the arctangent derivative, and the logarithm endpoint identity.
+  It is deliberately not a checked scoreboard row until those data construct
+  valid raw reals and their final `RealRaw.Equiv` theorem.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant

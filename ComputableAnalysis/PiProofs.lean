@@ -1,5 +1,6 @@
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.ArctanGeometry
+import ComputableAnalysis.ArctanPresentations
 import ComputableAnalysis.Basic
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.IntegralIdentities
@@ -10151,6 +10152,25 @@ theorem arctanEqualsGeom_finiteRiemannBridge
   exact RealRaw.equiv_trans hArctanValid hRectValid hGeomValid
     (arctanEqualsRectangleRaw_finiteRiemannBridge hx0 hx1)
     (ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom hx0)
+
+/-- The named geometric and power-series arctangent presentations agree on
+the nonnegative unit branch.  This is the reusable function-level form of the
+finite-Riemann bridge: it compares the representations themselves, rather
+than creating another special-purpose π formula. -/
+theorem arctanGeomPresentation_equiv_arctanSeriesPresentation_on_nonnegativeUnit
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (arctan.geom.raw.evalRaw x (by trivial)).Equiv
+      (arctan.series.raw.evalRaw x
+        (by
+          unfold Elementary.Arctan.powerSeriesDomain qabs
+          have hnonneg : qabs x = x := by
+            simp [qabs, hx0]
+          rw [hnonneg]
+          exact hx1)) := by
+  simpa [arctan.geom, arctan.series, ArctanGeometry.representation,
+    ArctanGeometry.functionRaw, Elementary.Arctan.powerSeries,
+    Elementary.Arctan.powerSeriesFunctionRaw, PartialRealFunRaw.evalRaw] using
+    (RealRaw.equiv_symm (arctanEqualsGeom_finiteRiemannBridge hx0 hx1))
 
 /-- The series/kernal-integral comparison obtained from the finite Riemann
 bridge.  This is the analytic input used at the two arguments in Machin's

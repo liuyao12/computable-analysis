@@ -169,6 +169,44 @@ respect addition, rational scalar multiplication, and adjacent-interval
 additivity.
 \end{theorem}
 
+\begin{theorem}[Finite geometric integration by parts]
+\label{thm:finite-geometric-integration-by-parts}
+\lean{ComputableAnalysis.leftStieltjesSum}
+\lean{ComputableAnalysis.rightStieltjesSum}
+\lean{ComputableAnalysis.quadraticVariationSum}
+\lean{ComputableAnalysis.productIncrement_decomposition}
+\lean{ComputableAnalysis.finiteIntegrationByParts}
+\lean{ComputableAnalysis.finiteIntegrationByParts_withVariation}
+\uses{def:definite-integral-identity}
+\leanok
+For rational sequences \((u_i,v_i)\), one partition cell has the exact
+rectangle decomposition
+\[
+ u_{i+1}v_{i+1}-u_iv_i
+ =u_i(v_{i+1}-v_i)+v_{i+1}(u_{i+1}-u_i).
+\]
+Summing the cells gives the finite integration-by-parts identity
+\[
+ \sum_{i<n}u_i\Delta v_i+
+ \sum_{i<n}v_{i+1}\Delta u_i
+ =u_nv_n-u_0v_0.
+\]
+Thus the proof is literally a tiling of the endpoint-product rectangle by
+two oriented strips.  If both sums use left endpoints, Lean also records the
+exact corner-area correction
+\[
+ \sum_{i<n}u_i\Delta v_i+
+ \sum_{i<n}v_i\Delta u_i+
+ \sum_{i<n}\Delta u_i\Delta v_i
+ =u_nv_n-u_0v_0.
+\]
+For the later integral theorem, functions are supplied on explicit increasing
+or decreasing pieces and the two decompositions are replaced by a common
+rational refinement.  The corner correction is then bounded piece by piece
+by their signed variations.  This is a finite interval estimate, not an
+appeal to completeness or an implicit choice of a variation decomposition.
+\end{theorem}
+
 \section{Nondecreasing integrands and piecewise monotone integrals}
 
 The first integral theorem should be for nondecreasing functions on rational
