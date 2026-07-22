@@ -7824,28 +7824,6 @@ theorem curvatureChordLower_sq_le_segmentNormSq_of_unit
   change sq (c + sq d / 4) <= sq c + sq d
   exact hbound
 
-/-- Convert the exact rational curvature certificate into a lower bound for a
-finite bisection enclosure.  The only loss is the explicitly computed width
-of that enclosure. -/
-theorem curvatureChordLower_sub_width_le_segment_lo_of_unit
-    {p q : PiCirclePoint}
-    (hp : RationalCircle.Stage.normSq p = 1)
-    (hq : RationalCircle.Stage.normSq q = 1)
-    (hcross : 0 <= pointCross p q)
-    (hdot : 0 <= RationalCircle.Stage.dot p q)
-    (hdeficit : 0 <= 1 - RationalCircle.Stage.dot p q)
-    (precision : Nat) :
-    curvatureChordLower p q -
-        (pointSegmentLengthInterval p q precision).width <=
-      (pointSegmentLengthInterval p q precision).lo := by
-  have hhi : curvatureChordLower p q <=
-      (pointSegmentLengthInterval p q precision).hi :=
-    pointSegmentLengthInterval_le_hi_of_sq_le p q precision
-      (curvatureChordLower_sq_le_segmentNormSq_of_unit hp hq hcross hdot
-        hdeficit)
-  unfold QInterval.width
-  grind [Rat.sub_eq_add_neg]
-
 theorem pointSegmentNormSq_self (p : PiCirclePoint) :
     pointSegmentNormSq p p = 0 := by
   grind [pointSegmentNormSq, Rat.sub_eq_add_neg]
@@ -8076,6 +8054,28 @@ theorem pointSegmentLengthInterval_hi_nonneg
   Rat.le_trans
     (pointSegmentLengthInterval_lo_nonneg p q n)
     (pointSegmentLengthInterval_lo_le_hi p q n)
+
+/-- Convert the exact rational curvature certificate into a lower bound for a
+finite bisection enclosure.  The only loss is the explicitly computed width
+of that enclosure. -/
+theorem curvatureChordLower_sub_width_le_segment_lo_of_unit
+    {p q : PiCirclePoint}
+    (hp : RationalCircle.Stage.normSq p = 1)
+    (hq : RationalCircle.Stage.normSq q = 1)
+    (hcross : 0 <= pointCross p q)
+    (hdot : 0 <= RationalCircle.Stage.dot p q)
+    (hdeficit : 0 <= 1 - RationalCircle.Stage.dot p q)
+    (precision : Nat) :
+    curvatureChordLower p q -
+        (pointSegmentLengthInterval p q precision).width <=
+      (pointSegmentLengthInterval p q precision).lo := by
+  have hhi : curvatureChordLower p q <=
+      (pointSegmentLengthInterval p q precision).hi :=
+    pointSegmentLengthInterval_le_hi_of_sq_le p q precision
+      (curvatureChordLower_sq_le_segmentNormSq_of_unit hp hq hcross hdot
+        hdeficit)
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
 
 theorem chordLengthLo_le_outerTangentCrossSum
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
@@ -17129,7 +17129,10 @@ theorem piCircleAreaPolygon_equiv_piCircleArea :
   rw [piCircleAreaPolygonAgreement n]
   have hordered := piCircleAreaPolygon_ordered n
   unfold QInterval.width at hordered
-  exact ⟨hordered, hordered⟩
+  have hlohi : (piCircleAreaPolygon.compute n).lo <=
+      (piCircleAreaPolygon.compute n).hi := by
+    grind [Rat.sub_eq_add_neg]
+  exact ⟨hlohi, hlohi⟩
 
 /-- Canonical checked presentations of π.
 
@@ -17273,7 +17276,15 @@ def piCertified : Real :=
       piReciprocalQuarticCompact]
     alternative_valid := by
       intro rep hrep
-      simp only [List.mem_cons, List.not_mem_nil] at hrep
+      change rep = piCircleAreaPolygon \/
+        rep = piCircumferenceStabilized \/
+        rep = piCircumferenceReboxed \/
+        rep = piCircumferenceFan \/
+        rep = ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) \/
+        rep = piFromArctanIntegralRectangleUnitAtOne \/
+        rep = piLeibniz \/ rep = piNilakantha \/ rep = piMachin \/
+        rep = IntegralIdentities.cauchyFullLineIntegral \/
+        rep = piReciprocalQuarticCompact at hrep
       rcases hrep with h | h | h | h | h | h | h | h | h | h | h
       all_goals subst rep
       all_goals first
@@ -17290,7 +17301,15 @@ def piCertified : Real :=
         | exact piPresentation_valid .reciprocalQuarticIntegral
     coherent := by
       intro rep hrep
-      simp only [List.mem_cons, List.not_mem_nil] at hrep
+      change rep = piCircleAreaPolygon \/
+        rep = piCircumferenceStabilized \/
+        rep = piCircumferenceReboxed \/
+        rep = piCircumferenceFan \/
+        rep = ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) \/
+        rep = piFromArctanIntegralRectangleUnitAtOne \/
+        rep = piLeibniz \/ rep = piNilakantha \/ rep = piMachin \/
+        rep = IntegralIdentities.cauchyFullLineIntegral \/
+        rep = piReciprocalQuarticCompact at hrep
       rcases hrep with h | h | h | h | h | h | h | h | h | h | h
       all_goals subst rep
       all_goals first
