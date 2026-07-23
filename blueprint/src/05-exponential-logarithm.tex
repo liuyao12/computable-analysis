@@ -108,13 +108,14 @@ power-series tail bounds into the corresponding derivative certificate, whose
 finite-difference and derivative boxes are within the requested tolerance
 rather than required to overlap exactly, and then establish the displayed
 uniqueness statement by finite rational estimates.  More generally, this is
-the scalar case of an effective Picard--Lindelof theorem: a supplied rational
-Lipschitz constant, bounded interval box, and interval-regularity moduli
-should construct a solution from Picard iterates with factorial tail boxes.
-For uniqueness, choose rational subintervals short enough that the induced
-contraction factor is below one, and propagate equality across a finite
-subdivision.  Thus neither the existence construction nor the uniqueness
-argument needs completeness of an ambient real-number type.
+the scalar case of the linear Picard--Lindel\"of construction target in
+\cref{thm:linear-picard-lindelof}: the Peano--Baker series for the
+one-dimensional coefficient \(A=1\) provides the solution and its factorial
+tail, while the zero-initial homogeneous case proves uniqueness.  Thus neither
+the existence construction nor the uniqueness argument needs completeness of
+an ambient real-number type.  A general nonlinear Picard--Lindel\"of theorem
+is a later extension requiring interval-certified Lipschitz maps and a
+separate contraction argument.
 \end{theorem}
 
 \section{Three definitions of \texorpdfstring{$e$}{e}}
@@ -383,6 +384,26 @@ upper rational endpoints.  They are nested and have the exact width
 so in particular \(w_n\le 1/n\) for every positive stage.  This is a
 finite-rational convergence proof, with no appeal to a completed real line.
 
+\begin{proposition}[Finite logarithm-series/Riemann bridge]
+\label{prop:log-two-series-right-riemann}
+\lean{ComputableAnalysis.Logarithm.logTwoLo_eq_logTwoKernelRightRiemann}
+\uses{def:log-two-series,def:log-two-reciprocal-darboux}
+\leanok
+For every positive integer \(n\), the lower endpoint of the alternating
+calculation is exactly the literal uniform right-endpoint Riemann sum
+\[
+  L_n
+  =\frac1n\sum_{k=0}^{n-1}
+    \frac1{1+(k+1)/n}.
+\]
+This is an equality of finite rational computations.  Lean first proves the
+harmonic normal form
+\(L_n=H_{2n}-H_n\), then reindexes the difference as
+\(\sum_{k<n}1/(n+k+1)\), and finally cancels the positive mesh factor in
+each summand.  It therefore supplies the series side of the intended
+logarithm integral identity without silently passing to a limit.
+\end{proposition}
+
 At present this defines the named series presentation
 \code{Logarithm.logTwoSeries}.  Alongside it,
 \cref{def:log-two-reciprocal-darboux} supplies a valid finite raw integral for
@@ -390,7 +411,8 @@ the translated reciprocal kernel.  The theorem
 \(\log_{\mathrm{series}}2=\int_1^2 dt/t\), equivalently the raw-real
 agreement of those two algorithms after the affine change of variables, is
 deliberately still open.  It requires a finite comparison/FTC bridge, not the
-bare alternating-series or Darboux validity proofs.
+bare alternating-series or Darboux validity proofs: specifically, the checked
+right mesh above must still be compared with the nested dyadic Darboux boxes.
 \end{definition}
 
 \section{Complex logarithm at \texorpdfstring{$i$}{i}}

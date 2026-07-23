@@ -268,6 +268,17 @@ theorem logTwoState_succ (n : Nat) :
   rw [List.range_succ, List.foldl_append]
   rfl
 
+/-- The finite harmonic sum, kept as a recursive rational computation so that
+the conversion of the alternating logarithm enclosure to Riemann sums stays
+entirely algebraic. -/
+def harmonicSum : Nat -> Rat
+  | 0 => 0
+  | n + 1 => harmonicSum n + 1 / ((n + 1 : Nat) : Rat)
+
+theorem harmonicSum_succ (n : Nat) :
+    harmonicSum (n + 1) = harmonicSum n + 1 / ((n + 1 : Nat) : Rat) :=
+  rfl
+
 theorem logTwo_width_eq (n : Nat) :
     (logTwoCompute n).width = 1 / ((2 * n + 1 : Nat) : Rat) := by
   cases n with
@@ -282,6 +293,181 @@ theorem logTwo_width_eq (n : Nat) :
         grind
       rw [hden]
       grind [QInterval.width, Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem logTwoHi_eq_logTwoLo_add_remainder (n : Nat) :
+    logTwoHi n = logTwoLo n + 1 / ((2 * n + 1 : Nat) : Rat) := by
+  have hwidth := logTwo_width_eq n
+  change logTwoHi n - logTwoLo n = 1 / ((2 * n + 1 : Nat) : Rat) at hwidth
+  grind [Rat.sub_eq_add_neg]
+
+theorem logTwoLo_succ (n : Nat) :
+    logTwoLo (n + 1) =
+      logTwoLo n + 1 / ((2 * n + 1 : Nat) : Rat) -
+        1 / ((2 * n + 2 : Nat) : Rat) := by
+  unfold logTwoLo
+  rw [logTwoState_succ]
+  simp [logTwoStep]
+  have hhi := logTwoHi_eq_logTwoLo_add_remainder n
+  change (logTwoState n).1 - 1 / (2 * (n : Rat) + 2) = _
+  change (logTwoState n).1 =
+    (logTwoState n).2 + 1 / ((2 * n + 1 : Nat) : Rat) at hhi
+  have hden1 : 2 * (n : Rat) + 1 = ((2 * n + 1 : Nat) : Rat) := by
+    exact_mod_cast (by rfl : 2 * n + 1 = 2 * n + 1)
+  rw [hden1]
+  rw [hhi]
+
+private theorem one_div_nat_succ_eq_two_half_terms (n : Nat) :
+    1 / ((n + 1 : Nat) : Rat) =
+      1 / ((2 * n + 2 : Nat) : Rat) +
+        1 / ((2 * n + 2 : Nat) : Rat) := by
+  have hden : ((2 * n + 2 : Nat) : Rat) =
+      2 * ((n + 1 : Nat) : Rat) := by
+    exact_mod_cast (by omega : 2 * n + 2 = 2 * (n + 1))
+  rw [hden]
+  simp only [Rat.div_def, Rat.one_mul, Rat.inv_mul_rev]
+  have hhalf : (2 : Rat)⁻¹ + (2 : Rat)⁻¹ = 1 := by native_decide
+  calc
+    ((n + 1 : Nat) : Rat)⁻¹ = ((n + 1 : Nat) : Rat)⁻¹ * 1 :=
+      (Rat.mul_one _).symm
+    _ = ((n + 1 : Nat) : Rat)⁻¹ * ((2 : Rat)⁻¹ + (2 : Rat)⁻¹) := by
+      rw [hhalf]
+    _ = ((n + 1 : Nat) : Rat)⁻¹ * (2 : Rat)⁻¹ +
+          ((n + 1 : Nat) : Rat)⁻¹ * (2 : Rat)⁻¹ := by
+      rw [Rat.mul_add]
+
+private theorem harmonicSum_double_succ (n : Nat) :
+    harmonicSum (2 * (n + 1)) =
+      harmonicSum (2 * n) + 1 / ((2 * n + 1 : Nat) : Rat) +
+        1 / ((2 * n + 2 : Nat) : Rat) := by
+  have hindex : 2 * (n + 1) = (2 * n + 1) + 1 := by omega
+  rw [hindex, harmonicSum_succ, harmonicSum_succ]
+
+/-- The tail of a finite harmonic sum, written as an explicit finite list
+sum.  It is the combinatorial reindexing that turns `H_(2n)-H_n` into a
+right-endpoint reciprocal sum. -/
+private theorem harmonicSum_add_sub_eq_tail (n m : Nat) :
+    harmonicSum (n + m) - harmonicSum n =
+      (List.range m).foldl
+        (fun acc k => acc + 1 / ((n + k + 1 : Nat) : Rat)) 0 := by
+  induction m with
+  | zero =>
+      simp
+      grind [Rat.sub_eq_add_neg]
+  | succ m ih =>
+      have hindex : n + (m + 1) = (n + m) + 1 := by omega
+      rw [hindex, harmonicSum_succ]
+      calc
+        harmonicSum (n + m) + 1 / ((n + m + 1 : Nat) : Rat) -
+            harmonicSum n =
+          (harmonicSum (n + m) - harmonicSum n) +
+            1 / ((n + m + 1 : Nat) : Rat) := by
+              grind [Rat.sub_eq_add_neg]
+        _ = (List.range m).foldl
+              (fun acc k => acc + 1 / ((n + k + 1 : Nat) : Rat)) 0 +
+            1 / ((n + m + 1 : Nat) : Rat) := by rw [ih]
+        _ = (List.range (m + 1)).foldl
+              (fun acc k => acc + 1 / ((n + k + 1 : Nat) : Rat)) 0 := by
+              simp only [List.range_succ, List.foldl_append, List.foldl_cons,
+                List.foldl_nil]
+
+/-- The finite right-endpoint reciprocal sum on the uniform `n`-mesh of
+`[0,1]`, after cancellation of the mesh factor. -/
+def logTwoRightRiemann (n : Nat) : Rat :=
+  (List.range n).foldl
+    (fun acc k => acc + 1 / ((n + k + 1 : Nat) : Rat)) 0
+
+/-- One right-mesh rectangle for `logTwoKernel` simplifies to the matching
+reciprocal-harmonic term.  Positivity of the mesh count is exactly what makes
+the cancellation constructive. -/
+private theorem logTwo_rightRiemann_term (n k : Nat) (hn : 0 < n) :
+    (1 / (n : Rat)) *
+        logTwoKernel (((k + 1 : Nat) : Rat) / (n : Rat)) =
+      1 / ((n + k + 1 : Nat) : Rat) := by
+  let N : Rat := (n : Rat)
+  let K : Rat := ((k + 1 : Nat) : Rat)
+  have hsum : ((n + k + 1 : Nat) : Rat) = N + K := by
+    dsimp [N, K]
+    exact_mod_cast (by omega : n + k + 1 = n + (k + 1))
+  unfold logTwoKernel
+  rw [hsum]
+  change (1 / N) * (1 / (1 + K / N)) = 1 / (N + K)
+  have hNpos : 0 < N := by
+    dsimp [N]
+    exact (Rat.natCast_pos).2 hn
+  have hNne : N ≠ 0 := Rat.ne_of_gt hNpos
+  have hden : 1 + K / N = (N + K) / N := by
+    rw [Rat.div_def, Rat.div_def]
+    have hcancel : N * N⁻¹ = 1 := Rat.mul_inv_cancel N hNne
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  rw [hden]
+  simp only [Rat.div_def, Rat.one_mul, Rat.inv_mul_rev, Rat.inv_inv]
+  rw [← Rat.mul_assoc, Rat.inv_mul_cancel N hNne, Rat.one_mul]
+
+/-- Finite left folds agree when their update functions agree pointwise. -/
+private theorem foldl_eq_of_pointwise
+    (f g : Rat -> Nat -> Rat)
+    (h : ∀ acc k, f acc k = g acc k)
+    (xs : List Nat) (acc : Rat) :
+    xs.foldl f acc = xs.foldl g acc := by
+  induction xs generalizing acc with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.foldl]
+      rw [h acc x]
+      exact ih (g acc x)
+
+/-- The literal uniform right Riemann sum for `logTwoKernel` on `[0,1]`.
+It deliberately retains both the mesh width and the kernel evaluation, so
+that the bridge from the alternating series has a transparent integral form. -/
+def logTwoKernelRightRiemann (n : Nat) : Rat :=
+  (List.range n).foldl
+    (fun acc k =>
+      acc + (1 / (n : Rat)) *
+        logTwoKernel (((k + 1 : Nat) : Rat) / (n : Rat))) 0
+
+/-- On a positive mesh, the literal right Riemann sum has the reciprocal
+harmonic normal form obtained by cancelling the mesh factor. -/
+theorem logTwoKernelRightRiemann_eq_logTwoRightRiemann
+    (n : Nat) (hn : 0 < n) :
+    logTwoKernelRightRiemann n = logTwoRightRiemann n := by
+  unfold logTwoKernelRightRiemann logTwoRightRiemann
+  apply foldl_eq_of_pointwise
+  intro acc k
+  rw [logTwo_rightRiemann_term n k hn]
+
+theorem harmonicSum_double_sub_eq_logTwoRightRiemann (n : Nat) :
+    harmonicSum (2 * n) - harmonicSum n = logTwoRightRiemann n := by
+  rw [show 2 * n = n + n by omega]
+  exact harmonicSum_add_sub_eq_tail n n
+
+/-- The lower alternating-harmonic endpoint is the finite reciprocal sum
+`H_(2n) - H_n`.  This is the exact algebraic normal form used to connect the
+logarithm series with right-endpoint Riemann sums for `t ↦ 1/(1+t)`. -/
+theorem logTwoLo_eq_harmonicSum_sub (n : Nat) :
+    logTwoLo n = harmonicSum (2 * n) - harmonicSum n := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [logTwoLo_succ, ih, harmonicSum_double_succ, harmonicSum_succ]
+      rw [one_div_nat_succ_eq_two_half_terms]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/-- The lower series endpoint is exactly the finite uniform right Riemann sum
+for the translated reciprocal kernel.  The remaining logarithm theorem must
+still compare this mesh to the literal nested Lipschitz--Darboux boxes. -/
+theorem logTwoLo_eq_logTwoRightRiemann (n : Nat) :
+    logTwoLo n = logTwoRightRiemann n := by
+  rw [logTwoLo_eq_harmonicSum_sub,
+    harmonicSum_double_sub_eq_logTwoRightRiemann]
+
+/-- The alternating-series lower endpoint is exactly a literal uniform right
+Riemann sum for `t ↦ 1/(1+t)`.  This is an equality of finite rational
+computations, before the remaining comparison with the dyadic Darboux boxes. -/
+theorem logTwoLo_eq_logTwoKernelRightRiemann
+    (n : Nat) (hn : 0 < n) :
+    logTwoLo n = logTwoKernelRightRiemann n := by
+  rw [logTwoLo_eq_logTwoRightRiemann,
+    logTwoKernelRightRiemann_eq_logTwoRightRiemann n hn]
 
 theorem logTwoLo_mono_succ (n : Nat) :
     logTwoLo n <= logTwoLo (n + 1) := by

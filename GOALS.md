@@ -103,6 +103,12 @@ gates.
   expansion, and discrete variation of constants. The scientific-calculus
   gate is the continuous interval-matrix Peano--Baker series with simplex
   integral boxes, factorial tail certificates, and variation of constants.
+  This is the intended constructive **linear Picard--Lindelöf** theorem:
+  Peano--Baker supplies the homogeneous resolvent, variation of constants
+  supplies the affine solution, and the factorial tail supplies its modulus
+  and zero-initial-data uniqueness. It includes the scalar `f' = f` uniqueness
+  route needed for exponential. General nonlinear Picard--Lindelöf remains a
+  later interval-Lipschitz/contraction layer.
 
 There is intentionally no aggregate percentage: these gates have distinct
 dependencies, and a proof in one does not compensate for a missing proof in
@@ -211,8 +217,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   It requires the remaining product-derivative/FTC bridge, the explicit monotone-piece
   refinement, the arctangent derivative, and the logarithm endpoint identity.
   `Logarithm.logTwoSeries` now supplies a valid, rate-certified alternating
-  harmonic raw presentation of `log 2`; it is not yet proved equal to the
-  reciprocal-kernel integral, so it does not discharge that endpoint gate.
+  harmonic raw presentation of `log 2`.  Its lower endpoint is now proved
+  exactly equal, for every positive mesh count, to the literal uniform right
+  Riemann sum for `t ↦ 1/(1+t)`:
+  `Logarithm.logTwoLo_eq_logTwoKernelRightRiemann` factors the calculation
+  through `H_(2*n) - H_n` and cancels the mesh term by term.  It is not yet
+  proved equal to the reciprocal-kernel integral, so it does not discharge
+  that endpoint gate: the remaining step is a shrinking comparison with the
+  literal dyadic Darboux boxes.
   It is deliberately not a checked scoreboard row until those data construct
   valid raw reals and their final `RealRaw.Equiv` theorem.
 - Formula-identification route: to identify a proposed kernel, prove that it
@@ -533,8 +545,9 @@ another. The Pi score stays useful only as secondary integration coverage.
   literal rational epsilon--delta continuity, on `[1,2]`:
   `Logarithm.oneOverXOnOneTwo_intervalRegular` uses the exact enclosure
   `[1/r, 1/p]` for each rational `[p,r]`.  The missing logarithm-at-two
-  bridge is the general construction of its integral, not a continuity or
-  topology assumption.
+  bridge is now specifically a finite comparison of the uniform right mesh
+  (already identified exactly with the alternating lower endpoint) with the
+  nested dyadic Darboux boxes, not a continuity or topology assumption.
 - Power-series representations of `sin` and `cos` are named in
   `ComputableAnalysis/ElementaryFunctions.lean`.
 - Hyperbolic sine and cosine have constructive exponential representations
@@ -572,17 +585,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   to exponential first; a general term-by-term differentiation theorem can
   come later.
 - To prove equality of the three exponential representations by calculus
-  rather than by ad hoc estimates, prove a constructive uniqueness principle
-  for `f' = f` with `f(0) = 1`, then prove the equivalent unit-slope
-  characterization of the base at zero.  See
+  rather than by ad hoc estimates, specialize the constructive linear
+  Picard--Lindelöf theorem to the scalar equation `f' = f` with `f(0) = 1`,
+  then prove the equivalent unit-slope characterization of the base at zero.
+  See
   `SolvesSelfDerivativeOnInterval` and `SelfDerivativeInitialValueUnique` in
-  `ComputableAnalysis/Differential.lean`.  The reusable theorem should be an
-  effective Picard--Lindelof theorem: supplied rational interval-regularity,
-  a Lipschitz constant, a bounded box, and explicit moduli produce a valid
-  raw solution together with uniqueness.  Build it from finite Picard
-  iterates and factorial tail boxes, then prove uniqueness by rational
-  short-interval contraction and a finite subdivision.  This is constructive
-  existence-and-uniqueness data, not an appeal to real-number completeness.
+  `ComputableAnalysis/Differential.lean`.  The reusable linear theorem is
+  built from continuous Peano--Baker simplex boxes and factorial tail boxes;
+  general nonlinear Picard--Lindelöf can later add interval-Lipschitz Picard
+  iterates, rational short-interval contraction, and finite subdivision.
+  Both are constructive existence-and-uniqueness data, not appeals to
+  real-number completeness.
 
 ## Linear Differential Equations
 
@@ -625,7 +638,10 @@ another. The Pi score stays useful only as secondary integration coverage.
 - Next analytic target: build interval matrices for ordered-simplex
   Peano--Baker terms, prove a factorial tail enclosure from a rational
   coefficient bound, and obtain state-transition and variation-of-constants
-  formulas for `x' = A(t)x + b(t)`. The next specializations are the analytic
+  formulas for `x' = A(t)x + b(t)`. Together these are the effective linear
+  Picard--Lindelöf theorem: the zero-initial homogeneous case gives
+  uniqueness, and the factorial tail is the explicit solution modulus. The
+  next specializations are the scalar `f'=f` exponential route, the analytic
   commuting-exponential identification, scalar and piecewise-constant
   systems, and higher-order nilpotent/triangular systems. Chapter `Linear
   Differential Equations` gives the certificate plan.

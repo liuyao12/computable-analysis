@@ -57,7 +57,7 @@ the gates have different dependencies and none can substitute for another.
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, positive bounded interval products, and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
 | Differentiated elementary functions | Formal power-series derivative table and finite-difference affine/square examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
-| Linear ODEs | Finite Peano--Baker, chronological products, and discrete variation of constants are checked | Interval-matrix simplex integrals, factorial tails, and continuous variation of constants |
+| Linear ODEs | Finite Peano--Baker, chronological products, and discrete variation of constants are checked | Interval-matrix simplex integrals and factorial tails yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
 it exercises a genuinely new foundation or a new end-to-end bridge.  Do not
@@ -124,11 +124,20 @@ certified `O(1/n)` rate.  Independently,
 `Logarithm.logTwoReciprocalIntegral` is now a literal finite
 Lipschitz--Darboux integral for the translated reciprocal kernel
 `t ↦ 1/(1+t)` on `[0,1]`: its boxes have exact width `2/2^n`.
+There is now an exact finite bridge between the two styles of calculation:
+for every positive `n`,
+`Logarithm.logTwoLo_eq_logTwoKernelRightRiemann` identifies the alternating
+lower endpoint with the literal uniform right Riemann sum
+`(1/n) * Σ_{k<n} 1/(1+(k+1)/n)`.  The proof first rewrites it as
+`H_(2n) - H_n` and then cancels the mesh factor term by term.  Thus it is a
+finite rational identity, not an appeal to an integral limit.
 The shared `IntegralIdentities.LipschitzDyadic` constructor works for any
 rational kernel with a supplied natural rational Lipschitz bound.  The
 identification of these two valid raw reals—the theorem
 `logTwoSeries ≡ logTwoReciprocalIntegral`—remains open, so the logarithmic
-term is still not a completed integration-by-parts route.
+term is still not a completed integration-by-parts route: the remaining
+task is a shrinking finite comparison between this uniform right mesh and the
+literal dyadic Darboux boxes.
 The reciprocal kernel itself also has a finite interval-regularity and
 epsilon--delta continuity proof on `[1,2]`, using `[1/r, 1/p]` for an input
 box `[p,r]`; extending the new Lipschitz construction to that general
