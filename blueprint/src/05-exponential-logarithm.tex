@@ -329,10 +329,40 @@ It contains every exact rational point value in \(I\).  Its width is
 so the input modulus \(r-p\le1/(n+1)\) produces an output box of width at
 most \(1/(n+1)\).  Lean therefore proves the literal rational
 \(\varepsilon\)--\(\delta\) continuity predicate for this kernel, without
-topology or real-number completeness.  The remaining step toward the
-logarithmic integral is not continuity but the reusable construction turning
-such interval boxes into a certified integral raw real.
+topology or real-number completeness.  This interval evaluator is a stronger
+domain-local continuity certificate than is needed for the first literal
+integral below.  Extending that integral construction to arbitrary
+\code{IntervalRegularOn} kernels remains later work.
 \end{proposition}
+
+\begin{definition}[Finite reciprocal Darboux integral at two]
+\label{def:log-two-reciprocal-darboux}
+\lean{ComputableAnalysis.Logarithm.logTwoKernel_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_width}
+\lean{ComputableAnalysis.Logarithm.logTwoReciprocalIntegral_valid}
+\uses{prop:one-over-x-one-two-continuity}
+Put \(g(t)=1/(1+t)\) on \([0,1]\), the affine translate of \(1/x\) on
+\([1,2]\).  Lean proves the entirely rational estimate
+
+\[
+ |g(s)-g(t)|\le |t-s|\qquad(0\le s,t\le1).
+\]
+
+For every rational kernel with a supplied natural Lipschitz constant \(L\),
+the generic constructor forms the lower and upper rectangles on each cell of
+the midpoint-refined dyadic mesh.  The resulting boxes are nested, valid raw
+real data, and have exact width
+\[
+ w_n=\frac{2L}{2^n}.
+\]
+For \(g\), the constant is \(L=1\); hence
+\code{logTwoReciprocalIntegral} is a genuine finite rectangle construction
+with \(w_n=2/2^n\).  It is the raw integral associated with
+\(\int_0^1dt/(1+t)=\int_1^2dx/x\), not a placeholder interface and not an
+appeal to a completed integral.  The change-of-variable and series comparison
+theorems are intentionally separate: this definition alone does not name the
+result \(\log 2\).
+\end{definition}
 
 \begin{definition}[The logarithmic series at two]
 \label{def:log-two-series}
@@ -354,11 +384,13 @@ so in particular \(w_n\le 1/n\) for every positive stage.  This is a
 finite-rational convergence proof, with no appeal to a completed real line.
 
 At present this defines the named series presentation
-\code{Logarithm.logTwoSeries}.  The theorem
-\(\log_{\mathrm{series}}2=\int_1^2 dt/t\), which licenses its identification
-with the logarithm above, is deliberately still open.  It belongs to the
-general constructive integral and FTC bridge, not to the bare alternating
-series validity proof.
+\code{Logarithm.logTwoSeries}.  Alongside it,
+\cref{def:log-two-reciprocal-darboux} supplies a valid finite raw integral for
+the translated reciprocal kernel.  The theorem
+\(\log_{\mathrm{series}}2=\int_1^2 dt/t\), equivalently the raw-real
+agreement of those two algorithms after the affine change of variables, is
+deliberately still open.  It requires a finite comparison/FTC bridge, not the
+bare alternating-series or Darboux validity proofs.
 \end{definition}
 
 \section{Complex logarithm at \texorpdfstring{$i$}{i}}

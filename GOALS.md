@@ -84,9 +84,11 @@ gates.
 - **Finite integration and FTC — partly checked.**
   `Integral.ConstructionFor`, its validity bridge, and the derivative-bound
   FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact
-  reciprocal-quartic computations exercise them concretely. What remains is
-  a broadly reusable construction from interval regularity, together with
-  derivative certificates for the standard function table.
+  reciprocal-quartic computations exercise them concretely. The reusable
+  `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
+  Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. What remains
+  is its extension to interval-regular functions, together with derivative
+  certificates for the standard function table.
 - **Monotone inverse functions — partly checked.** The branch-local
   `InvertibleFunctionOnInterval`/`InverseRaw`/bisection API is checked, with
   the unit-interval square-root search for exact rational targets. Extend it

@@ -1,5 +1,6 @@
 import ComputableAnalysis.FTC
 import ComputableAnalysis.FunctionDomains
+import ComputableAnalysis.IntegralIdentities
 
 /-!
 # A certified logarithmic-series value
@@ -126,6 +127,113 @@ theorem oneOverXOnOneTwo_epsilonDeltaContinuous :
     EpsilonDeltaContinuousOn
       (RatFun.oneOverXOnPositiveInterval 1 2 (by native_decide)) :=
   oneOverXOnOneTwo_intervalRegular.epsilonDeltaContinuous
+
+/-- The translated positive reciprocal kernel.  Its unit-interval integral is
+the constructive candidate for `∫_1^2 dx/x`, under the affine substitution
+`x = 1 + t`. -/
+def logTwoKernel (t : Rat) : Rat :=
+  1 / (1 + t)
+
+private theorem logTwoKernel_difference_mul_denominator
+    {s t : Rat} (hs0 : 0 <= s) (ht0 : 0 <= t) :
+    (logTwoKernel s - logTwoKernel t) * ((1 + s) * (1 + t)) = t - s := by
+  have hspos : 0 < 1 + s := by grind
+  have htpos : 0 < 1 + t := by grind
+  have hsne : 1 + s ≠ 0 := Rat.ne_of_gt hspos
+  have htne : 1 + t ≠ 0 := Rat.ne_of_gt htpos
+  have hscancel : (1 + s) * (1 + s)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hsne
+  have htcancel : (1 + t) * (1 + t)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ htne
+  unfold logTwoKernel
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- `t ↦ 1/(1+t)` is 1-Lipschitz on the unit interval.  The proof is a
+finite denominator calculation: the product `(1+s)(1+t)` is at least one. -/
+theorem logTwoKernel_lipschitz_on_unit
+    (s t : Rat)
+    (hs0 : 0 <= s) (_hs1 : s <= 1)
+    (ht0 : 0 <= t) (_ht1 : t <= 1) :
+    qabs (logTwoKernel s - logTwoKernel t) <= qabs (t - s) := by
+  have hspos : 0 < 1 + s := by grind
+  have htpos : 0 < 1 + t := by grind
+  have hprod : 1 <= (1 + s) * (1 + t) := by
+    calc
+      (1 : Rat) = 1 * 1 := by native_decide
+      _ <= (1 + s) * 1 := Rat.mul_le_mul_of_nonneg_right
+        (by grind) (by native_decide)
+      _ <= (1 + s) * (1 + t) := Rat.mul_le_mul_of_nonneg_left
+        (by grind) (Rat.le_of_lt hspos)
+  have hprod0 : 0 <= (1 + s) * (1 + t) :=
+    Rat.le_trans (by native_decide) hprod
+  have hqprod : 1 <= qabs ((1 + s) * (1 + t)) := by
+    rw [qabs_eq_self_of_nonneg hprod0]
+    exact hprod
+  have hmul := logTwoKernel_difference_mul_denominator hs0 ht0
+  calc
+    qabs (logTwoKernel s - logTwoKernel t) =
+        qabs (logTwoKernel s - logTwoKernel t) * 1 := by
+      rw [Rat.mul_one]
+    _ <= qabs (logTwoKernel s - logTwoKernel t) *
+          qabs ((1 + s) * (1 + t)) :=
+      Rat.mul_le_mul_of_nonneg_left hqprod (qabs_nonneg _)
+    _ = qabs ((logTwoKernel s - logTwoKernel t) *
+          ((1 + s) * (1 + t))) := by
+      exact (qabs_mul _ _).symm
+    _ = qabs (t - s) := by rw [hmul]
+
+/-- The finite rational Lipschitz certificate used by the unit-interval
+Darboux integral construction for the logarithmic kernel. -/
+def logTwoKernel_lipschitz : Integral.LipschitzOnUnit logTwoKernel 1 :=
+  ⟨by native_decide, fun s t hs0 hs1 ht0 ht1 => by
+    simpa using logTwoKernel_lipschitz_on_unit s t hs0 hs1 ht0 ht1⟩
+
+/-- The actual finite lower/upper Darboux box for the translated reciprocal
+kernel.  It evaluates only rational function values on a dyadic mesh. -/
+def logTwoDarbouxCompute (stage : Nat) : QInterval :=
+  IntegralIdentities.LipschitzDyadic.compute logTwoKernel 1 stage
+
+theorem logTwoDarbouxCompute_width (stage : Nat) :
+    (logTwoDarbouxCompute stage).width =
+      2 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  simpa [logTwoDarbouxCompute] using
+    (IntegralIdentities.LipschitzDyadic.compute_width
+      (f := logTwoKernel) 1 stage)
+
+/-- A certified raw real from literal midpoint-refined Lipschitz--Darboux
+rectangles for `t ↦ 1/(1+t)` on `[0,1]`.  Its stage-`n` box has exact width
+`2/2^n`.  No equality with the alternating logarithm series is claimed yet. -/
+def logTwoDarbouxRaw : RealRaw :=
+  IntegralIdentities.LipschitzDyadic.raw logTwoKernel 1
+
+theorem logTwoDarbouxRaw_valid : logTwoDarbouxRaw.Valid := by
+  simpa [logTwoDarbouxRaw] using
+    (IntegralIdentities.LipschitzDyadic.raw_valid logTwoKernel_lipschitz)
+
+/-- The domain-aware construction behind `logTwoDarbouxRaw`.  Unlike a bare
+existence interface, its boxes are the finite rectangles in
+`logTwoDarbouxCompute`. -/
+def logTwoDarbouxConstruction :
+    Integral.ConstructionFor (FunctionOnInterval.exactRat logTwoKernel 0 1) :=
+  IntegralIdentities.LipschitzDyadic.construction logTwoKernel 1
+    logTwoKernel_lipschitz
+
+/-- The constructive definite-integral raw for the translated reciprocal
+kernel.  The remaining logarithm bridge is the theorem that this raw agrees
+with `logTwoSeries`, not a hidden part of this definition. -/
+def logTwoReciprocalIntegral : RealRaw :=
+  Integral.integralFor (FunctionOnInterval.exactRat logTwoKernel 0 1)
+    logTwoDarbouxConstruction
+
+theorem logTwoReciprocalIntegral_valid : logTwoReciprocalIntegral.Valid :=
+  Integral.integralFor_valid (FunctionOnInterval.exactRat logTwoKernel 0 1)
+    logTwoDarbouxConstruction
+
+theorem logTwoReciprocalIntegral_compute_eq (stage : Nat) :
+    logTwoReciprocalIntegral.compute stage = logTwoDarbouxCompute stage :=
+  rfl
 
 /-- One paired update of the alternating harmonic enclosure for `log 2`.
 

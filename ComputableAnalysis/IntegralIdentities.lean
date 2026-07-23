@@ -9893,6 +9893,390 @@ structure AbelianTrigIntegralRepresentations where
   ellipticDifferential : AbelianIntegral.DifferentialRaw
   ellipticIntegral : AbelianIntegral.Raw
 
+/-!
+## Generic finite Lipschitz--Darboux integrals on the unit interval
+
+The earlier compact examples use the midpoint mesh from `ArctanGeometry`.
+The following constructor exposes the part of that argument which is not
+specific to a circle or a quartic density.  Given only a rational Lipschitz
+bound on `[0,1]`, it produces nested rational lower and upper rectangle sums.
+Thus it is an actual raw integral algorithm, rather than a postulated
+`ConstructionFor` certificate.
+-/
+
+namespace LipschitzDyadic
+
+/-- The lower Lipschitz rectangle on a unit-interval cell. -/
+private def lowerCell (f : Rat -> Rat) (L : Nat) (p r : Rat) : Rat :=
+  Integral.lipschitzLowerCell f (L : Rat) p r
+
+/-- The matching upper Lipschitz rectangle on a unit-interval cell. -/
+private def upperCell (f : Rat -> Rat) (L : Nat) (p r : Rat) : Rat :=
+  Integral.lipschitzUpperCell f (L : Rat) p r
+
+private def lowerSum (f : Rat -> Rat) (L : Nat) :
+    List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest => lowerCell f L p r + lowerSum f L rest
+
+private def upperSum (f : Rat -> Rat) (L : Nat) :
+    List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest => upperCell f L p r + upperSum f L rest
+
+/-- The finite dyadic Darboux box for a rational function with a certified
+Lipschitz constant.  Stage `n` uses the `2^n` midpoint-refined cells of the
+unit interval. -/
+def compute (f : Rat -> Rat) (L stage : Nat) : QInterval :=
+  let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  { lo := lowerSum f L cells, hi := upperSum f L cells }
+
+/-- The two rational values used for a Lipschitz cell bound every value of the
+kernel on that cell.  This is the local Darboux meaning of the rectangle
+algorithm, before any limiting or completed-integral interpretation. -/
+theorem cell_value_bounds {f : Rat -> Rat} {L : Nat} {p r x : Rat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1)
+    (hpx : p <= x) (hxr : x <= r) :
+    f p - (L : Rat) * (r - p) <= f x /\
+      f x <= f p + (L : Rat) * (r - p) := by
+  have hL0 := hlip.1
+  have hx0 : 0 <= x := Rat.le_trans hp0 hpx
+  have hx1 : x <= 1 := Rat.le_trans hxr hr1
+  have hxp0 : 0 <= x - p := by grind [Rat.sub_eq_add_neg]
+  have hxpabs : qabs (x - p) = x - p :=
+    qabs_eq_self_of_nonneg hxp0
+  have hxpr : x - p <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hscaled : (L : Rat) * (x - p) <= (L : Rat) * (r - p) :=
+    Rat.mul_le_mul_of_nonneg_left hxpr hL0
+  have hlip_px := hlip.2 p x hp0 (Rat.le_trans hpr hr1) hx0 hx1
+  have hforward : f p - f x <= (L : Rat) * (r - p) := by
+    calc
+      f p - f x <= qabs (f p - f x) := self_le_qabs _
+      _ <= (L : Rat) * qabs (x - p) := hlip_px
+      _ = (L : Rat) * (x - p) := by rw [hxpabs]
+      _ <= (L : Rat) * (r - p) := hscaled
+  have hreverse : f x - f p <= (L : Rat) * (r - p) := by
+    calc
+      f x - f p = -(f p - f x) := by
+        grind [Rat.sub_eq_add_neg]
+      _ <= qabs (-(f p - f x)) := self_le_qabs _
+      _ = qabs (f p - f x) := qabs_neg _
+      _ <= (L : Rat) * (r - p) :=
+        Rat.le_trans hlip_px (by simpa [hxpabs] using hscaled)
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+private theorem cells_refine {f : Rat -> Rat} {L : Nat} {p r : Rat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    let q := (p + r) / 2
+    lowerCell f L p r <= lowerCell f L p q + lowerCell f L q r /\
+    upperCell f L p q + upperCell f L q r <= upperCell f L p r := by
+  simpa [lowerCell, upperCell] using
+    (Integral.lipschitzCells_refine hlip hp0 hpr hr1)
+
+private theorem lowerSum_refineAux {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    lowerSum f L intervals <=
+      lowerSum f L
+        (ArctanGeometry.AreaLoopState.refineAux lo hi intervals).intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [ArctanGeometry.AreaLoopState.refineAux, lowerSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨hp0, hpr, hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hcell := cells_refine hlip hp0 hpr hr1
+      have htail := ih
+        (lo + ArctanGeometry.arctanAreaIncrement p q r)
+        (hi - ArctanGeometry.arctanAreaDecrement p q r) hrest
+      dsimp [q] at hcell
+      dsimp [q] at htail ⊢
+      simp [ArctanGeometry.AreaLoopState.refineAux, lowerSum] at htail ⊢
+      calc
+        lowerCell f L p r + lowerSum f L rest <=
+            (lowerCell f L p ((p + r) / 2) +
+              lowerCell f L ((p + r) / 2) r) + lowerSum f L rest :=
+          rat_add_le_add hcell.1 Rat.le_refl
+        _ <= (lowerCell f L p ((p + r) / 2) +
+              lowerCell f L ((p + r) / 2) r) +
+              lowerSum f L
+                (ArctanGeometry.AreaLoopState.refineAux
+                  (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                  (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                  rest).intervals := by
+          exact rat_add_le_add Rat.le_refl htail
+        _ = lowerCell f L p ((p + r) / 2) +
+              (lowerCell f L ((p + r) / 2) r +
+                lowerSum f L
+                  (ArctanGeometry.AreaLoopState.refineAux
+                    (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                    (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                    rest).intervals) := by
+          grind [Rat.add_assoc]
+
+private theorem upperSum_refineAux {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (lo hi : Rat) (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    upperSum f L
+        (ArctanGeometry.AreaLoopState.refineAux lo hi intervals).intervals <=
+      upperSum f L intervals := by
+  induction intervals generalizing lo hi with
+  | nil =>
+      simp [ArctanGeometry.AreaLoopState.refineAux, upperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨hp0, hpr, hr1, hrest⟩
+      let q : Rat := (p + r) / 2
+      have hcell := cells_refine hlip hp0 hpr hr1
+      have htail := ih
+        (lo + ArctanGeometry.arctanAreaIncrement p q r)
+        (hi - ArctanGeometry.arctanAreaDecrement p q r) hrest
+      dsimp [q] at hcell
+      dsimp [q] at htail ⊢
+      simp [ArctanGeometry.AreaLoopState.refineAux, upperSum] at htail ⊢
+      calc
+        upperCell f L p ((p + r) / 2) +
+            (upperCell f L ((p + r) / 2) r +
+              upperSum f L
+                (ArctanGeometry.AreaLoopState.refineAux
+                  (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                  (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                  rest).intervals) =
+            upperCell f L p ((p + r) / 2) +
+              upperCell f L ((p + r) / 2) r + upperSum f L
+                (ArctanGeometry.AreaLoopState.refineAux
+                  (lo + ArctanGeometry.arctanAreaIncrement p ((p + r) / 2) r)
+                  (hi - ArctanGeometry.arctanAreaDecrement p ((p + r) / 2) r)
+                  rest).intervals := by
+              grind [Rat.add_assoc]
+        _ <= upperCell f L p ((p + r) / 2) +
+              upperCell f L ((p + r) / 2) r + upperSum f L rest :=
+          rat_add_le_add Rat.le_refl htail
+        _ <= upperCell f L p r + upperSum f L rest :=
+          rat_add_le_add hcell.2 Rat.le_refl
+
+theorem compute_step_refines {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat)) (stage : Nat) :
+    (compute f L stage).lo <= (compute f L (stage + 1)).lo /\
+      (compute f L (stage + 1)).hi <= (compute f L stage).hi := by
+  unfold compute
+  rw [show stage + 1 = Nat.succ stage by omega,
+    ArctanGeometry.arctanAreaLoopState_succ]
+  dsimp
+  let state := ArctanGeometry.arctanAreaLoopState 1 stage
+  have hunit : ArctanGeometry.UnitIntervals state.intervals :=
+    ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := 1) (by native_decide) (by native_decide) stage
+  constructor
+  · exact lowerSum_refineAux hlip state.lo state.hi state.intervals hunit
+  · exact upperSum_refineAux hlip state.lo state.hi state.intervals hunit
+
+private theorem lowerCell_le_upperCell {f : Rat -> Rat} {L : Nat}
+    {p r : Rat} (hpr : p <= r) :
+    lowerCell f L p r <= upperCell f L p r := by
+  have hwidth : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hinner :
+      f p - (L : Rat) * (r - p) <= f p + (L : Rat) * (r - p) := by
+    have hL0 : 0 <= (L : Rat) := by
+      exact_mod_cast Nat.zero_le L
+    have hterm : 0 <= (L : Rat) * (r - p) :=
+      Rat.mul_nonneg hL0 hwidth
+    grind [Rat.sub_eq_add_neg]
+  unfold lowerCell upperCell Integral.lipschitzLowerCell
+    Integral.lipschitzUpperCell
+  exact Rat.mul_le_mul_of_nonneg_left hinner hwidth
+
+private theorem lowerSum_le_upperSum {f : Rat -> Rat} {L : Nat}
+    (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    lowerSum f L intervals <= upperSum f L intervals := by
+  induction intervals with
+  | nil => simp [lowerSum, upperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨_hp0, hpr, _hr1, hrest⟩
+      simp [lowerSum, upperSum]
+      exact rat_add_le_add (lowerCell_le_upperCell hpr) (ih hrest)
+
+private theorem cell_width {f : Rat -> Rat} (L : Nat) (p r : Rat) :
+    upperCell f L p r - lowerCell f L p r =
+      (2 * (L : Rat)) * ((r - p) * (r - p)) := by
+  change
+    (r - p) * (f p + (L : Rat) * (r - p)) -
+        (r - p) * (f p - (L : Rat) * (r - p)) =
+      (2 * (L : Rat)) * ((r - p) * (r - p))
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem sum_width {f : Rat -> Rat} (L : Nat)
+    (intervals : List (Rat × Rat)) :
+    upperSum f L intervals - lowerSum f L intervals =
+      (2 * (L : Rat)) * ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [lowerSum, upperSum, ArctanGeometry.intervalSquareSum]
+      native_decide
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      have hcell := cell_width (f := f) L p r
+      simp [lowerSum, upperSum, ArctanGeometry.intervalSquareSum]
+      calc
+        upperCell f L p r + upperSum f L rest -
+            (lowerCell f L p r + lowerSum f L rest) =
+            (upperCell f L p r - lowerCell f L p r) +
+              (upperSum f L rest - lowerSum f L rest) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+        _ = (2 * (L : Rat)) * ((r - p) * (r - p)) +
+              (2 * (L : Rat)) * ArctanGeometry.intervalSquareSum rest := by
+              rw [hcell, ih]
+        _ = (2 * (L : Rat)) * ((r - p) * (r - p) +
+              ArctanGeometry.intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+theorem compute_ordered {f : Rat -> Rat} {L : Nat} (stage : Nat) :
+    0 <= (compute f L stage).width := by
+  unfold compute QInterval.width
+  dsimp
+  let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  have hunit : ArctanGeometry.UnitIntervals cells :=
+    ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := 1) (by native_decide) (by native_decide) stage
+  have hsum := lowerSum_le_upperSum (f := f) (L := L) cells hunit
+  grind [Rat.sub_eq_add_neg]
+
+theorem compute_width {f : Rat -> Rat} (L stage : Nat) :
+    (compute f L stage).width =
+      (2 * (L : Rat)) * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  unfold compute QInterval.width
+  dsimp
+  rw [sum_width, ArctanGeometry.arctanAreaLoopState_one_squareSum]
+
+theorem compute_nested {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (n m : Nat) (hnm : n <= m) :
+    (compute f L n).lo <= (compute f L m).lo /\
+      (compute f L m).lo <= (compute f L m).hi /\
+      (compute f L m).hi <= (compute f L n).hi := by
+  induction hnm with
+  | refl =>
+      have hordered := compute_ordered (f := f) (L := L) n
+      unfold QInterval.width at hordered
+      have hmid : (compute f L n).lo <= (compute f L n).hi := by
+        grind [Rat.sub_eq_add_neg]
+      exact ⟨Rat.le_refl, hmid, Rat.le_refl⟩
+  | step hnm ih =>
+      rename_i k
+      have hstep := compute_step_refines hlip k
+      have hordered := compute_ordered (f := f) (L := L) (k + 1)
+      unfold QInterval.width at hordered
+      have hmid : (compute f L (k + 1)).lo <= (compute f L (k + 1)).hi := by
+        grind [Rat.sub_eq_add_neg]
+      exact ⟨Rat.le_trans ih.1 hstep.1, hmid,
+        Rat.le_trans hstep.2 ih.2.2⟩
+
+private theorem succ_le_two_pow (n : Nat) : n + 1 <= 2 ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 2 * (n + 1) := by omega
+        _ <= 2 * 2 ^ n := Nat.mul_le_mul_left 2 ih
+        _ = 2 ^ (n + 1) := by rw [Nat.pow_succ]; omega
+
+theorem compute_width_le_nat_over_succ {f : Rat -> Rat} (L stage : Nat) :
+    (compute f L stage).width <=
+      ((2 * L : Nat) : Rat) / (((stage + 1 : Nat) : Rat)) := by
+  rw [compute_width]
+  have hpow : stage + 1 <= 2 ^ stage := succ_le_two_pow stage
+  have hinv :
+      1 / (((2 ^ stage : Nat) : Rat)) <=
+        1 / (((stage + 1 : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone (Nat.succ_pos stage)
+      (Nat.pow_pos (by omega : 0 < 2)) hpow
+  have hL0 : 0 <= (L : Rat) := by
+    exact_mod_cast Nat.zero_le L
+  have hscale : 0 <= 2 * (L : Rat) :=
+    Rat.mul_nonneg (by native_decide) hL0
+  have hcast : ((2 * L : Nat) : Rat) = 2 * (L : Rat) := by
+    exact_mod_cast (by rfl : 2 * L = 2 * L)
+  calc
+    (2 * (L : Rat)) * (1 / (((2 ^ stage : Nat) : Rat))) <=
+        (2 * (L : Rat)) * (1 / (((stage + 1 : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left hinv hscale
+    _ = (2 * (L : Rat)) / (((stage + 1 : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc]
+    _ = ((2 * L : Nat) : Rat) / (((stage + 1 : Nat) : Rat)) := by
+      rw [hcast]
+
+private theorem widthsShrink_of_natOverSuccBound
+    {compute : Nat -> QInterval} {C : Nat}
+    (hbound : forall n,
+      (compute n).width <= (C : Rat) / (((n + 1 : Nat) : Rat))) :
+    RealRaw.WidthsShrinkToZero compute := by
+  intro eps
+  refine ⟨C * (eps.val.den + 1), ?_⟩
+  intro n hn
+  have hmain :
+      (C : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (C : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega : C * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hABpos
+  exact Rat.le_trans (hbound n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
+theorem compute_widthsShrink {f : Rat -> Rat} (L : Nat) :
+    RealRaw.WidthsShrinkToZero (compute f L) :=
+  widthsShrink_of_natOverSuccBound (compute_width_le_nat_over_succ L)
+
+/-- The raw real produced by finite unit-interval Lipschitz--Darboux boxes.
+At stage `n` its width is exactly `2L / 2^n`. -/
+def raw (f : Rat -> Rat) (L : Nat) : RealRaw where
+  compute := compute f L
+
+theorem raw_valid {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat)) :
+    (raw f L).Valid := by
+  change RealRaw.ValidCompute (compute f L)
+  exact ⟨compute_ordered, compute_nested hlip, compute_widthsShrink L⟩
+
+/-- Package the finite Lipschitz--Darboux algorithm as a construction for the
+exact rational kernel that its rectangles evaluate. -/
+def construction (f : Rat -> Rat) (L : Nat)
+    (hlip : Integral.LipschitzOnUnit f (L : Rat)) :
+    Integral.ConstructionFor (FunctionOnInterval.exactRat f 0 1) where
+  compute := compute f L
+  certificate := raw_valid hlip
+
+end LipschitzDyadic
+
 end IntegralIdentities
 
 end ComputableAnalysis
