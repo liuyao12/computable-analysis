@@ -183,7 +183,13 @@ additivity.
 \lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative}
 \lean{ComputableAnalysis.quadraticVariationSum_neg_neg}
 \lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonpositive}
+\lean{ComputableAnalysis.quadraticVariationSum_eq_nat_mul_of_constant_steps}
+\lean{ComputableAnalysis.unitMeshPath}
+\lean{ComputableAnalysis.unitMeshPath_quadraticVariation}
+\lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
 \lean{ComputableAnalysis.mesh_refine_mul_right}
+\lean{ComputableAnalysis.dyadic_leftPoint_refines}
+\lean{ComputableAnalysis.dyadic_mesh_refines}
 \lean{ComputableAnalysis.RationalPartition.uniform}
 \lean{ComputableAnalysis.RationalPartition.uniform_refines_right}
 \lean{ComputableAnalysis.RationalPartition.uniform_refines_left}
@@ -230,6 +236,12 @@ It also proves the coarser endpoint-variation bound
 Negating both paths preserves the corner sum, giving the corresponding bound
 for two decreasing pieces.  Thus the needed increasing/decreasing split is
 explicit finite rational data rather than a hidden global variation theorem.
+There is already one complete mesh-vanishing schedule: for the unit mesh
+\(u_i=v_i=i/n\), the corner sum is exactly \(1/n\).  Given a positive rational
+\(\varepsilon\), the fully explicit choice
+\(n=\varepsilon.\mathrm{den}+1\) makes that rational corner sum at most
+\(\varepsilon\).  This illustrates the intended limit discipline without
+asserting the general product theorem.
 The first common-refinement interface is now checked for uniform rational
 grids: the \(mn\)-piece grid contains the \(m\)-piece grid at indices
 \(i\mapsto in\), and contains the \(n\)-piece grid at indices
@@ -237,7 +249,8 @@ grids: the \(mn\)-piece grid contains the \(m\)-piece grid at indices
 by \(n\).  Lean packages the two index maps as a
 \code{CommonRefinement} certificate; refinement maps have checked identity
 and composition operations.  This is enough for the dyadic meshes used by the
-present rectangle algorithms; synchronizing arbitrary finite rational
+present rectangle algorithms: stage \(n+1\) keeps the old point \(k\) at
+\(2k\) and halves the mesh exactly.  Synchronizing arbitrary finite rational
 breakpoint lists remains the later general piecewise-refinement step.
 For the later integral theorem, functions are supplied on explicit increasing
 or decreasing pieces and the two decompositions are replaced by a common

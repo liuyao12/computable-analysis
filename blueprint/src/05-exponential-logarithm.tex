@@ -107,8 +107,14 @@ quotients at zero.  Lean already proves the formal coefficient identity
 power-series tail bounds into the corresponding derivative certificate, whose
 finite-difference and derivative boxes are within the requested tolerance
 rather than required to overlap exactly, and then establish the displayed
-uniqueness statement by finite rational
-estimates.
+uniqueness statement by finite rational estimates.  More generally, this is
+the scalar case of an effective Picard--Lindelof theorem: a supplied rational
+Lipschitz constant, bounded interval box, and interval-regularity moduli
+should construct a solution from Picard iterates with factorial tail boxes.
+For uniqueness, choose rational subintervals short enough that the induced
+contraction factor is below one, and propagate equality across a finite
+subdivision.  Thus neither the existence construction nor the uniqueness
+argument needs completeness of an ambient real-number type.
 \end{theorem}
 
 \section{Three definitions of \texorpdfstring{$e$}{e}}

@@ -79,6 +79,25 @@ theorem mesh_refine_mul_right {a b : Rat} {m n : Nat}
   grind [Rat.div_def, Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm,
     Rat.mul_inv_cancel]
 
+/-- Successive dyadic meshes preserve every previous grid point.  The old
+index `k` is the new index `2*k`; this is the exact finite compatibility
+behind stagewise dyadic Riemann constructions. -/
+theorem dyadic_leftPoint_refines (a b : Rat) (n k : Nat) :
+    leftPoint a b (2 ^ (n + 1)) (2 * k) =
+      leftPoint a b (2 ^ n) k := by
+  have hpow : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+  have htwo : 0 < 2 := by omega
+  simpa [Nat.pow_succ, Nat.mul_comm] using
+    leftPoint_refine_mul_right (a := a) (b := b) (i := k) hpow htwo
+
+/-- The dyadic mesh width is halved at every successor stage. -/
+theorem dyadic_mesh_refines (a b : Rat) (n : Nat) :
+    mesh a b (2 ^ (n + 1)) = mesh a b (2 ^ n) / 2 := by
+  have hpow : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+  have htwo : 0 < 2 := by omega
+  simpa [Nat.pow_succ] using mesh_refine_mul_right
+    (a := a) (b := b) hpow htwo
+
 def riemannLeftExact (g : Rat -> Rat) (a b : Rat) (n : Nat) : Rat :=
   let h := mesh a b n
   (List.range n).foldl (fun acc k => acc + h * g (leftPoint a b n k)) 0
@@ -337,6 +356,55 @@ theorem quadraticVariationSum_le_endpointVariationProduct_of_step_nonpositive
     _ = (u 0 - u n) * (v 0 - v n) := by
       grind [Rat.neg_sub, Rat.neg_mul, Rat.mul_neg, Rat.neg_neg,
         Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
+/-- If the two paths have constant rational increments, their corner sum is
+exactly the number of cells times one corner rectangle.  This is the finite
+calculation behind the elementary mesh-vanishing schedule below. -/
+theorem quadraticVariationSum_eq_nat_mul_of_constant_steps
+    (u v : Nat -> Rat) (du dv : Rat)
+    (hu : forall i, u (i + 1) - u i = du)
+    (hv : forall i, v (i + 1) - v i = dv)
+    (n : Nat) :
+    quadraticVariationSum u v n = (n : Rat) * (du * dv) := by
+  induction n with
+  | zero =>
+      grind [quadraticVariationSum]
+  | succ n ih =>
+      rw [quadraticVariationSum, hu, hv, ih, Rat.natCast_add]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+
+/-- The rational identity path on an `n`-cell unit mesh.  It is a concrete
+test case for the geometric integration-by-parts correction. -/
+def unitMeshPath (n k : Nat) : Rat := (k : Rat) / (n : Rat)
+
+/-- Every increment of the unit mesh path is exactly `1/n`. -/
+theorem unitMeshPath_step (n k : Nat) :
+    unitMeshPath n (k + 1) - unitMeshPath n k = 1 / (n : Rat) := by
+  unfold unitMeshPath
+  rw [Rat.natCast_add, Rat.div_def, Rat.div_def]
+  grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- On the positive `n`-cell unit mesh the corner correction is exactly
+`1/n`.  This is an explicit rational equality, not a completeness-based
+limit assertion. -/
+theorem unitMeshPath_quadraticVariation {n : Nat} (hn : 0 < n) :
+    quadraticVariationSum (unitMeshPath n) (unitMeshPath n) n =
+      1 / (n : Rat) := by
+  rw [quadraticVariationSum_eq_nat_mul_of_constant_steps
+    (unitMeshPath n) (unitMeshPath n) (1 / (n : Rat)) (1 / (n : Rat))
+    (unitMeshPath_step n) (unitMeshPath_step n)]
+  have hnat : (n : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- A fully explicit epsilon schedule for the unit-mesh corner correction.
+Choosing `n = eps.den + 1` makes the rational correction at most `eps`. -/
+theorem unitMeshPath_quadraticVariation_le_epsilon (eps : QPos) :
+    quadraticVariationSum (unitMeshPath (eps.val.den + 1))
+      (unitMeshPath (eps.val.den + 1)) (eps.val.den + 1) <= eps.val := by
+  rw [unitMeshPath_quadraticVariation (Nat.succ_pos _)]
+  exact one_div_den_succ_le_of_pos eps.property
 
 private theorem riemannLeftInterval_point_fold_eq
     (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)

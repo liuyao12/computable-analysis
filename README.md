@@ -100,7 +100,11 @@ grids, and its mesh is the old width divided by the positive factor.  The two
 embeddings are packaged as a checked `CommonRefinement` certificate.  General
 piecewise synchronization still remains before this can count as the sixth
 bridge; its staged refinements will compose through the checked
-`RationalPartition.Refines` interface.
+`RationalPartition.Refines` interface.  The dyadic stages used by existing
+Riemann algorithms now have direct point-preservation and mesh-halving
+theorems as well.  The finite corner correction now has a checked rational
+vanishing schedule on the unit mesh: it is exactly `1/n`, hence at most a
+requested positive epsilon at `n = epsilon.den + 1`.
 
 The direct chord-path route now also has a checked
 `piCircumferenceStabilized` representative. It evaluates only a finite prefix

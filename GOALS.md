@@ -169,7 +169,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `CommonRefinement` package the two endpoint-preserving index embeddings as
   finite data; `uniformCommonRefinement` constructs the certified uniform
   case, and `Refines.refl`/`Refines.trans` make staged rational refinements
-  compositional.  For the integral theorem, extend this interface to
+  compositional.  The literal dyadic grids used by the current Riemann
+  constructors inherit this interface directly: `dyadic_leftPoint_refines`
+  keeps old index `k` at `2*k`, and `dyadic_mesh_refines` halves its mesh.
+  The model unit path has a fully checked vanishing schedule:
+  `unitMeshPath_quadraticVariation` is exactly `1/n`, and choosing
+  `eps.den + 1` makes it at most any positive rational epsilon.  For the
+  integral theorem, extend this interface to
   increasing/decreasing pieces with arbitrary rational breakpoints, then
   discharge the maximum-increment bound cell by cell.  Do not invoke a
   nonconstructive global variation or Jordan decomposition.
@@ -535,7 +541,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   for `f' = f` with `f(0) = 1`, then prove the equivalent unit-slope
   characterization of the base at zero.  See
   `SolvesSelfDerivativeOnInterval` and `SelfDerivativeInitialValueUnique` in
-  `ComputableAnalysis/Differential.lean`.
+  `ComputableAnalysis/Differential.lean`.  The reusable theorem should be an
+  effective Picard--Lindelof theorem: supplied rational interval-regularity,
+  a Lipschitz constant, a bounded box, and explicit moduli produce a valid
+  raw solution together with uniqueness.  Build it from finite Picard
+  iterates and factorial tail boxes, then prove uniqueness by rational
+  short-interval contraction and a finite subdivision.  This is constructive
+  existence-and-uniqueness data, not an appeal to real-number completeness.
 
 ## Linear Differential Equations
 
