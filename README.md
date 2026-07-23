@@ -114,6 +114,9 @@ representation itself is now checked, including the concrete domain-aware
 at every stage it is exactly the two-corner box `[x * A.lo, x * A.hi]`.
 The exact rational product-difference identities, including the explicit
 `h * D_h x * D_h(arctan)` corner remainder, are now checked as well.
+Their three-term absolute-error estimate is checked too: the two component
+derivative errors are multiplied by the opposite point value, and the final
+budget is exactly `h * |D_h x| * |D_h(arctan)|`.
 The remaining product derivative and FTC comparison are deliberately still
 separate: they must turn those identities into interval enclosures with
 continuity and remainder budgets.

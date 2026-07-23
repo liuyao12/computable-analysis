@@ -248,7 +248,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor
   at the right endpoint, while `..._corner` exposes the explicit
-  `h * D_h(u) * D_h(v)` remainder.  The remaining product certificate must
+  `h * D_h(u) * D_h(v)` remainder.  The checked theorem
+  `..._error_le` also gives the exact three-term absolute-error allocation:
+  the two component derivative errors weighted by the opposite point value
+  plus that corner remainder.  The remaining product certificate must
   bound that remainder and the endpoint replacement through interval
   continuity data; no limit or completeness principle is being assumed.
 - A future pi coverage bridge should exercise this theorem rather than merely

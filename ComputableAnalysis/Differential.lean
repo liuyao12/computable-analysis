@@ -80,6 +80,11 @@ theorem square_derivative_effective :
     Nonempty (EffectiveDerivativeExact square doubleId) :=
   ⟨squareDerivative⟩
 
+/-- The exact rational difference quotient used by the finite product
+identities below. -/
+def differenceQuotient (f : Rat -> Rat) (x h : Rat) : Rat :=
+  (f (x + h) - f x) / h
+
 /-- The exact finite-difference product decomposition with the second factor
 evaluated at the right endpoint.  This is the algebraic core of the product
 rule before any continuity or limiting certificate is invoked. -/
@@ -107,6 +112,50 @@ theorem product_differenceQuotient_corner
   have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The finite product-rule error is bounded by the two supplied
+difference-quotient errors and one explicit corner remainder.  This is a
+rational inequality, before it is lifted to interval enclosures or any
+continuity certificate. -/
+theorem product_differenceQuotient_error_le
+    (u du v dv : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) (h0 : 0 <= h) :
+    qabs (differenceQuotient (fun z => u z * v z) x h -
+      (u x * dv x + v x * du x)) <=
+      qabs (u x) * qabs (differenceQuotient v x h - dv x) +
+        qabs (v x) * qabs (differenceQuotient u x h - du x) +
+          h * qabs (differenceQuotient u x h) *
+            qabs (differenceQuotient v x h) := by
+  have hdecomp :
+      differenceQuotient (fun z => u z * v z) x h -
+          (u x * dv x + v x * du x) =
+        u x * (differenceQuotient v x h - dv x) +
+          v x * (differenceQuotient u x h - du x) +
+            h * differenceQuotient u x h * differenceQuotient v x h := by
+    unfold differenceQuotient
+    rw [product_differenceQuotient_corner u v x h hh]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  rw [hdecomp]
+  calc
+    qabs
+        (u x * (differenceQuotient v x h - dv x) +
+          v x * (differenceQuotient u x h - du x) +
+            h * differenceQuotient u x h * differenceQuotient v x h) <=
+        qabs
+          (u x * (differenceQuotient v x h - dv x) +
+            v x * (differenceQuotient u x h - du x)) +
+          qabs (h * differenceQuotient u x h * differenceQuotient v x h) :=
+      qabs_add_le _ _
+    _ <= (qabs (u x * (differenceQuotient v x h - dv x)) +
+          qabs (v x * (differenceQuotient u x h - du x))) +
+          qabs (h * differenceQuotient u x h * differenceQuotient v x h) :=
+      (Rat.add_le_add_right).2 (qabs_add_le _ _)
+    _ = qabs (u x) * qabs (differenceQuotient v x h - dv x) +
+          qabs (v x) * qabs (differenceQuotient u x h - du x) +
+            h * qabs (differenceQuotient u x h) *
+              qabs (differenceQuotient v x h) := by
+      rw [qabs_mul, qabs_mul, qabs_mul, qabs_mul,
+        qabs_eq_self_of_nonneg h0]
 end ExactFunction
 
 namespace QInterval

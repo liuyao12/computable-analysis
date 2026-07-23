@@ -366,6 +366,22 @@ continuity budget to replace \(V(x+h)\) by \(V(x)\), and a bound making the
 displayed \(h\)-remainder smaller than its allocated error.  This is the
 precise missing bridge for \(x\arctan x\); no product rule is inferred from
 the product evaluator alone.
+
+More specifically, if \(U'\) and \(V'\) are the proposed derivatives and
+\(h\ge0\), the finite identity gives the rational error allocation
+\[
+\begin{aligned}
+ \left|D_h(UV)(x)-\bigl(U(x)V'(x)+V(x)U'(x)\bigr)\right|
+ &\leq |U(x)|\,|D_hV(x)-V'(x)| \\
+ &\quad+|V(x)|\,|D_hU(x)-U'(x)|
+   +h\,|D_hU(x)|\,|D_hV(x)|.
+\end{aligned}
+\]
+The three summands are respectively the two supplied derivative-error
+budgets and the corner-remainder budget.  This finite inequality is the
+formal hand-off from the product algebra to the interval-continuity
+certificate; it does not assert that any particular elementary function has
+already met those budgets.
 \end{theorem}
 
 \section{A constructive integration-by-parts certificate}
