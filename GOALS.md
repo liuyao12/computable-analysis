@@ -197,7 +197,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   rational path.  Uniform grids instantiate the cap by their literal mesh,
   while unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference is
   the exact one-over-n endpoint-variation bound needed for sampled
-  x-times-arctangent.  The general finite merge
+  x-times-arctangent.  The arctangent subcertificate is deliberately split
+  in two.  Lean now proves the same-stage box order
+  lo(arctan(x), n) <= hi(arctan(y), n) for 0 <= x <= y <= 1 by extending
+  the finite rectangle cover of [0,x] with [x,y] and comparing lower and
+  upper sums on [0,y]; it is packaged as a weak nondecreasing
+  FunctionOnInterval witness.  The remaining step is to construct a
+  compatible nondecreasing rational sampling path, charging its box widths
+  to the integration-by-parts budget.  The checked endpoint-order fact is not
+  the kernel's monotonicity in its integration variable, and it does not by
+  itself permit arbitrary box endpoints to be treated as an exact
+  nondecreasing path.  The general finite merge
   is now checked: `commonRefinementOfPartitions` inserts the right
   `breakpointList` into the left partition and recovers the second ordered
   embedding with a bounded `firstOccurrence` scan.  It is deterministic and

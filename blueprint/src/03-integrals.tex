@@ -409,9 +409,55 @@ piecewise-continuous functions should be separate theorems with their own
 finite regularity certificates.
 \end{theorem}
 
+\begin{definition}[Finite arctangent endpoint-order certificate]
+\label{def:arctangent-sampled-monotonicity}
+\uses{thm:finite-geometric-integration-by-parts}
+The integration-by-parts route needs an order fact about the \emph{input} of
+arctangent which is distinct from the already used fact that its reciprocal
+kernel decreases as the integration variable increases.  For the rectangle
+presentation \(A(x)\) of arctangent on the unit branch, the first finite
+certificate is
+\[
+  0\leq x\leq y\leq1
+  \quad\Longrightarrow\quad
+  \operatorname{lo}(A(x,n))\leq\operatorname{hi}(A(y,n))
+  \qquad\text{for every stage }n.
+\]
+This is the box-valued, same-stage form of the statement that \(A\) is
+nondecreasing, and is the right statement for a rational-input
+\code{FunctionOnInterval}.  It should not be obtained by first assuming the
+derivative theorem and then appealing to a classical mean-value theorem.
+The endpoint-order portion is now a checked theorem for the rectangle
+algorithm and is packaged as a weak nondecreasing
+\code{FunctionOnInterval} witness.
+
+For the geometric rectangle algorithm the proof has a literal finite
+covering shape.  The stage-\(n\) cells for \([0,x]\) cover that interval;
+append the one rational cell \([x,y]\).  Positivity of
+\(1/(1+t^2)\) says that this extension cannot decrease the lower rectangle
+sum.  The extended cells and the stage-\(n\) cells for \([0,y]\) are two
+finite covers of the same interval, so the lower sum of the former is at
+most the upper sum of the latter.  Their composite is precisely the displayed
+box inequality.  Thus the certificate needs only rational covers and
+nonnegative rectangle areas, not a completed real line or a geometric
+sector-limit argument.
+
+This endpoint-order lemma is necessary but is intentionally not confused
+with the entire corner-error input.  For a particular common partition
+\(x_0<\cdots<x_m\), the integration-by-parts construction must additionally
+produce compatible rational sample boxes whose widths are charged to the
+global error budget, and whose selected comparison path is nondecreasing.
+That \emph{monotone sampling lift} is what permits
+\(\sum_i\Delta x_i\,\Delta v_i\) to use the finite corner bound.  Merely
+knowing that lower and upper endpoints at adjacent samples overlap in the
+correct direction does not license treating one arbitrary choice of endpoints
+as an exactly nondecreasing rational path.  Keeping these two certificates
+separate makes the remaining formalization target precise.
+\end{definition}
+
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
-\uses{thm:integration-by-parts-certificate,thm:log-two-series-reciprocal-integral}
+\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,thm:log-two-series-reciprocal-integral}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
 certificate gives
@@ -420,12 +466,14 @@ certificate gives
 \]
 the corner correction has the particularly transparent mesh bound
 \[
- \sum_{I\in P}\Delta_Ix\,\Delta_I\arctan
+\sum_{I\in P}\Delta_Ix\,\Delta_I\arctan
  \leq \mesh(P)\bigl(\arctan(1)-\arctan(0)\bigr).
 \]
-The geometric unit-branch bounds will supply a rational upper bound for the
-last factor, so this is an executable rather than asymptotic estimate.  The
-resulting finite certificates give
+The endpoint-order and monotone-sampling certificates above turn this into
+the required finite rational corner estimate; the geometric unit-branch
+bounds supply a rational upper bound for the last factor.  It is therefore an
+executable budget rather than an asymptotic assertion.  The resulting finite
+certificates give
 \[
  \int_0^1\arctan(x)\,\dd x
  \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.

@@ -1895,6 +1895,40 @@ theorem arctanIntegralRectangleFunctionRaw_valid :
   simpa [arctanIntegralRectangleFunctionRaw] using
     arctanIntegralRectangleFor_valid x hx.1 hx.2
 
+/-- The rectangle arctangent as a domain-aware function on the unit slope
+interval.  This keeps upper-endpoint monotonicity separate from the
+nonincreasing property of its integration kernel. -/
+def arctanIntegralRectangleOnUnit : FunctionOnInterval where
+  raw := arctanIntegralRectangleFunctionRaw
+  lower := 0
+  upper := 1
+  defined_on := by
+    intro x hx
+    exact hx
+  valid_on := by
+    intro x hx
+    simpa [arctanIntegralRectangleFunctionRaw] using
+      arctanIntegralRectangleFor_valid x hx.1 hx.2
+
+/-- The finite rectangle arctangent is nondecreasing in its upper endpoint on
+the rational unit branch. -/
+theorem arctanIntegralRectangleOnUnit_nondecreasing :
+    NondecreasingOnInterval arctanIntegralRectangleOnUnit := by
+  intro x y hx hy hxy n
+  change
+    ((arctanIntegralRectangleFor x hx.1 hx.2).compute n).lo <=
+      ((arctanIntegralRectangleFor y hy.1 hy.2).compute n).hi
+  rw [arctanIntegralRectangleFor_compute_eq,
+    arctanIntegralRectangleFor_compute_eq]
+  exact ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
+    hx.1 hxy n
+
+/-- The packaged weak-monotonicity witness for the rectangle arctangent. -/
+def arctanIntegralRectangleOnUnit_monotone :
+    MonotoneOnInterval arctanIntegralRectangleOnUnit :=
+  MonotoneOnInterval.ofNondecreasing
+    arctanIntegralRectangleOnUnit_nondecreasing
+
 theorem arctanIntegralRectangleFunctionAgreement :
     Elementary.Arctan.Equivalent
       arctanIntegralRectangleRepresentation

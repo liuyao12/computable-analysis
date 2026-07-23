@@ -123,6 +123,13 @@ composable sequence of those insertions.  The general merge is now checked:
 the other and uses a bounded `firstOccurrence` scan to reconstruct the second
 monotone index embedding.  It deliberately keeps duplicate breakpoints, so it
 is a deterministic certified merge rather than a minimal-union optimization.
+The finite upper-endpoint order certificate for rectangle arctangent is now
+checked as well: if \(0\le x\le y\le1\), the lower stage box at \(x\) is at
+most the upper stage box at \(y\).  It is a separate fact from monotonicity
+of the reciprocal kernel and is packaged as a weak nondecreasing
+interval-function witness.  The still-open next step is a compatible
+nondecreasing rational sampling path for the corner-error estimate; arbitrary
+choices of adjacent box endpoints are not silently treated as such a path.
 `Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw
 presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
 certified `O(1/n)` rate.  Independently,

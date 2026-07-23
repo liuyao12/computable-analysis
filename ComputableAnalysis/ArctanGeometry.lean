@@ -3148,6 +3148,38 @@ same midpoint partition schedule as `arctanGeom x`. -/
 def arctanIntegralRectangleCompute (x : Rat) (n : Nat) : QInterval :=
   integralSumInterval (arctanAreaLoopState x n).intervals
 
+/-- Finite monotonicity in the upper endpoint of the rectangle arctangent.
+The proof appends the rational tail from x to y to the cover from 0 to x and
+then compares its lower sum with the upper sum from the stage cover from 0 to
+y. -/
+theorem arctanIntegralRectangleCompute_lower_le_upper_of_le
+    {x y : Rat} (hx0 : 0 <= x) (hxy : x <= y) (n : Nat) :
+    (arctanIntegralRectangleCompute x n).lo <=
+      (arctanIntegralRectangleCompute y n).hi := by
+  let left : List (Rat × Rat) := (arctanAreaLoopState x n).intervals
+  let right : List (Rat × Rat) := (arctanAreaLoopState y n).intervals
+  have hleft : CoversInterval 0 x left := by
+    dsimp [left]
+    exact arctanAreaLoopState_intervals_covers hx0 n
+  have hy0 : 0 <= y := Rat.le_trans hx0 hxy
+  have hright : CoversInterval 0 y right := by
+    dsimp [right]
+    exact arctanAreaLoopState_intervals_covers hy0 n
+  have htail : NonnegativeIntervals [(x, y)] := by
+    simp [NonnegativeIntervals, hx0, hxy]
+  have hprefix :
+      integralLowerSum left <= integralLowerSum (left ++ [(x, y)]) :=
+    integralLowerSum_le_append_of_nonnegative left [(x, y)] htail
+  have hcover : CoversInterval 0 y (left ++ [(x, y)]) :=
+    CoversInterval.extend_right hleft hxy
+  have hcompare :
+      integralLowerSum (left ++ [(x, y)]) <= integralUpperSum right :=
+    integralLowerSum_le_integralUpperSum_of_covers
+      (a := 0) (b := y) (by native_decide) (left ++ [(x, y)]) right
+      hcover hright
+  change integralLowerSum left <= integralUpperSum right
+  exact Rat.le_trans hprefix hcompare
+
 /-- At every midpoint-refinement stage, the endpointwise chart image of a
 unit source partition has a target rectangle bracket containing the source
 bracket. -/
