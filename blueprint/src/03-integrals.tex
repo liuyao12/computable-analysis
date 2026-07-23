@@ -315,6 +315,115 @@ derivative rule, its FTC comparison, and the logarithm endpoint identity are
 still required before the resulting pi formula is claimed.
 \end{theorem}
 
+\section{A constructive integration-by-parts certificate}
+
+The finite rectangle theorem above is not merely motivational.  It fixes the
+interface for the first function-level integration-by-parts result, and makes
+clear which parts of the usual textbook proof must become finite certificates.
+This avoids accidentally obtaining the theorem from an unintroduced general
+FTC, a completeness argument, or an unbounded-variation assertion.
+
+\begin{definition}[Integration-by-parts certificate on rational pieces]
+\label{def:integration-by-parts-certificate}
+\uses{thm:finite-geometric-integration-by-parts,def:definite-integral-identity}
+Let \(a=b_0<\cdots<b_r=b\) be a supplied finite list of rational
+breakpoints.  On every piece \([b_j,b_{j+1}]\), an
+integration-by-parts certificate for raw functions \(U,V\) consists of the
+following explicit data.
+\begin{enumerate}
+  \item Certified integral constructions for the two ordinary integrands
+  \(U V'\) and \(U' V\), together with endpoint-difference certificates for
+  \(U\) and \(V\).  Here \(U'\) and \(V'\) name supplied derivative algorithms;
+  they are not values chosen by a hidden limiting operation.
+  \item A valid product raw function for \(UV\), with its rational bounds on
+  the piece.  The first implementation may use the already checked positive
+  bounded product interface; signed products are obtained later by an explicit
+  finite sign split, not by changing the meaning of multiplication.
+  \item A declared direction for each factor on the piece (increasing or
+  decreasing), a common rational-refinement procedure, and rational moduli
+  \(\omega_U,\omega_V\) such that every refined cell of mesh at most \(h\)
+  has first increments bounded by the corresponding modulus.  The finite
+  rectangle correction is then bounded using the signed endpoint variations
+  of that particular piece.
+  \item A computable schedule which refines until the sum of the product-box,
+  quadrature, and corner-rectangle error budgets is below a requested positive
+  rational epsilon.
+\end{enumerate}
+The certificate records its breakpoints and its error schedule as finite
+rational data.  It does not quantify over an unspecified ``partition fine
+enough'', and it does not require a global Jordan decomposition.
+\end{definition}
+
+\begin{theorem}[Integration by parts from the certificate: construction target]
+\label{thm:integration-by-parts-certificate}
+\uses{def:integration-by-parts-certificate}
+For an integration-by-parts certificate, the intended theorem is the raw-real
+equivalence
+\[
+ \int_a^b U(x)V'(x)\,\dd x
+ \Equiv U(b)V(b)-U(a)V(a)-\int_a^b U'(x)V(x)\,\dd x.
+\]
+At a common rational refinement \(P\), the only new term in the finite
+identity is the sum of corner rectangles.  On an increasing piece it has the
+literal bound
+\[
+ 0\leq \sum_{I\in P}\Delta_IU\,\Delta_IV
+ \leq \max_{I\in P}\Delta_IU\,\bigl(V(b_{j+1})-V(b_j)\bigr),
+\]
+when both factors are increasing.  The corresponding decreasing or mixed-sign
+formula uses the declared nonnegative signed endpoint variation on that piece.
+Thus the refinement schedule makes this term
+smaller than its allocated rational error budget.  The finite identities on
+the pieces telescope, and the supplied endpoint/product certificates compare
+the resulting boxes.  Showing overlap at every requested precision is exactly
+the required \code{RealRaw.Equiv} proof.
+
+This is a construction target, not yet a Lean theorem.  Its deliberately
+small first scope is bounded functions with finitely many rational monotone
+pieces; that includes the positive branch needed below and is already broad
+enough for many tabulated engineering kernels.  Extensions to arbitrary
+piecewise-continuous functions should be separate theorems with their own
+finite regularity certificates.
+\end{theorem}
+
+\begin{corollary}[The arctangent--logarithm pi route: construction target]
+\label{cor:arctangent-logarithm-pi-route}
+\uses{thm:integration-by-parts-certificate,thm:log-two-series-reciprocal-integral}
+Apply the preceding certificate on the single positive piece \([0,1]\) with
+\(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
+certificate gives
+\[
+ V'(x)=\frac{1}{1+x^2},
+\]
+the corner correction has the particularly transparent mesh bound
+\[
+ \sum_{I\in P}\Delta_Ix\,\Delta_I\arctan
+ \leq \mesh(P)\bigl(\arctan(1)-\arctan(0)\bigr).
+\]
+The geometric unit-branch bounds will supply a rational upper bound for the
+last factor, so this is an executable rather than asymptotic estimate.  The
+resulting finite certificates give
+\[
+ \int_0^1\arctan(x)\,\dd x
+ \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.
+\]
+The final endpoint bridge is deliberately stated separately:
+\[
+ 2\int_0^1\frac{x}{1+x^2}\,\dd x
+ \Equiv \log 2.
+\]
+It is obtained by the rational substitution \(t=1+x^2\), followed by the
+canonical-exponential/inverse-logarithm identification.  The already checked
+series-to-reciprocal-integral equality at \(2\) supplies a concrete comparison
+point, but it is not silently promoted to this change-of-variables theorem.
+Combining the two certified equivalences gives the natural statement
+\[
+  \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log2.
+\]
+Only after the displayed expression itself is a valid raw evaluator should
+its agreement with \code{piCircleArea} enter the pi registry.
+\end{corollary}
+
 \section{Nondecreasing integrands and piecewise monotone integrals}
 
 The first integral theorem should be for nondecreasing functions on rational

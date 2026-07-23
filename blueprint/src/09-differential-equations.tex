@@ -173,6 +173,34 @@ extension needs an interval-certified Lipschitz map and a separate Picard
 contraction construction.
 \end{theorem}
 
+\begin{remark}[Why Peano--Baker existence also needs a separate uniqueness certificate]
+\label{rem:peano-baker-uniqueness-certificate}
+\uses{thm:linear-picard-lindelof}
+The Peano--Baker construction itself supplies one interval algorithm satisfying
+the initial-value problem.  That is existence, not yet uniqueness: another
+candidate solution must be compared with it by a finite estimate that applies
+to every certified candidate.  The required input is a rational coefficient
+bound \(M\), an interval length \(T\), and a rational enclosure \(B\) for the
+candidate difference \(z\).  A supplied solution certificate normally gives
+such a bound directly; if it is local, a finite rational cover of the time
+interval supplies one before the argument is iterated.
+
+Subtracting the two Volterra identities gives a zero-initial homogeneous
+identity.  Its \(N\)-fold ordered substitution is a finite simplex expression,
+and interval multiplication bounds its norm by
+\[
+  B\frac{(MT)^N}{N!}.
+\]
+For a requested positive rational epsilon, the factorial-tail procedure
+computes an \(N\) for which this rational bound is below epsilon.  The two
+candidate output boxes consequently overlap at every requested precision,
+which is the project definition of equality of raw vectors.  No supremum of
+\(\lVert z\rVert\), limiting function sequence, or completeness theorem is
+being invoked.  This is why the linear theorem is properly described as
+constructive Picard--Lindel\"of, while a nonlinear Picard theorem still needs
+additional contraction data.
+\end{remark}
+
 \section{Special cases and computational uses}
 
 \begin{definition}[Constant and commuting samples]

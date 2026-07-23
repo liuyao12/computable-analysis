@@ -457,15 +457,16 @@ Its intended proof order is:
   exponential.  The concrete finite comparison at two is already checked by
   \cref{thm:log-two-series-reciprocal-integral}; transport that equality to
   the resulting canonical \(\log 2\);
-  \item prove the arctangent derivative and the common
-  increasing/decreasing-piece integration-by-parts theorem.  The rational
+  \item prove the arctangent derivative and instantiate the common
+  increasing/decreasing-piece integration-by-parts certificate of
+  \cref{thm:integration-by-parts-certificate}.  The rational
   identity
   \[
     \int_0^1\arctan(x)\,\dd x
       =\frac{\pi}{4}-\frac12\log 2
   \]
-  follows from \((x\arctan x)'=\arctan x+x/(1+x^2)\) and the
-  logarithmic endpoint calculation;
+  follows from \((x\arctan x)'=\arctan x+x/(1+x^2)\), its finite
+  corner-rectangle schedule, and the logarithmic endpoint calculation;
   \item package the right-hand side as a valid raw pi evaluator and prove it
   equivalent to the geometric circle-area presentation.
 \end{enumerate}

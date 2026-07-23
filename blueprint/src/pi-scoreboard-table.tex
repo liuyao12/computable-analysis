@@ -60,7 +60,9 @@ and its \code{RealRaw.Equiv} bridge are formalized.
 Arctangent integration by parts &
 \(\pi=4\int_0^1\arctan(x)\,\dd x+2\log2\); product/FTC, the canonical
 logarithm, and the common monotone-piece refinement &
-finite product/partition error plus the \(\log2\) endpoint modulus &
+the certificate of \cref{def:integration-by-parts-certificate}: common-piece
+corner error, product boxes, and a three-budget schedule for the integral,
+endpoint product, and \(\log2\) bridge &
 -- & --\\
 Euler identity and complex logarithm &
 for \(a=\arctan_{\mathrm{geom}}(1)\),
@@ -92,14 +94,18 @@ endpoint refinement is checked; the universal margin inequality remains open.
 The next candidate for a new coverage cell is the arctangent
 integration-by-parts evaluation.  Its public statement will be the natural
 integral evaluation; only the derived agreement of its raw presentation with
-the preferred pi presentation belongs in the registry.  Its finite rational
-rectangle identity is now checked, but the cell remains unmarked until the
-product/derivative/FTC bridge, common increasing/decreasing-piece refinement,
-and logarithm endpoint identity are all constructive.  This is deliberately
-the long elementary-function route: its \(\log 2\) endpoint must agree with
-the inverse of the canonical exponential, whose representation agreement is
-proved by the linear Peano--Baker/Picard--Lindel\"of uniqueness theorem.
-Thus the prospective row tests a capability the arctangent rows do not.
+the preferred pi presentation belongs in the registry.  The exact finite
+acceptance contract is now stated in
+\cref{def:integration-by-parts-certificate,thm:integration-by-parts-certificate}:
+every monotone piece must provide its product box, common refinement,
+corner-rectangle bound, and rational error schedule.  The concrete target is
+then isolated in \cref{cor:arctangent-logarithm-pi-route}.  The cell remains
+unmarked until those product/derivative/FTC certificates and the canonical
+logarithm endpoint identity are constructive.  This is deliberately the long
+elementary-function route: its \(\log 2\) endpoint must agree with the inverse
+of the canonical exponential, whose representation agreement is proved by the
+linear Peano--Baker/Picard--Lindel\"of uniqueness theorem.  Thus the prospective
+row tests a capability the arctangent rows do not.
 The Euler/complex-logarithm row above is a second, longer exp/log/ODE
 corroboration; it remains unmarked until its explicit complex certificates are
 present.  The arcsine/Newton and Gaussian rows remain future probes for
