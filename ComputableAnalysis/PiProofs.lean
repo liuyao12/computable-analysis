@@ -10162,10 +10162,8 @@ theorem arctanGeomPresentation_equiv_arctanSeriesPresentation_on_nonnegativeUnit
     (arctan.geom.raw.evalRaw x (by trivial)).Equiv
       (arctan.series.raw.evalRaw x
         (by
-          unfold Elementary.Arctan.powerSeriesDomain qabs
-          have hnonneg : qabs x = x := by
-            simp [qabs, hx0]
-          rw [hnonneg]
+          change qabs x <= 1
+          rw [qabs_eq_self_of_nonneg hx0]
           exact hx1)) := by
   simpa [arctan.geom, arctan.series, ArctanGeometry.representation,
     ArctanGeometry.functionRaw, Elementary.Arctan.powerSeries,
@@ -17276,54 +17274,54 @@ def piCertified : Real :=
       piReciprocalQuarticCompact]
     alternative_valid := by
       intro rep hrep
-      change rep = piCircleAreaPolygon \/
-        rep = piCircumferenceStabilized \/
-        rep = piCircumferenceReboxed \/
-        rep = piCircumferenceFan \/
-        rep = ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) \/
-        rep = piFromArctanIntegralRectangleUnitAtOne \/
-        rep = piLeibniz \/ rep = piNilakantha \/ rep = piMachin \/
-        rep = IntegralIdentities.cauchyFullLineIntegral \/
-        rep = piReciprocalQuarticCompact at hrep
-      rcases hrep with h | h | h | h | h | h | h | h | h | h | h
-      all_goals subst rep
-      all_goals first
-        | exact piPresentation_valid .areaPolygon
-        | exact piPresentation_valid .circumferenceStabilized
-        | exact piPresentation_valid .circumferenceReboxed
-        | exact piPresentation_valid .circumferenceFan
-        | exact piPresentation_valid .arctanGeometry
-        | exact piPresentation_valid .arctanRectangleIntegral
-        | exact piPresentation_valid .leibnizSeries
-        | exact piPresentation_valid .nilakanthaSeries
-        | exact piPresentation_valid .machinSeries
-        | exact piPresentation_valid .cauchyIntegral
-        | exact piPresentation_valid .reciprocalQuarticIntegral
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .areaPolygon
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .circumferenceStabilized
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .circumferenceReboxed
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .circumferenceFan
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .arctanGeometry
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .arctanRectangleIntegral
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .leibnizSeries
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .nilakanthaSeries
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .machinSeries
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_valid .cauchyIntegral
+      have h := List.mem_singleton.mp hrep
+      subst rep
+      exact piPresentation_valid .reciprocalQuarticIntegral
     coherent := by
       intro rep hrep
-      change rep = piCircleAreaPolygon \/
-        rep = piCircumferenceStabilized \/
-        rep = piCircumferenceReboxed \/
-        rep = piCircumferenceFan \/
-        rep = ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) \/
-        rep = piFromArctanIntegralRectangleUnitAtOne \/
-        rep = piLeibniz \/ rep = piNilakantha \/ rep = piMachin \/
-        rep = IntegralIdentities.cauchyFullLineIntegral \/
-        rep = piReciprocalQuarticCompact at hrep
-      rcases hrep with h | h | h | h | h | h | h | h | h | h | h
-      all_goals subst rep
-      all_goals first
-        | exact piPresentation_equiv_piCircleArea .areaPolygon
-        | exact piPresentation_equiv_piCircleArea .circumferenceStabilized
-        | exact piPresentation_equiv_piCircleArea .circumferenceReboxed
-        | exact piPresentation_equiv_piCircleArea .circumferenceFan
-        | exact piPresentation_equiv_piCircleArea .arctanGeometry
-        | exact piPresentation_equiv_piCircleArea .arctanRectangleIntegral
-        | exact piPresentation_equiv_piCircleArea .leibnizSeries
-        | exact piPresentation_equiv_piCircleArea .nilakanthaSeries
-        | exact piPresentation_equiv_piCircleArea .machinSeries
-        | exact piPresentation_equiv_piCircleArea .cauchyIntegral
-        | exact piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral }
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .areaPolygon
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .circumferenceStabilized
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .circumferenceReboxed
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .circumferenceFan
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .arctanGeometry
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .arctanRectangleIntegral
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .leibnizSeries
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .nilakanthaSeries
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .machinSeries
+      rcases List.mem_cons.mp hrep with h | hrep
+      · subst rep; exact piPresentation_equiv_piCircleArea .cauchyIntegral
+      have h := List.mem_singleton.mp hrep
+      subst rep
+      exact piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral }
 
 theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
   rfl

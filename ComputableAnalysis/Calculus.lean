@@ -112,6 +112,158 @@ theorem finiteIntegrationByParts_withVariation
             grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
               Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-- On an explicitly nondecreasing rational path, every endpoint displacement
+from the initial point is nonnegative.  This is the finite order fact used to
+control the corner rectangles in geometric integration by parts. -/
+theorem endpointDifference_nonneg_of_step_nonnegative
+    (u : Nat -> Rat)
+    (hu : forall i, 0 <= u (i + 1) - u i) (n : Nat) :
+    0 <= u n - u 0 := by
+  induction n with
+  | zero =>
+      grind [Rat.sub_eq_add_neg]
+  | succ n ih =>
+      calc
+        0 <= (u n - u 0) + (u (n + 1) - u n) :=
+          Rat.add_nonneg ih (hu n)
+        _ = u (n + 1) - u 0 := by
+          grind [Rat.sub_eq_add_neg]
+
+/-- If the two paths move in the same nondecreasing direction, the finite
+corner correction is nonnegative.  Geometrically it is a sum of areas of
+ordinary (not signed) corner rectangles. -/
+theorem quadraticVariationSum_nonneg_of_step_nonnegative
+    (u v : Nat -> Rat)
+    (hu : forall i, 0 <= u (i + 1) - u i)
+    (hv : forall i, 0 <= v (i + 1) - v i)
+    (n : Nat) :
+    0 <= quadraticVariationSum u v n := by
+  induction n with
+  | zero =>
+      grind [quadraticVariationSum]
+  | succ n ih =>
+      rw [quadraticVariationSum]
+      exact Rat.add_nonneg ih (Rat.mul_nonneg (hu n) (hv n))
+
+/-- A mesh-size bound for the corner correction.  If every increment of the
+first path is at most `delta` and the second path is nondecreasing, then the
+entire correction is at most `delta` times the total variation of the second
+path.  This is the finite estimate that will make the correction vanish on a
+common rational refinement. -/
+theorem quadraticVariationSum_le_stepBound_mul_endpointDifference
+    (u v : Nat -> Rat) (delta : Rat)
+    (hu : forall i, u (i + 1) - u i <= delta)
+    (hv : forall i, 0 <= v (i + 1) - v i)
+    (n : Nat) :
+    quadraticVariationSum u v n <= delta * (v n - v 0) := by
+  induction n with
+  | zero =>
+      grind [quadraticVariationSum, Rat.sub_eq_add_neg]
+  | succ n ih =>
+      rw [quadraticVariationSum]
+      calc
+        quadraticVariationSum u v n +
+            (u (n + 1) - u n) * (v (n + 1) - v n) <=
+          delta * (v n - v 0) +
+            (u (n + 1) - u n) * (v (n + 1) - v n) :=
+          Rat.add_le_add_right.mpr ih
+        _ <= delta * (v n - v 0) +
+            delta * (v (n + 1) - v n) :=
+          Rat.add_le_add_left.mpr
+            (Rat.mul_le_mul_of_nonneg_right (hu n) (hv n))
+        _ = delta * (v (n + 1) - v 0) := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- With two nondecreasing paths, the corner correction is bounded by the
+product of their endpoint variations.  This is the finite rectangle form of
+the usual ``variation times mesh'' estimate, before a particular mesh modulus
+is supplied. -/
+theorem quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative
+    (u v : Nat -> Rat)
+    (hu : forall i, 0 <= u (i + 1) - u i)
+    (hv : forall i, 0 <= v (i + 1) - v i)
+    (n : Nat) :
+    quadraticVariationSum u v n <=
+      (u n - u 0) * (v n - v 0) := by
+  induction n with
+  | zero =>
+      grind [quadraticVariationSum, Rat.sub_eq_add_neg]
+  | succ n ih =>
+      let du := u (n + 1) - u n
+      let dv := v (n + 1) - v n
+      let U := u n - u 0
+      let V := v n - v 0
+      have hU : 0 <= U := by
+        dsimp [U]
+        exact endpointDifference_nonneg_of_step_nonnegative u hu n
+      have hV : 0 <= V := by
+        dsimp [V]
+        exact endpointDifference_nonneg_of_step_nonnegative v hv n
+      have hdu : 0 <= du := by
+        dsimp [du]
+        exact hu n
+      have hdv : 0 <= dv := by
+        dsimp [dv]
+        exact hv n
+      have hcross : 0 <= U * dv + du * V :=
+        Rat.add_nonneg (Rat.mul_nonneg hU hdv) (Rat.mul_nonneg hdu hV)
+      rw [quadraticVariationSum]
+      calc
+        quadraticVariationSum u v n + du * dv <= U * V + du * dv := by
+          exact Rat.add_le_add_right.mpr ih
+        _ <= U * V + du * dv + (U * dv + du * V) := by
+          grind [Rat.sub_eq_add_neg]
+        _ = (U + du) * (V + dv) := by
+          grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+            Rat.mul_assoc, Rat.mul_comm]
+        _ = (u (n + 1) - u 0) * (v (n + 1) - v 0) := by
+          dsimp [U, V, du, dv]
+          grind [Rat.sub_eq_add_neg]
+
+/-- Negating both paths preserves every corner rectangle: its two signed side
+increments change sign together.  This transfers the finite estimates from
+increasing pieces to decreasing pieces without a Jordan decomposition. -/
+theorem quadraticVariationSum_neg_neg
+    (u v : Nat -> Rat) (n : Nat) :
+    quadraticVariationSum (fun i => -u i) (fun i => -v i) n =
+      quadraticVariationSum u v n := by
+  induction n with
+  | zero =>
+      grind [quadraticVariationSum]
+  | succ n ih =>
+      rw [quadraticVariationSum, quadraticVariationSum, ih]
+      grind [Rat.neg_sub, Rat.neg_mul, Rat.mul_neg, Rat.neg_neg,
+        Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/-- The endpoint-variation bound on an explicitly nonincreasing pair of
+paths.  It is obtained by negating both paths, so the correction is still a
+sum of ordinary corner areas while the endpoint variations are reversed. -/
+theorem quadraticVariationSum_le_endpointVariationProduct_of_step_nonpositive
+    (u v : Nat -> Rat)
+    (hu : forall i, u (i + 1) - u i <= 0)
+    (hv : forall i, v (i + 1) - v i <= 0)
+    (n : Nat) :
+    quadraticVariationSum u v n <=
+      (u 0 - u n) * (v 0 - v n) := by
+  have hu' : forall i, 0 <= (-u (i + 1)) - (-u i) := by
+    intro i
+    have h := hu i
+    grind [Rat.neg_sub, Rat.sub_eq_add_neg]
+  have hv' : forall i, 0 <= (-v (i + 1)) - (-v i) := by
+    intro i
+    have h := hv i
+    grind [Rat.neg_sub, Rat.sub_eq_add_neg]
+  have h := quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative
+    (fun i => -u i) (fun i => -v i) hu' hv' n
+  rw [quadraticVariationSum_neg_neg] at h
+  calc
+    quadraticVariationSum u v n <=
+        ((-u n) - (-u 0)) * ((-v n) - (-v 0)) := h
+    _ = (u 0 - u n) * (v 0 - v n) := by
+      grind [Rat.neg_sub, Rat.neg_mul, Rat.mul_neg, Rat.neg_neg,
+        Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+
 private theorem riemannLeftInterval_point_fold_eq
     (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
     (hpoint : forall x, (g.compute x prec).lo = (g.compute x prec).hi)

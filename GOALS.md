@@ -158,11 +158,14 @@ another. The Pi score stays useful only as secondary integration coverage.
 - Integration by parts should follow the same explicit-piece discipline.
   `leftStieltjesSum`, `rightStieltjesSum`, and
   `finiteIntegrationByParts_withVariation` now prove the exact rational
-  rectangle decomposition, including its corner-area correction.  For the
-  integral theorem, provide increasing/decreasing pieces for both factors,
-  replace them by a common rational refinement, and bound the signed variation
-  cell by cell.  Do not invoke a nonconstructive global variation or Jordan
-  decomposition.
+  rectangle decomposition, including its corner-area correction.  The checked
+  `quadraticVariationSum` estimates bound that correction by a maximum first
+  increment times the second endpoint variation, or by the product of the two
+  endpoint variations; negating both paths supplies the decreasing-piece
+  version.  For the integral theorem, provide increasing/decreasing pieces for
+  both factors, replace them by a common rational refinement, and discharge
+  the maximum-increment bound cell by cell.  Do not invoke a nonconstructive
+  global variation or Jordan decomposition.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
