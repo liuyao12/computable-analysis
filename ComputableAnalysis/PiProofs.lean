@@ -15246,6 +15246,33 @@ def piFromArctanIntegralRectangleUnitAtOne : RealRaw :=
       (IntegralIdentities.arctanIntegralRectangleUnitData.constructionAt
         (1 : Rat) (by native_decide) (by native_decide)))
 
+/-- At the raw-computation level, the public rectangle presentation of pi is
+exactly four times the unit rectangle integral. -/
+theorem piFromArctanIntegralRectangleUnitAtOne_compute_eq_four_rectangle
+    (n : Nat) :
+    piFromArctanIntegralRectangleUnitAtOne.compute n =
+      ((4 : Nat) * IntegralIdentities.arctanIntegralRectangleForAtOne : RealRaw).compute n :=
+  rfl
+
+/-- Certified linear width bound for the public rectangle-integral
+presentation of pi.  The unscaled integral has bound `4/(n+1)`; the displayed
+pi evaluator includes its factor of four. -/
+theorem piFromArctanIntegralRectangleUnitAtOne_width_le_sixteen_div_succ
+    (n : Nat) :
+    (piFromArctanIntegralRectangleUnitAtOne.compute n).width <=
+      (16 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  rw [piFromArctanIntegralRectangleUnitAtOne_compute_eq_four_rectangle]
+  rw [RealRaw.natScale_width]
+  calc
+    (4 : Rat) * (IntegralIdentities.arctanIntegralRectangleForAtOne.compute n).width <=
+        4 * ((4 : Rat) / (((n + 1 : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (IntegralIdentities.arctanIntegralRectangleForAtOne_width_le_four_div_succ n)
+        (by native_decide)
+    _ = (16 : Rat) / (((n + 1 : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc]
+
 theorem piFromArctanIntegralRectangleUnitAtOne_valid :
     piFromArctanIntegralRectangleUnitAtOne.Valid := by
   unfold piFromArctanIntegralRectangleUnitAtOne
@@ -15404,6 +15431,13 @@ reboxing of an existing pi raw real.  Its equivalence to `piCircleArea` is
 proved below through a finite projective/Cauchy bridge. -/
 def piReciprocalQuarticCompact : RealRaw :=
   IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral
+
+/-- Exact dyadic width of the public compact reciprocal-quartic pi
+presentation. -/
+theorem piReciprocalQuarticCompact_width (n : Nat) :
+    (piReciprocalQuarticCompact.compute n).width =
+      64 * (1 / (((2 ^ n : Nat) : Rat))) := by
+  exact IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_width n
 
 theorem piReciprocalQuarticCompact_valid :
     piReciprocalQuarticCompact.Valid := by

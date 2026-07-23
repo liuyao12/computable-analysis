@@ -2356,6 +2356,14 @@ theorem arctanIntegralRectangleForAtOne_compute_eq (n : Nat) :
     arctanIntegralRectangleForAtOne.compute n =
       ArctanGeometry.arctanIntegralRectangleComputeAtOne n := rfl
 
+/-- The unit-branch rectangle evaluator has the explicit rational mesh
+width bound used by the pi-level integral and Cauchy presentations. -/
+theorem arctanIntegralRectangleForAtOne_width_le_four_div_succ (n : Nat) :
+    (arctanIntegralRectangleForAtOne.compute n).width <=
+      (4 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  rw [arctanIntegralRectangleForAtOne_compute_eq]
+  exact ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ n
+
 theorem arctanIntegralRectangleForAtOne_equiv_raw :
     arctanIntegralRectangleForAtOne.Equiv
       ArctanGeometry.arctanIntegralRectangleRawAtOne := by
@@ -3763,6 +3771,25 @@ theorem cauchyFullLineIntegral_compute_eq_four_rectangle (n : Nat) :
     cauchyReciprocalTailConstruction, Integral.integralFor,
     RealRaw.scaleRat, RealRaw.scaleRatCompute]
   grind [Rat.mul_assoc]
+
+/-- The certified full-line Cauchy evaluator is four times the unit
+rectangle evaluator, so its own interval width has a direct linear bound.
+The dyadic `224 / 2^n` bound used elsewhere is a bridge-envelope bound, not
+the convergence rate of this public raw evaluator. -/
+theorem cauchyFullLineIntegral_width_le_sixteen_div_succ (n : Nat) :
+    (cauchyFullLineIntegral.compute n).width <=
+      (16 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  rw [cauchyFullLineIntegral_compute_eq_four_rectangle]
+  rw [RealRaw.scaleRat_width_of_nonneg (by native_decide : (0 : Rat) <= 4)]
+  calc
+    4 * (arctanIntegralRectangleForAtOne.compute n).width <=
+        4 * ((4 : Rat) / (((n + 1 : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (arctanIntegralRectangleForAtOne_width_le_four_div_succ n)
+        (by native_decide)
+    _ = (16 : Rat) / (((n + 1 : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc]
 
 /-- The denominator of the reciprocal quartic test integrand. -/
 def reciprocalQuarticDenominator (a x : Rat) : Rat :=
@@ -9232,6 +9259,15 @@ theorem reciprocalQuarticMinusOneCompactDyadicIntegral_compute_eq
     reciprocalQuarticMinusOneCompactDyadicIntegral.compute stage =
       reciprocalQuarticMinusOneUnitDyadicCompute stage :=
   rfl
+
+/-- Exact dyadic width of the compact reciprocal-quartic integral evaluator.
+This is the rate of the public raw integral, rather than merely a comparison
+envelope used in its Cauchy bridge. -/
+theorem reciprocalQuarticMinusOneCompactDyadicIntegral_width (stage : Nat) :
+    (reciprocalQuarticMinusOneCompactDyadicIntegral.compute stage).width =
+      64 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  rw [reciprocalQuarticMinusOneCompactDyadicIntegral_compute_eq]
+  exact reciprocalQuarticMinusOneUnitDyadicCompute_width stage
 
 /-- Any nonnegative rational multiple of the standard dyadic zero budget
 still shrinks, even after a schedule that is always at least the requested

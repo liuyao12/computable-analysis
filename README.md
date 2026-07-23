@@ -81,8 +81,8 @@ capability—not a percentage for the whole foundation.
 | --- | --- | --- |
 | finite Archimedean theorem | perimeter and area presentations agree | cross-fan: $w_n\le10/(n+1)$ |
 | arctangent power-series theorem | geometric and series presentations agree | Leibniz: $w_n=4/(4n+1)$ |
-| arctangent integral evaluation | integral and series presentations agree | rectangle: $w_n\le4/(n+1)$ |
-| Cauchy integral evaluation | full-line integral and area presentations agree | full-line envelope: $w_n\le224/2^n$ |
+| arctangent integral evaluation | integral and series presentations agree | rectangle $\pi$ raw: $w_n\le16/(n+1)$ |
+| Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
 
 This deliberately does not measure the primary application gaps: an
@@ -91,10 +91,12 @@ or the continuous matrix Peano--Baker theorem would each be major progress
 without adding a π equivalence.  Rendered copy:
 [front page: π equivalence coverage](https://liuyao12.github.io/computable-analysis/).
 
-The width metric is attached to the named checked representative, not
-automatically transported across an equivalence proof.  It is a useful
-cost/precision diagnostic for a construction, rather than a second score for
-the underlying theorem.
+The width metric is attached to the named checked $\pi$ raw evaluator, not
+automatically transported across an equivalence proof.  The previous dyadic
+`224/2^n` Cauchy figure is retained in Lean as the shrinking comparison
+envelope for the quartic bridge; it is not the convergence rate of the public
+Cauchy raw evaluator.  The table is a useful cost/precision diagnostic for a
+construction, rather than a second score for the underlying theorem.
 
 The next intended π registry benchmark is the arctangent
 integration-by-parts evaluation, not another arctangent variant.  Its public

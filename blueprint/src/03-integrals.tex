@@ -929,7 +929,8 @@ instead from the static dyadic mesh
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement}\par
 \lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC}\par
 \lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}\par
-\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}\par}
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}\par
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_width_le_sixteen_div_succ}\par}
 \uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
 Any certified integral construction for
 \[
@@ -956,7 +957,9 @@ available through the monotone-integral interface:
 Equivalently, the unit-branch construction
 \code{arctanIntegralRectangleUnitData} gives the table-facing raw real
 \code{piFromArctanIntegralRectangleUnitAtOne} and theorem
-\code{piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}.  The same
+\code{piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}; its
+certified interval width is at most \(16/(n+1)\) at stage \(n\), including
+the displayed outer factor of four.  The same
 rectangle schedule is also packaged as a \code{DefiniteIdentityFor} certificate
 \code{arctanGeomUnitRectangleDefiniteIdentity}; Lean proves the resulting pi
 raw real has the same stage computations as
@@ -1031,6 +1034,7 @@ rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalTailCompactification}
 \lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_width_le_sixteen_div_succ}
 \lean{ComputableAnalysis.PiProofs.cauchyFullLineIntegral_equiv_piCircleArea}
 \uses{def:arctan-integral}
 \leanok
@@ -1053,6 +1057,9 @@ zero.  Lean scales the verified rectangle bracket cellwise and obtains
     =4\int_0^1\frac{\dd x}{1+x^2}
     \sim\pi_{\mathrm{area}}.
 \]
+Its public raw evaluator has certified width at most \(16/(n+1)\) at stage
+\(n\).  The coarser dyadic rate used in the reciprocal-quartic comparison is
+an auxiliary shrinking envelope, not a rate attached to this evaluator.
 The construction supplies the full-line target needed by the quartic route,
 without counting a tail limit as a primitive operation.
 \end{definition}
@@ -1155,6 +1162,7 @@ value.
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_width}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_existsConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
@@ -1247,7 +1255,8 @@ equivalence-complete scoreboard computation.  A general projective
 change-of-variables theorem remains a useful later abstraction, but is no
 longer needed for this concrete pi route.  The compact density itself is a
 total rational-name interval function on every rational interval; its
-interval-level regularity is proved below.
+interval-level regularity is proved below.  Its direct dyadic raw interval has
+the exact width \(64/2^n\) at stage \(n\).
 For rational chart endpoints away from \(\pm1\), Lean now also proves the
 denominator-cleared displacement identity
 \[

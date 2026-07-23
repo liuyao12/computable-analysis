@@ -30,11 +30,11 @@ Leibniz: \(w_n=4/(4n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
 Arctangent integral &
 certified rectangle integration and its endpoint bridge &
-rectangle: \(w_n\le4/(n+1)\) &
+rectangle \(\pi\)-raw: \(w_n\le16/(n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
 Cauchy integral &
 reciprocal-tail transport from a full line to a finite interval &
-full-line envelope: \(w_n\le224/2^n\) &
+Cauchy \(\pi\)-raw: \(w_n\le16/(n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
 Reciprocal-quartic integral &
 a nontrivial rational kernel, finite quadrature, and its integral identity &
@@ -43,10 +43,10 @@ dyadic quadrature: \(w_n=64/2^n\) &
 \end{tabular}
 \end{center}
 
-The width column belongs to the named checked representative in that row; an
-equivalence proof does not silently transfer a stage-by-stage rate to every
-other presentation.  It is therefore a useful cost/precision diagnostic for
-the constructive witness, not an additional measure of theorem importance.
+The width column belongs to the named checked \(\pi\)-raw evaluator in that
+row; an equivalence proof does not silently transfer a stage-by-stage rate to
+every other presentation.  It is therefore a useful cost/precision diagnostic
+for the constructive witness, not an additional measure of theorem importance.
 
 The full \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two
