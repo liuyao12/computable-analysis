@@ -194,10 +194,21 @@ additivity.
 \lean{ComputableAnalysis.RationalPartition.uniform_refines_right}
 \lean{ComputableAnalysis.RationalPartition.uniform_refines_left}
 \lean{ComputableAnalysis.RationalPartition.Refines}
+\lean{ComputableAnalysis.RationalPartition.Refines.point_between_consecutive}
 \lean{ComputableAnalysis.RationalPartition.Refines.refl}
 \lean{ComputableAnalysis.RationalPartition.Refines.trans}
 \lean{ComputableAnalysis.RationalPartition.CommonRefinement}
 \lean{ComputableAnalysis.RationalPartition.uniformCommonRefinement}
+\lean{ComputableAnalysis.RationalPartition.insertPointValue}
+\lean{ComputableAnalysis.RationalPartition.insertPoint}
+\lean{ComputableAnalysis.RationalPartition.insertPoint_refines}
+\lean{ComputableAnalysis.RationalPartition.insertPointCommonRefinement}
+\lean{ComputableAnalysis.RationalPartition.InsertionChain}
+\lean{ComputableAnalysis.RationalPartition.InsertionChain.refines}
+\lean{ComputableAnalysis.RationalPartition.InsertionChain.commonRefinement}
+\lean{ComputableAnalysis.RationalPartition.clampedPath}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_step_nonnegative}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_endpointSquare}
 \uses{def:definite-integral-identity}
 \leanok
 For rational sequences \((u_i,v_i)\), one partition cell has the exact
@@ -251,7 +262,16 @@ by \(n\).  Lean packages the two index maps as a
 and composition operations.  This is enough for the dyadic meshes used by the
 present rectangle algorithms: stage \(n+1\) keeps the old point \(k\) at
 \(2k\) and halves the mesh exactly.  Synchronizing arbitrary finite rational
-breakpoint lists remains the later general piecewise-refinement step.
+breakpoint lists now has a checked insertion primitive: any rational point in
+a specified cell gives a refined partition and an explicit embedding of every
+old breakpoint.  A finite \code{InsertionChain} composes such arbitrary
+rational insertions, and its endpoint is a certified common refinement of the
+initial and final lists.  Moreover, every fine point between embedded
+consecutive coarse points is proved to stay inside that coarse cell, so local
+bounds transfer cell by cell.  The clamped breakpoint path is nondecreasing,
+and its corner sum is bounded by the square of the endpoint variation.  The
+remaining general construction is the canonical merge of two independently
+given breakpoint lists into one insertion chain.
 For the later integral theorem, functions are supplied on explicit increasing
 or decreasing pieces and the two decompositions are replaced by a common
 rational refinement.  The corner correction is then bounded piece by piece

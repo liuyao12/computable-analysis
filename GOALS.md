@@ -172,6 +172,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   compositional.  The literal dyadic grids used by the current Riemann
   constructors inherit this interface directly: `dyadic_leftPoint_refines`
   keeps old index `k` at `2*k`, and `dyadic_mesh_refines` halves its mesh.
+  Arbitrary rational breakpoints now have a checked local insertion step:
+  `insertPoint_refines` embeds the old partition, `InsertionChain.refines`
+  composes finitely many such steps, and
+  `Refines.point_between_consecutive` keeps every fine point in its parent
+  coarse cell.  `clampedPath_quadraticVariation_le_endpointSquare` applies
+  the corner estimate directly to partition data.  What remains is a
+  canonical merge procedure taking two independently supplied breakpoint
+  lists to a shared insertion chain.
   The model unit path has a fully checked vanishing schedule:
   `unitMeshPath_quadraticVariation` is exactly `1/n`, and choosing
   `eps.den + 1` makes it at most any positive rational epsilon.  For the

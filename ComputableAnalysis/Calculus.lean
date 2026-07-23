@@ -1214,6 +1214,27 @@ theorem Refines.index_le {a b : Rat}
     R.index i <= R.index coarse.pieces := R.index_mono i coarse.pieces hi
     _ = fine.pieces := R.index_last
 
+/-- Every fine breakpoint between two consecutive embedded coarse indices lies
+in the corresponding coarse cell.  This is the finite order fact needed to
+transfer a cellwise derivative, monotonicity, or variation bound to a common
+refinement. -/
+theorem Refines.point_between_consecutive {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i j : Nat} (hi : i < coarse.pieces)
+    (hleft : R.index i <= j) (hright : j <= R.index (i + 1)) :
+    coarse.point i <= fine.point j /\ fine.point j <= coarse.point (i + 1) := by
+  have hisucc : i + 1 <= coarse.pieces := Nat.succ_le_of_lt hi
+  have hjfine : j <= fine.pieces :=
+    Nat.le_trans hright (R.index_le hisucc)
+  constructor
+  · calc
+      coarse.point i = fine.point (R.index i) := (R.point_eq i (Nat.le_of_lt hi)).symm
+      _ <= fine.point j := fine.monotone _ _ hleft hjfine
+  · calc
+      fine.point j <= fine.point (R.index (i + 1)) :=
+        fine.monotone _ _ hright (R.index_le hisucc)
+      _ = coarse.point (i + 1) := R.point_eq _ hisucc
+
 /-- Every partition refines itself by the identity index map. -/
 def Refines.refl {a b : Rat} (P : RationalPartition a b) : Refines P P where
   index := fun i => i
@@ -1285,6 +1306,139 @@ def uniformCommonRefinement (a b : Rat) (m n : Nat)
         intro j _hj
         exact uniform_refines_left hm hn hab }
 
+/-- Insert one rational breakpoint after cell index `k`.  The new list keeps
+all old points in order, placing `x` between `point k` and `point (k+1)`.
+Repeated use of this finite operation is the constructive route from explicit
+breakpoint lists to a general common refinement. -/
+def insertPointValue {a b : Rat} (P : RationalPartition a b)
+    (k : Nat) (x : Rat) : Nat -> Rat :=
+  fun i => if i <= k then P.point i else
+    if i = k + 1 then x else P.point (i - 1)
+
+/-- The partition obtained by inserting a rational point in one specified
+cell.  Degenerate insertion at an endpoint is allowed: partitions record
+monotone, rather than strictly increasing, rational breakpoint data. -/
+def insertPoint {a b : Rat} (P : RationalPartition a b)
+    (k : Nat) (hk : k < P.pieces) (x : Rat)
+    (hleft : P.point k <= x) (hright : x <= P.point (k + 1)) :
+    RationalPartition a b where
+  pieces := P.pieces + 1
+  positive := by omega
+  point := insertPointValue P k x
+  left_endpoint := by
+    simp [insertPointValue, P.left_endpoint]
+  right_endpoint := by
+    have hnot : ¬ (P.pieces + 1 <= k) := by omega
+    have hneq : P.pieces ≠ k := by omega
+    simp [insertPointValue, hnot, hneq, P.right_endpoint]
+  monotone := by
+    intro i j hij hj
+    by_cases hjk : j <= k
+    · have hik : i <= k := Nat.le_trans hij hjk
+      simp [insertPointValue, hik, hjk]
+      exact P.monotone i j hij (Nat.le_trans hjk (Nat.le_of_lt hk))
+    · have hkj : k + 1 <= j := by omega
+      by_cases hik : i <= k
+      · by_cases hjeq : j = k + 1
+        · subst j
+          simp [insertPointValue, hik, hjk]
+          exact Rat.le_trans
+            (P.monotone i k hik (Nat.le_of_lt hk)) hleft
+        · have hsub : j - 1 <= P.pieces := by omega
+          have hisub : i <= j - 1 := by omega
+          simp [insertPointValue, hik, hjk, hjeq]
+          exact P.monotone i (j - 1) hisub hsub
+      · have hki : k + 1 <= i := by omega
+        by_cases hieq : i = k + 1
+        · subst i
+          by_cases hjeq : j = k + 1
+          · subst j
+            simp [insertPointValue, hjk]
+          · have hsub : j - 1 <= P.pieces := by omega
+            have hbetween : k + 1 <= j - 1 := by omega
+            have hnotik : ¬ (k + 1 <= k) := by omega
+            simp [insertPointValue, hjk, hjeq, hnotik]
+            exact Rat.le_trans hright (P.monotone (k + 1) (j - 1) hbetween hsub)
+        · have hsubi : i - 1 <= P.pieces := by omega
+          have hsubj : j - 1 <= P.pieces := by omega
+          have hisub : i - 1 <= j - 1 := by omega
+          have hjeq : j ≠ k + 1 := by omega
+          simp [insertPointValue, hik, hjk, hieq, hjeq]
+          exact P.monotone (i - 1) (j - 1) hisub hsubj
+
+/-- The old partition is explicitly embedded in a one-point insertion. -/
+def insertPoint_refines {a b : Rat} (P : RationalPartition a b)
+    (k : Nat) (hk : k < P.pieces) (x : Rat)
+    (hleft : P.point k <= x) (hright : x <= P.point (k + 1)) :
+    Refines (insertPoint P k hk x hleft hright) P where
+  index := fun i => if i <= k then i else i + 1
+  index_zero := by simp
+  index_last := by
+    have hnot : ¬ (P.pieces <= k) := by omega
+    simp [hnot, insertPoint]
+  index_mono := by
+    intro i j hij
+    by_cases hik : i <= k
+    · by_cases hjk : j <= k
+      · simp [hik, hjk, hij]
+      · have hle : i <= j + 1 := by omega
+        simp [hik, hjk, hle]
+    · have hjk : ¬ j <= k := by
+        intro hjk
+        exact hik (Nat.le_trans hij hjk)
+      have hle : i + 1 <= j + 1 := Nat.succ_le_succ hij
+      simp [hik, hjk, hle]
+  point_eq := by
+    intro i hi
+    by_cases hik : i <= k
+    · simp [insertPoint, insertPointValue, hik]
+    · have hindex : ¬ (i + 1 <= k) := by omega
+      have hneq : i ≠ k := by omega
+      simp [insertPoint, insertPointValue, hik, hindex, hneq]
+
+/-- A single arbitrary rational breakpoint yields a certified common
+refinement of the old partition and the inserted partition. -/
+def insertPointCommonRefinement {a b : Rat} (P : RationalPartition a b)
+    (k : Nat) (hk : k < P.pieces) (x : Rat)
+    (hleft : P.point k <= x) (hright : x <= P.point (k + 1)) :
+    CommonRefinement P (insertPoint P k hk x hleft hright) where
+  refinement := insertPoint P k hk x hleft hright
+  refines_left := insertPoint_refines P k hk x hleft hright
+  refines_right := Refines.refl _
+
+/-- A finite record of successive rational breakpoint insertions.  Each step
+has its own cell-membership proof, so the resulting refinement is executable
+finite data rather than an existential appeal to density of the rationals. -/
+inductive InsertionChain {a b : Rat} :
+    RationalPartition a b -> RationalPartition a b -> Type
+  | refl (P : RationalPartition a b) : InsertionChain P P
+  | insert {base current : RationalPartition a b}
+      (chain : InsertionChain base current)
+      (k : Nat) (hk : k < current.pieces) (x : Rat)
+      (hleft : current.point k <= x) (hright : x <= current.point (k + 1)) :
+      InsertionChain base (insertPoint current k hk x hleft hright)
+
+/-- A finite insertion chain carries its composite refinement certificate back
+to its starting breakpoint list. -/
+noncomputable def InsertionChain.refines {a b : Rat}
+    {base target : RationalPartition a b} :
+    InsertionChain base target -> Refines target base := by
+  intro chain
+  induction chain with
+  | refl =>
+      exact Refines.refl _
+  | insert chain k hk x hleft hright ih =>
+      exact (insertPoint_refines _ k hk x hleft hright).trans ih
+
+/-- Every endpoint of a finite insertion chain is a common refinement of its
+initial partition and its final explicitly inserted breakpoint list. -/
+noncomputable def InsertionChain.commonRefinement {a b : Rat}
+    {base target : RationalPartition a b}
+    (chain : InsertionChain base target) : CommonRefinement base target where
+  refinement := target
+  refines_left := chain.refines
+  refines_right := Refines.refl target
+
 def cell {a b : Rat} (P : RationalPartition a b)
     (k : Nat) (hk : k < P.pieces) : RationalSubinterval a b where
   lower := P.point k
@@ -1298,6 +1452,48 @@ def cell {a b : Rat} (P : RationalPartition a b)
   upper_mem := by
     have h := P.monotone (k + 1) P.pieces (Nat.succ_le_of_lt hk) (Nat.le_refl P.pieces)
     simpa [P.right_endpoint] using h
+
+/-- Regard a partition's breakpoint list as a total rational path by holding
+its final value constant beyond the last cell.  This permits the finite
+corner-sum estimates to apply directly to partition data. -/
+def clampedPath {a b : Rat} (P : RationalPartition a b) (i : Nat) : Rat :=
+  P.point (min i P.pieces)
+
+theorem clampedPath_eq_point {a b : Rat} (P : RationalPartition a b)
+    {i : Nat} (hi : i <= P.pieces) :
+    P.clampedPath i = P.point i := by
+  simp [clampedPath, Nat.min_eq_left hi]
+
+/-- Successive values of a clamped partition path are nondecreasing. -/
+theorem clampedPath_step_nonnegative {a b : Rat}
+    (P : RationalPartition a b) (i : Nat) :
+    0 <= P.clampedPath (i + 1) - P.clampedPath i := by
+  by_cases hi : i < P.pieces
+  · have hmin : min i P.pieces = i := Nat.min_eq_left (Nat.le_of_lt hi)
+    have hminsucc : min (i + 1) P.pieces = i + 1 :=
+      Nat.min_eq_left (Nat.succ_le_of_lt hi)
+    have hmono := P.monotone i (i + 1) (Nat.le_succ i) (Nat.succ_le_of_lt hi)
+    rw [clampedPath, clampedPath, hmin, hminsucc]
+    grind [Rat.sub_eq_add_neg]
+  · have hpieces : P.pieces <= i := Nat.le_of_not_gt hi
+    have hmin : min i P.pieces = P.pieces := Nat.min_eq_right hpieces
+    have hminsucc : min (i + 1) P.pieces = P.pieces :=
+      Nat.min_eq_right (Nat.le_trans hpieces (Nat.le_succ i))
+    rw [clampedPath, clampedPath, hmin, hminsucc]
+    grind [Rat.sub_eq_add_neg]
+
+/-- The nonnegative corner correction for a partition's own monotone
+breakpoint path is bounded by the square of its endpoint variation.  This
+instantiates the geometric finite integration-by-parts estimate on an actual
+rational partition, ready for cellwise mesh bounds. -/
+theorem clampedPath_quadraticVariation_le_endpointSquare {a b : Rat}
+    (P : RationalPartition a b) :
+    quadraticVariationSum P.clampedPath P.clampedPath P.pieces <=
+      (b - a) * (b - a) := by
+  have h := quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative
+    P.clampedPath P.clampedPath
+    (clampedPath_step_nonnegative P) (clampedPath_step_nonnegative P) P.pieces
+  simpa [clampedPath, P.left_endpoint, P.right_endpoint] using h
 
 def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
     (bound : (k : Nat) -> k < P.pieces -> QInterval) : QInterval :=
