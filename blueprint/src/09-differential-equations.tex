@@ -152,11 +152,21 @@ The certified solution is the displayed variation-of-constants raw vector.
 Its executable modulus is assembled from the coefficient enclosure, simplex
 quadrature error, and the Peano--Baker factorial tail.  If two certified
 solutions have the same initial box, their difference solves the homogeneous
-system with zero initial data; the state transition therefore proves equality
-without an ambient complete function space.  Thus the continuous
-Peano--Baker layer is the linear Picard--Lindel\"of theorem needed for
-science and engineering, including the scalar uniqueness route for
-\(f'=f\).
+system with zero initial data.  The uniqueness proof must be a universal
+finite estimate, not merely a claim about the constructed solution.  Given a
+rational bound \(B\) for a candidate difference \(z\), iterate its Volterra
+identity \(z(t)=\int_s^tA(u)z(u)\,\dd u\) exactly \(N\) times.  A coefficient
+bound \(\lVert A(u)\rVert\le M\) on an interval of length \(T\) then gives
+\[
+  \lVert z(t)\rVert\le B\,\frac{(MT)^N}{N!}.
+\]
+The same rational factorial-tail certificate used to construct the
+Peano--Baker series makes this bound smaller than every requested positive
+rational.  Hence \(z(t)=0\) as a raw real, and the two solutions agree,
+without an ambient complete function space or a nonconstructive supremum.
+Thus the continuous Peano--Baker layer is the linear Picard--Lindel\"of
+theorem needed for science and engineering, including the scalar uniqueness
+route for \(f'=f\).
 
 This deliberately does not assert the general nonlinear theorem: that later
 extension needs an interval-certified Lipschitz map and a separate Picard

@@ -415,6 +415,50 @@ bare alternating-series or Darboux validity proofs: specifically, the checked
 right mesh above must still be compared with the nested dyadic Darboux boxes.
 \end{definition}
 
+\begin{remark}[A deliberately long ODE--exponential--logarithm--pi route]
+\label{rem:ode-exp-log-pi-route}
+The project should make one pi equivalence exercise the elementary-function
+and ODE layers rather than obtain every pi row from arctangent alone.  The
+natural route is the integration-by-parts identity
+\[
+  \pi
+   =4\int_0^1\arctan(x)\,\dd x+2\log 2.
+\]
+Its intended proof order is:
+\begin{enumerate}
+  \item construct the continuous Peano--Baker state transition and its
+  factorial tail; \cref{thm:linear-picard-lindelof} then gives constructive
+  existence and uniqueness for \(x'=A(t)x+b(t)\);
+  \item specialize to \(f'=f,\ f(0)=1\).  Once the power-series,
+  Euler-limit, and inverse-logarithmic-integral exponentials all satisfy this
+  problem, uniqueness proves that the three exponential representations
+  agree;
+  \item use the inverse-function and FTC certificates to identify the
+  positive logarithmic integral with the inverse of that canonical
+  exponential.  Separately finish the finite comparison from
+  \cref{prop:log-two-series-right-riemann} to the dyadic Darboux boxes; this
+  transports the alternating series at two to the same \(\log 2\);
+  \item prove the arctangent derivative and the common
+  increasing/decreasing-piece integration-by-parts theorem.  The rational
+  identity
+  \[
+    \int_0^1\arctan(x)\,\dd x
+      =\frac{\pi}{4}-\frac12\log 2
+  \]
+  follows from \((x\arctan x)'=\arctan x+x/(1+x^2)\) and the
+  logarithmic endpoint calculation;
+  \item package the right-hand side as a valid raw pi evaluator and prove it
+  equivalent to the geometric circle-area presentation.
+\end{enumerate}
+Thus this one final equality deliberately depends on exp/log agreement and
+therefore on linear ODE uniqueness.  It is not currently a scoreboard cell:
+every arrow above must be a checked finite certificate first.  A later,
+strictly longer complex corroboration is
+\(\pi=-2i\log(i)\); it additionally needs extension from rational names to
+represented complex inputs and the agreement of the circular and exponential
+solutions of the \(2\)-dimensional rotation system.
+\end{remark}
+
 \section{Complex logarithm at \texorpdfstring{$i$}{i}}
 
 \begin{definition}[Logarithm from local power-series continuation]

@@ -48,6 +48,30 @@ row; an equivalence proof does not silently transfer a stage-by-stage rate to
 every other presentation.  It is therefore a useful cost/precision diagnostic
 for the constructive witness, not an additional measure of theorem importance.
 
+\paragraph{Named future coverage rows (unmarked).}
+These are part of the scoreboard so their required foundations remain visible,
+but neither contributes to the checked registry until both a valid evaluator
+and its \code{RealRaw.Equiv} bridge are formalized.
+\begin{center}
+\begin{tabular}{@{}p{0.23\textwidth}p{0.31\textwidth}p{0.21\textwidth}cc@{}}
+\textbf{Theorem family} & \textbf{Content to exercise} &
+\textbf{Planned certificate} & \textbf{Def.} & \textbf{Registry}\\
+\hline
+Arctangent integration by parts &
+\(\pi=4\int_0^1\arctan(x)\,\dd x+2\log2\); product/FTC, the canonical
+logarithm, and the common monotone-piece refinement &
+finite product/partition error plus the \(\log2\) endpoint modulus &
+-- & --\\
+Euler identity and complex logarithm &
+for \(a=\arctan_{\mathrm{geom}}(1)\),
+\(\exp(2ia)=i\), hence
+\(\exp(i\pi/2)=i\) and \(\pi=-2i\log(i)\) &
+matrix Peano--Baker factorial tail, represented-input extension, rotation
+system and branch-agreement moduli &
+-- & --\\
+\end{tabular}
+\end{center}
+
 The primary \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two
 perimeter normalizations, Nilakantha, and the single Machin power-series
@@ -71,7 +95,13 @@ integral evaluation; only the derived agreement of its raw presentation with
 the preferred pi presentation belongs in the registry.  Its finite rational
 rectangle identity is now checked, but the cell remains unmarked until the
 product/derivative/FTC bridge, common increasing/decreasing-piece refinement,
-and logarithm endpoint identity are all constructive.  The arcsine/Newton and
-Gaussian rows remain future probes for inverse/square-root integration and the
-exponential/full-line layers; advanced routes are intentionally omitted from
-this progress table.
+and logarithm endpoint identity are all constructive.  This is deliberately
+the long elementary-function route: its \(\log 2\) endpoint must agree with
+the inverse of the canonical exponential, whose representation agreement is
+proved by the linear Peano--Baker/Picard--Lindel\"of uniqueness theorem.
+Thus the prospective row tests a capability the arctangent rows do not.
+The Euler/complex-logarithm row above is a second, longer exp/log/ODE
+corroboration; it remains unmarked until its explicit complex certificates are
+present.  The arcsine/Newton and Gaussian rows remain future probes for
+inverse/square-root integration and the exponential/full-line layers; other
+advanced routes are intentionally omitted from this progress table.

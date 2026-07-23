@@ -84,6 +84,7 @@ capability—not a percentage for the whole foundation.
 | arctangent integral evaluation | integral and series presentations agree | rectangle $\pi$ raw: $w_n\le16/(n+1)$ |
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
+| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | Planned: matrix Peano--Baker factorial tail plus represented-input extension modulus |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,
@@ -103,7 +104,11 @@ integration-by-parts evaluation, not another arctangent variant.  Its public
 statement will be the natural integral formula; its derived presentation
 agreement will become a sixth coverage bridge only after the remaining
 product-derivative/FTC route, its common monotone-piece refinement, and the
-logarithm endpoint identity are all checked.  The positive bounded product
+logarithm endpoint identity are all checked.  This is intentionally the long
+elementary-function route: identify `log 2` with the inverse of the canonical
+exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
+exponential representations agree, then use
+`pi = 4 * integral_0^1(arctan x) + 2 * log 2`.  The positive bounded product
 representation itself is now checked, with an explicit width bound and
 representation-respect theorem.  The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
@@ -181,8 +186,9 @@ The following longer table preserves every checked implementation and future
 probe.  It is a regression inventory, not the progress board: Machin is the
 single power-series formula, while Nilakantha and the normalization variants
 are supplementary tests; the direct perimeter, arcsine/Newton, and Gaussian
-entries diagnose future calculus gates.  Basel, Brouncker, and logarithm at
-`i` are advanced-analysis entries, not scientific-calculus prerequisites.
+entries diagnose future calculus gates.  Basel and Brouncker remain
+advanced-analysis entries; the Euler/logarithm-at-`i` route is now a named,
+unmarked long scoreboard target because it exercises the exp/log/ODE chain.
 
 | Computation | Blueprint | Formula | Def. | Equiv. |
 | --- | --- | --- | --- | --- |

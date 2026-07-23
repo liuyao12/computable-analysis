@@ -216,6 +216,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
   It requires the remaining product-derivative/FTC bridge, the explicit monotone-piece
   refinement, the arctangent derivative, and the logarithm endpoint identity.
+  This is deliberately the long exp/log/ODE route: first identify the
+  logarithmic integral with the inverse of canonical exponential, use the
+  linear Peano--Baker/Picard--Lindelöf uniqueness theorem to equate the
+  power-series, Euler, and inverse-integral exponentials, then transport the
+  resulting `log 2` through the integration-by-parts identity.  A later
+  complex corroboration can prove `pi = -2i * log(i)`, but it needs
+  represented-input extension and the rotation-system bridge in addition.
   `Logarithm.logTwoSeries` now supplies a valid, rate-certified alternating
   harmonic raw presentation of `log 2`.  Its lower endpoint is now proved
   exactly equal, for every positive mesh count, to the literal uniform right
@@ -785,9 +792,13 @@ students actually compute.
   `pi.curvatureFan` raw evaluator; it remains outside the coverage count.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
-  exponential/full-line probes.  Basel, Brouncker, and logarithm-at-`i` are
-  advanced-analysis topics, deliberately outside the scientific-calculus
-  progress board.  The primary gates remain the no-completeness audit,
+  exponential/full-line probes.  Basel and Brouncker are advanced-analysis
+  topics outside the scientific-calculus progress board.  Euler identity with
+  the complex logarithm is instead a named but unmarked long scoreboard
+  target: it should establish `exp(i * pi / 2) = i` and
+  `pi = -2i * log(i)` by the complex rotation-system extension of the linear
+  Peano--Baker uniqueness theorem.  The primary gates remain the
+  no-completeness audit,
   epsilon--delta continuity and extension, finite integration/FTC, inverse
   functions, differentiated elementary functions, and continuous ODE
   solution operators.
