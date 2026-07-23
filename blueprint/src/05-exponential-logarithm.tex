@@ -311,6 +311,29 @@ and \(\exp(x+y)=\exp(x)\exp(y)\) should be proved from uniqueness of the
 inverse and then transported between representations.
 \end{definition}
 
+\begin{proposition}[Positive reciprocal continuity at two]
+\label{prop:one-over-x-one-two-continuity}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_intervalRegular}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_epsilonDeltaContinuous}
+\uses{def:logarithm-integral}
+The kernel \(x\mapsto1/x\) on \([1,2]\) has a concrete interval evaluator:
+for a rational input interval \(I=[p,r]\subseteq[1,2]\), it returns
+\[
+ \left[\frac1r,\frac1p\right].
+\]
+It contains every exact rational point value in \(I\).  Its width is
+\[
+ \frac1p-\frac1r
+   =(r-p)\frac1{pr}\le r-p,
+\]
+so the input modulus \(r-p\le1/(n+1)\) produces an output box of width at
+most \(1/(n+1)\).  Lean therefore proves the literal rational
+\(\varepsilon\)--\(\delta\) continuity predicate for this kernel, without
+topology or real-number completeness.  The remaining step toward the
+logarithmic integral is not continuity but the reusable construction turning
+such interval boxes into a certified integral raw real.
+\end{proposition}
+
 \begin{definition}[The logarithmic series at two]
 \label{def:log-two-series}
 \lean{ComputableAnalysis.Logarithm.logTwoSeries}

@@ -123,6 +123,10 @@ presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
 certified `O(1/n)` rate.  Its identification with the reciprocal-kernel
 integral remains open, so it is a prerequisite rather than a completed
 integration-by-parts route.
+The reciprocal kernel itself now has a finite interval-regularity and
+epsilon--delta continuity proof on `[1,2]`, using `[1/r, 1/p]` for an input
+box `[p,r]`; only the generic construction of the corresponding integral is
+still absent.
 The dyadic stages used by existing Riemann
 algorithms now have direct point-preservation and mesh-halving theorems as
 well.  The finite corner correction now has a checked rational vanishing

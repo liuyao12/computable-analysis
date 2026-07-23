@@ -527,6 +527,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   See `Elementary.LogFromMonotoneExp`, `Elementary.LogFromIntegralInv`, and
   `Elementary.LogIntegralAgreesWithInverseExp` in
   `ComputableAnalysis/Elementary.lean`.
+  The concrete reciprocal kernel is now interval-regular, and hence has
+  literal rational epsilon--delta continuity, on `[1,2]`:
+  `Logarithm.oneOverXOnOneTwo_intervalRegular` uses the exact enclosure
+  `[1/r, 1/p]` for each rational `[p,r]`.  The missing logarithm-at-two
+  bridge is the general construction of its integral, not a continuity or
+  topology assumption.
 - Power-series representations of `sin` and `cos` are named in
   `ComputableAnalysis/ElementaryFunctions.lean`.
 - Hyperbolic sine and cosine have constructive exponential representations

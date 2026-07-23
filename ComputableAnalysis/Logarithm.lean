@@ -1,4 +1,5 @@
 import ComputableAnalysis.FTC
+import ComputableAnalysis.FunctionDomains
 
 /-!
 # A certified logarithmic-series value
@@ -14,6 +15,117 @@ construction and FTC bridge.
 namespace ComputableAnalysis
 
 namespace Logarithm
+
+/-- Reciprocation reverses the positive rational order.  This finite lemma is
+the only order calculation needed for the interval evaluator of `1/x`. -/
+private theorem one_div_antitone_of_pos {a b : Rat}
+    (ha : 0 < a) (hab : a <= b) :
+    1 / b <= 1 / a := by
+  have hb : 0 < b := by grind
+  have hane : a ≠ 0 := Rat.ne_of_gt ha
+  have hbne : b ≠ 0 := Rat.ne_of_gt hb
+  have habpos : 0 < a * b := Rat.mul_pos ha hb
+  apply Rat.le_of_mul_le_mul_right (c := a * b)
+  · calc
+      (1 / b) * (a * b) = a := by
+        rw [Rat.div_def]
+        have hcancel : b * b⁻¹ = 1 := Rat.mul_inv_cancel b hbne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= b := hab
+      _ = (1 / a) * (a * b) := by
+        rw [Rat.div_def]
+        have hcancel : a * a⁻¹ = 1 := Rat.mul_inv_cancel a hane
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact habpos
+
+/-- Interval evaluation of the positive reciprocal kernel on `[1,2]`. -/
+def oneOverXOneTwoEvalInterval (I : QInterval) : QInterval :=
+  { lo := 1 / I.hi, hi := 1 / I.lo }
+
+private theorem oneOverXOneTwoEvalInterval_width
+    {I : QInterval} (hI : subintervalOf I 1 2) :
+    (oneOverXOneTwoEvalInterval I).width =
+      I.width * (1 / (I.lo * I.hi)) := by
+  rcases hI with ⟨hlo, _hord, _hhi⟩
+  have hlopos : 0 < I.lo := by grind
+  have hhipos : 0 < I.hi := by grind
+  have hlone : I.lo ≠ 0 := Rat.ne_of_gt hlopos
+  have hhine : I.hi ≠ 0 := Rat.ne_of_gt hhipos
+  unfold oneOverXOneTwoEvalInterval QInterval.width
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have hlocancel : I.lo * I.lo⁻¹ = 1 := Rat.mul_inv_cancel I.lo hlone
+  have hhicancel : I.hi * I.hi⁻¹ = 1 := Rat.mul_inv_cancel I.hi hhine
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The positive reciprocal kernel is interval-regular on `[1,2]`.
+
+This is a literal rational certificate: an input interval of width at most
+`1/(n+1)` is mapped to a reciprocal interval of no greater width.  It uses no
+topological space, no completed real line, and no analytic import. -/
+def oneOverXOnOneTwo_intervalRegular :
+    IntervalRegularOn
+      (RatFun.oneOverXOnPositiveInterval 1 2 (by native_decide)) := by
+  refine
+    { evalInterval := fun I _ _ => oneOverXOneTwoEvalInterval I
+      inputPrecision := fun n => n + 1
+      inputPrecision_pos := by
+        intro n
+        omega
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hwidth
+    change (1 : Rat) <= I.lo /\ I.lo <= I.hi /\ I.hi <= 2 at hI
+    rcases hI with ⟨hlo, hord, hhi⟩
+    have hlopos : 0 < I.lo := by grind
+    have hhipos : 0 < I.hi := by grind
+    have hwidth_nonneg : 0 <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hprod_ge_one : 1 <= I.lo * I.hi := by
+      calc
+        (1 : Rat) = 1 * 1 := by native_decide
+        _ <= I.lo * 1 := Rat.mul_le_mul_of_nonneg_right hlo (by native_decide)
+        _ <= I.lo * I.hi := Rat.mul_le_mul_of_nonneg_left
+          (Rat.le_trans hlo hord) (Rat.le_of_lt hlopos)
+    have hrecip_le_one : 1 / (I.lo * I.hi) <= 1 := by
+      have h := one_div_antitone_of_pos
+        (a := (1 : Rat)) (b := I.lo * I.hi) (by native_decide) hprod_ge_one
+      calc
+        1 / (I.lo * I.hi) <= 1 / (1 : Rat) := h
+        _ = 1 := by native_decide
+    constructor
+    · rw [oneOverXOneTwoEvalInterval_width ⟨hlo, hord, hhi⟩]
+      have hrecip_nonneg : 0 <= 1 / (I.lo * I.hi) := by
+        rw [Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos hlopos hhipos))
+      exact Rat.mul_nonneg hwidth_nonneg hrecip_nonneg
+    · rw [oneOverXOneTwoEvalInterval_width ⟨hlo, hord, hhi⟩]
+      calc
+        I.width * (1 / (I.lo * I.hi)) <= I.width * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hrecip_le_one hwidth_nonneg
+        _ = I.width := by grind
+        _ <= 1 / (((n + 1 : Nat) : Rat)) := hwidth
+  · intro I hI x hx n hxlo hxhi
+    change (1 : Rat) <= I.lo /\ I.lo <= I.hi /\ I.hi <= 2 at hI
+    rcases hI with ⟨hlo, _hord, _hhi⟩
+    change (1 : Rat) <= x /\ x <= 2 at hx
+    have hxpos : 0 < x := by grind
+    change (oneOverXOneTwoEvalInterval I).ContainsInterval
+      ((RatFun.oneOverXOnPositiveInterval 1 2 (by native_decide)).compute x hx n)
+    rw [RatFun.oneOverXOnPositiveInterval_compute_eq 1 2
+      (by native_decide) x hx n]
+    unfold oneOverXOneTwoEvalInterval QInterval.ContainsInterval
+    constructor
+    · exact one_div_antitone_of_pos hxpos hxhi
+    · exact one_div_antitone_of_pos (by grind) hxlo
+
+/-- The reciprocal kernel `x ↦ 1/x` on `[1,2]` satisfies the project's
+literal epsilon--delta continuity definition. -/
+theorem oneOverXOnOneTwo_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn
+      (RatFun.oneOverXOnPositiveInterval 1 2 (by native_decide)) :=
+  oneOverXOnOneTwo_intervalRegular.epsilonDeltaContinuous
 
 /-- One paired update of the alternating harmonic enclosure for `log 2`.
 
