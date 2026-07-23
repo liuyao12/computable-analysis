@@ -216,7 +216,7 @@ another. The Pi score stays useful only as secondary integration coverage.
   corner correction is at most `1/(eps.den + 1) <= eps`; independently,
   rectangle evaluation stage `4 * (eps.den + 1)` makes every sampled box
   have width at most `eps`.  What remains is to connect these finite
-  estimates through the product, derivative, and FTC certificates.  The
+  estimates through the product-derivative and FTC certificates.  The
   general finite merge
   is now checked: `commonRefinementOfPartitions` inserts the right
   `breakpointList` into the left partition and recovers the second ordered
@@ -237,8 +237,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   width bounded by `Bx * width(y) + By * width(x)`, and
   `RealRaw.mul_equiv_of_nonneg` preserves changes of certified
   representation.  `RealFunRaw.mul_valid_of_nonneg_bounded` lifts this
-  pointwise to rational-input functions.  This is the product layer needed
-  for the positive `x * arctan x` branch on `[0,1]`; a general signed product,
+  pointwise to rational-input functions.  `FunctionOnInterval.mulOfNonnegBounded`
+  now turns that into a domain-aware interval function.  Its first concrete
+  use is `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit`:
+  the exact coordinate factor and the geometric arctangent rectangle factor
+  are uniformly bounded in `[0,1]`, and its stage box is proved to be
+  `[x * A.lo, x * A.hi]`.  This is the product representation needed for
+  the positive `x * arctan x` branch on `[0,1]`; a general signed product,
   product derivative rule, and its FTC comparison are still open.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove

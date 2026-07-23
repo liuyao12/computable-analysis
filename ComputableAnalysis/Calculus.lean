@@ -2897,6 +2897,71 @@ theorem exactRat_compute (f : Rat -> Rat) (a b x : Rat)
     (exactRat f a b).compute x hx n = { lo := f x, hi := f x } :=
   rfl
 
+/-- The pointwise interval product of two functions on the same rational
+interval, under explicit nonnegative rational bounds for both factors.
+
+This is an evaluator-level construction.  It intentionally supplies neither
+a product-derivative theorem nor an integral construction: those require
+separate finite certificates. -/
+def mulOfNonnegBounded
+    (F G : FunctionOnInterval)
+    (same_lower : F.lower = G.lower) (same_upper : F.upper = G.upper)
+    (Fbounds : forall x (hx : inDomainInterval F.lower F.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (F.compute x hx n).lo /\ (F.compute x hx n).hi <= B)
+    (Gbounds : forall x (hx : inDomainInterval G.lower G.upper x),
+      Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (G.compute x hx n).lo /\ (G.compute x hx n).hi <= B) :
+    FunctionOnInterval where
+  raw :=
+    { definedAt := fun x =>
+        inDomainInterval F.lower F.upper x /\
+          F.raw.definedAt x /\ G.raw.definedAt x
+      compute := fun x hx n =>
+        QBox.mulRealInterval
+          (F.raw.compute x hx.2.1 n).lo (F.raw.compute x hx.2.1 n).hi
+          (G.raw.compute x hx.2.2 n).lo (G.raw.compute x hx.2.2 n).hi }
+  lower := F.lower
+  upper := F.upper
+  defined_on := by
+    intro x hx
+    refine ⟨hx, F.defined_on x hx, G.defined_on x ?_⟩
+    constructor
+    · rw [← same_lower]
+      exact hx.1
+    · rw [← same_upper]
+      exact hx.2
+  valid_on := by
+    intro x hx
+    let hxF : inDomainInterval F.lower F.upper x := hx.1
+    let hxG : inDomainInterval G.lower G.upper x := by
+      constructor
+      · rw [← same_lower]
+        exact hxF.1
+      · rw [← same_upper]
+        exact hxF.2
+    rcases Fbounds x hxF with ⟨BF, hBF, hFbounds⟩
+    rcases Gbounds x hxG with ⟨BG, hBG, hGbounds⟩
+    let X : RealRaw := { compute := F.raw.compute x hx.2.1 }
+    let Y : RealRaw := { compute := G.raw.compute x hx.2.2 }
+    have hX : X.Valid := by
+      simpa [X, RealRaw.Valid] using F.valid_on x hx.2.1
+    have hY : Y.Valid := by
+      simpa [Y, RealRaw.Valid] using G.valid_on x hx.2.2
+    have hXbounds : forall n,
+        0 <= (X.compute n).lo /\ (X.compute n).hi <= BF := by
+      intro n
+      simpa [X] using hFbounds n
+    have hYbounds : forall n,
+        0 <= (Y.compute n).lo /\ (Y.compute n).hi <= BG := by
+      intro n
+      simpa [Y] using hGbounds n
+    have hproduct : (X * Y).Valid :=
+      RealRaw.mul_valid_of_nonneg_bounded
+        hX hY hBF hBG hXbounds hYbounds
+    simpa [X, Y, RealRaw.mul, RealRaw.mulCompute] using
+      hproduct
+
 def secantSlopeInterval (F : FunctionOnInterval)
     (x y : Rat)
     (hx : inDomainInterval F.lower F.upper x)

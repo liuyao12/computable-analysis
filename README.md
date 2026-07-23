@@ -54,7 +54,7 @@ the gates have different dependencies and none can substitute for another.
 | --- | --- | --- |
 | Rational interval foundation | `RealRaw.Valid`, equivalence by overlap, and the no-completeness/no-Mathlib-analysis audit | Continue dependency auditing as modules grow |
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit` is a checked non-exact interval-regular example with a quadratic modulus | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
-| Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products, and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
+| Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
 | Differentiated elementary functions | Formal power-series derivative table and finite-difference affine/square examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, and discrete variation of constants are checked | Interval-matrix simplex integrals and factorial tails yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
@@ -109,8 +109,11 @@ elementary-function route: identify `log 2` with the inverse of the canonical
 exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
 exponential representations agree, then use
 `pi = 4 * integral_0^1(arctan x) + 2 * log 2`.  The positive bounded product
-representation itself is now checked, with an explicit width bound and
-representation-respect theorem.  The uniform-grid core of that
+representation itself is now checked, including the concrete domain-aware
+`IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit` evaluator:
+at every stage it is exactly the two-corner box `[x * A.lo, x * A.hi]`.
+The product derivative and FTC comparison are deliberately still separate.
+The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
 both the `m` and `n` grids, and its mesh is the old width divided by the
 positive factor.  The two embeddings are packaged as a checked
@@ -135,7 +138,7 @@ arbitrary adjacent box endpoints as a monotone path.  Its two finite error
 knobs are now explicit: mesh `eps.den + 1` makes the corner correction at
 most `eps`, while evaluation stage `4 * (eps.den + 1)` makes each selected
 sample lie within `eps` of either endpoint of its rectangle box.  The
-remaining arctangent--logarithm route work is the product, derivative, and
+remaining arctangent--logarithm route work is the product-derivative and
 FTC comparison certificates that connect these finite samples to the
 displayed integrals.
 `Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw

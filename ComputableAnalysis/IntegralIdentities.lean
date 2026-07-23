@@ -1929,6 +1929,86 @@ def arctanIntegralRectangleOnUnit_monotone :
   MonotoneOnInterval.ofNondecreasing
     arctanIntegralRectangleOnUnit_nondecreasing
 
+/-- The exact coordinate evaluator on the unit interval.  It is the first
+factor in the literal product `x * arctan x` used by the constructive
+integration-by-parts route. -/
+def coordinateOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat (fun x => x) 0 1
+
+theorem coordinateOnUnit_bounds :
+    forall x (hx : inDomainInterval coordinateOnUnit.lower
+      coordinateOnUnit.upper x), Exists fun B : Rat => 0 < B /\ forall n,
+        0 <= (coordinateOnUnit.compute x hx n).lo /\
+          (coordinateOnUnit.compute x hx n).hi <= B := by
+  intro x hx
+  refine ⟨1, by native_decide, ?_⟩
+  intro n
+  change 0 <= x /\ x <= 1
+  exact hx
+
+/-- Uniform nonnegative bounds for the geometric arctangent rectangles on
+the unit branch. -/
+theorem arctanIntegralRectangleOnUnit_bounds :
+    forall x (hx : inDomainInterval arctanIntegralRectangleOnUnit.lower
+      arctanIntegralRectangleOnUnit.upper x), Exists fun B : Rat => 0 < B /\
+        forall n, 0 <= (arctanIntegralRectangleOnUnit.compute x hx n).lo /\
+          (arctanIntegralRectangleOnUnit.compute x hx n).hi <= B := by
+  intro x hx
+  refine ⟨1, by native_decide, ?_⟩
+  intro n
+  change
+    0 <= (ArctanGeometry.arctanIntegralRectangleCompute x n).lo /\
+      (ArctanGeometry.arctanIntegralRectangleCompute x n).hi <= 1
+  constructor
+  · exact ArctanGeometry.arctanIntegralRectangleCompute_lower_nonnegative
+      hx.1 n
+  · exact Rat.le_trans
+      (ArctanGeometry.arctanIntegralRectangleCompute_upper_le_input hx.1 n)
+      hx.2
+
+/-- The certified evaluator-level product `x * arctan x` on the unit
+interval.  The construction uses only positive interval multiplication; it
+does not assert a product derivative or an integral identity. -/
+def coordinateTimesArctanIntegralRectangleOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.mulOfNonnegBounded
+    coordinateOnUnit arctanIntegralRectangleOnUnit rfl rfl
+    coordinateOnUnit_bounds arctanIntegralRectangleOnUnit_bounds
+
+/-- At every rational input and precision, the product evaluator is the
+literal interval product of the exact coordinate and arctangent rectangle
+boxes. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_compute
+    (x : Rat)
+    (hx : inDomainInterval coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper x) (n : Nat) :
+    coordinateTimesArctanIntegralRectangleOnUnit.compute x hx n =
+      QBox.mulRealInterval x x
+        (ArctanGeometry.arctanIntegralRectangleCompute x n).lo
+        (ArctanGeometry.arctanIntegralRectangleCompute x n).hi := by
+  rfl
+
+/-- Since both factors are nonnegative on the unit interval, the four-corner
+interval product for `x * arctan x` reduces to its lower--lower and
+upper--upper corners. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg
+    (x : Rat)
+    (hx : inDomainInterval coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper x) (n : Nat) :
+    coordinateTimesArctanIntegralRectangleOnUnit.compute x hx n =
+      { lo := x * (ArctanGeometry.arctanIntegralRectangleCompute x n).lo,
+        hi := x * (ArctanGeometry.arctanIntegralRectangleCompute x n).hi } := by
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_compute x hx n]
+  apply QBox.mulRealInterval_of_nonneg
+  · exact hx.1
+  · exact Rat.le_refl
+  · exact ArctanGeometry.arctanIntegralRectangleCompute_lower_nonnegative
+      hx.1 n
+  · have hordered :
+        0 <= (ArctanGeometry.arctanIntegralRectangleCompute x n).width :=
+      ArctanGeometry.arctanIntegralRectangleCompute_ordered hx.1 n
+    unfold QInterval.width at hordered
+    grind [Rat.sub_eq_add_neg]
+
 /-- The fixed-stage arctangent boxes along a unit mesh, held at the final
 mesh point after the last cell.  This produces a total box path suitable
 for the finite integration-by-parts sums. -/

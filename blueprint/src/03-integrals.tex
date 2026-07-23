@@ -328,14 +328,26 @@ or decreasing pieces and the two decompositions are replaced by a common
 rational refinement.  The corner correction is then bounded piece by piece
 by their signed variations.  This is a finite interval estimate, not an
 appeal to completeness or an implicit choice of a variation decomposition.
-The product representation needed to promote the finite identity has now
-been checked on its first useful domain: a pointwise product of two
-nonnegative rational-input functions is valid when each value carries a
-positive rational upper bound.  Its width is controlled by the two factor
-widths and those bounds.  This supplies the positive bounded product layer
-for the intended \(x\arctan x\) calculation on \([0,1]\); the product
-derivative rule, its FTC comparison, and the logarithm endpoint identity are
-still required before the resulting pi formula is claimed.
+The product representation needed to promote the finite identity is kept
+separate from the product rule.  On \([0,1]\), let \(X(x)=[x,x]\) be the
+exact coordinate box and let \(A(x,n)=[A_{\mathrm{lo}}(x,n),A_{\mathrm{hi}}(x,n)]\) be the
+rectangle evaluator for arctangent.  Both factors have certified endpoints
+in \([0,1]\).  Hence their literal interval product has the monotone
+corner form
+\[
+  P(x,n)=[xA_{\mathrm{lo}}(x,n),\,xA_{\mathrm{hi}}(x,n)].
+\]
+More generally, a pointwise product of two nonnegative rational-input
+functions is valid when each value carries a positive rational upper bound;
+its width is controlled by the two factor widths and those bounds.  The Lean
+development instantiates
+this construction as the concrete function \(P=xA\) on the unit interval,
+and proves that its evaluator reduces to the displayed two-corner box.
+This is an evaluator-level representation of \(x\arctan x\), not yet a claim that
+\((x\arctan x)'=\arctan x+x/(1+x^2)\), nor that the finite sums compare
+to the displayed integrals.  Those product-derivative, FTC, and logarithm
+endpoint certificates remain required before the resulting pi formula is
+claimed.
 \end{theorem}
 
 \section{A constructive integration-by-parts certificate}
@@ -477,8 +489,8 @@ Independently, every rectangle box at stage \(r\) has width at most
 \(4/(r+1)\leq\varepsilon\), so the selected rational sample is within
 \(\varepsilon\) of either endpoint of its own box.  These are checked
 finite inequalities, not an appeal to a limiting partition.  They do not
-yet identify a sampled sum with an integral or discharge the product,
-derivative, and FTC comparison certificates needed by the later
+yet identify a sampled sum with an integral or discharge the
+product-derivative and FTC comparison certificates needed by the later
 integration-by-parts theorem.
 \end{definition}
 
@@ -501,7 +513,7 @@ turn the unit-mesh statement into a checked finite rational corner estimate;
 the two explicit stages above also bound the rectangle sampling error.
 Thus the geometric unit-branch bounds are now an executable finite budget,
 rather than an asymptotic assertion.  Completing the displayed integral identity still
-requires the separate product, derivative, and FTC certificates.  With
+requires the separate product-derivative and FTC certificates.  With
 those certificates, the resulting construction will give
 \[
  \int_0^1\arctan(x)\,\dd x
