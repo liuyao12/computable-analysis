@@ -765,8 +765,10 @@ students actually compute.
   be major calculus progress without adding a π row.
   `PiPresentation.integrationFamily` and the full registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
-  regressions.  The original direct perimeter is a square-root-enclosure
-  diagnostic; arcsine/Newton and Gaussian are future inverse/integral and
+  regressions.  The separately named `pi.curvatureFan` is another checked
+  finite-geometry representation, so it remains outside the coverage count.
+  The original direct perimeter is a square-root-enclosure diagnostic;
+  arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel, Brouncker, and logarithm-at-`i` are
   advanced-analysis topics, deliberately outside the scientific-calculus
   progress board.  The primary gates remain the no-completeness audit,
@@ -858,6 +860,9 @@ students actually compute.
   names, and `PiProofs.piCertifiedPresentation` retrieves a certified raw
   representative without depending on a list position. This turns the Pi
   suite into an integration registry rather than a progress percentage. The
+  supplementary `PiProofs.pi.curvatureFan` exposes the independently checked
+  curvature-corrected fan as a named `Real.Representation`; it is not another
+  calculus-coverage row. The
   stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical
@@ -894,10 +899,11 @@ students actually compute.
   `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
   combines its all-stage form with the proved outer endpoint.  The original
   direct circumference row remains uncounted until that local bisection
-  comparison is proved.  A curvature-corrected fan remains a design note
-  only: it must first acquire a self-contained finite proof of its outer
-  bound and dyadic refinement before it can become a checked representative,
-  and it will not count as a primary calculus milestone.
+  comparison is proved.  The distinct curvature-corrected fan now has a
+  self-contained finite outer bound, dyadic refinement, and same-stage
+  agreement with `piCircleArea`, and is exposed as the checked supplementary
+  representation `pi.curvatureFan`.  It remains outside the primary calculus
+  milestones.
 
 ### Archived pre-refactor notes (not current source)
 

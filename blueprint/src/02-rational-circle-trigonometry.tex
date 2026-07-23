@@ -742,6 +742,10 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.pi.presentation}
 \lean{ComputableAnalysis.PiProofs.pi.circleArea}
 \lean{ComputableAnalysis.PiProofs.pi.machin}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.curvatureFan}
 \uses{thm:finite-archimedes,def:raw-real}
 The public area loop is a valid raw real.  The circumference computation is
 ordered and has a proved width-shrinking bound, but it is not yet certified as
@@ -775,10 +779,14 @@ interval-normalization tool, not a proof of the direct perimeter
 endpoint-refinement theorem and not a new scoreboard row. The older
 \code{piCircumferenceReboxed} reads area intervals at evaluation time and is
 retained as a second certified alternative.
-The curvature-corrected cross-fan is retained only as an internal design
-note.  It is not a checked representative or a scoreboard row: its proposed
-second-order correction still needs a self-contained finite proof that it
-stays below the outer envelope and refines under dyadic subdivision.
+The distinct curvature-corrected cross-fan is now a checked supplementary
+representative.  Its lower endpoint is a finite rational chord correction;
+its upper endpoint is the independently certified outer polygonal path.
+Lean proves its dyadic refinement, width shrinkage, and same-stage agreement
+with the area loop.  It is exposed at the abstract-real layer as
+\code{pi.curvatureFan}.  This does not repair the original direct-perimeter
+endpoint-refinement theorem, nor does it create another scoreboard row:
+it is a second finite-geometry implementation of the same capability.
 The project-facing certified value \code{PiProofs.piCertified} chooses the
 area loop as its evaluator and records the checked completed presentations
 as verified alternatives: the polygon area and cross-fan routes, the two
@@ -792,11 +800,12 @@ the compact \code{PiProofs.PiCoverageBridge} suite records only distinct
 end-to-end capability bridges.  The unfinished direct perimeter computation
 is retained as a square-root-enclosure diagnostic, rather than as a missing
 unit of calculus progress.
-For use at the abstract-real layer, the same registry is also exposed as
-\code{PiProofs.pi}: \code{pi.circleArea.raw} and \code{pi.machin.raw}, for
-example, are named raw computations equipped with agreement proofs to the one
-certified pi handle.  This is a naming façade over \code{Real}, not a new
-quotient or a second definition of real number.
+For use at the abstract-real layer, the certified handle is also exposed as
+\code{PiProofs.pi}: \code{pi.circleArea.raw}, \code{pi.machin.raw}, and the
+supplementary \code{pi.curvatureFan.raw}, for example, are named raw
+computations equipped with agreement proofs to the one certified pi handle.
+This is a naming façade over \code{Real}, not a new quotient or a second
+definition of real number.
 \end{theorem}
 
 \section{Trigonometric Functions}

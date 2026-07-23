@@ -17372,9 +17372,10 @@ def piCertifiedPresentation (presentation : PiPresentation) :
 one `Real` handle, not independently declared real numbers. -/
 abbrev pi : Real := piCertified
 
-/-- Named views of the certified pi registry.  For example,
-`pi.circleArea.raw` and `pi.machin.raw` are executable raw interval algorithms
-with checked agreement to the same abstract certified value. -/
+/-- Named views of the certified pi handle.  For example,
+`pi.circleArea.raw`, `pi.machin.raw`, and the supplementary
+`pi.curvatureFan.raw` are executable raw interval algorithms with checked
+agreement to the same abstract certified value. -/
 namespace pi
 
 def presentation (kind : PiPresentation) : Real.Representation pi :=
@@ -17465,17 +17466,11 @@ theorem PiCoverageBridge.equivalent (bridge : PiCoverageBridge) :
     (RealRaw.equiv_symm
       (piPresentation_equiv_piCircleArea bridge.targetPresentation))
 
-/- A second-order rational lower certificate for the length of a positively
+/-- A second-order rational lower certificate for the length of a positively
 oriented unit-circle chord.  The correction is deliberately rational: it
 uses only the cross product and the dot product of the two rational endpoints.
 It is the first ingredient of a sharper Archimedean circumference fan, rather
 than a new inverse-trigonometric presentation of pi. -/
-/- The curvature-corrected fan and its margin reduction are retained below as
-development notes while their rational proof dependency order is redesigned.
-They are deliberately not declarations in the checking surface: only the
-cross-fan circumference route is currently claimed as a verified raw pi
-computation. -/
-/-
 def curvatureChordLower (p q : PiCirclePoint) : Rat :=
   pointCross p q +
     sq (1 - RationalCircle.Stage.dot p q) / 4
@@ -18164,6 +18159,19 @@ theorem piCircumferenceCurvatureFan_equiv_piCircleArea :
       (piStage n) (piStage_pos n)
   · exact piCircleArea_compute_lo_le_piCircumferenceCurvatureFan_compute_hi n
 
+namespace pi
+
+/-- The curvature-corrected Archimedean fan as a named certified
+representation of the abstract value `pi`.  It is a supplementary geometric
+implementation, not an additional calculus-coverage row. -/
+def curvatureFan : Real.Representation pi where
+  raw := piCircumferenceCurvatureFan
+  valid := piCircumferenceCurvatureFan_valid
+  agrees := piCircumferenceCurvatureFan_equiv_piCircleArea
+
+end pi
+
+/-
 /-- Algebraic Pythagoras for two rational unit-circle points, expressed with
 their cross product and their dot-product deficit. -/
 private theorem segmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit

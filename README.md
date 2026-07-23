@@ -163,6 +163,9 @@ routes stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
 routes, together with the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants.
+The complementary named view `PiProofs.pi.curvatureFan` exposes the separately
+proved curvature-corrected geometric fan without turning it into another
+calculus-coverage row.
 
 ### Full implementation inventory
 
