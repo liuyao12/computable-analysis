@@ -117,13 +117,13 @@ theorem product_differenceQuotient_corner
 difference-quotient errors and one explicit corner remainder.  This is a
 rational inequality, before it is lifted to interval enclosures or any
 continuity certificate. -/
-theorem product_differenceQuotient_error_le
-    (u du v dv : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) (h0 : 0 <= h) :
+theorem product_differenceQuotient_error_le_qabs
+    (u du v dv : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) :
     qabs (differenceQuotient (fun z => u z * v z) x h -
       (u x * dv x + v x * du x)) <=
       qabs (u x) * qabs (differenceQuotient v x h - dv x) +
         qabs (v x) * qabs (differenceQuotient u x h - du x) +
-          h * qabs (differenceQuotient u x h) *
+          qabs h * qabs (differenceQuotient u x h) *
             qabs (differenceQuotient v x h) := by
   have hdecomp :
       differenceQuotient (fun z => u z * v z) x h -
@@ -152,10 +152,34 @@ theorem product_differenceQuotient_error_le
       (Rat.add_le_add_right).2 (qabs_add_le _ _)
     _ = qabs (u x) * qabs (differenceQuotient v x h - dv x) +
           qabs (v x) * qabs (differenceQuotient u x h - du x) +
+            qabs h * qabs (differenceQuotient u x h) *
+              qabs (differenceQuotient v x h) := by
+      rw [qabs_mul, qabs_mul, qabs_mul, qabs_mul]
+
+/-- The nonnegative-step form of the two-sided product-error estimate.  This
+is convenient for forward mesh arguments, while the absolute-step theorem
+above is the form used by the interval derivative interface. -/
+theorem product_differenceQuotient_error_le
+    (u du v dv : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) (h0 : 0 <= h) :
+    qabs (differenceQuotient (fun z => u z * v z) x h -
+      (u x * dv x + v x * du x)) <=
+      qabs (u x) * qabs (differenceQuotient v x h - dv x) +
+        qabs (v x) * qabs (differenceQuotient u x h - du x) +
+          h * qabs (differenceQuotient u x h) *
+            qabs (differenceQuotient v x h) := by
+  calc
+    qabs (differenceQuotient (fun z => u z * v z) x h -
+      (u x * dv x + v x * du x)) <=
+        qabs (u x) * qabs (differenceQuotient v x h - dv x) +
+          qabs (v x) * qabs (differenceQuotient u x h - du x) +
+            qabs h * qabs (differenceQuotient u x h) *
+              qabs (differenceQuotient v x h) :=
+      product_differenceQuotient_error_le_qabs u du v dv x h hh
+    _ = qabs (u x) * qabs (differenceQuotient v x h - dv x) +
+          qabs (v x) * qabs (differenceQuotient u x h - du x) +
             h * qabs (differenceQuotient u x h) *
               qabs (differenceQuotient v x h) := by
-      rw [qabs_mul, qabs_mul, qabs_mul, qabs_mul,
-        qabs_eq_self_of_nonneg h0]
+      rw [qabs_eq_self_of_nonneg h0]
 end ExactFunction
 
 namespace QInterval
@@ -281,6 +305,54 @@ def exactRatIdDerivative (a b : Rat) :
       (exactRat (fun _x => 1) a b) := by
   simpa [Rat.one_mul, Rat.add_zero] using
     exactRatAffineDerivative a b 1 0
+
+/-- The exact square is the first non-affine example of the interval-valued
+derivative definition.  Its finite quotient differs from twice its input by
+exactly the signed step, so the precision-indexed step budget closes the four
+interval-nearness inequalities without a limit principle. -/
+def exactRatSquareDerivative (a b : Rat) :
+    HasDerivativeOnInterval
+      (exactRat (fun x => x * x) a b)
+      (exactRat (fun x => 2 * x) a b) where
+  same_lower := rfl
+  same_upper := rfl
+  stepPrecision := fun n => if n = 0 then 1 else n
+  evalPrecision := fun _n => 0
+  close := by
+    intro x h n _hx _hxh _hdx hh hsmall
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        { lo := (x + h) * (x + h), hi := (x + h) * (x + h) }
+        { lo := x * x, hi := x * x } h)
+      { lo := 2 * x, hi := 2 * x } n
+    rw [QInterval.differenceQuotient_singleton]
+    have hcalc : ((x + h) * (x + h) - x * x) / h = 2 * x + h := by
+      rw [Rat.div_def]
+      have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hcalc]
+    have hprecision : qabs h <= (precisionAtStage n).val := by
+      change qabs h <=
+        1 / (((if n = 0 then 1 else n : Nat) : Rat)) at hsmall
+      by_cases hn : n = 0
+      · subst n
+        have hsmall' : qabs h <= 1 / (1 : Rat) := by
+          simpa only [if_pos rfl] using hsmall
+        calc
+          qabs h <= 1 / (1 : Rat) := hsmall'
+          _ = (precisionAtStage 0).val := by native_decide
+      · simpa [precisionAtStage, hn] using hsmall
+    have hupper : h <= (precisionAtStage n).val :=
+      Rat.le_trans (self_le_qabs h) hprecision
+    have hlower : -h <= (precisionAtStage n).val :=
+      Rat.le_trans (by simpa [qabs_neg] using self_le_qabs (-h)) hprecision
+    unfold intervalNearAtPrecision QInterval.NearAt QInterval.width
+    constructor
+    · grind
+    constructor
+    · grind
+    constructor <;> grind [Rat.sub_eq_add_neg]
 
 end FunctionOnInterval
 

@@ -259,7 +259,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   the finite quotient of every exact affine rational function is its constant
   slope, and `IntegralIdentities.coordinateOnUnitDerivative` specializes it
   to `d/dx x = 1` on `[0,1]`.  The arctangent certificate, remainder budget,
-  and product closure remain separate.
+  and product closure remain separate.  The error algebra is now two-sided:
+  `ExactFunction.product_differenceQuotient_error_le_qabs` carries `qabs h`
+  in the corner budget, with the earlier nonnegative-step theorem as its
+  forward-mesh corollary.  This matches the interval derivative interface's
+  signed rational steps.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
@@ -1372,7 +1376,11 @@ scoreboard above.
   is its constant slope, and the derivative of `x^2` is `2x`.
   See `ExactFunction.affine_derivative_effective` and
   `ExactFunction.square_derivative_effective` in
-  `ComputableAnalysis/Differential.lean`.
+  `ComputableAnalysis/Differential.lean`.  The same examples now inhabit the
+  newer interval-valued derivative interface: the exact singleton affine
+  quotient is its slope, while
+  `FunctionOnInterval.exactRatSquareDerivative` proves that the signed
+  quotient error for `x^2` is the step itself and fits the stage precision.
 - First checked non-affine FTC estimate: for `F(x)=x^2`, `f(x)=2x` on
   `[0,1]`, the left-sum FTC error at stage `m+1` is exactly `1/(m+1)`.
   See `FTC.ftcError_square_doubleId_zero_one_succ` and

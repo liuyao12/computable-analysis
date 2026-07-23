@@ -383,6 +383,13 @@ formal hand-off from the product algebra to the interval-continuity
 certificate; it does not assert that any particular elementary function has
 already met those budgets.
 
+The interval derivative interface permits signed rational steps.  The same
+checked finite calculation therefore has the genuinely two-sided form with
+\(\lvert h\rvert\) in the final summand; the displayed \(h\ge0\) formula is
+its forward-mesh specialization.  This matters when a derivative certificate
+is stated using arbitrary nearby rational inputs rather than only a right
+difference quotient.
+
 The coordinate factor has now crossed the first of those obligations.  For
 an exact rational affine function \(L(x)=mx+c\), the singleton interval
 quotient is literally
@@ -397,6 +404,16 @@ certificate \(X'=1\), not merely an informal differentiation rule.  This is
 the first component certificate for \(X\arctan X\).  It does not supply the
 arctangent certificate, bound the final \(h\)-remainder, or close the product
 rule; those are the remaining substantive obligations.
+
+There is also a first non-affine regression case for the interval definition:
+\[
+ D_h(x^2)=2x+h.
+\]
+At precision \(n\), the certificate asks for
+\(\lvert h\rvert\) no larger than the rational stage tolerance itself.  The
+two singleton quotient and derivative boxes are then near at that precision.
+This verifies a real error budget in the definition, rather than only the
+zero-error affine case, while still using only rational arithmetic.
 \end{theorem}
 
 \section{A constructive integration-by-parts certificate}

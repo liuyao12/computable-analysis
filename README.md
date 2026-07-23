@@ -56,7 +56,7 @@ the gates have different dependencies and none can substitute for another.
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit` is a checked non-exact interval-regular example with a quadratic modulus | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
-| Differentiated elementary functions | Formal power-series derivative table and finite-difference affine/square examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
+| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, and interval-valued affine/square derivative examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, and discrete variation of constants are checked | Interval-matrix simplex integrals and factorial tails yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
@@ -120,6 +120,10 @@ budget is exactly `h * |D_h x| * |D_h(arctan)|`.
 The exact unit coordinate now also carries an interval-valued derivative
 certificate with derivative `1`, obtained from the literal affine
 difference-quotient identity.
+The exact square now tests the nonzero-error case of the same interface:
+its quotient is `2*x + h`, and the signed step is allocated directly to the
+requested rational precision.  The product-error theorem now uses `|h|`, so
+it applies to the two-sided rational steps required by that interface.
 The remaining product derivative and FTC comparison are deliberately still
 separate: they must turn those identities into interval enclosures with
 continuity and remainder budgets.
