@@ -1536,6 +1536,280 @@ def insertionChainOfPointList {a b : Rat} (P : RationalPartition a b) :
       ⟨insertLocatedPoint rest.1 x hx.1 hx.2,
         rest.2.insertLocated x hx.1 hx.2⟩
 
+/-- A rational value occurs among a partition's finite breakpoint list. -/
+def ContainsPoint {a b : Rat} (P : RationalPartition a b) (x : Rat) : Prop :=
+  exists i, i <= P.pieces /\ P.point i = x
+
+/-- A refinement preserves every explicitly occurring breakpoint. -/
+theorem containsPoint_of_refines {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {x : Rat} (hx : coarse.ContainsPoint x) : fine.ContainsPoint x := by
+  rcases hx with ⟨i, hi, hpoint⟩
+  refine ⟨R.index i, R.index_le hi, ?_⟩
+  rw [R.point_eq i hi, hpoint]
+
+/-- The scan-selected insertion explicitly contains its inserted value. -/
+theorem insertLocatedPoint_contains {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (hleft : a <= x) (hright : x <= b) :
+    (insertLocatedPoint P x hleft hright).ContainsPoint x := by
+  have h := locateInsertionCell_spec P x hleft hright
+  refine ⟨locateInsertionCell P x + 1, ?_, ?_⟩
+  · change locateInsertionCell P x + 1 <= P.pieces + 1
+    omega
+  · have hnot : ¬ (locateInsertionCell P x + 1 <= locateInsertionCell P x) := by
+      omega
+    simp [insertLocatedPoint, insertPoint, insertPointValue, hnot]
+
+/-- Every member of an in-range finite list occurs in the breakpoint list
+produced by the scan-and-insert construction. -/
+theorem insertionChainOfPointList_contains {a b : Rat}
+    (P : RationalPartition a b) :
+    forall (xs : List Rat)
+      (hinside : forall x, x ∈ xs -> a <= x /\ x <= b)
+      {x : Rat}, x ∈ xs ->
+        (insertionChainOfPointList P xs hinside).1.ContainsPoint x := by
+  intro xs
+  induction xs with
+  | nil =>
+      intro hinside x hx
+      simp at hx
+  | cons y ys ih =>
+      intro hinside x hx
+      let htail : forall z, z ∈ ys -> a <= z /\ z <= b :=
+        fun z hz => hinside z (List.mem_cons_of_mem y hz)
+      let rest := insertionChainOfPointList P ys htail
+      have hy : a <= y /\ y <= b := hinside y (by simp)
+      change (insertLocatedPoint rest.1 y hy.1 hy.2).ContainsPoint x
+      rcases List.mem_cons.mp hx with hxy | hx
+      · subst x
+        exact insertLocatedPoint_contains rest.1 y hy.1 hy.2
+      · exact containsPoint_of_refines
+          (insertLocatedPoint_refines rest.1 y hy.1 hy.2)
+          (ih htail hx)
+
+/-- Scan a finite breakpoint list for the first occurrence of a rational
+value.  The scan is total; its correctness theorem below is used only when
+the value is known to occur. -/
+def firstOccurrenceAux {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (i fuel : Nat) : Nat :=
+  match fuel with
+  | 0 => i
+  | fuel + 1 =>
+      if P.point i = x then i else firstOccurrenceAux P x (i + 1) fuel
+
+/-- The leftmost-occurrence search over all actual breakpoint indices. -/
+def firstOccurrence {a b : Rat} (P : RationalPartition a b) (x : Rat) : Nat :=
+  firstOccurrenceAux P x 0 (P.pieces + 1)
+
+/-- Correctness of the finite first-occurrence scan. -/
+theorem firstOccurrenceAux_spec {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) :
+    forall (i fuel j : Nat),
+      i <= j -> j < i + fuel -> P.point j = x ->
+      let k := firstOccurrenceAux P x i fuel
+      i <= k /\ k <= j /\ P.point k = x := by
+  intro i fuel
+  induction fuel generalizing i with
+  | zero =>
+      intro j hij hj hpoint
+      omega
+  | succ fuel ih =>
+      intro j hij hj hpoint
+      simp only [firstOccurrenceAux]
+      by_cases hi : P.point i = x
+      · rw [if_pos hi]
+        exact ⟨Nat.le_refl _, hij, hi⟩
+      · rw [if_neg hi]
+        have hijne : i ≠ j := by
+          intro heq
+          apply hi
+          simpa [heq] using hpoint
+        have hlt : i < j := Nat.lt_of_le_of_ne hij hijne
+        rcases ih (i + 1) j (by omega) (by omega) hpoint with
+          ⟨hfirst, hsecond, hvalue⟩
+        exact ⟨Nat.le_trans (Nat.le_succ i) hfirst, hsecond, hvalue⟩
+
+/-- If a rational value occurs in a partition, the finite scan finds its
+leftmost occurrence and is no later than every other occurrence. -/
+theorem firstOccurrence_spec {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (hx : P.ContainsPoint x) :
+    firstOccurrence P x <= P.pieces /\
+      P.point (firstOccurrence P x) = x /\
+      forall j, j <= P.pieces -> P.point j = x -> firstOccurrence P x <= j := by
+  rcases hx with ⟨j, hj, hpoint⟩
+  have hfound := firstOccurrenceAux_spec P x 0 (P.pieces + 1) j
+    (Nat.zero_le _) (by omega) hpoint
+  constructor
+  · exact Nat.le_trans (by simpa [firstOccurrence] using hfound.2.1) hj
+  constructor
+  · simpa [firstOccurrence] using hfound.2.2
+  · intro i hi hvalue
+    have hfirst := firstOccurrenceAux_spec P x 0 (P.pieces + 1) i
+      (Nat.zero_le _) (by omega) hvalue
+    simpa [firstOccurrence] using hfirst.2.1
+
+/-- The leftmost occurrence of the left endpoint is index zero. -/
+theorem firstOccurrence_leftEndpoint {a b : Rat} (P : RationalPartition a b) :
+    firstOccurrence P a = 0 := by
+  have ha : P.ContainsPoint a := ⟨0, Nat.zero_le _, P.left_endpoint⟩
+  apply Nat.eq_zero_of_le_zero
+  exact (firstOccurrence_spec P a ha).2.2 0 (Nat.zero_le _) P.left_endpoint
+
+/-- First occurrences preserve the rational order of values that occur in a
+monotone partition. -/
+theorem firstOccurrence_mono {a b : Rat} (P : RationalPartition a b)
+    {x y : Rat} (hx : P.ContainsPoint x) (hy : P.ContainsPoint y)
+    (hxy : x <= y) :
+    firstOccurrence P x <= firstOccurrence P y := by
+  by_cases hEq : x = y
+  · subst y
+    exact Nat.le_refl _
+  · apply Nat.le_of_not_lt
+    intro hindex
+    have hspecX := firstOccurrence_spec P x hx
+    have hspecY := firstOccurrence_spec P y hy
+    have hyx : y <= x := by
+      calc
+        y = P.point (firstOccurrence P y) := hspecY.2.1.symm
+        _ <= P.point (firstOccurrence P x) :=
+          P.monotone _ _ (Nat.le_of_lt hindex) hspecX.1
+        _ = x := hspecX.2.1
+    exact hEq (Rat.le_antisymm hxy hyx)
+
+/-- A refinement may be recovered constructively from the information that
+every coarse breakpoint occurs somewhere in a fine monotone list. -/
+def ContainsAllPoints {a b : Rat}
+    (fine coarse : RationalPartition a b) : Prop :=
+  forall i, i <= coarse.pieces -> fine.ContainsPoint (coarse.point i)
+
+/-- The index used to recover an ordered refinement from point containment.
+After the final coarse breakpoint it stays at the final fine breakpoint, so it
+is a monotone total function on natural numbers as required by `Refines`. -/
+def refinementIndex {a b : Rat}
+    (fine coarse : RationalPartition a b) (i : Nat) : Nat :=
+  let j := min i coarse.pieces
+  if j = coarse.pieces then fine.pieces else firstOccurrence fine (coarse.point j)
+
+theorem refinementIndex_le {a b : Rat}
+    {fine coarse : RationalPartition a b}
+    (hcontains : ContainsAllPoints fine coarse) (i : Nat) :
+    refinementIndex fine coarse i <= fine.pieces := by
+  simp only [refinementIndex]
+  split
+  · exact Nat.le_refl _
+  · exact (firstOccurrence_spec fine _
+      (hcontains _ (Nat.min_le_right _ _))).1
+
+theorem refinementIndex_zero {a b : Rat}
+    {fine coarse : RationalPartition a b} :
+    refinementIndex fine coarse 0 = 0 := by
+  have hpositive : coarse.pieces ≠ 0 := Nat.ne_of_gt coarse.positive
+  have hmin : min 0 coarse.pieces = 0 := Nat.min_eq_left (Nat.zero_le _)
+  have hlast : ¬ (0 = coarse.pieces) := fun h => hpositive h.symm
+  rw [refinementIndex, hmin, if_neg hlast]
+  simpa [coarse.left_endpoint] using firstOccurrence_leftEndpoint fine
+
+theorem refinementIndex_last {a b : Rat}
+    (fine coarse : RationalPartition a b) :
+    refinementIndex fine coarse coarse.pieces = fine.pieces := by
+  simp [refinementIndex]
+
+theorem refinementIndex_point_eq {a b : Rat}
+    {fine coarse : RationalPartition a b}
+    (hcontains : ContainsAllPoints fine coarse)
+    {i : Nat} (hi : i <= coarse.pieces) :
+    fine.point (refinementIndex fine coarse i) = coarse.point i := by
+  have hmin : min i coarse.pieces = i := Nat.min_eq_left hi
+  rw [refinementIndex, hmin]
+  by_cases hlast : i = coarse.pieces
+  · rw [if_pos hlast]
+    subst i
+    rw [fine.right_endpoint, coarse.right_endpoint]
+  · rw [if_neg hlast]
+    exact (firstOccurrence_spec fine _ (hcontains i hi)).2.1
+
+theorem refinementIndex_mono {a b : Rat}
+    {fine coarse : RationalPartition a b}
+    (hcontains : ContainsAllPoints fine coarse)
+    (i j : Nat) (hij : i <= j) :
+    refinementIndex fine coarse i <= refinementIndex fine coarse j := by
+  let i' := min i coarse.pieces
+  let j' := min j coarse.pieces
+  have hi' : i' <= coarse.pieces := Nat.min_le_right _ _
+  have hj' : j' <= coarse.pieces := Nat.min_le_right _ _
+  have hij' : i' <= j' := by
+    dsimp [i', j']
+    omega
+  by_cases hilast : i' = coarse.pieces
+  · have hjlast : j' = coarse.pieces := by
+      apply Nat.le_antisymm hj'
+      simpa [hilast] using hij'
+    simp [refinementIndex, i', j', hilast, hjlast]
+  · by_cases hjlast : j' = coarse.pieces
+    · simp only [refinementIndex]
+      rw [show min i coarse.pieces = i' by rfl,
+        show min j coarse.pieces = j' by rfl, if_neg hilast, if_pos hjlast]
+      exact (firstOccurrence_spec fine _ (hcontains i' hi')).1
+    · simp only [refinementIndex]
+      rw [show min i coarse.pieces = i' by rfl,
+        show min j coarse.pieces = j' by rfl, if_neg hilast, if_neg hjlast]
+      exact firstOccurrence_mono fine (hcontains i' hi') (hcontains j' hj')
+        (coarse.monotone i' j' hij' hj')
+
+/-- Point containment is sufficient to build the full finite refinement
+certificate, including a monotone embedding of all coarse breakpoint indices. -/
+def refinesOfContainsAllPoints {a b : Rat}
+    {fine coarse : RationalPartition a b}
+    (hcontains : ContainsAllPoints fine coarse) : Refines fine coarse where
+  index := refinementIndex fine coarse
+  index_zero := refinementIndex_zero
+  index_last := refinementIndex_last fine coarse
+  index_mono := refinementIndex_mono hcontains
+  point_eq := fun _ hi => refinementIndex_point_eq hcontains hi
+
+/-- The explicitly finite list of every breakpoint in a partition. -/
+def breakpointList {a b : Rat} (P : RationalPartition a b) : List Rat :=
+  (List.range (P.pieces + 1)).map P.point
+
+theorem point_mem_breakpointList {a b : Rat} (P : RationalPartition a b)
+    {i : Nat} (hi : i <= P.pieces) : P.point i ∈ P.breakpointList := by
+  apply List.mem_map.mpr
+  exact ⟨i, List.mem_range.mpr (Nat.lt_succ_of_le hi), rfl⟩
+
+theorem point_in_bounds {a b : Rat} (P : RationalPartition a b)
+    {i : Nat} (hi : i <= P.pieces) :
+    a <= P.point i /\ P.point i <= b := by
+  constructor
+  · calc
+      a = P.point 0 := P.left_endpoint.symm
+      _ <= P.point i := P.monotone 0 i (Nat.zero_le _) hi
+  · calc
+      P.point i <= P.point P.pieces := P.monotone i P.pieces hi (Nat.le_refl _)
+      _ = b := P.right_endpoint
+
+theorem breakpointList_in_bounds {a b : Rat} (P : RationalPartition a b) :
+    forall x, x ∈ P.breakpointList -> a <= x /\ x <= b := by
+  intro x hx
+  rcases List.mem_map.mp hx with ⟨i, hi, hpoint⟩
+  rw [← hpoint]
+  apply P.point_in_bounds
+  have hindex := List.mem_range.mp hi
+  omega
+
+/-- Insert every breakpoint of the right partition into the left one by a
+deterministic finite scan.  The following theorem turns the resulting point
+containment into both refinement certificates. -/
+def partitionPointInsertionChain {a b : Rat}
+    (left right : RationalPartition a b) : Sigma (InsertionChain left) :=
+  insertionChainOfPointList left right.breakpointList (breakpointList_in_bounds right)
+
+theorem partitionPointInsertionChain_contains {a b : Rat}
+    (left right : RationalPartition a b) {i : Nat} (hi : i <= right.pieces) :
+    (partitionPointInsertionChain left right).1.ContainsPoint (right.point i) := by
+  apply insertionChainOfPointList_contains left right.breakpointList
+    (breakpointList_in_bounds right)
+  exact right.point_mem_breakpointList hi
+
 /-- A finite insertion chain carries its composite refinement certificate back
 to its starting breakpoint list. -/
 noncomputable def InsertionChain.refines {a b : Rat}
@@ -1556,6 +1830,17 @@ noncomputable def InsertionChain.commonRefinement {a b : Rat}
   refinement := target
   refines_left := chain.refines
   refines_right := Refines.refl target
+
+/-- A general finite common-refinement construction for arbitrary rational
+partitions.  It uses only the supplied breakpoint lists, bounded scans, and
+the monotonicity proof already carried by each partition. -/
+noncomputable def commonRefinementOfPartitions {a b : Rat}
+    (left right : RationalPartition a b) : CommonRefinement left right :=
+  let chain := partitionPointInsertionChain left right
+  { refinement := chain.1
+    refines_left := chain.2.refines
+    refines_right := refinesOfContainsAllPoints
+      (fun _ hi => partitionPointInsertionChain_contains left right hi) }
 
 def cell {a b : Rat} (P : RationalPartition a b)
     (k : Nat) (hk : k < P.pieces) : RationalSubinterval a b where

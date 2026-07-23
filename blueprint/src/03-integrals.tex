@@ -213,6 +213,14 @@ additivity.
 \lean{ComputableAnalysis.RationalPartition.InsertionChain}
 \lean{ComputableAnalysis.RationalPartition.InsertionChain.insertLocated}
 \lean{ComputableAnalysis.RationalPartition.insertionChainOfPointList}
+\lean{ComputableAnalysis.RationalPartition.ContainsPoint}
+\lean{ComputableAnalysis.RationalPartition.insertionChainOfPointList_contains}
+\lean{ComputableAnalysis.RationalPartition.firstOccurrence}
+\lean{ComputableAnalysis.RationalPartition.firstOccurrence_spec}
+\lean{ComputableAnalysis.RationalPartition.refinementIndex}
+\lean{ComputableAnalysis.RationalPartition.refinesOfContainsAllPoints}
+\lean{ComputableAnalysis.RationalPartition.breakpointList}
+\lean{ComputableAnalysis.RationalPartition.commonRefinementOfPartitions}
 \lean{ComputableAnalysis.RationalPartition.InsertionChain.refines}
 \lean{ComputableAnalysis.RationalPartition.InsertionChain.commonRefinement}
 \lean{ComputableAnalysis.RationalPartition.clampedPath}
@@ -281,10 +289,15 @@ into explicit scan-and-insert data.  A finite \code{InsertionChain} composes
 such insertions, and its endpoint is a certified refinement of the initial
 list.  Moreover, every fine point between embedded consecutive coarse points
 is proved to stay inside that coarse cell, so local bounds transfer cell by
-cell.  The clamped breakpoint path is nondecreasing, and its corner sum is
-bounded by the square of the endpoint variation.  The remaining general
-construction is the canonical merge which also records the embedding of each
-of two independently given breakpoint lists into the shared insertion chain.
+cell.  The general merge is now checked as well.  Lean forms
+\code{breakpointList} for the right partition, inserts that finite list into
+the left partition, and uses a second bounded \code{firstOccurrence} scan to
+recover the monotone embedding of every right breakpoint.  The resulting
+\code{commonRefinementOfPartitions} carries both index embeddings.  It is a
+deterministic finite merge of the supplied ordered data; it intentionally
+retains duplicate breakpoints rather than optimizing to a minimal union.  The
+clamped breakpoint path is nondecreasing, and its corner sum is bounded by the
+square of the endpoint variation.
 For the later integral theorem, functions are supplied on explicit increasing
 or decreasing pieces and the two decompositions are replaced by a common
 rational refinement.  The corner correction is then bounded piece by piece

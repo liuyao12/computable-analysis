@@ -17334,6 +17334,31 @@ def piCertifiedPresentation (presentation : PiPresentation) :
   valid := piPresentation_valid presentation
   agrees := piPresentation_equiv_piCircleArea presentation
 
+/-- The abstract certified value of pi.  Its named members below are views of
+one `Real` handle, not independently declared real numbers. -/
+abbrev pi : Real := piCertified
+
+/-- Named views of the certified pi registry.  For example,
+`pi.circleArea.raw` and `pi.machin.raw` are executable raw interval algorithms
+with checked agreement to the same abstract certified value. -/
+namespace pi
+
+def presentation (kind : PiPresentation) : Real.Representation pi :=
+  piCertifiedPresentation kind
+
+def circleArea : Real.Representation pi := presentation .area
+def circleAreaPolygon : Real.Representation pi := presentation .areaPolygon
+def circumference : Real.Representation pi := presentation .circumferenceFan
+def arctanGeom : Real.Representation pi := presentation .arctanGeometry
+def arctanIntegral : Real.Representation pi := presentation .arctanRectangleIntegral
+def leibniz : Real.Representation pi := presentation .leibnizSeries
+def nilakantha : Real.Representation pi := presentation .nilakanthaSeries
+def machin : Real.Representation pi := presentation .machinSeries
+def cauchy : Real.Representation pi := presentation .cauchyIntegral
+def reciprocalQuartic : Real.Representation pi := presentation .reciprocalQuarticIntegral
+
+end pi
+
 /-- The small set of π equivalences that act as distinct end-to-end
 calculus-regression bridges.
 

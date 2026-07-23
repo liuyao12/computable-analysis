@@ -180,9 +180,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   `InsertionChain.refines` composes those steps, and
   `Refines.point_between_consecutive` keeps every fine point in its parent
   coarse cell.  `clampedPath_quadraticVariation_le_endpointSquare` applies
-  the corner estimate directly to partition data.  What remains is a
-  canonical merge procedure taking two independently supplied breakpoint
-  lists to a shared insertion chain while retaining both index embeddings.
+  the corner estimate directly to partition data.  The general finite merge
+  is now checked: `commonRefinementOfPartitions` inserts the right
+  `breakpointList` into the left partition and recovers the second ordered
+  embedding with a bounded `firstOccurrence` scan.  It is deterministic and
+  preserves both index embeddings; duplicate breakpoints are retained, so a
+  later minimal-union optimization is optional rather than a theorem gap.
   The model unit path has a fully checked vanishing schedule:
   `unitMeshPath_quadraticVariation` is exactly `1/n`, and choosing
   `eps.den + 1` makes it at most any positive rational epsilon.  For the

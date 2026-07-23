@@ -16,27 +16,37 @@ the selected exponential satisfies \(e^x{}'=e^x\) are major advances even
 though neither creates a new pi row.
 
 \begin{center}
-\begin{tabular}{@{}p{0.32\textwidth}p{0.43\textwidth}cc@{}}
-\textbf{Natural theorem family} & \textbf{Constructive content exercised} &
-\textbf{Def.} & \textbf{Registry}\\
+\begin{tabular}{@{}p{0.23\textwidth}p{0.31\textwidth}p{0.21\textwidth}cc@{}}
+\textbf{Theorem family} & \textbf{Content exercised} &
+\textbf{Width metric} & \textbf{Def.} & \textbf{Registry}\\
 \hline
-Finite Archimedean geometry &
+Finite Archimedes theorem &
 exact rational circle fans, square-root enclosures, and nested interval bounds &
+cross-fan: \(w_n\le 10/(n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
-Arctangent power-series theorem &
+Arctangent series theorem &
 circular inverse geometry against the alternating arctangent series &
+Leibniz: \(w_n=4/(4n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
-Arctangent integral evaluation &
+Arctangent integral &
 certified rectangle integration and its endpoint bridge &
+rectangle: \(w_n\le4/(n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
-Cauchy integral evaluation &
+Cauchy integral &
 reciprocal-tail transport from a full line to a finite interval &
+full-line envelope: \(w_n\le224/2^n\) &
 \(\checkmark\) & \(\checkmark\)\\
-Reciprocal-quartic integral evaluation &
+Reciprocal-quartic integral &
 a nontrivial rational kernel, finite quadrature, and its integral identity &
+dyadic quadrature: \(w_n=64/2^n\) &
 \(\checkmark\) & \(\checkmark\)\\
 \end{tabular}
 \end{center}
+
+The width column belongs to the named checked representative in that row; an
+equivalence proof does not silently transfer a stage-by-stage rate to every
+other presentation.  It is therefore a useful cost/precision diagnostic for
+the constructive witness, not an additional measure of theorem importance.
 
 The full \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two

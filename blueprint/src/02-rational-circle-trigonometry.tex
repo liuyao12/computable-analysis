@@ -738,6 +738,10 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.piPresentation_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCertified}
 \lean{ComputableAnalysis.PiProofs.piCertifiedPresentation}
+\lean{ComputableAnalysis.PiProofs.pi}
+\lean{ComputableAnalysis.PiProofs.pi.presentation}
+\lean{ComputableAnalysis.PiProofs.pi.circleArea}
+\lean{ComputableAnalysis.PiProofs.pi.machin}
 \uses{thm:finite-archimedes,def:raw-real}
 The public area loop is a valid raw real.  The circumference computation is
 ordered and has a proved width-shrinking bound, but it is not yet certified as
@@ -788,6 +792,11 @@ the compact \code{PiProofs.PiCoverageBridge} suite records only distinct
 end-to-end capability bridges.  The unfinished direct perimeter computation
 is retained as a square-root-enclosure diagnostic, rather than as a missing
 unit of calculus progress.
+For use at the abstract-real layer, the same registry is also exposed as
+\code{PiProofs.pi}: \code{pi.circleArea.raw} and \code{pi.machin.raw}, for
+example, are named raw computations equipped with agreement proofs to the one
+certified pi handle.  This is a naming façade over \code{Real}, not a new
+quotient or a second definition of real number.
 \end{theorem}
 
 \section{Trigonometric Functions}

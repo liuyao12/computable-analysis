@@ -77,19 +77,24 @@ theorems such as an integral evaluation or the Basel identity; registry
 agreement is a derived corollary.  This is evidence for a calculus
 capability—not a percentage for the whole foundation.
 
-| Natural theorem family | Checked registry role |
-| --- | --- |
-| finite Archimedean theorem | perimeter and area presentations agree |
-| arctangent power-series theorem | geometric and series presentations agree |
-| arctangent integral evaluation | integral and series presentations agree |
-| Cauchy integral evaluation | full-line integral and area presentations agree |
-| reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree |
+| Natural theorem family | Checked registry role | Certified width metric |
+| --- | --- | --- |
+| finite Archimedean theorem | perimeter and area presentations agree | cross-fan: $w_n\le10/(n+1)$ |
+| arctangent power-series theorem | geometric and series presentations agree | Leibniz: $w_n=4/(4n+1)$ |
+| arctangent integral evaluation | integral and series presentations agree | rectangle: $w_n\le4/(n+1)$ |
+| Cauchy integral evaluation | full-line integral and area presentations agree | full-line envelope: $w_n\le224/2^n$ |
+| reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,
 or the continuous matrix Peano--Baker theorem would each be major progress
 without adding a π equivalence.  Rendered copy:
 [front page: π equivalence coverage](https://liuyao12.github.io/computable-analysis/).
+
+The width metric is attached to the named checked representative, not
+automatically transported across an equivalence proof.  It is a useful
+cost/precision diagnostic for a construction, rather than a second score for
+the underlying theorem.
 
 The next intended π registry benchmark is the arctangent
 integration-by-parts evaluation, not another arctangent variant.  Its public
@@ -104,8 +109,11 @@ positive factor.  The two embeddings are packaged as a checked
 checked arbitrary-breakpoint insertion primitive: `locateInsertionCell` scans
 the finite partition to select and certify an enclosing cell, and
 `insertionChainOfPointList` turns any finite in-range rational list into a
-composable sequence of those insertions.  The remaining step is a canonical
-merge that retains the two independently supplied breakpoint-list embeddings.
+composable sequence of those insertions.  The general merge is now checked:
+`commonRefinementOfPartitions` inserts one partition's `breakpointList` into
+the other and uses a bounded `firstOccurrence` scan to reconstruct the second
+monotone index embedding.  It deliberately keeps duplicate breakpoints, so it
+is a deterministic certified merge rather than a minimal-union optimization.
 The dyadic stages used by existing Riemann
 algorithms now have direct point-preservation and mesh-halving theorems as
 well.  The finite corner correction now has a checked rational vanishing
