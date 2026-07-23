@@ -244,7 +244,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   are uniformly bounded in `[0,1]`, and its stage box is proved to be
   `[x * A.lo, x * A.hi]`.  This is the product representation needed for
   the positive `x * arctan x` branch on `[0,1]`; a general signed product,
-  product derivative rule, and its FTC comparison are still open.
+  product derivative rule, and its FTC comparison are still open.  The
+  exact algebraic core is now formalized for arbitrary rational functions:
+  `ExactFunction.product_differenceQuotient_right` keeps the second factor
+  at the right endpoint, while `..._corner` exposes the explicit
+  `h * D_h(u) * D_h(v)` remainder.  The remaining product certificate must
+  bound that remainder and the endpoint replacement through interval
+  continuity data; no limit or completeness principle is being assumed.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.

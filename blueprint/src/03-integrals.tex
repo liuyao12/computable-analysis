@@ -348,6 +348,24 @@ This is an evaluator-level representation of \(x\arctan x\), not yet a claim tha
 to the displayed integrals.  Those product-derivative, FTC, and logarithm
 endpoint certificates remain required before the resulting pi formula is
 claimed.
+
+The next certificate begins with an exact finite identity, rather than with
+an assumed product rule.  For rational \(h\ne0\), write
+\(D_hU(x)=(U(x+h)-U(x))/h\).  Then
+\[
+  D_h(UV)(x)=U(x)D_hV(x)+V(x+h)D_hU(x)
+\]
+and, equivalently,
+\[
+  D_h(UV)(x)=U(x)D_hV(x)+V(x)D_hU(x)
+    +h\,D_hU(x)D_hV(x).
+\]
+Thus a constructive product-derivative certificate must provide finite
+enclosures for the two difference quotients and point values, a rational
+continuity budget to replace \(V(x+h)\) by \(V(x)\), and a bound making the
+displayed \(h\)-remainder smaller than its allocated error.  This is the
+precise missing bridge for \(x\arctan x\); no product rule is inferred from
+the product evaluator alone.
 \end{theorem}
 
 \section{A constructive integration-by-parts certificate}

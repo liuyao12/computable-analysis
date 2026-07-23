@@ -112,7 +112,11 @@ exponential representations agree, then use
 representation itself is now checked, including the concrete domain-aware
 `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit` evaluator:
 at every stage it is exactly the two-corner box `[x * A.lo, x * A.hi]`.
-The product derivative and FTC comparison are deliberately still separate.
+The exact rational product-difference identities, including the explicit
+`h * D_h x * D_h(arctan)` corner remainder, are now checked as well.
+The remaining product derivative and FTC comparison are deliberately still
+separate: they must turn those identities into interval enclosures with
+continuity and remainder budgets.
 The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
 both the `m` and `n` grids, and its mesh is the old width divided by the

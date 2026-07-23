@@ -79,6 +79,34 @@ def squareDerivative : EffectiveDerivativeExact square doubleId where
 theorem square_derivative_effective :
     Nonempty (EffectiveDerivativeExact square doubleId) :=
   ⟨squareDerivative⟩
+
+/-- The exact finite-difference product decomposition with the second factor
+evaluated at the right endpoint.  This is the algebraic core of the product
+rule before any continuity or limiting certificate is invoked. -/
+theorem product_differenceQuotient_right
+    (u v : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) :
+    (u (x + h) * v (x + h) - u x * v x) / h =
+      u x * ((v (x + h) - v x) / h) +
+        v (x + h) * ((u (x + h) - u x) / h) := by
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The equivalent finite-difference product decomposition with both main
+terms evaluated at the left endpoint.  The last term is the explicit corner
+remainder which a constructive product-derivative proof must bound. -/
+theorem product_differenceQuotient_corner
+    (u v : Rat -> Rat) (x h : Rat) (hh : h ≠ 0) :
+    (u (x + h) * v (x + h) - u x * v x) / h =
+      u x * ((v (x + h) - v x) / h) +
+        v x * ((u (x + h) - u x) / h) +
+          h * ((u (x + h) - u x) / h) *
+            ((v (x + h) - v x) / h) := by
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 end ExactFunction
 
 namespace QInterval
