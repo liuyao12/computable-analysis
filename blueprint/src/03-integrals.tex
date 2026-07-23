@@ -187,6 +187,7 @@ additivity.
 \lean{ComputableAnalysis.unitMeshPath}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
+\lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference}
 \lean{ComputableAnalysis.mesh_refine_mul_right}
 \lean{ComputableAnalysis.dyadic_leftPoint_refines}
 \lean{ComputableAnalysis.dyadic_mesh_refines}
@@ -224,7 +225,12 @@ additivity.
 \lean{ComputableAnalysis.RationalPartition.InsertionChain.refines}
 \lean{ComputableAnalysis.RationalPartition.InsertionChain.commonRefinement}
 \lean{ComputableAnalysis.RationalPartition.clampedPath}
+\lean{ComputableAnalysis.RationalPartition.MaxStepAtMost}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_step_nonnegative}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_step_le_of_maxStep}
+\lean{ComputableAnalysis.RationalPartition.uniform_maxStepAtMost_mesh}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference}
+\lean{ComputableAnalysis.RationalPartition.uniform_clampedPath_quadraticVariation_le_mesh_mul_endpointDifference}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_endpointSquare}
 \lean{ComputableAnalysis.RealFunRaw.mul}
 \lean{ComputableAnalysis.RealFunRaw.mul_valid_of_nonneg_bounded}
@@ -299,7 +305,24 @@ recover the monotone embedding of every right breakpoint.  The resulting
 deterministic finite merge of the supplied ordered data; it intentionally
 retains duplicate breakpoints rather than optimizing to a minimal union.  The
 clamped breakpoint path is nondecreasing, and its corner sum is bounded by the
-square of the endpoint variation.
+square of the endpoint variation.  The maximum-increment premise is now
+connected directly to partition data.  The finite predicate
+\code{MaxStepAtMost} records a nonnegative rational cell-width cap, and
+\code{clampedPath\_step\_le\_of\_maxStep} extends it to every increment of
+the total clamped path, including its zero tail.  Therefore
+\code{clampedPath\_quadraticVariation\_le\_stepBound\_mul\_endpointDifference}
+proves, for any nondecreasing second rational path, that the corner correction
+is at most that cap times its endpoint variation.  Uniform partitions
+instantiate the cap by their literal mesh.  On the unit mesh,
+\code{unitMeshPath\_quadraticVariation\_le\_one\_div\_mul\_endpointDifference}
+gives the checked finite estimate
+\[
+ \sum_{i<n}\Delta_i x\,\Delta_i v
+ \leq \frac1n\bigl(v_n-v_0\bigr)
+\]
+for every nondecreasing sampled path \(v\).  This is exactly the coordinate
+side of the corner estimate needed for \(x\arctan x\); the remaining
+arctangent monotonicity certificate is deliberately separate.
 For the later integral theorem, functions are supplied on explicit increasing
 or decreasing pieces and the two decompositions are replaced by a common
 rational refinement.  The corner correction is then bounded piece by piece

@@ -406,6 +406,21 @@ theorem unitMeshPath_quadraticVariation_le_epsilon (eps : QPos) :
   rw [unitMeshPath_quadraticVariation (Nat.succ_pos _)]
   exact one_div_den_succ_le_of_pos eps.property
 
+/-- The unit-mesh coordinate path supplies the exact one-over-n first-increment
+bound needed for integration by parts against an arbitrary nondecreasing
+sample path.  This is the finite corner estimate for the future
+x-times-arctangent calculation on the unit interval. -/
+theorem unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference
+    (n : Nat) (v : Nat -> Rat)
+    (hv : forall i, 0 <= v (i + 1) - v i) :
+    quadraticVariationSum (unitMeshPath n) v n <=
+      (1 / (n : Rat)) * (v n - v 0) :=
+  quadraticVariationSum_le_stepBound_mul_endpointDifference
+    (unitMeshPath n) v (1 / (n : Rat))
+    (fun i => by
+      rw [unitMeshPath_step]
+      exact Rat.le_refl) hv n
+
 private theorem riemannLeftInterval_point_fold_eq
     (g : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
     (hpoint : forall x, (g.compute x prec).lo = (g.compute x prec).hi)
@@ -1904,6 +1919,13 @@ theorem clampedPath_eq_point {a b : Rat} (P : RationalPartition a b)
     P.clampedPath i = P.point i := by
   simp [clampedPath, Nat.min_eq_left hi]
 
+/-- A finite upper bound for the widths of all genuine cells of a rational
+partition.  The nonnegativity field makes the bound meaningful beyond the
+last cell of the clamped path, where its increments are zero. -/
+def MaxStepAtMost {a b : Rat} (P : RationalPartition a b) (delta : Rat) : Prop :=
+  0 <= delta /\
+    forall k, k < P.pieces -> P.point (k + 1) - P.point k <= delta
+
 /-- Successive values of a clamped partition path are nondecreasing. -/
 theorem clampedPath_step_nonnegative {a b : Rat}
     (P : RationalPartition a b) (i : Nat) :
@@ -1921,6 +1943,70 @@ theorem clampedPath_step_nonnegative {a b : Rat}
       Nat.min_eq_right (Nat.le_trans hpieces (Nat.le_succ i))
     rw [clampedPath, clampedPath, hmin, hminsucc]
     grind [Rat.sub_eq_add_neg]
+
+/-- A cell-width bound transfers to every increment of the total clamped
+path.  This supplies the first factor required by the finite corner-area
+estimate, including the zero increments after the final partition cell. -/
+theorem clampedPath_step_le_of_maxStep {a b : Rat}
+    (P : RationalPartition a b) (delta : Rat)
+    (hstep : P.MaxStepAtMost delta) (i : Nat) :
+    P.clampedPath (i + 1) - P.clampedPath i <= delta := by
+  by_cases hi : i < P.pieces
+  · have hmin : min i P.pieces = i := Nat.min_eq_left (Nat.le_of_lt hi)
+    have hminsucc : min (i + 1) P.pieces = i + 1 :=
+      Nat.min_eq_left (Nat.succ_le_of_lt hi)
+    rw [clampedPath, clampedPath, hmin, hminsucc]
+    exact hstep.2 i hi
+  · have hpieces : P.pieces <= i := Nat.le_of_not_gt hi
+    have hmin : min i P.pieces = P.pieces := Nat.min_eq_right hpieces
+    have hminsucc : min (i + 1) P.pieces = P.pieces :=
+      Nat.min_eq_right (Nat.le_trans hpieces (Nat.le_succ i))
+    rw [clampedPath, clampedPath, hmin, hminsucc]
+    calc
+      P.point P.pieces - P.point P.pieces = 0 := by
+        grind [Rat.sub_eq_add_neg]
+      _ <= delta := hstep.1
+
+/-- The explicit uniform partition has mesh as a certified bound for every
+cell width. -/
+theorem uniform_maxStepAtMost_mesh (a b : Rat) (pieces : Nat)
+    (hpieces : 0 < pieces) (hab : a <= b) :
+    (uniform a b pieces hpieces hab).MaxStepAtMost (mesh a b pieces) := by
+  constructor
+  · exact mesh_nonneg_of_le hpieces hab
+  · intro k hk
+    change leftPoint a b pieces (k + 1) - leftPoint a b pieces k <=
+      mesh a b pieces
+    rw [leftPoint_step]
+    exact Rat.le_refl
+
+/-- The finite corner correction between a partition coordinate path and any
+nondecreasing rational path is controlled by the partition's explicit maximum
+cell width times the endpoint variation of the latter path.  This is the
+function-ready form of the geometric rectangle estimate: a later sampled
+arctangent path need only supply its monotonicity. -/
+theorem clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference
+    {a b : Rat} (P : RationalPartition a b) (v : Nat -> Rat) (delta : Rat)
+    (hstep : P.MaxStepAtMost delta)
+    (hv : forall i, 0 <= v (i + 1) - v i) :
+    quadraticVariationSum P.clampedPath v P.pieces <=
+      delta * (v P.pieces - v 0) :=
+  quadraticVariationSum_le_stepBound_mul_endpointDifference
+    P.clampedPath v delta (clampedPath_step_le_of_maxStep P delta hstep) hv P.pieces
+
+/-- On a uniform rational partition the preceding estimate takes its expected
+mesh form.  It is independent of how the nondecreasing second path was
+obtained, so it applies equally to geometric, series, or inverse-function
+sample values. -/
+theorem uniform_clampedPath_quadraticVariation_le_mesh_mul_endpointDifference
+    (a b : Rat) (pieces : Nat) (hpieces : 0 < pieces) (hab : a <= b)
+    (v : Nat -> Rat) (hv : forall i, 0 <= v (i + 1) - v i) :
+    quadraticVariationSum (uniform a b pieces hpieces hab).clampedPath v pieces <=
+      mesh a b pieces * (v pieces - v 0) := by
+  simpa [uniform] using
+    clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference
+      (uniform a b pieces hpieces hab) v (mesh a b pieces)
+      (uniform_maxStepAtMost_mesh a b pieces hpieces hab) hv
 
 /-- The nonnegative corner correction for a partition's own monotone
 breakpoint path is bounded by the square of its endpoint variation.  This

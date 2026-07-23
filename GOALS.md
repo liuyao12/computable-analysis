@@ -188,7 +188,16 @@ another. The Pi score stays useful only as secondary integration coverage.
   `InsertionChain.refines` composes those steps, and
   `Refines.point_between_consecutive` keeps every fine point in its parent
   coarse cell.  `clampedPath_quadraticVariation_le_endpointSquare` applies
-  the corner estimate directly to partition data.  The general finite merge
+  the corner estimate directly to partition data.  The maximum-increment
+  premise is now also a checked partition interface.  MaxStepAtMost carries a
+  nonnegative rational cap on every genuine cell; clampedPath_step_le_of_maxStep
+  extends it to the clamped total path; and
+  clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference bounds
+  that coordinate-path corner correction against any nondecreasing second
+  rational path.  Uniform grids instantiate the cap by their literal mesh,
+  while unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference is
+  the exact one-over-n endpoint-variation bound needed for sampled
+  x-times-arctangent.  The general finite merge
   is now checked: `commonRefinementOfPartitions` inserts the right
   `breakpointList` into the left partition and recovers the second ordered
   embedding with a bounded `firstOccurrence` scan.  It is deterministic and
@@ -197,10 +206,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   The model unit path has a fully checked vanishing schedule:
   `unitMeshPath_quadraticVariation` is exactly `1/n`, and choosing
   `eps.den + 1` makes it at most any positive rational epsilon.  For the
-  integral theorem, extend this interface to
-  increasing/decreasing pieces with arbitrary rational breakpoints, then
-  discharge the maximum-increment bound cell by cell.  Do not invoke a
-  nonconstructive global variation or Jordan decomposition.
+  integral theorem, extend this interface from the coordinate factor to
+  increasing/decreasing function pieces with arbitrary rational breakpoints,
+  then supply product/derivative/FTC comparison certificates.  Do not invoke
+  a nonconstructive global variation or Jordan decomposition.
 - The first raw product bridge is now checked on positive bounded branches.
   `QBox.mulRealInterval_of_nonneg` reduces the four-corner enclosure to the
   lower--lower and upper--upper products.  Given positive rational bounds,
