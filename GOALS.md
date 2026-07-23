@@ -208,6 +208,9 @@ another. The Pi score stays useful only as secondary integration coverage.
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
   It requires the remaining product-derivative/FTC bridge, the explicit monotone-piece
   refinement, the arctangent derivative, and the logarithm endpoint identity.
+  `Logarithm.logTwoSeries` now supplies a valid, rate-certified alternating
+  harmonic raw presentation of `log 2`; it is not yet proved equal to the
+  reciprocal-kernel integral, so it does not discharge that endpoint gate.
   It is deliberately not a checked scoreboard row until those data construct
   valid raw reals and their final `RealRaw.Equiv` theorem.
 - Formula-identification route: to identify a proposed kernel, prove that it

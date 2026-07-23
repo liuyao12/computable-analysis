@@ -118,6 +118,11 @@ composable sequence of those insertions.  The general merge is now checked:
 the other and uses a bounded `firstOccurrence` scan to reconstruct the second
 monotone index embedding.  It deliberately keeps duplicate breakpoints, so it
 is a deterministic certified merge rather than a minimal-union optimization.
+`Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw
+presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
+certified `O(1/n)` rate.  Its identification with the reciprocal-kernel
+integral remains open, so it is a prerequisite rather than a completed
+integration-by-parts route.
 The dyadic stages used by existing Riemann
 algorithms now have direct point-preservation and mesh-halving theorems as
 well.  The finite corner correction now has a checked rational vanishing

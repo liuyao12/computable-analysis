@@ -311,6 +311,33 @@ and \(\exp(x+y)=\exp(x)\exp(y)\) should be proved from uniqueness of the
 inverse and then transported between representations.
 \end{definition}
 
+\begin{definition}[The logarithmic series at two]
+\label{def:log-two-series}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries_valid}
+\uses{def:logarithm-integral}
+The alternating harmonic calculation gives a separate, fully certified raw
+real presentation
+\[
+  \log_{\mathrm{series}}2 :=
+    1-\frac12+\frac13-\frac14+\cdots.
+\]
+At stage \(n\), Lean uses the two adjacent paired partial sums as lower and
+upper rational endpoints.  They are nested and have the exact width
+\[
+  w_n=\frac{1}{2n+1},
+\]
+so in particular \(w_n\le 1/n\) for every positive stage.  This is a
+finite-rational convergence proof, with no appeal to a completed real line.
+
+At present this defines the named series presentation
+\code{Logarithm.logTwoSeries}.  The theorem
+\(\log_{\mathrm{series}}2=\int_1^2 dt/t\), which licenses its identification
+with the logarithm above, is deliberately still open.  It belongs to the
+general constructive integral and FTC bridge, not to the bare alternating
+series validity proof.
+\end{definition}
+
 \section{Complex logarithm at \texorpdfstring{$i$}{i}}
 
 \begin{definition}[Logarithm from local power-series continuation]
