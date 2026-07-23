@@ -94,7 +94,11 @@ variant: construct the two sides of
 `pi = 4 * ∫_0^1 arctan(x) dx + 2 * log(2)` and prove their equivalence.  It
 will become a sixth coverage bridge only after the product/derivative/FTC
 route, its common monotone-piece refinement, and the logarithm endpoint
-identity are all checked.
+identity are all checked.  The uniform-grid core of that refinement is now
+formalized: the `m*n` rational grid explicitly contains both the `m` and `n`
+grids, and its mesh is the old width divided by the positive factor.  General
+piecewise synchronization still remains before this can count as the sixth
+bridge.
 
 The direct chord-path route now also has a checked
 `piCircumferenceStabilized` representative. It evaluates only a finite prefix

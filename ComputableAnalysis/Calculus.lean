@@ -5,6 +5,80 @@ namespace ComputableAnalysis
 def mesh (a b : Rat) (n : Nat) : Rat := if n = 0 then 0 else (b - a) / n
 def leftPoint (a b : Rat) (n k : Nat) : Rat := a + (k : Rat) * mesh a b n
 
+/-- The first point of every positive uniform rational mesh is its left
+endpoint. -/
+theorem leftPoint_zero (a b : Rat) (n : Nat) :
+    leftPoint a b n 0 = a := by
+  unfold leftPoint
+  grind
+
+/-- The last point of a positive uniform rational mesh is its right endpoint.
+This is an exact rational identity; no limiting argument is involved. -/
+theorem leftPoint_endpoint {a b : Rat} {n : Nat} (hn : 0 < n) :
+    leftPoint a b n n = b := by
+  have hnat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  unfold leftPoint mesh
+  rw [if_neg (Nat.ne_of_gt hn)]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+    Rat.sub_eq_add_neg]
+
+/-- Consecutive points of a uniform rational mesh are separated by precisely
+its mesh width. -/
+theorem leftPoint_step (a b : Rat) (n k : Nat) :
+    leftPoint a b n (k + 1) - leftPoint a b n k = mesh a b n := by
+  unfold leftPoint
+  grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add, Rat.add_assoc,
+    Rat.add_comm]
+
+/-- The mesh width is nonnegative on an ordered interval. -/
+theorem mesh_nonneg_of_le {a b : Rat} {n : Nat}
+    (hn : 0 < n) (hab : a <= b) :
+    0 <= mesh a b n := by
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt hn), Rat.div_def]
+  have hden : 0 <= ((n : Rat)⁻¹) :=
+    Rat.le_of_lt (Rat.inv_pos.mpr ((Rat.natCast_pos).2 hn))
+  exact Rat.mul_nonneg (by grind [Rat.sub_eq_add_neg]) hden
+
+/-- An ordered interval gives an ordered uniform rational mesh. -/
+theorem leftPoint_monotone {a b : Rat} {n i j : Nat}
+    (hn : 0 < n) (hab : a <= b) (hij : i <= j) :
+    leftPoint a b n i <= leftPoint a b n j := by
+  have hmesh : 0 <= mesh a b n := mesh_nonneg_of_le hn hab
+  have hcast : (i : Rat) <= (j : Rat) := by
+    exact_mod_cast hij
+  exact (Rat.add_le_add_left).mpr
+    (Rat.mul_le_mul_of_nonneg_right hcast hmesh)
+
+/-- Refining a uniform mesh by a positive factor preserves every old mesh
+point.  The embedding sends index `i` to `i*n` in the `m*n` mesh. -/
+theorem leftPoint_refine_mul_right {a b : Rat} {m n i : Nat}
+    (hm : 0 < m) (hn : 0 < n) :
+    leftPoint a b (m * n) (i * n) = leftPoint a b m i := by
+  have hmrat : (m : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hm)
+  have hnrat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  unfold leftPoint mesh
+  rw [if_neg (Nat.mul_ne_zero (Nat.ne_of_gt hm) (Nat.ne_of_gt hn)),
+    if_neg (Nat.ne_of_gt hm)]
+  simp only [Rat.natCast_mul]
+  grind [Rat.div_def, Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
+/-- Under the same refinement, the fine mesh width is the old width divided
+by the positive refinement factor. -/
+theorem mesh_refine_mul_right {a b : Rat} {m n : Nat}
+    (hm : 0 < m) (hn : 0 < n) :
+    mesh a b (m * n) = mesh a b m / (n : Rat) := by
+  unfold mesh
+  rw [if_neg (Nat.mul_ne_zero (Nat.ne_of_gt hm) (Nat.ne_of_gt hn)),
+    if_neg (Nat.ne_of_gt hm)]
+  simp only [Rat.natCast_mul]
+  grind [Rat.div_def, Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_inv_cancel]
+
 def riemannLeftExact (g : Rat -> Rat) (a b : Rat) (n : Nat) : Rat :=
   let h := mesh a b n
   (List.range n).foldl (fun acc k => acc + h * g (leftPoint a b n k)) 0
@@ -1004,6 +1078,51 @@ structure RationalPartition (a b : Rat) where
     forall i j, i <= j -> j <= pieces -> point i <= point j
 
 namespace RationalPartition
+
+/-- The explicit equally-spaced rational partition of an ordered interval.
+Uniform partitions are the first common-refinement interface needed for the
+geometric integration-by-parts route: multiplication of the number of pieces
+gives a single rational grid containing both input grids. -/
+def uniform (a b : Rat) (pieces : Nat)
+    (hpieces : 0 < pieces) (hab : a <= b) : RationalPartition a b where
+  pieces := pieces
+  positive := hpieces
+  point := leftPoint a b pieces
+  left_endpoint := leftPoint_zero a b pieces
+  right_endpoint := leftPoint_endpoint hpieces
+  monotone := by
+    intro i j hij _hj
+    exact leftPoint_monotone hpieces hab hij
+
+/-- The old indices of the `m`-piece uniform grid remain valid in its
+`m*n`-piece refinement. -/
+theorem uniform_refinement_index_right {m n i : Nat}
+    (hi : i <= m) : i * n <= m * n :=
+  Nat.mul_le_mul_right n hi
+
+/-- The old indices of the `n`-piece uniform grid remain valid in the common
+`m*n` refinement. -/
+theorem uniform_refinement_index_left {m n j : Nat}
+    (hj : j <= n) : j * m <= m * n := by
+  simpa [Nat.mul_comm] using Nat.mul_le_mul_right m hj
+
+/-- The `m*n` uniform grid contains the complete `m`-piece grid. -/
+theorem uniform_refines_right {a b : Rat} {m n i : Nat}
+    (hm : 0 < m) (hn : 0 < n) (hab : a <= b) :
+    (uniform a b (m * n) (Nat.mul_pos hm hn) hab).point (i * n) =
+      (uniform a b m hm hab).point i := by
+  simpa [uniform] using leftPoint_refine_mul_right
+    (a := a) (b := b) (i := i) hm hn
+
+/-- The `m*n` uniform grid contains the complete `n`-piece grid as well.
+Together with `uniform_refines_right` this is an explicit common rational
+refinement, not a choice principle over arbitrary partitions. -/
+theorem uniform_refines_left {a b : Rat} {m n j : Nat}
+    (hm : 0 < m) (hn : 0 < n) (hab : a <= b) :
+    (uniform a b (m * n) (Nat.mul_pos hm hn) hab).point (j * m) =
+      (uniform a b n hn hab).point j := by
+  simpa [uniform, Nat.mul_comm] using leftPoint_refine_mul_right
+    (a := a) (b := b) (i := j) hn hm
 
 def cell {a b : Rat} (P : RationalPartition a b)
     (k : Nat) (hk : k < P.pieces) : RationalSubinterval a b where

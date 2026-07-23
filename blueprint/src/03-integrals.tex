@@ -183,6 +183,10 @@ additivity.
 \lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative}
 \lean{ComputableAnalysis.quadraticVariationSum_neg_neg}
 \lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonpositive}
+\lean{ComputableAnalysis.mesh_refine_mul_right}
+\lean{ComputableAnalysis.RationalPartition.uniform}
+\lean{ComputableAnalysis.RationalPartition.uniform_refines_right}
+\lean{ComputableAnalysis.RationalPartition.uniform_refines_left}
 \uses{def:definite-integral-identity}
 \leanok
 For rational sequences \((u_i,v_i)\), one partition cell has the exact
@@ -221,6 +225,13 @@ It also proves the coarser endpoint-variation bound
 Negating both paths preserves the corner sum, giving the corresponding bound
 for two decreasing pieces.  Thus the needed increasing/decreasing split is
 explicit finite rational data rather than a hidden global variation theorem.
+The first common-refinement interface is now checked for uniform rational
+grids: the \(mn\)-piece grid contains the \(m\)-piece grid at indices
+\(i\mapsto in\), and contains the \(n\)-piece grid at indices
+\(j\mapsto jm\).  Its fine width is exactly the old \(m\)-mesh width divided
+by \(n\).  This is enough for the dyadic meshes used by the present rectangle
+algorithms; synchronizing arbitrary finite rational breakpoint lists remains
+the later general piecewise-refinement step.
 For the later integral theorem, functions are supplied on explicit increasing
 or decreasing pieces and the two decompositions are replaced by a common
 rational refinement.  The corner correction is then bounded piece by piece
