@@ -1390,6 +1390,32 @@ theorem integralUpperSum_nonneg
         (ih hrest)
       grind
 
+/-- An upper rectangle sum for a finite cover is bounded by the length of
+the covered interval.  This uses only the pointwise bound
+`1 / (1 + u^2) <= 1`. -/
+theorem integralUpperSum_le_intervalLength
+    {a b : Rat} {intervals : List (Rat × Rat)}
+    (hcover : CoversInterval a b intervals) :
+    integralUpperSum intervals <= b - a := by
+  induction intervals generalizing a with
+  | nil =>
+      have hab : a = b := by
+        simpa [CoversInterval] using hcover
+      subst b
+      simp [integralUpperSum]
+      grind [Rat.sub_eq_add_neg]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      calc
+        integralUpperSum ((a, r) :: rest) =
+            integralUpperStep a r + integralUpperSum rest := rfl
+        _ <= (r - a) + (b - r) :=
+          rat_add_le_add (integralUpperStep_le_width hpr) (ih hrest)
+        _ = b - a := by
+          grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 theorem integralLowerStep_zero_right (p : Rat) :
     integralLowerStep p p = 0 := by
   grind [integralLowerStep, Rat.sub_eq_add_neg]
@@ -3148,6 +3174,44 @@ same midpoint partition schedule as `arctanGeom x`. -/
 def arctanIntegralRectangleCompute (x : Rat) (n : Nat) : QInterval :=
   integralSumInterval (arctanAreaLoopState x n).intervals
 
+/-- Every lower rectangle sum on a nonnegative arctangent interval is
+nonnegative. -/
+theorem arctanIntegralRectangleCompute_lower_nonnegative
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    0 <= (arctanIntegralRectangleCompute x n).lo := by
+  unfold arctanIntegralRectangleCompute integralSumInterval
+  exact integralLowerSum_nonneg (arctanAreaLoopState x n).intervals
+    (arctanAreaLoopState_intervals_nonnegative hx n)
+
+/-- Every upper rectangle sum on a nonnegative arctangent interval is at
+most the interval length. -/
+theorem arctanIntegralRectangleCompute_upper_le_input
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    (arctanIntegralRectangleCompute x n).hi <= x := by
+  unfold arctanIntegralRectangleCompute integralSumInterval
+  calc
+    integralUpperSum (arctanAreaLoopState x n).intervals <= x - 0 :=
+      integralUpperSum_le_intervalLength
+        (arctanAreaLoopState_intervals_covers hx n)
+    _ = x := by grind [Rat.sub_eq_add_neg]
+
+/-- The lower endpoint of the rectangle bracket is exactly zero at the
+zero upper endpoint. -/
+theorem arctanIntegralRectangleCompute_zero_lower (n : Nat) :
+    (arctanIntegralRectangleCompute 0 n).lo = 0 := by
+  have hlow : 0 <= (arctanIntegralRectangleCompute 0 n).lo :=
+    arctanIntegralRectangleCompute_lower_nonnegative (by native_decide) n
+  have hupper : (arctanIntegralRectangleCompute 0 n).hi <= 0 :=
+    arctanIntegralRectangleCompute_upper_le_input (by native_decide) n
+  have hordered :
+      (arctanIntegralRectangleCompute 0 n).lo <=
+        (arctanIntegralRectangleCompute 0 n).hi := by
+    unfold arctanIntegralRectangleCompute integralSumInterval
+    exact integralLowerSum_le_integralUpperSum
+      (arctanAreaLoopState 0 n).intervals
+      (arctanAreaLoopState_intervals_nonnegative (by native_decide) n)
+  exact Rat.le_antisymm (Rat.le_trans hordered hupper) hlow
+
 /-- Finite monotonicity in the upper endpoint of the rectangle arctangent.
 The proof appends the rational tail from x to y to the cover from 0 to x and
 then compares its lower sum with the upper sum from the stage cover from 0 to
@@ -3556,12 +3620,13 @@ theorem chartAddAreaLoopCompute_widthsShrink
     (chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ
       hu0 huHalf hx0 hx1 himage)
 
-theorem arctanIntegralRectangleCompute_widthsShrink
-    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
-    RealRaw.WidthsShrinkToZero (arctanIntegralRectangleCompute x) := by
-  intro eps
-  refine ⟨4 * (eps.val.den + 1), ?_⟩
-  intro n hn
+/-- The explicit rectangle precision schedule: any stage at least
+`4 * (eps.den + 1)` has box width at most the requested positive rational
+tolerance. -/
+theorem arctanIntegralRectangleCompute_width_le_eps_of_precision
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (eps : QPos) (n : Nat) (hn : 4 * (eps.val.den + 1) <= n) :
+    (arctanIntegralRectangleCompute x n).width <= eps.val := by
   have hmain :
       (4 : Rat) / (((n + 1 : Nat) : Rat)) <=
         1 / (((eps.val.den + 1 : Nat) : Rat)) := by
@@ -3595,6 +3660,15 @@ theorem arctanIntegralRectangleCompute_widthsShrink
     (arctanIntegralRectangleCompute_width_le_four_div_succ hx0 hx1 n)
     (Rat.le_trans hmain
       (FTC.one_div_den_succ_le_of_pos eps.property))
+
+theorem arctanIntegralRectangleCompute_widthsShrink
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    RealRaw.WidthsShrinkToZero (arctanIntegralRectangleCompute x) := by
+  intro eps
+  refine ⟨4 * (eps.val.den + 1), ?_⟩
+  intro n hn
+  exact arctanIntegralRectangleCompute_width_le_eps_of_precision
+    hx0 hx1 eps n hn
 
 private theorem width_le_of_contains
     {outer inner : QInterval} (h : outer.ContainsInterval inner) :

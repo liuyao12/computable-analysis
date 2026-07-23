@@ -211,8 +211,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   endpoint-order fact is not the kernel's monotonicity in its integration
   variable, and the lower-envelope construction is precisely what prevents
   arbitrary box endpoints from being treated as an exact nondecreasing path.
-  What remains is to schedule box-width and quadrature errors and connect
-  these samples through the product, derivative, and FTC certificates.  The
+  The first explicit two-parameter error schedule is now the target:
+  at mesh `eps.den + 1` the endpoint variation lies in `[0,1]`, so the
+  corner correction is at most `1/(eps.den + 1) <= eps`; independently,
+  rectangle evaluation stage `4 * (eps.den + 1)` makes every sampled box
+  have width at most `eps`.  What remains is to connect these finite
+  estimates through the product, derivative, and FTC certificates.  The
   general finite merge
   is now checked: `commonRefinementOfPartitions` inserts the right
   `breakpointList` into the left partition and recovers the second ordered

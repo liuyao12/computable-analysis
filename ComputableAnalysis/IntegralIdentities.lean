@@ -1957,6 +1957,19 @@ theorem arctanIntegralRectangleMeshBoxes_weaklyOrdered
   · exact unitMeshPath_nonnegative meshStage (min i meshStage)
   · exact unitMeshPath_clamped_monotone meshStage i j hij
 
+/-- The rectangle width bound is uniform over all unit-mesh sample points. -/
+theorem arctanIntegralRectangleMeshBoxes_width_le_eps
+    (meshStage evalStage k : Nat) (eps : QPos)
+    (heval : 4 * (eps.val.den + 1) <= evalStage) :
+    (arctanIntegralRectangleMeshBoxes meshStage evalStage k).width <=
+      eps.val := by
+  unfold arctanIntegralRectangleMeshBoxes
+  apply ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+  · exact unitMeshPath_nonnegative meshStage (min k meshStage)
+  · exact unitMeshPath_le_one meshStage (min k meshStage)
+      (Nat.min_le_right _ _)
+  · exact heval
+
 /-- The canonical nondecreasing rational arctangent sample path obtained
 from the cumulative lower envelope of the fixed-stage mesh boxes. -/
 def arctanIntegralRectangleMeshSamples
@@ -1976,6 +1989,54 @@ theorem arctanIntegralRectangleMeshSamples_mem
     (arctanIntegralRectangleMeshBoxes meshStage evalStage)
     (arctanIntegralRectangleMeshBoxes_weaklyOrdered meshStage evalStage) k
 
+/-- The selected sample is within the width of its own rectangle box above
+the lower endpoint. -/
+theorem arctanIntegralRectangleMeshSamples_sub_lower_le_boxWidth
+    (meshStage evalStage k : Nat) :
+    arctanIntegralRectangleMeshSamples meshStage evalStage k -
+        (arctanIntegralRectangleMeshBoxes meshStage evalStage k).lo <=
+      (arctanIntegralRectangleMeshBoxes meshStage evalStage k).width := by
+  exact QInterval.point_sub_lower_le_width
+    (arctanIntegralRectangleMeshSamples_mem meshStage evalStage k).2
+
+/-- The selected sample is within the width of its own rectangle box below
+the upper endpoint. -/
+theorem arctanIntegralRectangleMeshSamples_upper_sub_le_boxWidth
+    (meshStage evalStage k : Nat) :
+    (arctanIntegralRectangleMeshBoxes meshStage evalStage k).hi -
+        arctanIntegralRectangleMeshSamples meshStage evalStage k <=
+      (arctanIntegralRectangleMeshBoxes meshStage evalStage k).width := by
+  exact QInterval.upper_sub_point_le_width
+    (arctanIntegralRectangleMeshSamples_mem meshStage evalStage k).1
+
+/-- At the explicit evaluation precision, either endpoint of a sampled
+rectangle box is within the requested rational error budget. -/
+theorem arctanIntegralRectangleMeshSamples_sub_lower_le_eps
+    (meshStage evalStage k : Nat) (eps : QPos)
+    (heval : 4 * (eps.val.den + 1) <= evalStage) :
+    arctanIntegralRectangleMeshSamples meshStage evalStage k -
+        (arctanIntegralRectangleMeshBoxes meshStage evalStage k).lo <=
+      eps.val :=
+  Rat.le_trans
+    (arctanIntegralRectangleMeshSamples_sub_lower_le_boxWidth
+      meshStage evalStage k)
+    (arctanIntegralRectangleMeshBoxes_width_le_eps
+      meshStage evalStage k eps heval)
+
+/-- At the explicit evaluation precision, the upper endpoint of a sampled
+rectangle box is within the requested rational error budget of its sample. -/
+theorem arctanIntegralRectangleMeshSamples_upper_sub_le_eps
+    (meshStage evalStage k : Nat) (eps : QPos)
+    (heval : 4 * (eps.val.den + 1) <= evalStage) :
+    (arctanIntegralRectangleMeshBoxes meshStage evalStage k).hi -
+        arctanIntegralRectangleMeshSamples meshStage evalStage k <=
+      eps.val :=
+  Rat.le_trans
+    (arctanIntegralRectangleMeshSamples_upper_sub_le_boxWidth
+      meshStage evalStage k)
+    (arctanIntegralRectangleMeshBoxes_width_le_eps
+      meshStage evalStage k eps heval)
+
 /-- The canonical arctangent mesh sample path is nondecreasing. -/
 theorem arctanIntegralRectangleMeshSamples_step_nonnegative
     (meshStage evalStage k : Nat) :
@@ -1983,6 +2044,51 @@ theorem arctanIntegralRectangleMeshSamples_step_nonnegative
       arctanIntegralRectangleMeshSamples meshStage evalStage k := by
   exact QInterval.lowerEnvelope_step_nonnegative
     (arctanIntegralRectangleMeshBoxes meshStage evalStage) k
+
+/-- The first lower-envelope sample is exactly zero because the rectangle
+integral at the zero upper endpoint is exact. -/
+theorem arctanIntegralRectangleMeshSamples_zero
+    (meshStage evalStage : Nat) :
+    arctanIntegralRectangleMeshSamples meshStage evalStage 0 = 0 := by
+  unfold arctanIntegralRectangleMeshSamples QInterval.lowerEnvelope
+    arctanIntegralRectangleMeshBoxes
+  simp only [Nat.zero_min]
+  have hpoint : unitMeshPath meshStage 0 = 0 := by
+    unfold unitMeshPath
+    rw [Rat.div_def]
+    simp
+  rw [hpoint]
+  exact ArctanGeometry.arctanIntegralRectangleCompute_zero_lower evalStage
+
+/-- The final unit-mesh sample is at most one. -/
+theorem arctanIntegralRectangleMeshSamples_endpoint_le_one
+    (meshStage evalStage : Nat) :
+    arctanIntegralRectangleMeshSamples meshStage evalStage meshStage <= 1 := by
+  have hmem := arctanIntegralRectangleMeshSamples_mem
+    meshStage evalStage meshStage
+  have hupper :
+      (arctanIntegralRectangleMeshBoxes meshStage evalStage meshStage).hi <=
+        unitMeshPath meshStage (min meshStage meshStage) := by
+    unfold arctanIntegralRectangleMeshBoxes
+    exact ArctanGeometry.arctanIntegralRectangleCompute_upper_le_input
+      (unitMeshPath_nonnegative meshStage (min meshStage meshStage)) evalStage
+  calc
+    arctanIntegralRectangleMeshSamples meshStage evalStage meshStage <=
+        (arctanIntegralRectangleMeshBoxes meshStage evalStage meshStage).hi :=
+      hmem.2
+    _ <= unitMeshPath meshStage (min meshStage meshStage) := hupper
+    _ <= 1 := unitMeshPath_le_one meshStage (min meshStage meshStage)
+      (Nat.min_le_right _ _)
+
+/-- The sampled arctangent endpoint variation is bounded by one. -/
+theorem arctanIntegralRectangleMeshSamples_endpointDifference_le_one
+    (meshStage evalStage : Nat) :
+    arctanIntegralRectangleMeshSamples meshStage evalStage meshStage -
+      arctanIntegralRectangleMeshSamples meshStage evalStage 0 <= 1 := by
+  rw [arctanIntegralRectangleMeshSamples_zero meshStage evalStage]
+  have h := arctanIntegralRectangleMeshSamples_endpoint_le_one
+    meshStage evalStage
+  grind [Rat.sub_eq_add_neg]
 
 /-- The finite integration-by-parts corner correction now applies directly
 to the canonical sampled arctangent path on every unit mesh. -/
@@ -1996,6 +2102,45 @@ theorem arctanIntegralRectangleMeshSamples_cornerBound
   unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference
     meshStage (arctanIntegralRectangleMeshSamples meshStage evalStage)
     (arctanIntegralRectangleMeshSamples_step_nonnegative meshStage evalStage)
+
+/-- The arctangent corner correction is bounded by the reciprocal mesh size:
+the sampled endpoint variation is at most one. -/
+theorem arctanIntegralRectangleMeshSamples_cornerBound_le_one_div
+    (meshStage evalStage : Nat) :
+    quadraticVariationSum (unitMeshPath meshStage)
+        (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage <=
+      1 / (meshStage : Rat) := by
+  have hvariation :=
+    arctanIntegralRectangleMeshSamples_endpointDifference_le_one
+      meshStage evalStage
+  have hfactor : 0 <= 1 / (meshStage : Rat) := by
+    simpa [unitMeshPath] using unitMeshPath_nonnegative meshStage 1
+  calc
+    quadraticVariationSum (unitMeshPath meshStage)
+        (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage <=
+        (1 / (meshStage : Rat)) *
+          (arctanIntegralRectangleMeshSamples meshStage evalStage meshStage -
+            arctanIntegralRectangleMeshSamples meshStage evalStage 0) :=
+      arctanIntegralRectangleMeshSamples_cornerBound meshStage evalStage
+    _ <= (1 / (meshStage : Rat)) * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hvariation hfactor
+    _ = 1 / (meshStage : Rat) := by
+      rw [Rat.mul_one]
+
+/-- The explicit unit-mesh stage `eps.den + 1` makes the arctangent corner
+correction at most the requested positive rational epsilon. -/
+theorem arctanIntegralRectangleMeshSamples_cornerBound_le_eps
+    (evalStage : Nat) (eps : QPos) :
+    quadraticVariationSum (unitMeshPath (eps.val.den + 1))
+        (arctanIntegralRectangleMeshSamples (eps.val.den + 1) evalStage)
+        (eps.val.den + 1) <= eps.val := by
+  calc
+    quadraticVariationSum (unitMeshPath (eps.val.den + 1))
+        (arctanIntegralRectangleMeshSamples (eps.val.den + 1) evalStage)
+        (eps.val.den + 1) <= 1 / (((eps.val.den + 1 : Nat) : Rat)) :=
+      arctanIntegralRectangleMeshSamples_cornerBound_le_one_div
+        (eps.val.den + 1) evalStage
+    _ <= eps.val := FTC.one_div_den_succ_le_of_pos eps.property
 
 theorem arctanIntegralRectangleFunctionAgreement :
     Elementary.Arctan.Equivalent

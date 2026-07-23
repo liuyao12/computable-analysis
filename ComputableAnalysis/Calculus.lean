@@ -444,6 +444,22 @@ theorem QInterval.lowerEnvelope_mem
   ⟨QInterval.boxLower_le_lowerEnvelope boxes n,
     QInterval.lowerEnvelope_le_boxUpper boxes hboxes n n (Nat.le_refl n)⟩
 
+/-- A selected rational point of an interval is at most one box width above
+the lower endpoint. -/
+theorem QInterval.point_sub_lower_le_width {I : QInterval} {x : Rat}
+    (hx : x <= I.hi) :
+    x - I.lo <= I.width := by
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+/-- A selected rational point of an interval is at most one box width below
+the upper endpoint. -/
+theorem QInterval.upper_sub_point_le_width {I : QInterval} {x : Rat}
+    (hx : I.lo <= x) :
+    I.hi - x <= I.width := by
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
 /-- Unit-mesh coordinates are nonnegative, even at the degenerate
 zero-cell mesh where rational division returns zero. -/
 theorem unitMeshPath_nonnegative (n k : Nat) :
@@ -478,6 +494,34 @@ theorem unitMeshPath_monotone (n i j : Nat) (hij : i <= j) :
         (Rat.natCast_pos).2 (Nat.succ_pos n)
       exact Rat.mul_le_mul_of_nonneg_right hcast
         (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+/-- A unit-mesh coordinate does not exceed the right endpoint when its
+index lies in the mesh. -/
+theorem unitMeshPath_le_one (n k : Nat) (hk : k <= n) :
+    unitMeshPath n k <= 1 := by
+  cases n with
+  | zero =>
+      have hk0 : k = 0 := by omega
+      subst k
+      unfold unitMeshPath
+      rw [Rat.div_def]
+      simp
+      native_decide
+  | succ n =>
+      unfold unitMeshPath
+      rw [Rat.div_def]
+      have hcast : (k : Rat) <= ((n + 1 : Nat) : Rat) := by
+        exact_mod_cast hk
+      have hden : 0 < ((n + 1 : Nat) : Rat) :=
+        (Rat.natCast_pos).2 (Nat.succ_pos n)
+      have hden_ne : ((n + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hden
+      calc
+        (k : Rat) * ((n + 1 : Nat) : Rat)⁻¹ <=
+            ((n + 1 : Nat) : Rat) * ((n + 1 : Nat) : Rat)⁻¹ :=
+          Rat.mul_le_mul_of_nonneg_right hcast
+            (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+        _ = 1 := by
+          grind [Rat.mul_inv_cancel]
 
 /-- Every increment of the unit mesh path is exactly `1/n`. -/
 theorem unitMeshPath_step (n k : Nat) :

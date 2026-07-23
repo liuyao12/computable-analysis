@@ -131,9 +131,13 @@ interval-function witness.  The compatible rational sampling path is now
 also checked: the cumulative maximum of earlier lower endpoints stays in
 each current box by that weak order and is nondecreasing by construction.
 It therefore instantiates the unit-mesh corner-error bound without treating
-arbitrary adjacent box endpoints as a monotone path.  The remaining
-arctangent--logarithm route work is the global error schedule and the
-product, derivative, and FTC comparison certificates.
+arbitrary adjacent box endpoints as a monotone path.  Its two finite error
+knobs are now explicit: mesh `eps.den + 1` makes the corner correction at
+most `eps`, while evaluation stage `4 * (eps.den + 1)` makes each selected
+sample lie within `eps` of either endpoint of its rectangle box.  The
+remaining arctangent--logarithm route work is the product, derivative, and
+FTC comparison certificates that connect these finite samples to the
+displayed integrals.
 `Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw
 presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
 certified `O(1/n)` rate.  Independently,
