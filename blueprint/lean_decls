@@ -6,6 +6,9 @@ ComputableAnalysis.RealRaw.Neg
 ComputableAnalysis.RealRaw.add
 ComputableAnalysis.RealRaw.sub
 ComputableAnalysis.RealRaw.mul
+ComputableAnalysis.QBox.mulRealInterval_of_nonneg
+ComputableAnalysis.RealRaw.mul_valid_of_nonneg_bounded
+ComputableAnalysis.RealRaw.mul_equiv_of_nonneg
 ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg
 ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos
 ComputableAnalysis.RealRaw.valid_of_natScale_valid
@@ -67,6 +70,8 @@ ComputableAnalysis.Complex.ofQComplex
 ComputableAnalysis.Complex.ofReal
 ComputableAnalysis.FunctionRaw
 ComputableAnalysis.RealFunRaw
+ComputableAnalysis.RealFunRaw.mul
+ComputableAnalysis.RealFunRaw.mul_valid_of_nonneg_bounded
 ComputableAnalysis.PartialRealFunRaw
 ComputableAnalysis.FunctionOnInterval
 ComputableAnalysis.EffectiveInverseSeparation

@@ -193,10 +193,20 @@ another. The Pi score stays useful only as secondary integration coverage.
   increasing/decreasing pieces with arbitrary rational breakpoints, then
   discharge the maximum-increment bound cell by cell.  Do not invoke a
   nonconstructive global variation or Jordan decomposition.
+- The first raw product bridge is now checked on positive bounded branches.
+  `QBox.mulRealInterval_of_nonneg` reduces the four-corner enclosure to the
+  lower--lower and upper--upper products.  Given positive rational bounds,
+  `RealRaw.mul_valid_of_nonneg_bounded` proves the product raw valid with
+  width bounded by `Bx * width(y) + By * width(x)`, and
+  `RealRaw.mul_equiv_of_nonneg` preserves changes of certified
+  representation.  `RealFunRaw.mul_valid_of_nonneg_bounded` lifts this
+  pointwise to rational-input functions.  This is the product layer needed
+  for the positive `x * arctan x` branch on `[0,1]`; a general signed product,
+  product derivative rule, and its FTC comparison are still open.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
-  It requires the product/derivative/FTC bridge, the explicit monotone-piece
+  It requires the remaining product-derivative/FTC bridge, the explicit monotone-piece
   refinement, the arctangent derivative, and the logarithm endpoint identity.
   It is deliberately not a checked scoreboard row until those data construct
   valid raw reals and their final `RealRaw.Equiv` theorem.

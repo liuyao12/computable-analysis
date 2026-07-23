@@ -2548,6 +2548,26 @@ theorem mulRealInterval_self_of_nonneg {a b : Rat}
   unfold mulRealInterval min4 max4 minRat maxRat2
   simp [h12, h13, h34, h24]
 
+/-- On two nonnegative rational intervals, interval multiplication has the
+expected endpoint form.  This is the finite order fact behind the first
+certified product construction for nonnegative bounded raw reals. -/
+theorem mulRealInterval_of_nonneg {a b c d : Rat}
+    (ha0 : 0 <= a) (hab : a <= b)
+    (hc0 : 0 <= c) (hcd : c <= d) :
+    mulRealInterval a b c d = { lo := a * c, hi := b * d } := by
+  have hb0 : 0 <= b := by grind
+  have hd0 : 0 <= d := by grind
+  have h12 : a * c <= a * d :=
+    Rat.mul_le_mul_of_nonneg_left hcd ha0
+  have h13 : a * c <= b * c :=
+    Rat.mul_le_mul_of_nonneg_right hab hc0
+  have h24 : a * d <= b * d :=
+    Rat.mul_le_mul_of_nonneg_right hab hd0
+  have h34 : b * c <= b * d :=
+    Rat.mul_le_mul_of_nonneg_left hcd hb0
+  unfold mulRealInterval min4 max4 minRat maxRat2
+  simp [h12, h13, h24, h34]
+
 def mul (A B : QBox) : QBox :=
   let rr := mulRealInterval A.lo.re A.hi.re B.lo.re B.hi.re
   let ii := mulRealInterval A.lo.im A.hi.im B.lo.im B.hi.im
@@ -3008,6 +3028,229 @@ theorem mulSelf_valid_of_nonneg_bounded {x : RealRaw}
               rw [Rat.div_def]
               have hne : (2 : Rat) * B ≠ 0 := Rat.ne_of_gt hdenPos
               grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The interval computation for a product of nonnegative raw reals has the
+ordinary lower--lower and upper--upper endpoint form. -/
+private theorem mul_compute_of_nonneg
+    {x y : RealRaw} (hx : x.Valid) (hy : y.Valid)
+    (hxnonneg : forall n, 0 <= (x.compute n).lo)
+    (hynonneg : forall n, 0 <= (y.compute n).lo)
+    (n : Nat) :
+    ((x * y).compute n) =
+      { lo := (x.compute n).lo * (y.compute n).lo,
+        hi := (x.compute n).hi * (y.compute n).hi } := by
+  change QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      (y.compute n).lo (y.compute n).hi = _
+  exact QBox.mulRealInterval_of_nonneg
+    (hxnonneg n) (RealRaw.interval_order_of_valid x hx n)
+    (hynonneg n) (RealRaw.interval_order_of_valid y hy n)
+
+/-- Products of nonnegative, rationally bounded computable reals are valid.
+
+The proof is entirely interval based.  Its width estimate is
+`B_x * width(y) + B_y * width(x)`, so it supplies the product operation needed
+for local positive-domain calculus without a completed-real multiplication
+principle. -/
+theorem mul_valid_of_nonneg_bounded {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    {Bx By : Rat} (hBx : 0 < Bx) (hBy : 0 < By)
+    (hxbounds : forall n,
+      0 <= (x.compute n).lo /\ (x.compute n).hi <= Bx)
+    (hybounds : forall n,
+      0 <= (y.compute n).lo /\ (y.compute n).hi <= By) :
+    (x * y).Valid := by
+  have hxnonneg : forall n, 0 <= (x.compute n).lo := fun n =>
+    (hxbounds n).1
+  have hynonneg : forall n, 0 <= (y.compute n).lo := fun n =>
+    (hybounds n).1
+  constructor
+  · intro n
+    have horderx := RealRaw.interval_order_of_valid x hx n
+    have hordery := RealRaw.interval_order_of_valid y hy n
+    have hcompute := mul_compute_of_nonneg hx hy hxnonneg hynonneg n
+    rw [hcompute]
+    unfold QInterval.width
+    have hxhi0 : 0 <= (x.compute n).hi := by grind
+    have hleft :
+        (x.compute n).lo * (y.compute n).lo <=
+          (x.compute n).hi * (y.compute n).lo :=
+      Rat.mul_le_mul_of_nonneg_right horderx (hynonneg n)
+    have hright :
+        (x.compute n).hi * (y.compute n).lo <=
+          (x.compute n).hi * (y.compute n).hi :=
+      Rat.mul_le_mul_of_nonneg_left hordery hxhi0
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      have hxnm := hx.2.1 n m hnm
+      have hynm := hy.2.1 n m hnm
+      have hcomputeN := mul_compute_of_nonneg hx hy hxnonneg hynonneg n
+      have hcomputeM := mul_compute_of_nonneg hx hy hxnonneg hynonneg m
+      rw [hcomputeN, hcomputeM]
+      have hxloM0 : 0 <= (x.compute m).lo := hxnonneg m
+      have hyloN0 : 0 <= (y.compute n).lo := hynonneg n
+      have hyhiM0 : 0 <= (y.compute m).hi := by
+        have hordery := RealRaw.interval_order_of_valid y hy m
+        grind
+      have hlow :
+          (x.compute n).lo * (y.compute n).lo <=
+            (x.compute m).lo * (y.compute m).lo := by
+        calc
+          (x.compute n).lo * (y.compute n).lo <=
+              (x.compute m).lo * (y.compute n).lo :=
+            Rat.mul_le_mul_of_nonneg_right hxnm.1 hyloN0
+          _ <= (x.compute m).lo * (y.compute m).lo :=
+            Rat.mul_le_mul_of_nonneg_left hynm.1 hxloM0
+      have hhigh :
+          (x.compute m).hi * (y.compute m).hi <=
+            (x.compute n).hi * (y.compute n).hi := by
+        calc
+          (x.compute m).hi * (y.compute m).hi <=
+              (x.compute n).hi * (y.compute m).hi :=
+            Rat.mul_le_mul_of_nonneg_right hxnm.2.2 hyhiM0
+          _ <= (x.compute n).hi * (y.compute n).hi := by
+            have hxhiN0 : 0 <= (x.compute n).hi := by
+              have horderx := RealRaw.interval_order_of_valid x hx n
+              grind
+            exact Rat.mul_le_mul_of_nonneg_left hynm.2.2 hxhiN0
+      have horderxM := RealRaw.interval_order_of_valid x hx m
+      have horderyM := RealRaw.interval_order_of_valid y hy m
+      have hxhiM0 : 0 <= (x.compute m).hi := by grind
+      have hmid :
+          (x.compute m).lo * (y.compute m).lo <=
+            (x.compute m).hi * (y.compute m).hi := by
+        calc
+          (x.compute m).lo * (y.compute m).lo <=
+              (x.compute m).hi * (y.compute m).lo :=
+            Rat.mul_le_mul_of_nonneg_right horderxM (hynonneg m)
+          _ <= (x.compute m).hi * (y.compute m).hi :=
+            Rat.mul_le_mul_of_nonneg_left horderyM hxhiM0
+      exact ⟨hlow, hmid, hhigh⟩
+    · intro eps
+      let B : Rat := Bx + By
+      have hB : 0 < B := by
+        dsimp [B]
+        grind
+      have htwoB : 0 < (2 : Rat) * B :=
+        Rat.mul_pos (by native_decide) hB
+      let delta : QPos :=
+        ⟨eps.val / ((2 : Rat) * B), by
+          rw [Rat.div_def]
+          exact Rat.mul_pos eps.property ((Rat.inv_pos).2 htwoB)⟩
+      obtain ⟨Nx, hNx⟩ := hx.2.2 delta
+      obtain ⟨Ny, hNy⟩ := hy.2.2 delta
+      refine ⟨Nat.max Nx Ny, ?_⟩
+      intro n hn
+      have hnx : Nx <= n := Nat.le_trans (Nat.le_max_left Nx Ny) hn
+      have hny : Ny <= n := Nat.le_trans (Nat.le_max_right Nx Ny) hn
+      have hxwidth := hNx n hnx
+      have hywidth := hNy n hny
+      have hxgap :
+          (x.compute n).hi - (x.compute n).lo <= delta.val := by
+        simpa [QInterval.width] using hxwidth
+      have hygap :
+          (y.compute n).hi - (y.compute n).lo <= delta.val := by
+        simpa [QInterval.width] using hywidth
+      have horderx := RealRaw.interval_order_of_valid x hx n
+      have hordery := RealRaw.interval_order_of_valid y hy n
+      have hxgap0 : 0 <= (x.compute n).hi - (x.compute n).lo := by
+        grind [Rat.sub_eq_add_neg]
+      have hygap0 : 0 <= (y.compute n).hi - (y.compute n).lo := by
+        grind [Rat.sub_eq_add_neg]
+      have hBxleB : Bx <= B := by
+        dsimp [B]
+        grind
+      have hByleB : By <= B := by
+        dsimp [B]
+        grind
+      have hxhiB : (x.compute n).hi <= B :=
+        Rat.le_trans (hxbounds n).2 hBxleB
+      have hyloB : (y.compute n).lo <= B := by
+        have hylohi : (y.compute n).lo <= (y.compute n).hi := hordery
+        exact Rat.le_trans hylohi (Rat.le_trans (hybounds n).2 hByleB)
+      have hB0 : 0 <= B := Rat.le_of_lt hB
+      have hfirst :
+          (x.compute n).hi * ((y.compute n).hi - (y.compute n).lo) <=
+            B * delta.val := by
+        calc
+          (x.compute n).hi * ((y.compute n).hi - (y.compute n).lo) <=
+              B * ((y.compute n).hi - (y.compute n).lo) :=
+            Rat.mul_le_mul_of_nonneg_right hxhiB hygap0
+          _ <= B * delta.val :=
+            Rat.mul_le_mul_of_nonneg_left hygap hB0
+      have hsecond :
+          (y.compute n).lo * ((x.compute n).hi - (x.compute n).lo) <=
+            B * delta.val := by
+        calc
+          (y.compute n).lo * ((x.compute n).hi - (x.compute n).lo) <=
+              B * ((x.compute n).hi - (x.compute n).lo) :=
+            Rat.mul_le_mul_of_nonneg_right hyloB hxgap0
+          _ <= B * delta.val :=
+            Rat.mul_le_mul_of_nonneg_left hxgap hB0
+      have hcompute := mul_compute_of_nonneg hx hy hxnonneg hynonneg n
+      rw [hcompute]
+      unfold QInterval.width
+      calc
+        (x.compute n).hi * (y.compute n).hi -
+            (x.compute n).lo * (y.compute n).lo =
+          (x.compute n).hi * ((y.compute n).hi - (y.compute n).lo) +
+            (y.compute n).lo * ((x.compute n).hi - (x.compute n).lo) := by
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+        _ <= B * delta.val + B * delta.val :=
+          rat_add_le_add hfirst hsecond
+        _ = eps.val := by
+          dsimp [delta]
+          rw [Rat.div_def]
+          have hne : (2 : Rat) * B ≠ 0 := Rat.ne_of_gt htwoB
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Nonnegative interval multiplication respects changes of certified raw
+representation.  Bounds are needed for validity, but not for this same-stage
+overlap argument. -/
+theorem mul_equiv_of_nonneg {x x' y y' : RealRaw}
+    (hx : x.Valid) (hx' : x'.Valid) (hy : y.Valid) (hy' : y'.Valid)
+    (hxnonneg : forall n, 0 <= (x.compute n).lo)
+    (hx'nonneg : forall n, 0 <= (x'.compute n).lo)
+    (hynonneg : forall n, 0 <= (y.compute n).lo)
+    (hy'nonneg : forall n, 0 <= (y'.compute n).lo)
+    (hxx' : x.Equiv x') (hyy' : y.Equiv y') :
+    (x * y).Equiv (x' * y') := by
+  intro n
+  have hxx := (RealRaw.compareAt_overlap_iff x x' n n).1
+    (RealRaw.sameStageOverlap_of_equiv hx hx' hxx' n)
+  have hyy := (RealRaw.compareAt_overlap_iff y y' n n).1
+    (RealRaw.sameStageOverlap_of_equiv hy hy' hyy' n)
+  have hcompute := mul_compute_of_nonneg hx hy hxnonneg hynonneg n
+  have hcompute' := mul_compute_of_nonneg hx' hy' hx'nonneg hy'nonneg n
+  apply (RealRaw.compareAt_overlap_iff (x * y) (x' * y') n n).2
+  rw [hcompute, hcompute']
+  change QInterval.Overlaps
+    { lo := (x.compute n).lo * (y.compute n).lo,
+      hi := (x.compute n).hi * (y.compute n).hi }
+    { lo := (x'.compute n).lo * (y'.compute n).lo,
+      hi := (x'.compute n).hi * (y'.compute n).hi }
+  have hx'hi0 : 0 <= (x'.compute n).hi := by
+    have horder := RealRaw.interval_order_of_valid x' hx' n
+    grind
+  have hxhi0 : 0 <= (x.compute n).hi := by
+    have horder := RealRaw.interval_order_of_valid x hx n
+    grind
+  unfold QInterval.Overlaps at hxx hyy ⊢
+  constructor
+  · calc
+      (x.compute n).lo * (y.compute n).lo <=
+          (x'.compute n).hi * (y.compute n).lo :=
+        Rat.mul_le_mul_of_nonneg_right hxx.1 (hynonneg n)
+      _ <= (x'.compute n).hi * (y'.compute n).hi :=
+        Rat.mul_le_mul_of_nonneg_left hyy.1 hx'hi0
+  · calc
+      (x'.compute n).lo * (y'.compute n).lo <=
+          (x.compute n).hi * (y'.compute n).lo :=
+        Rat.mul_le_mul_of_nonneg_right hxx.2 (hy'nonneg n)
+      _ <= (x.compute n).hi * (y.compute n).hi :=
+        Rat.mul_le_mul_of_nonneg_left hyy.2 hxhi0
 
 private theorem le_of_mul_le_mul_pos_left {r a b : Rat}
     (hr : 0 < r) (h : r * a <= r * b) : a <= b := by

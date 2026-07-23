@@ -91,18 +91,22 @@ products:
   \qquad
   S_n=\{a_nc_n,a_nd_n,b_nc_n,b_nd_n\}.
 \]
-If \(x\) is nonzero, let \(N\) be the smallest natural number such that
-\([a_N,b_N]\) avoids zero.  Then
-we define
+An inverse needs an explicit apartness schedule: from a stage at which
+\([a_N,b_N]\) avoids zero, the intended later construction is
 \[
   x^{-1}:= [ b_{N+n}^{-1}, a_{N+n}^{-1} ]_{n\in\N}.
 \]
-Then \(y/x\) is defined as \(yx^{-1}\), when \(x\) is nonzero.
+The current formal layer records this as a future computable-inverse
+obligation rather than claiming a completed general inverse or division
+operation.
 \end{definition}
 
 
 \begin{proposition}[Arithmetic preserves real numbers]\label{prop:raw-arithmetic-valid}
 {\footnotesize\raggedright
+\lean{ComputableAnalysis.QBox.mulRealInterval_of_nonneg}\par
+\lean{ComputableAnalysis.RealRaw.mul_valid_of_nonneg_bounded}\par
+\lean{ComputableAnalysis.RealRaw.mul_equiv_of_nonneg}\par
 \lean{ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg}\par
 \lean{ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos}\par
 \lean{ComputableAnalysis.RealRaw.valid_of_natScale_valid}\par
@@ -113,11 +117,22 @@ Then \(y/x\) is defined as \(yx^{-1}\), when \(x\) is nonzero.
 \lean{ComputableAnalysis.RealRaw.equiv_of_scaleRat_equiv_of_pos}\par
 \lean{ComputableAnalysis.RealRaw.equiv_of_natScale_equiv}\par}
 \uses{def:raw-real,def:raw-real-arithmetic}
-The operations \(x+y\), \(x-y\), \(-x\), and \(xy\) are real numbers
-whenever \(x\) and \(y\) are.  If \(x\) is nonzero, then \(x^{-1}\)
-is also a real number.  Positive rational scaling is reversible at the level
-of validity and equivalence: if \(r>0\), then validity of \(rx\) implies
-validity of \(x\), and \(rx\sim ry\) implies \(x\sim y\).
+Addition, subtraction, negation, and rational scaling preserve valid raw
+reals.  The first checked multiplication theorem is deliberately local and
+quantitative: if both factors have nonnegative interval enclosures and a
+positive rational upper bound, their four-corner product enclosure is valid.
+At stage \(n\) its width is bounded by
+\[
+ B_x\operatorname{width}(y_n)+B_y\operatorname{width}(x_n),
+\]
+so widths shrink by an explicit rational precision budget.  The same positive
+product computation respects proved raw equivalence.  This is the product
+case needed on positive bounded branches such as \([0,1]\); the fully
+sign-sensitive multiplication and an inverse construction remain separate
+foundational work, rather than consequences of an ambient completed field.
+Positive rational scaling is reversible at the level of validity and
+equivalence: if \(r>0\), then validity of \(rx\) implies validity of \(x\),
+and \(rx\sim ry\) implies \(x\sim y\).
 At each finite stage, addition and subtraction add interval widths exactly,
 and natural scaling multiplies them by the corresponding natural number; these
 finite identities support explicit precision budgets for composite
@@ -219,9 +234,12 @@ unproved global identification is introduced.
 \lean{ComputableAnalysis.Real.ofRat}
 \lean{ComputableAnalysis.RealRaw.add_equiv}
 \lean{ComputableAnalysis.RealRaw.sub_equiv}
+\lean{ComputableAnalysis.RealRaw.mul_equiv_of_nonneg}
 \uses{def:reals-quotient,def:raw-real-sign,def:raw-real-arithmetic,prop:raw-arithmetic-valid}
-Raw interval arithmetic preserves validity and is compatible with proved raw
-equivalence.  Constant rational intervals provide certified handles through
+The checked arithmetic operations preserve validity and are compatible with
+proved raw equivalence in their stated domains; in particular, the new
+nonnegative bounded product does not select a preferred representative.
+Constant rational intervals provide certified handles through
 \code{Real.ofRat}.  The development deliberately does not assert that these
 handles form a quotient, an ordered field, or a completed continuum; later
 theorems remain stated in terms of valid raw algorithms and explicit

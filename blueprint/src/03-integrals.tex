@@ -226,6 +226,8 @@ additivity.
 \lean{ComputableAnalysis.RationalPartition.clampedPath}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_step_nonnegative}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_endpointSquare}
+\lean{ComputableAnalysis.RealFunRaw.mul}
+\lean{ComputableAnalysis.RealFunRaw.mul_valid_of_nonneg_bounded}
 \uses{def:definite-integral-identity}
 \leanok
 For rational sequences \((u_i,v_i)\), one partition cell has the exact
@@ -303,6 +305,14 @@ or decreasing pieces and the two decompositions are replaced by a common
 rational refinement.  The corner correction is then bounded piece by piece
 by their signed variations.  This is a finite interval estimate, not an
 appeal to completeness or an implicit choice of a variation decomposition.
+The product representation needed to promote the finite identity has now
+been checked on its first useful domain: a pointwise product of two
+nonnegative rational-input functions is valid when each value carries a
+positive rational upper bound.  Its width is controlled by the two factor
+widths and those bounds.  This supplies the positive bounded product layer
+for the intended \(x\arctan x\) calculation on \([0,1]\); the product
+derivative rule, its FTC comparison, and the logarithm endpoint identity are
+still required before the resulting pi formula is claimed.
 \end{theorem}
 
 \section{Nondecreasing integrands and piecewise monotone integrals}

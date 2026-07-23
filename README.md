@@ -54,7 +54,7 @@ the gates have different dependencies and none can substitute for another.
 | --- | --- | --- |
 | Rational interval foundation | `RealRaw.Valid`, equivalence by overlap, and the no-completeness/no-Mathlib-analysis audit | Continue dependency auditing as modules grow |
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit` is a checked non-exact interval-regular example with a quadratic modulus | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
-| Finite integration and FTC | Certified integral constructions, finite geometric integration by parts with increasing/decreasing-piece corner bounds, and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | A broadly reusable construction from interval regularity and derivative certificates for standard functions |
+| Finite integration and FTC | Certified integral constructions, finite geometric integration by parts with increasing/decreasing-piece corner bounds, positive bounded interval products, and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | A broadly reusable construction from interval regularity and derivative certificates for standard functions |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
 | Differentiated elementary functions | Formal power-series derivative table and finite-difference affine/square examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, and discrete variation of constants are checked | Interval-matrix simplex integrals, factorial tails, and continuous variation of constants |
@@ -101,9 +101,11 @@ construction, rather than a second score for the underlying theorem.
 The next intended π registry benchmark is the arctangent
 integration-by-parts evaluation, not another arctangent variant.  Its public
 statement will be the natural integral formula; its derived presentation
-agreement will become a sixth coverage bridge only after the
-product/derivative/FTC route, its common monotone-piece refinement, and the
-logarithm endpoint identity are all checked.  The uniform-grid core of that
+agreement will become a sixth coverage bridge only after the remaining
+product-derivative/FTC route, its common monotone-piece refinement, and the
+logarithm endpoint identity are all checked.  The positive bounded product
+representation itself is now checked, with an explicit width bound and
+representation-respect theorem.  The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
 both the `m` and `n` grids, and its mesh is the old width divided by the
 positive factor.  The two embeddings are packaged as a checked

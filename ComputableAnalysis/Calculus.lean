@@ -467,6 +467,43 @@ def scaleRat (r : Rat) (f : RealFunRaw) : RealFunRaw where
     else
       { lo := r * F.hi, hi := r * F.lo }
 
+/-- Pointwise interval multiplication on the common rational domain.
+
+Validity is intentionally supplied separately: unlike addition, a shrinking
+product enclosure needs a finite bound on both factors.  The positive bounded
+certificate below is the first reusable case needed by product rules and
+integration by parts. -/
+def mul (f g : RealFunRaw) : RealFunRaw where
+  domain := fun x => f.domain x /\ g.domain x
+  compute := fun x n =>
+    QBox.mulRealInterval
+      (f.compute x n).lo (f.compute x n).hi
+      (g.compute x n).lo (g.compute x n).hi
+
+/-- A rational pointwise product is a valid interval-real function whenever
+each factor has a positive rational enclosure bound at that point.  The bound
+may depend on the rational input, which is sufficient for the foundational
+function notion and avoids any hidden compactness argument. -/
+theorem mul_valid_of_nonneg_bounded
+    {f g : RealFunRaw} (hf : f.Valid) (hg : g.Valid)
+    (hfbounds : forall (x : Rat) (_hx : f.domain x), Exists fun B : Rat =>
+      0 < B /\ forall n, 0 <= (f.compute x n).lo /\ (f.compute x n).hi <= B)
+    (hgbounds : forall (x : Rat) (_hx : g.domain x), Exists fun B : Rat =>
+      0 < B /\ forall n, 0 <= (g.compute x n).lo /\ (g.compute x n).hi <= B) :
+    (mul f g).Valid := by
+  intro x hx
+  rcases hfbounds x hx.1 with ⟨Bx, hBx, hxbounds⟩
+  rcases hgbounds x hx.2 with ⟨By, hBy, hybounds⟩
+  let X : RealRaw := { compute := f.compute x }
+  let Y : RealRaw := { compute := g.compute x }
+  have hX : X.Valid := by
+    simpa [X, RealRaw.Valid, RealFunRaw.applyCompute] using hf x hx.1
+  have hY : Y.Valid := by
+    simpa [Y, RealRaw.Valid, RealFunRaw.applyCompute] using hg x hx.2
+  have hproduct : (X * Y).Valid :=
+    RealRaw.mul_valid_of_nonneg_bounded hX hY hBx hBy hxbounds hybounds
+  simpa [mul, X, Y, RealRaw.mul, RealRaw.mulCompute] using hproduct
+
 end RealFunRaw
 
 def precisionAtStage (n : Nat) : QPos :=
