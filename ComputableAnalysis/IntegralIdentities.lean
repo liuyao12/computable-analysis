@@ -1929,6 +1929,74 @@ def arctanIntegralRectangleOnUnit_monotone :
   MonotoneOnInterval.ofNondecreasing
     arctanIntegralRectangleOnUnit_nondecreasing
 
+/-- The fixed-stage arctangent boxes along a unit mesh, held at the final
+mesh point after the last cell.  This produces a total box path suitable
+for the finite integration-by-parts sums. -/
+def arctanIntegralRectangleMeshBoxes
+    (meshStage evalStage : Nat) : Nat -> QInterval :=
+  fun k => ArctanGeometry.arctanIntegralRectangleCompute
+    (unitMeshPath meshStage (min k meshStage)) evalStage
+
+/-- The clamped unit-mesh points preserve index order. -/
+theorem unitMeshPath_clamped_monotone
+    (meshStage i j : Nat) (hij : i <= j) :
+    unitMeshPath meshStage (min i meshStage) <=
+      unitMeshPath meshStage (min j meshStage) := by
+  apply unitMeshPath_monotone
+  omega
+
+/-- The arctangent rectangle boxes along a unit mesh are weakly ordered at
+every fixed evaluation stage. -/
+theorem arctanIntegralRectangleMeshBoxes_weaklyOrdered
+    (meshStage evalStage : Nat) :
+    QInterval.WeaklyOrdered
+      (arctanIntegralRectangleMeshBoxes meshStage evalStage) := by
+  intro i j hij
+  unfold arctanIntegralRectangleMeshBoxes
+  apply ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
+  · exact unitMeshPath_nonnegative meshStage (min i meshStage)
+  · exact unitMeshPath_clamped_monotone meshStage i j hij
+
+/-- The canonical nondecreasing rational arctangent sample path obtained
+from the cumulative lower envelope of the fixed-stage mesh boxes. -/
+def arctanIntegralRectangleMeshSamples
+    (meshStage evalStage : Nat) : Nat -> Rat :=
+  QInterval.lowerEnvelope
+    (arctanIntegralRectangleMeshBoxes meshStage evalStage)
+
+/-- Each canonical sample remains inside its corresponding rectangle box. -/
+theorem arctanIntegralRectangleMeshSamples_mem
+    (meshStage evalStage k : Nat) :
+    And
+      ((arctanIntegralRectangleMeshBoxes meshStage evalStage k).lo <=
+        arctanIntegralRectangleMeshSamples meshStage evalStage k)
+      (arctanIntegralRectangleMeshSamples meshStage evalStage k <=
+        (arctanIntegralRectangleMeshBoxes meshStage evalStage k).hi) := by
+  exact QInterval.lowerEnvelope_mem
+    (arctanIntegralRectangleMeshBoxes meshStage evalStage)
+    (arctanIntegralRectangleMeshBoxes_weaklyOrdered meshStage evalStage) k
+
+/-- The canonical arctangent mesh sample path is nondecreasing. -/
+theorem arctanIntegralRectangleMeshSamples_step_nonnegative
+    (meshStage evalStage k : Nat) :
+    0 <= arctanIntegralRectangleMeshSamples meshStage evalStage (k + 1) -
+      arctanIntegralRectangleMeshSamples meshStage evalStage k := by
+  exact QInterval.lowerEnvelope_step_nonnegative
+    (arctanIntegralRectangleMeshBoxes meshStage evalStage) k
+
+/-- The finite integration-by-parts corner correction now applies directly
+to the canonical sampled arctangent path on every unit mesh. -/
+theorem arctanIntegralRectangleMeshSamples_cornerBound
+    (meshStage evalStage : Nat) :
+    quadraticVariationSum (unitMeshPath meshStage)
+        (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage <=
+      (1 / (meshStage : Rat)) *
+        (arctanIntegralRectangleMeshSamples meshStage evalStage meshStage -
+          arctanIntegralRectangleMeshSamples meshStage evalStage 0) :=
+  unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference
+    meshStage (arctanIntegralRectangleMeshSamples meshStage evalStage)
+    (arctanIntegralRectangleMeshSamples_step_nonnegative meshStage evalStage)
+
 theorem arctanIntegralRectangleFunctionAgreement :
     Elementary.Arctan.Equivalent
       arctanIntegralRectangleRepresentation

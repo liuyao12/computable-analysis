@@ -378,6 +378,107 @@ theorem quadraticVariationSum_eq_nat_mul_of_constant_steps
 test case for the geometric integration-by-parts correction. -/
 def unitMeshPath (n k : Nat) : Rat := (k : Rat) / (n : Rat)
 
+/-- A family of interval boxes is weakly ordered when every earlier lower
+endpoint is compatible with every later upper endpoint.  This is the
+finite, box-valued order relation supplied by a nondecreasing interval
+function. -/
+def QInterval.WeaklyOrdered (boxes : Nat -> QInterval) : Prop :=
+  forall i j, i <= j -> (boxes i).lo <= (boxes j).hi
+
+/-- The cumulative maximum of lower endpoints.  It is a canonical rational
+sample chosen from a weakly ordered family of interval boxes. -/
+def QInterval.lowerEnvelope (boxes : Nat -> QInterval) : Nat -> Rat
+  | 0 => (boxes 0).lo
+  | n + 1 => max (QInterval.lowerEnvelope boxes n) (boxes (n + 1)).lo
+
+theorem QInterval.lowerEnvelope_le_succ
+    (boxes : Nat -> QInterval) (n : Nat) :
+    QInterval.lowerEnvelope boxes n <= QInterval.lowerEnvelope boxes (n + 1) := by
+  simp only [QInterval.lowerEnvelope]
+  grind
+
+theorem QInterval.boxLower_le_lowerEnvelope
+    (boxes : Nat -> QInterval) (n : Nat) :
+    (boxes n).lo <= QInterval.lowerEnvelope boxes n := by
+  induction n with
+  | zero =>
+      exact Rat.le_refl
+  | succ n _ =>
+      simp only [QInterval.lowerEnvelope]
+      grind
+
+/-- Every cumulative lower-envelope sample is below the upper endpoint of
+every later box in a weakly ordered family. -/
+theorem QInterval.lowerEnvelope_le_boxUpper
+    (boxes : Nat -> QInterval) (hboxes : QInterval.WeaklyOrdered boxes) :
+    forall n j, n <= j ->
+      QInterval.lowerEnvelope boxes n <= (boxes j).hi := by
+  intro n
+  induction n with
+  | zero =>
+      intro j hj
+      simpa [QInterval.lowerEnvelope] using hboxes 0 j hj
+  | succ n ih =>
+      intro j hj
+      simp only [QInterval.lowerEnvelope]
+      have hprev := ih j (Nat.le_trans (Nat.le_succ n) hj)
+      have hcurrent := hboxes (n + 1) j hj
+      grind
+
+/-- The lower envelope is a nondecreasing rational path. -/
+theorem QInterval.lowerEnvelope_step_nonnegative
+    (boxes : Nat -> QInterval) (n : Nat) :
+    0 <= QInterval.lowerEnvelope boxes (n + 1) -
+      QInterval.lowerEnvelope boxes n := by
+  have h := QInterval.lowerEnvelope_le_succ boxes n
+  grind [Rat.sub_eq_add_neg]
+
+/-- On a weakly ordered family, the lower-envelope sample lies in the box at
+the same index.  This is the finite monotone-sampling lift used by the
+integration-by-parts corner estimate. -/
+theorem QInterval.lowerEnvelope_mem
+    (boxes : Nat -> QInterval) (hboxes : QInterval.WeaklyOrdered boxes)
+    (n : Nat) :
+    And ((boxes n).lo <= QInterval.lowerEnvelope boxes n)
+      (QInterval.lowerEnvelope boxes n <= (boxes n).hi) :=
+  ⟨QInterval.boxLower_le_lowerEnvelope boxes n,
+    QInterval.lowerEnvelope_le_boxUpper boxes hboxes n n (Nat.le_refl n)⟩
+
+/-- Unit-mesh coordinates are nonnegative, even at the degenerate
+zero-cell mesh where rational division returns zero. -/
+theorem unitMeshPath_nonnegative (n k : Nat) :
+    0 <= unitMeshPath n k := by
+  cases n with
+  | zero =>
+      unfold unitMeshPath
+      rw [Rat.div_def]
+      simp
+  | succ n =>
+      unfold unitMeshPath
+      rw [Rat.div_def]
+      have hden : 0 < ((n + 1 : Nat) : Rat) :=
+        (Rat.natCast_pos).2 (Nat.succ_pos n)
+      exact Rat.mul_nonneg Rat.natCast_nonneg
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+/-- Unit-mesh coordinates preserve the natural-number order. -/
+theorem unitMeshPath_monotone (n i j : Nat) (hij : i <= j) :
+    unitMeshPath n i <= unitMeshPath n j := by
+  cases n with
+  | zero =>
+      unfold unitMeshPath
+      rw [Rat.div_def, Rat.div_def]
+      simp
+  | succ n =>
+      unfold unitMeshPath
+      rw [Rat.div_def, Rat.div_def]
+      have hcast : (i : Rat) <= (j : Rat) := by
+        exact_mod_cast hij
+      have hden : 0 < ((n + 1 : Nat) : Rat) :=
+        (Rat.natCast_pos).2 (Nat.succ_pos n)
+      exact Rat.mul_le_mul_of_nonneg_right hcast
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
 /-- Every increment of the unit mesh path is exactly `1/n`. -/
 theorem unitMeshPath_step (n k : Nat) :
     unitMeshPath n (k + 1) - unitMeshPath n k = 1 / (n : Rat) := by

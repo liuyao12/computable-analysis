@@ -202,12 +202,18 @@ another. The Pi score stays useful only as secondary integration coverage.
   lo(arctan(x), n) <= hi(arctan(y), n) for 0 <= x <= y <= 1 by extending
   the finite rectangle cover of [0,x] with [x,y] and comparing lower and
   upper sums on [0,y]; it is packaged as a weak nondecreasing
-  FunctionOnInterval witness.  The remaining step is to construct a
-  compatible nondecreasing rational sampling path, charging its box widths
-  to the integration-by-parts budget.  The checked endpoint-order fact is not
-  the kernel's monotonicity in its integration variable, and it does not by
-  itself permit arbitrary box endpoints to be treated as an exact
-  nondecreasing path.  The general finite merge
+  FunctionOnInterval witness.  The compatible nondecreasing rational
+  sampling path is now also checked: `QInterval.lowerEnvelope` takes the
+  cumulative maximum of the lower endpoints of any weakly ordered box family.
+  It stays in every corresponding box, is nondecreasing, and
+  `arctanIntegralRectangleMeshSamples_cornerBound` instantiates the unit-mesh
+  corner estimate for the fixed-stage rectangle arctangent boxes.  The
+  endpoint-order fact is not the kernel's monotonicity in its integration
+  variable, and the lower-envelope construction is precisely what prevents
+  arbitrary box endpoints from being treated as an exact nondecreasing path.
+  What remains is to schedule box-width and quadrature errors and connect
+  these samples through the product, derivative, and FTC certificates.  The
+  general finite merge
   is now checked: `commonRefinementOfPartitions` inserts the right
   `breakpointList` into the left partition and recovers the second ordered
   embedding with a bounded `firstOccurrence` scan.  It is deterministic and

@@ -451,8 +451,19 @@ That \emph{monotone sampling lift} is what permits
 \(\sum_i\Delta x_i\,\Delta v_i\) to use the finite corner bound.  Merely
 knowing that lower and upper endpoints at adjacent samples overlap in the
 correct direction does not license treating one arbitrary choice of endpoints
-as an exactly nondecreasing rational path.  Keeping these two certificates
-separate makes the remaining formalization target precise.
+as an exactly nondecreasing rational path.  On a fixed unit mesh the lift is
+now checked by the canonical cumulative lower envelope
+\[
+  v_i=\max_{0\leq j\leq i}\operatorname{lo}(A(x_j,n)).
+\]
+The weak box order says that every earlier lower endpoint is at most the
+upper endpoint of the current box.  Consequently \(v_i\) lies in the
+\(i\)-th box, while its definition makes the rational path
+nondecreasing.  The exact finite unit-mesh corner estimate therefore applies
+to these samples.  This construction deliberately rules out arbitrary
+endpoint choices.  It does not yet identify the sampled path with an
+integral or discharge the product, derivative, and global error-scheduling
+certificates needed by the later integration-by-parts theorem.
 \end{definition}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
@@ -469,11 +480,13 @@ the corner correction has the particularly transparent mesh bound
 \sum_{I\in P}\Delta_Ix\,\Delta_I\arctan
  \leq \mesh(P)\bigl(\arctan(1)-\arctan(0)\bigr).
 \]
-The endpoint-order and monotone-sampling certificates above turn this into
-the required finite rational corner estimate; the geometric unit-branch
-bounds supply a rational upper bound for the last factor.  It is therefore an
-executable budget rather than an asymptotic assertion.  The resulting finite
-certificates give
+The endpoint-order certificate and its canonical monotone-sampling lift now
+turn the unit-mesh statement into a checked finite rational corner estimate;
+the geometric unit-branch bounds supply a rational upper bound for the last
+factor.  It is therefore an executable finite budget rather than an
+asymptotic assertion.  Completing the displayed integral identity still
+requires the separate product, derivative, and FTC certificates.  With
+those certificates, the resulting construction will give
 \[
  \int_0^1\arctan(x)\,\dd x
  \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.

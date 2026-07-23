@@ -127,9 +127,13 @@ The finite upper-endpoint order certificate for rectangle arctangent is now
 checked as well: if \(0\le x\le y\le1\), the lower stage box at \(x\) is at
 most the upper stage box at \(y\).  It is a separate fact from monotonicity
 of the reciprocal kernel and is packaged as a weak nondecreasing
-interval-function witness.  The still-open next step is a compatible
-nondecreasing rational sampling path for the corner-error estimate; arbitrary
-choices of adjacent box endpoints are not silently treated as such a path.
+interval-function witness.  The compatible rational sampling path is now
+also checked: the cumulative maximum of earlier lower endpoints stays in
+each current box by that weak order and is nondecreasing by construction.
+It therefore instantiates the unit-mesh corner-error bound without treating
+arbitrary adjacent box endpoints as a monotone path.  The remaining
+arctangent--logarithm route work is the global error schedule and the
+product, derivative, and FTC comparison certificates.
 `Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw
 presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
 certified `O(1/n)` rate.  Independently,
