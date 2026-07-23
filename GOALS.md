@@ -173,13 +173,16 @@ another. The Pi score stays useful only as secondary integration coverage.
   constructors inherit this interface directly: `dyadic_leftPoint_refines`
   keeps old index `k` at `2*k`, and `dyadic_mesh_refines` halves its mesh.
   Arbitrary rational breakpoints now have a checked local insertion step:
-  `insertPoint_refines` embeds the old partition, `InsertionChain.refines`
-  composes finitely many such steps, and
+  `insertPoint_refines` embeds the old partition.  The finite scan
+  `locateInsertionCell` chooses and certifies the containing cell of any
+  in-range rational point, and `insertionChainOfPointList` converts any
+  finite in-range rational list into successive scan-and-insert data.
+  `InsertionChain.refines` composes those steps, and
   `Refines.point_between_consecutive` keeps every fine point in its parent
   coarse cell.  `clampedPath_quadraticVariation_le_endpointSquare` applies
   the corner estimate directly to partition data.  What remains is a
   canonical merge procedure taking two independently supplied breakpoint
-  lists to a shared insertion chain.
+  lists to a shared insertion chain while retaining both index embeddings.
   The model unit path has a fully checked vanishing schedule:
   `unitMeshPath_quadraticVariation` is exactly `1/n`, and choosing
   `eps.den + 1` makes it at most any positive rational epsilon.  For the
@@ -1239,7 +1242,10 @@ scoreboard above.
   validity theorem `Basel.geometricPiSquaredOverSixRaw_valid`.
 - `Basel.eulerBasel_geometricPi` is the remaining constructive theorem
   statement relating these two valid computations.  It is not yet a proved
-  equivalence and therefore does not complete the Basel scoreboard row.
+  equivalence.  Its public mathematical form is the Basel identity
+  \(\zeta(2)=\pi^2/6\); a positive-normalization theorem may later expose a
+  pi-presentation agreement as a registry corollary, rather than treating the
+  squared identity itself as a scoreboard formula.
 
 ## Long-Term Theorems
 

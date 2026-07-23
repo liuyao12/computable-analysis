@@ -1315,6 +1315,71 @@ def insertPointValue {a b : Rat} (P : RationalPartition a b)
   fun i => if i <= k then P.point i else
     if i = k + 1 then x else P.point (i - 1)
 
+/-- Scan a finite breakpoint list from the left for a cell whose right
+endpoint reaches a specified rational value.  The fuel is explicit so this is
+a total rational computation, not a choice of a supremum. -/
+def locateInsertionCellAux {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (i fuel : Nat) : Nat :=
+  match fuel with
+  | 0 => i
+  | fuel + 1 =>
+      if x <= P.point (i + 1) then i
+      else locateInsertionCellAux P x (i + 1) fuel
+
+/-- Locate a cell containing `x` by scanning all cells of a finite rational
+partition.  Its correctness proof below supplies the local ordering data for
+the subsequent insertion. -/
+def locateInsertionCell {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) : Nat :=
+  locateInsertionCellAux P x 0 P.pieces
+
+/-- Correctness of the finite left-to-right cell scan. -/
+theorem locateInsertionCellAux_spec {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) :
+    forall (i fuel : Nat),
+      0 < fuel ->
+      i + fuel <= P.pieces ->
+      P.point i <= x ->
+      x <= P.point (i + fuel) ->
+      let k := locateInsertionCellAux P x i fuel
+      i <= k /\ k < i + fuel /\ P.point k <= x /\ x <= P.point (k + 1) := by
+  intro i fuel hfuel hbound hleft hright
+  induction fuel generalizing i with
+  | zero => omega
+  | succ fuel ih =>
+      simp only [locateInsertionCellAux]
+      by_cases hnext : x <= P.point (i + 1)
+      · rw [if_pos hnext]
+        exact ⟨Nat.le_refl _, by omega, hleft, hnext⟩
+      · rw [if_neg hnext]
+        cases fuel with
+        | zero =>
+            exfalso
+            apply hnext
+            simpa using hright
+        | succ fuel =>
+            have hnext_left : P.point (i + 1) <= x := by
+              exact (Rat.le_total : P.point (i + 1) <= x \/ x <= P.point (i + 1)).resolve_right hnext
+            have hbound' : (i + 1) + (fuel + 1) <= P.pieces := by omega
+            have hright' : x <= P.point ((i + 1) + (fuel + 1)) := by
+              have hindex : (i + 1) + (fuel + 1) = i + (fuel + 1 + 1) := by omega
+              simpa [hindex] using hright
+            rcases ih (i + 1) (by omega) hbound' hnext_left hright' with
+              ⟨hfirst, hsecond, hvalue, hupper⟩
+            exact ⟨Nat.le_trans (Nat.le_succ i) hfirst, by omega, hvalue, hupper⟩
+
+/-- A point in the enclosing interval is located in an actual partition cell,
+with all bounds obtained by the finite scan. -/
+theorem locateInsertionCell_spec {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (hleft : a <= x) (hright : x <= b) :
+    locateInsertionCell P x < P.pieces /\
+      P.point (locateInsertionCell P x) <= x /\
+      x <= P.point (locateInsertionCell P x + 1) := by
+  have h := locateInsertionCellAux_spec P x 0 P.pieces P.positive
+    (by omega) (by simpa [P.left_endpoint] using hleft)
+    (by simpa [P.right_endpoint] using hright)
+  simpa [locateInsertionCell] using h
+
 /-- The partition obtained by inserting a rational point in one specified
 cell.  Degenerate insertion at an endpoint is allowed: partitions record
 monotone, rather than strictly increasing, rational breakpoint data. -/
@@ -1366,6 +1431,13 @@ def insertPoint {a b : Rat} (P : RationalPartition a b)
           simp [insertPointValue, hik, hjk, hieq, hjeq]
           exact P.monotone (i - 1) (j - 1) hisub hsubj
 
+/-- Insert a rational point known to lie in the enclosing interval, choosing
+its containing cell by the explicit finite scan. -/
+def insertLocatedPoint {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (hleft : a <= x) (hright : x <= b) : RationalPartition a b :=
+  let h := locateInsertionCell_spec P x hleft hright
+  insertPoint P (locateInsertionCell P x) h.1 x h.2.1 h.2.2
+
 /-- The old partition is explicitly embedded in a one-point insertion. -/
 def insertPoint_refines {a b : Rat} (P : RationalPartition a b)
     (k : Nat) (hk : k < P.pieces) (x : Rat)
@@ -1396,6 +1468,15 @@ def insertPoint_refines {a b : Rat} (P : RationalPartition a b)
       have hneq : i ≠ k := by omega
       simp [insertPoint, insertPointValue, hik, hindex, hneq]
 
+/-- The scan-selected insertion is also a certified refinement of the old
+partition. -/
+def insertLocatedPoint_refines {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (hleft : a <= x) (hright : x <= b) :
+    Refines (insertLocatedPoint P x hleft hright) P := by
+  unfold insertLocatedPoint
+  dsimp
+  exact insertPoint_refines _ _ _ _ _ _
+
 /-- A single arbitrary rational breakpoint yields a certified common
 refinement of the old partition and the inserted partition. -/
 def insertPointCommonRefinement {a b : Rat} (P : RationalPartition a b)
@@ -1404,6 +1485,15 @@ def insertPointCommonRefinement {a b : Rat} (P : RationalPartition a b)
     CommonRefinement P (insertPoint P k hk x hleft hright) where
   refinement := insertPoint P k hk x hleft hright
   refines_left := insertPoint_refines P k hk x hleft hright
+  refines_right := Refines.refl _
+
+/-- The scan-selected insertion packages the same common-refinement
+certificate without requiring the caller to choose a cell index. -/
+def insertLocatedPointCommonRefinement {a b : Rat} (P : RationalPartition a b)
+    (x : Rat) (hleft : a <= x) (hright : x <= b) :
+    CommonRefinement P (insertLocatedPoint P x hleft hright) where
+  refinement := insertLocatedPoint P x hleft hright
+  refines_left := insertLocatedPoint_refines P x hleft hright
   refines_right := Refines.refl _
 
 /-- A finite record of successive rational breakpoint insertions.  Each step
@@ -1417,6 +1507,34 @@ inductive InsertionChain {a b : Rat} :
       (k : Nat) (hk : k < current.pieces) (x : Rat)
       (hleft : current.point k <= x) (hright : x <= current.point (k + 1)) :
       InsertionChain base (insertPoint current k hk x hleft hright)
+
+/-- Extend an insertion chain by any rational point in the enclosing interval.
+The finite scan chooses its containing cell, so a later list-merging algorithm
+can add breakpoints without any external choice operation. -/
+def InsertionChain.insertLocated {a b : Rat}
+    {base current : RationalPartition a b}
+    (chain : InsertionChain base current) (x : Rat)
+    (hleft : a <= x) (hright : x <= b) :
+    InsertionChain base (insertLocatedPoint current x hleft hright) :=
+  let h := locateInsertionCell_spec current x hleft hright
+  InsertionChain.insert chain (locateInsertionCell current x) h.1 x h.2.1 h.2.2
+
+/-- Turn any finite list of rational points in `[a,b]` into an explicit
+insertion chain.  The returned sigma pair contains both the final partition
+and the proof-relevant sequence of finite scan-and-insert steps that produced
+it. -/
+def insertionChainOfPointList {a b : Rat} (P : RationalPartition a b) :
+    (xs : List Rat) ->
+    (forall x, x ∈ xs -> a <= x /\ x <= b) ->
+    Sigma (InsertionChain P)
+  | [], _ => ⟨P, InsertionChain.refl P⟩
+  | x :: xs, hinside =>
+      let htail : forall y, y ∈ xs -> a <= y /\ y <= b :=
+        fun y hy => hinside y (List.mem_cons_of_mem x hy)
+      let rest := insertionChainOfPointList P xs htail
+      let hx := hinside x (by simp)
+      ⟨insertLocatedPoint rest.1 x hx.1 hx.2,
+        rest.2.insertLocated x hx.1 hx.2⟩
 
 /-- A finite insertion chain carries its composite refinement certificate back
 to its starting breakpoint list. -/

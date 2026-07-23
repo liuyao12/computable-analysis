@@ -1,9 +1,11 @@
-Definition-complete means a valid raw real; equivalence-complete means a
-formal chain of \code{RealRaw.Equiv} theorems.  The table is a compact
+Definition-complete means a valid raw real; registry-complete means that the
+corresponding raw presentation has a formal chain of \code{RealRaw.Equiv}
+theorems to the preferred area presentation.  The table is a compact
 release-style coverage suite, not a numerator for a calculus-completeness
-percentage.  Its five rows are the deliberately distinct bridges formalized
-by the \code{PiProofs.PiCoverageBridge} type and its \code{equivalent}
-theorem.
+percentage.  It deliberately names natural theorem families rather than
+presenting a catalogue of rearranged equations for pi.  The checked registry
+corollaries are formalized by \code{PiProofs.PiCoverageBridge} and its
+\code{equivalent} theorem.
 
 The suite asks whether a construction useful elsewhere in calculus agrees
 with an independently constructed value of the same constant.  Thus a row is
@@ -14,28 +16,23 @@ the selected exponential satisfies \(e^x{}'=e^x\) are major advances even
 though neither creates a new pi row.
 
 \begin{center}
-\begin{tabular}{p{0.21\textwidth}p{0.29\textwidth}p{0.27\textwidth}cc}
-\textbf{Capability exercised} & \textbf{Witnessed equivalence} &
-\textbf{What it regression-tests} & \textbf{Def.} & \textbf{Equiv.}\\
+\begin{tabular}{@{}p{0.32\textwidth}p{0.43\textwidth}cc@{}}
+\textbf{Natural theorem family} & \textbf{Constructive content exercised} &
+\textbf{Def.} & \textbf{Registry}\\
 \hline
 Finite Archimedean geometry &
-cross-fan circumference \(\sim\) area loop &
 exact rational circle fans, square-root enclosures, and nested interval bounds &
 \(\checkmark\) & \(\checkmark\)\\
-Arctangent and power series &
-geometric arctangent \(\sim\) Leibniz series &
+Arctangent power-series theorem &
 circular inverse geometry against the alternating arctangent series &
 \(\checkmark\) & \(\checkmark\)\\
-Finite definite integration &
-rectangle arctangent integral \(\sim\) Leibniz series &
+Arctangent integral evaluation &
 certified rectangle integration and its endpoint bridge &
 \(\checkmark\) & \(\checkmark\)\\
-Compactified improper integration &
-Cauchy full-line integral \(\sim\) area loop &
+Cauchy integral evaluation &
 reciprocal-tail transport from a full line to a finite interval &
 \(\checkmark\) & \(\checkmark\)\\
-Algebraic-kernel integration &
-reciprocal-quartic integral \(\sim\) Cauchy integral &
+Reciprocal-quartic integral evaluation &
 a nontrivial rational kernel, finite quadrature, and its integral identity &
 \(\checkmark\) & \(\checkmark\)\\
 \end{tabular}
@@ -54,13 +51,13 @@ problem, not a missing calculus gate.  Lean now reduces it to
 margin comparing the two fine curvature certificates, their bisection widths,
 and the coarse squared chord.  The reduction from that margin to the original
 endpoint refinement is checked; the universal margin inequality remains open.
-The next candidate for a new coverage cell is integration by parts:
-\[
-  \pi=4\int_0^1\arctan(x)\,\dd x+2\log 2.
-\]
-Its finite rational rectangle identity is now checked, but the cell remains
-unmarked until the product/derivative/FTC bridge, common increasing/decreasing
-piece refinement, and logarithm endpoint identity are all constructive.  The
-arcsine/Newton and Gaussian rows remain future probes for inverse/square-root
-integration and the exponential/full-line layers; advanced routes are
-intentionally omitted from this progress table.
+The next candidate for a new coverage cell is the arctangent
+integration-by-parts evaluation.  Its public statement will be the natural
+integral evaluation; only the derived agreement of its raw presentation with
+the preferred pi presentation belongs in the registry.  Its finite rational
+rectangle identity is now checked, but the cell remains unmarked until the
+product/derivative/FTC bridge, common increasing/decreasing-piece refinement,
+and logarithm endpoint identity are all constructive.  The arcsine/Newton and
+Gaussian rows remain future probes for inverse/square-root integration and the
+exponential/full-line layers; advanced routes are intentionally omitted from
+this progress table.

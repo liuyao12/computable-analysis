@@ -67,21 +67,23 @@ The checked registry records its primary coverage family in Lean as
 dependencies explicit instead of turning the number of presentation variants
 into a progress percentage.
 
-## Pi equivalence coverage suite
+## Pi registry coverage suite
 
-`PiProofs.PiCoverageBridge` is the project-facing π measure.  It has one
-constructor for each distinct end-to-end bridge, and its `equivalent` theorem
-checks both sides as valid `RealRaw` computations and proves their
-`RealRaw.Equiv` relation.  This is evidence for a calculus capability—not a
-percentage for the whole foundation.
+`PiProofs.PiCoverageBridge` is a supporting registry, not the public list of
+pi formulas.  It has one constructor for each distinct end-to-end bridge, and
+its `equivalent` theorem checks both sides as valid `RealRaw` computations and
+proves their `RealRaw.Equiv` relation.  Public chapters instead state natural
+theorems such as an integral evaluation or the Basel identity; registry
+agreement is a derived corollary.  This is evidence for a calculus
+capability—not a percentage for the whole foundation.
 
-| Capability | Checked bridge |
+| Natural theorem family | Checked registry role |
 | --- | --- |
-| finite Archimedean geometry | `piCircumferenceFan ≃ piCircleArea` |
-| arctangent and alternating series | `4 * arctanGeom(1) ≃ piLeibniz` |
-| finite definite integration | rectangle arctangent integral `≃ piLeibniz` |
-| compactified improper integration | `cauchyFullLineIntegral ≃ piCircleArea` |
-| algebraic-kernel integration | `piReciprocalQuarticCompact ≃ cauchyFullLineIntegral` |
+| finite Archimedean theorem | perimeter and area presentations agree |
+| arctangent power-series theorem | geometric and series presentations agree |
+| arctangent integral evaluation | integral and series presentations agree |
+| Cauchy integral evaluation | full-line integral and area presentations agree |
+| reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,
@@ -89,20 +91,22 @@ or the continuous matrix Peano--Baker theorem would each be major progress
 without adding a π equivalence.  Rendered copy:
 [front page: π equivalence coverage](https://liuyao12.github.io/computable-analysis/).
 
-The next intended π benchmark is integration by parts, not another arctangent
-variant: construct the two sides of
-`pi = 4 * ∫_0^1 arctan(x) dx + 2 * log(2)` and prove their equivalence.  It
-will become a sixth coverage bridge only after the product/derivative/FTC
-route, its common monotone-piece refinement, and the logarithm endpoint
-identity are all checked.  The uniform-grid core of that refinement is now
-formalized: the `m*n` rational grid explicitly contains both the `m` and `n`
-grids, and its mesh is the old width divided by the positive factor.  The two
-embeddings are packaged as a checked `CommonRefinement` certificate.  General
-piecewise synchronization now has a checked arbitrary-breakpoint insertion
-primitive: every point inserted into a rational cell preserves the old list
-through `insertPoint_refines`, and `InsertionChain` composes finite insertion
-sequences.  The remaining step is a canonical merge for two independently
-supplied breakpoint lists.  The dyadic stages used by existing Riemann
+The next intended π registry benchmark is the arctangent
+integration-by-parts evaluation, not another arctangent variant.  Its public
+statement will be the natural integral formula; its derived presentation
+agreement will become a sixth coverage bridge only after the
+product/derivative/FTC route, its common monotone-piece refinement, and the
+logarithm endpoint identity are all checked.  The uniform-grid core of that
+refinement is now formalized: the `m*n` rational grid explicitly contains
+both the `m` and `n` grids, and its mesh is the old width divided by the
+positive factor.  The two embeddings are packaged as a checked
+`CommonRefinement` certificate.  General piecewise synchronization now has a
+checked arbitrary-breakpoint insertion primitive: `locateInsertionCell` scans
+the finite partition to select and certify an enclosing cell, and
+`insertionChainOfPointList` turns any finite in-range rational list into a
+composable sequence of those insertions.  The remaining step is a canonical
+merge that retains the two independently supplied breakpoint-list embeddings.
+The dyadic stages used by existing Riemann
 algorithms now have direct point-preservation and mesh-halving theorems as
 well.  The finite corner correction now has a checked rational vanishing
 schedule on the unit mesh: it is exactly `1/n`, hence at most a requested
