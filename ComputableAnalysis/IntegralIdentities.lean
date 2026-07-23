@@ -1935,6 +1935,16 @@ integration-by-parts route. -/
 def coordinateOnUnit : FunctionOnInterval :=
   FunctionOnInterval.exactRat (fun x => x) 0 1
 
+/-- The coordinate factor in the unit-branch product has the exact
+interval-valued derivative `1`.  This supplies one of the two component
+certificates needed for the eventual derivative of `x * arctan x`; the
+arctangent derivative and the product closure are separate work. -/
+def coordinateOnUnitDerivative :
+    HasDerivativeOnInterval coordinateOnUnit
+      (FunctionOnInterval.exactRat (fun _x => 1) 0 1) := by
+  simpa [coordinateOnUnit] using
+    FunctionOnInterval.exactRatIdDerivative 0 1
+
 theorem coordinateOnUnit_bounds :
     forall x (hx : inDomainInterval coordinateOnUnit.lower
       coordinateOnUnit.upper x), Exists fun B : Rat => 0 < B /\ forall n,

@@ -178,7 +178,31 @@ def divRat (I : QInterval) (h : Rat) : QInterval :=
 def differenceQuotient (fxh fx : QInterval) (h : Rat) : QInterval :=
   divRat (sub fxh fx) h
 
+/-- Dividing the difference of two exact singleton boxes gives the exact
+rational difference quotient.  The sign split in interval division is harmless
+here because both endpoints coincide. -/
+theorem differenceQuotient_singleton
+    (y x h : Rat) :
+    differenceQuotient { lo := y, hi := y } { lo := x, hi := x } h =
+      { lo := (y - x) / h, hi := (y - x) / h } := by
+  unfold differenceQuotient divRat sub scaleRat
+  simp [Rat.div_def, Rat.mul_comm]
+
 end QInterval
+
+/-- Two identical exact singleton boxes are near at every requested precision.
+This small lemma is the interval-valued replacement for treating a rational
+calculation as an exact real value. -/
+theorem intervalNearAtPrecision_singleton_self (q : Rat) (n : Nat) :
+    intervalNearAtPrecision { lo := q, hi := q } { lo := q, hi := q } n := by
+  unfold intervalNearAtPrecision QInterval.NearAt QInterval.width
+  have heps : 0 <= (precisionAtStage n).val :=
+    Rat.le_of_lt (precisionAtStage n).property
+  constructor
+  · grind
+  constructor
+  · grind
+  constructor <;> grind [Rat.sub_eq_add_neg]
 
 /-- Two interval functions represent the same function on the same rational
 interval when all point-values overlap at every precision.
@@ -219,6 +243,46 @@ structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
             h)
           (df.compute x hdx (evalPrecision n))
           n
+
+namespace FunctionOnInterval
+
+/-- Exact affine rational functions satisfy the interval-valued derivative
+definition on every rational interval.  The certificate uses no limiting
+operation: each finite quotient is literally the constant rational slope. -/
+def exactRatAffineDerivative (a b m c : Rat) :
+    HasDerivativeOnInterval
+      (exactRat (fun x => m * x + c) a b)
+      (exactRat (fun _x => m) a b) where
+  same_lower := rfl
+  same_upper := rfl
+  stepPrecision := fun _n => 1
+  evalPrecision := fun _n => 0
+  close := by
+    intro x h n _hx _hxh _hdx hh _hsmall
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        { lo := m * (x + h) + c, hi := m * (x + h) + c }
+        { lo := m * x + c, hi := m * x + c } h)
+      { lo := m, hi := m } n
+    rw [QInterval.differenceQuotient_singleton]
+    have hcalc : (m * (x + h) + c - (m * x + c)) / h = m := by
+      rw [Rat.div_def]
+      have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hcalc]
+    exact intervalNearAtPrecision_singleton_self m n
+
+/-- The exact unit coordinate has derivative one in the interval-valued
+finite-difference sense used by the calculus layer. -/
+def exactRatIdDerivative (a b : Rat) :
+    HasDerivativeOnInterval
+      (exactRat (fun x => x) a b)
+      (exactRat (fun _x => 1) a b) := by
+  simpa [Rat.one_mul, Rat.add_zero] using
+    exactRatAffineDerivative a b 1 0
+
+end FunctionOnInterval
 
 /-- A function solving `f' = f` on an interval with a specified initial value.
 

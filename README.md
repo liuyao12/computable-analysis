@@ -117,6 +117,9 @@ The exact rational product-difference identities, including the explicit
 Their three-term absolute-error estimate is checked too: the two component
 derivative errors are multiplied by the opposite point value, and the final
 budget is exactly `h * |D_h x| * |D_h(arctan)|`.
+The exact unit coordinate now also carries an interval-valued derivative
+certificate with derivative `1`, obtained from the literal affine
+difference-quotient identity.
 The remaining product derivative and FTC comparison are deliberately still
 separate: they must turn those identities into interval enclosures with
 continuity and remainder budgets.

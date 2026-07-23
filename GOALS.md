@@ -253,7 +253,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   the two component derivative errors weighted by the opposite point value
   plus that corner remainder.  The remaining product certificate must
   bound that remainder and the endpoint replacement through interval
-  continuity data; no limit or completeness principle is being assumed.
+  continuity data; no limit or completeness principle is being assumed.  The
+  first component certificate is now checked in the actual interval-valued
+  derivative interface: `FunctionOnInterval.exactRatAffineDerivative` proves
+  the finite quotient of every exact affine rational function is its constant
+  slope, and `IntegralIdentities.coordinateOnUnitDerivative` specializes it
+  to `d/dx x = 1` on `[0,1]`.  The arctangent certificate, remainder budget,
+  and product closure remain separate.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
