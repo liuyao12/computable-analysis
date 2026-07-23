@@ -9924,6 +9924,71 @@ private def upperSum (f : Rat -> Rat) (L : Nat) :
   | [] => 0
   | (p, r) :: rest => upperCell f L p r + upperSum f L rest
 
+/-- The literal finite right-endpoint rectangle sum on a supplied rational
+partition.  It is kept separate from the Darboux lower/upper sums so a later
+integral theorem can compare a familiar Riemann computation with its certified
+enclosure without appealing to a completed real number. -/
+def rightEndpointSum (f : Rat -> Rat) : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest => (r - p) * f r + rightEndpointSum f rest
+
+private theorem foldl_add_initial {α : Type} (g : α -> Rat)
+    (xs : List α) (initial : Rat) :
+    xs.foldl (fun total x => total + g x) initial =
+      initial + xs.foldl (fun total x => total + g x) 0 := by
+  induction xs generalizing initial with
+  | nil =>
+      change initial = initial + 0
+      grind
+  | cons x xs ih =>
+      change xs.foldl (fun total x => total + g x) (initial + g x) =
+        initial + xs.foldl (fun total x => total + g x) (0 + g x)
+      rw [ih (initial + g x)]
+      rw [show (0 : Rat) + g x = g x by grind, ih (g x)]
+      grind [Rat.add_assoc]
+
+/-- The recursive presentation of a finite right sum agrees with the usual
+left fold that adds its rectangles in mesh order. -/
+theorem rightEndpointSum_eq_foldl (f : Rat -> Rat)
+    (intervals : List (Rat × Rat)) :
+    rightEndpointSum f intervals =
+      intervals.foldl
+        (fun total cell => total + (cell.2 - cell.1) * f cell.2) 0 := by
+  induction intervals with
+  | nil => rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      change (r - p) * f r + rightEndpointSum f rest =
+        rest.foldl
+          (fun total cell => total + (cell.2 - cell.1) * f cell.2)
+          (0 + (r - p) * f r)
+      rw [show (0 : Rat) + (r - p) * f r = (r - p) * f r by grind]
+      rw [ih]
+      exact (foldl_add_initial
+        (fun cell : Rat × Rat => (cell.2 - cell.1) * f cell.2)
+        rest ((r - p) * f r)).symm
+
+/-- The standard finite uniform right Riemann sum on `[0,1]`.  The `n = 0`
+case is deliberately the empty finite computation; applications to an
+integral use a positive mesh count. -/
+def uniformRightEndpointSum (f : Rat -> Rat) (n : Nat) : Rat :=
+  (List.range n).foldl
+    (fun total (k : Nat) =>
+      total + (1 / (n : Rat)) *
+        f ((Nat.succ k : Rat) / (n : Rat))) 0
+
+private theorem foldl_eq_of_pointwise {α : Type}
+    (g h : Rat -> α -> Rat)
+    (hgh : forall total x, g total x = h total x)
+    (xs : List α) (initial : Rat) :
+    xs.foldl g initial = xs.foldl h initial := by
+  induction xs generalizing initial with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.foldl]
+      rw [hgh initial x]
+      exact ih (h initial x)
+
 /-- The finite dyadic Darboux box for a rational function with a certified
 Lipschitz constant.  Stage `n` uses the `2^n` midpoint-refined cells of the
 unit interval. -/
@@ -9965,6 +10030,109 @@ theorem cell_value_bounds {f : Rat -> Rat} {L : Nat} {p r x : Rat}
       _ <= (L : Rat) * (r - p) :=
         Rat.le_trans hlip_px (by simpa [hxpabs] using hscaled)
   constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- On one unit-interval cell, the Lipschitz lower rectangle lies below the
+literal rectangle evaluated at the right endpoint. -/
+private theorem lowerCell_le_rightEndpoint {f : Rat -> Rat} {L : Nat}
+    {p r : Rat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    lowerCell f L p r <= (r - p) * f r := by
+  have hvalue := cell_value_bounds hlip hp0 hpr hr1 hpr Rat.le_refl
+  have hwidth : 0 <= r - p := by
+    grind [Rat.sub_eq_add_neg]
+  exact Rat.mul_le_mul_of_nonneg_left hvalue.1 hwidth
+
+/-- On one unit-interval cell, the literal right-endpoint rectangle lies
+below the matching Lipschitz upper rectangle. -/
+private theorem rightEndpoint_le_upperCell {f : Rat -> Rat} {L : Nat}
+    {p r : Rat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    (r - p) * f r <= upperCell f L p r := by
+  have hvalue := cell_value_bounds hlip hp0 hpr hr1 hpr Rat.le_refl
+  have hwidth : 0 <= r - p := by
+    grind [Rat.sub_eq_add_neg]
+  exact Rat.mul_le_mul_of_nonneg_left hvalue.2 hwidth
+
+private theorem lowerSum_le_rightEndpointSum {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    lowerSum f L intervals <= rightEndpointSum f intervals := by
+  induction intervals with
+  | nil => simp [lowerSum, rightEndpointSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨hp0, hpr, hr1, hrest⟩
+      simp only [lowerSum, rightEndpointSum]
+      exact rat_add_le_add
+        (lowerCell_le_rightEndpoint hlip hp0 hpr hr1) (ih hrest)
+
+private theorem rightEndpointSum_le_upperSum {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat))
+    (intervals : List (Rat × Rat))
+    (hunit : ArctanGeometry.UnitIntervals intervals) :
+    rightEndpointSum f intervals <= upperSum f L intervals := by
+  induction intervals with
+  | nil => simp [rightEndpointSum, upperSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hunit with ⟨hp0, hpr, hr1, hrest⟩
+      simp only [rightEndpointSum, upperSum]
+      exact rat_add_le_add
+        (rightEndpoint_le_upperCell hlip hp0 hpr hr1) (ih hrest)
+
+/-- Each finite literal right-endpoint sum on the dyadic unit mesh lies in the
+matching Lipschitz--Darboux box.  This is the finite bridge from a conventional
+Riemann computation to the project's certified integral representation. -/
+theorem compute_contains_rightEndpointSum {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat)) (stage : Nat) :
+    (compute f L stage).ContainsInterval
+      { lo := rightEndpointSum f
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+        hi := rightEndpointSum f
+          (ArctanGeometry.arctanAreaLoopState 1 stage).intervals } := by
+  let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  have hunit : ArctanGeometry.UnitIntervals cells :=
+    ArctanGeometry.arctanAreaLoopState_intervals_unit
+      (x := 1) (by native_decide) (by native_decide) stage
+  change lowerSum f L cells <= rightEndpointSum f cells /\
+    rightEndpointSum f cells <= upperSum f L cells
+  exact ⟨lowerSum_le_rightEndpointSum hlip cells hunit,
+    rightEndpointSum_le_upperSum hlip cells hunit⟩
+
+/-- The right-endpoint sum on the actual midpoint-refined area-loop cells is
+the ordinary uniform right Riemann sum with `2^stage` cells. -/
+theorem dyadicRightEndpointSum_eq_uniform (f : Rat -> Rat) (stage : Nat) :
+    rightEndpointSum f
+      (ArctanGeometry.arctanAreaLoopState 1 stage).intervals =
+      uniformRightEndpointSum f (2 ^ stage) := by
+  rw [ArctanGeometry.arctanAreaLoopState_one_intervals_eq_uniform,
+    rightEndpointSum_eq_foldl]
+  simp only [List.foldl_map]
+  unfold uniformRightEndpointSum
+  apply foldl_eq_of_pointwise
+  intro total k
+  have hwidth := RationalCircle.Stage.parameter_succ_sub
+    (RationalCircle.dyadicStage stage) k
+  change
+    ((k + 1 : Nat) : Rat) / ((2 ^ stage : Nat) : Rat) -
+        (k : Rat) / ((2 ^ stage : Nat) : Rat) =
+      1 / ((2 ^ stage : Nat) : Rat) at hwidth
+  rw [hwidth]
+
+/-- A conventional uniform right Riemann sum is enclosed by the corresponding
+finite Lipschitz--Darboux box.  This is the reusable finite comparison used
+to identify series computations with certified rational integrals. -/
+theorem compute_contains_uniformRightEndpointSum {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat)) (stage : Nat) :
+    (compute f L stage).ContainsInterval
+      { lo := uniformRightEndpointSum f (2 ^ stage)
+        hi := uniformRightEndpointSum f (2 ^ stage) } := by
+  have h := compute_contains_rightEndpointSum hlip stage
+  rw [dyadicRightEndpointSum_eq_uniform] at h
+  exact h
 
 private theorem cells_refine {f : Rat -> Rat} {L : Nat} {p r : Rat}
     (hlip : Integral.LipschitzOnUnit f (L : Rat))

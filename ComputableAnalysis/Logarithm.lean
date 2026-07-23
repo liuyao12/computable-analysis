@@ -8,9 +8,9 @@ import ComputableAnalysis.IntegralIdentities
 This module starts the logarithm layer with the concrete value
 `logTwoSeries = 1 - 1/2 + 1/3 - ...`.  The construction is entirely finite
 rational arithmetic: its `n`th box is enclosed by two adjacent alternating
-partial sums.  It is deliberately *not* yet identified with the integral
-`∫_1^2 dt/t`; that identification belongs to the still-open general integral
-construction and FTC bridge.
+partial sums.  Later in this module, a finite right-mesh/Darboux comparison
+identifies it with the literal reciprocal integral at two, without invoking a
+general FTC or completed-real construction.
 -/
 
 namespace ComputableAnalysis
@@ -204,7 +204,8 @@ theorem logTwoDarbouxCompute_width (stage : Nat) :
 
 /-- A certified raw real from literal midpoint-refined Lipschitz--Darboux
 rectangles for `t ↦ 1/(1+t)` on `[0,1]`.  Its stage-`n` box has exact width
-`2/2^n`.  No equality with the alternating logarithm series is claimed yet. -/
+`2/2^n`; the later logarithm bridge proves it equivalent to the alternating
+series representation. -/
 def logTwoDarbouxRaw : RealRaw :=
   IntegralIdentities.LipschitzDyadic.raw logTwoKernel 1
 
@@ -221,8 +222,8 @@ def logTwoDarbouxConstruction :
     logTwoKernel_lipschitz
 
 /-- The constructive definite-integral raw for the translated reciprocal
-kernel.  The remaining logarithm bridge is the theorem that this raw agrees
-with `logTwoSeries`, not a hidden part of this definition. -/
+kernel.  Its agreement with `logTwoSeries` is proved later as an explicit
+finite mesh comparison, rather than hidden in this definition. -/
 def logTwoReciprocalIntegral : RealRaw :=
   Integral.integralFor (FunctionOnInterval.exactRat logTwoKernel 0 1)
     logTwoDarbouxConstruction
@@ -453,8 +454,8 @@ theorem logTwoLo_eq_harmonicSum_sub (n : Nat) :
       grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
 /-- The lower series endpoint is exactly the finite uniform right Riemann sum
-for the translated reciprocal kernel.  The remaining logarithm theorem must
-still compare this mesh to the literal nested Lipschitz--Darboux boxes. -/
+for the translated reciprocal kernel.  The later logarithm theorem compares
+that mesh with the literal nested Lipschitz--Darboux boxes. -/
 theorem logTwoLo_eq_logTwoRightRiemann (n : Nat) :
     logTwoLo n = logTwoRightRiemann n := by
   rw [logTwoLo_eq_harmonicSum_sub,
@@ -574,8 +575,8 @@ theorem logTwoCompute_valid : RealRaw.ValidCompute logTwoCompute := by
 `log 2 = 1 - 1/2 + 1/3 - ...`.
 
 Its validity and the displayed `O(1/n)` rate are finite rational proofs.  The
-separate theorem identifying this raw value with `∫_1^2 dt/t` is intentionally
-not claimed here: it requires the general integral/FTC bridge. -/
+separate theorem later in this module identifies this raw value with the
+literal finite reciprocal integral at two by rational mesh comparison. -/
 def logTwoSeries : RealRaw where
   compute := logTwoCompute
   rate := .power
@@ -598,6 +599,80 @@ theorem logTwoSeries_width_le_one_div (n : Nat) (hn : 0 < n) :
   exact FTC.one_div_nat_antitone hn
     (by omega : 0 < 2 * n + 1)
     (by omega : n <= 2 * n + 1)
+
+/-- At a dyadic mesh size, the alternating-series lower endpoint is literally
+enclosed by the finite Darboux integral box.  The proof combines the exact
+harmonic-to-right-Riemann identity with the generic finite Riemann/Darboux
+comparison; no limiting real number is introduced here. -/
+theorem logTwoDarbouxCompute_contains_dyadicSeriesLower (stage : Nat) :
+    (logTwoDarbouxCompute stage).ContainsInterval
+      { lo := logTwoLo (2 ^ stage), hi := logTwoLo (2 ^ stage) } := by
+  have h := IntegralIdentities.LipschitzDyadic.compute_contains_uniformRightEndpointSum
+      (f := logTwoKernel) (L := 1) logTwoKernel_lipschitz stage
+  have hpow : 0 < 2 ^ stage := Nat.pow_pos (by omega : 0 < 2)
+  rw [logTwoLo_eq_logTwoKernelRightRiemann (2 ^ stage) hpow]
+  simpa [logTwoDarbouxCompute,
+    IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum,
+    logTwoKernelRightRiemann] using h
+
+private theorem logTwoDarbouxCompute_nested
+    (n m : Nat) (hnm : n <= m) :
+    (logTwoDarbouxCompute n).lo <= (logTwoDarbouxCompute m).lo /\
+      (logTwoDarbouxCompute m).lo <= (logTwoDarbouxCompute m).hi /\
+      (logTwoDarbouxCompute m).hi <= (logTwoDarbouxCompute n).hi := by
+  simpa [logTwoDarbouxCompute] using
+    (IntegralIdentities.LipschitzDyadic.compute_nested
+      (f := logTwoKernel) (L := 1) logTwoKernel_lipschitz n m hnm)
+
+private theorem succ_le_two_pow (n : Nat) : n + 1 <= 2 ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 2 * (n + 1) := by omega
+        _ <= 2 * 2 ^ n := Nat.mul_le_mul_left 2 ih
+        _ = 2 ^ (n + 1) := by
+          rw [Nat.pow_succ]
+          omega
+
+/-- The alternating harmonic construction of `log 2` and the literal
+Lipschitz--Darboux integral of `1/x` on `[1,2]` are the same raw real.
+
+For arbitrary requested stages, compare both nested algorithms at a common
+dyadic refinement.  The finite enclosure above places the series box inside
+the integral box there; the elementary bound `k + 1 <= 2^k` makes that mesh
+cofinal.  Thus the equality is an overlap proof between rational interval
+algorithms, not an appeal to completeness or a general FTC axiom. -/
+theorem logTwoSeries_equiv_logTwoReciprocalIntegral :
+    logTwoSeries.Equiv logTwoReciprocalIntegral := by
+  apply RealRaw.equiv_of_le_of_ge
+  · intro n m
+    let k := n + m + 1
+    have hmk : m <= k := by
+      dsimp [k]
+      omega
+    have hnpow : n <= 2 ^ k := by
+      exact Nat.le_trans (by dsimp [k]; omega) (succ_le_two_pow k)
+    have hseries := logTwoCompute_nested n (2 ^ k) hnpow
+    have hdarboux := logTwoDarbouxCompute_nested m k hmk
+    have hcontain := logTwoDarbouxCompute_contains_dyadicSeriesLower k
+    change logTwoLo n <= (logTwoDarbouxCompute m).hi
+    exact Rat.le_trans hseries.1
+      (Rat.le_trans hcontain.2 hdarboux.2.2)
+  · intro n m
+    let k := n + m + 1
+    have hnk : n <= k := by
+      dsimp [k]
+      omega
+    have hmpow : m <= 2 ^ k := by
+      exact Nat.le_trans (by dsimp [k]; omega) (succ_le_two_pow k)
+    have hdarboux := logTwoDarbouxCompute_nested n k hnk
+    have hseries := logTwoCompute_nested m (2 ^ k) hmpow
+    have hcontain := logTwoDarbouxCompute_contains_dyadicSeriesLower k
+    change (logTwoDarbouxCompute n).lo <= logTwoHi m
+    exact Rat.le_trans hdarboux.1
+      (Rat.le_trans hcontain.1
+        (Rat.le_trans hseries.2.1 hseries.2.2))
 
 end Logarithm
 

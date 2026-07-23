@@ -383,10 +383,12 @@ upper rational endpoints.  They are nested and have the exact width
 \]
 so in particular \(w_n\le 1/n\) for every positive stage.  This is a
 finite-rational convergence proof, with no appeal to a completed real line.
+\end{definition}
 
 \begin{proposition}[Finite logarithm-series/Riemann bridge]
 \label{prop:log-two-series-right-riemann}
 \lean{ComputableAnalysis.Logarithm.logTwoLo_eq_logTwoKernelRightRiemann}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_contains_uniformRightEndpointSum}
 \uses{def:log-two-series,def:log-two-reciprocal-darboux}
 \leanok
 For every positive integer \(n\), the lower endpoint of the alternating
@@ -404,16 +406,33 @@ each summand.  It therefore supplies the series side of the intended
 logarithm integral identity without silently passing to a limit.
 \end{proposition}
 
-At present this defines the named series presentation
-\code{Logarithm.logTwoSeries}.  Alongside it,
-\cref{def:log-two-reciprocal-darboux} supplies a valid finite raw integral for
-the translated reciprocal kernel.  The theorem
-\(\log_{\mathrm{series}}2=\int_1^2 dt/t\), equivalently the raw-real
-agreement of those two algorithms after the affine change of variables, is
-deliberately still open.  It requires a finite comparison/FTC bridge, not the
-bare alternating-series or Darboux validity proofs: specifically, the checked
-right mesh above must still be compared with the nested dyadic Darboux boxes.
-\end{definition}
+\begin{theorem}[Series equals the finite reciprocal integral]
+\label{thm:log-two-series-reciprocal-integral}
+\lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
+\uses{prop:log-two-series-right-riemann,def:log-two-reciprocal-darboux}
+\leanok
+The two raw algorithms now agree:
+\[
+  \log_{\mathrm{series}}2
+    \Equiv \int_1^2\frac{\dd t}{t},
+\]
+where the right side means the literal translated reciprocal
+Lipschitz--Darboux construction of
+\cref{def:log-two-reciprocal-darboux}.  At dyadic stage \(k\), Lean first
+identifies the area-loop cells with the ordinary uniform \(2^k\)-mesh.  The
+generic lower/right/upper rectangle comparison encloses that right Riemann
+sum in the Darboux box, while the preceding proposition identifies the same
+sum with the alternating-series lower endpoint.  For arbitrary stages, both
+valid algorithms are compared at a common refinement; the elementary rational
+bound \(k+1\le2^k\) makes the dyadic mesh cofinal.  Thus this is a direct
+finite interval-overlap proof, without completeness, topology, or a general
+FTC axiom.
+
+This settles the concrete endpoint bridge at two.  Identifying this local
+integral raw with the inverse branch of the project's selected canonical
+exponential remains a separate, later log/exp theorem.
+\end{theorem}
 
 \begin{remark}[A deliberately long ODE--exponential--logarithm--pi route]
 \label{rem:ode-exp-log-pi-route}
@@ -435,9 +454,9 @@ Its intended proof order is:
   agree;
   \item use the inverse-function and FTC certificates to identify the
   positive logarithmic integral with the inverse of that canonical
-  exponential.  Separately finish the finite comparison from
-  \cref{prop:log-two-series-right-riemann} to the dyadic Darboux boxes; this
-  transports the alternating series at two to the same \(\log 2\);
+  exponential.  The concrete finite comparison at two is already checked by
+  \cref{thm:log-two-series-reciprocal-integral}; transport that equality to
+  the resulting canonical \(\log 2\);
   \item prove the arctangent derivative and the common
   increasing/decreasing-piece integration-by-parts theorem.  The rational
   identity

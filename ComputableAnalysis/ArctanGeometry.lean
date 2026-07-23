@@ -4517,6 +4517,20 @@ private theorem stageIntervals_refineByDoubling
       simpa [RationalCircle.Stage.refineIndex, Nat.mul_add, Nat.add_assoc,
         Nat.add_comm, Nat.mul_comm] using hnext
 
+/-- The consecutive parameter cells of a rational circle stage are the
+ordinary finite uniform mesh, written with `List.range'` so that its starting
+index is explicit. -/
+private theorem stageIntervals_eq_uniformRange
+    (S : RationalCircle.Stage) (k count : Nat) :
+    stageIntervals S k count =
+      (List.range' k count).map
+        (fun j => (S.parameter j, S.parameter (j + 1))) := by
+  induction count generalizing k with
+  | zero => simp [stageIntervals]
+  | succ count ih =>
+      simp only [stageIntervals, List.range'_succ, List.map_cons]
+      rw [ih (k + 1)]
+
 private theorem arctanAreaLoopIntervals_one_eq_stageIntervals (n : Nat) :
     (arctanAreaLoopState (1 : Rat) n).intervals =
       stageIntervals (RationalCircle.dyadicStage n) 0
@@ -4533,6 +4547,21 @@ private theorem arctanAreaLoopIntervals_one_eq_stageIntervals (n : Nat) :
       simpa [RationalCircle.Stage.refineIndex] using
         (stageIntervals_refineByDoubling href 0
           (RationalCircle.dyadicStage n).subdivisions).symm
+
+/-- The midpoint-refined area loop at `1` has exactly the usual `2^n`
+uniform rational cells of `[0,1]`.  This makes its mesh available to general
+Riemann-sum theorems without exposing the circle-specific polygon machinery. -/
+theorem arctanAreaLoopState_one_intervals_eq_uniform (n : Nat) :
+    (arctanAreaLoopState (1 : Rat) n).intervals =
+      (List.range (2 ^ n)).map
+        (fun (k : Nat) =>
+          ((k : Rat) / ((2 ^ n : Nat) : Rat),
+            ((Nat.succ k : Nat) : Rat) / ((2 ^ n : Nat) : Rat))) := by
+  rw [arctanAreaLoopIntervals_one_eq_stageIntervals,
+    stageIntervals_eq_uniformRange]
+  rw [← List.range_eq_range']
+  simp [RationalCircle.dyadicStage, RationalCircle.dyadicSubdivisions,
+    RationalCircle.Stage.parameter]
 
 private theorem stage_innerQuarterArea_eq_geometricLowerSum (n : Nat) :
     (RationalCircle.dyadicStage n).innerQuarterArea =

@@ -104,7 +104,7 @@ integration-by-parts evaluation, not another arctangent variant.  Its public
 statement will be the natural integral formula; its derived presentation
 agreement will become a sixth coverage bridge only after the remaining
 product-derivative/FTC route, its common monotone-piece refinement, and the
-logarithm endpoint identity are all checked.  This is intentionally the long
+canonical exponential/logarithm alignment are all checked.  This is intentionally the long
 elementary-function route: identify `log 2` with the inverse of the canonical
 exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
 exponential representations agree, then use
@@ -136,13 +136,16 @@ lower endpoint with the literal uniform right Riemann sum
 `(1/n) * Σ_{k<n} 1/(1+(k+1)/n)`.  The proof first rewrites it as
 `H_(2n) - H_n` and then cancels the mesh factor term by term.  Thus it is a
 finite rational identity, not an appeal to an integral limit.
-The shared `IntegralIdentities.LipschitzDyadic` constructor works for any
-rational kernel with a supplied natural rational Lipschitz bound.  The
-identification of these two valid raw reals—the theorem
-`logTwoSeries ≡ logTwoReciprocalIntegral`—remains open, so the logarithmic
-term is still not a completed integration-by-parts route: the remaining
-task is a shrinking finite comparison between this uniform right mesh and the
-literal dyadic Darboux boxes.
+The shared `IntegralIdentities.LipschitzDyadic` constructor now proves that a
+literal uniform right sum lies inside its matching finite Darboux box.  The
+area-loop mesh is proved to be the usual `2^stage` uniform mesh, so
+`Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower` encloses the
+matching alternating-series lower endpoint.  Nestedness and the cofinal rational bound
+`k + 1 <= 2^k` then give the checked raw-real theorem
+`Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral`.  This completes the
+concrete logarithm-at-two endpoint bridge using only finite rational boxes;
+identification with the inverse branch of the selected canonical exponential
+remains a separate log/exp theorem.
 The reciprocal kernel itself also has a finite interval-regularity and
 epsilon--delta continuity proof on `[1,2]`, using `[1/r, 1/p]` for an input
 box `[p,r]`; extending the new Lipschitz construction to that general

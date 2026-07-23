@@ -215,7 +215,8 @@ another. The Pi score stays useful only as secondary integration coverage.
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
   It requires the remaining product-derivative/FTC bridge, the explicit monotone-piece
-  refinement, the arctangent derivative, and the logarithm endpoint identity.
+  refinement, the arctangent derivative, and canonical exponential/logarithm
+  alignment.
   This is deliberately the long exp/log/ODE route: first identify the
   logarithmic integral with the inverse of canonical exponential, use the
   linear Peano--Baker/Picard--Lindelöf uniqueness theorem to equate the
@@ -228,12 +229,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   exactly equal, for every positive mesh count, to the literal uniform right
   Riemann sum for `t ↦ 1/(1+t)`:
   `Logarithm.logTwoLo_eq_logTwoKernelRightRiemann` factors the calculation
-  through `H_(2*n) - H_n` and cancels the mesh term by term.  It is not yet
-  proved equal to the reciprocal-kernel integral, so it does not discharge
-  that endpoint gate: the remaining step is a shrinking comparison with the
-  literal dyadic Darboux boxes.
-  It is deliberately not a checked scoreboard row until those data construct
-  valid raw reals and their final `RealRaw.Equiv` theorem.
+  through `H_(2*n) - H_n` and cancels the mesh term by term.  The generic
+  finite right-sum/Darboux containment and the public uniform-mesh identity
+  now give `Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower`; common
+  dyadic refinements then prove the final raw-real theorem
+  `Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral`.  This discharges
+  the concrete endpoint bridge using rational boxes alone.  The distinct
+  remaining logarithm gate is to identify that integral raw with the inverse
+  branch of the selected canonical exponential.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
@@ -551,10 +554,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   The concrete reciprocal kernel is now interval-regular, and hence has
   literal rational epsilon--delta continuity, on `[1,2]`:
   `Logarithm.oneOverXOnOneTwo_intervalRegular` uses the exact enclosure
-  `[1/r, 1/p]` for each rational `[p,r]`.  The missing logarithm-at-two
-  bridge is now specifically a finite comparison of the uniform right mesh
-  (already identified exactly with the alternating lower endpoint) with the
-  nested dyadic Darboux boxes, not a continuity or topology assumption.
+  `[1/r, 1/p]` for each rational `[p,r]`.  The logarithm-at-two bridge is now
+  checked: the uniform right mesh is enclosed by the nested dyadic Darboux
+  boxes and `logTwoSeries_equiv_logTwoReciprocalIntegral` completes the raw
+  equivalence.  This is a finite rational comparison, not a continuity or
+  topology assumption; aligning it with the selected canonical exp/log
+  inverse branch remains the next distinct theorem.
 - Power-series representations of `sin` and `cos` are named in
   `ComputableAnalysis/ElementaryFunctions.lean`.
 - Hyperbolic sine and cosine have constructive exponential representations
