@@ -96,7 +96,8 @@ will become a sixth coverage bridge only after the product/derivative/FTC
 route, its common monotone-piece refinement, and the logarithm endpoint
 identity are all checked.  The uniform-grid core of that refinement is now
 formalized: the `m*n` rational grid explicitly contains both the `m` and `n`
-grids, and its mesh is the old width divided by the positive factor.  General
+grids, and its mesh is the old width divided by the positive factor.  The two
+embeddings are packaged as a checked `CommonRefinement` certificate.  General
 piecewise synchronization still remains before this can count as the sixth
 bridge.
 

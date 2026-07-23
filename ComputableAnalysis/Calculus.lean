@@ -1124,6 +1124,64 @@ theorem uniform_refines_left {a b : Rat} {m n j : Nat}
   simpa [uniform, Nat.mul_comm] using leftPoint_refine_mul_right
     (a := a) (b := b) (i := j) hn hm
 
+/-- A finite rational partition `fine` refines `coarse` when it explicitly
+embeds every coarse grid point into the fine grid, preserving endpoints and
+index order.  This is finite data: no supremum, density, or completed real
+line is involved. -/
+structure Refines {a b : Rat}
+    (fine coarse : RationalPartition a b) where
+  index : Nat -> Nat
+  index_zero : index 0 = 0
+  index_last : index coarse.pieces = fine.pieces
+  index_mono : forall i j, i <= j -> index i <= index j
+  point_eq : forall i, i <= coarse.pieces ->
+    fine.point (index i) = coarse.point i
+
+/-- Every embedded coarse index is a valid index in the refining partition. -/
+theorem Refines.index_le {a b : Rat}
+    {fine coarse : RationalPartition a b} (R : Refines fine coarse)
+    {i : Nat} (hi : i <= coarse.pieces) :
+    R.index i <= fine.pieces := by
+  calc
+    R.index i <= R.index coarse.pieces := R.index_mono i coarse.pieces hi
+    _ = fine.pieces := R.index_last
+
+/-- A common rational refinement carries one finite refinement certificate for
+each input grid. -/
+structure CommonRefinement {a b : Rat}
+    (left right : RationalPartition a b) where
+  refinement : RationalPartition a b
+  refines_left : Refines refinement left
+  refines_right : Refines refinement right
+
+/-- The `m*n` uniform grid is a certified common refinement of the `m` and
+`n` grids.  Its two embeddings are the elementary index multiplications
+`i ↦ i*n` and `j ↦ j*m`. -/
+def uniformCommonRefinement (a b : Rat) (m n : Nat)
+    (hm : 0 < m) (hn : 0 < n) (hab : a <= b) :
+    CommonRefinement (uniform a b m hm hab) (uniform a b n hn hab) where
+  refinement := uniform a b (m * n) (Nat.mul_pos hm hn) hab
+  refines_left :=
+    { index := fun i => i * n
+      index_zero := by grind
+      index_last := by simp [uniform]
+      index_mono := by
+        intro i j hij
+        exact Nat.mul_le_mul_right n hij
+      point_eq := by
+        intro i _hi
+        exact uniform_refines_right hm hn hab }
+  refines_right :=
+    { index := fun j => j * m
+      index_zero := by grind
+      index_last := by simp [uniform, Nat.mul_comm]
+      index_mono := by
+        intro i j hij
+        exact Nat.mul_le_mul_right m hij
+      point_eq := by
+        intro j _hj
+        exact uniform_refines_left hm hn hab }
+
 def cell {a b : Rat} (P : RationalPartition a b)
     (k : Nat) (hk : k < P.pieces) : RationalSubinterval a b where
   lower := P.point k
