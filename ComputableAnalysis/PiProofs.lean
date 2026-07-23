@@ -17294,106 +17294,6 @@ theorem piPresentation_equiv_piCircleArea (presentation : PiPresentation) :
   | reciprocalQuarticIntegral => simpa [piPresentationRaw] using
       piReciprocalQuarticCompact_equiv_piCircleArea
 
-/-- The project-facing certified π value.  It keeps the fast public area loop
-as its preferred evaluator and points to every canonical completed route as a
-valid, equivalent alternative. -/
-def piCertified : Real :=
-  { preferred := piCircleArea
-    valid := piPresentation_valid .area
-    alternatives := [piCircleAreaPolygon, piCircumferenceStabilized,
-      piCircumferenceReboxed, piCircumferenceFan,
-      (4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat),
-      piFromArctanIntegralRectangleUnitAtOne, piLeibniz, piNilakantha,
-      piMachin, IntegralIdentities.cauchyFullLineIntegral,
-      piReciprocalQuarticCompact]
-    alternative_valid := by
-      intro rep hrep
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .areaPolygon
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .circumferenceStabilized
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .circumferenceReboxed
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .circumferenceFan
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .arctanGeometry
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .arctanRectangleIntegral
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .leibnizSeries
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .nilakanthaSeries
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .machinSeries
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_valid .cauchyIntegral
-      have h := List.mem_singleton.mp hrep
-      subst rep
-      exact piPresentation_valid .reciprocalQuarticIntegral
-    coherent := by
-      intro rep hrep
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .areaPolygon
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .circumferenceStabilized
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .circumferenceReboxed
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .circumferenceFan
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .arctanGeometry
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .arctanRectangleIntegral
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .leibnizSeries
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .nilakanthaSeries
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .machinSeries
-      rcases List.mem_cons.mp hrep with h | hrep
-      · subst rep; exact piPresentation_equiv_piCircleArea .cauchyIntegral
-      have h := List.mem_singleton.mp hrep
-      subst rep
-      exact piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral }
-
-theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
-  rfl
-
-/-- Retrieve a named certified representation from the π registry without
-depending on its position in the implementation list. -/
-def piCertifiedPresentation (presentation : PiPresentation) :
-    Real.Representation piCertified where
-  raw := piPresentationRaw presentation
-  valid := piPresentation_valid presentation
-  agrees := piPresentation_equiv_piCircleArea presentation
-
-/-- The abstract certified value of pi.  Its named members below are views of
-one `Real` handle, not independently declared real numbers. -/
-abbrev pi : Real := piCertified
-
-/-- Named views of the certified pi handle.  For example,
-`pi.circleArea.raw`, `pi.machin.raw`, and the supplementary
-`pi.curvatureFan.raw` are executable raw interval algorithms with checked
-agreement to the same abstract certified value. -/
-namespace pi
-
-def presentation (kind : PiPresentation) : Real.Representation pi :=
-  piCertifiedPresentation kind
-
-def circleArea : Real.Representation pi := presentation .area
-def circleAreaPolygon : Real.Representation pi := presentation .areaPolygon
-def circumference : Real.Representation pi := presentation .circumferenceFan
-def arctanGeom : Real.Representation pi := presentation .arctanGeometry
-def arctanIntegral : Real.Representation pi := presentation .arctanRectangleIntegral
-def leibniz : Real.Representation pi := presentation .leibnizSeries
-def nilakantha : Real.Representation pi := presentation .nilakanthaSeries
-def machin : Real.Representation pi := presentation .machinSeries
-def cauchy : Real.Representation pi := presentation .cauchyIntegral
-def reciprocalQuartic : Real.Representation pi := presentation .reciprocalQuarticIntegral
-
-end pi
-
 /-- The small set of π equivalences that act as distinct end-to-end
 calculus-regression bridges.
 
@@ -18159,11 +18059,90 @@ theorem piCircumferenceCurvatureFan_equiv_piCircleArea :
       (piStage n) (piStage_pos n)
   · exact piCircleArea_compute_lo_le_piCircumferenceCurvatureFan_compute_hi n
 
+/-- The project-facing certified π value.  It keeps the fast public area loop
+as its preferred evaluator and records every currently checked equivalent raw
+algorithm, including the supplementary curvature-corrected fan. -/
+def piCertified : Real :=
+  ((((((((((((Real.ofRaw piCircleArea (piPresentation_valid .area))
+    .withAlternative piCircleAreaPolygon
+      (piPresentation_valid .areaPolygon)
+      (piPresentation_equiv_piCircleArea .areaPolygon))
+    .withAlternative piCircumferenceStabilized
+      (piPresentation_valid .circumferenceStabilized)
+      (piPresentation_equiv_piCircleArea .circumferenceStabilized))
+    .withAlternative piCircumferenceReboxed
+      (piPresentation_valid .circumferenceReboxed)
+      (piPresentation_equiv_piCircleArea .circumferenceReboxed))
+    .withAlternative piCircumferenceFan
+      (piPresentation_valid .circumferenceFan)
+      (piPresentation_equiv_piCircleArea .circumferenceFan))
+    .withAlternative ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat))
+      (piPresentation_valid .arctanGeometry)
+      (piPresentation_equiv_piCircleArea .arctanGeometry))
+    .withAlternative piFromArctanIntegralRectangleUnitAtOne
+      (piPresentation_valid .arctanRectangleIntegral)
+      (piPresentation_equiv_piCircleArea .arctanRectangleIntegral))
+    .withAlternative piLeibniz
+      (piPresentation_valid .leibnizSeries)
+      (piPresentation_equiv_piCircleArea .leibnizSeries))
+    .withAlternative piNilakantha
+      (piPresentation_valid .nilakanthaSeries)
+      (piPresentation_equiv_piCircleArea .nilakanthaSeries))
+    .withAlternative piMachin
+      (piPresentation_valid .machinSeries)
+      (piPresentation_equiv_piCircleArea .machinSeries))
+    .withAlternative IntegralIdentities.cauchyFullLineIntegral
+      (piPresentation_valid .cauchyIntegral)
+      (piPresentation_equiv_piCircleArea .cauchyIntegral))
+    .withAlternative piReciprocalQuarticCompact
+      (piPresentation_valid .reciprocalQuarticIntegral)
+      (piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral))
+    .withAlternative piCircumferenceCurvatureFan
+      piCircumferenceCurvatureFan_valid
+      piCircumferenceCurvatureFan_equiv_piCircleArea
+
+theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
+  rfl
+
+/-- The supplementary curvature fan is stored in the certified abstract π
+handle itself, rather than merely related to it by an external theorem. -/
+theorem piCircumferenceCurvatureFan_mem_piCertified_alternatives :
+    piCircumferenceCurvatureFan ∈ piCertified.alternatives := by
+  simp [piCertified, Real.withAlternative]
+
+/-- Retrieve a named certified representation from the primary π registry
+without depending on its position in the implementation list. -/
+def piCertifiedPresentation (presentation : PiPresentation) :
+    Real.Representation piCertified where
+  raw := piPresentationRaw presentation
+  valid := piPresentation_valid presentation
+  agrees := piPresentation_equiv_piCircleArea presentation
+
+/-- The abstract certified value of pi.  Its named members below are views of
+one `Real` handle, not independently declared real numbers. -/
+abbrev pi : Real := piCertified
+
+/-- Named views of the certified pi handle.  The handle's alternative list
+contains every checked raw algorithm, while this namespace assigns stable
+semantic names to the most useful views. -/
 namespace pi
 
-/-- The curvature-corrected Archimedean fan as a named certified
-representation of the abstract value `pi`.  It is a supplementary geometric
-implementation, not an additional calculus-coverage row. -/
+def presentation (kind : PiPresentation) : Real.Representation pi :=
+  piCertifiedPresentation kind
+
+def circleArea : Real.Representation pi := presentation .area
+def circleAreaPolygon : Real.Representation pi := presentation .areaPolygon
+def circumference : Real.Representation pi := presentation .circumferenceFan
+def arctanGeom : Real.Representation pi := presentation .arctanGeometry
+def arctanIntegral : Real.Representation pi := presentation .arctanRectangleIntegral
+def leibniz : Real.Representation pi := presentation .leibnizSeries
+def nilakantha : Real.Representation pi := presentation .nilakanthaSeries
+def machin : Real.Representation pi := presentation .machinSeries
+def cauchy : Real.Representation pi := presentation .cauchyIntegral
+def reciprocalQuartic : Real.Representation pi := presentation .reciprocalQuarticIntegral
+
+/-- The curvature-corrected Archimedean fan is a named certified view of the
+same abstract pi.  It remains supplementary to the calculus-coverage score. -/
 def curvatureFan : Real.Representation pi where
   raw := piCircumferenceCurvatureFan
   valid := piCircumferenceCurvatureFan_valid

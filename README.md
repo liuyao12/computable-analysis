@@ -156,16 +156,15 @@ still open.
 
 The useful output of the completed rows is now formalized as a registry rather
 than another percentage. `PiProofs.piCertified : Real` uses `piCircleArea` as
-its preferred evaluator and retains each canonical completed route as a
-certified equivalent alternative. `PiProofs.PiPresentation` gives those
-routes stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
+its preferred evaluator and literally retains every currently certified raw
+route as an equivalent alternative, including the supplementary
+curvature-corrected fan. `PiProofs.PiPresentation` gives the primary routes
+stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 `Real.Representation`. This includes the geometry, stabilized circumference,
 single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
 routes, together with the two certified perimeter normalizations; it excludes
-unproved rows and arbitrary presentation variants.
-The complementary named view `PiProofs.pi.curvatureFan` exposes the separately
-proved curvature-corrected geometric fan without turning it into another
-calculus-coverage row.
+unproved rows and arbitrary presentation variants. The complementary named
+view `PiProofs.pi.curvatureFan` does not create another calculus-coverage row.
 
 ### Full implementation inventory
 

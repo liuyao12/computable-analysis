@@ -48,15 +48,15 @@ row; an equivalence proof does not silently transfer a stage-by-stage rate to
 every other presentation.  It is therefore a useful cost/precision diagnostic
 for the constructive witness, not an additional measure of theorem importance.
 
-The full \code{PiProofs.PiPresentation} registry retains supplementary
+The primary \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two
 perimeter normalizations, Nilakantha, and the single Machin power-series
 formula.  They remain useful executable comparisons, but are not additional
 readiness cells because they reuse one of the bridges above.
-The separately named \code{pi.curvatureFan} is also a checked geometric
-representation of the same abstract pi value.  It likewise remains outside
-the readiness table: it sharpens a finite-geometry implementation rather
-than adding a distinct calculus bridge.
+The abstract \code{piCertified} handle also stores the separately named
+\code{pi.curvatureFan} as a checked geometric representation.  It remains
+outside the readiness table: it sharpens a finite-geometry implementation
+rather than adding a distinct calculus bridge.
 
 The direct \code{piCircumference} evaluator remains a geometric diagnostic:
 its unresolved lower-endpoint refinement is a local square-root-enclosure

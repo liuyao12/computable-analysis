@@ -763,10 +763,10 @@ students actually compute.
   completion percentage: multiple implementations can share a bridge, and a
   continuous Peano--Baker theorem or an analytic proof that `exp' = exp` would
   be major calculus progress without adding a π row.
-  `PiPresentation.integrationFamily` and the full registry retain the
+  `PiPresentation.integrationFamily` and the primary registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
-  regressions.  The separately named `pi.curvatureFan` is another checked
-  finite-geometry representation, so it remains outside the coverage count.
+  regressions.  `piCertified.alternatives` also literally carries the checked
+  `pi.curvatureFan` raw evaluator; it remains outside the coverage count.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel, Brouncker, and logarithm-at-`i` are
@@ -861,8 +861,8 @@ students actually compute.
   representative without depending on a list position. This turns the Pi
   suite into an integration registry rather than a progress percentage. The
   supplementary `PiProofs.pi.curvatureFan` exposes the independently checked
-  curvature-corrected fan as a named `Real.Representation`; it is not another
-  calculus-coverage row. The
+  curvature-corrected fan as a named `Real.Representation`, stored directly
+  in `piCertified.alternatives`; it is not another calculus-coverage row. The
   stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical
