@@ -1146,6 +1146,41 @@ theorem Refines.index_le {a b : Rat}
     R.index i <= R.index coarse.pieces := R.index_mono i coarse.pieces hi
     _ = fine.pieces := R.index_last
 
+/-- Every partition refines itself by the identity index map. -/
+def Refines.refl {a b : Rat} (P : RationalPartition a b) : Refines P P where
+  index := fun i => i
+  index_zero := rfl
+  index_last := rfl
+  index_mono := by
+    intro i j hij
+    exact hij
+  point_eq := by
+    intro i _hi
+    rfl
+
+/-- Finite refinement certificates compose.  This lets a later construction
+refine a mesh in several explicit rational stages without losing the map back
+to its original partition. -/
+def Refines.trans {a b : Rat}
+    {fine middle coarse : RationalPartition a b}
+    (Rfine : Refines fine middle) (Rmiddle : Refines middle coarse) :
+    Refines fine coarse where
+  index := fun i => Rfine.index (Rmiddle.index i)
+  index_zero := by
+    rw [Rmiddle.index_zero, Rfine.index_zero]
+  index_last := by
+    rw [Rmiddle.index_last, Rfine.index_last]
+  index_mono := by
+    intro i j hij
+    exact Rfine.index_mono _ _ (Rmiddle.index_mono i j hij)
+  point_eq := by
+    intro i hi
+    calc
+      fine.point (Rfine.index (Rmiddle.index i)) =
+          middle.point (Rmiddle.index i) :=
+        Rfine.point_eq _ (Rmiddle.index_le hi)
+      _ = coarse.point i := Rmiddle.point_eq i hi
+
 /-- A common rational refinement carries one finite refinement certificate for
 each input grid. -/
 structure CommonRefinement {a b : Rat}

@@ -168,7 +168,8 @@ another. The Pi score stays useful only as secondary integration coverage.
   positive refinement factor.  `RationalPartition.Refines` and
   `CommonRefinement` package the two endpoint-preserving index embeddings as
   finite data; `uniformCommonRefinement` constructs the certified uniform
-  case.  For the integral theorem, extend this interface to
+  case, and `Refines.refl`/`Refines.trans` make staged rational refinements
+  compositional.  For the integral theorem, extend this interface to
   increasing/decreasing pieces with arbitrary rational breakpoints, then
   discharge the maximum-increment bound cell by cell.  Do not invoke a
   nonconstructive global variation or Jordan decomposition.

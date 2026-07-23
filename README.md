@@ -99,7 +99,8 @@ formalized: the `m*n` rational grid explicitly contains both the `m` and `n`
 grids, and its mesh is the old width divided by the positive factor.  The two
 embeddings are packaged as a checked `CommonRefinement` certificate.  General
 piecewise synchronization still remains before this can count as the sixth
-bridge.
+bridge; its staged refinements will compose through the checked
+`RationalPartition.Refines` interface.
 
 The direct chord-path route now also has a checked
 `piCircumferenceStabilized` representative. It evaluates only a finite prefix
