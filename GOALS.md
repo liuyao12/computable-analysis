@@ -243,7 +243,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   at mesh `eps.den + 1` the endpoint variation lies in `[0,1]`, so the
   corner correction is at most `1/(eps.den + 1) <= eps`; independently,
   rectangle evaluation stage `4 * (eps.den + 1)` makes every sampled box
-  have width at most `eps`.  What remains is to connect these finite
+  have width at most `eps`.  These samples now instantiate the exact finite
+  integration-by-parts equality: the two left strip sums plus the corner
+  correction equal the final sample, and their total is bracketed within
+  `1/mesh` (or the requested epsilon under the denominator-plus-one
+  schedule) of that endpoint.  What remains is to connect these finite
   estimates through the product-derivative and FTC certificates.  The
   general finite merge
   is now checked: `commonRefinementOfPartitions` inserts the right

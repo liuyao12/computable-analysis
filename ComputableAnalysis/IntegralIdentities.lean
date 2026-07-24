@@ -2736,6 +2736,115 @@ theorem arctanIntegralRectangleMeshSamples_cornerBound_le_eps
         (eps.val.den + 1) evalStage
     _ <= eps.val := FTC.one_div_den_succ_le_of_pos eps.property
 
+/-- The two left-endpoint strip sums in the concrete unit-branch
+integration-by-parts calculation.  The first is the finite approximation to
+\(\int x\,d(\arctan x)\); the second is the complementary approximation to
+\(\int\arctan x\,dx\). -/
+def arctanIntegralRectangleMeshIntegrationByPartsSum
+    (meshStage evalStage : Nat) : Rat :=
+  leftStieltjesSum (unitMeshPath meshStage)
+      (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage +
+    leftStieltjesSum
+      (arctanIntegralRectangleMeshSamples meshStage evalStage)
+      (unitMeshPath meshStage) meshStage
+
+/-- The certified unit-mesh arctangent samples satisfy the exact finite
+integration-by-parts identity.  The only remaining term is the explicitly
+named corner correction; this is a rational equality, not a limiting
+argument or an invocation of FTC. -/
+theorem arctanIntegralRectangleMeshIntegrationByParts_finite_identity
+    (meshStage evalStage : Nat) (hmesh : 0 < meshStage) :
+    arctanIntegralRectangleMeshIntegrationByPartsSum meshStage evalStage +
+        quadraticVariationSum (unitMeshPath meshStage)
+          (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage =
+      arctanIntegralRectangleMeshSamples meshStage evalStage meshStage := by
+  calc
+    arctanIntegralRectangleMeshIntegrationByPartsSum meshStage evalStage +
+        quadraticVariationSum (unitMeshPath meshStage)
+          (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage =
+        unitMeshPath meshStage meshStage *
+            arctanIntegralRectangleMeshSamples meshStage evalStage meshStage -
+          unitMeshPath meshStage 0 *
+            arctanIntegralRectangleMeshSamples meshStage evalStage 0 :=
+      finiteIntegrationByParts_withVariation
+        (unitMeshPath meshStage)
+        (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage
+    _ = arctanIntegralRectangleMeshSamples meshStage evalStage meshStage := by
+      rw [unitMeshPath_endpoint hmesh, unitMeshPath_zero,
+        arctanIntegralRectangleMeshSamples_zero]
+      grind [Rat.sub_eq_add_neg]
+
+/-- The concrete finite integration-by-parts sum is trapped between the
+sampled arctangent endpoint and that endpoint minus the explicit mesh error
+\(1/n\).  This is the exact error bridge needed before the two strip sums
+are independently promoted to definite integrals. -/
+theorem arctanIntegralRectangleMeshIntegrationByParts_endpoint_bracket
+    (meshStage evalStage : Nat) (hmesh : 0 < meshStage) :
+    arctanIntegralRectangleMeshSamples meshStage evalStage meshStage -
+        1 / (meshStage : Rat) <=
+      arctanIntegralRectangleMeshIntegrationByPartsSum meshStage evalStage /\
+    arctanIntegralRectangleMeshIntegrationByPartsSum meshStage evalStage <=
+      arctanIntegralRectangleMeshSamples meshStage evalStage meshStage := by
+  have hidentity :=
+    arctanIntegralRectangleMeshIntegrationByParts_finite_identity
+      meshStage evalStage hmesh
+  have hcorner_nonneg :
+      0 <= quadraticVariationSum (unitMeshPath meshStage)
+        (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage :=
+    quadraticVariationSum_nonneg_of_step_nonnegative
+      (unitMeshPath meshStage)
+      (arctanIntegralRectangleMeshSamples meshStage evalStage)
+      (fun i => by
+        rw [unitMeshPath_step, Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2
+          ((Rat.natCast_pos).2 hmesh)))
+      (arctanIntegralRectangleMeshSamples_step_nonnegative meshStage evalStage)
+      meshStage
+  have hcorner_le :
+      quadraticVariationSum (unitMeshPath meshStage)
+        (arctanIntegralRectangleMeshSamples meshStage evalStage) meshStage <=
+        1 / (meshStage : Rat) :=
+    arctanIntegralRectangleMeshSamples_cornerBound_le_one_div
+      meshStage evalStage
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- Choosing the denominator-plus-one mesh makes the same finite
+integration-by-parts bracket fit any requested positive rational tolerance.
+This supplies the mesh part of the later three-budget pi route. -/
+theorem arctanIntegralRectangleMeshIntegrationByParts_endpoint_bracket_le_eps
+    (evalStage : Nat) (eps : QPos) :
+    arctanIntegralRectangleMeshSamples (eps.val.den + 1) evalStage
+        (eps.val.den + 1) - eps.val <=
+      arctanIntegralRectangleMeshIntegrationByPartsSum
+        (eps.val.den + 1) evalStage /\
+    arctanIntegralRectangleMeshIntegrationByPartsSum
+        (eps.val.den + 1) evalStage <=
+      arctanIntegralRectangleMeshSamples (eps.val.den + 1) evalStage
+        (eps.val.den + 1) := by
+  have hidentity :=
+    arctanIntegralRectangleMeshIntegrationByParts_finite_identity
+      (eps.val.den + 1) evalStage (Nat.succ_pos _)
+  have hcorner_nonneg :
+      0 <= quadraticVariationSum (unitMeshPath (eps.val.den + 1))
+        (arctanIntegralRectangleMeshSamples (eps.val.den + 1) evalStage)
+        (eps.val.den + 1) :=
+    quadraticVariationSum_nonneg_of_step_nonnegative
+      (unitMeshPath (eps.val.den + 1))
+      (arctanIntegralRectangleMeshSamples (eps.val.den + 1) evalStage)
+      (fun i => by
+        rw [unitMeshPath_step, Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2
+          ((Rat.natCast_pos).2 (Nat.succ_pos _))))
+      (arctanIntegralRectangleMeshSamples_step_nonnegative
+        (eps.val.den + 1) evalStage)
+      (eps.val.den + 1)
+  have hcorner_le :
+      quadraticVariationSum (unitMeshPath (eps.val.den + 1))
+        (arctanIntegralRectangleMeshSamples (eps.val.den + 1) evalStage)
+        (eps.val.den + 1) <= eps.val :=
+    arctanIntegralRectangleMeshSamples_cornerBound_le_eps evalStage eps
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 theorem arctanIntegralRectangleFunctionAgreement :
     Elementary.Arctan.Equivalent
       arctanIntegralRectangleRepresentation

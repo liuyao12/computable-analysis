@@ -378,6 +378,24 @@ theorem quadraticVariationSum_eq_nat_mul_of_constant_steps
 test case for the geometric integration-by-parts correction. -/
 def unitMeshPath (n k : Nat) : Rat := (k : Rat) / (n : Rat)
 
+/-- The unit-mesh coordinate starts at the exact rational left endpoint. -/
+theorem unitMeshPath_zero (n : Nat) :
+    unitMeshPath n 0 = 0 := by
+  unfold unitMeshPath
+  rw [Rat.div_def]
+  simp
+
+/-- On a positive unit mesh, the final coordinate is the exact right
+endpoint.  This is the endpoint normalization used by the concrete
+finite integration-by-parts calculation. -/
+theorem unitMeshPath_endpoint {n : Nat} (hn : 0 < n) :
+    unitMeshPath n n = 1 := by
+  unfold unitMeshPath
+  rw [Rat.div_def]
+  have hne : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  exact Rat.mul_inv_cancel _ hne
+
 /-- A family of interval boxes is weakly ordered when every earlier lower
 endpoint is compatible with every later upper endpoint.  This is the
 finite, box-valued order relation supplied by a nondecreasing interval

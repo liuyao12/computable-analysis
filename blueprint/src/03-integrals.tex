@@ -185,6 +185,8 @@ additivity.
 \lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonpositive}
 \lean{ComputableAnalysis.quadraticVariationSum_eq_nat_mul_of_constant_steps}
 \lean{ComputableAnalysis.unitMeshPath}
+\lean{ComputableAnalysis.unitMeshPath_zero}
+\lean{ComputableAnalysis.unitMeshPath_endpoint}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference}
@@ -570,8 +572,31 @@ evaluation stage.  The canonical path starts at \(0\), remains at most
 Independently, every rectangle box at stage \(r\) has width at most
 \(4/(r+1)\leq\varepsilon\), so the selected rational sample is within
 \(\varepsilon\) of either endpoint of its own box.  These are checked
-finite inequalities, not an appeal to a limiting partition.  They do not
-yet identify a sampled sum with an integral or discharge the
+finite inequalities, not an appeal to a limiting partition.
+
+The two left-endpoint strip sums are now instantiated with this particular
+coordinate path and this particular arctangent sample path.  Write
+\[
+ S_{m,r}
+ =\sum_{i<m}x_i(v_{i+1}-v_i)
+   +\sum_{i<m}v_i(x_{i+1}-x_i),
+ \qquad
+ C_{m,r}=\sum_{i<m}(x_{i+1}-x_i)(v_{i+1}-v_i).
+\]
+Lean proves the exact finite identity
+\[
+ S_{m,r}+C_{m,r}=v_m,
+\]
+because \(x_0=v_0=0\) and \(x_m=1\).  Its already checked nonnegative
+corner bound gives the stronger endpoint bracket
+\[
+ v_m-\frac1m\leq S_{m,r}\leq v_m,
+\]
+and the explicit choice \(m=\varepsilon.\mathrm{den}+1\) replaces
+\(1/m\) by \(\varepsilon\).  Thus the concrete rectangle route now has a
+full finite integration-by-parts mesh certificate, including its endpoint
+and convergence-rate budget; the two summands are not yet claimed to be
+definite integrals.  Promoting them separately still requires the
 product-derivative and FTC comparison certificates needed by the later
 integration-by-parts theorem.
 \end{definition}

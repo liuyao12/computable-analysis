@@ -175,9 +175,14 @@ arbitrary adjacent box endpoints as a monotone path.  Its two finite error
 knobs are now explicit: mesh `eps.den + 1` makes the corner correction at
 most `eps`, while evaluation stage `4 * (eps.den + 1)` makes each selected
 sample lie within `eps` of either endpoint of its rectangle box.  The
-remaining arctangent--logarithm route work is the product-derivative and
-FTC comparison certificates that connect these finite samples to the
-displayed integrals.
+same concrete samples now also instantiate finite integration by parts:
+the two left-endpoint strip sums plus the corner correction equal the final
+arctangent sample exactly, and the strip-sum total lies between that endpoint
+and the endpoint minus \(1/\mathrm{mesh}\) (or minus the requested
+precision under the denominator-plus-one schedule).  This remains a finite
+mesh certificate: the remaining arctangent--logarithm route work is the
+product-derivative and FTC comparison certificates that connect its two strip
+sums to the displayed integrals.
 `Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw
 presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
 certified `O(1/n)` rate.  Independently,
