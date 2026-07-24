@@ -178,6 +178,17 @@ matching alternating-series lower endpoint.  Nestedness and the cofinal rational
 concrete logarithm-at-two endpoint bridge using only finite rational boxes;
 identification with the inverse branch of the selected canonical exponential
 remains a separate log/exp theorem.
+The same generic construction now has a checked specialization for the
+arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
+factorization gives the Lipschitz constant `2`, hence the raw
+`IntegralIdentities.arctanKernelLipschitzIntegral` has exact stage width
+`4/2^n`.  At every stage its Darboux box and the established geometric
+arctangent rectangle box contain the same finite right-endpoint sum; the
+resulting checked raw-real equivalence
+`arctanKernelLipschitzIntegral_equiv_rectangleForAtOne` is therefore a
+comparison of two genuine integration algorithms.  It is deliberately not a
+new pi-registry row, and it asserts neither the derivative of arctangent nor
+an FTC theorem.
 The reciprocal kernel itself also has a finite interval-regularity and
 epsilon--delta continuity proof on `[1,2]`, using `[1/r, 1/p]` for an input
 box `[p,r]`; extending the new Lipschitz construction to that general

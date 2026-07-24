@@ -86,9 +86,12 @@ gates.
   FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact
   reciprocal-quartic computations exercise them concretely. The reusable
   `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
-  Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. What remains
-  is its extension to interval-regular functions, together with derivative
-  certificates for the standard function table.
+  Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new
+  arctangent-kernel specialization has a checked rational Lipschitz constant
+  `2`, exact width `4/2^n`, and a stagewise common-right-sum comparison with
+  the existing geometric rectangle integral. What remains is its extension to
+  interval-regular functions, together with derivative certificates for the
+  standard function table.
 - **Monotone inverse functions — partly checked.** The branch-local
   `InvertibleFunctionOnInterval`/`InverseRaw`/bisection API is checked, with
   the unit-interval square-root search for exact rational targets. Extend it
@@ -778,9 +781,10 @@ students actually compute.
   and `RatFun.oneOverX_denominator_apart_on_pos_interval` proves that `1/x`
   is denominator-apart on every interval `[a,b]` with `0 < a`.  These expose
   `1/(1+x^2)` and `1/x` as certified interval functions.
-- Next concrete integral targets, without a general integrability theorem:
+- Next concrete integral targets, beyond the checked unit-branch arctangent
+  rectangle/Lipschitz comparison and without a general integrability theorem:
   `integral 1/x = log x` on positive intervals,
-  `integral 1/(1+x^2) = arctan x`,
+  `integral 1/(1+x^2) = arctan x` on general certified branch intervals,
   `integral 1/sqrt(1-x^2) = asin x` on certified subintervals of `[-1,1]`,
   tangent/secant formulas on intervals whose cosine denominator is apart from
   zero, and polynomial/rational examples via domain-specific interval

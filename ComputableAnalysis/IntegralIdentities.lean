@@ -1731,6 +1731,81 @@ theorem oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity
   rw [RationalCircle.Stage.sectorAreaDensity_eq_one_over_one_plus_square]
   simp [oneOverOnePlusSquareRaw]
 
+/-- Exact rational difference factorization for the arctangent kernel. -/
+private theorem oneOverOnePlusSquare_difference (s t : Rat) :
+    (1 / (1 + s * s)) - (1 / (1 + t * t)) =
+      ((t - s) * (s + t)) / ((1 + s * s) * (1 + t * t)) := by
+  have hspos : 0 < 1 + s * s := by
+    have hsq := RationalCircle.Stage.ratSquare_nonneg s
+    grind
+  have htpos : 0 < 1 + t * t := by
+    have hsq := RationalCircle.Stage.ratSquare_nonneg t
+    grind
+  have hsne : 1 + s * s ≠ 0 := Rat.ne_of_gt hspos
+  have htne : 1 + t * t ≠ 0 := Rat.ne_of_gt htpos
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have hscancel : (1 + s * s) * (1 + s * s)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hsne
+  have htcancel : (1 + t * t) * (1 + t * t)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ htne
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem oneOverOnePlusSquare_lipschitz_on_unit :
+    Integral.LipschitzOnUnit (fun x : Rat => 1 / (1 + x * x)) 2 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    let d : Rat := (1 + s * s) * (1 + t * t)
+    have hsone : 1 <= 1 + s * s := by
+      have hsq := RationalCircle.Stage.ratSquare_nonneg s
+      grind
+    have htone : 1 <= 1 + t * t := by
+      have hsq := RationalCircle.Stage.ratSquare_nonneg t
+      grind
+    have hdpos : 0 < d := by
+      dsimp [d]
+      exact Rat.mul_pos (by grind) (by grind)
+    have hdone : 1 <= d := by
+      dsimp [d]
+      have hs0 : 0 <= 1 + s * s := Rat.le_trans (by native_decide) hsone
+      calc
+        1 = 1 * 1 := by native_decide
+        _ <= (1 + s * s) * 1 :=
+          Rat.mul_le_mul_of_nonneg_right hsone (by native_decide)
+        _ <= (1 + s * s) * (1 + t * t) :=
+          Rat.mul_le_mul_of_nonneg_left htone hs0
+    have hdinv0 : 0 <= d⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hdpos)
+    have hdinv : d⁻¹ <= 1 := by
+      apply Rat.le_of_mul_le_mul_right (c := d)
+      · calc
+          d⁻¹ * d = d * d⁻¹ := by rw [Rat.mul_comm]
+          _ = 1 := Rat.mul_inv_cancel _ (Rat.ne_of_gt hdpos)
+          _ <= 1 * d := by simpa using hdone
+      · exact hdpos
+    have hsum0 : 0 <= s + t := Rat.add_nonneg hs0 ht0
+    have hsum : s + t <= 2 := by grind
+    have hsumabs : qabs (s + t) = s + t :=
+      qabs_eq_self_of_nonneg hsum0
+    have hfactor : (s + t) * d⁻¹ <= 2 := by
+      calc
+        (s + t) * d⁻¹ <= 2 * d⁻¹ :=
+          Rat.mul_le_mul_of_nonneg_right hsum hdinv0
+        _ <= 2 * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hdinv (by native_decide)
+        _ = 2 := by native_decide
+    rw [oneOverOnePlusSquare_difference]
+    change qabs (((t - s) * (s + t)) / d) <= 2 * qabs (t - s)
+    rw [Rat.div_def, qabs_mul, qabs_mul, hsumabs,
+      qabs_eq_self_of_nonneg hdinv0]
+    calc
+      qabs (t - s) * (s + t) * d⁻¹ =
+          qabs (t - s) * ((s + t) * d⁻¹) := by
+            rw [Rat.mul_assoc]
+      _ <= qabs (t - s) * 2 :=
+        Rat.mul_le_mul_of_nonneg_left hfactor (qabs_nonneg _)
+      _ = 2 * qabs (t - s) := by rw [Rat.mul_comm]
+
 /-- The arctangent kernel on `[0, x]`, as a domain-aware function. -/
 abbrev arctanKernelInterval (x : Rat) : FunctionOnInterval :=
   oneOverOnePlusSquareOnInterval 0 x
@@ -10781,6 +10856,91 @@ def construction (f : Rat -> Rat) (L : Nat)
   certificate := raw_valid hlip
 
 end LipschitzDyadic
+
+def arctanKernelLipschitzConstruction :
+    Integral.ConstructionFor
+      (FunctionOnInterval.exactRat
+        (fun x : Rat => 1 / (1 + x * x)) 0 1) :=
+  LipschitzDyadic.construction (fun x : Rat => 1 / (1 + x * x)) 2
+    oneOverOnePlusSquare_lipschitz_on_unit
+
+def arctanKernelLipschitzIntegral : RealRaw :=
+  Integral.integralFor
+    (FunctionOnInterval.exactRat (fun x : Rat => 1 / (1 + x * x)) 0 1)
+    arctanKernelLipschitzConstruction
+
+theorem arctanKernelLipschitzIntegral_valid :
+    arctanKernelLipschitzIntegral.Valid :=
+  Integral.integralFor_valid
+    (FunctionOnInterval.exactRat (fun x : Rat => 1 / (1 + x * x)) 0 1)
+    arctanKernelLipschitzConstruction
+
+theorem arctanKernelLipschitzIntegral_compute_eq (stage : Nat) :
+    arctanKernelLipschitzIntegral.compute stage =
+      LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage := rfl
+
+theorem arctanKernelLipschitzIntegral_width (stage : Nat) :
+    (arctanKernelLipschitzIntegral.compute stage).width =
+      4 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  rw [arctanKernelLipschitzIntegral_compute_eq,
+    LipschitzDyadic.compute_width]
+  have hfour : (2 : Rat) * ((2 : Nat) : Rat) = 4 := by native_decide
+  rw [hfour]
+
+private theorem arctanKernel_rightEndpointSum_eq_integralLowerSum
+    (intervals : List (Rat × Rat)) :
+    LipschitzDyadic.rightEndpointSum
+      (fun x : Rat => 1 / (1 + x * x)) intervals =
+      ArctanGeometry.integralLowerSum intervals := by
+  induction intervals with
+  | nil => rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      simp [LipschitzDyadic.rightEndpointSum,
+        ArctanGeometry.integralLowerSum, ArctanGeometry.integralLowerStep,
+        ArctanGeometry.integralKernel, ih]
+
+theorem arctanKernelLipschitz_compute_overlaps_rectangle (stage : Nat) :
+    QInterval.Overlaps
+      (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage)
+      (ArctanGeometry.arctanIntegralRectangleComputeAtOne stage) := by
+  let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  have hcommon := LipschitzDyadic.compute_contains_rightEndpointSum
+    (f := fun x : Rat => 1 / (1 + x * x))
+    oneOverOnePlusSquare_lipschitz_on_unit stage
+  rw [arctanKernel_rightEndpointSum_eq_integralLowerSum] at hcommon
+  have hrectangle :
+      ArctanGeometry.integralLowerSum cells <=
+        ArctanGeometry.integralUpperSum cells :=
+    ArctanGeometry.integralLowerSum_le_integralUpperSum cells
+      (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
+        (x := 1) (by native_decide) stage)
+  change QInterval.Overlaps
+    (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage)
+    (ArctanGeometry.integralSumInterval cells)
+  change
+    (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage).lo <=
+      ArctanGeometry.integralUpperSum cells /\
+    ArctanGeometry.integralLowerSum cells <=
+      (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage).hi
+  change
+    (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage).lo <=
+      ArctanGeometry.integralLowerSum cells /\
+    ArctanGeometry.integralLowerSum cells <=
+      (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage).hi at hcommon
+  exact ⟨Rat.le_trans hcommon.1 hrectangle, hcommon.2⟩
+
+theorem arctanKernelLipschitzIntegral_equiv_rectangleForAtOne :
+    arctanKernelLipschitzIntegral.Equiv
+      arctanIntegralRectangleForAtOne := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    arctanKernelLipschitzIntegral arctanIntegralRectangleForAtOne stage stage).2
+  change QInterval.Overlaps
+    (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage)
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne stage)
+  exact arctanKernelLipschitz_compute_overlaps_rectangle stage
 
 end IntegralIdentities
 

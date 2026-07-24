@@ -868,6 +868,56 @@ raw kernel computes the exact sector-area density of the rational circle
 parametrization from \cref{thm:sector-area-density}.
 \end{definition}
 
+\clearpage
+
+\begin{proposition}[A finite Lipschitz certificate for the arctangent kernel]
+\label{prop:arctangent-kernel-lipschitz}
+\uses{def:one-over-one-plus-square-kernel,def:definite-integral-identity}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_width}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitz_compute_overlaps_rectangle}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelLipschitzIntegral_equiv_rectangleForAtOne}
+\leanok
+The existing geometric rectangle construction exploits that
+\(1/(1+x^2)\) decreases on the unit interval.  It is also important to
+record a direction-free estimate, because the generic finite
+Lipschitz--Darboux constructor is the integration interface intended for
+regular rational kernels more generally.  For rational \(s,t\in[0,1]\),
+the required estimate follows from the exact identity
+\[
+ \frac{1}{1+s^2}-\frac{1}{1+t^2}
+ =\frac{(t-s)(s+t)}{(1+s^2)(1+t^2)}.
+\]
+Here \(0\le s+t\le2\), while both denominator factors are at least one.
+Consequently
+\[
+ \left|\frac{1}{1+s^2}-\frac{1}{1+t^2}\right|
+ \le 2|t-s|.
+\]
+Every step is finite rational arithmetic: positivity of \(1+x^2\), the
+displayed factorization, and multiplication of ordered rational bounds.
+It neither asserts an arctangent derivative nor uses a mean-value theorem.
+
+The resulting dyadic boxes use the generic lower and upper Lipschitz
+rectangles with \(L=2\), so their exact width is \(4/2^n\) at stage \(n\).
+The comparison with the established circle rectangle boxes is also finite.
+On their common midpoint-refined mesh, the literal right-endpoint
+sum
+\[
+ \sum_{[p,r]}(r-p)\frac{1}{1+r^2}
+\]
+is both the generic box's certified interior point and the lower rectangle
+sum of the decreasing-kernel construction.  Lean proves that the two stage
+boxes contain this same rational computation, and therefore proves their
+raw-real overlap directly.  This comparison is useful evidence that the
+generic integration layer agrees
+with the geometric arctangent integral; it is not a further pi-scoreboard
+row, and it does not replace the later derivative/FTC identity
+\(\int_0^x(1+t^2)^{-1}\,\dd t=\arctan x\).
+\end{proposition}
+
 \begin{definition}[Arctangent as an integral]
 \label{def:arctan-integral}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralConstruction}
