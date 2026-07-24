@@ -576,7 +576,7 @@ product-derivative and FTC comparison certificates needed by the later
 integration-by-parts theorem.
 \end{definition}
 
-\begin{proposition}[Monotonicity of the positive arctangent product]
+\begin{proposition}[Monotonicity and endpoint anchoring of the positive arctangent product]
 \label{prop:coordinate-arctangent-monotonicity}
 \uses{def:arctangent-sampled-monotonicity}
 \leanok
@@ -594,10 +594,18 @@ For \(0\le x\le y\le1\), the checked weak endpoint order gives
 Lean packages this as a nondecreasing interval-function witness for the
 positive product branch \(x\arctan(x)\).
 
-This discharges the declared-direction requirement for this product in the
-single-piece integration-by-parts plan.  It neither differentiates the
-product nor identifies an integral of the product with an endpoint
-difference; those remain the separate product-derivative and FTC
+The same explicit boxes also give the two endpoint facts needed by the
+finite rectangle identity:
+\[
+  P_n(0)=[0,0],
+  \qquad
+  P_n(1)=A_n(1).
+\]
+Consequently the endpoint-difference raw for this product on \([0,1]\) is a
+valid presentation equivalent to the geometric value
+\(\arctan_{\mathrm{geom}}(1)\).  This is boundary data only: it does not
+differentiate the product or identify an integral of the product with that
+endpoint difference.  Those remain the separate product-derivative and FTC
 certificates required by \cref{thm:integration-by-parts-certificate}.
 \end{proposition}
 

@@ -2272,6 +2272,125 @@ def coordinateTimesArctanIntegralRectangleOnUnit_monotone :
   MonotoneOnInterval.ofNondecreasing
     coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing
 
+/-- At the left endpoint, the positive product branch is the exact zero
+interval at every stage. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_toRealFunRaw_compute_zero
+    (n : Nat) :
+    coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw.compute 0 n =
+      { lo := 0, hi := 0 } := by
+  have hzero : inDomainInterval
+      coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper 0 := by
+    change (0 : Rat) <= 0 /\ 0 <= 1
+    exact ⟨Rat.le_refl, by native_decide⟩
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    coordinateTimesArctanIntegralRectangleOnUnit (x := 0)
+      (hx := hzero) n]
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg 0
+    hzero n]
+  grind
+
+/-- At the right endpoint, the positive product branch literally has the
+geometric rectangle box for arctangent at one. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_toRealFunRaw_compute_one
+    (n : Nat) :
+    coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw.compute 1 n =
+      ArctanGeometry.arctanIntegralRectangleComputeAtOne n := by
+  have hone : inDomainInterval
+      coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper 1 := by
+    change (0 : Rat) <= 1 /\ 1 <= 1
+    exact ⟨by native_decide, Rat.le_refl⟩
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    coordinateTimesArctanIntegralRectangleOnUnit (x := 1)
+      (hx := hone) n]
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg 1
+    hone n]
+  simp [ArctanGeometry.arctanIntegralRectangleComputeAtOne,
+    ArctanGeometry.arctanIntegralRectangleCompute]
+
+/-- The endpoint difference of the positive product branch is exactly the
+rectangle evaluator for arctangent at one, before any derivative or FTC
+argument. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq
+    (n : Nat) :
+    endpointDifferenceCompute
+      coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 n =
+      ArctanGeometry.arctanIntegralRectangleComputeAtOne n := by
+  unfold endpointDifferenceCompute endpointDifferenceInterval
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_toRealFunRaw_compute_one,
+    coordinateTimesArctanIntegralRectangleOnUnit_toRealFunRaw_compute_zero]
+  change
+    { lo := (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).lo - 0,
+      hi := (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).hi - 0 } =
+      ArctanGeometry.arctanIntegralRectangleComputeAtOne n
+  have hlo :
+      (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).lo - 0 =
+        (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).lo := by
+    grind [Rat.sub_eq_add_neg]
+  have hhi :
+      (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).hi - 0 =
+        (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).hi := by
+    grind [Rat.sub_eq_add_neg]
+  rw [hlo, hhi]
+
+/-- The explicitly anchored endpoint difference of the positive product
+branch is a valid raw real. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1) := by
+  have hcompute :
+      endpointDifferenceCompute
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 =
+        ArctanGeometry.arctanIntegralRectangleRawAtOne.compute := by
+    funext n
+    exact coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq n
+  rw [hcompute]
+  exact ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+
+/-- The endpoint difference of the positive product branch is equivalent to
+the geometric arctangent at one.  This packages only its boundary value, not
+a product derivative or an integral identity. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_arctanGeom_one :
+    (endpointDifferenceRaw
+      coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) := by
+  have hEndpointValid :
+      (endpointDifferenceRaw
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+        coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+  have hEndpointRectangle :
+      (endpointDifferenceRaw
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+        coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).Equiv
+          ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff
+      (endpointDifferenceRaw
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+        coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid)
+      ArctanGeometry.arctanIntegralRectangleRawAtOne n n).2
+    change QInterval.Overlaps
+      (endpointDifferenceCompute
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 n)
+      (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n)
+    rw [coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq]
+    have hordered := RealRaw.interval_order_of_valid
+      ArctanGeometry.arctanIntegralRectangleRawAtOne
+      ArctanGeometry.arctanIntegralRectangleRawAtOne_valid n
+    exact ⟨hordered, hordered⟩
+  exact RealRaw.equiv_trans hEndpointValid
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    (ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide))
+    hEndpointRectangle
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one
+
 /-- The fixed-stage arctangent boxes along a unit mesh, held at the final
 mesh point after the last cell.  This produces a total box path suitable
 for the finite integration-by-parts sums. -/

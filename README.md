@@ -140,6 +140,11 @@ The positive product branch is now also proved nondecreasing: for
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
 for `x * arctan x` in the single-piece integration-by-parts plan, without
 claiming its product derivative or an endpoint FTC identity.
+Its endpoint data are now checked too: the product box at `0` is exactly
+`[0,0]`, the box at `1` is the geometric rectangle evaluator for
+`arctan(1)`, and their endpoint-difference raw is valid and equivalent to
+the geometric arctangent value. This supplies boundary data for the finite
+rectangle identity, not a product derivative or a fundamental-theorem step.
 The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
 both the `m` and `n` grids, and its mesh is the old width divided by the

@@ -276,6 +276,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   proves its declared increasing direction from the weak arctangent endpoint
   order and nonnegative product endpoints. A general signed product,
   product derivative rule, and its FTC comparison are still open.  The
+  product endpoint anchors are now checked as well: the box is exactly zero
+  at `0`, agrees with the rectangle evaluator at `1`, and its endpoint
+  difference is a valid raw equivalent to `arctanGeom 1`.  This is the
+  boundary term needed by the finite integration-by-parts identity, not an
+  integral identity for the product.  The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor
   at the right endpoint, while `..._corner` exposes the explicit
