@@ -271,7 +271,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   the exact coordinate factor and the geometric arctangent rectangle factor
   are uniformly bounded in `[0,1]`, and its stage box is proved to be
   `[x * A.lo, x * A.hi]`.  This is the product representation needed for
-  the positive `x * arctan x` branch on `[0,1]`; a general signed product,
+  the positive `x * arctan x` branch on `[0,1]`.
+  `coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing` now also
+  proves its declared increasing direction from the weak arctangent endpoint
+  order and nonnegative product endpoints. A general signed product,
   product derivative rule, and its FTC comparison are still open.  The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor

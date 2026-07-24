@@ -135,6 +135,11 @@ it applies to the two-sided rational steps required by that interface.
 The remaining product derivative and FTC comparison are deliberately still
 separate: they must turn those identities into interval enclosures with
 continuity and remainder budgets.
+The positive product branch is now also proved nondecreasing: for
+`0 <= x <= y <= 1`, the literal product endpoints satisfy
+`x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
+for `x * arctan x` in the single-piece integration-by-parts plan, without
+claiming its product derivative or an endpoint FTC identity.
 The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
 both the `m` and `n` grids, and its mesh is the old width divided by the

@@ -576,9 +576,34 @@ product-derivative and FTC comparison certificates needed by the later
 integration-by-parts theorem.
 \end{definition}
 
+\begin{proposition}[Monotonicity of the positive arctangent product]
+\label{prop:coordinate-arctangent-monotonicity}
+\uses{def:arctangent-sampled-monotonicity}
+\leanok
+On the unit branch, let \(A_n(x)=[L_n(x),U_n(x)]\) be the geometric
+arctangent box and let \(P_n(x)\) be the certified product box for
+\(x\arctan(x)\).  Its nonnegative endpoint form is
+\[
+  P_n(x)=[xL_n(x),xU_n(x)].
+\]
+For \(0\le x\le y\le1\), the checked weak endpoint order gives
+\(L_n(x)\le U_n(y)\), while both lower endpoints are nonnegative.  Hence
+\[
+  xL_n(x)\le yL_n(x)\le yU_n(y).
+\]
+Lean packages this as a nondecreasing interval-function witness for the
+positive product branch \(x\arctan(x)\).
+
+This discharges the declared-direction requirement for this product in the
+single-piece integration-by-parts plan.  It neither differentiates the
+product nor identifies an integral of the product with an endpoint
+difference; those remain the separate product-derivative and FTC
+certificates required by \cref{thm:integration-by-parts-certificate}.
+\end{proposition}
+
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
-\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,thm:log-two-series-reciprocal-integral}
+\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:log-two-series-reciprocal-integral}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
 certificate gives

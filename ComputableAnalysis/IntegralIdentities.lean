@@ -2239,6 +2239,39 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg
     unfold QInterval.width at hordered
     grind [Rat.sub_eq_add_neg]
 
+/-- The positive product branch x times arctan x is nondecreasing on the
+unit interval.  This is a finite interval-order certificate for the
+monotone-piece integration-by-parts route; it is not a product-derivative
+or FTC theorem. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing :
+    NondecreasingOnInterval coordinateTimesArctanIntegralRectangleOnUnit := by
+  intro x y hx hy hxy n
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg x hx n,
+    coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg y hy n]
+  change
+    x * (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+      y * (ArctanGeometry.arctanIntegralRectangleCompute y n).hi
+  have hlow : 0 <= (ArctanGeometry.arctanIntegralRectangleCompute x n).lo :=
+    ArctanGeometry.arctanIntegralRectangleCompute_lower_nonnegative hx.1 n
+  have hcross :
+      (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+        (ArctanGeometry.arctanIntegralRectangleCompute y n).hi :=
+    ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
+      hx.1 hxy n
+  calc
+    x * (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+        y * (ArctanGeometry.arctanIntegralRectangleCompute x n).lo :=
+      Rat.mul_le_mul_of_nonneg_right hxy hlow
+    _ <= y * (ArctanGeometry.arctanIntegralRectangleCompute y n).hi :=
+      Rat.mul_le_mul_of_nonneg_left hcross hy.1
+
+/-- The packaged monotonicity witness for the positive product branch
+x times arctan x. -/
+def coordinateTimesArctanIntegralRectangleOnUnit_monotone :
+    MonotoneOnInterval coordinateTimesArctanIntegralRectangleOnUnit :=
+  MonotoneOnInterval.ofNondecreasing
+    coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing
+
 /-- The fixed-stage arctangent boxes along a unit mesh, held at the final
 mesh point after the last cell.  This produces a total box path suitable
 for the finite integration-by-parts sums. -/
