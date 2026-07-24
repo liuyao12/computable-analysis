@@ -84,6 +84,34 @@ The sampled recurrence is \(x_{k+1}=S_kx_k+g_k\). For the Euler sampling of
 rational matrix definitions, not an imported matrix or analysis library.
 \end{definition}
 
+\begin{theorem}[Forced oscillator: checked finite seed]
+\label{thm:forced-oscillator-finite-seed}
+\uses{def:rational-linear-system}
+\leanok
+For the oscillator matrix in the preceding section, the checked rational
+Euler system uses the state \(X_n=(q_n,v_n)\), step \(h\), and force samples
+\(r_n\).  Its literal two-coordinate update is
+\[
+ q_{n+1}=q_n+h v_n,
+ \qquad
+ v_{n+1}=v_n-h\omega^2q_n+h r_n.
+\]
+Eliminating the velocity is also a checked finite identity:
+\[
+ q_{n+2}-2q_{n+1}+q_n=-h^2\omega^2q_n+h^2r_n.
+\]
+The declarations
+\code{HarmonicOscillator.eulerStep\_position},
+\code{HarmonicOscillator.eulerStep\_velocity}, and
+\code{HarmonicOscillator.trajectory\_position\_secondDifference} establish
+these formulas by finite rational matrix action and recurrence algebra.  They
+give a concrete entry point from the familiar second-order equation to the
+general sampled inhomogeneous vector system and its Peano--Baker transition.
+They do \emph{not} assert that the Euler mesh has converged, nor that the
+continuous ODE has yet been solved; those are the separate certified
+simplex-integral and factorial-tail obligations below.
+\end{theorem}
+
 \begin{definition}[Finite Peano--Baker word sum]
 \label{def:finite-peano-baker-word-sum}
 \uses{def:rational-linear-system}

@@ -30,6 +30,11 @@ recurrence is that trajectory, and a zero-initial homogeneous candidate is
 identically zero. This is the exact discrete core of the later constructive
 uniqueness proof, not a substitute for its continuous simplex-integral and
 factorial-tail estimates.
+The familiar forced oscillator is now a checked two-dimensional instance:
+its Euler state update gives the exact scalar recurrence
+`q_(n+2) - 2 q_(n+1) + q_n = -h^2 omega^2 q_n + h^2 r_n`. This is the
+intended bridge from the chapter's second-order introduction to the general
+inhomogeneous vector formalism; it makes no claim that the mesh has converged.
 Constant Euler increments reduce exactly to `(I + B)^N`, while the zero
 coefficient case is the identity. A square-zero sampled coefficient family
 reduces exactly to `I + sum B_k`, so the finite word series already covers a

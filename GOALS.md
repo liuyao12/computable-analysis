@@ -127,8 +127,10 @@ gates.
   `PeanoBaker.lean` proves finite chronological products, the ordered-word
   expansion, discrete variation of constants, and recurrence uniqueness:
   every sampled candidate is the recursive trajectory, while a zero-initial
-  homogeneous sampled candidate is identically zero. The scientific-calculus
-  gate is the continuous interval-matrix Peano--Baker series with simplex
+  homogeneous sampled candidate is identically zero. Its checked forced
+  harmonic-oscillator instance derives the exact second-order Euler recurrence
+  after vectorizing position and velocity. The scientific-calculus gate is the
+  continuous interval-matrix Peano--Baker series with simplex
   integral boxes, factorial tail certificates, and variation of constants.
   This is the intended constructive **linear Picard--Lindelöf** theorem:
   Peano--Baker supplies the homogeneous resolvent, variation of constants
@@ -745,6 +747,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   unique trajectory, and `solvesHomogeneousRecurrence_zero` proves the
   zero-initial homogeneous candidate is identically zero. This is the
   exact discrete seed for the later factorial-tail uniqueness estimate.
+  `LinearODE.HarmonicOscillator` now instantiates that generic system for
+  `q'' + omega^2 q = r`: `eulerStep_position` and `eulerStep_velocity`
+  give the two coordinate updates, and
+  `trajectory_position_secondDifference` eliminates velocity to prove the
+  exact scalar Euler recurrence. This is the checked finite bridge from the
+  chapter's familiar second-order model to general vector-valued
+  inhomogeneous Peano--Baker; it is not a continuous convergence theorem.
   Constant increments are checked exactly by
   `chronologicalProduct_constant` and `peanoBakerDiscreteSum_constant`, giving
   `(I + B)^N`; `peanoBakerDiscreteSum_zeroCoefficient` supplies the zero

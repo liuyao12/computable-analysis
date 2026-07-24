@@ -599,6 +599,166 @@ def PairwiseCommutingSteps (system : DiscreteLinearSystem dimension) : Prop :=
 
 end DiscreteLinearSystem
 
+/- The familiar forced harmonic oscillator, represented as the two-dimensional
+Euler system that the finite Peano--Baker layer actually computes.  This is a
+finite rational seed for the later continuous rotation and exponential
+identifications; it does not presuppose sine, cosine, or a completed real
+line. -/
+namespace HarmonicOscillator
+
+/-- Position/velocity state vector. -/
+def state (position velocity : Rat) : RatVector 2 :=
+  fun i => if i = 0 then position else velocity
+
+/-- Position coordinate of a two-dimensional state. -/
+def position (x : RatVector 2) : Rat := x 0
+
+/-- Velocity coordinate of a two-dimensional state. -/
+def velocity (x : RatVector 2) : Rat := x 1
+
+theorem state_position (q v : Rat) :
+    position (state q v) = q := by
+  simp [position, state]
+
+theorem state_velocity (q v : Rat) :
+    velocity (state q v) = v := by
+  simp [state, velocity]
+
+private theorem finiteSum_two (f : Fin 2 -> Rat) :
+    finiteSum f = f 0 + f 1 := by
+  change f 0 + (f 1 + 0) = f 0 + f 1
+  rw [Rat.add_zero]
+
+/-- The generator with rows `(0, 1)` and `(-omega^2, 0)`. -/
+def generator (omega : Rat) : RatMatrix 2 :=
+  fun i =>
+    Fin.cases
+      (fun j => Fin.cases 0 (fun _ => 1) j)
+      (fun _ j => Fin.cases (-(omega * omega)) (fun _ => 0) j)
+      i
+
+/-- One forward Euler step for the oscillator generator. -/
+def eulerStep (step omega : Rat) : RatMatrix 2 :=
+  fun i =>
+    Fin.cases
+      (fun j => Fin.cases 1 (fun _ => step) j)
+      (fun _ j => Fin.cases (-(step * omega * omega)) (fun _ => 1) j)
+      i
+
+@[simp] theorem eulerStep_00 (step omega : Rat) :
+    eulerStep step omega 0 0 = 1 := by rfl
+
+@[simp] theorem eulerStep_01 (step omega : Rat) :
+    eulerStep step omega 0 1 = step := by rfl
+
+@[simp] theorem eulerStep_10 (step omega : Rat) :
+    eulerStep step omega 1 0 = -(step * omega * omega) := by rfl
+
+@[simp] theorem eulerStep_11 (step omega : Rat) :
+    eulerStep step omega 1 1 = 1 := by rfl
+
+/-- Applying the oscillator Euler step produces the familiar position update. -/
+theorem eulerStep_position (step omega : Rat) (x : RatVector 2) :
+    position (matrixApply (eulerStep step omega) x) =
+      position x + step * velocity x := by
+  unfold position velocity matrixApply
+  rw [finiteSum_two]
+  rw [eulerStep_00, eulerStep_01]
+  simp
+
+/-- Applying the oscillator Euler step produces the familiar velocity update. -/
+theorem eulerStep_velocity (step omega : Rat) (x : RatVector 2) :
+    velocity (matrixApply (eulerStep step omega) x) =
+      velocity x - step * omega * omega * position x := by
+  unfold position velocity matrixApply
+  rw [finiteSum_two]
+  rw [eulerStep_10, eulerStep_11]
+  simp
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.mul_assoc,
+    Rat.mul_comm]
+
+/-- Force samples enter only the velocity coordinate. -/
+def forcing (step : Rat) (drive : Nat -> Rat) : Nat -> RatVector 2 :=
+  fun n => state 0 (step * drive n)
+
+/-- The sampled inhomogeneous oscillator system. -/
+def eulerSystem (step omega : Rat) (drive : Nat -> Rat) :
+    DiscreteLinearSystem 2 where
+  step := fun _ => eulerStep step omega
+  forcing := forcing step drive
+
+theorem forcing_position (step : Rat) (drive : Nat -> Rat) (n : Nat) :
+    position (forcing step drive n) = 0 := by
+  simp [forcing, state_position]
+
+theorem forcing_velocity (step : Rat) (drive : Nat -> Rat) (n : Nat) :
+    velocity (forcing step drive n) = step * drive n := by
+  simp [forcing, state_velocity]
+
+/-- The vector Euler system has exactly the expected discrete position update. -/
+theorem trajectory_position_succ
+    (step omega : Rat) (drive : Nat -> Rat) (initial : RatVector 2) (n : Nat) :
+    position ((eulerSystem step omega drive).trajectory initial (n + 1)) =
+      position ((eulerSystem step omega drive).trajectory initial n) +
+        step * velocity ((eulerSystem step omega drive).trajectory initial n) := by
+  rw [DiscreteLinearSystem.trajectory_succ]
+  change
+    position
+      (vectorAdd
+        (matrixApply (eulerStep step omega)
+          ((eulerSystem step omega drive).trajectory initial n))
+        (forcing step drive n)) = _
+  change
+    position
+        (matrixApply (eulerStep step omega)
+          ((eulerSystem step omega drive).trajectory initial n)) +
+      position (forcing step drive n) = _
+  rw [eulerStep_position]
+  rw [forcing_position, Rat.add_zero]
+
+/-- The vector Euler system has exactly the expected discrete velocity update. -/
+theorem trajectory_velocity_succ
+    (step omega : Rat) (drive : Nat -> Rat) (initial : RatVector 2) (n : Nat) :
+    velocity ((eulerSystem step omega drive).trajectory initial (n + 1)) =
+      velocity ((eulerSystem step omega drive).trajectory initial n) -
+          step * omega * omega *
+            position ((eulerSystem step omega drive).trajectory initial n) +
+        step * drive n := by
+  rw [DiscreteLinearSystem.trajectory_succ]
+  change
+    velocity
+      (vectorAdd
+        (matrixApply (eulerStep step omega)
+          ((eulerSystem step omega drive).trajectory initial n))
+        (forcing step drive n)) = _
+  change
+    velocity
+        (matrixApply (eulerStep step omega)
+          ((eulerSystem step omega drive).trajectory initial n)) +
+      velocity (forcing step drive n) = _
+  rw [eulerStep_velocity]
+  rw [forcing_velocity]
+
+/-- Eliminating velocity gives the exact second-order finite Euler recurrence.
+It is the discrete counterpart of the forced oscillator equation, with no
+limiting argument hidden in the statement. -/
+theorem trajectory_position_secondDifference
+    (step omega : Rat) (drive : Nat -> Rat) (initial : RatVector 2) (n : Nat) :
+    position ((eulerSystem step omega drive).trajectory initial (n + 2)) -
+        2 * position ((eulerSystem step omega drive).trajectory initial (n + 1)) +
+        position ((eulerSystem step omega drive).trajectory initial n) =
+      -(step * step * omega * omega *
+          position ((eulerSystem step omega drive).trajectory initial n)) +
+        step * step * drive n := by
+  have hq0 := trajectory_position_succ step omega drive initial n
+  have hv0 := trajectory_velocity_succ step omega drive initial n
+  have hq1 := trajectory_position_succ step omega drive initial (n + 1)
+  rw [show n + 2 = (n + 1) + 1 by omega, hq1, hv0, hq0]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+end HarmonicOscillator
+
 /-- All strictly time-ordered selections from the first `steps` sample times.
 
 The newest selected time is put on the left.  Thus `[3, 1, 0]` denotes the
