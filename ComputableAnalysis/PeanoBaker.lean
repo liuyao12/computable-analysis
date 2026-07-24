@@ -424,6 +424,83 @@ theorem homogeneousTrajectory_succ (system : DiscreteLinearSystem dimension)
     system.homogeneousTrajectory initial (n + 1) =
       matrixApply (system.step n) (system.homogeneousTrajectory initial n) := rfl
 
+/-- A candidate solution of the sampled inhomogeneous recurrence.  Stating the
+recurrence separately from the recursive evaluator makes finite uniqueness a
+checked theorem rather than a property of one chosen implementation. -/
+structure SolvesRecurrence (system : DiscreteLinearSystem dimension)
+    (initial : RatVector dimension) (candidate : Nat -> RatVector dimension) : Prop where
+  initial_eq : candidate 0 = initial
+  step_eq : forall n,
+    candidate (n + 1) =
+      vectorAdd (matrixApply (system.step n) (candidate n))
+        (system.forcing n)
+
+/-- A candidate solution of the homogeneous sampled recurrence.  This is the
+finite rational core of the zero-initial uniqueness argument used later for
+linear Peano--Baker systems. -/
+structure SolvesHomogeneousRecurrence (system : DiscreteLinearSystem dimension)
+    (initial : RatVector dimension) (candidate : Nat -> RatVector dimension) : Prop where
+  initial_eq : candidate 0 = initial
+  step_eq : forall n,
+    candidate (n + 1) =
+      matrixApply (system.step n) (candidate n)
+
+/-- The recursive evaluator is a solution of its sampled recurrence. -/
+theorem trajectory_solvesRecurrence
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension) :
+    system.SolvesRecurrence initial (system.trajectory initial) :=
+  { initial_eq := rfl
+    step_eq := fun _ => rfl }
+
+/-- The recursive homogeneous evaluator is a solution of the homogeneous
+sampled recurrence. -/
+theorem homogeneousTrajectory_solvesHomogeneousRecurrence
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension) :
+    system.SolvesHomogeneousRecurrence initial
+      (system.homogeneousTrajectory initial) :=
+  { initial_eq := rfl
+    step_eq := fun _ => rfl }
+
+/-- Finite uniqueness for a sampled inhomogeneous linear system.  The proof is
+induction over a finite list of rational matrix updates; it invokes neither a
+limit nor an inverse transition matrix. -/
+theorem solvesRecurrence_eq_trajectory
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension)
+    (candidate : Nat -> RatVector dimension)
+    (hsolution : system.SolvesRecurrence initial candidate) :
+    forall n, candidate n = system.trajectory initial n
+  | 0 => hsolution.initial_eq
+  | n + 1 => by
+      rw [hsolution.step_eq n, trajectory_succ,
+        solvesRecurrence_eq_trajectory system initial candidate hsolution n]
+
+/-- Finite uniqueness for the homogeneous sampled recurrence. -/
+theorem solvesHomogeneousRecurrence_eq_homogeneousTrajectory
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension)
+    (candidate : Nat -> RatVector dimension)
+    (hsolution : system.SolvesHomogeneousRecurrence initial candidate) :
+    forall n, candidate n = system.homogeneousTrajectory initial n
+  | 0 => hsolution.initial_eq
+  | n + 1 => by
+      rw [hsolution.step_eq n, homogeneousTrajectory_succ,
+        solvesHomogeneousRecurrence_eq_homogeneousTrajectory
+          system initial candidate hsolution n]
+
+/-- The exact zero-initial homogeneous uniqueness certificate.  This is the
+finite form of the comparison step for two candidate continuous solutions:
+their difference has zero initial data, and a later enclosure argument must
+pass this finite conclusion through refining sampled systems. -/
+theorem solvesHomogeneousRecurrence_zero
+    (system : DiscreteLinearSystem dimension) (candidate : Nat -> RatVector dimension)
+    (hsolution : system.SolvesHomogeneousRecurrence
+      (vectorZero dimension) candidate) :
+    forall n, candidate n = vectorZero dimension
+  | 0 => hsolution.initial_eq
+  | n + 1 => by
+      rw [hsolution.step_eq n,
+        solvesHomogeneousRecurrence_zero system candidate hsolution n,
+        matrixApply_zero]
+
 /-- A homogeneous sampled trajectory is the action of its exact
 chronological transition matrix on the initial state. -/
 theorem homogeneousTrajectory_eq_chronologicalStepProduct

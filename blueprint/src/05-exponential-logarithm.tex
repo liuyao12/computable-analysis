@@ -114,11 +114,14 @@ be magnified by division by an arbitrarily small step.  More generally, this is
 the scalar case of the linear Picard--Lindel\"of construction target in
 \cref{thm:linear-picard-lindelof}: the Peano--Baker series for the
 one-dimensional coefficient \(A=1\) provides the solution and its factorial
-tail, while the zero-initial homogeneous case proves uniqueness.  Thus neither
-the existence construction nor the uniqueness argument needs completeness of
-an ambient real-number type.  A general nonlinear Picard--Lindel\"of theorem
-is a later extension requiring interval-certified Lipschitz maps and a
-separate contraction argument.
+tail, while the zero-initial homogeneous case proves uniqueness.  Lean now
+checks that exact zero-initial statement for every finite sampled recurrence.
+The continuous lift must still pass its bounded difference through the
+factorial tail schedule described in \cref{thm:linear-picard-lindelof}.
+Thus neither the existence construction nor the uniqueness argument needs
+completeness of an ambient real-number type.  A general nonlinear
+Picard--Lindel\"of theorem is a later extension requiring interval-certified
+Lipschitz maps and a separate contraction argument.
 \end{theorem}
 
 \section{Three definitions of \texorpdfstring{$e$}{e}}

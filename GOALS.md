@@ -125,15 +125,18 @@ gates.
   followed by uniqueness and the logarithm relation.
 - **Linear ODEs — finite core checked; analytic layer open.**
   `PeanoBaker.lean` proves finite chronological products, the ordered-word
-  expansion, and discrete variation of constants. The scientific-calculus
+  expansion, discrete variation of constants, and recurrence uniqueness:
+  every sampled candidate is the recursive trajectory, while a zero-initial
+  homogeneous sampled candidate is identically zero. The scientific-calculus
   gate is the continuous interval-matrix Peano--Baker series with simplex
   integral boxes, factorial tail certificates, and variation of constants.
   This is the intended constructive **linear Picard--Lindelöf** theorem:
   Peano--Baker supplies the homogeneous resolvent, variation of constants
-  supplies the affine solution, and the factorial tail supplies its modulus
-  and zero-initial-data uniqueness. It includes the scalar `f' = f` uniqueness
-  route needed for exponential. General nonlinear Picard--Lindelöf remains a
-  later interval-Lipschitz/contraction layer.
+  supplies the affine solution, and a bounded zero-initial difference is
+  driven to the zero raw vector by an explicit factorial schedule. It includes
+  the scalar `f' = f` uniqueness route needed for exponential. General
+  nonlinear Picard--Lindelöf remains a later interval-Lipschitz/contraction
+  layer.
 
 There is intentionally no aggregate percentage: these gates have distinct
 dependencies, and a proof in one does not compensate for a missing proof in
@@ -711,6 +714,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   splits an inhomogeneous trajectory into that finite transition of its
   initial state and the zero-initial forcing response. `ForcingZero` makes
   that response vanish.
+  The new `SolvesRecurrence` and `SolvesHomogeneousRecurrence` witnesses
+  separate the recurrence specification from its recursive evaluator.
+  `solvesRecurrence_eq_trajectory` proves every sampled candidate is the
+  unique trajectory, and `solvesHomogeneousRecurrence_zero` proves the
+  zero-initial homogeneous candidate is identically zero. This is the
+  exact discrete seed for the later factorial-tail uniqueness estimate.
   Constant increments are checked exactly by
   `chronologicalProduct_constant` and `peanoBakerDiscreteSum_constant`, giving
   `(I + B)^N`; `peanoBakerDiscreteSum_zeroCoefficient` supplies the zero

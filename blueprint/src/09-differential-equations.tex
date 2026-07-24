@@ -100,6 +100,31 @@ and its two theorems prove that, when every \(g_k=0\), the second summand
 vanishes and the trajectory is exactly the homogeneous action.
 \end{theorem}
 
+\begin{theorem}[Finite uniqueness for sampled linear systems]
+\label{thm:sampled-linear-uniqueness}
+\uses{def:rational-linear-system,thm:discrete-variation-of-constants}
+\leanok
+Fix rational matrices \(S_k\), rational forcing vectors \(g_k\), and an
+initial vector \(x_0\).  A sampled solution is any vector sequence satisfying
+\[
+  x_{k+1}=S_kx_k+g_k,\qquad x_0\text{ as prescribed}.
+\]
+Lean proves that every sampled solution agrees at every natural index with
+the recursive trajectory.  In particular, every homogeneous candidate
+\[
+  z_{k+1}=S_kz_k,\qquad z_0=0,
+\]
+is identically zero.
+
+The proof is induction over the literal finite rational updates.  It uses
+neither an inverse transition matrix nor a limiting argument.  Together with
+the preceding transition formula, it says that the chronological product is
+not merely one possible calculation: it is the unique sampled evolution from
+its declared initial data.  This is the exact discrete uniqueness component of
+the later continuous theorem, not a claim that continuous ODE uniqueness has
+already been proved.
+\end{theorem}
+
 \section{The continuous Peano--Baker target}
 
 \begin{definition}[Interval-certified linear-system input]
@@ -153,7 +178,7 @@ existence theorems are deliberately outside this first layer.
 
 \begin{theorem}[Linear Picard--Lindel\"of: construction target]
 \label{thm:linear-picard-lindelof}
-\uses{thm:peano-baker-state-transition,thm:variation-of-constants}
+\uses{thm:sampled-linear-uniqueness,thm:peano-baker-state-transition,thm:variation-of-constants}
 The preceding Peano--Baker transition and variation-of-constants formula are
 also the constructive existence-and-uniqueness theorem for the affine linear
 initial-value problem
