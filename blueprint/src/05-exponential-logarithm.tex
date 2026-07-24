@@ -442,19 +442,21 @@ exponential remains a separate, later log/exp theorem.
 
 \begin{remark}[A deliberately long ODE--exponential--logarithm--pi route]
 \label{rem:ode-exp-log-pi-route}
+\uses{thm:linear-ode-elementary-function-agreement}
 The project should make one pi equivalence exercise the elementary-function
-and ODE layers rather than obtain every pi row from arctangent alone.  The
-natural route is the integration-by-parts identity
+and ODE layers rather than obtain every pi row from arctangent alone.
+\Cref{thm:linear-ode-elementary-function-agreement} gives the common
+identification principle: Peano--Baker first constructs a solution, and its
+factorial-tail uniqueness certificate then makes every representation with the
+same derivative and initial data agree with it.  The natural pi specialization
+is the integration-by-parts identity
 \[
   \pi
    =4\int_0^1\arctan(x)\,\dd x+2\log 2.
 \]
 Its intended proof order is:
 \begin{enumerate}
-  \item construct the continuous Peano--Baker state transition and its
-  factorial tail; \cref{thm:linear-picard-lindelof} then gives constructive
-  existence and uniqueness for \(x'=A(t)x+b(t)\);
-  \item specialize to \(f'=f,\ f(0)=1\).  Once the power-series,
+  \item apply that theorem to \(f'=f,\ f(0)=1\).  Once the power-series,
   Euler-limit, and inverse-logarithmic-integral exponentials all satisfy this
   problem, uniqueness proves that the three exponential representations
   agree;

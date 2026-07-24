@@ -10,6 +10,62 @@ width, not a limit in a complete function space. The central target is
 \end{equation}
 where \(A(t)\) is a finite square matrix and \(x(t),b(t)\) are finite vectors.
 
+\section{A familiar second-order model, then its vector form}
+
+The intended first encounter with this chapter is a scalar second-order
+equation, not an abstract matrix series.  For example, the forced harmonic
+oscillator
+\begin{equation}\label{eq:forced-oscillator}
+ q''(t)+\omega^2q(t)=r(t),\qquad
+ q(s)=q_s,\quad q'(s)=v_s
+\end{equation}
+has, in the homogeneous constant-coefficient case, the familiar solution
+\[
+ q(t)=q_s\cos\bigl(\omega(t-s)\bigr)
+      +\frac{v_s}{\omega}\sin\bigl(\omega(t-s)\bigr)
+ \qquad(\omega\ne0).
+\]
+The opposite sign \(q''-\lambda^2q=0\) has the corresponding exponential
+modes \(e^{\lambda(t-s)}\) and \(e^{-\lambda(t-s)}\).  More generally,
+constant-coefficient second-order equations are organized by exponential
+modes, with conjugate imaginary modes rewritten as sine and cosine.  These
+are the formulas scientists and engineers expect the later theory to recover.
+
+They are not definitions of sine, cosine, or exponential in this chapter:
+using them first would make the desired agreement theorem circular.  Instead,
+put
+\[
+ X(t)=
+ \begin{bmatrix}q(t)\\q'(t)\end{bmatrix},
+ \qquad
+ A_\omega=
+ \begin{bmatrix}0&1\\-\omega^2&0\end{bmatrix},
+ \qquad
+ b_r(t)=
+ \begin{bmatrix}0\\r(t)\end{bmatrix}.
+\]
+Then \eqref{eq:forced-oscillator} is precisely
+\[
+ X'(t)=A_\omega X(t)+b_r(t).
+\]
+The variable-coefficient second-order equation
+\[
+ q''(t)+a(t)q'(t)+c(t)q(t)=r(t)
+\]
+has the same first-order form with
+\[
+ A(t)=
+ \begin{bmatrix}0&1\\-c(t)&-a(t)\end{bmatrix},
+ \qquad
+ b(t)=
+ \begin{bmatrix}0\\r(t)\end{bmatrix}.
+\]
+Thus the general vector-valued inhomogeneous system \eqref{eq:linear-ode}
+is not a detour: it is the constructive engine behind the familiar
+second-order formulas.  Peano--Baker will construct the vector transition,
+and the trigonometric and exponential displays above will later be recovered
+by uniqueness.
+
 \section{Finite time ordering before analysis}
 
 \begin{definition}[Rational matrices and sampled systems]
@@ -237,6 +293,79 @@ being invoked.  This is why the linear theorem is properly described as
 constructive Picard--Lindel\"of, while a nonlinear Picard theorem still needs
 additional contraction data.
 \end{remark}
+
+\section{Elementary functions recovered by linear uniqueness}
+
+\begin{theorem}[Elementary-function agreement from linear uniqueness: construction target]
+\label{thm:linear-ode-elementary-function-agreement}
+\uses{thm:linear-picard-lindelof}
+The continuous linear theorem has a deliberately important consequence beyond
+the solution of a single engineering model: it supplies a common
+identification principle for independently constructed elementary functions.
+Every proposed representation must first carry its own interval algorithm,
+derivative certificate, and initial-value certificate.  If two such
+representations solve the same linear problem, the factorial-tail uniqueness
+argument identifies them as raw functions.
+
+For the scalar problem
+\[
+ E'(t)=E(t),\qquad E(0)=1,
+\]
+Peano--Baker constructs the canonical exponential directly from the
+one-dimensional transition.  The power-series evaluator, the
+repeated-multiplication (Euler/compound-interest) evaluator, and the
+inverse-logarithmic-integral evaluator therefore agree once each has been
+shown to satisfy this equation and initial condition:
+\[
+ E_{\mathrm{series}}
+ \Equiv E_{\mathrm{repeated}}
+ \Equiv E_{\mathrm{invlog}}.
+\]
+This is stronger and cleaner than a collection of pairwise limit comparisons:
+the representations are all forced to be the same solution.  In particular,
+the chosen Euler base is \(e=E(1)\), and the derivative statement
+\(\dd(e^t)/\dd t=e^t\) is a theorem of the selected canonical
+representation, not a convention.
+
+The rotation system supplies the trigonometric counterpart:
+\[
+ \frac{\dd}{\dd t}
+ \begin{bmatrix}C(t)\\S(t)\end{bmatrix}
+ =
+ \begin{bmatrix}0&-1\\1&0\end{bmatrix}
+ \begin{bmatrix}C(t)\\S(t)\end{bmatrix},
+ \qquad
+ (C(0),S(0))=(1,0).
+\]
+The Peano--Baker solution is then identified with the sine and cosine
+constructed from the inverse-arctangent circle chart, once their
+derivative and initial-value certificates have been supplied.  Over rational
+complex boxes this same agreement yields
+\[
+ \exp(it)=C(t)+iS(t).
+\]
+Thus Euler's identity is a long but natural ODE consequence, rather than an
+additional definition of either exponential or trigonometry.
+
+On the positive branch, the inverse of this canonical exponential is the
+canonical logarithm.  The positive logarithmic-integral evaluator must be
+proved to be that inverse by its own finite FTC and inverse-function
+certificates; its already checked comparison at \(2\) is useful boundary
+data, not a substitute for the function theorem.  Once this agreement is
+available, the integration-by-parts target
+\[
+ \int_0^1\arctan(x)\,\dd x
+ =\frac{\pi}{4}-\frac12\log 2
+\]
+has the canonical \(\log 2\) required for the derived pi computation
+\[
+ \pi=4\int_0^1\arctan(x)\,\dd x+2\log2.
+\]
+The global product derivative, FTC, and change-of-variables certificates
+needed for that integral identity remain separate work.  Likewise,
+\(\exp(i\pi/2)=i\) and \(\pi=-2i\log(i)\) remain future scoreboard
+corroborations, not completed consequences of this theorem.
+\end{theorem}
 
 \section{Special cases and computational uses}
 
