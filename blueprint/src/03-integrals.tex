@@ -609,9 +609,36 @@ endpoint difference.  Those remain the separate product-derivative and FTC
 certificates required by \cref{thm:integration-by-parts-certificate}.
 \end{proposition}
 
+\begin{theorem}[Right derivative of the positive arctangent product at zero]
+\label{thm:coordinate-arctangent-forward-derivative-zero}
+\uses{prop:coordinate-arctangent-monotonicity,prop:arctangent-zero-tangent-bracket}
+\leanok
+The same positive product evaluator has a checked right derivative at the
+left endpoint:
+\[
+  \left.\frac{\dd}{\dd x}\bigl(x\arctan(x)\bigr)\right|_{0+}=0.
+\]
+This is proved directly from its finite boxes, rather than by invoking a
+general product rule.  If \(P_n(x)\) is the product box and \(0<h\le1\),
+then the exact rational interval calculation is
+\[
+  \frac{P_n(h)-P_n(0)}h=A_n(h).
+\]
+The lower endpoint of \(A_n(h)\) is nonnegative and its upper endpoint is at
+most \(h\).  Therefore, for \(0<h\le\varepsilon_n\), this quotient box is
+within the stage-\(n\) tolerance of \([0,0]\), and its width is at most that
+tolerance.
+
+This is an endpoint test of the concrete product representation and a
+genuine product-differentiation certificate at one boundary point.  It does
+not provide the two-sided derivative of the product at interior rational
+points, and so it is not the global product-derivative input required by
+integration by parts.
+\end{theorem}
+
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
-\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:log-two-series-reciprocal-integral}
+\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,thm:log-two-series-reciprocal-integral}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
 certificate gives

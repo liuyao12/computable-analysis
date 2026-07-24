@@ -145,6 +145,11 @@ Its endpoint data are now checked too: the product box at `0` is exactly
 `arctan(1)`, and their endpoint-difference raw is valid and equivalent to
 the geometric arctangent value. This supplies boundary data for the finite
 rectangle identity, not a product derivative or a fundamental-theorem step.
+The first derivative test of this actual product evaluator is now checked
+as well: at the zero basepoint, its positive-step quotient is exactly the
+arctangent rectangle box, so it has forward derivative `0`. This remains
+an endpoint certificate, not the global product derivative needed for
+integration by parts.
 The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
 both the `m` and `n` grids, and its mesh is the old width divided by the

@@ -2391,6 +2391,138 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_ar
     hEndpointRectangle
     ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one
 
+/-- At the zero basepoint, the finite difference quotient of the positive
+product branch is exactly the corresponding arctangent rectangle box. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_zero_differenceQuotient_compute_eq
+    (h : Rat) (hpos : 0 < h)
+    (hmem : inDomainInterval coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper h)
+    (hzero : inDomainInterval coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper 0)
+    (n : Nat) :
+    QInterval.differenceQuotient
+      (coordinateTimesArctanIntegralRectangleOnUnit.compute h hmem n)
+      (coordinateTimesArctanIntegralRectangleOnUnit.compute 0 hzero n) h =
+      ArctanGeometry.arctanIntegralRectangleCompute h n := by
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg h hmem n,
+    coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg 0 hzero n]
+  simp only [Rat.zero_mul]
+  unfold QInterval.differenceQuotient QInterval.divRat QInterval.sub
+    QInterval.scaleRat
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  rw [if_pos hinv]
+  let A := ArctanGeometry.arctanIntegralRectangleCompute h n
+  change
+    { lo := (1 / h) * (h * A.lo - 0),
+      hi := (1 / h) * (h * A.hi - 0) } = A
+  have hcancel : h⁻¹ * h = 1 :=
+    Rat.inv_mul_cancel h (Rat.ne_of_gt hpos)
+  have hscale (q : Rat) : (1 / h) * (h * q - 0) = q := by
+    have hsub : h * q - 0 = h * q := by
+      grind [Rat.sub_eq_add_neg]
+    rw [hsub, Rat.div_def, Rat.one_mul]
+    calc
+      h⁻¹ * (h * q) = (h⁻¹ * h) * q := by
+        exact (Rat.mul_assoc _ _ _).symm
+      _ = q := by
+        rw [hcancel]
+        grind
+  apply (QInterval.mk.injEq _ _ _ _).mpr
+  exact ⟨hscale A.lo, hscale A.hi⟩
+
+/-- The certified positive product branch has right derivative zero at the
+left endpoint.  The proof uses the exact finite quotient identity above,
+not a global product rule. -/
+def coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAtZero :
+    HasForwardDerivativeAt coordinateTimesArctanIntegralRectangleOnUnit
+      0 RealRaw.zero := by
+  refine
+    { x_mem := by
+        change (0 : Rat) <= 0 /\ 0 <= 1
+        exact ⟨Rat.le_refl, by native_decide⟩
+      derivative_valid := by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+        exact RealRaw.ofRat_valid (0 : Rat)
+      stepPrecision := fun n => if n = 0 then 1 else n
+      evalPrecision := fun _h _n => 0
+      close := ?_ }
+  intro h n hmem hpos hsmall
+  have hprecision : h <= (precisionAtStage n).val := by
+    change h <= 1 / (((if n = 0 then 1 else n : Nat) : Rat)) at hsmall
+    by_cases hn : n = 0
+    · subst n
+      calc
+        h <= 1 / (1 : Rat) := by
+          simpa only [if_pos rfl] using hsmall
+        _ = (precisionAtStage 0).val := by native_decide
+    · simpa [precisionAtStage, hn] using hsmall
+  have hzero : inDomainInterval coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper 0 := by
+    change (0 : Rat) <= 0 /\ 0 <= 1
+    exact ⟨Rat.le_refl, by native_decide⟩
+  have hmemAtH : inDomainInterval coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper h := by
+    have hzero_add : (0 : Rat) + h = h := by grind
+    rw [← hzero_add]
+    exact hmem
+  have hquotient :=
+    coordinateTimesArctanIntegralRectangleOnUnit_zero_differenceQuotient_compute_eq
+      h hpos hmemAtH hzero 0
+  have hlower :
+      0 <= (ArctanGeometry.arctanIntegralRectangleCompute h 0).lo :=
+    ArctanGeometry.arctanIntegralRectangleCompute_lower_nonnegative
+      (Rat.le_of_lt hpos) 0
+  have hupper :
+      (ArctanGeometry.arctanIntegralRectangleCompute h 0).hi <= h :=
+    ArctanGeometry.arctanIntegralRectangleCompute_upper_le_input
+      (Rat.le_of_lt hpos) 0
+  have hordered :
+      (ArctanGeometry.arctanIntegralRectangleCompute h 0).lo <=
+        (ArctanGeometry.arctanIntegralRectangleCompute h 0).hi := by
+    have hwidth :=
+      ArctanGeometry.arctanIntegralRectangleCompute_ordered
+        (Rat.le_of_lt hpos) 0
+    unfold QInterval.width at hwidth
+    grind [Rat.sub_eq_add_neg]
+  have hnear : intervalNearAtPrecision
+      (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+      { lo := 0, hi := 0 } n := by
+    unfold intervalNearAtPrecision QInterval.NearAt
+    constructor
+    · calc
+        (ArctanGeometry.arctanIntegralRectangleCompute h 0).lo <=
+            (ArctanGeometry.arctanIntegralRectangleCompute h 0).hi :=
+          hordered
+        _ <= h := hupper
+        _ <= 0 + (precisionAtStage n).val := by
+          grind
+    constructor
+    · have hupper_nonneg :
+          0 <= (ArctanGeometry.arctanIntegralRectangleCompute h 0).hi :=
+        Rat.le_trans hlower hordered
+      grind
+    constructor
+    · unfold QInterval.width
+      calc
+        (ArctanGeometry.arctanIntegralRectangleCompute h 0).hi -
+            (ArctanGeometry.arctanIntegralRectangleCompute h 0).lo <= h := by
+          grind [Rat.sub_eq_add_neg]
+        _ <= (precisionAtStage n).val := hprecision
+    · unfold QInterval.width
+      rw [show (0 : Rat) - 0 = 0 by native_decide]
+      exact Rat.le_of_lt (precisionAtStage n).property
+  have hfromExact : intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        (coordinateTimesArctanIntegralRectangleOnUnit.compute h hmemAtH 0)
+        (coordinateTimesArctanIntegralRectangleOnUnit.compute 0 hzero 0) h)
+      (RealRaw.zero.compute 0) n := by
+    rw [hquotient]
+    simpa [RealRaw.zero, RealRaw.ofRat_compute] using hnear
+  have hzero_add : (0 : Rat) + h = h := by grind
+  simpa [hzero_add] using hfromExact
+
 /-- The fixed-stage arctangent boxes along a unit mesh, held at the final
 mesh point after the last cell.  This produces a total box path suitable
 for the finite integration-by-parts sums. -/
