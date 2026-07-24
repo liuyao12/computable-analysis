@@ -15162,6 +15162,28 @@ theorem four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea :
     hscale
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- The direct finite integration-by-parts mesh computation is a valid
+supplementary pi evaluator.  Its proof is intentionally separate from the
+uncompleted arctangent--logarithm integral route: it uses only the finite mesh
+identity, its explicit corner budget, and the verified arctangent rectangle
+anchor. -/
+theorem piFromArctanIntegrationByPartsMesh_equiv_piCircleArea :
+    IntegralIdentities.piFromArctanIntegrationByPartsMesh.Equiv
+      piCircleArea := by
+  have hscale :
+      IntegralIdentities.piFromArctanIntegrationByPartsMesh.Equiv
+        ((4 : Nat) * ArctanGeometry.arctanIntegralRectangleRawAtOne : RealRaw) := by
+    unfold IntegralIdentities.piFromArctanIntegrationByPartsMesh
+    exact RealRaw.natScale_equiv 4
+      IntegralIdentities.arctanIntegrationByPartsMesh_equiv_rectangleAtOne
+  exact RealRaw.equiv_trans
+    IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
+    (RealRaw.natScale_valid 4
+      ArctanGeometry.arctanIntegralRectangleRawAtOne_valid)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    hscale
+    four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea
+
 theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     (IntegralIdentities.PiFromArctanIntegral
       IntegralIdentities.arctanIntegralRectangleForAtOne).Equiv

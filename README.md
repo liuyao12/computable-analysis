@@ -182,7 +182,15 @@ and the endpoint minus \(1/\mathrm{mesh}\) (or minus the requested
 precision under the denominator-plus-one schedule).  This remains a finite
 mesh certificate: the remaining arctangent--logarithm route work is the
 product-derivative and FTC comparison certificates that connect its two strip
-sums to the displayed integrals.
+sums to the displayed integrals.  The same bracket now produces a valid
+supplementary direct raw evaluator: at stage `n` it widens the point interval
+at the finite sum `S_(n+1,n)` by `1/(n+1)` and stabilizes the finite prefix
+with the verified public radius `4/(n+1)`.  Its candidate width is exactly
+`2/(n+1)`, and the stabilized computation is equivalent to the rectangle
+arctangent at one; multiplying by four gives a checked pi regression
+evaluator.  This does not count as the arctangent--logarithm scoreboard row,
+because it does not identify either strip sum with a definite integral or
+with `log 2`.
 `Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw
 presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
 certified `O(1/n)` rate.  Independently,

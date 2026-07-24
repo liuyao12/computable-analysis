@@ -2845,6 +2845,155 @@ theorem arctanIntegralRectangleMeshIntegrationByParts_endpoint_bracket_le_eps
     arctanIntegralRectangleMeshSamples_cornerBound_le_eps evalStage eps
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+/-- The direct interval emitted by the finite unit-mesh integration-by-parts
+calculation.  Stage `n` uses an `(n + 1)`-cell mesh and arctangent rectangle
+samples evaluated at stage `n`; the explicit `1 / (n + 1)` enlargement is
+exactly the finite corner-error budget. -/
+def arctanIntegrationByPartsMeshCandidateCompute (n : Nat) : QInterval :=
+  let sum := arctanIntegralRectangleMeshIntegrationByPartsSum (n + 1) n
+  QInterval.expand { lo := sum, hi := sum }
+    (1 / (((n + 1 : Nat) : Rat)))
+
+/-- The unnormalised direct raw evaluator behind the finite
+integration-by-parts calculation.  It evaluates only rational mesh sums and
+arctangent rectangle samples. -/
+def arctanIntegrationByPartsMeshCandidate : RealRaw where
+  compute := arctanIntegrationByPartsMeshCandidateCompute
+
+theorem arctanIntegrationByPartsMeshCandidateCompute_width_eq (n : Nat) :
+    (arctanIntegrationByPartsMeshCandidateCompute n).width =
+      2 / (((n + 1 : Nat) : Rat)) := by
+  unfold arctanIntegrationByPartsMeshCandidateCompute
+  rw [QInterval.expand_width]
+  simp only [QInterval.width]
+  change (arctanIntegralRectangleMeshIntegrationByPartsSum (n + 1) n -
+      arctanIntegralRectangleMeshIntegrationByPartsSum (n + 1) n) +
+      2 * (1 / ((n + 1 : Nat) : Rat)) = _
+  have hzero : arctanIntegralRectangleMeshIntegrationByPartsSum (n + 1) n -
+      arctanIntegralRectangleMeshIntegrationByPartsSum (n + 1) n = 0 := by
+    grind [Rat.sub_eq_add_neg]
+  rw [hzero]
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The direct mesh interval has the public rational width modulus `2/(n+1)`.
+No convergence principle is used: the proof is the denominator schedule from
+`ShrinksToZero`. -/
+theorem arctanIntegrationByPartsMeshCandidate_widthsShrink :
+    RealRaw.WidthsShrinkToZero arctanIntegrationByPartsMeshCandidate.compute := by
+  apply shrinksToZero_of_natOverSuccBound (C := 2)
+  intro n
+  rw [show arctanIntegrationByPartsMeshCandidate.compute n =
+      arctanIntegrationByPartsMeshCandidateCompute n by rfl,
+    arctanIntegrationByPartsMeshCandidateCompute_width_eq]
+  change (2 : Rat) / (((n + 1 : Nat) : Rat)) <=
+    (2 : Rat) / (((n + 1 : Nat) : Rat))
+  exact Rat.le_refl
+
+/-- At each common stage, the finite integration-by-parts candidate interval
+overlaps the verified rectangle interval for arctangent at one.  The proof
+uses the actual final mesh sample as the witness; it does not identify either
+strip sum with a definite integral. -/
+theorem arctanIntegrationByPartsMeshCandidate_overlaps_rectangleAtOne
+    (n : Nat) :
+    QInterval.Overlaps
+      (arctanIntegrationByPartsMeshCandidate.compute n)
+      (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n) := by
+  have hbracket := arctanIntegralRectangleMeshIntegrationByParts_endpoint_bracket
+    (n + 1) n (Nat.succ_pos _)
+  have hsample := arctanIntegralRectangleMeshSamples_mem (n + 1) n (n + 1)
+  have hendpoint : unitMeshPath (n + 1) (n + 1) = 1 :=
+    unitMeshPath_endpoint (Nat.succ_pos _)
+  have hsampleAtOne :
+      (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n).lo <=
+          arctanIntegralRectangleMeshSamples (n + 1) n (n + 1) /\
+      arctanIntegralRectangleMeshSamples (n + 1) n (n + 1) <=
+        (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n).hi := by
+    simpa [ArctanGeometry.arctanIntegralRectangleRawAtOne,
+      arctanIntegralRectangleMeshBoxes, Nat.min_self, hendpoint] using hsample
+  unfold arctanIntegrationByPartsMeshCandidate
+    arctanIntegrationByPartsMeshCandidateCompute
+  dsimp only
+  unfold QInterval.expand
+  have hrecip_nonneg : 0 <= 1 / (((n + 1 : Nat) : Rat)) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      ((Rat.natCast_pos).2 (Nat.succ_pos n)))
+  constructor
+  · exact Rat.le_trans
+      (Rat.le_trans (by grind [Rat.sub_eq_add_neg]) hbracket.2)
+      hsampleAtOne.2
+  · exact Rat.le_trans hsampleAtOne.1 (by
+      grind [Rat.sub_eq_add_neg])
+
+theorem arctanIntegrationByPartsMeshCandidate_equiv_rectangleAtOne :
+    arctanIntegrationByPartsMeshCandidate.Equiv
+      ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    arctanIntegrationByPartsMeshCandidate
+    ArctanGeometry.arctanIntegralRectangleRawAtOne n n).2
+  exact arctanIntegrationByPartsMeshCandidate_overlaps_rectangleAtOne n
+
+/-- The public rational radius that stabilizes the direct finite-mesh
+integration-by-parts evaluator.  Its proof-side cover comes from the existing
+arctangent rectangle width theorem; evaluating the stabilized raw never reads
+the rectangle evaluator. -/
+def arctanIntegrationByPartsMeshStabilizationRadius (n : Nat) : Rat :=
+  4 / (((n + 1 : Nat) : Rat))
+
+theorem arctanIntegrationByPartsMeshStabilizationRadius_covers_rectangleAtOne
+    (n : Nat) :
+    (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n).width <=
+      arctanIntegrationByPartsMeshStabilizationRadius n := by
+  simpa [arctanIntegrationByPartsMeshStabilizationRadius] using
+    ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ n
+
+theorem arctanIntegrationByPartsMeshStabilizationRadius_shrinks :
+    ShrinksToZero arctanIntegrationByPartsMeshStabilizationRadius := by
+  apply shrinksToZero_of_natOverSuccBound (C := 4)
+  intro n
+  exact Rat.le_refl
+
+/-- A valid direct-only representative of the finite arctangent
+integration-by-parts calculation.  It intersects a finite prefix of widened
+mesh intervals, using only the rational radius schedule at runtime.  The
+rectangle computation is an anchor used solely in its correctness proof. -/
+def arctanIntegrationByPartsMesh : RealRaw :=
+  RealRaw.prefixStabilize arctanIntegrationByPartsMeshCandidate
+    arctanIntegrationByPartsMeshStabilizationRadius
+
+theorem arctanIntegrationByPartsMesh_valid :
+    arctanIntegrationByPartsMesh.Valid := by
+  unfold arctanIntegrationByPartsMesh
+  exact RealRaw.prefixStabilize_valid
+    arctanIntegrationByPartsMeshCandidate_widthsShrink
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    arctanIntegrationByPartsMeshCandidate_equiv_rectangleAtOne
+    arctanIntegrationByPartsMeshStabilizationRadius_covers_rectangleAtOne
+    arctanIntegrationByPartsMeshStabilizationRadius_shrinks
+
+theorem arctanIntegrationByPartsMesh_equiv_rectangleAtOne :
+    arctanIntegrationByPartsMesh.Equiv
+      ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+  unfold arctanIntegrationByPartsMesh
+  exact RealRaw.prefixStabilize_equiv_anchor
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    arctanIntegrationByPartsMeshCandidate_equiv_rectangleAtOne
+    arctanIntegrationByPartsMeshStabilizationRadius_covers_rectangleAtOne
+
+/-- Four times the stabilized finite integration-by-parts mesh evaluator.
+This is a supplementary direct pi computation: it is deliberately not named
+as the arctangent--logarithm integral formula, whose separate FTC and
+canonical-logarithm bridges remain future work. -/
+def piFromArctanIntegrationByPartsMesh : RealRaw :=
+  (4 : Nat) * arctanIntegrationByPartsMesh
+
+theorem piFromArctanIntegrationByPartsMesh_valid :
+    piFromArctanIntegrationByPartsMesh.Valid := by
+  unfold piFromArctanIntegrationByPartsMesh
+  exact RealRaw.natScale_valid 4 arctanIntegrationByPartsMesh_valid
+
 theorem arctanIntegralRectangleFunctionAgreement :
     Elementary.Arctan.Equivalent
       arctanIntegralRectangleRepresentation

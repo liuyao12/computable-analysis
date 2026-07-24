@@ -247,7 +247,15 @@ another. The Pi score stays useful only as secondary integration coverage.
   integration-by-parts equality: the two left strip sums plus the corner
   correction equal the final sample, and their total is bracketed within
   `1/mesh` (or the requested epsilon under the denominator-plus-one
-  schedule) of that endpoint.  What remains is to connect these finite
+  schedule) of that endpoint.  The bracket now additionally feeds a valid
+  direct-only regression raw: stage `n` uses the point interval at
+  `S_(n+1,n)` widened by `1/(n+1)`, and finite-prefix stabilization uses the
+  public `4/(n+1)` rectangle-width radius.  Its candidate width is exactly
+  `2/(n+1)`, it is equivalent to the rectangle arctangent at one, and four
+  times it is a checked supplementary pi evaluator.  It is intentionally not
+  a scoreboard completion: the two finite strip sums have not been promoted
+  to definite integrals and no canonical logarithm has entered this proof.
+  What remains is to connect these finite
   estimates through the product-derivative and FTC certificates.  The
   general finite merge
   is now checked: `commonRefinementOfPartitions` inserts the right

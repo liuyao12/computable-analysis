@@ -599,6 +599,20 @@ and convergence-rate budget; the two summands are not yet claimed to be
 definite integrals.  Promoting them separately still requires the
 product-derivative and FTC comparison certificates needed by the later
 integration-by-parts theorem.
+
+There is nevertheless a useful checked \emph{supplementary computation} at
+this finite stage.  At stage \(n\), form the point interval at
+\(S_{n+1,n}\), enlarge it by \(1/(n+1)\), and intersect the finite prefix of
+these direct intervals after widening the \(k\)-th one by the public radius
+\(4/(k+1)\).  The endpoint bracket supplies the first enlargement, while the
+already verified rectangle arctangent width supplies the second.  Thus the
+result is a valid raw representative equivalent to the rectangle computation
+of \(\arctan(1)\); its direct candidate has width exactly \(2/(n+1)\).
+Multiplying it by four gives a rate-certified regression evaluator for
+\(\pi\).  This does \emph{not} promote either strip sum to a definite integral
+and does not mark the arctangent--logarithm scoreboard row: its purpose is to
+keep the actual finite integration-by-parts algebra executable while the
+product-derivative, FTC, and canonical-logarithm bridges are developed.
 \end{definition}
 
 \begin{proposition}[Monotonicity and endpoint anchoring of the positive arctangent product]
