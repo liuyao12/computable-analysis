@@ -89,9 +89,14 @@ gates.
   Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new
   arctangent-kernel specialization has a checked rational Lipschitz constant
   `2`, exact width `4/2^n`, and a stagewise common-right-sum comparison with
-  the existing geometric rectangle integral. What remains is its extension to
-  interval-regular functions, together with derivative certificates for the
-  standard function table.
+  the existing geometric rectangle integral.  The same rectangle construction
+  now also has the finite tangent enclosure `x - x^3 <= A_n(x) <= x` for
+  every nonnegative rational endpoint, and its zero-endpoint quotient box is
+  `[1 - h^2, 1]` for `h > 0`.  This isolates the basepoint portion of the
+  arctangent derivative without declaring a global derivative or FTC theorem.
+  What remains is extension to interval-regular functions, tangent-chart
+  transport and schedule compatibility for the derivative certificates, and
+  then the standard function table.
 - **Monotone inverse functions — partly checked.** The branch-local
   `InvertibleFunctionOnInterval`/`InverseRaw`/bisection API is checked, with
   the unit-interval square-root search for exact rational targets. Extend it

@@ -918,6 +918,47 @@ row, and it does not replace the later derivative/FTC identity
 \(\int_0^x(1+t^2)^{-1}\,\dd t=\arctan x\).
 \end{proposition}
 
+\begin{proposition}[Finite zero-tangent bracket for arctangent]
+\label{prop:arctangent-zero-tangent-bracket}
+\uses{def:one-over-one-plus-square-kernel,prop:arctangent-kernel-lipschitz}
+\lean{ComputableAnalysis.ArctanGeometry.intervalLength_mul_integralKernel_right_le_integralLowerSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_input_mul_kernel_le_lower}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_upper_le_input}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangent_box_contains}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_zero_lower}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_zero_upper}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_zero_tangent_quotient_contains}
+\leanok
+Let \(A_n(x)=[L_n(x),U_n(x)]\) be a finite geometric rectangle box for
+the arctangent integral on \([0,x]\), with \(0\le x\le1\).  The next
+derivative-facing certificate is the pair of finite bounds
+\[
+  \frac{x}{1+x^2}\le L_n(x)\le U_n(x)\le x.
+\]
+The upper bound is the familiar comparison with a rectangle of height one.
+For the lower bound, every right-endpoint kernel value on an ordered cover of
+\([0,x]\) is at least \(1/(1+x^2)\); summing the cell lengths gives the
+displayed left inequality.  Thus the whole finite box lies in
+\[
+  [\,x-x^3,\;x\,],
+\]
+because \(x-x/(1+x^2)\le x^3\).
+
+At \(x=0\) the rectangle box is exactly \([0,0]\).  Dividing the preceding
+enclosure by a positive rational \(h\le1\) produces the literal finite
+difference-quotient bracket
+\[
+  1-h^2\le \frac{A_n(h)-A_n(0)}{h}\le1.
+\]
+Its width is \(h^2\), independent of a completed-real limit.  This is the
+basepoint calculation needed to identify \(\arctan'(0)=1\).  It is not yet a
+global \code{HasDerivativeOnInterval} certificate: transporting this bracket
+to a nonzero rational basepoint requires the rational tangent-addition chart
+and compatible evaluation schedules.  That later transport is exactly where
+the project must account for the denominator \(1+x(x+h)\), rather than
+silently invoking the mean-value theorem.
+\end{proposition}
+
 \begin{definition}[Arctangent as an integral]
 \label{def:arctan-integral}
 \lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralConstruction}

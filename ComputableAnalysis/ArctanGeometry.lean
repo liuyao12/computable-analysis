@@ -1416,6 +1416,40 @@ theorem integralUpperSum_le_intervalLength
         _ = b - a := by
           grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
+theorem intervalLength_mul_integralKernel_right_le_integralLowerSum
+    {a b : Rat} {intervals : List (Rat × Rat)}
+    (ha : 0 <= a) (hcover : CoversInterval a b intervals) :
+    (b - a) * integralKernel b <= integralLowerSum intervals := by
+  induction intervals generalizing a with
+  | nil =>
+      have hab : a = b := by
+        simpa [CoversInterval] using hcover
+      subst b
+      simp [integralLowerSum]
+      grind [Rat.sub_eq_add_neg]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hcover with ⟨hp, hpr, hrest⟩
+      subst p
+      have hr0 : 0 <= r := Rat.le_trans ha hpr
+      have hrb : r <= b := CoversInterval.start_le_end hrest
+      have hkernel : integralKernel b <= integralKernel r :=
+        integralKernel_antitone_nonneg hr0 hrb
+      have hlength : 0 <= r - a := by
+        grind [Rat.sub_eq_add_neg]
+      have hhead :
+          (r - a) * integralKernel b <= integralLowerStep a r := by
+        unfold integralLowerStep
+        exact Rat.mul_le_mul_of_nonneg_left hkernel hlength
+      calc
+        (b - a) * integralKernel b =
+            (r - a) * integralKernel b + (b - r) * integralKernel b := by
+              grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.add_assoc,
+                Rat.add_comm]
+        _ <= integralLowerStep a r + integralLowerSum rest :=
+          rat_add_le_add hhead (ih hr0 hrest)
+        _ = integralLowerSum ((a, r) :: rest) := rfl
+
 theorem integralLowerStep_zero_right (p : Rat) :
     integralLowerStep p p = 0 := by
   grind [integralLowerStep, Rat.sub_eq_add_neg]
@@ -3192,8 +3226,72 @@ theorem arctanIntegralRectangleCompute_upper_le_input
   calc
     integralUpperSum (arctanAreaLoopState x n).intervals <= x - 0 :=
       integralUpperSum_le_intervalLength
-        (arctanAreaLoopState_intervals_covers hx n)
+      (arctanAreaLoopState_intervals_covers hx n)
     _ = x := by grind [Rat.sub_eq_add_neg]
+
+theorem arctanIntegralRectangleCompute_input_mul_kernel_le_lower
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    x * integralKernel x <= (arctanIntegralRectangleCompute x n).lo := by
+  unfold arctanIntegralRectangleCompute integralSumInterval
+  have hbound := intervalLength_mul_integralKernel_right_le_integralLowerSum
+    (a := 0) (b := x) (intervals := (arctanAreaLoopState x n).intervals)
+    (by native_decide : (0 : Rat) <= 0)
+    (arctanAreaLoopState_intervals_covers hx n)
+  calc
+    x * integralKernel x = (x - 0) * integralKernel x := by
+      congr 1
+      grind [Rat.sub_eq_add_neg]
+    _ <= integralLowerSum (arctanAreaLoopState x n).intervals := hbound
+
+theorem arctanIntegralRectangleCompute_input_sub_lower_le_cube
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    x - (arctanIntegralRectangleCompute x n).lo <= x * x * x := by
+  have hlower := arctanIntegralRectangleCompute_input_mul_kernel_le_lower hx n
+  have hkernelError : x - x * integralKernel x <= x * x * x := by
+    let d : Rat := 1 + x * x
+    have hdpos : 0 < d := by
+      dsimp [d]
+      have hsq := RationalCircle.Stage.ratSquare_nonneg x
+      grind
+    have hdone : 1 <= d := by
+      dsimp [d]
+      have hsq := RationalCircle.Stage.ratSquare_nonneg x
+      grind
+    have hcube : 0 <= x * x * x := by
+      have hsq : 0 <= x * x := Rat.mul_nonneg hx hx
+      exact Rat.mul_nonneg hsq hx
+    have hdinv : d⁻¹ <= 1 := by
+      apply Rat.le_of_mul_le_mul_right (c := d)
+      · calc
+          d⁻¹ * d = d * d⁻¹ := by rw [Rat.mul_comm]
+          _ = 1 := Rat.mul_inv_cancel _ (Rat.ne_of_gt hdpos)
+          _ <= 1 * d := by simpa using hdone
+      · exact hdpos
+    calc
+      x - x * integralKernel x = (x * x * x) * d⁻¹ := by
+        unfold integralKernel
+        rw [Rat.div_def]
+        have hcancel : d * d⁻¹ = 1 :=
+          Rat.mul_inv_cancel _ (Rat.ne_of_gt hdpos)
+        dsimp [d] at hcancel ⊢
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      _ <= (x * x * x) * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hdinv hcube
+      _ = x * x * x := by grind
+  exact Rat.le_trans (by grind [Rat.sub_eq_add_neg]) hkernelError
+
+/-- Every finite rectangle bracket for arctangent is contained in the
+elementary tangent enclosure `[x - x^3, x]`. -/
+theorem arctanIntegralRectangleCompute_tangent_box_contains
+    {x : Rat} (hx : 0 <= x) (n : Nat) :
+    ({ lo := x - x * x * x, hi := x } : QInterval).ContainsInterval
+      (arctanIntegralRectangleCompute x n) := by
+  unfold QInterval.ContainsInterval
+  constructor
+  · have hlower := arctanIntegralRectangleCompute_input_sub_lower_le_cube hx n
+    grind [Rat.sub_eq_add_neg]
+  · exact arctanIntegralRectangleCompute_upper_le_input hx n
 
 /-- The lower endpoint of the rectangle bracket is exactly zero at the
 zero upper endpoint. -/
@@ -3211,6 +3309,81 @@ theorem arctanIntegralRectangleCompute_zero_lower (n : Nat) :
       (arctanAreaLoopState 0 n).intervals
       (arctanAreaLoopState_intervals_nonnegative (by native_decide) n)
   exact Rat.le_antisymm (Rat.le_trans hordered hupper) hlow
+
+/-- The upper endpoint of the rectangle bracket is exactly zero at the
+zero upper endpoint. -/
+theorem arctanIntegralRectangleCompute_zero_upper (n : Nat) :
+    (arctanIntegralRectangleCompute 0 n).hi = 0 := by
+  have hlow : 0 <= (arctanIntegralRectangleCompute 0 n).lo :=
+    arctanIntegralRectangleCompute_lower_nonnegative (by native_decide) n
+  have hupper : (arctanIntegralRectangleCompute 0 n).hi <= 0 :=
+    arctanIntegralRectangleCompute_upper_le_input (by native_decide) n
+  have hordered :
+      (arctanIntegralRectangleCompute 0 n).lo <=
+        (arctanIntegralRectangleCompute 0 n).hi := by
+    unfold arctanIntegralRectangleCompute integralSumInterval
+    exact integralLowerSum_le_integralUpperSum
+      (arctanAreaLoopState 0 n).intervals
+      (arctanAreaLoopState_intervals_nonnegative (by native_decide) n)
+  exact Rat.le_antisymm hupper (Rat.le_trans hlow hordered)
+
+/-- Dividing the finite tangent enclosure at the zero endpoint gives a
+basepoint difference-quotient bracket of width `h^2`. -/
+theorem arctanIntegralRectangleCompute_zero_tangent_quotient_contains
+    {h : Rat} (hpos : 0 < h) (n : Nat) :
+    ({ lo := 1 - h * h, hi := 1 } : QInterval).ContainsInterval
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute h n)
+        (arctanIntegralRectangleCompute 0 n) h) := by
+  have hne : h ≠ 0 := Rat.ne_of_gt hpos
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hbox := arctanIntegralRectangleCompute_tangent_box_contains
+    (Rat.le_of_lt hpos) n
+  have hleft :
+      1 - h * h <= (1 / h) * (arctanIntegralRectangleCompute h n).lo := by
+    apply Rat.le_of_mul_le_mul_right (c := h)
+    · calc
+        (1 - h * h) * h = h - h * h * h := by
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+        _ <= (arctanIntegralRectangleCompute h n).lo := hbox.1
+        _ = ((1 / h) * (arctanIntegralRectangleCompute h n).lo) * h := by
+          rw [Rat.div_def]
+          have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hpos
+  have hright :
+      (1 / h) * (arctanIntegralRectangleCompute h n).hi <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := h)
+    · calc
+        ((1 / h) * (arctanIntegralRectangleCompute h n).hi) * h =
+            (arctanIntegralRectangleCompute h n).hi := by
+              rw [Rat.div_def]
+              have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hne
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= h := arctanIntegralRectangleCompute_upper_le_input
+          (Rat.le_of_lt hpos) n
+        _ = 1 * h := by grind
+    · exact hpos
+  unfold QInterval.ContainsInterval QInterval.differenceQuotient
+    QInterval.divRat QInterval.sub QInterval.scaleRat
+  rw [if_pos hinv]
+  rw [arctanIntegralRectangleCompute_zero_lower,
+    arctanIntegralRectangleCompute_zero_upper]
+  constructor
+  · calc
+      1 - h * h <= (1 / h) * (arctanIntegralRectangleCompute h n).lo := hleft
+      _ = (1 / h) * ((arctanIntegralRectangleCompute h n).lo - 0) := by
+        congr 1
+        grind [Rat.sub_eq_add_neg]
+  · calc
+      (1 / h) * ((arctanIntegralRectangleCompute h n).hi - 0) =
+          (1 / h) * (arctanIntegralRectangleCompute h n).hi := by
+            congr 1
+            grind [Rat.sub_eq_add_neg]
+      _ <= 1 := hright
 
 /-- Finite monotonicity in the upper endpoint of the rectangle arctangent.
 The proof appends the rational tail from x to y to the cover from 0 to x and
