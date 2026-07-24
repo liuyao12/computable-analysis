@@ -271,6 +271,33 @@ structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
           (df.compute x hdx (evalPrecision x h n))
           n
 
+/-- A pointwise forward finite-difference derivative certificate.
+
+This deliberately records only positive rational steps from one specified
+basepoint.  It is useful for boundary calculations before the separate
+two-sided and transport arguments needed by an interval derivative
+certificate. -/
+structure HasForwardDerivativeAt (f : FunctionOnInterval)
+    (x : Rat) (derivative : RealRaw) where
+  x_mem : inDomainInterval f.lower f.upper x
+  derivative_valid : derivative.Valid
+  stepPrecision : Nat -> Nat
+  /-- The evaluator stage may depend on the positive rational step because
+later non-exact certificates may divide a box by that step. -/
+  evalPrecision : Rat -> Nat -> Nat
+  close :
+    forall h n
+      (hxh : inDomainInterval f.lower f.upper (x + h)),
+      0 < h ->
+      h <= (1 / ((stepPrecision n : Nat) : Rat)) ->
+        intervalNearAtPrecision
+          (QInterval.differenceQuotient
+            (f.compute (x + h) hxh (evalPrecision h n))
+            (f.compute x x_mem (evalPrecision h n))
+            h)
+          (derivative.compute (evalPrecision h n))
+          n
+
 namespace FunctionOnInterval
 
 /-- Exact affine rational functions satisfy the interval-valued derivative

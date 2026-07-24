@@ -196,9 +196,11 @@ The next derivative-facing finite fact is now checked directly on the
 geometric rectangle boxes: for every rational `x >= 0`, their box lies in
 `[x - x^3, x]`.  At the zero endpoint the box is exactly `[0,0]`, so every
 positive rational difference quotient is enclosed by `[1 - h^2, 1]`.
-This is the constructive basepoint seed for `arctan'(0) = 1`; transporting it
-to nonzero basepoints and turning it into a global derivative certificate are
-still separate tangent-addition and schedule-compatibility work.
+The new forward finite-difference interface packages this as a checked
+one-sided derivative certificate `arctan'(0+) = 1`, evaluated at its exact
+stage-zero boxes. Transporting it to nonzero basepoints and turning it into
+a global two-sided derivative certificate are still separate tangent-addition
+and schedule-compatibility work.
 That transport's rational algebra is now checked on the first half of the
 unit branch.  The ordinary step `h` corresponds exactly to the chart step
 `h / (1 + x * (x + h))`; the chart reaches `x + h`, and its reciprocal scale

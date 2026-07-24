@@ -94,7 +94,11 @@ gates.
   every nonnegative rational endpoint, and its zero-endpoint quotient box is
   `[1 - h^2, 1]` for `h > 0`.  This isolates the basepoint portion of the
   arctangent derivative without declaring a global derivative or FTC theorem.
-  The next tangent-chart algebra is checked as well: at `x`, ordinary step
+  The new `HasForwardDerivativeAt` interface now packages this endpoint fact
+  as the checked one-sided certificate
+  `arctanIntegralRectangleOnUnit_forwardDerivativeAtZero`, with derivative
+  `1` and exact stage-zero evaluation. The next tangent-chart algebra is
+  checked as well: at `x`, ordinary step
   `h` is represented by `h / (1 + x * (x + h))`, which the chart sends exactly
   to `x + h`; its scale differs from the kernel at `x` by at most `h` on the
   unit branch.  The geometric arctangent addition identity for this transport

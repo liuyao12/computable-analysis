@@ -1985,6 +1985,151 @@ def arctanIntegralRectangleOnUnit : FunctionOnInterval where
     simpa [arctanIntegralRectangleFunctionRaw] using
       arctanIntegralRectangleFor_valid x hx.1 hx.2
 
+/-- The rectangle arctangent has a certified forward derivative equal to one
+at the rational endpoint zero.  This uses the direct finite tangent bracket;
+it does not yet assert a two-sided derivative away from that endpoint. -/
+def arctanIntegralRectangleOnUnit_forwardDerivativeAtZero :
+    HasForwardDerivativeAt arctanIntegralRectangleOnUnit 0 RealRaw.one := by
+  refine
+    { x_mem := by
+        constructor <;> native_decide
+      derivative_valid := by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 1, hi := 1 })
+        exact RealRaw.ofRat_valid (1 : Rat)
+      stepPrecision := fun n => if n = 0 then 1 else n
+      evalPrecision := fun _h _n => 0
+      close := ?_ }
+  intro h n hmem hpos hsmall
+  have hprecision : h <= (precisionAtStage n).val := by
+    change h <= 1 / (((if n = 0 then 1 else n : Nat) : Rat)) at hsmall
+    by_cases hn : n = 0
+    · subst n
+      calc
+        h <= 1 / (1 : Rat) := by
+          simpa only [if_pos rfl] using hsmall
+        _ = (precisionAtStage 0).val := by native_decide
+    · simpa [precisionAtStage, hn] using hsmall
+  have hprecision_le_one : (precisionAtStage n).val <= 1 := by
+    by_cases hn : n = 0
+    · subst n
+      native_decide
+    ·
+      have hnpos : 0 < n := Nat.pos_of_ne_zero hn
+      have hnat : (1 : Rat) <= (n : Rat) := by
+        exact_mod_cast hnpos
+      have hfrac : 1 / (n : Rat) <= 1 := by
+        apply Rat.le_of_mul_le_mul_right (c := (n : Rat))
+        · calc
+            (1 / (n : Rat)) * (n : Rat) = 1 := by
+              have hne : (n : Rat) ≠ 0 := by
+                exact_mod_cast (Nat.ne_of_gt hnpos)
+              rw [Rat.div_def]
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+            _ <= 1 * (n : Rat) := by simpa using hnat
+        · exact_mod_cast hnpos
+      simpa only [precisionAtStage, dif_neg hn] using hfrac
+  have hle_one : h <= 1 :=
+    Rat.le_trans hprecision hprecision_le_one
+  have hsquare : h * h <= (precisionAtStage n).val := by
+    calc
+      h * h <= h * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hle_one (Rat.le_of_lt hpos)
+      _ = h := by grind
+      _ <= (precisionAtStage n).val := hprecision
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hhordered :
+      (ArctanGeometry.arctanIntegralRectangleCompute h 0).lo <=
+        (ArctanGeometry.arctanIntegralRectangleCompute h 0).hi := by
+    have hwidth :=
+      ArctanGeometry.arctanIntegralRectangleCompute_ordered
+        (Rat.le_of_lt hpos) 0
+    unfold QInterval.width at hwidth
+    grind [Rat.sub_eq_add_neg]
+  have hzeroordered :
+      (ArctanGeometry.arctanIntegralRectangleCompute 0 0).lo <=
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0).hi := by
+    have hwidth :=
+      ArctanGeometry.arctanIntegralRectangleCompute_ordered
+        (x := 0) (by native_decide) 0
+    unfold QInterval.width at hwidth
+    grind [Rat.sub_eq_add_neg]
+  have hquotient_ordered :
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).lo <=
+        (QInterval.differenceQuotient
+          (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+          (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi := by
+    unfold QInterval.differenceQuotient QInterval.divRat QInterval.sub
+      QInterval.scaleRat
+    rw [if_pos hinv]
+    apply Rat.mul_le_mul_of_nonneg_left _ hinv
+    grind [Rat.sub_eq_add_neg]
+  have hcontains :=
+    ArctanGeometry.arctanIntegralRectangleCompute_zero_tangent_quotient_contains
+      hpos 0
+  unfold QInterval.ContainsInterval at hcontains
+  change intervalNearAtPrecision
+    (QInterval.differenceQuotient
+      ((arctanIntegralRectangleFor (0 + h) hmem.1 hmem.2).compute 0)
+      ((arctanIntegralRectangleFor 0 (by native_decide) (by native_decide)).compute 0)
+      h)
+    (RealRaw.one.compute 0) n
+  simp only [arctanIntegralRectangleFor_compute_eq, Rat.zero_add,
+    RealRaw.one, RealRaw.ofRat_compute]
+  unfold intervalNearAtPrecision QInterval.NearAt
+  constructor
+  · calc
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).lo <=
+          (QInterval.differenceQuotient
+            (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+            (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi :=
+        hquotient_ordered
+      _ <= 1 := hcontains.2
+      _ <= 1 + (precisionAtStage n).val := by
+        calc
+          1 = 1 + 0 := by grind
+          _ <= 1 + (precisionAtStage n).val :=
+            (Rat.add_le_add_left).2
+              (Rat.le_of_lt (precisionAtStage n).property)
+  constructor
+  · calc
+      1 = (1 - h * h) + h * h := by
+        grind [Rat.sub_eq_add_neg]
+      _ <=
+          (QInterval.differenceQuotient
+            (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+            (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi +
+            (precisionAtStage n).val := by
+          have hlower :
+              1 - h * h <=
+                (QInterval.differenceQuotient
+                  (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+                  (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi :=
+            Rat.le_trans hcontains.1 hquotient_ordered
+          grind [Rat.sub_eq_add_neg]
+  constructor
+  · unfold QInterval.width
+    calc
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi -
+          (QInterval.differenceQuotient
+            (ArctanGeometry.arctanIntegralRectangleCompute h 0)
+            (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).lo <=
+          1 - (1 - h * h) := by
+            grind [Rat.sub_eq_add_neg]
+      _ = h * h := by
+        grind [Rat.sub_eq_add_neg]
+      _ <= (precisionAtStage n).val := hsquare
+  · unfold QInterval.width
+    rw [show (1 : Rat) - 1 = 0 by native_decide]
+    exact Rat.le_of_lt (precisionAtStage n).property
+
 /-- The finite rectangle arctangent is nondecreasing in its upper endpoint on
 the rational unit branch. -/
 theorem arctanIntegralRectangleOnUnit_nondecreasing :
