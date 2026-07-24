@@ -94,9 +94,22 @@ gates.
   every nonnegative rational endpoint, and its zero-endpoint quotient box is
   `[1 - h^2, 1]` for `h > 0`.  This isolates the basepoint portion of the
   arctangent derivative without declaring a global derivative or FTC theorem.
-  What remains is extension to interval-regular functions, tangent-chart
-  transport and schedule compatibility for the derivative certificates, and
-  then the standard function table.
+  The next tangent-chart algebra is checked as well: at `x`, ordinary step
+  `h` is represented by `h / (1 + x * (x + h))`, which the chart sends exactly
+  to `x + h`; its scale differs from the kernel at `x` by at most `h` on the
+  unit branch.  The geometric arctangent addition identity for this transport
+  is now a raw-real equivalence on the first half branch.  What remains is
+  extension to interval-regular functions, evaluator scheduling and two-sided
+  control for the derivative certificates, and then the standard function
+  table.
+- **Derivative scheduling — corrected interface.** `HasDerivativeOnInterval`
+  and the rational-power `HasDerivativeAt` certificate now choose evaluator
+  precision from the rational point, nonzero rational step, and requested
+  output precision.  This is necessary for an inexact interval evaluator:
+  quotienting a fixed-width box by an arbitrarily smaller step cannot have a
+  uniform error bound.  Exact rational examples still use the constant stage
+  zero; the correction creates the finite scheduling slot needed by the
+  arctangent and exponential derivative constructions.
 - **Monotone inverse functions — partly checked.** The branch-local
   `InvertibleFunctionOnInterval`/`InverseRaw`/bisection API is checked, with
   the unit-interval square-root search for exact rational targets. Extend it

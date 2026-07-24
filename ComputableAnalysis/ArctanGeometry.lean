@@ -4312,6 +4312,221 @@ theorem arctanGeom_chartAdd_add_of_half
     (RealRaw.equiv_trans hmiddle hright hgeomV hcomm
       (RealRaw.sub_add_cancel_equiv hgeomV hgeomU))
 
+/-- The tangent-chart coordinate which turns an ordinary increment `h` at
+`x` into a chart increment based at zero. -/
+def tangentChartIncrement (x h : Rat) : Rat :=
+  h / (1 + x * (x + h))
+
+theorem tangentChartIncrement_den_pos
+    {x h : Rat} (hx : 0 <= x) (hxh : 0 <= x + h) :
+    0 < 1 + x * (x + h) := by
+  have hprod : 0 <= x * (x + h) := Rat.mul_nonneg hx hxh
+  grind
+
+theorem tangentChartIncrement_pos
+    {x h : Rat} (hx : 0 <= x) (hpos : 0 < h) :
+    0 < tangentChartIncrement x h := by
+  unfold tangentChartIncrement
+  rw [Rat.div_def]
+  apply Rat.mul_pos hpos
+  apply (Rat.inv_pos).2
+  exact tangentChartIncrement_den_pos hx (by grind)
+
+theorem tangentChartIncrement_le_step
+    {x h : Rat} (hx : 0 <= x) (hpos : 0 < h) :
+    tangentChartIncrement x h <= h := by
+  let d : Rat := 1 + x * (x + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact tangentChartIncrement_den_pos hx (by grind)
+  have hd1 : 1 <= d := by
+    dsimp [d]
+    have hprod : 0 <= x * (x + h) := Rat.mul_nonneg hx (by grind)
+    grind
+  have hdinv : d⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := d)
+    · calc
+        d⁻¹ * d = d * d⁻¹ := by rw [Rat.mul_comm]
+        _ = 1 := Rat.mul_inv_cancel _ (Rat.ne_of_gt hdpos)
+        _ <= 1 * d := by simpa using hd1
+    · exact hdpos
+  unfold tangentChartIncrement
+  rw [Rat.div_def]
+  calc
+    h * d⁻¹ <= h * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hdinv (Rat.le_of_lt hpos)
+    _ = h := by grind
+
+/-- The chart increment has exactly the scale factor required to compare an
+ordinary difference quotient with the basepoint quotient. -/
+theorem tangentChartIncrement_div_step
+    {x h : Rat} (hpos : 0 < h) :
+    tangentChartIncrement x h / h = 1 / (1 + x * (x + h)) := by
+  have hne : h ≠ 0 := Rat.ne_of_gt hpos
+  unfold tangentChartIncrement
+  rw [Rat.div_def, Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hne
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The tangent-addition chart maps the derived chart increment to the
+ordinary endpoint `x + h`. -/
+theorem chartAddParameter_tangentChartIncrement
+    {x h : Rat} (hx : 0 <= x) (hxh : 0 <= x + h) :
+    RationalCircle.Trigonometry.chartAddParameter x
+      (tangentChartIncrement x h) = x + h := by
+  let d : Rat := 1 + x * (x + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact tangentChartIncrement_den_pos hx hxh
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hxdenpos : 0 < 1 + x * x :=
+    RationalCircle.Stage.one_add_square_pos x
+  have hxdenne : 1 + x * x ≠ 0 := Rat.ne_of_gt hxdenpos
+  have hdenEq : 1 - x * (h * d⁻¹) = (1 + x * x) * d⁻¹ := by
+    have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    dsimp [d] at hcancel ⊢
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hnumEq : x + h * d⁻¹ = (x + h) * (1 + x * x) * d⁻¹ := by
+    have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    dsimp [d] at hcancel ⊢
+    grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  unfold RationalCircle.Trigonometry.chartAddParameter
+    RationalCircle.Trigonometry.chartAddNum
+    RationalCircle.Trigonometry.chartAddDen tangentChartIncrement
+  change (x + h * d⁻¹) / (1 - x * (h * d⁻¹)) = x + h
+  rw [hnumEq, hdenEq, Rat.div_def, Rat.inv_mul_rev]
+  have hcancelD : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+  have hcancelX : (1 + x * x) * (1 + x * x)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hxdenne
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- On the unit branch, changing from the basepoint kernel to the tangent
+chart scale changes it by at most the ordinary positive increment. -/
+theorem integralKernel_sub_tangentChartScale_le_step
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hxh : 0 <= x + h) :
+    0 <= integralKernel x - 1 / (1 + x * (x + h)) /\
+      integralKernel x - 1 / (1 + x * (x + h)) <= h := by
+  let d0 : Rat := 1 + x * x
+  let d : Rat := 1 + x * (x + h)
+  have hh0 : 0 <= h := Rat.le_of_lt hpos
+  have hd0pos : 0 < d0 := by
+    dsimp [d0]
+    exact RationalCircle.Stage.one_add_square_pos x
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact tangentChartIncrement_den_pos hx0 hxh
+  have hd0le : d0 <= d := by
+    have hterm : 0 <= x * h := Rat.mul_nonneg hx0 hh0
+    dsimp [d0, d]
+    grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+  have hscale_le : 1 / d <= 1 / d0 :=
+    one_div_le_one_div_of_pos_of_le hd0pos hd0le
+  have hnonneg : 0 <= 1 / d0 - 1 / d := by grind
+  have hd0ne : d0 ≠ 0 := Rat.ne_of_gt hd0pos
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hformula : 1 / d0 - 1 / d = (x * h) / (d0 * d) := by
+    simp only [Rat.div_def, Rat.one_mul, Rat.inv_mul_rev]
+    have hcancel0 : d0 * d0⁻¹ = 1 := Rat.mul_inv_cancel d0 hd0ne
+    have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    dsimp [d0, d] at hcancel0 hcancel ⊢
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hprodpos : 0 < d0 * d := Rat.mul_pos hd0pos hdpos
+  have hprod1 : 1 <= d0 * d := by
+    have hd01 : 1 <= d0 := by
+      dsimp [d0]
+      have hsq := RationalCircle.Stage.ratSquare_nonneg x
+      grind
+    have hd1 : 1 <= d := by
+      dsimp [d]
+      have hprod : 0 <= x * (x + h) := Rat.mul_nonneg hx0 hxh
+      grind
+    calc
+      1 = 1 * 1 := by grind
+      _ <= d0 * 1 := Rat.mul_le_mul_of_nonneg_right hd01 (by native_decide)
+      _ <= d0 * d := Rat.mul_le_mul_of_nonneg_left hd1
+        (Rat.le_trans (by native_decide) hd01)
+  have hprodinv : (d0 * d)⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := d0 * d)
+    · calc
+        (d0 * d)⁻¹ * (d0 * d) = 1 :=
+          Rat.inv_mul_cancel _ (Rat.ne_of_gt hprodpos)
+        _ <= 1 * (d0 * d) := by simpa using hprod1
+    · exact hprodpos
+  have hnumle : x * h <= h := by
+    calc
+      x * h <= 1 * h := Rat.mul_le_mul_of_nonneg_right hx1 hh0
+      _ = h := by grind
+  have hprodinv0 : 0 <= (d0 * d)⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hprodpos)
+  have hupper : (x * h) / (d0 * d) <= h := by
+    rw [Rat.div_def]
+    calc
+      (x * h) * (d0 * d)⁻¹ <= h * (d0 * d)⁻¹ :=
+        Rat.mul_le_mul_of_nonneg_right hnumle hprodinv0
+      _ <= h * 1 := Rat.mul_le_mul_of_nonneg_left hprodinv hh0
+      _ = h := by grind
+  change 0 <= 1 / d0 - 1 / d /\ 1 / d0 - 1 / d <= h
+  exact ⟨hnonneg, by simpa [hformula] using hupper⟩
+
+/-- Tangent addition expresses an ordinary forward increment by the chart
+increment based at zero on the first half of the unit branch. -/
+theorem arctanGeom_add_tangentChartIncrement_equiv
+    {x h : Rat} (hx0 : 0 <= x) (hxHalf : x <= (1 : Rat) / 2)
+    (hpos : 0 < h) (hupper : x + h <= 1) :
+    (arctanGeom x + arctanGeom (tangentChartIncrement x h)).Equiv
+      (arctanGeom (x + h)) := by
+  have hxh : 0 <= x + h := by grind
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have hh1 : h <= 1 := by grind
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hchart := chartAddParameter_tangentChartIncrement hx0 hxh
+  have himage : RationalCircle.Trigonometry.chartAddParameter x
+      (tangentChartIncrement x h) <= 1 := by
+    rw [hchart]
+    exact hupper
+  have hadd := arctanGeom_chartAdd_add_of_half hx0 hxHalf ht0 ht1 himage
+  rw [hchart] at hadd
+  exact hadd
+
+/-- Subtracting the basepoint turns the tangent-chart addition theorem into
+an ordinary forward endpoint-difference equivalence. -/
+theorem arctanGeom_forward_difference_equiv_tangentChartIncrement
+    {x h : Rat} (hx0 : 0 <= x) (hxHalf : x <= (1 : Rat) / 2)
+    (hpos : 0 < h) (hupper : x + h <= 1) :
+    (arctanGeom (x + h) - arctanGeom x).Equiv
+      (arctanGeom (tangentChartIncrement x h)) := by
+  have hxh : 0 <= x + h := by grind
+  have hx1 : x <= 1 := Rat.le_trans hxHalf (by native_decide)
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have hh1 : h <= 1 := by grind
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hX : (arctanGeom x).Valid := arctanGeom_valid_on_unit hx0 hx1
+  have hT : (arctanGeom (tangentChartIncrement x h)).Valid :=
+    arctanGeom_valid_on_unit ht0 ht1
+  have hY : (arctanGeom (x + h)).Valid :=
+    arctanGeom_valid_on_unit hxh hupper
+  have hsum : (arctanGeom x + arctanGeom (tangentChartIncrement x h)).Valid :=
+    RealRaw.add_valid hX hT
+  have hadd := arctanGeom_add_tangentChartIncrement_equiv
+    hx0 hxHalf hpos hupper
+  have hsub :
+      (arctanGeom (x + h) - arctanGeom x).Equiv
+        ((arctanGeom x + arctanGeom (tangentChartIncrement x h)) -
+          arctanGeom x) :=
+    RealRaw.sub_equiv hY hsum hX hX (RealRaw.equiv_symm hadd)
+      (RealRaw.equiv_refl (arctanGeom x) hX)
+  exact RealRaw.equiv_trans (RealRaw.sub_valid hY hX)
+    (RealRaw.sub_valid hsum hX) hT hsub
+    (RealRaw.add_sub_cancel_left_equiv hX hT)
+
 /-- Three bounded rational chart additions compose at the level of geometric
 arctangent intervals.  This packages the reassociation needed by rational
 three-term arctangent formulae while keeping every branch and image bound

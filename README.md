@@ -196,6 +196,20 @@ positive rational difference quotient is enclosed by `[1 - h^2, 1]`.
 This is the constructive basepoint seed for `arctan'(0) = 1`; transporting it
 to nonzero basepoints and turning it into a global derivative certificate are
 still separate tangent-addition and schedule-compatibility work.
+That transport's rational algebra is now checked on the first half of the
+unit branch.  The ordinary step `h` corresponds exactly to the chart step
+`h / (1 + x * (x + h))`; the chart reaches `x + h`, and its reciprocal scale
+differs from `1 / (1 + x*x)` by at most `h`.  The resulting geometric
+arctangent addition identity is a finite raw-real equivalence.  It isolates
+the remaining work as evaluator scheduling and two-sided derivative control,
+rather than a missing tangent identity.
+The derivative interfaces now make that scheduling obligation expressible:
+their evaluation stage depends on the rational basepoint, nonzero step, and
+requested output precision.  A stage depending only on output precision would
+leave a fixed box width that becomes unbounded after division by arbitrarily
+small steps.  Exact affine and quadratic examples use the constant-zero
+special case, while arctangent and the eventual exponential certificates will
+use genuine step-aware schedules.
 The reciprocal kernel itself also has a finite interval-regularity and
 epsilon--delta continuity proof on `[1,2]`, using `[1/r, 1/p]` for an input
 box `[p,r]`; extending the new Lipschitz construction to that general

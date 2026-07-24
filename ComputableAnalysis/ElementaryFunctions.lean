@@ -117,15 +117,18 @@ structure HasDerivativeAt (powers : RationalPowerExtension base)
     (x : Rat) (derivative : RealRaw) where
   derivative_valid : derivative.Valid
   stepPrecision : Nat -> Nat
-  evalPrecision : Nat -> Nat
+  /-- The interval evaluation stage may depend on the nonzero rational step,
+  since quotienting a fixed-width enclosure by a smaller step magnifies its
+  uncertainty. -/
+  evalPrecision : Rat -> Nat -> Nat
   close :
     forall h n, h ≠ 0 ->
       qabs h <= (1 / ((stepPrecision n : Nat) : Rat)) ->
       intervalNearAtPrecision
         (QInterval.differenceQuotient
-          ((powers.power (x + h)).compute (evalPrecision n))
-          ((powers.power x).compute (evalPrecision n)) h)
-        (derivative.compute (evalPrecision n)) n
+          ((powers.power (x + h)).compute (evalPrecision h n))
+          ((powers.power x).compute (evalPrecision h n)) h)
+        (derivative.compute (evalPrecision h n)) n
 
 /-- The alternative characterization of the Euler base: its rational powers
 have derivative `1` at exponent zero. -/

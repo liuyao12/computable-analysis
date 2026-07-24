@@ -252,7 +252,10 @@ structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
   same_lower : df.lower = f.lower
   same_upper : df.upper = f.upper
   stepPrecision : Nat -> Nat
-  evalPrecision : Nat -> Nat
+  /-- Interval evaluators need a step-aware precision schedule: a fixed
+  nonzero box width would be magnified without bound when divided by an
+  arbitrarily smaller rational step. -/
+  evalPrecision : Rat -> Rat -> Nat -> Nat
   close :
     forall x h n
       (hx : inDomainInterval f.lower f.upper x)
@@ -262,10 +265,10 @@ structure HasDerivativeOnInterval (f df : FunctionOnInterval) where
       qabs h <= (1 / ((stepPrecision n : Nat) : Rat)) ->
         intervalNearAtPrecision
           (QInterval.differenceQuotient
-            (f.compute (x + h) hxh (evalPrecision n))
-            (f.compute x hx (evalPrecision n))
+            (f.compute (x + h) hxh (evalPrecision x h n))
+            (f.compute x hx (evalPrecision x h n))
             h)
-          (df.compute x hdx (evalPrecision n))
+          (df.compute x hdx (evalPrecision x h n))
           n
 
 namespace FunctionOnInterval
@@ -280,7 +283,7 @@ def exactRatAffineDerivative (a b m c : Rat) :
   same_lower := rfl
   same_upper := rfl
   stepPrecision := fun _n => 1
-  evalPrecision := fun _n => 0
+  evalPrecision := fun _x _h _n => 0
   close := by
     intro x h n _hx _hxh _hdx hh _hsmall
     change intervalNearAtPrecision
@@ -317,7 +320,7 @@ def exactRatSquareDerivative (a b : Rat) :
   same_lower := rfl
   same_upper := rfl
   stepPrecision := fun n => if n = 0 then 1 else n
-  evalPrecision := fun _n => 0
+  evalPrecision := fun _x _h _n => 0
   close := by
     intro x h n _hx _hxh _hdx hh hsmall
     change intervalNearAtPrecision

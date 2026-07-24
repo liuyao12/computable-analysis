@@ -107,7 +107,10 @@ quotients at zero.  Lean already proves the formal coefficient identity
 power-series tail bounds into the corresponding derivative certificate, whose
 finite-difference and derivative boxes are within the requested tolerance
 rather than required to overlap exactly, and then establish the displayed
-uniqueness statement by finite rational estimates.  More generally, this is
+uniqueness statement by finite rational estimates.  Its evaluator schedule is
+allowed to depend on the rational basepoint and nonzero rational step as well
+as on the requested output precision: otherwise a fixed interval width would
+be magnified by division by an arbitrarily small step.  More generally, this is
 the scalar case of the linear Picard--Lindel\"of construction target in
 \cref{thm:linear-picard-lindelof}: the Peano--Baker series for the
 one-dimensional coefficient \(A=1\) provides the solution and its factorial

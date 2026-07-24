@@ -390,6 +390,22 @@ its forward-mesh specialization.  This matters when a derivative certificate
 is stated using arbitrary nearby rational inputs rather than only a right
 difference quotient.
 
+For an inexact interval evaluator, the evaluation precision in that
+certificate must also be allowed to depend on the rational basepoint and
+nonzero step.  A stage selected only from the requested output precision has
+a fixed positive box width; after division by an arbitrarily smaller
+\(\lvert h\rvert\), it cannot certify a quotient error bound.  Thus the
+derivative interface uses a rational step-aware schedule
+\[
+  E(x,h,n)
+\]
+for the two function evaluations and the derivative evaluation at requested
+precision \(n\).  This is finite scheduling data, not a limit operation.
+Exact rational functions may take \(E\equiv0\), which is why the affine and
+quadratic regression examples retain their simple proofs.  The chart
+transport of \cref{prop:arctangent-tangent-chart-increment} is the first
+non-exact case that requires this dependence explicitly.
+
 The coordinate factor has now crossed the first of those obligations.  For
 an exact rational affine function \(L(x)=mx+c\), the singleton interval
 quotient is literally
@@ -957,6 +973,62 @@ to a nonzero rational basepoint requires the rational tangent-addition chart
 and compatible evaluation schedules.  That later transport is exactly where
 the project must account for the denominator \(1+x(x+h)\), rather than
 silently invoking the mean-value theorem.
+\end{proposition}
+
+\begin{proposition}[Tangent-chart coordinate for derivative transport]
+\label{prop:arctangent-tangent-chart-increment}
+\uses{prop:arctangent-zero-tangent-bracket}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChartIncrement}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChartIncrement_pos}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChartIncrement_le_step}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChartIncrement_div_step}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddParameter_tangentChartIncrement}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel_sub_tangentChartScale_le_step}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_add_tangentChartIncrement_equiv}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_forward_difference_equiv_tangentChartIncrement}
+\leanok
+For a basepoint \(x\) and an ordinary positive rational increment \(h\), put
+\[
+  \tau(x,h)=\frac{h}{1+x(x+h)}.
+\]
+This is the chart increment that represents the ordinary endpoint \(x+h\):
+whenever the displayed denominators are positive, the rational
+tangent-addition chart satisfies
+\[
+  \frac{x+\tau(x,h)}{1-x\tau(x,h)}=x+h,
+  \qquad
+  \frac{\tau(x,h)}h=\frac1{1+x(x+h)}.
+\]
+Thus, on the branch \(0\le x\le\tfrac12\), \(0<h\), and \(x+h\le1\), the
+finite chart-addition theorem gives
+\[
+  \arctan_{\mathrm{geom}}(x)+\arctan_{\mathrm{geom}}(\tau(x,h))
+  =\arctan_{\mathrm{geom}}(x+h).
+\]
+This is an equality of certified rational interval reals, obtained from the
+same finite rectangle transport used for tangent addition; it is not a
+continuity or mean-value argument.  Lean also records the equivalent
+endpoint-difference form
+\[
+ \arctan_{\mathrm{geom}}(x+h)-\arctan_{\mathrm{geom}}(x)
+ =\arctan_{\mathrm{geom}}(\tau(x,h)).
+\]
+
+The scale conversion is controlled directly by rational inequalities.  On
+\(0\le x\le1\), \(0<h\), and \(x+h\le1\),
+\[
+  0\le
+  \frac1{1+x^2}-\frac1{1+x(x+h)}
+  =\frac{xh}{(1+x^2)(1+x(x+h))}
+  \le h.
+\]
+In particular \(0<\tau(x,h)\le h\le1\).  Combining this finite algebra
+with \cref{prop:arctangent-zero-tangent-bracket} is the next step toward the
+forward derivative of arctangent: it moves the zero-basepoint enclosure to a
+nonzero basepoint while making the denominator error explicit.  A full
+\code{HasDerivativeOnInterval} certificate still requires a compatible
+evaluation schedule for the chart-addition equivalence and a separate
+two-sided endpoint treatment.
 \end{proposition}
 
 \begin{definition}[Arctangent as an integral]
