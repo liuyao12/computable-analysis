@@ -20,9 +20,12 @@ definitions/proved bridge theorems.
 The foundation now has a finite Peano--Baker entry point in
 `ComputableAnalysis/PeanoBaker.lean`: rational matrices, sampled linear
 systems, and an executable noncommutative ordered-word expansion. The finite
-identity between that expansion and the chronological Euler product is proved,
-as is a discrete variation-of-constants decomposition for the inhomogeneous
-recurrence. Constant increments reduce exactly to `(I + B)^N`, while the zero
+identity between that expansion and the chronological Euler product is proved.
+The finite layer also now exposes the general transition
+`S_(N-1) * ... * S_0` for a sampled recurrence, proves that it acts exactly
+on the homogeneous trajectory, and gives the inhomogeneous trajectory as that
+transition of the initial state plus its zero-initial forcing response.
+Constant Euler increments reduce exactly to `(I + B)^N`, while the zero
 coefficient case is the identity. A square-zero sampled coefficient family
 reduces exactly to `I + sum B_k`, so the finite word series already covers a
 nontrivial nilpotent case. Local matrix associativity and a chronological

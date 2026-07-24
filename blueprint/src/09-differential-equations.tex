@@ -74,15 +74,27 @@ chronological action be
 \[
  H_0(x)=x,\qquad H_{k+1}(x)=S_kH_k(x).
 \]
+It is useful to keep its transition matrix as a separate finite object:
+\[
+ T(m,0)=S_{m-1}\cdots S_1S_0,\qquad T(0,0)=I,
+ \qquad H_m(x)=T(m,0)x.
+\]
+This is an exact recursive product, with no claim that a mesh has converged.
+For Euler increments \(S_k=I+B_k\), the checked transition is exactly the
+finite Peano--Baker chronological product
+\[
+ T(N,0)=(I+B_{N-1})\cdots(I+B_0).
+\]
 Lean proves the exact finite decomposition
 \[
  x_N=H_N(x_0)+v_N,\qquad
  v_0=0,\quad v_{k+1}=S_kv_k+g_k.
 \]
 Thus \(v_N\) is the finite, time-ordered Duhamel contribution of the forcing
-samples. The checked lemma \code{trajectory\_eq\_homogeneous\_add\_zeroInitial}
-deliberately keeps the matrix actions recursive, so it needs only the
-distributivity of finite rational matrix action; the future matrix-simplex
+samples. The checked lemmas
+for the transition action and variation-of-constants identity deliberately
+keep the matrix products and the forcing response recursive, so they need only
+the distributivity of finite rational matrix action; the future matrix-simplex
 integral formula will use the same time order. The \code{ForcingZero} condition
 and its two theorems prove that, when every \(g_k=0\), the second summand
 vanishes and the trajectory is exactly the homogeneous action.

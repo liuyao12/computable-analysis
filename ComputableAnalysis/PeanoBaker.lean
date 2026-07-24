@@ -197,6 +197,56 @@ theorem matrixApply_vectorAdd {dimension : Nat}
         finiteSum (fun j => A i j * y j) :=
       finiteSum_add _ _
 
+/-- The identity matrix acts as the identity on a finite rational vector. -/
+theorem matrixApply_identity {dimension : Nat} (x : RatVector dimension) :
+    matrixApply (matrixIdentity dimension) x = x := by
+  funext i
+  unfold matrixApply matrixIdentity
+  calc
+    finiteSum (fun j => (if i = j then 1 else 0) * x j) =
+        finiteSum (fun j => if j = i then x j else 0) := by
+          congr 1
+          funext j
+          by_cases h : j = i
+          · subst j
+            simp
+          · have h' : ¬ i = j := by
+              intro hij
+              exact h hij.symm
+            simp [h, h']
+    _ = x i :=
+      finiteSum_ite_eq i x
+
+/-- Matrix action respects the project-local finite matrix product.  This is
+the finite reassociation used to turn a homogeneous recurrence into one
+chronological transition matrix. -/
+theorem matrixApply_matrixMul {dimension : Nat}
+    (A B : RatMatrix dimension) (x : RatVector dimension) :
+    matrixApply (matrixMul A B) x =
+      matrixApply A (matrixApply B x) := by
+  funext i
+  unfold matrixApply matrixMul
+  calc
+    finiteSum (fun j => finiteSum (fun k => A i k * B k j) * x j) =
+        finiteSum (fun j => finiteSum (fun k => (A i k * B k j) * x j)) := by
+          congr 1
+          funext j
+          rw [finiteSum_mul_right]
+    _ = finiteSum (fun k => finiteSum (fun j => (A i k * B k j) * x j)) :=
+      finiteSum_swap dimension dimension
+        (fun j k => (A i k * B k j) * x j)
+    _ = finiteSum (fun k => A i k * finiteSum (fun j => B k j * x j)) := by
+          congr 1
+          funext k
+          calc
+            finiteSum (fun j => (A i k * B k j) * x j) =
+                finiteSum (fun j => A i k * (B k j * x j)) := by
+                  congr 1
+                  funext j
+                  exact Rat.mul_assoc _ _ _
+            _ = A i k * finiteSum (fun j => B k j * x j) :=
+              (finiteSum_mul_left (A i k) (fun j => B k j * x j)).symm
+
 theorem matrixAdd_zero_left {dimension : Nat} (A : RatMatrix dimension) :
     matrixAdd (matrixZero dimension) A = A := by
   funext i j
@@ -309,6 +359,27 @@ theorem matrixMul_zero_left {dimension : Nat} (A : RatMatrix dimension) :
     exact Rat.zero_mul _]
   exact finiteSum_zero dimension
 
+/-- The exact transition matrix of a sampled linear recurrence, starting at a
+given index and taking a prescribed number of chronological updates.  The
+newest sample occurs on the left, so this convention agrees with the
+Peano--Baker word order. -/
+def chronologicalStepProduct {dimension : Nat} (S : Nat -> RatMatrix dimension)
+    (start : Nat) : Nat -> RatMatrix dimension
+  | 0 => matrixIdentity dimension
+  | steps + 1 =>
+      matrixMul (S (start + steps))
+        (chronologicalStepProduct S start steps)
+
+@[simp] theorem chronologicalStepProduct_zero {dimension : Nat}
+    (S : Nat -> RatMatrix dimension) (start : Nat) :
+    chronologicalStepProduct S start 0 = matrixIdentity dimension := rfl
+
+@[simp] theorem chronologicalStepProduct_succ {dimension : Nat}
+    (S : Nat -> RatMatrix dimension) (start steps : Nat) :
+    chronologicalStepProduct S start (steps + 1) =
+      matrixMul (S (start + steps))
+        (chronologicalStepProduct S start steps) := rfl
+
 /-- A sampled, possibly inhomogeneous, linear recurrence
 `x_(k+1) = step(k) * x_k + forcing(k)`.  For an Euler discretization of
 `x' = A(t)x+b(t)`, use `step(k) = I + h A(t_k)` and
@@ -353,6 +424,21 @@ theorem homogeneousTrajectory_succ (system : DiscreteLinearSystem dimension)
     system.homogeneousTrajectory initial (n + 1) =
       matrixApply (system.step n) (system.homogeneousTrajectory initial n) := rfl
 
+/-- A homogeneous sampled trajectory is the action of its exact
+chronological transition matrix on the initial state. -/
+theorem homogeneousTrajectory_eq_chronologicalStepProduct
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension) :
+    forall n,
+      system.homogeneousTrajectory initial n =
+        matrixApply (chronologicalStepProduct system.step 0 n) initial
+  | 0 => by
+      exact (matrixApply_identity initial).symm
+  | n + 1 => by
+      rw [homogeneousTrajectory_succ, chronologicalStepProduct_succ]
+      simp only [Nat.zero_add]
+      rw [homogeneousTrajectory_eq_chronologicalStepProduct system initial n]
+      exact (matrixApply_matrixMul _ _ _).symm
+
 /-- Exact finite variation of constants for a sampled linear system.
 
 The second summand is the trajectory from zero initial data, so its recursion
@@ -383,6 +469,18 @@ theorem trajectory_eq_homogeneous_add_zeroInitial
       rw [trajectory_eq_homogeneous_add_zeroInitial system initial n]
       rw [matrixApply_vectorAdd]
       exact vectorAdd_assoc _ _ _
+
+/-- Exact finite variation of constants with the homogeneous term displayed
+as its chronological transition matrix. -/
+theorem trajectory_eq_transition_add_zeroInitial
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension)
+    (n : Nat) :
+    system.trajectory initial n =
+      vectorAdd
+        (matrixApply (chronologicalStepProduct system.step 0 n) initial)
+        (system.trajectory (vectorZero dimension) n) := by
+  rw [trajectory_eq_homogeneous_add_zeroInitial]
+  rw [homogeneousTrajectory_eq_chronologicalStepProduct system initial n]
 
 /-- A sampled system has no inhomogeneous contribution when every forcing
 sample is the zero vector. -/
@@ -479,6 +577,20 @@ def chronologicalProduct {dimension : Nat} (B : Nat -> RatMatrix dimension) : Na
   | 0 => matrixIdentity dimension
   | n + 1 => matrixMul (matrixAdd (matrixIdentity dimension) (B n))
       (chronologicalProduct B n)
+
+/-- The general sampled transition specializes exactly to the
+Peano--Baker chronological product for Euler increments. -/
+theorem chronologicalStepProduct_eulerIncrement {dimension : Nat}
+    (B : Nat -> RatMatrix dimension) :
+    forall steps,
+      chronologicalStepProduct
+        (fun k => matrixAdd (matrixIdentity dimension) (B k)) 0 steps =
+        chronologicalProduct B steps
+  | 0 => rfl
+  | steps + 1 => by
+      rw [chronologicalStepProduct_succ, chronologicalProduct]
+      simp only [Nat.zero_add]
+      rw [chronologicalStepProduct_eulerIncrement B steps]
 
 /-- Splitting a sampled time interval preserves chronological order: increments
 from the later subinterval occur on the left of the earlier transition. -/

@@ -696,10 +696,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   algebra theorem equating that word sum with
   `(I + B_(N-1)) * ... * (I + B_0)`. Its proof establishes the local matrix
   identity, distributivity, and finite induction before touching convergence.
-- The same finite layer now proves a sampled variation-of-constants formula:
-  `DiscreteLinearSystem.trajectory_eq_homogeneous_add_zeroInitial` splits any
-  inhomogeneous trajectory into its time-ordered homogeneous action and the
-  zero-initial forcing response. `ForcingZero` makes that response vanish.
+- The same finite layer now gives the homogeneous action a concrete transition
+  matrix: `chronologicalStepProduct S 0 N = S_(N-1) * ... * S_0`, and
+  `homogeneousTrajectory_eq_chronologicalStepProduct` proves that this matrix
+  acts on the initial state exactly. The Euler specialization
+  `chronologicalStepProduct_eulerIncrement` is the already-checked
+  Peano--Baker chronological product. The strengthened sampled
+  variation-of-constants theorem
+  `DiscreteLinearSystem.trajectory_eq_transition_add_zeroInitial` therefore
+  splits an inhomogeneous trajectory into that finite transition of its
+  initial state and the zero-initial forcing response. `ForcingZero` makes
+  that response vanish.
   Constant increments are checked exactly by
   `chronologicalProduct_constant` and `peanoBakerDiscreteSum_constant`, giving
   `(I + B)^N`; `peanoBakerDiscreteSum_zeroCoefficient` supplies the zero
