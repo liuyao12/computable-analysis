@@ -270,9 +270,15 @@ Lipschitz constant of `1`.  Natural rational scaling of the finite Darboux
 boxes is checked stage by stage, giving
 `two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral`:
 `2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`.  This clears the logarithmic strip of
-the arctangent integration-by-parts route; the complementary arctangent
-integral still needs the global product-derivative/FTC proof and the later
-canonical exp/log transport.
+the arctangent integration-by-parts route.  The complementary rational strip
+`(1-x)/(1+x*x)` is now also a literal 3-Lipschitz Darboux integral.
+`LipschitzDyadic.compute_add` proves that its boxes and the logarithmic-strip
+boxes add exactly to the 4-Lipschitz boxes for `1/(1+x*x)`, and common
+uniform-left sums prove the resulting raw sum equivalent to the existing
+sharper arctangent-kernel integral.  This is a finite rational decomposition,
+not yet the claim that the complementary strip is `∫ arctan`: that still
+requires the global product-derivative/FTC (or finite triangle/Fubini) proof,
+followed by canonical exp/log transport.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

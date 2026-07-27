@@ -458,6 +458,136 @@ theorem arctanLogKernel_lipschitz_on_unit :
     · simpa [Rat.one_mul] using hpull
     · native_decide
 
+/-- The complementary rational strip in the arctangent integration-by-parts
+route.  Its later identification with the integral of `arctan` needs the
+separate finite Fubini/product-derivative certificate; at this point it is
+only the literal rational kernel that complements `x/(1+x^2)`. -/
+def arctanComplementKernel (x : Rat) : Rat :=
+  (1 - x) * logTwoKernel (x * x)
+
+/-- Exact rational factorization of the complementary-strip difference. -/
+private theorem arctanComplementKernel_difference (s t : Rat) :
+    arctanComplementKernel s - arctanComplementKernel t =
+      ((t - s) * (1 + s + t - s * t)) /
+        ((1 + s * s) * (1 + t * t)) := by
+  have hspos : 0 < 1 + s * s := by
+    have hsq := RationalCircle.Stage.ratSquare_nonneg s
+    grind
+  have htpos : 0 < 1 + t * t := by
+    have hsq := RationalCircle.Stage.ratSquare_nonneg t
+    grind
+  have hsne : 1 + s * s ≠ 0 := Rat.ne_of_gt hspos
+  have htne : 1 + t * t ≠ 0 := Rat.ne_of_gt htpos
+  unfold arctanComplementKernel logTwoKernel
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have hscancel : (1 + s * s) * (1 + s * s)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hsne
+  have htcancel : (1 + t * t) * (1 + t * t)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ htne
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The complementary rational strip is three-Lipschitz on the unit
+interval.  This certificate is a direct finite denominator estimate. -/
+theorem arctanComplementKernel_lipschitz_on_unit :
+    Integral.LipschitzOnUnit arctanComplementKernel 3 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    let d : Rat := (1 + s * s) * (1 + t * t)
+    let c : Rat := 1 + s + t - s * t
+    have hsone : 1 <= 1 + s * s := by
+      have hsq := RationalCircle.Stage.ratSquare_nonneg s
+      grind
+    have htone : 1 <= 1 + t * t := by
+      have hsq := RationalCircle.Stage.ratSquare_nonneg t
+      grind
+    have hdpos : 0 < d := by
+      dsimp [d]
+      exact Rat.mul_pos (by grind) (by grind)
+    have hdone : 1 <= d := by
+      dsimp [d]
+      have hsnonneg : 0 <= 1 + s * s := Rat.le_trans (by native_decide) hsone
+      calc
+        1 = 1 * 1 := by native_decide
+        _ <= (1 + s * s) * 1 :=
+          Rat.mul_le_mul_of_nonneg_right hsone (by native_decide)
+        _ <= (1 + s * s) * (1 + t * t) :=
+          Rat.mul_le_mul_of_nonneg_left htone hsnonneg
+    have hdinv0 : 0 <= d⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hdpos)
+    have hdinv : d⁻¹ <= 1 := by
+      apply Rat.le_of_mul_le_mul_right (c := d)
+      · calc
+          d⁻¹ * d = d * d⁻¹ := by rw [Rat.mul_comm]
+          _ = 1 := Rat.mul_inv_cancel _ (Rat.ne_of_gt hdpos)
+          _ <= 1 * d := by simpa using hdone
+      · exact hdpos
+    have hproduct0 : 0 <= s * t := Rat.mul_nonneg hs0 ht0
+    have hproduct : s * t <= 1 := by
+      calc
+        s * t <= 1 * t :=
+          Rat.mul_le_mul_of_nonneg_right hs1 ht0
+        _ <= 1 * 1 :=
+          Rat.mul_le_mul_of_nonneg_left ht1 (by native_decide)
+        _ = 1 := by native_decide
+    have hc0 : 0 <= c := by
+      dsimp [c]
+      have hrest : 0 <= 1 - s * t := by grind
+      grind [Rat.sub_eq_add_neg]
+    have hc : c <= 3 := by
+      dsimp [c]
+      calc
+        1 + s + t - s * t <= 1 + s + t := by
+          have : 0 <= s * t := hproduct0
+          grind [Rat.sub_eq_add_neg]
+        _ <= 1 + 1 + 1 := by
+          exact rat_add_le_add
+            (Rat.add_le_add_left.mpr hs1) ht1
+        _ = 3 := by native_decide
+    have hctimes : c * d⁻¹ <= 3 := by
+      calc
+        c * d⁻¹ <= 3 * d⁻¹ :=
+          Rat.mul_le_mul_of_nonneg_right hc hdinv0
+        _ <= 3 * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hdinv (by native_decide)
+        _ = 3 := by native_decide
+    rw [arctanComplementKernel_difference]
+    change qabs ((t - s) * c / d) <= 3 * qabs (t - s)
+    rw [Rat.div_def, qabs_mul, qabs_mul,
+      qabs_eq_self_of_nonneg hc0,
+      qabs_eq_self_of_nonneg hdinv0]
+    calc
+      qabs (t - s) * c * d⁻¹ = qabs (t - s) * (c * d⁻¹) := by
+        rw [Rat.mul_assoc]
+      _ <= qabs (t - s) * 3 :=
+        Rat.mul_le_mul_of_nonneg_left hctimes (qabs_nonneg _)
+      _ = 3 * qabs (t - s) := by rw [Rat.mul_comm]
+
+/-- The two rational strips add pointwise to the usual arctangent kernel. -/
+theorem arctanComplementKernel_add_arctanLogKernel (x : Rat) :
+    arctanComplementKernel x + arctanLogKernel x =
+      1 / (1 + x * x) := by
+  unfold arctanComplementKernel arctanLogKernel logTwoKernel
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- A deliberately slack version of the existing two-Lipschitz arctangent
+kernel certificate.  It lets the exact four-Lipschitz sum box be compared to
+the sharper existing two-Lipschitz box by their common finite Riemann sum. -/
+private theorem arctanKernel_lipschitz_on_unit_four :
+    Integral.LipschitzOnUnit (fun x : Rat => 1 / (1 + x * x)) 4 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    have htwo := IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit.2
+      s t hs0 hs1 ht0 ht1
+    calc
+      qabs ((1 / (1 + s * s)) - (1 / (1 + t * t))) <=
+          2 * qabs (t - s) := htwo
+      _ <= 4 * qabs (t - s) := by
+        have habs : 0 <= qabs (t - s) := qabs_nonneg _
+        exact Rat.mul_le_mul_of_nonneg_right (by native_decide) habs
+
 /-- A local finite-fold congruence lemma used to put square-substitution sums
 in the same literal mesh normal form as the Darboux constructor. -/
 private theorem finiteFoldl_eq_of_pointwise
@@ -544,6 +674,76 @@ theorem arctanLogKernelIntegral_compute_eq (stage : Nat) :
     arctanLogKernelIntegral.compute stage =
       IntegralIdentities.LipschitzDyadic.compute arctanLogKernel 1 stage :=
   rfl
+
+/-- A literal certified integral for the rational strip complementary to
+`x/(1+x^2)`.  It is intentionally named as a strip rather than as an
+arctangent integral: the later finite Fubini/product-derivative proof is what
+will identify it with \(\int_0^1\arctan(x)\,dx\). -/
+def arctanComplementKernelIntegral : RealRaw :=
+  Integral.integralFor
+    (FunctionOnInterval.exactRat arctanComplementKernel 0 1)
+    (IntegralIdentities.LipschitzDyadic.construction arctanComplementKernel 3
+      arctanComplementKernel_lipschitz_on_unit)
+
+theorem arctanComplementKernelIntegral_valid :
+    arctanComplementKernelIntegral.Valid :=
+  Integral.integralFor_valid
+    (FunctionOnInterval.exactRat arctanComplementKernel 0 1)
+    (IntegralIdentities.LipschitzDyadic.construction arctanComplementKernel 3
+      arctanComplementKernel_lipschitz_on_unit)
+
+theorem arctanComplementKernelIntegral_compute_eq (stage : Nat) :
+    arctanComplementKernelIntegral.compute stage =
+      IntegralIdentities.LipschitzDyadic.compute arctanComplementKernel 3 stage :=
+  rfl
+
+/-- The raw sum of the two literal strip integrals is, stage by stage, the
+four-Lipschitz Darboux box for the arctangent kernel.  This is the finite
+additivity bridge that precedes any claim about the integral of arctangent. -/
+theorem arctanStripIntegrals_add_compute_eq_arctanKernel (stage : Nat) :
+    (arctanComplementKernelIntegral + arctanLogKernelIntegral).compute stage =
+      IntegralIdentities.LipschitzDyadic.compute
+        (fun x : Rat => 1 / (1 + x * x)) 4 stage := by
+  change
+    { lo := (arctanComplementKernelIntegral.compute stage).lo +
+        (arctanLogKernelIntegral.compute stage).lo,
+      hi := (arctanComplementKernelIntegral.compute stage).hi +
+        (arctanLogKernelIntegral.compute stage).hi } =
+      IntegralIdentities.LipschitzDyadic.compute
+        (fun x : Rat => 1 / (1 + x * x)) 4 stage
+  rw [arctanComplementKernelIntegral_compute_eq,
+    arctanLogKernelIntegral_compute_eq]
+  symm
+  have hadd := IntegralIdentities.LipschitzDyadic.compute_add
+    arctanComplementKernel arctanLogKernel 3 1 stage
+  have hkernel : (fun x : Rat =>
+      arctanComplementKernel x + arctanLogKernel x) =
+      (fun x : Rat => 1 / (1 + x * x)) := by
+    funext x
+    exact arctanComplementKernel_add_arctanLogKernel x
+  rw [hkernel] at hadd
+  exact hadd
+
+/-- The two-strip sum agrees with the already certified arctangent-kernel
+integral.  Both finite boxes contain the same literal uniform left Riemann
+sum; no abstract integral-linearity or completeness principle is used. -/
+theorem arctanStripIntegrals_add_equiv_arctanKernelIntegral :
+    (arctanComplementKernelIntegral + arctanLogKernelIntegral).Equiv
+      IntegralIdentities.arctanKernelLipschitzIntegral := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanComplementKernelIntegral + arctanLogKernelIntegral)
+    IntegralIdentities.arctanKernelLipschitzIntegral stage stage).mpr
+  rw [arctanStripIntegrals_add_compute_eq_arctanKernel,
+    IntegralIdentities.arctanKernelLipschitzIntegral_compute_eq]
+  have hfour :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+      arctanKernel_lipschitz_on_unit_four stage
+  have htwo :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+      IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit stage
+  exact ⟨Rat.le_trans hfour.1 htwo.2, Rat.le_trans htwo.1 hfour.2⟩
 
 /-- Stage by stage, the existing square-pullback boxes are exactly twice the
 boxes for the first arctangent--logarithm strip.  Thus this bridge is a

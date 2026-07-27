@@ -565,6 +565,52 @@ exponential remains the separate exp/log agreement theorem; no such
 identification is assumed here.
 \end{theorem}
 
+\begin{theorem}[Rational two-strip decomposition]
+\label{thm:arctan-log-two-strip-decomposition}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_add}
+\lean{ComputableAnalysis.Logarithm.arctanComplementKernel}
+\lean{ComputableAnalysis.Logarithm.arctanComplementKernel_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.arctanComplementKernelIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_compute_eq_arctanKernel}
+\lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_equiv_arctanKernelIntegral}
+\uses{thm:arctan-log-first-strip}
+\leanok
+Put
+\[
+  J=\int_0^1\frac{1-x}{1+x^2}\,\dd x,
+  \qquad
+  K=\int_0^1\frac{x}{1+x^2}\,\dd x.
+\]
+Both are now literal rational Lipschitz--Darboux constructions.  The second
+kernel has the already checked constant \(1\); Lean proves the direct
+factorization
+\[
+ \frac{1-s}{1+s^2}-\frac{1-t}{1+t^2}
+ =\frac{(t-s)(1+s+t-st)}{(1+s^2)(1+t^2)},
+\]
+which gives the first one the rational Lipschitz constant \(3\) on the unit
+interval.  Pointwise, the two strips satisfy
+\[
+  \frac{1-x}{1+x^2}+\frac{x}{1+x^2}=\frac1{1+x^2}.
+\]
+
+More importantly, this is not recorded merely as a prospective integral
+linearity rule.  The generic finite Darboux lower and upper boxes add
+exactly, stage by stage, so Lean proves that the raw sum \(J+K\) is the
+four-Lipschitz box for \(1/(1+x^2)\).  That box and the existing sharper
+two-Lipschitz arctangent-kernel box contain the same literal uniform left
+Riemann sum at every stage.  Consequently,
+\[
+  J+K\Equiv\int_0^1\frac{\dd x}{1+x^2}.
+\]
+
+This is deliberately a rational-kernel decomposition, not yet an integration
+by parts theorem: identifying \(J\) with
+\(\int_0^1\arctan(x)\,\dd x\) requires the pending finite
+triangle/Fubini or product-derivative/FTC certificate.  It therefore does
+not add a pi-scoreboard row or replace that certificate.
+\end{theorem}
+
 \begin{theorem}[Series equals the finite reciprocal integral]
 \label{thm:log-two-series-reciprocal-integral}
 \lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower}

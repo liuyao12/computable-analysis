@@ -11049,7 +11049,9 @@ private theorem lowerSum_natScale (f : Rat -> Rat) (L scale : Nat) :
     forall intervals,
       lowerSum (fun x => (scale : Rat) * f x) (scale * L) intervals =
         (scale : Rat) * lowerSum f L intervals
-  | [] => by simp [lowerSum]
+  | [] => by
+      simp only [lowerSum]
+      grind
   | (p, r) :: rest => by
       rw [lowerSum, lowerSum, lowerCell_natScale, lowerSum_natScale]
       grind [Rat.mul_add]
@@ -11058,7 +11060,9 @@ private theorem upperSum_natScale (f : Rat -> Rat) (L scale : Nat) :
     forall intervals,
       upperSum (fun x => (scale : Rat) * f x) (scale * L) intervals =
         (scale : Rat) * upperSum f L intervals
-  | [] => by simp [upperSum]
+  | [] => by
+      simp only [upperSum]
+      grind
   | (p, r) :: rest => by
       rw [upperSum, upperSum, upperCell_natScale, upperSum_natScale]
       grind [Rat.mul_add]
@@ -11179,6 +11183,62 @@ theorem compute_natScale (f : Rat -> Rat) (L scale stage : Nat) :
   unfold compute
   dsimp
   rw [lowerSum_natScale, upperSum_natScale]
+
+/-- Adding two Lipschitz lower rectangles is exactly the lower rectangle for
+the pointwise sum, with the two rational constants added.  This finite cell
+identity is the algebra needed to join independently certified integral
+strips without postulating linearity of an integral. -/
+private theorem lowerCell_add (f g : Rat -> Rat) (L M : Nat)
+    (p r : Rat) :
+    lowerCell (fun x => f x + g x) (L + M) p r =
+      lowerCell f L p r + lowerCell g M p r := by
+  unfold lowerCell Integral.lipschitzLowerCell
+  rw [Rat.natCast_add]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The matching exact finite identity for upper Lipschitz rectangles. -/
+private theorem upperCell_add (f g : Rat -> Rat) (L M : Nat)
+    (p r : Rat) :
+    upperCell (fun x => f x + g x) (L + M) p r =
+      upperCell f L p r + upperCell g M p r := by
+  unfold upperCell Integral.lipschitzUpperCell
+  rw [Rat.natCast_add]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem lowerSum_add (f g : Rat -> Rat) (L M : Nat) :
+    forall intervals,
+      lowerSum (fun x => f x + g x) (L + M) intervals =
+        lowerSum f L intervals + lowerSum g M intervals
+  | [] => by
+      simp only [lowerSum]
+      grind
+  | (p, r) :: rest => by
+      rw [lowerSum, lowerSum, lowerSum, lowerCell_add, lowerSum_add]
+      grind [Rat.add_assoc]
+
+private theorem upperSum_add (f g : Rat -> Rat) (L M : Nat) :
+    forall intervals,
+      upperSum (fun x => f x + g x) (L + M) intervals =
+        upperSum f L intervals + upperSum g M intervals
+  | [] => by
+      simp only [upperSum]
+      grind
+  | (p, r) :: rest => by
+      rw [upperSum, upperSum, upperSum, upperCell_add, upperSum_add]
+      grind [Rat.add_assoc]
+
+/-- The literal finite Darboux box for a pointwise sum is exactly the
+componentwise sum of the two boxes.  This is a stagewise rational identity;
+the Lipschitz hypotheses needed to certify either side remain separate. -/
+theorem compute_add (f g : Rat -> Rat) (L M stage : Nat) :
+    compute (fun x => f x + g x) (L + M) stage =
+      { lo := (compute f L stage).lo + (compute g M stage).lo,
+        hi := (compute f L stage).hi + (compute g M stage).hi } := by
+  unfold compute
+  dsimp
+  rw [lowerSum_add, upperSum_add]
 
 /-- The two rational values used for a Lipschitz cell bound every value of the
 kernel on that cell.  This is the local Darboux meaning of the rectangle

@@ -390,7 +390,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   `two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral` establish
   `2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`. The remaining Pi-route gates are the
   complementary `∫ arctan` strip through global product derivative/FTC and
-  the later canonical exp/log identification.
+  the later canonical exp/log identification.  A useful finite predecessor is
+  now checked without pretending to discharge that gate:
+  `arctanComplementKernelIntegral` is the literal 3-Lipschitz integral of
+  `(1-x)/(1+x*x)`, and the exact Darboux-box addition theorem
+  `LipschitzDyadic.compute_add` proves that this strip plus
+  `arctanLogKernelIntegral` is stagewise the 4-Lipschitz box for
+  `1/(1+x*x)`. Common uniform-left sums yield
+  `arctanStripIntegrals_add_equiv_arctanKernelIntegral`. This is the
+  rational two-strip decomposition that a later triangle/Fubini or
+  product-derivative/FTC certificate must identify with `∫ arctan`; it is not
+  a new Pi-scoreboard row.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
