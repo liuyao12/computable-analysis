@@ -1361,6 +1361,97 @@ theorem peanoBakerFactorialTail_shifted_le_eps {M T : Rat}
   exact RationalMajorant.factorialTailPartial_shifted_le_eps
     (Rat.mul_nonneg hM hT) eps terms
 
+/-- The computable iteration count used in the zero-initial Volterra
+uniqueness argument.  The factor B is a rational enclosure bound for a
+candidate difference, while the remaining factor is the usual Peano--Baker
+factorial-tail radius. -/
+def zeroInitialVolterraIterationShift (M T B : Rat) (eps : QPos) : Nat :=
+  RationalMajorant.halfDecayShift
+    (B * (2 * RationalMajorant.factorialTailTerm (M * T)
+      (RationalMajorant.factorialTailStart (M * T)))) eps
+
+/-- After this many ordered substitutions, a zero-initial Volterra estimate
+of the form B * (M*T)^n / n! is below any requested positive rational
+tolerance.  This is a finite rational estimate, not an appeal to a complete
+space of functions. -/
+theorem zeroInitialVolterra_iteration_le_eps {M T B : Rat}
+    (hM : 0 <= M) (hT : 0 <= T) (hB : 0 <= B) (eps : QPos) :
+    B * RationalMajorant.factorialTailTerm (M * T)
+      (RationalMajorant.factorialTailStart (M * T) +
+        zeroInitialVolterraIterationShift M T B eps) <= eps.val := by
+  let shift := zeroInitialVolterraIterationShift M T B eps
+  have htail := peanoBakerFactorialTail_shifted_bound hM hT shift 1
+  have htailTerm :
+      RationalMajorant.factorialTailTerm (M * T)
+        (RationalMajorant.factorialTailStart (M * T) + shift) <=
+        2 * RationalMajorant.factorialTailTerm (M * T)
+          (RationalMajorant.factorialTailStart (M * T)) *
+            ((1 : Rat) / 2) ^ shift := by
+    simpa [peanoBakerFactorialTail,
+      RationalMajorant.factorialTailPartial, Rat.zero_add] using htail
+  have hscaled := Rat.mul_le_mul_of_nonneg_left htailTerm hB
+  have htermNonneg : 0 <= RationalMajorant.factorialTailTerm (M * T)
+      (RationalMajorant.factorialTailStart (M * T)) :=
+    RationalMajorant.factorialTailTerm_nonneg (Rat.mul_nonneg hM hT) _
+  have hradiusNonneg :
+      0 <= B * (2 * RationalMajorant.factorialTailTerm (M * T)
+        (RationalMajorant.factorialTailStart (M * T))) := by
+    exact Rat.mul_nonneg hB (Rat.mul_nonneg (by native_decide) htermNonneg)
+  calc
+    B * RationalMajorant.factorialTailTerm (M * T)
+        (RationalMajorant.factorialTailStart (M * T) + shift) <=
+        B * (2 * RationalMajorant.factorialTailTerm (M * T)
+          (RationalMajorant.factorialTailStart (M * T)) *
+            ((1 : Rat) / 2) ^ shift) := hscaled
+    _ = (B * (2 * RationalMajorant.factorialTailTerm (M * T)
+          (RationalMajorant.factorialTailStart (M * T)))) *
+            ((1 : Rat) / 2) ^ shift := by
+      grind [Rat.mul_assoc]
+    _ <= eps.val := by
+      simpa [zeroInitialVolterraIterationShift, shift] using
+        RationalMajorant.halfDecayShift_spec hradiusNonneg eps
+
+/-- A scalar error satisfying the repeated zero-initial Volterra estimate is
+literally zero.  A continuous uniqueness proof need only establish this
+finite bound for the norm of the difference of two candidate solutions; the
+factorial-tail kernel below then closes the equality without a supremum or a
+completeness argument. -/
+def ZeroInitialVolterraIterationBound (M T B error : Rat) : Prop :=
+  0 <= error /\
+  forall iterations : Nat,
+    error <= B * RationalMajorant.factorialTailTerm (M * T)
+      (RationalMajorant.factorialTailStart (M * T) + iterations)
+
+theorem zeroInitialVolterraIterationBound_eq_zero {M T B error : Rat}
+    (hM : 0 <= M) (hT : 0 <= T) (hB : 0 <= B)
+    (herror : ZeroInitialVolterraIterationBound M T B error) :
+    error = 0 := by
+  rcases herror with ⟨herrorNonneg, hiterations⟩
+  by_cases hzero : error = 0
+  · exact hzero
+  · have herrorPos : 0 < error :=
+      Rat.lt_of_le_of_ne herrorNonneg (Ne.symm hzero)
+    let eps : QPos :=
+      ⟨error / 2, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos herrorPos
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+    have hiteration := hiterations
+      (zeroInitialVolterraIterationShift M T B eps)
+    have hsmall := zeroInitialVolterra_iteration_le_eps hM hT hB eps
+    have hhalf : error <= error / 2 := by
+      exact Rat.le_trans hiteration hsmall
+    have hstrict : error / 2 < error := by
+      rw [Rat.div_def]
+      have hinv : (2 : Rat)⁻¹ < 1 := by native_decide
+      calc
+        error * (2 : Rat)⁻¹ < error * 1 :=
+          Rat.mul_lt_mul_of_pos_left hinv herrorPos
+        _ = error := Rat.mul_one _
+    have hnot : ¬ error <= error / 2 := by
+      simpa [Rat.not_le] using hstrict
+    exact False.elim (hnot hhalf)
+
 end LinearODE
 
 end ComputableAnalysis
