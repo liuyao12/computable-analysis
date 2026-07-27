@@ -559,6 +559,124 @@ theorem trajectory_eq_transition_add_zeroInitial
   rw [trajectory_eq_homogeneous_add_zeroInitial]
   rw [homogeneousTrajectory_eq_chronologicalStepProduct system initial n]
 
+/-- The literal finite sum of a vector-valued sequence.  It is kept separate
+from matrix sums because the inhomogeneous Peano--Baker formula transports
+forcing *vectors*, not additional matrices. -/
+def vectorSequenceSum {dimension : Nat} (f : Nat -> RatVector dimension) :
+    Nat -> RatVector dimension
+  | 0 => vectorZero dimension
+  | n + 1 => vectorAdd (vectorSequenceSum f n) (f n)
+
+theorem vectorSequenceSum_congr_on {dimension : Nat}
+    (f g : Nat -> RatVector dimension) :
+    forall n, (forall k, k < n -> f k = g k) ->
+      vectorSequenceSum f n = vectorSequenceSum g n
+  | 0, _ => rfl
+  | n + 1, h => by
+      rw [vectorSequenceSum, vectorSequenceSum,
+        vectorSequenceSum_congr_on f g n (fun k hk => h k (by omega)),
+        h n (by omega)]
+
+theorem matrixApply_vectorSequenceSum {dimension : Nat}
+    (A : RatMatrix dimension) (f : Nat -> RatVector dimension) :
+    forall n,
+      matrixApply A (vectorSequenceSum f n) =
+        vectorSequenceSum (fun k => matrixApply A (f k)) n
+  | 0 => by
+      change matrixApply A (vectorZero dimension) = vectorZero dimension
+      exact matrixApply_zero A
+  | n + 1 => by
+      change matrixApply A (vectorAdd (vectorSequenceSum f n) (f n)) =
+        vectorAdd (vectorSequenceSum (fun k => matrixApply A (f k)) n)
+          (matrixApply A (f n))
+      rw [matrixApply_vectorAdd, matrixApply_vectorSequenceSum A f n]
+
+/-- The transition carrying the forcing sample at time `k` to the final
+sample time `final`.  The first step after the force is `k + 1`; hence a
+force applied at the final step itself is transported by the identity. -/
+def forcingTransition (system : DiscreteLinearSystem dimension)
+    (final k : Nat) : RatMatrix dimension :=
+  chronologicalStepProduct system.step (k + 1) (final - (k + 1))
+
+/-- The `k`th time-ordered forcing contribution to the state at `final`. -/
+def duhamelTerm (system : DiscreteLinearSystem dimension)
+    (final k : Nat) : RatVector dimension :=
+  matrixApply (forcingTransition system final k) (system.forcing k)
+
+/-- The finite Duhamel sum for the zero-initial sampled system:
+`∑_{k < N} S_{N-1} ⋯ S_{k+1} g_k`.  Every factor is a literal
+rational transition product; no continuous integral or limiting argument is
+hidden in this definition. -/
+def duhamelSum (system : DiscreteLinearSystem dimension) (final : Nat) :
+    RatVector dimension :=
+  vectorSequenceSum (duhamelTerm system final) final
+
+private theorem forcingTransition_succ
+    (system : DiscreteLinearSystem dimension) (n k : Nat) (hk : k < n) :
+    forcingTransition system (n + 1) k =
+      matrixMul (system.step n) (forcingTransition system n k) := by
+  unfold forcingTransition
+  have hlength : n + 1 - (k + 1) = (n - (k + 1)) + 1 := by
+    omega
+  have hindex : k + 1 + (n - (k + 1)) = n := by
+    exact Nat.add_sub_of_le (by omega)
+  rw [hlength, chronologicalStepProduct_succ]
+  rw [hindex]
+
+private theorem duhamelTerm_succ
+    (system : DiscreteLinearSystem dimension) (n k : Nat) (hk : k < n) :
+    duhamelTerm system (n + 1) k =
+      matrixApply (system.step n) (duhamelTerm system n k) := by
+  unfold duhamelTerm
+  rw [forcingTransition_succ system n k hk, matrixApply_matrixMul]
+
+private theorem duhamelTerm_latest
+    (system : DiscreteLinearSystem dimension) (n : Nat) :
+    duhamelTerm system (n + 1) n = system.forcing n := by
+  unfold duhamelTerm forcingTransition
+  simp [matrixApply_identity]
+
+private theorem duhamelSum_prefix_succ
+    (system : DiscreteLinearSystem dimension) (n : Nat) :
+    vectorSequenceSum (duhamelTerm system (n + 1)) n =
+      matrixApply (system.step n) (duhamelSum system n) := by
+  calc
+    vectorSequenceSum (duhamelTerm system (n + 1)) n =
+        vectorSequenceSum
+          (fun k => matrixApply (system.step n) (duhamelTerm system n k)) n :=
+      vectorSequenceSum_congr_on _ _ n
+        (fun k hk => duhamelTerm_succ system n k hk)
+    _ = matrixApply (system.step n) (duhamelSum system n) := by
+      unfold duhamelSum
+      exact (matrixApply_vectorSequenceSum (system.step n)
+        (duhamelTerm system n) n).symm
+
+/-- Exact finite variation of constants for the zero-initial sampled system.
+The recursive forcing response is the explicit chronological Duhamel sum. -/
+theorem trajectory_zeroInitial_eq_duhamelSum
+    (system : DiscreteLinearSystem dimension) :
+    forall n, system.trajectory (vectorZero dimension) n = duhamelSum system n
+  | 0 => rfl
+  | n + 1 => by
+      rw [trajectory_succ,
+        trajectory_zeroInitial_eq_duhamelSum system n]
+      unfold duhamelSum
+      rw [vectorSequenceSum, duhamelSum_prefix_succ,
+        duhamelTerm_latest]
+      rfl
+
+/-- Exact finite variation of constants with both the homogeneous state
+transition and the explicit time-ordered Duhamel sum displayed. -/
+theorem trajectory_eq_transition_add_duhamelSum
+    (system : DiscreteLinearSystem dimension) (initial : RatVector dimension)
+    (n : Nat) :
+    system.trajectory initial n =
+      vectorAdd
+        (matrixApply (chronologicalStepProduct system.step 0 n) initial)
+        (duhamelSum system n) := by
+  rw [trajectory_eq_transition_add_zeroInitial,
+    trajectory_zeroInitial_eq_duhamelSum]
+
 /-- A sampled system has no inhomogeneous contribution when every forcing
 sample is the zero vector. -/
 def ForcingZero (system : DiscreteLinearSystem dimension) : Prop :=

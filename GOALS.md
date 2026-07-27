@@ -126,8 +126,10 @@ gates.
 - **Linear ODEs — finite core checked; analytic layer open.**
   `PeanoBaker.lean` proves finite chronological products, the ordered-word
   expansion, discrete variation of constants, and recurrence uniqueness:
-  every sampled candidate is the recursive trajectory, while a zero-initial
-  homogeneous sampled candidate is identically zero. Its checked forced
+  the zero-initial forcing response is the explicit time-ordered Duhamel sum
+  sum_(k<N) S_(N-1) * ... * S_(k+1) * g_k; every sampled candidate is the
+  recursive trajectory, while a zero-initial homogeneous sampled candidate is
+  identically zero. Its checked forced
   harmonic-oscillator instance derives the exact second-order Euler recurrence
   after vectorizing position and velocity. The scientific-calculus gate is the
   continuous interval-matrix Peano--Baker series with simplex
@@ -743,10 +745,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `chronologicalStepProduct_eulerIncrement` is the already-checked
   Peano--Baker chronological product. The strengthened sampled
   variation-of-constants theorem
-  `DiscreteLinearSystem.trajectory_eq_transition_add_zeroInitial` therefore
-  splits an inhomogeneous trajectory into that finite transition of its
-  initial state and the zero-initial forcing response. `ForcingZero` makes
-  that response vanish.
+  DiscreteLinearSystem.trajectory_eq_transition_add_duhamelSum now splits
+  an inhomogeneous trajectory into that finite transition of its initial state
+  and the literal time-ordered forcing sum
+  sum_(k<N) S_(N-1) * ... * S_(k+1) * g_k.
+  trajectory_zeroInitial_eq_duhamelSum separately identifies the latter
+  with the recursive zero-initial response. ForcingZero makes that response
+  vanish.
   The new `SolvesRecurrence` and `SolvesHomogeneousRecurrence` witnesses
   separate the recurrence specification from its recursive evaluator.
   `solvesRecurrence_eq_trajectory` proves every sampled candidate is the

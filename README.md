@@ -25,7 +25,8 @@ The finite layer also now exposes the general transition
 `S_(N-1) * ... * S_0` for a sampled recurrence, proves that it acts exactly
 on the homogeneous trajectory, and gives the inhomogeneous trajectory as that
 transition of the initial state plus its zero-initial forcing response. It now
-also proves finite uniqueness: every candidate sequence satisfying the sampled
+also expands that response as the explicit time-ordered Duhamel sum
+sum_(k<N) S_(N-1) * ... * S_(k+1) * g_k. It proves finite uniqueness: every candidate sequence satisfying the sampled
 recurrence is that trajectory, and a zero-initial homogeneous candidate is
 identically zero. This is the exact discrete core of the later constructive
 uniqueness proof, not a substitute for its continuous simplex-integral and

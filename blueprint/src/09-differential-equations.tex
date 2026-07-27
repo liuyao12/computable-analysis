@@ -171,17 +171,22 @@ finite Peano--Baker chronological product
 \]
 Lean proves the exact finite decomposition
 \[
- x_N=H_N(x_0)+v_N,\qquad
- v_0=0,\quad v_{k+1}=S_kv_k+g_k.
+ x_N=T(N,0)x_0+v_N,\qquad
+ v_N=\sum_{k=0}^{N-1}T(N,k+1)g_k,
+ \qquad T(N,k+1)=S_{N-1}\cdots S_{k+1}.
 \]
-Thus \(v_N\) is the finite, time-ordered Duhamel contribution of the forcing
-samples. The checked lemmas
-for the transition action and variation-of-constants identity deliberately
-keep the matrix products and the forcing response recursive, so they need only
-the distributivity of finite rational matrix action; the future matrix-simplex
-integral formula will use the same time order. The \code{ForcingZero} condition
-and its two theorems prove that, when every \(g_k=0\), the second summand
-vanishes and the trajectory is exactly the homogeneous action.
+The empty transition in the last summand is \(I\), so the newest force is
+added without further transport. Thus \(v_N\) is the finite, time-ordered
+Duhamel contribution of the forcing samples. Lean defines the displayed vector
+sum as \code{DiscreteLinearSystem.duhamelSum};
+\code{trajectory\_zeroInitial\_eq\_duhamelSum} identifies it with the
+recursive zero-initial response, and
+\code{trajectory\_eq\_transition\_add\_duhamelSum} proves the full displayed
+formula. The proof uses only finite distributivity of rational matrix action;
+the future matrix-simplex integral formula will use exactly the same time
+order. The \code{ForcingZero} condition and its two theorems prove that, when
+every \(g_k=0\), the second summand vanishes and the trajectory is exactly the
+homogeneous action.
 \end{theorem}
 
 \begin{theorem}[Finite uniqueness for sampled linear systems]
