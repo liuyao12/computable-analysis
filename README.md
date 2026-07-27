@@ -230,8 +230,14 @@ The pullback `x ↦ 2*x/(1+x*x)` is now certified 2-Lipschitz, and its
 Lipschitz--Darboux integral has exact width `4/2^stage`.
 `logTwoSquareStieltjesRaw` stabilizes the literal Stieltjes mesh with the
 same rational budget and is proved equivalent to that pullback integral.
-What remains is the finite common-refinement comparison with the ordinary
-`t ↦ 1/(1+t)` mesh; no general substitution theorem is being assumed.
+The finite common-refinement is now checked too: the uniform `n^2` mesh
+decomposes into square blocks of `2*k+1` cells, and reciprocal-kernel
+monotonicity plus its Lipschitz bound gives an aggregate error at most `4/n`.
+Thus `logTwoSquarePullbackIntegral_equiv_reciprocalIntegral` proves the
+specialized square substitution
+`∫₀¹ 2*x/(1+x*x) dx ≡ ∫₀¹ dt/(1+t)`.  This uses only finite rational
+mesh comparisons; identifying the resulting logarithm with the inverse of
+the selected canonical exponential remains separate.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

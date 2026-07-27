@@ -511,21 +511,21 @@ theorem logTwoSquarePullbackIntegral_contains_weightedMesh
   exact IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
     logTwoSquarePullback_lipschitz_on_unit stage
 
-/-- The direct finite square-Stieltjes candidate for the pullback integral.
-At dyadic stage the explicit expansion is exactly the finite dx-squared
-correction budget from the substitution identity. -/
+/-- The direct finite square-Stieltjes candidate.  Its radius covers both the
+finite square-substitution correction and the later square-block comparison
+with the reciprocal mesh. -/
 def logTwoSquareStieltjesCandidateCompute (stage : Nat) : QInterval :=
   let meshStage := 2 ^ stage
   let sum := logTwoSquareMeshStieltjesSum meshStage meshStage
   QInterval.expand { lo := sum, hi := sum }
-    (1 / (meshStage : Rat))
+    (4 * (1 / (meshStage : Rat)))
 
 def logTwoSquareStieltjesCandidate : RealRaw where
   compute := logTwoSquareStieltjesCandidateCompute
 
 theorem logTwoSquareStieltjesCandidateCompute_width (stage : Nat) :
     (logTwoSquareStieltjesCandidateCompute stage).width =
-      2 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+      8 * (1 / (((2 ^ stage : Nat) : Rat))) := by
   unfold logTwoSquareStieltjesCandidateCompute
   rw [QInterval.expand_width]
   simp only [QInterval.width]
@@ -536,14 +536,18 @@ theorem logTwoSquareStieltjesCandidateCompute_width (stage : Nat) :
   rw [hzero]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
-/-- The candidate width is no larger than the certified pullback-integral
-width, and therefore has an executable shrink modulus. -/
+/-- The wider candidate still has an executable shrink modulus: its width is
+twice the certified pullback-integral width at the same dyadic stage. -/
 theorem logTwoSquareStieltjesCandidate_widthsShrink :
     RealRaw.WidthsShrinkToZero logTwoSquareStieltjesCandidate.compute := by
   intro eps
+  let half : QPos := ⟨eps.val / 2, by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property
+      ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
   obtain ⟨N, hN⟩ :=
     (IntegralIdentities.LipschitzDyadic.compute_widthsShrink
-      (f := logTwoSquarePullback) 2) eps
+      (f := logTwoSquarePullback) 2) half
   refine ⟨N, ?_⟩
   intro stage hstage
   rw [show logTwoSquareStieltjesCandidate.compute stage =
@@ -555,14 +559,18 @@ theorem logTwoSquareStieltjesCandidate_widthsShrink :
     rw [Rat.div_def, Rat.one_mul]
     exact Rat.le_of_lt ((Rat.inv_pos).2 hmesh_pos)
   calc
-    2 * (1 / (((2 ^ stage : Nat) : Rat)) ) <=
-        4 * (1 / (((2 ^ stage : Nat) : Rat))) :=
-      Rat.mul_le_mul_of_nonneg_right (by native_decide) hmesh_inv_nonneg
-    _ = (IntegralIdentities.LipschitzDyadic.compute
+    8 * (1 / (((2 ^ stage : Nat) : Rat)) ) =
+        2 * (IntegralIdentities.LipschitzDyadic.compute
           logTwoSquarePullback 2 stage).width := by
       rw [IntegralIdentities.LipschitzDyadic.compute_width]
       grind [Rat.mul_assoc, Rat.mul_comm]
-    _ <= eps.val := hN stage hstage
+    _ <= 2 * half.val :=
+      Rat.mul_le_mul_of_nonneg_left (hN stage hstage)
+        (by native_decide)
+    _ = eps.val := by
+      dsimp [half]
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 /-- The finite Stieltjes candidate overlaps the certified pullback-integral
 box at every dyadic stage.  The witness is the exact weighted mesh sum; no
@@ -576,13 +584,28 @@ theorem logTwoSquareStieltjesCandidate_overlaps_pullbackIntegral
   let stieltjes := logTwoSquareMeshStieltjesSum meshStage meshStage
   let weighted := logTwoSquareMeshWeightedSum meshStage meshStage
   let correction := logTwoSquareMeshCorrection meshStage meshStage
-  let radius := 1 / (meshStage : Rat)
+  let radius := 4 * (1 / (meshStage : Rat))
+  have hmesh_pos : 0 < meshStage := Nat.pow_pos (by omega : 0 < 2)
+  have hmesh_inv_nonneg : 0 <= 1 / (meshStage : Rat) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      ((Rat.natCast_pos).2 hmesh_pos))
   have hidentity : stieltjes = weighted + correction := by
     exact logTwoSquareMesh_substitution_identity meshStage meshStage
   have hcorrection : 0 <= correction /\ correction <= radius := by
-    simpa [radius] using
-      logTwoSquareMeshCorrection_le_one_div meshStage
-        (Nat.pow_pos (by omega : 0 < 2))
+    constructor
+    · exact (logTwoSquareMeshCorrection_le_one_div meshStage
+        hmesh_pos).1
+    · calc
+        correction <= 1 / (meshStage : Rat) :=
+          (logTwoSquareMeshCorrection_le_one_div meshStage
+            hmesh_pos).2
+        _ <= 4 * (1 / (meshStage : Rat)) :=
+          by
+            simpa using
+              (Rat.mul_le_mul_of_nonneg_right
+                (by native_decide : (1 : Rat) <= 4) hmesh_inv_nonneg)
+        _ = radius := by rfl
   have hweighted :
       (logTwoSquarePullbackIntegral.compute stage).lo <= weighted /\
         weighted <= (logTwoSquarePullbackIntegral.compute stage).hi := by
@@ -732,17 +755,21 @@ private def logTwoUniformLeftPrefix (meshStage terms : Nat) : Rat :=
       total + (1 / ((meshStage * meshStage : Nat) : Rat)) *
         logTwoKernel ((j : Rat) / ((meshStage * meshStage : Nat) : Rat))) 0
 
-/-- The same uniform prefix, enumerated square block by square block.  The
-`m`th block has the indices `m², ..., (m+1)²-1`, hence `2m+1` cells. -/
+/-- The uniform left sum on the `k`th square block.  Its finite index set is
+`k², ..., (k+1)²-1`, written by its offsets `0, ..., 2k`. -/
+private def logTwoUniformLeftSquareBlock (meshStage k : Nat) : Rat :=
+  (List.range (2 * k + 1)).foldl
+    (fun (total : Rat) (offset : Nat) =>
+      total + (1 / ((meshStage * meshStage : Nat) : Rat)) *
+        logTwoKernel (((k * k + offset : Nat) : Rat) /
+          ((meshStage * meshStage : Nat) : Rat))) 0
+
+/-- The same uniform prefix, enumerated square block by square block. -/
 private def logTwoUniformLeftSquareBlocks (meshStage : Nat) : Nat -> Rat
   | 0 => 0
   | terms + 1 =>
       logTwoUniformLeftSquareBlocks meshStage terms +
-        (List.range (2 * terms + 1)).foldl
-          (fun (total : Rat) (offset : Nat) =>
-            total + (1 / ((meshStage * meshStage : Nat) : Rat)) *
-              logTwoKernel (((terms * terms + offset : Nat) : Rat) /
-                ((meshStage * meshStage : Nat) : Rat))) 0
+        logTwoUniformLeftSquareBlock meshStage terms
 
 /-- Adding a finite sequence of rational summands commutes with changing the
 initial accumulator to the left.  This small finite-fold lemma keeps the
@@ -761,6 +788,61 @@ private theorem logTwo_foldl_add_initial (g : Nat -> Rat)
       rw [ih (initial + g x)]
       rw [show (0 : Rat) + g x = g x by grind, ih (g x)]
       grind [Rat.add_assoc]
+
+/-- A finite list of summands bounded above by a constant has the expected
+constant-times-length upper bound. -/
+private theorem foldl_add_le_length_mul
+    (xs : List Nat) (term : Nat -> Rat) (c : Rat)
+    (hterm : forall i, i ∈ xs -> term i <= c) :
+    xs.foldl (fun total i => total + term i) 0 <= (xs.length : Rat) * c := by
+  induction xs with
+  | nil =>
+      simp
+  | cons x xs ih =>
+      have hrest : xs.foldl (fun total i => total + term i) 0 <=
+          (xs.length : Rat) * c :=
+        ih (fun i hi => hterm i (List.mem_cons_of_mem x hi))
+      have hx : term x <= c := hterm x (by simp)
+      simp only [List.length_cons]
+      rw [Rat.natCast_add]
+      have hone : ((1 : Nat) : Rat) = 1 := by native_decide
+      rw [hone]
+      calc
+        (x :: xs).foldl (fun total i => total + term i) 0 =
+            xs.foldl (fun total i => total + term i) (term x) := by
+              simp only [List.foldl, Rat.zero_add]
+        _ = term x + xs.foldl (fun total i => total + term i) 0 :=
+          logTwo_foldl_add_initial term xs (term x)
+        _ <= c + (xs.length : Rat) * c := rat_add_le_add hx hrest
+        _ = ((xs.length : Rat) + 1) * c := by
+          grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+/-- The lower counterpart of `foldl_add_le_length_mul`. -/
+private theorem length_mul_le_foldl_add
+    (xs : List Nat) (term : Nat -> Rat) (c : Rat)
+    (hterm : forall i, i ∈ xs -> c <= term i) :
+    (xs.length : Rat) * c <= xs.foldl (fun total i => total + term i) 0 := by
+  induction xs with
+  | nil =>
+      simp
+  | cons x xs ih =>
+      have hrest : (xs.length : Rat) * c <=
+          xs.foldl (fun total i => total + term i) 0 :=
+        ih (fun i hi => hterm i (List.mem_cons_of_mem x hi))
+      have hx : c <= term x := hterm x (by simp)
+      simp only [List.length_cons]
+      rw [Rat.natCast_add]
+      have hone : ((1 : Nat) : Rat) = 1 := by native_decide
+      rw [hone]
+      calc
+        ((xs.length : Rat) + 1) * c = c + (xs.length : Rat) * c := by
+          grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+        _ <= term x + xs.foldl (fun total i => total + term i) 0 :=
+          rat_add_le_add hx hrest
+        _ = xs.foldl (fun total i => total + term i) (term x) :=
+          (logTwo_foldl_add_initial term xs (term x)).symm
+        _ = (x :: xs).foldl (fun total i => total + term i) 0 := by
+          simp only [List.foldl, Rat.zero_add]
 
 /-- Exact finite reindexing of a uniform `n²`-mesh into the `n` square-image
 blocks.  This is the discrete common-refinement skeleton of the remaining
@@ -802,6 +884,377 @@ theorem logTwoUniformLeftSquareBlocks_eq_uniformLeftEndpoint
         logTwoKernel (meshStage * meshStage) := by
   rw [← logTwoUniformLeftPrefix_eq_squareBlocks]
   rfl
+
+/-- A nonnegative rational fraction of two natural numbers is at most one
+when its numerator does not exceed its positive denominator. -/
+private theorem natCast_div_le_one {a b : Nat}
+    (hb : 0 < b) (hab : a <= b) :
+    (a : Rat) / (b : Rat) <= 1 := by
+  have hbpos : 0 < (b : Rat) := (Rat.natCast_pos).2 hb
+  have hbne : (b : Rat) ≠ 0 := Rat.ne_of_gt hbpos
+  apply Rat.le_of_mul_le_mul_right (c := (b : Rat))
+  · calc
+      ((a : Rat) / (b : Rat)) * (b : Rat) = (a : Rat) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (b : Rat) := by exact_mod_cast hab
+      _ = 1 * (b : Rat) := by grind
+  · exact hbpos
+
+/-- The displacement of a point inside a square-image mesh block is bounded
+by twice the original mesh width.  This is the quantitative input that makes
+the eventual common-refinement error shrink. -/
+private theorem natCast_div_square_le_two_div {l n : Nat}
+    (hn : 0 < n) (hl : l <= 2 * n) :
+    (l : Rat) / ((n * n : Nat) : Rat) <= 2 / (n : Rat) := by
+  let N : Rat := (n : Rat)
+  have hNpos : 0 < N := by
+    dsimp [N]
+    exact (Rat.natCast_pos).2 hn
+  have hNne : N ≠ 0 := Rat.ne_of_gt hNpos
+  have hNNpos : 0 < N * N := Rat.mul_pos hNpos hNpos
+  rw [Rat.natCast_mul]
+  change (l : Rat) / (N * N) <= 2 / N
+  apply Rat.le_of_mul_le_mul_right (c := N * N)
+  · calc
+      ((l : Rat) / (N * N)) * (N * N) = (l : Rat) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= 2 * N := by
+        dsimp [N]
+        exact_mod_cast hl
+      _ = (2 / N) * (N * N) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact hNNpos
+
+/-- Division by a positive natural denominator preserves the order of natural
+numerators after their rational embedding. -/
+private theorem natCast_div_mono {a b d : Nat}
+    (hd : 0 < d) (hab : a <= b) :
+    (a : Rat) / (d : Rat) <= (b : Rat) / (d : Rat) := by
+  rw [Rat.div_def, Rat.div_def]
+  apply Rat.mul_le_mul_of_nonneg_right
+  · exact_mod_cast hab
+  · exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hd))
+
+/-- A point enumerated in the `k`th square block remains in the unit interval.
+The proof uses only the finite index inequality
+`k² + l < (k+1)² ≤ n²`. -/
+private theorem squareBlock_index_le_square
+    {n k l : Nat} (hk : k < n) (hl : l < 2 * k + 1) :
+    k * k + l <= n * n := by
+  have hstep : (k + 1) * (k + 1) =
+      k * k + (2 * k + 1) := by
+    calc
+      (k + 1) * (k + 1) = k * (k + 1) + (k + 1) := by
+        simpa using Nat.succ_mul k (k + 1)
+      _ = (k * k + k) + (k + 1) := by rw [Nat.mul_succ]
+      _ = k * k + (2 * k + 1) := by omega
+  have hblock : k * k + l < (k + 1) * (k + 1) := by
+    rw [hstep]
+    omega
+  have hk1 : k + 1 <= n := Nat.succ_le_of_lt hk
+  have hsquare : (k + 1) * (k + 1) <= n * n :=
+    Nat.mul_le_mul hk1 hk1
+  exact Nat.le_trans (Nat.le_of_lt hblock) hsquare
+
+/-- The square-block coordinate at offset `l`. -/
+private def squareBlockPoint (n k l : Nat) : Rat :=
+  ((k * k + l : Nat) : Rat) / ((n * n : Nat) : Rat)
+
+/-- The square left endpoint and every uniform subcell point in its block are
+ordered points of `[0,1]`, with a displacement of at most `2/n`. -/
+private theorem squareBlockPoint_bounds
+    {n k l : Nat} (hn : 0 < n) (hk : k < n) (hl : l < 2 * k + 1) :
+    0 <= squareBlockPoint n k 0 /\
+      squareBlockPoint n k 0 <= squareBlockPoint n k l /\
+      squareBlockPoint n k l <= 1 /\
+      squareBlockPoint n k l - squareBlockPoint n k 0 <= 2 / (n : Rat) := by
+  have hnn : 0 < n * n := Nat.mul_pos hn hn
+  have hindex : k * k + l <= n * n := squareBlock_index_le_square hk hl
+  have hzero : k * k <= k * k + l := by omega
+  have hlbound : l <= 2 * n := by
+    have htwo : 2 * k + 1 <= 2 * n := by omega
+    omega
+  constructor
+  · unfold squareBlockPoint
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg
+      (by exact_mod_cast (Nat.zero_le (k * k)))
+      (Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hnn)))
+  constructor
+  · unfold squareBlockPoint
+    exact natCast_div_mono hnn hzero
+  constructor
+  · unfold squareBlockPoint
+    exact natCast_div_le_one hnn hindex
+  · unfold squareBlockPoint
+    simp only [Nat.add_zero]
+    have hdiff :
+        ((k * k + l : Nat) : Rat) / ((n * n : Nat) : Rat) -
+          ((k * k : Nat) : Rat) / ((n * n : Nat) : Rat) =
+          (l : Rat) / ((n * n : Nat) : Rat) := by
+      rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.natCast_add]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hdiff]
+    exact natCast_div_square_le_two_div hn hlbound
+
+/-- The uniform rectangles inside a square block lie below the square left
+rectangle, because the reciprocal kernel is nonincreasing. -/
+private theorem logTwoUniformLeftSquareBlock_le_leftCell
+    (n k : Nat) (hn : 0 < n) (hk : k < n) :
+    logTwoUniformLeftSquareBlock n k <=
+      ((2 * k + 1 : Nat) : Rat) *
+        ((1 / ((n * n : Nat) : Rat)) *
+          logTwoKernel (squareBlockPoint n k 0)) := by
+  let h : Rat := 1 / ((n * n : Nat) : Rat)
+  let a : Rat := squareBlockPoint n k 0
+  let term : Nat -> Rat := fun l => h * logTwoKernel (squareBlockPoint n k l)
+  let c : Rat := h * logTwoKernel a
+  have hnn : 0 < n * n := Nat.mul_pos hn hn
+  have hcoeff : 0 <= h := by
+    dsimp [h]
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hnn))
+  have hterm : forall l, l ∈ List.range (2 * k + 1) -> term l <= c := by
+    intro l hl
+    have hlindex : l < 2 * k + 1 := List.mem_range.mp hl
+    have hpoint := squareBlockPoint_bounds hn hk hlindex
+    have hkernel : logTwoKernel (squareBlockPoint n k l) <=
+        logTwoKernel (squareBlockPoint n k 0) :=
+      logTwoKernel_antitone_nonnegative hpoint.1 hpoint.2.1
+    dsimp [term, c, h, a]
+    exact Rat.mul_le_mul_of_nonneg_left hkernel hcoeff
+  have hsum := foldl_add_le_length_mul (List.range (2 * k + 1)) term c hterm
+  simpa [logTwoUniformLeftSquareBlock, term, c, h, a, squareBlockPoint] using hsum
+
+/-- Conversely, the reciprocal kernel can lose at most `2/n` over a square
+block, so its uniform rectangles dominate the correspondingly lowered square
+left rectangle. -/
+private theorem leftCell_minus_twoDiv_le_logTwoUniformLeftSquareBlock
+    (n k : Nat) (hn : 0 < n) (hk : k < n) :
+    ((2 * k + 1 : Nat) : Rat) *
+        ((1 / ((n * n : Nat) : Rat)) *
+          (logTwoKernel (squareBlockPoint n k 0) - 2 / (n : Rat))) <=
+      logTwoUniformLeftSquareBlock n k := by
+  let h : Rat := 1 / ((n * n : Nat) : Rat)
+  let a : Rat := squareBlockPoint n k 0
+  let term : Nat -> Rat := fun l => h * logTwoKernel (squareBlockPoint n k l)
+  let c : Rat := h * (logTwoKernel a - 2 / (n : Rat))
+  have hnn : 0 < n * n := Nat.mul_pos hn hn
+  have hcoeff : 0 <= h := by
+    dsimp [h]
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hnn))
+  have hterm : forall l, l ∈ List.range (2 * k + 1) -> c <= term l := by
+    intro l hl
+    have hlindex : l < 2 * k + 1 := List.mem_range.mp hl
+    have hpoint := squareBlockPoint_bounds hn hk hlindex
+    have hdrop := logTwoKernel_drop_le_step hpoint.1
+      (Rat.le_trans hpoint.2.1 hpoint.2.2.1)
+      hpoint.2.1 hpoint.2.2.1
+    have hkernel : logTwoKernel (squareBlockPoint n k 0) - 2 / (n : Rat) <=
+        logTwoKernel (squareBlockPoint n k l) := by
+      grind [Rat.sub_eq_add_neg]
+    dsimp [term, c, h, a]
+    exact Rat.mul_le_mul_of_nonneg_left hkernel hcoeff
+  have hsum := length_mul_le_foldl_add (List.range (2 * k + 1)) term c hterm
+  simpa [logTwoUniformLeftSquareBlock, term, c, h, a, squareBlockPoint] using hsum
+
+/-- The product of two `2/n` block bounds has the square-mesh denominator. -/
+private theorem two_div_mul_two_div_eq_four_div_square
+    (n : Nat) :
+    (2 / (n : Rat)) * (2 / (n : Rat)) =
+      4 / ((n * n : Nat) : Rat) := by
+  simp only [Rat.div_def, Rat.natCast_mul, Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- A square left rectangle and its corresponding uniform block differ by a
+nonnegative amount at most `4/n²`. -/
+private theorem leftCell_sub_logTwoUniformLeftSquareBlock_bounds
+    (n k : Nat) (hn : 0 < n) (hk : k < n) :
+    let cell := ((2 * k + 1 : Nat) : Rat) *
+      ((1 / ((n * n : Nat) : Rat)) * logTwoKernel (squareBlockPoint n k 0))
+    0 <= cell - logTwoUniformLeftSquareBlock n k /\
+      cell - logTwoUniformLeftSquareBlock n k <= 4 / ((n * n : Nat) : Rat) := by
+  dsimp only
+  let M : Rat := ((2 * k + 1 : Nat) : Rat)
+  let h : Rat := 1 / ((n * n : Nat) : Rat)
+  let a : Rat := squareBlockPoint n k 0
+  let B : Rat := logTwoUniformLeftSquareBlock n k
+  let d : Rat := 2 / (n : Rat)
+  have hupper : B <= M * (h * logTwoKernel a) := by
+    dsimp [M, h, a, B]
+    exact logTwoUniformLeftSquareBlock_le_leftCell n k hn hk
+  have hlower : M * (h * (logTwoKernel a - d)) <= B := by
+    dsimp [M, h, a, B, d]
+    exact leftCell_minus_twoDiv_le_logTwoUniformLeftSquareBlock n k hn hk
+  have hnonneg : 0 <= M * (h * logTwoKernel a) - B := by
+    grind [Rat.sub_eq_add_neg]
+  have hinter : M * (h * logTwoKernel a) - B <= M * (h * d) := by
+    have hid : M * (h * logTwoKernel a) - M * (h * d) =
+        M * (h * (logTwoKernel a - d)) := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [← hid] at hlower
+    grind [Rat.sub_eq_add_neg]
+  have hMle : 2 * k + 1 <= 2 * n := by omega
+  have hwidth : M * h <= d := by
+    dsimp [M, h, d]
+    simpa [Rat.div_def, Rat.mul_assoc] using
+      (natCast_div_square_le_two_div hn hMle)
+  have hdnonneg : 0 <= d := by
+    dsimp [d]
+    rw [Rat.div_def]
+    exact Rat.le_of_lt (Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)))
+  have hbudget : M * (h * d) <= d * d := by
+    calc
+      M * (h * d) = (M * h) * d := by rw [Rat.mul_assoc]
+      _ <= d * d := Rat.mul_le_mul_of_nonneg_right hwidth hdnonneg
+  dsimp [M, h, a, B, d] at hnonneg hinter hbudget ⊢
+  constructor
+  · exact hnonneg
+  · calc
+      ((2 * k + 1 : Nat) : Rat) *
+          ((1 / ((n * n : Nat) : Rat)) * logTwoKernel (squareBlockPoint n k 0)) -
+          logTwoUniformLeftSquareBlock n k <=
+          ((2 * k + 1 : Nat) : Rat) *
+            ((1 / ((n * n : Nat) : Rat)) * (2 / (n : Rat))) := hinter
+      _ <= (2 / (n : Rat)) * (2 / (n : Rat)) := hbudget
+      _ = 4 / ((n * n : Nat) : Rat) :=
+        two_div_mul_two_div_eq_four_div_square n
+
+/-- The square of a uniform source-mesh coordinate is its corresponding
+square-block left endpoint. -/
+private theorem unitMeshPath_square_eq_squareBlockPoint
+    (n k : Nat) :
+    unitMeshPath n k * unitMeshPath n k = squareBlockPoint n k 0 := by
+  unfold unitMeshPath squareBlockPoint
+  simp only [Nat.add_zero, Rat.div_def, Rat.natCast_mul, Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The image under `x ↦ x²` of one source-mesh cell has width
+`(2k+1)/n²`. -/
+private theorem unitMeshPath_square_increment_eq_squareBlockWidth
+    (n k : Nat) :
+    unitMeshPath n (k + 1) * unitMeshPath n (k + 1) -
+        unitMeshPath n k * unitMeshPath n k =
+      ((2 * k + 1 : Nat) : Rat) / ((n * n : Nat) : Rat) := by
+  unfold unitMeshPath
+  simp only [Rat.div_def, Rat.natCast_add, Rat.natCast_mul, Rat.inv_mul_rev]
+  have htwo : ((2 : Nat) : Rat) = 2 := by native_decide
+  have hone : ((1 : Nat) : Rat) = 1 := by native_decide
+  rw [htwo, hone]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The recursive square-Stieltjes sum adds exactly the left rectangle of its
+next square block. -/
+private theorem logTwoSquareMeshStieltjesSum_succ_eq_leftCell
+    (n k : Nat) :
+    logTwoSquareMeshStieltjesSum n (k + 1) =
+      logTwoSquareMeshStieltjesSum n k +
+        ((2 * k + 1 : Nat) : Rat) *
+          ((1 / ((n * n : Nat) : Rat)) *
+            logTwoKernel (squareBlockPoint n k 0)) := by
+  unfold logTwoSquareMeshStieltjesSum
+  rw [leftStieltjesSum]
+  have hbase := unitMeshPath_square_eq_squareBlockPoint n k
+  have hwidth := unitMeshPath_square_increment_eq_squareBlockWidth n k
+  rw [hbase] at hwidth ⊢
+  rw [hwidth]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- Up through any first `m` square blocks, the square Stieltjes sum is above
+the corresponding uniform left sum and differs from it by at most one
+`4/n²` budget per block. -/
+private theorem logTwoSquareMesh_sub_uniformSquareBlocks_bounds
+    (n m : Nat) (hn : 0 < n) (hmn : m <= n) :
+    0 <= logTwoSquareMeshStieltjesSum n m -
+        logTwoUniformLeftSquareBlocks n m /\
+      logTwoSquareMeshStieltjesSum n m -
+          logTwoUniformLeftSquareBlocks n m <=
+        (m : Rat) * (4 / ((n * n : Nat) : Rat)) := by
+  induction m generalizing n with
+  | zero =>
+      simp [logTwoSquareMeshStieltjesSum, leftStieltjesSum,
+        logTwoUniformLeftSquareBlocks]
+      grind [Rat.sub_eq_add_neg]
+  | succ m ih =>
+      have hmle : m <= n := Nat.le_trans (Nat.le_succ m) hmn
+      have hmk : m < n := by omega
+      have hprev := ih n hn hmle
+      have hcell := leftCell_sub_logTwoUniformLeftSquareBlock_bounds n m hn hmk
+      let P : Rat := logTwoSquareMeshStieltjesSum n m
+      let Q : Rat := logTwoUniformLeftSquareBlocks n m
+      let C : Rat := ((2 * m + 1 : Nat) : Rat) *
+        ((1 / ((n * n : Nat) : Rat)) * logTwoKernel (squareBlockPoint n m 0))
+      let B : Rat := logTwoUniformLeftSquareBlock n m
+      let e : Rat := 4 / ((n * n : Nat) : Rat)
+      have hprev' : 0 <= P - Q /\ P - Q <= (m : Rat) * e := by
+        dsimp [P, Q, e]
+        exact hprev
+      have hcell' : 0 <= C - B /\ C - B <= e := by
+        dsimp [C, B, e]
+        exact hcell
+      rw [logTwoSquareMeshStieltjesSum_succ_eq_leftCell,
+        logTwoUniformLeftSquareBlocks]
+      change 0 <= (P + C) - (Q + B) /\
+        (P + C) - (Q + B) <= ((m + 1 : Nat) : Rat) * e
+      have hsplit : (P + C) - (Q + B) = (P - Q) + (C - B) := by
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      rw [hsplit]
+      constructor
+      · exact Rat.add_nonneg hprev'.1 hcell'.1
+      · calc
+          (P - Q) + (C - B) <= (m : Rat) * e + e :=
+            rat_add_le_add hprev'.2 hcell'.2
+          _ = ((m + 1 : Nat) : Rat) * e := by
+            rw [Rat.natCast_add]
+            have hone : ((1 : Nat) : Rat) = 1 := by native_decide
+            rw [hone]
+            grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+/-- Summing the `4/n²` block budgets over all `n` blocks yields the explicit
+`4/n` common-refinement budget. -/
+private theorem nat_mul_four_div_square_eq_four_div
+    (n : Nat) (hn : 0 < n) :
+    (n : Rat) * (4 / ((n * n : Nat) : Rat)) = 4 / (n : Rat) := by
+  let N : Rat := (n : Rat)
+  have hNpos : 0 < N := by
+    dsimp [N]
+    exact (Rat.natCast_pos).2 hn
+  have hNne : N ≠ 0 := Rat.ne_of_gt hNpos
+  have hcancel : N * N⁻¹ = 1 := Rat.mul_inv_cancel N hNne
+  simp only [Rat.div_def, Rat.natCast_mul, Rat.inv_mul_rev]
+  change N * (4 * (N⁻¹ * N⁻¹)) = 4 * N⁻¹
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The literal square Stieltjes sum and the ordinary uniform left Riemann
+sum for `t ↦ 1/(1+t)` have a finite, explicitly shrinking common-refinement
+comparison.  This is the analytic half of the square-substitution bridge. -/
+theorem logTwoSquareMesh_sub_uniformLeftEndpoint_bounds
+    (n : Nat) (hn : 0 < n) :
+    0 <= logTwoSquareMeshStieltjesSum n n -
+        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          logTwoKernel (n * n) /\
+      logTwoSquareMeshStieltjesSum n n -
+          IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+            logTwoKernel (n * n) <= 4 / (n : Rat) := by
+  have h := logTwoSquareMesh_sub_uniformSquareBlocks_bounds n n hn
+    (Nat.le_refl n)
+  rw [logTwoUniformLeftSquareBlocks_eq_uniformLeftEndpoint] at h
+  constructor
+  · exact h.1
+  · calc
+      logTwoSquareMeshStieltjesSum n n -
+          IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+            logTwoKernel (n * n) <=
+          (n : Rat) * (4 / ((n * n : Nat) : Rat)) := h.2
+      _ = 4 / (n : Rat) := nat_mul_four_div_square_eq_four_div n hn
 
 /-- The actual finite lower/upper Darboux box for the translated reciprocal
 kernel.  It evaluates only rational function values on a dyadic mesh. -/
@@ -848,6 +1301,160 @@ theorem logTwoReciprocalIntegral_valid : logTwoReciprocalIntegral.Valid :=
 theorem logTwoReciprocalIntegral_compute_eq (stage : Nat) :
     logTwoReciprocalIntegral.compute stage = logTwoDarbouxCompute stage :=
   rfl
+
+/-- The reciprocal integral sampled at twice a stage uses the `n²`-mesh when
+the square Stieltjes computation uses the `n=2^stage` source mesh. -/
+def logTwoSquareMeshStageSchedule : RealRaw.StageSchedule where
+  stage := fun n => 2 * n
+  monotone := by
+    intro i j hij
+    exact Nat.mul_le_mul_left 2 hij
+  cofinal := by
+    intro target
+    refine ⟨target, ?_⟩
+    omega
+
+def logTwoReciprocalSquareScheduled : RealRaw :=
+  RealRaw.schedule logTwoSquareMeshStageSchedule logTwoReciprocalIntegral
+
+theorem logTwoReciprocalSquareScheduled_valid :
+    logTwoReciprocalSquareScheduled.Valid :=
+  RealRaw.schedule_valid logTwoReciprocalIntegral
+    logTwoReciprocalIntegral_valid logTwoSquareMeshStageSchedule
+
+theorem logTwoReciprocalSquareScheduled_contains_uniformLeftEndpoint
+    (stage : Nat) :
+    (logTwoReciprocalSquareScheduled.compute stage).ContainsInterval
+      { lo := IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          logTwoKernel ((2 ^ stage) * (2 ^ stage))
+        hi := IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          logTwoKernel ((2 ^ stage) * (2 ^ stage)) } := by
+  change (logTwoReciprocalIntegral.compute (2 * stage)).ContainsInterval _
+  rw [logTwoReciprocalIntegral_compute_eq]
+  have h := IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+    logTwoKernel_lipschitz (2 * stage)
+  have hpow : (2 ^ stage) * (2 ^ stage) = 2 ^ (2 * stage) := by
+    rw [show 2 * stage = stage + stage by omega, Nat.pow_add]
+  simpa [logTwoDarbouxCompute, hpow] using h
+
+/-- The widened direct square-Stieltjes candidate overlaps the reciprocal
+integral sampled on the matching square mesh.  The witness is the ordinary
+uniform left sum, and the exact `4/n` block budget supplies the overlap. -/
+theorem logTwoSquareStieltjesCandidate_overlaps_reciprocalSquareScheduled
+    (stage : Nat) :
+    QInterval.Overlaps
+      (logTwoSquareStieltjesCandidate.compute stage)
+      (logTwoReciprocalSquareScheduled.compute stage) := by
+  let meshStage := 2 ^ stage
+  let stieltjes := logTwoSquareMeshStieltjesSum meshStage meshStage
+  let uniform := IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+    logTwoKernel (meshStage * meshStage)
+  let radius := 4 * (1 / (meshStage : Rat))
+  have hmesh_pos : 0 < meshStage := Nat.pow_pos (by omega : 0 < 2)
+  have hbound : 0 <= stieltjes - uniform /\
+      stieltjes - uniform <= radius := by
+    simpa [stieltjes, uniform, radius, Rat.div_def] using
+      (logTwoSquareMesh_sub_uniformLeftEndpoint_bounds meshStage hmesh_pos)
+  have huniform :
+      (logTwoReciprocalSquareScheduled.compute stage).lo <= uniform /\
+        uniform <= (logTwoReciprocalSquareScheduled.compute stage).hi := by
+    simpa [uniform] using
+      logTwoReciprocalSquareScheduled_contains_uniformLeftEndpoint stage
+  have hradius0 : 0 <= radius := by
+    dsimp [radius]
+    apply Rat.mul_nonneg
+    · exact (by native_decide : (0 : Rat) <= 4)
+    · rw [Rat.div_def, Rat.one_mul]
+      exact Rat.le_of_lt ((Rat.inv_pos).2
+        ((Rat.natCast_pos).2 hmesh_pos))
+  unfold logTwoSquareStieltjesCandidate
+    logTwoSquareStieltjesCandidateCompute
+  dsimp only
+  unfold QInterval.expand
+  change stieltjes - radius <=
+      (logTwoReciprocalSquareScheduled.compute stage).hi /\
+    (logTwoReciprocalSquareScheduled.compute stage).lo <= stieltjes + radius
+  constructor
+  · have hleft : stieltjes - radius <= uniform := by
+      grind [Rat.sub_eq_add_neg]
+    exact Rat.le_trans hleft huniform.2
+  · have hright : uniform <= stieltjes := by
+      grind [Rat.sub_eq_add_neg]
+    exact Rat.le_trans huniform.1
+      (Rat.le_trans hright (by grind [Rat.sub_eq_add_neg]))
+
+theorem logTwoSquareStieltjesCandidate_equiv_reciprocalSquareScheduled :
+    logTwoSquareStieltjesCandidate.Equiv
+      logTwoReciprocalSquareScheduled := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    logTwoSquareStieltjesCandidate logTwoReciprocalSquareScheduled stage stage).2
+  exact logTwoSquareStieltjesCandidate_overlaps_reciprocalSquareScheduled stage
+
+/-- The reciprocal integral's doubled-stage boxes are narrower than the
+public `4/2^stage` stabilization radius of the direct Stieltjes evaluator. -/
+theorem logTwoSquareStieltjesStabilizationRadius_covers_reciprocalSquareScheduled
+    (stage : Nat) :
+    (logTwoReciprocalSquareScheduled.compute stage).width <=
+      logTwoSquareStieltjesStabilizationRadius stage := by
+  let meshStage := 2 ^ stage
+  have hmesh_pos : 0 < meshStage := Nat.pow_pos (by omega : 0 < 2)
+  have htwo_le : 2 <= 2 * meshStage := by omega
+  have hsmall : (2 : Rat) / ((meshStage * meshStage : Nat) : Rat) <=
+      2 / (meshStage : Rat) :=
+    natCast_div_square_le_two_div hmesh_pos htwo_le
+  have hinv_nonneg : 0 <= 1 / (meshStage : Rat) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      ((Rat.natCast_pos).2 hmesh_pos))
+  have hfour : 2 / (meshStage : Rat) <=
+      4 * (1 / (meshStage : Rat)) := by
+    simpa [Rat.div_def] using
+      (Rat.mul_le_mul_of_nonneg_right
+        (by native_decide : (2 : Rat) <= 4) hinv_nonneg)
+  have hpow : (2 ^ stage) * (2 ^ stage) = 2 ^ (2 * stage) := by
+    rw [show 2 * stage = stage + stage by omega, Nat.pow_add]
+  change (logTwoReciprocalIntegral.compute (2 * stage)).width <= _
+  rw [logTwoReciprocalIntegral_compute_eq, logTwoDarbouxCompute_width,
+    ← hpow]
+  unfold logTwoSquareStieltjesStabilizationRadius
+  simpa [meshStage, Rat.div_def] using Rat.le_trans hsmall hfour
+
+/-- The direct stabilized Stieltjes evaluator is also certified by the
+reciprocal integral, using exactly the same finite runtime computation. -/
+theorem logTwoSquareStieltjesRaw_equiv_reciprocalSquareScheduled :
+    logTwoSquareStieltjesRaw.Equiv logTwoReciprocalSquareScheduled := by
+  unfold logTwoSquareStieltjesRaw
+  exact RealRaw.prefixStabilize_equiv_anchor
+    logTwoReciprocalSquareScheduled_valid
+    logTwoSquareStieltjesCandidate_equiv_reciprocalSquareScheduled
+    logTwoSquareStieltjesStabilizationRadius_covers_reciprocalSquareScheduled
+
+/-- The square-substitution Stieltjes evaluator and the ordinary reciprocal
+integral are equivalent raw reals.  The right side is scheduled only inside
+the proof; its public evaluator remains the original integral algorithm. -/
+theorem logTwoSquareStieltjesRaw_equiv_reciprocalIntegral :
+    logTwoSquareStieltjesRaw.Equiv logTwoReciprocalIntegral := by
+  have hsquare : logTwoSquareStieltjesRaw.Equiv
+      logTwoReciprocalSquareScheduled :=
+    logTwoSquareStieltjesRaw_equiv_reciprocalSquareScheduled
+  have hschedule : logTwoReciprocalIntegral.Equiv
+      logTwoReciprocalSquareScheduled :=
+    RealRaw.schedule_equiv logTwoReciprocalIntegral
+      logTwoReciprocalIntegral_valid logTwoSquareMeshStageSchedule
+  exact RealRaw.equiv_trans logTwoSquareStieltjesRaw_valid
+    logTwoReciprocalSquareScheduled_valid logTwoReciprocalIntegral_valid
+    hsquare (RealRaw.equiv_symm hschedule)
+
+/-- The certified square-pullback integral is the ordinary reciprocal
+integral for `log 2`.  This is the project's first checked finite
+change-of-variables theorem, specialized to the square map. -/
+theorem logTwoSquarePullbackIntegral_equiv_reciprocalIntegral :
+    logTwoSquarePullbackIntegral.Equiv logTwoReciprocalIntegral := by
+  exact RealRaw.equiv_trans logTwoSquarePullbackIntegral_valid
+    logTwoSquareStieltjesRaw_valid logTwoReciprocalIntegral_valid
+    (RealRaw.equiv_symm logTwoSquareStieltjesRaw_equiv_pullbackIntegral)
+    logTwoSquareStieltjesRaw_equiv_reciprocalIntegral
 
 /-- One paired update of the alternating harmonic enclosure for `log 2`.
 

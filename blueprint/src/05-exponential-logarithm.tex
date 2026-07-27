@@ -463,6 +463,8 @@ integral: the necessary common-refinement/FTC promotion remains explicit.
 \lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_valid}
 \lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_equiv_pullbackIntegral}
 \lean{ComputableAnalysis.Logarithm.logTwoUniformLeftSquareBlocks_eq_uniformLeftEndpoint}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_sub_uniformLeftEndpoint_bounds}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_equiv_reciprocalIntegral}
 \uses{prop:log-two-square-substitution}
 \leanok
 Put
@@ -495,18 +497,29 @@ pullback box at every stage.  Prefix stabilization yields the direct raw
 Thus the square substitution is already an executable integral
 representation, not merely a formal differential mnemonic.
 
-What remains is deliberately narrow but genuine: prove that this direct
-Stieltjes representation is equivalent to
-\(\code{logTwoReciprocalIntegral}=\int_0^1dt/(1+t)\).  That proof needs a
-finite common-refinement comparison between the square-image mesh and the
-ordinary uniform \(t\)-mesh.  It is the final change-of-variables certificate,
-not an appeal to real completeness.  The exact reindexing skeleton is now
-checked: the uniform \(n^2\)-mesh splits into the successive index blocks
+The final common-refinement comparison is now checked.  The uniform
+\(n^2\)-mesh splits into the successive index blocks
 \[0^2,1^2),\ [1^2,2^2),\ \ldots,\ [(n-1)^2,n^2),
 \]
-with block \(k\) containing \(2k+1\) cells.  The remaining estimate compares
-the reciprocal-kernel value at the block's square left endpoint with its
-values in those finite cells using the already certified Lipschitz bound.
+with block \(k\) containing \(2k+1\) cells.  Kernel monotonicity and the
+unit-interval Lipschitz bound give a nonnegative block error at most
+\(4/n^2\), hence the exact aggregate rational bound
+\[
+  0\le S_n-U_{n^2}\le\frac4n,
+\]
+where \(S_n\) is the square Stieltjes sum and \(U_{n^2}\) the ordinary
+uniform left reciprocal sum.  Lean widens the direct Stieltjes candidate by
+that same rational budget, compares it at doubled dyadic stages with the
+existing reciprocal integral boxes, and prefix-stabilizes the identical
+finite evaluator.  Consequently it now proves
+\[
+  \code{logTwoSquareStieltjesRaw}
+  \Equiv H
+  \Equiv \int_0^1\frac{\dd t}{1+t}
+  =\code{logTwoReciprocalIntegral}.
+\]
+This is a specialized, completely finite change-of-variables theorem for
+\(t=x^2\), not an appeal to real completeness or a general substitution axiom.
 \end{theorem}
 
 \begin{theorem}[Series equals the finite reciprocal integral]
@@ -573,8 +586,8 @@ Its intended proof order is:
   follows from \((x\arctan x)'=\arctan x+x/(1+x^2)\), its finite
   corner-rectangle schedule, and the logarithmic endpoint calculation.  The
   latter now has its exact finite square-substitution core in
-  \cref{prop:log-two-square-substitution}; its promotion to the two definite
-  integrals remains a separate certificate;
+  \cref{prop:log-two-square-substitution} and its checked promotion to the
+  two definite integrals in \cref{thm:log-two-square-pullback-integral};
   \item package the right-hand side as a valid raw pi evaluator and prove it
   equivalent to the geometric circle-area presentation.
 \end{enumerate}

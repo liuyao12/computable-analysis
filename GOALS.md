@@ -352,15 +352,18 @@ another. The Pi score stays useful only as secondary integration coverage.
   left-Stieltjes sum for `t = x*x` as the ordinary left mesh sum for
   `2*x/(1+x*x)` plus `Logarithm.logTwoSquareMeshCorrection`; the correction
   is nonnegative and at most `1/n` on the `n`-cell mesh
-  (`logTwoSquareMeshCorrection_le_one_div`).  This is deliberately only the
-  finite square-substitution core.  It is now promoted on the pullback side:
+  (`logTwoSquareMeshCorrection_le_one_div`).  This finite
+  square-substitution core is now promoted all the way to the reciprocal
+  integral: 
   logTwoSquarePullback_lipschitz_on_unit certifies 2*x/(1+x*x) as
   2-Lipschitz, and logTwoSquareStieltjesRaw_equiv_pullbackIntegral identifies
   the stabilized finite Stieltjes evaluator with its valid
-  Lipschitz--Darboux integral.  The remaining common-refinement theorem is
-  precisely the comparison of that square-image mesh with the ordinary
-  reciprocal t-mesh; it must then prove the pullback integral equal to the
-  existing logTwoReciprocalIntegral.
+  Lipschitz--Darboux integral.  The checked square-block reindexing compares
+  it with the ordinary reciprocal t-mesh: each block contributes at most
+  `4/n^2`, so `logTwoSquareMesh_sub_uniformLeftEndpoint_bounds` gives the
+  aggregate `4/n` bound, and
+  `logTwoSquarePullbackIntegral_equiv_reciprocalIntegral` proves the
+  pullback integral equal to the existing `logTwoReciprocalIntegral`.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
