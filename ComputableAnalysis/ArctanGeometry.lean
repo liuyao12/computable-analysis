@@ -368,6 +368,97 @@ theorem chartAddParameter_width_le_eight_mul {u p r : Rat}
       Rat.mul_le_mul_of_nonneg_left hratio hlen
     _ = 8 * (r - p) := by grind [Rat.mul_comm]
 
+/-- The same factor-eight distortion bound needs only a local right-endpoint
+product bound.  This is the form used for a small tangent increment based at
+any point of the unit branch. -/
+theorem chartAddParameter_width_le_eight_mul_of_rightProduct_le_half
+    {u p r : Rat} (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hpr : p <= r) (hur : u * r <= (1 : Rat) / 2) :
+    RationalCircle.Trigonometry.chartAddParameter u r -
+      RationalCircle.Trigonometry.chartAddParameter u p <=
+        8 * (r - p) := by
+  have hdenP :
+      (1 : Rat) / 2 <= RationalCircle.Trigonometry.chartAddDen u p := by
+    unfold RationalCircle.Trigonometry.chartAddDen
+    have hmul : u * p <= (1 : Rat) / 2 := by
+      calc
+        u * p <= u * r := Rat.mul_le_mul_of_nonneg_left hpr hu0
+        _ <= (1 : Rat) / 2 := hur
+    grind [Rat.sub_eq_add_neg]
+  have hdenR :
+      (1 : Rat) / 2 <= RationalCircle.Trigonometry.chartAddDen u r := by
+    unfold RationalCircle.Trigonometry.chartAddDen
+    grind [Rat.sub_eq_add_neg]
+  have hdenPpos : 0 < RationalCircle.Trigonometry.chartAddDen u p := by
+    have : (0 : Rat) < 1 / 2 := by native_decide
+    grind
+  have hdenRpos : 0 < RationalCircle.Trigonometry.chartAddDen u r := by
+    have : (0 : Rat) < 1 / 2 := by native_decide
+    grind
+  have hdenProduct :
+      (1 : Rat) / 2 * ((1 : Rat) / 2) <=
+        RationalCircle.Trigonometry.chartAddDen u p *
+          RationalCircle.Trigonometry.chartAddDen u r := by
+    calc
+      (1 : Rat) / 2 * ((1 : Rat) / 2) <=
+          RationalCircle.Trigonometry.chartAddDen u p * ((1 : Rat) / 2) :=
+        Rat.mul_le_mul_of_nonneg_right hdenP (by native_decide)
+      _ <= RationalCircle.Trigonometry.chartAddDen u p *
+          RationalCircle.Trigonometry.chartAddDen u r :=
+        Rat.mul_le_mul_of_nonneg_left hdenR
+          (Rat.le_trans (by native_decide : (0 : Rat) <= 1 / 2) hdenP)
+  have hSquare : u * u <= 1 := by
+    calc
+      u * u <= u * 1 := Rat.mul_le_mul_of_nonneg_left hu1 hu0
+      _ = u := by grind
+      _ <= 1 := hu1
+  have hNorm : 1 + u * u <= 2 := by grind
+  have hproductPos :
+      0 < RationalCircle.Trigonometry.chartAddDen u p *
+        RationalCircle.Trigonometry.chartAddDen u r :=
+    Rat.mul_pos hdenPpos hdenRpos
+  have hratio :
+      (1 + u * u) /
+        (RationalCircle.Trigonometry.chartAddDen u p *
+          RationalCircle.Trigonometry.chartAddDen u r) <= 8 := by
+    apply Rat.le_of_mul_le_mul_right
+      (c := RationalCircle.Trigonometry.chartAddDen u p *
+        RationalCircle.Trigonometry.chartAddDen u r)
+    · rw [Rat.div_def]
+      calc
+        ((1 + u * u) *
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r)⁻¹) *
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r) =
+            1 + u * u := by
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= 2 := hNorm
+        _ = 8 * ((1 : Rat) / 2 * ((1 : Rat) / 2)) := by native_decide
+        _ <= 8 *
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r) :=
+          Rat.mul_le_mul_of_nonneg_left hdenProduct
+            (by native_decide : (0 : Rat) <= 8)
+    · exact hproductPos
+  have hlen : 0 <= r - p := by grind [Rat.sub_eq_add_neg]
+  have hdiff :=
+    RationalCircle.Trigonometry.chartAddParameter_sub
+      (u := u) (p := p) (r := r)
+      (Rat.ne_of_gt hdenPpos) (Rat.ne_of_gt hdenRpos)
+  calc
+    RationalCircle.Trigonometry.chartAddParameter u r -
+        RationalCircle.Trigonometry.chartAddParameter u p =
+        (r - p) *
+          ((1 + u * u) /
+            (RationalCircle.Trigonometry.chartAddDen u p *
+              RationalCircle.Trigonometry.chartAddDen u r)) := by
+          rw [hdiff]
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= (r - p) * 8 :=
+      Rat.mul_le_mul_of_nonneg_left hratio hlen
+    _ = 8 * (r - p) := by grind [Rat.mul_comm]
+
 /-- Inscribed geometric sector cell between rational parameters `p` and `r`. -/
 def geometricLowerStep (p r : Rat) : Rat :=
   ((r - p) * (1 + p * r)) /
@@ -1047,6 +1138,36 @@ def ChartAddPositiveDenominators (u : Rat) : List (Rat × Rat) -> Prop
         0 < RationalCircle.Trigonometry.chartAddDen u r /\
           ChartAddPositiveDenominators u rest
 
+/-- A finite source partition on which every right endpoint stays far enough
+from the tangent-chart pole for the uniform factor-eight distortion bound. -/
+def ChartAddRightProductAtMostHalf (u : Rat) : List (Rat × Rat) -> Prop
+  | [] => True
+  | (_p, r) :: rest =>
+      u * r <= (1 : Rat) / 2 /\
+        ChartAddRightProductAtMostHalf u rest
+
+/-- A cover inherits the right-endpoint product bound from its final endpoint.
+This is the local replacement for unnecessarily requiring the chart base to
+lie in the first half of the whole unit interval. -/
+theorem CoversInterval.chartAddRightProductAtMostHalf
+    {u a b : Rat} {intervals : List (Rat × Rat)}
+    (hu0 : 0 <= u) (hub : u * b <= (1 : Rat) / 2)
+    (hcover : CoversInterval a b intervals) :
+    ChartAddRightProductAtMostHalf u intervals := by
+  induction intervals generalizing a with
+  | nil =>
+      simp [ChartAddRightProductAtMostHalf]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hcover with ⟨hpa, hpr, hrest⟩
+      have hrb : r <= b := CoversInterval.start_le_end hrest
+      have hur : u * r <= (1 : Rat) / 2 := by
+        calc
+          u * r <= u * b := Rat.mul_le_mul_of_nonneg_left hrb hu0
+          _ <= (1 : Rat) / 2 := hub
+      simp only [ChartAddRightProductAtMostHalf]
+      exact ⟨hur, ih hub hrest⟩
+
 /-- Summed lower rectangles decrease under an admissible nonnegative
 tangent-addition chart transport. -/
 theorem chartAddIntervals_lowerSum_le
@@ -1260,6 +1381,84 @@ theorem chartAddIntervals_squareSum_le_sixtyFour
           _ = 64 * ((r - p) * (r - p)) := by
               grind [Rat.mul_assoc, Rat.mul_comm]
       have htail := ih hrest
+      simp only [chartAddIntervals, intervalSquareSum]
+      calc
+        (RationalCircle.Trigonometry.chartAddParameter u r -
+          RationalCircle.Trigonometry.chartAddParameter u p) *
+            (RationalCircle.Trigonometry.chartAddParameter u r -
+              RationalCircle.Trigonometry.chartAddParameter u p) +
+            intervalSquareSum (chartAddIntervals u rest) <=
+          64 * ((r - p) * (r - p)) +
+            64 * intervalSquareSum rest :=
+              rat_add_le_add hcellSquare htail
+        _ = 64 * ((r - p) * (r - p) + intervalSquareSum rest) := by
+              grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+/-- The local product condition is enough for the transported squared-mesh
+bound.  Unlike the older half-chart lemma, the base may lie anywhere in the
+unit interval as long as every source cell stays within the pole margin. -/
+theorem chartAddIntervals_squareSum_le_sixtyFour_of_rightProduct_le_half
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hintervals : UnitIntervals intervals)
+    (hproduct : ChartAddRightProductAtMostHalf u intervals) :
+    intervalSquareSum (chartAddIntervals u intervals) <=
+      64 * intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [chartAddIntervals, intervalSquareSum]
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      rcases hintervals with ⟨hp0, hpr, hr1, hrest⟩
+      rcases hproduct with ⟨hur, hproductRest⟩
+      have hmulP : u * p <= (1 : Rat) / 2 :=
+        Rat.le_trans (Rat.mul_le_mul_of_nonneg_left hpr hu0) hur
+      have hdenP : 0 < RationalCircle.Trigonometry.chartAddDen u p := by
+        unfold RationalCircle.Trigonometry.chartAddDen
+        have hhalfPos : (0 : Rat) < 1 / 2 := by native_decide
+        grind [Rat.sub_eq_add_neg]
+      have hdenR : 0 < RationalCircle.Trigonometry.chartAddDen u r := by
+        unfold RationalCircle.Trigonometry.chartAddDen
+        have hhalfPos : (0 : Rat) < 1 / 2 := by native_decide
+        grind [Rat.sub_eq_add_neg]
+      have horder :
+          RationalCircle.Trigonometry.chartAddParameter u p <=
+            RationalCircle.Trigonometry.chartAddParameter u r :=
+        RationalCircle.Trigonometry.chartAddParameter_mono hdenP hdenR hpr
+      have himageNonneg :
+          0 <= RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p := by
+        grind [Rat.sub_eq_add_neg]
+      have hsourceNonneg : 0 <= r - p := by
+        grind [Rat.sub_eq_add_neg]
+      have himage :
+          RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p <=
+              8 * (r - p) :=
+        chartAddParameter_width_le_eight_mul_of_rightProduct_le_half
+          hu0 hu1 hpr hur
+      have hscaledNonneg : 0 <= 8 * (r - p) :=
+        Rat.mul_nonneg (by native_decide) hsourceNonneg
+      have hcellSquare :
+          (RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p) *
+              (RationalCircle.Trigonometry.chartAddParameter u r -
+                RationalCircle.Trigonometry.chartAddParameter u p) <=
+            64 * ((r - p) * (r - p)) := by
+        calc
+          (RationalCircle.Trigonometry.chartAddParameter u r -
+            RationalCircle.Trigonometry.chartAddParameter u p) *
+              (RationalCircle.Trigonometry.chartAddParameter u r -
+                RationalCircle.Trigonometry.chartAddParameter u p) <=
+            (8 * (r - p)) *
+              (RationalCircle.Trigonometry.chartAddParameter u r -
+                RationalCircle.Trigonometry.chartAddParameter u p) :=
+              Rat.mul_le_mul_of_nonneg_right himage himageNonneg
+          _ <= (8 * (r - p)) * (8 * (r - p)) :=
+              Rat.mul_le_mul_of_nonneg_left himage hscaledNonneg
+          _ = 64 * ((r - p) * (r - p)) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+      have htail := ih hrest hproductRest
       simp only [chartAddIntervals, intervalSquareSum]
       calc
         (RationalCircle.Trigonometry.chartAddParameter u r -
@@ -2800,6 +2999,22 @@ theorem chartAddAreaLoop_intervals_unit
     exact hu0
   exact CoversInterval.unit hstart himage hcover
 
+/-- Unit-range preservation for a transported area loop only needs a positive
+chart denominator and an explicit bound on the transported endpoint. -/
+theorem chartAddAreaLoop_intervals_unit_of_lt
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (n : Nat) :
+    UnitIntervals
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals) := by
+  have hcover := chartAddAreaLoop_covers hu0 hu1 hx0 hx1 n
+  have hstart :
+      0 <= RationalCircle.Trigonometry.chartAddParameter u 0 := by
+    rw [RationalCircle.Trigonometry.chartAddParameter_zero_right]
+    exact hu0
+  exact CoversInterval.unit hstart himage hcover
+
 private theorem div_two_pow_succ (a : Rat) (n : Nat) :
     (a / (((2 ^ n : Nat) : Rat))) / 2 =
       a / (((2 ^ (n + 1) : Nat) : Rat)) := by
@@ -2904,6 +3119,57 @@ theorem chartAddAreaLoop_integralSum_width_le
     _ <= 2 * (64 * ((x * x) / (((2 ^ n : Nat) : Rat)))) :=
       Rat.mul_le_mul_of_nonneg_left
         (chartAddAreaLoop_squareSum_le_sixtyFour hu0 huHalf hx0 hx1 n)
+        (by native_decide : (0 : Rat) <= 2)
+    _ = 128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The local pole-margin hypothesis gives the same transported mesh budget
+even when the chart base is in the right half of the unit branch. -/
+theorem chartAddAreaLoop_squareSum_le_sixtyFour_of_rightProduct_le_half
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hux : u * x <= (1 : Rat) / 2) (n : Nat) :
+    intervalSquareSum
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals) <=
+        64 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+  have hcover : CoversInterval 0 x (arctanAreaLoopState x n).intervals :=
+    arctanAreaLoopState_intervals_covers hx0 n
+  have hproduct :
+      ChartAddRightProductAtMostHalf u
+        (arctanAreaLoopState x n).intervals :=
+    CoversInterval.chartAddRightProductAtMostHalf hu0 hux hcover
+  calc
+    intervalSquareSum
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals) <=
+        64 * intervalSquareSum (arctanAreaLoopState x n).intervals :=
+      chartAddIntervals_squareSum_le_sixtyFour_of_rightProduct_le_half u
+        (arctanAreaLoopState x n).intervals hu0 hu1
+        (arctanAreaLoopState_intervals_unit hx0 hx1 n) hproduct
+    _ = 64 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+      rw [arctanAreaLoopState_squareSum]
+
+/-- A transported rectangle width under the local pole-margin condition. -/
+theorem chartAddAreaLoop_integralSum_width_le_of_rightProduct_le_half
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1) (huOne : u <= 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hux : u * x <= (1 : Rat) / 2)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (n : Nat) :
+    (integralSumInterval
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals)).width <=
+        128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+  calc
+    (integralSumInterval
+      (chartAddIntervals u (arctanAreaLoopState x n).intervals)).width <=
+        2 * intervalSquareSum
+          (chartAddIntervals u (arctanAreaLoopState x n).intervals) :=
+      integralSumInterval_width_le_two_squareSum
+        (chartAddIntervals u (arctanAreaLoopState x n).intervals)
+        (chartAddAreaLoop_intervals_unit_of_lt hu0 hu1 hx0 hx1 himage n)
+    _ <= 2 * (64 * ((x * x) / (((2 ^ n : Nat) : Rat)))) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (chartAddAreaLoop_squareSum_le_sixtyFour_of_rightProduct_le_half
+          hu0 huOne hx0 hx1 hux n)
         (by native_decide : (0 : Rat) <= 2)
     _ = 128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
       grind [Rat.mul_assoc, Rat.mul_comm]
@@ -3784,6 +4050,46 @@ theorem chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ
     _ = 256 / (((n + 1 : Nat) : Rat)) := by
       exact twoFiveSix_mul_one_div_eq_div (n + 1)
 
+/-- The explicit transported width schedule under the local pole-margin
+condition.  It has the same `256/(n+1)` rate as the first-half chart. -/
+theorem chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ_of_rightProduct_le_half
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1) (huOne : u <= 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hux : u * x <= (1 : Rat) / 2)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (n : Nat) :
+    (chartAddAreaLoopCompute u x n).width <=
+      (256 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  have hmesh :
+      (chartAddAreaLoopCompute u x n).width <=
+        128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := by
+    exact chartAddAreaLoop_integralSum_width_le_of_rightProduct_le_half
+      hu0 hu1 huOne hx0 hx1 hux himage n
+  calc
+    (chartAddAreaLoopCompute u x n).width
+        <= 128 * ((x * x) / (((2 ^ n : Nat) : Rat))) := hmesh
+    _ <= 128 * (1 / (((2 ^ n : Nat) : Rat))) := by
+      exact Rat.mul_le_mul_of_nonneg_left
+        (square_div_two_pow_le_one_div_two_pow hx0 hx1 n)
+        (by native_decide : (0 : Rat) <= 128)
+    _ = 64 * (2 * (1 / (((2 ^ n : Nat) : Rat)))) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = 64 * (4 * (1 / (((2 ^ (n + 1) : Nat) : Rat)))) := by
+      rw [two_mul_one_div_two_pow_eq_four_mul_one_div_two_pow_succ n]
+    _ = 256 * (1 / (((2 ^ (n + 1) : Nat) : Rat))) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= 256 * (1 / (((n + 1 : Nat) : Rat))) := by
+      have hone :
+          1 / (((2 ^ (n + 1) : Nat) : Rat)) <=
+            1 / (((n + 1 : Nat) : Rat)) :=
+        FTC.one_div_nat_antitone (Nat.succ_pos n)
+          (Nat.pow_pos (by omega : 0 < 2))
+          (succ_le_two_pow_succ n)
+      exact Rat.mul_le_mul_of_nonneg_left hone
+        (by native_decide : (0 : Rat) <= 256)
+    _ = 256 / (((n + 1 : Nat) : Rat)) := by
+      exact twoFiveSix_mul_one_div_eq_div (n + 1)
+
 theorem chartAddAreaLoopCompute_widthsShrink
     {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
     (hx0 : 0 <= x) (hx1 : x <= 1)
@@ -3832,6 +4138,47 @@ theorem chartAddAreaLoopCompute_width_le_eps_of_precision
   exact Rat.le_trans
     (chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ
       hu0 huHalf hx0 hx1 himage n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
+/-- The precision-indexed form of the local pole-margin width schedule. -/
+theorem chartAddAreaLoopCompute_width_le_eps_of_rightProduct_le_half
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1) (huOne : u <= 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hux : u * x <= (1 : Rat) / 2)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (eps : QPos) (n : Nat) (hn : 256 * (eps.val.den + 1) <= n) :
+    (chartAddAreaLoopCompute u x n).width <= eps.val := by
+  have hmain :
+      (256 : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (256 : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega :
+        256 * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hABpos
+  exact Rat.le_trans
+    (chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ_of_rightProduct_le_half
+      hu0 hu1 huOne hx0 hx1 hux himage n)
     (Rat.le_trans hmain
       (FTC.one_div_den_succ_le_of_pos eps.property))
 
@@ -3989,6 +4336,54 @@ theorem chartAddAreaLoopCompute_overlaps_rectangleSub
     grind
   have huUnit : u <= 1 := by
     exact Rat.le_trans huHalf (by native_decide : (1 : Rat) / 2 <= 1)
+  let v : Rat := RationalCircle.Trigonometry.chartAddParameter u x
+  let A : List (Rat × Rat) := (arctanAreaLoopState u n).intervals
+  let B : List (Rat × Rat) := (arctanAreaLoopState v n).intervals
+  let C : List (Rat × Rat) :=
+    chartAddIntervals u (arctanAreaLoopState x n).intervals
+  have hcoverC : CoversInterval u v C := by
+    dsimp [v, C]
+    simpa only [RationalCircle.Trigonometry.chartAddParameter_zero_right] using
+      (chartAddAreaLoop_covers hu0 hu1 hx0 hx1 n)
+  have huv : u <= v := CoversInterval.start_le_end hcoverC
+  have hv0 : 0 <= v := Rat.le_trans hu0 huv
+  have hcoverA : CoversInterval 0 u A := by
+    dsimp [A]
+    exact arctanAreaLoopState_intervals_covers hu0 n
+  have hcoverB : CoversInterval 0 v B := by
+    dsimp [B]
+    exact arctanAreaLoopState_intervals_covers hv0 n
+  have hcoverAppend : CoversInterval 0 v (A ++ C) :=
+    CoversInterval.append hcoverA hcoverC
+  have hlower :
+      integralLowerSum (A ++ C) <= integralUpperSum B :=
+    integralLowerSum_le_integralUpperSum_of_covers
+      (a := 0) (b := v) (by native_decide) (A ++ C) B
+      hcoverAppend hcoverB
+  have hupper :
+      integralLowerSum B <= integralUpperSum (A ++ C) :=
+    integralLowerSum_le_integralUpperSum_of_covers
+      (a := 0) (b := v) (by native_decide) B (A ++ C)
+      hcoverB hcoverAppend
+  rw [integralLowerSum_append] at hlower
+  rw [integralUpperSum_append] at hupper
+  change QInterval.Overlaps (integralSumInterval C)
+    (QInterval.subInterval (integralSumInterval B) (integralSumInterval A))
+  unfold QInterval.Overlaps QInterval.subInterval integralSumInterval
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The finite subtraction overlap itself only needs the chart base to stay
+strictly below the pole.  The half-unit restriction belongs to the older
+uniform-width theorem, not to this exact cover comparison. -/
+theorem chartAddAreaLoopCompute_overlaps_rectangleSub_of_lt
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (n : Nat) :
+    QInterval.Overlaps (chartAddAreaLoopCompute u x n)
+      (QInterval.subInterval
+        (arctanIntegralRectangleCompute
+          (RationalCircle.Trigonometry.chartAddParameter u x) n)
+        (arctanIntegralRectangleCompute u n)) := by
   let v : Rat := RationalCircle.Trigonometry.chartAddParameter u x
   let A : List (Rat × Rat) := (arctanAreaLoopState u n).intervals
   let B : List (Rat × Rat) := (arctanAreaLoopState v n).intervals
@@ -4359,6 +4754,281 @@ theorem arctanGeom_chartAdd_add_of_half
 def tangentChartIncrement (x h : Rat) : Rat :=
   h / (1 + x * (x + h))
 
+/-- The inverse tangent-addition coordinate based at the half-unit slope.
+It maps the right half of the unit branch back into the first half. -/
+def halfChartCoordinate (x : Rat) : Rat :=
+  (x - (1 : Rat) / 2) / (1 + x / 2)
+
+theorem halfChartCoordinate_den_pos {x : Rat} (hx0 : 0 <= x) :
+    0 < 1 + x / 2 := by
+  have hxhalf : 0 <= x / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hx0 (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))
+  grind
+
+theorem halfChartCoordinate_nonneg {x : Rat}
+    (hxHalf : (1 : Rat) / 2 <= x) :
+    0 <= halfChartCoordinate x := by
+  have hx0 : 0 <= x := by grind
+  unfold halfChartCoordinate
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg (by grind)
+    (Rat.le_of_lt ((Rat.inv_pos).2 (halfChartCoordinate_den_pos hx0)))
+
+theorem halfChartCoordinate_le_half {x : Rat}
+    (hxHalf : (1 : Rat) / 2 <= x) (hx1 : x <= 1) :
+    halfChartCoordinate x <= (1 : Rat) / 2 := by
+  have hx0 : 0 <= x := by grind
+  let d : Rat := 1 + x / 2
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact halfChartCoordinate_den_pos hx0
+  have hnum : x - (1 : Rat) / 2 <= ((1 : Rat) / 2) * d := by
+    dsimp [d]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add]
+  apply Rat.le_of_mul_le_mul_right (c := d)
+  · calc
+      halfChartCoordinate x * d = x - (1 : Rat) / 2 := by
+        unfold halfChartCoordinate
+        rw [Rat.div_def]
+        have hcancel : d⁻¹ * d = 1 := Rat.inv_mul_cancel d (Rat.ne_of_gt hdpos)
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= ((1 : Rat) / 2) * d := hnum
+  · exact hdpos
+
+theorem chartAddParameter_half_halfChartCoordinate {x : Rat}
+    (hx0 : 0 <= x) :
+    RationalCircle.Trigonometry.chartAddParameter ((1 : Rat) / 2)
+      (halfChartCoordinate x) = x := by
+  let d : Rat := 1 + x / 2
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact halfChartCoordinate_den_pos hx0
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hdenEq :
+      1 - ((1 : Rat) / 2) * ((x - (1 : Rat) / 2) / d) =
+        ((5 : Rat) / 4) / d := by
+    rw [Rat.div_def, Rat.div_def]
+    have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    dsimp [d] at hcancel ⊢
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  have hnumEq :
+      (1 : Rat) / 2 + (x - (1 : Rat) / 2) / d =
+        (((5 : Rat) / 4) * x) / d := by
+    rw [Rat.div_def, Rat.div_def]
+    have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    dsimp [d] at hcancel ⊢
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  have hfivepos : 0 < (5 : Rat) / 4 := by native_decide
+  have hfactorne : (5 : Rat) / 4 ≠ 0 := Rat.ne_of_gt hfivepos
+  unfold RationalCircle.Trigonometry.chartAddParameter
+    RationalCircle.Trigonometry.chartAddNum
+    RationalCircle.Trigonometry.chartAddDen halfChartCoordinate
+  change ((1 : Rat) / 2 + (x - (1 : Rat) / 2) / d) /
+      (1 - ((1 : Rat) / 2) * ((x - (1 : Rat) / 2) / d)) = x
+  rw [hnumEq, hdenEq]
+  simp only [Rat.div_def]
+  rw [Rat.inv_mul_rev]
+  have hcancelD : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+  have hcancelF : ((5 : Rat) / 4) * ((5 : Rat) / 4)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hfactorne
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The right-half chart has an exact rational forward difference quotient.
+This is the coordinate-scale factor needed to transport a derivative from the
+first-half parameter back to the original unit-slope coordinate. -/
+theorem halfChartCoordinate_differenceQuotient
+    {x h : Rat} (hx0 : 0 <= x) (hpos : 0 < h) :
+    (halfChartCoordinate (x + h) - halfChartCoordinate x) / h =
+      ((5 : Rat) / 4) /
+        ((1 + x / 2) * (1 + (x + h) / 2)) := by
+  let d0 : Rat := 1 + x / 2
+  let d1 : Rat := 1 + (x + h) / 2
+  have hd0pos : 0 < d0 := by
+    dsimp [d0]
+    exact halfChartCoordinate_den_pos hx0
+  have hxh0 : 0 <= x + h := by grind
+  have hd1pos : 0 < d1 := by
+    dsimp [d1]
+    exact halfChartCoordinate_den_pos hxh0
+  have hhne : h ≠ 0 := Rat.ne_of_gt hpos
+  have hd0ne : d0 ≠ 0 := Rat.ne_of_gt hd0pos
+  have hd1ne : d1 ≠ 0 := Rat.ne_of_gt hd1pos
+  apply rat_eq_of_mul_eq_mul_pos (c := h * d0 * d1)
+  · exact Rat.mul_pos (Rat.mul_pos hpos hd0pos) hd1pos
+  · unfold halfChartCoordinate
+    change (((x + h - (1 : Rat) / 2) / d1 -
+        (x - (1 : Rat) / 2) / d0) / h) * (h * d0 * d1) =
+        (((5 : Rat) / 4) / (d0 * d1)) * (h * d0 * d1)
+    rw [Rat.div_def]
+    have hcancelH : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hhne
+    have hcancelD0 : d0⁻¹ * d0 = 1 := Rat.inv_mul_cancel d0 hd0ne
+    have hcancelD1 : d1⁻¹ * d1 = 1 := Rat.inv_mul_cancel d1 hd1ne
+    dsimp [d0, d1] at hcancelD0 hcancelD1 ⊢
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact denominator transformation for the inverse half-unit tangent chart. -/
+theorem one_add_square_halfChartCoordinate {x : Rat} (hx0 : 0 <= x) :
+    1 + halfChartCoordinate x * halfChartCoordinate x =
+      (((5 : Rat) / 4) * (1 + x * x)) /
+        ((1 + x / 2) * (1 + x / 2)) := by
+  let d : Rat := 1 + x / 2
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact halfChartCoordinate_den_pos hx0
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hdsqpos : 0 < d * d := Rat.mul_pos hdpos hdpos
+  apply rat_eq_of_mul_eq_mul_pos (c := d * d)
+  · exact hdsqpos
+  · unfold halfChartCoordinate
+    change (1 + ((x - (1 : Rat) / 2) / d) *
+        ((x - (1 : Rat) / 2) / d)) * (d * d) =
+        ((((5 : Rat) / 4) * (1 + x * x)) / (d * d)) * (d * d)
+    rw [Rat.div_def]
+    have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+    have hcancelD' : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The inverse half-unit chart transports the arctangent kernel by its exact
+rational coordinate derivative. -/
+theorem halfChartCoordinate_scale_mul_integralKernel {x : Rat}
+    (hx0 : 0 <= x) :
+    (((5 : Rat) / 4) / ((1 + x / 2) * (1 + x / 2))) *
+        integralKernel (halfChartCoordinate x) = integralKernel x := by
+  let d : Rat := 1 + x / 2
+  let a : Rat := (5 : Rat) / 4
+  let k : Rat := 1 + x * x
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact halfChartCoordinate_den_pos hx0
+  have hapos : 0 < a := by
+    dsimp [a]
+    native_decide
+  have hkpos : 0 < k := by
+    dsimp [k]
+    exact RationalCircle.Stage.one_add_square_pos x
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hane : a ≠ 0 := Rat.ne_of_gt hapos
+  have hkne : k ≠ 0 := Rat.ne_of_gt hkpos
+  have hden : 1 + halfChartCoordinate x * halfChartCoordinate x =
+      (a * k) / (d * d) := by
+    dsimp [a, k, d]
+    exact one_add_square_halfChartCoordinate hx0
+  unfold integralKernel
+  rw [hden]
+  dsimp [a, d, k] at hane hkne hdne ⊢
+  rw [Rat.div_def, Rat.inv_mul_rev]
+  have hcancelD : (1 + x / 2) * (1 + x / 2)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hdne
+  have hcancelA : ((5 : Rat) / 4) * ((5 : Rat) / 4)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hane
+  have hcancelK : (1 + x * x) * (1 + x * x)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hkne
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The finite right-half coordinate scale approaches its derivative scale
+with a directly computable error no larger than the ordinary input step. -/
+theorem halfChartCoordinate_scale_sub_differenceQuotient_le_step
+    {x h : Rat} (hx0 : 0 <= x) (hpos : 0 < h) :
+    0 <= ((5 : Rat) / 4) / ((1 + x / 2) * (1 + x / 2)) -
+        (halfChartCoordinate (x + h) - halfChartCoordinate x) / h /\
+      ((5 : Rat) / 4) / ((1 + x / 2) * (1 + x / 2)) -
+        (halfChartCoordinate (x + h) - halfChartCoordinate x) / h <= h := by
+  rw [halfChartCoordinate_differenceQuotient hx0 hpos]
+  let d0 : Rat := 1 + x / 2
+  let d1 : Rat := 1 + (x + h) / 2
+  let a : Rat := (5 : Rat) / 4
+  have hd0pos : 0 < d0 := by
+    dsimp [d0]
+    exact halfChartCoordinate_den_pos hx0
+  have hxh0 : 0 <= x + h := by grind
+  have hd1pos : 0 < d1 := by
+    dsimp [d1]
+    exact halfChartCoordinate_den_pos hxh0
+  have hd0ne : d0 ≠ 0 := Rat.ne_of_gt hd0pos
+  have hd1ne : d1 ≠ 0 := Rat.ne_of_gt hd1pos
+  have hapos : 0 < a := by
+    dsimp [a]
+    native_decide
+  have ha2 : a <= 2 := by
+    dsimp [a]
+    native_decide
+  have hd0one : 1 <= d0 := by
+    dsimp [d0]
+    have hxhalf : 0 <= x / 2 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg hx0 (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))
+    grind
+  have hd1one : 1 <= d1 := by
+    dsimp [d1]
+    have hhalf : 0 <= (x + h) / 2 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg hxh0 (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))
+    grind
+  have hdprodpos : 0 < d0 * d1 := Rat.mul_pos hd0pos hd1pos
+  have hdprodOne : 1 <= d0 * d1 := by
+    calc
+      1 = 1 * 1 := by grind
+      _ <= d0 * 1 := Rat.mul_le_mul_of_nonneg_right hd0one (by native_decide)
+      _ <= d0 * d1 := Rat.mul_le_mul_of_nonneg_left hd1one
+        (Rat.le_trans (by native_decide) hd0one)
+  have hdelta : d1 - d0 = h / 2 := by
+    dsimp [d0, d1]
+    grind [Rat.sub_eq_add_neg]
+  have hformula : a / (d0 * d0) - a / (d0 * d1) =
+      (a * (h / 2)) / (d0 * d1) := by
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    have hcancelD0 : d0⁻¹ * d0 = 1 := Rat.inv_mul_cancel d0 hd0ne
+    have hcancelD1 : d1⁻¹ * d1 = 1 := Rat.inv_mul_cancel d1 hd1ne
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  change 0 <= a / (d0 * d0) - a / (d0 * d1) /\
+    a / (d0 * d0) - a / (d0 * d1) <= h
+  rw [hformula]
+  have hnum0 : 0 <= a * (h / 2) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (Rat.le_of_lt hapos)
+      (Rat.mul_nonneg (Rat.le_of_lt hpos)
+        (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide))))
+  have hinv0 : 0 <= (d0 * d1)⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hdprodpos)
+  have hnonneg : 0 <= (a * (h / 2)) / (d0 * d1) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hnum0 hinv0
+  have hinvLe : (d0 * d1)⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := d0 * d1)
+    · calc
+        (d0 * d1)⁻¹ * (d0 * d1) = 1 :=
+          Rat.inv_mul_cancel _ (Rat.ne_of_gt hdprodpos)
+        _ <= 1 * (d0 * d1) := by simpa using hdprodOne
+    · exact hdprodpos
+  have hhalfLe : h / 2 <= h := by
+    rw [Rat.div_def]
+    have htwoInv : (2 : Rat)⁻¹ <= 1 := by native_decide
+    calc
+      h * (2 : Rat)⁻¹ <= h * 1 :=
+        Rat.mul_le_mul_of_nonneg_left htwoInv (Rat.le_of_lt hpos)
+      _ = h := by grind
+  have hupper : (a * (h / 2)) / (d0 * d1) <= h := by
+    rw [Rat.div_def]
+    calc
+      (a * (h / 2)) * (d0 * d1)⁻¹ <= (2 * (h / 2)) * (d0 * d1)⁻¹ :=
+        Rat.mul_le_mul_of_nonneg_right
+          (Rat.mul_le_mul_of_nonneg_right ha2
+            (by rw [Rat.div_def]; exact Rat.mul_nonneg (Rat.le_of_lt hpos)
+              (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide))))) hinv0
+      _ = h * (d0 * d1)⁻¹ := by
+        rw [Rat.div_def]
+        have hcancel : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= h * 1 := Rat.mul_le_mul_of_nonneg_left hinvLe (Rat.le_of_lt hpos)
+      _ = h := by grind
+  exact ⟨hnonneg, hupper⟩
+
 theorem tangentChartIncrement_den_pos
     {x h : Rat} (hx : 0 <= x) (hxh : 0 <= x + h) :
     0 < 1 + x * (x + h) := by
@@ -4398,6 +5068,28 @@ theorem tangentChartIncrement_le_step
     h * d⁻¹ <= h * 1 :=
       Rat.mul_le_mul_of_nonneg_left hdinv (Rat.le_of_lt hpos)
     _ = h := by grind
+
+/-- On a positive step which remains in the unit branch, the tangent chart
+increment stays a uniform distance from its pole even when the basepoint is
+in the right half. -/
+theorem tangentChartIncrement_base_mul_le_half
+    {x h : Rat} (hx0 : 0 <= x) (hpos : 0 < h) (hupper : x + h <= 1) :
+    x * tangentChartIncrement x h <= (1 : Rat) / 2 := by
+  have hstep : tangentChartIncrement x h <= h :=
+    tangentChartIncrement_le_step hx0 hpos
+  have hlimit : h <= 1 - x := by
+    grind [Rat.sub_eq_add_neg]
+  have hquad : x * (1 - x) <= (1 : Rat) / 4 := by
+    have hsquare := RationalCircle.Stage.ratSquare_nonneg
+      (x - (1 : Rat) / 2)
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
+  calc
+    x * tangentChartIncrement x h <= x * h :=
+      Rat.mul_le_mul_of_nonneg_left hstep hx0
+    _ <= x * (1 - x) :=
+      Rat.mul_le_mul_of_nonneg_left hlimit hx0
+    _ <= (1 : Rat) / 4 := hquad
+    _ <= (1 : Rat) / 2 := by native_decide
 
 /-- A nonnegative chart increment no larger than a half unit remains on the
 unit arctangent branch.  This is the domain gate for the local tangent-chart
@@ -4767,6 +5459,99 @@ theorem tangentChart_transport_scaled_overlaps_forwardQuotient
     simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
   have hscaled := QInterval.scaleRat_overlaps_of_nonneg hinv hover
   simpa [QInterval.differenceQuotient, QInterval.divRat] using hscaled
+
+/-- The finite tangent-chart containment applies throughout the unit branch;
+the right-half case uses the local pole margin rather than a global
+half-unit-base assumption. -/
+theorem tangentChart_transport_scaled_contains_chartQuotient_on_unit
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat) :
+    (QInterval.scaleRat (1 / h)
+      (chartAddAreaLoopCompute x (tangentChartIncrement x h) n)).ContainsInterval
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (tangentChartIncrement x h) n)
+        (arctanIntegralRectangleCompute 0 n) h) := by
+  have hxh0 : 0 <= x + h := by grind
+  have hh1 : h <= 1 := by grind
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hxlt : x < 1 := by grind
+  have hcontains := chartAddAreaLoop_integralSum_contains
+    hx0 hxlt ht0 ht1 n
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hscaled := QInterval.scaleRat_contains_of_nonneg hinv hcontains
+  have hquotientEq :
+      QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (tangentChartIncrement x h) n)
+        (arctanIntegralRectangleCompute 0 n) h =
+        QInterval.scaleRat (1 / h)
+          (arctanIntegralRectangleCompute (tangentChartIncrement x h) n) := by
+    unfold QInterval.differenceQuotient QInterval.divRat QInterval.sub
+      QInterval.scaleRat
+    simp only [if_pos hinv]
+    rw [arctanIntegralRectangleCompute_zero_lower,
+      arctanIntegralRectangleCompute_zero_upper]
+    apply (QInterval.mk.injEq _ _ _ _).mpr
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  rw [hquotientEq]
+  exact hscaled
+
+/-- The scaled tangent chart overlaps the ordinary forward quotient throughout
+the unit branch.  This is the exact finite transport needed by the global
+forward arctangent derivative certificate. -/
+theorem tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat) :
+    QInterval.Overlaps
+      (QInterval.scaleRat (1 / h)
+        (chartAddAreaLoopCompute x (tangentChartIncrement x h) n))
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (x + h) n)
+        (arctanIntegralRectangleCompute x n) h) := by
+  have hxh0 : 0 <= x + h := by grind
+  have hh1 : h <= 1 := by grind
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hxlt : x < 1 := by grind
+  have hparam := chartAddParameter_tangentChartIncrement hx0 hxh0
+  have hover := chartAddAreaLoopCompute_overlaps_rectangleSub_of_lt
+    hx0 hxlt ht0 ht1 n
+  rw [hparam] at hover
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hscaled := QInterval.scaleRat_overlaps_of_nonneg hinv hover
+  simpa [QInterval.differenceQuotient, QInterval.divRat] using hscaled
+
+/-- A tangent increment based anywhere on the unit branch has the same
+explicit chart-width precision schedule as the earlier first-half proof. -/
+theorem tangentChartAreaLoopCompute_width_le_eps_on_unit
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1)
+    (eps : QPos) (n : Nat) (hn : 256 * (eps.val.den + 1) <= n) :
+    (chartAddAreaLoopCompute x (tangentChartIncrement x h) n).width <= eps.val := by
+  have hxh0 : 0 <= x + h := by grind
+  have hh1 : h <= 1 := by grind
+  have hxlt : x < 1 := by grind
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hmargin : x * tangentChartIncrement x h <= (1 : Rat) / 2 :=
+    tangentChartIncrement_base_mul_le_half hx0 hpos hupper
+  have hchart := chartAddParameter_tangentChartIncrement hx0 hxh0
+  have himage : RationalCircle.Trigonometry.chartAddParameter x
+      (tangentChartIncrement x h) <= 1 := by
+    rw [hchart]
+    exact hupper
+  exact chartAddAreaLoopCompute_width_le_eps_of_rightProduct_le_half
+    hx0 hxlt hx1 ht0 ht1 hmargin himage eps n hn
 
 /-- Tangent addition expresses an ordinary forward increment by the chart
 increment based at zero on the first half of the unit branch. -/

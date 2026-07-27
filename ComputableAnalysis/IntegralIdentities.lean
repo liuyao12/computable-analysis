@@ -2332,23 +2332,23 @@ def arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero
       ArctanGeometry.integralKernel x = 0 by grind]
     exact Rat.le_of_lt (precisionAtStage n).property
 
-/-- On the first half of the unit branch, the ordinary rectangle arctangent
-has the expected forward derivative.  The proof transports the local chart
-quotient through finite overlapping brackets whose evaluation precision is
-explicitly scaled by the rational step. -/
+/-- On the full unit branch, the ordinary rectangle arctangent has the
+expected forward derivative.  The proof transports the local chart quotient
+through finite overlapping brackets whose evaluation precision is explicitly
+scaled by the rational step; the right half uses the local tangent-chart pole
+margin rather than a second arctangent construction. -/
 def arctanIntegralRectangleOnUnit_forwardDerivativeAt
-    (x : Rat) (hx0 : 0 <= x) (hxHalf : x <= (1 : Rat) / 2) :
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
     HasForwardDerivativeAt arctanIntegralRectangleOnUnit x
       (RealRaw.ofRat (ArctanGeometry.integralKernel x)) := by
   refine
-    { x_mem := ⟨hx0, Rat.le_trans hxHalf (by native_decide)⟩
+    { x_mem := ⟨hx0, hx1⟩
       derivative_valid := RealRaw.ofRat_valid (ArctanGeometry.integralKernel x)
       stepPrecision := fun n => 8 * (n + 1)
       evalPrecision := arctanRectangleTangentTransportPrecision
       close := ?_ }
   intro h n hmem hpos hsmall
   change 0 <= x + h /\ x + h <= 1 at hmem
-  have hx1 : x <= 1 := Rat.le_trans hxHalf (by native_decide)
   have hxh0 : 0 <= x + h := by grind
   have hh1 : h <= 1 := by grind
   have hsmall' : h <= 1 / (((8 * (n + 1) : Nat) : Rat)) := by
@@ -2389,8 +2389,8 @@ def arctanIntegralRectangleOnUnit_forwardDerivativeAt
   have hAxWidth :=
     ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
       hx0 hx1 eps N hNrect
-  have hCWidth := ArctanGeometry.chartAddAreaLoopCompute_width_le_eps_of_precision
-    hx0 hxHalf ht0 ht1 hchartImage eps N hNchart
+  have hCWidth := ArctanGeometry.tangentChartAreaLoopCompute_width_le_eps_on_unit
+    hx0 hx1 hpos hmem.2 eps N hNchart
   have hinv : 0 <= 1 / h := by
     rw [Rat.div_def]
     simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
@@ -2411,12 +2411,12 @@ def arctanIntegralRectangleOnUnit_forwardDerivativeAt
     (ArctanGeometry.arctanIntegralRectangleCompute x N) h
   have hCcontainsP : C.ContainsInterval P := by
     dsimp [C, P]
-    exact ArctanGeometry.tangentChart_transport_scaled_contains_chartQuotient
-      hx0 hxHalf hpos hmem.2 N
+    exact ArctanGeometry.tangentChart_transport_scaled_contains_chartQuotient_on_unit
+      hx0 hx1 hpos hmem.2 N
   have hCoverlapsQ : C.Overlaps Q := by
     dsimp [C, Q]
-    exact ArctanGeometry.tangentChart_transport_scaled_overlaps_forwardQuotient
-      hx0 hxHalf hpos hmem.2 N
+    exact ArctanGeometry.tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit
+      hx0 hx1 hpos hmem.2 N
   have hPkernel :
       ({ lo := ArctanGeometry.integralKernel x - (h + h * h),
          hi := ArctanGeometry.integralKernel x } : QInterval).ContainsInterval P := by

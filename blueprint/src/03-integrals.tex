@@ -744,6 +744,9 @@ integration by parts.
 \label{prop:arctangent-tangent-chart-quotient}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_contains}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChartAreaLoopCompute_width_le_eps_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChart_transport_scaled_contains_chartQuotient_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_forwardDerivativeAt}
 Let \(0\le x\le1\), \(h>0\), and set
@@ -794,9 +797,9 @@ raw-real forward-difference identification
 \arctan_{\rm geom}(x+h)-\arctan_{\rm geom}(x)
 \Equiv\arctan_{\rm geom}(\tau).
 \]
-The finite transport has now also been completed for the rectangle
-arctangent representation itself.  For every rational
-\(0\le x\le1/2\), Lean proves
+The finite transport has now been completed for the rectangle arctangent
+representation itself on the full unit branch.  For every rational
+\(0\le x<1\), Lean proves the nonvacuous forward certificate
 \[
  A'(x)=\frac1{1+x^2},
  \qquad A(x)=\int_0^x\frac{\dd t}{1+t^2},
@@ -808,12 +811,25 @@ chart interval contains the chart quotient and overlaps the ordinary endpoint
 quotient at that same stage; together with the \(h+h^2\) kernel error, these
 are a fully rational proof of the derivative certificate.
 
-The remaining work to obtain the global interval-valued derivative
+The former half-unit restriction has been removed by a local finite estimate,
+not by a real-analysis extension theorem.  A chart cell based at \(x\) only
+needs the explicit pole-margin bound
+\[
+ x\,\tau(x,h)\le\frac12,
+\]
+which follows from \(x+h\le1\) and
+\(x(1-x)\le1/4\).  Lean proves that this bound gives the same factor-eight
+chart distortion and the same \(256/(n+1)\) transported width schedule as
+the old half-unit chart.  Thus the evaluator remains entirely rational and
+its precision still survives division by the positive step \(h\).
+
+The remaining derivative work is to upgrade these one-sided certificates to
+the two-sided interval-valued derivative
 \[
  \arctan'(x)=\frac1{1+x^2}
  \quad\text{on }[0,1]
 \]
-is to cover the right half of the branch and, separately, to transport the
+by supplying backward/interior step schedules and then transporting the
 result to the geometric representative.  The latter must preserve the
 requested quotient tolerance, rather than merely say that equivalent raw
 reals have the same limit.  This isolates the genuine remaining analytic
@@ -1314,13 +1330,12 @@ The scale conversion is controlled directly by rational inequalities.  On
   =\frac{xh}{(1+x^2)(1+x(x+h))}
   \le h.
 \]
-In particular \(0<\tau(x,h)\le h\le1\).  Combining this finite algebra
-with \cref{prop:arctangent-zero-tangent-bracket} is the next step toward the
-forward derivative of arctangent: it moves the zero-basepoint enclosure to a
-nonzero basepoint while making the denominator error explicit.  A full
-\code{HasDerivativeOnInterval} certificate still requires a compatible
-evaluation schedule for the chart-addition equivalence and a separate
-two-sided endpoint treatment.
+In particular \(0<\tau(x,h)\le h\le1\).  Combined with the finite
+tangent box, this algebra is now part of the checked full-unit forward
+derivative certificate for the rectangle arctangent.  The same formulas are
+retained for the geometric transport; a full \code{HasDerivativeOnInterval}
+certificate still requires a compatible evaluation schedule for that
+equivalence and a separate two-sided endpoint treatment.
 \end{proposition}
 
 \begin{definition}[Arctangent as an integral]
