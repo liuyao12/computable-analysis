@@ -220,6 +220,14 @@ matching alternating-series lower endpoint.  Nestedness and the cofinal rational
 concrete logarithm-at-two endpoint bridge using only finite rational boxes;
 identification with the inverse branch of the selected canonical exponential
 remains a separate log/exp theorem.
+The next endpoint step is now also finite and explicit.  On the `n`-cell
+unit mesh, `Logarithm.logTwoSquareMesh_substitution_identity` proves that the
+left Stieltjes sum for `t = x*x` equals the ordinary mesh expression for
+`2*x/(1+x*x)` plus a named correction.  The correction is nonnegative and at
+most `1/n` (`logTwoSquareMeshCorrection_le_one_div`).  This is the exact
+square-substitution algebra needed by the arctangent--logarithm formula; it
+does not yet claim a general substitution rule or promote either sum to a
+definite integral.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

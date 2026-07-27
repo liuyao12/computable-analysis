@@ -677,7 +677,7 @@ integration by parts.
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
-\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,thm:log-two-series-reciprocal-integral}
+\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
 certificate gives
@@ -705,10 +705,15 @@ The final endpoint bridge is deliberately stated separately:
  2\int_0^1\frac{x}{1+x^2}\,\dd x
  \Equiv \log 2.
 \]
-It is obtained by the rational substitution \(t=1+x^2\), followed by the
-canonical-exponential/inverse-logarithm identification.  The already checked
-series-to-reciprocal-integral equality at \(2\) supplies a concrete comparison
-point, but it is not silently promoted to this change-of-variables theorem.
+Its finite square-substitution core is now checked: on the \(n\)-mesh, the
+left Stieltjes sum for \(t=x^2\) is exactly twice the ordinary left sum plus a
+nonnegative correction at most \(1/n\)
+(\cref{prop:log-two-square-substitution}).  Promoting these two finite sums
+to the definite integrals still requires the common-refinement certificate,
+followed by the canonical-exponential/inverse-logarithm identification.  The
+already checked series-to-reciprocal-integral equality at \(2\) supplies a
+concrete comparison point, but is not silently promoted to that
+change-of-variables theorem.
 Combining the two certified equivalences gives the natural statement
 \[
   \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log2.

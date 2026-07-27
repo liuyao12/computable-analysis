@@ -134,6 +134,186 @@ the constructive candidate for `∫_1^2 dx/x`, under the affine substitution
 def logTwoKernel (t : Rat) : Rat :=
   1 / (1 + t)
 
+/-- The left-endpoint Stieltjes sum for the square substitution `t = x^2`
+on a uniform unit mesh.  Its limiting target is the reciprocal integral
+`∫₀¹ dt / (1+t)`, but this definition is only a finite rational computation. -/
+def logTwoSquareMeshStieltjesSum (meshStage terms : Nat) : Rat :=
+  leftStieltjesSum
+    (fun k => logTwoKernel
+      (unitMeshPath meshStage k * unitMeshPath meshStage k))
+    (fun k => unitMeshPath meshStage k * unitMeshPath meshStage k)
+    terms
+
+/-- The ordinary left-mesh sum which results from the formal substitution
+`dt = 2x dx`.  It is kept separate from the Stieltjes sum so the finite
+corner correction is visible rather than hidden in a limit argument. -/
+def logTwoSquareMeshWeightedSum (meshStage : Nat) : Nat -> Rat
+  | 0 => 0
+  | terms + 1 =>
+      logTwoSquareMeshWeightedSum meshStage terms +
+        2 * unitMeshPath meshStage terms *
+          logTwoKernel
+            (unitMeshPath meshStage terms * unitMeshPath meshStage terms) *
+          (1 / (meshStage : Rat))
+
+/-- The exact finite correction in the square-substitution formula.  Each
+cell carries the `dx²` part of `(x + dx)² - x²`. -/
+def logTwoSquareMeshCorrection (meshStage : Nat) : Nat -> Rat
+  | 0 => 0
+  | terms + 1 =>
+      logTwoSquareMeshCorrection meshStage terms +
+        logTwoKernel
+          (unitMeshPath meshStage terms * unitMeshPath meshStage terms) *
+          ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat)))
+
+/-- The finite square-substitution identity.  It is the literal rational
+version of `∫₀¹ dt/(1+t) = 2∫₀¹ x/(1+x²) dx`; the named correction is still
+present at finite mesh size and will later be bounded by `1 / n`. -/
+theorem logTwoSquareMesh_substitution_identity
+    (meshStage terms : Nat) :
+    logTwoSquareMeshStieltjesSum meshStage terms =
+      logTwoSquareMeshWeightedSum meshStage terms +
+        logTwoSquareMeshCorrection meshStage terms := by
+  induction terms with
+  | zero =>
+      simp [logTwoSquareMeshStieltjesSum, logTwoSquareMeshWeightedSum,
+        logTwoSquareMeshCorrection, leftStieltjesSum, Rat.zero_add]
+  | succ terms ih =>
+      change logTwoSquareMeshStieltjesSum meshStage terms +
+          logTwoKernel
+            (unitMeshPath meshStage terms * unitMeshPath meshStage terms) *
+            (unitMeshPath meshStage (terms + 1) * unitMeshPath meshStage (terms + 1) -
+              unitMeshPath meshStage terms * unitMeshPath meshStage terms) = _
+      rw [ih,
+        logTwoSquareMeshWeightedSum, logTwoSquareMeshCorrection]
+      have hstep := unitMeshPath_step meshStage terms
+      have hnext :
+          unitMeshPath meshStage (terms + 1) =
+            unitMeshPath meshStage terms + 1 / (meshStage : Rat) := by
+        grind [Rat.sub_eq_add_neg]
+      rw [hnext]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Positivity of the translated reciprocal kernel on the nonnegative ray. -/
+theorem logTwoKernel_nonnegative {t : Rat} (ht : 0 <= t) :
+    0 <= logTwoKernel t := by
+  unfold logTwoKernel
+  rw [Rat.div_def, Rat.one_mul]
+  exact Rat.le_of_lt ((Rat.inv_pos).2 (by grind))
+
+/-- The translated reciprocal kernel never exceeds one on the nonnegative
+ray.  This elementary bound gives the explicit square-substitution error
+rate below. -/
+theorem logTwoKernel_le_one {t : Rat} (ht : 0 <= t) :
+    logTwoKernel t <= 1 := by
+  have hden : 0 < 1 + t := by grind
+  have h := one_div_antitone_of_pos (a := (1 : Rat)) (b := 1 + t)
+    (by native_decide) (by grind)
+  calc
+    logTwoKernel t = 1 / (1 + t) := rfl
+    _ <= 1 / (1 : Rat) := h
+    _ = 1 := by native_decide
+
+private theorem logTwoSquareMeshCorrection_nonnegative
+    (meshStage terms : Nat) :
+    0 <= logTwoSquareMeshCorrection meshStage terms := by
+  cases meshStage with
+  | zero =>
+      induction terms with
+      | zero =>
+          exact Rat.le_refl
+      | succ terms ih =>
+          rw [logTwoSquareMeshCorrection]
+          rw [show ((0 : Nat) : Rat) = 0 by native_decide]
+          have hzero : 1 / (0 : Rat) = 0 := by native_decide
+          rw [hzero]
+          simpa only [Rat.zero_mul, Rat.mul_zero, Rat.add_zero] using ih
+  | succ meshStage =>
+      induction terms with
+      | zero =>
+          simp [logTwoSquareMeshCorrection]
+      | succ terms ih =>
+          rw [logTwoSquareMeshCorrection]
+          apply Rat.add_nonneg ih
+          apply Rat.mul_nonneg
+          · apply logTwoKernel_nonnegative
+            exact Rat.mul_nonneg (unitMeshPath_nonnegative (meshStage + 1) terms)
+              (unitMeshPath_nonnegative (meshStage + 1) terms)
+          · exact Rat.mul_nonneg
+              (by simpa [Rat.div_def, Rat.one_mul] using
+                Rat.le_of_lt ((Rat.inv_pos).2
+                  ((Rat.natCast_pos).2 (Nat.succ_pos meshStage))))
+              (by simpa [Rat.div_def, Rat.one_mul] using
+                Rat.le_of_lt ((Rat.inv_pos).2
+                  ((Rat.natCast_pos).2 (Nat.succ_pos meshStage))))
+
+private theorem logTwoSquareMeshCorrection_le_terms_meshSquare
+    (meshStage terms : Nat) (hmesh : 0 < meshStage) :
+    logTwoSquareMeshCorrection meshStage terms <=
+      (terms : Rat) * ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) := by
+  induction terms with
+  | zero =>
+      simp [logTwoSquareMeshCorrection]
+  | succ terms ih =>
+      rw [logTwoSquareMeshCorrection]
+      have hsq_nonneg : 0 <=
+          (1 / (meshStage : Rat)) * (1 / (meshStage : Rat)) := by
+        exact Rat.mul_nonneg
+          (by simpa [Rat.div_def, Rat.one_mul] using
+            Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hmesh)))
+          (by simpa [Rat.div_def, Rat.one_mul] using
+            Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hmesh)))
+      have hkernel :
+          logTwoKernel
+            (unitMeshPath meshStage terms * unitMeshPath meshStage terms) <= 1 :=
+        logTwoKernel_le_one
+          (Rat.mul_nonneg (unitMeshPath_nonnegative meshStage terms)
+            (unitMeshPath_nonnegative meshStage terms))
+      calc
+        logTwoSquareMeshCorrection meshStage terms +
+            logTwoKernel
+              (unitMeshPath meshStage terms * unitMeshPath meshStage terms) *
+              ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) <=
+            (terms : Rat) *
+              ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) +
+            logTwoKernel
+              (unitMeshPath meshStage terms * unitMeshPath meshStage terms) *
+              ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) :=
+          Rat.add_le_add_right.mpr ih
+        _ <= (terms : Rat) *
+              ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) +
+            1 * ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) :=
+          Rat.add_le_add_left.mpr
+            (Rat.mul_le_mul_of_nonneg_right hkernel hsq_nonneg)
+        _ = ((terms + 1 : Nat) : Rat) *
+              ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) := by
+          rw [Rat.natCast_add]
+          grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+            Rat.mul_assoc, Rat.mul_comm]
+
+/-- On an `n`-cell unit mesh, the finite square-substitution correction is
+between zero and `1/n`.  This supplies a computable rate for the later
+change-of-variables bridge, without invoking a general substitution theorem. -/
+theorem logTwoSquareMeshCorrection_le_one_div
+    (meshStage : Nat) (hmesh : 0 < meshStage) :
+    0 <= logTwoSquareMeshCorrection meshStage meshStage /\
+      logTwoSquareMeshCorrection meshStage meshStage <= 1 / (meshStage : Rat) := by
+  constructor
+  · exact logTwoSquareMeshCorrection_nonnegative meshStage meshStage
+  · calc
+      logTwoSquareMeshCorrection meshStage meshStage <=
+          (meshStage : Rat) *
+            ((1 / (meshStage : Rat)) * (1 / (meshStage : Rat))) :=
+        logTwoSquareMeshCorrection_le_terms_meshSquare meshStage meshStage hmesh
+      _ = 1 / (meshStage : Rat) := by
+        have hne : (meshStage : Rat) ≠ 0 :=
+          Rat.ne_of_gt ((Rat.natCast_pos).2 hmesh)
+        rw [Rat.div_def, Rat.one_mul]
+        have hcancel : (meshStage : Rat) * (meshStage : Rat)⁻¹ = 1 :=
+          Rat.mul_inv_cancel _ hne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+
 private theorem logTwoKernel_difference_mul_denominator
     {s t : Rat} (hs0 : 0 <= s) (ht0 : 0 <= t) :
     (logTwoKernel s - logTwoKernel t) * ((1 + s) * (1 + t)) = t - s := by

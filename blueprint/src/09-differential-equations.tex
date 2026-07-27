@@ -169,6 +169,14 @@ finite Peano--Baker chronological product
 \[
  T(N,0)=(I+B_{N-1})\cdots(I+B_0).
 \]
+Time shifts compose in the same order:
+\[
+ T(s,m+n)=T(s+m,n)\,T(s,m).
+\]
+The checked declaration \code{chronologicalStepProduct\_split} proves this
+finite semigroup identity before any continuous state transition is
+constructed. It is the sampled precursor of
+\(\Phi(t,r)\Phi(r,s)=\Phi(t,s)\).
 Lean proves the exact finite decomposition
 \[
  x_N=T(N,0)x_0+v_N,\qquad

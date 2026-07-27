@@ -425,6 +425,36 @@ each summand.  It therefore supplies the series side of the intended
 logarithm integral identity without silently passing to a limit.
 \end{proposition}
 
+\begin{proposition}[Finite square-substitution bridge]
+\label{prop:log-two-square-substitution}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshStieltjesSum}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshWeightedSum}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshCorrection}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshCorrection_le_one_div}
+\uses{def:log-two-reciprocal-darboux}
+\leanok
+Let \(x_k=k/n\) and \(g(t)=1/(1+t)\).  Lean now proves the literal
+finite rational identity
+\[
+ \sum_{k<n}g(x_k^2)(x_{k+1}^2-x_k^2)
+ =\sum_{k<n}\frac{2x_k}{n}g(x_k^2)+R_n,
+ \qquad 0\le R_n\le\frac1n
+\]
+for every positive \(n\).  The left side is the named left-endpoint
+Stieltjes sum for the path \(t=x^2\); the first term on the right is the
+ordinary left-mesh expression suggested by \(dt=2x\,dx\).  The correction is
+not discarded: its \(k\)-th exact contribution is
+\(g(x_k^2)/n^2\), the square part of
+\((x_k+1/n)^2-x_k^2\).  Positivity and \(g\le1\) give the displayed
+computable \(O(1/n)\) rate.
+
+This is the finite algebraic core of the endpoint bridge
+\(2\int_0^1x/(1+x^2)\,dx=\log2\).  It does not yet claim a general
+change-of-variables theorem or identify either finite sum with its raw
+integral: the necessary common-refinement/FTC promotion remains explicit.
+\end{proposition}
+
 \begin{theorem}[Series equals the finite reciprocal integral]
 \label{thm:log-two-series-reciprocal-integral}
 \lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower}
@@ -487,7 +517,10 @@ Its intended proof order is:
       =\frac{\pi}{4}-\frac12\log 2
   \]
   follows from \((x\arctan x)'=\arctan x+x/(1+x^2)\), its finite
-  corner-rectangle schedule, and the logarithmic endpoint calculation;
+  corner-rectangle schedule, and the logarithmic endpoint calculation.  The
+  latter now has its exact finite square-substitution core in
+  \cref{prop:log-two-square-substitution}; its promotion to the two definite
+  integrals remains a separate certificate;
   \item package the right-hand side as a valid raw pi evaluator and prove it
   equivalent to the geometric circle-area presentation.
 \end{enumerate}

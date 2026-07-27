@@ -346,7 +346,15 @@ another. The Pi score stays useful only as secondary integration coverage.
   `Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral`.  This discharges
   the concrete endpoint bridge using rational boxes alone.  The distinct
   remaining logarithm gate is to identify that integral raw with the inverse
-  branch of the selected canonical exponential.
+  branch of the selected canonical exponential.  The elementary
+  change-of-variables algebra is now checked as well:
+  `Logarithm.logTwoSquareMesh_substitution_identity` writes the finite
+  left-Stieltjes sum for `t = x*x` as the ordinary left mesh sum for
+  `2*x/(1+x*x)` plus `Logarithm.logTwoSquareMeshCorrection`; the correction
+  is nonnegative and at most `1/n` on the `n`-cell mesh
+  (`logTwoSquareMeshCorrection_le_one_div`).  This is deliberately only the
+  finite square-substitution core.  A common-refinement/FTC proof must still
+  promote the two sums to their respective definite integrals.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
@@ -751,7 +759,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   sum_(k<N) S_(N-1) * ... * S_(k+1) * g_k.
   trajectory_zeroInitial_eq_duhamelSum separately identifies the latter
   with the recursive zero-initial response. ForcingZero makes that response
-  vanish.
+  vanish. `chronologicalStepProduct_split` additionally proves the
+  time-shifted finite semigroup law
+  `T(s,m+n) = T(s+m,n) * T(s,m)`, the exact sampled predecessor of the
+  continuous state-transition composition law.
   The new `SolvesRecurrence` and `SolvesHomogeneousRecurrence` witnesses
   separate the recurrence specification from its recursive evaluator.
   `solvesRecurrence_eq_trajectory` proves every sampled candidate is the

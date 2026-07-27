@@ -380,6 +380,35 @@ def chronologicalStepProduct {dimension : Nat} (S : Nat -> RatMatrix dimension)
       matrixMul (S (start + steps))
         (chronologicalStepProduct S start steps) := rfl
 
+/-- Exact composition of time-shifted sampled transitions.  The transition
+over the later block occurs on the left, as required by chronological time
+ordering.  This is the finite semigroup law behind the future continuous
+identity `Phi(t,r) * Phi(r,s) = Phi(t,s)`. -/
+theorem chronologicalStepProduct_split {dimension : Nat}
+    (S : Nat -> RatMatrix dimension) (start first second : Nat) :
+    chronologicalStepProduct S start (first + second) =
+      matrixMul
+        (chronologicalStepProduct S (start + first) second)
+        (chronologicalStepProduct S start first) := by
+  induction second with
+  | zero =>
+      change chronologicalStepProduct S start first =
+        matrixMul (matrixIdentity dimension) (chronologicalStepProduct S start first)
+      exact (matrixMul_identity_left _).symm
+  | succ second ih =>
+      rw [show first + (second + 1) = (first + second) + 1 by omega]
+      rw [chronologicalStepProduct_succ, ih]
+      change
+        matrixMul (S (start + (first + second)))
+          (matrixMul (chronologicalStepProduct S (start + first) second)
+            (chronologicalStepProduct S start first)) =
+          matrixMul
+            (matrixMul (S ((start + first) + second))
+              (chronologicalStepProduct S (start + first) second))
+            (chronologicalStepProduct S start first)
+      rw [show start + (first + second) = (start + first) + second by omega]
+      exact (matrixMul_assoc _ _ _).symm
+
 /-- A sampled, possibly inhomogeneous, linear recurrence
 `x_(k+1) = step(k) * x_k + forcing(k)`.  For an Euler discretization of
 `x' = A(t)x+b(t)`, use `step(k) = I + h A(t_k)` and
