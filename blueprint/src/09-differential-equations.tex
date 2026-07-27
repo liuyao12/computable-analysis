@@ -66,6 +66,51 @@ second-order formulas.  Peano--Baker will construct the vector transition,
 and the trigonometric and exponential displays above will later be recovered
 by uniqueness.
 
+\section{The construction and identification route}
+\label{sec:ode-construction-identification-route}
+
+The chapter has two jobs which must not be conflated.  First, it constructs a
+solution of a general inhomogeneous vector system.  Second, it identifies
+independently constructed familiar functions with that solution.  The intended
+dependency order is
+\[
+ \text{second-order model}
+ \longrightarrow \text{first-order affine system}
+ \longrightarrow \text{Peano--Baker transition and Duhamel term}
+ \longrightarrow \text{existence and uniqueness}
+ \longrightarrow \text{elementary-function agreement}.
+\]
+More explicitly, the continuous layer will perform the following finite
+certificate steps.
+\begin{enumerate}
+  \item For interval-regular (A) and (b), construct the ordered
+  Peano--Baker transition (Phi(t,s)) and the Duhamel expression for
+  (x'=A(t)x+b(t)).  Simplex-quadrature boxes and a factorial-tail modulus
+  supply existence as an executable raw vector.
+  \item Compare any two certified solutions by subtracting their Volterra
+  identities.  Iterated substitution bounds their difference by an explicit
+  factorial term, proving uniqueness without invoking a complete space of
+  functions.
+  \item Only after those two steps, specialize to constant matrices.  The
+  oscillator matrix then identifies the constructed transition with the
+  supplied sine--cosine pair, and the one-dimensional coefficient (A=1)
+  identifies the constructed transition with a supplied exponential.
+\end{enumerate}
+Thus the displayed oscillator and exponential formulas are validation targets,
+not assumptions used to manufacture the Peano--Baker solution.  This direction
+also makes the general inhomogeneous theorem immediately useful: the same
+transition that recovers the homogeneous modes carries forcing through the
+Duhamel term.
+
+The scalar specialization has a deliberately important downstream use.  Once
+the power-series, repeated-multiplication, and inverse-logarithmic-integral
+representatives have each supplied a derivative and initial-value certificate
+for (E'=E, E(0)=1), the uniqueness step identifies all three.  The positive
+inverse is then the canonical logarithm.  This is the intended long route by
+which the arctangent integration-by-parts formula later acquires its canonical
+\(\log 2\); it is a dependency route for one pi benchmark, not a claim that
+the Pi scoreboard measures ODE progress.
+
 \section{Finite time ordering before analysis}
 
 \begin{definition}[Rational matrices and sampled systems]

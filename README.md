@@ -61,6 +61,20 @@ the calculus foundation. The Pi integration suite records which independent
 capabilities its checked routes exercise; it intentionally has no completion
 fraction for calculus.
 
+The blueprint now makes the intended direction explicit: begin with the
+forced second-order oscillator that practitioners recognize, convert it to an
+inhomogeneous first-order vector system, construct its general solution by
+Peano--Baker plus Duhamel, and prove uniqueness by iterating the zero-initial
+Volterra identity until its explicit factorial bound is below any requested
+rational tolerance.  The familiar sine/cosine and exponential formulae are
+then recovered by that uniqueness theorem, rather than used as definitions.
+For the scalar `E' = E`, `E(0) = 1` specialization this identifies the
+power-series, repeated-multiplication, and inverse-logarithmic-integral
+exponentials once each has its own derivative certificate.  The resulting
+canonical positive inverse is the logarithm needed by the deliberately long
+arctangent integration-by-parts Pi route.  This is a dependency route for one
+coverage benchmark, not a claim that Pi rows measure ODE progress.
+
 ## Calculus readiness ledger
 
 The Pi table below is deliberately an integration suite, not the project

@@ -833,6 +833,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   interval. `CoefficientsRegular` asks for supplied componentwise
   `IntervalRegularOn` witnesses; it does not assume a completed-real
   function space.
+- The blueprint now fixes the chapter's proof direction: start from the
+  forced second-order oscillator, turn it into the general affine vector
+  equation `x' = A(t)x + b(t)`, construct Peano--Baker plus Duhamel boxes for
+  that general problem, and prove uniqueness by iterating the zero-initial
+  Volterra identity until the factorial estimate is below an arbitrary
+  rational tolerance.  Only then specialize to the oscillator and to
+  `E' = E`, `E(0) = 1`.  This recovers sine/cosine and identifies every
+  exponential representative that has independently supplied the same
+  derivative and initial-value certificate.  The positive inverse is the
+  canonical logarithm used by the long arctangent integration-by-parts Pi
+  route; this is a named dependency chain, not an extra Pi-scoreboard row.
 - Next analytic target: build interval matrices for ordered-simplex
   Peano--Baker terms, prove a factorial tail enclosure from a rational
   coefficient bound, and obtain state-transition and variation-of-constants
