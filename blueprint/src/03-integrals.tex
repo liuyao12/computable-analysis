@@ -744,6 +744,7 @@ integration by parts.
 \label{prop:arctangent-tangent-chart-quotient}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_contains}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero}
 Let \(0\le x\le1\), \(h>0\), and set
 \[
  \tau=\frac{h}{1+x(x+h)},\qquad
@@ -770,9 +771,21 @@ rational scale comparison \(0\le(1+x^2)^{-1}-\sigma\le h\):
 \]
 It holds at every rectangle stage \(n\), so this is already a genuine
 finite forward-quotient estimate with an explicit, stage-independent error
-modulus.  In particular, the tangent-chart representative has the local
-derivative kernel \((1+x^2)^{-1}\) once the elementary schedule
-\(h+h^2\le\varepsilon\) is installed.
+modulus.  Lean now packages the resulting local statement as an actual
+forward derivative certificate.  On the increment interval \([0,1/2]\),
+put
+\[
+  T_x(h)=A\!\left(\frac{h}{1+x(x+h)}\right).
+\]
+Then
+\[
+  T_x'(0+)=\frac1{1+x^2}.
+\]
+For requested stage \(n\), the checked schedule takes
+\(0<h\le1/(2(n+1))\); the elementary rational estimate
+\(h+h^2\le\operatorname{precision}(n)\) closes all four interval-nearness
+obligations.  This is a derivative certificate for a real interval
+evaluator, not a statement about a limit in a completed function space.
 
 On the first half of the unit branch, tangent addition also gives the
 raw-real forward-difference identification
@@ -785,10 +798,10 @@ Thus the remaining step to obtain the actual interval-valued derivative
  \arctan'(x)=\frac1{1+x^2}
 \]
 is a quantitative transport lemma through that raw-real forward-difference
-equivalence.  It must preserve the requested quotient tolerance while
-choosing representatives, rather than merely say that equivalent raw reals
-have the same limit.  This isolates the genuine analytic work; no
-completeness or mean-value theorem is required.
+equivalence.  It must transport the already-checked certificate for \(T_x\)
+while preserving the requested quotient tolerance, rather than merely say
+that equivalent raw reals have the same limit.  This isolates the genuine
+analytic work; no completeness or mean-value theorem is required.
 \end{proposition}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]

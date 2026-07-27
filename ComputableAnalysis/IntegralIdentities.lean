@@ -1985,6 +1985,255 @@ def arctanIntegralRectangleOnUnit : FunctionOnInterval where
     simpa [arctanIntegralRectangleFunctionRaw] using
       arctanIntegralRectangleFor_valid x hx.1 hx.2
 
+/-- The rectangle arctangent evaluated in the tangent-addition chart based at
+`x`.  Its input is the ordinary positive increment `h`; restricting it to a
+half unit makes every derived chart increment a valid unit-branch input. -/
+def arctanIntegralRectangleTangentChartOnHalf
+    (x : Rat) (hx0 : 0 <= x) : FunctionOnInterval where
+  raw :=
+    { definedAt := fun h => 0 <= h /\ h <= (1 : Rat) / 2
+      compute := fun h hh =>
+        (arctanIntegralRectangleFor (ArctanGeometry.tangentChartIncrement x h)
+          (ArctanGeometry.tangentChartIncrement_mem_unit_of_mem_half
+            hx0 hh.1 hh.2).1
+          (ArctanGeometry.tangentChartIncrement_mem_unit_of_mem_half
+            hx0 hh.1 hh.2).2).compute
+      rate := fun h hh =>
+        (arctanIntegralRectangleFor (ArctanGeometry.tangentChartIncrement x h)
+          (ArctanGeometry.tangentChartIncrement_mem_unit_of_mem_half
+            hx0 hh.1 hh.2).1
+          (ArctanGeometry.tangentChartIncrement_mem_unit_of_mem_half
+            hx0 hh.1 hh.2).2).rate }
+  lower := 0
+  upper := (1 : Rat) / 2
+  defined_on := by
+    intro _h hh
+    exact hh
+  valid_on := by
+    intro h hh
+    exact arctanIntegralRectangleFor_valid
+      (ArctanGeometry.tangentChartIncrement x h)
+      (ArctanGeometry.tangentChartIncrement_mem_unit_of_mem_half
+        hx0 hh.1 hh.2).1
+      (ArctanGeometry.tangentChartIncrement_mem_unit_of_mem_half
+        hx0 hh.1 hh.2).2
+
+theorem arctanIntegralRectangleTangentChartOnHalf_compute
+    (x : Rat) (hx0 : 0 <= x) (h : Rat)
+    (hh : inDomainInterval
+      (arctanIntegralRectangleTangentChartOnHalf x hx0).lower
+      (arctanIntegralRectangleTangentChartOnHalf x hx0).upper h)
+    (n : Nat) :
+    (arctanIntegralRectangleTangentChartOnHalf x hx0).compute h hh n =
+      ArctanGeometry.arctanIntegralRectangleCompute
+        (ArctanGeometry.tangentChartIncrement x h) n := rfl
+
+/-- The explicit step schedule for the tangent-chart derivative: a step at
+most `1 / (2 (n + 1))` makes the rational error `h + h^2` no larger than the
+requested stage tolerance. -/
+private theorem tangentChart_stepError_le_precision
+    {h : Rat} (n : Nat) (hpos : 0 < h)
+    (hsmall : h <= 1 / (((2 * (n + 1) : Nat) : Rat))) :
+    h + h * h <= (precisionAtStage n).val := by
+  let m : Rat := ((n + 1 : Nat) : Rat)
+  have hmpos : 0 < m := by
+    dsimp [m]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hmne : m ≠ 0 := Rat.ne_of_gt hmpos
+  have hdenpos : 0 < 2 * m := Rat.mul_pos (by native_decide) hmpos
+  have hsmall' : h <= 1 / (2 * m) := by
+    simpa [m] using hsmall
+  have hle_one : h <= 1 := by
+    have hdenone : 1 <= 2 * m := by
+      have hmone : 1 <= m := by
+        dsimp [m]
+        exact_mod_cast (Nat.succ_le_succ (Nat.zero_le n))
+      calc
+        1 = 1 * 1 := by grind
+        _ <= 2 * 1 := Rat.mul_le_mul_of_nonneg_right (by native_decide)
+          (by native_decide)
+        _ <= 2 * m := Rat.mul_le_mul_of_nonneg_left hmone (by native_decide)
+    have hinv : (2 * m)⁻¹ <= 1 := by
+      apply Rat.le_of_mul_le_mul_right (c := 2 * m)
+      · calc
+          (2 * m)⁻¹ * (2 * m) = 1 :=
+            Rat.inv_mul_cancel _ (Rat.ne_of_gt hdenpos)
+          _ <= 1 * (2 * m) := by simpa using hdenone
+      · exact hdenpos
+    calc
+      h <= 1 / (2 * m) := hsmall'
+      _ = (2 * m)⁻¹ := by rw [Rat.div_def, Rat.one_mul]
+      _ <= 1 := hinv
+  have hsquare : h * h <= h := by
+    calc
+      h * h <= h * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hle_one (Rat.le_of_lt hpos)
+      _ = h := by grind
+  have htwice : 2 * h <= 1 / m := by
+    apply Rat.le_of_mul_le_mul_right (c := m)
+    · calc
+        (2 * h) * m = h * (2 * m) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= (1 / (2 * m)) * (2 * m) :=
+          Rat.mul_le_mul_of_nonneg_right hsmall' (Rat.le_of_lt hdenpos)
+        _ = 1 := by
+          rw [Rat.div_def]
+          have hne : 2 * m ≠ 0 := Rat.ne_of_gt hdenpos
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ = (1 / m) * m := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hmpos
+  have hstage : 1 / m <= (precisionAtStage n).val := by
+    dsimp [m]
+    by_cases hn : n = 0
+    · subst n
+      native_decide
+    · simp only [precisionAtStage, dif_neg hn]
+      exact FTC.one_div_nat_antitone (Nat.pos_of_ne_zero hn)
+        (Nat.succ_pos n) (Nat.le_succ n)
+  calc
+    h + h * h <= h + h := (Rat.add_le_add_left).2 hsquare
+    _ = 2 * h := by grind
+    _ <= 1 / m := htwice
+    _ <= (precisionAtStage n).val := hstage
+
+/-- The tangent-chart rectangle evaluator has the derivative kernel
+`1 / (1 + x^2)` at its zero increment.  This is an actual
+`HasForwardDerivativeAt` certificate for the charted evaluator; transferring
+it to the geometric arctangent still requires a quantitative equivalence
+transport theorem. -/
+def arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
+    HasForwardDerivativeAt
+      (arctanIntegralRectangleTangentChartOnHalf x hx0)
+      0 (RealRaw.ofRat (ArctanGeometry.integralKernel x)) := by
+  refine
+    { x_mem := by
+        change (0 : Rat) <= 0 /\ 0 <= (1 : Rat) / 2
+        exact ⟨Rat.le_refl, by native_decide⟩
+      derivative_valid := by
+        exact RealRaw.ofRat_valid (ArctanGeometry.integralKernel x)
+      stepPrecision := fun n => 2 * (n + 1)
+      evalPrecision := fun _h _n => 0
+      close := ?_ }
+  intro h n hmem hpos hsmall
+  have hzeroAdd : (0 : Rat) + h = h := by grind
+  have hmemAtH : inDomainInterval
+      (arctanIntegralRectangleTangentChartOnHalf x hx0).lower
+      (arctanIntegralRectangleTangentChartOnHalf x hx0).upper h := by
+    exact hzeroAdd ▸ hmem
+  have hzero : inDomainInterval
+      (arctanIntegralRectangleTangentChartOnHalf x hx0).lower
+      (arctanIntegralRectangleTangentChartOnHalf x hx0).upper 0 := by
+    change (0 : Rat) <= 0 /\ 0 <= (1 : Rat) / 2
+    exact ⟨Rat.le_refl, by native_decide⟩
+  have herror : h + h * h <= (precisionAtStage n).val := by
+    change h <= 1 / (((2 * (n + 1) : Nat) : Rat)) at hsmall
+    exact tangentChart_stepError_le_precision n hpos hsmall
+  have htmem := ArctanGeometry.tangentChartIncrement_mem_unit_of_mem_half
+    hx0 hmemAtH.1 hmemAtH.2
+  have hquotientContains :=
+    ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains
+      hx0 hx1 hpos 0
+  have hzeroChart : ArctanGeometry.tangentChartIncrement x 0 = 0 := by
+    unfold ArctanGeometry.tangentChartIncrement
+    rw [Rat.div_def, Rat.zero_mul]
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hleftOrdered :
+      (ArctanGeometry.arctanIntegralRectangleCompute
+        (ArctanGeometry.tangentChartIncrement x h) 0).lo <=
+      (ArctanGeometry.arctanIntegralRectangleCompute
+        (ArctanGeometry.tangentChartIncrement x h) 0).hi := by
+    have hwidth := ArctanGeometry.arctanIntegralRectangleCompute_ordered
+      htmem.1 0
+    unfold QInterval.width at hwidth
+    grind [Rat.sub_eq_add_neg]
+  have hzeroOrdered :
+      (ArctanGeometry.arctanIntegralRectangleCompute 0 0).lo <=
+      (ArctanGeometry.arctanIntegralRectangleCompute 0 0).hi := by
+    have hwidth := ArctanGeometry.arctanIntegralRectangleCompute_ordered
+      (x := 0) (by native_decide) 0
+    unfold QInterval.width at hwidth
+    grind [Rat.sub_eq_add_neg]
+  have hquotientOrdered :
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute
+          (ArctanGeometry.tangentChartIncrement x h) 0)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).lo <=
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute
+          (ArctanGeometry.tangentChartIncrement x h) 0)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi := by
+    unfold QInterval.differenceQuotient QInterval.divRat QInterval.sub
+      QInterval.scaleRat
+    rw [if_pos hinv]
+    apply Rat.mul_le_mul_of_nonneg_left _ hinv
+    grind [Rat.sub_eq_add_neg]
+  suffices hnear : intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        ((arctanIntegralRectangleTangentChartOnHalf x hx0).compute h hmemAtH 0)
+        ((arctanIntegralRectangleTangentChartOnHalf x hx0).compute 0 hzero 0) h)
+      ((RealRaw.ofRat (ArctanGeometry.integralKernel x)).compute 0) n by
+    simpa only [Rat.zero_add] using hnear
+  change intervalNearAtPrecision
+    (QInterval.differenceQuotient
+      ((arctanIntegralRectangleTangentChartOnHalf x hx0).compute h hmemAtH 0)
+      ((arctanIntegralRectangleTangentChartOnHalf x hx0).compute 0 hzero 0) h)
+    ((RealRaw.ofRat (ArctanGeometry.integralKernel x)).compute 0) n
+  rw [arctanIntegralRectangleTangentChartOnHalf_compute x hx0 h hmemAtH 0,
+    arctanIntegralRectangleTangentChartOnHalf_compute x hx0 0 hzero 0,
+    hzeroChart]
+  unfold intervalNearAtPrecision QInterval.NearAt
+  unfold QInterval.ContainsInterval at hquotientContains
+  simp only [RealRaw.ofRat_compute]
+  constructor
+  · calc
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute
+          (ArctanGeometry.tangentChartIncrement x h) 0)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).lo <=
+          (QInterval.differenceQuotient
+            (ArctanGeometry.arctanIntegralRectangleCompute
+              (ArctanGeometry.tangentChartIncrement x h) 0)
+            (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi :=
+        hquotientOrdered
+      _ <= ArctanGeometry.integralKernel x := hquotientContains.2
+      _ <= ArctanGeometry.integralKernel x + (precisionAtStage n).val := by
+        grind
+  constructor
+  · calc
+      ArctanGeometry.integralKernel x =
+          (ArctanGeometry.integralKernel x - (h + h * h)) + (h + h * h) := by
+            grind [Rat.sub_eq_add_neg]
+      _ <=
+          (QInterval.differenceQuotient
+            (ArctanGeometry.arctanIntegralRectangleCompute
+              (ArctanGeometry.tangentChartIncrement x h) 0)
+            (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).hi +
+              (precisionAtStage n).val := by
+            have hlower := hquotientContains.1
+            grind [Rat.sub_eq_add_neg]
+  constructor
+  · calc
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute
+          (ArctanGeometry.tangentChartIncrement x h) 0)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 0) h).width <=
+          ({ lo := ArctanGeometry.integralKernel x - (h + h * h),
+             hi := ArctanGeometry.integralKernel x } : QInterval).width :=
+        QInterval.width_le_of_contains hquotientContains
+      _ = h + h * h := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg]
+      _ <= (precisionAtStage n).val := herror
+  · unfold QInterval.width
+    rw [show ArctanGeometry.integralKernel x -
+      ArctanGeometry.integralKernel x = 0 by grind]
+    exact Rat.le_of_lt (precisionAtStage n).property
+
 /-- The rectangle arctangent has a certified forward derivative equal to one
 at the rational endpoint zero.  This uses the direct finite tangent bracket;
 it does not yet assert a two-sided derivative away from that endpoint. -/

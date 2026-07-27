@@ -4357,6 +4357,26 @@ theorem tangentChartIncrement_le_step
       Rat.mul_le_mul_of_nonneg_left hdinv (Rat.le_of_lt hpos)
     _ = h := by grind
 
+/-- A nonnegative chart increment no larger than a half unit remains on the
+unit arctangent branch.  This is the domain gate for the local tangent-chart
+derivative certificate. -/
+theorem tangentChartIncrement_mem_unit_of_mem_half
+    {x h : Rat} (hx : 0 <= x) (hh0 : 0 <= h) (hhhalf : h <= (1 : Rat) / 2) :
+    0 <= tangentChartIncrement x h /\ tangentChartIncrement x h <= 1 := by
+  by_cases hpos : 0 < h
+  · constructor
+    · exact Rat.le_of_lt (tangentChartIncrement_pos hx hpos)
+    · calc
+        tangentChartIncrement x h <= h := tangentChartIncrement_le_step hx hpos
+        _ <= (1 : Rat) / 2 := hhhalf
+        _ <= 1 := by native_decide
+  · have hle : h <= 0 := by grind
+    have hzero : h = 0 := Rat.le_antisymm hle hh0
+    subst h
+    unfold tangentChartIncrement
+    rw [Rat.div_def, Rat.zero_mul]
+    exact ⟨Rat.le_refl, by native_decide⟩
+
 /-- The chart increment has exactly the scale factor required to compare an
 ordinary difference quotient with the basepoint quotient. -/
 theorem tangentChartIncrement_div_step
