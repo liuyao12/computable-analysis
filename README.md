@@ -225,9 +225,13 @@ unit mesh, `Logarithm.logTwoSquareMesh_substitution_identity` proves that the
 left Stieltjes sum for `t = x*x` equals the ordinary mesh expression for
 `2*x/(1+x*x)` plus a named correction.  The correction is nonnegative and at
 most `1/n` (`logTwoSquareMeshCorrection_le_one_div`).  This is the exact
-square-substitution algebra needed by the arctangent--logarithm formula; it
-does not yet claim a general substitution rule or promote either sum to a
-definite integral.
+square-substitution algebra needed by the arctangent--logarithm formula.
+The pullback `x ↦ 2*x/(1+x*x)` is now certified 2-Lipschitz, and its
+Lipschitz--Darboux integral has exact width `4/2^stage`.
+`logTwoSquareStieltjesRaw` stabilizes the literal Stieltjes mesh with the
+same rational budget and is proved equivalent to that pullback integral.
+What remains is the finite common-refinement comparison with the ordinary
+`t ↦ 1/(1+t)` mesh; no general substitution theorem is being assumed.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

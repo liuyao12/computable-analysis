@@ -709,11 +709,15 @@ Its finite square-substitution core is now checked: on the \(n\)-mesh, the
 left Stieltjes sum for \(t=x^2\) is exactly twice the ordinary left sum plus a
 nonnegative correction at most \(1/n\)
 (\cref{prop:log-two-square-substitution}).  Promoting these two finite sums
-to the definite integrals still requires the common-refinement certificate,
-followed by the canonical-exponential/inverse-logarithm identification.  The
-already checked series-to-reciprocal-integral equality at \(2\) supplies a
-concrete comparison point, but is not silently promoted to that
-change-of-variables theorem.
+to the pullback integral is now checked:
+\cref{thm:log-two-square-pullback-integral} constructs a direct valid raw
+from those Stieltjes sums and identifies it with
+\(\int_0^1 2x/(1+x^2)\,\dd x\).  The remaining endpoint comparison is the
+finite common-refinement certificate between the square-image mesh and the
+ordinary \(t\)-mesh for \(\int_0^1dt/(1+t)\), followed by the
+canonical-exponential/inverse-logarithm identification.  The already checked
+series-to-reciprocal-integral equality at \(2\) supplies a concrete comparison
+point, but is not silently promoted to that change-of-variables theorem.
 Combining the two certified equivalences gives the natural statement
 \[
   \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log2.

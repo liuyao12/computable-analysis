@@ -455,6 +455,53 @@ change-of-variables theorem or identify either finite sum with its raw
 integral: the necessary common-refinement/FTC promotion remains explicit.
 \end{proposition}
 
+\begin{theorem}[Certified square-pullback integral]
+\label{thm:log-two-square-pullback-integral}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullback_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_equiv_pullbackIntegral}
+\uses{prop:log-two-square-substitution}
+\leanok
+Put
+\[
+ h(x)=\frac{2x}{1+x^2}.
+\]
+Lean proves the rational factorization
+\[
+ h(s)-h(t)=
+ \frac{2(s-t)(1-st)}{(1+s^2)(1+t^2)}
+\]
+and hence the literal unit-interval Lipschitz bound
+\(\lvert h(s)-h(t)\rvert\le2\lvert s-t\rvert\).  The generic
+Lipschitz--Darboux constructor therefore supplies a valid raw integral
+\[
+  H=\int_0^1h(x)\,\dd x
+\]
+whose stage-\(n\) box has width exactly \(4/2^n\).
+
+The constructor now certifies both left- and right-endpoint uniform Riemann
+sums.  The checked finite identity of
+\cref{prop:log-two-square-substitution} identifies the left sum for \(h\)
+with the weighted square mesh.  Its nonnegative correction is at most
+\(1/2^n\), so the widened finite Stieltjes box overlaps the certified
+pullback box at every stage.  Prefix stabilization yields the direct raw
+\code{logTwoSquareStieltjesRaw}, and Lean proves
+\[
+ \code{logTwoSquareStieltjesRaw}\Equiv H.
+\]
+Thus the square substitution is already an executable integral
+representation, not merely a formal differential mnemonic.
+
+What remains is deliberately narrow but genuine: prove that this direct
+Stieltjes representation is equivalent to
+\(\code{logTwoReciprocalIntegral}=\int_0^1dt/(1+t)\).  That proof needs a
+finite common-refinement comparison between the square-image mesh and the
+ordinary uniform \(t\)-mesh.  It is the final change-of-variables certificate,
+not an appeal to real completeness.
+\end{theorem}
+
 \begin{theorem}[Series equals the finite reciprocal integral]
 \label{thm:log-two-series-reciprocal-integral}
 \lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower}

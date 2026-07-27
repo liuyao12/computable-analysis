@@ -314,6 +314,333 @@ theorem logTwoSquareMeshCorrection_le_one_div
           Rat.mul_inv_cancel _ hne
         grind [Rat.mul_assoc, Rat.mul_comm]
 
+/-- The pullback of the translated reciprocal kernel along the square map.
+Its unit-interval integral is the finite-mesh target twice the integral of
+x/(1+x²) in the arctangent--logarithm route. -/
+def logTwoSquarePullback (x : Rat) : Rat :=
+  2 * x * logTwoKernel (x * x)
+
+/-- Exact rational factorization of the pullback difference.  It is the
+finite algebra behind the Lipschitz certificate below. -/
+private theorem logTwoSquarePullback_difference (s t : Rat) :
+    logTwoSquarePullback s - logTwoSquarePullback t =
+      (2 * (s - t) * (1 - s * t)) /
+        ((1 + s * s) * (1 + t * t)) := by
+  have hspos : 0 < 1 + s * s := by
+    have hsq := RationalCircle.Stage.ratSquare_nonneg s
+    grind
+  have htpos : 0 < 1 + t * t := by
+    have hsq := RationalCircle.Stage.ratSquare_nonneg t
+    grind
+  have hsne : 1 + s * s ≠ 0 := Rat.ne_of_gt hspos
+  have htne : 1 + t * t ≠ 0 := Rat.ne_of_gt htpos
+  unfold logTwoSquarePullback logTwoKernel
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have hscancel : (1 + s * s) * (1 + s * s)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hsne
+  have htcancel : (1 + t * t) * (1 + t * t)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ htne
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The square pullback is two-Lipschitz on the unit interval.  This is a
+literal rational inequality, so its integral can use the same finite
+Lipschitz--Darboux construction as the reciprocal endpoint. -/
+theorem logTwoSquarePullback_lipschitz_on_unit :
+    Integral.LipschitzOnUnit logTwoSquarePullback 2 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    let d : Rat := (1 + s * s) * (1 + t * t)
+    have hsone : 1 <= 1 + s * s := by
+      have hsq := RationalCircle.Stage.ratSquare_nonneg s
+      grind
+    have htone : 1 <= 1 + t * t := by
+      have hsq := RationalCircle.Stage.ratSquare_nonneg t
+      grind
+    have hdpos : 0 < d := by
+      dsimp [d]
+      exact Rat.mul_pos (by grind) (by grind)
+    have hdone : 1 <= d := by
+      dsimp [d]
+      have hsnonneg : 0 <= 1 + s * s := Rat.le_trans (by native_decide) hsone
+      calc
+        1 = 1 * 1 := by native_decide
+        _ <= (1 + s * s) * 1 :=
+          Rat.mul_le_mul_of_nonneg_right hsone (by native_decide)
+        _ <= (1 + s * s) * (1 + t * t) :=
+          Rat.mul_le_mul_of_nonneg_left htone hsnonneg
+    have hdinv0 : 0 <= d⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hdpos)
+    have hdinv : d⁻¹ <= 1 := by
+      apply Rat.le_of_mul_le_mul_right (c := d)
+      · calc
+          d⁻¹ * d = d * d⁻¹ := by rw [Rat.mul_comm]
+          _ = 1 := Rat.mul_inv_cancel _ (Rat.ne_of_gt hdpos)
+          _ <= 1 * d := by simpa using hdone
+      · exact hdpos
+    have hproduct0 : 0 <= s * t := Rat.mul_nonneg hs0 ht0
+    have hproduct : s * t <= 1 := by
+      calc
+        s * t <= 1 * t :=
+          Rat.mul_le_mul_of_nonneg_right hs1 ht0
+        _ <= 1 * 1 :=
+          Rat.mul_le_mul_of_nonneg_left ht1 (by native_decide)
+        _ = 1 := by native_decide
+    have hfactor0 : 0 <= 1 - s * t := by grind
+    have hfactor : 1 - s * t <= 1 := by grind
+    have hfactorTimes : (1 - s * t) * d⁻¹ <= 1 := by
+      calc
+        (1 - s * t) * d⁻¹ <= 1 * d⁻¹ :=
+          Rat.mul_le_mul_of_nonneg_right hfactor hdinv0
+        _ <= 1 * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hdinv (by native_decide)
+        _ = 1 := by native_decide
+    rw [logTwoSquarePullback_difference]
+    change qabs ((2 * (s - t) * (1 - s * t)) / d) <=
+      2 * qabs (t - s)
+    rw [Rat.div_def, qabs_mul, qabs_mul,
+      qabs_eq_self_of_nonneg hfactor0,
+      qabs_eq_self_of_nonneg hdinv0]
+    have htwo : qabs (2 : Rat) = 2 := by native_decide
+    rw [qabs_mul, htwo]
+    calc
+      2 * qabs (s - t) * (1 - s * t) * d⁻¹ =
+          2 * qabs (s - t) * ((1 - s * t) * d⁻¹) := by
+        rw [Rat.mul_assoc]
+      _ <= 2 * qabs (s - t) * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hfactorTimes
+          (Rat.mul_nonneg (by native_decide) (qabs_nonneg _))
+      _ = 2 * qabs (t - s) := by
+        have hneg : s - t = -(t - s) := by
+          grind [Rat.sub_eq_add_neg]
+        rw [hneg, qabs_neg, Rat.mul_one]
+
+/-- A local finite-fold congruence lemma used to put square-substitution sums
+in the same literal mesh normal form as the Darboux constructor. -/
+private theorem finiteFoldl_eq_of_pointwise
+    (f g : Rat -> Nat -> Rat)
+    (h : ∀ total k, f total k = g total k)
+    (xs : List Nat) (initial : Rat) :
+    xs.foldl f initial = xs.foldl g initial := by
+  induction xs generalizing initial with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [List.foldl]
+      rw [h initial x]
+      exact ih (g initial x)
+
+private theorem logTwoSquareMeshWeightedSum_eq_foldl
+    (meshStage terms : Nat) :
+    logTwoSquareMeshWeightedSum meshStage terms =
+      (List.range terms).foldl
+        (fun total k =>
+          total + 2 * unitMeshPath meshStage k *
+            logTwoKernel (unitMeshPath meshStage k * unitMeshPath meshStage k) *
+            (1 / (meshStage : Rat))) 0 := by
+  induction terms with
+  | zero =>
+      rfl
+  | succ terms ih =>
+      rw [logTwoSquareMeshWeightedSum, ih, List.range_succ,
+        List.foldl_append]
+      rfl
+
+/-- The weighted square-substitution mesh is exactly the ordinary uniform
+left Riemann sum for the square pullback. -/
+theorem logTwoSquareMeshWeightedSum_eq_uniformLeftEndpoint
+    (meshStage : Nat) :
+    logTwoSquareMeshWeightedSum meshStage meshStage =
+      IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        logTwoSquarePullback meshStage := by
+  rw [logTwoSquareMeshWeightedSum_eq_foldl]
+  unfold IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+  apply finiteFoldl_eq_of_pointwise
+  intro total k
+  unfold logTwoSquarePullback
+  simp only [unitMeshPath]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The certified unit-interval integral representation of the square
+pullback.  It has literal finite Lipschitz--Darboux boxes and does not use a
+substitution axiom. -/
+def logTwoSquarePullbackIntegral : RealRaw :=
+  Integral.integralFor
+    (FunctionOnInterval.exactRat logTwoSquarePullback 0 1)
+    (IntegralIdentities.LipschitzDyadic.construction logTwoSquarePullback 2
+      logTwoSquarePullback_lipschitz_on_unit)
+
+theorem logTwoSquarePullbackIntegral_valid :
+    logTwoSquarePullbackIntegral.Valid :=
+  Integral.integralFor_valid
+    (FunctionOnInterval.exactRat logTwoSquarePullback 0 1)
+    (IntegralIdentities.LipschitzDyadic.construction logTwoSquarePullback 2
+      logTwoSquarePullback_lipschitz_on_unit)
+
+theorem logTwoSquarePullbackIntegral_compute_eq (stage : Nat) :
+    logTwoSquarePullbackIntegral.compute stage =
+      IntegralIdentities.LipschitzDyadic.compute logTwoSquarePullback 2 stage :=
+  rfl
+
+theorem logTwoSquarePullbackIntegral_width (stage : Nat) :
+    (logTwoSquarePullbackIntegral.compute stage).width =
+      4 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  rw [logTwoSquarePullbackIntegral_compute_eq,
+    IntegralIdentities.LipschitzDyadic.compute_width]
+  have hfour : (2 : Rat) * ((2 : Nat) : Rat) = 4 := by native_decide
+  rw [hfour]
+
+/-- At every dyadic stage, the exact weighted square-substitution sum lies in
+the corresponding certified pullback-integral box. -/
+theorem logTwoSquarePullbackIntegral_contains_weightedMesh
+    (stage : Nat) :
+    (logTwoSquarePullbackIntegral.compute stage).ContainsInterval
+      { lo := logTwoSquareMeshWeightedSum (2 ^ stage) (2 ^ stage),
+        hi := logTwoSquareMeshWeightedSum (2 ^ stage) (2 ^ stage) } := by
+  rw [logTwoSquarePullbackIntegral_compute_eq,
+    logTwoSquareMeshWeightedSum_eq_uniformLeftEndpoint]
+  exact IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+    logTwoSquarePullback_lipschitz_on_unit stage
+
+/-- The direct finite square-Stieltjes candidate for the pullback integral.
+At dyadic stage the explicit expansion is exactly the finite dx-squared
+correction budget from the substitution identity. -/
+def logTwoSquareStieltjesCandidateCompute (stage : Nat) : QInterval :=
+  let meshStage := 2 ^ stage
+  let sum := logTwoSquareMeshStieltjesSum meshStage meshStage
+  QInterval.expand { lo := sum, hi := sum }
+    (1 / (meshStage : Rat))
+
+def logTwoSquareStieltjesCandidate : RealRaw where
+  compute := logTwoSquareStieltjesCandidateCompute
+
+theorem logTwoSquareStieltjesCandidateCompute_width (stage : Nat) :
+    (logTwoSquareStieltjesCandidateCompute stage).width =
+      2 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  unfold logTwoSquareStieltjesCandidateCompute
+  rw [QInterval.expand_width]
+  simp only [QInterval.width]
+  have hzero :
+      logTwoSquareMeshStieltjesSum (2 ^ stage) (2 ^ stage) -
+        logTwoSquareMeshStieltjesSum (2 ^ stage) (2 ^ stage) = 0 := by
+    grind [Rat.sub_eq_add_neg]
+  rw [hzero]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The candidate width is no larger than the certified pullback-integral
+width, and therefore has an executable shrink modulus. -/
+theorem logTwoSquareStieltjesCandidate_widthsShrink :
+    RealRaw.WidthsShrinkToZero logTwoSquareStieltjesCandidate.compute := by
+  intro eps
+  obtain ⟨N, hN⟩ :=
+    (IntegralIdentities.LipschitzDyadic.compute_widthsShrink
+      (f := logTwoSquarePullback) 2) eps
+  refine ⟨N, ?_⟩
+  intro stage hstage
+  rw [show logTwoSquareStieltjesCandidate.compute stage =
+      logTwoSquareStieltjesCandidateCompute stage by rfl,
+    logTwoSquareStieltjesCandidateCompute_width]
+  have hmesh_pos : 0 < ((2 ^ stage : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hmesh_inv_nonneg : 0 <= 1 / (((2 ^ stage : Nat) : Rat)) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 hmesh_pos)
+  calc
+    2 * (1 / (((2 ^ stage : Nat) : Rat)) ) <=
+        4 * (1 / (((2 ^ stage : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_right (by native_decide) hmesh_inv_nonneg
+    _ = (IntegralIdentities.LipschitzDyadic.compute
+          logTwoSquarePullback 2 stage).width := by
+      rw [IntegralIdentities.LipschitzDyadic.compute_width]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= eps.val := hN stage hstage
+
+/-- The finite Stieltjes candidate overlaps the certified pullback-integral
+box at every dyadic stage.  The witness is the exact weighted mesh sum; no
+general substitution theorem is used in this proof. -/
+theorem logTwoSquareStieltjesCandidate_overlaps_pullbackIntegral
+    (stage : Nat) :
+    QInterval.Overlaps
+      (logTwoSquareStieltjesCandidate.compute stage)
+      (logTwoSquarePullbackIntegral.compute stage) := by
+  let meshStage := 2 ^ stage
+  let stieltjes := logTwoSquareMeshStieltjesSum meshStage meshStage
+  let weighted := logTwoSquareMeshWeightedSum meshStage meshStage
+  let correction := logTwoSquareMeshCorrection meshStage meshStage
+  let radius := 1 / (meshStage : Rat)
+  have hidentity : stieltjes = weighted + correction := by
+    exact logTwoSquareMesh_substitution_identity meshStage meshStage
+  have hcorrection : 0 <= correction /\ correction <= radius := by
+    simpa [radius] using
+      logTwoSquareMeshCorrection_le_one_div meshStage
+        (Nat.pow_pos (by omega : 0 < 2))
+  have hweighted :
+      (logTwoSquarePullbackIntegral.compute stage).lo <= weighted /\
+        weighted <= (logTwoSquarePullbackIntegral.compute stage).hi := by
+    simpa [weighted] using
+      logTwoSquarePullbackIntegral_contains_weightedMesh stage
+  unfold logTwoSquareStieltjesCandidate
+    logTwoSquareStieltjesCandidateCompute
+  dsimp only
+  unfold QInterval.expand
+  change stieltjes - radius <=
+      (logTwoSquarePullbackIntegral.compute stage).hi /\
+    (logTwoSquarePullbackIntegral.compute stage).lo <= stieltjes + radius
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem logTwoSquareStieltjesCandidate_equiv_pullbackIntegral :
+    logTwoSquareStieltjesCandidate.Equiv logTwoSquarePullbackIntegral := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    logTwoSquareStieltjesCandidate logTwoSquarePullbackIntegral stage stage).2
+  exact logTwoSquareStieltjesCandidate_overlaps_pullbackIntegral stage
+
+/-- The public radius covering the pullback-integral box at every stage. -/
+def logTwoSquareStieltjesStabilizationRadius (stage : Nat) : Rat :=
+  4 * (1 / (((2 ^ stage : Nat) : Rat)))
+
+theorem logTwoSquareStieltjesStabilizationRadius_covers_pullbackIntegral
+    (stage : Nat) :
+    (logTwoSquarePullbackIntegral.compute stage).width <=
+      logTwoSquareStieltjesStabilizationRadius stage := by
+  unfold logTwoSquareStieltjesStabilizationRadius
+  rw [logTwoSquarePullbackIntegral_width]
+  exact Rat.le_refl
+
+theorem logTwoSquareStieltjesStabilizationRadius_shrinks :
+    ShrinksToZero logTwoSquareStieltjesStabilizationRadius := by
+  intro eps
+  obtain ⟨N, hN⟩ := logTwoSquarePullbackIntegral_valid.2.2 eps
+  refine ⟨N, ?_⟩
+  intro stage hstage
+  unfold logTwoSquareStieltjesStabilizationRadius
+  rw [← logTwoSquarePullbackIntegral_width]
+  exact hN stage hstage
+
+/-- A valid direct-only raw evaluator for the square substitution.  Runtime
+evaluation reads only finite Stieltjes sums and rational radii; the
+Lipschitz integral is used only as its proof-side anchor. -/
+def logTwoSquareStieltjesRaw : RealRaw :=
+  RealRaw.prefixStabilize logTwoSquareStieltjesCandidate
+    logTwoSquareStieltjesStabilizationRadius
+
+theorem logTwoSquareStieltjesRaw_valid :
+    logTwoSquareStieltjesRaw.Valid := by
+  unfold logTwoSquareStieltjesRaw
+  exact RealRaw.prefixStabilize_valid
+    logTwoSquareStieltjesCandidate_widthsShrink
+    logTwoSquarePullbackIntegral_valid
+    logTwoSquareStieltjesCandidate_equiv_pullbackIntegral
+    logTwoSquareStieltjesStabilizationRadius_covers_pullbackIntegral
+    logTwoSquareStieltjesStabilizationRadius_shrinks
+
+theorem logTwoSquareStieltjesRaw_equiv_pullbackIntegral :
+    logTwoSquareStieltjesRaw.Equiv logTwoSquarePullbackIntegral := by
+  unfold logTwoSquareStieltjesRaw
+  exact RealRaw.prefixStabilize_equiv_anchor
+    logTwoSquarePullbackIntegral_valid
+    logTwoSquareStieltjesCandidate_equiv_pullbackIntegral
+    logTwoSquareStieltjesStabilizationRadius_covers_pullbackIntegral
+
 private theorem logTwoKernel_difference_mul_denominator
     {s t : Rat} (hs0 : 0 <= s) (ht0 : 0 <= t) :
     (logTwoKernel s - logTwoKernel t) * ((1 + s) * (1 + t)) = t - s := by
