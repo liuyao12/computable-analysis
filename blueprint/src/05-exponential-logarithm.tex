@@ -13,6 +13,8 @@ of the same constant or function should be proved equivalent as raw reals.
 \begin{definition}[Positive base and repeated multiplication]
 \label{def:positive-base-natural-powers}
 \lean{ComputableAnalysis.exp.PositiveRealRaw.natPow}
+\lean{ComputableAnalysis.exp.PositiveRealRaw.natPow_valid}
+\lean{ComputableAnalysis.exp.PositiveRealRaw.natPowPositive}
 \uses{def:raw-real}
 A positive computable real is represented by a valid raw real together with
 one positive rational lower bound that holds for every interval stage.  This
@@ -27,6 +29,17 @@ multiplication:
 The raw interval multiplication is the same finite rational interval
 arithmetic used throughout the foundation.  Thus this definition works for
 an arbitrary positive computable real base, not merely for a rational base.
+Lean now proves the resulting raw evaluator valid at every natural exponent.
+More precisely, if \(\ell>0\) is the supplied lower bound and \(U\) is the
+upper endpoint of the initial interval, then every stage of \(b^n\) lies in
+\[
+  [\ell^n,U^n].
+\]
+Thus repeated multiplication returns another positive computable real, via
+\code{PositiveRealRaw.natPowPositive}, rather than merely a syntactic raw
+algorithm.  This is the checked natural-exponent base of the later rational
+root construction; it does not pretend that arbitrary roots have already
+been constructed.
 \end{definition}
 
 \begin{definition}[Rational powers]

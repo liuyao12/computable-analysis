@@ -742,6 +742,7 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.pi.presentation}
 \lean{ComputableAnalysis.PiProofs.pi.circleArea}
 \lean{ComputableAnalysis.PiProofs.pi.machin}
+\lean{ComputableAnalysis.PiProofs.pi.integrationByPartsMesh}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_equiv_piCircleArea}
@@ -799,13 +800,17 @@ raw representative.  This is a representation registry, not a score increase:
 the compact \code{PiProofs.PiCoverageBridge} suite records only distinct
 end-to-end capability bridges.  The unfinished direct perimeter computation
 is retained as a square-root-enclosure diagnostic, rather than as a missing
-unit of calculus progress.  The supplementary curvature fan is also stored
-directly in \code{piCertified.alternatives}, but stays outside the finite
-\code{PiPresentation} type because it adds no distinct calculus bridge.
+unit of calculus progress.  The supplementary curvature fan and the direct
+finite integration-by-parts mesh are also stored directly in
+\code{piCertified.alternatives}, but stay outside the finite
+\code{PiPresentation} type because neither adds a distinct calculus bridge.
+The latter is a checked mesh evaluator, not yet the arctangent--logarithm
+integration-by-parts theorem.
 For use at the abstract-real layer, the certified handle is also exposed as
 \code{PiProofs.pi}: \code{pi.circleArea.raw}, \code{pi.machin.raw}, and the
-supplementary \code{pi.curvatureFan.raw}, for example, are named raw
-computations equipped with agreement proofs to the one certified pi handle.
+supplementary \code{pi.curvatureFan.raw} and
+\code{pi.integrationByPartsMesh.raw}, for example, are named raw computations
+equipped with agreement proofs to the one certified pi handle.
 This is a naming façade over \code{Real}, not a new quotient or a second
 definition of real number.
 \end{theorem}

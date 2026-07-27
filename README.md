@@ -288,7 +288,9 @@ stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
 routes, together with the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants. The complementary named
-view `PiProofs.pi.curvatureFan` does not create another calculus-coverage row.
+views `PiProofs.pi.curvatureFan` and `PiProofs.pi.integrationByPartsMesh` do
+not create additional calculus-coverage rows. The latter is the checked
+finite mesh evaluator, not the pending arctangent--logarithm/FTC theorem.
 
 ### Full implementation inventory
 

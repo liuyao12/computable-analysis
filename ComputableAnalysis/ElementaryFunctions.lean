@@ -48,6 +48,134 @@ def natPowRaw (value : RealRaw) : Nat -> RealRaw
 def natPow (base : PositiveRealRaw) : Nat -> RealRaw :=
   natPowRaw base.value
 
+/-- A uniform rational upper bound obtained from the zeroth interval of a
+positive raw real.  Validity makes every later interval lie inside this one. -/
+def upperBound (base : PositiveRealRaw) : Rat :=
+  (base.value.compute 0).hi
+
+theorem upperBound_pos (base : PositiveRealRaw) : 0 < upperBound base := by
+  unfold upperBound
+  have hlower := base.lower_bound_le 0
+  have horder := RealRaw.interval_order_of_valid base.value base.valid 0
+  have hle : base.lower_bound <= (base.value.compute 0).hi :=
+    Rat.le_trans hlower horder
+  grind [base.lower_bound_pos]
+
+/-- Every stage of a positive raw real is nonnegative and bounded above by
+its zeroth-stage upper endpoint. -/
+theorem base_bounds (base : PositiveRealRaw) (k : Nat) :
+    0 <= (base.value.compute k).lo /\
+      (base.value.compute k).hi <= upperBound base := by
+  constructor
+  · exact Rat.le_trans (Rat.le_of_lt base.lower_bound_pos)
+      (base.lower_bound_le k)
+  · unfold upperBound
+    exact (base.valid.2.1 0 k (Nat.zero_le k)).2.2
+
+/-- Repeated multiplication preserves validity, constructive positivity, and
+a uniform rational upper bound.  The proof uses only finite interval product
+arithmetic; no completed-real multiplication is involved. -/
+theorem natPow_valid_and_bounds (base : PositiveRealRaw) :
+    forall n,
+      (natPow base n).Valid /\
+        forall k,
+          base.lower_bound ^ n <= ((natPow base n).compute k).lo /\
+            ((natPow base n).compute k).hi <= upperBound base ^ n
+  | 0 => by
+      constructor
+      · simpa [natPow, natPowRaw, RealRaw.one] using
+          (RealRaw.ofRat_valid (1 : Rat))
+      · intro k
+        change base.lower_bound ^ 0 <= (1 : Rat) /\
+          (1 : Rat) <= upperBound base ^ 0
+        simp
+  | n + 1 => by
+      rcases natPow_valid_and_bounds base n with ⟨hprevious_valid, hprevious⟩
+      have hbase_bounds : forall k,
+          0 <= (base.value.compute k).lo /\
+            (base.value.compute k).hi <= upperBound base :=
+        base_bounds base
+      have hprevious_nonneg : forall k,
+          0 <= ((natPow base n).compute k).lo := by
+        intro k
+        exact Rat.le_trans
+          (Rat.pow_nonneg (Rat.le_of_lt base.lower_bound_pos))
+          (hprevious k).1
+      have hpower_valid : (natPow base (n + 1)).Valid := by
+        change (natPow base n * base.value).Valid
+        exact RealRaw.mul_valid_of_nonneg_bounded
+          hprevious_valid base.valid
+          (Rat.pow_pos (upperBound_pos base)) (upperBound_pos base)
+          (fun k => ⟨hprevious_nonneg k, (hprevious k).2⟩)
+          hbase_bounds
+      refine ⟨hpower_valid, ?_⟩
+      intro k
+      have hbase := hbase_bounds k
+      have hprevious_bounds := hprevious k
+      have hbase_nonneg : 0 <= (base.value.compute k).lo := hbase.1
+      have hbase_hi_nonneg : 0 <= (base.value.compute k).hi := by
+        have horder := RealRaw.interval_order_of_valid base.value base.valid k
+        exact Rat.le_trans hbase_nonneg horder
+      have hcompute :
+          ((natPow base n * base.value).compute k) =
+            { lo := ((natPow base n).compute k).lo * (base.value.compute k).lo,
+              hi := ((natPow base n).compute k).hi * (base.value.compute k).hi } := by
+        change QBox.mulRealInterval
+            ((natPow base n).compute k).lo ((natPow base n).compute k).hi
+            (base.value.compute k).lo (base.value.compute k).hi = _
+        exact QBox.mulRealInterval_of_nonneg
+          (hprevious_nonneg k)
+          (RealRaw.interval_order_of_valid
+            (natPow base n) hprevious_valid k)
+          hbase_nonneg
+          (RealRaw.interval_order_of_valid base.value base.valid k)
+      change base.lower_bound ^ (n + 1) <=
+          ((natPow base n * base.value).compute k).lo /\
+        ((natPow base n * base.value).compute k).hi <=
+          upperBound base ^ (n + 1)
+      rw [hcompute]
+      constructor
+      · calc
+          base.lower_bound ^ (n + 1) =
+              base.lower_bound ^ n * base.lower_bound := by
+                rw [Rat.pow_succ]
+          _ <= ((natPow base n).compute k).lo * base.lower_bound :=
+            Rat.mul_le_mul_of_nonneg_right hprevious_bounds.1
+              (Rat.le_of_lt base.lower_bound_pos)
+          _ <= ((natPow base n).compute k).lo * (base.value.compute k).lo :=
+            Rat.mul_le_mul_of_nonneg_left (base.lower_bound_le k)
+              (hprevious_nonneg k)
+      · calc
+          ((natPow base n).compute k).hi * (base.value.compute k).hi <=
+              upperBound base ^ n * (base.value.compute k).hi :=
+            Rat.mul_le_mul_of_nonneg_right hprevious_bounds.2
+              hbase_hi_nonneg
+          _ <= upperBound base ^ n * upperBound base :=
+            Rat.mul_le_mul_of_nonneg_left hbase.2
+              (Rat.pow_nonneg (Rat.le_of_lt (upperBound_pos base)))
+          _ = upperBound base ^ (n + 1) := by
+            rw [Rat.pow_succ]
+
+theorem natPow_valid (base : PositiveRealRaw) (n : Nat) :
+    (natPow base n).Valid :=
+  (natPow_valid_and_bounds base n).1
+
+theorem natPow_lower_bound (base : PositiveRealRaw) (n k : Nat) :
+    base.lower_bound ^ n <= ((natPow base n).compute k).lo :=
+  (natPow_valid_and_bounds base n).2 k |>.1
+
+theorem natPow_upper_bound (base : PositiveRealRaw) (n k : Nat) :
+    ((natPow base n).compute k).hi <= upperBound base ^ n :=
+  (natPow_valid_and_bounds base n).2 k |>.2
+
+/-- Each repeated-multiplication power is itself a positive raw real. -/
+def natPowPositive (base : PositiveRealRaw) (n : Nat) : PositiveRealRaw where
+  value := natPow base n
+  valid := natPow_valid base n
+  lower_bound := base.lower_bound ^ n
+  lower_bound_pos := Rat.pow_pos base.lower_bound_pos
+  lower_bound_le := natPow_lower_bound base n
+
 end PositiveRealRaw
 
 /-- A verified extension of repeated multiplication from natural to rational

@@ -633,7 +633,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   of any exponential representation.  See `PositiveRealRaw`,
   `PositiveRealRaw.natPow`, `RationalPowerExtension`, and
   `ExponentialFunction.eAtOne` in
-  `ComputableAnalysis/ElementaryFunctions.lean`.
+  `ComputableAnalysis/ElementaryFunctions.lean`. Repeated multiplication is
+  now itself checked: `PositiveRealRaw.natPow_valid_and_bounds` proves every
+  natural power valid and enclosed between the corresponding powers of the
+  supplied positive lower bound and initial upper endpoint, and
+  `natPowPositive` packages it as a new positive raw real. Constructing the
+  non-integral root layer and its epsilon--delta exponent-continuity proof
+  remains the next rational-power task.
 - The two intended characterizations of the Euler base are now explicit
   obligations: the exponential solves `f' = f` on rational intervals, and a
   positive base is Euler exactly when its rational powers have derivative `1`
@@ -923,7 +929,10 @@ students actually compute.
   `PiPresentation.integrationFamily` and the primary registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
   regressions.  `piCertified.alternatives` also literally carries the checked
-  `pi.curvatureFan` raw evaluator; it remains outside the coverage count.
+  `pi.curvatureFan` and `pi.integrationByPartsMesh` raw evaluators; they
+  remain outside the coverage count. The latter is the finite mesh regression
+  calculation, not a substitute for the pending arctangent--logarithm FTC
+  bridge.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel and Brouncker are advanced-analysis
@@ -1021,10 +1030,12 @@ students actually compute.
   names, and `PiProofs.piCertifiedPresentation` retrieves a certified raw
   representative without depending on a list position. This turns the Pi
   suite into an integration registry rather than a progress percentage. The
-  supplementary `PiProofs.pi.curvatureFan` exposes the independently checked
-  curvature-corrected fan as a named `Real.Representation`, stored directly
-  in `piCertified.alternatives`; it is not another calculus-coverage row. The
-  stabilization remains a reusable interval-normalization bridge, not a
+  supplementary `PiProofs.pi.curvatureFan` and
+  `PiProofs.pi.integrationByPartsMesh` expose checked named
+  `Real.Representation`s, stored directly in `piCertified.alternatives`; they
+  are not additional calculus-coverage rows. The latter remains the finite
+  mesh evaluator, not the arctangent--logarithm integration-by-parts theorem.
+  The stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical
   row remains uncounted.

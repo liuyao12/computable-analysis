@@ -18104,6 +18104,9 @@ def piCertified : Real :=
     .withAlternative piFromArctanIntegralRectangleUnitAtOne
       (piPresentation_valid .arctanRectangleIntegral)
       (piPresentation_equiv_piCircleArea .arctanRectangleIntegral))
+    .withAlternative IntegralIdentities.piFromArctanIntegrationByPartsMesh
+      IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
+      piFromArctanIntegrationByPartsMesh_equiv_piCircleArea)
     .withAlternative piLeibniz
       (piPresentation_valid .leibnizSeries)
       (piPresentation_equiv_piCircleArea .leibnizSeries))
@@ -18132,6 +18135,15 @@ theorem piCircumferenceCurvatureFan_mem_piCertified_alternatives :
     piCircumferenceCurvatureFan ∈ piCertified.alternatives := by
   simp [piCertified, Real.withAlternative]
 
+/-- The direct finite integration-by-parts mesh is stored as a supplementary
+representation of the same abstract pi.  It remains outside
+`PiCoverageBridge`: its finite mesh identity is a regression evaluator, not
+the still-open arctangent--logarithm/FTC coverage route. -/
+theorem piFromArctanIntegrationByPartsMesh_mem_piCertified_alternatives :
+    IntegralIdentities.piFromArctanIntegrationByPartsMesh ∈
+      piCertified.alternatives := by
+  simp [piCertified, Real.withAlternative]
+
 /-- Retrieve a named certified representation from the primary π registry
 without depending on its position in the implementation list. -/
 def piCertifiedPresentation (presentation : PiPresentation) :
@@ -18157,6 +18169,15 @@ def circleAreaPolygon : Real.Representation pi := presentation .areaPolygon
 def circumference : Real.Representation pi := presentation .circumferenceFan
 def arctanGeom : Real.Representation pi := presentation .arctanGeometry
 def arctanIntegral : Real.Representation pi := presentation .arctanRectangleIntegral
+
+/-- The supplementary direct finite mesh behind integration by parts.  This
+is deliberately distinct from the future arctangent--logarithm integral
+theorem. -/
+def integrationByPartsMesh : Real.Representation pi where
+  raw := IntegralIdentities.piFromArctanIntegrationByPartsMesh
+  valid := IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
+  agrees := piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
+
 def leibniz : Real.Representation pi := presentation .leibnizSeries
 def nilakantha : Real.Representation pi := presentation .nilakanthaSeries
 def machin : Real.Representation pi := presentation .machinSeries
