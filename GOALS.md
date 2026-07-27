@@ -142,7 +142,11 @@ gates.
   `peanoBakerFactorialTailShift` and theorem
   `peanoBakerFactorialTail_shifted_le_eps` now turn the geometric tail into
   any requested positive rational tolerance, uniformly over every finite
-  remaining prefix. The scientific-calculus gate is the continuous
+  remaining prefix. The constant-coefficient degree term
+  `constantPeanoBakerSimplexTerm A T r = (T^r/r!) * A^r` and its checked
+  one-step recurrence now give the finite algebraic bridge to the exponential
+  series, while deliberately leaving its continuous-simplex interpretation
+  open. The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of
   constants.

@@ -463,6 +463,9 @@ Peano--Baker series exact.
 \begin{theorem}[Finite Peano--Baker specializations]
 \label{thm:peano-baker-specializations}
 \uses{thm:peano-baker-state-transition,def:constant-commuting-samples}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_zero}
+\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
 \leanok
 The finite layer already proves constant, zero, square-zero, and
 pairwise-commuting specializations. For a constant Euler increment \(B\),
@@ -476,6 +479,24 @@ constant and zero-coefficient regression cases for the eventual continuous
 theorem, proved by \code{chronologicalProduct\_constant},
 \code{peanoBakerDiscreteSum\_constant}, and
 \code{peanoBakerDiscreteSum\_zeroCoefficient}.
+
+The continuous constant-coefficient series already has a checked finite
+algebraic spine.  Its degree-\(r\) ordered-simplex term is represented by
+the literal rational matrix expression
+\[
+  \frac{T^r}{r!}A^r.
+\]
+Lean defines it as \code{constantPeanoBakerSimplexTerm}, proves that degree
+zero is \(I\), and proves the recurrence
+\[
+  \frac{T^{r+1}}{(r+1)!}A^{r+1}
+  =\frac{T}{r+1}A\left(\frac{T^r}{r!}A^r\right).
+\]
+This is the exact finite coefficient recurrence shared by the scalar
+exponential and the constant-matrix Peano--Baker series.  It does not yet
+claim that these terms are the values of continuous ordered-simplex
+integrals: that remaining analytic identification is precisely what the
+future interval-simplex quadrature must certify.
 
 For a square-zero sampled family, every selected word with two or more
 factors is zero. Therefore Lean proves the exact finite collapse

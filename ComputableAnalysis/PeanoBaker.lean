@@ -127,6 +127,36 @@ theorem finiteSum_ite_eq {dimension : Nat} (j : Fin dimension) (f : Fin dimensio
 def matrixMul {dimension : Nat} (A B : RatMatrix dimension) : RatMatrix dimension :=
   fun i j => finiteSum (fun k => A i k * B k j)
 
+/-- Rational scaling is compatible with the local matrix product on the
+right.  This finite distributivity calculation is the scalar algebra behind
+the constant-coefficient Peano--Baker simplex terms. -/
+theorem matrixMul_matrixScale_right {dimension : Nat}
+    (A B : RatMatrix dimension) (r : Rat) :
+    matrixMul A (matrixScale r B) = matrixScale r (matrixMul A B) := by
+  funext i j
+  unfold matrixMul matrixScale
+  calc
+    finiteSum (fun k => A i k * (r * B k j)) =
+        finiteSum (fun k => r * (A i k * B k j)) := by
+          congr 1
+          funext k
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = r * finiteSum (fun k => A i k * B k j) :=
+      (finiteSum_mul_left r (fun k => A i k * B k j)).symm
+
+theorem matrixScale_comp {dimension : Nat} (r s : Rat)
+    (A : RatMatrix dimension) :
+    matrixScale r (matrixScale s A) = matrixScale (r * s) A := by
+  funext i j
+  unfold matrixScale
+  exact (Rat.mul_assoc _ _ _).symm
+
+theorem matrixScale_one {dimension : Nat} (A : RatMatrix dimension) :
+    matrixScale 1 A = A := by
+  funext i j
+  unfold matrixScale
+  exact Rat.one_mul _
+
 /-- Associativity of the local rational matrix product.  This is proved from
 finite distributivity and the finite-sum interchange above, without importing
 a general matrix library. -/
@@ -1010,6 +1040,56 @@ theorem matrixPow_identity {dimension : Nat} :
   | 0 => rfl
   | n + 1 => by
       rw [matrixPow, matrixPow_identity n, matrixMul_identity_left]
+
+/-- The degree-`r` ordered-simplex term for a constant coefficient matrix.
+The scalar factor `T^r/r!` is the exact rational volume of the ordered
+simplex of duration `T`; the matrix factor keeps the chronological order
+visible.  This is a finite term, not yet an infinite matrix series. -/
+def constantPeanoBakerSimplexTerm {dimension : Nat}
+    (A : RatMatrix dimension) (T : Rat) (degree : Nat) : RatMatrix dimension :=
+  matrixScale (T ^ degree / factorialRat degree) (matrixPow A degree)
+
+/-- A finite constant-coefficient Peano--Baker polynomial, assembled in
+increasing degree order from its explicit ordered-simplex terms. -/
+def constantPeanoBakerSimplexPartial {dimension : Nat}
+    (A : RatMatrix dimension) (T : Rat) : Nat -> RatMatrix dimension
+  | 0 => matrixZero dimension
+  | terms + 1 => matrixAdd
+      (constantPeanoBakerSimplexPartial A T terms)
+      (constantPeanoBakerSimplexTerm A T terms)
+
+theorem constantPeanoBakerSimplexTerm_zero {dimension : Nat}
+    (A : RatMatrix dimension) (T : Rat) :
+    constantPeanoBakerSimplexTerm A T 0 = matrixIdentity dimension := by
+  unfold constantPeanoBakerSimplexTerm
+  have hscalar : T ^ 0 / factorialRat 0 = (1 : Rat) := by
+    rw [Rat.pow_zero]
+    unfold factorialRat factorial
+    native_decide
+  change matrixScale (T ^ 0 / factorialRat 0) (matrixIdentity dimension) =
+    matrixIdentity dimension
+  rw [hscalar, matrixScale_one]
+
+/-- Adjacent constant-coefficient simplex terms satisfy the expected
+Peano--Baker recurrence: prepend the coefficient matrix and multiply by the
+next time-volume factor `T/(r+1)`. -/
+theorem constantPeanoBakerSimplexTerm_succ {dimension : Nat}
+    (A : RatMatrix dimension) (T : Rat) (degree : Nat) :
+    constantPeanoBakerSimplexTerm A T (degree + 1) =
+      matrixScale (T / ((degree + 1 : Nat) : Rat))
+        (matrixMul A (constantPeanoBakerSimplexTerm A T degree)) := by
+  unfold constantPeanoBakerSimplexTerm
+  rw [matrixMul_matrixScale_right, matrixScale_comp]
+  rw [Rat.pow_succ, FormalPowerSeries.factorialRat_succ]
+  congr 1
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem constantPeanoBakerSimplexPartial_succ {dimension : Nat}
+    (A : RatMatrix dimension) (T : Rat) (terms : Nat) :
+    constantPeanoBakerSimplexPartial A T (terms + 1) = matrixAdd
+      (constantPeanoBakerSimplexPartial A T terms)
+      (constantPeanoBakerSimplexTerm A T terms) := rfl
 
 /-- The finite sum of a sampled matrix family over the first `steps` times. -/
 def matrixSequenceSum {dimension : Nat} (B : Nat -> RatMatrix dimension) : Nat ->

@@ -38,7 +38,11 @@ start `2 * |C.num| + 1` makes every finite omitted prefix of
 for the eventual Peano--Baker matrix boxes.  Its epsilon modulus is now also
 checked: `peanoBakerFactorialTailShift M T eps` is an explicit rational-data
 stage after which every finite remaining tail prefix is at most `eps`.
-Simplex quadrature and component interval arithmetic are still separate work.
+For a constant coefficient, the corresponding degree-`r` ordered-simplex
+matrix term is now the checked rational polynomial `T^r/r! * A^r`, with the
+recurrence obtained by prepending `A` and multiplying by `T/(r+1)`. This is
+the algebraic common core with the exponential series; simplex quadrature and
+component interval arithmetic are still separate work.
 The familiar forced oscillator is now a checked two-dimensional instance:
 its Euler state update gives the exact scalar recurrence
 `q_(n+2) - 2 q_(n+1) + q_n = -h^2 omega^2 q_n + h^2 r_n`. This is the
