@@ -202,6 +202,39 @@ def divRat (I : QInterval) (h : Rat) : QInterval :=
 def differenceQuotient (fxh fx : QInterval) (h : Rat) : QInterval :=
   divRat (sub fxh fx) h
 
+/-- Subtracting interval enclosures adds their widths exactly. -/
+theorem sub_width (I J : QInterval) :
+    (sub I J).width = I.width + J.width := by
+  unfold sub width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/-- Nonnegative scaling preserves the exact width factor. -/
+theorem scaleRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
+    (scaleRat r I).width = r * I.width := by
+  unfold scaleRat width
+  rw [if_pos hr]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add]
+
+/-- Nonnegative scaling preserves finite interval overlap. -/
+theorem scaleRat_overlaps_of_nonneg {r : Rat} (hr : 0 <= r)
+    {I J : QInterval} (hover : I.Overlaps J) :
+    (scaleRat r I).Overlaps (scaleRat r J) := by
+  unfold scaleRat QInterval.Overlaps
+  simp only [if_pos hr]
+  constructor
+  · exact Rat.mul_le_mul_of_nonneg_left hover.1 hr
+  · exact Rat.mul_le_mul_of_nonneg_left hover.2 hr
+
+/-- Nonnegative scaling also preserves enclosure. -/
+theorem scaleRat_contains_of_nonneg {r : Rat} (hr : 0 <= r)
+    {outer inner : QInterval} (hcontains : outer.ContainsInterval inner) :
+    (scaleRat r outer).ContainsInterval (scaleRat r inner) := by
+  unfold scaleRat QInterval.ContainsInterval
+  simp only [if_pos hr]
+  constructor
+  · exact Rat.mul_le_mul_of_nonneg_left hcontains.1 hr
+  · exact Rat.mul_le_mul_of_nonneg_left hcontains.2 hr
+
 /-- Dividing the difference of two exact singleton boxes gives the exact
 rational difference quotient.  The sign split in interval division is harmless
 here because both endpoints coincide. -/

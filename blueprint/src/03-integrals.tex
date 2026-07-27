@@ -745,6 +745,7 @@ integration by parts.
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_contains}
 \lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_forwardDerivativeAt}
 Let \(0\le x\le1\), \(h>0\), and set
 \[
  \tau=\frac{h}{1+x(x+h)},\qquad
@@ -793,15 +794,30 @@ raw-real forward-difference identification
 \arctan_{\rm geom}(x+h)-\arctan_{\rm geom}(x)
 \Equiv\arctan_{\rm geom}(\tau).
 \]
-Thus the remaining step to obtain the actual interval-valued derivative
+The finite transport has now also been completed for the rectangle
+arctangent representation itself.  For every rational
+\(0\le x\le1/2\), Lean proves
+\[
+ A'(x)=\frac1{1+x^2},
+ \qquad A(x)=\int_0^x\frac{\dd t}{1+t^2},
+\]
+in the project's forward interval-derivative sense.  At requested stage
+\(n\), its evaluator chooses a finite chart/rectangle stage whose boxes have
+width at most \(h\operatorname{precision}(n)/16\).  The scaled transported
+chart interval contains the chart quotient and overlaps the ordinary endpoint
+quotient at that same stage; together with the \(h+h^2\) kernel error, these
+are a fully rational proof of the derivative certificate.
+
+The remaining work to obtain the global interval-valued derivative
 \[
  \arctan'(x)=\frac1{1+x^2}
+ \quad\text{on }[0,1]
 \]
-is a quantitative transport lemma through that raw-real forward-difference
-equivalence.  It must transport the already-checked certificate for \(T_x\)
-while preserving the requested quotient tolerance, rather than merely say
-that equivalent raw reals have the same limit.  This isolates the genuine
-analytic work; no completeness or mean-value theorem is required.
+is to cover the right half of the branch and, separately, to transport the
+result to the geometric representative.  The latter must preserve the
+requested quotient tolerance, rather than merely say that equivalent raw
+reals have the same limit.  This isolates the genuine remaining analytic
+work; no completeness or mean-value theorem is required.
 \end{proposition}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]

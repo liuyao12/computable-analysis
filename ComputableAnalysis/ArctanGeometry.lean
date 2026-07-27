@@ -3793,6 +3793,48 @@ theorem chartAddAreaLoopCompute_widthsShrink
     (chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ
       hu0 huHalf hx0 hx1 himage)
 
+/-- The explicit transported-chart precision schedule.  The larger constant
+comes only from the finite chart-distortion bound, and is suitable for
+dividing a chart comparison by a small positive rational increment. -/
+theorem chartAddAreaLoopCompute_width_le_eps_of_precision
+    {u x : Rat} (hu0 : 0 <= u) (huHalf : u <= (1 : Rat) / 2)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1)
+    (eps : QPos) (n : Nat) (hn : 256 * (eps.val.den + 1) <= n) :
+    (chartAddAreaLoopCompute u x n).width <= eps.val := by
+  have hmain :
+      (256 : Rat) / (((n + 1 : Nat) : Rat)) <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    let A : Rat := ((n + 1 : Nat) : Rat)
+    let B : Rat := ((eps.val.den + 1 : Nat) : Rat)
+    let K : Rat := (256 : Rat)
+    have hApos : 0 < A := by
+      dsimp [A]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+    have hBpos : 0 < B := by
+      dsimp [B]
+      exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+    have hABpos : 0 < A * B := Rat.mul_pos hApos hBpos
+    have hscaledRat : K * B <= A := by
+      dsimp [A, B, K]
+      exact_mod_cast (by omega :
+        256 * (eps.val.den + 1) <= n + 1)
+    apply Rat.le_of_mul_le_mul_right (c := A * B)
+    · calc
+        (K / A) * (A * B) = K * B := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= A := hscaledRat
+        _ = (1 / B) * (A * B) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hABpos
+  exact Rat.le_trans
+    (chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ
+      hu0 huHalf hx0 hx1 himage n)
+    (Rat.le_trans hmain
+      (FTC.one_div_den_succ_le_of_pos eps.property))
+
 /-- The explicit rectangle precision schedule: any stage at least
 `4 * (eps.den + 1)` has box width at most the requested positive rational
 tolerance. -/
@@ -4652,6 +4694,79 @@ theorem arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains
   have hupper : scale <= integralKernel x := by
     grind [Rat.sub_eq_add_neg, hscaleError'.1]
   exact ⟨Rat.le_trans hlower hbase'.1, Rat.le_trans hbase'.2 hupper⟩
+
+/-- After positive scaling by `1 / h`, the finite transported chart bracket
+still contains the chart-increment difference quotient.  This is the finite
+substitution datum needed to transport the local tangent-chart derivative to
+the ordinary rectangle arctangent. -/
+theorem tangentChart_transport_scaled_contains_chartQuotient
+    {x h : Rat} (hx0 : 0 <= x) (hxHalf : x <= (1 : Rat) / 2)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat) :
+    (QInterval.scaleRat (1 / h)
+      (chartAddAreaLoopCompute x (tangentChartIncrement x h) n)).ContainsInterval
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (tangentChartIncrement x h) n)
+        (arctanIntegralRectangleCompute 0 n) h) := by
+  have hx1 : x <= 1 := Rat.le_trans hxHalf (by native_decide)
+  have hxh0 : 0 <= x + h := by grind
+  have hh1 : h <= 1 := by grind
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hxlt : x < 1 := by
+    have hhalf : (1 : Rat) / 2 < 1 := by native_decide
+    grind
+  have hparam := chartAddParameter_tangentChartIncrement hx0 hxh0
+  have hcontains := chartAddAreaLoop_integralSum_contains
+    hx0 hxlt ht0 ht1 n
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hscaled := QInterval.scaleRat_contains_of_nonneg hinv hcontains
+  have hquotientEq :
+      QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (tangentChartIncrement x h) n)
+        (arctanIntegralRectangleCompute 0 n) h =
+        QInterval.scaleRat (1 / h)
+          (arctanIntegralRectangleCompute (tangentChartIncrement x h) n) := by
+    unfold QInterval.differenceQuotient QInterval.divRat QInterval.sub
+      QInterval.scaleRat
+    simp only [if_pos hinv]
+    rw [arctanIntegralRectangleCompute_zero_lower,
+      arctanIntegralRectangleCompute_zero_upper]
+    apply (QInterval.mk.injEq _ _ _ _).mpr
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  rw [hquotientEq]
+  exact hscaled
+
+/-- The scaled transported chart bracket overlaps the ordinary forward
+difference quotient at the same finite stage. -/
+theorem tangentChart_transport_scaled_overlaps_forwardQuotient
+    {x h : Rat} (hx0 : 0 <= x) (hxHalf : x <= (1 : Rat) / 2)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat) :
+    QInterval.Overlaps
+      (QInterval.scaleRat (1 / h)
+        (chartAddAreaLoopCompute x (tangentChartIncrement x h) n))
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (x + h) n)
+        (arctanIntegralRectangleCompute x n) h) := by
+  have hx1 : x <= 1 := Rat.le_trans hxHalf (by native_decide)
+  have hxh0 : 0 <= x + h := by grind
+  have hh1 : h <= 1 := by grind
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hparam := chartAddParameter_tangentChartIncrement hx0 hxh0
+  have hover := chartAddAreaLoopCompute_overlaps_rectangleSub
+    hx0 hxHalf ht0 ht1 n
+  rw [hparam] at hover
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hscaled := QInterval.scaleRat_overlaps_of_nonneg hinv hover
+  simpa [QInterval.differenceQuotient, QInterval.divRat] using hscaled
 
 /-- Tangent addition expresses an ordinary forward increment by the chart
 increment based at zero on the first half of the unit branch. -/
