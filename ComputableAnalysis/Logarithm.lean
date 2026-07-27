@@ -330,6 +330,17 @@ x/(1+x²) in the arctangent--logarithm route. -/
 def logTwoSquarePullback (x : Rat) : Rat :=
   2 * x * logTwoKernel (x * x)
 
+/-- The first strip in the arctangent integration-by-parts route: the
+rational kernel `x/(1+x²)`, expressed through the already certified positive
+reciprocal kernel. -/
+def arctanLogKernel (x : Rat) : Rat :=
+  x * logTwoKernel (x * x)
+
+theorem logTwoSquarePullback_eq_two_mul_arctanLogKernel (x : Rat) :
+    logTwoSquarePullback x = 2 * arctanLogKernel x := by
+  unfold logTwoSquarePullback arctanLogKernel
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- Exact rational factorization of the pullback difference.  It is the
 finite algebra behind the Lipschitz certificate below. -/
 private theorem logTwoSquarePullback_difference (s t : Rat) :
@@ -425,6 +436,28 @@ theorem logTwoSquarePullback_lipschitz_on_unit :
           grind [Rat.sub_eq_add_neg]
         rw [hneg, qabs_neg, Rat.mul_one]
 
+/-- The first integration-by-parts kernel is one-Lipschitz on the unit
+interval.  Rather than repeat a denominator estimate, this divides the
+already checked two-Lipschitz square-pullback bound by its exact factor two. -/
+theorem arctanLogKernel_lipschitz_on_unit :
+    Integral.LipschitzOnUnit arctanLogKernel 1 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    have hpull := logTwoSquarePullback_lipschitz_on_unit.2
+      s t hs0 hs1 ht0 ht1
+    have hdiff : logTwoSquarePullback s - logTwoSquarePullback t =
+        2 * (arctanLogKernel s - arctanLogKernel t) := by
+      rw [logTwoSquarePullback_eq_two_mul_arctanLogKernel,
+        logTwoSquarePullback_eq_two_mul_arctanLogKernel]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add]
+    rw [hdiff, qabs_mul] at hpull
+    have htwo : qabs (2 : Rat) = 2 := by native_decide
+    rw [htwo] at hpull
+    apply Rat.le_of_mul_le_mul_left (c := (2 : Rat))
+    · simpa [Rat.one_mul] using hpull
+    · native_decide
+
 /-- A local finite-fold congruence lemma used to put square-substitution sums
 in the same literal mesh normal form as the Darboux constructor. -/
 private theorem finiteFoldl_eq_of_pointwise
@@ -490,6 +523,48 @@ theorem logTwoSquarePullbackIntegral_compute_eq (stage : Nat) :
     logTwoSquarePullbackIntegral.compute stage =
       IntegralIdentities.LipschitzDyadic.compute logTwoSquarePullback 2 stage :=
   rfl
+
+/-- A literal certified integral for the first arctangent--logarithm
+integration-by-parts strip.  It uses the same finite Lipschitz--Darboux
+algorithm as the square pullback, with its sharper unit Lipschitz constant. -/
+def arctanLogKernelIntegral : RealRaw :=
+  Integral.integralFor
+    (FunctionOnInterval.exactRat arctanLogKernel 0 1)
+    (IntegralIdentities.LipschitzDyadic.construction arctanLogKernel 1
+      arctanLogKernel_lipschitz_on_unit)
+
+theorem arctanLogKernelIntegral_valid :
+    arctanLogKernelIntegral.Valid :=
+  Integral.integralFor_valid
+    (FunctionOnInterval.exactRat arctanLogKernel 0 1)
+    (IntegralIdentities.LipschitzDyadic.construction arctanLogKernel 1
+      arctanLogKernel_lipschitz_on_unit)
+
+theorem arctanLogKernelIntegral_compute_eq (stage : Nat) :
+    arctanLogKernelIntegral.compute stage =
+      IntegralIdentities.LipschitzDyadic.compute arctanLogKernel 1 stage :=
+  rfl
+
+/-- Stage by stage, the existing square-pullback boxes are exactly twice the
+boxes for the first arctangent--logarithm strip.  Thus this bridge is a
+finite interval equality, not a later appeal to integral linearity. -/
+theorem logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral
+    (stage : Nat) :
+    logTwoSquarePullbackIntegral.compute stage =
+      RealRaw.scaleRatCompute 2 arctanLogKernelIntegral stage := by
+  rw [logTwoSquarePullbackIntegral_compute_eq]
+  unfold RealRaw.scaleRatCompute
+  have htwo : 0 <= (2 : Rat) := by native_decide
+  simp only [if_pos htwo]
+  rw [arctanLogKernelIntegral_compute_eq]
+  have hscale := IntegralIdentities.LipschitzDyadic.compute_natScale
+    arctanLogKernel 1 2 stage
+  have hfunction : (fun x => ((2 : Nat) : Rat) * arctanLogKernel x) =
+      logTwoSquarePullback := by
+    funext x
+    exact (logTwoSquarePullback_eq_two_mul_arctanLogKernel x).symm
+  rw [hfunction] at hscale
+  simpa using hscale
 
 theorem logTwoSquarePullbackIntegral_width (stage : Nat) :
     (logTwoSquarePullbackIntegral.compute stage).width =
@@ -1455,6 +1530,35 @@ theorem logTwoSquarePullbackIntegral_equiv_reciprocalIntegral :
     logTwoSquareStieltjesRaw_valid logTwoReciprocalIntegral_valid
     (RealRaw.equiv_symm logTwoSquareStieltjesRaw_equiv_pullbackIntegral)
     logTwoSquareStieltjesRaw_equiv_reciprocalIntegral
+
+/-- The first arctangent integration-by-parts strip evaluates to `log 2`:
+the literal certified integral of `x/(1+x²)` on the unit interval, multiplied
+by two, agrees with the existing reciprocal-integral logarithm.  This is the
+non-circular logarithmic half of the later formula for the integral of
+`arctan`; the complementary `∫ arctan` strip and the global FTC/product rule
+remain separate work. -/
+theorem two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral :
+    (RealRaw.scaleRat 2 arctanLogKernelIntegral).Equiv
+      logTwoReciprocalIntegral := by
+  have hpull : (RealRaw.scaleRat 2 arctanLogKernelIntegral).Equiv
+      logTwoSquarePullbackIntegral := by
+    intro stage
+    apply (RealRaw.compareAt_overlap_iff
+      (RealRaw.scaleRat 2 arctanLogKernelIntegral)
+      logTwoSquarePullbackIntegral stage stage).2
+    change QInterval.Overlaps
+      (RealRaw.scaleRatCompute 2 arctanLogKernelIntegral stage)
+      (logTwoSquarePullbackIntegral.compute stage)
+    rw [← logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral]
+    unfold QInterval.Overlaps
+    have hordered := RealRaw.interval_order_of_valid
+      logTwoSquarePullbackIntegral logTwoSquarePullbackIntegral_valid stage
+    exact ⟨hordered, hordered⟩
+  exact RealRaw.equiv_trans
+    (RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      arctanLogKernelIntegral_valid)
+    logTwoSquarePullbackIntegral_valid logTwoReciprocalIntegral_valid hpull
+    logTwoSquarePullbackIntegral_equiv_reciprocalIntegral
 
 /-- One paired update of the alternating harmonic enclosure for `log 2`.
 

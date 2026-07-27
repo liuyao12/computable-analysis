@@ -380,6 +380,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   aggregate `4/n` bound, and
   `logTwoSquarePullbackIntegral_equiv_reciprocalIntegral` proves the
   pullback integral equal to the existing `logTwoReciprocalIntegral`.
+  The first arctangent--logarithm integration-by-parts strip is now a
+  separate literal certified integral, not just a scaled notation:
+  `arctanLogKernelIntegral` integrates `x/(1+x*x)` with Lipschitz constant
+  one. `LipschitzDyadic.compute_natScale` proves the finite Darboux boxes
+  respect natural scaling exactly, so the stagewise theorem
+  `logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral` and
+  the endpoint theorem
+  `two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral` establish
+  `2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`. The remaining Pi-route gates are the
+  complementary `∫ arctan` strip through global product derivative/FTC and
+  the later canonical exp/log identification.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant

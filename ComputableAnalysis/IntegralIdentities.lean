@@ -11023,6 +11023,46 @@ private def upperSum (f : Rat -> Rat) (L : Nat) :
   | [] => 0
   | (p, r) :: rest => upperCell f L p r + upperSum f L rest
 
+/-- Scaling a Lipschitz lower rectangle by a natural rational factor is an
+exact finite identity.  Keeping this at the cell level makes later integral
+identifications use the same literal Darboux boxes, rather than a separate
+linearity axiom. -/
+private theorem lowerCell_natScale (f : Rat -> Rat) (L scale : Nat)
+    (p r : Rat) :
+    lowerCell (fun x => (scale : Rat) * f x) (scale * L) p r =
+      (scale : Rat) * lowerCell f L p r := by
+  unfold lowerCell Integral.lipschitzLowerCell
+  rw [Rat.natCast_mul]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem upperCell_natScale (f : Rat -> Rat) (L scale : Nat)
+    (p r : Rat) :
+    upperCell (fun x => (scale : Rat) * f x) (scale * L) p r =
+      (scale : Rat) * upperCell f L p r := by
+  unfold upperCell Integral.lipschitzUpperCell
+  rw [Rat.natCast_mul]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+private theorem lowerSum_natScale (f : Rat -> Rat) (L scale : Nat) :
+    forall intervals,
+      lowerSum (fun x => (scale : Rat) * f x) (scale * L) intervals =
+        (scale : Rat) * lowerSum f L intervals
+  | [] => by simp [lowerSum]
+  | (p, r) :: rest => by
+      rw [lowerSum, lowerSum, lowerCell_natScale, lowerSum_natScale]
+      grind [Rat.mul_add]
+
+private theorem upperSum_natScale (f : Rat -> Rat) (L scale : Nat) :
+    forall intervals,
+      upperSum (fun x => (scale : Rat) * f x) (scale * L) intervals =
+        (scale : Rat) * upperSum f L intervals
+  | [] => by simp [upperSum]
+  | (p, r) :: rest => by
+      rw [upperSum, upperSum, upperCell_natScale, upperSum_natScale]
+      grind [Rat.mul_add]
+
 /-- The literal finite right-endpoint rectangle sum on a supplied rational
 partition.  It is kept separate from the Darboux lower/upper sums so a later
 integral theorem can compare a familiar Riemann computation with its certified
@@ -11129,6 +11169,16 @@ unit interval. -/
 def compute (f : Rat -> Rat) (L stage : Nat) : QInterval :=
   let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
   { lo := lowerSum f L cells, hi := upperSum f L cells }
+
+/-- The whole finite Lipschitz--Darboux box scales exactly by a natural
+rational factor.  This is a concrete box identity, valid stage by stage. -/
+theorem compute_natScale (f : Rat -> Rat) (L scale stage : Nat) :
+    compute (fun x => (scale : Rat) * f x) (scale * L) stage =
+      { lo := (scale : Rat) * (compute f L stage).lo,
+        hi := (scale : Rat) * (compute f L stage).hi } := by
+  unfold compute
+  dsimp
+  rw [lowerSum_natScale, upperSum_natScale]
 
 /-- The two rational values used for a Lipschitz cell bound every value of the
 kernel on that cell.  This is the local Darboux meaning of the rectangle

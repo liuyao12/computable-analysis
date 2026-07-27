@@ -250,6 +250,15 @@ specialized square substitution
 `∫₀¹ 2*x/(1+x*x) dx ≡ ∫₀¹ dt/(1+t)`.  This uses only finite rational
 mesh comparisons; identifying the resulting logarithm with the inverse of
 the selected canonical exponential remains separate.
+The first integration-by-parts strip is now also a direct certified integral:
+`Logarithm.arctanLogKernelIntegral` uses the kernel `x/(1+x*x)` and a
+Lipschitz constant of `1`.  Natural rational scaling of the finite Darboux
+boxes is checked stage by stage, giving
+`two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral`:
+`2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`.  This clears the logarithmic strip of
+the arctangent integration-by-parts route; the complementary arctangent
+integral still needs the global product-derivative/FTC proof and the later
+canonical exp/log transport.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

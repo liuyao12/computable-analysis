@@ -700,32 +700,30 @@ those certificates, the resulting construction will give
  \int_0^1\arctan(x)\,\dd x
  \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.
 \]
-The final endpoint bridge is deliberately stated separately:
+The final endpoint bridge is now checked for the concrete reciprocal-integral
+logarithm representative:
 \[
  2\int_0^1\frac{x}{1+x^2}\,\dd x
- \Equiv \log 2.
+ \Equiv \log_{\mathrm{rec}} 2.
 \]
-Its finite square-substitution core is now checked: on the \(n\)-mesh, the
-left Stieltjes sum for \(t=x^2\) is exactly twice the ordinary left sum plus a
-nonnegative correction at most \(1/n\)
-(\cref{prop:log-two-square-substitution}).  Promoting these two finite sums
-to the pullback integral is now checked:
-\cref{thm:log-two-square-pullback-integral} constructs a direct valid raw
-from those Stieltjes sums and identifies it with
-\(\int_0^1 2x/(1+x^2)\,\dd x\).  The finite common-refinement certificate
-is now checked as well: its square blocks have error at most \(4/n^2\), so
-the direct raw is equivalent to the ordinary \(t\)-mesh for
-\(\int_0^1dt/(1+t)\).  The remaining logarithm task is only the
+The checked theorem \cref{thm:arctan-log-first-strip} constructs the left
+integral directly with a unit Lipschitz Darboux algorithm and proves that its
+boxes are exactly half the square-pullback boxes at every stage.  Combined
+with the finite square substitution and common-refinement certificates, this
+is the promised endpoint equality without a general change-of-variables or
+integral-linearity axiom.  The remaining logarithm task is only the
 canonical-exponential/inverse-logarithm identification.  The already checked
 series-to-reciprocal-integral equality at \(2\) is therefore now a genuine
 endpoint bridge, while the function-level canonical-logarithm identification
 remains separate.
 Combining the two certified equivalences gives the natural statement
 \[
-  \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log2.
+  \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log_{\mathrm{rec}}2.
 \]
-Only after the displayed expression itself is a valid raw evaluator should
-its agreement with \code{piCircleArea} enter the pi registry.
+After the canonical exp/log agreement transports
+\(\log_{\mathrm{rec}}2\) to the canonical \(\log2\), and only after the
+displayed expression itself is a valid raw evaluator, its agreement with
+\code{piCircleArea} should enter the pi registry.
 \end{corollary}
 
 \section{Nondecreasing integrands and piecewise monotone integrals}

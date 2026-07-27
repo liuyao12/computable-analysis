@@ -522,6 +522,49 @@ This is a specialized, completely finite change-of-variables theorem for
 \(t=x^2\), not an appeal to real completeness or a general substitution axiom.
 \end{theorem}
 
+\begin{theorem}[First arctangent--logarithm strip]
+\label{thm:arctan-log-first-strip}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_natScale}
+\lean{ComputableAnalysis.Logarithm.arctanLogKernel}
+\lean{ComputableAnalysis.Logarithm.arctanLogKernel_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.arctanLogKernelIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral}
+\uses{thm:log-two-square-pullback-integral}
+\leanok
+Put
+\[
+ K=\int_0^1\frac{x}{1+x^2}\,\dd x.
+\]
+This is now a literal certified integral, not merely the formal half of the
+square-substitution formula.  Lean defines its rational kernel as
+\code{arctanLogKernel}, proves the exact relation
+\[
+ \frac{2x}{1+x^2}=2\frac{x}{1+x^2},
+\]
+and obtains the unit Lipschitz bound for the latter kernel by dividing the
+checked two-Lipschitz pullback estimate by two.  The generic Darboux
+constructor therefore gives a valid raw integral \(K\).
+
+More strongly, the finite lower and upper Darboux sums themselves respect
+natural rational scaling.  At every common stage, Lean proves the literal box
+identity
+\[
+ \left(\int_0^1\frac{2x}{1+x^2}\,\dd x\right)_n
+ =2K_n.
+\]
+Combining this stagewise identity with the checked square substitution yields
+the natural endpoint theorem
+\[
+ 2K\Equiv\int_0^1\frac{\dd t}{1+t}
+   =\log_{\mathrm{rec}}2.
+\]
+Here \(\log_{\mathrm{rec}}2\) is the project's already checked reciprocal-
+integral representative.  Transporting it to the inverse of the canonical
+exponential remains the separate exp/log agreement theorem; no such
+identification is assumed here.
+\end{theorem}
+
 \begin{theorem}[Series equals the finite reciprocal integral]
 \label{thm:log-two-series-reciprocal-integral}
 \lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower}
@@ -585,9 +628,9 @@ Its intended proof order is:
   \]
   follows from \((x\arctan x)'=\arctan x+x/(1+x^2)\), its finite
   corner-rectangle schedule, and the logarithmic endpoint calculation.  The
-  latter now has its exact finite square-substitution core in
-  \cref{prop:log-two-square-substitution} and its checked promotion to the
-  two definite integrals in \cref{thm:log-two-square-pullback-integral};
+  latter is now the checked literal strip theorem
+  \cref{thm:arctan-log-first-strip}, built from the finite square-substitution
+  core in \cref{prop:log-two-square-substitution};
   \item package the right-hand side as a valid raw pi evaluator and prove it
   equivalent to the geometric circle-area presentation.
 \end{enumerate}
