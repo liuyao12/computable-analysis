@@ -697,6 +697,118 @@ theorem arctanComplementKernelIntegral_compute_eq (stage : Nat) :
       IntegralIdentities.LipschitzDyadic.compute arctanComplementKernel 3 stage :=
   rfl
 
+/-- The literal finite triangular mesh behind the iterated integral of the
+arctangent kernel.  At this point it is named for the kernel rather than for
+`arctan`: identifying its growing inner sums with arctangent is the separate
+effective-FTC/product-derivative step. -/
+def arctanKernelTriangleCandidateCompute (stage : Nat) : QInterval :=
+  let mesh := 2 ^ stage
+  let sum := IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum
+    (fun x : Rat => 1 / (1 + x * x)) mesh mesh
+  { lo := sum, hi := sum }
+
+/-- The direct, unnormalized triangular mesh computation. -/
+def arctanKernelTriangleCandidate : RealRaw where
+  compute := arctanKernelTriangleCandidateCompute
+
+theorem arctanKernelTriangleCandidateCompute_width (stage : Nat) :
+    (arctanKernelTriangleCandidateCompute stage).width = 0 := by
+  unfold arctanKernelTriangleCandidateCompute
+  simp only [QInterval.width]
+  grind [Rat.sub_eq_add_neg]
+
+theorem arctanKernelTriangleCandidate_widthsShrink :
+    RealRaw.WidthsShrinkToZero arctanKernelTriangleCandidate.compute := by
+  intro eps
+  refine ⟨0, ?_⟩
+  intro stage _
+  rw [show arctanKernelTriangleCandidate.compute stage =
+      arctanKernelTriangleCandidateCompute stage by rfl,
+    arctanKernelTriangleCandidateCompute_width]
+  exact Rat.le_of_lt eps.property
+
+/-- The triangle reindexing theorem places the direct mesh calculation inside
+the certified complementary-strip box at every common dyadic stage. -/
+theorem arctanKernelTriangleCandidate_overlaps_complementKernelIntegral
+    (stage : Nat) :
+    QInterval.Overlaps
+      (arctanKernelTriangleCandidate.compute stage)
+      (arctanComplementKernelIntegral.compute stage) := by
+  have hmesh : 0 < 2 ^ stage :=
+    Nat.pow_pos (by omega : 0 < 2)
+  have htriangle :=
+    IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum
+      (fun x : Rat => 1 / (1 + x * x)) (2 ^ stage) hmesh
+  have hcontains :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum
+      arctanComplementKernel_lipschitz_on_unit stage
+  unfold arctanKernelTriangleCandidate
+    arctanKernelTriangleCandidateCompute
+  dsimp only
+  rw [arctanComplementKernelIntegral_compute_eq, htriangle]
+  exact ⟨hcontains.2, hcontains.1⟩
+
+theorem arctanKernelTriangleCandidate_equiv_complementKernelIntegral :
+    arctanKernelTriangleCandidate.Equiv arctanComplementKernelIntegral := by
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    arctanKernelTriangleCandidate arctanComplementKernelIntegral stage stage).2
+  exact arctanKernelTriangleCandidate_overlaps_complementKernelIntegral stage
+
+/-- The public rational radius covering the complementary-strip Darboux box.
+It is also the visible convergence rate for the direct triangular mesh. -/
+def arctanKernelTriangleStabilizationRadius (stage : Nat) : Rat :=
+  6 * (1 / (((2 ^ stage : Nat) : Rat)))
+
+theorem arctanKernelTriangleStabilizationRadius_eq_complementKernelIntegral_width
+    (stage : Nat) :
+    arctanKernelTriangleStabilizationRadius stage =
+      (arctanComplementKernelIntegral.compute stage).width := by
+  unfold arctanKernelTriangleStabilizationRadius
+  rw [arctanComplementKernelIntegral_compute_eq,
+    IntegralIdentities.LipschitzDyadic.compute_width]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem arctanKernelTriangleStabilizationRadius_covers_complementKernelIntegral
+    (stage : Nat) :
+    (arctanComplementKernelIntegral.compute stage).width <=
+      arctanKernelTriangleStabilizationRadius stage := by
+  rw [arctanKernelTriangleStabilizationRadius_eq_complementKernelIntegral_width]
+  exact Rat.le_refl
+
+theorem arctanKernelTriangleStabilizationRadius_shrinks :
+    ShrinksToZero arctanKernelTriangleStabilizationRadius := by
+  intro eps
+  obtain ⟨N, hN⟩ := arctanComplementKernelIntegral_valid.2.2 eps
+  refine ⟨N, ?_⟩
+  intro stage hstage
+  rw [arctanKernelTriangleStabilizationRadius_eq_complementKernelIntegral_width]
+  exact hN stage hstage
+
+/-- A valid direct-only raw representative of the finite triangular mesh.
+Runtime evaluation reads only rational triangle sums and the public radius;
+the complementary-strip integral is used only to certify the enclosure. -/
+def arctanKernelTriangleRaw : RealRaw :=
+  RealRaw.prefixStabilize arctanKernelTriangleCandidate
+    arctanKernelTriangleStabilizationRadius
+
+theorem arctanKernelTriangleRaw_valid : arctanKernelTriangleRaw.Valid := by
+  unfold arctanKernelTriangleRaw
+  exact RealRaw.prefixStabilize_valid
+    arctanKernelTriangleCandidate_widthsShrink
+    arctanComplementKernelIntegral_valid
+    arctanKernelTriangleCandidate_equiv_complementKernelIntegral
+    arctanKernelTriangleStabilizationRadius_covers_complementKernelIntegral
+    arctanKernelTriangleStabilizationRadius_shrinks
+
+theorem arctanKernelTriangleRaw_equiv_complementKernelIntegral :
+    arctanKernelTriangleRaw.Equiv arctanComplementKernelIntegral := by
+  unfold arctanKernelTriangleRaw
+  exact RealRaw.prefixStabilize_equiv_anchor
+    arctanComplementKernelIntegral_valid
+    arctanKernelTriangleCandidate_equiv_complementKernelIntegral
+    arctanKernelTriangleStabilizationRadius_covers_complementKernelIntegral
+
 /-- The raw sum of the two literal strip integrals is, stage by stage, the
 four-Lipschitz Darboux box for the arctangent kernel.  This is the finite
 additivity bridge that precedes any claim about the integral of arctangent. -/

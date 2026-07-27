@@ -285,6 +285,13 @@ outer right sum of growing inner left sums is exactly the left sum for
 `(1 - x) * f(x)`.  It is the literal finite integration-by-parts rectangle
 identity, not a continuous Fubini axiom; relating its inner prefix to
 `arctan` is the remaining semantic FTC/product-derivative step.
+The direct dyadic specialization is now a valid raw real too:
+`arctanKernelTriangleRaw` executes only the finite triangle sums for
+`1/(1+x*x)` and carries the public `6/2^n` enclosure radius.  Its stagewise
+overlap with `arctanComplementKernelIntegral` is checked, so it is equivalent
+to the complementary rational strip without being mislabeled as an integral
+of arctangent.  The missing effective FTC/product-derivative theorem remains
+the sole semantic step in that identification.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

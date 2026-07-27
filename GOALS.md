@@ -407,7 +407,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   from `finiteIntegrationByParts`, so it supplies the required finite
   rectangle geometry without importing continuous Fubini. The remaining
   point is semantic: effective FTC/product-derivative data must identify the
-  inner prefixes with arctangent.
+  inner prefixes with arctangent. The direct dyadic specialization is now
+  packaged as `arctanKernelTriangleRaw`: its runtime evaluator is only the
+  finite triangle sum for `1/(1+x*x)`, its public stabilization radius is
+  `6/2^n`, and Lean proves it equivalent to
+  `arctanComplementKernelIntegral`. This is an executable geometry-to-strip
+  bridge, not yet a statement that the triangles integrate arctangent.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
