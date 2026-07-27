@@ -345,11 +345,10 @@ its width is controlled by the two factor widths and those bounds.  The Lean
 development instantiates
 this construction as the concrete function \(P=xA\) on the unit interval,
 and proves that its evaluator reduces to the displayed two-corner box.
-This is an evaluator-level representation of \(x\arctan x\), not yet a claim that
-\((x\arctan x)'=\arctan x+x/(1+x^2)\), nor that the finite sums compare
-to the displayed integrals.  Those product-derivative, FTC, and logarithm
-endpoint certificates remain required before the resulting pi formula is
-claimed.
+This is an evaluator-level representation of \(x\arctan x\).  The concrete
+forward product derivative is now checked below; the remaining work is its
+two-sided transport and the FTC/logarithm endpoint certificates required
+before the resulting pi formula is claimed.
 
 The next certificate begins with an exact finite identity, rather than with
 an assumed product rule.  For rational \(h\ne0\), write
@@ -365,9 +364,9 @@ and, equivalently,
 Thus a constructive product-derivative certificate must provide finite
 enclosures for the two difference quotients and point values, a rational
 continuity budget to replace \(V(x+h)\) by \(V(x)\), and a bound making the
-displayed \(h\)-remainder smaller than its allocated error.  This is the
-precise missing bridge for \(x\arctan x\); no product rule is inferred from
-the product evaluator alone.
+displayed \(h\)-remainder smaller than its allocated error.  The concrete
+positive product below now supplies these data for \(x\arctan x\) and
+positive steps; no general product rule is inferred from the evaluator alone.
 
 More specifically, if \(U'\) and \(V'\) are the proposed derivatives and
 \(h\ge0\), the finite identity gives the rational error allocation
@@ -418,10 +417,10 @@ quotient is literally
 \]
 
 Thus the unit coordinate \(X(x)=x\) has a checked interval-valued derivative
-certificate \(X'=1\), not merely an informal differentiation rule.  This is
-the first component certificate for \(X\arctan X\).  It does not supply the
-arctangent certificate, bound the final \(h\)-remainder, or close the product
-rule; those are the remaining substantive obligations.
+certificate \(X'=1\), not merely an informal differentiation rule.  Together
+with the checked arctangent derivative, this is the first component certificate
+used by the concrete forward product rule below.  A reusable two-sided product
+closure remains a later theorem.
 
 There is also a first non-affine regression case for the interval definition:
 \[
@@ -432,6 +431,52 @@ At precision \(n\), the certificate asks for
 two singleton quotient and derivative boxes are then near at that precision.
 This verifies a real error budget in the definition, rather than only the
 zero-error affine case, while still using only rational arithmetic.
+\end{theorem}
+
+\begin{theorem}[Forward product rule for the rectangle arctangent]
+\label{thm:coordinate-arctangent-forward-product-rule}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw_compute}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt}
+\uses{prop:arctangent-tangent-chart-quotient}
+\leanok
+Let \(P=xA\) be the positive interval product on \([0,1]\), where \(A\)
+is the rectangle arctangent.  Lean now proves, at every rational
+\(0\le x\le1\), the forward derivative certificate
+\[
+  P'_+(x)=A(x)+\frac{x}{1+x^2}.
+\]
+The right-hand side is itself a raw interval evaluator: at stage \(N\) it is
+the rectangle box for \(A(x)\) shifted by the exact rational value
+\(x/(1+x^2)\).
+
+The proof uses no unproved product rule.  For a positive step \(h\), put
+\(Q=D_hA(x)\).  At the same evaluation stage the literal product quotient
+has the exact endpoint identity
+\[
+ D_hP(x)=
+ \bigl[A_{\mathrm{hi}}(x)+(x+h)Q_{\mathrm{lo}},\,
+       A_{\mathrm{lo}}(x)+(x+h)Q_{\mathrm{hi}}\bigr].
+\]
+For requested precision \(n\), the product certificate requires
+\(h\le1/(72(n+1))\), calls the arctangent derivative at the finer precision
+\(m=8(n+1)\), and uses its step-aware rectangle stage.  The checked bounds
+\[
+  \varepsilon_m\le\varepsilon_n/8,
+  \qquad 2h\le\varepsilon_n/4,
+  \qquad 0<\frac1{1+x^2}\le1
+\]
+bound the two displayed endpoint errors and both interval widths by
+\(\varepsilon_n\).  In particular, this is an end-to-end derivative theorem
+for the actual inexact product evaluator, not merely the algebraic identity
+for exact functions.
+
+It is deliberately a \emph{forward} result.  A full
+\code{HasDerivativeOnInterval} product certificate still needs the negative
+step reversal together with interval transport of the derivative raw.  The
+effective FTC comparison then remains a separate gate for integration by
+parts.
 \end{theorem}
 
 \begin{theorem}[Finite triangle reindexing on a uniform mesh]

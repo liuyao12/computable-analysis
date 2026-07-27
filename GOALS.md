@@ -309,17 +309,20 @@ another. The Pi score stays useful only as secondary integration coverage.
   `coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing` now also
   proves its declared increasing direction from the weak arctangent endpoint
   order and nonnegative product endpoints. A general signed product,
-  product derivative rule, and its FTC comparison are still open.  The
+  two-sided product derivative rule, and its FTC comparison are still open.  The
   product endpoint anchors are now checked as well: the box is exactly zero
   at `0`, agrees with the rectangle evaluator at `1`, and its endpoint
   difference is a valid raw equivalent to `arctanGeom 1`.  This is the
   boundary term needed by the finite integration-by-parts identity, not an
   integral identity for the product.  The
   same concrete positive product evaluator now has a checked forward
-  derivative at zero, equal to `0`: its quotient for a positive step `h`
-  is literally the stagewise rectangle box for `arctan h`, with endpoints
-  between `0` and `h`.  This is an endpoint product-derivative certificate
-  only; the global product rule and its FTC comparison remain open.  The
+  derivative at every rational unit-branch point:
+  `coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt` uses
+  the raw derivative box `arctan(x) + x/(1+x*x)`. Its positive quotient is
+  decomposed exactly into the arctangent quotient and a bounded product term;
+  the arctangent stage `8*(n+1)` and step budget `1/(72*(n+1))` close the
+  finite error. The earlier zero theorem is its endpoint specialization.
+  This is not yet a two-sided product certificate or an FTC comparison. The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor
   at the right endpoint, while `..._corner` exposes the explicit

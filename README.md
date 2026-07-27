@@ -96,7 +96,7 @@ the gates have different dependencies and none can substitute for another.
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit` is a checked non-exact interval-regular example with a quadratic modulus | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
-| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, and the rectangle arctangent certificate (d(\arctan x)/dx=1/(1+x^2)) on ([0,1]) are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
+| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the forward derivative of its actual product evaluator `d_+(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Two-sided product closure, then an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a factorial-tail majorant with an explicit rational epsilon modulus are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
@@ -164,14 +164,19 @@ The exact square now tests the nonzero-error case of the same interface:
 its quotient is `2*x + h`, and the signed step is allocated directly to the
 requested rational precision.  The product-error theorem now uses `|h|`, so
 it applies to the two-sided rational steps required by that interface.
-The remaining product derivative and FTC comparison are deliberately still
-separate: they must turn those identities into interval enclosures with
-continuity and remainder budgets.
+The concrete product now closes the positive-step enclosure: at each rational
+unit-branch point, `coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt`
+certifies the forward derivative box `arctan(x) + x/(1+x*x)`. It uses the
+actual rectangle box for `arctan(x)`, the arctangent quotient at stage
+`8*(n+1)`, and the step budget `h <= 1/(72*(n+1))`; the finite endpoint
+identity controls the remaining corner term. The remaining product derivative
+and FTC comparison are the negative-step transport/two-sided closure and the
+effective FTC bridge.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
-for `x * arctan x` in the single-piece integration-by-parts plan, without
-claiming its product derivative or an endpoint FTC identity.
+for `x * arctan x` in the single-piece integration-by-parts plan, together
+with its checked forward derivative; an endpoint FTC identity remains open.
 Its endpoint data are now checked too: the product box at `0` is exactly
 `[0,0]`, the box at `1` is the geometric rectangle evaluator for
 `arctan(1)`, and their endpoint-difference raw is valid and equivalent to
