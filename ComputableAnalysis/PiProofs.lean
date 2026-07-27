@@ -4,6 +4,7 @@ import ComputableAnalysis.ArctanPresentations
 import ComputableAnalysis.Basic
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.Logarithm
 import ComputableAnalysis.Nilakantha
 import ComputableAnalysis.Taylor
 
@@ -15184,6 +15185,20 @@ theorem piFromArctanIntegrationByPartsMesh_equiv_piCircleArea :
     hscale
     four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea
 
+/-- The direct triangle-plus-alternating-logarithm formula is a valid
+supplementary pi computation.  Its proof uses the finite triangle/strip
+bridge and the independently checked logarithm series at two; it deliberately
+does not assert the still-pending function-level integration-by-parts theorem.
+-/
+theorem piTriangleLogSeries_equiv_piCircleArea :
+    Logarithm.piTriangleLogSeries.Equiv piCircleArea := by
+  exact RealRaw.equiv_trans
+    Logarithm.piTriangleLogSeries_valid
+    fourArctanGeomOneValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one
+    four_arctanGeom_one_equiv_piCircleArea
+
 theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     (IntegralIdentities.PiFromArctanIntegral
       IntegralIdentities.arctanIntegralRectangleForAtOne).Equiv
@@ -18107,6 +18122,9 @@ def piCertified : Real :=
     .withAlternative IntegralIdentities.piFromArctanIntegrationByPartsMesh
       IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
       piFromArctanIntegrationByPartsMesh_equiv_piCircleArea)
+    .withAlternative Logarithm.piTriangleLogSeries
+      Logarithm.piTriangleLogSeries_valid
+      piTriangleLogSeries_equiv_piCircleArea)
     .withAlternative piLeibniz
       (piPresentation_valid .leibnizSeries)
       (piPresentation_equiv_piCircleArea .leibnizSeries))
@@ -18144,6 +18162,12 @@ theorem piFromArctanIntegrationByPartsMesh_mem_piCertified_alternatives :
       piCertified.alternatives := by
   simp [piCertified, Real.withAlternative]
 
+/-- The triangle-plus-alternating-logarithm computation is stored directly in
+the abstract pi handle as a supplementary certified alternative. -/
+theorem piTriangleLogSeries_mem_piCertified_alternatives :
+    Logarithm.piTriangleLogSeries ∈ piCertified.alternatives := by
+  simp [piCertified, Real.withAlternative]
+
 /-- Retrieve a named certified representation from the primary π registry
 without depending on its position in the implementation list. -/
 def piCertifiedPresentation (presentation : PiPresentation) :
@@ -18177,6 +18201,13 @@ def integrationByPartsMesh : Real.Representation pi where
   raw := IntegralIdentities.piFromArctanIntegrationByPartsMesh
   valid := IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
   agrees := piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
+
+/-- The direct triangle plus logarithm-series evaluator.  It is a named
+supplementary view of pi, not an additional `PiCoverageBridge` constructor. -/
+def triangleLogSeries : Real.Representation pi where
+  raw := Logarithm.piTriangleLogSeries
+  valid := Logarithm.piTriangleLogSeries_valid
+  agrees := piTriangleLogSeries_equiv_piCircleArea
 
 def leibniz : Real.Representation pi := presentation .leibnizSeries
 def nilakantha : Real.Representation pi := presentation .nilakanthaSeries

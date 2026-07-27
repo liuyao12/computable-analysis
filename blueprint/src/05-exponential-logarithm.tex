@@ -534,6 +534,8 @@ This is a specialized, completely finite change-of-variables theorem for
 \lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoSeries}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_valid}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSeries_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.triangleLogSeries}
 \uses{thm:log-two-square-pullback-integral}
 \leanok
 Put
@@ -595,11 +597,13 @@ finite triangle computation \(T_{\mathrm{triangle}}\) from
 \]
 The direct theorem
 \code{piTriangleLogSeries\_equiv\_four\_arctanGeom\_one} identifies this
-raw evaluator with \(4\arctan_{\mathrm{geom}}(1)\), whose established
-geometric bridge gives the pi corollary.  This is an executable cross-check
-of the triangle, strip, and logarithm-series algorithms.  It remains outside
-the pi coverage score because it does not establish the missing function-level
-FTC or canonical-logarithm theorem.
+raw evaluator with \(4\arctan_{\mathrm{geom}}(1)), and
+\code{PiProofs.piTriangleLogSeries\_equiv\_piCircleArea} records the full
+circle-area pi equivalence.  The abstract pi handle exposes it as
+\code{PiProofs.pi.triangleLogSeries}.  This is an executable cross-check of
+the triangle, strip, and logarithm-series algorithms.  It remains outside the
+pi coverage score because it does not establish the missing function-level FTC
+or canonical-logarithm theorem.
 \end{theorem}
 
 \begin{theorem}[Rational two-strip decomposition]

@@ -1034,9 +1034,10 @@ students actually compute.
   `PiPresentation.integrationFamily` and the primary registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
   regressions.  `piCertified.alternatives` also literally carries the checked
-  `pi.curvatureFan` and `pi.integrationByPartsMesh` raw evaluators; they
-  remain outside the coverage count. The latter is the finite mesh regression
-  calculation, not a substitute for the pending arctangent--logarithm FTC
+  `pi.curvatureFan`, `pi.integrationByPartsMesh`, and
+  `pi.triangleLogSeries` raw evaluators; they remain outside the coverage
+  count. The latter two are finite mesh and triangle--logarithm-series
+  regressions, not substitutes for the pending arctangent--logarithm FTC
   bridge.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
@@ -1135,11 +1136,13 @@ students actually compute.
   names, and `PiProofs.piCertifiedPresentation` retrieves a certified raw
   representative without depending on a list position. This turns the Pi
   suite into an integration registry rather than a progress percentage. The
-  supplementary `PiProofs.pi.curvatureFan` and
-  `PiProofs.pi.integrationByPartsMesh` expose checked named
+  supplementary `PiProofs.pi.curvatureFan`,
+  `PiProofs.pi.integrationByPartsMesh`, and
+  `PiProofs.pi.triangleLogSeries` expose checked named
   `Real.Representation`s, stored directly in `piCertified.alternatives`; they
-  are not additional calculus-coverage rows. The latter remains the finite
-  mesh evaluator, not the arctangent--logarithm integration-by-parts theorem.
+  are not additional calculus-coverage rows. The latter two remain finite
+  mesh and triangle--logarithm-series evaluators, not the arctangent--logarithm
+  integration-by-parts theorem.
   The stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical
