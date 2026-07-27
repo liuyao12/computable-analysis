@@ -270,8 +270,16 @@ Lipschitz constant of `1`.  Natural rational scaling of the finite Darboux
 boxes is checked stage by stage, giving
 `two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral`:
 `2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`.  This clears the logarithmic strip of
-the arctangent integration-by-parts route.  The complementary rational strip
-`(1-x)/(1+x*x)` is now also a literal 3-Lipschitz Darboux integral.
+the arctangent integration-by-parts route. Its direct dyadic evaluation has
+the exact width `4/2^stage` (`two_arctanLogKernelIntegral_compute_width`).
+The complementary rational strip `(1-x)/(1+x*x)` is now also a literal
+3-Lipschitz Darboux integral.
+Composing the already independent alternating-series comparison adds the
+direct endpoint theorem
+`two_arctanLogKernelIntegral_equiv_logTwoSeries`:
+`2 * ∫₀¹ x/(1+x*x) dx ≡ log_series 2`.  This is still only an equality of
+the certified rational-name computations at two; it does not assume that
+either is the inverse of the selected canonical exponential.
 `LipschitzDyadic.compute_add` proves that its boxes and the logarithmic-strip
 boxes add exactly to the 4-Lipschitz boxes for `1/(1+x*x)`, and common
 uniform-left sums prove the resulting raw sum equivalent to the existing
@@ -299,6 +307,14 @@ equivalent to `arctanGeom(1)`.  This is intentionally not the pending
 displayed calculus identity `4 * ∫ arctan + 2 * log 2 = pi`: the triangle has
 not yet been identified with `∫ arctan`, and the logarithm is not yet the
 canonical inverse-exponential one.
+The independently checked equality
+`2 * arctanLogKernelIntegral ≡ logTwoSeries` now gives a supplementary
+executable pi formula too:
+`Logarithm.piTriangleLogSeries = 4 * triangle + 2 * log_series(2)`.
+Lean proves it equivalent to `4 * arctanGeom(1)`, hence to the preferred
+circle-area pi by the existing geometric bridge. It is deliberately excluded
+from the Pi coverage count: it is a cross-check of the same arctangent
+endpoint, not a substitute for the missing global FTC/product rule.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

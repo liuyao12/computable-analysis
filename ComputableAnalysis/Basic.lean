@@ -3395,6 +3395,51 @@ theorem scaleRat_equiv {r : Rat} {x y : RealRaw}
       scaleRatCompute_neg_eq_scaleRatCompute_neg hr y]
     exact h n
 
+/-- Nonnegative scalar multiplication distributes over raw interval addition,
+up to the project's overlap equivalence.  This is finite endpoint algebra;
+it does not pass to a quotient or appeal to a completed ordered field. -/
+theorem scaleRat_add_equiv_of_nonneg (r : Rat) (hr : 0 <= r)
+    (x y : RealRaw) (hx : x.Valid) (hy : y.Valid) :
+    (scaleRat r (add x y)).Equiv (add (scaleRat r x) (scaleRat r y)) := by
+  intro n
+  apply (compareAt_overlap_iff
+    (scaleRat r (add x y)) (add (scaleRat r x) (scaleRat r y)) n n).2
+  simp only [scaleRat, scaleRatCompute, add, addCompute, if_pos hr]
+  change QInterval.Overlaps
+    { lo := r * ((x.compute n).lo + (y.compute n).lo),
+      hi := r * ((x.compute n).hi + (y.compute n).hi) }
+    { lo := r * (x.compute n).lo + r * (y.compute n).lo,
+      hi := r * (x.compute n).hi + r * (y.compute n).hi }
+  have hxorder := interval_order_of_valid x hx n
+  have hyorder := interval_order_of_valid y hy n
+  have hsum : (x.compute n).lo + (y.compute n).lo <=
+      (x.compute n).hi + (y.compute n).hi := by
+    grind [Rat.sub_eq_add_neg]
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hsum hr
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.mul_add]
+
+/-- Two nonnegative raw scalings compose to their product scaling.  The
+statement is deliberately an interval-overlap equivalence so it is reusable
+before any identification of raw representatives. -/
+theorem scaleRat_scaleRat_equiv_of_nonneg (r s : Rat)
+    (hr : 0 <= r) (hs : 0 <= s) (x : RealRaw) (hx : x.Valid) :
+    (scaleRat r (scaleRat s x)).Equiv (scaleRat (r * s) x) := by
+  intro n
+  apply (compareAt_overlap_iff
+    (scaleRat r (scaleRat s x)) (scaleRat (r * s) x) n n).2
+  have hrs : 0 <= r * s := Rat.mul_nonneg hr hs
+  simp only [scaleRat, scaleRatCompute, if_pos hr, if_pos hs, if_pos hrs]
+  change QInterval.Overlaps
+    { lo := r * (s * (x.compute n).lo),
+      hi := r * (s * (x.compute n).hi) }
+    { lo := (r * s) * (x.compute n).lo,
+      hi := (r * s) * (x.compute n).hi }
+  have horder := interval_order_of_valid x hx n
+  have hscaled := Rat.mul_le_mul_of_nonneg_left horder hrs
+  unfold QInterval.Overlaps
+  constructor <;> grind [Rat.mul_assoc]
+
 theorem add_equiv {x x' y y' : RealRaw}
     (hx : x.Valid) (hx' : x'.Valid)
     (hy : y.Valid) (hy' : y'.Valid)

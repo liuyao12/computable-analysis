@@ -388,9 +388,15 @@ another. The Pi score stays useful only as secondary integration coverage.
   `logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral` and
   the endpoint theorem
   `two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral` establish
-  `2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`. The remaining Pi-route gates are the
-  complementary `∫ arctan` strip through global product derivative/FTC and
-  the later canonical exp/log identification.  A useful finite predecessor is
+  `2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`; its composition with the independent
+  alternating-harmonic comparison now also gives the direct theorem
+  `two_arctanLogKernelIntegral_equiv_logTwoSeries` to `log_series 2`.  The
+  scaled strip has exact dyadic width `4/2^stage`, recorded by
+  `two_arctanLogKernelIntegral_compute_width`.
+  These are endpoint equivalences at the rational name two, not the pending
+  function-level canonical-logarithm theorem. The remaining Pi-route gates
+  are the complementary `∫ arctan` strip through global product derivative/FTC
+  and the later canonical exp/log identification. A useful finite predecessor is
   now checked without pretending to discharge that gate:
   `arctanComplementKernelIntegral` is the literal 3-Lipschitz integral of
   `(1-x)/(1+x*x)`, and the exact Darboux-box addition theorem
@@ -420,6 +426,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `4 * ∫ arctan + 2 * log 2 = pi`.  The two remaining semantic inputs are
   exactly the global effective FTC/product-derivative identification of the
   triangle and canonical exp/log transport.
+  The direct series endpoint is now also used to package the supplementary
+  raw `Logarithm.piTriangleLogSeries = 4 * triangle + 2 * log_series(2)`.
+  Its formal theorem `piTriangleLogSeries_equiv_four_arctanGeom_one` reaches
+  the already certified geometric arctangent endpoint. It is intentionally
+  outside `PiCoverageBridge`: it tests agreement among finite triangle,
+  Darboux-strip, and alternating-series algorithms, but does not remove either
+  semantic gate in the displayed arctangent/logarithm calculus identity.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant

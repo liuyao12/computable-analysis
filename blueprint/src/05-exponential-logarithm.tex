@@ -529,7 +529,11 @@ This is a specialized, completely finite change-of-variables theorem for
 \lean{ComputableAnalysis.Logarithm.arctanLogKernel_lipschitz_on_unit}
 \lean{ComputableAnalysis.Logarithm.arctanLogKernelIntegral_valid}
 \lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_compute_width}
 \lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral}
+\lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoSeries}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_valid}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one}
 \uses{thm:log-two-square-pullback-integral}
 \leanok
 Put
@@ -550,9 +554,15 @@ More strongly, the finite lower and upper Darboux sums themselves respect
 natural rational scaling.  At every common stage, Lean proves the literal box
 identity
 \[
- \left(\int_0^1\frac{2x}{1+x^2}\,\dd x\right)_n
+\left(\int_0^1\frac{2x}{1+x^2}\,\dd x\right)_n
  =2K_n.
 \]
+The scaled-strip box has the explicit dyadic width
+\[
+  \operatorname{width}(2K_n)=\frac4{2^n},
+\]
+which Lean obtains from that literal box identity, not from an abstract
+linearity assertion.
 Combining this stagewise identity with the checked square substitution yields
 the natural endpoint theorem
 \[
@@ -563,6 +573,33 @@ Here \(\log_{\mathrm{rec}}2\) is the project's already checked reciprocal-
 integral representative.  Transporting it to the inverse of the canonical
 exponential remains the separate exp/log agreement theorem; no such
 identification is assumed here.
+
+The two independently executable endpoint calculations now have a direct
+comparison as well:
+\[
+  2K\Equiv\log_{\mathrm{series}}2.
+\]
+Its Lean proof composes the finite square-substitution/strip comparison with
+the separately checked alternating-series--reciprocal-integral comparison.
+This is useful evidence that the logarithmic term in the later pi formula is
+not tied to one quadrature presentation.  It still concerns only the rational
+name \(2\), rather than a function-level identification with the inverse of
+the canonical exponential.
+
+The bridge now also supplies a supplementary executable pi formula using the
+finite triangle computation \(T_{\mathrm{triangle}}\) from
+\cref{thm:finite-uniform-triangle-reindexing}:
+\[
+ P_{\triangle,\log\mathrm{series}}
+ =4T_{\mathrm{triangle}}+2\log_{\mathrm{series}}2.
+\]
+The direct theorem
+\code{piTriangleLogSeries\_equiv\_four\_arctanGeom\_one} identifies this
+raw evaluator with \(4\arctan_{\mathrm{geom}}(1)\), whose established
+geometric bridge gives the pi corollary.  This is an executable cross-check
+of the triangle, strip, and logarithm-series algorithms.  It remains outside
+the pi coverage score because it does not establish the missing function-level
+FTC or canonical-logarithm theorem.
 \end{theorem}
 
 \begin{theorem}[Rational two-strip decomposition]

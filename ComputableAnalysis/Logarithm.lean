@@ -947,6 +947,15 @@ theorem logTwoSquarePullbackIntegral_width (stage : Nat) :
   have hfour : (2 : Rat) * ((2 : Nat) : Rat) = 4 := by native_decide
   rw [hfour]
 
+/-- The scaled first strip has the same explicit dyadic width as the square
+pullback computation, because their finite boxes are literally identical. -/
+theorem two_arctanLogKernelIntegral_compute_width (stage : Nat) :
+    ((RealRaw.scaleRat 2 arctanLogKernelIntegral).compute stage).width =
+      4 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  change (RealRaw.scaleRatCompute 2 arctanLogKernelIntegral stage).width = _
+  rw [← logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral]
+  exact logTwoSquarePullbackIntegral_width stage
+
 /-- At every dyadic stage, the exact weighted square-substitution sum lies in
 the corresponding certified pullback-integral box. -/
 theorem logTwoSquarePullbackIntegral_contains_weightedMesh
@@ -2370,6 +2379,110 @@ theorem logTwoSeries_equiv_logTwoReciprocalIntegral :
     exact Rat.le_trans hdarboux.1
       (Rat.le_trans hcontain.1
         (Rat.le_trans hseries.2.1 hseries.2.2))
+
+/-- The first arctangent--logarithm strip also agrees directly with the
+alternating-harmonic logarithm computation.  The proof composes two explicit
+finite-box comparisons through the reciprocal integral; it does not identify
+the result with the inverse of a canonical exponential. -/
+theorem two_arctanLogKernelIntegral_equiv_logTwoSeries :
+    (RealRaw.scaleRat 2 arctanLogKernelIntegral).Equiv logTwoSeries := by
+  exact RealRaw.equiv_trans
+    (RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      arctanLogKernelIntegral_valid)
+    logTwoReciprocalIntegral_valid logTwoSeries_valid
+    two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral
+    (RealRaw.equiv_symm logTwoSeries_equiv_logTwoReciprocalIntegral)
+
+/-- A direct finite pi formula formed from the triangular arctangent-kernel
+mesh and the independent alternating-harmonic computation of `log 2`.
+
+The first summand is deliberately still named for the kernel triangle, rather
+than for an integral of arctangent: the global FTC/product-derivative theorem
+is a separate semantic identification. -/
+def piTriangleLogSeries : RealRaw :=
+  (4 : Nat) * arctanKernelTriangleRaw + (2 : Nat) * logTwoSeries
+
+theorem piTriangleLogSeries_valid : piTriangleLogSeries.Valid := by
+  unfold piTriangleLogSeries
+  exact RealRaw.add_valid
+    (RealRaw.natScale_valid 4 arctanKernelTriangleRaw_valid)
+    (RealRaw.natScale_valid 2 logTwoSeries_valid)
+
+/-- The direct triangle-plus-log-series formula is four times the geometric
+unit arctangent.  Together with the established `4 * arctanGeom 1` pi
+bridge, this is a supplementary executable pi computation, not a new
+calculus-coverage row. -/
+theorem piTriangleLogSeries_equiv_four_arctanGeom_one :
+    piTriangleLogSeries.Equiv
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+  have htriangleValid : arctanKernelTriangleRaw.Valid :=
+    arctanKernelTriangleRaw_valid
+  have hstripValid : arctanLogKernelIntegral.Valid :=
+    arctanLogKernelIntegral_valid
+  have hseriesValid : logTwoSeries.Valid := logTwoSeries_valid
+  have hfourTriangleValid : ((4 : Nat) * arctanKernelTriangleRaw).Valid :=
+    RealRaw.natScale_valid 4 htriangleValid
+  have htwoSeriesValid : ((2 : Nat) * logTwoSeries).Valid :=
+    RealRaw.natScale_valid 2 hseriesValid
+  have hfourStripValid : ((4 : Nat) * arctanLogKernelIntegral).Valid :=
+    RealRaw.natScale_valid 4 hstripValid
+  have hmiddleValid :
+      ((4 : Nat) * arctanKernelTriangleRaw +
+        (4 : Nat) * arctanLogKernelIntegral).Valid :=
+    RealRaw.add_valid hfourTriangleValid hfourStripValid
+  have hsumValid :
+      ((4 : Nat) *
+        (arctanKernelTriangleRaw + arctanLogKernelIntegral)).Valid :=
+    RealRaw.natScale_valid 4
+      (RealRaw.add_valid htriangleValid hstripValid)
+  have hfourGeomValid :
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid :=
+    RealRaw.natScale_valid 4
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+  have hseriesToDoubleStrip :
+      ((2 : Nat) * logTwoSeries).Equiv
+        ((2 : Nat) * (RealRaw.scaleRat 2 arctanLogKernelIntegral)) :=
+    RealRaw.natScale_equiv 2
+      (RealRaw.equiv_symm two_arctanLogKernelIntegral_equiv_logTwoSeries)
+  have hdoubleStripToFour :
+      ((2 : Nat) * (RealRaw.scaleRat 2 arctanLogKernelIntegral)).Equiv
+        ((4 : Nat) * arctanLogKernelIntegral) := by
+    have hcompose := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
+      (2 : Rat) (2 : Rat) (by native_decide) (by native_decide)
+      arctanLogKernelIntegral hstripValid
+    simpa only [show (2 : Rat) * (2 : Rat) = 4 by native_decide] using hcompose
+  have hreplace : piTriangleLogSeries.Equiv
+      ((4 : Nat) * arctanKernelTriangleRaw +
+        (4 : Nat) * arctanLogKernelIntegral) := by
+    unfold piTriangleLogSeries
+    exact RealRaw.add_equiv hfourTriangleValid hfourTriangleValid
+      htwoSeriesValid hfourStripValid
+      (RealRaw.equiv_refl ((4 : Nat) * arctanKernelTriangleRaw)
+        hfourTriangleValid)
+      (RealRaw.equiv_trans htwoSeriesValid
+        (RealRaw.natScale_valid 2
+          (RealRaw.scaleRat_valid_of_nonneg (by native_decide) hstripValid))
+        hfourStripValid hseriesToDoubleStrip hdoubleStripToFour)
+  have hdistribute :
+      ((4 : Nat) * arctanKernelTriangleRaw +
+        (4 : Nat) * arctanLogKernelIntegral).Equiv
+        ((4 : Nat) *
+          (arctanKernelTriangleRaw + arctanLogKernelIntegral)) := by
+    have h := RealRaw.scaleRat_add_equiv_of_nonneg
+      (4 : Rat) (by native_decide) arctanKernelTriangleRaw
+      arctanLogKernelIntegral htriangleValid hstripValid
+    simpa using RealRaw.equiv_symm h
+  have hsumToGeom :
+      ((4 : Nat) *
+        (arctanKernelTriangleRaw + arctanLogKernelIntegral)).Equiv
+        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
+    RealRaw.natScale_equiv 4
+      arctanKernelTrianglePlusLog_equiv_arctanGeom_one
+  exact RealRaw.equiv_trans piTriangleLogSeries_valid hsumValid hfourGeomValid
+    (RealRaw.equiv_trans piTriangleLogSeries_valid hmiddleValid hsumValid
+      hreplace hdistribute)
+    hsumToGeom
 
 end Logarithm
 
