@@ -749,6 +749,8 @@ integration by parts.
 \lean{ComputableAnalysis.ArctanGeometry.tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_forwardDerivativeAt}
+\lean{ComputableAnalysis.QInterval.differenceQuotient_reverse_of_pos}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_hasDerivative}
 Let \(0\le x\le1\), \(h>0\), and set
 \[
  \tau=\frac{h}{1+x(x+h)},\qquad
@@ -823,17 +825,31 @@ chart distortion and the same \(256/(n+1)\) transported width schedule as
 the old half-unit chart.  Thus the evaluator remains entirely rational and
 its precision still survives division by the positive step \(h\).
 
-The remaining derivative work is to upgrade these one-sided certificates to
-the two-sided interval-valued derivative
+The rectangle representative has now also crossed the two-sided step.  Lean
+packages it as a checked \code{HasDerivativeOnInterval} certificate on the
+entire rational unit branch:
 \[
- \arctan'(x)=\frac1{1+x^2}
- \quad\text{on }[0,1]
+ A'(x)=\frac1{1+x^2}\qquad(0\le x\le1).
 \]
-by supplying backward/interior step schedules and then transporting the
-result to the geometric representative.  The latter must preserve the
-requested quotient tolerance, rather than merely say that equivalent raw
-reals have the same limit.  This isolates the genuine remaining analytic
-work; no completeness or mean-value theorem is required.
+For requested stage (n), it uses derivative stage (8(n+1)) and the
+signed-step budget (lvert hvertle1/(72(n+1))).  When (h<0), put
+(k=-h>0) and take the already checked positive quotient from the left
+endpoint (x+h).  The literal interval algebra is
+\[
+ \frac{A(x+h)-A(x)}{h}=
+ \frac{A(x)-A(x+h)}{k}.
+\]
+The kernel is rationally (2)-Lipschitz on the unit branch, so moving its
+value from (x+h) back to (x) costs at most (2k).  The selected schedule
+reserves that cost alongside the forward quotient box.  Thus the proof is a
+finite epsilon--delta argument over rational intervals, including the
+one-sided boundary cases, with no completeness or mean-value theorem.
+
+What remains is transport of this two-sided rectangle certificate to the
+geometric representative, followed by the global product-derivative and FTC
+certificates needed for integration by parts.  Those transports must preserve
+the requested quotient tolerance rather than merely assert equality of
+completed-real limits.
 \end{proposition}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]

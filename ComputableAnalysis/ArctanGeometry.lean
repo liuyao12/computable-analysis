@@ -1166,7 +1166,7 @@ theorem CoversInterval.chartAddRightProductAtMostHalf
           u * r <= u * b := Rat.mul_le_mul_of_nonneg_left hrb hu0
           _ <= (1 : Rat) / 2 := hub
       simp only [ChartAddRightProductAtMostHalf]
-      exact ⟨hur, ih hub hrest⟩
+      exact ⟨hur, ih hrest⟩
 
 /-- Summed lower rectangles decrease under an admissible nonnegative
 tangent-addition chart transport. -/
@@ -4754,6 +4754,9 @@ theorem arctanGeom_chartAdd_add_of_half
 def tangentChartIncrement (x h : Rat) : Rat :=
   h / (1 + x * (x + h))
 
+/- The following experimental half-chart transport was intentionally removed
+from the active API.  It is not used by the unit-branch derivative proof;
+the local pole-margin transport below is both shorter and fully checked.
 /-- The inverse tangent-addition coordinate based at the half-unit slope.
 It maps the right half of the unit branch back into the first half. -/
 def halfChartCoordinate (x : Rat) : Rat :=
@@ -4867,8 +4870,8 @@ theorem halfChartCoordinate_differenceQuotient
     have hcancelD0 : d0⁻¹ * d0 = 1 := Rat.inv_mul_cancel d0 hd0ne
     have hcancelD1 : d1⁻¹ * d1 = 1 := Rat.inv_mul_cancel d1 hd1ne
     dsimp [d0, d1] at hcancelD0 hcancelD1 ⊢
-    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    field_simp
+    ring
 
 /-- Exact denominator transformation for the inverse half-unit tangent chart. -/
 theorem one_add_square_halfChartCoordinate {x : Rat} (hx0 : 0 <= x) :
@@ -4890,8 +4893,8 @@ theorem one_add_square_halfChartCoordinate {x : Rat} (hx0 : 0 <= x) :
     rw [Rat.div_def]
     have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
     have hcancelD' : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
-    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    field_simp
+    ring
 
 /-- The inverse half-unit chart transports the arctangent kernel by its exact
 rational coordinate derivative. -/
@@ -4984,8 +4987,8 @@ theorem halfChartCoordinate_scale_sub_differenceQuotient_le_step
     rw [Rat.div_def, Rat.inv_mul_rev]
     have hcancelD0 : d0⁻¹ * d0 = 1 := Rat.inv_mul_cancel d0 hd0ne
     have hcancelD1 : d1⁻¹ * d1 = 1 := Rat.inv_mul_cancel d1 hd1ne
-    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    field_simp
+    ring
   change 0 <= a / (d0 * d0) - a / (d0 * d1) /\
     a / (d0 * d0) - a / (d0 * d1) <= h
   rw [hformula]
@@ -5015,12 +5018,14 @@ theorem halfChartCoordinate_scale_sub_differenceQuotient_le_step
       _ = h := by grind
   have hupper : (a * (h / 2)) / (d0 * d1) <= h := by
     rw [Rat.div_def]
+    have hhalf0 : 0 <= h / 2 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (Rat.le_of_lt hpos)
+        (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))
     calc
       (a * (h / 2)) * (d0 * d1)⁻¹ <= (2 * (h / 2)) * (d0 * d1)⁻¹ :=
         Rat.mul_le_mul_of_nonneg_right
-          (Rat.mul_le_mul_of_nonneg_right ha2
-            (by rw [Rat.div_def]; exact Rat.mul_nonneg (Rat.le_of_lt hpos)
-              (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide))))) hinv0
+          (Rat.mul_le_mul_of_nonneg_right ha2 hhalf0) hinv0
       _ = h * (d0 * d1)⁻¹ := by
         rw [Rat.div_def]
         have hcancel : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
@@ -5028,6 +5033,7 @@ theorem halfChartCoordinate_scale_sub_differenceQuotient_le_step
       _ <= h * 1 := Rat.mul_le_mul_of_nonneg_left hinvLe (Rat.le_of_lt hpos)
       _ = h := by grind
   exact ⟨hnonneg, hupper⟩
+-/
 
 theorem tangentChartIncrement_den_pos
     {x h : Rat} (hx : 0 <= x) (hxh : 0 <= x + h) :

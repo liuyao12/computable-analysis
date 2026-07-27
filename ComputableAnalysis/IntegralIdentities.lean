@@ -2522,6 +2522,119 @@ def arctanIntegralRectangleOnUnit_forwardDerivativeAt
     arctanIntegralRectangleFor_compute_eq]
   simpa [Q, RealRaw.ofRat_compute] using hnear
 
+/-! The next three finite estimates reserve precision for transporting the
+forward rectangle certificate across a negative step.  They use only rational
+arithmetic and the project-wide `1/n` stage schedule. -/
+
+private theorem twoSided_precision_stage_le_eighth (n : Nat) :
+    (precisionAtStage (8 * (n + 1))).val <=
+      (precisionAtStage n).val / 8 := by
+  let m : Rat := ((n + 1 : Nat) : Rat)
+  have hmpos : 0 < m := by
+    dsimp [m]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hstage : 1 / m <= (precisionAtStage n).val := by
+    dsimp [m]
+    by_cases hn : n = 0
+    · subst n
+      native_decide
+    · simp only [precisionAtStage, dif_neg hn]
+      exact FTC.one_div_nat_antitone (Nat.pos_of_ne_zero hn)
+        (Nat.succ_pos n) (Nat.le_succ n)
+  have hfactor : 0 <= (1 : Rat) / 8 := by native_decide
+  have hscale := Rat.mul_le_mul_of_nonneg_left hstage hfactor
+  have hindex : 8 * (n + 1) ≠ 0 := by omega
+  simp only [precisionAtStage, dif_neg hindex]
+  calc
+    1 / (((8 * (n + 1) : Nat) : Rat)) = ((1 : Rat) / 8) * (1 / m) := by
+      rw [Rat.natCast_mul]
+      change 1 / (8 * m) = ((1 : Rat) / 8) * (1 / m)
+      rw [Rat.div_def, Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= ((1 : Rat) / 8) * (precisionAtStage n).val := hscale
+    _ = (precisionAtStage n).val / 8 := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem twoSided_step_le_quarterPrecision
+    {k : Rat} (n : Nat)
+    (hsmall : k <= 1 / (((72 * (n + 1) : Nat) : Rat))) :
+    2 * k <= (precisionAtStage n).val / 4 := by
+  let m : Rat := ((n + 1 : Nat) : Rat)
+  have hmpos : 0 < m := by
+    dsimp [m]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hsmall' : k <= 1 / (72 * m) := by
+    simpa [m] using hsmall
+  have hdenpos : 0 < 72 * m := Rat.mul_pos (by native_decide) hmpos
+  have hthirtySixPos : 0 < 36 * m := Rat.mul_pos (by native_decide) hmpos
+  have htwice : 2 * k <= 1 / (36 * m) := by
+    apply Rat.le_of_mul_le_mul_right (c := 36 * m)
+    · calc
+        (2 * k) * (36 * m) = k * (72 * m) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= (1 / (72 * m)) * (72 * m) :=
+          Rat.mul_le_mul_of_nonneg_right hsmall' (Rat.le_of_lt hdenpos)
+        _ = 1 := by
+          rw [Rat.div_def]
+          have hne : 72 * m ≠ 0 := Rat.ne_of_gt hdenpos
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ = (1 / (36 * m)) * (36 * m) := by
+          rw [Rat.div_def]
+          have hne : 36 * m ≠ 0 := Rat.ne_of_gt hthirtySixPos
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact hthirtySixPos
+  have hstage : 1 / m <= (precisionAtStage n).val := by
+    dsimp [m]
+    by_cases hn : n = 0
+    · subst n
+      native_decide
+    · simp only [precisionAtStage, dif_neg hn]
+      exact FTC.one_div_nat_antitone (Nat.pos_of_ne_zero hn)
+        (Nat.succ_pos n) (Nat.le_succ n)
+  have hsixthirtySix : 1 / (36 * m) <= (precisionAtStage n).val / 36 := by
+    have hfactor : 0 <= (1 : Rat) / 36 := by native_decide
+    have hscale := Rat.mul_le_mul_of_nonneg_left hstage hfactor
+    calc
+      1 / (36 * m) = ((1 : Rat) / 36) * (1 / m) := by
+        rw [Rat.div_def, Rat.inv_mul_rev]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= ((1 : Rat) / 36) * (precisionAtStage n).val := hscale
+      _ = (precisionAtStage n).val / 36 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hprecisionNonneg : 0 <= (precisionAtStage n).val :=
+    Rat.le_of_lt (precisionAtStage n).property
+  calc
+    2 * k <= 1 / (36 * m) := htwice
+    _ <= (precisionAtStage n).val / 36 := hsixthirtySix
+    _ <= (precisionAtStage n).val / 4 := by
+      grind [Rat.div_def]
+
+private theorem twoSided_step_implies_forward
+    {k : Rat} (n : Nat)
+    (hsmall : k <= 1 / (((72 * (n + 1) : Nat) : Rat))) :
+    k <= 1 / (((8 * (8 * (n + 1) + 1) : Nat) : Rat)) := by
+  have hsmallDenPos : 0 < 72 * (n + 1) := by omega
+  have hforwardDenPos : 0 < 8 * (8 * (n + 1) + 1) := by omega
+  have hdenOrder : 8 * (8 * (n + 1) + 1) <= 72 * (n + 1) := by omega
+  have hreciprocal := FTC.one_div_nat_antitone hforwardDenPos hsmallDenPos
+    hdenOrder
+  calc
+    k <= 1 / (((72 * (n + 1) : Nat) : Rat)) := hsmall
+    _ <= 1 / (((8 * (8 * (n + 1) + 1) : Nat) : Rat)) := hreciprocal
+
+private theorem intervalNearAtPrecision_weaken
+    {I J : QInterval} {m n : Nat}
+    (hnear : intervalNearAtPrecision I J m)
+    (hprecision : (precisionAtStage m).val <= (precisionAtStage n).val) :
+    intervalNearAtPrecision I J n := by
+  unfold intervalNearAtPrecision QInterval.NearAt at hnear ⊢
+  rcases hnear with ⟨hleft, hright, hwidthI, hwidthJ⟩
+  exact ⟨Rat.le_trans hleft ((Rat.add_le_add_left).2 hprecision),
+    Rat.le_trans hright ((Rat.add_le_add_left).2 hprecision),
+    Rat.le_trans hwidthI hprecision, Rat.le_trans hwidthJ hprecision⟩
+
 /-- The rectangle arctangent has a certified forward derivative equal to one
 at the rational endpoint zero.  This uses the direct finite tangent bracket;
 it does not yet assert a two-sided derivative away from that endpoint. -/
@@ -2666,6 +2779,207 @@ def arctanIntegralRectangleOnUnit_forwardDerivativeAtZero :
   · unfold QInterval.width
     rw [show (1 : Rat) - 1 = 0 by native_decide]
     exact Rat.le_of_lt (precisionAtStage n).property
+
+/-- The geometric rectangle construction has a two-sided interval derivative
+on the whole rational unit branch.  A negative step is reversed into the
+positive step based at its left endpoint; the kernel's finite Lipschitz bound
+then transports the derivative value back to the requested basepoint. -/
+def arctanIntegralRectangleOnUnit_hasDerivative :
+    HasDerivativeOnInterval arctanIntegralRectangleOnUnit
+      arctanKernelIntervalAtOne := by
+  refine
+    { same_lower := rfl
+      same_upper := rfl
+      stepPrecision := fun n => 72 * (n + 1)
+      evalPrecision := fun _x h n =>
+        arctanRectangleTangentTransportPrecision (qabs h) (8 * (n + 1))
+      close := ?_ }
+  intro x h n hx hxh hdx hh hsmall
+  change 0 <= x /\ x <= 1 at hx hdx
+  change 0 <= x + h /\ x + h <= 1 at hxh
+  change intervalNearAtPrecision
+    (QInterval.differenceQuotient
+      (arctanIntegralRectangleOnUnit.compute (x + h) hxh
+        (arctanRectangleTangentTransportPrecision (qabs h) (8 * (n + 1))))
+      (arctanIntegralRectangleOnUnit.compute x hx
+        (arctanRectangleTangentTransportPrecision (qabs h) (8 * (n + 1)))) h)
+    { lo := ArctanGeometry.integralKernel x,
+      hi := ArctanGeometry.integralKernel x } n
+  have hprecisionNonneg : 0 <= (precisionAtStage n).val :=
+    Rat.le_of_lt (precisionAtStage n).property
+  have hstageLe :
+      (precisionAtStage (8 * (n + 1))).val <= (precisionAtStage n).val := by
+    calc
+      (precisionAtStage (8 * (n + 1))).val <=
+          (precisionAtStage n).val / 8 :=
+        twoSided_precision_stage_le_eighth n
+      _ <= (precisionAtStage n).val := by
+        grind [Rat.div_def]
+  by_cases hpos : 0 < h
+  · have hqabs : qabs h = h := qabs_eq_self_of_nonneg (Rat.le_of_lt hpos)
+    rw [hqabs] at hsmall ⊢
+    have hforwardSmall := twoSided_step_implies_forward n hsmall
+    have hforward :=
+      (arctanIntegralRectangleOnUnit_forwardDerivativeAt x hx.1 hx.2).close
+        h (8 * (n + 1)) hxh hpos hforwardSmall
+    have hforward' : intervalNearAtPrecision
+        (QInterval.differenceQuotient
+          (arctanIntegralRectangleOnUnit.compute (x + h) hxh
+            (arctanRectangleTangentTransportPrecision h (8 * (n + 1))))
+          (arctanIntegralRectangleOnUnit.compute x hx
+            (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))) h)
+        { lo := ArctanGeometry.integralKernel x,
+          hi := ArctanGeometry.integralKernel x }
+        (8 * (n + 1)) := by
+      simpa [RealRaw.ofRat_compute] using hforward
+    exact intervalNearAtPrecision_weaken hforward' hstageLe
+  · have hneg : h < 0 := by grind
+    let k : Rat := -h
+    have hkpos : 0 < k := by
+      dsimp [k]
+      grind
+    have hk0 : 0 <= k := Rat.le_of_lt hkpos
+    have hqabs : qabs h = k := by
+      dsimp [k]
+      exact qabs_eq_neg_of_nonpos (Rat.le_of_lt hneg)
+    rw [hqabs] at hsmall ⊢
+    have hforwardSmall := twoSided_step_implies_forward n hsmall
+    have hy : 0 <= x + h /\ x + h <= 1 := hxh
+    have hyplus : 0 <= (x + h) + k /\ (x + h) + k <= 1 := by
+      rw [show x + h + k = x by dsimp [k]; grind]
+      exact hx
+    have hforward :=
+      (arctanIntegralRectangleOnUnit_forwardDerivativeAt (x + h) hy.1 hy.2).close
+        k (8 * (n + 1)) hyplus hkpos hforwardSmall
+    have hforward' : intervalNearAtPrecision
+        (QInterval.differenceQuotient
+          (arctanIntegralRectangleOnUnit.compute x hx
+            (arctanRectangleTangentTransportPrecision k (8 * (n + 1))))
+          (arctanIntegralRectangleOnUnit.compute (x + h) hxh
+            (arctanRectangleTangentTransportPrecision k (8 * (n + 1)))) k)
+        { lo := ArctanGeometry.integralKernel (x + h),
+          hi := ArctanGeometry.integralKernel (x + h) }
+        (8 * (n + 1)) := by
+      simpa [show x + h + k = x by dsimp [k]; grind, RealRaw.ofRat_compute]
+        using hforward
+    have hkernelLip := oneOverOnePlusSquare_lipschitz_on_unit.2
+      (x + h) x hy.1 hy.2 hx.1 hx.2
+    have hkernelDiff :
+        qabs (ArctanGeometry.integralKernel (x + h) -
+          ArctanGeometry.integralKernel x) <= 2 * k := by
+      simpa [ArctanGeometry.integralKernel, show x - (x + h) = k by
+        dsimp [k]
+        grind, qabs_eq_self_of_nonneg hk0] using hkernelLip
+    have hkernelForward : ArctanGeometry.integralKernel (x + h) <=
+        ArctanGeometry.integralKernel x + 2 * k := by
+      have h := Rat.le_trans
+        (self_le_qabs (ArctanGeometry.integralKernel (x + h) -
+          ArctanGeometry.integralKernel x)) hkernelDiff
+      grind [Rat.sub_eq_add_neg]
+    have hkernelBackward : ArctanGeometry.integralKernel x <=
+        ArctanGeometry.integralKernel (x + h) + 2 * k := by
+      have hneg := Rat.neg_le_neg
+        (neg_qabs_le_self (ArctanGeometry.integralKernel (x + h) -
+          ArctanGeometry.integralKernel x))
+      have hrev : -(ArctanGeometry.integralKernel (x + h) -
+          ArctanGeometry.integralKernel x) <=
+          qabs (ArctanGeometry.integralKernel (x + h) -
+            ArctanGeometry.integralKernel x) := by
+        calc
+          -(ArctanGeometry.integralKernel (x + h) -
+              ArctanGeometry.integralKernel x) <=
+              -(-qabs (ArctanGeometry.integralKernel (x + h) -
+                ArctanGeometry.integralKernel x)) := hneg
+          _ = qabs (ArctanGeometry.integralKernel (x + h) -
+            ArctanGeometry.integralKernel x) := by grind
+      have h := Rat.le_trans hrev hkernelDiff
+      grind [Rat.sub_eq_add_neg]
+    have htransportBudget :
+        (precisionAtStage (8 * (n + 1))).val + 2 * k <=
+          (precisionAtStage n).val := by
+      have hstep := twoSided_step_le_quarterPrecision n hsmall
+      calc
+        (precisionAtStage (8 * (n + 1))).val + 2 * k <=
+            (precisionAtStage n).val / 8 + (precisionAtStage n).val / 4 :=
+          rat_add_le_add (twoSided_precision_stage_le_eighth n) hstep
+        _ <= (precisionAtStage n).val := by
+          grind [Rat.div_def]
+    let leftValue : QInterval := arctanIntegralRectangleOnUnit.compute (x + h) hxh
+      (arctanRectangleTangentTransportPrecision k (8 * (n + 1)))
+    let baseValue : QInterval := arctanIntegralRectangleOnUnit.compute x hx
+      (arctanRectangleTangentTransportPrecision k (8 * (n + 1)))
+    have hforward'' : intervalNearAtPrecision
+        (QInterval.differenceQuotient baseValue leftValue k)
+        { lo := ArctanGeometry.integralKernel (x + h),
+          hi := ArctanGeometry.integralKernel (x + h) }
+        (8 * (n + 1)) := by
+      simpa [leftValue, baseValue] using hforward'
+    have hquotient :
+        QInterval.differenceQuotient leftValue baseValue h =
+          QInterval.differenceQuotient baseValue leftValue k := by
+      change QInterval.differenceQuotient leftValue baseValue h = _
+      have hhneg : h = -k := by
+        dsimp [k]
+        grind
+      rw [hhneg]
+      exact QInterval.differenceQuotient_reverse_of_pos (A := baseValue)
+        (B := leftValue) hkpos
+    have hrewritten : intervalNearAtPrecision
+        (QInterval.differenceQuotient leftValue baseValue h)
+        { lo := ArctanGeometry.integralKernel (x + h),
+          hi := ArctanGeometry.integralKernel (x + h) }
+        (8 * (n + 1)) := by
+      change intervalNearAtPrecision
+        (QInterval.differenceQuotient leftValue baseValue h) _ _
+      rw [hquotient]
+      exact hforward''
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient leftValue baseValue h)
+      { lo := ArctanGeometry.integralKernel x,
+        hi := ArctanGeometry.integralKernel x } n
+    generalize hq : QInterval.differenceQuotient leftValue baseValue h = quotient at hrewritten ⊢
+    unfold intervalNearAtPrecision QInterval.NearAt at hrewritten ⊢
+    rcases hrewritten with ⟨hleft, hright, hwidth, _⟩
+    refine ⟨?_, ?_, Rat.le_trans hwidth hstageLe, ?_⟩
+    · calc
+        quotient.lo <=
+            ArctanGeometry.integralKernel (x + h) +
+              (precisionAtStage (8 * (n + 1))).val := hleft
+        _ <= ArctanGeometry.integralKernel x + (precisionAtStage n).val := by
+          calc
+            ArctanGeometry.integralKernel (x + h) +
+                (precisionAtStage (8 * (n + 1))).val <=
+                (ArctanGeometry.integralKernel x + 2 * k) +
+                  (precisionAtStage (8 * (n + 1))).val :=
+              (Rat.add_le_add_right).2 hkernelForward
+            _ = ArctanGeometry.integralKernel x +
+                ((precisionAtStage (8 * (n + 1))).val + 2 * k) := by
+              grind [Rat.add_assoc, Rat.add_comm]
+            _ <= ArctanGeometry.integralKernel x + (precisionAtStage n).val :=
+              (Rat.add_le_add_left).2 htransportBudget
+    · calc
+        ArctanGeometry.integralKernel x <=
+            ArctanGeometry.integralKernel (x + h) + 2 * k := hkernelBackward
+        _ <=
+            quotient.hi +
+              (precisionAtStage (8 * (n + 1))).val + 2 * k := by
+                exact (Rat.add_le_add_right).2 hright
+        _ <=
+            quotient.hi +
+              (precisionAtStage n).val := by
+                calc
+                  quotient.hi +
+                      (precisionAtStage (8 * (n + 1))).val + 2 * k =
+                      quotient.hi +
+                        ((precisionAtStage (8 * (n + 1))).val + 2 * k) := by
+                    grind [Rat.add_assoc]
+                  _ <= quotient.hi +
+                      (precisionAtStage n).val :=
+                    (Rat.add_le_add_left).2 htransportBudget
+    · unfold QInterval.width
+      rw [show ArctanGeometry.integralKernel x -
+        ArctanGeometry.integralKernel x = 0 by grind]
+      exact Rat.le_of_lt (precisionAtStage n).property
 
 /-- The finite rectangle arctangent is nondecreasing in its upper endpoint on
 the rational unit branch. -/

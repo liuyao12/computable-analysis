@@ -245,6 +245,46 @@ theorem differenceQuotient_singleton
   unfold differenceQuotient divRat sub scaleRat
   simp [Rat.div_def, Rat.mul_comm]
 
+/-- Reversing a positive finite step reverses both interval endpoints and the
+sign of its denominator, leaving the enclosure of the difference quotient
+unchanged.  This is the finite algebra needed to transport a forward
+derivative certificate to a backward step. -/
+theorem differenceQuotient_reverse_of_pos {A B : QInterval} {h : Rat}
+    (hpos : 0 < h) :
+    differenceQuotient B A (-h) = differenceQuotient A B h := by
+  have hhne : h ≠ 0 := Rat.ne_of_gt hpos
+  have hnegne : -h ≠ 0 := by grind
+  have hinvpos' : 0 < h⁻¹ := (Rat.inv_pos).2 hpos
+  have hinvneg_eq : (-h)⁻¹ = -h⁻¹ := by
+    have hnegmul : (-h) * (-h⁻¹) = 1 := by
+      have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hhne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    calc
+      (-h)⁻¹ = (-h)⁻¹ * 1 := by grind
+      _ = (-h)⁻¹ * ((-h) * (-h⁻¹)) := by rw [hnegmul]
+      _ = ((-h)⁻¹ * (-h)) * (-h⁻¹) := by
+        rw [Rat.mul_assoc]
+      _ = 1 * (-h⁻¹) := by
+        rw [Rat.inv_mul_cancel _ hnegne]
+      _ = -h⁻¹ := by grind
+  have hinvpos : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt hinvpos'
+  have hinvneg : ¬ 0 <= 1 / (-h) := by
+    rw [Rat.div_def]
+    rw [hinvneg_eq]
+    apply Rat.not_le.mpr
+    simpa using Rat.neg_lt_neg hinvpos'
+  unfold differenceQuotient divRat sub scaleRat
+  rw [if_neg hinvneg, if_pos hinvpos]
+  rw [Rat.div_def, hinvneg_eq]
+  cases A
+  cases B
+  dsimp
+  congr 1 <;>
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+
 end QInterval
 
 /-- Two identical exact singleton boxes are near at every requested precision.
