@@ -462,6 +462,7 @@ integral: the necessary common-refinement/FTC promotion remains explicit.
 \lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_valid}
 \lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_valid}
 \lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_equiv_pullbackIntegral}
+\lean{ComputableAnalysis.Logarithm.logTwoUniformLeftSquareBlocks_eq_uniformLeftEndpoint}
 \uses{prop:log-two-square-substitution}
 \leanok
 Put
@@ -499,7 +500,13 @@ Stieltjes representation is equivalent to
 \(\code{logTwoReciprocalIntegral}=\int_0^1dt/(1+t)\).  That proof needs a
 finite common-refinement comparison between the square-image mesh and the
 ordinary uniform \(t\)-mesh.  It is the final change-of-variables certificate,
-not an appeal to real completeness.
+not an appeal to real completeness.  The exact reindexing skeleton is now
+checked: the uniform \(n^2\)-mesh splits into the successive index blocks
+\[0^2,1^2),\ [1^2,2^2),\ \ldots,\ [(n-1)^2,n^2),
+\]
+with block \(k\) containing \(2k+1\) cells.  The remaining estimate compares
+the reciprocal-kernel value at the block's square left endpoint with its
+values in those finite cells using the already certified Lipschitz bound.
 \end{theorem}
 
 \begin{theorem}[Series equals the finite reciprocal integral]

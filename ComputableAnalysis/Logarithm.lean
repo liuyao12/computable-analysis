@@ -215,6 +215,16 @@ theorem logTwoKernel_le_one {t : Rat} (ht : 0 <= t) :
     _ <= 1 / (1 : Rat) := h
     _ = 1 := by native_decide
 
+/-- On the nonnegative ray the translated reciprocal kernel is
+nonincreasing.  This is the order half of the square-block comparison; its
+Lipschitz estimate will bound the remaining difference within each block. -/
+theorem logTwoKernel_antitone_nonnegative {s t : Rat}
+    (hs : 0 <= s) (hst : s <= t) :
+    logTwoKernel t <= logTwoKernel s := by
+  unfold logTwoKernel
+  exact one_div_antitone_of_pos (a := 1 + s) (b := 1 + t)
+    (by grind) (by grind)
+
 private theorem logTwoSquareMeshCorrection_nonnegative
     (meshStage terms : Nat) :
     0 <= logTwoSquareMeshCorrection meshStage terms := by
@@ -691,11 +701,107 @@ theorem logTwoKernel_lipschitz_on_unit
       exact (qabs_mul _ _).symm
     _ = qabs (t - s) := by rw [hmul]
 
+/-- On an ordered unit interval, the loss in the reciprocal kernel is at most
+the horizontal displacement.  This one-sided form packages the monotonicity
+and Lipschitz facts needed for a finite square-block Riemann comparison. -/
+theorem logTwoKernel_drop_le_step {s t : Rat}
+    (hs0 : 0 <= s) (hs1 : s <= 1)
+    (hst : s <= t) (ht1 : t <= 1) :
+    logTwoKernel s - logTwoKernel t <= t - s := by
+  have hdrop0 : 0 <= logTwoKernel s - logTwoKernel t := by
+    grind [logTwoKernel_antitone_nonnegative hs0 hst]
+  have hstep0 : 0 <= t - s := by
+    grind [Rat.sub_eq_add_neg]
+  have hlip := logTwoKernel_lipschitz_on_unit s t hs0 hs1
+    (Rat.le_trans hs0 hst) ht1
+  simpa only [qabs_eq_self_of_nonneg hdrop0,
+    qabs_eq_self_of_nonneg hstep0] using hlip
+
 /-- The finite rational Lipschitz certificate used by the unit-interval
 Darboux integral construction for the logarithmic kernel. -/
 def logTwoKernel_lipschitz : Integral.LipschitzOnUnit logTwoKernel 1 :=
   ⟨by native_decide, fun s t hs0 hs1 ht0 ht1 => by
     simpa using logTwoKernel_lipschitz_on_unit s t hs0 hs1 ht0 ht1⟩
+
+/-- A uniform left sum truncated at an arbitrary number of cells.  The square
+change-of-variables comparison below groups this prefix into the blocks whose
+endpoints are the square-mesh breakpoints. -/
+private def logTwoUniformLeftPrefix (meshStage terms : Nat) : Rat :=
+  (List.range terms).foldl
+    (fun (total : Rat) (j : Nat) =>
+      total + (1 / ((meshStage * meshStage : Nat) : Rat)) *
+        logTwoKernel ((j : Rat) / ((meshStage * meshStage : Nat) : Rat))) 0
+
+/-- The same uniform prefix, enumerated square block by square block.  The
+`m`th block has the indices `m², ..., (m+1)²-1`, hence `2m+1` cells. -/
+private def logTwoUniformLeftSquareBlocks (meshStage : Nat) : Nat -> Rat
+  | 0 => 0
+  | terms + 1 =>
+      logTwoUniformLeftSquareBlocks meshStage terms +
+        (List.range (2 * terms + 1)).foldl
+          (fun (total : Rat) (offset : Nat) =>
+            total + (1 / ((meshStage * meshStage : Nat) : Rat)) *
+              logTwoKernel (((terms * terms + offset : Nat) : Rat) /
+                ((meshStage * meshStage : Nat) : Rat))) 0
+
+/-- Adding a finite sequence of rational summands commutes with changing the
+initial accumulator to the left.  This small finite-fold lemma keeps the
+square-block reindexing below entirely algebraic. -/
+private theorem logTwo_foldl_add_initial (g : Nat -> Rat)
+    (xs : List Nat) (initial : Rat) :
+    xs.foldl (fun total x => total + g x) initial =
+      initial + xs.foldl (fun total x => total + g x) 0 := by
+  induction xs generalizing initial with
+  | nil =>
+      change initial = initial + 0
+      grind
+  | cons x xs ih =>
+      change xs.foldl (fun total x => total + g x) (initial + g x) =
+        initial + xs.foldl (fun total x => total + g x) (0 + g x)
+      rw [ih (initial + g x)]
+      rw [show (0 : Rat) + g x = g x by grind, ih (g x)]
+      grind [Rat.add_assoc]
+
+/-- Exact finite reindexing of a uniform `n²`-mesh into the `n` square-image
+blocks.  This is the discrete common-refinement skeleton of the remaining
+square-substitution comparison. -/
+private theorem logTwoUniformLeftPrefix_eq_squareBlocks
+    (meshStage terms : Nat) :
+    logTwoUniformLeftPrefix meshStage (terms * terms) =
+      logTwoUniformLeftSquareBlocks meshStage terms := by
+  induction terms with
+  | zero =>
+      simp [logTwoUniformLeftPrefix, logTwoUniformLeftSquareBlocks]
+  | succ terms ih =>
+      have hsq : (terms + 1) * (terms + 1) =
+          terms * terms + (2 * terms + 1) := by
+        calc
+          (terms + 1) * (terms + 1) = terms * (terms + 1) + (terms + 1) := by
+            simpa using Nat.succ_mul terms (terms + 1)
+          _ = (terms * terms + terms) + (terms + 1) := by rw [Nat.mul_succ]
+          _ = terms * terms + (2 * terms + 1) := by omega
+      unfold logTwoUniformLeftPrefix
+      rw [hsq, List.range_add, List.foldl_append]
+      change (List.map (fun x => terms * terms + x)
+          (List.range (2 * terms + 1))).foldl _
+          (logTwoUniformLeftPrefix meshStage (terms * terms)) =
+        logTwoUniformLeftSquareBlocks meshStage (terms + 1)
+      rw [logTwo_foldl_add_initial]
+      rw [ih]
+      simp only [List.foldl_map]
+      rfl
+
+/-- At a square number of cells, the ordinary uniform left sum is exactly the
+sum of the explicitly enumerated square-image blocks.  This is the finite
+common-refinement equality which will let the square Stieltjes mesh be
+compared with the reciprocal integral without a change-of-variables axiom. -/
+theorem logTwoUniformLeftSquareBlocks_eq_uniformLeftEndpoint
+    (meshStage : Nat) :
+    logTwoUniformLeftSquareBlocks meshStage meshStage =
+      IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        logTwoKernel (meshStage * meshStage) := by
+  rw [← logTwoUniformLeftPrefix_eq_squareBlocks]
+  rfl
 
 /-- The actual finite lower/upper Darboux box for the translated reciprocal
 kernel.  It evaluates only rational function values on a dyadic mesh. -/
