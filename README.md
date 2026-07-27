@@ -292,6 +292,13 @@ overlap with `arctanComplementKernelIntegral` is checked, so it is equivalent
 to the complementary rational strip without being mislabeled as an integral
 of arctangent.  The missing effective FTC/product-derivative theorem remains
 the sole semantic step in that identification.
+There is now also a complete direct companion computation:
+`arctanKernelTrianglePlusLog` adds that triangle raw to the certified
+`x/(1+x*x)` logarithmic strip.  The finite two-strip comparison proves it
+equivalent to `arctanGeom(1)`.  This is intentionally not the pending
+displayed calculus identity `4 * ∫ arctan + 2 * log 2 = pi`: the triangle has
+not yet been identified with `∫ arctan`, and the logarithm is not yet the
+canonical inverse-exponential one.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

@@ -444,6 +444,8 @@ zero-error affine case, while still using only rational arithmetic.
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleCandidate_overlaps_complementKernelIntegral}
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_valid}
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_equiv_complementKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_valid}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_equiv_arctanGeom_one}
 \uses{thm:finite-geometric-integration-by-parts}
 \leanok
 Let \(n>0\), \(h=1/n\), and let \(f\) be any rational-valued function on
@@ -481,6 +483,20 @@ arctangent integration-by-parts row, with an explicit convergence rate, but
 the name deliberately remains \code{arctanKernelTriangleRaw}: replacing the
 growing inner sums by \(\arctan(x)\) is exactly the still-open effective
 FTC/product-derivative identification.
+
+There is nevertheless a completed direct evaluator obtained by putting that
+triangle raw beside the already certified logarithmic strip for
+\(x/(1+x^2)\).  The finite two-strip comparison identifies their sum with
+the unit arctangent kernel box, and Lean proves
+\[
+ T_{\mathrm{triangle}}+L_{x/(1+x^2)}
+ \Equiv \arctan_{\mathrm{geom}}(1).
+\]
+This is a useful finite Fubini/strip computation and an explicit test case
+for the later logarithm route.  It is deliberately not called
+\(4\int\arctan+2\log 2\): that displayed calculus identity still needs the
+global effective FTC/product-derivative identification and the canonical
+logarithm transport.
 \end{theorem}
 
 \section{A constructive integration-by-parts certificate}

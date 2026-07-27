@@ -857,6 +857,67 @@ theorem arctanStripIntegrals_add_equiv_arctanKernelIntegral :
       IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit stage
   exact ⟨Rat.le_trans hfour.1 htwo.2, Rat.le_trans htwo.1 hfour.2⟩
 
+/-- The finite triangular kernel computation together with the logarithmic
+strip.  This is the direct finite Fubini form of the decomposition of the
+arctangent kernel; it is deliberately not named as an integral of arctangent,
+whose product-derivative/FTC interpretation remains a separate theorem. -/
+def arctanKernelTrianglePlusLog : RealRaw :=
+  arctanKernelTriangleRaw + arctanLogKernelIntegral
+
+theorem arctanKernelTrianglePlusLog_valid :
+    arctanKernelTrianglePlusLog.Valid := by
+  unfold arctanKernelTrianglePlusLog
+  exact RealRaw.add_valid arctanKernelTriangleRaw_valid
+    arctanLogKernelIntegral_valid
+
+/-- The direct triangle-plus-strip computation is the geometric arctangent
+at one.  Its proof passes through literal finite strip boxes and their common
+uniform Riemann sum, rather than through a general FTC or integral-linearity
+axiom. -/
+theorem arctanKernelTrianglePlusLog_equiv_arctanGeom_one :
+    arctanKernelTrianglePlusLog.Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) := by
+  have htriangleValid : arctanKernelTriangleRaw.Valid :=
+    arctanKernelTriangleRaw_valid
+  have hcomplementValid : arctanComplementKernelIntegral.Valid :=
+    arctanComplementKernelIntegral_valid
+  have hlogValid : arctanLogKernelIntegral.Valid :=
+    arctanLogKernelIntegral_valid
+  have htrianglePlusLogValid :
+      (arctanKernelTriangleRaw + arctanLogKernelIntegral).Valid :=
+    RealRaw.add_valid htriangleValid hlogValid
+  have hstripValid :
+      (arctanComplementKernelIntegral + arctanLogKernelIntegral).Valid :=
+    RealRaw.add_valid hcomplementValid hlogValid
+  have hreplace :
+      (arctanKernelTriangleRaw + arctanLogKernelIntegral).Equiv
+        (arctanComplementKernelIntegral + arctanLogKernelIntegral) :=
+    RealRaw.add_equiv htriangleValid hcomplementValid hlogValid hlogValid
+      arctanKernelTriangleRaw_equiv_complementKernelIntegral
+      (RealRaw.equiv_refl arctanLogKernelIntegral hlogValid)
+  have htoKernel :
+      (arctanKernelTriangleRaw + arctanLogKernelIntegral).Equiv
+        IntegralIdentities.arctanKernelLipschitzIntegral :=
+    RealRaw.equiv_trans htrianglePlusLogValid hstripValid
+      IntegralIdentities.arctanKernelLipschitzIntegral_valid hreplace
+      arctanStripIntegrals_add_equiv_arctanKernelIntegral
+  have hkernelToGeom :
+      IntegralIdentities.arctanKernelLipschitzIntegral.Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans
+      IntegralIdentities.arctanKernelLipschitzIntegral_valid
+      IntegralIdentities.arctanIntegralRectangleForAtOne_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      IntegralIdentities.arctanKernelLipschitzIntegral_equiv_rectangleForAtOne
+      IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
+  simpa [arctanKernelTrianglePlusLog] using
+    (RealRaw.equiv_trans htrianglePlusLogValid
+      IntegralIdentities.arctanKernelLipschitzIntegral_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      htoKernel hkernelToGeom)
+
 /-- Stage by stage, the existing square-pullback boxes are exactly twice the
 boxes for the first arctangent--logarithm strip.  Thus this bridge is a
 finite interval equality, not a later appeal to integral linearity. -/

@@ -413,6 +413,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `6/2^n`, and Lean proves it equivalent to
   `arctanComplementKernelIntegral`. This is an executable geometry-to-strip
   bridge, not yet a statement that the triangles integrate arctangent.
+  The companion raw `arctanKernelTrianglePlusLog` now adds this triangle
+  computation to the certified `x/(1+x*x)` logarithmic strip.  Its proved
+  equivalence to `arctanGeom(1)` makes it a finite strip/Fubini regression of
+  the same arctangent endpoint, not the pending calculus theorem
+  `4 * ∫ arctan + 2 * log 2 = pi`.  The two remaining semantic inputs are
+  exactly the global effective FTC/product-derivative identification of the
+  triangle and canonical exp/log transport.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
