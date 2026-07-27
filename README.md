@@ -35,8 +35,10 @@ as well: for a nonnegative norm-length product `C = M*T`, the computable
 start `2 * |C.num| + 1` makes every finite omitted prefix of
 `sum C^r/r!` at most twice its first term, with an additional factor
 `(1/2)^shift` after any further shift.  This is the rational tail certificate
-for the eventual Peano--Baker matrix boxes; simplex quadrature and component
-interval arithmetic are still separate work.
+for the eventual Peano--Baker matrix boxes.  Its epsilon modulus is now also
+checked: `peanoBakerFactorialTailShift M T eps` is an explicit rational-data
+stage after which every finite remaining tail prefix is at most `eps`.
+Simplex quadrature and component interval arithmetic are still separate work.
 The familiar forced oscillator is now a checked two-dimensional instance:
 its Euler state update gives the exact scalar recurrence
 `q_(n+2) - 2 q_(n+1) + q_n = -h^2 omega^2 q_n + h^2 r_n`. This is the
@@ -77,7 +79,7 @@ the gates have different dependencies and none can substitute for another.
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
 | Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, and interval-valued affine/square derivative examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
-| Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a computable rational factorial-tail majorant are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
+| Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a factorial-tail majorant with an explicit rational epsilon modulus are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
 it exercises a genuinely new foundation or a new end-to-end bridge.  Do not

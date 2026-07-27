@@ -637,6 +637,149 @@ theorem factorialTailPartial_shifted_bound {C : Rat} {N : Nat}
     _ = 2 * factorialTailTerm C N * ((1 : Rat) / 2) ^ k := by
       grind [Rat.mul_assoc]
 
+/-- The explicit stage used to turn a rational geometric bound of ratio
+one half into a requested positive rational tolerance.  Its two factors are
+the numerator bound for the initial radius and the denominator bound for the
+tolerance; no archimedean principle over completed reals is involved. -/
+def halfDecayShift (bound : Rat) (eps : QPos) : Nat :=
+  (bound.num.natAbs + 1) * (eps.val.den + 1)
+
+private theorem one_div_antitone_of_pos {a b : Rat}
+    (ha : 0 < a) (hab : a <= b) :
+    1 / b <= 1 / a := by
+  have hb : 0 < b := by grind
+  have hane : a ≠ 0 := Rat.ne_of_gt ha
+  have hbne : b ≠ 0 := Rat.ne_of_gt hb
+  have habpos : 0 < a * b := Rat.mul_pos ha hb
+  apply Rat.le_of_mul_le_mul_right (c := a * b)
+  · calc
+      (1 / b) * (a * b) = a := by
+        rw [Rat.div_def]
+        have hcancel : b * b⁻¹ = 1 := Rat.mul_inv_cancel b hbne
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= b := hab
+      _ = (1 / a) * (a * b) := by
+        rw [Rat.div_def]
+        have hcancel : a * a⁻¹ = 1 := Rat.mul_inv_cancel a hane
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact habpos
+
+private theorem nat_succ_le_two_pow (n : Nat) : n + 1 <= 2 ^ n := by
+  induction n with
+  | zero => decide
+  | succ n ih =>
+      calc
+        n + 1 + 1 <= 2 * (n + 1) := by omega
+        _ <= 2 * (2 ^ n) := Nat.mul_le_mul_left 2 ih
+        _ = 2 ^ (n + 1) := by
+          rw [Nat.pow_succ]
+          omega
+
+private theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
+    ((1 : Rat) / 2) ^ n = 1 / (((2 ^ n : Nat) : Rat)) := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [Rat.pow_succ, ih, Nat.pow_succ, Rat.natCast_mul]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.one_mul]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The ratio-one-half geometric factor is below the ordinary reciprocal
+denominator schedule.  This connects the factorial tail to the project's
+existing epsilon--denominator convention. -/
+theorem half_pow_le_one_div_succ (n : Nat) :
+    ((1 : Rat) / 2) ^ n <= 1 / (((n + 1 : Nat) : Rat)) := by
+  rw [half_pow_eq_one_div_nat_two_pow]
+  have hpowpos : 0 < (((2 ^ n : Nat) : Rat)) := by
+    exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hcast : (((n + 1 : Nat) : Rat)) <= ((2 ^ n : Nat) : Rat) := by
+    exact_mod_cast nat_succ_le_two_pow n
+  exact one_div_antitone_of_pos
+    ((Rat.natCast_pos).2 (Nat.succ_pos n)) hcast
+
+/-- The explicit geometric shift makes any nonnegative rational radius with
+ratio one half no larger than the requested positive rational epsilon. -/
+theorem halfDecayShift_spec {bound : Rat} (hbound : 0 <= bound)
+    (eps : QPos) :
+    bound * ((1 : Rat) / 2) ^ halfDecayShift bound eps <= eps.val := by
+  let B : Nat := bound.num.natAbs + 1
+  let D : Nat := eps.val.den + 1
+  let shift : Nat := B * D
+  have hboundNat : bound <= (B : Rat) := by
+    dsimp [B]
+    simpa only [Rat.natCast_add] using rat_le_num_natAbs_succ bound
+  have hBpos : 0 < (B : Rat) := by
+    dsimp [B]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos _)
+  have hDpos : 0 < (D : Rat) := by
+    dsimp [D]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos _)
+  have hshiftDenPos : 0 < ((shift + 1 : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (Nat.succ_pos _)
+  have hgeometric : ((1 : Rat) / 2) ^ shift <=
+      1 / (((shift + 1 : Nat) : Rat)) :=
+    half_pow_le_one_div_succ shift
+  have hrecipNonneg : 0 <= 1 / (((shift + 1 : Nat) : Rat)) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 hshiftDenPos)
+  have hboundOver : bound * (1 / (((shift + 1 : Nat) : Rat))) <=
+      (B : Rat) * (1 / (((shift + 1 : Nat) : Rat))) :=
+    Rat.mul_le_mul_of_nonneg_right hboundNat hrecipNonneg
+  have hBD : ((B : Rat) * (D : Rat)) <= ((shift + 1 : Nat) : Rat) := by
+    dsimp [shift]
+    rw [← Rat.natCast_mul]
+    exact_mod_cast (Nat.le_succ (B * D))
+  have hratio : (B : Rat) * (1 / (((shift + 1 : Nat) : Rat))) <=
+      1 / (D : Rat) := by
+    apply Rat.le_of_mul_le_mul_right (c := (D : Rat) * ((shift + 1 : Nat) : Rat))
+    · calc
+        ((B : Rat) * (1 / (((shift + 1 : Nat) : Rat))) *
+            ((D : Rat) * ((shift + 1 : Nat) : Rat)) =
+            (B : Rat) * (D : Rat)) := by
+              rw [Rat.div_def]
+              have hne : ((shift + 1 : Nat) : Rat) ≠ 0 :=
+                Rat.ne_of_gt hshiftDenPos
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ <= ((shift + 1 : Nat) : Rat) := hBD
+        _ = (1 / (D : Rat)) * ((D : Rat) * ((shift + 1 : Nat) : Rat)) := by
+              rw [Rat.div_def]
+              have hne : (D : Rat) ≠ 0 := Rat.ne_of_gt hDpos
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact Rat.mul_pos hDpos hshiftDenPos
+  have heps : 1 / (D : Rat) <= eps.val := by
+    dsimp [D]
+    exact one_div_den_succ_le_of_pos eps.property
+  have hshift : halfDecayShift bound eps = shift := rfl
+  rw [hshift]
+  exact Rat.le_trans
+    (Rat.le_trans (Rat.mul_le_mul_of_nonneg_left hgeometric hbound) hboundOver)
+    (Rat.le_trans hratio heps)
+
+/-- The factorial-tail majorant comes with an executable epsilon modulus:
+after this shift, every finite prefix of the remaining tail is within the
+requested tolerance. -/
+theorem factorialTailPartial_shifted_le_eps {C : Rat} (hC : 0 <= C)
+    (eps : QPos) (terms : Nat) :
+    factorialTailPartial C
+      (factorialTailStart C +
+        halfDecayShift (2 * factorialTailTerm C (factorialTailStart C)) eps)
+      terms <= eps.val := by
+  let bound : Rat := 2 * factorialTailTerm C (factorialTailStart C)
+  have hbound : 0 <= bound := by
+    dsimp [bound]
+    exact Rat.mul_nonneg (by native_decide)
+      (factorialTailTerm_nonneg hC _)
+  calc
+    factorialTailPartial C
+        (factorialTailStart C + halfDecayShift bound eps) terms <=
+        bound * ((1 : Rat) / 2) ^ halfDecayShift bound eps := by
+          dsimp [bound]
+          exact factorialTailPartial_shifted_bound hC
+            (factorialTailStart_satisfies C)
+            (halfDecayShift (2 * factorialTailTerm C (factorialTailStart C)) eps)
+            terms
+    _ <= eps.val := halfDecayShift_spec hbound eps
+
 /-- The fully computable version of the factorial-prefix bound. -/
 theorem factorialTailPartial_bound_at_start {C : Rat} (hC : 0 <= C) (k : Nat) :
     factorialTailPartial C (factorialTailStart C) k <=

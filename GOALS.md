@@ -138,10 +138,14 @@ gates.
   twice its first omitted term, and the shifted version has an additional
   `1/2^shift` factor. `LinearODE.peanoBakerFactorialTail_bound` specializes
   that estimate to `C = M*T`, the coefficient-norm and interval-length
-  product in the continuous Peano--Baker plan. The scientific-calculus gate
-  is the continuous interval-matrix Peano--Baker series with simplex
-  integral boxes, that scalar tail certificate lifted to componentwise boxes,
-  and variation of constants.
+  product in the continuous Peano--Baker plan. The new executable shift
+  `peanoBakerFactorialTailShift` and theorem
+  `peanoBakerFactorialTail_shifted_le_eps` now turn the geometric tail into
+  any requested positive rational tolerance, uniformly over every finite
+  remaining prefix. The scientific-calculus gate is the continuous
+  interval-matrix Peano--Baker series with simplex integral boxes, that
+  scalar tail certificate lifted to componentwise boxes, and variation of
+  constants.
   This is the intended constructive **linear Picard--Lindelöf** theorem:
   Peano--Baker supplies the homogeneous resolvent, variation of constants
   supplies the affine solution, and a bounded zero-initial difference is

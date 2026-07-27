@@ -241,6 +241,8 @@ classical assumption that coefficients live on a completed real interval.
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail}
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_bound}
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_bound}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTailShift}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
 For interval-regular coefficients, construct a matrix of raw reals
 \(\Phi(t,s)\) by the ordered-simplex series
 \begin{align*}
@@ -267,7 +269,18 @@ multiplied by \(2^{-j}\).  These are the declarations
 \code{peanoBakerFactorialTail\_bound} and
 \code{peanoBakerFactorialTail\_shifted\_bound}; they quantify over every
 finite prefix, so they are exactly the finite enclosure needed before an
-infinite tail is represented by raw boxes.
+infinite tail is represented by raw boxes.  The remaining epsilon step is now
+checked as well.  Put
+\[
+ B=2\frac{C^{N_0}}{N_0!},\qquad
+ j=(|\operatorname{num}(B)|+1)(\operatorname{den}(\varepsilon)+1).
+\]
+Then \code{peanoBakerFactorialTailShift} computes this \(j\), and
+\code{peanoBakerFactorialTail\_shifted\_le\_eps} proves that every finite
+prefix beginning at \(N_0+j\) is at most the requested positive rational
+\(\varepsilon\).  Thus the scalar majorant already has the explicit
+tail modulus needed by the later raw-box construction; only the matrix
+simplex and quadrature parts remain.
 
 The proof must still combine this majorant with componentwise matrix interval
 arithmetic and ordered-simplex quadrature to obtain nested, shrinking

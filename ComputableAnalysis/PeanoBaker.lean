@@ -1261,6 +1261,26 @@ theorem peanoBakerFactorialTail_shifted_bound {M T : Rat}
     (Rat.mul_nonneg hM hT)
     (RationalMajorant.factorialTailStart_satisfies (M * T)) shift terms
 
+/-- The executable shift which turns the Peano--Baker factorial majorant
+into a requested positive rational error budget. -/
+def peanoBakerFactorialTailShift (M T : Rat) (eps : QPos) : Nat :=
+  RationalMajorant.halfDecayShift
+    (2 * RationalMajorant.factorialTailTerm (M * T)
+      (RationalMajorant.factorialTailStart (M * T))) eps
+
+/-- After the displayed computable shift, every finite prefix of the omitted
+Peano--Baker factorial tail is within the requested rational tolerance.  This
+is the tail-modulus component needed for constructive matrix-series
+uniqueness, independent of a completed function space. -/
+theorem peanoBakerFactorialTail_shifted_le_eps {M T : Rat}
+    (hM : 0 <= M) (hT : 0 <= T) (eps : QPos) (terms : Nat) :
+    peanoBakerFactorialTail M T
+      (RationalMajorant.factorialTailStart (M * T) +
+        peanoBakerFactorialTailShift M T eps) terms <= eps.val := by
+  unfold peanoBakerFactorialTail peanoBakerFactorialTailShift
+  exact RationalMajorant.factorialTailPartial_shifted_le_eps
+    (Rat.mul_nonneg hM hT) eps terms
+
 end LinearODE
 
 end ComputableAnalysis
