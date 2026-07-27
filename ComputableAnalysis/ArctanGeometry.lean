@@ -4368,6 +4368,83 @@ theorem tangentChartIncrement_div_step
   have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hne
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+/-- The finite rectangle arctangent quotient at an arbitrary nonnegative
+basepoint is controlled by the zero-based tangent chart.  The chart
+increment is evaluated by the same rectangle construction, while the
+ordinary quotient is scaled by its exact rational ratio to the input step.
+
+This is the local finite enclosure needed for the eventual theorem that the
+derivative of arctangent is one over one plus its square: the remaining
+derivative proof must choose a stage whose rectangle width survives division
+by h, and then compare the right endpoint scale with the derivative kernel. -/
+theorem arctanIntegralRectangleCompute_tangentChart_quotient_contains
+    {x h : Rat} (hx : 0 <= x) (hpos : 0 < h) (n : Nat) :
+    ({ lo :=
+        (1 / (1 + x * (x + h))) *
+          (1 - tangentChartIncrement x h * tangentChartIncrement x h),
+       hi := 1 / (1 + x * (x + h)) } : QInterval).ContainsInterval
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (tangentChartIncrement x h) n)
+        (arctanIntegralRectangleCompute 0 n) h) := by
+  let t := tangentChartIncrement x h
+  let scale : Rat := 1 / (1 + x * (x + h))
+  have hhne : h ≠ 0 := Rat.ne_of_gt hpos
+  have hhinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have htpos : 0 < t := by
+    dsimp [t]
+    exact tangentChartIncrement_pos hx hpos
+  have ht0 : 0 <= t := Rat.le_of_lt htpos
+  have hbox := arctanIntegralRectangleCompute_tangent_box_contains ht0 n
+  have hscale : t / h = scale := by
+    dsimp [t, scale]
+    exact tangentChartIncrement_div_step hpos
+  have hleft :
+      scale * (1 - t * t) <=
+        (1 / h) * (arctanIntegralRectangleCompute t n).lo := by
+    apply Rat.le_of_mul_le_mul_right (c := h)
+    · calc
+        (scale * (1 - t * t)) * h =
+            ((t / h) * (1 - t * t)) * h := by rw [hscale]
+        _ = t - t * t * t := by
+          rw [Rat.div_def]
+          have hcancel : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hhne
+          grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+            Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+        _ <= (arctanIntegralRectangleCompute t n).lo := hbox.1
+        _ = ((1 / h) * (arctanIntegralRectangleCompute t n).lo) * h := by
+          rw [Rat.div_def]
+          have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hhne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hpos
+  have hright :
+      (1 / h) * (arctanIntegralRectangleCompute t n).hi <= scale := by
+    apply Rat.le_of_mul_le_mul_right (c := h)
+    · calc
+        ((1 / h) * (arctanIntegralRectangleCompute t n).hi) * h =
+            (arctanIntegralRectangleCompute t n).hi := by
+              rw [Rat.div_def]
+              have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hhne
+              grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= t := hbox.2
+        _ = scale * h := by
+          rw [← hscale, Rat.div_def]
+          have hcancel : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hhne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hpos
+  unfold QInterval.ContainsInterval QInterval.differenceQuotient
+    QInterval.divRat QInterval.sub QInterval.scaleRat
+  rw [if_pos hhinv]
+  rw [arctanIntegralRectangleCompute_zero_lower,
+    arctanIntegralRectangleCompute_zero_upper]
+  constructor
+  · change scale * (1 - t * t) <=
+      (1 / h) * ((arctanIntegralRectangleCompute t n).lo - 0)
+    simpa [Rat.sub_eq_add_neg, Rat.add_zero] using hleft
+  · change (1 / h) * ((arctanIntegralRectangleCompute t n).hi - 0) <= scale
+    simpa [Rat.sub_eq_add_neg, Rat.add_zero] using hright
+
 /-- The tangent-addition chart maps the derived chart increment to the
 ordinary endpoint `x + h`. -/
 theorem chartAddParameter_tangentChartIncrement
@@ -4471,6 +4548,90 @@ theorem integralKernel_sub_tangentChartScale_le_step
       _ = h := by grind
   change 0 <= 1 / d0 - 1 / d /\ 1 / d0 - 1 / d <= h
   exact ⟨hnonneg, by simpa [hformula] using hupper⟩
+
+/-- The tangent-chart quotient has a direct derivative-kernel enclosure.
+The error is entirely rational and independent of the rectangle stage:
+the scale changes by at most h, while the zero-based arctangent tangent box
+contributes at most h squared. -/
+theorem arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (hpos : 0 < h) (n : Nat) :
+    ({ lo := integralKernel x - (h + h * h), hi := integralKernel x } :
+      QInterval).ContainsInterval
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleCompute (tangentChartIncrement x h) n)
+        (arctanIntegralRectangleCompute 0 n) h) := by
+  let t := tangentChartIncrement x h
+  let d : Rat := 1 + x * (x + h)
+  let scale : Rat := 1 / d
+  have hbase := arctanIntegralRectangleCompute_tangentChart_quotient_contains
+    hx0 hpos n
+  have hbase' :
+      scale * (1 - t * t) <=
+          (QInterval.differenceQuotient
+            (arctanIntegralRectangleCompute t n)
+            (arctanIntegralRectangleCompute 0 n) h).lo /\
+        (QInterval.differenceQuotient
+            (arctanIntegralRectangleCompute t n)
+            (arctanIntegralRectangleCompute 0 n) h).hi <= scale := by
+    simpa [t, d, scale] using hbase
+  have hxh : 0 <= x + h := by
+    exact Rat.add_nonneg hx0 (Rat.le_of_lt hpos)
+  have hscaleError := integralKernel_sub_tangentChartScale_le_step
+    hx0 hx1 hpos hxh
+  have hscaleError' :
+      0 <= integralKernel x - scale /\
+        integralKernel x - scale <= h := by
+    simpa [d, scale] using hscaleError
+  have ht0 : 0 <= t := by
+    dsimp [t]
+    exact Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have htle : t <= h := by
+    dsimp [t]
+    exact tangentChartIncrement_le_step hx0 hpos
+  have htsquare : t * t <= h * h := by
+    calc
+      t * t <= h * t :=
+        Rat.mul_le_mul_of_nonneg_right htle ht0
+      _ <= h * h :=
+        Rat.mul_le_mul_of_nonneg_left htle (Rat.le_of_lt hpos)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact tangentChartIncrement_den_pos hx0 hxh
+  have hd1 : 1 <= d := by
+    dsimp [d]
+    have hprod : 0 <= x * (x + h) := Rat.mul_nonneg hx0 hxh
+    grind
+  have hscaleLe : scale <= 1 := by
+    have hinv : d⁻¹ <= 1 := by
+      apply Rat.le_of_mul_le_mul_right (c := d)
+      · calc
+          d⁻¹ * d = 1 := Rat.inv_mul_cancel d (Rat.ne_of_gt hdpos)
+          _ <= 1 * d := by simpa using hd1
+      · exact hdpos
+    dsimp [scale]
+    rw [Rat.div_def, Rat.one_mul]
+    exact hinv
+  have hscaledSquare : scale * (t * t) <= h * h := by
+    calc
+      scale * (t * t) <= 1 * (t * t) :=
+        Rat.mul_le_mul_of_nonneg_right hscaleLe
+          (Rat.mul_nonneg ht0 ht0)
+      _ = t * t := by grind
+      _ <= h * h := htsquare
+  have hkernelLeScalePlus : integralKernel x <= scale + h := by
+    grind [Rat.sub_eq_add_neg, hscaleError'.2]
+  have hlower :
+      integralKernel x - (h + h * h) <= scale * (1 - t * t) := by
+    calc
+      integralKernel x - (h + h * h) <= scale - h * h := by
+        grind [Rat.sub_eq_add_neg]
+      _ <= scale - scale * (t * t) := by
+        grind [Rat.sub_eq_add_neg]
+      _ = scale * (1 - t * t) := by
+        grind [Rat.sub_eq_add_neg, Rat.mul_add]
+  have hupper : scale <= integralKernel x := by
+    grind [Rat.sub_eq_add_neg, hscaleError'.1]
+  exact ⟨Rat.le_trans hlower hbase'.1, Rat.le_trans hbase'.2 hupper⟩
 
 /-- Tangent addition expresses an ordinary forward increment by the chart
 increment based at zero on the first half of the unit branch. -/

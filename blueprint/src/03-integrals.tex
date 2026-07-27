@@ -740,9 +740,60 @@ points, and so it is not the global product-derivative input required by
 integration by parts.
 \end{theorem}
 
+\begin{proposition}[Finite tangent-chart arctangent quotient]
+\label{prop:arctangent-tangent-chart-quotient}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_contains}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains}
+Let \(0\le x\le1\), \(h>0\), and set
+\[
+ \tau=\frac{h}{1+x(x+h)},\qquad
+ \sigma=\frac1{1+x(x+h)}.
+\]
+For every rectangle stage \(n\), Lean now proves the literal interval
+enclosure
+\[
+ \frac{A_n(\tau)-A_n(0)}h
+ \ \subseteq\
+ [\,\sigma(1-\tau^2),\,\sigma\,],
+\]
+where \(A_n\) is the certified rectangle arctangent box.  This is not a
+formal rearrangement of a limit: it follows from the finite tangent box
+\([\,\tau-\tau^3,\tau\,]\) and the exact rational identity
+\(\tau/h=\sigma\).
+
+The strengthened checked enclosure combines this tangent box with the
+rational scale comparison \(0\le(1+x^2)^{-1}-\sigma\le h\):
+\[
+ \frac{A_n(\tau)-A_n(0)}h
+ \ \subseteq\
+ \left[\,\frac1{1+x^2}-(h+h^2),\,\frac1{1+x^2}\,\right].
+\]
+It holds at every rectangle stage \(n\), so this is already a genuine
+finite forward-quotient estimate with an explicit, stage-independent error
+modulus.  In particular, the tangent-chart representative has the local
+derivative kernel \((1+x^2)^{-1}\) once the elementary schedule
+\(h+h^2\le\varepsilon\) is installed.
+
+On the first half of the unit branch, tangent addition also gives the
+raw-real forward-difference identification
+\[
+\arctan_{\rm geom}(x+h)-\arctan_{\rm geom}(x)
+\Equiv\arctan_{\rm geom}(\tau).
+\]
+Thus the remaining step to obtain the actual interval-valued derivative
+\[
+ \arctan'(x)=\frac1{1+x^2}
+\]
+is a quantitative transport lemma through that raw-real forward-difference
+equivalence.  It must preserve the requested quotient tolerance while
+choosing representatives, rather than merely say that equivalent raw reals
+have the same limit.  This isolates the genuine analytic work; no
+completeness or mean-value theorem is required.
+\end{proposition}
+
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
-\uses{thm:integration-by-parts-certificate,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
+\uses{thm:integration-by-parts-certificate,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
 certificate gives

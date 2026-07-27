@@ -461,20 +461,40 @@ For the scalar problem
  E'(t)=E(t),\qquad E(0)=1,
 \]
 Peano--Baker constructs the canonical exponential directly from the
-one-dimensional transition.  The power-series evaluator, the
-repeated-multiplication (Euler/compound-interest) evaluator, and the
-inverse-logarithmic-integral evaluator therefore agree once each has been
-shown to satisfy this equation and initial condition:
+one-dimensional transition.  The power-series evaluator and the
+repeated-multiplication (Euler/compound-interest) evaluator therefore agree
+once each has been shown to satisfy this equation and initial condition:
 \[
  E_{\mathrm{series}}
- \Equiv E_{\mathrm{repeated}}
- \Equiv E_{\mathrm{invlog}}.
+ \Equiv E_{\mathrm{repeated}}.
 \]
-This is stronger and cleaner than a collection of pairwise limit comparisons:
-the representations are all forced to be the same solution.  In particular,
-the chosen Euler base is \(e=E(1)\), and the derivative statement
-\(\dd(e^t)/\dd t=e^t\) is a theorem of the selected canonical
-representation, not a convention.
+Here \(E_{\mathrm{repeated}}(q)\) is specifically the rational-power
+extension of the positive base \(e=E(1)\), beginning with literal repeated
+multiplication at natural exponents.  Its exponent-continuity certificate and
+the finite product rule reduce the derivative check to its rational
+difference quotients.  This is stronger than a collection of pairwise limit
+comparisons: the representations are forced to be the same solution.
+
+It also gives the requested alternative characterization of the Euler base.
+For a positive base \(b\) with rational-power function \(P_b(q)=b^q\), let
+\(\lambda_b\) denote its certified derivative at zero.  The additive power
+law and a finite product-derivative certificate should give
+\[
+  P_b'(q)=\lambda_b P_b(q),\qquad P_b(0)=1.
+\]
+Consequently the condition \(\lambda_b=1\), equivalently
+\(\left.\dd(b^q)/\dd q\right|_{q=0}=1\), makes \(P_b\) a solution of the
+same scalar initial-value problem.  Linear uniqueness then proves
+\[
+ \left.\frac{\dd}{\dd q}b^q\right|_{q=0}=1
+ \quad\Longleftrightarrow\quad b=e,
+ \qquad e:=E(1),
+\]
+among positive bases carrying these certificates.  In particular,
+\(\dd(e^q)/\dd q=e^q\) is a theorem of the selected canonical
+representation, not a convention.  The inverse-logarithmic-integral
+evaluator joins this equality only after its inverse-function and FTC
+certificates have established that it solves this same initial-value problem.
 
 The rotation system supplies the trigonometric counterpart:
 \[
@@ -500,8 +520,11 @@ On the positive branch, the inverse of this canonical exponential is the
 canonical logarithm.  The positive logarithmic-integral evaluator must be
 proved to be that inverse by its own finite FTC and inverse-function
 certificates; its already checked comparison at \(2\) is useful boundary
-data, not a substitute for the function theorem.  Once this agreement is
-available, the integration-by-parts target
+data, not a substitute for the function theorem.  That inverse theorem then
+also identifies its exponential presentation with the same \(E\), completing
+\(E_{\mathrm{series}}\Equiv E_{\mathrm{repeated}}\Equiv
+E_{\mathrm{invlog}}\).  Once this agreement is available, the
+integration-by-parts target
 \[
  \int_0^1\arctan(x)\,\dd x
  =\frac{\pi}{4}-\frac12\log 2
