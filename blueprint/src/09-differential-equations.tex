@@ -113,6 +113,21 @@ Duhamel term.  In particular, applying the general formula to
 \(A_\omega\) must recover \eqref{eq:forced-oscillator-duhamel}; it is a
 special-case identification theorem, not an additional analytic construction.
 
+\paragraph{What the identification theorem does, and does not, provide.}
+For the scalar coefficient \(A=1\), Peano--Baker produces a distinguished
+raw function \(E_{\mathrm{PB}}\) together with the certificates
+\[
+ E_{\mathrm{PB}}'(q)=E_{\mathrm{PB}}(q),\qquad E_{\mathrm{PB}}(0)=1.
+\]
+The uniqueness proof then has a precise use: any independently constructed
+raw function carrying these same two certificates is equivalent to
+\(E_{\mathrm{PB}}\), on each rational time interval.  It does \emph{not}
+by itself show that a power series, a compound-interest construction, or an
+inverse logarithmic integral carries those certificates.  Those are three
+separate finite-estimate theorems.  Keeping that separation explicit avoids
+the common circularity of calling a proposed formula ``the exponential''
+before proving its differential equation.
+
 The scalar specialization has a deliberately important downstream use.  Once
 the power-series, repeated-multiplication, and inverse-logarithmic-integral
 representatives have each supplied a derivative and initial-value certificate
@@ -474,6 +489,29 @@ multiplication at natural exponents.  Its exponent-continuity certificate and
 the finite product rule reduce the derivative check to its rational
 difference quotients.  This is stronger than a collection of pairwise limit
 comparisons: the representations are forced to be the same solution.
+
+The three independent inputs to this conclusion should remain visible in the
+formalization plan:
+\begin{enumerate}
+  \item The power-series evaluator needs a termwise derivative certificate
+  with a factorial-tail schedule, and its value at zero must be enclosed by
+  the constant raw real \(1\).
+  \item The repeated-multiplication representative begins with a positive
+  base and literal natural powers.  Its extension to rational exponents needs
+  certified positive roots, the additive power law, and the rational
+  epsilon--delta continuity-in-exponent certificate.  A compound-interest
+  raw real for the single value \(e\) is useful evidence for the base, but is
+  not yet a rational-input function \(q\mapsto e^q\).
+  \item The inverse-logarithmic-integral representative needs a monotone
+  inverse certificate and the finite FTC identity for \(1/x\).  These give
+  both its initial value and its self-derivative without presupposing an
+  ambient completed real line.
+\end{enumerate}
+Once these obligations are supplied, all three functions agree with
+\(E_{\mathrm{PB}}\), rather than merely agreeing at the isolated point
+\(1\).  Their Euler bases consequently agree as the derived corollary
+\(E_{\mathrm{series}}(1)\Equiv E_{\mathrm{repeated}}(1)\Equiv
+E_{\mathrm{invlog}}(1)\).
 
 It also gives the requested alternative characterization of the Euler base.
 For a positive base \(b\) with rational-power function \(P_b(q)=b^q\), let
