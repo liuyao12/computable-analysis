@@ -238,6 +238,9 @@ classical assumption that coefficients live on a completed real interval.
 \begin{theorem}[Peano--Baker state transition: construction target]
 \label{thm:peano-baker-state-transition}
 \uses{def:interval-linear-system,thm:effective-ftc-certificate}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_bound}
+\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_bound}
 For interval-regular coefficients, construct a matrix of raw reals
 \(\Phi(t,s)\) by the ordered-simplex series
 \begin{align*}
@@ -248,15 +251,35 @@ The order of factors follows the nested integration order. The certificate
 consists of finite interval boxes for truncated simplex integrals and a
 rational submultiplicative matrix-norm bound for the tail. A bound
 \(\lVert A(u)\rVert\le M\) on an interval of length \(T\) should yield the
-factorial tail \(\sum_{r>N}(MT)^r/r!\). The proof must obtain nested,
-shrinking raw-matrix boxes and verify
+factorial tail \(\sum_{r>N}(MT)^r/r!\).  Its scalar finite core is now
+checked.  With \(C=MT\), Lean chooses the computable rational-name index
+\[
+ N_0=2\,|\operatorname{num}(C)|+1.
+\]
+For every finite number \(K\) of omitted degrees, the literal rational
+prefix satisfies
+\[
+ \sum_{r=N_0}^{N_0+K-1}\frac{C^r}{r!}
+ \le 2\frac{C^{N_0}}{N_0!}.
+\]
+After shifting the start by \(j\), the corresponding bound is further
+multiplied by \(2^{-j}\).  These are the declarations
+\code{peanoBakerFactorialTail\_bound} and
+\code{peanoBakerFactorialTail\_shifted\_bound}; they quantify over every
+finite prefix, so they are exactly the finite enclosure needed before an
+infinite tail is represented by raw boxes.
+
+The proof must still combine this majorant with componentwise matrix interval
+arithmetic and ordered-simplex quadrature to obtain nested, shrinking
+raw-matrix boxes and verify
 \[
  \partial_t\Phi(t,s)=A(t)\Phi(t,s),\qquad \Phi(s,s)=I,
 \qquad \Phi(t,r)\Phi(r,s)=\Phi(t,s).
 \]
-This is a target, not a completed Lean theorem: componentwise matrix interval
-arithmetic, iterated-simplex integral constructors, and the factorial-tail
-certificate remain to be formalized.
+This remains a target, not a completed continuous ODE theorem: componentwise
+matrix interval arithmetic and iterated-simplex integral constructors remain
+to be formalized.  No completeness or convergence theorem is being hidden in
+the factorial estimate.
 \end{theorem}
 
 \begin{theorem}[Variation of constants: construction target]

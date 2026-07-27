@@ -1,4 +1,5 @@
 import ComputableAnalysis.Differential
+import ComputableAnalysis.PowerSeries
 
 /-!
 # Finite Peano--Baker algebra
@@ -1224,6 +1225,41 @@ def IntervalLinearSystem.CoefficientsRegular
     (system : IntervalLinearSystem dimension lower upper) : Prop :=
   (forall i j, Nonempty (IntervalRegularOn (system.coefficient i j))) /\
   (forall i, Nonempty (IntervalRegularOn (system.forcing i)))
+
+/-- The scalar majorant for the terms omitted from a Peano--Baker transition
+series.  If a submultiplicative matrix norm bounds `A` by `M` on an interval
+of length `T`, its degree-`r` simplex contribution is bounded by
+`(M*T)^r/r!`; this definition is the literal finite rational prefix of that
+tail. -/
+def peanoBakerFactorialTail (M T : Rat) (start : Nat) : Nat -> Rat :=
+  RationalMajorant.factorialTailPartial (M * T) start
+
+/-- A computable Peano--Baker factorial-tail prefix is bounded by twice its
+first omitted term.  This is an all-finite statement: `terms` is arbitrary,
+so it can be used to enclose every finite truncation before a raw matrix
+algorithm is constructed. -/
+theorem peanoBakerFactorialTail_bound {M T : Rat}
+    (hM : 0 <= M) (hT : 0 <= T) (terms : Nat) :
+    peanoBakerFactorialTail M T (RationalMajorant.factorialTailStart (M * T)) terms <=
+      2 * RationalMajorant.factorialTailTerm (M * T)
+        (RationalMajorant.factorialTailStart (M * T)) := by
+  unfold peanoBakerFactorialTail
+  apply RationalMajorant.factorialTailPartial_bound_at_start
+  exact Rat.mul_nonneg hM hT
+
+/-- The same tail certificate records its explicit geometric decay after the
+computable start.  This is the modulus needed for the eventual continuous
+Peano--Baker raw-matrix construction. -/
+theorem peanoBakerFactorialTail_shifted_bound {M T : Rat}
+    (hM : 0 <= M) (hT : 0 <= T) (shift terms : Nat) :
+    peanoBakerFactorialTail M T
+        (RationalMajorant.factorialTailStart (M * T) + shift) terms <=
+      2 * RationalMajorant.factorialTailTerm (M * T)
+        (RationalMajorant.factorialTailStart (M * T)) * ((1 : Rat) / 2) ^ shift := by
+  unfold peanoBakerFactorialTail
+  exact RationalMajorant.factorialTailPartial_shifted_bound
+    (Rat.mul_nonneg hM hT)
+    (RationalMajorant.factorialTailStart_satisfies (M * T)) shift terms
 
 end LinearODE
 

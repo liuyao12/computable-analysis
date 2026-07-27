@@ -123,7 +123,7 @@ gates.
   power-series derivatives and finite-difference examples are checked. The
   next end-to-end gate is a selected exponential raw that proves `f' = f`,
   followed by uniqueness and the logarithm relation.
-- **Linear ODEs — finite core checked; analytic layer open.**
+- **Linear ODEs — finite core and scalar tail certificate checked; analytic layer open.**
   `PeanoBaker.lean` proves finite chronological products, the ordered-word
   expansion, discrete variation of constants, and recurrence uniqueness:
   the zero-initial forcing response is the explicit time-ordered Duhamel sum
@@ -131,9 +131,17 @@ gates.
   recursive trajectory, while a zero-initial homogeneous sampled candidate is
   identically zero. Its checked forced
   harmonic-oscillator instance derives the exact second-order Euler recurrence
-  after vectorizing position and velocity. The scientific-calculus gate is the
-  continuous interval-matrix Peano--Baker series with simplex
-  integral boxes, factorial tail certificates, and variation of constants.
+  after vectorizing position and velocity. `RationalMajorant.factorialTailTerm`
+  and `...factorialTailPartial_bound_at_start` now prove the finite rational
+  factorial-tail engine: at the computable start
+  `2 * C.num.natAbs + 1`, every finite prefix of `sum C^r/r!` is bounded by
+  twice its first omitted term, and the shifted version has an additional
+  `1/2^shift` factor. `LinearODE.peanoBakerFactorialTail_bound` specializes
+  that estimate to `C = M*T`, the coefficient-norm and interval-length
+  product in the continuous Peano--Baker plan. The scientific-calculus gate
+  is the continuous interval-matrix Peano--Baker series with simplex
+  integral boxes, that scalar tail certificate lifted to componentwise boxes,
+  and variation of constants.
   This is the intended constructive **linear Picard--Lindelöf** theorem:
   Peano--Baker supplies the homogeneous resolvent, variation of constants
   supplies the affine solution, and a bounded zero-initial difference is

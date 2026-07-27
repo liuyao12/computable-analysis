@@ -442,6 +442,207 @@ theorem certificate_tail_bound (cert : GeometricCertificate) (k : Nat) :
       geomTailBound cert.scale cert.ratio cert.start :=
   geometric_tail_partial_bound cert.scale_nonneg cert.ratio_nonneg cert.ratio_small
 
+/-- The nonnegative magnitude of the `n`th factorial-series term with
+coefficient bound `C`.  This is the scalar majorant for the ordered-simplex
+terms in a Peano--Baker series, as well as for exponential-type power series. -/
+def factorialTailTerm (C : Rat) (n : Nat) : Rat :=
+  C ^ n / factorialRat n
+
+/-- A finite prefix of the factorial tail starting with the `N`th term.  This
+is deliberately a finite rational sum; the following theorem supplies its
+uniform tail enclosure. -/
+def factorialTailPartial (C : Rat) (N : Nat) : Nat -> Rat
+  | 0 => 0
+  | k + 1 => factorialTailPartial C N k + factorialTailTerm C (N + k)
+
+theorem factorialRat_pos (n : Nat) : 0 < factorialRat n := by
+  unfold factorialRat
+  exact_mod_cast (show 0 < factorial n from by
+    induction n with
+    | zero => simp [factorial]
+    | succ n ih =>
+      simp only [factorial]
+      exact Nat.mul_pos (Nat.succ_pos n) ih)
+
+theorem factorialTailTerm_nonneg {C : Rat} (hC : 0 <= C) (n : Nat) :
+    0 <= factorialTailTerm C n := by
+  unfold factorialTailTerm
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg (Rat.pow_nonneg hC)
+    (Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos n)))
+
+/-- Successive factorial terms differ by the expected rational ratio. -/
+theorem factorialTailTerm_succ (C : Rat) (n : Nat) :
+    factorialTailTerm C (n + 1) =
+      factorialTailTerm C n * (C / ((n + 1 : Nat) : Rat)) := by
+  unfold factorialTailTerm
+  rw [Rat.pow_succ, FormalPowerSeries.factorialRat_succ]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem factorialTailTerm_succ_le_half {C : Rat} (hC : 0 <= C) (n : Nat)
+    (hratio : C / ((n + 1 : Nat) : Rat) <= (1 : Rat) / 2) :
+    factorialTailTerm C (n + 1) <= factorialTailTerm C n * ((1 : Rat) / 2) := by
+  rw [factorialTailTerm_succ]
+  exact Rat.mul_le_mul_of_nonneg_left hratio (factorialTailTerm_nonneg hC n)
+
+/-- Once the first omitted factorial term has denominator at least twice its
+coefficient bound, every later term has ratio at most one half. -/
+theorem factorialTailRatio_le_half_from_start (C : Rat) (N k : Nat)
+    (hstart : C <= (((N + 1 : Nat) : Rat) / 2)) :
+    C / ((N + k + 1 : Nat) : Rat) <= (1 : Rat) / 2 := by
+  let D : Rat := ((N + k + 1 : Nat) : Rat)
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact_mod_cast (show 0 < N + k + 1 by omega)
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  have hND : (((N + 1 : Nat) : Rat)) <= D := by
+    dsimp [D]
+    exact_mod_cast (show N + 1 <= N + k + 1 by omega)
+  have hhalfNonneg : (0 : Rat) <= 1 / 2 := by native_decide
+  have hhalf := Rat.mul_le_mul_of_nonneg_left hND hhalfNonneg
+  have hscaled : (((N + 1 : Nat) : Rat) / 2) <= D / 2 := by
+    simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using hhalf
+  apply Rat.le_of_mul_le_mul_right (c := D)
+  · calc
+      (C / D) * D = C := by
+        rw [Rat.div_def]
+        calc
+          C * D⁻¹ * D = C * (D⁻¹ * D) := by grind [Rat.mul_assoc]
+          _ = C * 1 := by rw [Rat.inv_mul_cancel D hDne]
+          _ = C := by rw [Rat.mul_one]
+      _ <= D / 2 := Rat.le_trans hstart hscaled
+      _ = ((1 : Rat) / 2) * D := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hDpos
+
+/-- A computable start for the factorial tail.  It depends only on the
+rational numerator of `C`, so it introduces no ceiling operation over a
+completed real line. -/
+def factorialTailStart (C : Rat) : Nat :=
+  2 * C.num.natAbs + 1
+
+private theorem rat_le_num_natAbs_succ (q : Rat) :
+    q <= (((q.num.natAbs : Nat) : Rat) + 1) := by
+  by_cases hqpos : 0 < q
+  · have hdenpos : 0 < ((q.den : Nat) : Rat) := by
+      exact (Rat.natCast_pos).2 (Nat.pos_of_ne_zero q.den_nz)
+    apply Rat.le_of_mul_le_mul_right (c := ((q.den : Nat) : Rat))
+    · rw [Rat.mul_comm q ((q.den : Nat) : Rat), rat_den_mul_self]
+      have hnumpos : 0 < q.num := rat_num_pos_of_pos hqpos
+      have hnum_nonneg : 0 <= q.num := Int.le_of_lt hnumpos
+      have hcast : (((q.num.natAbs : Nat) : Rat)) = (q.num : Rat) := by
+        exact_mod_cast (Int.natAbs_of_nonneg hnum_nonneg)
+      calc
+        (q.num : Rat) = ((q.num.natAbs : Nat) : Rat) := by rw [hcast]
+        _ <= (((q.num.natAbs : Nat) : Rat) + 1) := by
+          exact_mod_cast (Nat.le_succ q.num.natAbs)
+        _ <= (((q.num.natAbs : Nat) : Rat) + 1) *
+            ((q.den : Nat) : Rat) := by
+          exact_mod_cast (Nat.le_mul_of_pos_right (q.num.natAbs + 1)
+            (Nat.pos_of_ne_zero q.den_nz))
+    · exact hdenpos
+  · have hqnonpos : q <= 0 := by grind
+    have hzero : (0 : Rat) <= (((q.num.natAbs : Nat) : Rat) + 1) := by
+      exact_mod_cast (Nat.zero_le (q.num.natAbs + 1))
+    exact Rat.le_trans hqnonpos hzero
+
+theorem factorialTailStart_satisfies (C : Rat) :
+    C <= (((factorialTailStart C + 1 : Nat) : Rat) / 2) := by
+  have h := rat_le_num_natAbs_succ C
+  unfold factorialTailStart
+  have htwopos : (0 : Rat) < 2 := by native_decide
+  have htwone : (2 : Rat) ≠ 0 := Rat.ne_of_gt htwopos
+  apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+  · calc
+      C * 2 <= (((C.num.natAbs : Nat) : Rat) + 1) * 2 :=
+        Rat.mul_le_mul_of_nonneg_right h (Rat.le_of_lt htwopos)
+      _ = ((2 * C.num.natAbs + 1 + 1 : Nat) : Rat) := by
+        exact_mod_cast
+          (show (C.num.natAbs + 1) * 2 = 2 * C.num.natAbs + 1 + 1 by omega)
+      _ = (((2 * C.num.natAbs + 1 + 1 : Nat) : Rat) / 2) * 2 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact htwopos
+
+/-- The sufficient ratio condition remains true after any number of terms. -/
+theorem factorialTailStart_mono (C : Rat) (N k : Nat)
+    (hstart : C <= (((N + 1 : Nat) : Rat) / 2)) :
+    C <= (((N + k + 1 : Nat) : Rat) / 2) := by
+  have hND : (((N + 1 : Nat) : Rat)) <= ((N + k + 1 : Nat) : Rat) := by
+    exact_mod_cast (show N + 1 <= N + k + 1 by omega)
+  have hhalfNonneg : (0 : Rat) <= 1 / 2 := by native_decide
+  have h := Rat.mul_le_mul_of_nonneg_left hND hhalfNonneg
+  have hscaled : (((N + 1 : Nat) : Rat) / 2) <=
+      ((N + k + 1 : Nat) : Rat) / 2 := by
+    simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
+  exact Rat.le_trans hstart hscaled
+
+/-- Each factorial term after a certified start is dominated by a concrete
+geometric term of ratio one half. -/
+theorem factorialTailTerm_le_geometric_from_start {C : Rat} {N : Nat}
+    (hC : 0 <= C) (hstart : C <= (((N + 1 : Nat) : Rat) / 2)) :
+    forall k, factorialTailTerm C (N + k) <=
+      factorialTailTerm C N * ((1 : Rat) / 2) ^ k
+  | 0 => by simp
+  | k + 1 => by
+      rw [show N + (k + 1) = N + k + 1 by omega]
+      have hstep := factorialTailTerm_succ_le_half hC (N + k)
+        (factorialTailRatio_le_half_from_start C N k hstart)
+      calc
+        factorialTailTerm C (N + k + 1) <=
+            factorialTailTerm C (N + k) * ((1 : Rat) / 2) := hstep
+        _ <= (factorialTailTerm C N * ((1 : Rat) / 2) ^ k) * ((1 : Rat) / 2) :=
+          Rat.mul_le_mul_of_nonneg_right
+            (factorialTailTerm_le_geometric_from_start hC hstart k)
+            (by native_decide : (0 : Rat) <= 1 / 2)
+        _ = factorialTailTerm C N * ((1 : Rat) / 2) ^ (k + 1) := by
+          rw [Rat.pow_succ]
+          grind [Rat.mul_assoc]
+
+/-- Every finite prefix of a factorial tail is bounded by twice its first
+omitted term.  Because this is proved for arbitrary prefix length, it is the
+finite certificate needed to enclose an infinite Peano--Baker tail. -/
+theorem factorialTailPartial_bound {C : Rat} {N : Nat}
+    (hC : 0 <= C) (hstart : C <= (((N + 1 : Nat) : Rat) / 2)) (k : Nat) :
+    factorialTailPartial C N k <= 2 * factorialTailTerm C N := by
+  calc
+    factorialTailPartial C N k <=
+        geomTailPartial (factorialTailTerm C N) ((1 : Rat) / 2) 0 k := by
+      induction k with
+      | zero => rfl
+      | succ k ih =>
+        rw [factorialTailPartial, geomTailPartial]
+        have hterm := factorialTailTerm_le_geometric_from_start hC hstart k
+        grind
+    _ <= geomTailBound (factorialTailTerm C N) ((1 : Rat) / 2) 0 :=
+      geometric_tail_partial_bound (factorialTailTerm_nonneg hC N)
+        (by native_decide) (by native_decide)
+    _ = 2 * factorialTailTerm C N := by simp [geomTailBound]
+
+/-- A shifted factorial tail has an explicit geometric decay budget. -/
+theorem factorialTailPartial_shifted_bound {C : Rat} {N : Nat}
+    (hC : 0 <= C) (hstart : C <= (((N + 1 : Nat) : Rat) / 2)) (k m : Nat) :
+    factorialTailPartial C (N + k) m <=
+      2 * factorialTailTerm C N * ((1 : Rat) / 2) ^ k := by
+  calc
+    factorialTailPartial C (N + k) m <=
+        2 * factorialTailTerm C (N + k) :=
+      factorialTailPartial_bound hC (factorialTailStart_mono C N k hstart) m
+    _ <= 2 * (factorialTailTerm C N * ((1 : Rat) / 2) ^ k) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (factorialTailTerm_le_geometric_from_start hC hstart k)
+        (by native_decide : (0 : Rat) <= 2)
+    _ = 2 * factorialTailTerm C N * ((1 : Rat) / 2) ^ k := by
+      grind [Rat.mul_assoc]
+
+/-- The fully computable version of the factorial-prefix bound. -/
+theorem factorialTailPartial_bound_at_start {C : Rat} (hC : 0 <= C) (k : Nat) :
+    factorialTailPartial C (factorialTailStart C) k <=
+      2 * factorialTailTerm C (factorialTailStart C) :=
+  factorialTailPartial_bound hC (factorialTailStart_satisfies C) k
+
 end RationalMajorant
 
 namespace ComplexSeries
