@@ -398,9 +398,16 @@ another. The Pi score stays useful only as secondary integration coverage.
   `arctanLogKernelIntegral` is stagewise the 4-Lipschitz box for
   `1/(1+x*x)`. Common uniform-left sums yield
   `arctanStripIntegrals_add_equiv_arctanKernelIntegral`. This is the
-  rational two-strip decomposition that a later triangle/Fubini or
-  product-derivative/FTC certificate must identify with `∫ arctan`; it is not
-  a new Pi-scoreboard row.
+  rational two-strip decomposition that a later product-derivative/FTC
+  certificate must identify with `∫ arctan`; it is not a new Pi-scoreboard
+  row. The mesh-level triangle/Fubini reindexing is now separately checked:
+  `LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum`
+  proves the exact identity between an outer right sum of fixed-mesh inner
+  left prefixes and the complementary left sum `(1-x)*f(x)`. It is obtained
+  from `finiteIntegrationByParts`, so it supplies the required finite
+  rectangle geometry without importing continuous Fubini. The remaining
+  point is semantic: effective FTC/product-derivative data must identify the
+  inner prefixes with arctangent.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant

@@ -11155,6 +11155,143 @@ def uniformLeftEndpointSum (f : Rat -> Rat) (n : Nat) : Rat :=
     (fun total (k : Nat) =>
       total + (1 / (n : Rat)) * f ((k : Rat) / (n : Rat))) 0
 
+/-- The literal inner left-rectangle sum through a specified number of cells
+of a fixed uniform unit mesh.  Keeping the mesh denominator fixed while the
+prefix grows is the finite object needed for a triangle/Fubini comparison. -/
+def uniformLeftPrefixSum (f : Rat -> Rat) (mesh : Nat) : Nat -> Rat
+  | 0 => 0
+  | terms + 1 =>
+      uniformLeftPrefixSum f mesh terms +
+        (1 / (mesh : Rat)) * f ((terms : Rat) / (mesh : Rat))
+
+/-- The finite triangular rectangle sum: at outer mesh point `i+1`, use the
+inner left sum through `i+1` cells and multiply it by the outer mesh width.
+This is the exact finite precursor of
+`∫₀¹ (∫₀ˣ f(t) dt) dx`. -/
+def uniformTriangleRightSum (f : Rat -> Rat) (mesh terms : Nat) : Rat :=
+  rightStieltjesSum
+    (fun k => (k : Rat) / (mesh : Rat))
+    (uniformLeftPrefixSum f mesh) terms
+
+private theorem uniformLeftPrefixSum_eq_foldl (f : Rat -> Rat)
+    (mesh terms : Nat) :
+    uniformLeftPrefixSum f mesh terms =
+      (List.range terms).foldl
+        (fun total (k : Nat) =>
+          total + (1 / (mesh : Rat)) * f ((k : Rat) / (mesh : Rat))) 0 := by
+  induction terms with
+  | zero => rfl
+  | succ terms ih =>
+      rw [uniformLeftPrefixSum, ih, List.range_succ, List.foldl_append]
+      rfl
+
+/-- At the full mesh length, the prefix presentation is exactly the public
+uniform left Riemann sum. -/
+theorem uniformLeftPrefixSum_at_mesh (f : Rat -> Rat) (mesh : Nat) :
+    uniformLeftPrefixSum f mesh mesh = uniformLeftEndpointSum f mesh := by
+  rw [uniformLeftPrefixSum_eq_foldl]
+  rfl
+
+/-- Pointwise splitting `f = x*f + (1-x)*f` survives every finite fixed-mesh
+prefix.  This is finite rational algebra, not integral linearity. -/
+private theorem uniformLeftPrefixSum_sub_coordinate (f : Rat -> Rat)
+    (mesh : Nat) : forall terms,
+      uniformLeftPrefixSum f mesh terms -
+          uniformLeftPrefixSum (fun x => x * f x) mesh terms =
+        uniformLeftPrefixSum (fun x => (1 - x) * f x) mesh terms
+  | 0 => by
+      simp only [uniformLeftPrefixSum]
+      grind
+  | terms + 1 => by
+      simp only [uniformLeftPrefixSum]
+      calc
+        uniformLeftPrefixSum f mesh terms +
+            (1 / (mesh : Rat)) * f ((terms : Rat) / (mesh : Rat)) -
+            (uniformLeftPrefixSum (fun x => x * f x) mesh terms +
+              (1 / (mesh : Rat)) *
+                (((terms : Rat) / (mesh : Rat)) *
+                  f ((terms : Rat) / (mesh : Rat)))) =
+            (uniformLeftPrefixSum f mesh terms -
+              uniformLeftPrefixSum (fun x => x * f x) mesh terms) +
+              ((1 / (mesh : Rat)) * f ((terms : Rat) / (mesh : Rat)) -
+                (1 / (mesh : Rat)) *
+                  (((terms : Rat) / (mesh : Rat)) *
+                    f ((terms : Rat) / (mesh : Rat)))) := by
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+        _ = uniformLeftPrefixSum (fun x => (1 - x) * f x) mesh terms +
+              ((1 / (mesh : Rat)) * f ((terms : Rat) / (mesh : Rat)) -
+                (1 / (mesh : Rat)) *
+                  (((terms : Rat) / (mesh : Rat)) *
+                    f ((terms : Rat) / (mesh : Rat)))) := by
+              rw [uniformLeftPrefixSum_sub_coordinate f mesh terms]
+        _ = uniformLeftPrefixSum (fun x => (1 - x) * f x) mesh terms +
+              (1 / (mesh : Rat)) *
+                ((1 - (terms : Rat) / (mesh : Rat)) *
+                  f ((terms : Rat) / (mesh : Rat))) := by
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The left Stieltjes strip of the fixed-mesh inner sums is exactly the
+ordinary left Riemann prefix for `x*f(x)`. -/
+private theorem leftStieltjes_uniformLeftPrefix_eq_coordinate (f : Rat -> Rat)
+    (mesh : Nat) : forall terms,
+      leftStieltjesSum
+          (fun k => (k : Rat) / (mesh : Rat))
+          (uniformLeftPrefixSum f mesh) terms =
+        uniformLeftPrefixSum (fun x => x * f x) mesh terms
+  | 0 => by
+      simp only [leftStieltjesSum, uniformLeftPrefixSum]
+  | terms + 1 => by
+      change
+        leftStieltjesSum
+            (fun k => (k : Rat) / (mesh : Rat))
+            (uniformLeftPrefixSum f mesh) terms +
+          ((terms : Rat) / (mesh : Rat)) *
+            ((uniformLeftPrefixSum f mesh terms +
+                (1 / (mesh : Rat)) * f ((terms : Rat) / (mesh : Rat))) -
+              uniformLeftPrefixSum f mesh terms) =
+          uniformLeftPrefixSum (fun x => x * f x) mesh terms +
+            (1 / (mesh : Rat)) *
+              (((terms : Rat) / (mesh : Rat)) *
+                f ((terms : Rat) / (mesh : Rat)))
+      rw [leftStieltjes_uniformLeftPrefix_eq_coordinate f mesh terms]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact finite triangle/Fubini identity on a positive uniform unit mesh.
+The outer right sum of the inner left sums equals the ordinary left sum of
+the complementary kernel `(1-x)*f(x)`.  Its proof is the project’s literal
+finite integration-by-parts rectangle identity, so no continuous Fubini or
+integral-linearity theorem is being assumed. -/
+theorem uniformTriangleRightSum_eq_complementUniformLeftEndpointSum
+    (f : Rat -> Rat) (mesh : Nat) (hmesh : 0 < mesh) :
+    uniformTriangleRightSum f mesh mesh =
+      uniformLeftEndpointSum (fun x => (1 - x) * f x) mesh := by
+  have hfinite := finiteIntegrationByParts
+    (fun k => (k : Rat) / (mesh : Rat))
+    (uniformLeftPrefixSum f mesh) mesh
+  have hleft := leftStieltjes_uniformLeftPrefix_eq_coordinate f mesh mesh
+  have hmeshRat : (mesh : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hmesh)
+  have hendpoint : ((mesh : Nat) : Rat) / (mesh : Rat) = 1 := by
+    rw [Rat.div_def, Rat.mul_inv_cancel _ hmeshRat]
+  have hzero : ((0 : Nat) : Rat) / (mesh : Rat) = 0 := by
+    grind [Rat.div_def]
+  have hprefzero : uniformLeftPrefixSum f mesh 0 = 0 := rfl
+  have hsplit := uniformLeftPrefixSum_sub_coordinate f mesh mesh
+  unfold uniformTriangleRightSum
+  rw [hleft] at hfinite
+  have htriangle :
+      rightStieltjesSum
+          (fun k => (k : Rat) / (mesh : Rat))
+          (uniformLeftPrefixSum f mesh) mesh =
+        uniformLeftPrefixSum f mesh mesh -
+          uniformLeftPrefixSum (fun x => x * f x) mesh mesh := by
+    rw [hendpoint, hzero, hprefzero] at hfinite
+    grind [Rat.sub_eq_add_neg]
+  rw [htriangle, hsplit, uniformLeftPrefixSum_at_mesh]
+
 private theorem foldl_eq_of_pointwise {α : Type}
     (g h : Rat -> α -> Rat)
     (hgh : forall total x, g total x = h total x)

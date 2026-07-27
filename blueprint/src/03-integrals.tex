@@ -434,6 +434,35 @@ This verifies a real error budget in the definition, rather than only the
 zero-error affine case, while still using only rational arithmetic.
 \end{theorem}
 
+\begin{theorem}[Finite triangle reindexing on a uniform mesh]
+\label{thm:finite-uniform-triangle-reindexing}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum_at_mesh}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum}
+\uses{thm:finite-geometric-integration-by-parts}
+\leanok
+Let \(n>0\), \(h=1/n\), and let \(f\) be any rational-valued function on
+the unit mesh.  Lean proves the literal finite identity
+\[
+ h\sum_{i=1}^{n}\left(h\sum_{j=0}^{i-1}f(jh)\right)
+ =h\sum_{j=0}^{n-1}(1-jh)f(jh).
+\]
+The left side is the outer right rectangle sum of the growing inner left
+rectangle sums; the right side assigns each inner rectangle to the remaining
+height of the unit square.  Thus it is a finite triangle/Fubini reindexing
+whose proof is exactly the finite integration-by-parts rectangle identity,
+not an appeal to a continuous Fubini theorem.
+
+This is the reusable mesh fact needed for the future identity
+\(\int_0^1\int_0^x f(t)\,\dd t\,\dd x
+=\int_0^1(1-x)f(x)\,\dd x\).  It does not by itself identify the growing
+inner sum with an elementary function: that semantic step still requires the
+appropriate effective FTC or product-derivative certificate.  In particular,
+it is finite groundwork for, but not yet a proof of,
+\(\int_0^1\arctan(x)\,\dd x\).
+\end{theorem}
+
 \section{A constructive integration-by-parts certificate}
 
 The finite rectangle theorem above is not merely motivational.  It fixes the
@@ -677,7 +706,7 @@ integration by parts.
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
-\uses{thm:integration-by-parts-certificate,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
+\uses{thm:integration-by-parts-certificate,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
 certificate gives
@@ -718,8 +747,10 @@ endpoint bridge, while the function-level canonical-logarithm identification
 remains separate.
 \Cref{thm:arctan-log-two-strip-decomposition} additionally checks the exact
 rational-kernel decomposition of the arctangent kernel into this logarithmic
-strip and its complement.  It is useful finite evidence for the eventual
-triangle comparison, but it does \emph{not} identify that complement with
+strip and its complement.  The exact finite triangle comparison is now
+available as \cref{thm:finite-uniform-triangle-reindexing}; it reindexes the
+outer mesh of growing inner sums into this complementary kernel without a
+continuous Fubini theorem.  It still does \emph{not} identify that complement with
 the integral of arctangent; the product-derivative/FTC certificate remains
 the gate that supplies that identification.
 Combining the two certified equivalences gives the natural statement

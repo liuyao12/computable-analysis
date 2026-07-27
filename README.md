@@ -277,8 +277,14 @@ boxes add exactly to the 4-Lipschitz boxes for `1/(1+x*x)`, and common
 uniform-left sums prove the resulting raw sum equivalent to the existing
 sharper arctangent-kernel integral.  This is a finite rational decomposition,
 not yet the claim that the complementary strip is `∫ arctan`: that still
-requires the global product-derivative/FTC (or finite triangle/Fubini) proof,
-followed by canonical exp/log transport.
+requires the global product-derivative/FTC identification, followed by
+canonical exp/log transport.  The finite triangle part is now a checked,
+reusable reindexing theorem:
+`uniformTriangleRightSum_eq_complementUniformLeftEndpointSum` proves that an
+outer right sum of growing inner left sums is exactly the left sum for
+`(1 - x) * f(x)`.  It is the literal finite integration-by-parts rectangle
+identity, not a continuous Fubini axiom; relating its inner prefix to
+`arctan` is the remaining semantic FTC/product-derivative step.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw
