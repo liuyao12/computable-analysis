@@ -96,7 +96,7 @@ the gates have different dependencies and none can substitute for another.
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit` is a checked non-exact interval-regular example with a quadratic modulus | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
-| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, and interval-valued affine/square derivative examples are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
+| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, and the rectangle arctangent certificate (d(\arctan x)/dx=1/(1+x^2)) on ([0,1]) are checked | An analytic certificate that the chosen exponential has derivative itself, followed by log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a factorial-tail majorant with an explicit rational epsilon modulus are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
@@ -332,16 +332,17 @@ geometric rectangle boxes: for every rational `x >= 0`, their box lies in
 positive rational difference quotient is enclosed by `[1 - h^2, 1]`.
 The new forward finite-difference interface packages this as a checked
 one-sided derivative certificate `arctan'(0+) = 1`, evaluated at its exact
-stage-zero boxes. Transporting it to nonzero basepoints and turning it into
-a global two-sided derivative certificate are still separate tangent-addition
-and schedule-compatibility work.
-That transport's rational algebra is now checked on the first half of the
-unit branch.  The ordinary step `h` corresponds exactly to the chart step
+stage-zero boxes. The transport to nonzero basepoints is now checked on the
+whole unit branch.  The ordinary step `h` corresponds exactly to the chart step
 `h / (1 + x * (x + h))`; the chart reaches `x + h`, and its reciprocal scale
 differs from `1 / (1 + x*x)` by at most `h`.  The resulting geometric
-arctangent addition identity is a finite raw-real equivalence.  It isolates
-the remaining work as evaluator scheduling and two-sided derivative control,
-rather than a missing tangent identity.
+arctangent addition identity is a finite raw-real equivalence.  Combined with
+backward quotient reversal and the rational Lipschitz bound for the kernel,
+it proves `arctanIntegralRectangleOnUnit_hasDerivative`: the rectangle
+arctangent has the two-sided derivative `1/(1+x*x)` on `[0,1]`.  Its finite
+schedule uses derivative stage `8*(n+1)` and signed step budget
+`1/(72*(n+1))`; the remaining work is product closure and FTC, not an
+arctangent derivative.
 The derivative interfaces now make that scheduling obligation expressible:
 their evaluation stage depends on the rational basepoint, nonzero step, and
 requested output precision.  A stage depending only on output precision would

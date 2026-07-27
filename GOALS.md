@@ -92,20 +92,22 @@ gates.
   the existing geometric rectangle integral.  The same rectangle construction
   now also has the finite tangent enclosure `x - x^3 <= A_n(x) <= x` for
   every nonnegative rational endpoint, and its zero-endpoint quotient box is
-  `[1 - h^2, 1]` for `h > 0`.  This isolates the basepoint portion of the
-  arctangent derivative without declaring a global derivative or FTC theorem.
+  `[1 - h^2, 1]` for `h > 0`.  This supplies the basepoint finite estimate.
   The new `HasForwardDerivativeAt` interface now packages this endpoint fact
   as the checked one-sided certificate
   `arctanIntegralRectangleOnUnit_forwardDerivativeAtZero`, with derivative
-  `1` and exact stage-zero evaluation. The next tangent-chart algebra is
-  checked as well: at `x`, ordinary step
+  `1` and exact stage-zero evaluation. The tangent-chart algebra is checked
+  as well: at `x`, ordinary step
   `h` is represented by `h / (1 + x * (x + h))`, which the chart sends exactly
   to `x + h`; its scale differs from the kernel at `x` by at most `h` on the
-  unit branch.  The geometric arctangent addition identity for this transport
-  is now a raw-real equivalence on the first half branch.  What remains is
-  extension to interval-regular functions, evaluator scheduling and two-sided
-  control for the derivative certificates, and then the standard function
-  table.
+  unit branch.  These estimates now close the full two-sided certificate
+  `arctanIntegralRectangleOnUnit_hasDerivative` on `[0,1]`: negative steps are
+  reversed to a positive step at the left endpoint and the kernel's rational
+  Lipschitz bound transports the derivative back to the requested point.  The
+  checked schedule uses derivative stage `8*(n+1)` and signed step budget
+  `1/(72*(n+1))`.  This is not an FTC theorem.  What remains is extension to
+  interval-regular functions, a product-derivative/FTC closure, and then the
+  standard function table.
 - **Derivative scheduling — corrected interface.** `HasDerivativeOnInterval`
   and the rational-power `HasDerivativeAt` certificate now choose evaluator
   precision from the rational point, nonzero rational step, and requested
@@ -331,8 +333,9 @@ another. The Pi score stays useful only as secondary integration coverage.
   derivative interface: `FunctionOnInterval.exactRatAffineDerivative` proves
   the finite quotient of every exact affine rational function is its constant
   slope, and `IntegralIdentities.coordinateOnUnitDerivative` specializes it
-  to `d/dx x = 1` on `[0,1]`.  The arctangent certificate, remainder budget,
-  and product closure remain separate.  The error algebra is now two-sided:
+  to `d/dx x = 1` on `[0,1]`.  The arctangent certificate is now checked;
+  its remainder budget and the product closure remain separate.  The error
+  algebra is now two-sided:
   `ExactFunction.product_differenceQuotient_error_le_qabs` carries `qabs h`
   in the corner budget, with the earlier nonnegative-step theorem as its
   forward-mesh corollary.  This matches the interval derivative interface's
@@ -341,7 +344,7 @@ another. The Pi score stays useful only as secondary integration coverage.
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
   It requires the remaining product-derivative/FTC bridge, the explicit monotone-piece
-  refinement, the arctangent derivative, and canonical exponential/logarithm
+  refinement, the checked arctangent derivative, and canonical exponential/logarithm
   alignment.
   This is deliberately the long exp/log/ODE route: first identify the
   logarithmic integral with the inverse of canonical exponential, use the

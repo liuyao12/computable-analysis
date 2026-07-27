@@ -137,6 +137,36 @@ which the arctangent integration-by-parts formula later acquires its canonical
 \(\log 2\); it is a dependency route for one pi benchmark, not a claim that
 the Pi scoreboard measures ODE progress.
 
+\paragraph{Certificate ledger for the exp/log route.}
+This long route has a useful non-circular order.  First, the continuous
+one-dimensional Peano--Baker construction supplies a reference solution
+\(E_{\mathrm{PB}}\) of \(E'=E\), \(E(0)=1\).  Separately, finite tail,
+product, and inverse-function estimates must certify those two statements for
+the power-series, positive-base/repeated-multiplication, and inverse-logarithm
+presentations on their common rational intervals.  Only then may the linear
+uniqueness theorem identify each of them with \(E_{\mathrm{PB}}\).  Finally,
+the positive inverse of that agreed exponential is the canonical logarithm.
+In symbols, the required proof graph is
+\[
+ \begin{array}{c}
+  E_{\mathrm{PB}}\text{ exists and is unique}\\[-2pt]
+  \downarrow\quad\uparrow\ \text{separate derivative and initial-value certificates}\\[-2pt]
+  E_{\mathrm{series}},\ E_{\mathrm{power}},\ E_{\log^{-1}}
+  \quad\longrightarrow\quad \log_{\mathrm{canonical}}=E^{-1}.
+ \end{array}
+\]
+Thus uniqueness is an identification theorem, not a substitute for proving
+that a proposed formula has derivative itself.  The integration-by-parts
+Pi target first obtains a literal logarithmic-integral endpoint by finite
+calculus; this route is what later permits that endpoint to be named
+\(\log_{\mathrm{canonical}}2\).  It also explains why the Euler-identity
+scoreboard row needs the matrix version of the same construction, together
+with the separate rotation and complex-branch certificates.  At present the
+finite ordered products, the sampled Duhamel identity, and the scalar
+factorial-tail schedule are checked; every continuous arrow in this ledger is
+still a construction target.  The diagram therefore records a dependency
+contract, not an already completed exp/log equivalence.
+
 \section{Finite time ordering before analysis}
 
 \begin{definition}[Rational matrices and sampled systems]
