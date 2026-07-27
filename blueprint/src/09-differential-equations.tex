@@ -25,8 +25,17 @@ has, in the homogeneous constant-coefficient case, the familiar solution
       +\frac{v_s}{\omega}\sin\bigl(\omega(t-s)\bigr)
  \qquad(\omega\ne0).
 \]
+The forced formula that the chapter must ultimately certify is
+\begin{equation}\label{eq:forced-oscillator-duhamel}
+ q(t)=q_s\cos\bigl(\omega(t-s)\bigr)
+      +\frac{v_s}{\omega}\sin\bigl(\omega(t-s)\bigr)
+      +\int_s^t\frac{\sin\bigl(\omega(t-u)\bigr)}{\omega}r(u)\,\dd u
+ \qquad(\omega\ne0).
+\end{equation}
 The opposite sign \(q''-\lambda^2q=0\) has the corresponding exponential
-modes \(e^{\lambda(t-s)}\) and \(e^{-\lambda(t-s)}\).  More generally,
+modes \(e^{\lambda(t-s)}\) and \(e^{-\lambda(t-s)}\), so its homogeneous
+solutions have the form \(c_+e^{\lambda(t-s)}+c_-e^{-\lambda(t-s)}\).
+More generally,
 constant-coefficient second-order equations are organized by exponential
 modes, with conjugate imaginary modes rewritten as sine and cosine.  These
 are the formulas scientists and engineers expect the later theory to recover.
@@ -83,9 +92,9 @@ dependency order is
 More explicitly, the continuous layer will perform the following finite
 certificate steps.
 \begin{enumerate}
-  \item For interval-regular (A) and (b), construct the ordered
-  Peano--Baker transition (Phi(t,s)) and the Duhamel expression for
-  (x'=A(t)x+b(t)).  Simplex-quadrature boxes and a factorial-tail modulus
+  \item For interval-regular \(A\) and \(b\), construct the ordered
+  Peano--Baker transition \(\Phi(t,s)\) and the Duhamel expression for
+  \(x'=A(t)x+b(t)\).  Simplex-quadrature boxes and a factorial-tail modulus
   supply existence as an executable raw vector.
   \item Compare any two certified solutions by subtracting their Volterra
   identities.  Iterated substitution bounds their difference by an explicit
@@ -100,7 +109,9 @@ Thus the displayed oscillator and exponential formulas are validation targets,
 not assumptions used to manufacture the Peano--Baker solution.  This direction
 also makes the general inhomogeneous theorem immediately useful: the same
 transition that recovers the homogeneous modes carries forcing through the
-Duhamel term.
+Duhamel term.  In particular, applying the general formula to
+\(A_\omega\) must recover \eqref{eq:forced-oscillator-duhamel}; it is a
+special-case identification theorem, not an additional analytic construction.
 
 The scalar specialization has a deliberately important downstream use.  Once
 the power-series, repeated-multiplication, and inverse-logarithmic-integral

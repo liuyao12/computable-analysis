@@ -17476,6 +17476,55 @@ private theorem stableCurvatureChordLower_le_curvatureChordLower
   exact (Rat.add_le_add_left).2
     (Rat.mul_le_mul_of_nonneg_left hinv hsq)
 
+/-- The rational curvature lower certificate lies below the tangent-cross
+upper certificate on every positive rational-circle cell.  This finite
+comparison is shared by the stable fan and the sharper curvature fan. -/
+private theorem curvatureChordLower_le_outerTangentCrossSum
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) :
+    curvatureChordLower (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) <=
+      outerTangentCrossSum stage k := by
+  let p := circleSamplePoint stage k
+  let q := circleSamplePoint stage (k + 1)
+  have hp : RationalCircle.Stage.normSq p = 1 := by
+    dsimp [p]
+    simpa [RationalCircle.Stage.normSq] using circleSamplePoint_normSq stage k
+  have hq : RationalCircle.Stage.normSq q = 1 := by
+    dsimp [q]
+    simpa [RationalCircle.Stage.normSq] using
+      circleSamplePoint_normSq stage (k + 1)
+  have hcross : 0 <= pointCross p q := by
+    dsimp [p, q]
+    exact circleSamplePoint_cross_nonneg_of_order stage hstage (by omega)
+  have hdot : 0 <= RationalCircle.Stage.dot p q := by
+    dsimp [p, q]
+    exact circleSamplePoint_dot_nonneg_adjacent stage hstage k
+  have hdeficit : 0 <= 1 - RationalCircle.Stage.dot p q := by
+    dsimp [p, q]
+    have h := circleSamplePoint_dot_le_one stage k (k + 1)
+    grind [Rat.sub_eq_add_neg]
+  have hcurvature_sq : sq (curvatureChordLower p q) <=
+      pointSegmentNormSq p q :=
+    curvatureChordLower_sq_le_segmentNormSq_of_unit hp hq hcross hdot hdeficit
+  have htangent_sq : pointSegmentNormSq p q <=
+      sq (outerTangentCrossSum stage k) := by
+    dsimp [p, q]
+    simpa [rationalCircleStage, circleSamplePoint, circleParameter,
+      circlePoint, pointCross, outerTangentCrossSum, outerTangentPoint,
+      tangentIntersection, pointSegmentNormSq,
+      RationalCircle.Stage.samplePoint,
+      RationalCircle.Stage.parameter, RationalCircle.Stage.point,
+      RationalCircle.Stage.cross, RationalCircle.Stage.tangentPoint,
+      RationalCircle.Stage.tangentIntersection,
+      RationalCircle.Stage.segmentNormSq] using
+      RationalCircle.Stage.adjacentChordSegmentNormSq_le_tangentCrossSum_sq
+        (rationalCircleStage stage) hstage k
+  have htangent : 0 <= outerTangentCrossSum stage k := by
+    exact Rat.add_nonneg (entryTangentCross_nonneg stage hstage k)
+      (exitTangentCross_nonneg stage hstage k)
+  apply le_of_sq_le_sq_of_nonneg_right htangent
+  exact Rat.le_trans hcurvature_sq htangent_sq
+
 private theorem circleParameter_double_inserted
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
     circleParameter (2 * stage) (2 * k + 1) =
@@ -18121,7 +18170,7 @@ def piCertified : Real :=
       (piPresentation_equiv_piCircleArea .arctanRectangleIntegral))
     .withAlternative IntegralIdentities.piFromArctanIntegrationByPartsMesh
       IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
-      piFromArctanIntegrationByPartsMesh_equiv_piCircleArea)
+      piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
     .withAlternative Logarithm.piTriangleLogSeries
       Logarithm.piTriangleLogSeries_valid
       piTriangleLogSeries_equiv_piCircleArea)
