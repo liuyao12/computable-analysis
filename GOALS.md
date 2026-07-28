@@ -135,8 +135,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   runtime. Its `..._valid` theorem provides the public construction, and
   `coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity` exposes the
   endpoint formula through the monotone, ordinary, and finite-piece integral
-  interfaces. The remaining task is to generalize this normalization pattern,
-  not to reprove the product FTC.
+  interfaces. The normalization pattern is now generalized as
+  `TwoStageCandidateDerivativeFTC.stabilizedRaw`: any two-stage certificate
+  supplies a public construction after its bounded-sum width modulus and an
+  explicit shrinking endpoint-radius schedule have been given. The remaining
+  task is to supply those schedules for further calculus formulas, not to
+  reprove the product FTC.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.

@@ -1234,9 +1234,15 @@ stage for every cell and at the global endpoint.
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCEndpoint_width_le}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.boundedIntegralRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.stabilizedRaw}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.stabilizedRaw_valid}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.stabilizedRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.Integral.constructionFor_of_twoStageCandidateDerivativeFTC_stabilized}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_widthsShrink}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_equiv_rectangleAtOne}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizationRadius}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_endpointDifference}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_valid}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageConstruction}
@@ -1278,7 +1284,11 @@ nested representative of the same computation, hence
 \]
 The identity is available through the ordinary, monotone, and finite-piece
 integral interfaces.  This closes the product-specific public FTC bridge;
-the remaining work is its reusable generalization.
+the normalization is now also reusable: every two-stage certificate has a
+theorem relating its bounded sums directly to the canonical endpoint raw, and
+the generic stabilized constructor needs only a finite-sum width modulus plus
+an explicit shrinking radius covering that endpoint raw.  Formula-specific
+work remains in producing those two rational schedules.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]

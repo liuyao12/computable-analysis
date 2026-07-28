@@ -1022,6 +1022,30 @@ def definiteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule
     (FTC.endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule
       h hendpoint sigma hsigma)
 
+/-- Package a stabilized two-stage finite FTC evaluator as a public
+domain-aware integral construction.
+
+The evaluator itself is the finite-prefix stabilization of the certificate's
+bounded sums.  The endpoint raw appears only in the proof-side hypotheses
+which show that the explicit radius schedule is sufficient. -/
+def constructionFor_of_twoStageCandidateDerivativeFTC_stabilized
+    {primitive integrand : FunctionOnInterval}
+    (h : TwoStageCandidateDerivativeFTC primitive.toRealFunRaw integrand.toRealFunRaw
+      integrand.lower integrand.upper)
+    (hendpoint : RealRaw.ValidCompute
+      (endpointDifferenceCompute primitive.toRealFunRaw integrand.lower integrand.upper))
+    (radius : Nat -> Rat)
+    (hshrink : RealRaw.WidthsShrinkToZero h.boundedIntegralRaw.compute)
+    (hradius : forall n,
+      ((endpointDifferenceRaw primitive.toRealFunRaw integrand.lower integrand.upper
+        hendpoint).compute n).width <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) :
+    Integral.ConstructionFor integrand where
+  compute := (h.stabilizedRaw hendpoint radius).compute
+  certificate := by
+    simpa [TwoStageCandidateDerivativeFTC.stabilizedRaw, RealRaw.Valid] using
+      h.stabilizedRaw_valid hendpoint radius hshrink hradius hradius_shrinks
+
 /-- Package a derivative-bound FTC cell-sum algorithm as a domain-aware
 integral construction.
 
@@ -5824,6 +5848,15 @@ theorem coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_rectangle
   simpa [coordinateTimesArctanForwardTwoStageStabilizationRadius] using
     ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ n
 
+theorem coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_endpointDifference
+    (n : Nat) :
+    ((endpointDifferenceRaw coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).compute n).width <=
+      coordinateTimesArctanForwardTwoStageStabilizationRadius n := by
+  change (endpointDifferenceCompute coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 n).width <= _
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq]
+  exact coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_rectangleAtOne n
+
 theorem coordinateTimesArctanForwardTwoStageStabilizationRadius_shrinks :
     ShrinksToZero coordinateTimesArctanForwardTwoStageStabilizationRadius := by
   apply shrinksToZero_of_natOverSuccBound (C := 4)
@@ -5878,11 +5911,14 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_re
 /-- The public integral construction for the positive product derivative,
 computed by the stabilized finite bounded-sum evaluator. -/
 def coordinateTimesArctanForwardTwoStageConstruction :
-    Integral.ConstructionFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
-  compute := coordinateTimesArctanForwardTwoStageStabilizedRaw.compute
-  certificate := by
-    simpa [coordinateTimesArctanForwardTwoStageStabilizedRaw, RealRaw.Valid] using
-      coordinateTimesArctanForwardTwoStageStabilizedRaw_valid
+    Integral.ConstructionFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit :=
+  Integral.constructionFor_of_twoStageCandidateDerivativeFTC_stabilized
+    coordinateTimesArctanForwardTwoStageFTC
+    coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+    coordinateTimesArctanForwardTwoStageStabilizationRadius
+    coordinateTimesArctanForwardTwoStageRaw_widthsShrink
+    coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_endpointDifference
+    coordinateTimesArctanForwardTwoStageStabilizationRadius_shrinks
 
 /-- The stabilized bounded-sum construction through the monotone integral
 API. -/

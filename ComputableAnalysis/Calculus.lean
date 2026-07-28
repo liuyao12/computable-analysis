@@ -3796,6 +3796,98 @@ theorem integralFor_valid (F : FunctionOnInterval)
 
 end Integral
 
+namespace TwoStageCandidateDerivativeFTC
+
+/-- The finite bounded-sum raw of any two-stage FTC certificate already
+agrees with the canonical primitive endpoint raw.  No monotonicity of either
+stage selector is needed for this comparison: at each requested stage the
+finite telescope contains its selected endpoint box, and that box overlaps the
+canonical endpoint box by the primitive's validated nestedness. -/
+theorem boundedIntegralRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.boundedIntegralRaw.Equiv (endpointDifferenceRaw F a b hendpoint) := by
+  intro n
+  let eps := precisionAtStage n
+  let s := h.chooseEndpointStage eps
+  have hcontains :
+      QInterval.ContainsInterval
+        ((h.choosePartition eps).boundIntegralSum (fun k hk => h.derivativeBound eps k hk))
+        (endpointDifferenceInterval F a b s) := by
+    apply RationalPartition.boundIntegralSum_contains_endpointDifference
+      (P := h.choosePartition eps) (F := F) (prec := s) h.primitive_valid
+    · intro i hi
+      exact h.primitive_domain_on eps i hi
+    · intro k hk
+      simpa [RationalPartition.cell, s] using h.local_endpoint_contained eps k hk
+  let endpoint : RealRaw := endpointDifferenceRaw F a b hendpoint
+  have hvalid : endpoint.Valid := by
+    simpa [endpoint, endpointDifferenceRaw, RealRaw.Valid] using hendpoint
+  have hall := RealRaw.allStagesOverlap_refl endpoint hvalid s n
+  have hover := (RealRaw.compareAt_overlap_iff endpoint endpoint s n).1 hall
+  apply (RealRaw.compareAt_overlap_iff h.boundedIntegralRaw endpoint n n).2
+  change QInterval.Overlaps
+    ((h.choosePartition eps).boundIntegralSum (fun k hk => h.derivativeBound eps k hk))
+    (endpointDifferenceCompute F a b n)
+  have hscheduled :
+      QInterval.Overlaps (endpointDifferenceInterval F a b s)
+        (endpointDifferenceCompute F a b n) := by
+    change QInterval.Overlaps
+      (endpointDifferenceCompute F a b s)
+      (endpointDifferenceCompute F a b n)
+    simpa [endpoint, endpointDifferenceRaw] using hover
+  exact ⟨Rat.le_trans hcontains.1 hscheduled.1,
+    Rat.le_trans hscheduled.2 hcontains.2⟩
+
+/-- Stabilize the actual finite bounded-sum evaluator of a two-stage FTC
+certificate.  At runtime this reads only bounded-sum boxes and a rational
+radius schedule; the primitive endpoint raw is used solely in the proof of
+validity. -/
+def stabilizedRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b)
+    (_hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (radius : Nat -> Rat) : RealRaw :=
+  RealRaw.prefixStabilize h.boundedIntegralRaw radius
+
+/-- A width modulus for the finite sums and a covering, shrinking radius for
+the canonical endpoint raw make the stabilized two-stage evaluator valid. -/
+theorem stabilizedRaw_valid
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (radius : Nat -> Rat)
+    (hshrink : RealRaw.WidthsShrinkToZero h.boundedIntegralRaw.compute)
+    (hradius : forall n,
+      ((endpointDifferenceRaw F a b hendpoint).compute n).width <= radius n)
+    (hradius_shrinks : ShrinksToZero radius) :
+    (h.stabilizedRaw hendpoint radius).Valid := by
+  unfold stabilizedRaw
+  exact RealRaw.prefixStabilize_valid hshrink
+    (by simpa [endpointDifferenceRaw, RealRaw.Valid] using hendpoint)
+    (h.boundedIntegralRaw_equiv_endpointDifference hendpoint)
+    hradius hradius_shrinks
+
+/-- The valid stabilized evaluator represents the primitive endpoint
+difference. -/
+theorem stabilizedRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (radius : Nat -> Rat)
+    (hradius : forall n,
+      ((endpointDifferenceRaw F a b hendpoint).compute n).width <= radius n) :
+    (h.stabilizedRaw hendpoint radius).Equiv
+      (endpointDifferenceRaw F a b hendpoint) := by
+  unfold stabilizedRaw
+  exact RealRaw.prefixStabilize_equiv_anchor
+    (by simpa [endpointDifferenceRaw, RealRaw.Valid] using hendpoint)
+    (h.boundedIntegralRaw_equiv_endpointDifference hendpoint)
+    hradius
+
+end TwoStageCandidateDerivativeFTC
+
 def Integral.ExistsConstructionFor (F : FunctionOnInterval) : Prop :=
   Nonempty (Integral.ConstructionFor F)
 
