@@ -345,10 +345,10 @@ its width is controlled by the two factor widths and those bounds.  The Lean
 development instantiates
 this construction as the concrete function \(P=xA\) on the unit interval,
 and proves that its evaluator reduces to the displayed two-corner box.
-This is an evaluator-level representation of \(x\arctan x\).  The concrete
-forward product derivative is now checked below; the remaining work is its
-two-sided transport and the FTC/logarithm endpoint certificates required
-before the resulting pi formula is claimed.
+This is an evaluator-level representation of \(x\arctan x\).  Its concrete
+two-sided product derivative is now checked below.  The remaining work is the
+effective FTC/logarithm endpoint certificates required before the resulting
+pi formula is claimed.
 
 The next certificate begins with an exact finite identity, rather than with
 an assumed product rule.  For rational \(h\ne0\), write
@@ -472,11 +472,37 @@ bound the two displayed endpoint errors and both interval widths by
 for the actual inexact product evaluator, not merely the algebraic identity
 for exact functions.
 
-It is deliberately a \emph{forward} result.  A full
-\code{HasDerivativeOnInterval} product certificate still needs the negative
-step reversal together with interval transport of the derivative raw.  The
-effective FTC comparison then remains a separate gate for integration by
-parts.
+The next theorem supplies the negative-step reversal and derivative-box
+transport.  The effective FTC comparison remains a separate gate for
+integration by parts.
+\end{theorem}
+
+\begin{theorem}[Two-sided product rule for the rectangle arctangent]
+\label{thm:coordinate-arctangent-product-rule}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
+\uses{thm:coordinate-arctangent-forward-product-rule,prop:arctangent-tangent-chart-quotient}
+\leanok
+Lean now proves the full interval derivative certificate on \([0,1]\):
+\[
+  \frac{\dd}{\dd x}\bigl(xA(x)\bigr)=A(x)+\frac{x}{1+x^2}.
+\]
+For a negative rational step \(h\), write \(k=-h>0\) and reverse the
+quotient based at \(x+h\).  The forward product certificate supplies its
+finite box there.  A second, finer arctangent quotient controls the movement
+of the rectangle box, while the rational Lipschitz estimate
+\[
+  \left|\frac1{1+y^2}-\frac1{1+x^2}\right|\le2|y-x|
+\]
+transports the exact \(x/(1+x^2)\) summand.  The checked step budget is
+\( |h|\le1/(648(n+1)) \); it leaves room for all box widths and transport
+errors at requested precision \(n\).  This is a concrete product theorem,
+not a general product-rule closure theorem.
+
+Only the effective FTC connection from this derivative certificate to the
+already finite integration-by-parts rectangles remains for this calculus
+bridge.
 \end{theorem}
 
 \begin{theorem}[Finite triangle reindexing on a uniform mesh]
@@ -890,10 +916,10 @@ reserves that cost alongside the forward quotient box.  Thus the proof is a
 finite epsilon--delta argument over rational intervals, including the
 one-sided boundary cases, with no completeness or mean-value theorem.
 
-What remains is transport of this two-sided rectangle certificate to the
-geometric representative, followed by the global product-derivative and FTC
-certificates needed for integration by parts.  Those transports must preserve
-the requested quotient tolerance rather than merely assert equality of
+What remains for this route is the effective FTC certificate that turns the
+checked derivative into the required endpoint identity for integration by
+parts.  That bridge must preserve the requested quotient tolerance rather
+than merely assert equality of
 completed-real limits.
 \end{proposition}
 
@@ -944,8 +970,8 @@ strip and its complement.  The exact finite triangle comparison is now
 available as \cref{thm:finite-uniform-triangle-reindexing}; it reindexes the
 outer mesh of growing inner sums into this complementary kernel without a
 continuous Fubini theorem.  It still does \emph{not} identify that complement with
-the integral of arctangent; the product-derivative/FTC certificate remains
-the gate that supplies that identification.
+the integral of arctangent; the effective FTC certificate remains the gate
+that supplies that identification.
 Combining the two certified equivalences gives the natural statement
 \[
   \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log_{\mathrm{rec}}2.

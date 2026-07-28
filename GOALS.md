@@ -106,7 +106,7 @@ gates.
   Lipschitz bound transports the derivative back to the requested point.  The
   checked schedule uses derivative stage `8*(n+1)` and signed step budget
   `1/(72*(n+1))`.  This is not an FTC theorem.  What remains is extension to
-  interval-regular functions, a product-derivative/FTC closure, and then the
+  interval-regular functions, an effective FTC closure, and then the
   standard function table.
 - **Derivative scheduling — corrected interface.** `HasDerivativeOnInterval`
   and the rational-power `HasDerivativeAt` certificate now choose evaluator
@@ -308,8 +308,9 @@ another. The Pi score stays useful only as secondary integration coverage.
   the positive `x * arctan x` branch on `[0,1]`.
   `coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing` now also
   proves its declared increasing direction from the weak arctangent endpoint
-  order and nonnegative product endpoints. A general signed product,
-  two-sided product derivative rule, and its FTC comparison are still open.  The
+  order and nonnegative product endpoints. A general signed product and its
+  FTC comparison are still open; the concrete two-sided derivative below is
+  checked separately. The
   product endpoint anchors are now checked as well: the box is exactly zero
   at `0`, agrees with the rectangle evaluator at `1`, and its endpoint
   difference is a valid raw equivalent to `arctanGeom 1`.  This is the
@@ -322,7 +323,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   decomposed exactly into the arctangent quotient and a bounded product term;
   the arctangent stage `8*(n+1)` and step budget `1/(72*(n+1))` close the
   finite error. The earlier zero theorem is its endpoint specialization.
-  This is not yet a two-sided product certificate or an FTC comparison. The
+  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit` packages that raw
+  box as an interval function, and
+  `coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative` proves its
+  full signed-step derivative on `[0,1]`: a negative quotient is reversed at
+  `x+h`, and a finer rectangle arctangent quotient plus the kernel's
+  rational 2-Lipschitz estimate transports the derivative box back to `x`.
+  Its explicit step budget is `|h| <= 1/(648*(n+1))`. The FTC comparison is
+  still open. The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor
   at the right endpoint, while `..._corner` exposes the explicit
@@ -346,7 +354,7 @@ another. The Pi score stays useful only as secondary integration coverage.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
-  It requires the remaining product-derivative/FTC bridge, the explicit monotone-piece
+  It requires the remaining FTC bridge, the explicit monotone-piece
   refinement, the checked arctangent derivative, and canonical exponential/logarithm
   alignment.
   This is deliberately the long exp/log/ODE route: first identify the
@@ -401,7 +409,7 @@ another. The Pi score stays useful only as secondary integration coverage.
   `two_arctanLogKernelIntegral_compute_width`.
   These are endpoint equivalences at the rational name two, not the pending
   function-level canonical-logarithm theorem. The remaining Pi-route gates
-  are the complementary `∫ arctan` strip through global product derivative/FTC
+  are the complementary `∫ arctan` strip through effective FTC
   and the later canonical exp/log identification. A useful finite predecessor is
   now checked without pretending to discharge that gate:
   `arctanComplementKernelIntegral` is the literal 3-Lipschitz integral of
@@ -410,7 +418,7 @@ another. The Pi score stays useful only as secondary integration coverage.
   `arctanLogKernelIntegral` is stagewise the 4-Lipschitz box for
   `1/(1+x*x)`. Common uniform-left sums yield
   `arctanStripIntegrals_add_equiv_arctanKernelIntegral`. This is the
-  rational two-strip decomposition that a later product-derivative/FTC
+  rational two-strip decomposition that a later effective FTC
   certificate must identify with `∫ arctan`; it is not a new Pi-scoreboard
   row. The mesh-level triangle/Fubini reindexing is now separately checked:
   `LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum`

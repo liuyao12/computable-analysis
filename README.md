@@ -96,7 +96,7 @@ the gates have different dependencies and none can substitute for another.
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit` is a checked non-exact interval-regular example with a quadratic modulus | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
-| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the forward derivative of its actual product evaluator `d_+(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Two-sided product closure, then an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
+| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the two-sided derivative of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Effective FTC for the concrete derivative, then an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a factorial-tail majorant with an explicit rational epsilon modulus are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
@@ -143,7 +143,7 @@ The next intended π registry benchmark is the arctangent
 integration-by-parts evaluation, not another arctangent variant.  Its public
 statement will be the natural integral formula; its derived presentation
 agreement will become a sixth coverage bridge only after the remaining
-product-derivative/FTC route, its common monotone-piece refinement, and the
+effective-FTC route, its common monotone-piece refinement, and the
 canonical exponential/logarithm alignment are all checked.  This is intentionally the long
 elementary-function route: identify `log 2` with the inverse of the canonical
 exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
@@ -169,9 +169,12 @@ unit-branch point, `coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivati
 certifies the forward derivative box `arctan(x) + x/(1+x*x)`. It uses the
 actual rectangle box for `arctan(x)`, the arctangent quotient at stage
 `8*(n+1)`, and the step budget `h <= 1/(72*(n+1))`; the finite endpoint
-identity controls the remaining corner term. The remaining product derivative
-and FTC comparison are the negative-step transport/two-sided closure and the
-effective FTC bridge.
+identity controls the remaining corner term. The full interval certificate is
+now also checked as `coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative`:
+negative steps are reversed to a positive quotient at `x+h`, and explicit
+rectangle/kernel transport closes with the stricter budget
+`|h| <= 1/(648*(n+1))`. The remaining gate is the effective FTC bridge, not
+a product derivative.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
@@ -290,7 +293,7 @@ boxes add exactly to the 4-Lipschitz boxes for `1/(1+x*x)`, and common
 uniform-left sums prove the resulting raw sum equivalent to the existing
 sharper arctangent-kernel integral.  This is a finite rational decomposition,
 not yet the claim that the complementary strip is `∫ arctan`: that still
-requires the global product-derivative/FTC identification, followed by
+requires the effective FTC identification, followed by
 canonical exp/log transport.  The finite triangle part is now a checked,
 reusable reindexing theorem:
 `uniformTriangleRightSum_eq_complementUniformLeftEndpointSum` proves that an
