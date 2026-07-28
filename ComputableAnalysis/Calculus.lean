@@ -721,6 +721,18 @@ def scaleByRat (r : Rat) (I : QInterval) : QInterval :=
   else
     { lo := r * I.hi, hi := r * I.lo }
 
+/-- Positive rational scaling preserves finite interval containment.  This is
+the scaling direction used when a derivative bound is converted into an
+endpoint-difference bound on a rational cell. -/
+theorem scaleByRat_contains_of_nonneg {r : Rat} (hr : 0 <= r)
+    {outer inner : QInterval} (hcontains : outer.ContainsInterval inner) :
+    (scaleByRat r outer).ContainsInterval (scaleByRat r inner) := by
+  unfold scaleByRat QInterval.ContainsInterval
+  simp only [if_pos hr]
+  constructor
+  · exact Rat.mul_le_mul_of_nonneg_left hcontains.1 hr
+  · exact Rat.mul_le_mul_of_nonneg_left hcontains.2 hr
+
 def subInterval (I J : QInterval) : QInterval :=
   { lo := I.lo - J.hi, hi := I.hi - J.lo }
 

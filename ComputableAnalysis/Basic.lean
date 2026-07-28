@@ -121,6 +121,18 @@ theorem expand_contains_right_of_overlaps
   unfold expand ContainsInterval width Overlaps at *
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
+/-- Quantitative nearness gives a concrete enclosure after widening the first
+box by twice the tolerance.  One tolerance covers the gap between the two
+boxes and the other covers the width of the right box. -/
+theorem expand_contains_right_of_near
+    {I J : QInterval} {eps : QPos}
+    (hnear : I.NearAt J eps) :
+    (expand I (2 * eps.val)).ContainsInterval J := by
+  unfold NearAt width at hnear
+  unfold ContainsInterval expand
+  rcases hnear with ⟨hIJ, hJI, _hIwidth, hJwidth⟩
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 def inv (I : QInterval) : QInterval :=
   if 0 < I.lo then
     { lo := 1 / I.hi, hi := 1 / I.lo }

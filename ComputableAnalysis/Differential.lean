@@ -335,6 +335,93 @@ theorem scaleByRat_expand_contains_subInterval_of_differenceQuotient_near
       _ <= h * (D.hi + 2 * eps.val) :=
             Rat.mul_le_mul_of_nonneg_left hDhi' h0
 
+/-- Combine two finite nearness certificates into one derivative-bound box.
+
+The first certificate places a positive-step secant near a derivative box;
+the second places a candidate value near a possibly differently evaluated
+base derivative box.  The hull of the two twice-widened boxes contains both
+the candidate value and the scaled endpoint difference.  Its width is at
+most ten times the requested tolerance.  This is the local algebra needed to
+combine a step-aware derivative evaluator with a continuity evaluator before
+forming a common FTC cell bound. -/
+theorem common_secant_derivative_bound_of_near
+    {A B secantDerivative baseDerivative candidateValue : QInterval}
+    {h : Rat} {eps : QPos}
+    (hpos : 0 < h)
+    (hsecant :
+      (differenceQuotient B A h).NearAt secantDerivative eps)
+    (hvalue : baseDerivative.NearAt candidateValue eps)
+    (hover : secantDerivative.Overlaps baseDerivative)
+    (hsecantOrdered : 0 <= secantDerivative.width)
+    (hbaseOrdered : 0 <= baseDerivative.width) :
+    let bound :=
+      hull (expand secantDerivative (2 * eps.val))
+        (expand baseDerivative (2 * eps.val))
+    bound.ContainsInterval candidateValue /\
+      (scaleByRat h bound).ContainsInterval (subInterval B A) /\
+        bound.width <= 10 * eps.val := by
+  let left := expand secantDerivative (2 * eps.val)
+  let right := expand baseDerivative (2 * eps.val)
+  let bound := hull left right
+  have hzero : 0 <= eps.val := Rat.le_of_lt eps.property
+  have hvalueRight : right.ContainsInterval candidateValue := by
+    dsimp [right]
+    exact expand_contains_right_of_near hvalue
+  have hboundRight : bound.ContainsInterval right := by
+    dsimp [bound]
+    exact hull_contains_right left right
+  have hcandidate : bound.ContainsInterval candidateValue :=
+    ⟨Rat.le_trans hboundRight.1 hvalueRight.1,
+      Rat.le_trans hvalueRight.2 hboundRight.2⟩
+  have hsecantLeft :
+      (scaleByRat h left).ContainsInterval (subInterval B A) := by
+    dsimp [left]
+    exact scaleByRat_expand_contains_subInterval_of_differenceQuotient_near
+      hpos hsecant
+  have hboundLeft : bound.ContainsInterval left := by
+    dsimp [bound]
+    exact hull_contains_left left right
+  have hscaledBound :
+      (scaleByRat h bound).ContainsInterval (scaleByRat h left) :=
+    scaleByRat_contains_of_nonneg (Rat.le_of_lt hpos) hboundLeft
+  have hendpoint :
+      (scaleByRat h bound).ContainsInterval (subInterval B A) :=
+    ⟨Rat.le_trans hscaledBound.1 hsecantLeft.1,
+      Rat.le_trans hsecantLeft.2 hscaledBound.2⟩
+  have hleftOrdered : 0 <= left.width := by
+    rw [show left = expand secantDerivative (2 * eps.val) by rfl,
+      expand_width]
+    grind [Rat.mul_nonneg]
+  have hrightOrdered : 0 <= right.width := by
+    rw [show right = expand baseDerivative (2 * eps.val) by rfl,
+      expand_width]
+    grind [Rat.mul_nonneg]
+  have hleftRightOverlap : left.Overlaps right := by
+    dsimp [left, right]
+    unfold Overlaps at hover
+    unfold Overlaps expand
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  have hwidth :
+      bound.width <= left.width + right.width := by
+    dsimp [bound]
+    exact hull_width_le_add_of_overlaps hleftOrdered hrightOrdered
+      hleftRightOverlap
+  have hwidthBound : bound.width <= 10 * eps.val := by
+    calc
+      bound.width <= left.width + right.width := hwidth
+      _ = (secantDerivative.width + 2 * (2 * eps.val)) +
+            (baseDerivative.width + 2 * (2 * eps.val)) := by
+            rw [show left = expand secantDerivative (2 * eps.val) by rfl,
+              show right = expand baseDerivative (2 * eps.val) by rfl,
+              expand_width, expand_width]
+      _ <= 10 * eps.val := by
+            have hsecantWidth : secantDerivative.width <= eps.val :=
+              hsecant.2.2.2
+            have hbaseWidth : baseDerivative.width <= eps.val :=
+              hvalue.2.2.1
+            grind
+  exact ⟨hcandidate, hendpoint, hwidthBound⟩
+
 end QInterval
 
 /-- Two identical exact singleton boxes are near at every requested precision.

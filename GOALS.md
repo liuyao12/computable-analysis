@@ -89,10 +89,12 @@ gates.
   derivative box. Its checked positive product secants now also satisfy
   `coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
   the endpoint difference lies in the cell width times the left derivative
-  box widened by twice the requested stage tolerance. This and the continuity
-  theorem supply the two local ingredients for the pending derivative-bound
-  FTC route; a common cell range bound and shrinking Riemann-width schedule
-  remain open.
+  box widened by twice the requested stage tolerance.
+  `...forward_secant_range_enclosure` now composes this with
+  epsilon--delta continuity: every derivative value in a selected rational
+  radius and the endpoint secant share a box of width at most ten stage
+  tolerances. The remaining derivative-bound FTC work is the global
+  partition/telescoping and shrinking Riemann-width schedule.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
@@ -354,10 +356,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   box uses its geometric endpoint order. Thus
   `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing`
   supplies endpoint derivative ranges on every positive rational cell. The
-  checked forward secant enclosure now supplies endpoint containment in a
-  widened left derivative box. Combining it with the continuity range bound
-  into one common cell box, and then proving the shrinking-bound schedule,
-  remains open; so does the resulting FTC comparison.
+  checked forward-range enclosure now supplies one common box for every
+  derivative value within its continuity radius and the endpoint difference,
+  with an explicit ten-tolerance width bound. Constructing a compatible
+  global rational partition, proving its telescoping overlap and shrinking
+  bound schedule, and deriving the resulting FTC comparison remain open.
   The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor

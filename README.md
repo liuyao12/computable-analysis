@@ -184,8 +184,11 @@ positive product secants now also have the explicit
 `coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
 the endpoint difference is contained in the cell width times the
 left-endpoint derivative box widened by twice the requested tolerance.
-What remains is a single common cell box, obtained by combining this secant
-fact with derivative continuity, and a shrinking Riemann-width schedule.
+The stronger `...forward_secant_range_enclosure` now combines that
+step-aware secant box with epsilon--delta continuity: every derivative value
+inside a chosen rational radius and the endpoint difference share a box of
+width at most ten stage tolerances. What remains is global partition,
+telescoping, and shrinking Riemann-width assembly.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
@@ -227,10 +230,10 @@ the tangent-chart transport proves `A.lo(x+h) - A.hi(x) <= h`; choosing
 `delta = eps` and stage `4 * (eps.den + 1)` then bounds both cross-box gaps
 and both widths by `eps` on the whole rational unit branch.  This is finite
 continuity data, not a shortcut from differentiability to FTC.  The product
-branch now separately has finite local secant containment: its endpoint
-difference lies in the positive cell width times a derivative box widened by
-twice the stage tolerance.  Combining range and secant data into a common
-cell bound, followed by a compatible shrinking partition, remains open.
+branch now has a finite common local certificate: its endpoint difference
+and every derivative value within a certified radius lie in one explicit
+box, with width at most ten stage tolerances.  A compatible shrinking
+partition and the global telescoping/width proof remain open.
 The actual product derivative candidate now has its own literal continuity
 certificate as well.  Its rational correction `x/(1+x*x)` is proved
 3-Lipschitz by combining the 2-Lipschitz reciprocal kernel with the exact
