@@ -573,8 +573,14 @@ bridge.
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleCandidate_overlaps_complementKernelIntegral}
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_valid}
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_equiv_complementKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleConstruction}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleMonotoneConstruction}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_valid}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_compute_eq}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_equiv_complementKernelIntegral}
 \lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_valid}
 \lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral}
 \uses{thm:finite-geometric-integration-by-parts}
 \leanok
 Let \(n>0\), \(h=1/n\), and let \(f\) be any rational-valued function on
@@ -589,13 +595,11 @@ height of the unit square.  Thus it is a finite triangle/Fubini reindexing
 whose proof is exactly the finite integration-by-parts rectangle identity,
 not an appeal to a continuous Fubini theorem.
 
-This is the reusable mesh fact needed for the future identity
+This is the reusable mesh fact behind the unit-branch construction
 \(\int_0^1\int_0^x f(t)\,\dd t\,\dd x
-=\int_0^1(1-x)f(x)\,\dd x\).  It does not by itself identify the growing
-inner sum with an elementary function: that semantic step still requires the
-appropriate effective FTC or product-derivative certificate.  In particular,
-it is finite groundwork for, but not yet a proof of,
-\(\int_0^1\arctan(x)\,\dd x\).
+=\int_0^1(1-x)f(x)\,\dd x\).  On its own, the mesh identity does not state a
+general Fubini or effective-FTC theorem: identifying each growing inner sum
+with an elementary function remains a separate certificate.
 
 There is now also a certified raw representative for the literal left side
 when \(f(t)=1/(1+t^2)\).  At dyadic stage \(n\), it executes precisely the
@@ -608,24 +612,31 @@ integral
 \]
 Consequently Lean proves a raw-real equivalence between the executable
 triangle representative and that strip.  This is progress toward the
-arctangent integration-by-parts row, with an explicit convergence rate, but
-the name deliberately remains \code{arctanKernelTriangleRaw}: replacing the
-growing inner sums by \(\arctan(x)\) is exactly the still-open effective FTC
-identification.
+arctangent integration-by-parts row, with an explicit convergence rate.  The
+raw algorithm retains the transparent implementation name
+\code{arctanKernelTriangleRaw}.  Lean now also attaches precisely that runtime
+to the certified monotone function \code{arctan.integral.rectangle} and calls
+the resulting unit-interval construction \code{arctanIntegralTriangle}.  Its
+finite triangle reindexing theorem is the explicit provenance of this
+integral construction; no general Fubini or integral-linearity axiom has
+been introduced.
 
-There is nevertheless a completed direct evaluator obtained by putting that
-triangle raw beside the already certified logarithmic strip for
-\(x/(1+x^2)\).  The finite two-strip comparison identifies their sum with
-the unit arctangent kernel box, and Lean proves
+Writing \(\arctanintegraltriangle\) for this supplied unit integral
+construction, putting it beside the already certified logarithmic strip for
+\(x/(1+x^2)\) now gives a public finite-mesh bridge to the independently
+constructed product-FTC integral:
 \[
- T_{\mathrm{triangle}}+L_{x/(1+x^2)}
- \Equiv \arctangeom(1).
+ \arctanintegraltriangle+L_{x/(1+x^2)}
+ \Equiv I_{x\arctan x}^{\mathrm{FTC}}.
 \]
-This is a useful finite Fubini/strip computation and an explicit test case
-for the later logarithm route.  It is deliberately not called
-\(4\int\arctan+2\log 2\): that displayed calculus identity still needs the
-global effective FTC identification and the canonical
-logarithm transport.
+Both sides are separately certified constructions and the proof compares
+them through \(\arctangeom(1)\); it does not assume additivity of arbitrary
+integrals.  This is a useful finite Fubini/strip computation and an explicit
+test case for the later logarithm route.  It is deliberately not yet called
+\(4\int\arctan+2\log 2\): the logarithm still needs its canonical
+exponential transport, and the triangle construction still needs a
+generalized effective-FTC theorem before it can be used as a schema beyond
+this supplied unit branch.
 \end{theorem}
 
 \section{A constructive integration-by-parts certificate}

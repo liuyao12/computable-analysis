@@ -368,16 +368,21 @@ The direct dyadic specialization is now a valid raw real too:
 `arctanKernelTriangleRaw` executes only the finite triangle sums for
 `1/(1+x*x)` and carries the public `6/2^n` enclosure radius.  Its stagewise
 overlap with `arctanComplementKernelIntegral` is checked, so it is equivalent
-to the complementary rational strip without being mislabeled as an integral
-of arctangent.  The missing effective FTC theorem remains the sole semantic
-step in that identification.
+to the complementary rational strip.  The same finite runtime is now exposed
+as `arctanIntegralTriangle`, a `MonotoneConstructionFor` the certified
+`arctan.integral.rectangle` function on `[0,1]`; its construction and
+monotonicity witnesses make the finite triangle/Fubini provenance explicit,
+without assuming general Fubini or integral-linearity.  Generalizing this
+unit-branch construction still requires an effective FTC theorem.
 There is now also a complete direct companion computation:
 `arctanKernelTrianglePlusLog` adds that triangle raw to the certified
 `x/(1+x*x)` logarithmic strip.  The finite two-strip comparison proves it
 equivalent to `arctanGeom(1)`.  This is intentionally not the pending
-displayed calculus identity `4 * ∫ arctan + 2 * log 2 = pi`: the triangle has
-not yet been identified with `∫ arctan`, and the logarithm is not yet the
-canonical inverse-exponential one.
+displayed calculus identity `4 * ∫ arctan + 2 * log 2 = pi`: the new direct
+bridge `arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral`
+compares the supplied triangle integral plus the strip to the independently
+certified product-FTC integral, but the logarithm is not yet the canonical
+inverse-exponential one.
 The independently checked equality
 `2 * arctanLogKernelIntegral ≡ logTwoSeries` now gives a supplementary
 executable pi formula too:

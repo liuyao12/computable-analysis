@@ -809,6 +809,49 @@ theorem arctanKernelTriangleRaw_equiv_complementKernelIntegral :
     arctanKernelTriangleCandidate_equiv_complementKernelIntegral
     arctanKernelTriangleStabilizationRadius_covers_complementKernelIntegral
 
+/-- The triangular mesh as a named construction of the unit integral of the
+rectangle arctangent.  Its runtime is precisely `arctanKernelTriangleRaw`:
+the outer right sum is taken over the growing inner kernel sums.  The
+function-facing side is the already certified monotone
+`arctan.integral.rectangle` presentation.  The finite triangle identity and
+the comparison below are the explicit bridge between those two descriptions;
+no general Fubini or integral-linearity axiom is used. -/
+def arctanIntegralTriangleConstruction :
+    Integral.ConstructionFor IntegralIdentities.arctanIntegralRectangleOnUnit where
+  compute := arctanKernelTriangleRaw.compute
+  certificate := arctanKernelTriangleRaw_valid
+
+/-- The monotonicity certificate accompanying the direct triangular
+construction of the unit arctangent integral. -/
+def arctanIntegralTriangleMonotoneConstruction :
+    Integral.MonotoneConstructionFor IntegralIdentities.arctanIntegralRectangleOnUnit where
+  monotone := IntegralIdentities.arctanIntegralRectangleOnUnit_monotone
+  construction := arctanIntegralTriangleConstruction
+
+/-- The direct finite-triangle construction of
+`∫₀¹ arctan.integral.rectangle(x) dx`.  At every stage its rational runtime
+is the triangular kernel sum; `arctanIntegralTriangle_compute_eq` exposes
+that fact without unfolding the integral interface. -/
+def arctanIntegralTriangle : RealRaw :=
+  Integral.monotoneIntegralFor IntegralIdentities.arctanIntegralRectangleOnUnit
+    arctanIntegralTriangleMonotoneConstruction
+
+theorem arctanIntegralTriangle_valid : arctanIntegralTriangle.Valid :=
+  Integral.monotoneIntegralFor_valid IntegralIdentities.arctanIntegralRectangleOnUnit
+    arctanIntegralTriangleMonotoneConstruction
+
+theorem arctanIntegralTriangle_compute_eq (stage : Nat) :
+    arctanIntegralTriangle.compute stage =
+      arctanKernelTriangleRaw.compute stage := rfl
+
+/-- The triangular integral construction agrees with the complementary
+rational strip.  This is the public unit-integral form of the exact finite
+triangle reindexing computation. -/
+theorem arctanIntegralTriangle_equiv_complementKernelIntegral :
+    arctanIntegralTriangle.Equiv arctanComplementKernelIntegral := by
+  simpa [arctanIntegralTriangle] using
+    arctanKernelTriangleRaw_equiv_complementKernelIntegral
+
 /-- The raw sum of the two literal strip integrals is, stage by stage, the
 four-Lipschitz Darboux box for the arctangent kernel.  This is the finite
 additivity bridge that precedes any claim about the integral of arctangent. -/
@@ -917,6 +960,28 @@ theorem arctanKernelTrianglePlusLog_equiv_arctanGeom_one :
       (ArctanGeometry.arctanGeom_valid_on_unit
         (x := (1 : Rat)) (by native_decide) (by native_decide))
       htoKernel hkernelToGeom)
+
+/-- The direct arctangent triangle integral plus the logarithmic kernel strip
+is the independently constructed product-FTC integral.  Both sides are
+certified finite mesh constructions: the proof passes through
+`arctan.geom(1)`, rather than assuming a general additivity theorem for
+integrals. -/
+theorem arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral :
+    (arctanIntegralTriangle + arctanLogKernelIntegral).Equiv
+      IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral := by
+  have hleft : (arctanIntegralTriangle + arctanLogKernelIntegral).Valid :=
+    RealRaw.add_valid arctanIntegralTriangle_valid arctanLogKernelIntegral_valid
+  have hproduct :
+      IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral.Valid :=
+    IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid
+  exact RealRaw.equiv_trans hleft
+    (ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide))
+    hproduct
+    (by simpa [arctanIntegralTriangle, arctanKernelTrianglePlusLog] using
+      arctanKernelTrianglePlusLog_equiv_arctanGeom_one)
+    (RealRaw.equiv_symm
+      IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one)
 
 /-- Stage by stage, the existing square-pullback boxes are exactly twice the
 boxes for the first arctangent--logarithm strip.  Thus this bridge is a

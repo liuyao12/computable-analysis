@@ -199,6 +199,16 @@ algebra, not a universal theorem.  Consequently, an LLM must currently
 either stay within an existing concrete construction or make the missing
 general theorem its explicit proof goal.
 
+One useful fully scoped exception is the unit arctangent triangle route in
+`Logarithm.lean`.  `Logarithm.arctanIntegralTriangle` is a certified monotone
+construction for `IntegralIdentities.arctanIntegralRectangleOnUnit`; its
+runtime is the explicit rational triangle mesh, exposed by
+`arctanIntegralTriangle_compute_eq`.  The theorem
+`arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral` compares
+that construction plus the `x/(1+x^2)` strip with the independently certified
+product-FTC integral.  Use it only on this supplied unit branch; it is not a
+general Fubini, integral-additivity, or integration-by-parts rule.
+
 ## Exponentials, logarithms, and trigonometry
 
 `ElementaryFunctions.lean` is the map of the desired identification route

@@ -509,9 +509,9 @@ another. The Pi score stays useful only as secondary integration coverage.
   `two_arctanLogKernelIntegral_compute_width`.
   These are endpoint equivalences at the rational name two, not the pending
   function-level canonical-logarithm theorem. The remaining Pi-route gates
-  are the complementary `∫ arctan` strip through effective FTC
-  and the later canonical exp/log identification. A useful finite predecessor is
-  now checked without pretending to discharge that gate:
+  are a general effective-FTC extension beyond the supplied unit arctangent
+  triangle construction and the later canonical exp/log identification.  The
+  finite predecessor and its unit construction are now checked:
   `arctanComplementKernelIntegral` is the literal 3-Lipschitz integral of
   `(1-x)/(1+x*x)`, and the exact Darboux-box addition theorem
   `LipschitzDyadic.compute_add` proves that this strip plus
@@ -531,15 +531,21 @@ another. The Pi score stays useful only as secondary integration coverage.
   packaged as `arctanKernelTriangleRaw`: its runtime evaluator is only the
   finite triangle sum for `1/(1+x*x)`, its public stabilization radius is
   `6/2^n`, and Lean proves it equivalent to
-  `arctanComplementKernelIntegral`. This is an executable geometry-to-strip
-  bridge, not yet a statement that the triangles integrate arctangent.
+  `arctanComplementKernelIntegral`.  Lean now also packages that exact runtime
+  as `arctanIntegralTriangle`, a monotone integral construction for the
+  certified `arctan.integral.rectangle` unit function.  Its finite triangle
+  reindexing is recorded as the construction's explicit provenance; it does
+  not assume general Fubini or integral-linearity.
   The companion raw `arctanKernelTrianglePlusLog` now adds this triangle
   computation to the certified `x/(1+x*x)` logarithmic strip.  Its proved
   equivalence to `arctanGeom(1)` makes it a finite strip/Fubini regression of
-  the same arctangent endpoint, not the pending calculus theorem
-  `4 * ∫ arctan + 2 * log 2 = pi`.  The two remaining semantic inputs are
-  exactly the global effective FTC/product-derivative identification of the
-  triangle and canonical exp/log transport.
+  the same arctangent endpoint.  The public theorem
+  `arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral` further
+  identifies the supplied triangle integral plus that strip with the
+  independently certified product-FTC integral.  This is not yet the pending
+  calculus theorem `4 * ∫ arctan + 2 * log 2 = pi`: canonical exp/log
+  transport and a general effective-FTC extension beyond the supplied unit
+  construction remain separate work.
   The direct series endpoint is now also used to package the supplementary
   raw `Logarithm.piTriangleLogSeries = 4 * triangle + 2 * log_series(2)`.
   Its formal theorem `piTriangleLogSeries_equiv_four_arctanGeom_one` reaches
@@ -1561,8 +1567,8 @@ scoreboard above.
   also in place: `point_cross_nonneg_of_order` proves that ordered rational
   Pythagorean arc points have nonnegative cross product.
 - The power-series arctangent pi representative is now named separately:
-  `CirclePi.powerSeriesArctanOnePiRawAlgorithm` is `4 * arctan_ps(1)`, where
-  `arctan_ps x = x - x^3/3 + x^5/5 - ...`.  This is intentionally not a
+  `CirclePi.powerSeriesArctanOnePiRawAlgorithm` is `4 * arctan.series(1)`, where
+  `arctan.series(x) = x - x^3/3 + x^5/5 - ...`.  This is intentionally not a
   geometric definition.  The theorem
   `CirclePi.powerSeriesArctanOnePi_equiv_fourArctanOnePi_of_directInequalities`
   proves that the direct finite arctangent inequalities on `[0,1]` would
