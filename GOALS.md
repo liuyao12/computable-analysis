@@ -123,11 +123,14 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   order of quantifiers: a common derivative-continuity stage may differ from
   the common endpoint stage used by the telescope. Its overlap is derived
   rather than postulated; `SelectedStageCandidateDerivativeFTC` remains the
-  coincident-stage special case. The remaining product-specific FTC work is
-  to build its cell family and endpoint-width schedule. The uniform cell count
-  `coordinateTimesArctanForwardPartitionPieces` is now explicit and
-  formally below both the executable continuity radius and forward step
-  budget.
+  coincident-stage special case. The product-specific cell family, common
+  endpoint stage, Riemann-width budget, and endpoint-width budget are now
+  assembled in `coordinateTimesArctanForwardTwoStageFTC`; Lean proves its
+  bounded-sum raw equivalent to the product endpoint raw. The uniform cell
+  count `coordinateTimesArctanForwardPartitionPieces` remains the explicit
+  finite mesh selector. The remaining bridge is to package this new
+  two-stage raw as a valid public `Integral.ConstructionFor`, not to prove
+  the finite FTC comparison again.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
@@ -406,9 +409,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   radius and evaluation stage now come from the checked effective modulus,
   not a choice extracted from epsilon--delta existence. The compatible uniform rational
   partition is now selected by the finite denominator product
-  `(delta.den + 1) * 72 * (n + 1)`. Proving its
-  telescoping overlap and shrinking bound schedule, and deriving the
-  resulting FTC comparison, remain open.
+  `(delta.den + 1) * 72 * (n + 1)`. Its cell containment, common endpoint
+  transport stage, global Riemann-width and endpoint-width schedules are
+  now all checked in `coordinateTimesArctanForwardTwoStageFTC`, which proves
+  the bounded-sum raw equivalent to the product endpoint raw. What remains
+  is the validity/nestedness bridge that promotes this two-stage raw to the
+  public definite-integral API.
   The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor

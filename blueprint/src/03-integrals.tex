@@ -837,7 +837,9 @@ Consequently the endpoint-difference raw for this product on \([0,1]\) is a
 valid presentation equivalent to the geometric value
 \(\arctan_{\mathrm{geom}}(1)\).  This is boundary data only: it does not
 differentiate the product or identify an integral of the product with that
-endpoint difference.  The remaining effective FTC certificate is required by
+endpoint difference.  The finite two-stage raw certificate later in this
+chapter supplies the product comparison; its remaining public
+definite-integral packaging is required by
 \cref{thm:integration-by-parts-certificate}.
 \end{proposition}
 
@@ -1155,10 +1157,9 @@ radius:
 \]
 Its unit mesh is formally at most both \(\delta\) and
 \(1/(72(n+1))\).  Thus the remaining work is no longer the choice of a
-small partition either.  The required finite telescope and uniform-width
-calculation are now generic theorems; the remaining concrete work is to feed
-this particular common box into every selected cell and give the product
-endpoint box its shrinking schedule.
+small partition either.  The next theorem instantiates the finite telescope,
+the uniform-width calculation, and the common endpoint stage with these
+literal cell data.
 \end{theorem}
 
 \begin{theorem}[Finite common-stage FTC assembly]
@@ -1178,6 +1179,8 @@ endpoint box its shrinking schedule.
 \lean{ComputableAnalysis.selectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.twoStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
 \uses{thm:coordinate-arctangent-forward-secant-enclosure}
 \leanok
 Let a rational partition of \([a,b]\) be fixed, and suppose that at one
@@ -1212,15 +1215,55 @@ which those two schedules happen to coincide.
 
 For \(P(x)=x\arctan(x)\), the preceding local result supplies the required
 two-stage box of width at most \(10\varepsilon_n\), and the explicit uniform
-mesh supplies the cells.  Still required before claiming the effective FTC
-for this product are the fully assembled cell function and an explicit
-endpoint-width schedule for \(P(1)-P(0)\).  This theorem closes the generic
-global algebra, not that final concrete instantiation.
+mesh supplies the cells.  The new concrete instantiation immediately below
+uses outer stage \(10(\varepsilon.\mathrm{den}+1)\), so those ten local
+tolerances fit the requested tolerance.  It uses the same tangent-transport
+stage for every cell and at the global endpoint.
+\end{theorem}
+
+\begin{theorem}[Concrete two-stage FTC raw for the arctangent product]
+\label{thm:coordinate-arctangent-two-stage-ftc}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardOuterStage}
+\lean{ComputableAnalysis.IntegralIdentities.ten_mul_precisionAtStage_coordinateTimesArctanForwardOuterStage_le}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCPartition}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeStage}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCEndpointStage}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeBound}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeBound_contains}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeBound_contains_endpointDifference}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCRiemann_width_le}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCEndpoint_width_le}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
+\uses{thm:coordinate-arctangent-forward-secant-enclosure,thm:finite-common-stage-ftc-assembly}
+\leanok
+The product now has a fully assembled \emph{finite two-stage FTC raw}\ on
+\([0,1]\).  At requested tolerance \(\varepsilon\), select
+\[
+ n=10(\varepsilon.\mathrm{den}+1),\quad
+ \delta=\varepsilon_n/6,\quad
+ N=(\delta.\mathrm{den}+1)72(n+1).
+\]
+The uniform \(N\)-cell partition has mesh below both the local continuity
+radius and the forward step budget.  Its derivative boxes use the common
+stage \(4((\varepsilon_n/2).\mathrm{den}+1)\); the endpoint boxes use the
+single tangent-transport stage determined by that mesh.  Lean proves every
+cell enclosure, the global Riemann-box width, and the global endpoint-box
+width.  Consequently its two executable raw reals satisfy
+\[
+ \operatorname{BoundSum}_{x\arctan x}\ \Equiv\
+ \bigl(x\arctan x\bigr)(1)-\bigl(x\arctan x\bigr)(0).
+\]
+This is the finite FTC comparison itself, with no limit or completeness
+argument.  It is intentionally not yet presented as the repository's public
+definite integral: the remaining engineering step is to give this new
+two-stage raw the validity/nestedness bridge required by
+\texttt{Integral.ConstructionFor}.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
-\uses{thm:integration-by-parts-certificate,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
+\uses{thm:integration-by-parts-certificate,thm:coordinate-arctangent-two-stage-ftc,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
 certificate gives
@@ -1236,9 +1279,10 @@ The endpoint-order certificate and its canonical monotone-sampling lift now
 turn the unit-mesh statement into a checked finite rational corner estimate;
 the two explicit stages above also bound the rectangle sampling error.
 Thus the geometric unit-branch bounds are now an executable finite budget,
-rather than an asymptotic assertion.  Completing the displayed integral identity still
-requires the separate effective FTC certificate.  With that certificate, the
-resulting construction will give
+rather than an asymptotic assertion.  The finite two-stage FTC comparison is
+now checked; exposing its bounded-sum raw as a public definite-integral
+construction is the remaining API bridge.  With that bridge, the resulting
+construction gives
 \[
  \int_0^1\arctan(x)\,\dd x
  \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.
@@ -1265,8 +1309,8 @@ strip and its complement.  The exact finite triangle comparison is now
 available as \cref{thm:finite-uniform-triangle-reindexing}; it reindexes the
 outer mesh of growing inner sums into this complementary kernel without a
 continuous Fubini theorem.  It still does \emph{not} identify that complement with
-the integral of arctangent; the effective FTC certificate remains the gate
-that supplies that identification.
+the integral of arctangent; the public integral-construction bridge remains
+the gate that supplies that identification.
 Combining the two certified equivalences gives the natural statement
 \[
   \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log_{\mathrm{rec}}2.

@@ -100,9 +100,9 @@ the gates have different dependencies and none can substitute for another.
 | --- | --- | --- |
 | Rational interval foundation | `RealRaw.Valid`, equivalence by overlap, and the no-completeness/no-Mathlib-analysis audit | Continue dependency auditing as modules grow |
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit`, the non-exact rectangle arctangent, and the concrete \(x\arctan x\) derivative candidate now have checked executable `EffectiveModulusFor` schedules | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
-| Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, exact finite integration-by-parts on arbitrary certified rational partitions, and a coordinate-by-monotone-path endpoint bracket with explicit mesh-times-variation error are checked; positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates, then prove general bounded piecewise integration-by-parts and substitution theorems rather than a table of integration recipes |
+| Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, exact finite integration-by-parts on arbitrary certified rational partitions, and a coordinate-by-monotone-path endpoint bracket with explicit mesh-times-variation error are checked; the concrete \(x\arctan x\) product now has an executable two-stage finite FTC raw equivalent to its endpoint raw | Give that two-stage raw the validity/nestedness bridge needed by the public definite-integral construction, then generalize to interval-regular derivatives, bounded piecewise integration by parts, and substitution |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
-| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the two-sided derivative of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Effective FTC for the concrete derivative, then an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
+| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the two-sided derivative of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Promote the concrete two-stage FTC raw to the public integral API, then prove an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a factorial-tail majorant with an explicit rational epsilon modulus are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
@@ -201,12 +201,12 @@ and an `N`-cell uniform partition converts a width `e` on each derivative
 box into total width at most `(b-a)*e`. The new
 `TwoStageCandidateDerivativeFTC` matches the actual two-schedule data and
 derives its overlap condition; `SelectedStageCandidateDerivativeFTC` remains
-the common-stage special case. What remains is the concrete product cell
-family and endpoint-width schedule. Its derivative-continuity radius and
-evaluation stage are now supplied by an executable
-`coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus`,
-so a cell constructor need not choose them from an existential theorem. The
-partition count is already explicit:
+the common-stage special case. The concrete product cell family and
+endpoint-width schedule are now assembled in
+`coordinateTimesArctanForwardTwoStageFTC`: it proves its bounded-sum raw
+equivalent to the primitive endpoint raw. Its derivative-continuity radius
+and evaluation stage are executable, so the constructor makes no existential
+choice. The partition count is:
 `(delta.den + 1) * 72 * (n + 1)` gives a unit mesh below both the selected
 continuity radius and the forward step budget.
 The positive product branch is now also proved nondecreasing: for

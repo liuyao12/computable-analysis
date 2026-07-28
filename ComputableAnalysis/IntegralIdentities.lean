@@ -4503,6 +4503,95 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uni
       simpa [qabs] using Rat.le_of_lt delta.property
     simpa [delta] using (hboxed x ⟨hx0, hx1⟩ hzero).2.2
 
+/-- The step-aware rectangle stage used by a positive unit-branch cell is
+already narrow enough at the global endpoint.  This supplies the endpoint
+width half of the later two-stage FTC certificate without selecting a second
+ad hoc rectangle schedule. -/
+theorem arctanRectangleTangentTransportPrecision_atOne_width_le_stageTolerance
+    {h : Rat} (hpos : 0 < h) (hle : h <= 1) (n : Nat) :
+    (ArctanGeometry.arctanIntegralRectangleComputeAtOne
+      (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))).width <=
+        (precisionAtStage n).val := by
+  let eps : QPos :=
+    { val := h * (precisionAtStage (8 * (n + 1))).val / 16
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos (Rat.mul_pos hpos
+          (precisionAtStage (8 * (n + 1))).property)
+          ((Rat.inv_pos).2 (by native_decide)) }
+  let N : Nat := 256 * (eps.val.den + 1)
+  have hN : arctanRectangleTangentTransportPrecision h (8 * (n + 1)) = N := by
+    simp only [arctanRectangleTangentTransportPrecision, dif_pos hpos]
+    rfl
+  have hNrect : 4 * (eps.val.den + 1) <= N := by
+    dsimp [N]
+    omega
+  have hrectangle :
+      (ArctanGeometry.arctanIntegralRectangleComputeAtOne N).width <= eps.val := by
+    change (ArctanGeometry.arctanIntegralRectangleCompute (1 : Rat) N).width <= _
+    exact ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+      (by native_decide) (by native_decide) eps N hNrect
+  have heps : eps.val <= (precisionAtStage n).val := by
+    have hp8 : 0 <= (precisionAtStage (8 * (n + 1))).val :=
+      Rat.le_of_lt (precisionAtStage (8 * (n + 1))).property
+    have hscaled : h * (precisionAtStage (8 * (n + 1))).val / 16 <=
+        (precisionAtStage (8 * (n + 1))).val := by
+      calc
+        h * (precisionAtStage (8 * (n + 1))).val / 16 =
+            h * ((precisionAtStage (8 * (n + 1))).val / 16) := by
+              grind [Rat.div_def]
+        _ <= 1 * ((precisionAtStage (8 * (n + 1))).val / 16) :=
+          Rat.mul_le_mul_of_nonneg_right hle (by
+            rw [Rat.div_def]
+            exact Rat.mul_nonneg hp8 (by native_decide))
+        _ = (precisionAtStage (8 * (n + 1))).val / 16 := by grind
+        _ <= (precisionAtStage (8 * (n + 1))).val := by
+          rw [Rat.div_def]
+          grind
+    calc
+      eps.val = h * (precisionAtStage (8 * (n + 1))).val / 16 := by rfl
+      _ <= (precisionAtStage (8 * (n + 1))).val := hscaled
+      _ <= (precisionAtStage n).val / 8 :=
+        twoSided_precision_stage_le_eighth n
+      _ <= (precisionAtStage n).val := by
+        rw [Rat.div_def]
+        grind
+  rw [hN]
+  exact Rat.le_trans hrectangle heps
+
+/-- The outer derivative stage used for the product FTC candidate spends a
+factor ten on the local common-box width. -/
+def coordinateTimesArctanForwardOuterStage (eps : QPos) : Nat :=
+  10 * (eps.val.den + 1)
+
+/-- The ten local tolerances in the forward common box fit inside the
+requested outer tolerance at `coordinateTimesArctanForwardOuterStage`. -/
+theorem ten_mul_precisionAtStage_coordinateTimesArctanForwardOuterStage_le
+    (eps : QPos) :
+    10 * (precisionAtStage (coordinateTimesArctanForwardOuterStage eps)).val <=
+      eps.val := by
+  let d : Nat := eps.val.den + 1
+  have hdpos : 0 < d := by
+    dsimp [d]
+    omega
+  have hstagepos : 0 < 10 * d := Nat.mul_pos (by native_decide) hdpos
+  have hfactor : 0 <= (10 : Rat) := by native_decide
+  have hden : 1 / (d : Rat) <= eps.val :=
+    FTC.one_div_den_succ_le_of_pos eps.property
+  have hrewrite :
+      (10 : Rat) * (1 / (((10 * d : Nat) : Rat))) = 1 / (d : Rat) := by
+    rw [Rat.natCast_mul]
+    change (10 : Rat) * (1 / ((10 : Rat) * (d : Rat))) = 1 / (d : Rat)
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    have hten : (10 : Rat) * (10 : Rat)⁻¹ = 1 := by native_decide
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  unfold coordinateTimesArctanForwardOuterStage
+  change 10 * (precisionAtStage (10 * d)).val <= eps.val
+  rw [precisionAtStage, dif_neg (Nat.ne_of_gt hstagepos)]
+  calc
+    10 * (1 / (((10 * d : Nat) : Rat))) = 1 / (d : Rat) := hrewrite
+    _ <= eps.val := hden
+
 /-- The preceding common-box construction is available directly from the
 checked rational epsilon--delta continuity theorem for the product
 derivative.  For every forward-derivative stage it chooses one continuity
@@ -4766,6 +4855,345 @@ theorem coordinateTimesArctanForwardPartition_mesh_le_forward_step
     rw [Nat.mul_comm]
     exact Nat.le_mul_of_pos_right q hp
   exact FTC.one_div_nat_antitone hq hpq hqle
+
+/-- The uniform partition used by the concrete two-stage FTC candidate for
+the positive product.  Its mesh simultaneously meets the explicit
+continuity radius and the forward derivative step budget. -/
+def coordinateTimesArctanForwardFTCPartition (eps : QPos) :
+    RationalPartition 0 1 :=
+  let n : Nat := coordinateTimesArctanForwardOuterStage eps
+  let delta : QPos := coordinateTimesArctanForwardContinuityRadius n
+  let pieces : Nat := coordinateTimesArctanForwardPartitionPieces delta n
+  RationalPartition.uniform 0 1 pieces
+    (coordinateTimesArctanForwardPartitionPieces_positive delta n)
+    (by native_decide)
+
+/-- The common derivative stage assigned to all cells of the selected
+positive-product partition. -/
+def coordinateTimesArctanForwardFTCDerivativeStage (eps : QPos) : Nat :=
+  coordinateTimesArctanForwardContinuityStage
+    (coordinateTimesArctanForwardOuterStage eps)
+
+/-- The common endpoint stage assigned to all cells of the selected uniform
+partition.  Uniformity makes the step-aware transport stage literally the
+same natural number on every cell. -/
+def coordinateTimesArctanForwardFTCEndpointStage (eps : QPos) : Nat :=
+  arctanRectangleTangentTransportPrecision
+    (mesh 0 1 (coordinateTimesArctanForwardFTCPartition eps).pieces)
+    (8 * (coordinateTimesArctanForwardOuterStage eps + 1))
+
+/-- The executable derivative bound on one selected uniform cell. -/
+def coordinateTimesArctanForwardFTCDerivativeBound
+    (eps : QPos) (k : Nat)
+    (hk : k < (coordinateTimesArctanForwardFTCPartition eps).pieces) : QInterval :=
+  let P := coordinateTimesArctanForwardFTCPartition eps
+  let n : Nat := coordinateTimesArctanForwardOuterStage eps
+  coordinateTimesArctanForwardSecantBound
+    (P.point k) (mesh 0 1 P.pieces)
+    (by
+      change 0 <= P.point k /\ P.point k <= 1
+      exact P.point_in_bounds (Nat.le_of_lt hk)) n
+
+theorem coordinateTimesArctanForwardFTCPartition_mesh_le_radius (eps : QPos) :
+    mesh 0 1 (coordinateTimesArctanForwardFTCPartition eps).pieces <=
+      (coordinateTimesArctanForwardContinuityRadius
+        (coordinateTimesArctanForwardOuterStage eps)).val := by
+  change mesh 0 1
+    (coordinateTimesArctanForwardPartitionPieces
+      (coordinateTimesArctanForwardContinuityRadius
+        (coordinateTimesArctanForwardOuterStage eps))
+      (coordinateTimesArctanForwardOuterStage eps)) <= _
+  exact coordinateTimesArctanForwardPartition_mesh_le_radius _ _
+
+theorem coordinateTimesArctanForwardFTCPartition_mesh_le_forward_step (eps : QPos) :
+    mesh 0 1 (coordinateTimesArctanForwardFTCPartition eps).pieces <=
+      1 / (((72 * (coordinateTimesArctanForwardOuterStage eps + 1) : Nat) : Rat)) := by
+  change mesh 0 1
+    (coordinateTimesArctanForwardPartitionPieces
+      (coordinateTimesArctanForwardContinuityRadius
+        (coordinateTimesArctanForwardOuterStage eps))
+      (coordinateTimesArctanForwardOuterStage eps)) <= _
+  exact coordinateTimesArctanForwardPartition_mesh_le_forward_step _ _
+
+theorem coordinateTimesArctanForwardFTCPartition_mesh_pos (eps : QPos) :
+    0 < mesh 0 1 (coordinateTimesArctanForwardFTCPartition eps).pieces := by
+  let P := coordinateTimesArctanForwardFTCPartition eps
+  have hp : 0 < P.pieces := P.positive
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt hp), Rat.div_def]
+  exact Rat.mul_pos (by native_decide)
+    ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hp))
+
+theorem coordinateTimesArctanForwardFTCPartition_mesh_le_one (eps : QPos) :
+    mesh 0 1 (coordinateTimesArctanForwardFTCPartition eps).pieces <= 1 := by
+  let P := coordinateTimesArctanForwardFTCPartition eps
+  have hp : 0 < P.pieces := P.positive
+  have hpOne : 1 <= P.pieces := Nat.succ_le_of_lt hp
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt hp)]
+  calc
+    (1 - 0) / (P.pieces : Rat) = 1 / (P.pieces : Rat) := by grind
+    _ <= 1 / ((1 : Nat) : Rat) :=
+      FTC.one_div_nat_antitone (Nat.succ_pos 0) hp hpOne
+    _ = 1 := by native_decide
+
+/-- Each selected derivative bound contains every derivative value on its
+own uniform cell, at the single executable continuity stage. -/
+theorem coordinateTimesArctanForwardFTCDerivativeBound_contains
+    (eps : QPos) (k : Nat)
+    (hk : k < (coordinateTimesArctanForwardFTCPartition eps).pieces)
+    (t : Rat)
+    (ht : ((coordinateTimesArctanForwardFTCPartition eps).cell k hk).contains t) :
+    (coordinateTimesArctanForwardFTCDerivativeBound eps k hk).ContainsInterval
+      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.toRealFunRaw.compute t
+        (coordinateTimesArctanForwardFTCDerivativeStage eps)) := by
+  let P := coordinateTimesArctanForwardFTCPartition eps
+  let n : Nat := coordinateTimesArctanForwardOuterStage eps
+  let delta : QPos := coordinateTimesArctanForwardContinuityRadius n
+  let h : Rat := mesh 0 1 P.pieces
+  change (P.cell k hk).contains t at ht
+  have htInDomain : inDomainInterval 0 1 t :=
+    (P.cell k hk).contains_inDomain ht
+  change P.point k <= t /\ t <= P.point (k + 1) at ht
+  have hleft : 0 <= P.point k /\ P.point k <= 1 :=
+    P.point_in_bounds (Nat.le_of_lt hk)
+  have htDomain : inDomainInterval
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper t := by
+    change 0 <= t /\ t <= 1
+    exact htInDomain
+  have hpos : 0 < h := by
+    simpa [h, P] using coordinateTimesArctanForwardFTCPartition_mesh_pos eps
+  have hupper : P.point k + h <= 1 := by
+    dsimp [P, h]
+    let pieces := coordinateTimesArctanForwardPartitionPieces delta n
+    change leftPoint 0 1 pieces k + mesh 0 1 pieces <= 1
+    have hstep := leftPoint_step 0 1 pieces k
+    have hpieces : 0 < pieces :=
+      coordinateTimesArctanForwardPartitionPieces_positive delta n
+    calc
+      leftPoint 0 1 pieces k + mesh 0 1 pieces = leftPoint 0 1 pieces (k + 1) := by
+        rw [← hstep]
+        grind [Rat.sub_eq_add_neg]
+      _ <= leftPoint 0 1 pieces pieces :=
+        leftPoint_monotone hpieces (by native_decide) (Nat.succ_le_of_lt hk)
+      _ = 1 := leftPoint_endpoint hpieces
+  have hstep : P.point (k + 1) - P.point k = h := by
+    dsimp [P, h]
+    exact leftPoint_step 0 1
+      (coordinateTimesArctanForwardPartitionPieces delta n) k
+  have hsmall : h <= 1 / (((72 * (n + 1) : Nat) : Rat)) := by
+    simpa [h, P] using coordinateTimesArctanForwardFTCPartition_mesh_le_forward_step eps
+  have hclose : qabs (t - P.point k) <= delta.val := by
+    have hnonneg : 0 <= t - P.point k := by grind [Rat.sub_eq_add_neg]
+    rw [qabs_eq_self_of_nonneg hnonneg]
+    calc
+      t - P.point k <= P.point (k + 1) - P.point k := by
+        grind [Rat.sub_eq_add_neg]
+      _ = h := hstep
+      _ <= delta.val := by
+        simpa [delta] using coordinateTimesArctanForwardFTCPartition_mesh_le_radius eps
+  have hlocal :=
+    coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uniform_range_enclosure
+      hleft.1 hleft.2 hpos hupper n hsmall
+  have hvalue := hlocal.1 t htDomain hclose
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit htDomain]
+  simpa [coordinateTimesArctanForwardFTCDerivativeBound,
+    coordinateTimesArctanForwardFTCDerivativeStage, P, n, h] using hvalue
+
+/-- The same selected cell bound contains the primitive's endpoint
+difference when scaled by that cell's width.  Because the partition is
+uniform, all of these endpoint intervals use one literal transport stage. -/
+theorem coordinateTimesArctanForwardFTCDerivativeBound_contains_endpointDifference
+    (eps : QPos) (k : Nat)
+    (hk : k < (coordinateTimesArctanForwardFTCPartition eps).pieces) :
+    QInterval.ContainsInterval
+      (((coordinateTimesArctanForwardFTCPartition eps).cell k hk).scaleBound
+        (coordinateTimesArctanForwardFTCDerivativeBound eps k hk))
+      (endpointDifferenceInterval
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw
+        ((coordinateTimesArctanForwardFTCPartition eps).cell k hk).lower
+        ((coordinateTimesArctanForwardFTCPartition eps).cell k hk).upper
+        (coordinateTimesArctanForwardFTCEndpointStage eps)) := by
+  let P := coordinateTimesArctanForwardFTCPartition eps
+  let n : Nat := coordinateTimesArctanForwardOuterStage eps
+  let delta : QPos := coordinateTimesArctanForwardContinuityRadius n
+  let h : Rat := mesh 0 1 P.pieces
+  have hleft : 0 <= P.point k /\ P.point k <= 1 :=
+    P.point_in_bounds (Nat.le_of_lt hk)
+  have hpos : 0 < h := by
+    simpa [h, P] using coordinateTimesArctanForwardFTCPartition_mesh_pos eps
+  have hupper : P.point k + h <= 1 := by
+    dsimp [P, h]
+    let pieces := coordinateTimesArctanForwardPartitionPieces delta n
+    change leftPoint 0 1 pieces k + mesh 0 1 pieces <= 1
+    have hstep := leftPoint_step 0 1 pieces k
+    have hpieces : 0 < pieces :=
+      coordinateTimesArctanForwardPartitionPieces_positive delta n
+    calc
+      leftPoint 0 1 pieces k + mesh 0 1 pieces = leftPoint 0 1 pieces (k + 1) := by
+        rw [← hstep]
+        grind [Rat.sub_eq_add_neg]
+      _ <= leftPoint 0 1 pieces pieces :=
+        leftPoint_monotone hpieces (by native_decide) (Nat.succ_le_of_lt hk)
+      _ = 1 := leftPoint_endpoint hpieces
+  have hsmall : h <= 1 / (((72 * (n + 1) : Nat) : Rat)) := by
+    simpa [h, P] using coordinateTimesArctanForwardFTCPartition_mesh_le_forward_step eps
+  have hnext : P.point k + h = P.point (k + 1) := by
+    have hstep : P.point (k + 1) - P.point k = h := by
+      dsimp [P, h]
+      exact leftPoint_step 0 1
+        (coordinateTimesArctanForwardPartitionPieces delta n) k
+    grind [Rat.sub_eq_add_neg]
+  have hlocal :=
+    coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uniform_range_enclosure
+      hleft.1 hleft.2 hpos hupper n hsmall
+  change QInterval.ContainsInterval
+    (QInterval.scaleByRat (P.point (k + 1) - P.point k)
+      (coordinateTimesArctanForwardFTCDerivativeBound eps k hk))
+    (endpointDifferenceInterval
+      coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw
+      (P.point k) (P.point (k + 1))
+      (coordinateTimesArctanForwardFTCEndpointStage eps))
+  rw [← hnext]
+  have hscale : P.point k + h - P.point k = h := by
+    grind [Rat.sub_eq_add_neg]
+  rw [hscale]
+  simpa [coordinateTimesArctanForwardFTCDerivativeBound,
+    coordinateTimesArctanForwardFTCEndpointStage, P, n, h] using hlocal.2.1
+
+/-- Every selected derivative hull has the ten-tolerance width budget used in
+the finite uniform Riemann-sum estimate. -/
+theorem coordinateTimesArctanForwardFTCDerivativeBound_width_le
+    (eps : QPos) (k : Nat)
+    (hk : k < (coordinateTimesArctanForwardFTCPartition eps).pieces) :
+    (coordinateTimesArctanForwardFTCDerivativeBound eps k hk).width <=
+      10 * (precisionAtStage (coordinateTimesArctanForwardOuterStage eps)).val := by
+  let P := coordinateTimesArctanForwardFTCPartition eps
+  let n : Nat := coordinateTimesArctanForwardOuterStage eps
+  let delta : QPos := coordinateTimesArctanForwardContinuityRadius n
+  let h : Rat := mesh 0 1 P.pieces
+  have hleft : 0 <= P.point k /\ P.point k <= 1 :=
+    P.point_in_bounds (Nat.le_of_lt hk)
+  have hpos : 0 < h := by
+    simpa [h, P] using coordinateTimesArctanForwardFTCPartition_mesh_pos eps
+  have hupper : P.point k + h <= 1 := by
+    dsimp [P, h]
+    let pieces := coordinateTimesArctanForwardPartitionPieces delta n
+    change leftPoint 0 1 pieces k + mesh 0 1 pieces <= 1
+    have hstep := leftPoint_step 0 1 pieces k
+    have hpieces : 0 < pieces :=
+      coordinateTimesArctanForwardPartitionPieces_positive delta n
+    calc
+      leftPoint 0 1 pieces k + mesh 0 1 pieces = leftPoint 0 1 pieces (k + 1) := by
+        rw [← hstep]
+        grind [Rat.sub_eq_add_neg]
+      _ <= leftPoint 0 1 pieces pieces :=
+        leftPoint_monotone hpieces (by native_decide) (Nat.succ_le_of_lt hk)
+      _ = 1 := leftPoint_endpoint hpieces
+  have hsmall : h <= 1 / (((72 * (n + 1) : Nat) : Rat)) := by
+    simpa [h, P] using coordinateTimesArctanForwardFTCPartition_mesh_le_forward_step eps
+  have hlocal :=
+    coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uniform_range_enclosure
+      hleft.1 hleft.2 hpos hupper n hsmall
+  simpa [coordinateTimesArctanForwardFTCDerivativeBound, P, n, h] using hlocal.2.2
+
+/-- The finite derivative-bound sum on the selected unit partition has width
+at most the requested outer tolerance. -/
+theorem coordinateTimesArctanForwardFTCRiemann_width_le (eps : QPos) :
+    ((coordinateTimesArctanForwardFTCPartition eps).boundIntegralSum
+      (fun k hk => coordinateTimesArctanForwardFTCDerivativeBound eps k hk)).width <=
+        eps.val := by
+  let n : Nat := coordinateTimesArctanForwardOuterStage eps
+  let delta : QPos := coordinateTimesArctanForwardContinuityRadius n
+  let pieces := coordinateTimesArctanForwardPartitionPieces delta n
+  have hpieces : 0 < pieces :=
+    coordinateTimesArctanForwardPartitionPieces_positive delta n
+  have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+    (a := (0 : Rat)) (b := (1 : Rat)) pieces hpieces (by native_decide)
+    (fun k hk => coordinateTimesArctanForwardFTCDerivativeBound eps k
+      (by simpa [pieces, delta, n] using hk))
+    (10 * (precisionAtStage n).val) (by
+      intro k hk
+      simpa [pieces, delta, n] using
+        coordinateTimesArctanForwardFTCDerivativeBound_width_le eps k
+          (by simpa [pieces, delta, n] using hk))
+  have houter := ten_mul_precisionAtStage_coordinateTimesArctanForwardOuterStage_le eps
+  change ((RationalPartition.uniform 0 1 pieces hpieces (by native_decide)).boundIntegralSum
+    (fun k hk => coordinateTimesArctanForwardFTCDerivativeBound eps k
+      (by simpa [pieces, delta, n] using hk))).width <= eps.val
+  calc
+    _ <= (1 - 0) * (10 * (precisionAtStage n).val) := hsum
+    _ = 10 * (precisionAtStage n).val := by grind
+    _ <= eps.val := by simpa [n] using houter
+
+/-- The selected common endpoint stage is narrow enough for the global
+primitive endpoint interval as well. -/
+theorem coordinateTimesArctanForwardFTCEndpoint_width_le (eps : QPos) :
+    (endpointDifferenceInterval
+      coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+      (coordinateTimesArctanForwardFTCEndpointStage eps)).width <= eps.val := by
+  let n : Nat := coordinateTimesArctanForwardOuterStage eps
+  let h : Rat := mesh 0 1 (coordinateTimesArctanForwardFTCPartition eps).pieces
+  have hpos : 0 < h := by
+    simpa [h] using coordinateTimesArctanForwardFTCPartition_mesh_pos eps
+  have hle : h <= 1 := by
+    simpa [h] using coordinateTimesArctanForwardFTCPartition_mesh_le_one eps
+  have hendpoint := arctanRectangleTangentTransportPrecision_atOne_width_le_stageTolerance
+    hpos hle n
+  change (endpointDifferenceCompute coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+    (coordinateTimesArctanForwardFTCEndpointStage eps)).width <= eps.val
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq]
+  calc
+    _ <= (precisionAtStage n).val := by
+      simpa [coordinateTimesArctanForwardFTCEndpointStage, h, n] using hendpoint
+    _ = 1 * (precisionAtStage n).val := by grind
+    _ <= 10 * (precisionAtStage n).val :=
+      Rat.mul_le_mul_of_nonneg_right (by native_decide)
+        (Rat.le_of_lt (precisionAtStage n).property)
+    _ <= eps.val := by
+      simpa [n] using ten_mul_precisionAtStage_coordinateTimesArctanForwardOuterStage_le eps
+
+/-- A fully executable two-stage finite FTC certificate for the positive
+product `x * arctan x` on `[0,1]`.  Its derivative stage is selected by the
+explicit continuity modulus; its endpoint stage is the common uniform-cell
+tangent-transport precision. -/
+def coordinateTimesArctanForwardTwoStageFTC :
+    TwoStageCandidateDerivativeFTC
+      coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.toRealFunRaw 0 1 where
+  primitive_valid := FunctionOnInterval.toRealFunRaw_valid
+    coordinateTimesArctanIntegralRectangleOnUnit
+  choosePartition := coordinateTimesArctanForwardFTCPartition
+  chooseDerivativeStage := coordinateTimesArctanForwardFTCDerivativeStage
+  chooseEndpointStage := coordinateTimesArctanForwardFTCEndpointStage
+  derivativeBound := coordinateTimesArctanForwardFTCDerivativeBound
+  primitive_domain_on := by
+    intro eps i hi
+    change 0 <= (coordinateTimesArctanForwardFTCPartition eps).point i /\
+      (coordinateTimesArctanForwardFTCPartition eps).point i <= 1
+    exact (coordinateTimesArctanForwardFTCPartition eps).point_in_bounds hi
+  candidate_domain_on := by
+    intro eps k hk x hx
+    change 0 <= x /\ x <= 1
+    exact ((coordinateTimesArctanForwardFTCPartition eps).cell k hk).contains_inDomain hx
+  candidate_contained := by
+    intro eps k hk x hx
+    exact coordinateTimesArctanForwardFTCDerivativeBound_contains eps k hk x hx
+  local_endpoint_contained := by
+    intro eps k hk
+    simpa [RationalPartition.cell] using
+      coordinateTimesArctanForwardFTCDerivativeBound_contains_endpointDifference eps k hk
+  riemann_width := coordinateTimesArctanForwardFTCRiemann_width_le
+  endpoint_width := coordinateTimesArctanForwardFTCEndpoint_width_le
+
+/-- The derivative-bound Riemann raw and primitive endpoint raw for
+`x * arctan x` are equivalent by the finite two-stage FTC assembly. -/
+theorem coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint :
+    coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw.Equiv
+      coordinateTimesArctanForwardTwoStageFTC.endpointRaw :=
+  twoStageCandidateDerivativeFTC coordinateTimesArctanForwardTwoStageFTC
 
 /-- The stricter two-sided product budget is small enough both for the
 forward product certificate at the reversed basepoint and for transporting
