@@ -69,6 +69,16 @@ bridge, and a major capability such as continuous Peano--Baker need not add a
 Pi representation.  Do not optimize the Pi numerator at the expense of these
 gates.
 
+The integration policy is deliberately narrow: prove the general FTC,
+substitution, and integration-by-parts theorems with explicit constructive
+certificates, but do not build a catalogue of antiderivatives or named
+``techniques.''  An LLM (or a user) may supply a proposed primitive or
+decomposition; the project should check its derivative, domain, and endpoint
+certificate through those general theorems.  This is not yet a replacement for
+Mathlib in arbitrary scientific or engineering proofs: general calculus
+closure, analytic exp/log and trigonometric bridges, continuous matrix
+Peano--Baker, and broad numerical/PDE infrastructure remain open.
+
 - **Rational interval foundation — checked.** `RealRaw.Valid`, interval
   overlap equivalence, and the source audit excluding Mathlib analysis and
   completed-real completeness are the non-negotiable base.  Re-audit imports

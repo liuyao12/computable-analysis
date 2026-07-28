@@ -9,6 +9,18 @@ algorithms.  Integral formulas enter only after those algorithms exist, as
 theorems saying that a Riemann-sum algorithm computes the same raw real as an
 endpoint expression or an inverse branch.
 
+This is deliberately a \emph{certificate layer}, not a table of integrals.
+The foundation must prove general substitution and integration-by-parts
+theorems, with their domain, orientation, and endpoint hypotheses explicit.
+After that, a user or an LLM may recall or propose a primitive, a
+partial-fraction decomposition, or another familiar calculation; the kernel
+checks its finite algebra and the relevant derivative theorem.  A derivative
+identity alone does not establish a definite-integral formula: one still
+needs a certified integral and a general FTC/substitution/integration-by-parts
+bridge to its endpoint difference.  The finite integration-by-parts material
+below is retained as a pi benchmark for this general interface, not as a
+template for accumulating named integration recipes.
+
 \begin{definition}[Interval function as a total raw evaluator]
 \label{def:function-on-interval-to-realfunraw}
 \lean{ComputableAnalysis.FunctionOnInterval.toRealFunRaw}

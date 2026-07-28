@@ -101,7 +101,7 @@ derivative-bound endpoint bridges, and concrete rectangle/Cauchy/quartic
 routes; the finite rectangle identity and refinement machinery behind
 \cref{def:integration-by-parts-certificate} & reusable construction from
 interval regularity and standard-function derivative certificates, followed by
-the bounded piecewise integration-by-parts theorem\\
+general bounded piecewise integration-by-parts and substitution theorems\\
 Monotone inverse functions & branch-local inverse and bisection interfaces;
 unit-interval square-root search for rational targets & represented targets,
 then sine/arcsine and exponential/logarithm branches\\
@@ -125,6 +125,21 @@ compactified improper integral).  Add a row only when it exercises a genuinely
 new foundation or end-to-end bridge; do not inflate it with presentation
 variants of the same arctangent construction.  The unchecked formulae are
 capability probes, not a denominator for this ledger.
+
+\paragraph{Scientific-calculus boundary.}
+The intended result is a small certificate kernel for scientific and
+engineering arguments, not yet a replacement for a general-purpose analysis
+library.  An LLM should be able to propose a familiar antiderivative or
+calculation, and the kernel should check it after the general FTC,
+substitution, and integration-by-parts bridges have been proved.  At present
+those bridges are only partly instantiated: the project does not yet provide
+general product, chain, quotient, integrability, or endpoint theorems for
+arbitrary raw functions.  It also lacks the analytic (E'=E) certificate,
+the exp/log identifications, completed trigonometric calculus, continuous
+matrix Peano--Baker boxes, and the numerical/PDE/domain layers needed by many
+applications.  Thus the current boundary is a research prototype for tightly
+certified rational one-variable calculations, rather than a drop-in basis for
+proving arbitrary real-world models.
 
 \section{Pi integration suite}\label{sec:pi-scoreboard}
 \lean{ComputableAnalysis.PiProofs.PiIntegrationFamily}
