@@ -244,6 +244,7 @@ additivity.
 \lean{ComputableAnalysis.RationalPartition.clampedPath_step_le_of_maxStep}
 \lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_onPartition}
 \lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_withVariation_onPartition}
+\lean{ComputableAnalysis.RationalPartition.coordinateIntegrationByParts_onPartition_endpoint_bracket}
 \lean{ComputableAnalysis.RationalPartition.uniform_maxStepAtMost_mesh}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference}
 \lean{ComputableAnalysis.RationalPartition.uniform_clampedPath_quadraticVariation_le_mesh_mul_endpointDifference}
@@ -345,6 +346,20 @@ gives the checked finite estimate
 for every nondecreasing sampled path \(v\).  This is exactly the coordinate
 side of the corner estimate needed for \(x\arctan x\); the remaining
 arctangent monotonicity certificate is deliberately separate.
+The finite ingredients are now combined for every supplied certified
+partition.  If its maximum step is at most \(\delta\) and the sampled path
+\(v(P_i)\) is nondecreasing, Lean proves the literal endpoint bracket
+\[
+ b v(b)-a v(a)-\delta\bigl(v(b)-v(a)\bigr)
+ \leq
+ \sum_i P_i\Delta v_i+\sum_i v_i\Delta P_i
+ \leq b v(b)-a v(a).
+\]
+This is
+\code{coordinateIntegrationByParts\_onPartition\_endpoint\_bracket}.
+It is the finite, monotone-piece integration-by-parts theorem required by the
+\(x\arctan x\) route; calling either strip an integral still requires its
+separate effective-FTC certificate.
 For the later integral theorem, functions are supplied on explicit increasing
 or decreasing pieces and the two decompositions are replaced by a common
 rational refinement.  The corner correction is then bounded piece by piece

@@ -254,7 +254,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `RationalPartition.finiteIntegrationByParts_onPartition` and its
   left-endpoint-with-variation counterpart now lift that identity to every
   supplied certified rational partition, with the actual interval endpoints
-  on the right-hand side.  The checked
+  on the right-hand side.  The combined coordinate theorem
+  `coordinateIntegrationByParts_onPartition_endpoint_bracket` now turns the
+  exact identity and maximum-step corner bound into the usable finite bracket
+  `b*v(b)-a*v(a)-delta*(v(b)-v(a)) <= left strips <= b*v(b)-a*v(a)` whenever
+  the sampled second path is nondecreasing.  It is the finite
+  monotone-piece form needed by the `x*arctan x` Pi route, not yet an FTC
+  identification of either strip.  The checked
   `quadraticVariationSum` estimates bound that correction by a maximum first
   increment times the second endpoint variation, or by the product of the two
   endpoint variations; negating both paths supplies the decreasing-piece

@@ -2270,6 +2270,49 @@ theorem finiteIntegrationByParts_withVariation_onPartition {a b : Rat}
       (fun i => u (P.clampedPath i))
       (fun i => v (P.clampedPath i)) P.pieces)
 
+/-- The constructive finite integration-by-parts estimate on an arbitrary
+certified rational partition.  If the sampled second factor is nondecreasing,
+the two left Stieltjes strips differ from the endpoint product by at most the
+partition mesh times that factor's endpoint variation.
+
+This is an exact finite certificate: it does not identify either strip with a
+definite integral or invoke a limiting partition.  It is the form consumed by
+the later monotone-piece FTC construction. -/
+theorem coordinateIntegrationByParts_onPartition_endpoint_bracket {a b : Rat}
+    (P : RationalPartition a b) (v : Rat -> Rat) (delta : Rat)
+    (hstep : P.MaxStepAtMost delta)
+    (hv : forall i,
+      0 <= v (P.clampedPath (i + 1)) - v (P.clampedPath i)) :
+    b * v b - a * v a - delta * (v b - v a) <=
+      leftStieltjesSum P.clampedPath
+          (fun i => v (P.clampedPath i)) P.pieces +
+        leftStieltjesSum (fun i => v (P.clampedPath i))
+          P.clampedPath P.pieces /\
+      leftStieltjesSum P.clampedPath
+          (fun i => v (P.clampedPath i)) P.pieces +
+        leftStieltjesSum (fun i => v (P.clampedPath i))
+          P.clampedPath P.pieces <=
+        b * v b - a * v a := by
+  let corner := quadraticVariationSum
+    P.clampedPath
+    (fun i => v (P.clampedPath i)) P.pieces
+  have hidentity := finiteIntegrationByParts_withVariation_onPartition P
+    (fun x => x) v
+  have hcorner_nonneg : 0 <= corner := by
+    dsimp [corner]
+    exact quadraticVariationSum_nonneg_of_step_nonnegative
+      P.clampedPath
+      (fun i => v (P.clampedPath i))
+      (clampedPath_step_nonnegative P) hv P.pieces
+  have hcorner_le : corner <= delta * (v b - v a) := by
+    dsimp [corner]
+    simpa [clampedPath, P.left_endpoint, P.right_endpoint] using
+      (quadraticVariationSum_le_stepBound_mul_endpointDifference
+        P.clampedPath (fun i => v (P.clampedPath i)) delta
+        (clampedPath_step_le_of_maxStep P delta hstep) hv P.pieces)
+  dsimp [corner] at hcorner_nonneg hcorner_le
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-- The explicit uniform partition has mesh as a certified bound for every
 cell width. -/
 theorem uniform_maxStepAtMost_mesh (a b : Rat) (pieces : Nat)
