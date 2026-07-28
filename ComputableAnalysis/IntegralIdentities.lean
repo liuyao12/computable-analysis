@@ -3000,22 +3000,21 @@ def arctanIntegralRectangleOnUnit_monotone :
   MonotoneOnInterval.ofNondecreasing
     arctanIntegralRectangleOnUnit_nondecreasing
 
-/-- The rectangle-integral arctangent is epsilon--delta continuous on the
-rational unit branch, in the project's literal finite-box sense.  The input
-modulus is the identity: a forward step of size `h` changes the enclosed
-arctangent by at most `h`, and stage
-`4 * (eps.den + 1)` makes each rectangle box no wider than `eps`.  This proof
-uses neither a topology import nor completeness of a real-number model. -/
-theorem arctanIntegralRectangleOnUnit_epsilonDeltaContinuous :
-    EpsilonDeltaContinuousOn arctanIntegralRectangleOnUnit := by
-  intro eps
-  let delta : QPos := ⟨eps.val, eps.property⟩
-  let n : Nat := 4 * (eps.val.den + 1)
-  refine ⟨delta, n, ?_⟩
-  intro x y hx hy hclose
-  have hn : 4 * (eps.val.den + 1) <= n := by
-    dsimp [n]
-    omega
+/-- A fixed-tolerance, fixed-stage form of rational continuity for the
+rectangle arctangent.  It exposes the literal schedule used by the later FTC
+cell construction: input distance at most `eps` and any rectangle stage at
+least `4 * (eps.den + 1)` give `eps`-near output boxes. -/
+theorem arctanIntegralRectangleOnUnit_near_of_qabs_le
+    (eps : QPos) (n : Nat) (hn : 4 * (eps.val.den + 1) <= n)
+    {x y : Rat}
+    (hx : inDomainInterval arctanIntegralRectangleOnUnit.lower
+      arctanIntegralRectangleOnUnit.upper x)
+    (hy : inDomainInterval arctanIntegralRectangleOnUnit.lower
+      arctanIntegralRectangleOnUnit.upper y)
+    (hclose : qabs (y - x) <= eps.val) :
+    QInterval.NearAt
+      (arctanIntegralRectangleOnUnit.compute x hx n)
+      (arctanIntegralRectangleOnUnit.compute y hy n) eps := by
   have hwidthX :
       (ArctanGeometry.arctanIntegralRectangleCompute x n).width <= eps.val :=
     ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
@@ -3034,7 +3033,7 @@ theorem arctanIntegralRectangleOnUnit_epsilonDeltaContinuous :
   · have hstep0 : 0 <= y - x := by grind [Rat.sub_eq_add_neg]
     have hstep : y - x <= eps.val := by
       rw [← qabs_eq_self_of_nonneg hstep0]
-      simpa [delta] using hclose
+      exact hclose
     have hmonotone :
         (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
           (ArctanGeometry.arctanIntegralRectangleCompute y n).hi :=
@@ -3077,7 +3076,7 @@ theorem arctanIntegralRectangleOnUnit_epsilonDeltaContinuous :
         rw [qabs_eq_neg_of_nonpos (by grind [Rat.sub_eq_add_neg])]
         grind [Rat.sub_eq_add_neg]
       rw [← hqabs]
-      simpa [delta] using hclose
+      exact hclose
     have hmonotone :
         (ArctanGeometry.arctanIntegralRectangleCompute y n).lo <=
           (ArctanGeometry.arctanIntegralRectangleCompute x n).hi :=
@@ -3114,6 +3113,51 @@ theorem arctanIntegralRectangleOnUnit_epsilonDeltaContinuous :
         _ <= (ArctanGeometry.arctanIntegralRectangleCompute y n).hi + eps.val :=
               (Rat.add_le_add_left).2 hstep
     · grind [Rat.sub_eq_add_neg]
+
+/-- The rectangle-integral arctangent is epsilon--delta continuous on the
+rational unit branch, in the project's literal finite-box sense.  The input
+modulus is the identity: a forward step of size `h` changes the enclosed
+arctangent by at most `h`, and stage
+`4 * (eps.den + 1)` makes each rectangle box no wider than `eps`.  This proof
+uses neither a topology import nor completeness of a real-number model. -/
+theorem arctanIntegralRectangleOnUnit_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn arctanIntegralRectangleOnUnit := by
+  intro eps
+  let delta : QPos := ⟨eps.val, eps.property⟩
+  let n : Nat := 4 * (eps.val.den + 1)
+  refine ⟨delta, n, ?_⟩
+  intro x y hx hy hclose
+  apply arctanIntegralRectangleOnUnit_near_of_qabs_le eps n
+  · dsimp [n]
+    omega
+  · simpa [delta] using hclose
+
+/-- A computable modulus for the rectangle arctangent on the unit branch.
+At requested stage `n`, an input distance at most `1/(n+1)` is sufficient;
+the rectangle evaluation stage is the explicit denominator schedule for the
+requested output box `precisionAtStage n`. -/
+def arctanIntegralRectangleOnUnit_effectiveModulus :
+    EffectiveModulusFor arctanIntegralRectangleOnUnit where
+  inputPrecision := fun n => n + 1
+  evalPrecision := fun n =>
+    4 * ((precisionAtStage n).val.den + 1)
+  close := by
+    intro x y n hx hy hclose
+    let eps : QPos := precisionAtStage n
+    let N : Nat := 4 * (eps.val.den + 1)
+    have hinput : qabs (y - x) <= eps.val := by
+      cases n with
+      | zero =>
+          have hone : (1 : Rat) / 1 = 1 := by native_decide
+          simpa [eps, precisionAtStage, hone] using hclose
+      | succ n =>
+          have hreciprocal :
+              1 / (((n + 2 : Nat) : Rat)) <= 1 / (((n + 1 : Nat) : Rat)) :=
+            FTC.one_div_nat_antitone (by omega) (by omega) (by omega)
+          simpa [eps, precisionAtStage] using Rat.le_trans hclose hreciprocal
+    simpa [eps, N] using
+      (arctanIntegralRectangleOnUnit_near_of_qabs_le eps N (by omega)
+        hx hy hinput)
 
 /-- The exact coordinate evaluator on the unit interval.  It is the first
 factor in the literal product `x * arctan x` used by the constructive
@@ -3681,15 +3725,24 @@ def coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone :
   MonotoneOnInterval.ofNondecreasing
     coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing
 
-/-- The concrete derivative candidate `arctan x + x / (1 + x^2)` has literal
-rational epsilon--delta continuity on the unit branch.  This is the
-shrinking-range input needed by the derivative-bound FTC route: it combines
-the already certified rectangle-arctangent continuity with the finite
-three-Lipschitz correction estimate above. -/
-theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaContinuous :
-    EpsilonDeltaContinuousOn
-      coordinateTimesArctanIntegralRectangleDerivativeOnUnit := by
-  intro eps
+/-- A fixed-tolerance, explicit-stage continuity estimate for the derivative
+candidate `arctan x + x / (1 + x^2)`.  Input distance at most `eps/6` gives
+`eps`-near derivative boxes at the stated rectangle stage.  Exposing this
+schedule is what later lets a uniform FTC partition remain executable. -/
+theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le
+    (eps : QPos) {x y : Rat}
+    (hx : inDomainInterval
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper x)
+    (hy : inDomainInterval
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper y)
+    (hclose : qabs (y - x) <= eps.val / 6) :
+    QInterval.NearAt
+      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx
+        (4 * ((eps.val / 2).den + 1)))
+      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute y hy
+        (4 * ((eps.val / 2).den + 1))) eps := by
   let eta : QPos :=
     { val := eps.val / 2
       property := by
@@ -3702,32 +3755,20 @@ theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaConti
         rw [Rat.div_def]
         exact Rat.mul_pos eps.property
           ((Rat.inv_pos).2 (by native_decide)) }
-  obtain ⟨deltaA, n, hA⟩ :=
-    arctanIntegralRectangleOnUnit_epsilonDeltaContinuous eta
-  let delta : QPos :=
-    { val := if deltaA.val <= rho.val then deltaA.val else rho.val
-      property := by
-        split
-        · exact deltaA.property
-        · exact rho.property }
-  refine ⟨delta, n, ?_⟩
-  intro x y hx hy hclose
-  have hdeltaA : delta.val <= deltaA.val := by
-    dsimp [delta]
-    split
-    · grind
-    · grind
-  have hdeltaRho : delta.val <= rho.val := by
-    dsimp [delta]
-    split
-    · grind
-    · grind
-  have hAnear := hA x y hx hy (Rat.le_trans hclose hdeltaA)
+  let n : Nat := 4 * (eta.val.den + 1)
+  have hrho_le_eta : rho.val <= eta.val := by
+    dsimp [rho, eta]
+    rw [Rat.div_def, Rat.div_def]
+    apply Rat.mul_le_mul_of_nonneg_left
+    · native_decide
+    · exact Rat.le_of_lt eps.property
+  have hAnear := arctanIntegralRectangleOnUnit_near_of_qabs_le eta n
+    (by dsimp [n]; omega) hx hy (Rat.le_trans (by simpa [rho] using hclose) hrho_le_eta)
   rcases hAnear with ⟨hAxy, hAyx, hAwidthX, hAwidthY⟩
   have hcorrection := coordinate_integralKernel_lipschitz_on_unit.2
     x y hx.1 hx.2 hy.1 hy.2
-  have hinputRho : qabs (y - x) <= rho.val :=
-    Rat.le_trans hclose hdeltaRho
+  have hinputRho : qabs (y - x) <= rho.val := by
+    simpa [rho] using hclose
   have hthreeRho : (3 : Rat) * rho.val = eta.val := by
     dsimp [rho, eta]
     rw [Rat.div_def, Rat.div_def]
@@ -3818,6 +3859,69 @@ theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaConti
             (arctanIntegralRectangleOnUnit.compute y hy n).lo <= eps.val :=
       Rat.le_trans hAwidthY heta_le_eps
     grind [Rat.sub_eq_add_neg]
+
+/-- The concrete derivative candidate `arctan x + x / (1 + x^2)` has literal
+rational epsilon--delta continuity on the unit branch.  Its executable
+schedule is the fixed-stage theorem above: the radius is `eps/6` and the
+rectangle stage is determined by the denominator of `eps/2`. -/
+theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit := by
+  intro eps
+  let rho : QPos :=
+    { val := eps.val / 6
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide)) }
+  let n : Nat := 4 * ((eps.val / 2).den + 1)
+  refine ⟨rho, n, ?_⟩
+  intro x y hx hy hclose
+  simpa [n] using
+    (coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le
+      eps hx hy (by simpa [rho] using hclose))
+
+/-- The elementary denominator schedule used to turn the fixed-tolerance
+derivative estimate into an `EffectiveModulusFor`. -/
+private theorem one_div_six_mul_succ_le_precision_div_six (n : Nat) :
+    1 / (((6 * (n + 1) : Nat) : Rat)) <= (precisionAtStage n).val / 6 := by
+  cases n with
+  | zero => native_decide
+  | succ n =>
+      have hreciprocal :
+          1 / (((6 * (n + 2) : Nat) : Rat)) <=
+            1 / (((6 * (n + 1) : Nat) : Rat)) :=
+        FTC.one_div_nat_antitone (by omega) (by omega) (by omega)
+      calc
+        1 / (((6 * (Nat.succ n + 1) : Nat) : Rat)) =
+            1 / (((6 * (n + 2) : Nat) : Rat)) := by congr 3 <;> omega
+        _ <= 1 / (((6 * (n + 1) : Nat) : Rat)) := hreciprocal
+        _ = (precisionAtStage (Nat.succ n)).val / 6 := by
+          rw [precisionAtStage, dif_neg (Nat.succ_ne_zero n), Rat.natCast_mul]
+          change 1 / (6 * ((n + 1 : Nat) : Rat)) =
+            (1 / ((n + 1 : Nat) : Rat)) / 6
+          rw [Rat.div_def, Rat.inv_mul_rev]
+          grind [Rat.mul_comm]
+
+/-- A computable modulus for the derivative of the unit-branch product
+`x * arctan x`.  The stage and radius are explicit finite rational functions
+of the requested output stage, so the later FTC partition can be computed
+without extracting a witness from an existential continuity statement. -/
+def coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus :
+    EffectiveModulusFor
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
+  inputPrecision := fun n => 6 * (n + 1)
+  evalPrecision := fun n =>
+    4 * (((precisionAtStage n).val / 2).den + 1)
+  close := by
+    intro x y n hx hy hclose
+    let eps : QPos := precisionAtStage n
+    have hinput : qabs (y - x) <= eps.val / 6 := by
+      exact Rat.le_trans hclose (by simpa [eps] using
+        one_div_six_mul_succ_le_precision_div_six n)
+    simpa [eps] using
+      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le
+        eps hx hy hinput)
 
 /-- The positive-step quotient of the literal interval product has an exact
 endpoint decomposition.  The terms use the arctangent quotient at the same

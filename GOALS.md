@@ -92,11 +92,19 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `arctanIntegralRectangleOnUnit_epsilonDeltaContinuous`: its finite tangent
   chart proves `A.lo(x+h) - A.hi(x) <= h`, so `delta = eps` and common stage
   `4 * (eps.den + 1)` make both cross-box gaps and both widths at most `eps`.
+  Its checked `arctanIntegralRectangleOnUnit_effectiveModulus` packages the
+  same data as the executable schedule `inputPrecision n = n + 1`, with the
+  displayed denominator-controlled rectangle stage at output tolerance
+  `precisionAtStage n`.
   The concrete product-derivative candidate `arctan x + x/(1+x*x)` now also
   has literal epsilon--delta continuity. Its rational correction is checked
   3-Lipschitz; splitting the output budget as `eps/2` for arctangent and
   `eps/6` for the input correction gives a finite modulus for the whole
-  derivative box. Its checked positive product secants now also satisfy
+  derivative box. Its fixed theorem uses exactly that radius and stage
+  `4 * ((eps / 2).den + 1)`; the checked
+  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus`
+  makes this a computable schedule with `inputPrecision n = 6 * (n + 1)`.
+  Its checked positive product secants now also satisfy
   `coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
   the endpoint difference lies in the cell width times the left derivative
   box widened by twice the requested stage tolerance.
@@ -113,7 +121,8 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   coincident-stage special case. The remaining product-specific FTC work is
   to build its cell family and endpoint-width schedule. The uniform cell count
   `coordinateTimesArctanForwardPartitionPieces` is now explicit and
-  formally below both the continuity radius and forward step budget.
+  formally below both the executable continuity radius and forward step
+  budget.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
@@ -387,7 +396,9 @@ another. The Pi score stays useful only as secondary integration coverage.
   supplies endpoint derivative ranges on every positive rational cell. The
   checked forward-range enclosure now supplies one common box for every
   derivative value within its continuity radius and the endpoint difference,
-  with an explicit ten-tolerance width bound. The compatible uniform rational
+  with an explicit ten-tolerance width bound. The derivative-continuity
+  radius and evaluation stage now come from the checked effective modulus,
+  not a choice extracted from epsilon--delta existence. The compatible uniform rational
   partition is now selected by the finite denominator product
   `(delta.den + 1) * 72 * (n + 1)`. Proving its
   telescoping overlap and shrinking bound schedule, and deriving the
