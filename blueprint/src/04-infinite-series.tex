@@ -34,6 +34,7 @@ term magnitudes shrink to zero.
 \section{Arctangent, Leibniz, and Machin}
 
 \begin{definition}[Power-series arctangent]\label{def:arctan-series}
+\lean{ComputableAnalysis.arctan.series}
 \lean{ComputableAnalysis.arctan}
 \lean{ComputableAnalysis.arctanSeries}
 \lean{ComputableAnalysis.PiProofs.arctanFunction}
@@ -47,10 +48,10 @@ intervals for
 This is an instance of \cref{def:real-fun-raw}: the domain is the rational
 interval \([-1,1]\), and the stage algorithm sends \((x,n)\) to the interval
 between two consecutive alternating partial sums.  For fixed rational
-\(x\in[-1,1]\), the resulting sequence in \(n\) is a raw real.  Lean keeps the
-older readable evaluator \code{arctan : Rat -> RealRaw}; the scoreboard-facing
-alias is \code{arctanSeries : Rat -> RealRaw}, and the proof-facing function is
-\code{PiProofs.arctanFunction}.
+\(x\in[-1,1]\), the resulting sequence in \(n\) is a raw real.  Its public
+presentation is \code{arctan.series}.  Lean keeps the older raw evaluator
+\code{arctan : Rat -> RealRaw}, and \code{arctanSeries : Rat -> RealRaw} as a
+compatibility alias; the proof-facing function is \code{PiProofs.arctanFunction}.
 \end{definition}
 
 \begin{theorem}[Leibniz as arctangent]\label{thm:leibniz-arctan}

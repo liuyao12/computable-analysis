@@ -186,6 +186,7 @@ sector has area equal to half its angle, the area computed by the algorithm is
 \begin{definition}[Geometric arctangent area algorithm]
 \label{def:geometric-arctan}
 \label{def:arctan-area-stage-algorithm}
+\lean{ComputableAnalysis.arctan.geom}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
 \lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
 \lean{ComputableAnalysis.ArctanGeometry.arctanAreaIncrement}
@@ -199,7 +200,7 @@ lower bound \(x/(1+x^2)\) and the tangent-triangle upper bound \(x\).  It then
 bisects the current rational parameter intervals, using exactly the same
 increment and decrement formulas as \code{piCircleArea}.
 \begin{verbatim}
-def arctanGeom(x, n):
+def arctan.geom(x, n):
     a = x / (1 + x*x)
     b = x
     intervals = [(0, x)]
@@ -225,7 +226,9 @@ def arctanGeom(x, n):
     return [a, b]
 \end{verbatim}
 The algorithm is packaged as its own raw function, not as a definitional
-alias of \code{piCircleArea}.  The special case \(x=1\) is related to
+alias of \code{piCircleArea}.  The implementation-level evaluator is
+\code{ArctanGeometry.arctanGeom}; its public presentation name is
+\code{arctan.geom}.  The special case \(x=1\) is related to
 \code{piCircleArea} by a theorem, which is the right proof obligation for the
 geometric identity \(\pi=4\arctangeom(1)\).
 \end{definition}

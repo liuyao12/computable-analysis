@@ -20,12 +20,18 @@ At a certified rational input, either raw can be turned into a `Real` with
 records the other raw as a verified alternative computation. -/
 namespace arctan
 
-/-- Arctangent from geometric sector-area exhaustion. -/
+/-- Arctangent from geometric sector-area exhaustion.
+
+This is the public dot-qualified presentation; the older
+`ArctanGeometry.arctanGeom` remains the implementation-level raw evaluator. -/
 def geom : Elementary.Arctan.FunctionRepresentation where
   name := "arctan.geom"
   raw := ArctanGeometry.representation.raw
 
-/-- Arctangent from its alternating power series on `|x| <= 1`. -/
+/-- Arctangent from its alternating power series on `|x| <= 1`.
+
+This is the public dot-qualified presentation; the shorter `arctan` and
+`arctanSeries` names remain compatibility aliases for the raw evaluator. -/
 def series : Elementary.Arctan.FunctionRepresentation where
   name := "arctan.series"
   raw := Elementary.Arctan.powerSeries.raw

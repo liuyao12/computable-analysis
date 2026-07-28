@@ -230,7 +230,7 @@ theorem powerSeriesFunctionRaw_compute_eq_arctan
     powerSeriesFunctionRaw.compute x h n = (arctan x).compute n := rfl
 
 def powerSeries : FunctionRepresentation where
-  name := "arctan.ps"
+  name := "arctan.series"
   raw := powerSeriesFunctionRaw
 
 def PowerSeriesSpec : Prop :=
