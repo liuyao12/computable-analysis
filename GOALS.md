@@ -106,10 +106,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   tolerances. The generic finite global assembly is now checked: adjacent
   common-stage endpoint boxes telescope by interval containment, and a
   uniform partition turns a per-cell width bound `e` into total width at
-  most `(b-a)*e`. `SelectedStageCandidateDerivativeFTC` packages precisely
-  this selected-common-stage order of quantifiers and derives overlap rather
-  than postulating it. The remaining product-specific FTC work is to build
-  its cell family and endpoint-width schedule. The uniform cell count
+  most `(b-a)*e`. `TwoStageCandidateDerivativeFTC` now packages the actual
+  order of quantifiers: a common derivative-continuity stage may differ from
+  the common endpoint stage used by the telescope. Its overlap is derived
+  rather than postulated; `SelectedStageCandidateDerivativeFTC` remains the
+  coincident-stage special case. The remaining product-specific FTC work is
+  to build its cell family and endpoint-width schedule. The uniform cell count
   `coordinateTimesArctanForwardPartitionPieces` is now explicit and
   formally below both the continuity radius and forward step budget.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension

@@ -3047,6 +3047,155 @@ theorem selectedStageCandidateDerivativeFTC
     h.boundedIntegralRaw.Equiv h.endpointRaw :=
   h.equiv_endpoint
 
+/-- A finite candidate-derivative FTC certificate with independently chosen
+derivative and primitive-endpoint evaluation stages.
+
+The two schedules are intentional.  A step-aware derivative construction can
+need a fine stage depending on a cell width in order to enclose the primitive
+secant, while epsilon--delta continuity can provide a different common stage
+at which the candidate derivative is enclosed throughout that cell.  The
+finite telescope only needs all *endpoint* boxes at one common stage, so
+requiring those two unrelated schedules to coincide would add a spurious
+analytic obligation.
+
+As in `SelectedStageCandidateDerivativeFTC`, the certificate is finite at
+each requested outer precision: its partition, both stages, cell bounds, and
+all enclosures are explicit rational data. -/
+structure TwoStageCandidateDerivativeFTC
+    (F dF : RealFunRaw) (a b : Rat) where
+  primitive_valid : F.Valid
+  choosePartition : QPos -> RationalPartition a b
+  chooseDerivativeStage : QPos -> Nat
+  chooseEndpointStage : QPos -> Nat
+  derivativeBound :
+    forall eps,
+      forall k (_ : k < (choosePartition eps).pieces), QInterval
+  primitive_domain_on :
+    forall eps i, i <= (choosePartition eps).pieces ->
+      F.domain ((choosePartition eps).point i)
+  candidate_domain_on :
+    forall eps k (hk : k < (choosePartition eps).pieces) x,
+      ((choosePartition eps).cell k hk).contains x -> dF.domain x
+  candidate_contained :
+    forall eps k (hk : k < (choosePartition eps).pieces) x
+      (_ : ((choosePartition eps).cell k hk).contains x),
+      QInterval.ContainsInterval
+        (derivativeBound eps k hk)
+        (dF.compute x (chooseDerivativeStage eps))
+  local_endpoint_contained :
+    forall eps k (hk : k < (choosePartition eps).pieces),
+      QInterval.ContainsInterval
+        (((choosePartition eps).cell k hk).scaleBound (derivativeBound eps k hk))
+        (endpointDifferenceInterval F
+          ((choosePartition eps).cell k hk).lower
+          ((choosePartition eps).cell k hk).upper
+          (chooseEndpointStage eps))
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk => derivativeBound eps k hk)).width <= eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseEndpointStage eps)).width <= eps.val
+
+namespace TwoStageCandidateDerivativeFTC
+
+/-- The finite derivative-bound sum selected at an outer precision. -/
+def boundedIntegralInterval
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) (eps : QPos) : QInterval :=
+  (h.choosePartition eps).boundIntegralSum
+    (fun k hk => h.derivativeBound eps k hk)
+
+/-- The primitive endpoint box, evaluated at its independently selected
+common stage. -/
+def endpointInterval
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) (eps : QPos) : QInterval :=
+  endpointDifferenceInterval F a b (h.chooseEndpointStage eps)
+
+/-- The literal finite telescope still derives overlap: only the endpoint
+stage participates in the telescoping calculation. -/
+theorem overlap
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) (eps : QPos) :
+    QInterval.Overlaps (h.boundedIntegralInterval eps) (h.endpointInterval eps) := by
+  apply RationalPartition.boundIntegralSum_overlaps_endpointDifference
+    (P := h.choosePartition eps) (F := F) (prec := h.chooseEndpointStage eps)
+    h.primitive_valid
+  · intro i hi
+    exact h.primitive_domain_on eps i hi
+  · intro k hk
+    simpa [RationalPartition.cell] using h.local_endpoint_contained eps k hk
+
+theorem closeAt
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) (eps : QPos) :
+    QInterval.CloseAt (h.boundedIntegralInterval eps) (h.endpointInterval eps) eps := by
+  exact ⟨h.overlap eps, h.riemann_width eps, h.endpoint_width eps⟩
+
+def boundedIntegralCompute
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) : Nat -> QInterval :=
+  fun n => h.boundedIntegralInterval (precisionAtStage n)
+
+def endpointCompute
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) : Nat -> QInterval :=
+  fun n => h.endpointInterval (precisionAtStage n)
+
+def boundedIntegralRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) : RealRaw where
+  compute := h.boundedIntegralCompute
+
+def endpointRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) : RealRaw where
+  compute := h.endpointCompute
+
+/-- The two independently scheduled finite algorithms compute the same raw
+real: the derivative schedule affects the certified cell bounds, while the
+endpoint schedule supplies the common-stage telescope. -/
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) :
+    h.boundedIntegralRaw.Equiv h.endpointRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hgood := h.closeAt (precisionAtStage n)
+  exact (RealRaw.compareAt_overlap_iff
+    h.boundedIntegralRaw h.endpointRaw n n).2 hgood.1
+
+end TwoStageCandidateDerivativeFTC
+
+/-- Top-level closure theorem for the independently scheduled finite
+candidate-derivative strategy. -/
+theorem twoStageCandidateDerivativeFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : TwoStageCandidateDerivativeFTC F dF a b) :
+    h.boundedIntegralRaw.Equiv h.endpointRaw :=
+  h.equiv_endpoint
+
+/-- A common-stage certificate is a special case of the two-stage interface.
+This preserves the simpler API for constructions whose derivative and
+endpoint schedules genuinely coincide. -/
+def SelectedStageCandidateDerivativeFTC.toTwoStage
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) :
+    TwoStageCandidateDerivativeFTC F dF a b where
+  primitive_valid := h.primitive_valid
+  choosePartition := h.choosePartition
+  chooseDerivativeStage := h.chooseStage
+  chooseEndpointStage := h.chooseStage
+  derivativeBound := h.derivativeBound
+  primitive_domain_on := h.primitive_domain_on
+  candidate_domain_on := h.candidate_domain_on
+  candidate_contained := h.candidate_contained
+  local_endpoint_contained := h.local_endpoint_contained
+  riemann_width := h.riemann_width
+  endpoint_width := h.endpoint_width
+
 inductive MonotonicityKind where
   | nondecreasing
   | nonincreasing

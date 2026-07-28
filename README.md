@@ -197,8 +197,9 @@ width at most ten stage tolerances. The generic finite global assembly is
 now checked: common-stage endpoint boxes telescope by interval containment,
 and an `N`-cell uniform partition converts a width `e` on each derivative
 box into total width at most `(b-a)*e`. The new
-`SelectedStageCandidateDerivativeFTC` matches this selected-stage data and
-derives its overlap condition. What remains is the concrete product cell
+`TwoStageCandidateDerivativeFTC` matches the actual two-schedule data and
+derives its overlap condition; `SelectedStageCandidateDerivativeFTC` remains
+the common-stage special case. What remains is the concrete product cell
 family and endpoint-width schedule. The partition count is already explicit:
 `(delta.den + 1) * 72 * (n + 1)` gives a unit mesh below both the selected
 continuity radius and the forward step budget.

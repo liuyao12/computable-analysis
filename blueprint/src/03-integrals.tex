@@ -1136,12 +1136,17 @@ endpoint box its shrinking schedule.
 \lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
 \lean{ComputableAnalysis.SelectedStageCandidateDerivativeFTC}
 \lean{ComputableAnalysis.selectedStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.twoStageCandidateDerivativeFTC}
 \uses{thm:coordinate-arctangent-forward-secant-enclosure}
 \leanok
 Let a rational partition of \([a,b]\) be fixed, and suppose that at one
-common computation stage each scaled derivative box on a cell contains the
-computed endpoint difference on that cell.  Lean now proves, by induction on
-the literal finite fold, that their sum contains the single box for
+common \emph{endpoint} computation stage each scaled derivative box on a
+cell contains the computed endpoint difference on that cell.  The candidate
+derivative values may use a distinct common continuity stage: the finite
+telescope consumes the certified boxes and endpoint stage, not the raw index
+at which the candidate values were obtained.  Lean now proves, by induction
+on the literal finite fold, that their sum contains the single box for
 \(F(b)-F(a)\).  The key adjacent calculation is
 \[
  [F(b)-F(a)]+[F(c)-F(b)]\ \supseteq\ [F(c)-F(a)],
@@ -1157,17 +1162,20 @@ most \(e\), the same finite fold has width at most
 \]
 On the unit interval this is simply \(e\): the formal proof uses the exact
 rational identity \(N\,((b-a)/N)=b-a\).  The new
-\texttt{SelectedStageCandidateDerivativeFTC} package matches this order of
-quantifiers.  At each requested outer precision it asks for a partition and
-only one common evaluation stage; its overlap field is a theorem derived
-from the finite telescope, rather than an unproved numerical side condition.
+\texttt{TwoStageCandidateDerivativeFTC} package matches the actual order of
+quantifiers.  At each requested outer precision it asks for a partition, a
+common derivative-continuity stage, and a common endpoint stage; its overlap
+field is a theorem derived from the finite telescope, rather than an unproved
+numerical side condition.  The older
+\texttt{SelectedStageCandidateDerivativeFTC} remains the special case in
+which those two schedules happen to coincide.
 
 For \(P(x)=x\arctan(x)\), the preceding local result supplies the required
-common-stage box of width at most \(10\varepsilon_n\), and the explicit
-uniform mesh supplies the cells.  Still required before claiming the
-effective FTC for this product are the fully assembled cell function and an
-explicit endpoint-width schedule for \(P(1)-P(0)\).  This theorem closes the
-generic global algebra, not that final concrete instantiation.
+two-stage box of width at most \(10\varepsilon_n\), and the explicit uniform
+mesh supplies the cells.  Still required before claiming the effective FTC
+for this product are the fully assembled cell function and an explicit
+endpoint-width schedule for \(P(1)-P(0)\).  This theorem closes the generic
+global algebra, not that final concrete instantiation.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
