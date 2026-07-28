@@ -5737,6 +5737,102 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
             (precisionAtStage n).val :=
           (Rat.add_le_add_left).2 hrightBudget
 
+/-- A public integral construction for the positive product derivative,
+deliberately computed by the certified primitive endpoint difference.
+
+The separately checked
+`coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint` identifies the
+finite derivative-bound Riemann raw with this endpoint.  This construction
+does not claim that the two computations are definitionally the same: the
+validity/nestedness normalization of that Riemann raw remains a separate FTC
+bridge. -/
+def coordinateTimesArctanDerivativeEndpointConstruction :
+    Integral.ConstructionFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
+  compute := endpointDifferenceCompute
+    coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+  certificate := coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+
+/-- The endpoint-transport construction packaged through the monotone
+integral API. -/
+def coordinateTimesArctanDerivativeEndpointMonotoneConstruction :
+    Integral.MonotoneConstructionFor
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
+  monotone := coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone
+  construction := coordinateTimesArctanDerivativeEndpointConstruction
+
+/-- The public monotone integral raw exposed by the endpoint-transport
+construction for `arctan x + x / (1 + x^2)` on `[0,1]`. -/
+def coordinateTimesArctanDerivativeEndpointMonotoneIntegral : RealRaw :=
+  Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+    coordinateTimesArctanDerivativeEndpointMonotoneConstruction
+
+theorem coordinateTimesArctanDerivativeEndpointMonotoneIntegral_valid :
+    coordinateTimesArctanDerivativeEndpointMonotoneIntegral.Valid :=
+  Integral.monotoneIntegralFor_valid
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+    coordinateTimesArctanDerivativeEndpointMonotoneConstruction
+
+theorem coordinateTimesArctanDerivativeEndpointMonotoneIntegral_compute_eq (n : Nat) :
+    coordinateTimesArctanDerivativeEndpointMonotoneIntegral.compute n =
+      endpointDifferenceCompute coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 n := rfl
+
+/-- The primitive endpoint formula through the public monotone integral API.
+This is an endpoint transport; the finite two-stage Riemann-raw comparison is
+recorded separately in `coordinateTimesArctanForwardTwoStageFTC`. -/
+def coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity :
+    Integral.MonotoneDefiniteIdentityFor
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+      coordinateTimesArctanIntegralRectangleOnUnit where
+  same_lower := rfl
+  same_upper := rfl
+  construction := coordinateTimesArctanDerivativeEndpointMonotoneConstruction
+  endpoint_valid := coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+  equivalent := by
+    apply RealRaw.equiv_refl
+    simpa [Integral.monotoneIntegralFor, Integral.integralFor,
+      coordinateTimesArctanDerivativeEndpointMonotoneConstruction,
+      coordinateTimesArctanDerivativeEndpointConstruction,
+      endpointDifferenceRaw, RealRaw.Valid] using
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+
+/-- The endpoint-transport identity viewed through the non-monotone definite
+integral interface. -/
+def coordinateTimesArctanDerivativeEndpointDefiniteIdentity :
+    Integral.DefiniteIdentityFor
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+      coordinateTimesArctanIntegralRectangleOnUnit :=
+  coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity.toDefiniteIdentityFor
+
+/-- The endpoint-transport identity viewed through the public finite-piece
+monotone integral interface. -/
+noncomputable def coordinateTimesArctanDerivativeEndpointGeneralDefiniteIdentity :
+    Integral.GeneralDefiniteIdentityFor
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+      coordinateTimesArctanIntegralRectangleOnUnit :=
+  Integral.GeneralDefiniteIdentityFor.ofMonotone
+    coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity
+    (by native_decide)
+
+/-- The public endpoint-transport integral computes the geometric arctangent
+at one. -/
+theorem coordinateTimesArctanDerivativeEndpointMonotoneIntegral_equiv_arctanGeom_one :
+    coordinateTimesArctanDerivativeEndpointMonotoneIntegral.Equiv
+      (ArctanGeometry.arctanGeom (1 : Rat)) := by
+  have hleft : coordinateTimesArctanDerivativeEndpointMonotoneIntegral.Valid :=
+    coordinateTimesArctanDerivativeEndpointMonotoneIntegral_valid
+  have hendpoint :
+      (endpointDifferenceRaw coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+        coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+  have hgeom : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit
+      (x := (1 : Rat)) (by native_decide) (by native_decide)
+  simpa [coordinateTimesArctanDerivativeEndpointMonotoneIntegral] using
+    RealRaw.equiv_trans hleft hendpoint hgeom
+      coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity.equivalent
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_arctanGeom_one
+
 /-- The certified positive product branch has right derivative zero at the
 left endpoint.  The proof uses the exact finite quotient identity above,
 not a global product rule. -/

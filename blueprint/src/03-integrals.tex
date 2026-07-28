@@ -1235,6 +1235,11 @@ stage for every cell and at the global endpoint.
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCEndpoint_width_le}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneIntegral_equiv_arctanGeom_one}
 \uses{thm:coordinate-arctangent-forward-secant-enclosure,thm:finite-common-stage-ftc-assembly}
 \leanok
 The product now has a fully assembled \emph{finite two-stage FTC raw}\ on
@@ -1259,6 +1264,22 @@ argument.  It is intentionally not yet presented as the repository's public
 definite integral: the remaining engineering step is to give this new
 two-stage raw the validity/nestedness bridge required by
 \texttt{Integral.ConstructionFor}.
+
+There is now also a deliberately named \emph{endpoint-transport} public
+interface for this derivative. Its monotone construction computes the already
+certified raw \((xA(x))(1)-(xA(x))(0)\), and hence Lean exposes the endpoint
+formula through the ordinary, monotone, and finite-piece integral interfaces.
+In particular,
+\[
+  \mathop{\int}_{0}^{1}\!\left(A(x)+\frac{x}{1+x^2}\right)\,dx
+  \ \Equiv\ A(1).
+\]
+The name is significant: the current \texttt{ConstructionFor} contract asks
+only for a valid computation, so this does \emph{not} assert that the public
+computation is definitionally the bounded Riemann raw. The preceding
+two-stage theorem supplies that finite comparison separately; making their
+validity/nestedness relation a single normalized construction is still the
+remaining FTC engineering task.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]

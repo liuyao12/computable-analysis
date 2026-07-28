@@ -128,9 +128,15 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   assembled in `coordinateTimesArctanForwardTwoStageFTC`; Lean proves its
   bounded-sum raw equivalent to the product endpoint raw. The uniform cell
   count `coordinateTimesArctanForwardPartitionPieces` remains the explicit
-  finite mesh selector. The remaining bridge is to package this new
-  two-stage raw as a valid public `Integral.ConstructionFor`, not to prove
-  the finite FTC comparison again.
+  finite mesh selector. An explicitly named endpoint-transport construction,
+  `coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity`, now
+  exposes the same primitive endpoint formula through the public monotone,
+  ordinary, and finite-piece integral interfaces; its raw computes the
+  certified endpoint difference and therefore evaluates to `arctanGeom 1`.
+  This is intentionally not counted as the missing normalization theorem:
+  the remaining bridge is to package the new two-stage bounded-sum raw
+  itself as a valid public `Integral.ConstructionFor`, not to prove the
+  finite FTC comparison again.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
@@ -414,7 +420,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   now all checked in `coordinateTimesArctanForwardTwoStageFTC`, which proves
   the bounded-sum raw equivalent to the product endpoint raw. What remains
   is the validity/nestedness bridge that promotes this two-stage raw to the
-  public definite-integral API.
+  public definite-integral API. A distinctly named endpoint-transport
+  monotone construction is now available for immediate API use: it computes
+  the already certified product endpoint raw and Lean proves it equivalent to
+  `arctanGeom 1`. It is not a substitute for the outstanding bounded-sum
+  normalization bridge.
   The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor

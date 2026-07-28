@@ -209,6 +209,14 @@ and evaluation stage are executable, so the constructor makes no existential
 choice. The partition count is:
 `(delta.den + 1) * 72 * (n + 1)` gives a unit mesh below both the selected
 continuity radius and the forward step budget.
+For direct use by later developments, the deliberately named
+`coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity` also
+exposes that endpoint formula through the public monotone, ordinary, and
+finite-piece integral interfaces; its certified computation is the primitive
+endpoint raw and Lean proves it equivalent to `arctanGeom 1`. This is an
+endpoint transport, not a claim that the public computation has already been
+normalized to the two-stage bounded Riemann raw. That validity/nestedness
+normalization remains the next FTC bridge.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
