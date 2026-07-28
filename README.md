@@ -15,6 +15,12 @@ being as fast as possible.
 See `GOALS.md` for the current mathematical roadmap and links to the Lean
 definitions/proved bridge theorems.
 
+For a fast, task-oriented map of the Lean API---including the difference
+between checked theorems, interfaces, and open targets---start with
+[FORMALIZATION_GUIDE.md](FORMALIZATION_GUIDE.md).  It is the recommended
+on-ramp for an LLM or a contributor formalizing a new scientific or
+engineering argument.
+
 ## Linear differential equations
 
 The foundation now has a finite Peano--Baker entry point in
