@@ -481,6 +481,8 @@ integration by parts.
 \label{thm:coordinate-arctangent-product-rule}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nonneg_bounded}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
 \uses{thm:coordinate-arctangent-forward-product-rule,prop:arctangent-tangent-chart-quotient}
 \leanok
@@ -499,6 +501,11 @@ transports the exact \(x/(1+x^2)\) summand.  The checked step budget is
 \( |h|\le1/(648(n+1)) \); it leaves room for all box widths and transport
 errors at requested precision \(n\).  This is a concrete product theorem,
 not a general product-rule closure theorem.
+
+The same finite evaluator is now certified in the derivative-bound form used
+by the FTC layer: every stage box for the right-hand side lies in
+\([0,2]\).  This is a usable bound on the candidate derivative, not yet the
+cellwise secant-containment certificate that the effective FTC still requires.
 
 Only the effective FTC connection from this derivative certificate to the
 already finite integration-by-parts rectangles remains for this calculus
@@ -552,8 +559,8 @@ Consequently Lean proves a raw-real equivalence between the executable
 triangle representative and that strip.  This is progress toward the
 arctangent integration-by-parts row, with an explicit convergence rate, but
 the name deliberately remains \code{arctanKernelTriangleRaw}: replacing the
-growing inner sums by \(\arctan(x)\) is exactly the still-open effective
-FTC/product-derivative identification.
+growing inner sums by \(\arctan(x)\) is exactly the still-open effective FTC
+identification.
 
 There is nevertheless a completed direct evaluator obtained by putting that
 triangle raw beside the already certified logarithmic strip for
@@ -566,7 +573,7 @@ the unit arctangent kernel box, and Lean proves
 This is a useful finite Fubini/strip computation and an explicit test case
 for the later logarithm route.  It is deliberately not called
 \(4\int\arctan+2\log 2\): that displayed calculus identity still needs the
-global effective FTC/product-derivative identification and the canonical
+global effective FTC identification and the canonical
 logarithm transport.
 \end{theorem}
 
@@ -732,9 +739,8 @@ and the explicit choice \(m=\varepsilon.\mathrm{den}+1\) replaces
 \(1/m\) by \(\varepsilon\).  Thus the concrete rectangle route now has a
 full finite integration-by-parts mesh certificate, including its endpoint
 and convergence-rate budget; the two summands are not yet claimed to be
-definite integrals.  Promoting them separately still requires the
-product-derivative and FTC comparison certificates needed by the later
-integration-by-parts theorem.
+definite integrals.  Promoting them separately still requires the effective
+FTC comparison certificates needed by the later integration-by-parts theorem.
 
 There is nevertheless a useful checked \emph{supplementary computation} at
 this finite stage.  At stage \(n\), form the point interval at
@@ -748,7 +754,7 @@ Multiplying it by four gives a rate-certified regression evaluator for
 \(\pi\).  This does \emph{not} promote either strip sum to a definite integral
 and does not mark the arctangent--logarithm scoreboard row: its purpose is to
 keep the actual finite integration-by-parts algebra executable while the
-product-derivative, FTC, and canonical-logarithm bridges are developed.
+effective-FTC and canonical-logarithm bridges are developed.
 \end{definition}
 
 \begin{proposition}[Monotonicity and endpoint anchoring of the positive arctangent product]
@@ -780,8 +786,8 @@ Consequently the endpoint-difference raw for this product on \([0,1]\) is a
 valid presentation equivalent to the geometric value
 \(\arctan_{\mathrm{geom}}(1)\).  This is boundary data only: it does not
 differentiate the product or identify an integral of the product with that
-endpoint difference.  Those remain the separate product-derivative and FTC
-certificates required by \cref{thm:integration-by-parts-certificate}.
+endpoint difference.  The remaining effective FTC certificate is required by
+\cref{thm:integration-by-parts-certificate}.
 \end{proposition}
 
 \begin{theorem}[Right derivative of the positive arctangent product at zero]
@@ -942,8 +948,8 @@ turn the unit-mesh statement into a checked finite rational corner estimate;
 the two explicit stages above also bound the rectangle sampling error.
 Thus the geometric unit-branch bounds are now an executable finite budget,
 rather than an asymptotic assertion.  Completing the displayed integral identity still
-requires the separate product-derivative and FTC certificates.  With
-those certificates, the resulting construction will give
+requires the separate effective FTC certificate.  With that certificate, the
+resulting construction will give
 \[
  \int_0^1\arctan(x)\,\dd x
  \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.

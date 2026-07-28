@@ -3354,6 +3354,61 @@ theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute
           x * ArctanGeometry.integralKernel x } := by
   exact coordinateTimesArctanIntegralRectangleDerivativeRaw_compute x hx n
 
+/-- Uniform finite range bound for the concrete product derivative on the
+unit branch.  This is the first derivative-bound datum needed by the
+derivative-bound FTC route: every evaluated box for
+`arctan x + x / (1 + x^2)` lies in `[0,2]`. -/
+theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range
+    (x : Rat)
+    (hx : inDomainInterval
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper x)
+    (n : Nat) :
+    0 <=
+        (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx n).lo /\
+      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx n).hi <= 2 := by
+  change 0 <= x /\ x <= 1 at hx
+  rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+  have hAlo : 0 <= (arctanIntegralRectangleOnUnit.compute x hx n).lo := by
+    change 0 <= (ArctanGeometry.arctanIntegralRectangleCompute x n).lo
+    exact ArctanGeometry.arctanIntegralRectangleCompute_lower_nonnegative hx.1 n
+  have hAhi : (arctanIntegralRectangleOnUnit.compute x hx n).hi <= x := by
+    change (ArctanGeometry.arctanIntegralRectangleCompute x n).hi <= x
+    exact ArctanGeometry.arctanIntegralRectangleCompute_upper_le_input hx.1 n
+  have hkernel0 : 0 <= ArctanGeometry.integralKernel x :=
+    Rat.le_of_lt (ArctanGeometry.integralKernel_pos x)
+  have hxkernel0 : 0 <= x * ArctanGeometry.integralKernel x :=
+    Rat.mul_nonneg hx.1 hkernel0
+  have hxkernel : x * ArctanGeometry.integralKernel x <= x := by
+    calc
+      x * ArctanGeometry.integralKernel x <= x * 1 :=
+        Rat.mul_le_mul_of_nonneg_left
+          (ArctanGeometry.integralKernel_le_one x) hx.1
+      _ = x := by grind
+  constructor
+  · exact Rat.add_nonneg hAlo hxkernel0
+  · calc
+      (arctanIntegralRectangleOnUnit.compute x hx n).hi +
+          x * ArctanGeometry.integralKernel x <= x + x :=
+        rat_add_le_add hAhi hxkernel
+      _ <= 1 + 1 := rat_add_le_add hx.2 hx.2
+      _ = 2 := by native_decide
+
+/-- The same range fact in the positive-bounded form consumed by the
+interval-product and derivative-bound FTC APIs. -/
+theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nonneg_bounded
+    (x : Rat)
+    (hx : inDomainInterval
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper x) :
+    Exists fun B : Rat => 0 < B /\ forall n,
+      0 <=
+          (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx n).lo /\
+        (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx n).hi <= B := by
+  refine ⟨2, by native_decide, ?_⟩
+  intro n
+  exact coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range x hx n
+
 /-- The positive-step quotient of the literal interval product has an exact
 endpoint decomposition.  The terms use the arctangent quotient at the same
 evaluation stage; the swapped endpoint of the base arctangent box is exactly

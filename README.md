@@ -221,7 +221,7 @@ arctangent sample exactly, and the strip-sum total lies between that endpoint
 and the endpoint minus \(1/\mathrm{mesh}\) (or minus the requested
 precision under the denominator-plus-one schedule).  This remains a finite
 mesh certificate: the remaining arctangent--logarithm route work is the
-product-derivative and FTC comparison certificates that connect its two strip
+effective FTC comparison certificate that connects its two strip
 sums to the displayed integrals.  The same bracket now produces a valid
 supplementary direct raw evaluator: at stage `n` it widens the point interval
 at the finite sum `S_(n+1,n)` by `1/(n+1)` and stabilizes the finite prefix
@@ -300,14 +300,14 @@ reusable reindexing theorem:
 outer right sum of growing inner left sums is exactly the left sum for
 `(1 - x) * f(x)`.  It is the literal finite integration-by-parts rectangle
 identity, not a continuous Fubini axiom; relating its inner prefix to
-`arctan` is the remaining semantic FTC/product-derivative step.
+`arctan` is the remaining semantic effective-FTC step.
 The direct dyadic specialization is now a valid raw real too:
 `arctanKernelTriangleRaw` executes only the finite triangle sums for
 `1/(1+x*x)` and carries the public `6/2^n` enclosure radius.  Its stagewise
 overlap with `arctanComplementKernelIntegral` is checked, so it is equivalent
 to the complementary rational strip without being mislabeled as an integral
-of arctangent.  The missing effective FTC/product-derivative theorem remains
-the sole semantic step in that identification.
+of arctangent.  The missing effective FTC theorem remains the sole semantic
+step in that identification.
 There is now also a complete direct companion computation:
 `arctanKernelTrianglePlusLog` adds that triangle raw to the certified
 `x/(1+x*x)` logarithmic strip.  The finite two-strip comparison proves it
@@ -322,7 +322,7 @@ executable pi formula too:
 Lean proves it equivalent to `4 * arctanGeom(1)`, hence to the preferred
 circle-area pi by the existing geometric bridge. It is deliberately excluded
 from the Pi coverage count: it is a cross-check of the same arctangent
-endpoint, not a substitute for the missing global FTC/product rule.
+endpoint, not a substitute for the missing global effective FTC bridge.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw

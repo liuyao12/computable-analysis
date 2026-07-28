@@ -329,8 +329,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   full signed-step derivative on `[0,1]`: a negative quotient is reversed at
   `x+h`, and a finer rectangle arctangent quotient plus the kernel's
   rational 2-Lipschitz estimate transports the derivative box back to `x`.
-  Its explicit step budget is `|h| <= 1/(648*(n+1))`. The FTC comparison is
-  still open. The
+  Its explicit step budget is `|h| <= 1/(648*(n+1))`. The derivative boxes
+  are now also certified uniformly inside `[0,2]` by
+  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range` and its
+  `..._nonneg_bounded` packaging, supplying the first range datum for a
+  derivative-bound FTC certificate. The cellwise secant-containment and
+  shrinking-bound schedules, hence the FTC comparison itself, remain open.
+  The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor
   at the right endpoint, while `..._corner` exposes the explicit
