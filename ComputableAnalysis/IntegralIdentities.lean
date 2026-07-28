@@ -4450,6 +4450,77 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_uniform_rang
   exact ⟨delta, m, bound, fun t ht hclose => (hboxed t ht hclose).1,
     hbase.2.1, hbase.2.2⟩
 
+/-- A concrete number of unit cells that is small enough both for a rational
+continuity radius and for the forward derivative's stage-dependent step
+budget.  It is a finite denominator product, so selecting the partition uses
+no density or completeness principle. -/
+def coordinateTimesArctanForwardPartitionPieces (delta : QPos) (n : Nat) : Nat :=
+  (delta.val.den + 1) * (72 * (n + 1))
+
+theorem coordinateTimesArctanForwardPartitionPieces_positive
+    (delta : QPos) (n : Nat) :
+    0 < coordinateTimesArctanForwardPartitionPieces delta n := by
+  unfold coordinateTimesArctanForwardPartitionPieces
+  exact Nat.mul_pos (Nat.succ_pos _) (by omega)
+
+theorem coordinateTimesArctanForwardPartition_mesh_eq_inverse
+    (delta : QPos) (n : Nat) :
+    mesh 0 1 (coordinateTimesArctanForwardPartitionPieces delta n) =
+      1 / ((coordinateTimesArctanForwardPartitionPieces delta n : Nat) : Rat) := by
+  have hpos : 0 < coordinateTimesArctanForwardPartitionPieces delta n :=
+    coordinateTimesArctanForwardPartitionPieces_positive delta n
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt hpos)]
+  grind [Rat.sub_eq_add_neg]
+
+/-- The selected unit mesh is within the supplied continuity radius. -/
+theorem coordinateTimesArctanForwardPartition_mesh_le_radius
+    (delta : QPos) (n : Nat) :
+    mesh 0 1 (coordinateTimesArctanForwardPartitionPieces delta n) <= delta.val := by
+  let p : Nat := delta.val.den + 1
+  let q : Nat := 72 * (n + 1)
+  have hp : 0 < p := by
+    dsimp [p]
+    exact Nat.succ_pos _
+  have hq : 0 < q := by
+    dsimp [q]
+    omega
+  have hpq : 0 < p * q := Nat.mul_pos hp hq
+  have hpieces : coordinateTimesArctanForwardPartitionPieces delta n = p * q := by
+    rfl
+  have hmesh := coordinateTimesArctanForwardPartition_mesh_eq_inverse delta n
+  rw [hpieces] at hmesh
+  rw [hpieces, hmesh]
+  calc
+    1 / ((p * q : Nat) : Rat) <= 1 / (p : Rat) :=
+      FTC.one_div_nat_antitone hp hpq (Nat.le_mul_of_pos_right p hq)
+    _ <= delta.val := one_div_den_succ_le_of_pos delta.property
+
+/-- The same selected unit mesh is within the forward derivative's positive
+step budget at stage n. -/
+theorem coordinateTimesArctanForwardPartition_mesh_le_forward_step
+    (delta : QPos) (n : Nat) :
+    mesh 0 1 (coordinateTimesArctanForwardPartitionPieces delta n) <=
+      1 / (((72 * (n + 1) : Nat) : Rat)) := by
+  let p : Nat := delta.val.den + 1
+  let q : Nat := 72 * (n + 1)
+  have hp : 0 < p := by
+    dsimp [p]
+    exact Nat.succ_pos _
+  have hq : 0 < q := by
+    dsimp [q]
+    omega
+  have hpq : 0 < p * q := Nat.mul_pos hp hq
+  have hpieces : coordinateTimesArctanForwardPartitionPieces delta n = p * q := by
+    rfl
+  have hmesh := coordinateTimesArctanForwardPartition_mesh_eq_inverse delta n
+  rw [hpieces] at hmesh
+  rw [hpieces, hmesh]
+  have hqle : q <= p * q := by
+    rw [Nat.mul_comm]
+    exact Nat.le_mul_of_pos_right q hp
+  exact FTC.one_div_nat_antitone hq hpq hqle
+
 /-- The stricter two-sided product budget is small enough both for the
 forward product certificate at the reversed basepoint and for transporting
 the explicit derivative box back across a negative step. -/

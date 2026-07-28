@@ -94,7 +94,9 @@ gates.
   epsilon--delta continuity: every derivative value in a selected rational
   radius and the endpoint secant share a box of width at most ten stage
   tolerances. The remaining derivative-bound FTC work is the global
-  partition/telescoping and shrinking Riemann-width schedule.
+  telescope and shrinking Riemann-width schedule: the uniform cell count
+  `coordinateTimesArctanForwardPartitionPieces` is now explicit and
+  formally below both the continuity radius and forward step budget.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
@@ -358,9 +360,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   supplies endpoint derivative ranges on every positive rational cell. The
   checked forward-range enclosure now supplies one common box for every
   derivative value within its continuity radius and the endpoint difference,
-  with an explicit ten-tolerance width bound. Constructing a compatible
-  global rational partition, proving its telescoping overlap and shrinking
-  bound schedule, and deriving the resulting FTC comparison remain open.
+  with an explicit ten-tolerance width bound. The compatible uniform rational
+  partition is now selected by the finite denominator product
+  `(delta.den + 1) * 72 * (n + 1)`. Proving its
+  telescoping overlap and shrinking bound schedule, and deriving the
+  resulting FTC comparison, remain open.
   The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor

@@ -188,7 +188,9 @@ The stronger `...forward_secant_uniform_range_enclosure` now combines that
 step-aware secant box with epsilon--delta continuity: every derivative value
 inside a chosen rational radius and the endpoint difference share a box of
 width at most ten stage tolerances. What remains is global partition,
-telescoping, and shrinking Riemann-width assembly.
+telescoping, and shrinking Riemann-width assembly. The partition count is
+already explicit: `(delta.den + 1) * 72 * (n + 1)` gives a unit mesh
+below both the selected continuity radius and the forward step budget.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
@@ -233,7 +235,8 @@ continuity data, not a shortcut from differentiability to FTC.  The product
 branch now has a finite common local certificate: its endpoint difference
 and every derivative value within a certified radius lie in one explicit
 box, with width at most ten stage tolerances.  A compatible shrinking
-partition and the global telescoping/width proof remain open.
+partition count is now explicit; the global telescoping/width proof remains
+open.
 The actual product derivative candidate now has its own literal continuity
 certificate as well.  Its rational correction `x/(1+x*x)` is proved
 3-Lipschitz by combining the 2-Lipschitz reciprocal kernel with the exact

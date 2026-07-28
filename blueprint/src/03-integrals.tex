@@ -1032,6 +1032,9 @@ schedule.
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value_enclosure}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_range_enclosure}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_uniform_range_enclosure}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartitionPieces}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartition_mesh_le_radius}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartition_mesh_le_forward_step}
 \uses{thm:coordinate-arctangent-forward-product-rule,thm:coordinate-arctangent-derivative-epsilon-delta-continuity}
 \leanok
 Let \(P(x)=xA(x)\), let \(D_N(x)\) be the finite stage-\(N\) box for
@@ -1070,10 +1073,16 @@ differ.  It contains \(D_m(t)\), while \(hB\) contains
 \(P(x+h)-P(x)\).  Thus a cell whose width is at most \(\delta\) has precisely
 the common range-and-secant datum required by the FTC architecture.
 
-What remains is no longer local analytic comparison: it is the finite global
-assembly of a uniform rational partition below all chosen radii, plus the
-telescoping and shrinking-width estimates required before invoking the
-derivative-bound FTC package.
+The uniform partition itself is now selected explicitly:
+\[
+ N_{\delta,n}
+ =(\delta.\mathrm{den}+1)\,72(n+1).
+\]
+Its unit mesh is formally at most both \(\delta\) and
+\(1/(72(n+1))\).  Thus the remaining work is no longer the choice of a
+small partition either.  It is the finite global assembly: sum the common
+cell bounds, telescope their endpoint enclosures, and prove the resulting
+sum width shrinks before invoking the derivative-bound FTC package.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
