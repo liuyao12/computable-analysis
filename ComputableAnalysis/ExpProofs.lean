@@ -1252,6 +1252,85 @@ theorem eCompoundInterest_eq_eEuler :
     eCompoundInterest.Equiv eEuler :=
   RealRaw.equiv_symm eEuler_eq_eCompoundInterest
 
+/-- Public rational radius for certifying the literal repeated-multiplication
+Euler computation.  Evaluation of the resulting stabilized representative
+uses only Euler prefixes and this rational schedule; the compound-interest
+enclosure is a proof-side anchor. -/
+def eEulerStabilizationRadius (n : Nat) : Rat :=
+  4 / (((n + 1 : Nat) : Rat))
+
+theorem eEulerStabilizationRadius_covers_compoundInterest (n : Nat) :
+    (eCompoundInterest.compute n).width <= eEulerStabilizationRadius n := by
+  simpa [eEulerStabilizationRadius] using
+    eCompoundInterest_width_le_of_stageBound
+      eCompoundInterestStageBound_four n
+
+theorem eEulerStabilizationRadius_shrinks :
+    ShrinksToZero eEulerStabilizationRadius := by
+  apply shrinksToZero_of_natOverSuccBound (C := 4)
+  intro n
+  exact Rat.le_refl
+
+/-- A valid direct-only representative of `e` whose runtime is finite prefixes
+of the literal repeated-multiplication Euler computation.  This normalization
+does not prove the original Euler boxes nested. -/
+def eEulerStabilized : RealRaw :=
+  RealRaw.prefixStabilize eEuler eEulerStabilizationRadius
+
+theorem eEulerStabilized_valid : eEulerStabilized.Valid := by
+  unfold eEulerStabilized
+  have hshrink : RealRaw.WidthsShrinkToZero eEuler.compute := by
+    simpa [eEuler] using expEuler_widths_shrink (1 : Rat)
+  exact RealRaw.prefixStabilize_valid
+    hshrink
+    eCompoundInterest_valid
+    eEuler_eq_eCompoundInterest
+    eEulerStabilizationRadius_covers_compoundInterest
+    eEulerStabilizationRadius_shrinks
+
+/-- The direct repeated-multiplication candidate overlaps its certified
+prefix-stabilized representative at every common stage. -/
+theorem eEuler_equiv_eEulerStabilized :
+    eEuler.Equiv eEulerStabilized := by
+  unfold eEulerStabilized
+  exact RealRaw.candidate_equiv_prefixStabilize
+    eCompoundInterest_valid
+    eEuler_eq_eCompoundInterest
+    eEulerStabilizationRadius_covers_compoundInterest
+
+/-- The certified repeated-multiplication representation agrees with the
+sharp compound-interest enclosure for `e`. -/
+theorem eEulerStabilized_equiv_eCompoundInterest :
+    eEulerStabilized.Equiv eCompoundInterest := by
+  unfold eEulerStabilized
+  exact RealRaw.prefixStabilize_equiv_anchor
+    eCompoundInterest_valid
+    eEuler_eq_eCompoundInterest
+    eEulerStabilizationRadius_covers_compoundInterest
+
+/-- The abstract certified value of `e` currently joins the sharp
+compound-interest enclosure to the direct repeated-multiplication runtime.
+The power-series and inverse-logarithm routes join this handle only after
+their separate analytic agreement certificates are proved. -/
+def eCertified : Real :=
+  Real.withAlternative
+    (Real.ofRaw eCompoundInterest eCompoundInterest_valid)
+    eEulerStabilized eEulerStabilized_valid
+    eEulerStabilized_equiv_eCompoundInterest
+
+abbrev e : Real := eCertified
+
+/-- The preferred compound-interest view of the abstract `e` handle. -/
+def eCompoundInterestRepresentation : Real.Representation e :=
+  Real.preferredRepresentation eCertified
+
+/-- The certified direct repeated-multiplication view of the abstract `e`
+handle. -/
+def eRepeatedMultiplicationRepresentation : Real.Representation e where
+  raw := eEulerStabilized
+  valid := eEulerStabilized_valid
+  agrees := eEulerStabilized_equiv_eCompoundInterest
+
 def PowerSeriesNested (x : Rat) : Prop :=
   forall n m, n <= m ->
     ((expPowerSeries x).compute n).lo <= ((expPowerSeries x).compute m).lo /\

@@ -273,6 +273,17 @@ monotone integral of \(1/x\).  Lean records the remaining estimates in
 \lean{ComputableAnalysis.ExpProofs.eEulerCenterStepMovementUpToFifty}
 \lean{ComputableAnalysis.ExpProofs.eEuler_eq_eCompoundInterest}
 \lean{ComputableAnalysis.ExpProofs.eCompoundInterest_eq_eEuler}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilizationRadius}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilizationRadius_covers_compoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilizationRadius_shrinks}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilized}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilized_valid}
+\lean{ComputableAnalysis.ExpProofs.eEuler_equiv_eEulerStabilized}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilized_equiv_eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eCertified}
+\lean{ComputableAnalysis.ExpProofs.e}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestRepresentation}
+\lean{ComputableAnalysis.ExpProofs.eRepeatedMultiplicationRepresentation}
 \lean{ComputableAnalysis.ExpProofs.ePowerSeries_eq_eCompoundInterest_of_complete}
 \lean{ComputableAnalysis.ExpProofs.ExpProofRemainders}
 \uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:real-fun-raw}
@@ -298,6 +309,17 @@ agrees with the verified compound-interest representative:
 \[
   e_{\mathrm{Euler}}\Equiv e_{\mathrm{compound}}.
 \]
+It now exposes a certified direct-runtime view as well.  At stage \(n\),
+\code{eEulerStabilized} intersects the finite prefix of the literal
+repeated-multiplication Euler boxes after widening each by \(4/(n+1)\).  Its
+runtime never evaluates the compound-interest boxes; their valid enclosure is
+used only to prove that the public radius is sound.  Thus
+\code{eEulerStabilized} is a valid raw real equivalent to
+\code{eCompoundInterest}, and \code{eCertified : Real} retains both as named
+representations.  This is the same finite interval-normalization pattern used
+for other direct candidates in the development, not a claim that the original
+Euler boxes have been proved nested.
+
 The center at stage \(n\) is the lower endpoint of the compound-interest
 interval at stage \((n+1)^2-1\), and compound-interest nesting supplies the
 same-stage overlap.  Lean also proves that these Euler centers are monotone, so
