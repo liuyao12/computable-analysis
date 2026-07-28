@@ -236,10 +236,72 @@ the full exp/log equivalence.  The next analytic milestone is an actual boxed
 exponential with a `HasDerivativeOnInterval` self-derivative certificate,
 then uniqueness from the Peano--Baker route.
 
+There is, however, one fully certified constant-level exponential handle that
+is useful today.  `ExpProofs.e : Real` has the sharp compound-interest
+enclosure as its preferred representation and
+`ExpProofs.eRepeatedMultiplicationRepresentation` as an alternate
+representation.  The latter evaluates finite prefixes of the literal
+repeated-multiplication Euler computation, normalised by finite-prefix
+intersection with the public rational radius `4/(n+1)`.  The compound-interest
+boxes are used only in its validity/equivalence proof, never at runtime.
+The relevant checked facts are:
+
+```lean
+import ComputableAnalysis.ExpProofs
+
+open ComputableAnalysis
+
+#check ExpProofs.e
+#check ExpProofs.eCompoundInterestRepresentation
+#check ExpProofs.eRepeatedMultiplicationRepresentation
+#check ExpProofs.eEulerStabilized_valid
+#check ExpProofs.eEulerStabilized_equiv_eCompoundInterest
+```
+
+This certifies the repeated-multiplication computation *as a value of* `e`;
+it does not yet connect `ePowerSeries` to that handle or establish an
+analytic derivative theorem.  Keep those three levels separate in downstream
+work: a valid raw constant, agreement of two raw constants, and a
+derivative/ODE certificate for an exponential function.
+
 The rational-circle and arctangent code contains useful geometric and
 power-series computations, but normalized-angle sine/cosine/tangent special
 values remain partly target-level.  Consult the green/orange legend in the
 blueprint before relying on one.
+
+## Pi as a regression suite, not a target namespace
+
+`PiProofs.PiCoverageBridge` is deliberately a compact list of distinct
+end-to-end capability tests.  It currently has five checked bridges; it is
+not a percentage or a catalogue of all certified pi computations.  Consume a
+named presentation from the abstract `pi : Real` handle when you need a
+specific implementation:
+
+```lean
+import ComputableAnalysis.PiProofs
+
+open ComputableAnalysis
+
+#check pi.circleArea
+#check pi.circumference
+#check pi.arctanGeom
+#check pi.leibniz
+#check pi.machin
+#check pi.cauchy
+#check pi.reciprocalQuartic
+```
+
+For example, `pi.machin` is the one classical series computation
+`16 * arctan.series (1/5) - 4 * arctan.series (1/239)`.  Its agreement with
+the area presentation is proved, but it does not create a separate coverage
+cell: it reuses the same arctangent-series capability already tested by the
+Leibniz bridge.  Similarly, the direct geometric diagnostic
+`pi.circumference` and the certified normalizations
+`pi.circumferenceStabilized`/`pi.circumferenceReboxed` are alternative views,
+not additional points on the scoreboard.  Use
+`PiCoverageBridge.equivalent` only when the compact suite itself is what a
+test needs; expose the natural integral, series, or geometry theorem in a
+downstream result.
 
 ## Linear systems and Peano--Baker
 
