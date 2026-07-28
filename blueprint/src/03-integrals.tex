@@ -944,6 +944,48 @@ than merely assert equality of
 completed-real limits.
 \end{proposition}
 
+\begin{theorem}[Rational epsilon--delta continuity of the rectangle arctangent]
+\label{thm:arctangent-rectangle-epsilon-delta-continuity}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_valid_of_rightProduct_le_half}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_equiv_rectangleSub_of_lt}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_forward_difference_equiv_tangentChartIncrement}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_forward_lower_sub_upper_le_step}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_epsilonDeltaContinuous}
+\uses{prop:arctangent-tangent-chart-quotient}
+\leanok
+Write (A_n(x)) for the concrete stage-(n) rectangle box.  For rational
+(0\le x\le1), (h>0), and (x+h\le1), Lean proves the common-stage
+one-sided estimate
+\[
+  A_n(x+h)_{\mathrm{lo}}-A_n(x)_{\mathrm{hi}}\le h.
+\]
+It is a finite chart calculation: the difference box is equivalent to the
+rectangle box at
+\(	au=h/(1+x(x+h))\), whose upper endpoint is at most
+\(\tau\le h\).  The local product margin
+\(x\tau\le1/2\) supplies the raw-validity and shrinking-width certificate
+for this transport even in the right half of the unit branch.
+
+Consequently the domain-aware rectangle evaluator has the project's literal
+rational epsilon--delta continuity certificate on ([0,1]).  Given positive
+rational \(\varepsilon\), choose
+\[
+  \delta=\varepsilon,\qquad
+  n=4\bigl(\varepsilon.\mathrm{den}+1\bigr).
+\]
+Both endpoint boxes at stage (n) have width at most \(\varepsilon\).  In
+either order of two inputs (x,y), weak rectangle monotonicity provides one
+cross-box inequality and the displayed forward estimate bounds the other by
+\(\lvert y-x\rvert\le\varepsilon\).  Thus the certificate says exactly
+that the two finite boxes are \(\varepsilon\)-near; it invokes neither a
+topology import nor a completed real line.
+
+This is continuity data, not an FTC theorem.  In particular, it does not yet
+give the cellwise secant containment or the compatible shrinking partition
+schedule needed to turn the product derivative into the arctangent
+integration-by-parts endpoint identity.
+\end{theorem}
+
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
 \uses{thm:integration-by-parts-certificate,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}

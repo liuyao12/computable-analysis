@@ -77,10 +77,14 @@ gates.
   `IntervalRegularOn.epsilonDeltaContinuous` give the literal rational
   epsilon--delta theorem. The scheduled `sqrtOnUnit` bisection branch is now
   a concrete non-exact interval-regular function, with a quadratic rational
-  input modulus on `[0,1]`. `UniformRealFun.CertifiedExtension` states the
-  representation-safe extension contract. General closure and extension
-  theorems remain work, so this gate is not yet a general function-calculus
-  package.
+  input modulus on `[0,1]`. The non-exact rectangle arctangent now has its
+  own literal continuity theorem
+  `arctanIntegralRectangleOnUnit_epsilonDeltaContinuous`: its finite tangent
+  chart proves `A.lo(x+h) - A.hi(x) <= h`, so `delta = eps` and common stage
+  `4 * (eps.den + 1)` make both cross-box gaps and both widths at most `eps`.
+  `UniformRealFun.CertifiedExtension` states the representation-safe extension
+  contract. General closure and extension theorems remain work, so this gate
+  is not yet a general function-calculus package.
 - **Finite integration and FTC — partly checked.**
   `Integral.ConstructionFor`, its validity bridge, and the derivative-bound
   FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact

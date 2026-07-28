@@ -3000,6 +3000,121 @@ def arctanIntegralRectangleOnUnit_monotone :
   MonotoneOnInterval.ofNondecreasing
     arctanIntegralRectangleOnUnit_nondecreasing
 
+/-- The rectangle-integral arctangent is epsilon--delta continuous on the
+rational unit branch, in the project's literal finite-box sense.  The input
+modulus is the identity: a forward step of size `h` changes the enclosed
+arctangent by at most `h`, and stage
+`4 * (eps.den + 1)` makes each rectangle box no wider than `eps`.  This proof
+uses neither a topology import nor completeness of a real-number model. -/
+theorem arctanIntegralRectangleOnUnit_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn arctanIntegralRectangleOnUnit := by
+  intro eps
+  let delta : QPos := ⟨eps.val, eps.property⟩
+  let n : Nat := 4 * (eps.val.den + 1)
+  refine ⟨delta, n, ?_⟩
+  intro x y hx hy hclose
+  have hn : 4 * (eps.val.den + 1) <= n := by
+    dsimp [n]
+    omega
+  have hwidthX :
+      (ArctanGeometry.arctanIntegralRectangleCompute x n).width <= eps.val :=
+    ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+      hx.1 hx.2 eps n hn
+  have hwidthY :
+      (ArctanGeometry.arctanIntegralRectangleCompute y n).width <= eps.val :=
+    ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+      hy.1 hy.2 eps n hn
+  change QInterval.NearAt
+    ((arctanIntegralRectangleFor x hx.1 hx.2).compute n)
+    ((arctanIntegralRectangleFor y hy.1 hy.2).compute n) eps
+  rw [arctanIntegralRectangleFor_compute_eq,
+    arctanIntegralRectangleFor_compute_eq]
+  unfold QInterval.NearAt
+  rcases (Rat.le_total : x <= y \/ y <= x) with hxy | hyx
+  · have hstep0 : 0 <= y - x := by grind [Rat.sub_eq_add_neg]
+    have hstep : y - x <= eps.val := by
+      rw [← qabs_eq_self_of_nonneg hstep0]
+      simpa [delta] using hclose
+    have hmonotone :
+        (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+          (ArctanGeometry.arctanIntegralRectangleCompute y n).hi :=
+      ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
+        hx.1 hxy n
+    have hforward :
+        (ArctanGeometry.arctanIntegralRectangleCompute y n).lo -
+            (ArctanGeometry.arctanIntegralRectangleCompute x n).hi <=
+          y - x := by
+      by_cases heq : x = y
+      · subst y
+        have hordered :=
+          ArctanGeometry.arctanIntegralRectangleCompute_ordered hx.1 n
+        grind [Rat.sub_eq_add_neg]
+      · have hpos : 0 < y - x := by grind [Rat.sub_eq_add_neg]
+        have hy1 : y <= (1 : Rat) := by
+          simpa [arctanIntegralRectangleOnUnit] using hy.2
+        have hsum : x + (y - x) = y := by
+          grind [Rat.sub_eq_add_neg]
+        have hupper : x + (y - x) <= 1 := by
+          calc
+            x + (y - x) = y := hsum
+            _ <= 1 := hy1
+        have h :=
+          ArctanGeometry.arctanIntegralRectangleCompute_forward_lower_sub_upper_le_step
+            hx.1 hx.2 hpos hupper n
+        rw [hsum] at h
+        exact h
+    refine ⟨?_, ?_, hwidthX, hwidthY⟩
+    · grind [Rat.sub_eq_add_neg]
+    · calc
+        (ArctanGeometry.arctanIntegralRectangleCompute y n).lo <=
+            (ArctanGeometry.arctanIntegralRectangleCompute x n).hi + (y - x) := by
+              grind [Rat.sub_eq_add_neg]
+        _ <= (ArctanGeometry.arctanIntegralRectangleCompute x n).hi + eps.val :=
+              (Rat.add_le_add_left).2 hstep
+  · have hstep0 : 0 <= x - y := by grind [Rat.sub_eq_add_neg]
+    have hstep : x - y <= eps.val := by
+      have hqabs : qabs (y - x) = x - y := by
+        rw [qabs_eq_neg_of_nonpos (by grind [Rat.sub_eq_add_neg])]
+        grind [Rat.sub_eq_add_neg]
+      rw [← hqabs]
+      simpa [delta] using hclose
+    have hmonotone :
+        (ArctanGeometry.arctanIntegralRectangleCompute y n).lo <=
+          (ArctanGeometry.arctanIntegralRectangleCompute x n).hi :=
+      ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
+        hy.1 hyx n
+    have hforward :
+        (ArctanGeometry.arctanIntegralRectangleCompute x n).lo -
+            (ArctanGeometry.arctanIntegralRectangleCompute y n).hi <=
+          x - y := by
+      by_cases heq : y = x
+      · subst y
+        have hordered :=
+          ArctanGeometry.arctanIntegralRectangleCompute_ordered hx.1 n
+        grind [Rat.sub_eq_add_neg]
+      · have hpos : 0 < x - y := by grind [Rat.sub_eq_add_neg]
+        have hx1 : x <= (1 : Rat) := by
+          simpa [arctanIntegralRectangleOnUnit] using hx.2
+        have hsum : y + (x - y) = x := by
+          grind [Rat.sub_eq_add_neg]
+        have hupper : y + (x - y) <= 1 := by
+          calc
+            y + (x - y) = x := hsum
+            _ <= 1 := hx1
+        have h :=
+          ArctanGeometry.arctanIntegralRectangleCompute_forward_lower_sub_upper_le_step
+            hy.1 hy.2 hpos hupper n
+        rw [hsum] at h
+        exact h
+    refine ⟨?_, ?_, hwidthX, hwidthY⟩
+    · calc
+        (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+            (ArctanGeometry.arctanIntegralRectangleCompute y n).hi + (x - y) := by
+              grind [Rat.sub_eq_add_neg]
+        _ <= (ArctanGeometry.arctanIntegralRectangleCompute y n).hi + eps.val :=
+              (Rat.add_le_add_left).2 hstep
+    · grind [Rat.sub_eq_add_neg]
+
 /-- The exact coordinate evaluator on the unit interval.  It is the first
 factor in the literal product `x * arctan x` used by the constructive
 integration-by-parts route. -/

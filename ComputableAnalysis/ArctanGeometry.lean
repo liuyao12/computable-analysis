@@ -4293,6 +4293,27 @@ theorem chartAddAreaLoopRaw_valid
     · exact chartAddAreaLoopCompute_nested hu0 hu1 hx0 hx1
     · exact chartAddAreaLoopCompute_widthsShrink hu0 huHalf hx0 hx1 himage
 
+/-- The transported midpoint rectangle schedule is also valid under the
+local pole-margin condition used by the full unit-branch tangent chart.  The
+finite cover and nesting arguments require only a basepoint below the pole;
+the product margin supplies the explicit shrinking-width schedule. -/
+theorem chartAddAreaLoopRaw_valid_of_rightProduct_le_half
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1) (huUnit : u <= 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hux : u * x <= (1 : Rat) / 2)
+    (himage : RationalCircle.Trigonometry.chartAddParameter u x <= 1) :
+    (chartAddAreaLoopRaw u x).Valid := by
+  change RealRaw.ValidCompute (chartAddAreaLoopCompute u x)
+  constructor
+  · exact chartAddAreaLoopCompute_ordered hu0 hu1 hx0 hx1
+  · constructor
+    · exact chartAddAreaLoopCompute_nested hu0 hu1 hx0 hx1
+    · intro eps
+      refine ⟨256 * (eps.val.den + 1), ?_⟩
+      intro n hn
+      exact chartAddAreaLoopCompute_width_le_eps_of_rightProduct_le_half
+        hu0 hu1 huUnit hx0 hx1 hux himage eps n hn
+
 /-- At every common stage the source midpoint rectangle bracket is enclosed
 by its transported bracket.  Consequently the two valid raw constructions
 are equivalent; this is the construction-level substitution half of the
@@ -4419,6 +4440,27 @@ theorem chartAddAreaLoopCompute_overlaps_rectangleSub_of_lt
     (QInterval.subInterval (integralSumInterval B) (integralSumInterval A))
   unfold QInterval.Overlaps QInterval.subInterval integralSumInterval
   constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The exact finite subtraction comparison is a raw-real equivalence as
+soon as the chart base stays below its pole.  Unlike the earlier half-unit
+version, its validity can use the local product margin supplied by a concrete
+application. -/
+theorem chartAddAreaLoopRaw_equiv_rectangleSub_of_lt
+    {u x : Rat} (hu0 : 0 <= u) (hu1 : u < 1)
+    (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (chartAddAreaLoopRaw u x).Equiv
+      (arctanIntegralRectangleRaw
+        (RationalCircle.Trigonometry.chartAddParameter u x) -
+        arctanIntegralRectangleRaw u) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (chartAddAreaLoopRaw u x)
+    (arctanIntegralRectangleRaw
+      (RationalCircle.Trigonometry.chartAddParameter u x) -
+      arctanIntegralRectangleRaw u) n n).2
+  exact chartAddAreaLoopCompute_overlaps_rectangleSub_of_lt
+    hu0 hu1 hx0 hx1 n
 
 /-- The finite overlap above is promoted to a raw equivalence between the
 transported interval construction and the difference of canonical midpoint
@@ -5534,6 +5576,89 @@ theorem tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit
     simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
   have hscaled := QInterval.scaleRat_overlaps_of_nonneg hinv hover
   simpa [QInterval.differenceQuotient, QInterval.divRat] using hscaled
+
+/-- On the whole rational unit branch, a forward difference of the canonical
+rectangle arctangent is equivalent to the rectangle construction at its
+tangent-chart increment.  The proof is entirely finite: the transported
+partition computes the same short interval, while the local product margin
+certifies the raw transport itself. -/
+theorem arctanIntegralRectangleRaw_forward_difference_equiv_tangentChartIncrement
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) :
+    (arctanIntegralRectangleRaw (x + h) - arctanIntegralRectangleRaw x).Equiv
+      (arctanIntegralRectangleRaw (tangentChartIncrement x h)) := by
+  have hxh0 : 0 <= x + h := by grind
+  have hxlt : x < 1 := by grind
+  have hh1 : h <= 1 := by grind
+  have ht0 : 0 <= tangentChartIncrement x h :=
+    Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)
+  have ht1 : tangentChartIncrement x h <= 1 :=
+    Rat.le_trans (tangentChartIncrement_le_step hx0 hpos) hh1
+  have hmargin : x * tangentChartIncrement x h <= (1 : Rat) / 2 :=
+    tangentChartIncrement_base_mul_le_half hx0 hpos hupper
+  have hchart : RationalCircle.Trigonometry.chartAddParameter x
+      (tangentChartIncrement x h) = x + h :=
+    chartAddParameter_tangentChartIncrement hx0 hxh0
+  have himage : RationalCircle.Trigonometry.chartAddParameter x
+      (tangentChartIncrement x h) <= 1 := by
+    rw [hchart]
+    exact hupper
+  have hX : (arctanIntegralRectangleRaw x).Valid :=
+    arctanIntegralRectangleRaw_valid hx0 hx1
+  have hY : (arctanIntegralRectangleRaw (x + h)).Valid :=
+    arctanIntegralRectangleRaw_valid hxh0 hupper
+  have hT : (arctanIntegralRectangleRaw (tangentChartIncrement x h)).Valid :=
+    arctanIntegralRectangleRaw_valid ht0 ht1
+  have hTransport : (chartAddAreaLoopRaw x (tangentChartIncrement x h)).Valid :=
+    chartAddAreaLoopRaw_valid_of_rightProduct_le_half
+      hx0 hxlt hx1 ht0 ht1 hmargin himage
+  have hRectTransport :
+      (arctanIntegralRectangleRaw (tangentChartIncrement x h)).Equiv
+        (chartAddAreaLoopRaw x (tangentChartIncrement x h)) :=
+    arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw hx0 hxlt ht0 ht1
+  have hTransportDifference :
+      (chartAddAreaLoopRaw x (tangentChartIncrement x h)).Equiv
+        (arctanIntegralRectangleRaw (x + h) - arctanIntegralRectangleRaw x) := by
+    have h := chartAddAreaLoopRaw_equiv_rectangleSub_of_lt
+      (u := x) (x := tangentChartIncrement x h) hx0 hxlt ht0 ht1
+    rw [hchart] at h
+    exact h
+  exact RealRaw.equiv_trans (RealRaw.sub_valid hY hX) hTransport hT
+    (RealRaw.equiv_symm hTransportDifference)
+    (RealRaw.equiv_symm hRectTransport)
+
+/-- A common finite stage of the rectangle algorithm obeys the forward
+one-Lipschitz estimate.  This is stronger than stagewise monotonicity: it
+controls the lower endpoint at `x+h` by the upper endpoint at `x` plus the
+literal rational step. -/
+theorem arctanIntegralRectangleCompute_forward_lower_sub_upper_le_step
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat) :
+    (arctanIntegralRectangleCompute (x + h) n).lo -
+        (arctanIntegralRectangleCompute x n).hi <= h := by
+  have hequiv := arctanIntegralRectangleRaw_forward_difference_equiv_tangentChartIncrement
+    hx0 hx1 hpos hupper
+  have hover := (RealRaw.compareAt_overlap_iff
+    (arctanIntegralRectangleRaw (x + h) - arctanIntegralRectangleRaw x)
+    (arctanIntegralRectangleRaw (tangentChartIncrement x h)) n n).1
+      (hequiv n)
+  change QInterval.Overlaps
+      (QInterval.subInterval
+        (arctanIntegralRectangleCompute (x + h) n)
+        (arctanIntegralRectangleCompute x n))
+      (arctanIntegralRectangleCompute (tangentChartIncrement x h) n) at hover
+  calc
+    (arctanIntegralRectangleCompute (x + h) n).lo -
+        (arctanIntegralRectangleCompute x n).hi =
+        (QInterval.subInterval
+          (arctanIntegralRectangleCompute (x + h) n)
+          (arctanIntegralRectangleCompute x n)).lo := rfl
+    _ <= (arctanIntegralRectangleCompute (tangentChartIncrement x h) n).hi :=
+      hover.1
+    _ <= tangentChartIncrement x h :=
+      arctanIntegralRectangleCompute_upper_le_input
+        (Rat.le_of_lt (tangentChartIncrement_pos hx0 hpos)) n
+    _ <= h := tangentChartIncrement_le_step hx0 hpos
 
 /-- A tangent increment based anywhere on the unit branch has the same
 explicit chart-width precision schedule as the earlier first-half proof. -/
