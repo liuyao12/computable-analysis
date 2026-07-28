@@ -483,6 +483,9 @@ integration by parts.
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nonneg_bounded}
+\lean{ComputableAnalysis.IntegralIdentities.coordinate_integralKernel_nondecreasing_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
 \uses{thm:coordinate-arctangent-forward-product-rule,prop:arctangent-tangent-chart-quotient}
 \leanok
@@ -506,6 +509,18 @@ The same finite evaluator is now certified in the derivative-bound form used
 by the FTC layer: every stage box for the right-hand side lies in
 \([0,2]\).  This is a usable bound on the candidate derivative, not yet the
 cellwise secant-containment certificate that the effective FTC still requires.
+It is also weakly nondecreasing on the positive unit piece.  The only new
+algebraic summand is ordered by clearing positive denominators:
+\[
+ \frac{x}{1+x^2}\leq\frac{y}{1+y^2}
+ \quad\Longleftrightarrow\quad
+ 0\leq(y-x)(1-xy)
+ \qquad(0\leq x\leq y\leq1).
+\]
+Together with geometric monotonicity of the rectangle arctangent, this gives
+endpoint derivative ranges on each positive rational cell.  It is useful
+input for the later monotone-piece derivative-bound construction, while still
+not a substitute for its finite secant containment.
 
 Only the effective FTC connection from this derivative certificate to the
 already finite integration-by-parts rectangles remains for this calculus

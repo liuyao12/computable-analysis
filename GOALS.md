@@ -333,8 +333,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   are now also certified uniformly inside `[0,2]` by
   `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range` and its
   `..._nonneg_bounded` packaging, supplying the first range datum for a
-  derivative-bound FTC certificate. The cellwise secant-containment and
-  shrinking-bound schedules, hence the FTC comparison itself, remain open.
+  derivative-bound FTC certificate. They are also weakly nondecreasing on
+  `[0,1]`: the rational term uses the explicit factor
+  `(y-x)*(1-x*y)` after clearing positive denominators, and the arctangent
+  box uses its geometric endpoint order. Thus
+  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing`
+  supplies endpoint derivative ranges on every positive rational cell. The
+  cellwise secant-containment and shrinking-bound schedules, hence the FTC
+  comparison itself, remain open.
   The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor

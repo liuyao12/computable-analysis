@@ -175,6 +175,12 @@ negative steps are reversed to a positive quotient at `x+h`, and explicit
 rectangle/kernel transport closes with the stricter budget
 `|h| <= 1/(648*(n+1))`. The remaining gate is the effective FTC bridge, not
 a product derivative.
+The resulting derivative candidate is now also proved nondecreasing on the
+same branch.  Its rational correction is ordered by the finite identity
+`(y-x)*(1-x*y) >= 0` after clearing the two positive denominators, and the
+arctangent summand retains its geometric endpoint order.  This yields
+endpoint derivative ranges for later positive-cell FTC bounds; it does not
+yet give their required secant containment.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction

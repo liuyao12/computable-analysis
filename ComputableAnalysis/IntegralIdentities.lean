@@ -3409,6 +3409,96 @@ theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nonneg_bounded
   intro n
   exact coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range x hx n
 
+/-- The rational correction in the product derivative is nondecreasing on
+the positive unit branch.  This is proved by clearing its two positive
+denominators: the remaining difference is
+`(y - x) * (1 - x * y)`.  Keeping that finite algebra explicit is useful for
+the later monotone-cell FTC construction. -/
+theorem coordinate_integralKernel_nondecreasing_on_unit
+    {x y : Rat}
+    (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hy0 : 0 <= y) (hy1 : y <= 1)
+    (hxy : x <= y) :
+    x * ArctanGeometry.integralKernel x <=
+      y * ArctanGeometry.integralKernel y := by
+  let dx : Rat := 1 + x * x
+  let dy : Rat := 1 + y * y
+  have hdxpos : 0 < dx := by
+    dsimp [dx]
+    have hsq := RationalCircle.Stage.ratSquare_nonneg x
+    grind
+  have hdypos : 0 < dy := by
+    dsimp [dy]
+    have hsq := RationalCircle.Stage.ratSquare_nonneg y
+    grind
+  have hprodpos : 0 < dx * dy := Rat.mul_pos hdxpos hdypos
+  have hdxne : dx ≠ 0 := Rat.ne_of_gt hdxpos
+  have hdyne : dy ≠ 0 := Rat.ne_of_gt hdypos
+  have hxyprod : x * y <= 1 := by
+    calc
+      x * y <= 1 * y := Rat.mul_le_mul_of_nonneg_right hx1 hy0
+      _ <= 1 * 1 := Rat.mul_le_mul_of_nonneg_left hy1 (by native_decide)
+      _ = 1 := by native_decide
+  have hfactor : 0 <= (y - x) * (1 - x * y) := by
+    apply Rat.mul_nonneg
+    · grind
+    · have hproductNonneg : 0 <= x * y := Rat.mul_nonneg hx0 hy0
+      grind [Rat.sub_eq_add_neg]
+  have hcross : x * dy <= y * dx := by
+    calc
+      x * dy = y * dx - ((y - x) * (1 - x * y)) := by
+        dsimp [dx, dy]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+          Rat.mul_comm]
+      _ <= y * dx := by grind [Rat.sub_eq_add_neg]
+  apply Rat.le_of_mul_le_mul_right (c := dx * dy)
+  · unfold ArctanGeometry.integralKernel
+    rw [Rat.div_def, Rat.div_def]
+    have hcancelx : dx⁻¹ * dx = 1 := Rat.inv_mul_cancel dx hdxne
+    have hcancely : dy⁻¹ * dy = 1 := Rat.inv_mul_cancel dy hdyne
+    calc
+      (x * (1 * dx⁻¹)) * (dx * dy) = x * dy := by
+        calc
+          (x * (1 * dx⁻¹)) * (dx * dy) =
+              (x * dy) * (dx⁻¹ * dx) := by
+                grind [Rat.mul_assoc, Rat.mul_comm]
+          _ = x * dy := by rw [hcancelx, Rat.mul_one]
+      _ <= y * dx := hcross
+      _ = (y * (1 * dy⁻¹)) * (dx * dy) := by
+        symm
+        calc
+          (y * (1 * dy⁻¹)) * (dx * dy) =
+              (y * dx) * (dy⁻¹ * dy) := by
+                grind [Rat.mul_assoc, Rat.mul_comm]
+          _ = y * dx := by rw [hcancely, Rat.mul_one]
+  · exact hprodpos
+
+/-- The two-sided product derivative is itself nondecreasing on `[0,1]`.
+The rectangle arctangent summand is monotone by geometric inclusion, while
+the rational correction is monotone by the denominator-clearing calculation
+above.  This is an endpoint-range input for the derivative-bound FTC route;
+it does not by itself establish the required endpoint secant containment. -/
+theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing :
+    NondecreasingOnInterval
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit := by
+  intro x y hx hy hxy n
+  change 0 <= x /\ x <= 1 at hx
+  change 0 <= y /\ y <= 1 at hy
+  rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+  exact rat_add_le_add
+    (ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
+      hx.1 hxy n)
+    (coordinate_integralKernel_nondecreasing_on_unit
+      hx.1 hx.2 hy.1 hy.2 hxy)
+
+/-- Packaged weak monotonicity of the derivative candidate for use by
+piecewise-monotone and derivative-bound constructions. -/
+def coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone :
+    MonotoneOnInterval coordinateTimesArctanIntegralRectangleDerivativeOnUnit :=
+  MonotoneOnInterval.ofNondecreasing
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing
+
 /-- The positive-step quotient of the literal interval product has an exact
 endpoint decomposition.  The terms use the arctangent quotient at the same
 evaluation stage; the swapped endpoint of the base arctangent box is exactly
