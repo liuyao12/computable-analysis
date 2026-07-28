@@ -15199,6 +15199,19 @@ theorem piTriangleLogSeries_equiv_piCircleArea :
     Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- The literal reciprocal-integral logarithm version of the supplied
+arctangent integration-by-parts formula is also a certified pi presentation.
+It is deliberately supplementary: it gives the natural calculus-side formula
+before the still-open transport to the canonical inverse-exponential log. -/
+theorem piTriangleLogReciprocalIntegral_equiv_piCircleArea :
+    Logarithm.piTriangleLogReciprocalIntegral.Equiv piCircleArea := by
+  exact RealRaw.equiv_trans
+    Logarithm.piTriangleLogReciprocalIntegral_valid
+    fourArctanGeomOneValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one
+    four_arctanGeom_one_equiv_piCircleArea
+
 theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     (IntegralIdentities.PiFromArctanIntegral
       IntegralIdentities.arctanIntegralRectangleForAtOne).Equiv
@@ -18173,7 +18186,10 @@ def piCertified : Real :=
       piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
     .withAlternative Logarithm.piTriangleLogSeries
       Logarithm.piTriangleLogSeries_valid
-      piTriangleLogSeries_equiv_piCircleArea)
+      piTriangleLogSeries_equiv_piCircleArea
+    .withAlternative Logarithm.piTriangleLogReciprocalIntegral
+      Logarithm.piTriangleLogReciprocalIntegral_valid
+      piTriangleLogReciprocalIntegral_equiv_piCircleArea)
     .withAlternative piLeibniz
       (piPresentation_valid .leibnizSeries)
       (piPresentation_equiv_piCircleArea .leibnizSeries))
@@ -18217,6 +18233,12 @@ theorem piTriangleLogSeries_mem_piCertified_alternatives :
     Logarithm.piTriangleLogSeries ∈ piCertified.alternatives := by
   simp [piCertified, Real.withAlternative]
 
+/-- The literal reciprocal-log integration-by-parts formula is stored directly
+in the abstract pi handle as a supplementary certified alternative. -/
+theorem piTriangleLogReciprocalIntegral_mem_piCertified_alternatives :
+    Logarithm.piTriangleLogReciprocalIntegral ∈ piCertified.alternatives := by
+  simp [piCertified, Real.withAlternative]
+
 /-- Retrieve a named certified representation from the primary π registry
 without depending on its position in the implementation list. -/
 def piCertifiedPresentation (presentation : PiPresentation) :
@@ -18257,6 +18279,13 @@ def triangleLogSeries : Real.Representation pi where
   raw := Logarithm.piTriangleLogSeries
   valid := Logarithm.piTriangleLogSeries_valid
   agrees := piTriangleLogSeries_equiv_piCircleArea
+
+/-- The same supplied arctangent integration-by-parts formula with its
+logarithm retained as the literal reciprocal integral on `[1,2]`. -/
+def triangleLogReciprocalIntegral : Real.Representation pi where
+  raw := Logarithm.piTriangleLogReciprocalIntegral
+  valid := Logarithm.piTriangleLogReciprocalIntegral_valid
+  agrees := piTriangleLogReciprocalIntegral_equiv_piCircleArea
 
 def leibniz : Real.Representation pi := presentation .leibnizSeries
 def nilakantha : Real.Representation pi := presentation .nilakanthaSeries

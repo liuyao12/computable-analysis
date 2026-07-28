@@ -206,8 +206,12 @@ runtime is the explicit rational triangle mesh, exposed by
 `arctanIntegralTriangle_compute_eq`.  The theorem
 `arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral` compares
 that construction plus the `x/(1+x^2)` strip with the independently certified
-product-FTC integral.  Use it only on this supplied unit branch; it is not a
-general Fubini, integral-additivity, or integration-by-parts rule.
+product-FTC integral.  `Logarithm.piTriangleLogReciprocalIntegral` then gives
+the natural endpoint formula with `∫₁² 1/t dt`, and its theorem
+`piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`
+is the direct product-FTC bridge.  Use these only on this supplied unit
+branch; they are not general Fubini, integral-additivity, or
+integration-by-parts rules.
 
 ## Exponentials, logarithms, and trigonometry
 

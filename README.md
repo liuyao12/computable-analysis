@@ -180,8 +180,10 @@ now also checked as `coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative`
 negative steps are reversed to a positive quotient at `x+h`, and explicit
 rectangle/kernel transport closes with the stricter budget
 `|h| <= 1/(648*(n+1))`.  The resulting two-stage bounded sums are now
-stabilized into a public FTC construction; the remaining gate is to split the
-product identity into separately constructed arctangent and logarithmic strips.
+stabilized into a public FTC construction.  The supplied unit triangle
+arctangent construction and logarithmic strip now split that product identity;
+the remaining gate is a reusable monotone-piece theorem together with the
+canonical exp/log transport.
 The resulting derivative candidate is now also proved nondecreasing on the
 same branch.  Its rational correction is ordered by the finite identity
 `(y-x)*(1-x*y) >= 0` after clearing the two positive denominators, and the
@@ -284,16 +286,17 @@ arctangent sample exactly, and the strip-sum total lies between that endpoint
 and the endpoint minus \(1/\mathrm{mesh}\) (or minus the requested
 precision under the denominator-plus-one schedule).  This remains a finite
 mesh certificate: the remaining arctangent--logarithm route work is the
-effective FTC comparison certificate that connects its two strip
-sums to the displayed integrals.  The same bracket now produces a valid
+general effective-FTC comparison certificate that connects arbitrary such
+strip sums to displayed integrals.  The same bracket now produces a valid
 supplementary direct raw evaluator: at stage `n` it widens the point interval
 at the finite sum `S_(n+1,n)` by `1/(n+1)` and stabilizes the finite prefix
 with the verified public radius `4/(n+1)`.  Its candidate width is exactly
 `2/(n+1)`, and the stabilized computation is equivalent to the rectangle
 arctangent at one; multiplying by four gives a checked pi regression
 evaluator.  This does not count as the arctangent--logarithm scoreboard row,
-because it does not identify either strip sum with a definite integral or
-with `log 2`.
+because this particular mesh does not itself identify either strip sum with a
+definite integral or with canonical `log 2`; the separate triangle construction
+does supply the scoped unit-branch split later in this file.
 `Logarithm.logTwoSeries` additionally gives a valid alternating-harmonic raw
 presentation of `log 2`, with exact stage width `1/(2*n+1)` and hence a
 certified `O(1/n)` rate.  Independently,
@@ -362,8 +365,9 @@ reusable reindexing theorem:
 `uniformTriangleRightSum_eq_complementUniformLeftEndpointSum` proves that an
 outer right sum of growing inner left sums is exactly the left sum for
 `(1 - x) * f(x)`.  It is the literal finite integration-by-parts rectangle
-identity, not a continuous Fubini axiom; relating its inner prefix to
-`arctan` is the remaining semantic effective-FTC step.
+identity, not a continuous Fubini axiom.  The supplied arctangent triangle
+construction now packages this unit-branch prefix as an integral; extending
+that identification to a general effective-FTC schema remains open.
 The direct dyadic specialization is now a valid raw real too:
 `arctanKernelTriangleRaw` executes only the finite triangle sums for
 `1/(1+x*x)` and carries the public `6/2^n` enclosure radius.  Its stagewise
@@ -386,11 +390,15 @@ inverse-exponential one.
 The independently checked equality
 `2 * arctanLogKernelIntegral ≡ logTwoSeries` now gives a supplementary
 executable pi formula too:
-`Logarithm.piTriangleLogSeries = 4 * triangle + 2 * log_series(2)`.
-Lean proves it equivalent to `4 * arctanGeom(1)`, hence to the preferred
-circle-area pi by the existing geometric bridge. It is deliberately excluded
-from the Pi coverage count: it is a cross-check of the same arctangent
-endpoint, not a substitute for the missing global effective FTC bridge.
+`Logarithm.piTriangleLogSeries = 4 * arctan.integral.triangle +
+2 * log.series(2)`.  Lean proves it equivalent first to four times the
+product-FTC integral, then to `4 * arctan.geom(1)` and the preferred circle-
+area pi.  The companion
+`Logarithm.piTriangleLogReciprocalIntegral` replaces the series term by the
+literal reciprocal integral `log_rec 2`; it has the same product-FTC and pi
+bridges.  Both remain outside the Pi coverage count: they establish a scoped
+unit construction, not the reusable effective-FTC or canonical-logarithm
+theorems.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw
@@ -463,9 +471,11 @@ single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
 routes, together with the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants. The complementary named
 views `PiProofs.pi.curvatureFan`, `PiProofs.pi.integrationByPartsMesh`, and
-`PiProofs.pi.triangleLogSeries` do not create additional calculus-coverage
-rows. The last two are finite mesh and triangle--logarithm-series evaluators,
-not the pending arctangent--logarithm/FTC theorem.
+`PiProofs.pi.triangleLogSeries` (with its literal-log companion
+`PiProofs.pi.triangleLogReciprocalIntegral`) do not create additional
+calculus-coverage rows. The last three are finite mesh and supplied-
+triangle/logarithm evaluators, not the pending general arctangent--logarithm
+integration-by-parts theorem.
 
 ### Full implementation inventory
 
@@ -487,7 +497,8 @@ unmarked long scoreboard target because it exercises the exp/log/ODE chain.
 | `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\texttt{arctan.geom}(1)$ | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [finite Riemann bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✓ |
-| `Logarithm.piTriangleLogSeries` | [finite triangle](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-uniform-triangle-reindexing), [logarithm strip](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:arctan-log-first-strip) | $\pi=4T_{\triangle}+2\log_{\mathrm{series}}2$ | ✓ | ✓ |
+| `Logarithm.piTriangleLogReciprocalIntegral` | [finite triangle](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-uniform-triangle-reindexing), [logarithm strip](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:arctan-log-first-strip) | $\pi=4\,\texttt{arctan.integral.triangle}+2\log_{\mathrm{rec}}2$ | ✓ | ✓ |
+| `Logarithm.piTriangleLogSeries` | [finite triangle](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-uniform-triangle-reindexing), [logarithm strip](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:arctan-log-first-strip) | $\pi=4\,\texttt{arctan.integral.triangle}+2\log_{\mathrm{series}}2$ | ✓ | ✓ |
 | `piNilakantha` | [finite series transformation](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:nilakantha-pi) | $\pi=3+\frac4{2\cdot3\cdot4}-\frac4{4\cdot5\cdot6}+\frac4{6\cdot7\cdot8}-\cdots$ | ✓ | ✓ |
 | `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [finite bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\,\texttt{arctan.series}(1/5)-\texttt{arctan.series}(1/239))$ | ✓ | ✓ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
@@ -508,13 +519,15 @@ Lean hooks:
   `PiProofs.four_arctanGeom_one_equiv_piCircleArea`.
 - Unit arctangent: `ArctanGeometry.arctanGeom_valid_on_unit`,
   `ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`.
-- Triangle/logarithm series: `Logarithm.piTriangleLogSeries`,
-  `PiProofs.piTriangleLogSeries_equiv_piCircleArea`.  Its triangle and
-  logarithm components retain their own public metrics: the triangle
-  enclosure radius is $6/2^n$, while the alternating logarithm-series box
-  has width at most $1/n$ for positive stage $n$.  This representation is a
-  supplementary endpoint cross-check, not the integration-by-parts coverage
-  bridge.
+- Triangle/logarithm formulas: `Logarithm.piTriangleLogReciprocalIntegral`,
+  `Logarithm.piTriangleLogSeries`,
+  `PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea`, and
+  `PiProofs.piTriangleLogSeries_equiv_piCircleArea`.  Both factor through
+  `piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`.
+  The triangle runtime retains radius $6/2^n$, while the alternating
+  logarithm-series box has width at most $1/n$ for positive stage $n$. These
+  are supplied-branch integration-by-parts cross-checks, not the general
+  coverage bridge.
 - Generic arctangent bridge: `PiProofs.arctanEqualsGeom_finiteRiemannBridge`.
   It supports the series-to-geometry comparison but is not a separate pi-scoreboard route.
 - Nilakantha series: `piNilakantha`, `Nilakantha.compute_width_eq`,

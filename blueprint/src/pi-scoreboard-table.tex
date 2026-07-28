@@ -84,7 +84,8 @@ separately named \code{pi.curvatureFan} and
 representatives.  They remain useful
 executable comparisons, but are not additional readiness cells: the former
 sharpens finite geometry, while the latter two do not yet establish the
-arctangent--logarithm/FTC route.
+general arctangent--logarithm integration-by-parts route or its canonical
+logarithm transport.
 
 The direct \code{piCircumference} evaluator remains a geometric diagnostic:
 its unresolved lower-endpoint refinement is a local square-root-enclosure
@@ -93,19 +94,20 @@ problem, not a missing calculus gate.  Lean now reduces it to
 margin comparing the two fine curvature certificates, their bisection widths,
 and the coarse squared chord.  The reduction from that margin to the original
 endpoint refinement is checked; the universal margin inequality remains open.
-The next candidate for a new coverage cell is the arctangent
-integration-by-parts evaluation.  Its public statement will be the natural
-integral evaluation; only the derived agreement of its raw presentation with
-the preferred pi presentation belongs in the registry.  The exact finite
-acceptance contract is now stated in
+The next candidate for a new coverage cell is the general arctangent
+integration-by-parts evaluation.  The supplied unit formula is now a certified
+pi representation through the finite triangle, product-FTC, and reciprocal-log
+bridges; only the derived agreement of a reusable general theorem with the
+preferred pi presentation would belong in the coverage registry.  The exact
+finite acceptance contract is stated in
 \cref{def:integration-by-parts-certificate,thm:integration-by-parts-certificate}:
 every monotone piece must provide its product box, common refinement,
 corner-rectangle bound, and rational error schedule.  The concrete target is
 then isolated in \cref{cor:arctangent-logarithm-pi-route}.  The cell remains
-unmarked until the effective FTC certificate and the canonical logarithm
-endpoint identity are constructive.  The two-sided product derivative of the
-actual \(x\arctan x\) evaluator is now checked; the FTC comparison is the
-remaining calculus gate.
+unmarked until this reusable effective-FTC certificate and the canonical
+logarithm endpoint identity are constructive.  The two-sided product derivative
+of the actual \(x\arctan x\) evaluator and its supplied finite FTC comparison
+are checked; general monotone-piece composition is the remaining calculus gate.
 This is deliberately the long
 elementary-function route: its \(\log 2\) endpoint must agree with the inverse
 of the canonical exponential.  The linear Peano--Baker/Picard--Lindel\"of

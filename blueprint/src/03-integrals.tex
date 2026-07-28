@@ -1311,7 +1311,7 @@ endpoint raw.  Formula-specific work remains in producing those two rational
 schedules.
 \end{theorem}
 
-\begin{corollary}[The arctangent--logarithm pi route: construction target]
+\begin{corollary}[The arctangent--logarithm pi route: supplied branch and generalization target]
 \label{cor:arctangent-logarithm-pi-route}
 \uses{thm:integration-by-parts-certificate,thm:coordinate-arctangent-two-stage-ftc,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
@@ -1330,13 +1330,17 @@ turn the unit-mesh statement into a checked finite rational corner estimate;
 the two explicit stages above also bound the rectangle sampling error.
 Thus the geometric unit-branch bounds are now an executable finite budget,
 rather than an asymptotic assertion.  The finite two-stage FTC comparison and
-its public definite-integral construction are now checked for the emph{sum}
-of the two product-rule terms.  What remains is a direct Riemann/Darboux
-construction for the separate \(\arctan(x)\) strip and a checked splitting
-identity with the existing logarithmic strip.  The resulting target is
+its public definite-integral construction are now checked for the \emph{sum}
+of the two product-rule terms.  The direct Riemann/Darboux construction for
+the separate arctangent strip is now supplied by
+\(\arctanintegraltriangle\): its runtime is the finite outer triangle of
+inner kernel sums, and it is a certified monotone construction for
+\code{arctan.integral.rectangle}.  The checked splitting identity is
 \[
- \int_0^1\arctan(x)\,\dd x
- \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.
+ \arctanintegraltriangle+
+ \int_0^1\frac{x}{1+x^2}\,\dd x
+ \Equiv I_{x\arctan x}^{\mathrm{FTC}}
+ \Equiv \arctangeom(1).
 \]
 The final endpoint bridge is now checked for the concrete reciprocal-integral
 logarithm representative:
@@ -1359,17 +1363,18 @@ rational-kernel decomposition of the arctangent kernel into this logarithmic
 strip and its complement.  The exact finite triangle comparison is now
 available as \cref{thm:finite-uniform-triangle-reindexing}; it reindexes the
 outer mesh of growing inner sums into this complementary kernel without a
-continuous Fubini theorem.  It still does \emph{not} identify that complement with
-the integral of arctangent; the public integral-construction bridge remains
-the gate that supplies that identification.
-Combining the two certified equivalences gives the natural statement
+continuous Fubini theorem, and its certified triangle integral is equivalent
+to that complementary strip.  Combining the two certified endpoint bridges
+gives the formally proved supplied-branch statement
 \[
-  \pi\Equiv 4\int_0^1\arctan(x)\,\dd x+2\log_{\mathrm{rec}}2.
+  \pi_{\mathrm{area}}\Equiv
+  4\arctanintegraltriangle+2\log_{\mathrm{rec}}2.
 \]
-After the canonical exp/log agreement transports
-\(\log_{\mathrm{rec}}2\) to the canonical \(\log2\), and only after the
-displayed expression itself is a valid raw evaluator, its agreement with
-\code{piCircleArea} should enter the pi registry.
+Lean stores this valid raw formula as the supplementary certified view
+\code{PiProofs.pi.triangleLogReciprocalIntegral}.  After the canonical
+exp/log agreement transports \(\log_{\mathrm{rec}}2\) to the canonical
+\(\log2\), the same formula will have the textbook logarithm; a reusable
+piecewise integration-by-parts theorem remains a separate generalization.
 \end{corollary}
 
 \section{Nondecreasing integrands and piecewise monotone integrals}

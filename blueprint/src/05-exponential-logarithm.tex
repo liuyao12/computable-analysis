@@ -532,10 +532,16 @@ This is a specialized, completely finite change-of-variables theorem for
 \lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_compute_width}
 \lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral}
 \lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoSeries}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_valid}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogSeries_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pi.triangleLogSeries}
+\lean{ComputableAnalysis.PiProofs.pi.triangleLogReciprocalIntegral}
 \uses{thm:log-two-square-pullback-integral}
 \leanok
 Put
@@ -589,21 +595,32 @@ name \(2\), rather than a function-level identification with the inverse of
 the canonical exponential.
 
 The bridge now also supplies a supplementary executable pi formula using the
-finite triangle computation \(T_{\mathrm{triangle}}\) from
+supplied finite-triangle arctangent integral
+\(\arctanintegraltriangle\) from
 \cref{thm:finite-uniform-triangle-reindexing}:
 \[
  P_{\triangle,\log\mathrm{series}}
- =4T_{\mathrm{triangle}}+2\log_{\mathrm{series}}2.
+ =4\arctanintegraltriangle+2\log_{\mathrm{series}}2.
 \]
-The direct theorem
+Lean first proves the specific finite integration-by-parts chain
+\[
+ P_{\triangle,\log\mathrm{series}}
+ \Equiv 4I_{x\arctan x}^{\mathrm{FTC}}
+ \Equiv 4\arctangeom(1).
+\]
+The first equivalence is
+\code{piTriangleLogSeries\_equiv\_four\_coordinateTimesArctanForwardTwoStageMonotoneIntegral}:
+it scales the separately checked triangle-plus-strip/product-FTC bridge, then
+uses the independently checked logarithm-series comparison.  The direct theorem
 \code{piTriangleLogSeries\_equiv\_four\_arctanGeom\_one} identifies this
 raw evaluator with \(4\arctangeom(1)\), and
 \code{PiProofs.piTriangleLogSeries\_equiv\_piCircleArea} records the full
 circle-area pi equivalence.  The abstract pi handle exposes it as
 \code{PiProofs.pi.triangleLogSeries}.  This is an executable cross-check of
-the triangle, strip, and logarithm-series algorithms.  It remains outside the
-pi coverage score because it does not establish the missing function-level FTC
-or canonical-logarithm theorem.
+the triangle integral, strip, product-FTC, and logarithm-series algorithms.
+It remains outside the pi coverage score because it does not establish a
+general function-level integration-by-parts theorem or transport the
+logarithm to the canonical inverse-exponential presentation.
 \end{theorem}
 
 \begin{theorem}[Rational two-strip decomposition]
@@ -645,11 +662,15 @@ Riemann sum at every stage.  Consequently,
   J+K\Equiv\int_0^1\frac{\dd x}{1+x^2}.
 \]
 
-This is deliberately a rational-kernel decomposition, not yet an integration
-by parts theorem: identifying \(J\) with
-\(\int_0^1\arctan(x)\,\dd x\) requires the pending finite
-triangle/Fubini or product-derivative/FTC certificate.  It therefore does
-not add a pi-scoreboard row or replace that certificate.
+The direct unit triangle construction now supplies that particular
+identification: \code{arctanIntegralTriangle} is a monotone integral
+construction for \code{arctan.integral.rectangle}, has the literal triangle
+mesh as its runtime, and is equivalent to \(J\).  Its theorem
+\code{arctanIntegralTriangle\_add\_logKernelIntegral\_equiv\_productIntegral}
+then proves the supplied integration-by-parts formula against the product-FTC
+integral.  This remains deliberately narrower than a general integration by
+parts theorem: it does not provide a reusable additivity rule for arbitrary
+integrals, a canonical logarithm, or a new pi-scoreboard row.
 \end{theorem}
 
 \begin{theorem}[Series equals the finite reciprocal integral]

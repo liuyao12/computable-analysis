@@ -517,17 +517,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   `LipschitzDyadic.compute_add` proves that this strip plus
   `arctanLogKernelIntegral` is stagewise the 4-Lipschitz box for
   `1/(1+x*x)`. Common uniform-left sums yield
-  `arctanStripIntegrals_add_equiv_arctanKernelIntegral`. This is the
-  rational two-strip decomposition that a later effective FTC
-  certificate must identify with `∫ arctan`; it is not a new Pi-scoreboard
-  row. The mesh-level triangle/Fubini reindexing is now separately checked:
+  `arctanStripIntegrals_add_equiv_arctanKernelIntegral`. The supplied unit
+  triangle construction now identifies the complementary strip with its
+  arctangent integral; this is still not a new Pi-scoreboard row because the
+  result is not a reusable effective-FTC theorem. The mesh-level triangle/Fubini
+  reindexing is separately checked:
   `LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum`
   proves the exact identity between an outer right sum of fixed-mesh inner
   left prefixes and the complementary left sum `(1-x)*f(x)`. It is obtained
   from `finiteIntegrationByParts`, so it supplies the required finite
-  rectangle geometry without importing continuous Fubini. The remaining
-  point is semantic: effective FTC/product-derivative data must identify the
-  inner prefixes with arctangent. The direct dyadic specialization is now
+  rectangle geometry without importing continuous Fubini. The supplied
+  direct dyadic specialization is now
   packaged as `arctanKernelTriangleRaw`: its runtime evaluator is only the
   finite triangle sum for `1/(1+x*x)`, its public stabilization radius is
   `6/2^n`, and Lean proves it equivalent to
@@ -546,13 +546,18 @@ another. The Pi score stays useful only as secondary integration coverage.
   calculus theorem `4 * ∫ arctan + 2 * log 2 = pi`: canonical exp/log
   transport and a general effective-FTC extension beyond the supplied unit
   construction remain separate work.
-  The direct series endpoint is now also used to package the supplementary
-  raw `Logarithm.piTriangleLogSeries = 4 * triangle + 2 * log_series(2)`.
-  Its formal theorem `piTriangleLogSeries_equiv_four_arctanGeom_one` reaches
-  the already certified geometric arctangent endpoint. It is intentionally
-  outside `PiCoverageBridge`: it tests agreement among finite triangle,
-  Darboux-strip, and alternating-series algorithms, but does not remove either
-  semantic gate in the displayed arctangent/logarithm calculus identity.
+  The direct endpoint now packages two supplementary raw formulas:
+  `Logarithm.piTriangleLogReciprocalIntegral =
+  4 * arctan.integral.triangle + 2 * log_rec(2)` and
+  `Logarithm.piTriangleLogSeries =
+  4 * arctan.integral.triangle + 2 * log_series(2)`.
+  Their formal product-FTC bridge is
+  `piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`
+  (and its series counterpart); both then reach the geometric arctangent
+  endpoint and the circle-area pi. They intentionally remain outside
+  `PiCoverageBridge`: they test a supplied finite triangle, Darboux-strip,
+  product-FTC, and logarithm route, but do not establish general effective
+  FTC/integration-by-parts or canonical exp/log transport.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
@@ -1156,9 +1161,9 @@ students actually compute.
   regressions.  `piCertified.alternatives` also literally carries the checked
   `pi.curvatureFan`, `pi.integrationByPartsMesh`, and
   `pi.triangleLogSeries` raw evaluators; they remain outside the coverage
-  count. The latter two are finite mesh and triangle--logarithm-series
-  regressions, not substitutes for the pending arctangent--logarithm FTC
-  bridge.
+  count. The latter two are finite mesh and supplied triangle--logarithm
+  regressions, not substitutes for the pending general arctangent--logarithm
+  effective-FTC bridge.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel and Brouncker are advanced-analysis
@@ -1261,8 +1266,8 @@ students actually compute.
   `PiProofs.pi.triangleLogSeries` expose checked named
   `Real.Representation`s, stored directly in `piCertified.alternatives`; they
   are not additional calculus-coverage rows. The latter two remain finite
-  mesh and triangle--logarithm-series evaluators, not the arctangent--logarithm
-  integration-by-parts theorem.
+  mesh and supplied triangle--logarithm evaluators, not the general
+  arctangent--logarithm integration-by-parts theorem.
   The stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical

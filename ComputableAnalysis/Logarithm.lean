@@ -2458,53 +2458,61 @@ theorem two_arctanLogKernelIntegral_equiv_logTwoSeries :
     two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral
     (RealRaw.equiv_symm logTwoSeries_equiv_logTwoReciprocalIntegral)
 
-/-- A direct finite pi formula formed from the triangular arctangent-kernel
-mesh and the independent alternating-harmonic computation of `log 2`.
+/-- The supplied arctangent integration-by-parts pi formula, with the
+arctangent term evaluated by the direct finite triangle construction and the
+logarithm term by its independent alternating series:
+`4 * arctan.integral.triangle + 2 * log.series(2)`.
 
-The first summand is deliberately still named for the kernel triangle, rather
-than for an integral of arctangent: the global FTC/product-derivative theorem
-is a separate semantic identification. -/
+Its construction is intentionally specific to the certified unit branch.  The
+following theorems make the whole route explicit: first the finite triangle
+and strip sum is the product-FTC integral, then that product integral is the
+geometric arctangent endpoint.  No general integral-linearity, integration by
+parts, or canonical exp/log theorem is assumed. -/
 def piTriangleLogSeries : RealRaw :=
-  (4 : Nat) * arctanKernelTriangleRaw + (2 : Nat) * logTwoSeries
+  (4 : Nat) * arctanIntegralTriangle + (2 : Nat) * logTwoSeries
 
 theorem piTriangleLogSeries_valid : piTriangleLogSeries.Valid := by
   unfold piTriangleLogSeries
   exact RealRaw.add_valid
-    (RealRaw.natScale_valid 4 arctanKernelTriangleRaw_valid)
+    (RealRaw.natScale_valid 4 arctanIntegralTriangle_valid)
     (RealRaw.natScale_valid 2 logTwoSeries_valid)
 
-/-- The direct triangle-plus-log-series formula is four times the geometric
-unit arctangent.  Together with the established `4 * arctanGeom 1` pi
-bridge, this is a supplementary executable pi computation, not a new
-calculus-coverage row. -/
-theorem piTriangleLogSeries_equiv_four_arctanGeom_one :
+/-- The supplied triangle/log-series formula is four times the independently
+certified product-FTC integral for `x * arctan.integral.rectangle(x)`.
+This is the concrete integration-by-parts bridge: its proof is a composition
+of finite rational mesh comparisons, not an instance of a general
+integration-by-parts rule. -/
+theorem piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral :
     piTriangleLogSeries.Equiv
-      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
-  have htriangleValid : arctanKernelTriangleRaw.Valid :=
-    arctanKernelTriangleRaw_valid
+      ((4 : Nat) *
+        IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral :
+          RealRaw) := by
+  have htriangleValid : arctanIntegralTriangle.Valid :=
+    arctanIntegralTriangle_valid
   have hstripValid : arctanLogKernelIntegral.Valid :=
     arctanLogKernelIntegral_valid
   have hseriesValid : logTwoSeries.Valid := logTwoSeries_valid
-  have hfourTriangleValid : ((4 : Nat) * arctanKernelTriangleRaw).Valid :=
+  have hfourTriangleValid : ((4 : Nat) * arctanIntegralTriangle).Valid :=
     RealRaw.natScale_valid 4 htriangleValid
   have htwoSeriesValid : ((2 : Nat) * logTwoSeries).Valid :=
     RealRaw.natScale_valid 2 hseriesValid
   have hfourStripValid : ((4 : Nat) * arctanLogKernelIntegral).Valid :=
     RealRaw.natScale_valid 4 hstripValid
   have hmiddleValid :
-      ((4 : Nat) * arctanKernelTriangleRaw +
+      ((4 : Nat) * arctanIntegralTriangle +
         (4 : Nat) * arctanLogKernelIntegral).Valid :=
     RealRaw.add_valid hfourTriangleValid hfourStripValid
   have hsumValid :
       ((4 : Nat) *
-        (arctanKernelTriangleRaw + arctanLogKernelIntegral)).Valid :=
+        (arctanIntegralTriangle + arctanLogKernelIntegral)).Valid :=
     RealRaw.natScale_valid 4
       (RealRaw.add_valid htriangleValid hstripValid)
-  have hfourGeomValid :
-      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).Valid :=
+  have hfourProductValid :
+      ((4 : Nat) *
+        IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral :
+          RealRaw).Valid :=
     RealRaw.natScale_valid 4
-      (ArctanGeometry.arctanGeom_valid_on_unit
-        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid
   have hseriesToDoubleStrip :
       ((2 : Nat) * logTwoSeries).Equiv
         ((2 : Nat) * (RealRaw.scaleRat 2 arctanLogKernelIntegral)) :=
@@ -2518,36 +2526,119 @@ theorem piTriangleLogSeries_equiv_four_arctanGeom_one :
       arctanLogKernelIntegral hstripValid
     simpa only [show (2 : Rat) * (2 : Rat) = 4 by native_decide] using hcompose
   have hreplace : piTriangleLogSeries.Equiv
-      ((4 : Nat) * arctanKernelTriangleRaw +
+      ((4 : Nat) * arctanIntegralTriangle +
         (4 : Nat) * arctanLogKernelIntegral) := by
     unfold piTriangleLogSeries
     exact RealRaw.add_equiv hfourTriangleValid hfourTriangleValid
       htwoSeriesValid hfourStripValid
-      (RealRaw.equiv_refl ((4 : Nat) * arctanKernelTriangleRaw)
+      (RealRaw.equiv_refl ((4 : Nat) * arctanIntegralTriangle)
         hfourTriangleValid)
       (RealRaw.equiv_trans htwoSeriesValid
         (RealRaw.natScale_valid 2
           (RealRaw.scaleRat_valid_of_nonneg (by native_decide) hstripValid))
         hfourStripValid hseriesToDoubleStrip hdoubleStripToFour)
   have hdistribute :
-      ((4 : Nat) * arctanKernelTriangleRaw +
+      ((4 : Nat) * arctanIntegralTriangle +
         (4 : Nat) * arctanLogKernelIntegral).Equiv
         ((4 : Nat) *
-          (arctanKernelTriangleRaw + arctanLogKernelIntegral)) := by
+          (arctanIntegralTriangle + arctanLogKernelIntegral)) := by
     have h := RealRaw.scaleRat_add_equiv_of_nonneg
-      (4 : Rat) (by native_decide) arctanKernelTriangleRaw
+      (4 : Rat) (by native_decide) arctanIntegralTriangle
       arctanLogKernelIntegral htriangleValid hstripValid
     simpa using RealRaw.equiv_symm h
-  have hsumToGeom :
+  have hsumToProduct :
       ((4 : Nat) *
-        (arctanKernelTriangleRaw + arctanLogKernelIntegral)).Equiv
-        ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
+        (arctanIntegralTriangle + arctanLogKernelIntegral)).Equiv
+        ((4 : Nat) *
+          IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral :
+            RealRaw) :=
     RealRaw.natScale_equiv 4
-      arctanKernelTrianglePlusLog_equiv_arctanGeom_one
-  exact RealRaw.equiv_trans piTriangleLogSeries_valid hsumValid hfourGeomValid
+      arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral
+  exact RealRaw.equiv_trans piTriangleLogSeries_valid hsumValid hfourProductValid
     (RealRaw.equiv_trans piTriangleLogSeries_valid hmiddleValid hsumValid
       hreplace hdistribute)
-    hsumToGeom
+    hsumToProduct
+
+/-- The supplied triangle/log-series formula is four times the geometric
+unit arctangent.  This packages the product-FTC bridge above with the
+already established endpoint bridge; it remains supplementary to the compact
+calculus-coverage score because the logarithm has not yet been transported to
+the canonical inverse-exponential presentation. -/
+theorem piTriangleLogSeries_equiv_four_arctanGeom_one :
+    piTriangleLogSeries.Equiv
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+  exact RealRaw.equiv_trans
+    piTriangleLogSeries_valid
+    (RealRaw.natScale_valid 4
+      IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid)
+    (RealRaw.natScale_valid 4
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide)))
+    piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral
+    IntegralIdentities.four_coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_four_arctanGeom_one
+
+/-- The same supplied integration-by-parts formula with the logarithm kept as
+its literal reciprocal integral on `[1,2]`, rather than transported to the
+alternating series.  This is the natural integral-side endpoint before the
+still-open identification with the canonical inverse-exponential logarithm. -/
+def piTriangleLogReciprocalIntegral : RealRaw :=
+  (4 : Nat) * arctanIntegralTriangle + (2 : Nat) * logTwoReciprocalIntegral
+
+theorem piTriangleLogReciprocalIntegral_valid :
+    piTriangleLogReciprocalIntegral.Valid := by
+  unfold piTriangleLogReciprocalIntegral
+  exact RealRaw.add_valid
+    (RealRaw.natScale_valid 4 arctanIntegralTriangle_valid)
+    (RealRaw.natScale_valid 2 logTwoReciprocalIntegral_valid)
+
+/-- The reciprocal-integral and alternating-series forms of the supplied
+arctangent integration-by-parts formula agree.  The triangle integral is
+shared literally; the only transport is the independently certified
+`log.series(2) = ∫₁² 1/t dt` bridge. -/
+theorem piTriangleLogReciprocalIntegral_equiv_piTriangleLogSeries :
+    piTriangleLogReciprocalIntegral.Equiv piTriangleLogSeries := by
+  have htriangleValid : ((4 : Nat) * arctanIntegralTriangle).Valid :=
+    RealRaw.natScale_valid 4 arctanIntegralTriangle_valid
+  have hreciprocalValid : ((2 : Nat) * logTwoReciprocalIntegral).Valid :=
+    RealRaw.natScale_valid 2 logTwoReciprocalIntegral_valid
+  have hseriesValid : ((2 : Nat) * logTwoSeries).Valid :=
+    RealRaw.natScale_valid 2 logTwoSeries_valid
+  unfold piTriangleLogReciprocalIntegral piTriangleLogSeries
+  exact RealRaw.add_equiv htriangleValid htriangleValid
+    hreciprocalValid hseriesValid
+    (RealRaw.equiv_refl ((4 : Nat) * arctanIntegralTriangle) htriangleValid)
+    (RealRaw.natScale_equiv 2
+      (RealRaw.equiv_symm logTwoSeries_equiv_logTwoReciprocalIntegral))
+
+/-- The literal-log version of the supplied integration-by-parts formula is
+four times the independently certified product-FTC integral. -/
+theorem piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral :
+    piTriangleLogReciprocalIntegral.Equiv
+      ((4 : Nat) *
+        IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral :
+          RealRaw) := by
+  exact RealRaw.equiv_trans
+    piTriangleLogReciprocalIntegral_valid
+    piTriangleLogSeries_valid
+    (RealRaw.natScale_valid 4
+      IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid)
+    piTriangleLogReciprocalIntegral_equiv_piTriangleLogSeries
+    piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral
+
+/-- The literal-log integration-by-parts formula reaches the geometric unit
+arctangent, before the final geometric pi normalization. -/
+theorem piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one :
+    piTriangleLogReciprocalIntegral.Equiv
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+  exact RealRaw.equiv_trans
+    piTriangleLogReciprocalIntegral_valid
+    (RealRaw.natScale_valid 4
+      IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid)
+    (RealRaw.natScale_valid 4
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide)))
+    piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral
+    IntegralIdentities.four_coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_four_arctanGeom_one
 
 end Logarithm
 
