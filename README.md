@@ -93,7 +93,7 @@ the gates have different dependencies and none can substitute for another.
 | Gate | Current checked boundary | Next boundary |
 | --- | --- | --- |
 | Rational interval foundation | `RealRaw.Valid`, equivalence by overlap, and the no-completeness/no-Mathlib-analysis audit | Continue dependency auditing as modules grow |
-| Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit` and the non-exact rectangle arctangent now have checked finite moduli | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
+| Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit`, the non-exact rectangle arctangent, and the concrete (xarctan x) derivative candidate now have checked finite moduli | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, finite geometric integration by parts with increasing/decreasing-piece corner bounds, a partition maximum-step-to-corner-error bridge (including the \(1/n\) unit-mesh coordinate estimate), positive bounded interval products including the concrete unit-branch evaluator \(x\arctan x\), and certificate-to-endpoint FTC bridges are checked; concrete rectangle and compactified Cauchy/quartic integrals run end to end | Extend the constructor from rational Lipschitz kernels to interval-regular functions and derivative certificates for the standard table |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
 | Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the two-sided derivative of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Effective FTC for the concrete derivative, then an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
@@ -223,6 +223,11 @@ the tangent-chart transport proves `A.lo(x+h) - A.hi(x) <= h`; choosing
 and both widths by `eps` on the whole rational unit branch.  This is finite
 continuity data, not a shortcut from differentiability to FTC: cellwise
 secant containment and a compatible shrinking partition remain open.
+The actual product derivative candidate now has its own literal continuity
+certificate as well.  Its rational correction `x/(1+x*x)` is proved
+3-Lipschitz by combining the 2-Lipschitz reciprocal kernel with the exact
+product difference; allocating `eps/2` to rectangle arctangent and an input
+budget `eps/6` to the correction makes the derivative boxes `eps`-near.
 It therefore instantiates the unit-mesh corner-error bound without treating
 arbitrary adjacent box endpoints as a monotone path.  Its two finite error
 knobs are now explicit: mesh `eps.den + 1` makes the corner correction at

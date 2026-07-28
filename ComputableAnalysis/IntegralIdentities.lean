@@ -3588,6 +3588,73 @@ theorem coordinate_integralKernel_nondecreasing_on_unit
           _ = y * dx := by rw [hcancely, Rat.mul_one]
   · exact hprodpos
 
+/-- The rational correction `x / (1 + x^2)` in the product derivative is
+three-Lipschitz on the unit interval.  The deliberately slack constant comes
+from the already certified two-Lipschitz reciprocal kernel plus one factor
+for moving the coordinate.  It is a finite rational estimate used to give
+the product derivative its own continuity modulus. -/
+theorem coordinate_integralKernel_lipschitz_on_unit :
+    Integral.LipschitzOnUnit
+      (fun x : Rat => x * ArctanGeometry.integralKernel x) 3 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    have hkernel := oneOverOnePlusSquare_lipschitz_on_unit.2
+      s t hs0 hs1 ht0 ht1
+    have hkernel' :
+        qabs (ArctanGeometry.integralKernel s -
+          ArctanGeometry.integralKernel t) <= 2 * qabs (t - s) := by
+      simpa [ArctanGeometry.integralKernel] using hkernel
+    have hkernelT0 : 0 <= ArctanGeometry.integralKernel t :=
+      Rat.le_of_lt (ArctanGeometry.integralKernel_pos t)
+    have hkernelT1 : ArctanGeometry.integralKernel t <= 1 :=
+      ArctanGeometry.integralKernel_le_one t
+    have hfirst :
+        qabs (s * (ArctanGeometry.integralKernel s -
+          ArctanGeometry.integralKernel t)) <= 2 * qabs (t - s) := by
+      rw [qabs_mul, qabs_eq_self_of_nonneg hs0]
+      calc
+        s * qabs (ArctanGeometry.integralKernel s -
+            ArctanGeometry.integralKernel t) <=
+            s * (2 * qabs (t - s)) :=
+          Rat.mul_le_mul_of_nonneg_left hkernel' hs0
+        _ <= 1 * (2 * qabs (t - s)) :=
+          Rat.mul_le_mul_of_nonneg_right hs1 (by
+            exact Rat.mul_nonneg (by native_decide) (qabs_nonneg _))
+        _ = 2 * qabs (t - s) := by grind
+    have hsecond :
+        qabs ((s - t) * ArctanGeometry.integralKernel t) <= qabs (t - s) := by
+      rw [qabs_mul, qabs_eq_self_of_nonneg hkernelT0]
+      have hdist : qabs (s - t) = qabs (t - s) := by
+        have hneg : s - t = -(t - s) := by grind [Rat.sub_eq_add_neg]
+        rw [hneg, qabs_neg]
+      rw [hdist]
+      calc
+        qabs (t - s) * ArctanGeometry.integralKernel t <=
+            qabs (t - s) * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hkernelT1 (qabs_nonneg _)
+        _ = qabs (t - s) := by grind
+    have hsplit :
+        s * ArctanGeometry.integralKernel s -
+            t * ArctanGeometry.integralKernel t =
+          s * (ArctanGeometry.integralKernel s -
+            ArctanGeometry.integralKernel t) +
+          (s - t) * ArctanGeometry.integralKernel t := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    rw [hsplit]
+    calc
+      qabs (s * (ArctanGeometry.integralKernel s -
+          ArctanGeometry.integralKernel t) +
+          (s - t) * ArctanGeometry.integralKernel t) <=
+          qabs (s * (ArctanGeometry.integralKernel s -
+            ArctanGeometry.integralKernel t)) +
+            qabs ((s - t) * ArctanGeometry.integralKernel t) :=
+        qabs_add_le _ _
+      _ <= 2 * qabs (t - s) + qabs (t - s) :=
+        rat_add_le_add hfirst hsecond
+      _ = 3 * qabs (t - s) := by grind
+
 /-- The two-sided product derivative is itself nondecreasing on `[0,1]`.
 The rectangle arctangent summand is monotone by geometric inclusion, while
 the rational correction is monotone by the denominator-clearing calculation
@@ -3613,6 +3680,144 @@ def coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone :
     MonotoneOnInterval coordinateTimesArctanIntegralRectangleDerivativeOnUnit :=
   MonotoneOnInterval.ofNondecreasing
     coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing
+
+/-- The concrete derivative candidate `arctan x + x / (1 + x^2)` has literal
+rational epsilon--delta continuity on the unit branch.  This is the
+shrinking-range input needed by the derivative-bound FTC route: it combines
+the already certified rectangle-arctangent continuity with the finite
+three-Lipschitz correction estimate above. -/
+theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit := by
+  intro eps
+  let eta : QPos :=
+    { val := eps.val / 2
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide)) }
+  let rho : QPos :=
+    { val := eps.val / 6
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide)) }
+  obtain ⟨deltaA, n, hA⟩ :=
+    arctanIntegralRectangleOnUnit_epsilonDeltaContinuous eta
+  let delta : QPos :=
+    { val := if deltaA.val <= rho.val then deltaA.val else rho.val
+      property := by
+        split
+        · exact deltaA.property
+        · exact rho.property }
+  refine ⟨delta, n, ?_⟩
+  intro x y hx hy hclose
+  have hdeltaA : delta.val <= deltaA.val := by
+    dsimp [delta]
+    split
+    · grind
+    · grind
+  have hdeltaRho : delta.val <= rho.val := by
+    dsimp [delta]
+    split
+    · grind
+    · grind
+  have hAnear := hA x y hx hy (Rat.le_trans hclose hdeltaA)
+  rcases hAnear with ⟨hAxy, hAyx, hAwidthX, hAwidthY⟩
+  have hcorrection := coordinate_integralKernel_lipschitz_on_unit.2
+    x y hx.1 hx.2 hy.1 hy.2
+  have hinputRho : qabs (y - x) <= rho.val :=
+    Rat.le_trans hclose hdeltaRho
+  have hthreeRho : (3 : Rat) * rho.val = eta.val := by
+    dsimp [rho, eta]
+    rw [Rat.div_def, Rat.div_def]
+    have hsix : (6 : Rat) * (6 : Rat)⁻¹ = 1 := by native_decide
+    have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hcorrectionNear :
+      qabs (x * ArctanGeometry.integralKernel x -
+        y * ArctanGeometry.integralKernel y) <= eta.val := by
+    calc
+      qabs (x * ArctanGeometry.integralKernel x -
+          y * ArctanGeometry.integralKernel y) <=
+          3 * qabs (y - x) := hcorrection
+      _ <= 3 * rho.val :=
+        Rat.mul_le_mul_of_nonneg_left hinputRho (by native_decide)
+      _ = eta.val := hthreeRho
+  have hcorrectionXY :
+      x * ArctanGeometry.integralKernel x <=
+        y * ArctanGeometry.integralKernel y + eta.val := by
+    have h := Rat.le_trans
+      (self_le_qabs (x * ArctanGeometry.integralKernel x -
+        y * ArctanGeometry.integralKernel y)) hcorrectionNear
+    grind [Rat.sub_eq_add_neg]
+  have hcorrectionYX :
+      y * ArctanGeometry.integralKernel y <=
+        x * ArctanGeometry.integralKernel x + eta.val := by
+    have hrev :
+        qabs (y * ArctanGeometry.integralKernel y -
+          x * ArctanGeometry.integralKernel x) <= eta.val := by
+      rw [show y * ArctanGeometry.integralKernel y -
+          x * ArctanGeometry.integralKernel x =
+          -(x * ArctanGeometry.integralKernel x -
+            y * ArctanGeometry.integralKernel y) by
+          grind [Rat.sub_eq_add_neg], qabs_neg]
+      exact hcorrectionNear
+    have h := Rat.le_trans
+      (self_le_qabs (y * ArctanGeometry.integralKernel y -
+        x * ArctanGeometry.integralKernel x)) hrev
+    grind [Rat.sub_eq_add_neg]
+  have heta_le_eps : eta.val <= eps.val := by
+    dsimp [eta]
+    rw [Rat.div_def]
+    calc
+      eps.val * (2 : Rat)⁻¹ <= eps.val * 1 :=
+        Rat.mul_le_mul_of_nonneg_left (by native_decide)
+          (Rat.le_of_lt eps.property)
+      _ = eps.val := by grind
+  change QInterval.NearAt
+    (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx n)
+    (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute y hy n) eps
+  rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+  unfold QInterval.NearAt
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · calc
+      (arctanIntegralRectangleOnUnit.compute x hx n).lo +
+          x * ArctanGeometry.integralKernel x <=
+          ((arctanIntegralRectangleOnUnit.compute y hy n).hi + eta.val) +
+            (y * ArctanGeometry.integralKernel y + eta.val) :=
+        rat_add_le_add hAxy hcorrectionXY
+      _ = (arctanIntegralRectangleOnUnit.compute y hy n).hi +
+          y * ArctanGeometry.integralKernel y + eps.val := by
+        dsimp [eta]
+        rw [Rat.div_def]
+        have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+        grind [Rat.add_assoc, Rat.add_comm, Rat.mul_assoc]
+  · calc
+      (arctanIntegralRectangleOnUnit.compute y hy n).lo +
+          y * ArctanGeometry.integralKernel y <=
+          ((arctanIntegralRectangleOnUnit.compute x hx n).hi + eta.val) +
+            (x * ArctanGeometry.integralKernel x + eta.val) :=
+        rat_add_le_add hAyx hcorrectionYX
+      _ = (arctanIntegralRectangleOnUnit.compute x hx n).hi +
+          x * ArctanGeometry.integralKernel x + eps.val := by
+        dsimp [eta]
+        rw [Rat.div_def]
+        have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+        grind [Rat.add_assoc, Rat.add_comm, Rat.mul_assoc]
+  · unfold QInterval.width
+    have :
+        (arctanIntegralRectangleOnUnit.compute x hx n).hi -
+            (arctanIntegralRectangleOnUnit.compute x hx n).lo <= eps.val :=
+      Rat.le_trans hAwidthX heta_le_eps
+    grind [Rat.sub_eq_add_neg]
+  · unfold QInterval.width
+    have :
+        (arctanIntegralRectangleOnUnit.compute y hy n).hi -
+            (arctanIntegralRectangleOnUnit.compute y hy n).lo <= eps.val :=
+      Rat.le_trans hAwidthY heta_le_eps
+    grind [Rat.sub_eq_add_neg]
 
 /-- The positive-step quotient of the literal interval product has an exact
 endpoint decomposition.  The terms use the arctangent quotient at the same

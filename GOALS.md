@@ -82,6 +82,12 @@ gates.
   `arctanIntegralRectangleOnUnit_epsilonDeltaContinuous`: its finite tangent
   chart proves `A.lo(x+h) - A.hi(x) <= h`, so `delta = eps` and common stage
   `4 * (eps.den + 1)` make both cross-box gaps and both widths at most `eps`.
+  The concrete product-derivative candidate `arctan x + x/(1+x*x)` now also
+  has literal epsilon--delta continuity. Its rational correction is checked
+  3-Lipschitz; splitting the output budget as `eps/2` for arctangent and
+  `eps/6` for the input correction gives a finite modulus for the whole
+  derivative box. This is the shrinking-range datum for the pending
+  derivative-bound FTC route, not its missing secant containment.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
