@@ -2642,4 +2642,25 @@ theorem piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one :
 
 end Logarithm
 
+/-! The supplied unit triangle is a public arctangent-integral presentation,
+not merely an internal mesh name. -/
+namespace arctan
+namespace integral
+
+/-- The certified finite triangle integral of
+`arctan.integral.rectangle` over `[0,1]`. -/
+def triangle : RealRaw := Logarithm.arctanIntegralTriangle
+
+theorem triangle_raw_eq : triangle = Logarithm.arctanIntegralTriangle := rfl
+
+theorem triangle_valid : triangle.Valid :=
+  Logarithm.arctanIntegralTriangle_valid
+
+theorem triangle_equiv_complementKernelIntegral :
+    triangle.Equiv Logarithm.arctanComplementKernelIntegral :=
+  Logarithm.arctanIntegralTriangle_equiv_complementKernelIntegral
+
+end integral
+end arctan
+
 end ComputableAnalysis

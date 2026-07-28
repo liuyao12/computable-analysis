@@ -663,9 +663,10 @@ Riemann sum at every stage.  Consequently,
 \]
 
 The direct unit triangle construction now supplies that particular
-identification: \code{arctanIntegralTriangle} is a monotone integral
-construction for \code{arctan.integral.rectangle}, has the literal triangle
-mesh as its runtime, and is equivalent to \(J\).  Its theorem
+identification: \code{arctan.integral.triangle} (implemented by
+\code{arctanIntegralTriangle}) is a monotone integral construction for
+\code{arctan.integral.rectangle}, has the literal triangle mesh as its
+runtime, and is equivalent to \(J\).  Its theorem
 \code{arctanIntegralTriangle\_add\_logKernelIntegral\_equiv\_productIntegral}
 then proves the supplied integration-by-parts formula against the product-FTC
 integral.  This remains deliberately narrower than a general integration by

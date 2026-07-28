@@ -200,9 +200,10 @@ either stay within an existing concrete construction or make the missing
 general theorem its explicit proof goal.
 
 One useful fully scoped exception is the unit arctangent triangle route in
-`Logarithm.lean`.  `Logarithm.arctanIntegralTriangle` is a certified monotone
-construction for `IntegralIdentities.arctanIntegralRectangleOnUnit`; its
-runtime is the explicit rational triangle mesh, exposed by
+`Logarithm.lean`.  Its public name is `arctan.integral.triangle` (implemented
+by `Logarithm.arctanIntegralTriangle`), a certified monotone construction for
+the public `arctan.integral.rectangle` function on `[0,1]`; its runtime is the
+explicit rational triangle mesh, exposed by
 `arctanIntegralTriangle_compute_eq`.  The theorem
 `arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral` compares
 that construction plus the `x/(1+x^2)` strip with the independently certified

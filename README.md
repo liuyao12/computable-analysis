@@ -373,8 +373,9 @@ The direct dyadic specialization is now a valid raw real too:
 `1/(1+x*x)` and carries the public `6/2^n` enclosure radius.  Its stagewise
 overlap with `arctanComplementKernelIntegral` is checked, so it is equivalent
 to the complementary rational strip.  The same finite runtime is now exposed
-as `arctanIntegralTriangle`, a `MonotoneConstructionFor` the certified
-`arctan.integral.rectangle` function on `[0,1]`; its construction and
+as `arctan.integral.triangle` (implemented by `arctanIntegralTriangle`), a
+`MonotoneConstructionFor` the certified `arctan.integral.rectangle` function
+on `[0,1]`; its construction and
 monotonicity witnesses make the finite triangle/Fubini provenance explicit,
 without assuming general Fubini or integral-linearity.  Generalizing this
 unit-branch construction still requires an effective FTC theorem.

@@ -575,6 +575,7 @@ bridge.
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_equiv_complementKernelIntegral}
 \lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleConstruction}
 \lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleMonotoneConstruction}
+\lean{ComputableAnalysis.arctan.integral.triangle}
 \lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_valid}
 \lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_compute_eq}
 \lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_equiv_complementKernelIntegral}
@@ -614,9 +615,10 @@ Consequently Lean proves a raw-real equivalence between the executable
 triangle representative and that strip.  This is progress toward the
 arctangent integration-by-parts row, with an explicit convergence rate.  The
 raw algorithm retains the transparent implementation name
-\code{arctanKernelTriangleRaw}.  Lean now also attaches precisely that runtime
-to the certified monotone function \code{arctan.integral.rectangle} and calls
-the resulting unit-interval construction \code{arctanIntegralTriangle}.  Its
+\code{arctanKernelTriangleRaw}.  Lean now also exposes the certified monotone
+function as \code{arctan.integral.rectangle}, and its resulting unit-interval
+construction as \code{arctan.integral.triangle} (implemented by the legacy
+name \code{arctanIntegralTriangle}).  Its
 finite triangle reindexing theorem is the explicit provenance of this
 integral construction; no general Fubini or integral-linearity axiom has
 been introduced.
@@ -1979,6 +1981,7 @@ below.
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleRepresentation}
+\lean{ComputableAnalysis.arctan.integral.rectangle}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw_valid}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionAgreement}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit}
@@ -2152,8 +2155,9 @@ to \code{arctanGeom x} throughout the rational unit branch.  The zero endpoint
 uses a small degenerate-loop invariant, while the positive endpoint proof is
 exactly the finite rectangle/geometric overlap.  This is the finite algebraic
 core of the comparison \(\arctanintegral=\arctangeom\).  Lean also
-wraps this construction as
-\code{arctanIntegralRectangleRepresentation} and proves the function-level
+wraps this construction under the public name
+\code{arctan.integral.rectangle} (implemented by
+\code{arctanIntegralRectangleRepresentation}) and proves the function-level
 overlap agreement \code{arctanIntegralRectangleFunctionAgreement}.  Lean now
 also packages the same construction as the unit-branch integral arctangent
 \code{arctanIntegralUnit}; the theorem

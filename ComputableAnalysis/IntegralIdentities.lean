@@ -15610,4 +15610,32 @@ theorem arctanKernelLipschitzIntegral_equiv_rectangleForAtOne :
 
 end IntegralIdentities
 
+/-! Public dot-qualified arctangent integral presentations.
+
+These aliases sit outside `IntegralIdentities` so the names used throughout
+the blueprint are useful Lean entry points as well.  The longer names above
+remain the implementation-facing constructions and theorems. -/
+namespace arctan
+namespace integral
+
+/-- Arctangent as the certified rectangle integral of `1 / (1 + x^2)` on the
+rational unit branch. -/
+def rectangle : Elementary.Arctan.FunctionRepresentation :=
+  IntegralIdentities.arctanIntegralRectangleRepresentation
+
+theorem rectangle_raw_eq :
+    rectangle.raw = IntegralIdentities.arctanIntegralRectangleFunctionRaw := rfl
+
+/-- The monotone-integral packaging of the same unit-branch rectangle
+construction. -/
+def rectangleMonotone : Elementary.Arctan.FunctionRepresentation :=
+  IntegralIdentities.arctanIntegralRectangleMonotoneRepresentation
+
+theorem rectangleMonotone_raw_eq :
+    rectangleMonotone.raw =
+      IntegralIdentities.arctanIntegralRectangleMonotoneFunctionRaw := rfl
+
+end integral
+end arctan
+
 end ComputableAnalysis
