@@ -18261,7 +18261,27 @@ def presentation (kind : PiPresentation) : Real.Representation pi :=
 
 def circleArea : Real.Representation pi := presentation .area
 def circleAreaPolygon : Real.Representation pi := presentation .areaPolygon
+/-- The default circumference view: the fully direct cross-fan evaluator.
+It is deliberately separate from the original, still diagnostic, chord-path
+raw algorithm `piCircumference`. -/
 def circumference : Real.Representation pi := presentation .circumferenceFan
+
+/-- Explicit name for the same default direct cross-fan circumference view.
+`pi.circumference` is retained as the convenient short name. -/
+def circumferenceFan : Real.Representation pi := circumference
+
+/-- The prefix-stabilized view of the original direct chord-path computation.
+Its evaluator reads only finite prefixes of `piCircumference`; the area loop
+appears only in the proof that its rational stabilization radius is sound. -/
+def circumferenceStabilized : Real.Representation pi :=
+  presentation .circumferenceStabilized
+
+/-- The older anchor-reboxed view of the original direct chord-path
+computation.  Unlike `pi.circumferenceStabilized`, its evaluator reads the
+area anchor at run time. -/
+def circumferenceReboxed : Real.Representation pi :=
+  presentation .circumferenceReboxed
+
 def arctanGeom : Real.Representation pi := presentation .arctanGeometry
 def arctanIntegral : Real.Representation pi := presentation .arctanRectangleIntegral
 

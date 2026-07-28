@@ -749,6 +749,10 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.pi}
 \lean{ComputableAnalysis.PiProofs.pi.presentation}
 \lean{ComputableAnalysis.PiProofs.pi.circleArea}
+\lean{ComputableAnalysis.PiProofs.pi.circumference}
+\lean{ComputableAnalysis.PiProofs.pi.circumferenceFan}
+\lean{ComputableAnalysis.PiProofs.pi.circumferenceStabilized}
+\lean{ComputableAnalysis.PiProofs.pi.circumferenceReboxed}
 \lean{ComputableAnalysis.PiProofs.pi.machin}
 \lean{ComputableAnalysis.PiProofs.pi.integrationByPartsMesh}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
@@ -819,6 +823,12 @@ For use at the abstract-real layer, the certified handle is also exposed as
 supplementary \code{pi.curvatureFan.raw} and
 \code{pi.integrationByPartsMesh.raw}, for example, are named raw computations
 equipped with agreement proofs to the one certified pi handle.
+The circumference names make the provenance explicit:
+\code{pi.circumference} (also \code{pi.circumferenceFan}) is the direct
+cross-fan evaluator, while \code{pi.circumferenceStabilized} and
+\code{pi.circumferenceReboxed} name the two normalizations of the original
+chord-path computation.  These are views of one handle, not extra definitions
+or extra scoreboard rows.
 This is a naming façade over \code{Real}, not a new quotient or a second
 definition of real number.
 \end{theorem}

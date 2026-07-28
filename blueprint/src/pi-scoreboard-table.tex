@@ -77,8 +77,10 @@ system and branch-agreement moduli &
 
 The primary \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two
-perimeter normalizations, Nilakantha, and the single Machin power-series
-formula.  The abstract \code{piCertified} handle additionally stores the
+perimeter normalizations (available as \code{pi.circumferenceStabilized} and
+\code{pi.circumferenceReboxed}), Nilakantha, and the single Machin power-series
+formula.  Its direct cross-fan view is \code{pi.circumference} (also
+\code{pi.circumferenceFan}).  The abstract \code{piCertified} handle additionally stores the
 separately named \code{pi.curvatureFan} and
 \code{pi.integrationByPartsMesh}, and \code{pi.triangleLogSeries}
 representatives.  They remain useful

@@ -470,12 +470,16 @@ stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
 routes, together with the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants. The complementary named
-views `PiProofs.pi.curvatureFan`, `PiProofs.pi.integrationByPartsMesh`, and
-`PiProofs.pi.triangleLogSeries` (with its literal-log companion
-`PiProofs.pi.triangleLogReciprocalIntegral`) do not create additional
-calculus-coverage rows. The last three are finite mesh and supplied-
-triangle/logarithm evaluators, not the pending general arctangent--logarithm
-integration-by-parts theorem.
+views make the perimeter provenance readable: `PiProofs.pi.circumference`
+(also `PiProofs.pi.circumferenceFan`) is the direct cross-fan evaluator,
+whereas `PiProofs.pi.circumferenceStabilized` and
+`PiProofs.pi.circumferenceReboxed` are the two certified normalizations of
+the original chord path. Along with `PiProofs.pi.curvatureFan`,
+`PiProofs.pi.integrationByPartsMesh`, and `PiProofs.pi.triangleLogSeries`
+(with its literal-log companion `PiProofs.pi.triangleLogReciprocalIntegral`),
+these views do not create additional calculus-coverage rows. The mesh and
+supplied-triangle/logarithm evaluators are not the pending general
+arctangent--logarithm integration-by-parts theorem.
 
 ### Full implementation inventory
 

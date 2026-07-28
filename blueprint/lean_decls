@@ -227,6 +227,10 @@ ComputableAnalysis.PiProofs.piCertifiedPresentation
 ComputableAnalysis.PiProofs.pi
 ComputableAnalysis.PiProofs.pi.presentation
 ComputableAnalysis.PiProofs.pi.circleArea
+ComputableAnalysis.PiProofs.pi.circumference
+ComputableAnalysis.PiProofs.pi.circumferenceFan
+ComputableAnalysis.PiProofs.pi.circumferenceStabilized
+ComputableAnalysis.PiProofs.pi.circumferenceReboxed
 ComputableAnalysis.PiProofs.pi.machin
 ComputableAnalysis.PiProofs.pi.integrationByPartsMesh
 ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan
