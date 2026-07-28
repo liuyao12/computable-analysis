@@ -715,6 +715,41 @@ def StrongLe (I J : QInterval) : Prop :=
 def addInterval (I J : QInterval) : QInterval :=
   { lo := I.lo + J.lo, hi := I.hi + J.hi }
 
+/-- Finite enclosure is reflexive. -/
+theorem containsInterval_refl (I : QInterval) : I.ContainsInterval I := by
+  unfold ContainsInterval
+  exact ⟨Rat.le_refl, Rat.le_refl⟩
+
+/-- Finite interval enclosure composes in the expected direction. -/
+theorem ContainsInterval.trans {A B C : QInterval}
+    (hAB : A.ContainsInterval B) (hBC : B.ContainsInterval C) :
+    A.ContainsInterval C := by
+  unfold ContainsInterval at *
+  exact ⟨Rat.le_trans hAB.1 hBC.1, Rat.le_trans hBC.2 hAB.2⟩
+
+/-- An outer interval overlaps every ordered interval that it encloses. -/
+theorem overlaps_of_contains_right {outer inner : QInterval}
+    (hcontains : outer.ContainsInterval inner)
+    (hordered : 0 <= inner.width) : outer.Overlaps inner := by
+  unfold ContainsInterval Overlaps width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- Adding two enclosing intervals still encloses the sum of the inner
+intervals.  This is the finite algebra used to assemble cellwise FTC bounds. -/
+theorem addInterval_contains {A B C D : QInterval}
+    (hAC : A.ContainsInterval C) (hBD : B.ContainsInterval D) :
+    (addInterval A B).ContainsInterval (addInterval C D) := by
+  unfold ContainsInterval addInterval at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The degenerate zero interval is an additive identity for finite interval
+addition. -/
+theorem zero_addInterval (I : QInterval) :
+    addInterval { lo := 0, hi := 0 } I = I := by
+  cases I
+  unfold addInterval
+  congr <;> grind
+
 /-- Interval addition adds enclosure widths exactly. -/
 theorem addInterval_width (I J : QInterval) :
     (addInterval I J).width = I.width + J.width := by
@@ -1201,8 +1236,41 @@ def endpointDifferenceInterval (F : RealFunRaw) (a b : Rat) (prec : Nat) : QInte
   let B := F.compute b prec
   { lo := B.lo - A.hi, hi := B.hi - A.lo }
 
+/-- The width of an endpoint-difference box is exactly the sum of the two
+endpoint evaluation widths. -/
+theorem endpointDifferenceInterval_width (F : RealFunRaw) (a b : Rat)
+    (prec : Nat) :
+    (endpointDifferenceInterval F a b prec).width =
+      (F.compute a prec).width + (F.compute b prec).width := by
+  unfold endpointDifferenceInterval QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/-- A valid primitive produces an ordered endpoint-difference enclosure at
+every finite computation stage. -/
+theorem endpointDifferenceInterval_width_nonneg {F : RealFunRaw}
+    (hF : F.Valid) {a b : Rat} (ha : F.domain a) (hb : F.domain b)
+    (prec : Nat) :
+    0 <= (endpointDifferenceInterval F a b prec).width := by
+  rw [endpointDifferenceInterval_width]
+  exact Rat.add_nonneg ((hF a ha).1 prec) ((hF b hb).1 prec)
+
 def endpointDifferenceCompute (F : RealFunRaw) (a b : Rat) : Nat -> QInterval :=
   fun prec => endpointDifferenceInterval F a b prec
+
+/-- At one fixed evaluation stage, adjacent endpoint-difference enclosures
+combine to enclose the endpoint difference across both cells.  The only loss
+comes from the (nonnegative) width of the shared middle evaluation box. -/
+theorem endpointDifferenceInterval_adjacent_additive_contains
+    {F : RealFunRaw} {a b c : Rat} {prec : Nat}
+    (hmiddle : 0 <= (F.compute b prec).width) :
+    QInterval.ContainsInterval
+      (QInterval.addInterval
+        (endpointDifferenceInterval F a b prec)
+        (endpointDifferenceInterval F b c prec))
+      (endpointDifferenceInterval F a c prec) := by
+  unfold endpointDifferenceInterval QInterval.addInterval QInterval.ContainsInterval
+    QInterval.width at *
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
 
 def endpointDifferenceRaw (F : RealFunRaw) (a b : Rat)
     (_h : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) : RealRaw where
@@ -2220,15 +2288,289 @@ theorem clampedPath_quadraticVariation_le_endpointSquare {a b : Rat}
     (clampedPath_step_nonnegative P) (clampedPath_step_nonnegative P) P.pieces
   simpa [clampedPath, P.left_endpoint, P.right_endpoint] using h
 
+/-- The total interval contribution of one index to a derivative-bound sum.
+The out-of-range branch is deliberately the degenerate zero interval, making
+finite fold arguments total even before a list-membership fact is supplied. -/
+def boundIntegralTerm {a b : Rat} (P : RationalPartition a b)
+    (bound : (k : Nat) -> k < P.pieces -> QInterval) (k : Nat) : QInterval :=
+  if hk : k < P.pieces then
+    (P.cell k hk).scaleBound (bound k hk)
+  else
+    { lo := 0, hi := 0 }
+
+/-- The matching total interval contribution of a cell endpoint difference at
+one fixed function-evaluation stage. -/
+def endpointDifferenceTerm {a b : Rat} (P : RationalPartition a b)
+    (F : RealFunRaw) (prec k : Nat) : QInterval :=
+  if _ : k < P.pieces then
+    endpointDifferenceInterval F (P.point k) (P.point (k + 1)) prec
+  else
+    { lo := 0, hi := 0 }
+
+/-- A generic finite addition fold preserves interval containment when every
+summand does.  It is the exact finite-sum transport used by the FTC assembly
+below. -/
+theorem addInterval_fold_contains (xs : List Nat)
+    (outer inner : Nat -> QInterval) {outerInit innerInit : QInterval}
+    (hinit : outerInit.ContainsInterval innerInit)
+    (hterm : forall k, (outer k).ContainsInterval (inner k)) :
+    ((xs.foldl (fun acc k => QInterval.addInterval acc (outer k)) outerInit)
+      ).ContainsInterval
+      (xs.foldl (fun acc k => QInterval.addInterval acc (inner k)) innerInit) := by
+  induction xs generalizing outerInit innerInit with
+  | nil =>
+      exact hinit
+  | cons k xs ih =>
+      exact ih
+        (QInterval.addInterval_contains hinit (hterm k))
+
+/-- Moving a rational initial value outside a finite addition fold. -/
+theorem rat_add_fold_initial (xs : List Nat) (term : Nat -> Rat)
+    (initial : Rat) :
+    xs.foldl (fun total k => total + term k) initial =
+      initial + xs.foldl (fun total k => total + term k) 0 := by
+  induction xs generalizing initial with
+  | nil =>
+      grind
+  | cons k xs ih =>
+      simp only [List.foldl]
+      rw [ih (initial + term k)]
+      rw [show (0 : Rat) + term k = term k by grind, ih (term k)]
+      grind [Rat.add_assoc]
+
+/-- Interval addition folds add enclosure widths exactly, including a
+possibly nonzero initial interval. -/
+theorem addInterval_fold_width (xs : List Nat) (term : Nat -> QInterval)
+    (initial : QInterval) :
+    (xs.foldl (fun acc k => QInterval.addInterval acc (term k)) initial).width =
+      initial.width + xs.foldl (fun total k => total + (term k).width) 0 := by
+  induction xs generalizing initial with
+  | nil =>
+      grind
+  | cons k xs ih =>
+      change
+        (xs.foldl (fun acc j => QInterval.addInterval acc (term j))
+          (QInterval.addInterval initial (term k))).width =
+          initial.width + xs.foldl (fun total j => total + (term j).width)
+            (0 + (term k).width)
+      rw [ih (QInterval.addInterval initial (term k))]
+      rw [QInterval.addInterval_width]
+      rw [show (0 : Rat) + (term k).width = (term k).width by grind]
+      rw [rat_add_fold_initial xs (fun j => (term j).width) (term k).width]
+      grind [Rat.add_assoc]
+
+/-- A finite rational addition fold whose every term is bounded above by a
+constant is bounded by that constant times the number of terms. -/
+theorem rat_add_fold_le_length_mul (xs : List Nat) (term : Nat -> Rat)
+    (c : Rat) (hterm : forall k, k ∈ xs -> term k <= c) :
+    xs.foldl (fun total k => total + term k) 0 <= (xs.length : Rat) * c := by
+  induction xs with
+  | nil =>
+      simp
+  | cons k xs ih =>
+      have hrest : xs.foldl (fun total k => total + term k) 0 <=
+          (xs.length : Rat) * c :=
+        ih (fun j hj => hterm j (List.mem_cons_of_mem k hj))
+      have hk : term k <= c := hterm k (by simp)
+      simp only [List.length_cons]
+      rw [Rat.natCast_add]
+      have hone : ((1 : Nat) : Rat) = 1 := by native_decide
+      rw [hone]
+      calc
+        (k :: xs).foldl (fun total j => total + term j) 0 =
+            xs.foldl (fun total j => total + term j) (term k) := by
+              simp only [List.foldl, Rat.zero_add]
+        _ = term k + xs.foldl (fun total j => total + term j) 0 :=
+          rat_add_fold_initial xs term (term k)
+        _ <= c + (xs.length : Rat) * c := rat_add_le_add hk hrest
+        _ = ((xs.length : Rat) + 1) * c := by
+          grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
 def boundIntegralSum {a b : Rat} (P : RationalPartition a b)
     (bound : (k : Nat) -> k < P.pieces -> QInterval) : QInterval :=
   (List.range P.pieces).foldl
-    (fun acc k =>
-      if hk : k < P.pieces then
-        QInterval.addInterval acc ((P.cell k hk).scaleBound (bound k hk))
-      else
-        acc)
+    (fun acc k => QInterval.addInterval acc (P.boundIntegralTerm bound k))
     { lo := 0, hi := 0 }
+
+/-- The finite sum of computed endpoint differences over the cells of a
+rational partition, all evaluated at one common stage. -/
+def endpointDifferenceSum {a b : Rat} (P : RationalPartition a b)
+    (F : RealFunRaw) (prec : Nat) : QInterval :=
+  (List.range P.pieces).foldl
+    (fun acc k => QInterval.addInterval acc (P.endpointDifferenceTerm F prec k))
+    { lo := 0, hi := 0 }
+
+/-- If each derivative box on a uniform rational partition has width at most
+`eps`, then the width of the finite scaled sum is at most the interval length
+times `eps`.  This is a literal finite-fold calculation: the cell widths sum
+to `b-a`, without invoking a limiting integral theorem. -/
+theorem uniform_boundIntegralSum_width_le {a b : Rat}
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : a <= b)
+    (bound : (k : Nat) -> k < pieces -> QInterval) (eps : Rat)
+    (hbound : forall k (hk : k < pieces), (bound k hk).width <= eps) :
+    ((uniform a b pieces hpieces hab).boundIntegralSum bound).width <=
+      (b - a) * eps := by
+  have hmesh : 0 <= mesh a b pieces := mesh_nonneg_of_le hpieces hab
+  have hsum := rat_add_fold_le_length_mul (List.range pieces)
+    (fun k => ((uniform a b pieces hpieces hab).boundIntegralTerm bound k).width)
+    (mesh a b pieces * eps) (by
+      intro k hk
+      have hklt : k < pieces := List.mem_range.mp hk
+      have hcell : 0 <= ((uniform a b pieces hpieces hab).cell k hklt).width := by
+        rw [uniform_cell_width a b pieces hpieces hab k hklt]
+        exact hmesh
+      change
+        (if hk : k < pieces then
+          ((uniform a b pieces hpieces hab).cell k hk).scaleBound (bound k hk)
+        else { lo := 0, hi := 0 }).width <= mesh a b pieces * eps
+      rw [dif_pos hklt]
+      unfold RationalSubinterval.scaleBound
+      rw [QInterval.scaleByRat_width_of_nonneg hcell,
+        uniform_cell_width a b pieces hpieces hab k hklt]
+      exact Rat.mul_le_mul_of_nonneg_left (hbound k hklt) hmesh)
+  calc
+    ((uniform a b pieces hpieces hab).boundIntegralSum bound).width =
+        (List.range pieces).foldl
+          (fun total k => total +
+            ((uniform a b pieces hpieces hab).boundIntegralTerm bound k).width) 0 := by
+          unfold boundIntegralSum
+          rw [addInterval_fold_width]
+          change ({ lo := 0, hi := 0 } : QInterval).width + (List.range pieces).foldl
+            (fun total k => total +
+              ((uniform a b pieces hpieces hab).boundIntegralTerm bound k).width) 0 = _
+          have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+            unfold QInterval.width
+            grind
+          rw [hzero]
+          grind
+    _ <= (pieces : Rat) * (mesh a b pieces * eps) := by
+      simpa using hsum
+    _ = (b - a) * eps := by
+      have hpiecesRat : (pieces : Rat) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 hpieces)
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hpieces)]
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel]
+
+/-- The recursive prefix form of `endpointDifferenceSum`.  It avoids any
+hidden reindexing while proving the finite telescope. -/
+def endpointDifferencePrefix {a b : Rat} (P : RationalPartition a b)
+    (F : RealFunRaw) (prec : Nat) : Nat -> QInterval
+  | 0 => { lo := 0, hi := 0 }
+  | n + 1 => QInterval.addInterval (P.endpointDifferencePrefix F prec n)
+      (endpointDifferenceInterval F (P.point n) (P.point (n + 1)) prec)
+
+/-- The range-fold and recursive presentations of the endpoint-difference
+sum agree for every genuine partition prefix. -/
+theorem endpointDifferencePrefix_eq_rangeFold {a b : Rat}
+    (P : RationalPartition a b) (F : RealFunRaw) (prec n : Nat)
+    (hn : n <= P.pieces) :
+    (List.range n).foldl
+        (fun acc k => QInterval.addInterval acc (P.endpointDifferenceTerm F prec k))
+        { lo := 0, hi := 0 } =
+      P.endpointDifferencePrefix F prec n := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      have hnlt : n < P.pieces := Nat.lt_of_succ_le hn
+      rw [List.range_succ, List.foldl_append, ih (Nat.le_of_succ_le hn)]
+      simp only [List.foldl_cons, List.foldl_nil, endpointDifferenceTerm,
+        dif_pos hnlt]
+      rfl
+
+/-- A positive endpoint-difference prefix encloses the direct endpoint
+difference from its first to its last breakpoint.  Interior evaluation-box
+widths are accounted for constructively by the adjacent-cell enclosure
+lemma; no cancellation of approximations is assumed. -/
+theorem endpointDifferencePrefix_contains {a b : Rat}
+    (P : RationalPartition a b) (F : RealFunRaw) (prec : Nat)
+    (hF : F.Valid)
+    (hdomain : forall i, i <= P.pieces -> F.domain (P.point i)) :
+    forall n, 0 < n -> n <= P.pieces ->
+      (P.endpointDifferencePrefix F prec n).ContainsInterval
+        (endpointDifferenceInterval F (P.point 0) (P.point n) prec) := by
+  intro n hnpos hnle
+  induction n with
+  | zero => exact False.elim (Nat.not_lt_zero _ hnpos)
+  | succ n ih =>
+      by_cases hnzero : n = 0
+      · subst n
+        simpa [endpointDifferencePrefix, QInterval.zero_addInterval] using
+          (QInterval.containsInterval_refl
+            (endpointDifferenceInterval F (P.point 0) (P.point 1) prec))
+      · have hprefix := ih (Nat.zero_lt_of_ne_zero hnzero)
+          (Nat.le_of_succ_le hnle)
+        have hmiddle := (hF (P.point n)
+          (hdomain n (Nat.le_of_succ_le hnle))).1 prec
+        have hadd := QInterval.addInterval_contains hprefix
+          (QInterval.containsInterval_refl
+            (endpointDifferenceInterval F (P.point n) (P.point (n + 1)) prec))
+        have hadj := endpointDifferenceInterval_adjacent_additive_contains
+          (F := F) (a := P.point 0) (b := P.point n) (c := P.point (n + 1))
+          (prec := prec) hmiddle
+        simpa [endpointDifferencePrefix] using hadd.trans hadj
+
+/-- The finite sum of all adjacent endpoint-difference boxes encloses the
+single endpoint-difference box across the whole partition. -/
+theorem endpointDifferenceSum_contains {a b : Rat}
+    (P : RationalPartition a b) (F : RealFunRaw) (prec : Nat)
+    (hF : F.Valid)
+    (hdomain : forall i, i <= P.pieces -> F.domain (P.point i)) :
+    (P.endpointDifferenceSum F prec).ContainsInterval
+      (endpointDifferenceInterval F a b prec) := by
+  rw [endpointDifferenceSum,
+    endpointDifferencePrefix_eq_rangeFold P F prec P.pieces (Nat.le_refl _)]
+  have hprefix := endpointDifferencePrefix_contains P F prec hF hdomain
+    P.pieces P.positive (Nat.le_refl _)
+  simpa [P.left_endpoint, P.right_endpoint] using hprefix
+
+/-- Cellwise endpoint enclosures assemble into a global endpoint enclosure.
+This is the finite telescoping core of the derivative-bound FTC: every local
+scaled derivative box may be summed at one common evaluation stage, and the
+result provably contains `F(b)-F(a)`. -/
+theorem boundIntegralSum_contains_endpointDifference {a b : Rat}
+    (P : RationalPartition a b) (F : RealFunRaw) (prec : Nat)
+    (hF : F.Valid)
+    (hdomain : forall i, i <= P.pieces -> F.domain (P.point i))
+    (bound : (k : Nat) -> k < P.pieces -> QInterval)
+    (hlocal : forall k (hk : k < P.pieces),
+      ((P.cell k hk).scaleBound (bound k hk)).ContainsInterval
+        (endpointDifferenceInterval F (P.point k) (P.point (k + 1)) prec)) :
+    (P.boundIntegralSum bound).ContainsInterval
+      (endpointDifferenceInterval F a b prec) := by
+  have hsum : (P.boundIntegralSum bound).ContainsInterval
+      (P.endpointDifferenceSum F prec) := by
+    unfold boundIntegralSum endpointDifferenceSum
+    apply addInterval_fold_contains (List.range P.pieces)
+      (P.boundIntegralTerm bound) (P.endpointDifferenceTerm F prec)
+      (QInterval.containsInterval_refl _)
+    intro k
+    unfold boundIntegralTerm endpointDifferenceTerm
+    split
+    · exact hlocal k _
+    · exact QInterval.containsInterval_refl _
+  exact hsum.trans (endpointDifferenceSum_contains P F prec hF hdomain)
+
+/-- The global finite derivative-bound sum automatically overlaps the endpoint
+difference it encloses.  Thus a common-stage local FTC proof need not list
+overlap as an independent numerical axiom. -/
+theorem boundIntegralSum_overlaps_endpointDifference {a b : Rat}
+    (P : RationalPartition a b) (F : RealFunRaw) (prec : Nat)
+    (hF : F.Valid)
+    (hdomain : forall i, i <= P.pieces -> F.domain (P.point i))
+    (bound : (k : Nat) -> k < P.pieces -> QInterval)
+    (hlocal : forall k (hk : k < P.pieces),
+      ((P.cell k hk).scaleBound (bound k hk)).ContainsInterval
+        (endpointDifferenceInterval F (P.point k) (P.point (k + 1)) prec)) :
+    QInterval.Overlaps (P.boundIntegralSum bound)
+      (endpointDifferenceInterval F a b prec) := by
+  apply QInterval.overlaps_of_contains_right
+    (boundIntegralSum_contains_endpointDifference P F prec hF hdomain bound hlocal)
+  simpa [P.left_endpoint, P.right_endpoint] using
+    (endpointDifferenceInterval_width_nonneg hF
+    (hdomain 0 (Nat.zero_le _))
+    (hdomain P.pieces (Nat.le_refl _)) prec)
 
 end RationalPartition
 
@@ -2503,6 +2845,127 @@ theorem candidateDerivativeFTC
     (h : CandidateDerivativeFTC F dF a b) :
     h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       h.toDerivativeBoundFTC.endpointRaw :=
+  h.equiv_endpoint
+
+/-- A stage-indexed variant of the finite candidate-derivative FTC.
+
+Unlike `CandidateDerivativeFTC`, this certificate asks for local derivative
+and secant information only at the *one common computation stage selected for
+the requested outer precision*.  That is exactly the data supplied by an
+epsilon--delta construction with a finite partition: all cells use one
+uniform evaluation stage, their local endpoint boxes telescope, and their
+summed width is controlled separately.  This avoids imposing an artificial
+``all stages on a fixed cell'' obligation on a partition whose mesh is itself
+chosen from the requested precision. -/
+structure SelectedStageCandidateDerivativeFTC
+    (F dF : RealFunRaw) (a b : Rat) where
+  primitive_valid : F.Valid
+  choosePartition : QPos -> RationalPartition a b
+  chooseStage : QPos -> Nat
+  derivativeBound :
+    forall eps,
+      forall k (_ : k < (choosePartition eps).pieces), QInterval
+  primitive_domain_on :
+    forall eps i, i <= (choosePartition eps).pieces ->
+      F.domain ((choosePartition eps).point i)
+  candidate_domain_on :
+    forall eps k (hk : k < (choosePartition eps).pieces) x,
+      ((choosePartition eps).cell k hk).contains x -> dF.domain x
+  candidate_contained :
+    forall eps k (hk : k < (choosePartition eps).pieces) x
+      (_ : ((choosePartition eps).cell k hk).contains x),
+      QInterval.ContainsInterval
+        (derivativeBound eps k hk)
+        (dF.compute x (chooseStage eps))
+  local_endpoint_contained :
+    forall eps k (hk : k < (choosePartition eps).pieces),
+      QInterval.ContainsInterval
+        (((choosePartition eps).cell k hk).scaleBound (derivativeBound eps k hk))
+        (endpointDifferenceInterval F
+          ((choosePartition eps).cell k hk).lower
+          ((choosePartition eps).cell k hk).upper
+          (chooseStage eps))
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk => derivativeBound eps k hk)).width <= eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseStage eps)).width <= eps.val
+
+namespace SelectedStageCandidateDerivativeFTC
+
+def boundedIntegralInterval
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) (eps : QPos) : QInterval :=
+  (h.choosePartition eps).boundIntegralSum
+    (fun k hk => h.derivativeBound eps k hk)
+
+def endpointInterval
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) (eps : QPos) : QInterval :=
+  endpointDifferenceInterval F a b (h.chooseStage eps)
+
+/-- The finite telescope derives overlap from the local common-stage
+enclosures, so it is not a further axiom of the certificate. -/
+theorem overlap
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) (eps : QPos) :
+    QInterval.Overlaps (h.boundedIntegralInterval eps) (h.endpointInterval eps) := by
+  apply RationalPartition.boundIntegralSum_overlaps_endpointDifference
+    (P := h.choosePartition eps) (F := F) (prec := h.chooseStage eps)
+    h.primitive_valid
+  · intro i hi
+    exact h.primitive_domain_on eps i hi
+  · intro k hk
+    simpa [RationalPartition.cell] using h.local_endpoint_contained eps k hk
+
+theorem closeAt
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) (eps : QPos) :
+    QInterval.CloseAt (h.boundedIntegralInterval eps) (h.endpointInterval eps) eps := by
+  exact ⟨h.overlap eps, h.riemann_width eps, h.endpoint_width eps⟩
+
+def boundedIntegralCompute
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) : Nat -> QInterval :=
+  fun n => h.boundedIntegralInterval (precisionAtStage n)
+
+def endpointCompute
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) : Nat -> QInterval :=
+  fun n => h.endpointInterval (precisionAtStage n)
+
+def boundedIntegralRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) : RealRaw where
+  compute := h.boundedIntegralCompute
+
+def endpointRaw
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) : RealRaw where
+  compute := h.endpointCompute
+
+/-- The selected-stage finite derivative sum and endpoint difference compute
+the same raw real number. -/
+theorem equiv_endpoint
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) :
+    h.boundedIntegralRaw.Equiv h.endpointRaw := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  have hgood := h.closeAt (precisionAtStage n)
+  exact (RealRaw.compareAt_overlap_iff
+    h.boundedIntegralRaw h.endpointRaw n n).2 hgood.1
+
+end SelectedStageCandidateDerivativeFTC
+
+/-- Top-level closure theorem for the stage-indexed candidate-derivative
+strategy. -/
+theorem selectedStageCandidateDerivativeFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTC F dF a b) :
+    h.boundedIntegralRaw.Equiv h.endpointRaw :=
   h.equiv_endpoint
 
 inductive MonotonicityKind where

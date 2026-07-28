@@ -93,8 +93,13 @@ gates.
   `...forward_secant_uniform_range_enclosure` now composes this with
   epsilon--delta continuity: every derivative value in a selected rational
   radius and the endpoint secant share a box of width at most ten stage
-  tolerances. The remaining derivative-bound FTC work is the global
-  telescope and shrinking Riemann-width schedule: the uniform cell count
+  tolerances. The generic finite global assembly is now checked: adjacent
+  common-stage endpoint boxes telescope by interval containment, and a
+  uniform partition turns a per-cell width bound `e` into total width at
+  most `(b-a)*e`. `SelectedStageCandidateDerivativeFTC` packages precisely
+  this selected-common-stage order of quantifiers and derives overlap rather
+  than postulating it. The remaining product-specific FTC work is to build
+  its cell family and endpoint-width schedule. The uniform cell count
   `coordinateTimesArctanForwardPartitionPieces` is now explicit and
   formally below both the continuity radius and forward step budget.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension

@@ -1080,9 +1080,59 @@ The uniform partition itself is now selected explicitly:
 \]
 Its unit mesh is formally at most both \(\delta\) and
 \(1/(72(n+1))\).  Thus the remaining work is no longer the choice of a
-small partition either.  It is the finite global assembly: sum the common
-cell bounds, telescope their endpoint enclosures, and prove the resulting
-sum width shrinks before invoking the derivative-bound FTC package.
+small partition either.  The required finite telescope and uniform-width
+calculation are now generic theorems; the remaining concrete work is to feed
+this particular common box into every selected cell and give the product
+endpoint box its shrinking schedule.
+\end{theorem}
+
+\begin{theorem}[Finite common-stage FTC assembly]
+\label{thm:finite-common-stage-ftc-assembly}
+\lean{ComputableAnalysis.QInterval.addInterval_contains}
+\lean{ComputableAnalysis.QInterval.overlaps_of_contains_right}
+\lean{ComputableAnalysis.endpointDifferenceInterval_adjacent_additive_contains}
+\lean{ComputableAnalysis.endpointDifferenceInterval_width}
+\lean{ComputableAnalysis.RationalPartition.addInterval_fold_contains}
+\lean{ComputableAnalysis.RationalPartition.addInterval_fold_width}
+\lean{ComputableAnalysis.RationalPartition.rat_add_fold_le_length_mul}
+\lean{ComputableAnalysis.RationalPartition.uniform_boundIntegralSum_width_le}
+\lean{ComputableAnalysis.RationalPartition.endpointDifferenceSum_contains}
+\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_contains_endpointDifference}
+\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
+\lean{ComputableAnalysis.SelectedStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.selectedStageCandidateDerivativeFTC}
+\uses{thm:coordinate-arctangent-forward-secant-enclosure}
+\leanok
+Let a rational partition of \([a,b]\) be fixed, and suppose that at one
+common computation stage each scaled derivative box on a cell contains the
+computed endpoint difference on that cell.  Lean now proves, by induction on
+the literal finite fold, that their sum contains the single box for
+\(F(b)-F(a)\).  The key adjacent calculation is
+\[
+ [F(b)-F(a)]+[F(c)-F(b)]\ \supseteq\ [F(c)-F(a)],
+\]
+where the excess is exactly the nonnegative width of the independently
+computed middle box.  Thus no cancellation of approximations, and no
+completeness principle, is hidden in ``telescoping.''
+
+For a uniform \(N\)-cell partition, if every derivative box has width at
+most \(e\), the same finite fold has width at most
+\[
+ (b-a)e.
+\]
+On the unit interval this is simply \(e\): the formal proof uses the exact
+rational identity \(N\,((b-a)/N)=b-a\).  The new
+\texttt{SelectedStageCandidateDerivativeFTC} package matches this order of
+quantifiers.  At each requested outer precision it asks for a partition and
+only one common evaluation stage; its overlap field is a theorem derived
+from the finite telescope, rather than an unproved numerical side condition.
+
+For \(P(x)=x\arctan(x)\), the preceding local result supplies the required
+common-stage box of width at most \(10\varepsilon_n\), and the explicit
+uniform mesh supplies the cells.  Still required before claiming the
+effective FTC for this product are the fully assembled cell function and an
+explicit endpoint-width schedule for \(P(1)-P(0)\).  This theorem closes the
+generic global algebra, not that final concrete instantiation.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]

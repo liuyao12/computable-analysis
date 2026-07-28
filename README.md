@@ -187,10 +187,15 @@ left-endpoint derivative box widened by twice the requested tolerance.
 The stronger `...forward_secant_uniform_range_enclosure` now combines that
 step-aware secant box with epsilon--delta continuity: every derivative value
 inside a chosen rational radius and the endpoint difference share a box of
-width at most ten stage tolerances. What remains is global partition,
-telescoping, and shrinking Riemann-width assembly. The partition count is
-already explicit: `(delta.den + 1) * 72 * (n + 1)` gives a unit mesh
-below both the selected continuity radius and the forward step budget.
+width at most ten stage tolerances. The generic finite global assembly is
+now checked: common-stage endpoint boxes telescope by interval containment,
+and an `N`-cell uniform partition converts a width `e` on each derivative
+box into total width at most `(b-a)*e`. The new
+`SelectedStageCandidateDerivativeFTC` matches this selected-stage data and
+derives its overlap condition. What remains is the concrete product cell
+family and endpoint-width schedule. The partition count is already explicit:
+`(delta.den + 1) * 72 * (n + 1)` gives a unit mesh below both the selected
+continuity radius and the forward step budget.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
