@@ -7,8 +7,8 @@ geometric arctangent, arctangent as \(\int_0^x dt/(1+t^2)\), and sine/cosine
 on normalized quarter-turn inputs.  Its first job is not to introduce a second,
 unrelated value of \(\pi\), but to prove that the classical series
 computations land on the same value.  The running examples are the Leibniz
-series for \(4\arctan_{\mathrm{series}}(1)\) and Machin's faster combination
-\(16\arctan_{\mathrm{series}}(1/5)-4\arctan_{\mathrm{series}}(1/239)\).
+series for \(4\arctanseries(1)\) and Machin's faster combination
+\(16\arctanseries(1/5)-4\arctanseries(1/239)\).
 Nilakantha's rational series is included as a separate accelerated series
 algorithm, connected by a finite summation transformation rather than by a
 second trigonometric identity.
@@ -61,7 +61,7 @@ alias is \code{arctanSeries : Rat -> RealRaw}, and the proof-facing function is
 For the Leibniz algorithm, pi is computed as four times the arctangent series
 at \(1\):
 \[
-  \pi \sim 4\arctan_{\mathrm{series}}(1).
+  \pi \sim 4\arctanseries(1).
 \]
 Equivalently, this algorithm is the alternating series
 \[
@@ -346,7 +346,7 @@ It is deliberately not a Machin row: no arctangent addition formula is used.
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
 \uses{thm:leibniz-arctan,thm:geometric-arctan-one-area-pi}
 \[
-  4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
+  4\arctanseries(1)\sim \pi_{\mathrm{area}}.
 \]
 The table-facing equivalence is now discharged by
 \code{PiProofs.leibnizEqualsRectangleRawAtOne\_finiteRiemannBridge} and
@@ -460,7 +460,7 @@ unit-cell corollary
 \[
   \bigl(\forall N,\ \operatorname{CellBoundsUpTo}(N)\bigr)
   \Rightarrow
-  4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
+  4\arctanseries(1)\sim \pi_{\mathrm{area}}.
 \]
 Lean name:
 \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_cellBoundsUpToAll}.
@@ -468,7 +468,7 @@ The parallel unit-cell route is also named:
 \[
   \bigl(\forall N,\ \operatorname{UnitCellBoundsUpTo}(N)\bigr)
   \Rightarrow
-  4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}},
+  4\arctanseries(1)\sim \pi_{\mathrm{area}},
 \]
 via
 \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_unitUniformCellBoundsUpToAll}.
@@ -557,9 +557,9 @@ The Leibniz and Machin interval algorithms compute the same abstract real
 number.  In the power-series arctangent notation, this is the agreement
 between the two rational linear combinations of arctangent values:
 \[
-  4\arctan_{\mathrm{series}}(1) \sim
-  16\arctan_{\mathrm{series}}\frac15
-  -4\arctan_{\mathrm{series}}\frac{1}{239}.
+  4\arctanseries(1) \sim
+  16\arctanseries\frac15
+  -4\arctanseries\frac{1}{239}.
 \]
 Lean now proves that the raw-real agreement target \code{LeibnizEqMachin} is
 equivalent to the underlying Machin branch identity: the outer factor \(4\) can

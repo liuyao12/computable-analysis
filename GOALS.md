@@ -435,15 +435,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   `h * D_h(u) * D_h(v)` remainder.  The checked theorem
   `..._error_le` also gives the exact three-term absolute-error allocation:
   the two component derivative errors weighted by the opposite point value
-  plus that corner remainder.  The remaining product certificate must
-  bound that remainder and the endpoint replacement through interval
-  continuity data; no limit or completeness principle is being assumed.  The
+  plus that corner remainder.  The concrete product certificate now bounds
+  that remainder and the endpoint replacement through interval continuity
+  data, and stabilizes the resulting two-stage finite sum into a public FTC
+  construction; no limit or completeness principle is being assumed.  The
   first component certificate is now checked in the actual interval-valued
   derivative interface: `FunctionOnInterval.exactRatAffineDerivative` proves
   the finite quotient of every exact affine rational function is its constant
   slope, and `IntegralIdentities.coordinateOnUnitDerivative` specializes it
-  to `d/dx x = 1` on `[0,1]`.  The arctangent certificate is now checked;
-  its remainder budget and the product closure remain separate.  The error
+  to `d/dx x = 1` on `[0,1]`.  The arctangent certificate, its remainder
+  budget, the product closure, and the product-specific FTC are now checked.
+  The error
   algebra is now two-sided:
   `ExactFunction.product_differenceQuotient_error_le_qabs` carries `qabs h`
   in the corner budget, with the earlier nonnegative-step theorem as its
@@ -452,9 +454,9 @@ another. The Pi score stays useful only as secondary integration coverage.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
-  The product FTC bridge is now available; this still requires the explicit
-  monotone-piece refinement, the checked arctangent derivative, and canonical
-  exponential/logarithm alignment.
+  The product FTC bridge and arctangent derivative are now available; this
+  still requires an explicit separate arctangent strip, its monotone-piece
+  refinement/splitting theorem, and canonical exponential/logarithm alignment.
   This is deliberately the long exp/log/ODE route: first identify the
   logarithmic integral with the inverse of canonical exponential, use the
   linear Peano--Baker/Picard--Lindelöf uniqueness theorem to equate the

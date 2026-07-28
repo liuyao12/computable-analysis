@@ -6014,6 +6014,15 @@ theorem coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_on
       coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity.equivalent
       coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_arctanGeom_one
 
+/-- The customary fourfold normalization of the product FTC integral agrees
+with four times the geometric arctangent at one.  The pi registry later
+identifies that geometric raw with the certified circle-area presentation. -/
+theorem four_coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_four_arctanGeom_one :
+    ((4 : Nat) * coordinateTimesArctanForwardTwoStageMonotoneIntegral : RealRaw).Equiv
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) :=
+  RealRaw.natScale_equiv 4
+    coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one
+
 /-- The certified positive product branch has right derivative zero at the
 left endpoint.  The proof uses the exact finite quotient identity above,
 not a global product rule. -/

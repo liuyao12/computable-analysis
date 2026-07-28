@@ -75,13 +75,16 @@ slope of the projection line from \((-1,0)\).  The endpoint \(u=0\) gives
   \draw[thick] (P0) arc[start angle=0,end angle=90,radius=1];
   \draw[teal!70!black,very thick] (P0) -- (P1) -- (P2) -- (P3) -- (P4);
 
-  \draw[blue!70!black,very thick] (V0) -- (V4);
+  % The parameter is a length on the vertical radius, not a horizontal
+  % coordinate or an angle.  Highlight precisely the subsegment [0,x].
+  \draw[gray!45,very thick] (V0) -- (V4);
+  \draw[blue!70!black,very thick] (V0) -- (Vx);
   \foreach \V in {V0,V1,V2,V3,V4} {
     \draw[gray!50] (W) -- (\V);
     \fill[black] (\V) circle (0.014);
   }
-  \draw[orange!80!black,very thick] (W) -- (Px);
-  \fill[orange!80!black] (Vx) circle (0.017);
+  \draw[blue!70!black,very thick] (W) -- (Px);
+  \fill[blue!70!black] (Vx) circle (0.017);
 
   \foreach \P in {P0,P1,P2,P3,P4,Px}
     \fill[black] (\P) circle (0.014);
@@ -91,14 +94,16 @@ slope of the projection line from \((-1,0)\).  The endpoint \(u=0\) gives
   \node[below left] at (O) {\scriptsize \(O\)};
   \node[below left] at (W) {\scriptsize \((-1,0)\)};
   \node[above left] at (Vx) {\scriptsize \(V(x)=(0,x)\)};
+  \node[blue!70!black,right] at (0,0.30) {\scriptsize \(x\)};
   \node[above left] at (V4) {\scriptsize \(V(1)=P(1)\)};
   \node[above left] at (Px) {\scriptsize \(P(x)\)};
   \node[below right] at (P0) {\scriptsize \(P(0)\)};
 \end{tikzpicture}
 \caption{The rational parameter radius for the quarter-circle.  The blue
-height \(u\) on the vertical unit radius is exactly the slope of the line
-from \((-1,0)\) through \(V(u)=(0,u)\).  Projecting this line to the circle
-gives the rational point \(P(u)\), and equally spaced heights partition the
+subsegment from \(0\) to \(x\) lies on the vertical unit radius, so its
+coordinate (and its length) is exactly the slope of the blue projection line
+from \((-1,0)\) through \(V(x)=(0,x)\).  Its second intersection with the
+circle is the rational point \(P(x)\); equally spaced heights partition the
 arc from \((1,0)\) to \((0,1)\).}
 \label{fig:rational-parameter-line}
 \end{figure}
@@ -175,7 +180,7 @@ inner and outer polygonal bounds for the sector from \(P(0)=(1,0)\) to
 sector has area equal to half its angle, the area computed by the algorithm is
 \(\arctan(x)\).  Thus \(x=1\) is exactly the quarter-circle case, and
 \[
-  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
+  4\arctangeom(1)\sim \pi_{\mathrm{area}}.
 \]
 
 \begin{definition}[Geometric arctangent area algorithm]
@@ -222,7 +227,7 @@ def arctanGeom(x, n):
 The algorithm is packaged as its own raw function, not as a definitional
 alias of \code{piCircleArea}.  The special case \(x=1\) is related to
 \code{piCircleArea} by a theorem, which is the right proof obligation for the
-geometric identity \(\pi=4\arctan_{\mathrm{geom}}(1)\).
+geometric identity \(\pi=4\arctangeom(1)\).
 \end{definition}
 
 \begin{theorem}[Sector-area density]
@@ -267,7 +272,7 @@ than by taking area or derivative facts as primitives.
 \uses{def:circle-area-stage-algorithm,def:geometric-arctan}
 The geometric sector-area arctangent satisfies
 \[
-  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
+  4\arctangeom(1)\sim \pi_{\mathrm{area}}.
 \]
 Lean proves this by transporting the verified \code{piCircleArea} interval
 algorithm across the same-stage equality with \code{4 * arctanGeom(1)}.
@@ -288,7 +293,7 @@ using oddness to reduce the negative branch to the positive loop.
 Moreover, the resulting function should be monotone: if
 \(0\le x\le y\le1\), then
 \[
-  \arctan_{\mathrm{geom}}(x)\le \arctan_{\mathrm{geom}}(y).
+  \arctangeom(x)\le \arctangeom(y).
 \]
 The validity proof is finite: endpoint monotonicity comes from nonnegative
 increment/decrement triangles, while shrinking follows because the geometric
@@ -401,7 +406,7 @@ coordinates
 Interval evaluation of these rational formulas gives boxes for sine and
 cosine without ever computing a square root.  Quadrant, sign, and reciprocal
 reductions extend the construction to the full normalized interval \([0,1]\)
-once \(\pi/4=\arctan_{\mathrm{geom}}(1)\) and the endpoint at \(t=1\) have
+once \(\pi/4=\arctangeom(1)\) and the endpoint at \(t=1\) have
 been identified.
 \end{definition}
 
@@ -1097,11 +1102,20 @@ angle-to-circle-point construction to identify the one-third input with the
 equilateral chord.
 \end{theorem}
 
+For a degree-angle \(\theta=t\pi/2\), every row is obtained from the same
+inverse-arctangent step: choose the slope \(u_\theta\) satisfying
+\[
+  \arctangeom(u_\theta)=\theta/2=t\pi/4,
+\]
+then evaluate the rational-circle point \(P(u_\theta)\).  Thus the displayed
+sine, cosine, and tangent values are all projections or ratios of one listed
+arctangent input, rather than independent square-root definitions.
+
 \begin{center}
 \scriptsize
 \begin{tabular}{c c p{0.16\textwidth}p{0.17\textwidth}p{0.17\textwidth}p{0.15\textwidth}}
-\textbf{\(t\)} & \textbf{degrees} &
-\textbf{\(u\) with \(\arctan(u)=t\pi/4\)} &
+\textbf{\(t\)} & \textbf{angle (\(^{\circ}\))} &
+\textbf{\(u_\theta\) with \(\arctangeom(u_\theta)=\theta/2\)} &
 \textbf{\(\sin(t\pi/2)\)} &
 \textbf{\(\cos(t\pi/2)\)} &
 \textbf{\(\tan(t\pi/2)\)}\\
@@ -1117,7 +1131,7 @@ equilateral chord.
 \((\sqrt3/2)^{\S}\) &
 \((\sqrt3/3)^{\S}\)\\
 \(2/5\) & \(36^\circ\) &
-\(\sqrt{5-2\sqrt5}^{\S}\) &
+\(\sqrt{(5-2\sqrt5)/5}^{\S}\) &
 \(\sqrt{(5-\sqrt5)/8}^{\S}\) &
 \(((1+\sqrt5)/4)^{\S}\) &
 \(\sqrt{5-2\sqrt5}^{\S}\)\\
@@ -1141,7 +1155,7 @@ equilateral chord.
 \(1^{\ast}\) &
 \(0^{\ast}\) &
 \(\infty^{\ast}\)\\
-\(4/17\) & \(360^\circ/17\) &
+\(4/17\) & \(\frac{360^\circ}{17}\) &
 \(\sqrt{(1-C)/(1+C)}^{\dagger}\) &
 \(\sqrt{1-C^2}^{\dagger}\) &
 \(C^{\dagger}\) &
@@ -1150,10 +1164,9 @@ equilateral chord.
 \end{center}
 
 Here \(C\) denotes the Gauss nested radical for \(\cos(2\pi/17)\) displayed
-below.  The new arctangent-input column records the required slope
-\(u=\tan(t\pi/4)\): after the corresponding geometric-arctangent equality
-\(\arctan(u)=t\pi/4\), every trigonometric entry is the rational-circle
-projection \(P(u)\).  A superscript \(\ast\) means that the displayed endpoint value is
+below.  In particular, the \(36^\circ\) arctangent input is
+\(\tan(18^\circ)=\sqrt{(5-2\sqrt5)/5}\), whereas the \(72^\circ\) input is
+\(\tan(36^\circ)=\sqrt{5-2\sqrt5}\).  A superscript \(\ast\) means that the displayed endpoint value is
 formalized in Lean at the currently available rational-circle layer; a
 superscript \(\S\) means Lean has formalized the displayed algebraic raw value,
 or the displayed square-value when only the square is currently represented,

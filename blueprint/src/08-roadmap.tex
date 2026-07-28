@@ -739,7 +739,7 @@ proving arbitrary real-world models.
 
 The selected rectangle-integral computation is complete:
 \[
-  4\arctan_{\int,\mathrm{rect}}(1)\sim\pi_{\mathrm{area}}.
+  4\arctanintegralrect(1)\sim\pi_{\mathrm{area}}.
 \]
 Lean proves this using the certified rectangle construction and its equivalent
 unit-branch presentation.  The older generic \code{Integral.Construction}
@@ -923,7 +923,7 @@ scoreboard-scaled version
 \[
   (\forall N,\ \operatorname{CellBoundsUpTo}(N))
   \Rightarrow
-  4\arctan_{\mathrm{series}}(1)\sim \pi_{\mathrm{area}}.
+  4\arctanseries(1)\sim \pi_{\mathrm{area}}.
 \]
 Lean name:
 \code{PiProofs.four\_arctanSeries\_one\_equiv\_piCircleArea\_of\_cellBoundsUpToAll}.
@@ -936,7 +936,7 @@ depend on missing hypotheses:
 \begin{tabular}{lll}
 \textbf{Pending fact} & \textbf{Lean theorem or target} & \textbf{Missing input}\\
 \hline
-\(4\arctan_{\int}(1)\sim\pi_{\mathrm{area}}\) for the legacy
+\(4\arctanintegral(1)\sim\pi_{\mathrm{area}}\) for the legacy
 \code{Integral.Construction} wrapper &
 \code{PiProofs.piFromArctanIntegral\_equiv\_piCircleArea\_of\_function\_agreement} &
 \code{ArctanIntegralGeomFunctionAgreement}; equivalently an effective FTC

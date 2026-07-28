@@ -110,7 +110,7 @@ available at the ordinary, monotone, and general-integral levels.
 The default finite mesh for ordinary definite integrals is static dyadic:
 stage \(n\) uses the equal subdivision of \([a,b]\) into \(2^n\) intervals.
 This is deliberately different from the dynamic subdivision in
-\(\arctan_{\mathrm{geom}}\), where the next partition is chosen by repeatedly
+\(\arctangeom\), where the next partition is chosen by repeatedly
 refining the rational circle parameters already present in the sector
 algorithm.  When an FTC proof uses this default mesh, the bridge to endpoint
 identities is \code{definiteIdentity\_of\_staticDyadicEffectiveFTC}.
@@ -619,7 +619,7 @@ triangle raw beside the already certified logarithmic strip for
 the unit arctangent kernel box, and Lean proves
 \[
  T_{\mathrm{triangle}}+L_{x/(1+x^2)}
- \Equiv \arctan_{\mathrm{geom}}(1).
+ \Equiv \arctangeom(1).
 \]
 This is a useful finite Fubini/strip computation and an explicit test case
 for the later logarithm route.  It is deliberately not called
@@ -835,7 +835,7 @@ finite rectangle identity:
 \]
 Consequently the endpoint-difference raw for this product on \([0,1]\) is a
 valid presentation equivalent to the geometric value
-\(\arctan_{\mathrm{geom}}(1)\).  This is boundary data only: it does not
+\(\arctangeom(1)\).  This is boundary data only: it does not
 differentiate the product or identify an integral of the product with that
 endpoint difference.  The finite two-stage construction later in this
 chapter supplies both the product comparison and its public stabilized
@@ -925,8 +925,8 @@ evaluator, not a statement about a limit in a completed function space.
 On the first half of the unit branch, tangent addition also gives the
 raw-real forward-difference identification
 \[
-\arctan_{\rm geom}(x+h)-\arctan_{\rm geom}(x)
-\Equiv\arctan_{\rm geom}(\tau).
+\arctangeom(x+h)-\arctangeom(x)
+\Equiv\arctangeom(\tau).
 \]
 The finite transport has now been completed for the rectangle arctangent
 representation itself on the full unit branch.  For every rational
@@ -1248,6 +1248,7 @@ stage for every cell and at the global endpoint.
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageConstruction}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.four_coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_four_arctanGeom_one}
 \uses{thm:coordinate-arctangent-forward-secant-enclosure,thm:finite-common-stage-ftc-assembly}
 \leanok
 The product now has a fully assembled \emph{finite two-stage FTC raw}\ on
@@ -1284,18 +1285,26 @@ nested representative of the same computation, hence
 \]
 The identity is available through the ordinary, monotone, and finite-piece
 integral interfaces.  This closes the product-specific public FTC bridge;
-the normalization is now also reusable: every two-stage certificate has a
-theorem relating its bounded sums directly to the canonical endpoint raw, and
-the generic stabilized constructor needs only a finite-sum width modulus plus
-an explicit shrinking radius covering that endpoint raw.  Formula-specific
-work remains in producing those two rational schedules.
+its checked fourfold normalization is
+\[
+  4\mathop{\int}_{0}^{1}\!\left(A(x)+\frac{x}{1+x^2}\right)\,dx
+  \ \Equiv\ 4\arctangeom(1).
+\]
+This is an intermediate calculus corollary, not an additional pi-scoreboard
+row: the existing geometric normalization carries its right-hand side to the
+area presentation of pi.  The normalization is now also reusable: every
+two-stage certificate has a theorem relating its bounded sums directly to the
+canonical endpoint raw, and the generic stabilized constructor needs only a
+finite-sum width modulus plus an explicit shrinking radius covering that
+endpoint raw.  Formula-specific work remains in producing those two rational
+schedules.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
 \label{cor:arctangent-logarithm-pi-route}
 \uses{thm:integration-by-parts-certificate,thm:coordinate-arctangent-two-stage-ftc,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
-\(U(x)=x\) and \(V(x)=\arctan(x)\).  Once the sector-area derivative
+\(U(x)=x\) and \(V(x)=\arctan(x)\).  The checked sector-area derivative
 certificate gives
 \[
  V'(x)=\frac{1}{1+x^2},
@@ -1309,10 +1318,11 @@ The endpoint-order certificate and its canonical monotone-sampling lift now
 turn the unit-mesh statement into a checked finite rational corner estimate;
 the two explicit stages above also bound the rectangle sampling error.
 Thus the geometric unit-branch bounds are now an executable finite budget,
-rather than an asymptotic assertion.  The finite two-stage FTC comparison is
-now checked; exposing its bounded-sum raw as a public definite-integral
-construction is the remaining API bridge.  With that bridge, the resulting
-construction gives
+rather than an asymptotic assertion.  The finite two-stage FTC comparison and
+its public definite-integral construction are now checked for the emph{sum}
+of the two product-rule terms.  What remains is a direct Riemann/Darboux
+construction for the separate \(\arctan(x)\) strip and a checked splitting
+identity with the existing logarithmic strip.  The resulting target is
 \[
  \int_0^1\arctan(x)\,\dd x
  \Equiv \frac{\pi}{4}-\int_0^1\frac{x}{1+x^2}\,\dd x.
@@ -1730,7 +1740,7 @@ transport and endpoint work visible.
 The rectangle arctangent on \([0,1]\) has a checked forward derivative
 certificate at the rational endpoint \(0\), with derivative \(1\):
 \[
-  \left.\frac{\dd}{\dd x}\arctan_{\mathrm{rectangle}}(x)\right|_{0+}=1.
+  \left.\frac{\dd}{\dd x}\arctanintegralrect(x)\right|_{0+}=1.
 \]
 At requested tolerance \(\varepsilon_n\), take the positive step budget
 \(h\le\varepsilon_n\) and evaluate both rectangle boxes at their finite
@@ -1766,16 +1776,16 @@ tangent-addition chart satisfies
 Thus, on the branch \(0\le x\le\tfrac12\), \(0<h\), and \(x+h\le1\), the
 finite chart-addition theorem gives
 \[
-  \arctan_{\mathrm{geom}}(x)+\arctan_{\mathrm{geom}}(\tau(x,h))
-  =\arctan_{\mathrm{geom}}(x+h).
+  \arctangeom(x)+\arctangeom(\tau(x,h))
+  =\arctangeom(x+h).
 \]
 This is an equality of certified rational interval reals, obtained from the
 same finite rectangle transport used for tangent addition; it is not a
 continuity or mean-value argument.  Lean also records the equivalent
 endpoint-difference form
 \[
- \arctan_{\mathrm{geom}}(x+h)-\arctan_{\mathrm{geom}}(x)
- =\arctan_{\mathrm{geom}}(\tau(x,h)).
+ \arctangeom(x+h)-\arctangeom(x)
+ =\arctangeom(\tau(x,h)).
 \]
 
 The scale conversion is controlled directly by rational inequalities.  On
@@ -1821,14 +1831,14 @@ equivalence and a separate two-sided endpoint treatment.
 \uses{def:one-over-one-plus-square-kernel,def:inverse-elementary-integral-identities}
 Define another arctangent representative by
 \[
-  \arctan_{\int}(x)=\int_0^x \frac{dt}{1+t^2}.
+  \arctanintegral(x)=\int_0^x \frac{dt}{1+t^2}.
 \]
 The preceding density calculation shows why this is the right kernel: it is
 the differential area swept by the same rational parametrized circle sectors
-used by \(\arctan_{\mathrm{geom}}\).
+used by \(\arctangeom\).
 This gives a new computation of \(\pi\) via
 \[
-  \pi \Equiv 4\arctan_{\int}(1).
+  \pi \Equiv 4\arctanintegral(1).
 \]
 The comparison theorem should identify this integral arctangent with both the
 geometric-sector arctangent and the power-series arctangent.  Following the
@@ -2125,7 +2135,7 @@ the kernel on \([0,x]\), and proves this domain-aware construction equivalent
 to \code{arctanGeom x} throughout the rational unit branch.  The zero endpoint
 uses a small degenerate-loop invariant, while the positive endpoint proof is
 exactly the finite rectangle/geometric overlap.  This is the finite algebraic
-core of the comparison \(\arctan_{\int}=\arctan_{\mathrm{geom}}\).  Lean also
+core of the comparison \(\arctanintegral=\arctangeom\).  Lean also
 wraps this construction as
 \code{arctanIntegralRectangleRepresentation} and proves the function-level
 overlap agreement \code{arctanIntegralRectangleFunctionAgreement}.  Lean now
@@ -2141,7 +2151,7 @@ schedule.  It is therefore not a separate scoreboard row.
 This midpoint-dyadic rectangle construction is not the foundational
 left-Riemann mesh of the chapter.  It is a comparison schedule deliberately
 synchronized with the dynamic subdivision already used by
-\(\arctan_{\mathrm{geom}}\).  The general integral interface above starts
+\(\arctangeom\).  The general integral interface above starts
 instead from the static dyadic mesh
 \([a+k(b-a)/2^n,a+(k+1)(b-a)/2^n]\).
 \end{theorem}
@@ -2157,12 +2167,12 @@ instead from the static dyadic mesh
 \uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
 Any certified integral construction for
 \[
-  \arctan_{\int}(1)=\int_0^1 \frac{\dd t}{1+t^2}
+  \arctanintegral(1)=\int_0^1 \frac{\dd t}{1+t^2}
 \]
 that agrees with the geometric sector arctangent gives a new raw-real
 representative of \(\pi\):
 \[
-  4\arctan_{\int}(1)\sim \pi_{\mathrm{area}}.
+  4\arctanintegral(1)\sim \pi_{\mathrm{area}}.
 \]
 Thus the remaining analytic work is the function-level arctangent-integral
 comparison \code{ArctanIntegralGeomFunctionAgreement}.  Independently, the

@@ -179,8 +179,9 @@ identity controls the remaining corner term. The full interval certificate is
 now also checked as `coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative`:
 negative steps are reversed to a positive quotient at `x+h`, and explicit
 rectangle/kernel transport closes with the stricter budget
-`|h| <= 1/(648*(n+1))`. The remaining gate is the effective FTC bridge, not
-a product derivative.
+`|h| <= 1/(648*(n+1))`.  The resulting two-stage bounded sums are now
+stabilized into a public FTC construction; the remaining gate is to split the
+product identity into separately constructed arctangent and logarithmic strips.
 The resulting derivative candidate is now also proved nondecreasing on the
 same branch.  Its rational correction is ordered by the finite identity
 `(y-x)*(1-x*y) >= 0` after clearing the two positive denominators, and the
@@ -225,17 +226,17 @@ The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
 for `x * arctan x` in the single-piece integration-by-parts plan, together
-with its checked forward derivative; an endpoint FTC identity remains open.
+with its checked two-sided derivative and public stabilized FTC identity.
 Its endpoint data are now checked too: the product box at `0` is exactly
 `[0,0]`, the box at `1` is the geometric rectangle evaluator for
 `arctan(1)`, and their endpoint-difference raw is valid and equivalent to
-the geometric arctangent value. This supplies boundary data for the finite
-rectangle identity, not a product derivative or a fundamental-theorem step.
+the geometric arctangent value.  This supplies the endpoint side of the finite
+product FTC, whose global derivative and two-stage construction are now also
+checked.
 The first derivative test of this actual product evaluator is now checked
 as well: at the zero basepoint, its positive-step quotient is exactly the
-arctangent rectangle box, so it has forward derivative `0`. This remains
-an endpoint certificate, not the global product derivative needed for
-integration by parts.
+arctangent rectangle box, so it has forward derivative `0`.  It is the
+endpoint subcertificate used by the global product derivative and finite FTC.
 The uniform-grid core of that
 refinement is now formalized: the `m*n` rational grid explicitly contains
 both the `m` and `n` grids, and its mesh is the old width divided by the
@@ -411,8 +412,9 @@ backward quotient reversal and the rational Lipschitz bound for the kernel,
 it proves `arctanIntegralRectangleOnUnit_hasDerivative`: the rectangle
 arctangent has the two-sided derivative `1/(1+x*x)` on `[0,1]`.  Its finite
 schedule uses derivative stage `8*(n+1)` and signed step budget
-`1/(72*(n+1))`; the remaining work is product closure and FTC, not an
-arctangent derivative.
+`1/(72*(n+1))`; its product closure and product-specific stabilized FTC are
+now also checked.  What remains is the separate integration-by-parts strip
+identification.
 The derivative interfaces now make that scheduling obligation expressible:
 their evaluation stage depends on the rational basepoint, nonzero step, and
 requested output precision.  A stage depending only on output precision would
@@ -477,12 +479,12 @@ unmarked long scoreboard target because it exercises the exp/log/ODE chain.
 | `piCircumference` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [comparison](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | $\pi\in[L_n,U_n],\quad U_n-L_n\to0$ | ✗ | ✗ |
 | `piCircumferenceFan` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [finite Archimedes bridge](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | exact inscribed cross-fan lower bound with circumscribed polygonal upper bound | ✓ | ✓ |
 | **Arctangent routes** | [geom](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4\arctan(1)=4\int_0^1\frac{dt}{1+t^2}=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ |  |  |
-| `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\arctan_{\mathrm{geom}}(1)$ | ✓ | ✓ |
+| `4 * arctanGeom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\texttt{arctan.geom}(1)$ | ✓ | ✓ |
 | `4 * arctanIntegralRectangleForAtOne` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
 | `4 * arctanSeries(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [finite Riemann bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✓ |
 | `Logarithm.piTriangleLogSeries` | [finite triangle](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-uniform-triangle-reindexing), [logarithm strip](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:arctan-log-first-strip) | $\pi=4T_{\triangle}+2\log_{\mathrm{series}}2$ | ✓ | ✓ |
 | `piNilakantha` | [finite series transformation](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:nilakantha-pi) | $\pi=3+\frac4{2\cdot3\cdot4}-\frac4{4\cdot5\cdot6}+\frac4{6\cdot7\cdot8}-\cdots$ | ✓ | ✓ |
-| `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [finite bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\arctan_{\mathrm{series}}(1/5)-\arctan_{\mathrm{series}}(1/239))$ | ✓ | ✓ |
+| `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [finite bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\,\texttt{arctan.series}(1/5)-\texttt{arctan.series}(1/239))$ | ✓ | ✓ |
 | `6 * arcsinIntegral(1/2)` | [definition](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:inverse-elementary-integral-identities) | $\pi=6\arcsin(1/2)=6\int_0^{1/2}\frac{dx}{\sqrt{1-x^2}}$ | ✗ | ✗ |
 | `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
 | `GaussianPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2$ | ✗ | ✗ |

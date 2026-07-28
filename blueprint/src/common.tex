@@ -63,6 +63,14 @@
 \newcommand{\mesh}{\operatorname{mesh}}
 \newcommand{\riem}{\operatorname{Riemann}}
 \newcommand{\Sec}{\operatorname{Sec}}
+% Dot-qualified names distinguish certified presentations from a single
+% completed function.  They deliberately render as names rather than as
+% mathematical subscripts: arctan.geom and arctan.series are separate raw
+% algorithms until an explicit equivalence is proved.
+\newcommand{\arctangeom}{\mathop{\texttt{arctan.geom}}\nolimits}
+\newcommand{\arctanseries}{\mathop{\texttt{arctan.series}}\nolimits}
+\newcommand{\arctanintegral}{\mathop{\texttt{arctan.integral}}\nolimits}
+\newcommand{\arctanintegralrect}{\mathop{\texttt{arctan.integral.rectangle}}\nolimits}
 \def\endpoint{\operatorname{Endpoint}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\humanchecked}{\textcolor{blue}{[human-checked]}}
