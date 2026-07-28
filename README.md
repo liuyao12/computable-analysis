@@ -193,7 +193,9 @@ left-endpoint derivative box widened by twice the requested tolerance.
 The stronger `...forward_secant_uniform_range_enclosure` now combines that
 step-aware secant box with epsilon--delta continuity: every derivative value
 inside a chosen rational radius and the endpoint difference share a box of
-width at most ten stage tolerances. The generic finite global assembly is
+width at most ten stage tolerances. The radius, derivative evaluation stage,
+and hull are now named executable definitions, with an explicit local
+enclosure theorem rather than an existentially selected bound. The generic finite global assembly is
 now checked: common-stage endpoint boxes telescope by interval containment,
 and an `N`-cell uniform partition converts a width `e` on each derivative
 box into total width at most `(b-a)*e`. The new

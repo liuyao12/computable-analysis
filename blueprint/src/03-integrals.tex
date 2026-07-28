@@ -1094,6 +1094,10 @@ schedule.
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value_enclosure}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_range_enclosure}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_uniform_range_enclosure}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardContinuityRadius}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardContinuityStage}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardSecantBound}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uniform_range_enclosure}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartitionPieces}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartition_mesh_le_radius}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartition_mesh_le_forward_step}
@@ -1120,9 +1124,16 @@ quotient's width.  Positive scaling by \(h\) then recovers the endpoint
 difference exactly.
 
 This is now a common local certificate, not merely a secant estimate.
-For every requested forward-derivative stage, Lean selects one rational
-radius \(\delta\) and one continuity evaluation stage \(m\) using the
-explicit modulus above.  Every rational
+For every requested forward-derivative stage \(n\), Lean defines the common
+cell data, rather than merely proving that they exist:
+\[
+ \delta_n=\frac{\varepsilon_n}{6},\qquad
+ m_n=4\bigl((\varepsilon_n/2).\mathrm{den}+1\bigr),
+ \qquad \varepsilon_n=\texttt{precisionAtStage}(n).
+\]
+Its named \texttt{coordinateTimesArctanForwardSecantBound} is the hull of
+the step-aware derivative box and the stage-\(m_n\) derivative box, each
+expanded by \(2\varepsilon_n\).  Every rational
 \(t\) with \(\lvert t-x\rvert\le\delta\) is enclosed together with the
 endpoint difference by
 \[
@@ -1131,12 +1142,13 @@ endpoint difference by
  \qquad \operatorname{width}(B)\le10\varepsilon_n.
 \]
 The hull accommodates the step-aware derivative stage \(N\) and the
-continuity stage \(m\), whose valid raw boxes overlap even when their indices
+continuity stage \(m_n\), whose valid raw boxes overlap even when their indices
 differ.  It contains \(D_m(t)\), while \(hB\) contains
 \(P(x+h)-P(x)\).  Thus a cell whose width is at most \(\delta\) has precisely
 the common range-and-secant datum required by the FTC architecture.
 
-The uniform partition itself is now selected explicitly:
+The uniform partition itself is now selected explicitly from this named
+radius:
 \[
  N_{\delta,n}
  =(\delta.\mathrm{den}+1)\,72(n+1).

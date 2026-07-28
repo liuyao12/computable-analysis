@@ -111,7 +111,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `...forward_secant_uniform_range_enclosure` now composes this with
   epsilon--delta continuity: every derivative value in a selected rational
   radius and the endpoint secant share a box of width at most ten stage
-  tolerances. The generic finite global assembly is now checked: adjacent
+  tolerances. The local data are now definitions rather than extracted
+  witnesses: `coordinateTimesArctanForwardContinuityRadius n` is
+  `precisionAtStage n / 6`, its companion stage is
+  `4 * ((precisionAtStage n / 2).den + 1)`, and
+  `coordinateTimesArctanForwardSecantBound` has the corresponding checked
+  explicit enclosure theorem. The generic finite global assembly is now checked: adjacent
   common-stage endpoint boxes telescope by interval containment, and a
   uniform partition turns a per-cell width bound `e` into total width at
   most `(b-a)*e`. `TwoStageCandidateDerivativeFTC` now packages the actual
@@ -396,7 +401,8 @@ another. The Pi score stays useful only as secondary integration coverage.
   supplies endpoint derivative ranges on every positive rational cell. The
   checked forward-range enclosure now supplies one common box for every
   derivative value within its continuity radius and the endpoint difference,
-  with an explicit ten-tolerance width bound. The derivative-continuity
+  with an explicit ten-tolerance width bound. Its radius, derivative stage,
+  and hull bound are now named computable definitions. The derivative-continuity
   radius and evaluation stage now come from the checked effective modulus,
   not a choice extracted from epsilon--delta existence. The compatible uniform rational
   partition is now selected by the finite denominator product
