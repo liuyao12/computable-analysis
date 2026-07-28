@@ -86,8 +86,13 @@ gates.
   has literal epsilon--delta continuity. Its rational correction is checked
   3-Lipschitz; splitting the output budget as `eps/2` for arctangent and
   `eps/6` for the input correction gives a finite modulus for the whole
-  derivative box. This is the shrinking-range datum for the pending
-  derivative-bound FTC route, not its missing secant containment.
+  derivative box. Its checked positive product secants now also satisfy
+  `coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
+  the endpoint difference lies in the cell width times the left derivative
+  box widened by twice the requested stage tolerance. This and the continuity
+  theorem supply the two local ingredients for the pending derivative-bound
+  FTC route; a common cell range bound and shrinking Riemann-width schedule
+  remain open.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
@@ -349,8 +354,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   box uses its geometric endpoint order. Thus
   `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing`
   supplies endpoint derivative ranges on every positive rational cell. The
-  cellwise secant-containment and shrinking-bound schedules, hence the FTC
-  comparison itself, remain open.
+  checked forward secant enclosure now supplies endpoint containment in a
+  widened left derivative box. Combining it with the continuity range bound
+  into one common cell box, and then proving the shrinking-bound schedule,
+  remains open; so does the resulting FTC comparison.
   The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor

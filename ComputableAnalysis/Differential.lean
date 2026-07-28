@@ -285,6 +285,56 @@ theorem differenceQuotient_reverse_of_pos {A B : QInterval} {h : Rat}
     grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
       Rat.mul_comm]
 
+/-- A finite secant certificate can be converted directly into the endpoint
+difference enclosure used by the FTC layer.  More precisely, if the interval
+quotient over a positive rational step is near a derivative box, then the
+endpoint difference lies in the step times that box widened by twice the
+requested tolerance.  The second tolerance pays for the quotient box's own
+width; no limiting or completeness principle is involved. -/
+theorem scaleByRat_expand_contains_subInterval_of_differenceQuotient_near
+    {A B D : QInterval} {h : Rat} {eps : QPos}
+    (hpos : 0 < h)
+    (hnear : (differenceQuotient B A h).NearAt D eps) :
+    (scaleByRat h (expand D (2 * eps.val))).ContainsInterval
+      (subInterval B A) := by
+  have h0 : 0 <= h := Rat.le_of_lt hpos
+  have hne : h ≠ 0 := Rat.ne_of_gt hpos
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hcancel : h * (1 / h) = 1 := by
+    simpa [Rat.div_def] using Rat.mul_inv_cancel h hne
+  have hlo : (1 / h) * (B.lo - A.hi) <= D.hi + eps.val := by
+    simpa [differenceQuotient, divRat, sub, scaleRat, if_pos hinv] using
+      hnear.1
+  have hDlo : D.lo <= (1 / h) * (B.hi - A.lo) + eps.val := by
+    simpa [differenceQuotient, divRat, sub, scaleRat, if_pos hinv] using
+      hnear.2.1
+  have hwidth :
+      (1 / h) * (B.hi - A.lo) - (1 / h) * (B.lo - A.hi) <= eps.val := by
+    simpa [differenceQuotient, divRat, sub, scaleRat, if_pos hinv,
+      QInterval.width] using hnear.2.2.1
+  have hDlo' : D.lo - 2 * eps.val <= (1 / h) * (B.lo - A.hi) := by
+    grind [Rat.sub_eq_add_neg]
+  have hDhi' : (1 / h) * (B.hi - A.lo) <= D.hi + 2 * eps.val := by
+    grind [Rat.sub_eq_add_neg]
+  unfold ContainsInterval scaleByRat expand subInterval
+  rw [if_pos h0]
+  constructor
+  · calc
+      h * (D.lo - 2 * eps.val) <=
+          h * ((1 / h) * (B.lo - A.hi)) :=
+            Rat.mul_le_mul_of_nonneg_left hDlo' h0
+      _ = B.lo - A.hi := by
+            rw [← Rat.mul_assoc, hcancel]
+            grind
+  · calc
+      B.hi - A.lo = h * ((1 / h) * (B.hi - A.lo)) := by
+        rw [← Rat.mul_assoc, hcancel]
+        grind
+      _ <= h * (D.hi + 2 * eps.val) :=
+            Rat.mul_le_mul_of_nonneg_left hDhi' h0
+
 end QInterval
 
 /-- Two identical exact singleton boxes are near at every requested precision.

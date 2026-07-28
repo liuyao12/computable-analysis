@@ -179,8 +179,13 @@ The resulting derivative candidate is now also proved nondecreasing on the
 same branch.  Its rational correction is ordered by the finite identity
 `(y-x)*(1-x*y) >= 0` after clearing the two positive denominators, and the
 arctangent summand retains its geometric endpoint order.  This yields
-endpoint derivative ranges for later positive-cell FTC bounds; it does not
-yet give their required secant containment.
+endpoint derivative ranges for later positive-cell FTC bounds.  Its checked
+positive product secants now also have the explicit
+`coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
+the endpoint difference is contained in the cell width times the
+left-endpoint derivative box widened by twice the requested tolerance.
+What remains is a single common cell box, obtained by combining this secant
+fact with derivative continuity, and a shrinking Riemann-width schedule.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
@@ -221,8 +226,11 @@ The rectangle function itself now has the literal epsilon--delta certificate
 the tangent-chart transport proves `A.lo(x+h) - A.hi(x) <= h`; choosing
 `delta = eps` and stage `4 * (eps.den + 1)` then bounds both cross-box gaps
 and both widths by `eps` on the whole rational unit branch.  This is finite
-continuity data, not a shortcut from differentiability to FTC: cellwise
-secant containment and a compatible shrinking partition remain open.
+continuity data, not a shortcut from differentiability to FTC.  The product
+branch now separately has finite local secant containment: its endpoint
+difference lies in the positive cell width times a derivative box widened by
+twice the stage tolerance.  Combining range and secant data into a common
+cell bound, followed by a compatible shrinking partition, remains open.
 The actual product derivative candidate now has its own literal continuity
 certificate as well.  Its rational correction `x/(1+x*x)` is proved
 3-Lipschitz by combining the 2-Lipschitz reciprocal kernel with the exact

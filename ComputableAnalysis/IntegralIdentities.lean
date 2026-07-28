@@ -4148,6 +4148,61 @@ def coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt
     coordinateTimesArctanIntegralRectangleDerivativeRaw_compute]
   exact hcore
 
+/-- The finite forward derivative certificate for `x * arctan(x)` also gives
+the local endpoint enclosure required by the derivative-bound FTC interface.
+For a positive cell of admissible width, its endpoint difference is contained
+in the cell width times the left-endpoint derivative box widened by twice the
+requested precision.  This is a secant enclosure, not yet a global FTC: a
+separate cell-range argument will make one common derivative bound cover all
+points of the cell. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat)
+    (hsmall : h <= 1 / (((72 * (n + 1) : Nat) : Rat))) :
+    QInterval.ContainsInterval
+      (QInterval.scaleByRat h
+        (QInterval.expand
+          (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x
+            ⟨hx0, hx1⟩
+            (arctanRectangleTangentTransportPrecision h (8 * (n + 1))))
+          (2 * (precisionAtStage n).val)))
+      (endpointDifferenceInterval
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw x (x + h)
+        (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))) := by
+  have hmem : inDomainInterval
+      coordinateTimesArctanIntegralRectangleOnUnit.lower
+      coordinateTimesArctanIntegralRectangleOnUnit.upper (x + h) := by
+    change 0 <= x + h /\ x + h <= 1
+    exact ⟨by grind, hupper⟩
+  let N : Nat := arctanRectangleTangentTransportPrecision h (8 * (n + 1))
+  have hnearRaw :=
+    (coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt x hx0 hx1).close
+      h n hmem hpos hsmall
+  have hnear : intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        (coordinateTimesArctanIntegralRectangleOnUnit.compute (x + h) hmem N)
+        (coordinateTimesArctanIntegralRectangleOnUnit.compute x ⟨hx0, hx1⟩ N) h)
+      ((coordinateTimesArctanIntegralRectangleDerivativeRaw x ⟨hx0, hx1⟩).compute N)
+      n := by
+    simpa only [coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt,
+      N] using hnearRaw
+  have hsecant :=
+    QInterval.scaleByRat_expand_contains_subInterval_of_differenceQuotient_near
+      hpos hnear
+  change QInterval.ContainsInterval
+      (QInterval.scaleByRat h
+        (QInterval.expand
+          ((coordinateTimesArctanIntegralRectangleDerivativeRaw x ⟨hx0, hx1⟩).compute N)
+          (2 * (precisionAtStage n).val)))
+      (endpointDifferenceInterval
+        coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw x (x + h) N)
+  unfold endpointDifferenceInterval
+  rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+        coordinateTimesArctanIntegralRectangleOnUnit hmem,
+    FunctionOnInterval.toRealFunRaw_compute_of_mem
+      coordinateTimesArctanIntegralRectangleOnUnit ⟨hx0, hx1⟩]
+  exact hsecant
+
 /-- The stricter two-sided product budget is small enough both for the
 forward product certificate at the reversed basepoint and for transporting
 the explicit derivative box back across a negative step. -/

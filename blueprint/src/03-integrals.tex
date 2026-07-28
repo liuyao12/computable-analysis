@@ -508,7 +508,8 @@ not a general product-rule closure theorem.
 The same finite evaluator is now certified in the derivative-bound form used
 by the FTC layer: every stage box for the right-hand side lies in
 \([0,2]\).  This is a usable bound on the candidate derivative, not yet the
-cellwise secant-containment certificate that the effective FTC still requires.
+common cell bound required by the effective FTC.  The explicit forward secant
+enclosure below supplies the other local half of that certificate.
 It is also weakly nondecreasing on the positive unit piece.  The only new
 algebraic summand is ordered by clearing positive denominators:
 \[
@@ -1016,9 +1017,45 @@ gap by \(\eta+\eta=\varepsilon\), while translation by the rational
 correction preserves the rectangle-box widths.
 
 This provides the needed shrinking-range datum for a derivative-bound FTC
-construction.  It still does not establish that a product secant lies in its
-cell's derivative range: that finite containment, and the resulting
-Riemann-width schedule, remain the next proof obligations.
+construction.  Together with the forward secant enclosure below it supplies
+the two distinct local ingredients: a derivative range can be made small on
+a short cell, and the primitive's endpoint difference is certified by a
+widened derivative box.  What remains is to combine those ingredients into
+one common cell bound and prove the resulting Riemann-width schedule.
+\end{theorem}
+
+\begin{theorem}[Finite forward secant enclosure for the arctangent product]
+\label{thm:coordinate-arctangent-forward-secant-enclosure}
+\lean{ComputableAnalysis.QInterval.scaleByRat_expand_contains_subInterval_of_differenceQuotient_near}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure}
+\uses{thm:coordinate-arctangent-forward-product-rule,thm:coordinate-arctangent-derivative-epsilon-delta-continuity}
+\leanok
+Let \(P(x)=xA(x)\), let \(D_N(x)\) be the finite stage-\(N\) box for
+\[
+  A(x)+\frac{x}{1+x^2},
+\]
+and take a positive rational step \(h\) within the checked forward-derivative
+budget.  Lean now proves the literal endpoint enclosure
+\[
+ P(x+h)-P(x)
+ \ \in\
+ h\bigl[D_N(x)_{\mathrm{lo}}-2\varepsilon_n,\,
+         D_N(x)_{\mathrm{hi}}+2\varepsilon_n\bigr].
+\]
+Here \(N\) is the existing step-aware rectangle precision and
+\(\varepsilon_n\) is the requested rational stage tolerance.  The generic
+finite lemma first observes that two \(\varepsilon_n\)-near quotient and
+derivative boxes have a quotient box contained in the derivative box widened
+by \(2\varepsilon_n\): one tolerance is for their separation and one for the
+quotient's width.  Positive scaling by \(h\) then recovers the endpoint
+difference exactly.
+
+This is genuine local secant containment, with all endpoint evaluations made
+at a common explicit precision.  It deliberately does not claim that this
+widened box contains \(D(t)\) for every rational \(t\) in the cell.  The
+epsilon--delta derivative-continuity theorem provides the route to that
+remaining range obligation; a shrinking partition and width estimate are
+still required before invoking the global derivative-bound FTC package.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]
