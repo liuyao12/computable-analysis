@@ -2234,6 +2234,42 @@ theorem clampedPath_step_le_of_maxStep {a b : Rat}
         grind [Rat.sub_eq_add_neg]
       _ <= delta := hstep.1
 
+/-- Exact finite integration by parts on an arbitrary certified rational
+partition.  The two functions are sampled at the supplied breakpoints (and
+the total clamped path makes the samples harmless beyond the final cell).
+This is the partition-level form used by later certified integral arguments:
+it is still a rational finite-sum identity, not an FTC or a claim about an
+unconstructed integral. -/
+theorem finiteIntegrationByParts_onPartition {a b : Rat}
+    (P : RationalPartition a b) (u v : Rat -> Rat) :
+    leftStieltjesSum (fun i => u (P.clampedPath i))
+        (fun i => v (P.clampedPath i)) P.pieces +
+      rightStieltjesSum (fun i => u (P.clampedPath i))
+        (fun i => v (P.clampedPath i)) P.pieces =
+      u b * v b - u a * v a := by
+  simpa [clampedPath, P.left_endpoint, P.right_endpoint] using
+    (finiteIntegrationByParts
+      (fun i => u (P.clampedPath i))
+      (fun i => v (P.clampedPath i)) P.pieces)
+
+/-- The corresponding arbitrary-partition identity when both Stieltjes sums
+use left endpoints.  The sole discrepancy from the endpoint-product formula
+is the explicit finite corner correction.  This is the version consumed by
+monotone-piece error bounds in constructive integration by parts. -/
+theorem finiteIntegrationByParts_withVariation_onPartition {a b : Rat}
+    (P : RationalPartition a b) (u v : Rat -> Rat) :
+    leftStieltjesSum (fun i => u (P.clampedPath i))
+        (fun i => v (P.clampedPath i)) P.pieces +
+      leftStieltjesSum (fun i => v (P.clampedPath i))
+        (fun i => u (P.clampedPath i)) P.pieces +
+        quadraticVariationSum (fun i => u (P.clampedPath i))
+          (fun i => v (P.clampedPath i)) P.pieces =
+      u b * v b - u a * v a := by
+  simpa [clampedPath, P.left_endpoint, P.right_endpoint] using
+    (finiteIntegrationByParts_withVariation
+      (fun i => u (P.clampedPath i))
+      (fun i => v (P.clampedPath i)) P.pieces)
+
 /-- The explicit uniform partition has mesh as a certified bound for every
 cell width. -/
 theorem uniform_maxStepAtMost_mesh (a b : Rat) (pieces : Nat)

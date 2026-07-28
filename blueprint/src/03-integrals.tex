@@ -242,6 +242,8 @@ additivity.
 \lean{ComputableAnalysis.RationalPartition.MaxStepAtMost}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_step_nonnegative}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_step_le_of_maxStep}
+\lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_onPartition}
+\lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_withVariation_onPartition}
 \lean{ComputableAnalysis.RationalPartition.uniform_maxStepAtMost_mesh}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference}
 \lean{ComputableAnalysis.RationalPartition.uniform_clampedPath_quadraticVariation_le_mesh_mul_endpointDifference}
@@ -258,9 +260,9 @@ rectangle decomposition
 \]
 Summing the cells gives the finite integration-by-parts identity
 \[
- \sum_{i<n}u_i\Delta v_i+
- \sum_{i<n}v_{i+1}\Delta u_i
- =u_nv_n-u_0v_0.
+\sum_{i<n}u_i\Delta v_i+
+\sum_{i<n}v_{i+1}\Delta u_i
+=u_nv_n-u_0v_0.
 \]
 Thus the proof is literally a tiling of the endpoint-product rectangle by
 two oriented strips.  If both sums use left endpoints, Lean also records the
@@ -268,9 +270,15 @@ exact corner-area correction
 \[
  \sum_{i<n}u_i\Delta v_i+
  \sum_{i<n}v_i\Delta u_i+
- \sum_{i<n}\Delta u_i\Delta v_i
- =u_nv_n-u_0v_0.
+\sum_{i<n}\Delta u_i\Delta v_i
+=u_nv_n-u_0v_0.
 \]
+The same two identities are now exposed for every supplied
+\code{RationalPartition} of a rational interval: sample two rational-valued
+functions at its clamped breakpoints, and the right-hand side is exactly
+\(u(b)v(b)-u(a)v(a)\).  Thus later monotone-piece certificates work with the
+project's explicit common-refinement API rather than having to re-express an
+arbitrary partition as a bare natural-number path.
 On an increasing piece each corner rectangle is nonnegative.  If
 \(\Delta u_i\leq\delta\) on the chosen common refinement, Lean proves the
 sharp finite estimate

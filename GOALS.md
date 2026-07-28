@@ -250,7 +250,11 @@ another. The Pi score stays useful only as secondary integration coverage.
 - Integration by parts should follow the same explicit-piece discipline.
   `leftStieltjesSum`, `rightStieltjesSum`, and
   `finiteIntegrationByParts_withVariation` now prove the exact rational
-  rectangle decomposition, including its corner-area correction.  The checked
+  rectangle decomposition, including its corner-area correction.
+  `RationalPartition.finiteIntegrationByParts_onPartition` and its
+  left-endpoint-with-variation counterpart now lift that identity to every
+  supplied certified rational partition, with the actual interval endpoints
+  on the right-hand side.  The checked
   `quadraticVariationSum` estimates bound that correction by a maximum first
   increment times the second endpoint variation, or by the product of the two
   endpoint variations; negating both paths supplies the decreasing-piece
