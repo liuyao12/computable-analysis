@@ -715,6 +715,12 @@ def StrongLe (I J : QInterval) : Prop :=
 def addInterval (I J : QInterval) : QInterval :=
   { lo := I.lo + J.lo, hi := I.hi + J.hi }
 
+/-- Interval addition adds enclosure widths exactly. -/
+theorem addInterval_width (I J : QInterval) :
+    (addInterval I J).width = I.width + J.width := by
+  unfold addInterval QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 def scaleByRat (r : Rat) (I : QInterval) : QInterval :=
   if 0 <= r then
     { lo := r * I.lo, hi := r * I.hi }
@@ -732,6 +738,13 @@ theorem scaleByRat_contains_of_nonneg {r : Rat} (hr : 0 <= r)
   constructor
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.1 hr
   · exact Rat.mul_le_mul_of_nonneg_left hcontains.2 hr
+
+/-- Positive rational scaling multiplies enclosure width by the scale. -/
+theorem scaleByRat_width_of_nonneg {r : Rat} (hr : 0 <= r) (I : QInterval) :
+    (scaleByRat r I).width = r * I.width := by
+  unfold scaleByRat QInterval.width
+  rw [if_pos hr]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add]
 
 def subInterval (I J : QInterval) : QInterval :=
   { lo := I.lo - J.hi, hi := I.hi - J.lo }
@@ -2082,6 +2095,17 @@ def cell {a b : Rat} (P : RationalPartition a b)
   upper_mem := by
     have h := P.monotone (k + 1) P.pieces (Nat.succ_le_of_lt hk) (Nat.le_refl P.pieces)
     simpa [P.right_endpoint] using h
+
+/-- Every genuine cell of an explicit uniform partition has exactly its
+rational mesh width. -/
+theorem uniform_cell_width (a b : Rat) (pieces : Nat)
+    (hpieces : 0 < pieces) (hab : a <= b)
+    (k : Nat) (hk : k < pieces) :
+    ((uniform a b pieces hpieces hab).cell k hk).width =
+      mesh a b pieces := by
+  change leftPoint a b pieces (k + 1) - leftPoint a b pieces k =
+    mesh a b pieces
+  exact leftPoint_step a b pieces k
 
 /-- Regard a partition's breakpoint list as a total rational path by holding
 its final value constant beyond the last cell.  This permits the finite

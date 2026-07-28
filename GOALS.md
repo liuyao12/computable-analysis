@@ -90,7 +90,7 @@ gates.
   `coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
   the endpoint difference lies in the cell width times the left derivative
   box widened by twice the requested stage tolerance.
-  `...forward_secant_range_enclosure` now composes this with
+  `...forward_secant_uniform_range_enclosure` now composes this with
   epsilon--delta continuity: every derivative value in a selected rational
   radius and the endpoint secant share a box of width at most ten stage
   tolerances. The remaining derivative-bound FTC work is the global

@@ -184,7 +184,7 @@ positive product secants now also have the explicit
 `coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
 the endpoint difference is contained in the cell width times the
 left-endpoint derivative box widened by twice the requested tolerance.
-The stronger `...forward_secant_range_enclosure` now combines that
+The stronger `...forward_secant_uniform_range_enclosure` now combines that
 step-aware secant box with epsilon--delta continuity: every derivative value
 inside a chosen rational radius and the endpoint difference share a box of
 width at most ten stage tolerances. What remains is global partition,

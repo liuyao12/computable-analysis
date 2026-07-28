@@ -4356,6 +4356,100 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_range_enclos
       coordinateTimesArctanIntegralRectangleOnUnit ⟨hx0, hx1⟩]
   exact hboxed.2.1
 
+/-- The common secant-and-range box can be selected before the point in its
+continuity radius is given.  This quantifier order is the form needed for a
+rational partition cell: one finite box covers every candidate derivative
+value in the cell and its one endpoint difference. -/
+theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_uniform_range_enclosure
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat)
+    (hsmall : h <= 1 / (((72 * (n + 1) : Nat) : Rat))) :
+    Exists fun delta : QPos => Exists fun m : Nat => Exists fun bound : QInterval =>
+      (forall t
+        (ht : inDomainInterval
+          coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+          coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper t),
+        qabs (t - x) <= delta.val ->
+          bound.ContainsInterval
+            ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)) /\
+        (QInterval.scaleByRat h bound).ContainsInterval
+          (endpointDifferenceInterval
+            coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw
+            x (x + h)
+            (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))) /\
+          bound.width <= 10 * (precisionAtStage n).val := by
+  obtain ⟨delta, m, hcontinuous⟩ :=
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaContinuous
+      (precisionAtStage n)
+  let N : Nat := arctanRectangleTangentTransportPrecision h (8 * (n + 1))
+  let bound : QInterval :=
+    QInterval.hull
+      (QInterval.expand
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw x
+          ⟨hx0, hx1⟩).compute N)
+        (2 * (precisionAtStage n).val))
+      (QInterval.expand
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw x
+          ⟨hx0, hx1⟩).compute m)
+        (2 * (precisionAtStage n).val))
+  have hboxed :
+      forall t
+        (ht : inDomainInterval
+          coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+          coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper t),
+        qabs (t - x) <= delta.val ->
+          bound.ContainsInterval
+              ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m) /\
+            (QInterval.scaleByRat h bound).ContainsInterval
+              (endpointDifferenceInterval
+                coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw
+                x (x + h) N) /\
+              bound.width <= 10 * (precisionAtStage n).val := by
+    intro t ht hclose
+    have hvalueFunction := hcontinuous x t ⟨hx0, hx1⟩ ht hclose
+    have hvalue :
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw x ⟨hx0, hx1⟩).compute m).NearAt
+          ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)
+          (precisionAtStage n) := by
+      simpa only [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
+        coordinateTimesArctanIntegralRectangleDerivativeRaw_compute] using
+        hvalueFunction
+    have hlocal :=
+      coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value_enclosure
+        hx0 hx1 hpos hupper ht n m hsmall hvalue
+    have hlocal' :
+        bound.ContainsInterval
+            ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m) /\
+          (QInterval.scaleByRat h bound).ContainsInterval
+            (QInterval.subInterval
+              (coordinateTimesArctanIntegralRectangleOnUnit.compute (x + h)
+                (by
+                  change 0 <= x + h /\ x + h <= 1
+                  exact ⟨by grind, hupper⟩) N)
+              (coordinateTimesArctanIntegralRectangleOnUnit.compute x
+                ⟨hx0, hx1⟩ N)) /\
+            bound.width <= 10 * (precisionAtStage n).val := by
+      simpa only [N, bound] using hlocal
+    refine ⟨hlocal'.1, ?_, hlocal'.2.2⟩
+    have hmem : inDomainInterval
+        coordinateTimesArctanIntegralRectangleOnUnit.lower
+        coordinateTimesArctanIntegralRectangleOnUnit.upper (x + h) := by
+      change 0 <= x + h /\ x + h <= 1
+      exact ⟨by grind, hupper⟩
+    unfold endpointDifferenceInterval
+    rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
+          coordinateTimesArctanIntegralRectangleOnUnit hmem,
+      FunctionOnInterval.toRealFunRaw_compute_of_mem
+        coordinateTimesArctanIntegralRectangleOnUnit ⟨hx0, hx1⟩]
+    exact hlocal'.2.1
+  have hzero : qabs (x - x) <= delta.val := by
+    have hsub : x - x = 0 := by grind
+    rw [hsub]
+    simpa [qabs] using Rat.le_of_lt delta.property
+  have hbase := hboxed x ⟨hx0, hx1⟩ hzero
+  exact ⟨delta, m, bound, fun t ht hclose => (hboxed t ht hclose).1,
+    hbase.2.1, hbase.2.2⟩
+
 /-- The stricter two-sided product budget is small enough both for the
 forward product certificate at the reversed basepoint and for transporting
 the explicit derivative box back across a negative step. -/
