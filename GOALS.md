@@ -128,15 +128,15 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   assembled in `coordinateTimesArctanForwardTwoStageFTC`; Lean proves its
   bounded-sum raw equivalent to the product endpoint raw. The uniform cell
   count `coordinateTimesArctanForwardPartitionPieces` remains the explicit
-  finite mesh selector. An explicitly named endpoint-transport construction,
-  `coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity`, now
-  exposes the same primitive endpoint formula through the public monotone,
-  ordinary, and finite-piece integral interfaces; its raw computes the
-  certified endpoint difference and therefore evaluates to `arctanGeom 1`.
-  This is intentionally not counted as the missing normalization theorem:
-  the remaining bridge is to package the new two-stage bounded-sum raw
-  itself as a valid public `Integral.ConstructionFor`, not to prove the
-  finite FTC comparison again.
+  finite mesh selector. The product-specific public FTC bridge is now
+  complete: `coordinateTimesArctanForwardTwoStageStabilizedRaw` applies
+  finite-prefix stabilization to the actual bounded-sum evaluator, with the
+  `4/(n+1)` radius proved against the rectangle anchor but not read at
+  runtime. Its `..._valid` theorem provides the public construction, and
+  `coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity` exposes the
+  endpoint formula through the monotone, ordinary, and finite-piece integral
+  interfaces. The remaining task is to generalize this normalization pattern,
+  not to reprove the product FTC.
   `UniformRealFun.CertifiedExtension` states the representation-safe extension
   contract. General closure and extension theorems remain work, so this gate
   is not yet a general function-calculus package.
@@ -418,13 +418,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   `(delta.den + 1) * 72 * (n + 1)`. Its cell containment, common endpoint
   transport stage, global Riemann-width and endpoint-width schedules are
   now all checked in `coordinateTimesArctanForwardTwoStageFTC`, which proves
-  the bounded-sum raw equivalent to the product endpoint raw. What remains
-  is the validity/nestedness bridge that promotes this two-stage raw to the
-  public definite-integral API. A distinctly named endpoint-transport
-  monotone construction is now available for immediate API use: it computes
-  the already certified product endpoint raw and Lean proves it equivalent to
-  `arctanGeom 1`. It is not a substitute for the outstanding bounded-sum
-  normalization bridge.
+  the bounded-sum raw equivalent to the product endpoint raw. That raw is now
+  normalized by `coordinateTimesArctanForwardTwoStageStabilizedRaw`: finite
+  intersections of its widened bounded-sum boxes are valid and shrinking,
+  while the rectangle anchor is proof-side only. Thus the actual finite-sum
+  computation supplies `coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity`,
+  a public definite-integral identity equivalent to `arctanGeom 1`.
   The
   exact algebraic core is now formalized for arbitrary rational functions:
   `ExactFunction.product_differenceQuotient_right` keeps the second factor
@@ -449,9 +448,9 @@ another. The Pi score stays useful only as secondary integration coverage.
 - A future pi coverage bridge should exercise this theorem rather than merely
   mention it: prove
   `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
-  It requires the remaining FTC bridge, the explicit monotone-piece
-  refinement, the checked arctangent derivative, and canonical exponential/logarithm
-  alignment.
+  The product FTC bridge is now available; this still requires the explicit
+  monotone-piece refinement, the checked arctangent derivative, and canonical
+  exponential/logarithm alignment.
   This is deliberately the long exp/log/ODE route: first identify the
   logarithmic integral with the inverse of canonical exponential, use the
   linear Peano--Baker/Picard--Lindelöf uniqueness theorem to equate the

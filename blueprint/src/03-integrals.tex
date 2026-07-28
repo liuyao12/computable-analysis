@@ -837,10 +837,9 @@ Consequently the endpoint-difference raw for this product on \([0,1]\) is a
 valid presentation equivalent to the geometric value
 \(\arctan_{\mathrm{geom}}(1)\).  This is boundary data only: it does not
 differentiate the product or identify an integral of the product with that
-endpoint difference.  The finite two-stage raw certificate later in this
-chapter supplies the product comparison; its remaining public
-definite-integral packaging is required by
-\cref{thm:integration-by-parts-certificate}.
+endpoint difference.  The finite two-stage construction later in this
+chapter supplies both the product comparison and its public stabilized
+definite-integral packaging.
 \end{proposition}
 
 \begin{theorem}[Right derivative of the positive arctangent product at zero]
@@ -1235,11 +1234,14 @@ stage for every cell and at the global endpoint.
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCEndpoint_width_le}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointConstruction}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneConstruction}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneIntegral}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanDerivativeEndpointMonotoneIntegral_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_widthsShrink}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_equiv_rectangleAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizationRadius}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
 \uses{thm:coordinate-arctangent-forward-secant-enclosure,thm:finite-common-stage-ftc-assembly}
 \leanok
 The product now has a fully assembled \emph{finite two-stage FTC raw}\ on
@@ -1260,26 +1262,23 @@ width.  Consequently its two executable raw reals satisfy
  \bigl(x\arctan x\bigr)(1)-\bigl(x\arctan x\bigr)(0).
 \]
 This is the finite FTC comparison itself, with no limit or completeness
-argument.  It is intentionally not yet presented as the repository's public
-definite integral: the remaining engineering step is to give this new
-two-stage raw the validity/nestedness bridge required by
-\texttt{Integral.ConstructionFor}.
-
-There is now also a deliberately named \emph{endpoint-transport} public
-interface for this derivative. Its monotone construction computes the already
-certified raw \((xA(x))(1)-(xA(x))(0)\), and hence Lean exposes the endpoint
-formula through the ordinary, monotone, and finite-piece integral interfaces.
-In particular,
+argument.  Lean now promotes its actual bounded-sum evaluator to a public
+definite integral.  Although the selected sum boxes need not be nested, their
+widths have an explicit rational modulus.  At each stage the finite telescope
+contains its selected endpoint box, and that box overlaps the canonical
+rectangle evaluator by the primitive's validated nestedness.  The public raw
+therefore takes the finite prefix intersection of these bounded-sum boxes,
+each widened by (4/(n+1)).  Its runtime reads only rational bounded sums
+and this radius schedule; the rectangle evaluator is used only in the proof
+that the intersections remain inhabited.  This yields a valid, shrinking,
+nested representative of the same computation, hence
 \[
   \mathop{\int}_{0}^{1}\!\left(A(x)+\frac{x}{1+x^2}\right)\,dx
   \ \Equiv\ A(1).
 \]
-The name is significant: the current \texttt{ConstructionFor} contract asks
-only for a valid computation, so this does \emph{not} assert that the public
-computation is definitionally the bounded Riemann raw. The preceding
-two-stage theorem supplies that finite comparison separately; making their
-validity/nestedness relation a single normalized construction is still the
-remaining FTC engineering task.
+The identity is available through the ordinary, monotone, and finite-piece
+integral interfaces.  This closes the product-specific public FTC bridge;
+the remaining work is its reusable generalization.
 \end{theorem}
 
 \begin{corollary}[The arctangent--logarithm pi route: construction target]

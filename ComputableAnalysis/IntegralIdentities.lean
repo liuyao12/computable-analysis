@@ -5737,89 +5737,234 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
             (precisionAtStage n).val :=
           (Rat.add_le_add_left).2 hrightBudget
 
-/-- A public integral construction for the positive product derivative,
-deliberately computed by the certified primitive endpoint difference.
+/-- The actual finite bounded-sum raw for the product FTC has a rational
+width modulus.  Its boxes need not themselves be nested, which is why the
+subsequent construction applies finite-prefix stabilization. -/
+theorem coordinateTimesArctanForwardTwoStageRaw_widthsShrink :
+    RealRaw.WidthsShrinkToZero
+      coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw.compute := by
+  intro eps
+  refine ⟨eps.val.den + 1, ?_⟩
+  intro n hn
+  have hbound := coordinateTimesArctanForwardFTCRiemann_width_le (precisionAtStage n)
+  have hdenPos : 0 < eps.val.den + 1 := Nat.succ_pos _
+  have hnPos : 0 < n := Nat.lt_of_lt_of_le hdenPos hn
+  have hprecision : (precisionAtStage n).val <=
+      1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    rw [precisionAtStage, dif_neg (Nat.ne_of_gt hnPos)]
+    exact FTC.one_div_nat_antitone hdenPos hnPos hn
+  change (coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw.compute n).width <= eps.val
+  calc
+    (coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw.compute n).width <=
+        (precisionAtStage n).val := by
+      simpa [TwoStageCandidateDerivativeFTC.boundedIntegralRaw,
+        TwoStageCandidateDerivativeFTC.boundedIntegralCompute,
+        TwoStageCandidateDerivativeFTC.boundedIntegralInterval,
+        coordinateTimesArctanForwardTwoStageFTC] using hbound
+    _ <= 1 / (((eps.val.den + 1 : Nat) : Rat)) := hprecision
+    _ <= eps.val := FTC.one_div_den_succ_le_of_pos eps.property
 
-The separately checked
-`coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint` identifies the
-finite derivative-bound Riemann raw with this endpoint.  This construction
-does not claim that the two computations are definitionally the same: the
-validity/nestedness normalization of that Riemann raw remains a separate FTC
-bridge. -/
-def coordinateTimesArctanDerivativeEndpointConstruction :
+/-- The finite bounded-sum raw is equivalent to the independent rectangle
+evaluator for arctangent at one.  At every stage its telescope contains an
+endpoint box at its selected stage; that box overlaps the rectangle evaluator
+at the requested stage by the primitive's validated nestedness. -/
+theorem coordinateTimesArctanForwardTwoStageRaw_equiv_rectangleAtOne :
+    coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw.Equiv
+      ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+  intro n
+  let h := coordinateTimesArctanForwardTwoStageFTC
+  let eps := precisionAtStage n
+  let s := h.chooseEndpointStage eps
+  have hcontains :
+      QInterval.ContainsInterval
+        ((h.choosePartition eps).boundIntegralSum (fun k hk => h.derivativeBound eps k hk))
+        (endpointDifferenceInterval coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 s) := by
+    apply RationalPartition.boundIntegralSum_contains_endpointDifference
+      (P := h.choosePartition eps)
+      (F := coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw)
+      (prec := s) h.primitive_valid
+    · intro i hi
+      exact h.primitive_domain_on eps i hi
+    · intro k hk
+      simpa [RationalPartition.cell, s] using h.local_endpoint_contained eps k hk
+  have hall := RealRaw.allStagesOverlap_refl
+    ArctanGeometry.arctanIntegralRectangleRawAtOne
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid s n
+  have hover := (RealRaw.compareAt_overlap_iff
+    ArctanGeometry.arctanIntegralRectangleRawAtOne
+    ArctanGeometry.arctanIntegralRectangleRawAtOne s n).1 hall
+  apply (RealRaw.compareAt_overlap_iff
+    coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw
+    ArctanGeometry.arctanIntegralRectangleRawAtOne n n).2
+  change QInterval.Overlaps
+    ((h.choosePartition eps).boundIntegralSum (fun k hk => h.derivativeBound eps k hk))
+    (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n)
+  have hscheduled :
+      QInterval.Overlaps
+        (endpointDifferenceInterval coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 s)
+        (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n) := by
+    change QInterval.Overlaps
+      (endpointDifferenceCompute coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 s)
+      (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n)
+    rw [coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq]
+    exact hover
+  exact ⟨Rat.le_trans hcontains.1 hscheduled.1,
+    Rat.le_trans hscheduled.2 hcontains.2⟩
+
+/-- The public rational radius used to stabilize the finite bounded-sum FTC
+raw.  The rectangle endpoint evaluator occurs only in the proof that this
+radius covers the common value, never in the stabilized runtime evaluator. -/
+def coordinateTimesArctanForwardTwoStageStabilizationRadius (n : Nat) : Rat :=
+  4 / (((n + 1 : Nat) : Rat))
+
+theorem coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_rectangleAtOne
+    (n : Nat) :
+    (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n).width <=
+      coordinateTimesArctanForwardTwoStageStabilizationRadius n := by
+  simpa [coordinateTimesArctanForwardTwoStageStabilizationRadius] using
+    ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ n
+
+theorem coordinateTimesArctanForwardTwoStageStabilizationRadius_shrinks :
+    ShrinksToZero coordinateTimesArctanForwardTwoStageStabilizationRadius := by
+  apply shrinksToZero_of_natOverSuccBound (C := 4)
+  intro n
+  exact Rat.le_refl
+
+/-- A valid direct-only representative of the finite product FTC: at stage
+`n` it intersects the widened bounded-sum boxes from stages `0` through `n`.
+The primitive endpoint evaluator is proof-side support only. -/
+def coordinateTimesArctanForwardTwoStageStabilizedRaw : RealRaw :=
+  RealRaw.prefixStabilize coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw
+    coordinateTimesArctanForwardTwoStageStabilizationRadius
+
+theorem coordinateTimesArctanForwardTwoStageStabilizedRaw_valid :
+    coordinateTimesArctanForwardTwoStageStabilizedRaw.Valid := by
+  unfold coordinateTimesArctanForwardTwoStageStabilizedRaw
+  exact RealRaw.prefixStabilize_valid
+    coordinateTimesArctanForwardTwoStageRaw_widthsShrink
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    coordinateTimesArctanForwardTwoStageRaw_equiv_rectangleAtOne
+    coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_rectangleAtOne
+    coordinateTimesArctanForwardTwoStageStabilizationRadius_shrinks
+
+theorem coordinateTimesArctanForwardTwoStageStabilizedRaw_equiv_rectangleAtOne :
+    coordinateTimesArctanForwardTwoStageStabilizedRaw.Equiv
+      ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+  unfold coordinateTimesArctanForwardTwoStageStabilizedRaw
+  exact RealRaw.prefixStabilize_equiv_anchor
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    coordinateTimesArctanForwardTwoStageRaw_equiv_rectangleAtOne
+    coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_rectangleAtOne
+
+theorem coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_rectangleAtOne :
+    (endpointDifferenceRaw coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).Equiv
+      ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (endpointDifferenceRaw coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid)
+    ArctanGeometry.arctanIntegralRectangleRawAtOne n n).2
+  change QInterval.Overlaps
+    (endpointDifferenceCompute coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 n)
+    (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n)
+  rw [coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_compute_eq]
+  have hordered := RealRaw.interval_order_of_valid
+    ArctanGeometry.arctanIntegralRectangleRawAtOne
+    ArctanGeometry.arctanIntegralRectangleRawAtOne_valid n
+  exact ⟨hordered, hordered⟩
+
+/-- The public integral construction for the positive product derivative,
+computed by the stabilized finite bounded-sum evaluator. -/
+def coordinateTimesArctanForwardTwoStageConstruction :
     Integral.ConstructionFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
-  compute := endpointDifferenceCompute
-    coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
-  certificate := coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+  compute := coordinateTimesArctanForwardTwoStageStabilizedRaw.compute
+  certificate := by
+    simpa [coordinateTimesArctanForwardTwoStageStabilizedRaw, RealRaw.Valid] using
+      coordinateTimesArctanForwardTwoStageStabilizedRaw_valid
 
-/-- The endpoint-transport construction packaged through the monotone
-integral API. -/
-def coordinateTimesArctanDerivativeEndpointMonotoneConstruction :
+/-- The stabilized bounded-sum construction through the monotone integral
+API. -/
+def coordinateTimesArctanForwardTwoStageMonotoneConstruction :
     Integral.MonotoneConstructionFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit where
   monotone := coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone
-  construction := coordinateTimesArctanDerivativeEndpointConstruction
+  construction := coordinateTimesArctanForwardTwoStageConstruction
 
-/-- The public monotone integral raw exposed by the endpoint-transport
-construction for `arctan x + x / (1 + x^2)` on `[0,1]`. -/
-def coordinateTimesArctanDerivativeEndpointMonotoneIntegral : RealRaw :=
+/-- The public monotone integral raw computed from finite stabilized
+derivative-bound sums. -/
+def coordinateTimesArctanForwardTwoStageMonotoneIntegral : RealRaw :=
   Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
-    coordinateTimesArctanDerivativeEndpointMonotoneConstruction
+    coordinateTimesArctanForwardTwoStageMonotoneConstruction
 
-theorem coordinateTimesArctanDerivativeEndpointMonotoneIntegral_valid :
-    coordinateTimesArctanDerivativeEndpointMonotoneIntegral.Valid :=
+theorem coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid :
+    coordinateTimesArctanForwardTwoStageMonotoneIntegral.Valid :=
   Integral.monotoneIntegralFor_valid
     coordinateTimesArctanIntegralRectangleDerivativeOnUnit
-    coordinateTimesArctanDerivativeEndpointMonotoneConstruction
+    coordinateTimesArctanForwardTwoStageMonotoneConstruction
 
-theorem coordinateTimesArctanDerivativeEndpointMonotoneIntegral_compute_eq (n : Nat) :
-    coordinateTimesArctanDerivativeEndpointMonotoneIntegral.compute n =
-      endpointDifferenceCompute coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1 n := rfl
-
-/-- The primitive endpoint formula through the public monotone integral API.
-This is an endpoint transport; the finite two-stage Riemann-raw comparison is
-recorded separately in `coordinateTimesArctanForwardTwoStageFTC`. -/
-def coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity :
+/-- The primitive endpoint formula now follows from the actual stabilized
+finite bounded-sum integral construction. -/
+def coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity :
     Integral.MonotoneDefiniteIdentityFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit
       coordinateTimesArctanIntegralRectangleOnUnit where
   same_lower := rfl
   same_upper := rfl
-  construction := coordinateTimesArctanDerivativeEndpointMonotoneConstruction
+  construction := coordinateTimesArctanForwardTwoStageMonotoneConstruction
   endpoint_valid := coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
   equivalent := by
-    apply RealRaw.equiv_refl
-    simpa [Integral.monotoneIntegralFor, Integral.integralFor,
-      coordinateTimesArctanDerivativeEndpointMonotoneConstruction,
-      coordinateTimesArctanDerivativeEndpointConstruction,
-      endpointDifferenceRaw, RealRaw.Valid] using
-      coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+    have hleft :
+        (Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+          coordinateTimesArctanForwardTwoStageMonotoneConstruction).Valid :=
+      Integral.monotoneIntegralFor_valid coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+        coordinateTimesArctanForwardTwoStageMonotoneConstruction
+    have hrect : ArctanGeometry.arctanIntegralRectangleRawAtOne.Valid :=
+      ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    have hendpoint :
+        (endpointDifferenceRaw coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
+          coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).Valid := by
+      simpa [endpointDifferenceRaw, RealRaw.Valid] using
+        coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid
+    have hleftrect :
+        (Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
+          coordinateTimesArctanForwardTwoStageMonotoneConstruction).Equiv
+          ArctanGeometry.arctanIntegralRectangleRawAtOne := by
+      simpa [Integral.monotoneIntegralFor, Integral.integralFor,
+        coordinateTimesArctanForwardTwoStageMonotoneConstruction,
+        coordinateTimesArctanForwardTwoStageConstruction,
+        coordinateTimesArctanForwardTwoStageStabilizedRaw, RealRaw.Valid] using
+        coordinateTimesArctanForwardTwoStageStabilizedRaw_equiv_rectangleAtOne
+    exact RealRaw.equiv_trans hleft hrect hendpoint hleftrect
+      (RealRaw.equiv_symm
+        coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_rectangleAtOne)
 
-/-- The endpoint-transport identity viewed through the non-monotone definite
+/-- The stabilized bounded-sum identity through the ordinary definite
 integral interface. -/
-def coordinateTimesArctanDerivativeEndpointDefiniteIdentity :
+def coordinateTimesArctanForwardTwoStageDefiniteIdentity :
     Integral.DefiniteIdentityFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit
       coordinateTimesArctanIntegralRectangleOnUnit :=
-  coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity.toDefiniteIdentityFor
+  coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity.toDefiniteIdentityFor
 
-/-- The endpoint-transport identity viewed through the public finite-piece
+/-- The stabilized bounded-sum identity through the public finite-piece
 monotone integral interface. -/
-noncomputable def coordinateTimesArctanDerivativeEndpointGeneralDefiniteIdentity :
+noncomputable def coordinateTimesArctanForwardTwoStageGeneralDefiniteIdentity :
     Integral.GeneralDefiniteIdentityFor
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit
       coordinateTimesArctanIntegralRectangleOnUnit :=
   Integral.GeneralDefiniteIdentityFor.ofMonotone
-    coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity
+    coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity
     (by native_decide)
 
-/-- The public endpoint-transport integral computes the geometric arctangent
-at one. -/
-theorem coordinateTimesArctanDerivativeEndpointMonotoneIntegral_equiv_arctanGeom_one :
-    coordinateTimesArctanDerivativeEndpointMonotoneIntegral.Equiv
+/-- The stabilized finite bounded-sum integral computes the geometric
+arctangent at one. -/
+theorem coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one :
+    coordinateTimesArctanForwardTwoStageMonotoneIntegral.Equiv
       (ArctanGeometry.arctanGeom (1 : Rat)) := by
-  have hleft : coordinateTimesArctanDerivativeEndpointMonotoneIntegral.Valid :=
-    coordinateTimesArctanDerivativeEndpointMonotoneIntegral_valid
+  have hleft : coordinateTimesArctanForwardTwoStageMonotoneIntegral.Valid :=
+    coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid
   have hendpoint :
       (endpointDifferenceRaw coordinateTimesArctanIntegralRectangleOnUnit.toRealFunRaw 0 1
         coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_valid).Valid := by
@@ -5828,9 +5973,9 @@ theorem coordinateTimesArctanDerivativeEndpointMonotoneIntegral_equiv_arctanGeom
   have hgeom : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
     ArctanGeometry.arctanGeom_valid_on_unit
       (x := (1 : Rat)) (by native_decide) (by native_decide)
-  simpa [coordinateTimesArctanDerivativeEndpointMonotoneIntegral] using
+  simpa [coordinateTimesArctanForwardTwoStageMonotoneIntegral] using
     RealRaw.equiv_trans hleft hendpoint hgeom
-      coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity.equivalent
+      coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity.equivalent
       coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_arctanGeom_one
 
 /-- The certified positive product branch has right derivative zero at the

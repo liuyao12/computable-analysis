@@ -100,9 +100,9 @@ the gates have different dependencies and none can substitute for another.
 | --- | --- | --- |
 | Rational interval foundation | `RealRaw.Valid`, equivalence by overlap, and the no-completeness/no-Mathlib-analysis audit | Continue dependency auditing as modules grow |
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit`, the non-exact rectangle arctangent, and the concrete \(x\arctan x\) derivative candidate now have checked executable `EffectiveModulusFor` schedules | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
-| Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, exact finite integration-by-parts on arbitrary certified rational partitions, and a coordinate-by-monotone-path endpoint bracket with explicit mesh-times-variation error are checked; the concrete \(x\arctan x\) product now has an executable two-stage finite FTC raw equivalent to its endpoint raw | Give that two-stage raw the validity/nestedness bridge needed by the public definite-integral construction, then generalize to interval-regular derivatives, bounded piecewise integration by parts, and substitution |
+| Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, exact finite integration-by-parts on arbitrary certified rational partitions, and a coordinate-by-monotone-path endpoint bracket with explicit mesh-times-variation error are checked; the concrete \(x\arctan x\) product has a public integral construction obtained by finite-prefix stabilization of its executable two-stage bounded sums | Generalize this normalization pattern to interval-regular derivatives, bounded piecewise integration by parts, and substitution |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
-| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the two-sided derivative of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Promote the concrete two-stage FTC raw to the public integral API, then prove an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
+| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, and the two-sided derivative and public FTC identity of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]` are checked | Prove an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a factorial-tail majorant with an explicit rational epsilon modulus are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
@@ -209,14 +209,14 @@ and evaluation stage are executable, so the constructor makes no existential
 choice. The partition count is:
 `(delta.den + 1) * 72 * (n + 1)` gives a unit mesh below both the selected
 continuity radius and the forward step budget.
-For direct use by later developments, the deliberately named
-`coordinateTimesArctanDerivativeEndpointMonotoneDefiniteIdentity` also
-exposes that endpoint formula through the public monotone, ordinary, and
-finite-piece integral interfaces; its certified computation is the primitive
-endpoint raw and Lean proves it equivalent to `arctanGeom 1`. This is an
-endpoint transport, not a claim that the public computation has already been
-normalized to the two-stage bounded Riemann raw. That validity/nestedness
-normalization remains the next FTC bridge.
+The actual bounded-sum evaluator is now normalized as
+`coordinateTimesArctanForwardTwoStageStabilizedRaw`: its runtime intersects a
+finite prefix of widened bounded-sum boxes, using only rational sums and the
+explicit radius `4/(n+1)`. The rectangle evaluator is an anchor only in the
+validity proof. Thus
+`coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity` is a genuine
+public monotone/ordinary/finite-piece integral identity, and its integral is
+equivalent to `arctanGeom 1`.
 The positive product branch is now also proved nondecreasing: for
 `0 <= x <= y <= 1`, the literal product endpoints satisfy
 `x * A.lo(x) <= y * A.hi(y)`. This supplies the declared monotone direction
