@@ -867,6 +867,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `natPowPositive` packages it as a new positive raw real. Constructing the
   non-integral root layer and its epsilon--delta exponent-continuity proof
   remains the next rational-power task.
+  At the constant level, `ExpProofs.eEulerNested` now gives a direct valid
+  repeated-multiplication representative of (e): stage `n` evaluates
+  ((1+1/(n+1)^2)^{(n+1)^2}) and carries the nested radius `8/(n+1)`.
+  Its exact width is `16/(n+1)`, and it is proved equivalent to the sharp
+  compound-interest evaluator before being stored in the abstract
+  `ExpProofs.e` handle. This is a certified constant construction, not yet a
+  function-level `exp' = exp` theorem.
 - The two intended characterizations of the Euler base are now explicit
   obligations: the exponential solves `f' = f` on rational intervals, and a
   positive base is Euler exactly when its rational powers have derivative `1`

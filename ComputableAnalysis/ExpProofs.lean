@@ -1252,6 +1252,232 @@ theorem eCompoundInterest_eq_eEuler :
     eCompoundInterest.Equiv eEuler :=
   RealRaw.equiv_symm eEuler_eq_eCompoundInterest
 
+/-- A deliberately generous rational radius for the direct
+repeated-multiplication computation of `e`.  The center at stage `n` is
+`(1 + 1/(n+1)^2)^(n+1)^2`; the radius is chosen so that the resulting boxes
+are themselves nested, rather than needing a later prefix stabilization. -/
+def eEulerNestedRadius (n : Nat) : Rat :=
+  8 / (((n + 1 : Nat) : Rat))
+
+/-- A direct valid raw representative of `e` evaluated by repeated
+multiplication.  Each stage performs only the finite rational calculation
+`(1 + 1/(n+1)^2)^(n+1)^2`; the enclosing radius is explicit rational data. -/
+def eEulerNested : RealRaw where
+  compute := fun n =>
+    intervalAround (eulerCenter (1 : Rat) n) (eEulerNestedRadius n)
+
+theorem eEulerNested_compute_eq (n : Nat) :
+    eEulerNested.compute n =
+      intervalAround (eulerCenter (1 : Rat) n) (eEulerNestedRadius n) := by
+  rfl
+
+theorem eEulerNestedRadius_nonneg (n : Nat) :
+    0 <= eEulerNestedRadius n := by
+  unfold eEulerNestedRadius
+  have hpos : 0 < (((n + 1 : Nat) : Rat)) :=
+    (Rat.natCast_pos).2 (Nat.succ_pos n)
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg (by native_decide) (Rat.le_of_lt ((Rat.inv_pos).2 hpos))
+
+theorem eEulerNestedRadius_antitone {n m : Nat} (hnm : n <= m) :
+    eEulerNestedRadius m <= eEulerNestedRadius n := by
+  unfold eEulerNestedRadius
+  have hnpos : 0 < n + 1 := Nat.succ_pos n
+  have hmpos : 0 < m + 1 := Nat.succ_pos m
+  have hsucc : n + 1 <= m + 1 := Nat.succ_le_succ hnm
+  have hrecip :
+      1 / (((m + 1 : Nat) : Rat)) <= 1 / (((n + 1 : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone hnpos hmpos hsucc
+  simpa [Rat.div_def] using
+    Rat.mul_le_mul_of_nonneg_left hrecip (by native_decide : (0 : Rat) <= 8)
+
+private theorem eEulerSquareStageWidth_le_eEulerNestedRadius_drop (n : Nat) :
+    (4 : Rat) /
+        ((((n + 1) * (n + 1) : Nat) : Rat)) <=
+      eEulerNestedRadius n - eEulerNestedRadius (n + 1) := by
+  let A : Rat := (((n + 1 : Nat) : Rat))
+  let B : Rat := (((n + 2 : Nat) : Rat))
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hBpos : 0 < B := by
+    dsimp [B]
+    exact (Rat.natCast_pos).2 (by omega)
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have hBne : B ≠ 0 := Rat.ne_of_gt hBpos
+  have hcast : (((n + 1) * (n + 1) : Nat) : Rat) = A * A := by
+    dsimp [A]
+    exact_mod_cast (by omega : (n + 1) * (n + 1) = (n + 1) * (n + 1))
+  have hnext : (((n + 1 + 1 : Nat) : Rat)) = B := by
+    dsimp [B]
+  have hB_eq : B = A + 1 := by
+    dsimp [A, B]
+    exact_mod_cast (by omega : n + 2 = n + 1 + 1)
+  have hB_le : B <= 2 * A := by
+    rw [hB_eq]
+    have hAone : (1 : Rat) <= A := by
+      dsimp [A]
+      exact_mod_cast (Nat.succ_le_succ (Nat.zero_le n))
+    grind
+  have hCpos : 0 < A * A * B :=
+    Rat.mul_pos (Rat.mul_pos hApos hApos) hBpos
+  rw [hcast]
+  unfold eEulerNestedRadius
+  rw [hnext]
+  apply Rat.le_of_mul_le_mul_right (c := A * A * B)
+  · rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    have hAinv : A * A⁻¹ = 1 := Rat.mul_inv_cancel A hAne
+    have hBinv : B * B⁻¹ = 1 := Rat.mul_inv_cancel B hBne
+    calc
+      (4 * (A * A)⁻¹) * (A * A * B) = 4 * B := by
+        rw [Rat.inv_mul_rev]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= 8 * A := by
+        have h := Rat.mul_le_mul_of_nonneg_left hB_le
+          (by native_decide : (0 : Rat) <= 4)
+        grind
+      _ = (8 * A⁻¹ - 8 * B⁻¹) * (A * A * B) := by
+        grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm,
+          Rat.mul_add, Rat.add_mul]
+  · exact hCpos
+
+theorem eEulerNested_width_eq (n : Nat) :
+    (eEulerNested.compute n).width =
+      (16 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  rw [eEulerNested_compute_eq, intervalAround_width]
+  unfold eEulerNestedRadius
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add]
+
+theorem eEulerNested_widths_shrink :
+    RealRaw.WidthsShrinkToZero eEulerNested.compute := by
+  apply shrinksToZero_of_natOverSuccBound (C := 16)
+  intro n
+  have h16 : (16 : Rat) = ((16 : Nat) : Rat) := by native_decide
+  rw [eEulerNested_width_eq, h16]
+  exact Rat.le_refl
+
+theorem eEulerNested_nested :
+    forall n m, n <= m ->
+      (eEulerNested.compute n).lo <= (eEulerNested.compute m).lo /\
+      (eEulerNested.compute m).lo <= (eEulerNested.compute m).hi /\
+      (eEulerNested.compute m).hi <= (eEulerNested.compute n).hi := by
+  intro n m hnm
+  rw [eEulerNested_compute_eq, eEulerNested_compute_eq]
+  by_cases hsame : m = n
+  · subst m
+    exact ⟨Rat.le_refl,
+      intervalAround_ordered _ _ (eEulerNestedRadius_nonneg n), Rat.le_refl⟩
+  · have hsuccm : n + 1 <= m := by omega
+    have hcenter_mono : eulerCenter (1 : Rat) n <= eulerCenter (1 : Rat) m :=
+      eEulerCenter_mono hnm
+    have hradius_mono :
+        eEulerNestedRadius m <= eEulerNestedRadius (n + 1) :=
+      eEulerNestedRadius_antitone hsuccm
+    let k : Nat := ((n + 1) * (n + 1)) - 1
+    let l : Nat := ((m + 1) * (m + 1)) - 1
+    have hkl : k <= l := by
+      simpa [k, l] using squareSubOne_mono hnm
+    have hcenter_n :
+        eulerCenter (1 : Rat) n = (eCompoundInterestStage k).lo := by
+      simpa [k] using eulerCenter_one_eq_compoundInterestStage_lo_square n
+    have hcenter_m :
+        eulerCenter (1 : Rat) m = (eCompoundInterestStage l).lo := by
+      simpa [l] using eulerCenter_one_eq_compoundInterestStage_lo_square m
+    have hlo_hi :
+        (eCompoundInterestStage l).lo <= (eCompoundInterestStage k).hi :=
+      Rat.le_trans (eCompoundInterestStage_lo_le_hi l)
+        (eCompoundInterestStage_hi_antitone hkl)
+    have hcenter_gap_stage :
+        eulerCenter (1 : Rat) m - eulerCenter (1 : Rat) n <=
+          (eCompoundInterestStage k).hi - (eCompoundInterestStage k).lo := by
+      rw [hcenter_n, hcenter_m]
+      grind [Rat.sub_eq_add_neg]
+    have hcenter_gap :
+        eulerCenter (1 : Rat) m - eulerCenter (1 : Rat) n <=
+          (eCompoundInterest.compute k).width := by
+      rw [eCompoundInterest_compute_eq]
+      simpa [QInterval.width] using hcenter_gap_stage
+    have hden :
+        (((k + 1 : Nat) : Rat)) =
+          ((((n + 1) * (n + 1) : Nat) : Rat)) := by
+      dsimp [k]
+      have hpos : 0 < (n + 1) * (n + 1) :=
+        Nat.mul_pos (Nat.succ_pos n) (Nat.succ_pos n)
+      exact_mod_cast (by omega : ((n + 1) * (n + 1) - 1) + 1 =
+        (n + 1) * (n + 1))
+    have hgap :
+        eulerCenter (1 : Rat) m - eulerCenter (1 : Rat) n <=
+          eEulerNestedRadius n - eEulerNestedRadius (n + 1) := by
+      calc
+        eulerCenter (1 : Rat) m - eulerCenter (1 : Rat) n <=
+            (eCompoundInterest.compute k).width := hcenter_gap
+        _ <= (4 : Rat) / (((k + 1 : Nat) : Rat)) :=
+          eCompoundInterest_width_le_of_stageBound
+            eCompoundInterestStageBound_four k
+        _ = (4 : Rat) /
+            ((((n + 1) * (n + 1) : Nat) : Rat)) := by rw [hden]
+        _ <= eEulerNestedRadius n - eEulerNestedRadius (n + 1) :=
+          eEulerSquareStageWidth_le_eEulerNestedRadius_drop n
+    constructor
+    · unfold intervalAround
+      grind [Rat.sub_eq_add_neg]
+    · constructor
+      · exact intervalAround_ordered _ _ (eEulerNestedRadius_nonneg m)
+      · unfold intervalAround
+        grind [Rat.sub_eq_add_neg]
+
+theorem eEulerNested_valid : eEulerNested.Valid := by
+  unfold RealRaw.Valid RealRaw.ValidCompute
+  constructor
+  · intro n
+    rw [eEulerNested_compute_eq, intervalAround_width]
+    exact Rat.add_nonneg (eEulerNestedRadius_nonneg n)
+      (eEulerNestedRadius_nonneg n)
+  · exact ⟨eEulerNested_nested, eEulerNested_widths_shrink⟩
+
+theorem eEulerNested_equiv_eCompoundInterest :
+    eEulerNested.Equiv eCompoundInterest := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  let k : Nat := ((n + 1) * (n + 1)) - 1
+  have hnk : n <= k := by
+    have hsucc_le_square :
+        n + 1 <= (n + 1) * (n + 1) :=
+      Nat.le_mul_of_pos_right (n + 1) (Nat.succ_pos n)
+    dsimp [k]
+    omega
+  have hcenter :
+      eulerCenter (1 : Rat) n = (eCompoundInterestStage k).lo := by
+    simpa [k] using eulerCenter_one_eq_compoundInterestStage_lo_square n
+  have hradius : 0 <= eEulerNestedRadius n := eEulerNestedRadius_nonneg n
+  have hlo_mono :
+      (eCompoundInterestStage n).lo <=
+        (eCompoundInterestStage k).lo :=
+    eCompoundInterestStage_lo_mono hnk
+  have hhi_anti :
+      (eCompoundInterestStage k).hi <=
+        (eCompoundInterestStage n).hi :=
+    eCompoundInterestStage_hi_antitone hnk
+  have hk_order :
+      (eCompoundInterestStage k).lo <=
+        (eCompoundInterestStage k).hi :=
+    eCompoundInterestStage_lo_le_hi k
+  apply (RealRaw.compareAt_overlap_iff eEulerNested eCompoundInterest n n).2
+  rw [eEulerNested_compute_eq, eCompoundInterest_compute_eq]
+  unfold intervalAround QInterval.Overlaps
+  constructor
+  · calc
+      eulerCenter 1 n - eEulerNestedRadius n <= eulerCenter 1 n := by grind
+      _ = (eCompoundInterestStage k).lo := hcenter
+      _ <= (eCompoundInterestStage k).hi := hk_order
+      _ <= (eCompoundInterestStage n).hi := hhi_anti
+  · calc
+      (eCompoundInterestStage n).lo <=
+          (eCompoundInterestStage k).lo := hlo_mono
+      _ = eulerCenter 1 n := hcenter.symm
+      _ <= eulerCenter 1 n + eEulerNestedRadius n := by grind
+
 /-- Public rational radius for certifying the literal repeated-multiplication
 Euler computation.  Evaluation of the resulting stabilized representative
 uses only Euler prefixes and this rational schedule; the compound-interest
@@ -1308,25 +1534,48 @@ theorem eEulerStabilized_equiv_eCompoundInterest :
     eEuler_eq_eCompoundInterest
     eEulerStabilizationRadius_covers_compoundInterest
 
-/-- The abstract certified value of `e` currently joins the sharp
-compound-interest enclosure to the direct repeated-multiplication runtime.
-The power-series and inverse-logarithm routes join this handle only after
-their separate analytic agreement certificates are proved. -/
+/-- The abstract certified value of `e` joins the sharp compound-interest
+enclosure to two direct repeated-multiplication representations: a nested
+single-stage enclosure and the older prefix-stabilized evaluator.  The
+power-series and inverse-logarithm routes join this handle only after their
+separate analytic agreement certificates are proved. -/
 def eCertified : Real :=
-  Real.withAlternative
+  (Real.withAlternative
     (Real.ofRaw eCompoundInterest eCompoundInterest_valid)
-    eEulerStabilized eEulerStabilized_valid
-    eEulerStabilized_equiv_eCompoundInterest
+    eEulerNested eEulerNested_valid
+    eEulerNested_equiv_eCompoundInterest).withAlternative
+      eEulerStabilized eEulerStabilized_valid
+      eEulerStabilized_equiv_eCompoundInterest
 
 abbrev e : Real := eCertified
+
+/-- The direct nested repeated-multiplication raw is stored in the abstract
+Euler-base handle, rather than merely related to it by an external theorem. -/
+theorem eEulerNested_mem_eCertified_alternatives :
+    eEulerNested ∈ eCertified.alternatives := by
+  simp [eCertified, Real.withAlternative]
+
+/-- The older prefix-stabilized raw remains stored as a supplementary
+representation of the same abstract Euler base. -/
+theorem eEulerStabilized_mem_eCertified_alternatives :
+    eEulerStabilized ∈ eCertified.alternatives := by
+  simp [eCertified, Real.withAlternative]
 
 /-- The preferred compound-interest view of the abstract `e` handle. -/
 def eCompoundInterestRepresentation : Real.Representation e :=
   Real.preferredRepresentation eCertified
 
 /-- The certified direct repeated-multiplication view of the abstract `e`
-handle. -/
+handle.  Every stage is one explicit rational power at the square mesh
+`(n+1)^2`, enclosed by the nested radius `8/(n+1)`. -/
 def eRepeatedMultiplicationRepresentation : Real.Representation e where
+  raw := eEulerNested
+  valid := eEulerNested_valid
+  agrees := eEulerNested_equiv_eCompoundInterest
+
+/-- The older prefix-stabilized direct repeated-multiplication evaluator is
+retained as an alternative diagnostic representation. -/
+def eRepeatedMultiplicationStabilizedRepresentation : Real.Representation e where
   raw := eEulerStabilized
   valid := eEulerStabilized_valid
   agrees := eEulerStabilized_equiv_eCompoundInterest

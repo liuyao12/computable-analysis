@@ -269,10 +269,11 @@ There is, however, one fully certified constant-level exponential handle that
 is useful today.  `ExpProofs.e : Real` has the sharp compound-interest
 enclosure as its preferred representation and
 `ExpProofs.eRepeatedMultiplicationRepresentation` as an alternate
-representation.  The latter evaluates finite prefixes of the literal
-repeated-multiplication Euler computation, normalised by finite-prefix
-intersection with the public rational radius `4/(n+1)`.  The compound-interest
-boxes are used only in its validity/equivalence proof, never at runtime.
+representation.  The latter is a direct nested evaluator: stage `n` computes
+the single rational power `(1 + 1/(n+1)^2)^((n+1)^2)` and uses radius
+`8/(n+1)`, giving exact width `16/(n+1)`.  The compound-interest boxes are
+used only in its validity/equivalence proof, never at runtime.  The older
+prefix-stabilized evaluator remains available separately for diagnostics.
 The relevant checked facts are:
 
 ```lean
@@ -283,6 +284,8 @@ open ComputableAnalysis
 #check ExpProofs.e
 #check ExpProofs.eCompoundInterestRepresentation
 #check ExpProofs.eRepeatedMultiplicationRepresentation
+#check ExpProofs.eEulerNested_valid
+#check ExpProofs.eEulerNested_equiv_eCompoundInterest
 #check ExpProofs.eEulerStabilized_valid
 #check ExpProofs.eEulerStabilized_equiv_eCompoundInterest
 ```
