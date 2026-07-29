@@ -898,9 +898,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   the rational binomial coordinates, and
   `euler_binomial_prefix_nat_expansion` proves the exact expansion of
   `(1 + x)^m`.  At `x = 1/m` this is the literal Euler product in
-  factorial-series coordinates.  The still-open work is its uniform
-  coefficient-error bound plus the already available factorial-tail radius;
-  no completeness or analytic binomial theorem is being assumed.
+  factorial-series coordinates. The coefficient-error bound is now checked:
+  each gap is bounded by `k*(k-1)/(2*m*k!)`, its finite sum by `3/m`, and
+  the square-mesh error fits the nested Euler radius. Consequently
+  `ePowerSeries_equiv_eCompoundInterest` is a completed constant-level
+  series/compound equivalence, and `eCertified` stores the series raw as an
+  alternative alongside both repeated-multiplication raws. No completeness or
+  analytic binomial theorem is assumed.
 - The two intended characterizations of the Euler base are now explicit
   obligations: the exponential solves `f' = f` on rational intervals, and a
   positive base is Euler exactly when its rational powers have derivative `1`

@@ -172,7 +172,7 @@ evaluators away from zero.
 \lean{ComputableAnalysis.ExpProofs.euler_binomial_prefix_nat_expansion}
 \uses{def:positive-base-natural-powers}
 \leanok
-For a rational (x) and natural (m), Lean now proves the finite identity
+For a rational \(x\) and natural \(m\), Lean now proves the finite identity
 \[
  (1+x)^m=
  \sum_{k=0}^{m}
@@ -180,16 +180,20 @@ For a rational (x) and natural (m), Lean now proves the finite identity
 \]
 The sum is implemented as an explicitly recursive rational prefix, not
 imported as an analytic binomial theorem.  In particular, substituting
-(x=1/m) expresses the literal Euler product
-\(left(1+1/m\right)^m) in the same factorial coordinates used by the
+\(x=1/m\) expresses the literal Euler product
+\(\left(1+1/m\right)^m\) in the same factorial coordinates used by the
 power-series evaluator.
 
-This is the algebraic half of the outstanding
-(e_{\mathrm{series}}\Equiv e_{\mathrm{compound}}) proof.  The next, still
-open, finite estimate bounds the difference between its falling-factorial
-coefficients and (1/k!\), then combines the resulting prefix inequality
-with the already checked factorial-series tail radius.  Thus the route does
-not require a limit theorem or completeness of a real-number type.
+Lean now also checks the finite coefficient-loss estimate
+\[
+  0\le\frac1{k!}-\frac{m(m-1)\cdots(m-k+1)}{m^k k!}
+  \le\frac{k(k-1)}{2m\,k!},
+\]
+and sums it with the certified factorial tail.  At the square Euler mesh
+\(m=(n+1)^2\), its total \(3/m\) error fits inside the direct Euler radius
+\(8/(n+1)\).  This completes the raw-real equivalence
+\(e_{\mathrm{series}}\Equiv e_{\mathrm{compound}}\) without a limit theorem
+or completeness of a real-number type.
 \end{theorem}
 
 \section{Three definitions of \texorpdfstring{$e$}{e}}
@@ -201,6 +205,7 @@ not require a limit theorem or completeness of a real-number type.
 \lean{ComputableAnalysis.ExpProofs.expPowerSeries_widths_shrink}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesRate}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeries_valid}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eCompoundInterest}
 \uses{def:arctan-series}
 The power-series evaluator is now certified at \emph{every rational input}.
 For \(q\in\mathbb Q\), its stage \(n\) chooses the entirely computable prefix
@@ -224,10 +229,11 @@ The first constant definition is the specialization at \(1\):
 \[
   e = \sum_{k=0}^{\infty}\frac{1}{k!}.
 \]
-The Lean raw representative is \code{ePowerSeries}.  This establishes the
-power-series computation as a valid raw real, but it does not yet identify it
-with the compound-interest representative or prove the analytic theorem
-\(\exp'=\exp\).
+The Lean raw representative is \code{ePowerSeries}.  Lean now identifies it
+with the compound-interest representative by a finite rational binomial
+coefficient comparison and an explicit factorial-tail budget.  This remains a
+constant-level agreement at input \(1\), not a proof of the analytic theorem
+\(\exp'=\exp\) for a rational-input function.
 \end{definition}
 
 \begin{definition}[Compound-interest \texorpdfstring{$e$}{e} intervals]
@@ -325,16 +331,17 @@ construction as \code{LogIntegralInverseBranch}; evaluating such a branch at
 \begin{theorem}[Agreement of the three \texorpdfstring{$e$}{e} definitions]
 \label{thm:e-three-way-agreement}
 \lean{ComputableAnalysis.ExpProofs.EThreeWayAgreement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eCompoundInterest}
 \uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:raw-equiv}
 The three raw representatives of \(e\) should be equivalent:
 \[
   e_{\mathrm{series}} \Equiv e_{\mathrm{compound}}
   \Equiv e_{\mathrm{log}^{-1}}.
 \]
-The power-series/compound-interest bridge is an explicit rational estimate;
-the logarithmic-integral bridge is an inverse-function theorem for the
-monotone integral of \(1/x\).  Lean records the remaining estimates in
-\code{EThreeWayRemainders} and closes the displayed agreement by
+Lean now checks the power-series/compound-interest half directly.  The
+remaining logarithmic-integral bridge is an inverse-function theorem for the
+monotone integral of \(1/x\).  \code{EThreeWayRemainders} retains all three
+fields so a chosen log-inverse representative can be joined explicitly by
 \code{eThreeWayAgreement\_of\_remainders}.
 \end{theorem}
 
@@ -362,6 +369,8 @@ monotone integral of \(1/x\).  Lean records the remaining estimates in
 \lean{ComputableAnalysis.ExpProofs.ePowerSeries_center_step_movement}
 \lean{ComputableAnalysis.ExpProofs.ePowerSeries_widths_shrink}
 \lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eEulerNested}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eCompoundInterest}
 \lean{ComputableAnalysis.ExpProofs.EEulerEqCompoundInterest}
 \lean{ComputableAnalysis.ExpProofs.eulerCenter_one_eq_compoundInterestStage_lo_square}
 \lean{ComputableAnalysis.ExpProofs.eEulerCenter_mono}
@@ -397,9 +406,11 @@ monotone integral of \(1/x\).  Lean records the remaining estimates in
 \lean{ComputableAnalysis.ExpProofs.e}
 \lean{ComputableAnalysis.ExpProofs.eEulerNested_mem_eCertified_alternatives}
 \lean{ComputableAnalysis.ExpProofs.eEulerStabilized_mem_eCertified_alternatives}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_mem_eCertified_alternatives}
 \lean{ComputableAnalysis.ExpProofs.eCompoundInterestRepresentation}
 \lean{ComputableAnalysis.ExpProofs.eRepeatedMultiplicationRepresentation}
 \lean{ComputableAnalysis.ExpProofs.eRepeatedMultiplicationStabilizedRepresentation}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeriesRepresentation}
 \lean{ComputableAnalysis.ExpProofs.ePowerSeries_eq_eCompoundInterest_of_complete}
 \lean{ComputableAnalysis.ExpProofs.ExpProofRemainders}
 \uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:real-fun-raw}
@@ -450,14 +461,18 @@ estimate
 \[
   c_{n+1}-c_n\le r_n-r_{n+1},
 \]
-and this forward estimate is checked through stage \(50\).  Therefore an
-\code{ExpProofsComplete} package, once it contains the remaining Euler
-validity and power-series/Euler overlap estimates, also yields
-\(e_{\mathrm{series}}\Equiv e_{\mathrm{compound}}\).  The remaining comparison
-data are the coefficient/tail overlap estimates with the power-series and
-log-integral representatives.  The finite binomial identity in
-\cref{thm:finite-euler-binomial-bridge} is now checked and supplies the
-common coefficient language for the first of those estimates.
+and this forward estimate is checked through stage \(50\).  It remains a
+separate certification task for the deliberately narrower \code{eEuler}
+boxes.  It is no longer needed for the canonical constant: the finite
+coefficient/tail proof in \cref{thm:finite-euler-binomial-bridge} proves
+\[
+  e_{\mathrm{series}}\Equiv e_{\mathrm{EulerNested}}
+  \Equiv e_{\mathrm{compound}}.
+\]
+Accordingly \code{eCertified} now stores the factorial-series raw alongside
+both direct repeated-multiplication raws, and
+\code{ePowerSeriesRepresentation} exposes it to downstream formalizations.
+Only the inverse-logarithmic-integral agreement remains open.
 \end{definition}
 
 \begin{definition}[Logarithm]

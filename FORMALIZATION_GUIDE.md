@@ -271,8 +271,9 @@ rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
 explicit geometric bound
 `width <= 4 * |first omitted term at stage 0| * (1/2)^n`.  This is a
 rational finite-sum/tail certificate, including nesting; it is not yet a
-`PartialRealFunRaw` analytic exponential, a derivative theorem, or an
-equivalence with compound interest and inverse-logarithmic constructions.
+`PartialRealFunRaw` analytic exponential or a derivative theorem. At the
+constant input `1`, it is now proved equivalent to compound interest; the
+inverse-logarithmic construction remains a separate open bridge.
 
 The two concrete finite evaluators do now have a checked initial condition.
 `ExpProofs.expPowerSeries_zero_compute_eq n` identifies the series box at
@@ -288,9 +289,12 @@ small readable API: `fallingFactorialRat`, `eulerBinomialTerm`, and
 `eulerBinomialPrefix`.  The checked theorem
 `euler_binomial_prefix_nat_expansion m x` is the rational finite identity
 `prefix (m : Rat) x (m + 1) = (1 + x)^m`.  At `x = 1 / m`, it gives the exact
-factorial-coordinate expansion of the literal Euler product.  It is not yet
-the series/Euler equivalence: the remaining step is a coefficient-error and
-tail-radius estimate.
+factorial-coordinate expansion of the literal Euler product. Lean now proves
+the quadratic coefficient-loss estimate, sums it to a `3/m` prefix budget,
+and compares it with the factorial tail and nested Euler radius. The resulting
+theorem `ePowerSeries_equiv_eCompoundInterest` is the constant-level
+series/compound equivalence; function-level and inverse-logarithm agreements
+remain open.
 
 There is, however, one fully certified constant-level exponential handle that
 is useful today.  `ExpProofs.e : Real` has the sharp compound-interest
@@ -301,6 +305,9 @@ the single rational power `(1 + 1/(n+1)^2)^((n+1)^2)` and uses radius
 `8/(n+1)`, giving exact width `16/(n+1)`.  The compound-interest boxes are
 used only in its validity/equivalence proof, never at runtime.  The older
 prefix-stabilized evaluator remains available separately for diagnostics.
+The same abstract handle now also stores `ePowerSeries`; its direct rational
+binomial/tail proof is `ePowerSeries_equiv_eCompoundInterest`, and
+`ePowerSeriesRepresentation` makes that representation explicit.
 The preferred compound-interest representative is also the checked positive
 base `ExpProofs.ePositive`: every lower endpoint is at least `2`, and its
 literal natural powers `ExpProofs.eNaturalPower n` are valid with interval
@@ -325,6 +332,8 @@ open ComputableAnalysis
 #check ExpProofs.eulerBinomialTerm
 #check ExpProofs.eulerBinomialPrefix
 #check ExpProofs.euler_binomial_prefix_nat_expansion
+#check ExpProofs.ePowerSeries_equiv_eEulerNested
+#check ExpProofs.ePowerSeries_equiv_eCompoundInterest
 #check ExpProofs.ePositive
 #check ExpProofs.eNaturalPower_valid
 #check ExpProofs.eNaturalPower_lower_bound
@@ -335,12 +344,13 @@ open ComputableAnalysis
 #check ExpProofs.eEulerNested_equiv_eCompoundInterest
 #check ExpProofs.eEulerStabilized_valid
 #check ExpProofs.eEulerStabilized_equiv_eCompoundInterest
+#check ExpProofs.ePowerSeries_mem_eCertified_alternatives
+#check ExpProofs.ePowerSeriesRepresentation
 ```
 
-This certifies the repeated-multiplication computation *as a value of* `e`;
-it does not yet connect `ePowerSeries` to that handle or establish an
-analytic derivative theorem.  Keep those three levels separate in downstream
-work: a valid raw constant, agreement of two raw constants, and a
+This certifies both repeated multiplication and the factorial power series as
+representations of the same abstract value `e`; it does not establish an
+analytic derivative theorem. Keep constant-level agreement distinct from a
 derivative/ODE certificate for an exponential function.
 
 The rational-circle and arctangent code contains useful geometric and

@@ -984,6 +984,451 @@ private theorem ePowerSeries_term_nonneg (N : Nat) :
       exact Rat.mul_nonneg ih
         (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
 
+/-- At the Euler input `1/m`, one binomial term is obtained from the
+previous one by the factorial-series ratio `1/(k+1)` multiplied by the
+finite correction `(m-k)/m`. -/
+private theorem eulerBinomialTerm_one_div_succ
+    (m k : Nat) (hm : 0 < m) :
+    eulerBinomialTerm (m : Rat) (1 / (m : Rat)) (k + 1) =
+      eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+        (((m : Rat) - (k : Rat)) / (m : Rat)) /
+          ((k : Rat) + 1) := by
+  unfold eulerBinomialTerm
+  rw [fallingFactorialRat_succ, FormalPowerSeries.factorialRat_succ,
+    Rat.pow_succ, Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def,
+    Rat.div_def]
+  have hmrat : (0 : Rat) < (m : Rat) := by
+    exact_mod_cast hm
+  have hmne : (m : Rat) ≠ 0 := Rat.ne_of_gt hmrat
+  have hkpos : (0 : Rat) < (k : Rat) + 1 := by
+    exact_mod_cast Nat.succ_pos k
+  have hkne : (k : Rat) + 1 ≠ 0 := Rat.ne_of_gt hkpos
+  have hfactpos : (0 : Rat) < factorialRat k :=
+    RationalMajorant.factorialRat_pos k
+  have hfactne : factorialRat k ≠ 0 := Rat.ne_of_gt hfactpos
+  rw [Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+    Rat.inv_mul_cancel]
+
+/-- Before the finite binomial expansion terminates, its correction factor is
+an ordinary rational number in the unit interval. -/
+private theorem eulerBinomialCorrection_bounds
+    (m k : Nat) (hm : 0 < m) (hkm : k <= m) :
+    0 <= (((m : Rat) - (k : Rat)) / (m : Rat)) /\
+      (((m : Rat) - (k : Rat)) / (m : Rat)) <= 1 := by
+  have hmrat : (0 : Rat) < (m : Rat) := by
+    exact_mod_cast hm
+  have hkmrat : (k : Rat) <= (m : Rat) := by
+    exact_mod_cast hkm
+  have hdiff : 0 <= (m : Rat) - (k : Rat) := by
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · rw [Rat.div_def]
+    exact Rat.mul_nonneg hdiff
+      (Rat.le_of_lt ((Rat.inv_pos).2 hmrat))
+  · apply Rat.le_of_mul_le_mul_right (c := (m : Rat))
+    · rw [Rat.div_def]
+      have hmne : (m : Rat) ≠ 0 := Rat.ne_of_gt hmrat
+      calc
+        ((m : Rat) - (k : Rat)) * (m : Rat)⁻¹ * (m : Rat) =
+            (m : Rat) - (k : Rat) := by
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_cancel]
+        _ <= 1 * (m : Rat) := by grind [Rat.sub_eq_add_neg]
+    · exact hmrat
+
+/-- Each nonzero Euler-binomial term is nonnegative and no larger than the
+matching factorial-series term.  The only input is that the finite correction
+factor is in `[0,1]`. -/
+private theorem eulerBinomialTerm_one_div_nonneg_le_seriesTerm
+    (m : Nat) (hm : 0 < m) :
+    forall k, k <= m ->
+      0 <= eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k /\
+        eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k <=
+          ePowerSeriesTermAtTerms k := by
+  intro k
+  induction k with
+  | zero =>
+      intro _
+      rw [eulerBinomialTerm_zero]
+      constructor
+      · native_decide
+      · unfold ePowerSeriesTermAtTerms powerSeriesState
+        native_decide
+  | succ k ih =>
+      intro hsucc
+      have hk : k <= m := by omega
+      have hprev := ih hk
+      have hcor := eulerBinomialCorrection_bounds m k hm hk
+      have hdenpos : (0 : Rat) < (k : Rat) + 1 := by
+        exact_mod_cast Nat.succ_pos k
+      have hdeninv : 0 <= ((k : Rat) + 1)⁻¹ :=
+        Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+      have hscaled_nonneg :
+          0 <= eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+            (((m : Rat) - (k : Rat)) / (m : Rat)) :=
+        Rat.mul_nonneg hprev.1 hcor.1
+      have hscaled_le_prev :
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+            (((m : Rat) - (k : Rat)) / (m : Rat)) <=
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k := by
+        calc
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+              (((m : Rat) - (k : Rat)) / (m : Rat)) <=
+            eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k * 1 :=
+              Rat.mul_le_mul_of_nonneg_left hcor.2 hprev.1
+          _ = eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k := by
+              grind
+      have hscaled_le_series :
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+            (((m : Rat) - (k : Rat)) / (m : Rat)) <=
+          ePowerSeriesTermAtTerms k :=
+        Rat.le_trans hscaled_le_prev hprev.2
+      constructor
+      · rw [eulerBinomialTerm_one_div_succ m k hm, Rat.div_def]
+        exact Rat.mul_nonneg hscaled_nonneg hdeninv
+      · rw [eulerBinomialTerm_one_div_succ m k hm,
+          ePowerSeries_term_succ, Rat.div_def, Rat.div_def]
+        exact Rat.mul_le_mul_of_nonneg_right hscaled_le_series hdeninv
+
+/-- Summing the termwise Euler-binomial bound gives a finite prefix bound.
+The `m + 1` cutoff is exactly where the natural binomial expansion stops. -/
+private theorem eulerBinomialPrefix_one_div_le_seriesCenter
+    (m : Nat) (hm : 0 < m) :
+    forall N, N <= m + 1 ->
+      eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) N <=
+        ePowerSeriesCenterAtTerms N := by
+  intro N
+  induction N with
+  | zero =>
+      intro _
+      unfold eulerBinomialPrefix ePowerSeriesCenterAtTerms powerSeriesState
+      native_decide
+  | succ N ih =>
+      intro hN
+      have hNle : N <= m := by omega
+      have hprev :
+          eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) N <=
+            ePowerSeriesCenterAtTerms N :=
+        ih (by omega)
+      have hterm :=
+        (eulerBinomialTerm_one_div_nonneg_le_seriesTerm m hm N hNle).2
+      rw [eulerBinomialPrefix_succ, ePowerSeries_center_succ]
+      grind
+
+/-- The difference between matching factorial-series and Euler-binomial
+terms has a one-step recurrence with an explicit `k/m` loss. -/
+private theorem eulerBinomialTerm_deficit_succ
+    (m k : Nat) (hm : 0 < m) :
+    ePowerSeriesTermAtTerms (k + 1) -
+        eulerBinomialTerm (m : Rat) (1 / (m : Rat)) (k + 1) =
+      (ePowerSeriesTermAtTerms k -
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k +
+        eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+          ((k : Rat) / (m : Rat))) /
+        ((k : Rat) + 1) := by
+  rw [ePowerSeries_term_succ, eulerBinomialTerm_one_div_succ m k hm]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def,
+    Rat.div_def, Rat.div_def]
+  have hmrat : (0 : Rat) < (m : Rat) := by
+    exact_mod_cast hm
+  have hmne : (m : Rat) ≠ 0 := Rat.ne_of_gt hmrat
+  have hkpos : (0 : Rat) < (k : Rat) + 1 := by
+    exact_mod_cast Nat.succ_pos k
+  have hkne : (k : Rat) + 1 ≠ 0 := Rat.ne_of_gt hkpos
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm, Rat.mul_inv_cancel, Rat.inv_mul_cancel]
+
+/-- The loss in the `k`th Euler-binomial coefficient is at most the familiar
+quadratic finite-mesh correction `k(k-1)/(2m)` times the factorial term. -/
+private theorem eulerBinomialTerm_deficit_nonneg_le_quadratic
+    (m : Nat) (hm : 0 < m) :
+    forall k, k <= m ->
+      0 <= ePowerSeriesTermAtTerms k -
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k /\
+        ePowerSeriesTermAtTerms k -
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k <=
+          ((k : Rat) * ((k : Rat) - 1) / (2 * (m : Rat))) *
+            ePowerSeriesTermAtTerms k := by
+  intro k
+  induction k with
+  | zero =>
+      intro _
+      rw [eulerBinomialTerm_zero]
+      unfold ePowerSeriesTermAtTerms powerSeriesState
+      grind [Rat.div_def]
+  | succ k ih =>
+      intro hsucc
+      have hk : k <= m := by omega
+      have hprev := ih hk
+      have hterm :=
+        eulerBinomialTerm_one_div_nonneg_le_seriesTerm m hm k hk
+      have hmrat : (0 : Rat) < (m : Rat) := by
+        exact_mod_cast hm
+      have hkrat : (0 : Rat) <= (k : Rat) := Rat.natCast_nonneg
+      have hratio_nonneg : 0 <= (k : Rat) / (m : Rat) := by
+        rw [Rat.div_def]
+        exact Rat.mul_nonneg hkrat
+          (Rat.le_of_lt ((Rat.inv_pos).2 hmrat))
+      have hratio_scale :
+          eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+            ((k : Rat) / (m : Rat)) <=
+          ePowerSeriesTermAtTerms k * ((k : Rat) / (m : Rat)) :=
+        Rat.mul_le_mul_of_nonneg_right hterm.2 hratio_nonneg
+      have hquad_nonneg :
+          0 <= (k : Rat) * ((k : Rat) - 1) / (2 * (m : Rat)) := by
+        by_cases hkzero : k = 0
+        · subst k
+          grind [Rat.div_def]
+        · have hkpos : (0 : Rat) < (k : Rat) := by
+            exact_mod_cast Nat.pos_of_ne_zero hkzero
+          have hkone : (1 : Rat) <= (k : Rat) := by
+            exact_mod_cast Nat.succ_le_of_lt (Nat.pos_of_ne_zero hkzero)
+          have hdenpos : 0 < 2 * (m : Rat) := by grind
+          rw [Rat.div_def]
+          exact Rat.mul_nonneg
+            (Rat.mul_nonneg hkrat (by grind [Rat.sub_eq_add_neg]))
+            (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+      have hnumer_nonneg :
+          0 <= ePowerSeriesTermAtTerms k -
+              eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k +
+            eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+              ((k : Rat) / (m : Rat)) :=
+        Rat.add_nonneg hprev.1
+          (Rat.mul_nonneg hterm.1 hratio_nonneg)
+      have hnumer_bound :
+          ePowerSeriesTermAtTerms k -
+              eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k +
+            eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+              ((k : Rat) / (m : Rat)) <=
+            (((k : Rat) * ((k : Rat) - 1) / (2 * (m : Rat))) +
+              (k : Rat) / (m : Rat)) * ePowerSeriesTermAtTerms k := by
+        calc
+          ePowerSeriesTermAtTerms k -
+              eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k +
+            eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+              ((k : Rat) / (m : Rat)) <=
+            ((k : Rat) * ((k : Rat) - 1) / (2 * (m : Rat))) *
+                ePowerSeriesTermAtTerms k +
+              ePowerSeriesTermAtTerms k * ((k : Rat) / (m : Rat)) := by
+              grind
+          _ = (((k : Rat) * ((k : Rat) - 1) / (2 * (m : Rat))) +
+              (k : Rat) / (m : Rat)) * ePowerSeriesTermAtTerms k := by
+              grind [Rat.mul_add, Rat.add_mul, Rat.mul_comm]
+      have hdenpos : (0 : Rat) < (k : Rat) + 1 := by
+        exact_mod_cast Nat.succ_pos k
+      have hdeninv : 0 <= ((k : Rat) + 1)⁻¹ :=
+        Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+      have hcast : (((k + 1 : Nat) : Rat)) = (k : Rat) + 1 := by
+        exact_mod_cast (by omega : k + 1 = k + 1)
+      rw [hcast, eulerBinomialTerm_deficit_succ m k hm,
+        ePowerSeries_term_succ, Rat.div_def, Rat.div_def]
+      constructor
+      · exact Rat.mul_nonneg hnumer_nonneg hdeninv
+      · have hscaled :=
+          Rat.mul_le_mul_of_nonneg_right hnumer_bound hdeninv
+        have htarget :
+            (ePowerSeriesTermAtTerms k -
+                eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k +
+              eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+                ((k : Rat) / (m : Rat))) * ((k : Rat) + 1)⁻¹ <=
+              (((k : Rat) + 1) * (k : Rat) / (2 * (m : Rat))) *
+                (ePowerSeriesTermAtTerms k * ((k : Rat) + 1)⁻¹) := by
+          calc
+            (ePowerSeriesTermAtTerms k -
+                  eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k +
+                eulerBinomialTerm (m : Rat) (1 / (m : Rat)) k *
+                  ((k : Rat) / (m : Rat))) * ((k : Rat) + 1)⁻¹ <=
+              ((((k : Rat) * ((k : Rat) - 1) / (2 * (m : Rat))) +
+                (k : Rat) / (m : Rat)) * ePowerSeriesTermAtTerms k) *
+                  ((k : Rat) + 1)⁻¹ := hscaled
+            _ = (((k : Rat) + 1) * (k : Rat) / (2 * (m : Rat))) *
+                  (ePowerSeriesTermAtTerms k * ((k : Rat) + 1)⁻¹) := by
+                  have hmne : (m : Rat) ≠ 0 := Rat.ne_of_gt hmrat
+                  have htwomne : (2 : Rat) * (m : Rat) ≠ 0 := by
+                    exact Rat.ne_of_gt (Rat.mul_pos (by native_decide) hmrat)
+                  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+                    Rat.inv_mul_cancel]
+        have hsub : (k : Rat) + 1 - 1 = (k : Rat) := by
+          grind [Rat.sub_eq_add_neg]
+        rw [hsub]
+        simpa [Rat.div_def] using htarget
+
+private theorem eulerBinomialTerm_deficit_le_shiftedSeriesTerm
+    (m k : Nat) (hm : 0 < m) (hk : k + 2 <= m) :
+    ePowerSeriesTermAtTerms (k + 2) -
+        eulerBinomialTerm (m : Rat) (1 / (m : Rat)) (k + 2) <=
+      (1 / (m : Rat)) * ePowerSeriesTermAtTerms k := by
+  have hquad :=
+    (eulerBinomialTerm_deficit_nonneg_le_quadratic m hm (k + 2) hk).2
+  have hmrat : (0 : Rat) < (m : Rat) := by
+    exact_mod_cast hm
+  have hmne : (m : Rat) ≠ 0 := Rat.ne_of_gt hmrat
+  have hk1pos : (0 : Rat) < (k : Rat) + 1 := by
+    exact_mod_cast Nat.succ_pos k
+  have hk2pos : (0 : Rat) < (k : Rat) + 2 := by
+    exact_mod_cast (by omega : 0 < k + 2)
+  have hk1ne : (k : Rat) + 1 ≠ 0 := Rat.ne_of_gt hk1pos
+  have hk2ne : (k : Rat) + 2 ≠ 0 := Rat.ne_of_gt hk2pos
+  have hcast1 : (((k + 1 : Nat) : Rat)) = (k : Rat) + 1 := by
+    exact_mod_cast (by omega : k + 1 = k + 1)
+  have hcast2 : (((k + 2 : Nat) : Rat)) = (k : Rat) + 2 := by
+    exact_mod_cast (by omega : k + 2 = k + 2)
+  have hterm :
+      ePowerSeriesTermAtTerms (k + 2) =
+        ePowerSeriesTermAtTerms k /
+          (((k : Rat) + 1) * ((k : Rat) + 2)) := by
+    rw [show k + 2 = (k + 1) + 1 by omega,
+      ePowerSeries_term_succ, ePowerSeries_term_succ, hcast1]
+    have hsum : (k : Rat) + 1 + 1 = (k : Rat) + 2 := by
+      grind
+    rw [hsum]
+    rw [Rat.div_def, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_rev]
+  have hcoefficient :
+      ((k + 2 : Nat) : Rat) * (((k + 2 : Nat) : Rat) - 1) /
+          (2 * (m : Rat)) * ePowerSeriesTermAtTerms (k + 2) =
+        (1 / (2 * (m : Rat))) * ePowerSeriesTermAtTerms k := by
+    rw [hcast2, hterm, Rat.div_def, Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel, Rat.inv_mul_cancel]
+  have hhalf_le : 1 / (2 * (m : Rat)) <= 1 / (m : Rat) := by
+    apply Rat.le_of_mul_le_mul_right (c := 2 * (m : Rat))
+    · have htwomne : (2 : Rat) * (m : Rat) ≠ 0 :=
+        Rat.ne_of_gt (Rat.mul_pos (by native_decide) hmrat)
+      calc
+        (1 / (2 * (m : Rat))) * (2 * (m : Rat)) = 1 := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_cancel]
+        _ <= 2 := by native_decide
+        _ = (1 / (m : Rat)) * (2 * (m : Rat)) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+    · exact Rat.mul_pos (by native_decide) hmrat
+  have hscaled := Rat.mul_le_mul_of_nonneg_right hhalf_le
+    (ePowerSeries_term_nonneg k)
+  calc
+    ePowerSeriesTermAtTerms (k + 2) -
+        eulerBinomialTerm (m : Rat) (1 / (m : Rat)) (k + 2) <=
+        ((k + 2 : Nat) : Rat) * (((k + 2 : Nat) : Rat) - 1) /
+          (2 * (m : Rat)) * ePowerSeriesTermAtTerms (k + 2) := hquad
+    _ = (1 / (2 * (m : Rat))) * ePowerSeriesTermAtTerms k := hcoefficient
+    _ <= (1 / (m : Rat)) * ePowerSeriesTermAtTerms k := hscaled
+
+/-- A finite accumulator for the coefficient-loss budget.  Its delayed
+index matches the fact that the first two Euler-binomial coefficients agree
+with the factorial series exactly. -/
+private def eulerBinomialDeficitMajorant (m : Nat) : Nat -> Rat
+  | 0 => 0
+  | 1 => 0
+  | 2 => 0
+  | k + 3 =>
+      eulerBinomialDeficitMajorant m (k + 2) +
+        (1 / (m : Rat)) * ePowerSeriesTermAtTerms k
+
+private theorem eulerBinomialDeficitMajorant_eq_shiftedCenter
+    (m k : Nat) :
+    eulerBinomialDeficitMajorant m (k + 2) =
+      (1 / (m : Rat)) * ePowerSeriesCenterAtTerms k := by
+  induction k with
+  | zero =>
+      unfold eulerBinomialDeficitMajorant ePowerSeriesCenterAtTerms
+        powerSeriesState
+      grind
+  | succ k ih =>
+      rw [show k + 1 + 2 = k + 3 by omega,
+        eulerBinomialDeficitMajorant, ih, ePowerSeries_center_succ]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc]
+
+/-- The total difference of any finite series prefix and its Euler-binomial
+counterpart is bounded by the delayed factorial-prefix budget. -/
+private theorem eulerBinomialPrefix_deficit_le_majorant
+    (m : Nat) (hm : 0 < m) :
+    forall N, N <= m + 1 ->
+      ePowerSeriesCenterAtTerms N -
+          eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) N <=
+        eulerBinomialDeficitMajorant m N := by
+  intro N
+  induction N with
+  | zero =>
+      intro _
+      unfold ePowerSeriesCenterAtTerms eulerBinomialPrefix
+        eulerBinomialDeficitMajorant powerSeriesState
+      grind
+  | succ N ih =>
+      intro hN
+      cases N with
+      | zero =>
+          rw [ePowerSeries_center_succ, eulerBinomialPrefix_succ,
+            eulerBinomialTerm_zero]
+          unfold eulerBinomialDeficitMajorant eulerBinomialPrefix
+            ePowerSeriesTermAtTerms
+            ePowerSeriesCenterAtTerms powerSeriesState
+          grind
+      | succ N =>
+          cases N with
+          | zero =>
+              have hprev :
+                  ePowerSeriesCenterAtTerms 1 -
+                      eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) 1 <= 0 := by
+                have h := ih (by omega)
+                simpa [eulerBinomialDeficitMajorant] using h
+              have hterm :
+                  ePowerSeriesTermAtTerms 1 -
+                      eulerBinomialTerm (m : Rat) (1 / (m : Rat)) 1 <= 0 := by
+                have h :=
+                  (eulerBinomialTerm_deficit_nonneg_le_quadratic m hm 1
+                    (by omega : 1 <= m)).2
+                grind [Rat.div_def]
+              rw [show 1 + 1 = 2 by rfl,
+                ePowerSeries_center_succ, eulerBinomialPrefix_succ]
+              unfold eulerBinomialDeficitMajorant
+              grind [Rat.sub_eq_add_neg]
+          | succ k =>
+              have hprev :
+                  ePowerSeriesCenterAtTerms (k + 2) -
+                      eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) (k + 2) <=
+                    eulerBinomialDeficitMajorant m (k + 2) :=
+                ih (by omega)
+              have hterm :=
+                eulerBinomialTerm_deficit_le_shiftedSeriesTerm m k hm
+                  (by omega : k + 2 <= m)
+              rw [show k + 2 + 1 = k + 3 by omega,
+                ePowerSeries_center_succ, eulerBinomialPrefix_succ,
+                eulerBinomialDeficitMajorant]
+              grind [Rat.sub_eq_add_neg]
+
+private theorem eulerBinomialPrefix_one_div_mono
+    (m : Nat) (hm : 0 < m) (N M : Nat)
+    (hNM : N <= M) (hM : M <= m + 1) :
+    eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) N <=
+      eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) M := by
+  induction hNM with
+  | refl => exact Rat.le_refl
+  | step hNM ih =>
+      rename_i K
+      have hK : K <= m := by omega
+      have hterm :=
+        (eulerBinomialTerm_one_div_nonneg_le_seriesTerm m hm K hK).1
+      rw [eulerBinomialPrefix_succ]
+      grind
+
+private theorem ePowerSeries_tailRadiusAtTerms_nonneg
+    (N : Nat) (hN : 0 < N) :
+    0 <= ePowerSeriesTailRadiusAtTerms N := by
+  have hNrat : (0 : Rat) < (N : Rat) := by
+    exact_mod_cast hN
+  have hN1pos : (0 : Rat) < (N : Rat) + 1 := by grind
+  have hratio : 1 / ((N : Rat) + 1) < 1 := by
+    rw [Rat.div_lt_iff hN1pos]
+    grind
+  have hden : 0 < 1 - 1 / ((N : Rat) + 1) := by
+    grind [Rat.sub_eq_add_neg]
+  unfold ePowerSeriesTailRadiusAtTerms
+  rw [Rat.div_def]
+  exact Rat.mul_nonneg (ePowerSeries_term_nonneg N)
+    (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
 private theorem ePowerSeries_term_le_one_div
     (N : Nat) (hN : 0 < N) :
     ePowerSeriesTermAtTerms N <= 1 / (N : Rat) := by
@@ -1119,6 +1564,128 @@ private theorem ePowerSeries_term_le_tailRadius_drop
           rw [hdrop]
           exact hnonneg)
   grind [Rat.sub_eq_add_neg]
+
+/-- Adding the certified tail to a factorial-series prefix is antitone in
+the number of retained terms.  This is a finite telescoping argument over
+the explicit one-term tail budget. -/
+private theorem ePowerSeries_center_add_tail_antitone
+    (N M : Nat) (hN : 0 < N) (hNM : N <= M) :
+    ePowerSeriesCenterAtTerms M + ePowerSeriesTailRadiusAtTerms M <=
+      ePowerSeriesCenterAtTerms N + ePowerSeriesTailRadiusAtTerms N := by
+  induction hNM with
+  | refl => exact Rat.le_refl
+  | step hNM ih =>
+      rename_i K
+      have hKpos : 0 < K := Nat.lt_of_lt_of_le hN hNM
+      have hdrop := ePowerSeries_term_le_tailRadius_drop K hKpos
+      rw [ePowerSeries_center_succ]
+      grind [Rat.sub_eq_add_neg]
+
+private theorem ePowerSeries_center_le_center_add_tail
+    (N M : Nat) (hN : 0 < N) (hNM : N <= M) :
+    ePowerSeriesCenterAtTerms M <=
+      ePowerSeriesCenterAtTerms N + ePowerSeriesTailRadiusAtTerms N := by
+  have htailM := ePowerSeries_tailRadiusAtTerms_nonneg M
+    (Nat.lt_of_lt_of_le hN hNM)
+  calc
+    ePowerSeriesCenterAtTerms M <=
+        ePowerSeriesCenterAtTerms M + ePowerSeriesTailRadiusAtTerms M := by
+          grind
+    _ <= ePowerSeriesCenterAtTerms N + ePowerSeriesTailRadiusAtTerms N :=
+      ePowerSeries_center_add_tail_antitone N M hN hNM
+
+/-- A deliberately simple finite global bound for factorial-series prefixes.
+The prefix-plus-tail envelope at one retained term is exactly `3`. -/
+private theorem ePowerSeries_centerAtTerms_le_three
+    (N : Nat) (hN : 0 < N) :
+    ePowerSeriesCenterAtTerms N <= (3 : Rat) := by
+  have htail := ePowerSeries_tailRadiusAtTerms_nonneg N hN
+  have hant := ePowerSeries_center_add_tail_antitone 1 N
+    (by omega : 0 < 1) (by omega : 1 <= N)
+  have hone :
+      ePowerSeriesCenterAtTerms 1 + ePowerSeriesTailRadiusAtTerms 1 =
+        (3 : Rat) := by
+    native_decide
+  calc
+    ePowerSeriesCenterAtTerms N <=
+        ePowerSeriesCenterAtTerms N + ePowerSeriesTailRadiusAtTerms N := by
+          grind
+    _ <= ePowerSeriesCenterAtTerms 1 + ePowerSeriesTailRadiusAtTerms 1 :=
+      hant
+    _ = (3 : Rat) := hone
+
+/-- Summing the quadratic coefficient loss gives a uniform `3/m` bound on
+the difference between a factorial-series prefix and its Euler-binomial
+prefix. -/
+private theorem ePowerSeriesCenter_sub_eulerBinomialPrefix_le_three_div
+    (m N : Nat) (hm : 0 < m) (hNthree : 3 <= N) (hNM : N <= m + 1) :
+    ePowerSeriesCenterAtTerms N -
+        eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) N <=
+      3 / (m : Rat) := by
+  have hdef := eulerBinomialPrefix_deficit_le_majorant m hm N hNM
+  let K : Nat := N - 2
+  have hK : K + 2 = N := by
+    dsimp [K]
+    omega
+  have hKpos : 0 < K := by
+    dsimp [K]
+    omega
+  have hmajorant :
+      eulerBinomialDeficitMajorant m N =
+        (1 / (m : Rat)) * ePowerSeriesCenterAtTerms K := by
+    rw [← hK]
+    exact eulerBinomialDeficitMajorant_eq_shiftedCenter m K
+  have hcenter := ePowerSeries_centerAtTerms_le_three K hKpos
+  have hmrat : (0 : Rat) < (m : Rat) := by
+    exact_mod_cast hm
+  have hinvnonneg : 0 <= 1 / (m : Rat) := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 hmrat))
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hcenter hinvnonneg
+  calc
+    ePowerSeriesCenterAtTerms N -
+        eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) N <=
+        eulerBinomialDeficitMajorant m N := hdef
+    _ = (1 / (m : Rat)) * ePowerSeriesCenterAtTerms K := hmajorant
+    _ <= (1 / (m : Rat)) * 3 := hscaled
+    _ = 3 / (m : Rat) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem ePowerSeriesCenter_le_eulerProduct_add_three_div
+    (m N : Nat) (hm : 0 < m) (hNthree : 3 <= N) (hNM : N <= m + 1) :
+    ePowerSeriesCenterAtTerms N <=
+      (1 + 1 / (m : Rat)) ^ m + 3 / (m : Rat) := by
+  have hdef := ePowerSeriesCenter_sub_eulerBinomialPrefix_le_three_div
+    m N hm hNthree hNM
+  have hprefix := eulerBinomialPrefix_one_div_mono m hm N (m + 1)
+    hNM (Nat.le_refl _)
+  calc
+    ePowerSeriesCenterAtTerms N <=
+        eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) N + 3 / (m : Rat) := by
+          grind [Rat.sub_eq_add_neg]
+    _ <= eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) (m + 1) +
+          3 / (m : Rat) := by
+      grind
+    _ = (1 + 1 / (m : Rat)) ^ m + 3 / (m : Rat) := by
+      rw [euler_binomial_prefix_nat_expansion]
+
+/-- The finite Euler product is below the series prefix plus its explicit
+tail budget.  This is the upper half of the eventual raw-real overlap. -/
+private theorem eulerProduct_one_div_le_series_upper
+    (m N : Nat) (hm : 0 < m) (hN : 0 < N) (hNM : N <= m + 1) :
+    (1 + 1 / (m : Rat)) ^ m <=
+      ePowerSeriesCenterAtTerms N + ePowerSeriesTailRadiusAtTerms N := by
+  calc
+    (1 + 1 / (m : Rat)) ^ m =
+        eulerBinomialPrefix (m : Rat) (1 / (m : Rat)) (m + 1) := by
+          exact (euler_binomial_prefix_nat_expansion m (1 / (m : Rat))).symm
+    _ <= ePowerSeriesCenterAtTerms (m + 1) :=
+      eulerBinomialPrefix_one_div_le_seriesCenter m hm (m + 1)
+        (Nat.le_refl _)
+    _ <= ePowerSeriesCenterAtTerms N + ePowerSeriesTailRadiusAtTerms N :=
+      ePowerSeries_center_le_center_add_tail N (m + 1) hN hNM
 
 private theorem ePowerSeries_tailRadius_le_two_mul_term
     {T M : Rat} (hT : 0 <= T) (hM : 1 <= M) :
@@ -1446,6 +2013,13 @@ theorem expEuler_widths_shrink (x : Rat) :
         rw [expEuler_width_eq]
         exact hN n hn)
 
+private theorem eulerCenter_one_eq_squareProduct (n : Nat) :
+    eulerCenter 1 n =
+      (1 + 1 / ((((n + 1) * (n + 1) : Nat) : Rat))) ^
+        ((n + 1) * (n + 1)) := by
+  rw [eulerCenter_eq_repeatedMulLoop, repeatedMulLoop_one_eq_pow]
+  simp
+
 theorem eulerCenter_one_eq_compoundInterestStage_lo_square
     (n : Nat) :
     eulerCenter 1 n =
@@ -1556,6 +2130,32 @@ theorem eEulerNestedRadius_nonneg (n : Nat) :
     (Rat.natCast_pos).2 (Nat.succ_pos n)
   rw [Rat.div_def]
   exact Rat.mul_nonneg (by native_decide) (Rat.le_of_lt ((Rat.inv_pos).2 hpos))
+
+private theorem eulerBinomialError_le_eEulerNestedRadius (n : Nat) :
+    (3 : Rat) / ((((n + 1) * (n + 1) : Nat) : Rat)) <=
+      eEulerNestedRadius n := by
+  let A : Rat := ((n + 1 : Nat) : Rat)
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+  have hAone : (1 : Rat) <= A := by
+    dsimp [A]
+    exact_mod_cast (Nat.succ_le_succ (Nat.zero_le n))
+  have hcast : (((n + 1) * (n + 1) : Nat) : Rat) = A * A := by
+    dsimp [A]
+    exact_mod_cast (by omega : (n + 1) * (n + 1) = (n + 1) * (n + 1))
+  rw [hcast]
+  unfold eEulerNestedRadius
+  apply Rat.le_of_mul_le_mul_right (c := A * A)
+  · rw [Rat.div_def, Rat.div_def]
+    calc
+      (3 * (A * A)⁻¹) * (A * A) = 3 := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= 8 * A := by grind
+      _ = (8 * A⁻¹) * (A * A) := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos hApos hApos
 
 theorem eEulerNestedRadius_antitone {n m : Nat} (hnm : n <= m) :
     eEulerNestedRadius m <= eEulerNestedRadius n := by
@@ -1756,6 +2356,103 @@ theorem eEulerNested_equiv_eCompoundInterest :
       _ = eulerCenter 1 n := hcenter.symm
       _ <= eulerCenter 1 n + eEulerNestedRadius n := by grind
 
+private theorem ePowerSeriesTerms_le_squareEulerTerms
+    (n : Nat) (hn : 3 <= n) :
+    n + 10 <= (n + 1) * (n + 1) + 1 := by
+  have hfour : 4 <= n + 1 := by omega
+  have hmul : (n + 1) * 4 <= (n + 1) * (n + 1) :=
+    Nat.mul_le_mul_left (n + 1) hfour
+  have hmul' : 4 * (n + 1) <= (n + 1) * (n + 1) := by
+    simpa [Nat.mul_comm] using hmul
+  have hlinear : n + 10 <= 4 * (n + 1) + 1 := by omega
+  exact Nat.le_trans hlinear (Nat.succ_le_succ hmul')
+
+private theorem eEulerNested_lower_le_ePowerSeries_upper (n : Nat) :
+    eulerCenter (1 : Rat) n - eEulerNestedRadius n <=
+      powerSeriesCenter (1 : Rat) n + powerSeriesTailRadius (1 : Rat) n := by
+  by_cases hn : 3 <= n
+  · let M : Nat := (n + 1) * (n + 1)
+    let N : Nat := n + 10
+    have hMpos : 0 < M := by
+      dsimp [M]
+      exact Nat.mul_pos (Nat.succ_pos n) (Nat.succ_pos n)
+    have hNpos : 0 < N := by
+      dsimp [N]
+      omega
+    have hNM : N <= M + 1 := by
+      dsimp [N, M]
+      exact ePowerSeriesTerms_le_squareEulerTerms n hn
+    have hbound := eulerProduct_one_div_le_series_upper M N hMpos hNpos hNM
+    have hcenter := eulerCenter_one_eq_squareProduct n
+    have hseriesCenter := ePowerSeries_center_stage_eq n
+    have hseriesTail := ePowerSeries_tailRadius_stage_eq n
+    calc
+      eulerCenter (1 : Rat) n - eEulerNestedRadius n <=
+          eulerCenter (1 : Rat) n := by
+            have hradius := eEulerNestedRadius_nonneg n
+            grind [Rat.sub_eq_add_neg]
+      _ = (1 + 1 / (M : Rat)) ^ M := by
+            simpa [M] using hcenter
+      _ <= ePowerSeriesCenterAtTerms N + ePowerSeriesTailRadiusAtTerms N :=
+            hbound
+      _ = powerSeriesCenter (1 : Rat) n + powerSeriesTailRadius (1 : Rat) n := by
+            rw [hseriesCenter, hseriesTail]
+  · have hcases : n = 0 \/ n = 1 \/ n = 2 := by omega
+    rcases hcases with rfl | rfl | rfl <;> native_decide
+
+private theorem ePowerSeries_lower_le_eEulerNested_upper (n : Nat) :
+    powerSeriesCenter (1 : Rat) n - powerSeriesTailRadius (1 : Rat) n <=
+      eulerCenter (1 : Rat) n + eEulerNestedRadius n := by
+  by_cases hn : 3 <= n
+  · let M : Nat := (n + 1) * (n + 1)
+    let N : Nat := n + 10
+    have hMpos : 0 < M := by
+      dsimp [M]
+      exact Nat.mul_pos (Nat.succ_pos n) (Nat.succ_pos n)
+    have hNpos : 0 < N := by
+      dsimp [N]
+      omega
+    have hNthree : 3 <= N := by
+      dsimp [N]
+      omega
+    have hNM : N <= M + 1 := by
+      dsimp [N, M]
+      exact ePowerSeriesTerms_le_squareEulerTerms n hn
+    have hbound :=
+      ePowerSeriesCenter_le_eulerProduct_add_three_div M N hMpos hNthree hNM
+    have herror := eulerBinomialError_le_eEulerNestedRadius n
+    have htail := ePowerSeries_tailRadiusAtTerms_nonneg N hNpos
+    have hcenter := eulerCenter_one_eq_squareProduct n
+    have hseriesCenter := ePowerSeries_center_stage_eq n
+    have hseriesTail := ePowerSeries_tailRadius_stage_eq n
+    calc
+      powerSeriesCenter (1 : Rat) n - powerSeriesTailRadius (1 : Rat) n =
+          ePowerSeriesCenterAtTerms N - ePowerSeriesTailRadiusAtTerms N := by
+            rw [hseriesCenter, hseriesTail]
+      _ <= ePowerSeriesCenterAtTerms N := by
+            grind [Rat.sub_eq_add_neg]
+      _ <= (1 + 1 / (M : Rat)) ^ M + 3 / (M : Rat) := hbound
+      _ = eulerCenter (1 : Rat) n + 3 / (M : Rat) := by
+            rw [hcenter]
+      _ <= eulerCenter (1 : Rat) n + eEulerNestedRadius n := by
+            apply (Rat.add_le_add_left).2
+            simpa [M] using herror
+  · have hcases : n = 0 \/ n = 1 \/ n = 2 := by omega
+    rcases hcases with rfl | rfl | rfl <;> native_decide
+
+/-- The valid factorial-series raw for `e` agrees directly with the nested
+repeated-multiplication raw.  The proof is a finite binomial coefficient and
+tail-budget comparison, independent of real-number completeness. -/
+theorem ePowerSeries_equiv_eEulerNested :
+    ePowerSeries.Equiv eEulerNested := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff ePowerSeries eEulerNested n n).2
+  rw [ePowerSeries, expPowerSeries_compute_eq, eEulerNested_compute_eq]
+  unfold intervalAround QInterval.Overlaps
+  exact ⟨ePowerSeries_lower_le_eEulerNested_upper n,
+    eEulerNested_lower_le_ePowerSeries_upper n⟩
+
 /-- Public rational radius for certifying the literal repeated-multiplication
 Euler computation.  Evaluation of the resulting stabilized representative
 uses only Euler prefixes and this rational schedule; the compound-interest
@@ -1811,52 +2508,6 @@ theorem eEulerStabilized_equiv_eCompoundInterest :
     eCompoundInterest_valid
     eEuler_eq_eCompoundInterest
     eEulerStabilizationRadius_covers_compoundInterest
-
-/-- The abstract certified value of `e` joins the sharp compound-interest
-enclosure to two direct repeated-multiplication representations: a nested
-single-stage enclosure and the older prefix-stabilized evaluator.  The
-power-series and inverse-logarithm routes join this handle only after their
-separate analytic agreement certificates are proved. -/
-def eCertified : Real :=
-  (Real.withAlternative
-    (Real.ofRaw eCompoundInterest eCompoundInterest_valid)
-    eEulerNested eEulerNested_valid
-    eEulerNested_equiv_eCompoundInterest).withAlternative
-      eEulerStabilized eEulerStabilized_valid
-      eEulerStabilized_equiv_eCompoundInterest
-
-abbrev e : Real := eCertified
-
-/-- The direct nested repeated-multiplication raw is stored in the abstract
-Euler-base handle, rather than merely related to it by an external theorem. -/
-theorem eEulerNested_mem_eCertified_alternatives :
-    eEulerNested ∈ eCertified.alternatives := by
-  simp [eCertified, Real.withAlternative]
-
-/-- The older prefix-stabilized raw remains stored as a supplementary
-representation of the same abstract Euler base. -/
-theorem eEulerStabilized_mem_eCertified_alternatives :
-    eEulerStabilized ∈ eCertified.alternatives := by
-  simp [eCertified, Real.withAlternative]
-
-/-- The preferred compound-interest view of the abstract `e` handle. -/
-def eCompoundInterestRepresentation : Real.Representation e :=
-  Real.preferredRepresentation eCertified
-
-/-- The certified direct repeated-multiplication view of the abstract `e`
-handle.  Every stage is one explicit rational power at the square mesh
-`(n+1)^2`, enclosed by the nested radius `8/(n+1)`. -/
-def eRepeatedMultiplicationRepresentation : Real.Representation e where
-  raw := eEulerNested
-  valid := eEulerNested_valid
-  agrees := eEulerNested_equiv_eCompoundInterest
-
-/-- The older prefix-stabilized direct repeated-multiplication evaluator is
-retained as an alternative diagnostic representation. -/
-def eRepeatedMultiplicationStabilizedRepresentation : Real.Representation e where
-  raw := eEulerStabilized
-  valid := eEulerStabilized_valid
-  agrees := eEulerStabilized_equiv_eCompoundInterest
 
 def PowerSeriesNested (x : Rat) : Prop :=
   forall n m, n <= m ->
@@ -2739,6 +3390,64 @@ theorem ePowerSeries_valid : EPowerSeriesValid :=
   ePowerSeries_valid_of_centerStepMovement
     ePowerSeries_center_step_movement
     ePowerSeries_widths_shrink
+
+/-- The factorial-series and compound-interest computations of `e` are now
+directly equivalent through the nested repeated-multiplication bridge. -/
+theorem ePowerSeries_equiv_eCompoundInterest :
+    EPowerSeriesEqCompoundInterest :=
+  RealRaw.equiv_trans
+    ePowerSeries_valid
+    eEulerNested_valid
+    eCompoundInterest_valid
+    ePowerSeries_equiv_eEulerNested
+    eEulerNested_equiv_eCompoundInterest
+
+/-- The abstract Euler-base handle now lists all three certified finite
+computations: compound-interest intervals, nested repeated multiplication,
+and the factorial power series. -/
+def eCertified : Real :=
+  ((Real.withAlternative
+    (Real.ofRaw eCompoundInterest eCompoundInterest_valid)
+    eEulerNested eEulerNested_valid
+    eEulerNested_equiv_eCompoundInterest).withAlternative
+      eEulerStabilized eEulerStabilized_valid
+      eEulerStabilized_equiv_eCompoundInterest).withAlternative
+        ePowerSeries ePowerSeries_valid
+        ePowerSeries_equiv_eCompoundInterest
+
+abbrev e : Real := eCertified
+
+theorem eEulerNested_mem_eCertified_alternatives :
+    eEulerNested ∈ eCertified.alternatives := by
+  simp [eCertified, Real.withAlternative]
+
+theorem eEulerStabilized_mem_eCertified_alternatives :
+    eEulerStabilized ∈ eCertified.alternatives := by
+  simp [eCertified, Real.withAlternative]
+
+theorem ePowerSeries_mem_eCertified_alternatives :
+    ePowerSeries ∈ eCertified.alternatives := by
+  simp [eCertified, Real.withAlternative]
+
+/-- The preferred compound-interest view of the abstract `e` handle. -/
+def eCompoundInterestRepresentation : Real.Representation e :=
+  Real.preferredRepresentation eCertified
+
+def eRepeatedMultiplicationRepresentation : Real.Representation e where
+  raw := eEulerNested
+  valid := eEulerNested_valid
+  agrees := eEulerNested_equiv_eCompoundInterest
+
+def eRepeatedMultiplicationStabilizedRepresentation : Real.Representation e where
+  raw := eEulerStabilized
+  valid := eEulerStabilized_valid
+  agrees := eEulerStabilized_equiv_eCompoundInterest
+
+/-- The certified factorial-series view of the same abstract Euler base. -/
+def ePowerSeriesRepresentation : Real.Representation e where
+  raw := ePowerSeries
+  valid := ePowerSeries_valid
+  agrees := ePowerSeries_equiv_eCompoundInterest
 
 theorem eEuler_valid_of_centerStepMovement
     (hstep : EEulerCenterStepMovement) : EEulerValid :=
