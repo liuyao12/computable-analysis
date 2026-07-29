@@ -710,6 +710,135 @@ private theorem eulerCenter_eq_repeatedMulLoop (x : Rat) (n : Nat) :
         (List.range ((n + 1) * (n + 1))) 1 := by
   rfl
 
+/-- Falling factorials over rational arithmetic. Keeping the parameter
+rational lets the finite binomial algebra below be used directly at the
+Euler mesh `m` without importing a combinatorics library. -/
+def fallingFactorialRat (M : Rat) : Nat -> Rat
+  | 0 => 1
+  | k + 1 => fallingFactorialRat M k * (M - (k : Rat))
+
+private theorem fallingFactorialRat_succ (M : Rat) (k : Nat) :
+    fallingFactorialRat M (k + 1) =
+      fallingFactorialRat M k * (M - (k : Rat)) :=
+  rfl
+
+/-- The falling-factorial form of Pascal's identity. This is a finite
+rational polynomial identity, not an analytic use of the binomial theorem. -/
+private theorem fallingFactorialRat_pascal_succ (M : Rat) (k : Nat) :
+    fallingFactorialRat (M + 1) (k + 1) =
+      fallingFactorialRat M (k + 1) +
+        ((k + 1 : Nat) : Rat) * fallingFactorialRat M k := by
+  induction k with
+  | zero =>
+      simp [fallingFactorialRat, Rat.sub_eq_add_neg]
+      grind [Rat.sub_eq_add_neg]
+  | succ k ih =>
+      rw [fallingFactorialRat_succ (M + 1) (k + 1),
+        fallingFactorialRat_succ M (k + 1), ih,
+        fallingFactorialRat_succ M k]
+      have hcast1 : (((k + 1 : Nat) : Rat)) = (k : Rat) + 1 := by
+        exact_mod_cast (by omega : k + 1 = k + 1)
+      have hcast2 : (((k + 2 : Nat) : Rat)) = (k : Rat) + 2 := by
+        exact_mod_cast (by omega : k + 2 = k + 2)
+      rw [hcast1, hcast2]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_comm]
+
+/-- The `k`th term of the finite binomial expansion of `(1 + x)^M` when the
+exponent `M` is a natural number embedded in the rationals. -/
+def eulerBinomialTerm (M x : Rat) (k : Nat) : Rat :=
+  fallingFactorialRat M k / factorialRat k * x ^ k
+
+ /-- A finite prefix of the rational binomial expansion.  At the natural
+endpoint `M = m`, the prefix of `m + 1` terms is exactly `(1 + x)^m`. -/
+def eulerBinomialPrefix (M x : Rat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 =>
+      eulerBinomialPrefix M x count + eulerBinomialTerm M x count
+
+private theorem eulerBinomialTerm_zero (M x : Rat) :
+    eulerBinomialTerm M x 0 = 1 := by
+  unfold eulerBinomialTerm fallingFactorialRat factorialRat factorial
+  grind [Rat.div_def]
+
+/-- The coefficient identity needed to expand one more finite Euler
+factor.  The factorial denominator cancels entirely by rational algebra. -/
+private theorem eulerBinomialTerm_pascal_succ (M x : Rat) (k : Nat) :
+    eulerBinomialTerm (M + 1) x (k + 1) =
+      eulerBinomialTerm M x (k + 1) + x * eulerBinomialTerm M x k := by
+  unfold eulerBinomialTerm
+  rw [fallingFactorialRat_pascal_succ, FormalPowerSeries.factorialRat_succ,
+    Rat.pow_succ, Rat.div_def, Rat.div_def, Rat.div_def]
+  have hkpos : (0 : Rat) < ((k + 1 : Nat) : Rat) := by
+    exact_mod_cast Nat.succ_pos k
+  have hfactpos : (0 : Rat) < factorialRat k :=
+    RationalMajorant.factorialRat_pos k
+  have hkne : ((k + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hkpos
+  have hfactne : factorialRat k ≠ 0 := Rat.ne_of_gt hfactpos
+  rw [Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.mul_inv_cancel]
+
+private theorem eulerBinomialPrefix_succ (M x : Rat) (count : Nat) :
+    eulerBinomialPrefix M x (count + 1) =
+      eulerBinomialPrefix M x count + eulerBinomialTerm M x count :=
+  rfl
+
+/-- Summing Pascal's identity over a finite prefix. -/
+private theorem eulerBinomialPrefix_pascal (M x : Rat) (count : Nat) :
+    eulerBinomialPrefix (M + 1) x (count + 1) =
+      eulerBinomialPrefix M x (count + 1) +
+        x * eulerBinomialPrefix M x count := by
+  induction count with
+  | zero =>
+      grind [eulerBinomialPrefix, eulerBinomialTerm_zero]
+  | succ count ih =>
+      calc
+        eulerBinomialPrefix (M + 1) x ((count + 1) + 1) =
+            eulerBinomialPrefix (M + 1) x (count + 1) +
+              eulerBinomialTerm (M + 1) x (count + 1) := rfl
+        _ = (eulerBinomialPrefix M x (count + 1) +
+              x * eulerBinomialPrefix M x count) +
+            (eulerBinomialTerm M x (count + 1) +
+              x * eulerBinomialTerm M x count) := by
+              rw [ih, eulerBinomialTerm_pascal_succ]
+        _ = (eulerBinomialPrefix M x (count + 1) +
+              eulerBinomialTerm M x (count + 1)) +
+            x * eulerBinomialPrefix M x (count + 1) := by
+              rw [eulerBinomialPrefix_succ M x count]
+              grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.mul_assoc,
+                Rat.mul_comm]
+        _ = eulerBinomialPrefix M x ((count + 1) + 1) +
+            x * eulerBinomialPrefix M x (count + 1) := rfl
+
+private theorem fallingFactorialRat_nat_succ_zero (m : Nat) :
+    fallingFactorialRat (m : Rat) (m + 1) = 0 := by
+  rw [fallingFactorialRat_succ]
+  have hcast : ((m : Nat) : Rat) = (m : Rat) := rfl
+  rw [hcast]
+  grind [Rat.sub_eq_add_neg]
+
+private theorem eulerBinomialTerm_nat_succ_zero (m : Nat) (x : Rat) :
+    eulerBinomialTerm (m : Rat) x (m + 1) = 0 := by
+  unfold eulerBinomialTerm
+  rw [fallingFactorialRat_nat_succ_zero]
+  grind [Rat.div_def]
+
+/-- The finite binomial expansion used to compare the Euler powers with
+factorial-series prefixes. -/
+theorem euler_binomial_prefix_nat_expansion (m : Nat) (x : Rat) :
+    eulerBinomialPrefix (m : Rat) x (m + 1) = (1 + x) ^ m := by
+  induction m with
+  | zero =>
+      grind [eulerBinomialPrefix, eulerBinomialTerm_zero]
+  | succ m ih =>
+      have hcast : (((m + 1 : Nat) : Rat)) = (m : Rat) + 1 := by
+        exact_mod_cast (by omega : m + 1 = m + 1)
+      rw [hcast, eulerBinomialPrefix_pascal, eulerBinomialPrefix_succ,
+        eulerBinomialTerm_nat_succ_zero, ih, Rat.pow_succ]
+      grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.mul_assoc,
+        Rat.mul_comm]
+
 private def powerSeriesLoopStep (x : Rat) (s : Rat × Rat)
     (k : Nat) : Rat × Rat :=
   (s.1 + s.2, s.2 * x / ((k : Rat) + 1))

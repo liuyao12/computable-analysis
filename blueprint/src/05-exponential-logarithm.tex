@@ -164,6 +164,34 @@ derivative proof or as an identification of the series and Euler
 evaluators away from zero.
 \end{theorem}
 
+\begin{theorem}[Finite binomial bridge for Euler products]
+\label{thm:finite-euler-binomial-bridge}
+\lean{ComputableAnalysis.ExpProofs.fallingFactorialRat}
+\lean{ComputableAnalysis.ExpProofs.eulerBinomialTerm}
+\lean{ComputableAnalysis.ExpProofs.eulerBinomialPrefix}
+\lean{ComputableAnalysis.ExpProofs.euler_binomial_prefix_nat_expansion}
+\uses{def:positive-base-natural-powers}
+\leanok
+For a rational (x) and natural (m), Lean now proves the finite identity
+\[
+ (1+x)^m=
+ \sum_{k=0}^{m}
+   \frac{m(m-1)\cdots(m-k+1)}{k!}\,x^k.
+\]
+The sum is implemented as an explicitly recursive rational prefix, not
+imported as an analytic binomial theorem.  In particular, substituting
+(x=1/m) expresses the literal Euler product
+\(left(1+1/m\right)^m) in the same factorial coordinates used by the
+power-series evaluator.
+
+This is the algebraic half of the outstanding
+(e_{\mathrm{series}}\Equiv e_{\mathrm{compound}}) proof.  The next, still
+open, finite estimate bounds the difference between its falling-factorial
+coefficients and (1/k!\), then combines the resulting prefix inequality
+with the already checked factorial-series tail radius.  Thus the route does
+not require a limit theorem or completeness of a real-number type.
+\end{theorem}
+
 \section{Three definitions of \texorpdfstring{$e$}{e}}
 
 \begin{definition}[Power-series \texorpdfstring{$e$}{e}]
@@ -426,8 +454,10 @@ and this forward estimate is checked through stage \(50\).  Therefore an
 \code{ExpProofsComplete} package, once it contains the remaining Euler
 validity and power-series/Euler overlap estimates, also yields
 \(e_{\mathrm{series}}\Equiv e_{\mathrm{compound}}\).  The remaining comparison
-data are the overlap estimates with the power-series and log-integral
-representatives.
+data are the coefficient/tail overlap estimates with the power-series and
+log-integral representatives.  The finite binomial identity in
+\cref{thm:finite-euler-binomial-bridge} is now checked and supplies the
+common coefficient language for the first of those estimates.
 \end{definition}
 
 \begin{definition}[Logarithm]

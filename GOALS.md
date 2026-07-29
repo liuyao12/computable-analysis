@@ -893,6 +893,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   `expEuler_zero_equiv_one` proves its explicit-radius boxes overlap that
   same point.  These initial-value facts are deliberately distinct from the
   pending self-derivative and nonzero-input comparison theorems.
+  The finite algebra for that nonzero comparison is now checked too:
+  `fallingFactorialRat`, `eulerBinomialTerm`, and `eulerBinomialPrefix` expose
+  the rational binomial coordinates, and
+  `euler_binomial_prefix_nat_expansion` proves the exact expansion of
+  `(1 + x)^m`.  At `x = 1/m` this is the literal Euler product in
+  factorial-series coordinates.  The still-open work is its uniform
+  coefficient-error bound plus the already available factorial-tail radius;
+  no completeness or analytic binomial theorem is being assumed.
 - The two intended characterizations of the Euler base are now explicit
   obligations: the exponential solves `f' = f` on rational intervals, and a
   positive base is Euler exactly when its rational powers have derivative `1`

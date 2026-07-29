@@ -283,6 +283,15 @@ latter retains its deliberate displayed radius.  These are finite loop
 calculations and establish `exp(0) = 1`; they do not establish a derivative
 or agreement of the evaluators at nonzero input.
 
+The finite algebra needed for the nonzero comparison is now available as a
+small readable API: `fallingFactorialRat`, `eulerBinomialTerm`, and
+`eulerBinomialPrefix`.  The checked theorem
+`euler_binomial_prefix_nat_expansion m x` is the rational finite identity
+`prefix (m : Rat) x (m + 1) = (1 + x)^m`.  At `x = 1 / m`, it gives the exact
+factorial-coordinate expansion of the literal Euler product.  It is not yet
+the series/Euler equivalence: the remaining step is a coefficient-error and
+tail-radius estimate.
+
 There is, however, one fully certified constant-level exponential handle that
 is useful today.  `ExpProofs.e : Real` has the sharp compound-interest
 enclosure as its preferred representation and
@@ -312,6 +321,10 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeries_zero_equiv_one
 #check ExpProofs.eulerCenter_zero
 #check ExpProofs.expEuler_zero_equiv_one
+#check ExpProofs.fallingFactorialRat
+#check ExpProofs.eulerBinomialTerm
+#check ExpProofs.eulerBinomialPrefix
+#check ExpProofs.euler_binomial_prefix_nat_expansion
 #check ExpProofs.ePositive
 #check ExpProofs.eNaturalPower_valid
 #check ExpProofs.eNaturalPower_lower_bound
