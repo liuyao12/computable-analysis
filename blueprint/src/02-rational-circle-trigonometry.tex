@@ -748,6 +748,16 @@ def pi(n):
     outer_len = path_length_interval(outer, 2**n)
     return [(4*inner_len.lo)/2, (4*outer_len.hi)/2]
 \end{verbatim}
+For an adjacent chord of a stage with at least two cells, Lean now proves that
+its rational squared length is at most \(1\).  Consequently a nonzero
+square-root bisection stage \(m\) has the literal width
+\[
+  2^{-(m+9)},
+\]
+rather than merely a convergence bound.  This is the finite error budget used
+when comparing a coarse chord with its two fine successors.  It is a local
+input to the still-open direct endpoint-refinement certificate, not a claim
+that the circumference algorithm has become valid.
 \end{definition}
 
 \begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}
