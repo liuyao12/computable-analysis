@@ -273,6 +273,188 @@ theorem point_cross_formula (u v : Rat) :
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm]
 
+/-- Splitting a rational chart cell at its parameter midpoint gives an exact
+cubic gain in the sum of its two cross-product certificates.  This
+denominator-cleared formula is entirely rational; it is the local geometric
+budget used to compare a coarse chord with its two dyadic subchords without
+selecting square roots. -/
+theorem midpoint_cross_refinement_gap_cleared (u h : Rat) :
+    let m := u + h / 2
+    let d0 := 1 + u * u
+    let dm := 1 + m * m
+    let dv := 1 + (u + h) * (u + h)
+    (d0 * dm * dv) *
+        (cross (point u) (point m) + cross (point m) (point (u + h)) -
+          cross (point u) (point (u + h))) =
+      h * h * h := by
+  dsimp
+  rw [point_cross_formula, point_cross_formula, point_cross_formula]
+  let d0 := 1 + u * u
+  let m := u + h / 2
+  let dm := 1 + m * m
+  let v := u + h
+  let dv := 1 + v * v
+  let a := 2 * (m - u) * (1 + u * m)
+  let b := 2 * (v - m) * (1 + m * v)
+  let c := 2 * (v - u) * (1 + u * v)
+  change (d0 * dm * dv) *
+      (a / (d0 * dm) + b / (dm * dv) - c / (d0 * dv)) = h * h * h
+  have hd0 : 0 < d0 := by
+    dsimp [d0]
+    exact one_add_square_pos u
+  have hdm : 0 < dm := by
+    dsimp [dm]
+    exact one_add_square_pos m
+  have hdv : 0 < dv := by
+    dsimp [dv]
+    exact one_add_square_pos v
+  have hd0ne : d0 ≠ 0 := Rat.ne_of_gt hd0
+  have hdmne : dm ≠ 0 := Rat.ne_of_gt hdm
+  have hdvne : dv ≠ 0 := Rat.ne_of_gt hdv
+  have hpolynomial : a * dv + b * d0 - c * dm = h * h * h := by
+    dsimp [a, b, c, d0, dm, dv, m, v]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have distribute (d x y z : Rat) :
+      d * (x + y - z) = d * x + d * y - d * z := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.mul_assoc]
+  have hparts :
+      (d0 * dm * dv) * (a / (d0 * dm)) = a * dv /\
+        (d0 * dm * dv) * (b / (dm * dv)) = b * d0 /\
+        (d0 * dm * dv) * (c / (d0 * dv)) = c * dm := by
+    clear hpolynomial distribute
+    constructor
+    · rw [Rat.div_def, Rat.inv_mul_rev]
+      have hcancel0 : d0 * d0⁻¹ = 1 := Rat.mul_inv_cancel d0 hd0ne
+      have hcancelm : dm * dm⁻¹ = 1 := Rat.mul_inv_cancel dm hdmne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    constructor
+    · rw [Rat.div_def, Rat.inv_mul_rev]
+      have hcancelm : dm * dm⁻¹ = 1 := Rat.mul_inv_cancel dm hdmne
+      have hcancelv : dv * dv⁻¹ = 1 := Rat.mul_inv_cancel dv hdvne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · rw [Rat.div_def, Rat.inv_mul_rev]
+      have hcancel0 : d0 * d0⁻¹ = 1 := Rat.mul_inv_cancel d0 hd0ne
+      have hcancelv : dv * dv⁻¹ = 1 := Rat.mul_inv_cancel dv hdvne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+  calc
+    (d0 * dm * dv) *
+        (a / (d0 * dm) + b / (dm * dv) - c / (d0 * dv)) =
+        (d0 * dm * dv) * (a / (d0 * dm)) +
+          (d0 * dm * dv) * (b / (dm * dv)) -
+          (d0 * dm * dv) * (c / (d0 * dv)) :=
+      distribute _ _ _ _
+    _ = a * dv + b * d0 - c * dm := by rw [hparts.1, hparts.2.1, hparts.2.2]
+    _ = h * h * h := hpolynomial
+
+/-- On the first-quadrant chart, midpoint subdivision increases the sum of
+cross-product chord certificates by at least one eighth of the parameter-step
+cube.  This is the uniform geometric part of the direct circumference margin;
+the remaining loss is only the explicitly budgeted square-root bisection. -/
+theorem midpoint_cross_refinement_gap_ge_cube_eighth
+    {u h : Rat} (hu : 0 <= u) (hh : 0 <= h) (huend : u + h <= 1) :
+    let m := u + h / 2
+    cross (point u) (point m) + cross (point m) (point (u + h)) >=
+      cross (point u) (point (u + h)) + (h * h * h) / 8 := by
+  dsimp
+  let m := u + h / 2
+  let d0 := 1 + u * u
+  let dm := 1 + m * m
+  let v := u + h
+  let dv := 1 + v * v
+  have hhalf : 0 <= h / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hh (by native_decide)
+  have huone : u <= 1 := by grind
+  have hm0 : 0 <= m := by
+    dsimp [m]
+    exact Rat.add_nonneg hu hhalf
+  have hmone : m <= 1 := by
+    dsimp [m]
+    have hhalf_le : h / 2 <= h := by
+      have hrecip : (2 : Rat)⁻¹ <= 1 := by native_decide
+      simpa [Rat.div_def, Rat.mul_comm] using
+        Rat.mul_le_mul_of_nonneg_left hrecip hh
+    grind
+  have hv0 : 0 <= v := by
+    dsimp [v]
+    exact Rat.add_nonneg hu hh
+  have hvone : v <= 1 := by simpa [v] using huend
+  have hsq_le_one {x : Rat} (hx : 0 <= x) (hxone : x <= 1) : x * x <= 1 := by
+    have hmul := Rat.mul_le_mul_of_nonneg_left hxone hx
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hd0pos : 0 < d0 := by
+    dsimp [d0]
+    exact one_add_square_pos u
+  have hdmpos : 0 < dm := by
+    dsimp [dm]
+    exact one_add_square_pos m
+  have hdvpos : 0 < dv := by
+    dsimp [dv]
+    exact one_add_square_pos v
+  have hd0le : d0 <= 2 := by
+    dsimp [d0]
+    have hsq := hsq_le_one hu huone
+    grind
+  have hdmle : dm <= 2 := by
+    dsimp [dm]
+    have hsq := hsq_le_one hm0 hmone
+    grind
+  have hdvle : dv <= 2 := by
+    dsimp [dv]
+    have hsq := hsq_le_one hv0 hvone
+    grind
+  have hDpos : 0 < d0 * dm * dv :=
+    Rat.mul_pos (Rat.mul_pos hd0pos hdmpos) hdvpos
+  have hDle : d0 * dm * dv <= 8 := by
+    have hdmv0 : 0 <= dm * dv :=
+      Rat.mul_nonneg (Rat.le_of_lt hdmpos) (Rat.le_of_lt hdvpos)
+    calc
+      d0 * dm * dv = d0 * (dm * dv) := by grind [Rat.mul_assoc]
+      _ <= 2 * (dm * dv) := Rat.mul_le_mul_of_nonneg_right hd0le hdmv0
+      _ = (2 * dm) * dv := by grind [Rat.mul_assoc]
+      _ <= (2 * 2) * dv :=
+        Rat.mul_le_mul_of_nonneg_right
+          (Rat.mul_le_mul_of_nonneg_left hdmle (by native_decide))
+          (Rat.le_of_lt hdvpos)
+      _ <= 2 * 2 * 2 :=
+        Rat.mul_le_mul_of_nonneg_left hdvle (by native_decide)
+      _ = 8 := by native_decide
+  have hcube : 0 <= h * h * h :=
+    Rat.mul_nonneg (Rat.mul_nonneg hh hh) hh
+  have hgap : (h * h * h) / 8 <=
+      cross (point u) (point m) + cross (point m) (point v) -
+        cross (point u) (point v) := by
+    apply Rat.le_of_mul_le_mul_right (c := 8 * (d0 * dm * dv))
+    · rw [Rat.div_def]
+      have h8ne : (8 : Rat) ≠ 0 := by native_decide
+      calc
+        ((h * h * h) / 8) * (8 * (d0 * dm * dv)) =
+            h * h * h * (d0 * dm * dv) := by
+          have hcancel : (8 : Rat)⁻¹ * 8 = 1 := Rat.inv_mul_cancel 8 h8ne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= h * h * h * 8 := Rat.mul_le_mul_of_nonneg_left hDle hcube
+        _ = (cross (point u) (point m) + cross (point m) (point v) -
+            cross (point u) (point v)) * (8 * (d0 * dm * dv)) := by
+          have hcleared := midpoint_cross_refinement_gap_cleared u h
+          have hcleared' : (d0 * dm * dv) *
+              (cross (point u) (point m) + cross (point m) (point v) -
+                cross (point u) (point v)) = h * h * h := by
+            simpa [m, d0, dm, v, dv] using hcleared
+          calc
+            (h * h * h) * 8 = 8 * ((d0 * dm * dv) *
+                (cross (point u) (point m) + cross (point m) (point v) -
+                  cross (point u) (point v))) := by
+              rw [hcleared']
+              grind [Rat.mul_comm]
+            _ = (cross (point u) (point m) + cross (point m) (point v) -
+                cross (point u) (point v)) * (8 * (d0 * dm * dv)) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact Rat.mul_pos (by native_decide) hDpos
+  change cross (point u) (point m) + cross (point m) (point v) >=
+    cross (point u) (point v) + (h * h * h) / 8
+  grind [Rat.sub_eq_add_neg]
+
 theorem point_cross_nonneg_of_nonneg_of_le
     {u v : Rat} (hu : 0 <= u) (hv : 0 <= v) (huv : u <= v) :
     0 <= cross (point u) (point v) := by
