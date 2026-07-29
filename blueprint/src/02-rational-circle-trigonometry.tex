@@ -1224,7 +1224,9 @@ bisection is the remaining implementation step for the non-endpoint rows.
 The checked Lean API is \code{FirstQuadrantArctanWitness} in the
 \code{RationalCircle.GeometricTrig} namespace; its reusable bridge is
 \code{arctan\_to\_sine\_cosine\_coordinates}.  The two green endpoint
-equations are formally checked in \code{ArctanGeometry}.
+rows are the concrete \code{zero} and \code{one} objects in that namespace,
+whose coordinate corollaries are checked as \code{zero\_coordinates} and
+\code{one\_coordinates}.
 \end{theorem}
 
 The table therefore colors only the arctangent equation.  Green means Lean

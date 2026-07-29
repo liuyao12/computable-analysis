@@ -6453,6 +6453,55 @@ theorem arctan_to_sine_cosine_coordinates
   · exact Trigonometry.sin_eq W.slope
   · exact Trigonometry.sin_sq_add_cos_sq W.slope
 
+/-- The zero-degree endpoint of the arctangent half-angle construction. -/
+theorem arctanGeom_zero_equiv_halfQuarterTurnRaw_zero :
+    (ArctanGeometry.arctanGeom (0 : Rat)).Equiv
+      (halfQuarterTurnRaw (0 : QuarterTurn)) := by
+  rw [ArctanGeometry.arctanGeom_zero]
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (RealRaw.ofRat (0 : Rat)) (halfQuarterTurnRaw (0 : QuarterTurn)) n n).2
+  unfold halfQuarterTurnRaw RealRaw.scaleRat RealRaw.scaleRatCompute
+  change ({ lo := 0, hi := 0 } : QInterval).Overlaps
+    (if 0 <= (0 : Rat) / 4 then
+      ({ lo := (0 : Rat) / 4 * (piCircleArea.compute n).lo,
+         hi := (0 : Rat) / 4 * (piCircleArea.compute n).hi } : QInterval)
+    else
+      ({ lo := (0 : Rat) / 4 * (piCircleArea.compute n).hi,
+         hi := (0 : Rat) / 4 * (piCircleArea.compute n).lo } : QInterval))
+  rw [if_pos (by native_decide : (0 : Rat) <= 0 / 4)]
+  unfold QInterval.Overlaps
+  have hzero : (0 : Rat) / 4 = 0 := by native_decide
+  rw [hzero]
+  simp
+
+/-- A reusable witness for the zero-degree special-value row. -/
+def zero : FirstQuadrantArctanWitness (0 : QuarterTurn) where
+  slope := 0
+  slope_nonneg := by native_decide
+  slope_le_one := by native_decide
+  arctan_geom_eq_half_angle := arctanGeom_zero_equiv_halfQuarterTurnRaw_zero
+
+/-- A reusable witness for the ninety-degree special-value row. -/
+def one : FirstQuadrantArctanWitness (1 : QuarterTurn) where
+  slope := 1
+  slope_nonneg := by native_decide
+  slope_le_one := by native_decide
+  arctan_geom_eq_half_angle :=
+    ArctanGeometry.arctanGeom_one_equiv_piCircleArea_quarter
+
+/-- Exact coordinate values selected by the zero-degree arctangent witness. -/
+theorem zero_coordinates :
+    zero.cosine = 1 /\ zero.sine = 0 /\
+      sq zero.sine + sq zero.cosine = 1 := by
+  native_decide
+
+/-- Exact coordinate values selected by the ninety-degree arctangent witness. -/
+theorem one_coordinates :
+    one.cosine = 0 /\ one.sine = 1 /\
+      sq one.sine + sq one.cosine = 1 := by
+  native_decide
+
 theorem cosine_eq_chart_cosine
     {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) :
     W.cosine = Trigonometry.cos W.slope := rfl
