@@ -884,6 +884,15 @@ another. The Pi score stays useful only as secondary integration coverage.
   compound-interest evaluator before being stored in the abstract
   `ExpProofs.e` handle. This is a certified constant construction, not yet a
   function-level `exp' = exp` theorem.
+  The generic rational-input power-series raw now also has its exact
+  zero-input normalization checked: every series stage at `0` is precisely
+  `[1,1]`, via `ExpProofs.expPowerSeries_zero_compute_eq`;
+  `expPowerSeries_zero_equiv_one` packages the raw equivalence and
+  `expPowerSeries_zero_valid` supplies validity.  The finite
+  repeated-multiplication evaluator has center exactly `1` at zero and
+  `expEuler_zero_equiv_one` proves its explicit-radius boxes overlap that
+  same point.  These initial-value facts are deliberately distinct from the
+  pending self-derivative and nonzero-input comparison theorems.
 - The two intended characterizations of the Euler base are now explicit
   obligations: the exponential solves `f' = f` on rational intervals, and a
   positive base is Euler exactly when its rational powers have derivative `1`

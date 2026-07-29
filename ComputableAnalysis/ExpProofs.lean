@@ -703,6 +703,13 @@ private theorem repeatedMulLoop_one_eq_pow
   rw [repeatedMulLoop_eq_foldl, foldl_repeatedMul_eq_mul_pow]
   grind
 
+private theorem eulerCenter_eq_repeatedMulLoop (x : Rat) (n : Nat) :
+    eulerCenter x n =
+      repeatedMulLoop
+        (1 + x / ((((n + 1) * (n + 1) : Nat) : Rat)))
+        (List.range ((n + 1) * (n + 1))) 1 := by
+  rfl
+
 private def powerSeriesLoopStep (x : Rat) (s : Rat × Rat)
     (k : Nat) : Rat × Rat :=
   (s.1 + s.2, s.2 * x / ((k : Rat) + 1))
@@ -755,6 +762,23 @@ private theorem powerSeriesState_succ (x : Rat) (N : Nat) :
   unfold powerSeriesState
   rw [List.range_succ, List.foldl_append]
   rfl
+
+/-- At the zero input the finite series state is exactly `(1, 0)` as soon as
+at least one term has been processed.  This is a finite-loop fact, kept
+separate from convergence or any completed-real interpretation. -/
+private theorem powerSeriesState_zero_of_pos (N : Nat) (hN : 0 < N) :
+    powerSeriesState (0 : Rat) N = (1, 0) := by
+  cases N with
+  | zero => omega
+  | succ N =>
+      by_cases hzero : N = 0
+      · subst N
+        native_decide
+      · have hNpos : 0 < N := Nat.pos_of_ne_zero hzero
+        rw [powerSeriesState_succ,
+          powerSeriesState_zero_of_pos N hNpos]
+        simp [powerSeriesLoopStep, Rat.div_def]
+        grind [Rat.add_zero]
 
 private theorem expPowerSeries_center_eq_state
     (x : Rat) (n : Nat) :
@@ -1074,6 +1098,82 @@ theorem stageRadius_nonneg (n : Nat) : 0 <= stageRadius n := by
     unfold stageRadius
     simp [hn]
     exact Rat.le_of_lt hpos
+
+/-- The finite power-series loop at zero has already consumed its initial
+constant term at every public stage. -/
+private theorem expPowerSeriesTerms_zero_pos (n : Nat) :
+    0 < expPowerSeriesTerms (0 : Rat) n := by
+  unfold expPowerSeriesTerms
+  change 0 < n + 8 + 2 * 0
+  omega
+
+theorem expPowerSeries_zero_center (n : Nat) :
+    powerSeriesCenter (0 : Rat) n = 1 := by
+  rw [expPowerSeries_center_eq_state,
+    powerSeriesState_zero_of_pos
+      (expPowerSeriesTerms (0 : Rat) n)
+      (expPowerSeriesTerms_zero_pos n)]
+
+theorem expPowerSeries_zero_tailRadius (n : Nat) :
+    powerSeriesTailRadius (0 : Rat) n = 0 := by
+  rw [expPowerSeries_tailRadius_eq_state,
+    powerSeriesState_zero_of_pos
+      (expPowerSeriesTerms (0 : Rat) n)
+      (expPowerSeriesTerms_zero_pos n)]
+  have habs : qabs (0 : Rat) = 0 := by native_decide
+  rw [habs]
+  grind [expPowerSeriesTailRatioBound, Rat.div_def]
+
+/-- The rational exponential power series has the exact initial value one at
+zero, stage by stage. -/
+theorem expPowerSeries_zero_compute_eq (n : Nat) :
+    (expPowerSeries (0 : Rat)).compute n = (RealRaw.ofRat 1).compute n := by
+  rw [expPowerSeries_compute_eq, expPowerSeries_zero_center,
+    expPowerSeries_zero_tailRadius, RealRaw.ofRat_compute]
+  native_decide
+
+theorem expPowerSeries_zero_equiv_one :
+    (expPowerSeries (0 : Rat)).Equiv (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (expPowerSeries (0 : Rat)) (RealRaw.ofRat 1) n n).2
+  rw [expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
+  simp [QInterval.Overlaps]
+
+theorem eulerCenter_zero (n : Nat) : eulerCenter (0 : Rat) n = 1 := by
+  rw [eulerCenter_eq_repeatedMulLoop]
+  have hbase :
+      1 + (0 : Rat) / ((((n + 1) * (n + 1) : Nat) : Rat)) = 1 := by
+    grind [Rat.div_def, Rat.sub_eq_add_neg]
+  rw [hbase, repeatedMulLoop_one_eq_pow]
+  have hone_pow : forall m : Nat, (1 : Rat) ^ m = 1 := by
+    intro m
+    induction m with
+    | zero => rfl
+    | succ m ih =>
+        rw [Rat.pow_succ, ih]
+        grind
+  exact hone_pow _
+
+/-- The repeated-multiplication exponential centers also satisfy the exact
+initial condition.  Their public boxes retain their explicit radius, so this
+theorem records overlap with one rather than claiming those boxes are point
+intervals. -/
+theorem expEuler_zero_compute_eq (n : Nat) :
+    (expEuler (0 : Rat)).compute n = intervalAround 1 (stageRadius n) := by
+  rw [expEuler_compute_eq, eulerCenter_zero]
+
+theorem expEuler_zero_equiv_one :
+    (expEuler (0 : Rat)).Equiv (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (expEuler (0 : Rat)) (RealRaw.ofRat 1) n n).2
+  rw [expEuler_zero_compute_eq, RealRaw.ofRat_compute]
+  unfold intervalAround QInterval.Overlaps
+  have hradius : 0 <= stageRadius n := stageRadius_nonneg n
+  constructor <;> grind [Rat.sub_eq_add_neg]
 
 private theorem two_inv_two_mul_nat (n : Nat) (hn : Not (n = 0)) :
     1 / (2 * (n : Rat)) + 1 / (2 * (n : Rat)) =
@@ -2469,6 +2569,11 @@ theorem expPowerSeries_valid (x : Rat) : PowerSeriesValid x :=
       (powerSeriesCenterMovement_of_stepMovement
         (expPowerSeries_center_step_movement x)))
     (expPowerSeries_widths_shrink x)
+
+/-- The exact zero-input series computation is therefore a valid raw real,
+in addition to being stagewise equal to the rational constant one. -/
+theorem expPowerSeries_zero_valid : (expPowerSeries (0 : Rat)).Valid := by
+  simpa [PowerSeriesValid] using expPowerSeries_valid (0 : Rat)
 
 theorem ePowerSeries_valid_of_nested
     (hnested : EPowerSeriesNested)

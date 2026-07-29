@@ -137,6 +137,33 @@ Picard--Lindel\"of theorem is a later extension requiring interval-certified
 Lipschitz maps and a separate contraction argument.
 \end{theorem}
 
+\begin{theorem}[Initial value of the two finite exponential evaluators]
+\label{thm:exponential-initial-value}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_zero_compute_eq}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_zero_valid}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_zero_equiv_one}
+\lean{ComputableAnalysis.ExpProofs.eulerCenter_zero}
+\lean{ComputableAnalysis.ExpProofs.expEuler_zero_equiv_one}
+\uses{def:positive-base-natural-powers}
+\leanok
+The two explicit rational algorithms already have the required initial
+condition.  For the power-series evaluator, every finite loop has processed
+the constant term and all later terms are literally zero at input \(0\).
+Thus its interval is exactly the rational point interval
+\[
+  \exp_{\mathrm{series}}(0)=[1,1]
+\]
+at every stage.  The repeated-multiplication evaluator has center
+\((1+0/m)^m=1\); its explicitly displayed radius remains, but its box
+overlaps the same point interval at every stage.  Lean records both facts as
+raw-real equivalences to \(1\), using only finite rational arithmetic.
+
+This is the initial-value part of the eventual theorem
+\(\exp'= \exp,\ \exp(0)=1\).  It is deliberately not presented as a
+derivative proof or as an identification of the series and Euler
+evaluators away from zero.
+\end{theorem}
+
 \section{Three definitions of \texorpdfstring{$e$}{e}}
 
 \begin{definition}[Power-series \texorpdfstring{$e$}{e}]

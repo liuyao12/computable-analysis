@@ -274,6 +274,15 @@ rational finite-sum/tail certificate, including nesting; it is not yet a
 `PartialRealFunRaw` analytic exponential, a derivative theorem, or an
 equivalence with compound interest and inverse-logarithmic constructions.
 
+The two concrete finite evaluators do now have a checked initial condition.
+`ExpProofs.expPowerSeries_zero_compute_eq n` identifies the series box at
+zero with the point interval `1` at every stage, while
+`ExpProofs.expEuler_zero_equiv_one` proves that the repeated-multiplication
+box at zero overlaps that same rational point interval at every stage.  The
+latter retains its deliberate displayed radius.  These are finite loop
+calculations and establish `exp(0) = 1`; they do not establish a derivative
+or agreement of the evaluators at nonzero input.
+
 There is, however, one fully certified constant-level exponential handle that
 is useful today.  `ExpProofs.e : Real` has the sharp compound-interest
 enclosure as its preferred representation and
@@ -298,6 +307,11 @@ open ComputableAnalysis
 #check ExpProofs.e
 #check ExpProofs.expPowerSeries_valid
 #check ExpProofs.expPowerSeriesRate
+#check ExpProofs.expPowerSeries_zero_compute_eq
+#check ExpProofs.expPowerSeries_zero_valid
+#check ExpProofs.expPowerSeries_zero_equiv_one
+#check ExpProofs.eulerCenter_zero
+#check ExpProofs.expEuler_zero_equiv_one
 #check ExpProofs.ePositive
 #check ExpProofs.eNaturalPower_valid
 #check ExpProofs.eNaturalPower_lower_bound
