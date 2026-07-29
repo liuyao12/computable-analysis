@@ -230,6 +230,10 @@ with a checked rational-interval restriction.  This makes the valid boxes
 available to a derivative or ODE certificate without conflating this
 representation step with the still-open analytic theorem
 \(\exp'=\exp\).
+On every selected interval containing (0), Lean also transports the exact
+series value (1) to the function-level evaluator.  Thus its future ODE
+certificate already has the required domain, validity, and initial-value
+data; only the self-derivative field remains to be proved.
 
 The first constant definition is the specialization at \(1\):
 \[

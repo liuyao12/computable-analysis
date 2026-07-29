@@ -1041,6 +1041,17 @@ theorem matrixPow_identity {dimension : Nat} :
   | n + 1 => by
       rw [matrixPow, matrixPow_identity n, matrixMul_identity_left]
 
+/-- Matrix powers split at a finite degree.  This is the local algebra used
+to group constant Peano--Baker terms into their even and odd parts. -/
+theorem matrixPow_add {dimension : Nat} (A : RatMatrix dimension) :
+    forall m n, matrixPow A (m + n) = matrixMul (matrixPow A m) (matrixPow A n)
+  | 0, n => by
+      simp [matrixPow, matrixMul_identity_left]
+  | m + 1, n => by
+      rw [show (m + 1) + n = (m + n) + 1 by omega]
+      rw [matrixPow, matrixPow, matrixPow_add A m n]
+      exact (matrixMul_assoc _ _ _).symm
+
 /-- The degree-`r` ordered-simplex term for a constant coefficient matrix.
 The scalar factor `T^r/r!` is the exact rational volume of the ordered
 simplex of duration `T`; the matrix factor keeps the chronological order
@@ -1090,6 +1101,94 @@ theorem constantPeanoBakerSimplexPartial_succ {dimension : Nat}
     constantPeanoBakerSimplexPartial A T (terms + 1) = matrixAdd
       (constantPeanoBakerSimplexPartial A T terms)
       (constantPeanoBakerSimplexTerm A T terms) := rfl
+
+/-! ## Finite rotation-series core
+
+The continuous rotation system is a later analytic construction.  Its
+constant-coefficient Peano--Baker coefficients already have the familiar
+finite even/odd split, which is the exact algebraic core of the eventual
+comparison with cosine and sine. -/
+
+namespace RotationSystem
+
+/-- The counter-clockwise quarter-turn generator. -/
+def generator : RatMatrix 2 :=
+  fun i =>
+    Fin.cases
+      (fun j => Fin.cases 0 (fun _ => -1) j)
+      (fun _ j => Fin.cases 1 (fun _ => 0) j)
+      i
+
+/-- Squaring the rotation generator is minus the identity.  This is a closed
+finite rational matrix calculation. -/
+theorem generator_square :
+    matrixMul generator generator = matrixScale (-1) (matrixIdentity 2) := by
+  funext i j
+  refine Fin.cases ?_ ?_ i
+  · refine Fin.cases ?_ ?_ j
+    · native_decide
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      native_decide
+  · intro i
+    refine Fin.cases ?_ (fun i => Fin.elim0 i) i
+    refine Fin.cases ?_ ?_ j
+    · native_decide
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      native_decide
+
+/-- The matrix-power normalization of the preceding square identity. -/
+theorem generator_pow_two :
+    matrixPow generator 2 = matrixScale (-1) (matrixIdentity 2) := by
+  change matrixMul generator (matrixMul generator (matrixIdentity 2)) =
+    matrixScale (-1) (matrixIdentity 2)
+  rw [matrixMul_identity_right]
+  exact generator_square
+
+/-- Even powers of the rotation generator are alternating scalar identities. -/
+theorem generator_pow_even (k : Nat) :
+    matrixPow generator (2 * k) =
+      matrixScale ((-1 : Rat) ^ k) (matrixIdentity 2) := by
+  induction k with
+  | zero =>
+      simp [matrixPow, matrixScale_one]
+  | succ k ih =>
+      rw [show 2 * (k + 1) = 2 + 2 * k by omega]
+      rw [matrixPow_add, generator_pow_two, ih]
+      rw [matrixMul_matrixScale_right, matrixMul_identity_right,
+        matrixScale_comp, Rat.pow_succ]
+
+/-- Odd powers of the rotation generator are the same alternating scalar
+times one quarter turn. -/
+theorem generator_pow_odd (k : Nat) :
+    matrixPow generator (2 * k + 1) =
+      matrixScale ((-1 : Rat) ^ k) generator := by
+  rw [matrixPow]
+  rw [generator_pow_even]
+  rw [matrixMul_matrixScale_right, matrixMul_identity_right]
+
+/-- The even constant Peano--Baker coefficient for rotation has exactly the
+alternating cosine-series matrix form. -/
+theorem simplexTerm_even (T : Rat) (k : Nat) :
+    constantPeanoBakerSimplexTerm generator T (2 * k) =
+      matrixScale
+        (T ^ (2 * k) / factorialRat (2 * k) * ((-1 : Rat) ^ k))
+        (matrixIdentity 2) := by
+  unfold constantPeanoBakerSimplexTerm
+  rw [generator_pow_even, matrixScale_comp]
+
+/-- The odd constant Peano--Baker coefficient for rotation has exactly the
+alternating sine-series matrix form. -/
+theorem simplexTerm_odd (T : Rat) (k : Nat) :
+    constantPeanoBakerSimplexTerm generator T (2 * k + 1) =
+      matrixScale
+        (T ^ (2 * k + 1) / factorialRat (2 * k + 1) * ((-1 : Rat) ^ k))
+        generator := by
+  unfold constantPeanoBakerSimplexTerm
+  rw [generator_pow_odd, matrixScale_comp]
+
+end RotationSystem
 
 /-- The finite sum of a sampled matrix family over the first `steps` times. -/
 def matrixSequenceSum {dimension : Nat} (B : Nat -> RatMatrix dimension) : Nat ->
@@ -1506,11 +1605,15 @@ theorem equivalent
 end SelfDerivativeVolterraComparison
 
 /-- The remaining analytic task for continuous Peano--Baker uniqueness,
-stated as a reusable finite-certificate provider. -/
+stated as a reusable finite-certificate provider.  It is invoked only after
+the two candidates have been shown to share both their rational initial point
+and their certified raw-real initial value. -/
 def SelfDerivativeVolterraUniqueness : Prop :=
   forall f g,
     (hf : SolvesSelfDerivativeOnInterval f) ->
     (hg : SolvesSelfDerivativeOnInterval g) ->
+    hf.initial = hg.initial ->
+    hf.initial_value.Equiv hg.initial_value ->
     Nonempty (SelfDerivativeVolterraComparison f g hf hg)
 
 /-- A supply of finite Volterra comparison certificates proves the project's
@@ -1518,8 +1621,8 @@ topology-free uniqueness principle for `f' = f` with a common initial value. -/
 theorem selfDerivativeInitialValueUnique_of_volterra
     (hvolterra : SelfDerivativeVolterraUniqueness) :
     SelfDerivativeInitialValueUnique := by
-  intro f g hf hg
-  rcases hvolterra f g hf hg with ⟨comparison⟩
+  intro f g hf hg hinitial hvalue
+  rcases hvolterra f g hf hg hinitial hvalue with ⟨comparison⟩
   exact comparison.equivalent
 
 end LinearODE

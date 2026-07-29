@@ -614,11 +614,14 @@ structure SolvesSelfDerivativeOnInterval (f : FunctionOnInterval) where
 
 The future proof should be constructive: estimate the difference of two
 solutions on a finite rational subdivision, rather than invoking a classical
-ODE theorem. -/
+ODE theorem.  The shared initial coordinate and raw-real initial value are
+explicit hypotheses; they are not inferred from the differential equation. -/
 def SelfDerivativeInitialValueUnique : Prop :=
   forall f g,
-    SolvesSelfDerivativeOnInterval f ->
-    SolvesSelfDerivativeOnInterval g ->
+    (hf : SolvesSelfDerivativeOnInterval f) ->
+    (hg : SolvesSelfDerivativeOnInterval g) ->
+    hf.initial = hg.initial ->
+    hf.initial_value.Equiv hg.initial_value ->
     FunctionOnInterval.Equivalent f g
 
 end ComputableAnalysis

@@ -524,8 +524,8 @@ def realPowerSeriesOnInterval (a b : Rat)
 exponential to the constructive uniqueness theorem for `f' = f`, `f(0)=1`.
 
 This is the calculus route: prove each representation solves the same
-differential equation with the same initial value, then use the uniqueness
-principle. -/
+differential equation at the same rational initial coordinate with equivalent
+certified initial values, then use the uniqueness principle. -/
 structure PowerSeriesLogIntegralInverseComparison (a b : Rat) where
   ps_valid :
     forall x, inDomainInterval a b x ->
@@ -535,6 +535,9 @@ structure PowerSeriesLogIntegralInverseComparison (a b : Rat) where
     SolvesSelfDerivativeOnInterval (realPowerSeriesOnInterval a b ps_valid)
   logInv_solves :
     SolvesSelfDerivativeOnInterval logInv.toFunctionOnInterval
+  same_initial : ps_solves.initial = logInv_solves.initial
+  initial_values_equiv :
+    ps_solves.initial_value.Equiv logInv_solves.initial_value
 
 theorem powerSeries_equiv_logIntegralInverse_on_interval
     (uniq : SelfDerivativeInitialValueUnique)
@@ -548,6 +551,8 @@ theorem powerSeries_equiv_logIntegralInverse_on_interval
     comparison.logInv.toFunctionOnInterval
     comparison.ps_solves
     comparison.logInv_solves
+    comparison.same_initial
+    comparison.initial_values_equiv
 
 /-- The exp/log comparison route obtained from the constructive
 Peano--Baker/Volterra uniqueness provider.  The provider is still an analytic

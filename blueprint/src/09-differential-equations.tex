@@ -176,6 +176,10 @@ certificate's \code{equivalent} theorem applies the proved factorial-tail
 lemma to obtain pointwise function agreement; the provider-shaped hypothesis
 \code{SelfDerivativeVolterraUniqueness} then yields
 \code{selfDerivativeInitialValueUnique\_of\_volterra}.
+Both interfaces explicitly require that the candidates have the same rational
+initial coordinate and equivalent certified raw values there.  Thus
+``zero-initial'' is a finite hypothesis to verify for a particular comparison,
+not an unstated consequence of the differential equation.
 This does not pretend that the analytic Volterra estimate is already proved:
 constructing the \code{error\_iterated} field from certified integral boxes is
 exactly the remaining continuous Peano--Baker task.  It does, however, fix
@@ -678,6 +682,35 @@ exponential and the constant-matrix Peano--Baker series.  It does not yet
 claim that these terms are the values of continuous ordered-simplex
 integrals: that remaining analytic identification is precisely what the
 future interval-simplex quadrature must certify.
+
+There is now also a checked finite rotation specialization.  For the
+counter-clockwise quarter-turn matrix
+\[
+ J=\begin{pmatrix}0&-1\\1&0\end{pmatrix},
+ \qquad J^2=-I,
+\]
+the named rational-matrix calculation \code{RotationSystem.generator\_square}
+and the power-splitting lemma \code{matrixPow\_add} prove, for every finite
+degree (k),
+\[
+ J^{2k}=(-1)^k I,
+ \qquad
+ J^{2k+1}=(-1)^kJ.
+\]
+Consequently the checked terms
+\code{RotationSystem.simplexTerm\_even} and
+\code{RotationSystem.simplexTerm\_odd} are exactly
+\[
+ \frac{T^{2k}}{(2k)!}J^{2k}
+   =(-1)^k\frac{T^{2k}}{(2k)!}I,
+ \qquad
+ \frac{T^{2k+1}}{(2k+1)!}J^{2k+1}
+   =(-1)^k\frac{T^{2k+1}}{(2k+1)!}J.
+\]
+This is the finite even--odd coefficient core of the later
+cosine--sine rotation matrix and hence of the intended Euler-identity
+comparison.  It deliberately stops before summing an infinite series or
+identifying that sum with a continuous ODE solution.
 
 For a square-zero sampled family, every selected word with two or more
 factors is zero. Therefore Lean proves the exact finite collapse

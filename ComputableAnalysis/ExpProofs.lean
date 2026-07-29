@@ -3382,6 +3382,27 @@ def expPowerSeriesOnInterval (a b : Rat) : FunctionOnInterval where
   defined_on := fun _ _ => trivial
   valid_on := expPowerSeriesFunction_valid
 
+/-- The total series-function wrapper inherits the exact power-series initial
+value at zero. -/
+theorem expPowerSeriesFunction_zero_equiv_one :
+    (expPowerSeriesFunction.evalRaw (0 : Rat) trivial).Equiv
+      (RealRaw.ofRat 1) := by
+  rw [expPowerSeriesFunction_evalRaw_eq]
+  exact expPowerSeries_zero_equiv_one
+
+/-- On every rational interval that contains zero, the packaged series
+function supplies the initial-value field required by a future
+`SolvesSelfDerivativeOnInterval` certificate.  The missing field is precisely
+the analytic self-derivative proof, not a domain or initial-value issue. -/
+theorem expPowerSeriesOnInterval_zero_initial_value
+    {a b : Rat} (hzero : inDomainInterval a b 0) :
+    (PartialRealFunRaw.apply (expPowerSeriesOnInterval a b).raw
+      (expPowerSeriesOnInterval a b).valid_on 0
+      ((expPowerSeriesOnInterval a b).defined_on 0 hzero)).Equiv
+      (RealRaw.ofRat 1) := by
+  change (expPowerSeries (0 : Rat)).Equiv (RealRaw.ofRat 1)
+  exact expPowerSeries_zero_equiv_one
+
 /-- The exact zero-input series computation is therefore a valid raw real,
 in addition to being stagewise equal to the rational constant one. -/
 theorem expPowerSeries_zero_valid : (expPowerSeries (0 : Rat)).Valid := by

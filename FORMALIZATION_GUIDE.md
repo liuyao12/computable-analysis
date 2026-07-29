@@ -298,10 +298,18 @@ explicit geometric bound
 rational finite-sum/tail certificate, including nesting.  It is now packaged
 as the total `ExpProofs.expPowerSeriesFunction : PartialRealFunRaw`, with
 `ExpProofs.expPowerSeriesOnInterval a b` supplying its valid restriction to a
-rational closed interval.  This representation layer is deliberately still
-not a derivative theorem. At the constant input `1`, it is now proved
+rational closed interval.  If the interval contains zero,
+`ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies exactly the
+initial-value equivalence required by `SolvesSelfDerivativeOnInterval`.
+This representation layer is deliberately still not a derivative theorem. At
+the constant input `1`, it is now proved
 equivalent to compound interest; the inverse-logarithmic construction remains
 a separate open bridge.
+
+When using `SelfDerivativeInitialValueUnique`, provide both pieces of common
+initial data explicitly: equality of the rational initial coordinates and a
+`RealRaw.Equiv` proof for their certified initial values.  The differential
+equation alone does not identify two solutions with different initial values.
 
 The two concrete finite evaluators do now have a checked initial condition.
 `ExpProofs.expPowerSeries_zero_compute_eq n` identifies the series box at
@@ -354,6 +362,8 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeriesFunction
 #check ExpProofs.expPowerSeriesFunction_valid
 #check ExpProofs.expPowerSeriesOnInterval
+#check ExpProofs.expPowerSeriesFunction_zero_equiv_one
+#check ExpProofs.expPowerSeriesOnInterval_zero_initial_value
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
@@ -449,6 +459,15 @@ uniqueness, chronological transition product, and a discrete Duhamel formula.
 product.  `LinearODE.peanoBakerFactorialTailShift` turns a nonnegative
 rational norm-length bound and requested rational error into an executable
 factorial-tail shift.
+
+The finite constant-coefficient layer also contains the exact rotation-series
+coefficient calculation. `LinearODE.RotationSystem.generator` is the rational
+matrix `[[0, -1], [1, 0]]`; `generator_square`, `generator_pow_even`, and
+`generator_pow_odd` prove its alternating even/odd powers. The corresponding
+`simplexTerm_even` and `simplexTerm_odd` normalize every finite
+constant Peano--Baker term to its cosine-type or sine-type coefficient. This
+is useful when formalizing a future Euler comparison, but it is not a claim
+that a continuous matrix series has already been summed.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a

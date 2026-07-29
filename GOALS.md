@@ -208,8 +208,11 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   The same evaluator is now the total `PartialRealFunRaw`
   `ExpProofs.expPowerSeriesFunction`, and
   `ExpProofs.expPowerSeriesOnInterval a b` gives its valid rational-interval
-  restriction. This is a certified representation layer, not yet an analytic
-  self-derivative theorem or a bridge to the other definitions. The
+  restriction. When zero is in that interval,
+  `ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies the exact
+  function-level initial equivalence required by the ODE interface. This is a
+  certified representation layer, not yet an analytic self-derivative theorem
+  or a bridge to the other definitions. The
   constant-level compound-interest representative is now additionally packaged as the
   positive base `ExpProofs.ePositive`: its lower interval endpoint is always
   at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural
@@ -994,6 +997,8 @@ another. The Pi score stays useful only as secondary integration coverage.
   `SolvesSelfDerivativeOnInterval` and `SelfDerivativeInitialValueUnique` in
   `ComputableAnalysis/Differential.lean`.  The reusable linear theorem is
   built from continuous Peano--Baker simplex boxes and factorial tail boxes;
+  its uniqueness interface explicitly requires equality of the rational
+  initial coordinate and equivalence of the two certified initial raw values.
   general nonlinear Picard--Lindelöf can later add interval-Lipschitz Picard
   iterates, rational short-interval contraction, and finite subdivision.
   Both are constructive existence-and-uniqueness data, not appeals to
@@ -1050,6 +1055,13 @@ another. The Pi score stays useful only as secondary integration coverage.
   `chronologicalProduct_pairwiseProductZero` and
   `peanoBakerDiscreteSum_pairwiseProductZero` collapse the exact transition
   to `I + matrixSequenceSum B N`.
+  The constant-coefficient rotation specialization is now checked as well:
+  `LinearODE.RotationSystem.generator_square` proves that the rational
+  quarter-turn matrix squares to `-I`, while `generator_pow_even`,
+  `generator_pow_odd`, `simplexTerm_even`, and `simplexTerm_odd` put every
+  finite Peano--Baker coefficient into its alternating cosine-type or
+  sine-type form. This is a finite algebraic precursor of the intended Euler
+  identity, not a continuous series or ODE-identification theorem.
 - The local matrix product is now proved associative by a finite double-sum
   interchange (`matrixMul_assoc`). Consequently
   `chronologicalProduct_split` proves the exact chronological composition law
