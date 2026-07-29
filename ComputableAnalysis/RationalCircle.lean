@@ -180,6 +180,16 @@ theorem parameter_mono (S : Stage)
   exact Rat.mul_le_mul_of_nonneg_right hijRat
     (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
 
+/-- A chart parameter stays in the first-quadrant interval whenever its
+finite index has not passed the last subdivision. -/
+theorem parameter_le_one (S : Stage)
+    (hS : 0 < S.subdivisions) {k : Nat} (hk : k <= S.subdivisions) :
+    S.parameter k <= 1 := by
+  calc
+    S.parameter k <= S.parameter S.subdivisions :=
+      parameter_mono S hS hk
+    _ = 1 := parameter_last S hS
+
 theorem parameter_succ_sub (S : Stage) (k : Nat) :
     S.parameter (k + 1) - S.parameter k =
       1 / (S.subdivisions : Rat) := by
@@ -662,6 +672,166 @@ theorem point_normSq (u : Rat) :
   rw [Rat.div_def, Rat.div_def]
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The positive polynomial core of midpoint curvature refinement.
+
+For a rational chart cell `[u, u + h]` in the first quadrant, this is the
+denominator-cleared inequality which says that the two midpoint curvature
+corrections pay for the defect between the coarse chord and the two rational
+cross-product cells.  It is purely ordered-field arithmetic; no square root,
+limit, or completeness principle is involved. -/
+theorem midpointCurvaturePolynomialBound
+    {u h : Rat} (hu : 0 <= u) (hh : 0 <= h) (huend : u + h <= 1) :
+    let m := u + h / 2
+    let d0 := 1 + u * u
+    let dm := 1 + m * m
+    let dv := 1 + (u + h) * (u + h)
+    let K := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+    8 * h * m * m * d0 * dm * dv <= K * (d0 * d0 + dv * dv) := by
+  let m : Rat := u + h / 2
+  let d0 : Rat := 1 + u * u
+  let dm : Rat := 1 + m * m
+  let dv : Rat := 1 + (u + h) * (u + h)
+  let K : Rat := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+  change 8 * h * m * m * d0 * dm * dv <= K * (d0 * d0 + dv * dv)
+  have hhhalf : h / 2 <= h := by
+    have hinv : (2 : Rat)⁻¹ <= 1 := by native_decide
+    simpa [Rat.div_def, Rat.mul_comm] using
+      Rat.mul_le_mul_of_nonneg_left hinv hh
+  have hh_le_one : h <= 1 := by
+    grind
+  have hhhalf_nonneg : 0 <= h / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hh (by native_decide)
+  have hu_le_one : u <= 1 := by
+    grind
+  have hm0 : 0 <= m := by
+    dsimp [m]
+    exact Rat.add_nonneg hu hhhalf_nonneg
+  have hmle : m <= 1 := by
+    dsimp [m]
+    have hsum : u + h / 2 <= u + h := (Rat.add_le_add_left).2 hhhalf
+    exact Rat.le_trans hsum huend
+  have ha0 : 0 <= 1 - h / 2 := by
+    have hhalf : h / 2 <= 1 := Rat.le_trans hhhalf hh_le_one
+    grind [Rat.sub_eq_add_neg]
+  have hmle_a : m <= 1 - h / 2 := by
+    dsimp [m]
+    grind [Rat.sub_eq_add_neg]
+  have hmsq_le : m * m <= (1 - h / 2) * (1 - h / 2) := by
+    have hleft : m * m <= (1 - h / 2) * m :=
+      Rat.mul_le_mul_of_nonneg_right hmle_a hm0
+    have hright : (1 - h / 2) * m <=
+        (1 - h / 2) * (1 - h / 2) :=
+      Rat.mul_le_mul_of_nonneg_left hmle_a ha0
+    exact Rat.le_trans hleft hright
+  have ha_le_one : 1 - h / 2 <= 1 := by
+    grind [Rat.sub_eq_add_neg]
+  have ha_sq_le : (1 - h / 2) * (1 - h / 2) <= 1 - h / 2 := by
+    have hmul := Rat.mul_le_mul_of_nonneg_left ha_le_one ha0
+    simpa [Rat.mul_comm] using hmul
+  have hhm_sq : h * m * m <= (1 : Rat) / 2 := by
+    have hscaled := Rat.mul_le_mul_of_nonneg_left
+      (Rat.le_trans hmsq_le ha_sq_le) hh
+    have hquad : h * (1 - h / 2) <= (1 : Rat) / 2 := by
+      have hsquare := ratSquare_nonneg (h - 1)
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+        Rat.mul_assoc, Rat.mul_comm]
+    calc
+      h * m * m = h * (m * m) := by grind [Rat.mul_assoc]
+      _ <= h * (1 - h / 2) := hscaled
+      _ <= (1 : Rat) / 2 := hquad
+  have hdm_ge : 2 * h * m * m <= dm := by
+    dsimp [dm]
+    have hdouble : 2 * (h * m * m) <= 1 := by
+      have hmul := Rat.mul_le_mul_of_nonneg_left hhm_sq
+        (by native_decide : (0 : Rat) <= 2)
+      calc
+        2 * (h * m * m) <= 2 * ((1 : Rat) / 2) := by
+          simpa [Rat.mul_assoc] using hmul
+        _ = 1 := by native_decide
+    have hm_sq_nonneg : 0 <= m * m := ratSquare_nonneg m
+    calc
+      2 * h * m * m = 2 * (h * m * m) := by
+        grind [Rat.mul_assoc]
+      _ <= 1 := hdouble
+      _ <= 1 + m * m := by grind
+      _ = dm := by rfl
+  have hd0_pos : 0 < d0 := by
+    dsimp [d0]
+    exact one_add_square_pos u
+  have hdm_pos : 0 < dm := by
+    dsimp [dm]
+    exact one_add_square_pos m
+  have hdv_pos : 0 < dv := by
+    dsimp [dv]
+    exact one_add_square_pos (u + h)
+  have hd0_nonneg : 0 <= d0 := Rat.le_of_lt hd0_pos
+  have hdm_nonneg : 0 <= dm := Rat.le_of_lt hdm_pos
+  have hdv_nonneg : 0 <= dv := Rat.le_of_lt hdv_pos
+  have hfactor0 : 0 <= 2 - h - 2 * u := by
+    have hfirst : 0 <= 1 - u - h := by
+      grind [Rat.sub_eq_add_neg]
+    have hsecond : 0 <= 1 - u := by
+      grind [Rat.sub_eq_add_neg]
+    grind [Rat.sub_eq_add_neg]
+  have hfactor1 : 0 <= h + 2 * u + 2 := by
+    grind
+  have hK_ge : 2 * dm * dm <= K := by
+    have hsq : 0 <= h * h := ratSquare_nonneg h
+    have hterm : 0 <= h * h * (2 - h - 2 * u) * (h + 2 * u + 2) / 8 := by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg
+        (Rat.mul_nonneg (Rat.mul_nonneg hsq hfactor0) hfactor1)
+        (by native_decide)
+    have hformula :
+        K - 2 * dm * dm =
+          h * h * (2 - h - 2 * u) * (h + 2 * u + 2) / 8 := by
+      dsimp [K, d0, dm, dv, m]
+      rw [Rat.div_def]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+    have hdiff : 0 <= K - 2 * dm * dm := by
+      rw [hformula]
+      exact hterm
+    grind [Rat.sub_eq_add_neg]
+  have hsum_ge : 2 * d0 * dv <= d0 * d0 + dv * dv := by
+    have hsquare := ratSquare_nonneg (dv - d0)
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  have hsum_nonneg : 0 <= d0 * d0 + dv * dv := by
+    exact Rat.add_nonneg
+      (Rat.mul_nonneg hd0_nonneg hd0_nonneg)
+      (Rat.mul_nonneg hdv_nonneg hdv_nonneg)
+  have htwo_dm_sq_nonneg : 0 <= 2 * dm * dm := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg (by native_decide) hdm_nonneg) hdm_nonneg
+  have hproduct_ge : 4 * dm * dm * d0 * dv <= K * (d0 * d0 + dv * dv) := by
+    have hright : (2 * dm * dm) * (2 * d0 * dv) <=
+        (2 * dm * dm) * (d0 * d0 + dv * dv) :=
+      Rat.mul_le_mul_of_nonneg_left hsum_ge htwo_dm_sq_nonneg
+    have hleft : (2 * dm * dm) * (d0 * d0 + dv * dv) <=
+        K * (d0 * d0 + dv * dv) :=
+      Rat.mul_le_mul_of_nonneg_right hK_ge hsum_nonneg
+    calc
+      4 * dm * dm * d0 * dv = (2 * dm * dm) * (2 * d0 * dv) := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= (2 * dm * dm) * (d0 * d0 + dv * dv) := hright
+      _ <= K * (d0 * d0 + dv * dv) := hleft
+  have hscale_nonneg : 0 <= 4 * d0 * dm * dv := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg
+        (Rat.mul_nonneg (by native_decide) hd0_nonneg) hdm_nonneg)
+      hdv_nonneg
+  have hscaled := Rat.mul_le_mul_of_nonneg_right hdm_ge hscale_nonneg
+  calc
+    8 * h * m * m * d0 * dm * dv =
+        (2 * h * m * m) * (4 * d0 * dm * dv) := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= dm * (4 * d0 * dm * dv) := hscaled
+    _ = 4 * dm * dm * d0 * dv := by
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= K * (d0 * d0 + dv * dv) := hproduct_ge
 
 theorem samplePoint_normSq (S : Stage) (k : Nat) :
     (S.samplePoint k).x * (S.samplePoint k).x +

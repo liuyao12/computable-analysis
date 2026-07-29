@@ -786,6 +786,27 @@ proves that this one certificate would close the public direct lower-path
 refinement.  No completed-real square root or completeness principle occurs in
 this reduction.
 
+The geometric part of that remaining certificate has a new checked
+ordered-field core.  For a chart cell \([u,u+h]\subseteq[0,1]\), with midpoint
+\(m=u+h/2\), write \(d_0=1+u^2\), \(d_m=1+m^2\),
+\(d_v=1+(u+h)^2\), and
+\[
+ K=(1+um)d_v+(1+m(u+h))d_0.
+\]
+Lean proves
+\[
+  8hm^2d_0d_md_v \le K(d_0^2+d_v^2)
+\]
+in \code{RationalCircle.Stage.midpointCurvaturePolynomialBound}.  This is
+the denominator-cleared positive-polynomial inequality that pays for the
+curvature defect when a chord is split at its rational midpoint.  The related
+fact \code{RationalCircle.Stage.parameter\_le\_one} makes the chart-domain
+hypothesis explicit.  What is still open is deliberately narrower: package
+this identity into the two curvature chord certificates and show that its
+strict rational margin dominates the two chosen bisection widths.  Thus it is
+progress on the original circumference diagnostic, not another Pi scoreboard
+row.
+
 There is nevertheless a separately named certified representative,
 \code{piCircumferenceStabilized}. At stage \(n\), it takes the finite prefix
 of direct perimeter intervals, widens each by the public rational radius
