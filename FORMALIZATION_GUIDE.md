@@ -445,6 +445,15 @@ prove the resulting nonnegative rational is at least the coarse chord in the
 squared sense.  This exact target is
 `PiProofs.AdjacentChordSecantMarginCoversFineWidths`; its proved reduction
 theorem is `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin`.
+Before estimating that margin, normalize the bisection budget explicitly.
+`sqrtApproxOnDomain_width_eq_unit` says that a nonzero square-root bisection
+stage `m` for a rational input at most `1` has width exactly `1 / 2^(m + 9)`.
+For an adjacent stage chord, obtain that input hypothesis from
+`RationalCircle.Stage.samplePoint_segmentNormSq_le_one_of_two_le_subdivisions`.
+Thus the two fine widths in the margin target are literal dyadic rational
+terms, rather than unspecified quantities known only to tend to zero.  This
+reduction is a necessary local ingredient; it does not discharge
+`AdjacentChordSecantMarginCoversFineWidths`.
 
 ## Pi as a regression suite, not a target namespace
 

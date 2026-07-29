@@ -372,6 +372,21 @@ theorem sqrtApproxOnDomain_width_eq_positive_stage
   rw [sqrtApproxOnDomain_width_eq]
   rw [sqrtFuel_sqrtStageEps_eq q n hn]
 
+/-- On a rational input in the unit interval, the square-root bisection
+box has an exact dyadic width.  The extra nine bisections are the fixed
+initial safety margin of the public square-root algorithm.  This is useful
+when a geometric construction chooses its evaluation precision from a mesh
+size: it gives a literal error budget rather than only convergence. -/
+theorem sqrtApproxOnDomain_width_eq_unit
+    {q : Rat} (h : sqrtDomain q) (hq : q <= 1) (n : Nat) (hn : n ≠ 0) :
+    (sqrtApproxOnDomain q h n).width =
+      1 / (((2 ^ (n + 9) : Nat) : Rat)) := by
+  rw [sqrtApproxOnDomain_width_eq_positive_stage q h n hn]
+  rw [sqrtUpperBound_eq_one hq]
+  change 1 / (((2 ^ (n + 1 + 8) : Nat) : Rat)) =
+    1 / (((2 ^ (n + 9) : Nat) : Rat))
+  congr 3 <;> omega
+
 theorem sqrtStageEps_den_mono {n m : Nat} (hnm : n <= m) :
     (sqrtStageEps n).val.den <= (sqrtStageEps m).val.den := by
   by_cases hm0 : m = 0
