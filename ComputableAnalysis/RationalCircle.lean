@@ -882,6 +882,98 @@ theorem secantChordLower_samplePoint_ge_cross_add_step_cube_eighth
   simpa [samplePoint, parameter_succ_sub] using
     (secantChordLower_point_ge_cross_add_cube_eighth hu huv hv)
 
+/-- Combining the exact midpoint cross gain with the two cubic secant
+certificates gives a single same-units lower budget for a split chart chord.
+The gain `5 h^3 / 32` is entirely rational and precedes the separate
+square-root-bisection loss in the original direct circumference algorithm. -/
+theorem midpoint_secant_refinement_ge_cross_add_five_cube_thirtysecond
+    {u h : Rat} (hu : 0 <= u) (hpos : 0 < h) (huend : u + h <= 1) :
+    let m := u + h / 2
+    cross (point u) (point (u + h)) + (5 * (h * h * h)) / 32 <=
+      secantChordLower (point u) (point m) +
+        secantChordLower (point m) (point (u + h)) := by
+  dsimp
+  let m := u + h / 2
+  have hh : 0 <= h := Rat.le_of_lt hpos
+  have hhalfpos : 0 < h / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_pos hpos (by native_decide)
+  have hhalf : 0 <= h / 2 := Rat.le_of_lt hhalfpos
+  have hm0 : 0 <= m := by
+    dsimp [m]
+    exact Rat.add_nonneg hu hhalf
+  have hhalf_le : h / 2 <= h := by
+    have hrecip : (2 : Rat)⁻¹ <= 1 := by native_decide
+    simpa [Rat.div_def, Rat.mul_comm] using
+      Rat.mul_le_mul_of_nonneg_left hrecip hh
+  have hmone : m <= 1 := by
+    dsimp [m]
+    grind
+  have hum : u < m := by
+    dsimp [m]
+    grind [Rat.sub_eq_add_neg]
+  have hmv : m < u + h := by
+    dsimp [m]
+    grind [Rat.sub_eq_add_neg]
+  have hleftRaw := secantChordLower_point_ge_cross_add_cube_eighth
+    hu hum hmone
+  have hrightRaw := secantChordLower_point_ge_cross_add_cube_eighth
+    hm0 hmv huend
+  have hleftCorrection :
+      (h * h * h) / 64 =
+        ((m - u) * (m - u) * (m - u)) / 8 := by
+    dsimp [m]
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  have hrightCorrection :
+      (h * h * h) / 64 =
+        ((u + h - m) * (u + h - m) * (u + h - m)) / 8 := by
+    dsimp [m]
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  have hleft :
+      cross (point u) (point m) + (h * h * h) / 64 <=
+        secantChordLower (point u) (point m) := by
+    calc
+      cross (point u) (point m) + (h * h * h) / 64 =
+          cross (point u) (point m) +
+            ((m - u) * (m - u) * (m - u)) / 8 := by
+        rw [hleftCorrection]
+      _ <= secantChordLower (point u) (point m) := hleftRaw
+  have hright :
+      cross (point m) (point (u + h)) + (h * h * h) / 64 <=
+        secantChordLower (point m) (point (u + h)) := by
+    calc
+      cross (point m) (point (u + h)) + (h * h * h) / 64 =
+          cross (point m) (point (u + h)) +
+            ((u + h - m) * (u + h - m) * (u + h - m)) / 8 := by
+        rw [hrightCorrection]
+      _ <= secantChordLower (point m) (point (u + h)) := hrightRaw
+  have hcross := midpoint_cross_refinement_gap_ge_cube_eighth
+    hu hh huend
+  calc
+    cross (point u) (point (u + h)) + (5 * (h * h * h)) / 32 =
+        (cross (point u) (point (u + h)) + (h * h * h) / 8) +
+          (h * h * h) / 64 + (h * h * h) / 64 := by
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    _ <=
+        (cross (point u) (point m) + cross (point m) (point (u + h))) +
+          (h * h * h) / 64 + (h * h * h) / 64 := by
+      exact (Rat.add_le_add_right).2 ((Rat.add_le_add_right).2 hcross)
+    _ =
+        (cross (point u) (point m) + (h * h * h) / 64) +
+          (cross (point m) (point (u + h)) + (h * h * h) / 64) := by
+      grind [Rat.add_assoc, Rat.add_comm]
+    _ <= secantChordLower (point u) (point m) +
+          secantChordLower (point m) (point (u + h)) := by
+      calc
+        (cross (point u) (point m) + (h * h * h) / 64) +
+            (cross (point m) (point (u + h)) + (h * h * h) / 64) <=
+            secantChordLower (point u) (point m) +
+              (cross (point m) (point (u + h)) + (h * h * h) / 64) :=
+          (Rat.add_le_add_right).2 hleft
+        _ <= secantChordLower (point u) (point m) +
+              secantChordLower (point m) (point (u + h)) :=
+          (Rat.add_le_add_left).2 hright
+
 /-- The cross-product certificate of one adjacent first-quadrant chart cell
 is at least half its rational parameter mesh. -/
 theorem samplePoint_cross_ge_half_step

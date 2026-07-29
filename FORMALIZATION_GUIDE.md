@@ -440,9 +440,14 @@ states that the common positive denominator times the gain is `h^3`, and
 the usable bound `coarseCross + h^3 / 8 <= leftCross + rightCross` on
 `[0,1]`.  Its finite-stage transport,
 `PiProofs.adjacentChordCross_refinesByDoubling_with_cube_eighth`, supplies
-this cross-product gain directly for `k < stage`.  Combine it with the two fine secant
-gains and the explicit dyadic width budget; do not replace it by an appeal to
-exact chord lengths.
+this cross-product gain directly for `k < stage`.  The combined generic
+certificate is also checked as
+`RationalCircle.Stage.midpoint_secant_refinement_ge_cross_add_five_cube_thirtysecond`:
+splitting a chart cell of mesh `h` makes the two secant certificates sum to at
+least `coarseCross + 5 * h^3 / 32`.  It packages the `h^3 / 8` cross gain and
+the two `h^3 / 64` secant gains in the units needed by the remaining margin.
+The next step is solely to compare that explicit rational slack with the
+dyadic width budget; do not replace it by an appeal to exact chord lengths.
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,
