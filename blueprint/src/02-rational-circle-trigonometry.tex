@@ -758,6 +758,13 @@ rather than merely a convergence bound.  This is the finite error budget used
 when comparing a coarse chord with its two fine successors.  It is a local
 input to the still-open direct endpoint-refinement certificate, not a claim
 that the circumference algorithm has become valid.
+
+For the direct secant-margin target, Lean now substitutes these two fine
+widths by the displayed dyadic rational budget.  Thus the remaining margin is
+an entirely rational inequality between the coarse squared chord and two
+secant certificates minus two copies of \(2^{-(2s+9)}\), where \(s\) is the
+coarse stage.  This normalized target is definitionally transported back to
+the original interval statement; no exact square root is selected.
 \end{definition}
 
 \begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}
