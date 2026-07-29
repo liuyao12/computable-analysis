@@ -52,6 +52,35 @@ from \((-1,0)\).  The endpoint \(t=0\) gives \((1,0)\), and \(t=1\) gives
 \((0,1)\).
 \end{remark}
 
+\begin{theorem}[Rational secant lower certificate]
+\label{thm:rational-secant-lower}
+\uses{rem:rational-circle-point}
+\leanok
+For an oriented nondegenerate chord \(p\mathbin{\to}q\) of the rational unit
+circle, put
+\[
+ c=\operatorname{cross}(p,q),\qquad d=1-p\mathbin{\cdot}q.
+\]
+When \(c>0\) and \(d\ge0\), the rational number
+\[
+ L_{\mathrm{sec}}(p,q)=c+\frac{d^2}{2c+d}
+\]
+is nonnegative and satisfies
+\[
+ L_{\mathrm{sec}}(p,q)^2\le\lVert q-p\rVert^2.
+\]
+The exact nonnegative remainder after clearing the denominator is
+\[
+ \lVert q-p\rVert^2-L_{\mathrm{sec}}(p,q)^2
+   =\frac{2cd^3}{(2c+d)^2}.
+\]
+Thus this is a stronger rational lower certificate than the bare cross
+product, with the cubic correction scale needed for short chord refinements.
+It is a finite ordered-field identity and does not select an exact square
+root.  It is intended for the remaining direct chord-path diagnostic, not as
+another \(\pi\) scoreboard row.
+\end{theorem}
+
 \begin{figure}[!htbp]
 \centering
 \begin{tikzpicture}[scale=4.5, line cap=round, line join=round, >=stealth]

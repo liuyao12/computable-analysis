@@ -420,6 +420,13 @@ that one equation is certified. At present, only the two endpoint witness
 equations are fully proved; the non-endpoint rows remain computation-ready
 targets until their raw-slope equalities are formalized.
 
+For rational-circle chord refinements, use
+`RationalCircle.Stage.secantChordLower` rather than selecting a square root.
+For a nondegenerate positively oriented chord it supplies
+`cross + (1 - dot)^2 / (2 * cross + 1 - dot)` and its squared lower-bound
+theorem. This is the stronger rational certificate for the remaining direct
+circumference diagnostic; it is not a new Pi-registry presentation.
+
 ## Pi as a regression suite, not a target namespace
 
 `PiProofs.PiCoverageBridge` is deliberately a compact list of distinct

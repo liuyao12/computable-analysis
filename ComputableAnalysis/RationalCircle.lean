@@ -456,6 +456,83 @@ theorem segmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-- A rational lower certificate for the length of an oriented unit-circle
+chord.  The denominator is positive for a nondegenerate positively oriented
+chord, and the correction has the natural cubic scale near a short chord.
+It is deliberately a rational expression: no exact square root is selected. -/
+def secantChordLower (p q : PiCirclePoint) : Rat :=
+  let c := cross p q
+  let d := 1 - dot p q
+  c + sq d / (2 * c + d)
+
+/-- The rational secant certificate is nonnegative on an oriented
+nondegenerate unit-circle chord. -/
+theorem secantChordLower_nonneg
+    {p q : PiCirclePoint}
+    (hcross : 0 < cross p q) (hdeficit : 0 <= 1 - dot p q) :
+    0 <= secantChordLower p q := by
+  let c := cross p q
+  let d := 1 - dot p q
+  have hc : 0 <= c := Rat.le_of_lt hcross
+  have hden : 0 < 2 * c + d := by
+    have htwo : 0 < (2 : Rat) := by native_decide
+    have htwoc : 0 < 2 * c := Rat.mul_pos htwo hcross
+    grind
+  have hinv : 0 <= (2 * c + d)⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hden)
+  dsimp [secantChordLower, c, d]
+  rw [Rat.div_def]
+  exact Rat.add_nonneg hc (Rat.mul_nonneg (rat_sq_nonneg _) hinv)
+
+/-- On a unit-circle chord, the secant certificate lies below the chord
+length in the squared rational sense.  The exact remainder is
+`2*c*d^3/(2*c+d)^2`, hence nonnegative from the orientation and dot-deficit
+facts alone. -/
+theorem secantChordLower_sq_le_segmentNormSq_of_unit
+    {p q : PiCirclePoint}
+    (hp : normSq p = 1) (hq : normSq q = 1)
+    (hcross : 0 < cross p q) (hdeficit : 0 <= 1 - dot p q) :
+    sq (secantChordLower p q) <= segmentNormSq p q := by
+  let c := cross p q
+  let d := 1 - dot p q
+  let r := c + sq d / (2 * c + d)
+  have hc : 0 <= c := Rat.le_of_lt hcross
+  have hden : 0 < 2 * c + d := by
+    have htwo : 0 < (2 : Rat) := by native_decide
+    have htwoc : 0 < 2 * c := Rat.mul_pos htwo hcross
+    grind
+  have hden_ne : 2 * c + d ≠ 0 := Rat.ne_of_gt hden
+  have hrem :
+      sq c + sq d - sq r =
+        (2 * c * d * d * d) / sq (2 * c + d) := by
+    dsimp [r]
+    unfold sq
+    rw [Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+    have hcancel : (2 * c + d) * (2 * c + d)⁻¹ = 1 :=
+      Rat.mul_inv_cancel _ hden_ne
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  have hrem_nonneg : 0 <= (2 * c * d * d * d) / sq (2 * c + d) := by
+    have htwoc : 0 <= 2 * c :=
+      Rat.mul_nonneg (by native_decide) hc
+    have hnum : 0 <= 2 * c * d * d * d := by
+      exact Rat.mul_nonneg
+        (Rat.mul_nonneg (Rat.mul_nonneg htwoc hdeficit) hdeficit) hdeficit
+    have hden_sq : 0 < sq (2 * c + d) := by
+      unfold sq
+      exact Rat.mul_pos hden hden
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden_sq))
+  have hsum : sq r <= sq c + sq d := by
+    have hdiff : 0 <= sq c + sq d - sq r := by
+      rw [hrem]
+      exact hrem_nonneg
+    grind [Rat.sub_eq_add_neg]
+  have hunit := segmentNormSq_eq_cross_sq_add_dot_deficit_sq_of_unit hp hq
+  dsimp [secantChordLower, c, d, r] at hsum ⊢
+  rw [hunit]
+  exact hsum
+
 theorem cross_sq_le_segmentNormSq_of_unit
     {p q : PiCirclePoint}
     (hp : normSq p = 1) (_hq : normSq q = 1) :

@@ -1286,6 +1286,12 @@ students actually compute.
   finite margin inequality into the original local refinement theorem.  The
   still-open work is the universal rational margin estimate itself, not an
   appeal to real square roots or completeness.
+  `RationalCircle.Stage.secantChordLower` now provides a stronger generic
+  rational lower certificate, `c + d^2/(2*c+d)` for chord cross product `c`
+  and dot deficit `d`. Its proved squared remainder
+  `2*c*d^3/(2*c+d)^2` supplies the cubic correction scale appropriate to the
+  next version of that local margin argument; it is a prerequisite, not a
+  new Pi-scoreboard row.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
