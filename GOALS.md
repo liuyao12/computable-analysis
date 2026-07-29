@@ -23,14 +23,15 @@ not a description of the current module graph. The checked blueprint
   nested inside earlier stages, and widths shrink to zero.  Any clean bound
   such as `C/n^r` or `C*rho^n` is evidence for this, not the definition.
   `ComplexRaw.ValidCompute` has the same shape for rectangular boxes.
-- `RealRaw` has a single optional `rate` metadata field.  The rate is not a
-  second kind of real number: it is either unknown, eventually polynomial, or
-  eventually geometric.  See `RealRaw.Rate` in
+- `RealRaw.Rate` is optional rate metadata that a concrete evaluator may
+  expose alongside its validity theorem.  It is not a field of `RealRaw` and
+  not a second kind of real number: it is either unknown, eventually
+  polynomial, or eventually geometric.  See `RealRaw.Rate` in
   `ComputableAnalysis/Basic.lean`.
 - For concrete algorithms, record public rate information as eventual upper
-  bounds, not necessarily exact widths.  For pi, `piLeibnizRate` records width
-  `<= 4/n`, while `piMachinRate` records width `<= 20*(1/2)^n`, i.e.
-  `20/2^n`.
+  bounds, not necessarily exact widths.  For pi,
+  `PiProofs.piLeibnizRate` records width `<= 4/n`, while
+  `PiProofs.piMachinRate` records width `<= 20*(1/2)^n`, i.e. `20/2^n`.
 - Equality of raw representatives is same-stage rational-interval overlap:
   `RealRaw.Equiv x y` means that `x.compute n` and `y.compute n` overlap for
   every `n`. Validity makes this relation transitive. The project-facing
@@ -1655,12 +1656,11 @@ scoreboard above.
   `Pi.leibniz_machin_overlap_of_safe_arctan_sound` connects that safe analytic
   theorem to `Pi.LeibnizMachinOverlap`.
 - Quantitative convergence is now measured for the concrete algorithms:
-  `piMachin_width_eq_ratio_mul_leibniz_width` proves that the Machin interval
-  width is the Leibniz interval width times
-  `machinToLeibnizRatioAt n = 4*(1/5)^(4*n+1) + (1/239)^(4*n+1)` at the shared
-  natural alternating-series stage.  The checked estimates
-  `machinRatioAt_one_lt_one_over_thirty` and
-  `machinRatioAt_five_lt_one_over_ten_million` record the speedup.
+  `PiProofs.piMachin_compute_width_eq` gives the exact width of the one Machin
+  evaluator as the sum of its two literal alternating-series widths, and
+  `PiProofs.piMachin_compute_width_le_geometric_half` gives the simple public
+  bound `20/2^n`.  This rate belongs to the Machin runtime boxes themselves,
+  not to a width transported across its equivalence with area pi.
 - The series layer now owns the natural alternating-stage representation:
   `Series.evenOddInterval partials n` returns the interval between the `2n`th
   and `(2n+1)`st partial sums, and `Series.AlternatingRaw.interval` uses this

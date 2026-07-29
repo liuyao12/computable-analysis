@@ -710,6 +710,110 @@ def kernelComparisonAtOne_of_powerSeriesEqualsRectangleKernelAtOne
 theorem machinValid : MachinValid :=
   machinValid_of_arctanValid arctanValid
 
+/-- At a nonnegative series input, the literal arctangent evaluator has the
+expected alternating-series width.  This makes convergence-rate statements
+for concrete combinations such as Machin refer to their actual runtime boxes,
+not to a transported equivalence. -/
+theorem arctan_compute_width_eq_of_nonnegative
+    (x : Rat) (hx : 0 <= x) (n : Nat) :
+    ((arctan x).compute n).width =
+      x ^ (4 * n + 1) / (4 * (n : Rat) + 1) := by
+  rw [ArctanValidity.arctan_compute_nonneg x hx]
+  unfold ArctanValidity.positiveRaw QInterval.width
+  exact ArctanValidity.width_eq x n
+
+private theorem arctan_width_le_geometric_half
+    (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) (hx4 : x ^ 4 <= (1 : Rat) / 2)
+    (n : Nat) :
+    ((arctan x).compute n).width <= ((1 : Rat) / 2) ^ n := by
+  rw [arctan_compute_width_eq_of_nonnegative x hx0]
+  have hpower : x ^ (4 * n + 1) <= ((1 : Rat) / 2) ^ n := by
+    induction n with
+    | zero =>
+        simpa using hx1
+    | succ n ih =>
+        have hnonneg : 0 <= x ^ (4 * n + 1) := Rat.pow_nonneg hx0
+        have hhalf_nonneg : 0 <= (1 : Rat) / 2 := by native_decide
+        have hmul := Rat.mul_le_mul ih hx4 hnonneg hhalf_nonneg
+        have hleft : x ^ (4 * (n + 1) + 1) =
+            x ^ (4 * n + 1) * x ^ 4 := by
+          rw [show 4 * (n + 1) + 1 = (4 * n + 1) + 4 by omega]
+          rw [Rat.pow_add]
+        have hright : ((1 : Rat) / 2) ^ (n + 1) =
+            ((1 : Rat) / 2) ^ n * ((1 : Rat) / 2) := by
+          rw [Rat.pow_succ]
+        rw [hleft, hright]
+        exact hmul
+  have hdenpos : 0 < 4 * (n : Rat) + 1 := by
+    have : (0 : Rat) <= 4 * (n : Rat) := by
+      exact Rat.mul_nonneg (by native_decide) Rat.natCast_nonneg
+    grind
+  apply (Rat.div_le_iff hdenpos).2
+  calc
+    x ^ (4 * n + 1) <= ((1 : Rat) / 2) ^ n := hpower
+    _ = ((1 : Rat) / 2) ^ n * 1 := by grind
+    _ <= ((1 : Rat) / 2) ^ n * (4 * (n : Rat) + 1) := by
+      apply Rat.mul_le_mul_of_nonneg_left
+      · grind
+      · exact Rat.pow_nonneg (by native_decide)
+
+private theorem arctan_one_fifth_width_le_geometric_half (n : Nat) :
+    ((arctan ((1 : Rat) / 5)).compute n).width <= ((1 : Rat) / 2) ^ n := by
+  apply arctan_width_le_geometric_half
+  · native_decide
+  · native_decide
+  · native_decide
+
+private theorem arctan_one_239_width_le_geometric_half (n : Nat) :
+    ((arctan ((1 : Rat) / 239)).compute n).width <= ((1 : Rat) / 2) ^ n := by
+  apply arctan_width_le_geometric_half
+  · native_decide
+  · native_decide
+  · native_decide
+
+/-- Exact width formula for the single Machin power-series computation. -/
+theorem piMachin_compute_width_eq (n : Nat) :
+    (piMachin.compute n).width =
+      (16 : Rat) *
+          (((1 : Rat) / 5) ^ (4 * n + 1) / (4 * (n : Rat) + 1)) +
+        4 * (((1 : Rat) / 239) ^ (4 * n + 1) / (4 * (n : Rat) + 1)) := by
+  unfold piMachin
+  rw [RealRaw.natScale_width, RealRaw.sub_width, RealRaw.natScale_width,
+    arctan_compute_width_eq_of_nonnegative ((1 : Rat) / 5) (by native_decide),
+    arctan_compute_width_eq_of_nonnegative ((1 : Rat) / 239) (by native_decide)]
+  norm_num
+  grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The literal Machin power-series boxes contract geometrically.  The
+constant is deliberately simple; the preceding exact formula is available
+when a sharper cost estimate is useful. -/
+theorem piMachin_compute_width_le_geometric_half (n : Nat) :
+    (piMachin.compute n).width <= 20 * ((1 : Rat) / 2) ^ n := by
+  rw [piMachin_compute_width_eq]
+  have h15 := arctan_one_fifth_width_le_geometric_half n
+  have h239 := arctan_one_239_width_le_geometric_half n
+  have h16 : (16 : Rat) *
+      (((1 : Rat) / 5) ^ (4 * n + 1) / (4 * (n : Rat) + 1)) <=
+      16 * ((1 : Rat) / 2) ^ n :=
+    Rat.mul_le_mul_of_nonneg_left h15 (by native_decide)
+  have h4 : (4 : Rat) *
+      (((1 : Rat) / 239) ^ (4 * n + 1) / (4 * (n : Rat) + 1)) <=
+      4 * ((1 : Rat) / 2) ^ n :=
+    Rat.mul_le_mul_of_nonneg_left h239 (by native_decide)
+  calc
+    (16 : Rat) *
+          (((1 : Rat) / 5) ^ (4 * n + 1) / (4 * (n : Rat) + 1)) +
+        4 * (((1 : Rat) / 239) ^ (4 * n + 1) / (4 * (n : Rat) + 1)) <=
+      16 * ((1 : Rat) / 2) ^ n + 4 * ((1 : Rat) / 2) ^ n :=
+        Rat.add_le_add h16 h4
+    _ = 20 * ((1 : Rat) / 2) ^ n := by
+      grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.mul_assoc]
+
+/-- Public rate metadata for the one Machin formula. -/
+def piMachinRate : RealRaw.Rate piMachin.compute :=
+  .geometric 0 20 ((1 : Rat) / 2) (by native_decide) (by native_decide)
+    (fun n _ => piMachin_compute_width_le_geometric_half n)
+
 namespace LeibnizValidity
 
 def step (state : Rat × Rat) (i : Nat) : Rat × Rat :=
@@ -1014,6 +1118,32 @@ end LeibnizValidity
 
 theorem leibnizValid : LeibnizValid :=
   LeibnizValidity.valid
+
+/-- A simple public rate bound for the literal Leibniz pi boxes. -/
+theorem piLeibniz_compute_width_le_four_div (n : Nat) (hn : 0 < n) :
+    (piLeibniz.compute n).width <= 4 / (n : Rat) := by
+  rw [LeibnizValidity.compute_width_eq]
+  have hdenpos : 0 < 4 * n + 1 := by omega
+  have hreciprocal :
+      1 / (((4 * n + 1 : Nat) : Rat)) <= 1 / (n : Rat) :=
+    FTC.one_div_nat_antitone (Nat.pos_of_ne_zero (by omega)) hdenpos
+      (by omega : n <= 4 * n + 1)
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hreciprocal
+    (by native_decide : (0 : Rat) <= 4)
+  calc
+    4 / ((4 * n + 1 : Nat) : Rat) =
+        (4 : Rat) * (1 / ((4 * n + 1 : Nat) : Rat)) := by
+          rw [Rat.div_def]
+          grind
+    _ <= 4 * (1 / (n : Rat)) := hscaled
+    _ = 4 / (n : Rat) := by
+      rw [Rat.div_def]
+
+/-- Public rate metadata for the literal Leibniz series. -/
+def piLeibnizRate : RealRaw.Rate piLeibniz.compute :=
+  .power 1 4 1 (by omega)
+    (fun n hn => by
+      simpa using piLeibniz_compute_width_le_four_div n (by omega))
 
 theorem leibnizSeriesValid : leibnizSeries.Valid := by
   exact RealRaw.valid_of_natScale_valid (by omega : 0 < (4 : Nat))

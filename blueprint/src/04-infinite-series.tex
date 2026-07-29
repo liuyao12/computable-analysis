@@ -58,6 +58,7 @@ compatibility alias; the proof-facing function is \code{PiProofs.arctanFunction}
 \lean{ComputableAnalysis.PiProofs.leibnizSeries_compute_eq_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.leibnizSeries_equiv_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.fourArctanSeriesOneValid}
+\lean{ComputableAnalysis.PiProofs.piLeibnizRate}
 \uses{def:arctan-series,def:raw-equiv}
 For the Leibniz algorithm, pi is computed as four times the arctangent series
 at \(1\):
@@ -73,6 +74,9 @@ Equivalently, this algorithm is the alternating series
 as an equivalence of real numbers.
 Lean verifies the underlying \(\pi/4\) equality stagewise and as a raw-real
 equivalence.
+Its literal interval evaluator also has the public eventual bound
+\(w_n\leq 4/n\), recorded separately as rate metadata; this is a cost
+statement about the computation, not an additional definition of pi.
 \end{theorem}
 
 \begin{theorem}[Nilakantha's rational pi series]
@@ -511,6 +515,9 @@ tangent identity exactly.
 \end{theorem}
 
 \begin{theorem}[Leibniz-Machin agreement]\label{thm:leibniz-machin}
+\lean{ComputableAnalysis.PiProofs.piMachin_compute_width_eq}
+\lean{ComputableAnalysis.PiProofs.piMachin_compute_width_le_geometric_half}
+\lean{ComputableAnalysis.PiProofs.piMachinRate}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.piMachin_eq_four_arctanSeries_one_of_branchIdentity}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_of_piMachin_eq_four_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.MachinIdentity.branchIdentity_iff_piMachin_eq_four_arctanSeries_one}
@@ -562,6 +569,15 @@ between the two rational linear combinations of arctangent values:
   16\arctanseries\frac15
   -4\arctanseries\frac{1}{239}.
 \]
+The width of the literal Machin runtime box is also checked directly:
+\[
+ w_n=16\frac{(1/5)^{4n+1}}{4n+1}
+      +4\frac{(1/239)^{4n+1}}{4n+1}
+ \le 20\left(\frac12\right)^n.
+\]
+This rate belongs to the two power-series boxes actually evaluated by the
+single Machin formula; it is not transferred from the Leibniz or geometric
+representation.
 Lean now proves that the raw-real agreement target \code{LeibnizEqMachin} is
 equivalent to the underlying Machin branch identity: the outer factor \(4\) can
 be cancelled by the positive-scaling cancellation theorem for raw-real

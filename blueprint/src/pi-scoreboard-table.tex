@@ -79,7 +79,9 @@ The primary \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two
 perimeter normalizations (available as \code{pi.circumferenceStabilized} and
 \code{pi.circumferenceReboxed}), Nilakantha, and the single Machin power-series
-formula.  Its direct cross-fan view is \code{pi.circumference} (also
+formula.  The Machin runtime has its own certified bound
+\(w_n\le20/2^n\), recorded by \code{PiProofs.piMachinRate}; it remains a
+series-regression implementation rather than another coverage row.  Its direct cross-fan view is \code{pi.circumference} (also
 \code{pi.circumferenceFan}).  The abstract \code{piCertified} handle additionally stores the
 separately named \code{pi.curvatureFan} and
 \code{pi.integrationByPartsMesh}, and \code{pi.triangleLogSeries}
