@@ -154,6 +154,14 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `Integral.ConstructionFor`, its validity bridge, and the derivative-bound
   FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact
   reciprocal-quartic computations exercise them concretely. The reusable
+  single-turn pattern in `TurningPointIntegral` handles a particular
+  up-then-down integrand whose (possibly non-rational) turning point is
+  represented by shrinking rational brackets: stagewise monotone outer
+  constructions are combined with a fixed range box times the unresolved
+  middle width. Lean proves the three-part candidate's width shrinks, but a
+  `SingleTurnIntegralCompletion` must still prove, function by function, that
+  it encloses the intended integral. This is consciously not a universal
+  existence definition for integrals. The reusable
   `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
   Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new
   arctangent-kernel specialization has a checked rational Lipschitz constant

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Computable Analysis Formalization"
+  short_description: "Formalize rational certificate proofs"
+  default_prompt: "Use $computable-analysis-formalization to formalize a calculus statement with rational interval certificates."

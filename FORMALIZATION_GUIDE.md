@@ -11,6 +11,12 @@ to the desired theorem through explicit finite certificates.  Do not replace a
 missing certificate with an appeal to completed real numbers, topology, or a
 Mathlib analysis theorem.
 
+For an external human or agent that needs a repeatable procedure rather than
+just an API map, start with the public
+[computable-analysis formalization skill](skills/computable-analysis-formalization/SKILL.md).
+Its integral reference documents the per-function constructions, including a
+shrinking rational bracket around a non-rational turning point.
+
 ## Read this first
 
 The repository is deliberately not a drop-in replacement for Mathlib.  Its
@@ -71,6 +77,7 @@ Start with the smallest target module rather than importing
 | Rational interval arithmetic and raw reals | `ComputableAnalysis.Basic` | `QInterval`, `RealRaw`, `RealRaw.Valid`, `RealRaw.Equiv` |
 | Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.ConstructionFor` |
+| One non-rational turning point in an integral | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.SingleTurnIntegralCandidate` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
 | Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `IntegralIdentities` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
@@ -95,7 +102,7 @@ finished general theorem.
 | --- | --- | --- |
 | Foundation | `Basic`, `Algebraic`, `AlgebraicNumbers`, `AlgebraicFunctions`, `FunctionDomains`, `Extension`, `Calculus`, `Differential`, `MonotonicityConvexity`, `FTC` | Raw interval representations, domains, continuity, inverse branches, finite derivatives, integral/FTC certificate interfaces |
 | Elementary functions and series | `Elementary`, `ElementaryFunctions`, `Exp`, `ExpProofs`, `Logarithm`, `PowerSeries`, `Series`, `Taylor`, `FirstYearCalculus` | Power-series algorithms, rational majorants, exp/log comparison interfaces, and the current formal derivative ledger |
-| Integrals and special computations | `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
+| Integrals and special computations | `TurningPointIntegral`, `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
 | Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `Nilakantha`, `PeanoBaker` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, and finite linear-system algebra |
 | Polynomial and complex checks | `Polynomial`, `ComplexPolynomial`, `ComplexInterval` | Exact polynomial algebra and rational complex-box root checks |
 
@@ -227,6 +234,24 @@ available.  The finite integration-by-parts construction in
 algebra, not a universal theorem.  Consequently, an LLM must currently
 either stay within an existing concrete construction or make the missing
 general theorem its explicit proof goal.
+
+### A single non-rational turning point
+
+When an integrand is certified increasing up to a turning point and decreasing
+after it, do not pretend that the turn has a rational coordinate.  Use
+`Integral.TurningPointBracket`: its raw interval boxes supply rational
+endpoints `[ell_n, r_n]` that shrink around the unknown turn.  At stage `n`,
+construct the two outer integrals on `[a, ell_n]` and `[r_n, b]`.  Enclose the
+unresolved middle values in one fixed rational range `B`; the literal middle
+box is `(r_n - ell_n) * B`.  `Integral.SingleTurnIntegralCandidate` proves
+that this middle width, and then the width of the three-part sum, tends to
+zero.  Its `middleBox_contained_symmetric` theorem supplies the sharper
+vanishing bound from any absolute-value enclosure.
+
+This is deliberately a per-function workflow.  `SingleTurnIntegralCompletion`
+is the remaining proof obligation that the three boxes enclose that
+function's intended integral representative.  It does not turn every bounded
+or continuous interval function into an integral.
 
 One useful fully scoped exception is the unit arctangent triangle route in
 `Logarithm.lean`.  Its public name is `arctan.integral.triangle` (implemented

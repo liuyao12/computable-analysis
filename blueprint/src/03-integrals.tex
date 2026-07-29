@@ -1550,6 +1550,75 @@ once two integrals are identified with primitive endpoint differences,
 the endpoint differences.
 \end{theorem}
 
+\begin{theorem}[A computable single-turn integral construction]
+\label{thm:single-turn-integral-candidate}
+\lean{ComputableAnalysis.Integral.TurningPointBracket}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.left}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.right}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.width}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.widths_shrink}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.leftRestriction}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.rightRestriction}
+\lean{ComputableAnalysis.Integral.IntervalAbsBound}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox_width}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox_widths_shrink}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox_contained_symmetric}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.leftBox}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleBox}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.rightBox}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_width}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleBox_contained_symmetric}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_equiv_anchor}
+\uses{thm:monotone-integral-construction}
+\leanok
+For an integrand that increases and then decreases, the turning point need not
+be rational.  Instead, the particular construction supplies a valid shrinking
+rational bracket
+\[
+  [\ell_n,r_n]\subseteq[a,b].
+\]
+At stage \(n\), the left restriction \([a,\ell_n]\) is accompanied by its
+own monotone integral construction, and the right restriction
+\([r_n,b]\) by its own monotone integral construction in the opposite
+direction.  No monotonicity claim is made for the unresolved middle interval.
+
+Rather, a fixed rational value enclosure \(B=[L,U]\) for the integrand on
+\([\ell_n,r_n]\) gives the literal middle contribution box
+\[
+  M_n=(r_n-\ell_n)B.
+\]
+Lean proves
+\[
+  \operatorname{width}(M_n)
+  =(r_n-\ell_n)\operatorname{width}(B)\longrightarrow0.
+\]
+If \(B\subseteq[-K,K]\), it also proves
+\[
+  M_n\subseteq[-K(r_n-\ell_n),K(r_n-\ell_n)],
+\]
+so this is a genuine vanishing contribution, not merely a shrinking box around
+an uncontrolled value.  The runtime candidate is the finite interval sum
+\[
+  I_n^{\mathrm{left}}+M_n+I_n^{\mathrm{right}},
+\]
+and its width shrinks whenever the two supplied outer constructions do.
+
+This is a construction pattern for a \emph{particular} function, not a
+definition saying that every bounded or continuous function has an integral.
+The remaining proof for that function must establish that the three boxes
+enclose its intended integral value.  The
+\code{SingleTurnIntegralCompletion} certificate records exactly this
+function-specific comparison and then applies finite-prefix stabilization; the
+runtime reads only the three-part candidate and its rational radius schedule.
+\end{theorem}
+
 \begin{theorem}[Derivative-bound FTC package]
 \label{thm:derivative-bound-ftc-package}
 \lean{ComputableAnalysis.derivativeBoundFTC}

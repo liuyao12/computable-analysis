@@ -20,6 +20,11 @@ between checked theorems, interfaces, and open targets---start with
 [FORMALIZATION_GUIDE.md](FORMALIZATION_GUIDE.md).  It is the recommended
 on-ramp for an LLM or a contributor formalizing a new scientific or
 engineering argument.
+For a reusable procedural entry point, use the public
+[computable-analysis formalization skill](skills/computable-analysis-formalization/SKILL.md).
+Its integral reference includes the constructive, non-rational turning-point
+strategy; its certificate catalog routes series, derivatives, inverse
+functions, and finite ODE work without silently introducing completeness.
 
 ## Linear differential equations
 

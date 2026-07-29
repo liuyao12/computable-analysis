@@ -36,4 +36,5 @@ import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
 import ComputableAnalysis.Taylor
 import ComputableAnalysis.TrigSpecialValues
+import ComputableAnalysis.TurningPointIntegral
 import ComputableAnalysis.GaussSeventeen
