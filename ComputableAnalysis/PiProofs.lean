@@ -7673,10 +7673,11 @@ def originPoint : PiCirclePoint :=
 def circleParameter (stage k : Nat) : Rat :=
   (k : Rat) / (stage : Rat)
 
-def circlePoint (u : Rat) : PiCirclePoint :=
-  let d := 1 + u * u
-  { x := (1 - u * u) / d,
-    y := (2 * u) / d }
+/-- The quarter-circle chart point for the vertical-radius coordinate `t`. -/
+def circlePoint (t : Rat) : PiCirclePoint :=
+  let d := 1 + t * t
+  { x := (1 - t * t) / d,
+    y := (2 * t) / d }
 
 def circleSamplePoint (stage k : Nat) : PiCirclePoint :=
   circlePoint (circleParameter stage k)

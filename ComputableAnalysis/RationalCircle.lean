@@ -46,10 +46,14 @@ def insertedIndex (k : Nat) : Nat :=
 def parameter (S : Stage) (k : Nat) : Rat :=
   (k : Rat) / (S.subdivisions : Rat)
 
-def point (u : Rat) : PiCirclePoint :=
-  let d := 1 + u * u
-  { x := (1 - u * u) / d,
-    y := (2 * u) / d }
+/-- The rational point obtained by projecting from `(-1, 0)` through `(0, t)`.
+
+The chart coordinate `t` is a height on the vertical radius, equivalently the
+slope of that projection line; it is not an angle. -/
+def point (t : Rat) : PiCirclePoint :=
+  let d := 1 + t * t
+  { x := (1 - t * t) / d,
+    y := (2 * t) / d }
 
 def samplePoint (S : Stage) (k : Nat) : PiCirclePoint :=
   point (S.parameter k)
@@ -276,34 +280,34 @@ theorem point_cross_nonneg_of_nonneg_of_le
   exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
 
 /-- Derivative of the rational circle parametrization
-`u ↦ ((1-u^2)/(1+u^2), 2u/(1+u^2))`.  This is an exact rational function,
+`t ↦ ((1-t^2)/(1+t^2), 2t/(1+t^2))`.  This is an exact rational function,
 not a limiting construction. -/
-def pointDerivative (u : Rat) : PiCirclePoint :=
-  let d := 1 + u * u
-  { x := (-4 * u) / (d * d),
-    y := (2 * (1 - u * u)) / (d * d) }
+def pointDerivative (t : Rat) : PiCirclePoint :=
+  let d := 1 + t * t
+  { x := (-4 * t) / (d * d),
+    y := (2 * (1 - t * t)) / (d * d) }
 
-/-- The signed area speed of the parametrized unit-circle sector. -/
-def sectorAreaSpeed (u : Rat) : Rat :=
-  cross (point u) (pointDerivative u)
+/-- The signed area speed of the parametrized unit-circle sector at `t`. -/
+def sectorAreaSpeed (t : Rat) : Rat :=
+  cross (point t) (pointDerivative t)
 
-/-- The unit-sector area density: half of the signed area speed. -/
-def sectorAreaDensity (u : Rat) : Rat :=
-  sectorAreaSpeed u / 2
+/-- The unit-sector area density at `t`: half of the signed area speed. -/
+def sectorAreaDensity (t : Rat) : Rat :=
+  sectorAreaSpeed t / 2
 
-theorem sectorAreaSpeed_eq_two_over_one_plus_square (u : Rat) :
-    sectorAreaSpeed u = 2 / (1 + u * u) := by
+theorem sectorAreaSpeed_eq_two_over_one_plus_square (t : Rat) :
+    sectorAreaSpeed t = 2 / (1 + t * t) := by
   unfold sectorAreaSpeed pointDerivative cross point
   simp
   rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
-  have hdpos : 0 < 1 + u * u := one_add_square_pos u
-  have hdne : 1 + u * u ≠ 0 := Rat.ne_of_gt hdpos
+  have hdpos : 0 < 1 + t * t := one_add_square_pos t
+  have hdne : 1 + t * t ≠ 0 := Rat.ne_of_gt hdpos
   have htwo : (2 : Rat) ≠ 0 := by native_decide
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
-theorem sectorAreaDensity_eq_one_over_one_plus_square (u : Rat) :
-    sectorAreaDensity u = 1 / (1 + u * u) := by
+theorem sectorAreaDensity_eq_one_over_one_plus_square (t : Rat) :
+    sectorAreaDensity t = 1 / (1 + t * t) := by
   unfold sectorAreaDensity
   rw [sectorAreaSpeed_eq_two_over_one_plus_square]
   rw [Rat.div_def, Rat.div_def]
@@ -1828,53 +1832,53 @@ namespace Trigonometry
 /-!
 Exact trigonometry on the rational circle.
 
-The parameter `u` is the rational slope coordinate for the stereographic
+The parameter `t` is the rational slope coordinate for the stereographic
 circle chart.  This gives a first, fully rational layer of circle-coordinate
 identities before the later angle-to-point algorithm turns arbitrary raw
 angles into circle points.
 -/
 
-def point (u : Rat) : PiCirclePoint :=
-  Stage.point u
+def point (t : Rat) : PiCirclePoint :=
+  Stage.point t
 
-def cos (u : Rat) : Rat :=
-  (point u).x
+def cos (t : Rat) : Rat :=
+  (point t).x
 
-def sin (u : Rat) : Rat :=
-  (point u).y
+def sin (t : Rat) : Rat :=
+  (point t).y
 
-def finiteTan (u : Rat) : Rat :=
-  sin u / cos u
+def finiteTan (t : Rat) : Rat :=
+  sin t / cos t
 
-def tan (u : Rat) : ProjectiveRat :=
-  projectiveSlope (point u)
+def tan (t : Rat) : ProjectiveRat :=
+  projectiveSlope (point t)
 
-def cot (u : Rat) : Rat :=
-  cos u / sin u
+def cot (t : Rat) : Rat :=
+  cos t / sin t
 
-def sec (u : Rat) : Rat :=
-  1 / cos u
+def sec (t : Rat) : Rat :=
+  1 / cos t
 
-def csc (u : Rat) : Rat :=
-  1 / sin u
+def csc (t : Rat) : Rat :=
+  1 / sin t
 
-def cosRaw (u : Rat) : RealRaw :=
-  RealRaw.ofRat (cos u)
+def cosRaw (t : Rat) : RealRaw :=
+  RealRaw.ofRat (cos t)
 
-def sinRaw (u : Rat) : RealRaw :=
-  RealRaw.ofRat (sin u)
+def sinRaw (t : Rat) : RealRaw :=
+  RealRaw.ofRat (sin t)
 
-def tanRaw (u : Rat) : RealRaw :=
-  RealRaw.ofRat (finiteTan u)
+def tanRaw (t : Rat) : RealRaw :=
+  RealRaw.ofRat (finiteTan t)
 
-def cotRaw (u : Rat) : RealRaw :=
-  RealRaw.ofRat (cot u)
+def cotRaw (t : Rat) : RealRaw :=
+  RealRaw.ofRat (cot t)
 
-def secRaw (u : Rat) : RealRaw :=
-  RealRaw.ofRat (sec u)
+def secRaw (t : Rat) : RealRaw :=
+  RealRaw.ofRat (sec t)
 
-def cscRaw (u : Rat) : RealRaw :=
-  RealRaw.ofRat (csc u)
+def cscRaw (t : Rat) : RealRaw :=
+  RealRaw.ofRat (csc t)
 
 def dyadicPoint (n k : Nat) : PiCirclePoint :=
   (dyadicStage n).samplePoint k

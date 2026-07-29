@@ -164,10 +164,10 @@ def piCircleAreaPolygon : RealRaw where
   compute := fun n =>
     let stage : Nat := 2 ^ n
     let parameter := fun (k : Nat) => (k : Rat) / (stage : Rat)
-    let point := fun u =>
-      let d := 1 + u * u
-      let x := (1 - u * u) / d
-      let y := (2 * u) / d
+    let point := fun t =>
+      let d := 1 + t * t
+      let x := (1 - t * t) / d
+      let y := (2 * t) / d
       ({ x := x, y := y } : PiCirclePoint)
     let samplePoint := fun k => point (parameter k)
     let rec innerBoundaryFrom (k count : Nat) : List PiCirclePoint :=
@@ -213,10 +213,10 @@ def piCircumference : RealRaw where
   compute := fun n =>
     let stage : Nat := 2 ^ n
     let parameter := fun (k : Nat) => (k : Rat) / (stage : Rat)
-    let point := fun u =>
-      let d := 1 + u * u
-      let x := (1 - u * u) / d
-      let y := (2 * u) / d
+    let point := fun t =>
+      let d := 1 + t * t
+      let x := (1 - t * t) / d
+      let y := (2 * t) / d
       ({ x := x, y := y } : PiCirclePoint)
     let samplePoint := fun k => point (parameter k)
     let rec innerBoundaryFrom (k count : Nat) : List PiCirclePoint :=
