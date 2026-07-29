@@ -1,6 +1,7 @@
 import ComputableAnalysis.AbelianIntegrals
 import ComputableAnalysis.Differential
 import ComputableAnalysis.FunctionDomains
+import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.PowerSeries
 
 /-!
@@ -541,12 +542,27 @@ theorem powerSeries_equiv_logIntegralInverse_on_interval
     (comparison : PowerSeriesLogIntegralInverseComparison a b) :
     FunctionOnInterval.Equivalent
       (realPowerSeriesOnInterval a b comparison.ps_valid)
-      comparison.logInv.toFunctionOnInterval :=
+    comparison.logInv.toFunctionOnInterval :=
   uniq
     (realPowerSeriesOnInterval a b comparison.ps_valid)
     comparison.logInv.toFunctionOnInterval
     comparison.ps_solves
     comparison.logInv_solves
+
+/-- The exp/log comparison route obtained from the constructive
+Peano--Baker/Volterra uniqueness provider.  The provider is still an analytic
+obligation: it must build the iterated error certificate from finite integral
+enclosures, rather than assuming any completed-real ODE theorem. -/
+theorem powerSeries_equiv_logIntegralInverse_on_interval_of_volterra
+    (hvolterra : LinearODE.SelfDerivativeVolterraUniqueness)
+    {a b : Rat}
+    (comparison : PowerSeriesLogIntegralInverseComparison a b) :
+    FunctionOnInterval.Equivalent
+      (realPowerSeriesOnInterval a b comparison.ps_valid)
+      comparison.logInv.toFunctionOnInterval :=
+  powerSeries_equiv_logIntegralInverse_on_interval
+    (LinearODE.selfDerivativeInitialValueUnique_of_volterra hvolterra)
+    comparison
 
 /-- Finite product estimate behind the comparison between
 `lim (1 + x/n)^n` and the inverse of `int_1^x dt/t`.

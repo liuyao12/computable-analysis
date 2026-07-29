@@ -940,6 +940,14 @@ strictly longer complex corroboration is
 \(\pi=-2i\log(i)\); it additionally needs extension from rational names to
 represented complex inputs and the agreement of the circular and exponential
 solutions of the \(2\)-dimensional rotation system.
+
+The formal interface now records this dependency directly: the exp/log
+comparison theorem has a Volterra specialization which applies the
+finite-tail uniqueness provider to the power-series and inverse-logarithm
+candidate certificates.  Consequently no ambient ODE uniqueness axiom is
+silently used in this route.  What remains is concrete and local: construct
+the provider from certified integral boxes, then supply the derivative and
+initial-value certificates for each proposed exponential.
 \end{remark}
 
 \section{Complex logarithm at \texorpdfstring{$i$}{i}}
