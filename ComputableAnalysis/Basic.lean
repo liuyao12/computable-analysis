@@ -1701,6 +1701,14 @@ structure Representation (x : Real) where
   valid : raw.Valid
   agrees : raw.Equiv x.preferred
 
+/-- Any two certified representations of one abstract real compute the same
+raw real.  This representation-level interoperability principle is used by
+named views such as the various computations of pi and e. -/
+theorem Representation.equiv {x : Real} (source target : Representation x) :
+    source.raw.Equiv target.raw :=
+  RealRaw.equiv_trans source.valid x.valid target.valid source.agrees
+    (RealRaw.equiv_symm target.agrees)
+
 def preferredRepresentation (x : Real) : Representation x where
   raw := x.preferred
   valid := x.valid

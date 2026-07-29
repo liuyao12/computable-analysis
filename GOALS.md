@@ -855,6 +855,15 @@ another. The Pi score stays useful only as secondary integration coverage.
   bridge by proving interval regularity, monotonicity, and effective
   separation for `arctanGeomOnUnit`; no inverse law is assumed as a bare
   proposition.
+- The completed rational-slope half of that route is now exposed as
+  `RationalCircle.GeometricTrig.FirstQuadrantArctanWitness`.
+  `arctan_to_sine_cosine_coordinates` packages one arctangent equation
+  `arctanGeom(u) ~ t*pi/4`, the exact stereographic formulas
+  `cos = (1-u^2)/(1+u^2)` and `sin = 2u/(1+u^2)`, and the unit-circle
+  identity. The special-values table consequently treats that arctangent
+  equation as the only colored proof-status obligation; extending the
+  witness from a rational slope to a bisection-produced raw slope remains
+  the non-endpoint task.
 - `asin` is the inverse of sine on a chosen monotone branch, and `log` is the
   inverse of exponential on a chosen monotone branch.
   See `Elementary.ArcsinFromMonotoneSin`, `Elementary.LogFromMonotoneExp`,
@@ -1236,6 +1245,11 @@ students actually compute.
   use, `PiProofs.piPresentation_equiv source target` directly compares any two
   named checked presentations through the certified area representative.  It
   is a registry interoperability theorem, not an extra scoreboard witness.
+  The generic `Real.Representation.equiv` compares any two certified views of
+  one abstract real; its pi specialization `PiProofs.pi.representations_equiv`
+  therefore also covers the supplementary curvature-fan, finite
+  integration-by-parts-mesh, and triangle-log-series views that intentionally
+  sit outside `PiPresentation`.
   `PiPresentation.integrationFamily` and the primary registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
   regressions.  `piCertified.alternatives` also literally carries the checked

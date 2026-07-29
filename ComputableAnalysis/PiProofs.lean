@@ -18515,6 +18515,15 @@ namespace pi
 def presentation (kind : PiPresentation) : Real.Representation pi :=
   piCertifiedPresentation kind
 
+/-- Every named certified view of the abstract pi handle is interchangeable
+with every other one.  Unlike `PiPresentation`, this also covers supplementary
+views whose role is regression or implementation provenance rather than a
+new calculus-coverage bridge. -/
+theorem representations_equiv
+    (source target : Real.Representation pi) :
+    source.raw.Equiv target.raw :=
+  Real.Representation.equiv source target
+
 def circleArea : Real.Representation pi := presentation .area
 def circleAreaPolygon : Real.Representation pi := presentation .areaPolygon
 /-- The default circumference view: the fully direct cross-fan evaluator.

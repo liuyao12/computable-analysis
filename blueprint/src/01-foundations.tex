@@ -222,6 +222,10 @@ and a finite list of alternative valid algorithms, each equipped with a proof
 of \(\Equiv\) to the preferred one.  This makes a chosen computation and its
 rate directly available while recording the representation changes that have
 already been proved.
+In particular, \code{Real.Representation.equiv} proves that any two certified
+representations of the same handle have equivalent raw evaluators.  This is an
+interoperability theorem about proved representations, not an identification
+of all raw algorithms by quotienting.
 For functions, the same distinction is kept at the appropriate level: named
 presentations use dot-qualified public names.  Thus \code{arctan.geom} and
 \code{arctan.series} are explicit domain-aware function representations, while

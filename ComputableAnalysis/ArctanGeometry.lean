@@ -6445,9 +6445,12 @@ the two coordinates of the same rational-circle point. -/
 theorem arctan_to_sine_cosine_coordinates
     {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) :
     (ArctanGeometry.arctanGeom W.slope).Equiv (halfQuarterTurnRaw t) /\
+      W.cosine = (1 - W.slope * W.slope) / (1 + W.slope * W.slope) /\
+      W.sine = (2 * W.slope) / (1 + W.slope * W.slope) /\
       sq W.sine + sq W.cosine = 1 := by
-  constructor
-  · exact W.arctan_geom_eq_half_angle
+  refine ⟨W.arctan_geom_eq_half_angle, ?_, ?_, ?_⟩
+  · exact Trigonometry.cos_eq W.slope
+  · exact Trigonometry.sin_eq W.slope
   · exact Trigonometry.sin_sq_add_cos_sq W.slope
 
 theorem cosine_eq_chart_cosine

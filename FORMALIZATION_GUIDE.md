@@ -399,6 +399,27 @@ power-series computations, but normalized-angle sine/cosine/tangent special
 values remain partly target-level.  Consult the green/orange legend in the
 blueprint before relying on one.
 
+For a first-quadrant special value, the central certified interface is
+`RationalCircle.GeometricTrig.FirstQuadrantArctanWitness`. It records a
+rational slope in `[0,1]` and the one required equation
+`arctan.geom(slope) = t*pi/4`. Its checked bridge then returns the exact
+stereographic cosine and sine coordinates and their unit-circle identity:
+
+```lean
+import ComputableAnalysis.ArctanGeometry
+
+open ComputableAnalysis
+
+#check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness
+#check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness.arctan_to_sine_cosine_coordinates
+```
+
+This is why the special-values table colors only its arctangent-witness
+column: the displayed sine and cosine entries follow by rational algebra once
+that one equation is certified. At present, only the two endpoint witness
+equations are fully proved; the non-endpoint rows remain computation-ready
+targets until their raw-slope equalities are formalized.
+
 ## Pi as a regression suite, not a target namespace
 
 `PiProofs.PiCoverageBridge` is deliberately a compact list of distinct
@@ -422,6 +443,8 @@ open ComputableAnalysis
 #check pi.cauchy
 #check pi.symmetricCauchy
 #check pi.reciprocalQuartic
+#check Real.Representation.equiv
+#check pi.representations_equiv
 ```
 
 For example, `pi.machin` is the one classical series computation
@@ -446,6 +469,19 @@ integration-by-parts theorem or canonical-exp/log transport.
 `2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
 `pi.integrationByParts` is the finite `t = x*x` substitution certificate.
 It is likewise not a general substitution theorem.
+
+For views deliberately outside `PiPresentation`—for example
+`pi.curvatureFan`, `pi.integrationByPartsMesh`, and `pi.triangleLogSeries`—use
+`pi.representations_equiv source target`. It specializes the generic
+`Real.Representation.equiv`: two certified views of the same abstract `Real`
+have equivalent raw evaluators. This gives supplementary pi computations the
+same pairwise API without treating implementation variants as new scorecard
+capabilities.
+
+```lean
+example : pi.triangleLogSeries.raw.Equiv pi.curvatureFan.raw :=
+  pi.representations_equiv _ _
+```
 `pi.symmetricCauchy` is the bounded formula assembled over `[-1,0,1]` by the
 public piecewise-monotone interface; it checks the increasing and decreasing
 branches separately and has direct width bound `16 / (n+1)`.

@@ -860,6 +860,11 @@ supplementary \code{pi.curvatureFan.raw} and
 \code{pi.integrationByParts.raw} and \code{pi.squareSubstitution.raw}, for
 example, are named raw computations
 equipped with agreement proofs to the one certified pi handle.
+The theorem \code{pi.representations\_equiv} therefore compares any two
+named \code{Real.Representation pi} views directly, including supplementary
+views which are intentionally absent from the compact
+\code{PiPresentation} registry.  This is the abstract-handle form of a pi
+equivalence, not an additional scoreboard row.
 The circumference names make the provenance explicit:
 \code{pi.circumference} (also \code{pi.circumferenceFan}) is the direct
 cross-fan evaluator, while \code{pi.circumferenceStabilized} and
@@ -1150,15 +1155,16 @@ slope \(u_\theta\in[0,1]\) together with
   \arctangeom(u_\theta)\sim\theta/2=t\pi/4.
 \]
 Lean's general theorem then returns the two coordinates of the same rational
-circle point,
+circle point by the stereographic formulas,
 \[
   \cos\theta=\frac{1-u_\theta^2}{1+u_\theta^2},\qquad
   \sin\theta=\frac{2u_\theta}{1+u_\theta^2},
   \qquad \sin^2\theta+\cos^2\theta=1.
 \]
 Thus a special-value proof has one central analytic obligation---the
-arctangent equation---rather than separate proofs for sine, cosine, and
-tangent.  The checked theorem presently takes a rational slope; lifting the
+arctangent equation---followed by exact rational algebra in these two
+coordinate formulas, rather than separate analytic proofs for sine, cosine,
+and tangent.  The checked theorem presently takes a rational slope; lifting the
 same coordinate calculation to the raw interval slope returned by certified
 bisection is the remaining implementation step for the non-endpoint rows.
 The checked Lean API is \code{FirstQuadrantArctanWitness} in the
