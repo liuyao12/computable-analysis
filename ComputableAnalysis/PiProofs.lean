@@ -17557,6 +17557,21 @@ theorem piPresentation_equiv_piCircleArea (presentation : PiPresentation) :
   | reciprocalQuarticIntegral => simpa [piPresentationRaw] using
       piReciprocalQuarticCompact_equiv_piCircleArea
 
+/-- Any two named, checked pi presentations are interchangeable.
+
+This is an API-level interoperability theorem for the complete presentation
+registry.  It intentionally does not add a `PiCoverageBridge` row: the latter
+keeps only the independent calculus capabilities exercised by the compact
+scoreboard. -/
+theorem piPresentation_equiv (source target : PiPresentation) :
+    (piPresentationRaw source).Equiv (piPresentationRaw target) := by
+  exact RealRaw.equiv_trans
+    (piPresentation_valid source)
+    (piPresentation_valid .area)
+    (piPresentation_valid target)
+    (piPresentation_equiv_piCircleArea source)
+    (RealRaw.equiv_symm (piPresentation_equiv_piCircleArea target))
+
 /-- The small set of π equivalences that act as distinct end-to-end
 calculus-regression bridges.
 
