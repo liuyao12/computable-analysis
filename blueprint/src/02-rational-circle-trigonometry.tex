@@ -754,6 +754,7 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.pi.circumferenceStabilized}
 \lean{ComputableAnalysis.PiProofs.pi.circumferenceReboxed}
 \lean{ComputableAnalysis.PiProofs.pi.machin}
+\lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
 \lean{ComputableAnalysis.PiProofs.pi.integrationByPartsMesh}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
@@ -816,12 +817,15 @@ unit of calculus progress.  The supplementary curvature fan and the direct
 finite integration-by-parts mesh are also stored directly in
 \code{piCertified.alternatives}, but stay outside the finite
 \code{PiPresentation} type because neither adds a distinct calculus bridge.
-The latter is a checked mesh evaluator, not yet the arctangent--logarithm
-integration-by-parts theorem.
+In contrast, the literal reciprocal-log unit formula is the primary
+\code{pi.integrationByParts} presentation and the distinct finite
+integration-by-parts coverage bridge.  It is narrower than the still-open
+general arctangent--logarithm theorem.
 For use at the abstract-real layer, the certified handle is also exposed as
 \code{PiProofs.pi}: \code{pi.circleArea.raw}, \code{pi.machin.raw}, and the
 supplementary \code{pi.curvatureFan.raw} and
-\code{pi.integrationByPartsMesh.raw}, for example, are named raw computations
+\code{pi.integrationByPartsMesh.raw}, and the primary
+\code{pi.integrationByParts.raw}, for example, are named raw computations
 equipped with agreement proofs to the one certified pi handle.
 The circumference names make the provenance explicit:
 \code{pi.circumference} (also \code{pi.circumferenceFan}) is the direct

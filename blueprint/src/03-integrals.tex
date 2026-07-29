@@ -1315,6 +1315,10 @@ schedules.
 
 \begin{corollary}[The arctangent--logarithm pi route: supplied branch and generalization target]
 \label{cor:arctangent-logarithm-pi-route}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegralRate}
+\lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
 \uses{thm:integration-by-parts-certificate,thm:coordinate-arctangent-two-stage-ftc,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  The checked sector-area derivative
@@ -1372,11 +1376,14 @@ gives the formally proved supplied-branch statement
   \pi_{\mathrm{area}}\Equiv
   4\arctanintegraltriangle+2\log_{\mathrm{rec}}2.
 \]
-Lean stores this valid raw formula as the supplementary certified view
-\code{PiProofs.pi.triangleLogReciprocalIntegral}.  After the canonical
-exp/log agreement transports \(\log_{\mathrm{rec}}2\) to the canonical
-\(\log2\), the same formula will have the textbook logarithm; a reusable
-piecewise integration-by-parts theorem remains a separate generalization.
+Lean stores this valid raw formula as the checked finite-calculus view
+\code{PiProofs.pi.integrationByParts} (with
+\code{pi.triangleLogReciprocalIntegral} retained as a descriptive alias).
+Its literal runtime satisfies \(w_n\le52/2^n\), certified independently
+from the triangle and reciprocal-integral boxes.  After the canonical exp/log
+agreement transports \(\log_{\mathrm{rec}}2\) to the canonical \(\log2\),
+the same formula will have the textbook logarithm; a reusable piecewise
+integration-by-parts theorem remains a separate generalization.
 \end{corollary}
 
 \section{Nondecreasing integrands and piecewise monotone integrals}

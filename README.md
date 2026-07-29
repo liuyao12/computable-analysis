@@ -128,6 +128,7 @@ capability—not a percentage for the whole foundation.
 | finite Archimedean theorem | perimeter and area presentations agree | cross-fan: $w_n\le10/(n+1)$ |
 | arctangent power-series theorem | geometric and series presentations agree | Leibniz: $w_n=4/(4n+1)$ |
 | arctangent integral evaluation | integral and series presentations agree | rectangle $\pi$ raw: $w_n\le16/(n+1)$ |
+| finite arctangent integration by parts | supplied unit-branch triangle/strip reindexing, product FTC, and reciprocal-log endpoint agree with area pi | literal runtime: $w_n\le52/2^n$ |
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
 | Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | Planned: matrix Peano--Baker factorial tail plus represented-input extension modulus |
@@ -145,12 +146,11 @@ envelope for the quartic bridge; it is not the convergence rate of the public
 Cauchy raw evaluator.  The table is a useful cost/precision diagnostic for a
 construction, rather than a second score for the underlying theorem.
 
-The next intended π registry benchmark is the arctangent
-integration-by-parts evaluation, not another arctangent variant.  Its public
-statement will be the natural integral formula; its derived presentation
-agreement will become a sixth coverage bridge only after the remaining
-effective-FTC route, its common monotone-piece refinement, and the
-canonical exponential/logarithm alignment are all checked.  This is intentionally the long
+The sixth registry bridge is the supplied finite arctangent
+integration-by-parts formula with its literal reciprocal-integral logarithm:
+`pi.integrationByParts` is equivalent to area pi and has the direct runtime
+bound `52 / 2^n`.  It is intentionally not presented as the completed general
+theorem.  The stronger canonical textbook form still follows the long
 elementary-function route: identify `log 2` with the inverse of the canonical
 exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
 exponential representations agree, then use
@@ -397,8 +397,10 @@ product-FTC integral, then to `4 * arctan.geom(1)` and the preferred circle-
 area pi.  The companion
 `Logarithm.piTriangleLogReciprocalIntegral` replaces the series term by the
 literal reciprocal integral `log_rec 2`; it has the same product-FTC and pi
-bridges.  Both remain outside the Pi coverage count: they establish a scoped
-unit construction, not the reusable effective-FTC or canonical-logarithm
+bridges.  The reciprocal-integral form is the sixth Pi-coverage bridge: it
+checks a supplied finite integration-by-parts construction with its own
+runtime bound.  The series form remains supplementary, and neither formula
+by itself supplies the reusable effective-FTC or canonical-logarithm
 theorems.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
@@ -468,19 +470,20 @@ route as an equivalent alternative, including the supplementary
 curvature-corrected fan. `PiProofs.PiPresentation` gives the primary routes
 stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 `Real.Representation`. This includes the geometry, stabilized circumference,
-single Machin, Leibniz, Nilakantha, rectangle, Cauchy, and reciprocal-quartic
-routes, together with the two certified perimeter normalizations; it excludes
+single Machin, Leibniz, Nilakantha, rectangle, supplied finite
+integration-by-parts, Cauchy, and reciprocal-quartic routes, together with
+the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants. The complementary named
 views make the perimeter provenance readable: `PiProofs.pi.circumference`
 (also `PiProofs.pi.circumferenceFan`) is the direct cross-fan evaluator,
 whereas `PiProofs.pi.circumferenceStabilized` and
 `PiProofs.pi.circumferenceReboxed` are the two certified normalizations of
 the original chord path. Along with `PiProofs.pi.curvatureFan`,
-`PiProofs.pi.integrationByPartsMesh`, and `PiProofs.pi.triangleLogSeries`
-(with its literal-log companion `PiProofs.pi.triangleLogReciprocalIntegral`),
-these views do not create additional calculus-coverage rows. The mesh and
-supplied-triangle/logarithm evaluators are not the pending general
-arctangent--logarithm integration-by-parts theorem.
+`PiProofs.pi.integrationByPartsMesh`, and `PiProofs.pi.triangleLogSeries`,
+these views do not create additional calculus-coverage rows.  In contrast,
+`PiProofs.pi.integrationByParts` is the checked literal-reciprocal-log
+integration-by-parts coverage view; it remains narrower than the pending
+general arctangent--logarithm theorem.
 
 ### Full implementation inventory
 
@@ -529,10 +532,10 @@ Lean hooks:
   `PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea`, and
   `PiProofs.piTriangleLogSeries_equiv_piCircleArea`.  Both factor through
   `piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`.
-  The triangle runtime retains radius $6/2^n$, while the alternating
-  logarithm-series box has width at most $1/n$ for positive stage $n$. These
-  are supplied-branch integration-by-parts cross-checks, not the general
-  coverage bridge.
+  `Logarithm.piTriangleLogReciprocalIntegral_compute_width_le` gives the
+  literal formula $w_n\le52/2^n$, and
+  `PiProofs.pi.integrationByParts` is its sixth coverage bridge.  It is still
+  a supplied-branch theorem, not the general integration-by-parts rule.
 - Generic arctangent bridge: `PiProofs.arctanEqualsGeom_finiteRiemannBridge`.
   It supports the series-to-geometry comparison but is not a separate pi-scoreboard route.
 - Nilakantha series: `piNilakantha`, `Nilakantha.compute_width_eq`,

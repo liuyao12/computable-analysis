@@ -17363,6 +17363,7 @@ inductive PiPresentation where
   | circumferenceFan
   | arctanGeometry
   | arctanRectangleIntegral
+  | arctanIntegrationByParts
   | leibnizSeries
   | nilakanthaSeries
   | machinSeries
@@ -17382,6 +17383,7 @@ inductive PiIntegrationFamily where
   | finiteGeometry
   | arctangentGeometry
   | finiteIntegral
+  | finiteIntegrationByParts
   | alternatingSeries
   | compactifiedImproperIntegral
 deriving DecidableEq, Repr
@@ -17395,6 +17397,7 @@ def PiPresentation.integrationFamily : PiPresentation -> PiIntegrationFamily
       .circumferenceFan => .finiteGeometry
   | .arctanGeometry => .arctangentGeometry
   | .arctanRectangleIntegral | .reciprocalQuarticIntegral => .finiteIntegral
+  | .arctanIntegrationByParts => .finiteIntegrationByParts
   | .leibnizSeries | .nilakanthaSeries | .machinSeries => .alternatingSeries
   | .cauchyIntegral => .compactifiedImproperIntegral
 
@@ -17407,6 +17410,7 @@ def piPresentationRaw : PiPresentation -> RealRaw
   | .circumferenceFan => piCircumferenceFan
   | .arctanGeometry => (4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat)
   | .arctanRectangleIntegral => piFromArctanIntegralRectangleUnitAtOne
+  | .arctanIntegrationByParts => Logarithm.piTriangleLogReciprocalIntegral
   | .leibnizSeries => piLeibniz
   | .nilakanthaSeries => piNilakantha
   | .machinSeries => piMachin
@@ -17429,6 +17433,8 @@ theorem piPresentation_valid (presentation : PiPresentation) :
   | arctanGeometry => simpa [piPresentationRaw] using fourArctanGeomOneValid
   | arctanRectangleIntegral =>
       simpa [piPresentationRaw] using piFromArctanIntegralRectangleUnitAtOne_valid
+  | arctanIntegrationByParts =>
+      simpa [piPresentationRaw] using Logarithm.piTriangleLogReciprocalIntegral_valid
   | leibnizSeries => simpa [piPresentationRaw, LeibnizValid, RealRaw.Valid] using
       leibnizValid
   | nilakanthaSeries => simpa [piPresentationRaw] using Nilakantha.valid
@@ -17458,6 +17464,8 @@ theorem piPresentation_equiv_piCircleArea (presentation : PiPresentation) :
       four_arctanGeom_one_equiv_piCircleArea
   | arctanRectangleIntegral => simpa [piPresentationRaw] using
       piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea
+  | arctanIntegrationByParts => simpa [piPresentationRaw] using
+      piTriangleLogReciprocalIntegral_equiv_piCircleArea
   | leibnizSeries =>
       exact RealRaw.equiv_trans
         (piPresentation_valid .leibnizSeries)
@@ -17490,6 +17498,9 @@ inductive PiCoverageBridge where
   | arctangentPowerSeries
   /-- A finite rectangle integral agrees with the arctangent series. -/
   | definiteIntegral
+  /-- The supplied arctangent integration-by-parts formula with its literal
+  reciprocal-integral logarithm agrees with area pi. -/
+  | arctangentIntegrationByParts
   /-- Reciprocal-tail compactification agrees with the bounded geometry value. -/
   | compactifiedImproperIntegral
   /-- A nontrivial algebraic kernel agrees with the compactified Cauchy route. -/
@@ -17501,6 +17512,7 @@ def PiCoverageBridge.sourcePresentation : PiCoverageBridge -> PiPresentation
   | .archimedeanGeometry => .circumferenceFan
   | .arctangentPowerSeries => .arctanGeometry
   | .definiteIntegral => .arctanRectangleIntegral
+  | .arctangentIntegrationByParts => .arctanIntegrationByParts
   | .compactifiedImproperIntegral => .cauchyIntegral
   | .algebraicKernelIntegral => .reciprocalQuarticIntegral
 
@@ -17510,6 +17522,7 @@ def PiCoverageBridge.targetPresentation : PiCoverageBridge -> PiPresentation
   | .archimedeanGeometry => .area
   | .arctangentPowerSeries => .leibnizSeries
   | .definiteIntegral => .leibnizSeries
+  | .arctangentIntegrationByParts => .area
   | .compactifiedImproperIntegral => .area
   | .algebraicKernelIntegral => .cauchyIntegral
 
@@ -18415,6 +18428,13 @@ def circumferenceReboxed : Real.Representation pi :=
 def arctanGeom : Real.Representation pi := presentation .arctanGeometry
 def arctanIntegral : Real.Representation pi := presentation .arctanRectangleIntegral
 
+/-- The checked unit-branch integration-by-parts formula
+`4 * ∫₀¹ arctan(x) dx + 2 * log_rec(2)`.  Its logarithm is the literal
+reciprocal integral; transporting it to a canonical inverse-exponential log
+is a separate later theorem. -/
+def integrationByParts : Real.Representation pi :=
+  presentation .arctanIntegrationByParts
+
 /-- The supplementary direct finite mesh behind integration by parts.  This
 is deliberately distinct from the future arctangent--logarithm integral
 theorem. -/
@@ -18432,10 +18452,7 @@ def triangleLogSeries : Real.Representation pi where
 
 /-- The same supplied arctangent integration-by-parts formula with its
 logarithm retained as the literal reciprocal integral on `[1,2]`. -/
-def triangleLogReciprocalIntegral : Real.Representation pi where
-  raw := Logarithm.piTriangleLogReciprocalIntegral
-  valid := Logarithm.piTriangleLogReciprocalIntegral_valid
-  agrees := piTriangleLogReciprocalIntegral_equiv_piCircleArea
+def triangleLogReciprocalIntegral : Real.Representation pi := integrationByParts
 
 def leibniz : Real.Representation pi := presentation .leibnizSeries
 def nilakantha : Real.Representation pi := presentation .nilakanthaSeries

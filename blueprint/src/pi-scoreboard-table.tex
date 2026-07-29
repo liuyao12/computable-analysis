@@ -32,6 +32,11 @@ Arctangent integral &
 certified rectangle integration and its endpoint bridge &
 rectangle \(\pi\)-raw: \(w_n\le16/(n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
+Finite arctangent integration by parts &
+the supplied unit-branch triangle/strip reindexing, product FTC, and
+literal reciprocal-integral logarithm &
+triangle--reciprocal-log raw: \(w_n\le52/2^n\) &
+\(\checkmark\) & \(\checkmark\)\\
 Cauchy integral &
 reciprocal-tail transport from a full line to a finite interval &
 Cauchy \(\pi\)-raw: \(w_n\le16/(n+1)\) &
@@ -49,21 +54,20 @@ every other presentation.  It is therefore a useful cost/precision diagnostic
 for the constructive witness, not an additional measure of theorem importance.
 
 \paragraph{Named future coverage rows (unmarked).}
-These are part of the scoreboard so their required foundations remain visible,
-but neither contributes to the checked registry until both a valid evaluator
-and its \code{RealRaw.Equiv} bridge are formalized.
+These retain the stronger canonical formulations not supplied by the checked
+finite branch.  They remain visible so that a concrete equivalence is not
+mistaken for a completed general calculus theorem.
 \begin{center}
 \begin{tabular}{@{}p{0.23\textwidth}p{0.31\textwidth}p{0.21\textwidth}cc@{}}
 \textbf{Theorem family} & \textbf{Content to exercise} &
 \textbf{Planned certificate} & \textbf{Def.} & \textbf{Registry}\\
 \hline
-Arctangent integration by parts &
-\(\pi=4\int_0^1\arctan(x)\,\dd x+2\log2\); two-sided product derivative,
-effective FTC, the canonical
-logarithm, and the common monotone-piece refinement &
-the certificate of \cref{def:integration-by-parts-certificate}: common-piece
-corner error, product boxes, and a three-budget schedule for the integral,
-endpoint product, and \(\log2\) bridge &
+Canonical arctangent integration by parts &
+\(\pi=4\int_0^1\arctan(x)\,\dd x+2\log_{\mathrm{canonical}}2\);
+transport the checked reciprocal-log endpoint through exp/log uniqueness and
+generalize the supplied branch to common monotone pieces &
+canonical exp/log transport plus the certificate of
+\cref{def:integration-by-parts-certificate} &
 -- & --\\
 Euler identity and complex logarithm &
 for \(a=\arctangeom(1)\),
@@ -87,9 +91,13 @@ separately named \code{pi.curvatureFan} and
 \code{pi.integrationByPartsMesh}, and \code{pi.triangleLogSeries}
 representatives.  They remain useful
 executable comparisons, but are not additional readiness cells: the former
-sharpens finite geometry, while the latter two do not yet establish the
-general arctangent--logarithm integration-by-parts route or its canonical
-logarithm transport.
+sharpens finite geometry, while the latter two are variants of the checked
+finite integration-by-parts bridge.  The primary named view
+\code{pi.integrationByParts} is the reciprocal-log formula itself; its rate
+\(w_n\le52/2^n\) is certified by
+\code{Logarithm.piTriangleLogReciprocalIntegralRate}.  None of these facts
+yet transports the logarithm to the canonical inverse-exponential
+presentation.
 
 The direct \code{piCircumference} evaluator remains a geometric diagnostic:
 its unresolved lower-endpoint refinement is a local square-root-enclosure
@@ -98,27 +106,21 @@ problem, not a missing calculus gate.  Lean now reduces it to
 margin comparing the two fine curvature certificates, their bisection widths,
 and the coarse squared chord.  The reduction from that margin to the original
 endpoint refinement is checked; the universal margin inequality remains open.
-The next candidate for a new coverage cell is the general arctangent
-integration-by-parts evaluation.  The supplied unit formula is now a certified
-pi representation through the finite triangle, product-FTC, and reciprocal-log
-bridges; only the derived agreement of a reusable general theorem with the
-preferred pi presentation would belong in the coverage registry.  The exact
-finite acceptance contract is stated in
+The checked finite integration-by-parts row is deliberately narrower than the
+future canonical formulation.  Its exact finite acceptance contract is stated in
 \cref{def:integration-by-parts-certificate,thm:integration-by-parts-certificate}:
 every monotone piece must provide its product box, common refinement,
 corner-rectangle bound, and rational error schedule.  The concrete target is
-then isolated in \cref{cor:arctangent-logarithm-pi-route}.  The cell remains
-unmarked until this reusable effective-FTC certificate and the canonical
-logarithm endpoint identity are constructive.  The two-sided product derivative
+then isolated in \cref{cor:arctangent-logarithm-pi-route}.  The two-sided product derivative
 of the actual \(x\arctan x\) evaluator and its supplied finite FTC comparison
-are checked; general monotone-piece composition is the remaining calculus gate.
-This is deliberately the long
-elementary-function route: its \(\log 2\) endpoint must agree with the inverse
+are checked; general monotone-piece composition remains the calculus gate.
+The canonical refinement is deliberately the long elementary-function route:
+its \(\log 2\) endpoint must agree with the inverse
 of the canonical exponential.  The linear Peano--Baker/Picard--Lindel\"of
 uniqueness theorem will make that identification only after the individual
 exponential presentations have supplied their own derivative and initial-value
-certificates.  Thus the prospective row tests a capability the arctangent rows
-do not.
+certificates.  Thus the prospective refinement tests a capability the checked
+finite row does not.
 The Euler/complex-logarithm row above is a second, longer exp/log/ODE
 corroboration; it remains unmarked until its explicit complex certificates are
 present.  The arcsine/Newton and Gaussian rows remain future probes for

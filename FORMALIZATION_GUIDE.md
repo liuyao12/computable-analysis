@@ -301,7 +301,7 @@ blueprint before relying on one.
 ## Pi as a regression suite, not a target namespace
 
 `PiProofs.PiCoverageBridge` is deliberately a compact list of distinct
-end-to-end capability tests.  It currently has five checked bridges; it is
+end-to-end capability tests.  It currently has six checked bridges; it is
 not a percentage or a catalogue of all certified pi computations.  Consume a
 named presentation from the abstract `pi : Real` handle when you need a
 specific implementation:
@@ -314,6 +314,7 @@ open ComputableAnalysis
 #check pi.circleArea
 #check pi.circumference
 #check pi.arctanGeom
+#check pi.integrationByParts
 #check pi.leibniz
 #check pi.machin
 #check pi.cauchy
@@ -330,7 +331,10 @@ Leibniz bridge.  Similarly, the direct geometric diagnostic
 not additional points on the scoreboard.  Use
 `PiCoverageBridge.equivalent` only when the compact suite itself is what a
 test needs; expose the natural integral, series, or geometry theorem in a
-downstream result.
+downstream result.  `pi.integrationByParts` is the checked supplied-unit
+formula using the literal reciprocal-integral logarithm, with runtime bound
+`52 / 2^n`; it is a finite calculus bridge, not the still-open general
+integration-by-parts theorem or canonical-exp/log transport.
 
 ## Linear systems and Peano--Baker
 

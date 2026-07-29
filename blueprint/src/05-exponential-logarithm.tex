@@ -558,12 +558,15 @@ This is a specialized, completely finite change-of-variables theorem for
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_valid}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegralRate}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogSeries_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pi.triangleLogSeries}
 \lean{ComputableAnalysis.PiProofs.pi.triangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
 \uses{thm:log-two-square-pullback-integral}
 \leanok
 Put
@@ -640,9 +643,14 @@ raw evaluator with \(4\arctangeom(1)\), and
 circle-area pi equivalence.  The abstract pi handle exposes it as
 \code{PiProofs.pi.triangleLogSeries}.  This is an executable cross-check of
 the triangle integral, strip, product-FTC, and logarithm-series algorithms.
-It remains outside the pi coverage score because it does not establish a
-general function-level integration-by-parts theorem or transport the
-logarithm to the canonical inverse-exponential presentation.
+It remains the supplementary series variant.  Replacing its alternating
+logarithm by the directly equivalent reciprocal-integral logarithm gives the
+checked coverage view \code{pi.integrationByParts}: the concrete formula
+\(4\arctanintegraltriangle+2\log_{\mathrm{rec}}2\) is equivalent to area
+pi and its literal runtime satisfies \(w_n\le52/2^n\), via
+\code{Logarithm.piTriangleLogReciprocalIntegralRate}.  This finite bridge does
+not establish a general function-level integration-by-parts theorem or
+transport the logarithm to the canonical inverse-exponential presentation.
 \end{theorem}
 
 \begin{theorem}[Rational two-strip decomposition]

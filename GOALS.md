@@ -32,6 +32,9 @@ not a description of the current module graph. The checked blueprint
   bounds, not necessarily exact widths.  For pi,
   `PiProofs.piLeibnizRate` records width `<= 4/n`, while
   `PiProofs.piMachinRate` records width `<= 20*(1/2)^n`, i.e. `20/2^n`.
+  The literal reciprocal-log integration-by-parts evaluator similarly has
+  `Logarithm.piTriangleLogReciprocalIntegralRate`, with width
+  `<= 52*(1/2)^n`.
 - Equality of raw representatives is same-stage rational-interval overlap:
   `RealRaw.Equiv x y` means that `x.compute n` and `y.compute n` overlap for
   every `n`. Validity makes this relation transitive. The project-facing
@@ -555,10 +558,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   Their formal product-FTC bridge is
   `piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`
   (and its series counterpart); both then reach the geometric arctangent
-  endpoint and the circle-area pi. They intentionally remain outside
-  `PiCoverageBridge`: they test a supplied finite triangle, Darboux-strip,
-  product-FTC, and logarithm route, but do not establish general effective
-  FTC/integration-by-parts or canonical exp/log transport.
+  endpoint and the circle-area pi.  The literal reciprocal-log formula is now
+  the sixth `PiCoverageBridge` constructor: it tests a supplied finite
+  triangle, Darboux-strip, product-FTC, and logarithm route, with direct rate
+  `52/2^n`.  It still does not establish a general effective
+  FTC/integration-by-parts theorem or canonical exp/log transport; those are
+  the stronger remaining refinement of this row.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
@@ -1148,11 +1153,12 @@ students actually compute.
 ## Pi Representations
 
 - `PiProofs.PiCoverageBridge` is the π progress measure in
-  `blueprint/src/pi-scoreboard-table.tex`.  Its five constructors have one
+  `blueprint/src/pi-scoreboard-table.tex`.  Its six constructors have one
   checked `RealRaw.Equiv` witness per distinct bridge: Archimedean geometry,
-  arctangent versus alternating series, finite definite integration,
-  compactified improper integration, and the nontrivial reciprocal-quartic
-  kernel.  The theorem `PiCoverageBridge.equivalent` derives each witness from
+  arctangent versus alternating series, finite definite integration, the
+  supplied finite integration-by-parts formula, compactified improper
+  integration, and the nontrivial reciprocal-quartic kernel.  The theorem
+  `PiCoverageBridge.equivalent` derives each witness from
   the certified presentation registry.  This is a coverage suite, not a
   completion percentage: multiple implementations can share a bridge, and a
   continuous Peano--Baker theorem or an analytic proof that `exp' = exp` would
@@ -1161,10 +1167,11 @@ students actually compute.
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
   regressions.  `piCertified.alternatives` also literally carries the checked
   `pi.curvatureFan`, `pi.integrationByPartsMesh`, and
-  `pi.triangleLogSeries` raw evaluators; they remain outside the coverage
-  count. The latter two are finite mesh and supplied triangle--logarithm
-  regressions, not substitutes for the pending general arctangent--logarithm
-  effective-FTC bridge.
+  `pi.triangleLogSeries` raw evaluators; those remain outside the coverage
+  count.  The reciprocal-log triangle formula is instead the primary
+  `pi.integrationByParts` view and the sixth finite-calculus bridge.  It is
+  not a substitute for the pending general arctangent--logarithm effective-FTC
+  bridge or canonical-logarithm transport.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel and Brouncker are advanced-analysis
@@ -1266,9 +1273,10 @@ students actually compute.
   `PiProofs.pi.integrationByPartsMesh`, and
   `PiProofs.pi.triangleLogSeries` expose checked named
   `Real.Representation`s, stored directly in `piCertified.alternatives`; they
-  are not additional calculus-coverage rows. The latter two remain finite
-  mesh and supplied triangle--logarithm evaluators, not the general
-  arctangent--logarithm integration-by-parts theorem.
+  are not additional calculus-coverage rows.  The literal reciprocal-log
+  triangle formula is the primary `PiProofs.pi.integrationByParts` view and
+  does count as the supplied finite bridge; the general
+  arctangent--logarithm integration-by-parts theorem remains open.
   The stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical

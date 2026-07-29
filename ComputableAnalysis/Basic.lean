@@ -1094,6 +1094,16 @@ private theorem prefixStabilizeCompute_contained_in_current_expand
         (prefixStabilizeCompute candidate radius n)
         (QInterval.expand (candidate (n + 1)) (radius (n + 1)))
 
+/-- At every stage, finite-prefix stabilization is contained in the current
+widened candidate interval.  This exposes the direct runtime width bound of a
+stabilized algorithm without referring to its proof-side anchor. -/
+theorem prefixStabilize_contained_in_current_expand
+    (candidate : RealRaw) (radius : Nat -> Rat) (n : Nat) :
+    (QInterval.expand (candidate.compute n) (radius n)).ContainsInterval
+      ((prefixStabilize candidate radius).compute n) := by
+  exact prefixStabilizeCompute_contained_in_current_expand
+    candidate.compute radius n
+
 private theorem prefixStabilizeCompute_step_nested
     (candidate : Nat -> QInterval) (radius : Nat -> Rat) (n : Nat) :
     (prefixStabilizeCompute candidate radius n).lo <=

@@ -801,6 +801,29 @@ theorem arctanKernelTriangleRaw_valid : arctanKernelTriangleRaw.Valid := by
     arctanKernelTriangleStabilizationRadius_covers_complementKernelIntegral
     arctanKernelTriangleStabilizationRadius_shrinks
 
+/-- The direct triangular runtime is no wider than its current widened
+point-candidate box.  The factor `12` is twice the public `6/2^n`
+stabilization radius; no rate is transferred from the proof-side integral
+anchor. -/
+theorem arctanKernelTriangleRaw_compute_width_le (stage : Nat) :
+    (arctanKernelTriangleRaw.compute stage).width <=
+      12 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  have hcontain := RealRaw.prefixStabilize_contained_in_current_expand
+    arctanKernelTriangleCandidate arctanKernelTriangleStabilizationRadius stage
+  have hwidth := QInterval.width_le_of_contains hcontain
+  rw [QInterval.expand_width] at hwidth
+  change (arctanKernelTriangleRaw.compute stage).width <= _
+  rw [show arctanKernelTriangleCandidate.compute stage =
+      arctanKernelTriangleCandidateCompute stage by rfl,
+    arctanKernelTriangleCandidateCompute_width] at hwidth
+  unfold arctanKernelTriangleStabilizationRadius at hwidth
+  calc
+    (arctanKernelTriangleRaw.compute stage).width <=
+        0 + 2 * (6 * (1 / (((2 ^ stage : Nat) : Rat)))) := by
+          simpa [arctanKernelTriangleRaw] using hwidth
+    _ = 12 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+
 theorem arctanKernelTriangleRaw_equiv_complementKernelIntegral :
     arctanKernelTriangleRaw.Equiv arctanComplementKernelIntegral := by
   unfold arctanKernelTriangleRaw
@@ -843,6 +866,14 @@ theorem arctanIntegralTriangle_valid : arctanIntegralTriangle.Valid :=
 theorem arctanIntegralTriangle_compute_eq (stage : Nat) :
     arctanIntegralTriangle.compute stage =
       arctanKernelTriangleRaw.compute stage := rfl
+
+/-- Width bound inherited by the named arctangent triangle integral from its
+literal finite-triangle runtime. -/
+theorem arctanIntegralTriangle_compute_width_le (stage : Nat) :
+    (arctanIntegralTriangle.compute stage).width <=
+      12 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  rw [arctanIntegralTriangle_compute_eq]
+  exact arctanKernelTriangleRaw_compute_width_le stage
 
 /-- The triangular integral construction agrees with the complementary
 rational strip.  This is the public unit-integral form of the exact finite
@@ -2590,6 +2621,52 @@ theorem piTriangleLogReciprocalIntegral_valid :
   exact RealRaw.add_valid
     (RealRaw.natScale_valid 4 arctanIntegralTriangle_valid)
     (RealRaw.natScale_valid 2 logTwoReciprocalIntegral_valid)
+
+/-- Explicit runtime width bound for the supplied reciprocal-log
+integration-by-parts formula.  It comes directly from the finite triangle
+runtime and the dyadic Darboux boxes for `∫₁² 1/t dt`; it is not transported
+through the pi equivalence. -/
+theorem piTriangleLogReciprocalIntegral_compute_width_le (stage : Nat) :
+    (piTriangleLogReciprocalIntegral.compute stage).width <=
+      52 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  have htriangle := arctanIntegralTriangle_compute_width_le stage
+  have hlog :
+      (logTwoReciprocalIntegral.compute stage).width =
+        2 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+    rw [logTwoReciprocalIntegral_compute_eq, logTwoDarbouxCompute_width]
+  have hfourTriangle :
+      (4 : Rat) * (arctanIntegralTriangle.compute stage).width <=
+        4 * (12 * (1 / (((2 ^ stage : Nat) : Rat)))) :=
+    Rat.mul_le_mul_of_nonneg_left htriangle (by native_decide)
+  unfold piTriangleLogReciprocalIntegral
+  rw [RealRaw.add_width, RealRaw.natScale_width,
+    RealRaw.natScale_width, hlog]
+  calc
+    (4 : Rat) * (arctanIntegralTriangle.compute stage).width +
+        2 * (2 * (1 / (((2 ^ stage : Nat) : Rat)))) <=
+      4 * (12 * (1 / (((2 ^ stage : Nat) : Rat)))) +
+        2 * (2 * (1 / (((2 ^ stage : Nat) : Rat)))) :=
+      Rat.add_le_add_right hfourTriangle _
+    _ = 52 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+      grind [Rat.add_mul, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
+    ((1 : Rat) / 2) ^ n = 1 / (((2 ^ n : Nat) : Rat)) := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [Rat.pow_succ, ih, Nat.pow_succ, Rat.natCast_mul]
+      rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.one_mul]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Public geometric-rate metadata for the literal reciprocal-log
+integration-by-parts evaluator. -/
+def piTriangleLogReciprocalIntegralRate :
+    RealRaw.Rate piTriangleLogReciprocalIntegral.compute :=
+  .geometric 0 52 ((1 : Rat) / 2) (by native_decide) (by native_decide)
+    (fun n _ => by
+      rw [half_pow_eq_one_div_nat_two_pow]
+      exact piTriangleLogReciprocalIntegral_compute_width_le n)
 
 /-- The reciprocal-integral and alternating-series forms of the supplied
 arctangent integration-by-parts formula agree.  The triangle integral is
