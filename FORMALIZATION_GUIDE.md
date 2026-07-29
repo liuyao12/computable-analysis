@@ -450,10 +450,17 @@ Before estimating that margin, normalize the bisection budget explicitly.
 stage `m` for a rational input at most `1` has width exactly `1 / 2^(m + 9)`.
 For an adjacent stage chord, obtain that input hypothesis from
 `RationalCircle.Stage.samplePoint_segmentNormSq_le_one_of_two_le_subdivisions`.
+The direct interface is now the specialized theorem
+`PiProofs.adjacentPointSegmentLengthInterval_width_eq_unit`.
 Thus the two fine widths in the margin target are literal dyadic rational
-terms, rather than unspecified quantities known only to tend to zero.  This
+terms, rather than unspecified quantities known only to tend to zero. This
 reduction is a necessary local ingredient; it does not discharge
 `AdjacentChordSecantMarginCoversFineWidths`.
+For a proof that wants the finite rational target directly, use
+`PiProofs.AdjacentChordSecantMarginCoversFineDyadicBudget`; the transport
+theorem `PiProofs.adjacentChordSecantMargin_of_fineDyadicBudget` converts that
+explicit-budget certificate to the original interval condition, which in turn
+feeds `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin`.
 
 ## Pi as a regression suite, not a target namespace
 

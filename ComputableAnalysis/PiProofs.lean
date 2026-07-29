@@ -8145,6 +8145,30 @@ theorem pointSegmentLengthInterval_width_eq
     sqrtApproxOnDomain_width_eq (pointSegmentNormSq p q)
       (pointSegmentNormSq_sqrtDomain p q) n
 
+/-- For an adjacent chord in a stage with at least two cells, the concrete
+square-root interval used by the original circumference algorithm has an exact
+dyadic width. This exposes the literal error term that must be paid in the
+remaining local refinement margin. -/
+theorem adjacentPointSegmentLengthInterval_width_eq_unit
+    (stage : Nat) (hstage : 2 <= stage) (k n : Nat) (hn : n ≠ 0) :
+    (pointSegmentLengthInterval
+      (circleSamplePoint stage k)
+      (circleSamplePoint stage (k + 1)) n).width =
+      1 / (((2 ^ (n + 9) : Nat) : Rat)) := by
+  have hunit :
+      pointSegmentNormSq
+          (circleSamplePoint stage k)
+          (circleSamplePoint stage (k + 1)) <= 1 := by
+    simpa [circleSamplePoint_eq_rationalCircleStage,
+      pointSegmentNormSq_eq_rationalCircleSegmentNormSq] using
+      RationalCircle.Stage.samplePoint_segmentNormSq_le_one_of_two_le_subdivisions
+        (rationalCircleStage stage) hstage k
+  simpa [pointSegmentLengthInterval, sqrtPartialRaw] using
+    (sqrtApproxOnDomain_width_eq_unit
+      (pointSegmentNormSq_sqrtDomain
+        (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1))) hunit n hn)
+
 theorem pointSegmentLengthInterval_contains_of_le_precision
     (p q : PiCirclePoint) {n m : Nat} (hnm : n <= m) :
     (pointSegmentLengthInterval p q n).ContainsInterval
@@ -17110,6 +17134,45 @@ def AdjacentChordSecantMarginCoversFineWidths (stage : Nat) : Prop :=
     let r := RationalCircle.Stage.secantChordLower p' m +
       RationalCircle.Stage.secantChordLower m q' - left.width - right.width
     0 <= r /\ pointSegmentNormSq p q <= sq r
+
+/-- The literal bisection width for a unit-bounded chord at a nonzero
+precision. This is the rational error budget used by the fine-cell secant
+margin, separated from the square-root evaluator for arithmetic proofs. -/
+def adjacentChordBisectionWidth (precision : Nat) : Rat :=
+  1 / (((2 ^ (precision + 9) : Nat) : Rat))
+
+/-- The direct secant-margin condition with its two fine square-root errors
+already normalized to explicit dyadic rationals.  It is a finite rational
+inequality; `adjacentChordSecantMargin_of_fineDyadicBudget` transports it to
+the original interval-based condition. -/
+def AdjacentChordSecantMarginCoversFineDyadicBudget (stage : Nat) : Prop :=
+  forall k : Fin stage,
+    let p := circleSamplePoint stage k.1
+    let q := circleSamplePoint stage (k.1 + 1)
+    let p' := circleSamplePoint (2 * stage) (2 * k.1)
+    let m := circleSamplePoint (2 * stage) (2 * k.1 + 1)
+    let q' := circleSamplePoint (2 * stage) (2 * k.1 + 2)
+    let b := adjacentChordBisectionWidth (2 * stage)
+    let r := RationalCircle.Stage.secantChordLower p' m +
+      RationalCircle.Stage.secantChordLower m q' - b - b
+    0 <= r /\ pointSegmentNormSq p q <= sq r
+
+/-- Replacing the two fine interval widths by their exact dyadic value turns
+the explicit budget margin into the original secant margin condition. -/
+theorem adjacentChordSecantMargin_of_fineDyadicBudget
+    (stage : Nat) (hstage : 0 < stage)
+    (hbudget : AdjacentChordSecantMarginCoversFineDyadicBudget stage) :
+    AdjacentChordSecantMarginCoversFineWidths stage := by
+  intro k
+  have h := hbudget k
+  dsimp [AdjacentChordSecantMarginCoversFineDyadicBudget] at h
+  dsimp [AdjacentChordSecantMarginCoversFineWidths]
+  have hleft := adjacentPointSegmentLengthInterval_width_eq_unit
+    (2 * stage) (by omega) (2 * k.1) (2 * stage) (by omega)
+  have hright := adjacentPointSegmentLengthInterval_width_eq_unit
+    (2 * stage) (by omega) (2 * k.1 + 1) (2 * stage) (by omega)
+  rw [hleft, hright]
+  simpa [adjacentChordBisectionWidth] using h
 
 /-- A verified secant margin yields the original local lower-chord
 refinement.  This packages the new rational chord certificate directly in
