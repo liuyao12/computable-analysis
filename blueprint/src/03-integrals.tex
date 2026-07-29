@@ -2342,6 +2342,30 @@ The construction supplies the full-line target needed by the quartic route,
 without counting a tail limit as a primitive operation.
 \end{definition}
 
+\paragraph{A bounded symmetric Cauchy computation.}
+The same kernel also exercises the public finite piecewise-monotone integral
+interface directly.  Lean certifies that \(1/(1+x^2)\) is increasing on
+\([-1,0]\) and decreasing on \([0,1]\), assembles those two rectangle
+pieces at the partition \([-1,0,1]\), and proves the natural formula
+\[
+  2\left(\int_{-1}^{0}\frac{\dd x}{1+x^2}
+    +\int_0^1\frac{\dd x}{1+x^2}\right)
+  \sim \pi_{\mathrm{area}}.
+\]
+Its direct rational interval evaluator has width at most \(16/(n+1)\) at
+stage \(n\).  This is a regression of monotonicity splitting and finite
+integral assembly, not a second arctangent series formula.
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyKernelInterval}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyTwoPieceConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral_equiv_two_rectangle}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral_compute_width_le_eight_div_succ}
+\lean{ComputableAnalysis.IntegralIdentities.piSymmetricCauchyPiecewiseIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_compute_width_le_sixteen_div_succ}
+\lean{ComputableAnalysis.PiProofs.piSymmetricCauchyPiecewiseIntegral_equiv_piCircleArea}
+
 \begin{definition}[The reciprocal quartic test kernel]
 \label{def:reciprocal-quartic-test-kernel}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator}

@@ -15397,6 +15397,47 @@ theorem cauchyFullLineIntegral_equiv_piCircleArea :
       piCircleArea n n).1
       (four_arctanIntegralRectangleForAtOne_equiv_piCircleArea n)
 
+/-- The bounded symmetric Cauchy formula is a separate finite
+piecewise-monotone computation: the kernel is assembled from an increasing
+negative branch and a decreasing positive branch before being compared with
+the unit-branch rectangle integral. -/
+theorem piSymmetricCauchyPiecewiseIntegral_equiv_four_arctanIntegralRectangleForAtOne :
+    IntegralIdentities.piSymmetricCauchyPiecewiseIntegral.Equiv
+      ((4 : Nat) * IntegralIdentities.arctanIntegralRectangleForAtOne : RealRaw) := by
+  have hA : IntegralIdentities.arctanIntegralRectangleForAtOne.Valid :=
+    IntegralIdentities.arctanIntegralRectangleForAtOne_valid
+  have hfirst : IntegralIdentities.piSymmetricCauchyPiecewiseIntegral.Equiv
+      ((2 : Nat) * ((2 : Nat) *
+        IntegralIdentities.arctanIntegralRectangleForAtOne : RealRaw) : RealRaw) := by
+    unfold IntegralIdentities.piSymmetricCauchyPiecewiseIntegral
+    exact RealRaw.natScale_equiv 2
+      IntegralIdentities.symmetricCauchyPiecewiseIntegral_equiv_two_rectangle
+  have hcompose :
+      ((2 : Nat) * ((2 : Nat) *
+        IntegralIdentities.arctanIntegralRectangleForAtOne : RealRaw) : RealRaw).Equiv
+      ((4 : Nat) * IntegralIdentities.arctanIntegralRectangleForAtOne : RealRaw) := by
+    have h := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
+      (2 : Rat) (2 : Rat) (by native_decide) (by native_decide)
+      IntegralIdentities.arctanIntegralRectangleForAtOne hA
+    simpa only [show (2 : Rat) * (2 : Rat) = 4 by native_decide] using h
+  exact RealRaw.equiv_trans
+    IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid
+    (RealRaw.natScale_valid 2 (RealRaw.natScale_valid 2 hA))
+    (RealRaw.natScale_valid 4 hA)
+    hfirst hcompose
+
+/-- The bounded symmetric Cauchy formula evaluates to the preferred
+circle-area representation of pi. -/
+theorem piSymmetricCauchyPiecewiseIntegral_equiv_piCircleArea :
+    IntegralIdentities.piSymmetricCauchyPiecewiseIntegral.Equiv piCircleArea := by
+  exact RealRaw.equiv_trans
+    IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid
+    (RealRaw.natScale_valid 4
+      IntegralIdentities.arctanIntegralRectangleForAtOne_valid)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piSymmetricCauchyPiecewiseIntegral_equiv_four_arctanIntegralRectangleForAtOne
+    four_arctanIntegralRectangleForAtOne_equiv_piCircleArea
+
 /-- The same completed rectangle-integral pi route, viewed through the
 monotone-integral interface for the decreasing kernel `1/(1+x^2)` on
 `[0,1]`. -/
@@ -17382,6 +17423,7 @@ inductive PiPresentation where
   | nilakanthaSeries
   | machinSeries
   | cauchyIntegral
+  | symmetricCauchyPiecewiseIntegral
   | reciprocalQuarticIntegral
 deriving DecidableEq, Repr
 
@@ -17401,6 +17443,7 @@ inductive PiIntegrationFamily where
   | finiteSubstitution
   | alternatingSeries
   | compactifiedImproperIntegral
+  | piecewiseMonotoneIntegral
 deriving DecidableEq, Repr
 
 /-- The primary constructive capability exercised by a checked π
@@ -17416,6 +17459,7 @@ def PiPresentation.integrationFamily : PiPresentation -> PiIntegrationFamily
   | .arctanSquareSubstitution => .finiteSubstitution
   | .leibnizSeries | .nilakanthaSeries | .machinSeries => .alternatingSeries
   | .cauchyIntegral => .compactifiedImproperIntegral
+  | .symmetricCauchyPiecewiseIntegral => .piecewiseMonotoneIntegral
 
 /-- The raw interval algorithm behind each canonical checked presentation. -/
 def piPresentationRaw : PiPresentation -> RealRaw
@@ -17433,6 +17477,8 @@ def piPresentationRaw : PiPresentation -> RealRaw
   | .nilakanthaSeries => piNilakantha
   | .machinSeries => piMachin
   | .cauchyIntegral => IntegralIdentities.cauchyFullLineIntegral
+  | .symmetricCauchyPiecewiseIntegral =>
+      IntegralIdentities.piSymmetricCauchyPiecewiseIntegral
   | .reciprocalQuarticIntegral => piReciprocalQuarticCompact
 
 /-- Every canonical presentation has a checked nested, shrinking interval
@@ -17463,6 +17509,9 @@ theorem piPresentation_valid (presentation : PiPresentation) :
       machinValid
   | cauchyIntegral =>
       simpa [piPresentationRaw] using IntegralIdentities.cauchyFullLineIntegral_valid
+  | symmetricCauchyPiecewiseIntegral =>
+      simpa [piPresentationRaw] using
+        IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid
   | reciprocalQuarticIntegral =>
       simpa [piPresentationRaw] using piReciprocalQuarticCompact_valid
 
@@ -17502,6 +17551,8 @@ theorem piPresentation_equiv_piCircleArea (presentation : PiPresentation) :
       piMachin_equiv_piCircleArea_finiteRiemannBridge
   | cauchyIntegral => simpa [piPresentationRaw] using
       cauchyFullLineIntegral_equiv_piCircleArea
+  | symmetricCauchyPiecewiseIntegral => simpa [piPresentationRaw] using
+      piSymmetricCauchyPiecewiseIntegral_equiv_piCircleArea
   | reciprocalQuarticIntegral => simpa [piPresentationRaw] using
       piReciprocalQuarticCompact_equiv_piCircleArea
 
@@ -17531,6 +17582,9 @@ inductive PiCoverageBridge where
   | compactifiedImproperIntegral
   /-- A nontrivial algebraic kernel agrees with the compactified Cauchy route. -/
   | algebraicKernelIntegral
+  /-- The bounded symmetric Cauchy integral uses the public finite
+  piecewise-monotone assembler, with an increasing and a decreasing branch. -/
+  | piecewiseMonotoneCauchyIntegral
 deriving DecidableEq, Repr
 
 /-- The source implementation for a distinct π coverage bridge. -/
@@ -17542,6 +17596,7 @@ def PiCoverageBridge.sourcePresentation : PiCoverageBridge -> PiPresentation
   | .arctangentSquareSubstitution => .arctanSquareSubstitution
   | .compactifiedImproperIntegral => .cauchyIntegral
   | .algebraicKernelIntegral => .reciprocalQuarticIntegral
+  | .piecewiseMonotoneCauchyIntegral => .symmetricCauchyPiecewiseIntegral
 
 /-- The independently constructed target implementation for a distinct π
 coverage bridge. -/
@@ -17553,6 +17608,7 @@ def PiCoverageBridge.targetPresentation : PiCoverageBridge -> PiPresentation
   | .arctangentSquareSubstitution => .arctanIntegrationByParts
   | .compactifiedImproperIntegral => .area
   | .algebraicKernelIntegral => .cauchyIntegral
+  | .piecewiseMonotoneCauchyIntegral => .arctanRectangleIntegral
 
 /-- The source raw computation for a coverage bridge. -/
 def PiCoverageBridge.sourceRaw (bridge : PiCoverageBridge) : RealRaw :=
@@ -18333,7 +18389,7 @@ theorem piCircumferenceCurvatureFan_equiv_piCircleArea :
 as its preferred evaluator and records every currently checked equivalent raw
 algorithm, including the supplementary curvature-corrected fan. -/
 def piCertified : Real :=
-  ((((((((((((Real.ofRaw piCircleArea (piPresentation_valid .area))
+  (((((((((((((Real.ofRaw piCircleArea (piPresentation_valid .area))
     .withAlternative piCircleAreaPolygon
       (piPresentation_valid .areaPolygon)
       (piPresentation_equiv_piCircleArea .areaPolygon))
@@ -18376,6 +18432,9 @@ def piCertified : Real :=
     .withAlternative IntegralIdentities.cauchyFullLineIntegral
       (piPresentation_valid .cauchyIntegral)
       (piPresentation_equiv_piCircleArea .cauchyIntegral))
+    .withAlternative IntegralIdentities.piSymmetricCauchyPiecewiseIntegral
+      (piPresentation_valid .symmetricCauchyPiecewiseIntegral)
+      (piPresentation_equiv_piCircleArea .symmetricCauchyPiecewiseIntegral))
     .withAlternative piReciprocalQuarticCompact
       (piPresentation_valid .reciprocalQuarticIntegral)
       (piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral))
@@ -18503,6 +18562,10 @@ def leibniz : Real.Representation pi := presentation .leibnizSeries
 def nilakantha : Real.Representation pi := presentation .nilakanthaSeries
 def machin : Real.Representation pi := presentation .machinSeries
 def cauchy : Real.Representation pi := presentation .cauchyIntegral
+/-- The bounded symmetric Cauchy computation, built by the public
+piecewise-monotone integral assembler on `[-1,0,1]`. -/
+def symmetricCauchy : Real.Representation pi :=
+  presentation .symmetricCauchyPiecewiseIntegral
 def reciprocalQuartic : Real.Representation pi := presentation .reciprocalQuarticIntegral
 
 /-- The curvature-corrected Archimedean fan is a named certified view of the

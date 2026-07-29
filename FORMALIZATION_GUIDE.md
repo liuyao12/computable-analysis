@@ -301,7 +301,7 @@ blueprint before relying on one.
 ## Pi as a regression suite, not a target namespace
 
 `PiProofs.PiCoverageBridge` is deliberately a compact list of distinct
-end-to-end capability tests.  It currently has seven checked bridges; it is
+end-to-end capability tests.  It currently has eight checked bridges; it is
 not a percentage or a catalogue of all certified pi computations.  Consume a
 named presentation from the abstract `pi : Real` handle when you need a
 specific implementation:
@@ -319,6 +319,7 @@ open ComputableAnalysis
 #check pi.leibniz
 #check pi.machin
 #check pi.cauchy
+#check pi.symmetricCauchy
 #check pi.reciprocalQuartic
 ```
 
@@ -341,6 +342,9 @@ integration-by-parts theorem or canonical-exp/log transport.
 `2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
 `pi.integrationByParts` is the finite `t = x*x` substitution certificate.
 It is likewise not a general substitution theorem.
+`pi.symmetricCauchy` is the bounded formula assembled over `[-1,0,1]` by the
+public piecewise-monotone interface; it checks the increasing and decreasing
+branches separately and has direct width bound `16 / (n+1)`.
 
 ## Linear systems and Peano--Baker
 

@@ -131,6 +131,7 @@ capability—not a percentage for the whole foundation.
 | finite arctangent integration by parts | supplied unit-branch triangle/strip reindexing, product FTC, and reciprocal-log endpoint agree with area pi | literal runtime: $w_n\le52/2^n$ |
 | finite square substitution in the pi formula | the same supplied product endpoint plus the checked $t=x^2$ mesh correction and pullback integral agree with the reciprocal-log formula | square-pullback pi raw: $w_n\le56/2^n$ |
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
+| bounded symmetric Cauchy integral | public two-piece monotone assembly, with an increasing `[-1,0]` branch and a decreasing `[0,1]` branch | symmetric Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
 | Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | Planned: matrix Peano--Baker factorial tail plus represented-input extension modulus |
 
@@ -163,6 +164,14 @@ exponential representations agree, then use
 representation itself is now checked, including the concrete domain-aware
 `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit` evaluator:
 at every stage it is exactly the two-corner box `[x * A.lo, x * A.hi]`.
+
+The eighth bridge is the bounded symmetric Cauchy formula
+\(\pi=2(\int_{-1}^{0}dx/(1+x^2)+\int_0^1dx/(1+x^2))\).  It tests the public
+finite piecewise-monotone integral assembler: Lean checks the increasing and
+decreasing branches separately before folding their certified rectangle
+computations.  It is not another arctangent series or a replacement for a
+general integration theorem.
+
 The exact rational product-difference identities, including the explicit
 `h * D_h x * D_h(arctan)` corner remainder, are now checked as well.
 Their three-term absolute-error estimate is checked too: the two component
@@ -524,6 +533,7 @@ unmarked long scoreboard target because it exercises the exp/log/ODE chain.
 | `NewtonSegmentPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=12(\int_0^{1/2}\sqrt{1-x^2}\,dx-\sqrt3/8)$ | ✗ | ✗ |
 | `GaussianPi` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\pi=\frac12(\int_{-\infty}^{\infty}e^{-x^2/2}\,dx)^2$ | ✗ | ✗ |
 | `cauchyFullLineIntegral` | [reciprocal-tail compactification](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-tail-compactification) | $\pi=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}$, represented by a finite reciprocal-tail chart | ✓ | ✓ |
+| `piSymmetricCauchyPiecewiseIntegral` | [bounded symmetric assembly](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-tail-compactification) | $\pi=2(\int_{-1}^{0}\frac{dx}{1+x^2}+\int_0^1\frac{dx}{1+x^2})$ | ✓ | ✓ |
 | `piReciprocalQuarticCompact` | [kernel](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:reciprocal-quartic-test-kernel), [route](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:reciprocal-quartic-route-package) | $\pi=\int_{-1}^{1}\frac{1+x^2}{x^4-x^2+1}\,dx$ | ✓ | ✓ |
 | `baselSeriesRaw` / `pi^2/6` | [definition](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:zeta-two-raw), [RHS valid](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:basel-geometric-rhs-valid) | $\zeta(2)=\sum_{n\ge1}\frac1{n^2}=\pi^2/6$ | ✓ | ✗ |
 | `Brouncker(4/pi)` | [sources](https://liuyao12.github.io/computable-analysis/sect0002.html#rem:sources-of-raw-reals) | $\frac4\pi=1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cdots}}}$ | ✗ | ✗ |
@@ -568,6 +578,10 @@ Lean hooks:
   `IntegralIdentities.ReciprocalTailCompactification`,
   `IntegralIdentities.cauchyFullLineIntegral_valid`,
   `PiProofs.cauchyFullLineIntegral_equiv_piCircleArea`.
+- Bounded symmetric Cauchy integral:
+  `IntegralIdentities.symmetricCauchyTwoPieceConstruction`,
+  `IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid`, and
+  `PiProofs.piSymmetricCauchyPiecewiseIntegral_equiv_piCircleArea`.
 - Old point-Riemann arctangent:
   `IntegralIdentities.arctanIntegral_compute_width_zero`,
   `IntegralIdentities.arctanIntegral_stages_constant`.

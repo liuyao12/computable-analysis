@@ -1161,12 +1161,12 @@ students actually compute.
 ## Pi Representations
 
 - `PiProofs.PiCoverageBridge` is the π progress measure in
-  `blueprint/src/pi-scoreboard-table.tex`.  Its seven constructors have one
+  `blueprint/src/pi-scoreboard-table.tex`.  Its eight constructors have one
   checked `RealRaw.Equiv` witness per distinct bridge: Archimedean geometry,
   arctangent versus alternating series, finite definite integration, the
   supplied finite integration-by-parts formula, its finite square-substitution
-  companion, compactified improper integration, and the nontrivial
-  reciprocal-quartic kernel.  The theorem
+  companion, compactified improper integration, the nontrivial
+  reciprocal-quartic kernel, and bounded symmetric Cauchy assembly.  The theorem
   `PiCoverageBridge.equivalent` derives each witness from
   the certified presentation registry.  This is a coverage suite, not a
   completion percentage: multiple implementations can share a bridge, and a
@@ -1184,6 +1184,11 @@ students actually compute.
   `pi.squareSubstitution` view is the seventh bridge: it preserves the
   square-pullback integral and verifies its finite substitution transport to
   the reciprocal-log view.
+  The eighth bridge is `pi.symmetricCauchy`: the public general integral
+  construction folds the explicitly certified increasing `[-1,0]` and
+  decreasing `[0,1]` Cauchy-kernel branches.  Its direct pi raw evaluator has
+  width at most `16 / (n + 1)`.  This is a concrete piecewise-monotone
+  assembly regression, not another arctangent-series entry.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel and Brouncker are advanced-analysis

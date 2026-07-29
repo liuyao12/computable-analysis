@@ -8481,6 +8481,229 @@ theorem cauchyFullLineIntegral_width_le_sixteen_div_succ (n : Nat) :
       rw [Rat.div_def]
       grind [Rat.mul_assoc]
 
+/-- The bounded symmetric Cauchy kernel on `[-1,1]`.  Its natural
+piecewise-monotone decomposition breaks at zero: it is nondecreasing on the
+negative half and nonincreasing on the positive half. -/
+def symmetricCauchyKernelInterval : FunctionOnInterval :=
+  oneOverOnePlusSquareOnInterval (-1) 1
+
+/-- The negative half of the symmetric Cauchy kernel, evaluated by reflecting
+the certified positive unit-branch rectangle computation.  The monotonicity
+certificate is genuinely increasing: `x ↦ 1 / (1 + x^2)` rises on `[-1,0]`. -/
+private def symmetricCauchyNegativePiece :
+    Integral.MonotoneConstructionFor
+      (symmetricCauchyKernelInterval.restrict (-1) 0 (by native_decide)
+        (by native_decide) (by native_decide)) where
+  monotone := MonotoneOnInterval.ofNondecreasing (by
+    intro p q hp hq hpq n
+    have hqbounds : (-1 : Rat) <= q /\ q <= 0 := by
+      simpa [symmetricCauchyKernelInterval, FunctionOnInterval.restrict,
+        inDomainInterval] using hq
+    have hq0 : 0 <= -q := by grind
+    have hneg : -q <= -p := by grind
+    have h := ArctanGeometry.integralKernel_antitone_nonneg hq0 hneg
+    change 1 / (1 + p * p) <= 1 / (1 + q * q)
+    unfold ArctanGeometry.integralKernel at h
+    rw [show -p * -p = p * p by grind [Rat.neg_mul, Rat.mul_neg],
+      show -q * -q = q * q by grind [Rat.neg_mul, Rat.mul_neg]] at h
+    simpa only [ArctanGeometry.integralKernel] using h)
+  construction :=
+    { compute := arctanIntegralRectangleForAtOne.compute
+      certificate := by
+        exact arctanIntegralRectangleForAtOne_valid }
+
+/-- The positive half of the symmetric Cauchy kernel, using the usual
+decreasing unit-branch rectangle computation. -/
+private def symmetricCauchyPositivePiece :
+    Integral.MonotoneConstructionFor
+      (symmetricCauchyKernelInterval.restrict 0 1 (by native_decide)
+        (by native_decide) (by native_decide)) where
+  monotone := MonotoneOnInterval.ofNonincreasing (by
+    intro p q hp hq hpq n
+    have hpbounds : (0 : Rat) <= p /\ p <= 1 := by
+      simpa [symmetricCauchyKernelInterval, FunctionOnInterval.restrict,
+        inDomainInterval] using hp
+    have hp0 : 0 <= p := hpbounds.1
+    have h := ArctanGeometry.integralKernel_antitone_nonneg hp0 hpq
+    change 1 / (1 + q * q) <= 1 / (1 + p * p)
+    simpa only [ArctanGeometry.integralKernel] using h)
+  construction :=
+    { compute := arctanIntegralRectangleForAtOne.compute
+      certificate := by
+        exact arctanIntegralRectangleForAtOne_valid }
+
+/-- An executable two-piece construction for the bounded symmetric Cauchy
+integral.  The partition `[-1,0,1]` makes the increasing/decreasing split
+explicit instead of hiding it in an evenness argument. -/
+def symmetricCauchyTwoPieceConstruction :
+    Integral.GeneralConstructionFor symmetricCauchyKernelInterval where
+  pieces := 2
+  positive := by decide
+  point
+    | 0 => -1
+    | 1 => 0
+    | _ + 2 => 1
+  left_endpoint := rfl
+  right_endpoint := rfl
+  point_mem := by
+    intro i hi
+    have hcases : i = 0 \/ i = 1 \/ i = 2 := by omega
+    rcases hcases with rfl | rfl | rfl
+    · change (-1 : Rat) <= -1 /\ -1 <= 1
+      native_decide
+    · change (-1 : Rat) <= 0 /\ 0 <= 1
+      native_decide
+    · change (-1 : Rat) <= 1 /\ 1 <= 1
+      native_decide
+  point_mono := by
+    intro i j hij hj
+    have hicases : i = 0 \/ i = 1 \/ i = 2 := by omega
+    have hjcases : j = 0 \/ j = 1 \/ j = 2 := by omega
+    rcases hicases with rfl | rfl | rfl <;>
+      rcases hjcases with rfl | rfl | rfl <;>
+      first | omega | native_decide
+  construction := by
+    intro k hk
+    cases k with
+    | zero => exact symmetricCauchyNegativePiece
+    | succ k =>
+      cases k with
+      | zero => exact symmetricCauchyPositivePiece
+      | succ k => exact False.elim (by omega)
+
+/-- The bounded Cauchy integral assembled by the public finite
+piecewise-monotone integral operator. -/
+def symmetricCauchyPiecewiseIntegral : RealRaw :=
+  Integral.generalIntegralFor symmetricCauchyKernelInterval
+    symmetricCauchyTwoPieceConstruction
+
+theorem symmetricCauchyPiecewiseIntegral_valid :
+    symmetricCauchyPiecewiseIntegral.Valid :=
+  Integral.generalIntegralFor_valid symmetricCauchyKernelInterval
+    symmetricCauchyTwoPieceConstruction
+
+/-- The two monotone pieces are both the reflected unit-branch rectangle
+evaluator.  Their finite sum is therefore equivalent to two copies of that
+evaluator, without invoking a limit-level evenness principle. -/
+theorem symmetricCauchyPiecewiseIntegral_equiv_two_rectangle :
+    symmetricCauchyPiecewiseIntegral.Equiv
+      ((2 : Nat) * arctanIntegralRectangleForAtOne : RealRaw) := by
+  change
+    (RealRaw.ofRat 0 + arctanIntegralRectangleForAtOne +
+      arctanIntegralRectangleForAtOne).Equiv
+      ((2 : Nat) * arctanIntegralRectangleForAtOne : RealRaw)
+  have hA : arctanIntegralRectangleForAtOne.Valid :=
+    arctanIntegralRectangleForAtOne_valid
+  have hzeroA : (RealRaw.ofRat 0 + arctanIntegralRectangleForAtOne).Valid :=
+    RealRaw.add_valid (RealRaw.ofRat_valid 0) hA
+  have hsum :
+      (RealRaw.ofRat 0 + arctanIntegralRectangleForAtOne +
+        arctanIntegralRectangleForAtOne).Valid :=
+    RealRaw.add_valid hzeroA hA
+  have hdouble :
+      (arctanIntegralRectangleForAtOne +
+        arctanIntegralRectangleForAtOne).Valid :=
+    RealRaw.add_valid hA hA
+  have hscale :
+      ((2 : Nat) * arctanIntegralRectangleForAtOne : RealRaw).Valid :=
+    RealRaw.natScale_valid 2 hA
+  have hsum_double :
+      (RealRaw.ofRat 0 + arctanIntegralRectangleForAtOne +
+        arctanIntegralRectangleForAtOne).Equiv
+      (arctanIntegralRectangleForAtOne +
+        arctanIntegralRectangleForAtOne) :=
+    RealRaw.add_equiv hzeroA hA hA hA
+      (RealRaw.zero_add_equiv hA)
+      (RealRaw.equiv_refl arctanIntegralRectangleForAtOne hA)
+  exact RealRaw.equiv_trans hsum hdouble hscale hsum_double
+    (RealRaw.equiv_symm
+      (RealRaw.two_natscale_equiv_add_self
+        arctanIntegralRectangleForAtOne hA))
+
+/-- Direct width bound for the two-piece bounded Cauchy integral. -/
+theorem symmetricCauchyPiecewiseIntegral_compute_width_le_eight_div_succ
+    (n : Nat) :
+    (symmetricCauchyPiecewiseIntegral.compute n).width <=
+      (8 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  change
+    ((RealRaw.ofRat 0 + arctanIntegralRectangleForAtOne +
+      arctanIntegralRectangleForAtOne).compute n).width <=
+      (8 : Rat) / (((n + 1 : Nat) : Rat))
+  rw [RealRaw.add_width, RealRaw.add_width]
+  have hA := arctanIntegralRectangleForAtOne_width_le_four_div_succ n
+  have hdouble :
+      (arctanIntegralRectangleForAtOne.compute n).width +
+        (arctanIntegralRectangleForAtOne.compute n).width <=
+      (8 : Rat) / (((n + 1 : Nat) : Rat)) := by
+    calc
+      (arctanIntegralRectangleForAtOne.compute n).width +
+          (arctanIntegralRectangleForAtOne.compute n).width <=
+        (4 : Rat) / (((n + 1 : Nat) : Rat)) +
+          (arctanIntegralRectangleForAtOne.compute n).width :=
+        (Rat.add_le_add_right).2 hA
+      _ <= (4 : Rat) / (((n + 1 : Nat) : Rat)) +
+          (4 : Rat) / (((n + 1 : Nat) : Rat)) :=
+        (Rat.add_le_add_left).2 hA
+      _ = (8 : Rat) / (((n + 1 : Nat) : Rat)) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+  have hzero : (RealRaw.ofRat 0).compute n = { lo := 0, hi := 0 } := rfl
+  rw [hzero]
+  change 0 - 0 +
+      ((arctanIntegralRectangleForAtOne.compute n).hi -
+        (arctanIntegralRectangleForAtOne.compute n).lo) +
+      ((arctanIntegralRectangleForAtOne.compute n).hi -
+        (arctanIntegralRectangleForAtOne.compute n).lo) <=
+      (8 : Rat) / (((n + 1 : Nat) : Rat))
+  have hzero_sub : (0 : Rat) - 0 = 0 := by native_decide
+  rw [hzero_sub]
+  change
+    ((arctanIntegralRectangleForAtOne.compute n).hi -
+        (arctanIntegralRectangleForAtOne.compute n).lo) +
+      ((arctanIntegralRectangleForAtOne.compute n).hi -
+        (arctanIntegralRectangleForAtOne.compute n).lo) <=
+      (8 : Rat) / (((n + 1 : Nat) : Rat)) at hdouble
+  have hzero_add :
+      (0 : Rat) +
+        ((arctanIntegralRectangleForAtOne.compute n).hi -
+          (arctanIntegralRectangleForAtOne.compute n).lo) +
+        ((arctanIntegralRectangleForAtOne.compute n).hi -
+          (arctanIntegralRectangleForAtOne.compute n).lo) =
+      ((arctanIntegralRectangleForAtOne.compute n).hi -
+        (arctanIntegralRectangleForAtOne.compute n).lo) +
+        ((arctanIntegralRectangleForAtOne.compute n).hi -
+          (arctanIntegralRectangleForAtOne.compute n).lo) := by
+        grind [Rat.add_assoc]
+  rw [hzero_add]
+  exact hdouble
+
+/-- The bounded symmetric Cauchy formula for pi:
+`pi = 2 * (∫_{-1}^0 dx/(1+x^2) + ∫_0^1 dx/(1+x^2))`.
+The outer factor accounts for the two half-turns represented by this bounded
+chart integral. -/
+def piSymmetricCauchyPiecewiseIntegral : RealRaw :=
+  (2 : Nat) * symmetricCauchyPiecewiseIntegral
+
+theorem piSymmetricCauchyPiecewiseIntegral_valid :
+    piSymmetricCauchyPiecewiseIntegral.Valid := by
+  unfold piSymmetricCauchyPiecewiseIntegral
+  exact RealRaw.natScale_valid 2 symmetricCauchyPiecewiseIntegral_valid
+
+theorem piSymmetricCauchyPiecewiseIntegral_compute_width_le_sixteen_div_succ
+    (n : Nat) :
+    (piSymmetricCauchyPiecewiseIntegral.compute n).width <=
+      (16 : Rat) / (((n + 1 : Nat) : Rat)) := by
+  unfold piSymmetricCauchyPiecewiseIntegral
+  rw [RealRaw.natScale_width]
+  have h := symmetricCauchyPiecewiseIntegral_compute_width_le_eight_div_succ n
+  calc
+    (2 : Rat) * (symmetricCauchyPiecewiseIntegral.compute n).width <=
+        2 * ((8 : Rat) / (((n + 1 : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left h (by native_decide)
+    _ = (16 : Rat) / (((n + 1 : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- The denominator of the reciprocal quartic test integrand. -/
 def reciprocalQuarticDenominator (a x : Rat) : Rat :=
   x * x * x * x + a * (x * x) + 1
