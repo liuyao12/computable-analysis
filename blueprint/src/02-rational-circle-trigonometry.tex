@@ -816,6 +816,14 @@ proves that this one certificate would close the public direct lower-path
 refinement.  No completed-real square root or completeness principle occurs in
 this reduction.
 
+The sharper secant certificate is connected to the same finite bisection
+interface by an adjacent-secant lower-endpoint lemma: its rational lower value,
+less precisely the certified bisection width, is below the actual lower
+endpoint for every adjacent chart chord.  Lean then states the resulting
+secant-margin condition exactly, and its reduction theorem turns such a
+uniform estimate directly into the original chord-path refinement.  This need
+not change the evaluator or introduce an exact square-root operation.
+
 The geometric part of that remaining certificate has a new checked
 ordered-field core.  For a chart cell \([u,u+h]\subseteq[0,1]\), with midpoint
 \(m=u+h/2\), write \(d_0=1+u^2\), \(d_m=1+m^2\),

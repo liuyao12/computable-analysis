@@ -118,16 +118,13 @@ presentation.
 
 The direct \code{piCircumference} evaluator remains a geometric diagnostic:
 its unresolved lower-endpoint refinement is a local square-root-enclosure
-problem, not a missing calculus gate.  Lean now reduces it to
-\code{AdjacentChordCurvatureMarginCoversFineWidths}: an explicit rational
-margin comparing the two fine curvature certificates, their bisection widths,
-and the coarse squared chord.  The reduction from that margin to the original
-endpoint refinement is checked; the universal margin inequality remains open.
-Its positive geometric numerator is now separately certified as
-\code{RationalCircle.Stage.midpointCurvaturePolynomialBound}; the remaining
-work is to connect that numerator to the curvature-certificate sum with a
-margin large enough to pay the explicitly chosen bisection widths.  This is
-diagnostic progress only, not a new row.
+problem, not a missing calculus gate.  Lean now states the sharper secant-margin
+condition: two cubic-scale rational secant certificates for the fine chords,
+less their explicit bisection widths, must dominate the coarse squared chord.
+Its checked reduction yields the original endpoint refinement.  The older
+curvature target and its positive polynomial numerator remain useful
+diagnostics, but the universal secant-margin inequality is now the direct open
+proof obligation.  This is diagnostic progress only, not a new row.
 The checked finite integration-by-parts and square-substitution rows are
 deliberately narrower than the future canonical formulation.  The former's
 exact finite acceptance contract is stated in

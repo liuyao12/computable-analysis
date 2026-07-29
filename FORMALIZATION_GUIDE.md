@@ -426,6 +426,14 @@ For a nondegenerate positively oriented chord it supplies
 `cross + (1 - dot)^2 / (2 * cross + 1 - dot)` and its squared lower-bound
 theorem. This is the stronger rational certificate for the remaining direct
 circumference diagnostic; it is not a new Pi-registry presentation.
+`PiProofs.adjacentSecantChordLower_sub_width_le_segment_lo` connects that
+certificate to the concrete lower endpoint used by the original finite
+square-root bisection.  A proposed direct-refinement inequality should subtract
+the two displayed fine-chord widths from the two secant certificates, then
+prove the resulting nonnegative rational is at least the coarse chord in the
+squared sense.  This exact target is
+`PiProofs.AdjacentChordSecantMarginCoversFineWidths`; its proved reduction
+theorem is `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin`.
 
 ## Pi as a regression suite, not a target namespace
 

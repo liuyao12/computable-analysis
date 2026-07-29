@@ -8209,6 +8209,63 @@ theorem curvatureChordLower_sub_width_le_segment_lo_of_unit
   unfold QInterval.width
   grind [Rat.sub_eq_add_neg]
 
+/-- The sharper rational secant certificate also survives a finite square-root
+bisection with only its displayed width lost.  In contrast to the older
+curvature certificate, its correction is cubic at short chord scale. -/
+theorem secantChordLower_sub_width_le_segment_lo_of_unit
+    {p q : PiCirclePoint}
+    (hp : RationalCircle.Stage.normSq p = 1)
+    (hq : RationalCircle.Stage.normSq q = 1)
+    (hcross : 0 < pointCross p q)
+    (hdeficit : 0 <= 1 - RationalCircle.Stage.dot p q)
+    (precision : Nat) :
+    RationalCircle.Stage.secantChordLower p q -
+        (pointSegmentLengthInterval p q precision).width <=
+      (pointSegmentLengthInterval p q precision).lo := by
+  have hhi : RationalCircle.Stage.secantChordLower p q <=
+      (pointSegmentLengthInterval p q precision).hi :=
+    pointSegmentLengthInterval_le_hi_of_sq_le p q precision (by
+      simpa [pointSegmentNormSq, RationalCircle.Stage.segmentNormSq,
+        pointCross, RationalCircle.Stage.cross] using
+        RationalCircle.Stage.secantChordLower_sq_le_segmentNormSq_of_unit
+          hp hq (by simpa [pointCross, RationalCircle.Stage.cross] using hcross)
+          hdeficit)
+  unfold QInterval.width
+  grind [Rat.sub_eq_add_neg]
+
+/-- Specialize the sharper secant certificate to consecutive rational-circle
+samples.  This is the bisection-ready local ingredient for the remaining
+direct circumference refinement problem. -/
+theorem adjacentSecantChordLower_sub_width_le_segment_lo
+    (stage : Nat) (hstage : 0 < stage) (k precision : Nat) :
+    RationalCircle.Stage.secantChordLower
+        (circleSamplePoint stage k) (circleSamplePoint stage (k + 1)) -
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage k) (circleSamplePoint stage (k + 1))
+        precision).width <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint stage k) (circleSamplePoint stage (k + 1))
+        precision).lo := by
+  apply secantChordLower_sub_width_le_segment_lo_of_unit
+  · change RationalCircle.Stage.normSq
+      ((rationalCircleStage stage).samplePoint k) = 1
+    exact RationalCircle.Stage.samplePoint_normSq_unit
+      (rationalCircleStage stage) k
+  · change RationalCircle.Stage.normSq
+      ((rationalCircleStage stage).samplePoint (k + 1)) = 1
+    exact RationalCircle.Stage.samplePoint_normSq_unit
+      (rationalCircleStage stage) (k + 1)
+  · change 0 < RationalCircle.Stage.cross
+      ((rationalCircleStage stage).samplePoint k)
+      ((rationalCircleStage stage).samplePoint (k + 1))
+    exact RationalCircle.Stage.samplePoint_cross_pos_adjacent
+      (rationalCircleStage stage) hstage k
+  · change 0 <= 1 - RationalCircle.Stage.dot
+      (RationalCircle.Stage.point (circleParameter stage k))
+      (RationalCircle.Stage.point (circleParameter stage (k + 1)))
+    exact RationalCircle.Stage.one_sub_point_dot_nonneg
+      (circleParameter stage k) (circleParameter stage (k + 1))
+
 theorem chordLengthLo_le_outerTangentCrossSum
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
     (pointSegmentLengthInterval
@@ -17021,6 +17078,81 @@ theorem adjacentChordLowerRefinesByDoubling_of_curvatureMargin
       curvatureChordLower (circleSamplePoint (2 * stage) (2 * k.1))
           (circleSamplePoint (2 * stage) (2 * k.1 + 1)) +
         curvatureChordLower (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) -
+        (pointSegmentLengthInterval
+          (circleSamplePoint (2 * stage) (2 * k.1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1)) (2 * stage)).width -
+        (pointSegmentLengthInterval
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).width :=
+      hcoarse
+    _ <=
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k.1))
+        (circleSamplePoint (2 * stage) (2 * k.1 + 1)) (2 * stage)).lo +
+      (pointSegmentLengthInterval
+        (circleSamplePoint (2 * stage) (2 * k.1 + 1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 2)) (2 * stage)).lo := by
+      grind [Rat.sub_eq_add_neg]
+
+/-- The sharper finite rational margin for the direct chord-path
+refinement.  It differs from the curvature margin only in replacing each
+fine chord's lower certificate by the cubic-scale secant certificate. -/
+def AdjacentChordSecantMarginCoversFineWidths (stage : Nat) : Prop :=
+  forall k : Fin stage,
+    let p := circleSamplePoint stage k.1
+    let q := circleSamplePoint stage (k.1 + 1)
+    let p' := circleSamplePoint (2 * stage) (2 * k.1)
+    let m := circleSamplePoint (2 * stage) (2 * k.1 + 1)
+    let q' := circleSamplePoint (2 * stage) (2 * k.1 + 2)
+    let left := pointSegmentLengthInterval p' m (2 * stage)
+    let right := pointSegmentLengthInterval m q' (2 * stage)
+    let r := RationalCircle.Stage.secantChordLower p' m +
+      RationalCircle.Stage.secantChordLower m q' - left.width - right.width
+    0 <= r /\ pointSegmentNormSq p q <= sq r
+
+/-- A verified secant margin yields the original local lower-chord
+refinement.  This packages the new rational chord certificate directly in
+the criterion used by `piCircumference`. -/
+theorem adjacentChordLowerRefinesByDoubling_of_secantMargin
+    (stage : Nat) (hstage : 0 < stage)
+    (hmargin : AdjacentChordSecantMarginCoversFineWidths stage) :
+    AdjacentChordLowerRefinesByDoubling stage := by
+  intro k
+  have h := hmargin k
+  dsimp at h
+  let p := circleSamplePoint stage k.1
+  let q := circleSamplePoint stage (k.1 + 1)
+  let p' := circleSamplePoint (2 * stage) (2 * k.1)
+  let m := circleSamplePoint (2 * stage) (2 * k.1 + 1)
+  let q' := circleSamplePoint (2 * stage) (2 * k.1 + 2)
+  let left := pointSegmentLengthInterval p' m (2 * stage)
+  let right := pointSegmentLengthInterval m q' (2 * stage)
+  let r := RationalCircle.Stage.secantChordLower p' m +
+    RationalCircle.Stage.secantChordLower m q' - left.width - right.width
+  have hcoarse :
+      (pointSegmentLengthInterval p q stage).lo <= r :=
+    pointSegmentLengthInterval_lo_le_of_sq_le p q stage h.1 h.2
+  have hleft : RationalCircle.Stage.secantChordLower p' m - left.width <=
+      left.lo := by
+    dsimp [p', m, left]
+    exact adjacentSecantChordLower_sub_width_le_segment_lo
+      (2 * stage) (by omega) (2 * k.1) (2 * stage)
+  have hright : RationalCircle.Stage.secantChordLower m q' - right.width <=
+      right.lo := by
+    dsimp [m, q', right]
+    exact adjacentSecantChordLower_sub_width_le_segment_lo
+      (2 * stage) (by omega) (2 * k.1 + 1) (2 * stage)
+  dsimp [p, q, p', m, q', left, right, r] at hcoarse hleft hright ⊢
+  calc
+    (pointSegmentLengthInterval
+        (circleSamplePoint stage k.1)
+        (circleSamplePoint stage (k.1 + 1)) stage).lo <=
+      RationalCircle.Stage.secantChordLower
+          (circleSamplePoint (2 * stage) (2 * k.1))
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1)) +
+        RationalCircle.Stage.secantChordLower
+          (circleSamplePoint (2 * stage) (2 * k.1 + 1))
           (circleSamplePoint (2 * stage) (2 * k.1 + 2)) -
         (pointSegmentLengthInterval
           (circleSamplePoint (2 * stage) (2 * k.1))

@@ -1290,8 +1290,14 @@ students actually compute.
   rational lower certificate, `c + d^2/(2*c+d)` for chord cross product `c`
   and dot deficit `d`. Its proved squared remainder
   `2*c*d^3/(2*c+d)^2` supplies the cubic correction scale appropriate to the
-  next version of that local margin argument; it is a prerequisite, not a
-  new Pi-scoreboard row.
+  next version of that local margin argument.  The interface theorem
+  `PiProofs.adjacentSecantChordLower_sub_width_le_segment_lo` now transports
+  this certificate through the exact bisection width to each actual direct
+  chord lower endpoint.  `PiProofs.AdjacentChordSecantMarginCoversFineWidths`
+  now states the resulting universal rational inequality exactly, and
+  `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin` transports it
+  to the original local endpoint refinement.  Proving that uniform secant
+  margin remains a prerequisite, not a new Pi-scoreboard row.
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
