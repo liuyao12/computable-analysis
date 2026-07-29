@@ -295,10 +295,13 @@ rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
 `expPowerSeries x` valid, and `ExpProofs.expPowerSeriesRate x` records the
 explicit geometric bound
 `width <= 4 * |first omitted term at stage 0| * (1/2)^n`.  This is a
-rational finite-sum/tail certificate, including nesting; it is not yet a
-`PartialRealFunRaw` analytic exponential or a derivative theorem. At the
-constant input `1`, it is now proved equivalent to compound interest; the
-inverse-logarithmic construction remains a separate open bridge.
+rational finite-sum/tail certificate, including nesting.  It is now packaged
+as the total `ExpProofs.expPowerSeriesFunction : PartialRealFunRaw`, with
+`ExpProofs.expPowerSeriesOnInterval a b` supplying its valid restriction to a
+rational closed interval.  This representation layer is deliberately still
+not a derivative theorem. At the constant input `1`, it is now proved
+equivalent to compound interest; the inverse-logarithmic construction remains
+a separate open bridge.
 
 The two concrete finite evaluators do now have a checked initial condition.
 `ExpProofs.expPowerSeries_zero_compute_eq n` identifies the series box at
@@ -348,6 +351,9 @@ open ComputableAnalysis
 #check ExpProofs.e
 #check ExpProofs.expPowerSeries_valid
 #check ExpProofs.expPowerSeriesRate
+#check ExpProofs.expPowerSeriesFunction
+#check ExpProofs.expPowerSeriesFunction_valid
+#check ExpProofs.expPowerSeriesOnInterval
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
@@ -418,7 +424,10 @@ Leibniz bridge.  Similarly, the direct geometric diagnostic
 not additional points on the scoreboard.  Use
 `PiCoverageBridge.equivalent` only when the compact suite itself is what a
 test needs; expose the natural integral, series, or geometry theorem in a
-downstream result.  `pi.integrationByParts` is the checked supplied-unit
+downstream result.  When two named checked evaluators themselves must be
+compared, use `PiProofs.piPresentation_equiv source target`; it derives their
+raw-real equivalence through the certified area presentation, without
+pretending that the comparison adds a new calculus capability.  `pi.integrationByParts` is the checked supplied-unit
 formula using the literal reciprocal-integral logarithm, with runtime bound
 `52 / 2^n`; it is a finite calculus bridge, not the still-open general
 integration-by-parts theorem or canonical-exp/log transport.

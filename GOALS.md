@@ -205,9 +205,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for
   every `x : Rat`: its finite rational series boxes are nested and have the
   public geometric rate `ExpProofs.expPowerSeriesRate x`, with ratio `1/2`.
-  This is a convergence certificate for the series computation, not yet an
-  analytic exponential function or a bridge to the other definitions. The constant-level
-  compound-interest representative is now additionally packaged as the
+  The same evaluator is now the total `PartialRealFunRaw`
+  `ExpProofs.expPowerSeriesFunction`, and
+  `ExpProofs.expPowerSeriesOnInterval a b` gives its valid rational-interval
+  restriction. This is a certified representation layer, not yet an analytic
+  self-derivative theorem or a bridge to the other definitions. The
+  constant-level compound-interest representative is now additionally packaged as the
   positive base `ExpProofs.ePositive`: its lower interval endpoint is always
   at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural
   powers between `2^n` and `4^n`. Rational roots, rational-exponent
@@ -1217,7 +1220,10 @@ students actually compute.
   the certified presentation registry.  This is a coverage suite, not a
   completion percentage: multiple implementations can share a bridge, and a
   continuous Peano--Baker theorem or an analytic proof that `exp' = exp` would
-  be major calculus progress without adding a π row.
+  be major calculus progress without adding a π row.  For ordinary downstream
+  use, `PiProofs.piPresentation_equiv source target` directly compares any two
+  named checked presentations through the certified area representative.  It
+  is a registry interoperability theorem, not an extra scoreboard witness.
   `PiPresentation.integrationFamily` and the primary registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
   regressions.  `piCertified.alternatives` also literally carries the checked

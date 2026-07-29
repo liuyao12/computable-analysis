@@ -3350,6 +3350,38 @@ theorem expPowerSeries_valid (x : Rat) : PowerSeriesValid x :=
         (expPowerSeries_center_step_movement x)))
     (expPowerSeries_widths_shrink x)
 
+/-- The already-certified rational-input power-series evaluator, packaged as
+a total partial real function.  This is a representation layer only: it makes
+the pointwise raw algorithms available to derivative and ODE certificates
+without asserting an analytic derivative law. -/
+def expPowerSeriesFunction : PartialRealFunRaw where
+  definedAt := fun _ => True
+  compute := fun x _ => (expPowerSeries x).compute
+
+/-- The function wrapper evaluates definitionally to the original finite
+power-series raw algorithm. -/
+theorem expPowerSeriesFunction_evalRaw_eq (x : Rat)
+    (hx : expPowerSeriesFunction.definedAt x) :
+    expPowerSeriesFunction.evalRaw x hx = expPowerSeries x :=
+  rfl
+
+/-- Every rational input of the packaged series function has a valid raw
+interval computation. -/
+theorem expPowerSeriesFunction_valid (x : Rat)
+    (hx : expPowerSeriesFunction.definedAt x) :
+    RealRaw.ValidCompute (expPowerSeriesFunction.compute x hx) := by
+  simpa [expPowerSeriesFunction, PowerSeriesValid] using expPowerSeries_valid x
+
+/-- Restrict the certified power-series exponential to a rational closed
+interval.  This is the input object for a future proof of `d/dx exp = exp`.
+It currently provides validity and totality, not a derivative certificate. -/
+def expPowerSeriesOnInterval (a b : Rat) : FunctionOnInterval where
+  raw := expPowerSeriesFunction
+  lower := a
+  upper := b
+  defined_on := fun _ _ => trivial
+  valid_on := expPowerSeriesFunction_valid
+
 /-- The exact zero-input series computation is therefore a valid raw real,
 in addition to being stagewise equal to the rational constant one. -/
 theorem expPowerSeries_zero_valid : (expPowerSeries (0 : Rat)).Valid := by
