@@ -309,6 +309,7 @@ the additional sector between \(P(x)\) and \(P(y)\).
 \label{def:quarter-turn-angle}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.QuarterTurn}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.quarterTurnRaw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.halfQuarterTurnRaw}
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch}
 \uses{def:circle-area-stage-algorithm}
 An input angle for the first sine and cosine algorithms is a rational number
@@ -316,29 +317,32 @@ An input angle for the first sine and cosine algorithms is a rational number
 not the rational number \(t\); it is the product of \(t/2\) with whichever
 certified \(\pi\)-algorithm is being used.  Lean records this convention by the
 abbreviation \code{QuarterTurn} and by the raw representative
-\code{quarterTurnRaw}.
+\code{quarterTurnRaw}.  The inverse arctangent does \emph{not} target that
+full angle: it computes a unit-sector area, so its target is the separately
+named \code{halfQuarterTurnRaw(t)}\(=t\pi/4\).
 \end{definition}
 
 \begin{definition}[Monotone inverse arctangent interface]
 \label{def:inverse-arctan-interface}
 {\scriptsize
 \par\noindent
-\lean{ComputableAnalysis.RationalCircle.GeometricTrig.firstOctantBranch}\par
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.firstQuadrantBranch}\par
 \lean{ComputableAnalysis.IntegralIdentities.ArctanInverseBisection}\par
 \lean{ComputableAnalysis.IntegralIdentities.ArctanInverseBisection.tangentRaw}
 }
 \uses{def:geometric-arctan,def:quarter-turn-angle,def:qbox,thm:constructive-inverse-function}
 The inverse-arctangent step is the first trigonometric consumer of the
-constructive inverse-function theorem.  The bounded slope branch is the first
-octant \(0\le t\le1/2\), whose angles lie in \([0,\pi/4]\); the second octant
-is then obtained by reciprocal/complement reduction.  Thus the search never
-pretends that tangent is bounded at a quarter turn.
+constructive inverse-function theorem.  The bounded slope branch is the full
+first quadrant \(0\le t\le1\): because the slope is the half-angle parameter
+\(u=\tan(t\pi/4)\), it remains in \([0,1]\) all the way to the quarter turn.
+Thus the search never pretends that the ordinary tangent is bounded at a
+quarter turn.
 
 For a recovered slope \(u\in[0,1]\), the rational circle chart
 \[
   P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right)
 \]
-supplies the intended first-octant point.  The two coordinate projections are
+supplies the intended first-quadrant point.  The two coordinate projections are
 therefore the planned definitions of \(\cos(t\pi/2)\) and
 \(\sin(t\pi/2)\).  This keeps the dependency direction explicit: geometric
 arctangent is inverted first, then the same rational chart that drove the
@@ -346,8 +350,8 @@ circle exhaustion defines sine and cosine.
 
 Lean now has a checked bridge \code{ArctanInverseBisection}.  It requires an
 \code{InvertibleFunctionOnInterval} whose forward function is certified equal
-to \code{arctanGeomOnUnit}, a valid range-enclosed target for every first-octant
-quarter turn, and an \code{InverseBisectionSearch} for each target.  From this
+to \code{arctanGeomOnUnit}, a valid range-enclosed target for every
+first-quadrant quarter turn, and an \code{InverseBisectionSearch} for each target.  From this
 data it constructs the actual partial raw tangent function
 \code{tangentRaw}; its output boxes are valid, remain in the unit slope
 interval, and their forward interval evaluations overlap the target boxes at
@@ -360,20 +364,19 @@ The checked bridge asks for:
 \item a valid target, with explicit endpoint range enclosure, for each angle,
 \item a bisection search whose output remains in the source interval and
   overlaps the forward target evaluation, and
-\item an equivalence between each target and the selected quarter-turn
-  representative \(t\pi/2\).
+\item an equivalence between each target and the selected half-angle sector
+  representative \(t\pi/4\).
 \end{enumerate}
-Constructing the interval evaluation of \(P(u)\) for the recovered raw slope,
-and then extending from the first octant by the stated reductions, is the next
-formal trigonometric step.  The bridge already fixes its required inverse data
-rather than assuming trigonometric inverse laws.
+Constructing the interval evaluation of \(P(u)\) for the recovered raw slope
+is the next formal trigonometric step.  The bridge already fixes its required
+inverse data rather than assuming trigonometric inverse laws.
 \end{definition}
 
 \begin{definition}[Inverse arctangent search]
 \label{def:inverse-arctan-search}
 \uses{def:arctan-area-stage-algorithm,thm:arctan-area-valid-monotone}
 For an angle parameter \(t\) interpreted as \(t\pi/2\) and known on the
-principal first-octant branch \(0\le t\le 1/2\), define its tangent parameter
+principal first-quadrant branch \(0\le t\le 1\), define its half-angle slope
 \(u\in[0,1]\) by bisection against the monotone arctangent algorithm.
 \begin{verbatim}
 def inverse_arctan(t, n):
@@ -381,9 +384,9 @@ def inverse_arctan(t, n):
     for i in range(n):
         m = (lo + hi) / 2
         am = arctanGeom(m, n+i)
-        if am.hi < t*pi/2:
+        if am.hi < t*pi/4:
             lo = m
-        elif t*pi/2 < am.lo:
+        elif t*pi/4 < am.lo:
             hi = m
         else:
             lo, hi = lo, hi
@@ -392,13 +395,15 @@ def inverse_arctan(t, n):
 The stage used for \code{arctanGeom(m, n+i)} is intentionally allowed to
 increase inside the search: the comparison must be refined until it certifies
 which side of \(m\) contains the inverse, or else safely keeps the current
-bracket.  The output is a rational interval for \(u=\tan(t\pi/2)\).
+bracket.  The output is a rational interval for \(u=\tan(t\pi/4)\), the
+stereographic half-angle parameter.  Evaluating \(P(u)\) then produces the
+point at the full angle \(t\pi/2\).
 \end{definition}
 
 \begin{definition}[Sine and cosine from inverse arctangent]
 \label{def:sin-cos-from-inverse-arctan}
 \uses{def:inverse-arctan-search,rem:rational-circle-point}
-On the first octant, compute an interval for \(u=\tan(t\pi/2)\) by
+On the first quadrant, compute an interval for \(u=\tan(t\pi/4)\) by
 \cref{def:inverse-arctan-search} and then evaluate the rational circle
 coordinates
 \[
@@ -407,10 +412,9 @@ coordinates
   \sin(t\pi/2)=\frac{2u}{1+u^2}.
 \]
 Interval evaluation of these rational formulas gives boxes for sine and
-cosine without ever computing a square root.  Quadrant, sign, and reciprocal
-reductions extend the construction to the full normalized interval \([0,1]\)
-once \(\pi/4=\arctangeom(1)\) and the endpoint at \(t=1\) have
-been identified.
+cosine without ever computing a square root.  This already covers the full
+normalized interval \([0,1]\); sign and period reductions will later extend
+it outside the first quadrant.
 \end{definition}
 
 \begin{definition}[Sine and cosine from a circle-point algorithm]
@@ -1026,66 +1030,54 @@ corresponding raw functions.  These are not yet the usual angle special values:
 \lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid}
 \uses{def:geometric-sin-cos-functionraw,rem:algebraic-numbers-sqrt-two}
 \leanok
-\begin{center}
-\small
-\renewcommand{\arraystretch}{1.12}
-\begin{tabular}{p{0.25\textwidth}p{0.60\textwidth}}
-\formallyproved{\textbf{Green: formally proved}} & A Lean theorem proves the
-displayed claim at its stated raw-value or rational-circle scope.\\
-\computeverifiable{\textbf{Orange: compute-verifiable target}} & The named
-raw value is a valid computable real and its algebraic square data are checked,
-but its connection to the completed normalized-angle \(\sin\), \(\cos\), or
-\(\tan\) construction has not yet been proved.
-\end{tabular}
-\end{center}
 For the normalized angle input \(t\), the target formulas include
 \[
-  \computeverifiable{\cos(\tfrac12\cdot\tfrac\pi2)=
-  \sin(\tfrac12\cdot\tfrac\pi2)=\sqrt{1/2}.}
+  \cos(\tfrac12\cdot\tfrac\pi2)=
+  \sin(\tfrac12\cdot\tfrac\pi2)=\sqrt{1/2}.
 \]
 \[
-  \computeverifiable{\sin(30^\circ)=\cos(60^\circ)=\frac12,\qquad
-  \cos(30^\circ)=\sin(60^\circ)=\frac{\sqrt3}{2},}
+  \sin(30^\circ)=\cos(60^\circ)=\frac12,\qquad
+  \cos(30^\circ)=\sin(60^\circ)=\frac{\sqrt3}{2},
 \]
 \[
-  \computeverifiable{\tan(30^\circ)=\frac{\sqrt3}{3},\qquad
-  \tan(60^\circ)=\sqrt3,}
+  \tan(30^\circ)=\frac{\sqrt3}{3},\qquad
+  \tan(60^\circ)=\sqrt3,
 \]
 \[
-  \computeverifiable{\cos(36^\circ)=\frac{1+\sqrt5}{4},
+  \cos(36^\circ)=\frac{1+\sqrt5}{4},
   \qquad
-  \cos(72^\circ)=\frac{\sqrt5-1}{4},}
+  \cos(72^\circ)=\frac{\sqrt5-1}{4},
 \]
 \[
-  \computeverifiable{\sin^2(36^\circ)=\frac{5-\sqrt5}{8},
+  \sin^2(36^\circ)=\frac{5-\sqrt5}{8},
   \qquad
-  \sin^2(72^\circ)=\frac{5+\sqrt5}{8}.}
+  \sin^2(72^\circ)=\frac{5+\sqrt5}{8}.
 \]
 \[
-  \computeverifiable{\tan^2(36^\circ)=5-2\sqrt5,
+  \tan^2(36^\circ)=5-2\sqrt5,
   \qquad
-  \tan^2(72^\circ)=5+2\sqrt5.}
+  \tan^2(72^\circ)=5+2\sqrt5.
 \]
 \[
-  \formallyproved{\begin{aligned}
+  \begin{aligned}
   (\sqrt{1/2})^2&=1/2,\quad (\sqrt3)^2=3,\quad
   (\sqrt5)^2=5,\quad (\sqrt3/2)^2=3/4,\\
   (\sqrt3/3)^2&=1/3,\quad (\sqrt5/2)^2=5/4,\quad
   (\sqrt5/4)^2=5/16.
-  \end{aligned}}
+  \end{aligned}
 \]
 \[
-  \computeverifiable{\cos^2(45^\circ)=\sin^2(45^\circ)=1/2,\quad
-  \sin^2(30^\circ)=\cos^2(60^\circ)=1/4,}
+  \cos^2(45^\circ)=\sin^2(45^\circ)=1/2,\quad
+  \sin^2(30^\circ)=\cos^2(60^\circ)=1/4,
 \]
 \[
-  \computeverifiable{\cos^2(30^\circ)=\sin^2(60^\circ)=3/4,\quad
+  \cos^2(30^\circ)=\sin^2(60^\circ)=3/4,\quad
   \tan^2(30^\circ)=1/3,\quad
-  \tan^2(60^\circ)=3.}
+  \tan^2(60^\circ)=3.
 \]
 \[
-  \computeverifiable{\cos^2(36^\circ)=\frac{3+\sqrt5}{8},\qquad
-  \cos^2(72^\circ)=\frac{3-\sqrt5}{8}.}
+  \cos^2(36^\circ)=\frac{3+\sqrt5}{8},\qquad
+  \cos^2(72^\circ)=\frac{3-\sqrt5}{8}.
 \]
 For the named raw-value algorithms, Lean formally verifies the displayed
 \(30^\circ\), \(45^\circ\), and \(60^\circ\) square data satisfy the
@@ -1126,83 +1118,85 @@ angle-to-circle-point construction to identify the one-third input with the
 equilateral chord.
 \end{theorem}
 
-For a degree-angle \(\theta=t\pi/2\), every row is obtained from the same
-inverse-arctangent step: choose the slope \(u_\theta\) satisfying
+\begin{theorem}[Arctangent witnesses select sine and cosine coordinates]
+\label{thm:arctan-witness-coordinates}
+\uses{def:geometric-arctan,rem:rational-circle-point}
+\leanok
+For a degree-angle \(\theta=t\pi/2\), an arctangent witness consists of a
+slope \(u_\theta\in[0,1]\) together with
 \[
-  \arctangeom(u_\theta)=\theta/2=t\pi/4,
+  \arctangeom(u_\theta)\sim\theta/2=t\pi/4.
 \]
-then evaluate the rational-circle point \(P(u_\theta)\).  Thus the displayed
-sine, cosine, and tangent values are all projections or ratios of one listed
-arctangent input, rather than independent square-root definitions.
+Lean's general theorem then returns the two coordinates of the same rational
+circle point,
+\[
+  \cos\theta=\frac{1-u_\theta^2}{1+u_\theta^2},\qquad
+  \sin\theta=\frac{2u_\theta}{1+u_\theta^2},
+  \qquad \sin^2\theta+\cos^2\theta=1.
+\]
+Thus a special-value proof has one central analytic obligation---the
+arctangent equation---rather than separate proofs for sine, cosine, and
+tangent.  The checked theorem presently takes a rational slope; lifting the
+same coordinate calculation to the raw interval slope returned by certified
+bisection is the remaining implementation step for the non-endpoint rows.
+The checked Lean API is \code{FirstQuadrantArctanWitness} in the
+\code{RationalCircle.GeometricTrig} namespace; its reusable bridge is
+\code{arctan\_to\_sine\_cosine\_coordinates}.  The two green endpoint
+equations are formally checked in \code{ArctanGeometry}.
+\end{theorem}
+
+The table therefore colors only the arctangent equation.  Green means Lean
+proves that equation.  Orange marks a computation-ready algebraic target: its
+raw algebraic operands have certified computations (and the \(17\)-gon row
+has a finite interval check), but the raw-slope arctangent equality is not yet
+proved.  The sine and cosine columns are deliberately uncolored consequences
+of the equation in the colored column via
+\cref{thm:arctan-witness-coordinates}.
 
 \begin{center}
 \scriptsize
-\begin{tabular}{c c p{0.16\textwidth}p{0.17\textwidth}p{0.17\textwidth}p{0.15\textwidth}}
-\textbf{\(t\)} & \textbf{angle (\(^{\circ}\))} &
-\textbf{\(u_\theta\) with \(\arctangeom(u_\theta)=\theta/2\)} &
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{c c p{0.36\textwidth}p{0.20\textwidth}p{0.20\textwidth}}
+\textbf{\(t\)} & \textbf{angle (\(\circ\))} &
+\textbf{arctangent half-angle equation} &
 \textbf{\(\sin(t\pi/2)\)} &
-\textbf{\(\cos(t\pi/2)\)} &
-\textbf{\(\tan(t\pi/2)\)}\\
+\textbf{\(\cos(t\pi/2)\)}\\
 \hline
 \(0\) & \(0^\circ\) &
-\(0^{\ast}\) &
-\(0^{\ast}\) &
-\(1^{\ast}\) &
-\(0^{\ast}\)\\
+\formallyproved{\(\arctangeom(0)\sim0\)} &
+\(0\) & \(1\)\\
 \(1/3\) & \(30^\circ\) &
-\((2-\sqrt3)^{\S}\) &
-\(1/2^{\S}\) &
-\((\sqrt3/2)^{\S}\) &
-\((\sqrt3/3)^{\S}\)\\
+\computeverifiable{\(\arctangeom(2-\sqrt3)\sim\pi/12\)} &
+\(1/2\) & \(\sqrt3/2\)\\
 \(2/5\) & \(36^\circ\) &
-\(\sqrt{(5-2\sqrt5)/5}^{\S}\) &
-\(\sqrt{(5-\sqrt5)/8}^{\S}\) &
-\(((1+\sqrt5)/4)^{\S}\) &
-\(\sqrt{5-2\sqrt5}^{\S}\)\\
+\computeverifiable{\(\arctangeom\!\left(\sqrt{(5-2\sqrt5)/5}\right)\sim\pi/10\)} &
+\(\sqrt{(5-\sqrt5)/8}\) & \((1+\sqrt5)/4\)\\
 \(1/2\) & \(45^\circ\) &
-\((\sqrt2-1)^{\S}\) &
-\(\sqrt{1/2}^{\S}\) &
-\(\sqrt{1/2}^{\S}\) &
-\(1^{\S}\)\\
+\computeverifiable{\(\arctangeom(\sqrt2-1)\sim\pi/8\)} &
+\(\sqrt{1/2}\) & \(\sqrt{1/2}\)\\
 \(2/3\) & \(60^\circ\) &
-\((\sqrt3/3)^{\S}\) &
-\((\sqrt3/2)^{\S}\) &
-\(1/2^{\S}\) &
-\(\sqrt3^{\S}\)\\
+\computeverifiable{\(\arctangeom(\sqrt3/3)\sim\pi/6\)} &
+\(\sqrt3/2\) & \(1/2\)\\
 \(4/5\) & \(72^\circ\) &
-\(\sqrt{5-2\sqrt5}^{\S}\) &
-\(\sqrt{(5+\sqrt5)/8}^{\S}\) &
-\(((\sqrt5-1)/4)^{\S}\) &
-\(\sqrt{5+2\sqrt5}^{\S}\)\\
+\computeverifiable{\(\arctangeom\!\left(\sqrt{5-2\sqrt5}\right)\sim\pi/5\)} &
+\(\sqrt{(5+\sqrt5)/8}\) & \((\sqrt5-1)/4\)\\
 \(1\) & \(90^\circ\) &
-\(1^{\ast}\) &
-\(1^{\ast}\) &
-\(0^{\ast}\) &
-\(\infty^{\ast}\)\\
+\formallyproved{\(\arctangeom(1)\sim\pi_{\mathrm{area}}/4\)} &
+\(1\) & \(0\)\\
 \(4/17\) & \(\frac{360^\circ}{17}\) &
-\(\sqrt{(1-C)/(1+C)}^{\dagger}\) &
-\(\sqrt{1-C^2}^{\dagger}\) &
-\(C^{\dagger}\) &
-\((\sqrt{1-C^2}/C)^{\dagger}\)\\
+\computeverifiable{\(\arctangeom\!\left(\sqrt{(1-C)/(1+C)}\right)\sim\pi/17\)} &
+\(\sqrt{1-C^2}\) & \(C\)\\
 \end{tabular}
 \end{center}
 
 Here \(C\) denotes the Gauss nested radical for \(\cos(2\pi/17)\) displayed
 below.  In particular, the \(36^\circ\) arctangent input is
 \(\tan(18^\circ)=\sqrt{(5-2\sqrt5)/5}\), whereas the \(72^\circ\) input is
-\(\tan(36^\circ)=\sqrt{5-2\sqrt5}\).  A superscript \(\ast\) means that the displayed endpoint value is
-formalized in Lean at the currently available rational-circle layer; a
-superscript \(\S\) means Lean has formalized the displayed algebraic raw value,
-or the displayed square-value when only the square is currently represented,
-as a valid raw real with the corresponding square/Pythagorean checks; and a
-superscript \(\dagger\) means that the displayed value is available as an
-executable finite interval check.  These marks do not yet assert the completed
-normalized-angle theorem for every non-endpoint row.  For example, the
-equilateral dot-product lemma above is already formalized, but the
-normalized-angle theorem identifying \(t=1/3\) with the \(30^\circ\) value is
-still open.  The finite check for the \(17\)-gon is the executable interval
-overlap test in \code{GaussSeventeen}; it is deliberately weaker than a proof
-of Gauss's constructibility theorem.
+\(\tan(36^\circ)=\sqrt{5-2\sqrt5}\).  The tangent column has intentionally
+been removed: tangent is a ratio of the displayed sine and cosine values, not
+an independent special-value obligation.  The finite \(17\)-gon check is the
+executable interval overlap test in \code{GaussSeventeen}; it remains weaker
+than a proof of Gauss's constructibility theorem.
 
 \begin{remark}[Gauss's 17-gon]
 \lean{ComputableAnalysis.GaussSeventeen.powerSeriesCheck_default}

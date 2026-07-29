@@ -3338,6 +3338,17 @@ the current geometric-area `pi` algorithm. -/
 def quarterTurnRaw (t : QuarterTurn) : RealRaw :=
   RealRaw.scaleRat (t / 2) piCircleArea
 
+/-- The unit-sector area of a normalized quarter-turn input.
+
+If `t` denotes the geometric angle `t * (pi / 2)`, its unit-sector area is
+`t * (pi / 4)`.  This is the quantity computed by `arctan.geom`: the rational
+circle parameter is `u = tan(theta / 2)`, so the sector from `(1, 0)` to
+`P(u)` has area `arctan(u) = theta / 2`.  Keeping this separate from
+`quarterTurnRaw` prevents the inverse-arctangent construction from silently
+losing that factor of two. -/
+def halfQuarterTurnRaw (t : QuarterTurn) : RealRaw :=
+  RealRaw.scaleRat (t / 4) piCircleArea
+
 /-- Principal branch for the inverse-arctangent search, measured in normalized
 quarter-turns.  This is the interval `[0, 1]`, corresponding to
 `[0, pi / 2]`. -/
@@ -3346,14 +3357,19 @@ def unitIntervalBranch (t : QuarterTurn) : Prop :=
 
 /-- The first octant of the normalized quarter-turn coordinate.
 
-On this branch the angle is in `[0, π/4]`, exactly the image of the unit
-arctangent-slope interval.  It is therefore the branch on which the
-constructive inverse-arctangent search has a bounded slope target in `[0,1]`.
-The remaining half of the first quadrant is obtained by the reciprocal and
-complement reductions, rather than by pretending that the tangent is bounded
-at a quarter turn. -/
+This is the smaller branch `[0, π/4]`; it remains useful for symmetry and
+complement reductions. -/
 def firstOctantBranch (t : QuarterTurn) : Prop :=
   0 <= t /\ t <= (1 : Rat) / 2
+
+/-- The full first-quadrant branch used by the half-angle arctangent inverse.
+
+For `u = tan(theta / 2)`, the range `0 <= u <= 1` covers every
+`0 <= theta <= pi / 2`, hence every normalized quarter-turn input
+`0 <= t <= 1`.  The arctangent itself returns the sector area `theta / 2`,
+which is why this branch is valid without any unbounded tangent calculation. -/
+abbrev firstQuadrantBranch (t : QuarterTurn) : Prop :=
+  unitIntervalBranch t
 
 theorem unitIntervalBranch_zero : unitIntervalBranch 0 := by
   unfold unitIntervalBranch
@@ -3375,6 +3391,15 @@ theorem firstOctantBranch_zero : firstOctantBranch 0 := by
 theorem firstOctantBranch_half : firstOctantBranch ((1 : Rat) / 2) := by
   unfold firstOctantBranch
   constructor <;> native_decide
+
+theorem firstQuadrantBranch_zero : firstQuadrantBranch 0 :=
+  unitIntervalBranch_zero
+
+theorem firstQuadrantBranch_half : firstQuadrantBranch ((1 : Rat) / 2) :=
+  unitIntervalBranch_half
+
+theorem firstQuadrantBranch_one : firstQuadrantBranch 1 :=
+  unitIntervalBranch_one
 
 theorem firstOctantBranch_subset_unitInterval
     {t : QuarterTurn} (ht : firstOctantBranch t) :

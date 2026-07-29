@@ -6363,6 +6363,105 @@ theorem powerSeriesAgreesAt_of_agreement
     PowerSeriesAgreesAt x :=
   powerSeries_equiv_geometric_of_agreement h hx
 
+/-- The endpoint of the unit-slope arctangent branch in half-angle form.
+
+The branch computes unit-sector area, so the slope `1` gives `pi / 4`, not
+the full normalized quarter-turn `pi / 2`. -/
+theorem arctanGeom_one_equiv_piCircleArea_quarter :
+    (arctanGeom (1 : Rat)).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (arctanGeom (1 : Rat))
+    (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) n n).2
+  change QInterval.Overlaps
+    ((arctanGeom (1 : Rat)).compute n)
+    ((RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).compute n)
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 4)]
+  rw [← piAreaCompatibility n]
+  have hvalid : (arctanGeom (1 : Rat)).Valid :=
+    arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have horder := RealRaw.interval_order_of_valid
+    (arctanGeom (1 : Rat)) hvalid n
+  unfold QInterval.Overlaps
+  change
+    ((arctanGeom (1 : Rat)).compute n).lo <=
+        ((1 : Rat) / 4) * (4 * ((arctanGeom (1 : Rat)).compute n).hi) /\
+      ((1 : Rat) / 4) * (4 * ((arctanGeom (1 : Rat)).compute n).lo) <=
+        ((arctanGeom (1 : Rat)).compute n).hi
+  have hquarter_four : ((1 : Rat) / 4) * 4 = 1 := by native_decide
+  have hcancel (q : Rat) : ((1 : Rat) / 4) * (4 * q) = q := by
+    calc
+      ((1 : Rat) / 4) * (4 * q) = (((1 : Rat) / 4) * 4) * q :=
+        (Rat.mul_assoc _ _ _).symm
+      _ = q := by rw [hquarter_four, Rat.one_mul]
+  constructor
+  · rw [hcancel]
+    exact horder
+  · rw [hcancel]
+    exact horder
+
 end ArctanGeometry
+
+namespace RationalCircle
+
+namespace GeometricTrig
+
+/-- A first-quadrant angle exhibited by a rational slope in the circle chart.
+
+The certificate is intentionally phrased in terms of the sector-area
+arctangent: if the normalized quarter-turn angle is `t * pi / 2`, the
+arctangent of its stereographic slope is the *half-angle* `t * pi / 4`.
+The attached coordinates are therefore exactly the rational-circle sine and
+cosine coordinates selected by that arctangent identity.  A later raw-slope
+extension will use the same interface with interval coordinates. -/
+structure FirstQuadrantArctanWitness (t : QuarterTurn) where
+  slope : Rat
+  slope_nonneg : 0 <= slope
+  slope_le_one : slope <= 1
+  arctan_geom_eq_half_angle :
+    (ArctanGeometry.arctanGeom slope).Equiv (halfQuarterTurnRaw t)
+
+namespace FirstQuadrantArctanWitness
+
+/-- The rational-circle cosine coordinate selected by an arctangent witness. -/
+def cosine {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) : Rat :=
+  Trigonometry.cos W.slope
+
+/-- The rational-circle sine coordinate selected by an arctangent witness. -/
+def sine {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) : Rat :=
+  Trigonometry.sin W.slope
+
+theorem slope_mem_unit {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) :
+    0 <= W.slope /\ W.slope <= 1 :=
+  ⟨W.slope_nonneg, W.slope_le_one⟩
+
+/-- The general arctangent-to-coordinate bridge.
+
+It is deliberately independent of any individual special-value calculation:
+once a slope is shown to have sector area `t*pi/4`, its sine and cosine are
+the two coordinates of the same rational-circle point. -/
+theorem arctan_to_sine_cosine_coordinates
+    {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) :
+    (ArctanGeometry.arctanGeom W.slope).Equiv (halfQuarterTurnRaw t) /\
+      sq W.sine + sq W.cosine = 1 := by
+  constructor
+  · exact W.arctan_geom_eq_half_angle
+  · exact Trigonometry.sin_sq_add_cos_sq W.slope
+
+theorem cosine_eq_chart_cosine
+    {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) :
+    W.cosine = Trigonometry.cos W.slope := rfl
+
+theorem sine_eq_chart_sine
+    {t : QuarterTurn} (W : FirstQuadrantArctanWitness t) :
+    W.sine = Trigonometry.sin W.slope := rfl
+
+end FirstQuadrantArctanWitness
+
+end GeometricTrig
+
+end RationalCircle
 
 end ComputableAnalysis
