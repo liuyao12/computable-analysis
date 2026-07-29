@@ -887,10 +887,20 @@ gives the uniform finite inequality
   \ge \operatorname{cross}(u,u+h)+h^3/8.
 \]
 Together with the two fine secant gains, this supplies the geometric side of
-the sharper margin entirely in rational arithmetic.  What is still open is
-deliberately narrower: show that the resulting strict rational margin
-dominates the two chosen bisection widths.  Thus it is progress on the
-original circumference diagnostic, not another Pi scoreboard row.
+the sharper margin entirely in rational arithmetic.  Lean now packages the
+sum as
+\code{midpoint\_secant\_refinement\_ge\_cross\_add\_five\_cube\_thirtysecond}:
+
+\[
+ \operatorname{secantLower}(u,m)+\operatorname{secantLower}(m,u+h)
+ \geq \operatorname{cross}(u,u+h)+5h^3/32.
+\]
+
+Here the added \(5h^3/32\) is exactly the cross gain \(h^3/8\) plus the two
+fine secant gains \(h^3/64\).  What is still open is deliberately narrower:
+show that this explicit rational slack dominates the two chosen bisection
+widths.  Thus it is progress on the original circumference diagnostic, not
+another Pi scoreboard row.
 The stage-indexed transport
 \code{PiProofs.adjacentChordCross\_refinesByDoubling\_with\_cube\_eighth}
 applies this exact gain to every finite cell \(k<\textit{stage}\), which is
