@@ -32,6 +32,35 @@ A declaration may be a useful interface, a target `Prop`, or a fully proved
 theorem.  The guide calls out that distinction.  A named `def` or `structure`
 is never evidence that its intended mathematical theorem has been proved.
 
+## Foundation boundary and reproducible audit
+
+The project source deliberately has no imports from `Mathlib`, `Std`, or
+`Batteries`.  The only foundation import is
+`Init.Grind.Ordered.Rat` in `ComputableAnalysis.Basic`; every other source
+import is another `ComputableAnalysis` module.  The manifest's only external
+package is `checkdecls`, which validates the blueprint's declaration links.
+Thus the project is not silently using a completed-real analysis library; it
+uses Lean's rational arithmetic and its own interval constructions.
+
+This is an import boundary, not a mathematical theorem.  It does not by
+itself show that a proposed declaration avoids a completeness-like assumption:
+read the declaration and its certificate hypotheses.  Before depending on a
+new module or publishing a material update, rerun this compact audit from the
+repository root:
+
+```bash
+rg -n '^import\s+(Mathlib|Mathlib\.|Std\.|Batteries\.)' ComputableAnalysis
+rg -n '\b(sorry|admit)\b' ComputableAnalysis
+lake build ComputableAnalysis
+lake env .lake/packages/checkdecls/.lake/build/bin/checkdecls blueprint/lean_decls
+```
+
+The first two commands should print nothing.  The build and declaration check
+then establish that the project modules and every Lean name cited in the
+blueprint compile in the selected Lean toolchain.  This audit is intentionally
+simple enough for an LLM or a contributor to repeat before treating the
+repository as a dependency.
+
 ## Fast navigation
 
 Start with the smallest target module rather than importing
