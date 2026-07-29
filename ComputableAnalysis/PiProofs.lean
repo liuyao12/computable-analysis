@@ -18618,8 +18618,13 @@ private theorem piCircumferenceCurvatureFanComputeAtStage_lo_le_area_hi
       (4 * stableCurvatureChordFanPerimeter stage) / 2 <=
         (4 * Fan.perimeter (outerFanWidths stage)) / 2 :=
     div_two_le_div_two (four_mul_le_four_mul hfan)
-  convert hscaled using 1 <;>
-    grind [four_div_two_eq_two_mul, Rat.mul_assoc, Rat.mul_comm]
+  change (4 * stableCurvatureChordFanPerimeter stage) / 2 <=
+    4 * (Fan.perimeter (outerFanWidths stage) / 2)
+  calc
+    (4 * stableCurvatureChordFanPerimeter stage) / 2 <=
+        (4 * Fan.perimeter (outerFanWidths stage)) / 2 := hscaled
+    _ = 4 * (Fan.perimeter (outerFanWidths stage) / 2) := by
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
 
 private theorem piCircleArea_compute_lo_le_piCircumferenceCurvatureFan_compute_hi
     (n : Nat) :
@@ -18632,8 +18637,8 @@ private theorem piCircleArea_compute_lo_le_piCircumferenceCurvatureFan_compute_h
   rw [piCircumferenceFan_compute_eq,
     piCircumferenceCurvatureFan_compute_eq]
   rw [piCircumferenceFan_compute_eq] at hfan
-  unfold piCircumferenceFanComputeAtStage
-    piCircumferenceCurvatureFanComputeAtStage at hfan ⊢
+  unfold piCircumferenceFanComputeAtStage at hfan ⊢
+  unfold piCircumferenceCurvatureFanComputeAtStage
   exact hfan
 
 /-- The curvature-corrected fan and the baseline circle-area computation
@@ -18655,58 +18660,66 @@ theorem piCircumferenceCurvatureFan_equiv_piCircleArea :
 as its preferred evaluator and records every currently checked equivalent raw
 algorithm, including the supplementary curvature-corrected fan. -/
 def piCertified : Real :=
-  (((((((((((((Real.ofRaw piCircleArea (piPresentation_valid .area))
-    .withAlternative piCircleAreaPolygon
-      (piPresentation_valid .areaPolygon)
-      (piPresentation_equiv_piCircleArea .areaPolygon))
-    .withAlternative piCircumferenceStabilized
-      (piPresentation_valid .circumferenceStabilized)
-      (piPresentation_equiv_piCircleArea .circumferenceStabilized))
-    .withAlternative piCircumferenceReboxed
-      (piPresentation_valid .circumferenceReboxed)
-      (piPresentation_equiv_piCircleArea .circumferenceReboxed))
-    .withAlternative piCircumferenceFan
-      (piPresentation_valid .circumferenceFan)
-      (piPresentation_equiv_piCircleArea .circumferenceFan))
-    .withAlternative ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat))
-      (piPresentation_valid .arctanGeometry)
-      (piPresentation_equiv_piCircleArea .arctanGeometry))
-    .withAlternative piFromArctanIntegralRectangleUnitAtOne
-      (piPresentation_valid .arctanRectangleIntegral)
-      (piPresentation_equiv_piCircleArea .arctanRectangleIntegral))
-    .withAlternative IntegralIdentities.piFromArctanIntegrationByPartsMesh
-      IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
-      piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
-    .withAlternative Logarithm.piTriangleLogSeries
-      Logarithm.piTriangleLogSeries_valid
-      piTriangleLogSeries_equiv_piCircleArea
-    .withAlternative Logarithm.piTriangleLogReciprocalIntegral
-      Logarithm.piTriangleLogReciprocalIntegral_valid
-      piTriangleLogReciprocalIntegral_equiv_piCircleArea)
-    .withAlternative Logarithm.piTriangleLogSquareSubstitutionIntegral
+  let base := Real.ofRaw piCircleArea (piPresentation_valid .area)
+  let areaPolygon := base.withAlternative piCircleAreaPolygon
+    (piPresentation_valid .areaPolygon)
+    (piPresentation_equiv_piCircleArea .areaPolygon)
+  let circumferenceStabilized := areaPolygon.withAlternative piCircumferenceStabilized
+    (piPresentation_valid .circumferenceStabilized)
+    (piPresentation_equiv_piCircleArea .circumferenceStabilized)
+  let circumferenceReboxed := circumferenceStabilized.withAlternative piCircumferenceReboxed
+    (piPresentation_valid .circumferenceReboxed)
+    (piPresentation_equiv_piCircleArea .circumferenceReboxed)
+  let circumferenceFan := circumferenceReboxed.withAlternative piCircumferenceFan
+    (piPresentation_valid .circumferenceFan)
+    (piPresentation_equiv_piCircleArea .circumferenceFan)
+  let arctanGeometry := circumferenceFan.withAlternative
+    ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat))
+    (piPresentation_valid .arctanGeometry)
+    (piPresentation_equiv_piCircleArea .arctanGeometry)
+  let arctanRectangleIntegral := arctanGeometry.withAlternative
+    piFromArctanIntegralRectangleUnitAtOne
+    (piPresentation_valid .arctanRectangleIntegral)
+    (piPresentation_equiv_piCircleArea .arctanRectangleIntegral)
+  let integrationByPartsMesh := arctanRectangleIntegral.withAlternative
+    IntegralIdentities.piFromArctanIntegrationByPartsMesh
+    IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
+    piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
+  let triangleLogSeries := integrationByPartsMesh.withAlternative
+    Logarithm.piTriangleLogSeries
+    Logarithm.piTriangleLogSeries_valid
+    piTriangleLogSeries_equiv_piCircleArea
+  let triangleLogReciprocalIntegral := triangleLogSeries.withAlternative
+    Logarithm.piTriangleLogReciprocalIntegral
+    Logarithm.piTriangleLogReciprocalIntegral_valid
+    piTriangleLogReciprocalIntegral_equiv_piCircleArea
+  let triangleLogSquareSubstitutionIntegral :=
+    triangleLogReciprocalIntegral.withAlternative
+      Logarithm.piTriangleLogSquareSubstitutionIntegral
       Logarithm.piTriangleLogSquareSubstitutionIntegral_valid
-      piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea)
-    .withAlternative piLeibniz
-      (piPresentation_valid .leibnizSeries)
-      (piPresentation_equiv_piCircleArea .leibnizSeries))
-    .withAlternative piNilakantha
-      (piPresentation_valid .nilakanthaSeries)
-      (piPresentation_equiv_piCircleArea .nilakanthaSeries))
-    .withAlternative piMachin
-      (piPresentation_valid .machinSeries)
-      (piPresentation_equiv_piCircleArea .machinSeries))
-    .withAlternative IntegralIdentities.cauchyFullLineIntegral
-      (piPresentation_valid .cauchyIntegral)
-      (piPresentation_equiv_piCircleArea .cauchyIntegral))
-    .withAlternative IntegralIdentities.piSymmetricCauchyPiecewiseIntegral
-      (piPresentation_valid .symmetricCauchyPiecewiseIntegral)
-      (piPresentation_equiv_piCircleArea .symmetricCauchyPiecewiseIntegral))
-    .withAlternative piReciprocalQuarticCompact
-      (piPresentation_valid .reciprocalQuarticIntegral)
-      (piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral))
-    .withAlternative piCircumferenceCurvatureFan
-      piCircumferenceCurvatureFan_valid
-      piCircumferenceCurvatureFan_equiv_piCircleArea
+      piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea
+  let leibniz := triangleLogSquareSubstitutionIntegral.withAlternative piLeibniz
+    (piPresentation_valid .leibnizSeries)
+    (piPresentation_equiv_piCircleArea .leibnizSeries)
+  let nilakantha := leibniz.withAlternative piNilakantha
+    (piPresentation_valid .nilakanthaSeries)
+    (piPresentation_equiv_piCircleArea .nilakanthaSeries)
+  let machin := nilakantha.withAlternative piMachin
+    (piPresentation_valid .machinSeries)
+    (piPresentation_equiv_piCircleArea .machinSeries)
+  let cauchy := machin.withAlternative IntegralIdentities.cauchyFullLineIntegral
+    (piPresentation_valid .cauchyIntegral)
+    (piPresentation_equiv_piCircleArea .cauchyIntegral)
+  let symmetricCauchy := cauchy.withAlternative
+    IntegralIdentities.piSymmetricCauchyPiecewiseIntegral
+    (piPresentation_valid .symmetricCauchyPiecewiseIntegral)
+    (piPresentation_equiv_piCircleArea .symmetricCauchyPiecewiseIntegral)
+  let reciprocalQuartic := symmetricCauchy.withAlternative piReciprocalQuarticCompact
+    (piPresentation_valid .reciprocalQuarticIntegral)
+    (piPresentation_equiv_piCircleArea .reciprocalQuarticIntegral)
+  reciprocalQuartic.withAlternative piCircumferenceCurvatureFan
+    piCircumferenceCurvatureFan_valid
+    piCircumferenceCurvatureFan_equiv_piCircleArea
 
 theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
   rfl
