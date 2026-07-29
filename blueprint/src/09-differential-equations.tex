@@ -167,6 +167,21 @@ factorial-tail schedule are checked; every continuous arrow in this ledger is
 still a construction target.  The diagram therefore records a dependency
 contract, not an already completed exp/log equivalence.
 
+The handoff from the finite tail to continuous uniqueness is now explicit in
+Lean.  The \code{SelfDerivativeVolterraComparison} certificate supplies, for two
+candidate interval-valued solutions, a rational error at each rational input,
+an iterated zero-initial Volterra bound for that error, and the local rule that
+zero error gives equivalent raw values.  The theorem
+certificate's \code{equivalent} theorem applies the proved factorial-tail
+lemma to obtain pointwise function agreement; the provider-shaped hypothesis
+\code{SelfDerivativeVolterraUniqueness} then yields
+\code{selfDerivativeInitialValueUnique\_of\_volterra}.
+This does not pretend that the analytic Volterra estimate is already proved:
+constructing the \code{error\_iterated} field from certified integral boxes is
+exactly the remaining continuous Peano--Baker task.  It does, however, fix
+the non-circular certificate that both the scalar exp/log comparison and the
+two-dimensional Euler-identity route must discharge.
+
 \section{Finite time ordering before analysis}
 
 \begin{definition}[Rational matrices and sampled systems]

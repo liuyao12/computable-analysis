@@ -1452,6 +1452,76 @@ theorem zeroInitialVolterraIterationBound_eq_zero {M T B error : Rat}
       simpa [Rat.not_le] using hstrict
     exact False.elim (hnot hhalf)
 
+/-- A constructive uniqueness certificate for two interval-valued solutions
+of `f' = f`.
+
+The analytic layer supplies a nonnegative rational error at every rational
+input and proves the iterated Volterra bound for that error.  This finite
+Peano--Baker module then turns the factorial-tail estimate into pointwise
+function agreement.  No norm completion, supremum, or completed real line is
+part of this interface. -/
+structure SelfDerivativeVolterraComparison
+    (f g : FunctionOnInterval)
+    (_hf : SolvesSelfDerivativeOnInterval f)
+    (_hg : SolvesSelfDerivativeOnInterval g) where
+  same_lower : f.lower = g.lower
+  same_upper : f.upper = g.upper
+  matrix_bound : Rat
+  time_bound : Rat
+  initial_error_bound : Rat
+  matrix_bound_nonneg : 0 <= matrix_bound
+  time_bound_nonneg : 0 <= time_bound
+  initial_error_bound_nonneg : 0 <= initial_error_bound
+  error : Rat -> Rat
+  error_iterated :
+    forall x,
+      ZeroInitialVolterraIterationBound
+        matrix_bound time_bound initial_error_bound (error x)
+  equivalent_of_error_zero :
+    forall x
+      (hxF : inDomainInterval f.lower f.upper x)
+      (hxG : inDomainInterval g.lower g.upper x),
+      error x = 0 ->
+        (PartialRealFunRaw.apply f.raw f.valid_on x (f.defined_on x hxF)).Equiv
+          (PartialRealFunRaw.apply g.raw g.valid_on x (g.defined_on x hxG))
+
+namespace SelfDerivativeVolterraComparison
+
+/-- The factorial-tail comparison closes the requested pointwise agreement. -/
+theorem equivalent
+    {f g : FunctionOnInterval}
+    {hf : SolvesSelfDerivativeOnInterval f}
+    {hg : SolvesSelfDerivativeOnInterval g}
+    (comparison : SelfDerivativeVolterraComparison f g hf hg) :
+    FunctionOnInterval.Equivalent f g := by
+  refine ⟨comparison.same_lower, comparison.same_upper, ?_⟩
+  intro x hxF hxG
+  apply comparison.equivalent_of_error_zero x hxF hxG
+  exact zeroInitialVolterraIterationBound_eq_zero
+    comparison.matrix_bound_nonneg
+    comparison.time_bound_nonneg
+    comparison.initial_error_bound_nonneg
+    (comparison.error_iterated x)
+
+end SelfDerivativeVolterraComparison
+
+/-- The remaining analytic task for continuous Peano--Baker uniqueness,
+stated as a reusable finite-certificate provider. -/
+def SelfDerivativeVolterraUniqueness : Prop :=
+  forall f g,
+    (hf : SolvesSelfDerivativeOnInterval f) ->
+    (hg : SolvesSelfDerivativeOnInterval g) ->
+    Nonempty (SelfDerivativeVolterraComparison f g hf hg)
+
+/-- A supply of finite Volterra comparison certificates proves the project's
+topology-free uniqueness principle for `f' = f` with a common initial value. -/
+theorem selfDerivativeInitialValueUnique_of_volterra
+    (hvolterra : SelfDerivativeVolterraUniqueness) :
+    SelfDerivativeInitialValueUnique := by
+  intro f g hf hg
+  rcases hvolterra f g hf hg with ⟨comparison⟩
+  exact comparison.equivalent
+
 end LinearODE
 
 end ComputableAnalysis
