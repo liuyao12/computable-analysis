@@ -1,5 +1,6 @@
 import ComputableAnalysis.Exp
 import ComputableAnalysis.FTC
+import ComputableAnalysis.ElementaryFunctions
 
 /-!
 # Proof targets for the exponential algorithms
@@ -606,6 +607,54 @@ theorem eCompoundInterest_valid_of_nested
 
 theorem eCompoundInterest_valid : ECompoundInterestValid :=
   eCompoundInterest_valid_of_nested eCompoundInterest_nested
+
+/-- The verified compound-interest boxes for `e` have the uniform positive
+lower bound `2`.  This is the concrete positivity certificate needed to use
+the Euler base as the input of the project's repeated-natural-power and later
+rational-power interfaces. -/
+theorem eCompoundInterest_lower_bound_two (n : Nat) :
+    (2 : Rat) <= (eCompoundInterest.compute n).lo := by
+  rw [eCompoundInterest_compute_eq]
+  have hmono := eCompoundInterestStage_lo_mono (n := 0) (m := n)
+    (Nat.zero_le n)
+  have hzero : (eCompoundInterestStage 0).lo = (2 : Rat) := by
+    native_decide
+  rw [hzero] at hmono
+  exact hmono
+
+/-- The certified positive base underlying the compound-interest presentation
+of Euler's number.  Its value is still the direct rational interval algorithm
+`eCompoundInterest`; no logarithm, root operation, or completed real number
+is used to establish positivity. -/
+def ePositive : exp.PositiveRealRaw where
+  value := eCompoundInterest
+  valid := eCompoundInterest_valid
+  lower_bound := 2
+  lower_bound_pos := by native_decide
+  lower_bound_le := eCompoundInterest_lower_bound_two
+
+/-- The literal repeated-multiplication powers of the certified positive
+Euler base.  The generic positive-base API proves each such power valid and
+keeps its rational lower bound explicit. -/
+def eNaturalPower (n : Nat) : RealRaw :=
+  ePositive.natPow n
+
+theorem eNaturalPower_valid (n : Nat) :
+    (eNaturalPower n).Valid :=
+  ePositive.natPow_valid n
+
+theorem eNaturalPower_lower_bound (n stage : Nat) :
+    (2 : Rat) ^ n <= ((eNaturalPower n).compute stage).lo :=
+  ePositive.natPow_lower_bound n stage
+
+theorem eNaturalPower_upper_bound (n stage : Nat) :
+    ((eNaturalPower n).compute stage).hi <= (4 : Rat) ^ n := by
+  have hbase : exp.PositiveRealRaw.upperBound ePositive = (4 : Rat) := by
+    unfold exp.PositiveRealRaw.upperBound ePositive
+    rw [eCompoundInterest_compute_eq]
+    native_decide
+  rw [← hbase]
+  exact ePositive.natPow_upper_bound n stage
 
 private def repeatedMulLoop (a : Rat) (xs : List Nat) (value : Rat) : Rat :=
   Id.run do
@@ -1964,6 +2013,408 @@ theorem expPowerSeries_ratio_bound (x : Rat) :
   rw [Rat.div_lt_iff hDpos]
   simpa [D] using hnum
 
+/-- The term immediately following a finite exponential power-series prefix.
+This private finite-state view is used to prove that the public boxes are
+nested for every rational input, not only at the special value `x = 1`. -/
+private def powerSeriesTermAtTerms (x : Rat) (terms : Nat) : Rat :=
+  (powerSeriesState x terms).2
+
+private def powerSeriesCenterAtTerms (x : Rat) (terms : Nat) : Rat :=
+  (powerSeriesState x terms).1
+
+private def powerSeriesTailRadiusAtTerms (x : Rat) (terms : Nat) : Rat :=
+  qabs (powerSeriesTermAtTerms x terms) /
+    (1 - qabs x / ((terms : Rat) + 1))
+
+private theorem powerSeriesTermAtTerms_succ (x : Rat) (terms : Nat) :
+    powerSeriesTermAtTerms x (terms + 1) =
+      powerSeriesTermAtTerms x terms * x / ((terms : Rat) + 1) := by
+  unfold powerSeriesTermAtTerms
+  rw [powerSeriesState_succ]
+  simp [powerSeriesLoopStep]
+
+private theorem powerSeriesCenterAtTerms_succ (x : Rat) (terms : Nat) :
+    powerSeriesCenterAtTerms x (terms + 1) =
+      powerSeriesCenterAtTerms x terms + powerSeriesTermAtTerms x terms := by
+  unfold powerSeriesCenterAtTerms powerSeriesTermAtTerms
+  rw [powerSeriesState_succ]
+  simp [powerSeriesLoopStep]
+
+private theorem powerSeriesCenter_stage_eq (x : Rat) (n : Nat) :
+    powerSeriesCenter x n =
+      powerSeriesCenterAtTerms x (expPowerSeriesTerms x n) := by
+  rw [expPowerSeries_center_eq_state]
+  rfl
+
+private theorem powerSeriesTailRadius_stage_eq (x : Rat) (n : Nat) :
+    powerSeriesTailRadius x n =
+      powerSeriesTailRadiusAtTerms x (expPowerSeriesTerms x n) := by
+  rw [expPowerSeries_tailRadius_eq_state]
+  have hcast : ((expPowerSeriesTerms x n + 1 : Nat) : Rat) =
+      (expPowerSeriesTerms x n : Rat) + 1 := by
+    exact_mod_cast (show expPowerSeriesTerms x n + 1 =
+      expPowerSeriesTerms x n + 1 by rfl)
+  unfold powerSeriesTailRadiusAtTerms powerSeriesTermAtTerms
+    expPowerSeriesTailRatioBound
+  rw [hcast]
+
+private theorem powerSeriesTermAtTerms_abs_succ (x : Rat) (terms : Nat) :
+    qabs (powerSeriesTermAtTerms x (terms + 1)) =
+      qabs (powerSeriesTermAtTerms x terms) *
+        (qabs x / ((terms : Rat) + 1)) := by
+  rw [powerSeriesTermAtTerms_succ, Rat.div_def, qabs_mul, qabs_mul]
+  have hdenpos : (0 : Rat) < (terms : Rat) + 1 := by
+    exact_mod_cast Nat.succ_pos terms
+  rw [qabs_eq_self_of_nonneg
+    (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))]
+  rw [Rat.div_def]
+  rw [Rat.mul_assoc]
+
+private theorem expPowerSeriesTerms_succ (x : Rat) (n : Nat) :
+    expPowerSeriesTerms x (n + 1) = expPowerSeriesTerms x n + 1 := by
+  unfold expPowerSeriesTerms
+  omega
+
+private theorem expPowerSeriesTermRatio_le_half_at_terms
+    (x : Rat) (terms : Nat)
+    (hterms : expPowerSeriesTerms x 0 <= terms) :
+    qabs x / ((terms : Rat) + 1) <= (1 : Rat) / 2 := by
+  have hqabs := qabs_le_num_natAbs_succ x
+  have htermsNat : 2 * x.num.natAbs + 2 <= terms + 1 := by
+    unfold expPowerSeriesTerms at hterms
+    omega
+  have htermsRat :
+      ((2 * x.num.natAbs + 2 : Nat) : Rat) <= (terms : Rat) + 1 := by
+    exact_mod_cast htermsNat
+  have htwoPos : (0 : Rat) < 2 := by native_decide
+  have hdenPos : (0 : Rat) < (terms : Rat) + 1 := by
+    exact_mod_cast Nat.succ_pos terms
+  have htwice : 2 * qabs x <= (terms : Rat) + 1 := by
+    calc
+      2 * qabs x <= 2 * (((x.num.natAbs : Nat) : Rat) + 1) :=
+        Rat.mul_le_mul_of_nonneg_left hqabs (Rat.le_of_lt htwoPos)
+      _ = ((2 * x.num.natAbs + 2 : Nat) : Rat) := by
+        exact_mod_cast (by omega : 2 * (x.num.natAbs + 1) = 2 * x.num.natAbs + 2)
+      _ <= (terms : Rat) + 1 := htermsRat
+  apply Rat.le_of_mul_le_mul_right (c := 2 * ((terms : Rat) + 1))
+  · rw [Rat.div_def, Rat.div_def]
+    have htwoNe : (2 : Rat) ≠ 0 := Rat.ne_of_gt htwoPos
+    have hdenNe : (terms : Rat) + 1 ≠ 0 := Rat.ne_of_gt hdenPos
+    calc
+      (qabs x * ((terms : Rat) + 1)⁻¹) *
+          (2 * ((terms : Rat) + 1)) = 2 * qabs x := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (terms : Rat) + 1 := htwice
+      _ = ((1 : Rat) * 2⁻¹) * (2 * ((terms : Rat) + 1)) := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos htwoPos hdenPos
+
+/-- Dividing a nonnegative rational by a larger positive denominator can only
+decrease it.  This deliberately finite rational lemma keeps the tail proof
+independent of an ordered-field import. -/
+private theorem rat_div_den_antitone {a d e : Rat}
+    (ha : 0 <= a) (hd : 0 < d) (hde : d <= e) :
+    a / e <= a / d := by
+  have he : 0 < e := by grind
+  have hdne : d ≠ 0 := Rat.ne_of_gt hd
+  have hene : e ≠ 0 := Rat.ne_of_gt he
+  apply Rat.le_of_mul_le_mul_right (c := d * e)
+  · calc
+      (a / e) * (d * e) = a * d := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= a * e := Rat.mul_le_mul_of_nonneg_left hde ha
+      _ = (a / d) * (d * e) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos hd he
+
+private theorem tail_radius_absorbs_next_term
+    {T r s : Rat} (hT : 0 <= T) (hr0 : 0 <= r) (hr : r < 1)
+    (hs : s < 1) (hsle : s <= r) :
+    T <= T / (1 - r) - (T * r) / (1 - s) := by
+  have hdenr : 0 < 1 - r := by grind [Rat.sub_eq_add_neg]
+  have hdens : 0 < 1 - s := by grind [Rat.sub_eq_add_neg]
+  have hdenle : 1 - r <= 1 - s := by grind [Rat.sub_eq_add_neg]
+  have hinv : 1 / (1 - s) <= 1 / (1 - r) :=
+    rat_div_den_antitone (a := 1) (d := 1 - r) (e := 1 - s)
+      (by native_decide) hdenr hdenle
+  have hTr0 : 0 <= T * r := Rat.mul_nonneg hT hr0
+  have hnext : (T * r) / (1 - s) <= (T * r) / (1 - r) := by
+    calc
+      (T * r) / (1 - s) = (T * r) * (1 / (1 - s)) := by
+        rw [Rat.div_def, Rat.div_def, Rat.one_mul]
+      _ <= (T * r) * (1 / (1 - r)) :=
+        Rat.mul_le_mul_of_nonneg_left hinv hTr0
+      _ = (T * r) / (1 - r) := by
+        rw [Rat.div_def, Rat.div_def, Rat.one_mul]
+  have hsum : T + (T * r) / (1 - r) = T / (1 - r) := by
+    have hdenne : 1 - r ≠ 0 := Rat.ne_of_gt hdenr
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel, Rat.inv_mul_cancel]
+  have hbound : T + (T * r) / (1 - s) <= T / (1 - r) := by
+    calc
+      T + (T * r) / (1 - s) <= T + (T * r) / (1 - r) :=
+        by grind
+      _ = T / (1 - r) := hsum
+  grind [Rat.sub_eq_add_neg]
+
+private theorem powerSeriesAbsTerm_le_tailRadius_drop
+    (x : Rat) (n : Nat) :
+    qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) <=
+      powerSeriesTailRadiusAtTerms x (expPowerSeriesTerms x n) -
+        powerSeriesTailRadiusAtTerms x (expPowerSeriesTerms x n + 1) := by
+  let N : Nat := expPowerSeriesTerms x n
+  let T : Rat := qabs (powerSeriesTermAtTerms x N)
+  let a : Rat := qabs x
+  have hN1 : 0 < (N : Rat) + 1 := by
+    dsimp [N]
+    exact_mod_cast Nat.succ_pos (expPowerSeriesTerms x n)
+  have ha0 : 0 <= a := by
+    dsimp [a]
+    exact qabs_nonneg x
+  have ha : a < (N : Rat) + 1 := by
+    dsimp [a, N]
+    have h := qabs_lt_expPowerSeriesTailDen x n
+    have hcast : ((expPowerSeriesTerms x n + 1 : Nat) : Rat) =
+        (expPowerSeriesTerms x n : Rat) + 1 := by
+      exact_mod_cast (show expPowerSeriesTerms x n + 1 =
+        expPowerSeriesTerms x n + 1 by rfl)
+    rwa [hcast] at h
+  have hT0 : 0 <= T := by
+    dsimp [T]
+    exact qabs_nonneg _
+  let r : Rat := a / ((N : Rat) + 1)
+  let s : Rat := a / ((N : Rat) + 2)
+  have hN2 : 0 < (N : Rat) + 2 := by grind
+  have hr0 : 0 <= r := by
+    dsimp [r]
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg ha0 (Rat.le_of_lt ((Rat.inv_pos).2 hN1))
+  have hr : r < 1 := by
+    dsimp [r]
+    rw [Rat.div_lt_iff hN1]
+    simpa using ha
+  have ha2 : a < (N : Rat) + 2 := by grind
+  have hs : s < 1 := by
+    dsimp [s]
+    rw [Rat.div_lt_iff hN2]
+    simpa using ha2
+  have hdenle : (N : Rat) + 1 <= (N : Rat) + 2 := by grind
+  have hsle : s <= r := by
+    dsimp [s, r]
+    exact rat_div_den_antitone ha0 hN1 hdenle
+  have htail := tail_radius_absorbs_next_term
+    (T := T) (r := r) (s := s) hT0 hr0 hr hs hsle
+  unfold powerSeriesTailRadiusAtTerms
+  rw [powerSeriesTermAtTerms_abs_succ]
+  have hsuccDen : (((N + 1 : Nat) : Rat)) + 1 = (N : Rat) + 2 := by
+    exact_mod_cast (show N + 1 + 1 = N + 2 by omega)
+  rw [hsuccDen]
+  dsimp [T, a, r, s] at htail
+  exact htail
+
+/-- Every public exponential power-series box is nested in the preceding one.
+The proof is entirely about finite rational partial sums and their certified
+geometric tails. -/
+theorem expPowerSeries_center_step_movement (x : Rat) :
+    PowerSeriesCenterStepMovement x := by
+  intro n
+  let N : Nat := expPowerSeriesTerms x n
+  have hNsucc : expPowerSeriesTerms x (n + 1) = N + 1 := by
+    dsimp [N]
+    exact expPowerSeriesTerms_succ x n
+  have hcenter0 := powerSeriesCenter_stage_eq x n
+  have hcenter1 := powerSeriesCenter_stage_eq x (n + 1)
+  have hradius0 := powerSeriesTailRadius_stage_eq x n
+  have hradius1 := powerSeriesTailRadius_stage_eq x (n + 1)
+  have hcenterSucc :
+      powerSeriesCenter x (n + 1) =
+        powerSeriesCenter x n + powerSeriesTermAtTerms x N := by
+    rw [hcenter0, hcenter1, hNsucc, powerSeriesCenterAtTerms_succ]
+  have hdrop := powerSeriesAbsTerm_le_tailRadius_drop x n
+  constructor
+  · rw [hcenterSucc, hradius0, hradius1, hNsucc]
+    have hterm := self_le_qabs (powerSeriesTermAtTerms x N)
+    grind [Rat.sub_eq_add_neg]
+  · rw [hcenterSucc, hradius0, hradius1, hNsucc]
+    have hterm := neg_qabs_le_self (powerSeriesTermAtTerms x N)
+    grind [Rat.sub_eq_add_neg]
+
+private theorem expPowerSeriesTerms_zero_le (x : Rat) (n : Nat) :
+    expPowerSeriesTerms x 0 <= expPowerSeriesTerms x n := by
+  unfold expPowerSeriesTerms
+  omega
+
+/-- After its computable start, the magnitude of each newly omitted term is
+bounded by a geometric sequence of ratio one half. -/
+private theorem powerSeries_absTerm_stage_le_geometric (x : Rat) :
+    forall n,
+      qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) <=
+        qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0)) *
+          ((1 : Rat) / 2) ^ n
+  | 0 => by simp
+  | n + 1 => by
+      have hratio := expPowerSeriesTermRatio_le_half_at_terms x
+        (expPowerSeriesTerms x n) (expPowerSeriesTerms_zero_le x n)
+      rw [expPowerSeriesTerms_succ, powerSeriesTermAtTerms_abs_succ]
+      calc
+        qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) *
+            (qabs x / ((expPowerSeriesTerms x n : Rat) + 1)) <=
+          qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) *
+            ((1 : Rat) / 2) :=
+          Rat.mul_le_mul_of_nonneg_left hratio (qabs_nonneg _)
+        _ <=
+            (qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0)) *
+              ((1 : Rat) / 2) ^ n) * ((1 : Rat) / 2) :=
+          Rat.mul_le_mul_of_nonneg_right
+            (powerSeries_absTerm_stage_le_geometric x n)
+            (by native_decide : (0 : Rat) <= 1 / 2)
+        _ =
+            qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0)) *
+              ((1 : Rat) / 2) ^ (n + 1) := by
+          rw [Rat.pow_succ]
+          grind [Rat.mul_assoc]
+
+private theorem powerSeriesTailRadiusAtTerms_le_two_mul_absTerm
+    (x : Rat) (terms : Nat)
+    (hratio : qabs x / ((terms : Rat) + 1) <= (1 : Rat) / 2) :
+    powerSeriesTailRadiusAtTerms x terms <=
+      2 * qabs (powerSeriesTermAtTerms x terms) := by
+  let T : Rat := qabs (powerSeriesTermAtTerms x terms)
+  let r : Rat := qabs x / ((terms : Rat) + 1)
+  have hT : 0 <= T := by
+    dsimp [T]
+    exact qabs_nonneg _
+  have hr : r <= (1 : Rat) / 2 := by
+    exact hratio
+  have hden : 0 < 1 - r := by
+    have hhalf : (1 : Rat) / 2 < 1 := by native_decide
+    grind [Rat.sub_eq_add_neg]
+  have hfactor : 1 <= 2 * (1 - r) := by
+    have hhalf : (1 : Rat) / 2 <= 1 - r := by
+      grind [Rat.sub_eq_add_neg]
+    calc
+      (1 : Rat) = 2 * ((1 : Rat) / 2) := by native_decide
+      _ <= 2 * (1 - r) :=
+        Rat.mul_le_mul_of_nonneg_left hhalf (by native_decide)
+  apply Rat.le_of_mul_le_mul_right (c := 1 - r)
+  · rw [powerSeriesTailRadiusAtTerms]
+    dsimp [T, r]
+    rw [Rat.div_def]
+    have hdenne : 1 - qabs x / ((terms : Rat) + 1) ≠ 0 := by
+      dsimp [r] at hden
+      exact Rat.ne_of_gt hden
+    calc
+      qabs (powerSeriesTermAtTerms x terms) *
+          (1 - qabs x / ((terms : Rat) + 1))⁻¹ *
+            (1 - qabs x / ((terms : Rat) + 1)) =
+          qabs (powerSeriesTermAtTerms x terms) := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= qabs (powerSeriesTermAtTerms x terms) *
+          (2 * (1 - qabs x / ((terms : Rat) + 1))) := by
+        dsimp [T, r] at hfactor
+        simpa using
+          Rat.mul_le_mul_of_nonneg_left hfactor (qabs_nonneg _)
+      _ = (2 * qabs (powerSeriesTermAtTerms x terms)) *
+          (1 - qabs x / ((terms : Rat) + 1)) := by
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  · exact hden
+
+private theorem powerSeriesTailRadius_stage_le_two_mul_absTerm
+    (x : Rat) (n : Nat) :
+    powerSeriesTailRadius x n <=
+      2 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) := by
+  rw [powerSeriesTailRadius_stage_eq]
+  exact powerSeriesTailRadiusAtTerms_le_two_mul_absTerm x
+    (expPowerSeriesTerms x n)
+    (expPowerSeriesTermRatio_le_half_at_terms x
+      (expPowerSeriesTerms x n) (expPowerSeriesTerms_zero_le x n))
+
+private theorem rat_pow_add (q : Rat) (m n : Nat) :
+    q ^ (m + n) = q ^ m * q ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [show m + (n + 1) = m + n + 1 by omega]
+      rw [Rat.pow_succ, ih, Rat.pow_succ]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem half_pow_antitone_at_or_after (N n : Nat) (hN : N <= n) :
+    ((1 : Rat) / 2) ^ n <= ((1 : Rat) / 2) ^ N := by
+  let k := n - N
+  have hNk : N + k = n := by
+    dsimp [k]
+    exact Nat.add_sub_of_le hN
+  rw [← hNk, rat_pow_add]
+  have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
+  have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+  have hpow0 : 0 <= ((1 : Rat) / 2) ^ N := Rat.pow_nonneg hhalf0
+  have hpow1 : ((1 : Rat) / 2) ^ k <= 1 := by
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        rw [Rat.pow_succ]
+        calc
+          ((1 : Rat) / 2) ^ k * ((1 : Rat) / 2) <=
+              ((1 : Rat) / 2) ^ k * 1 :=
+            Rat.mul_le_mul_of_nonneg_left hhalf1
+              (Rat.pow_nonneg hhalf0)
+          _ = ((1 : Rat) / 2) ^ k := by rw [Rat.mul_one]
+          _ <= 1 := ih
+  calc
+    ((1 : Rat) / 2) ^ N * ((1 : Rat) / 2) ^ k <=
+        ((1 : Rat) / 2) ^ N * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hpow1 hpow0
+    _ = ((1 : Rat) / 2) ^ N := by rw [Rat.mul_one]
+
+private theorem expPowerSeries_width_le_geometric (x : Rat) (n : Nat) :
+    ((expPowerSeries x).compute n).width <=
+      (4 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0))) *
+        ((1 : Rat) / 2) ^ n := by
+  have hrad := powerSeriesTailRadius_stage_le_two_mul_absTerm x n
+  have hterm := powerSeries_absTerm_stage_le_geometric x n
+  rw [expPowerSeries_width_eq]
+  calc
+    powerSeriesTailRadius x n + powerSeriesTailRadius x n <=
+        2 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) +
+          2 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) := by
+      grind
+    _ = 4 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x n)) := by
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc]
+    _ <= 4 *
+          (qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0)) *
+            ((1 : Rat) / 2) ^ n) :=
+      Rat.mul_le_mul_of_nonneg_left hterm (by native_decide)
+    _ = (4 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0))) *
+          ((1 : Rat) / 2) ^ n := by
+      grind [Rat.mul_assoc]
+
+/-- The finite exponential power-series evaluator has an executable width
+modulus at every rational input. -/
+theorem expPowerSeries_widths_shrink (x : Rat) :
+    PowerSeriesWidthsShrink x := by
+  unfold PowerSeriesWidthsShrink RealRaw.WidthsShrinkToZero
+  intro eps
+  let bound : Rat :=
+    4 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0))
+  let N : Nat := RationalMajorant.halfDecayShift bound eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hbound0 : 0 <= bound := by
+    dsimp [bound]
+    exact Rat.mul_nonneg (by native_decide) (qabs_nonneg _)
+  have hwidth := expPowerSeries_width_le_geometric x n
+  have hpow := half_pow_antitone_at_or_after N n hn
+  have hscaled : bound * ((1 : Rat) / 2) ^ n <=
+      bound * ((1 : Rat) / 2) ^ N :=
+    Rat.mul_le_mul_of_nonneg_left hpow hbound0
+  have hfinal := RationalMajorant.halfDecayShift_spec hbound0 eps
+  dsimp [N] at hpow hscaled hfinal ⊢
+  dsimp [bound] at hwidth hscaled hfinal
+  exact Rat.le_trans hwidth (Rat.le_trans hscaled hfinal)
+
 theorem ePowerSeries_ratio_bound : EPowerSeriesRatioBound := by
   simpa [EPowerSeriesRatioBound] using expPowerSeries_ratio_bound (1 : Rat)
 
@@ -1997,6 +2448,27 @@ theorem powerSeriesNested_of_centerMovement_autoRatio
     (x : Rat) (hmove : PowerSeriesCenterMovement x) :
     PowerSeriesNested x :=
   powerSeriesNested_of_centerMovement x (expPowerSeries_ratio_bound x) hmove
+
+/-- Explicit geometric convergence metadata for the rational-input
+exponential power-series evaluator. -/
+def expPowerSeriesRate (x : Rat) :
+    RealRaw.Rate (expPowerSeries x).compute :=
+  .geometric 0
+    (4 * qabs (powerSeriesTermAtTerms x (expPowerSeriesTerms x 0)))
+    ((1 : Rat) / 2)
+    (by native_decide)
+    (by native_decide)
+    (fun n _ => expPowerSeries_width_le_geometric x n)
+
+/-- The literal finite power-series evaluator for `exp x` is a valid raw real
+for every rational input.  Its proof uses only rational interval arithmetic,
+finite sums, and the executable half-ratio tail bound. -/
+theorem expPowerSeries_valid (x : Rat) : PowerSeriesValid x :=
+  expPowerSeries_valid_of_nested_and_shrinking_autoRatio x
+    (powerSeriesNested_of_centerMovement_autoRatio x
+      (powerSeriesCenterMovement_of_stepMovement
+        (expPowerSeries_center_step_movement x)))
+    (expPowerSeries_widths_shrink x)
 
 theorem ePowerSeries_valid_of_nested
     (hnested : EPowerSeriesNested)

@@ -142,13 +142,37 @@ Lipschitz maps and a separate contraction argument.
 \begin{definition}[Power-series \texorpdfstring{$e$}{e}]
 \label{def:e-power-series}
 \lean{ComputableAnalysis.ePowerSeries}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_center_step_movement}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_widths_shrink}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeriesRate}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_valid}
 \uses{def:arctan-series}
-The first definition is the specialization of the exponential power series at
-\(1\):
+The power-series evaluator is now certified at \emph{every rational input}.
+For \(q\in\mathbb Q\), its stage \(n\) chooses the entirely computable prefix
+length
+\[
+  N_n=n+8+2\,|\operatorname{num}(q)|
+\]
+and encloses the finite sum through degree \(N_n-1\) by the usual rational
+geometric-tail radius.  Lean proves the resulting boxes nested and valid, not
+merely ordered.  Their public rate certificate is
+\[
+  \operatorname{width}(\exp_{\mathrm{series}}(q)_n)
+    \le4|t_{N_0}|\left(\frac12\right)^n,
+  \qquad t_N=\frac{q^N}{N!},
+\]
+where \(t_{N_0}\) is itself obtained by the finite rational loop.  The proof
+uses the fact that every later term ratio is at most \(1/2\); it invokes no
+completed real line or completeness principle.
+
+The first constant definition is the specialization at \(1\):
 \[
   e = \sum_{k=0}^{\infty}\frac{1}{k!}.
 \]
-The existing Lean raw representative is \code{ePowerSeries}.
+The Lean raw representative is \code{ePowerSeries}.  This establishes the
+power-series computation as a valid raw real, but it does not yet identify it
+with the compound-interest representative or prove the analytic theorem
+\(\exp'=\exp\).
 \end{definition}
 
 \begin{definition}[Compound-interest \texorpdfstring{$e$}{e} intervals]
@@ -176,6 +200,12 @@ The existing Lean raw representative is \code{ePowerSeries}.
 \lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid_of_nested_and_stageBound}
 \lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid_of_nested}
 \lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_lower_bound_two}
+\lean{ComputableAnalysis.ExpProofs.ePositive}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower_valid}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower_lower_bound}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower_upper_bound}
 \uses{def:raw-real}
 The second definition uses the classical limit
 \[
@@ -203,6 +233,24 @@ Lean verifies
   b_m-a_m\le \frac4m\longrightarrow0.
 \]
 \code{eCompoundInterest} is a valid raw real.
+
+The checked lower sequence also starts at (2) and is nondecreasing, so Lean
+proves the uniform fact
+\[
+  2\le(e_{\mathrm{compound}})_n.\mathrm{lo}.
+\]
+It packages this particular certified representative as
+\code{ExpProofs.ePositive}, an instance of the general positive-base
+interface. Consequently literal repeated multiplication already supplies
+valid raw powers \code{ExpProofs.eNaturalPower} for every (r\in\mathbb N),
+with the fully explicit enclosure
+\[
+  2^r\le (e^r)_n.\mathrm{lo}\le(e^r)_n.\mathrm{hi}\le4^r.
+\]
+This is the checked natural-exponent portion of the requested positive-base
+exponential. It does \emph{not} construct positive rational roots or claim
+continuity in the exponent; those are still the explicit obligations of
+\cref{def:rational-powers,rem:rational-power-continuity-extension}.
 \end{definition}
 
 \begin{definition}[\texorpdfstring{$e$}{e} from the inverse logarithmic integral]

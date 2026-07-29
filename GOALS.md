@@ -193,7 +193,17 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
 - **Differentiated elementary functions — partly checked.** Formal
   power-series derivatives and finite-difference examples are checked. The
   next end-to-end gate is a selected exponential raw that proves `f' = f`,
-  followed by uniqueness and the logarithm relation.
+  followed by uniqueness and the logarithm relation. The literal rational-input
+  evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for
+  every `x : Rat`: its finite rational series boxes are nested and have the
+  public geometric rate `ExpProofs.expPowerSeriesRate x`, with ratio `1/2`.
+  This is a convergence certificate for the series computation, not yet an
+  analytic exponential function or a bridge to the other definitions. The constant-level
+  compound-interest representative is now additionally packaged as the
+  positive base `ExpProofs.ePositive`: its lower interval endpoint is always
+  at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural
+  powers between `2^n` and `4^n`. Rational roots, rational-exponent
+  continuity, and the self-derivative theorem remain separate open bridges.
 - **Linear ODEs — finite core and scalar tail certificate checked; analytic layer open.**
   `PeanoBaker.lean` proves finite chronological products, the ordered-word
   expansion, discrete variation of constants, and recurrence uniqueness:

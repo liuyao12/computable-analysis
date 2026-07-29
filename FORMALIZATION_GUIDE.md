@@ -265,6 +265,15 @@ the full exp/log equivalence.  The next analytic milestone is an actual boxed
 exponential with a `HasDerivativeOnInterval` self-derivative certificate,
 then uniqueness from the Peano--Baker route.
 
+The literal power-series computation itself is now fully certified at every
+rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
+`expPowerSeries x` valid, and `ExpProofs.expPowerSeriesRate x` records the
+explicit geometric bound
+`width <= 4 * |first omitted term at stage 0| * (1/2)^n`.  This is a
+rational finite-sum/tail certificate, including nesting; it is not yet a
+`PartialRealFunRaw` analytic exponential, a derivative theorem, or an
+equivalence with compound interest and inverse-logarithmic constructions.
+
 There is, however, one fully certified constant-level exponential handle that
 is useful today.  `ExpProofs.e : Real` has the sharp compound-interest
 enclosure as its preferred representation and
@@ -274,6 +283,11 @@ the single rational power `(1 + 1/(n+1)^2)^((n+1)^2)` and uses radius
 `8/(n+1)`, giving exact width `16/(n+1)`.  The compound-interest boxes are
 used only in its validity/equivalence proof, never at runtime.  The older
 prefix-stabilized evaluator remains available separately for diagnostics.
+The preferred compound-interest representative is also the checked positive
+base `ExpProofs.ePositive`: every lower endpoint is at least `2`, and its
+literal natural powers `ExpProofs.eNaturalPower n` are valid with interval
+bounds `2^n <= lo <= hi <= 4^n`. This is ready to be supplied to a future
+`exp.RationalPowerExtension`; it is not that extension.
 The relevant checked facts are:
 
 ```lean
@@ -282,6 +296,12 @@ import ComputableAnalysis.ExpProofs
 open ComputableAnalysis
 
 #check ExpProofs.e
+#check ExpProofs.expPowerSeries_valid
+#check ExpProofs.expPowerSeriesRate
+#check ExpProofs.ePositive
+#check ExpProofs.eNaturalPower_valid
+#check ExpProofs.eNaturalPower_lower_bound
+#check ExpProofs.eNaturalPower_upper_bound
 #check ExpProofs.eCompoundInterestRepresentation
 #check ExpProofs.eRepeatedMultiplicationRepresentation
 #check ExpProofs.eEulerNested_valid
