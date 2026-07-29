@@ -76,6 +76,16 @@ The exact nonnegative remainder after clearing the denominator is
 \]
 Thus this is a stronger rational lower certificate than the bare cross
 product, with the cubic correction scale needed for short chord refinements.
+More specifically, for chart parameters \(0\le u<v\le1\), direct rational
+algebra proves the usable uniform estimate
+\[
+ L_{\mathrm{sec}}(P(u),P(v))
+ \ge \operatorname{cross}(P(u),P(v))+\frac{(v-u)^3}{8}.
+\]
+Thus an adjacent cell of mesh \(h\) gains at least \(h^3/8\) over the cross
+certificate.  After a dyadic split, each fine half-cell contributes at least
+\(h^3/64\).  These are finite ordered-rational inequalities, not asymptotic
+claims or an invocation of an exact chord length.
 It is a finite ordered-field identity and does not select an exact square
 root.  It is intended for the remaining direct chord-path diagnostic, not as
 another \(\pi\) scoreboard row.

@@ -426,6 +426,13 @@ For a nondegenerate positively oriented chord it supplies
 `cross + (1 - dot)^2 / (2 * cross + 1 - dot)` and its squared lower-bound
 theorem. This is the stronger rational certificate for the remaining direct
 circumference diagnostic; it is not a new Pi-registry presentation.
+On a chart chord with `0 <= u < v <= 1`, the checked theorem
+`RationalCircle.Stage.secantChordLower_point_ge_cross_add_cube_eighth` gives
+the explicit gain `secantChordLower >= cross + (v-u)^3 / 8`.  Its adjacent-cell
+specialization,
+`RationalCircle.Stage.secantChordLower_samplePoint_ge_cross_add_step_cube_eighth`,
+is the preferred input for a dyadic refinement proof: a fine cell of mesh
+`h/2` contributes at least `h^3 / 64` beyond its cross product.
 `PiProofs.adjacentSecantChordLower_sub_width_le_segment_lo` connects that
 certificate to the concrete lower endpoint used by the original finite
 square-root bisection.  A proposed direct-refinement inequality should subtract

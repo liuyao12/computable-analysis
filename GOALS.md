@@ -1290,7 +1290,12 @@ students actually compute.
   rational lower certificate, `c + d^2/(2*c+d)` for chord cross product `c`
   and dot deficit `d`. Its proved squared remainder
   `2*c*d^3/(2*c+d)^2` supplies the cubic correction scale appropriate to the
-  next version of that local margin argument.  The interface theorem
+  next version of that local margin argument.  This scale is now quantitative:
+  `secantChordLower_point_ge_cross_add_cube_eighth` proves, on every chart
+  chord `0 <= u < v <= 1`, the lower gain
+  `secantChordLower >= cross + (v-u)^3/8`; the checked adjacent-cell
+  specialization gives a gain of one eighth of the cube of the local mesh.
+  The interface theorem
   `PiProofs.adjacentSecantChordLower_sub_width_le_segment_lo` now transports
   this certificate through the exact bisection width to each actual direct
   chord lower endpoint.  `PiProofs.AdjacentChordSecantMarginCoversFineWidths`

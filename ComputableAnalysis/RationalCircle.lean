@@ -465,6 +465,183 @@ def secantChordLower (p q : PiCirclePoint) : Rat :=
   let d := 1 - dot p q
   c + sq d / (2 * c + d)
 
+private theorem secant_rat_eq_of_pos_mul_eq_mul {a b c : Rat} (hc : 0 < c)
+    (h : c * a = c * b) : a = b := by
+  have hcne : c ≠ 0 := Rat.ne_of_gt hc
+  calc
+    a = c⁻¹ * (c * a) := by
+      have hcancel : c⁻¹ * c = 1 := Rat.inv_mul_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = c⁻¹ * (c * b) := by rw [h]
+    _ = b := by
+      have hcancel : c⁻¹ * c = 1 := Rat.inv_mul_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem secantCorrection_division_formula
+    {d D E : Rat} (hd : 0 < d) (hD : 0 < D) (hE : 0 < E) :
+    (2 * d * d / D) * (2 * d * d / D) / ((2 * d * E) / D) =
+      2 * d * d * d / (D * E) := by
+  have hDne : D ≠ 0 := Rat.ne_of_gt hD
+  have hEne : E ≠ 0 := Rat.ne_of_gt hE
+  have hDEpos : 0 < D * E := Rat.mul_pos hD hE
+  have hDEne : D * E ≠ 0 := Rat.ne_of_gt hDEpos
+  have hzpos : 0 < (2 * d * E) / D := by
+    rw [Rat.div_def]
+    exact Rat.mul_pos
+      (Rat.mul_pos (Rat.mul_pos (by native_decide) hd) hE)
+      (Rat.inv_pos.mpr hD)
+  have hzne : (2 * d * E) / D ≠ 0 := Rat.ne_of_gt hzpos
+  apply secant_rat_eq_of_pos_mul_eq_mul
+    (c := (D * E) * ((2 * d * E) / D))
+    (Rat.mul_pos hDEpos hzpos)
+  rw [Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- The exact chart formula for the cubic correction in `secantChordLower`.
+For `u < v`, its denominator is positive under the displayed hypothesis, so
+the square-root-free chord certificate gains a positive cubic term over the
+bare cross-product certificate. -/
+theorem secantChordLower_point_formula
+    {u v : Rat} (huv : 0 < v - u)
+    (hE : 0 < 2 * (1 + u * v) + (v - u)) :
+    secantChordLower (point u) (point v) =
+      cross (point u) (point v) +
+        (2 * (v - u) * (v - u) * (v - u)) /
+          ((1 + u * u) * (1 + v * v) *
+            (2 * (1 + u * v) + (v - u))) := by
+  let d := v - u
+  let D := (1 + u * u) * (1 + v * v)
+  let A := 1 + u * v
+  let E := 2 * A + d
+  have hD : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos (one_add_square_pos u) (one_add_square_pos v)
+  unfold secantChordLower
+  rw [point_cross_formula, one_sub_point_dot_formula]
+  change 2 * d * A / D + (2 * d * d / D) * (2 * d * d / D) /
+      (2 * (2 * d * A / D) + 2 * d * d / D) =
+    2 * d * A / D + (2 * d * d * d) / (D * E)
+  have hden :
+      2 * (2 * d * A / D) + 2 * d * d / D = (2 * d * E) / D := by
+    rw [Rat.div_def]
+    grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  rw [hden]
+  have hd : 0 < d := by
+    dsimp [d]
+    exact huv
+  have hcorrection :
+      (2 * d * d / D) * (2 * d * d / D) / ((2 * d * E) / D) =
+        2 * d * d * d / (D * E) := by
+    exact secantCorrection_division_formula hd hD (by simpa [E, A, d] using hE)
+  rw [hcorrection]
+
+/-- On a first-quadrant chart chord, `secantChordLower` improves the bare
+cross-product certificate by a uniform cubic amount.  The proof uses only
+ordered rational arithmetic and the bounds `1 + u^2, 1 + v^2 <= 2`. -/
+theorem secantChordLower_point_ge_cross_add_cube_eighth
+    {u v : Rat} (hu : 0 <= u) (huv : u < v) (hv : v <= 1) :
+    cross (point u) (point v) +
+        ((v - u) * (v - u) * (v - u)) / 8 <=
+      secantChordLower (point u) (point v) := by
+  let d := v - u
+  let D := (1 + u * u) * (1 + v * v)
+  let E := 2 * (1 + u * v) + d
+  have hdp : 0 < d := by
+    dsimp [d]
+    grind [Rat.sub_eq_add_neg]
+  have hu1 : u <= 1 := Rat.le_trans (Rat.le_of_lt huv) hv
+  have huu : u * u <= 1 := by
+    have h := Rat.mul_le_mul_of_nonneg_left hu1 hu
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hv0 : 0 <= v := Rat.le_trans hu (Rat.le_of_lt huv)
+  have hvv : v * v <= 1 := by
+    have h := Rat.mul_le_mul_of_nonneg_left hv hv0
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have h1u : 1 + u * u <= 2 := by grind
+  have h1v : 1 + v * v <= 2 := by grind
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos (one_add_square_pos u) (one_add_square_pos v)
+  have hDle : D <= 4 := by
+    dsimp [D]
+    calc
+      (1 + u * u) * (1 + v * v) <= 2 * (1 + v * v) :=
+        Rat.mul_le_mul_of_nonneg_right h1u
+          (Rat.le_of_lt (one_add_square_pos v))
+      _ <= 2 * 2 := Rat.mul_le_mul_of_nonneg_left h1v (by native_decide)
+      _ = 4 := by native_decide
+  have huv_le_u : u * v <= u := by
+    have h := Rat.mul_le_mul_of_nonneg_left hv hu
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have htwouv : 2 * (1 + u * v) <= 2 * (1 + u) := by
+    exact Rat.mul_le_mul_of_nonneg_left (by grind) (by native_decide)
+  have hdle : d <= 1 - u := by
+    dsimp [d]
+    grind [Rat.sub_eq_add_neg]
+  have hEpos : 0 < E := by
+    dsimp [E]
+    have hmain : 0 < 2 * (1 + u * v) := by
+      exact Rat.mul_pos (by native_decide) (one_add_mul_pos_of_nonneg hu hv0)
+    grind
+  have hEle : E <= 4 := by
+    dsimp [E]
+    grind [Rat.sub_eq_add_neg]
+  have hDEpos : 0 < D * E := Rat.mul_pos hDpos hEpos
+  have hDEle : D * E <= 16 := by
+    calc
+      D * E <= 4 * E := Rat.mul_le_mul_of_nonneg_right hDle (Rat.le_of_lt hEpos)
+      _ <= 4 * 4 := Rat.mul_le_mul_of_nonneg_left hEle (by native_decide)
+      _ = 16 := by native_decide
+  have hcube0 : 0 <= d * d * d := by
+    exact Rat.mul_nonneg (Rat.mul_nonneg (Rat.le_of_lt hdp) (Rat.le_of_lt hdp))
+      (Rat.le_of_lt hdp)
+  have hcorrection :
+      (d * d * d) / 8 <= 2 * d * d * d / (D * E) := by
+    apply Rat.le_of_mul_le_mul_right (c := 8 * (D * E))
+    · have h8ne : (8 : Rat) ≠ 0 := by native_decide
+      have hDEne : D * E ≠ 0 := Rat.ne_of_gt hDEpos
+      calc
+        ((d * d * d) / 8) * (8 * (D * E)) = d * d * d * (D * E) := by
+          rw [Rat.div_def]
+          have hcancel : (8 : Rat)⁻¹ * 8 = 1 := Rat.inv_mul_cancel 8 h8ne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ <= d * d * d * 16 :=
+          Rat.mul_le_mul_of_nonneg_left hDEle hcube0
+        _ = (2 * d * d * d / (D * E)) * (8 * (D * E)) := by
+          rw [Rat.div_def]
+          have hcancel : (D * E)⁻¹ * (D * E) = 1 :=
+            Rat.inv_mul_cancel _ hDEne
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact Rat.mul_pos (by native_decide) hDEpos
+  rw [secantChordLower_point_formula (by simpa [d] using hdp)
+    (by simpa [E, d] using hEpos)]
+  exact (Rat.add_le_add_left).mpr hcorrection
+
+/-- The preceding cubic certificate specialized to one adjacent cell of a
+rational-circle stage.  This is the form used when a stage is dyadically
+split: each new half-cell gains one eighth of the cube of its own parameter
+mesh. -/
+theorem secantChordLower_samplePoint_ge_cross_add_step_cube_eighth
+    (S : Stage) (hS : 0 < S.subdivisions) (k : Nat)
+    (hk : k < S.subdivisions) :
+    cross (S.samplePoint k) (S.samplePoint (k + 1)) +
+        ((1 / (S.subdivisions : Rat)) *
+          (1 / (S.subdivisions : Rat)) *
+          (1 / (S.subdivisions : Rat))) / 8 <=
+      secantChordLower (S.samplePoint k) (S.samplePoint (k + 1)) := by
+  have hu : 0 <= S.parameter k := parameter_nonneg S hS k
+  have huv : S.parameter k < S.parameter (k + 1) := by
+    have hdiff := parameter_succ_sub S k
+    have hpos : 0 < (1 : Rat) / (S.subdivisions : Rat) := by
+      rw [Rat.div_def, Rat.one_mul]
+      exact Rat.inv_pos.mpr ((Rat.natCast_pos).2 hS)
+    grind [Rat.sub_eq_add_neg]
+  have hv : S.parameter (k + 1) <= 1 :=
+    parameter_le_one S hS (by omega)
+  simpa [samplePoint, parameter_succ_sub] using
+    (secantChordLower_point_ge_cross_add_cube_eighth hu huv hv)
+
 /-- The rational secant certificate is nonnegative on an oriented
 nondegenerate unit-circle chord. -/
 theorem secantChordLower_nonneg
