@@ -289,6 +289,64 @@ theorem point_cross_nonneg_of_nonneg_of_le
   rw [Rat.div_def]
   exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
 
+/-- A first-quadrant chart chord has cross-product length at least half its
+parameter step.  This denominator-cleared estimate is the linear factor that
+turns a cubic refinement gain into the fourth-order slack needed to cover a
+coarse chord square. -/
+theorem point_cross_ge_half_step
+    {u v : Rat} (hu : 0 <= u) (huv : u < v) (hv : v <= 1) :
+    (v - u) / 2 <= cross (point u) (point v) := by
+  let d := v - u
+  let A := (1 + u * u) * (1 + v * v)
+  let M := 1 + u * v
+  have hdpos : 0 < d := by
+    dsimp [d]
+    grind [Rat.sub_eq_add_neg]
+  have hv0 : 0 <= v := Rat.le_trans hu (Rat.le_of_lt huv)
+  have hu1 : u <= 1 := Rat.le_trans (Rat.le_of_lt huv) hv
+  have huu : u * u <= 1 := by
+    have h := Rat.mul_le_mul_of_nonneg_left hu1 hu
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hvv : v * v <= 1 := by
+    have h := Rat.mul_le_mul_of_nonneg_left hv hv0
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hApos : 0 < A := by
+    dsimp [A]
+    exact Rat.mul_pos (one_add_square_pos u) (one_add_square_pos v)
+  have hAle : A <= 4 := by
+    dsimp [A]
+    have h1u : 1 + u * u <= 2 := by grind
+    have h1v : 1 + v * v <= 2 := by grind
+    calc
+      (1 + u * u) * (1 + v * v) <= 2 * (1 + v * v) :=
+        Rat.mul_le_mul_of_nonneg_right h1u
+          (Rat.le_of_lt (one_add_square_pos v))
+      _ <= 2 * 2 := Rat.mul_le_mul_of_nonneg_left h1v (by native_decide)
+      _ = 4 := by native_decide
+  have hMone : 1 <= M := by
+    dsimp [M]
+    have huv0 : 0 <= u * v := Rat.mul_nonneg hu hv0
+    grind
+  rw [point_cross_formula]
+  change d / 2 <= (2 * d * M) / A
+  apply Rat.le_of_mul_le_mul_right (c := 2 * A)
+  · have hAne : A ≠ 0 := Rat.ne_of_gt hApos
+    rw [Rat.div_def, Rat.div_def]
+    calc
+      (d * 2⁻¹) * (2 * A) = d * A := by
+        have htwo : (2 : Rat)⁻¹ * 2 = 1 := by native_decide
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= d * (4 * M) := by
+        have h4M : 4 <= 4 * M := by
+          calc
+            4 = 4 * 1 := by grind
+            _ <= 4 * M := Rat.mul_le_mul_of_nonneg_left hMone (by native_decide)
+        have hAM : A <= 4 * M := Rat.le_trans hAle h4M
+        exact Rat.mul_le_mul_of_nonneg_left hAM (Rat.le_of_lt hdpos)
+      _ = (2 * d * M * A⁻¹) * (2 * A) := by
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos (by native_decide) hApos
+
 /-- Derivative of the rational circle parametrization
 `t ↦ ((1-t^2)/(1+t^2), 2t/(1+t^2))`.  This is an exact rational function,
 not a limiting construction. -/
@@ -641,6 +699,25 @@ theorem secantChordLower_samplePoint_ge_cross_add_step_cube_eighth
     parameter_le_one S hS (by omega)
   simpa [samplePoint, parameter_succ_sub] using
     (secantChordLower_point_ge_cross_add_cube_eighth hu huv hv)
+
+/-- The cross-product certificate of one adjacent first-quadrant chart cell
+is at least half its rational parameter mesh. -/
+theorem samplePoint_cross_ge_half_step
+    (S : Stage) (hS : 0 < S.subdivisions) (k : Nat)
+    (hk : k < S.subdivisions) :
+    (1 / (S.subdivisions : Rat)) / 2 <=
+      cross (S.samplePoint k) (S.samplePoint (k + 1)) := by
+  have hu : 0 <= S.parameter k := parameter_nonneg S hS k
+  have huv : S.parameter k < S.parameter (k + 1) := by
+    have hdiff := parameter_succ_sub S k
+    have hpos : 0 < (1 : Rat) / (S.subdivisions : Rat) := by
+      rw [Rat.div_def, Rat.one_mul]
+      exact Rat.inv_pos.mpr ((Rat.natCast_pos).2 hS)
+    grind [Rat.sub_eq_add_neg]
+  have hv : S.parameter (k + 1) <= 1 :=
+    parameter_le_one S hS (by omega)
+  simpa [samplePoint, parameter_succ_sub] using
+    (point_cross_ge_half_step hu huv hv)
 
 /-- The rational secant certificate is nonnegative on an oriented
 nondegenerate unit-circle chord. -/

@@ -433,6 +433,10 @@ specialization,
 `RationalCircle.Stage.secantChordLower_samplePoint_ge_cross_add_step_cube_eighth`,
 is the preferred input for a dyadic refinement proof: a fine cell of mesh
 `h/2` contributes at least `h^3 / 64` beyond its cross product.
+For the complementary coarse-scale estimate, use
+`RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
+`RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,
+the cross product is at least `(v - u) / 2`.
 `PiProofs.adjacentSecantChordLower_sub_width_le_segment_lo` connects that
 certificate to the concrete lower endpoint used by the original finite
 square-root bisection.  A proposed direct-refinement inequality should subtract

@@ -79,9 +79,16 @@ product, with the cubic correction scale needed for short chord refinements.
 More specifically, for chart parameters \(0\le u<v\le1\), direct rational
 algebra proves the usable uniform estimate
 \[
- L_{\mathrm{sec}}(P(u),P(v))
+L_{\mathrm{sec}}(P(u),P(v))
  \ge \operatorname{cross}(P(u),P(v))+\frac{(v-u)^3}{8}.
 \]
+The same chart assumptions also give the uniform first-order lower bound
+\[
+ \operatorname{cross}(P(u),P(v))\ge\frac{v-u}{2}.
+\]
+For an adjacent stage cell this is exposed directly as a sample-point theorem.
+It supplies the positive coarse scale needed when a cubic correction is used
+to dominate a squared-chord residual.
 Thus an adjacent cell of mesh \(h\) gains at least \(h^3/8\) over the cross
 certificate.  After a dyadic split, each fine half-cell contributes at least
 \(h^3/64\).  These are finite ordered-rational inequalities, not asymptotic
