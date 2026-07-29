@@ -873,11 +873,24 @@ in \code{RationalCircle.Stage.midpointCurvaturePolynomialBound}.  This is
 the denominator-cleared positive-polynomial inequality that pays for the
 curvature defect when a chord is split at its rational midpoint.  The related
 fact \code{RationalCircle.Stage.parameter\_le\_one} makes the chart-domain
-hypothesis explicit.  What is still open is deliberately narrower: package
-this identity into the two curvature chord certificates and show that its
-strict rational margin dominates the two chosen bisection widths.  Thus it is
-progress on the original circumference diagnostic, not another Pi scoreboard
-row.
+hypothesis explicit.
+
+There is also a sharper direct cross-certificate identity.  In
+\code{RationalCircle.Stage}, Lean proves
+\code{midpoint\_cross\_refinement\_gap\_cleared}: the
+product \(d_0d_md_v\) times the excess of the two fine cross products over
+the coarse one is exactly \(h^3\).  Consequently,
+the companion theorem \code{midpoint\_cross\_refinement\_gap\_ge\_cube\_eighth}
+gives the uniform finite inequality
+\[
+  \operatorname{cross}(u,m)+\operatorname{cross}(m,u+h)
+  \ge \operatorname{cross}(u,u+h)+h^3/8.
+\]
+Together with the two fine secant gains, this supplies the geometric side of
+the sharper margin entirely in rational arithmetic.  What is still open is
+deliberately narrower: show that the resulting strict rational margin
+dominates the two chosen bisection widths.  Thus it is progress on the
+original circumference diagnostic, not another Pi scoreboard row.
 
 There is nevertheless a separately named certified representative,
 \code{piCircumferenceStabilized}. At stage \(n\), it takes the finite prefix
