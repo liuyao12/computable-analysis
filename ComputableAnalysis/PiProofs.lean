@@ -15342,6 +15342,19 @@ theorem piTriangleLogReciprocalIntegral_equiv_piCircleArea :
     Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one
     four_arctanGeom_one_equiv_piCircleArea
 
+/-- The square-substitution form of the supplied arctangent formula is a
+certified pi presentation.  Its logarithmic endpoint is the literal integral
+of `2*x/(1+x^2)` on the unit interval, kept separate from the reciprocal-log
+form so the finite substitution certificate is exercised at pi level. -/
+theorem piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea :
+    Logarithm.piTriangleLogSquareSubstitutionIntegral.Equiv piCircleArea := by
+  exact RealRaw.equiv_trans
+    Logarithm.piTriangleLogSquareSubstitutionIntegral_valid
+    fourArctanGeomOneValid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    Logarithm.piTriangleLogSquareSubstitutionIntegral_equiv_four_arctanGeom_one
+    four_arctanGeom_one_equiv_piCircleArea
+
 theorem four_arctanIntegralRectangleForAtOne_equiv_piCircleArea :
     (IntegralIdentities.PiFromArctanIntegral
       IntegralIdentities.arctanIntegralRectangleForAtOne).Equiv
@@ -17364,6 +17377,7 @@ inductive PiPresentation where
   | arctanGeometry
   | arctanRectangleIntegral
   | arctanIntegrationByParts
+  | arctanSquareSubstitution
   | leibnizSeries
   | nilakanthaSeries
   | machinSeries
@@ -17384,6 +17398,7 @@ inductive PiIntegrationFamily where
   | arctangentGeometry
   | finiteIntegral
   | finiteIntegrationByParts
+  | finiteSubstitution
   | alternatingSeries
   | compactifiedImproperIntegral
 deriving DecidableEq, Repr
@@ -17398,6 +17413,7 @@ def PiPresentation.integrationFamily : PiPresentation -> PiIntegrationFamily
   | .arctanGeometry => .arctangentGeometry
   | .arctanRectangleIntegral | .reciprocalQuarticIntegral => .finiteIntegral
   | .arctanIntegrationByParts => .finiteIntegrationByParts
+  | .arctanSquareSubstitution => .finiteSubstitution
   | .leibnizSeries | .nilakanthaSeries | .machinSeries => .alternatingSeries
   | .cauchyIntegral => .compactifiedImproperIntegral
 
@@ -17411,6 +17427,8 @@ def piPresentationRaw : PiPresentation -> RealRaw
   | .arctanGeometry => (4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat)
   | .arctanRectangleIntegral => piFromArctanIntegralRectangleUnitAtOne
   | .arctanIntegrationByParts => Logarithm.piTriangleLogReciprocalIntegral
+  | .arctanSquareSubstitution =>
+      Logarithm.piTriangleLogSquareSubstitutionIntegral
   | .leibnizSeries => piLeibniz
   | .nilakanthaSeries => piNilakantha
   | .machinSeries => piMachin
@@ -17435,6 +17453,9 @@ theorem piPresentation_valid (presentation : PiPresentation) :
       simpa [piPresentationRaw] using piFromArctanIntegralRectangleUnitAtOne_valid
   | arctanIntegrationByParts =>
       simpa [piPresentationRaw] using Logarithm.piTriangleLogReciprocalIntegral_valid
+  | arctanSquareSubstitution =>
+      simpa [piPresentationRaw] using
+        Logarithm.piTriangleLogSquareSubstitutionIntegral_valid
   | leibnizSeries => simpa [piPresentationRaw, LeibnizValid, RealRaw.Valid] using
       leibnizValid
   | nilakanthaSeries => simpa [piPresentationRaw] using Nilakantha.valid
@@ -17466,6 +17487,8 @@ theorem piPresentation_equiv_piCircleArea (presentation : PiPresentation) :
       piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea
   | arctanIntegrationByParts => simpa [piPresentationRaw] using
       piTriangleLogReciprocalIntegral_equiv_piCircleArea
+  | arctanSquareSubstitution => simpa [piPresentationRaw] using
+      piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea
   | leibnizSeries =>
       exact RealRaw.equiv_trans
         (piPresentation_valid .leibnizSeries)
@@ -17501,6 +17524,9 @@ inductive PiCoverageBridge where
   /-- The supplied arctangent integration-by-parts formula with its literal
   reciprocal-integral logarithm agrees with area pi. -/
   | arctangentIntegrationByParts
+  /-- The arctangent formula with its logarithmic endpoint evaluated by the
+  checked finite square substitution agrees with the reciprocal-log form. -/
+  | arctangentSquareSubstitution
   /-- Reciprocal-tail compactification agrees with the bounded geometry value. -/
   | compactifiedImproperIntegral
   /-- A nontrivial algebraic kernel agrees with the compactified Cauchy route. -/
@@ -17513,6 +17539,7 @@ def PiCoverageBridge.sourcePresentation : PiCoverageBridge -> PiPresentation
   | .arctangentPowerSeries => .arctanGeometry
   | .definiteIntegral => .arctanRectangleIntegral
   | .arctangentIntegrationByParts => .arctanIntegrationByParts
+  | .arctangentSquareSubstitution => .arctanSquareSubstitution
   | .compactifiedImproperIntegral => .cauchyIntegral
   | .algebraicKernelIntegral => .reciprocalQuarticIntegral
 
@@ -17523,6 +17550,7 @@ def PiCoverageBridge.targetPresentation : PiCoverageBridge -> PiPresentation
   | .arctangentPowerSeries => .leibnizSeries
   | .definiteIntegral => .leibnizSeries
   | .arctangentIntegrationByParts => .area
+  | .arctangentSquareSubstitution => .arctanIntegrationByParts
   | .compactifiedImproperIntegral => .area
   | .algebraicKernelIntegral => .cauchyIntegral
 
@@ -18333,6 +18361,9 @@ def piCertified : Real :=
     .withAlternative Logarithm.piTriangleLogReciprocalIntegral
       Logarithm.piTriangleLogReciprocalIntegral_valid
       piTriangleLogReciprocalIntegral_equiv_piCircleArea)
+    .withAlternative Logarithm.piTriangleLogSquareSubstitutionIntegral
+      Logarithm.piTriangleLogSquareSubstitutionIntegral_valid
+      piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea)
     .withAlternative piLeibniz
       (piPresentation_valid .leibnizSeries)
       (piPresentation_equiv_piCircleArea .leibnizSeries))
@@ -18380,6 +18411,13 @@ theorem piTriangleLogSeries_mem_piCertified_alternatives :
 in the abstract pi handle as a supplementary certified alternative. -/
 theorem piTriangleLogReciprocalIntegral_mem_piCertified_alternatives :
     Logarithm.piTriangleLogReciprocalIntegral ∈ piCertified.alternatives := by
+  simp [piCertified, Real.withAlternative]
+
+/-- The finite square-substitution form is stored directly in the certified
+pi handle as the named evaluator for the substitution coverage bridge. -/
+theorem piTriangleLogSquareSubstitutionIntegral_mem_piCertified_alternatives :
+    Logarithm.piTriangleLogSquareSubstitutionIntegral ∈
+      piCertified.alternatives := by
   simp [piCertified, Real.withAlternative]
 
 /-- Retrieve a named certified representation from the primary π registry
@@ -18434,6 +18472,13 @@ reciprocal integral; transporting it to a canonical inverse-exponential log
 is a separate later theorem. -/
 def integrationByParts : Real.Representation pi :=
   presentation .arctanIntegrationByParts
+
+/-- The finite square-substitution view
+`4 * ∫₀¹ arctan(x) dx + 4 * ∫₀¹ x/(1+x^2) dx`.  It is equivalent to the
+literal reciprocal-log integration-by-parts view, but retains the pullback
+integral as the executable substitution witness. -/
+def squareSubstitution : Real.Representation pi :=
+  presentation .arctanSquareSubstitution
 
 /-- The supplementary direct finite mesh behind integration by parts.  This
 is deliberately distinct from the future arctangent--logarithm integral

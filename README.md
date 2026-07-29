@@ -129,6 +129,7 @@ capability—not a percentage for the whole foundation.
 | arctangent power-series theorem | geometric and series presentations agree | Leibniz: $w_n=4/(4n+1)$ |
 | arctangent integral evaluation | integral and series presentations agree | rectangle $\pi$ raw: $w_n\le16/(n+1)$ |
 | finite arctangent integration by parts | supplied unit-branch triangle/strip reindexing, product FTC, and reciprocal-log endpoint agree with area pi | literal runtime: $w_n\le52/2^n$ |
+| finite square substitution in the pi formula | the same supplied product endpoint plus the checked $t=x^2$ mesh correction and pullback integral agree with the reciprocal-log formula | square-pullback pi raw: $w_n\le56/2^n$ |
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
 | Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | Planned: matrix Peano--Baker factorial tail plus represented-input extension modulus |
@@ -149,8 +150,12 @@ construction, rather than a second score for the underlying theorem.
 The sixth registry bridge is the supplied finite arctangent
 integration-by-parts formula with its literal reciprocal-integral logarithm:
 `pi.integrationByParts` is equivalent to area pi and has the direct runtime
-bound `52 / 2^n`.  It is intentionally not presented as the completed general
-theorem.  The stronger canonical textbook form still follows the long
+bound `52 / 2^n`.  The seventh bridge is the corresponding finite
+square-substitution formula, exposed as `pi.squareSubstitution` with direct
+bound `56 / 2^n`; it retains the integral of `2*x/(1+x*x)` so its agreement
+with the reciprocal-log formula exercises the explicit `t = x*x` mesh
+correction.  Neither is presented as the completed general theorem.  The
+stronger canonical textbook form still follows the long
 elementary-function route: identify `log 2` with the inverse of the canonical
 exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
 exponential representations agree, then use
@@ -399,9 +404,11 @@ area pi.  The companion
 literal reciprocal integral `log_rec 2`; it has the same product-FTC and pi
 bridges.  The reciprocal-integral form is the sixth Pi-coverage bridge: it
 checks a supplied finite integration-by-parts construction with its own
-runtime bound.  The series form remains supplementary, and neither formula
-by itself supplies the reusable effective-FTC or canonical-logarithm
-theorems.
+runtime bound.  The square-pullback form is the seventh: it preserves
+`2 * integral(2*x/(1+x*x))` and reaches this reciprocal endpoint through the
+checked finite `t = x*x` substitution theorem.  The series form remains
+supplementary, and none of these formulas by itself supplies the reusable
+effective-FTC, general substitution, or canonical-logarithm theorems.
 The same generic construction now has a checked specialization for the
 arctangent kernel `t ↦ 1/(1+t*t)` on `[0,1]`.  Its entirely rational
 factorization gives the Lipschitz constant `2`, hence the raw
@@ -471,7 +478,8 @@ curvature-corrected fan. `PiProofs.PiPresentation` gives the primary routes
 stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 `Real.Representation`. This includes the geometry, stabilized circumference,
 single Machin, Leibniz, Nilakantha, rectangle, supplied finite
-integration-by-parts, Cauchy, and reciprocal-quartic routes, together with
+integration-by-parts, finite square substitution, Cauchy, and
+reciprocal-quartic routes, together with
 the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants. The complementary named
 views make the perimeter provenance readable: `PiProofs.pi.circumference`
@@ -483,7 +491,9 @@ the original chord path. Along with `PiProofs.pi.curvatureFan`,
 these views do not create additional calculus-coverage rows.  In contrast,
 `PiProofs.pi.integrationByParts` is the checked literal-reciprocal-log
 integration-by-parts coverage view; it remains narrower than the pending
-general arctangent--logarithm theorem.
+general arctangent--logarithm theorem.  The separate
+`PiProofs.pi.squareSubstitution` coverage view retains the square-pullback
+integral and checks its finite substitution transport to that formula.
 
 ### Full implementation inventory
 
@@ -506,6 +516,7 @@ unmarked long scoreboard target because it exercises the exp/log/ODE chain.
 | `4 * arctan.integral.rectangle(1)` | [rectangles](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-arctan-integral-comparison), [equiv](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:arctan-integral-pi) | $\pi=4\int_0^1 \frac{dt}{1+t^2}$ | ✓ | ✓ |
 | `4 * arctan.series(1)` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [endpoint](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-arctan), [finite Riemann bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi) | $\pi=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ | ✓ | ✓ |
 | `Logarithm.piTriangleLogReciprocalIntegral` | [finite triangle](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-uniform-triangle-reindexing), [logarithm strip](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:arctan-log-first-strip) | $\pi=4\,\texttt{arctan.integral.triangle}+2\log_{\mathrm{rec}}2$ | ✓ | ✓ |
+| `Logarithm.piTriangleLogSquareSubstitutionIntegral` | [finite square substitution](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#prop:log-two-square-substitution), [pullback integral](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:log-two-square-pullback-integral) | $\pi=4\,\texttt{arctan.integral.triangle}+4\int_0^1\frac{x}{1+x^2}\,dx$ | ✓ | ✓ |
 | `Logarithm.piTriangleLogSeries` | [finite triangle](https://liuyao12.github.io/computable-analysis/ch-integrals.html#thm:finite-uniform-triangle-reindexing), [logarithm strip](https://liuyao12.github.io/computable-analysis/ch-exponential-logarithm.html#thm:arctan-log-first-strip) | $\pi=4\,\texttt{arctan.integral.triangle}+2\log_{\mathrm{series}}2$ | ✓ | ✓ |
 | `piNilakantha` | [finite series transformation](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:nilakantha-pi) | $\pi=3+\frac4{2\cdot3\cdot4}-\frac4{4\cdot5\cdot6}+\frac4{6\cdot7\cdot8}-\cdots$ | ✓ | ✓ |
 | `piMachin` | [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [identity](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:machin-tangent), [finite bridge](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4(4\,\texttt{arctan.series}(1/5)-\texttt{arctan.series}(1/239))$ | ✓ | ✓ |
@@ -528,14 +539,20 @@ Lean hooks:
 - Unit arctangent: `ArctanGeometry.arctanGeom_valid_on_unit`,
   `ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain`.
 - Triangle/logarithm formulas: `Logarithm.piTriangleLogReciprocalIntegral`,
+  `Logarithm.piTriangleLogSquareSubstitutionIntegral`,
   `Logarithm.piTriangleLogSeries`,
   `PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea`, and
-  `PiProofs.piTriangleLogSeries_equiv_piCircleArea`.  Both factor through
+  `PiProofs.piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea`, and
+  `PiProofs.piTriangleLogSeries_equiv_piCircleArea`.  The reciprocal and
+  square-pullback forms factor through
   `piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`.
   `Logarithm.piTriangleLogReciprocalIntegral_compute_width_le` gives the
   literal formula $w_n\le52/2^n$, and
-  `PiProofs.pi.integrationByParts` is its sixth coverage bridge.  It is still
-  a supplied-branch theorem, not the general integration-by-parts rule.
+  `Logarithm.piTriangleLogSquareSubstitutionIntegral_compute_width_le` gives
+  the pullback formula $w_n\le56/2^n$.  `PiProofs.pi.integrationByParts` and
+  `PiProofs.pi.squareSubstitution` are respectively the sixth and seventh
+  coverage bridges.  They are supplied-branch theorems, not the general
+  integration-by-parts or substitution rules.
 - Generic arctangent bridge: `PiProofs.arctanEqualsGeom_finiteRiemannBridge`.
   It supports the series-to-geometry comparison but is not a separate pi-scoreboard route.
 - Nilakantha series: `piNilakantha`, `Nilakantha.compute_width_eq`,

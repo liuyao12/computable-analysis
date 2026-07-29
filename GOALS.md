@@ -34,7 +34,9 @@ not a description of the current module graph. The checked blueprint
   `PiProofs.piMachinRate` records width `<= 20*(1/2)^n`, i.e. `20/2^n`.
   The literal reciprocal-log integration-by-parts evaluator similarly has
   `Logarithm.piTriangleLogReciprocalIntegralRate`, with width
-  `<= 52*(1/2)^n`.
+  `<= 52*(1/2)^n`.  Its square-pullback substitution companion has
+  `Logarithm.piTriangleLogSquareSubstitutionIntegralRate`, with width
+  `<= 56*(1/2)^n`.
 - Equality of raw representatives is same-stage rational-interval overlap:
   `RealRaw.Equiv x y` means that `x.compute n` and `y.compute n` overlap for
   every `n`. Validity makes this relation transitive. The project-facing
@@ -564,6 +566,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   `52/2^n`.  It still does not establish a general effective
   FTC/integration-by-parts theorem or canonical exp/log transport; those are
   the stronger remaining refinement of this row.
+  The square-pullback companion
+  `Logarithm.piTriangleLogSquareSubstitutionIntegral` is the seventh bridge:
+  its endpoint is `2 * ∫_0^1 2*x/(1+x*x) dx`, it reaches the reciprocal-log
+  formula by the finite `t = x*x` mesh correction, and its direct rate is
+  `56/2^n`.  It is the concrete substitution regression, not a general
+  change-of-variables theorem.
 - Formula-identification route: to identify a proposed kernel, prove that it
   lies in the same shrinking enclosures as the pointwise derivative produced
   by secants.  For arctangent, this means proving finite sector-area secant
@@ -1153,11 +1161,12 @@ students actually compute.
 ## Pi Representations
 
 - `PiProofs.PiCoverageBridge` is the π progress measure in
-  `blueprint/src/pi-scoreboard-table.tex`.  Its six constructors have one
+  `blueprint/src/pi-scoreboard-table.tex`.  Its seven constructors have one
   checked `RealRaw.Equiv` witness per distinct bridge: Archimedean geometry,
   arctangent versus alternating series, finite definite integration, the
-  supplied finite integration-by-parts formula, compactified improper
-  integration, and the nontrivial reciprocal-quartic kernel.  The theorem
+  supplied finite integration-by-parts formula, its finite square-substitution
+  companion, compactified improper integration, and the nontrivial
+  reciprocal-quartic kernel.  The theorem
   `PiCoverageBridge.equivalent` derives each witness from
   the certified presentation registry.  This is a coverage suite, not a
   completion percentage: multiple implementations can share a bridge, and a
@@ -1171,7 +1180,10 @@ students actually compute.
   count.  The reciprocal-log triangle formula is instead the primary
   `pi.integrationByParts` view and the sixth finite-calculus bridge.  It is
   not a substitute for the pending general arctangent--logarithm effective-FTC
-  bridge or canonical-logarithm transport.
+  bridge or canonical-logarithm transport.  The primary
+  `pi.squareSubstitution` view is the seventh bridge: it preserves the
+  square-pullback integral and verifies its finite substitution transport to
+  the reciprocal-log view.
   The original direct perimeter is a square-root-enclosure diagnostic;
   arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel and Brouncker are advanced-analysis
@@ -1275,8 +1287,11 @@ students actually compute.
   `Real.Representation`s, stored directly in `piCertified.alternatives`; they
   are not additional calculus-coverage rows.  The literal reciprocal-log
   triangle formula is the primary `PiProofs.pi.integrationByParts` view and
-  does count as the supplied finite bridge; the general
-  arctangent--logarithm integration-by-parts theorem remains open.
+  does count as the supplied finite bridge.  The distinct
+  `PiProofs.pi.squareSubstitution` view likewise counts because it exercises
+  the finite `t = x*x` pullback certificate; the general
+  arctangent--logarithm integration-by-parts and substitution theorems remain
+  open.
   The stabilization remains a reusable interval-normalization bridge, not a
   substitute for the direct `piCircumference` validity proof: the original
   algorithm still lacks the one-step refinement certificate, so the canonical

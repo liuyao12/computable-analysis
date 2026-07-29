@@ -1319,6 +1319,11 @@ schedules.
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_compute_width_le}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegralRate}
 \lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegralRate}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.pi.squareSubstitution}
 \uses{thm:integration-by-parts-certificate,thm:coordinate-arctangent-two-stage-ftc,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
 Apply the preceding certificate on the single positive piece \([0,1]\) with
 \(U(x)=x\) and \(V(x)=\arctan(x)\).  The checked sector-area derivative
@@ -1384,6 +1389,19 @@ from the triangle and reciprocal-integral boxes.  After the canonical exp/log
 agreement transports \(\log_{\mathrm{rec}}2\) to the canonical \(\log2\),
 the same formula will have the textbook logarithm; a reusable piecewise
 integration-by-parts theorem remains a separate generalization.
+
+There is also a distinct supplied substitution corollary, with the
+pullback retained rather than normalized away:
+\[
+ \pi_{\mathrm{area}}\Equiv
+ 4\arctanintegraltriangle+
+  2\int_0^1\frac{2x}{1+x^2}\,\dd x.
+\]
+The finite \(t=x^2\) mesh comparison proves this raw evaluator equivalent to
+the reciprocal-log formula above, and Lean exposes it as
+\code{PiProofs.pi.squareSubstitution}.  Its direct runtime has
+\(w_n\le56/2^n\).  This uses a concrete, fully checked substitution
+certificate; the general substitution theorem remains a later calculus gate.
 \end{corollary}
 
 \section{Nondecreasing integrands and piecewise monotone integrals}

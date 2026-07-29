@@ -816,11 +816,11 @@ theorem arctanKernelTriangleRaw_compute_width_le (stage : Nat) :
   rw [show arctanKernelTriangleCandidate.compute stage =
       arctanKernelTriangleCandidateCompute stage by rfl,
     arctanKernelTriangleCandidateCompute_width] at hwidth
-  unfold arctanKernelTriangleStabilizationRadius at hwidth
   calc
     (arctanKernelTriangleRaw.compute stage).width <=
         0 + 2 * (6 * (1 / (((2 ^ stage : Nat) : Rat)))) := by
-          simpa [arctanKernelTriangleRaw] using hwidth
+          simpa [arctanKernelTriangleRaw,
+            arctanKernelTriangleStabilizationRadius] using hwidth
     _ = 12 * (1 / (((2 ^ stage : Nat) : Rat))) := by
           grind [Rat.mul_assoc, Rat.mul_comm]
 
@@ -2646,7 +2646,7 @@ theorem piTriangleLogReciprocalIntegral_compute_width_le (stage : Nat) :
         2 * (2 * (1 / (((2 ^ stage : Nat) : Rat)))) <=
       4 * (12 * (1 / (((2 ^ stage : Nat) : Rat)))) +
         2 * (2 * (1 / (((2 ^ stage : Nat) : Rat)))) :=
-      Rat.add_le_add_right hfourTriangle _
+      (Rat.add_le_add_right).2 hfourTriangle
     _ = 52 * (1 / (((2 ^ stage : Nat) : Rat))) := by
       grind [Rat.add_mul, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
 
@@ -2667,6 +2667,77 @@ def piTriangleLogReciprocalIntegralRate :
     (fun n _ => by
       rw [half_pow_eq_one_div_nat_two_pow]
       exact piTriangleLogReciprocalIntegral_compute_width_le n)
+
+/-- The supplied arctangent integration-by-parts formula with its logarithmic
+endpoint evaluated by the checked square substitution
+`t = x^2`.  In ordinary integral notation it is
+`4 * ∫₀¹ arctan(x) dx + 4 * ∫₀¹ x/(1+x^2) dx`.
+
+The second summand is deliberately retained as the square-pullback integral,
+rather than being normalized immediately to `log_rec(2)`: this raw evaluator
+is the pi-level regression case for the project's finite substitution
+certificate. -/
+def piTriangleLogSquareSubstitutionIntegral : RealRaw :=
+  (4 : Nat) * arctanIntegralTriangle +
+    (2 : Nat) * logTwoSquarePullbackIntegral
+
+theorem piTriangleLogSquareSubstitutionIntegral_valid :
+    piTriangleLogSquareSubstitutionIntegral.Valid := by
+  unfold piTriangleLogSquareSubstitutionIntegral
+  exact RealRaw.add_valid
+    (RealRaw.natScale_valid 4 arctanIntegralTriangle_valid)
+    (RealRaw.natScale_valid 2 logTwoSquarePullbackIntegral_valid)
+
+/-- Direct geometric runtime bound for the square-substitution pi evaluator.
+The triangle term contributes `48 / 2^n`; the square-pullback logarithm
+contributes `8 / 2^n`. -/
+theorem piTriangleLogSquareSubstitutionIntegral_compute_width_le (stage : Nat) :
+    (piTriangleLogSquareSubstitutionIntegral.compute stage).width <=
+      56 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+  have htriangle := arctanIntegralTriangle_compute_width_le stage
+  have hpull := logTwoSquarePullbackIntegral_width stage
+  have hfourTriangle :
+      (4 : Rat) * (arctanIntegralTriangle.compute stage).width <=
+        4 * (12 * (1 / (((2 ^ stage : Nat) : Rat)))) :=
+    Rat.mul_le_mul_of_nonneg_left htriangle (by native_decide)
+  unfold piTriangleLogSquareSubstitutionIntegral
+  rw [RealRaw.add_width, RealRaw.natScale_width,
+    RealRaw.natScale_width, hpull]
+  calc
+    (4 : Rat) * (arctanIntegralTriangle.compute stage).width +
+        2 * (4 * (1 / (((2 ^ stage : Nat) : Rat)))) <=
+      4 * (12 * (1 / (((2 ^ stage : Nat) : Rat)))) +
+        2 * (4 * (1 / (((2 ^ stage : Nat) : Rat)))) :=
+      (Rat.add_le_add_right).2 hfourTriangle
+    _ = 56 * (1 / (((2 ^ stage : Nat) : Rat))) := by
+      grind [Rat.add_mul, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Public geometric-rate metadata for the square-substitution pi evaluator. -/
+def piTriangleLogSquareSubstitutionIntegralRate :
+    RealRaw.Rate piTriangleLogSquareSubstitutionIntegral.compute :=
+  .geometric 0 56 ((1 : Rat) / 2) (by native_decide) (by native_decide)
+    (fun n _ => by
+      rw [half_pow_eq_one_div_nat_two_pow]
+      exact piTriangleLogSquareSubstitutionIntegral_compute_width_le n)
+
+/-- The square-substitution and direct reciprocal-integral forms of the
+supplied arctangent formula agree.  This is exactly the project's checked
+finite substitution theorem at the logarithmic endpoint. -/
+theorem piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral :
+    piTriangleLogSquareSubstitutionIntegral.Equiv
+      piTriangleLogReciprocalIntegral := by
+  have htriangle : ((4 : Nat) * arctanIntegralTriangle).Valid :=
+    RealRaw.natScale_valid 4 arctanIntegralTriangle_valid
+  have hpull : ((2 : Nat) * logTwoSquarePullbackIntegral).Valid :=
+    RealRaw.natScale_valid 2 logTwoSquarePullbackIntegral_valid
+  have hreciprocal : ((2 : Nat) * logTwoReciprocalIntegral).Valid :=
+    RealRaw.natScale_valid 2 logTwoReciprocalIntegral_valid
+  unfold piTriangleLogSquareSubstitutionIntegral
+    piTriangleLogReciprocalIntegral
+  exact RealRaw.add_equiv htriangle htriangle hpull hreciprocal
+    (RealRaw.equiv_refl ((4 : Nat) * arctanIntegralTriangle) htriangle)
+    (RealRaw.natScale_equiv 2
+      logTwoSquarePullbackIntegral_equiv_reciprocalIntegral)
 
 /-- The reciprocal-integral and alternating-series forms of the supplied
 arctangent integration-by-parts formula agree.  The triangle integral is
@@ -2716,6 +2787,20 @@ theorem piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one :
         (x := (1 : Rat)) (by native_decide) (by native_decide)))
     piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral
     IntegralIdentities.four_coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_four_arctanGeom_one
+
+/-- The square-substitution form reaches the same geometric arctangent
+endpoint as the direct reciprocal-log form. -/
+theorem piTriangleLogSquareSubstitutionIntegral_equiv_four_arctanGeom_one :
+    piTriangleLogSquareSubstitutionIntegral.Equiv
+      ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw) := by
+  exact RealRaw.equiv_trans
+    piTriangleLogSquareSubstitutionIntegral_valid
+    piTriangleLogReciprocalIntegral_valid
+    (RealRaw.natScale_valid 4
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide)))
+    piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral
+    piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one
 
 end Logarithm
 

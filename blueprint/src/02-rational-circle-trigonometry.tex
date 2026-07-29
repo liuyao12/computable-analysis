@@ -755,6 +755,7 @@ outer tangent segments.
 \lean{ComputableAnalysis.PiProofs.pi.circumferenceReboxed}
 \lean{ComputableAnalysis.PiProofs.pi.machin}
 \lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
+\lean{ComputableAnalysis.PiProofs.pi.squareSubstitution}
 \lean{ComputableAnalysis.PiProofs.pi.integrationByPartsMesh}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceCurvatureFan_valid}
@@ -821,11 +822,17 @@ In contrast, the literal reciprocal-log unit formula is the primary
 \code{pi.integrationByParts} presentation and the distinct finite
 integration-by-parts coverage bridge.  It is narrower than the still-open
 general arctangent--logarithm theorem.
+The related \code{pi.squareSubstitution} presentation is a second distinct
+coverage bridge: it retains the \(t=x^2\) pullback integral and agrees with
+the reciprocal-log formula by a finite mesh correction.  Thus it tests the
+project's checked substitution capability, rather than merely duplicating a
+series or quadrature implementation.
 For use at the abstract-real layer, the certified handle is also exposed as
 \code{PiProofs.pi}: \code{pi.circleArea.raw}, \code{pi.machin.raw}, and the
 supplementary \code{pi.curvatureFan.raw} and
 \code{pi.integrationByPartsMesh.raw}, and the primary
-\code{pi.integrationByParts.raw}, for example, are named raw computations
+\code{pi.integrationByParts.raw} and \code{pi.squareSubstitution.raw}, for
+example, are named raw computations
 equipped with agreement proofs to the one certified pi handle.
 The circumference names make the provenance explicit:
 \code{pi.circumference} (also \code{pi.circumferenceFan}) is the direct

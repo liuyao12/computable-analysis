@@ -562,11 +562,17 @@ This is a specialized, completely finite change-of-variables theorem for
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegralRate}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegralRate}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogSeries_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pi.triangleLogSeries}
 \lean{ComputableAnalysis.PiProofs.pi.triangleLogReciprocalIntegral}
 \lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
+\lean{ComputableAnalysis.PiProofs.pi.squareSubstitution}
 \uses{thm:log-two-square-pullback-integral}
 \leanok
 Put
@@ -651,6 +657,21 @@ pi and its literal runtime satisfies \(w_n\le52/2^n\), via
 \code{Logarithm.piTriangleLogReciprocalIntegralRate}.  This finite bridge does
 not establish a general function-level integration-by-parts theorem or
 transport the logarithm to the canonical inverse-exponential presentation.
+
+Keeping the endpoint in its square-pullback form adds a distinct checked
+substitution bridge:
+\[
+ P_{\triangle,x^2}
+ =4\arctanintegraltriangle+
+   2\int_0^1\frac{2x}{1+x^2}\,\dd x
+ =4\arctanintegraltriangle+4K.
+\]
+Lean exposes this as \code{pi.squareSubstitution}.  The theorem
+\code{piTriangleLogSquareSubstitutionIntegral\_equiv\_piTriangleLogReciprocalIntegral}
+is precisely the finite \(t=x^2\) transport to the preceding reciprocal-log
+formula; the independent raw runtime satisfies \(w_n\le56/2^n\).  It is a
+concrete substitution regression, not yet a general change-of-variables
+theorem.
 \end{theorem}
 
 \begin{theorem}[Rational two-strip decomposition]

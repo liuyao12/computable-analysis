@@ -301,7 +301,7 @@ blueprint before relying on one.
 ## Pi as a regression suite, not a target namespace
 
 `PiProofs.PiCoverageBridge` is deliberately a compact list of distinct
-end-to-end capability tests.  It currently has six checked bridges; it is
+end-to-end capability tests.  It currently has seven checked bridges; it is
 not a percentage or a catalogue of all certified pi computations.  Consume a
 named presentation from the abstract `pi : Real` handle when you need a
 specific implementation:
@@ -315,6 +315,7 @@ open ComputableAnalysis
 #check pi.circumference
 #check pi.arctanGeom
 #check pi.integrationByParts
+#check pi.squareSubstitution
 #check pi.leibniz
 #check pi.machin
 #check pi.cauchy
@@ -335,6 +336,11 @@ downstream result.  `pi.integrationByParts` is the checked supplied-unit
 formula using the literal reciprocal-integral logarithm, with runtime bound
 `52 / 2^n`; it is a finite calculus bridge, not the still-open general
 integration-by-parts theorem or canonical-exp/log transport.
+`pi.squareSubstitution` is a separate checked bridge with runtime bound
+`56 / 2^n`: its raw formula retains the pullback integral
+`2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
+`pi.integrationByParts` is the finite `t = x*x` substitution certificate.
+It is likewise not a general substitution theorem.
 
 ## Linear systems and Peano--Baker
 
