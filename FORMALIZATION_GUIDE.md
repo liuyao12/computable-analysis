@@ -438,8 +438,11 @@ now exact: `RationalCircle.Stage.midpoint_cross_refinement_gap_cleared`
 states that the common positive denominator times the gain is `h^3`, and
 `RationalCircle.Stage.midpoint_cross_refinement_gap_ge_cube_eighth` derives
 the usable bound `coarseCross + h^3 / 8 <= leftCross + rightCross` on
-`[0,1]`.  Combine this with the two fine secant gains and the explicit dyadic
-width budget; do not replace it by an appeal to exact chord lengths.
+`[0,1]`.  Its finite-stage transport,
+`PiProofs.adjacentChordCross_refinesByDoubling_with_cube_eighth`, supplies
+this cross-product gain directly for `k < stage`.  Combine it with the two fine secant
+gains and the explicit dyadic width budget; do not replace it by an appeal to
+exact chord lengths.
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,
