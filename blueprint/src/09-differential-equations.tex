@@ -523,9 +523,10 @@ comparisons: the representations are forced to be the same solution.
 The three independent inputs to this conclusion should remain visible in the
 formalization plan:
 \begin{enumerate}
-  \item The power-series evaluator needs a termwise derivative certificate
-  with a factorial-tail schedule, and its value at zero must be enclosed by
-  the constant raw real \(1\).
+  \item The power-series evaluator now has its exact zero-input certificate:
+  \code{ExpProofs.expPowerSeries_zero_compute_eq} identifies every stage
+  with the constant raw real \(1\).  It still needs the termwise derivative
+  certificate with a factorial-tail schedule.
   \item The repeated-multiplication representative begins with a positive
   base and literal natural powers.  Its extension to rational exponents needs
   certified positive roots, the additive power law, and the rational
