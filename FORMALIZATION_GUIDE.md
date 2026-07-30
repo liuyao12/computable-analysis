@@ -474,6 +474,18 @@ geometry portion of `AdjacentChordCurvatureMarginCoversFineWidths` is
 discharged without selecting a square root.  The still-open part is precisely
 the separate, explicit bisection-width budget; this theorem does not conceal
 that numerical enclosure loss.
+
+Use the stage-level transport
+`RationalCircle.Stage.midpoint_curvature_certificate_refines_squared_chord_of_refinement`
+when a caller has a `Stage.RefinesByDoubling` witness.  It internally uses the
+checked midpoint identities
+`parameter_insertedIndex_of_refinement` and
+`samplePoint_insertedIndex_of_refinement`, so the inserted odd fine index is
+identified with the exact rational midpoint of the coarse cell.  This is the
+preferred interface for any later direct-perimeter margin proof; it keeps the
+local algebra in `RationalCircle.lean` rather than copying it into
+`PiProofs.lean`.
+
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,

@@ -22,3 +22,22 @@ leanblueprint checkdecls
 The source files are in `blueprint/src`.  The two entry points are
 `blueprint/src/print.tex` and `blueprint/src/web.tex`; both include
 `blueprint/src/content.tex`, which then includes the numbered chapter files.
+
+## Animated finite stages
+
+The web blueprint may use a looping GIF when a picture can show the actual
+finite state of a certified algorithm more clearly than a paragraph.  Print
+uses the corresponding final PNG frame.  An animation is evidence only for
+the finite computation it depicts; its theorem status still comes from the
+linked Lean declarations.
+
+| Animation | Exact finite state shown | Source |
+| --- | --- | --- |
+| Rational-circle subdivision | The `Stage` points for (1,2,4,8) equal parameter cells, their projections, and the inscribed/circumscribed polygon bounds | `scripts/generate_rational_circle_animation.py` |
+| Arctangent rectangle enclosure | The lower/right and upper/left endpoint rectangles for (1/(1+t^2)) on the midpoint partitions with (1,2,4,8) cells | `scripts/generate_arctan_rectangle_animation.py` |
+
+Good next candidates are the rational bisection trace for a monotone inverse,
+an alternating-series remainder bracket, a piecewise-monotone integral split,
+and finite Peano--Baker partial sums.  Add one only alongside its precise
+finite evaluator and its checked bounds, never as an illustration of an
+unimplemented completed-real argument.
