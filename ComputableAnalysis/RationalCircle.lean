@@ -571,6 +571,22 @@ theorem midpoint_cross_sum_formula (u h : Rat) :
     _ = N := hN
     _ = D * (N / D) := hright.symm
 
+/-- Exact square defect between the coarse chord numerator and the sum of the
+two midpoint cross-product numerators.  This is the algebraic term paid for
+by the curvature corrections. -/
+theorem midpoint_cross_square_defect_formula (u h : Rat) :
+    let m := u + h / 2
+    let d0 := 1 + u * u
+    let dm := 1 + m * m
+    let dv := 1 + (u + h) * (u + h)
+    let K := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+    4 * d0 * dm * dm * dv - K * K = h * h * h * h * m * m := by
+  dsimp
+  rw [Rat.div_def]
+  have htwo : (2 : Rat) * 2⁻¹ = 1 := by native_decide
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 theorem point_cross_nonneg_of_nonneg_of_le
     {u v : Rat} (hu : 0 <= u) (hv : 0 <= v) (huv : u <= v) :
     0 <= cross (point u) (point v) := by
@@ -688,6 +704,94 @@ private theorem rat_sq_nonneg (x : Rat) : 0 <= sq x := by
     have hsq : 0 <= (-x) * (-x) := Rat.mul_nonneg hneg hneg
     grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
 
+/-- The square of a rational quotient, followed by the curvature factor
+`1/4`, in a denominator-cleared form. -/
+theorem sq_div_four_formula (x d : Rat) :
+    sq (x / d) / 4 = (x * x) / (4 * d * d) := by
+  unfold sq
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The curvature correction for a midpoint cell after inserting its exact
+dot-deficit denominator.  This is a generic rational identity, independent
+of any circle geometry. -/
+theorem midpoint_correction_term_formula (h a b : Rat) :
+    sq ((h * h) / (2 * a * b)) / 4 =
+      (h * h * h * h) / (16 * a * a * b * b) := by
+  rw [sq_div_four_formula]
+  rw [Rat.div_def, Rat.div_def]
+  simp only [Rat.inv_mul_rev]
+  have hscalar : (2 : Rat)⁻¹ * 2⁻¹ * 4⁻¹ = 16⁻¹ := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- Common-denominator addition for the two midpoint curvature corrections.
+The positivity hypotheses are exactly those supplied by the rational-circle
+chart denominators. -/
+theorem midpoint_correction_sum_algebra
+    {H a b c : Rat} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) :
+    H / (16 * a * a * b * b) + H / (16 * b * b * c * c) =
+      (H * (a * a + c * c)) / (16 * a * a * b * b * c * c) := by
+  let A : Rat := 16 * a * a * b * b
+  let B : Rat := 16 * b * b * c * c
+  let D : Rat := 16 * a * a * b * b * c * c
+  change H / A + H / B = H * (a * a + c * c) / D
+  have hane : a ≠ 0 := Rat.ne_of_gt ha
+  have hbne : b ≠ 0 := Rat.ne_of_gt hb
+  have hcne : c ≠ 0 := Rat.ne_of_gt hc
+  have hDpos : 0 < D := by
+    dsimp [D]
+    have hsixteen : (0 : Rat) < 16 := by native_decide
+    exact Rat.mul_pos
+      (Rat.mul_pos
+        (Rat.mul_pos
+          (Rat.mul_pos
+            (Rat.mul_pos
+              (Rat.mul_pos hsixteen ha)
+              ha)
+            hb)
+          hb)
+        hc)
+      hc
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  have clear_left (x y z : Rat) (hy : y ≠ 0)
+      (hxy : y * x = y * z) : x = z := by
+    calc
+      x = y⁻¹ * (y * x) := by
+        have hcancel : y⁻¹ * y = 1 := Rat.inv_mul_cancel y hy
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ = y⁻¹ * (y * z) := by rw [hxy]
+      _ = z := by
+        have hcancel : y⁻¹ * y = 1 := Rat.inv_mul_cancel y hy
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hleft : D * (H / A) = H * c * c := by
+    dsimp [D, A]
+    rw [Rat.div_def]
+    simp only [Rat.inv_mul_rev]
+    have hsixteen : (16 : Rat) * 16⁻¹ = 1 := by native_decide
+    have hacancel : a * a⁻¹ = 1 := Rat.mul_inv_cancel a hane
+    have hbcancel : b * b⁻¹ = 1 := Rat.mul_inv_cancel b hbne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hright : D * (H / B) = H * a * a := by
+    dsimp [D, B]
+    rw [Rat.div_def]
+    simp only [Rat.inv_mul_rev]
+    have hsixteen : (16 : Rat) * 16⁻¹ = 1 := by native_decide
+    have hbcancel : b * b⁻¹ = 1 := Rat.mul_inv_cancel b hbne
+    have hccancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hfinal : D * (H * (a * a + c * c) / D) =
+      H * (a * a + c * c) := by
+    rw [Rat.div_def]
+    have hcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hDne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  apply clear_left _ D _ hDne
+  calc
+    D * (H / A + H / B) = D * (H / A) + D * (H / B) := Rat.mul_add _ _ _
+    _ = H * c * c + H * a * a := by rw [hleft, hright]
+    _ = H * (a * a + c * c) := by
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+    _ = D * (H * (a * a + c * c) / D) := hfinal.symm
+
 theorem dot_self_eq_normSq (p : PiCirclePoint) :
     dot p p = normSq p := by
   unfold dot normSq
@@ -734,6 +838,79 @@ theorem one_sub_point_dot_formula (u v : Rat) :
     Rat.ne_of_gt (Rat.mul_pos hdupos hdvpos)
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-- Exact dot-deficit formulas for the two cells created by a midpoint split.
+They turn the quadratic curvature correction into common-denominator rational
+algebra, with no choice of a square root. -/
+theorem midpoint_one_sub_point_dot_formulas (u h : Rat) :
+    let m := u + h / 2
+    let d0 := 1 + u * u
+    let dm := 1 + m * m
+    let dv := 1 + (u + h) * (u + h)
+    1 - dot (point u) (point m) = (h * h) / (2 * d0 * dm) /\
+      1 - dot (point m) (point (u + h)) = (h * h) / (2 * dm * dv) := by
+  dsimp
+  let m : Rat := u + h / 2
+  let d0 : Rat := 1 + u * u
+  let dm : Rat := 1 + m * m
+  let dv : Rat := 1 + (u + h) * (u + h)
+  have hleftStep : m - u = h / 2 := by
+    dsimp [m]
+    grind [Rat.sub_eq_add_neg]
+  have hrightStep : (u + h) - m = h / 2 := by
+    dsimp [m]
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · rw [one_sub_point_dot_formula]
+    change (2 * (m - u) * (m - u)) / (d0 * dm) =
+      (h * h) / (2 * d0 * dm)
+    rw [hleftStep]
+    rw [Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+    have htwo : (2 : Rat) * 2⁻¹ = 1 := by native_decide
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  · rw [one_sub_point_dot_formula]
+    change (2 * ((u + h) - m) * ((u + h) - m)) / (dm * dv) =
+      (h * h) / (2 * dm * dv)
+    rw [hrightStep]
+    rw [Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+    have htwo : (2 : Rat) * 2⁻¹ = 1 := by native_decide
+    grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The two quadratic midpoint corrections have the same exact denominator
+structure as the curvature polynomial bound. -/
+theorem midpoint_dot_deficit_correction_sum_formula (u h : Rat) :
+    let m := u + h / 2
+    let d0 := 1 + u * u
+    let dm := 1 + m * m
+    let dv := 1 + (u + h) * (u + h)
+    sq (1 - dot (point u) (point m)) / 4 +
+        sq (1 - dot (point m) (point (u + h))) / 4 =
+      (h * h * h * h * (d0 * d0 + dv * dv)) /
+        (16 * d0 * d0 * dm * dm * dv * dv) := by
+  dsimp
+  let m : Rat := u + h / 2
+  let d0 : Rat := 1 + u * u
+  let dm : Rat := 1 + m * m
+  let dv : Rat := 1 + (u + h) * (u + h)
+  have hd0pos : 0 < d0 := by
+    dsimp [d0]
+    exact one_add_square_pos u
+  have hdmpos : 0 < dm := by
+    dsimp [dm]
+    exact one_add_square_pos m
+  have hdvpos : 0 < dv := by
+    dsimp [dv]
+    exact one_add_square_pos (u + h)
+  have hdeficits := midpoint_one_sub_point_dot_formulas u h
+  change
+    sq (1 - dot (point u) (point m)) / 4 +
+        sq (1 - dot (point m) (point (u + h))) / 4 =
+      (h * h * h * h * (d0 * d0 + dv * dv)) /
+        (16 * d0 * d0 * dm * dm * dv * dv)
+  rw [hdeficits.1, hdeficits.2]
+  rw [midpoint_correction_term_formula,
+    midpoint_correction_term_formula]
+  exact midpoint_correction_sum_algebra hd0pos hdmpos hdvpos
 
 theorem one_sub_point_dot_nonneg (u v : Rat) :
     0 <= 1 - dot (point u) (point v) := by

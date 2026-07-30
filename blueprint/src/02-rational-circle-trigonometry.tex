@@ -881,9 +881,15 @@ the two fine cross certificates as
 \[
   \frac{hK}{d_0d_md_v}.
 \]
-Thus the curvature polynomial and the rational formula for the dot deficit
-can be combined without choosing a square root.  This closes the common-
-denominator algebraic bridge toward the curvature-margin target; the separate
+Lean also gives the two midpoint dot deficits and the sum of their quadratic
+corrections in
+\code{RationalCircle.Stage.midpoint\_one\_sub\_point\_dot\_formulas} and
+\code{RationalCircle.Stage.midpoint\_dot\_deficit\_correction\_sum\_formula}.
+Finally,
+\code{RationalCircle.Stage.midpoint\_cross\_square\_defect\_formula}
+identifies the exact coarse cross-square numerator left to pay.  Thus the
+curvature polynomial and the rational dot-deficit formulas now isolate the
+entire geometric comparison without choosing a square root.  The separate
 finite bisection-width budget remains an explicit obligation.
 
 There is also a sharper direct cross-certificate identity.  In
