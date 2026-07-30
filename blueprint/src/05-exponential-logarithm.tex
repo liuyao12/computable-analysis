@@ -502,6 +502,28 @@ and \(\exp(x+y)=\exp(x)\exp(y)\) should be proved from uniqueness of the
 inverse and then transported between representations.
 \end{definition}
 
+\begin{theorem}[Canonical-logarithm endpoint transport]
+\label{thm:canonical-logarithm-pi-transport}
+\lean{ComputableAnalysis.PiProofs.CanonicalLogTwoCertificate}
+\lean{ComputableAnalysis.PiProofs.piFromCanonicalLogTwo}
+\lean{ComputableAnalysis.PiProofs.piFromCanonicalLogTwo_equiv_reciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.piFromCanonicalLogTwo_equiv_piCircleArea}
+\uses{def:logarithm-integral}
+Let \(L_2\) be a valid raw value produced by a canonical inverse-exponential
+logarithm at \(2\).  Its complete endpoint obligation is the checked
+certificate
+\[
+ L_2\Equiv\int_1^2\frac{dt}{t}.
+\]
+Lean then proves directly that
+\[
+ 4\int_0^1\arctan(x)\,\dd x+2L_2\Equiv\pi_{\mathrm{area}}.
+\]
+Thus the future canonical row has one analytic gap---the displayed
+logarithm-at-two equivalence---rather than a second unformalized
+integration-by-parts argument.
+\end{theorem}
+
 \begin{proposition}[Positive reciprocal continuity at two]
 \label{prop:one-over-x-one-two-continuity}
 \lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_intervalRegular}

@@ -577,6 +577,14 @@ integration-by-parts theorem or canonical-exp/log transport.
 `pi.integrationByParts` is the finite `t = x*x` substitution certificate.
 It is likewise not a general substitution theorem.
 
+The future canonical-logarithm π formula has one explicit entry point:
+`PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and
+a proof that it agrees with `Logarithm.logTwoReciprocalIntegral`; then
+`PiProofs.piFromCanonicalLogTwo_equiv_piCircleArea` proves the full
+integration-by-parts π equivalence. This deliberately does not create a
+certificate for the inverse-exponential logarithm—the remaining analytic
+work is precisely to construct that input certificate.
+
 For views deliberately outside `PiPresentation`—for example
 `pi.integrationByPartsMesh` and `pi.triangleLogSeries`—use
 `pi.representations_equiv source target`. It specializes the generic
