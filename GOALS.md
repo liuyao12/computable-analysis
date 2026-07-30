@@ -1246,16 +1246,16 @@ students actually compute.
   named checked presentations through the certified area representative.  It
   is a registry interoperability theorem, not an extra scoreboard witness.
   The generic `Real.Representation.equiv` compares any two certified views of
-  one abstract real; its pi specialization `PiProofs.pi.representations_equiv`
-  therefore also covers the supplementary curvature-fan, finite
-  integration-by-parts-mesh, and triangle-log-series views that intentionally
-  sit outside `PiPresentation`.
+one abstract real; its pi specialization `PiProofs.pi.representations_equiv`
+therefore also covers the supplementary finite integration-by-parts-mesh and
+triangle-log-series views that intentionally
+sit outside `PiPresentation`.
   `PiPresentation.integrationFamily` and the primary registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
-  regressions.  `piCertified.alternatives` also literally carries the checked
-  `pi.curvatureFan`, `pi.integrationByPartsMesh`, and
-  `pi.triangleLogSeries` raw evaluators; those remain outside the coverage
-  count.  The reciprocal-log triangle formula is instead the primary
+regressions.  `piCertified.alternatives` also literally carries the checked
+`pi.integrationByPartsMesh` and `pi.triangleLogSeries` raw evaluators; those
+remain outside the coverage
+count.  The reciprocal-log triangle formula is instead the primary
   `pi.integrationByParts` view and the sixth finite-calculus bridge.  It is
   not a substitute for the pending general arctangent--logarithm effective-FTC
   bridge or canonical-logarithm transport.  The primary
@@ -1380,11 +1380,10 @@ students actually compute.
   a checked alternative. `PiProofs.PiPresentation` gives those routes stable
   names, and `PiProofs.piCertifiedPresentation` retrieves a certified raw
   representative without depending on a list position. This turns the Pi
-  suite into an integration registry rather than a progress percentage. The
-  supplementary `PiProofs.pi.curvatureFan`,
-  `PiProofs.pi.integrationByPartsMesh`, and
-  `PiProofs.pi.triangleLogSeries` expose checked named
-  `Real.Representation`s, stored directly in `piCertified.alternatives`; they
+suite into an integration registry rather than a progress percentage. The
+supplementary `PiProofs.pi.integrationByPartsMesh` and
+`PiProofs.pi.triangleLogSeries` expose checked named
+`Real.Representation`s, stored directly in `piCertified.alternatives`; they
   are not additional calculus-coverage rows.  The literal reciprocal-log
   triangle formula is the primary `PiProofs.pi.integrationByParts` view and
   does count as the supplied finite bridge.  The distinct
@@ -1427,12 +1426,11 @@ students actually compute.
   `innerQuarterLength_lo_refinesByDoubling_of_adjacentChordLowerRefines`, and
   `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
   combines its all-stage form with the proved outer endpoint.  The original
-  direct circumference row remains uncounted until that local bisection
-  comparison is proved.  The distinct curvature-corrected fan now has a
-  self-contained finite outer bound, dyadic refinement, and same-stage
-  agreement with `piCircleArea`, and is exposed as the checked supplementary
-  representation `pi.curvatureFan`.  It remains outside the primary calculus
-  milestones.
+direct circumference row remains uncounted until that local bisection
+comparison is proved.  The distinct curvature-corrected fan now has a
+The independently certified cross-fan remains available as
+`pi.circumference`; it is the direct Archimedean presentation used by the
+geometry bridge, while the original chord path remains diagnostic.
 
 ### Archived pre-refactor notes (not current source)
 

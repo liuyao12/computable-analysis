@@ -491,6 +491,13 @@ The companion `dyadicStage_parameter_insertedIndex` and
 `dyadicStage_samplePoint_insertedIndex` lemmas expose the exact midpoint
 without any index arithmetic at a call site.
 
+Callers working in the original circumference vocabulary can instead use
+`PiProofs.adjacentCurvatureCertificates_refineSquaredChord`.  It is only a
+thin, checked translation of the generic theorem to `circleSamplePoint stage
+k` and its two `2 * stage` subcells.  In particular, it proves the geometric
+squared-chord comparison but does **not** subtract either bisection width and
+does not close `AdjacentChordCurvatureMarginCoversFineWidths`.
+
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,
@@ -525,7 +532,7 @@ feeds `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin`.
 `PiProofs.PiCoverageBridge` is deliberately a compact list of distinct
 end-to-end capability tests.  It currently has eight checked bridges; it is
 not a percentage or a catalogue of all certified pi computations.  Consume a
-named presentation from the abstract `pi : Real` handle when you need a
+named presentation from the abstract `pi.value : Real` handle when you need a
 specific implementation:
 
 ```lean
@@ -571,7 +578,7 @@ integration-by-parts theorem or canonical-exp/log transport.
 It is likewise not a general substitution theorem.
 
 For views deliberately outside `PiPresentation`—for example
-`pi.curvatureFan`, `pi.integrationByPartsMesh`, and `pi.triangleLogSeries`—use
+`pi.integrationByPartsMesh` and `pi.triangleLogSeries`—use
 `pi.representations_equiv source target`. It specializes the generic
 `Real.Representation.equiv`: two certified views of the same abstract `Real`
 have equivalent raw evaluators. This gives supplementary pi computations the
@@ -579,7 +586,7 @@ same pairwise API without treating implementation variants as new scorecard
 capabilities.
 
 ```lean
-example : pi.triangleLogSeries.raw.Equiv pi.curvatureFan.raw :=
+example : pi.triangleLogSeries.raw.Equiv pi.integrationByPartsMesh.raw :=
   pi.representations_equiv _ _
 ```
 `pi.symmetricCauchy` is the bounded formula assembled over `[-1,0,1]` by the

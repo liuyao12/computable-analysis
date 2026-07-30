@@ -487,8 +487,7 @@ still open.
 The useful output of the completed rows is now formalized as a registry rather
 than another percentage. `PiProofs.piCertified : Real` uses `piCircleArea` as
 its preferred evaluator and literally retains every currently certified raw
-route as an equivalent alternative, including the supplementary
-curvature-corrected fan. `PiProofs.PiPresentation` gives the primary routes
+route as an equivalent alternative. `PiProofs.PiPresentation` gives the primary routes
 stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
 `Real.Representation`. This includes the geometry, stabilized circumference,
 single Machin, Leibniz, Nilakantha, rectangle, supplied finite
@@ -500,9 +499,10 @@ views make the perimeter provenance readable: `PiProofs.pi.circumference`
 (also `PiProofs.pi.circumferenceFan`) is the direct cross-fan evaluator,
 whereas `PiProofs.pi.circumferenceStabilized` and
 `PiProofs.pi.circumferenceReboxed` are the two certified normalizations of
-the original chord path. Along with `PiProofs.pi.curvatureFan`,
-`PiProofs.pi.integrationByPartsMesh`, and `PiProofs.pi.triangleLogSeries`,
-these views do not create additional calculus-coverage rows.  In contrast,
+the original chord path.
+The supplementary views are `PiProofs.pi.integrationByPartsMesh` and
+`PiProofs.pi.triangleLogSeries`.
+They do not create additional calculus-coverage rows.  In contrast,
 `PiProofs.pi.integrationByParts` is the checked literal-reciprocal-log
 integration-by-parts coverage view; it remains narrower than the pending
 general arctangent--logarithm theorem.  The separate

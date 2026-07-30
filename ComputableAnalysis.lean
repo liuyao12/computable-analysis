@@ -12,6 +12,7 @@ import ComputableAnalysis.Calculus
 import ComputableAnalysis.ComplexInterval
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.ComplexPolynomial
+import ComputableAnalysis.CircumferenceBridge
 import ComputableAnalysis.Differential
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.Elementary
