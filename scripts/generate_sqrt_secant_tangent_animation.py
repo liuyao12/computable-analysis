@@ -21,9 +21,11 @@ GIF_PATH = ASSET_DIR / "sqrt-secant-tangent.gif"
 PNG_PATH = ASSET_DIR / "sqrt-secant-tangent.png"
 
 TARGET = Fraction(2)
-WIDTH, HEIGHT = 720, 500
-LEFT, RIGHT = 92, 650
-TOP, BASELINE = 52, 404
+WIDTH, HEIGHT = 430, 700
+# The data rectangle is 300 by 600 pixels for `[0, 9/4] × [0, 9/2]`.
+# Thus one unit on either coordinate axis occupies the same 400/3 pixels.
+LEFT, RIGHT = 70, 370
+TOP, BASELINE = 25, 625
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)
 AXIS = (100, 116, 139, 255)
@@ -68,11 +70,11 @@ def next_bracket(a: Fraction, b: Fraction) -> tuple[Fraction, Fraction]:
 
 
 def stages() -> list[tuple[Fraction, Fraction]]:
-    """Return the four displayed rational enclosure states."""
+    """Return two visibly distinct rational enclosure states."""
 
     a, b = Fraction(1), Fraction(2)
     result = []
-    for _ in range(4):
+    for _ in range(2):
         result.append((a, b))
         a, b = next_bracket(a, b)
     return result
@@ -133,7 +135,6 @@ def frame(a: Fraction, b: Fraction) -> Image.Image:
 
     draw.text((ax, BASELINE + 54), "a", font=SMALL, fill=SECANT, anchor="mm")
     draw.text((bx, BASELINE + 54), "b", font=SMALL, fill=TANGENT, anchor="mm")
-    draw.text((RIGHT + 8, BASELINE + 4), "x", font=LABEL, fill=INK, anchor="lm")
     return image
 
 
@@ -147,7 +148,7 @@ def main() -> None:
         format="GIF",
         save_all=True,
         append_images=frames[1:],
-        duration=[1450, 1250, 1250, 1800],
+        duration=[1500, 1900],
         loop=0,
         disposal=2,
         optimize=True,
