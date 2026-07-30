@@ -60,6 +60,7 @@ that two exponential representations agree also identifies their Euler bases.
 
 \begin{theorem}[Derivative characterizations of \(e\)]
 \label{thm:e-self-derivative-and-unit-slope}
+\lean{ComputableAnalysis.ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero}
 The required certificates are
 \[
  E'(x)=E(x),\quad E(0)=1,
@@ -68,8 +69,9 @@ The required certificates are
 \]
 The derivative interface is finite-difference based: its evaluator precision
 may depend on the rational step.  The initial-value field is checked below;
-the tail-aware self-derivative certificate and the uniqueness application are
-still open work.
+Lean already checks its degree-two Taylor prefix at zero, where the quotient
+is \(1+h/2\).  The tail-aware self-derivative certificate for the full series
+and the uniqueness application are still open work.
 \end{theorem}
 
 \begin{theorem}[Checked initial values and finite binomial bridge]

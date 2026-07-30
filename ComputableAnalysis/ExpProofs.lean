@@ -3408,6 +3408,67 @@ in addition to being stagewise equal to the rational constant one. -/
 theorem expPowerSeries_zero_valid : (expPowerSeries (0 : Rat)).Valid := by
   simpa [PowerSeriesValid] using expPowerSeries_valid (0 : Rat)
 
+/-- The exact degree-two Taylor prefix has forward derivative one at zero.
+
+This is a finite-difference certificate for the literal rational polynomial,
+not yet the analytic derivative certificate for the full series evaluator. -/
+def expTaylorQuadraticOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat expTaylorQuadratic 0 1
+
+def expTaylorQuadratic_forwardDerivativeAtZero :
+    HasForwardDerivativeAt expTaylorQuadraticOnUnit 0 RealRaw.one := by
+  refine
+    { x_mem := by
+        constructor <;> native_decide
+      derivative_valid := by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 1, hi := 1 })
+        exact RealRaw.ofRat_valid (1 : Rat)
+      stepPrecision := fun n => if n = 0 then 1 else n
+      evalPrecision := fun _h _n => 0
+      close := ?_ }
+  intro h n hmem hpos hsmall
+  have hprecision : h <= (precisionAtStage n).val := by
+    change h <= 1 / (((if n = 0 then 1 else n : Nat) : Rat)) at hsmall
+    by_cases hn : n = 0
+    · subst n
+      calc
+        h <= 1 / (1 : Rat) := by
+          simpa only [if_pos rfl] using hsmall
+        _ = (precisionAtStage 0).val := by native_decide
+    · simpa [precisionAtStage, hn] using hsmall
+  have hhalf_le_h : h / 2 <= h := by
+    have hscale := Rat.mul_le_mul_of_nonneg_right
+      (show (1 : Rat) / 2 <= 1 by native_decide) (Rat.le_of_lt hpos)
+    simpa [Rat.div_def, Rat.mul_comm] using hscale
+  have hhalf : h / 2 <= (precisionAtStage n).val :=
+    Rat.le_trans hhalf_le_h hprecision
+  have hgoal : intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        { lo := expTaylorQuadratic h, hi := expTaylorQuadratic h }
+        { lo := expTaylorQuadratic 0, hi := expTaylorQuadratic 0 } h)
+      { lo := 1, hi := 1 } n := by
+    rw [QInterval.differenceQuotient_singleton]
+    have hhne : h ≠ 0 := Rat.ne_of_gt hpos
+    have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hhne
+    have hquotient :
+        (expTaylorQuadratic h - expTaylorQuadratic 0) / h = 1 + h / 2 := by
+      unfold expTaylorQuadratic
+      rw [Rat.div_def]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+        Rat.mul_comm]
+    rw [hquotient]
+    unfold intervalNearAtPrecision QInterval.NearAt QInterval.width
+    have heps : 0 <= (precisionAtStage n).val :=
+      Rat.le_of_lt (precisionAtStage n).property
+    constructor
+    · exact (Rat.add_le_add_left).2 hhalf
+    constructor
+    · grind [Rat.sub_eq_add_neg]
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  simpa only [expTaylorQuadraticOnUnit, FunctionOnInterval.compute,
+    FunctionOnInterval.exactRat, Rat.zero_add, RealRaw.one,
+    RealRaw.ofRat_compute] using hgoal
+
 theorem ePowerSeries_valid_of_nested
     (hnested : EPowerSeriesNested)
     (hshrink : EPowerSeriesWidthsShrink) : EPowerSeriesValid := by
