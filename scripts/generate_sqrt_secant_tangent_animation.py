@@ -70,11 +70,11 @@ def next_bracket(a: Fraction, b: Fraction) -> tuple[Fraction, Fraction]:
 
 
 def stages() -> list[tuple[Fraction, Fraction]]:
-    """Return two visibly distinct rational enclosure states."""
+    """Return three exact rational enclosure states."""
 
     a, b = Fraction(1), Fraction(2)
     result = []
-    for _ in range(2):
+    for _ in range(3):
         result.append((a, b))
         a, b = next_bracket(a, b)
     return result
@@ -90,6 +90,15 @@ def frame(a: Fraction, b: Fraction) -> Image.Image:
     a_next, b_next = next_bracket(a, b)
     image = Image.new("RGBA", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(image)
+
+    # Half-unit rational grid cells are square because `x_screen` and
+    # `y_screen` use the same pixels-per-unit scale.
+    for half in range(1, 5):
+        x = x_screen(Fraction(half, 2))
+        draw.line((x, TOP, x, BASELINE), fill=GRID, width=1)
+    for half in range(1, 10):
+        y = y_screen(Fraction(half, 2))
+        draw.line((LEFT, y, RIGHT, y), fill=GRID, width=1)
 
     draw.line((LEFT - 24, BASELINE, RIGHT + 22, BASELINE), fill=AXIS, width=3)
     draw.line((LEFT, BASELINE + 18, LEFT, TOP - 10), fill=AXIS, width=3)
@@ -111,7 +120,6 @@ def frame(a: Fraction, b: Fraction) -> Image.Image:
     draw.line(points, fill=CURVE, width=4, joint="curve")
 
     target_y = y_screen(TARGET)
-    draw.line((LEFT, target_y, RIGHT, target_y), fill=GRID, width=2)
 
     ax, ay = x_screen(a), y_screen(a * a)
     bx, by = x_screen(b), y_screen(b * b)
@@ -133,8 +141,9 @@ def frame(a: Fraction, b: Fraction) -> Image.Image:
     draw.line((an_x, target_y, an_x, BASELINE - 17), fill=SECANT, width=2)
     draw.line((bn_x, target_y, bn_x, BASELINE - 17), fill=TANGENT, width=2)
 
-    draw.text((ax, BASELINE + 54), "a", font=SMALL, fill=SECANT, anchor="mm")
-    draw.text((bx, BASELINE + 54), "b", font=SMALL, fill=TANGENT, anchor="mm")
+    # Keep the labels distinct even once the rational endpoints are sub-pixel close.
+    draw.text((ax - 12, BASELINE + 54), "a", font=SMALL, fill=SECANT, anchor="rm")
+    draw.text((bx + 12, BASELINE + 54), "b", font=SMALL, fill=TANGENT, anchor="lm")
     return image
 
 
@@ -148,7 +157,7 @@ def main() -> None:
         format="GIF",
         save_all=True,
         append_images=frames[1:],
-        duration=[1500, 1900],
+        duration=[1500, 1250, 1900],
         loop=0,
         disposal=2,
         optimize=True,
