@@ -431,6 +431,8 @@ import ComputableAnalysis.CircumferenceBridge
 #check PiProofs.piCircumference_valid
 #check PiProofs.piCircumferenceDirect
 #check PiProofs.piCircumferenceDirect_equiv_piCircleArea
+#check PiProofs.pi.circumferenceDirect
+#check PiProofs.pi.circumferenceDirect_equiv_circleArea
 ```
 
 The proof reduces every stage to rational data.  It uses

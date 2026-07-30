@@ -490,7 +490,7 @@ the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants. The complementary named
 views make the perimeter provenance readable: `PiProofs.pi.circumference`
 (also `PiProofs.pi.circumferenceFan`) is the direct cross-fan evaluator,
-whereas `PiProofs.piCircumferenceDirect` is the certified original chord path,
+whereas `PiProofs.pi.circumferenceDirect` is the certified original chord path,
 and `PiProofs.pi.circumferenceStabilized` and
 `PiProofs.pi.circumferenceReboxed` are the two certified normalizations of
 the original chord path.

@@ -1292,7 +1292,9 @@ count.  The reciprocal-log triangle formula is instead the primary
   fourth-order secant--curvature budget for every later dyadic stage.
   `PiProofs.piCircumference_valid` then certifies the original evaluator,
   and `PiProofs.piCircumferenceDirect_equiv_piCircleArea` supplies its
-  finite Archimedean equivalence.  This is one geometry capability, not a new
+  finite Archimedean equivalence.  The named view
+  `PiProofs.pi.circumferenceDirect` makes this literal path evaluator
+  available through the abstract pi handle.  This is one geometry capability, not a new
   scoreboard row.
 
 

@@ -17979,8 +17979,9 @@ theorem representations_equiv
 def circleArea : Real.Representation value := presentation .area
 def circleAreaPolygon : Real.Representation value := presentation .areaPolygon
 /-- The default circumference view: the fully direct cross-fan evaluator.
-It is deliberately separate from the original, still diagnostic, chord-path
-raw algorithm `piCircumference`. -/
+It is deliberately separate from the original chord-path raw algorithm
+`piCircumference`; `CircumferenceBridge` certifies that direct view
+downstream. -/
 def circumference : Real.Representation value := presentation .circumferenceFan
 
 /-- Explicit name for the same default direct cross-fan circumference view.
