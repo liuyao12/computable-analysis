@@ -524,6 +524,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   aggregate `4/n` bound, and
   `logTwoSquarePullbackIntegral_equiv_reciprocalIntegral` proves the
   pullback integral equal to the existing `logTwoReciprocalIntegral`.
+  The new direct raw pi evaluator
+  `PiProofs.piTriangleLogSquareStieltjes` combines that stabilized
+  Stieltjes logarithm with the finite arctangent triangle.  Its validity and
+  equivalence to both the reciprocal-log formula and area pi are checked in
+  `PiStieltjesBridge.lean`; `pi.squareStieltjes` exposes it as a
+  supplementary algorithmic view, not another coverage row.
   The first arctangent--logarithm integration-by-parts strip is now a
   separate literal certified integral, not just a scaled notation:
   `arctanLogKernelIntegral` integrates `x/(1+x*x)` with Lipschitz constant
