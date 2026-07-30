@@ -157,95 +157,20 @@ additivity.
 
 \begin{theorem}[Finite geometric integration by parts]
 \label{thm:finite-geometric-integration-by-parts}
-\lean{ComputableAnalysis.leftStieltjesSum}
-\lean{ComputableAnalysis.rightStieltjesSum}
-\lean{ComputableAnalysis.quadraticVariationSum}
-\lean{ComputableAnalysis.productIncrement_decomposition}
 \lean{ComputableAnalysis.finiteIntegrationByParts}
 \lean{ComputableAnalysis.finiteIntegrationByParts_withVariation}
-\lean{ComputableAnalysis.endpointDifference_nonneg_of_step_nonnegative}
-\lean{ComputableAnalysis.quadraticVariationSum_nonneg_of_step_nonnegative}
-\lean{ComputableAnalysis.quadraticVariationSum_le_stepBound_mul_endpointDifference}
-\lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative}
-\lean{ComputableAnalysis.quadraticVariationSum_neg_neg}
-\lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonpositive}
-\lean{ComputableAnalysis.quadraticVariationSum_eq_nat_mul_of_constant_steps}
-\lean{ComputableAnalysis.unitMeshPath}
-\lean{ComputableAnalysis.unitMeshPath_zero}
-\lean{ComputableAnalysis.unitMeshPath_endpoint}
-\lean{ComputableAnalysis.unitMeshPath_quadraticVariation}
-\lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
-\lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference}
-\lean{ComputableAnalysis.mesh_refine_mul_right}
-\lean{ComputableAnalysis.dyadic_leftPoint_refines}
-\lean{ComputableAnalysis.dyadic_mesh_refines}
-\lean{ComputableAnalysis.RationalPartition.uniform}
-\lean{ComputableAnalysis.RationalPartition.uniform_refines_right}
-\lean{ComputableAnalysis.RationalPartition.uniform_refines_left}
-\lean{ComputableAnalysis.RationalPartition.Refines}
-\lean{ComputableAnalysis.RationalPartition.Refines.point_between_consecutive}
-\lean{ComputableAnalysis.RationalPartition.Refines.refl}
-\lean{ComputableAnalysis.RationalPartition.Refines.trans}
-\lean{ComputableAnalysis.RationalPartition.CommonRefinement}
-\lean{ComputableAnalysis.RationalPartition.uniformCommonRefinement}
-\lean{ComputableAnalysis.RationalPartition.insertPointValue}
-\lean{ComputableAnalysis.RationalPartition.locateInsertionCellAux}
-\lean{ComputableAnalysis.RationalPartition.locateInsertionCell}
-\lean{ComputableAnalysis.RationalPartition.locateInsertionCellAux_spec}
-\lean{ComputableAnalysis.RationalPartition.locateInsertionCell_spec}
-\lean{ComputableAnalysis.RationalPartition.insertPoint}
-\lean{ComputableAnalysis.RationalPartition.insertPoint_refines}
-\lean{ComputableAnalysis.RationalPartition.insertPointCommonRefinement}
-\lean{ComputableAnalysis.RationalPartition.insertLocatedPoint}
-\lean{ComputableAnalysis.RationalPartition.insertLocatedPoint_refines}
-\lean{ComputableAnalysis.RationalPartition.insertLocatedPointCommonRefinement}
-\lean{ComputableAnalysis.RationalPartition.InsertionChain}
-\lean{ComputableAnalysis.RationalPartition.InsertionChain.insertLocated}
-\lean{ComputableAnalysis.RationalPartition.insertionChainOfPointList}
-\lean{ComputableAnalysis.RationalPartition.ContainsPoint}
-\lean{ComputableAnalysis.RationalPartition.insertionChainOfPointList_contains}
-\lean{ComputableAnalysis.RationalPartition.firstOccurrence}
-\lean{ComputableAnalysis.RationalPartition.firstOccurrence_spec}
-\lean{ComputableAnalysis.RationalPartition.refinementIndex}
-\lean{ComputableAnalysis.RationalPartition.refinesOfContainsAllPoints}
-\lean{ComputableAnalysis.RationalPartition.breakpointList}
 \lean{ComputableAnalysis.RationalPartition.commonRefinementOfPartitions}
-\lean{ComputableAnalysis.RationalPartition.InsertionChain.refines}
-\lean{ComputableAnalysis.RationalPartition.InsertionChain.commonRefinement}
-\lean{ComputableAnalysis.RationalPartition.clampedPath}
-\lean{ComputableAnalysis.RationalPartition.MaxStepAtMost}
-\lean{ComputableAnalysis.RationalPartition.clampedPath_step_nonnegative}
-\lean{ComputableAnalysis.RationalPartition.clampedPath_step_le_of_maxStep}
-\lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_onPartition}
-\lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_withVariation_onPartition}
-\lean{ComputableAnalysis.RationalPartition.coordinateIntegrationByParts_onPartition_endpoint_bracket}
-\lean{ComputableAnalysis.RationalPartition.uniform_maxStepAtMost_mesh}
 \lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference}
-\lean{ComputableAnalysis.RationalPartition.uniform_clampedPath_quadraticVariation_le_mesh_mul_endpointDifference}
-\lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_endpointSquare}
-\lean{ComputableAnalysis.RealFunRaw.mul}
-\lean{ComputableAnalysis.RealFunRaw.mul_valid_of_nonneg_bounded}
-\uses{def:definite-integral-identity}
+\lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
 \leanok
-For rational sequences \((u_i,v_i)\), one partition cell has the exact
-rectangle decomposition
+For a rational partition and sampled paths \(u,v\), Lean checks
 \[
- u_{i+1}v_{i+1}-u_iv_i
- =u_i(v_{i+1}-v_i)+v_{i+1}(u_{i+1}-u_i).
+ \sum_i u_i\Delta v_i+\sum_i v_{i+1}\Delta u_i=u_nv_n-u_0v_0,
 \]
-Summing the cells gives the finite integration-by-parts identity
+and, with both sums at left endpoints,
 \[
-\sum_{i<n}u_i\Delta v_i+
-\sum_{i<n}v_{i+1}\Delta u_i
-=u_nv_n-u_0v_0.
-\]
-If both sums use left endpoints, Lean also records the
-exact corner-area correction
-\[
-\sum_{i<n}u_i\Delta v_i+
-\sum_{i<n}v_i\Delta u_i+
-\sum_{i<n}\Delta u_i\Delta v_i
-=u_nv_n-u_0v_0.
+ \sum_i u_i\Delta v_i+\sum_i v_i\Delta u_i+
+ \sum_i\Delta u_i\Delta v_i=u_nv_n-u_0v_0.
 \]
 \begin{figure}[!htbp]
 \centering
@@ -253,366 +178,43 @@ exact corner-area correction
 \caption{One rational product increment.}
 \label{fig:integration-by-parts-cell}
 \end{figure}
-The same identities are checked for every supplied \code{RationalPartition}.
-On an increasing piece each corner rectangle is nonnegative.  If
-\(\Delta u_i\leq\delta\) on the chosen common refinement, Lean proves the
-sharp finite estimate
-\[
-  \sum_{i<n}\Delta u_i\Delta v_i
-  \leq\delta\,(v_n-v_0).
-\]
-It also proves the coarser endpoint-variation bound
-\[
-  \sum_{i<n}\Delta u_i\Delta v_i
-  \leq (u_n-u_0)(v_n-v_0).
-\]
-Negating both paths preserves the corner sum, giving the corresponding bound
-for two decreasing pieces.  Thus the needed increasing/decreasing split is
-explicit finite rational data rather than a hidden global variation theorem.
-There is already one complete mesh-vanishing schedule: for the unit mesh
-\(u_i=v_i=i/n\), the corner sum is exactly \(1/n\).  Given a positive rational
-\(\varepsilon\), the fully explicit choice
-\(n=\varepsilon.\mathrm{den}+1\) makes that rational corner sum at most
-\(\varepsilon\).  This illustrates the intended limit discipline without
-asserting the general product theorem.
-The first common-refinement interface is now checked for uniform rational
-grids: the \(mn\)-piece grid contains the \(m\)-piece grid at indices
-\(i\mapsto in\), and contains the \(n\)-piece grid at indices
-\(j\mapsto jm\).  Its fine width is exactly the old \(m\)-mesh width divided
-by \(n\).  Lean packages the two index maps as a
-\code{CommonRefinement} certificate; refinement maps have checked identity
-and composition operations.  This is enough for the dyadic meshes used by the
-present rectangle algorithms: stage \(n+1\) keeps the old point \(k\) at
-\(2k\) and halves the mesh exactly.  Synchronizing arbitrary finite rational
-breakpoint lists now has a checked insertion primitive: any rational point in
-a specified cell gives a refined partition and an explicit embedding of every
-old breakpoint.  The next step no longer needs a caller to supply that cell:
-\code{locateInsertionCell} performs a bounded left-to-right scan of the
-finite rational partition and proves that the chosen cell encloses the point.
-Thus \code{insertionChainOfPointList} turns any finite in-range rational list
-into explicit scan-and-insert data.  A finite \code{InsertionChain} composes
-such insertions, and its endpoint is a certified refinement of the initial
-list.  Moreover, every fine point between embedded consecutive coarse points
-is proved to stay inside that coarse cell, so local bounds transfer cell by
-cell.  The general merge is now checked as well.  Lean forms
-\code{breakpointList} for the right partition, inserts that finite list into
-the left partition, and uses a second bounded \code{firstOccurrence} scan to
-recover the monotone embedding of every right breakpoint.  The resulting
-\code{commonRefinementOfPartitions} carries both index embeddings.  It is a
-deterministic finite merge of the supplied ordered data; it intentionally
-retains duplicate breakpoints rather than optimizing to a minimal union.  The
-clamped breakpoint path is nondecreasing, and its corner sum is bounded by the
-square of the endpoint variation.  The maximum-increment premise is now
-connected directly to partition data.  The finite predicate
-\code{MaxStepAtMost} records a nonnegative rational cell-width cap, and
-\code{clampedPath\_step\_le\_of\_maxStep} extends it to every increment of
-the total clamped path, including its zero tail.  Therefore
-\code{clampedPath\_quadraticVariation\_le\_stepBound\_mul\_endpointDifference}
-proves, for any nondecreasing second rational path, that the corner correction
-is at most that cap times its endpoint variation.  Uniform partitions
-instantiate the cap by their literal mesh.  On the unit mesh,
-\code{unitMeshPath\_quadraticVariation\_le\_one\_div\_mul\_endpointDifference}
-gives the checked finite estimate
-\[
- \sum_{i<n}\Delta_i x\,\Delta_i v
- \leq \frac1n\bigl(v_n-v_0\bigr)
-\]
-for every nondecreasing sampled path \(v\).  This is exactly the coordinate
-side of the corner estimate needed for \(x\arctan x\); the remaining
-arctangent monotonicity certificate is deliberately separate.
-The finite ingredients are now combined for every supplied certified
-partition.  If its maximum step is at most \(\delta\) and the sampled path
-\(v(P_i)\) is nondecreasing, Lean proves the literal endpoint bracket
-\[
- b v(b)-a v(a)-\delta\bigl(v(b)-v(a)\bigr)
- \leq
- \sum_i P_i\Delta v_i+\sum_i v_i\Delta P_i
- \leq b v(b)-a v(a).
-\]
-This is
-\code{coordinateIntegrationByParts\_onPartition\_endpoint\_bracket}.
-It is the finite, monotone-piece integration-by-parts theorem required by the
-\(x\arctan x\) route; calling either strip an integral still requires its
-separate effective-FTC certificate.
-For the later integral theorem, functions are supplied on explicit increasing
-or decreasing pieces and the two decompositions are replaced by a common
-rational refinement.  The corner correction is then bounded piece by piece
-by their signed variations.  This is a finite interval estimate, not an
-appeal to completeness or an implicit choice of a variation decomposition.
-The product representation needed to promote the finite identity is kept
-separate from the product rule.  On \([0,1]\), let \(X(x)=[x,x]\) be the
-exact coordinate box and let \(A(x,n)=[A_{\mathrm{lo}}(x,n),A_{\mathrm{hi}}(x,n)]\) be the
-rectangle evaluator for arctangent.  Both factors have certified endpoints
-in \([0,1]\).  Hence their literal interval product has the monotone
-corner form
-\[
-  P(x,n)=[xA_{\mathrm{lo}}(x,n),\,xA_{\mathrm{hi}}(x,n)].
-\]
-More generally, a pointwise product of two nonnegative rational-input
-functions is valid when each value carries a positive rational upper bound;
-its width is controlled by the two factor widths and those bounds.  The Lean
-development instantiates
-this construction as the concrete function \(P=xA\) on the unit interval,
-and proves that its evaluator reduces to the displayed two-corner box.
-This is an evaluator-level representation of \(x\arctan x\).  Its concrete
-two-sided product derivative is now checked below.  The remaining work is the
-effective FTC/logarithm endpoint certificates required before the resulting
-pi formula is claimed.
-
-The next certificate begins with an exact finite identity, rather than with
-an assumed product rule.  For rational \(h\ne0\), write
-\(D_hU(x)=(U(x+h)-U(x))/h\).  Then
-\[
-  D_h(UV)(x)=U(x)D_hV(x)+V(x+h)D_hU(x)
-\]
-and, equivalently,
-\[
-  D_h(UV)(x)=U(x)D_hV(x)+V(x)D_hU(x)
-    +h\,D_hU(x)D_hV(x).
-\]
-Thus a constructive product-derivative certificate must provide finite
-enclosures for the two difference quotients and point values, a rational
-continuity budget to replace \(V(x+h)\) by \(V(x)\), and a bound making the
-displayed \(h\)-remainder smaller than its allocated error.  The concrete
-positive product below now supplies these data for \(x\arctan x\) and
-positive steps; no general product rule is inferred from the evaluator alone.
-
-More specifically, if \(U'\) and \(V'\) are the proposed derivatives and
-\(h\ge0\), the finite identity gives the rational error allocation
-\[
-\begin{aligned}
- \left|D_h(UV)(x)-\bigl(U(x)V'(x)+V(x)U'(x)\bigr)\right|
- &\leq |U(x)|\,|D_hV(x)-V'(x)| \\
- &\quad+|V(x)|\,|D_hU(x)-U'(x)|
-   +h\,|D_hU(x)|\,|D_hV(x)|.
-\end{aligned}
-\]
-The three summands are respectively the two supplied derivative-error
-budgets and the corner-remainder budget.  This finite inequality is the
-formal hand-off from the product algebra to the interval-continuity
-certificate; it does not assert that any particular elementary function has
-already met those budgets.
-
-The interval derivative interface permits signed rational steps.  The same
-checked finite calculation therefore has the genuinely two-sided form with
-\(\lvert h\rvert\) in the final summand; the displayed \(h\ge0\) formula is
-its forward-mesh specialization.  This matters when a derivative certificate
-is stated using arbitrary nearby rational inputs rather than only a right
-difference quotient.
-
-For an inexact interval evaluator, the evaluation precision in that
-certificate must also be allowed to depend on the rational basepoint and
-nonzero step.  A stage selected only from the requested output precision has
-a fixed positive box width; after division by an arbitrarily smaller
-\(\lvert h\rvert\), it cannot certify a quotient error bound.  Thus the
-derivative interface uses a rational step-aware schedule
-\[
-  E(x,h,n)
-\]
-for the two function evaluations and the derivative evaluation at requested
-precision \(n\).  This is finite scheduling data, not a limit operation.
-Exact rational functions may take \(E\equiv0\), which is why the affine and
-quadratic regression examples retain their simple proofs.  The chart
-transport of \cref{prop:arctangent-tangent-chart-increment} is the first
-non-exact case that requires this dependence explicitly.
-
-The coordinate factor has now crossed the first of those obligations.  For
-an exact rational affine function \(L(x)=mx+c\), the singleton interval
-quotient is literally
-
-\[
- \frac{[L(x+h),L(x+h)]-[L(x),L(x)]}{h}=[m,m]
- \qquad(h\ne0).
-\]
-
-Thus the unit coordinate \(X(x)=x\) has a checked interval-valued derivative
-certificate \(X'=1\), not merely an informal differentiation rule.  Together
-with the checked arctangent derivative, this is the first component certificate
-used by the concrete forward product rule below.  A reusable two-sided product
-closure remains a later theorem.
-
-There is also a first non-affine regression case for the interval definition:
-\[
- D_h(x^2)=2x+h.
-\]
-At precision \(n\), the certificate asks for
-\(\lvert h\rvert\) no larger than the rational stage tolerance itself.  The
-two singleton quotient and derivative boxes are then near at that precision.
-This verifies a real error budget in the definition, rather than only the
-zero-error affine case, while still using only rational arithmetic.
+On a monotone piece, the corner rectangles have their signed endpoint
+variation bound.  A certified common refinement and an explicit mesh schedule
+make their total below the requested rational error.  This is the finite core
+used by the function-level certificate below; it never appeals to a general
+variation or integration theorem.
 \end{theorem}
 
-\begin{theorem}[Forward product rule for the rectangle arctangent]
+\begin{theorem}[Product rule for the rectangle arctangent]
 \label{thm:coordinate-arctangent-forward-product-rule}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw_valid}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw_compute}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt}
-\uses{prop:arctangent-tangent-chart-quotient}
 \leanok
-Let \(P=xA\) be the positive interval product on \([0,1]\), where \(A\)
-is the rectangle arctangent.  Lean now proves, at every rational
-\(0\le x\le1\), the forward derivative certificate
-\[
-  P'_+(x)=A(x)+\frac{x}{1+x^2}.
-\]
-The right-hand side is itself a raw interval evaluator: at stage \(N\) it is
-the rectangle box for \(A(x)\) shifted by the exact rational value
-\(x/(1+x^2)\).
-
-The proof uses no unproved product rule.  For a positive step \(h\), put
-\(Q=D_hA(x)\).  At the same evaluation stage the literal product quotient
-has the exact endpoint identity
-\[
- D_hP(x)=
- \bigl[A_{\mathrm{hi}}(x)+(x+h)Q_{\mathrm{lo}},\,
-       A_{\mathrm{lo}}(x)+(x+h)Q_{\mathrm{hi}}\bigr].
-\]
-For requested precision \(n\), the product certificate requires
-\(h\le1/(72(n+1))\), calls the arctangent derivative at the finer precision
-\(m=8(n+1)\), and uses its step-aware rectangle stage.  The checked bounds
-\[
-  \varepsilon_m\le\varepsilon_n/8,
-  \qquad 2h\le\varepsilon_n/4,
-  \qquad 0<\frac1{1+x^2}\le1
-\]
-bound the two displayed endpoint errors and both interval widths by
-\(\varepsilon_n\).  In particular, this is an end-to-end derivative theorem
-for the actual inexact product evaluator, not merely the algebraic identity
-for exact functions.
-
-The next theorem supplies the negative-step reversal and derivative-box
-transport.  The effective FTC comparison remains a separate gate for
-integration by parts.
+For \(P(x)=xA(x)\) on \([0,1]\), the forward finite-difference certificate
+has candidate derivative \(A(x)+x/(1+x^2)\).
 \end{theorem}
 
 \begin{theorem}[Two-sided product rule for the rectangle arctangent]
 \label{thm:coordinate-arctangent-product-rule}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nonneg_bounded}
-\lean{ComputableAnalysis.IntegralIdentities.coordinate_integralKernel_nondecreasing_on_unit}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
-\uses{thm:coordinate-arctangent-forward-product-rule,prop:arctangent-tangent-chart-quotient}
+\uses{thm:coordinate-arctangent-forward-product-rule}
 \leanok
-Lean now proves the full interval derivative certificate on \([0,1]\):
-\[
-  \frac{\dd}{\dd x}\bigl(xA(x)\bigr)=A(x)+\frac{x}{1+x^2}.
-\]
-For a negative rational step \(h\), write \(k=-h>0\) and reverse the
-quotient based at \(x+h\).  The forward product certificate supplies its
-finite box there.  A second, finer arctangent quotient controls the movement
-of the rectangle box, while the rational Lipschitz estimate
-\[
-  \left|\frac1{1+y^2}-\frac1{1+x^2}\right|\le2|y-x|
-\]
-transports the exact \(x/(1+x^2)\) summand.  The checked step budget is
-\( |h|\le1/(648(n+1)) \); it leaves room for all box widths and transport
-errors at requested precision \(n\).  This is a concrete product theorem,
-not a general product-rule closure theorem.
-
-The same finite evaluator is now certified in the derivative-bound form used
-by the FTC layer: every stage box for the right-hand side lies in
-\([0,2]\).  This is a usable bound on the candidate derivative, not yet the
-common cell bound required by the effective FTC.  The explicit forward secant
-enclosure below supplies the other local half of that certificate.
-It is also weakly nondecreasing on the positive unit piece.  The only new
-algebraic summand is ordered by clearing positive denominators:
-\[
- \frac{x}{1+x^2}\leq\frac{y}{1+y^2}
- \quad\Longleftrightarrow\quad
- 0\leq(y-x)(1-xy)
- \qquad(0\leq x\leq y\leq1).
-\]
-Together with geometric monotonicity of the rectangle arctangent, this gives
-endpoint derivative ranges on each positive rational cell.  It is useful
-input for the later monotone-piece derivative-bound construction, while still
-not a substitute for its finite secant containment.
-
-Only the effective FTC connection from this derivative certificate to the
-already finite integration-by-parts rectangles remains for this calculus
-bridge.
+The preceding certificate transports to signed rational steps on the unit
+interval.
 \end{theorem}
 
 \begin{theorem}[Finite triangle reindexing on a uniform mesh]
 \label{thm:finite-uniform-triangle-reindexing}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum}
-\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum_at_mesh}
 \lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum}
-\lean{ComputableAnalysis.Logarithm.arctanKernelTriangleCandidateCompute}
-\lean{ComputableAnalysis.Logarithm.arctanKernelTriangleCandidate_overlaps_complementKernelIntegral}
-\lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_valid}
 \lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_equiv_complementKernelIntegral}
-\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleConstruction}
-\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleMonotoneConstruction}
-\lean{ComputableAnalysis.arctan.integral.triangle}
-\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_valid}
-\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_compute_eq}
-\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_equiv_complementKernelIntegral}
-\lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_valid}
-\lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_equiv_arctanGeom_one}
-\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral}
 \uses{thm:finite-geometric-integration-by-parts}
 \leanok
-Let \(n>0\), \(h=1/n\), and let \(f\) be any rational-valued function on
-the unit mesh.  Lean proves the literal finite identity
+For \(h=1/n\),
 \[
  h\sum_{i=1}^{n}\left(h\sum_{j=0}^{i-1}f(jh)\right)
  =h\sum_{j=0}^{n-1}(1-jh)f(jh).
 \]
-The left side is the outer right rectangle sum of the growing inner left
-rectangle sums; the right side assigns each inner rectangle to the remaining
-height of the unit square.  Thus it is a finite triangle/Fubini reindexing
-whose proof is exactly the finite integration-by-parts rectangle identity,
-not an appeal to a continuous Fubini theorem.
-
-This is the reusable mesh fact behind the unit-branch construction
-\(\int_0^1\int_0^x f(t)\,\dd t\,\dd x
-=\int_0^1(1-x)f(x)\,\dd x\).  On its own, the mesh identity does not state a
-general Fubini or effective-FTC theorem: identifying each growing inner sum
-with an elementary function remains a separate certificate.
-
-There is now also a certified raw representative for the literal left side
-when \(f(t)=1/(1+t^2)\).  At dyadic stage \(n\), it executes precisely the
-outer triangular sum above, returns its rational value as a singleton, and
-uses the public radius \(6/2^n\).  The finite-triangle theorem shows that
-this singleton lies in the same certified box as the complementary-strip
-integral
-\[
- \int_0^1\frac{1-x}{1+x^2}\,\dd x.
-\]
-Consequently Lean proves a raw-real equivalence between the executable
-triangle representative and that strip.  This is progress toward the
-arctangent integration-by-parts row, with an explicit convergence rate.  The
-raw algorithm retains the transparent implementation name
-\code{arctanKernelTriangleRaw}.  Lean now also exposes the certified monotone
-function as \code{arctan.integral.rectangle}, and its resulting unit-interval
-construction as \code{arctan.integral.triangle} (implemented by the legacy
-name \code{arctanIntegralTriangle}).  Its
-finite triangle reindexing theorem is the explicit provenance of this
-integral construction; no general Fubini or integral-linearity axiom has
-been introduced.
-
-Writing \(\arctanintegraltriangle\) for this supplied unit integral
-construction, putting it beside the already certified logarithmic strip for
-\(x/(1+x^2)\) now gives a public finite-mesh bridge to the independently
-constructed product-FTC integral:
-\[
- \arctanintegraltriangle+L_{x/(1+x^2)}
- \Equiv I_{x\arctan x}^{\mathrm{FTC}}.
-\]
-Both sides are separately certified constructions and the proof compares
-them through \(\arctangeom(1)\); it does not assume additivity of arbitrary
-integrals.  This is a useful finite Fubini/strip computation and an explicit
-test case for the later logarithm route.  It is deliberately not yet called
-\(4\int\arctan+2\log 2\): the logarithm still needs its canonical
-exponential transport, and the triangle construction still needs a
-generalized effective-FTC theorem before it can be used as a schema beyond
-this supplied unit branch.
+The executable arctangent-kernel triangle is certified against the
+corresponding complementary strip.
 \end{theorem}
 
 \section{A constructive integration-by-parts certificate}
@@ -1527,68 +1129,18 @@ the endpoint differences.
 \begin{theorem}[A computable single-turn integral construction]
 \label{thm:single-turn-integral-candidate}
 \lean{ComputableAnalysis.Integral.TurningPointBracket}
-\lean{ComputableAnalysis.Integral.TurningPointBracket.left}
-\lean{ComputableAnalysis.Integral.TurningPointBracket.right}
-\lean{ComputableAnalysis.Integral.TurningPointBracket.width}
-\lean{ComputableAnalysis.Integral.TurningPointBracket.widths_shrink}
-\lean{ComputableAnalysis.Integral.TurningPointBracket.leftRestriction}
-\lean{ComputableAnalysis.Integral.TurningPointBracket.rightRestriction}
-\lean{ComputableAnalysis.Integral.IntervalAbsBound}
 \lean{ComputableAnalysis.Integral.turningPointMiddleBox}
-\lean{ComputableAnalysis.Integral.turningPointMiddleBox_width}
-\lean{ComputableAnalysis.Integral.turningPointMiddleBox_widths_shrink}
-\lean{ComputableAnalysis.Integral.turningPointMiddleBox_contained_symmetric}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.leftBox}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleBox}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.rightBox}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_width}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleBox_contained_symmetric}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
-\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_equiv_anchor}
 \uses{thm:monotone-integral-construction}
 \leanok
-For an integrand that increases and then decreases, the turning point need not
-be rational.  Instead, the particular construction supplies a valid shrinking
-rational bracket
-\[
-  [\ell_n,r_n]\subseteq[a,b].
-\]
-At stage \(n\), the left restriction \([a,\ell_n]\) is accompanied by its
-own monotone integral construction, and the right restriction
-\([r_n,b]\) by its own monotone integral construction in the opposite
-direction.  No monotonicity claim is made for the unresolved middle interval.
-
-Rather, a fixed rational value enclosure \(B=[L,U]\) for the integrand on
-\([\ell_n,r_n]\) gives the literal middle contribution box
-\[
-  M_n=(r_n-\ell_n)B.
-\]
-Lean proves
-\[
-  \operatorname{width}(M_n)
-  =(r_n-\ell_n)\operatorname{width}(B)\longrightarrow0.
-\]
-If \(B\subseteq[-K,K]\), it also proves
-\[
-  M_n\subseteq[-K(r_n-\ell_n),K(r_n-\ell_n)],
-\]
-so this is a genuine vanishing contribution, not merely a shrinking box around
-an uncontrolled value.  The runtime candidate is the finite interval sum
-\[
-  I_n^{\mathrm{left}}+M_n+I_n^{\mathrm{right}},
-\]
-and its width shrinks whenever the two supplied outer constructions do.
-For \(f(t)=4-(t^2-2)^2\) on \([0,2]\), the turn is \(\sqrt2\) and
-\(B=[0,4]\):
+A shrinking rational bracket \([\ell_n,r_n]\) isolates a possibly
+irrational turn.  Integrate the certified monotone restrictions on either
+side, and enclose the middle by \((r_n-\ell_n)[L,U]\):
 \begin{verbatim}
 def single_turn_stage(n):
-    l, r = sqrt2(n)
-    return left_box(0, l, n) + (r - l) * [0, 4] + right_box(r, 2, n)
+    l, r = turn_bracket(n)
+    return left_box(a, l, n) + (r - l) * bound + right_box(r, b, n)
 \end{verbatim}
 \begin{figure}[!htbp]
 \centering
@@ -1596,10 +1148,10 @@ def single_turn_stage(n):
 \caption{A rational single-turn split.}
 \label{fig:single-turn-integral}
 \end{figure}
-
-This is a function-specific construction.  \code{SingleTurnIntegralCompletion}
-supplies its enclosure proof and stabilized raw evaluator.
+The supplied width and absolute-bound certificates make the middle error
+vanish.  The completed construction supplies the resulting valid raw real.
 \end{theorem}
+
 
 \begin{theorem}[Derivative-bound FTC package]
 \label{thm:derivative-bound-ftc-package}
