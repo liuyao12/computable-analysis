@@ -46,9 +46,12 @@ Use the following convention for every new algorithm animation:
 | Rational-circle subdivision | The `Stage` points for (1,2,4,8) equal parameter cells, their projections, and the inscribed/circumscribed polygon bounds | `scripts/generate_rational_circle_animation.py` |
 | Arctangent rectangle enclosure | The lower/right and upper/left endpoint rectangles for (1/(1+t^2)) on the midpoint partitions with (1,2,4,8) cells | `scripts/generate_arctan_rectangle_animation.py` |
 | Square-root secant--tangent | The rational secant and tangent intersections defining four successive brackets for `sqrt(2)` | `scripts/generate_sqrt_secant_tangent_animation.py` |
-| Leibniz series bracket | The exact brackets `piLeibniz.compute n` at stages (1,2,4,8), with their next-term widths | `scripts/generate_leibniz_interval_animation.py` |
+| Integration-by-parts product cell | Three exact rational `((u_i,v_i),(u_{i+1},v_{i+1}))` states whose two strips tile the endpoint-product increment | `scripts/generate_integration_by_parts_animation.py` |
+| Single-turn integral | Rational secant--tangent brackets for `sqrt(2)`, the monotone tails of `4-(t^2-2)^2`, and the exact middle box `(r-l)[0,4]` | `scripts/generate_single_turn_integral_animation.py` |
+| FTC endpoint comparison | Dyadic lower/right and upper/left derivative rectangles for `F(t)=t^2` and `F'(t)=2t`, beside the exact endpoint rise | `scripts/generate_ftc_endpoint_animation.py` |
 
-Good next candidates are a piecewise-monotone integral split and finite
-Peano--Baker partial sums.  Add one only alongside its precise finite
-evaluator and its checked bounds, never as an illustration of an unimplemented
+Good candidates are finite product-rectangle reindexing, a piecewise-monotone
+split around a rational turning bracket, finite FTC endpoint comparison, and
+Peano--Baker partial sums.  Add one only alongside its precise finite evaluator
+and its checked bounds, never as an illustration of an unimplemented
 completed-real argument.

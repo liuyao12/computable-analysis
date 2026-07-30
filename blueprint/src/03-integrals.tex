@@ -269,11 +269,18 @@ Thus the proof is literally a tiling of the endpoint-product rectangle by
 two oriented strips.  If both sums use left endpoints, Lean also records the
 exact corner-area correction
 \[
- \sum_{i<n}u_i\Delta v_i+
- \sum_{i<n}v_i\Delta u_i+
+\sum_{i<n}u_i\Delta v_i+
+\sum_{i<n}v_i\Delta u_i+
 \sum_{i<n}\Delta u_i\Delta v_i
 =u_nv_n-u_0v_0.
 \]
+\begin{figure}[!htbp]
+\centering
+\integrationByPartsAnimation
+\caption{One finite rational product increment: the teal and orange strips
+tile the difference of the two endpoint-product rectangles.}
+\label{fig:integration-by-parts-cell}
+\end{figure}
 The same two identities are now exposed for every supplied
 \code{RationalPartition} of a rational interval: sample two rational-valued
 functions at its clamped breakpoints, and the right-hand side is exactly
@@ -1609,6 +1616,22 @@ an uncontrolled value.  The runtime candidate is the finite interval sum
   I_n^{\mathrm{left}}+M_n+I_n^{\mathrm{right}},
 \]
 and its width shrinks whenever the two supplied outer constructions do.
+For the illustrative polynomial \(f(t)=4-(t^2-2)^2\) on \([0,2]\), the
+turning point is \(\sqrt2\) and the fixed bound is \([0,4]\).  Thus the
+same rational secant--tangent brackets from \cref{fig:sqrt-secant-tangent}
+give the literal staged computation
+\begin{verbatim}
+def single_turn_stage(n):
+    l, r = sqrt2(n)
+    return left_box(0, l, n) + (r - l) * [0, 4] + right_box(r, 2, n)
+\end{verbatim}
+\begin{figure}[!htbp]
+\centering
+\singleTurnIntegralAnimation
+\caption{A shrinking rational turning bracket, its bounded middle box, and
+the two monotone outer pieces.}
+\label{fig:single-turn-integral}
+\end{figure}
 
 This is a construction pattern for a \emph{particular} function, not a
 definition saying that every bounded or continuous function has an integral.
@@ -1692,6 +1715,23 @@ real.  Lean also packages the derivative-bound cell-sum algorithm as a
 bookkeeping is supplied, turns the certificate into a
 \code{DefiniteIdentityFor}.  Endpoint-agreement variants package the scheduled
 endpoint validity and comparison with the canonical endpoint difference.  The
+smallest exact model is \(F(t)=t^2\), with candidate derivative \(2t\) on
+\([0,1]\).  On a dyadic cell \([p,r]\), the finite comparison is
+\(2p(r-p)\leq F(r)-F(p)\leq2r(r-p)\):
+\begin{verbatim}
+def quadratic_ftc_box(n):
+    P = [i / 2**n for i in range(2**n + 1)]
+    lower = sum(2*p * (r-p) for p, r in zip(P, P[1:]))
+    upper = sum(2*r * (r-p) for p, r in zip(P, P[1:]))
+    return [lower, upper]       # contains F(1) - F(0)
+\end{verbatim}
+\begin{figure}[!htbp]
+\centering
+\ftcEndpointAnimation
+\caption{Finite endpoint-versus-derivative-rectangle comparison for
+\(F(t)=t^2\).}
+\label{fig:ftc-endpoint-comparison}
+\end{figure}
 stage-schedule variants construct this agreement directly from a cofinal
 monotone endpoint precision schedule.  The corresponding
 \code{definiteIdentityFor} constructors whose names end in
