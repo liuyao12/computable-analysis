@@ -49,9 +49,8 @@ Use the following convention for every new algorithm animation:
 | Integration-by-parts product cell | Three exact rational `((u_i,v_i),(u_{i+1},v_{i+1}))` states whose two strips tile the endpoint-product increment | `scripts/generate_integration_by_parts_animation.py` |
 | Single-turn integral | Rational secant--tangent brackets for `sqrt(2)`, the monotone tails of `4-(t^2-2)^2`, and the exact middle box `(r-l)[0,4]` | `scripts/generate_single_turn_integral_animation.py` |
 | FTC endpoint comparison | Dyadic lower/right and upper/left derivative rectangles for `F(t)=t^2` and `F'(t)=2t`, beside the exact endpoint rise | `scripts/generate_ftc_endpoint_animation.py` |
+| Peano--Baker words | The exact `orderedIndexWords` recursion for 0, 1, 2, and 3 samples, preserving newest-to-oldest matrix-factor order | `scripts/generate_peano_baker_words_animation.py` |
 
-Good candidates are finite product-rectangle reindexing, a piecewise-monotone
-split around a rational turning bracket, finite FTC endpoint comparison, and
-Peano--Baker partial sums.  Add one only alongside its precise finite evaluator
-and its checked bounds, never as an illustration of an unimplemented
+Further animations should be added only alongside their precise finite
+evaluator and checked bounds, never as illustrations of an unimplemented
 completed-real argument.
