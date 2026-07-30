@@ -157,6 +157,14 @@ theorem matrixScale_one {dimension : Nat} (A : RatMatrix dimension) :
   unfold matrixScale
   exact Rat.one_mul _
 
+/-- Two scalar multiples of one finite rational matrix combine by addition of
+their rational coefficients. -/
+theorem matrixAdd_scale_same {dimension : Nat} (r s : Rat)
+    (A : RatMatrix dimension) :
+    matrixAdd (matrixScale r A) (matrixScale s A) = matrixScale (r + s) A := by
+  funext i j
+  exact (Rat.add_mul _ _ _).symm
+
 /-- Associativity of the local rational matrix product.  This is proved from
 finite distributivity and the finite-sum interchange above, without importing
 a general matrix library. -/
@@ -292,6 +300,17 @@ theorem matrixAdd_assoc {dimension : Nat} (A B C : RatMatrix dimension) :
     matrixAdd (matrixAdd A B) C = matrixAdd A (matrixAdd B C) := by
   funext i j
   exact Rat.add_assoc _ _ _
+
+/-- Regroup four finite matrix summands into their first-and-third and
+second-and-fourth pairs. -/
+theorem matrixAdd_group_even_odd {dimension : Nat}
+    (A B C D : RatMatrix dimension) :
+    matrixAdd (matrixAdd (matrixAdd A B) C) D =
+      matrixAdd (matrixAdd A C) (matrixAdd B D) := by
+  funext i j
+  change ((A i j + B i j) + C i j) + D i j =
+    (A i j + C i j) + (B i j + D i j)
+  ac_rfl
 
 theorem matrixMul_zero_right {dimension : Nat} (A : RatMatrix dimension) :
     matrixMul A (matrixZero dimension) = matrixZero dimension := by
@@ -1187,6 +1206,48 @@ theorem simplexTerm_odd (T : Rat) (k : Nat) :
         generator := by
   unfold constantPeanoBakerSimplexTerm
   rw [generator_pow_odd, matrixScale_comp]
+
+/-- The degree-`2k` coefficient of the finite rotation polynomial. -/
+def cosineCoefficient (T : Rat) (k : Nat) : Rat :=
+  T ^ (2 * k) / factorialRat (2 * k) * ((-1 : Rat) ^ k)
+
+/-- The degree-`2k+1` coefficient of the finite rotation polynomial. -/
+def sineCoefficient (T : Rat) (k : Nat) : Rat :=
+  T ^ (2 * k + 1) / factorialRat (2 * k + 1) * ((-1 : Rat) ^ k)
+
+/-- An executable finite cosine-type prefix. -/
+def cosinePrefix (T : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => cosinePrefix T n + cosineCoefficient T n
+
+/-- An executable finite sine-type prefix. -/
+def sinePrefix (T : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => sinePrefix T n + sineCoefficient T n
+
+/-- The first `2n` constant Peano--Baker terms for the rotation system split
+exactly into their cosine- and sine-type rational prefixes.  This is finite
+matrix algebra only; it does not yet sum a continuous ODE or a complex raw
+exponential. -/
+theorem simplexPartial_even_split (T : Rat) (n : Nat) :
+    constantPeanoBakerSimplexPartial generator T (2 * n) =
+      matrixAdd
+        (matrixScale (cosinePrefix T n) (matrixIdentity 2))
+        (matrixScale (sinePrefix T n) generator) := by
+  induction n with
+  | zero =>
+      simp only [constantPeanoBakerSimplexPartial, cosinePrefix, sinePrefix]
+      funext i j
+      unfold matrixZero matrixAdd matrixScale
+      rw [Rat.zero_mul, Rat.zero_mul, Rat.zero_add]
+  | succ n ih =>
+      rw [show 2 * (n + 1) = (2 * n + 1) + 1 by omega]
+      rw [constantPeanoBakerSimplexPartial_succ]
+      rw [show 2 * n + 1 = (2 * n) + 1 by omega]
+      rw [constantPeanoBakerSimplexPartial_succ, ih]
+      rw [simplexTerm_even, simplexTerm_odd, matrixAdd_group_even_odd]
+      rw [matrixAdd_scale_same, matrixAdd_scale_same]
+      rfl
 
 end RotationSystem
 

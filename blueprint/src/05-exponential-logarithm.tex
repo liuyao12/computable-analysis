@@ -995,13 +995,11 @@ equivalence machinery for complex logarithm.
 \begin{theorem}[Euler identity]
 \label{thm:euler-identity}
 \uses{def:geometric-sin-cos-functionraw,def:exp-representations}
-The exponential power series over rational complex boxes should agree with the
-geometric sine and cosine functions from Chapter~\ref{ch:rational-circle-trigonometry}:
 \[
   \exp(i\theta)=\cos(\theta)+i\sin(\theta).
 \]
-With the normalized quarter-turn convention this is stated for rational
-\(t\), where \(\theta=t\pi/2\).  The proof route is to first prove the formal
-power-series identity, then use the already established agreement between
-power-series and geometric trigonometry.
+For rational \(t\), take \(\theta=t\pi/2\).  The finite rotation-prefix
+identity is checked in \code{RotationSystem.simplexPartial\_even\_split};
+the remaining tail, geometric-trigonometric, and complex-raw bridges are the
+open certificate.
 \end{theorem}

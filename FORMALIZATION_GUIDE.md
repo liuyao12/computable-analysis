@@ -545,14 +545,12 @@ product.  `LinearODE.peanoBakerFactorialTailShift` turns a nonnegative
 rational norm-length bound and requested rational error into an executable
 factorial-tail shift.
 
-The finite constant-coefficient layer also contains the exact rotation-series
-coefficient calculation. `LinearODE.RotationSystem.generator` is the rational
-matrix `[[0, -1], [1, 0]]`; `generator_square`, `generator_pow_even`, and
-`generator_pow_odd` prove its alternating even/odd powers. The corresponding
-`simplexTerm_even` and `simplexTerm_odd` normalize every finite
-constant Peano--Baker term to its cosine-type or sine-type coefficient. This
-is useful when formalizing a future Euler comparison, but it is not a claim
-that a continuous matrix series has already been summed.
+The finite rotation core exposes the exact prefix identity
+`RotationSystem.simplexPartial_even_split`:
+`sum_(r < 2*n) T^r/r! * J^r = C_n(T) * I + S_n(T) * J`, with the executable
+alternating rational prefixes `cosinePrefix` and `sinePrefix`. It is useful
+finite algebra for a future Euler comparison, not a summed continuous matrix
+series or a complex exponential certificate.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a
