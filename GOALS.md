@@ -1262,6 +1262,9 @@ one abstract real; its pi specialization `PiProofs.pi.representations_equiv`
 therefore also covers the supplementary finite integration-by-parts-mesh and
 triangle-log-series views that intentionally
 sit outside `PiPresentation`.
+  The now-certified `pi.dirichletBeta` view records the natural Dirichlet
+  formula `pi = 4 * L(1, chi4)`; its literal boxes are stagewise the Leibniz
+  boxes, so it is deliberately not a ninth alternating-series capability.
   `PiPresentation.integrationFamily` and the primary registry retain the
   polygonal, stabilized, Nilakantha, and single Machin variants as executable
 regressions.  `piCertified.alternatives` also literally carries the checked

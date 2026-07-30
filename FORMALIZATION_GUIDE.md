@@ -476,6 +476,7 @@ open ComputableAnalysis
 #check pi.squareSubstitution
 #check pi.squareStieltjes
 #check pi.leibniz
+#check pi.dirichletBeta
 #check pi.machin
 #check pi.cauchy
 #check pi.symmetricCauchy
@@ -488,7 +489,10 @@ For example, `pi.machin` is the one classical series computation
 `16 * arctan.series (1/5) - 4 * arctan.series (1/239)`.  Its agreement with
 the area presentation is proved, but it does not create a separate coverage
 cell: it reuses the same arctangent-series capability already tested by the
-Leibniz bridge.  Similarly, the direct geometric diagnostic
+Leibniz bridge. `pi.dirichletBeta` records the equally literal formula
+`pi = 4 * L(1, chi4)`; its raw evaluator is stagewise the Leibniz alternating
+series, so it is a named view rather than another coverage cell. Similarly,
+the direct geometric diagnostic
 `pi.circumference` and the certified normalizations
 `pi.circumferenceStabilized`/`pi.circumferenceReboxed` are alternative views,
 not additional points on the scoreboard.  Use
