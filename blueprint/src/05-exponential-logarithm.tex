@@ -737,6 +737,10 @@ This is a specialized, completely finite change-of-variables theorem for
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_compute_width_le}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegralRate}
 \lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSquareStieltjes}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSquareStieltjes_valid}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSquareStieltjes_equiv_piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSquareStieltjes_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogSeries_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea}
@@ -744,6 +748,8 @@ This is a specialized, completely finite change-of-variables theorem for
 \lean{ComputableAnalysis.PiProofs.pi.triangleLogReciprocalIntegral}
 \lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
 \lean{ComputableAnalysis.PiProofs.pi.squareSubstitution}
+\lean{ComputableAnalysis.PiProofs.pi.squareStieltjes}
+\lean{ComputableAnalysis.PiProofs.pi.squareStieltjes_equiv_squareSubstitution}
 \uses{thm:log-two-square-pullback-integral}
 \leanok
 Put
@@ -843,6 +849,7 @@ is precisely the finite \(t=x^2\) transport to the preceding reciprocal-log
 formula; the independent raw runtime satisfies \(w_n\le56/2^n\).  It is a
 concrete substitution regression, not yet a general change-of-variables
 theorem.
+
 \end{theorem}
 
 \begin{theorem}[Rational two-strip decomposition]

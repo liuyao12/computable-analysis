@@ -465,7 +465,7 @@ named presentation from the abstract `pi.value : Real` handle when you need a
 specific implementation:
 
 ```lean
-import ComputableAnalysis.PiProofs
+import ComputableAnalysis.PiStieltjesBridge
 
 open ComputableAnalysis
 
@@ -474,6 +474,7 @@ open ComputableAnalysis
 #check pi.arctanGeom
 #check pi.integrationByParts
 #check pi.squareSubstitution
+#check pi.squareStieltjes
 #check pi.leibniz
 #check pi.machin
 #check pi.cauchy
@@ -505,6 +506,10 @@ integration-by-parts theorem or canonical-exp/log transport.
 `2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
 `pi.integrationByParts` is the finite `t = x*x` substitution certificate.
 It is likewise not a general substitution theorem.
+`pi.squareStieltjes` is the supplementary direct-mesh view: it evaluates
+the stabilized finite Stieltjes sums for the same substitution, then proves
+equivalent to `pi.squareSubstitution` and area pi.  It is an executable
+algorithmic witness, not a ninth coverage bridge.
 
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and

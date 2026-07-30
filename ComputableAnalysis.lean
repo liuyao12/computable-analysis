@@ -31,6 +31,7 @@ import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.Nilakantha
 import ComputableAnalysis.Pi
 import ComputableAnalysis.PiProofs
+import ComputableAnalysis.PiStieltjesBridge
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.Polynomial
