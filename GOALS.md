@@ -1259,6 +1259,13 @@ count.  The reciprocal-log triangle formula is instead the primary
   `pi.integrationByParts` view and the sixth finite-calculus bridge.  It is
   not a substitute for the pending general arctangent--logarithm effective-FTC
   bridge or canonical-logarithm transport.  The primary
+  canonical handoff is now formalized separately:
+  `PiProofs.CanonicalLogTwoCertificate` packages a valid raw value at two
+  together with its equivalence to `Logarithm.logTwoReciprocalIntegral`, and
+  `piFromCanonicalLogTwo_equiv_piCircleArea` then proves the canonical-form
+  pi formula.  Constructing that certificate from an inverse-exponential
+  logarithm remains the one explicit analytic gap; it is not an additional
+  scorecard row.
   `pi.squareSubstitution` view is the seventh bridge: it preserves the
   square-pullback integral and verifies its finite substitution transport to
   the reciprocal-log view.
