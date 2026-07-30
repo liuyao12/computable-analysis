@@ -265,13 +265,13 @@ connects this value to the chosen abstract \(\pi\) representation.
 \begin{theorem}[Euler identity]
 \label{thm:euler-identity}
 \lean{ComputableAnalysis.RotationSeries.expPartial_imaginary_even_split}
+\lean{ComputableAnalysis.RotationSeries.rotationExpRaw_valid}
+\lean{ComputableAnalysis.RotationSeries.rotationExpRaw_width_le_geometric}
 \leanok
-The checked finite core is
 \[
  \operatorname{expPrefix}_{2n}(iT)=C_n(T)+iS_n(T).
 \]
-The remaining theorem \(e^{i\pi}+1=0\) needs the exponential tail, rotation
-identification, complex raw validity, and the selected \(\pi\) value.  The
-scoreboard records that route as a target rather than presenting the finite
-prefix identity as Euler's identity.
+Its nested complex boxes have both widths at most \(8t_0(T)2^{-n}\).
+The remaining theorem \(e^{i\pi}+1=0\) needs rotation/geometric
+identification, represented-input extension, and the selected \(\pi\) value.
 \end{theorem}

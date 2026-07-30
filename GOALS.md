@@ -250,8 +250,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `C_n(T) * I + S_n(T) * J`, with executable alternating rational prefixes.
   `RotationSeries.expPartial_imaginary_even_split` proves that the literal
   complex prefix at `i*T` has those same `C_n(T)` and `S_n(T)` coordinates.
-  These remain finite algebra; the continuous-simplex interpretation and the
-  complex-raw tail certificate are open.
+  `RotationSeries.rotationExpRaw_valid` now encloses those prefixes in nested
+  rational complex boxes, with both coordinate widths bounded by
+  `8 * rotationTailMagnitude T 0 * (1/2)^n`. The continuous-simplex
+  interpretation and the rotation/geometric identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of
@@ -1302,7 +1304,10 @@ count.  The reciprocal-log triangle formula is instead the primary
   the complex logarithm is instead a named but unmarked long scoreboard
   target: it should establish `exp(i * pi / 2) = i` and
   `pi = -2i * log(i)` by the complex rotation-system extension of the linear
-  Peano--Baker uniqueness theorem.  The primary gates remain the
+  Peano--Baker uniqueness theorem.  Its rational imaginary-axis factorial
+  tail is now a valid complex raw (`RotationSeries.rotationExpRaw_valid`),
+  while rotation/geometric and branch bridges remain. The primary gates remain
+  the
   no-completeness audit,
   epsilon--delta continuity and extension, finite integration/FTC, inverse
   functions, differentiated elementary functions, and continuous ODE

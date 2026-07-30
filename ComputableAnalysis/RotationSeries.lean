@@ -111,6 +111,56 @@ theorem expTerm_imaginary_odd (T : Rat) (k : Nat) :
         T ^ (2 * k + 1) / factorialRat (2 * k + 1) * (-1 : Rat) ^ k
     grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
 
+/-- Rational absolute value commutes with a natural power.  This local lemma
+keeps the complex-tail certificate below entirely in rational arithmetic. -/
+private theorem qabs_pow (x : Rat) : forall n : Nat, qabs (x ^ n) = qabs x ^ n
+  | 0 => by
+      have hnot : ¬ ((1 : Rat) < 0) := by native_decide
+      simp [Rat.pow_zero, qabs, hnot]
+  | n + 1 => by
+      rw [Rat.pow_succ, qabs_mul, qabs_pow, Rat.pow_succ]
+
+private theorem qabs_neg_one_pow (n : Nat) : qabs ((-1 : Rat) ^ n) = 1 := by
+  rw [qabs_pow]
+  have hneg : (-1 : Rat) < 0 := by native_decide
+  have habs : qabs (-1 : Rat) = 1 := by
+    unfold qabs
+    simp [hneg]
+  rw [habs]
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [Rat.pow_succ, ih, Rat.one_mul]
+
+private theorem qabs_inv_factorialRat (n : Nat) :
+    qabs ((factorialRat n)⁻¹) = (factorialRat n)⁻¹ := by
+  apply qabs_eq_self_of_nonneg
+  exact Rat.le_of_lt ((Rat.inv_pos).2 (RationalMajorant.factorialRat_pos n))
+
+/-- The real coordinate of each even imaginary-axis exponential term has the
+standard factorial majorant exactly, rather than merely asymptotically. -/
+theorem expTerm_imaginary_even_re_abs (T : Rat) (k : Nat) :
+    qabs (ComplexSeries.expTerm (imaginaryAxis T) (2 * k)).re =
+      RationalMajorant.factorialTailTerm (qabs T) (2 * k) := by
+  rw [expTerm_imaginary_even]
+  unfold LinearODE.RotationSystem.cosineCoefficient
+    RationalMajorant.factorialTailTerm
+  rw [Rat.div_def, qabs_mul, qabs_mul, qabs_pow, qabs_inv_factorialRat,
+    qabs_neg_one_pow]
+  grind [Rat.div_def, Rat.mul_assoc]
+
+/-- The imaginary coordinate of each odd imaginary-axis exponential term has
+the standard factorial majorant exactly. -/
+theorem expTerm_imaginary_odd_im_abs (T : Rat) (k : Nat) :
+    qabs (ComplexSeries.expTerm (imaginaryAxis T) (2 * k + 1)).im =
+      RationalMajorant.factorialTailTerm (qabs T) (2 * k + 1) := by
+  rw [expTerm_imaginary_odd]
+  unfold LinearODE.RotationSystem.sineCoefficient
+    RationalMajorant.factorialTailTerm
+  rw [Rat.div_def, qabs_mul, qabs_mul, qabs_pow, qabs_inv_factorialRat,
+    qabs_neg_one_pow]
+  grind [Rat.div_def, Rat.mul_assoc]
+
 /-- The literal finite complex exponential prefix advances by its next
 rational term. -/
 theorem expPartial_succ (z : QComplex) (terms : Nat) :
@@ -124,6 +174,37 @@ theorem expPartial_succ (z : QComplex) (terms : Nat) :
 def complexPrefix (T : Rat) (n : Nat) : QComplex :=
   { re := LinearODE.RotationSystem.cosinePrefix T n,
     im := LinearODE.RotationSystem.sinePrefix T n }
+
+/-- The certified factorial-tail start for the imaginary-axis exponential
+input.  Its magnitude is purely rational. -/
+def rotationTailStart (T : Rat) : Nat :=
+  RationalMajorant.factorialTailStart (qabs T)
+
+/-- Each stage advances by an even pair of complex exponential terms, so its
+center remains exactly a cosine--sine rotation prefix. -/
+def rotationTailTerms (T : Rat) (n : Nat) : Nat :=
+  2 * (rotationTailStart T + n)
+
+def rotationTailMagnitude (T : Rat) (n : Nat) : Rat :=
+  RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T n)
+
+/-- A deliberately slack radius: four times the first omitted term.  The
+slack makes consecutive certified boxes nest while their centers advance by
+one even--odd term pair. -/
+def rotationTailRadius (T : Rat) (n : Nat) : Rat :=
+  4 * rotationTailMagnitude T n
+
+/-- The center stored at each stage of the certified complex rotation
+evaluator. -/
+def rotationCenter (T : Rat) (n : Nat) : QComplex :=
+  complexPrefix T (rotationTailStart T + n)
+
+/-- A symmetric rational complex box around a rotation-series center. -/
+def rotationBox (T : Rat) (n : Nat) : QBox :=
+  let c := rotationCenter T n
+  let r := rotationTailRadius T n
+  { lo := { re := c.re - r, im := c.im - r },
+    hi := { re := c.re + r, im := c.im + r } }
 
 /-- At every finite even truncation, the rational complex exponential at
 `i*T` is exactly the cosine--sine rotation prefix. -/
@@ -151,6 +232,435 @@ theorem expPartial_imaginary_even_split (T : Rat) (n : Nat) :
             LinearODE.RotationSystem.sinePrefix T n +
               LinearODE.RotationSystem.sineCoefficient T n
         rw [Rat.add_zero]
+
+/-- The even-stage centers of the complex evaluator are literally the finite
+complex exponential prefixes, not a separately postulated rotation value. -/
+theorem rotationCenter_eq_expPartial (T : Rat) (n : Nat) :
+    rotationCenter T n =
+      ComplexSeries.expPartial (imaginaryAxis T) (rotationTailTerms T n) := by
+  unfold rotationCenter rotationTailTerms
+  symm
+  exact expPartial_imaginary_even_split T (rotationTailStart T + n)
+
+private theorem rotation_tail_start (T : Rat) (n : Nat) :
+    qabs T <= (((rotationTailTerms T n + 1 : Nat) : Rat) / 2) := by
+  let s := RationalMajorant.factorialTailStart (qabs T)
+  have hs := RationalMajorant.factorialTailStart_satisfies (qabs T)
+  have hmono := RationalMajorant.factorialTailStart_mono (qabs T) s (s + 2 * n)
+    (by simpa [s] using hs)
+  change qabs T <= (((2 * (s + n) + 1 : Nat) : Rat) / 2)
+  have hterms : s + (s + 2 * n) + 1 = 2 * (s + n) + 1 := by omega
+  rw [hterms] at hmono
+  exact hmono
+
+private theorem rotationTailMagnitude_nonneg (T : Rat) (n : Nat) :
+    0 <= rotationTailMagnitude T n := by
+  unfold rotationTailMagnitude
+  exact RationalMajorant.factorialTailTerm_nonneg (qabs_nonneg T) _
+
+private theorem rotationTailMagnitude_next_le_quarter (T : Rat) (n : Nat) :
+    rotationTailMagnitude T (n + 1) <= rotationTailMagnitude T n * ((1 : Rat) / 2) ^ 2 := by
+  have h := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    (C := qabs T) (N := rotationTailTerms T n)
+    (qabs_nonneg T) (rotation_tail_start T n) 2
+  change RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T (n + 1)) <=
+    RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T n) *
+      ((1 : Rat) / 2) ^ 2
+  have hterms : rotationTailTerms T (n + 1) = rotationTailTerms T n + 2 := by
+    unfold rotationTailTerms
+    omega
+  rw [hterms]
+  exact h
+
+private theorem rotationTailRadius_drop_majorizes (T : Rat) (n : Nat) :
+    rotationTailMagnitude T n <=
+      rotationTailRadius T n - rotationTailRadius T (n + 1) := by
+  have hnext := rotationTailMagnitude_next_le_quarter T n
+  have hmag0 := rotationTailMagnitude_nonneg T n
+  have hquarter : ((1 : Rat) / 2) ^ 2 = (1 : Rat) / 4 := by native_decide
+  rw [hquarter] at hnext
+  have hfour : 4 * rotationTailMagnitude T (n + 1) <= rotationTailMagnitude T n := by
+    calc
+      4 * rotationTailMagnitude T (n + 1) <=
+          4 * (rotationTailMagnitude T n * ((1 : Rat) / 4)) :=
+        Rat.mul_le_mul_of_nonneg_left hnext (by native_decide)
+      _ = rotationTailMagnitude T n := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  unfold rotationTailRadius
+  grind [Rat.sub_eq_add_neg]
+
+private theorem rotationCenter_succ (T : Rat) (n : Nat) :
+    rotationCenter T (n + 1) =
+      QComplex.add
+        (QComplex.add (rotationCenter T n)
+          (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)))
+        (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)) := by
+  rw [rotationCenter_eq_expPartial, rotationCenter_eq_expPartial]
+  unfold rotationTailTerms
+  rw [show 2 * (rotationTailStart T + (n + 1)) =
+      (2 * (rotationTailStart T + n) + 1) + 1 by omega]
+  rw [expPartial_succ]
+  rw [show 2 * (rotationTailStart T + n) + 1 =
+      2 * (rotationTailStart T + n) + 1 by rfl]
+  rw [expPartial_succ]
+
+private theorem even_term_coordinate_bounds (T : Rat) (k : Nat) :
+    -RationalMajorant.factorialTailTerm (qabs T) (2 * k) <=
+        (ComplexSeries.expTerm (imaginaryAxis T) (2 * k)).re /\
+      (ComplexSeries.expTerm (imaginaryAxis T) (2 * k)).re <=
+        RationalMajorant.factorialTailTerm (qabs T) (2 * k) := by
+  have habs := expTerm_imaginary_even_re_abs T k
+  constructor
+  · rw [← habs]
+    exact neg_qabs_le_self _
+  · rw [← habs]
+    exact self_le_qabs _
+
+private theorem odd_term_coordinate_bounds (T : Rat) (k : Nat) :
+    -RationalMajorant.factorialTailTerm (qabs T) (2 * k + 1) <=
+        (ComplexSeries.expTerm (imaginaryAxis T) (2 * k + 1)).im /\
+      (ComplexSeries.expTerm (imaginaryAxis T) (2 * k + 1)).im <=
+        RationalMajorant.factorialTailTerm (qabs T) (2 * k + 1) := by
+  have habs := expTerm_imaginary_odd_im_abs T k
+  constructor
+  · rw [← habs]
+    exact neg_qabs_le_self _
+  · rw [← habs]
+    exact self_le_qabs _
+
+private theorem rotationTailMagnitude_middle_le (T : Rat) (n : Nat) :
+    RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T n + 1) <=
+      rotationTailMagnitude T n := by
+  have hhalf := RationalMajorant.factorialTailTerm_succ_le_half
+    (qabs_nonneg T) (rotationTailTerms T n)
+    (RationalMajorant.factorialTailRatio_le_half_from_start
+      (qabs T) (rotationTailTerms T n) 0 (rotation_tail_start T n))
+  have hmag0 := rotationTailMagnitude_nonneg T n
+  change RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T n + 1) <=
+    RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T n) *
+      ((1 : Rat) / 2) at hhalf
+  calc
+    RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T n + 1) <=
+        rotationTailMagnitude T n * ((1 : Rat) / 2) := by
+      simpa [rotationTailMagnitude] using hhalf
+    _ <= rotationTailMagnitude T n := by
+      have hhalf_le_one : (1 : Rat) / 2 <= 1 := by native_decide
+      calc
+        rotationTailMagnitude T n * ((1 : Rat) / 2) <=
+            rotationTailMagnitude T n * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hhalf_le_one hmag0
+        _ = rotationTailMagnitude T n := by rw [Rat.mul_one]
+
+private theorem rotation_even_term_coordinate_bounds (T : Rat) (n : Nat) :
+    -rotationTailMagnitude T n <=
+        (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)).re /\
+      (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)).re <=
+        rotationTailMagnitude T n := by
+  simpa [rotationTailMagnitude, rotationTailTerms] using
+    even_term_coordinate_bounds T (rotationTailStart T + n)
+
+private theorem rotation_odd_term_coordinate_bounds (T : Rat) (n : Nat) :
+    -rotationTailMagnitude T n <=
+        (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)).im /\
+      (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)).im <=
+        rotationTailMagnitude T n := by
+  have hterm := odd_term_coordinate_bounds T (rotationTailStart T + n)
+  have hmiddle := rotationTailMagnitude_middle_le T n
+  have hterms : rotationTailTerms T n + 1 = 2 * (rotationTailStart T + n) + 1 := by
+    unfold rotationTailTerms
+    rfl
+  constructor
+  · rw [hterms]
+    calc
+      -rotationTailMagnitude T n <=
+          -RationalMajorant.factorialTailTerm (qabs T) (2 * (rotationTailStart T + n) + 1) :=
+        Rat.neg_le_neg (by simpa [rotationTailMagnitude, rotationTailTerms] using hmiddle)
+      _ <= (ComplexSeries.expTerm
+          (imaginaryAxis T) (2 * (rotationTailStart T + n) + 1)).im := hterm.1
+  · rw [hterms]
+    calc
+      (ComplexSeries.expTerm
+          (imaginaryAxis T) (2 * (rotationTailStart T + n) + 1)).im <=
+          RationalMajorant.factorialTailTerm (qabs T) (2 * (rotationTailStart T + n) + 1) :=
+        hterm.2
+      _ <= rotationTailMagnitude T n := by
+        simpa [rotationTailMagnitude, rotationTailTerms] using hmiddle
+
+private theorem rotation_even_term_im_eq_zero (T : Rat) (n : Nat) :
+    (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)).im = 0 := by
+  change (ComplexSeries.expTerm
+    (imaginaryAxis T) (2 * (rotationTailStart T + n))).im = 0
+  rw [expTerm_imaginary_even]
+
+private theorem rotation_odd_term_re_eq_zero (T : Rat) (n : Nat) :
+    (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)).re = 0 := by
+  change (ComplexSeries.expTerm
+    (imaginaryAxis T) (2 * (rotationTailStart T + n) + 1)).re = 0
+  rw [expTerm_imaginary_odd]
+
+private theorem rotationCenter_step_re_bounds (T : Rat) (n : Nat) :
+    -rotationTailMagnitude T n <=
+        (rotationCenter T (n + 1)).re - (rotationCenter T n).re /\
+      (rotationCenter T (n + 1)).re - (rotationCenter T n).re <=
+        rotationTailMagnitude T n := by
+  have hcenter := rotationCenter_succ T n
+  have heven := rotation_even_term_coordinate_bounds T n
+  have hoddzero := rotation_odd_term_re_eq_zero T n
+  rw [hcenter]
+  change -rotationTailMagnitude T n <=
+      ((rotationCenter T n).re +
+        (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)).re +
+          (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)).re) -
+        (rotationCenter T n).re /\
+    ((rotationCenter T n).re +
+        (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)).re +
+          (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)).re) -
+        (rotationCenter T n).re <= rotationTailMagnitude T n
+  rw [hoddzero]
+  grind [Rat.sub_eq_add_neg]
+
+private theorem rotationCenter_step_im_bounds (T : Rat) (n : Nat) :
+    -rotationTailMagnitude T n <=
+        (rotationCenter T (n + 1)).im - (rotationCenter T n).im /\
+      (rotationCenter T (n + 1)).im - (rotationCenter T n).im <=
+        rotationTailMagnitude T n := by
+  have hcenter := rotationCenter_succ T n
+  have hodd := rotation_odd_term_coordinate_bounds T n
+  have hevenzero := rotation_even_term_im_eq_zero T n
+  rw [hcenter]
+  change -rotationTailMagnitude T n <=
+      ((rotationCenter T n).im +
+        (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)).im +
+          (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)).im) -
+        (rotationCenter T n).im /\
+    ((rotationCenter T n).im +
+        (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n)).im +
+          (ComplexSeries.expTerm (imaginaryAxis T) (rotationTailTerms T n + 1)).im) -
+        (rotationCenter T n).im <= rotationTailMagnitude T n
+  rw [hevenzero]
+  grind [Rat.sub_eq_add_neg]
+
+private theorem rotationBox_width (T : Rat) (n : Nat) :
+    (rotationBox T n).width = 2 * rotationTailRadius T n := by
+  unfold rotationBox QBox.width
+  dsimp
+  grind [Rat.sub_eq_add_neg]
+
+private theorem rotationBox_height (T : Rat) (n : Nat) :
+    (rotationBox T n).height = 2 * rotationTailRadius T n := by
+  unfold rotationBox QBox.height
+  dsimp
+  grind [Rat.sub_eq_add_neg]
+
+private theorem rotationBox_ordered (T : Rat) (n : Nat) :
+    0 <= (rotationBox T n).width /\ 0 <= (rotationBox T n).height := by
+  have hmag0 := rotationTailMagnitude_nonneg T n
+  rw [rotationBox_width, rotationBox_height]
+  unfold rotationTailRadius
+  constructor <;> exact Rat.mul_nonneg (by native_decide) (Rat.mul_nonneg (by native_decide) hmag0)
+
+private theorem rotationBox_nested_step (T : Rat) (n : Nat) :
+    QBox.NestedIn (rotationBox T (n + 1)) (rotationBox T n) := by
+  have hre := rotationCenter_step_re_bounds T n
+  have him := rotationCenter_step_im_bounds T n
+  have hdrop := rotationTailRadius_drop_majorizes T n
+  unfold QBox.NestedIn rotationBox
+  dsimp
+  constructor
+  · constructor
+    · grind [Rat.sub_eq_add_neg]
+    · grind [Rat.sub_eq_add_neg]
+  · constructor
+    · grind [Rat.sub_eq_add_neg]
+    · grind [Rat.sub_eq_add_neg]
+
+private theorem qbox_nested_trans {A B C : QBox}
+    (hAB : QBox.NestedIn A B) (hBC : QBox.NestedIn B C) :
+    QBox.NestedIn A C := by
+  exact ⟨QComplex.le_trans hBC.1 hAB.1, QComplex.le_trans hAB.2 hBC.2⟩
+
+private theorem rotationBox_nested (T : Rat) :
+    forall n m : Nat, n <= m -> QBox.NestedIn (rotationBox T m) (rotationBox T n)
+  | n, 0, hnm => by
+      have hn : n = 0 := by omega
+      subst n
+      exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+  | n, m + 1, hnm => by
+      by_cases hlast : n = m + 1
+      · subst n
+        exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+      · have hnm' : n <= m := by omega
+        exact qbox_nested_trans (rotationBox_nested_step T m) (rotationBox_nested T n m hnm')
+
+private theorem rat_pow_add (q : Rat) (m n : Nat) :
+    q ^ (m + n) = q ^ m * q ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [show m + (n + 1) = m + n + 1 by omega]
+      rw [Rat.pow_succ, ih, Rat.pow_succ]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem half_pow_twice_le (n : Nat) :
+    ((1 : Rat) / 2) ^ (2 * n) <= ((1 : Rat) / 2) ^ n := by
+  rw [show 2 * n = n + n by omega, rat_pow_add]
+  have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
+  have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+  have hpow0 : 0 <= ((1 : Rat) / 2) ^ n := Rat.pow_nonneg hhalf0
+  have hpow1 : ((1 : Rat) / 2) ^ n <= 1 := by
+    induction n with
+    | zero =>
+        rw [Rat.pow_zero]
+        exact Rat.le_refl
+    | succ n ih =>
+        rw [Rat.pow_succ]
+        calc
+          ((1 : Rat) / 2) ^ n * ((1 : Rat) / 2) <=
+              ((1 : Rat) / 2) ^ n * 1 :=
+            Rat.mul_le_mul_of_nonneg_left hhalf1 (Rat.pow_nonneg hhalf0)
+          _ = ((1 : Rat) / 2) ^ n := by rw [Rat.mul_one]
+          _ <= 1 := ih (Rat.pow_nonneg hhalf0)
+  calc
+    ((1 : Rat) / 2) ^ n * ((1 : Rat) / 2) ^ n <=
+        ((1 : Rat) / 2) ^ n * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hpow1 hpow0
+    _ = ((1 : Rat) / 2) ^ n := by rw [Rat.mul_one]
+
+private theorem rotationTailMagnitude_le_geometric (T : Rat) (n : Nat) :
+    rotationTailMagnitude T n <=
+      rotationTailMagnitude T 0 * ((1 : Rat) / 2) ^ n := by
+  have htail := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    (C := qabs T) (N := rotationTailTerms T 0)
+    (qabs_nonneg T) (rotation_tail_start T 0) (2 * n)
+  have hterms : rotationTailTerms T n = rotationTailTerms T 0 + 2 * n := by
+    unfold rotationTailTerms
+    omega
+  unfold rotationTailMagnitude
+  rw [hterms]
+  calc
+    RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T 0 + 2 * n) <=
+        RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T 0) *
+          ((1 : Rat) / 2) ^ (2 * n) := htail
+    _ <= RationalMajorant.factorialTailTerm (qabs T) (rotationTailTerms T 0) *
+          ((1 : Rat) / 2) ^ n :=
+      Rat.mul_le_mul_of_nonneg_left (half_pow_twice_le n)
+        (RationalMajorant.factorialTailTerm_nonneg (qabs_nonneg T) _)
+
+private theorem rotationBox_width_le_geometric (T : Rat) (n : Nat) :
+    (rotationBox T n).width <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n := by
+  have htail := rotationTailMagnitude_le_geometric T n
+  rw [rotationBox_width]
+  unfold rotationTailRadius
+  calc
+    2 * (4 * rotationTailMagnitude T n) = 8 * rotationTailMagnitude T n := by
+      grind [Rat.mul_assoc]
+    _ <= 8 * (rotationTailMagnitude T 0 * ((1 : Rat) / 2) ^ n) :=
+      Rat.mul_le_mul_of_nonneg_left htail (by native_decide)
+    _ = (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n := by
+      grind [Rat.mul_assoc]
+
+private theorem rotationBox_height_le_geometric (T : Rat) (n : Nat) :
+    (rotationBox T n).height <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n := by
+  rw [rotationBox_height, ← rotationBox_width]
+  exact rotationBox_width_le_geometric T n
+
+private theorem rotationBox_widths_shrink (T : Rat) :
+    ComplexRaw.WidthsShrinkToZero (rotationBox T) := by
+  intro eps
+  let bound : Rat := 8 * rotationTailMagnitude T 0
+  let N : Nat := RationalMajorant.halfDecayShift bound eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hbound0 : 0 <= bound := by
+    dsimp [bound]
+    exact Rat.mul_nonneg (by native_decide) (rotationTailMagnitude_nonneg T 0)
+  have hwidth := rotationBox_width_le_geometric T n
+  have hheight := rotationBox_height_le_geometric T n
+  have hfactor : ((1 : Rat) / 2) ^ n <= ((1 : Rat) / 2) ^ N := by
+    let k := n - N
+    have hNk : N + k = n := by
+      dsimp [k]
+      exact Nat.add_sub_of_le hn
+    rw [← hNk, rat_pow_add]
+    have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
+    have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+    have hpow0 : 0 <= ((1 : Rat) / 2) ^ N := Rat.pow_nonneg hhalf0
+    have hpow1 : ((1 : Rat) / 2) ^ k <= 1 := by
+      induction k with
+      | zero =>
+          rw [Rat.pow_zero]
+          exact Rat.le_refl
+      | succ k ih =>
+          rw [Rat.pow_succ]
+          calc
+            ((1 : Rat) / 2) ^ k * ((1 : Rat) / 2) <=
+                ((1 : Rat) / 2) ^ k * 1 :=
+              Rat.mul_le_mul_of_nonneg_left hhalf1 (Rat.pow_nonneg hhalf0)
+            _ = ((1 : Rat) / 2) ^ k := by rw [Rat.mul_one]
+            _ <= 1 := ih
+    calc
+      ((1 : Rat) / 2) ^ N * ((1 : Rat) / 2) ^ k <=
+          ((1 : Rat) / 2) ^ N * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hpow1 hpow0
+      _ = ((1 : Rat) / 2) ^ N := by rw [Rat.mul_one]
+  have hscaled : bound * ((1 : Rat) / 2) ^ n <=
+      bound * ((1 : Rat) / 2) ^ N :=
+    Rat.mul_le_mul_of_nonneg_left hfactor hbound0
+  have hfinal := RationalMajorant.halfDecayShift_spec hbound0 eps
+  dsimp [N] at hfactor hscaled hfinal ⊢
+  dsimp [bound] at hwidth hheight hscaled hfinal
+  exact ⟨Rat.le_trans hwidth (Rat.le_trans hscaled hfinal),
+    Rat.le_trans hheight (Rat.le_trans hscaled hfinal)⟩
+
+/-- Geometric width metadata for the imaginary-axis exponential evaluator.
+Both coordinate widths are at most the displayed rational half-decay bound. -/
+def rotationExpRate (T : Rat) : ComplexRaw.Rate (rotationBox T) :=
+  .geometric 0
+    (8 * rotationTailMagnitude T 0)
+    ((1 : Rat) / 2)
+    (by native_decide)
+    (by native_decide)
+    (fun n _ => ⟨rotationBox_width_le_geometric T n,
+      rotationBox_height_le_geometric T n⟩)
+
+/-- A certified complex raw evaluator for the exponential series at `i*T`.
+
+Its finite centers are rotation prefixes and its symmetric rational boxes have
+an explicit factorial-tail, half-geometric convergence rate. -/
+def rotationExpRaw (T : Rat) : ComplexRaw where
+  compute := rotationBox T
+  rate := rotationExpRate T
+
+theorem rotationExpRaw_compute (T : Rat) (n : Nat) :
+    (rotationExpRaw T).compute n = rotationBox T n := rfl
+
+/-- The public rate bound for the checked imaginary-axis exponential
+evaluator. -/
+theorem rotationExpRaw_width_le_geometric (T : Rat) (n : Nat) :
+    ((rotationExpRaw T).compute n).width <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n :=
+  rotationBox_width_le_geometric T n
+
+theorem rotationExpRaw_height_le_geometric (T : Rat) (n : Nat) :
+    ((rotationExpRaw T).compute n).height <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n :=
+  rotationBox_height_le_geometric T n
+
+/-- The factorial-tail boxes around the rotation prefixes form a valid raw
+complex computation.  This establishes the complex convergence layer needed
+before any Euler identity can connect it to geometric trigonometry. -/
+theorem rotationExpRaw_valid (T : Rat) : (rotationExpRaw T).Valid := by
+  unfold ComplexRaw.Valid ComplexRaw.ValidCompute rotationExpRaw
+  constructor
+  · exact rotationBox_ordered T
+  · constructor
+    · intro n m hnm
+      have hnest := rotationBox_nested T n m hnm
+      exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
+    · exact rotationBox_widths_shrink T
 
 end RotationSeries
 
