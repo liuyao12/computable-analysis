@@ -670,13 +670,16 @@ inequalities.
 \lean{ComputableAnalysis.PiProofs.piCircumference_valid}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceDirect}
 \lean{ComputableAnalysis.PiProofs.piCircumferenceDirect_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect_equiv_piCircumferenceFan}
 \lean{ComputableAnalysis.PiProofs.pi.circumferenceDirect}
 \lean{ComputableAnalysis.PiProofs.pi.circumferenceDirect_equiv_circleArea}
+\lean{ComputableAnalysis.PiProofs.pi.circumferenceDirect_equiv_circumference}
 \lean{ComputableAnalysis.PiProofs.piCertified}
 \uses{thm:finite-archimedes,def:raw-real}
 Both the area loop and the original chord path are valid raw reals.  The
 latter is available as \code{pi.circumferenceDirect}; the separately named
-cross-fan and interval normalizations remain useful regression computations.
+cross-fan view is directly equivalent to it, while the interval normalizations
+remain useful regression computations.
 \code{PiCoverageBridge} counts calculus capabilities, not these equivalent
 implementations.
 \end{theorem}

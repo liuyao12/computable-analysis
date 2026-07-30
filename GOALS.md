@@ -1294,8 +1294,11 @@ count.  The reciprocal-log triangle formula is instead the primary
   and `PiProofs.piCircumferenceDirect_equiv_piCircleArea` supplies its
   finite Archimedean equivalence.  The named view
   `PiProofs.pi.circumferenceDirect` makes this literal path evaluator
-  available through the abstract pi handle.  This is one geometry capability, not a new
-  scoreboard row.
+  available through the abstract pi handle.
+  `piCircumferenceDirect_equiv_piCircumferenceFan` and
+  `pi.circumferenceDirect_equiv_circumference` now make its agreement with
+  the default cross-fan circumference view explicit.  This is one geometry
+  capability, not a new scoreboard row.
 
 
 - The canonical Leibniz series equivalence is proved by the finite Riemann
