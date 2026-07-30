@@ -101,10 +101,13 @@ formula.  The Machin runtime has its own certified bound
 \(w_n\le20/2^n\), recorded by \code{PiProofs.piMachinRate}; it remains a
 series-regression implementation rather than another coverage row.  Its direct cross-fan view is \code{pi.circumference} (also
 \code{pi.circumferenceFan}).  The abstract \code{piCertified} handle additionally stores the
-supplementary \code{pi.integrationByPartsMesh}, \code{pi.triangleLogSeries}, and
-\code{pi.squareStieltjes} representatives.  They remain useful
-executable comparisons, but are not additional readiness cells: they are variants of the checked
-finite integration-by-parts bridge.  The primary named view
+supplementary \code{pi.dirichletBeta}, \code{pi.integrationByPartsMesh},
+\code{pi.triangleLogSeries}, and \code{pi.squareStieltjes} representatives.
+Here \code{pi.dirichletBeta} is the literal formula
+\(\pi=4L(1,\chi_4)\), stagewise the Leibniz computation.  These are useful
+executable comparisons, but not additional readiness cells: beta reuses the
+alternating-series bridge and the remaining three refine the checked finite
+integration-by-parts bridge.  The primary named view
 \code{pi.integrationByParts} is the reciprocal-log formula itself; its rate
 \(w_n\le52/2^n\) is certified by
 \code{Logarithm.piTriangleLogReciprocalIntegralRate}.  In contrast,

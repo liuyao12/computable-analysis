@@ -6867,6 +6867,27 @@ theorem leibnizSeries_equiv_dirichletLChi4AtOne :
   rw [LeibnizValidity.leibnizSeries_compute_eq n]
   exact ⟨hordered, hordered⟩
 
+/-- The Dirichlet-beta evaluator is a valid raw real: its literal alternating
+state is stagewise the Leibniz evaluator. -/
+theorem dirichletLChi4AtOne_valid :
+    DirichletSeries.dirichletLChi4AtOne.Valid := by
+  simpa [leibnizSeries, DirichletSeries.dirichletLChi4AtOne] using
+    leibnizSeriesValid
+
+/-- The classical Dirichlet-beta presentation of pi, `4 * L(1, chi4)`. -/
+def piDirichletBeta : RealRaw :=
+  (4 : Nat) * DirichletSeries.dirichletBetaAtOne
+
+theorem piDirichletBeta_valid : piDirichletBeta.Valid := by
+  unfold piDirichletBeta DirichletSeries.dirichletBetaAtOne
+  exact RealRaw.natScale_valid 4 dirichletLChi4AtOne_valid
+
+/-- The Dirichlet-beta and Leibniz pi evaluators agree term for term. -/
+theorem piLeibniz_equiv_piDirichletBeta :
+    piLeibniz.Equiv piDirichletBeta := by
+  unfold piLeibniz piDirichletBeta DirichletSeries.dirichletBetaAtOne
+  exact RealRaw.natScale_equiv 4 leibnizSeries_equiv_dirichletLChi4AtOne
+
 theorem fourArctanOneValid :
     ((4 : Nat) * arctan (1 : Rat) : RealRaw).Valid :=
   RealRaw.natScale_valid 4
@@ -17931,6 +17952,7 @@ canonical family covers the scoreboard presentations; the three supplementary
 entries are independently useful finite computations. -/
 inductive PiView where
   | canonical (presentation : PiPresentation)
+  | dirichletBeta
   | integrationByPartsMesh
   | triangleLogSeries
   | squareStieltjes
@@ -17938,6 +17960,7 @@ deriving DecidableEq, Repr
 
 def PiView.raw : PiView -> RealRaw
   | .canonical presentation => piPresentationRaw presentation
+  | .dirichletBeta => piDirichletBeta
   | .integrationByPartsMesh => IntegralIdentities.piFromArctanIntegrationByPartsMesh
   | .triangleLogSeries => Logarithm.piTriangleLogSeries
   | .squareStieltjes => piTriangleLogSquareStieltjes
@@ -17945,6 +17968,7 @@ def PiView.raw : PiView -> RealRaw
 theorem PiView.valid (view : PiView) : view.raw.Valid := by
   cases view with
   | canonical presentation => exact piPresentation_valid presentation
+  | dirichletBeta => exact piDirichletBeta_valid
   | integrationByPartsMesh =>
       exact IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
   | triangleLogSeries => exact Logarithm.piTriangleLogSeries_valid
@@ -17954,6 +17978,13 @@ theorem PiView.equiv_piCircleArea (view : PiView) :
     view.raw.Equiv piCircleArea := by
   cases view with
   | canonical presentation => exact piPresentation_equiv_piCircleArea presentation
+  | dirichletBeta =>
+      exact RealRaw.equiv_trans
+        piDirichletBeta_valid
+        (piPresentation_valid .leibnizSeries)
+        (piPresentation_valid .area)
+        (RealRaw.equiv_symm piLeibniz_equiv_piDirichletBeta)
+        (piPresentation_equiv_piCircleArea .leibnizSeries)
   | integrationByPartsMesh =>
       exact piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
   | triangleLogSeries => exact piTriangleLogSeries_equiv_piCircleArea
@@ -17969,6 +18000,7 @@ def piCertifiedViews : List PiView :=
     .canonical .circumferenceFan,
     .canonical .arctanGeometry,
     .canonical .arctanRectangleIntegral,
+    .dirichletBeta,
     .integrationByPartsMesh,
     .triangleLogSeries,
     .squareStieltjes,
@@ -18100,6 +18132,18 @@ logarithm retained as the literal reciprocal integral on `[1,2]`. -/
 def triangleLogReciprocalIntegral : Real.Representation value := integrationByParts
 
 def leibniz : Real.Representation value := presentation .leibnizSeries
+/-- The Dirichlet-series reading of the Leibniz computation:
+`pi = 4 * L(1, chi4)`.  It is a supplementary named view, not a second
+alternating-series scoreboard cell. -/
+def dirichletBeta : Real.Representation value where
+  raw := piDirichletBeta
+  valid := piDirichletBeta_valid
+  agrees := PiView.equiv_piCircleArea .dirichletBeta
+
+theorem dirichletBeta_equiv_leibniz :
+    dirichletBeta.raw.Equiv leibniz.raw :=
+  RealRaw.equiv_symm piLeibniz_equiv_piDirichletBeta
+
 def nilakantha : Real.Representation value := presentation .nilakanthaSeries
 def machin : Real.Representation value := presentation .machinSeries
 def cauchy : Real.Representation value := presentation .cauchyIntegral
