@@ -17880,19 +17880,67 @@ theorem PiCoverageBridge.equivalent (bridge : PiCoverageBridge) :
     (RealRaw.equiv_symm
       (piPresentation_equiv_piCircleArea bridge.targetPresentation))
 
+/-- The arctangent triangle plus the direct square-Stieltjes logarithm
+evaluator.  Its second summand is the stabilized rational mesh with terms
+`(xᵢ₊₁² - xᵢ²) / (1 + xᵢ²)`.  This is a supplementary executable view of the
+already checked square substitution, not an additional coverage bridge. -/
+def piTriangleLogSquareStieltjes : RealRaw :=
+  (4 : Nat) * Logarithm.arctanIntegralTriangle +
+    (2 : Nat) * Logarithm.logTwoSquareStieltjesRaw
+
+theorem piTriangleLogSquareStieltjes_valid :
+    piTriangleLogSquareStieltjes.Valid := by
+  unfold piTriangleLogSquareStieltjes
+  exact RealRaw.add_valid
+    (RealRaw.natScale_valid 4 Logarithm.arctanIntegralTriangle_valid)
+    (RealRaw.natScale_valid 2 Logarithm.logTwoSquareStieltjesRaw_valid)
+
+/-- The literal Stieltjes substitution and reciprocal-log versions of the
+supplied arctangent formula agree. -/
+theorem piTriangleLogSquareStieltjes_equiv_piTriangleLogReciprocalIntegral :
+    piTriangleLogSquareStieltjes.Equiv
+      Logarithm.piTriangleLogReciprocalIntegral := by
+  have htriangle : ((4 : Nat) * Logarithm.arctanIntegralTriangle).Valid :=
+    RealRaw.natScale_valid 4 Logarithm.arctanIntegralTriangle_valid
+  have hstieltjes : ((2 : Nat) * Logarithm.logTwoSquareStieltjesRaw).Valid :=
+    RealRaw.natScale_valid 2 Logarithm.logTwoSquareStieltjesRaw_valid
+  have hreciprocal :
+      ((2 : Nat) * Logarithm.logTwoReciprocalIntegral).Valid :=
+    RealRaw.natScale_valid 2 Logarithm.logTwoReciprocalIntegral_valid
+  unfold piTriangleLogSquareStieltjes
+    Logarithm.piTriangleLogReciprocalIntegral
+  exact RealRaw.add_equiv htriangle htriangle hstieltjes hreciprocal
+    (RealRaw.equiv_refl ((4 : Nat) * Logarithm.arctanIntegralTriangle)
+      htriangle)
+    (RealRaw.natScale_equiv 2
+      Logarithm.logTwoSquareStieltjesRaw_equiv_reciprocalIntegral)
+
+/-- The direct square-Stieltjes computation is pi by the independently
+certified reciprocal-log integration-by-parts bridge. -/
+theorem piTriangleLogSquareStieltjes_equiv_piCircleArea :
+    piTriangleLogSquareStieltjes.Equiv piCircleArea := by
+  exact RealRaw.equiv_trans
+    piTriangleLogSquareStieltjes_valid
+    Logarithm.piTriangleLogReciprocalIntegral_valid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piTriangleLogSquareStieltjes_equiv_piTriangleLogReciprocalIntegral
+    piTriangleLogReciprocalIntegral_equiv_piCircleArea
+
 /-- Every raw algorithm placed directly in the abstract π registry.  The
-canonical family covers the scoreboard presentations; the two supplementary
+canonical family covers the scoreboard presentations; the three supplementary
 entries are independently useful finite computations. -/
 inductive PiView where
   | canonical (presentation : PiPresentation)
   | integrationByPartsMesh
   | triangleLogSeries
+  | squareStieltjes
 deriving DecidableEq, Repr
 
 def PiView.raw : PiView -> RealRaw
   | .canonical presentation => piPresentationRaw presentation
   | .integrationByPartsMesh => IntegralIdentities.piFromArctanIntegrationByPartsMesh
   | .triangleLogSeries => Logarithm.piTriangleLogSeries
+  | .squareStieltjes => piTriangleLogSquareStieltjes
 
 theorem PiView.valid (view : PiView) : view.raw.Valid := by
   cases view with
@@ -17900,6 +17948,7 @@ theorem PiView.valid (view : PiView) : view.raw.Valid := by
   | integrationByPartsMesh =>
       exact IntegralIdentities.piFromArctanIntegrationByPartsMesh_valid
   | triangleLogSeries => exact Logarithm.piTriangleLogSeries_valid
+  | squareStieltjes => exact piTriangleLogSquareStieltjes_valid
 
 theorem PiView.equiv_piCircleArea (view : PiView) :
     view.raw.Equiv piCircleArea := by
@@ -17908,6 +17957,7 @@ theorem PiView.equiv_piCircleArea (view : PiView) :
   | integrationByPartsMesh =>
       exact piFromArctanIntegrationByPartsMesh_equiv_piCircleArea
   | triangleLogSeries => exact piTriangleLogSeries_equiv_piCircleArea
+  | squareStieltjes => exact piTriangleLogSquareStieltjes_equiv_piCircleArea
 
 /-- The finite registry of non-preferred π computations.  'PiView.canonical'
 keeps the table tied to the public coverage presentations rather than to
@@ -17921,6 +17971,7 @@ def piCertifiedViews : List PiView :=
     .canonical .arctanRectangleIntegral,
     .integrationByPartsMesh,
     .triangleLogSeries,
+    .squareStieltjes,
     .canonical .arctanIntegrationByParts,
     .canonical .arctanSquareSubstitution,
     .canonical .leibnizSeries,
@@ -18031,6 +18082,18 @@ def triangleLogSeries : Real.Representation value where
   raw := Logarithm.piTriangleLogSeries
   valid := Logarithm.piTriangleLogSeries_valid
   agrees := piTriangleLogSeries_equiv_piCircleArea
+
+/-- The literal finite Stieltjes implementation of the checked square
+substitution, retained in the primary abstract pi registry as a supplementary
+algorithmic view. -/
+def squareStieltjes : Real.Representation value where
+  raw := piTriangleLogSquareStieltjes
+  valid := piTriangleLogSquareStieltjes_valid
+  agrees := piTriangleLogSquareStieltjes_equiv_piCircleArea
+
+theorem squareStieltjes_equiv_squareSubstitution :
+    squareStieltjes.raw.Equiv squareSubstitution.raw :=
+  representations_equiv squareStieltjes squareSubstitution
 
 /-- The same supplied arctangent integration-by-parts formula with its
 logarithm retained as the literal reciprocal integral on `[1,2]`. -/

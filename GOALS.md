@@ -528,7 +528,7 @@ another. The Pi score stays useful only as secondary integration coverage.
   `PiProofs.piTriangleLogSquareStieltjes` combines that stabilized
   Stieltjes logarithm with the finite arctangent triangle.  Its validity and
   equivalence to both the reciprocal-log formula and area pi are checked in
-  `PiStieltjesBridge.lean`; `pi.squareStieltjes` exposes it as a
+  `PiProofs.lean`; `pi.squareStieltjes` exposes it as a
   supplementary algorithmic view, not another coverage row.
   The first arctangent--logarithm integration-by-parts strip is now a
   separate literal certified integral, not just a scaled notation:
