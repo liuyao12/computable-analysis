@@ -25,7 +25,7 @@ though neither creates a new pi row.
 \hline
 Finite Archimedes theorem &
 exact rational circle fans, square-root enclosures, and nested interval bounds &
-cross-fan: \(w_n\le 10/(n+1)\) &
+direct chord and cross-fan: \(w_n\le 10/(n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
 Arctangent series theorem &
 circular inverse geometry against the alternating arctangent series &
@@ -115,17 +115,11 @@ with rate \(w_n\le56/2^n\), certified by
 yet transports the logarithm to the canonical inverse-exponential
 presentation.
 
-The direct \code{piCircumference} evaluator remains a geometric diagnostic:
-its unresolved lower-endpoint refinement is a local square-root-enclosure
-problem, not a missing calculus gate.  Lean now states the sharper secant-margin
-condition: two cubic-scale rational secant certificates for the fine chords,
-less their explicit bisection widths, must dominate the coarse squared chord.
-Its checked reduction yields the original endpoint refinement.  The older
-curvature route has now discharged its geometric squared-chord comparison by
-an exact midpoint-certificate theorem; its only remaining part is likewise the
-explicit bisection-width loss.  The universal secant-margin inequality is
-still the direct open proof obligation.  This is diagnostic progress only, not
-a new row.
+The original \code{piCircumference} evaluator is now valid.  Exact rational
+checks cover stages \(1,2,4,8\); a fourth-order secant--curvature margin and a
+dyadic exponent bound cover every later stage.  The resulting
+\code{PiProofs.piCircumferenceDirect\_equiv\_piCircleArea} strengthens the
+existing geometric row rather than adding a second scoreboard capability.
 The checked finite integration-by-parts and square-substitution rows are
 deliberately narrower than the future canonical formulation.  The former's
 exact finite acceptance contract is stated in

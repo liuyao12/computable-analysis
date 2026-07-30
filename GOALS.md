@@ -1274,7 +1274,8 @@ count.  The reciprocal-log triangle formula is instead the primary
   decreasing `[0,1]` Cauchy-kernel branches.  Its direct pi raw evaluator has
   width at most `16 / (n + 1)`.  This is a concrete piecewise-monotone
   assembly regression, not another arctangent-series entry.
-  The original direct perimeter is a square-root-enclosure diagnostic;
+  The original direct perimeter is now a certified square-root-enclosure
+  computation;
   arcsine/Newton and Gaussian are future inverse/integral and
   exponential/full-line probes.  Basel and Brouncker are advanced-analysis
   topics outside the scientific-calculus progress board.  Euler identity with
@@ -1286,35 +1287,15 @@ count.  The reciprocal-log triangle formula is instead the primary
   epsilon--delta continuity and extension, finite integration/FTC, inverse
   functions, differentiated elementary functions, and continuous ODE
   solution operators.
-- The remaining direct `piCircumference` lower-endpoint step is now isolated
-  as `AdjacentChordCurvatureMarginCoversFineWidths`.  A rational curvature
-  chord certificate and its explicit bisection-width loss are checked, and
-  `adjacentChordLowerRefinesByDoubling_of_curvatureMargin` turns that one
-  finite margin inequality into the original local refinement theorem.  The
-  still-open work is the universal rational margin estimate itself, not an
-  appeal to real square roots or completeness.
-  The one- and two-cell secant-budget instances are independently proved by
-  `adjacentChordSecantMarginCoversFineDyadicBudget_one` and
-  `adjacentChordSecantMarginCoversFineDyadicBudget_two`, with matching
-  `adjacentChordLowerRefinesByDoubling_*` consequences. They discharge finite
-  base stages but deliberately make no claim about all positive stages.
-  `RationalCircle.Stage.secantChordLower` now provides a stronger generic
-  rational lower certificate, `c + d^2/(2*c+d)` for chord cross product `c`
-  and dot deficit `d`. Its proved squared remainder
-  `2*c*d^3/(2*c+d)^2` supplies the cubic correction scale appropriate to the
-  next version of that local margin argument.  This scale is now quantitative:
-  `secantChordLower_point_ge_cross_add_cube_eighth` proves, on every chart
-  chord `0 <= u < v <= 1`, the lower gain
-  `secantChordLower >= cross + (v-u)^3/8`; the checked adjacent-cell
-  specialization gives a gain of one eighth of the cube of the local mesh.
-  The interface theorem
-  `PiProofs.adjacentSecantChordLower_sub_width_le_segment_lo` now transports
-  this certificate through the exact bisection width to each actual direct
-  chord lower endpoint.  `PiProofs.AdjacentChordSecantMarginCoversFineWidths`
-  now states the resulting universal rational inequality exactly, and
-  `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin` transports it
-  to the original local endpoint refinement.  Proving that uniform secant
-  margin remains a prerequisite, not a new Pi-scoreboard row.
+- Direct `piCircumference` is now complete.  `CircumferenceBridge.innerChordLowerRefinement`
+  combines exact rational checks at stages `1, 2, 4, 8` with a uniform
+  fourth-order secant--curvature budget for every later dyadic stage.
+  `PiProofs.piCircumference_valid` then certifies the original evaluator,
+  and `PiProofs.piCircumferenceDirect_equiv_piCircleArea` supplies its
+  finite Archimedean equivalence.  This is one geometry capability, not a new
+  scoreboard row.
+
+
 - The canonical Leibniz series equivalence is proved by the finite Riemann
   bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
   a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
@@ -1375,74 +1356,14 @@ count.  The reciprocal-log triangle formula is instead the primary
   scoreboard deliberately uses it only for the Leibniz endpoint and the two
   power-series inputs in the single Machin formula; auxiliary arctangent
   addition identities are not separate pi computations.
-- The exact stage bridge
-  `ArctanGeometry.piCircleArea_compute_eq_piCircleAreaPolygon_compute` now
-  proves `PiProofs.PiCircleAreaPolygonAgreement`; with finite Archimedes this
-  gives the raw equivalence
-  `PiProofs.piCircumference_equiv_piCircleArea_of_verified_area_polygon` and
-  promotes the polygon scaffolding computation to a valid raw real through
-  `PiProofs.areaPolygonValid`.  `PiProofs.piCircumferenceStabilized` is now a
-  valid finite-prefix stabilization of the direct perimeter intervals. Its
-  evaluator sees only direct chord-path intervals and the public rational
-  radius `4/(n+1)`; `piCircleArea` is used only proof-side to certify that
-  radius. It is formally equivalent to both `piCircumference` and
-  `piCircleArea`. `PiProofs.piCircumferenceReboxed` remains the older
-  area-reading normalization. `PiProofs.piCertified : Real` uses the area loop
-  as its preferred evaluator and records every canonical completed Pi route as
-  a checked alternative. `PiProofs.PiPresentation` gives those routes stable
-  names, and `PiProofs.piCertifiedPresentation` retrieves a certified raw
-  representative without depending on a list position. This turns the Pi
-suite into an integration registry rather than a progress percentage. The
-supplementary `PiProofs.pi.integrationByPartsMesh` and
-`PiProofs.pi.triangleLogSeries` expose checked named
-`Real.Representation`s, stored directly in `piCertified.alternatives`; they
-  are not additional calculus-coverage rows.  The literal reciprocal-log
-  triangle formula is the primary `PiProofs.pi.integrationByParts` view and
-  does count as the supplied finite bridge.  The distinct
-  `PiProofs.pi.squareSubstitution` view likewise counts because it exercises
-  the finite `t = x*x` pullback certificate; the general
-  arctangent--logarithm integration-by-parts and substitution theorems remain
-  open.
-  The stabilization remains a reusable interval-normalization bridge, not a
-  substitute for the direct `piCircumference` validity proof: the original
-  algorithm still lacks the one-step refinement certificate, so the canonical
-  row remains uncounted.
-  The direct rational endpoint condition has an executable regression proof
-  through the first twelve dyadic transitions in
-  `PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve`; the required
-  all-stage theorem remains open.  The exact tangent-geometry half is now
-  symbolic rather than experimental: `adjacentTangentCrossClosedForm` gives
-  each outer tangent cell a denominator-cleared rational length, and
-  `outerFanPerimeter_refinesByDoubling_withZeroGap` proves that the exact
-  outer tangent fan decreases by an explicit positive first-cell gap under
-  every dyadic subdivision.  The certified bisection-width schedule is below
-  that gap, so `outerQuarterLength_hi_refinesByDyadicStage` proves the outer
-  (circumscribed) endpoint at every public stage.  The complementary exact
-  inner geometry is now also symbolic:
-  `innerFanPerimeter_refinesByDoubling` proves that the rational inscribed
-  chord cross-product fan increases under every dyadic subdivision.  This is
-  an exact sector-area fan, not the chord-path length: it improves the
-  Archimedes geometry but cannot on its own transport the direct lower
-  endpoint of the original `piCircumference` evaluator.  It does, however,
-  give a separate direct raw computation: `piCircumferenceFan` uses this
-  exact rational cross-fan as its lower endpoint and the original
-  circumscribed path-length upper endpoint.  Lean proves its ordered nested
-  brackets and explicit `10/(n+1)` width modulus in
-  `piCircumferenceFan_valid`, then proves
-  `piCircumferenceFan_equiv_piCircleArea` from the common inscribed-polygon
-  lower endpoint.  The original chord-length lower path remains isolated as
-  `AdjacentChordLowerRefinesByDoubling`: a local comparison between the
-  bisection lower enclosure of each coarse chord and the two lower enclosures
-  of its refined chords.  Lean proves that this finite local condition lifts
-  to the entire quarter path through
-  `innerQuarterLength_lo_refinesByDoubling_of_adjacentChordLowerRefines`, and
-  `circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement`
-  combines its all-stage form with the proved outer endpoint.  The original
-direct circumference row remains uncounted until that local bisection
-comparison is proved.  The distinct curvature-corrected fan now has a
-The independently certified cross-fan remains available as
-`pi.circumference`; it is the direct Archimedean presentation used by the
-geometry bridge, while the original chord path remains diagnostic.
+- The finite Archimedes comparison aligns the polygon and circumference
+  computations.  `PiProofs.piCircumference_valid` now closes the original
+  chord-path evaluator itself, and `PiProofs.piCircumferenceDirect` is its
+  certified `Real` handle.  The cross-fan, stabilization, and reboxing
+  remain useful regression views.  `PiProofs.piCertified` continues to use
+  the area loop as its preferred representation and records the checked
+  alternatives without treating implementation variants as extra score rows.
+
 
 ### Archived pre-refactor notes (not current source)
 

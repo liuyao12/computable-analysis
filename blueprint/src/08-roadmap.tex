@@ -61,9 +61,10 @@ completeness principle is available or planned as a proof shortcut.
   identity to prove that the geometric and power-series arctangents agree on
   \([0,1]\), giving the analytic bridge needed for pi.
 
-  \item Finish geometric pi validity:
-  the area loop now has a direct validity proof; finish circumference validity
-  through its all-stage dyadic endpoint-refinement theorem.
+  \item Geometric pi validity is complete:
+  the direct area and circumference raw evaluators are certified and
+  equivalent.  Further geometry work is therefore optional infrastructure rather
+  than a prerequisite for calculus.
 
   \item Choose an FTA route:
   either develop algebraic complex numbers with isolation boxes, or develop
@@ -147,6 +148,10 @@ proving arbitrary real-world models.
 \lean{ComputableAnalysis.piMachin}
 \lean{ComputableAnalysis.piCircleArea}
 \lean{ComputableAnalysis.piCircumference}
+\lean{ComputableAnalysis.PiProofs.innerChordLowerRefinement}
+\lean{ComputableAnalysis.PiProofs.piCircumference_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.machinValid}
 \lean{ComputableAnalysis.PiProofs.fourArctanOneValid}
 \lean{ComputableAnalysis.PiProofs.areaValid_of_nested_and_shrinking}
@@ -1002,66 +1007,16 @@ integration output---interchangeable checked computations.  The compact
 \code{PiProofs.PiCoverageBridge} layer selects one equivalence per distinct
 capability, without treating the number of formulas as a measure of calculus
 completeness.
-The sharper public completion package is
-\code{PiProofs.CompletionCircumferenceQuarterLengthRemainders}: it reuses the
-proved area-loop validity and the proved circumference width shrinkage, leaving
-only the two dyadic quarter-path endpoint inequalities and the analytic
-arctangent agreements.  Lean promotes those two quarter-path
-inequalities to public step refinement through
-\code{PiProofs.circumferenceStepRefines\_of\_quarterLengthStepRefines}.  The
-same exact endpoint-refinement target is certified through \(n\le12\) as
-\code{PiProofs.circumferenceQuarterLengthStepRefinesUpToTwelve}, and promoted
-to public compute steps by
-\code{PiProofs.circumferenceStepRefinesUpToTwelve}; the \(n\le8\) wrapper is a
-cheap consequence.  This is a finite regression certificate, not the full
-circumference-validity row.  The dyadic endpoint reuse facts for the rational circle are named as
-\code{PiProofs.circleSamplePoint\_double\_index} and
-\code{PiProofs.circleSamplePoint\_double\_index\_succ}.
-The outer tangent geometry itself is now settled symbolically: the exact
-rational cell length is \code{PiProofs.adjacentTangentCrossClosedForm}, and
-\code{PiProofs.outerFanPerimeter\_refinesByDoubling\_withZeroGap} proves
-that its full outer fan decreases by an explicit positive first-cell gap under
-every dyadic subdivision.  The sharper certified bisection-width budget
-\code{PiProofs.outerQuarterLength\_width\_le\_sharp} is below that gap at
-each public stage, so
-\code{PiProofs.outerQuarterLength\_hi\_refinesByDyadicStage} proves the
-circumscribed upper endpoint outright.  Thus the sole remaining all-stage
-endpoint proof is the corresponding inscribed lower-path estimate.  Its
-rational geometric half is now explicit too:
-\code{PiProofs.adjacentChordCross\_refinesByDoubling} proves the local
-chord-cross inequality and
-\code{PiProofs.innerFanPerimeter\_refinesByDoubling} lifts it to the whole
-fan.  This fan is a sum of rational cross-products, hence has the sector-area
-normalization used by the Archimedes comparison; it is not the chord-path
-length itself.  Its refinement is therefore useful geometry, but it cannot
-by itself transport the inscribed lower endpoint.  The remaining direct
-endpoint proof has now been reduced to those local same-units comparisons:
-\code{PiProofs.AdjacentChordLowerRefinesByDoubling} says that the bisection
-lower enclosure of a coarse chord is bounded by the sum of the lower
-enclosures of its two refined chords.  Lean lifts this finite condition across
-the whole quarter path through
-\code{PiProofs.innerQuarterLength\_lo\_refinesByDoubling\_of\_adjacentChordLowerRefines}.
-The all-stage package \code{PiProofs.InnerChordLowerRefinement}, combined
-with the already proved outer inequality, gives the direct refinement target
-through
-\code{PiProofs.circumferenceQuarterLengthStepRefines\_of\_adjacentChordLowerRefinement}.
-Proving the local bisection comparison remains necessary for the original
-chord-length evaluator \code{piCircumference}.  The exact cross fan does now
-complete a distinct direct Archimedean representative:
-\code{PiProofs.piCircumferenceFan} evaluates the rational inscribed
-cross-product fan as its lower endpoint and the original circumscribed
-polygonal path as its upper endpoint.  It is not an anchor reboxing.  Lean
-proves ordered dyadic brackets in
-\code{PiProofs.piCircumferenceFan\_valid}, with width at most
-\(10/(n+1)\), and proves its exact agreement with the area-loop baseline in
-\code{PiProofs.piCircumferenceFan\_equiv\_piCircleArea}.  Consequently this
-new row counts on the scoreboard, while the original circumference row remains
-pending.
-The proposed curvature-corrected cross-fan remains an internal design note,
-not a checked representative or scoreboard row.  Its finite rational
-correction must first be shown self-containedly to remain below the outer
-envelope and to refine under dyadic subdivision; it is not a substitute for
-the remaining chord-path refinement proof.
+The direct perimeter proof is complete:
+\code{PiProofs.innerChordLowerRefinement} checks the finite stages
+\(1,2,4,8\) and proves a rational fourth-order margin for all later dyadic
+stages.  It yields \code{PiProofs.piCircumference\_valid}; the certified
+\code{PiProofs.piCircumferenceDirect} is equivalent to the area evaluator by
+\code{PiProofs.piCircumferenceDirect\_equiv\_piCircleArea}.  The cross-fan,
+stabilization, and reboxing remain regression implementations, not additional
+scoreboard rows.
+
+
 The width-bound target has been sharpened to
 \code{PiProofs.CircumferenceQuarterGapLinearBound}: Lean proves
 \code{PiProofs.piCircumference\_compute\_width\_eq}, reducing the public
