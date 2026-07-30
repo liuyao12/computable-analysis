@@ -9,7 +9,6 @@ PDF fallback use the exact final GIF frame.
 
 from __future__ import annotations
 
-from math import ceil
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -20,16 +19,18 @@ ASSET_DIR = ROOT / "blueprint" / "src" / "assets"
 GIF_PATH = ASSET_DIR / "rational-circle-subdivision.gif"
 PNG_PATH = ASSET_DIR / "rational-circle-subdivision.png"
 
-WIDTH, HEIGHT = 1400, 900
-CENTER = (480, 650)
-RADIUS = 380
+# Keep the source itself narrower than a typical reading column.  The web
+# renderer preserves the GIF's intrinsic size if it cannot interpret a TeX
+# relative width, so a compact canvas also prevents horizontal scrolling.
+WIDTH, HEIGHT = 720, 580
+CENTER = (330, 430)
+RADIUS = 250
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)
 AXIS = (111, 126, 140, 255)
-BLUE = (37, 99, 235, 255)
-BLUE_FAINT = (37, 99, 235, 76)
+PROJECTION = (148, 163, 184, 255)
 TEAL = (13, 148, 136, 255)
-TEAL_FILL = (225, 247, 243, 255)
+TEAL_FILL = (176, 227, 219, 255)
 CORAL = (234, 88, 12, 255)
 ARC = (52, 64, 76, 255)
 GRID = (148, 163, 184, 255)
@@ -59,9 +60,7 @@ def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.Im
     return ImageFont.load_default()
 
 
-TITLE_FONT = font(38, bold=True)
-LABEL_FONT = font(25)
-SMALL_FONT = font(21)
+SMALL_FONT = font(17)
 
 
 def point(t: float) -> tuple[float, float]:
@@ -86,52 +85,11 @@ def tangent_intersection(
     return ((q[1] - p[1]) / determinant, (p[0] - q[0]) / determinant)
 
 
-def draw_dashed_line(
-    draw: ImageDraw.ImageDraw,
-    start: tuple[float, float],
-    end: tuple[float, float],
-    fill: tuple[int, int, int, int],
-    width: int,
-    dash: int = 16,
-    gap: int = 11,
-) -> None:
-    """Draw a crisp dashed segment without a graphics-library dependency."""
-
-    dx, dy = end[0] - start[0], end[1] - start[1]
-    length = (dx * dx + dy * dy) ** 0.5
-    if length == 0:
-        return
-    position = 0.0
-    while position < length:
-        finish = min(position + dash, length)
-        draw.line(
-            (
-                start[0] + dx * position / length,
-                start[1] + dy * position / length,
-                start[0] + dx * finish / length,
-                start[1] + dy * finish / length,
-            ),
-            fill=fill,
-            width=width,
-        )
-        position += dash + gap
-
-
 def dot(draw: ImageDraw.ImageDraw, p: tuple[float, float], radius: int, fill: tuple[int, int, int, int]) -> None:
     draw.ellipse((p[0] - radius, p[1] - radius, p[0] + radius, p[1] + radius), fill=fill)
 
 
-def text_centered(
-    draw: ImageDraw.ImageDraw,
-    xy: tuple[float, float],
-    text: str,
-    fill: tuple[int, int, int, int],
-    used_font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
-) -> None:
-    draw.text(xy, text, font=used_font, fill=fill, anchor="mm")
-
-
-def stage_frame(subdivisions: int, iteration: int) -> Image.Image:
+def stage_frame(subdivisions: int) -> Image.Image:
     """Render one rational parameter subdivision stage."""
 
     image = Image.new("RGBA", (WIDTH, HEIGHT), WHITE)
@@ -156,17 +114,22 @@ def stage_frame(subdivisions: int, iteration: int) -> Image.Image:
     circle_points = [point(value) for value in values]
     raster_points = [screen(p) for p in circle_points]
 
-    # Equal vertical marks and their rays are the main visual explanation.
-    draw.line((origin, top), fill=(100, 116, 139, 255), width=5)
+    # The coloured wedge is precisely the inscribed polygon whose area is the
+    # lower certificate.  Draw it before the construction rays so both remain
+    # visible in every GIF frame.
+    draw.polygon([origin, *raster_points], fill=TEAL_FILL)
+
+    # Equal vertical marks and the straight projection segments encode the
+    # rational parametrisation.  Each segment from (-1, 0) reaches its point
+    # on the arc; the thin neutral grey keeps it subordinate to the area data.
+    draw.line((origin, top), fill=(100, 116, 139, 255), width=4)
     for value, endpoint in zip(values, raster_points):
         height = screen((0, value))
-        draw.line((west, height, endpoint), fill=BLUE_FAINT, width=3)
-        draw.line((height[0] - 9, height[1], height[0] + 9, height[1]), fill=GRID, width=3)
-        dot(draw, height, 6, BLUE)
+        draw.line((west, endpoint), fill=PROJECTION, width=2)
+        draw.line((height[0] - 7, height[1], height[0] + 7, height[1]), fill=GRID, width=2)
+        dot(draw, height, 4, AXIS)
 
-    # The visible wedge is the inscribed polygon, not an arbitrary shaded arc.
-    draw.polygon([origin, *raster_points], fill=TEAL_FILL)
-    draw.line(raster_points, fill=TEAL, width=8, joint="curve")
+    draw.line(raster_points, fill=TEAL, width=6, joint="curve")
 
     # The tangent-intersection chain is the circumscribed polygon.
     tangent_points = [
@@ -175,30 +138,13 @@ def stage_frame(subdivisions: int, iteration: int) -> Image.Image:
     ]
     outer_chain = [raster_points[0], *tangent_points, raster_points[-1]]
     for left, right_point in zip(outer_chain, outer_chain[1:]):
-        draw_dashed_line(draw, left, right_point, CORAL, width=6)
+        draw.line((left, right_point), fill=CORAL, width=4)
 
     # Points are drawn last so the rational samples remain unmistakable.
     for sample in raster_points:
-        dot(draw, sample, 8, INK)
-    dot(draw, origin, 8, INK)
-    dot(draw, west, 8, INK)
-
-    # A compact visual legend replaces paragraph-level prose in the original figure.
-    text_centered(draw, (1050, 128), "rational-circle refinement", INK, TITLE_FONT)
-    text_centered(
-        draw,
-        (1050, 182),
-        f"iteration {iteration}:  {subdivisions} equal vertical pieces",
-        INK,
-        LABEL_FONT,
-    )
-    legend_x, legend_y = 970, 275
-    draw.line((legend_x, legend_y, legend_x + 86, legend_y), fill=BLUE, width=5)
-    draw.text((legend_x + 108, legend_y), "projection rays", font=LABEL_FONT, fill=INK, anchor="lm")
-    draw.line((legend_x, legend_y + 57, legend_x + 86, legend_y + 57), fill=TEAL, width=8)
-    draw.text((legend_x + 108, legend_y + 57), "inscribed polygon", font=LABEL_FONT, fill=INK, anchor="lm")
-    draw_dashed_line(draw, (legend_x, legend_y + 114), (legend_x + 86, legend_y + 114), CORAL, width=6)
-    draw.text((legend_x + 108, legend_y + 114), "circumscribed polygon", font=LABEL_FONT, fill=INK, anchor="lm")
+        dot(draw, sample, 6, INK)
+    dot(draw, origin, 6, INK)
+    dot(draw, west, 6, INK)
 
     draw.text((west[0] - 10, west[1] + 39), "(-1, 0)", font=SMALL_FONT, fill=INK, anchor="mm")
     draw.text((origin[0] + 1, origin[1] + 39), "0", font=SMALL_FONT, fill=INK, anchor="mm")
@@ -206,19 +152,13 @@ def stage_frame(subdivisions: int, iteration: int) -> Image.Image:
     draw.text((right[0] + 22, right[1] + 36), "P(0)", font=SMALL_FONT, fill=INK, anchor="mm")
     draw.text((top[0] + 48, top[1] - 20), "P(1)", font=SMALL_FONT, fill=INK, anchor="mm")
 
-    # A short progress indicator makes the loop readable even when viewed once.
-    bar_x, bar_y, bar_width = 980, 770, 300
-    draw.rounded_rectangle((bar_x, bar_y, bar_x + bar_width, bar_y + 12), radius=6, fill=(226, 232, 240, 255))
-    completed = iteration / 4
-    draw.rounded_rectangle((bar_x, bar_y, bar_x + ceil(bar_width * completed), bar_y + 12), radius=6, fill=BLUE)
-    draw.text((1130, 814), "vertical marks → rational arc points", font=SMALL_FONT, fill=INK, anchor="mm")
     return image
 
 
 def main() -> None:
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
     stages = [1, 2, 4, 8]
-    frames = [stage_frame(subdivisions, index) for index, subdivisions in enumerate(stages, start=1)]
+    frames = [stage_frame(subdivisions) for subdivisions in stages]
     frames[-1].save(PNG_PATH, format="PNG", optimize=True)
     frames[0].save(
         GIF_PATH,

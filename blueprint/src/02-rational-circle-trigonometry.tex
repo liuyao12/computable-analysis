@@ -3,20 +3,8 @@
 
 \section{Archimedes' Method of Exhaustion}
 
-Archimedes' method of exhaustion computes the area of the unit disk by
-trapping it between an inscribed polygon and a circumscribed polygon, then
-refining the polygons until the two areas are forced close together.  The
-classical presentation starts with a hexagon and repeatedly doubles the number
-of sides, producing regular \(6\cdot2^n\)-gons.  That version is geometrically
-natural, but its vertices generally have coordinates involving square roots
-and other non-rational quantities.  It is therefore not the most transparent
-first algorithm for a blueprint whose basic data are rational intervals.
-
-We instead use the rational parametrization of the circle.  Put the parameter
-segment on the vertical unit radius, from \((0,0)\) to \((0,1)\), and for
-\(t\in[0,1]\cap\Q\) take the point \((0,t)\) on that radius.  The line
-through \((-1,0)\) and \((0,t)\) has slope \(t\), and meets the unit circle
-again at
+For \(t\in[0,1]\cap\Q\), project \((0,t)\) from \((-1,0)\) to the unit
+circle:
 \[
   P(t)=
   \left(
@@ -24,18 +12,6 @@ again at
     \frac{2t}{1+t^2}
   \right).
 \]
-This is the normalized version of the classical parametrization of
-Pythagorean triples: Euclid already knew that triples of the form
-\[
-  (r^2-s^2,\,2rs,\,r^2+s^2)
-\]
-satisfy the Pythagorean equation, and dividing by \(r^2+s^2\) gives a rational
-point on the unit circle.  Bisection on the vertical parameter segment keeps
-all data rational, and the corresponding points \(P(t)\) partition the
-quarter-circle.  Polygonal area is then especially convenient: determinants
-of rational coordinates are rational, so no square-root subroutine is needed.
-Thus the first computation of \(\pi\) in this development is an area
-computation, not a circumference computation.
 
 \begin{remark}[Rational circle parametrization]
 \label{rem:rational-circle-point}
@@ -46,8 +22,6 @@ def circle_point(t):
     d = 1 + t*t
     return Point((1 - t*t) / d, (2*t) / d)
 \end{verbatim}
-The animation below reads \(t\) directly as a height on the vertical radius;
-projection from \((-1,0)\) selects \(P(t)\) on the arc.
 \end{remark}
 
 \begin{theorem}[Rational secant lower certificate]
@@ -99,9 +73,7 @@ another \(\pi\) scoreboard row.
 \begin{figure}[!htbp]
 \centering
 \rationalCircleSubdivisionAnimation
-\caption{Equal vertical parameter subdivisions project from \((-1,0)\) to
-rational points on the arc.  Solid teal is the inscribed polygon; dashed
-orange is the circumscribed tangent polygon.}
+\caption{Rational-circle subdivision.}
 \label{fig:rational-parameter-line}
 \end{figure}
 
