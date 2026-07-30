@@ -827,6 +827,10 @@ count, and a cell index \(k<\textit{coarse.subdivisions}\); its inserted odd
 fine index is proved to be exactly the rational midpoint.  Thus downstream
 perimeter work can use the certificate without redoing chart-coordinate
 algebra for a concrete dyadic stage.
+For the actual \(2^n\)-cell schedule of the \(\pi\) evaluator, the specialization
+\code{RationalCircle.dyadicStage\_midpoint\_curvature\_certificate\_refines\_squared\_chord}
+supplies the same statement directly, together with named even- and odd-index
+sample-point identities.
 
 There is also a sharper direct cross-certificate identity.  In
 \code{RationalCircle.Stage}, Lean proves

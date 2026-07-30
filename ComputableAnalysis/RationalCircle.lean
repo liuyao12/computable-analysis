@@ -3304,6 +3304,44 @@ theorem dyadicStage_samplePoint_refineIndex (n k : Nat) :
   Stage.samplePoint_refineIndex_of_refinement
     (dyadicStage_refinesByDoubling n) k
 
+/-- On the public dyadic stage sequence, the new odd sample is the exact
+rational midpoint of its parent chart cell. -/
+theorem dyadicStage_parameter_insertedIndex (n k : Nat) :
+    (dyadicStage (n + 1)).parameter (Stage.insertedIndex k) =
+      (dyadicStage n).parameter k +
+        (1 / ((dyadicStage n).subdivisions : Rat)) / 2 :=
+  Stage.parameter_insertedIndex_of_refinement
+    (dyadicStage_refinesByDoubling n) (dyadicStage_positive n) k
+
+theorem dyadicStage_samplePoint_insertedIndex (n k : Nat) :
+    (dyadicStage (n + 1)).samplePoint (Stage.insertedIndex k) =
+      Stage.point ((dyadicStage n).parameter k +
+        (1 / ((dyadicStage n).subdivisions : Rat)) / 2) :=
+  Stage.samplePoint_insertedIndex_of_refinement
+    (dyadicStage_refinesByDoubling n) (dyadicStage_positive n) k
+
+/-- The curvature-corrected split certificate on the concrete dyadic schedule
+underlying the finite rational-circle π computation. -/
+theorem dyadicStage_midpoint_curvature_certificate_refines_squared_chord
+    (n k : Nat) (hk : k < (dyadicStage n).subdivisions) :
+    Stage.segmentNormSq
+        ((dyadicStage n).samplePoint k)
+        ((dyadicStage n).samplePoint (k + 1)) <=
+      sq (Stage.cross
+            ((dyadicStage (n + 1)).samplePoint (Stage.refineIndex k))
+            ((dyadicStage (n + 1)).samplePoint (Stage.insertedIndex k)) +
+          sq (1 - Stage.dot
+            ((dyadicStage (n + 1)).samplePoint (Stage.refineIndex k))
+            ((dyadicStage (n + 1)).samplePoint (Stage.insertedIndex k))) / 4 +
+          Stage.cross
+            ((dyadicStage (n + 1)).samplePoint (Stage.insertedIndex k))
+            ((dyadicStage (n + 1)).samplePoint (Stage.refineIndex (k + 1))) +
+          sq (1 - Stage.dot
+            ((dyadicStage (n + 1)).samplePoint (Stage.insertedIndex k))
+            ((dyadicStage (n + 1)).samplePoint (Stage.refineIndex (k + 1)))) / 4) :=
+  Stage.midpoint_curvature_certificate_refines_squared_chord_of_refinement
+    (dyadicStage_refinesByDoubling n) (dyadicStage_positive n) k hk
+
 def areaIntervalAt (n : Nat) : QInterval :=
   (dyadicStage n).areaInterval
 
