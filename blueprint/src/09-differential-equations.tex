@@ -179,6 +179,8 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
 \lean{ComputableAnalysis.RotationSeries.expPartial_imaginary_even_split}
+\lean{ComputableAnalysis.RotationSeries.rotationExpRaw_valid}
+\lean{ComputableAnalysis.RotationSeries.rotationExpRaw_width_le_geometric}
 \leanok
 For constant \(A\), the checked degree-\(r\) term is \(T^rA^r/r!\).  For the
 quarter-turn matrix \(J^2=-I\), its even prefix is exactly
@@ -187,9 +189,10 @@ quarter-turn matrix \(J^2=-I\), its even prefix is exactly
  \qquad
  \operatorname{expPrefix}_{2n}(iT)=C_n(T)+iS_n(T).
 \]
+The complex boxes centered at the second prefix are checked valid, with both
+widths bounded by \(8t_0(T)2^{-n}\).
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
-can be reordered.  The continuous exponential and complex-tail conclusions
-remain separate targets.
+can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}
 
 \begin{remark}[Engineering-facing output]

@@ -84,6 +84,7 @@ Start with the smallest target module rather than importing
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
+| Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationExpRaw_valid`, `rotationExpRaw_width_le_geometric` |
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
 
@@ -103,7 +104,7 @@ finished general theorem.
 | Foundation | `Basic`, `Algebraic`, `AlgebraicNumbers`, `AlgebraicFunctions`, `FunctionDomains`, `Extension`, `Calculus`, `Differential`, `MonotonicityConvexity`, `FTC` | Raw interval representations, domains, continuity, inverse branches, finite derivatives, integral/FTC certificate interfaces |
 | Elementary functions and series | `Elementary`, `ElementaryFunctions`, `Exp`, `ExpProofs`, `Logarithm`, `PowerSeries`, `Series`, `Taylor`, `FirstYearCalculus` | Power-series algorithms, rational majorants, exp/log comparison interfaces, and the current formal derivative ledger |
 | Integrals and special computations | `TurningPointIntegral`, `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
-| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, and finite ODE/complex-prefix algebra |
+| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, finite ODE algebra, and the certified imaginary-axis complex series |
 | Polynomial and complex checks | `Polynomial`, `ComplexPolynomial`, `ComplexInterval` | Exact polynomial algebra and rational complex-box root checks |
 
 `Playground`, `MembershipCheck`, and the repair/check files are development
@@ -403,6 +404,20 @@ representations of the same abstract value `e`; it does not establish an
 analytic derivative theorem. Keep constant-level agreement distinct from a
 derivative/ODE certificate for an exponential function.
 
+```lean
+import ComputableAnalysis.RotationSeries
+
+open ComputableAnalysis
+
+#check RotationSeries.rotationCenter_eq_expPartial
+#check RotationSeries.rotationExpRaw
+#check RotationSeries.rotationExpRaw_valid
+#check RotationSeries.rotationExpRaw_width_le_geometric
+```
+
+These names expose the certified complex series at rational imaginary inputs;
+they do not identify its coordinates with geometric trigonometry.
+
 The rational-circle and arctangent code contains useful geometric and
 power-series computations, but normalized-angle sine/cosine/tangent special
 values remain partly target-level.  Consult the green/orange legend in the
@@ -563,9 +578,12 @@ The finite rotation core exposes two matching exact prefix identities:
 `sum_(r < 2*n) T^r/r! * J^r = C_n(T) * I + S_n(T) * J`, while
 `RotationSeries.expPartial_imaginary_even_split` gives
 `expPrefix_(2*n)(i*T) = C_n(T) + i*S_n(T)`. The executable rational prefixes
-are `cosinePrefix` and `sinePrefix`. This is useful finite algebra for a
-future Euler comparison, not a summed continuous matrix series or a valid
-complex exponential raw.
+are `cosinePrefix` and `sinePrefix`. `RotationSeries.rotationExpRaw T` now
+encloses those even prefixes in valid nested complex boxes, and
+`rotationExpRaw_width_le_geometric` bounds both coordinate widths by
+`8 * rotationTailMagnitude T 0 * (1/2)^n`. This is a certified complex
+series computation at rational `i*T`, not yet a summed continuous matrix
+series, geometric trigonometry, or Euler identity.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a
