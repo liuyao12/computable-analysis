@@ -286,14 +286,18 @@ nesting, and an explicit width-shrinking bound directly.
 \lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
 \uses{def:raw-real}
 The first nontrivial computable real number to keep in mind is \(\sqrt2\).
-In pseudocode, with all arithmetic performed in \(\Q\), the stage algorithm is:
+The actual Lean interval evaluator starts from \([0,2]\) and bisects it.  In
+pseudocode, with all arithmetic performed in \(\Q\), it is:
 \begin{verbatim}
 def sqrt2(n):
-    a = 1
+    a = 0
     b = 2
     for _ in range(n):
-        a = (2 + a*b) / (a + b)
-        b = (b + 2/b) / 2
+        m = (a + b) / 2
+        if m*m <= 2:
+            a = m
+        else:
+            b = m
     return [a, b]
 \end{verbatim}
 This is the stage-based version of the precision loop: instead of looping
@@ -304,6 +308,15 @@ contains the positive solution of
 \[
   x^2-2=0.
 \]
+The animation shows six exact finite states of this same rational bisection:
+the teal segment is the current bracket, and the purple point is the next
+rational midpoint whose square selects the retained half.
+\begin{figure}[ht]
+\centering
+\sqrtBisectionAnimation
+\caption{Finite rational bisection brackets for \(\sqrt2\).}
+\label{fig:sqrt-bisection}
+\end{figure}
 Algebraic numbers more generally are solutions of polynomial equations with
 rational coefficients.  They can be represented by interval algorithms that
 isolate a root and then refine the isolating interval.  The Lean square-root

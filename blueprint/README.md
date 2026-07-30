@@ -35,9 +35,10 @@ linked Lean declarations.
 | --- | --- | --- |
 | Rational-circle subdivision | The `Stage` points for (1,2,4,8) equal parameter cells, their projections, and the inscribed/circumscribed polygon bounds | `scripts/generate_rational_circle_animation.py` |
 | Arctangent rectangle enclosure | The lower/right and upper/left endpoint rectangles for (1/(1+t^2)) on the midpoint partitions with (1,2,4,8) cells | `scripts/generate_arctan_rectangle_animation.py` |
+| Square-root bisection | The rational brackets `sqrtBisect 2 k [0,2]` for six finite midpoint comparisons | `scripts/generate_sqrt_bisection_animation.py` |
+| Leibniz series bracket | The exact brackets `piLeibniz.compute n` at stages (1,2,4,8), with their next-term widths | `scripts/generate_leibniz_interval_animation.py` |
 
-Good next candidates are the rational bisection trace for a monotone inverse,
-an alternating-series remainder bracket, a piecewise-monotone integral split,
-and finite Peano--Baker partial sums.  Add one only alongside its precise
-finite evaluator and its checked bounds, never as an illustration of an
-unimplemented completed-real argument.
+Good next candidates are a piecewise-monotone integral split and finite
+Peano--Baker partial sums.  Add one only alongside its precise finite
+evaluator and its checked bounds, never as an illustration of an unimplemented
+completed-real argument.
