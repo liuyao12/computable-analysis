@@ -265,8 +265,7 @@ Summing the cells gives the finite integration-by-parts identity
 \sum_{i<n}v_{i+1}\Delta u_i
 =u_nv_n-u_0v_0.
 \]
-Thus the proof is literally a tiling of the endpoint-product rectangle by
-two oriented strips.  If both sums use left endpoints, Lean also records the
+If both sums use left endpoints, Lean also records the
 exact corner-area correction
 \[
 \sum_{i<n}u_i\Delta v_i+
@@ -277,16 +276,10 @@ exact corner-area correction
 \begin{figure}[!htbp]
 \centering
 \integrationByPartsAnimation
-\caption{One finite rational product increment: the teal and orange strips
-tile the difference of the two endpoint-product rectangles.}
+\caption{One rational product increment.}
 \label{fig:integration-by-parts-cell}
 \end{figure}
-The same two identities are now exposed for every supplied
-\code{RationalPartition} of a rational interval: sample two rational-valued
-functions at its clamped breakpoints, and the right-hand side is exactly
-\(u(b)v(b)-u(a)v(a)\).  Thus later monotone-piece certificates work with the
-project's explicit common-refinement API rather than having to re-express an
-arbitrary partition as a bare natural-number path.
+The same identities are checked for every supplied \code{RationalPartition}.
 On an increasing piece each corner rectangle is nonnegative.  If
 \(\Delta u_i\leq\delta\) on the chosen common refinement, Lean proves the
 sharp finite estimate
@@ -1616,10 +1609,8 @@ an uncontrolled value.  The runtime candidate is the finite interval sum
   I_n^{\mathrm{left}}+M_n+I_n^{\mathrm{right}},
 \]
 and its width shrinks whenever the two supplied outer constructions do.
-For the illustrative polynomial \(f(t)=4-(t^2-2)^2\) on \([0,2]\), the
-turning point is \(\sqrt2\) and the fixed bound is \([0,4]\).  Thus the
-same rational secant--tangent brackets from \cref{fig:sqrt-secant-tangent}
-give the literal staged computation
+For \(f(t)=4-(t^2-2)^2\) on \([0,2]\), the turn is \(\sqrt2\) and
+\(B=[0,4]\):
 \begin{verbatim}
 def single_turn_stage(n):
     l, r = sqrt2(n)
@@ -1628,18 +1619,12 @@ def single_turn_stage(n):
 \begin{figure}[!htbp]
 \centering
 \singleTurnIntegralAnimation
-\caption{A shrinking rational turning bracket, its bounded middle box, and
-the two monotone outer pieces.}
+\caption{A rational single-turn split.}
 \label{fig:single-turn-integral}
 \end{figure}
 
-This is a construction pattern for a \emph{particular} function, not a
-definition saying that every bounded or continuous function has an integral.
-The remaining proof for that function must establish that the three boxes
-enclose its intended integral value.  The
-\code{SingleTurnIntegralCompletion} certificate records exactly this
-function-specific comparison and then applies finite-prefix stabilization; the
-runtime reads only the three-part candidate and its rational radius schedule.
+This is a function-specific construction.  \code{SingleTurnIntegralCompletion}
+supplies its enclosure proof and stabilized raw evaluator.
 \end{theorem}
 
 \begin{theorem}[Derivative-bound FTC package]
@@ -1704,19 +1689,9 @@ runtime reads only the three-part candidate and its rational radius schedule.
 \lean{ComputableAnalysis.concaveFTC}
 \uses{thm:monotone-integral-construction}
 \leanok
-Monotone integrability supplies a valid integral algorithm.  The fundamental
-theorem of calculus supplies something different: an endpoint-equivalence proof
-for that integral algorithm.  The current Lean theorem packages the completed
-derivative-bound route: once finite local derivative bounds on rational
-partition cells enclose both candidate derivative values and primitive endpoint
-differences, the integral raw real is equivalent to the endpoint-difference raw
-real.  Lean also packages the derivative-bound cell-sum algorithm as a
-\code{ConstructionFor} and, once the remaining validity and endpoint-schedule
-bookkeeping is supplied, turns the certificate into a
-\code{DefiniteIdentityFor}.  Endpoint-agreement variants package the scheduled
-endpoint validity and comparison with the canonical endpoint difference.  The
-smallest exact model is \(F(t)=t^2\), with candidate derivative \(2t\) on
-\([0,1]\).  On a dyadic cell \([p,r]\), the finite comparison is
+The FTC package turns finite local derivative and endpoint bounds into a
+\code{DefiniteIdentityFor}.  For \(F(t)=t^2\), \(F'=2t\), on \([0,1]\),
+each dyadic cell \([p,r]\) satisfies
 \(2p(r-p)\leq F(r)-F(p)\leq2r(r-p)\):
 \begin{verbatim}
 def quadratic_ftc_box(n):
@@ -1728,33 +1703,12 @@ def quadratic_ftc_box(n):
 \begin{figure}[!htbp]
 \centering
 \ftcEndpointAnimation
-\caption{Finite endpoint-versus-derivative-rectangle comparison for
-\(F(t)=t^2\).}
+\caption{Finite FTC comparison for \(F(t)=t^2\).}
 \label{fig:ftc-endpoint-comparison}
 \end{figure}
-stage-schedule variants construct this agreement directly from a cofinal
-monotone endpoint precision schedule.  The corresponding
-\code{definiteIdentityFor} constructors whose names end in
-\code{stageSchedule} are the
-domain-aware bridge used by FTC pi routes when the schedule is explicit.
-When an equivalent public \code{generalIntegralFor} construction is also
-available, the matching
-\code{generalDefiniteIdentityFor} constructors whose names end in
-\code{stageSchedule}
-move the same FTC certificate directly into the public general-integral
-interface.
-The
-same domain-aware interface is now available directly for \code{EffectiveFTC},
-its static-dyadic specialization, and the candidate-derivative certificate.
-The curvature certificate
-\code{CurvatureFTCCertificate} is the version needed for both convex and
-concave primitives; the public convex and concave certificates
-\code{ConvexFTCCertificate} and \code{ConcaveFTCCertificate} are
-specializations that convert through it.  The concave specialization is the
-one naturally matched to the arctangent primitive on \([0,1]\).  This is the
-calculus-facing interface needed by the pi routes: an integral row in the
-scoreboard can measure genuine FTC content while still counting only the
-underlying pi computation.
+Stage-schedule variants carry this certificate to the public general-integral
+interface.  Curvature, convex, and concave variants provide the corresponding
+cell bounds; the concave case matches arctangent on \([0,1]\).
 \end{theorem}
 
 \section{The arctangent integral}

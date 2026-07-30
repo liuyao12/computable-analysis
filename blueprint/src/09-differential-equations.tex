@@ -256,16 +256,8 @@ issue.
 \label{thm:finite-peano-baker-enumeration}
 \uses{def:finite-peano-baker-word-sum}
 \leanok
-The checked enumerator contains exactly \(2^N\) words after \(N\) samples.
-Its first three word lists are
-\[
- [\,[]\,],\qquad [\,[],[0]\,],\qquad
- [\,[],[0],[1],[1,0]\,].
-\]
-Thus the two-step expression has the required ordered term \(B_1B_0\), not
-the generally incorrect \(B_0B_1\). These are finite rational computations;
-they do not yet assert convergence as the mesh tends to zero.
-The executable recursion is exactly
+The enumerator has \(2^N\) words after \(N\) samples; at \(N=2\) it includes
+\(B_1B_0\), never \(B_0B_1\).  The executable recursion is
 \begin{verbatim}
 def words(n):
     if n == 0:
@@ -276,8 +268,7 @@ def words(n):
 \begin{figure}[!htbp]
 \centering
 \peanoBakerWordsAnimation
-\caption{Finite chronological word enumeration.  Each coloured tile is a
-rational matrix factor, with the newest selected time on the left.}
+\caption{Finite chronological word enumeration.}
 \label{fig:peano-baker-words}
 \end{figure}
 \end{theorem}
