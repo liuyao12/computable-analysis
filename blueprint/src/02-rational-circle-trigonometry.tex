@@ -56,9 +56,9 @@ It also gives the first-order bound
  \operatorname{cross}(P(u),P(v))\ge\frac{v-u}{2}.
 \]
 For mesh \(h\), the first bound gains \(h^3/8\) over the cross certificate
-(and \(h^3/64\) on each dyadic half-cell).  These are finite rational
-inequalities for the remaining direct-chord diagnostic, not a new \(\pi\)
-scoreboard row.
+(and \(h^3/64\) on each dyadic half-cell).  Together with the curvature
+certificate, this finite margin pays for the square-root enclosures in the
+direct circumference proof below.
 \end{theorem}
 
 \begin{figure}[!htbp]
@@ -627,13 +627,11 @@ geometric fact packaged by the incremental area corrections in
 
 \begin{definition}[Circumference stage algorithm]\label{def:circle-circumference-stage-algorithm}
 \lean{ComputableAnalysis.piCircumference}
+\lean{ComputableAnalysis.PiProofs.innerChordLowerRefinement}
+\lean{ComputableAnalysis.PiProofs.piCircumference_valid}
+\lean{ComputableAnalysis.PiProofs.circumferenceWidthLinearBound_ten}
 \uses{def:circle-area-stage-algorithm}
-The circumference algorithm uses the same inner and outer rational boundaries,
-but replaces polygonal area by path length.  The square-root subroutine is
-therefore part of the proof interface: its stage choices must leave enough
-room for the finite chord and tangent inequalities to close.  In this
-definition, the function named \code{pi} is the circumference algorithm for
-pi.
+The circumference algorithm replaces polygonal area by path length.
 \begin{verbatim}
 def pi(n):
     inner, outer = circle_boundaries(n)
@@ -641,21 +639,11 @@ def pi(n):
     outer_len = path_length_interval(outer, 2**n)
     return [(4*inner_len.lo)/2, (4*outer_len.hi)/2]
 \end{verbatim}
-For adjacent chords with at least two cells, the squared length is at most
-\(1\), so square-root bisection stage \(m\) has width
-\[
-  2^{-(m+9)},
-\]
-giving the dyadic error budget for a coarse chord and its fine successors.
-The remaining margin is a rational inequality between that coarse squared
-chord and two secant certificates minus \(2\cdot2^{-(2s+9)}\).
-The one- and two-cell instances are checked by
-\lean{ComputableAnalysis.PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_one}
-and
-\lean{ComputableAnalysis.PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_two},
-with matching \lean{ComputableAnalysis.PiProofs.adjacentChordLowerRefinesByDoubling_one}
-and \lean{ComputableAnalysis.PiProofs.adjacentChordLowerRefinesByDoubling_two}
-consequences.  The uniform positive-stage inequality remains open.
+The proof is entirely rational: exact checks handle stages \(1,2,4,8\), and
+a fourth-order secant--curvature margin dominates the literal bisection budget
+at every later dyadic stage.  Hence \code{piCircumference} is a valid raw
+real with width at most \(10/(n+1)\), without choosing exact square roots or
+invoking completeness.
 \end{definition}
 
 \begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}
@@ -670,82 +658,24 @@ now identifies the polygon computation with the public increment/decrement
 \code{piCircleArea} loop, yielding
 \code{PiProofs.piCircumference\_equiv\_piCircleArea\_of\_verified\_area\_polygon}.
 It also promotes the polygon computation to a valid raw real through
-\code{PiProofs.areaPolygonValid}.  Validity of \code{piCircumference} remains
-open.
-The proof reduces to finite inequalities comparing inscribed chords and
-outer tangent segments.
+\code{PiProofs.areaPolygonValid}.  With the direct chord-path validity proof,
+\code{PiProofs.piCircumferenceDirect\_equiv\_piCircleArea} identifies the two
+certified evaluators.  All comparisons are finite chord and tangent
+inequalities.
 \end{theorem}
 
 \begin{theorem}[Geometric pi validity status]\label{thm:geometric-pi-validity}
 \lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
-\lean{ComputableAnalysis.PiProofs.circumferenceWidthsShrink}
-\lean{ComputableAnalysis.PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefinesUpToAll_of_stepRefines}
-\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_iff_upToAll}
-\lean{ComputableAnalysis.PiProofs.CircumferenceStepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToAll_of_stepRefines}
-\lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToAll_of_quarterLengthStepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_iff_upToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_stepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_quarterLengthStepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_quarterLengthStepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceStepRemainders_of_quarterLengthStepRefinesUpToAll}
-\lean{ComputableAnalysis.PiProofs.circumferenceStabilizationRadius}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized_valid}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_valid}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.PiPresentation}
-\lean{ComputableAnalysis.PiProofs.piPresentationRaw}
-\lean{ComputableAnalysis.PiProofs.piPresentation_valid}
-\lean{ComputableAnalysis.PiProofs.piPresentation_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piPresentation_equiv}
+\lean{ComputableAnalysis.PiProofs.piCircumference_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCertified}
-\lean{ComputableAnalysis.PiProofs.piCertifiedPresentation}
-\lean{ComputableAnalysis.PiProofs.pi.value}
-\lean{ComputableAnalysis.PiProofs.pi.presentation}
-\lean{ComputableAnalysis.PiProofs.pi.circleArea}
-\lean{ComputableAnalysis.PiProofs.pi.circumference}
-\lean{ComputableAnalysis.PiProofs.pi.circumferenceFan}
-\lean{ComputableAnalysis.PiProofs.pi.circumferenceStabilized}
-\lean{ComputableAnalysis.PiProofs.pi.circumferenceReboxed}
-\lean{ComputableAnalysis.PiProofs.pi.machin}
-\lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
-\lean{ComputableAnalysis.PiProofs.pi.squareSubstitution}
-\lean{ComputableAnalysis.PiProofs.pi.integrationByPartsMesh}
-\lean{ComputableAnalysis.PiProofs.adjacentCurvatureCertificates_refineSquaredChord}
 \uses{thm:finite-archimedes,def:raw-real}
-The area loop is a valid raw real.  The original chord path remains a
-diagnostic: it has ordering and a width modulus, while its all-stage
-lower-endpoint refinement is open.  Its finite-prefix formulation makes the
-remaining task a family of rational certificates, not an appeal to a completed
-real number.
-
-The local geometric part is complete.  The generic midpoint theorem
-\code{RationalCircle.Stage.midpoint\_curvature\_certificate\_refines\_squared\_chord\_of\_refinement}
-proves that a coarse squared chord is bounded by the square of two fine
-curvature certificates.  The declaration above is its direct
-\code{circleSamplePoint} specialization.  The only missing part is paying the
-two finite square-root-bisection widths; this is the explicit condition
-\code{PiProofs.AdjacentChordCurvatureMarginCoversFineWidths}, not a hidden
-completeness argument.
-
-The independently certified cross-fan is the direct Archimedean
-representation \code{pi.circumference}.  The original chord path also has
-the certified finite-prefix normalizations
-\code{pi.circumferenceStabilized} and \code{pi.circumferenceReboxed}; neither
-settles its endpoint-refinement diagnostic.
-
-The project-facing \code{PiProofs.piCertified} value has named, equivalent
-views such as \code{pi.circleArea}, \code{pi.machin}, and
-\code{pi.integrationByParts}.  \code{PiCoverageBridge} records distinct
-calculus capabilities, rather than counting every implementation variant;
-\code{pi.squareSubstitution} is the finite \(t=x^2\) bridge.  The theorem
-\code{pi.representations\_equiv} compares any two named views of this one
-\code{Real} handle.
+Both the area loop and the original chord path are valid raw reals.  The
+latter is exposed as \code{piCircumferenceDirect}; the separately named
+cross-fan and interval normalizations remain useful regression computations.
+\code{PiCoverageBridge} counts calculus capabilities, not these equivalent
+implementations.
 \end{theorem}
 
 \section{Trigonometric Functions}

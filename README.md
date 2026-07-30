@@ -469,27 +469,20 @@ well.  The finite corner correction now has a checked rational vanishing
 schedule on the unit mesh: it is exactly `1/n`, hence at most a requested
 positive epsilon at `n = epsilon.den + 1`.
 
-The direct chord-path route now also has a checked
-`piCircumferenceStabilized` representative. It evaluates only a finite prefix
-of widened chord-path intervals, using the public rational modulus `4/(n+1)`;
-the area loop is used only in the proof that this radius is sound. This is a
-useful general interval-normalization bridge, but deliberately not a new
-coverage bridge: it does not prove the original `piCircumference` endpoints
-refine stage by stage.
-
-The direct proof has a sharper checked boundary: the rational curvature chord
-certificate is converted to a bisection lower bound with its explicit width
-loss, and `AdjacentChordCurvatureMarginCoversFineWidths` states the sole
-remaining finite margin inequality.  Its implication to the original local
-endpoint-refinement condition is formalized; the universal margin proof is
-still open.
+The original direct chord-path evaluator is now certified:
+`PiProofs.piCircumference_valid` combines exact rational checks at stages
+`1, 2, 4, 8` with a fourth-order secant--curvature budget at every later
+dyadic stage.  `PiProofs.piCircumferenceDirect` is its certified `Real`
+handle, and `PiProofs.piCircumferenceDirect_equiv_piCircleArea` proves the
+finite Archimedean equivalence.  The stabilized and reboxed variants remain
+useful interval-normalization regressions, not extra coverage rows.
 
 The useful output of the completed rows is now formalized as a registry rather
 than another percentage. `PiProofs.piCertified : Real` uses `piCircleArea` as
 its preferred evaluator and literally retains every currently certified raw
 route as an equivalent alternative. `PiProofs.PiPresentation` gives the primary routes
 stable names, and `PiProofs.piCertifiedPresentation` retrieves a named
-`Real.Representation`. This includes the geometry, stabilized circumference,
+`Real.Representation`. This includes the geometry, direct circumference,
 single Machin, Leibniz, Nilakantha, rectangle, supplied finite
 integration-by-parts, finite square substitution, Cauchy, and
 reciprocal-quartic routes, together with
@@ -497,7 +490,8 @@ the two certified perimeter normalizations; it excludes
 unproved rows and arbitrary presentation variants. The complementary named
 views make the perimeter provenance readable: `PiProofs.pi.circumference`
 (also `PiProofs.pi.circumferenceFan`) is the direct cross-fan evaluator,
-whereas `PiProofs.pi.circumferenceStabilized` and
+whereas `PiProofs.piCircumferenceDirect` is the certified original chord path,
+and `PiProofs.pi.circumferenceStabilized` and
 `PiProofs.pi.circumferenceReboxed` are the two certified normalizations of
 the original chord path.
 The supplementary views are `PiProofs.pi.integrationByPartsMesh` and
@@ -523,7 +517,7 @@ unmarked long scoreboard target because it exercises the exp/log/ODE chain.
 | --- | --- | --- | --- | --- |
 | `piCircleArea` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [validity](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-pi-validity) | $a_{n+1}=a_n+\Delta_n,\ b_{n+1}=b_n-\nabla_n,\ \pi\in[4a_n,4b_n]$ | ✓ | N/A |
 | `piCircleAreaPolygon` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-area-stage-algorithm), [finite Archimedes bridge](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | rational chord and tangent polygon fans | ✓ | ✓ |
-| `piCircumference` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [comparison](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | $\pi\in[L_n,U_n],\quad U_n-L_n\to0$ | ✗ | ✗ |
+| `piCircumference` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [validity](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-pi-validity) | $\pi\in[L_n,U_n],\quad U_n-L_n\le10/(n+1)$ | ✓ | ✓ |
 | `piCircumferenceFan` | [algorithm](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:circle-circumference-stage-algorithm), [finite Archimedes bridge](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:finite-archimedes) | exact inscribed cross-fan lower bound with circumscribed polygonal upper bound | ✓ | ✓ |
 | **Arctangent routes** | [geom](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [integral](https://liuyao12.github.io/computable-analysis/ch-integrals.html#def:arctan-integral), [series](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#def:arctan-series), [area](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:power-series-arctan-area-pi), [Machin](https://liuyao12.github.io/computable-analysis/ch-infinite-series.html#thm:leibniz-machin) | $\pi=4\arctan(1)=4\int_0^1\frac{dt}{1+t^2}=4\sum_{k\ge0}\frac{(-1)^k}{2k+1}$ |  |  |
 | `4 * arctan.geom(1)` | [definition](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#def:arctan-area-stage-algorithm), [equiv](https://liuyao12.github.io/computable-analysis/ch-rational-circle-trigonometry.html#thm:geometric-arctan-one-area-pi) | $\pi=4\,\texttt{arctan.geom}(1)$ | ✓ | ✓ |
@@ -773,7 +767,7 @@ primitive by its endpoint rectangles, and
 equivalence; the remaining work is finite alternating-polynomial summation
 over the existing dyadic square-mesh budget.
 
-Circumference target:
+Circumference result:
 
 $$
 L_n\le L_{n+1}\le U_{n+1}\le U_n,\qquad U_n-L_n\to0.
@@ -781,12 +775,9 @@ $$
 
 Shrinkage: `PiProofs.circumferenceWidthsShrink`.
 Comparison target: `PiProofs.CircumferenceQuarterLengthRemainders`.
-All finite refinement prefixes now feed validity through
-`PiProofs.circumferenceValid_of_quarterLengthStepRefinesUpToAll`.
-The finite-prefix and global refinement predicates are linked by
-`PiProofs.circumferenceQuarterLengthStepRefines_iff_upToAll` and
-`PiProofs.circumferenceStepRefines_iff_upToAll`, with a direct completion
-package `PiProofs.CompletionCircumferenceQuarterLengthUpToAllRemainders`.
+`PiProofs.innerChordLowerRefinement` supplies the required all-stage local
+refinement, and `PiProofs.piCircumference_valid` packages the result as a
+valid raw real.
 
 Reciprocal quartic algebra:
 

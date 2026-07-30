@@ -420,117 +420,27 @@ that one equation is certified. At present, only the two endpoint witness
 equations are fully proved; the non-endpoint rows remain computation-ready
 targets until their raw-slope equalities are formalized.
 
-For rational-circle chord refinements, use
-`RationalCircle.Stage.secantChordLower` rather than selecting a square root.
-For a nondegenerate positively oriented chord it supplies
-`cross + (1 - dot)^2 / (2 * cross + 1 - dot)` and its squared lower-bound
-theorem. This is the stronger rational certificate for the remaining direct
-circumference diagnostic; it is not a new Pi-registry presentation.
-On a chart chord with `0 <= u < v <= 1`, the checked theorem
-`RationalCircle.Stage.secantChordLower_point_ge_cross_add_cube_eighth` gives
-the explicit gain `secantChordLower >= cross + (v-u)^3 / 8`.  Its adjacent-cell
-specialization,
-`RationalCircle.Stage.secantChordLower_samplePoint_ge_cross_add_step_cube_eighth`,
-is the preferred input for a dyadic refinement proof: a fine cell of mesh
-`h/2` contributes at least `h^3 / 64` beyond its cross product.
-The complementary geometric gain from splitting the *coarse* cross cell is
-now exact: `RationalCircle.Stage.midpoint_cross_refinement_gap_cleared`
-states that the common positive denominator times the gain is `h^3`, and
-`RationalCircle.Stage.midpoint_cross_refinement_gap_ge_cube_eighth` derives
-the usable bound `coarseCross + h^3 / 8 <= leftCross + rightCross` on
-`[0,1]`.  Its finite-stage transport,
-`PiProofs.adjacentChordCross_refinesByDoubling_with_cube_eighth`, supplies
-this cross-product gain directly for `k < stage`.  The combined generic
-certificate is also checked as
-`RationalCircle.Stage.midpoint_secant_refinement_ge_cross_add_five_cube_thirtysecond`:
-splitting a chart cell of mesh `h` makes the two secant certificates sum to at
-least `coarseCross + 5 * h^3 / 32`.  It packages the `h^3 / 8` cross gain and
-the two `h^3 / 64` secant gains in the units needed by the remaining margin.
-For the direct circumference interfaces, use its stage-indexed transport
-`PiProofs.adjacentSecantChord_refinesByDoubling_with_five_cube_thirtysecond`.
-It eliminates chart-coordinate bookkeeping for a concrete cell `k < stage`;
-the remaining margin must show that the secant gain covers both the coarse
-chord's defect over `coarseCross` (in the squared, rational form used by the
-endpoint proof) and the explicit dyadic bisection budget.  The cubic bound by
-itself is not asserted to settle that stronger comparison; do not replace it
-by an appeal to exact chord lengths.
+For rational-circle chord refinements, do not select an exact square root.
+The direct evaluator is already certified in
+`ComputableAnalysis/CircumferenceBridge.lean`.  Its public endpoints are:
 
-For the curvature route, start instead with the checked exact identity
-`RationalCircle.Stage.midpoint_cross_sum_formula`.  For `m = u + h / 2`, it
-expresses the sum of the two fine cross certificates as
-`h * K / (d0 * dm * dv)`, using the same positive denominators as
-`midpointCurvaturePolynomialBound`.  The next checked ingredients are
-`midpoint_one_sub_point_dot_formulas`,
-`midpoint_dot_deficit_correction_sum_formula`, and
-`midpoint_cross_square_defect_formula`: respectively they compute the two
-fine dot deficits, their two `sq(deficit) / 4` corrections, and the remaining
-coarse cross-square numerator.  The composed theorem
-`midpoint_curvature_certificate_refines_squared_chord` now proves the full
-local geometric comparison: on every chart cell in `[0,1]`, the coarse
-squared chord is at most the square of the sum of the two curvature
-certificates.  Its proof uses the positive midpoint polynomial, the exact
-cross-square gap, and a rational completing-square inequality.  Thus the
-geometry portion of `AdjacentChordCurvatureMarginCoversFineWidths` is
-discharged without selecting a square root.  The still-open part is precisely
-the separate, explicit bisection-width budget; this theorem does not conceal
-that numerical enclosure loss.
+```lean
+import ComputableAnalysis.CircumferenceBridge
 
-Use the stage-level transport
-`RationalCircle.Stage.midpoint_curvature_certificate_refines_squared_chord_of_refinement`
-when a caller has a `Stage.RefinesByDoubling` witness.  It internally uses the
-checked midpoint identities
-`parameter_insertedIndex_of_refinement` and
-`samplePoint_insertedIndex_of_refinement`, so the inserted odd fine index is
-identified with the exact rational midpoint of the coarse cell.  This is the
-preferred interface for any later direct-perimeter margin proof; it keeps the
-local algebra in `RationalCircle.lean` rather than copying it into
-`PiProofs.lean`.
-For the evaluator's concrete (2^n)-cell schedule, use
-`RationalCircle.dyadicStage_midpoint_curvature_certificate_refines_squared_chord`.
-The companion `dyadicStage_parameter_insertedIndex` and
-`dyadicStage_samplePoint_insertedIndex` lemmas expose the exact midpoint
-without any index arithmetic at a call site.
+#check PiProofs.innerChordLowerRefinement
+#check PiProofs.piCircumference_valid
+#check PiProofs.piCircumferenceDirect
+#check PiProofs.piCircumferenceDirect_equiv_piCircleArea
+```
 
-Callers working in the original circumference vocabulary can instead use
-`PiProofs.adjacentCurvatureCertificates_refineSquaredChord`.  It is only a
-thin, checked translation of the generic theorem to `circleSamplePoint stage
-k` and its two `2 * stage` subcells.  In particular, it proves the geometric
-squared-chord comparison but does **not** subtract either bisection width and
-does not close `AdjacentChordCurvatureMarginCoversFineWidths`.
+The proof reduces every stage to rational data.  It uses
+`RationalCircle.Stage.secantChordLower` and the curvature lower certificate
+for adjacent fine chords, pays their literal bisection widths, checks stages
+(1,2,4,8) exactly, and uses a natural-number exponent bound from then on.
+Use the four public declarations above rather than reproducing that local
+margin argument in a downstream proof.  The cross-fan and stabilized variants
+remain regression implementations, not prerequisites for this direct result.
 
-For the complementary coarse-scale estimate, use
-`RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
-`RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,
-the cross product is at least `(v - u) / 2`.
-`PiProofs.adjacentSecantChordLower_sub_width_le_segment_lo` connects that
-certificate to the concrete lower endpoint used by the original finite
-square-root bisection.  A proposed direct-refinement inequality should subtract
-the two displayed fine-chord widths from the two secant certificates, then
-prove the resulting nonnegative rational is at least the coarse chord in the
-squared sense.  This exact target is
-`PiProofs.AdjacentChordSecantMarginCoversFineWidths`; its proved reduction
-theorem is `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin`.
-Before estimating that margin, normalize the bisection budget explicitly.
-`sqrtApproxOnDomain_width_eq_unit` says that a nonzero square-root bisection
-stage `m` for a rational input at most `1` has width exactly `1 / 2^(m + 9)`.
-For an adjacent stage chord, obtain that input hypothesis from
-`RationalCircle.Stage.samplePoint_segmentNormSq_le_one_of_two_le_subdivisions`.
-The direct interface is now the specialized theorem
-`PiProofs.adjacentPointSegmentLengthInterval_width_eq_unit`.
-Thus the two fine widths in the margin target are literal dyadic rational
-terms, rather than unspecified quantities known only to tend to zero. This
-reduction is a necessary local ingredient; it does not discharge
-`AdjacentChordSecantMarginCoversFineWidths`.
-For a proof that wants the finite rational target directly, use
-`PiProofs.AdjacentChordSecantMarginCoversFineDyadicBudget`; the transport
-theorem `PiProofs.adjacentChordSecantMargin_of_fineDyadicBudget` converts that
-explicit-budget certificate to the original interval condition, which in turn
-feeds `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin`.
-The one- and two-cell certificates are checked as
-`PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_one` and
-`PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_two`, with matching
-`adjacentChordLowerRefinesByDoubling_*` endpoint consequences. They are finite
-base cases only; do not extrapolate them to the unresolved all-stage theorem.
 
 ## Pi as a regression suite, not a target namespace
 
