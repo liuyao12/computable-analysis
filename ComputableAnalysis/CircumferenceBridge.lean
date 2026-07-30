@@ -601,6 +601,25 @@ theorem piCircumferenceDirect_equiv_piCircleArea :
 /-- A certified handle for the original chord-path circumference computation. -/
 def piCircumferenceDirect : Real :=
   Real.ofRaw piCircumference piCircumference_valid
+
+namespace pi
+
+/-- The original square-root chord-path computation as a named representation
+of the abstract certified value of pi.  It is kept separate from the
+cross-fan default `pi.circumference` so a downstream theorem can select the
+literal path-length evaluator explicitly. -/
+def circumferenceDirect : Real.Representation value where
+  raw := piCircumference
+  valid := piCircumference_valid
+  agrees := piCircumferenceDirect_equiv_piCircleArea
+
+/-- Selecting the original chord path or the area loop from the abstract pi
+handle gives equivalent certified raw computations. -/
+theorem circumferenceDirect_equiv_circleArea :
+    circumferenceDirect.raw.Equiv circleArea.raw :=
+  representations_equiv circumferenceDirect circleArea
+
+end pi
 end PiProofs
 
 end ComputableAnalysis
