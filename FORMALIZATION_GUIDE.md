@@ -432,17 +432,20 @@ import ComputableAnalysis.CircumferenceBridge
 #check PiProofs.piCircumference_nonneg_bounded_by_four
 #check PiProofs.piCircumferenceDirect
 #check PiProofs.piCircumferenceDirect_equiv_piCircleArea
+#check PiProofs.piCircumferenceDirect_equiv_piCircumferenceFan
 #check PiProofs.pi.circumferenceDirect
 #check PiProofs.pi.circumferenceDirect_equiv_circleArea
+#check PiProofs.pi.circumferenceDirect_equiv_circumference
 ```
 
 The proof reduces every stage to rational data.  It uses
 `RationalCircle.Stage.secantChordLower` and the curvature lower certificate
 for adjacent fine chords, pays their literal bisection widths, checks stages
 (1,2,4,8) exactly, and uses a natural-number exponent bound from then on.
-Use the four public declarations above rather than reproducing that local
-margin argument in a downstream proof.  The cross-fan and stabilized variants
-remain regression implementations, not prerequisites for this direct result.
+Use the public declarations above rather than reproducing that local
+margin argument in a downstream proof.  The direct chord path and default
+cross-fan views now also have their own raw and representation-level
+equivalence theorems; stabilized variants remain regression implementations.
 
 For a nonlinear construction that depends on pi, use the explicitly proved
 representation transport rather than treating raw values as equal.  For

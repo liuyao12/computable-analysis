@@ -620,6 +620,19 @@ theorem piCircumferenceDirect_equiv_piCircleArea :
     piCircumference.Equiv piCircleArea :=
   piCircumference_equiv_piCircleArea_of_verified_area_polygon
 
+/-- The original square-root chord path and the default cross-fan
+circumference evaluator are interchangeable certified geometric
+computations.  The bridge is through their separately proved finite
+Archimedean comparisons with the area loop. -/
+theorem piCircumferenceDirect_equiv_piCircumferenceFan :
+    piCircumference.Equiv piCircumferenceFan :=
+  RealRaw.equiv_trans
+    piCircumference_valid
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+    piCircumferenceFan_valid
+    piCircumferenceDirect_equiv_piCircleArea
+    (RealRaw.equiv_symm piCircumferenceFan_equiv_piCircleArea)
+
 /-- A certified handle for the original chord-path circumference computation. -/
 def piCircumferenceDirect : Real :=
   Real.ofRaw piCircumference piCircumference_valid
@@ -640,6 +653,13 @@ handle gives equivalent certified raw computations. -/
 theorem circumferenceDirect_equiv_circleArea :
     circumferenceDirect.raw.Equiv circleArea.raw :=
   representations_equiv circumferenceDirect circleArea
+
+/-- The two named circumference views select equivalent certified raw
+algorithms: the original chord-path computation and the default cross-fan
+computation. -/
+theorem circumferenceDirect_equiv_circumference :
+    circumferenceDirect.raw.Equiv circumference.raw :=
+  representations_equiv circumferenceDirect circumference
 
 end pi
 end PiProofs
