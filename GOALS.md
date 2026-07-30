@@ -243,7 +243,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   series. For the quarter-turn generator, the checked finite identity
   `RotationSystem.simplexPartial_even_split` groups the first `2*n` terms as
   `C_n(T) * I + S_n(T) * J`, with executable alternating rational prefixes.
-  These remain finite algebra; the continuous-simplex interpretation is open.
+  `RotationSeries.expPartial_imaginary_even_split` proves that the literal
+  complex prefix at `i*T` has those same `C_n(T)` and `S_n(T)` coordinates.
+  These remain finite algebra; the continuous-simplex interpretation and the
+  complex-raw tail certificate are open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of

@@ -103,7 +103,7 @@ finished general theorem.
 | Foundation | `Basic`, `Algebraic`, `AlgebraicNumbers`, `AlgebraicFunctions`, `FunctionDomains`, `Extension`, `Calculus`, `Differential`, `MonotonicityConvexity`, `FTC` | Raw interval representations, domains, continuity, inverse branches, finite derivatives, integral/FTC certificate interfaces |
 | Elementary functions and series | `Elementary`, `ElementaryFunctions`, `Exp`, `ExpProofs`, `Logarithm`, `PowerSeries`, `Series`, `Taylor`, `FirstYearCalculus` | Power-series algorithms, rational majorants, exp/log comparison interfaces, and the current formal derivative ledger |
 | Integrals and special computations | `TurningPointIntegral`, `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
-| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `Nilakantha`, `PeanoBaker` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, and finite linear-system algebra |
+| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, and finite ODE/complex-prefix algebra |
 | Polynomial and complex checks | `Polynomial`, `ComplexPolynomial`, `ComplexInterval` | Exact polynomial algebra and rational complex-box root checks |
 
 `Playground`, `MembershipCheck`, and the repair/check files are development
@@ -545,12 +545,14 @@ product.  `LinearODE.peanoBakerFactorialTailShift` turns a nonnegative
 rational norm-length bound and requested rational error into an executable
 factorial-tail shift.
 
-The finite rotation core exposes the exact prefix identity
-`RotationSystem.simplexPartial_even_split`:
-`sum_(r < 2*n) T^r/r! * J^r = C_n(T) * I + S_n(T) * J`, with the executable
-alternating rational prefixes `cosinePrefix` and `sinePrefix`. It is useful
-finite algebra for a future Euler comparison, not a summed continuous matrix
-series or a complex exponential certificate.
+The finite rotation core exposes two matching exact prefix identities:
+`RotationSystem.simplexPartial_even_split` gives
+`sum_(r < 2*n) T^r/r! * J^r = C_n(T) * I + S_n(T) * J`, while
+`RotationSeries.expPartial_imaginary_even_split` gives
+`expPrefix_(2*n)(i*T) = C_n(T) + i*S_n(T)`. The executable rational prefixes
+are `cosinePrefix` and `sinePrefix`. This is useful finite algebra for a
+future Euler comparison, not a summed continuous matrix series or a valid
+complex exponential raw.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a
