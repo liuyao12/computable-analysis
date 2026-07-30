@@ -30,6 +30,17 @@ finite rational state more clearly than a paragraph.  Print uses a carefully
 chosen static PNG frame.  The pseudocode specifies the update; an animation
 never supplies theorem status, which still comes from linked Lean declarations.
 
+Use the following convention for every new algorithm animation:
+
+- Put the precise update immediately beside it in Python-like pseudocode;
+  rationals are implicit unless a special representation is needed.
+- Make the GIF almost wordless: use only the mathematical variables, axes,
+  and colour needed to follow one finite update—no title, legend, or prose.
+- Generate each frame from exact finite rational state.  The GIF illustrates
+  the computation; a linked Lean declaration establishes any certificate.
+- Choose a static print frame that still displays the construction, rather
+  than merely the last, nearly converged state.
+
 | Animation | Exact finite state shown | Source |
 | --- | --- | --- |
 | Rational-circle subdivision | The `Stage` points for (1,2,4,8) equal parameter cells, their projections, and the inscribed/circumscribed polygon bounds | `scripts/generate_rational_circle_animation.py` |

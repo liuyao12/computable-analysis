@@ -110,8 +110,6 @@ def frame(a: Fraction, b: Fraction) -> Image.Image:
 
     target_y = y_screen(TARGET)
     draw.line((LEFT, target_y, RIGHT, target_y), fill=GRID, width=2)
-    draw.text((RIGHT - 5, target_y - 14), "q = 2", font=LABEL,
-              fill=INK, anchor="rm")
 
     ax, ay = x_screen(a), y_screen(a * a)
     bx, by = x_screen(b), y_screen(b * b)
@@ -133,8 +131,8 @@ def frame(a: Fraction, b: Fraction) -> Image.Image:
     draw.line((an_x, target_y, an_x, BASELINE - 17), fill=SECANT, width=2)
     draw.line((bn_x, target_y, bn_x, BASELINE - 17), fill=TANGENT, width=2)
 
-    draw.text((ax - 10, ay + 19), "a", font=SMALL, fill=SECANT, anchor="rm")
-    draw.text((bx + 10, by - 15), "b", font=SMALL, fill=TANGENT, anchor="lm")
+    draw.text((ax, BASELINE + 54), "a", font=SMALL, fill=SECANT, anchor="mm")
+    draw.text((bx, BASELINE + 54), "b", font=SMALL, fill=TANGENT, anchor="mm")
     draw.text((RIGHT + 8, BASELINE + 4), "x", font=LABEL, fill=INK, anchor="lm")
     return image
 
