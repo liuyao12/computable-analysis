@@ -46,10 +46,8 @@ def circle_point(t):
     d = 1 + t*t
     return Point((1 - t*t) / d, (2*t) / d)
 \end{verbatim}
-The parameter \(t\) is not an angle.  It is the height coordinate on the
-vertical radius; equivalently, it is exactly the slope of the projection line
-from \((-1,0)\).  The endpoint \(t=0\) gives \((1,0)\), and \(t=1\) gives
-\((0,1)\).
+The animation below reads \(t\) directly as a height on the vertical radius;
+projection from \((-1,0)\) selects \(P(t)\) on the arc.
 \end{remark}
 
 \begin{theorem}[Rational secant lower certificate]
@@ -100,57 +98,10 @@ another \(\pi\) scoreboard row.
 
 \begin{figure}[!htbp]
 \centering
-\begin{tikzpicture}[scale=4.5, line cap=round, line join=round, >=stealth]
-  \coordinate (O) at (0,0);
-  \coordinate (W) at (-1,0);
-  \coordinate (T0) at (0,0);
-  \coordinate (T1) at (0,0.25);
-  \coordinate (T2) at (0,0.5);
-  \coordinate (T3) at (0,0.75);
-  \coordinate (T4) at (0,1);
-  \coordinate (P0) at (1,0);
-  \coordinate (P1) at (0.882,0.471);
-  \coordinate (P2) at (0.6,0.8);
-  \coordinate (P3) at (0.28,0.96);
-  \coordinate (P4) at (0,1);
-  \coordinate (Tt) at (0,0.6);
-  \coordinate (Pt) at (0.471,0.882);
-
-  \fill[teal!18] (O) -- (P0) -- (P1) -- (P2) -- (P3) -- (P4) -- cycle;
-  \draw[->,gray!70] (-1.18,0) -- (1.25,0);
-  \draw[->,gray!70] (0,-0.08) -- (0,1.16);
-  \draw[thick] (P0) arc[start angle=0,end angle=90,radius=1];
-  \draw[teal!70!black,very thick] (P0) -- (P1) -- (P2) -- (P3) -- (P4);
-
-  % The parameter is a length on the vertical radius, not a horizontal
-  % coordinate or an angle.  Highlight precisely the subsegment [0,t].
-  \draw[gray!45,very thick] (T0) -- (T4);
-  \draw[blue!70!black,very thick] (T0) -- (Tt);
-  \foreach \T in {T0,T1,T2,T3,T4} {
-    \draw[gray!50] (W) -- (\T);
-    \fill[black] (\T) circle (0.014);
-  }
-  \draw[blue!70!black,very thick] (W) -- (Pt);
-  \fill[blue!70!black] (Tt) circle (0.017);
-
-  \foreach \P in {P0,P1,P2,P3,P4,Pt}
-    \fill[black] (\P) circle (0.014);
-  \fill[black] (W) circle (0.014);
-  \fill[black] (O) circle (0.014);
-
-  \node[below left] at (O) {\scriptsize \(O\)};
-  \node[below left] at (W) {\scriptsize \((-1,0)\)};
-  \node[blue!70!black,right] at (0,0.30) {\scriptsize \(t\)};
-  \node[above left] at (T4) {\scriptsize \((0,1)=P(1)\)};
-  \node[above left] at (Pt) {\scriptsize \(P(t)\)};
-  \node[below right] at (P0) {\scriptsize \(P(0)\)};
-\end{tikzpicture}
-\caption{The rational parameter radius for the quarter-circle.  The blue
-subsegment from \(0\) to \(t\) lies on the vertical unit radius, so its
-coordinate (and its length) is exactly the slope of the blue projection line
-from \((-1,0)\) through \((0,t)\).  Its second intersection with the
-circle is the rational point \(P(t)\); equally spaced heights partition the
-arc from \((1,0)\) to \((0,1)\).}
+\rationalCircleSubdivisionAnimation
+\caption{Equal vertical parameter subdivisions project from \((-1,0)\) to
+rational points on the arc.  Solid teal is the inscribed polygon; dashed
+orange is the circumscribed tangent polygon.}
 \label{fig:rational-parameter-line}
 \end{figure}
 
