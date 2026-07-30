@@ -454,6 +454,17 @@ chord's defect over `coarseCross` (in the squared, rational form used by the
 endpoint proof) and the explicit dyadic bisection budget.  The cubic bound by
 itself is not asserted to settle that stronger comparison; do not replace it
 by an appeal to exact chord lengths.
+
+For the curvature route, start instead with the checked exact identity
+`RationalCircle.Stage.midpoint_cross_sum_formula`.  For `m = u + h / 2`, it
+expresses the sum of the two fine cross certificates as
+`h * K / (d0 * dm * dv)`, using the same positive denominators as
+`midpointCurvaturePolynomialBound`.  Together with
+`one_sub_point_dot_formula`, this keeps the desired comparison between the
+coarse squared chord and the sum of the two curvature certificates entirely
+in rational, denominator-cleared algebra.  It is a bridge toward the
+existing `AdjacentChordCurvatureMarginCoversFineWidths` target, not a claim
+that its bisection-width budget has already been discharged.
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,

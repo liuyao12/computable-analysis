@@ -875,6 +875,17 @@ curvature defect when a chord is split at its rational midpoint.  The related
 fact \code{RationalCircle.Stage.parameter\_le\_one} makes the chart-domain
 hypothesis explicit.
 
+The companion exact identity
+\code{RationalCircle.Stage.midpoint\_cross\_sum\_formula} writes the sum of
+the two fine cross certificates as
+\[
+  \frac{hK}{d_0d_md_v}.
+\]
+Thus the curvature polynomial and the rational formula for the dot deficit
+can be combined without choosing a square root.  This closes the common-
+denominator algebraic bridge toward the curvature-margin target; the separate
+finite bisection-width budget remains an explicit obligation.
+
 There is also a sharper direct cross-certificate identity.  In
 \code{RationalCircle.Stage}, Lean proves
 \code{midpoint\_cross\_refinement\_gap\_cleared}: the
