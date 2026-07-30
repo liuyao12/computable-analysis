@@ -465,7 +465,7 @@ named presentation from the abstract `pi.value : Real` handle when you need a
 specific implementation:
 
 ```lean
-import ComputableAnalysis.PiStieltjesBridge
+import ComputableAnalysis.PiProofs
 
 open ComputableAnalysis
 
@@ -509,7 +509,7 @@ It is likewise not a general substitution theorem.
 `pi.squareStieltjes` is the supplementary direct-mesh view: it evaluates
 the stabilized finite Stieltjes sums for the same substitution, then proves
 equivalent to `pi.squareSubstitution` and area pi.  It is an executable
-algorithmic witness, not a ninth coverage bridge.
+algorithmic witness in the primary pi registry, not a ninth coverage bridge.
 
 The future canonical-logarithm π formula has one explicit entry point:
 `PiProofs.CanonicalLogTwoCertificate`. Supply a valid raw value at two and
