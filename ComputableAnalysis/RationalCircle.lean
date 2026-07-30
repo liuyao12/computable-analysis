@@ -455,6 +455,122 @@ theorem midpoint_cross_refinement_gap_ge_cube_eighth
     cross (point u) (point v) + (h * h * h) / 8
   grind [Rat.sub_eq_add_neg]
 
+/-- Exact common-denominator formula for the two cross-product certificates
+created by a midpoint split.  This is the numerator used by the curvature
+refinement calculation: no length or square root occurs here. -/
+theorem midpoint_cross_sum_formula (u h : Rat) :
+    let m := u + h / 2
+    let d0 := 1 + u * u
+    let dm := 1 + m * m
+    let dv := 1 + (u + h) * (u + h)
+    let K := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+    cross (point u) (point m) + cross (point m) (point (u + h)) =
+      (h * K) / (d0 * dm * dv) := by
+  dsimp
+  let m : Rat := u + h / 2
+  let d0 : Rat := 1 + u * u
+  let dm : Rat := 1 + m * m
+  let dv : Rat := 1 + (u + h) * (u + h)
+  let K : Rat := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+  have hd0pos : 0 < d0 := by
+    dsimp [d0]
+    exact one_add_square_pos u
+  have hdmpos : 0 < dm := by
+    dsimp [dm]
+    exact one_add_square_pos m
+  have hdvpos : 0 < dv := by
+    dsimp [dv]
+    exact one_add_square_pos (u + h)
+  have hd0ne : d0 ≠ 0 := Rat.ne_of_gt hd0pos
+  have hdmne : dm ≠ 0 := Rat.ne_of_gt hdmpos
+  have hdvne : dv ≠ 0 := Rat.ne_of_gt hdvpos
+  have hleftNumerator : 2 * (m - u) = h := by
+    dsimp [m]
+    rw [Rat.div_def]
+    have htwo : (2 : Rat)⁻¹ * 2 = 1 := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+  have hrightNumerator : 2 * ((u + h) - m) = h := by
+    dsimp [m]
+    rw [Rat.div_def]
+    have htwo : (2 : Rat)⁻¹ * 2 = 1 := by native_decide
+    grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+  have hleft :
+      cross (point u) (point m) = (h * (1 + u * m)) / (d0 * dm) := by
+    rw [point_cross_formula]
+    change (2 * (m - u) * (1 + u * m)) / (d0 * dm) =
+      (h * (1 + u * m)) / (d0 * dm)
+    rw [show 2 * (m - u) = h from hleftNumerator]
+  have hright :
+      cross (point m) (point (u + h)) =
+        (h * (1 + m * (u + h))) / (dm * dv) := by
+    rw [point_cross_formula]
+    change (2 * ((u + h) - m) * (1 + m * (u + h))) / (dm * dv) =
+      (h * (1 + m * (u + h))) / (dm * dv)
+    rw [show 2 * ((u + h) - m) = h from hrightNumerator]
+  rw [hleft, hright]
+  change
+    (h * (1 + u * m)) / (d0 * dm) +
+        (h * (1 + m * (u + h))) / (dm * dv) =
+      (h * ((1 + u * m) * dv + (1 + m * (u + h)) * d0)) /
+        (d0 * dm * dv)
+  clear hleft hright hleftNumerator hrightNumerator
+  have clear_left (x y z : Rat) (hy : y ≠ 0)
+      (hxy : y * x = y * z) : x = z := by
+    calc
+      x = y⁻¹ * (y * x) := by
+        have hcancel : y⁻¹ * y = 1 := Rat.inv_mul_cancel y hy
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ = y⁻¹ * (y * z) := by rw [hxy]
+      _ = z := by
+        have hcancel : y⁻¹ * y = 1 := Rat.inv_mul_cancel y hy
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have clear_first (z : Rat) :
+      (d0 * dm * dv) * (z / (d0 * dm)) = z * dv := by
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    have hcancel0 : d0 * d0⁻¹ = 1 := Rat.mul_inv_cancel d0 hd0ne
+    have hcancelm : dm * dm⁻¹ = 1 := Rat.mul_inv_cancel dm hdmne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have clear_second (z : Rat) :
+      (d0 * dm * dv) * (z / (dm * dv)) = z * d0 := by
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    have hcancelm : dm * dm⁻¹ = 1 := Rat.mul_inv_cancel dm hdmne
+    have hcancelv : dv * dv⁻¹ = 1 := Rat.mul_inv_cancel dv hdvne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have clear_division (z D : Rat) (hD : D ≠ 0) : D * (z / D) = z := by
+    rw [Rat.div_def]
+    have hcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hD
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  let a : Rat := h * (1 + u * m)
+  let b : Rat := h * (1 + m * (u + h))
+  let N : Rat := h * ((1 + u * m) * dv + (1 + m * (u + h)) * d0)
+  let D : Rat := d0 * dm * dv
+  change a / (d0 * dm) + b / (dm * dv) = N / D
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos (Rat.mul_pos hd0pos hdmpos) hdvpos
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  have hfirst :
+      D * (a / (d0 * dm)) = a * dv := by
+    change (d0 * dm * dv) * (a / (d0 * dm)) = a * dv
+    exact clear_first a
+  have hsecond :
+      D * (b / (dm * dv)) = b * d0 := by
+    change (d0 * dm * dv) * (b / (dm * dv)) = b * d0
+    exact clear_second b
+  have hright :
+      D * (N / D) = N := by
+    exact clear_division N D hDne
+  have hN : a * dv + b * d0 = N := by
+    dsimp [a, b, N]
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc]
+  apply clear_left _ D _ hDne
+  calc
+    D * (a / (d0 * dm) + b / (dm * dv)) =
+        D * (a / (d0 * dm)) + D * (b / (dm * dv)) := Rat.mul_add _ _ _
+    _ = a * dv + b * d0 := by rw [hfirst, hsecond]
+    _ = N := hN
+    _ = D * (N / D) := hright.symm
+
 theorem point_cross_nonneg_of_nonneg_of_le
     {u v : Rat} (hu : 0 <= u) (hv : 0 <= v) (huv : u <= v) :
     0 <= cross (point u) (point v) := by
