@@ -36,6 +36,8 @@ Use the following convention for every new algorithm animation:
   rationals are implicit unless a special representation is needed.
 - Make the GIF almost wordless: use only the mathematical variables, axes,
   and colour needed to follow one finite update—no title, legend, or prose.
+- Do not repeat in prose what the GIF and its pseudocode already show; retain
+  only the invariant or certificate scope that the picture cannot establish.
 - Generate each frame from exact finite rational state.  The GIF illustrates
   the computation; a linked Lean declaration establishes any certificate.
 - Choose a static print frame that still displays the construction, rather

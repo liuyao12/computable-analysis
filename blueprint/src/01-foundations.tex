@@ -302,39 +302,16 @@ def sqrt2(n):
 \caption{Secant--tangent rational enclosure for \(\sqrt2\).}
 \label{fig:sqrt-secant-tangent}
 \end{figure}
-Algebraic numbers more generally are solutions of polynomial equations with
-rational coefficients.  They can be represented by interval algorithms that
-isolate a root and then refine the isolating interval.  The Lean square-root
-algorithm is the rational-input instance of this idea, and the finite square
-criterion proves that \(\sqrt2\) is not equivalent to any rational number.
-Lean now also records the exact bisection-width facts for the rational
-square-root subroutine: one bisection halves the interval width, \(k\)
-bisections divide the width by \(2^k\), each bisection stays inside the
-previous ordered interval, and the public staged square-root approximation has
-the corresponding explicit power-of-two width.  For positive stages, Lean also
-normalizes the precision denominator and the \(\code{sqrtFuel}\) schedule, so
-the public width unfolds to the concrete denominator
-\(2^{n+\code{den}(\code{sqrtUpperBound}\ q)+8}\).  The square-root raw real is
-now fully verified: later stages are obtained by extra bisections inside the
-same initial isolating interval, and the explicit width is bounded by a
-rational constant divided by \(n+1\).  Consequently every rational input in
-the square-root domain has a certified optional square-root computation.
-On the unit interval, a cofinal scheduled version additionally has a verified
-quadratic interval modulus and hence literal rational
-\(\varepsilon\)--\(\delta\) continuity.  These are the small interval-shrinking
-facts needed later for square-root path lengths such as the circumference
-computation and for inverse-trigonometric integral branches.
+Algebraic numbers are represented by rational isolating intervals.  Lean
+proves this computation's nesting, explicit width schedule, irrationality
+criterion, and unit-interval rational \(\varepsilon\)--\(\delta\) modulus.
 \end{remark}
 
 \begin{remark}[Pseudocode convention]\label{rem:pseudocode-convention}
 \uses{rem:computable-presentations,rem:algebraic-numbers-sqrt-two}
-When an algorithm is displayed as a code block, it is Python-like pseudocode
-for rational arithmetic.  Variables such as \(a,b,x,y\) represent rational
-numbers unless the text explicitly says otherwise; assignments, loops, and
-lists are finite operations; and no floating-point approximation is being
-used.  A code block records the intended terminating stage algorithm, while
-the surrounding propositions prove that the returned rational intervals are
-nested and have widths tending to zero.
+Displayed code is Python-like finite rational pseudocode.  Variables are
+rational unless stated otherwise; no floating-point operation is implied.  The
+linked Lean declarations supply the certificates.
 \end{remark}
 
 \begin{remark}[Other types of real numbers]\label{rem:sources-of-raw-reals}
