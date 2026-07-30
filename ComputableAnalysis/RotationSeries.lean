@@ -662,6 +662,99 @@ theorem rotationExpRaw_valid (T : Rat) : (rotationExpRaw T).Valid := by
       exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
     · exact rotationBox_widths_shrink T
 
+/-- The real coordinate boxes of the certified imaginary-axis exponential. -/
+def rotationCosCompute (T : Rat) (n : Nat) : QInterval :=
+  { lo := (rotationBox T n).lo.re, hi := (rotationBox T n).hi.re }
+
+/-- The imaginary coordinate boxes of the certified imaginary-axis
+exponential. -/
+def rotationSinCompute (T : Rat) (n : Nat) : QInterval :=
+  { lo := (rotationBox T n).lo.im, hi := (rotationBox T n).hi.im }
+
+private theorem rotationCosCompute_width_le_geometric (T : Rat) (n : Nat) :
+    (rotationCosCompute T n).width <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n := by
+  change (rotationBox T n).width <=
+    (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n
+  exact rotationBox_width_le_geometric T n
+
+private theorem rotationSinCompute_width_le_geometric (T : Rat) (n : Nat) :
+    (rotationSinCompute T n).width <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n := by
+  change (rotationBox T n).height <=
+    (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n
+  exact rotationBox_height_le_geometric T n
+
+def rotationCosRate (T : Rat) : RealRaw.Rate (rotationCosCompute T) :=
+  .geometric 0
+    (8 * rotationTailMagnitude T 0)
+    ((1 : Rat) / 2)
+    (by native_decide)
+    (by native_decide)
+    (fun n _ => rotationCosCompute_width_le_geometric T n)
+
+def rotationSinRate (T : Rat) : RealRaw.Rate (rotationSinCompute T) :=
+  .geometric 0
+    (8 * rotationTailMagnitude T 0)
+    ((1 : Rat) / 2)
+    (by native_decide)
+    (by native_decide)
+    (fun n _ => rotationSinCompute_width_le_geometric T n)
+
+/-- The power-series cosine coordinate at a rational input, as a certified
+raw real computation. -/
+def rotationCosRaw (T : Rat) : RealRaw where
+  compute := rotationCosCompute T
+  rate := rotationCosRate T
+
+/-- The power-series sine coordinate at a rational input, as a certified raw
+real computation. -/
+def rotationSinRaw (T : Rat) : RealRaw where
+  compute := rotationSinCompute T
+  rate := rotationSinRate T
+
+theorem rotationCosRaw_valid (T : Rat) : (rotationCosRaw T).Valid := by
+  change RealRaw.ValidCompute (rotationCosCompute T)
+  have hvalid := ComplexRaw.realPart_valid (rotationExpRaw_valid T)
+  simpa [rotationCosCompute, ComplexRaw.realPart, rotationExpRaw] using hvalid
+
+theorem rotationSinRaw_valid (T : Rat) : (rotationSinRaw T).Valid := by
+  change RealRaw.ValidCompute (rotationSinCompute T)
+  have hvalid := ComplexRaw.imagPart_valid (rotationExpRaw_valid T)
+  simpa [rotationSinCompute, ComplexRaw.imagPart, rotationExpRaw] using hvalid
+
+theorem rotationCosRaw_compute (T : Rat) (n : Nat) :
+    (rotationCosRaw T).compute n =
+      { lo := LinearODE.RotationSystem.cosinePrefix T (rotationTailStart T + n) -
+          rotationTailRadius T n,
+        hi := LinearODE.RotationSystem.cosinePrefix T (rotationTailStart T + n) +
+          rotationTailRadius T n } := rfl
+
+theorem rotationSinRaw_compute (T : Rat) (n : Nat) :
+    (rotationSinRaw T).compute n =
+      { lo := LinearODE.RotationSystem.sinePrefix T (rotationTailStart T + n) -
+          rotationTailRadius T n,
+        hi := LinearODE.RotationSystem.sinePrefix T (rotationTailStart T + n) +
+          rotationTailRadius T n } := rfl
+
+theorem rotationCosRaw_width_le_geometric (T : Rat) (n : Nat) :
+    ((rotationCosRaw T).compute n).width <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n :=
+  rotationCosCompute_width_le_geometric T n
+
+theorem rotationSinRaw_width_le_geometric (T : Rat) (n : Nat) :
+    ((rotationSinRaw T).compute n).width <=
+      (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n :=
+  rotationSinCompute_width_le_geometric T n
+
+/-- Certified abstract real handles for the two rational-input rotation
+coordinates. -/
+def rotationCos (T : Rat) : Real :=
+  Real.ofRaw (rotationCosRaw T) (rotationCosRaw_valid T)
+
+def rotationSin (T : Rat) : Real :=
+  Real.ofRaw (rotationSinRaw T) (rotationSinRaw_valid T)
+
 end RotationSeries
 
 end ComputableAnalysis

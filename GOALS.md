@@ -252,8 +252,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   complex prefix at `i*T` has those same `C_n(T)` and `S_n(T)` coordinates.
   `RotationSeries.rotationExpRaw_valid` now encloses those prefixes in nested
   rational complex boxes, with both coordinate widths bounded by
-  `8 * rotationTailMagnitude T 0 * (1/2)^n`. The continuous-simplex
-  interpretation and the rotation/geometric identification remain open.
+  `8 * rotationTailMagnitude T 0 * (1/2)^n`. Its
+  `rotationCosRaw` and `rotationSinRaw` coordinate projections are valid raw
+  reals with the same rate. The continuous-simplex interpretation and the
+  rotation/geometric identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of

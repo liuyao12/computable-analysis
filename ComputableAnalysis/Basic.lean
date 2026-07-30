@@ -2340,6 +2340,66 @@ theorem ofQComplex_valid (z : QComplex) :
 
 def center (z : ComplexRaw) (n : Nat) : QComplex := (z.compute n).center
 
+/-- The real coordinate of a certified complex-box computation, kept as its
+own raw real interval algorithm. -/
+def realPart (z : ComplexRaw) : RealRaw where
+  compute := fun n =>
+    { lo := (z.compute n).lo.re, hi := (z.compute n).hi.re }
+
+/-- The imaginary coordinate of a certified complex-box computation, kept as
+its own raw real interval algorithm. -/
+def imagPart (z : ComplexRaw) : RealRaw where
+  compute := fun n =>
+    { lo := (z.compute n).lo.im, hi := (z.compute n).hi.im }
+
+theorem realPart_valid {z : ComplexRaw} (hz : z.Valid) :
+    z.realPart.Valid := by
+  constructor
+  · intro n
+    exact (hz.1 n).1
+  · constructor
+    · intro n m hnm
+      have hnest := hz.2.1 n m hnm
+      have hordered := (hz.1 m).1
+      exact ⟨hnest.1, by
+        change (z.compute m).lo.re <= (z.compute m).hi.re
+        unfold QBox.width at hordered
+        grind [Rat.sub_eq_add_neg], hnest.2.1⟩
+    · intro eps
+      obtain ⟨N, hN⟩ := hz.2.2 eps
+      exact ⟨N, fun n hn => (hN n hn).1⟩
+
+theorem imagPart_valid {z : ComplexRaw} (hz : z.Valid) :
+    z.imagPart.Valid := by
+  constructor
+  · intro n
+    exact (hz.1 n).2
+  · constructor
+    · intro n m hnm
+      have hnest := hz.2.1 n m hnm
+      have hordered := (hz.1 m).2
+      exact ⟨hnest.2.2.1, by
+        change (z.compute m).lo.im <= (z.compute m).hi.im
+        unfold QBox.height at hordered
+        grind [Rat.sub_eq_add_neg], hnest.2.2.2⟩
+    · intro eps
+      obtain ⟨N, hN⟩ := hz.2.2 eps
+      exact ⟨N, fun n hn => (hN n hn).2⟩
+
+theorem realPart_equiv {z w : ComplexRaw} (hzw : z.Equiv w) :
+    z.realPart.Equiv w.realPart := by
+  intro n
+  have hover := (compareAt_overlap_iff z w n n).1 (hzw n)
+  apply (RealRaw.compareAt_overlap_iff z.realPart w.realPart n n).2
+  exact ⟨hover.1.1, hover.2.1⟩
+
+theorem imagPart_equiv {z w : ComplexRaw} (hzw : z.Equiv w) :
+    z.imagPart.Equiv w.imagPart := by
+  intro n
+  have hover := (compareAt_overlap_iff z w n n).1 (hzw n)
+  apply (RealRaw.compareAt_overlap_iff z.imagPart w.imagPart n n).2
+  exact ⟨hover.1.2, hover.2.2⟩
+
 /-- Embed a raw real interval algorithm as a raw complex-box algorithm on the
 real axis. -/
 def ofRealRaw (x : RealRaw) : ComplexRaw where

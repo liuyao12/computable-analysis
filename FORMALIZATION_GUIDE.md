@@ -84,7 +84,7 @@ Start with the smallest target module rather than importing
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
-| Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationExpRaw_valid`, `rotationExpRaw_width_le_geometric` |
+| Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
 
@@ -413,10 +413,15 @@ open ComputableAnalysis
 #check RotationSeries.rotationExpRaw
 #check RotationSeries.rotationExpRaw_valid
 #check RotationSeries.rotationExpRaw_width_le_geometric
+#check RotationSeries.rotationCosRaw_valid
+#check RotationSeries.rotationSinRaw_valid
+#check RotationSeries.rotationCosRaw_compute
+#check RotationSeries.rotationSinRaw_compute
 ```
 
 These names expose the certified complex series at rational imaginary inputs;
-they do not identify its coordinates with geometric trigonometry.
+their real and imaginary coordinates are certified rational-input power-series
+computations, not yet geometric trigonometry.
 
 The rational-circle and arctangent code contains useful geometric and
 power-series computations, but normalized-angle sine/cosine/tangent special
@@ -582,7 +587,8 @@ are `cosinePrefix` and `sinePrefix`. `RotationSeries.rotationExpRaw T` now
 encloses those even prefixes in valid nested complex boxes, and
 `rotationExpRaw_width_le_geometric` bounds both coordinate widths by
 `8 * rotationTailMagnitude T 0 * (1/2)^n`. This is a certified complex
-series computation at rational `i*T`, not yet a summed continuous matrix
+series computation at rational `i*T`; `rotationCosRaw` and `rotationSinRaw`
+are its valid coordinate raw reals. It is not yet a summed continuous matrix
 series, geometric trigonometry, or Euler identity.
 
 This is ideal for proving identities about a *given rational discretization*.
