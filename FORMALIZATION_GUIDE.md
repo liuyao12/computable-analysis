@@ -459,12 +459,16 @@ For the curvature route, start instead with the checked exact identity
 `RationalCircle.Stage.midpoint_cross_sum_formula`.  For `m = u + h / 2`, it
 expresses the sum of the two fine cross certificates as
 `h * K / (d0 * dm * dv)`, using the same positive denominators as
-`midpointCurvaturePolynomialBound`.  Together with
-`one_sub_point_dot_formula`, this keeps the desired comparison between the
-coarse squared chord and the sum of the two curvature certificates entirely
-in rational, denominator-cleared algebra.  It is a bridge toward the
-existing `AdjacentChordCurvatureMarginCoversFineWidths` target, not a claim
-that its bisection-width budget has already been discharged.
+`midpointCurvaturePolynomialBound`.  The next checked ingredients are
+`midpoint_one_sub_point_dot_formulas`,
+`midpoint_dot_deficit_correction_sum_formula`, and
+`midpoint_cross_square_defect_formula`: respectively they compute the two
+fine dot deficits, their two `sq(deficit) / 4` corrections, and the remaining
+coarse cross-square numerator.  Together these keep the desired comparison
+between the coarse squared chord and the sum of the two curvature certificates
+entirely in rational, denominator-cleared algebra.  They are a bridge toward
+the existing `AdjacentChordCurvatureMarginCoversFineWidths` target, not a
+claim that its bisection-width budget has already been discharged.
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,
