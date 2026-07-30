@@ -756,99 +756,33 @@ Put
 \[
  K=\int_0^1\frac{x}{1+x^2}\,\dd x.
 \]
-This is now a literal certified integral, not merely the formal half of the
-square-substitution formula.  Lean defines its rational kernel as
-\code{arctanLogKernel}, proves the exact relation
-\[
- \frac{2x}{1+x^2}=2\frac{x}{1+x^2},
-\]
-and obtains the unit Lipschitz bound for the latter kernel by dividing the
-checked two-Lipschitz pullback estimate by two.  The generic Darboux
-constructor therefore gives a valid raw integral \(K\).
-
-More strongly, the finite lower and upper Darboux sums themselves respect
-natural rational scaling.  At every common stage, Lean proves the literal box
-identity
-\[
-\left(\int_0^1\frac{2x}{1+x^2}\,\dd x\right)_n
- =2K_n.
-\]
-The scaled-strip box has the explicit dyadic width
-\[
-  \operatorname{width}(2K_n)=\frac4{2^n},
-\]
-which Lean obtains from that literal box identity, not from an abstract
-linearity assertion.
-Combining this stagewise identity with the checked square substitution yields
-the natural endpoint theorem
+The checked finite boxes give
 \[
  2K\Equiv\int_0^1\frac{\dd t}{1+t}
-   =\log_{\mathrm{rec}}2.
+ =\log_{\mathrm{rec}}2
+ \qquad\text{and}\qquad
+ 2K\Equiv\log_{\mathrm{series}}2.
 \]
-Here \(\log_{\mathrm{rec}}2\) is the project's already checked reciprocal-
-integral representative.  Transporting it to the inverse of the canonical
-exponential remains the separate exp/log agreement theorem; no such
-identification is assumed here.
-
-The two independently executable endpoint calculations now have a direct
-comparison as well:
+Thus the supplied triangle calculation gives the checked finite formula
 \[
-  2K\Equiv\log_{\mathrm{series}}2.
+ \pi_{\mathrm{area}}\Equiv
+ 4\arctanintegraltriangle+2\log_{\mathrm{rec}}2.
 \]
-Its Lean proof composes the finite square-substitution/strip comparison with
-the separately checked alternating-series--reciprocal-integral comparison.
-This is useful evidence that the logarithmic term in the later pi formula is
-not tied to one quadrature presentation.  It still concerns only the rational
-name \(2\), rather than a function-level identification with the inverse of
-the canonical exponential.
+Its literal runtime satisfies \(w_n\le52/2^n\).  The series and direct
+Stieltjes implementations are supplementary named views; the latter keeps the
+finite mesh \(\sum_i(x_{i+1}^2-x_i^2)/(1+x_i^2)\) visible in the abstract pi
+registry without adding a scoreboard row.
 
-The bridge now also supplies a supplementary executable pi formula using the
-supplied finite-triangle arctangent integral
-\(\arctanintegraltriangle\) from
-\cref{thm:finite-uniform-triangle-reindexing}:
-\[
- P_{\triangle,\log\mathrm{series}}
- =4\arctanintegraltriangle+2\log_{\mathrm{series}}2.
-\]
-Lean first proves the specific finite integration-by-parts chain
-\[
- P_{\triangle,\log\mathrm{series}}
- \Equiv 4I_{x\arctan x}^{\mathrm{FTC}}
- \Equiv 4\arctangeom(1).
-\]
-The first equivalence is
-\code{piTriangleLogSeries\_equiv\_four\_coordinateTimesArctanForwardTwoStageMonotoneIntegral}:
-it scales the separately checked triangle-plus-strip/product-FTC bridge, then
-uses the independently checked logarithm-series comparison.  The direct theorem
-\code{piTriangleLogSeries\_equiv\_four\_arctanGeom\_one} identifies this
-raw evaluator with \(4\arctangeom(1)\), and
-\code{PiProofs.piTriangleLogSeries\_equiv\_piCircleArea} records the full
-circle-area pi equivalence.  The abstract pi handle exposes it as
-\code{PiProofs.pi.triangleLogSeries}.  This is an executable cross-check of
-the triangle integral, strip, product-FTC, and logarithm-series algorithms.
-It remains the supplementary series variant.  Replacing its alternating
-logarithm by the directly equivalent reciprocal-integral logarithm gives the
-checked coverage view \code{pi.integrationByParts}: the concrete formula
-\(4\arctanintegraltriangle+2\log_{\mathrm{rec}}2\) is equivalent to area
-pi and its literal runtime satisfies \(w_n\le52/2^n\), via
-\code{Logarithm.piTriangleLogReciprocalIntegralRate}.  This finite bridge does
-not establish a general function-level integration-by-parts theorem or
-transport the logarithm to the canonical inverse-exponential presentation.
-
-Keeping the endpoint in its square-pullback form adds a distinct checked
-substitution bridge:
+The separate supplied substitution bridge retains its pullback:
 \[
  P_{\triangle,x^2}
  =4\arctanintegraltriangle+
    2\int_0^1\frac{2x}{1+x^2}\,\dd x
  =4\arctanintegraltriangle+4K.
 \]
-Lean exposes this as \code{pi.squareSubstitution}.  The theorem
-\code{piTriangleLogSquareSubstitutionIntegral\_equiv\_piTriangleLogReciprocalIntegral}
-is precisely the finite \(t=x^2\) transport to the preceding reciprocal-log
-formula; the independent raw runtime satisfies \(w_n\le56/2^n\).  It is a
-concrete substitution regression, not yet a general change-of-variables
-theorem.
+It is the view \code{pi.squareSubstitution}, with runtime
+\(w_n\le56/2^n\).  These are supplied finite certificates, not a general
+integration-by-parts, substitution, or canonical-exp/log theorem.
 
 \end{theorem}
 
