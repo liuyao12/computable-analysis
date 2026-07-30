@@ -657,6 +657,9 @@ Peano--Baker series exact.
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_zero}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
 \leanok
 The finite layer already proves constant, zero, square-zero, and
 pairwise-commuting specializations. For a constant Euler increment \(B\),
@@ -689,34 +692,29 @@ claim that these terms are the values of continuous ordered-simplex
 integrals: that remaining analytic identification is precisely what the
 future interval-simplex quadrature must certify.
 
-There is now also a checked finite rotation specialization.  For the
-counter-clockwise quarter-turn matrix
+For the counter-clockwise quarter-turn matrix
 \[
  J=\begin{pmatrix}0&-1\\1&0\end{pmatrix},
  \qquad J^2=-I,
 \]
-the named rational-matrix calculation \code{RotationSystem.generator\_square}
-and the power-splitting lemma \code{matrixPow\_add} prove, for every finite
-degree (k),
+Lean checks
 \[
  J^{2k}=(-1)^k I,
  \qquad
  J^{2k+1}=(-1)^kJ.
 \]
-Consequently the checked terms
-\code{RotationSystem.simplexTerm\_even} and
-\code{RotationSystem.simplexTerm\_odd} are exactly
+Writing
 \[
- \frac{T^{2k}}{(2k)!}J^{2k}
-   =(-1)^k\frac{T^{2k}}{(2k)!}I,
+ C_n(T)=\sum_{k<n}(-1)^k\frac{T^{2k}}{(2k)!},
  \qquad
- \frac{T^{2k+1}}{(2k+1)!}J^{2k+1}
-   =(-1)^k\frac{T^{2k+1}}{(2k+1)!}J.
+ S_n(T)=\sum_{k<n}(-1)^k\frac{T^{2k+1}}{(2k+1)!},
 \]
-This is the finite even--odd coefficient core of the later
-cosine--sine rotation matrix and hence of the intended Euler-identity
-comparison.  It deliberately stops before summing an infinite series or
-identifying that sum with a continuous ODE solution.
+the checked finite-prefix identity is
+\[
+ \sum_{r<2n}\frac{T^r}{r!}J^r=C_n(T)I+S_n(T)J.
+\]
+It is finite matrix algebra, not yet a continuous ODE or complex-exponential
+certificate.
 
 For a square-zero sampled family, every selected word with two or more
 factors is zero. Therefore Lean proves the exact finite collapse
