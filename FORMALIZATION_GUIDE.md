@@ -446,8 +446,14 @@ certificate is also checked as
 splitting a chart cell of mesh `h` makes the two secant certificates sum to at
 least `coarseCross + 5 * h^3 / 32`.  It packages the `h^3 / 8` cross gain and
 the two `h^3 / 64` secant gains in the units needed by the remaining margin.
-The next step is solely to compare that explicit rational slack with the
-dyadic width budget; do not replace it by an appeal to exact chord lengths.
+For the direct circumference interfaces, use its stage-indexed transport
+`PiProofs.adjacentSecantChord_refinesByDoubling_with_five_cube_thirtysecond`.
+It eliminates chart-coordinate bookkeeping for a concrete cell `k < stage`;
+the remaining margin must show that the secant gain covers both the coarse
+chord's defect over `coarseCross` (in the squared, rational form used by the
+endpoint proof) and the explicit dyadic bisection budget.  The cubic bound by
+itself is not asserted to settle that stronger comparison; do not replace it
+by an appeal to exact chord lengths.
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,

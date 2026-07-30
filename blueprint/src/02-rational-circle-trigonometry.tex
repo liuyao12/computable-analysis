@@ -897,14 +897,20 @@ sum as
 \]
 
 Here the added \(5h^3/32\) is exactly the cross gain \(h^3/8\) plus the two
-fine secant gains \(h^3/64\).  What is still open is deliberately narrower:
-show that this explicit rational slack dominates the two chosen bisection
-widths.  Thus it is progress on the original circumference diagnostic, not
-another Pi scoreboard row.
+fine secant gains \(h^3/64\).  This is deliberately only a cross-product
+certificate: the open margin must also cover the difference between the
+coarse cross product and the coarse chord (in its rational squared form), as
+well as the two chosen bisection widths.  Thus it is progress on the original
+circumference diagnostic, not another Pi scoreboard row.
 The stage-indexed transport
 \code{PiProofs.adjacentChordCross\_refinesByDoubling\_with\_cube\_eighth}
 applies this exact gain to every finite cell \(k<\textit{stage}\), which is
 the hypothesis shape used by that remaining margin criterion.
+The companion transport
+\code{PiProofs.adjacentSecantChord\_refinesByDoubling\_with\_five\_cube\_thirtysecond}
+does the same for the combined secant sum, so a direct margin proof need not
+reconstruct the midpoint chart coordinates before comparing it with the
+coarse chord defect and the two explicit bisection widths.
 
 There is nevertheless a separately named certified representative,
 \code{piCircumferenceStabilized}. At stage \(n\), it takes the finite prefix
