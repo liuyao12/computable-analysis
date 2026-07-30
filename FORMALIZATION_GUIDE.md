@@ -485,6 +485,11 @@ identified with the exact rational midpoint of the coarse cell.  This is the
 preferred interface for any later direct-perimeter margin proof; it keeps the
 local algebra in `RationalCircle.lean` rather than copying it into
 `PiProofs.lean`.
+For the evaluator's concrete (2^n)-cell schedule, use
+`RationalCircle.dyadicStage_midpoint_curvature_certificate_refines_squared_chord`.
+The companion `dyadicStage_parameter_insertedIndex` and
+`dyadicStage_samplePoint_insertedIndex` lemmas expose the exact midpoint
+without any index arithmetic at a call site.
 
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
