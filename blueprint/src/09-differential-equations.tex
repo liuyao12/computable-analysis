@@ -660,6 +660,7 @@ Peano--Baker series exact.
 \lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
+\lean{ComputableAnalysis.RotationSeries.expPartial_imaginary_even_split}
 \leanok
 The finite layer already proves constant, zero, square-zero, and
 pairwise-commuting specializations. For a constant Euler increment \(B\),
@@ -713,8 +714,12 @@ the checked finite-prefix identity is
 \[
  \sum_{r<2n}\frac{T^r}{r!}J^r=C_n(T)I+S_n(T)J.
 \]
-It is finite matrix algebra, not yet a continuous ODE or complex-exponential
-certificate.
+The literal rational-complex prefix has the matching checked identity
+\[
+ \operatorname{expPrefix}_{2n}(iT)=C_n(T)+iS_n(T).
+\]
+These are finite identities, not yet a complex-raw tail certificate or a
+continuous ODE theorem.
 
 For a square-zero sampled family, every selected word with two or more
 factors is zero. Therefore Lean proves the exact finite collapse

@@ -33,6 +33,7 @@ import ComputableAnalysis.Pi
 import ComputableAnalysis.PiProofs
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.RationalCircle
+import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.Polynomial
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
