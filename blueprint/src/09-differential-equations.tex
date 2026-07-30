@@ -1,780 +1,201 @@
 \chapter{Linear Differential Equations}
 \label{ch:differential-equations}
 
-Differential equations belong to the same finite-estimate programme as the
-integral and derivative chapters. A solution is an interval algorithm with
-rational mesh, enclosure, and tail estimates giving nested boxes of shrinking
-width, not a limit in a complete function space. The central target is
+The continuous target is the rational-box initial-value problem
 \begin{equation}\label{eq:linear-ode}
-  x'(t)=A(t)x(t)+b(t),\qquad x(s)=x_s,
+ x'(t)=A(t)x(t)+b(t),\qquad x(s)=x_s.
 \end{equation}
-where \(A(t)\) is a finite square matrix and \(x(t),b(t)\) are finite vectors.
+The chapter starts from the finite time-ordered calculation, then states the
+two still-separate continuous certificates: a Peano--Baker enclosure for
+existence and a factorial estimate for uniqueness.
 
-\section{A familiar second-order model, then its vector form}
+\section{Model, vector form, and proof route}
 
-The intended first encounter with this chapter is a scalar second-order
-equation, not an abstract matrix series.  For example, the forced harmonic
-oscillator
 \begin{equation}\label{eq:forced-oscillator}
- q''(t)+\omega^2q(t)=r(t),\qquad
- q(s)=q_s,\quad q'(s)=v_s
+ q''+\omega^2q=r,\qquad q(s)=q_s,\quad q'(s)=v_s.
 \end{equation}
-has, in the homogeneous constant-coefficient case, the familiar solution
+With \(X=(q,q')^T\), this is \eqref{eq:linear-ode} with
 \[
- q(t)=q_s\cos\bigl(\omega(t-s)\bigr)
-      +\frac{v_s}{\omega}\sin\bigl(\omega(t-s)\bigr)
- \qquad(\omega\ne0).
+ A_\omega=\begin{bmatrix}0&1\\-\omega^2&0\end{bmatrix},\qquad
+ b_r=\begin{bmatrix}0\\r\end{bmatrix}.
 \]
-The forced formula that the chapter must ultimately certify is
+The desired familiar output is
 \begin{equation}\label{eq:forced-oscillator-duhamel}
- q(t)=q_s\cos\bigl(\omega(t-s)\bigr)
-      +\frac{v_s}{\omega}\sin\bigl(\omega(t-s)\bigr)
-      +\int_s^t\frac{\sin\bigl(\omega(t-u)\bigr)}{\omega}r(u)\,\dd u
- \qquad(\omega\ne0).
+ q(t)=q_s\cos(\omega(t-s))+
+ \frac{v_s}{\omega}\sin(\omega(t-s))+
+ \int_s^t\frac{\sin(\omega(t-u))}{\omega}r(u)\,\dd u.
 \end{equation}
-The opposite sign \(q''-\lambda^2q=0\) has the corresponding exponential
-modes \(e^{\lambda(t-s)}\) and \(e^{-\lambda(t-s)}\), so its homogeneous
-solutions have the form \(c_+e^{\lambda(t-s)}+c_-e^{-\lambda(t-s)}\).
-More generally,
-constant-coefficient second-order equations are organized by exponential
-modes, with conjugate imaginary modes rewritten as sine and cosine.  These
-are the formulas scientists and engineers expect the later theory to recover.
+It is a later identification theorem, not a definition of sine or cosine.
 
-They are not definitions of sine, cosine, or exponential in this chapter:
-using them first would make the desired agreement theorem circular.  Instead,
-put
-\[
- X(t)=
- \begin{bmatrix}q(t)\\q'(t)\end{bmatrix},
- \qquad
- A_\omega=
- \begin{bmatrix}0&1\\-\omega^2&0\end{bmatrix},
- \qquad
- b_r(t)=
- \begin{bmatrix}0\\r(t)\end{bmatrix}.
-\]
-Then \eqref{eq:forced-oscillator} is precisely
-\[
- X'(t)=A_\omega X(t)+b_r(t).
-\]
-The variable-coefficient second-order equation
-\[
- q''(t)+a(t)q'(t)+c(t)q(t)=r(t)
-\]
-has the same first-order form with
-\[
- A(t)=
- \begin{bmatrix}0&1\\-c(t)&-a(t)\end{bmatrix},
- \qquad
- b(t)=
- \begin{bmatrix}0\\r(t)\end{bmatrix}.
-\]
-Thus the general vector-valued inhomogeneous system \eqref{eq:linear-ode}
-is not a detour: it is the constructive engine behind the familiar
-second-order formulas.  Peano--Baker will construct the vector transition,
-and the trigonometric and exponential displays above will later be recovered
-by uniqueness.
-
-\section{The construction and identification route}
+\section{Finite time ordering}
 \label{sec:ode-construction-identification-route}
 
-The chapter has two jobs which must not be conflated.  First, it constructs a
-solution of a general inhomogeneous vector system.  Second, it identifies
-independently constructed familiar functions with that solution.  The intended
-dependency order is
-\[
- \text{second-order model}
- \longrightarrow \text{first-order affine system}
- \longrightarrow \text{Peano--Baker transition and Duhamel term}
- \longrightarrow \text{existence and uniqueness}
- \longrightarrow \text{elementary-function agreement}.
-\]
-More explicitly, the continuous layer will perform the following finite
-certificate steps.
-\begin{enumerate}
-  \item For interval-regular \(A\) and \(b\), construct the ordered
-  Peano--Baker transition \(\Phi(t,s)\) and the Duhamel expression for
-  \(x'=A(t)x+b(t)\).  Simplex-quadrature boxes and a factorial-tail modulus
-  supply existence as an executable raw vector.
-  \item Compare any two certified solutions by subtracting their Volterra
-  identities.  Iterated substitution bounds their difference by an explicit
-  factorial term, proving uniqueness without invoking a complete space of
-  functions.
-  \item Only after those two steps, specialize to constant matrices.  The
-  oscillator matrix then identifies the constructed transition with the
-  supplied sine--cosine pair, and the one-dimensional coefficient (A=1)
-  identifies the constructed transition with a supplied exponential.
-\end{enumerate}
-Thus the displayed oscillator and exponential formulas are validation targets,
-not assumptions used to manufacture the Peano--Baker solution.  This direction
-also makes the general inhomogeneous theorem immediately useful: the same
-transition that recovers the homogeneous modes carries forcing through the
-Duhamel term.  In particular, applying the general formula to
-\(A_\omega\) must recover \eqref{eq:forced-oscillator-duhamel}; it is a
-special-case identification theorem, not an additional analytic construction.
-
-\paragraph{What the identification theorem does, and does not, provide.}
-For the scalar coefficient \(A=1\), Peano--Baker produces a distinguished
-raw function \(E_{\mathrm{PB}}\) together with the certificates
-\[
- E_{\mathrm{PB}}'(q)=E_{\mathrm{PB}}(q),\qquad E_{\mathrm{PB}}(0)=1.
-\]
-The uniqueness proof then has a precise use: any independently constructed
-raw function carrying these same two certificates is equivalent to
-\(E_{\mathrm{PB}}\), on each rational time interval.  It does \emph{not}
-by itself show that a power series, a compound-interest construction, or an
-inverse logarithmic integral carries those certificates.  Those are three
-separate finite-estimate theorems.  Keeping that separation explicit avoids
-the common circularity of calling a proposed formula ``the exponential''
-before proving its differential equation.
-
-The scalar specialization has a deliberately important downstream use.  Once
-the power-series, repeated-multiplication, and inverse-logarithmic-integral
-representatives have each supplied a derivative and initial-value certificate
-for (E'=E, E(0)=1), the uniqueness step identifies all three.  The positive
-inverse is then the canonical logarithm.  This is the intended long route by
-which the arctangent integration-by-parts formula later acquires its canonical
-\(\log 2\); it is a dependency route for one pi benchmark, not a claim that
-the Pi scoreboard measures ODE progress.
-
-\paragraph{Certificate ledger for the exp/log route.}
-This long route has a useful non-circular order.  First, the continuous
-one-dimensional Peano--Baker construction supplies a reference solution
-\(E_{\mathrm{PB}}\) of \(E'=E\), \(E(0)=1\).  Separately, finite tail,
-product, and inverse-function estimates must certify those two statements for
-the power-series, positive-base/repeated-multiplication, and inverse-logarithm
-presentations on their common rational intervals.  Only then may the linear
-uniqueness theorem identify each of them with \(E_{\mathrm{PB}}\).  Finally,
-the positive inverse of that agreed exponential is the canonical logarithm.
-In symbols, the required proof graph is
-\[
- \begin{array}{c}
-  E_{\mathrm{PB}}\text{ exists and is unique}\\[-2pt]
-  \downarrow\quad\uparrow\ \text{separate derivative and initial-value certificates}\\[-2pt]
-  E_{\mathrm{series}},\ E_{\mathrm{power}},\ E_{\log^{-1}}
-  \quad\longrightarrow\quad \log_{\mathrm{canonical}}=E^{-1}.
- \end{array}
-\]
-Thus uniqueness is an identification theorem, not a substitute for proving
-that a proposed formula has derivative itself.  The integration-by-parts
-Pi target first obtains a literal logarithmic-integral endpoint by finite
-calculus; this route is what later permits that endpoint to be named
-\(\log_{\mathrm{canonical}}2\).  It also explains why the Euler-identity
-scoreboard row needs the matrix version of the same construction, together
-with the separate rotation and complex-branch certificates.  At present the
-finite ordered products, the sampled Duhamel identity, and the scalar
-factorial-tail schedule are checked; every continuous arrow in this ledger is
-still a construction target.  The diagram therefore records a dependency
-contract, not an already completed exp/log equivalence.
-
-The handoff from the finite tail to continuous uniqueness is now explicit in
-Lean.  The \code{SelfDerivativeVolterraComparison} certificate supplies, for two
-candidate interval-valued solutions, a rational error at each rational input,
-an iterated zero-initial Volterra bound for that error, and the local rule that
-zero error gives equivalent raw values.  The theorem
-certificate's \code{equivalent} theorem applies the proved factorial-tail
-lemma to obtain pointwise function agreement; the provider-shaped hypothesis
-\code{SelfDerivativeVolterraUniqueness} then yields
-\code{selfDerivativeInitialValueUnique\_of\_volterra}.
-Both interfaces explicitly require that the candidates have the same rational
-initial coordinate and equivalent certified raw values there.  Thus
-``zero-initial'' is a finite hypothesis to verify for a particular comparison,
-not an unstated consequence of the differential equation.
-This does not pretend that the analytic Volterra estimate is already proved:
-constructing the \code{error\_iterated} field from certified integral boxes is
-exactly the remaining continuous Peano--Baker task.  It does, however, fix
-the non-circular certificate that both the scalar exp/log comparison and the
-two-dimensional Euler-identity route must discharge.
-
-\section{Finite time ordering before analysis}
-
-\begin{definition}[Rational matrices and sampled systems]
+\begin{definition}[Rational sampled system]
 \label{def:rational-linear-system}
 \leanok
-For a fixed dimension \(d\), a rational vector is a function
-\(\{0,\ldots,d-1\}\to\Q\), and a rational matrix is a function
-\(\{0,\ldots,d-1\}^2\to\Q\). Matrix multiplication is the literal finite
-rational sum
+For rational matrices and vectors, the executable recurrence is
 \[
- (CD)_{ij}=\sum_{k=0}^{d-1}C_{ik}D_{kj}.
+ x_{k+1}=S_kx_k+g_k.
 \]
-The sampled recurrence is \(x_{k+1}=S_kx_k+g_k\). For the Euler sampling of
-\eqref{eq:linear-ode} with rational step \(h\), take
-\(S_k=I+hA(t_k)\) and \(g_k=hb(t_k)\). The implementation uses local
-rational matrix definitions, not an imported matrix or analysis library.
+All matrix products and sums are literal finite rational loops.
 \end{definition}
 
-\begin{theorem}[Forced oscillator: checked finite seed]
+\begin{theorem}[Forced oscillator: finite seed]
 \label{thm:forced-oscillator-finite-seed}
-\uses{def:rational-linear-system}
 \leanok
-For the oscillator matrix in the preceding section, the checked rational
-Euler system uses the state \(X_n=(q_n,v_n)\), step \(h\), and force samples
-\(r_n\).  Its literal two-coordinate update is
+Euler sampling gives
 \[
- q_{n+1}=q_n+h v_n,
- \qquad
- v_{n+1}=v_n-h\omega^2q_n+h r_n.
+ q_{n+1}=q_n+hv_n,\qquad
+ v_{n+1}=v_n-h\omega^2q_n+hr_n,
 \]
-Eliminating the velocity is also a checked finite identity:
-\[
- q_{n+2}-2q_{n+1}+q_n=-h^2\omega^2q_n+h^2r_n.
-\]
-The declarations
-\code{HarmonicOscillator.eulerStep\_position},
-\code{HarmonicOscillator.eulerStep\_velocity}, and
-\code{HarmonicOscillator.trajectory\_position\_secondDifference} establish
-these formulas by finite rational matrix action and recurrence algebra.  They
-give a concrete entry point from the familiar second-order equation to the
-general sampled inhomogeneous vector system and its Peano--Baker transition.
-They do \emph{not} assert that the Euler mesh has converged, nor that the
-continuous ODE has yet been solved; those are the separate certified
-simplex-integral and factorial-tail obligations below.
+and Lean checks the resulting finite second-difference identity.  No mesh
+limit is claimed here.
 \end{theorem}
 
-\begin{definition}[Finite Peano--Baker word sum]
+\begin{definition}[Finite Peano--Baker sum]
 \label{def:finite-peano-baker-word-sum}
-\uses{def:rational-linear-system}
 \leanok
-For matrices \(B_0,\ldots,B_{N-1}\), the discrete Peano--Baker sum is
-\[
- \sum_{N>i_1>\cdots>i_r\ge0}B_{i_1}\cdots B_{i_r},
-\]
-including the empty word \(I\). Newer sample times occur on the left, because
-generally \(B_iB_j\ne B_jB_i\). Lean proves the finite algebra theorem
+For increments \(B_0,\ldots,B_{N-1}\), the checked identity is
 \[
  (I+B_{N-1})\cdots(I+B_0)
  =\sum_{N>i_1>\cdots>i_r\ge0}B_{i_1}\cdots B_{i_r}.
 \]
-by \code{discretePeanoBakerExpansion}; \code{DiscretePeanoBakerExpansion}
-is its reusable proposition form. Separating this rational identity from
-analytic convergence prevents a continuous ODE theorem from concealing either
-issue.
+Later times are on the left.
 \end{definition}
 
-\begin{theorem}[Finite Peano--Baker enumeration]
+\begin{theorem}[Finite word enumeration]
 \label{thm:finite-peano-baker-enumeration}
-\uses{def:finite-peano-baker-word-sum}
 \leanok
-The enumerator has \(2^N\) words after \(N\) samples; at \(N=2\) it includes
-\(B_1B_0\), never \(B_0B_1\).  The executable recursion is
 \begin{verbatim}
 def words(n):
-    if n == 0:
-        return [[]]
+    if n == 0: return [[]]
     old = words(n - 1)
     return old + [[n - 1] + word for word in old]
 \end{verbatim}
 \begin{figure}[!htbp]
 \centering
 \peanoBakerWordsAnimation
-\caption{Finite chronological word enumeration.}
+\caption{Chronological word enumeration.}
 \label{fig:peano-baker-words}
 \end{figure}
 \end{theorem}
 
-\section{Exact finite variation of constants}
-
-\begin{theorem}[Discrete variation of constants]
+\begin{theorem}[Discrete variation of constants and uniqueness]
 \label{thm:discrete-variation-of-constants}
-\uses{def:rational-linear-system}
-\leanok
-For the sampled system \(x_{k+1}=S_kx_k+g_k\), let the homogeneous
-chronological action be
-\[
- H_0(x)=x,\qquad H_{k+1}(x)=S_kH_k(x).
-\]
-It is useful to keep its transition matrix as a separate finite object:
-\[
- T(m,0)=S_{m-1}\cdots S_1S_0,\qquad T(0,0)=I,
- \qquad H_m(x)=T(m,0)x.
-\]
-This is an exact recursive product, with no claim that a mesh has converged.
-For Euler increments \(S_k=I+B_k\), the checked transition is exactly the
-finite Peano--Baker chronological product
-\[
- T(N,0)=(I+B_{N-1})\cdots(I+B_0).
-\]
-Time shifts compose in the same order:
-\[
- T(s,m+n)=T(s+m,n)\,T(s,m).
-\]
-The checked declaration \code{chronologicalStepProduct\_split} proves this
-finite semigroup identity before any continuous state transition is
-constructed. It is the sampled precursor of
-\(\Phi(t,r)\Phi(r,s)=\Phi(t,s)\).
-Lean proves the exact finite decomposition
-\[
- x_N=T(N,0)x_0+v_N,\qquad
- v_N=\sum_{k=0}^{N-1}T(N,k+1)g_k,
- \qquad T(N,k+1)=S_{N-1}\cdots S_{k+1}.
-\]
-The empty transition in the last summand is \(I\), so the newest force is
-added without further transport. Thus \(v_N\) is the finite, time-ordered
-Duhamel contribution of the forcing samples. Lean defines the displayed vector
-sum as \code{DiscreteLinearSystem.duhamelSum};
-\code{trajectory\_zeroInitial\_eq\_duhamelSum} identifies it with the
-recursive zero-initial response, and
-\code{trajectory\_eq\_transition\_add\_duhamelSum} proves the full displayed
-formula. The proof uses only finite distributivity of rational matrix action;
-the future matrix-simplex integral formula will use exactly the same time
-order. The \code{ForcingZero} condition and its two theorems prove that, when
-every \(g_k=0\), the second summand vanishes and the trajectory is exactly the
-homogeneous action.
-\end{theorem}
-
-\begin{theorem}[Finite uniqueness for sampled linear systems]
 \label{thm:sampled-linear-uniqueness}
-\uses{def:rational-linear-system,thm:discrete-variation-of-constants}
 \leanok
-Fix rational matrices \(S_k\), rational forcing vectors \(g_k\), and an
-initial vector \(x_0\).  A sampled solution is any vector sequence satisfying
+Writing \(T(N,k)=S_{N-1}\cdots S_k\), Lean proves
 \[
-  x_{k+1}=S_kx_k+g_k,\qquad x_0\text{ as prescribed}.
+ x_N=T(N,0)x_0+\sum_{k<N}T(N,k+1)g_k.
 \]
-Lean proves that every sampled solution agrees at every natural index with
-the recursive trajectory.  In particular, every homogeneous candidate
-\[
-  z_{k+1}=S_kz_k,\qquad z_0=0,
-\]
-is identically zero.
-
-The proof is induction over the literal finite rational updates.  It uses
-neither an inverse transition matrix nor a limiting argument.  Together with
-the preceding transition formula, it says that the chronological product is
-not merely one possible calculation: it is the unique sampled evolution from
-its declared initial data.  This is the exact discrete uniqueness component of
-the later continuous theorem, not a claim that continuous ODE uniqueness has
-already been proved.
+The recursive trajectory is the unique sampled solution with its declared
+initial vector.  This is exact finite induction, including the zero-initial
+homogeneous case.
 \end{theorem}
 
-\section{The continuous Peano--Baker target}
+\section{Continuous Peano--Baker target}
 
-\begin{definition}[Interval-certified linear-system input]
+\begin{definition}[Interval-certified input]
 \label{def:interval-linear-system}
-\uses{def:finite-peano-baker-word-sum}
 \leanok
-On a rational time interval \([s,t]\), each entry of \(A\) and \(b\) is an
-existing \code{FunctionOnInterval} with the same domain. The regularity
-obligation requires a supplied \code{IntervalRegularOn} witness for each
-entry. The ODE layer therefore consumes interval algorithms and moduli, not a
-classical assumption that coefficients live on a completed real interval.
+Each entry of \(A\) and \(b\) is an interval-regular function on the same
+rational time interval.  The continuous construction consumes those
+algorithms and their moduli, not a completed function space.
 \end{definition}
 
-\begin{theorem}[Peano--Baker state transition: construction target]
+\begin{theorem}[State transition: construction target]
 \label{thm:peano-baker-state-transition}
-\uses{def:interval-linear-system,thm:effective-ftc-certificate}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_bound}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_bound}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTailShift}
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
-For interval-regular coefficients, construct a matrix of raw reals
-\(\Phi(t,s)\) by the ordered-simplex series
-\begin{align*}
- \Phi(t,s)={}&I+\int_s^t A(u_1)\,du_1\\
- &+\int_s^t A(u_1)\int_s^{u_1}A(u_2)\,du_2\,du_1+\cdots.
-\end{align*}
-The order of factors follows the nested integration order. The certificate
-consists of finite interval boxes for truncated simplex integrals and a
-rational submultiplicative matrix-norm bound for the tail. A bound
-\(\lVert A(u)\rVert\le M\) on an interval of length \(T\) should yield the
-factorial tail \(\sum_{r>N}(MT)^r/r!\).  Its scalar finite core is now
-checked.  With \(C=MT\), Lean chooses the computable rational-name index
+The required transition is
 \[
- N_0=2\,|\operatorname{num}(C)|+1.
+ \Phi(t,s)=I+\int_s^tA(u_1)\,du_1+
+ \int_s^tA(u_1)\int_s^{u_1}A(u_2)\,du_2\,du_1+\cdots.
 \]
-For every finite number \(K\) of omitted degrees, the literal rational
-prefix satisfies
-\[
- \sum_{r=N_0}^{N_0+K-1}\frac{C^r}{r!}
- \le 2\frac{C^{N_0}}{N_0!}.
-\]
-After shifting the start by \(j\), the corresponding bound is further
-multiplied by \(2^{-j}\).  These are the declarations
-\code{peanoBakerFactorialTail\_bound} and
-\code{peanoBakerFactorialTail\_shifted\_bound}; they quantify over every
-finite prefix, so they are exactly the finite enclosure needed before an
-infinite tail is represented by raw boxes.  The remaining epsilon step is now
-checked as well.  Put
-\[
- B=2\frac{C^{N_0}}{N_0!},\qquad
- j=(|\operatorname{num}(B)|+1)(\operatorname{den}(\varepsilon)+1).
-\]
-Then \code{peanoBakerFactorialTailShift} computes this \(j\), and
-\code{peanoBakerFactorialTail\_shifted\_le\_eps} proves that every finite
-prefix beginning at \(N_0+j\) is at most the requested positive rational
-\(\varepsilon\).  Thus the scalar majorant already has the explicit
-tail modulus needed by the later raw-box construction; only the matrix
-simplex and quadrature parts remain.
-
-The proof must still combine this majorant with componentwise matrix interval
-arithmetic and ordered-simplex quadrature to obtain nested, shrinking
-raw-matrix boxes and verify
-\[
- \partial_t\Phi(t,s)=A(t)\Phi(t,s),\qquad \Phi(s,s)=I,
-\qquad \Phi(t,r)\Phi(r,s)=\Phi(t,s).
-\]
-This remains a target, not a completed continuous ODE theorem: componentwise
-matrix interval arithmetic and iterated-simplex integral constructors remain
-to be formalized.  No completeness or convergence theorem is being hidden in
-the factorial estimate.
+Finite simplex quadrature boxes plus a matrix bound \(\lVert A\rVert\le M\)
+must provide the raw-matrix enclosure.  The scalar factorial-tail schedule
+for \(\sum_{r>N}(MT)^r/r!\) is already checked; matrix/simplex packaging is
+the remaining work.
 \end{theorem}
 
 \begin{theorem}[Variation of constants: construction target]
 \label{thm:variation-of-constants}
-\uses{thm:peano-baker-state-transition}
-Once the state transition has the preceding certificate, the solution of
-\eqref{eq:linear-ode} should be the interval-certified raw vector
 \[
  x(t)=\Phi(t,s)x_s+\int_s^t\Phi(t,u)b(u)\,du.
 \]
-The derivative identity is checked by finite product and integral rules, and
-the initial value follows from the zero-length integral certificate. This is
-the general linear ODE result needed by most applications; nonlinear
-existence theorems are deliberately outside this first layer.
+The same enclosure must certify the derivative and initial-value fields.
 \end{theorem}
 
 \begin{theorem}[Linear Picard--Lindel\"of: construction target]
 \label{thm:linear-picard-lindelof}
-\uses{thm:sampled-linear-uniqueness,thm:peano-baker-state-transition,thm:variation-of-constants}
-\lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationShift}
-\lean{ComputableAnalysis.LinearODE.zeroInitialVolterra_iteration_le_eps}
-\lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
 \lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationBound_eq_zero}
-The preceding Peano--Baker transition and variation-of-constants formula are
-also the constructive existence-and-uniqueness theorem for the affine linear
-initial-value problem
+For two candidates, the zero-initial difference must satisfy the finite
+Volterra estimate
 \[
-  x'(u)=A(u)x(u)+b(u),\qquad x(s)=x_s.
+ \lVert z(t)\rVert\le B\frac{(MT)^N}{N!}\quad\text{for every }N.
 \]
-The certified solution is the displayed variation-of-constants raw vector.
-Its executable modulus is assembled from the coefficient enclosure, simplex
-quadrature error, and the Peano--Baker factorial tail.  If two certified
-solutions have the same initial box, their difference solves the homogeneous
-system with zero initial data.  The uniqueness proof must be a universal
-finite estimate, not merely a claim about the constructed solution.  Given a
-rational bound \(B\) for a candidate difference \(z\), iterate its Volterra
-identity \(z(t)=\int_s^tA(u)z(u)\,\dd u\) exactly \(N\) times.  A coefficient
-bound \(\lVert A(u)\rVert\le M\) on an interval of length \(T\) then gives
-\[
-  \lVert z(t)\rVert\le B\,\frac{(MT)^N}{N!}.
-\]
-The same rational factorial-tail certificate used to construct the
-Peano--Baker series makes this bound smaller than every requested positive
-rational.  Hence \(z(t)=0\) as a raw real, and the two solutions agree,
-without an ambient complete function space or a nonconstructive supremum.
-Thus the continuous Peano--Baker layer is the linear Picard--Lindel\"of
-theorem needed for science and engineering, including the scalar uniqueness
-route for \(f'=f\).
-
-The purely rational tail kernel of this argument is already checked.  If a
-nonnegative scalar error is bounded after every ordered substitution by
-\(B(MT)^N/N!\), the declaration
-\code{LinearODE.zeroInitialVolterraIterationBound\_eq\_zero} proves that the
-error is literally zero.  It chooses the substitution count with the
-executable schedule
-\code{LinearODE.zeroInitialVolterraIterationShift}; the accompanying theorem
-\code{LinearODE.zeroInitialVolterraIteration\_le\_eps} proves the requested
-rational bound.  The remaining continuous work is therefore sharply scoped:
-derive this bound componentwise from certified Volterra identities and a
-rational matrix norm, rather than postulating an ODE uniqueness principle.
-
-This deliberately does not assert the general nonlinear theorem: that later
-extension needs an interval-certified Lipschitz map and a separate Picard
-contraction construction.
+The checked factorial schedule makes this smaller than every positive
+rational tolerance, hence proves raw-box equality.  Deriving this universal
+bound from interval Volterra identities is still open; no general nonlinear
+Picard theorem is claimed.
 \end{theorem}
 
-\begin{remark}[Why Peano--Baker existence also needs a separate uniqueness certificate]
+\begin{remark}[Why uniqueness is separate]
 \label{rem:peano-baker-uniqueness-certificate}
-\uses{thm:linear-picard-lindelof}
-The Peano--Baker construction itself supplies one interval algorithm satisfying
-the initial-value problem.  That is existence, not yet uniqueness: another
-candidate solution must be compared with it by a finite estimate that applies
-to every certified candidate.  The required input is a rational coefficient
-bound \(M\), an interval length \(T\), and a rational enclosure \(B\) for the
-candidate difference \(z\).  A supplied solution certificate normally gives
-such a bound directly; if it is local, a finite rational cover of the time
-interval supplies one before the argument is iterated.
-
-Subtracting the two Volterra identities gives a zero-initial homogeneous
-identity.  Its \(N\)-fold ordered substitution is a finite simplex expression,
-and interval multiplication bounds its norm by
-\[
-  B\frac{(MT)^N}{N!}.
-\]
-For a requested positive rational epsilon, the factorial-tail procedure
-computes an \(N\) for which this rational bound is below epsilon.  The two
-candidate output boxes consequently overlap at every requested precision,
-which is the project definition of equality of raw vectors.  No supremum of
-\(\lVert z\rVert\), limiting function sequence, or completeness theorem is
-being invoked.  This is why the linear theorem is properly described as
-constructive Picard--Lindel\"of, while a nonlinear Picard theorem still needs
-additional contraction data.
+Peano--Baker produces one candidate.  The iterated zero-initial bound is what
+compares it with every other certified candidate; it replaces neither
+existence nor a hidden completeness principle.
 \end{remark}
 
-\section{Elementary functions recovered by linear uniqueness}
+\section{Elementary-function identification}
 
-\begin{theorem}[Elementary-function agreement from linear uniqueness: construction target]
+\begin{theorem}[Agreement from linear uniqueness: construction target]
 \label{thm:linear-ode-elementary-function-agreement}
-\uses{thm:linear-picard-lindelof}
-The continuous linear theorem has a deliberately important consequence beyond
-the solution of a single engineering model: it supplies a common
-identification principle for independently constructed elementary functions.
-Every proposed representation must first carry its own interval algorithm,
-derivative certificate, and initial-value certificate.  If two such
-representations solve the same linear problem, the factorial-tail uniqueness
-argument identifies them as raw functions.
-
-For the scalar problem
+Once each named representation independently supplies its derivative and
+initial-value certificate, linear uniqueness identifies it with the
+Peano--Baker solution.  The two intended applications are
 \[
- E'(t)=E(t),\qquad E(0)=1,
-\]
-Peano--Baker constructs the canonical exponential directly from the
-one-dimensional transition.  The power-series evaluator and the
-repeated-multiplication (Euler/compound-interest) evaluator therefore agree
-once each has been shown to satisfy this equation and initial condition:
-\[
- E_{\mathrm{series}}
- \Equiv E_{\mathrm{repeated}}.
-\]
-Here \(E_{\mathrm{repeated}}(q)\) is specifically the rational-power
-extension of the positive base \(e=E(1)\), beginning with literal repeated
-multiplication at natural exponents.  Its exponent-continuity certificate and
-the finite product rule reduce the derivative check to its rational
-difference quotients.  This is stronger than a collection of pairwise limit
-comparisons: the representations are forced to be the same solution.
-
-The three independent inputs to this conclusion should remain visible in the
-formalization plan:
-\begin{enumerate}
-  \item The power-series evaluator now has its exact zero-input certificate:
-  \code{ExpProofs.expPowerSeries\_zero\_compute\_eq} identifies every stage
-  with the constant raw real \(1\).  It still needs the termwise derivative
-  certificate with a factorial-tail schedule.
-  \item The repeated-multiplication representative begins with a positive
-  base and literal natural powers.  Its extension to rational exponents needs
-  certified positive roots, the additive power law, and the rational
-  epsilon--delta continuity-in-exponent certificate.  A compound-interest
-  raw real for the single value \(e\) is useful evidence for the base, but is
-  not yet a rational-input function \(q\mapsto e^q\).
-  \item The inverse-logarithmic-integral representative needs a monotone
-  inverse certificate and the finite FTC identity for \(1/x\).  These give
-  both its initial value and its self-derivative without presupposing an
-  ambient completed real line.
-\end{enumerate}
-Once these obligations are supplied, all three functions agree with
-\(E_{\mathrm{PB}}\), rather than merely agreeing at the isolated point
-\(1\).  Their Euler bases consequently agree as the derived corollary
-\(E_{\mathrm{series}}(1)\Equiv E_{\mathrm{repeated}}(1)\Equiv
-E_{\mathrm{invlog}}(1)\).
-
-It also gives the requested alternative characterization of the Euler base.
-For a positive base \(b\) with rational-power function \(P_b(q)=b^q\), let
-\(\lambda_b\) denote its certified derivative at zero.  The additive power
-law and a finite product-derivative certificate should give
-\[
-  P_b'(q)=\lambda_b P_b(q),\qquad P_b(0)=1.
-\]
-Consequently the condition \(\lambda_b=1\), equivalently
-\(\left.\dd(b^q)/\dd q\right|_{q=0}=1\), makes \(P_b\) a solution of the
-same scalar initial-value problem.  Linear uniqueness then proves
-\[
- \left.\frac{\dd}{\dd q}b^q\right|_{q=0}=1
- \quad\Longleftrightarrow\quad b=e,
- \qquad e:=E(1),
-\]
-among positive bases carrying these certificates.  In particular,
-\(\dd(e^q)/\dd q=e^q\) is a theorem of the selected canonical
-representation, not a convention.  The inverse-logarithmic-integral
-evaluator joins this equality only after its inverse-function and FTC
-certificates have established that it solves this same initial-value problem.
-
-The rotation system supplies the trigonometric counterpart:
-\[
- \frac{\dd}{\dd t}
- \begin{bmatrix}C(t)\\S(t)\end{bmatrix}
- =
- \begin{bmatrix}0&-1\\1&0\end{bmatrix}
- \begin{bmatrix}C(t)\\S(t)\end{bmatrix},
+ E'=E,\ E(0)=1,
  \qquad
- (C(0),S(0))=(1,0).
+ \binom{C}{S}'=\begin{bmatrix}0&-1\\1&0\end{bmatrix}\binom{C}{S},
+ \quad(C(0),S(0))=(1,0).
 \]
-The Peano--Baker solution is then identified with the sine and cosine
-constructed from the inverse-arctangent circle chart, once their
-derivative and initial-value certificates have been supplied.  Over rational
-complex boxes this same agreement yields
-\[
- \exp(it)=C(t)+iS(t).
-\]
-Thus Euler's identity is a long but natural ODE consequence, rather than an
-additional definition of either exponential or trigonometry.
-
-On the positive branch, the inverse of this canonical exponential is the
-canonical logarithm.  The positive logarithmic-integral evaluator must be
-proved to be that inverse by its own finite FTC and inverse-function
-certificates; its already checked comparison at \(2\) is useful boundary
-data, not a substitute for the function theorem.  That inverse theorem then
-also identifies its exponential presentation with the same \(E\), completing
-\(E_{\mathrm{series}}\Equiv E_{\mathrm{repeated}}\Equiv
-E_{\mathrm{invlog}}\).  Once this agreement is available, the
-integration-by-parts target
-\[
- \int_0^1\arctan(x)\,\dd x
- =\frac{\pi}{4}-\frac12\log 2
-\]
-has the canonical \(\log 2\) required for the derived pi computation
-\[
- \pi=4\int_0^1\arctan(x)\,\dd x+2\log2.
-\]
-The global product derivative and its stabilized FTC identity are now
-available.  The remaining separate work is a direct arctangent strip,
-its splitting identity with the logarithmic strip, and the required
-change-of-variables/canonical-logarithm alignment.  Likewise,
-\(\exp(i\pi/2)=i\) and \(\pi=-2i\log(i)\) remain future scoreboard
-corroborations, not completed consequences of this theorem.
+This is the non-circular path from power series, repeated multiplication, and
+inverse logarithms to a canonical exponential/logarithm, and from rotation to
+\(\exp(it)=C(t)+iS(t)\).  The representative-specific derivative proofs are
+not supplied by uniqueness.
 \end{theorem}
 
-\section{Special cases and computational uses}
+\section{Finite special cases}
 
 \begin{definition}[Constant and commuting samples]
 \label{def:constant-commuting-samples}
-\uses{def:rational-linear-system}
 \leanok
-The finite layer records when time ordering simplifies: all step matrices
-equal, or all sampled steps commute pairwise. These are explicit propositions,
-since a generic linear system has neither property.
-
-A stronger finite nilpotence condition is also useful: a sampled family is
-square-zero when \(B_iB_j=0\) for every pair of sample times. This is more
-than commutation, but it makes the first nontrivial truncation of the
-Peano--Baker series exact.
+Constant, pairwise-commuting, and square-zero increments are explicit finite
+hypotheses; generic time-ordered systems need none of them.
 \end{definition}
 
 \begin{theorem}[Finite Peano--Baker specializations]
 \label{thm:peano-baker-specializations}
-\uses{thm:peano-baker-state-transition,def:constant-commuting-samples}
-\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm}
-\lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_zero}
 \lean{ComputableAnalysis.LinearODE.constantPeanoBakerSimplexTerm_succ}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
 \lean{ComputableAnalysis.RotationSeries.expPartial_imaginary_even_split}
 \leanok
-The finite layer already proves constant, zero, square-zero, and
-pairwise-commuting specializations. For a constant Euler increment \(B\),
+For constant \(A\), the checked degree-\(r\) term is \(T^rA^r/r!\).  For the
+quarter-turn matrix \(J^2=-I\), its even prefix is exactly
 \[
- (I+B)\cdots(I+B)=(I+B)^N
-   =\sum_{N>i_1>\cdots>i_r\ge0}B\cdots B,
-\]
-where the right side is the checked finite Peano--Baker word sum. For
-\(B=0\), it is exactly \(I\) at every stage. These statements are the
-constant and zero-coefficient regression cases for the eventual continuous
-theorem, proved by \code{chronologicalProduct\_constant},
-\code{peanoBakerDiscreteSum\_constant}, and
-\code{peanoBakerDiscreteSum\_zeroCoefficient}.
-
-The continuous constant-coefficient series already has a checked finite
-algebraic spine.  Its degree-\(r\) ordered-simplex term is represented by
-the literal rational matrix expression
-\[
-  \frac{T^r}{r!}A^r.
-\]
-Lean defines it as \code{constantPeanoBakerSimplexTerm}, proves that degree
-zero is \(I\), and proves the recurrence
-\[
-  \frac{T^{r+1}}{(r+1)!}A^{r+1}
-  =\frac{T}{r+1}A\left(\frac{T^r}{r!}A^r\right).
-\]
-This is the exact finite coefficient recurrence shared by the scalar
-exponential and the constant-matrix Peano--Baker series.  It does not yet
-claim that these terms are the values of continuous ordered-simplex
-integrals: that remaining analytic identification is precisely what the
-future interval-simplex quadrature must certify.
-
-For the counter-clockwise quarter-turn matrix
-\[
- J=\begin{pmatrix}0&-1\\1&0\end{pmatrix},
- \qquad J^2=-I,
-\]
-Lean checks
-\[
- J^{2k}=(-1)^k I,
+ \sum_{r<2n}\frac{T^r}{r!}J^r=C_n(T)I+S_n(T)J,
  \qquad
- J^{2k+1}=(-1)^kJ.
-\]
-Writing
-\[
- C_n(T)=\sum_{k<n}(-1)^k\frac{T^{2k}}{(2k)!},
- \qquad
- S_n(T)=\sum_{k<n}(-1)^k\frac{T^{2k+1}}{(2k+1)!},
-\]
-the checked finite-prefix identity is
-\[
- \sum_{r<2n}\frac{T^r}{r!}J^r=C_n(T)I+S_n(T)J.
-\]
-The literal rational-complex prefix has the matching checked identity
-\[
  \operatorname{expPrefix}_{2n}(iT)=C_n(T)+iS_n(T).
 \]
-These are finite identities, not yet a complex-raw tail certificate or a
-continuous ODE theorem.
-
-For a square-zero sampled family, every selected word with two or more
-factors is zero. Therefore Lean proves the exact finite collapse
-\[
- (I+B_{N-1})\cdots(I+B_0)
- = I+\sum_{k=0}^{N-1}B_k.
-\]
-The right-hand side is the executable recursive matrix sum
-\code{matrixSequenceSum}; the two checked theorems above establish the
-formula both for the chronological product and for the ordered-word
-Peano--Baker sum. This is a genuine nilpotent regression case, not a
-continuous limiting argument.
-
-For arbitrary pairwise-commuting sampled increments, Lean now proves the
-finite algebra needed before an exponential collapse: every \(B_i\) commutes
-with the accumulated chronological transition
-\[
- B_i (I+B_{N-1})\cdots(I+B_0)
- =
- (I+B_{N-1})\cdots(I+B_0) B_i.
-\]
-The checked lemmas \code{PairwiseCommuting} and
-\code{matrixMul\_commutes\_chronologicalProduct} establish precisely this
-reordering fact, while \code{chronologicalProduct\_split} gives the
-time-interval composition law with later increments on the left. Identifying
-the continuous commuting case with
-\(\exp(\int_s^t A(u)\,du)\) still requires the analytic construction and is
-not asserted by these finite lemmas.
-
-The continuous construction should yield the familiar special cases
-\[
- \begin{array}{rcl}
- A(u)=A_0&:&\Phi(t,s)=\exp((t-s)A_0),\\[2mm]
- A(u)A(v)=A(v)A(u)&:&
- \Phi(t,s)=\exp\!\left(\int_s^tA(u)\,du\right),\\[2mm]
- x'=a(t)x+b(t)&:&
- x(t)=e^{\int_s^t a}\,x_s+\int_s^t e^{\int_u^t a}\,b(u)\,du.
- \end{array}
-\]
-For piecewise-constant coefficients, the direct finite answer is the
-chronological product of constant-step exponentials. The remaining
-specializations are the analytic commuting-exponential identification and
-finite algebra for strictly triangular and higher-order nilpotent coefficient
-algebras; sufficiently long ordered products should then vanish, making the
-series a finite certified calculation.
+Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
+can be reordered.  The continuous exponential and complex-tail conclusions
+remain separate targets.
 \end{theorem}
 
-\begin{remark}[Engineering-facing error certificates]
+\begin{remark}[Engineering-facing output]
 \label{rem:ode-error-certificates}
-\uses{thm:peano-baker-state-transition,thm:variation-of-constants}
-A practical result should return a rational enclosure for each component and
-an error budget split between mesh error, coefficient-evaluation error, and
-the Peano--Baker tail. Piecewise-constant dynamics, constant-coefficient
-circuits and control models, triangular reaction chains, and small coupled
-linearizations are natural first regression examples. Stiffness, adaptive
-step choice, and nonlinear Picard--Lindel\"of theory should follow only after
-these finite certificates are in place.
+The intended result reports rational component boxes and a split error budget:
+coefficient evaluation, simplex quadrature, and factorial tail.  Constant,
+piecewise-constant, triangular, and small coupled systems are the first
+regression examples.
 \end{remark}
