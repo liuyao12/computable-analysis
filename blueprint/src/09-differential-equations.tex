@@ -265,6 +265,21 @@ Its first three word lists are
 Thus the two-step expression has the required ordered term \(B_1B_0\), not
 the generally incorrect \(B_0B_1\). These are finite rational computations;
 they do not yet assert convergence as the mesh tends to zero.
+The executable recursion is exactly
+\begin{verbatim}
+def words(n):
+    if n == 0:
+        return [[]]
+    old = words(n - 1)
+    return old + [[n - 1] + word for word in old]
+\end{verbatim}
+\begin{figure}[!htbp]
+\centering
+\peanoBakerWordsAnimation
+\caption{Finite chronological word enumeration.  Each coloured tile is a
+rational matrix factor, with the newest selected time on the left.}
+\label{fig:peano-baker-words}
+\end{figure}
 \end{theorem}
 
 \section{Exact finite variation of constants}
