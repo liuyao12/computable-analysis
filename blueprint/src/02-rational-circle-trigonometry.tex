@@ -688,6 +688,11 @@ an entirely rational inequality between the coarse squared chord and two
 secant certificates minus two copies of \(2^{-(2s+9)}\), where \(s\) is the
 coarse stage.  This normalized target is definitionally transported back to
 the original interval statement; no exact square root is selected.
+Its first one-cell instance is checked by
+\lean{ComputableAnalysis.PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_one}
+and already yields
+\lean{ComputableAnalysis.PiProofs.adjacentChordLowerRefinesByDoubling_one}
+The uniform positive-stage inequality remains open.
 \end{definition}
 
 \begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}

@@ -43,6 +43,26 @@ theorem adjacentCurvatureCertificates_refineSquaredChord
     (RationalCircle.Stage.midpoint_curvature_certificate_refines_squared_chord_of_refinement
       href hstage k hk)
 
+/-- The explicit secant-margin budget holds at the initial one-cell stage.
+This is a finite rational normalization check, not a numerical approximation
+or a claim about all later stages. -/
+theorem adjacentChordSecantMarginCoversFineDyadicBudget_one :
+    AdjacentChordSecantMarginCoversFineDyadicBudget 1 := by
+  intro k
+  have hkzero : k = (⟨0, by omega⟩ : Fin 1) :=
+    Fin.ext (by omega)
+  subst k
+  native_decide
+
+/-- The original square-root lower-chord endpoint refines at the first dyadic
+step.  The remaining direct-circumference problem is therefore the uniform
+positive-stage margin theorem. -/
+theorem adjacentChordLowerRefinesByDoubling_one :
+    AdjacentChordLowerRefinesByDoubling 1 :=
+  adjacentChordLowerRefinesByDoubling_of_secantMargin 1 (by native_decide)
+    (adjacentChordSecantMargin_of_fineDyadicBudget 1 (by native_decide)
+      adjacentChordSecantMarginCoversFineDyadicBudget_one)
+
 end PiProofs
 
 end ComputableAnalysis
