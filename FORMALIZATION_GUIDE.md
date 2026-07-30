@@ -464,11 +464,16 @@ expresses the sum of the two fine cross certificates as
 `midpoint_dot_deficit_correction_sum_formula`, and
 `midpoint_cross_square_defect_formula`: respectively they compute the two
 fine dot deficits, their two `sq(deficit) / 4` corrections, and the remaining
-coarse cross-square numerator.  Together these keep the desired comparison
-between the coarse squared chord and the sum of the two curvature certificates
-entirely in rational, denominator-cleared algebra.  They are a bridge toward
-the existing `AdjacentChordCurvatureMarginCoversFineWidths` target, not a
-claim that its bisection-width budget has already been discharged.
+coarse cross-square numerator.  The composed theorem
+`midpoint_curvature_certificate_refines_squared_chord` now proves the full
+local geometric comparison: on every chart cell in `[0,1]`, the coarse
+squared chord is at most the square of the sum of the two curvature
+certificates.  Its proof uses the positive midpoint polynomial, the exact
+cross-square gap, and a rational completing-square inequality.  Thus the
+geometry portion of `AdjacentChordCurvatureMarginCoversFineWidths` is
+discharged without selecting a square root.  The still-open part is precisely
+the separate, explicit bisection-width budget; this theorem does not conceal
+that numerical enclosure loss.
 For the complementary coarse-scale estimate, use
 `RationalCircle.Stage.point_cross_ge_half_step` (or its adjacent-stage form
 `RationalCircle.Stage.samplePoint_cross_ge_half_step`): on `0 <= u < v <= 1`,

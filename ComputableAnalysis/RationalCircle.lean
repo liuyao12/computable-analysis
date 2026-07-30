@@ -704,6 +704,27 @@ private theorem rat_sq_nonneg (x : Rat) : 0 <= sq x := by
     have hsq : 0 <= (-x) * (-x) := Rat.mul_nonneg hneg hneg
     grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
 
+/-- Completing the square in the form used by the midpoint curvature
+certificate.  No sign condition on either summand is needed. -/
+theorem sq_add_ge_sq_add_two_mul (x y : Rat) :
+    sq x + 2 * x * y <= sq (x + y) := by
+  have hy : 0 <= sq y := rat_sq_nonneg y
+  unfold sq at *
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact product of the midpoint cross certificate and its quadratic
+correction, placed over the common denominator used by the curvature
+polynomial. -/
+theorem midpoint_cross_correction_product_formula (h K S D : Rat) :
+    2 * ((h * K) / D) *
+        ((h * h * h * h * S) / (16 * D * D)) =
+      (h * h * h * h * h * K * S) / (8 * D * D * D) := by
+  rw [Rat.div_def, Rat.div_def]
+  simp only [Rat.inv_mul_rev]
+  have hscalar : (2 : Rat) * 16⁻¹ = 8⁻¹ := by native_decide
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- The square of a rational quotient, followed by the curvature factor
 `1/4`, in a denominator-cleared form. -/
 theorem sq_div_four_formula (x d : Rat) :
@@ -791,6 +812,122 @@ theorem midpoint_correction_sum_algebra
     _ = H * (a * a + c * c) := by
       grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
     _ = D * (H * (a * a + c * c) / D) := hfinal.symm
+
+/-- Scaling the midpoint curvature polynomial by the fifth power of the step
+gives the exact rational comparison required between the coarse cross-square
+defect and the cross--correction product. -/
+theorem midpoint_curvature_polynomial_scaled
+    {h m D K S : Rat} (hh : 0 <= h) (hD : 0 < D)
+    (hpoly : 8 * h * m * m * D <= K * S) :
+    (h * h * h * h * h * h * m * m) / (D * D) <=
+      (h * h * h * h * h * K * S) / (8 * D * D * D) := by
+  let H5 : Rat := h * h * h * h * h
+  let C : Rat := 8 * D * D * D
+  have hH5 : 0 <= H5 := by
+    dsimp [H5]
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg
+        (Rat.mul_nonneg
+          (Rat.mul_nonneg hh hh)
+          hh)
+        hh)
+      hh
+  have hCpos : 0 < C := by
+    dsimp [C]
+    exact Rat.mul_pos
+      (Rat.mul_pos
+        (Rat.mul_pos (by native_decide) hD)
+        hD)
+      hD
+  have hDne : D ≠ 0 := Rat.ne_of_gt hD
+  have hCne : C ≠ 0 := Rat.ne_of_gt hCpos
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hpoly hH5
+  have hscaled' :
+      8 * h * h * h * h * h * h * m * m * D <= H5 * (K * S) := by
+    dsimp [H5] at hscaled ⊢
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  apply Rat.le_of_mul_le_mul_right (c := C)
+  · have hleft :
+        ((h * h * h * h * h * h * m * m) / (D * D)) * C =
+          8 * h * h * h * h * h * h * m * m * D := by
+      dsimp [C]
+      rw [Rat.div_def, Rat.inv_mul_rev]
+      have hcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hDne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    have hright :
+        ((h * h * h * h * h * K * S) / C) * C = H5 * (K * S) := by
+      rw [Rat.div_def]
+      have hcancel : C⁻¹ * C = 1 := Rat.inv_mul_cancel C hCne
+      dsimp [H5]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    change
+      ((h * h * h * h * h * h * m * m) / (D * D)) * C <=
+        ((h * h * h * h * h * K * S) / C) * C
+    rw [hleft, hright]
+    exact hscaled'
+  · exact hCpos
+
+/-- Denominator-cleared form of the gap between the coarse squared chord and
+the square of the two fine cross certificates. -/
+theorem midpoint_cross_square_gap_algebra
+    {h m d0 dm dv K : Rat}
+    (hd0 : 0 < d0) (hdm : 0 < dm) (hdv : 0 < dv)
+    (hdefect : 4 * d0 * dm * dm * dv - K * K =
+      h * h * h * h * m * m) :
+    (4 * h * h) / (d0 * dv) - sq ((h * K) / (d0 * dm * dv)) =
+      (h * h * h * h * h * h * m * m) /
+        ((d0 * dm * dv) * (d0 * dm * dv)) := by
+  let D : Rat := d0 * dm * dv
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos (Rat.mul_pos hd0 hdm) hdv
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  have hDDpos : 0 < D * D := Rat.mul_pos hDpos hDpos
+  have hDDne : D * D ≠ 0 := Rat.ne_of_gt hDDpos
+  have clear_left (x y z : Rat) (hy : y ≠ 0)
+      (hxy : y * x = y * z) : x = z := by
+    calc
+      x = y⁻¹ * (y * x) := by
+        have hcancel : y⁻¹ * y = 1 := Rat.inv_mul_cancel y hy
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ = y⁻¹ * (y * z) := by rw [hxy]
+      _ = z := by
+        have hcancel : y⁻¹ * y = 1 := Rat.inv_mul_cancel y hy
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  change (4 * h * h) / (d0 * dv) - sq ((h * K) / D) =
+    (h * h * h * h * h * h * m * m) / (D * D)
+  have hcoarse :
+      (D * D) * ((4 * h * h) / (d0 * dv)) =
+        4 * h * h * d0 * dm * dm * dv := by
+    dsimp [D]
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    have hcancel0 : d0 * d0⁻¹ = 1 := Rat.mul_inv_cancel d0 (Rat.ne_of_gt hd0)
+    have hcancelv : dv * dv⁻¹ = 1 := Rat.mul_inv_cancel dv (Rat.ne_of_gt hdv)
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hcross :
+      (D * D) * sq ((h * K) / D) = h * h * K * K := by
+    unfold sq
+    rw [Rat.div_def]
+    have hcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hDne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hright :
+      (D * D) * ((h * h * h * h * h * h * m * m) / (D * D)) =
+        h * h * h * h * h * h * m * m := by
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    have hcancel : D * D⁻¹ = 1 := Rat.mul_inv_cancel D hDne
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have mul_sub (x y z : Rat) : x * (y - z) = x * y - x * z := by
+    rw [Rat.sub_eq_add_neg]
+    grind [Rat.mul_add, Rat.mul_assoc]
+  apply clear_left _ (D * D) _ hDDne
+  rw [mul_sub, hcoarse, hcross, hright]
+  calc
+    4 * h * h * d0 * dm * dm * dv - h * h * K * K =
+        h * h * (4 * d0 * dm * dm * dv - K * K) := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+    _ = h * h * (h * h * h * h * m * m) := by rw [hdefect]
+    _ = h * h * h * h * h * h * m * m := by
+      grind [Rat.mul_assoc]
 
 theorem dot_self_eq_normSq (p : PiCirclePoint) :
     dot p p = normSq p := by
@@ -911,6 +1048,50 @@ theorem midpoint_dot_deficit_correction_sum_formula (u h : Rat) :
   rw [midpoint_correction_term_formula,
     midpoint_correction_term_formula]
   exact midpoint_correction_sum_algebra hd0pos hdmpos hdvpos
+
+/-- Closed rational form of the two midpoint curvature certificates: the
+cross-product sum and the two quadratic dot-deficit corrections are kept
+separate but share one explicit positive denominator system. -/
+theorem midpoint_curvature_certificate_sum_formula (u h : Rat) :
+    let m := u + h / 2
+    let d0 := 1 + u * u
+    let dm := 1 + m * m
+    let dv := 1 + (u + h) * (u + h)
+    let K := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+    cross (point u) (point m) + sq (1 - dot (point u) (point m)) / 4 +
+        cross (point m) (point (u + h)) +
+          sq (1 - dot (point m) (point (u + h))) / 4 =
+      (h * K) / (d0 * dm * dv) +
+        (h * h * h * h * (d0 * d0 + dv * dv)) /
+          (16 * d0 * d0 * dm * dm * dv * dv) := by
+  dsimp
+  let m : Rat := u + h / 2
+  let d0 : Rat := 1 + u * u
+  let dm : Rat := 1 + m * m
+  let dv : Rat := 1 + (u + h) * (u + h)
+  let K : Rat := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+  have hcross :
+      cross (point u) (point m) + cross (point m) (point (u + h)) =
+        (h * K) / (d0 * dm * dv) := by
+    simpa [m, d0, dm, dv, K] using midpoint_cross_sum_formula u h
+  have hcorrection :
+      sq (1 - dot (point u) (point m)) / 4 +
+          sq (1 - dot (point m) (point (u + h))) / 4 =
+        (h * h * h * h * (d0 * d0 + dv * dv)) /
+          (16 * d0 * d0 * dm * dm * dv * dv) := by
+    simpa [m, d0, dm, dv] using midpoint_dot_deficit_correction_sum_formula u h
+  calc
+    cross (point u) (point m) + sq (1 - dot (point u) (point m)) / 4 +
+        cross (point m) (point (u + h)) +
+          sq (1 - dot (point m) (point (u + h))) / 4 =
+      (cross (point u) (point m) + cross (point m) (point (u + h))) +
+        (sq (1 - dot (point u) (point m)) / 4 +
+          sq (1 - dot (point m) (point (u + h))) / 4) := by
+        grind [Rat.add_assoc, Rat.add_comm]
+    _ = (h * K) / (d0 * dm * dv) +
+        (h * h * h * h * (d0 * d0 + dv * dv)) /
+          (16 * d0 * d0 * dm * dm * dv * dv) := by
+        rw [hcross, hcorrection]
 
 theorem one_sub_point_dot_nonneg (u v : Rat) :
     0 <= 1 - dot (point u) (point v) := by
@@ -1750,6 +1931,108 @@ theorem point_segmentNormSq_formula (u v : Rat) :
   rw [one_sub_point_dot_formula]
   rw [Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- A midpoint split in the first-quadrant rational circle chart refines the
+coarse squared chord by the square of the two curvature-corrected fine
+certificates.
+
+This is the local geometric bridge needed for a direct circumference proof:
+the correction terms pay for the precise defect left by replacing the coarse
+chord with the two rational cross-product cells.  It is a finite rational
+inequality, with no square roots, limits, or real-number completeness. -/
+theorem midpoint_curvature_certificate_refines_squared_chord
+    {u h : Rat} (hu : 0 <= u) (hh : 0 <= h) (huend : u + h <= 1) :
+    segmentNormSq (point u) (point (u + h)) <=
+      sq (cross (point u) (point (u + h / 2)) +
+          sq (1 - dot (point u) (point (u + h / 2))) / 4 +
+          cross (point (u + h / 2)) (point (u + h)) +
+          sq (1 - dot (point (u + h / 2)) (point (u + h))) / 4) := by
+  let m : Rat := u + h / 2
+  let d0 : Rat := 1 + u * u
+  let dm : Rat := 1 + m * m
+  let dv : Rat := 1 + (u + h) * (u + h)
+  let K : Rat := (1 + u * m) * dv + (1 + m * (u + h)) * d0
+  let D : Rat := d0 * dm * dv
+  let S : Rat := d0 * d0 + dv * dv
+  let C : Rat := (h * K) / D
+  let Q : Rat := (h * h * h * h * S) / (16 * D * D)
+  let L : Rat := (4 * h * h) / (d0 * dv)
+  have hd0pos : 0 < d0 := by
+    dsimp [d0]
+    exact one_add_square_pos u
+  have hdmpos : 0 < dm := by
+    dsimp [dm]
+    exact one_add_square_pos m
+  have hdvpos : 0 < dv := by
+    dsimp [dv]
+    exact one_add_square_pos (u + h)
+  have hDpos : 0 < D := by
+    dsimp [D]
+    exact Rat.mul_pos (Rat.mul_pos hd0pos hdmpos) hdvpos
+  have hdefect :
+      4 * d0 * dm * dm * dv - K * K = h * h * h * h * m * m := by
+    simpa [m, d0, dm, dv, K] using midpoint_cross_square_defect_formula u h
+  have hgap : L - sq C =
+      (h * h * h * h * h * h * m * m) / (D * D) := by
+    simpa [L, C, D, m, d0, dm, dv] using
+      midpoint_cross_square_gap_algebra hd0pos hdmpos hdvpos hdefect
+  have hpoly : 8 * h * m * m * D <= K * S := by
+    have hpoly0 := midpointCurvaturePolynomialBound hu hh huend
+    change 8 * h * m * m * d0 * dm * dv <= K * S at hpoly0
+    calc
+      8 * h * m * m * D = 8 * h * m * m * d0 * dm * dv := by
+        dsimp [D]
+        grind [Rat.mul_assoc]
+      _ <= K * S := hpoly0
+  have hscaled :
+      (h * h * h * h * h * h * m * m) / (D * D) <=
+        (h * h * h * h * h * K * S) / (8 * D * D * D) :=
+    midpoint_curvature_polynomial_scaled hh hDpos hpoly
+  have hproduct : 2 * C * Q =
+      (h * h * h * h * h * K * S) / (8 * D * D * D) := by
+    simpa [C, Q] using midpoint_cross_correction_product_formula h K S D
+  have hgapbound : L - sq C <= 2 * C * Q := by
+    rw [hgap, hproduct]
+    exact hscaled
+  have hLbound : L <= sq C + 2 * C * Q := by
+    grind [Rat.sub_eq_add_neg]
+  have hcertificate :
+      cross (point u) (point m) + sq (1 - dot (point u) (point m)) / 4 +
+          cross (point m) (point (u + h)) +
+          sq (1 - dot (point m) (point (u + h))) / 4 = C + Q := by
+    have hcertificate0 := midpoint_curvature_certificate_sum_formula u h
+    change
+      cross (point u) (point m) + sq (1 - dot (point u) (point m)) / 4 +
+          cross (point m) (point (u + h)) +
+          sq (1 - dot (point m) (point (u + h))) / 4 =
+        (h * K) / (d0 * dm * dv) +
+          (h * h * h * h * S) /
+            (16 * d0 * d0 * dm * dm * dv * dv) at hcertificate0
+    have hdenom : 16 * D * D = 16 * d0 * d0 * dm * dm * dv * dv := by
+      dsimp [D]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    calc
+      cross (point u) (point m) + sq (1 - dot (point u) (point m)) / 4 +
+          cross (point m) (point (u + h)) +
+          sq (1 - dot (point m) (point (u + h))) / 4 =
+          (h * K) / (d0 * dm * dv) +
+            (h * h * h * h * S) /
+              (16 * d0 * d0 * dm * dm * dv * dv) := hcertificate0
+      _ = C + Q := by
+        rw [← hdenom]
+  have hsegment : segmentNormSq (point u) (point (u + h)) = L := by
+    rw [point_segmentNormSq_formula]
+    have hstep : u + h - u = h := by grind [Rat.sub_eq_add_neg]
+    rw [hstep]
+  calc
+    segmentNormSq (point u) (point (u + h)) = L := hsegment
+    _ <= sq C + 2 * C * Q := hLbound
+    _ <= sq (C + Q) := sq_add_ge_sq_add_two_mul C Q
+    _ = sq (cross (point u) (point (u + h / 2)) +
+        sq (1 - dot (point u) (point (u + h / 2))) / 4 +
+        cross (point (u + h / 2)) (point (u + h)) +
+        sq (1 - dot (point (u + h / 2)) (point (u + h))) / 4) := by
+      rw [hcertificate]
 
 /-- Every adjacent chord of a rational-circle stage with at least two cells
 has squared length at most one.  This makes the square-root enclosure for an
