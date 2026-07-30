@@ -820,6 +820,13 @@ exact cross-square gap, the positive polynomial inequality, and completing a
 square.  The separate finite bisection-width budget remains an explicit
 obligation; this local theorem does not claim that the two enclosure widths
 have already been paid.
+The same result is now exposed at the finite-stage interface as
+\code{RationalCircle.Stage.midpoint\_curvature\_certificate\_refines\_squared\_chord\_of\_refinement}.
+It takes a \code{RefinesByDoubling} witness, a positive coarse subdivision
+count, and a cell index \(k<\textit{coarse.subdivisions}\); its inserted odd
+fine index is proved to be exactly the rational midpoint.  Thus downstream
+perimeter work can use the certificate without redoing chart-coordinate
+algebra for a concrete dyadic stage.
 
 There is also a sharper direct cross-certificate identity.  In
 \code{RationalCircle.Stage}, Lean proves

@@ -209,6 +209,29 @@ theorem parameter_refineIndex_of_refinement
   grind [Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm,
     Rat.mul_inv_cancel]
 
+/-- The odd point inserted by a dyadic refinement is the rational midpoint of
+the corresponding coarse chart cell. -/
+theorem parameter_insertedIndex_of_refinement
+    {coarse fine : Stage}
+    (href : RefinesByDoubling coarse fine)
+    (hcoarse : 0 < coarse.subdivisions) (k : Nat) :
+    fine.parameter (insertedIndex k) =
+      coarse.parameter k + (1 / (coarse.subdivisions : Rat)) / 2 := by
+  unfold parameter insertedIndex RefinesByDoubling at *
+  rw [href]
+  simp only [Rat.natCast_add, Rat.natCast_mul]
+  change (2 * (k : Rat) + 1) / (2 * (coarse.subdivisions : Rat)) =
+    (k : Rat) / (coarse.subdivisions : Rat) +
+      (1 / (coarse.subdivisions : Rat)) / 2
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hsubdivisions_pos : 0 < (coarse.subdivisions : Rat) :=
+    (Rat.natCast_pos).2 hcoarse
+  have hsubdivisions_ne : (coarse.subdivisions : Rat) ≠ 0 :=
+    Rat.ne_of_gt hsubdivisions_pos
+  have htwo : (2 : Rat) ≠ 0 := by native_decide
+  grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 theorem point_zero :
     point 0 = ({ x := 1, y := 0 } : PiCirclePoint) := by
   native_decide
@@ -232,6 +255,15 @@ theorem samplePoint_refineIndex_of_refinement
     fine.samplePoint (refineIndex k) = coarse.samplePoint k := by
   unfold samplePoint
   rw [parameter_refineIndex_of_refinement href k]
+
+theorem samplePoint_insertedIndex_of_refinement
+    {coarse fine : Stage}
+    (href : RefinesByDoubling coarse fine)
+    (hcoarse : 0 < coarse.subdivisions) (k : Nat) :
+    fine.samplePoint (insertedIndex k) =
+      point (coarse.parameter k + (1 / (coarse.subdivisions : Rat)) / 2) := by
+  unfold samplePoint
+  rw [parameter_insertedIndex_of_refinement href hcoarse k]
 
 theorem cross_origin_left (p : PiCirclePoint) :
     cross origin p = 0 := by
@@ -2033,6 +2065,60 @@ theorem midpoint_curvature_certificate_refines_squared_chord
         cross (point (u + h / 2)) (point (u + h)) +
         sq (1 - dot (point (u + h / 2)) (point (u + h))) / 4) := by
       rw [hcertificate]
+
+/-- The local midpoint curvature certificate transported to any finite stage
+and its dyadic refinement.  This supplies the exact rational geometric part
+of one adjacent-chord refinement; a perimeter algorithm need only account for
+its separate finite square-root enclosure losses. -/
+theorem midpoint_curvature_certificate_refines_squared_chord_of_refinement
+    {coarse fine : Stage}
+    (href : RefinesByDoubling coarse fine)
+    (hcoarse : 0 < coarse.subdivisions) (k : Nat)
+    (hk : k < coarse.subdivisions) :
+    segmentNormSq (coarse.samplePoint k) (coarse.samplePoint (k + 1)) <=
+      sq (cross (fine.samplePoint (refineIndex k))
+            (fine.samplePoint (insertedIndex k)) +
+          sq (1 - dot (fine.samplePoint (refineIndex k))
+            (fine.samplePoint (insertedIndex k))) / 4 +
+          cross (fine.samplePoint (insertedIndex k))
+            (fine.samplePoint (refineIndex (k + 1))) +
+          sq (1 - dot (fine.samplePoint (insertedIndex k))
+            (fine.samplePoint (refineIndex (k + 1)))) / 4) := by
+  let u := coarse.parameter k
+  let h : Rat := 1 / (coarse.subdivisions : Rat)
+  have hu : 0 <= u := by
+    dsimp [u]
+    exact parameter_nonneg coarse hcoarse k
+  have hh : 0 <= h := by
+    dsimp [h]
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hcoarse))
+  have hsucc : coarse.parameter (k + 1) = u + h := by
+    dsimp [u, h]
+    have hdiff := parameter_succ_sub coarse k
+    grind [Rat.sub_eq_add_neg]
+  have huend : u + h <= 1 := by
+    calc
+      u + h = coarse.parameter (k + 1) := hsucc.symm
+      _ <= 1 := parameter_le_one coarse hcoarse (by omega)
+  have hcoarse_left : coarse.samplePoint k = point u := by
+    rfl
+  have hcoarse_right : coarse.samplePoint (k + 1) = point (u + h) := by
+    unfold samplePoint
+    rw [hsucc]
+  have hfine_left : fine.samplePoint (refineIndex k) = point u := by
+    rw [samplePoint_refineIndex_of_refinement href k]
+    exact hcoarse_left
+  have hfine_mid : fine.samplePoint (insertedIndex k) = point (u + h / 2) := by
+    simpa [u, h] using
+      (samplePoint_insertedIndex_of_refinement href hcoarse k)
+  have hfine_right : fine.samplePoint (refineIndex (k + 1)) = point (u + h) := by
+    rw [samplePoint_refineIndex_of_refinement href (k + 1)]
+    exact hcoarse_right
+  have hgeometry :=
+    midpoint_curvature_certificate_refines_squared_chord hu hh huend
+  simpa [hcoarse_left, hcoarse_right, hfine_left, hfine_mid, hfine_right] using
+    hgeometry
 
 /-- Every adjacent chord of a rational-circle stage with at least two cells
 has squared length at most one.  This makes the square-root enclosure for an
