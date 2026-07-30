@@ -888,9 +888,15 @@ corrections in
 Finally,
 \code{RationalCircle.Stage.midpoint\_cross\_square\_defect\_formula}
 identifies the exact coarse cross-square numerator left to pay.  Thus the
-curvature polynomial and the rational dot-deficit formulas now isolate the
-entire geometric comparison without choosing a square root.  The separate
-finite bisection-width budget remains an explicit obligation.
+curvature polynomial and the rational dot-deficit formulas now close the
+entire local geometric comparison without choosing a square root:
+\code{RationalCircle.Stage.midpoint\_curvature\_certificate\_refines\_squared\_chord}
+proves that the coarse squared chord is at most the square of the sum of the
+two fine curvature certificates.  Its proof is finite rational algebra---the
+exact cross-square gap, the positive polynomial inequality, and completing a
+square.  The separate finite bisection-width budget remains an explicit
+obligation; this local theorem does not claim that the two enclosure widths
+have already been paid.
 
 There is also a sharper direct cross-certificate identity.  In
 \code{RationalCircle.Stage}, Lean proves
