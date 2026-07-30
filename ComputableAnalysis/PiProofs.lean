@@ -18047,6 +18047,63 @@ theorem adjacentChordCross_refinesByDoubling_with_cube_eighth
   simpa [pointCross, circlePoint, RationalCircle.Stage.cross, hcoarse_left,
     hcoarse_right, hfine_left, hfine_right, hmid] using hgap
 
+/-- The two rational secant certificates created by midpoint insertion gain at
+least `5 h^3 / 32` beyond the coarse cross-product chord, where `h` is the
+coarse parameter mesh.  This is the concrete stage form of the generic
+midpoint certificate and is the natural geometric input to the remaining
+direct circumference margin. -/
+theorem adjacentSecantChord_refinesByDoubling_with_five_cube_thirtysecond
+    (stage : Nat) (hstage : 0 < stage) (k : Nat) (hk : k < stage) :
+    pointCross (circleSamplePoint stage k)
+        (circleSamplePoint stage (k + 1)) +
+      (5 * ((1 / (stage : Rat)) * (1 / (stage : Rat)) *
+        (1 / (stage : Rat)))) / 32 <=
+      RationalCircle.Stage.secantChordLower
+          (circleSamplePoint (2 * stage) (2 * k))
+          (circleSamplePoint (2 * stage) (2 * k + 1)) +
+        RationalCircle.Stage.secantChordLower
+          (circleSamplePoint (2 * stage) (2 * k + 1))
+          (circleSamplePoint (2 * stage) (2 * k + 2)) := by
+  let u := circleParameter stage k
+  let h : Rat := 1 / (stage : Rat)
+  have hu : 0 <= u := by
+    dsimp [u]
+    exact circleParameter_nonneg stage hstage k
+  have hpos : 0 < h := by
+    dsimp [h]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hstage)
+  have hsucc : circleParameter stage (k + 1) = u + h := by
+    dsimp [u, h]
+    have hdiff := circleParameter_succ_sub stage k
+    grind [Rat.sub_eq_add_neg]
+  have huend : u + h <= 1 := by
+    calc
+      u + h = circleParameter stage (k + 1) := hsucc.symm
+      _ <= 1 := circleParameter_le_one stage hstage (by omega)
+  have hmid : circleSamplePoint (2 * stage) (2 * k + 1) =
+      circlePoint (u + h / 2) := by
+    unfold circleSamplePoint
+    rw [circleParameter_double_inserted stage hstage k]
+  have hcoarse_left : circleSamplePoint stage k = circlePoint u := by
+    rfl
+  have hcoarse_right : circleSamplePoint stage (k + 1) = circlePoint (u + h) := by
+    unfold circleSamplePoint
+    rw [hsucc]
+  have hfine_left : circleSamplePoint (2 * stage) (2 * k) = circlePoint u := by
+    rw [circleSamplePoint_double_index]
+    exact hcoarse_left
+  have hfine_right : circleSamplePoint (2 * stage) (2 * k + 2) =
+      circlePoint (u + h) := by
+    rw [show 2 * k + 2 = 2 * (k + 1) by omega,
+      circleSamplePoint_double_index]
+    exact hcoarse_right
+  have hgap :=
+    RationalCircle.Stage.midpoint_secant_refinement_ge_cross_add_five_cube_thirtysecond
+      hu hpos huend
+  simpa [pointCross, circlePoint, RationalCircle.Stage.cross, hcoarse_left,
+    hcoarse_right, hfine_left, hfine_right, hmid] using hgap
+
 private theorem adjacentChordCross_refinement_gap_formula
     (stage : Nat) (hstage : 0 < stage) (k : Nat) :
     let u := circleParameter stage k
