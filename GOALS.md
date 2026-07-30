@@ -212,7 +212,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies the exact
   function-level initial equivalence required by the ODE interface. This is a
   certified representation layer, not yet an analytic self-derivative theorem
-  or a bridge to the other definitions. The
+  or a bridge to the other definitions. Its first finite-difference brick is
+  now explicit: `expTaylorQuadratic x = 1 + x + x*x/2`, and
+  `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` certifies its forward
+  derivative `1` at zero by the exact quotient `1 + h/2`. This is deliberately
+  a finite polynomial theorem, not the missing tail-aware derivative theorem
+  for `expPowerSeries`. The
   constant-level compound-interest representative is now additionally packaged as the
   positive base `ExpProofs.ePositive`: its lower interval endpoint is always
   at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural

@@ -206,6 +206,13 @@ identities for exp, sin, cos, sinh, and cosh.  Those formal identities are not
 yet interval-analytic derivative theorems for the corresponding boxed raw
 functions.  This distinction must be preserved in downstream proofs.
 
+The first exponential finite-difference brick is also available:
+`expTaylorQuadratic x = 1 + x + x^2/2`, and
+`ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` proves a
+`HasForwardDerivativeAt` certificate at zero with derivative `1`.
+Its literal quotient is `1 + h/2`; it is not a claim that the
+tail-enclosed `expPowerSeries` already has derivative itself.
+
 ## How to formalize a familiar integration formula
 
 The project should prove **general** substitution and integration-by-parts
@@ -367,6 +374,8 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
+#check expTaylorQuadratic
+#check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero
 #check ExpProofs.eulerCenter_zero
 #check ExpProofs.expEuler_zero_equiv_one
 #check ExpProofs.fallingFactorialRat

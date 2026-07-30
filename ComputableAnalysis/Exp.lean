@@ -15,6 +15,14 @@ def expPowerSeriesTerms (x : Rat) (n : Nat) : Nat :=
 def expPowerSeriesTailRatioBound (x : Rat) (n : Nat) : Rat :=
   qabs x / ((expPowerSeriesTerms x n + 1 : Nat) : Rat)
 
+/-- The degree-two Taylor prefix of the exponential series.
+
+This exact rational polynomial is kept public as the first
+finite-difference bridge toward the derivative certificate for the full
+tail-enclosed evaluator. -/
+def expTaylorQuadratic (x : Rat) : Rat :=
+  1 + x + x * x / 2
+
 /-- The finite power-series calculation used by `expPowerSeries`.
 
 The first component is the partial sum.  The second component is a rational
