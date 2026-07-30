@@ -16,7 +16,7 @@ circle:
 \begin{remark}[Rational circle parametrization]
 \label{rem:rational-circle-point}
 \lean{ComputableAnalysis.RationalCircle.Stage.point}
-In the pseudocode convention of this blueprint, the point construction is:
+The rational point construction is:
 \begin{verbatim}
 def circle_point(t):
     d = 1 + t*t
@@ -46,28 +46,19 @@ The exact nonnegative remainder after clearing the denominator is
  \lVert q-p\rVert^2-L_{\mathrm{sec}}(p,q)^2
    =\frac{2cd^3}{(2c+d)^2}.
 \]
-Thus this is a stronger rational lower certificate than the bare cross
-product, with the cubic correction scale needed for short chord refinements.
-More specifically, for chart parameters \(0\le u<v\le1\), direct rational
-algebra proves the usable uniform estimate
+For chart parameters \(0\le u<v\le1\), rational algebra gives
 \[
 L_{\mathrm{sec}}(P(u),P(v))
  \ge \operatorname{cross}(P(u),P(v))+\frac{(v-u)^3}{8}.
 \]
-The same chart assumptions also give the uniform first-order lower bound
+It also gives the first-order bound
 \[
  \operatorname{cross}(P(u),P(v))\ge\frac{v-u}{2}.
 \]
-For an adjacent stage cell this is exposed directly as a sample-point theorem.
-It supplies the positive coarse scale needed when a cubic correction is used
-to dominate a squared-chord residual.
-Thus an adjacent cell of mesh \(h\) gains at least \(h^3/8\) over the cross
-certificate.  After a dyadic split, each fine half-cell contributes at least
-\(h^3/64\).  These are finite ordered-rational inequalities, not asymptotic
-claims or an invocation of an exact chord length.
-It is a finite ordered-field identity and does not select an exact square
-root.  It is intended for the remaining direct chord-path diagnostic, not as
-another \(\pi\) scoreboard row.
+For mesh \(h\), the first bound gains \(h^3/8\) over the cross certificate
+(and \(h^3/64\) on each dyadic half-cell).  These are finite rational
+inequalities for the remaining direct-chord diagnostic, not a new \(\pi\)
+scoreboard row.
 \end{theorem}
 
 \begin{figure}[!htbp]
@@ -88,11 +79,8 @@ another \(\pi\) scoreboard row.
 \lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
 \uses{rem:pseudocode-convention}
-The loop form of the stage algorithm keeps a current lower bound \(a\), a
-current upper bound \(b\), and the list of rational parameter intervals still
-being refined.  On one interval \([p,r]\), let \(q=(p+r)/2\).  The lower-bound
-increment is the area of the new chord triangle, and the upper-bound decrement
-is the tangent triangle removed from the old outer cap:
+On each current interval \([p,r]\), set \(q=(p+r)/2\) and update the inner
+and outer polygon bounds by
 \[
   \Delta(p,q,r)=
     \frac{2(r-p)(q-p)(r-q)}
@@ -103,8 +91,7 @@ is the tangent triangle removed from the old outer cap:
     \frac{(r-p)(q-p)(r-q)}
       {(1+pr)(1+pq)(1+qr)}.
 \]
-The case \(p=0,r=1\) is the quarter circle.  The initial quarter-sector bounds
-are \(1/2\le\pi/4\le1\), and the final answer is multiplied by \(4\).
+The initial bounds are \([1/2,1]\) on the quarter circle.
 \begin{verbatim}
 def piCircleArea(n):
     a, b = 1/2, 1
@@ -130,24 +117,14 @@ def piCircleArea(n):
 
     return [4*a, 4*b]
 \end{verbatim}
-Every operation in this pseudocode is a rational operation.  The returned pair
-for \code{piCircleArea} is meant to be the first raw interval algorithm for
-\(\pi\): the lower endpoint is the area of the refined inscribed rational
-polygon, and the upper endpoint is the area of the corresponding refined outer
-tangent polygon.  In Lean this increment/decrement loop is the single public
-\code{piCircleArea} definition.
+The returned endpoints are the inscribed and circumscribed polygon areas;
+Lean exposes this rational loop as \code{piCircleArea}.
 \end{definition}
 
 \section{Sector Area, Arctangent, and Normalized Angles}
 
-The second algorithm is not a new idea, but the same exhaustion procedure with
-a moving endpoint.  For \(0\le x\le1\), take the point \(L(x)=(1,2x)\) on the
-vertical parameter segment and project it from \((-1,0)\) to the unit-circle
-point \(P(x)\).  Refining the parameter interval \([0,x]\) gives rational
-inner and outer polygonal bounds for the sector from \(P(0)=(1,0)\) to
-\(P(x)\).  The geometric angle of this sector is \(2\arctan(x)\); since a unit
-sector has area equal to half its angle, the area computed by the algorithm is
-\(\arctan(x)\).  Thus \(x=1\) is exactly the quarter-circle case, and
+Refining \([0,x]\) by the same loop computes the sector area, hence
+\(\arctangeom(x)\); at \(x=1\),
 \[
   4\arctangeom(1)\sim \pi_{\mathrm{area}}.
 \]
@@ -164,10 +141,7 @@ sector has area equal to half its angle, the area computed by the algorithm is
 \lean{ComputableAnalysis.ArctanGeometry.PiAreaCompatibility}
 \lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
 \uses{def:circle-area-stage-algorithm,rem:rational-circle-point,rem:pseudocode-convention}
-For \(0\le x\le1\), the arctangent algorithm starts with the chord-triangle
-lower bound \(x/(1+x^2)\) and the tangent-triangle upper bound \(x\).  It then
-bisects the current rational parameter intervals, using exactly the same
-increment and decrement formulas as \code{piCircleArea}.
+For \(0\le x\le1\), begin with \([x/(1+x^2),x]\) and use the same updates.
 \begin{verbatim}
 def arctan.geom(x, n):
     a = x / (1 + x*x)
@@ -194,12 +168,8 @@ def arctan.geom(x, n):
 
     return [a, b]
 \end{verbatim}
-The algorithm is packaged as its own raw function, not as a definitional
-alias of \code{piCircleArea}.  The implementation-level evaluator is
-\code{ArctanGeometry.arctanGeom}; its public presentation name is
-\code{arctan.geom}.  The special case \(x=1\) is related to
-\code{piCircleArea} by a theorem, which is the right proof obligation for the
-geometric identity \(\pi=4\arctangeom(1)\).
+Lean presents the evaluator as \code{arctan.geom}; its \(x=1\) agreement with
+\code{piCircleArea} is a theorem, not a definitional identification.
 \end{definition}
 
 \begin{theorem}[Sector-area density]
@@ -671,28 +641,21 @@ def pi(n):
     outer_len = path_length_interval(outer, 2**n)
     return [(4*inner_len.lo)/2, (4*outer_len.hi)/2]
 \end{verbatim}
-For an adjacent chord of a stage with at least two cells, Lean now proves that
-its rational squared length is at most \(1\).  Consequently a nonzero
-square-root bisection stage \(m\) has the literal width
+For adjacent chords with at least two cells, the squared length is at most
+\(1\), so square-root bisection stage \(m\) has width
 \[
   2^{-(m+9)},
 \]
-rather than merely a convergence bound.  This is the finite error budget used
-when comparing a coarse chord with its two fine successors.  It is a local
-input to the still-open direct endpoint-refinement certificate, not a claim
-that the circumference algorithm has become valid.
-
-For the direct secant-margin target, Lean now substitutes these two fine
-widths by the displayed dyadic rational budget.  Thus the remaining margin is
-an entirely rational inequality between the coarse squared chord and two
-secant certificates minus two copies of \(2^{-(2s+9)}\), where \(s\) is the
-coarse stage.  This normalized target is definitionally transported back to
-the original interval statement; no exact square root is selected.
-Its first one-cell instance is checked by
+giving the dyadic error budget for a coarse chord and its fine successors.
+The remaining margin is a rational inequality between that coarse squared
+chord and two secant certificates minus \(2\cdot2^{-(2s+9)}\).
+The one- and two-cell instances are checked by
 \lean{ComputableAnalysis.PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_one}
-and already yields
-\lean{ComputableAnalysis.PiProofs.adjacentChordLowerRefinesByDoubling_one}
-The uniform positive-stage inequality remains open.
+and
+\lean{ComputableAnalysis.PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_two},
+with matching \lean{ComputableAnalysis.PiProofs.adjacentChordLowerRefinesByDoubling_one}
+and \lean{ComputableAnalysis.PiProofs.adjacentChordLowerRefinesByDoubling_two}
+consequences.  The uniform positive-stage inequality remains open.
 \end{definition}
 
 \begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}

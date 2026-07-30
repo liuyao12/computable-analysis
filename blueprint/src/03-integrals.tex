@@ -3,23 +3,11 @@
 
 \section{Constructive Definite Integrals}
 
-This chapter is the comparison layer.  The trigonometric functions constructed
-in Chapter~\ref{ch:rational-circle-trigonometry} remain the geometric
-algorithms.  Integral formulas enter only after those algorithms exist, as
-theorems saying that a Riemann-sum algorithm computes the same raw real as an
-endpoint expression or an inverse branch.
-
-This is deliberately a \emph{certificate layer}, not a table of integrals.
-The foundation must prove general substitution and integration-by-parts
-theorems, with their domain, orientation, and endpoint hypotheses explicit.
-After that, a user or an LLM may recall or propose a primitive, a
-partial-fraction decomposition, or another familiar calculation; the kernel
-checks its finite algebra and the relevant derivative theorem.  A derivative
-identity alone does not establish a definite-integral formula: one still
-needs a certified integral and a general FTC/substitution/integration-by-parts
-bridge to its endpoint difference.  The finite integration-by-parts material
-below is retained as a pi benchmark for this general interface, not as a
-template for accumulating named integration recipes.
+This is the certificate layer: it proves finite integral constructions and
+general FTC, substitution, and integration-by-parts theorems.  It is not a
+table of integrals.  A recalled or proposed primitive is useful only after the
+linked derivative theorem and endpoint bridge check it; the finite
+integration-by-parts material is retained as a \(\pi\) benchmark.
 
 \begin{definition}[Interval function as a total raw evaluator]
 \label{def:function-on-interval-to-realfunraw}
@@ -88,24 +76,10 @@ For raw functions \(f\) and \(F\), a definite integral identity over
   \item an equivalence proof, in the raw-real overlap sense, between the
   constructed integral and that endpoint difference.
 \end{enumerate}
-The interval version packages the same statement when \(f\) and \(F\) are
-already certified as \code{FunctionOnInterval}s.  The
-\code{DefiniteIdentityFor} variant is the same endpoint-difference interface
-for newer domain-aware \code{ConstructionFor} algorithms.  It is stable under
-replacing the construction by an equivalent integral computation, via
-\code{transportConstruction}, and two endpoint identities for the same
-integrand and primitive have equivalent integral raw reals.  The
-\code{MonotoneDefiniteIdentityFor} variant records the same endpoint identity
-when the integral side is explicitly supplied by a monotone construction, and
-forgets back to \code{DefiniteIdentityFor}.  The
-\code{GeneralDefiniteIdentityFor} variant records the endpoint identity for
-the public piecewise-monotone integral \code{generalIntegralFor}; a one-piece
-monotone endpoint identity promotes to it by \code{ofMonotone}.  It can also
-be transported across equivalent general constructions, forgotten back to the
-ordinary endpoint-identity interface, or built from an ordinary
-\code{DefiniteIdentityFor} together with an equivalent general construction.
-The endpoint-additivity, linearity, scalar, and order-transfer laws are
-available at the ordinary, monotone, and general-integral levels.
+The interval, domain-aware, monotone, and piecewise-monotone variants package
+the same contract for their respective construction interfaces.  The linked
+Lean declarations provide transports between equivalent constructions and the
+additivity, linearity, scalar, and order consequences.
 
 The default finite mesh for ordinary definite integrals is static dyadic:
 stage \(n\) uses the equal subdivision of \([a,b]\) into \(2^n\) intervals.

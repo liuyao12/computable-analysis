@@ -526,10 +526,11 @@ For a proof that wants the finite rational target directly, use
 theorem `PiProofs.adjacentChordSecantMargin_of_fineDyadicBudget` converts that
 explicit-budget certificate to the original interval condition, which in turn
 feeds `PiProofs.adjacentChordLowerRefinesByDoubling_of_secantMargin`.
-The initial one-cell certificate is already checked as
-`PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_one`, with
-`adjacentChordLowerRefinesByDoubling_one` as its endpoint consequence. It is
-a base case only; do not extrapolate it to the unresolved all-stage theorem.
+The one- and two-cell certificates are checked as
+`PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_one` and
+`PiProofs.adjacentChordSecantMarginCoversFineDyadicBudget_two`, with matching
+`adjacentChordLowerRefinesByDoubling_*` endpoint consequences. They are finite
+base cases only; do not extrapolate them to the unresolved all-stage theorem.
 
 ## Pi as a regression suite, not a target namespace
 

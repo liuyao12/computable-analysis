@@ -1293,10 +1293,11 @@ count.  The reciprocal-log triangle formula is instead the primary
   finite margin inequality into the original local refinement theorem.  The
   still-open work is the universal rational margin estimate itself, not an
   appeal to real square roots or completeness.
-  The first one-cell secant-budget instance is independently proved by
-  `adjacentChordSecantMarginCoversFineDyadicBudget_one`, yielding
-  `adjacentChordLowerRefinesByDoubling_one`; it discharges the base stage but
-  deliberately makes no claim about all positive stages.
+  The one- and two-cell secant-budget instances are independently proved by
+  `adjacentChordSecantMarginCoversFineDyadicBudget_one` and
+  `adjacentChordSecantMarginCoversFineDyadicBudget_two`, with matching
+  `adjacentChordLowerRefinesByDoubling_*` consequences. They discharge finite
+  base stages but deliberately make no claim about all positive stages.
   `RationalCircle.Stage.secantChordLower` now provides a stronger generic
   rational lower certificate, `c + d^2/(2*c+d)` for chord cross product `c`
   and dot deficit `d`. Its proved squared remainder

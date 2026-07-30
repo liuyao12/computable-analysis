@@ -63,6 +63,30 @@ theorem adjacentChordLowerRefinesByDoubling_one :
     (adjacentChordSecantMargin_of_fineDyadicBudget 1 (by native_decide)
       adjacentChordSecantMarginCoversFineDyadicBudget_one)
 
+/-- The same explicit secant-margin calculation succeeds for the two-cell
+stage.  The cases are enumerated as rational arithmetic, not sampled
+floating-point evidence. -/
+theorem adjacentChordSecantMarginCoversFineDyadicBudget_two :
+    AdjacentChordSecantMarginCoversFineDyadicBudget 2 := by
+  intro k
+  have hcases : k.1 = 0 ∨ k.1 = 1 := by omega
+  rcases hcases with hzero | hone
+  · have hk : k = (⟨0, by omega⟩ : Fin 2) := Fin.ext hzero
+    rw [hk]
+    simp
+    native_decide
+  · have hk : k = (⟨1, by omega⟩ : Fin 2) := Fin.ext hone
+    rw [hk]
+    simp
+    native_decide
+
+/-- The original chord endpoint also refines at the two-cell stage. -/
+theorem adjacentChordLowerRefinesByDoubling_two :
+    AdjacentChordLowerRefinesByDoubling 2 :=
+  adjacentChordLowerRefinesByDoubling_of_secantMargin 2 (by native_decide)
+    (adjacentChordSecantMargin_of_fineDyadicBudget 2 (by native_decide)
+      adjacentChordSecantMarginCoversFineDyadicBudget_two)
+
 end PiProofs
 
 end ComputableAnalysis
