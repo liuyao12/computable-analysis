@@ -755,6 +755,7 @@ telescoping bound
 \begin{definition}[Basel right-hand side]\label{def:basel-geometric-rhs}
 \lean{ComputableAnalysis.Basel.piSquaredOverSixRaw}
 \lean{ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw}
+\lean{ComputableAnalysis.Basel.circumferencePiSquaredOverSixRaw}
 \uses{def:raw-real,def:circle-area-stage-algorithm}
 For any chosen raw representative \(\pi_0\), define
 \[
@@ -762,20 +763,25 @@ For any chosen raw representative \(\pi_0\), define
 \]
 by the standard stagewise interval square and the nonnegative scale factor
 \(1/6\).  The geometric instance uses \(\pi_0=\code{piCircleArea}\).
+The separately certified chord-path instance uses \(\pi_0=\code{piCircumference}\).
 \end{definition}
 
 \begin{theorem}[Geometric Basel right-hand side validity]
 \label{thm:basel-geometric-rhs-valid}
 \lean{ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw_valid}
+\lean{ComputableAnalysis.Basel.circumferencePiSquaredOverSixRaw_valid}
+\lean{ComputableAnalysis.Basel.circumferencePiSquaredOverSixRaw_equiv_geometric}
 \uses{def:basel-geometric-rhs,thm:geometric-pi-validity,def:raw-real}
 \leanok
-The raw interval algorithm \(\code{geometricPiSquaredOverSixRaw}\) is valid.
-Lean proves the general bounded nonnegative square lemma and applies it to the
-area-pi intervals, which are nested inside the stage-zero bound \([2,4]\).
+Both geometric right-hand-side computations are valid and equivalent.  Lean
+uses finite nonnegative interval multiplication; this does not prove the
+remaining equality with the independent zeta-two series.
 \end{theorem}
 
 \begin{conjecture}[Euler's Basel theorem]\label{conj:basel}
 \lean{ComputableAnalysis.Basel.eulerBasel_geometricPi}
+\lean{ComputableAnalysis.Basel.eulerBasel_circumferencePi}
+\lean{ComputableAnalysis.Basel.eulerBasel_circumference_iff_geometric}
 \uses{def:zeta-two-raw,thm:basel-geometric-rhs-valid,def:raw-equiv}
 For the geometric pi real number,
 \[
@@ -785,7 +791,8 @@ This is deliberately the statement of the Basel theorem, not a scoreboard
 spelling of pi as a square root.  Once this theorem and a positive
 normalization lemma are available, the registry may record the resulting
 agreement of pi presentations as a corollary.  That supporting corollary is
-not part of the mathematical statement above.
+not part of the mathematical statement above.  The direct-circumference
+formulation is already formally equivalent to this one.
 Possible constructive routes include Euler's sine product, a Fourier-series
 argument with explicit rational tail bounds, or a contour-integral proof once
 the complex path-integral layer is mature.

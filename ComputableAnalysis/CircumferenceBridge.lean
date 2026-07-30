@@ -592,6 +592,28 @@ theorem piCircumference_valid : piCircumference.Valid :=
     (circumferenceQuarterLengthStepRefines_of_adjacentChordLowerRefinement
       innerChordLowerRefinement)
 
+/-- Every direct circumference box is nonnegative and remains below the exact
+stage-zero outer bound four.  This makes the path evaluator usable in
+nonlinear constructions such as the Basel right-hand side. -/
+theorem piCircumference_nonneg_bounded_by_four (n : Nat) :
+    0 <= (piCircumference.compute n).lo ∧
+      (piCircumference.compute n).hi <= 4 := by
+  constructor
+  · rw [piCircumference_compute_eq,
+      piCircumferenceComputeAtStage_eq_common]
+    simp only [piCircumferenceCommonComputeAtStage]
+    have hinner := rationalPointPathLength_lo_nonneg
+      (innerBoundary (piStage n)) (piStage n)
+    change 0 <= (4 * (innerQuarterLength (piStage n)).lo) / 2
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg (by native_decide) hinner)
+      (by native_decide)
+  · have hnest := piCircumference_valid.2.1 0 n (Nat.zero_le n)
+    have hzero : (piCircumference.compute 0).hi = 4 := by
+      native_decide
+    simpa [hzero] using hnest.2.2
+
 /-- The now-validated original chord-path evaluator agrees with the area
 construction of pi by the finite Archimedean comparison. -/
 theorem piCircumferenceDirect_equiv_piCircleArea :

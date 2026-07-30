@@ -429,6 +429,7 @@ import ComputableAnalysis.CircumferenceBridge
 
 #check PiProofs.innerChordLowerRefinement
 #check PiProofs.piCircumference_valid
+#check PiProofs.piCircumference_nonneg_bounded_by_four
 #check PiProofs.piCircumferenceDirect
 #check PiProofs.piCircumferenceDirect_equiv_piCircleArea
 #check PiProofs.pi.circumferenceDirect
@@ -442,6 +443,14 @@ for adjacent fine chords, pays their literal bisection widths, checks stages
 Use the four public declarations above rather than reproducing that local
 margin argument in a downstream proof.  The cross-fan and stabilized variants
 remain regression implementations, not prerequisites for this direct result.
+
+For a nonlinear construction that depends on pi, use the explicitly proved
+representation transport rather than treating raw values as equal.  For
+example, `Basel.circumferencePiSquaredOverSixRaw_equiv_geometric` proves that
+the direct circumference and area versions of `pi^2 / 6` agree.
+Consequently `Basel.eulerBasel_circumference_iff_geometric` transfers the
+future Basel theorem between those two pi representations without claiming
+the zeta-two identity itself.
 
 
 ## Pi as a regression suite, not a target namespace

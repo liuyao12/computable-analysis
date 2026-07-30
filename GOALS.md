@@ -1730,7 +1730,13 @@ scoreboard above.
 - `Basel.piSquaredOverSixRaw pi` computes \(\pi^2/6\) from any valid bounded
   raw pi representative.  The current geometric specialization is
   `Basel.geometricPiSquaredOverSixRaw`, built from `piCircleArea`, with
-  validity theorem `Basel.geometricPiSquaredOverSixRaw_valid`.
+  validity theorem `Basel.geometricPiSquaredOverSixRaw_valid`.  The original
+  chord-path specialization `Basel.circumferencePiSquaredOverSixRaw` is also
+  valid, and `circumferencePiSquaredOverSixRaw_equiv_geometric` proves that
+  the two geometric right-hand sides agree by finite nonnegative interval
+  multiplication.  The conditional theorem
+  `eulerBasel_circumference_iff_geometric` therefore transfers any future
+  Basel proof between the direct circumference and area formulations.
 - `Basel.eulerBasel_geometricPi` is the remaining constructive theorem
   statement relating these two valid computations.  It is not yet a proved
   equivalence.  Its public mathematical form is the Basel identity
