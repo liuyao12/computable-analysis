@@ -183,6 +183,7 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.rotationExpRaw_width_le_geometric}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
+\lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \leanok
 For constant \(A\), the checked degree-\(r\) term is \(T^rA^r/r!\).  For the
 quarter-turn matrix \(J^2=-I\), its even prefix is exactly
@@ -195,6 +196,9 @@ The complex boxes centered at the second prefix are checked valid, with both
 widths bounded by \(8t_0(T)2^{-n}\).
 Their real and imaginary coordinate boxes are the certified rational-input
 \(\cos\)- and \(\sin\)-series evaluators.
+Separately, any certified real can now be embedded as the certified imaginary
+axis input \(ix\); extending the series evaluator from rational \(T\) to that
+represented input is the next analytic step.
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
 can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}

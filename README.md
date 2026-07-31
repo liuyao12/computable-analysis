@@ -138,7 +138,7 @@ capability—not a percentage for the whole foundation.
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | bounded symmetric Cauchy integral | public two-piece monotone assembly, with an increasing `[-1,0]` branch and a decreasing `[0,1]` branch | symmetric Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
-| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | Planned: matrix Peano--Baker factorial tail plus represented-input extension modulus |
+| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | The input $i\pi/2$ is now a certified raw box through `PiProofs.pi.imaginaryHalf`; the represented-input exponential modulus and geometric identification remain planned |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,

@@ -1179,6 +1179,13 @@ arguments.
 - Next finite algebra target: prove `ComplexRaw.mul` preserves validity, then
   use resultant-style rational polynomial transformations to supply the
   addition, negation, and multiplication annihilator witnesses.
+- The important Euler-route special case is now checked before that full
+  target: `ComplexRaw.mulI` is the direct coordinate rotation
+  \(x+iy\mapsto-y+ix\), and `ComplexRaw.imaginaryAxis` embeds any certified
+  real as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
+  already yields a valid raw \(i\pi/2\) after rational scaling.  This does not
+  yet extend the factorial-series exponential to represented complex inputs
+  or establish Euler's identity.
 
 ## First-Year Calculus Course
 

@@ -26,9 +26,15 @@ ASSET_DIR = ROOT / "blueprint" / "src" / "assets"
 GIF_PATH = ASSET_DIR / "single-turn-integral.gif"
 PNG_PATH = ASSET_DIR / "single-turn-integral.png"
 
-WIDTH, HEIGHT = 620, 500
-LEFT, RIGHT = 74, 554
-TOP, BASELINE = 46, 380
+WIDTH, HEIGHT = 620, 400
+# The sinc input is the normalized angle t in sin(pi*t)/(pi*t).  Map t to its
+# actual angle pi*t, using the same pixels per radian and per function-value
+# unit.  This deliberately differs from square Cartesian scaling: it gives
+# the underlying trigonometric oscillation its natural visual aspect.
+TRIG_SCALE = 82
+LEFT = 74
+RIGHT = LEFT + round(2 * math.pi * TRIG_SCALE)
+TOP, BASELINE = 170, 270
 Y_MIN, Y_MAX = -0.28, 1.04
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)
@@ -61,11 +67,11 @@ LABEL = font(18)
 
 
 def x_screen(t: Fraction | float) -> float:
-    return LEFT + float(t) / 2 * (RIGHT - LEFT)
+    return LEFT + float(t) * math.pi * TRIG_SCALE
 
 
 def y_screen(value: float) -> float:
-    return BASELINE - (value / (Y_MAX - Y_MIN)) * (BASELINE - TOP)
+    return BASELINE - value * TRIG_SCALE
 
 
 def sinc(t: Fraction | float) -> float:

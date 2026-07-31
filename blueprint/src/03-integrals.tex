@@ -1,10 +1,11 @@
 \chapter{Integrals}
 \label{ch:integrals}
 
-An integral here is a named rational-box algorithm plus its validity proof.
-There is no ambient completed-real integral and no table of antiderivatives.
-The GIFs show the computations; the linked Lean declarations contain their
-finite certificates.
+An integral is defined here first as a named rational-box algorithm.  A
+separate well-definedness proposition must prove that this raw algorithm is a
+\code{RealRaw}, hence actually represents a real number.  There is no ambient
+completed-real integral and no table of antiderivatives.  The GIFs show the
+definitions; the linked Lean declarations contain their finite certificates.
 
 \section{From \texorpdfstring{\code{arctan.geom}}{arctan.geom} to definite integrals}
 
@@ -15,7 +16,7 @@ density by a particular function, prove the cell boxes shrink, and obtain an
 integral.  This is a per-function construction, not a universal operator.
 \end{remark}
 
-\begin{definition}[Monotone-function integral stage]
+\begin{definition}[Monotone-function integral raw]
 \label{def:increasing-integral-stage}
 \lean{ComputableAnalysis.NondecreasingOnInterval}
 \lean{ComputableAnalysis.IntervalRegularOn}
@@ -45,9 +46,22 @@ function happens to have exact rational endpoint values.
 \(\displaystyle 1/(1+t^2)\); its endpoint boxes are singletons.}
 \label{fig:monotone-integral-stage}
 \end{figure}
-Monotonicity orders each cell; interval regularity and a function-specific
-width estimate prove that the stage sequence is a \code{RealRaw}.
 \end{definition}
+
+\begin{proposition}[Well-definedness of a monotone integral computation]
+\label{prop:monotone-integral-well-defined}
+\lean{ComputableAnalysis.Integral.ConstructionFor}
+\lean{ComputableAnalysis.Integral.integralFor}
+\lean{ComputableAnalysis.Integral.integralFor_compute_eq}
+\lean{ComputableAnalysis.Integral.integralFor_valid}
+\lean{ComputableAnalysis.integral_construction_proves_well_defined_for}
+\uses{def:increasing-integral-stage}
+The separate integrability proof for a particular \(F\) proves that its raw
+stage function has ordered, nested boxes and a rational width modulus.  It
+then supplies a \code{ConstructionFor F}; \code{integralFor\_valid} says the
+defined raw is valid and so is a real number in this project.  Monotonicity
+alone does not yet construct that certificate automatically.
+\end{proposition}
 
 \begin{example}[The rational monotone example \(1/(1+t^2)\)]
 \label{ex:increasing-integral-square}
@@ -66,7 +80,9 @@ For the displayed dyadic evaluator, take any \(n\) with
 On \([0,\tfrac12]\), the intended sine evaluator for
 \(\sin(\pi t)\) returns a rational bracket at each dyadic endpoint.  The
 blue segments in the animation are those value brackets, and the two
-rectangle sums use their lower and upper ends:
+rectangle sums use the left lower and right upper ends.  The retained rational
+evaluation radius halves at every displayed stage, so the blue bars visibly
+shrink along with the mesh:
 \begin{figure}[!htbp]
 \centering
 \intervalSineIntegralStageAnimation
@@ -173,7 +189,36 @@ For \(f(x)=c\), every stage is the exact singleton
 \]
 \end{theorem}
 
-\section{Integration by parts}
+\section{Substitution: transported divisions}
+
+\begin{definition}[Finite square substitution stage]
+\label{def:finite-substitution-stage}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshCorrection_le_one_div}
+\uses{def:increasing-integral-stage}
+\leanok
+Substitution transports a uniform parameter partition to an ordinarily
+unequal image partition.  For the rational map \(x=\phi(t)=t^2\), on the
+fixed interval \([t_0,t_1]=[0,1]\):
+\begin{verbatim}
+def substitution_stage(phi, t0, t1, n):
+    T = uniform_partition(t0, t1, 2**n)
+    X = [phi(t) for t in T]
+    return T, X                 # equal T divisions, unequal X divisions
+\end{verbatim}
+\begin{figure}[!htbp]
+\centering
+\substitutionPartitionAnimation
+\caption{Equal parameter divisions transported by \(x=t^2\) to unequal
+rational image divisions.}
+\label{fig:substitution-partition}
+\end{figure}
+The finite square identity retains its explicit cell correction; the checked
+bound is at most \(1/n\) on an \(n\)-cell mesh.  This is a computation, not a
+general change-of-variables axiom.
+\end{definition}
+
+\section{Integration by parts: paired subdivisions}
 
 \begin{theorem}[Finite geometric integration by parts]
 \label{thm:finite-geometric-integration-by-parts}
@@ -181,18 +226,31 @@ For \(f(x)=c\), every stage is the exact singleton
 \lean{ComputableAnalysis.finiteIntegrationByParts_withVariation}
 \lean{ComputableAnalysis.RationalPartition.commonRefinementOfPartitions}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
+\uses{def:finite-substitution-stage}
 \leanok
-For \(U(t)=t\), \(V(t)=t^2\), the curve \(V=U^2\) splits the product
-rectangle into \(\int V\,\dd U\) and \(\int U\,\dd V\).
+Fix \([t_0,t_1]\).  Sample \(f(t)\) and \(g(t)\) at one equal subdivision of
+that parameter interval.  The induced \(f\)- and \(g\)-subdivisions need not
+be equal; in the displayed \(f(t)=t, g(t)=t^2\) instance, only the
+\(f\)-division is uniform:
+\begin{verbatim}
+def parts_stage(f, g, t0, t1, n):
+    T = uniform_partition(t0, t1, 2**n)
+    F = [f(t) for t in T]
+    G = [g(t) for t in T]
+    return zigzag_horizontal_first(F, G), zigzag_vertical_first(F, G)
+\end{verbatim}
 \begin{figure}[!htbp]
 \centering
 \integrationByPartsAnimation
-\caption{Orange and teal tile \([0,U(t)]\mathbin{\times}[0,V(t)]\).}
+\caption{One equal parameter subdivision gives equal \(f\)-levels and
+unequal \(g\)-levels.  The two endpoint zigzags close around the sampled
+curve as the stage increases.}
 \label{fig:integration-by-parts-cell}
 \end{figure}
 The checked finite identity is
 \[
- \sum_i u_i\Delta v_i+\sum_i v_{i+1}\Delta u_i=u_nv_n-u_0v_0.
+ \sum_i f_i(g_{i+1}-g_i)+
+ \sum_i g_{i+1}(f_{i+1}-f_i)=f_ng_n-f_0g_0.
 \]
 Common rational refinements make the corner rectangles an explicit error
 budget.

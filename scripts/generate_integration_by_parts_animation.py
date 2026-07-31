@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Render the continuous geometric picture for integration by parts.
+"""Render paired finite subdivisions for integration by parts.
 
-The increasing rational parametrization ``U(t)=t, V(t)=t^2`` traces the
-curve ``V=U^2`` from ``(0,0)`` to ``(1,1)``.  Within the product rectangle up
-to the current parameter, the area below the curve is ``∫ V dU`` and the
-area above it is ``∫ U dV``.  The two coloured regions therefore tile the
-rectangle ``[0,U(t)] × [0,V(t)]``.  The GIF is intentionally continuous and
-nearly wordless; the Lean theorem below it supplies the synchronized finite
-rational partition calculation that certifies this picture.
+The parameter interval is the fixed rational interval [t0, t1] = [0, 1].
+For f(t) = t and g(t) = t^2, equal divisions of t give equal f-divisions but
+unequal g-divisions.  The orange horizontal-first and teal vertical-first
+staircases are the two endpoint zigzags through the same sampled points.
+They visibly close around the curve as the common parameter subdivision is
+refined.  Every displayed sample is rational.
 """
 
 from __future__ import annotations
 
+from fractions import Fraction
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -22,18 +22,18 @@ ASSET_DIR = ROOT / "blueprint" / "src" / "assets"
 GIF_PATH = ASSET_DIR / "integration-by-parts-cell.gif"
 PNG_PATH = ASSET_DIR / "integration-by-parts-cell.png"
 
-WIDTH, HEIGHT = 560, 480
-LEFT, RIGHT = 92, 468
-TOP, BASELINE = 38, 414
+WIDTH, HEIGHT = 600, 500
+# Both displayed coordinate ranges are [0, 1], so the f and g units are
+# square.  The nonuniformity in the picture comes only from g(t)=t^2.
+LEFT, RIGHT = 120, 480
+TOP, BASELINE = 42, 402
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)
 AXIS = (100, 116, 139, 255)
 GRID = (203, 213, 225, 255)
-TEAL_FILL = (176, 227, 219, 255)
-TEAL_EDGE = (13, 148, 136, 255)
-ORANGE_FILL = (254, 215, 170, 255)
-ORANGE_EDGE = (234, 88, 12, 255)
-CURVE = (51, 65, 85, 255)
+CURVE = (38, 50, 68, 255)
+ORANGE = (234, 88, 12, 255)
+TEAL = (13, 148, 136, 255)
 
 
 def font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -49,74 +49,96 @@ def font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     return ImageFont.load_default()
 
 
-SMALL = font(17)
+SMALL = font(16)
 LABEL = font(19)
 
 
-def x_screen(value: float) -> float:
-    return LEFT + value * (RIGHT - LEFT)
+def f(t: Fraction) -> Fraction:
+    return t
 
 
-def y_screen(value: float) -> float:
-    return BASELINE - value * (BASELINE - TOP)
+def g(t: Fraction) -> Fraction:
+    return t * t
 
 
-def curve_points(stop: float, count: int = 160) -> list[tuple[float, float]]:
-    return [(x_screen(stop * i / count), y_screen((stop * i / count) ** 2))
-            for i in range(count + 1)]
+def x_screen(value: Fraction | float) -> float:
+    return LEFT + float(value) * (RIGHT - LEFT)
 
 
-def frame(stop: float) -> Image.Image:
+def y_screen(value: Fraction | float) -> float:
+    return BASELINE - float(value) * (BASELINE - TOP)
+
+
+def draw_path(
+    draw: ImageDraw.ImageDraw,
+    points: list[tuple[float, float]],
+    colour: tuple[int, int, int, int],
+) -> None:
+    for left, right in zip(points, points[1:]):
+        draw.line((*left, *right), fill=colour, width=4)
+
+
+def frame(subdivisions: int) -> Image.Image:
     image = Image.new("RGBA", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(image)
+    parameters = [Fraction(index, subdivisions) for index in range(subdivisions + 1)]
+    f_values = [f(t) for t in parameters]
+    g_values = [g(t) for t in parameters]
 
-    for quarter in range(1, 5):
-        x = x_screen(quarter / 4)
-        y = y_screen(quarter / 4)
+    # Equal f-divisions are vertical; their g-images are intentionally uneven
+    # horizontal levels.  Neither is decorative: both come from the same t_i.
+    for value in f_values:
+        x = x_screen(value)
         draw.line((x, TOP, x, BASELINE), fill=GRID, width=1)
+    for value in g_values[1:]:
+        y = y_screen(value)
         draw.line((LEFT, y, RIGHT, y), fill=GRID, width=1)
 
-    draw.line((LEFT - 20, BASELINE, RIGHT + 25, BASELINE), fill=AXIS, width=3)
+    draw.line((LEFT - 22, BASELINE, RIGHT + 28, BASELINE), fill=AXIS, width=3)
     draw.line((LEFT, BASELINE + 18, LEFT, TOP - 18), fill=AXIS, width=3)
 
-    top = stop * stop
-    # Below V=U²: ∫ V dU.  Above it in the current product rectangle:
-    # ∫ U dV.  The polygons meet exactly along the parametrized curve.
-    lower = [(x_screen(0), y_screen(0))] + curve_points(stop) + [
-        (x_screen(stop), y_screen(0))]
-    upper = [(x_screen(0), y_screen(top)), (x_screen(stop), y_screen(top))]
-    upper += list(reversed(curve_points(stop)))
-    draw.polygon(lower, fill=ORANGE_FILL)
-    draw.polygon(upper, fill=TEAL_FILL)
+    curve = [
+        (x_screen(Fraction(index, 240)), y_screen(Fraction(index, 240) ** 2))
+        for index in range(241)
+    ]
+    draw.line(curve, fill=CURVE, width=3, joint="curve")
 
-    draw.line(curve_points(stop), fill=CURVE, width=3, joint="curve")
-    draw.rectangle(
-        (x_screen(0), y_screen(top), x_screen(stop), y_screen(0)),
-        outline=CURVE,
-        width=2,
-    )
+    lower = [(x_screen(f_values[0]), y_screen(g_values[0]))]
+    upper = [(x_screen(f_values[0]), y_screen(g_values[0]))]
+    for left_f, right_f, left_g, right_g in zip(
+        f_values, f_values[1:], g_values, g_values[1:]
+    ):
+        # Horizontal-first uses the old g endpoint; vertical-first uses the
+        # old f endpoint.  These are the two finite integration-by-parts
+        # zigzags whose common refinement is the parameter partition.
+        lower.extend([(x_screen(right_f), y_screen(left_g)),
+                      (x_screen(right_f), y_screen(right_g))])
+        upper.extend([(x_screen(left_f), y_screen(right_g)),
+                      (x_screen(right_f), y_screen(right_g))])
+    draw_path(draw, lower, ORANGE)
+    draw_path(draw, upper, TEAL)
 
-    x = x_screen(stop)
-    y = y_screen(top)
-    draw.ellipse((x - 5, y - 5, x + 5, y + 5), fill=CURVE)
-    draw.text((RIGHT + 23, BASELINE + 4), "U", font=LABEL, fill=INK, anchor="lm")
-    draw.text((LEFT - 4, TOP - 20), "V", font=LABEL, fill=INK, anchor="mm")
-    draw.text((x, BASELINE + 30), "U(t)", font=SMALL, fill=INK, anchor="mm")
-    draw.text((LEFT - 14, y), "V(t)", font=SMALL, fill=INK, anchor="rm")
+    for fv, gv in zip(f_values, g_values):
+        x, y = x_screen(fv), y_screen(gv)
+        draw.ellipse((x - 4, y - 4, x + 4, y + 4), fill=CURVE)
+
+    draw.text((LEFT - 14, BASELINE + 30), "t0", font=SMALL, fill=INK, anchor="mm")
+    draw.text((RIGHT + 12, BASELINE + 30), "t1", font=SMALL, fill=INK, anchor="mm")
+    draw.text((RIGHT + 26, BASELINE + 4), "f(t)", font=LABEL, fill=INK, anchor="lm")
+    draw.text((LEFT - 4, TOP - 22), "g(t)", font=LABEL, fill=INK, anchor="mm")
     return image
 
 
 def main() -> None:
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
-    states = [1 / 8, 2 / 8, 3 / 8, 4 / 8, 5 / 8, 6 / 8, 7 / 8, 1]
-    frames = [frame(stop) for stop in states]
-    frames[-1].save(PNG_PATH, format="PNG", optimize=True)
+    frames = [frame(subdivisions) for subdivisions in (1, 2, 4, 8)]
+    frames[2].save(PNG_PATH, format="PNG", optimize=True)
     frames[0].save(
         GIF_PATH,
         format="GIF",
         save_all=True,
         append_images=frames[1:],
-        duration=[500] * (len(frames) - 1) + [1800],
+        duration=[1200, 1200, 1200, 1900],
         loop=0,
         disposal=2,
         optimize=True,
