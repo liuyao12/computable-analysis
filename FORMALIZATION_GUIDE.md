@@ -211,8 +211,13 @@ The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`, and
 `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` proves a
 `HasForwardDerivativeAt` certificate at zero with derivative `1`.
-Its literal quotient is `1 + h/2`; it is not a claim that the
-tail-enclosed `expPowerSeries` already has derivative itself.
+Its literal quotient is `1 + h/2`.  The actual tail-enclosed evaluator has
+now crossed the same local gate:
+`ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` proves its forward
+derivative at zero is `1`.  Its proof uses the literal public stage-zero
+finite sum, whose positive tail and geometric radius are both bounded by
+`h^2` on positive half-unit steps.  This is not a global `exp' = exp`
+certificate on an interval.
 
 ## How to formalize a familiar integration formula
 
@@ -314,6 +319,12 @@ the constant input `1`, it is now proved
 equivalent to compound interest; the inverse-logarithmic construction remains
 a separate open bridge.
 
+There is one local derivative theorem for that representation:
+`ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` proves the full
+power-series evaluator has forward derivative `1` at zero.  It is deliberately
+kept distinct from the still-open interval self-derivative certificate needed
+by `SolvesSelfDerivativeOnInterval`.
+
 When using `SelfDerivativeInitialValueUnique`, provide both pieces of common
 initial data explicitly: equality of the rational initial coordinates and a
 `RealRaw.Equiv` proof for their certified initial values.  The differential
@@ -372,6 +383,7 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeriesOnInterval
 #check ExpProofs.expPowerSeriesFunction_zero_equiv_one
 #check ExpProofs.expPowerSeriesOnInterval_zero_initial_value
+#check ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
@@ -400,9 +412,9 @@ open ComputableAnalysis
 ```
 
 This certifies both repeated multiplication and the factorial power series as
-representations of the same abstract value `e`; it does not establish an
-analytic derivative theorem. Keep constant-level agreement distinct from a
-derivative/ODE certificate for an exponential function.
+representations of the same abstract value `e`.  Keep that constant-level
+agreement, the checked local forward derivative at zero, and the still-open
+global derivative/ODE certificate distinct.
 
 ```lean
 import ComputableAnalysis.RotationSeries

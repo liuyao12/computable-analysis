@@ -61,6 +61,7 @@ that two exponential representations agree also identifies their Euler bases.
 \begin{theorem}[Derivative characterizations of \(e\)]
 \label{thm:e-self-derivative-and-unit-slope}
 \lean{ComputableAnalysis.ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero}
 The required certificates are
 \[
  E'(x)=E(x),\quad E(0)=1,
@@ -69,9 +70,16 @@ The required certificates are
 \]
 The derivative interface is finite-difference based: its evaluator precision
 may depend on the rational step.  The initial-value field is checked below;
-Lean already checks its degree-two Taylor prefix at zero, where the quotient
-is \(1+h/2\).  The tail-aware self-derivative certificate for the full series
-and the uniqueness application are still open work.
+Lean checks both its degree-two Taylor prefix and the actual tail-enclosed
+power-series evaluator at zero.  For the latter, its public stage already has
+enough positive Taylor terms that the finite remaining sum and the certified
+geometric radius are both at most \(h^2\) for \(0<h\le1/2\).  Dividing the
+resulting box by \(h\) yields a genuine forward certificate
+\[
+ \left.E'_{\mathrm{series}}(x)\right|_{0+}=1.
+\]
+This is not yet the global self-derivative theorem \(E'=E\) on an interval,
+nor the uniqueness application that compares exponential representations.
 \end{theorem}
 
 \begin{theorem}[Checked initial values and finite binomial bridge]
