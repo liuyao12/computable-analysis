@@ -76,7 +76,7 @@ Start with the smallest target module rather than importing
 | --- | --- | --- |
 | Rational interval arithmetic and raw reals | `ComputableAnalysis.Basic` | `QInterval`, `RealRaw`, `RealRaw.Valid`, `RealRaw.Equiv` |
 | Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
-| Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.ConstructionFor` |
+| Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
 | One non-rational turning point in an integral | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.SingleTurnIntegralCandidate` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
 | Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `IntegralIdentities` |
@@ -247,6 +247,24 @@ available.  The finite integration-by-parts construction in
 algebra, not a universal theorem.  Consequently, an LLM must currently
 either stay within an existing concrete construction or make the missing
 general theorem its explicit proof goal.
+
+### Increasing pieces: start with the literal finite stage
+
+For a nondecreasing `FunctionOnInterval F`,
+`Integral.nondecreasingDarbouxRange F P k hk prec` is the endpoint box for
+the `k`th rational cell of `P`, and
+`Integral.nondecreasingDarbouxStage F P prec` folds those width-scaled boxes.
+`Integral.nondecreasingDarbouxDyadicStage F hinterval evalPrecision n` is the
+literal `2^n`-cell instance used by the blueprint pseudocode.  The theorem
+`nondecreasingDarbouxRange_width_nonneg` proves the one finite fact supplied
+by weak monotonicity: each endpoint range is ordered.
+
+This API is deliberately *not* a universal integrability result.  To publish
+the stage sequence as a `RealRaw`, the particular function still supplies
+interval regularity, compatible stage choices, and an explicit bound making
+the finite bracket width smaller than any requested rational epsilon.  This
+keeps the computation, its validity proof, and its endpoint identity visibly
+separate.
 
 ### A single non-rational turning point
 

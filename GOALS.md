@@ -154,6 +154,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `Integral.ConstructionFor`, its validity bridge, and the derivative-bound
   FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact
   reciprocal-quartic computations exercise them concretely. The reusable
+  `Integral.nondecreasingDarbouxRange`, `...Stage`, and
+  `...DyadicStage` now expose the literal increasing-function endpoint-box
+  calculation from the blueprint.  Weak monotonicity proves each cell range
+  ordered; interval regularity, stage compatibility, and a function-specific
+  shrinking-width estimate remain deliberately separate requirements before
+  a `ConstructionFor` can be claimed.  The reusable
   single-turn pattern in `TurningPointIntegral` handles a particular
   up-then-down integrand whose (possibly non-rational) turning point is
   represented by shrinking rational brackets: stagewise monotone outer
