@@ -77,7 +77,7 @@ Start with the smallest target module rather than importing
 | Rational interval arithmetic and raw reals | `ComputableAnalysis.Basic` | `QInterval`, `RealRaw`, `RealRaw.Valid`, `RealRaw.Equiv` |
 | Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
-| One non-rational turning point in an integral | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.SingleTurnIntegralCandidate` |
+| Finite monotone decomposition with non-rational turns | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.TurningBracketIntegralCandidate` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
 | Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `IntegralIdentities` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
@@ -266,22 +266,27 @@ the finite bracket width smaller than any requested rational epsilon.  This
 keeps the computation, its validity proof, and its endpoint identity visibly
 separate.
 
-### A single non-rational turning point
+### Non-rational turns in a finite monotone decomposition
 
-When an integrand is certified increasing up to a turning point and decreasing
-after it, do not pretend that the turn has a rational coordinate.  Use
-`Integral.TurningPointBracket`: its raw interval boxes supply rational
-endpoints `[ell_n, r_n]` that shrink around the unknown turn.  At stage `n`,
-construct the two outer integrals on `[a, ell_n]` and `[r_n, b]`.  Enclose the
-unresolved middle values in one fixed rational range `B`; the literal middle
-box is `(r_n - ell_n) * B`.  `Integral.SingleTurnIntegralCandidate` proves
-that this middle width, and then the width of the three-part sum, tends to
-zero.  Its `middleBox_contained_symmetric` theorem supplies the sharper
-vanishing bound from any absolute-value enclosure.
+Do not make a non-rational turn a distinguished kind of integral.  For every
+turn in a supplied finite monotone decomposition, use an
+`Integral.TurningPointBracket`: its raw boxes expose rational endpoints
+`[ell_n, r_n]`.  Evaluate every monotone tail at the same stage and add one
+middle box `(r_n - ell_n) * B` for each unresolved gap.  The one-bracket helper
+`Integral.TurningBracketIntegralCandidate` proves that one gap's width
+vanishes; the general algorithm repeats that finite calculation. Its legacy
+Lean implementation name is `SingleTurnIntegralCandidate`.
 
-This is deliberately a per-function workflow.  `SingleTurnIntegralCompletion`
-is the remaining proof obligation that the three boxes enclose that
-function's intended integral representative.  It does not turn every bounded
+The normalized-sinc illustration uses the first positive solution of
+`tan(pi*t) = pi*t`, with a decreasing left tail and increasing right tail.
+It is not yet a Lean instance: the project still needs certified sine/tangent
+sign boxes and their rational bisection schedule.
+
+This is deliberately a per-function workflow.  A completion certificate for
+each assembled finite stage remains the proof obligation that its boxes
+enclose the function's intended integral representative.  The current
+one-bracket API calls this `TurningBracketIntegralCompletion` (implemented by
+the legacy `SingleTurnIntegralCompletion`).  It does not turn every bounded
 or continuous interval function into an integral.
 
 One useful fully scoped exception is the unit arctangent triangle route in

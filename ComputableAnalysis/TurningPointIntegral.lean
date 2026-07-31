@@ -1,14 +1,15 @@
 import ComputableAnalysis.Calculus
 
 /-!
-# Single-turn integral candidates
+# Turning-bracket helper for finite piecewise-monotone integral candidates
 
-This module records a constructive pattern for a *particular* bounded integral
-whose integrand rises and then falls.  It deliberately does not define a
-general integral operator.  A client supplies shrinking rational brackets for
-the (possibly non-rational) turning point, monotone integral constructions on
-the two certified outer pieces, and a finite range enclosure for the shrinking
-middle piece.
+This module records the one-bracket component of a *particular* bounded
+piecewise-monotone integral.  A general finite-piece computation repeats this
+component at every non-rational turn and sums the certified monotone pieces.
+It deliberately does not define a general integral operator.  A client
+supplies a shrinking rational bracket for one turn, monotone integral
+constructions on the two certified outer pieces, and a finite range enclosure
+for the shrinking middle piece.
 
 The resulting candidate is a literal stagewise rational interval computation.
 Its width is proved to shrink.  Identifying it with a desired integral remains
@@ -165,8 +166,8 @@ theorem turningPointMiddleBox_contained_symmetric {a b : Rat}
   · simpa [Rat.mul_comm] using
       Rat.mul_le_mul_of_nonneg_left hbound.2.2 hwidth
 
-/-- The finite data for the up-then-down computation of one particular
-integral.  The two outer constructions may depend on the requested stage,
+/-- The finite data for the one-bracket helper in one particular integral.
+The two outer constructions may depend on the requested stage,
 because their rational endpoints are supplied by a shrinking bracket for a
 possibly non-rational turning point.
 
@@ -203,6 +204,13 @@ structure SingleTurnIntegralCandidate (F : FunctionOnInterval) where
         (monotoneIntegralFor (turning.rightRestriction n)
           (rightConstruction n)).compute n)
 
+/-- The public name emphasizes that this is one reusable turning-bracket
+component, not a distinguished kind of one-turn integral.  A finite
+piecewise-monotone computation has one such component for each unresolved
+turn. -/
+abbrev TurningBracketIntegralCandidate (F : FunctionOnInterval) :=
+  SingleTurnIntegralCandidate F
+
 namespace SingleTurnIntegralCandidate
 
 def leftBox {F : FunctionOnInterval}
@@ -220,7 +228,9 @@ def middleBox {F : FunctionOnInterval}
   turningPointMiddleBox C.turning C.valueRange n
 
 /-- The literal three-part stage computation: left monotone piece, bounded
-turning-point middle, and right monotone piece. -/
+turning-point middle, and right monotone piece.  The two pieces may have
+either opposite orientation: a decreasing-then-increasing `sinc` branch is
+as admissible as an increasing-then-decreasing branch. -/
 def compute {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) (n : Nat) : QInterval :=
   QInterval.addInterval
@@ -279,10 +289,10 @@ theorem middleBox_contained_symmetric {F : FunctionOnInterval}
   obtain ⟨M, hM⟩ := C.valueRange_abs_bound
   exact ⟨M, turningPointMiddleBox_contained_symmetric C.turning hM n⟩
 
-/-- The direct three-part computation has a vanishing width.  This is the
-quantitative core of the turning-point method: no monotonicity is demanded on
-the unresolved central bracket, only a fixed rational range bound and a
-shrinking rational width. -/
+/-- The direct one-gap calculation has a vanishing width.  This is the
+quantitative core repeated at every turn: no monotonicity is demanded on an
+unresolved bracket, only a fixed rational range bound and a shrinking
+rational width. -/
 theorem compute_widths_shrink {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) :
     RealRaw.WidthsShrinkToZero C.compute := by
@@ -332,6 +342,11 @@ structure SingleTurnIntegralCompletion {F : FunctionOnInterval}
   radius : Nat -> Rat
   anchor_width_le_radius : forall n, (anchor.compute n).width <= radius n
   radius_shrinks : ShrinksToZero radius
+
+/-- The completion certificate for one reusable turning-bracket component. -/
+abbrev TurningBracketIntegralCompletion {F : FunctionOnInterval}
+    (C : TurningBracketIntegralCandidate F) :=
+  SingleTurnIntegralCompletion C
 
 namespace SingleTurnIntegralCompletion
 

@@ -22,7 +22,7 @@ separate from the raw interval computation.
 | Monotone on one rational interval | `MonotoneConstructionFor` or `NondecreasingConstructionFor` | Prove the declared order and the rectangle-width schedule |
 | Rational-Lipschitz on `[0,1]` | `IntegralIdentities.LipschitzDyadic` | Prove a rational Lipschitz constant and the dyadic error bound |
 | Monotone on finitely many rational pieces | `PiecewiseMonotoneConstructionFor` | Prove order independently on every piece and combine their boxes |
-| One non-rational maximum or minimum | `SingleTurnIntegralCandidate` | Supply shrinking rational turn brackets, outer monotone certificates, and a middle range bound |
+| Finite monotone decomposition with non-rational turns | `TurningPointBracket` plus `TurningBracketIntegralCandidate` | Supply one shrinking rational bracket per turn, monotone-piece certificates, and a range bound for every gap |
 | Substitution, symmetry, or integration by parts | A literal finite mesh comparison | Prove the finite algebra and error terms; do not cite a future general theorem |
 
 Use the exact expression of the integrand in every construction. State where
@@ -30,41 +30,44 @@ denominators stay apart from zero and where a branch or sign condition holds.
 Use an interval evaluator rather than endpoint samples when the function is
 inexact.
 
-## Build a single-turn computation
+## Build a finite turning-bracket computation
 
-Use the following route when an integrand rises and then falls, or falls and
-then rises after reversing orientation. The turning coordinate may be a
-non-rational computable real.
+Use the following route for any supplied finite monotone decomposition.  A
+one-turn picture is only the smallest illustration: every non-rational turn
+uses the same component, and the finite stage sums all outer pieces and all
+unresolved gaps.
 
-1. Define `TurningPointBracket a b`. Its `raw` gives a stagewise rational
-   bracket `[ell_n, r_n]`; prove `raw.Valid` and prove every bracket lies
-   inside `[a,b]`.
-2. Prove that the bracket widths tend to zero. Do not select the turning
-   point as a rational number merely to make a static partition.
-3. At stage `n`, construct the left integral on `[a, ell_n]` and the right
-   integral on `[r_n, b]`. Supply `MonotoneConstructionFor` for each
-   restricted `FunctionOnInterval`; the two constructions may depend on
+1. List the finitely many monotone pieces and every non-rational turn between
+   adjacent pieces.  Do not select a rational point merely to make a static
+   partition.
+2. For every turn, define `TurningPointBracket a b`. Its `raw` exposes the
+   stagewise rational bracket `[ell_n, r_n]`; prove `raw.Valid`, containment
+   in `[a,b]`, and shrinking width.
+3. At stage `n`, construct every outer integral on the rational endpoints
+   selected by its adjacent brackets.  Supply `MonotoneConstructionFor` for
+   each restricted `FunctionOnInterval`; these constructions may depend on
    `n`.
-4. Choose one fixed rational value interval `B=[L,U]` valid throughout every
-   unresolved middle bracket. Prove `middle_encloses` pointwise at every
+4. Choose a fixed rational value interval `B=[L,U]` for every unresolved
+   gap, and prove the corresponding pointwise range enclosure at every
    requested evaluator precision.
-5. Define the literal middle box as `(r_n - ell_n) * B`. The checked theorem
+5. Give each gap the literal box `(r_n - ell_n) * B`. The checked theorem
    `turningPointMiddleBox_width` gives
    `width = (r_n - ell_n) * width(B)`.
-6. Add left, middle, and right boxes. The theorem
-   `SingleTurnIntegralCandidate.compute_widths_shrink` proves that the
-   three-part width tends to zero once the two outer schedules and the
-   bracket schedule are supplied.
+6. Sum all monotone boxes and all gap boxes. The current checked helper
+   `TurningBracketIntegralCandidate` (implemented by the legacy
+   `SingleTurnIntegralCandidate`) proves the one-gap width calculation; use
+   it once per turn while a packaged finite-gap aggregation theorem is still
+   future work.
 7. Use `middleBox_contained_symmetric` when a bound `B ⊆ [-K,K]` is
-   available. It yields the sharper central estimate
-   `[-K*(r_n-ell_n), K*(r_n-ell_n)]`.
+   available. It yields the sharper estimate
+   `[-K*(r_n-ell_n), K*(r_n-ell_n)]` for that gap.
 
 These seven steps build a numerical candidate. They do not yet prove that the
 candidate boxes enclose an intended integral. Finish with
-`SingleTurnIntegralCompletion`: give a valid anchor raw value, prove the
+`TurningBracketIntegralCompletion`: give a valid anchor raw value, prove the
 candidate is equivalent to that anchor, and give the stated anchor radius
 schedule. The resulting `stabilizedRaw` has a checked validity proof while
-its runtime still reads only the three finite pieces.
+its runtime still reads only the finite pieces belonging to that bracket.
 
 ## Prove the missing semantic comparison
 

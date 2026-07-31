@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Render lower and upper Darboux stages for an increasing rational example.
+"""Render lower and upper Darboux stages for an exact rational example.
 
-The frames use the exact function ``f(t) = t^2`` on ``[0, 1]``.  At each
-dyadic stage the green left-endpoint rectangles and orange right-endpoint
-rectangles are the finite lower and upper brackets for the same increasing
-function.  This is the visual model for the stage algorithm in the integral
-chapter; it does not depict a pre-existing completed area.
+The frames use the decreasing rational function ``f(t) = 1 / (1 + t^2)`` on
+``[0, 1]``.  Every endpoint value and every rectangle height is a rational
+number.  Green right-endpoint rectangles are the lower sum and orange
+left-endpoint rectangles are the upper sum.  This exact case contrasts with
+the interval-valued sine stage rendered by the companion script.
 """
 
 from __future__ import annotations
@@ -61,7 +61,7 @@ def y_screen(value: Fraction) -> float:
 
 
 def value(t: Fraction) -> Fraction:
-    return t * t
+    return Fraction(1, 1) / (Fraction(1, 1) + t * t)
 
 
 def rectangle(
@@ -92,12 +92,12 @@ def frame(subdivisions: int) -> Image.Image:
         draw.line((x, TOP, x, BASELINE), fill=GRID, width=1)
         draw.line((x, BASELINE - 6, x, BASELINE + 6), fill=AXIS, width=2)
 
-    # Right endpoints give the upper bracket for an increasing function.
-    # Painting those first leaves the finite interval gap visible in orange.
+    # This function is decreasing: left endpoints give the upper bracket.
+    # Paint it first so the orange finite gap remains visible.
     for left, right in zip(cells, cells[1:]):
-        rectangle(draw, left, right, value(right), UPPER_FILL, UPPER_EDGE)
+        rectangle(draw, left, right, value(left), UPPER_FILL, UPPER_EDGE)
     for left, right in zip(cells, cells[1:]):
-        rectangle(draw, left, right, value(left), LOWER_FILL, LOWER_EDGE)
+        rectangle(draw, left, right, value(right), LOWER_FILL, LOWER_EDGE)
 
     points = []
     for index in range(241):
@@ -108,7 +108,7 @@ def frame(subdivisions: int) -> Image.Image:
     for t, label in ((Fraction(0), "0"), (Fraction(1), "1")):
         draw.text((x_screen(t), BASELINE + 29), label, font=SMALL, fill=INK, anchor="mm")
     draw.text((LEFT - 26, TOP + 2), "1", font=SMALL, fill=INK, anchor="mm")
-    draw.text((RIGHT - 30, y_screen(Fraction(3, 4)) - 20), "t²", font=LABEL,
+    draw.text((RIGHT - 72, y_screen(Fraction(3, 5)) - 20), "1/(1+t²)", font=LABEL,
               fill=CURVE, anchor="mm")
     draw.text((RIGHT + 22, BASELINE + 4), "t", font=LABEL, fill=INK, anchor="lm")
     return image
