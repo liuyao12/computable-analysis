@@ -200,8 +200,8 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   exponential/logarithm branches.
 - **Differentiated elementary functions — partly checked.** Formal
   power-series derivatives and finite-difference examples are checked. The
-  next end-to-end gate is a selected exponential raw that proves `f' = f`,
-  followed by uniqueness and the logarithm relation. The literal rational-input
+  next end-to-end gate is a selected exponential raw that proves `f' = f` on
+  an interval, followed by uniqueness and the logarithm relation. The literal rational-input
   evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for
   every `x : Rat`: its finite rational series boxes are nested and have the
   public geometric rate `ExpProofs.expPowerSeriesRate x`, with ratio `1/2`.
@@ -211,13 +211,17 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   restriction. When zero is in that interval,
   `ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies the exact
   function-level initial equivalence required by the ODE interface. This is a
-  certified representation layer, not yet an analytic self-derivative theorem
-  or a bridge to the other definitions. Its first finite-difference brick is
+  certified representation layer, not yet a global analytic self-derivative
+  theorem or a bridge to the other definitions. Its finite-difference bridge is
   now explicit: `expTaylorQuadratic x = 1 + x + x*x/2`, and
   `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` certifies its forward
-  derivative `1` at zero by the exact quotient `1 + h/2`. This is deliberately
-  a finite polynomial theorem, not the missing tail-aware derivative theorem
-  for `expPowerSeries`. The
+  derivative `1` at zero by the exact quotient `1 + h/2`. More importantly,
+  `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` now certifies the
+  tail-enclosed power-series evaluator itself has forward derivative `1` at
+  zero. Its finite stage-zero loop has a positive-tail-plus-radius budget of
+  `O(h^2)` on `0 < h <= 1/2`, so quotienting gives an explicit first-order
+  enclosure. This remains a local boundary theorem, not the missing global
+  self-derivative theorem for `expPowerSeries`. The
   constant-level compound-interest representative is now additionally packaged as the
   positive base `ExpProofs.ePositive`: its lower interval endpoint is always
   at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural

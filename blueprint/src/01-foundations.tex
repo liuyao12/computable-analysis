@@ -641,8 +641,9 @@ the preceding setup: the interval is the rational segment from \(a+i0\) to
 the pointwise outputs are real numbers.
 \end{definition}
 
-\begin{definition}[Interval regularity]\label{def:interval-regular}
+\begin{definition}[Interval regularity (rational continuity)]\label{def:interval-regular}
 \lean{ComputableAnalysis.IntervalRegularOn}
+\lean{ComputableAnalysis.EpsilonDeltaContinuousOn}
 \uses{def:function-on-interval}
 Let \(F\) be a real-valued function on \([a,b]\).  An interval-regularity
 certificate assigns to each rational subinterval
@@ -661,7 +662,12 @@ and \(Y(K,n)=[u,v]\), we have
 and for every rational point \(x\in K\), the point-value interval
 \(F(x,n)\) is enclosed by \(Y(K,n)\).  Thus this is genuinely
 interval-valued continuity: it controls both the separation of values and
-the widths of their rational enclosures.
+the widths of their rational enclosures.  In particular, this is the
+project's epsilon--delta notion of continuity, stated only over rational
+inputs and rational tolerances: given \(\varepsilon>0\), it computes a
+\(\delta>0\) and a common evaluation stage at which inputs within
+\(\delta\) have \(\varepsilon\)-near output boxes.  No topology or completed
+real line is part of the definition.
 \end{definition}
 
 \begin{theorem}[Constructive monotone inverse-function theorem]

@@ -1,13 +1,116 @@
 \chapter{Integrals}
 \label{ch:integrals}
 
-\section{Constructive Definite Integrals}
-
-This is the certificate layer: it proves finite integral constructions and
-general FTC, substitution, and integration-by-parts theorems.  It is not a
-table of integrals.  A recalled or proposed primitive is useful only after the
+This chapter begins with computation-definitions of definite integrals, then
+uses them for FTC, substitution, and integration by parts.  It is not a table
+of integrals.  A recalled or proposed primitive is useful only after the
 linked derivative theorem and endpoint bridge check it; the finite
 integration-by-parts material is retained as a \(\pi\) benchmark.
+
+\section{From \texorpdfstring{\code{arctan.geom}}{arctan.geom} to definite integrals}
+
+\begin{remark}[The geometric prototype]
+\label{rem:arctan-geom-general-integral}
+The computation \code{arctan.geom} first encloses the area swept out by a
+rational circle construction.  Its rectangle comparison reveals the more
+general pattern: enclose the contribution of each rational cell, add the
+finitely many rational boxes, and prove that the resulting stage boxes define
+a raw real.  An integral is therefore not an ambient operation on all
+functions.  It is a named interval algorithm together with its validity
+certificate.
+\end{remark}
+
+\begin{definition}[Increasing-function integral stage]
+\label{def:increasing-integral-stage}
+\lean{ComputableAnalysis.NondecreasingOnInterval}
+\lean{ComputableAnalysis.IntervalRegularOn}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor}
+\uses{rem:arctan-geom-general-integral,def:interval-regular}
+Let \(F\) be nondecreasing on a rational interval \([a,b]\), with rational
+point boxes.  On the uniform rational partition
+\(a=x_0<\cdots<x_m=b\), its finite lower and upper brackets use opposite
+endpoints:
+\[
+ L=\sum_{i<m}(x_{i+1}-x_i)F(x_i)_{\rm lo},\qquad
+ U=\sum_{i<m}(x_{i+1}-x_i)F(x_{i+1})_{\rm hi}.
+\]
+The intended stage algorithm is deliberately literal:
+\begin{verbatim}
+def increasing_integral_stage(F, a, b, n):
+    P = uniform_partition(a, b, 2**n)
+    q = evaluation_stage(F, n)
+    lower = sum((P[i+1] - P[i]) * F(P[i], q).lo for i in range(len(P)-1))
+    upper = sum((P[i+1] - P[i]) * F(P[i+1], q).hi for i in range(len(P)-1))
+    return [lower, upper]
+\end{verbatim}
+\begin{figure}[!htbp]
+\centering
+\monotoneIntegralStageAnimation
+\caption{Finite lower and upper stages for the increasing example \(t^2\).}
+\label{fig:monotone-integral-stage}
+\end{figure}
+This is a definition of a candidate interval computation, not yet an
+automatic theorem that every monotone function has an integral.  To obtain a
+\code{RealRaw}, the particular analysis must prove ordered, compatible, and
+shrinking boxes.  Interval regularity is the continuity datum that supplies a
+common rational cell-image stage; monotonicity supplies the endpoint order;
+the remaining finite estimate makes \(U-L\) smaller than a requested rational
+epsilon.  In Lean, a completed instance is packaged as a
+\code{NondecreasingConstructionFor}, whose \code{construction} field is the
+valid raw-real certificate.
+\end{definition}
+
+\begin{example}[The increasing rational example \(t^2\)]
+\label{ex:increasing-integral-square}
+\uses{def:increasing-integral-stage}
+For \(F(t)=t^2\) on \([0,1]\), every point box is the exact rational
+singleton \([t^2,t^2]\).  With \(m\) equal cells, the lower and upper
+endpoint sums differ by exactly
+\[
+ U_m-L_m=\frac1m\bigl(F(1)-F(0)\bigr)=\frac1m.
+\]
+Thus the animation is an actual computation-definition: its coloured
+rectangles are the stage boxes, and the elementary choice
+\(m=\varepsilon.\mathrm{den}+1\) proves their width at most
+\(\varepsilon\).  The later FTC construction recognizes the same integral as
+\(1^3/3-0^3/3\); that endpoint identity is a theorem, not part of this
+definition.
+\end{example}
+
+\begin{definition}[Piecewise-monotone stage computation]
+\label{def:piecewise-monotone-stage}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
+\uses{def:increasing-integral-stage}
+For supplied rational breakpoints, compute one monotone interval box on each
+piece at stage \(n\), then add those boxes.  A turn need not itself be
+rational.  Instead, a particular analysis supplies shrinking rational
+brackets \([\ell_n,r_n]\) around it and a rational range bound \([A,B]\):
+\begin{verbatim}
+def single_turn_stage(n):
+    l, r = turn_bracket(n)
+    left   = increasing_stage(F, a, l, n)
+    middle = (r - l) * [A, B]
+    right  = decreasing_stage(F, r, b, n)
+    return left + middle + right
+\end{verbatim}
+\begin{figure}[!htbp]
+\centering
+\singleTurnIntegralAnimation
+\caption{Every frame is one finite three-piece computation: the two tails
+are their own refined monotone brackets, and the middle is a shrinking
+rational bound.}
+\label{fig:single-turn-integral}
+\end{figure}
+All three boxes change with \(n\).  The middle width is controlled by
+\((r_n-\ell_n)(B-A)\), while the two tail widths use their own monotone and
+continuity certificates.  A finite sum of the three valid raw reals is the
+piecewise-monotone integral; this is the project's general-integral shape.
+\end{definition}
+
+\section{Constructive Definite Integrals}
 
 \begin{definition}[Interval function as a total raw evaluator]
 \label{def:function-on-interval-to-realfunraw}
@@ -1132,24 +1235,14 @@ the endpoint differences.
 \lean{ComputableAnalysis.Integral.turningPointMiddleBox}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion}
-\uses{thm:monotone-integral-construction}
+\uses{thm:monotone-integral-construction,def:piecewise-monotone-stage}
 \leanok
-A shrinking rational bracket \([\ell_n,r_n]\) isolates a possibly
-irrational turn.  Integrate the certified monotone restrictions on either
-side, and enclose the middle by \((r_n-\ell_n)[L,U]\):
-\begin{verbatim}
-def single_turn_stage(n):
-    l, r = turn_bracket(n)
-    return left_box(a, l, n) + (r - l) * bound + right_box(r, b, n)
-\end{verbatim}
-\begin{figure}[!htbp]
-\centering
-\singleTurnIntegralAnimation
-\caption{A rational single-turn split.}
-\label{fig:single-turn-integral}
-\end{figure}
-The supplied width and absolute-bound certificates make the middle error
-vanish.  The completed construction supplies the resulting valid raw real.
+The stagewise three-piece computation of
+\cref{def:piecewise-monotone-stage} is formalized here for a shrinking
+rational turn bracket.  The supplied width and absolute-bound certificates
+make the middle error vanish, while the two supplied monotone constructions
+control their separately refined tails.  The completed construction supplies
+the resulting valid raw real.
 \end{theorem}
 
 

@@ -3392,8 +3392,9 @@ theorem expPowerSeriesFunction_zero_equiv_one :
 
 /-- On every rational interval that contains zero, the packaged series
 function supplies the initial-value field required by a future
-`SolvesSelfDerivativeOnInterval` certificate.  The missing field is precisely
-the analytic self-derivative proof, not a domain or initial-value issue. -/
+`SolvesSelfDerivativeOnInterval` certificate.  The remaining field is the
+global analytic self-derivative proof; the local forward derivative at zero is
+constructed below. -/
 theorem expPowerSeriesOnInterval_zero_initial_value
     {a b : Rat} (hzero : inDomainInterval a b 0) :
     (PartialRealFunRaw.apply (expPowerSeriesOnInterval a b).raw
@@ -3407,6 +3408,274 @@ theorem expPowerSeriesOnInterval_zero_initial_value
 in addition to being stagewise equal to the rational constant one. -/
 theorem expPowerSeries_zero_valid : (expPowerSeries (0 : Rat)).Valid := by
   simpa [PowerSeriesValid] using expPowerSeries_valid (0 : Rat)
+
+private theorem powerSeriesState_two (x : Rat) :
+    powerSeriesState x 2 = (1 + x, x * x / 2) := by
+  unfold powerSeriesState
+  change powerSeriesLoopStep x (powerSeriesLoopStep x (0, 1) 0) 1 = _
+  simp [powerSeriesLoopStep]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem powerSeriesState_term_nonneg (x : Rat) (hx : 0 <= x) :
+    forall N, 0 <= (powerSeriesState x N).2
+  | 0 => by
+      change 0 <= (1 : Rat)
+      native_decide
+  | N + 1 => by
+      rw [powerSeriesState_succ]
+      simp only [powerSeriesLoopStep]
+      rw [Rat.div_def]
+      have hden : 0 < (N : Rat) + 1 := by
+        exact_mod_cast Nat.succ_pos N
+      exact Rat.mul_nonneg
+        (Rat.mul_nonneg (powerSeriesState_term_nonneg x hx N) hx)
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+
+private theorem rat_div_le_self_of_one_le {a d : Rat}
+    (ha : 0 <= a) (hd : 1 <= d) :
+    a / d <= a := by
+  have hdpos : 0 < d := by grind
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  apply Rat.le_of_mul_le_mul_right (c := d)
+  · calc
+      (a / d) * d = a := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_cancel]
+      _ <= a * d := by
+        calc
+          a = a * 1 := by rw [Rat.mul_one]
+          _ <= a * d := Rat.mul_le_mul_of_nonneg_left hd ha
+  · exact hdpos
+
+/-- A finite positive-tail budget for the factorial series.  After the
+constant and linear terms, the accumulated remainder plus twice the next
+term never exceeds the square of the input on the unit half interval. -/
+private theorem powerSeriesState_linear_tail_budget (x : Rat)
+    (hx : 0 <= x) (hxhalf : x <= (1 : Rat) / 2) :
+    forall k : Nat,
+      0 <= (powerSeriesState x (2 + k)).1 - (1 + x) /\
+      (powerSeriesState x (2 + k)).1 - (1 + x) +
+          2 * (powerSeriesState x (2 + k)).2 <= x * x
+  | 0 => by
+      rw [powerSeriesState_two]
+      constructor
+      · grind [Rat.sub_eq_add_neg]
+      · grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  | k + 1 => by
+      have ih := powerSeriesState_linear_tail_budget x hx hxhalf k
+      let N : Nat := 2 + k
+      have hterm0 : 0 <= (powerSeriesState x N).2 :=
+        powerSeriesState_term_nonneg x hx N
+      have hdenone : (1 : Rat) <= (N : Rat) + 1 := by
+        exact_mod_cast (show 1 <= N + 1 by omega)
+      have hratio_le_x : x / ((N : Rat) + 1) <= x :=
+        rat_div_le_self_of_one_le hx hdenone
+      have hratio : x / ((N : Rat) + 1) <= (1 : Rat) / 2 :=
+        Rat.le_trans hratio_le_x hxhalf
+      have hnext_le :
+          (powerSeriesState x N).2 * x / ((N : Rat) + 1) <=
+            (powerSeriesState x N).2 * ((1 : Rat) / 2) := by
+        calc
+          (powerSeriesState x N).2 * x / ((N : Rat) + 1) =
+              (powerSeriesState x N).2 * (x / ((N : Rat) + 1)) := by
+            rw [Rat.div_def]
+            grind [Rat.mul_assoc]
+          _ <= (powerSeriesState x N).2 * ((1 : Rat) / 2) :=
+            Rat.mul_le_mul_of_nonneg_left hratio hterm0
+      have htwo_next :
+          2 * ((powerSeriesState x N).2 * x / ((N : Rat) + 1)) <=
+            (powerSeriesState x N).2 := by
+        calc
+          2 * ((powerSeriesState x N).2 * x / ((N : Rat) + 1)) <=
+              2 * ((powerSeriesState x N).2 * ((1 : Rat) / 2)) :=
+            Rat.mul_le_mul_of_nonneg_left hnext_le (by native_decide)
+          _ = (powerSeriesState x N).2 := by
+            rw [Rat.div_def]
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      have hstate : powerSeriesState x (N + 1) =
+          powerSeriesLoopStep x (powerSeriesState x N) N :=
+        powerSeriesState_succ x N
+      have hsum :
+          (powerSeriesState x (N + 1)).1 =
+            (powerSeriesState x N).1 + (powerSeriesState x N).2 := by
+        rw [hstate]
+        rfl
+      have hterm :
+          (powerSeriesState x (N + 1)).2 =
+            (powerSeriesState x N).2 * x / ((N : Rat) + 1) := by
+        rw [hstate]
+        rfl
+      have hN : N + 1 = 2 + (k + 1) := by
+        dsimp [N]
+        omega
+      rw [← hN, hsum, hterm]
+      constructor
+      · have htail0 : 0 <= (powerSeriesState x N).1 - (1 + x) := by
+          simpa [N] using ih.1
+        grind [Rat.sub_eq_add_neg]
+      · have hbudget := ih.2
+        grind [Rat.sub_eq_add_neg]
+
+/-- The evaluator's initial public stage already includes enough positive
+Taylor terms for a quadratic forward-error budget on the half unit interval.
+This is a finite fact about the particular rational loop, not a limit or an
+appeal to completeness. -/
+private theorem expPowerSeries_stage_zero_linear_tail_bounds (x : Rat)
+    (hx : 0 <= x) (hxhalf : x <= (1 : Rat) / 2) :
+    0 <= powerSeriesCenter x 0 - (1 + x) /\
+      powerSeriesCenter x 0 - (1 + x) <= x * x /\
+      0 <= powerSeriesTailRadius x 0 /\
+      powerSeriesTailRadius x 0 <= x * x := by
+  let k : Nat := 6 + 2 * x.num.natAbs
+  have hterms : expPowerSeriesTerms x 0 = 2 + k := by
+    dsimp [k]
+    unfold expPowerSeriesTerms
+    omega
+  have hbudget := powerSeriesState_linear_tail_budget x hx hxhalf k
+  have hterm0 : 0 <= (powerSeriesState x (2 + k)).2 :=
+    powerSeriesState_term_nonneg x hx (2 + k)
+  have hrem0 : 0 <= powerSeriesCenter x 0 - (1 + x) := by
+    rw [expPowerSeries_center_eq_state, hterms]
+    exact hbudget.1
+  have hremle : powerSeriesCenter x 0 - (1 + x) <= x * x := by
+    rw [expPowerSeries_center_eq_state, hterms]
+    have htwoterm : 0 <= 2 * (powerSeriesState x (2 + k)).2 := by
+      exact Rat.mul_nonneg (by native_decide) hterm0
+    grind [Rat.sub_eq_add_neg]
+  have hr0 : 0 <= powerSeriesTailRadius x 0 :=
+    powerSeriesTailRadius_nonneg_of_ratioBound x
+      (expPowerSeries_ratio_bound x) 0
+  have htermle : 2 * (powerSeriesState x (2 + k)).2 <= x * x := by
+    have hrem := hbudget.1
+    have hbudget' := hbudget.2
+    grind [Rat.sub_eq_add_neg]
+  have htail := powerSeriesTailRadius_stage_le_two_mul_absTerm x 0
+  rw [hterms] at htail
+  unfold powerSeriesTermAtTerms at htail
+  rw [qabs_eq_self_of_nonneg hterm0] at htail
+  exact ⟨hrem0, hremle, hr0, Rat.le_trans htail htermle⟩
+
+/-- The forward derivative certificate asks for a factor-two smaller step
+than its output precision.  This elementary schedule both keeps the input in
+the half unit interval and leaves two copies of the step inside the requested
+precision. -/
+private theorem expPowerSeries_forward_step_bounds (h : Rat) (n : Nat)
+    (hsmall : h <=
+      1 / ((2 * (if n = 0 then 1 else n) : Nat) : Rat)) :
+    h <= (1 : Rat) / 2 /\ 2 * h <= (precisionAtStage n).val := by
+  by_cases hn : n = 0
+  · subst n
+    have hhalf : h <= (1 : Rat) / 2 := by
+      simpa using hsmall
+    constructor
+    · exact hhalf
+    · calc
+        2 * h <= 2 * ((1 : Rat) / 2) :=
+          Rat.mul_le_mul_of_nonneg_left hhalf (by native_decide)
+        _ = 1 := by native_decide
+        _ = (precisionAtStage 0).val := by native_decide
+  · have hnpos : 0 < n := Nat.pos_of_ne_zero hn
+    have hsmall' : h <= 1 / (2 * (n : Rat)) := by
+      simpa [hn, Rat.natCast_mul] using hsmall
+    have htwo_n : (2 : Rat) <= 2 * (n : Rat) := by
+      have hnat : (1 : Rat) <= (n : Rat) := by
+        exact_mod_cast (Nat.succ_le_iff.mpr hnpos)
+      simpa using Rat.mul_le_mul_of_nonneg_left hnat
+        (by native_decide : (0 : Rat) <= 2)
+    have hhalfbound : 1 / (2 * (n : Rat)) <= (1 : Rat) / 2 :=
+      rat_div_den_antitone (a := 1) (d := 2) (e := 2 * (n : Rat))
+        (by native_decide) (by native_decide) htwo_n
+    constructor
+    · exact Rat.le_trans hsmall' hhalfbound
+    · have htwice := Rat.mul_le_mul_of_nonneg_left hsmall'
+        (by native_decide : (0 : Rat) <= 2)
+      calc
+        2 * h <= 2 * (1 / (2 * (n : Rat))) := htwice
+        _ = 1 / (n : Rat) := by
+          rw [Rat.div_def, Rat.div_def]
+          have hnrat : (n : Rat) ≠ 0 :=
+            Rat.ne_of_gt ((Rat.natCast_pos).2 hnpos)
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        _ = (precisionAtStage n).val := by
+          simp [precisionAtStage, hn]
+
+/-- A positive interval enclosure whose center and radius have quadratic
+forward error yields a first-order difference quotient enclosure.  The two
+copies of the step in the precision budget pay separately for the center
+remainder and the interval radius. -/
+private theorem intervalAround_forward_quotient_near_one
+    (c r h : Rat) (eps : QPos)
+    (hpos : 0 < h)
+    (hrem0 : 0 <= c - (1 + h))
+    (hremle : c - (1 + h) <= h * h)
+    (hr0 : 0 <= r) (hrle : r <= h * h)
+    (hprec : 2 * h <= eps.val) :
+    QInterval.NearAt
+      (QInterval.differenceQuotient (intervalAround c r)
+        { lo := 1, hi := 1 } h)
+      { lo := 1, hi := 1 } eps := by
+  have hhne : h ≠ 0 := Rat.ne_of_gt hpos
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hprecmul : 2 * h * h <= eps.val * h :=
+    Rat.mul_le_mul_of_nonneg_right hprec (Rat.le_of_lt hpos)
+  have hupper : c - r - 1 <= (1 + eps.val) * h := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  have hlower : h <= c + r - 1 := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  have hwidth : 2 * r <= eps.val * h := by
+    calc
+      2 * r <= 2 * (h * h) :=
+        Rat.mul_le_mul_of_nonneg_left hrle (by native_decide)
+      _ = 2 * h * h := by grind [Rat.mul_assoc]
+      _ <= eps.val * h := hprecmul
+  unfold QInterval.NearAt QInterval.differenceQuotient QInterval.divRat
+    QInterval.sub QInterval.scaleRat intervalAround QInterval.width
+  rw [if_pos hinv]
+  dsimp
+  change
+    (1 / h) * (c - r - 1) <= 1 + eps.val /\
+      1 <= (1 / h) * (c + r - 1) + eps.val /\
+      (1 / h) * (c + r - 1) - (1 / h) * (c - r - 1) <= eps.val /\
+      1 - 1 <= eps.val
+  constructor
+  · apply Rat.le_of_mul_le_mul_right (c := h)
+    · rw [Rat.div_def, Rat.one_mul]
+      calc
+        (h⁻¹ * (c - r - 1)) * h = c - r - 1 := by
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_cancel]
+        _ <= (1 + eps.val) * h := hupper
+    · exact hpos
+  constructor
+  · have hquot : (1 : Rat) <= (1 / h) * (c + r - 1) := by
+      apply Rat.le_of_mul_le_mul_right (c := h)
+      · calc
+          (1 : Rat) * h = h := by rw [Rat.one_mul]
+          _ <= c + r - 1 := hlower
+          _ = ((1 / h) * (c + r - 1)) * h := by
+            rw [Rat.div_def, Rat.one_mul]
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      · exact hpos
+    calc
+      (1 : Rat) <= (1 / h) * (c + r - 1) := hquot
+      _ <= (1 / h) * (c + r - 1) + eps.val := by
+        grind
+  constructor
+  · have hwidthdiv : (2 * r) * h⁻¹ <= eps.val := by
+      apply Rat.le_of_mul_le_mul_right (c := h)
+      · calc
+          (2 * r) * h⁻¹ * h = 2 * r := by
+            grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_cancel]
+          _ <= eps.val * h := hwidth
+      · exact hpos
+    calc
+      (1 / h) * (c + r - 1) - (1 / h) * (c - r - 1) =
+          (2 * r) * h⁻¹ := by
+        rw [Rat.div_def, Rat.one_mul]
+        grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+      _ <= eps.val := hwidthdiv
+  · grind
 
 /-- The exact degree-two Taylor prefix has forward derivative one at zero.
 
@@ -3468,6 +3737,54 @@ def expTaylorQuadratic_forwardDerivativeAtZero :
   simpa only [expTaylorQuadraticOnUnit, FunctionOnInterval.compute,
     FunctionOnInterval.exactRat, Rat.zero_add, RealRaw.one,
     RealRaw.ofRat_compute] using hgoal
+
+/-- The tail-enclosed exponential evaluator itself has forward derivative
+one at zero on `[0, 1]`.
+
+For every requested rational precision, the certificate evaluates the full
+series algorithm at its public stage zero.  Its finite loop has already
+consumed enough positive terms that both the remaining Taylor sum and the
+certified geometric radius are quadratic in the positive step; interval
+division then produces the required first-order quotient enclosure. -/
+def expPowerSeriesOnUnit_forwardDerivativeAtZero :
+    HasForwardDerivativeAt (expPowerSeriesOnInterval 0 1) 0 RealRaw.one := by
+  refine
+    { x_mem := by
+        constructor <;> native_decide
+      derivative_valid := by
+        change RealRaw.ValidCompute (fun _ : Nat => { lo := 1, hi := 1 })
+        exact RealRaw.ofRat_valid (1 : Rat)
+      stepPrecision := fun n => 2 * (if n = 0 then 1 else n)
+      evalPrecision := fun _h _n => 0
+      close := ?_ }
+  intro h n hmem hpos hsmall
+  have hstep := expPowerSeries_forward_step_bounds h n hsmall
+  have hhalf : h <= (1 : Rat) / 2 := hstep.1
+  have hprecision : 2 * h <= (precisionAtStage n).val := hstep.2
+  have htail := expPowerSeries_stage_zero_linear_tail_bounds h
+    (Rat.le_of_lt hpos) hhalf
+  have hgoal : QInterval.NearAt
+      (QInterval.differenceQuotient
+        (intervalAround (powerSeriesCenter h 0) (powerSeriesTailRadius h 0))
+        { lo := 1, hi := 1 } h)
+      { lo := 1, hi := 1 } (precisionAtStage n) :=
+    intervalAround_forward_quotient_near_one
+      (powerSeriesCenter h 0) (powerSeriesTailRadius h 0) h
+      (precisionAtStage n) hpos htail.1 htail.2.1 htail.2.2.1 htail.2.2.2
+      hprecision
+  simp only [Rat.zero_add] at hmem
+  have hvalue : (expPowerSeriesOnInterval 0 1).compute h hmem 0 =
+      intervalAround (powerSeriesCenter h 0) (powerSeriesTailRadius h 0) := by
+    change (expPowerSeries h).compute 0 = _
+    exact expPowerSeries_compute_eq h 0
+  have hzero (hz : inDomainInterval (0 : Rat) 1 0) :
+      (expPowerSeriesOnInterval 0 1).compute 0 hz 0 = { lo := 1, hi := 1 } := by
+    change (expPowerSeries (0 : Rat)).compute 0 = _
+    rw [expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
+  simp only [Rat.zero_add]
+  rw [hvalue, hzero]
+  simpa only [intervalNearAtPrecision, RealRaw.one, RealRaw.ofRat_compute]
+    using hgoal
 
 theorem ePowerSeries_valid_of_nested
     (hnested : EPowerSeriesNested)
