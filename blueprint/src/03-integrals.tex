@@ -87,6 +87,7 @@ required evaluation data, not a completed Lean integral theorem.
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
+\lean{ComputableAnalysis.Integral.finiteStageSum_width_le_length_mul}
 \uses{def:increasing-integral-stage}
 The animation uses the normalized sinc example
 \[
@@ -113,8 +114,10 @@ stage: two refined tails and one shrinking rational gap.}
 \end{figure}
 Every gap vanishes with its bracket width.  A sinc instance still needs a
 certificate that bisects the tangent residual.  The finite box aggregation and
-its shrinking error budget are checked; obtaining the individual monotone and
-range boxes remains function-specific.
+its shrinking error budget are checked.  If every supplied box has width at
+most \(B_n\), the aggregate has width at most
+\(\#\mathrm{boxes}\cdot B_n\).  Obtaining the individual monotone and range
+boxes remains function-specific.
 \end{definition}
 
 \section{Finite integral interfaces}
@@ -374,19 +377,25 @@ and order preservation.
 \lean{ComputableAnalysis.Integral.TurningPointBracket}
 \lean{ComputableAnalysis.Integral.ShrinkingStage}
 \lean{ComputableAnalysis.Integral.finiteStageSum}
+\lean{ComputableAnalysis.Integral.finiteStageSum_width_le_length_mul}
 \lean{ComputableAnalysis.Integral.finiteStageSum_widths_shrink}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCandidate}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.leftShrinkingStage}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleShrinkingStage}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.rightShrinkingStage}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.finiteStageAssembly}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCompletion}
 \uses{def:piecewise-monotone-stage}
 \leanok
 The checked finite aggregation sums any supplied monotone-piece boxes and
 turning-gap boxes at the same rational stage, then assigns a finite error
-budget to prove the total width shrinks.  A one-bracket candidate supplies
-the three reusable component boxes.  Function-specific coverage and
-completion certificates remain separate.
+budget to prove the total width shrinks; a uniform input bound \(B_n\) becomes
+\(\#\mathrm{boxes}\cdot B_n\).  A one-bracket candidate supplies the three
+reusable component boxes.  Function-specific coverage and completion
+certificates remain separate.
 \end{theorem}
 
 \begin{theorem}[Derivative-bound FTC package]

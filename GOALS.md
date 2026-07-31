@@ -166,9 +166,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   pieces and fixed range boxes cover the complement and the unresolved gaps.
   Lean proves the one-gap component's width shrinks, and
   `FinitePiecewiseStageAssembly` now proves the finite rational aggregation
-  has shrinking width. Supplying the individual boxes and proving that their
-  combined stage encloses the intended integral remain function-by-function
-  work. This is consciously not a universal existence definition for
+  has shrinking width; its common-rate estimate is the literal number of
+  boxes times the supplied per-box width bound. Supplying the individual boxes
+  and proving that their combined stage encloses the intended integral remain
+  function-by-function work. This is consciously not a universal existence definition for
   integrals. The reusable
   `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
   Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new

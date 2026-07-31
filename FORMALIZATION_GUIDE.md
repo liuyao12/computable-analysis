@@ -282,6 +282,9 @@ step: it sums all supplied monotone-piece and gap boxes at one stage, proves
 the combined width nonnegative, and gives a finite error-budget proof that it
 shrinks.  It deliberately does not infer the individual boxes or their
 semantic coverage from a function name.
+When every input box has a common bound `B_n`, the checked theorem
+`finiteStageSum_width_le_length_mul` gives the explicit aggregate bound
+`number_of_boxes * B_n`.
 
 The normalized-sinc illustration uses the first positive solution of
 `tan(pi*t) = pi*t`, with a decreasing left tail and increasing right tail.

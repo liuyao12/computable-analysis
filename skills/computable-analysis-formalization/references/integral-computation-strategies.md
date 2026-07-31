@@ -60,6 +60,9 @@ unresolved gaps.
    `SingleTurnIntegralCandidate`) supplies reusable component boxes; the
    function-specific proof that the assembled boxes cover an intended integral
    is still required.
+   If the same stage bound `B_n` holds for every supplied box, use
+   `finiteStageSum_width_le_length_mul` to expose the rate
+   `number_of_boxes * B_n`.
 7. Use `middleBox_contained_symmetric` when a bound `B ⊆ [-K,K]` is
    available. It yields the sharper estimate
    `[-K*(r_n-ell_n), K*(r_n-ell_n)]` for that gap.

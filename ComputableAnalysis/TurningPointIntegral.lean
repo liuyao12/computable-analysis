@@ -129,6 +129,40 @@ theorem finiteStageSum_width_nonneg (stages : List ShrinkingStage) (n : Nat) :
       rw [QInterval.addInterval_width]
       exact Rat.add_nonneg (stage.width_nonneg n) (ih n)
 
+/-- A uniform rational width bound composes through a finite stage sum with
+the literal factor given by the number of supplied boxes.  This is the
+rate-composition rule used when a function-specific construction supplies a
+common stage budget. -/
+theorem finiteStageSum_width_le_length_mul
+    (stages : List ShrinkingStage) (n : Nat) (B : Rat)
+    (hbound : forall stage, stage ∈ stages -> (stage.compute n).width <= B) :
+    (finiteStageSum stages n).width <= (stages.length : Rat) * B := by
+  induction stages generalizing n B with
+  | nil =>
+      simp only [finiteStageSum, List.length_nil]
+      change (0 : Rat) - 0 <= (0 : Rat) * B
+      rw [Rat.sub_self, Rat.zero_mul]
+      exact Rat.le_refl
+  | cons stage stages ih =>
+      have hstage : (stage.compute n).width <= B :=
+        hbound stage (by simp)
+      have hrest :
+          (finiteStageSum stages n).width <= (stages.length : Rat) * B :=
+        ih n B (fun other hother =>
+          hbound other (List.mem_cons_of_mem stage hother))
+      change
+        (QInterval.addInterval (stage.compute n) (finiteStageSum stages n)).width
+          <= ((stages.length + 1 : Nat) : Rat) * B
+      rw [QInterval.addInterval_width, Rat.natCast_add]
+      have hone : ((1 : Nat) : Rat) = 1 := by native_decide
+      rw [hone]
+      calc
+        (stage.compute n).width + (finiteStageSum stages n).width <=
+            B + (stages.length : Rat) * B :=
+          rat_add_le_add hstage hrest
+        _ = ((stages.length : Rat) + 1) * B := by
+          grind [Rat.add_mul, Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
 /-- A finite sum of shrinking rational stage families has shrinking width.
 The proof gives each summand an equal rational portion of the requested error
 budget through structural recursion; it invokes neither completeness nor a
@@ -409,6 +443,14 @@ def rightShrinkingStage {F : FunctionOnInterval}
   compute := C.rightBox
   width_nonneg := C.rightBox_width_nonneg
   widths_shrink := C.right_widths_shrink
+
+/-- The existing one-bracket candidate, viewed as the smallest finite
+piecewise assembly: two certified monotone pieces and one unresolved turning
+gap. -/
+def finiteStageAssembly {F : FunctionOnInterval}
+    (C : SingleTurnIntegralCandidate F) : FinitePiecewiseStageAssembly where
+  monotonePieces := [C.leftShrinkingStage, C.rightShrinkingStage]
+  turningGaps := [C.middleShrinkingStage]
 
 /-- The data's fixed absolute-value certificate gives a stagewise, centred
 bound on the unresolved middle contribution.  This is the estimate a concrete
