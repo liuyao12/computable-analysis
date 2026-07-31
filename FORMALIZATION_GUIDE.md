@@ -277,6 +277,12 @@ middle box `(r_n - ell_n) * B` for each unresolved gap.  The one-bracket helper
 vanishes; the general algorithm repeats that finite calculation. Its legacy
 Lean implementation name is `SingleTurnIntegralCandidate`.
 
+`Integral.FinitePiecewiseStageAssembly` now performs the finite arithmetic
+step: it sums all supplied monotone-piece and gap boxes at one stage, proves
+the combined width nonnegative, and gives a finite error-budget proof that it
+shrinks.  It deliberately does not infer the individual boxes or their
+semantic coverage from a function name.
+
 The normalized-sinc illustration uses the first positive solution of
 `tan(pi*t) = pi*t`, with a decreasing left tail and increasing right tail.
 It is not yet a Lean instance: the project still needs certified sine/tangent

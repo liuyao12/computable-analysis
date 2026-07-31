@@ -53,11 +53,13 @@ unresolved gaps.
 5. Give each gap the literal box `(r_n - ell_n) * B`. The checked theorem
    `turningPointMiddleBox_width` gives
    `width = (r_n - ell_n) * width(B)`.
-6. Sum all monotone boxes and all gap boxes. The current checked helper
+6. Sum all monotone boxes and all gap boxes with
+   `FinitePiecewiseStageAssembly`. Its checked finite arithmetic theorem gives
+   the combined stage a shrinking width. The one-gap helper
    `TurningBracketIntegralCandidate` (implemented by the legacy
-   `SingleTurnIntegralCandidate`) proves the one-gap width calculation; use
-   it once per turn while a packaged finite-gap aggregation theorem is still
-   future work.
+   `SingleTurnIntegralCandidate`) supplies reusable component boxes; the
+   function-specific proof that the assembled boxes cover an intended integral
+   is still required.
 7. Use `middleBox_contained_symmetric` when a bound `B ⊆ [-K,K]` is
    available. It yields the sharper estimate
    `[-K*(r_n-ell_n), K*(r_n-ell_n)]` for that gap.

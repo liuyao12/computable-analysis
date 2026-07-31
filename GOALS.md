@@ -164,10 +164,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   a finite monotone decomposition: every possibly non-rational turn is
   represented by a shrinking rational bracket, while stagewise monotone
   pieces and fixed range boxes cover the complement and the unresolved gaps.
-  Lean proves the one-gap component's width shrinks; assembling arbitrary
-  finitely many non-rational gaps and proving that their combined stage
-  encloses the intended integral remain function-by-function work. This is
-  consciously not a universal existence definition for integrals. The reusable
+  Lean proves the one-gap component's width shrinks, and
+  `FinitePiecewiseStageAssembly` now proves the finite rational aggregation
+  has shrinking width. Supplying the individual boxes and proving that their
+  combined stage encloses the intended integral remain function-by-function
+  work. This is consciously not a universal existence definition for
+  integrals. The reusable
   `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
   Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new
   arctangent-kernel specialization has a checked rational Lipschitz constant
