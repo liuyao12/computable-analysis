@@ -85,6 +85,8 @@ required evaluation data, not a completed Lean integral theorem.
 \label{def:piecewise-monotone-stage}
 \lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
 \uses{def:increasing-integral-stage}
 The animation uses the normalized sinc example
 \[
@@ -110,8 +112,9 @@ stage: two refined tails and one shrinking rational gap.}
 \label{fig:single-turn-integral}
 \end{figure}
 Every gap vanishes with its bracket width.  A sinc instance still needs a
-certificate that bisects the tangent residual; the existing
-\code{TurningPointBracket} is only the one-gap helper.
+certificate that bisects the tangent residual.  The finite box aggregation and
+its shrinking error budget are checked; obtaining the individual monotone and
+range boxes remains function-specific.
 \end{definition}
 
 \section{Finite integral interfaces}
@@ -366,16 +369,24 @@ The intended package records adjacent additivity, rational scaling, linearity,
 and order preservation.
 \end{theorem}
 
-\begin{theorem}[One-bracket helper for a piecewise-monotone construction]
+\begin{theorem}[Finite turning-bracket stage aggregation]
 \label{thm:single-turn-integral-candidate}
 \lean{ComputableAnalysis.Integral.TurningPointBracket}
+\lean{ComputableAnalysis.Integral.ShrinkingStage}
+\lean{ComputableAnalysis.Integral.finiteStageSum}
+\lean{ComputableAnalysis.Integral.finiteStageSum_widths_shrink}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCandidate}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCompletion}
 \uses{def:piecewise-monotone-stage}
 \leanok
-This is the checked one-gap component.  A general finite-piece stage repeats
-it for every turning bracket, using the supplied range and outer-piece
-certificates to shrink every box.
+The checked finite aggregation sums any supplied monotone-piece boxes and
+turning-gap boxes at the same rational stage, then assigns a finite error
+budget to prove the total width shrinks.  A one-bracket candidate supplies
+the three reusable component boxes.  Function-specific coverage and
+completion certificates remain separate.
 \end{theorem}
 
 \begin{theorem}[Derivative-bound FTC package]
