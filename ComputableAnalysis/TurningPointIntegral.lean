@@ -231,6 +231,12 @@ theorem compute_width_nonneg (A : FinitePiecewiseStageAssembly) (n : Nat) :
     0 <= (A.compute n).width :=
   finiteStageSum_width_nonneg A.stages n
 
+theorem compute_width_le_length_mul (A : FinitePiecewiseStageAssembly)
+    (n : Nat) (B : Rat)
+    (hbound : forall stage, stage ∈ A.stages -> (stage.compute n).width <= B) :
+    (A.compute n).width <= (A.stages.length : Rat) * B :=
+  finiteStageSum_width_le_length_mul A.stages n B hbound
+
 theorem compute_widths_shrink (A : FinitePiecewiseStageAssembly) :
     RealRaw.WidthsShrinkToZero A.compute :=
   finiteStageSum_widths_shrink A.stages
@@ -451,6 +457,22 @@ def finiteStageAssembly {F : FunctionOnInterval}
     (C : SingleTurnIntegralCandidate F) : FinitePiecewiseStageAssembly where
   monotonePieces := [C.leftShrinkingStage, C.rightShrinkingStage]
   turningGaps := [C.middleShrinkingStage]
+
+/-- Finite interval addition is associative and commutative at the endpoint
+level, so the generic finite assembly reproduces the candidate's literal
+left--middle--right box exactly. -/
+theorem finiteStageAssembly_compute {F : FunctionOnInterval}
+    (C : SingleTurnIntegralCandidate F) (n : Nat) :
+    (C.finiteStageAssembly.compute n) = C.compute n := by
+  cases hleft : C.leftBox n
+  cases hmiddle : C.middleBox n
+  cases hright : C.rightBox n
+  simp [finiteStageAssembly, FinitePiecewiseStageAssembly.compute,
+    FinitePiecewiseStageAssembly.stages, finiteStageSum,
+    QInterval.addInterval, SingleTurnIntegralCandidate.compute,
+    leftShrinkingStage, middleShrinkingStage, rightShrinkingStage,
+    hleft, hmiddle, hright]
+  congr <;> grind [Rat.add_assoc, Rat.add_comm]
 
 /-- The data's fixed absolute-value certificate gives a stagewise, centred
 bound on the unresolved middle contribution.  This is the estimate a concrete

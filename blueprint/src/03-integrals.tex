@@ -86,6 +86,7 @@ required evaluation data, not a completed Lean integral theorem.
 \lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_length_mul}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.finiteStageSum_width_le_length_mul}
 \uses{def:increasing-integral-stage}
@@ -381,12 +382,14 @@ and order preservation.
 \lean{ComputableAnalysis.Integral.finiteStageSum_widths_shrink}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_length_mul}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCandidate}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.leftShrinkingStage}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleShrinkingStage}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.rightShrinkingStage}
 \lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.finiteStageAssembly}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.finiteStageAssembly_compute}
 \lean{ComputableAnalysis.Integral.TurningBracketIntegralCompletion}
 \uses{def:piecewise-monotone-stage}
 \leanok
@@ -394,7 +397,8 @@ The checked finite aggregation sums any supplied monotone-piece boxes and
 turning-gap boxes at the same rational stage, then assigns a finite error
 budget to prove the total width shrinks; a uniform input bound \(B_n\) becomes
 \(\#\mathrm{boxes}\cdot B_n\).  A one-bracket candidate supplies the three
-reusable component boxes.  Function-specific coverage and completion
+reusable component boxes, and the finite assembler reproduces its literal
+three-box stage exactly.  Function-specific coverage and completion
 certificates remain separate.
 \end{theorem}
 
