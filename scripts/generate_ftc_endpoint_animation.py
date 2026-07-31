@@ -24,10 +24,14 @@ ASSET_DIR = ROOT / "blueprint" / "src" / "assets"
 GIF_PATH = ASSET_DIR / "ftc-endpoint-comparison.gif"
 PNG_PATH = ASSET_DIR / "ftc-endpoint-comparison.png"
 
-WIDTH, HEIGHT = 760, 470
-P_LEFT, P_RIGHT = 74, 314
-D_LEFT, D_RIGHT = 446, 686
-TOP, BASELINE = 58, 368
+WIDTH, HEIGHT = 760, 500
+# Both panels use the same Cartesian pixels-per-unit scale.  The derivative
+# panel is taller because its natural range is [0, 2], not because its axes
+# are distorted.
+SCALE = 170
+P_LEFT, P_RIGHT = 74, 74 + SCALE
+D_LEFT, D_RIGHT = 446, 446 + SCALE
+PRIMITIVE_TOP, DERIVATIVE_TOP, BASELINE = 250, 80, 420
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)
 AXIS = (100, 116, 139, 255)
@@ -66,11 +70,11 @@ def dx(t: Fraction) -> float:
 
 
 def primitive_y(value: Fraction) -> float:
-    return BASELINE - float(value) * (BASELINE - TOP)
+    return BASELINE - float(value) * SCALE
 
 
 def derivative_y(value: Fraction) -> float:
-    return BASELINE - float(value / 2) * (BASELINE - (TOP + 16))
+    return BASELINE - float(value) * SCALE
 
 
 def axes(draw: ImageDraw.ImageDraw, left: int, right: int, label: str, y_top: int) -> None:
@@ -88,8 +92,8 @@ def axes(draw: ImageDraw.ImageDraw, left: int, right: int, label: str, y_top: in
 def frame(subdivisions: int) -> Image.Image:
     image = Image.new("RGBA", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(image)
-    axes(draw, P_LEFT, P_RIGHT, "F", TOP)
-    axes(draw, D_LEFT, D_RIGHT, "F'", TOP + 16)
+    axes(draw, P_LEFT, P_RIGHT, "F", PRIMITIVE_TOP)
+    axes(draw, D_LEFT, D_RIGHT, "F'", DERIVATIVE_TOP)
 
     # Endpoint rise F(1)-F(0), drawn as the exact vertical primitive span.
     draw.line((px(Fraction(1)), primitive_y(Fraction(0)),

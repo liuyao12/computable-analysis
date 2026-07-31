@@ -479,6 +479,10 @@ equivalence of the real and imaginary parts.
 \begin{definition}[Complex arithmetic]\label{def:complex-arithmetic}
 \lean{ComputableAnalysis.ComplexRaw.add}
 \lean{ComputableAnalysis.ComplexRaw.mul}
+\lean{ComputableAnalysis.ComplexRaw.mulI}
+\lean{ComputableAnalysis.ComplexRaw.mulI_valid}
+\lean{ComputableAnalysis.ComplexRaw.imaginaryAxis}
+\lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \uses{def:complex-raw,def:raw-real-arithmetic}
 For complex numbers as box sequences
 \[
@@ -504,6 +508,13 @@ where \(x,y,u,v\) are real numbers.  Then define
 At the level of rational boxes, multiplication is implemented by applying
 real interval arithmetic to these four real products and taking bounding
 intervals.
+The validity proof for arbitrary products is still a finite algebra target.
+The already certified special case
+\(iz=-\operatorname{im}(z)+i\operatorname{re}(z)\)
+is a coordinate rotation: it reverses one pair of endpoints and exchanges the
+coordinates.  Hence a certified real \(x\) already gives a certified complex
+handle \(ix\), without pretending that general complex multiplication is
+available.
 \end{definition}
 
 \begin{definition}[Complex inverse]\label{def:complex-inverse}
@@ -535,10 +546,11 @@ a quotient construction.
 
 \begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}
 \uses{def:complex-quotient,def:complex-arithmetic,def:complex-inverse}
-The raw box operations carry validity and equivalence lemmas.  The project
-does not currently claim a quotient field structure for \code{Complex};
-scientific constructions use certified raw operations and their accompanying
-overlap proofs.
+Addition, negation, rational scaling, real-axis embedding, and the
+imaginary-unit rotation carry validity lemmas.  General complex product and
+inverse remain explicit certification targets.  The project does not claim a
+quotient field structure for \code{Complex}; scientific constructions use
+only certified raw operations and their accompanying overlap proofs.
 \end{proposition}
 
 \begin{proposition}[Available rational and real embeddings]\label{thm:rational-complex-field-square}

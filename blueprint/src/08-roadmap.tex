@@ -142,35 +142,6 @@ applications.  Thus the current boundary is a research prototype for tightly
 certified rational one-variable calculations, rather than a drop-in basis for
 proving arbitrary real-world models.
 
-\section{Pi integration suite}\label{sec:pi-scoreboard}
-\lean{ComputableAnalysis.PiProofs.PiIntegrationFamily}
-\lean{ComputableAnalysis.PiProofs.piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect}
-\lean{ComputableAnalysis.PiProofs.piCircumferenceDirect_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piMachin}
-\lean{ComputableAnalysis.PiProofs.cauchyFullLineIntegral_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea}
-\leanok
-This is a coverage suite for the foundation, not a catalogue of formulas for
-\(\pi\).  A row is useful only when it exercises a distinct calculation
-certificate; the width is the cost of that particular evaluator.
-
-\input{pi-scoreboard-table.tex}
-
-The area evaluator is the preferred \(\pi\) representation.  Direct
-circumference, arctangent series and rectangle integration, Machin's single
-power-series formula, and the Cauchy and reciprocal-quartic integrals are
-named, independently checkable alternatives.  The direct circumference proof
-checks the finite exceptional stages and a uniform later-stage estimate; it
-strengthens the Archimedes row rather than creating a duplicate one.
-
-The completed finite integration-by-parts and square-substitution rows are
-deliberately narrower than their canonical exp/log formulations.  The
-unmarked rows identify the next genuine gates: canonical \(\log 2\), the
-self-derivative and uniqueness of exponential, and complex rotation.  Basel
-currently supplies valid series and both area- and direct-circumference
-\(\pi^2/6\) right-hand sides, together with their equivalence; it does not yet
-claim \(\zeta(2)=\pi^2/6\).
 \section{Lean module map}
 
 The Lean source is the exact specification; the blueprint links only public

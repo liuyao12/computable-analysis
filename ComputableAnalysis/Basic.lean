@@ -3916,6 +3916,198 @@ theorem sub_valid {z w : ComplexRaw}
     (hz : z.Valid) (hw : w.Valid) : (sub z w).Valid :=
   add_valid hz (neg_valid hw)
 
+/-- Left multiplication by the rational imaginary unit.
+
+This is written directly as a coordinate rotation rather than routed through
+the still-unproved general complex interval product.  Consequently it is
+already available for certified inputs such as `i * pi / 2`: it sends
+`x + i y` to `-y + i x` using only endpoint reversal and coordinate exchange.
+-/
+def mulI (z : ComplexRaw) : ComplexRaw where
+  compute := fun n =>
+    let Z := z.compute n
+    { lo := { re := -Z.hi.im, im := Z.lo.re },
+      hi := { re := -Z.lo.im, im := Z.hi.re } }
+
+/-- The direct coordinate rotation preserves validity of a complex raw
+algorithm.  The new real width is the old imaginary height, and conversely,
+so the proof consumes exactly the two shrinking-width certificates already
+present in `ComplexRaw.Valid`. -/
+theorem mulI_valid {z : ComplexRaw} (hz : z.Valid) : (mulI z).Valid := by
+  constructor
+  · intro n
+    have hre := valid_re_order hz n
+    have him := valid_im_order hz n
+    constructor
+    · change 0 <= -(z.compute n).lo.im - -(z.compute n).hi.im
+      grind [Rat.sub_eq_add_neg]
+    · change 0 <= (z.compute n).hi.re - (z.compute n).lo.re
+      grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      have hnest := hz.2.1 n m hnm
+      constructor
+      · change -(z.compute n).hi.im <= -(z.compute m).hi.im
+        exact Rat.neg_le_neg hnest.2.2.2
+      · constructor
+        · change -(z.compute m).lo.im <= -(z.compute n).lo.im
+          exact Rat.neg_le_neg hnest.2.2.1
+        · constructor
+          · change (z.compute n).lo.re <= (z.compute m).lo.re
+            exact hnest.1
+          · change (z.compute m).hi.re <= (z.compute n).hi.re
+            exact hnest.2.1
+    · intro eps
+      obtain ⟨N, hN⟩ := hz.2.2 eps
+      refine ⟨N, ?_⟩
+      intro n hn
+      have hwidthHeight := hN n hn
+      constructor
+      · change -(z.compute n).lo.im - -(z.compute n).hi.im <= eps.val
+        have hheight : (z.compute n).hi.im - (z.compute n).lo.im <= eps.val :=
+          by simpa [QBox.height] using hwidthHeight.2
+        grind [Rat.sub_eq_add_neg]
+      · change (z.compute n).hi.re - (z.compute n).lo.re <= eps.val
+        simpa [QBox.width] using hwidthHeight.1
+
+/-- Multiplication by the imaginary unit respects the raw overlap relation.
+No validity or boundedness assumption is needed: it is only a permutation and
+endpoint reversal of the two rational coordinate intervals. -/
+theorem mulI_equiv {z w : ComplexRaw} (hzw : z.Equiv w) :
+    (mulI z).Equiv (mulI w) := by
+  intro n
+  have hover := (compareAt_overlap_iff z w n n).1 (hzw n)
+  apply (compareAt_overlap_iff (mulI z) (mulI w) n n).2
+  change QBox.Overlaps
+    { lo := { re := -(z.compute n).hi.im, im := (z.compute n).lo.re },
+      hi := { re := -(z.compute n).lo.im, im := (z.compute n).hi.re } }
+    { lo := { re := -(w.compute n).hi.im, im := (w.compute n).lo.re },
+      hi := { re := -(w.compute n).lo.im, im := (w.compute n).hi.re } }
+  unfold QBox.Overlaps at hover ⊢
+  exact ⟨
+    ⟨Rat.neg_le_neg hover.2.2, hover.1.1⟩,
+    ⟨Rat.neg_le_neg hover.1.2, hover.2.1⟩⟩
+
+/-- Embed a certified raw real on the imaginary axis.  This is the concrete
+constructor for represented arguments of the form `i * x`; it does not claim
+the missing general complex multiplication theorem. -/
+def imaginaryAxis (x : RealRaw) : ComplexRaw :=
+  mulI (ofRealRaw x)
+
+theorem imaginaryAxis_valid {x : RealRaw} (hx : x.Valid) :
+    (imaginaryAxis x).Valid :=
+  mulI_valid (ofRealRaw_valid x hx)
+
+/-- Imaginary-axis embedding respects equivalence of real raw
+representatives. -/
+theorem imaginaryAxis_equiv {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) (hxy : x.Equiv y) :
+    (imaginaryAxis x).Equiv (imaginaryAxis y) :=
+  mulI_equiv (ofRealRaw_equiv_of_equiv hx hy hxy)
+
+theorem imaginaryAxis_compute (x : RealRaw) (n : Nat) :
+    (imaginaryAxis x).compute n =
+      { lo := { re := 0, im := (x.compute n).lo },
+        hi := { re := 0, im := (x.compute n).hi } } := by
+  rfl
+
+/-- Nonnegative rational scaling preserves validity of a complex raw
+algorithm.  Both coordinate widths are multiplied by the same rational, so a
+requested output tolerance is pulled back through a positive scale factor. -/
+theorem scaleRat_valid_of_nonneg {r : Rat} (hr : 0 <= r)
+    {z : ComplexRaw} (hz : z.Valid) : (scaleRat r z).Valid := by
+  constructor
+  · intro n
+    have hre := valid_re_order hz n
+    have him := valid_im_order hz n
+    constructor
+    · simp only [scaleRat, QBox.scaleRat, if_pos hr, QBox.width]
+      change 0 <= r * (z.compute n).hi.re - r * (z.compute n).lo.re
+      have hmul := Rat.mul_le_mul_of_nonneg_left hre hr
+      grind [Rat.sub_eq_add_neg, Rat.mul_add]
+    · simp only [scaleRat, QBox.scaleRat, if_pos hr, QBox.height]
+      change 0 <= r * (z.compute n).hi.im - r * (z.compute n).lo.im
+      have hmul := Rat.mul_le_mul_of_nonneg_left him hr
+      grind [Rat.sub_eq_add_neg, Rat.mul_add]
+  · constructor
+    · intro n m hnm
+      have hnest := hz.2.1 n m hnm
+      simp only [scaleRat, QBox.scaleRat, if_pos hr]
+      exact ⟨
+        Rat.mul_le_mul_of_nonneg_left hnest.1 hr,
+        Rat.mul_le_mul_of_nonneg_left hnest.2.1 hr,
+        Rat.mul_le_mul_of_nonneg_left hnest.2.2.1 hr,
+        Rat.mul_le_mul_of_nonneg_left hnest.2.2.2 hr⟩
+    · intro eps
+      by_cases hrzero : r = 0
+      · subst r
+        refine ⟨0, ?_⟩
+        intro n _hn
+        constructor <;>
+          grind [scaleRat, QBox.scaleRat, QBox.width, QBox.height,
+            Rat.sub_eq_add_neg]
+      · have hrpos : 0 < r := by grind
+        let scaled : QPos :=
+          ⟨eps.val / r, by
+            rw [Rat.div_def]
+            exact Rat.mul_pos eps.property ((Rat.inv_pos).2 hrpos)⟩
+        obtain ⟨N, hN⟩ := hz.2.2 scaled
+        refine ⟨N, ?_⟩
+        intro n hn
+        have hwidthHeight := hN n hn
+        have hscale : r * scaled.val = eps.val := by
+          dsimp [scaled]
+          rw [Rat.div_def]
+          have hrne : r ≠ 0 := Rat.ne_of_gt hrpos
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+        constructor
+        · have hwidth :
+            (z.compute n).hi.re - (z.compute n).lo.re <= scaled.val :=
+            by simpa [QBox.width] using hwidthHeight.1
+          simp only [scaleRat, QBox.scaleRat, if_pos hr, QBox.width]
+          change r * (z.compute n).hi.re - r * (z.compute n).lo.re <= eps.val
+          calc
+            r * (z.compute n).hi.re - r * (z.compute n).lo.re =
+                r * ((z.compute n).hi.re - (z.compute n).lo.re) := by
+                  grind [Rat.sub_eq_add_neg, Rat.mul_add]
+            _ <= r * scaled.val :=
+              Rat.mul_le_mul_of_nonneg_left hwidth hr
+            _ = eps.val := hscale
+        · have hheight :
+            (z.compute n).hi.im - (z.compute n).lo.im <= scaled.val :=
+            by simpa [QBox.height] using hwidthHeight.2
+          simp only [scaleRat, QBox.scaleRat, if_pos hr, QBox.height]
+          change r * (z.compute n).hi.im - r * (z.compute n).lo.im <= eps.val
+          calc
+            r * (z.compute n).hi.im - r * (z.compute n).lo.im =
+                r * ((z.compute n).hi.im - (z.compute n).lo.im) := by
+                  grind [Rat.sub_eq_add_neg, Rat.mul_add]
+            _ <= r * scaled.val :=
+              Rat.mul_le_mul_of_nonneg_left hheight hr
+            _ = eps.val := hscale
+
+/-- Nonnegative rational scaling respects complex raw equivalence.  This is
+the small compatibility lemma needed to pass from the certified input
+`i * pi` to `i * pi / 2`. -/
+theorem scaleRat_equiv_of_nonneg {r : Rat} (hr : 0 <= r)
+    {z w : ComplexRaw} (hzw : z.Equiv w) :
+    (scaleRat r z).Equiv (scaleRat r w) := by
+  intro n
+  have hover := (compareAt_overlap_iff z w n n).1 (hzw n)
+  apply (compareAt_overlap_iff (scaleRat r z) (scaleRat r w) n n).2
+  simp only [scaleRat, QBox.scaleRat, if_pos hr]
+  change QBox.Overlaps
+    { lo := { re := r * (z.compute n).lo.re, im := r * (z.compute n).lo.im },
+      hi := { re := r * (z.compute n).hi.re, im := r * (z.compute n).hi.im } }
+    { lo := { re := r * (w.compute n).lo.re, im := r * (w.compute n).lo.im },
+      hi := { re := r * (w.compute n).hi.re, im := r * (w.compute n).hi.im } }
+  unfold QBox.Overlaps at hover ⊢
+  exact ⟨
+    ⟨Rat.mul_le_mul_of_nonneg_left hover.1.1 hr,
+      Rat.mul_le_mul_of_nonneg_left hover.1.2 hr⟩,
+    ⟨Rat.mul_le_mul_of_nonneg_left hover.2.1 hr,
+      Rat.mul_le_mul_of_nonneg_left hover.2.2 hr⟩⟩
+
 def mul (z w : ComplexRaw) : ComplexRaw where
   compute := fun eps => QBox.mul (z.compute eps) (w.compute eps)
 

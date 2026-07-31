@@ -3,9 +3,10 @@
 
 Every coloured rectangle height comes from a rational interval.  The bounds
 use the rational pi enclosure 333/106 < pi < 355/113 and alternating Taylor
-partial sums on [0, 2].  The thin blue vertical segments are the actual finite
-value boxes used by the rectangles; the smooth black curve is only a visual
-reference shape.
+partial sums on [0, 2].  Each stage also retains a rational guard radius, so
+the blue value boxes visibly contract as both the mesh and the pointwise
+certification are refined.  The smooth black curve is only a visual reference
+shape.
 """
 
 from __future__ import annotations
@@ -23,8 +24,13 @@ GIF_PATH = ASSET_DIR / "interval-sine-integral-stage.gif"
 PNG_PATH = ASSET_DIR / "interval-sine-integral-stage.png"
 
 WIDTH, HEIGHT = 700, 500
-LEFT, RIGHT = 82, 642
 TOP, BASELINE = 58, 398
+# Here the horizontal coordinate is the normalized angle t in sin(pi*t).
+# One t-unit therefore represents pi radians, so its screen length is pi
+# times one vertical value-unit.  This makes the sine curve's zero-slope
+# geometry match an ordinary sin(theta) plot rather than treating t as radians.
+LEFT = 82
+RIGHT = LEFT + round(pi * (BASELINE - TOP) / 2)
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)
 AXIS = (100, 116, 139, 255)
@@ -75,17 +81,28 @@ def partial_sine(x: Fraction, last: int) -> Fraction:
     )
 
 
-def sine_box(t: Fraction, lower_last: int) -> tuple[Fraction, Fraction]:
+def sine_box(
+    t: Fraction,
+    lower_last: int,
+    retained_error: Fraction,
+) -> tuple[Fraction, Fraction]:
     """A rational Taylor enclosure for sin(pi*t), where 0 <= t <= 1/2.
 
     Odd final indices are alternating lower sums; even final indices are
     upper sums.  Both arguments stay in [0, 2], where the alternating-term
-    bound applies.
+    bound applies.  The final rational guard is deliberately retained at the
+    current stage rather than immediately discarded: it is a certified,
+    visibly shrinking error bar shared by the Darboux rectangles and the
+    vertical sample markers.
     """
 
+    if t == 0:
+        return Fraction(0), Fraction(0)
     lower = partial_sine(PI_LOWER * t, lower_last)
     upper = partial_sine(PI_UPPER * t, lower_last + 1)
-    return lower, upper
+    # On this first quadrant 0 <= sin(pi*t) <= 1.  Clipping the guarded Taylor
+    # enclosure to those rational global bounds remains a valid enclosure.
+    return max(Fraction(0), lower - retained_error), min(Fraction(1), upper + retained_error)
 
 
 def rectangle(
@@ -116,21 +133,27 @@ def value_bracket(
     draw.line((x - 5, y_screen(hi), x + 5, y_screen(hi)), fill=BOX, width=2)
 
 
-def frame(subdivisions: int, lower_last: int) -> Image.Image:
+def frame(
+    subdivisions: int,
+    lower_last: int,
+    retained_error: Fraction,
+) -> Image.Image:
     image = Image.new("RGBA", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(image)
     draw.line((LEFT - 25, BASELINE, RIGHT + 26, BASELINE), fill=AXIS, width=3)
     draw.line((LEFT, BASELINE + 18, LEFT, TOP - 18), fill=AXIS, width=3)
 
     cells = [Fraction(index, 2 * subdivisions) for index in range(subdivisions + 1)]
-    boxes = {t: sine_box(t, lower_last) for t in cells}
+    boxes = {t: sine_box(t, lower_last, retained_error) for t in cells}
     for t in cells:
         x = x_screen(t)
         draw.line((x, TOP, x, BASELINE), fill=GRID, width=1)
         draw.line((x, BASELINE - 6, x, BASELINE + 6), fill=AXIS, width=2)
 
-    # sin(pi*t) is increasing on this interval: left lower boxes and right
-    # upper boxes are the finite Darboux bounds.
+    # sin(pi*t) is increasing on this interval.  The lower Riemann bracket is
+    # exactly the left endpoint's lower value; the upper bracket is exactly
+    # the right endpoint's upper value.  The blue bars below are these same
+    # rational endpoint boxes, not decorative uncertainty markers.
     for left, right in zip(cells, cells[1:]):
         rectangle(draw, left, right, boxes[right][1], UPPER_FILL, UPPER_EDGE)
     for left, right in zip(cells, cells[1:]):
@@ -156,12 +179,17 @@ def frame(subdivisions: int, lower_last: int) -> Image.Image:
 def main() -> None:
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
     frames = [
-        frame(subdivisions, lower_last)
-        for subdivisions, lower_last in ((1, 1), (2, 3), (4, 5), (8, 7))
+        frame(subdivisions, lower_last, retained_error)
+        for subdivisions, lower_last, retained_error in (
+            (1, 1, Fraction(1, 2)),
+            (2, 3, Fraction(1, 4)),
+            (4, 5, Fraction(1, 8)),
+            (8, 7, Fraction(1, 16)),
+        )
     ]
-    # Keep the broad first Taylor brackets in print: later frames make their
-    # certified value intervals too narrow to see at page scale.
-    frames[0].save(PNG_PATH, format="PNG", optimize=True)
+    # The two-cell stage makes both the lower/upper endpoint choice and the
+    # shrinking blue boxes legible in the static fallback.
+    frames[1].save(PNG_PATH, format="PNG", optimize=True)
     frames[0].save(
         GIF_PATH,
         format="GIF",

@@ -23,7 +23,9 @@ GIF_PATH = ASSET_DIR / "arctan-rectangle-enclosure.gif"
 PNG_PATH = ASSET_DIR / "arctan-rectangle-enclosure.png"
 
 WIDTH, HEIGHT = 720, 500
-LEFT, RIGHT = 92, 642
+# The kernel is drawn on [0, 1] x [0, 1].  Keep Cartesian units square so the
+# decreasing rational graph is not widened merely to fill the canvas.
+LEFT, RIGHT = 196, 524
 TOP, BASELINE = 70, 398
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)

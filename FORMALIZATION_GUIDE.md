@@ -75,6 +75,7 @@ Start with the smallest target module rather than importing
 | Need | Import | Start with |
 | --- | --- | --- |
 | Rational interval arithmetic and raw reals | `ComputableAnalysis.Basic` | `QInterval`, `RealRaw`, `RealRaw.Valid`, `RealRaw.Equiv` |
+| Certified imaginary-axis input | `ComputableAnalysis.Basic` | `ComplexRaw.mulI`, `ComplexRaw.imaginaryAxis`, and their validity theorems |
 | Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
 | Finite monotone decomposition with non-rational turns | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.TurningBracketIntegralCandidate` |
@@ -104,7 +105,7 @@ finished general theorem.
 | Foundation | `Basic`, `Algebraic`, `AlgebraicNumbers`, `AlgebraicFunctions`, `FunctionDomains`, `Extension`, `Calculus`, `Differential`, `MonotonicityConvexity`, `FTC` | Raw interval representations, domains, continuity, inverse branches, finite derivatives, integral/FTC certificate interfaces |
 | Elementary functions and series | `Elementary`, `ElementaryFunctions`, `Exp`, `ExpProofs`, `Logarithm`, `PowerSeries`, `Series`, `Taylor`, `FirstYearCalculus` | Power-series algorithms, rational majorants, exp/log comparison interfaces, and the current formal derivative ledger |
 | Integrals and special computations | `TurningPointIntegral`, `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
-| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, finite ODE algebra, and the certified imaginary-axis complex series |
+| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `PiComplex`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, the certified `i*pi/2` input bridge, finite ODE algebra, and the certified imaginary-axis complex series |
 | Polynomial and complex checks | `Polynomial`, `ComplexPolynomial`, `ComplexInterval` | Exact polynomial algebra and rational complex-box root checks |
 
 `Playground`, `MembershipCheck`, and the repair/check files are development
@@ -466,6 +467,43 @@ open ComputableAnalysis
 These names expose the certified complex series at rational imaginary inputs;
 their real and imaginary coordinates are certified rational-input power-series
 computations, not yet geometric trigonometry.
+
+To turn a certified real input into the complex input `i * x`, use the
+coordinate rotation below.  It is intentionally narrower than
+`ComplexRaw.mul`: general complex multiplication still awaits its own
+interval-validity proof.
+
+```lean
+import ComputableAnalysis.Basic
+
+open ComputableAnalysis
+
+#check ComplexRaw.mulI
+#check ComplexRaw.mulI_valid
+#check ComplexRaw.imaginaryAxis
+#check ComplexRaw.imaginaryAxis_valid
+#check ComplexRaw.imaginaryAxis_compute
+```
+
+For example, if `piRaw` has a proof `hpi : piRaw.Valid`, then
+`ComplexRaw.imaginaryAxis_valid hpi` is the certificate for `i * piRaw`;
+`ComplexRaw.scaleRat_valid` then certifies its rational rescaling by `1/2`.
+This supplies the represented input `i*pi/2`, but not a complex exponential
+algorithm at represented inputs.
+
+When the selected value is the project pi handle, import
+`ComputableAnalysis.PiComplex` and use the named input rather than choosing a
+presentation ad hoc:
+
+```lean
+import ComputableAnalysis.PiComplex
+
+open ComputableAnalysis
+
+#check PiProofs.pi.imaginaryHalf
+#check PiProofs.pi.imaginaryHalf_valid
+#check PiProofs.pi.imaginaryHalf_equiv_presentation
+```
 
 The rational-circle and arctangent code contains useful geometric and
 power-series computations, but normalized-angle sine/cosine/tangent special

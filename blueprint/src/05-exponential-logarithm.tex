@@ -277,11 +277,18 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationSeries.rotationExpRaw_width_le_geometric}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
+\lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_valid}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_presentation}
 \leanok
 \[
  \operatorname{expPrefix}_{2n}(iT)=C_n(T)+iS_n(T).
 \]
 Its nested complex boxes have both widths at most \(8t_0(T)2^{-n}\).
-The remaining theorem \(e^{i\pi}+1=0\) needs rotation/geometric
-identification, represented-input extension, and the selected \(\pi\) value.
+The represented input \(i\pi/2\) is already a certified complex box handle:
+embed the selected \(\pi\)-raw on the real axis and apply the checked
+imaginary-unit rotation.  The remaining theorem \(e^{i\pi}+1=0\) still needs
+the extension of the rotation exponential to that represented input and its
+geometric identification.
 \end{theorem}

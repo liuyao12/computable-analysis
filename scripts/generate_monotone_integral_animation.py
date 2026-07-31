@@ -22,7 +22,9 @@ GIF_PATH = ASSET_DIR / "monotone-integral-stage.gif"
 PNG_PATH = ASSET_DIR / "monotone-integral-stage.png"
 
 WIDTH, HEIGHT = 700, 500
-LEFT, RIGHT = 82, 642
+# The rational domain and range are both [0, 1], so every unit grid cell is a
+# square on screen rather than an arbitrary horizontal stretch.
+LEFT, RIGHT = 180, 520
 TOP, BASELINE = 58, 398
 WHITE = (255, 255, 255, 255)
 INK = (28, 41, 56, 255)
