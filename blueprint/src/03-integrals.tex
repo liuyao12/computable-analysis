@@ -24,6 +24,10 @@ certificate.
 \label{def:increasing-integral-stage}
 \lean{ComputableAnalysis.NondecreasingOnInterval}
 \lean{ComputableAnalysis.IntervalRegularOn}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxRange}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxRange_width_nonneg}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxStage}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicStage}
 \lean{ComputableAnalysis.Integral.NondecreasingConstructionFor}
 \lean{ComputableAnalysis.Integral.nondecreasingIntegralFor}
 \uses{rem:arctan-geom-general-integral,def:interval-regular}
@@ -266,7 +270,13 @@ additivity.
 \lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
 \leanok
-For a rational partition and sampled paths \(u,v\), Lean checks
+The function-level picture comes first: for the increasing rational
+parametrization \(U(t)=t\), \(V(t)=t^2\), the curve in the \((U,V)\)-plane
+splits the growing product rectangle into the two complementary areas
+\(\int V\,\dd U\) and \(\int U\,\dd V\).  Their union is exactly
+\(U(t)V(t)\).  The rational partition identity below is the finite
+certificate for this geometric fact, not a separate integration technique.
+For a synchronized rational partition and sampled paths \(u,v\), Lean checks
 \[
  \sum_i u_i\Delta v_i+\sum_i v_{i+1}\Delta u_i=u_nv_n-u_0v_0,
 \]
@@ -278,14 +288,17 @@ and, with both sums at left endpoints,
 \begin{figure}[!htbp]
 \centering
 \integrationByPartsAnimation
-\caption{One rational product increment.}
+\caption{For \(U(t)=t\), \(V(t)=t^2\), the two coloured areas tile the
+growing rectangle \([0,U(t)]\mathbin{\times}[0,V(t)]\): orange is
+\(\int_0^t V\,\dd U\) and teal is \(\int_0^t U\,\dd V\).}
 \label{fig:integration-by-parts-cell}
 \end{figure}
-On a monotone piece, the corner rectangles have their signed endpoint
-variation bound.  A certified common refinement and an explicit mesh schedule
-make their total below the requested rational error.  This is the finite core
-used by the function-level certificate below; it never appeals to a general
-variation or integration theorem.
+On a monotone piece, synchronized rational subrectangles approximate the two
+coloured areas.  Their corner remainder has a signed endpoint-variation
+bound; a certified common refinement and an explicit mesh schedule make it
+smaller than the requested rational error.  This is the finite core used by
+the function-level certificate below; it never appeals to a general variation
+or integration theorem.
 \end{theorem}
 
 \begin{theorem}[Product rule for the rectangle arctangent]

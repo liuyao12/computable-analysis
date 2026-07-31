@@ -4175,6 +4175,59 @@ end NonincreasingOnInterval
 
 namespace Integral
 
+/-- The finite endpoint range used by a nondecreasing Darboux cell.
+
+For a rational cell `[p,r]`, the lower endpoint is evaluated at `p` and the
+upper endpoint at `r`, both at one explicitly supplied finite evaluator
+stage.  This is only the cell computation; interval regularity and a width
+argument remain responsible for turning its partition sums into a valid raw
+real. -/
+def nondecreasingDarbouxRange (F : FunctionOnInterval)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat) : QInterval :=
+  let C := P.cell k hk
+  { lo := (F.compute C.lower
+      (And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)) prec).lo
+    hi := (F.compute C.upper
+      (And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem) prec).hi }
+
+/-- Weak nondecreasingness is exactly enough to order each finite endpoint
+range.  No value on an unrepresented completed interval is used here. -/
+theorem nondecreasingDarbouxRange_width_nonneg
+    (F : FunctionOnInterval) (hF : NondecreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat) :
+    0 <= (nondecreasingDarbouxRange F P k hk prec).width := by
+  let C := P.cell k hk
+  have hlower : inDomainInterval F.lower F.upper C.lower :=
+    And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+  have hupper : inDomainInterval F.lower F.upper C.upper :=
+    And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+  have horder := hF C.lower C.upper hlower hupper C.ordered prec
+  change 0 <= (F.compute C.upper hupper prec).hi -
+    (F.compute C.lower hlower prec).lo
+  grind [Rat.sub_eq_add_neg]
+
+/-- The exact finite lower/upper Darboux bracket on a supplied rational
+partition.  Its `k`th summand is the cell width times the endpoint range.
+This direct finite calculation is intentionally exposed before a general
+validity theorem is available. -/
+def nondecreasingDarbouxStage (F : FunctionOnInterval)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) : QInterval :=
+  P.boundIntegralSum
+    (fun k hk => nondecreasingDarbouxRange F P k hk prec)
+
+/-- The static dyadic instance of `nondecreasingDarbouxStage` used by the
+chapter's increasing-function pseudocode.  The nondecreasing proof is not an
+input to this executable calculation; it is consumed by the later orderedness
+and shrinking certificates. -/
+def nondecreasingDarbouxDyadicStage (F : FunctionOnInterval)
+    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat)
+    (n : Nat) : QInterval :=
+  let P := RationalPartition.uniform F.lower F.upper (2 ^ n)
+    (Nat.pow_pos (by omega : 0 < 2)) hinterval
+  nondecreasingDarbouxStage F P (evalPrecision n)
+
 /-- The first-class integral object for monotone interval functions.
 
 The intended construction is by lower and upper endpoint sums on a static
