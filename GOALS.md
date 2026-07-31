@@ -160,14 +160,14 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   ordered; interval regularity, stage compatibility, and a function-specific
   shrinking-width estimate remain deliberately separate requirements before
   a `ConstructionFor` can be claimed.  The reusable
-  single-turn pattern in `TurningPointIntegral` handles a particular
-  up-then-down integrand whose (possibly non-rational) turning point is
-  represented by shrinking rational brackets: stagewise monotone outer
-  constructions are combined with a fixed range box times the unresolved
-  middle width. Lean proves the three-part candidate's width shrinks, but a
-  `SingleTurnIntegralCompletion` must still prove, function by function, that
-  it encloses the intended integral. This is consciously not a universal
-  existence definition for integrals. The reusable
+  turning-bracket helper in `TurningPointIntegral` supplies one component of
+  a finite monotone decomposition: every possibly non-rational turn is
+  represented by a shrinking rational bracket, while stagewise monotone
+  pieces and fixed range boxes cover the complement and the unresolved gaps.
+  Lean proves the one-gap component's width shrinks; assembling arbitrary
+  finitely many non-rational gaps and proving that their combined stage
+  encloses the intended integral remain function-by-function work. This is
+  consciously not a universal existence definition for integrals. The reusable
   `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
   Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new
   arctangent-kernel specialization has a checked rational Lipschitz constant
@@ -1208,10 +1208,21 @@ students actually compute.
   rectangle/Lipschitz comparison and without a general integrability theorem:
   `integral 1/x = log x` on positive intervals,
   `integral 1/(1+x^2) = arctan x` on general certified branch intervals,
+  the half-period sine endpoint `π * integral_0^(1/2) sin(π t) dt = 1`,
+  using interval-valued alternating-series sine evaluations rather than exact
+  samples,
   `integral 1/sqrt(1-x^2) = asin x` on certified subintervals of `[-1,1]`,
   tangent/secant formulas on intervals whose cosine denominator is apart from
   zero, and polynomial/rational examples via domain-specific interval
   certificates.
+- A later noncompact benchmark is the Dirichlet sinc integral
+  `∫ sin(π t)/t dt = π`, using the project's rational-angle convention.  The
+  first local illustration is its decreasing-then-increasing branch around
+  the irrational solution of `tan(π t) = π t`.  This does not justify a
+  special one-turn integral: the intended algorithm is a finite list of
+  monotone pieces and shrinking rational turn brackets, followed by a
+  separately certified oscillatory tail cancellation.  No sine/tangent
+  sign-bisection certificate or full-line sinc integral is checked yet.
 - For each target, the desired endpoint is a named raw algorithm with an
   optional `RealRaw.Rate`, plus a checked definite-integral formula on its
   natural certified domain.
