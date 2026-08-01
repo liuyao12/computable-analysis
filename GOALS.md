@@ -1194,16 +1194,24 @@ arguments.
   complex raw.  Its `i` specialization is the direct coordinate rotation
   `ComplexRaw.mulI`, and `ComplexRaw.imaginaryAxis` embeds any certified real
   as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
-  already yields a valid raw \(i\pi/2\) both by rational scaling and as the
-  literal exact \(i/2\)-scalar action.  The return scalar identity
+  already yields the valid bounded real input `PiProofs.pi.halfPi`, whose
+  boxes stay in \([1,2]\), and a valid raw \(i\pi/2\) both by rational
+  scaling and as the literal exact \(i/2\)-scalar action.  The return scalar identity
   \((-2i)(i\pi/2)=\pi\) is now available both as an exact stagewise affine
   theorem and as the general-product theorem
   `PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea`.
   `PiProofs.pi.LogAtICertificate` isolates the remaining
   branch-specific input: any valid complex logarithm raw agreeing with
   \(i\pi/2\) now immediately yields the certified complex formula
-  \(-2i\log(i)=\pi\).  This does not yet extend the factorial-series
+  \(-2i\log(i)=\pi\), both through the affine action and as the literal
+  `negativeTwoImaginaryRaw * logI.raw` product.  This does not yet extend the factorial-series
   exponential to represented complex inputs or establish Euler's identity.
+  The generic last assembly step is now present as
+  `ComplexRaw.cauchyStabilize_valid`: finite intersections of widened direct
+  complex candidates become a valid raw box computation when every later
+  candidate is contained in every earlier widened box.  The remaining
+  represented rotation work is to supply those explicit factorial-tail and
+  input-modulus bounds for `halfPi`.
 
 ## First-Year Calculus Course
 

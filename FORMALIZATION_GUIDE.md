@@ -515,6 +515,9 @@ open ComputableAnalysis
 #check ComplexRaw.qcomplexLeftMul
 #check ComplexRaw.qcomplexLeftMul_valid
 #check ComplexRaw.qcomplexLeftMul_equiv
+#check ComplexRaw.cauchyStabilize
+#check ComplexRaw.cauchyStabilize_contains_current
+#check ComplexRaw.cauchyStabilize_valid
 ```
 
 For example, if `piRaw` has a proof `hpi : piRaw.Valid`, then
@@ -523,6 +526,14 @@ literal exact-scalar action `(i/2) * piRaw`; this agrees with the direct
 `imaginaryAxis` coordinate rotation and rational rescaling.  This supplies
 the represented input `i*pi/2`, but not a complex exponential algorithm at
 represented inputs.
+
+For a direct complex candidate whose stages are not yet nested, use
+`ComplexRaw.cauchyStabilize`.  Its proof contract is entirely finite: give
+ordered candidate boxes, widths that shrink, a radius schedule that shrinks,
+and show that every later candidate is contained in each earlier widened box.
+The evaluator is then the finite intersection of the widened prefix; the
+later candidate itself witnesses that every such intersection is ordered.  It
+is the intended final assembly step for the represented-angle rotation series.
 
 When the selected value is the project pi handle, import
 `ComputableAnalysis.PiComplex` and use the named input rather than choosing a
@@ -535,6 +546,11 @@ open ComputableAnalysis
 
 #check PiProofs.pi.imaginaryHalf
 #check PiProofs.pi.imaginaryHalf_valid
+#check PiProofs.pi.halfPi
+#check PiProofs.pi.halfPi_valid
+#check PiProofs.pi.halfPi_width_le_two_div_succ
+#check PiProofs.pi.halfPi_bounds
+#check PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi
 #check PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul
 #check PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation
 #check PiProofs.pi.negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea
@@ -542,6 +558,7 @@ open ComputableAnalysis
 #check PiProofs.pi.negativeTwoImaginaryRaw_valid
 #check PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea
 #check PiProofs.pi.negativeTwoImaginary_logAtI_equiv_piCircleArea
+#check PiProofs.pi.negativeTwoImaginaryRaw_mul_logAtI_equiv_piCircleArea
 #check PiProofs.pi.imaginaryHalf_equiv_presentation
 ```
 

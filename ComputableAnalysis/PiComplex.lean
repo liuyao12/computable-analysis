@@ -18,10 +18,73 @@ namespace PiProofs
 
 namespace pi
 
+/-- The preferred circle-area representative stays inside its initial
+rational enclosure at every stage.  This tiny certificate is the uniform
+input bound for the future represented-angle rotation evaluator; it follows
+only from the checked nesting of the area boxes. -/
+theorem circleArea_bounds (n : Nat) :
+    (2 : Rat) <= (circleArea.raw.compute n).lo /\
+      (circleArea.raw.compute n).hi <= 4 := by
+  have hzero : circleArea.raw.compute 0 = { lo := 2, hi := 4 } := by
+    change piCircleArea.compute 0 = { lo := 2, hi := 4 }
+    exact piCircleArea_compute_zero
+  have hnest := circleArea.valid.2.1 0 n (Nat.zero_le n)
+  rw [hzero] at hnest
+  exact ⟨hnest.1, hnest.2.2⟩
+
+/-- The represented real angle \(\pi/2\), retained independently of its
+imaginary-axis embedding.  The separate name is convenient for algorithms
+that consume a bounded real parameter before multiplying by \(i\). -/
+def halfPi : RealRaw :=
+  RealRaw.scaleRat ((1 : Rat) / 2) circleArea.raw
+
+theorem halfPi_valid : halfPi.Valid := by
+  unfold halfPi
+  exact RealRaw.scaleRat_valid_of_nonneg (by native_decide) circleArea.valid
+
+/-- The real half-angle inherits an explicit denominator rate from the
+circle-area computation.  This is the usable input-width modulus for a
+represented-angle series construction. -/
+theorem halfPi_width_le_two_div_succ (n : Nat) :
+    (halfPi.compute n).width <= 2 / (((n + 1 : Nat) : Rat)) := by
+  have harea := AreaLoopValidity.areaWidthLinearBound_four n
+  have hhalf : (0 : Rat) <= (1 : Rat) / 2 := by native_decide
+  unfold halfPi
+  rw [RealRaw.scaleRat_width_of_nonneg hhalf]
+  calc
+    ((1 : Rat) / 2) * (circleArea.raw.compute n).width <=
+        ((1 : Rat) / 2) * (4 / (((n + 1 : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left harea hhalf
+    _ = 2 / (((n + 1 : Nat) : Rat)) := by
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- Every rational interval for \(\pi/2\) is contained in the fixed box
+\([1,2]\).  No decimal approximation or completed-real order is involved. -/
+theorem halfPi_bounds (n : Nat) :
+    (1 : Rat) <= (halfPi.compute n).lo /\
+      (halfPi.compute n).hi <= 2 := by
+  have hcircle := circleArea_bounds n
+  have hhalf : (0 : Rat) <= (1 : Rat) / 2 := by native_decide
+  unfold halfPi RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos hhalf]
+  change (1 : Rat) <= ((1 : Rat) / 2) * (circleArea.raw.compute n).lo /\
+    ((1 : Rat) / 2) * (circleArea.raw.compute n).hi <= 2
+  constructor
+  · calc
+      (1 : Rat) = ((1 : Rat) / 2) * 2 := by native_decide
+      _ <= ((1 : Rat) / 2) * (circleArea.raw.compute n).lo :=
+        Rat.mul_le_mul_of_nonneg_left hcircle.1 hhalf
+  · calc
+      ((1 : Rat) / 2) * (circleArea.raw.compute n).hi <=
+          ((1 : Rat) / 2) * 4 :=
+        Rat.mul_le_mul_of_nonneg_left hcircle.2 hhalf
+      _ = 2 := by native_decide
+
 /-- The certified complex raw input \(i\pi/2\), formed from the default
 circle-area representative of the abstract pi handle. -/
 def imaginaryHalf : ComplexRaw :=
-  ((1 : Rat) / 2) * ComplexRaw.imaginaryAxis circleArea.raw
+  ComplexRaw.scaleRat ((1 : Rat) / 2) (ComplexRaw.imaginaryAxis circleArea.raw)
 
 /-- The exact rational complex scalar `i/2`.  Applying it through
 `ComplexRaw.qcomplexLeftMul` is the algebraic presentation of the same
@@ -32,6 +95,27 @@ theorem imaginaryHalf_valid : imaginaryHalf.Valid := by
   unfold imaginaryHalf
   exact ComplexRaw.scaleRat_valid_of_nonneg (by native_decide)
     (ComplexRaw.imaginaryAxis_valid circleArea.valid)
+
+/-- The two construction orders for \(i\pi/2\) agree stagewise: first form
+the bounded real parameter \(\pi/2\) and embed it, or first embed \(\pi\)
+and apply the rational scalar \(1/2\). -/
+theorem imaginaryHalf_compute_eq_imaginaryAxis_halfPi :
+    imaginaryHalf.compute = (ComplexRaw.imaginaryAxis halfPi).compute := by
+  funext n
+  have hhalf : (0 : Rat) <= (1 : Rat) / 2 := by native_decide
+  simp only [imaginaryHalf, halfPi, ComplexRaw.scaleRat,
+    ComplexRaw.imaginaryAxis_compute, RealRaw.scaleRat,
+    RealRaw.scaleRatCompute, QBox.scaleRat, if_pos hhalf, Rat.mul_zero]
+
+theorem imaginaryHalf_equiv_imaginaryAxis_halfPi :
+    imaginaryHalf.Equiv (ComplexRaw.imaginaryAxis halfPi) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff imaginaryHalf
+    (ComplexRaw.imaginaryAxis halfPi) n n).2
+  rw [imaginaryHalf_compute_eq_imaginaryAxis_halfPi]
+  have hordered := ComplexRaw.valid_ordered
+    (ComplexRaw.imaginaryAxis_valid halfPi_valid) n
+  exact ⟨hordered, hordered⟩
 
 /-- The coordinate construction of `i*pi/2` agrees stage by stage with
 literal multiplication of the preferred pi representative by the exact
@@ -219,6 +303,29 @@ theorem negativeTwoImaginary_logAtI_equiv_piCircleArea
       logI.agreesWithImaginaryHalf)
     negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea
 
+/-- The same conditional logarithm route, stated with literal certified
+complex multiplication.  Thus a future branch certificate
+\(\log(i)=i\pi/2\) feeds the natural formula \((-2i)\log(i)=\pi\) directly,
+without routing the public conclusion through the affine scalar shortcut. -/
+theorem negativeTwoImaginaryRaw_mul_logAtI_equiv_piCircleArea
+    (logI : LogAtICertificate) :
+    (negativeTwoImaginaryRaw * logI.raw).Equiv
+      (ComplexRaw.ofRealRaw circleArea.raw) := by
+  have hproduct :
+      (negativeTwoImaginaryRaw * logI.raw).Equiv
+        (negativeTwoImaginaryRaw * imaginaryHalf) := by
+    apply ComplexRaw.mul_equiv negativeTwoImaginaryRaw_valid
+      negativeTwoImaginaryRaw_valid logI.valid imaginaryHalf_valid
+    · exact ComplexRaw.equiv_refl negativeTwoImaginaryRaw
+        negativeTwoImaginaryRaw_valid
+    · exact logI.agreesWithImaginaryHalf
+  exact ComplexRaw.equiv_trans
+    (ComplexRaw.mul_valid negativeTwoImaginaryRaw_valid logI.valid)
+    (ComplexRaw.mul_valid negativeTwoImaginaryRaw_valid imaginaryHalf_valid)
+    (ComplexRaw.ofRealRaw_valid circleArea.raw circleArea.valid)
+    hproduct
+    negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea
+
 /-- The `i*pi/2` input formed from any named pi presentation agrees with the
 default handle.  This is the representation transport needed before an Euler
 route can evaluate a complex exponential at the selected pi value. -/
@@ -226,6 +333,10 @@ theorem imaginaryHalf_equiv_presentation (kind : PiPresentation) :
     imaginaryHalf.Equiv
       (((1 : Rat) / 2) * ComplexRaw.imaginaryAxis (presentation kind).raw) := by
   unfold imaginaryHalf
+  change (ComplexRaw.scaleRat ((1 : Rat) / 2)
+      (ComplexRaw.imaginaryAxis circleArea.raw)).Equiv
+    (ComplexRaw.scaleRat ((1 : Rat) / 2)
+      (ComplexRaw.imaginaryAxis (presentation kind).raw))
   apply ComplexRaw.scaleRat_equiv_of_nonneg (by native_decide)
   apply ComplexRaw.imaginaryAxis_equiv circleArea.valid (presentation kind).valid
   exact representations_equiv circleArea (presentation kind)

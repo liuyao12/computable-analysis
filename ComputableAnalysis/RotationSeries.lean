@@ -4,8 +4,10 @@ import ComputableAnalysis.PeanoBaker
 # Finite complex rotation-series algebra
 
 This module joins two already finite calculations: rational complex exponential
-prefixes and constant-coefficient Peano--Baker rotation prefixes.  It does not
-construct a valid complex raw exponential or a continuous ODE solution.
+prefixes and constant-coefficient Peano--Baker rotation prefixes.  It
+constructs a valid factorial-tail complex raw exponential on rational
+imaginary-axis inputs; extending that evaluator to represented inputs and
+identifying it with geometry remain separate work.
 -/
 
 namespace ComputableAnalysis

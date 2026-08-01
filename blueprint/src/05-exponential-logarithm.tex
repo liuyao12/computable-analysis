@@ -280,8 +280,16 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
+\lean{ComputableAnalysis.ComplexRaw.cauchyStabilize}
+\lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_contains_current}
+\lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_width_le_two_div_succ}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_bounds}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_valid}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation}
@@ -290,19 +298,25 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryRaw_valid}
 \lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginary_logAtI_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryRaw_mul_logAtI_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_presentation}
 \leanok
 \[
  \operatorname{expPrefix}_{2n}(iT)=C_n(T)+iS_n(T).
 \]
 Its nested complex boxes have both widths at most \(8t_0(T)2^{-n}\).
-The represented input \(i\pi/2\) is already a certified complex box handle:
-embed the selected \(\pi\)-raw on the real axis and apply the checked
-imaginary-unit rotation.  Equivalently it is the exact affine scalar action
-\((i/2)\pi\), and this presentation transports across every checked
-\(\pi\)-representation.  The finite scalar return
-\((-2i)(i\pi/2)=\pi\) is also checked, so a future certified
-\(\log(i)=i\pi/2\) branch immediately yields \(-2i\log(i)=\pi\).
+The represented real parameter \(\pi/2\) has checked rational boxes inside
+\([1,2]\), of width at most \(2/(n+1)\) at stage \(n\).  Embedding it gives the certified complex input \(i\pi/2\),
+equivalently the exact affine scalar action \((i/2)\pi\); this transports
+across every checked \(\pi\)-representation.  The finite scalar return
+\((-2i)(i\pi/2)=\pi\), and the conditional literal-product formula
+\((-2i)\log(i)=\pi\) for any certified branch with
+\(\log(i)=i\pi/2\), are checked.
+The reusable represented-input construction is also checked: finite prefixes
+of widened complex candidate boxes are intersected, with each later candidate
+as the rational-box witness that the prefix remains ordered.  A rotation
+extension need only provide its explicit candidate-width, future-containment,
+and radius schedules.
 The remaining theorem \(e^{i\pi}+1=0\) still needs the extension of the
 rotation exponential to that represented input and its geometric
 identification.
