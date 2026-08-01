@@ -109,60 +109,61 @@ def riemannLeftInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : QI
     { lo := 0, hi := 0 }
 
 /-- The finite left-endpoint sum for the product contribution
-`u\,\Delta v`.  This is the rational rectangle area swept when the second
+`f\,\Delta g`.  This is the rational rectangle area swept when the second
 side of a rectangle changes while the first is held at its left endpoint. -/
-def leftStieltjesSum (u v : Nat -> Rat) : Nat -> Rat
+def leftStieltjesSum (f g : Nat -> Rat) : Nat -> Rat
   | 0 => 0
-  | n + 1 => leftStieltjesSum u v n + u n * (v (n + 1) - v n)
+  | n + 1 => leftStieltjesSum f g n + f n * (g (n + 1) - g n)
 
-/-- The complementary finite right-endpoint sum `v_{i+1}\,\Delta u_i`.
+/-- The complementary finite right-endpoint sum `g_{i+1}\,\Delta f_i`.
 Together with `leftStieltjesSum` it fills the endpoint-product rectangle
 exactly, before any limiting argument is made. -/
-def rightStieltjesSum (u v : Nat -> Rat) : Nat -> Rat
+def rightStieltjesSum (f g : Nat -> Rat) : Nat -> Rat
   | 0 => 0
-  | n + 1 => rightStieltjesSum u v n + v (n + 1) * (u (n + 1) - u n)
+  | n + 1 => rightStieltjesSum f g n + g (n + 1) * (f (n + 1) - f n)
 
 /-- The finite corner-rectangle correction obtained if both Stieltjes sums
 use left endpoints.  A constructive integration-by-parts proof only has to
 show this displayed rational sum tends to zero on its chosen mesh. -/
-def quadraticVariationSum (u v : Nat -> Rat) : Nat -> Rat
+def quadraticVariationSum (f g : Nat -> Rat) : Nat -> Rat
   | 0 => 0
-  | n + 1 => quadraticVariationSum u v n +
-      (u (n + 1) - u n) * (v (n + 1) - v n)
+  | n + 1 => quadraticVariationSum f g n +
+      (f (n + 1) - f n) * (g (n + 1) - g n)
 
 /-- One cell of the geometric integration-by-parts decomposition: the two
 oriented strips exactly make up the change in the endpoint-product rectangle. -/
 theorem productIncrement_decomposition
-    (u0 u1 v0 v1 : Rat) :
-    u1 * v1 - u0 * v0 =
-      u0 * (v1 - v0) + v1 * (u1 - u0) := by
+    (f0 f1 g0 g1 : Rat) :
+    f1 * g1 - f0 * g0 =
+      f0 * (g1 - g0) + g1 * (f1 - f0) := by
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
     Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 /-- Finite geometric integration by parts.  The two displayed sums tile the
-rectangle difference `u_n v_n-u_0v_0`; this is an exact rational identity,
-not a statement about unrepresented limiting real numbers. -/
-theorem finiteIntegrationByParts (u v : Nat -> Rat) (n : Nat) :
-    leftStieltjesSum u v n + rightStieltjesSum u v n =
-      u n * v n - u 0 * v 0 := by
+rectangle difference `f_n g_n-f_0 g_0`; on a subdivision `t_i` these are the
+samples `f(t_i)` and `g(t_i)`.  This is an exact rational identity, not a
+statement about unrepresented limiting real numbers. -/
+theorem finiteIntegrationByParts (f g : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum f g n + rightStieltjesSum f g n =
+      f n * g n - f 0 * g 0 := by
   induction n with
   | zero =>
       grind [leftStieltjesSum, rightStieltjesSum, Rat.sub_eq_add_neg]
   | succ n ih =>
       rw [leftStieltjesSum, rightStieltjesSum]
       have hcell := productIncrement_decomposition
-        (u n) (u (n + 1)) (v n) (v (n + 1))
+        (f n) (f (n + 1)) (g n) (g (n + 1))
       calc
-        (leftStieltjesSum u v n + u n * (v (n + 1) - v n)) +
-            (rightStieltjesSum u v n + v (n + 1) * (u (n + 1) - u n)) =
-          (leftStieltjesSum u v n + rightStieltjesSum u v n) +
-            (u n * (v (n + 1) - v n) +
-              v (n + 1) * (u (n + 1) - u n)) := by
+        (leftStieltjesSum f g n + f n * (g (n + 1) - g n)) +
+            (rightStieltjesSum f g n + g (n + 1) * (f (n + 1) - f n)) =
+          (leftStieltjesSum f g n + rightStieltjesSum f g n) +
+            (f n * (g (n + 1) - g n) +
+              g (n + 1) * (f (n + 1) - f n)) := by
             grind [Rat.add_assoc, Rat.add_comm]
-        _ = (u n * v n - u 0 * v 0) +
-            (u n * (v (n + 1) - v n) +
-              v (n + 1) * (u (n + 1) - u n)) := by rw [ih]
-        _ = u (n + 1) * v (n + 1) - u 0 * v 0 := by
+        _ = (f n * g n - f 0 * g 0) +
+            (f n * (g (n + 1) - g n) +
+              g (n + 1) * (f (n + 1) - f n)) := by rw [ih]
+        _ = f (n + 1) * g (n + 1) - f 0 * g 0 := by
             grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
               Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
@@ -170,38 +171,38 @@ theorem finiteIntegrationByParts (u v : Nat -> Rat) (n : Nat) :
 only difference from the exact tiling is the explicitly named corner-area
 sum `quadraticVariationSum`. -/
 theorem finiteIntegrationByParts_withVariation
-    (u v : Nat -> Rat) (n : Nat) :
-    leftStieltjesSum u v n + leftStieltjesSum v u n +
-        quadraticVariationSum u v n =
-      u n * v n - u 0 * v 0 := by
+    (f g : Nat -> Rat) (n : Nat) :
+    leftStieltjesSum f g n + leftStieltjesSum g f n +
+        quadraticVariationSum f g n =
+      f n * g n - f 0 * g 0 := by
   induction n with
   | zero =>
       grind [leftStieltjesSum, quadraticVariationSum, Rat.sub_eq_add_neg]
   | succ n ih =>
       rw [leftStieltjesSum, leftStieltjesSum, quadraticVariationSum]
       have hcell :
-          u (n + 1) * v (n + 1) - u n * v n =
-            u n * (v (n + 1) - v n) +
-              v n * (u (n + 1) - u n) +
-              (u (n + 1) - u n) * (v (n + 1) - v n) := by
+          f (n + 1) * g (n + 1) - f n * g n =
+            f n * (g (n + 1) - g n) +
+              g n * (f (n + 1) - f n) +
+              (f (n + 1) - f n) * (g (n + 1) - g n) := by
         grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
           Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
       calc
-        (leftStieltjesSum u v n + u n * (v (n + 1) - v n)) +
-              (leftStieltjesSum v u n + v n * (u (n + 1) - u n)) +
-            (quadraticVariationSum u v n +
-              (u (n + 1) - u n) * (v (n + 1) - v n)) =
-          (leftStieltjesSum u v n + leftStieltjesSum v u n +
-              quadraticVariationSum u v n) +
-            (u n * (v (n + 1) - v n) +
-              v n * (u (n + 1) - u n) +
-              (u (n + 1) - u n) * (v (n + 1) - v n)) := by
+        (leftStieltjesSum f g n + f n * (g (n + 1) - g n)) +
+              (leftStieltjesSum g f n + g n * (f (n + 1) - f n)) +
+            (quadraticVariationSum f g n +
+              (f (n + 1) - f n) * (g (n + 1) - g n)) =
+          (leftStieltjesSum f g n + leftStieltjesSum g f n +
+              quadraticVariationSum f g n) +
+            (f n * (g (n + 1) - g n) +
+              g n * (f (n + 1) - f n) +
+              (f (n + 1) - f n) * (g (n + 1) - g n)) := by
             grind [Rat.add_assoc, Rat.add_comm]
-        _ = (u n * v n - u 0 * v 0) +
-            (u n * (v (n + 1) - v n) +
-              v n * (u (n + 1) - u n) +
-              (u (n + 1) - u n) * (v (n + 1) - v n)) := by rw [ih]
-        _ = u (n + 1) * v (n + 1) - u 0 * v 0 := by
+        _ = (f n * g n - f 0 * g 0) +
+            (f n * (g (n + 1) - g n) +
+              g n * (f (n + 1) - f n) +
+              (f (n + 1) - f n) * (g (n + 1) - g n)) := by rw [ih]
+        _ = f (n + 1) * g (n + 1) - f 0 * g 0 := by
             grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
               Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 

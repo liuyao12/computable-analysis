@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Render uniform parameter divisions transported to unequal image divisions.
+"""Render equal parameter divisions transported to unequal image divisions.
 
-The finite substitution picture uses x = phi(t) = t^2 on [t0, t1] = [0, 1].
-At each stage the t line is divided equally; the exact rational images t_i^2
-form an unequal x subdivision.  The connecting segments expose the finite
-data behind a change of variables rather than suggesting a completed-real
-substitution rule.
+The finite substitution picture uses x = phi(t) = t^2 on a fixed parameter
+interval [t0, t1].  At each stage the t line is divided equally; the exact
+rational images phi(t_i) form an unequal x subdivision.  The connecting
+segments expose the finite data behind a change of variables rather than
+suggesting a completed-real substitution rule.
 """
 
 from __future__ import annotations
@@ -74,7 +74,7 @@ def frame(subdivisions: int) -> Image.Image:
     draw.text((LEFT - 11, T_AXIS + 30), "t0", font=SMALL, fill=INK, anchor="mm")
     draw.text((RIGHT + 9, T_AXIS + 30), "t1", font=SMALL, fill=INK, anchor="mm")
     draw.text((RIGHT + 26, T_AXIS + 3), "t", font=LABEL, fill=INK, anchor="lm")
-    draw.text((RIGHT + 26, X_AXIS + 3), "x", font=LABEL, fill=INK, anchor="lm")
+    draw.text((RIGHT + 26, X_AXIS + 3), "x=phi(t)", font=LABEL, fill=INK, anchor="lm")
     return image
 
 

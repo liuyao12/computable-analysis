@@ -278,8 +278,15 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_valid}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_valid}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginary_logAtI_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_presentation}
 \leanok
 \[
@@ -288,7 +295,12 @@ connects this value to the chosen abstract \(\pi\) representation.
 Its nested complex boxes have both widths at most \(8t_0(T)2^{-n}\).
 The represented input \(i\pi/2\) is already a certified complex box handle:
 embed the selected \(\pi\)-raw on the real axis and apply the checked
-imaginary-unit rotation.  The remaining theorem \(e^{i\pi}+1=0\) still needs
-the extension of the rotation exponential to that represented input and its
-geometric identification.
+imaginary-unit rotation.  Equivalently it is the exact affine scalar action
+\((i/2)\pi\), and this presentation transports across every checked
+\(\pi\)-representation.  The finite scalar return
+\((-2i)(i\pi/2)=\pi\) is also checked, so a future certified
+\(\log(i)=i\pi/2\) branch immediately yields \(-2i\log(i)=\pi\).
+The remaining theorem \(e^{i\pi}+1=0\) still needs the extension of the
+rotation exponential to that represented input and its geometric
+identification.
 \end{theorem}

@@ -1176,16 +1176,30 @@ arguments.
   `AlgebraicComplex.neg_annihilator_exists`,
   `AlgebraicComplex.mul_annihilator_exists`,
   `AlgebraicComplex.inv_exists`, and `AlgPoly.exists_root`.
-- Next finite algebra target: prove `ComplexRaw.mul` preserves validity, then
-  use resultant-style rational polynomial transformations to supply the
+- The finite four-corner product is now established independently of that
+  raw-validity goal: `QBox.mulRealInterval_contains` proves literal product
+  containment, `mulRealInterval_ordered` and `mulRealInterval_nested` prove
+  order and refinement, and `QBox.mul_contains`, `mul_ordered`, and
+  `mul_nested` lift those facts to complex boxes. `ComplexRaw.mul_compute_ordered`
+  and `mul_compute_nested` now lift them stagewise to valid inputs;
+  `mul_valid_of_widthsShrink` isolates exactly the remaining premise. The
+  next target is an explicit shrinking-width modulus for `ComplexRaw.mul`, then
+  resultant-style rational polynomial transformations can supply the
   addition, negation, and multiplication annihilator witnesses.
 - The important Euler-route special case is now checked before that full
-  target: `ComplexRaw.mulI` is the direct coordinate rotation
-  \(x+iy\mapsto-y+ix\), and `ComplexRaw.imaginaryAxis` embeds any certified
-  real as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
-  already yields a valid raw \(i\pi/2\) after rational scaling.  This does not
-  yet extend the factorial-series exponential to represented complex inputs
-  or establish Euler's identity.
+  target: `ComplexRaw.qcomplexLeftMul` gives every exact rational complex
+  scalar a validity- and equivalence-preserving affine action on a certified
+  complex raw.  Its `i` specialization is the direct coordinate rotation
+  `ComplexRaw.mulI`, and `ComplexRaw.imaginaryAxis` embeds any certified real
+  as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
+  already yields a valid raw \(i\pi/2\) both by rational scaling and as the
+  literal exact \(i/2\)-scalar action.  The return scalar identity
+  \((-2i)(i\pi/2)=\pi\) is now likewise an exact stagewise complex-box
+  theorem.  `PiProofs.pi.LogAtICertificate` isolates the remaining
+  branch-specific input: any valid complex logarithm raw agreeing with
+  \(i\pi/2\) now immediately yields the certified complex formula
+  \(-2i\log(i)=\pi\).  This does not yet extend the factorial-series
+  exponential to represented complex inputs or establish Euler's identity.
 
 ## First-Year Calculus Course
 

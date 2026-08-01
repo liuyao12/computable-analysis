@@ -189,7 +189,7 @@ For \(f(x)=c\), every stage is the exact singleton
 \]
 \end{theorem}
 
-\section{Substitution: transported divisions}
+\section{Substitution: making unequal divisions}
 
 \begin{definition}[Finite square substitution stage]
 \label{def:finite-substitution-stage}
@@ -197,20 +197,20 @@ For \(f(x)=c\), every stage is the exact singleton
 \lean{ComputableAnalysis.Logarithm.logTwoSquareMeshCorrection_le_one_div}
 \uses{def:increasing-integral-stage}
 \leanok
-Substitution transports a uniform parameter partition to an ordinarily
-unequal image partition.  For the rational map \(x=\phi(t)=t^2\), on the
-fixed interval \([t_0,t_1]=[0,1]\):
+Substitution makes an unequal division: transport the equal division of the
+fixed parameter interval \([t_0,t_1]\) by a rational map \(x=\phi(t)\).
+The square map is the checked concrete instance:
 \begin{verbatim}
 def substitution_stage(phi, t0, t1, n):
     T = uniform_partition(t0, t1, 2**n)
     X = [phi(t) for t in T]
-    return T, X                 # equal T divisions, unequal X divisions
+    return T, X                 # equal t divisions; unequal x divisions
 \end{verbatim}
 \begin{figure}[!htbp]
 \centering
 \substitutionPartitionAnimation
-\caption{Equal parameter divisions transported by \(x=t^2\) to unequal
-rational image divisions.}
+\caption{The square map carries equal \(t\)-divisions to unequal rational
+\(x\)-divisions.}
 \label{fig:substitution-partition}
 \end{figure}
 The finite square identity retains its explicit cell correction; the checked
@@ -228,10 +228,11 @@ general change-of-variables axiom.
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
 \uses{def:finite-substitution-stage}
 \leanok
-Fix \([t_0,t_1]\).  Sample \(f(t)\) and \(g(t)\) at one equal subdivision of
-that parameter interval.  The induced \(f\)- and \(g\)-subdivisions need not
-be equal; in the displayed \(f(t)=t, g(t)=t^2\) instance, only the
-\(f\)-division is uniform:
+Fix \([t_0,t_1]\), set
+\(t_i=t_0+i(t_1-t_0)/2^n\), and sample \(f(t_i)\), \(g(t_i)\).
+The finite identity is about this one equal parameter subdivision.  The
+picture chooses an affine \(f\) and a quadratic \(g\), so its vertical
+\(f\)-division is equal while its horizontal \(g\)-division is unequal:
 \begin{verbatim}
 def parts_stage(f, g, t0, t1, n):
     T = uniform_partition(t0, t1, 2**n)
@@ -242,18 +243,17 @@ def parts_stage(f, g, t0, t1, n):
 \begin{figure}[!htbp]
 \centering
 \integrationByPartsAnimation
-\caption{One equal parameter subdivision gives equal \(f\)-levels and
-unequal \(g\)-levels.  The two endpoint zigzags close around the sampled
-curve as the stage increases.}
+\caption{One equal subdivision of \([t_0,t_1]\): equal \(f\)-steps,
+unequal \(g\)-steps, and paired zigzags through the same samples.}
 \label{fig:integration-by-parts-cell}
 \end{figure}
-The checked finite identity is
+Writing \(f_i=f(t_i)\) and \(g_i=g(t_i)\), the checked finite identity is
 \[
  \sum_i f_i(g_{i+1}-g_i)+
  \sum_i g_{i+1}(f_{i+1}-f_i)=f_ng_n-f_0g_0.
 \]
-Common rational refinements make the corner rectangles an explicit error
-budget.
+The two zigzags meet at every sampled point; their corner rectangles are the
+explicit rational error budget when a common refinement is required.
 \end{theorem}
 
 \begin{theorem}[Product rule for the rectangle arctangent]

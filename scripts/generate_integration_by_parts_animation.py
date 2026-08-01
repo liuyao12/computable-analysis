@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Render paired finite subdivisions for integration by parts.
 
-The parameter interval is the fixed rational interval [t0, t1] = [0, 1].
-For f(t) = t and g(t) = t^2, equal divisions of t give equal f-divisions but
-unequal g-divisions.  The orange horizontal-first and teal vertical-first
-staircases are the two endpoint zigzags through the same sampled points.
-They visibly close around the curve as the common parameter subdivision is
-refined.  Every displayed sample is rational.
+The parameter interval is the fixed rational interval [t0, t1].  The display
+uses an affine f and a quadratic g: equal divisions of t give equal f-steps
+and unequal g-steps.  The orange horizontal-first and teal vertical-first
+staircases are the two endpoint zigzags through the same samples
+(f(t_i), g(t_i)).  They meet at every sample as the common parameter
+subdivision is refined.  Every displayed sample is rational.
 """
 
 from __future__ import annotations
@@ -53,12 +53,21 @@ SMALL = font(16)
 LABEL = font(19)
 
 
+T0 = Fraction(0)
+T1 = Fraction(1)
+
+
+def normalized_parameter(t: Fraction) -> Fraction:
+    """The affine demonstrator on the fixed interval [t0, t1]."""
+    return (t - T0) / (T1 - T0)
+
+
 def f(t: Fraction) -> Fraction:
-    return t
+    return normalized_parameter(t)
 
 
 def g(t: Fraction) -> Fraction:
-    return t * t
+    return normalized_parameter(t) ** 2
 
 
 def x_screen(value: Fraction | float) -> float:
@@ -81,7 +90,10 @@ def draw_path(
 def frame(subdivisions: int) -> Image.Image:
     image = Image.new("RGBA", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(image)
-    parameters = [Fraction(index, subdivisions) for index in range(subdivisions + 1)]
+    parameters = [
+        T0 + Fraction(index, subdivisions) * (T1 - T0)
+        for index in range(subdivisions + 1)
+    ]
     f_values = [f(t) for t in parameters]
     g_values = [g(t) for t in parameters]
 
@@ -97,10 +109,10 @@ def frame(subdivisions: int) -> Image.Image:
     draw.line((LEFT - 22, BASELINE, RIGHT + 28, BASELINE), fill=AXIS, width=3)
     draw.line((LEFT, BASELINE + 18, LEFT, TOP - 18), fill=AXIS, width=3)
 
-    curve = [
-        (x_screen(Fraction(index, 240)), y_screen(Fraction(index, 240) ** 2))
-        for index in range(241)
-    ]
+    curve = []
+    for index in range(241):
+        t = T0 + Fraction(index, 240) * (T1 - T0)
+        curve.append((x_screen(f(t)), y_screen(g(t))))
     draw.line(curve, fill=CURVE, width=3, joint="curve")
 
     lower = [(x_screen(f_values[0]), y_screen(g_values[0]))]

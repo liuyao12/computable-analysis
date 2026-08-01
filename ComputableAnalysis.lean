@@ -9,6 +9,8 @@ import ComputableAnalysis.ArctanPresentations
 import ComputableAnalysis.Basic
 import ComputableAnalysis.Basel
 import ComputableAnalysis.Calculus
+import ComputableAnalysis.ComplexAffine
+import ComputableAnalysis.ComplexMultiplication
 import ComputableAnalysis.ComplexInterval
 import ComputableAnalysis.ComplexPathIntegral
 import ComputableAnalysis.ComplexPolynomial

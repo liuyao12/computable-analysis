@@ -479,6 +479,15 @@ equivalence of the real and imaginary parts.
 \begin{definition}[Complex arithmetic]\label{def:complex-arithmetic}
 \lean{ComputableAnalysis.ComplexRaw.add}
 \lean{ComputableAnalysis.ComplexRaw.mul}
+\lean{ComputableAnalysis.QBox.mulRealInterval_contains}
+\lean{ComputableAnalysis.QBox.mulRealInterval_ordered}
+\lean{ComputableAnalysis.QBox.mulRealInterval_nested}
+\lean{ComputableAnalysis.QBox.mul_contains}
+\lean{ComputableAnalysis.QBox.mul_ordered}
+\lean{ComputableAnalysis.QBox.mul_nested}
+\lean{ComputableAnalysis.ComplexRaw.mul_compute_ordered}
+\lean{ComputableAnalysis.ComplexRaw.mul_compute_nested}
+\lean{ComputableAnalysis.ComplexRaw.mul_valid_of_widthsShrink}
 \lean{ComputableAnalysis.ComplexRaw.mulI}
 \lean{ComputableAnalysis.ComplexRaw.mulI_valid}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis}
@@ -507,14 +516,22 @@ where \(x,y,u,v\) are real numbers.  Then define
 \]
 At the level of rational boxes, multiplication is implemented by applying
 real interval arithmetic to these four real products and taking bounding
-intervals.
-The validity proof for arbitrary products is still a finite algebra target.
-The already certified special case
+intervals.  That finite layer is checked: the four-corner interval contains
+every enclosed rational product, is ordered, and refines when both input
+intervals refine; the corresponding complex box satisfies the same three
+facts.  The remaining raw-complex multiplication task is narrower: prove an
+explicit shrinking-width modulus for those nested boxes.
+For an exact rational complex scalar, the certified affine action
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
+is already available, with the two real scalar actions and the direct
+imaginary-unit rotation as its finite implementation.  The already certified special case
 \(iz=-\operatorname{im}(z)+i\operatorname{re}(z)\)
 is a coordinate rotation: it reverses one pair of endpoints and exchanges the
 coordinates.  Hence a certified real \(x\) already gives a certified complex
-handle \(ix\), without pretending that general complex multiplication is
-available.
+handle \(ix\), and \(i\pi/2\) is literally its exact \(i/2\)-scalar action,
+without pretending that general complex multiplication is available.
 \end{definition}
 
 \begin{definition}[Complex inverse]\label{def:complex-inverse}
