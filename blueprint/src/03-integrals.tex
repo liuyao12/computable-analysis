@@ -230,30 +230,28 @@ general change-of-variables axiom.
 \leanok
 Fix \([t_0,t_1]\), set
 \(t_i=t_0+i(t_1-t_0)/2^n\), and sample \(f(t_i)\), \(g(t_i)\).
-The finite identity is about this one equal parameter subdivision.  The
-picture chooses an affine \(f\) and a quadratic \(g\), so its vertical
-\(f\)-division is equal while its horizontal \(g\)-division is unequal:
+The two finite sums use this same equal subdivision.  In the picture, affine
+\(f\) gives equal horizontal divisions while quadratic \(g\) gives unequal
+vertical divisions:
 \begin{verbatim}
 def parts_stage(f, g, t0, t1, n):
     T = uniform_partition(t0, t1, 2**n)
-    F = [f(t) for t in T]
-    G = [g(t) for t in T]
-    return zigzag_horizontal_first(F, G), zigzag_vertical_first(F, G)
+    S = [(f(t), g(t)) for t in T]
+    return horizontal_then_vertical(S), vertical_then_horizontal(S)
 \end{verbatim}
 \begin{figure}[!htbp]
 \centering
 \integrationByPartsAnimation
-\caption{One equal subdivision of \([t_0,t_1]\): equal \(f\)-steps,
-unequal \(g\)-steps, and paired zigzags through the same samples.}
+\caption{A common equal subdivision of \([t_0,t_1]\): paired zigzags through
+the same \((f(t_i),g(t_i))\), with their corner discrepancy shrinking.}
 \label{fig:integration-by-parts-cell}
 \end{figure}
-Writing \(f_i=f(t_i)\) and \(g_i=g(t_i)\), the checked finite identity is
+The checked finite identity is
 \[
- \sum_i f_i(g_{i+1}-g_i)+
- \sum_i g_{i+1}(f_{i+1}-f_i)=f_ng_n-f_0g_0.
+ \sum_i f(t_i)\bigl(g(t_{i+1})-g(t_i)\bigr)+
+ \sum_i g(t_{i+1})\bigl(f(t_{i+1})-f(t_i)\bigr)
+ =f(t_1)g(t_1)-f(t_0)g(t_0).
 \]
-The two zigzags meet at every sampled point; their corner rectangles are the
-explicit rational error budget when a common refinement is required.
 \end{theorem}
 
 \begin{theorem}[Product rule for the rectangle arctangent]
@@ -288,7 +286,7 @@ The same candidate is checked for signed rational steps on \([0,1]\).
 \uses{thm:finite-geometric-integration-by-parts,def:definite-integral-identity}
 For rational monotone pieces, provide:
 \begin{verbatim}
-piece: integral(U*V'), integral(U'*V), product(U,V)
+piece: integral(f*g'), integral(f'*g), product(f,g)
 piece: directions, common_refinement, increment_moduli
 stage: rational error budget for boxes + quadrature + corners
 \end{verbatim}
@@ -301,12 +299,13 @@ integration-by-parts theorem.
 \uses{def:integration-by-parts-certificate}
 The target is
 \[
- \int_a^b U V'\,\dd x\ \Equiv\ U(b)V(b)-U(a)V(a)-\int_a^b U'V\,\dd x.
+ \int_{t_0}^{t_1} f(t)g'(t)\,\dd t\ \Equiv\
+ f(t_1)g(t_1)-f(t_0)g(t_0)-\int_{t_0}^{t_1} f'(t)g(t)\,\dd t.
 \]
 On an increasing piece the finite corner error is bounded by
 \[
- 0\le\sum_I\Delta_IU\,\Delta_IV
- \le\max_I\Delta_IU\,\bigl(V(b_{j+1})-V(b_j)\bigr).
+ 0\le\sum_i\Delta_i f\,\Delta_i g
+ \le\max_i\Delta_i f\,\bigl(g(t_1)-g(t_0)\bigr).
 \]
 \end{theorem}
 

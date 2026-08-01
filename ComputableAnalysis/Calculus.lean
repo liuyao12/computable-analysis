@@ -2242,34 +2242,34 @@ This is the partition-level form used by later certified integral arguments:
 it is still a rational finite-sum identity, not an FTC or a claim about an
 unconstructed integral. -/
 theorem finiteIntegrationByParts_onPartition {a b : Rat}
-    (P : RationalPartition a b) (u v : Rat -> Rat) :
-    leftStieltjesSum (fun i => u (P.clampedPath i))
-        (fun i => v (P.clampedPath i)) P.pieces +
-      rightStieltjesSum (fun i => u (P.clampedPath i))
-        (fun i => v (P.clampedPath i)) P.pieces =
-      u b * v b - u a * v a := by
+    (P : RationalPartition a b) (f g : Rat -> Rat) :
+    leftStieltjesSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces +
+      rightStieltjesSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces =
+      f b * g b - f a * g a := by
   simpa [clampedPath, P.left_endpoint, P.right_endpoint] using
     (finiteIntegrationByParts
-      (fun i => u (P.clampedPath i))
-      (fun i => v (P.clampedPath i)) P.pieces)
+      (fun i => f (P.clampedPath i))
+      (fun i => g (P.clampedPath i)) P.pieces)
 
 /-- The corresponding arbitrary-partition identity when both Stieltjes sums
 use left endpoints.  The sole discrepancy from the endpoint-product formula
 is the explicit finite corner correction.  This is the version consumed by
 monotone-piece error bounds in constructive integration by parts. -/
 theorem finiteIntegrationByParts_withVariation_onPartition {a b : Rat}
-    (P : RationalPartition a b) (u v : Rat -> Rat) :
-    leftStieltjesSum (fun i => u (P.clampedPath i))
-        (fun i => v (P.clampedPath i)) P.pieces +
-      leftStieltjesSum (fun i => v (P.clampedPath i))
-        (fun i => u (P.clampedPath i)) P.pieces +
-        quadraticVariationSum (fun i => u (P.clampedPath i))
-          (fun i => v (P.clampedPath i)) P.pieces =
-      u b * v b - u a * v a := by
+    (P : RationalPartition a b) (f g : Rat -> Rat) :
+    leftStieltjesSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces +
+      leftStieltjesSum (fun i => g (P.clampedPath i))
+        (fun i => f (P.clampedPath i)) P.pieces +
+      quadraticVariationSum (fun i => f (P.clampedPath i))
+        (fun i => g (P.clampedPath i)) P.pieces =
+      f b * g b - f a * g a := by
   simpa [clampedPath, P.left_endpoint, P.right_endpoint] using
     (finiteIntegrationByParts_withVariation
-      (fun i => u (P.clampedPath i))
-      (fun i => v (P.clampedPath i)) P.pieces)
+      (fun i => f (P.clampedPath i))
+      (fun i => g (P.clampedPath i)) P.pieces)
 
 /-- The constructive finite integration-by-parts estimate on an arbitrary
 certified rational partition.  If the sampled second factor is nondecreasing,
