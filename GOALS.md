@@ -1176,26 +1176,30 @@ arguments.
   `AlgebraicComplex.neg_annihilator_exists`,
   `AlgebraicComplex.mul_annihilator_exists`,
   `AlgebraicComplex.inv_exists`, and `AlgPoly.exists_root`.
-- The finite four-corner product is now established independently of that
-  raw-validity goal: `QBox.mulRealInterval_contains` proves literal product
-  containment, `mulRealInterval_ordered` and `mulRealInterval_nested` prove
-  order and refinement, and `QBox.mul_contains`, `mul_ordered`, and
-  `mul_nested` lift those facts to complex boxes. `ComplexRaw.mul_compute_ordered`
-  and `mul_compute_nested` now lift them stagewise to valid inputs;
-  `mul_valid_of_widthsShrink` isolates exactly the remaining premise. The
-  next target is an explicit shrinking-width modulus for `ComplexRaw.mul`, then
-  resultant-style rational polynomial transformations can supply the
-  addition, negation, and multiplication annihilator witnesses.
-- The important Euler-route special case is now checked before that full
-  target: `ComplexRaw.qcomplexLeftMul` gives every exact rational complex
+- The four-corner product is now a certified raw operation.  The finite
+  containment/order/refinement facts are `QBox.mulRealInterval_contains`,
+  `mulRealInterval_ordered`, `mulRealInterval_nested`, `QBox.mul_contains`,
+  `mul_ordered`, and `mul_nested`.  The checked width bound
+  `QBox.mulRealInterval_width_le_of_abs_bounded`, lifted by
+  `mul_width_height_le_of_coordinateBounded`, uses the explicit stage-zero
+  coordinate radii to prove `ComplexRaw.mul_valid`.  The finite-intersection
+  proof `QBox.mul_overlaps_of_overlaps` gives `ComplexRaw.mul_equiv`, so this
+  product is representation-safe.  Consequently
+  `AlgebraicComplex.mulRaw_valid` has discharged the former raw-validity
+  premise; resultant-style rational polynomial transformations remain the
+  actual addition, negation, and multiplication-annihilator targets.
+- The important Euler-route exact-scalar implementation is also checked:
+  `ComplexRaw.qcomplexLeftMul` gives every rational complex
   scalar a validity- and equivalence-preserving affine action on a certified
   complex raw.  Its `i` specialization is the direct coordinate rotation
   `ComplexRaw.mulI`, and `ComplexRaw.imaginaryAxis` embeds any certified real
   as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
   already yields a valid raw \(i\pi/2\) both by rational scaling and as the
   literal exact \(i/2\)-scalar action.  The return scalar identity
-  \((-2i)(i\pi/2)=\pi\) is now likewise an exact stagewise complex-box
-  theorem.  `PiProofs.pi.LogAtICertificate` isolates the remaining
+  \((-2i)(i\pi/2)=\pi\) is now available both as an exact stagewise affine
+  theorem and as the general-product theorem
+  `PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea`.
+  `PiProofs.pi.LogAtICertificate` isolates the remaining
   branch-specific input: any valid complex logarithm raw agreeing with
   \(i\pi/2\) now immediately yields the certified complex formula
   \(-2i\log(i)=\pi\).  This does not yet extend the factorial-series

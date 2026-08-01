@@ -1,4 +1,5 @@
 import ComputableAnalysis.ComplexInterval
+import ComputableAnalysis.ComplexMultiplication
 import ComputableAnalysis.Polynomial
 
 /-!
@@ -158,6 +159,12 @@ theorem negRaw_valid (z : AlgebraicComplex) : (negRaw z).Valid := by
 
 def MulRawValid (z w : AlgebraicComplex) : Prop :=
   (mulRaw z w).Valid
+
+/-- The raw box product of two certified algebraic-complex representatives is
+valid.  The remaining closure problem is algebraic, not analytic: construct a
+rational-polynomial annihilator for this already certified product. -/
+theorem mulRaw_valid (z w : AlgebraicComplex) : MulRawValid z w := by
+  exact ComplexRaw.mul_valid z.value.valid w.value.valid
 
 def addCert (z w : AlgebraicComplex) : ComplexCert where
   raw := addRaw z w

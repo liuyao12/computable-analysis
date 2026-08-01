@@ -3,9 +3,9 @@ import ComputableAnalysis.Basic
 /-!
 # Certified affine complex operations
 
-The full interval product of two represented complex values is still a
-separate constructive task.  This file establishes the useful exact-scalar
-layer now: a rational complex constant acts on any certified complex raw by
+The general interval product of two represented complex values is certified
+in `ComplexMultiplication`.  This file keeps the useful exact-scalar layer:
+a rational complex constant acts on any certified complex raw by
 coordinatewise affine interval operations.  In particular, multiplication by
 the rational imaginary unit agrees with the existing endpoint-reversing
 `mulI` operation.

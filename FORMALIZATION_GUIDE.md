@@ -75,7 +75,7 @@ Start with the smallest target module rather than importing
 | Need | Import | Start with |
 | --- | --- | --- |
 | Rational interval arithmetic and raw reals | `ComputableAnalysis.Basic` | `QInterval`, `RealRaw`, `RealRaw.Valid`, `RealRaw.Equiv` |
-| Finite complex-box multiplication | `ComputableAnalysis.ComplexMultiplication` | `QBox.mulRealInterval_contains`, `QBox.mul_contains`, `QBox.mul_ordered`, `QBox.mul_nested` |
+| Certified complex multiplication | `ComputableAnalysis.ComplexMultiplication` | `ComplexRaw.mul_valid`, `ComplexRaw.mul_equiv`, and the finite `QBox` bounds |
 | Certified imaginary-axis input | `ComputableAnalysis.ComplexAffine` | `ComplexRaw.mulI`, `ComplexRaw.imaginaryAxis`, and exact rational complex-scalar actions |
 | Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
@@ -106,7 +106,7 @@ finished general theorem.
 | Foundation | `Basic`, `Algebraic`, `AlgebraicNumbers`, `AlgebraicFunctions`, `FunctionDomains`, `Extension`, `Calculus`, `Differential`, `MonotonicityConvexity`, `FTC` | Raw interval representations, domains, continuity, inverse branches, finite derivatives, integral/FTC certificate interfaces |
 | Elementary functions and series | `Elementary`, `ElementaryFunctions`, `Exp`, `ExpProofs`, `Logarithm`, `PowerSeries`, `Series`, `Taylor`, `FirstYearCalculus` | Power-series algorithms, rational majorants, exp/log comparison interfaces, and the current formal derivative ledger |
 | Integrals and special computations | `TurningPointIntegral`, `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
-| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `ComplexAffine`, `ComplexMultiplication`, `PiComplex`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, exact rational complex-scalar actions, checked finite complex-box products, the certified `i*pi/2` input bridge, finite ODE algebra, and the certified imaginary-axis complex series |
+| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `ComplexAffine`, `ComplexMultiplication`, `PiComplex`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, certified raw complex multiplication and exact rational complex-scalar actions, the certified `i*pi/2` input bridge, finite ODE algebra, and the certified imaginary-axis complex series |
 | Polynomial and complex checks | `Polynomial`, `ComplexPolynomial`, `ComplexInterval` | Exact polynomial algebra and rational complex-box root checks |
 
 `Playground`, `MembershipCheck`, and the repair/check files are development
@@ -469,11 +469,11 @@ These names expose the certified complex series at rational imaginary inputs;
 their real and imaginary coordinates are certified rational-input power-series
 computations, not yet geometric trigonometry.
 
-The literal four-corner complex product now has its finite containment,
-order, and nesting proofs.  Import `ComplexMultiplication` when a downstream
-argument needs only rational box algebra.  General `ComplexRaw.mul` still
-awaits the separate shrinking-width modulus that turns those nested boxes into
-a valid raw computation.
+The literal four-corner complex product has finite containment, order,
+nesting, and a rational width estimate.  The width schedule is obtained from
+the two stage-zero boxes: nested validity keeps all later coordinates within
+their explicit rational radii.  Thus general `ComplexRaw.mul` is a valid raw
+computation and respects overlap equivalence.
 
 ```lean
 import ComputableAnalysis.ComplexMultiplication
@@ -486,14 +486,20 @@ open ComputableAnalysis
 #check QBox.mul_contains
 #check QBox.mul_ordered
 #check QBox.mul_nested
+#check QBox.mulRealInterval_width_le_of_abs_bounded
+#check QBox.mul_width_height_le_of_coordinateBounded
+#check QBox.mul_overlaps_of_overlaps
 #check ComplexRaw.mul_compute_ordered
 #check ComplexRaw.mul_compute_nested
 #check ComplexRaw.mul_valid_of_widthsShrink
+#check ComplexRaw.mul_valid
+#check ComplexRaw.mul_equiv
+#check ComplexRaw.qcomplexLeftMul_equiv_mul_ofQComplex
 ```
 
 To act on a certified complex input by any exact rational complex scalar, use
-the affine layer below.  It remains the usable raw-complex operation before
-the general product receives that width theorem.
+the affine layer below.  It remains a particularly transparent exact
+implementation, even though the general product is now available.
 
 ```lean
 import ComputableAnalysis.ComplexAffine
@@ -532,6 +538,9 @@ open ComputableAnalysis
 #check PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul
 #check PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation
 #check PiProofs.pi.negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea
+#check PiProofs.pi.negativeTwoImaginaryRaw
+#check PiProofs.pi.negativeTwoImaginaryRaw_valid
+#check PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea
 #check PiProofs.pi.negativeTwoImaginary_logAtI_equiv_piCircleArea
 #check PiProofs.pi.imaginaryHalf_equiv_presentation
 ```

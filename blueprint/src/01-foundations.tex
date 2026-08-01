@@ -480,14 +480,13 @@ equivalence of the real and imaginary parts.
 \lean{ComputableAnalysis.ComplexRaw.add}
 \lean{ComputableAnalysis.ComplexRaw.mul}
 \lean{ComputableAnalysis.QBox.mulRealInterval_contains}
-\lean{ComputableAnalysis.QBox.mulRealInterval_ordered}
-\lean{ComputableAnalysis.QBox.mulRealInterval_nested}
 \lean{ComputableAnalysis.QBox.mul_contains}
-\lean{ComputableAnalysis.QBox.mul_ordered}
-\lean{ComputableAnalysis.QBox.mul_nested}
-\lean{ComputableAnalysis.ComplexRaw.mul_compute_ordered}
-\lean{ComputableAnalysis.ComplexRaw.mul_compute_nested}
-\lean{ComputableAnalysis.ComplexRaw.mul_valid_of_widthsShrink}
+\lean{ComputableAnalysis.QBox.mulRealInterval_width_le_of_abs_bounded}
+\lean{ComputableAnalysis.QBox.mul_width_height_le_of_coordinateBounded}
+\lean{ComputableAnalysis.QBox.mul_overlaps_of_overlaps}
+\lean{ComputableAnalysis.ComplexRaw.mul_valid}
+\lean{ComputableAnalysis.ComplexRaw.mul_equiv}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv_mul_ofQComplex}
 \lean{ComputableAnalysis.ComplexRaw.mulI}
 \lean{ComputableAnalysis.ComplexRaw.mulI_valid}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis}
@@ -516,22 +515,27 @@ where \(x,y,u,v\) are real numbers.  Then define
 \]
 At the level of rational boxes, multiplication is implemented by applying
 real interval arithmetic to these four real products and taking bounding
-intervals.  That finite layer is checked: the four-corner interval contains
-every enclosed rational product, is ordered, and refines when both input
-intervals refine; the corresponding complex box satisfies the same three
-facts.  The remaining raw-complex multiplication task is narrower: prove an
-explicit shrinking-width modulus for those nested boxes.
+intervals.  The four-corner interval contains every enclosed rational product,
+is ordered, and refines when both input intervals refine; the corresponding
+complex box satisfies the same three facts.  This already gives a certified
+raw product: every later input box lies in its stage-zero box, whose explicit
+rational coordinate radius yields a product-width modulus.  The resulting
+product respects raw overlap equivalence, witnessed at each stage by rational
+points in the two finite box intersections.
 For an exact rational complex scalar, the certified affine action
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
-is already available, with the two real scalar actions and the direct
-imaginary-unit rotation as its finite implementation.  The already certified special case
+is already available as a lower-cost exact implementation, with the two real
+scalar actions and the direct imaginary-unit rotation as its finite
+implementation.  The already certified special case
 \(iz=-\operatorname{im}(z)+i\operatorname{re}(z)\)
 is a coordinate rotation: it reverses one pair of endpoints and exchanges the
 coordinates.  Hence a certified real \(x\) already gives a certified complex
-handle \(ix\), and \(i\pi/2\) is literally its exact \(i/2\)-scalar action,
-without pretending that general complex multiplication is available.
+handle \(ix\), and \(i\pi/2\) is literally its exact \(i/2\)-scalar action.
+The affine scalar action is proved equivalent to ordinary multiplication by
+its exact rational complex box, so either evaluator can be used in a
+representation-safe calculation.
 \end{definition}
 
 \begin{definition}[Complex inverse]\label{def:complex-inverse}
@@ -564,8 +568,9 @@ a quotient construction.
 \begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}
 \uses{def:complex-quotient,def:complex-arithmetic,def:complex-inverse}
 Addition, negation, rational scaling, real-axis embedding, and the
-imaginary-unit rotation carry validity lemmas.  General complex product and
-inverse remain explicit certification targets.  The project does not claim a
+imaginary-unit rotation carry validity lemmas.  General complex product now
+carries both its validity and overlap-congruence theorems; complex inverse
+remains an explicit certification target.  The project does not claim a
 quotient field structure for \code{Complex}; scientific constructions use
 only certified raw operations and their accompanying overlap proofs.
 \end{proposition}

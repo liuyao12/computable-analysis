@@ -138,7 +138,7 @@ capability—not a percentage for the whole foundation.
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | bounded symmetric Cauchy integral | public two-piece monotone assembly, with an increasing `[-1,0]` branch and a decreasing `[0,1]` branch | symmetric Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
-| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | The input $i\pi/2$ is a certified raw box through `PiProofs.pi.imaginaryHalf`, equivalently the exact `ComplexRaw.qcomplexLeftMul` action of $i/2$; the final scalar leg $(-2i)(i\pi/2)=\pi$ is also checked, while the represented-input exponential modulus, geometric identification, and a log-at-$i$ branch remain planned |
+| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | General `ComplexRaw.mul` is now valid and representation-safe; the input $i\pi/2$ is a certified raw box through `PiProofs.pi.imaginaryHalf`, equivalently the exact `ComplexRaw.qcomplexLeftMul` action of $i/2$; the final scalar leg $(-2i)(i\pi/2)=\pi$ is now checked both through that affine action and through ordinary raw-complex multiplication, while the represented-input exponential modulus, geometric identification, and a log-at-$i$ branch remain planned |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,

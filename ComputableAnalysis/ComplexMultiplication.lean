@@ -1,4 +1,4 @@
-import ComputableAnalysis.Basic
+import ComputableAnalysis.ComplexAffine
 
 /-!
 # Finite interval multiplication for complex boxes
@@ -249,6 +249,316 @@ theorem mulRealInterval_nested
   exact ⟨le_min4 h_ac.1 h_ad.1 h_bc.1 h_bd.1,
     max4_le h_ac.2 h_ad.2 h_bc.2 h_bd.2⟩
 
+/-- Every coordinate of a rational complex box is bounded in absolute value
+by the supplied rational radius.  This is the finite hypothesis used by the
+product-width estimate below. -/
+def CoordinateBounded (A : QBox) (B : Rat) : Prop :=
+  qabs A.lo.re <= B /\ qabs A.hi.re <= B /\
+    qabs A.lo.im <= B /\ qabs A.hi.im <= B
+
+/-- A strictly positive rational radius containing all four coordinates of a
+box.  Adding one is intentional: it gives a nonzero denominator in the
+eventual product-width schedule without any case distinction. -/
+def coordinateRadius (A : QBox) : Rat :=
+  1 + max4 (qabs A.lo.re) (qabs A.hi.re) (qabs A.lo.im) (qabs A.hi.im)
+
+theorem coordinateRadius_pos (A : QBox) : 0 < A.coordinateRadius := by
+  unfold coordinateRadius
+  have hmax : 0 <= max4 (qabs A.lo.re) (qabs A.hi.re)
+      (qabs A.lo.im) (qabs A.hi.im) :=
+    Rat.le_trans (qabs_nonneg A.lo.re)
+      (first_le_max4 _ _ _ _)
+  grind
+
+theorem coordinateBounded_radius (A : QBox) :
+    A.CoordinateBounded A.coordinateRadius := by
+  unfold CoordinateBounded coordinateRadius
+  constructor
+  · have hfirst : qabs A.lo.re <=
+        max4 (qabs A.lo.re) (qabs A.hi.re) (qabs A.lo.im) (qabs A.hi.im) :=
+      first_le_max4 _ _ _ _
+    exact Rat.le_trans hfirst (by grind)
+  constructor
+  · have hsecond : qabs A.hi.re <=
+        max4 (qabs A.lo.re) (qabs A.hi.re) (qabs A.lo.im) (qabs A.hi.im) :=
+      second_le_max4 _ _ _ _
+    exact Rat.le_trans hsecond (by grind)
+  constructor
+  · have hthird : qabs A.lo.im <=
+        max4 (qabs A.lo.re) (qabs A.hi.re) (qabs A.lo.im) (qabs A.hi.im) :=
+      third_le_max4 _ _ _ _
+    exact Rat.le_trans hthird (by grind)
+  · have hfourth : qabs A.hi.im <=
+        max4 (qabs A.lo.re) (qabs A.hi.re) (qabs A.lo.im) (qabs A.hi.im) :=
+      fourth_le_max4 _ _ _ _
+    exact Rat.le_trans hfourth (by grind)
+
+theorem CoordinateBounded.mono {A : QBox} {B C : Rat}
+    (hA : A.CoordinateBounded B) (hBC : B <= C) :
+    A.CoordinateBounded C := by
+  exact ⟨Rat.le_trans hA.1 hBC, Rat.le_trans hA.2.1 hBC,
+    Rat.le_trans hA.2.2.1 hBC, Rat.le_trans hA.2.2.2 hBC⟩
+
+private theorem qabs_le_of_endpoint_bounds {a b x B : Rat}
+    (ha : qabs a <= B) (hb : qabs b <= B)
+    (hax : a <= x) (hxb : x <= b) : qabs x <= B := by
+  apply qabs_le_of_neg_le_le
+  · calc
+      -B <= -qabs a := Rat.neg_le_neg ha
+      _ <= a := neg_qabs_le_self a
+      _ <= x := hax
+  · calc
+      x <= b := hxb
+      _ <= qabs b := self_le_qabs b
+      _ <= B := hb
+
+/-- A box nested in an ordered coordinate-bounded box inherits that rational
+coordinate bound. -/
+theorem coordinateBounded_of_nested {inner outer : QBox} {B : Rat}
+    (hinner : inner.Ordered) (hnested : inner.NestedIn outer)
+    (houter : outer.CoordinateBounded B) : inner.CoordinateBounded B := by
+  rcases houter with ⟨horelo, horehi, hoimlo, hoimhi⟩
+  constructor
+  · apply qabs_le_of_endpoint_bounds horelo horehi
+    · exact hnested.1.1
+    · exact Rat.le_trans hinner.1 hnested.2.1
+  constructor
+  · apply qabs_le_of_endpoint_bounds horelo horehi
+    · exact Rat.le_trans hnested.1.1 hinner.1
+    · exact hnested.2.1
+  constructor
+  · apply qabs_le_of_endpoint_bounds hoimlo hoimhi
+    · exact hnested.1.2
+    · exact Rat.le_trans hinner.2 hnested.2.2
+  · apply qabs_le_of_endpoint_bounds hoimlo hoimhi
+    · exact Rat.le_trans hnested.1.2 hinner.2
+    · exact hnested.2.2
+
+/-- The rational center of an ordered complex box is an enclosed rational
+point. -/
+theorem center_mem {A : QBox} (hA : A.Ordered) :
+    A.lo <= A.center /\ A.center <= A.hi := by
+  have hre := QInterval.midpoint_mem
+    (I := { lo := A.lo.re, hi := A.hi.re }) hA.1
+  have him := QInterval.midpoint_mem
+    (I := { lo := A.lo.im, hi := A.hi.im }) hA.2
+  simp only [QBox.center, QComplex.le_def]
+  exact ⟨⟨by simpa [QInterval.midpoint] using hre.1,
+      by simpa [QInterval.midpoint] using him.1⟩,
+    ⟨by simpa [QInterval.midpoint] using hre.2,
+      by simpa [QInterval.midpoint] using him.2⟩⟩
+
+/-- Coordinatewise addition of boxes contains the sum of any enclosed
+rational complex points. -/
+theorem add_contains {A C : QBox} {x y : QComplex}
+    (hxlo : A.lo <= x) (hxhi : x <= A.hi)
+    (hylo : C.lo <= y) (hyhi : y <= C.hi) :
+    (add A C).lo <= QComplex.add x y /\
+      QComplex.add x y <= (add A C).hi := by
+  change
+    (A.lo.re + C.lo.re <= x.re + y.re /\
+      A.lo.im + C.lo.im <= x.im + y.im) /\
+    (x.re + y.re <= A.hi.re + C.hi.re /\
+      x.im + y.im <= A.hi.im + C.hi.im)
+  exact ⟨⟨rat_add_le_add hxlo.1 hylo.1,
+      rat_add_le_add hxlo.2 hylo.2⟩,
+    ⟨rat_add_le_add hxhi.1 hyhi.1,
+      rat_add_le_add hxhi.2 hyhi.2⟩⟩
+
+/-- Scaling a box by an exact rational contains the scaled enclosed point,
+with endpoint reversal handled in the negative case. -/
+theorem scaleRat_contains {r : Rat} {A : QBox} {x : QComplex}
+    (hxlo : A.lo <= x) (hxhi : x <= A.hi) :
+    (scaleRat r A).lo <= QComplex.scaleRat r x /\
+      QComplex.scaleRat r x <= (scaleRat r A).hi := by
+  by_cases hr : 0 <= r
+  · simp only [scaleRat, QComplex.scaleRat, if_pos hr]
+    exact ⟨
+      ⟨Rat.mul_le_mul_of_nonneg_left hxlo.1 hr,
+        Rat.mul_le_mul_of_nonneg_left hxlo.2 hr⟩,
+      ⟨Rat.mul_le_mul_of_nonneg_left hxhi.1 hr,
+        Rat.mul_le_mul_of_nonneg_left hxhi.2 hr⟩⟩
+  · have hr0 : r <= 0 := by grind
+    simp only [scaleRat, QComplex.scaleRat, if_neg hr]
+    exact ⟨
+      ⟨mul_le_mul_of_nonpos_left hxhi.1 hr0,
+        mul_le_mul_of_nonpos_left hxhi.2 hr0⟩,
+      ⟨mul_le_mul_of_nonpos_left hxlo.1 hr0,
+        mul_le_mul_of_nonpos_left hxlo.2 hr0⟩⟩
+
+private theorem product_deviation_bound
+    {a b c d x y B : Rat}
+    (hab : a <= b) (hcd : c <= d)
+    (ha : qabs a <= B)
+    (hc : qabs c <= B) (hd : qabs d <= B)
+    (hax : a <= x) (hxb : x <= b)
+    (hcy : c <= y) (hyd : y <= d) :
+    qabs (x * y - a * c) <= B * ((b - a) + (d - c)) := by
+  have hxgap : qabs (x - a) <= b - a :=
+    qabs_sub_le_of_common_bounds hax hxb Rat.le_refl hab
+  have hygap : qabs (y - c) <= d - c :=
+    qabs_sub_le_of_common_bounds hcy hyd Rat.le_refl hcd
+  have hyabs : qabs y <= B :=
+    qabs_le_of_endpoint_bounds hc hd hcy hyd
+  have hwidthx : 0 <= b - a := by grind [Rat.sub_eq_add_neg]
+  have hwidthy : 0 <= d - c := by grind [Rat.sub_eq_add_neg]
+  have hleft : qabs (x - a) * qabs y <= (b - a) * B := by
+    calc
+      qabs (x - a) * qabs y <= (b - a) * qabs y :=
+        Rat.mul_le_mul_of_nonneg_right hxgap (qabs_nonneg y)
+      _ <= (b - a) * B :=
+        Rat.mul_le_mul_of_nonneg_left hyabs hwidthx
+  have hright : qabs a * qabs (y - c) <= B * (d - c) := by
+    calc
+      qabs a * qabs (y - c) <= qabs a * (d - c) :=
+        Rat.mul_le_mul_of_nonneg_left hygap (qabs_nonneg a)
+      _ <= B * (d - c) :=
+        Rat.mul_le_mul_of_nonneg_right ha hwidthy
+  have hdecompose :
+      x * y - a * c = (x - a) * y + a * (y - c) := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_comm]
+  calc
+    qabs (x * y - a * c) = qabs ((x - a) * y + a * (y - c)) := by
+      rw [hdecompose]
+    _ <= qabs ((x - a) * y) + qabs (a * (y - c)) :=
+      qabs_add_le _ _
+    _ = qabs (x - a) * qabs y + qabs a * qabs (y - c) := by
+      rw [qabs_mul, qabs_mul]
+    _ <= (b - a) * B + B * (d - c) := rat_add_le_add hleft hright
+    _ = B * ((b - a) + (d - c)) := by
+      grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem product_deviation_bounds
+    {a c p E : Rat} (h : qabs (p - a * c) <= E) :
+    a * c - E <= p /\ p <= a * c + E := by
+  constructor
+  · have hneg : -E <= p - a * c :=
+      Rat.le_trans (Rat.neg_le_neg h) (neg_qabs_le_self _)
+    grind [Rat.sub_eq_add_neg]
+  · have hpos : p - a * c <= E :=
+      Rat.le_trans (self_le_qabs _) h
+    grind [Rat.sub_eq_add_neg]
+
+/-- The width of a literal four-corner product is bounded by a finite
+rational Lipschitz estimate.  Both input intervals are assumed coordinatewise
+bounded by the same rational `B`; no ambient real multiplication is used. -/
+theorem mulRealInterval_width_le_of_abs_bounded {a b c d B : Rat}
+    (hab : a <= b) (hcd : c <= d)
+    (ha : qabs a <= B)
+    (hc : qabs c <= B) (hd : qabs d <= B) :
+    (mulRealInterval a b c d).width <=
+      2 * B * ((b - a) + (d - c)) := by
+  let E : Rat := B * ((b - a) + (d - c))
+  have hac := product_deviation_bounds
+    (a := a) (c := c) (E := E)
+    (product_deviation_bound hab hcd ha hc hd
+      Rat.le_refl hab Rat.le_refl hcd)
+  have had := product_deviation_bounds
+    (a := a) (c := c) (E := E)
+    (product_deviation_bound hab hcd ha hc hd
+      Rat.le_refl hab hcd Rat.le_refl)
+  have hbc := product_deviation_bounds
+    (a := a) (c := c) (E := E)
+    (product_deviation_bound hab hcd ha hc hd
+      hab Rat.le_refl Rat.le_refl hcd)
+  have hbd := product_deviation_bounds
+    (a := a) (c := c) (E := E)
+    (product_deviation_bound hab hcd ha hc hd
+      hab Rat.le_refl hcd Rat.le_refl)
+  have hlow : a * c - E <= min4 (a * c) (a * d) (b * c) (b * d) :=
+    le_min4 hac.1 had.1 hbc.1 hbd.1
+  have hhigh : max4 (a * c) (a * d) (b * c) (b * d) <= a * c + E :=
+    max4_le hac.2 had.2 hbc.2 hbd.2
+  unfold mulRealInterval QInterval.width
+  calc
+    max4 (a * c) (a * d) (b * c) (b * d) -
+        min4 (a * c) (a * d) (b * c) (b * d) <=
+        (a * c + E) - (a * c - E) := by grind [Rat.sub_eq_add_neg]
+    _ = 2 * B * ((b - a) + (d - c)) := by
+      dsimp [E]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+/-- A coordinatewise-bounded complex-box product has both coordinate widths
+controlled by the four input coordinate widths. -/
+theorem mul_width_height_le_of_coordinateBounded {A C : QBox} {B : Rat}
+    (hA : A.Ordered) (hC : C.Ordered)
+    (hAbound : A.CoordinateBounded B) (hCbound : C.CoordinateBounded B) :
+    (mul A C).width <= 2 * B * (A.width + A.height + C.width + C.height) /\
+      (mul A C).height <= 2 * B * (A.width + A.height + C.width + C.height) := by
+  rcases hAbound with ⟨hArelo, _, hAimlo, _⟩
+  rcases hCbound with ⟨hCrelo, hCrehi, hCimlo, hCimhi⟩
+  have hrr := mulRealInterval_width_le_of_abs_bounded hA.1 hC.1
+    hArelo hCrelo hCrehi
+  have hii := mulRealInterval_width_le_of_abs_bounded hA.2 hC.2
+    hAimlo hCimlo hCimhi
+  have hri := mulRealInterval_width_le_of_abs_bounded hA.1 hC.2
+    hArelo hCimlo hCimhi
+  have hir := mulRealInterval_width_le_of_abs_bounded hA.2 hC.1
+    hAimlo hCrelo hCrehi
+  constructor
+  · change
+      (mulRealInterval A.lo.re A.hi.re C.lo.re C.hi.re).hi -
+          (mulRealInterval A.lo.im A.hi.im C.lo.im C.hi.im).lo -
+        ((mulRealInterval A.lo.re A.hi.re C.lo.re C.hi.re).lo -
+          (mulRealInterval A.lo.im A.hi.im C.lo.im C.hi.im).hi) <= _
+    calc
+      (mulRealInterval A.lo.re A.hi.re C.lo.re C.hi.re).hi -
+            (mulRealInterval A.lo.im A.hi.im C.lo.im C.hi.im).lo -
+          ((mulRealInterval A.lo.re A.hi.re C.lo.re C.hi.re).lo -
+            (mulRealInterval A.lo.im A.hi.im C.lo.im C.hi.im).hi) =
+          (mulRealInterval A.lo.re A.hi.re C.lo.re C.hi.re).width +
+            (mulRealInterval A.lo.im A.hi.im C.lo.im C.hi.im).width := by
+              unfold QInterval.width
+              grind [Rat.sub_eq_add_neg]
+      _ <= 2 * B * ((A.hi.re - A.lo.re) + (C.hi.re - C.lo.re)) +
+          2 * B * ((A.hi.im - A.lo.im) + (C.hi.im - C.lo.im)) :=
+        rat_add_le_add hrr hii
+      _ = 2 * B * (A.width + A.height + C.width + C.height) := by
+        unfold QBox.width QBox.height
+        grind [Rat.mul_add, Rat.mul_assoc, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_comm]
+  · change
+      (mulRealInterval A.lo.re A.hi.re C.lo.im C.hi.im).hi +
+          (mulRealInterval A.lo.im A.hi.im C.lo.re C.hi.re).hi -
+        ((mulRealInterval A.lo.re A.hi.re C.lo.im C.hi.im).lo +
+          (mulRealInterval A.lo.im A.hi.im C.lo.re C.hi.re).lo) <= _
+    calc
+      (mulRealInterval A.lo.re A.hi.re C.lo.im C.hi.im).hi +
+            (mulRealInterval A.lo.im A.hi.im C.lo.re C.hi.re).hi -
+          ((mulRealInterval A.lo.re A.hi.re C.lo.im C.hi.im).lo +
+            (mulRealInterval A.lo.im A.hi.im C.lo.re C.hi.re).lo) =
+          (mulRealInterval A.lo.re A.hi.re C.lo.im C.hi.im).width +
+            (mulRealInterval A.lo.im A.hi.im C.lo.re C.hi.re).width := by
+              unfold QInterval.width
+              grind [Rat.sub_eq_add_neg]
+      _ <= 2 * B * ((A.hi.re - A.lo.re) + (C.hi.im - C.lo.im)) +
+          2 * B * ((A.hi.im - A.lo.im) + (C.hi.re - C.lo.re)) :=
+        rat_add_le_add hri hir
+      _ = 2 * B * (A.width + A.height + C.width + C.height) := by
+        unfold QBox.width QBox.height
+        grind [Rat.mul_add, Rat.mul_assoc, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_comm]
+
+/-- A rational point selected from the coordinatewise intersection of two
+overlapping boxes.  It is a finite witness for product-overlap transport. -/
+private def overlapPoint (A C : QBox) : QComplex :=
+  { re := maxRat2 A.lo.re C.lo.re, im := maxRat2 A.lo.im C.lo.im }
+
+private theorem overlapPoint_mem_left {A C : QBox}
+    (hA : A.Ordered) (hover : A.Overlaps C) :
+    A.lo <= overlapPoint A C /\ overlapPoint A C <= A.hi := by
+  constructor
+  · exact ⟨le_maxRat2_left _ _, le_maxRat2_left _ _⟩
+  · exact ⟨maxRat2_le hA.1 hover.2.1, maxRat2_le hA.2 hover.2.2⟩
+
+private theorem overlapPoint_mem_right {A C : QBox}
+    (hC : C.Ordered) (hover : A.Overlaps C) :
+    C.lo <= overlapPoint A C /\ overlapPoint A C <= C.hi := by
+  constructor
+  · exact ⟨le_maxRat2_right _ _, le_maxRat2_right _ _⟩
+  · exact ⟨maxRat2_le hover.1.1 hC.1, maxRat2_le hover.1.2 hC.2⟩
+
 /-- The literal complex box product contains the ordinary rational complex
 product of any two rational points enclosed by its input boxes. -/
 theorem mul_contains {A B : QBox} {z w : QComplex}
@@ -284,6 +594,31 @@ theorem mul_contains {A B : QBox} {z w : QComplex}
   constructor
   · constructor <;> grind [Rat.sub_eq_add_neg]
   · constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- Literal four-corner multiplication carries two pairs of overlapping,
+ordered input boxes to overlapping output boxes.  The proof names rational
+points in the two finite intersections, so it requires neither a completed
+complex plane nor a choice principle. -/
+theorem mul_overlaps_of_overlaps {A A' C C' : QBox}
+    (hA : A.Ordered) (hA' : A'.Ordered)
+    (hC : C.Ordered) (hC' : C'.Ordered)
+    (hAA' : A.Overlaps A') (hCC' : C.Overlaps C') :
+    (mul A C).Overlaps (mul A' C') := by
+  let x := overlapPoint A A'
+  let y := overlapPoint C C'
+  have hxA := overlapPoint_mem_left hA hAA'
+  have hxA' := overlapPoint_mem_right hA' hAA'
+  have hyC := overlapPoint_mem_left hC hCC'
+  have hyC' := overlapPoint_mem_right hC' hCC'
+  have hleft := mul_contains (A := A) (B := C) (z := x) (w := y)
+    hxA.1 hxA.2 hyC.1 hyC.2
+  have hright := mul_contains (A := A') (B := C') (z := x) (w := y)
+    hxA'.1 hxA'.2 hyC'.1 hyC'.2
+  exact ⟨
+    ⟨Rat.le_trans hleft.1.1 hright.2.1,
+      Rat.le_trans hleft.1.2 hright.2.2⟩,
+    ⟨Rat.le_trans hright.1.1 hleft.2.1,
+      Rat.le_trans hright.1.2 hleft.2.2⟩⟩
 
 /-- The literal product of two ordered complex boxes is ordered. -/
 theorem mul_ordered {A B : QBox}
@@ -376,6 +711,165 @@ theorem mul_valid_of_widthsShrink {z w : ComplexRaw}
       have hnest := mul_compute_nested hz hw hnm
       exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
     · exact hshrink
+
+/-- Arbitrary valid complex raw algorithms are closed under the literal
+four-corner complex product.  The width schedule is obtained constructively
+from the two finite stage-zero boxes: validity nests every later coordinate
+inside those boxes, whose explicit rational radii bound multiplication.
+
+This is a raw-box theorem, not an appeal to multiplication in a completed
+complex plane. -/
+theorem mul_valid {z w : ComplexRaw}
+    (hz : z.Valid) (hw : w.Valid) :
+    (mul z w).Valid := by
+  apply mul_valid_of_widthsShrink hz hw
+  intro eps
+  let Bz : Rat := (z.compute 0).coordinateRadius
+  let Bw : Rat := (w.compute 0).coordinateRadius
+  let B : Rat := Bz + Bw
+  have hBzpos : 0 < Bz := by
+    dsimp [Bz]
+    exact QBox.coordinateRadius_pos _
+  have hBwpos : 0 < Bw := by
+    dsimp [Bw]
+    exact QBox.coordinateRadius_pos _
+  have hBpos : 0 < B := by
+    dsimp [B]
+    grind
+  have height : 0 < (8 : Rat) * B :=
+    Rat.mul_pos (by native_decide) hBpos
+  let delta : QPos := ⟨eps.val / ((8 : Rat) * B), by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property ((Rat.inv_pos).2 height)⟩
+  obtain ⟨Nz, hNz⟩ := hz.2.2 delta
+  obtain ⟨Nw, hNw⟩ := hw.2.2 delta
+  refine ⟨Nat.max Nz Nw, ?_⟩
+  intro n hn
+  have hnz : Nz <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+  have hnw : Nw <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+  have hznarrow := hNz n hnz
+  have hwnarrow := hNw n hnw
+  have hzradius : (z.compute n).CoordinateBounded Bz := by
+    apply QBox.coordinateBounded_of_nested
+      (valid_ordered hz n) (valid_nestedIn hz (Nat.zero_le n))
+    exact QBox.coordinateBounded_radius _
+  have hwradius : (w.compute n).CoordinateBounded Bw := by
+    apply QBox.coordinateBounded_of_nested
+      (valid_ordered hw n) (valid_nestedIn hw (Nat.zero_le n))
+    exact QBox.coordinateBounded_radius _
+  have hBzle : Bz <= B := by
+    dsimp [B]
+    have hBw0 : 0 <= Bw := Rat.le_of_lt hBwpos
+    grind
+  have hBwle : Bw <= B := by
+    dsimp [B]
+    have hBz0 : 0 <= Bz := Rat.le_of_lt hBzpos
+    grind
+  have hzbound : (z.compute n).CoordinateBounded B :=
+    hzradius.mono hBzle
+  have hwbound : (w.compute n).CoordinateBounded B :=
+    hwradius.mono hBwle
+  have hproduct := QBox.mul_width_height_le_of_coordinateBounded
+    (valid_ordered hz n) (valid_ordered hw n) hzbound hwbound
+  have hsum :
+      (z.compute n).width + (z.compute n).height +
+          (w.compute n).width + (w.compute n).height <= 4 * delta.val := by
+    grind
+  have hconstant_nonneg : 0 <= 2 * B := by
+    have hB0 : 0 <= B := Rat.le_of_lt hBpos
+    grind
+  have hscaled :
+      2 * B * ((z.compute n).width + (z.compute n).height +
+          (w.compute n).width + (w.compute n).height) <= eps.val := by
+    calc
+      2 * B * ((z.compute n).width + (z.compute n).height +
+            (w.compute n).width + (w.compute n).height) <=
+          2 * B * (4 * delta.val) :=
+        Rat.mul_le_mul_of_nonneg_left hsum hconstant_nonneg
+      _ = eps.val := by
+        dsimp [delta]
+        rw [Rat.div_def]
+        have hne : (8 : Rat) * B ≠ 0 := Rat.ne_of_gt height
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  exact ⟨Rat.le_trans hproduct.1 hscaled,
+    Rat.le_trans hproduct.2 hscaled⟩
+
+/-- Multiplication respects the project's overlap equality on valid complex
+raw algorithms.  At each stage, the finite overlap witnesses for the two
+input boxes provide rational points in their intersections; the four-corner
+product boxes both contain the product of those points. -/
+theorem mul_equiv {z z' w w' : ComplexRaw}
+    (hz : z.Valid) (hz' : z'.Valid) (hw : w.Valid) (hw' : w'.Valid)
+    (hzz' : z.Equiv z') (hww' : w.Equiv w') :
+    (mul z w).Equiv (mul z' w') := by
+  intro n
+  have hzz := (compareAt_overlap_iff z z' n n).1 (hzz' n)
+  have hww := (compareAt_overlap_iff w w' n n).1 (hww' n)
+  apply (compareAt_overlap_iff (mul z w) (mul z' w') n n).2
+  change QBox.Overlaps (QBox.mul (z.compute n) (w.compute n))
+    (QBox.mul (z'.compute n) (w'.compute n))
+  exact QBox.mul_overlaps_of_overlaps
+    (valid_ordered hz n) (valid_ordered hz' n)
+    (valid_ordered hw n) (valid_ordered hw' n) hzz hww
+
+private theorem mulI_contains_rotation_point {z : ComplexRaw} {p : QComplex}
+    (n : Nat) (hp : (z.compute n).lo <= p /\ p <= (z.compute n).hi) :
+    ((mulI z).compute n).lo <= { re := -p.im, im := p.re } /\
+      { re := -p.im, im := p.re } <= ((mulI z).compute n).hi := by
+  change
+    (-((z.compute n).hi.im) <= -p.im /\ (z.compute n).lo.re <= p.re) /\
+      (-p.im <= -((z.compute n).lo.im) /\ p.re <= (z.compute n).hi.re)
+  exact ⟨⟨Rat.neg_le_neg hp.2.2, hp.1.1⟩,
+    ⟨Rat.neg_le_neg hp.1.2, hp.2.1⟩⟩
+
+private theorem qcomplex_mul_as_affine_rotation (c p : QComplex) :
+    QComplex.add (QComplex.scaleRat c.re p)
+      (QComplex.scaleRat c.im { re := -p.im, im := p.re }) =
+      QComplex.mul c p := by
+  cases c
+  cases p
+  simp only [QComplex.add, QComplex.scaleRat, QComplex.mul]
+  congr 1 <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact rational complex scalar multiplication agrees with the general
+four-corner product.  The affine representation remains a convenient exact
+evaluator, while this bridge lets later theorems use ordinary raw-complex
+multiplication without selecting a special scalar implementation. -/
+theorem qcomplexLeftMul_equiv_mul_ofQComplex (c : QComplex) {z : ComplexRaw}
+    (hz : z.Valid) :
+    (qcomplexLeftMul c z).Equiv (mul (ofQComplex c) z) := by
+  intro n
+  let p := (z.compute n).center
+  have hp : (z.compute n).lo <= p /\ p <= (z.compute n).hi :=
+    QBox.center_mem (valid_ordered hz n)
+  have hrotate := mulI_contains_rotation_point n hp
+  have hscale := QBox.scaleRat_contains (r := c.re) hp.1 hp.2
+  have hrotateScale := QBox.scaleRat_contains (r := c.im) hrotate.1 hrotate.2
+  have haffine := QBox.add_contains hscale.1 hscale.2
+    hrotateScale.1 hrotateScale.2
+  have hformula := qcomplex_mul_as_affine_rotation c p
+  have haffine' :
+      ((qcomplexLeftMul c z).compute n).lo <= QComplex.mul c p /\
+        QComplex.mul c p <= ((qcomplexLeftMul c z).compute n).hi := by
+    change
+      (QBox.add (QBox.scaleRat c.re (z.compute n))
+        (QBox.scaleRat c.im ((mulI z).compute n))).lo <= QComplex.mul c p /\
+      QComplex.mul c p <=
+        (QBox.add (QBox.scaleRat c.re (z.compute n))
+          (QBox.scaleRat c.im ((mulI z).compute n))).hi
+    rw [← hformula]
+    exact haffine
+  have hproduct :
+      ((mul (ofQComplex c) z).compute n).lo <= QComplex.mul c p /\
+        QComplex.mul c p <= ((mul (ofQComplex c) z).compute n).hi := by
+    change (QBox.mul (QBox.point c) (z.compute n)).lo <= QComplex.mul c p /\
+      QComplex.mul c p <= (QBox.mul (QBox.point c) (z.compute n)).hi
+    exact QBox.mul_contains (QComplex.le_refl c) (QComplex.le_refl c) hp.1 hp.2
+  apply (compareAt_overlap_iff (qcomplexLeftMul c z) (mul (ofQComplex c) z)
+    n n).2
+  exact ⟨QComplex.le_trans haffine'.1 hproduct.2,
+    QComplex.le_trans hproduct.1 haffine'.2⟩
 
 end ComplexRaw
 

@@ -1,4 +1,4 @@
-import ComputableAnalysis.ComplexAffine
+import ComputableAnalysis.ComplexMultiplication
 import ComputableAnalysis.PiProofs
 
 /-!
@@ -96,6 +96,15 @@ theorem imaginaryHalf_qcomplexLeftMul_equiv_presentation
 /-- The exact scalar `-2i`, used in the complex-logarithm presentation of pi. -/
 def negativeTwoImaginaryScalar : QComplex := { re := 0, im := -2 }
 
+/-- The exact rational raw complex number (-2i), retained separately from
+the affine scalar so that the Euler/logarithm route can use ordinary certified
+complex multiplication. -/
+def negativeTwoImaginaryRaw : ComplexRaw :=
+  ComplexRaw.ofQComplex negativeTwoImaginaryScalar
+
+theorem negativeTwoImaginaryRaw_valid : negativeTwoImaginaryRaw.Valid :=
+  ComplexRaw.ofQComplex_valid negativeTwoImaginaryScalar
+
 /-- The finite rational box calculation
 
 \[
@@ -158,6 +167,32 @@ theorem negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea :
   have hordered := ComplexRaw.valid_ordered
     (ComplexRaw.ofRealRaw_valid circleArea.raw circleArea.valid) n
   exact ⟨hordered, hordered⟩
+
+/-- The same return leg is now also a theorem of ordinary certified complex
+multiplication, rather than only of the exact affine scalar shortcut:
+
+\[
+  (-2i)(i\pi/2)=\pi.
+\]
+
+The general product is first bridged to the affine evaluator using its common
+rational center witness; no completed complex field is introduced. -/
+theorem negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea :
+    (negativeTwoImaginaryRaw * imaginaryHalf).Equiv
+      (ComplexRaw.ofRealRaw circleArea.raw) := by
+  have hproductToAffine :
+      (negativeTwoImaginaryRaw * imaginaryHalf).Equiv
+        (ComplexRaw.qcomplexLeftMul negativeTwoImaginaryScalar imaginaryHalf) := by
+    simpa [negativeTwoImaginaryRaw] using
+      ComplexRaw.equiv_symm
+        (ComplexRaw.qcomplexLeftMul_equiv_mul_ofQComplex
+          negativeTwoImaginaryScalar imaginaryHalf_valid)
+  exact ComplexRaw.equiv_trans
+    (ComplexRaw.mul_valid negativeTwoImaginaryRaw_valid imaginaryHalf_valid)
+    (ComplexRaw.qcomplexLeftMul_valid negativeTwoImaginaryScalar imaginaryHalf_valid)
+    (ComplexRaw.ofRealRaw_valid circleArea.raw circleArea.valid)
+    hproductToAffine
+    negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea
 
 /-- The remaining branch-specific input for the complex-logarithm pi route.
 This package does not construct a logarithm: a series, path, or inverse-exp
