@@ -553,9 +553,6 @@ open ComputableAnalysis
 #check PiProofs.pi.halfPi_valid
 #check PiProofs.pi.halfPi_width_le_two_div_succ
 #check PiProofs.pi.halfPi_bounds
-#check PiProofs.pi.halfPiFromArctanGeom
-#check PiProofs.pi.halfPi_equiv_twoArctanGeomOne
-#check PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne
 #check PiProofs.pi.halfPiRotation
 #check PiProofs.pi.halfPiRotation_valid
 #check PiProofs.pi.halfPiRotation_contains_current_candidate
@@ -571,9 +568,8 @@ open ComputableAnalysis
 #check PiProofs.pi.imaginaryHalf_equiv_presentation
 ```
 
-`halfPi` is a certified raw angle with boxes in `[1,2]`; it is also
-equivalent to both `2 * arctan.geom(1)` and the normalized geometric
-quarter-turn raw. `halfPiRotation` is the valid complex raw obtained by
+`halfPi` is a certified raw angle with boxes in `[1,2]`.
+`halfPiRotation` is the valid complex raw obtained by
 stabilizing the bounded rational factorial rotations at the midpoint of those
 boxes. Its explicit input radius is at most `32 / (n + 1)`, and
 `halfPiRotation_contains_current_candidate` lets a later geometric
@@ -611,8 +607,8 @@ targets until their raw-slope equalities are formalized.
 At the nontrivial endpoint, the direct finite-box theorem
 `two_arctanGeom_one_equiv_quarterTurnRaw_one` records
 `2 * arctan.geom(1) = pi / 2` as the normalized geometric quarter turn.  It
-does not identify the factorial rotation with that point; that remains the
-Euler bridge.
+does not yet transport that geometric angle to `PiProofs.pi.halfPi` or identify
+the factorial rotation with its point; those are the next Euler-bridge steps.
 
 For rational-circle chord refinements, do not select an exact square root.
 The direct evaluator is already certified in
