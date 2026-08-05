@@ -59,9 +59,17 @@ GeometricRotationODE.pointIm_differenceQuotient
 ```
 
 They give the two coordinate secants exactly, for every nonzero rational
-step.  The next proof package subtracts the named rational velocity, factors
-the error by the step, bounds it on a rational chart interval, and packages
-that bound in the project's epsilon--delta interval derivative interface.
+step.  Subtracting the named rational velocity is also checked:
+
+```lean
+GeometricRotationODE.pointRe_differenceQuotient_sub_derivative
+GeometricRotationODE.pointIm_differenceQuotient_sub_derivative
+```
+
+Each error is literally a rational fraction with an explicit factor of the
+step.  The next proof package bounds the remaining factors on a rational chart
+interval and packages that bound in the project's epsilon--delta interval
+derivative interface.
 
 A complex/vector derivative wrapper and the sector-area reparametrization then
 lead to Peano--Baker/Volterra uniqueness.  That comparison would identify the

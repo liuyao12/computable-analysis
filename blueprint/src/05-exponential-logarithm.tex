@@ -286,6 +286,8 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_sectorAreaSpeed_rotation}
 \lean{ComputableAnalysis.GeometricRotationODE.pointRe_differenceQuotient}
 \lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_differenceQuotient_sub_derivative}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient_sub_derivative}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -358,11 +360,13 @@ The rational circle chart now supplies the exact finite hand-off:
   \qquad \operatorname{sectorAreaSpeed}(t)=\frac{2}{1+t^2}.
 \]
 These are rational-function identities, not yet a represented-function
-derivative theorem.  The two coordinate secants have now been reduced exactly
-to rational fractions by portable denominator clearing.  The next package
-subtracts the rational velocity and turns those fractions into a literal
-epsilon--delta interval derivative certificate.  A complex/vector wrapper and
-sector-area reparametrization then remain before Peano--Baker/Volterra
-uniqueness can identify this geometric solution with the factorial rotation
-raw and connect it to the complex exponential/logarithm branches.
+derivative theorem.  The two coordinate secants and their errors relative to
+the rational velocity have now been reduced exactly to rational fractions by
+portable denominator clearing; each error displays an explicit factor of the
+rational step.  The next package bounds the remaining factors on a chart
+interval and turns the formulas into a literal epsilon--delta interval
+derivative certificate.  A complex/vector wrapper and sector-area
+reparametrization then remain before Peano--Baker/Volterra uniqueness can
+identify this geometric solution with the factorial rotation raw and connect
+it to the complex exponential/logarithm branches.
 \end{theorem}

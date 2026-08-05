@@ -44,6 +44,14 @@ def pointRe (t : Rat) : Rat := (RationalCircle.Stage.point t).x
 for finite-difference certificates. -/
 def pointIm (t : Rat) : Rat := (RationalCircle.Stage.point t).y
 
+/-- The exact rational velocity in the real coordinate. -/
+def pointReDerivative (t : Rat) : Rat :=
+  (RationalCircle.Stage.pointDerivative t).x
+
+/-- The exact rational velocity in the imaginary coordinate. -/
+def pointImDerivative (t : Rat) : Rat :=
+  (RationalCircle.Stage.pointDerivative t).y
+
 private theorem rat_eq_of_right_mul_eq_mul_ne {a b c : Rat}
     (hc : c ≠ 0) (h : a * c = b * c) : a = b := by
   calc
@@ -139,6 +147,99 @@ theorem pointIm_differenceQuotient (t h : Rat) (hh : h ≠ 0) :
       · exact hene hzero)
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact real-coordinate secant error relative to the named rational
+velocity.  Its explicit factor of `h` is the starting point for a quantitative
+derivative modulus. -/
+theorem pointRe_differenceQuotient_sub_derivative (t h : Rat) (hh : h ≠ 0) :
+    (pointRe (t + h) - pointRe t) / h - pointReDerivative t =
+      (2 * h * (-1 + 3 * t * t + 2 * t * h)) /
+        ((1 + t * t) * (1 + t * t) * (1 + (t + h) * (t + h))) := by
+  rw [pointRe_differenceQuotient t h hh]
+  let d := 1 + t * t
+  let e := 1 + (t + h) * (t + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos t
+  have hepos : 0 < e := by
+    dsimp [e]
+    exact RationalCircle.Stage.one_add_square_pos (t + h)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hene : e ≠ 0 := Rat.ne_of_gt hepos
+  have hprod : d * d * e ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hdne hzero
+      · exact hdne hzero
+    · exact hene hzero
+  apply rat_eq_of_right_mul_eq_mul_ne hprod
+  unfold pointReDerivative RationalCircle.Stage.pointDerivative
+  dsimp
+  change (((-2 * (2 * t + h)) / (d * e) - (-4 * t) / (d * d))) *
+      (d * d * e) =
+    ((2 * h * (-1 + 3 * t * t + 2 * t * h)) / (d * d * e)) *
+      (d * d * e)
+  rw [Rat.div_def]
+  simp only [Rat.inv_mul_rev]
+  have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+  have hcancelE : e⁻¹ * e = 1 := Rat.inv_mul_cancel e hene
+  have hcancelDD : (d * d)⁻¹ * (d * d) = 1 :=
+    Rat.inv_mul_cancel (d * d) (by
+      intro hzero
+      rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hdne hzero
+      · exact hdne hzero)
+  have hcancelDDE : (d * d * e)⁻¹ * (d * d * e) = 1 :=
+    Rat.inv_mul_cancel (d * d * e) hprod
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.neg_mul, Rat.mul_neg]
+
+/-- Exact imaginary-coordinate secant error relative to the named rational
+velocity. -/
+theorem pointIm_differenceQuotient_sub_derivative (t h : Rat) (hh : h ≠ 0) :
+    (pointIm (t + h) - pointIm t) / h - pointImDerivative t =
+      (-2 * h * (t * (3 - t * t) + h * (1 - t * t))) /
+        ((1 + t * t) * (1 + t * t) * (1 + (t + h) * (t + h))) := by
+  rw [pointIm_differenceQuotient t h hh]
+  let d := 1 + t * t
+  let e := 1 + (t + h) * (t + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos t
+  have hepos : 0 < e := by
+    dsimp [e]
+    exact RationalCircle.Stage.one_add_square_pos (t + h)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hene : e ≠ 0 := Rat.ne_of_gt hepos
+  have hprod : d * d * e ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hdne hzero
+      · exact hdne hzero
+    · exact hene hzero
+  apply rat_eq_of_right_mul_eq_mul_ne hprod
+  unfold pointImDerivative RationalCircle.Stage.pointDerivative
+  dsimp
+  change (((2 * (1 - t * t - t * h)) / (d * e) -
+      (2 * (1 - t * t)) / (d * d))) * (d * d * e) =
+    ((-2 * h * (t * (3 - t * t) + h * (1 - t * t))) /
+      (d * d * e)) * (d * d * e)
+  rw [Rat.div_def]
+  simp only [Rat.inv_mul_rev]
+  have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+  have hcancelE : e⁻¹ * e = 1 := Rat.inv_mul_cancel e hene
+  have hcancelDD : (d * d)⁻¹ * (d * d) = 1 :=
+    Rat.inv_mul_cancel (d * d) (by
+      intro hzero
+      rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hdne hzero
+      · exact hdne hzero)
+  have hcancelDDE : (d * d * e)⁻¹ * (d * d * e) = 1 :=
+    Rat.inv_mul_cancel (d * d * e) hprod
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.neg_mul, Rat.mul_neg]
 
 /-- The chart's angular coefficient is exactly the already-certified sector
 area speed.  Thus the reparametrization required for a constant rotation
