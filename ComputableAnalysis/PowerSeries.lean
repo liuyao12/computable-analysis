@@ -455,6 +455,23 @@ def factorialTailPartial (C : Rat) (N : Nat) : Nat -> Rat
   | 0 => 0
   | k + 1 => factorialTailPartial C N k + factorialTailTerm C (N + k)
 
+/- Splitting a finite factorial prefix after any prescribed number of terms
+is an exact rational identity.  This is the finite bookkeeping lemma behind
+uniform bounds for parameter-sensitive power-series prefixes. -/
+theorem factorialTailPartial_add (C : Rat) (N a b : Nat) :
+    factorialTailPartial C N (a + b) =
+      factorialTailPartial C N a + factorialTailPartial C (N + a) b := by
+  induction b with
+  | zero =>
+      rw [Nat.add_zero, factorialTailPartial]
+      grind [Rat.add_zero]
+  | succ b ih =>
+      rw [show a + (b + 1) = (a + b) + 1 by omega]
+      rw [factorialTailPartial, ih, factorialTailPartial]
+      have hindex : N + (a + b) = N + a + b := by omega
+      rw [hindex]
+      grind [Rat.add_assoc]
+
 theorem factorialRat_pos (n : Nat) : 0 < factorialRat n := by
   unfold factorialRat
   exact_mod_cast (show 0 < factorial n from by
@@ -470,6 +487,28 @@ theorem factorialTailTerm_nonneg {C : Rat} (hC : 0 <= C) (n : Nat) :
   rw [Rat.div_def]
   exact Rat.mul_nonneg (Rat.pow_nonneg hC)
     (Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos n)))
+
+/- A finite factorial prefix with nonnegative coefficient bound grows with
+its number of terms.  This is a statement about finite rational sums only. -/
+theorem factorialTailPartial_mono {C : Rat} (hC : 0 <= C) (N : Nat) :
+    forall k m : Nat, k <= m ->
+      factorialTailPartial C N k <= factorialTailPartial C N m
+  | k, 0, hkm => by
+      have hk : k = 0 := by omega
+      subst k
+      exact Rat.le_refl
+  | k, m + 1, hkm => by
+      by_cases hlast : k = m + 1
+      · subst k
+        exact Rat.le_refl
+      · have hkm' : k <= m := by omega
+        have ih := factorialTailPartial_mono hC N k m hkm'
+        calc
+          factorialTailPartial C N k <= factorialTailPartial C N m := ih
+          _ <= factorialTailPartial C N (m + 1) := by
+            rw [factorialTailPartial]
+            have hterm := factorialTailTerm_nonneg hC (N + m)
+            grind [Rat.sub_eq_add_neg]
 
 /-- The finite factorial majorant is monotone in its nonnegative coefficient
 bound.  This is the elementary uniformity fact used when a power-series
@@ -808,6 +847,162 @@ theorem factorialTailPartial_bound_at_start {C : Rat} (hC : 0 <= C) (k : Nat) :
     factorialTailPartial C (factorialTailStart C) k <=
       2 * factorialTailTerm C (factorialTailStart C) :=
   factorialTailPartial_bound hC (factorialTailStart_satisfies C) k
+
+/- The finite prefixes of the factorial series at coefficient bound 2
+are all below 8.  The first five terms total 7; the remaining finite
+tail is bounded by 8/15.  This deliberately coarse uniform constant is
+useful for a represented input ranging over [-2,2]. -/
+theorem factorialTailPartial_two_le_eight (k : Nat) :
+    factorialTailPartial 2 0 k <= 8 := by
+  by_cases hk : k <= 5
+  · calc
+      factorialTailPartial 2 0 k <= factorialTailPartial 2 0 5 :=
+        factorialTailPartial_mono (by native_decide) 0 k 5 hk
+      _ <= 8 := by native_decide
+  · have hfive : 5 <= k := by omega
+    obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hfive
+    rw [hd, factorialTailPartial_add]
+    have htail := factorialTailPartial_bound_at_start (C := (2 : Rat))
+      (by native_decide) d
+    have htail' : factorialTailPartial 2 5 d <= (8 : Rat) / 15 := by
+      have hstart : factorialTailStart (2 : Rat) = 5 := by native_decide
+      rw [hstart] at htail
+      calc
+        factorialTailPartial 2 5 d <= 2 * factorialTailTerm 2 5 := htail
+        _ = (8 : Rat) / 15 := by native_decide
+    calc
+      factorialTailPartial 2 0 5 + factorialTailPartial 2 (0 + 5) d <=
+          7 + (8 : Rat) / 15 := by
+            apply rat_add_le_add
+            · native_decide
+            · simpa using htail'
+      _ <= 8 := by native_decide
+
+/- Absolute value commutes with every natural rational power. -/
+theorem qabs_pow_eq_pow_qabs (x : Rat) : forall n : Nat,
+    qabs (x ^ n) = qabs x ^ n
+  | 0 => by
+      have hzero : qabs (1 : Rat) = 1 := by
+        rw [qabs_eq_self_of_nonneg (by native_decide)]
+      simpa using hzero
+  | n + 1 => by
+      rw [Rat.pow_succ, qabs_mul, qabs_pow_eq_pow_qabs, Rat.pow_succ]
+
+/- A rational power is bounded by the corresponding power of any
+nonnegative absolute-value bound. -/
+theorem qabs_pow_le_pow {x B : Rat} (hB : 0 <= B)
+    (hx : qabs x <= B) (n : Nat) :
+    qabs (x ^ n) <= B ^ n := by
+  rw [qabs_pow_eq_pow_qabs]
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Rat.pow_succ, Rat.pow_succ]
+      calc
+        qabs x ^ n * qabs x <= B ^ n * qabs x :=
+          Rat.mul_le_mul_of_nonneg_right ih (qabs_nonneg x)
+        _ <= B ^ n * B :=
+          Rat.mul_le_mul_of_nonneg_left hx (Rat.pow_nonneg hB)
+
+/- The finite difference of two rational powers has an explicit
+Lipschitz bound on any symmetric rational box of radius at least one.
+The proof is a direct finite recurrence, with no completed-real mean-value
+theorem. -/
+theorem qabs_pow_sub_le_lipschitz {x y B : Rat}
+    (hB0 : 0 <= B) (hBone : 1 <= B)
+    (hx : qabs x <= B) (hy : qabs y <= B) (n : Nat) :
+    qabs (x ^ n - y ^ n) <=
+      qabs (x - y) * (n : Rat) * B ^ n := by
+  induction n with
+  | zero =>
+      have hdiff : x ^ 0 - y ^ 0 = (0 : Rat) := by
+        rw [Rat.pow_zero, Rat.pow_zero]
+        native_decide
+      rw [hdiff, qabs_eq_self_of_nonneg (by native_decide)]
+      change (0 : Rat) <= qabs (x - y) * (0 : Rat) * B ^ 0
+      rw [Rat.mul_zero, Rat.zero_mul]
+      exact Rat.le_refl
+  | succ n ih =>
+      have hyPow := qabs_pow_le_pow hB0 hy n
+      have hdelta : 0 <= qabs (x - y) := qabs_nonneg _
+      have hpow0 : 0 <= B ^ n := Rat.pow_nonneg hB0
+      have hleft0 : 0 <= qabs (x - y) * (n : Rat) * B ^ n := by
+        exact Rat.mul_nonneg (Rat.mul_nonneg hdelta
+          (by exact_mod_cast Nat.zero_le n)) hpow0
+      have hright0 : 0 <= B ^ n * qabs (x - y) :=
+        Rat.mul_nonneg hpow0 hdelta
+      have hdecompose :
+          x ^ (n + 1) - y ^ (n + 1) =
+            (x ^ n - y ^ n) * x + y ^ n * (x - y) := by
+        rw [Rat.pow_succ, Rat.pow_succ]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+          Rat.mul_comm]
+      rw [hdecompose]
+      calc
+        qabs ((x ^ n - y ^ n) * x + y ^ n * (x - y)) <=
+            qabs ((x ^ n - y ^ n) * x) + qabs (y ^ n * (x - y)) :=
+          qabs_add_le _ _
+        _ = qabs (x ^ n - y ^ n) * qabs x +
+              qabs (y ^ n) * qabs (x - y) := by
+            rw [qabs_mul, qabs_mul]
+        _ <= (qabs (x - y) * (n : Rat) * B ^ n) * B +
+              B ^ n * qabs (x - y) :=
+          rat_add_le_add
+            (Rat.le_trans
+              (Rat.mul_le_mul_of_nonneg_right ih (qabs_nonneg x))
+              (Rat.mul_le_mul_of_nonneg_left hx hleft0))
+            (Rat.mul_le_mul_of_nonneg_right hyPow hdelta)
+        _ <= (qabs (x - y) * (n : Rat) * B ^ n) * B +
+              (B ^ n * qabs (x - y)) * B :=
+          rat_add_le_add Rat.le_refl
+            (by
+              calc
+                B ^ n * qabs (x - y) = (B ^ n * qabs (x - y)) * 1 := by
+                  rw [Rat.mul_one]
+                _ <= (B ^ n * qabs (x - y)) * B :=
+                  Rat.mul_le_mul_of_nonneg_left hBone hright0)
+        _ = qabs (x - y) * ((n + 1 : Nat) : Rat) * B ^ (n + 1) := by
+          rw [Rat.pow_succ]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+/- Dividing the (n+1)-st power difference by its factorial leaves the
+shifted factorial majorant which will be summed in a rotation-prefix
+Lipschitz certificate. -/
+theorem qabs_power_div_factorial_sub_le_two {x y : Rat}
+    (hx : qabs x <= 2) (hy : qabs y <= 2) (n : Nat) :
+    qabs (x ^ (n + 1) / factorialRat (n + 1) -
+      y ^ (n + 1) / factorialRat (n + 1)) <=
+      qabs (x - y) * 2 * factorialTailTerm 2 n := by
+  have hpow := qabs_pow_sub_le_lipschitz
+    (x := x) (y := y) (B := (2 : Rat))
+    (by native_decide) (by native_decide) hx hy (n + 1)
+  have hfacpos : 0 < factorialRat (n + 1) := factorialRat_pos _
+  have hinv : 0 <= (factorialRat (n + 1))⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hfacpos)
+  have hrewrite :
+      x ^ (n + 1) / factorialRat (n + 1) -
+          y ^ (n + 1) / factorialRat (n + 1) =
+        (x ^ (n + 1) - y ^ (n + 1)) * (factorialRat (n + 1))⁻¹ := by
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+  rw [hrewrite, qabs_mul, qabs_eq_self_of_nonneg hinv]
+  calc
+    qabs (x ^ (n + 1) - y ^ (n + 1)) *
+        (factorialRat (n + 1))⁻¹ <=
+        (qabs (x - y) * ((n + 1 : Nat) : Rat) * 2 ^ (n + 1)) *
+          (factorialRat (n + 1))⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_right hpow hinv
+    _ = qabs (x - y) * 2 * factorialTailTerm 2 n := by
+      have hnpos : 0 < ((n + 1 : Nat) : Rat) := by
+        exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+      have hcancel : ((n + 1 : Nat) : Rat) *
+          ((n + 1 : Nat) : Rat)⁻¹ = 1 :=
+        Rat.mul_inv_cancel _ (Rat.ne_of_gt hnpos)
+      unfold factorialTailTerm
+      rw [Rat.pow_succ, FormalPowerSeries.factorialRat_succ, Rat.div_def,
+        Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm]
 
 end RationalMajorant
 

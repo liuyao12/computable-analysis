@@ -277,6 +277,9 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationSeries.rotationExpRaw_width_le_geometric}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_input_lipschitz}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationBox_contained_expand_of_input_near}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationBox_future_contained_expand_of_input_near}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -287,6 +290,10 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_valid}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_width_le_two_div_succ}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_bounds}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius_shrinks}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_valid}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_valid}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi}
@@ -312,12 +319,15 @@ across every checked \(\pi\)-representation.  The finite scalar return
 \((-2i)(i\pi/2)=\pi\), and the conditional literal-product formula
 \((-2i)\log(i)=\pi\) for any certified branch with
 \(\log(i)=i\pi/2\), are checked.
-The reusable represented-input construction is also checked: finite prefixes
-of widened complex candidate boxes are intersected, with each later candidate
-as the rational-box witness that the prefix remains ordered.  A rotation
-extension need only provide its explicit candidate-width, future-containment,
-and radius schedules.
+The represented-input construction is now a valid raw complex computation:
+finite prefixes of the midpoint rotation boxes are intersected, with each
+later candidate as the rational-box witness that the prefix remains ordered.
+For (|T|,|U|le2), its finite cosine--sine prefix changes by at most
+(16|T-U|) in each coordinate.  Together with the midpoint modulus, this
+gives future containment after widening stage (k) by
+(16,operatorname{width}(pi/2,k)); that radius is at most (32/(k+1))
+and shrinks by the rational denominator schedule.
 The remaining theorem \(e^{i\pi}+1=0\) still needs the extension of the
-rotation exponential to that represented input and its geometric
-identification.
+represented rotation raw to the geometric quarter turn, and then its
+connection to the project’s complex exponential/logarithm branches.
 \end{theorem}

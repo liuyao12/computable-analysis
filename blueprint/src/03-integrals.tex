@@ -78,20 +78,22 @@ For the displayed dyadic evaluator, take any \(n\) with
 \begin{example}[An interval-valued monotone sine stage]
 \uses{def:increasing-integral-stage}
 On \([0,\tfrac12]\), the intended sine evaluator for
-\(\sin(\pi t)\) returns a rational bracket at each dyadic endpoint.  The
-blue segments in the animation are those value brackets, and the two
-rectangle sums use the left lower and right upper ends.  The retained rational
-evaluation radius halves at every displayed stage, so the blue bars visibly
-shrink along with the mesh:
+\(\sin(\pi x)\) has the exact singleton values \(0\) and \(1\) at the two
+endpoints.  At every interior dyadic endpoint it returns a rational bracket.
+The blue segments in the animation are those interior value brackets, and the
+two rectangle sums use the left lower and right upper ends.  The retained
+rational evaluation radius halves at every displayed stage, so the blue bars
+visibly shrink along with the mesh:
 \begin{figure}[!htbp]
 \centering
 \intervalSineIntegralStageAnimation
-\caption{A monotone sine stage uses rational value boxes, not exact samples.}
+\caption{A monotone sine stage uses exact endpoint samples and rational
+interior value boxes.}
 \label{fig:interval-sine-integral-stage}
 \end{figure}
 The intended endpoint identity is
 \[
- \pi\int_0^{1/2}\sin(\pi t)\,\dd t=1.
+ \pi\int_0^{1/2}\sin(\pi x)\,\dd x=1.
 \]
 It is a future pi route: the displayed Taylor brackets illustrate the
 required evaluation data, not a completed Lean integral theorem.

@@ -782,6 +782,295 @@ def uniformRotationTailRadius (n : Nat) : Rat :=
 def uniformRotationCenter (T : Rat) (n : Nat) : QComplex :=
   complexPrefix T (uniformRotationTailStart + n)
 
+/- The change in a nonconstant cosine coefficient is controlled by the
+shifted factorial majorant at radius two. -/
+private theorem cosineCoefficient_succ_input_lipschitz (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (k : Nat) :
+    qabs (LinearODE.RotationSystem.cosineCoefficient T (k + 1) -
+        LinearODE.RotationSystem.cosineCoefficient U (k + 1)) <=
+      qabs (T - U) * 2 *
+        RationalMajorant.factorialTailTerm 2 (2 * k + 1) := by
+  have hpower := RationalMajorant.qabs_power_div_factorial_sub_le_two
+    hT hU (2 * k + 1)
+  have hsign := qabs_neg_one_pow (k + 1)
+  have hrewrite :
+      LinearODE.RotationSystem.cosineCoefficient T (k + 1) -
+          LinearODE.RotationSystem.cosineCoefficient U (k + 1) =
+        (T ^ ((2 * k + 1) + 1) / factorialRat ((2 * k + 1) + 1) -
+          U ^ ((2 * k + 1) + 1) / factorialRat ((2 * k + 1) + 1)) *
+          ((-1 : Rat) ^ (k + 1)) := by
+    unfold LinearODE.RotationSystem.cosineCoefficient
+    rw [show 2 * (k + 1) = (2 * k + 1) + 1 by omega]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+  rw [hrewrite, qabs_mul, hsign, Rat.mul_one]
+  exact hpower
+
+/- The change in a sine coefficient is controlled by the preceding
+factorial term at the same uniform radius. -/
+private theorem sineCoefficient_input_lipschitz (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (k : Nat) :
+    qabs (LinearODE.RotationSystem.sineCoefficient T k -
+        LinearODE.RotationSystem.sineCoefficient U k) <=
+      qabs (T - U) * 2 *
+        RationalMajorant.factorialTailTerm 2 (2 * k) := by
+  have hpower := RationalMajorant.qabs_power_div_factorial_sub_le_two
+    hT hU (2 * k)
+  have hsign := qabs_neg_one_pow k
+  have hrewrite :
+      LinearODE.RotationSystem.sineCoefficient T k -
+          LinearODE.RotationSystem.sineCoefficient U k =
+        (T ^ ((2 * k) + 1) / factorialRat ((2 * k) + 1) -
+          U ^ ((2 * k) + 1) / factorialRat ((2 * k) + 1)) *
+          ((-1 : Rat) ^ k) := by
+    unfold LinearODE.RotationSystem.sineCoefficient
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+  rw [hrewrite, qabs_mul, hsign, Rat.mul_one]
+  exact hpower
+
+/- The coordinatewise rational distance between two finite rotation
+prefixes.  It is only a finite sum of rational absolute values. -/
+def rotationPrefixDistance (T U : Rat) (m : Nat) : Rat :=
+  qabs (LinearODE.RotationSystem.cosinePrefix T m -
+      LinearODE.RotationSystem.cosinePrefix U m) +
+    qabs (LinearODE.RotationSystem.sinePrefix T m -
+      LinearODE.RotationSystem.sinePrefix U m)
+
+/- The factorial budget for the first m rotation-prefix coefficient pairs. -/
+def rotationPrefixSensitivity (m : Nat) : Rat :=
+  2 * RationalMajorant.factorialTailPartial 2 0 (2 * m - 1)
+
+private theorem rotationPrefixDistance_zero (T U : Rat) :
+    rotationPrefixDistance T U 0 = 0 := by
+  unfold rotationPrefixDistance
+  change qabs ((0 : Rat) - 0) + qabs ((0 : Rat) - 0) = 0
+  have hzero : qabs (0 : Rat) = 0 := by
+    rw [qabs_eq_self_of_nonneg (by native_decide)]
+  have hdiff : (0 : Rat) - 0 = 0 := by native_decide
+  rw [hdiff, hzero]
+  native_decide
+
+private theorem rotationPrefixDistance_succ_le (T U : Rat) (m : Nat) :
+    rotationPrefixDistance T U (m + 1) <=
+      rotationPrefixDistance T U m +
+        qabs (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m) +
+        qabs (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m) := by
+  unfold rotationPrefixDistance
+  simp only [LinearODE.RotationSystem.cosinePrefix,
+    LinearODE.RotationSystem.sinePrefix]
+  have hre :
+      (LinearODE.RotationSystem.cosinePrefix T m +
+          LinearODE.RotationSystem.cosineCoefficient T m) -
+        (LinearODE.RotationSystem.cosinePrefix U m +
+          LinearODE.RotationSystem.cosineCoefficient U m) =
+        (LinearODE.RotationSystem.cosinePrefix T m -
+          LinearODE.RotationSystem.cosinePrefix U m) +
+        (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m) := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  have him :
+      (LinearODE.RotationSystem.sinePrefix T m +
+          LinearODE.RotationSystem.sineCoefficient T m) -
+        (LinearODE.RotationSystem.sinePrefix U m +
+          LinearODE.RotationSystem.sineCoefficient U m) =
+        (LinearODE.RotationSystem.sinePrefix T m -
+          LinearODE.RotationSystem.sinePrefix U m) +
+        (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m) := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  rw [hre, him]
+  calc
+    qabs (LinearODE.RotationSystem.cosinePrefix T m -
+        LinearODE.RotationSystem.cosinePrefix U m +
+        (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m)) +
+      qabs (LinearODE.RotationSystem.sinePrefix T m -
+        LinearODE.RotationSystem.sinePrefix U m +
+        (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m)) <=
+        (qabs (LinearODE.RotationSystem.cosinePrefix T m -
+          LinearODE.RotationSystem.cosinePrefix U m) +
+          qabs (LinearODE.RotationSystem.cosineCoefficient T m -
+            LinearODE.RotationSystem.cosineCoefficient U m)) +
+          (qabs (LinearODE.RotationSystem.sinePrefix T m -
+            LinearODE.RotationSystem.sinePrefix U m) +
+            qabs (LinearODE.RotationSystem.sineCoefficient T m -
+              LinearODE.RotationSystem.sineCoefficient U m)) :=
+      rat_add_le_add (qabs_add_le _ _) (qabs_add_le _ _)
+    _ = rotationPrefixDistance T U m +
+        qabs (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m) +
+        qabs (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m) := by
+      unfold rotationPrefixDistance
+      grind [Rat.add_assoc, Rat.add_comm]
+
+private theorem rotationPrefixSensitivity_succ_succ (m : Nat) :
+    rotationPrefixSensitivity (m + 2) =
+      rotationPrefixSensitivity (m + 1) +
+        2 * RationalMajorant.factorialTailTerm 2 (2 * m + 1) +
+        2 * RationalMajorant.factorialTailTerm 2 (2 * m + 2) := by
+  unfold rotationPrefixSensitivity
+  rw [show 2 * (m + 2) - 1 = (2 * m + 2) + 1 by omega,
+    RationalMajorant.factorialTailPartial]
+  rw [show 2 * m + 2 = (2 * m + 1) + 1 by omega,
+    RationalMajorant.factorialTailPartial]
+  have hindex : 2 * (m + 1) - 1 = 2 * m + 1 := by omega
+  rw [hindex]
+  grind [Rat.mul_add, Rat.mul_assoc, Rat.add_assoc, Rat.add_comm]
+
+private theorem rotationPrefixDistance_le_sensitivity (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) :
+    forall m : Nat,
+      rotationPrefixDistance T U m <=
+        qabs (T - U) * rotationPrefixSensitivity m
+  | 0 => by
+      rw [rotationPrefixDistance_zero]
+      unfold rotationPrefixSensitivity
+      change (0 : Rat) <= qabs (T - U) * (2 * 0)
+      calc
+        (0 : Rat) <= 0 := Rat.le_refl
+        _ = qabs (T - U) * (2 * 0) := by
+          rw [Rat.mul_zero]
+          exact (Rat.mul_zero _).symm
+  | 1 => by
+      have hstep := rotationPrefixDistance_succ_le T U 0
+      have hinvOne : ((1 : Rat)⁻¹) = 1 := by native_decide
+      have hcosT : LinearODE.RotationSystem.cosineCoefficient T 0 = 1 := by
+        simp [LinearODE.RotationSystem.cosineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hcosU : LinearODE.RotationSystem.cosineCoefficient U 0 = 1 := by
+        simp [LinearODE.RotationSystem.cosineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hcos : qabs (LinearODE.RotationSystem.cosineCoefficient T 0 -
+          LinearODE.RotationSystem.cosineCoefficient U 0) = 0 := by
+        rw [hcosT, hcosU]
+        have hzero : qabs (0 : Rat) = 0 := by
+          rw [qabs_eq_self_of_nonneg (by native_decide)]
+        rw [show (1 : Rat) - 1 = 0 by native_decide, hzero]
+      have hsinT : LinearODE.RotationSystem.sineCoefficient T 0 = T := by
+        simp [LinearODE.RotationSystem.sineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hsinU : LinearODE.RotationSystem.sineCoefficient U 0 = U := by
+        simp [LinearODE.RotationSystem.sineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hsin : qabs (LinearODE.RotationSystem.sineCoefficient T 0 -
+          LinearODE.RotationSystem.sineCoefficient U 0) = qabs (T - U) := by
+        rw [hsinT, hsinU]
+      rw [rotationPrefixDistance_zero, hcos, hsin, Rat.add_zero,
+        Rat.zero_add] at hstep
+      have hsens : rotationPrefixSensitivity 1 = 2 := by native_decide
+      rw [hsens]
+      calc
+        rotationPrefixDistance T U 1 <= qabs (T - U) := hstep
+        _ = qabs (T - U) * 1 := by rw [Rat.mul_one]
+        _ <= qabs (T - U) * 2 :=
+          Rat.mul_le_mul_of_nonneg_left (by native_decide) (qabs_nonneg _)
+  | m + 2 => by
+      have ih := rotationPrefixDistance_le_sensitivity T U hT hU (m + 1)
+      have hstep := rotationPrefixDistance_succ_le T U (m + 1)
+      have hcos := cosineCoefficient_succ_input_lipschitz T U hT hU m
+      have hsin := sineCoefficient_input_lipschitz T U hT hU (m + 1)
+      have hsens := rotationPrefixSensitivity_succ_succ m
+      rw [hsens]
+      calc
+        rotationPrefixDistance T U (m + 2) <=
+            rotationPrefixDistance T U (m + 1) +
+              qabs (LinearODE.RotationSystem.cosineCoefficient T (m + 1) -
+                LinearODE.RotationSystem.cosineCoefficient U (m + 1)) +
+              qabs (LinearODE.RotationSystem.sineCoefficient T (m + 1) -
+                LinearODE.RotationSystem.sineCoefficient U (m + 1)) := hstep
+        _ <= qabs (T - U) * rotationPrefixSensitivity (m + 1) +
+              (qabs (T - U) * 2 *
+                RationalMajorant.factorialTailTerm 2 (2 * m + 1)) +
+              (qabs (T - U) * 2 *
+                RationalMajorant.factorialTailTerm 2 (2 * m + 2)) :=
+          rat_add_le_add (rat_add_le_add ih hcos) hsin
+        _ = qabs (T - U) *
+            (rotationPrefixSensitivity (m + 1) +
+              2 * RationalMajorant.factorialTailTerm 2 (2 * m + 1) +
+              2 * RationalMajorant.factorialTailTerm 2 (2 * m + 2)) := by
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.add_assoc]
+
+/- The finite sensitivity budget is uniformly bounded by sixteen on the
+fixed input range.  It is intentionally coarse: it buys one simple rational
+radius for a later represented-input construction. -/
+private theorem rotationPrefixSensitivity_le_sixteen (m : Nat) :
+    rotationPrefixSensitivity m <= 16 := by
+  unfold rotationPrefixSensitivity
+  calc
+    2 * RationalMajorant.factorialTailPartial 2 0 (2 * m - 1) <= 2 * 8 :=
+      Rat.mul_le_mul_of_nonneg_left
+        (RationalMajorant.factorialTailPartial_two_le_eight (2 * m - 1))
+        (by native_decide)
+    _ = 16 := by native_decide
+
+/- A common bounded-input factorial prefix is Lipschitz in its rational
+input.  The statement is still entirely finite: both sides refer only to a
+specified pair of rational prefixes. -/
+theorem uniformRotationCenter_input_lipschitz (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (n : Nat) :
+    qabs ((uniformRotationCenter T n).re - (uniformRotationCenter U n).re) <=
+        16 * qabs (T - U) /\
+      qabs ((uniformRotationCenter T n).im - (uniformRotationCenter U n).im) <=
+        16 * qabs (T - U) := by
+  have hdistance := rotationPrefixDistance_le_sensitivity T U hT hU
+    (uniformRotationTailStart + n)
+  have hsensitivity := rotationPrefixSensitivity_le_sixteen
+    (uniformRotationTailStart + n)
+  have hsum : rotationPrefixDistance T U (uniformRotationTailStart + n) <=
+      qabs (T - U) * 16 := by
+    calc
+      rotationPrefixDistance T U (uniformRotationTailStart + n) <=
+          qabs (T - U) *
+            rotationPrefixSensitivity (uniformRotationTailStart + n) := hdistance
+      _ <= qabs (T - U) * 16 :=
+        Rat.mul_le_mul_of_nonneg_left hsensitivity (qabs_nonneg _)
+  have hre :
+      qabs (LinearODE.RotationSystem.cosinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.cosinePrefix U
+          (uniformRotationTailStart + n)) <=
+        rotationPrefixDistance T U (uniformRotationTailStart + n) := by
+    unfold rotationPrefixDistance
+    have himnonneg : 0 <= qabs (LinearODE.RotationSystem.sinePrefix T
+        (uniformRotationTailStart + n) -
+      LinearODE.RotationSystem.sinePrefix U
+        (uniformRotationTailStart + n)) := qabs_nonneg _
+    grind
+  have him :
+      qabs (LinearODE.RotationSystem.sinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.sinePrefix U
+          (uniformRotationTailStart + n)) <=
+        rotationPrefixDistance T U (uniformRotationTailStart + n) := by
+    unfold rotationPrefixDistance
+    have hrenonneg : 0 <= qabs (LinearODE.RotationSystem.cosinePrefix T
+        (uniformRotationTailStart + n) -
+      LinearODE.RotationSystem.cosinePrefix U
+        (uniformRotationTailStart + n)) := qabs_nonneg _
+    grind
+  constructor <;> unfold uniformRotationCenter complexPrefix
+  · calc
+      qabs (LinearODE.RotationSystem.cosinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.cosinePrefix U
+          (uniformRotationTailStart + n)) <=
+          rotationPrefixDistance T U (uniformRotationTailStart + n) := hre
+      _ <= qabs (T - U) * 16 := hsum
+      _ = 16 * qabs (T - U) := by grind [Rat.mul_comm]
+  · calc
+      qabs (LinearODE.RotationSystem.sinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.sinePrefix U
+          (uniformRotationTailStart + n)) <=
+          rotationPrefixDistance T U (uniformRotationTailStart + n) := him
+      _ <= qabs (T - U) * 16 := hsum
+      _ = 16 * qabs (T - U) := by grind [Rat.mul_comm]
+
 /-- A symmetric complex box around the uniform bounded-input rotation
 prefix. -/
 def uniformRotationBox (T : Rat) (n : Nat) : QBox :=
@@ -1065,6 +1354,55 @@ private theorem uniformRotationBox_nested (T : Rat) (hT : qabs T <= 2) :
         exact qbox_nested_trans
           (uniformRotationBox_nested_step T hT m)
           (uniformRotationBox_nested T hT n m hnm')
+
+/-- At one common factorial stage, changing the rational input by at most
+`eps` only widens the rotation box by `16 * eps` in each coordinate. -/
+theorem uniformRotationBox_contained_expand_of_input_near (T U eps : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (n : Nat)
+    (hnear : qabs (T - U) <= eps) :
+    QBox.NestedIn (uniformRotationBox T n)
+      (QBox.expand (uniformRotationBox U n) (16 * eps)) := by
+  have hcenter := uniformRotationCenter_input_lipschitz T U hT hU n
+  have hfactor : 16 * qabs (T - U) <= 16 * eps :=
+    Rat.mul_le_mul_of_nonneg_left hnear (by native_decide)
+  have hreupper : (uniformRotationCenter T n).re -
+      (uniformRotationCenter U n).re <= 16 * eps :=
+    Rat.le_trans (self_le_qabs _) (Rat.le_trans hcenter.1 hfactor)
+  have hrelower : -(16 * eps) <= (uniformRotationCenter T n).re -
+      (uniformRotationCenter U n).re := by
+    calc
+      -(16 * eps) <= -qabs ((uniformRotationCenter T n).re -
+          (uniformRotationCenter U n).re) := Rat.neg_le_neg
+            (Rat.le_trans hcenter.1 hfactor)
+      _ <= (uniformRotationCenter T n).re -
+          (uniformRotationCenter U n).re := neg_qabs_le_self _
+  have himupper : (uniformRotationCenter T n).im -
+      (uniformRotationCenter U n).im <= 16 * eps :=
+    Rat.le_trans (self_le_qabs _) (Rat.le_trans hcenter.2 hfactor)
+  have himlower : -(16 * eps) <= (uniformRotationCenter T n).im -
+      (uniformRotationCenter U n).im := by
+    calc
+      -(16 * eps) <= -qabs ((uniformRotationCenter T n).im -
+          (uniformRotationCenter U n).im) := Rat.neg_le_neg
+            (Rat.le_trans hcenter.2 hfactor)
+      _ <= (uniformRotationCenter T n).im -
+          (uniformRotationCenter U n).im := neg_qabs_le_self _
+  unfold QBox.NestedIn QBox.expand uniformRotationBox
+  dsimp
+  constructor
+  · constructor <;> grind [Rat.sub_eq_add_neg]
+  · constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- A later finite rotation prefix at a nearby bounded rational input fits in
+the earlier box after the same explicit input-error enlargement.  This is the
+finite-prefix Cauchy certificate used for represented-angle evaluation. -/
+theorem uniformRotationBox_future_contained_expand_of_input_near
+    (T U eps : Rat) (hT : qabs T <= 2) (hU : qabs U <= 2)
+    (k n : Nat) (hkn : k <= n) (hnear : qabs (T - U) <= eps) :
+    QBox.NestedIn (uniformRotationBox T n)
+      (QBox.expand (uniformRotationBox U k) (16 * eps)) := by
+  apply QBox.nested_trans (uniformRotationBox_nested T hT k n hkn)
+  exact uniformRotationBox_contained_expand_of_input_near T U eps hT hU k hnear
 
 /-- Uniform bounded-input boxes have exactly the same coordinate widths as
 the ordinary rational-input evaluator at the endpoint 2. This reuses the

@@ -131,8 +131,13 @@ def partial_sine(value: Fraction, last: int) -> Fraction:
 
 
 def sine_box(value: Fraction, last: int, guard: Fraction) -> tuple[Fraction, Fraction]:
+    # These two endpoint samples are exact: sin(0) = 0 and sin(pi / 2) = 1.
+    # All interior samples remain interval evaluations, even though the curve
+    # itself is drawn smoothly as a visual guide.
     if value == 0:
         return Fraction(0), Fraction(0)
+    if value == Fraction(1, 2):
+        return Fraction(1), Fraction(1)
     lower = partial_sine(Fraction(333, 106) * value, last)
     upper = partial_sine(Fraction(355, 113) * value, last + 1)
     return max(Fraction(0), lower - guard), min(Fraction(1), upper + guard)
@@ -164,6 +169,9 @@ def sine_frame(cells: int, last: int, guard: Fraction) -> str:
         x = x0 + 2 * float(t) * xunit
         lower, upper = boxes[t]
         low, high = y0 + float(lower) * yunit, y0 + float(upper) * yunit
+        if t == 0 or t == Fraction(1, 2):
+            out.append(dot(x, low, "curve", 1.35))
+            continue
         out += [
             rf"\draw[curve,line width=.8pt] ({q(x)},{q(low)}) -- ({q(x)},{q(high)});",
             rf"\draw[curve,line width=.6pt] ({q(x-2.5)},{q(low)}) -- ({q(x+2.5)},{q(low)});",
@@ -173,8 +181,8 @@ def sine_frame(cells: int, last: int, guard: Fraction) -> str:
         n(x0, y0 - 12, r"$0$", "anchor=north"),
         n(x0 + xunit, y0 - 12, r"$\frac12$", "anchor=north"),
         n(x0 - 10, y0 + yunit, r"$1$", "anchor=east"),
-        n(x0 + xunit + 12, y0 - 2, r"$t$", "anchor=west"),
-        n(x0 + 160, y0 + 109, r"$\sin(\pi t)$"),
+        n(x0 + xunit + 12, y0 - 2, r"$x$", "anchor=west"),
+        n(x0 + 160, y0 + 109, r"$\sin(\pi x)$"),
     ]
     return "\n".join(out)
 

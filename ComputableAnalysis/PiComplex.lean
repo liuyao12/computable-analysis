@@ -160,6 +160,46 @@ theorem halfPiRotationCandidate_widths_shrink :
     RotationSeries.uniformRotationBox_height] at h
   exact h
 
+/-- The input-error radius for the represented π/2 rotation candidate.
+The factor sixteen is the checked finite-prefix Lipschitz budget for the
+uniform rational factorial schedule. -/
+def halfPiRotationRadius (n : Nat) : Rat :=
+  16 * (halfPi.compute n).width
+
+theorem halfPiRotationRadius_shrinks :
+    ShrinksToZero halfPiRotationRadius := by
+  apply shrinksToZero_of_natOverSuccBound (C := 32)
+  intro n
+  have hwidth := halfPi_width_le_two_div_succ n
+  unfold halfPiRotationRadius
+  calc
+    16 * (halfPi.compute n).width <=
+        16 * (2 / (((n + 1 : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left hwidth (by native_decide)
+    _ = 32 / (((n + 1 : Nat) : Rat)) := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The represented-angle imaginary-axis rotation.  It stabilizes the
+finite boxes obtained by evaluating one common factorial schedule at the
+rational midpoint of each certified π/2 interval. -/
+def halfPiRotation : ComplexRaw :=
+  ComplexRaw.cauchyStabilize halfPiRotationCandidate halfPiRotationRadius
+
+theorem halfPiRotation_valid : halfPiRotation.Valid := by
+  unfold halfPiRotation
+  apply ComplexRaw.cauchyStabilize_valid
+  · exact halfPiRotationCandidate_ordered
+  · exact halfPiRotationCandidate_widths_shrink
+  · intro k n hkn
+    have hfuture := RotationSeries.uniformRotationBox_future_contained_expand_of_input_near
+      (halfPi.compute n).midpoint (halfPi.compute k).midpoint
+      (halfPi.compute k).width
+      (halfPi_midpoint_qabs_le_two n) (halfPi_midpoint_qabs_le_two k)
+      k n hkn (halfPi_midpoint_sub_le_width k n hkn)
+    simpa [halfPiRotationCandidate_compute, halfPiRotationRadius] using hfuture
+  · exact halfPiRotationRadius_shrinks
+
 /-- The certified complex raw input \(i\pi/2\), formed from the default
 circle-area representative of the abstract pi handle. -/
 def imaginaryHalf : ComplexRaw :=
