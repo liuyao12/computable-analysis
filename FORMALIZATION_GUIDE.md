@@ -463,11 +463,14 @@ open ComputableAnalysis
 #check RotationSeries.rotationSinRaw_valid
 #check RotationSeries.rotationCosRaw_compute
 #check RotationSeries.rotationSinRaw_compute
+#check RotationSeries.uniformRotationCenter_input_lipschitz
+#check RotationSeries.uniformRotationBox_future_contained_expand_of_input_near
 ```
 
-These names expose the certified complex series at rational imaginary inputs;
-their real and imaginary coordinates are certified rational-input power-series
-computations, not yet geometric trigonometry.
+These names expose the certified complex series at rational imaginary inputs.
+The uniform schedule adds a finite Lipschitz certificate on `|T| <= 2`, which
+is the input-stability ingredient for represented angles. Their real and
+imaginary coordinates are still not identified with geometric trigonometry.
 
 The literal four-corner complex product has finite containment, order,
 nesting, and a rational width estimate.  The width schedule is obtained from
@@ -550,6 +553,12 @@ open ComputableAnalysis
 #check PiProofs.pi.halfPi_valid
 #check PiProofs.pi.halfPi_width_le_two_div_succ
 #check PiProofs.pi.halfPi_bounds
+#check PiProofs.pi.halfPiFromArctanGeom
+#check PiProofs.pi.halfPi_equiv_twoArctanGeomOne
+#check PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne
+#check PiProofs.pi.halfPiRotation
+#check PiProofs.pi.halfPiRotation_valid
+#check PiProofs.pi.halfPiRotation_contains_current_candidate
 #check PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi
 #check PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul
 #check PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation
@@ -561,6 +570,16 @@ open ComputableAnalysis
 #check PiProofs.pi.negativeTwoImaginaryRaw_mul_logAtI_equiv_piCircleArea
 #check PiProofs.pi.imaginaryHalf_equiv_presentation
 ```
+
+`halfPi` is a certified raw angle with boxes in `[1,2]`; it is also
+equivalent to both `2 * arctan.geom(1)` and the normalized geometric
+quarter-turn raw. `halfPiRotation` is the valid complex raw obtained by
+stabilizing the bounded rational factorial rotations at the midpoint of those
+boxes. Its explicit input radius is at most `32 / (n + 1)`, and
+`halfPiRotation_contains_current_candidate` lets a later geometric
+quarter-turn enclosure lift from a direct factorial candidate to that raw.
+This is deliberately not yet `exp(i*pi/2) = i`: the missing proof is exactly
+the agreement of the factorial rotation with the geometric circle point.
 
 The rational-circle and arctangent code contains useful geometric and
 power-series computations, but normalized-angle sine/cosine/tangent special
@@ -580,6 +599,7 @@ open ComputableAnalysis
 
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness.arctan_to_sine_cosine_coordinates
+#check ArctanGeometry.two_arctanGeom_one_equiv_quarterTurnRaw_one
 ```
 
 This is why the special-values table colors only its arctangent-witness
@@ -587,6 +607,12 @@ column: the displayed sine and cosine entries follow by rational algebra once
 that one equation is certified. At present, only the two endpoint witness
 equations are fully proved; the non-endpoint rows remain computation-ready
 targets until their raw-slope equalities are formalized.
+
+At the nontrivial endpoint, the direct finite-box theorem
+`two_arctanGeom_one_equiv_quarterTurnRaw_one` records
+`2 * arctan.geom(1) = pi / 2` as the normalized geometric quarter turn.  It
+does not identify the factorial rotation with that point; that remains the
+Euler bridge.
 
 For rational-circle chord refinements, do not select an exact square root.
 The direct evaluator is already certified in
