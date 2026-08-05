@@ -620,8 +620,8 @@ for the series proof; they introduce no additional Machin pi computation.
 \begin{definition}[Formal power series and coefficient shift]
 \label{def:formal-power-series}
 \lean{ComputableAnalysis.FormalPowerSeries.Coeffs}
-\lean{ComputableAnalysis.FormalPowerSeries.derivative}
-\lean{ComputableAnalysis.FormalPowerSeries.HasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coefficientShift}
+\lean{ComputableAnalysis.FormalPowerSeries.HasCoefficientShift}
 \uses{def:raw-real}
 A formal power series is a rational coefficient stream
 \[
@@ -634,6 +634,9 @@ Its coefficient-shift operation is
 At the basepoint \(z=0\), the prospective first-order slope is simply the
 linear coefficient \(c_1\). This is algebraic Taylor data, separate from
 convergence and from an analytic derivative of the associated raw function.
+Lean retains the older names \code{derivative} and \code{HasFormalDerivative}
+as compatibility aliases; new series declarations use
+\code{coefficientShift} and \code{HasCoefficientShift}.
 \end{definition}
 
 \begin{remark}[The later Taylor--remainder bridge]

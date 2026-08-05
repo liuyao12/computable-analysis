@@ -39,9 +39,19 @@ abbrev Coeffs := Nat -> Rat
 
 def altSign (k : Nat) : Rat := if k % 2 = 0 then 1 else -1
 
-/-- Formal derivative of a rational coefficient stream. -/
-def derivative (c : Coeffs) : Coeffs :=
+/-- Algebraic coefficient shift of a rational power-series stream.
+
+This records the coefficients which would be the linear Taylor coefficients
+of a differentiated function.  It is deliberately defined before any
+convergence, remainder estimate, or interval-analytic derivative claim. -/
+def coefficientShift (c : Coeffs) : Coeffs :=
   fun n => ((n + 1 : Nat) : Rat) * c (n + 1)
+
+/-- Compatibility name for the coefficient-shift operation used by older
+finite algebra.  New declarations should prefer `coefficientShift`: an
+analytic derivative is introduced only after a quantitative remainder
+certificate. -/
+def derivative (c : Coeffs) : Coeffs := coefficientShift c
 
 def neg (c : Coeffs) : Coeffs :=
   fun n => -c n
@@ -52,6 +62,11 @@ def add (c d : Coeffs) : Coeffs :=
 def scaleRat (r : Rat) (c : Coeffs) : Coeffs :=
   fun n => r * c n
 
+/-- A checked algebraic coefficient-shift relation. -/
+def HasCoefficientShift (F f : Coeffs) : Prop :=
+  coefficientShift F = f
+
+/-- Compatibility name for the former formal-derivative predicate. -/
 def HasFormalDerivative (F f : Coeffs) : Prop :=
   derivative F = f
 
@@ -160,13 +175,13 @@ theorem coeffsFromDerivativeAtZero_hasFormalDerivative (F0 : Rat) (dF : Coeffs) 
     HasFormalDerivative (coeffsFromDerivativeAtZero F0 dF) dF := by
   unfold HasFormalDerivative
   funext n
-  dsimp [derivative, coeffsFromDerivativeAtZero]
+  dsimp [derivative, coefficientShift, coeffsFromDerivativeAtZero]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
 theorem derivative_neg (c : Coeffs) :
     derivative (neg c) = neg (derivative c) := by
   funext n
-  dsimp [derivative, neg]
+  dsimp [derivative, coefficientShift, neg]
   rw [Rat.mul_neg]
 
 theorem neg_neg (c : Coeffs) :
@@ -178,13 +193,13 @@ theorem neg_neg (c : Coeffs) :
 theorem derivative_add (c d : Coeffs) :
     derivative (add c d) = add (derivative c) (derivative d) := by
   funext n
-  dsimp [derivative, add]
+  dsimp [derivative, coefficientShift, add]
   rw [Rat.mul_add]
 
 theorem derivative_scaleRat (r : Rat) (c : Coeffs) :
     derivative (scaleRat r c) = scaleRat r (derivative c) := by
   funext n
-  dsimp [derivative, scaleRat]
+  dsimp [derivative, coefficientShift, scaleRat]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
 theorem HasFormalDerivative.add {F f G g : Coeffs}
@@ -203,7 +218,7 @@ theorem monomialShiftedCoeff_derivative (k : Nat) :
     HasFormalDerivative (monomialShiftedCoeff k) (monomialCoeff k) := by
   unfold HasFormalDerivative
   funext n
-  dsimp [derivative, monomialShiftedCoeff, monomialCoeff]
+  dsimp [derivative, coefficientShift, monomialShiftedCoeff, monomialCoeff]
   by_cases hn : n = k
   · subst n
     simp
@@ -263,7 +278,7 @@ that the boxed algorithm `exp.ps` has derivative `exp.ps`. -/
 theorem expCoeff_derivative :
     derivative expCoeff = expCoeff := by
   funext n
-  dsimp [derivative, expCoeff]
+  dsimp [derivative, coefficientShift, expCoeff]
   rw [factorialRat_succ n]
   have hn : (((n + 1 : Nat) : Rat) ≠ 0) := natCast_succ_ne_zero n
   have hf : factorialRat n ≠ 0 := by
@@ -281,7 +296,7 @@ theorem expCoeff_second_derivative :
 theorem sinCoeff_derivative :
     derivative sinCoeff = cosCoeff := by
   funext n
-  dsimp [derivative]
+  dsimp [derivative, coefficientShift]
   rw [sinCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -289,7 +304,7 @@ theorem sinCoeff_derivative :
 theorem cosCoeff_derivative :
     derivative cosCoeff = neg sinCoeff := by
   funext n
-  dsimp [derivative, neg]
+  dsimp [derivative, coefficientShift, neg]
   rw [cosCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -306,7 +321,7 @@ hyperbolic cosine. -/
 theorem sinhCoeff_derivative :
     derivative sinhCoeff = coshCoeff := by
   funext n
-  dsimp [derivative]
+  dsimp [derivative, coefficientShift]
   rw [sinhCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -315,7 +330,7 @@ hyperbolic sine. -/
 theorem coshCoeff_derivative :
     derivative coshCoeff = sinhCoeff := by
   funext n
-  dsimp [derivative]
+  dsimp [derivative, coefficientShift]
   rw [coshCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -351,6 +366,62 @@ theorem coshCoeff_hasFormalDerivative :
 /-- First-year calculus table entry: the formal derivative of `sinh` is `cosh`. -/
 theorem sinhCoeff_hasFormalDerivative :
     HasFormalDerivative sinhCoeff coshCoeff :=
+  sinhCoeff_derivative
+
+/-- Primary coefficient-shift names for the finite series algebra.
+
+The formal-derivative declarations above remain stable compatibility API; the
+following aliases are the names used by new finite Taylor constructions. -/
+theorem coefficientShift_neg (c : Coeffs) :
+    coefficientShift (neg c) = neg (coefficientShift c) :=
+  derivative_neg c
+
+theorem coefficientShift_add (c d : Coeffs) :
+    coefficientShift (add c d) =
+      add (coefficientShift c) (coefficientShift d) :=
+  derivative_add c d
+
+theorem coefficientShift_scaleRat (r : Rat) (c : Coeffs) :
+    coefficientShift (scaleRat r c) = scaleRat r (coefficientShift c) :=
+  derivative_scaleRat r c
+
+theorem hasCoefficientShift_add {F f G g : Coeffs}
+    (hF : HasCoefficientShift F f) (hG : HasCoefficientShift G g) :
+    HasCoefficientShift (add F G) (add f g) := by
+  change HasFormalDerivative F f at hF
+  change HasFormalDerivative G g at hG
+  change HasFormalDerivative (add F G) (add f g)
+  exact HasFormalDerivative.add hF hG
+
+theorem hasCoefficientShift_scaleRat (r : Rat) {F f : Coeffs}
+    (hF : HasCoefficientShift F f) :
+    HasCoefficientShift (scaleRat r F) (scaleRat r f) := by
+  change HasFormalDerivative F f at hF
+  change HasFormalDerivative (scaleRat r F) (scaleRat r f)
+  exact HasFormalDerivative.scaleRat r hF
+
+theorem monomialShiftedCoeff_hasCoefficientShift (k : Nat) :
+    HasCoefficientShift (monomialShiftedCoeff k) (monomialCoeff k) :=
+  monomialShiftedCoeff_derivative k
+
+theorem expCoeff_hasCoefficientShift :
+    HasCoefficientShift expCoeff expCoeff :=
+  expCoeff_derivative
+
+theorem sinCoeff_hasCoefficientShift :
+    HasCoefficientShift sinCoeff cosCoeff :=
+  sinCoeff_derivative
+
+theorem neg_cosCoeff_hasCoefficientShift :
+    HasCoefficientShift (neg cosCoeff) sinCoeff :=
+  neg_cosCoeff_hasFormalDerivative
+
+theorem coshCoeff_hasCoefficientShift :
+    HasCoefficientShift coshCoeff sinhCoeff :=
+  coshCoeff_derivative
+
+theorem sinhCoeff_hasCoefficientShift :
+    HasCoefficientShift sinhCoeff coshCoeff :=
   sinhCoeff_derivative
 
 end FormalPowerSeries

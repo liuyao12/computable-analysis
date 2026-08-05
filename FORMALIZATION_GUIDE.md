@@ -206,10 +206,12 @@ There are also genuine full interval derivative certificates on `[0,1]` for:
   (`d(x A_rect)/dx = A_rect + x/(1+x^2)`).
 
 `FirstYearCalculus.checked_power_series_table` proves the coefficient-shift
-identities for exp, sin, cos, sinh, and cosh. At a chosen expansion point this
-is the linear Taylor-coefficient data; it is not yet an interval-analytic
-derivative theorem for the corresponding boxed raw functions. Downstream
-proofs must preserve that distinction.
+identities for exp, sin, cos, sinh, and cosh. The primary series API calls
+this operation `FormalPowerSeries.coefficientShift` and its relation
+`HasCoefficientShift`; the older `derivative` names remain compatibility
+aliases. At a chosen expansion point this is linear Taylor-coefficient data,
+not yet an interval-analytic derivative theorem for the corresponding boxed
+raw functions. Downstream proofs must preserve that distinction.
 
 The finite polynomial bridge is now checked at the rational level:
 `FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`
@@ -219,6 +221,11 @@ proves an explicit `|h|` error bound for the literal quotient of
 bound as a full two-sided interval derivative certificate with an explicit
 dyadic half-decay step schedule.  It is also the right finite algebra for the
 termwise factorial-series bounds needed by exponential.
+`FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` materializes any
+formal coefficient stream as a finite rational Taylor polynomial and derives
+its interval derivative from `FormalPowerSeries.coefficientShift`. This is
+the intended hand-off from Chapter 4's algebra to Chapter 6's derivative
+certificates; no infinite-series tail is differentiated at this point.
 `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
 this construction under every finite rational coefficient prefix. Its
 quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
@@ -457,6 +464,7 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
 #check expTaylorQuadratic
+#check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero

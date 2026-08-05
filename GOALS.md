@@ -209,6 +209,15 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   exponential/logarithm branches.
 - **Differentiated elementary functions — partly checked.** Formal
   power-series coefficient shifts and finite-difference examples are checked.
+  The series-layer API now makes this staging explicit:
+  `FormalPowerSeries.coefficientShift` and `HasCoefficientShift` are the
+  primary names; legacy formal-derivative names are compatibility aliases,
+  not an assertion about evaluated raw functions.
+  `FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` now turns every
+  finite coefficient prefix into a two-sided rational-interval derivative
+  certificate for its coefficient-shift polynomial. This is the precise
+  finite Taylor--Lagrange hand-off; it still does not differentiate an
+  infinite tail.
   The executable factorial loop is also now identified, term by term and at
   every finite prefix, with its rational Taylor coefficients
   (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
@@ -1268,10 +1277,12 @@ students actually compute.
   of the formal stream: see
   `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval`.
 - Linear closure for the table is now available at the formal coefficient
-  level.  See `FormalPowerSeries.derivative_add`,
-  `FormalPowerSeries.derivative_scaleRat`,
-  `FormalPowerSeries.HasFormalDerivative.add`, and
-  `FormalPowerSeries.HasFormalDerivative.scaleRat`.
+  level.  The primary declarations are
+  `FormalPowerSeries.coefficientShift_add`,
+  `FormalPowerSeries.coefficientShift_scaleRat`,
+  `FormalPowerSeries.hasCoefficientShift_add`, and
+  `FormalPowerSeries.hasCoefficientShift_scaleRat`; their older
+  formal-derivative counterparts remain compatibility API.
 - Real-axis wrappers for concrete functions are named:
   `FirstYearCalculus.RealElementary.expPS`, `sinPS`, `cosPS`,
   `sinhFromExp`, `coshFromExp`, `sqrtRat`, `invX`, and

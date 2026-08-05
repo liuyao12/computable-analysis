@@ -286,6 +286,28 @@ def taylorDerivativePrefix (coeffs : Nat -> Rat) : Nat -> Rat -> Rat
   | n + 1 => fun x =>
       taylorDerivativePrefix coeffs n x + coeffs n * x ^ n
 
+/-- The finite polynomial formed from the first `terms` coefficients of a
+formal Taylor stream.
+
+The constant coefficient is retained explicitly; all higher terms are the
+finite primitive of the stream's algebraic coefficient shift.  Thus this is
+only rational polynomial evaluation, even when `coeffs` later belongs to an
+infinite series. -/
+def taylorPrefix (coeffs : FormalPowerSeries.Coeffs) : Nat -> Rat -> Rat
+  | 0 => fun _x => 0
+  | terms + 1 => fun x =>
+      coeffs 0 +
+        integratedTaylorPrefix
+          (FormalPowerSeries.coefficientShift coeffs) terms x
+
+/-- The finite coefficient-shift polynomial paired with `taylorPrefix`.
+For `terms + 1`, it is the literal derivative polynomial of the displayed
+finite prefix; no statement about an infinite tail is made here. -/
+def taylorPrefixShift (coeffs : FormalPowerSeries.Coeffs) : Nat -> Rat -> Rat
+  | 0 => fun _x => 0
+  | terms + 1 =>
+      taylorDerivativePrefix (FormalPowerSeries.coefficientShift coeffs) terms
+
 /-- Every finite rational Taylor primitive carries an explicit secant bound.
 The proof is structural: add the next normalized monomial, then scale it by
 its rational coefficient. -/
@@ -311,6 +333,35 @@ def integratedTaylorPrefix_hasDerivativeOnInterval
       (FunctionOnInterval.exactRat (integratedTaylorPrefix coeffs n) a b)
       (FunctionOnInterval.exactRat (taylorDerivativePrefix coeffs n) a b) :=
   (integratedTaylorPrefixSecantBound C coeffs hC1 n).toHasDerivativeOnInterval
+    a b hleft hright
+
+/-- Every finite Taylor prefix carries the explicit secant bound supplied by
+its coefficient shift.  This is the reusable Taylor--Lagrange bridge for a
+finite polynomial: the analytic-looking derivative claim is justified by a
+rational `|h|` remainder coefficient. -/
+def taylorPrefixSecantBound (C : Rat) (coeffs : FormalPowerSeries.Coeffs)
+    (hC1 : 1 <= C) : (terms : Nat) ->
+    SecantDerivativeBound C
+      (taylorPrefix coeffs terms)
+      (taylorPrefixShift coeffs terms)
+  | 0 => SecantDerivativeBound.constant C 0
+  | terms + 1 => by
+      simpa [taylorPrefix, taylorPrefixShift, Rat.zero_add] using
+        SecantDerivativeBound.add
+          (SecantDerivativeBound.constant C (coeffs 0))
+          (integratedTaylorPrefixSecantBound C
+            (FormalPowerSeries.coefficientShift coeffs) hC1 terms)
+
+/-- A finite Taylor coefficient prefix has its coefficient-shift polynomial
+as a two-sided interval derivative on every rational subinterval of a
+bounded symmetric box. -/
+def taylorPrefix_hasDerivativeOnInterval
+    (coeffs : FormalPowerSeries.Coeffs) (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (taylorPrefix coeffs terms) a b)
+      (FunctionOnInterval.exactRat (taylorPrefixShift coeffs terms) a b) :=
+  (taylorPrefixSecantBound C coeffs hC1 terms).toHasDerivativeOnInterval
     a b hleft hright
 
 /-- The ordinary finite factorial-series prefix for exponential. -/
