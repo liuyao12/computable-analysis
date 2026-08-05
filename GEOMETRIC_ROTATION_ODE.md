@@ -50,12 +50,26 @@ limit statement and use no completed real or complex numbers.  In particular,
 `pointComplexDerivative` is the exact rational derivative formula, not yet a
 `FunctionRaw` derivative certificate.
 
-The next theorem must supply rational difference-quotient boxes for the chart
-and for the sector-area reparametrization.  A continuous Peano--Baker/Volterra
-uniqueness proof can then compare that reparametrized geometric solution with
-the factorial rotation raw.  Its endpoint is `P(1) = i`; only after this
-comparison, and a separately certified exponential/logarithm branch, can the
-project state the Euler row as formally complete.
+The two exact finite quotients needed for that certificate are now available:
+
+```lean
+GeometricRotationODE.pointRe_differenceQuotient
+GeometricRotationODE.pointIm_differenceQuotient
+GeometricRotationODE.pointRe_differenceQuotient_sub_derivative
+GeometricRotationODE.pointIm_differenceQuotient_sub_derivative
+```
+
+The latter two put the secant error over a positive product of chart
+denominators and exhibit an explicit factor of the rational step `h`.  They
+are the finite algebra needed to bound the error uniformly on `[0,1]` and
+instantiate `HasDerivativeOnInterval`; the order estimates and singleton-box
+wrapper remain the next work item.
+
+A continuous Peano--Baker/Volterra uniqueness proof can then compare that
+reparametrized geometric solution with the factorial rotation raw.  Its
+endpoint is `P(1) = i`; only after this comparison, and a separately certified
+exponential/logarithm branch, can the project state the Euler row as formally
+complete.
 
 ## Focused check
 

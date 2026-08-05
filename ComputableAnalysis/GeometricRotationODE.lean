@@ -36,11 +36,73 @@ def pointComplexDerivative (t : Rat) : QComplex :=
 def angularVelocity (t : Rat) : QComplex :=
   { re := 0, im := 2 / (1 + t * t) }
 
+/-- The two rational coordinate functions of the chart, named separately for
+the finite-difference certificates below. -/
+def pointRe (t : Rat) : Rat := (RationalCircle.Stage.point t).x
+def pointIm (t : Rat) : Rat := (RationalCircle.Stage.point t).y
+
+/-- Their exact rational derivative formulas. -/
+def pointReDerivative (t : Rat) : Rat := (RationalCircle.Stage.pointDerivative t).x
+def pointImDerivative (t : Rat) : Rat := (RationalCircle.Stage.pointDerivative t).y
+
 theorem pointComplex_zero : pointComplex 0 = QComplex.one := by
   native_decide
 
 theorem pointComplex_one : pointComplex 1 = RotationSeries.imaginaryUnit := by
   native_decide
+
+/-- The real coordinate's finite difference quotient.  This is exact for
+every nonzero rational step, before any small-step estimate is applied. -/
+theorem pointRe_differenceQuotient (t h : Rat) (hh : h ≠ 0) :
+    (pointRe (t + h) - pointRe t) / h =
+      (-2 * (2 * t + h)) /
+        ((1 + t * t) * (1 + (t + h) * (t + h))) := by
+  unfold pointRe RationalCircle.Stage.point
+  dsimp
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The imaginary coordinate's finite difference quotient. -/
+theorem pointIm_differenceQuotient (t h : Rat) (hh : h ≠ 0) :
+    (pointIm (t + h) - pointIm t) / h =
+      (2 * (1 - t * t - t * h)) /
+        ((1 + t * t) * (1 + (t + h) * (t + h))) := by
+  unfold pointIm RationalCircle.Stage.point
+  dsimp
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact real-coordinate secant error relative to the rational derivative.
+The displayed factor of `h` is the finite source of the derivative modulus. -/
+theorem pointRe_differenceQuotient_sub_derivative (t h : Rat) (hh : h ≠ 0) :
+    (pointRe (t + h) - pointRe t) / h - pointReDerivative t =
+      (2 * h * (-1 + 3 * t * t + 2 * t * h)) /
+        ((1 + t * t) * (1 + t * t) * (1 + (t + h) * (t + h))) := by
+  rw [pointRe_differenceQuotient t h hh]
+  unfold pointReDerivative RationalCircle.Stage.pointDerivative
+  dsimp
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  simp only [Rat.inv_mul_rev]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.neg_mul, Rat.mul_neg]
+
+/-- Exact imaginary-coordinate secant error relative to the rational
+derivative. -/
+theorem pointIm_differenceQuotient_sub_derivative (t h : Rat) (hh : h ≠ 0) :
+    (pointIm (t + h) - pointIm t) / h - pointImDerivative t =
+      (-2 * h * (t * (3 - t * t) + h * (1 - t * t))) /
+        ((1 + t * t) * (1 + t * t) * (1 + (t + h) * (t + h))) := by
+  rw [pointIm_differenceQuotient t h hh]
+  unfold pointImDerivative RationalCircle.Stage.pointDerivative
+  dsimp
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  simp only [Rat.inv_mul_rev]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.neg_mul, Rat.mul_neg]
 
 /-- The chart's angular coefficient is exactly the already-certified sector
 area speed.  Thus the reparametrization required for a constant rotation

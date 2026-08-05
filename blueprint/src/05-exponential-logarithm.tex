@@ -284,6 +284,8 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
 \lean{ComputableAnalysis.GeometricRotationODE.angularVelocity_eq_imaginaryAxis_sectorAreaSpeed}
 \lean{ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_sectorAreaSpeed_rotation}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_differenceQuotient_sub_derivative}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient_sub_derivative}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -356,8 +358,10 @@ The rational circle chart now supplies the exact finite hand-off:
   \qquad \operatorname{sectorAreaSpeed}(t)=\frac{2}{1+t^2}.
 \]
 These are rational-function identities, not yet a represented-function
-derivative theorem.  The remaining step is a rational difference-quotient
-certificate plus reparametrized Peano--Baker/Volterra uniqueness; only then
-can this geometric solution be identified with the factorial rotation raw and
-connected to the complex exponential/logarithm branches.
+derivative theorem.  The two coordinate secant errors are also exact rational
+fractions with an explicit factor of the rational step.  Bounding them on the
+unit chart and wrapping their singleton boxes is the remaining derivative
+certificate; reparametrized Peano--Baker/Volterra uniqueness then identifies
+this geometric solution with the factorial rotation raw and connects it to the
+complex exponential/logarithm branches.
 \end{theorem}
