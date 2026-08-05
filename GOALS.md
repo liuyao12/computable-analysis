@@ -1038,9 +1038,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   `FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`
   bounds the quotient of `x^(n+1)/(n+1)` against `x^n` by an explicit
   `|h|` coefficient on a supplied bounded box.  This avoids any mean-value
-  theorem and is the direct finite algebra needed for the exponential tail;
-  wrapping the bound as a uniform interval derivative certificate remains the
-  next interface step.
+  theorem and is the direct finite algebra needed for the exponential tail.
+  `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval` now packages
+  that bound as a two-sided rational interval derivative certificate, with a
+  computed dyadic step schedule, on every interval contained in `[-C,C]` for
+  `C >= 1`.
 - Next theorem for `exp.ps`: turn the formal coefficient identity plus
   rational tail bounds and a translated-series/addition estimate into an
   effective derivative certificate for the boxed algorithm on an interval,
@@ -1249,7 +1251,7 @@ students actually compute.
   `FirstYearCalculus.checked_power_series_table`.
 - The monomial row also has an executable finite-secant estimate, independent
   of the formal stream: see
-  `FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`.
+  `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval`.
 - Linear closure for the table is now available at the formal coefficient
   level.  See `FormalPowerSeries.derivative_add`,
   `FormalPowerSeries.derivative_scaleRat`,

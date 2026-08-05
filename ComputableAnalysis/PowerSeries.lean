@@ -737,7 +737,10 @@ private theorem nat_succ_le_two_pow (n : Nat) : n + 1 <= 2 ^ n := by
           rw [Nat.pow_succ]
           omega
 
-private theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
+/-- The rational half-power and reciprocal dyadic schedules coincide exactly.
+This connects an executable natural precision budget with a geometric
+majorant, without an appeal to an ambient limit. -/
+theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
     ((1 : Rat) / 2) ^ n = 1 / (((2 ^ n : Nat) : Rat)) := by
   induction n with
   | zero => native_decide

@@ -25,6 +25,7 @@ import ComputableAnalysis.ElementaryFunctions
 import ComputableAnalysis.Exp
 import ComputableAnalysis.ExpProofs
 import ComputableAnalysis.Extension
+import ComputableAnalysis.FinitePolynomialCalculus
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FTC
 import ComputableAnalysis.FTA

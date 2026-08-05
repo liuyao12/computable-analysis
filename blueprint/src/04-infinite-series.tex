@@ -680,6 +680,7 @@ formal identities:
 \lean{ComputableAnalysis.FinitePolynomial.powerSecant_eq_differenceQuotient}
 \lean{ComputableAnalysis.FinitePolynomial.powerDerivative_succ}
 \lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
+\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
 \leanok
 For every rational box of radius \(C\ge1\), Lean proves directly that the
 literal quotient of the normalized monomial has the form
@@ -689,8 +690,9 @@ literal quotient of the normalized monomial has the form
 \]
 where \(E_{n+1}(C)\) is an explicitly recursive rational coefficient.
 This is finite algebra plus an absolute-value bound, with no mean-value or
-completeness theorem.  Packaging its computable step schedule as a full
-\code{HasDerivativeOnInterval} family is the next small interface step.
+completeness theorem.  Its dyadic half-decay schedule is now packaged as a
+two-sided \code{HasDerivativeOnInterval} certificate on every rational
+interval contained in \([-C,C]\), \(C\ge1\).
 \end{theorem}
 
 \lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
@@ -706,8 +708,8 @@ completeness theorem.  Packaging its computable step schedule as a full
 \(x^{n+1}/(n+1)\), formal coefficient stream & \(x^n\) &
 \formallyproved{Formal coefficient theorem} \\
 \(x^{n+1}/(n+1)\), rational secant on a bounded box & \(x^n\) &
-\formallyproved{Explicit \(\lvert h\rvert\)-error theorem; boxed interval
-certificate still to package} \\
+\formallyproved{Full \code{HasDerivativeOnInterval} family with an explicit
+dyadic step schedule} \\
 \(\exp_{\rm ps}\), formal coefficient stream & \(\exp_{\rm ps}\) &
 \formallyproved{Formal coefficient theorem} \\
 \(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal coefficient streams &
@@ -738,8 +740,8 @@ silently promoted to a derivative theorem for an evaluated raw function.}
 \noindent
 The formal-series green rows are witnessed by
 \code{FirstYearCalculus.checked\_power\_series\_table}; the monomial-secant
-row by the finite rational theorem
-\code{FinitePolynomial.qabs\_normalized\_power\_differenceQuotient\_sub\_monomial\_le};
+row by
+\code{FinitePolynomial.normalizedMonomial\_hasDerivativeOnInterval};
 the three full interval rows are witnessed respectively by
 \code{IntegralIdentities.coordinateOnUnitDerivative},
 \code{IntegralIdentities.arctanIntegralRectangleOnUnit\_hasDerivative}, and

@@ -213,10 +213,11 @@ functions.  This distinction must be preserved in downstream proofs.
 The finite polynomial bridge is now checked at the rational level:
 `FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`
 proves an explicit `|h|` error bound for the literal quotient of
-`x^(n+1)/(n+1)` against `x^n` on any supplied rational bounded box.  It is the
-right algebraic input for a future `HasDerivativeOnInterval` constructor and
-for termwise factorial-series bounds; it is not itself a boxed interval
-certificate yet.
+`x^(n+1)/(n+1)` against `x^n` on any supplied rational bounded box.
+`FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval` packages that
+bound as a full two-sided interval derivative certificate with an explicit
+dyadic half-decay step schedule.  It is also the right finite algebra for the
+termwise factorial-series bounds needed by exponential.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`, and
