@@ -518,6 +518,24 @@ def pointImOnUnit : FunctionOnInterval :=
 def pointImDerivativeOnUnit : FunctionOnInterval :=
   FunctionOnInterval.exactRat pointImDerivative 0 1
 
+/-- A complex-valued interval function is represented here by synchronized
+real and imaginary coordinate functions.  This is deliberately a small
+coordinatewise interface: it is enough to hand a geometric curve to the
+future vector ODE layer without importing a completed complex plane. -/
+structure ComplexFunctionOnInterval where
+  re : FunctionOnInterval
+  im : FunctionOnInterval
+  same_lower : im.lower = re.lower
+  same_upper : im.upper = re.upper
+
+/-- Coordinatewise derivative data for a complex interval function. -/
+structure HasComplexDerivativeOnInterval
+    (f df : ComplexFunctionOnInterval) where
+  same_lower : df.re.lower = f.re.lower
+  same_upper : df.re.upper = f.re.upper
+  re_derivative : HasDerivativeOnInterval f.re df.re
+  im_derivative : HasDerivativeOnInterval f.im df.im
+
 /-- A literal rational epsilon--delta derivative certificate for the real
 circle-chart coordinate on `[0,1]`. -/
 def pointRe_hasDerivativeOnUnit :
@@ -559,6 +577,29 @@ def pointIm_hasDerivativeOnUnit :
     exact Rat.le_trans
       (pointIm_secant_error_le_twelve hx.1 hx.2 hxh.1 hxh.2 hh)
       (twelve_qabs_step_le_precision n h hsmall)
+
+/-- The rational circle chart, as a synchronized complex interval function. -/
+def pointOnUnit : ComplexFunctionOnInterval where
+  re := pointReOnUnit
+  im := pointImOnUnit
+  same_lower := rfl
+  same_upper := rfl
+
+/-- Its rational velocity, as a synchronized complex interval function. -/
+def pointDerivativeOnUnit : ComplexFunctionOnInterval where
+  re := pointReDerivativeOnUnit
+  im := pointImDerivativeOnUnit
+  same_lower := rfl
+  same_upper := rfl
+
+/-- The rational circle chart has a coordinatewise epsilon--delta complex
+derivative certificate on the full unit chart. -/
+def point_hasComplexDerivativeOnUnit :
+    HasComplexDerivativeOnInterval pointOnUnit pointDerivativeOnUnit where
+  same_lower := rfl
+  same_upper := rfl
+  re_derivative := pointRe_hasDerivativeOnUnit
+  im_derivative := pointIm_hasDerivativeOnUnit
 
 /-- The chart's angular coefficient is exactly the already-certified sector
 area speed.  Thus the reparametrization required for a constant rotation

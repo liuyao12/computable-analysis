@@ -84,7 +84,12 @@ GeometricRotationODE.pointIm_hasDerivativeOnUnit
 
 At requested precision `n`, the explicit step budget is `1/(12*n)` (and
 `1/12` at stage zero).  A complex/vector wrapper and sector-area
-reparametrization are the next requirements for ODE uniqueness.
+reparametrization are the next requirements for ODE uniqueness.  The first
+wrapper is now present: `pointOnUnit` and `pointDerivativeOnUnit` are
+synchronized coordinate pairs, and
+`point_hasComplexDerivativeOnUnit` packages the two literal certificates.
+It is coordinatewise data only; it does not assert the reparametrized ODE
+solution or uniqueness.
 
 A complex/vector derivative wrapper and the sector-area reparametrization then
 lead to Peano--Baker/Volterra uniqueness.  That comparison would identify the

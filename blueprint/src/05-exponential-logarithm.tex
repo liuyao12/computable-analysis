@@ -292,6 +292,7 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.GeometricRotationODE.pointIm_secant_error_le_twelve}
 \lean{ComputableAnalysis.GeometricRotationODE.pointRe_hasDerivativeOnUnit}
 \lean{ComputableAnalysis.GeometricRotationODE.pointIm_hasDerivativeOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.point_hasComplexDerivativeOnUnit}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -371,8 +372,8 @@ rational step.  On the unit chart, the remaining factor is bounded so both
 errors are at most \(12|h|\).  Exact singleton evaluators package this as the
 project's literal epsilon--delta interval derivative certificate, using a
 step budget \(1/(12n)\) (and \(1/12\) at stage zero).  A complex/vector
-wrapper and sector-area reparametrization then remain before Peano--
-Baker/Volterra uniqueness can identify this geometric solution with the
-factorial rotation raw and connect it to the complex exponential/logarithm
-branches.
+wrapper now packages the two coordinate certificates, while sector-area
+reparametrization remains before Peano--Baker/Volterra uniqueness can identify
+this geometric solution with the factorial rotation raw and connect it to the
+complex exponential/logarithm branches.
 \end{theorem}
