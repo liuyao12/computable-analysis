@@ -71,6 +71,46 @@ theorem raw_equiv_piCircleArea : raw.Equiv piCircleArea := by
   exact (RealRaw.compareAt_overlap_iff rectangleRaw piCircleArea n n).1
     (rectangleRaw_equiv_piCircleArea n)
 
+/-- The bounded version splits the Cauchy kernel at zero, computes its
+increasing and decreasing pieces separately, and then applies the outer
+factor of two. -/
+def symmetricRaw : RealRaw :=
+  IntegralIdentities.piSymmetricCauchyPiecewiseIntegral
+
+theorem symmetricRaw_valid : symmetricRaw.Valid :=
+  IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid
+
+/-- The two-piece monotone assembly agrees with four copies of the same
+unit-interval rectangle computation used by the full-line route. -/
+theorem symmetricRaw_equiv_rectangleRaw : symmetricRaw.Equiv rectangleRaw := by
+  have hA : IntegralIdentities.arctanIntegralRectangleForAtOne.Valid :=
+    IntegralIdentities.arctanIntegralRectangleForAtOne_valid
+  have hfirst : symmetricRaw.Equiv
+      ((2 : Nat) * ((2 : Nat) *
+        IntegralIdentities.arctanIntegralRectangleForAtOne : RealRaw) : RealRaw) := by
+    unfold symmetricRaw IntegralIdentities.piSymmetricCauchyPiecewiseIntegral
+    exact RealRaw.natScale_equiv 2
+      IntegralIdentities.symmetricCauchyPiecewiseIntegral_equiv_two_rectangle
+  have hcompose :
+      ((2 : Nat) * ((2 : Nat) *
+        IntegralIdentities.arctanIntegralRectangleForAtOne : RealRaw) : RealRaw).Equiv
+        rectangleRaw := by
+    have h := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
+      (2 : Rat) (2 : Rat) (by native_decide) (by native_decide)
+      IntegralIdentities.arctanIntegralRectangleForAtOne hA
+    simpa only [rectangleRaw, IntegralIdentities.PiFromArctanIntegral,
+      show (2 : Rat) * (2 : Rat) = 4 by native_decide] using h
+  exact RealRaw.equiv_trans symmetricRaw_valid
+    (RealRaw.natScale_valid 2 (RealRaw.natScale_valid 2 hA))
+    rectangleRaw_valid hfirst hcompose
+
+/-- The bounded increasing/decreasing Cauchy calculation is independently
+equivalent to the circle-area computation of pi. -/
+theorem symmetricRaw_equiv_piCircleArea : symmetricRaw.Equiv piCircleArea := by
+  exact RealRaw.equiv_trans symmetricRaw_valid rectangleRaw_valid
+    piCircleArea_valid symmetricRaw_equiv_rectangleRaw
+    rectangleRaw_equiv_piCircleArea
+
 end CauchyPi
 
 end ComputableAnalysis

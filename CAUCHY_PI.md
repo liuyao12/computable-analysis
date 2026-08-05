@@ -31,6 +31,15 @@ Useful declarations:
 - `CauchyPi.raw`, `CauchyPi.raw_valid`
 - `CauchyPi.raw_compute_eq_rectangleRaw`
 - `CauchyPi.raw_equiv_piCircleArea`
+- `CauchyPi.symmetricRaw`, `CauchyPi.symmetricRaw_valid`
+- `CauchyPi.symmetricRaw_equiv_rectangleRaw`
+- `CauchyPi.symmetricRaw_equiv_piCircleArea`
+
+`symmetricRaw` is the companion bounded calculation.  It splits at zero,
+uses the increasing and decreasing branches separately, and proves that the
+two-piece finite assembly meets the same rectangle raw.  It is therefore a
+separate regression for the piecewise-monotone interface, not an alternate
+name for the full-line evaluator.
 
 The blueprint treatment is in the “Projective and improper test integrals”
 section of `blueprint/src/03-integrals.tex`.
