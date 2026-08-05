@@ -188,7 +188,15 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.uniformRotationBox_future_contained_expand_of_input_near}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
+\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
+\lean{ComputableAnalysis.GeometricRotationODE.pointComplex_one}
+\lean{ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_sectorAreaSpeed_rotation}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_equiv_halfPi}
+\lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_midpoint_qabs_le_two}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_midpoint_sub_le_width}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_ordered}
@@ -197,6 +205,7 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius_shrinks}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotation}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_contains_current_candidate}
 \leanok
 For constant \(A\), the checked degree-\(r\) term is \(T^rA^r/r!\).  For the
 quarter-turn matrix \(J^2=-I\), its even prefix is exactly
@@ -215,9 +224,16 @@ ordered and has shrinking widths. Later midpoints differ from an earlier
 one by at most the earlier rational input width. The finite-series Lipschitz
 bound is checked: each coordinate moves by at most sixteen times that input
 difference. Hence the direct candidates have the required future containment
-after an explicit (16,operatorname{width}(pi/2,k)) enlargement, and
+after an explicit \(16\,\operatorname{width}(\pi/2,k)\) enlargement, and
 their finite-prefix stabilization is a valid complex raw with a
-(32/(k+1)) radius modulus. No completed complex plane is being used.
+\(32/(k+1)\) radius modulus. No completed complex plane is being used.
+The input angle is not merely named: its raw boxes are certified equivalent
+both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
+quarter-turn raw.  The remaining identification is specifically between the
+power-series rotation output and the geometric circle point.  The chart's
+exact rational velocity is already in rotation form,
+\(P'=i\,\operatorname{sectorAreaSpeed}P\), with endpoint \(P(1)=i\); the
+missing bridge is its reparametrized represented-function/uniqueness theorem.
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
 can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}

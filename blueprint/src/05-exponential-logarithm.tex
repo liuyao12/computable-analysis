@@ -281,6 +281,9 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_input_lipschitz}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationBox_contained_expand_of_input_near}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationBox_future_contained_expand_of_input_near}
+\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
+\lean{ComputableAnalysis.GeometricRotationODE.angularVelocity_eq_imaginaryAxis_sectorAreaSpeed}
+\lean{ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_sectorAreaSpeed_rotation}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -346,7 +349,15 @@ For \(|T|,|U|\le2\), its finite cosine--sine prefix changes by at most
 gives future containment after widening stage \(k\) by
 \(16\,\operatorname{width}(\pi/2,k)\); that radius is at most \(32/(k+1)\)
 and shrinks by the rational denominator schedule.
-The remaining theorem \(e^{i\pi}+1=0\) still needs the extension of the
-represented rotation raw to the geometric quarter turn, and then its
-connection to the project’s complex exponential/logarithm branches.
+The rational circle chart now supplies the exact finite hand-off:
+\(P(0)=1\), \(P(1)=i\), and
+\[
+  P'(t)=i\,\operatorname{sectorAreaSpeed}(t)P(t),
+  \qquad \operatorname{sectorAreaSpeed}(t)=\frac{2}{1+t^2}.
+\]
+These are rational-function identities, not yet a represented-function
+derivative theorem.  The remaining step is a rational difference-quotient
+certificate plus reparametrized Peano--Baker/Volterra uniqueness; only then
+can this geometric solution be identified with the factorial rotation raw and
+connected to the complex exponential/logarithm branches.
 \end{theorem}

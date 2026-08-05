@@ -45,6 +45,7 @@ import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.RotationLift
 import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.GeometricPiRotation
+import ComputableAnalysis.GeometricRotationODE
 import ComputableAnalysis.Polynomial
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
