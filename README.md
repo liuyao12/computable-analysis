@@ -132,13 +132,14 @@ capability—not a percentage for the whole foundation.
 | --- | --- | --- |
 | finite Archimedean theorem | perimeter and area presentations agree | cross-fan: $w_n\le10/(n+1)$ |
 | arctangent power-series theorem | geometric and series presentations agree | Leibniz: $w_n=4/(4n+1)$ |
+| Machin's single power-series formula | $\pi=16\arctan_{\rm series}(1/5)-4\arctan_{\rm series}(1/239)$ agrees with geometric area pi | Machin: $w_n\le20/2^n$ |
 | arctangent integral evaluation | integral and series presentations agree | rectangle $\pi$ raw: $w_n\le16/(n+1)$ |
 | finite arctangent integration by parts | supplied unit-branch triangle/strip reindexing, product FTC, and reciprocal-log endpoint agree with area pi | literal runtime: $w_n\le52/2^n$ |
 | finite square substitution in the pi formula | the same supplied product endpoint plus the checked $t=x^2$ mesh correction and pullback integral agree with the reciprocal-log formula | square-pullback pi raw: $w_n\le56/2^n$ |
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | bounded symmetric Cauchy integral | public two-piece monotone assembly, with an increasing `[-1,0]` branch and a decreasing `[0,1]` branch | symmetric Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
-| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | `PiProofs.pi.halfPi` is a certified real parameter with every box in $[1,2]$ and width at most $2/(n+1)$. The finite rational rotation prefixes are now Lipschitz on that range, so their midpoint candidates stabilize to the valid represented complex raw `pi.halfPiRotation` with radius at most $32/(n+1)$. Its `imaginaryHalf` embedding is the exact $(i/2)$ scalar action; the return $(-2i)(i\pi/2)=\pi$ and, conditionally on `log(i)=i\pi/2`, the literal product $(-2i)\log(i)=\pi$ are checked. The geometric quarter-turn and branch-identification theorems remain planned. |
+| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | `PiProofs.pi.halfPi` is a certified real parameter with every box in $[1,2]$ and width at most $2/(n+1)$. It is formally bridged to both `2 * arctan.geom(1)` and the normalized geometric quarter-turn raw. The finite rational rotation prefixes are Lipschitz on that range, so their midpoint candidates stabilize to the valid represented complex raw `pi.halfPiRotation` with radius at most $32/(n+1)$. Its `imaginaryHalf` embedding is the exact $(i/2)$ scalar action; the return $(-2i)(i\pi/2)=\pi$ and, conditionally on `log(i)=i\pi/2`, the literal product $(-2i)\log(i)=\pi$ are checked. The power-series-to-geometric-quarter-turn and branch-identification theorems remain planned. |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,

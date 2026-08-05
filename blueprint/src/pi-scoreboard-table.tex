@@ -31,6 +31,11 @@ Arctangent series theorem &
 circular inverse geometry against the alternating arctangent series &
 Leibniz: \(w_n=4/(4n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
+Machin's single power-series formula &
+\(\pi=16\arctan_{\rm series}(1/5)-4\arctan_{\rm series}(1/239)\),
+with each alternating series compared to its geometric chart value &
+Machin: \(w_n\le20/2^n\) &
+\(\checkmark\) & \(\checkmark\)\\
 Arctangent integral &
 certified rectangle integration and its endpoint bridge &
 rectangle \(\pi\)-raw: \(w_n\le16/(n+1)\) &
@@ -103,7 +108,9 @@ the checked \code{pi.halfPi} input with rational boxes in \([1,2]\) and
 width \(\le2/(n+1)\), its midpoint Cauchy modulus and ordered shrinking
 uniform-rotation candidate; the checked finite-prefix Lipschitz bound and
 Cauchy stabilization produce a valid represented \code{pi.halfPiRotation}
-with radius \(\le32/(n+1)\); its \code{pi.imaginaryHalf} embedding, and exact product legs
+with radius \(\le32/(n+1)\). The input itself is bridged to both
+\(2\arctangeom(1)\) and the geometric normalized quarter turn; its
+\code{pi.imaginaryHalf} embedding, and exact product legs
 \((-2i)(i\pi/2)=\pi\) and conditionally \((-2i)\log(i)=\pi\); then matrix
 Peano--Baker factorial tail, rotation-system/geometric identification, and
 branch-agreement moduli
@@ -116,10 +123,10 @@ schedule are checked) &
 The primary \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two
 perimeter normalizations (available as \code{pi.circumferenceStabilized} and
-\code{pi.circumferenceReboxed}), Nilakantha, and the single Machin power-series
-formula.  The Machin runtime has its own certified bound
-\(w_n\le20/2^n\), recorded by \code{PiProofs.piMachinRate}; it remains a
-series-regression implementation rather than another coverage row.  Its direct cross-fan view is \code{pi.circumference} (also
+\code{pi.circumferenceReboxed}), Nilakantha, and direct cross-fan
+circumference views.  Machin is listed above as its single power-series
+formula; its certified bound \(w_n\le20/2^n\) is recorded by
+\code{PiProofs.piMachinRate}.  Its direct cross-fan view is \code{pi.circumference} (also
 \code{pi.circumferenceFan}).  The abstract \code{piCertified} handle additionally stores the
 supplementary \code{pi.dirichletBeta}, \code{pi.integrationByPartsMesh},
 \code{pi.triangleLogSeries}, and \code{pi.squareStieltjes} representatives.
