@@ -63,6 +63,8 @@ that two exponential representations agree also identifies their Euler bases.
 \lean{ComputableAnalysis.ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRaw}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRaw_equiv_expPowerSeries}
 \uses{def:effective-derivative}
 The intended later analytic package is
 \[
@@ -83,6 +85,11 @@ sum and certified geometric radius are at most \(h^2\) for
 \(0<h\le1/2\); division by \(h\) gives the first-order quotient bound.
 This is not yet the global self-derivative theorem \(E'=E\), nor the
 uniqueness application that compares exponential representations.
+The recently checked \code{uniformExpRaw} supplies the missing common
+factorial schedule on \(\lvert x\rvert\le2\), and is stagewise equivalent to
+the selected adaptive series evaluator.  The next certificate compares its
+same-stage prefixes at \(x\) and \(x+h\), attaches the two tail radii, and
+then applies the finite Taylor secant estimate.
 \end{remark}
 
 \begin{theorem}[Checked initial values and finite binomial bridge]

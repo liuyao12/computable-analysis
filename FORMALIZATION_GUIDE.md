@@ -257,6 +257,11 @@ center after `N + 1` terms with `FinitePolynomial.expTaylorPrefix N x`.
 `FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` puts every
 term under a common factorial-tail budget on a bounded rational box. Use
 these facts before attaching the separately certified geometric tail.
+`ExpProofs.uniformExpRaw` now carries out that attachment on `qabs x <= 2`:
+its fixed factorial stage is valid, nested, and geometrically shrinking;
+`ExpProofs.uniformExpRaw_equiv_expPowerSeries` proves it overlaps the selected
+adaptive series evaluator at every common stage. This is the representation
+to use when one proof must evaluate both `x` and `x + h` at the same prefix.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -481,6 +486,9 @@ open ComputableAnalysis
 #check ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix
 #check FinitePolynomial.expTaylorPrefix_succ
 #check FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm
+#check ExpProofs.uniformExpRaw
+#check ExpProofs.uniformExpRaw_valid
+#check ExpProofs.uniformExpRaw_equiv_expPowerSeries
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one

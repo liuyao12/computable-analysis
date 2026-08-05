@@ -235,7 +235,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   one-term extension, while
   `FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` supplies the
   common bounded-box factorial majorant needed for a future uniform tail
-  certificate; an analytic derivative still requires that certified remainder.
+  certificate. `ExpProofs.uniformExpRaw` now realizes that certificate on
+  `|x| <= 2`: its fixed-stage boxes are valid and geometrically shrinking,
+  and `uniformExpRaw_equiv_expPowerSeries` proves stagewise agreement with the
+  selected adaptive exponential evaluator. An analytic derivative still
+  requires the finite secant estimate plus a step-aware transport of the two
+  tail boxes.
   The
   next end-to-end gate is a selected exponential raw that proves `f' = f` on
   an interval, followed by uniqueness and the logarithm relation. The literal rational-input

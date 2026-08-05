@@ -2972,6 +2972,309 @@ theorem powerSeriesCenterAtTerms_eq_expTaylorPrefix (x : Rat) :
         FinitePolynomial.integratedTaylorPrefix]
       grind [Rat.add_assoc]
 
+/-!
+## A uniform bounded-input exponential schedule
+
+The ordinary power-series evaluator chooses its factorial start from the
+particular rational input.  For a difference quotient, the two inputs `x`
+and `x + h` must instead share one finite prefix and one tail budget.  The
+following raw evaluator fixes the majorant at `2`; it is the rational
+building block for the later self-derivative certificate on any subinterval
+of `[-2,2]`.
+-/
+
+/-- The common factorial start for every real input with absolute value at
+most two. -/
+def uniformExpTailStart : Nat :=
+  RationalMajorant.factorialTailStart 2
+
+/-- The finite number of factorial terms used by the common stage. -/
+def uniformExpTailTerms (n : Nat) : Nat :=
+  uniformExpTailStart + n
+
+/-- The scalar factorial majorant at the common stage. -/
+def uniformExpTailMagnitude (n : Nat) : Rat :=
+  RationalMajorant.factorialTailTerm 2 (uniformExpTailTerms n)
+
+/-- Twice the omitted-term majorant.  The factor two absorbs the finite
+center update and makes the literal rational boxes nested. -/
+def uniformExpTailRadius (n : Nat) : Rat :=
+  2 * uniformExpTailMagnitude n
+
+/-- The finite factorial prefix attached to the common bounded-input stage. -/
+def uniformExpCenter (x : Rat) (n : Nat) : Rat :=
+  powerSeriesCenterAtTerms x (uniformExpTailTerms n)
+
+/-- A symmetric rational box around the common finite exponential prefix. -/
+def uniformExpBox (x : Rat) (n : Nat) : QInterval :=
+  intervalAround (uniformExpCenter x n) (uniformExpTailRadius n)
+
+private theorem uniform_exp_tail_start (n : Nat) :
+    (2 : Rat) <= (((uniformExpTailTerms n + 1 : Nat) : Rat) / 2) := by
+  simpa [uniformExpTailTerms, uniformExpTailStart] using
+    RationalMajorant.factorialTailStart_mono (2 : Rat)
+      (RationalMajorant.factorialTailStart 2) n
+      (RationalMajorant.factorialTailStart_satisfies (2 : Rat))
+
+private theorem uniformExpTailMagnitude_nonneg (n : Nat) :
+    0 <= uniformExpTailMagnitude n := by
+  unfold uniformExpTailMagnitude
+  exact RationalMajorant.factorialTailTerm_nonneg (by native_decide) _
+
+private theorem uniformExpTailMagnitude_next_le_half (n : Nat) :
+    uniformExpTailMagnitude (n + 1) <=
+      uniformExpTailMagnitude n * ((1 : Rat) / 2) := by
+  have h := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    (C := (2 : Rat)) (N := uniformExpTailTerms n)
+    (by native_decide) (uniform_exp_tail_start n) 1
+  change RationalMajorant.factorialTailTerm 2 (uniformExpTailTerms (n + 1)) <=
+      RationalMajorant.factorialTailTerm 2 (uniformExpTailTerms n) *
+        ((1 : Rat) / 2)
+  have hterms : uniformExpTailTerms (n + 1) = uniformExpTailTerms n + 1 := by
+    unfold uniformExpTailTerms
+    omega
+  rw [hterms]
+  simpa using h
+
+private theorem uniformExpTailRadius_drop_majorizes (n : Nat) :
+    uniformExpTailMagnitude n <=
+      uniformExpTailRadius n - uniformExpTailRadius (n + 1) := by
+  have hnext := uniformExpTailMagnitude_next_le_half n
+  unfold uniformExpTailRadius
+  have hrewrite : (2 : Rat) * (uniformExpTailMagnitude n * ((1 : Rat) / 2)) =
+      uniformExpTailMagnitude n := by
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have htwice : 2 * uniformExpTailMagnitude (n + 1) <=
+      uniformExpTailMagnitude n := by
+    calc
+      2 * uniformExpTailMagnitude (n + 1) <=
+          2 * (uniformExpTailMagnitude n * ((1 : Rat) / 2)) :=
+        Rat.mul_le_mul_of_nonneg_left hnext (by native_decide)
+      _ = uniformExpTailMagnitude n := hrewrite
+  calc
+    uniformExpTailMagnitude n =
+        2 * uniformExpTailMagnitude n - uniformExpTailMagnitude n := by
+          grind [Rat.sub_eq_add_neg]
+    _ <= 2 * uniformExpTailMagnitude n -
+        2 * uniformExpTailMagnitude (n + 1) :=
+      by grind [Rat.sub_eq_add_neg]
+
+private theorem uniformExpCenter_step_qabs_le (x : Rat)
+    (hx : qabs x <= 2) (n : Nat) :
+    qabs (uniformExpCenter x (n + 1) - uniformExpCenter x n) <=
+      uniformExpTailMagnitude n := by
+  have hterms : uniformExpTailTerms (n + 1) = uniformExpTailTerms n + 1 := by
+    unfold uniformExpTailTerms
+    omega
+  rw [uniformExpCenter, uniformExpCenter, hterms,
+    powerSeriesCenterAtTerms_succ]
+  have hcancel :
+      powerSeriesCenterAtTerms x (uniformExpTailTerms n) +
+          powerSeriesTermAtTerms x (uniformExpTailTerms n) -
+        powerSeriesCenterAtTerms x (uniformExpTailTerms n) =
+      powerSeriesTermAtTerms x (uniformExpTailTerms n) := by
+    grind [Rat.sub_eq_add_neg]
+  have hterm := FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm
+    (C := (2 : Rat)) (x := x) (by native_decide) hx (uniformExpTailTerms n)
+  rw [hcancel, powerSeriesTermAtTerms_eq_expCoeff_monomial]
+  simpa [uniformExpTailMagnitude] using hterm
+
+theorem uniformExpCenter_step_bounds (x : Rat)
+    (hx : qabs x <= 2) (n : Nat) :
+    -uniformExpTailMagnitude n <=
+      uniformExpCenter x (n + 1) - uniformExpCenter x n /\
+    uniformExpCenter x (n + 1) - uniformExpCenter x n <=
+      uniformExpTailMagnitude n := by
+  have h := uniformExpCenter_step_qabs_le x hx n
+  exact ⟨Rat.le_trans (Rat.neg_le_neg h) (neg_qabs_le_self _),
+    Rat.le_trans (self_le_qabs _) h⟩
+
+/-- The difference between any two finite factorial prefixes is bounded by
+the corresponding finite factorial tail.  This is a finite rational sum
+identity, used to compare a common bounded-input prefix with an adaptive
+input-specific prefix. -/
+private theorem qabs_uniformExpCenter_add_sub_le_factorialTailPartial
+    (x : Rat) (hx : qabs x <= 2) (N k : Nat) :
+    qabs (powerSeriesCenterAtTerms x (N + k) -
+      powerSeriesCenterAtTerms x N) <=
+      RationalMajorant.factorialTailPartial 2 N k := by
+  induction k with
+  | zero =>
+      rw [Nat.add_zero, RationalMajorant.factorialTailPartial]
+      have hzero : powerSeriesCenterAtTerms x N - powerSeriesCenterAtTerms x N = 0 := by
+        grind [Rat.sub_eq_add_neg]
+      rw [hzero, qabs_eq_self_of_nonneg (by native_decide)]
+      exact Rat.le_refl
+  | succ k ih =>
+      rw [show N + (k + 1) = N + k + 1 by omega,
+        powerSeriesCenterAtTerms_succ,
+        RationalMajorant.factorialTailPartial]
+      have hrewrite :
+          (powerSeriesCenterAtTerms x (N + k) +
+              powerSeriesTermAtTerms x (N + k)) -
+            powerSeriesCenterAtTerms x N =
+          (powerSeriesCenterAtTerms x (N + k) -
+              powerSeriesCenterAtTerms x N) +
+            powerSeriesTermAtTerms x (N + k) := by
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+      rw [hrewrite]
+      have hterm := FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm
+        (C := (2 : Rat)) (x := x) (by native_decide) hx (N + k)
+      rw [powerSeriesTermAtTerms_eq_expCoeff_monomial]
+      calc
+        qabs ((powerSeriesCenterAtTerms x (N + k) -
+            powerSeriesCenterAtTerms x N) +
+            FormalPowerSeries.expCoeff (N + k) * x ^ (N + k)) <=
+            qabs (powerSeriesCenterAtTerms x (N + k) -
+              powerSeriesCenterAtTerms x N) +
+              qabs (FormalPowerSeries.expCoeff (N + k) * x ^ (N + k)) :=
+          qabs_add_le _ _
+        _ <= RationalMajorant.factorialTailPartial 2 N k +
+            RationalMajorant.factorialTailTerm 2 (N + k) :=
+          rat_add_le_add ih hterm
+
+theorem uniformExpBox_width (x : Rat) (n : Nat) :
+    (uniformExpBox x n).width = 2 * uniformExpTailRadius n := by
+  unfold uniformExpBox
+  rw [intervalAround_width]
+  grind [Rat.mul_assoc]
+
+private theorem uniformExpBox_ordered (x : Rat) (n : Nat) :
+    0 <= (uniformExpBox x n).width := by
+  rw [uniformExpBox_width]
+  exact Rat.mul_nonneg (by native_decide)
+    (Rat.mul_nonneg (by native_decide) (uniformExpTailMagnitude_nonneg n))
+
+private theorem uniformExpBox_nested_step (x : Rat)
+    (hx : qabs x <= 2) (n : Nat) :
+    (uniformExpBox x n).lo <= (uniformExpBox x (n + 1)).lo /\
+      (uniformExpBox x (n + 1)).hi <= (uniformExpBox x n).hi := by
+  have hcenter := uniformExpCenter_step_bounds x hx n
+  have hdrop := uniformExpTailRadius_drop_majorizes n
+  unfold uniformExpBox intervalAround
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+private theorem uniformExpBox_nested (x : Rat) (hx : qabs x <= 2) :
+    forall n m : Nat, n <= m ->
+      (uniformExpBox x n).lo <= (uniformExpBox x m).lo /\
+        (uniformExpBox x m).hi <= (uniformExpBox x n).hi
+  | n, 0, hnm => by
+      have hn : n = 0 := by omega
+      subst n
+      exact ⟨Rat.le_refl, Rat.le_refl⟩
+  | n, m + 1, hnm => by
+      by_cases hlast : n = m + 1
+      · subst n
+        exact ⟨Rat.le_refl, Rat.le_refl⟩
+      · have hnm' : n <= m := by omega
+        have hstep := uniformExpBox_nested_step x hx m
+        have hprev := uniformExpBox_nested x hx n m hnm'
+        exact ⟨Rat.le_trans hprev.1 hstep.1,
+          Rat.le_trans hstep.2 hprev.2⟩
+
+private theorem uniformExpBox_width_le_geometric (x : Rat) (n : Nat) :
+    (uniformExpBox x n).width <=
+      (4 * uniformExpTailMagnitude 0) * ((1 : Rat) / 2) ^ n := by
+  rw [uniformExpBox_width]
+  have htail := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    (C := (2 : Rat)) (N := uniformExpTailTerms 0)
+    (by native_decide) (uniform_exp_tail_start 0) n
+  change 2 * (2 * RationalMajorant.factorialTailTerm 2 (uniformExpTailTerms n)) <= _
+  have hterms : uniformExpTailTerms n = uniformExpTailTerms 0 + n := by
+    unfold uniformExpTailTerms
+    omega
+  rw [hterms]
+  calc
+    2 * (2 * RationalMajorant.factorialTailTerm 2
+        (uniformExpTailTerms 0 + n)) <=
+        2 * (2 * (RationalMajorant.factorialTailTerm 2 (uniformExpTailTerms 0) *
+          ((1 : Rat) / 2) ^ n)) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (Rat.mul_le_mul_of_nonneg_left htail (by native_decide)) (by native_decide)
+    _ = (4 * uniformExpTailMagnitude 0) * ((1 : Rat) / 2) ^ n := by
+      unfold uniformExpTailMagnitude
+      grind [Rat.mul_assoc]
+
+private theorem uniformExp_rat_pow_add (q : Rat) (m n : Nat) :
+    q ^ (m + n) = q ^ m * q ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [show m + (n + 1) = m + n + 1 by omega]
+      rw [Rat.pow_succ, ih, Rat.pow_succ]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem uniformExp_half_pow_antitone (N n : Nat) (hN : N <= n) :
+    ((1 : Rat) / 2) ^ n <= ((1 : Rat) / 2) ^ N := by
+  let k := n - N
+  have hNk : N + k = n := by
+    dsimp [k]
+    exact Nat.add_sub_of_le hN
+  rw [← hNk, uniformExp_rat_pow_add]
+  have hhalf0 : (0 : Rat) <= 1 / 2 := by native_decide
+  have hhalf1 : (1 : Rat) / 2 <= 1 := by native_decide
+  have hpow0 : 0 <= ((1 : Rat) / 2) ^ N := Rat.pow_nonneg hhalf0
+  have hpow1 : ((1 : Rat) / 2) ^ k <= 1 := by
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        rw [Rat.pow_succ]
+        calc
+          ((1 : Rat) / 2) ^ k * ((1 : Rat) / 2) <=
+              ((1 : Rat) / 2) ^ k * 1 :=
+            Rat.mul_le_mul_of_nonneg_left hhalf1 (Rat.pow_nonneg hhalf0)
+          _ = ((1 : Rat) / 2) ^ k := by rw [Rat.mul_one]
+          _ <= 1 := ih
+  calc
+    ((1 : Rat) / 2) ^ N * ((1 : Rat) / 2) ^ k <=
+        ((1 : Rat) / 2) ^ N * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hpow1 hpow0
+    _ = ((1 : Rat) / 2) ^ N := by rw [Rat.mul_one]
+
+private theorem uniformExpBox_widths_shrink (x : Rat) :
+    RealRaw.WidthsShrinkToZero (uniformExpBox x) := by
+  intro eps
+  let bound : Rat := 4 * uniformExpTailMagnitude 0
+  let N : Nat := RationalMajorant.halfDecayShift bound eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  have hbound : 0 <= bound := by
+    dsimp [bound]
+    exact Rat.mul_nonneg (by native_decide) (uniformExpTailMagnitude_nonneg 0)
+  have hwidth := uniformExpBox_width_le_geometric x n
+  have hpow := uniformExp_half_pow_antitone N n hn
+  have hscaled : bound * ((1 : Rat) / 2) ^ n <=
+      bound * ((1 : Rat) / 2) ^ N :=
+    Rat.mul_le_mul_of_nonneg_left hpow hbound
+  have hfinal := RationalMajorant.halfDecayShift_spec hbound eps
+  exact Rat.le_trans hwidth (Rat.le_trans hscaled hfinal)
+
+/-- A certified factorial-series evaluator with one common stage schedule for
+all rational inputs in the box `|x| <= 2`. -/
+def uniformExpRaw (x : Rat) : RealRaw where
+  compute := uniformExpBox x
+  rate := .geometric 0 (4 * uniformExpTailMagnitude 0) ((1 : Rat) / 2)
+    (by native_decide) (by native_decide)
+    (fun n _ => uniformExpBox_width_le_geometric x n)
+
+theorem uniformExpRaw_compute (x : Rat) (n : Nat) :
+    (uniformExpRaw x).compute n = uniformExpBox x n := rfl
+
+theorem uniformExpRaw_valid (x : Rat) (hx : qabs x <= 2) :
+    (uniformExpRaw x).Valid := by
+  unfold RealRaw.Valid RealRaw.ValidCompute uniformExpRaw
+  constructor
+  · exact uniformExpBox_ordered x
+  · constructor
+    · intro n m hnm
+      have hnest := uniformExpBox_nested x hx n m hnm
+      have hwidth := uniformExpBox_ordered x m
+      have hordered : (uniformExpBox x m).lo <= (uniformExpBox x m).hi := by
+        unfold QInterval.width at hwidth
+        grind [Rat.sub_eq_add_neg]
+      exact ⟨hnest.1, hordered, hnest.2⟩
+    · exact uniformExpBox_widths_shrink x
+
 private theorem powerSeriesCenter_stage_eq (x : Rat) (n : Nat) :
     powerSeriesCenter x n =
       powerSeriesCenterAtTerms x (expPowerSeriesTerms x n) := by
@@ -2989,6 +3292,69 @@ private theorem powerSeriesTailRadius_stage_eq (x : Rat) (n : Nat) :
   unfold powerSeriesTailRadiusAtTerms powerSeriesTermAtTerms
     expPowerSeriesTailRatioBound
   rw [hcast]
+
+private theorem uniformExpTailTerms_le_powerSeriesTerms (x : Rat) (n : Nat) :
+    uniformExpTailTerms n <= expPowerSeriesTerms x n := by
+  have hstart : uniformExpTailStart = 5 := by native_decide
+  unfold uniformExpTailTerms expPowerSeriesTerms
+  rw [hstart]
+  omega
+
+/-- The fixed bounded-input exponential boxes overlap the project’s existing
+adaptive factorial-series boxes at every common stage.  The proof compares
+only two finite rational prefixes; the remaining finite gap is paid for by
+the common factorial tail radius. -/
+theorem uniformExpRaw_equiv_expPowerSeries (x : Rat) (hx : qabs x <= 2) :
+    (uniformExpRaw x).Equiv (expPowerSeries x) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  rw [RealRaw.compareAt_overlap_iff]
+  let N : Nat := uniformExpTailTerms n
+  let M : Nat := expPowerSeriesTerms x n
+  have hNM : N <= M := by
+    dsimp [N, M]
+    exact uniformExpTailTerms_le_powerSeriesTerms x n
+  obtain ⟨k, hMk⟩ := Nat.exists_eq_add_of_le hNM
+  have hcenter :
+      qabs (powerSeriesCenterAtTerms x M - powerSeriesCenterAtTerms x N) <=
+        uniformExpTailRadius n := by
+    rw [hMk]
+    calc
+      qabs (powerSeriesCenterAtTerms x (N + k) -
+          powerSeriesCenterAtTerms x N) <=
+          RationalMajorant.factorialTailPartial 2 N k :=
+        qabs_uniformExpCenter_add_sub_le_factorialTailPartial x hx N k
+      _ <= 2 * RationalMajorant.factorialTailTerm 2 N :=
+        RationalMajorant.factorialTailPartial_bound (C := (2 : Rat))
+          (N := N) (by native_decide) (by simpa [N] using uniform_exp_tail_start n) k
+      _ = uniformExpTailRadius n := by
+        unfold uniformExpTailRadius uniformExpTailMagnitude
+        dsimp [N]
+  have hright :
+      powerSeriesCenterAtTerms x M - powerSeriesCenterAtTerms x N <=
+        uniformExpTailRadius n :=
+    Rat.le_trans (self_le_qabs _) hcenter
+  have hleft :
+      powerSeriesCenterAtTerms x N - powerSeriesCenterAtTerms x M <=
+        uniformExpTailRadius n := by
+    calc
+      powerSeriesCenterAtTerms x N - powerSeriesCenterAtTerms x M =
+          -(powerSeriesCenterAtTerms x M - powerSeriesCenterAtTerms x N) := by
+            grind [Rat.sub_eq_add_neg]
+      _ <= qabs (-(powerSeriesCenterAtTerms x M -
+          powerSeriesCenterAtTerms x N)) := self_le_qabs _
+      _ = qabs (powerSeriesCenterAtTerms x M -
+          powerSeriesCenterAtTerms x N) := qabs_neg _
+      _ <= uniformExpTailRadius n := hcenter
+  have hrad : 0 <= powerSeriesTailRadius x n :=
+    powerSeriesTailRadius_nonneg_of_ratioBound x (expPowerSeries_ratio_bound x) n
+  rw [uniformExpRaw_compute, expPowerSeries_compute_eq,
+    powerSeriesCenter_stage_eq]
+  change QInterval.Overlaps
+    (intervalAround (powerSeriesCenterAtTerms x N) (uniformExpTailRadius n))
+    (intervalAround (powerSeriesCenterAtTerms x M) (powerSeriesTailRadius x n))
+  unfold QInterval.Overlaps intervalAround
+  constructor <;> grind [Rat.sub_eq_add_neg]
 
 private theorem powerSeriesTermAtTerms_abs_succ (x : Rat) (terms : Nat) :
     qabs (powerSeriesTermAtTerms x (terms + 1)) =
