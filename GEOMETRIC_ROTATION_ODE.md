@@ -50,12 +50,18 @@ limit statement and use no completed real or complex numbers.  In particular,
 `pointComplexDerivative` is the exact rational derivative formula, not yet a
 `FunctionRaw` derivative certificate.
 
-The next proof package is a portable rational finite-difference calculation:
-derive exact coordinate secants, bound their error by a rational multiple of
-the step, and package the bounds in the project's epsilon--delta interval
-derivative interface.  It must use only declarations available from a fresh
-project build, rather than tactics or lemmas accidentally inherited from a
-local cache.
+The first finite-difference step is now checked with portable rational
+denominator clearing:
+
+```lean
+GeometricRotationODE.pointRe_differenceQuotient
+GeometricRotationODE.pointIm_differenceQuotient
+```
+
+They give the two coordinate secants exactly, for every nonzero rational
+step.  The next proof package subtracts the named rational velocity, factors
+the error by the step, bounds it on a rational chart interval, and packages
+that bound in the project's epsilon--delta interval derivative interface.
 
 A complex/vector derivative wrapper and the sector-area reparametrization then
 lead to Peano--Baker/Volterra uniqueness.  That comparison would identify the

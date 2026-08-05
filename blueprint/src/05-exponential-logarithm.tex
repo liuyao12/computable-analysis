@@ -284,6 +284,8 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
 \lean{ComputableAnalysis.GeometricRotationODE.angularVelocity_eq_imaginaryAxis_sectorAreaSpeed}
 \lean{ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_sectorAreaSpeed_rotation}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_differenceQuotient}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -356,8 +358,9 @@ The rational circle chart now supplies the exact finite hand-off:
   \qquad \operatorname{sectorAreaSpeed}(t)=\frac{2}{1+t^2}.
 \]
 These are rational-function identities, not yet a represented-function
-derivative theorem.  The next package is a portable rational secant-error
-calculation for the two coordinates, followed by the project's literal
+derivative theorem.  The two coordinate secants have now been reduced exactly
+to rational fractions by portable denominator clearing.  The next package
+subtracts the rational velocity and turns those fractions into a literal
 epsilon--delta interval derivative certificate.  A complex/vector wrapper and
 sector-area reparametrization then remain before Peano--Baker/Volterra
 uniqueness can identify this geometric solution with the factorial rotation

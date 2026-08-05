@@ -36,11 +36,109 @@ def pointComplexDerivative (t : Rat) : QComplex :=
 def angularVelocity (t : Rat) : QComplex :=
   { re := 0, im := 2 / (1 + t * t) }
 
+/-- The real coordinate of the rational circle chart, exposed separately for
+finite-difference certificates. -/
+def pointRe (t : Rat) : Rat := (RationalCircle.Stage.point t).x
+
+/-- The imaginary coordinate of the rational circle chart, exposed separately
+for finite-difference certificates. -/
+def pointIm (t : Rat) : Rat := (RationalCircle.Stage.point t).y
+
+private theorem rat_eq_of_right_mul_eq_mul_ne {a b c : Rat}
+    (hc : c ≠ 0) (h : a * c = b * c) : a = b := by
+  calc
+    a = (a * c) * c⁻¹ := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 theorem pointComplex_zero : pointComplex 0 = QComplex.one := by
   native_decide
 
 theorem pointComplex_one : pointComplex 1 = RotationSeries.imaginaryUnit := by
   native_decide
+
+/-- Exact finite quotient for the chart's real coordinate.  This is the first
+portable algebraic ingredient of the represented derivative certificate. -/
+theorem pointRe_differenceQuotient (t h : Rat) (hh : h ≠ 0) :
+    (pointRe (t + h) - pointRe t) / h =
+      (-2 * (2 * t + h)) /
+        ((1 + t * t) * (1 + (t + h) * (t + h))) := by
+  let d := 1 + t * t
+  let e := 1 + (t + h) * (t + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos t
+  have hepos : 0 < e := by
+    dsimp [e]
+    exact RationalCircle.Stage.one_add_square_pos (t + h)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hene : e ≠ 0 := Rat.ne_of_gt hepos
+  have hprod : h * d * e ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hh hzero
+      · exact hdne hzero
+    · exact hene hzero
+  apply rat_eq_of_right_mul_eq_mul_ne hprod
+  unfold pointRe RationalCircle.Stage.point
+  change (((1 - (t + h) * (t + h)) / e - (1 - t * t) / d) / h) *
+      (h * d * e) = ((-2 * (2 * t + h)) / (d * e)) * (h * d * e)
+  rw [Rat.div_def]
+  have hcancelH : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hh
+  have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+  have hcancelE : e⁻¹ * e = 1 := Rat.inv_mul_cancel e hene
+  have hcancelDE : (d * e)⁻¹ * (d * e) = 1 :=
+    Rat.inv_mul_cancel (d * e) (by
+      intro hzero
+      rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hdne hzero
+      · exact hene hzero)
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- Exact finite quotient for the chart's imaginary coordinate. -/
+theorem pointIm_differenceQuotient (t h : Rat) (hh : h ≠ 0) :
+    (pointIm (t + h) - pointIm t) / h =
+      (2 * (1 - t * t - t * h)) /
+        ((1 + t * t) * (1 + (t + h) * (t + h))) := by
+  let d := 1 + t * t
+  let e := 1 + (t + h) * (t + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos t
+  have hepos : 0 < e := by
+    dsimp [e]
+    exact RationalCircle.Stage.one_add_square_pos (t + h)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hene : e ≠ 0 := Rat.ne_of_gt hepos
+  have hprod : h * d * e ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+    · rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hh hzero
+      · exact hdne hzero
+    · exact hene hzero
+  apply rat_eq_of_right_mul_eq_mul_ne hprod
+  unfold pointIm RationalCircle.Stage.point
+  change (((2 * (t + h)) / e - (2 * t) / d) / h) * (h * d * e) =
+      ((2 * (1 - t * t - t * h)) / (d * e)) * (h * d * e)
+  rw [Rat.div_def]
+  have hcancelH : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hh
+  have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+  have hcancelE : e⁻¹ * e = 1 := Rat.inv_mul_cancel e hene
+  have hcancelDE : (d * e)⁻¹ * (d * e) = 1 :=
+    Rat.inv_mul_cancel (d * e) (by
+      intro hzero
+      rcases Rat.mul_eq_zero.mp hzero with hzero | hzero
+      · exact hdne hzero
+      · exact hene hzero)
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 /-- The chart's angular coefficient is exactly the already-certified sector
 area speed.  Thus the reparametrization required for a constant rotation
