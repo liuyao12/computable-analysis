@@ -75,8 +75,16 @@ GeometricRotationODE.pointIm_secant_error_le_twelve
 ```
 
 Both estimates are `<= 12 * qabs h` whenever the two rational endpoints lie
-in `[0,1]`.  The next package packages this explicit modulus in the project's
-epsilon--delta interval derivative interface.
+in `[0,1]`.  They are now packaged as exact singleton-evaluator certificates:
+
+```lean
+GeometricRotationODE.pointRe_hasDerivativeOnUnit
+GeometricRotationODE.pointIm_hasDerivativeOnUnit
+```
+
+At requested precision `n`, the explicit step budget is `1/(12*n)` (and
+`1/12` at stage zero).  A complex/vector wrapper and sector-area
+reparametrization are the next requirements for ODE uniqueness.
 
 A complex/vector derivative wrapper and the sector-area reparametrization then
 lead to Peano--Baker/Volterra uniqueness.  That comparison would identify the
