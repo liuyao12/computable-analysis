@@ -710,6 +710,9 @@ interval contained in \([-C,C]\), \(C\ge1\).
 \(x^{n+1}/(n+1)\), rational secant on a bounded box & \(x^n\) &
 \formallyproved{Full \code{HasDerivativeOnInterval} family with an explicit
 dyadic step schedule} \\
+\(1+x+x^2/2\), finite exponential Taylor prefix & \(1+x\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} family, assembled by
+quantitative constant/addition/scaling closure} \\
 \(\exp_{\rm ps}\), formal coefficient stream & \(\exp_{\rm ps}\) &
 \formallyproved{Formal coefficient theorem} \\
 \(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal coefficient streams &
@@ -742,6 +745,8 @@ The formal-series green rows are witnessed by
 \code{FirstYearCalculus.checked\_power\_series\_table}; the monomial-secant
 row by
 \code{FinitePolynomial.normalizedMonomial\_hasDerivativeOnInterval};
+the finite-exponential-prefix row by
+\code{FinitePolynomial.expTaylorQuadratic\_hasDerivativeOnInterval};
 the three full interval rows are witnessed respectively by
 \code{IntegralIdentities.coordinateOnUnitDerivative},
 \code{IntegralIdentities.arctanIntegralRectangleOnUnit\_hasDerivative}, and

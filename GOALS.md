@@ -223,8 +223,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   certified representation layer, not yet a global analytic self-derivative
   theorem or a bridge to the other definitions. Its finite-difference bridge is
   now explicit: `expTaylorQuadratic x = 1 + x + x*x/2`, and
-  `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` certifies its forward
-  derivative `1` at zero by the exact quotient `1 + h/2`. More importantly,
+  `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` certifies its
+  full two-sided interval derivative `1 + x` on every rational subinterval of
+  a supplied bounded symmetric box, using the reusable quantitative
+  finite-secant linear interface. `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero`
+  remains the specialized forward derivative `1` at zero by the exact quotient
+  `1 + h/2`. More importantly,
   `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` now certifies the
   tail-enclosed power-series evaluator itself has forward derivative `1` at
   zero. Its finite stage-zero loop has a positive-tail-plus-radius budget of

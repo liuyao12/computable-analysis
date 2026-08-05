@@ -60,6 +60,7 @@ that two exponential representations agree also identifies their Euler bases.
 
 \begin{theorem}[Derivative characterizations of \(e\)]
 \label{thm:e-self-derivative-and-unit-slope}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero}
@@ -70,9 +71,11 @@ The intended completed package is
  \left.\frac{d}{dx}b^x\right|_{x=0}=1\ \Longleftrightarrow\ b=e.
 \]
 The derivative interface is finite-difference based: its evaluator precision
-may depend on the rational step.  The initial-value field is checked below;
-Lean checks both its degree-two Taylor prefix and the actual tail-enclosed
-power-series evaluator at zero.  For the latter, its public stage already has
+may depend on the rational step.  The initial-value field is checked below.
+Lean now checks the degree-two Taylor prefix two-sidedly on every rational
+bounded interval, by explicit constant/addition/scaling secant coefficients,
+and checks the actual tail-enclosed power-series evaluator at zero. For the
+latter, its public stage already has
 enough positive Taylor terms that the finite remaining sum and the certified
 geometric radius are both at most \(h^2\) for \(0<h\le1/2\).  Dividing the
 resulting box by \(h\) yields the genuinely self-represented forward

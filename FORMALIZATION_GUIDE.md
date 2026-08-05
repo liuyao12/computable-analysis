@@ -220,10 +220,14 @@ dyadic half-decay step schedule.  It is also the right finite algebra for the
 termwise factorial-series bounds needed by exponential.
 
 The first exponential finite-difference brick is also available:
-`expTaylorQuadratic x = 1 + x + x^2/2`, and
-`ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` proves a
-`HasForwardDerivativeAt` certificate at zero with derivative `1`.
-Its literal quotient is `1 + h/2`.  The actual tail-enclosed evaluator has
+`expTaylorQuadratic x = 1 + x + x^2/2`.
+`FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` now proves its
+full two-sided interval derivative `1 + x` on every rational subinterval of a
+bounded symmetric box; it is assembled by the reusable quantitative
+`SecantDerivativeBound` constant/addition/rational-scaling interface.
+`ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` remains the small
+specialized forward certificate at zero, whose literal quotient is
+`1 + h/2`.  The actual tail-enclosed evaluator has
 now crossed the same local gate:
 `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` proves its forward
 derivative at zero is `1`.  Its proof uses the literal public stage-zero
@@ -438,6 +442,7 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
 #check expTaylorQuadratic
+#check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero
 #check ExpProofs.eulerCenter_zero
 #check ExpProofs.expEuler_zero_equiv_one
