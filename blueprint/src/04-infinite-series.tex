@@ -675,6 +675,24 @@ formal identities:
 \]
 \end{theorem}
 
+\begin{theorem}[Finite monomial secants]
+\label{thm:finite-monomial-secants}
+\lean{ComputableAnalysis.FinitePolynomial.powerSecant_eq_differenceQuotient}
+\lean{ComputableAnalysis.FinitePolynomial.powerDerivative_succ}
+\lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
+\leanok
+For every rational box of radius \(C\ge1\), Lean proves directly that the
+literal quotient of the normalized monomial has the form
+\[
+ \left|\frac{(x+h)^{n+1}/(n+1)-x^{n+1}/(n+1)}{h}-x^n\right|
+ \le |h|\,E_{n+1}(C),
+\]
+where \(E_{n+1}(C)\) is an explicitly recursive rational coefficient.
+This is finite algebra plus an absolute-value bound, with no mean-value or
+completeness theorem.  Packaging its computable step schedule as a full
+\code{HasDerivativeOnInterval} family is the next small interface step.
+\end{theorem}
+
 \lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
 \lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_hasDerivative}
 \lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
@@ -687,6 +705,9 @@ formal identities:
 \hline
 \(x^{n+1}/(n+1)\), formal coefficient stream & \(x^n\) &
 \formallyproved{Formal coefficient theorem} \\
+\(x^{n+1}/(n+1)\), rational secant on a bounded box & \(x^n\) &
+\formallyproved{Explicit \(\lvert h\rvert\)-error theorem; boxed interval
+certificate still to package} \\
 \(\exp_{\rm ps}\), formal coefficient stream & \(\exp_{\rm ps}\) &
 \formallyproved{Formal coefficient theorem} \\
 \(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal coefficient streams &
@@ -715,9 +736,11 @@ silently promoted to a derivative theorem for an evaluated raw function.}
 \end{table}
 
 \noindent
-The green formal-series rows are witnessed by
-\code{FirstYearCalculus.checked\_power\_series\_table}; the three full
-interval rows are witnessed respectively by
+The formal-series green rows are witnessed by
+\code{FirstYearCalculus.checked\_power\_series\_table}; the monomial-secant
+row by the finite rational theorem
+\code{FinitePolynomial.qabs\_normalized\_power\_differenceQuotient\_sub\_monomial\_le};
+the three full interval rows are witnessed respectively by
 \code{IntegralIdentities.coordinateOnUnitDerivative},
 \code{IntegralIdentities.arctanIntegralRectangleOnUnit\_hasDerivative}, and
 \code{IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit\_hasDerivative}.

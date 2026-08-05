@@ -1006,6 +1006,208 @@ theorem qabs_power_div_factorial_sub_le_two {x y : Rat}
 
 end RationalMajorant
 
+/-!
+## Finite polynomial secants
+
+The analytic power-series derivative theorem ultimately reduces to finite
+polynomial difference quotients plus a separately certified tail.  This small
+namespace records that rational algebra directly.  It deliberately does not
+invoke a mean-value theorem or a completed real line.
+-/
+
+namespace FinitePolynomial
+
+/-- The exact finite secant recurrence for the monomial `x^n`.
+
+At successor degree it peels off the factor `x + h`; when `h` is nonzero,
+`powerSecant x h n` is literally `((x+h)^n - x^n) / h`. -/
+def powerSecant (x h : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => (x + h) ^ n + x * powerSecant x h n
+
+/-- The derivative polynomial associated with `x^n`, in recurrence form.
+Keeping the zero case explicit avoids a predecessor convention at degree zero. -/
+def powerDerivative (x : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => x ^ n + x * powerDerivative x n
+
+/-- A recursively accumulated error coefficient for the finite secant.
+For inputs bounded by `C`, the error is at most this coefficient times the
+absolute step. -/
+def powerSecantErrorBound (C : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => (n : Rat) * C ^ n + C * powerSecantErrorBound C n
+
+/-- The recurrence is the exact rational difference quotient of a monomial. -/
+theorem powerSecant_eq_differenceQuotient (x h : Rat) (hh : h ≠ 0) :
+    forall n : Nat,
+      ((x + h) ^ n - x ^ n) / h = powerSecant x h n
+  | 0 => by
+      simp only [Rat.pow_zero, powerSecant]
+      rw [Rat.sub_self]
+      rw [Rat.div_def]
+      exact Rat.zero_mul _
+  | n + 1 => by
+      rw [Rat.pow_succ, Rat.pow_succ, powerSecant,
+        ← powerSecant_eq_differenceQuotient x h hh n, Rat.div_def]
+      have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_comm]
+
+/-- The recurrence agrees with the familiar monomial derivative formula. -/
+theorem powerDerivative_succ (x : Rat) (n : Nat) :
+    powerDerivative x (n + 1) = ((n + 1 : Nat) : Rat) * x ^ n := by
+  induction n with
+  | zero =>
+      simp [powerDerivative]
+      grind
+  | succ n ih =>
+      rw [show n + 2 = (n + 1) + 1 by omega, powerDerivative,
+        ih, Rat.pow_succ]
+      have hcast : (((n + 2 : Nat) : Rat)) = (n : Rat) + 2 := by
+        exact_mod_cast (by omega : n + 2 = n + 2)
+      have hcast' : (((n + 1 : Nat) : Rat)) = (n : Rat) + 1 := by
+        exact_mod_cast (by omega : n + 1 = n + 1)
+      rw [hcast, hcast']
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem powerSecantErrorBound_nonneg {C : Rat} (hC : 0 <= C) :
+    forall n : Nat, 0 <= powerSecantErrorBound C n
+  | 0 => by simp [powerSecantErrorBound]
+  | n + 1 => by
+      rw [powerSecantErrorBound]
+      exact Rat.add_nonneg
+        (Rat.mul_nonneg
+          (by exact_mod_cast Nat.zero_le n)
+          (Rat.pow_nonneg hC))
+        (Rat.mul_nonneg hC (powerSecantErrorBound_nonneg hC n))
+
+/-- On a rational box of radius `C >= 1`, the finite monomial secant differs
+from its derivative polynomial by at most `|h|` times the explicit recursive
+coefficient.  This is the quantitative finite-difference estimate needed
+before taking any factorial-series tail into account. -/
+theorem qabs_powerSecant_sub_powerDerivative_le
+    {x h C : Rat} (hC0 : 0 <= C) (hC1 : 1 <= C)
+    (hx : qabs x <= C) (hxh : qabs (x + h) <= C) :
+    forall n : Nat,
+      qabs (powerSecant x h n - powerDerivative x n) <=
+        qabs h * powerSecantErrorBound C n
+  | 0 => by
+      simp only [powerSecant, powerDerivative, powerSecantErrorBound,
+        Rat.mul_zero]
+      rw [show (0 : Rat) - 0 = 0 by native_decide,
+        qabs_eq_self_of_nonneg (by native_decide)]
+      exact Rat.le_refl
+  | n + 1 => by
+      have hpow := RationalMajorant.qabs_pow_sub_le_lipschitz
+        (x := x + h) (y := x) (B := C) hC0 hC1 hxh hx n
+      have hstep : qabs ((x + h) - x) = qabs h := by
+        have heq : (x + h) - x = h := by
+          grind [Rat.sub_eq_add_neg]
+        rw [heq]
+      rw [hstep] at hpow
+      have hbound0 : 0 <= powerSecantErrorBound C n :=
+        powerSecantErrorBound_nonneg hC0 n
+      have hh0 : 0 <= qabs h := qabs_nonneg _
+      have hproduct0 : 0 <= qabs h * powerSecantErrorBound C n :=
+        Rat.mul_nonneg hh0 hbound0
+      have hrec := qabs_powerSecant_sub_powerDerivative_le
+        hC0 hC1 hx hxh n
+      have hscaled :
+          qabs x * qabs (powerSecant x h n - powerDerivative x n) <=
+            C * (qabs h * powerSecantErrorBound C n) := by
+        calc
+          qabs x * qabs (powerSecant x h n - powerDerivative x n) <=
+              qabs x * (qabs h * powerSecantErrorBound C n) :=
+            Rat.mul_le_mul_of_nonneg_left hrec (qabs_nonneg x)
+          _ <= C * (qabs h * powerSecantErrorBound C n) :=
+            Rat.mul_le_mul_of_nonneg_right hx hproduct0
+      have hdecompose :
+          powerSecant x h (n + 1) - powerDerivative x (n + 1) =
+            ((x + h) ^ n - x ^ n) +
+              x * (powerSecant x h n - powerDerivative x n) := by
+        rw [powerSecant, powerDerivative]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+          Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      rw [hdecompose]
+      calc
+        qabs
+            ((x + h) ^ n - x ^ n +
+              x * (powerSecant x h n - powerDerivative x n)) <=
+            qabs ((x + h) ^ n - x ^ n) +
+              qabs (x * (powerSecant x h n - powerDerivative x n)) :=
+          qabs_add_le _ _
+        _ = qabs ((x + h) ^ n - x ^ n) +
+              qabs x * qabs (powerSecant x h n - powerDerivative x n) := by
+          rw [qabs_mul]
+        _ <= qabs h * (n : Rat) * C ^ n +
+              C * (qabs h * powerSecantErrorBound C n) :=
+          rat_add_le_add hpow hscaled
+        _ = qabs h * powerSecantErrorBound C (n + 1) := by
+          rw [powerSecantErrorBound]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The preceding estimate written directly for the literal rational quotient. -/
+theorem qabs_power_differenceQuotient_sub_derivative_le
+    {x h C : Rat} (hh : h ≠ 0) (hC0 : 0 <= C) (hC1 : 1 <= C)
+    (hx : qabs x <= C) (hxh : qabs (x + h) <= C) (n : Nat) :
+    qabs (((x + h) ^ n - x ^ n) / h - powerDerivative x n) <=
+      qabs h * powerSecantErrorBound C n := by
+  rw [powerSecant_eq_differenceQuotient x h hh n]
+  exact qabs_powerSecant_sub_powerDerivative_le hC0 hC1 hx hxh n
+
+/-- The conventional normalized monomial form of the finite secant estimate.
+Thus the rational polynomial `x^(n+1)/(n+1)` has derivative `x^n` with an
+explicit linear-in-`|h|` error on every supplied bounded box. -/
+theorem qabs_normalized_power_differenceQuotient_sub_monomial_le
+    {x h C : Rat} (hh : h ≠ 0) (hC0 : 0 <= C) (hC1 : 1 <= C)
+    (hx : qabs x <= C) (hxh : qabs (x + h) <= C) (n : Nat) :
+    qabs
+        ((((x + h) ^ (n + 1) / ((n + 1 : Nat) : Rat)) -
+          x ^ (n + 1) / ((n + 1 : Nat) : Rat)) / h - x ^ n) <=
+      qabs h * powerSecantErrorBound C (n + 1) := by
+  let d : Rat := ((n + 1 : Nat) : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hdone : (1 : Rat) <= d := by
+    dsimp [d]
+    exact_mod_cast (Nat.succ_le_succ (Nat.zero_le n))
+  have hinv0 : 0 <= d⁻¹ := Rat.le_of_lt ((Rat.inv_pos).2 hdpos)
+  have hinvle : d⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := d)
+    · calc
+        d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+        _ <= 1 * d := by simpa using hdone
+    · exact hdpos
+  have hraw := qabs_power_differenceQuotient_sub_derivative_le
+    (x := x) (h := h) (C := C) hh hC0 hC1 hx hxh (n + 1)
+  rw [powerDerivative_succ] at hraw
+  have hrewrite :
+      ((x + h) ^ (n + 1) / d - x ^ (n + 1) / d) / h - x ^ n =
+        (((x + h) ^ (n + 1) - x ^ (n + 1)) / h - d * x ^ n) * d⁻¹ := by
+    rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+    have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_comm]
+  have hbound0 : 0 <= powerSecantErrorBound C (n + 1) :=
+    powerSecantErrorBound_nonneg hC0 _
+  have hright0 : 0 <= qabs h * powerSecantErrorBound C (n + 1) :=
+    Rat.mul_nonneg (qabs_nonneg _) hbound0
+  change qabs
+      (((x + h) ^ (n + 1) / d - x ^ (n + 1) / d) / h - x ^ n) <= _
+  rw [hrewrite, qabs_mul, qabs_eq_self_of_nonneg hinv0]
+  calc
+    qabs (((x + h) ^ (n + 1) - x ^ (n + 1)) / h - d * x ^ n) * d⁻¹ <=
+        (qabs h * powerSecantErrorBound C (n + 1)) * d⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_right hraw hinv0
+    _ <= (qabs h * powerSecantErrorBound C (n + 1)) * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hinvle hright0
+    _ = qabs h * powerSecantErrorBound C (n + 1) := by rw [Rat.mul_one]
+
+end FinitePolynomial
+
 namespace ComplexSeries
 
 def expTerm (z : QComplex) (n : Nat) : QComplex :=
