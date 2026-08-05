@@ -30,6 +30,7 @@ import ComputableAnalysis.FTC
 import ComputableAnalysis.FTA
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.IntegrationByPartsPi
 import ComputableAnalysis.Logarithm
 import ComputableAnalysis.LogarithmicPi
 import ComputableAnalysis.MonotonicityConvexity

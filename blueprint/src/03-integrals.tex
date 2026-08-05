@@ -243,6 +243,7 @@ general change-of-variables axiom.
 \lean{ComputableAnalysis.finiteIntegrationByParts_withVariation}
 \lean{ComputableAnalysis.RationalPartition.commonRefinementOfPartitions}
 \lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
+\lean{ComputableAnalysis.IntegrationByPartsPi.raw_equiv_piCircleArea}
 \uses{def:finite-substitution-stage}
 \leanok
 Fix \([t_0,t_1]\), set
@@ -269,6 +270,8 @@ The checked finite identity is
  \sum_i g(t_{i+1})\bigl(f(t_{i+1})-f(t_i)\bigr)
  =f(t_1)g(t_1)-f(t_0)g(t_0).
 \]
+The concrete arctangent mesh is stabilized with its corner budget and gives
+an independent raw computation of \(\pi_{\rm area}\).
 \end{theorem}
 
 \begin{definition}[Integration-by-parts certificate on rational pieces]
