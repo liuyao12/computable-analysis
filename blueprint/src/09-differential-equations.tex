@@ -181,9 +181,15 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.expPartial_imaginary_even_split}
 \lean{ComputableAnalysis.RotationSeries.rotationExpRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationExpRaw_width_le_geometric}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_eq_expPartial}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationExpRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_midpoint_qabs_le_two}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_midpoint_sub_le_width}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_ordered}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_widths_shrink}
 \leanok
 For constant \(A\), the checked degree-\(r\) term is \(T^rA^r/r!\).  For the
 quarter-turn matrix \(J^2=-I\), its even prefix is exactly
@@ -195,10 +201,15 @@ quarter-turn matrix \(J^2=-I\), its even prefix is exactly
 The complex boxes centered at the second prefix are checked valid, with both
 widths bounded by \(8t_0(T)2^{-n}\).
 Their real and imaginary coordinate boxes are the certified rational-input
-\(\cos\)- and \(\sin\)-series evaluators.
-Separately, any certified real can now be embedded as the certified imaginary
-axis input \(ix\); extending the series evaluator from rational \(T\) to that
-represented input is the next analytic step.
+\(\cos\)- and \(\sin\)-series evaluators. A second checked evaluator fixes
+one schedule for every rational \(|T|\le2\). In particular, the midpoint of
+each \(\pi/2\) box lies in that range; its direct rotation candidate is
+ordered and has shrinking widths. Later midpoints differ from an earlier
+one by at most the earlier rational input width. The one remaining
+represented-input lemma is therefore concrete: a finite-series Lipschitz
+bound must turn that input modulus into the future-containment premise of
+complex Cauchy stabilization. No completed complex plane is being used to
+fill this gap.
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
 can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}

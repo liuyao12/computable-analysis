@@ -471,6 +471,29 @@ theorem factorialTailTerm_nonneg {C : Rat} (hC : 0 <= C) (n : Nat) :
   exact Rat.mul_nonneg (Rat.pow_nonneg hC)
     (Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos n)))
 
+/-- The finite factorial majorant is monotone in its nonnegative coefficient
+bound.  This is the elementary uniformity fact used when a power-series
+algorithm receives a rational parameter only through a certified enclosing
+interval. -/
+theorem factorialTailTerm_mono {C D : Rat}
+    (hC : 0 <= C) (hCD : C <= D) (n : Nat) :
+    factorialTailTerm C n <= factorialTailTerm D n := by
+  have hD : 0 <= D := Rat.le_trans hC hCD
+  have hpow : C ^ n <= D ^ n := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        rw [Rat.pow_succ, Rat.pow_succ]
+        calc
+          C ^ n * C <= D ^ n * C :=
+            Rat.mul_le_mul_of_nonneg_right ih hC
+          _ <= D ^ n * D :=
+            Rat.mul_le_mul_of_nonneg_left hCD (Rat.pow_nonneg hD)
+  unfold factorialTailTerm
+  rw [Rat.div_def, Rat.div_def]
+  exact Rat.mul_le_mul_of_nonneg_right hpow
+    (Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos n)))
+
 /-- Successive factorial terms differ by the expected rational ratio. -/
 theorem factorialTailTerm_succ (C : Rat) (n : Nat) :
     factorialTailTerm C (n + 1) =

@@ -1,5 +1,6 @@
 import ComputableAnalysis.ComplexMultiplication
 import ComputableAnalysis.PiProofs
+import ComputableAnalysis.RotationSeries
 
 /-!
 # The certified imaginary half-pi input
@@ -80,6 +81,84 @@ theorem halfPi_bounds (n : Nat) :
           ((1 : Rat) / 2) * 4 :=
         Rat.mul_le_mul_of_nonneg_left hcircle.2 hhalf
       _ = 2 := by native_decide
+
+/-- The rational midpoint selected from any pi/2 interval remains in the
+uniform input range for the imaginary-axis factorial evaluator. -/
+theorem halfPi_midpoint_qabs_le_two (n : Nat) :
+    qabs ((halfPi.compute n).midpoint) <= 2 := by
+  have hwidth := halfPi_valid.1 n
+  have hordered : (halfPi.compute n).lo <= (halfPi.compute n).hi := by
+    unfold QInterval.width at hwidth
+    grind [Rat.sub_eq_add_neg]
+  have hmid := QInterval.midpoint_mem hordered
+  have hbounds := halfPi_bounds n
+  have hnonneg : 0 <= (halfPi.compute n).midpoint :=
+    Rat.le_trans (Rat.le_of_lt (by native_decide : (0 : Rat) < 1))
+      (Rat.le_trans hbounds.1 hmid.1)
+  rw [qabs_eq_self_of_nonneg hnonneg]
+  exact Rat.le_trans hmid.2 hbounds.2
+
+/-- At every rational midpoint of the certified pi/2 input interval, the
+common factorial schedule is a valid complex rotation-series computation. -/
+theorem uniformRotationExpRaw_halfPi_midpoint_valid (n : Nat) :
+    (RotationSeries.uniformRotationExpRaw (halfPi.compute n).midpoint).Valid :=
+  RotationSeries.uniformRotationExpRaw_valid _
+    (halfPi_midpoint_qabs_le_two n)
+
+/-- Later midpoint samples of pi/2 remain within the earlier input box.
+This is the exact rational Cauchy modulus that the represented-angle
+rotation construction must combine with a finite series Lipschitz bound. -/
+theorem halfPi_midpoint_sub_le_width (k n : Nat) (hkn : k <= n) :
+    qabs ((halfPi.compute n).midpoint - (halfPi.compute k).midpoint) <=
+      (halfPi.compute k).width := by
+  have hkwidth := halfPi_valid.1 k
+  have hkordered : (halfPi.compute k).lo <= (halfPi.compute k).hi := by
+    unfold QInterval.width at hkwidth
+    grind [Rat.sub_eq_add_neg]
+  have hnwidth := halfPi_valid.1 n
+  have hnordered : (halfPi.compute n).lo <= (halfPi.compute n).hi := by
+    unfold QInterval.width at hnwidth
+    grind [Rat.sub_eq_add_neg]
+  have hmidk := QInterval.midpoint_mem hkordered
+  have hmidn := QInterval.midpoint_mem hnordered
+  have hnest := halfPi_valid.2.1 k n hkn
+  apply qabs_sub_le_of_common_bounds
+  · exact Rat.le_trans hnest.1 hmidn.1
+  · exact Rat.le_trans hmidn.2 hnest.2.2
+  · exact hmidk.1
+  · exact hmidk.2
+
+/-- The direct, non-nested candidate for a represented pi/2 rotation.
+Stage n evaluates the common rational factorial schedule at the midpoint of
+the stage-n pi/2 interval. A later Cauchy containment theorem will stabilize
+these already ordered, shrinking candidates without invoking completeness. -/
+def halfPiRotationCandidate : ComplexRaw where
+  compute := fun n =>
+    RotationSeries.uniformRotationBox (halfPi.compute n).midpoint n
+
+theorem halfPiRotationCandidate_compute (n : Nat) :
+    halfPiRotationCandidate.compute n =
+      RotationSeries.uniformRotationBox (halfPi.compute n).midpoint n := rfl
+
+theorem halfPiRotationCandidate_ordered (n : Nat) :
+    (halfPiRotationCandidate.compute n).Ordered := by
+  rw [halfPiRotationCandidate_compute]
+  have hvalid := uniformRotationExpRaw_halfPi_midpoint_valid n
+  exact ComplexRaw.valid_ordered hvalid n
+
+theorem halfPiRotationCandidate_widths_shrink :
+    ComplexRaw.WidthsShrinkToZero halfPiRotationCandidate.compute := by
+  intro eps
+  obtain ⟨N, hN⟩ := RotationSeries.uniformRotationBox_widths_shrink 0 eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  have h := hN n hn
+  rw [halfPiRotationCandidate_compute,
+    RotationSeries.uniformRotationBox_width,
+    RotationSeries.uniformRotationBox_height]
+  rw [RotationSeries.uniformRotationBox_width,
+    RotationSeries.uniformRotationBox_height] at h
+  exact h
 
 /-- The certified complex raw input \(i\pi/2\), formed from the default
 circle-area representative of the abstract pi handle. -/
