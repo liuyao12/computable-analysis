@@ -26,6 +26,7 @@ calls \(f'=D\).
 \lean{ComputableAnalysis.FinitePolynomial.powerDerivative_succ}
 \lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval}
@@ -43,6 +44,11 @@ to an interval derivative: finite algebra plus an absolute-value bound, with
 no mean-value or completeness theorem.  Translation applies the same bound
 to powers of \(x-a\), so the certified derivative at the expansion point is
 literally \(c_1\).
+The same quantified certificates are now closed under addition, rational
+scaling, and products.  The product coefficient carries the literal finite
+corner term from the two secant quotients, controlled by rational local
+majorants; this is the derivative-level input to a later product FTC and
+integration-by-parts theorem.
 \end{theorem}
 
 \lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}

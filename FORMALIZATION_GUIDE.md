@@ -236,6 +236,12 @@ assumptions are `-C <= lower - a` and `upper - a <= C`, and
 `FinitePolynomial.taylorPrefixShiftAt_at_basepoint` proves that the certified
 derivative at `a` is again `c 1`.  Thus the coefficient interpretation is
 translation-invariant without invoking an ambient real line.
+At the quantitative level, `FinitePolynomial.SecantDerivativeBound.add`,
+`scaleRat`, and `mul` compose finite derivative certificates.  The product
+constructor asks for rational bounds for each factor and its proposed
+derivative on the local box; its explicit coefficient includes the finite
+secant corner term.  Supply those majorants rather than invoking an
+unqualified product-rule limit.
 `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
 this construction under every finite rational coefficient prefix. Its
 quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
@@ -478,6 +484,7 @@ open ComputableAnalysis
 #check FinitePolynomial.taylorPrefixShiftAt_at_basepoint
 #check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
+#check FinitePolynomial.SecantDerivativeBound.mul
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero

@@ -145,6 +145,159 @@ def scaleRat (r : Rat) {C : Rat} {f df : Rat -> Rat}
       _ = qabs h * (qabs r * F.errorCoefficient) := by
         grind [Rat.mul_assoc, Rat.mul_comm]
 
+/-- Quantitative secant bounds are closed under products when rational local
+majorants for each factor and its proposed derivative are supplied.
+
+The final term of the coefficient is the finite ``corner rectangle'': the
+two secant quotients are bounded using `|h| <= 2C` on the symmetric box. -/
+def mul {C : Rat} {f df g dg : Rat -> Rat}
+    (F : SecantDerivativeBound C f df)
+    (G : SecantDerivativeBound C g dg)
+    (fMajorant dfMajorant gMajorant dgMajorant : Rat)
+    (hfMajorant : forall x, qabs x <= C -> qabs (f x) <= fMajorant)
+    (hdfMajorant : forall x, qabs x <= C -> qabs (df x) <= dfMajorant)
+    (hgMajorant : forall x, qabs x <= C -> qabs (g x) <= gMajorant)
+    (hdgMajorant : forall x, qabs x <= C -> qabs (dg x) <= dgMajorant)
+    (hC0 : 0 <= C) (hf0 : 0 <= fMajorant) (hdf0 : 0 <= dfMajorant)
+    (hg0 : 0 <= gMajorant) (hdg0 : 0 <= dgMajorant) :
+    SecantDerivativeBound C
+      (fun x => f x * g x)
+      (fun x => f x * dg x + g x * df x) where
+  errorCoefficient :=
+    fMajorant * G.errorCoefficient + gMajorant * F.errorCoefficient +
+      (dfMajorant + 2 * C * F.errorCoefficient) *
+        (dgMajorant + 2 * C * G.errorCoefficient)
+  errorCoefficient_nonneg := by
+    apply Rat.add_nonneg
+    · apply Rat.add_nonneg
+      · exact Rat.mul_nonneg hf0 G.errorCoefficient_nonneg
+      · exact Rat.mul_nonneg hg0 F.errorCoefficient_nonneg
+    · apply Rat.mul_nonneg
+      · exact Rat.add_nonneg hdf0
+          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hC0)
+            F.errorCoefficient_nonneg)
+      · exact Rat.add_nonneg hdg0
+          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hC0)
+            G.errorCoefficient_nonneg)
+  error_bound := by
+    intro x h hh hx hxh
+    let qf : Rat := (f (x + h) - f x) / h
+    let qg : Rat := (g (x + h) - g x) / h
+    have hstep : qabs h <= 2 * C := by
+      have hrewrite : h = (x + h) - x := by
+        grind [Rat.sub_eq_add_neg]
+      rw [hrewrite]
+      calc
+        qabs ((x + h) - x) <= qabs (x + h) + qabs x := qabs_sub_le _ _
+        _ <= C + C := rat_add_le_add hxh hx
+        _ = 2 * C := by grind
+    have hF := F.error_bound x h hh hx hxh
+    have hG := G.error_bound x h hh hx hxh
+    have hqf : qabs qf <= dfMajorant + 2 * C * F.errorCoefficient := by
+      have hq : qabs qf <= qabs (qf - df x) + qabs (df x) := by
+        calc
+          qabs qf = qabs ((qf - df x) + df x) := by
+            congr 1
+            grind [Rat.sub_eq_add_neg]
+          _ <= qabs (qf - df x) + qabs (df x) := qabs_add_le _ _
+      have hF' : qabs (qf - df x) <= qabs h * F.errorCoefficient := by
+        simpa [qf] using hF
+      have hstepF : qabs h * F.errorCoefficient <=
+          2 * C * F.errorCoefficient :=
+        Rat.mul_le_mul_of_nonneg_right hstep F.errorCoefficient_nonneg
+      calc
+        qabs qf <= qabs (qf - df x) + qabs (df x) := hq
+        _ <= qabs h * F.errorCoefficient + dfMajorant :=
+          rat_add_le_add hF' (hdfMajorant x hx)
+        _ <= 2 * C * F.errorCoefficient + dfMajorant :=
+          rat_add_le_add hstepF Rat.le_refl
+        _ = dfMajorant + 2 * C * F.errorCoefficient := by
+          grind [Rat.add_comm]
+    have hqg : qabs qg <= dgMajorant + 2 * C * G.errorCoefficient := by
+      have hq : qabs qg <= qabs (qg - dg x) + qabs (dg x) := by
+        calc
+          qabs qg = qabs ((qg - dg x) + dg x) := by
+            congr 1
+            grind [Rat.sub_eq_add_neg]
+          _ <= qabs (qg - dg x) + qabs (dg x) := qabs_add_le _ _
+      have hG' : qabs (qg - dg x) <= qabs h * G.errorCoefficient := by
+        simpa [qg] using hG
+      have hstepG : qabs h * G.errorCoefficient <=
+          2 * C * G.errorCoefficient :=
+        Rat.mul_le_mul_of_nonneg_right hstep G.errorCoefficient_nonneg
+      calc
+        qabs qg <= qabs (qg - dg x) + qabs (dg x) := hq
+        _ <= qabs h * G.errorCoefficient + dgMajorant :=
+          rat_add_le_add hG' (hdgMajorant x hx)
+        _ <= 2 * C * G.errorCoefficient + dgMajorant :=
+          rat_add_le_add hstepG Rat.le_refl
+        _ = dgMajorant + 2 * C * G.errorCoefficient := by
+          grind [Rat.add_comm]
+    have htermF :
+        qabs (f x) * qabs (qg - dg x) <=
+          qabs h * (fMajorant * G.errorCoefficient) := by
+      calc
+        qabs (f x) * qabs (qg - dg x) <=
+            fMajorant * qabs (qg - dg x) :=
+          Rat.mul_le_mul_of_nonneg_right (hfMajorant x hx) (qabs_nonneg _)
+        _ <= fMajorant * (qabs h * G.errorCoefficient) :=
+          Rat.mul_le_mul_of_nonneg_left (by simpa [qg] using hG) hf0
+        _ = qabs h * (fMajorant * G.errorCoefficient) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    have htermG :
+        qabs (g x) * qabs (qf - df x) <=
+          qabs h * (gMajorant * F.errorCoefficient) := by
+      calc
+        qabs (g x) * qabs (qf - df x) <=
+            gMajorant * qabs (qf - df x) :=
+          Rat.mul_le_mul_of_nonneg_right (hgMajorant x hx) (qabs_nonneg _)
+        _ <= gMajorant * (qabs h * F.errorCoefficient) :=
+          Rat.mul_le_mul_of_nonneg_left (by simpa [qf] using hF) hg0
+        _ = qabs h * (gMajorant * F.errorCoefficient) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    have htermQ :
+        qabs h * qabs qf * qabs qg <=
+          qabs h * ((dfMajorant + 2 * C * F.errorCoefficient) *
+            (dgMajorant + 2 * C * G.errorCoefficient)) := by
+      have hproduct : qabs qf * qabs qg <=
+          (dfMajorant + 2 * C * F.errorCoefficient) *
+            (dgMajorant + 2 * C * G.errorCoefficient) := by
+        calc
+          qabs qf * qabs qg <=
+              (dfMajorant + 2 * C * F.errorCoefficient) * qabs qg :=
+            Rat.mul_le_mul_of_nonneg_right hqf (qabs_nonneg _)
+          _ <= (dfMajorant + 2 * C * F.errorCoefficient) *
+              (dgMajorant + 2 * C * G.errorCoefficient) :=
+            Rat.mul_le_mul_of_nonneg_left hqg
+              (Rat.add_nonneg hdf0
+                (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hC0)
+                  F.errorCoefficient_nonneg))
+      calc
+        qabs h * qabs qf * qabs qg = qabs h * (qabs qf * qabs qg) := by
+          rw [Rat.mul_assoc]
+        _ <= qabs h * ((dfMajorant + 2 * C * F.errorCoefficient) *
+            (dgMajorant + 2 * C * G.errorCoefficient)) :=
+          Rat.mul_le_mul_of_nonneg_left hproduct (qabs_nonneg _)
+    have hproduct := ExactFunction.product_differenceQuotient_error_le_qabs
+      f df g dg x h hh
+    calc
+      qabs (((f (x + h) * g (x + h) - f x * g x) / h) -
+          (f x * dg x + g x * df x)) <=
+          qabs (f x) * qabs (qg - dg x) +
+            qabs (g x) * qabs (qf - df x) +
+              qabs h * qabs qf * qabs qg := by
+            simpa [qf, qg] using hproduct
+      _ <= qabs h * (fMajorant * G.errorCoefficient) +
+            qabs h * (gMajorant * F.errorCoefficient) +
+              qabs h * ((dfMajorant + 2 * C * F.errorCoefficient) *
+                (dgMajorant + 2 * C * G.errorCoefficient)) := by
+            exact rat_add_le_add (rat_add_le_add htermF htermG) htermQ
+      _ = qabs h *
+          (fMajorant * G.errorCoefficient + gMajorant * F.errorCoefficient +
+            (dfMajorant + 2 * C * F.errorCoefficient) *
+              (dgMajorant + 2 * C * G.errorCoefficient)) := by
+            grind [Rat.mul_add, Rat.mul_assoc, Rat.add_assoc]
+
 /-- Translation of the input leaves a quantitative secant bound unchanged.
 This is the finite algebra needed to use a Taylor polynomial at its declared
 rational expansion point instead of only at zero. -/

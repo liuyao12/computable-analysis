@@ -223,6 +223,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `taylorPrefixShiftAt_at_basepoint` make the same statement at every
   rational expansion point, using local `x-a` bounds. They still do not
   differentiate an infinite tail.
+  The quantitative certificate algebra is now closed under finite addition,
+  rational scaling, and products via `SecantDerivativeBound.mul`; the product
+  rule retains the explicitly bounded secant-corner term needed by later FTC,
+  integration-by-parts, and ODE arguments.
   The executable factorial loop is also now identified, term by term and at
   every finite prefix, with its rational Taylor coefficients
   (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
