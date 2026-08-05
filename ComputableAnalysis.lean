@@ -37,6 +37,7 @@ import ComputableAnalysis.PiComplex
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.RotationSeries
+import ComputableAnalysis.RotationLift
 import ComputableAnalysis.Polynomial
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series

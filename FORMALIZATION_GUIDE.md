@@ -87,6 +87,7 @@ Start with the smallest target module rather than importing
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
+| Represented-angle rotation lift | `ComputableAnalysis.RotationLift` | `RotationLift.HalfPiInput`, `rotation`, and its finite Cauchy certificate |
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
 
@@ -106,7 +107,7 @@ finished general theorem.
 | Foundation | `Basic`, `Algebraic`, `AlgebraicNumbers`, `AlgebraicFunctions`, `FunctionDomains`, `Extension`, `Calculus`, `Differential`, `MonotonicityConvexity`, `FTC` | Raw interval representations, domains, continuity, inverse branches, finite derivatives, integral/FTC certificate interfaces |
 | Elementary functions and series | `Elementary`, `ElementaryFunctions`, `Exp`, `ExpProofs`, `Logarithm`, `PowerSeries`, `Series`, `Taylor`, `FirstYearCalculus` | Power-series algorithms, rational majorants, exp/log comparison interfaces, and the current formal derivative ledger |
 | Integrals and special computations | `TurningPointIntegral`, `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
-| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `ComplexAffine`, `ComplexMultiplication`, `PiComplex`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, certified raw complex multiplication and exact rational complex-scalar actions, the certified `i*pi/2` input bridge, finite ODE algebra, and the certified imaginary-axis complex series |
+| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `ComplexAffine`, `ComplexMultiplication`, `PiComplex`, `Nilakantha`, `PeanoBaker`, `RotationSeries`, `RotationLift` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, certified raw complex multiplication and exact rational complex-scalar actions, the certified `i*pi/2` input bridge, finite ODE algebra, and the certified imaginary-axis complex series |
 | Polynomial and complex checks | `Polynomial`, `ComplexPolynomial`, `ComplexInterval` | Exact polynomial algebra and rational complex-box root checks |
 
 `Playground`, `MembershipCheck`, and the repair/check files are development
@@ -471,6 +472,27 @@ These names expose the certified complex series at rational imaginary inputs.
 The uniform schedule adds a finite Lipschitz certificate on `|T| <= 2`, which
 is the input-stability ingredient for represented angles. Their real and
 imaginary coordinates are still not identified with geometric trigonometry.
+
+```lean
+import ComputableAnalysis.RotationLift
+
+open ComputableAnalysis
+
+#check RotationLift.HalfPiInput
+#check RotationLift.HalfPiInput.midpoint_qabs_le_two
+#check RotationLift.HalfPiInput.rotationCandidate
+#check RotationLift.HalfPiInput.rotationRadius
+#check RotationLift.HalfPiInput.rotation
+#check RotationLift.HalfPiInput.rotation_valid
+#check RotationLift.HalfPiInput.rotation_contains_current_candidate
+```
+
+`RotationLift` is the represented-input assembly step in isolation.  Supply a
+valid nested raw angle with boxes in `[1,2]` and width at most `2/(n+1)`; it
+then stabilizes the common rational factorial boxes with the explicit radius
+`16 * width`, and proves the result valid.  A particular pi presentation is
+an instantiation of this finite certificate, not an extra assumption in the
+generic complex proof.
 
 The literal four-corner complex product has finite containment, order,
 nesting, and a rational width estimate.  The width schedule is obtained from
