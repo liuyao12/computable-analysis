@@ -208,7 +208,13 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   to represented targets, then use it for the sine/arcsine and
   exponential/logarithm branches.
 - **Differentiated elementary functions — partly checked.** Formal
-  power-series derivatives and finite-difference examples are checked. The
+  power-series coefficient shifts and finite-difference examples are checked.
+  The executable factorial loop is also now identified, term by term and at
+  every finite prefix, with its rational Taylor coefficients
+  (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
+  `ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix`). This is finite
+  algebra only; an analytic derivative still requires a certified remainder.
+  The
   next end-to-end gate is a selected exponential raw that proves `f' = f` on
   an interval, followed by uniqueness and the logarithm relation. The literal rational-input
   evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for

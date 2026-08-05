@@ -691,6 +691,25 @@ identities:
 \]
 \end{theorem}
 
+\begin{theorem}[Finite factorial-prefix identity]
+\label{thm:finite-factorial-prefix}
+\lean{ComputableAnalysis.ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial}
+\lean{ComputableAnalysis.ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix}
+\uses{def:formal-power-series}
+\leanok
+The finite rational loop used by the exponential evaluator has no hidden
+analytic step.  After (N) terms, its next term is exactly
+\[
+  \frac{x^N}{N!},
+\]
+and after (N+1) terms its accumulated center is exactly the finite
+factorial Taylor prefix through degree (N).  This connects the coefficient
+stream to the executable rational loop, but says neither that the infinite
+series has a derivative nor that a tail may be differentiated.  Those are
+the later remainder-certificate obligations of
+\cref{rem:series-linear-coefficient-bridge}.
+\end{theorem}
+
 \section{Euler's Basel Problem}
 
 \begin{definition}[Zeta-two interval series]\label{def:zeta-two-raw}

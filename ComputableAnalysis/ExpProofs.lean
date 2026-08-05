@@ -1,6 +1,7 @@
 import ComputableAnalysis.Exp
 import ComputableAnalysis.FTC
 import ComputableAnalysis.ElementaryFunctions
+import ComputableAnalysis.FinitePolynomialCalculus
 
 /-!
 # Proof targets for the exponential algorithms
@@ -2894,31 +2895,82 @@ theorem expPowerSeries_ratio_bound (x : Rat) :
   simpa [D] using hnum
 
 /-- The term immediately following a finite exponential power-series prefix.
-This private finite-state view is used to prove that the public boxes are
-nested for every rational input, not only at the special value `x = 1`. -/
-private def powerSeriesTermAtTerms (x : Rat) (terms : Nat) : Rat :=
+
+This is a literal rational loop state.  It is public so that finite Taylor
+algebra can be related to the evaluator without making a convergence or
+derivative claim. -/
+def powerSeriesTermAtTerms (x : Rat) (terms : Nat) : Rat :=
   (powerSeriesState x terms).2
 
-private def powerSeriesCenterAtTerms (x : Rat) (terms : Nat) : Rat :=
+/-- The finite partial-sum coordinate of the factorial-series loop. -/
+def powerSeriesCenterAtTerms (x : Rat) (terms : Nat) : Rat :=
   (powerSeriesState x terms).1
 
 private def powerSeriesTailRadiusAtTerms (x : Rat) (terms : Nat) : Rat :=
   qabs (powerSeriesTermAtTerms x terms) /
     (1 - qabs x / ((terms : Rat) + 1))
 
-private theorem powerSeriesTermAtTerms_succ (x : Rat) (terms : Nat) :
+theorem powerSeriesTermAtTerms_succ (x : Rat) (terms : Nat) :
     powerSeriesTermAtTerms x (terms + 1) =
       powerSeriesTermAtTerms x terms * x / ((terms : Rat) + 1) := by
   unfold powerSeriesTermAtTerms
   rw [powerSeriesState_succ]
   simp [powerSeriesLoopStep]
 
-private theorem powerSeriesCenterAtTerms_succ (x : Rat) (terms : Nat) :
+theorem powerSeriesCenterAtTerms_succ (x : Rat) (terms : Nat) :
     powerSeriesCenterAtTerms x (terms + 1) =
       powerSeriesCenterAtTerms x terms + powerSeriesTermAtTerms x terms := by
   unfold powerSeriesCenterAtTerms powerSeriesTermAtTerms
   rw [powerSeriesState_succ]
   simp [powerSeriesLoopStep]
+
+/-- Each finite loop term is exactly the corresponding factorial Taylor
+monomial.  This is an identity in rational arithmetic. -/
+theorem powerSeriesTermAtTerms_eq_expCoeff_monomial (x : Rat) :
+    forall terms : Nat,
+      powerSeriesTermAtTerms x terms =
+        FormalPowerSeries.expCoeff terms * x ^ terms
+  | 0 => by
+      simp [powerSeriesTermAtTerms, powerSeriesState,
+        FormalPowerSeries.expCoeff, factorialRat, factorial]
+      native_decide
+  | terms + 1 => by
+      rw [powerSeriesTermAtTerms_succ,
+        powerSeriesTermAtTerms_eq_expCoeff_monomial]
+      unfold FormalPowerSeries.expCoeff
+      rw [Rat.pow_succ, FormalPowerSeries.factorialRat_succ,
+        Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem expCoeff_succ_monomial (x : Rat) (terms : Nat) :
+    FormalPowerSeries.expCoeff (terms + 1) * x ^ (terms + 1) =
+      FormalPowerSeries.expCoeff terms *
+        (x ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) := by
+  unfold FormalPowerSeries.expCoeff
+  rw [FormalPowerSeries.factorialRat_succ,
+    Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- The executable finite factorial-series sum is the finite Taylor prefix
+with the same coefficients.  It is intentionally a finite identity: the
+separately certified tail remains responsible for the raw-real evaluator. -/
+theorem powerSeriesCenterAtTerms_eq_expTaylorPrefix (x : Rat) :
+    forall terms : Nat,
+      powerSeriesCenterAtTerms x (terms + 1) =
+        FinitePolynomial.expTaylorPrefix terms x
+  | 0 => by
+      simp [powerSeriesCenterAtTerms, powerSeriesState, powerSeriesLoopStep,
+        FinitePolynomial.expTaylorPrefix,
+        FinitePolynomial.integratedTaylorPrefix]
+      native_decide
+  | terms + 1 => by
+      rw [powerSeriesCenterAtTerms_succ,
+        powerSeriesCenterAtTerms_eq_expTaylorPrefix,
+        powerSeriesTermAtTerms_eq_expCoeff_monomial,
+        expCoeff_succ_monomial]
+      simp only [FinitePolynomial.expTaylorPrefix,
+        FinitePolynomial.integratedTaylorPrefix]
+      grind [Rat.add_assoc]
 
 private theorem powerSeriesCenter_stage_eq (x : Rat) (n : Nat) :
     powerSeriesCenter x n =

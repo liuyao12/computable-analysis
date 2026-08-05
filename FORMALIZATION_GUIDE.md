@@ -225,6 +225,13 @@ quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
 only after that bound is supplied does a linear coefficient become an
 interval derivative.
 
+The series implementation is connected to this finite algebra without making
+an analytic derivative claim. `ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial`
+proves that the literal loop's next rational term is `x^N / N!`, while
+`ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix` identifies its finite
+center after `N + 1` terms with `FinitePolynomial.expTaylorPrefix N x`.
+Use these facts before attaching the separately certified geometric tail.
+
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
 `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` now proves its
@@ -444,6 +451,8 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeriesOnInterval_zero_initial_value
 #check ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero
 #check ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero
+#check ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial
+#check ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
