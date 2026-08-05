@@ -6421,12 +6421,12 @@ theorem two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute (n : Nat) :
         (Rat.mul_assoc _ _ _).symm
       _ = 2 * q := by rw [hhalfFour]
   change
-    { lo := 2 * ((arctanGeom (1 : Rat)).compute n).lo,
-      hi := 2 * ((arctanGeom (1 : Rat)).compute n).hi }
-      = { lo := ((1 : Rat) / 2) *
+    ({ lo := 2 * ((arctanGeom (1 : Rat)).compute n).lo,
+       hi := 2 * ((arctanGeom (1 : Rat)).compute n).hi } : QInterval)
+      = ({ lo := ((1 : Rat) / 2) *
           (4 * ((arctanGeom (1 : Rat)).compute n).lo),
-      hi := ((1 : Rat) / 2) *
-          (4 * ((arctanGeom (1 : Rat)).compute n).hi) }
+           hi := ((1 : Rat) / 2) *
+           (4 * ((arctanGeom (1 : Rat)).compute n).hi) } : QInterval)
   rw [hscale, hscale]
 
 /-- Doubling the unit-slope sector computation gives the normalized geometric
@@ -6438,14 +6438,14 @@ theorem two_arctanGeom_one_equiv_quarterTurnRaw_one :
   apply (RealRaw.compareAt_overlap_iff
     ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw)
     (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)) n n).2
-  rw [two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute]
+  rw [← two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute]
   have hvalid : (arctanGeom (1 : Rat)).Valid :=
     arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have hscaledValid : ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw).Valid :=
+    RealRaw.natScale_valid 2 hvalid
   have horder := RealRaw.interval_order_of_valid
-    (arctanGeom (1 : Rat)) hvalid n
-  have hscaled := Rat.mul_le_mul_of_nonneg_left horder
-    (by native_decide : (0 : Rat) <= 2)
-  exact ⟨hscaled, hscaled⟩
+    ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw) hscaledValid n
+  exact ⟨horder, horder⟩
 
 end ArctanGeometry
 
