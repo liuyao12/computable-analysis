@@ -234,13 +234,14 @@ with the reciprocal integral.
 \lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_equiv_arctanKernelIntegral}
 \label{thm:log-two-series-reciprocal-integral}
 \lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
+\lean{ComputableAnalysis.LogarithmicPi.reciprocalRaw_equiv_piCircleArea}
+\lean{ComputableAnalysis.LogarithmicPi.squareSubstitutionRaw_equiv_piCircleArea}
 \leanok
 The finite integration-by-parts computation is organized as exact strip and
-square-substitution identities, then certified enclosure comparisons.  It
-produces the named π views \code{pi.integrationByParts},
-\code{pi.squareSubstitution}, and \code{pi.squareStieltjes}; it is a theorem
-of the already checked arctangent/integration capability, not a table of
-antiderivatives.
+square-substitution identities, then certified enclosure comparisons.  The
+reciprocal-integral and square-pullback raw algorithms both reach
+\(\pi_{\rm area}\); this is a theorem of the checked arctangent/integration
+capability, not a table of antiderivatives.
 \end{theorem}
 
 \begin{remark}[The deliberately long ODE route]
@@ -286,14 +287,26 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.ComplexRaw.cauchyStabilize}
 \lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_contains_current}
 \lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_valid}
+\lean{ComputableAnalysis.ArctanGeometry.two_arctanGeom_one_equiv_quarterTurnRaw_one}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_valid}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_width_le_two_div_succ}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_bounds}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_equiv_halfPi}
+\lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_equiv_twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.geometricQuarterTurnOne_valid}
+\lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne_equiv_geometricQuarterTurnOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius_shrinks}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotation}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_contains_current_candidate}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_valid}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi}
@@ -319,13 +332,19 @@ across every checked \(\pi\)-representation.  The finite scalar return
 \((-2i)(i\pi/2)=\pi\), and the conditional literal-product formula
 \((-2i)\log(i)=\pi\) for any certified branch with
 \(\log(i)=i\pi/2\), are checked.
+The input is also already tied to the geometric arctangent route:
+\(\pi/2\) is a certified raw equivalent of
+\(2\arctan_{\rm geom}(1)\), and of the normalized geometric quarter-turn
+raw at \(1\).  Thus the remaining quarter-turn theorem compares two named
+complex constructions at the same represented angle; it is not an
+unrecorded conversion of units or of \(\pi\)-representatives.
 The represented-input construction is now a valid raw complex computation:
 finite prefixes of the midpoint rotation boxes are intersected, with each
 later candidate as the rational-box witness that the prefix remains ordered.
-For (|T|,|U|le2), its finite cosine--sine prefix changes by at most
-(16|T-U|) in each coordinate.  Together with the midpoint modulus, this
-gives future containment after widening stage (k) by
-(16,operatorname{width}(pi/2,k)); that radius is at most (32/(k+1))
+For \(|T|,|U|\le2\), its finite cosine--sine prefix changes by at most
+\(16|T-U|\) in each coordinate.  Together with the midpoint modulus, this
+gives future containment after widening stage \(k\) by
+\(16\,\operatorname{width}(\pi/2,k)\); that radius is at most \(32/(k+1)\)
 and shrinks by the rational denominator schedule.
 The remaining theorem \(e^{i\pi}+1=0\) still needs the extension of the
 represented rotation raw to the geometric quarter turn, and then its
