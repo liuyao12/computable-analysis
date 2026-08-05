@@ -38,6 +38,7 @@ import ComputableAnalysis.PiProofs
 import ComputableAnalysis.PiComplex
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.RationalCircle
+import ComputableAnalysis.ReciprocalQuarticPi
 import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.RotationLift
 import ComputableAnalysis.GeometricPiRotation

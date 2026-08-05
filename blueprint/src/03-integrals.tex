@@ -418,7 +418,9 @@ The finite two-piece assembler computes the increasing branch on
 \begin{definition}[The reciprocal quartic test kernel]
 \label{def:reciprocal-quartic-test-kernel}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular}
-\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicConstruction}
+\lean{ComputableAnalysis.ReciprocalQuarticPi.raw}
+\lean{ComputableAnalysis.ReciprocalQuarticPi.raw_valid}
+\lean{ComputableAnalysis.ReciprocalQuarticPi.raw_width}
 \leanok
 \[
  f(x)=\frac{1+x^2}{x^4-x^2+1}\quad(-1\le x\le1),
@@ -429,9 +431,9 @@ The affine dyadic boxes have width \(64/2^n\).
 
 \begin{theorem}[Projective substitution for the quartic test]
 \label{thm:reciprocal-quartic-projective-substitution}
-\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_equiv_cauchyFullLine}
-\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea}
-\uses{def:reciprocal-quartic-test-kernel,thm:bounded-symmetric-cauchy-pi}
+\lean{ComputableAnalysis.ReciprocalQuarticPi.raw_equiv_cauchyRaw}
+\lean{ComputableAnalysis.ReciprocalQuarticPi.raw_equiv_piCircleArea}
+\uses{def:reciprocal-quartic-test-kernel,thm:cauchy-full-line-pi}
 \leanok
 The finite compact boxes and full-line Cauchy boxes meet in a shrinking
 rational envelope; hence the compact quartic evaluator is equivalent to
