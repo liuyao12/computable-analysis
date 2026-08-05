@@ -6,6 +6,7 @@ import ComputableAnalysis.AlgebraicNumbers
 import ComputableAnalysis.AlgebraicFunctions
 import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.ArctanPresentations
+import ComputableAnalysis.ArctanRectanglePi
 import ComputableAnalysis.Basic
 import ComputableAnalysis.Basel
 import ComputableAnalysis.Calculus

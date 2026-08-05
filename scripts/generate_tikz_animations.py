@@ -57,6 +57,10 @@ def path(points: list[tuple[float, float]]) -> str:
     return " ".join(f"({q(x)},{q(y)})" for x, y in points)
 
 
+def polygon(points: list[tuple[float, float]]) -> str:
+    return " -- ".join(f"({q(x)},{q(y)})" for x, y in points)
+
+
 def n(x: float, y: float, text: str, opts: str = "") -> str:
     extra = "," + opts if opts else ""
     return rf"\node[font=\small,text=ink{extra}] at ({q(x)},{q(y)}) {{{text}}};"
@@ -104,8 +108,8 @@ def kernel_frame(cells: int) -> str:
     for left, right in zip(mesh, mesh[1:]):
         lx, rx = x0 + float(left) * unit, x0 + float(right) * unit
         out += [
-            rf"\path[fill=orangefill,draw=orange,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(left))*unit)});",
-            rf"\path[fill=tealfill,draw=teal,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(right))*unit)});",
+            rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(left))*unit)});",
+            rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(right))*unit)});",
         ]
     curve = [(x0 + unit * i / 100, y0 + unit / (1 + (i / 100) ** 2)) for i in range(101)]
     out += [
@@ -160,8 +164,8 @@ def sine_frame(cells: int, last: int, guard: Fraction) -> str:
     for left, right in zip(mesh, mesh[1:]):
         lx, rx = x0 + 2 * float(left) * xunit, x0 + 2 * float(right) * xunit
         out += [
-            rf"\path[fill=orangefill,draw=orange,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[right][1])*yunit)});",
-            rf"\path[fill=tealfill,draw=teal,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[left][0])*yunit)});",
+            rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[right][1])*yunit)});",
+            rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[left][0])*yunit)});",
         ]
     curve = [(x0 + xunit * i / 150, y0 + yunit * math.sin(math.pi * i / 300)) for i in range(151)]
     out.append(rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};")
@@ -214,7 +218,8 @@ def circle_frame(cells: int) -> str:
         rf"\draw[axis,line width=.75pt] ({q(x0)},{q(y0-10)}) -- ({q(x0)},{q(north[1]+15)});",
         rf"\draw[curve,line width=1pt] ({q(x0)},{q(y0)}) -- ({q(x0)},{q(north[1])});",
         rf"\draw[ink,line width=1.2pt] ({q(east[0])},{q(y0)}) arc[start angle=0,end angle=90,radius={radius}pt];",
-        rf"\path[fill=tealfill] ({q(origin[0])},{q(origin[1])}) -- {path(plotted)} -- cycle;",
+        rf"\path[fill=orangefill,draw=orange,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
+        rf"\path[fill=tealfill,draw=teal,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
     ]
     for value, endpoint in zip(mesh, plotted):
         vertical = screen((0, value))
@@ -292,33 +297,55 @@ def sqrt_animation() -> Animation:
 
 
 def substitution_frame(cells: int) -> str:
-    left, right, top, bottom = 57, 300, 135, 51
+    left, right = 57, 300
+    t_base, x_base, height = 136, 39, 45
     x = lambda value: left + float(value) * (right - left)
     mesh = [Fraction(i, cells) for i in range(cells + 1)]
     out = [
-        rf"\draw[axis,line width=.75pt] ({left-10},{top}) -- ({right+14},{top});",
-        rf"\draw[axis,line width=.75pt] ({left-10},{bottom}) -- ({right+14},{bottom});",
+        rf"\draw[axis,line width=.75pt] ({left-10},{t_base}) -- ({right+14},{t_base});",
+        rf"\draw[axis,line width=.75pt] ({left},{t_base-8}) -- ({left},{t_base+height+11});",
+        rf"\draw[axis,line width=.75pt] ({left-10},{x_base}) -- ({right+14},{x_base});",
+        rf"\draw[axis,line width=.75pt] ({left},{x_base-8}) -- ({left},{x_base+height+11});",
     ]
-    for value in mesh:
-        t, image = x(value), x(value*value)
+    for start, stop in zip(mesh, mesh[1:]):
+        lx, rx = x(start), x(stop)
+        lower_height = 2 * float(start) * height
+        curve_points = [(lx, t_base + lower_height)] + [
+            (x(start + (stop - start) * Fraction(k, 16)),
+             t_base + 2 * float(start + (stop - start) * Fraction(k, 16)) * height)
+            for k in range(17)
+        ] + [(rx, t_base + lower_height)]
         out += [
-            rf"\draw[grid,line width=.5pt] ({q(t)},{top-4}) -- ({q(image)},{bottom+4});",
-            rf"\draw[axis,line width=.55pt] ({q(t)},{top-3.5}) -- ({q(t)},{top+3.5});",
-            rf"\draw[curve,line width=.55pt] ({q(image)},{bottom-3.5}) -- ({q(image)},{bottom+3.5});",
-            dot(t, top, "axis", 1.5),
-            dot(image, bottom, "curve", 1.5),
+            rf"\path[fill=orangefill] plot[smooth] coordinates {{{path(curve_points)}}} -- cycle;",
+            rf"\path[fill=tealfill,draw=teal,line width=.4pt] ({q(lx)},{t_base}) rectangle ({q(rx)},{q(t_base+lower_height)});",
+            rf"\path[fill=tealfill,draw=teal,line width=.4pt] ({q(x(start*start))},{x_base}) rectangle ({q(x(stop*stop))},{q(x_base+height)});",
         ]
+    for value in mesh:
+        t, image = x(value), x(value * value)
+        out += [
+            rf"\draw[projection,line width=.45pt] ({q(t)},{t_base-4}) -- ({q(image)},{x_base+height+4});",
+            rf"\draw[axis,line width=.55pt] ({q(t)},{t_base-3.5}) -- ({q(t)},{t_base+3.5});",
+            rf"\draw[axis,line width=.55pt] ({q(image)},{x_base-3.5}) -- ({q(image)},{x_base+3.5});",
+        ]
+    top_curve = [(x(i / 80), t_base + 2 * (i / 80) * height) for i in range(81)]
     out += [
-        n(left, top+12, r"$t_0$", "anchor=north"),
-        n(right, top+12, r"$t_1$", "anchor=north"),
-        n(right+13, top, r"$t$", "anchor=west"),
-        n(right+13, bottom, r"$x=\varphi(t)=t^2$", "anchor=west"),
+        rf"\draw[curve,line width=1.05pt] plot[smooth] coordinates {{{path(top_curve)}}};",
+        rf"\draw[curve,line width=1.05pt] ({left},{q(x_base+height)}) -- ({right},{q(x_base+height)});",
+        n(left, t_base-12, r"$0$", "anchor=north"),
+        n(right, t_base-12, r"$1$", "anchor=north"),
+        n(left, x_base-12, r"$0$", "anchor=north"),
+        n(right, x_base-12, r"$1$", "anchor=north"),
+        n(right+13, t_base-2, r"$t$", "anchor=west"),
+        n(right+13, x_base-2, r"$x$", "anchor=west"),
+        n(left+60, t_base+41, r"$\int_0^1 2t\,dt$", "anchor=south"),
+        n(left+60, x_base+height+10, r"$\int_0^1 1\,dx$", "anchor=south"),
+        n(right+18, 86, r"$x=t^2$", "anchor=west,text=axis"),
     ]
     return "\n".join(out)
 
 
 def substitution_animation() -> Animation:
-    return Animation("substitution-partition", 360, 170, tuple(substitution_frame(i) for i in (1, 2, 4, 8)), (1200, 1200, 1200, 1900), 2)
+    return Animation("substitution-partition", 360, 245, tuple(substitution_frame(i) for i in (1, 2, 4, 8)), (1200, 1200, 1200, 1900), 2)
 
 
 def ibp_frame(cells: int) -> str:
@@ -341,14 +368,18 @@ def ibp_frame(cells: int) -> str:
     curve = [(x(i/100), y((i/100)**2)) for i in range(101)]
     out.append(rf"\draw[ink,line width=.85pt] plot[smooth] coordinates {{{path(curve)}}};")
     for lf, rf_, lg, rg in zip(f, f[1:], g, g[1:]):
-        out.append(rf"\path[fill=yellowfill] ({q(x(lf))},{q(y(lg))}) rectangle ({q(x(rf_))},{q(y(rg))});")
+        out += [
+            rf"\path[fill=tealfill,draw=teal,line width=.3pt] ({q(x(lf))},{bottom}) rectangle ({q(x(rf_))},{q(y(lg))});",
+            rf"\path[fill=tealfill,draw=teal,line width=.3pt] ({left},{q(y(lg))}) rectangle ({q(x(lf))},{q(y(rg))});",
+            rf"\path[fill=orangefill,draw=orange,line width=.4pt] ({q(x(lf))},{q(y(lg))}) rectangle ({q(x(rf_))},{q(y(rg))});",
+        ]
     horizontal, vertical = [(x(f[0]), y(g[0]))], [(x(f[0]), y(g[0]))]
     for lf, rf_, lg, rg in zip(f, f[1:], g, g[1:]):
         horizontal += [(x(rf_), y(lg)), (x(rf_), y(rg))]
         vertical += [(x(lf), y(rg)), (x(rf_), y(rg))]
     out += [
-        rf"\draw[orange,line width=.9pt] plot coordinates {{{path(horizontal)}}};",
-        rf"\draw[teal,line width=.9pt] plot coordinates {{{path(vertical)}}};",
+        rf"\draw[ink,line width=.8pt] plot coordinates {{{path(horizontal)}}};",
+        rf"\draw[ink,line width=.8pt] plot coordinates {{{path(vertical)}}};",
         *[dot(x(fv), y(gv), "ink", 1.45) for fv, gv in zip(f, g)],
         n(left, ruler-11, r"$t_0$", "anchor=north"),
         n(left+unit, ruler-11, r"$t_1$", "anchor=north"),
@@ -385,8 +416,8 @@ def ftc_frame(cells: int) -> str:
     mesh = [Fraction(i, cells) for i in range(cells+1)]
     for left, right in zip(mesh, mesh[1:]):
         out += [
-            rf"\path[fill=orangefill,draw=orange,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*right))});",
-            rf"\path[fill=tealfill,draw=teal,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*left))});",
+            rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*right))});",
+            rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*left))});",
         ]
     out += [
         rf"\draw[curve,line width=1.05pt] plot coordinates {{{path(derivative)}}};",
@@ -421,22 +452,22 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
         for a, b in zip(mesh, mesh[1:]):
             lo, hi = sorted((sinc(float(a)), sinc(float(b))))
             out.extend([
-                rf"\path[fill=orangefill,draw=orange,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(hi))});",
-                rf"\path[fill=tealfill,draw=teal,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(lo))});",
+                rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(hi))});",
+                rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(lo))});",
             ])
     tail(Fraction(0), turn_left)
     tail(turn_right, Fraction(2))
-    out.append(rf"\path[fill=yellowfill,draw=yellowedge,line width=.55pt] ({q(x(turn_left))},{q(y(-.25))}) rectangle ({q(x(turn_right))},{q(y(0))});")
+    out.append(rf"\path[fill=orangefill,draw=orange,line width=.55pt] ({q(x(turn_left))},{q(y(-.25))}) rectangle ({q(x(turn_right))},{q(y(0))});")
     curve = [(x(i/300), y(sinc(i/300))) for i in range(601)]
     out += [
         rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",
-        rf"\draw[yellowedge,line width=.65pt] ({q(x(turn_left))},{q(y(-.25))}) -- ({q(x(turn_left))},{q(y(1.04))});",
-        rf"\draw[yellowedge,line width=.65pt] ({q(x(turn_right))},{q(y(-.25))}) -- ({q(x(turn_right))},{q(y(1.04))});",
+        rf"\draw[orange,line width=.65pt] ({q(x(turn_left))},{q(y(-.25))}) -- ({q(x(turn_left))},{q(y(1.04))});",
+        rf"\draw[orange,line width=.65pt] ({q(x(turn_right))},{q(y(-.25))}) -- ({q(x(turn_right))},{q(y(1.04))});",
         n(x(0), y(0)-12, r"$0$", "anchor=north"),
         n(x(1), y(0)-12, r"$1$", "anchor=north"),
         n(x(2), y(0)-12, r"$2$", "anchor=north"),
-        n(x(turn_left)-4, y(0)-23, r"$\ell$", "anchor=north east,text=yellowedge"),
-        n(x(turn_right)+4, y(0)-23, r"$r$", "anchor=north west,text=yellowedge"),
+        n(x(turn_left)-4, y(0)-23, r"$\ell$", "anchor=north east,text=orange"),
+        n(x(turn_right)+4, y(0)-23, r"$r$", "anchor=north west,text=orange"),
         n(x(2)+10, y(0), r"$t$", "anchor=west"),
         n(left+8, y(.88), r"$\frac{\sin(\pi t)}{\pi t}$", "anchor=west"),
     ]
