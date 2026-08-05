@@ -491,7 +491,6 @@ def all_animations() -> tuple[Animation, ...]:
     return (
         circle_animation(),
         kernel_animation("arctan-rectangle-enclosure"),
-        kernel_animation("monotone-integral-stage"),
         sine_animation(),
         sqrt_animation(),
         substitution_animation(),
