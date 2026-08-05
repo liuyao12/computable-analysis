@@ -617,6 +617,9 @@ open ComputableAnalysis
 
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness.arctan_to_sine_cosine_coordinates
+#check ArctanGeometry.arctanGeom_one_valid
+#check ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute
+#check ArctanGeometry.four_arctanGeom_one_equiv_piCircleArea
 #check ArctanGeometry.two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute
 #check ArctanGeometry.two_arctanGeom_one_equiv_quarterTurnRaw_one
 ```
@@ -634,6 +637,13 @@ corollary records `2 * arctan.geom(1) = pi / 2` as the normalized geometric
 quarter turn.  It does not yet transport that geometric angle to
 `PiProofs.pi.halfPi` or identify the factorial rotation with its point; those
 are the next Euler-bridge steps.
+
+The same small geometry module also carries the full-area bridge directly:
+`four_arctanGeom_one_compute_eq_piCircleArea_compute` is stagewise equality
+of `4 * arctan.geom(1)` with `piCircleArea`, and
+`four_arctanGeom_one_equiv_piCircleArea` is its raw-real corollary.  Use
+these declarations for the geometric pi route instead of importing the larger
+presentation registry merely for that fact.
 
 For rational-circle chord refinements, do not select an exact square root.
 The direct evaluator is already certified in
