@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[paperwidth=360pt,paperheight=170pt,margin=0pt,noheadfoot]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\definecolor{ink}{RGB}{28,41,56}
+\definecolor{axis}{RGB}{100,116,139}
+\definecolor{grid}{RGB}{203,213,225}
+\definecolor{curve}{RGB}{30,64,175}
+\definecolor{teal}{RGB}{13,148,136}
+\definecolor{tealfill}{RGB}{176,227,219}
+\definecolor{orange}{RGB}{234,88,12}
+\definecolor{orangefill}{RGB}{254,215,170}
+\definecolor{purple}{RGB}{126,34,206}
+\definecolor{yellowfill}{RGB}{254,243,199}
+\definecolor{yellowedge}{RGB}{202,138,4}
+\definecolor{projection}{RGB}{148,163,184}
+
+\pagestyle{empty}
+\setlength\parindent{0pt}
+\setlength\topskip{0pt}
+\begin{document}
+\noindent\begin{tikzpicture}[baseline=(current bounding box.north),x=1pt,y=1pt,line cap=round,line join=round]
+\useasboundingbox (0,0) rectangle (360,170);
+\draw[axis,line width=.75pt] (47,135) -- (314,135);
+\draw[axis,line width=.75pt] (47,51) -- (314,51);
+\draw[grid,line width=.5pt] (57,131) -- (57,55);
+\draw[axis,line width=.55pt] (57,131.5) -- (57,138.5);
+\draw[curve,line width=.55pt] (57,47.5) -- (57,54.5);
+\fill[axis] (57,135) circle[radius=1.5pt];
+\fill[curve] (57,51) circle[radius=1.5pt];
+\draw[grid,line width=.5pt] (178.5,131) -- (117.75,55);
+\draw[axis,line width=.55pt] (178.5,131.5) -- (178.5,138.5);
+\draw[curve,line width=.55pt] (117.75,47.5) -- (117.75,54.5);
+\fill[axis] (178.5,135) circle[radius=1.5pt];
+\fill[curve] (117.75,51) circle[radius=1.5pt];
+\draw[grid,line width=.5pt] (300,131) -- (300,55);
+\draw[axis,line width=.55pt] (300,131.5) -- (300,138.5);
+\draw[curve,line width=.55pt] (300,47.5) -- (300,54.5);
+\fill[axis] (300,135) circle[radius=1.5pt];
+\fill[curve] (300,51) circle[radius=1.5pt];
+\node[font=\small,text=ink,anchor=north] at (57,147) {$t_0$};
+\node[font=\small,text=ink,anchor=north] at (300,147) {$t_1$};
+\node[font=\small,text=ink,anchor=west] at (313,135) {$t$};
+\node[font=\small,text=ink,anchor=west] at (313,51) {$x=\varphi(t)=t^2$};
+\end{tikzpicture}
+\end{document}
