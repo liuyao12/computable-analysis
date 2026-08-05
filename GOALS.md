@@ -231,7 +231,11 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   every finite prefix, with its rational Taylor coefficients
   (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
   `ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix`). This is finite
-  algebra only; an analytic derivative still requires a certified remainder.
+  algebra only. `FinitePolynomial.expTaylorPrefix_succ` records the literal
+  one-term extension, while
+  `FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` supplies the
+  common bounded-box factorial majorant needed for a future uniform tail
+  certificate; an analytic derivative still requires that certified remainder.
   The
   next end-to-end gate is a selected exponential raw that proves `f' = f` on
   an interval, followed by uniqueness and the logarithm relation. The literal rational-input

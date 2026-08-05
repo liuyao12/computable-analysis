@@ -253,7 +253,10 @@ an analytic derivative claim. `ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_mono
 proves that the literal loop's next rational term is `x^N / N!`, while
 `ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix` identifies its finite
 center after `N + 1` terms with `FinitePolynomial.expTaylorPrefix N x`.
-Use these facts before attaching the separately certified geometric tail.
+`FinitePolynomial.expTaylorPrefix_succ` exposes the one-term recurrence, and
+`FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` puts every
+term under a common factorial-tail budget on a bounded rational box. Use
+these facts before attaching the separately certified geometric tail.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -476,6 +479,8 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero
 #check ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial
 #check ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix
+#check FinitePolynomial.expTaylorPrefix_succ
+#check FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one

@@ -701,6 +701,8 @@ identities:
 \label{thm:finite-factorial-prefix}
 \lean{ComputableAnalysis.ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial}
 \lean{ComputableAnalysis.ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorPrefix_succ}
+\lean{ComputableAnalysis.FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_at_zero}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShiftAt_at_basepoint}
 \uses{def:formal-power-series}
@@ -712,9 +714,11 @@ analytic step.  After (N) terms, its next term is exactly
 \]
 and after (N+1) terms its accumulated center is exactly the finite
 factorial Taylor prefix through degree (N).  This connects the coefficient
-stream to the executable rational loop, but says neither that the infinite
-series has a derivative nor that a tail may be differentiated.  Those are
-the later remainder-certificate obligations of
+stream to the executable rational loop.  On every rational box, the same
+finite monomial is bounded by the corresponding factorial-tail term, so one
+common rational tail budget can cover prefixes at nearby inputs.  This still
+says neither that the infinite series has a derivative nor that a tail may be
+differentiated.  Those are the later remainder-certificate obligations of
 \cref{rem:series-linear-coefficient-bridge}.
 For a finite prefix with a linear term, the coefficient-shift polynomial takes
 the value \(c_1\) at its declared rational expansion point;

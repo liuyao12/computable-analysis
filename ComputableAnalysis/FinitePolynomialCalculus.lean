@@ -737,6 +737,46 @@ def expTaylorPrefix (n : Nat) (x : Rat) : Rat :=
 def expTaylorDerivativePrefix (n : Nat) (x : Rat) : Rat :=
   taylorDerivativePrefix FormalPowerSeries.expCoeff n x
 
+/-- Advancing the finite exponential prefix appends exactly its next
+factorial monomial.  This finite recurrence is the shared algebra behind
+uniform series boxes and their tail certificates. -/
+theorem expTaylorPrefix_succ (n : Nat) (x : Rat) :
+    expTaylorPrefix (n + 1) x = expTaylorPrefix n x +
+      FormalPowerSeries.expCoeff n *
+        (x ^ (n + 1) / ((n + 1 : Nat) : Rat)) := by
+  unfold expTaylorPrefix
+  rw [integratedTaylorPrefix]
+  change 1 +
+      (integratedTaylorPrefix FormalPowerSeries.expCoeff n x +
+        FormalPowerSeries.expCoeff n * (x ^ (n + 1) / ((n + 1 : Nat) : Rat))) = _
+  rw [Rat.add_assoc]
+
+/-- On a rational box, every factorial-series monomial is bounded by the
+corresponding uniform factorial tail term.  This is the finite majorization
+needed before attaching a common tail certificate to Taylor prefixes at
+nearby inputs. -/
+theorem qabs_expCoeff_monomial_le_factorialTailTerm
+    {C x : Rat} (hC : 0 <= C) (hx : qabs x <= C) (n : Nat) :
+    qabs (FormalPowerSeries.expCoeff n * x ^ n) <=
+      RationalMajorant.factorialTailTerm C n := by
+  have hcoeff : 0 <= FormalPowerSeries.expCoeff n := by
+    unfold FormalPowerSeries.expCoeff
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 (RationalMajorant.factorialRat_pos n))
+  have hpow : qabs (x ^ n) <= C ^ n :=
+    RationalMajorant.qabs_pow_le_pow hC hx n
+  calc
+    qabs (FormalPowerSeries.expCoeff n * x ^ n) =
+        FormalPowerSeries.expCoeff n * qabs (x ^ n) := by
+          rw [qabs_mul, qabs_eq_self_of_nonneg hcoeff]
+    _ <= FormalPowerSeries.expCoeff n * C ^ n :=
+      Rat.mul_le_mul_of_nonneg_left hpow hcoeff
+    _ = C ^ n / factorialRat n := by
+      unfold FormalPowerSeries.expCoeff
+      rw [Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = RationalMajorant.factorialTailTerm C n := rfl
+
 /-- A finite factorial Taylor prefix for exponential has the expected
 one-degree-lower prefix as its derivative. -/
 def expTaylorPrefixSecantBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :
