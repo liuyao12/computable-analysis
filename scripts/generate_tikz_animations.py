@@ -30,6 +30,13 @@ COLOURS = r"""
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
+% The two Darboux bounds use cyan and yellow at half opacity.  Where both
+% bounds cover a cell, ordinary alpha compositing gives a clearly visible
+% green certificate region; orange remains reserved for an unresolved gap.
+\definecolor{cyan}{RGB}{7,128,84}
+\definecolor{cyanfill}{RGB}{0,160,90}
+\definecolor{yellow}{RGB}{170,142,0}
+\definecolor{yellowfill}{RGB}{180,210,0}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
@@ -433,50 +440,63 @@ def ftc_animation() -> Animation:
 
 
 def sinc(value: float) -> float:
-    return 1 if value == 0 else math.sin(math.pi*value)/(math.pi*value)
+    """The rational-input test function x |-> sin(pi x) / x.
+
+    The value at zero is pi, so it is an interval value in the eventual raw
+    evaluator.  Here the plotted curve is only a guide; the animated cells
+    still stand for rational enclosures.
+    """
+    return math.pi if value == 0 else math.sin(math.pi*value)/value
 
 
 def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> str:
-    left, base, trig, vertical = 47, 112, 45, 112
+    left, base, trig, vertical = 47, 84, 45, 44
     x, y = lambda v: left+float(v)*math.pi*trig, lambda v: base+float(v)*vertical
     out = [
         rf"\draw[axis,line width=.75pt] ({left-10},{q(y(0))}) -- ({q(x(2)+12)},{q(y(0))});",
-        rf"\draw[axis,line width=.75pt] ({left},{q(y(-.28)-10)}) -- ({left},{q(y(1.04)+10)});",
+        rf"\draw[axis,line width=.75pt] ({left},{q(y(-.9)-10)}) -- ({left},{q(y(3.65)+10)});",
     ]
     for value in (Fraction(1,2), Fraction(1), Fraction(3,2)):
-        out.append(rf"\draw[grid,line width=.3pt] ({q(x(value))},{q(y(-.28))}) -- ({q(x(value))},{q(y(1.04))});")
-    for value in (-.25, .25, .5, .75, 1):
+        out.append(rf"\draw[grid,line width=.3pt] ({q(x(value))},{q(y(-.9))}) -- ({q(x(value))},{q(y(3.65))});")
+    for value in (-.75, -.5, -.25, .5, 1, 2, 3):
         out.append(rf"\draw[grid,line width=.3pt] ({left},{q(y(value))}) -- ({q(x(2))},{q(y(value))});")
     def tail(start: Fraction, stop: Fraction) -> None:
         mesh = [start+(stop-start)*Fraction(i,cells) for i in range(cells+1)]
         for a, b in zip(mesh, mesh[1:]):
             lo, hi = sorted((sinc(float(a)), sinc(float(b))))
             out.extend([
-                rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(hi))});",
-                rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(lo))});",
+                rf"\path[fill=yellowfill,fill opacity=.5,draw=yellow,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(hi))});",
+                rf"\path[fill=cyanfill,fill opacity=.5,draw=cyan,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(lo))});",
             ])
     tail(Fraction(0), turn_left)
     tail(turn_right, Fraction(2))
-    out.append(rf"\path[fill=orangefill,draw=orange,line width=.55pt] ({q(x(turn_left))},{q(y(-.25))}) rectangle ({q(x(turn_right))},{q(y(0))});")
+    # The middle box is bounded by exactly the three relevant values: the two
+    # bracket endpoints and the turning value.  It deliberately spans only
+    # that value range, never the whole height of the plot.
+    turn = 1.430296653
+    gap_values = (sinc(float(turn_left)), sinc(turn), sinc(float(turn_right)))
+    gap_lo, gap_hi = min(gap_values), max(gap_values)
+    out.append(rf"\path[fill=orangefill,fill opacity=.72,draw=orange,line width=.55pt] ({q(x(turn_left))},{q(y(gap_lo))}) rectangle ({q(x(turn_right))},{q(y(gap_hi))});")
     curve = [(x(i/300), y(sinc(i/300))) for i in range(601)]
     out += [
         rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",
-        rf"\draw[orange,line width=.65pt] ({q(x(turn_left))},{q(y(-.25))}) -- ({q(x(turn_left))},{q(y(1.04))});",
-        rf"\draw[orange,line width=.65pt] ({q(x(turn_right))},{q(y(-.25))}) -- ({q(x(turn_right))},{q(y(1.04))});",
+        rf"\draw[orange,line width=.65pt] ({q(x(turn_left))},{q(y(gap_lo))}) -- ({q(x(turn_left))},{q(y(gap_hi))});",
+        rf"\draw[orange,line width=.65pt] ({q(x(turn_right))},{q(y(gap_lo))}) -- ({q(x(turn_right))},{q(y(gap_hi))});",
+        dot(x(turn), y(sinc(turn)), "orange", 1.45),
         n(x(0), y(0)-12, r"$0$", "anchor=north"),
         n(x(1), y(0)-12, r"$1$", "anchor=north"),
         n(x(2), y(0)-12, r"$2$", "anchor=north"),
         n(x(turn_left)-4, y(0)-23, r"$\ell$", "anchor=north east,text=orange"),
         n(x(turn_right)+4, y(0)-23, r"$r$", "anchor=north west,text=orange"),
-        n(x(2)+10, y(0), r"$t$", "anchor=west"),
-        n(left+8, y(.88), r"$\frac{\sin(\pi t)}{\pi t}$", "anchor=west"),
+        n(x(2)+10, y(0), r"$x$", "anchor=west"),
+        n(x(Fraction(1,4)), y(3.36), r"$\frac{\sin(\pi x)}{x}$", "anchor=west"),
     ]
     return "\n".join(out)
 
 
 def single_turn_animation() -> Animation:
     turns = ((Fraction(1), Fraction(3,2)), (Fraction(7,5), Fraction(29,20)), (Fraction(143,100), Fraction(287,200)), (Fraction(7151,5000), Fraction(3576,2500)))
-    return Animation("single-turn-integral", 360, 210, tuple(single_turn_frame(a,b,2**i) for i,(a,b) in enumerate(turns)), (1250,1250,1250,1900), 1)
+    return Animation("single-turn-integral", 360, 270, tuple(single_turn_frame(a,b,2**i) for i,(a,b) in enumerate(turns)), (1250,1250,1250,1900), 1)
 
 
 def words(steps: int) -> list[list[int]]:

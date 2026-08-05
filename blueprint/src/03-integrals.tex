@@ -128,9 +128,9 @@ covering all continuous monotone functions remains subsequent work.
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
 \lean{ComputableAnalysis.Integral.finiteStageSum_width_le_length_mul}
 \uses{def:increasing-integral-stage}
-The animation uses the normalized sinc example
+The animation uses the rational-input sinc example
 \[
- s(t)=\frac{\sin(\pi t)}{\pi t},\qquad s(0)=1,\qquad 0\le t\le2
+ s(x)=\frac{\sin(\pi x)}{x},\qquad s(0)=\pi,\qquad 0\le x\le2
 \]
 with one decreasing and one increasing piece.  Its nonrational turn is held
 in shrinking rational brackets \([\ell_n,r_n]\):
@@ -145,7 +145,7 @@ def piecewise_monotone_stage(F, monotone_pieces, turn_brackets, n):
 \begin{figure}[!htbp]
 \centering
 \singleTurnIntegralAnimation
-\caption{One normalized-sinc turn illustrates the general finite-piece
+\caption{One \(\sin(\pi x)/x\) turn illustrates the general finite-piece
 stage: two refined tails and one shrinking rational gap.}
 \label{fig:single-turn-integral}
 \end{figure}
