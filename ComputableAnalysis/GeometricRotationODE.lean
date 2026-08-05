@@ -1,5 +1,6 @@
 import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.RationalCircle
+import ComputableAnalysis.Differential
 
 /-!
 # The rational circle chart as a rotation equation
@@ -51,30 +52,73 @@ theorem pointComplex_zero : pointComplex 0 = QComplex.one := by
 theorem pointComplex_one : pointComplex 1 = RotationSeries.imaginaryUnit := by
   native_decide
 
+private theorem rat_eq_of_mul_eq_mul_ne {a b c : Rat}
+    (hc : c ≠ 0) (h : a * c = b * c) : a = b := by
+  calc
+    a = (a * c) * c⁻¹ := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hc
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- The real coordinate's finite difference quotient.  This is exact for
 every nonzero rational step, before any small-step estimate is applied. -/
 theorem pointRe_differenceQuotient (t h : Rat) (hh : h ≠ 0) :
     (pointRe (t + h) - pointRe t) / h =
       (-2 * (2 * t + h)) /
         ((1 + t * t) * (1 + (t + h) * (t + h))) := by
+  let d := 1 + t * t
+  let e := 1 + (t + h) * (t + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos t
+  have hepos : 0 < e := by
+    dsimp [e]
+    exact RationalCircle.Stage.one_add_square_pos (t + h)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hene : e ≠ 0 := Rat.ne_of_gt hepos
+  have hprod : h * d * e ≠ 0 :=
+    Rat.mul_ne_zero (Rat.mul_ne_zero hh hdne) hene
+  apply rat_eq_of_mul_eq_mul_ne hprod
   unfold pointRe RationalCircle.Stage.point
-  dsimp
-  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
-  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
-  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  change (((1 - (t + h) * (t + h)) / e - (1 - t * t) / d) / h) *
+      (h * d * e) = ((-2 * (2 * t + h)) / (d * e)) * (h * d * e)
+  rw [Rat.div_def]
+  have hcancelH : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hh
+  have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+  have hcancelE : e⁻¹ * e = 1 := Rat.inv_mul_cancel e hene
+  field_simp
+  ring
 
 /-- The imaginary coordinate's finite difference quotient. -/
 theorem pointIm_differenceQuotient (t h : Rat) (hh : h ≠ 0) :
     (pointIm (t + h) - pointIm t) / h =
       (2 * (1 - t * t - t * h)) /
         ((1 + t * t) * (1 + (t + h) * (t + h))) := by
+  let d := 1 + t * t
+  let e := 1 + (t + h) * (t + h)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos t
+  have hepos : 0 < e := by
+    dsimp [e]
+    exact RationalCircle.Stage.one_add_square_pos (t + h)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hene : e ≠ 0 := Rat.ne_of_gt hepos
+  have hprod : h * d * e ≠ 0 :=
+    Rat.mul_ne_zero (Rat.mul_ne_zero hh hdne) hene
+  apply rat_eq_of_mul_eq_mul_ne hprod
   unfold pointIm RationalCircle.Stage.point
-  dsimp
-  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
-  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
-  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
-    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  change (((2 * (t + h)) / e - (2 * t) / d) / h) * (h * d * e) =
+      ((2 * (1 - t * t - t * h)) / (d * e)) * (h * d * e)
+  rw [Rat.div_def]
+  have hcancelH : h⁻¹ * h = 1 := Rat.inv_mul_cancel h hh
+  have hcancelD : d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+  have hcancelE : e⁻¹ * e = 1 := Rat.inv_mul_cancel e hene
+  field_simp
+  ring
 
 /-- Exact real-coordinate secant error relative to the rational derivative.
 The displayed factor of `h` is the finite source of the derivative modulus. -/
@@ -201,9 +245,9 @@ private theorem qabs_re_secant_coefficient_le_six {t h : Rat}
     _ <= qabs (-1) + qabs (3 * t * t + 2 * t * h) := qabs_add_le _ _
     _ <= 1 + (qabs (3 * t * t) + qabs (2 * t * h)) := by
       rw [hnegone]
-      exact Rat.add_le_add_left (qabs_add_le _ _) _
-    _ <= 1 + (3 + 2) := Rat.add_le_add_left
-      (Rat.add_le_add h3tt h2th) _
+      exact (Rat.add_le_add_left).2 (qabs_add_le _ _)
+    _ <= 1 + (3 + 2) := (Rat.add_le_add_left).2
+      (rat_add_le_add h3tt h2th)
     _ = 6 := by native_decide
 
 private theorem qabs_im_secant_coefficient_le_six {t h : Rat}
@@ -217,13 +261,13 @@ private theorem qabs_im_secant_coefficient_le_six {t h : Rat}
     calc
       qabs (3 - t * t) <= qabs 3 + qabs (t * t) := qabs_sub_le _ _
       _ = 3 + (qabs t * qabs t) := by rw [qabs_mul, hthree]
-      _ <= 3 + 1 := Rat.add_le_add_left htt _
+      _ <= 3 + 1 := (Rat.add_le_add_left).2 htt
       _ = 4 := by native_decide
   have h1sub : qabs (1 - t * t) <= 2 := by
     calc
       qabs (1 - t * t) <= qabs 1 + qabs (t * t) := qabs_sub_le _ _
       _ = 1 + (qabs t * qabs t) := by rw [qabs_mul, hone]
-      _ <= 1 + 1 := Rat.add_le_add_left htt _
+      _ <= 1 + 1 := (Rat.add_le_add_left).2 htt
       _ = 2 := by native_decide
   have hleft : qabs (t * (3 - t * t)) <= 4 := by
     rw [qabs_mul]
@@ -242,7 +286,7 @@ private theorem qabs_im_secant_coefficient_le_six {t h : Rat}
   calc
     qabs (t * (3 - t * t) + h * (1 - t * t)) <=
         qabs (t * (3 - t * t)) + qabs (h * (1 - t * t)) := qabs_add_le _ _
-    _ <= 4 + 2 := Rat.add_le_add hleft hright
+    _ <= 4 + 2 := rat_add_le_add hleft hright
     _ = 6 := by native_decide
 
 /-- Uniform finite real-coordinate secant estimate on the unit chart. -/
@@ -316,6 +360,114 @@ theorem pointIm_secant_error_le_twelve {t h : Rat}
       Rat.mul_le_mul_of_nonneg_left hden
         (Rat.mul_nonneg (by native_decide) (qabs_nonneg h))
     _ = 12 * qabs h := by rw [Rat.mul_one]
+
+/-- The rational step budget used to convert the `12 |h|` secant estimates
+into the standard precision-indexed derivative interface. -/
+def unitChartStepPrecision (n : Nat) : Nat :=
+  if n = 0 then 12 else 12 * n
+
+private theorem twelve_qabs_step_le_precision (n : Nat) (h : Rat)
+    (hsmall : qabs h <= 1 / ((unitChartStepPrecision n : Nat) : Rat)) :
+    12 * qabs h <= (precisionAtStage n).val := by
+  unfold unitChartStepPrecision at hsmall
+  by_cases hn : n = 0
+  · subst n
+    have hmul := Rat.mul_le_mul_of_nonneg_left hsmall
+      (by native_decide : (0 : Rat) <= 12)
+    calc
+      12 * qabs h <= 12 * (1 / (12 : Rat)) := by simpa using hmul
+      _ = 1 := by native_decide
+      _ = (precisionAtStage 0).val := by native_decide
+  · rw [if_neg hn] at hsmall
+    simp only [Rat.natCast_mul] at hsmall
+    have hmul := Rat.mul_le_mul_of_nonneg_left hsmall
+      (by native_decide : (0 : Rat) <= 12)
+    calc
+      12 * qabs h <= 12 * (1 / (12 * (n : Rat))) := by simpa using hmul
+      _ = 1 / (n : Rat) := by
+        rw [Rat.div_def, Rat.inv_mul_rev]
+        have hcancel : (12 : Rat) * (12 : Rat)⁻¹ = 1 := by native_decide
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ = (precisionAtStage n).val := by simp [precisionAtStage, hn]
+
+private theorem singleton_near_of_qabs_sub_le (q d : Rat) (n : Nat)
+    (hqd : qabs (q - d) <= (precisionAtStage n).val) :
+    intervalNearAtPrecision { lo := q, hi := q } { lo := d, hi := d } n := by
+  have hupper : q - d <= (precisionAtStage n).val :=
+    Rat.le_trans (self_le_qabs (q - d)) hqd
+  have hlower : d - q <= (precisionAtStage n).val := by
+    have hneg : qabs (-(q - d)) <= (precisionAtStage n).val := by
+      simpa [qabs_neg] using hqd
+    have hself := Rat.le_trans (self_le_qabs (-(q - d))) hneg
+    grind [Rat.sub_eq_add_neg]
+  unfold intervalNearAtPrecision QInterval.NearAt QInterval.width
+  have heps : 0 <= (precisionAtStage n).val :=
+    Rat.le_of_lt (precisionAtStage n).property
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor
+  · grind [Rat.sub_eq_add_neg]
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The exact rational real coordinate of the circle chart on its unit
+parameter interval. -/
+def pointReOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat pointRe 0 1
+
+/-- The exact rational derivative coordinate on the same interval. -/
+def pointReDerivativeOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat pointReDerivative 0 1
+
+/-- The exact rational imaginary coordinate of the circle chart. -/
+def pointImOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat pointIm 0 1
+
+/-- The exact rational imaginary derivative coordinate. -/
+def pointImDerivativeOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat pointImDerivative 0 1
+
+/-- The real coordinate has a literal rational epsilon--delta derivative
+certificate on `[0,1]`.  Its evaluator is exact at stage zero; the only
+precision budget is the explicit `12 |h|` secant bound. -/
+def pointRe_hasDerivativeOnUnit :
+    HasDerivativeOnInterval pointReOnUnit pointReDerivativeOnUnit where
+  same_lower := rfl
+  same_upper := rfl
+  stepPrecision := unitChartStepPrecision
+  evalPrecision := fun _x _h _n => 0
+  close := by
+    intro x h n hx hxh _hdx hh hsmall
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        { lo := pointRe (x + h), hi := pointRe (x + h) }
+        { lo := pointRe x, hi := pointRe x } h)
+      { lo := pointReDerivative x, hi := pointReDerivative x } n
+    rw [QInterval.differenceQuotient_singleton]
+    apply singleton_near_of_qabs_sub_le
+    exact Rat.le_trans
+      (pointRe_secant_error_le_twelve hx.1 hx.2 hxh.1 hxh.2 hh)
+      (twelve_qabs_step_le_precision n h hsmall)
+
+/-- The imaginary coordinate has the same literal rational epsilon--delta
+derivative certificate. -/
+def pointIm_hasDerivativeOnUnit :
+    HasDerivativeOnInterval pointImOnUnit pointImDerivativeOnUnit where
+  same_lower := rfl
+  same_upper := rfl
+  stepPrecision := unitChartStepPrecision
+  evalPrecision := fun _x _h _n => 0
+  close := by
+    intro x h n hx hxh _hdx hh hsmall
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        { lo := pointIm (x + h), hi := pointIm (x + h) }
+        { lo := pointIm x, hi := pointIm x } h)
+      { lo := pointImDerivative x, hi := pointImDerivative x } n
+    rw [QInterval.differenceQuotient_singleton]
+    apply singleton_near_of_qabs_sub_le
+    exact Rat.le_trans
+      (pointIm_secant_error_le_twelve hx.1 hx.2 hxh.1 hxh.2 hh)
+      (twelve_qabs_step_le_precision n h hsmall)
 
 /-- The chart's angular coefficient is exactly the already-certified sector
 area speed.  Thus the reparametrization required for a constant rotation

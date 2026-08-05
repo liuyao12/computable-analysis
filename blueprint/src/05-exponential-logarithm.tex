@@ -288,6 +288,8 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient_sub_derivative}
 \lean{ComputableAnalysis.GeometricRotationODE.pointRe_secant_error_le_twelve}
 \lean{ComputableAnalysis.GeometricRotationODE.pointIm_secant_error_le_twelve}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_hasDerivativeOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_hasDerivativeOnUnit}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -362,9 +364,10 @@ The rational circle chart now supplies the exact finite hand-off:
 These are rational-function identities, not yet a represented-function
 derivative theorem.  The two coordinate secant errors are also exact rational
 fractions with an explicit factor of the rational step, and are bounded by
-\(12|h|\) on the unit chart.  Wrapping that finite epsilon--delta estimate in
-the project’s singleton interval derivative interface is the remaining local
-step; reparametrized Peano--Baker/Volterra uniqueness then identifies this
-geometric solution with the factorial rotation raw and connects it to the
+\(12|h|\) on the unit chart.  Their exact singleton evaluators now satisfy
+the project’s epsilon--delta interval derivative interface with the explicit
+step budget \(1/(12n)\).  A complex/vector wrapper and sector-area
+reparametrization remain before Peano--Baker/Volterra uniqueness can identify
+this geometric solution with the factorial rotation raw and connect it to the
 complex exponential/logarithm branches.
 \end{theorem}

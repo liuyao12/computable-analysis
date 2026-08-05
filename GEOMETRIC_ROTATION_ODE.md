@@ -64,11 +64,19 @@ GeometricRotationODE.pointIm_secant_error_le_twelve
 The latter two put the secant error over a positive product of chart
 denominators and exhibit an explicit factor of the rational step `h`.  They
 are now bounded on `[0,1]` by `12 * qabs h`.  This is the finite
-epsilon--delta estimate for both chart coordinates.  The exact singleton-box
-wrapper that instantiates `HasDerivativeOnInterval` remains the next work
-item.
+epsilon--delta estimate for both chart coordinates, and it is packaged as:
 
-A continuous Peano--Baker/Volterra uniqueness proof can then compare that
+```lean
+GeometricRotationODE.pointRe_hasDerivativeOnUnit
+GeometricRotationODE.pointIm_hasDerivativeOnUnit
+```
+
+Both use exact singleton evaluators and `unitChartStepPrecision`: at a
+requested stage `n>0`, a step of magnitude at most `1/(12*n)` makes the
+secant box near the derivative box at the project precision `1/n`.
+
+A complex/vector derivative wrapper and the sector-area reparametrization are
+next.  A continuous Peano--Baker/Volterra uniqueness proof can then compare that
 reparametrized geometric solution with the factorial rotation raw.  Its
 endpoint is `P(1) = i`; only after this comparison, and a separately certified
 exponential/logarithm branch, can the project state the Euler row as formally
