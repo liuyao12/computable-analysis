@@ -284,12 +284,6 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
 \lean{ComputableAnalysis.GeometricRotationODE.angularVelocity_eq_imaginaryAxis_sectorAreaSpeed}
 \lean{ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_sectorAreaSpeed_rotation}
-\lean{ComputableAnalysis.GeometricRotationODE.pointRe_differenceQuotient_sub_derivative}
-\lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient_sub_derivative}
-\lean{ComputableAnalysis.GeometricRotationODE.pointRe_secant_error_le_twelve}
-\lean{ComputableAnalysis.GeometricRotationODE.pointIm_secant_error_le_twelve}
-\lean{ComputableAnalysis.GeometricRotationODE.pointRe_hasDerivativeOnUnit}
-\lean{ComputableAnalysis.GeometricRotationODE.pointIm_hasDerivativeOnUnit}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
@@ -362,12 +356,10 @@ The rational circle chart now supplies the exact finite hand-off:
   \qquad \operatorname{sectorAreaSpeed}(t)=\frac{2}{1+t^2}.
 \]
 These are rational-function identities, not yet a represented-function
-derivative theorem.  The two coordinate secant errors are also exact rational
-fractions with an explicit factor of the rational step, and are bounded by
-\(12|h|\) on the unit chart.  Their exact singleton evaluators now satisfy
-the project’s epsilon--delta interval derivative interface with the explicit
-step budget \(1/(12n)\).  A complex/vector wrapper and sector-area
-reparametrization remain before Peano--Baker/Volterra uniqueness can identify
-this geometric solution with the factorial rotation raw and connect it to the
-complex exponential/logarithm branches.
+derivative theorem.  The next package is a portable rational secant-error
+calculation for the two coordinates, followed by the project's literal
+epsilon--delta interval derivative certificate.  A complex/vector wrapper and
+sector-area reparametrization then remain before Peano--Baker/Volterra
+uniqueness can identify this geometric solution with the factorial rotation
+raw and connect it to the complex exponential/logarithm branches.
 \end{theorem}
