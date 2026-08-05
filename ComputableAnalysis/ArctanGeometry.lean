@@ -6323,6 +6323,44 @@ theorem piAreaCompatibility : PiAreaCompatibility := by
     piCircleArea, piCircleAreaCompute, hstate,
     toPiAreaLoopState]
 
+/-- The geometric unit-sector computation, multiplied by four, has exactly
+the same rational box as the circle-area pi computation at every stage.
+This lives beside the two finite algorithms, so later consumers do not need
+the larger pi-presentation registry merely to use the geometric bridge. -/
+theorem four_arctanGeom_one_compute_eq_piCircleArea_compute (n : Nat) :
+    (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw).compute n) =
+      piCircleArea.compute n :=
+  piAreaCompatibility n
+
+/-- The unit-slope geometric arctangent is a valid raw real. -/
+theorem arctanGeom_one_valid : (arctanGeom (1 : Rat)).Valid :=
+  arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+
+/-- Four times the unit-slope geometric arctangent is a valid raw real. -/
+theorem four_arctanGeom_one_valid :
+    (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw).Valid) :=
+  RealRaw.natScale_valid 4 arctanGeom_one_valid
+
+/-- The geometric arctangent definition of pi agrees with the circle-area
+definition.  The proof uses the stronger stagewise equality above and the
+ordered boxes supplied by the geometric sector computation. -/
+theorem four_arctanGeom_one_equiv_piCircleArea :
+    (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw).Equiv piCircleArea) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ((4 : Nat) * arctanGeom (1 : Rat) : RealRaw) piCircleArea n n).2
+  rw [four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  have horder := RealRaw.interval_order_of_valid
+    ((4 : Nat) * arctanGeom (1 : Rat) : RealRaw)
+    four_arctanGeom_one_valid n
+  rw [four_arctanGeom_one_compute_eq_piCircleArea_compute n] at horder
+  exact ⟨horder, horder⟩
+
+/-- The symmetric form of the geometric arctangent pi bridge. -/
+theorem piCircleArea_equiv_four_arctanGeom_one :
+    piCircleArea.Equiv (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
+
 def functionRaw : PartialRealFunRaw where
   definedAt := fun _ => True
   compute := fun x _ => (arctanGeom x).compute

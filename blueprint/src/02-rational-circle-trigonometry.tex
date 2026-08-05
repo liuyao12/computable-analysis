@@ -74,10 +74,10 @@ direct circumference proof below.
 \lean{ComputableAnalysis.circleAreaDecrement}
 \lean{ComputableAnalysis.refineAreaBounds}
 \lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
-\lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute}
+\lean{ComputableAnalysis.ArctanGeometry.four_arctanGeom_one_valid}
+\lean{ComputableAnalysis.ArctanGeometry.four_arctanGeom_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.ArctanGeometry.piCircleArea_equiv_four_arctanGeom_one}
 \uses{rem:pseudocode-convention}
 On each current interval \([p,r]\), set \(q=(p+r)/2\) and update the inner
 and outer polygon bounds by
@@ -207,10 +207,10 @@ than by taking area or derivative facts as primitives.
 
 \begin{theorem}[Geometric arctangent gives the area definition of pi]
 \label{thm:geometric-arctan-one-area-pi}
-\lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
-\lean{ComputableAnalysis.PiProofs.arctanGeomOneValid}
-\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
-\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_valid}
+\lean{ComputableAnalysis.ArctanGeometry.four_arctanGeom_one_valid}
+\lean{ComputableAnalysis.ArctanGeometry.four_arctanGeom_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.ArctanGeometry.piCircleArea_equiv_four_arctanGeom_one}
 \uses{def:circle-area-stage-algorithm,def:geometric-arctan}
 The geometric sector-area arctangent satisfies
 \[
@@ -218,8 +218,9 @@ The geometric sector-area arctangent satisfies
 \]
 Lean proves this by transporting the verified \code{piCircleArea} interval
 algorithm across the same-stage equality with \code{4 * arctanGeom(1)}.
-The positive-scaling converse in \cref{prop:raw-arithmetic-valid} then also
-certifies the unscaled raw real \code{arctanGeom(1)}.
+The geometric module also certifies the unscaled raw real
+\code{arctanGeom(1)}, keeping this bridge independent of the larger
+presentation registry.
 \end{theorem}
 
 \begin{theorem}[Arctangent validity and monotonicity]
