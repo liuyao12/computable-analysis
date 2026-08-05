@@ -13,6 +13,77 @@ completed-real integral or table of antiderivatives.
 circle density by a particular function and certify that its boxes shrink.
 \end{remark}
 
+\section{Two direct computations}
+
+\begin{definition}[Exact reciprocal-square rectangles]
+\label{def:arctan-integral}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomFunctionAgreement}
+\uses{rem:arctan-geom-general-integral,thm:sector-area-density}
+\leanok
+For \(K(t)=1/(1+t^2)\) on \([0,1]\), every mesh point and function value is
+rational.  This is the same density already computed by \code{arctan.geom}
+and by the circle-area loop: those algorithms use rational sector/cross cells,
+not rectangular strips.  Here the right and left endpoint sums give a second,
+literal rectangle computation:
+\begin{verbatim}
+def reciprocal_square_stage(n):
+    P = uniform_partition(0, 1, 2**n)
+    lower = sum((P[i+1]-P[i]) / (1 + P[i+1]**2) for i in range(len(P)-1))
+    upper = sum((P[i+1]-P[i]) / (1 + P[i]**2) for i in range(len(P)-1))
+    return [lower, upper]
+\end{verbatim}
+\begin{figure}[!htbp]
+\centering
+\arctanRectangleEnclosureAnimation
+\caption{Exact rational rectangle stages for \(1/(1+t^2)\) on \([0,1]\).}
+\label{fig:arctan-rectangle-enclosure}
+\end{figure}
+There are no function-value error bars in this first computation.
+\end{definition}
+
+\begin{theorem}[Finite certificate for the reciprocal-square computation]
+\label{thm:arctan-integral-pi}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_zero_tangent_quotient_contains}
+\lean{ComputableAnalysis.HasForwardDerivativeAt}
+\lean{ComputableAnalysis.HasDerivativeOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_forwardDerivativeAtZero}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_forward_difference_equiv_tangentChartIncrement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom}
+\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
+\leanok
+The direct rational inequalities give a dyadic width at most \(4/2^n\),
+and hence a valid raw integral.  The completed endpoint bridge is
+\[
+ 4\int_0^1\frac{\dd t}{1+t^2}\ \Equiv\ \pi_{\rm area}.
+\]
+No general integrability theorem is used here.
+\end{theorem}
+
+\begin{example}[Interval-valued monotone sine stages]
+On \([0,\tfrac12]\), \(\sin(\pi x)\) is increasing.  The endpoint samples
+are exact singletons \(0\) and \(1\); every interior dyadic sample is a
+rational error bar.  The lower sum uses left lower ends and the upper sum
+right upper ends:
+\begin{figure}[!htbp]
+\centering
+\intervalSineIntegralStageAnimation
+\caption{Interval-valued stages for \(\sin(\pi x)\) on \([0,\tfrac12]\):
+only the interior function values carry shrinking error bars.}
+\label{fig:interval-sine-integral-stage}
+\end{figure}
+Its monotonicity, alternating-series boxes, and common width schedule are
+function-specific finite certificates to prove directly.  Only afterwards is
+the general monotone pattern useful; the target identity is
+\(\pi\int_0^{1/2}\sin(\pi x)\,\dd x=1\).
+\end{example}
+
+\section{A monotone computation pattern}
+
 \begin{definition}[Monotone-function integral raw]
 \label{def:increasing-integral-stage}
 \lean{ComputableAnalysis.NondecreasingOnInterval}
@@ -21,22 +92,19 @@ circle density by a particular function and certify that its boxes shrink.
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxRange_width_nonneg}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxStage}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicStage}
-\uses{rem:arctan-geom-general-integral,def:interval-regular}
-For a nondecreasing \(F\) on \([a,b]\), use opposite endpoints of a dyadic
-partition and retain the value boxes:
+\uses{rem:arctan-geom-general-integral,def:arctan-integral,def:interval-regular}
+For a nondecreasing \(F\), retain endpoint value boxes on a dyadic mesh:
 \begin{verbatim}
 def increasing_integral_stage(F, a, b, n):
-    P = uniform_partition(a, b, 2**n)
-    q = evaluation_stage(F, n)
+    P = uniform_partition(a, b, 2**n); q = evaluation_stage(F, n)
     lower = sum((P[i+1]-P[i]) * F(P[i], q).lo for i in range(len(P)-1))
     upper = sum((P[i+1]-P[i]) * F(P[i+1], q).hi for i in range(len(P)-1))
     return [lower, upper]
 \end{verbatim}
-For a decreasing piece, interchange the endpoints.  All samples are rational
-intervals, including singleton values when those are available.
+For a decreasing piece, interchange the endpoints.
 \end{definition}
 
-\begin{proposition}[Well-definedness of a monotone integral computation]
+\begin{proposition}[Well-definedness target for a monotone computation]
 \label{prop:monotone-integral-well-defined}
 \lean{ComputableAnalysis.Integral.ConstructionFor}
 \lean{ComputableAnalysis.Integral.integralFor}
@@ -44,26 +112,10 @@ intervals, including singleton values when those are available.
 \lean{ComputableAnalysis.Integral.integralFor_valid}
 \lean{ComputableAnalysis.integral_construction_proves_well_defined_for}
 \uses{def:increasing-integral-stage}
-For a particular \(F\), prove ordered nested stages and a rational width
-modulus.  This supplies \code{ConstructionFor F};
-\code{integralFor\_valid} then states that the raw computation is a real.
+For a particular \(F\), ordered nested stages and a rational width modulus
+give \code{ConstructionFor F}, hence a valid \code{RealRaw}.  A theorem
+covering all continuous monotone functions remains subsequent work.
 \end{proposition}
-
-\begin{example}[An interval-valued monotone sine stage]
-\uses{def:increasing-integral-stage}
-On \([0,\tfrac12]\), \(\sin(\pi x)\) is increasing.  The endpoint samples
-are the exact singletons \(0\) and \(1\); every interior dyadic sample is a
-rational bracket.  The lower sum uses left lower ends and the upper sum right
-upper ends:
-\begin{figure}[!htbp]
-\centering
-\intervalSineIntegralStageAnimation
-\caption{Refining interval-valued monotone stages for \(\sin(\pi x)\) on
-\([0,\tfrac12]\).}
-\label{fig:interval-sine-integral-stage}
-\end{figure}
-The intended future identity is \(\pi\int_0^{1/2}\sin(\pi x)\,\dd x=1\).
-\end{example}
 
 \begin{definition}[Piecewise-monotone stage computation]
 \label{def:piecewise-monotone-stage}
@@ -315,49 +367,6 @@ def quadratic_ftc_box(n):
 \caption{Finite FTC comparison for \(t^2\).}
 \label{fig:ftc-endpoint-comparison}
 \end{figure}
-\end{theorem}
-
-\section{The arctangent integral}
-
-\begin{definition}[The arctangent rectangle computation]
-\label{def:arctan-integral}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity}
-\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralConstruction}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral}
-\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomFunctionAgreement}
-\uses{def:function-on-interval-to-realfunraw,thm:sector-area-density}
-\leanok
-\[
- A(x)=\int_0^x\frac{\dd t}{1+t^2}\qquad(0\le x\le1).
-\]
-\begin{figure}[!htbp]
-\centering
-\arctanRectangleEnclosureAnimation
-\caption{The one rectangle-enclosure animation for
-\(K(t)=1/(1+t^2)\) on \([0,1]\).}
-\label{fig:arctan-rectangle-enclosure}
-\end{figure}
-\end{definition}
-
-\begin{theorem}[Finite certificates for the arctangent computation]
-\label{thm:arctan-integral-pi}
-\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit}
-\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_zero_tangent_quotient_contains}
-\lean{ComputableAnalysis.HasForwardDerivativeAt}
-\lean{ComputableAnalysis.HasDerivativeOnInterval}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_forwardDerivativeAtZero}
-\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_forward_difference_equiv_tangentChartIncrement}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom}
-\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleRawAtOne_equiv_piCircleArea}
-\leanok
-The kernel has \(|K(s)-K(t)|\le2|s-t|\), so the dyadic rectangle width is
-\(4/2^n\).  Rational quotient boxes give \(A'_+(0)=1\), the tangent chart
-links the local quotient to \code{arctan.geom}, and the completed endpoint
-certificate is
-\[
- 4\int_0^1\frac{\dd t}{1+t^2}\ \Equiv\ \pi_{\rm area}.
-\]
 \end{theorem}
 
 \section{Projective and improper test integrals}
