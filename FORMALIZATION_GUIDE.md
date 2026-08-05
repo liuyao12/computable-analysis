@@ -226,6 +226,9 @@ formal coefficient stream as a finite rational Taylor polynomial and derives
 its interval derivative from `FormalPowerSeries.coefficientShift`. This is
 the intended hand-off from Chapter 4's algebra to Chapter 6's derivative
 certificates; no infinite-series tail is differentiated at this point.
+For a prefix containing a linear term,
+`FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
+derivative polynomial at zero with the original coefficient `c 1`.
 `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
 this construction under every finite rational coefficient prefix. Its
 quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
@@ -464,6 +467,7 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
 #check expTaylorQuadratic
+#check FinitePolynomial.taylorPrefixShift_at_zero
 #check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval

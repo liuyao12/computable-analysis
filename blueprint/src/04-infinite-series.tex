@@ -632,8 +632,10 @@ Its coefficient-shift operation is
   (\partial_{\rm form}c)_n=(n+1)c_{n+1}.
 \]
 At the basepoint \(z=0\), the prospective first-order slope is simply the
-linear coefficient \(c_1\). This is algebraic Taylor data, separate from
-convergence and from an analytic derivative of the associated raw function.
+linear coefficient \(c_1\). For every finite prefix containing that term,
+its coefficient-shift polynomial has value \(c_1\) at zero. This is
+algebraic Taylor data, separate from convergence and from an analytic
+derivative of the associated raw function.
 Lean retains the older names \code{derivative} and \code{HasFormalDerivative}
 as compatibility aliases; new series declarations use
 \code{coefficientShift} and \code{HasCoefficientShift}.
@@ -698,6 +700,7 @@ identities:
 \label{thm:finite-factorial-prefix}
 \lean{ComputableAnalysis.ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial}
 \lean{ComputableAnalysis.ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_at_zero}
 \uses{def:formal-power-series}
 \leanok
 The finite rational loop used by the exponential evaluator has no hidden
@@ -711,6 +714,9 @@ stream to the executable rational loop, but says neither that the infinite
 series has a derivative nor that a tail may be differentiated.  Those are
 the later remainder-certificate obligations of
 \cref{rem:series-linear-coefficient-bridge}.
+For a finite prefix with a linear term, the coefficient-shift polynomial takes
+the value \(c_1\) at zero; Chapter~\ref{ch:effective-calculus} then supplies
+the rational secant certificate that makes that value an actual derivative.
 \end{theorem}
 
 \section{Euler's Basel Problem}

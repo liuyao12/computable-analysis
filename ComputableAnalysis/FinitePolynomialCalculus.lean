@@ -308,6 +308,34 @@ def taylorPrefixShift (coeffs : FormalPowerSeries.Coeffs) : Nat -> Rat -> Rat
   | terms + 1 =>
       taylorDerivativePrefix (FormalPowerSeries.coefficientShift coeffs) terms
 
+/-- At the basepoint, every nonconstant finite derivative prefix is its
+constant coefficient.  This elementary identity is the exact algebraic core
+of reading the linear Taylor coefficient as the slope at zero. -/
+theorem taylorDerivativePrefix_at_zero (coeffs : Nat -> Rat) (terms : Nat) :
+    taylorDerivativePrefix coeffs (terms + 1) 0 = coeffs 0 := by
+  induction terms with
+  | zero =>
+      change 0 + coeffs 0 * 0 ^ 0 = coeffs 0
+      rw [Rat.pow_zero, Rat.mul_one]
+      exact Rat.zero_add _
+  | succ terms ih =>
+      rw [taylorDerivativePrefix]
+      change taylorDerivativePrefix coeffs (terms + 1) 0 +
+          coeffs (terms + 1) * 0 ^ (terms + 1) = coeffs 0
+      rw [ih, Rat.pow_succ, Rat.mul_zero, Rat.mul_zero]
+      exact Rat.add_zero _
+
+/-- For a finite Taylor prefix with at least a linear term, the certified
+coefficient-shift derivative has value `c₁` at the basepoint.  The analytic
+certificate itself is supplied below by `taylorPrefix_hasDerivativeOnInterval`;
+this theorem records the value selected by the finite Lagrange remainder. -/
+theorem taylorPrefixShift_at_zero (coeffs : FormalPowerSeries.Coeffs)
+    (terms : Nat) :
+    taylorPrefixShift coeffs (terms + 2) 0 = coeffs 1 := by
+  rw [show terms + 2 = (terms + 1) + 1 by omega]
+  rw [taylorPrefixShift, taylorDerivativePrefix_at_zero]
+  simp [FormalPowerSeries.coefficientShift]
+
 /-- Every finite rational Taylor primitive carries an explicit secant bound.
 The proof is structural: add the next normalized monomial, then scale it by
 its rational coefficient. -/

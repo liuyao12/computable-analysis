@@ -216,8 +216,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` now turns every
   finite coefficient prefix into a two-sided rational-interval derivative
   certificate for its coefficient-shift polynomial. This is the precise
-  finite Taylor--Lagrange hand-off; it still does not differentiate an
-  infinite tail.
+  finite Taylor--Lagrange hand-off; at zero,
+  `FinitePolynomial.taylorPrefixShift_at_zero` identifies that derivative
+  polynomial with the original linear coefficient. It still does not
+  differentiate an infinite tail.
   The executable factorial loop is also now identified, term by term and at
   every finite prefix, with its rational Taylor coefficients
   (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
