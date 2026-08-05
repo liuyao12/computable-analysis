@@ -3786,6 +3786,50 @@ def expPowerSeriesOnUnit_forwardDerivativeAtZero :
   simpa only [intervalNearAtPrecision, RealRaw.one, RealRaw.ofRat_compute]
     using hgoal
 
+/-- The preceding basepoint derivative is genuinely a self-derivative
+statement: its derivative representative is the full power-series evaluator
+at zero, rather than an externally substituted constant.  The exact
+stagewise computation `expPowerSeries 0 = 1` makes the two presentations
+coincide without an appeal to real-number completeness. -/
+def expPowerSeriesOnUnit_forwardSelfDerivativeAtZero :
+    HasForwardDerivativeAt (expPowerSeriesOnInterval 0 1) 0
+      (expPowerSeries 0) := by
+  refine
+    { x_mem := by
+        constructor <;> native_decide
+      derivative_valid := by
+        exact expPowerSeries_valid 0
+      stepPrecision := fun n => 2 * (if n = 0 then 1 else n)
+      evalPrecision := fun _h _n => 0
+      close := ?_ }
+  intro h n hmem hpos hsmall
+  have hstep := expPowerSeries_forward_step_bounds h n hsmall
+  have hhalf : h <= (1 : Rat) / 2 := hstep.1
+  have hprecision : 2 * h <= (precisionAtStage n).val := hstep.2
+  have htail := expPowerSeries_stage_zero_linear_tail_bounds h
+    (Rat.le_of_lt hpos) hhalf
+  have hgoal : QInterval.NearAt
+      (QInterval.differenceQuotient
+        (intervalAround (powerSeriesCenter h 0) (powerSeriesTailRadius h 0))
+        { lo := 1, hi := 1 } h)
+      { lo := 1, hi := 1 } (precisionAtStage n) :=
+    intervalAround_forward_quotient_near_one
+      (powerSeriesCenter h 0) (powerSeriesTailRadius h 0) h
+      (precisionAtStage n) hpos htail.1 htail.2.1 htail.2.2.1 htail.2.2.2
+      hprecision
+  simp only [Rat.zero_add] at hmem
+  have hvalue : (expPowerSeriesOnInterval 0 1).compute h hmem 0 =
+      intervalAround (powerSeriesCenter h 0) (powerSeriesTailRadius h 0) := by
+    change (expPowerSeries h).compute 0 = _
+    exact expPowerSeries_compute_eq h 0
+  have hzero (hz : inDomainInterval (0 : Rat) 1 0) :
+      (expPowerSeriesOnInterval 0 1).compute 0 hz 0 = { lo := 1, hi := 1 } := by
+    change (expPowerSeries (0 : Rat)).compute 0 = _
+    rw [expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
+  simp only [Rat.zero_add]
+  rw [hvalue, hzero, expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
+  simpa only [intervalNearAtPrecision] using hgoal
+
 theorem ePowerSeries_valid_of_nested
     (hnested : EPowerSeriesNested)
     (hshrink : EPowerSeriesWidthsShrink) : EPowerSeriesValid := by

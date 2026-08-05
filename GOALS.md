@@ -950,6 +950,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   `expEuler_zero_equiv_one` proves its explicit-radius boxes overlap that
   same point.  These initial-value facts are deliberately distinct from the
   pending self-derivative and nonzero-input comparison theorems.
+  There is now one checked local derivative instance for the literal series
+  evaluator: `ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero`
+  certifies `D⁺ exp(0) = exp(0)`, with the derivative represented by the
+  full raw `expPowerSeries 0`; the stagewise normalization above yields its
+  value `1`.  Its finite proof uses positive steps at the endpoint only, so it
+  is not the required two-sided interval theorem `exp' = exp`.
   The finite algebra for that nonzero comparison is now checked too:
   `fallingFactorialRat`, `eulerBinomialTerm`, and `eulerBinomialPrefix` expose
   the rational binomial coordinates, and
@@ -1027,8 +1033,9 @@ another. The Pi score stays useful only as secondary integration coverage.
   `FormalPowerSeries.sinhCoeff_derivative`, and
   `FormalPowerSeries.coshCoeff_derivative`.
 - Next theorem for `exp.ps`: turn the formal coefficient identity plus
-  rational tail bounds into an effective derivative certificate for the boxed
-  algorithm, hence a witness for
+  rational tail bounds and a translated-series/addition estimate into an
+  effective derivative certificate for the boxed algorithm on an interval,
+  hence a witness for
   `exp.ExponentialFunction.SolvesSelfDerivativeOn`.  This can be specialized
   to exponential first; a general term-by-term differentiation theorem can
   come later.
@@ -1209,9 +1216,15 @@ arguments.
   The generic last assembly step is now present as
   `ComplexRaw.cauchyStabilize_valid`: finite intersections of widened direct
   complex candidates become a valid raw box computation when every later
-  candidate is contained in every earlier widened box.  The remaining
-  represented rotation work is to supply those explicit factorial-tail and
-  input-modulus bounds for `halfPi`.
+  candidate is contained in every earlier widened box.  Those factorial-tail
+  and input-modulus obligations are now discharged for `halfPi`:
+  `PiProofs.pi.halfPiRotation` is valid, using the common bounded-input
+  rotation schedule, its finite Lipschitz bound, and a radius at most
+  `32 / (n + 1)`.  The input is also bridged to
+  `2 * arctan.geom(1)` and the geometric normalized quarter-turn raw.  The
+  remaining Euler work is the output-side agreement of that factorial rotation
+  with the geometric circle point, followed by the relevant logarithm branch
+  certificate.
 
 ## First-Year Calculus Course
 

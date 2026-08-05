@@ -62,7 +62,8 @@ that two exponential representations agree also identifies their Euler bases.
 \label{thm:e-self-derivative-and-unit-slope}
 \lean{ComputableAnalysis.ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero}
-The required certificates are
+\lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero}
+The intended completed package is
 \[
  E'(x)=E(x),\quad E(0)=1,
  \qquad
@@ -74,10 +75,14 @@ Lean checks both its degree-two Taylor prefix and the actual tail-enclosed
 power-series evaluator at zero.  For the latter, its public stage already has
 enough positive Taylor terms that the finite remaining sum and the certified
 geometric radius are both at most \(h^2\) for \(0<h\le1/2\).  Dividing the
-resulting box by \(h\) yields a genuine forward certificate
+resulting box by \(h\) yields the genuinely self-represented forward
+certificate
 \[
- \left.E'_{\mathrm{series}}(x)\right|_{0+}=1.
+ D^+E_{\mathrm{series}}(0)=E_{\mathrm{series}}(0)=1.
 \]
+The first equality uses the full series evaluator as derivative data; the
+second is its stagewise exact normalization.  This is not merely a
+substitution of the rational constant \(1\).
 This is not yet the global self-derivative theorem \(E'=E\) on an interval,
 nor the uniqueness application that compares exponential representations.
 \end{theorem}

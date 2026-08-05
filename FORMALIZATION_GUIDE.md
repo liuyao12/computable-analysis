@@ -219,8 +219,11 @@ now crossed the same local gate:
 `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` proves its forward
 derivative at zero is `1`.  Its proof uses the literal public stage-zero
 finite sum, whose positive tail and geometric radius are both bounded by
-`h^2` on positive half-unit steps.  This is not a global `exp' = exp`
-certificate on an interval.
+`h^2` on positive half-unit steps.  The companion
+`ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero` uses
+`expPowerSeries 0` itself as the derivative representative, so it certifies
+the precise local identity `D⁺ exp(0) = exp(0) = 1`.  Neither result is a
+global `exp' = exp` certificate on an interval.
 
 ## How to formalize a familiar integration formula
 
@@ -356,9 +359,11 @@ a separate open bridge.
 
 There is one local derivative theorem for that representation:
 `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` proves the full
-power-series evaluator has forward derivative `1` at zero.  It is deliberately
-kept distinct from the still-open interval self-derivative certificate needed
-by `SolvesSelfDerivativeOnInterval`.
+power-series evaluator has forward derivative `1` at zero, while
+`ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero` proves the
+equivalent statement with `expPowerSeries 0` itself as derivative data.  Both
+are deliberately kept distinct from the still-open interval self-derivative
+certificate needed by `SolvesSelfDerivativeOnInterval`.
 
 When using `SelfDerivativeInitialValueUnique`, provide both pieces of common
 initial data explicitly: equality of the rational initial coordinates and a
@@ -419,6 +424,7 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeriesFunction_zero_equiv_one
 #check ExpProofs.expPowerSeriesOnInterval_zero_initial_value
 #check ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero
+#check ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
@@ -448,8 +454,8 @@ open ComputableAnalysis
 
 This certifies both repeated multiplication and the factorial power series as
 representations of the same abstract value `e`.  Keep that constant-level
-agreement, the checked local forward derivative at zero, and the still-open
-global derivative/ODE certificate distinct.
+agreement, the checked local self-represented forward derivative at zero, and
+the still-open global derivative/ODE certificate distinct.
 
 ```lean
 import ComputableAnalysis.RotationSeries
