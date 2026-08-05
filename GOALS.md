@@ -1025,13 +1025,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   `CurvatureOnSubinterval`; the current implementation still has older
   declaration names such as `MonotoneDerivativeBoundMethod` and
   `DerivativeBoundFromCurvature`.
-- The first proved power-series brick is formal: the coefficient stream
-  `1/n!` is fixed by formal differentiation.  See
+- The first proved power-series brick is formal: coefficient shift fixes the
+  stream `1/n!`. See
   `FormalPowerSeries.expCoeff_derivative` in
   `ComputableAnalysis/PowerSeries.lean`.
-- The same formal layer now covers the standard differential identities for
-  trig and hyperbolic functions:
-  `sin' = cos`, `cos' = -sin`, `sinh' = cosh`, and `cosh' = sinh`.
+- The same formal layer now covers the coefficient-shift identities for trig
+  and hyperbolic streams:
+  `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
+  `cosh -> sinh`.
   See `FormalPowerSeries.sinCoeff_derivative`,
   `FormalPowerSeries.cosCoeff_derivative`,
   `FormalPowerSeries.sinhCoeff_derivative`, and
@@ -1046,7 +1047,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval` now packages
   that bound as a two-sided rational interval derivative certificate, with a
   computed dyadic step schedule, on every interval contained in `[-C,C]` for
-  `C >= 1`.
+  `C >= 1`. `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval`
+  closes the same explicit remainder calculation under every finite rational
+  Taylor prefix. The blueprint keeps these finite-difference derivative
+  certificates in the later calculus chapter; the series chapter records only
+  coefficient-shift data.
 - Next theorem for `exp.ps`: turn the formal coefficient identity plus
   rational tail bounds and a translated-series/addition estimate into an
   effective derivative certificate for the boxed algorithm on an interval,
@@ -1249,7 +1254,7 @@ derivatives, and definite integration algorithms that covers the examples
 students actually compute.
 
 - New course module: `ComputableAnalysis/FirstYearCalculus.lean`.
-- Checked formal derivative table:
+- Checked formal coefficient-shift table:
   monomials `x^(n+1)/(n+1)`, `exp`, `sin`, `-cos`, `sinh`, and `cosh`.
   See `FirstYearCalculus.PowerSeriesDerivativeEntry` and
   `FirstYearCalculus.checked_power_series_table`.

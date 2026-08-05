@@ -617,7 +617,7 @@ for the series proof; they introduce no additional Machin pi computation.
 
 \section{General Power Series}
 
-\begin{definition}[Formal power series]
+\begin{definition}[Formal power series and coefficient shift]
 \label{def:formal-power-series}
 \lean{ComputableAnalysis.FormalPowerSeries.Coeffs}
 \lean{ComputableAnalysis.FormalPowerSeries.derivative}
@@ -627,13 +627,29 @@ A formal power series is a rational coefficient stream
 \[
   c:\N\to\Q,\qquad \sum_{n\ge0}c_nz^n.
 \]
-Formal differentiation is the coefficient operation
+Its coefficient-shift operation is
 \[
-  (c')_n=(n+1)c_{n+1}.
+  (\partial_{\rm form}c)_n=(n+1)c_{n+1}.
 \]
-This is algebraic data, separate from convergence of the associated raw
-function.
+At the basepoint \(z=0\), the prospective first-order slope is simply the
+linear coefficient \(c_1\). This is algebraic Taylor data, separate from
+convergence and from an analytic derivative of the associated raw function.
 \end{definition}
+
+\begin{remark}[The later Taylor--remainder bridge]
+\label{rem:series-linear-coefficient-bridge}
+The linear coefficient becomes an analytic derivative only after a certified
+first-order remainder is supplied.  Concretely, a finite rational certificate
+must bound
+\[
+  f(a+h)-f(a)-Lh
+\]
+by \(\lvert h\rvert\varepsilon\) once \(h\) is small enough, with an explicit
+stage schedule.  This is the computable content of the usual
+Taylor--Lagrange remainder step.  Chapter~\ref{ch:effective-calculus} makes
+that finite-difference assertion the definition of a derivative; no limit or
+completeness theorem is used here.
+\end{remark}
 
 \begin{definition}[Geometric majorants for power series]
 \label{def:power-series-geometric-majorant}
@@ -658,102 +674,22 @@ inputs.  Real functions are then obtained by restricting these complex
 algorithms to the real axis.
 \end{definition}
 
-\begin{theorem}[Formal derivative table]\label{thm:formal-derivative-table}
+\begin{theorem}[Coefficient-shift table]\label{thm:formal-derivative-table}
 \lean{ComputableAnalysis.FirstYearCalculus.checked_power_series_table}
 \uses{def:formal-power-series}
 \leanok
-The coefficient streams for the standard power series satisfy the familiar
-formal identities:
+The coefficient streams for the standard series satisfy the algebraic
+identities:
 \[
-  (\exp)'=\exp,\qquad
-  (\sin)'=\cos,\qquad
-  (\cos)'=-\sin,
+  \partial_{\rm form}\exp=\exp,\qquad
+  \partial_{\rm form}\sin=\cos,\qquad
+  \partial_{\rm form}\cos=-\sin,
 \]
 \[
-  (\sinh)'=\cosh,\qquad
-  (\cosh)'=\sinh.
+  \partial_{\rm form}\sinh=\cosh,\qquad
+  \partial_{\rm form}\cosh=\sinh.
 \]
 \end{theorem}
-
-\begin{theorem}[Finite monomial secants]
-\label{thm:finite-monomial-secants}
-\lean{ComputableAnalysis.FinitePolynomial.powerSecant_eq_differenceQuotient}
-\lean{ComputableAnalysis.FinitePolynomial.powerDerivative_succ}
-\lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
-\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
-\leanok
-For every rational box of radius \(C\ge1\), Lean proves directly that the
-literal quotient of the normalized monomial has the form
-\[
- \left|\frac{(x+h)^{n+1}/(n+1)-x^{n+1}/(n+1)}{h}-x^n\right|
- \le |h|\,E_{n+1}(C),
-\]
-where \(E_{n+1}(C)\) is an explicitly recursive rational coefficient.
-This is finite algebra plus an absolute-value bound, with no mean-value or
-completeness theorem.  Its dyadic half-decay schedule is now packaged as a
-two-sided \code{HasDerivativeOnInterval} certificate on every rational
-interval contained in \([-C,C]\), \(C\ge1\).
-\end{theorem}
-
-\lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_hasDerivative}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
-\begin{table}[htbp]
-\centering
-\small
-\renewcommand{\arraystretch}{1.16}
-\begin{tabular}{p{0.25\textwidth}p{0.25\textwidth}p{0.35\textwidth}}
-\textbf{Function and scope} & \textbf{Derivative} & \textbf{Sorry-free status}\\
-\hline
-\(x^{n+1}/(n+1)\), formal coefficient stream & \(x^n\) &
-\formallyproved{Formal coefficient theorem} \\
-\(x^{n+1}/(n+1)\), rational secant on a bounded box & \(x^n\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} family with an explicit
-dyadic step schedule} \\
-\(1+x+x^2/2\), finite exponential Taylor prefix & \(1+x\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} family, assembled by
-quantitative constant/addition/scaling closure} \\
-\(\exp_{\rm ps}\), formal coefficient stream & \(\exp_{\rm ps}\) &
-\formallyproved{Formal coefficient theorem} \\
-\(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal coefficient streams &
-\(\cos_{\rm ps}\), \(-\sin_{\rm ps}\) &
-\formallyproved{Formal coefficient theorems} \\
-\(\sinh_{\rm ps}\), \(\cosh_{\rm ps}\), formal coefficient streams &
-\(\cosh_{\rm ps}\), \(\sinh_{\rm ps}\) &
-\formallyproved{Formal coefficient theorems} \\
-\(x\) on \([0,1]\), interval evaluator & \(1\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
-\(A_{\rm rect}(x)\) on \([0,1]\) & \(1/(1+x^2)\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
-\(xA_{\rm rect}(x)\) on \([0,1]\) &
-\(A_{\rm rect}(x)+x/(1+x^2)\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
-Selected raw \(\exp\), \(\sin\), \(\cos\), \(\sqrt{\,}\), and \(\log\)
-evaluators & standard analytic table &
-\computeverifiable{Evaluator or formal identity exists; the corresponding
-raw interval-derivative theorem is still open}
-\end{tabular}
-\caption{Derivative status table.  Green means that Lean proves the precise
-claim in the stated semantic scope without \code{sorry}; orange is not a
-derivative theorem.  In particular, a formal coefficient identity is not
-silently promoted to a derivative theorem for an evaluated raw function.}
-\label{tab:derivative-status}
-\end{table}
-
-\noindent
-The formal-series green rows are witnessed by
-\code{FirstYearCalculus.checked\_power\_series\_table}; the monomial-secant
-row by
-\code{FinitePolynomial.normalizedMonomial\_hasDerivativeOnInterval};
-the finite-exponential-prefix row by
-\code{FinitePolynomial.expTaylorQuadratic\_hasDerivativeOnInterval};
-the three full interval rows are witnessed respectively by
-\code{IntegralIdentities.coordinateOnUnitDerivative},
-\code{IntegralIdentities.arctanIntegralRectangleOnUnit\_hasDerivative}, and
-\code{IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit\_hasDerivative}.
-This scope distinction is deliberate: it makes the derivative ledger useful
-without claiming the still-missing analytic identification of the selected
-exponential, trigonometric, or logarithmic raw algorithms.
 
 \section{Euler's Basel Problem}
 

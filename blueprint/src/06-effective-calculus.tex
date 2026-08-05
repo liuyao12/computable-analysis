@@ -1,4 +1,97 @@
 \chapter{Fundamental Theorem of Calculus}
+\label{ch:effective-calculus}
+
+\section{Finite-difference derivative certificates}
+
+\begin{definition}[Effective derivative on a rational interval]
+\label{def:effective-derivative}
+\lean{ComputableAnalysis.HasDerivativeOnInterval}
+\uses{def:raw-real,rem:series-linear-coefficient-bridge}
+For interval functions \(f,D\) on \([a,b]\cap\Q\), a derivative
+certificate supplies two algorithms. Given an output stage \(n\), it chooses
+a rational step budget \(\delta_n>0\); given \(x,h,n\), it also chooses the
+evaluation precision for the endpoint boxes.  For every nonzero rational
+\(\lvert h\rvert\le\delta_n\) with \(x,x+h\in[a,b]\), the interval quotient
+\[
+ \frac{f(x+h)-f(x)}{h}
+\]
+is within the requested stage-\(n\) tolerance of \(D(x)\). The displayed
+finite-error property, rather than an ambient limit, is what this project
+calls \(f'=D\).
+\end{definition}
+
+\begin{theorem}[Finite monomial secants]
+\label{thm:finite-monomial-secants}
+\lean{ComputableAnalysis.FinitePolynomial.powerSecant_eq_differenceQuotient}
+\lean{ComputableAnalysis.FinitePolynomial.powerDerivative_succ}
+\lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
+\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval}
+\leanok
+For every rational box of radius \(C\ge1\), Lean proves directly that the
+literal quotient of the normalized monomial has the form
+\[
+ \left|\frac{(x+h)^{n+1}/(n+1)-x^{n+1}/(n+1)}{h}-x^n\right|
+ \le |h|\,E_{n+1}(C),
+\]
+where \(E_{n+1}(C)\) is an explicitly recursive rational coefficient.
+This is the first explicit Taylor--remainder bridge from a linear coefficient
+to an interval derivative: finite algebra plus an absolute-value bound, with
+no mean-value or completeness theorem.
+\end{theorem}
+
+\lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_hasDerivative}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{1.16}
+\begin{tabular}{p{0.25\textwidth}p{0.25\textwidth}p{0.35\textwidth}}
+\textbf{Function and scope} & \textbf{Derivative} & \textbf{Sorry-free status}\\
+\hline
+\(x^{n+1}/(n+1)\), rational secant on a bounded box & \(x^n\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} family with an explicit
+dyadic step schedule} \\
+\(\sum_{k<n}c_kx^{k+1}/(k+1)\), finite rational Taylor primitive &
+\(\sum_{k<n}c_kx^k\) &
+\formallyproved{Full interval family, assembled by quantitative
+constant/addition/scaling closure} \\
+\(1+x+x^2/2\), finite exponential Taylor prefix & \(1+x\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} family} \\
+\(\exp_{\rm ps}\), \(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal streams &
+coefficient shift &
+\formallyproved{Formal Taylor data only; not an analytic derivative claim} \\
+\(x\) on \([0,1]\), interval evaluator & \(1\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
+\(A_{\rm rect}(x)\) on \([0,1]\) & \(1/(1+x^2)\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
+\(xA_{\rm rect}(x)\) on \([0,1]\) &
+\(A_{\rm rect}(x)+x/(1+x^2)\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
+Selected raw \(\exp\), \(\sin\), \(\cos\), \(\sqrt{\,}\), and \(\log\)
+evaluators & standard analytic table &
+\computeverifiable{Evaluator or formal Taylor data exists; the corresponding
+raw interval-derivative theorem is still open}
+\end{tabular}
+\caption{Derivative status table. Green means that Lean proves the precise
+finite-difference claim in the stated semantic scope without \code{sorry};
+orange is not an analytic derivative theorem.}
+\label{tab:derivative-status}
+\end{table}
+
+\noindent
+The finite Taylor row is witnessed by
+\code{FinitePolynomial.integratedTaylorPrefix\_hasDerivativeOnInterval};
+the quadratic exponential specialization by
+\code{FinitePolynomial.expTaylorQuadratic\_hasDerivativeOnInterval}; and
+the three interval-function rows respectively by
+\code{IntegralIdentities.coordinateOnUnitDerivative},
+\code{IntegralIdentities.arctanIntegralRectangleOnUnit\_hasDerivative}, and
+\code{IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit\_hasDerivative}.
+The coefficient-shift row stays deliberately separate until a certified
+remainder attaches it to an evaluated raw function.
 
 \section{Convexity}
 
