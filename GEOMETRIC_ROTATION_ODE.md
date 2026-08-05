@@ -57,13 +57,16 @@ GeometricRotationODE.pointRe_differenceQuotient
 GeometricRotationODE.pointIm_differenceQuotient
 GeometricRotationODE.pointRe_differenceQuotient_sub_derivative
 GeometricRotationODE.pointIm_differenceQuotient_sub_derivative
+GeometricRotationODE.pointRe_secant_error_le_twelve
+GeometricRotationODE.pointIm_secant_error_le_twelve
 ```
 
 The latter two put the secant error over a positive product of chart
 denominators and exhibit an explicit factor of the rational step `h`.  They
-are the finite algebra needed to bound the error uniformly on `[0,1]` and
-instantiate `HasDerivativeOnInterval`; the order estimates and singleton-box
-wrapper remain the next work item.
+are now bounded on `[0,1]` by `12 * qabs h`.  This is the finite
+epsilon--delta estimate for both chart coordinates.  The exact singleton-box
+wrapper that instantiates `HasDerivativeOnInterval` remains the next work
+item.
 
 A continuous Peano--Baker/Volterra uniqueness proof can then compare that
 reparametrized geometric solution with the factorial rotation raw.  Its
