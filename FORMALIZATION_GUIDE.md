@@ -595,6 +595,7 @@ open ComputableAnalysis
 
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness.arctan_to_sine_cosine_coordinates
+#check ArctanGeometry.two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute
 #check ArctanGeometry.two_arctanGeom_one_equiv_quarterTurnRaw_one
 ```
 
@@ -604,11 +605,13 @@ that one equation is certified. At present, only the two endpoint witness
 equations are fully proved; the non-endpoint rows remain computation-ready
 targets until their raw-slope equalities are formalized.
 
-At the nontrivial endpoint, the direct finite-box theorem
-`two_arctanGeom_one_equiv_quarterTurnRaw_one` records
-`2 * arctan.geom(1) = pi / 2` as the normalized geometric quarter turn.  It
-does not yet transport that geometric angle to `PiProofs.pi.halfPi` or identify
-the factorial rotation with its point; those are the next Euler-bridge steps.
+At the nontrivial endpoint,
+`two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute` gives literal
+equality of the two rational interval boxes at every stage; its equivalence
+corollary records `2 * arctan.geom(1) = pi / 2` as the normalized geometric
+quarter turn.  It does not yet transport that geometric angle to
+`PiProofs.pi.halfPi` or identify the factorial rotation with its point; those
+are the next Euler-bridge steps.
 
 For rational-circle chord refinements, do not select an exact square root.
 The direct evaluator is already certified in

@@ -6402,10 +6402,35 @@ theorem arctanGeom_one_equiv_piCircleArea_quarter :
   · rw [hcancel]
     exact horder
 
+/-- Doubling the unit-slope sector computation and taking the geometric
+quarter turn produce literally the same rational interval at every stage. -/
+theorem two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute (n : Nat) :
+    (((2 : Nat) * arctanGeom (1 : Rat) : RealRaw).compute n) =
+      ((RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)).compute n) := by
+  change
+    ((RealRaw.scaleRat (2 : Rat) (arctanGeom (1 : Rat))).compute n)
+      = ((RealRaw.scaleRat ((1 : Rat) / 2) piCircleArea).compute n)
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= 2),
+    if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 2)]
+  rw [← piAreaCompatibility n]
+  have hhalfFour : ((1 : Rat) / 2) * 4 = 2 := by native_decide
+  have hscale (q : Rat) : ((1 : Rat) / 2) * (4 * q) = 2 * q := by
+    calc
+      ((1 : Rat) / 2) * (4 * q) = (((1 : Rat) / 2) * 4) * q :=
+        (Rat.mul_assoc _ _ _).symm
+      _ = 2 * q := by rw [hhalfFour]
+  change
+    { lo := 2 * ((arctanGeom (1 : Rat)).compute n).lo,
+      hi := 2 * ((arctanGeom (1 : Rat)).compute n).hi }
+      = { lo := ((1 : Rat) / 2) *
+          (4 * ((arctanGeom (1 : Rat)).compute n).lo),
+      hi := ((1 : Rat) / 2) *
+          (4 * ((arctanGeom (1 : Rat)).compute n).hi) }
+  rw [hscale, hscale]
+
 /-- Doubling the unit-slope sector computation gives the normalized geometric
-quarter turn.  This is a direct finite-box bridge: the area loop identifies
-the circle-area stage with four geometric-arctangent stages, so the two
-scalings have the same endpoint enclosure at every precision. -/
+quarter turn.  This derives raw equivalence from the stronger stage equality. -/
 theorem two_arctanGeom_one_equiv_quarterTurnRaw_one :
     (((2 : Nat) * arctanGeom (1 : Rat) : RealRaw).Equiv
       (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat))) := by
@@ -6413,31 +6438,11 @@ theorem two_arctanGeom_one_equiv_quarterTurnRaw_one :
   apply (RealRaw.compareAt_overlap_iff
     ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw)
     (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)) n n).2
-  change QInterval.Overlaps
-    ((RealRaw.scaleRat (2 : Rat) (arctanGeom (1 : Rat))).compute n)
-    ((RealRaw.scaleRat ((1 : Rat) / 2) piCircleArea).compute n)
-  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
-  simp only [if_pos (by native_decide : (0 : Rat) <= 2),
-    if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 2)]
-  rw [← piAreaCompatibility n]
+  rw [two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute]
   have hvalid : (arctanGeom (1 : Rat)).Valid :=
     arctanGeom_valid_on_unit (by native_decide) (by native_decide)
   have horder := RealRaw.interval_order_of_valid
     (arctanGeom (1 : Rat)) hvalid n
-  have hhalfFour : ((1 : Rat) / 2) * 4 = 2 := by native_decide
-  have hscale (q : Rat) : ((1 : Rat) / 2) * (4 * q) = 2 * q := by
-    calc
-      ((1 : Rat) / 2) * (4 * q) = (((1 : Rat) / 2) * 4) * q :=
-        (Rat.mul_assoc _ _ _).symm
-      _ = 2 * q := by rw [hhalfFour]
-  change QInterval.Overlaps
-    { lo := 2 * ((arctanGeom (1 : Rat)).compute n).lo,
-      hi := 2 * ((arctanGeom (1 : Rat)).compute n).hi }
-    { lo := ((1 : Rat) / 2) *
-          (4 * ((arctanGeom (1 : Rat)).compute n).lo),
-      hi := ((1 : Rat) / 2) *
-          (4 * ((arctanGeom (1 : Rat)).compute n).hi) }
-  rw [hscale, hscale]
   have hscaled := Rat.mul_le_mul_of_nonneg_left horder
     (by native_decide : (0 : Rat) <= 2)
   exact ⟨hscaled, hscaled⟩
