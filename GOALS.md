@@ -218,7 +218,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   certificate for its coefficient-shift polynomial. This is the precise
   finite Taylor--Lagrange hand-off; at zero,
   `FinitePolynomial.taylorPrefixShift_at_zero` identifies that derivative
-  polynomial with the original linear coefficient. It still does not
+  polynomial with the original linear coefficient.  The centered forms
+  `taylorPrefixAt_hasDerivativeOnInterval` and
+  `taylorPrefixShiftAt_at_basepoint` make the same statement at every
+  rational expansion point, using local `x-a` bounds. They still do not
   differentiate an infinite tail.
   The executable factorial loop is also now identified, term by term and at
   every finite prefix, with its rational Taylor coefficients

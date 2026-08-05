@@ -229,6 +229,13 @@ certificates; no infinite-series tail is differentiated at this point.
 For a prefix containing a linear term,
 `FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
 derivative polynomial at zero with the original coefficient `c 1`.
+For an expansion centered at a rational `a`, use
+`FinitePolynomial.taylorPrefixAt` and
+`FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval`: the local box
+assumptions are `-C <= lower - a` and `upper - a <= C`, and
+`FinitePolynomial.taylorPrefixShiftAt_at_basepoint` proves that the certified
+derivative at `a` is again `c 1`.  Thus the coefficient interpretation is
+translation-invariant without invoking an ambient real line.
 `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
 this construction under every finite rational coefficient prefix. Its
 quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
@@ -468,7 +475,9 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeries_zero_equiv_one
 #check expTaylorQuadratic
 #check FinitePolynomial.taylorPrefixShift_at_zero
+#check FinitePolynomial.taylorPrefixShiftAt_at_basepoint
 #check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
+#check FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero

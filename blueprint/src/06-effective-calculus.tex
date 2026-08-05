@@ -27,6 +27,7 @@ calls \(f'=D\).
 \lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval}
 \leanok
@@ -39,7 +40,9 @@ literal quotient of the normalized monomial has the form
 where \(E_{n+1}(C)\) is an explicitly recursive rational coefficient.
 This is the first explicit Taylor--remainder bridge from a linear coefficient
 to an interval derivative: finite algebra plus an absolute-value bound, with
-no mean-value or completeness theorem.
+no mean-value or completeness theorem.  Translation applies the same bound
+to powers of \(x-a\), so the certified derivative at the expansion point is
+literally \(c_1\).
 \end{theorem}
 
 \lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
@@ -55,8 +58,8 @@ no mean-value or completeness theorem.
 \(x^{n+1}/(n+1)\), rational secant on a bounded box & \(x^n\) &
 \formallyproved{Full \code{HasDerivativeOnInterval} family with an explicit
 dyadic step schedule} \\
-\(\sum_{k<N}c_kx^k\), finite Taylor prefix &
-\(\sum_{k<N-1}(k+1)c_{k+1}x^k\) &
+\(\sum_{k<N}c_k(x-a)^k\), finite Taylor prefix at \(a\) &
+\(\sum_{k<N-1}(k+1)c_{k+1}(x-a)^k\) &
 \formallyproved{Full interval family, assembled from the algebraic
 coefficient shift and a quantitative remainder} \\
 \(1+x+x^2/2\), finite exponential Taylor prefix & \(1+x\) &
@@ -83,8 +86,10 @@ orange is not an analytic derivative theorem.}
 \end{table}
 
 \noindent
-The finite Taylor row is witnessed by
-\code{FinitePolynomial.taylorPrefix\_hasDerivativeOnInterval}; its internal
+The finite Taylor row is witnessed at zero by
+\code{FinitePolynomial.taylorPrefix\_hasDerivativeOnInterval}, and at any
+rational expansion point by
+\code{FinitePolynomial.taylorPrefixAt\_hasDerivativeOnInterval}; its internal
 primitive construction remains available as
 \code{FinitePolynomial.integratedTaylorPrefix\_hasDerivativeOnInterval}.
 The quadratic exponential specialization is

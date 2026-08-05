@@ -58,6 +58,18 @@ structure SecantDerivativeBound (C : Rat) (f df : Rat -> Rat) where
     qabs (((f (x + h) - f x) / h) - df x) <=
       qabs h * errorCoefficient
 
+/-- A quantitative secant bound on a box centered at a rational expansion
+point.  This is the translated form of `SecantDerivativeBound`; its local
+coordinate is `x - basepoint`. -/
+structure CenteredSecantDerivativeBound (basepoint C : Rat)
+    (f df : Rat -> Rat) where
+  errorCoefficient : Rat
+  errorCoefficient_nonneg : 0 <= errorCoefficient
+  error_bound : forall x h : Rat, h ≠ 0 ->
+    qabs (x - basepoint) <= C -> qabs (x + h - basepoint) <= C ->
+    qabs (((f (x + h) - f x) / h) - df x) <=
+      qabs h * errorCoefficient
+
 namespace SecantDerivativeBound
 
 /-- Constants have zero finite-difference error. -/
@@ -132,6 +144,25 @@ def scaleRat (r : Rat) {C : Rat} {f df : Rat -> Rat}
         Rat.mul_le_mul_of_nonneg_left hF (qabs_nonneg _)
       _ = qabs h * (qabs r * F.errorCoefficient) := by
         grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-- Translation of the input leaves a quantitative secant bound unchanged.
+This is the finite algebra needed to use a Taylor polynomial at its declared
+rational expansion point instead of only at zero. -/
+def translate (a : Rat) {C : Rat} {f df : Rat -> Rat}
+    (F : SecantDerivativeBound C f df) :
+    CenteredSecantDerivativeBound a C
+      (fun x => f (x - a))
+      (fun x => df (x - a)) where
+  errorCoefficient := F.errorCoefficient
+  errorCoefficient_nonneg := F.errorCoefficient_nonneg
+  error_bound := by
+    intro x h hh hx hxh
+    have hshift : (x - a) + h = (x + h) - a := by
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+    have hF := F.error_bound (x - a) h hh hx (by
+      rw [hshift]
+      exact hxh)
+    simpa [hshift] using hF
 
 /-- The dyadic schedule selected by a quantitative secant coefficient. -/
 def stepPrecision {C : Rat} {f df : Rat -> Rat}
@@ -215,6 +246,108 @@ def toHasDerivativeOnInterval {C : Rat} {f df : Rat -> Rat}
     constructor <;> grind [Rat.sub_eq_add_neg]
 
 end SecantDerivativeBound
+
+namespace CenteredSecantDerivativeBound
+
+/-- The same explicit dyadic schedule works on a translated box, because a
+translation changes neither the step nor the quantitative error coefficient. -/
+def stepPrecision {basepoint C : Rat} {f df : Rat -> Rat}
+    (F : CenteredSecantDerivativeBound basepoint C f df) (stage : Nat) : Nat :=
+  2 ^ RationalMajorant.halfDecayShift F.errorCoefficient
+    (precisionAtStage stage)
+
+private theorem step_error_le_precision
+    {basepoint C : Rat} {f df : Rat -> Rat}
+    (F : CenteredSecantDerivativeBound basepoint C f df) {h : Rat} (stage : Nat)
+    (hsmall : qabs h <= 1 / ((F.stepPrecision stage : Nat) : Rat)) :
+    qabs h * F.errorCoefficient <= (precisionAtStage stage).val := by
+  let shift : Nat := RationalMajorant.halfDecayShift F.errorCoefficient
+    (precisionAtStage stage)
+  have hsmall' : qabs h <= 1 / (((2 ^ shift : Nat) : Rat)) := by
+    simpa [stepPrecision, shift] using hsmall
+  have hscaled : qabs h * F.errorCoefficient <=
+      1 / (((2 ^ shift : Nat) : Rat)) * F.errorCoefficient :=
+    Rat.mul_le_mul_of_nonneg_right hsmall' F.errorCoefficient_nonneg
+  have hgeometric : F.errorCoefficient * ((1 : Rat) / 2) ^ shift <=
+      (precisionAtStage stage).val := by
+    simpa [shift] using RationalMajorant.halfDecayShift_spec
+      F.errorCoefficient_nonneg (precisionAtStage stage)
+  calc
+    qabs h * F.errorCoefficient <=
+        1 / (((2 ^ shift : Nat) : Rat)) * F.errorCoefficient := hscaled
+    _ = F.errorCoefficient * ((1 : Rat) / 2) ^ shift := by
+      rw [RationalMajorant.half_pow_eq_one_div_nat_two_pow]
+      grind [Rat.mul_comm]
+    _ <= (precisionAtStage stage).val := hgeometric
+
+/-- A translated quantitative secant bound gives a two-sided interval
+derivative certificate on any rational interval lying in its local box. -/
+def toHasDerivativeOnInterval {basepoint C : Rat} {f df : Rat -> Rat}
+    (F : CenteredSecantDerivativeBound basepoint C f df)
+    (a b : Rat) (hleft : -C <= a - basepoint)
+    (hright : b - basepoint <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat f a b)
+      (FunctionOnInterval.exactRat df a b) where
+  same_lower := rfl
+  same_upper := rfl
+  stepPrecision := F.stepPrecision
+  evalPrecision := fun _x _h _stage => 0
+  close := by
+    intro x h stage hx hxh _hdx hh hsmall
+    change a <= x /\ x <= b at hx
+    change a <= x + h /\ x + h <= b at hxh
+    have hxleft : -C <= x - basepoint := by
+      calc
+        -C <= a - basepoint := hleft
+        _ <= x - basepoint := by grind [Rat.sub_eq_add_neg]
+    have hxright : x - basepoint <= C := by
+      calc
+        x - basepoint <= b - basepoint := by grind [Rat.sub_eq_add_neg]
+        _ <= C := hright
+    have hxhleft : -C <= x + h - basepoint := by
+      calc
+        -C <= a - basepoint := hleft
+        _ <= x + h - basepoint := by grind [Rat.sub_eq_add_neg]
+    have hxhright : x + h - basepoint <= C := by
+      calc
+        x + h - basepoint <= b - basepoint := by grind [Rat.sub_eq_add_neg]
+        _ <= C := hright
+    have hxbound : qabs (x - basepoint) <= C :=
+      qabs_le_of_neg_le_le hxleft hxright
+    have hxhbound : qabs (x + h - basepoint) <= C :=
+      qabs_le_of_neg_le_le hxhleft hxhright
+    have hfinite := F.error_bound x h hh hxbound hxhbound
+    have hstep := F.step_error_le_precision stage hsmall
+    have herror : qabs (((f (x + h) - f x) / h) - df x) <=
+        (precisionAtStage stage).val :=
+      Rat.le_trans hfinite hstep
+    let q : Rat := (f (x + h) - f x) / h
+    have hupper : q - df x <= (precisionAtStage stage).val := by
+      calc
+        q - df x <= qabs (q - df x) := self_le_qabs _
+        _ <= (precisionAtStage stage).val := by simpa [q] using herror
+    have hlower : -(q - df x) <= (precisionAtStage stage).val := by
+      calc
+        -(q - df x) <= qabs (-(q - df x)) := self_le_qabs _
+        _ = qabs (q - df x) := qabs_neg _
+        _ <= (precisionAtStage stage).val := by simpa [q] using herror
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        { lo := f (x + h), hi := f (x + h) }
+        { lo := f x, hi := f x } h)
+      { lo := df x, hi := df x } stage
+    rw [QInterval.differenceQuotient_singleton]
+    unfold intervalNearAtPrecision QInterval.NearAt QInterval.width
+    constructor
+    · change q <= df x + (precisionAtStage stage).val
+      grind [Rat.sub_eq_add_neg]
+    constructor
+    · change df x <= q + (precisionAtStage stage).val
+      grind [Rat.sub_eq_add_neg]
+    constructor <;> grind [Rat.sub_eq_add_neg]
+
+end CenteredSecantDerivativeBound
 
 /-- The monomial secant estimate as reusable quantitative data. -/
 def normalizedMonomialSecantBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :
@@ -308,6 +441,19 @@ def taylorPrefixShift (coeffs : FormalPowerSeries.Coeffs) : Nat -> Rat -> Rat
   | terms + 1 =>
       taylorDerivativePrefix (FormalPowerSeries.coefficientShift coeffs) terms
 
+/-- A finite Taylor polynomial centered at the rational point `a`.
+
+The coefficient stream remains the usual stream in powers of `(x - a)`, so
+the linear coefficient has the same local meaning at every rational center. -/
+def taylorPrefixAt (a : Rat) (coeffs : FormalPowerSeries.Coeffs)
+    (terms : Nat) (x : Rat) : Rat :=
+  taylorPrefix coeffs terms (x - a)
+
+/-- The coefficient-shift polynomial paired with `taylorPrefixAt`. -/
+def taylorPrefixShiftAt (a : Rat) (coeffs : FormalPowerSeries.Coeffs)
+    (terms : Nat) (x : Rat) : Rat :=
+  taylorPrefixShift coeffs terms (x - a)
+
 /-- At the basepoint, every nonconstant finite derivative prefix is its
 constant coefficient.  This elementary identity is the exact algebraic core
 of reading the linear Taylor coefficient as the slope at zero. -/
@@ -335,6 +481,15 @@ theorem taylorPrefixShift_at_zero (coeffs : FormalPowerSeries.Coeffs)
   rw [show terms + 2 = (terms + 1) + 1 by omega]
   rw [taylorPrefixShift, taylorDerivativePrefix_at_zero]
   simp [FormalPowerSeries.coefficientShift]
+
+/-- The coefficient-shift polynomial of a finite Taylor expansion takes the
+value `c₁` at its declared rational basepoint. -/
+theorem taylorPrefixShiftAt_at_basepoint (a : Rat)
+    (coeffs : FormalPowerSeries.Coeffs) (terms : Nat) :
+    taylorPrefixShiftAt a coeffs (terms + 2) a = coeffs 1 := by
+  unfold taylorPrefixShiftAt
+  rw [Rat.sub_self]
+  exact taylorPrefixShift_at_zero coeffs terms
 
 /-- Every finite rational Taylor primitive carries an explicit secant bound.
 The proof is structural: add the next normalized monomial, then scale it by
@@ -390,6 +545,34 @@ def taylorPrefix_hasDerivativeOnInterval
       (FunctionOnInterval.exactRat (taylorPrefix coeffs terms) a b)
       (FunctionOnInterval.exactRat (taylorPrefixShift coeffs terms) a b) :=
   (taylorPrefixSecantBound C coeffs hC1 terms).toHasDerivativeOnInterval
+    a b hleft hright
+
+/-- The finite Taylor--Lagrange secant bound transports to any rational
+expansion point.  The symmetric box is expressed in the local coordinate
+`x - basepoint`. -/
+def taylorPrefixAtSecantBound (C basepoint : Rat)
+    (coeffs : FormalPowerSeries.Coeffs) (hC1 : 1 <= C) (terms : Nat) :
+    CenteredSecantDerivativeBound basepoint C
+      (taylorPrefixAt basepoint coeffs terms)
+      (taylorPrefixShiftAt basepoint coeffs terms) := by
+  simpa [taylorPrefixAt, taylorPrefixShiftAt] using
+    SecantDerivativeBound.translate basepoint
+      (taylorPrefixSecantBound C coeffs hC1 terms)
+
+/-- A finite Taylor polynomial centered at any rational basepoint has the
+coefficient-shift polynomial as its interval derivative.  Together with
+`taylorPrefixShiftAt_at_basepoint`, this makes `c₁` an actual certified slope
+at the point where the expansion is centered. -/
+def taylorPrefixAt_hasDerivativeOnInterval
+    (basepoint : Rat) (coeffs : FormalPowerSeries.Coeffs)
+    (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a - basepoint) (hright : b - basepoint <= C)
+    (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat (taylorPrefixAt basepoint coeffs terms) a b)
+      (FunctionOnInterval.exactRat (taylorPrefixShiftAt basepoint coeffs terms) a b) :=
+  CenteredSecantDerivativeBound.toHasDerivativeOnInterval
+    (taylorPrefixAtSecantBound C basepoint coeffs hC1 terms)
     a b hleft hright
 
 /-- The ordinary finite factorial-series prefix for exponential. -/
