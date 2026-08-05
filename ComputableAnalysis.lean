@@ -7,6 +7,7 @@ import ComputableAnalysis.AlgebraicFunctions
 import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.ArctanPresentations
 import ComputableAnalysis.ArctanRectanglePi
+import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.Basic
 import ComputableAnalysis.Basel
 import ComputableAnalysis.Calculus

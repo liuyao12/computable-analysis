@@ -376,11 +376,28 @@ def quadratic_ftc_box(n):
 \begin{definition}[Reciprocal-tail compactification]
 \label{def:reciprocal-tail-compactification}
 \lean{ComputableAnalysis.IntegralIdentities.ReciprocalTailCompactification}
-\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral}
+\lean{ComputableAnalysis.CauchyPi.raw}
+\lean{ComputableAnalysis.CauchyPi.raw_valid}
 \leanok
 The projective chart replaces a full-line reciprocal tail by a rational
 compact-interval density and an explicit tail box.
 \end{definition}
+
+\begin{theorem}[The full-line Cauchy computation]
+\label{thm:cauchy-full-line-pi}
+\lean{ComputableAnalysis.CauchyPi.raw_compute_eq_rectangleRaw}
+\lean{ComputableAnalysis.CauchyPi.raw_equiv_piCircleArea}
+\uses{def:reciprocal-tail-compactification,thm:arctan-integral-pi}
+\leanok
+The reciprocal substitution folds both tails of
+\(1/(1+x^2)\) into the same literal box as four unit-interval reciprocal-square
+rectangle sums, stage for stage.  Thus
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{1+x^2}\ \Equiv\ \pi_{\rm area}.
+\]
+This uses a finite rational compactification, rather than an improper-integral
+limit in an ambient completed real line.
+\end{theorem}
 
 \begin{definition}[The reciprocal quartic test kernel]
 \label{def:reciprocal-quartic-test-kernel}
@@ -398,7 +415,7 @@ The affine dyadic boxes have width \(64/2^n\).
 \label{thm:reciprocal-quartic-projective-substitution}
 \lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_equiv_cauchyFullLine}
 \lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea}
-\uses{def:reciprocal-quartic-test-kernel}
+\uses{def:reciprocal-quartic-test-kernel,thm:cauchy-full-line-pi}
 \leanok
 The finite compact boxes and full-line Cauchy boxes meet in a shrinking
 rational envelope; hence the compact quartic evaluator is equivalent to
