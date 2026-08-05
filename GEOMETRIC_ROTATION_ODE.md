@@ -67,9 +67,16 @@ GeometricRotationODE.pointIm_differenceQuotient_sub_derivative
 ```
 
 Each error is literally a rational fraction with an explicit factor of the
-step.  The next proof package bounds the remaining factors on a rational chart
-interval and packages that bound in the project's epsilon--delta interval
-derivative interface.
+step.  On the unit chart the remaining factors are now bounded directly:
+
+```lean
+GeometricRotationODE.pointRe_secant_error_le_twelve
+GeometricRotationODE.pointIm_secant_error_le_twelve
+```
+
+Both estimates are `<= 12 * qabs h` whenever the two rational endpoints lie
+in `[0,1]`.  The next package packages this explicit modulus in the project's
+epsilon--delta interval derivative interface.
 
 A complex/vector derivative wrapper and the sector-area reparametrization then
 lead to Peano--Baker/Volterra uniqueness.  That comparison would identify the
