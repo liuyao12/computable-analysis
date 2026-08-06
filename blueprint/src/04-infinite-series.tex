@@ -712,6 +712,8 @@ identities:
 \lean{ComputableAnalysis.FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four}
 \lean{ComputableAnalysis.ExpProofs.uniformExpQuotientPrecision}
 \lean{ComputableAnalysis.ExpProofs.uniformExpTailMagnitude_le_quotientTolerance}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSelfDerivativeEvalPrecision}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_secant_error_le}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_at_zero}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShiftAt_at_basepoint}
 \uses{def:formal-power-series}
@@ -742,7 +744,9 @@ magnitude is proved below that budget before any quotient is formed.
 For a finite prefix with a linear term, the coefficient-shift polynomial takes
 the value \(c_1\) at its declared rational expansion point;
 Chapter~\ref{ch:effective-calculus} then supplies the rational secant
-certificate that makes that value an actual derivative.
+certificate that makes that value an actual derivative.  The infinite-series
+tail transport is an analytic result of the next chapter, not a rule of
+formal coefficient algebra.
 \end{theorem}
 
 \section{Euler's Basel Problem}

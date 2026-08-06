@@ -234,29 +234,32 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   algebra only. `FinitePolynomial.expTaylorPrefix_succ` records the literal
   one-term extension, while
   `FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` supplies the
-  common bounded-box factorial majorant needed for a future uniform tail
-  certificate. `ExpProofs.uniformExpRaw` now realizes that certificate on
+  common bounded-box factorial majorant for a uniform tail
+  certificate. `ExpProofs.uniformExpRaw` realizes that certificate on
   `|x| <= 2`: its fixed-stage boxes are valid and geometrically shrinking,
   and `uniformExpRaw_equiv_expPowerSeries` proves stagewise agreement with the
-  selected adaptive exponential evaluator. An analytic derivative still
-  requires the finite secant estimate plus a step-aware transport of the two
-  tail boxes. `ExpProofs.uniformExpOnUnit` now exposes this schedule as an
+  selected adaptive exponential evaluator. `ExpProofs.uniformExpOnUnit`
+  exposes this schedule as an
   interval function, pointwise equivalent to the selected exponential. The
   derivative of the next finite prefix is exactly its common center, and
   `uniformExpTaylorPrefix_secant_error` bounds the residual finite secant
   error. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four` now
   proves the uniform coefficient `34` for every factorial prefix on
-  `|x| <= 2`, and the uniform schedule inherits it. What remains is the
-  step-aware transport of the two tail boxes through the quotient.
-  That transport now has its executable stage selection:
+  `|x| <= 2`, and the uniform schedule inherits it. The step-aware
+  tail transport has an executable stage selection:
   `uniformExpQuotientPrecision h hh n` makes the shared factorial magnitude
   no more than `precisionAtStage n * |h| / 24`, while
   `uniformExpSelfDerivativeStepPrecision` reserves half the requested output
-  precision for the `34 |h|` finite secant error. The pending proof is only
-  the resulting interval-endpoint algebra.
-  The
-  next end-to-end gate is a selected exponential raw that proves `f' = f` on
-  an interval, followed by uniqueness and the logarithm relation. The literal rational-input
+  precision for the `34 |h|` finite secant error.
+  `uniformExpCenter_secant_error_le` and
+  `uniformExpOnUnit_hasDerivativeOnInterval` complete the interval-endpoint
+  algebra: the common-prefix evaluator proves the full two-sided
+  `E' = E` certificate on `[0,1]`. Its exact zero value is separately
+  certified, so `uniformExpOnUnit_solvesSelfDerivative` is the first
+  constructive initial-value solution record. This does not silently
+  transfer the derivative to the pointwise-equivalent adaptive evaluator;
+  that representation-closure theorem, uniqueness, and the logarithm
+  relation are the next gates. The literal rational-input
   evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for
   every `x : Rat`: its finite rational series boxes are nested and have the
   public geometric rate `ExpProofs.expPowerSeriesRate x`, with ratio `1/2`.
@@ -266,9 +269,9 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   restriction. When zero is in that interval,
   `ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies the exact
   function-level initial equivalence required by the ODE interface. This is a
-  certified representation layer, not yet a global analytic self-derivative
-  theorem or a bridge to the other definitions. Its finite-difference bridge is
-  now explicit: `expTaylorQuadratic x = 1 + x + x*x/2`, and
+  certified representation layer, not yet a derivative-transport bridge to
+  the other definitions. Its finite-difference bridge is now explicit:
+  `expTaylorQuadratic x = 1 + x + x*x/2`, and
   `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` certifies its
   full two-sided interval derivative `1 + x` on every rational subinterval of
   a supplied bounded symmetric box, using the reusable quantitative
@@ -279,8 +282,8 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   tail-enclosed power-series evaluator itself has forward derivative `1` at
   zero. Its finite stage-zero loop has a positive-tail-plus-radius budget of
   `O(h^2)` on `0 < h <= 1/2`, so quotienting gives an explicit first-order
-  enclosure. This remains a local boundary theorem, not the missing global
-  self-derivative theorem for `expPowerSeries`. The
+  enclosure. This remains a local boundary theorem for the adaptive
+  representative. The
   constant-level compound-interest representative is now additionally packaged as the
   positive base `ExpProofs.ePositive`: its lower interval endpoint is always
   at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural

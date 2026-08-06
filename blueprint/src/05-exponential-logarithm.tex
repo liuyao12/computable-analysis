@@ -191,6 +191,30 @@ algorithms as named representations.  Their common abstract value is only
 introduced through an explicit agreement certificate.
 \end{definition}
 
+\begin{theorem}[A certified exponential initial-value solution]
+\label{thm:uniform-exponential-self-derivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_zero_equiv_one}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
+\leanok
+The common-prefix factorial evaluator on \([0,1]\) satisfies the literal
+two-sided interval certificate
+\[
+  E'=E,\qquad E(0)=1.
+\]
+At a nonzero rational step \(h\), both endpoint boxes are evaluated at the
+stage selected from \(\varepsilon\lvert h\rvert/24\).  The finite Taylor
+prefix spends at most \(\varepsilon/2\), using its uniform \(34\lvert h\rvert\)
+secant bound; the two tail boxes fill the remaining rational interval budget.
+This is the analytic Taylor--remainder bridge promised in Chapter~4.  The
+evaluator is pointwise equivalent to the selected adaptive series
+representation, but the derivative is deliberately certified on this
+common-prefix representation; transporting derivatives across equivalent
+representations is a later closure theorem.
+\end{theorem}
+
 \begin{definition}[Logarithm]
 \label{def:logarithm-integral}
 \lean{ComputableAnalysis.exp.logFromIntegral}
@@ -270,12 +294,13 @@ capability, not a table of antiderivatives.
 
 \begin{remark}[The deliberately long ODE route]
 \label{rem:ode-exp-log-pi-route}
-Once the three exponential representations separately prove
-\(E'=E,E(0)=1\),
-linear ODE uniqueness identifies them; their positive inverse becomes the
-canonical logarithm; the preceding endpoint transport then renames the
-integration-by-parts endpoint.  This is a dependency route, not a ninth \(\pi\)
-scoreboard cell.
+The common-prefix factorial representation has now proved
+\(E'=E,E(0)=1\) on its unit chart.  Once the other exponential
+representations have corresponding certificates and constructive linear ODE
+uniqueness is proved, those representations are identified; their positive
+inverse becomes the canonical logarithm; the preceding endpoint transport
+then renames the integration-by-parts endpoint.  This is a dependency route,
+not a ninth \(\pi\) scoreboard cell.
 \end{remark}
 
 \section{Complex logarithm and Euler's identity}

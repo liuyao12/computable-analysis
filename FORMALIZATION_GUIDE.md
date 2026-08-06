@@ -273,8 +273,15 @@ the common schedule. For `h ≠ 0`, choose
 `ExpProofs.uniformExpQuotientPrecision h hh n`: its shared tail magnitude is
 at most `precisionAtStage n * |h| / 24`. Pair it with
 `uniformExpSelfDerivativeStepPrecision`, which spends at most half the
-requested tolerance on the `34 |h|` finite error. The final interval-quotient
-algebra is the only remaining self-derivative certificate field.
+requested tolerance on the `34 |h|` finite error.
+`uniformExpSelfDerivativeEvalPrecision` makes this stage choice total, and
+`uniformExpCenter_secant_error_le` combines the finite and tail errors before
+the interval quotient is assembled. The resulting
+`uniformExpOnUnit_hasDerivativeOnInterval` is a full two-sided certificate
+`E' = E` on `[0,1]`, and `uniformExpOnUnit_solvesSelfDerivative` adds the
+checked exact initial value `E(0) = 1`. It is intentionally a certificate for
+the common-prefix evaluator rather than an unproved derivative transfer to
+the pointwise-equivalent adaptive evaluator.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
