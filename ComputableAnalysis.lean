@@ -19,6 +19,7 @@ import ComputableAnalysis.ComplexPolynomial
 import ComputableAnalysis.CanonicalPiBridge
 import ComputableAnalysis.CircumferenceBridge
 import ComputableAnalysis.Differential
+import ComputableAnalysis.IntervalQuotient
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.Elementary
 import ComputableAnalysis.ElementaryFunctions
@@ -45,6 +46,7 @@ import ComputableAnalysis.ReciprocalQuarticPi
 import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.RotationCalculus
 import ComputableAnalysis.RotationTaylorBridge
+import ComputableAnalysis.RotationDerivative
 import ComputableAnalysis.RotationLift
 import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.ScalarODEUniqueness

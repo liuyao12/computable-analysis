@@ -335,9 +335,13 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   sine/cosine Taylor prefixes and checks the fixed-stage sine secant estimate
   `uniformRotationSinCenter_secant_error`. Its odd-prefix recurrence is now
   bounded by the exponential factorial budget, giving the uniform finite
-  theorem `uniformRotationSinCenter_secant_error_le_thirty_four`. This is not
-  yet a derivative theorem: the divided-tail budget for `sin' = cos`,
-  `cos' = -sin` remains open. The continuous-simplex
+  theorem `uniformRotationSinCenter_secant_error_le_thirty_four`.
+  `RotationDerivative.uniformRotationSinOnTwo_hasDerivativeOnInterval` now
+  combines that finite `34 * |h|` error with a step-aware factorial stage
+  selected from `precisionAtStage n * |h| / 48`, proving the full two-sided
+  raw interval certificate `sin' = cos` on `[-2,2]`. The derivative belongs
+  to this common-prefix evaluator; derivative transport to equivalent
+  representations and `cos' = -sin` remain open. The continuous-simplex
   interpretation and the rotation/geometric identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that

@@ -9,7 +9,9 @@ bounded rational chart `[-2,2]`.  This module turns its already checked
 finite input-Lipschitz estimate into the project's literal rational
 epsilon--delta continuity predicate.  It deliberately stops short of a
 derivative claim: proving `sin' = cos` still needs a finite *secant* estimate
-which identifies the linear term of two nearby prefixes.
+which identifies the linear term of two nearby prefixes.  That derivative
+certificate now lives in `ComputableAnalysis.RotationDerivative`, leaving
+this module as the continuity layer it depends on.
 -/
 
 namespace ComputableAnalysis

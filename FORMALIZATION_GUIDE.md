@@ -300,8 +300,10 @@ has the \(N\)-term shifted target. The exact dropped-edge calculation is
 `taylorPrefixShift_succ_eq_of_coefficientShift`; attach an independent tail
 certificate before claiming a derivative for an evaluated sine or cosine raw.
 
-For the tail-enclosed rotation evaluator itself, import
-`ComputableAnalysis.RotationCalculus`.  Its common factorial schedule has
+For the tail-enclosed rotation evaluator,
+`ComputableAnalysis.RotationCalculus` provides the common factorial schedule
+and `ComputableAnalysis.RotationDerivative` supplies its first analytic
+derivative certificate. The schedule has
 checked literal rational epsilon--delta continuity on `[-2,2]` for both
 coordinates: `uniformRotationCosOnTwo_epsilonDeltaContinuous` and
 `uniformRotationSinOnTwo_epsilonDeltaContinuous` use the explicit modulus
@@ -314,11 +316,15 @@ Peano--Baker centers with the finite formal Taylor prefixes
 the finite shifted sine prefix with the cosine prefix
 (`sinePrefixShift_eq_cosinePrefix`), and supplies the fixed-stage rational
 secant certificate `uniformRotationSinCenter_secant_error`. Its direct odd
-prefix recurrence has now been majorized by the checked factorial exponential
-budget, yielding `uniformRotationSinCenter_secant_error_le_thirty_four`: a
-single `34 * |h|` bound on every finite common-stage sine center. Thus the
-whole finite two-point calculation is checked. `sin' = cos` and `cos' = -sin`
-still require the evaluator-tail budget after division by the rational step.
+prefix recurrence is majorized by the checked factorial exponential budget,
+yielding `uniformRotationSinCenter_secant_error_le_thirty_four`: a single
+`34 * |h|` bound on every finite common-stage sine center.
+`uniformRotationSinOnTwo_hasDerivativeOnInterval` now spends the remaining
+error budget on a stage chosen from `eps * |h| / 48`; together with the
+reusable symmetric-box quotient calculation in `IntervalQuotient`, this is a
+full two-sided literal certificate `sin' = cos` for the common-prefix
+evaluators on `[-2,2]`. It does not transfer that derivative to another
+pointwise-equivalent sine representation, and `cos' = -sin` remains open.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -973,9 +979,12 @@ encloses those even prefixes in valid nested complex boxes, and
 series computation at rational `i*T`; `rotationCosRaw` and `rotationSinRaw`
 are its valid coordinate raw reals. `RotationCalculus` additionally turns the
 shared bounded-input prefix and its `16 * |x-y|` box transport into literal
-rational epsilon--delta continuity for each coordinate on `[-2,2]`. It is
-not yet a summed continuous matrix series, a raw trigonometric derivative,
-geometric trigonometry, or Euler identity.
+rational epsilon--delta continuity for each coordinate on `[-2,2]`.
+`RotationDerivative.uniformRotationSinOnTwo_hasDerivativeOnInterval` now
+adds the full raw interval derivative `sin' = cos` for that same
+common-prefix chart. It is not yet a summed continuous matrix series,
+the companion `cos' = -sin` certificate, geometric trigonometry, or Euler
+identity.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a

@@ -250,6 +250,7 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.sinePrefixShift_eq_cosinePrefix}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinCenter_secant_error}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinCenter_secant_error_le_thirty_four}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
@@ -309,9 +310,13 @@ coordinates are the corresponding finite formal sine and cosine prefixes,
 their shifted sine prefix is the cosine prefix, and the sine center secant has
 the displayed Taylor--Lagrange error coefficient at every fixed stage. The
 odd-prefix recurrence is a subseries of the checked exponential factorial
-budget, so Lean also gives the single finite bound \(34\lvert h\rvert\) on
-the whole chart. This is not yet \(S'=C\) or \(C'=-S\): it remains to spend
-a tail budget after division by the rational step.
+budget, so Lean gives the single finite bound \(34\lvert h\rvert\) on the
+whole chart. A common evaluation stage selected from
+\(\varepsilon\lvert h\rvert/48\) pays the divided endpoint tails; combining
+it with the finite bound now gives the full rational-interval certificate
+\(S'=C\) on \([-2,2]\). This is a theorem about the common-prefix
+evaluator itself; derivative transport to an equivalent representation and
+the companion \(C'=-S\) certificate remain separate.
 The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
 quarter-turn raw.  The remaining identification is specifically between the
