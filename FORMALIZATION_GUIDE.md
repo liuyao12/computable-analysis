@@ -282,6 +282,12 @@ the interval quotient is assembled. The resulting
 checked exact initial value `E(0) = 1`. It is intentionally a certificate for
 the common-prefix evaluator rather than an unproved derivative transfer to
 the pointwise-equivalent adaptive evaluator.
+The centered chart is now checked as well:
+`uniformExpOnSymmetricUnit_hasDerivativeOnInterval` proves the same
+certificate on `[-1,1]`, where the endpoint hypothesis gives `|h| <= 2`;
+`uniformExpOnSymmetricUnit_solvesSelfDerivative` packages its initial value.
+This is the useful local chart for identities that use both signs of the
+exponent.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.

@@ -256,7 +256,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   algebra: the common-prefix evaluator proves the full two-sided
   `E' = E` certificate on `[0,1]`. Its exact zero value is separately
   certified, so `uniformExpOnUnit_solvesSelfDerivative` is the first
-  constructive initial-value solution record. This does not silently
+  constructive initial-value solution record. The same construction is now
+  checked on the centered chart `[-1,1]`:
+  `uniformExpOnSymmetricUnit_hasDerivativeOnInterval` uses the explicit
+  endpoint consequence `|h| <= 2`, and
+  `uniformExpOnSymmetricUnit_solvesSelfDerivative` supplies the corresponding
+  initial-value record. This does not silently
   transfer the derivative to the pointwise-equivalent adaptive evaluator;
   that representation-closure theorem, uniqueness, and the logarithm
   relation are the next gates. The literal rational-input

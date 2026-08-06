@@ -193,21 +193,22 @@ introduced through an explicit agreement certificate.
 
 \begin{theorem}[A certified exponential initial-value solution]
 \label{thm:uniform-exponential-self-derivative}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_hasDerivativeOnInterval}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_zero_equiv_one}
-\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_solvesSelfDerivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_equivalent_expPowerSeries}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_zero_equiv_one}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
 \leanok
-The common-prefix factorial evaluator on \([0,1]\) satisfies the literal
+The common-prefix factorial evaluator on \([-1,1]\) satisfies the literal
 two-sided interval certificate
 \[
   E'=E,\qquad E(0)=1.
 \]
 At a nonzero rational step \(h\), both endpoint boxes are evaluated at the
-stage selected from \(\varepsilon\lvert h\rvert/24\).  The finite Taylor
-prefix spends at most \(\varepsilon/2\), using its uniform \(34\lvert h\rvert\)
-secant bound; the two tail boxes fill the remaining rational interval budget.
+stage selected from \(\varepsilon\lvert h\rvert/24\).  The two endpoints give
+\(\lvert h\rvert\le2\).  The finite Taylor prefix spends at most
+\(\varepsilon/2\), using its uniform \(34\lvert h\rvert\) secant bound; the
+two tail boxes fill the remaining rational interval budget.
 This is the analytic Taylor--remainder bridge promised in Chapter~4.  The
 evaluator is pointwise equivalent to the selected adaptive series
 representation, but the derivative is deliberately certified on this

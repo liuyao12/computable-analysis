@@ -3674,6 +3674,80 @@ private theorem uniformExp_tail_transport_budgets
         grind [Rat.mul_assoc, Rat.mul_comm]
   exact ⟨height, hfour⟩
 
+/-- The same tail allowance remains sufficient when both endpoints are in a
+diameter-two interval.  The center budget is intentionally looser than on a
+unit interval, while the quotient and output-box widths retain the same
+step-scaled estimates. -/
+private theorem uniformExp_tail_transport_budgets_of_step_le_two
+    {h t : Rat} (hh : h ≠ 0) (habs : qabs h <= 2)
+    (eps : QPos) (ht : t <= eps.val * qabs h / 24) :
+    6 * t / qabs h + 2 * t <= eps.val / 2 /\
+      8 * t / qabs h <= eps.val / 3 /\
+      4 * t <= eps.val / 3 := by
+  have hApos : 0 < qabs h := qabs_pos_of_ne hh
+  have hAinv0 : 0 <= (qabs h)⁻¹ := Rat.le_of_lt ((Rat.inv_pos).2 hApos)
+  have hcancel : qabs h * (qabs h)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ (Rat.ne_of_gt hApos)
+  have htdiv : t / qabs h <= eps.val / 24 := by
+    calc
+      t / qabs h = t * (qabs h)⁻¹ := Rat.div_def _ _
+      _ <= (eps.val * qabs h / 24) * (qabs h)⁻¹ :=
+        Rat.mul_le_mul_of_nonneg_right ht hAinv0
+      _ = eps.val / 24 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hsix : 6 * t / qabs h <= eps.val / 4 := by
+    calc
+      6 * t / qabs h = 6 * (t / qabs h) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc]
+      _ <= 6 * (eps.val / 24) :=
+        Rat.mul_le_mul_of_nonneg_left htdiv (by native_decide)
+      _ = eps.val / 4 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have height : 8 * t / qabs h <= eps.val / 3 := by
+    calc
+      8 * t / qabs h = 8 * (t / qabs h) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc]
+      _ <= 8 * (eps.val / 24) :=
+        Rat.mul_le_mul_of_nonneg_left htdiv (by native_decide)
+      _ = eps.val / 3 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have heps12pos : 0 < eps.val / 12 := by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide))
+  have htwo : 2 * t <= eps.val / 6 := by
+    calc
+      2 * t <= 2 * (eps.val * qabs h / 24) :=
+        Rat.mul_le_mul_of_nonneg_left ht (by native_decide)
+      _ = (eps.val / 12) * qabs h := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= (eps.val / 12) * 2 :=
+        Rat.mul_le_mul_of_nonneg_left habs (Rat.le_of_lt heps12pos)
+      _ = eps.val / 6 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hfour : 4 * t <= eps.val / 3 := by
+    calc
+      4 * t = 2 * (2 * t) := by grind [Rat.mul_assoc]
+      _ <= 2 * (eps.val / 6) :=
+        Rat.mul_le_mul_of_nonneg_left htwo (by native_decide)
+      _ = eps.val / 3 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  constructor
+  · calc
+      6 * t / qabs h + 2 * t <= eps.val / 4 + eps.val / 6 :=
+        rat_add_le_add hsix htwo
+      _ <= eps.val / 2 := by
+        have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  exact ⟨height, hfour⟩
+
 private theorem uniformExp_rat_pow_add (q : Rat) (m n : Nat) :
     q ^ (m + n) = q ^ m * q ^ n := by
   induction n with
@@ -4518,6 +4592,166 @@ def uniformExpOnUnit_solvesSelfDerivative :
     simpa [RealRaw.ofRat] using RealRaw.ofRat_valid (1 : Rat)
   initial_value_equiv := by
     exact uniformExpOnUnit_zero_equiv_one
+
+/-- The same common-prefix evaluator, now exposed on the centered interval
+`[-1, 1]`.  This is the natural local chart for analytic identities that need
+both positive and negative rational inputs. -/
+def uniformExpOnSymmetricUnit : FunctionOnInterval where
+  raw :=
+    { definedAt := fun x => (-1 : Rat) <= x /\ x <= 1
+      compute := fun x _ => (uniformExpRaw x).compute }
+  lower := -1
+  upper := 1
+  defined_on := fun _ hx => hx
+  valid_on := by
+    intro x hx
+    have hx' : (-1 : Rat) <= x /\ x <= 1 := by
+      simpa [inDomainInterval] using hx
+    have hqabsOne : qabs x <= 1 :=
+      qabs_le_of_neg_le_le hx'.1 hx'.2
+    exact uniformExpRaw_valid x (Rat.le_trans hqabsOne (by native_decide))
+
+theorem uniformExpOnSymmetricUnit_compute (x : Rat)
+    (hx : inDomainInterval (-1 : Rat) 1 x) (n : Nat) :
+    uniformExpOnSymmetricUnit.compute x hx n = (uniformExpRaw x).compute n := rfl
+
+/-- On the centered unit interval the common-prefix representation and the
+selected adaptive exponential are pointwise equivalent. -/
+theorem uniformExpOnSymmetricUnit_equivalent_expPowerSeries :
+    FunctionOnInterval.Equivalent uniformExpOnSymmetricUnit
+      (expPowerSeriesOnInterval (-1) 1) := by
+  refine ⟨rfl, rfl, ?_⟩
+  intro x hxuniform hxadaptive
+  change (uniformExpRaw x).Equiv (expPowerSeries x)
+  have hx : (-1 : Rat) <= x /\ x <= 1 := by
+    simpa [inDomainInterval] using hxuniform
+  apply uniformExpRaw_equiv_expPowerSeries x
+  exact Rat.le_trans (qabs_le_of_neg_le_le hx.1 hx.2) (by native_decide)
+
+/-- The common-prefix exponential satisfies its own two-sided interval
+derivative certificate on `[-1,1]`.  The only new estimate beyond the unit
+chart is `|h| <= 2`; the `ε |h| / 24` tail stage still pays every quotient and
+output-box error. -/
+def uniformExpOnSymmetricUnit_hasDerivativeOnInterval :
+    HasDerivativeOnInterval uniformExpOnSymmetricUnit uniformExpOnSymmetricUnit where
+  same_lower := rfl
+  same_upper := rfl
+  stepPrecision := uniformExpSelfDerivativeStepPrecision
+  evalPrecision := fun _x h n => uniformExpSelfDerivativeEvalPrecision h n
+  close := by
+    intro x h n hx hxh _hdx hh hsmall
+    have hx' : (-1 : Rat) <= x /\ x <= 1 := by
+      simpa [inDomainInterval] using hx
+    have hxh' : (-1 : Rat) <= x + h /\ x + h <= 1 := by
+      simpa [inDomainInterval] using hxh
+    have hqx : qabs x <= 2 :=
+      Rat.le_trans (qabs_le_of_neg_le_le hx'.1 hx'.2) (by native_decide)
+    have hqxh : qabs (x + h) <= 2 :=
+      Rat.le_trans (qabs_le_of_neg_le_le hxh'.1 hxh'.2) (by native_decide)
+    have habs : qabs h <= 2 := by
+      by_cases hnonneg : 0 <= h
+      · rw [qabs_eq_self_of_nonneg hnonneg]
+        grind [Rat.sub_eq_add_neg]
+      · have hnonpos : h <= 0 := by grind
+        rw [qabs_eq_neg_of_nonpos hnonpos]
+        grind [Rat.sub_eq_add_neg]
+    let eps : QPos := precisionAtStage n
+    let stage : Nat := uniformExpQuotientPrecision h hh n
+    have hstage : uniformExpSelfDerivativeEvalPrecision h n = stage := by
+      dsimp [stage]
+      exact uniformExpSelfDerivativeEvalPrecision_of_ne h hh n
+    have htail : uniformExpTailMagnitude stage <=
+        eps.val * qabs h / 24 := by
+      dsimp [stage, eps]
+      simpa [uniformExpQuotientTailTolerance] using
+        uniformExpTailMagnitude_le_quotientTolerance h hh n
+    have hfinite : qabs h * 34 <= eps.val / 2 := by
+      dsimp [eps]
+      exact uniformExpSelfDerivative_finite_error_le_half_precision n hsmall
+    have htransport :=
+      uniformExp_tail_transport_budgets_of_step_le_two hh habs eps htail
+    have hbudget :
+        (qabs h * 34 + 2 * uniformExpTailMagnitude stage / qabs h) +
+            2 * uniformExpTailRadius stage / qabs h +
+              uniformExpTailRadius stage <= eps.val := by
+      have htailBudget : 6 * uniformExpTailMagnitude stage / qabs h +
+          2 * uniformExpTailMagnitude stage <= eps.val / 2 := htransport.1
+      calc
+        (qabs h * 34 + 2 * uniformExpTailMagnitude stage / qabs h) +
+            2 * uniformExpTailRadius stage / qabs h +
+              uniformExpTailRadius stage =
+            qabs h * 34 +
+              (6 * uniformExpTailMagnitude stage / qabs h +
+                2 * uniformExpTailMagnitude stage) := by
+                unfold uniformExpTailRadius
+                grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+        _ <= eps.val / 2 + eps.val / 2 := rat_add_le_add hfinite htailBudget
+        _ <= eps.val := by
+          have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+          grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hquotientWidth :
+        4 * uniformExpTailRadius stage / qabs h <= eps.val := by
+      have htailWidth : 8 * uniformExpTailMagnitude stage / qabs h <=
+          eps.val / 3 := htransport.2.1
+      calc
+        4 * uniformExpTailRadius stage / qabs h =
+            8 * uniformExpTailMagnitude stage / qabs h := by
+              unfold uniformExpTailRadius
+              grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+        _ <= eps.val / 3 := htailWidth
+        _ <= eps.val := by
+          have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+          grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hderivativeWidth : 2 * uniformExpTailRadius stage <= eps.val := by
+      have htailWidth : 4 * uniformExpTailMagnitude stage <= eps.val / 3 :=
+        htransport.2.2
+      calc
+        2 * uniformExpTailRadius stage =
+            4 * uniformExpTailMagnitude stage := by
+              unfold uniformExpTailRadius
+              grind [Rat.mul_assoc]
+        _ <= eps.val / 3 := htailWidth
+        _ <= eps.val := by
+          have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+          grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+    have hcenter := uniformExpCenter_secant_error_le hh hqx hqxh stage
+    rw [hstage]
+    change QInterval.NearAt
+      (QInterval.differenceQuotient
+        (uniformExpBox (x + h) stage) (uniformExpBox x stage) h)
+      (uniformExpBox x stage) eps
+    unfold uniformExpBox
+    exact intervalAround_differenceQuotient_near_intervalAround
+      (uniformExpCenter x stage) (uniformExpCenter (x + h) stage)
+      (uniformExpCenter x stage) (uniformExpTailRadius stage) h
+      (qabs h * 34 + 2 * uniformExpTailMagnitude stage / qabs h) eps
+      hh (by
+        unfold uniformExpTailRadius
+        exact Rat.mul_nonneg (by native_decide)
+          (uniformExpTailMagnitude_nonneg stage)) hcenter hbudget
+      hquotientWidth hderivativeWidth
+
+/-- The centered exponential chart has the exact initial value one at zero. -/
+theorem uniformExpOnSymmetricUnit_zero_equiv_one :
+    (PartialRealFunRaw.apply uniformExpOnSymmetricUnit.raw
+      uniformExpOnSymmetricUnit.valid_on (0 : Rat)
+      (uniformExpOnSymmetricUnit.defined_on 0 (by
+        constructor <;> native_decide))).Equiv (RealRaw.ofRat 1) := by
+  change (uniformExpRaw (0 : Rat)).Equiv (RealRaw.ofRat 1)
+  exact uniformExpOnUnit_zero_equiv_one
+
+/-- A centered constructive initial-value solution of `f' = f`. -/
+def uniformExpOnSymmetricUnit_solvesSelfDerivative :
+    SolvesSelfDerivativeOnInterval uniformExpOnSymmetricUnit where
+  derivative_self := uniformExpOnSymmetricUnit_hasDerivativeOnInterval
+  initial := 0
+  initial_mem := by
+    constructor <;> native_decide
+  initial_value := RealRaw.ofRat 1
+  initial_value_valid := by
+    simpa [RealRaw.ofRat] using RealRaw.ofRat_valid (1 : Rat)
+  initial_value_equiv := by
+    exact uniformExpOnSymmetricUnit_zero_equiv_one
 
 /-- The total series-function wrapper inherits the exact power-series initial
 value at zero. -/
