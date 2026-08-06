@@ -44,6 +44,7 @@ import ComputableAnalysis.RationalCircle
 import ComputableAnalysis.ReciprocalQuarticPi
 import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.RotationCalculus
+import ComputableAnalysis.RotationTaylorBridge
 import ComputableAnalysis.RotationLift
 import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.ScalarODEUniqueness

@@ -245,6 +245,10 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_epsilonDeltaContinuous}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.RotationSeries.sinePrefix_eq_taylorPrefix}
+\lean{ComputableAnalysis.RotationSeries.cosinePrefix_eq_taylorPrefix}
+\lean{ComputableAnalysis.RotationSeries.sinePrefixShift_eq_cosinePrefix}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinCenter_secant_error}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
@@ -299,9 +303,12 @@ The same common-prefix data now gives literal rational epsilon--delta
 continuity for both coordinate evaluators on \([-2,2]\): for output
 tolerance \(\varepsilon\), use \(\delta=\varepsilon/16\) and one uniform
 factorial stage at which both coordinate boxes have width at most
-\(\varepsilon\). This is a checked continuity theorem, not yet
-\(S'=C\) or \(C'=-S\); that next theorem must add a finite secant estimate
-for the two nearby prefixes and a quotient-tail budget.
+\(\varepsilon\). The finite bridge is also checked: the literal Peano--Baker
+coordinates are the corresponding finite formal sine and cosine prefixes,
+their shifted sine prefix is the cosine prefix, and the sine center secant has
+the displayed Taylor--Lagrange error coefficient at every fixed stage.  This
+is not yet \(S'=C\) or \(C'=-S\): it remains to bound that coefficient
+uniformly and to spend a tail budget after division by the rational step.
 The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
 quarter-turn raw.  The remaining identification is specifically between the

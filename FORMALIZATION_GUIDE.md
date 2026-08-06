@@ -308,9 +308,15 @@ coordinates: `uniformRotationCosOnTwo_epsilonDeltaContinuous` and
 `delta = eps / 16` together with
 `uniformRotationBoxes_widths_shrink_uniform`.  This is already suitable as a
 continuity input to a concrete integral construction. It is deliberately not
-a derivative transfer: `sin' = cos` and `cos' = -sin` still require a finite
-two-point secant estimate plus a tail budget after division by the rational
-step.
+a derivative transfer. `RotationTaylorBridge` identifies the literal
+Peano--Baker centers with the finite formal Taylor prefixes
+(`sinePrefix_eq_taylorPrefix` and `cosinePrefix_eq_taylorPrefix`), identifies
+the finite shifted sine prefix with the cosine prefix
+(`sinePrefixShift_eq_cosinePrefix`), and supplies the fixed-stage rational
+secant certificate `uniformRotationSinCenter_secant_error`. Thus the finite
+two-point calculation is now checked. `sin' = cos` and `cos' = -sin` still
+require the uniform bound on that stage-dependent coefficient and the tail
+budget after division by the rational step.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
