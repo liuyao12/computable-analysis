@@ -248,6 +248,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   proves the uniform coefficient `34` for every factorial prefix on
   `|x| <= 2`, and the uniform schedule inherits it. What remains is the
   step-aware transport of the two tail boxes through the quotient.
+  That transport now has its executable stage selection:
+  `uniformExpQuotientPrecision h hh n` makes the shared factorial magnitude
+  no more than `precisionAtStage n * |h| / 24`, while
+  `uniformExpSelfDerivativeStepPrecision` reserves half the requested output
+  precision for the `34 |h|` finite secant error. The pending proof is only
+  the resulting interval-endpoint algebra.
   The
   next end-to-end gate is a selected exponential raw that proves `f' = f` on
   an interval, followed by uniqueness and the logarithm relation. The literal rational-input

@@ -3218,6 +3218,94 @@ private theorem uniformExpBox_width_le_geometric (x : Rat) (n : Nat) :
       unfold uniformExpTailMagnitude
       grind [Rat.mul_assoc]
 
+/-- The scalar factorial tail itself has the same fixed geometric schedule as
+the enclosing boxes. -/
+private theorem uniformExpTailMagnitude_le_geometric (n : Nat) :
+    uniformExpTailMagnitude n <=
+      uniformExpTailMagnitude 0 * ((1 : Rat) / 2) ^ n := by
+  have htail := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    (C := (2 : Rat)) (N := uniformExpTailTerms 0)
+    (by native_decide) (uniform_exp_tail_start 0) n
+  change RationalMajorant.factorialTailTerm 2 (uniformExpTailTerms n) <= _
+  have hterms : uniformExpTailTerms n = uniformExpTailTerms 0 + n := by
+    unfold uniformExpTailTerms
+    omega
+  rw [hterms]
+  simpa [uniformExpTailMagnitude] using htail
+
+/-- The positive rational tail allowance assigned to a quotient with a
+nonzero rational step.  It reserves one twenty-fourth of the requested output
+precision times `|h|`, so all tail widths remain controlled after division by
+that step. -/
+def uniformExpQuotientTailTolerance (h : Rat) (hh : h ≠ 0) (n : Nat) : QPos :=
+  { val := (precisionAtStage n).val * qabs h / 24
+    property := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos
+        (Rat.mul_pos (precisionAtStage n).property
+          (qabs_pos_of_ne hh))
+        ((Rat.inv_pos).2 (by native_decide)) }
+
+/-- The common factorial stage used to evaluate both endpoints of a
+difference quotient.  Its input is the rational step and desired output
+precision, never an ambient real number. -/
+def uniformExpQuotientPrecision (h : Rat) (hh : h ≠ 0) (n : Nat) : Nat :=
+  RationalMajorant.halfDecayShift (uniformExpTailMagnitude 0)
+    (uniformExpQuotientTailTolerance h hh n)
+
+/-- At the selected quotient stage, the scalar factorial tail is at most the
+explicit `|h|`-scaled tolerance.  This is the computable tail transport that
+will be combined with the uniform finite secant bound. -/
+theorem uniformExpTailMagnitude_le_quotientTolerance
+    (h : Rat) (hh : h ≠ 0) (n : Nat) :
+    uniformExpTailMagnitude (uniformExpQuotientPrecision h hh n) <=
+      (uniformExpQuotientTailTolerance h hh n).val := by
+  let eps := uniformExpQuotientTailTolerance h hh n
+  let stage := uniformExpQuotientPrecision h hh n
+  have hbound : 0 <= uniformExpTailMagnitude 0 :=
+    uniformExpTailMagnitude_nonneg 0
+  have htail := uniformExpTailMagnitude_le_geometric stage
+  have hshift := RationalMajorant.halfDecayShift_spec hbound eps
+  exact Rat.le_trans htail hshift
+
+/-- The dyadic step schedule for the eventual two-sided self-derivative
+certificate.  The coefficient `68` reserves half of the requested precision
+for the uniform finite secant error `34 |h|`. -/
+def uniformExpSelfDerivativeStepPrecision (n : Nat) : Nat :=
+  2 ^ RationalMajorant.halfDecayShift (68 : Rat) (precisionAtStage n)
+
+/-- A step selected by `uniformExpSelfDerivativeStepPrecision` spends at most
+half the requested tolerance on the uniform finite Taylor secant error. -/
+theorem uniformExpSelfDerivative_finite_error_le_half_precision
+    {h : Rat} (n : Nat)
+    (hsmall : qabs h <=
+      1 / ((uniformExpSelfDerivativeStepPrecision n : Nat) : Rat)) :
+    qabs h * 34 <= (precisionAtStage n).val / 2 := by
+  let shift : Nat := RationalMajorant.halfDecayShift (68 : Rat)
+    (precisionAtStage n)
+  have hsmall' : qabs h <= 1 / (((2 ^ shift : Nat) : Rat)) := by
+    simpa [uniformExpSelfDerivativeStepPrecision, shift] using hsmall
+  have hscaled : qabs h * 68 <= 1 / (((2 ^ shift : Nat) : Rat)) * 68 :=
+    Rat.mul_le_mul_of_nonneg_right hsmall' (by native_decide)
+  have hgeometric : (68 : Rat) * ((1 : Rat) / 2) ^ shift <=
+      (precisionAtStage n).val := by
+    simpa [shift] using RationalMajorant.halfDecayShift_spec
+      (by native_decide : (0 : Rat) <= 68) (precisionAtStage n)
+  have hsixtyEight : qabs h * 68 <= (precisionAtStage n).val := by
+    calc
+      qabs h * 68 <= 1 / (((2 ^ shift : Nat) : Rat)) * 68 := hscaled
+      _ = 68 * ((1 : Rat) / 2) ^ shift := by
+        rw [RationalMajorant.half_pow_eq_one_div_nat_two_pow]
+        grind [Rat.mul_comm]
+      _ <= (precisionAtStage n).val := hgeometric
+  calc
+    qabs h * 34 = (qabs h * 68) / 2 := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= (precisionAtStage n).val / 2 :=
+      Rat.mul_le_mul_of_nonneg_right hsixtyEight (Rat.le_of_lt
+        ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)))
+
 private theorem uniformExp_rat_pow_add (q : Rat) (m n : Nat) :
     q ^ (m + n) = q ^ m * q ^ n := by
   induction n with

@@ -269,8 +269,12 @@ prefix has exactly the common center as derivative, while
 explicitly. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four`
 then proves the single bound `34` for every finite prefix on `|x| <= 2`, and
 `ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four` transfers it to
-the common schedule. Only the quotient transport of the two tail boxes
-remains before the self-derivative certificate.
+the common schedule. For `h ≠ 0`, choose
+`ExpProofs.uniformExpQuotientPrecision h hh n`: its shared tail magnitude is
+at most `precisionAtStage n * |h| / 24`. Pair it with
+`uniformExpSelfDerivativeStepPrecision`, which spends at most half the
+requested tolerance on the `34 |h|` finite error. The final interval-quotient
+algebra is the only remaining self-derivative certificate field.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -505,6 +509,11 @@ open ComputableAnalysis
 #check FinitePolynomial.expTaylorPrefixSecantCoefficient_le_thirty_four
 #check FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four
 #check ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four
+#check ExpProofs.uniformExpQuotientTailTolerance
+#check ExpProofs.uniformExpQuotientPrecision
+#check ExpProofs.uniformExpTailMagnitude_le_quotientTolerance
+#check ExpProofs.uniformExpSelfDerivativeStepPrecision
+#check ExpProofs.uniformExpSelfDerivative_finite_error_le_half_precision
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one

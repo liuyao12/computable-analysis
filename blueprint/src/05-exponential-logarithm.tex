@@ -70,6 +70,8 @@ that two exponential representations agree also identifies their Euler bases.
 \lean{ComputableAnalysis.ExpProofs.qabs_expTaylorPrefix_sub_uniformExpCenter_le}
 \lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error}
 \lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSelfDerivativeStepPrecision}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSelfDerivative_finite_error_le_half_precision}
 \uses{def:effective-derivative}
 The intended later analytic package is
 \[
@@ -97,8 +99,11 @@ same-stage prefixes at \(x\) and \(x+h\), attaches the two tail radii, and
 then applies the finite Taylor secant estimate.  The unit-interval wrapper is
 already pointwise equivalent to the selected exponential; the remaining
 analytic step transports the two shrinking tail boxes through the quotient.
-The finite coefficient is already uniform: it is at most (34) on
-(lvert xvertle2), independently of the factorial prefix.
+The finite coefficient is already uniform: it is at most \(34\) on
+\(\lvert x\rvert\le2\), independently of the factorial prefix.  The checked
+dyadic step schedule makes this finite part at most half the requested output
+precision; the shared tail stage is selected from
+\(\varepsilon\lvert h\rvert/24\).
 \end{remark}
 
 \begin{theorem}[Checked initial values and finite binomial bridge]
