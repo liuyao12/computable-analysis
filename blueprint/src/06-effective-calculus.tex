@@ -69,6 +69,8 @@ is explicit} \\
 \formallyproved{Full \code{HasDerivativeOnInterval} family} \\
 Common-prefix \(\sin\) on \([-2,2]\) & common-prefix \(\cos\) &
 \formallyproved{Full \code{HasDerivativeOnInterval} certificate} \\
+Common-prefix \(\cos\) on \([-2,2]\) & common-prefix \(-\sin\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} certificate} \\
 \(\exp_{\rm ps}\), \(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal streams &
 coefficient shift &
 \formallyproved{Formal Taylor data only; not an analytic derivative claim} \\
@@ -251,8 +253,9 @@ inequalities or algebraic identities for the particular function.
 \uses{def:formula-identification,thm:geometric-trig-identities,def:geometric-trig-integral-identities}
 For the common-prefix factorial rotation evaluator on \([-2,2]\), Lean
 already proves the literal interval derivative certificate \(S'=C\).
-The companion \(C'=-S\), geometric identification, and transport across
-equivalent representations remain distinct obligations.
+It also proves \(C'=-S\) against the explicit negative-sine evaluator.
+Geometric identification and transport across equivalent representations
+remain distinct obligations.
 
 For the geometric sine and cosine from the circle chapter, convexity or
 concavity is checked on intervals where the sign of the appropriate second

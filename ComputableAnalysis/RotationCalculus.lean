@@ -9,9 +9,9 @@ bounded rational chart `[-2,2]`.  This module turns its already checked
 finite input-Lipschitz estimate into the project's literal rational
 epsilon--delta continuity predicate.  It deliberately stops short of a
 derivative claim: proving `sin' = cos` still needs a finite *secant* estimate
-which identifies the linear term of two nearby prefixes.  That derivative
-certificate now lives in `ComputableAnalysis.RotationDerivative`, leaving
-this module as the continuity layer it depends on.
+which identifies the linear term of two nearby prefixes.  Those derivative
+certificates now live in `ComputableAnalysis.RotationDerivative`, leaving
+this module as the continuity layer they depend on.
 -/
 
 namespace ComputableAnalysis
@@ -51,6 +51,24 @@ def uniformRotationSinOnTwo : FunctionOnInterval where
       simpa [inDomainInterval] using hx
     exact ComplexRaw.imagPart_valid
       (uniformRotationExpRaw_valid x (qabs_le_of_neg_le_le hx'.1 hx'.2))
+
+/-- The negative of the common-prefix sine coordinate on the same bounded
+chart.  This is kept as an interval evaluator (rather than a notation for a
+completed real) so it can be the derivative target in `cos' = -sin`. -/
+def uniformRotationNegSinOnTwo : FunctionOnInterval where
+  raw :=
+    { definedAt := fun x => (-2 : Rat) <= x /\ x <= 2
+      compute := fun x _ n =>
+        (RealRaw.neg (ComplexRaw.imagPart (uniformRotationExpRaw x))).compute n }
+  lower := -2
+  upper := 2
+  defined_on := fun _ hx => hx
+  valid_on := by
+    intro x hx
+    have hx' : (-2 : Rat) <= x /\ x <= 2 := by
+      simpa [inDomainInterval] using hx
+    exact RealRaw.neg_valid (ComplexRaw.imagPart_valid
+      (uniformRotationExpRaw_valid x (qabs_le_of_neg_le_le hx'.1 hx'.2)))
 
 private theorem qabs_sub_comm (x y : Rat) : qabs (x - y) = qabs (y - x) := by
   have hneg : x - y = -(y - x) := by

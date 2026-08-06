@@ -340,8 +340,13 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   combines that finite `34 * |h|` error with a step-aware factorial stage
   selected from `precisionAtStage n * |h| / 48`, proving the full two-sided
   raw interval certificate `sin' = cos` on `[-2,2]`. The derivative belongs
-  to this common-prefix evaluator; derivative transport to equivalent
-  representations and `cos' = -sin` remain open. The continuous-simplex
+  to this common-prefix evaluator. Its companion
+  `RotationDerivative.uniformRotationCosOnTwo_hasDerivativeOnInterval`
+  now proves `cos' = -sin` against the explicit
+  `uniformRotationNegSinOnTwo` evaluator. The finite cosine prefix has one
+  dropped sine term, which is assigned a separate factorial shift and joined
+  to the divided-tail shift by `max`. Derivative transport to equivalent
+  representations remains open. The continuous-simplex
   interpretation and the rotation/geometric identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that

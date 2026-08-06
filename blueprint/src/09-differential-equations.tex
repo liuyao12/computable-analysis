@@ -243,6 +243,7 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.uniformRotationBoxes_widths_shrink_uniform}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationNegSinOnTwo}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_epsilonDeltaContinuous}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_epsilonDeltaContinuous}
 \lean{ComputableAnalysis.RotationSeries.sinePrefix_eq_taylorPrefix}
@@ -251,6 +252,9 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinCenter_secant_error}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinCenter_secant_error_le_thirty_four}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.RotationSeries.cosinePrefix_secant_error_le_thirty_four}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosCenter_secant_error_le_thirty_four_plus_edge}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
@@ -315,8 +319,11 @@ whole chart. A common evaluation stage selected from
 \(\varepsilon\lvert h\rvert/48\) pays the divided endpoint tails; combining
 it with the finite bound now gives the full rational-interval certificate
 \(S'=C\) on \([-2,2]\). This is a theorem about the common-prefix
-evaluator itself; derivative transport to an equivalent representation and
-the companion \(C'=-S\) certificate remain separate.
+evaluator itself. The companion \(C'=-S\) is checked on that same chart as
+well: the finite cosine prefix drops its last sine term, so its evaluation
+stage is the maximum of a factorial edge-term shift and the usual divided
+tail shift. Derivative transport to an equivalent representation remains
+separate.
 The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
 quarter-turn raw.  The remaining identification is specifically between the

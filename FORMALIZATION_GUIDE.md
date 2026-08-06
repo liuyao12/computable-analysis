@@ -323,8 +323,12 @@ yielding `uniformRotationSinCenter_secant_error_le_thirty_four`: a single
 error budget on a stage chosen from `eps * |h| / 48`; together with the
 reusable symmetric-box quotient calculation in `IntervalQuotient`, this is a
 full two-sided literal certificate `sin' = cos` for the common-prefix
-evaluators on `[-2,2]`. It does not transfer that derivative to another
-pointwise-equivalent sine representation, and `cos' = -sin` remains open.
+evaluators on `[-2,2]`. The companion is now checked too:
+`uniformRotationCosOnTwo_hasDerivativeOnInterval` proves `cos' = -sin`
+against `uniformRotationNegSinOnTwo`. A finite cosine prefix drops its final
+sine term; Lean bounds that term by its own factorial schedule and evaluates
+at the maximum of this edge shift and the divided-tail shift. Neither theorem
+silently transfers across a pointwise-equivalent representation.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -982,9 +986,10 @@ shared bounded-input prefix and its `16 * |x-y|` box transport into literal
 rational epsilon--delta continuity for each coordinate on `[-2,2]`.
 `RotationDerivative.uniformRotationSinOnTwo_hasDerivativeOnInterval` now
 adds the full raw interval derivative `sin' = cos` for that same
-common-prefix chart. It is not yet a summed continuous matrix series,
-the companion `cos' = -sin` certificate, geometric trigonometry, or Euler
-identity.
+common-prefix chart, and
+`RotationDerivative.uniformRotationCosOnTwo_hasDerivativeOnInterval` adds
+`cos' = -sin`. It is not yet a summed continuous matrix series, geometric
+trigonometry, or Euler identity.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a
