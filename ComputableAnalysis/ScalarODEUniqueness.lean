@@ -22,6 +22,51 @@ namespace ComputableAnalysis
 
 namespace ScalarODE
 
+/-- The rational output of one direct finite-mesh sweep on a short time
+block.  `next_le_mesh_bound` is the result of summing the cell estimates for
+the difference of two candidate solutions: the old envelope is multiplied by
+the block length, and the finite quotient/box errors are collected in
+`residual`.
+
+Choosing a block of length at most one quarter and a residual at most one
+quarter of the old envelope makes this one sweep a strict factor-one-half
+contraction.  Every field is rational data or a rational inequality. -/
+structure ShortBlockMeshSweep (previous next : Rat) where
+  blockLength : Rat
+  residual : Rat
+  previous_nonneg : 0 <= previous
+  blockLength_nonneg : 0 <= blockLength
+  block_short : blockLength <= (1 : Rat) / 4
+  residual_nonneg : 0 <= residual
+  residual_small : residual <= previous / 4
+  next_le_mesh_bound : next <= blockLength * previous + residual
+
+namespace ShortBlockMeshSweep
+
+/-- One finite short-block mesh sweep halves its rational envelope. -/
+theorem next_le_half {previous next : Rat}
+    (sweep : ShortBlockMeshSweep previous next) :
+    next <= previous * ((1 : Rat) / 2) := by
+  have hlength : sweep.blockLength * previous <=
+      ((1 : Rat) / 4) * previous :=
+    Rat.mul_le_mul_of_nonneg_right sweep.block_short sweep.previous_nonneg
+  calc
+    next <= sweep.blockLength * previous + sweep.residual :=
+      sweep.next_le_mesh_bound
+    _ <= ((1 : Rat) / 4) * previous + previous / 4 :=
+      rat_add_le_add hlength sweep.residual_small
+    _ = previous * ((1 : Rat) / 2) := by
+      rw [Rat.div_def]
+      have hquarters : (1 : Rat) / 4 + 1 / 4 = 1 / 2 := by native_decide
+      calc
+        (1 / 4 : Rat) * previous + previous * 4⁻¹ =
+            ((1 : Rat) / 4 + 1 / 4) * previous := by
+              grind [Rat.add_mul]
+        _ = (1 / 2 : Rat) * previous := by rw [hquarters]
+        _ = previous * (1 / 2 : Rat) := by grind [Rat.mul_comm]
+
+end ShortBlockMeshSweep
+
 /-- A direct mesh-contraction certificate for one nonnegative rational error.
 
 `bound round` is the rational envelope produced after `round` refinement
@@ -35,6 +80,21 @@ structure DirectMeshHalvingCertificate (error : Rat) where
     bound (round + 1) <= bound round * ((1 : Rat) / 2)
 
 namespace DirectMeshHalvingCertificate
+
+/-- Build a direct halving certificate from explicit finite short-block mesh
+sweeps.  This is the public entry point for a by-hand uniqueness proof: the
+analytic layer supplies the telescoped mesh estimate at each refinement, and
+this constructor turns it into the uniform dyadic envelope. -/
+def ofShortBlockSweeps (error : Rat) (bound : Nat -> Rat)
+    (error_nonneg : 0 <= error)
+    (error_le_bound : forall round, error <= bound round)
+    (sweeps : forall round,
+      ShortBlockMeshSweep (bound round) (bound (round + 1))) :
+    DirectMeshHalvingCertificate error where
+  bound := bound
+  error_nonneg := error_nonneg
+  error_le_bound := error_le_bound
+  halve := fun round => (sweeps round).next_le_half
 
 /-- Every finite refinement envelope is bounded by the explicit dyadic
 envelope determined by the initial sweep. -/
@@ -65,6 +125,18 @@ theorem initial_bound_nonneg {error : Rat}
     0 <= certificate.bound 0 :=
   Rat.le_trans certificate.error_nonneg (certificate.error_le_bound 0)
 
+/-- The explicit dyadic sweep selected for a positive rational tolerance
+already bounds the mesh error by that tolerance. -/
+theorem error_le_eps {error : Rat}
+    (certificate : DirectMeshHalvingCertificate error) (eps : QPos) :
+    error <= eps.val := by
+  let round := RationalMajorant.halfDecayShift (certificate.bound 0) eps
+  have herror := certificate.error_le_bound round
+  have hgeometric := bound_le_geometric certificate round
+  have hsmall := RationalMajorant.halfDecayShift_spec
+    (initial_bound_nonneg certificate) eps
+  exact Rat.le_trans herror (Rat.le_trans hgeometric hsmall)
+
 /-- Repeated direct mesh contraction forces its error to be literally zero.
 
 The proof chooses the executable refinement count supplied by
@@ -83,14 +155,8 @@ theorem error_eq_zero {error : Rat}
           rw [Rat.div_def]
           exact Rat.mul_pos herrorPos
             ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2)) }
-    have hround := certificate.error_le_bound
-      (RationalMajorant.halfDecayShift (certificate.bound 0) eps)
-    have hgeometric := bound_le_geometric certificate
-      (RationalMajorant.halfDecayShift (certificate.bound 0) eps)
-    have hsmall := RationalMajorant.halfDecayShift_spec
-      (initial_bound_nonneg certificate) eps
     have hhalf : error <= error / 2 := by
-      exact Rat.le_trans hround (Rat.le_trans hgeometric hsmall)
+      exact error_le_eps certificate eps
     have hstrict : error / 2 < error := by
       rw [Rat.div_def]
       have hinv : (2 : Rat)⁻¹ < 1 := by native_decide

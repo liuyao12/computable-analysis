@@ -436,6 +436,16 @@ exp/log equivalence. The common-prefix exponential does now have a local
 milestone is a concrete finite-mesh halving comparison, not a Peano--Baker
 or Picard argument.
 
+For a direct scalar uniqueness proof, make one finite short-block sweep an
+instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
+`next <= length * previous + residual`, choose `length <= 1/4`, and spend at
+most `previous/4` on the residual. The checked theorem `next_le_half`
+produces the dyadic contraction. Feed the sweep sequence to
+`DirectMeshHalvingCertificate.ofShortBlockSweeps`; its `error_eq_zero`
+theorem is preceded by `error_le_eps`, which chooses a concrete refinement
+count for any proposed rational error. This is the intended hand proof of
+scalar `f' = f` uniqueness.
+
 The literal power-series computation itself is now fully certified at every
 rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
 `expPowerSeries x` valid, and `ExpProofs.expPowerSeriesRate x` records the
@@ -568,7 +578,11 @@ open ComputableAnalysis
 #check ExpProofs.eNaturalPower_lower_bound
 #check ExpProofs.eNaturalPower_upper_bound
 #check ScalarODE.DirectMeshHalvingCertificate
+#check ScalarODE.ShortBlockMeshSweep
+#check ScalarODE.ShortBlockMeshSweep.next_le_half
+#check ScalarODE.DirectMeshHalvingCertificate.ofShortBlockSweeps
 #check ScalarODE.DirectMeshHalvingCertificate.bound_le_geometric
+#check ScalarODE.DirectMeshHalvingCertificate.error_le_eps
 #check ScalarODE.DirectMeshHalvingCertificate.error_eq_zero
 #check ScalarODE.SelfDerivativeDirectMeshComparison
 #check ScalarODE.selfDerivativeInitialValueUnique_of_directMesh
