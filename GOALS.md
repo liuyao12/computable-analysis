@@ -325,8 +325,15 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   rational complex boxes, with both coordinate widths bounded by
   `8 * rotationTailMagnitude T 0 * (1/2)^n`. Its
   `rotationCosRaw` and `rotationSinRaw` coordinate projections are valid raw
-  reals with the same rate. The continuous-simplex interpretation and the
-  rotation/geometric identification remain open.
+  reals with the same rate. The common bounded-input evaluator is now also
+  exposed as `RotationCalculus.uniformRotationCosOnTwo` and
+  `uniformRotationSinOnTwo`: both satisfy the project's literal rational
+  epsilon--delta continuity definition on `[-2,2]`, with the checked modulus
+  `delta = eps / 16` and one uniform factorial stage supplied by
+  `uniformRotationBoxes_widths_shrink_uniform`. This is not a derivative
+  theorem: the finite two-point secant estimate and divided-tail budget for
+  `sin' = cos`, `cos' = -sin` remain open. The continuous-simplex
+  interpretation and the rotation/geometric identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of

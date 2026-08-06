@@ -1441,6 +1441,33 @@ theorem uniformRotationBox_widths_shrink (T : Rat) :
   · rw [uniformRotationBox_height_eq_rotationBox_two]
     exact h.2
 
+/-- Every common-prefix rotation box is ordered in its real coordinate. -/
+theorem uniformRotationBox_width_nonneg (T : Rat) (n : Nat) :
+    0 <= (uniformRotationBox T n).width :=
+  (uniformRotationBox_ordered T n).1
+
+/-- Every common-prefix rotation box is ordered in its imaginary coordinate. -/
+theorem uniformRotationBox_height_nonneg (T : Rat) (n : Nat) :
+    0 <= (uniformRotationBox T n).height :=
+  (uniformRotationBox_ordered T n).2
+
+/-- One factorial stage works uniformly for the coordinate widths of every
+bounded-input rotation prefix.  The centers depend on the input, but the
+tail radius is the fixed radius-two majorant. -/
+theorem uniformRotationBoxes_widths_shrink_uniform (eps : QPos) :
+    Exists fun N : Nat => forall (T : Rat) (n : Nat), N <= n ->
+      (uniformRotationBox T n).width <= eps.val /\
+        (uniformRotationBox T n).height <= eps.val := by
+  obtain ⟨N, hN⟩ := rotationBox_widths_shrink 2 eps
+  refine ⟨N, ?_⟩
+  intro T n hn
+  have h := hN n hn
+  constructor
+  · rw [uniformRotationBox_width_eq_rotationBox_two]
+    exact h.1
+  · rw [uniformRotationBox_height_eq_rotationBox_two]
+    exact h.2
+
 /-- The rotation-series evaluator with one common tail schedule for all
 rational inputs satisfying the bound qabs T <= 2. It is the rational
 building block for represented-angle evaluation. -/

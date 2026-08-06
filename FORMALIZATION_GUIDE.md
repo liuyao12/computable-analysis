@@ -89,6 +89,7 @@ Start with the smallest target module rather than importing
 | Direct scalar ODE uniqueness | `ComputableAnalysis.ScalarODEUniqueness` | `ScalarODE.DirectMeshHalvingCertificate`, `SelfDerivativeDirectMeshComparison` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
+| Bounded rotation continuity | `ComputableAnalysis.RotationCalculus` | `uniformRotationCosOnTwo`, `uniformRotationSinOnTwo`, and their epsilon--delta theorems |
 | Represented-angle rotation lift | `ComputableAnalysis.RotationLift` | `RotationLift.HalfPiInput`, `rotation`, and its finite Cauchy certificate |
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
@@ -298,6 +299,18 @@ the actual interval derivative of a finite prefix only: an \(N+1\)-term source
 has the \(N\)-term shifted target. The exact dropped-edge calculation is
 `taylorPrefixShift_succ_eq_of_coefficientShift`; attach an independent tail
 certificate before claiming a derivative for an evaluated sine or cosine raw.
+
+For the tail-enclosed rotation evaluator itself, import
+`ComputableAnalysis.RotationCalculus`.  Its common factorial schedule has
+checked literal rational epsilon--delta continuity on `[-2,2]` for both
+coordinates: `uniformRotationCosOnTwo_epsilonDeltaContinuous` and
+`uniformRotationSinOnTwo_epsilonDeltaContinuous` use the explicit modulus
+`delta = eps / 16` together with
+`uniformRotationBoxes_widths_shrink_uniform`.  This is already suitable as a
+continuity input to a concrete integral construction. It is deliberately not
+a derivative transfer: `sin' = cos` and `cos' = -sin` still require a finite
+two-point secant estimate plus a tail budget after division by the rational
+step.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -950,8 +963,11 @@ encloses those even prefixes in valid nested complex boxes, and
 `rotationExpRaw_width_le_geometric` bounds both coordinate widths by
 `8 * rotationTailMagnitude T 0 * (1/2)^n`. This is a certified complex
 series computation at rational `i*T`; `rotationCosRaw` and `rotationSinRaw`
-are its valid coordinate raw reals. It is not yet a summed continuous matrix
-series, geometric trigonometry, or Euler identity.
+are its valid coordinate raw reals. `RotationCalculus` additionally turns the
+shared bounded-input prefix and its `16 * |x-y|` box transport into literal
+rational epsilon--delta continuity for each coordinate on `[-2,2]`. It is
+not yet a summed continuous matrix series, a raw trigonometric derivative,
+geometric trigonometry, or Euler identity.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a

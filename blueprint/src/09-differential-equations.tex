@@ -240,6 +240,11 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_input_lipschitz}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationBox_contained_expand_of_input_near}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationBox_future_contained_expand_of_input_near}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationBoxes_widths_shrink_uniform}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_epsilonDeltaContinuous}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
@@ -290,6 +295,13 @@ difference. Hence the direct candidates have the required future containment
 after an explicit \(16\,\operatorname{width}(\pi/2,k)\) enlargement, and
 their finite-prefix stabilization is a valid complex raw with a
 \(32/(k+1)\) radius modulus. No completed complex plane is being used.
+The same common-prefix data now gives literal rational epsilon--delta
+continuity for both coordinate evaluators on \([-2,2]\): for output
+tolerance \(\varepsilon\), use \(\delta=\varepsilon/16\) and one uniform
+factorial stage at which both coordinate boxes have width at most
+\(\varepsilon\). This is a checked continuity theorem, not yet
+\(S'=C\) or \(C'=-S\); that next theorem must add a finite secant estimate
+for the two nearby prefixes and a quotient-tail budget.
 The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
 quarter-turn raw.  The remaining identification is specifically between the
