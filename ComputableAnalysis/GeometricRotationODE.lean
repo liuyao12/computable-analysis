@@ -12,11 +12,12 @@ Written as a rational complex point `z(t)`, its formal velocity is
 `z'(t) = (2 i / (1 + t²)) z(t)`.
 
 This file records the exact finite algebraic identity.  It is deliberately
-not yet a theorem about a represented function or an ODE solution: the next
-step is to give rational difference-quotient boxes and invoke the
-Peano--Baker/Volterra uniqueness interface.  Keeping this part separate makes
-the missing analytic bridge visible rather than silently treating the chart
-parameter as an angle.
+separate from the represented sector-area reparametrization.  It now also
+packages rational difference-quotient boxes and endpoint data as a geometric
+variable-coefficient rotation candidate.  The missing analytic bridge is to
+reparametrize this chart by its represented sector-area angle and invoke
+vector uniqueness, rather than silently treating the chart parameter as an
+angle.
 -/
 
 namespace ComputableAnalysis
@@ -646,6 +647,120 @@ theorem pointComplexDerivative_eq_sectorAreaSpeed_rotation (t : Rat) :
         (pointComplex t) := by
   rw [← angularVelocity_eq_imaginaryAxis_sectorAreaSpeed]
   exact pointComplexDerivative_eq_angularVelocity_mul_point t
+
+/-- Coordinatewise equivalence of complex interval functions.  This records
+the two real raw equalities needed by a future vector ODE comparison, without
+introducing a completed complex plane. -/
+def ComplexFunctionOnInterval.Equivalent
+    (f g : ComplexFunctionOnInterval) : Prop :=
+  FunctionOnInterval.Equivalent f.re g.re /\
+    FunctionOnInterval.Equivalent f.im g.im
+
+/-- The exact variable-coefficient rotation velocity
+`(2 i / (1 + t^2)) * p(t)`, exposed as synchronized rational coordinate
+functions on the unit chart. -/
+def pointAngularVelocityOnUnit : ComplexFunctionOnInterval where
+  re := FunctionOnInterval.exactRat
+    (fun t => (QComplex.mul (angularVelocity t) (pointComplex t)).re) 0 1
+  im := FunctionOnInterval.exactRat
+    (fun t => (QComplex.mul (angularVelocity t) (pointComplex t)).im) 0 1
+  same_lower := rfl
+  same_upper := rfl
+
+/-- The exact rational velocity coordinates used in the derivative
+certificate agree pointwise with multiplication by the chart's angular
+coefficient. -/
+theorem pointDerivativeOnUnit_equiv_pointAngularVelocityOnUnit :
+    ComplexFunctionOnInterval.Equivalent pointDerivativeOnUnit
+      pointAngularVelocityOnUnit := by
+  constructor
+  · refine ⟨rfl, rfl, ?_⟩
+    intro t htDerivative htAngular
+    change (RealRaw.ofRat (pointReDerivative t)).Equiv
+      (RealRaw.ofRat (QComplex.mul (angularVelocity t) (pointComplex t)).re)
+    have h := congrArg QComplex.re
+      (pointComplexDerivative_eq_angularVelocity_mul_point t)
+    have hre : pointReDerivative t =
+        (QComplex.mul (angularVelocity t) (pointComplex t)).re := by
+      simpa [pointComplexDerivative, pointReDerivative] using h
+    rw [hre]
+    exact RealRaw.ofRat_equiv_self _
+  · refine ⟨rfl, rfl, ?_⟩
+    intro t htDerivative htAngular
+    change (RealRaw.ofRat (pointImDerivative t)).Equiv
+      (RealRaw.ofRat (QComplex.mul (angularVelocity t) (pointComplex t)).im)
+    have h := congrArg QComplex.im
+      (pointComplexDerivative_eq_angularVelocity_mul_point t)
+    have him : pointImDerivative t =
+        (QComplex.mul (angularVelocity t) (pointComplex t)).im := by
+      simpa [pointComplexDerivative, pointImDerivative] using h
+    rw [him]
+    exact RealRaw.ofRat_equiv_self _
+
+/-- Initial and terminal data for a geometric complex rotation candidate.
+The endpoint is included because the rational chart already reaches the
+quarter-turn point exactly at `t = 1`; a later reparametrization theorem will
+replace this chart coordinate by the represented sector-area angle. -/
+structure GeometricRotationSystemCertificate
+    (curve velocity : ComplexFunctionOnInterval) where
+  derivative : HasComplexDerivativeOnInterval curve velocity
+  rotation_equation : ComplexFunctionOnInterval.Equivalent velocity
+    pointAngularVelocityOnUnit
+  initial : Rat
+  initial_in_re : inDomainInterval curve.re.lower curve.re.upper initial
+  initial_in_im : inDomainInterval curve.im.lower curve.im.upper initial
+  initial_re :
+    (PartialRealFunRaw.apply curve.re.raw curve.re.valid_on initial
+      (curve.re.defined_on initial initial_in_re)).Equiv (RealRaw.ofRat 1)
+  initial_im :
+    (PartialRealFunRaw.apply curve.im.raw curve.im.valid_on initial
+      (curve.im.defined_on initial initial_in_im)).Equiv (RealRaw.ofRat 0)
+  terminal : Rat
+  terminal_in_re : inDomainInterval curve.re.lower curve.re.upper terminal
+  terminal_in_im : inDomainInterval curve.im.lower curve.im.upper terminal
+  terminal_re :
+    (PartialRealFunRaw.apply curve.re.raw curve.re.valid_on terminal
+      (curve.re.defined_on terminal terminal_in_re)).Equiv (RealRaw.ofRat 0)
+  terminal_im :
+    (PartialRealFunRaw.apply curve.im.raw curve.im.valid_on terminal
+      (curve.im.defined_on terminal terminal_in_im)).Equiv (RealRaw.ofRat 1)
+
+/-- The rational circle chart is a fully certified variable-coefficient
+rotation-system candidate: it starts at `1`, reaches `i`, and satisfies
+`p' = (2 i / (1+t^2)) p` coordinatewise on `[0,1]`.  This is still not the
+constant-coefficient factorial rotation at the represented angle `pi/2`; that
+identification is the future sector-area reparametrization plus vector
+uniqueness bridge. -/
+def pointOnUnit_geometricRotationSystemCertificate :
+    GeometricRotationSystemCertificate pointOnUnit pointDerivativeOnUnit where
+  derivative := point_hasComplexDerivativeOnUnit
+  rotation_equation := pointDerivativeOnUnit_equiv_pointAngularVelocityOnUnit
+  initial := 0
+  initial_in_re := by constructor <;> native_decide
+  initial_in_im := by constructor <;> native_decide
+  initial_re := by
+    change (RealRaw.ofRat (pointRe 0)).Equiv (RealRaw.ofRat 1)
+    have h : pointRe 0 = 1 := by native_decide
+    rw [h]
+    exact RealRaw.ofRat_equiv_self _
+  initial_im := by
+    change (RealRaw.ofRat (pointIm 0)).Equiv (RealRaw.ofRat 0)
+    have h : pointIm 0 = 0 := by native_decide
+    rw [h]
+    exact RealRaw.ofRat_equiv_self _
+  terminal := 1
+  terminal_in_re := by constructor <;> native_decide
+  terminal_in_im := by constructor <;> native_decide
+  terminal_re := by
+    change (RealRaw.ofRat (pointRe 1)).Equiv (RealRaw.ofRat 0)
+    have h : pointRe 1 = 0 := by native_decide
+    rw [h]
+    exact RealRaw.ofRat_equiv_self _
+  terminal_im := by
+    change (RealRaw.ofRat (pointIm 1)).Equiv (RealRaw.ofRat 1)
+    have h : pointIm 1 = 1 := by native_decide
+    rw [h]
+    exact RealRaw.ofRat_equiv_self _
 
 end GeometricRotationODE
 

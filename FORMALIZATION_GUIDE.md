@@ -999,8 +999,14 @@ rational epsilon--delta continuity for each coordinate on `[-2,2]`.
 adds the full raw interval derivative `sin' = cos` for that same
 common-prefix chart, and
 `RotationDerivative.uniformRotationCosOnTwo_hasDerivativeOnInterval` adds
-`cos' = -sin`. It is not yet a summed continuous matrix series, geometric
-trigonometry, or Euler identity.
+`cos' = -sin`. `RotationInitialValues.uniformRotationOnTwo_rotationInitialCertificate`
+also packages the literal boxes `C(0)=1`, `S(0)=0` with those derivatives.
+On the geometric side,
+`GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` now
+certifies the rational chart on `[0,1]` as
+`P' = (2 i / (1+t*t)) P`, with `P(0)=1` and `P(1)=i`, coordinate by
+coordinate. It is not yet a summed continuous matrix series, the represented
+sector-area reparametrization, geometric trigonometry, or Euler identity.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a

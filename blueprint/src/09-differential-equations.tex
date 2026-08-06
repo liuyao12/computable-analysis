@@ -274,6 +274,11 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.GeometricRotationODE.pointRe_hasDerivativeOnUnit}
 \lean{ComputableAnalysis.GeometricRotationODE.pointIm_hasDerivativeOnUnit}
 \lean{ComputableAnalysis.GeometricRotationODE.point_hasComplexDerivativeOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.ComplexFunctionOnInterval.Equivalent}
+\lean{ComputableAnalysis.GeometricRotationODE.pointAngularVelocityOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.pointDerivativeOnUnit_equiv_pointAngularVelocityOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.GeometricRotationSystemCertificate}
+\lean{ComputableAnalysis.GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_equiv_halfPi}
@@ -335,9 +340,14 @@ The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
 quarter-turn raw.  The remaining identification is specifically between the
 power-series rotation output and the geometric circle point.  The chart's
-exact rational velocity is already in rotation form,
-\(P'=i\,\operatorname{sectorAreaSpeed}P\), with endpoint \(P(1)=i\); the
-missing bridge is its reparametrized represented-function/uniqueness theorem.
+exact rational velocity is now packaged as the coordinatewise
+variable-coefficient system
+\[
+ P'=\frac{2i}{1+t^2}P=i\,\operatorname{sectorAreaSpeed}(t)P,
+ \qquad P(0)=1,\quad P(1)=i.
+\]
+The missing bridge is its sector-area reparametrized
+represented-function/vector-uniqueness theorem.
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
 can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}
