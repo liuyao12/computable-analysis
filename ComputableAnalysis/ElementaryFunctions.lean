@@ -2,6 +2,7 @@ import ComputableAnalysis.AbelianIntegrals
 import ComputableAnalysis.Differential
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.PeanoBaker
+import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.PowerSeries
 
 /-!
@@ -553,6 +554,21 @@ theorem powerSeries_equiv_logIntegralInverse_on_interval
     comparison.logInv_solves
     comparison.same_initial
     comparison.initial_values_equiv
+
+/-- The exp/log comparison route obtained from the direct scalar finite-mesh
+uniqueness provider.  Unlike the Peano--Baker route below, this is intended
+for the scalar equation `f' = f` itself: its analytic obligation is a checked
+short-block mesh contraction for the difference of the two candidates. -/
+theorem powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh
+    (hdirect : ScalarODE.SelfDerivativeDirectMeshUniqueness)
+    {a b : Rat}
+    (comparison : PowerSeriesLogIntegralInverseComparison a b) :
+    FunctionOnInterval.Equivalent
+      (realPowerSeriesOnInterval a b comparison.ps_valid)
+      comparison.logInv.toFunctionOnInterval :=
+  powerSeries_equiv_logIntegralInverse_on_interval
+    (ScalarODE.selfDerivativeInitialValueUnique_of_directMesh hdirect)
+    comparison
 
 /-- The exp/log comparison route obtained from the constructive
 Peano--Baker/Volterra uniqueness provider.  The provider is still an analytic

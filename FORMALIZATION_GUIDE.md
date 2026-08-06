@@ -86,6 +86,7 @@ Start with the smallest target module rather than importing
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
+| Direct scalar ODE uniqueness | `ComputableAnalysis.ScalarODEUniqueness` | `ScalarODE.DirectMeshHalvingCertificate`, `SelfDerivativeDirectMeshComparison` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
 | Represented-angle rotation lift | `ComputableAnalysis.RotationLift` | `RotationLift.HalfPiInput`, `rotation`, and its finite Cauchy certificate |
@@ -290,6 +291,14 @@ certificate on `[-1,1]`, where the endpoint hypothesis gives `|h| <= 2`;
 This is the useful local chart for identities that use both signs of the
 exponent.
 
+For finite trigonometric work, use
+`FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval` and
+`FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval`. They certify
+the actual interval derivative of a finite prefix only: an \(N+1\)-term source
+has the \(N\)-term shifted target. The exact dropped-edge calculation is
+`taylorPrefixShift_succ_eq_of_coefficientShift`; attach an independent tail
+certificate before claiming a derivative for an evaluated sine or cosine raw.
+
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
 `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` now proves its
@@ -420,11 +429,12 @@ integration-by-parts rules.
 - `exp.LogIntegralInverseBranch` records the inverse-logarithmic-integral
   route.
 
-These are mostly interfaces and comparison targets.  Do not claim that the
-repository has proved a general rational-power construction, `exp' = exp`, or
-the full exp/log equivalence.  The next analytic milestone is an actual boxed
-exponential with a `HasDerivativeOnInterval` self-derivative certificate,
-then uniqueness from the Peano--Baker route.
+These are mostly interfaces and comparison targets. Do not claim that the
+repository has proved a general rational-power construction or the full
+exp/log equivalence. The common-prefix exponential does now have a local
+`HasDerivativeOnInterval` self-derivative certificate; the next scalar
+milestone is a concrete finite-mesh halving comparison, not a Peano--Baker
+or Picard argument.
 
 The literal power-series computation itself is now fully certified at every
 rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
@@ -535,8 +545,12 @@ open ComputableAnalysis
 #check expTaylorQuadratic
 #check FinitePolynomial.taylorPrefixShift_at_zero
 #check FinitePolynomial.taylorPrefixShiftAt_at_basepoint
+#check FinitePolynomial.taylorPrefix_succ
+#check FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift
 #check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
+#check FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval
+#check FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.SecantDerivativeBound.mul
 #check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
 #check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
@@ -553,6 +567,12 @@ open ComputableAnalysis
 #check ExpProofs.eNaturalPower_valid
 #check ExpProofs.eNaturalPower_lower_bound
 #check ExpProofs.eNaturalPower_upper_bound
+#check ScalarODE.DirectMeshHalvingCertificate
+#check ScalarODE.DirectMeshHalvingCertificate.bound_le_geometric
+#check ScalarODE.DirectMeshHalvingCertificate.error_eq_zero
+#check ScalarODE.SelfDerivativeDirectMeshComparison
+#check ScalarODE.selfDerivativeInitialValueUnique_of_directMesh
+#check exp.powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh
 #check ExpProofs.eCompoundInterestRepresentation
 #check ExpProofs.eRepeatedMultiplicationRepresentation
 #check ExpProofs.eEulerNested_valid

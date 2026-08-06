@@ -16,8 +16,12 @@ is summed into an integral certificate.
 \lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
 \lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_succ}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval}
 \leanok
@@ -57,6 +61,10 @@ dyadic step schedule} \\
 \(\sum_{k<N-1}(k+1)c_{k+1}(x-a)^k\) &
 \formallyproved{Full interval family, assembled from the algebraic
 coefficient shift and a quantitative remainder} \\
+\((N+1)\)-term finite sine/cosine prefixes &
+\(N\)-term cosine / negative-sine prefixes &
+\formallyproved{Full interval certificates; the one dropped edge coefficient
+is explicit} \\
 \(1+x+x^2/2\), finite exponential Taylor prefix & \(1+x\) &
 \formallyproved{Full \code{HasDerivativeOnInterval} family} \\
 \(\exp_{\rm ps}\), \(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal streams &
@@ -87,6 +95,11 @@ rational expansion point by
 \code{FinitePolynomial.taylorPrefixAt\_hasDerivativeOnInterval}; its internal
 primitive construction remains available as
 \code{FinitePolynomial.integratedTaylorPrefix\_hasDerivativeOnInterval}.
+The trigonometric finite-prefix specializations are
+\code{FinitePolynomial.sineTaylorPrefix\_hasDerivativeOnInterval} and
+\code{FinitePolynomial.cosineTaylorPrefix\_hasDerivativeOnInterval};
+\code{taylorPrefixShift\_succ\_eq\_of\_coefficientShift} accounts for the
+deliberate \(N+1\) versus \(N\) truncation.
 The quadratic exponential specialization is
 \code{FinitePolynomial.expTaylorQuadratic\_hasDerivativeOnInterval}; and
 the three interval-function rows respectively by

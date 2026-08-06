@@ -45,6 +45,7 @@ import ComputableAnalysis.ReciprocalQuarticPi
 import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.RotationLift
 import ComputableAnalysis.RotationPeanoBakerBridge
+import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.GeometricPiRotation
 import ComputableAnalysis.GeometricRotationODE
 import ComputableAnalysis.Polynomial

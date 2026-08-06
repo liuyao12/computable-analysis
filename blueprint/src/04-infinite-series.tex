@@ -721,6 +721,10 @@ identities:
 \lean{ComputableAnalysis.ExpProofs.uniformExpCenter_secant_error_le}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_at_zero}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShiftAt_at_basepoint}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_succ}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
+\lean{ComputableAnalysis.FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval}
 \uses{def:formal-power-series}
 \leanok
 The finite rational loop used by the exponential evaluator has no hidden
@@ -751,6 +755,11 @@ the value \(c_1\) at its declared rational expansion point; the displayed
 secant estimate is its first-order Taylor--Lagrange certificate in the sense
 of \cref{def:effective-derivative}.  The infinite-series tail transport is an
 additional analytic result, not a rule of formal coefficient algebra.
+For the sine and cosine streams, Lean also checks the
+truncation-sensitive finite instances: an \(N+1\)-coefficient sine prefix has
+derivative the \(N\)-coefficient cosine prefix, and cosine differentiates to
+the \(N\)-coefficient negative sine prefix.  The dropped edge coefficient is
+explicit; no infinite tail is silently differentiated.
 \end{theorem}
 
 \section{Euler's Basel Problem}

@@ -586,6 +586,29 @@ def taylorPrefix (coeffs : FormalPowerSeries.Coeffs) : Nat -> Rat -> Rat
         integratedTaylorPrefix
           (FormalPowerSeries.coefficientShift coeffs) terms x
 
+/-- Adding one coefficient to a finite Taylor prefix adds precisely the
+corresponding rational monomial.  This is the finite cancellation which
+connects the integrated coefficient-shift presentation with the familiar
+polynomial `sum_{k < terms} c_k x^k`; no infinite series is involved. -/
+theorem taylorPrefix_succ (coeffs : FormalPowerSeries.Coeffs)
+    (terms : Nat) (x : Rat) :
+    taylorPrefix coeffs (terms + 1) x =
+      taylorPrefix coeffs terms x + coeffs terms * x ^ terms := by
+  cases terms with
+  | zero =>
+      simp [taylorPrefix, integratedTaylorPrefix, Rat.add_comm]
+  | succ terms =>
+      have hpos : 0 < (((terms + 1 : Nat) : Rat)) :=
+        (Rat.natCast_pos).2 (Nat.succ_pos terms)
+      have hne : ((terms + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hpos
+      simp only [taylorPrefix, integratedTaylorPrefix,
+        FormalPowerSeries.coefficientShift]
+      rw [Rat.div_def]
+      have hcancel : ((terms + 1 : Nat) : Rat) *
+          ((terms + 1 : Nat) : Rat)⁻¹ = 1 :=
+        Rat.mul_inv_cancel _ hne
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 /-- The finite coefficient-shift polynomial paired with `taylorPrefix`.
 For `terms + 1`, it is the literal derivative polynomial of the displayed
 finite prefix; no statement about an infinite tail is made here. -/
@@ -593,6 +616,32 @@ def taylorPrefixShift (coeffs : FormalPowerSeries.Coeffs) : Nat -> Rat -> Rat
   | 0 => fun _x => 0
   | terms + 1 =>
       taylorDerivativePrefix (FormalPowerSeries.coefficientShift coeffs) terms
+
+/-- The recursively presented finite Taylor prefix is the literal finite
+coefficient sum.  This lets a coefficient-shift identity identify a finite
+Taylor--Lagrange derivative with the next finite prefix without making any
+claim about the omitted tail. -/
+theorem taylorPrefix_eq_taylorDerivativePrefix
+    (coeffs : FormalPowerSeries.Coeffs) :
+    forall terms x,
+      taylorPrefix coeffs terms x = taylorDerivativePrefix coeffs terms x
+  | 0, _x => rfl
+  | terms + 1, x => by
+      rw [taylorPrefix_succ, taylorDerivativePrefix]
+      rw [taylorPrefix_eq_taylorDerivativePrefix coeffs terms x]
+
+/-- A checked coefficient-shift relation identifies the derivative of a
+finite prefix with the equally truncated target coefficient stream.  The
+extra source coefficient is necessary: differentiating a degree-`terms`
+prefix leaves `terms` target coefficients. -/
+theorem taylorPrefixShift_succ_eq_of_coefficientShift
+    {source target : FormalPowerSeries.Coeffs}
+    (hshift : FormalPowerSeries.HasCoefficientShift source target)
+    (terms : Nat) (x : Rat) :
+    taylorPrefixShift source (terms + 1) x = taylorPrefix target terms x := by
+  unfold FormalPowerSeries.HasCoefficientShift at hshift
+  rw [taylorPrefixShift, hshift]
+  exact (taylorPrefix_eq_taylorDerivativePrefix target terms x).symm
 
 /-- A finite Taylor polynomial centered at the rational point `a`.
 
@@ -699,6 +748,53 @@ def taylorPrefix_hasDerivativeOnInterval
       (FunctionOnInterval.exactRat (taylorPrefixShift coeffs terms) a b) :=
   (taylorPrefixSecantBound C coeffs hC1 terms).toHasDerivativeOnInterval
     a b hleft hright
+
+/-- Finite sine coefficient prefixes satisfy the full interval derivative
+interface with the equally truncated cosine coefficient prefix.  This is a
+Taylor--Lagrange theorem for rational polynomials, not yet a derivative claim
+for the tail-enclosed sine evaluator. -/
+def sineTaylorPrefix_hasDerivativeOnInterval
+    (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (taylorPrefix FormalPowerSeries.sinCoeff (terms + 1)) a b)
+      (FunctionOnInterval.exactRat
+        (taylorPrefix FormalPowerSeries.cosCoeff terms) a b) := by
+  have h := taylorPrefix_hasDerivativeOnInterval
+    FormalPowerSeries.sinCoeff (terms + 1) a b C hleft hright hC1
+  have hrewrite : taylorPrefixShift FormalPowerSeries.sinCoeff (terms + 1) =
+      taylorPrefix FormalPowerSeries.cosCoeff terms := by
+    funext x
+    exact taylorPrefixShift_succ_eq_of_coefficientShift
+      FormalPowerSeries.sinCoeff_hasCoefficientShift terms x
+  rw [hrewrite] at h
+  exact h
+
+/-- Finite cosine coefficient prefixes satisfy the corresponding negative
+sine Taylor--Lagrange derivative certificate.  Keeping the target stream as
+`-sin` makes the statement exact at every truncation order. -/
+def cosineTaylorPrefix_hasDerivativeOnInterval
+    (terms : Nat) (a b C : Rat)
+    (hleft : -C <= a) (hright : b <= C) (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (taylorPrefix FormalPowerSeries.cosCoeff (terms + 1)) a b)
+      (FunctionOnInterval.exactRat
+        (taylorPrefix (FormalPowerSeries.neg FormalPowerSeries.sinCoeff) terms) a b) := by
+  have hshift : FormalPowerSeries.HasCoefficientShift
+      FormalPowerSeries.cosCoeff
+      (FormalPowerSeries.neg FormalPowerSeries.sinCoeff) := by
+    simpa [FormalPowerSeries.derivative] using
+      FormalPowerSeries.cosCoeff_derivative
+  have h := taylorPrefix_hasDerivativeOnInterval
+    FormalPowerSeries.cosCoeff (terms + 1) a b C hleft hright hC1
+  have hrewrite : taylorPrefixShift FormalPowerSeries.cosCoeff (terms + 1) =
+      taylorPrefix (FormalPowerSeries.neg FormalPowerSeries.sinCoeff) terms := by
+    funext x
+    exact taylorPrefixShift_succ_eq_of_coefficientShift hshift terms x
+  rw [hrewrite] at h
+  exact h
 
 /-- The finite Taylor--Lagrange secant bound transports to any rational
 expansion point.  The symmetric box is expressed in the local coordinate

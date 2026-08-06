@@ -294,7 +294,7 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural
   powers between `2^n` and `4^n`. Rational roots, rational-exponent
   continuity, and the self-derivative theorem remain separate open bridges.
-- **Linear ODEs — finite core and scalar tail certificate checked; analytic layer open.**
+- **Linear ODEs — finite Peano--Baker core and direct scalar uniqueness closure checked; analytic layer open.**
   `PeanoBaker.lean` proves finite chronological products, the ordered-word
   expansion, discrete variation of constants, and recurrence uniqueness:
   the zero-initial forcing response is the explicit time-ordered Duhamel sum
@@ -331,13 +331,27 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of
   constants.
-  This is the intended constructive **linear Picard--Lindelöf** theorem:
+  This is the intended constructive **linear Picard--Lindelöf** theorem for
+  vector systems:
   Peano--Baker supplies the homogeneous resolvent, variation of constants
   supplies the affine solution, and a bounded zero-initial difference is
-  driven to the zero raw vector by an explicit factorial schedule. It includes
-  the scalar `f' = f` uniqueness route needed for exponential. General
-  nonlinear Picard--Lindelöf remains a later interval-Lipschitz/contraction
-  layer.
+  driven to the zero raw vector by an explicit factorial schedule.  Scalar
+  `f' = f` uniqueness is deliberately separate: the checked direct
+  finite-mesh closure reduces an error envelope by a factor of two per
+  refinement sweep.  Constructing that sweep from derivative certificates
+  remains open. General nonlinear Picard--Lindelöf remains a later
+  interval-Lipschitz/contraction layer.
+- **Scalar exponential uniqueness — direct mesh closure checked; analytic
+  bridge open.** `ScalarODEUniqueness.lean` does not use Peano--Baker or
+  Picard iteration.  A `DirectMeshHalvingCertificate` records rational error
+  envelopes from finite mesh sweeps, and its theorem `error_eq_zero` chooses
+  a computable dyadic sweep count to force the error to zero.  The
+  `SelfDerivativeDirectMeshComparison` wrapper then yields
+  `SelfDerivativeInitialValueUnique`; the exact comparison theorem for
+  power-series and inverse-logarithm exponentials is available as
+  `powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh`.
+  What remains is the concrete short-block construction of the halving
+  envelope from two supplied interval derivative certificates.
 
 There is intentionally no aggregate percentage: these gates have distinct
 dependencies, and a proof in one does not compensate for a missing proof in
@@ -582,10 +596,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   still requires an explicit separate arctangent strip, its monotone-piece
   refinement/splitting theorem, and canonical exponential/logarithm alignment.
   This is deliberately the long exp/log/ODE route: first identify the
-  logarithmic integral with the inverse of canonical exponential, use the
-  linear Peano--Baker/Picard--Lindelöf uniqueness theorem to equate the
-  power-series, Euler, and inverse-integral exponentials, then transport the
-  resulting `log 2` through the integration-by-parts identity.  A later
+  logarithmic integral with the inverse of canonical exponential, use direct
+  scalar finite-mesh uniqueness to equate the power-series, Euler, and
+  inverse-integral exponentials, then transport the resulting `log 2`
+  through the integration-by-parts identity.  A later
   complex corroboration can prove `pi = -2i * log(i)`, but it needs
   represented-input extension and the rotation-system bridge in addition.
   `Logarithm.logTwoSeries` now supplies a valid, rate-certified alternating
@@ -1123,19 +1137,17 @@ another. The Pi score stays useful only as secondary integration coverage.
   to exponential first; a general term-by-term differentiation theorem can
   come later.
 - To prove equality of the three exponential representations by calculus
-  rather than by ad hoc estimates, specialize the constructive linear
-  Picard--Lindelöf theorem to the scalar equation `f' = f` with `f(0) = 1`,
-  then prove the equivalent unit-slope characterization of the base at zero.
-  See
-  `SolvesSelfDerivativeOnInterval` and `SelfDerivativeInitialValueUnique` in
-  `ComputableAnalysis/Differential.lean`.  The reusable linear theorem is
-  built from continuous Peano--Baker simplex boxes and factorial tail boxes;
-  its uniqueness interface explicitly requires equality of the rational
-  initial coordinate and equivalence of the two certified initial raw values.
-  general nonlinear Picard--Lindelöf can later add interval-Lipschitz Picard
-  iterates, rational short-interval contraction, and finite subdivision.
-  Both are constructive existence-and-uniqueness data, not appeals to
-  real-number completeness.
+  rather than by ad hoc estimates, use the scalar equation `f' = f` with
+  `f(0) = 1` and the direct finite-mesh route in
+  `ComputableAnalysis/ScalarODEUniqueness.lean`. Its checked closure turns a
+  rational envelope with `B_(r+1) <= B_r/2` into zero error by an executable
+  dyadic stage; `SelfDerivativeDirectMeshComparison` then gives function
+  agreement. The remaining analytic theorem derives that envelope by
+  subtracting two derivative certificates on short rational blocks and
+  chaining finitely many blocks. This is intentionally independent of
+  Peano--Baker/Picard iteration. The vector linear theorem and a future
+  nonlinear interval-Lipschitz theory remain separate constructive
+  existence-and-uniqueness data.
 
 ## Linear Differential Equations
 
@@ -1208,27 +1220,27 @@ another. The Pi score stays useful only as secondary integration coverage.
   interval. `CoefficientsRegular` asks for supplied componentwise
   `IntervalRegularOn` witnesses; it does not assume a completed-real
   function space.
-- The blueprint now fixes the chapter's proof direction: start from the
+- The blueprint now fixes the vector chapter's proof direction: start from the
   forced second-order oscillator, turn it into the general affine vector
   equation `x' = A(t)x + b(t)`, construct Peano--Baker plus Duhamel boxes for
   that general problem, and prove uniqueness by iterating the zero-initial
   Volterra identity until the factorial estimate is below an arbitrary
-  rational tolerance.  Only then specialize to the oscillator and to
-  `E' = E`, `E(0) = 1`.  This recovers sine/cosine and identifies every
-  exponential representative that has independently supplied the same
-  derivative and initial-value certificate.  The positive inverse is the
+  rational tolerance. This recovers sine/cosine and the vector rotation
+  route. Scalar `E' = E`, `E(0) = 1` uses direct mesh contraction instead;
+  after its presentation-agreement theorem, the positive inverse is the
   canonical logarithm used by the long arctangent integration-by-parts Pi
-  route; this is a named dependency chain, not an extra Pi-scoreboard row.
+  route. These are named dependency chains, not extra Pi-scoreboard rows.
 - Next analytic target: build interval matrices for ordered-simplex
   Peano--Baker terms, prove a factorial tail enclosure from a rational
   coefficient bound, and obtain state-transition and variation-of-constants
   formulas for `x' = A(t)x + b(t)`. Together these are the effective linear
   Picard--Lindelöf theorem: the zero-initial homogeneous case gives
   uniqueness, and the factorial tail is the explicit solution modulus. The
-  next specializations are the scalar `f'=f` exponential route, the analytic
-  commuting-exponential identification, scalar and piecewise-constant
-  systems, and higher-order nilpotent/triangular systems. Chapter `Linear
-  Differential Equations` gives the certificate plan.
+  next specializations are the analytic commuting-exponential identification,
+  scalar and piecewise-constant systems, and higher-order
+  nilpotent/triangular systems. The scalar `f'=f` exponential route is
+  already specified separately by direct mesh contraction. Chapter `Linear
+  Differential Equations` gives the vector certificate plan.
 
 ## Elementary Function Coverage
 

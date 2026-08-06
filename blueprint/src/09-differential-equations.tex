@@ -6,8 +6,10 @@ The continuous target is the rational-box initial-value problem
  x'(t)=A(t)x(t)+b(t),\qquad x(s)=x_s.
 \end{equation}
 The chapter starts from the finite time-ordered calculation, then states the
-two still-separate continuous certificates: a Peano--Baker enclosure for
-existence and a factorial estimate for uniqueness.
+still-separate continuous certificates: a Peano--Baker enclosure for vector
+existence and a factorial estimate for vector uniqueness.  Scalar
+\(E'=E,E(0)=1\) instead uses the direct finite-mesh route in
+Chapter~\ref{ch:exponential-logarithm}.
 
 \section{Model, vector form, and proof route}
 
@@ -148,21 +150,45 @@ existence nor a hidden completeness principle.
 
 \section{Elementary-function identification}
 
-\begin{theorem}[Agreement from linear uniqueness: construction target]
+\begin{theorem}[Agreement from vector linear uniqueness: construction target]
 \label{thm:linear-ode-elementary-function-agreement}
 Once each named representation independently supplies its derivative and
-initial-value certificate, linear uniqueness identifies it with the
-Peano--Baker solution.  The two intended applications are
+initial-value certificate, vector linear uniqueness identifies it with the
+Peano--Baker solution.  The intended application is
 \[
- E'=E,\ E(0)=1,
- \qquad
  \binom{C}{S}'=\begin{bmatrix}0&-1\\1&0\end{bmatrix}\binom{C}{S},
  \quad(C(0),S(0))=(1,0).
 \]
-This is the non-circular path from power series, repeated multiplication, and
-inverse logarithms to a canonical exponential/logarithm, and from rotation to
-\(\exp(it)=C(t)+iS(t)\).  The representative-specific derivative proofs are
-not supplied by uniqueness.
+This is the route from rotation to \(\exp(it)=C(t)+iS(t)\).  The scalar
+exponential/logarithm route is intentionally separate: it uses direct mesh
+contraction, not the vector Peano--Baker theorem.  In both cases,
+representative-specific derivative proofs are not supplied by uniqueness.
+\end{theorem}
+
+\section{Direct scalar exponential uniqueness}
+
+\begin{theorem}[Finite-mesh contraction: checked closure]
+\label{thm:direct-scalar-mesh-uniqueness}
+\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate}
+\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.bound_le_geometric}
+\lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate.error_eq_zero}
+\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison}
+\lean{ComputableAnalysis.ScalarODE.SelfDerivativeDirectMeshComparison.equivalent}
+\lean{ComputableAnalysis.ScalarODE.selfDerivativeInitialValueUnique_of_directMesh}
+\lean{ComputableAnalysis.exp.powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh}
+\leanok
+For the difference of two scalar candidates with common initial value, a
+finite rational mesh on a sufficiently short block supplies a nonnegative
+error envelope \(B_r\).  If one checked sweep gives
+\[
+  B_{r+1}\le \frac{B_r}{2},
+\]
+then Lean proves \(B_r\le B_0\,2^{-r}\), chooses an explicit dyadic refinement
+count for the proposed error divided by two, and concludes that error is zero.
+Longer intervals use a finite chain of short blocks.  The closure theorem is
+checked; deriving the one-sweep envelope from arbitrary interval derivative
+certificates is the remaining analytic construction.  This route is
+deliberately neither Peano--Baker nor Picard iteration.
 \end{theorem}
 
 \section{Finite special cases}
