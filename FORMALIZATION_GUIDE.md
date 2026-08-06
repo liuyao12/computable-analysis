@@ -262,6 +262,11 @@ its fixed factorial stage is valid, nested, and geometrically shrinking;
 `ExpProofs.uniformExpRaw_equiv_expPowerSeries` proves it overlaps the selected
 adaptive series evaluator at every common stage. This is the representation
 to use when one proof must evaluate both `x` and `x + h` at the same prefix.
+`ExpProofs.uniformExpOnUnit` packages the same schedule on `[0,1]` and is
+pointwise equivalent to the selected exponential there. Its next finite
+prefix has exactly the common center as derivative, while
+`ExpProofs.uniformExpTaylorPrefix_secant_error` gives its finite secant error
+explicitly.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -489,6 +494,10 @@ open ComputableAnalysis
 #check ExpProofs.uniformExpRaw
 #check ExpProofs.uniformExpRaw_valid
 #check ExpProofs.uniformExpRaw_equiv_expPowerSeries
+#check ExpProofs.uniformExpOnUnit
+#check ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit
+#check ExpProofs.expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms
+#check ExpProofs.uniformExpTaylorPrefix_secant_error
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one

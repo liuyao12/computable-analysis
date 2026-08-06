@@ -706,6 +706,8 @@ identities:
 \lean{ComputableAnalysis.ExpProofs.uniformExpRaw}
 \lean{ComputableAnalysis.ExpProofs.uniformExpRaw_valid}
 \lean{ComputableAnalysis.ExpProofs.uniformExpRaw_equiv_expPowerSeries}
+\lean{ComputableAnalysis.ExpProofs.expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms}
+\lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_at_zero}
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShiftAt_at_basepoint}
 \uses{def:formal-power-series}
@@ -726,6 +728,8 @@ differentiated.  Those are the later remainder-certificate obligations of
 On the fixed box \(\lvert x\rvert\le2\), Lean now packages this common schedule
 as \code{uniformExpRaw}: its boxes are nested and geometrically shrinking, and
 they overlap the existing input-adaptive power-series boxes at every stage.
+The derivative of the next finite prefix is exactly the common center used by
+this schedule, and its secant error is explicitly proportional to the step.
 For a finite prefix with a linear term, the coefficient-shift polynomial takes
 the value \(c_1\) at its declared rational expansion point;
 Chapter~\ref{ch:effective-calculus} then supplies the rational secant

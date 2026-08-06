@@ -2972,6 +2972,29 @@ theorem powerSeriesCenterAtTerms_eq_expTaylorPrefix (x : Rat) :
         FinitePolynomial.integratedTaylorPrefix]
       grind [Rat.add_assoc]
 
+/-- The finite derivative polynomial of the factorial prefix is exactly the
+preceding finite factorial center.  This is a finite identity; it prepares the
+comparison of the Taylor secant polynomial with the common raw tail box. -/
+theorem expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms (x : Rat) :
+    forall terms : Nat,
+      FinitePolynomial.expTaylorDerivativePrefix terms x =
+        powerSeriesCenterAtTerms x terms
+  | 0 => by
+      simp [FinitePolynomial.expTaylorDerivativePrefix,
+        FinitePolynomial.taylorDerivativePrefix,
+        powerSeriesCenterAtTerms, powerSeriesState]
+  | terms + 1 => by
+      rw [show FinitePolynomial.expTaylorDerivativePrefix (terms + 1) x =
+          FinitePolynomial.taylorDerivativePrefix FormalPowerSeries.expCoeff terms x +
+            FormalPowerSeries.expCoeff terms * x ^ terms by
+            rfl]
+      change FinitePolynomial.expTaylorDerivativePrefix terms x +
+          FormalPowerSeries.expCoeff terms * x ^ terms =
+        powerSeriesCenterAtTerms x (terms + 1)
+      rw [expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms]
+      rw [powerSeriesCenterAtTerms_succ,
+        powerSeriesTermAtTerms_eq_expCoeff_monomial]
+
 /-!
 ## A uniform bounded-input exponential schedule
 
@@ -3259,6 +3282,52 @@ def uniformExpRaw (x : Rat) : RealRaw where
 
 theorem uniformExpRaw_compute (x : Rat) (n : Nat) :
     (uniformExpRaw x).compute n = uniformExpBox x n := rfl
+
+/-- At a common stage, the next finite Taylor prefix differs from the raw-box
+center by exactly one factorial monomial. -/
+theorem qabs_expTaylorPrefix_sub_uniformExpCenter_le (x : Rat)
+    (hx : qabs x <= 2) (n : Nat) :
+    qabs (FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) x -
+      uniformExpCenter x n) <= uniformExpTailMagnitude n := by
+  rw [← powerSeriesCenterAtTerms_eq_expTaylorPrefix]
+  unfold uniformExpCenter
+  rw [powerSeriesCenterAtTerms_succ]
+  have hcancel :
+      powerSeriesCenterAtTerms x (uniformExpTailTerms n) +
+          powerSeriesTermAtTerms x (uniformExpTailTerms n) -
+        powerSeriesCenterAtTerms x (uniformExpTailTerms n) =
+      powerSeriesTermAtTerms x (uniformExpTailTerms n) := by
+    grind [Rat.sub_eq_add_neg]
+  rw [hcancel, powerSeriesTermAtTerms_eq_expCoeff_monomial]
+  simpa [uniformExpTailMagnitude] using
+    FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm
+      (C := (2 : Rat)) (x := x) (by native_decide) hx
+      (uniformExpTailTerms n)
+
+/-- The common finite exponential prefix has its matching common raw-box
+center as the finite Taylor derivative polynomial.  Its remaining secant
+error is the explicit finite coefficient supplied by
+`SecantDerivativeBound`. -/
+theorem uniformExpTaylorPrefix_secant_error
+    {x h : Rat} (hh : h ≠ 0) (hx : qabs x <= 2)
+    (hxh : qabs (x + h) <= 2) (n : Nat) :
+    qabs
+      ((FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) (x + h) -
+        FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) x) / h -
+        uniformExpCenter x n) <=
+      qabs h *
+        (FinitePolynomial.expTaylorPrefixSecantBound 2
+          (uniformExpTailTerms n) (by native_decide)).errorCoefficient := by
+  have hfinite :=
+    (FinitePolynomial.expTaylorPrefixSecantBound 2
+      (uniformExpTailTerms n) (by native_decide)).error_bound
+      x h hh hx hxh
+  change qabs
+      ((FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) (x + h) -
+        FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) x) / h -
+        powerSeriesCenterAtTerms x (uniformExpTailTerms n)) <= _
+  rw [← expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms]
+  exact hfinite
 
 theorem uniformExpRaw_valid (x : Rat) (hx : qabs x <= 2) :
     (uniformExpRaw x).Valid := by
@@ -3799,6 +3868,41 @@ def expPowerSeriesOnInterval (a b : Rat) : FunctionOnInterval where
   upper := b
   defined_on := fun _ _ => trivial
   valid_on := expPowerSeriesFunction_valid
+
+/-- The common-prefix exponential representation on the unit interval.  Its
+fixed factorial stage is shared by all rational samples in the interval, so
+it is the preferred input for the later two-point difference-quotient proof. -/
+def uniformExpOnUnit : FunctionOnInterval where
+  raw :=
+    { definedAt := fun x => (0 : Rat) <= x /\ x <= 1
+      compute := fun x _ => (uniformExpRaw x).compute }
+  lower := 0
+  upper := 1
+  defined_on := fun _ hx => hx
+  valid_on := by
+    intro x hx
+    have hqabs : qabs x <= 2 := by
+      rw [qabs_eq_self_of_nonneg hx.1]
+      exact Rat.le_trans hx.2 (by native_decide)
+    exact uniformExpRaw_valid x hqabs
+
+theorem uniformExpOnUnit_compute (x : Rat)
+    (hx : inDomainInterval (0 : Rat) 1 x) (n : Nat) :
+    uniformExpOnUnit.compute x hx n = (uniformExpRaw x).compute n := rfl
+
+/-- On the unit interval the common-prefix representation and the selected
+adaptive representation are pointwise equivalent. -/
+theorem uniformExpOnUnit_equivalent_expPowerSeriesOnUnit :
+    FunctionOnInterval.Equivalent uniformExpOnUnit
+      (expPowerSeriesOnInterval 0 1) := by
+  refine ⟨rfl, rfl, ?_⟩
+  intro x hxuniform hxadaptive
+  change (uniformExpRaw x).Equiv (expPowerSeries x)
+  have hx : (0 : Rat) <= x /\ x <= 1 := by
+    simpa [inDomainInterval] using hxuniform
+  apply uniformExpRaw_equiv_expPowerSeries x
+  rw [qabs_eq_self_of_nonneg hx.1]
+  exact Rat.le_trans hx.2 (by native_decide)
 
 /-- The total series-function wrapper inherits the exact power-series initial
 value at zero. -/
