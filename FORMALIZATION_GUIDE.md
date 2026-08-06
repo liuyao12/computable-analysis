@@ -313,10 +313,12 @@ Peano--Baker centers with the finite formal Taylor prefixes
 (`sinePrefix_eq_taylorPrefix` and `cosinePrefix_eq_taylorPrefix`), identifies
 the finite shifted sine prefix with the cosine prefix
 (`sinePrefixShift_eq_cosinePrefix`), and supplies the fixed-stage rational
-secant certificate `uniformRotationSinCenter_secant_error`. Thus the finite
-two-point calculation is now checked. `sin' = cos` and `cos' = -sin` still
-require the uniform bound on that stage-dependent coefficient and the tail
-budget after division by the rational step.
+secant certificate `uniformRotationSinCenter_secant_error`. Its direct odd
+prefix recurrence has now been majorized by the checked factorial exponential
+budget, yielding `uniformRotationSinCenter_secant_error_le_thirty_four`: a
+single `34 * |h|` bound on every finite common-stage sine center. Thus the
+whole finite two-point calculation is checked. `sin' = cos` and `cos' = -sin`
+still require the evaluator-tail budget after division by the rational step.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.

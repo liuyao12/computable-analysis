@@ -333,9 +333,11 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `uniformRotationBoxes_widths_shrink_uniform`. `RotationTaylorBridge` now
   identifies those literal centers with the corresponding finite formal
   sine/cosine Taylor prefixes and checks the fixed-stage sine secant estimate
-  `uniformRotationSinCenter_secant_error`. This is not yet a derivative
-  theorem: a uniform bound for its stage-dependent coefficient and the
-  divided-tail budget for `sin' = cos`, `cos' = -sin` remain open. The continuous-simplex
+  `uniformRotationSinCenter_secant_error`. Its odd-prefix recurrence is now
+  bounded by the exponential factorial budget, giving the uniform finite
+  theorem `uniformRotationSinCenter_secant_error_le_thirty_four`. This is not
+  yet a derivative theorem: the divided-tail budget for `sin' = cos`,
+  `cos' = -sin` remains open. The continuous-simplex
   interpretation and the rotation/geometric identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that

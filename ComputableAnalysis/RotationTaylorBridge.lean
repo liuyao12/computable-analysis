@@ -15,6 +15,8 @@ namespace ComputableAnalysis
 
 namespace RotationSeries
 
+open FinitePolynomial
+
 /-- Dividing a factorial term by its next rational index is exactly the next
 factorial term.  Keeping this elementary rational identity separate makes the
 two-step sine/cosine recurrence readable. -/
@@ -203,6 +205,211 @@ theorem uniformRotationSinCenter_secant_error
             cosinePrefix_eq_taylorPrefix x _
   rw [← hshift']
   simpa [terms] using hfinite
+
+/-- The absolute value of the even factorial coefficient is exactly the
+matching exponential coefficient.  This lets a finite sine secant budget use
+the already checked factorial majorant without referring to a summed sine. -/
+private theorem qabs_signed_even_factorial (n : Nat) :
+    qabs (((-1 : Rat) ^ n) / factorialRat (2 * n)) =
+      FormalPowerSeries.expCoeff (2 * n) := by
+  unfold FormalPowerSeries.expCoeff
+  rw [Rat.div_def, qabs_mul]
+  have hsign : qabs ((-1 : Rat) ^ n) = 1 := by
+    rw [RationalMajorant.qabs_pow_eq_pow_qabs]
+    have hminus : qabs (-1 : Rat) = 1 := by native_decide
+    rw [hminus]
+    induction n with
+    | zero => rfl
+    | succ n ih => rw [Rat.pow_succ, ih, Rat.mul_one]
+  rw [hsign, Rat.one_mul]
+  calc
+    qabs (factorialRat (2 * n))⁻¹ = (factorialRat (2 * n))⁻¹ :=
+      qabs_eq_self_of_nonneg (Rat.le_of_lt ((Rat.inv_pos).2
+        (RationalMajorant.factorialRat_pos _)))
+    _ = 1 / factorialRat (2 * n) := by
+      rw [Rat.div_def, Rat.one_mul]
+
+/-- The accumulated error budget for the odd finite sine prefix.  It has one
+summand for each even exponential coefficient and is therefore a sub-budget
+of the factorial exponential secant coefficient. -/
+private def sinePrefixSecantCoefficient : Nat -> Rat
+  | 0 => 0
+  | n + 1 =>
+      sinePrefixSecantCoefficient n +
+        qabs (FormalPowerSeries.expCoeff (2 * n)) *
+          powerSecantErrorBound 2 (2 * n + 1)
+
+/-- A finite sine/cosine prefix together with the deliberately chosen error
+coefficient.  Recording the equality in the data avoids relying on the
+proof-term presentation of the generic Taylor bound. -/
+private structure SinePrefixSecantData (n : Nat) where
+  bound : SecantDerivativeBound 2
+    (fun x => LinearODE.RotationSystem.sinePrefix x n)
+    (fun x => LinearODE.RotationSystem.cosinePrefix x n)
+  errorCoefficient_eq : bound.errorCoefficient = sinePrefixSecantCoefficient n
+
+private def sinePrefixSecantData : (n : Nat) -> SinePrefixSecantData n
+  | 0 => by
+      let B : SecantDerivativeBound 2
+          (fun x => LinearODE.RotationSystem.sinePrefix x 0)
+          (fun x => LinearODE.RotationSystem.cosinePrefix x 0) := by
+        simpa [LinearODE.RotationSystem.sinePrefix,
+          LinearODE.RotationSystem.cosinePrefix] using
+          SecantDerivativeBound.constant 2 0
+      exact { bound := B, errorCoefficient_eq := rfl }
+  | n + 1 => by
+      let F := sinePrefixSecantData n
+      let G := SecantDerivativeBound.scaleRat
+        (((-1 : Rat) ^ n) / factorialRat (2 * n))
+        (normalizedMonomialSecantBound 2 (2 * n) (by native_decide))
+      let H := F.bound.add G
+      have hsource :
+          (fun x => LinearODE.RotationSystem.sinePrefix x n +
+            ((-1 : Rat) ^ n / factorialRat (2 * n)) *
+              (x ^ (2 * n + 1) / ((2 * n + 1 : Nat) : Rat))) =
+          fun x => LinearODE.RotationSystem.sinePrefix x (n + 1) := by
+        funext x
+        simp only [LinearODE.RotationSystem.sinePrefix,
+          LinearODE.RotationSystem.sineCoefficient]
+        rw [show 2 * n + 1 = (2 * n) + 1 by omega,
+          FormalPowerSeries.factorialRat_succ]
+        rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      have htarget :
+          (fun x => LinearODE.RotationSystem.cosinePrefix x n +
+            ((-1 : Rat) ^ n / factorialRat (2 * n)) * x ^ (2 * n)) =
+          fun x => LinearODE.RotationSystem.cosinePrefix x (n + 1) := by
+        funext x
+        simp only [LinearODE.RotationSystem.cosinePrefix,
+          LinearODE.RotationSystem.cosineCoefficient]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      have hcoeff : H.errorCoefficient = sinePrefixSecantCoefficient (n + 1) := by
+        dsimp [H, G, SecantDerivativeBound.add, SecantDerivativeBound.scaleRat,
+          normalizedMonomialSecantBound]
+        rw [F.errorCoefficient_eq, qabs_signed_even_factorial]
+        rw [sinePrefixSecantCoefficient]
+        have hexp : 0 <= FormalPowerSeries.expCoeff (2 * n) := by
+          unfold FormalPowerSeries.expCoeff
+          rw [Rat.div_def, Rat.one_mul]
+          exact Rat.le_of_lt ((Rat.inv_pos).2
+            (RationalMajorant.factorialRat_pos _))
+        rw [qabs_eq_self_of_nonneg hexp]
+      let B : SecantDerivativeBound 2
+          (fun x => LinearODE.RotationSystem.sinePrefix x (n + 1))
+          (fun x => LinearODE.RotationSystem.cosinePrefix x (n + 1)) :=
+        { errorCoefficient := sinePrefixSecantCoefficient (n + 1)
+          errorCoefficient_nonneg := by
+            unfold sinePrefixSecantCoefficient
+            apply Rat.add_nonneg
+            · rw [← F.errorCoefficient_eq]
+              exact F.bound.errorCoefficient_nonneg
+            · exact Rat.mul_nonneg (qabs_nonneg _)
+                (powerSecantErrorBound_nonneg (by native_decide) _)
+          error_bound := by
+            intro x h hh hx hxh
+            have hH := H.error_bound x h hh hx hxh
+            have hleft :
+                qabs
+                  ((LinearODE.RotationSystem.sinePrefix (x + h) (n + 1) -
+                      LinearODE.RotationSystem.sinePrefix x (n + 1)) / h -
+                    LinearODE.RotationSystem.cosinePrefix x (n + 1)) =
+                  qabs
+                    ((LinearODE.RotationSystem.sinePrefix (x + h) n +
+                        ((-1 : Rat) ^ n / factorialRat (2 * n)) *
+                          ((x + h) ^ (2 * n + 1) / ((2 * n + 1 : Nat) : Rat)) -
+                      (LinearODE.RotationSystem.sinePrefix x n +
+                        ((-1 : Rat) ^ n / factorialRat (2 * n)) *
+                          (x ^ (2 * n + 1) / ((2 * n + 1 : Nat) : Rat))) ) / h -
+                      (LinearODE.RotationSystem.cosinePrefix x n +
+                        ((-1 : Rat) ^ n / factorialRat (2 * n)) * x ^ (2 * n))) := by
+                  rw [← congrFun hsource (x + h), ← congrFun hsource x,
+                    ← congrFun htarget x]
+            calc
+              qabs
+                  ((LinearODE.RotationSystem.sinePrefix (x + h) (n + 1) -
+                      LinearODE.RotationSystem.sinePrefix x (n + 1)) / h -
+                    LinearODE.RotationSystem.cosinePrefix x (n + 1)) <=
+                  qabs h * H.errorCoefficient := by
+                    rw [hleft]
+                    exact hH
+              _ = qabs h * sinePrefixSecantCoefficient (n + 1) := by
+                    rw [hcoeff] }
+      exact { bound := B, errorCoefficient_eq := rfl }
+
+private def sinePrefixSecantBound (n : Nat) := (sinePrefixSecantData n).bound
+
+private theorem sinePrefixSecantBound_errorCoefficient (n : Nat) :
+    (sinePrefixSecantBound n).errorCoefficient = sinePrefixSecantCoefficient n :=
+  (sinePrefixSecantData n).errorCoefficient_eq
+
+private theorem sinePrefixSecantCoefficient_le_exp (n : Nat) :
+    sinePrefixSecantCoefficient n <=
+      expTaylorPrefixSecantCoefficient (2 * n) := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      have hstep :
+          sinePrefixSecantCoefficient (n + 1) <=
+            expTaylorPrefixSecantCoefficient (2 * n + 1) := by
+        rw [sinePrefixSecantCoefficient,
+          show 2 * n + 1 = (2 * n) + 1 by omega,
+          expTaylorPrefixSecantCoefficient]
+        exact rat_add_le_add ih Rat.le_refl
+      have hnext :
+          expTaylorPrefixSecantCoefficient (2 * n + 1) <=
+            expTaylorPrefixSecantCoefficient (2 * (n + 1)) := by
+        have hterm : 0 <=
+            qabs (FormalPowerSeries.expCoeff (2 * n + 1)) *
+              powerSecantErrorBound 2 (2 * n + 1 + 1) :=
+          Rat.mul_nonneg (qabs_nonneg _)
+            (powerSecantErrorBound_nonneg (by native_decide) _)
+        calc
+          expTaylorPrefixSecantCoefficient (2 * n + 1) =
+              expTaylorPrefixSecantCoefficient (2 * n + 1) + 0 := by
+                rw [Rat.add_zero]
+          _ <= expTaylorPrefixSecantCoefficient (2 * n + 1) +
+              qabs (FormalPowerSeries.expCoeff (2 * n + 1)) *
+                powerSecantErrorBound 2 (2 * n + 1 + 1) :=
+              rat_add_le_add (Rat.le_refl) hterm
+          _ = expTaylorPrefixSecantCoefficient ((2 * n + 1) + 1) := by
+              rfl
+          _ = expTaylorPrefixSecantCoefficient (2 * (n + 1)) := by
+              have hterms : (2 * n + 1) + 1 = 2 * (n + 1) := by omega
+              rw [hterms]
+      exact Rat.le_trans hstep hnext
+
+private theorem sinePrefixSecantCoefficient_le_thirty_four (n : Nat) :
+    sinePrefixSecantCoefficient n <= 34 :=
+  Rat.le_trans (sinePrefixSecantCoefficient_le_exp n)
+    (expTaylorPrefixSecantCoefficient_le_thirty_four _)
+
+/-- Every finite sine center in the common bounded rotation schedule has the
+single rational secant budget `34 |h|`.  This is a finite-prefix theorem: the
+separate evaluator-tail budget after dividing by `h` is still required before
+claiming `sin' = cos`. -/
+theorem uniformRotationSinCenter_secant_error_le_thirty_four
+    {x h : Rat} (hh : h ≠ 0) (hx : qabs x <= 2)
+    (hxh : qabs (x + h) <= 2) (n : Nat) :
+    qabs
+      (((uniformRotationCenter (x + h) n).im -
+          (uniformRotationCenter x n).im) / h -
+        (uniformRotationCenter x n).re) <=
+      qabs h * 34 := by
+  let terms := uniformRotationTailStart + n
+  have hfinite := (sinePrefixSecantBound terms).error_bound x h hh hx hxh
+  rw [sinePrefixSecantBound_errorCoefficient] at hfinite
+  change qabs
+      ((LinearODE.RotationSystem.sinePrefix (x + h) terms -
+          LinearODE.RotationSystem.sinePrefix x terms) / h -
+        LinearODE.RotationSystem.cosinePrefix x terms) <= _
+  calc
+    qabs
+        ((LinearODE.RotationSystem.sinePrefix (x + h) terms -
+            LinearODE.RotationSystem.sinePrefix x terms) / h -
+          LinearODE.RotationSystem.cosinePrefix x terms) <=
+        qabs h * sinePrefixSecantCoefficient terms := hfinite
+    _ <= qabs h * 34 := Rat.mul_le_mul_of_nonneg_left
+      (sinePrefixSecantCoefficient_le_thirty_four terms) (qabs_nonneg _)
 
 end RotationSeries
 
