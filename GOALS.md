@@ -406,6 +406,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   the sampled second path is nondecreasing.  It is the finite
   monotone-piece form needed by the `x*arctan x` Pi route, not yet an FTC
   identification of either strip.  The checked
+  `Integral.IntegrationByPartsCertificate` now packages the next general
+  handoff: after a particular paired mesh has certified that its two
+  integral raws add to the product-endpoint raw,
+  `left_integral_equiv_endpoint_sub_right` and its symmetric companion
+  derive the usual endpoint-minus-other-integral formula by valid raw
+  interval cancellation.  Constructing that paired mesh from arbitrary
+  derivative data remains separate.
+  The checked
   `quadraticVariationSum` estimates bound that correction by a maximum first
   increment times the second endpoint variation, or by the product of the two
   endpoint variations; negating both paths supplies the decreasing-piece
@@ -679,9 +687,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   endpoint and the circle-area pi.  The literal reciprocal-log formula is now
   the sixth `PiCoverageBridge` constructor: it tests a supplied finite
   triangle, Darboux-strip, product-FTC, and logarithm route, with direct rate
-  `52/2^n`.  It still does not establish a general effective
-  FTC/integration-by-parts theorem or canonical exp/log transport; those are
-  the stronger remaining refinement of this row.
+  `52/2^n`.  It instantiates the certificate-level integration-by-parts
+  rebalancing theorem, but does not yet construct such certificates from a
+  general effective FTC or identify the canonical exp/log transport; those
+  are the stronger remaining refinements of this row.
   The square-pullback companion
   `Logarithm.piTriangleLogSquareSubstitutionIntegral` is the seventh bridge:
   its endpoint is `2 * ∫_0^1 2*x/(1+x*x) dx`, it reaches the reciprocal-log

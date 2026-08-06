@@ -27,7 +27,8 @@ following are still open as *general* theorems:
 
 - product, chain, and quotient rules for arbitrary interval evaluators;
 - construction of an integral from every interval-regular function;
-- general FTC, substitution, and bounded piecewise integration-by-parts;
+- general FTC, substitution, and automatic construction of bounded
+  piecewise integration-by-parts certificates;
 - analytic certificates for the selected `exp`, `log`, `sin`, and `cos` raw
   functions, including `exp' = exp`;
 - continuous matrix Peano--Baker and constructive linear
@@ -331,11 +332,12 @@ derivative alone:
 `FTC.EffectiveFTC` and `FTC.effectiveFTC_definiteIntegralEqualsEndpoint`
 describe one checked endpoint-bridge route.  The generic bridge from an
 arbitrary `HasDerivativeOnInterval` to that FTC certificate is not yet
-available.  The finite integration-by-parts construction in
-`IntegralIdentities.lean` is a benchmark and a source of reusable finite
-algebra, not a universal theorem.  Consequently, an LLM must currently
-either stay within an existing concrete construction or make the missing
-general theorem its explicit proof goal.
+available.  `Integral.IntegrationByPartsCertificate` now turns a certified
+paired finite-subdivision identity into the standard endpoint-minus-integral
+formula through `left_integral_equiv_endpoint_sub_right` (and its symmetric
+companion).  An LLM must still construct the two integrals and the common
+mesh/corner certificate for its particular functions; that is deliberately
+not inferred from a formal product rule alone.
 
 ### Increasing pieces: start with the literal finite stage
 
@@ -841,13 +843,14 @@ test needs; expose the natural integral, series, or geometry theorem in a
 downstream result.  When two named checked evaluators themselves must be
 compared, use `PiProofs.piPresentation_equiv source target`; it derives their
 raw-real equivalence through the certified area presentation, without
-pretending that the comparison adds a new calculus capability.  `pi.integrationByParts` is the checked supplied-unit
-formula using the literal reciprocal-integral logarithm, with runtime bound
-`52 / 2^n`; it is a finite calculus bridge, not the still-open general
-integration-by-parts theorem or canonical-exp/log transport.
-`pi.squareSubstitution` is a separate checked bridge with runtime bound
-`56 / 2^n`: its raw formula retains the pullback integral
-`2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
+pretending that the comparison adds a new calculus capability.
+`pi.integrationByParts` is the checked supplied-unit formula using the
+literal reciprocal-integral logarithm, with runtime bound `52 / 2^n`; it
+supplies one paired-mesh certificate for the checked general rebalancing
+theorem, but not the still-open automatic construction of such certificates
+or canonical-exp/log transport. `pi.squareSubstitution` is a separate checked
+bridge with runtime bound `56 / 2^n`: its raw formula retains the pullback
+integral `2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
 `pi.integrationByParts` is the finite `t = x*x` substitution certificate.
 It is likewise not a general substitution theorem.
 `pi.squareStieltjes` is the supplementary direct-mesh view: it evaluates

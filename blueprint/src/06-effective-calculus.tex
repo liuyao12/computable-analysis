@@ -1,24 +1,13 @@
 \chapter{Fundamental Theorem of Calculus}
 \label{ch:effective-calculus}
 
-\section{Finite-difference derivative certificates}
+\section{From first-order data to FTC certificates}
 
-\begin{definition}[Effective derivative on a rational interval]
-\label{def:effective-derivative}
-\lean{ComputableAnalysis.HasDerivativeOnInterval}
-\uses{def:raw-real,rem:series-linear-coefficient-bridge}
-For interval functions \(f,D\) on \([a,b]\cap\Q\), a derivative
-certificate supplies two algorithms. Given an output stage \(n\), it chooses
-a rational step budget \(\delta_n>0\); given \(x,h,n\), it also chooses the
-evaluation precision for the endpoint boxes.  For every nonzero rational
-\(\lvert h\rvert\le\delta_n\) with \(x,x+h\in[a,b]\), the interval quotient
-\[
- \frac{f(x+h)-f(x)}{h}
-\]
-is within the requested stage-\(n\) tolerance of \(D(x)\). The displayed
-finite-error property, rather than an ambient limit, is what this project
-calls \(f'=D\).
-\end{definition}
+The derivative certificate was introduced with the power-series
+Taylor--Lagrange bridge in \cref{def:effective-derivative}.  Here it is used
+as finite input to the fundamental-theorem constructions: on each rational
+cell, the quantified secant estimate supplies the explicit error budget that
+is summed into an integral certificate.
 
 \begin{theorem}[Finite monomial secants]
 \label{thm:finite-monomial-secants}

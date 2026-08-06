@@ -276,6 +276,7 @@ an independent raw computation of \(\pi_{\rm area}\).
 
 \begin{definition}[Integration-by-parts certificate on rational pieces]
 \label{def:integration-by-parts-certificate}
+\lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate}
 \uses{thm:finite-geometric-integration-by-parts,def:definite-integral-identity}
 For rational monotone pieces, provide:
 \begin{verbatim}
@@ -283,17 +284,25 @@ piece: integral(f*g'), integral(f'*g), product(f,g)
 piece: directions, common_refinement, increment_moduli
 stage: rational error budget for boxes + quadrature + corners
 \end{verbatim}
-This is the general interface; it is not yet a universal theorem.
+In Lean the certified output is the paired-sum equivalence: the two integral
+raws add to the endpoint-product raw.  This keeps the common subdivision and
+its corner bound as a concrete proof obligation.
 \end{definition}
 
-\begin{theorem}[Integration by parts from the certificate: construction target]
+\begin{theorem}[Integration by parts from the certificate]
 \label{thm:integration-by-parts-certificate}
+\lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate.left_integral_equiv_endpoint_sub_right}
+\lean{ComputableAnalysis.Integral.IntegrationByPartsCertificate.right_integral_equiv_endpoint_sub_left}
 \uses{def:integration-by-parts-certificate}
-The target is
+\leanok
+Once the paired-sum field is checked, raw-interval cancellation proves
 \[
  \int_{t_0}^{t_1} f(t)g'(t)\,\dd t\ \Equiv\
  f(t_1)g(t_1)-f(t_0)g(t_0)-\int_{t_0}^{t_1} f'(t)g(t)\,\dd t.
 \]
+\noindent The theorem is therefore general over certified constructions, but
+it does not manufacture the finite subdivision certificate for an arbitrary
+pair of functions.
 \end{theorem}
 
 \begin{theorem}[Checked arctangent product FTC]

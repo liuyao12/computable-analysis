@@ -642,20 +642,25 @@ as compatibility aliases; new series declarations use
 \code{coefficientShift} and \code{HasCoefficientShift}.
 \end{definition}
 
-\begin{remark}[The later Taylor--remainder bridge]
-\label{rem:series-linear-coefficient-bridge}
-The linear coefficient becomes an analytic derivative only after a certified
-first-order remainder is supplied.  Concretely, a finite rational certificate
-must bound
+\begin{definition}[Derivative from a first-order Taylor--Lagrange certificate]
+\label{def:effective-derivative}
+\lean{ComputableAnalysis.HasDerivativeOnInterval}
+\uses{def:formal-power-series}
+For a series presented at a rational point \(a\), its candidate derivative is
+the coefficient \(c_1\) of \(x-a\).  We call that coefficient the derivative
+only after a first-order Taylor--Lagrange certificate has been checked:
+given an output stage \(n\), it provides a rational step budget
+\(\delta_n>0\) and endpoint precisions which bound
 \[
   f(a+h)-f(a)-Lh
 \]
 by \(\lvert h\rvert\varepsilon\) once \(h\) is small enough, with an explicit
-stage schedule.  This is the computable content of the usual
-Taylor--Lagrange remainder step.  Chapter~\ref{ch:effective-calculus} makes
-that finite-difference assertion the definition of a derivative; no limit or
-completeness theorem is used here.
-\end{remark}
+stage schedule.  \code{HasDerivativeOnInterval} is Lean's uniform-on-a-
+rational-interval form of precisely this certificate.  Thus the coefficient
+is the definitionally chosen linear term, while the Lagrange bound is the
+evidence that it describes the function.  No ambient limit or completeness
+theorem enters.
+\end{definition}
 
 \begin{definition}[Geometric majorants for power series]
 \label{def:power-series-geometric-majorant}
@@ -742,11 +747,10 @@ rational step \(h\), the common quotient stage is selected from the explicit
 positive budget \(\varepsilon\lvert h\rvert/24\); its omitted factorial
 magnitude is proved below that budget before any quotient is formed.
 For a finite prefix with a linear term, the coefficient-shift polynomial takes
-the value \(c_1\) at its declared rational expansion point;
-Chapter~\ref{ch:effective-calculus} then supplies the rational secant
-certificate that makes that value an actual derivative.  The infinite-series
-tail transport is an analytic result of the next chapter, not a rule of
-formal coefficient algebra.
+the value \(c_1\) at its declared rational expansion point; the displayed
+secant estimate is its first-order Taylor--Lagrange certificate in the sense
+of \cref{def:effective-derivative}.  The infinite-series tail transport is an
+additional analytic result, not a rule of formal coefficient algebra.
 \end{theorem}
 
 \section{Euler's Basel Problem}

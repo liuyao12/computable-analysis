@@ -392,6 +392,149 @@ theorem integral_le_of_endpoint_le
 
 end DefiniteIdentityFor
 
+/-- Data for a constructive integration-by-parts identity on one rational
+interval.
+
+`left` and `right` stand for the two integrands `f*g'` and `f'*g`; `product`
+is the endpoint product `f*g`.  The substantive field is
+`paired_sum_equiv`: it is where a common finite subdivision, its two
+Stieltjes computations, and its shrinking corner budget are certified.  The
+theorems below perform only representation-safe raw-interval algebra, so they
+do not turn a suggested antiderivative or an unproved limiting rule into an
+axiom. -/
+structure IntegrationByPartsCertificate
+    (left right product : FunctionOnInterval) where
+  same_lower_left : product.lower = left.lower
+  same_upper_left : product.upper = left.upper
+  same_lower_right : product.lower = right.lower
+  same_upper_right : product.upper = right.upper
+  left_construction : Integral.ConstructionFor left
+  right_construction : Integral.ConstructionFor right
+  endpoint_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute product.toRealFunRaw product.lower product.upper)
+  paired_sum_equiv :
+    ((Integral.integralFor left left_construction) +
+      (Integral.integralFor right right_construction)).Equiv
+        (endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+          endpoint_valid)
+
+namespace IntegrationByPartsCertificate
+
+theorem left_integral_valid
+    {left right product : FunctionOnInterval}
+    (C : IntegrationByPartsCertificate left right product) :
+    (Integral.integralFor left C.left_construction).Valid :=
+  Integral.integralFor_valid left C.left_construction
+
+theorem right_integral_valid
+    {left right product : FunctionOnInterval}
+    (C : IntegrationByPartsCertificate left right product) :
+    (Integral.integralFor right C.right_construction).Valid :=
+  Integral.integralFor_valid right C.right_construction
+
+theorem endpoint_raw_valid
+    {left right product : FunctionOnInterval}
+    (C : IntegrationByPartsCertificate left right product) :
+    (endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+      C.endpoint_valid).Valid := by
+  simpa [endpointDifferenceRaw, RealRaw.Valid] using C.endpoint_valid
+
+/-- Constructive integration by parts in its usual first orientation.  The
+finite paired-subdivision certificate states that the two integral raws add
+to the endpoint product; subtracting the second valid raw representative is
+then justified by the checked interval cancellation laws. -/
+theorem left_integral_equiv_endpoint_sub_right
+    {left right product : FunctionOnInterval}
+    (C : IntegrationByPartsCertificate left right product) :
+    (Integral.integralFor left C.left_construction).Equiv
+      ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+        C.endpoint_valid) -
+        (Integral.integralFor right C.right_construction)) := by
+  have hleft := C.left_integral_valid
+  have hright := C.right_integral_valid
+  have hendpoint := C.endpoint_raw_valid
+  have hsum :
+      ((Integral.integralFor left C.left_construction) +
+        (Integral.integralFor right C.right_construction)).Valid :=
+    RealRaw.add_valid hleft hright
+  have hsumSub :
+      (((Integral.integralFor left C.left_construction) +
+        (Integral.integralFor right C.right_construction)) -
+        (Integral.integralFor right C.right_construction)).Valid :=
+    RealRaw.sub_valid hsum hright
+  have hendpointSub :
+      ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+        C.endpoint_valid) -
+        (Integral.integralFor right C.right_construction)).Valid :=
+    RealRaw.sub_valid hendpoint hright
+  have hsubtract :
+      (((Integral.integralFor left C.left_construction) +
+        (Integral.integralFor right C.right_construction)) -
+        (Integral.integralFor right C.right_construction)).Equiv
+          ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+            C.endpoint_valid) -
+            (Integral.integralFor right C.right_construction)) :=
+    RealRaw.sub_equiv hsum hendpoint hright hright C.paired_sum_equiv
+      (RealRaw.equiv_refl _ hright)
+  exact RealRaw.equiv_trans hleft hsumSub hendpointSub
+    (RealRaw.equiv_symm (RealRaw.add_sub_cancel_right_equiv hleft hright))
+    hsubtract
+
+/-- The symmetric orientation of constructive integration by parts.  It is
+derived from the same paired mesh certificate after an explicit commutation of
+the two valid integral raws. -/
+theorem right_integral_equiv_endpoint_sub_left
+    {left right product : FunctionOnInterval}
+    (C : IntegrationByPartsCertificate left right product) :
+    (Integral.integralFor right C.right_construction).Equiv
+      ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+        C.endpoint_valid) -
+        (Integral.integralFor left C.left_construction)) := by
+  have hleft := C.left_integral_valid
+  have hright := C.right_integral_valid
+  have hendpoint := C.endpoint_raw_valid
+  have hsum :
+      ((Integral.integralFor left C.left_construction) +
+        (Integral.integralFor right C.right_construction)).Valid :=
+    RealRaw.add_valid hleft hright
+  have hsumComm :
+      ((Integral.integralFor right C.right_construction) +
+        (Integral.integralFor left C.left_construction)).Valid :=
+    RealRaw.add_valid hright hleft
+  have hsumSub :
+      (((Integral.integralFor right C.right_construction) +
+        (Integral.integralFor left C.left_construction)) -
+        (Integral.integralFor left C.left_construction)).Valid :=
+    RealRaw.sub_valid hsumComm hleft
+  have hendpointSub :
+      ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+        C.endpoint_valid) -
+        (Integral.integralFor left C.left_construction)).Valid :=
+    RealRaw.sub_valid hendpoint hleft
+  have hpairedComm :
+      ((Integral.integralFor right C.right_construction) +
+        (Integral.integralFor left C.left_construction)).Equiv
+          (endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+            C.endpoint_valid) :=
+    RealRaw.equiv_trans hsumComm hsum hendpoint
+      (RealRaw.add_comm_equiv _ _ hright hleft)
+      C.paired_sum_equiv
+  have hsubtract :
+      (((Integral.integralFor right C.right_construction) +
+        (Integral.integralFor left C.left_construction)) -
+        (Integral.integralFor left C.left_construction)).Equiv
+          ((endpointDifferenceRaw product.toRealFunRaw product.lower product.upper
+            C.endpoint_valid) -
+            (Integral.integralFor left C.left_construction)) :=
+    RealRaw.sub_equiv hsumComm hendpoint hleft hleft hpairedComm
+      (RealRaw.equiv_refl _ hleft)
+  exact RealRaw.equiv_trans hright hsumSub hendpointSub
+    (RealRaw.equiv_symm (RealRaw.add_sub_cancel_right_equiv hright hleft))
+    hsubtract
+
+end IntegrationByPartsCertificate
+
 /-- A definite-integral identity whose integral side is explicitly supplied by
 a monotone-integral construction. -/
 structure MonotoneDefiniteIdentityFor
