@@ -22,6 +22,96 @@ namespace ComputableAnalysis
 
 namespace ScalarODE
 
+namespace FiniteMesh
+
+/-- The literal finite rational sum over the first `count` mesh cells. -/
+def sumUpTo (f : Nat -> Rat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 => sumUpTo f count + f count
+
+theorem sumUpTo_add (f g : Nat -> Rat) :
+    forall count,
+      sumUpTo (fun cell => f cell + g cell) count =
+        sumUpTo f count + sumUpTo g count
+  | 0 => by
+      change (0 : Rat) = 0 + 0
+      exact (Rat.zero_add 0).symm
+  | count + 1 => by
+      rw [sumUpTo, sumUpTo, sumUpTo, sumUpTo_add f g count]
+      grind [Rat.add_assoc, Rat.add_comm]
+
+theorem sumUpTo_const (value : Rat) :
+    forall count,
+      sumUpTo (fun _cell => value) count = (count : Rat) * value
+  | 0 => by
+      change (0 : Rat) = 0 * value
+      exact (Rat.zero_mul value).symm
+  | count + 1 => by
+      rw [sumUpTo, sumUpTo_const value count, Rat.natCast_add]
+      grind [Rat.add_mul, Rat.add_assoc]
+
+/-- Cellwise rational bounds telescope under a finite mesh sum. -/
+theorem sumUpTo_le_of_le {f g : Nat -> Rat} :
+    forall count,
+      (forall cell, cell < count -> f cell <= g cell) ->
+        sumUpTo f count <= sumUpTo g count
+  | 0, _ => by simp [sumUpTo]
+  | count + 1, h => by
+      rw [sumUpTo, sumUpTo]
+      have hprefix : sumUpTo f count <= sumUpTo g count :=
+        sumUpTo_le_of_le count (fun cell hcell =>
+          h cell (Nat.lt_trans hcell (Nat.lt_succ_self count)))
+      have hcell : f count <= g count := h count (Nat.lt_succ_self count)
+      exact rat_add_le_add hprefix hcell
+
+/-- A finite sum of nonnegative residual boxes is nonnegative. -/
+theorem sumUpTo_nonneg {f : Nat -> Rat} :
+    forall count,
+      (forall cell, cell < count -> 0 <= f cell) ->
+        0 <= sumUpTo f count
+  | 0, _ => by simp [sumUpTo]
+  | count + 1, h => by
+      rw [sumUpTo]
+      exact Rat.add_nonneg
+        (sumUpTo_nonneg count (fun cell hcell =>
+          h cell (Nat.lt_trans hcell (Nat.lt_succ_self count))))
+        (h count (Nat.lt_succ_self count))
+
+/-- The finite sum of successive mesh increments is exactly the endpoint
+difference.  This is the rational telescoping identity used before any
+interval or derivative limit is taken. -/
+theorem sumUpTo_increments (state : Nat -> Rat) :
+    forall count,
+      sumUpTo (fun cell => state (cell + 1) - state cell) count =
+        state count - state 0
+  | 0 => by
+      rw [sumUpTo]
+      grind [Rat.sub_eq_add_neg]
+  | count + 1 => by
+      rw [sumUpTo, sumUpTo_increments state count]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+end FiniteMesh
+
+/-- A finite rational mesh estimate for the zero-initial difference on one
+short block.  `state cell` is its cell-endpoint envelope.  The analytic
+derivative proof supplies `cell_bound`; the rest is explicit finite
+telescoping rational arithmetic. -/
+structure FiniteMeshDifferenceBound (previous next : Rat) where
+  cells : Nat
+  state : Nat -> Rat
+  step : Rat
+  residual : Nat -> Rat
+  next_eq : next = state cells
+  initial_zero : state 0 = 0
+  previous_nonneg : 0 <= previous
+  step_nonneg : 0 <= step
+  cell_bound : forall cell, cell < cells ->
+    state (cell + 1) - state cell <= step * previous + residual cell
+  residual_nonneg : forall cell, cell < cells -> 0 <= residual cell
+  total_length_short : (cells : Rat) * step <= (1 : Rat) / 4
+  residual_sum_small : FiniteMesh.sumUpTo residual cells <= previous / 4
+
 /-- The rational output of one direct finite-mesh sweep on a short time
 block.  `next_le_mesh_bound` is the result of summing the cell estimates for
 the difference of two candidate solutions: the old envelope is multiplied by
@@ -66,6 +156,47 @@ theorem next_le_half {previous next : Rat}
         _ = previous * (1 / 2 : Rat) := by grind [Rat.mul_comm]
 
 end ShortBlockMeshSweep
+
+namespace FiniteMeshDifferenceBound
+
+/-- Finite cell telescoping produces the short-block envelope needed for a
+direct mesh-contraction sweep. -/
+def toShortBlockMeshSweep {previous next : Rat}
+    (bound : FiniteMeshDifferenceBound previous next) :
+    ShortBlockMeshSweep previous next where
+  blockLength := (bound.cells : Rat) * bound.step
+  residual := FiniteMesh.sumUpTo bound.residual bound.cells
+  previous_nonneg := bound.previous_nonneg
+  blockLength_nonneg := Rat.mul_nonneg (Rat.natCast_nonneg) bound.step_nonneg
+  block_short := bound.total_length_short
+  residual_nonneg := FiniteMesh.sumUpTo_nonneg bound.cells bound.residual_nonneg
+  residual_small := bound.residual_sum_small
+  next_le_mesh_bound := by
+    have hsum := FiniteMesh.sumUpTo_le_of_le bound.cells bound.cell_bound
+    have htel := FiniteMesh.sumUpTo_increments bound.state bound.cells
+    have hstate : bound.state bound.cells =
+        FiniteMesh.sumUpTo
+          (fun cell => bound.state (cell + 1) - bound.state cell) bound.cells := by
+      rw [htel, bound.initial_zero]
+      grind [Rat.sub_eq_add_neg]
+    calc
+      next = bound.state bound.cells := bound.next_eq
+      _ = FiniteMesh.sumUpTo
+          (fun cell => bound.state (cell + 1) - bound.state cell) bound.cells :=
+        hstate
+      _ <= FiniteMesh.sumUpTo
+          (fun cell => bound.step * previous + bound.residual cell) bound.cells := hsum
+      _ = ((bound.cells : Rat) * bound.step) * previous +
+          FiniteMesh.sumUpTo bound.residual bound.cells := by
+        rw [FiniteMesh.sumUpTo_add, FiniteMesh.sumUpTo_const]
+        grind [Rat.mul_assoc]
+
+theorem next_le_half {previous next : Rat}
+    (bound : FiniteMeshDifferenceBound previous next) :
+    next <= previous * ((1 : Rat) / 2) :=
+  bound.toShortBlockMeshSweep.next_le_half
+
+end FiniteMeshDifferenceBound
 
 /-- A direct mesh-contraction certificate for one nonnegative rational error.
 

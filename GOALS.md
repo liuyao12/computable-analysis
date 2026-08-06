@@ -353,8 +353,12 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   `ShortBlockMeshSweep.next_le_half` now checks the exact one-block algebra:
   a telescoped bound `next <= length * previous + residual` with
   `length <= 1/4` and `residual <= previous/4` halves the envelope.
-  What remains is to construct those finite cell/telescoping estimates from
-  two supplied interval derivative certificates.
+  The cell/telescoping part is now formalized as well:
+  `FiniteMesh.sumUpTo_increments` proves the finite endpoint identity and
+  `FiniteMeshDifferenceBound.toShortBlockMeshSweep` converts cellwise
+  rational increment bounds into that one-block sweep. What remains is only
+  to derive those finite increment estimates from two supplied interval
+  derivative certificates.
 
 There is intentionally no aggregate percentage: these gates have distinct
 dependencies, and a proof in one does not compensate for a missing proof in

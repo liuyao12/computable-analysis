@@ -169,6 +169,11 @@ representative-specific derivative proofs are not supplied by uniqueness.
 
 \begin{theorem}[Finite-mesh contraction: checked closure]
 \label{thm:direct-scalar-mesh-uniqueness}
+\lean{ComputableAnalysis.ScalarODE.FiniteMesh.sumUpTo}
+\lean{ComputableAnalysis.ScalarODE.FiniteMesh.sumUpTo_increments}
+\lean{ComputableAnalysis.ScalarODE.FiniteMeshDifferenceBound}
+\lean{ComputableAnalysis.ScalarODE.FiniteMeshDifferenceBound.toShortBlockMeshSweep}
+\lean{ComputableAnalysis.ScalarODE.FiniteMeshDifferenceBound.next_le_half}
 \lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep}
 \lean{ComputableAnalysis.ScalarODE.ShortBlockMeshSweep.next_le_half}
 \lean{ComputableAnalysis.ScalarODE.DirectMeshHalvingCertificate}
@@ -197,6 +202,17 @@ then Lean proves \(B_r\le B_0\,2^{-r}\), chooses an explicit dyadic refinement
 count for any positive rational tolerance, and proves the error below that
 tolerance. Applying this to the proposed error divided by two concludes that
 the error is zero.
+More concretely, \code{FiniteMeshDifferenceBound} records rational endpoint
+envelopes \(d_0,\ldots,d_N\), with \(d_0=0\), and the individual cell
+bounds
+\[
+ d_{j+1}-d_j\le hB_r+\rho_j.
+\]
+Lean proves the exact telescoping identity
+\(\sum_{j<N}(d_{j+1}-d_j)=d_N-d_0\), then packages the result as the
+short-block sweep above.  Thus the remaining analytic step is specifically a
+finite derivative-to-cell estimate, not a hidden appeal to a supremum,
+integral limit, or complete function space.
 Longer intervals use a finite chain of short blocks.  The closure theorem is
 checked; deriving the one-sweep envelope from arbitrary interval derivative
 certificates is the remaining analytic construction.  This route is

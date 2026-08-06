@@ -446,6 +446,15 @@ theorem is preceded by `error_le_eps`, which chooses a concrete refinement
 count for any proposed rational error. This is the intended hand proof of
 scalar `f' = f` uniqueness.
 
+The cellwise form is now executable too. Use
+`FiniteMeshDifferenceBound` with rational endpoint envelopes `state j`,
+`state 0 = 0`, and a certified bound for each increment
+`state (j+1) - state j`. `FiniteMesh.sumUpTo_increments` proves the literal
+finite telescoping identity, and `toShortBlockMeshSweep` turns the total
+length/residual budgets into the contraction certificate. The open analytic
+work is therefore exactly to derive those finite increment bounds from
+`HasDerivativeOnInterval`, at the chosen mesh precision.
+
 The literal power-series computation itself is now fully certified at every
 rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
 `expPowerSeries x` valid, and `ExpProofs.expPowerSeriesRate x` records the
@@ -578,6 +587,11 @@ open ComputableAnalysis
 #check ExpProofs.eNaturalPower_lower_bound
 #check ExpProofs.eNaturalPower_upper_bound
 #check ScalarODE.DirectMeshHalvingCertificate
+#check ScalarODE.FiniteMesh.sumUpTo
+#check ScalarODE.FiniteMesh.sumUpTo_increments
+#check ScalarODE.FiniteMeshDifferenceBound
+#check ScalarODE.FiniteMeshDifferenceBound.toShortBlockMeshSweep
+#check ScalarODE.FiniteMeshDifferenceBound.next_le_half
 #check ScalarODE.ShortBlockMeshSweep
 #check ScalarODE.ShortBlockMeshSweep.next_le_half
 #check ScalarODE.DirectMeshHalvingCertificate.ofShortBlockSweeps
