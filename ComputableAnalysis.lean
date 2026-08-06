@@ -47,6 +47,7 @@ import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.RotationCalculus
 import ComputableAnalysis.RotationTaylorBridge
 import ComputableAnalysis.RotationDerivative
+import ComputableAnalysis.RotationInitialValues
 import ComputableAnalysis.RotationLift
 import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.ScalarODEUniqueness

@@ -255,6 +255,11 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.RotationSeries.cosinePrefix_secant_error_le_thirty_four}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosCenter_secant_error_le_thirty_four_plus_edge}
 \lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCosOnTwo_zero_equiv_one}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationSinOnTwo_zero_equiv_zero}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationNegSinOnTwo_equiv_neg_sin}
+\lean{ComputableAnalysis.RotationSeries.RotationDerivativeInitialCertificate}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationOnTwo_rotationInitialCertificate}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
@@ -322,8 +327,10 @@ it with the finite bound now gives the full rational-interval certificate
 evaluator itself. The companion \(C'=-S\) is checked on that same chart as
 well: the finite cosine prefix drops its last sine term, so its evaluation
 stage is the maximum of a factorial edge-term shift and the usual divided
-tail shift. Derivative transport to an equivalent representation remains
-separate.
+tail shift. The same finite prefixes give the literal initial boxes
+\(C(0)=1\) and \(S(0)=0\); Lean packages these four statements as the
+common-prefix rotation initial-value candidate. Derivative transport to an
+equivalent representation and vector uniqueness remain separate.
 The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
 quarter-turn raw.  The remaining identification is specifically between the

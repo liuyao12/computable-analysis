@@ -345,9 +345,13 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   now proves `cos' = -sin` against the explicit
   `uniformRotationNegSinOnTwo` evaluator. The finite cosine prefix has one
   dropped sine term, which is assigned a separate factorial shift and joined
-  to the divided-tail shift by `max`. Derivative transport to equivalent
-  representations remains open. The continuous-simplex
-  interpretation and the rotation/geometric identification remain open.
+  to the divided-tail shift by `max`. `RotationInitialValues` now checks the
+  matching finite initial boxes `C(0)=1` and `S(0)=0`, then packages both
+  derivatives and those values as
+  `uniformRotationOnTwo_rotationInitialCertificate`. Derivative transport to
+  equivalent representations remains open. The continuous-simplex
+  interpretation, vector uniqueness, and the rotation/geometric
+  identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of

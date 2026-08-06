@@ -90,6 +90,7 @@ Start with the smallest target module rather than importing
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
 | Bounded rotation continuity | `ComputableAnalysis.RotationCalculus` | `uniformRotationCosOnTwo`, `uniformRotationSinOnTwo`, and their epsilon--delta theorems |
+| Common-prefix rotation IVP candidate | `ComputableAnalysis.RotationInitialValues` | `uniformRotationCosOnTwo_zero_equiv_one`, `uniformRotationSinOnTwo_zero_equiv_zero`, `uniformRotationNegSinOnTwo_equiv_neg_sin`, `uniformRotationOnTwo_rotationInitialCertificate` |
 | Represented-angle rotation lift | `ComputableAnalysis.RotationLift` | `RotationLift.HalfPiInput`, `rotation`, and its finite Cauchy certificate |
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
@@ -329,6 +330,11 @@ against `uniformRotationNegSinOnTwo`. A finite cosine prefix drops its final
 sine term; Lean bounds that term by its own factorial schedule and evaluates
 at the maximum of this edge shift and the divided-tail shift. Neither theorem
 silently transfers across a pointwise-equivalent representation.
+`RotationInitialValues` also proves the finite initial boxes
+`C(0) = 1` and `S(0) = 0` for these exact evaluators, and packages the four
+facts as `uniformRotationOnTwo_rotationInitialCertificate`. This is the
+checked rotation IVP candidate, still short of its geometric identification or
+a continuous vector uniqueness theorem.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -662,6 +668,11 @@ open ComputableAnalysis
 #check RotationSeries.rotationSinRaw_compute
 #check RotationSeries.uniformRotationCenter_input_lipschitz
 #check RotationSeries.uniformRotationBox_future_contained_expand_of_input_near
+#check RotationSeries.uniformRotationCosOnTwo_zero_equiv_one
+#check RotationSeries.uniformRotationSinOnTwo_zero_equiv_zero
+#check RotationSeries.uniformRotationNegSinOnTwo_equiv_neg_sin
+#check RotationSeries.RotationDerivativeInitialCertificate
+#check RotationSeries.uniformRotationOnTwo_rotationInitialCertificate
 ```
 
 These names expose the certified complex series at rational imaginary inputs.
