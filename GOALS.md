@@ -244,8 +244,10 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   interval function, pointwise equivalent to the selected exponential. The
   derivative of the next finite prefix is exactly its common center, and
   `uniformExpTaylorPrefix_secant_error` bounds the residual finite secant
-  error. What remains is a uniform bound on that coefficient along the
-  factorial schedule.
+  error. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four` now
+  proves the uniform coefficient `34` for every factorial prefix on
+  `|x| <= 2`, and the uniform schedule inherits it. What remains is the
+  step-aware transport of the two tail boxes through the quotient.
   The
   next end-to-end gate is a selected exponential raw that proves `f' = f` on
   an interval, followed by uniqueness and the logarithm relation. The literal rational-input

@@ -3329,6 +3329,26 @@ theorem uniformExpTaylorPrefix_secant_error
   rw [← expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms]
   exact hfinite
 
+/-- The finite exponential secant error in the common bounded-input schedule
+has one coefficient, `34`, for every stage.  The bound is independent of the
+factorial prefix length, which is what makes a single step modulus possible. -/
+theorem uniformExpTaylorPrefix_secant_error_le_thirty_four
+    {x h : Rat} (hh : h ≠ 0) (hx : qabs x <= 2)
+    (hxh : qabs (x + h) <= 2) (n : Nat) :
+    qabs
+      ((FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) (x + h) -
+        FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) x) / h -
+        uniformExpCenter x n) <=
+      qabs h * 34 := by
+  have hfinite := FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four
+    (x := x) (h := h) hh hx hxh (uniformExpTailTerms n)
+  change qabs
+      ((FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) (x + h) -
+        FinitePolynomial.expTaylorPrefix (uniformExpTailTerms n) x) / h -
+        powerSeriesCenterAtTerms x (uniformExpTailTerms n)) <= _
+  rw [← expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms]
+  exact hfinite
+
 theorem uniformExpRaw_valid (x : Rat) (hx : qabs x <= 2) :
     (uniformExpRaw x).Valid := by
   unfold RealRaw.Valid RealRaw.ValidCompute uniformExpRaw

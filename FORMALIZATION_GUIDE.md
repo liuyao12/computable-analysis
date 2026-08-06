@@ -266,7 +266,11 @@ to use when one proof must evaluate both `x` and `x + h` at the same prefix.
 pointwise equivalent to the selected exponential there. Its next finite
 prefix has exactly the common center as derivative, while
 `ExpProofs.uniformExpTaylorPrefix_secant_error` gives its finite secant error
-explicitly.
+explicitly. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four`
+then proves the single bound `34` for every finite prefix on `|x| <= 2`, and
+`ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four` transfers it to
+the common schedule. Only the quotient transport of the two tail boxes
+remains before the self-derivative certificate.
 
 The first exponential finite-difference brick is also available:
 `expTaylorQuadratic x = 1 + x + x^2/2`.
@@ -498,6 +502,9 @@ open ComputableAnalysis
 #check ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit
 #check ExpProofs.expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms
 #check ExpProofs.uniformExpTaylorPrefix_secant_error
+#check FinitePolynomial.expTaylorPrefixSecantCoefficient_le_thirty_four
+#check FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four
+#check ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one

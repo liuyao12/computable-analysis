@@ -777,6 +777,212 @@ theorem qabs_expCoeff_monomial_le_factorialTailTerm
       grind [Rat.mul_assoc, Rat.mul_comm]
     _ = RationalMajorant.factorialTailTerm C n := rfl
 
+/-- The accumulated finite secant coefficient for an exponential Taylor
+prefix on `[-2,2]`.  This is a finite rational recurrence: its `n`th step is
+the normalized-monomial secant coefficient weighted by `1/n!`. -/
+def expTaylorPrefixSecantCoefficient : Nat -> Rat
+  | 0 => 0
+  | n + 1 =>
+      expTaylorPrefixSecantCoefficient n +
+        qabs (FormalPowerSeries.expCoeff n) * powerSecantErrorBound 2 (n + 1)
+
+private theorem powerSecantErrorBound_two_closed (n : Nat) :
+    powerSecantErrorBound 2 (n + 2) =
+      ((n + 2 : Nat) : Rat) * ((n + 1 : Nat) : Rat) * (2 : Rat) ^ n := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [show n + 1 + 2 = (n + 2) + 1 by omega, powerSecantErrorBound, ih,
+        Rat.pow_succ]
+      have hn2 : (((n + 2 : Nat) : Rat)) = (n : Rat) + 2 := by
+        exact_mod_cast (by omega : n + 2 = n + 2)
+      have hn3 : (((n + 3 : Nat) : Rat)) = (n : Rat) + 3 := by
+        exact_mod_cast (by omega : n + 3 = n + 3)
+      have hn1 : (((n + 1 : Nat) : Rat)) = (n : Rat) + 1 := by
+        exact_mod_cast (by omega : n + 1 = n + 1)
+      rw [hn1, hn2, hn3]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem expTaylorPrefixSecantCoefficient_summand (n : Nat) :
+    qabs (FormalPowerSeries.expCoeff (n + 2)) *
+        powerSecantErrorBound 2 (n + 3) =
+      2 * RationalMajorant.factorialTailTerm 2 n +
+        2 * RationalMajorant.factorialTailTerm 2 (n + 1) := by
+  rw [powerSecantErrorBound_two_closed (n + 1)]
+  have hnonneg : (0 : Rat) <= FormalPowerSeries.expCoeff (n + 2) := by
+    unfold FormalPowerSeries.expCoeff
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      (RationalMajorant.factorialRat_pos _))
+  rw [qabs_eq_self_of_nonneg hnonneg]
+  unfold FormalPowerSeries.expCoeff RationalMajorant.factorialTailTerm
+  rw [FormalPowerSeries.factorialRat_succ,
+    FormalPowerSeries.factorialRat_succ, Rat.pow_succ]
+  have hcast2 : (((n + 1 + 1 : Nat) : Rat)) = ((n + 2 : Nat) : Rat) := by
+    exact_mod_cast (by omega : n + 1 + 1 = n + 2)
+  have hcast3 : (((n + 1 + 2 : Nat) : Rat)) = ((n + 3 : Nat) : Rat) := by
+    exact_mod_cast (by omega : n + 1 + 2 = n + 3)
+  rw [hcast2, hcast3, Rat.div_def, Rat.div_def, Rat.div_def,
+    Rat.inv_mul_rev, Rat.inv_mul_rev]
+  have hp1 : ((n + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt
+    ((Rat.natCast_pos).2 (Nat.succ_pos n))
+  have hp2 : ((n + 2 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt
+    ((Rat.natCast_pos).2 (by omega))
+  have hcancel1 : ((n + 1 : Nat) : Rat) * ((n + 1 : Nat) : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hp1
+  have hcancel2 : ((n + 2 : Nat) : Rat) * ((n + 2 : Nat) : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hp2
+  grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem expTaylorPrefixSecantCoefficient_eq_factorialTailPartials
+    (n : Nat) :
+    expTaylorPrefixSecantCoefficient (n + 2) =
+      2 + 2 * RationalMajorant.factorialTailPartial 2 0 n +
+        2 * RationalMajorant.factorialTailPartial 2 1 n := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      rw [show n + 1 + 2 = (n + 2) + 1 by omega,
+        expTaylorPrefixSecantCoefficient, ih,
+        expTaylorPrefixSecantCoefficient_summand]
+      rw [RationalMajorant.factorialTailPartial,
+        RationalMajorant.factorialTailPartial]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem factorialTailPartial_two_one_le_eight (n : Nat) :
+    RationalMajorant.factorialTailPartial 2 1 n <= 8 := by
+  have hsplit := RationalMajorant.factorialTailPartial_add 2 0 1 n
+  have hsplit' : RationalMajorant.factorialTailPartial 2 0 (n + 1) =
+      RationalMajorant.factorialTailPartial 2 0 1 +
+        RationalMajorant.factorialTailPartial 2 1 n := by
+    simpa [Nat.add_comm] using hsplit
+  have hone : RationalMajorant.factorialTailPartial 2 0 1 = 1 := by
+    native_decide
+  calc
+    RationalMajorant.factorialTailPartial 2 1 n =
+        0 + RationalMajorant.factorialTailPartial 2 1 n := by
+          rw [Rat.zero_add]
+    _ <= 1 + RationalMajorant.factorialTailPartial 2 1 n :=
+      rat_add_le_add (by native_decide) (Rat.le_refl)
+    _ = RationalMajorant.factorialTailPartial 2 0 (n + 1) := by
+      rw [hsplit', hone]
+    _ <= 8 := RationalMajorant.factorialTailPartial_two_le_eight (n + 1)
+
+/-- The finite secant coefficient of every factorial exponential prefix is
+bounded by the same rational constant on `[-2,2]`.  The proof is a finite
+factorial-series computation, not an appeal to a completed exponential. -/
+theorem expTaylorPrefixSecantCoefficient_le_thirty_four (terms : Nat) :
+    expTaylorPrefixSecantCoefficient terms <= 34 := by
+  cases terms with
+  | zero => native_decide
+  | succ terms =>
+      cases terms with
+      | zero => native_decide
+      | succ n =>
+          rw [show n + 1 + 1 = n + 2 by omega,
+            expTaylorPrefixSecantCoefficient_eq_factorialTailPartials]
+          calc
+            2 + 2 * RationalMajorant.factorialTailPartial 2 0 n +
+                2 * RationalMajorant.factorialTailPartial 2 1 n <=
+                2 + 2 * 8 + 2 * 8 := by
+              apply rat_add_le_add
+              · apply rat_add_le_add
+                · exact Rat.le_refl
+                · exact Rat.mul_le_mul_of_nonneg_left
+                    (RationalMajorant.factorialTailPartial_two_le_eight n)
+                    (by native_decide)
+              · exact Rat.mul_le_mul_of_nonneg_left
+                  (factorialTailPartial_two_one_le_eight n) (by native_decide)
+            _ = 34 := by native_decide
+
+/-- Every finite exponential Taylor prefix has a uniform, rational secant
+remainder on `[-2,2]`.  This is the finite bridge needed to pass from the
+common factorial schedule to an analytic derivative certificate. -/
+theorem expTaylorPrefix_secant_error_le_coefficient
+    {x h : Rat} (hh : h ≠ 0) (hx : qabs x <= 2)
+    (hxh : qabs (x + h) <= 2) : forall terms : Nat,
+    qabs
+      ((expTaylorPrefix terms (x + h) - expTaylorPrefix terms x) / h -
+        expTaylorDerivativePrefix terms x) <=
+      qabs h * expTaylorPrefixSecantCoefficient terms := by
+  intro terms
+  induction terms with
+  | zero =>
+      simp only [expTaylorPrefix, integratedTaylorPrefix,
+        expTaylorDerivativePrefix, taylorDerivativePrefix,
+        expTaylorPrefixSecantCoefficient]
+      rw [Rat.add_zero, Rat.sub_self, Rat.div_def, Rat.zero_mul,
+        show (0 : Rat) - 0 = 0 by native_decide,
+        qabs_eq_self_of_nonneg (by native_decide), Rat.mul_zero]
+      exact Rat.le_refl
+  | succ terms ih =>
+      have hmono := qabs_normalized_power_differenceQuotient_sub_monomial_le
+        (x := x) (h := h) (C := (2 : Rat)) hh (by native_decide)
+          (by native_decide) hx hxh terms
+      have hdecomp :
+          ((expTaylorPrefix (terms + 1) (x + h) -
+              expTaylorPrefix (terms + 1) x) / h -
+            expTaylorDerivativePrefix (terms + 1) x) =
+            (((expTaylorPrefix terms (x + h) - expTaylorPrefix terms x) / h -
+                expTaylorDerivativePrefix terms x) +
+              FormalPowerSeries.expCoeff terms *
+                ((((x + h) ^ (terms + 1) / ((terms + 1 : Nat) : Rat) -
+                    x ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) / h) -
+                  x ^ terms)) := by
+        rw [expTaylorPrefix_succ, expTaylorPrefix_succ]
+        change ((expTaylorPrefix terms (x + h) +
+            FormalPowerSeries.expCoeff terms *
+              ((x + h) ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) -
+            (expTaylorPrefix terms x +
+              FormalPowerSeries.expCoeff terms *
+                (x ^ (terms + 1) / ((terms + 1 : Nat) : Rat))) ) / h -
+            (expTaylorDerivativePrefix terms x +
+              FormalPowerSeries.expCoeff terms * x ^ terms)) = _
+        rw [Rat.div_def]
+        have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+          Rat.mul_assoc, Rat.mul_comm]
+      rw [hdecomp]
+      let A : Rat := (expTaylorPrefix terms (x + h) -
+        expTaylorPrefix terms x) / h - expTaylorDerivativePrefix terms x
+      let B : Rat := (((x + h) ^ (terms + 1) / ((terms + 1 : Nat) : Rat) -
+        x ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) / h) - x ^ terms
+      change qabs (A + FormalPowerSeries.expCoeff terms * B) <= _
+      have htriangle : qabs (A + FormalPowerSeries.expCoeff terms * B) <=
+          qabs A + qabs (FormalPowerSeries.expCoeff terms * B) :=
+        qabs_add_le _ _
+      rw [qabs_mul] at htriangle
+      have hsum : qabs A + qabs (FormalPowerSeries.expCoeff terms) * qabs B <=
+          qabs h * expTaylorPrefixSecantCoefficient terms +
+            qabs (FormalPowerSeries.expCoeff terms) *
+              (qabs h * powerSecantErrorBound 2 (terms + 1)) := by
+        dsimp [A, B]
+        exact rat_add_le_add ih
+          (Rat.mul_le_mul_of_nonneg_left hmono (qabs_nonneg _))
+      apply Rat.le_trans htriangle
+      apply Rat.le_trans hsum
+      simp only [expTaylorPrefixSecantCoefficient]
+      grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The preceding finite secant remainder with its coefficient replaced by
+the uniform rational bound `34`. -/
+theorem expTaylorPrefix_secant_error_le_thirty_four
+    {x h : Rat} (hh : h ≠ 0) (hx : qabs x <= 2)
+    (hxh : qabs (x + h) <= 2) (terms : Nat) :
+    qabs
+      ((expTaylorPrefix terms (x + h) - expTaylorPrefix terms x) / h -
+        expTaylorDerivativePrefix terms x) <=
+      qabs h * 34 := by
+  have hfinite := expTaylorPrefix_secant_error_le_coefficient
+    (x := x) (h := h) hh hx hxh terms
+  calc
+    qabs
+        ((expTaylorPrefix terms (x + h) - expTaylorPrefix terms x) / h -
+          expTaylorDerivativePrefix terms x) <=
+        qabs h * expTaylorPrefixSecantCoefficient terms := hfinite
+    _ <= qabs h * 34 := Rat.mul_le_mul_of_nonneg_left
+      (expTaylorPrefixSecantCoefficient_le_thirty_four terms) (qabs_nonneg _)
+
 /-- A finite factorial Taylor prefix for exponential has the expected
 one-degree-lower prefix as its derivative. -/
 def expTaylorPrefixSecantBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :

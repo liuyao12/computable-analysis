@@ -69,6 +69,7 @@ that two exponential representations agree also identifies their Euler bases.
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
 \lean{ComputableAnalysis.ExpProofs.qabs_expTaylorPrefix_sub_uniformExpCenter_le}
 \lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error}
+\lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four}
 \uses{def:effective-derivative}
 The intended later analytic package is
 \[
@@ -95,7 +96,9 @@ the selected adaptive series evaluator.  The next certificate compares its
 same-stage prefixes at \(x\) and \(x+h\), attaches the two tail radii, and
 then applies the finite Taylor secant estimate.  The unit-interval wrapper is
 already pointwise equivalent to the selected exponential; the remaining
-analytic step is a uniform bound on that finite secant coefficient.
+analytic step transports the two shrinking tail boxes through the quotient.
+The finite coefficient is already uniform: it is at most (34) on
+(lvert xvertle2), independently of the factorial prefix.
 \end{remark}
 
 \begin{theorem}[Checked initial values and finite binomial bridge]
