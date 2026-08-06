@@ -1587,12 +1587,16 @@ count.  The reciprocal-log triangle formula is instead the primary
   canonical scorecard row.  The endpoint comparison at `1` belongs to the
   independent Leibniz route.  Machin remains solely a power-series
   computation, not a second integral-based pi representation.
-- The generic finite-Riemann theorem
-  `arctanEqualsGeom_finiteRiemannBridge` remains reusable series-to-geometry
-  infrastructure on nonnegative rational inputs in `[0,1]`.  The canonical
-  scoreboard deliberately uses it only for the Leibniz endpoint and the two
-  power-series inputs in the single Machin formula; auxiliary arctangent
-  addition identities are not separate pi computations.
+- The reusable finite-Riemann bridge now covers every rational input on the
+  series chart `|x| <= 1`:
+  `arctanEqualsGeom_finiteRiemannBridge_on_unit`, with presentation-level
+  certificate `arctanPowerSeriesGeomAgreement_finiteRiemannBridge`.  Its
+  nonnegative core remains `arctanEqualsGeom_finiteRiemannBridge`; the
+  negative half follows from the literal raw-interval negation implemented by
+  both evaluators.  The canonical scoreboard deliberately uses this one
+  capability only for the Leibniz endpoint and the two power-series inputs in
+  the single Machin formula; this extension is not an additional pi
+  computation.
 - The finite Archimedes comparison aligns the polygon and circumference
   computations.  `PiProofs.piCircumference_valid` now closes the original
   chord-path evaluator itself, and `PiProofs.piCircumferenceDirect` is its

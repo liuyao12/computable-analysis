@@ -852,6 +852,27 @@ of `4 * arctan.geom(1)` with `piCircleArea`, and
 these declarations for the geometric pi route instead of importing the larger
 presentation registry merely for that fact.
 
+## Arctangent on the full series chart
+
+The finite-Riemann comparison is now a reusable equality of represented
+functions, not only an endpoint fact.  For any rational `x` with `|x| <= 1`,
+the following declarations certify `arctan.series(x) ≡ arctan.geom(x)`:
+
+```lean
+import ComputableAnalysis.PiProofs
+
+open ComputableAnalysis
+
+#check PiProofs.arctanEqualsGeom_finiteRiemannBridge_on_unit
+#check PiProofs.arctanPowerSeriesGeomAgreement_finiteRiemannBridge
+```
+
+The finite quadrature proof supplies the nonnegative branch.  The negative
+branch is not a fresh integral argument: both raw evaluators are exactly the
+endpoint-reversed negation of their evaluation at `-x`, and Lean proves that
+reflection at the raw-interval level.  This broadens the arctangent API, but
+does not add a ninth pi-scoreboard row.
+
 For rational-circle chord refinements, do not select an exact square root.
 The direct evaluator is already certified in
 `ComputableAnalysis/CircumferenceBridge.lean`.  Its public endpoints are:
