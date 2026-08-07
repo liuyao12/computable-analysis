@@ -1374,7 +1374,7 @@ arguments.
   `angleOnUnitRegular_intervalRegular` now gives the matching finite
   interval-image certificate through the cofinal `64*(n+1)` schedule, and
   `angleOnUnitRegular_invertible` packages it with monotonicity and effective
-  separation as a constructive inverse branch.  The remaining
+  separation as the prerequisites for a constructive inverse branch.  The remaining
   reparametrization work is the data-valued bisection search, then curve
   composition and the vector uniqueness theorem, not the derivative,
   interval regularity, or strict monotone separation of the sector-area

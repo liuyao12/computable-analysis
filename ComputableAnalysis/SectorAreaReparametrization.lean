@@ -665,9 +665,9 @@ def angleOnUnitRegular_continuous : ContinuousFunctionOnInterval where
   function := angleOnUnitRegular
   regular := angleOnUnitRegular_intervalRegular
 
-/-- A constructive inverse-function package for the sector-area clock on the
-unit chart.  It supplies finite interval images, weak monotonicity, and the
-strict separation modulus; an explicit bisection search is the next layer. -/
+/-- The constructive inverse-interface prerequisites for the sector-area clock
+on the unit chart.  They supply finite interval images, weak monotonicity, and
+the strict separation modulus; an explicit bisection search is the next layer. -/
 def angleOnUnitRegular_invertible : InvertibleFunctionOnInterval where
   continuous := angleOnUnitRegular_continuous
   source_ordered := by
