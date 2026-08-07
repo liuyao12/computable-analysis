@@ -1,4 +1,187 @@
 \chapter{Fundamental Theorem of Calculus}
+\label{ch:effective-calculus}
+
+\section{From first-order data to FTC certificates}
+
+The derivative certificate was introduced with the power-series
+Taylor--Lagrange bridge in \cref{def:effective-derivative}.  Here it is used
+as finite input to the fundamental-theorem constructions: on each rational
+cell, the quantified secant estimate supplies the explicit error budget that
+is summed into an integral certificate.
+
+\begin{theorem}[Finite monomial secants]
+\label{thm:finite-monomial-secants}
+\lean{ComputableAnalysis.FinitePolynomial.powerSecant_eq_differenceQuotient}
+\lean{ComputableAnalysis.FinitePolynomial.powerDerivative_succ}
+\lean{ComputableAnalysis.FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le}
+\lean{ComputableAnalysis.FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.SecantDerivativeBound.mul}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_succ}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval}
+\leanok
+For every rational box of radius \(C\ge1\), Lean proves directly that the
+literal quotient of the normalized monomial has the form
+\[
+ \left|\frac{(x+h)^{n+1}/(n+1)-x^{n+1}/(n+1)}{h}-x^n\right|
+ \le |h|\,E_{n+1}(C),
+\]
+where \(E_{n+1}(C)\) is an explicitly recursive rational coefficient.
+This is the first explicit Taylor--remainder bridge from a linear coefficient
+to an interval derivative: finite algebra plus an absolute-value bound, with
+no mean-value or completeness theorem.  Translation applies the same bound
+to powers of \(x-a\), so the certified derivative at the expansion point is
+literally \(c_1\).
+This finite certificate is the project's checked core of benchmark item 35;
+the completed Taylor theorem with integral remainder below still requires the
+corresponding effective FTC hypotheses.
+The same quantified certificates are now closed under addition, rational
+scaling, and products.  The product coefficient carries the literal finite
+corner term from the two secant quotients, controlled by rational local
+majorants; this is the derivative-level input to a later product FTC and
+integration-by-parts theorem.
+\end{theorem}
+
+\begin{theorem}[Affine secant certificate]
+\label{thm:affine-secants}
+\lean{ComputableAnalysis.ExactFunction.affine_differenceQuotient}
+\leanok
+For a rational affine function with formula $mx+c$, every nonzero rational
+secant step has exactly slope $m$.  This is the finite affine base case for
+the effective derivative layer and contributes to the project-level core of
+benchmark item 75.
+\end{theorem}
+
+\begin{theorem}[Affine zero certificate]
+\label{thm:affine-zero}
+\lean{ComputableAnalysis.ExactFunction.affine_root_of_nonzero_slope}
+\lean{ComputableAnalysis.ExactFunction.affine_root_between_of_sign_change}
+\lean{ComputableAnalysis.ExactFunction.affine_root_between_of_negative_sign_change}
+\leanok
+If $m\ne0$, the rational affine function with formula $mx+c$ has the exact
+zero $-c/m$.  This is the finite rational root base case for constructive
+intermediate-value searches; no general IVT or completeness principle is
+claimed here.  For positive $m$, the companion sign-change certificate
+additionally proves that this zero lies between endpoint values of opposite
+sign; the negative-slope orientation is checked by the second companion
+certificate.
+\end{theorem}
+
+\begin{theorem}[Cubic secant certificate]
+\label{thm:cubic-secants}
+\lean{ComputableAnalysis.ExactFunction.cube_differenceQuotient}
+\lean{ComputableAnalysis.Differential.cube_midpoint_secant}
+\lean{ComputableAnalysis.ExactFunction.quartic_differenceQuotient}
+\lean{ComputableAnalysis.Differential.quartic_midpoint_secant}
+\lean{ComputableAnalysis.ExactFunction.quintic_differenceQuotient}
+\lean{ComputableAnalysis.Differential.quintic_midpoint_secant}
+\lean{ComputableAnalysis.ExactFunction.square_quotient_by_id}
+\lean{ComputableAnalysis.ExactFunction.cube_quotient_by_id}
+\lean{ComputableAnalysis.ExactFunction.power_succ_quotient_by_id}
+\lean{ComputableAnalysis.ExactFunction.power_succ_quotient_by_power}
+\lean{ComputableAnalysis.ExactFunction.power_add_quotient_by_power}
+\leanok
+For nonzero rational step $h$, the exact secant quotient of $x^3$ at
+$x$ is $3x^2+3xh+h^2$.  This is a finite polynomial certificate for the
+Taylor layer, not a limiting derivative theorem.
+The corresponding quartic secant expansion is checked as well, giving the
+next finite monomial case.
+The quintic expansion is checked as the next member of this finite family.
+The exact quotient cancellations for (x^2/x) and (x^3/x) provide the
+finite algebraic base case for the optional L'Hôpital layer (benchmark item
+64).  Cancellation by an arbitrary nonzero power is checked as well, both
+for $x^{n+1}/x$, for $x^{n+1}/x^n$, and in the reusable form
+$x^{m+n}/x^m=x^n$.
+No limiting theorem is claimed.
+\end{theorem}
+
+\begin{theorem}[Rational midpoint mean-value certificate]
+\label{thm:square-midpoint-mean-value}
+\lean{ComputableAnalysis.Differential.square_midpoint_mean_value}
+\leanok
+For $a\ne b$, the secant slope of the rational square function from $a$ to
+$b$ equals its derivative $2x$ at the rational midpoint $(a+b)/2$.  This is
+an exact finite certificate for the square-function core of benchmark item
+75; it does not assert the general analytic Mean Value Theorem.
+\end{theorem}
+
+\lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_hasDerivative}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{1.16}
+\begin{tabular}{p{0.25\textwidth}p{0.25\textwidth}p{0.35\textwidth}}
+\textbf{Function and scope} & \textbf{Derivative} & \textbf{Sorry-free status}\\
+\hline
+\(x^{n+1}/(n+1)\), rational secant on a bounded box & \(x^n\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} family with an explicit
+dyadic step schedule} \\
+\(\sum_{k<N}c_k(x-a)^k\), finite Taylor prefix at \(a\) &
+\(\sum_{k<N-1}(k+1)c_{k+1}(x-a)^k\) &
+\formallyproved{Full interval family, assembled from the algebraic
+coefficient shift and a quantitative remainder} \\
+\((N+1)\)-term finite sine/cosine prefixes &
+\(N\)-term cosine / negative-sine prefixes &
+\formallyproved{Full interval certificates; the one dropped edge coefficient
+is explicit} \\
+\(1+x+x^2/2\), finite exponential Taylor prefix & \(1+x\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} family} \\
+Common-prefix \(E\) on \([-1,1]\) & the same \(E\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} certificate, with
+\(E(0)=1\)} \\
+Common-prefix \(\sin\) on \([-2,2]\) & common-prefix \(\cos\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} certificate} \\
+Common-prefix \(\cos\) on \([-2,2]\) & common-prefix \(-\sin\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} certificate; together
+with the preceding row, \(C(0)=1,S(0)=0\) are checked} \\
+\(\exp_{\rm ps}\), \(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal streams &
+coefficient shift &
+\formallyproved{Formal Taylor data only; not an analytic derivative claim} \\
+\(x\) on \([0,1]\), interval evaluator & \(1\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
+\(A_{\rm rect}(x)\) on \([0,1]\) & \(1/(1+x^2)\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
+\(xA_{\rm rect}(x)\) on \([0,1]\) &
+\(A_{\rm rect}(x)+x/(1+x^2)\) &
+\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
+Selected raw \(\exp\), \(\sin\), \(\cos\), \(\sqrt{\,}\), and \(\log\)
+evaluators & standard analytic table &
+\computeverifiable{Evaluator or formal Taylor data exists; the corresponding
+raw interval-derivative theorem is still open}
+\end{tabular}
+\caption{Derivative status table. Green means that Lean proves the precise
+finite-difference claim in the stated semantic scope without \code{sorry};
+orange is not an analytic derivative theorem.}
+\label{tab:derivative-status}
+\end{table}
+
+\noindent
+The finite Taylor row is witnessed at zero by
+\code{FinitePolynomial.taylorPrefix\_hasDerivativeOnInterval}, and at any
+rational expansion point by
+\code{FinitePolynomial.taylorPrefixAt\_hasDerivativeOnInterval}; its internal
+primitive construction remains available as
+\code{FinitePolynomial.integratedTaylorPrefix\_hasDerivativeOnInterval}.
+The trigonometric finite-prefix specializations are
+\code{FinitePolynomial.sineTaylorPrefix\_hasDerivativeOnInterval} and
+\code{FinitePolynomial.cosineTaylorPrefix\_hasDerivativeOnInterval};
+\code{taylorPrefixShift\_succ\_eq\_of\_coefficientShift} accounts for the
+deliberate \(N+1\) versus \(N\) truncation.
+The quadratic exponential specialization is
+\code{FinitePolynomial.expTaylorQuadratic\_hasDerivativeOnInterval}; and
+the three interval-function rows respectively by
+\code{IntegralIdentities.coordinateOnUnitDerivative},
+\code{IntegralIdentities.arctanIntegralRectangleOnUnit\_hasDerivative}, and
+\code{IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit\_hasDerivative}.
+The coefficient-shift row stays deliberately separate until a certified
+remainder attaches it to an evaluated raw function.
 
 \section{Convexity}
 
@@ -138,6 +321,12 @@ inequalities or algebraic identities for the particular function.
 
 \begin{example}[Trigonometric functions]\label{ex:trig-derivatives}
 \uses{def:formula-identification,thm:geometric-trig-identities,def:geometric-trig-integral-identities}
+For the common-prefix factorial rotation evaluator on \([-2,2]\), Lean
+already proves the literal interval derivative certificate \(S'=C\).
+It also proves \(C'=-S\) against the explicit negative-sine evaluator.
+Geometric identification and transport across equivalent representations
+remain distinct obligations.
+
 For the geometric sine and cosine from the circle chapter, convexity or
 concavity is checked on intervals where the sign of the appropriate second
 derivative is certified by the circle algorithm.  The derivative formulas are
@@ -348,6 +537,9 @@ domain-aware integral identity interface directly.  When the same integral
 algorithm is represented through the public \code{generalIntegralFor} operator,
 the corresponding \code{GeneralDefiniteIdentityFor} constructors record that
 FTC endpoint identity at the public general-integral level.
+This finite schedule-to-endpoint bridge is the constructive core of benchmark
+item 15; the certificate interface deliberately states its hypotheses
+explicitly rather than claiming an unrestricted classical FTC.
 
 The derivative-bound version is the current reusable finite-cell interface:
 local derivative bounds on rational partition cells are summed and compared

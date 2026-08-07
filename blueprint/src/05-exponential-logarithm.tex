@@ -6,7 +6,7 @@ their raw interval algorithms equivalent.  The intended long route is
 \[
  \text{power series / repeated multiplication / inverse log}
  \longrightarrow E'=E,\ E(0)=1
- \longrightarrow \text{linear-ODE uniqueness}
+ \longrightarrow \text{direct scalar mesh uniqueness}
  \longrightarrow \log=E^{-1}.
 \]
 It uses rational boxes and tail bounds throughout; it never asks for a
@@ -58,29 +58,53 @@ For an exponential representation \(E\), set \(e_E=E(1)\).  Thus a theorem
 that two exponential representations agree also identifies their Euler bases.
 \end{definition}
 
-\begin{theorem}[Derivative characterizations of \(e\)]
+\begin{remark}[The checked self-derivative chart]
 \label{thm:e-self-derivative-and-unit-slope}
 \lean{ComputableAnalysis.ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero}
-The required certificates are
+\lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRaw}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRaw_equiv_expPowerSeries}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit}
+\lean{ComputableAnalysis.ExpProofs.qabs_expTaylorPrefix_sub_uniformExpCenter_le}
+\lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error}
+\lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSelfDerivativeStepPrecision}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSelfDerivative_finite_error_le_half_precision}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
+\uses{def:effective-derivative}
+The intended identification package is
 \[
  E'(x)=E(x),\quad E(0)=1,
  \qquad
  \left.\frac{d}{dx}b^x\right|_{x=0}=1\ \Longleftrightarrow\ b=e.
 \]
-The derivative interface is finite-difference based: its evaluator precision
-may depend on the rational step.  The initial-value field is checked below;
-Lean checks both its degree-two Taylor prefix and the actual tail-enclosed
-power-series evaluator at zero.  For the latter, its public stage already has
-enough positive Taylor terms that the finite remaining sum and the certified
-geometric radius are both at most \(h^2\) for \(0<h\le1/2\).  Dividing the
-resulting box by \(h\) yields a genuine forward certificate
+Chapter~\ref{ch:infinite-series} introduces the finite-difference
+derivative certificate and first converts finite Taylor coefficients into
+derivatives.
+At the basepoint, Lean already checks the genuinely self-represented forward
+certificate
 \[
- \left.E'_{\mathrm{series}}(x)\right|_{0+}=1.
+ D^+E_{\mathrm{series}}(0)=E_{\mathrm{series}}(0)=1.
 \]
-This is not yet the global self-derivative theorem \(E'=E\) on an interval,
-nor the uniqueness application that compares exponential representations.
-\end{theorem}
+Its public stage has enough positive Taylor terms that the finite remaining
+sum and certified geometric radius are at most \(h^2\) for
+\(0<h\le1/2\); division by \(h\) gives the first-order quotient bound.
+This is not yet an agreement theorem for all exponential representations.
+The checked \code{uniformExpRaw} supplies the common factorial schedule on
+\(\lvert x\rvert\le2\), and is stagewise equivalent to the selected adaptive
+series evaluator.  Its same-stage prefixes at \(x\) and \(x+h\), together
+with the two tail radii, give the full derivative certificate on the centered
+unit chart.  Transporting derivatives across equivalent representations
+remains a separate closure theorem.
+The finite coefficient is already uniform: it is at most \(34\) on
+\(\lvert x\rvert\le2\), independently of the factorial prefix.  The checked
+dyadic step schedule makes this finite part at most half the requested output
+precision; the shared tail stage is selected from
+\(\varepsilon\lvert h\rvert/24\).
+\end{remark}
 
 \begin{theorem}[Checked initial values and finite binomial bridge]
 \label{thm:exponential-initial-value}
@@ -167,6 +191,31 @@ algorithms as named representations.  Their common abstract value is only
 introduced through an explicit agreement certificate.
 \end{definition}
 
+\begin{theorem}[A certified exponential initial-value solution]
+\label{thm:uniform-exponential-self-derivative}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_equivalent_expPowerSeries}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_zero_equiv_one}
+\lean{ComputableAnalysis.ExpProofs.uniformExpOnSymmetricUnit_solvesSelfDerivative}
+\leanok
+The common-prefix factorial evaluator on \([-1,1]\) satisfies the literal
+two-sided interval certificate
+\[
+  E'=E,\qquad E(0)=1.
+\]
+At a nonzero rational step \(h\), both endpoint boxes are evaluated at the
+stage selected from \(\varepsilon\lvert h\rvert/24\).  The two endpoints give
+\(\lvert h\rvert\le2\).  The finite Taylor prefix spends at most
+\(\varepsilon/2\), using its uniform \(34\lvert h\rvert\) secant bound; the
+two tail boxes fill the remaining rational interval budget.
+This is the analytic Taylor--remainder bridge promised in Chapter~4.  The
+evaluator is pointwise equivalent to the selected adaptive series
+representation, but the derivative is deliberately certified on this
+common-prefix representation; transporting derivatives across equivalent
+representations is a later closure theorem.
+\end{theorem}
+
 \begin{definition}[Logarithm]
 \label{def:logarithm-integral}
 \lean{ComputableAnalysis.exp.logFromIntegral}
@@ -234,23 +283,27 @@ with the reciprocal integral.
 \lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_equiv_arctanKernelIntegral}
 \label{thm:log-two-series-reciprocal-integral}
 \lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
+\lean{ComputableAnalysis.LogarithmicPi.reciprocalRaw_equiv_piCircleArea}
+\lean{ComputableAnalysis.LogarithmicPi.squareSubstitutionRaw_equiv_piCircleArea}
 \leanok
 The finite integration-by-parts computation is organized as exact strip and
-square-substitution identities, then certified enclosure comparisons.  It
-produces the named π views \code{pi.integrationByParts},
-\code{pi.squareSubstitution}, and \code{pi.squareStieltjes}; it is a theorem
-of the already checked arctangent/integration capability, not a table of
-antiderivatives.
+square-substitution identities, then certified enclosure comparisons.  The
+reciprocal-integral and square-pullback raw algorithms both reach
+\(\pi_{\rm area}\); this is a theorem of the checked arctangent/integration
+capability, not a table of antiderivatives.
 \end{theorem}
 
 \begin{remark}[The deliberately long ODE route]
 \label{rem:ode-exp-log-pi-route}
-Once the three exponential representations separately prove
-\(E'=E,E(0)=1\),
-linear ODE uniqueness identifies them; their positive inverse becomes the
-canonical logarithm; the preceding endpoint transport then renames the
-integration-by-parts endpoint.  This is a dependency route, not a ninth \(\pi\)
-scoreboard cell.
+The common-prefix factorial representation has now proved
+\(E'=E,E(0)=1\) on its unit chart.  Once the other exponential
+representations have corresponding certificates and constructive linear ODE
+uniqueness is proved, those representations are identified.  For scalar
+exponential this is a direct finite-mesh proof: a short rational block
+repeatedly halves the error envelope, without Peano--Baker or Picard
+iteration.  Their positive inverse becomes the canonical logarithm; the
+preceding endpoint transport then renames the integration-by-parts endpoint.
+This is a dependency route, not a ninth \(\pi\) scoreboard cell.
 \end{remark}
 
 \section{Complex logarithm and Euler's identity}
@@ -277,18 +330,118 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.RotationSeries.rotationExpRaw_width_le_geometric}
 \lean{ComputableAnalysis.RotationSeries.rotationCosRaw_valid}
 \lean{ComputableAnalysis.RotationSeries.rotationSinRaw_valid}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_input_lipschitz}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationBox_contained_expand_of_input_near}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationBox_future_contained_expand_of_input_near}
+\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
+\lean{ComputableAnalysis.GeometricRotationODE.angularVelocity_eq_imaginaryAxis_sectorAreaSpeed}
+\lean{ComputableAnalysis.GeometricRotationODE.pointComplexDerivative_eq_sectorAreaSpeed_rotation}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_differenceQuotient}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_differenceQuotient_sub_derivative}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_differenceQuotient_sub_derivative}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_secant_error_le_twelve}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_secant_error_le_twelve}
+\lean{ComputableAnalysis.GeometricRotationODE.pointRe_hasDerivativeOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.pointIm_hasDerivativeOnUnit}
+\lean{ComputableAnalysis.GeometricRotationODE.point_hasComplexDerivativeOnUnit}
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
+\lean{ComputableAnalysis.ComplexRaw.cauchyStabilize}
+\lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_contains_current}
+\lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_valid}
+\lean{ComputableAnalysis.ArctanGeometry.two_arctanGeom_one_equiv_quarterTurnRaw_one}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_width_le_two_div_succ}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_bounds}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_equiv_halfPi}
+\lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiFromArctanGeom_equiv_twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_twoArctanGeomOne}
+\lean{ComputableAnalysis.PiProofs.pi.geometricQuarterTurnOne_valid}
+\lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne_equiv_geometricQuarterTurnOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricHalfPi}
+\lean{ComputableAnalysis.RotationLift.HalfPiInput.rationalInput_rotation_equiv_uniformRotationExpRaw}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_contained_expand_geometricRotationCandidate}
+\lean{ComputableAnalysis.PiProofs.pi.geometricRotationCandidate_contained_expand_halfPiRotationCandidate}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_equiv_geometricRotation}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius_shrinks}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_valid}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_contains_current_candidate}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_valid}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_valid}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryRaw}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryRaw_valid}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginary_logAtI_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.negativeTwoImaginaryRaw_mul_logAtI_equiv_piCircleArea}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_presentation}
 \leanok
 \[
  \operatorname{expPrefix}_{2n}(iT)=C_n(T)+iS_n(T).
 \]
 Its nested complex boxes have both widths at most \(8t_0(T)2^{-n}\).
-The represented input \(i\pi/2\) is already a certified complex box handle:
-embed the selected \(\pi\)-raw on the real axis and apply the checked
-imaginary-unit rotation.  The remaining theorem \(e^{i\pi}+1=0\) still needs
-the extension of the rotation exponential to that represented input and its
-geometric identification.
+The represented real parameter \(\pi/2\) has checked rational boxes inside
+\([1,2]\), of width at most \(2/(n+1)\) at stage \(n\).  Embedding it gives the certified complex input \(i\pi/2\),
+equivalently the exact affine scalar action \((i/2)\pi\); this transports
+across every checked \(\pi\)-representation.  The finite scalar return
+\((-2i)(i\pi/2)=\pi\), and the conditional literal-product formula
+\((-2i)\log(i)=\pi\) for any certified branch with
+\(\log(i)=i\pi/2\), are checked.
+The input is also already tied to the geometric arctangent route:
+\(\pi/2\) is a certified raw equivalent of
+\(2\arctan_{\rm geom}(1)\), and of the normalized geometric quarter-turn
+raw at \(1\).  Lean now transports it all the way to the geometry-only
+half-angle and its \(i\)-axis embedding used by the rotation construction.
+The generic raw-representation transport now proves that the separately
+stabilized factorial rotations agree on these equivalent inputs.  The remaining
+quarter-turn work compares that resulting rotation with the geometric endpoint;
+it is not an unrecorded conversion of units or of \(\pi\)-representatives.
+For an exact rational input in the same bounded chart, the lift is already
+proved equivalent to the original common-schedule factorial evaluator; the
+represented construction therefore extends the rational exponential rather
+than defining a competing one.
+The represented-input construction is now a valid raw complex computation:
+finite prefixes of the midpoint rotation boxes are intersected, with each
+later candidate as the rational-box witness that the prefix remains ordered.
+For \(|T|,|U|\le2\), its finite cosine--sine prefix changes by at most
+\(16|T-U|\) in each coordinate.  Together with the midpoint modulus, this
+gives future containment after widening stage \(k\) by
+\(16\,\operatorname{width}(\pi/2,k)\); that radius is at most \(32/(k+1)\)
+and shrinks by the rational denominator schedule.
+The rational circle chart now supplies the exact finite hand-off:
+\(P(0)=1\), \(P(1)=i\), and
+\[
+  P'(t)=i\,\operatorname{sectorAreaSpeed}(t)P(t),
+  \qquad \operatorname{sectorAreaSpeed}(t)=\frac{2}{1+t^2}.
+\]
+These are rational-function identities, not yet a represented-function
+derivative theorem.  The two coordinate secants and their errors relative to
+the rational velocity have now been reduced exactly to rational fractions by
+portable denominator clearing; each error displays an explicit factor of the
+rational step.  On the unit chart, the remaining factor is bounded so both
+errors are at most \(12|h|\).  Exact singleton evaluators package this as the
+project's literal epsilon--delta interval derivative certificate, using a
+step budget \(1/(12n)\) (and \(1/12\) at stage zero).  A complex/vector
+wrapper now packages the two coordinate certificates.  The sector-area clock
+\(\Theta(t)=2\arctan_{\rm rectangle}(t)\) is now also a checked interval
+function with \(\Theta'(t)=2/(1+t^2)\), and its rational values agree with
+\(2\arctan_{\rm geom}(t)\).  What remains before Peano--Baker/Volterra
+uniqueness can identify this geometric solution with the factorial rotation
+raw is the effective inverse/reparametrized curve, then the vector uniqueness
+step and the complex exponential/logarithm branch connection.
 \end{theorem}

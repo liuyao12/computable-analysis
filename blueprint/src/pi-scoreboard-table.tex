@@ -18,6 +18,11 @@ calculus.  In particular, a continuous Peano--Baker theorem and a proof that
 the selected exponential satisfies \(e^x{}'=e^x\) are major advances even
 though neither creates a new pi row.
 
+There are eight such capability rows.  Machin's single formula is displayed
+inside the arctangent/power-series row: it is a separately checked,
+substantially faster computation, but it exercises the same series-to-
+geometric bridge rather than inflating the readiness count.
+
 \begin{center}
 \begin{tabular}{@{}p{0.23\textwidth}p{0.31\textwidth}p{0.21\textwidth}cc@{}}
 \textbf{Theorem family} & \textbf{Content exercised} &
@@ -27,9 +32,11 @@ Finite Archimedes theorem &
 exact rational circle fans, square-root enclosures, and nested interval bounds &
 direct chord and cross-fan: \(w_n\le 10/(n+1)\) &
 \(\checkmark\) & \(\checkmark\)\\
-Arctangent series theorem &
-circular inverse geometry against the alternating arctangent series &
-Leibniz: \(w_n=4/(4n+1)\) &
+Arctangent power-series theorems &
+circular inverse geometry against the alternating arctangent series;
+Leibniz and the single Machin formula
+\(\pi=16\arctan_{\rm series}(1/5)-4\arctan_{\rm series}(1/239)\) &
+Leibniz: \(w_n=4/(4n+1)\); Machin: \(w_n\le20/2^n\) &
 \(\checkmark\) & \(\checkmark\)\\
 Arctangent integral &
 certified rectangle integration and its endpoint bridge &
@@ -99,10 +106,25 @@ Euler identity and complex logarithm &
 for \(a=\arctangeom(1)\),
 \(\exp(2ia)=i\), hence
 \(\exp(i\pi/2)=i\) and \(\pi=-2i\log(i)\) &
-the checked \code{pi.imaginaryHalf} input, then matrix Peano--Baker
-factorial tail, represented-input extension, rotation-system/geometric
-identification, and branch-agreement moduli
-(the rational complex factorial-tail raw is checked) &
+the checked \code{pi.halfPi} input with rational boxes in \([1,2]\) and
+width \(\le2/(n+1)\), its midpoint Cauchy modulus and ordered shrinking
+uniform-rotation candidate; the checked finite-prefix Lipschitz bound and
+Cauchy stabilization produce a valid represented \code{pi.halfPiRotation}
+with radius \(\le32/(n+1)\). The input itself is bridged to
+\(2\arctangeom(1)\), the geometric normalized quarter turn, and the
+geometry-only represented half angle; its \code{pi.imaginaryHalf} embedding
+is likewise bridged to the geometry-only imaginary input. Independently, the
+accelerated sector-clock endpoint is now a bounded factorial-rotation input
+whose stabilized rotation agrees with that same geometry-only rotation and,
+therefore, with \code{pi.halfPiRotation}; its imaginary-axis embedding also
+agrees with \code{pi.imaginaryHalf}. Doubling the endpoint is likewise a
+checked direct pi raw, equivalent to the preferred circle-area raw but not a
+new capability row. The exact product legs
+\((-2i)(i\pi/2)=\pi\) and conditionally \((-2i)\log(i)=\pi\); then matrix
+Peano--Baker factorial tail, sector-area reparametrization and
+rotation-system/geometric endpoint identification, and branch-agreement moduli
+(the rational complex factorial-tail raw and its common bounded-input
+schedule are checked) &
 -- & --\\
 \end{tabular}
 \end{center}
@@ -110,10 +132,10 @@ identification, and branch-agreement moduli
 The primary \code{PiProofs.PiPresentation} registry retains supplementary
 checked evaluators as regression implementations: polygon area, the two
 perimeter normalizations (available as \code{pi.circumferenceStabilized} and
-\code{pi.circumferenceReboxed}), Nilakantha, and the single Machin power-series
-formula.  The Machin runtime has its own certified bound
-\(w_n\le20/2^n\), recorded by \code{PiProofs.piMachinRate}; it remains a
-series-regression implementation rather than another coverage row.  Its direct cross-fan view is \code{pi.circumference} (also
+\code{pi.circumferenceReboxed}), Nilakantha, and direct cross-fan
+circumference views.  Machin is listed above as its single power-series
+formula; its certified bound \(w_n\le20/2^n\) is recorded by
+\code{PiProofs.piMachinRate}.  Its direct cross-fan view is \code{pi.circumference} (also
 \code{pi.circumferenceFan}).  The abstract \code{piCertified} handle additionally stores the
 supplementary \code{pi.dirichletBeta}, \code{pi.integrationByPartsMesh},
 \code{pi.triangleLogSeries}, and \code{pi.squareStieltjes} representatives.
@@ -149,13 +171,16 @@ are checked; general monotone-piece composition remains the calculus gate.
 The canonical refinement is deliberately the long elementary-function route:
 its \(\log 2\) endpoint must agree with the inverse
 of the canonical exponential.  The linear Peano--Baker/Picard--Lindel\"of
-uniqueness theorem will make that identification only after the individual
-exponential presentations have supplied their own derivative and initial-value
-certificates.  Thus the prospective refinement tests a capability the checked
-finite row does not.
+theorem is reserved for vector systems.  The scalar exponential
+identification instead needs the direct finite-mesh contraction theorem, after
+the individual presentations have supplied their own derivative and
+initial-value certificates.  Thus the prospective refinement tests a
+capability the checked finite row does not.
 The Euler/complex-logarithm row above is a second, longer exp/log/ODE
-corroboration; its rational complex factorial-tail raw is now checked, but it
-remains unmarked pending rotation/geometric and branch certificates.  The
+corroboration; its rational complex factorial-tail raw and sector-clock
+endpoint \(\Theta(1)\Equiv\pi/2\) are now checked.  The accelerated endpoint
+also agrees directly with the normalized geometric quarter-turn raw, but the
+row remains unmarked pending rotation/geometric and branch certificates.  The
 arcsine/Newton and Gaussian rows remain future probes for
 inverse/square-root integration and the exponential/full-line layers; other
 advanced routes are intentionally omitted from this progress table.

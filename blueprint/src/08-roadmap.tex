@@ -106,14 +106,16 @@ general bounded piecewise integration-by-parts and substitution theorems\\
 Monotone inverse functions & branch-local inverse and bisection interfaces;
 unit-interval square-root search for rational targets & represented targets,
 then sine/arcsine and exponential/logarithm branches\\
-Differentiated elementary functions & formal power-series derivative table and
-finite-difference affine/square examples & a selected exponential raw with
-the analytic theorem \(f'=f\), then log/exp agreement\\
+Differentiated elementary functions & formal power-series derivative table,
+finite monomial interval-derivative certificates, and finite-difference
+affine/square examples &
+a selected exponential raw with the analytic theorem \(f'=f\), then log/exp
+agreement\\
 Linear ODEs & finite Peano--Baker ordered-word expansion, discrete
 variation of constants, and sampled zero-initial uniqueness & interval-matrix simplex boxes, factorial tails, and
-linear Picard--Lindel\"of via continuous variation of constants; then the
-scalar (E'=E, E(0)=1) uniqueness specialization identifying the selected
-exponential representations
+linear Picard--Lindel\"of via continuous variation of constants; scalar
+\(E'=E,E(0)=1\) representation agreement instead follows the separate direct
+finite-mesh contraction route
 \end{tabular}
 \end{center}
 
@@ -172,6 +174,103 @@ Linear systems and Peano--Baker &
 A public theorem is linked at its mathematical statement above.  Internal
 helper names belong in the source file beside the proof, not in this
 blueprint.
+
+\section{Alignment with the 100-theorem benchmark}
+\label{sec:100-theorem-alignment}
+
+The benchmark used here is Freek Wiedijk's list of 100 classic theorems,
+tracked for Lean by the Lean community.  It is a comparison list, not a
+syllabus: several entries require measure theory, probability, abstract
+algebra, topology, or set theory that this project intentionally does not
+provide.  The placement below is therefore a scope decision, not a claim
+that the project should reproduce the benchmark's library environment.
+
+\subsection{Primary inclusions}
+
+The following entries should appear as named end goals or worked examples in
+the indicated chapters.  A theorem may be stated in its familiar mathematical
+form, but its checked version must use the project's rational certificates.
+
+\begin{center}
+\small
+\begin{tabular}{p{0.10\textwidth}p{0.27\textwidth}p{0.49\textwidth}}
+\textbf{No.} & \textbf{Benchmark theorem} & \textbf{Placement and role}\\
+\hline
+1 & Irrationality of $\sqrt 2$ & Foundations; first algebraic-branch and non-rational-value case.\\
+2 & Fundamental Theorem of Algebra & Algebra and FTA; principal complex-algebraic endpoint.\\
+3 & Denumerability of $\mathbb Q$ & Foundations; checked natural-number code surjection; canonical injective enumeration deferred.\\
+4 & Pythagorean theorem & Circle and trigonometry; exact rational geometry.\\
+9 & Area of a circle & Circle and integrals; primary pi/area certificate.\\
+14 & Euler's Basel sum & Infinite series; checked zeta-two interval/tail core, with the Basel identity open.\\
+15 & Fundamental Theorem of Integral Calculus & Effective calculus; central constructive FTC bridge.\\
+16 & Abel--Ruffini theorem & Algebra and FTA; advanced algebraic endpoint.\\
+17 & de Moivre's formula & Circle/trigonometry and exponential/logarithm; complex bridge.\\
+23 & Formula for Pythagorean triples & Circle and trigonometry; exact parametrization.\\
+26 & Leibniz series for $\pi$ & Infinite series; alternating-series pi evaluator.\\
+27 & Sum of angles of a triangle & Circle and trigonometry; rational-coordinate geometry.\\
+34 & Divergence of the harmonic series & Infinite series; negative convergence example.\\
+35 & Taylor's theorem & Effective calculus; finite-prefix and remainder certificates.\\
+37 & Solution of a cubic & Algebra and FTA; explicit low-degree solver.\\
+44 & Binomial theorem & Infinite series; finite polynomial identity.\\
+46 & General quartic equation & Algebra and FTA; checked rational worked-example core, with the general formula deferred.\\
+49 & Cayley--Hamilton theorem & Differential equations; checked explicit rational $2\\times2$ matrix core, with the general characteristic-polynomial theorem deferred.\\
+55 & Product of segments of chords & Circle and trigonometry; checked rational power-of-a-point identity.\\
+57 & Heron's formula & Circle and trigonometry; rational area with square-root output.\\
+60 & Bézout's identity & Foundations; terminating integer-coefficient gcd certificate.\\
+64 & L'Hopital's rule & Effective calculus; checked rational quotient-cancellation core, with the limit theorem deferred.\\
+65 & Isosceles triangle theorem & Circle and trigonometry; elementary geometry.\\
+66 & Sum of a geometric series & Infinite series; core tail-majorant pattern.\\
+68 & Sum of an arithmetic series & Infinite series; finite-sum foundation.\\
+69 & Greatest-common-divisor algorithm & Foundations; executable exact arithmetic.\\
+74 & Mathematical induction & Foundations; checked finite induction schema for certificate construction.\\
+75 & Mean Value Theorem & Effective calculus; derivative/FTC support.\\
+79 & Intermediate Value Theorem & Foundations/effective calculus; constructive bisection.\\
+80 & Fundamental Theorem of Arithmetic & Foundations; exact arithmetic support.\\
+89 & Factor and remainder theorems & Algebra and FTA; polynomial root interface.\\
+91 & Triangle inequality & Foundations; interval-width and norm estimates.\\
+94 & Law of cosines & Circle and trigonometry; geometry bridge.\\
+95 & Ptolemy's theorem & Circle and trigonometry; checked rational oriented-chord numerator core.\\
+97 & Cramer's rule & Differential equations; finite linear-system prerequisite.\\
+100 & Descartes rule of signs & Algebra and FTA; checked sign-variation/root-exclusion data, with the root-counting rule deferred.\\
+\end{tabular}
+\end{center}
+
+Numbers 38 (AM--GM), 42 (reciprocal triangular numbers), 77 (sums of powers),
+and 85 (divisibility by 3) are useful exact-arithmetic exercises, but should
+be local lemmas or appendix exercises rather than chapter milestones.  The
+finite subset and binomial recurrences for 52/58 now live in Foundations as a
+small counting appendix.  Number 78 (Cauchy--Schwarz) is a
+supporting inequality if the norm layer expands; it does not justify adding a
+functional-analysis chapter.
+The factor-list certificate for 60, the bounded primality search, the
+recursive certificate-existence theorem, and
+`PrimeFactorCertificate.factor_perm` now give the checked certificate-level
+existence and uniqueness core of item 80.  The usual classical formulation
+over a separately developed prime-number library remains outside this scope.
+
+At the current certificate boundary, 39 benchmark entries have a checked
+project-relevant core: 1, 3, 4, 9, 15, 17, 23, 26, 27, 34, 35, 37, 38, 42, 44, 46, 49, 52, 55, 57, 58, 60, 64, 65, 66, 68,
+69, 74, 75, 77, 78, 79, 80, 85, 89, 91, 94, 95, and 97.  This count deliberately includes finite,
+rational-coordinate, and certificate-level cores; it is not a claim that all
+39 classical theorems have been reproduced with their usual analytic or
+number-theoretic hypotheses.
+
+\subsection{Explicit exclusions and deferred entries}
+
+The prime-number-theory entries (5, 7, 10, 11, 19, 20, 39, 48, 51, 70, 81,
+98), logic and set theory (6, 12, 22, 24, 25, 63), higher geometry and
+topology (8, 13, 21, 28, 29, 36, 40, 41, 43, 50, 61, 82, 84, 87, 92),
+combinatorics and probability (30--32, 45, 47, 54, 59, 62, 73, 83, 88,
+93, 96, 99), measure/Fourier analysis (76, 86), and deep transcendence or
+analytic number theory (18, 33, 53, 56, 67, 90), and abstract group theory
+(71, 72) remain outside the current boundary.  They become future work only
+after the project adds the required representation, measure, probability,
+topology, or algebraic infrastructure.
+
+The dependency order is now: foundations; circle and trigonometry; integrals;
+infinite series; exponential and logarithm; effective calculus; algebra and
+FTA; linear differential equations; roadmap and benchmark alignment.  The FTA
+chapter therefore precedes the ODE chapter in the assembled document.
 \section{A useful style rule}
 
 Every major theorem should have three layers:

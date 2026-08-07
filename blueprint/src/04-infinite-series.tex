@@ -19,16 +19,182 @@ Chapters~\ref{ch:rational-circle-trigonometry} and \ref{ch:integrals}.
 
 \section{Series Algorithms}
 
+\subsection{Benchmark foundations: finite arithmetic and geometric sums}
+\label{sec:series-benchmark-foundations}
+
+Before introducing an infinite-series representation, the project checks the
+finite identities that its tails and partial sums use:
+\lean{ComputableAnalysis.Series.arithmeticSum}
+\lean{ComputableAnalysis.Series.arithmeticSum_succ}
+\lean{ComputableAnalysis.Series.arithmeticSum_eq}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum_succ}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum_eq}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum_constant}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum_le_succ}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum_nonneg}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum_pos}
+\lean{ComputableAnalysis.Series.arithmeticSum_nonneg}
+\lean{ComputableAnalysis.Series.arithmeticSum_pos}
+\lean{ComputableAnalysis.Series.arithmeticSum_le_succ}
+\lean{ComputableAnalysis.Series.powerSum}
+\lean{ComputableAnalysis.Series.powerSum_zero}
+\lean{ComputableAnalysis.Series.powerSum_succ}
+\lean{ComputableAnalysis.Series.powerSum_nonneg}
+\lean{ComputableAnalysis.Series.powerSum_pos}
+\lean{ComputableAnalysis.Series.powerSum_zero_exponent}
+\lean{ComputableAnalysis.Series.powerSum_one_exponent}
+\lean{ComputableAnalysis.Series.powerSum_two_exponent}
+\lean{ComputableAnalysis.Series.powerSum_three_exponent}
+\lean{ComputableAnalysis.Series.powerSum_four_exponent}
+\lean{ComputableAnalysis.Series.powerSum_five_exponent}
+\lean{ComputableAnalysis.Series.powerSum_six_exponent}
+\lean{ComputableAnalysis.Series.powerSum_seven_exponent}
+\lean{ComputableAnalysis.Series.squareSum}
+\lean{ComputableAnalysis.Series.squareSum_succ}
+\lean{ComputableAnalysis.Series.squareSum_eq}
+\lean{ComputableAnalysis.Series.cubeSum}
+\lean{ComputableAnalysis.Series.cubeSum_succ}
+\lean{ComputableAnalysis.Series.cubeSum_eq}
+\lean{ComputableAnalysis.Series.fourthPowerSum}
+\lean{ComputableAnalysis.Series.fourthPowerSum_succ}
+\lean{ComputableAnalysis.Series.fourthPowerSum_eq}
+\lean{ComputableAnalysis.Series.fifthPowerSum}
+\lean{ComputableAnalysis.Series.fifthPowerSum_succ}
+\lean{ComputableAnalysis.Series.fifthPowerSum_eq}
+\lean{ComputableAnalysis.Series.sixthPowerSum}
+\lean{ComputableAnalysis.Series.sixthPowerSum_succ}
+\lean{ComputableAnalysis.Series.sixthPowerSum_eq}
+\lean{ComputableAnalysis.Series.seventhPowerSum}
+\lean{ComputableAnalysis.Series.seventhPowerSum_succ}
+\lean{ComputableAnalysis.Series.seventhPowerSum_eq}
+\lean{ComputableAnalysis.Series.geometricSum}
+\lean{ComputableAnalysis.Series.geometricSum_succ}
+\lean{ComputableAnalysis.Series.geometricSum_zero}
+\lean{ComputableAnalysis.Series.geometricSum_nonneg}
+\lean{ComputableAnalysis.Series.geometricSum_le_succ}
+\lean{ComputableAnalysis.Series.geometricSum_pos}
+\lean{ComputableAnalysis.Series.geometricSum_one}
+\lean{ComputableAnalysis.Series.geometricSum_zero_ratio}
+\lean{ComputableAnalysis.Series.geometricSum_mul_sub}
+\lean{ComputableAnalysis.Series.geometricSum_tail_eq}
+\lean{ComputableAnalysis.Series.geometricSum_le_inv_one_sub}
+\lean{ComputableAnalysis.Series.geometricSum_tail_nonneg}
+\lean{ComputableAnalysis.Series.geometricSum_tail_pos}
+\lean{ComputableAnalysis.Series.geometricSum_tail_le_one}
+\lean{ComputableAnalysis.Series.geometricSum_tail_lt_one}
+\lean{ComputableAnalysis.Series.half_pow_eq_one_div_nat_two_pow}
+\lean{ComputableAnalysis.Series.half_pow_le_one_div_succ}
+\lean{ComputableAnalysis.Series.geometricSum_half_tail_le_one_div_succ}
+\lean{ComputableAnalysis.Series.pow_le_half_pow}
+\lean{ComputableAnalysis.Series.geometricSum_tail_le_one_div_succ_of_le_half}
+\lean{ComputableAnalysis.Series.geometricRaw}
+\lean{ComputableAnalysis.Series.geometricRaw_compute_eq}
+\lean{ComputableAnalysis.Series.geometricRaw_valid_of_le_half}
+\lean{ComputableAnalysis.Series.geometricRaw_equiv_inv_one_sub}
+\lean{ComputableAnalysis.Series.geometricHalfRaw}
+\lean{ComputableAnalysis.Series.geometricHalfRaw_compute_eq}
+\lean{ComputableAnalysis.Series.geometricHalfRaw_valid}
+\lean{ComputableAnalysis.Series.geometricHalfRaw_equiv_two}
+\lean{ComputableAnalysis.Series.geometricSum_eq}
+\lean{ComputableAnalysis.ExpProofs.euler_binomial_prefix_nat_expansion}
+\lean{ComputableAnalysis.Series.binomialTerm}
+\lean{ComputableAnalysis.Series.binomialTerm_succ_succ_of_lt}
+\lean{ComputableAnalysis.Series.binomialSum}
+\lean{ComputableAnalysis.Series.binomialSum_succ}
+\lean{ComputableAnalysis.Series.binomialSum_succ_row}
+\lean{ComputableAnalysis.Series.binomialTerm_top}
+\lean{ComputableAnalysis.Series.binomialTerm_succ_top}
+\lean{ComputableAnalysis.Series.binomialSum_extra}
+\lean{ComputableAnalysis.Series.binomialSum_eq_pow}
+\lean{ComputableAnalysis.Series.binomial_square}
+\lean{ComputableAnalysis.Series.binomial_cube}
+\lean{ComputableAnalysis.Series.triangularTelescopingSum}
+\lean{ComputableAnalysis.Series.triangularTelescopingSum_succ}
+\lean{ComputableAnalysis.Series.triangularTelescopingSum_eq}
+\lean{ComputableAnalysis.Series.triangularTelescopingSum_tail_eq}
+\lean{ComputableAnalysis.Series.triangularTelescopingSum_lt_two}
+\lean{ComputableAnalysis.Series.triangularTelescopingSum_le_two}
+\lean{ComputableAnalysis.Series.triangularTelescopingSum_mono}
+\lean{ComputableAnalysis.Series.triangularTelescopingRaw}
+\lean{ComputableAnalysis.Series.triangularTelescopingRaw_valid}
+\lean{ComputableAnalysis.Series.triangularTelescopingRaw_equiv_two}
+\lean{ComputableAnalysis.Series.triangularTelescopingTerm}
+\lean{ComputableAnalysis.Series.triangularTelescopingTerm_eq_reciprocal}
+These are the project's first direct formalizations of benchmark items 68
+(sum of an arithmetic series, including a general rational progression), 66 (sum of a geometric series), and 44 (the
+finite binomial theorem in the Euler-power form), and 42 (the reciprocal
+triangular-number telescoping identity).  These are finite rational
+identities; the later convergence theorems add the explicit tail certificates
+needed for infinite values.  In particular, the reciprocal-triangular example
+now has a complete raw-real representation: its ordered intervals shrink and
+are equivalent to the exact rational value (2).
+The quadratic and cubic instances are included as small readable worked
+certificates of the same binomial expansion.  The rational term and partial-sum
+constructors, their interior and boundary recurrences, and
+`Series.binomialSum_eq_pow` now expose the full finite binomial identity over
+the rationals; convergence obligations remain separate.
+For the reciprocal triangular-number example, the exact remainder, monotonicity,
+and raw-real equivalence theorems expose the complete computable convergence
+certificate without invoking completed-real completeness.
+The ratio-one boundary `geometricSum_one` is checked separately so the finite
+interface remains total at the exceptional value excluded by the quotient
+formula.
+For a positive-length sum, `geometricSum_zero_ratio` similarly records the
+ratio-zero boundary.
+The exact finite remainder identity `geometricSum_tail_eq` records the
+geometric tail algebraically, before any limiting argument.
+For (0\le r<1), `geometricSum_le_inv_one_sub` gives the corresponding
+finite partial-sum majorant (1/(1-r)).
+On the wider range (0\le r\le1), the tail nonnegativity and upper-bound
+certificates enclose the normalized finite tail in [0,1].
+The square-, cube-, fourth-power, fifth-power, sixth-power, and seventh-power
+sum theorems are the (k=2) through (k=7) supporting cases of benchmark 77;
+the generic \texttt{powerSum} recurrence now supplies the executable finite sum for
+every fixed exponent, while no general Faulhaber formula is claimed here.
+Its exponent-zero and exponent-one bridge lemmas recover the counting sum and
+the existing arithmetic-sum evaluator exactly.
+
+\begin{theorem}[Dyadic lower bound for harmonic sums]
+\label{thm:harmonic-dyadic-lower-bound}
+\lean{ComputableAnalysis.Logarithm.harmonicSum}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_succ}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_double_lower}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_lower}
+\leanok
+The finite harmonic evaluator satisfies
+\[
+  H_{2^k}\geq \frac{k}{2}.
+\]
+Lean proves this by showing that each doubling block contributes at least
+one half.  This is the explicit finite-growth certificate underlying the
+divergence of the harmonic series (benchmark item 34); the project does not
+introduce a separate completed-real limit predicate here.
+\end{theorem}
+
 \begin{definition}[Alternating series intervals]
 \label{def:alternating-series-intervals}
 \lean{ComputableAnalysis.Series.AlternatingRaw}
 \lean{ComputableAnalysis.Series.alternatingInterval}
+\lean{ComputableAnalysis.Series.AlternatingRaw.toRealRaw}
+\lean{ComputableAnalysis.Series.AlternatingRaw.toRealRaw_valid}
+\lean{ComputableAnalysis.Series.leibnizTerm}
+\lean{ComputableAnalysis.Series.leibnizTerm_nonneg}
+\lean{ComputableAnalysis.Series.leibnizTerm_decreasing}
+\lean{ComputableAnalysis.Series.leibnizTerm_shrinks}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_valid}
+\lean{ComputableAnalysis.Series.AlternatingRaw.even_partialSum_mono}
+\lean{ComputableAnalysis.Series.AlternatingRaw.odd_partialSum_antitone}
+\lean{ComputableAnalysis.Series.AlternatingRaw.interval_eq_endpoints}
+\lean{ComputableAnalysis.Series.AlternatingRaw.intervals_nested}
 \uses{def:raw-real}
 An alternating series with nonnegative decreasing terms is computed by
 successive partial sums.  At stage \(n\), the natural interval is the interval
 between the \(2n\)-th and \((2n+1)\)-st partial sums.  The width is exactly
 the next term magnitude, so convergence reduces to the finite proof that the
-term magnitudes shrink to zero.
+term magnitudes shrink to zero.  The concrete Leibniz term
+\(1/(2n+1)\) supplies a checked instance of this generic construction.
 \end{definition}
 
 \section{Arctangent, Leibniz, and Machin}
@@ -59,6 +225,7 @@ compatibility alias; the proof-facing function is \code{PiProofs.arctanFunction}
 \lean{ComputableAnalysis.PiProofs.leibnizSeries_equiv_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.fourArctanSeriesOneValid}
 \lean{ComputableAnalysis.PiProofs.piLeibnizRate}
+\lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea}
 \uses{def:arctan-series,def:raw-equiv}
 For the Leibniz algorithm, pi is computed as four times the arctangent series
 at \(1\):
@@ -77,6 +244,10 @@ equivalence.
 Its literal interval evaluator also has the public eventual bound
 \(w_n\leq 4/n\), recorded separately as rate metadata; this is a cost
 statement about the computation, not an additional definition of pi.
+The unconditional finite-Riemann bridge
+`four\_arctanSeries\_one\_equiv_piCircleArea` also identifies this
+series presentation with the certified circle-area presentation.  This is the
+project's checked core of benchmark item 26.
 \end{theorem}
 
 \begin{theorem}[Nilakantha's rational pi series]
@@ -349,6 +520,8 @@ It is deliberately not a Machin row: no arctangent addition formula is used.
 \lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanSeries_one_of_powerSeriesGeometryAgreement}
 \lean{ComputableAnalysis.Taylor.ArctanComparison.powerSeriesAgreesOnUnit_of_kernelComparisonRoute}
 \lean{ComputableAnalysis.PiProofs.leibnizEqArea_of_powerSeriesGeometryAgreement_on_unit}
+\lean{ComputableAnalysis.PiProofs.arctanEqualsGeom_finiteRiemannBridge_on_unit}
+\lean{ComputableAnalysis.PiProofs.arctanPowerSeriesGeomAgreement_finiteRiemannBridge}
 \uses{thm:leibniz-arctan,thm:geometric-arctan-one-area-pi}
 \[
   4\arctanseries(1)\sim \pi_{\mathrm{area}}.
@@ -360,6 +533,17 @@ series stage (n), Lean schedules a substantially finer dyadic rectangle
 mesh, proves that the signed finite-polynomial endpoint error lies inside a
 vanishing dyadic-zero interval, and cancels that interval using raw-real
 arithmetic.  Every estimate is a finite rational identity or inequality.
+
+The same finite-Riemann bridge is available on the whole rational series
+chart (\(\lvert x\rvert\leq1\)):
+\code{PiProofs.arctanEqualsGeom\_finiteRiemannBridge\_on\_unit} proves
+\(\arctanseries(x)\sim\arctangeom(x)\), and its named representation
+certificate is
+\code{PiProofs.arctanPowerSeriesGeomAgreement\_finiteRiemannBridge}.
+The nonnegative half is the quadrature argument.  On the negative half both
+raw evaluators are literal endpoint-reversed negations of their values at
+\(-x\), so reflection is checked at the interval level rather than supplied
+as another integration theorem.
 
 The exact rational-cell order theorem
 \code{PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit}
@@ -617,22 +801,49 @@ for the series proof; they introduce no additional Machin pi computation.
 
 \section{General Power Series}
 
-\begin{definition}[Formal power series]
+\begin{definition}[Formal power series and coefficient shift]
 \label{def:formal-power-series}
 \lean{ComputableAnalysis.FormalPowerSeries.Coeffs}
-\lean{ComputableAnalysis.FormalPowerSeries.derivative}
-\lean{ComputableAnalysis.FormalPowerSeries.HasFormalDerivative}
+\lean{ComputableAnalysis.FormalPowerSeries.coefficientShift}
+\lean{ComputableAnalysis.FormalPowerSeries.HasCoefficientShift}
 \uses{def:raw-real}
 A formal power series is a rational coefficient stream
 \[
   c:\N\to\Q,\qquad \sum_{n\ge0}c_nz^n.
 \]
-Formal differentiation is the coefficient operation
+Its coefficient-shift operation is
 \[
-  (c')_n=(n+1)c_{n+1}.
+  (\partial_{\rm form}c)_n=(n+1)c_{n+1}.
 \]
-This is algebraic data, separate from convergence of the associated raw
-function.
+At its expansion point, the prospective first-order slope is simply the
+linear coefficient \(c_1\).  A finite prefix may be translated to any
+rational basepoint \(a\), with powers of \(x-a\); its coefficient-shift
+polynomial then has value \(c_1\) at \(a\). This is algebraic Taylor data,
+separate from convergence and from an analytic derivative of the associated
+raw function.
+Lean retains the older names \code{derivative} and \code{HasFormalDerivative}
+as compatibility aliases; new series declarations use
+\code{coefficientShift} and \code{HasCoefficientShift}.
+\end{definition}
+
+\begin{definition}[Derivative from a first-order Taylor--Lagrange certificate]
+\label{def:effective-derivative}
+\lean{ComputableAnalysis.HasDerivativeOnInterval}
+\uses{def:formal-power-series}
+For a series presented at a rational point \(a\), its candidate derivative is
+the coefficient \(c_1\) of \(x-a\).  We call that coefficient the derivative
+only after a first-order Taylor--Lagrange certificate has been checked:
+given an output stage \(n\), it provides a rational step budget
+\(\delta_n>0\) and endpoint precisions which bound
+\[
+  f(a+h)-f(a)-Lh
+\]
+by \(\lvert h\rvert\varepsilon\) once \(h\) is small enough, with an explicit
+stage schedule.  \code{HasDerivativeOnInterval} is Lean's uniform-on-a-
+rational-interval form of precisely this certificate.  Thus the coefficient
+is the definitionally chosen linear term, while the Lagrange bound is the
+evidence that it describes the function.  No ambient limit or completeness
+theorem enters.
 \end{definition}
 
 \begin{definition}[Geometric majorants for power series]
@@ -658,72 +869,82 @@ inputs.  Real functions are then obtained by restricting these complex
 algorithms to the real axis.
 \end{definition}
 
-\begin{theorem}[Formal derivative table]\label{thm:formal-derivative-table}
+\begin{theorem}[Coefficient-shift table]\label{thm:formal-derivative-table}
 \lean{ComputableAnalysis.FirstYearCalculus.checked_power_series_table}
 \uses{def:formal-power-series}
 \leanok
-The coefficient streams for the standard power series satisfy the familiar
-formal identities:
+The coefficient streams for the standard series satisfy the algebraic
+identities:
 \[
-  (\exp)'=\exp,\qquad
-  (\sin)'=\cos,\qquad
-  (\cos)'=-\sin,
+  \partial_{\rm form}\exp=\exp,\qquad
+  \partial_{\rm form}\sin=\cos,\qquad
+  \partial_{\rm form}\cos=-\sin,
 \]
 \[
-  (\sinh)'=\cosh,\qquad
-  (\cosh)'=\sinh.
+  \partial_{\rm form}\sinh=\cosh,\qquad
+  \partial_{\rm form}\cosh=\sinh.
 \]
 \end{theorem}
 
-\lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
-\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_hasDerivative}
-\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
-\begin{table}[htbp]
-\centering
-\small
-\renewcommand{\arraystretch}{1.16}
-\begin{tabular}{p{0.25\textwidth}p{0.25\textwidth}p{0.35\textwidth}}
-\textbf{Function and scope} & \textbf{Derivative} & \textbf{Sorry-free status}\\
-\hline
-\(x^{n+1}/(n+1)\), formal coefficient stream & \(x^n\) &
-\formallyproved{Formal coefficient theorem} \\
-\(\exp_{\rm ps}\), formal coefficient stream & \(\exp_{\rm ps}\) &
-\formallyproved{Formal coefficient theorem} \\
-\(\sin_{\rm ps}\), \(\cos_{\rm ps}\), formal coefficient streams &
-\(\cos_{\rm ps}\), \(-\sin_{\rm ps}\) &
-\formallyproved{Formal coefficient theorems} \\
-\(\sinh_{\rm ps}\), \(\cosh_{\rm ps}\), formal coefficient streams &
-\(\cosh_{\rm ps}\), \(\sinh_{\rm ps}\) &
-\formallyproved{Formal coefficient theorems} \\
-\(x\) on \([0,1]\), interval evaluator & \(1\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
-\(A_{\rm rect}(x)\) on \([0,1]\) & \(1/(1+x^2)\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
-\(xA_{\rm rect}(x)\) on \([0,1]\) &
-\(A_{\rm rect}(x)+x/(1+x^2)\) &
-\formallyproved{Full \code{HasDerivativeOnInterval} theorem} \\
-Selected raw \(\exp\), \(\sin\), \(\cos\), \(\sqrt{\,}\), and \(\log\)
-evaluators & standard analytic table &
-\computeverifiable{Evaluator or formal identity exists; the corresponding
-raw interval-derivative theorem is still open}
-\end{tabular}
-\caption{Derivative status table.  Green means that Lean proves the precise
-claim in the stated semantic scope without \code{sorry}; orange is not a
-derivative theorem.  In particular, a formal coefficient identity is not
-silently promoted to a derivative theorem for an evaluated raw function.}
-\label{tab:derivative-status}
-\end{table}
-
-\noindent
-The green formal-series rows are witnessed by
-\code{FirstYearCalculus.checked\_power\_series\_table}; the three full
-interval rows are witnessed respectively by
-\code{IntegralIdentities.coordinateOnUnitDerivative},
-\code{IntegralIdentities.arctanIntegralRectangleOnUnit\_hasDerivative}, and
-\code{IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit\_hasDerivative}.
-This scope distinction is deliberate: it makes the derivative ledger useful
-without claiming the still-missing analytic identification of the selected
-exponential, trigonometric, or logarithmic raw algorithms.
+\begin{theorem}[Finite factorial-prefix identity]
+\label{thm:finite-factorial-prefix}
+\lean{ComputableAnalysis.ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial}
+\lean{ComputableAnalysis.ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorPrefix_succ}
+\lean{ComputableAnalysis.FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRaw}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRaw_valid}
+\lean{ComputableAnalysis.ExpProofs.uniformExpRaw_equiv_expPowerSeries}
+\lean{ComputableAnalysis.ExpProofs.expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms}
+\lean{ComputableAnalysis.ExpProofs.uniformExpTaylorPrefix_secant_error}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorPrefixSecantCoefficient_le_thirty_four}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four}
+\lean{ComputableAnalysis.ExpProofs.uniformExpQuotientPrecision}
+\lean{ComputableAnalysis.ExpProofs.uniformExpTailMagnitude_le_quotientTolerance}
+\lean{ComputableAnalysis.ExpProofs.uniformExpSelfDerivativeEvalPrecision}
+\lean{ComputableAnalysis.ExpProofs.uniformExpCenter_secant_error_le}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_at_zero}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShiftAt_at_basepoint}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_succ}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
+\lean{ComputableAnalysis.FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval}
+\uses{def:formal-power-series}
+\leanok
+The finite rational loop used by the exponential evaluator has no hidden
+analytic step.  After (N) terms, its next term is exactly
+\[
+  \frac{x^N}{N!},
+\]
+and after (N+1) terms its accumulated center is exactly the finite
+factorial Taylor prefix through degree (N).  This connects the coefficient
+stream to the executable rational loop.  On every rational box, the same
+finite monomial is bounded by the corresponding factorial-tail term, so one
+common rational tail budget can cover prefixes at nearby inputs.  This still
+says neither that the infinite series has a derivative nor that a tail may be
+differentiated.  Those are the later remainder-certificate obligations of
+\cref{rem:series-linear-coefficient-bridge}.
+On the fixed box \(\lvert x\rvert\le2\), Lean now packages this common schedule
+as \code{uniformExpRaw}: its boxes are nested and geometrically shrinking, and
+they overlap the existing input-adaptive power-series boxes at every stage.
+The derivative of the next finite prefix is exactly the common center used by
+this schedule, and its secant error is explicitly proportional to the step.
+Summing the finite factorial coefficient bounds gives the single rational
+constant \(34\) on this box, uniformly in the prefix length.  For a nonzero
+rational step \(h\), the common quotient stage is selected from the explicit
+positive budget \(\varepsilon\lvert h\rvert/24\); its omitted factorial
+magnitude is proved below that budget before any quotient is formed.
+For a finite prefix with a linear term, the coefficient-shift polynomial takes
+the value \(c_1\) at its declared rational expansion point; the displayed
+secant estimate is its first-order Taylor--Lagrange certificate in the sense
+of \cref{def:effective-derivative}.  The infinite-series tail transport is an
+additional analytic result, not a rule of formal coefficient algebra.
+For the sine and cosine streams, Lean also checks the
+truncation-sensitive finite instances: an \(N+1\)-coefficient sine prefix has
+derivative the \(N\)-coefficient cosine prefix, and cosine differentiates to
+the \(N\)-coefficient negative sine prefix.  The dropped edge coefficient is
+explicit; no infinite tail is silently differentiated.
+\end{theorem}
 
 \section{Euler's Basel Problem}
 
@@ -743,6 +964,29 @@ for \(n>0\), with a harmless coarse stage at \(n=0\).
 
 \begin{theorem}[Basel series validity]\label{thm:zeta-two-valid}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_le_succ}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_le_of_le}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_le_tailBound}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_succ}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_nonneg}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoTerm_pos}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_lt_succ}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_succ}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_nonneg}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_pos}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoTerm_le_telescopeStep}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_le_telescoping}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_lt_one_div}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width_le_one_div}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width_nonneg}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width_pos}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_lo_nonneg}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_hi_pos}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_ordered}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_nested}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoWidthsShrinkToZero}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoRaw_validCompute}
 \uses{def:zeta-two-raw,def:raw-real}
 \leanok
 The intervals \(Z_n\) form a real number.  The key finite estimate is the
@@ -750,6 +994,16 @@ telescoping bound
 \[
   \frac{1}{(m+1)^2}\le \frac1m-\frac1{m+1}.
 \]
+The two linked Dirichlet-series theorems check this estimate termwise and
+after finite summation, with an explicit tail budget.
+For a nonempty finite tail, the derived strict bound is below $1/n$.
+At the interval level, the public width theorem
+`zetaTwoInterval_width_le_one_div` gives the same coarse budget directly for
+every positive stage.  The linked nesting, orderedness, and
+`zetaTwoRaw_validCompute` declarations expose the complete finite validity
+certificate for the interval algorithm, including width shrinkage.
+This is the checked interval-and-tail core of benchmark item 14; the final
+identification with \(\pi^2/6\) remains the separate Basel conjecture below.
 \end{theorem}
 
 \begin{definition}[Basel right-hand side]\label{def:basel-geometric-rhs}

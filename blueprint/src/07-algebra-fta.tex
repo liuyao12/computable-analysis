@@ -64,11 +64,201 @@ unproved closure theorems.
 
 \section{Base cases}
 
+\begin{theorem}[Linear remainder and factor base case]
+\label{thm:linear-factor-remainder-base}
+\lean{ComputableAnalysis.Polynomial.linear_remainder}
+\lean{ComputableAnalysis.Polynomial.linear_factor_of_root}
+\lean{ComputableAnalysis.Polynomial.linear_root_iff_constant_eq_neg_mul}
+\lean{ComputableAnalysis.Polynomial.quadratic_factor_of_root}
+\lean{ComputableAnalysis.Polynomial.quadratic_remainder}
+\lean{ComputableAnalysis.Polynomial.cubic_remainder}
+\lean{ComputableAnalysis.Polynomial.cubic_factor_of_root}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_linear}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_quadratic}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_cubic}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_quartic}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_quintic}
+\lean{ComputableAnalysis.Polynomial.cubic_example_factorization}
+\lean{ComputableAnalysis.Polynomial.cubic_example_roots}
+\lean{ComputableAnalysis.Polynomial.quartic_example_factorization}
+\lean{ComputableAnalysis.Polynomial.quartic_example_roots}
+\lean{ComputableAnalysis.Polynomial.signChangeCount}
+\lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros}
+\lean{ComputableAnalysis.Polynomial.signChangeCount_zero_of_nonneg}
+\lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_zero_of_nonneg_coeffs}
+\lean{ComputableAnalysis.Polynomial.signChangeCount_zero_of_nonpos}
+\lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_zero_of_nonpos_coeffs}
+\lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_quadratic}
+\lean{ComputableAnalysis.Polynomial.eval_nonneg_of_nonneg_coeffs}
+\lean{ComputableAnalysis.Polynomial.eval_nonpos_of_nonpos_coeffs}
+\lean{ComputableAnalysis.Polynomial.eval_pos_of_nonneg_coeffs_of_pos}
+\lean{ComputableAnalysis.Polynomial.eval_ne_zero_of_nonneg_coeffs_of_pos}
+\lean{ComputableAnalysis.Polynomial.no_positive_root_of_nonneg_coeffs_of_pos}
+\lean{ComputableAnalysis.Polynomial.eval_neg_of_nonpos_coeffs_of_neg}
+\lean{ComputableAnalysis.Polynomial.no_positive_root_of_nonpos_coeffs_of_neg}
+\lean{ComputableAnalysis.Polynomial.signChangeCount_quadratic_example}
+\lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_example}
+\lean{ComputableAnalysis.Polynomial.syntheticDivide}
+\lean{ComputableAnalysis.Polynomial.syntheticDivide_spec}
+\lean{ComputableAnalysis.Polynomial.syntheticDivide_factor_of_root}
+\lean{ComputableAnalysis.Polynomial.syntheticDivide_remainder_eq_eval}
+\lean{ComputableAnalysis.Polynomial.syntheticDivide_remainder_eq_zero_iff}
+\lean{ComputableAnalysis.Polynomial.syntheticDivide_secant_quotient}
+\lean{ComputableAnalysis.RatFun.polynomial_defined_all}
+\lean{ComputableAnalysis.RatFun.polynomial_evalOnDomain_eq}
+\lean{ComputableAnalysis.RatFun.polynomialOnInterval}
+\lean{ComputableAnalysis.RatFun.polynomialOnInterval_compute_eq}
+\leanok
+For a rational degree-one polynomial, evaluation splits into its value at the
+origin plus the linear coefficient times the input.  If the polynomial has a
+rational root (r), it factors exactly as (a(x-r)).  The corresponding
+quadratic factorization is also checked.  These are the finite rational base
+cases of benchmark item 89.  The recursive synthetic-division theorem then
+provides the corresponding linear factor/remainder statement for arbitrary
+finite rational coefficient lists.  Division by higher-degree factors remains
+future algebra infrastructure.  The cubic identity also provides the
+rational-root reduction step for benchmark item 37, not a general cubic
+solution formula.  The worked factorization and root certificate above give
+one explicit rational cubic solution within that boundary.  The quartic
+factorization and roots are the project's checked worked-example core for
+benchmark item 46; they do not claim a general quartic formula.
+The coefficient sign-change counter and its zero-free quadratic example record
+the finite input data for benchmark item 100; the Descartes root-counting rule
+itself remains optional future work.  Zero coefficients are explicitly removed
+before the second example is counted, matching the usual sign-variation input
+convention.  The quadratic sign-pattern theorem generalizes this finite count
+to all positive--negative--positive rational coefficient triples.
+The general finite lemma
+`signChangeCountIgnoringZeros_zero_of_nonneg_coeffs` proves that a list of
+nonnegative coefficients has zero sign variation after zero filtering.
+The sign-symmetric lemma
+`signChangeCountIgnoringZeros_zero_of_nonpos_coeffs` gives the same result for
+nonpositive coefficients.
+The nonnegative-coefficient evaluation lemma supplies the corresponding
+zero-sign-variation root-exclusion base case on the nonnegative ray.
+The nonpositive-coefficient dual is checked as well.
+With a positive input and one positive coefficient, the nonnegative case is
+strict, giving the corresponding positive-ray root exclusion.
+The packaged nonzero conclusion is available for direct root-search use.
+The strict negative dual completes the opposite coefficient-sign orientation.
+The rational-function wrapper for a polynomial is total on rational inputs:
+`RatFun.polynomial_defined_all` supplies the domain certificate and
+`RatFun.polynomial_evalOnDomain_eq` identifies its value with polynomial
+evaluation.  The construction \texttt{RatFun.polynomialOnInterval} packages the
+same certificate as a total interval function, with its exact evaluator
+identified by `RatFun.polynomialOnInterval_compute_eq`.
+The finite coefficient derivative identities `eval_derivative_linear`,
+`eval_derivative_quadratic`, `eval_derivative_cubic`,
+`eval_derivative_quartic`, and `eval_derivative_quintic` connect the
+coefficient-level derivative list back to pointwise evaluation for degrees one
+through five. They support the finite Taylor boundary without asserting a
+general analytic derivative theorem.
+The general finite identity `syntheticDivide_secant_quotient` additionally
+identifies every nonzero-step polynomial secant quotient with the synthetic
+quotient evaluated at the right endpoint. This is the reusable finite
+secant/Taylor bridge; no limiting theorem is hidden in it.
+\end{theorem}
+
 \begin{theorem}[Monic linear polynomials]\label{thm:monic-linear-root}
 \lean{ComputableAnalysis.monicLinear_has_computable_root}
 \uses{def:computable-root}
 \leanok
 For every \(r\in\Qi\), the polynomial \(z-r\) has the computable root \(r\).
+\end{theorem}
+
+\begin{theorem}[Rational linear polynomials]\label{thm:rational-linear-root}
+\lean{ComputableAnalysis.rationalLinearPolynomial}
+\lean{ComputableAnalysis.rationalLinear_positiveDegree}
+\lean{ComputableAnalysis.rationalLinear_exact_root}
+\lean{ComputableAnalysis.rationalLinear_has_computable_root}
+\uses{def:computable-root}
+\leanok
+For rational \(a\ne0\) and \(b\), the polynomial \(az+b\) has the exact
+rational-complex root \(-b/a\), which is packaged as a computable root.
+This extends the monic-linear base case without invoking complex division or
+an isolation procedure.
+\end{theorem}
+
+\begin{theorem}[Factorized rational quadratics]\label{thm:rational-quadratic-roots}
+\lean{ComputableAnalysis.rationalQuadraticPolynomial}
+\lean{ComputableAnalysis.rationalQuadratic_left_exact_root}
+\lean{ComputableAnalysis.rationalQuadratic_right_exact_root}
+\lean{ComputableAnalysis.rationalQuadratic_has_computable_roots}
+\uses{def:computable-root}
+\leanok
+The monic quadratic
+\[
+  z^2-(r+s)z+rs=(z-r)(z-s)
+\]
+has both rational roots \(r\) and \(s\) as exact computable-root
+certificates.  This is the factorized quadratic base case; arbitrary
+quadratics still require a discriminant and square-root layer.
+\end{theorem}
+
+\begin{theorem}[Quadratic root from a rational discriminant witness]
+\label{thm:rational-quadratic-discriminant}
+\lean{ComputableAnalysis.rationalQuadratic}
+\lean{ComputableAnalysis.rationalQuadratic_positiveDegree}
+\lean{ComputableAnalysis.rationalQuadratic_root_of_discriminant}
+\lean{ComputableAnalysis.rationalQuadratic_has_computable_root_of_discriminant}
+\lean{ComputableAnalysis.rationalQuadratic_other_root_of_discriminant}
+\lean{ComputableAnalysis.rationalQuadratic_has_computable_roots_of_discriminant}
+\lean{ComputableAnalysis.rationalQuadratic_has_algebraic_roots_of_discriminant}
+\uses{def:computable-root}
+\leanok
+For \(a\ne0\), the coefficient list is certified positive-degree; if a
+rational \(d\) satisfies
+\(d^2=b^2-4ac\), then the rational number
+\[
+  \frac{-b+d}{2a}
+\]
+is an exact root of \(az^2+bz+c\), and the companion
+\((-b-d)/(2a)\) is certified as well.  Both witnesses are packaged as
+computable roots.  The theorem checks the finite quadratic formula once a
+square-root witness is supplied; it does not yet construct that witness for
+an arbitrary discriminant.
+The same two roots are also packaged as algebraic-complex witnesses.
+\end{theorem}
+
+\begin{theorem}[Factorized rational cubics]
+\label{thm:rational-cubic-roots}
+\lean{ComputableAnalysis.rationalCubicPolynomial}
+\lean{ComputableAnalysis.rationalCubic_positiveDegree}
+\lean{ComputableAnalysis.rationalCubic_left_exact_root}
+\lean{ComputableAnalysis.rationalCubic_middle_exact_root}
+\lean{ComputableAnalysis.rationalCubic_right_exact_root}
+\lean{ComputableAnalysis.rationalCubic_has_computable_roots}
+\lean{ComputableAnalysis.rationalCubic_has_algebraic_roots}
+\uses{def:computable-root}
+\leanok
+The factorized cubic
+\[
+  (z-r)(z-s)(z-t)
+\]
+has the three explicit rational roots \(r,s,t\), each packaged as a
+computable-root certificate.  This is the reusable factorized cubic core of
+benchmark item 37; a general cubic formula remains outside the current scope.
+\end{theorem}
+
+\begin{theorem}[Factorized rational quartics]
+\label{thm:rational-quartic-roots}
+\lean{ComputableAnalysis.rationalQuarticPolynomial}
+\lean{ComputableAnalysis.rationalQuartic_positiveDegree}
+\lean{ComputableAnalysis.rationalQuartic_left_exact_root}
+\lean{ComputableAnalysis.rationalQuartic_second_exact_root}
+\lean{ComputableAnalysis.rationalQuartic_third_exact_root}
+\lean{ComputableAnalysis.rationalQuartic_right_exact_root}
+\lean{ComputableAnalysis.rationalQuartic_has_computable_roots}
+\lean{ComputableAnalysis.rationalQuartic_has_algebraic_roots}
+\uses{def:computable-root}
+\leanok
+The factorized quartic
+\[
+  (z-r)(z-s)(z-t)(z-u)
+\]
+has four explicit rational roots, each packaged as a computable-root
+certificate.  This is the checked factorized quartic core of benchmark item
+46; a general quartic formula remains outside the current scope.
 \end{theorem}
 
 \begin{theorem}[The root of \(z^2+1\)]\label{thm:z2-plus-one-root}
