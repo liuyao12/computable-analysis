@@ -1293,3 +1293,5 @@ ComputableAnalysis.zSqPlusOne_has_computable_root
 ComputableAnalysis.ComputableFTA
 ComputableAnalysis.AlgebraicFTA
 ComputableAnalysis.ComputableFTA_of_AlgebraicFTA
+ComputableAnalysis.triangle_inequality_rat
+ComputableAnalysis.triangle_inequality_rat_three

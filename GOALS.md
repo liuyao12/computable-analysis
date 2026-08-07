@@ -13,6 +13,14 @@ as `Base.lean`, `Core.lean`, or `RealEquiv.lean` are historical planning notes,
 not a description of the current module graph. The checked blueprint
 (`blueprint/lean_decls`) and current Lean declarations take precedence.
 
+The foundation benchmark scope is intentionally narrow: only rational coding,
+the interval-real irrationality certificate for \(\sqrt 2\), and the rational
+triangle inequality are project-facing foundations.  Generic combinatorics,
+standalone number theory, and broad inequality benchmarks remain useful
+implementation lemmas but are not counted as project goals.  The public
+three-term error certificate is `triangle_inequality_rat` and
+`triangle_inequality_rat_three` in `ComputableAnalysis/Basic.lean`.
+
 ## Ground Layer
 
 - Raw reals are interval algorithms `Nat -> QInterval`. `Real` packages a

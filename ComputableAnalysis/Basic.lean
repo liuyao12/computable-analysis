@@ -459,6 +459,18 @@ theorem qabs_add_le (x y : Rat) : qabs (x + y) <= qabs x + qabs y := by
       _ <= x + y := rat_add_le_add (neg_qabs_le_self x) (neg_qabs_le_self y)
   · exact rat_add_le_add (self_le_qabs x) (self_le_qabs y)
 
+theorem triangle_inequality_rat (x y : Rat) :
+    qabs (x + y) <= qabs x + qabs y := by
+  exact qabs_add_le x y
+
+theorem triangle_inequality_rat_three (x y z : Rat) :
+    qabs (x + y + z) <= qabs x + qabs y + qabs z := by
+  calc
+    qabs (x + y + z) <= qabs (x + y) + qabs z := qabs_add_le (x + y) z
+    _ <= (qabs x + qabs y) + qabs z := by
+      exact (Rat.add_le_add_right).2 (qabs_add_le x y)
+    _ = qabs x + qabs y + qabs z := by rfl
+
 theorem qabs_sub_le (x y : Rat) : qabs (x - y) <= qabs x + qabs y := by
   rw [show x - y = x + (-y) by grind [Rat.sub_eq_add_neg]]
   calc
