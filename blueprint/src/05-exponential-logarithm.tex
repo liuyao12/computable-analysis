@@ -367,6 +367,7 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne_equiv_geometricQuarterTurnOne}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricHalfPi}
+\lean{ComputableAnalysis.RotationLift.HalfPiInput.rationalInput_rotation_equiv_uniformRotationExpRaw}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_contained_expand_geometricRotationCandidate}
 \lean{ComputableAnalysis.PiProofs.pi.geometricRotationCandidate_contained_expand_halfPiRotationCandidate}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_equiv_geometricRotation}
@@ -410,6 +411,10 @@ The generic raw-representation transport now proves that the separately
 stabilized factorial rotations agree on these equivalent inputs.  The remaining
 quarter-turn work compares that resulting rotation with the geometric endpoint;
 it is not an unrecorded conversion of units or of \(\pi\)-representatives.
+For an exact rational input in the same bounded chart, the lift is already
+proved equivalent to the original common-schedule factorial evaluator; the
+represented construction therefore extends the rational exponential rather
+than defining a competing one.
 The represented-input construction is now a valid raw complex computation:
 finite prefixes of the midpoint rotation boxes are intersected, with each
 later candidate as the rational-box witness that the prefix remains ordered.

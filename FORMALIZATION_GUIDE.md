@@ -792,6 +792,9 @@ open ComputableAnalysis
 #check RotationLift.HalfPiInput.crossRadius_shrinks
 #check RotationLift.HalfPiInput.rotationCandidate_sameStage_contained_expand_of_equiv
 #check RotationLift.HalfPiInput.rotation_equiv_of_input_equiv
+#check RotationLift.HalfPiInput.rationalInput
+#check RotationLift.HalfPiInput.rationalInput_rotation_equiv_uniformRotationExpRaw
+#check RotationLift.HalfPiInput.rotation_equiv_uniformRotationExpRaw_of_equiv_ofRat
 #check PiProofs.pi.halfPi_equiv_geometricHalfPi
 #check PiProofs.pi.halfPiRotationCandidate_contained_expand_geometricRotationCandidate
 #check PiProofs.pi.geometricRotationCandidate_contained_expand_halfPiRotationCandidate
@@ -866,6 +869,15 @@ equivalent midpoint samples by the sum of their widths and uses the
 corresponding cross enclosure with radius at most `64/(n+1)`.  The remaining
 Euler bridge is the identification of that factorial rotation with its
 geometric endpoint, not a conversion of representatives.
+
+The lift has a checked rational compatibility law as well:
+`RotationLift.HalfPiInput.rationalInput_rotation_equiv_uniformRotationExpRaw`
+says that lifting an exact rational angle in `[1,2]` gives the pre-existing
+common-schedule rational factorial rotation.  Thus the represented evaluator
+extends, rather than replaces, the rational complex exponential algorithm.
+The companion theorem
+`rotation_equiv_uniformRotationExpRaw_of_equiv_ofRat` makes this independent
+of the selected valid raw representative of that rational angle.
 
 The same small geometry module also carries the full-area bridge directly:
 `four_arctanGeom_one_compute_eq_piCircleArea_compute` is stagewise equality

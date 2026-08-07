@@ -33,6 +33,40 @@ structure HalfPiInput where
 
 namespace HalfPiInput
 
+/-- The exact rational input on the bounded half-angle chart.  This is the
+compatibility witness between the represented-angle lift and the original
+rational factorial evaluator. -/
+def rationalInput (T : Rat) (hlo : (1 : Rat) <= T) (hhi : T <= 2) :
+    HalfPiInput where
+  raw := RealRaw.ofRat T
+  valid := RealRaw.ofRat_valid T
+  bounds := by
+    intro _
+    change (1 : Rat) <= T /\ T <= 2
+    exact ⟨hlo, hhi⟩
+  width_le_two_div_succ := by
+    intro n
+    change T - T <= 2 / (((n + 1 : Nat) : Rat))
+    rw [Rat.sub_self]
+    apply Rat.le_of_lt
+    rw [Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.succ_pos n)))
+
+/-- A rational input has its own value as every midpoint sample. -/
+theorem rationalInput_midpoint (T : Rat) (hlo : (1 : Rat) <= T) (hhi : T <= 2)
+    (n : Nat) :
+    ((rationalInput T hlo hhi).raw.compute n).midpoint = T := by
+  change (({ lo := T, hi := T } : QInterval).midpoint) = T
+  unfold QInterval.midpoint
+  rw [Rat.div_def]
+  have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 :=
+    Rat.mul_inv_cancel 2 (by native_decide)
+  calc
+    (T + T) * (2 : Rat)⁻¹ = T * (2 * (2 : Rat)⁻¹) := by
+      grind [Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+    _ = T := by rw [htwo, Rat.mul_one]
+
 /-- Every rational midpoint of the input boxes has absolute value at most
 two, so it lies in the uniform factorial domain. -/
 theorem midpoint_qabs_le_two (A : HalfPiInput) (n : Nat) :
@@ -122,6 +156,14 @@ def rotationCandidate (A : HalfPiInput) : ComplexRaw where
 theorem rotationCandidate_compute (A : HalfPiInput) (n : Nat) :
     (rotationCandidate A).compute n =
       RotationSeries.uniformRotationBox (A.raw.compute n).midpoint n := rfl
+
+/-- At an exact rational input, the direct represented-angle candidate is
+literally the existing common-schedule factorial box. -/
+theorem rationalInput_rotationCandidate_compute
+    (T : Rat) (hlo : (1 : Rat) <= T) (hhi : T <= 2) (n : Nat) :
+    (rotationCandidate (rationalInput T hlo hhi)).compute n =
+      RotationSeries.uniformRotationBox T n := by
+  rw [rotationCandidate_compute, rationalInput_midpoint T hlo hhi]
 
 theorem rotationCandidate_ordered (A : HalfPiInput) (n : Nat) :
     ((rotationCandidate A).compute n).Ordered := by
@@ -378,6 +420,53 @@ theorem rotation_contains_current_candidate (A : HalfPiInput) (n : Nat) :
     (midpoint_qabs_le_two A m) (midpoint_qabs_le_two A k)
     k m hkm (midpoint_sub_le_width A k m hkm)
   simpa [rotationCandidate_compute, rotationRadius] using hfuture
+
+/-- The represented-angle evaluator extends the original rational factorial
+rotation exactly on the bounded chart.  Thus lifting an already exact input
+does not introduce a second complex-exponential notion; stabilization merely
+reboxes the same nested rational factorial candidates. -/
+theorem rationalInput_rotation_equiv_uniformRotationExpRaw
+    (T : Rat) (hlo : (1 : Rat) <= T) (hhi : T <= 2) :
+    (rotation (rationalInput T hlo hhi)).Equiv
+      (RotationSeries.uniformRotationExpRaw T) := by
+  intro n
+  apply (ComplexRaw.compareAt_overlap_iff
+    (rotation (rationalInput T hlo hhi))
+    (RotationSeries.uniformRotationExpRaw T) n n).2
+  have hcontains := rotation_contains_current_candidate
+    (rationalInput T hlo hhi) n
+  rw [rationalInput_rotationCandidate_compute T hlo hhi n] at hcontains
+  have hTnonneg : (0 : Rat) <= T :=
+    Rat.le_trans (by native_decide) hlo
+  have hTbound : qabs T <= 2 := by
+    rw [qabs_eq_self_of_nonneg hTnonneg]
+    exact hhi
+  have hordered := ComplexRaw.valid_ordered
+    (RotationSeries.uniformRotationExpRaw_valid T hTbound) n
+  exact ⟨QComplex.le_trans hcontains.1 hordered,
+    QComplex.le_trans hordered hcontains.2⟩
+
+/-- Any bounded represented input that is certified equal to a rational
+angle has the original rational factorial rotation as its result.  This is
+the representation-independent compatibility law used when a later analytic
+construction happens to collapse to an exact rational parameter. -/
+theorem rotation_equiv_uniformRotationExpRaw_of_equiv_ofRat
+    (A : HalfPiInput) (T : Rat) (hlo : (1 : Rat) <= T) (hhi : T <= 2)
+    (hAT : A.raw.Equiv (RealRaw.ofRat T)) :
+    (rotation A).Equiv (RotationSeries.uniformRotationExpRaw T) := by
+  have hInput : A.raw.Equiv (rationalInput T hlo hhi).raw := by
+    simpa [rationalInput] using hAT
+  have hTnonneg : (0 : Rat) <= T :=
+    Rat.le_trans (by native_decide) hlo
+  have hTbound : qabs T <= 2 := by
+    rw [qabs_eq_self_of_nonneg hTnonneg]
+    exact hhi
+  exact ComplexRaw.equiv_trans
+    (rotation_valid A)
+    (rotation_valid (rationalInput T hlo hhi))
+    (RotationSeries.uniformRotationExpRaw_valid T hTbound)
+    (rotation_equiv_of_input_equiv A (rationalInput T hlo hhi) hInput)
+    (rationalInput_rotation_equiv_uniformRotationExpRaw T hlo hhi)
 
 end HalfPiInput
 
