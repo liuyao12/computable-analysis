@@ -358,15 +358,23 @@ The sector-area clock now has its own finite derivative certificate:
 \lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnit_hasDerivative}
 \lean{ComputableAnalysis.SectorAreaReparametrization.speedOnUnit_compute_eq_sectorAreaSpeed}
 \lean{ComputableAnalysis.SectorAreaReparametrization.angleAt_equiv_two_arctanGeom}
+\lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnit_boxes_strictly_separated}
+\lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnit_effectiveInverseSeparation}
 \[
   \Theta(t)=2\arctan_{\rm rectangle}(t),\qquad
   \Theta'(t)=\frac{2}{1+t^2}=\operatorname{sectorAreaSpeed}(t),\qquad
   \Theta(t)\Equiv 2\arctan_{\rm geom}(t).
 \]
+For the explicit finer rectangle stage \(64(n+1)\), Lean now checks
+\[
+ x+\frac1{n+1}\le y\quad\Longrightarrow\quad
+ \Theta_x^{\rm hi}<\Theta_y^{\rm lo}.
+\]
 Thus \(\Theta(1)\) is ready to transport to the existing represented
-\(\pi/2\) input.  The missing bridge is now specifically an effective inverse
-for this monotone clock, followed by the represented-function/vector-uniqueness
-theorem for the reparametrized curve.
+\(\pi/2\) input, and the clock already supplies the strict-separation field
+of the constructive inverse interface.  Still missing are its interval-image
+regularity and data-valued bisection search, then the represented-function/
+vector-uniqueness theorem for the reparametrized curve.
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
 can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}

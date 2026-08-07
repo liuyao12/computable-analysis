@@ -82,7 +82,7 @@ Start with the smallest target module rather than importing
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
 | Finite monotone decomposition with non-rational turns | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.TurningBracketIntegralCandidate` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
-| Sector-area time | `ComputableAnalysis.SectorAreaReparametrization` | `angleOnUnit`, `angleOnUnit_hasDerivative`, `angleAt_equiv_two_arctanGeom` |
+| Sector-area time | `ComputableAnalysis.SectorAreaReparametrization` | `angleOnUnit`, `angleOnUnit_hasDerivative`, `angleOnUnit_effectiveInverseSeparation`, `angleAt_equiv_two_arctanGeom` |
 | Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `IntegralIdentities` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
@@ -218,8 +218,11 @@ that rule to the rectangle arctangent.  Its `angleOnUnit` has derivative
 `speedOnUnit`, whose exact rational value is
 `RationalCircle.Stage.sectorAreaSpeed t = 2/(1+t^2)`;
 `angleAt_equiv_two_arctanGeom` supplies the pointwise bridge to the geometric
-angle representation.  Constructing the inverse reparametrization and using
-vector uniqueness are still separate tasks.
+angle representation.  The same module now proves the quantitative finite
+gap `x + 1/(n+1) <= y -> Theta_x.hi < Theta_y.lo` at stage `64*(n+1)`,
+and packages it as `angleOnUnit_effectiveInverseSeparation`.  Constructing
+the interval-image regularity and data-valued inverse search, then using the
+resulting reparametrization in vector uniqueness, remain separate tasks.
 
 `FirstYearCalculus.checked_power_series_table` proves the coefficient-shift
 identities for exp, sin, cos, sinh, and cosh. The primary series API calls

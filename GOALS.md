@@ -1368,9 +1368,12 @@ arguments.
   `SectorAreaReparametrization.angleOnUnit_hasDerivative` gives
   `Theta' = 2/(1+t*t)`, and
   `angleAt_equiv_two_arctanGeom` identifies every rational chart value with
-  `2 * arctan.geom(t)`.  The remaining reparametrization work is therefore
-  the effective monotone inverse/curve composition and the vector uniqueness
-  theorem, not the derivative of the sector-area clock.
+  `2 * arctan.geom(t)`.  The finite lower-tail comparison now also gives
+  `angleOnUnit_effectiveInverseSeparation`: an input gap `1/(n+1)` produces
+  strictly separated output boxes at stage `64*(n+1)`.  The remaining
+  reparametrization work is the interval-image regularity and data-valued
+  bisection search, then curve composition and the vector uniqueness theorem,
+  not the derivative or strict monotone separation of the sector-area clock.
 
 ## First-Year Calculus Course
 
