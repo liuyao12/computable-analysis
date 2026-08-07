@@ -10431,11 +10431,11 @@ private theorem arctan_neg_equiv_neg_arctan_of_neg
   have hqabsx : qabs x = -x := qabs_eq_neg_of_nonpos hxnonpos
   have hqabsnegx : qabs (-x) = -x := qabs_eq_self_of_nonneg hneg0
   have hstage : (arctan x).compute n = (-(arctan (-x))).compute n := by
-    change RealRaw.negCompute (positiveRaw (qabs x)) n =
+    change RealRaw.negCompute (ArctanValidity.positiveRaw (qabs x)) n =
       RealRaw.negCompute (arctan (-x)) n
     rw [ArctanValidity.arctan_compute_nonneg (-x) hneg0]
     rw [hqabsx, hqabsnegx]
-  rw [hstage]
+  rw [← hstage]
   exact (RealRaw.compareAt_overlap_iff (arctan x) (arctan x) n n).1
     (RealRaw.equiv_refl (arctan x) hvalid n)
 
@@ -10451,11 +10451,12 @@ private theorem arctanGeom_neg_equiv_neg_arctanGeom_of_neg
     (ArctanGeometry.arctanGeom x) (-(ArctanGeometry.arctanGeom (-x))) n n).2
   have hnot : ¬ (0 : Rat) <= x := by grind
   have hneg0 : 0 <= -x := by grind
+  have hxnonzero : x ≠ 0 := by grind
   have hnonzero : -x ≠ 0 := by grind
   have hstage : (ArctanGeometry.arctanGeom x).compute n =
       (-(ArctanGeometry.arctanGeom (-x))).compute n := by
-    simp [ArctanGeometry.arctanGeom, hnot, hneg0, hnonzero]
-  rw [hstage]
+    simp [ArctanGeometry.arctanGeom, hxnonzero, hnot, hneg0, hnonzero]
+  rw [← hstage]
   exact (RealRaw.compareAt_overlap_iff
     (ArctanGeometry.arctanGeom x) (ArctanGeometry.arctanGeom x) n n).1
     (RealRaw.equiv_refl (ArctanGeometry.arctanGeom x) hvalid n)
@@ -10478,7 +10479,12 @@ theorem arctanEqualsGeom_finiteRiemannBridge_on_unit
       simpa [Elementary.Arctan.powerSeriesDomain, qabs, hxneg] using hx
     have hseriesValid : (arctan x).Valid :=
       arctan_valid_at arctanValid (by
-        simpa [arctanDomain] using hx)
+        unfold arctanDomain
+        constructor
+        · have hleft : -x <= 1 := by
+            simpa [Elementary.Arctan.powerSeriesDomain, qabs, hxneg] using hx
+          grind
+        · exact Rat.le_trans (Rat.le_of_lt hxneg) (by native_decide))
     have hgeomValid : (ArctanGeometry.arctanGeom x).Valid :=
       ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain hx
     have hpositive := arctanEqualsGeom_finiteRiemannBridge hneg0 hneg1
