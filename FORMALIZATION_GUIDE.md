@@ -229,6 +229,9 @@ regularity, monotonicity, and strict separation required by the constructive
 inverse interface.  The data-valued inverse search, followed by curve
 reparametrization and vector uniqueness, remain separate tasks.
 At the unit endpoint,
+`regularAngleAt_one_equiv_quarterTurnRaw_one` directly identifies the
+accelerated clock with the normalized geometric quarter-turn raw.
+At the unit endpoint,
 `PiProofs.pi.sectorAreaAngleOne_equiv_halfPi` now closes the finite transport
 `Theta(1) ≡ pi/2`; this is an endpoint equivalence, not yet a general inverse
 or reparameterized-curve construction.

@@ -677,6 +677,74 @@ def angleOnUnitRegular_invertible : InvertibleFunctionOnInterval where
   separation := angleOnUnitRegular_effectiveInverseSeparation
   orientation := trivial
 
+/-- The accelerated sector angle at a rational chart point.  This is the
+reader-facing raw-real evaluator associated with angleOnUnitRegular. -/
+def regularAngleAt
+    (t : Rat)
+    (ht : inDomainInterval angleOnUnitRegular.lower angleOnUnitRegular.upper t) :
+    RealRaw :=
+  PartialRealFunRaw.apply angleOnUnitRegular.raw angleOnUnitRegular.valid_on t
+    (angleOnUnitRegular.defined_on t ht)
+
+theorem regularAngleAt_valid
+    (t : Rat)
+    (ht : inDomainInterval angleOnUnitRegular.lower angleOnUnitRegular.upper t) :
+    (regularAngleAt t ht).Valid :=
+  angleOnUnitRegular.valid_on t (angleOnUnitRegular.defined_on t ht)
+
+/-- Accelerating the rectangle stage changes only the representative, not the
+sector-angle value at a rational chart point. -/
+theorem regularAngleAt_equiv_angleAt
+    (t : Rat)
+    (ht : inDomainInterval angleOnUnitRegular.lower angleOnUnitRegular.upper t) :
+    (regularAngleAt t ht).Equiv (angleAt t ht) := by
+  simpa [regularAngleAt] using angleOnUnitRegular_equiv_angleAt t ht
+
+/-- The accelerated clock retains the geometric arctangent interpretation at
+every rational input. -/
+theorem regularAngleAt_equiv_two_arctanGeom
+    (t : Rat)
+    (ht : inDomainInterval angleOnUnitRegular.lower angleOnUnitRegular.upper t) :
+    (regularAngleAt t ht).Equiv
+      ((2 : Nat) * ArctanGeometry.arctanGeom t) := by
+  exact RealRaw.equiv_trans
+    (regularAngleAt_valid t ht)
+    (angleAt_valid t ht)
+    (RealRaw.natScale_valid 2
+      (ArctanGeometry.arctanGeom_valid_on_unit ht.1 ht.2))
+    (regularAngleAt_equiv_angleAt t ht)
+    (angleAt_equiv_two_arctanGeom t ht)
+
+/-- At the unit chart endpoint, the accelerated sector clock is equivalent to
+the normalized geometric quarter-turn raw.  The final comparison is a literal
+finite interval equality for the doubled geometric arctangent, so this bridge
+does not need an ambient real-number equality. -/
+theorem regularAngleAt_one_equiv_quarterTurnRaw_one :
+    (regularAngleAt (1 : Rat) (by
+      change (0 : Rat) <= 1 /\ 1 <= (1 : Rat)
+      native_decide)).Equiv
+      (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)) := by
+  let hunit : inDomainInterval
+      angleOnUnitRegular.lower angleOnUnitRegular.upper (1 : Rat) := by
+    change (0 : Rat) <= 1 /\ 1 <= (1 : Rat)
+    native_decide
+  intro n
+  have hregular := (RealRaw.compareAt_overlap_iff
+    (regularAngleAt (1 : Rat) hunit)
+    ((2 : Nat) * ArctanGeometry.arctanGeom (1 : Rat)) n n).1
+      (regularAngleAt_equiv_two_arctanGeom (1 : Rat) hunit n)
+  apply (RealRaw.compareAt_overlap_iff
+    (regularAngleAt (1 : Rat) hunit)
+    (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)) n n).2
+  rw [← ArctanGeometry.two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute]
+  exact hregular
+
+/-- The interval-image regularity supplies the literal epsilon--delta
+continuity theorem for the accelerated sector clock. -/
+theorem angleOnUnitRegular_epsilonDeltaContinuous :
+    EpsilonDeltaContinuousOn angleOnUnitRegular :=
+  angleOnUnitRegular_intervalRegular.epsilonDeltaContinuous
+
 end SectorAreaReparametrization
 
 end ComputableAnalysis
