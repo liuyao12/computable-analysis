@@ -9,11 +9,10 @@
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
-% Integral diagrams use blue for the under-estimate and yellow for the
-% over-estimate.  In the signed sinc animation the shared part is rendered
-% explicitly in green: GIF palette quantization otherwise makes the blended
-% blue/yellow area too similar to the blue-only tail below the axis.  Orange
-% is only a finite correction or an unresolved middle gap.
+% Integral diagrams have one consistent three-colour vocabulary: blue for an
+% under-only part, yellow for an over-only (or still-unresolved) part, and
+% green for their common part.  The common part is explicit rather than an
+% alpha blend, so it remains visibly distinct after GIF palette quantization.
 \definecolor{cyan}{RGB}{0,84,134}
 \definecolor{cyanfill}{RGB}{0,114,178}
 \definecolor{yellow}{RGB}{184,134,11}
@@ -31,8 +30,8 @@
 \colorlet{overfill}{yellowfill}
 \colorlet{shared}{overlap}
 \colorlet{sharedfill}{overlapfill}
-\colorlet{gap}{orange}
-\colorlet{gapfill}{orangefill}
+\colorlet{gap}{yellow}
+\colorlet{gapfill}{yellowfill}
 
 \pagestyle{empty}
 \setlength\parindent{0pt}

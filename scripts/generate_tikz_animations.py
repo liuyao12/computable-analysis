@@ -30,11 +30,10 @@ COLOURS = r"""
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
-% Integral diagrams use blue for the under-estimate and yellow for the
-% over-estimate.  In the signed sinc animation the shared part is rendered
-% explicitly in green: GIF palette quantization otherwise makes the blended
-% blue/yellow area too similar to the blue-only tail below the axis.  Orange
-% is only a finite correction or an unresolved middle gap.
+% Integral diagrams have one consistent three-colour vocabulary: blue for an
+% under-only part, yellow for an over-only (or still-unresolved) part, and
+% green for their common part.  The common part is explicit rather than an
+% alpha blend, so it remains visibly distinct after GIF palette quantization.
 \definecolor{cyan}{RGB}{0,84,134}
 \definecolor{cyanfill}{RGB}{0,114,178}
 \definecolor{yellow}{RGB}{184,134,11}
@@ -52,8 +51,8 @@ COLOURS = r"""
 \colorlet{overfill}{yellowfill}
 \colorlet{shared}{overlap}
 \colorlet{sharedfill}{overlapfill}
-\colorlet{gap}{orange}
-\colorlet{gapfill}{orangefill}
+\colorlet{gap}{yellow}
+\colorlet{gapfill}{yellowfill}
 """
 
 
@@ -106,6 +105,25 @@ def tex(width: int, height: int, body: str) -> str:
 """
 
 
+def positive_estimate_cell(
+    left: float, right: float, baseline: float, lower: float, upper: float,
+    line_width: float,
+) -> list[str]:
+    """Render a nested positive lower/upper estimate with semantic fills.
+
+    Green is the part common to both estimates; yellow is the upper-only
+    correction.  Blue remains the lower-estimate outline.  This explicit
+    partition is intentionally used instead of relying on raster alpha
+    compositing, so every GIF has the same three-colour meaning.
+    """
+    return [
+        rf"\path[fill=sharedfill,fill opacity=.85] ({q(left)},{q(baseline)}) rectangle ({q(right)},{q(lower)});",
+        rf"\path[fill=overfill,fill opacity=.5] ({q(left)},{q(lower)}) rectangle ({q(right)},{q(upper)});",
+        rf"\draw[under,draw opacity=.8,line width={q(line_width)}pt] ({q(left)},{q(baseline)}) rectangle ({q(right)},{q(lower)});",
+        rf"\draw[over,draw opacity=.8,line width={q(line_width)}pt] ({q(left)},{q(baseline)}) rectangle ({q(right)},{q(upper)});",
+    ]
+
+
 def rational_kernel(value: Fraction) -> Fraction:
     return 1 / (1 + value * value)
 
@@ -125,10 +143,12 @@ def kernel_frame(cells: int) -> str:
         ]
     for left, right in zip(mesh, mesh[1:]):
         lx, rx = x0 + float(left) * unit, x0 + float(right) * unit
-        out += [
-            rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(left))*unit)});",
-            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(right))*unit)});",
-        ]
+        out += positive_estimate_cell(
+            lx, rx, y0,
+            y0 + float(rational_kernel(right)) * unit,
+            y0 + float(rational_kernel(left)) * unit,
+            .45,
+        )
     curve = [(x0 + unit * i / 100, y0 + unit / (1 + (i / 100) ** 2)) for i in range(101)]
     out += [
         rf"\draw[curve,line width=1.1pt] plot[smooth] coordinates {{{path(curve)}}};",
@@ -181,10 +201,12 @@ def sine_frame(cells: int, last: int, guard: Fraction) -> str:
         ]
     for left, right in zip(mesh, mesh[1:]):
         lx, rx = x0 + 2 * float(left) * xunit, x0 + 2 * float(right) * xunit
-        out += [
-            rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[right][1])*yunit)});",
-            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[left][0])*yunit)});",
-        ]
+        out += positive_estimate_cell(
+            lx, rx, y0,
+            y0 + float(boxes[left][0]) * yunit,
+            y0 + float(boxes[right][1]) * yunit,
+            .45,
+        )
     curve = [(x0 + xunit * i / 150, y0 + yunit * math.sin(math.pi * i / 300)) for i in range(151)]
     out.append(rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};")
     for t in mesh:
@@ -236,8 +258,10 @@ def circle_frame(cells: int) -> str:
         rf"\draw[axis,line width=.75pt] ({q(x0)},{q(y0-10)}) -- ({q(x0)},{q(north[1]+15)});",
         rf"\draw[curve,line width=1pt] ({q(x0)},{q(y0)}) -- ({q(x0)},{q(north[1])});",
         rf"\draw[ink,line width=1.2pt] ({q(east[0])},{q(y0)}) arc[start angle=0,end angle=90,radius={radius}pt];",
-        rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
-        rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
+        rf"\path[fill=overfill,fill opacity=.5] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
+        rf"\path[fill=sharedfill,fill opacity=.85] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
+        rf"\draw[under,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
+        rf"\draw[over,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
     ]
     for value, endpoint in zip(mesh, plotted):
         vertical = screen((0, value))
@@ -387,8 +411,8 @@ def ibp_frame(cells: int) -> str:
     out.append(rf"\draw[ink,line width=.85pt] plot[smooth] coordinates {{{path(curve)}}};")
     for lf, rf_, lg, rg in zip(f, f[1:], g, g[1:]):
         out += [
-            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.3pt] ({q(x(lf))},{bottom}) rectangle ({q(x(rf_))},{q(y(lg))});",
-            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.3pt] ({left},{q(y(lg))}) rectangle ({q(x(lf))},{q(y(rg))});",
+            rf"\path[fill=sharedfill,fill opacity=.85,draw=shared,draw opacity=.8,line width=.3pt] ({q(x(lf))},{bottom}) rectangle ({q(x(rf_))},{q(y(lg))});",
+            rf"\path[fill=sharedfill,fill opacity=.85,draw=shared,draw opacity=.8,line width=.3pt] ({left},{q(y(lg))}) rectangle ({q(x(lf))},{q(y(rg))});",
             rf"\path[fill=gapfill,draw=gap,draw opacity=.8,line width=.4pt] ({q(x(lf))},{q(y(lg))}) rectangle ({q(x(rf_))},{q(y(rg))});",
         ]
     horizontal, vertical = [(x(f[0]), y(g[0]))], [(x(f[0]), y(g[0]))]
@@ -433,10 +457,9 @@ def ftc_frame(cells: int) -> str:
     ]
     mesh = [Fraction(i, cells) for i in range(cells+1)]
     for left, right in zip(mesh, mesh[1:]):
-        out += [
-            rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*right))});",
-            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*left))});",
-        ]
+        out += positive_estimate_cell(
+            dx(left), dx(right), base, y(2 * left), y(2 * right), .4
+        )
     out += [
         rf"\draw[curve,line width=1.05pt] plot coordinates {{{path(derivative)}}};",
         n(px(1)-3, y(1)+11, r"$F(1)-F(0)$", "anchor=south west,text=purple"),
