@@ -1370,10 +1370,15 @@ arguments.
   `angleAt_equiv_two_arctanGeom` identifies every rational chart value with
   `2 * arctan.geom(t)`.  The finite lower-tail comparison now also gives
   `angleOnUnit_effectiveInverseSeparation`: an input gap `1/(n+1)` produces
-  strictly separated output boxes at stage `64*(n+1)`.  The remaining
-  reparametrization work is the interval-image regularity and data-valued
-  bisection search, then curve composition and the vector uniqueness theorem,
-  not the derivative or strict monotone separation of the sector-area clock.
+  strictly separated output boxes at stage `64*(n+1)`.
+  `angleOnUnitRegular_intervalRegular` now gives the matching finite
+  interval-image certificate through the cofinal `64*(n+1)` schedule, and
+  `angleOnUnitRegular_invertible` packages it with monotonicity and effective
+  separation as a constructive inverse branch.  The remaining
+  reparametrization work is the data-valued bisection search, then curve
+  composition and the vector uniqueness theorem, not the derivative,
+  interval regularity, or strict monotone separation of the sector-area
+  clock.
   The corresponding endpoint has now been transported as well:
   `PiProofs.pi.sectorAreaAngleOne_equiv_halfPi` proves
   `Theta(1) ≡ pi/2` by the checked geometric arctangent bridge.

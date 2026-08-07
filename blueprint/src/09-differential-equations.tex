@@ -360,6 +360,8 @@ The sector-area clock now has its own finite derivative certificate:
 \lean{ComputableAnalysis.SectorAreaReparametrization.angleAt_equiv_two_arctanGeom}
 \lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnit_boxes_strictly_separated}
 \lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnit_effectiveInverseSeparation}
+\lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnitRegular_intervalRegular}
+\lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnitRegular_invertible}
 \lean{ComputableAnalysis.PiProofs.pi.sectorAreaAngleOne_equiv_halfPi}
 \[
   \Theta(t)=2\arctan_{\rm rectangle}(t),\qquad
@@ -373,9 +375,13 @@ For the explicit finer rectangle stage \(64(n+1)\), Lean now checks
 \]
 Thus Lean now checks the endpoint identity
 \(\Theta(1)\Equiv\pi/2\), and the clock already supplies the
-strict-separation field of the constructive inverse interface.  Still missing
-are its interval-image regularity and data-valued bisection search, then the
-represented-function/vector-uniqueness theorem for the reparametrized curve.
+strict-separation field of the constructive inverse interface.  Its cofinally
+accelerated presentation uses the rectangle stage \(64(n+1)\) at stage \(n\);
+an input interval of width at most \(1/(4(n+1))\) has a certified endpoint
+image of width at most \(1/(n+1)\), containing every stage-\(n\) point box.
+Thus the full interval-image and inverse-function data are checked.  Still
+missing are the data-valued bisection search, then the represented-function/
+vector-uniqueness theorem for the reparametrized curve.
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
 can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}
