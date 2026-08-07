@@ -31,13 +31,16 @@ COLOURS = r"""
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
 % Integral diagrams use blue for the under-estimate and yellow for the
-% over-estimate.  At half opacity their common region is a distinct green,
-% including below the axis in the signed sin(pi*x)/x diagram.  Orange is only
-% a finite correction or an unresolved middle gap.
+% over-estimate.  In the signed sinc animation the shared part is rendered
+% explicitly in green: GIF palette quantization otherwise makes the blended
+% blue/yellow area too similar to the blue-only tail below the axis.  Orange
+% is only a finite correction or an unresolved middle gap.
 \definecolor{cyan}{RGB}{0,84,134}
 \definecolor{cyanfill}{RGB}{0,114,178}
 \definecolor{yellow}{RGB}{184,134,11}
 \definecolor{yellowfill}{RGB}{240,228,66}
+\definecolor{overlap}{RGB}{15,110,67}
+\definecolor{overlapfill}{RGB}{20,153,92}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
@@ -47,6 +50,8 @@ COLOURS = r"""
 \colorlet{underfill}{cyanfill}
 \colorlet{over}{yellow}
 \colorlet{overfill}{yellowfill}
+\colorlet{shared}{overlap}
+\colorlet{sharedfill}{overlapfill}
 \colorlet{gap}{orange}
 \colorlet{gapfill}{orangefill}
 """
@@ -470,9 +475,30 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
         mesh = [start+(stop-start)*Fraction(i,cells) for i in range(cells+1)]
         for a, b in zip(mesh, mesh[1:]):
             lo, hi = sorted((sinc(float(a)), sinc(float(b))))
+            # A signed lower/upper cell has a common part and, away from the
+            # axis, exactly one exclusive strip.  Draw that partition
+            # explicitly.  This preserves the under/over semantics while
+            # keeping the shared green unmistakable in the GIF's negative
+            # lobe; alpha compositing alone was too close to blue there.
+            left, right, zero = q(x(a)), q(x(b)), q(y(0))
+            if lo >= 0:
+                out.extend([
+                    rf"\path[fill=sharedfill,fill opacity=.85] ({left},{zero}) rectangle ({right},{q(y(lo))});",
+                    rf"\path[fill=overfill,fill opacity=.5] ({left},{q(y(lo))}) rectangle ({right},{q(y(hi))});",
+                ])
+            elif hi <= 0:
+                out.extend([
+                    rf"\path[fill=sharedfill,fill opacity=.85] ({left},{zero}) rectangle ({right},{q(y(hi))});",
+                    rf"\path[fill=underfill,fill opacity=.5] ({left},{q(y(hi))}) rectangle ({right},{q(y(lo))});",
+                ])
+            else:
+                out.extend([
+                    rf"\path[fill=overfill,fill opacity=.5] ({left},{zero}) rectangle ({right},{q(y(hi))});",
+                    rf"\path[fill=underfill,fill opacity=.5] ({left},{zero}) rectangle ({right},{q(y(lo))});",
+                ])
             out.extend([
-                rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(hi))});",
-                rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(lo))});",
+                rf"\draw[over,draw opacity=.8,line width=.3pt] ({left},{zero}) rectangle ({right},{q(y(hi))});",
+                rf"\draw[under,draw opacity=.8,line width=.3pt] ({left},{zero}) rectangle ({right},{q(y(lo))});",
             ])
     tail(Fraction(0), turn_left)
     tail(turn_right, Fraction(2))
