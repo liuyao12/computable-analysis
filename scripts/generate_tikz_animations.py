@@ -30,19 +30,25 @@ COLOURS = r"""
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
-% The two Darboux bounds use cyan and yellow at half opacity.  Where both
-% bounds cover a cell, ordinary alpha compositing gives a clearly visible
-% green certificate region; orange remains reserved for an unresolved gap.
+% Integral diagrams use cyan for the under-estimate and yellow for the
+% over-estimate.  At half opacity their common region is the same green as in
+% the signed sin(pi*x)/x diagram, including below the axis.  Orange is only a
+% finite correction or an unresolved middle gap.
 \definecolor{cyan}{RGB}{7,128,84}
 \definecolor{cyanfill}{RGB}{0,160,90}
 \definecolor{yellow}{RGB}{170,142,0}
-\definecolor{yellowfill}{RGB}{180,210,0}
+\definecolor{yellowfill}{RGB}{254,243,199}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
-\definecolor{yellowfill}{RGB}{254,243,199}
 \definecolor{yellowedge}{RGB}{202,138,4}
 \definecolor{projection}{RGB}{148,163,184}
+\colorlet{under}{cyan}
+\colorlet{underfill}{cyanfill}
+\colorlet{over}{yellow}
+\colorlet{overfill}{yellowfill}
+\colorlet{gap}{orange}
+\colorlet{gapfill}{orangefill}
 """
 
 
@@ -115,8 +121,8 @@ def kernel_frame(cells: int) -> str:
     for left, right in zip(mesh, mesh[1:]):
         lx, rx = x0 + float(left) * unit, x0 + float(right) * unit
         out += [
-            rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(left))*unit)});",
-            rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(right))*unit)});",
+            rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(left))*unit)});",
+            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(rational_kernel(right))*unit)});",
         ]
     curve = [(x0 + unit * i / 100, y0 + unit / (1 + (i / 100) ** 2)) for i in range(101)]
     out += [
@@ -171,8 +177,8 @@ def sine_frame(cells: int, last: int, guard: Fraction) -> str:
     for left, right in zip(mesh, mesh[1:]):
         lx, rx = x0 + 2 * float(left) * xunit, x0 + 2 * float(right) * xunit
         out += [
-            rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[right][1])*yunit)});",
-            rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[left][0])*yunit)});",
+            rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[right][1])*yunit)});",
+            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.45pt] ({q(lx)},{y0}) rectangle ({q(rx)},{q(y0+float(boxes[left][0])*yunit)});",
         ]
     curve = [(x0 + xunit * i / 150, y0 + yunit * math.sin(math.pi * i / 300)) for i in range(151)]
     out.append(rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};")
@@ -225,8 +231,8 @@ def circle_frame(cells: int) -> str:
         rf"\draw[axis,line width=.75pt] ({q(x0)},{q(y0-10)}) -- ({q(x0)},{q(north[1]+15)});",
         rf"\draw[curve,line width=1pt] ({q(x0)},{q(y0)}) -- ({q(x0)},{q(north[1])});",
         rf"\draw[ink,line width=1.2pt] ({q(east[0])},{q(y0)}) arc[start angle=0,end angle=90,radius={radius}pt];",
-        rf"\path[fill=orangefill,draw=orange,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
-        rf"\path[fill=tealfill,draw=teal,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
+        rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
+        rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
     ]
     for value, endpoint in zip(mesh, plotted):
         vertical = screen((0, value))
@@ -236,8 +242,8 @@ def circle_frame(cells: int) -> str:
             dot(*vertical, "axis", 1.3),
         ]
     out += [
-        rf"\draw[teal,line width=1.1pt] plot coordinates {{{path(plotted)}}};",
-        rf"\draw[orange,line width=1.1pt] plot coordinates {{{path([plotted[0], *outer, plotted[-1]])}}};",
+        rf"\draw[under,line width=1.1pt] plot coordinates {{{path(plotted)}}};",
+        rf"\draw[over,line width=1.1pt] plot coordinates {{{path([plotted[0], *outer, plotted[-1]])}}};",
     ]
     out += [dot(*point, "ink", 1.65) for point in plotted]
     out += [
@@ -323,9 +329,9 @@ def substitution_frame(cells: int) -> str:
             for k in range(17)
         ] + [(rx, t_base + lower_height)]
         out += [
-            rf"\path[fill=orangefill] plot[smooth] coordinates {{{path(curve_points)}}} -- cycle;",
-            rf"\path[fill=tealfill,draw=teal,line width=.4pt] ({q(lx)},{t_base}) rectangle ({q(rx)},{q(t_base+lower_height)});",
-            rf"\path[fill=tealfill,draw=teal,line width=.4pt] ({q(x(start*start))},{x_base}) rectangle ({q(x(stop*stop))},{q(x_base+height)});",
+            rf"\path[fill=gapfill] plot[smooth] coordinates {{{path(curve_points)}}} -- cycle;",
+            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] ({q(lx)},{t_base}) rectangle ({q(rx)},{q(t_base+lower_height)});",
+            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] ({q(x(start*start))},{x_base}) rectangle ({q(x(stop*stop))},{q(x_base+height)});",
         ]
     for value in mesh:
         t, image = x(value), x(value * value)
@@ -376,9 +382,9 @@ def ibp_frame(cells: int) -> str:
     out.append(rf"\draw[ink,line width=.85pt] plot[smooth] coordinates {{{path(curve)}}};")
     for lf, rf_, lg, rg in zip(f, f[1:], g, g[1:]):
         out += [
-            rf"\path[fill=tealfill,draw=teal,line width=.3pt] ({q(x(lf))},{bottom}) rectangle ({q(x(rf_))},{q(y(lg))});",
-            rf"\path[fill=tealfill,draw=teal,line width=.3pt] ({left},{q(y(lg))}) rectangle ({q(x(lf))},{q(y(rg))});",
-            rf"\path[fill=orangefill,draw=orange,line width=.4pt] ({q(x(lf))},{q(y(lg))}) rectangle ({q(x(rf_))},{q(y(rg))});",
+            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.3pt] ({q(x(lf))},{bottom}) rectangle ({q(x(rf_))},{q(y(lg))});",
+            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.3pt] ({left},{q(y(lg))}) rectangle ({q(x(lf))},{q(y(rg))});",
+            rf"\path[fill=gapfill,draw=gap,draw opacity=.8,line width=.4pt] ({q(x(lf))},{q(y(lg))}) rectangle ({q(x(rf_))},{q(y(rg))});",
         ]
     horizontal, vertical = [(x(f[0]), y(g[0]))], [(x(f[0]), y(g[0]))]
     for lf, rf_, lg, rg in zip(f, f[1:], g, g[1:]):
@@ -423,8 +429,8 @@ def ftc_frame(cells: int) -> str:
     mesh = [Fraction(i, cells) for i in range(cells+1)]
     for left, right in zip(mesh, mesh[1:]):
         out += [
-            rf"\path[fill=orangefill,fill opacity=.55,draw=orange,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*right))});",
-            rf"\path[fill=tealfill,fill opacity=.55,draw=teal,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*left))});",
+            rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*right))});",
+            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] ({q(dx(left))},{base}) rectangle ({q(dx(right))},{q(y(2*left))});",
         ]
     out += [
         rf"\draw[curve,line width=1.05pt] plot coordinates {{{path(derivative)}}};",
@@ -465,8 +471,8 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
         for a, b in zip(mesh, mesh[1:]):
             lo, hi = sorted((sinc(float(a)), sinc(float(b))))
             out.extend([
-                rf"\path[fill=yellowfill,fill opacity=.5,draw=yellow,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(hi))});",
-                rf"\path[fill=cyanfill,fill opacity=.5,draw=cyan,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(lo))});",
+                rf"\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(hi))});",
+                rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.3pt] ({q(x(a))},{q(y(0))}) rectangle ({q(x(b))},{q(y(lo))});",
             ])
     tail(Fraction(0), turn_left)
     tail(turn_right, Fraction(2))
@@ -476,18 +482,18 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
     turn = 1.430296653
     gap_values = (sinc(float(turn_left)), sinc(turn), sinc(float(turn_right)))
     gap_lo, gap_hi = min(gap_values), max(gap_values)
-    out.append(rf"\path[fill=orangefill,fill opacity=.72,draw=orange,line width=.55pt] ({q(x(turn_left))},{q(y(gap_lo))}) rectangle ({q(x(turn_right))},{q(y(gap_hi))});")
+    out.append(rf"\path[fill=gapfill,fill opacity=.72,draw=gap,line width=.55pt] ({q(x(turn_left))},{q(y(gap_lo))}) rectangle ({q(x(turn_right))},{q(y(gap_hi))});")
     curve = [(x(i/300), y(sinc(i/300))) for i in range(601)]
     out += [
         rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",
-        rf"\draw[orange,line width=.65pt] ({q(x(turn_left))},{q(y(gap_lo))}) -- ({q(x(turn_left))},{q(y(gap_hi))});",
-        rf"\draw[orange,line width=.65pt] ({q(x(turn_right))},{q(y(gap_lo))}) -- ({q(x(turn_right))},{q(y(gap_hi))});",
-        dot(x(turn), y(sinc(turn)), "orange", 1.45),
+        rf"\draw[gap,line width=.65pt] ({q(x(turn_left))},{q(y(gap_lo))}) -- ({q(x(turn_left))},{q(y(gap_hi))});",
+        rf"\draw[gap,line width=.65pt] ({q(x(turn_right))},{q(y(gap_lo))}) -- ({q(x(turn_right))},{q(y(gap_hi))});",
+        dot(x(turn), y(sinc(turn)), "gap", 1.45),
         n(x(0), y(0)-12, r"$0$", "anchor=north"),
         n(x(1), y(0)-12, r"$1$", "anchor=north"),
         n(x(2), y(0)-12, r"$2$", "anchor=north"),
-        n(x(turn_left)-4, y(0)-23, r"$\ell$", "anchor=north east,text=orange"),
-        n(x(turn_right)+4, y(0)-23, r"$r$", "anchor=north west,text=orange"),
+        n(x(turn_left)-4, y(0)-23, r"$\ell$", "anchor=north east,text=gap"),
+        n(x(turn_right)+4, y(0)-23, r"$r$", "anchor=north west,text=gap"),
         n(x(2)+10, y(0), r"$x$", "anchor=west"),
         n(x(Fraction(1,4)), y(3.36), r"$\frac{\sin(\pi x)}{x}$", "anchor=west"),
     ]

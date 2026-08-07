@@ -9,12 +9,25 @@
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
+% Integral diagrams use cyan for the under-estimate and yellow for the
+% over-estimate.  At half opacity their common region is the same green as in
+% the signed sin(pi*x)/x diagram, including below the axis.  Orange is only a
+% finite correction or an unresolved middle gap.
+\definecolor{cyan}{RGB}{7,128,84}
+\definecolor{cyanfill}{RGB}{0,160,90}
+\definecolor{yellow}{RGB}{170,142,0}
+\definecolor{yellowfill}{RGB}{254,243,199}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
-\definecolor{yellowfill}{RGB}{254,243,199}
 \definecolor{yellowedge}{RGB}{202,138,4}
 \definecolor{projection}{RGB}{148,163,184}
+\colorlet{under}{cyan}
+\colorlet{underfill}{cyanfill}
+\colorlet{over}{yellow}
+\colorlet{overfill}{yellowfill}
+\colorlet{gap}{orange}
+\colorlet{gapfill}{orangefill}
 
 \pagestyle{empty}
 \setlength\parindent{0pt}
@@ -26,7 +39,8 @@
 \draw[axis,line width=.75pt] (166,52) -- (166,183);
 \draw[curve,line width=1pt] (166,62) -- (166,168);
 \draw[ink,line width=1.2pt] (272,62) arc[start angle=0,end angle=90,radius=106pt];
-\path[fill=tealfill] (166,62) -- (272,62) (259.5294,111.8824) (229.6,146.8) (195.68,163.76) (166,168) -- cycle;
+\path[fill=overfill,fill opacity=.5,draw=over,draw opacity=.8,line width=.45pt] (166,62) -- (272,62) -- (272,88.5) -- (248.4444,132.6667) -- (214.1818,158.3636) -- (181.1429,168) -- (166,168) -- cycle;
+\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.45pt] (166,62) -- (272,62) -- (259.5294,111.8824) -- (229.6,146.8) -- (195.68,163.76) -- (166,168) -- cycle;
 \draw[projection,line width=.5pt] (60,62) -- (272,62);
 \draw[grid,line width=.5pt] (163,62) -- (169,62);
 \fill[axis] (166,62) circle[radius=1.3pt];
@@ -42,8 +56,8 @@
 \draw[projection,line width=.5pt] (60,62) -- (166,168);
 \draw[grid,line width=.5pt] (163,168) -- (169,168);
 \fill[axis] (166,168) circle[radius=1.3pt];
-\draw[teal,line width=1.1pt] plot coordinates {(272,62) (259.5294,111.8824) (229.6,146.8) (195.68,163.76) (166,168)};
-\draw[orange,line width=1.1pt] plot coordinates {(272,62) (272,88.5) (248.4444,132.6667) (214.1818,158.3636) (181.1429,168) (166,168)};
+\draw[under,line width=1.1pt] plot coordinates {(272,62) (259.5294,111.8824) (229.6,146.8) (195.68,163.76) (166,168)};
+\draw[over,line width=1.1pt] plot coordinates {(272,62) (272,88.5) (248.4444,132.6667) (214.1818,158.3636) (181.1429,168) (166,168)};
 \fill[ink] (272,62) circle[radius=1.65pt];
 \fill[ink] (259.5294,111.8824) circle[radius=1.65pt];
 \fill[ink] (229.6,146.8) circle[radius=1.65pt];
