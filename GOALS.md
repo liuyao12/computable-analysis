@@ -1352,13 +1352,18 @@ arguments.
   `halfPi_equiv_geometricHalfPi` and
   `imaginaryHalf_equiv_geometricImaginaryHalf` now carry this agreement to
   the geometry-only represented half angle and its imaginary-axis input.
+  `RotationLift.HalfPiInput.rotation_equiv_of_input_equiv` now transports
+  equivalent half-angle raws through the separately stabilized factorial
+  rotations using a cross radius at most `64 / (n + 1)`, and
+  `halfPiRotation_equiv_geometricRotation` specializes that result to the
+  registry and geometry-only constructions.  The remaining Euler work is the
+  sector-area reparametrization and vector-uniqueness identification of that
+  rotation with the geometric endpoint, followed by the relevant logarithm
+  branch certificate.
   The rational chart side is now a checked variable-coefficient
   rotation-system candidate:
   `GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` gives
-  `P' = (2 i / (1+t*t)) P`, `P(0)=1`, and `P(1)=i` on `[0,1]`.  The remaining
-  Euler work is specifically the sector-area reparametrization and
-  vector-uniqueness identification of the factorial rotation with that
-  geometric endpoint, followed by the relevant logarithm branch certificate.
+  `P' = (2 i / (1+t*t)) P`, `P(0)=1`, and `P(1)=i` on `[0,1]`.
 
 ## First-Year Calculus Course
 

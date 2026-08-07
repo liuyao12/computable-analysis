@@ -2688,6 +2688,13 @@ def expand (A : QBox) (radius : Rat) : QBox :=
   { lo := { re := A.lo.re - radius, im := A.lo.im - radius },
     hi := { re := A.hi.re + radius, im := A.hi.im + radius } }
 
+/-- Enlarging a box by a larger rational radius can only enlarge it. -/
+theorem expand_mono_radius (A : QBox) {r s : Rat} (hrs : r <= s) :
+    (expand A r).NestedIn (expand A s) := by
+  unfold NestedIn expand
+  simp only [QComplex.le_def]
+  grind [Rat.sub_eq_add_neg]
+
 theorem intersection_contains {A B C : QBox}
     (hA : C.NestedIn A) (hB : C.NestedIn B) :
     C.NestedIn (intersection A B) := by
@@ -3862,6 +3869,32 @@ private theorem cauchyStabilizeCompute_contains_future
       · exact ih n (Nat.le_trans (Nat.le_succ k) hkn)
       · exact hfuture (k + 1) n hkn
 
+/-- An external sequence is contained in a finite-prefix stabilization
+whenever each of its future boxes is contained in every widened candidate box.
+This is the finite common-witness principle used to compare two separately
+stabilized computations. -/
+theorem cauchyStabilize_contains_external
+    {candidate : ComplexRaw} {radius : Nat -> Rat} {external : Nat -> QBox}
+    (hexternal : forall k n, k <= n ->
+      (external n).NestedIn
+        (QBox.expand (candidate.compute k) (radius k))) :
+    forall k n, k <= n ->
+      (external n).NestedIn ((cauchyStabilize candidate radius).compute k) := by
+  intro k
+  change forall n, k <= n ->
+    (external n).NestedIn
+      (cauchyStabilizeCompute candidate.compute radius k)
+  induction k with
+  | zero =>
+      intro n _
+      simpa [cauchyStabilizeCompute] using hexternal 0 n (Nat.zero_le n)
+  | succ k ih =>
+      intro n hkn
+      rw [cauchyStabilizeCompute]
+      apply QBox.intersection_contains
+      · exact ih n (Nat.le_trans (Nat.le_succ k) hkn)
+      · exact hexternal (k + 1) n hkn
+
 private theorem cauchyStabilizeCompute_contained_in_current_expand
     (candidate : Nat -> QBox) (radius : Nat -> Rat) :
     forall n,
@@ -3905,6 +3938,31 @@ theorem cauchyStabilize_contains_current
         (QBox.expand (candidate.compute k) (radius k))) (n : Nat) :
     (candidate.compute n).NestedIn ((cauchyStabilize candidate radius).compute n) := by
   exact cauchyStabilizeCompute_contains_future hfuture n n (Nat.le_refl n)
+
+/-- The finite-prefix stabilization does not depend on a particular valid
+widening-radius schedule once the direct candidate is fixed.  At every stage
+both intersections contain that same ordered rational candidate box, hence
+their boxes overlap directly. -/
+theorem cauchyStabilize_equiv_of_common_candidate
+    {candidate : ComplexRaw} {radius sigma : Nat -> Rat}
+    (hordered : forall n, (candidate.compute n).Ordered)
+    (hfutureRadius : forall k n, k <= n ->
+      (candidate.compute n).NestedIn
+        (QBox.expand (candidate.compute k) (radius k)))
+    (hfutureSigma : forall k n, k <= n ->
+      (candidate.compute n).NestedIn
+        (QBox.expand (candidate.compute k) (sigma k))) :
+    (cauchyStabilize candidate radius).Equiv
+      (cauchyStabilize candidate sigma) := by
+  intro n
+  apply (compareAt_overlap_iff
+    (cauchyStabilize candidate radius)
+    (cauchyStabilize candidate sigma) n n).2
+  have hRadius := cauchyStabilize_contains_current hfutureRadius n
+  have hSigma := cauchyStabilize_contains_current hfutureSigma n
+  exact ⟨
+    QComplex.le_trans hRadius.1 (QComplex.le_trans (hordered n) hSigma.2),
+    QComplex.le_trans hSigma.1 (QComplex.le_trans (hordered n) hRadius.2)⟩
 
 /-- A Cauchy family of finite complex computations produces a valid raw
 complex number once its own widths and widening radii shrink.  The proof is

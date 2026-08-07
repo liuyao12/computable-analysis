@@ -8,11 +8,10 @@ import ComputableAnalysis.RotationLift
 # The certified imaginary half-pi input
 
 This small bridge turns the project's abstract, multi-presentation pi handle
-into the represented complex input `i * pi / 2`.  It is deliberately not an
-Euler-identity theorem: the current rotation exponential accepts rational
-imaginary inputs only.  The point of this module is to make the already
-checked input-side transport explicit, independently of the remaining
-represented-input exponential construction.
+into the represented complex input `i * pi / 2` and a factorial rotation at
+its represented half angle.  It is deliberately not an Euler-identity
+theorem: the remaining work identifies that stabilized rotation with the
+geometric quarter-turn endpoint and establishes the logarithm branch.
 -/
 
 namespace ComputableAnalysis
@@ -213,6 +212,41 @@ theorem halfPiRotationCandidate_compute (n : Nat) :
   simpa [halfPiRotationCandidate, halfPiInput] using
     RotationLift.HalfPiInput.rotationCandidate_compute halfPiInput n
 
+/-- At a common finite factorial stage, the abstract-registry candidate fits
+inside the geometry-only candidate after the explicit Lipschitz enlargement
+from both half-angle input widths.  This is a rational-box transport fact;
+the stabilization-level equivalence is packaged below from the generic
+representative-respecting lift theorem. -/
+theorem halfPiRotationCandidate_contained_expand_geometricRotationCandidate
+    (n : Nat) :
+    QBox.NestedIn (halfPiRotationCandidate.compute n)
+      (QBox.expand (GeometricPiRotation.rotationCandidate.compute n)
+        (16 * ((halfPi.compute n).width +
+          (GeometricPiRotation.halfPi.compute n).width))) := by
+  simpa [halfPiRotationCandidate, halfPiInput,
+    GeometricPiRotation.rotationCandidate,
+    GeometricPiRotation.halfPiInput] using
+    RotationLift.HalfPiInput.rotationCandidate_sameStage_contained_expand_of_equiv
+      halfPiInput GeometricPiRotation.halfPiInput
+      halfPi_equiv_geometricHalfPi n
+
+/-- The symmetric same-stage finite enclosure for the geometry-only
+candidate.  Together with the forward enclosure it exhibits the finite data
+used by the generic equivalence theorem for the two Cauchy stabilizations. -/
+theorem geometricRotationCandidate_contained_expand_halfPiRotationCandidate
+    (n : Nat) :
+    QBox.NestedIn (GeometricPiRotation.rotationCandidate.compute n)
+      (QBox.expand (halfPiRotationCandidate.compute n)
+        (16 * ((halfPi.compute n).width +
+          (GeometricPiRotation.halfPi.compute n).width))) := by
+  simpa [halfPiRotationCandidate, halfPiInput,
+    GeometricPiRotation.rotationCandidate,
+    GeometricPiRotation.halfPiInput,
+    Rat.add_comm] using
+    RotationLift.HalfPiInput.rotationCandidate_sameStage_contained_expand_of_equiv
+      GeometricPiRotation.halfPiInput halfPiInput
+      (RealRaw.equiv_symm halfPi_equiv_geometricHalfPi) n
+
 theorem halfPiRotationCandidate_ordered (n : Nat) :
     (halfPiRotationCandidate.compute n).Ordered := by
   simpa [halfPiRotationCandidate] using
@@ -243,6 +277,19 @@ def halfPiRotation : ComplexRaw :=
 theorem halfPiRotation_valid : halfPiRotation.Valid := by
   simpa [halfPiRotation] using
     RotationLift.HalfPiInput.rotation_valid halfPiInput
+
+/-- The abstract-pi factorial rotation and the geometry-only factorial
+rotation are equivalent.  The generic lift transports raw-real equivalence of
+their half-angle inputs through finite Lipschitz boxes and Cauchy prefix
+stabilization; no completed complex plane is used. -/
+theorem halfPiRotation_equiv_geometricRotation :
+    halfPiRotation.Equiv GeometricPiRotation.rotation := by
+  simpa [halfPiRotation, halfPiInput,
+    GeometricPiRotation.rotation,
+    GeometricPiRotation.halfPiInput] using
+    RotationLift.HalfPiInput.rotation_equiv_of_input_equiv
+      halfPiInput GeometricPiRotation.halfPiInput
+      halfPi_equiv_geometricHalfPi
 
 /-- The stabilized represented rotation still contains the direct midpoint
 series box at the same stage.  This is the public finite witness to use when

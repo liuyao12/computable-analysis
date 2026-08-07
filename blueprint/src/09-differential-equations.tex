@@ -291,6 +291,9 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_midpoint_sub_le_width}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_ordered}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_widths_shrink}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_contained_expand_geometricRotationCandidate}
+\lean{ComputableAnalysis.PiProofs.pi.geometricRotationCandidate_contained_expand_halfPiRotationCandidate}
+\lean{ComputableAnalysis.PiProofs.pi.halfPiRotation_equiv_geometricRotation}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius_shrinks}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotation}
@@ -341,8 +344,9 @@ equivalent representation and vector uniqueness remain separate.
 The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
 quarter-turn raw, then to the geometry-only half-angle and its imaginary-axis
-embedding.  The remaining identification is specifically between the
-power-series rotation output and the geometric circle point.  The chart's
+embedding.  The generic raw-representation transport now identifies the two
+separately stabilized factorial rotations.  The remaining work identifies the
+resulting power-series rotation output with the geometric circle point.  The chart's
 exact rational velocity is now packaged as the coordinatewise
 variable-coefficient system
 \[

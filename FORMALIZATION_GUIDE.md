@@ -750,6 +750,7 @@ open ComputableAnalysis
 #check ComplexRaw.qcomplexLeftMul_equiv
 #check ComplexRaw.cauchyStabilize
 #check ComplexRaw.cauchyStabilize_contains_current
+#check ComplexRaw.cauchyStabilize_equiv_of_common_candidate
 #check ComplexRaw.cauchyStabilize_valid
 ```
 
@@ -786,7 +787,15 @@ open ComputableAnalysis
 #check PiProofs.pi.halfPiRotation
 #check PiProofs.pi.halfPiRotation_valid
 #check PiProofs.pi.halfPiRotation_contains_current_candidate
+#check RotationLift.HalfPiInput.midpoint_sub_le_width_add_width_of_equiv
+#check RotationLift.HalfPiInput.crossRadius
+#check RotationLift.HalfPiInput.crossRadius_shrinks
+#check RotationLift.HalfPiInput.rotationCandidate_sameStage_contained_expand_of_equiv
+#check RotationLift.HalfPiInput.rotation_equiv_of_input_equiv
 #check PiProofs.pi.halfPi_equiv_geometricHalfPi
+#check PiProofs.pi.halfPiRotationCandidate_contained_expand_geometricRotationCandidate
+#check PiProofs.pi.geometricRotationCandidate_contained_expand_halfPiRotationCandidate
+#check PiProofs.pi.halfPiRotation_equiv_geometricRotation
 #check PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi
 #check PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf
 #check PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul
@@ -848,8 +857,15 @@ quarter turn.  `PiProofs.pi.halfPi_equiv_geometricHalfPi` now transports that
 geometric angle to the geometry-only half-angle consumed by the represented
 factorial rotation, and
 `PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf` does the same after
-embedding on the imaginary axis.  The remaining Euler-bridge step is solely
-the identification of that factorial rotation with its geometric endpoint.
+embedding on the imaginary axis.  The generic theorem
+`RotationLift.HalfPiInput.rotation_equiv_of_input_equiv` now transports this
+input equivalence through the two separately stabilized factorial rotations;
+`PiProofs.pi.halfPiRotation_equiv_geometricRotation` specializes it to the
+registry and geometry-only half-angle inputs.  Its finite core bounds
+equivalent midpoint samples by the sum of their widths and uses the
+corresponding cross enclosure with radius at most `64/(n+1)`.  The remaining
+Euler bridge is the identification of that factorial rotation with its
+geometric endpoint, not a conversion of representatives.
 
 The same small geometry module also carries the full-area bridge directly:
 `four_arctanGeom_one_compute_eq_piCircleArea_compute` is stagewise equality
