@@ -510,6 +510,36 @@ later non-exact certificates may divide a box by that step. -/
 
 namespace FunctionOnInterval
 
+/-- Rationally scale every interval value of an interval-domain function.
+The domain is deliberately unchanged: scalar multiplication is a pointwise
+operation, not an extension of the function's rational chart. -/
+def scaleRat (r : Rat) (F : FunctionOnInterval) : FunctionOnInterval where
+  raw :=
+    { definedAt := F.raw.definedAt
+      compute := fun x hx n => QInterval.scaleRat r (F.raw.compute x hx n) }
+  lower := F.lower
+  upper := F.upper
+  defined_on := by
+    intro x hx
+    exact F.defined_on x hx
+  valid_on := by
+    intro x hraw
+    let X : RealRaw :=
+      { compute := F.raw.compute x hraw }
+    have hX : X.Valid := by
+      change RealRaw.ValidCompute X.compute
+      exact F.valid_on x hraw
+    change RealRaw.ValidCompute
+      (fun n => QInterval.scaleRat r (F.raw.compute x hraw n))
+    simpa [X, QInterval.scaleRat, RealRaw.scaleRatCompute] using
+      (RealRaw.scaleRatCompute_valid (r := r) hX)
+
+/-- The pointwise evaluator for a rationally scaled interval function. -/
+theorem scaleRat_compute (r : Rat) (F : FunctionOnInterval)
+    (x : Rat) (hx : inDomainInterval F.lower F.upper x) (n : Nat) :
+    (scaleRat r F).compute x hx n = QInterval.scaleRat r (F.compute x hx n) := by
+  rfl
+
 /-- Exact affine rational functions satisfy the interval-valued derivative
 definition on every rational interval.  The certificate uses no limiting
 operation: each finite quotient is literally the constant rational slope. -/
@@ -595,6 +625,136 @@ def exactRatSquareDerivative (a b : Rat) :
     constructor <;> grind [Rat.sub_eq_add_neg]
 
 end FunctionOnInterval
+
+namespace QInterval
+
+/-- Scaling both endpoint values by two commutes with the finite difference
+quotient, including for a negative rational step. -/
+theorem differenceQuotient_scaleRat_two (A B : QInterval) (h : Rat) :
+    differenceQuotient (scaleRat 2 A) (scaleRat 2 B) h =
+      scaleRat 2 (differenceQuotient A B h) := by
+  have htwo : (0 : Rat) <= 2 := by native_decide
+  by_cases hinv : 0 <= 1 / h
+  · cases A
+    cases B
+    congr 1 <;>
+      simp [differenceQuotient, divRat, sub, scaleRat, htwo, hinv] <;>
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+  · cases A
+    cases B
+    congr 1 <;>
+      simp [differenceQuotient, divRat, sub, scaleRat, htwo, hinv] <;>
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+end QInterval
+
+/-- If two interval boxes are close at a sufficiently finer precision, then
+doubling both boxes remains close at the requested precision.  This is the
+finite error-budget step behind the scalar-multiple derivative rule. -/
+theorem intervalNearAtPrecision_scaleRat_two
+    {I J : QInterval} {m n : Nat}
+    (hnear : intervalNearAtPrecision I J m)
+    (hprecision : 2 * (precisionAtStage m).val <= (precisionAtStage n).val) :
+    intervalNearAtPrecision (QInterval.scaleRat 2 I) (QInterval.scaleRat 2 J) n := by
+  unfold intervalNearAtPrecision QInterval.NearAt at hnear ⊢
+  rcases hnear with ⟨hleft, hright, hwidthI, hwidthJ⟩
+  have htwo : (0 : Rat) <= 2 := by native_decide
+  unfold QInterval.scaleRat
+  simp only [if_pos htwo]
+  constructor
+  · calc
+      2 * I.lo <= 2 * (J.hi + (precisionAtStage m).val) :=
+        Rat.mul_le_mul_of_nonneg_left hleft htwo
+      _ = 2 * J.hi + 2 * (precisionAtStage m).val := by
+        grind [Rat.mul_add]
+      _ <= 2 * J.hi + (precisionAtStage n).val :=
+        (Rat.add_le_add_left).2 hprecision
+  constructor
+  · calc
+      2 * J.lo <= 2 * (I.hi + (precisionAtStage m).val) :=
+        Rat.mul_le_mul_of_nonneg_left hright htwo
+      _ = 2 * I.hi + 2 * (precisionAtStage m).val := by
+        grind [Rat.mul_add]
+      _ <= 2 * I.hi + (precisionAtStage n).val :=
+        (Rat.add_le_add_left).2 hprecision
+  constructor
+  · change 2 * I.hi - 2 * I.lo <= (precisionAtStage n).val
+    calc
+      2 * I.hi - 2 * I.lo = 2 * I.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.mul_add]
+      _ <= 2 * (precisionAtStage m).val :=
+        Rat.mul_le_mul_of_nonneg_left hwidthI htwo
+      _ <= (precisionAtStage n).val := hprecision
+  · change 2 * J.hi - 2 * J.lo <= (precisionAtStage n).val
+    calc
+      2 * J.hi - 2 * J.lo = 2 * J.width := by
+        unfold QInterval.width
+        grind [Rat.sub_eq_add_neg, Rat.mul_add]
+      _ <= 2 * (precisionAtStage m).val :=
+        Rat.mul_le_mul_of_nonneg_left hwidthJ htwo
+      _ <= (precisionAtStage n).val := hprecision
+
+private theorem one_div_nat_antitone_for_derivative_precision {n m : Nat}
+    (hn : 0 < n) (hm : 0 < m) (hnm : n <= m) :
+    (1 / (m : Rat)) <= 1 / (n : Rat) := by
+  apply Rat.le_of_mul_le_mul_right (c := (n : Rat) * (m : Rat))
+  · calc
+      (1 / (m : Rat)) * ((n : Rat) * (m : Rat)) = (n : Rat) := by
+        have hmne : (m : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hm)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      _ <= (m : Rat) := by exact_mod_cast hnm
+      _ = (1 / (n : Rat)) * ((n : Rat) * (m : Rat)) := by
+        have hnne : (n : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+        grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · exact Rat.mul_pos ((Rat.natCast_pos).2 hn) ((Rat.natCast_pos).2 hm)
+
+/-- The doubled function evaluates its derivative certificate at a finer
+stage.  The resulting finite interval error remains within the original
+precision budget after multiplication by two. -/
+theorem precisionAtStage_scaleRat_two (n : Nat) :
+    2 * (precisionAtStage (2 * (n + 1))).val <= (precisionAtStage n).val := by
+  have hscaled :
+      2 * (precisionAtStage (2 * (n + 1))).val =
+        1 / (((n + 1 : Nat) : Rat)) := by
+    have hstage : 2 * (n + 1) ≠ 0 := by omega
+    change 2 * (1 / (((2 * (n + 1) : Nat) : Rat))) =
+      1 / (((n + 1 : Nat) : Rat))
+    rw [Rat.natCast_mul]
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    have htwo : (2 : Rat) * (2 : Rat)⁻¹ = 1 := by native_decide
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [hscaled]
+  by_cases hn : n = 0
+  · subst n
+    native_decide
+  · rw [precisionAtStage, dif_neg hn]
+    exact one_div_nat_antitone_for_derivative_precision
+      (Nat.pos_of_ne_zero hn) (Nat.succ_pos n) (Nat.le_succ n)
+
+/-- A two-sided interval derivative certificate is closed under multiplication
+by two.  This is a literal rational-box calculation, not a topology or a
+completed-real linearity rule. -/
+def HasDerivativeOnInterval.scaleRat_two
+    {f df : FunctionOnInterval}
+    (D : HasDerivativeOnInterval f df) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.scaleRat 2 f)
+      (FunctionOnInterval.scaleRat 2 df) where
+  same_lower := D.same_lower
+  same_upper := D.same_upper
+  stepPrecision := fun n => D.stepPrecision (2 * (n + 1))
+  evalPrecision := fun x h n => D.evalPrecision x h (2 * (n + 1))
+  close := by
+    intro x h n hx hxh hdx hh hsmall
+    change inDomainInterval f.lower f.upper x at hx
+    change inDomainInterval f.lower f.upper (x + h) at hxh
+    change inDomainInterval df.lower df.upper x at hdx
+    have hbase := D.close x h (2 * (n + 1)) hx hxh hdx hh hsmall
+    have hscaled := intervalNearAtPrecision_scaleRat_two hbase
+      (precisionAtStage_scaleRat_two n)
+    simpa only [FunctionOnInterval.scaleRat_compute,
+      QInterval.differenceQuotient_scaleRat_two] using hscaled
 
 /-- A function solving `f' = f` on an interval with a specified initial value.
 

@@ -53,6 +53,7 @@ import ComputableAnalysis.RotationPeanoBakerBridge
 import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.GeometricPiRotation
 import ComputableAnalysis.GeometricRotationODE
+import ComputableAnalysis.SectorAreaReparametrization
 import ComputableAnalysis.Polynomial
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series

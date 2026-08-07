@@ -437,8 +437,11 @@ rational step.  On the unit chart, the remaining factor is bounded so both
 errors are at most \(12|h|\).  Exact singleton evaluators package this as the
 project's literal epsilon--delta interval derivative certificate, using a
 step budget \(1/(12n)\) (and \(1/12\) at stage zero).  A complex/vector
-wrapper now packages the two coordinate certificates, while sector-area
-reparametrization remains before Peano--Baker/Volterra uniqueness can identify
-this geometric solution with the factorial rotation raw and connect it to the
-complex exponential/logarithm branches.
+wrapper now packages the two coordinate certificates.  The sector-area clock
+\(\Theta(t)=2\arctan_{\rm rectangle}(t)\) is now also a checked interval
+function with \(\Theta'(t)=2/(1+t^2)\), and its rational values agree with
+\(2\arctan_{\rm geom}(t)\).  What remains before Peano--Baker/Volterra
+uniqueness can identify this geometric solution with the factorial rotation
+raw is the effective inverse/reparametrized curve, then the vector uniqueness
+step and the complex exponential/logarithm branch connection.
 \end{theorem}

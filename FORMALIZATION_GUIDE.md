@@ -82,6 +82,7 @@ Start with the smallest target module rather than importing
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
 | Finite monotone decomposition with non-rational turns | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.TurningBracketIntegralCandidate` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
+| Sector-area time | `ComputableAnalysis.SectorAreaReparametrization` | `angleOnUnit`, `angleOnUnit_hasDerivative`, `angleAt_equiv_two_arctanGeom` |
 | Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `IntegralIdentities` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
@@ -208,6 +209,17 @@ There are also genuine full interval derivative certificates on `[0,1]` for:
   (`dA_rect/dx = 1/(1+x^2)`); and
 - `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative`
   (`d(x A_rect)/dx = A_rect + x/(1+x^2)`).
+
+`FunctionOnInterval.scaleRat` and
+`HasDerivativeOnInterval.scaleRat_two` are the first reusable scalar rule:
+they multiply the finite quotient and its derivative boxes by two while
+requesting the explicit finer stage `2*(n+1)`.  The sector-area module applies
+that rule to the rectangle arctangent.  Its `angleOnUnit` has derivative
+`speedOnUnit`, whose exact rational value is
+`RationalCircle.Stage.sectorAreaSpeed t = 2/(1+t^2)`;
+`angleAt_equiv_two_arctanGeom` supplies the pointwise bridge to the geometric
+angle representation.  Constructing the inverse reparametrization and using
+vector uniqueness are still separate tasks.
 
 `FirstYearCalculus.checked_power_series_table` proves the coefficient-shift
 identities for exp, sin, cos, sinh, and cosh. The primary series API calls
@@ -1060,8 +1072,14 @@ On the geometric side,
 `GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` now
 certifies the rational chart on `[0,1]` as
 `P' = (2 i / (1+t*t)) P`, with `P(0)=1` and `P(1)=i`, coordinate by
-coordinate. It is not yet a summed continuous matrix series, the represented
-sector-area reparametrization, geometric trigonometry, or Euler identity.
+coordinate.  `SectorAreaReparametrization.angleOnUnit_hasDerivative` now
+also certifies the represented sector-time coordinate
+`Theta(t) = 2 * arctan.rectangle(t)` with
+`Theta' = 2/(1+t*t)`, and
+`angleAt_equiv_two_arctanGeom` identifies its rational samples with the
+geometric angle. It is not yet a summed continuous matrix series, an inverse
+sector-area reparametrization of the curve, geometric trigonometry, or Euler
+identity.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a

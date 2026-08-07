@@ -1364,6 +1364,13 @@ arguments.
   rotation-system candidate:
   `GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` gives
   `P' = (2 i / (1+t*t)) P`, `P(0)=1`, and `P(1)=i` on `[0,1]`.
+  The scalar sector-time component is now checked as well:
+  `SectorAreaReparametrization.angleOnUnit_hasDerivative` gives
+  `Theta' = 2/(1+t*t)`, and
+  `angleAt_equiv_two_arctanGeom` identifies every rational chart value with
+  `2 * arctan.geom(t)`.  The remaining reparametrization work is therefore
+  the effective monotone inverse/curve composition and the vector uniqueness
+  theorem, not the derivative of the sector-area clock.
 
 ## First-Year Calculus Course
 

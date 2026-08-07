@@ -353,8 +353,20 @@ variable-coefficient system
  P'=\frac{2i}{1+t^2}P=i\,\operatorname{sectorAreaSpeed}(t)P,
  \qquad P(0)=1,\quad P(1)=i.
 \]
-The missing bridge is its sector-area reparametrized
-represented-function/vector-uniqueness theorem.
+The sector-area clock now has its own finite derivative certificate:
+\lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnit}
+\lean{ComputableAnalysis.SectorAreaReparametrization.angleOnUnit_hasDerivative}
+\lean{ComputableAnalysis.SectorAreaReparametrization.speedOnUnit_compute_eq_sectorAreaSpeed}
+\lean{ComputableAnalysis.SectorAreaReparametrization.angleAt_equiv_two_arctanGeom}
+\[
+  \Theta(t)=2\arctan_{\rm rectangle}(t),\qquad
+  \Theta'(t)=\frac{2}{1+t^2}=\operatorname{sectorAreaSpeed}(t),\qquad
+  \Theta(t)\Equiv 2\arctan_{\rm geom}(t).
+\]
+Thus \(\Theta(1)\) is ready to transport to the existing represented
+\(\pi/2\) input.  The missing bridge is now specifically an effective inverse
+for this monotone clock, followed by the represented-function/vector-uniqueness
+theorem for the reparametrized curve.
 Square-zero families collapse to \(I+\sum_kB_k\); commuting finite products
 can be reordered.  Continuous ODE/matrix identification remains separate.
 \end{theorem}
