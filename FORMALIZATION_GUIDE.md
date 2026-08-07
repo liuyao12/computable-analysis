@@ -223,6 +223,10 @@ gap `x + 1/(n+1) <= y -> Theta_x.hi < Theta_y.lo` at stage `64*(n+1)`,
 and packages it as `angleOnUnit_effectiveInverseSeparation`.  Constructing
 the interval-image regularity and data-valued inverse search, then using the
 resulting reparametrization in vector uniqueness, remain separate tasks.
+At the unit endpoint,
+`PiProofs.pi.sectorAreaAngleOne_equiv_halfPi` now closes the finite transport
+`Theta(1) ≡ pi/2`; this is an endpoint equivalence, not yet a general inverse
+or reparameterized-curve construction.
 
 `FirstYearCalculus.checked_power_series_table` proves the coefficient-shift
 identities for exp, sin, cos, sinh, and cosh. The primary series API calls

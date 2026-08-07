@@ -3,6 +3,7 @@ import ComputableAnalysis.GeometricPiRotation
 import ComputableAnalysis.PiProofs
 import ComputableAnalysis.RotationSeries
 import ComputableAnalysis.RotationLift
+import ComputableAnalysis.SectorAreaReparametrization
 
 /-!
 # The certified imaginary half-pi input
@@ -137,6 +138,30 @@ theorem halfPi_equiv_twoArctanGeomOne :
     halfPi_valid halfPiFromArctanGeom_valid twoArctanGeomOne_valid
     (RealRaw.equiv_symm halfPiFromArctanGeom_equiv_halfPi)
     halfPiFromArctanGeom_equiv_twoArctanGeomOne
+
+/-- The sector-area clock reaches the same represented quarter-turn angle as
+the preferred \(\pi/2\) handle.  This is an endpoint bridge between the
+rectangle-integral clock and the established geometric arctangent route. -/
+theorem sectorAreaAngleOne_equiv_halfPi :
+    (SectorAreaReparametrization.angleAt (1 : Rat) (by
+      change (0 : Rat) <= 1 /\ 1 <= (1 : Rat)
+      native_decide)).Equiv
+      halfPi := by
+  let hunit : inDomainInterval
+      SectorAreaReparametrization.angleOnUnit.lower
+      SectorAreaReparametrization.angleOnUnit.upper (1 : Rat) := by
+    change (0 : Rat) <= 1 /\ 1 <= (1 : Rat)
+    native_decide
+  have hangle := SectorAreaReparametrization.angleAt_equiv_two_arctanGeom
+    (1 : Rat) hunit
+  have hangle' :
+      (SectorAreaReparametrization.angleAt (1 : Rat) hunit).Equiv
+        twoArctanGeomOne := by
+    simpa [twoArctanGeomOne] using hangle
+  exact RealRaw.equiv_trans
+    (SectorAreaReparametrization.angleAt_valid (1 : Rat) hunit)
+    twoArctanGeomOne_valid halfPi_valid
+    hangle' (RealRaw.equiv_symm halfPi_equiv_twoArctanGeomOne)
 
 /-- The geometric normalized quarter-turn input is itself a valid raw real. -/
 theorem geometricQuarterTurnOne_valid :

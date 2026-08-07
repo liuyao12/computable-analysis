@@ -1374,6 +1374,9 @@ arguments.
   reparametrization work is the interval-image regularity and data-valued
   bisection search, then curve composition and the vector uniqueness theorem,
   not the derivative or strict monotone separation of the sector-area clock.
+  The corresponding endpoint has now been transported as well:
+  `PiProofs.pi.sectorAreaAngleOne_equiv_halfPi` proves
+  `Theta(1) ≡ pi/2` by the checked geometric arctangent bridge.
 
 ## First-Year Calculus Course
 
