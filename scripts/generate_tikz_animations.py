@@ -30,14 +30,14 @@ COLOURS = r"""
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
-% Integral diagrams use cyan for the under-estimate and yellow for the
-% over-estimate.  At half opacity their common region is the same green as in
-% the signed sin(pi*x)/x diagram, including below the axis.  Orange is only a
-% finite correction or an unresolved middle gap.
-\definecolor{cyan}{RGB}{7,128,84}
-\definecolor{cyanfill}{RGB}{0,160,90}
-\definecolor{yellow}{RGB}{170,142,0}
-\definecolor{yellowfill}{RGB}{254,243,199}
+% Integral diagrams use blue for the under-estimate and yellow for the
+% over-estimate.  At half opacity their common region is a distinct green,
+% including below the axis in the signed sin(pi*x)/x diagram.  Orange is only
+% a finite correction or an unresolved middle gap.
+\definecolor{cyan}{RGB}{0,84,134}
+\definecolor{cyanfill}{RGB}{0,114,178}
+\definecolor{yellow}{RGB}{184,134,11}
+\definecolor{yellowfill}{RGB}{240,228,66}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
