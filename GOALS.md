@@ -1348,12 +1348,16 @@ arguments.
   `PiProofs.pi.halfPiRotation` is valid, using the common bounded-input
   rotation schedule, its finite Lipschitz bound, and a radius at most
   `32 / (n + 1)`.  The input is also bridged to
-  `2 * arctan.geom(1)` and the geometric normalized quarter-turn raw.  The
-  rational chart side is now a checked variable-coefficient rotation-system
-  candidate: `GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate`
-  gives `P' = (2 i / (1+t*t)) P`, `P(0)=1`, and `P(1)=i` on `[0,1]`.
-  The remaining Euler work is specifically the sector-area reparametrization
-  and vector-uniqueness identification of the factorial rotation with that
+  `2 * arctan.geom(1)` and the geometric normalized quarter-turn raw.
+  `halfPi_equiv_geometricHalfPi` and
+  `imaginaryHalf_equiv_geometricImaginaryHalf` now carry this agreement to
+  the geometry-only represented half angle and its imaginary-axis input.
+  The rational chart side is now a checked variable-coefficient
+  rotation-system candidate:
+  `GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` gives
+  `P' = (2 i / (1+t*t)) P`, `P(0)=1`, and `P(1)=i` on `[0,1]`.  The remaining
+  Euler work is specifically the sector-area reparametrization and
+  vector-uniqueness identification of the factorial rotation with that
   geometric endpoint, followed by the relevant logarithm branch certificate.
 
 ## First-Year Calculus Course

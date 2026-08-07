@@ -366,6 +366,7 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.PiProofs.pi.geometricQuarterTurnOne_valid}
 \lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne_equiv_geometricQuarterTurnOne}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricHalfPi}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationRadius_shrinks}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotation}
@@ -374,6 +375,7 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_valid}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul}
 \lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation}
@@ -399,9 +401,11 @@ across every checked \(\pi\)-representation.  The finite scalar return
 The input is also already tied to the geometric arctangent route:
 \(\pi/2\) is a certified raw equivalent of
 \(2\arctan_{\rm geom}(1)\), and of the normalized geometric quarter-turn
-raw at \(1\).  Thus the remaining quarter-turn theorem compares two named
-complex constructions at the same represented angle; it is not an
-unrecorded conversion of units or of \(\pi\)-representatives.
+raw at \(1\).  Lean now transports it all the way to the geometry-only
+half-angle and its \(i\)-axis embedding used by the rotation construction.
+Thus the remaining quarter-turn theorem compares two named complex
+constructions at the same represented angle; it is not an unrecorded
+conversion of units or of \(\pi\)-representatives.
 The represented-input construction is now a valid raw complex computation:
 finite prefixes of the midpoint rotation boxes are intersected, with each
 later candidate as the rational-box witness that the prefix remains ordered.

@@ -469,9 +469,10 @@ integration-by-parts rules.
 These are mostly interfaces and comparison targets. Do not claim that the
 repository has proved a general rational-power construction or the full
 exp/log equivalence. The common-prefix exponential does now have a local
-`HasDerivativeOnInterval` self-derivative certificate; the next scalar
-milestone is a concrete finite-mesh halving comparison, not a Peano--Baker
-or Picard argument.
+`HasDerivativeOnInterval` self-derivative certificate.  Scalar uniqueness
+uses the checked direct finite-mesh halving closure below, not a
+Peano--Baker or Picard argument; the remaining scalar task is to derive its
+finite cell estimates from arbitrary derivative certificates.
 
 For a direct scalar uniqueness proof, make one finite short-block sweep an
 instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
@@ -785,7 +786,9 @@ open ComputableAnalysis
 #check PiProofs.pi.halfPiRotation
 #check PiProofs.pi.halfPiRotation_valid
 #check PiProofs.pi.halfPiRotation_contains_current_candidate
+#check PiProofs.pi.halfPi_equiv_geometricHalfPi
 #check PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi
+#check PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf
 #check PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul
 #check PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation
 #check PiProofs.pi.negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea
@@ -841,9 +844,12 @@ At the nontrivial endpoint,
 `two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute` gives literal
 equality of the two rational interval boxes at every stage; its equivalence
 corollary records `2 * arctan.geom(1) = pi / 2` as the normalized geometric
-quarter turn.  It does not yet transport that geometric angle to
-`PiProofs.pi.halfPi` or identify the factorial rotation with its point; those
-are the next Euler-bridge steps.
+quarter turn.  `PiProofs.pi.halfPi_equiv_geometricHalfPi` now transports that
+geometric angle to the geometry-only half-angle consumed by the represented
+factorial rotation, and
+`PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf` does the same after
+embedding on the imaginary axis.  The remaining Euler-bridge step is solely
+the identification of that factorial rotation with its geometric endpoint.
 
 The same small geometry module also carries the full-area bridge directly:
 `four_arctanGeom_one_compute_eq_piCircleArea_compute` is stagewise equality

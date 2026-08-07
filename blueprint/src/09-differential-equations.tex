@@ -285,6 +285,8 @@ hypotheses; generic time-ordered systems need none of them.
 \lean{ComputableAnalysis.PiProofs.pi.twoArctanGeomOne}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_twoArctanGeomOne}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricQuarterTurnOne}
+\lean{ComputableAnalysis.PiProofs.pi.halfPi_equiv_geometricHalfPi}
+\lean{ComputableAnalysis.PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_midpoint_qabs_le_two}
 \lean{ComputableAnalysis.PiProofs.pi.halfPi_midpoint_sub_le_width}
 \lean{ComputableAnalysis.PiProofs.pi.halfPiRotationCandidate_ordered}
@@ -338,7 +340,8 @@ common-prefix rotation initial-value candidate. Derivative transport to an
 equivalent representation and vector uniqueness remain separate.
 The input angle is not merely named: its raw boxes are certified equivalent
 both to \(2\arctan_{\rm geom}(1)\) and to the normalized geometric
-quarter-turn raw.  The remaining identification is specifically between the
+quarter-turn raw, then to the geometry-only half-angle and its imaginary-axis
+embedding.  The remaining identification is specifically between the
 power-series rotation output and the geometric circle point.  The chart's
 exact rational velocity is now packaged as the coordinatewise
 variable-coefficient system

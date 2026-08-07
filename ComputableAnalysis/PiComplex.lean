@@ -1,6 +1,8 @@
 import ComputableAnalysis.ComplexMultiplication
+import ComputableAnalysis.GeometricPiRotation
 import ComputableAnalysis.PiProofs
 import ComputableAnalysis.RotationSeries
+import ComputableAnalysis.RotationLift
 
 /-!
 # The certified imaginary half-pi input
@@ -82,21 +84,105 @@ theorem halfPi_bounds (n : Nat) :
         Rat.mul_le_mul_of_nonneg_left hcircle.2 hhalf
       _ = 2 := by native_decide
 
-/-- The rational midpoint selected from any pi/2 interval remains in the
+/-- The finite input certificate used by the generic represented-angle
+rotation lift.  It isolates exactly the area-loop facts required by the
+complex factorial calculation. -/
+def halfPiInput : RotationLift.HalfPiInput where
+  raw := halfPi
+  valid := halfPi_valid
+  bounds := halfPi_bounds
+  width_le_two_div_succ := halfPi_width_le_two_div_succ
+
+/-- The same represented half-angle, but evaluated through the checked
+geometric arctangent identity \(\pi=4\arctan_{\rm geom}(1)\).  Keeping this
+finite raw presentation separate exposes the exact input used by the Euler
+route before any rotation/geometry identification is claimed. -/
+def halfPiFromArctanGeom : RealRaw :=
+  RealRaw.scaleRat ((1 : Rat) / 2)
+    ((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat))
+
+theorem halfPiFromArctanGeom_valid : halfPiFromArctanGeom.Valid := by
+  unfold halfPiFromArctanGeom
+  exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+    fourArctanGeomOneValid
+
+/-- Scaling the geometric arctangent pi identity yields the represented
+half-angle identity \(\pi/2=2\arctan_{\rm geom}(1)\), at the raw interval
+level rather than in an ambient completed field. -/
+theorem halfPiFromArctanGeom_equiv_halfPi :
+    halfPiFromArctanGeom.Equiv halfPi := by
+  unfold halfPiFromArctanGeom halfPi
+  apply RealRaw.scaleRat_equiv_of_nonneg (by native_decide)
+  simpa [circleArea, presentation, piCertifiedPresentation,
+    piPresentationRaw] using four_arctanGeom_one_equiv_piCircleArea
+
+/-- The literal two-times-arctangent presentation of the half angle. -/
+def twoArctanGeomOne : RealRaw :=
+  (2 : Nat) * ArctanGeometry.arctanGeom (1 : Rat)
+
+theorem twoArctanGeomOne_valid : twoArctanGeomOne.Valid := by
+  unfold twoArctanGeomOne
+  exact RealRaw.natScale_valid 2 arctanGeomOneValid
+
+theorem halfPiFromArctanGeom_equiv_twoArctanGeomOne :
+    halfPiFromArctanGeom.Equiv twoArctanGeomOne := by
+  have hscale := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
+    ((1 : Rat) / 2) (4 : Rat) (by native_decide) (by native_decide)
+    (ArctanGeometry.arctanGeom (1 : Rat)) arctanGeomOneValid
+  have htwo : ((1 : Rat) / 2) * 4 = 2 := by native_decide
+  simpa [halfPiFromArctanGeom, twoArctanGeomOne, htwo] using hscale
+
+theorem halfPi_equiv_twoArctanGeomOne :
+    halfPi.Equiv twoArctanGeomOne := by
+  exact RealRaw.equiv_trans
+    halfPi_valid halfPiFromArctanGeom_valid twoArctanGeomOne_valid
+    (RealRaw.equiv_symm halfPiFromArctanGeom_equiv_halfPi)
+    halfPiFromArctanGeom_equiv_twoArctanGeomOne
+
+/-- The geometric normalized quarter-turn input is itself a valid raw real. -/
+theorem geometricQuarterTurnOne_valid :
+    (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)).Valid := by
+  unfold RationalCircle.GeometricTrig.quarterTurnRaw
+  exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+    (by simpa [AreaValid] using AreaLoopValidity.areaValid)
+
+/-- The literal doubled unit-slope arctangent and the normalized geometric
+quarter-turn use the same finite area computation. -/
+theorem twoArctanGeomOne_equiv_geometricQuarterTurnOne :
+    twoArctanGeomOne.Equiv
+      (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)) := by
+  simpa [twoArctanGeomOne] using
+    ArctanGeometry.two_arctanGeom_one_equiv_quarterTurnRaw_one
+
+/-- At normalized quarter turn one, the geometric angle raw is exactly the
+preferred represented half-pi input. -/
+theorem halfPi_equiv_geometricQuarterTurnOne :
+    halfPi.Equiv (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)) := by
+  exact RealRaw.equiv_trans
+    halfPi_valid twoArctanGeomOne_valid geometricQuarterTurnOne_valid
+    halfPi_equiv_twoArctanGeomOne
+    twoArctanGeomOne_equiv_geometricQuarterTurnOne
+
+/-- The abstract pi registry and the geometry-only Euler route use the same
+represented half angle.  This is an explicit raw-real transport through the
+normalized rational-circle quarter turn, rather than a choice of a preferred
+decimal or a completed-real equality. -/
+theorem halfPi_equiv_geometricHalfPi :
+    halfPi.Equiv GeometricPiRotation.halfPi := by
+  exact RealRaw.equiv_trans
+    halfPi_valid
+    geometricQuarterTurnOne_valid
+    GeometricPiRotation.halfPi_valid
+    halfPi_equiv_geometricQuarterTurnOne
+    (RealRaw.equiv_symm
+      GeometricPiRotation.halfPi_equiv_geometricQuarterTurnOne)
+
+/-- The rational midpoint selected from any pi/2 input interval remains in the
 uniform input range for the imaginary-axis factorial evaluator. -/
 theorem halfPi_midpoint_qabs_le_two (n : Nat) :
     qabs ((halfPi.compute n).midpoint) <= 2 := by
-  have hwidth := halfPi_valid.1 n
-  have hordered : (halfPi.compute n).lo <= (halfPi.compute n).hi := by
-    unfold QInterval.width at hwidth
-    grind [Rat.sub_eq_add_neg]
-  have hmid := QInterval.midpoint_mem hordered
-  have hbounds := halfPi_bounds n
-  have hnonneg : 0 <= (halfPi.compute n).midpoint :=
-    Rat.le_trans (Rat.le_of_lt (by native_decide : (0 : Rat) < 1))
-      (Rat.le_trans hbounds.1 hmid.1)
-  rw [qabs_eq_self_of_nonneg hnonneg]
-  exact Rat.le_trans hmid.2 hbounds.2
+  simpa [halfPiInput] using
+    RotationLift.HalfPiInput.midpoint_qabs_le_two halfPiInput n
 
 /-- At every rational midpoint of the certified pi/2 input interval, the
 common factorial schedule is a valid complex rotation-series computation. -/
@@ -111,94 +197,61 @@ rotation construction must combine with a finite series Lipschitz bound. -/
 theorem halfPi_midpoint_sub_le_width (k n : Nat) (hkn : k <= n) :
     qabs ((halfPi.compute n).midpoint - (halfPi.compute k).midpoint) <=
       (halfPi.compute k).width := by
-  have hkwidth := halfPi_valid.1 k
-  have hkordered : (halfPi.compute k).lo <= (halfPi.compute k).hi := by
-    unfold QInterval.width at hkwidth
-    grind [Rat.sub_eq_add_neg]
-  have hnwidth := halfPi_valid.1 n
-  have hnordered : (halfPi.compute n).lo <= (halfPi.compute n).hi := by
-    unfold QInterval.width at hnwidth
-    grind [Rat.sub_eq_add_neg]
-  have hmidk := QInterval.midpoint_mem hkordered
-  have hmidn := QInterval.midpoint_mem hnordered
-  have hnest := halfPi_valid.2.1 k n hkn
-  apply qabs_sub_le_of_common_bounds
-  · exact Rat.le_trans hnest.1 hmidn.1
-  · exact Rat.le_trans hmidn.2 hnest.2.2
-  · exact hmidk.1
-  · exact hmidk.2
+  simpa [halfPiInput] using
+    RotationLift.HalfPiInput.midpoint_sub_le_width halfPiInput k n hkn
 
 /-- The direct, non-nested candidate for a represented pi/2 rotation.
 Stage n evaluates the common rational factorial schedule at the midpoint of
 the stage-n pi/2 interval. A later Cauchy containment theorem will stabilize
 these already ordered, shrinking candidates without invoking completeness. -/
-def halfPiRotationCandidate : ComplexRaw where
-  compute := fun n =>
-    RotationSeries.uniformRotationBox (halfPi.compute n).midpoint n
+def halfPiRotationCandidate : ComplexRaw :=
+  RotationLift.HalfPiInput.rotationCandidate halfPiInput
 
 theorem halfPiRotationCandidate_compute (n : Nat) :
     halfPiRotationCandidate.compute n =
-      RotationSeries.uniformRotationBox (halfPi.compute n).midpoint n := rfl
+      RotationSeries.uniformRotationBox (halfPi.compute n).midpoint n := by
+  simpa [halfPiRotationCandidate, halfPiInput] using
+    RotationLift.HalfPiInput.rotationCandidate_compute halfPiInput n
 
 theorem halfPiRotationCandidate_ordered (n : Nat) :
     (halfPiRotationCandidate.compute n).Ordered := by
-  rw [halfPiRotationCandidate_compute]
-  have hvalid := uniformRotationExpRaw_halfPi_midpoint_valid n
-  exact ComplexRaw.valid_ordered hvalid n
+  simpa [halfPiRotationCandidate] using
+    RotationLift.HalfPiInput.rotationCandidate_ordered halfPiInput n
 
 theorem halfPiRotationCandidate_widths_shrink :
     ComplexRaw.WidthsShrinkToZero halfPiRotationCandidate.compute := by
-  intro eps
-  obtain ⟨N, hN⟩ := RotationSeries.uniformRotationBox_widths_shrink 0 eps
-  refine ⟨N, ?_⟩
-  intro n hn
-  have h := hN n hn
-  rw [halfPiRotationCandidate_compute,
-    RotationSeries.uniformRotationBox_width,
-    RotationSeries.uniformRotationBox_height]
-  rw [RotationSeries.uniformRotationBox_width,
-    RotationSeries.uniformRotationBox_height] at h
-  exact h
+  simpa [halfPiRotationCandidate] using
+    RotationLift.HalfPiInput.rotationCandidate_widths_shrink halfPiInput
 
 /-- The input-error radius for the represented π/2 rotation candidate.
 The factor sixteen is the checked finite-prefix Lipschitz budget for the
 uniform rational factorial schedule. -/
 def halfPiRotationRadius (n : Nat) : Rat :=
-  16 * (halfPi.compute n).width
+  RotationLift.HalfPiInput.rotationRadius halfPiInput n
 
 theorem halfPiRotationRadius_shrinks :
     ShrinksToZero halfPiRotationRadius := by
-  apply shrinksToZero_of_natOverSuccBound (C := 32)
-  intro n
-  have hwidth := halfPi_width_le_two_div_succ n
-  unfold halfPiRotationRadius
-  calc
-    16 * (halfPi.compute n).width <=
-        16 * (2 / (((n + 1 : Nat) : Rat))) :=
-      Rat.mul_le_mul_of_nonneg_left hwidth (by native_decide)
-    _ = 32 / (((n + 1 : Nat) : Rat)) := by
-      rw [Rat.div_def]
-      grind [Rat.mul_assoc, Rat.mul_comm]
+  simpa [halfPiRotationRadius] using
+    RotationLift.HalfPiInput.rotationRadius_shrinks halfPiInput
 
 /-- The represented-angle imaginary-axis rotation.  It stabilizes the
 finite boxes obtained by evaluating one common factorial schedule at the
 rational midpoint of each certified π/2 interval. -/
 def halfPiRotation : ComplexRaw :=
-  ComplexRaw.cauchyStabilize halfPiRotationCandidate halfPiRotationRadius
+  RotationLift.HalfPiInput.rotation halfPiInput
 
 theorem halfPiRotation_valid : halfPiRotation.Valid := by
-  unfold halfPiRotation
-  apply ComplexRaw.cauchyStabilize_valid
-  · exact halfPiRotationCandidate_ordered
-  · exact halfPiRotationCandidate_widths_shrink
-  · intro k n hkn
-    have hfuture := RotationSeries.uniformRotationBox_future_contained_expand_of_input_near
-      (halfPi.compute n).midpoint (halfPi.compute k).midpoint
-      (halfPi.compute k).width
-      (halfPi_midpoint_qabs_le_two n) (halfPi_midpoint_qabs_le_two k)
-      k n hkn (halfPi_midpoint_sub_le_width k n hkn)
-    simpa [halfPiRotationCandidate_compute, halfPiRotationRadius] using hfuture
-  · exact halfPiRotationRadius_shrinks
+  simpa [halfPiRotation] using
+    RotationLift.HalfPiInput.rotation_valid halfPiInput
+
+/-- The stabilized represented rotation still contains the direct midpoint
+series box at the same stage.  This is the public finite witness to use when
+an eventual quarter-turn proof encloses the direct factorial candidate. -/
+theorem halfPiRotation_contains_current_candidate (n : Nat) :
+    QBox.NestedIn (halfPiRotationCandidate.compute n)
+      (halfPiRotation.compute n) := by
+  simpa [halfPiRotationCandidate, halfPiRotation] using
+    RotationLift.HalfPiInput.rotation_contains_current_candidate halfPiInput n
 
 /-- The certified complex raw input \(i\pi/2\), formed from the default
 circle-area representative of the abstract pi handle. -/
@@ -235,6 +288,21 @@ theorem imaginaryHalf_equiv_imaginaryAxis_halfPi :
   have hordered := ComplexRaw.valid_ordered
     (ComplexRaw.imaginaryAxis_valid halfPi_valid) n
   exact ⟨hordered, hordered⟩
+
+/-- The registry's `i*pi/2` input is equivalent to the geometry-only
+imaginary half angle used by the represented factorial rotation.  Thus the
+remaining Euler gap is the rotation-system/quarter-turn endpoint theorem,
+not a mismatch between the two half-pi inputs. -/
+theorem imaginaryHalf_equiv_geometricImaginaryHalf :
+    imaginaryHalf.Equiv GeometricPiRotation.imaginaryHalf := by
+  exact ComplexRaw.equiv_trans
+    imaginaryHalf_valid
+    (ComplexRaw.imaginaryAxis_valid halfPi_valid)
+    GeometricPiRotation.imaginaryHalf_valid
+    imaginaryHalf_equiv_imaginaryAxis_halfPi
+    (ComplexRaw.imaginaryAxis_equiv
+      halfPi_valid GeometricPiRotation.halfPi_valid
+      halfPi_equiv_geometricHalfPi)
 
 /-- The coordinate construction of `i*pi/2` agrees stage by stage with
 literal multiplication of the preferred pi representative by the exact
