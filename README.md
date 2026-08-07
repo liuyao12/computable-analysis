@@ -77,10 +77,12 @@ forced second-order oscillator that practitioners recognize, convert it to an
 inhomogeneous first-order vector system, construct its general solution by
 Peano--Baker plus Duhamel, and prove uniqueness by iterating the zero-initial
 Volterra identity until its explicit factorial bound is below any requested
-rational tolerance.  The familiar sine/cosine and exponential formulae are
-then recovered by that uniqueness theorem, rather than used as definitions.
-For the scalar `E' = E`, `E(0) = 1` specialization this identifies the
-power-series, repeated-multiplication, and inverse-logarithmic-integral
+rational tolerance.  The familiar sine/cosine formulae are then recovered by
+that vector uniqueness theorem, rather than used as definitions.  The scalar
+`E' = E`, `E(0) = 1` specialization is deliberately different: a direct
+finite rational mesh telescopes short-block estimates and repeatedly halves
+the error envelope, with no Peano--Baker or Picard iteration.  It identifies
+the power-series, repeated-multiplication, and inverse-logarithmic-integral
 exponentials once each has its own derivative certificate.  The resulting
 canonical positive inverse is the logarithm needed by the deliberately long
 arctangent integration-by-parts Pi route.  This is a dependency route for one
@@ -139,7 +141,7 @@ capability—not a percentage for the whole foundation.
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | bounded symmetric Cauchy integral | public two-piece monotone assembly, with an increasing `[-1,0]` branch and a decreasing `[0,1]` branch | symmetric Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
-| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | `PiProofs.pi.halfPi` is a certified real parameter with every box in $[1,2]$ and width at most $2/(n+1)$. It is formally bridged to both `2 * arctan.geom(1)` and the normalized geometric quarter-turn raw. The finite rational rotation prefixes are Lipschitz on that range, so their midpoint candidates stabilize to the valid represented complex raw `pi.halfPiRotation` with radius at most $32/(n+1)$. Its `imaginaryHalf` embedding is the exact $(i/2)$ scalar action; the return $(-2i)(i\pi/2)=\pi$ and, conditionally on `log(i)=i\pi/2`, the literal product $(-2i)\log(i)=\pi$ are checked. The power-series-to-geometric-quarter-turn and branch-identification theorems remain planned. |
+| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | `PiProofs.pi.halfPi` is a certified real parameter with every box in $[1,2]$ and width at most $2/(n+1)$. It is formally bridged to `2 * arctan.geom(1)`, the normalized geometric quarter-turn raw, and the geometry-only `GeometricPiRotation.halfPi`; its `imaginaryHalf` embedding likewise agrees with the geometry-only imaginary input. The finite rational rotation prefixes are Lipschitz on that range, so their midpoint candidates stabilize to the valid represented complex raw `pi.halfPiRotation` with radius at most $32/(n+1)$. The return $(-2i)(i\pi/2)=\pi$ and, conditionally on `log(i)=i\pi/2`, the literal product $(-2i)\log(i)=\pi$ are checked. The remaining power-series-to-geometric-quarter-turn endpoint and branch-identification theorems remain planned. |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,
@@ -164,8 +166,9 @@ with the reciprocal-log formula exercises the explicit `t = x*x` mesh
 correction.  Neither is presented as the completed general theorem.  The
 stronger canonical textbook form still follows the long
 elementary-function route: identify `log 2` with the inverse of the canonical
-exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
-exponential representations agree, then use
+exponential, use direct scalar finite-mesh uniqueness (not linear
+Peano--Baker/Picard--Lindelöf) to prove the exponential representations agree,
+then use
 `pi = 4 * integral_0^1(arctan x) + 2 * log 2`.  The positive bounded product
 representation itself is now checked, including the concrete domain-aware
 `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit` evaluator:
