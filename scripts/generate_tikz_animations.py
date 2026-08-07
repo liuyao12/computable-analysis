@@ -30,27 +30,27 @@ COLOURS = r"""
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
-% Integral diagrams have one consistent three-colour vocabulary: blue for an
-% under-only part, yellow for an over-only (or still-unresolved) part, and
+% Integral diagrams use exactly one semantic palette: blue for the
+% lower-only part, yellow for the upper-only (or still unresolved) part, and
 % green for their common part.  The common part is explicit rather than an
-% alpha blend, so it remains visibly distinct after GIF palette quantization.
-\definecolor{cyan}{RGB}{0,84,134}
-\definecolor{cyanfill}{RGB}{0,114,178}
-\definecolor{yellow}{RGB}{184,134,11}
-\definecolor{yellowfill}{RGB}{240,228,66}
-\definecolor{overlap}{RGB}{15,110,67}
-\definecolor{overlapfill}{RGB}{20,153,92}
+% alpha blend, so the three meanings stay distinct after GIF quantization.
+\definecolor{blue}{RGB}{0,114,178}
+\definecolor{bluefill}{RGB}{86,180,233}
+\definecolor{yellow}{RGB}{230,159,0}
+\definecolor{yellowfill}{RGB}{255,218,102}
+\definecolor{green}{RGB}{0,128,84}
+\definecolor{greenfill}{RGB}{89,190,142}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
 \definecolor{yellowedge}{RGB}{202,138,4}
 \definecolor{projection}{RGB}{148,163,184}
-\colorlet{under}{cyan}
-\colorlet{underfill}{cyanfill}
+\colorlet{under}{blue}
+\colorlet{underfill}{bluefill}
 \colorlet{over}{yellow}
 \colorlet{overfill}{yellowfill}
-\colorlet{shared}{overlap}
-\colorlet{sharedfill}{overlapfill}
+\colorlet{shared}{green}
+\colorlet{sharedfill}{greenfill}
 \colorlet{gap}{yellow}
 \colorlet{gapfill}{yellowfill}
 """
@@ -111,14 +111,14 @@ def positive_estimate_cell(
 ) -> list[str]:
     """Render a nested positive lower/upper estimate with semantic fills.
 
-    Green is the part common to both estimates; yellow is the upper-only
-    correction.  Blue remains the lower-estimate outline.  This explicit
-    partition is intentionally used instead of relying on raster alpha
-    compositing, so every GIF has the same three-colour meaning.
+    Blue and yellow are the two estimate colours; green is the part common to
+    both.  This explicit partition is intentionally used instead of relying
+    on raster alpha compositing, so every GIF has the same three-colour
+    meaning.
     """
     return [
-        rf"\path[fill=sharedfill,fill opacity=.85] ({q(left)},{q(baseline)}) rectangle ({q(right)},{q(lower)});",
-        rf"\path[fill=overfill,fill opacity=.5] ({q(left)},{q(lower)}) rectangle ({q(right)},{q(upper)});",
+        rf"\path[fill=sharedfill] ({q(left)},{q(baseline)}) rectangle ({q(right)},{q(lower)});",
+        rf"\path[fill=overfill] ({q(left)},{q(lower)}) rectangle ({q(right)},{q(upper)});",
         rf"\draw[under,draw opacity=.8,line width={q(line_width)}pt] ({q(left)},{q(baseline)}) rectangle ({q(right)},{q(lower)});",
         rf"\draw[over,draw opacity=.8,line width={q(line_width)}pt] ({q(left)},{q(baseline)}) rectangle ({q(right)},{q(upper)});",
     ]
@@ -258,8 +258,8 @@ def circle_frame(cells: int) -> str:
         rf"\draw[axis,line width=.75pt] ({q(x0)},{q(y0-10)}) -- ({q(x0)},{q(north[1]+15)});",
         rf"\draw[curve,line width=1pt] ({q(x0)},{q(y0)}) -- ({q(x0)},{q(north[1])});",
         rf"\draw[ink,line width=1.2pt] ({q(east[0])},{q(y0)}) arc[start angle=0,end angle=90,radius={radius}pt];",
-        rf"\path[fill=overfill,fill opacity=.5] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
-        rf"\path[fill=sharedfill,fill opacity=.85] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
+        rf"\path[fill=overfill] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
+        rf"\path[fill=sharedfill] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
         rf"\draw[under,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon(plotted)} -- cycle;",
         rf"\draw[over,draw opacity=.8,line width=.45pt] ({q(origin[0])},{q(origin[1])}) -- {polygon([plotted[0], *outer, plotted[-1]])} -- cycle;",
     ]
@@ -359,8 +359,8 @@ def substitution_frame(cells: int) -> str:
         ] + [(rx, t_base + lower_height)]
         out += [
             rf"\path[fill=gapfill] plot[smooth] coordinates {{{path(curve_points)}}} -- cycle;",
-            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] ({q(lx)},{t_base}) rectangle ({q(rx)},{q(t_base+lower_height)});",
-            rf"\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] ({q(x(start*start))},{x_base}) rectangle ({q(x(stop*stop))},{q(x_base+height)});",
+            rf"\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] ({q(lx)},{t_base}) rectangle ({q(rx)},{q(t_base+lower_height)});",
+            rf"\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] ({q(x(start*start))},{x_base}) rectangle ({q(x(stop*stop))},{q(x_base+height)});",
         ]
     for value in mesh:
         t, image = x(value), x(value * value)
@@ -411,8 +411,8 @@ def ibp_frame(cells: int) -> str:
     out.append(rf"\draw[ink,line width=.85pt] plot[smooth] coordinates {{{path(curve)}}};")
     for lf, rf_, lg, rg in zip(f, f[1:], g, g[1:]):
         out += [
-            rf"\path[fill=sharedfill,fill opacity=.85,draw=shared,draw opacity=.8,line width=.3pt] ({q(x(lf))},{bottom}) rectangle ({q(x(rf_))},{q(y(lg))});",
-            rf"\path[fill=sharedfill,fill opacity=.85,draw=shared,draw opacity=.8,line width=.3pt] ({left},{q(y(lg))}) rectangle ({q(x(lf))},{q(y(rg))});",
+            rf"\path[fill=sharedfill,draw=shared,draw opacity=.8,line width=.3pt] ({q(x(lf))},{bottom}) rectangle ({q(x(rf_))},{q(y(lg))});",
+            rf"\path[fill=sharedfill,draw=shared,draw opacity=.8,line width=.3pt] ({left},{q(y(lg))}) rectangle ({q(x(lf))},{q(y(rg))});",
             rf"\path[fill=gapfill,draw=gap,draw opacity=.8,line width=.4pt] ({q(x(lf))},{q(y(lg))}) rectangle ({q(x(rf_))},{q(y(rg))});",
         ]
     horizontal, vertical = [(x(f[0]), y(g[0]))], [(x(f[0]), y(g[0]))]
@@ -452,8 +452,8 @@ def ftc_frame(cells: int) -> str:
     primitive = [(px(i/100), y((i/100)**2)) for i in range(101)]
     derivative = [(dx(i/100), y(2*i/100)) for i in range(101)]
     out += [
-        rf"\draw[purple,line width=1.05pt] plot[smooth] coordinates {{{path(primitive)}}};",
-        rf"\draw[purple,line width=1.8pt] ({q(px(1))},{base}) -- ({q(px(1))},{q(y(1))});",
+        rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(primitive)}}};",
+        rf"\draw[ink,line width=1.8pt] ({q(px(1))},{base}) -- ({q(px(1))},{q(y(1))});",
     ]
     mesh = [Fraction(i, cells) for i in range(cells+1)]
     for left, right in zip(mesh, mesh[1:]):
@@ -462,7 +462,7 @@ def ftc_frame(cells: int) -> str:
         )
     out += [
         rf"\draw[curve,line width=1.05pt] plot coordinates {{{path(derivative)}}};",
-        n(px(1)-3, y(1)+11, r"$F(1)-F(0)$", "anchor=south west,text=purple"),
+        n(px(1)-3, y(1)+11, r"$F(1)-F(0)$", "anchor=south west,text=ink"),
         n(pleft+unit+11, base, r"$t$", "anchor=west"),
         n(dleft+unit+11, base, r"$t$", "anchor=west"),
     ]
@@ -506,18 +506,18 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
             left, right, zero = q(x(a)), q(x(b)), q(y(0))
             if lo >= 0:
                 out.extend([
-                    rf"\path[fill=sharedfill,fill opacity=.85] ({left},{zero}) rectangle ({right},{q(y(lo))});",
-                    rf"\path[fill=overfill,fill opacity=.5] ({left},{q(y(lo))}) rectangle ({right},{q(y(hi))});",
+                    rf"\path[fill=sharedfill] ({left},{zero}) rectangle ({right},{q(y(lo))});",
+                    rf"\path[fill=overfill] ({left},{q(y(lo))}) rectangle ({right},{q(y(hi))});",
                 ])
             elif hi <= 0:
                 out.extend([
-                    rf"\path[fill=sharedfill,fill opacity=.85] ({left},{zero}) rectangle ({right},{q(y(hi))});",
-                    rf"\path[fill=underfill,fill opacity=.5] ({left},{q(y(hi))}) rectangle ({right},{q(y(lo))});",
+                    rf"\path[fill=sharedfill] ({left},{zero}) rectangle ({right},{q(y(hi))});",
+                    rf"\path[fill=underfill] ({left},{q(y(hi))}) rectangle ({right},{q(y(lo))});",
                 ])
             else:
                 out.extend([
-                    rf"\path[fill=overfill,fill opacity=.5] ({left},{zero}) rectangle ({right},{q(y(hi))});",
-                    rf"\path[fill=underfill,fill opacity=.5] ({left},{zero}) rectangle ({right},{q(y(lo))});",
+                    rf"\path[fill=overfill] ({left},{zero}) rectangle ({right},{q(y(hi))});",
+                    rf"\path[fill=underfill] ({left},{zero}) rectangle ({right},{q(y(lo))});",
                 ])
             out.extend([
                 rf"\draw[over,draw opacity=.8,line width=.3pt] ({left},{zero}) rectangle ({right},{q(y(hi))});",
@@ -531,7 +531,7 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
     turn = 1.430296653
     gap_values = (sinc(float(turn_left)), sinc(turn), sinc(float(turn_right)))
     gap_lo, gap_hi = min(gap_values), max(gap_values)
-    out.append(rf"\path[fill=gapfill,fill opacity=.72,draw=gap,line width=.55pt] ({q(x(turn_left))},{q(y(gap_lo))}) rectangle ({q(x(turn_right))},{q(y(gap_hi))});")
+    out.append(rf"\path[fill=gapfill,draw=gap,line width=.55pt] ({q(x(turn_left))},{q(y(gap_lo))}) rectangle ({q(x(turn_right))},{q(y(gap_hi))});")
     curve = [(x(i/300), y(sinc(i/300))) for i in range(601)]
     out += [
         rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",

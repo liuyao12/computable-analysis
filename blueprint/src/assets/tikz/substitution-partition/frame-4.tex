@@ -9,27 +9,27 @@
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
-% Integral diagrams have one consistent three-colour vocabulary: blue for an
-% under-only part, yellow for an over-only (or still-unresolved) part, and
+% Integral diagrams use exactly one semantic palette: blue for the
+% lower-only part, yellow for the upper-only (or still unresolved) part, and
 % green for their common part.  The common part is explicit rather than an
-% alpha blend, so it remains visibly distinct after GIF palette quantization.
-\definecolor{cyan}{RGB}{0,84,134}
-\definecolor{cyanfill}{RGB}{0,114,178}
-\definecolor{yellow}{RGB}{184,134,11}
-\definecolor{yellowfill}{RGB}{240,228,66}
-\definecolor{overlap}{RGB}{15,110,67}
-\definecolor{overlapfill}{RGB}{20,153,92}
+% alpha blend, so the three meanings stay distinct after GIF quantization.
+\definecolor{blue}{RGB}{0,114,178}
+\definecolor{bluefill}{RGB}{86,180,233}
+\definecolor{yellow}{RGB}{230,159,0}
+\definecolor{yellowfill}{RGB}{255,218,102}
+\definecolor{green}{RGB}{0,128,84}
+\definecolor{greenfill}{RGB}{89,190,142}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
 \definecolor{yellowedge}{RGB}{202,138,4}
 \definecolor{projection}{RGB}{148,163,184}
-\colorlet{under}{cyan}
-\colorlet{underfill}{cyanfill}
+\colorlet{under}{blue}
+\colorlet{underfill}{bluefill}
 \colorlet{over}{yellow}
 \colorlet{overfill}{yellowfill}
-\colorlet{shared}{overlap}
-\colorlet{sharedfill}{overlapfill}
+\colorlet{shared}{green}
+\colorlet{sharedfill}{greenfill}
 \colorlet{gap}{yellow}
 \colorlet{gapfill}{yellowfill}
 
@@ -44,29 +44,29 @@
 \draw[axis,line width=.75pt] (47,39) -- (314,39);
 \draw[axis,line width=.75pt] (57,31) -- (57,95);
 \path[fill=gapfill] plot[smooth] coordinates {(57,136) (57,136) (58.8984,136.7031) (60.7969,137.4062) (62.6953,138.1094) (64.5938,138.8125) (66.4922,139.5156) (68.3906,140.2188) (70.2891,140.9219) (72.1875,141.625) (74.0859,142.3281) (75.9844,143.0312) (77.8828,143.7344) (79.7812,144.4375) (81.6797,145.1406) (83.5781,145.8438) (85.4766,146.5469) (87.375,147.25) (87.375,136)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (57,136) rectangle (87.375,136);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (57,39) rectangle (60.7969,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (57,136) rectangle (87.375,136);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (57,39) rectangle (60.7969,84);
 \path[fill=gapfill] plot[smooth] coordinates {(87.375,147.25) (87.375,147.25) (89.2734,147.9531) (91.1719,148.6562) (93.0703,149.3594) (94.9688,150.0625) (96.8672,150.7656) (98.7656,151.4688) (100.6641,152.1719) (102.5625,152.875) (104.4609,153.5781) (106.3594,154.2812) (108.2578,154.9844) (110.1562,155.6875) (112.0547,156.3906) (113.9531,157.0938) (115.8516,157.7969) (117.75,158.5) (117.75,147.25)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (87.375,136) rectangle (117.75,147.25);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (60.7969,39) rectangle (72.1875,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (87.375,136) rectangle (117.75,147.25);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (60.7969,39) rectangle (72.1875,84);
 \path[fill=gapfill] plot[smooth] coordinates {(117.75,158.5) (117.75,158.5) (119.6484,159.2031) (121.5469,159.9062) (123.4453,160.6094) (125.3438,161.3125) (127.2422,162.0156) (129.1406,162.7188) (131.0391,163.4219) (132.9375,164.125) (134.8359,164.8281) (136.7344,165.5312) (138.6328,166.2344) (140.5312,166.9375) (142.4297,167.6406) (144.3281,168.3438) (146.2266,169.0469) (148.125,169.75) (148.125,158.5)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (117.75,136) rectangle (148.125,158.5);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (72.1875,39) rectangle (91.1719,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (117.75,136) rectangle (148.125,158.5);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (72.1875,39) rectangle (91.1719,84);
 \path[fill=gapfill] plot[smooth] coordinates {(148.125,169.75) (148.125,169.75) (150.0234,170.4531) (151.9219,171.1562) (153.8203,171.8594) (155.7188,172.5625) (157.6172,173.2656) (159.5156,173.9688) (161.4141,174.6719) (163.3125,175.375) (165.2109,176.0781) (167.1094,176.7812) (169.0078,177.4844) (170.9062,178.1875) (172.8047,178.8906) (174.7031,179.5938) (176.6016,180.2969) (178.5,181) (178.5,169.75)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (148.125,136) rectangle (178.5,169.75);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (91.1719,39) rectangle (117.75,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (148.125,136) rectangle (178.5,169.75);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (91.1719,39) rectangle (117.75,84);
 \path[fill=gapfill] plot[smooth] coordinates {(178.5,181) (178.5,181) (180.3984,181.7031) (182.2969,182.4062) (184.1953,183.1094) (186.0938,183.8125) (187.9922,184.5156) (189.8906,185.2188) (191.7891,185.9219) (193.6875,186.625) (195.5859,187.3281) (197.4844,188.0312) (199.3828,188.7344) (201.2812,189.4375) (203.1797,190.1406) (205.0781,190.8438) (206.9766,191.5469) (208.875,192.25) (208.875,181)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (178.5,136) rectangle (208.875,181);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (117.75,39) rectangle (151.9219,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (178.5,136) rectangle (208.875,181);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (117.75,39) rectangle (151.9219,84);
 \path[fill=gapfill] plot[smooth] coordinates {(208.875,192.25) (208.875,192.25) (210.7734,192.9531) (212.6719,193.6562) (214.5703,194.3594) (216.4688,195.0625) (218.3672,195.7656) (220.2656,196.4688) (222.1641,197.1719) (224.0625,197.875) (225.9609,198.5781) (227.8594,199.2812) (229.7578,199.9844) (231.6562,200.6875) (233.5547,201.3906) (235.4531,202.0938) (237.3516,202.7969) (239.25,203.5) (239.25,192.25)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (208.875,136) rectangle (239.25,192.25);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (151.9219,39) rectangle (193.6875,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (208.875,136) rectangle (239.25,192.25);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (151.9219,39) rectangle (193.6875,84);
 \path[fill=gapfill] plot[smooth] coordinates {(239.25,203.5) (239.25,203.5) (241.1484,204.2031) (243.0469,204.9062) (244.9453,205.6094) (246.8438,206.3125) (248.7422,207.0156) (250.6406,207.7188) (252.5391,208.4219) (254.4375,209.125) (256.3359,209.8281) (258.2344,210.5312) (260.1328,211.2344) (262.0312,211.9375) (263.9297,212.6406) (265.8281,213.3438) (267.7266,214.0469) (269.625,214.75) (269.625,203.5)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (239.25,136) rectangle (269.625,203.5);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (193.6875,39) rectangle (243.0469,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (239.25,136) rectangle (269.625,203.5);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (193.6875,39) rectangle (243.0469,84);
 \path[fill=gapfill] plot[smooth] coordinates {(269.625,214.75) (269.625,214.75) (271.5234,215.4531) (273.4219,216.1562) (275.3203,216.8594) (277.2188,217.5625) (279.1172,218.2656) (281.0156,218.9688) (282.9141,219.6719) (284.8125,220.375) (286.7109,221.0781) (288.6094,221.7812) (290.5078,222.4844) (292.4062,223.1875) (294.3047,223.8906) (296.2031,224.5938) (298.1016,225.2969) (300,226) (300,214.75)} -- cycle;
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (269.625,136) rectangle (300,214.75);
-\path[fill=underfill,fill opacity=.5,draw=under,draw opacity=.8,line width=.4pt] (243.0469,39) rectangle (300,84);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (269.625,136) rectangle (300,214.75);
+\path[fill=underfill,draw=under,draw opacity=.8,line width=.4pt] (243.0469,39) rectangle (300,84);
 \draw[projection,line width=.45pt] (57,132) -- (57,88);
 \draw[axis,line width=.55pt] (57,132.5) -- (57,139.5);
 \draw[axis,line width=.55pt] (57,35.5) -- (57,42.5);

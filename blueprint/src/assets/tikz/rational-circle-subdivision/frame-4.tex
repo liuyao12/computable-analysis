@@ -9,27 +9,27 @@
 \definecolor{curve}{RGB}{30,64,175}
 \definecolor{teal}{RGB}{13,148,136}
 \definecolor{tealfill}{RGB}{176,227,219}
-% Integral diagrams have one consistent three-colour vocabulary: blue for an
-% under-only part, yellow for an over-only (or still-unresolved) part, and
+% Integral diagrams use exactly one semantic palette: blue for the
+% lower-only part, yellow for the upper-only (or still unresolved) part, and
 % green for their common part.  The common part is explicit rather than an
-% alpha blend, so it remains visibly distinct after GIF palette quantization.
-\definecolor{cyan}{RGB}{0,84,134}
-\definecolor{cyanfill}{RGB}{0,114,178}
-\definecolor{yellow}{RGB}{184,134,11}
-\definecolor{yellowfill}{RGB}{240,228,66}
-\definecolor{overlap}{RGB}{15,110,67}
-\definecolor{overlapfill}{RGB}{20,153,92}
+% alpha blend, so the three meanings stay distinct after GIF quantization.
+\definecolor{blue}{RGB}{0,114,178}
+\definecolor{bluefill}{RGB}{86,180,233}
+\definecolor{yellow}{RGB}{230,159,0}
+\definecolor{yellowfill}{RGB}{255,218,102}
+\definecolor{green}{RGB}{0,128,84}
+\definecolor{greenfill}{RGB}{89,190,142}
 \definecolor{orange}{RGB}{234,88,12}
 \definecolor{orangefill}{RGB}{254,215,170}
 \definecolor{purple}{RGB}{126,34,206}
 \definecolor{yellowedge}{RGB}{202,138,4}
 \definecolor{projection}{RGB}{148,163,184}
-\colorlet{under}{cyan}
-\colorlet{underfill}{cyanfill}
+\colorlet{under}{blue}
+\colorlet{underfill}{bluefill}
 \colorlet{over}{yellow}
 \colorlet{overfill}{yellowfill}
-\colorlet{shared}{overlap}
-\colorlet{sharedfill}{overlapfill}
+\colorlet{shared}{green}
+\colorlet{sharedfill}{greenfill}
 \colorlet{gap}{yellow}
 \colorlet{gapfill}{yellowfill}
 
@@ -43,8 +43,8 @@
 \draw[axis,line width=.75pt] (166,52) -- (166,183);
 \draw[curve,line width=1pt] (166,62) -- (166,168);
 \draw[ink,line width=1.2pt] (272,62) arc[start angle=0,end angle=90,radius=106pt];
-\path[fill=overfill,fill opacity=.5] (166,62) -- (272,62) -- (272,75.25) -- (265.5758,100.5455) -- (253.8286,122.5714) -- (238.5263,140.1053) -- (221.5238,152.8571) -- (204.3404,161.234) -- (188,166) -- (173.0667,168) -- (166,168) -- cycle;
-\path[fill=sharedfill,fill opacity=.85] (166,62) -- (272,62) -- (268.7385,88.0923) -- (259.5294,111.8824) -- (245.863,131.6986) -- (229.6,146.8) -- (212.4494,157.2809) -- (195.68,163.76) -- (180.0708,167.0619) -- (166,168) -- cycle;
+\path[fill=overfill] (166,62) -- (272,62) -- (272,75.25) -- (265.5758,100.5455) -- (253.8286,122.5714) -- (238.5263,140.1053) -- (221.5238,152.8571) -- (204.3404,161.234) -- (188,166) -- (173.0667,168) -- (166,168) -- cycle;
+\path[fill=sharedfill] (166,62) -- (272,62) -- (268.7385,88.0923) -- (259.5294,111.8824) -- (245.863,131.6986) -- (229.6,146.8) -- (212.4494,157.2809) -- (195.68,163.76) -- (180.0708,167.0619) -- (166,168) -- cycle;
 \draw[under,draw opacity=.8,line width=.45pt] (166,62) -- (272,62) -- (268.7385,88.0923) -- (259.5294,111.8824) -- (245.863,131.6986) -- (229.6,146.8) -- (212.4494,157.2809) -- (195.68,163.76) -- (180.0708,167.0619) -- (166,168) -- cycle;
 \draw[over,draw opacity=.8,line width=.45pt] (166,62) -- (272,62) -- (272,75.25) -- (265.5758,100.5455) -- (253.8286,122.5714) -- (238.5263,140.1053) -- (221.5238,152.8571) -- (204.3404,161.234) -- (188,166) -- (173.0667,168) -- (166,168) -- cycle;
 \draw[projection,line width=.5pt] (60,62) -- (272,62);
