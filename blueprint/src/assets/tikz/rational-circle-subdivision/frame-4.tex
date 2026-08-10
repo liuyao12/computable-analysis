@@ -1,0 +1,96 @@
+\documentclass{article}
+\usepackage[paperwidth=360pt,paperheight=190pt,margin=0pt,noheadfoot]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\definecolor{ink}{RGB}{28,41,56}
+\definecolor{axis}{RGB}{100,116,139}
+\definecolor{grid}{RGB}{203,213,225}
+\definecolor{curve}{RGB}{30,64,175}
+\definecolor{teal}{RGB}{13,148,136}
+\definecolor{tealfill}{RGB}{176,227,219}
+% Integral diagrams use exactly one semantic palette: blue for the
+% lower-only part, yellow for the upper-only (or still unresolved) part, and
+% green for their common part.  The common part is explicit rather than an
+% alpha blend, so the three meanings stay distinct after GIF quantization.
+\definecolor{blue}{RGB}{0,114,178}
+\definecolor{bluefill}{RGB}{86,180,233}
+\definecolor{yellow}{RGB}{230,159,0}
+\definecolor{yellowfill}{RGB}{255,218,102}
+\definecolor{green}{RGB}{0,128,84}
+\definecolor{greenfill}{RGB}{89,190,142}
+\definecolor{orange}{RGB}{234,88,12}
+\definecolor{orangefill}{RGB}{254,215,170}
+\definecolor{purple}{RGB}{126,34,206}
+\definecolor{yellowedge}{RGB}{202,138,4}
+\definecolor{projection}{RGB}{148,163,184}
+\colorlet{under}{blue}
+\colorlet{underfill}{bluefill}
+\colorlet{over}{yellow}
+\colorlet{overfill}{yellowfill}
+\colorlet{shared}{green}
+\colorlet{sharedfill}{greenfill}
+\colorlet{gap}{yellow}
+\colorlet{gapfill}{yellowfill}
+
+\pagestyle{empty}
+\setlength\parindent{0pt}
+\setlength\topskip{0pt}
+\begin{document}
+\noindent\begin{tikzpicture}[baseline=(current bounding box.north),x=1pt,y=1pt,line cap=round,line join=round]
+\useasboundingbox (0,0) rectangle (360,190);
+\draw[axis,line width=.75pt] (48,62) -- (288,62);
+\draw[axis,line width=.75pt] (166,52) -- (166,183);
+\draw[curve,line width=1pt] (166,62) -- (166,168);
+\draw[ink,line width=1.2pt] (272,62) arc[start angle=0,end angle=90,radius=106pt];
+\path[fill=overfill] (166,62) -- (272,62) -- (272,75.25) -- (265.5758,100.5455) -- (253.8286,122.5714) -- (238.5263,140.1053) -- (221.5238,152.8571) -- (204.3404,161.234) -- (188,166) -- (173.0667,168) -- (166,168) -- cycle;
+\path[fill=sharedfill] (166,62) -- (272,62) -- (268.7385,88.0923) -- (259.5294,111.8824) -- (245.863,131.6986) -- (229.6,146.8) -- (212.4494,157.2809) -- (195.68,163.76) -- (180.0708,167.0619) -- (166,168) -- cycle;
+\draw[under,draw opacity=.8,line width=.45pt] (166,62) -- (272,62) -- (268.7385,88.0923) -- (259.5294,111.8824) -- (245.863,131.6986) -- (229.6,146.8) -- (212.4494,157.2809) -- (195.68,163.76) -- (180.0708,167.0619) -- (166,168) -- cycle;
+\draw[over,draw opacity=.8,line width=.45pt] (166,62) -- (272,62) -- (272,75.25) -- (265.5758,100.5455) -- (253.8286,122.5714) -- (238.5263,140.1053) -- (221.5238,152.8571) -- (204.3404,161.234) -- (188,166) -- (173.0667,168) -- (166,168) -- cycle;
+\draw[projection,line width=.5pt] (60,62) -- (272,62);
+\draw[grid,line width=.5pt] (163,62) -- (169,62);
+\fill[axis] (166,62) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (268.7385,88.0923);
+\draw[grid,line width=.5pt] (163,75.25) -- (169,75.25);
+\fill[axis] (166,75.25) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (259.5294,111.8824);
+\draw[grid,line width=.5pt] (163,88.5) -- (169,88.5);
+\fill[axis] (166,88.5) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (245.863,131.6986);
+\draw[grid,line width=.5pt] (163,101.75) -- (169,101.75);
+\fill[axis] (166,101.75) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (229.6,146.8);
+\draw[grid,line width=.5pt] (163,115) -- (169,115);
+\fill[axis] (166,115) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (212.4494,157.2809);
+\draw[grid,line width=.5pt] (163,128.25) -- (169,128.25);
+\fill[axis] (166,128.25) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (195.68,163.76);
+\draw[grid,line width=.5pt] (163,141.5) -- (169,141.5);
+\fill[axis] (166,141.5) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (180.0708,167.0619);
+\draw[grid,line width=.5pt] (163,154.75) -- (169,154.75);
+\fill[axis] (166,154.75) circle[radius=1.3pt];
+\draw[projection,line width=.5pt] (60,62) -- (166,168);
+\draw[grid,line width=.5pt] (163,168) -- (169,168);
+\fill[axis] (166,168) circle[radius=1.3pt];
+\draw[under,line width=1.1pt] plot coordinates {(272,62) (268.7385,88.0923) (259.5294,111.8824) (245.863,131.6986) (229.6,146.8) (212.4494,157.2809) (195.68,163.76) (180.0708,167.0619) (166,168)};
+\draw[over,line width=1.1pt] plot coordinates {(272,62) (272,75.25) (265.5758,100.5455) (253.8286,122.5714) (238.5263,140.1053) (221.5238,152.8571) (204.3404,161.234) (188,166) (173.0667,168) (166,168)};
+\fill[ink] (272,62) circle[radius=1.65pt];
+\fill[ink] (268.7385,88.0923) circle[radius=1.65pt];
+\fill[ink] (259.5294,111.8824) circle[radius=1.65pt];
+\fill[ink] (245.863,131.6986) circle[radius=1.65pt];
+\fill[ink] (229.6,146.8) circle[radius=1.65pt];
+\fill[ink] (212.4494,157.2809) circle[radius=1.65pt];
+\fill[ink] (195.68,163.76) circle[radius=1.65pt];
+\fill[ink] (180.0708,167.0619) circle[radius=1.65pt];
+\fill[ink] (166,168) circle[radius=1.65pt];
+\fill[ink] (166,62) circle[radius=1.7pt];
+\fill[ink] (60,62) circle[radius=1.7pt];
+\node[font=\small,text=ink,anchor=north] at (60,49) {$(-1,0)$};
+\node[font=\small,text=ink,anchor=north] at (166,49) {$0$};
+\node[font=\small,text=ink,anchor=east] at (154,168) {$1$};
+\node[font=\small,text=ink,anchor=west] at (283,60) {$P(0)$};
+\node[font=\small,text=ink,anchor=west] at (177,170) {$P(1)$};
+\end{tikzpicture}
+\end{document}

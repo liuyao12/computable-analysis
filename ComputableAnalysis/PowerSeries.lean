@@ -39,9 +39,19 @@ abbrev Coeffs := Nat -> Rat
 
 def altSign (k : Nat) : Rat := if k % 2 = 0 then 1 else -1
 
-/-- Formal derivative of a rational coefficient stream. -/
-def derivative (c : Coeffs) : Coeffs :=
+/-- Algebraic coefficient shift of a rational power-series stream.
+
+This records the coefficients which would be the linear Taylor coefficients
+of a differentiated function.  It is deliberately defined before any
+convergence, remainder estimate, or interval-analytic derivative claim. -/
+def coefficientShift (c : Coeffs) : Coeffs :=
   fun n => ((n + 1 : Nat) : Rat) * c (n + 1)
+
+/-- Compatibility name for the coefficient-shift operation used by older
+finite algebra.  New declarations should prefer `coefficientShift`: an
+analytic derivative is introduced only after a quantitative remainder
+certificate. -/
+def derivative (c : Coeffs) : Coeffs := coefficientShift c
 
 def neg (c : Coeffs) : Coeffs :=
   fun n => -c n
@@ -52,6 +62,11 @@ def add (c d : Coeffs) : Coeffs :=
 def scaleRat (r : Rat) (c : Coeffs) : Coeffs :=
   fun n => r * c n
 
+/-- A checked algebraic coefficient-shift relation. -/
+def HasCoefficientShift (F f : Coeffs) : Prop :=
+  coefficientShift F = f
+
+/-- Compatibility name for the former formal-derivative predicate. -/
 def HasFormalDerivative (F f : Coeffs) : Prop :=
   derivative F = f
 
@@ -160,13 +175,13 @@ theorem coeffsFromDerivativeAtZero_hasFormalDerivative (F0 : Rat) (dF : Coeffs) 
     HasFormalDerivative (coeffsFromDerivativeAtZero F0 dF) dF := by
   unfold HasFormalDerivative
   funext n
-  dsimp [derivative, coeffsFromDerivativeAtZero]
+  dsimp [derivative, coefficientShift, coeffsFromDerivativeAtZero]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
 theorem derivative_neg (c : Coeffs) :
     derivative (neg c) = neg (derivative c) := by
   funext n
-  dsimp [derivative, neg]
+  dsimp [derivative, coefficientShift, neg]
   rw [Rat.mul_neg]
 
 theorem neg_neg (c : Coeffs) :
@@ -178,13 +193,13 @@ theorem neg_neg (c : Coeffs) :
 theorem derivative_add (c d : Coeffs) :
     derivative (add c d) = add (derivative c) (derivative d) := by
   funext n
-  dsimp [derivative, add]
+  dsimp [derivative, coefficientShift, add]
   rw [Rat.mul_add]
 
 theorem derivative_scaleRat (r : Rat) (c : Coeffs) :
     derivative (scaleRat r c) = scaleRat r (derivative c) := by
   funext n
-  dsimp [derivative, scaleRat]
+  dsimp [derivative, coefficientShift, scaleRat]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
 theorem HasFormalDerivative.add {F f G g : Coeffs}
@@ -203,7 +218,7 @@ theorem monomialShiftedCoeff_derivative (k : Nat) :
     HasFormalDerivative (monomialShiftedCoeff k) (monomialCoeff k) := by
   unfold HasFormalDerivative
   funext n
-  dsimp [derivative, monomialShiftedCoeff, monomialCoeff]
+  dsimp [derivative, coefficientShift, monomialShiftedCoeff, monomialCoeff]
   by_cases hn : n = k
   · subst n
     simp
@@ -263,7 +278,7 @@ that the boxed algorithm `exp.ps` has derivative `exp.ps`. -/
 theorem expCoeff_derivative :
     derivative expCoeff = expCoeff := by
   funext n
-  dsimp [derivative, expCoeff]
+  dsimp [derivative, coefficientShift, expCoeff]
   rw [factorialRat_succ n]
   have hn : (((n + 1 : Nat) : Rat) ≠ 0) := natCast_succ_ne_zero n
   have hf : factorialRat n ≠ 0 := by
@@ -281,7 +296,7 @@ theorem expCoeff_second_derivative :
 theorem sinCoeff_derivative :
     derivative sinCoeff = cosCoeff := by
   funext n
-  dsimp [derivative]
+  dsimp [derivative, coefficientShift]
   rw [sinCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -289,7 +304,7 @@ theorem sinCoeff_derivative :
 theorem cosCoeff_derivative :
     derivative cosCoeff = neg sinCoeff := by
   funext n
-  dsimp [derivative, neg]
+  dsimp [derivative, coefficientShift, neg]
   rw [cosCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -306,7 +321,7 @@ hyperbolic cosine. -/
 theorem sinhCoeff_derivative :
     derivative sinhCoeff = coshCoeff := by
   funext n
-  dsimp [derivative]
+  dsimp [derivative, coefficientShift]
   rw [sinhCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -315,7 +330,7 @@ hyperbolic sine. -/
 theorem coshCoeff_derivative :
     derivative coshCoeff = sinhCoeff := by
   funext n
-  dsimp [derivative]
+  dsimp [derivative, coefficientShift]
   rw [coshCoeff]
   exact mul_div_cancel_left (natCast_succ_ne_zero n)
 
@@ -351,6 +366,62 @@ theorem coshCoeff_hasFormalDerivative :
 /-- First-year calculus table entry: the formal derivative of `sinh` is `cosh`. -/
 theorem sinhCoeff_hasFormalDerivative :
     HasFormalDerivative sinhCoeff coshCoeff :=
+  sinhCoeff_derivative
+
+/-- Primary coefficient-shift names for the finite series algebra.
+
+The formal-derivative declarations above remain stable compatibility API; the
+following aliases are the names used by new finite Taylor constructions. -/
+theorem coefficientShift_neg (c : Coeffs) :
+    coefficientShift (neg c) = neg (coefficientShift c) :=
+  derivative_neg c
+
+theorem coefficientShift_add (c d : Coeffs) :
+    coefficientShift (add c d) =
+      add (coefficientShift c) (coefficientShift d) :=
+  derivative_add c d
+
+theorem coefficientShift_scaleRat (r : Rat) (c : Coeffs) :
+    coefficientShift (scaleRat r c) = scaleRat r (coefficientShift c) :=
+  derivative_scaleRat r c
+
+theorem hasCoefficientShift_add {F f G g : Coeffs}
+    (hF : HasCoefficientShift F f) (hG : HasCoefficientShift G g) :
+    HasCoefficientShift (add F G) (add f g) := by
+  change HasFormalDerivative F f at hF
+  change HasFormalDerivative G g at hG
+  change HasFormalDerivative (add F G) (add f g)
+  exact HasFormalDerivative.add hF hG
+
+theorem hasCoefficientShift_scaleRat (r : Rat) {F f : Coeffs}
+    (hF : HasCoefficientShift F f) :
+    HasCoefficientShift (scaleRat r F) (scaleRat r f) := by
+  change HasFormalDerivative F f at hF
+  change HasFormalDerivative (scaleRat r F) (scaleRat r f)
+  exact HasFormalDerivative.scaleRat r hF
+
+theorem monomialShiftedCoeff_hasCoefficientShift (k : Nat) :
+    HasCoefficientShift (monomialShiftedCoeff k) (monomialCoeff k) :=
+  monomialShiftedCoeff_derivative k
+
+theorem expCoeff_hasCoefficientShift :
+    HasCoefficientShift expCoeff expCoeff :=
+  expCoeff_derivative
+
+theorem sinCoeff_hasCoefficientShift :
+    HasCoefficientShift sinCoeff cosCoeff :=
+  sinCoeff_derivative
+
+theorem neg_cosCoeff_hasCoefficientShift :
+    HasCoefficientShift (neg cosCoeff) sinCoeff :=
+  neg_cosCoeff_hasFormalDerivative
+
+theorem coshCoeff_hasCoefficientShift :
+    HasCoefficientShift coshCoeff sinhCoeff :=
+  coshCoeff_derivative
+
+theorem sinhCoeff_hasCoefficientShift :
+    HasCoefficientShift sinhCoeff coshCoeff :=
   sinhCoeff_derivative
 
 end FormalPowerSeries
@@ -455,6 +526,23 @@ def factorialTailPartial (C : Rat) (N : Nat) : Nat -> Rat
   | 0 => 0
   | k + 1 => factorialTailPartial C N k + factorialTailTerm C (N + k)
 
+/- Splitting a finite factorial prefix after any prescribed number of terms
+is an exact rational identity.  This is the finite bookkeeping lemma behind
+uniform bounds for parameter-sensitive power-series prefixes. -/
+theorem factorialTailPartial_add (C : Rat) (N a b : Nat) :
+    factorialTailPartial C N (a + b) =
+      factorialTailPartial C N a + factorialTailPartial C (N + a) b := by
+  induction b with
+  | zero =>
+      rw [Nat.add_zero, factorialTailPartial]
+      grind [Rat.add_zero]
+  | succ b ih =>
+      rw [show a + (b + 1) = (a + b) + 1 by omega]
+      rw [factorialTailPartial, ih, factorialTailPartial]
+      have hindex : N + (a + b) = N + a + b := by omega
+      rw [hindex]
+      grind [Rat.add_assoc]
+
 theorem factorialRat_pos (n : Nat) : 0 < factorialRat n := by
   unfold factorialRat
   exact_mod_cast (show 0 < factorial n from by
@@ -469,6 +557,51 @@ theorem factorialTailTerm_nonneg {C : Rat} (hC : 0 <= C) (n : Nat) :
   unfold factorialTailTerm
   rw [Rat.div_def]
   exact Rat.mul_nonneg (Rat.pow_nonneg hC)
+    (Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos n)))
+
+/- A finite factorial prefix with nonnegative coefficient bound grows with
+its number of terms.  This is a statement about finite rational sums only. -/
+theorem factorialTailPartial_mono {C : Rat} (hC : 0 <= C) (N : Nat) :
+    forall k m : Nat, k <= m ->
+      factorialTailPartial C N k <= factorialTailPartial C N m
+  | k, 0, hkm => by
+      have hk : k = 0 := by omega
+      subst k
+      exact Rat.le_refl
+  | k, m + 1, hkm => by
+      by_cases hlast : k = m + 1
+      · subst k
+        exact Rat.le_refl
+      · have hkm' : k <= m := by omega
+        have ih := factorialTailPartial_mono hC N k m hkm'
+        calc
+          factorialTailPartial C N k <= factorialTailPartial C N m := ih
+          _ <= factorialTailPartial C N (m + 1) := by
+            rw [factorialTailPartial]
+            have hterm := factorialTailTerm_nonneg hC (N + m)
+            grind [Rat.sub_eq_add_neg]
+
+/-- The finite factorial majorant is monotone in its nonnegative coefficient
+bound.  This is the elementary uniformity fact used when a power-series
+algorithm receives a rational parameter only through a certified enclosing
+interval. -/
+theorem factorialTailTerm_mono {C D : Rat}
+    (hC : 0 <= C) (hCD : C <= D) (n : Nat) :
+    factorialTailTerm C n <= factorialTailTerm D n := by
+  have hD : 0 <= D := Rat.le_trans hC hCD
+  have hpow : C ^ n <= D ^ n := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        rw [Rat.pow_succ, Rat.pow_succ]
+        calc
+          C ^ n * C <= D ^ n * C :=
+            Rat.mul_le_mul_of_nonneg_right ih hC
+          _ <= D ^ n * D :=
+            Rat.mul_le_mul_of_nonneg_left hCD (Rat.pow_nonneg hD)
+  unfold factorialTailTerm
+  rw [Rat.div_def, Rat.div_def]
+  exact Rat.mul_le_mul_of_nonneg_right hpow
     (Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos n)))
 
 /-- Successive factorial terms differ by the expected rational ratio. -/
@@ -675,7 +808,10 @@ private theorem nat_succ_le_two_pow (n : Nat) : n + 1 <= 2 ^ n := by
           rw [Nat.pow_succ]
           omega
 
-private theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
+/-- The rational half-power and reciprocal dyadic schedules coincide exactly.
+This connects an executable natural precision budget with a geometric
+majorant, without an appeal to an ambient limit. -/
+theorem half_pow_eq_one_div_nat_two_pow (n : Nat) :
     ((1 : Rat) / 2) ^ n = 1 / (((2 ^ n : Nat) : Rat)) := by
   induction n with
   | zero => native_decide
@@ -786,7 +922,365 @@ theorem factorialTailPartial_bound_at_start {C : Rat} (hC : 0 <= C) (k : Nat) :
       2 * factorialTailTerm C (factorialTailStart C) :=
   factorialTailPartial_bound hC (factorialTailStart_satisfies C) k
 
+/- The finite prefixes of the factorial series at coefficient bound 2
+are all below 8.  The first five terms total 7; the remaining finite
+tail is bounded by 8/15.  This deliberately coarse uniform constant is
+useful for a represented input ranging over [-2,2]. -/
+theorem factorialTailPartial_two_le_eight (k : Nat) :
+    factorialTailPartial 2 0 k <= 8 := by
+  by_cases hk : k <= 5
+  · calc
+      factorialTailPartial 2 0 k <= factorialTailPartial 2 0 5 :=
+        factorialTailPartial_mono (by native_decide) 0 k 5 hk
+      _ <= 8 := by native_decide
+  · have hfive : 5 <= k := by omega
+    obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hfive
+    rw [hd, factorialTailPartial_add]
+    have htail := factorialTailPartial_bound_at_start (C := (2 : Rat))
+      (by native_decide) d
+    have htail' : factorialTailPartial 2 5 d <= (8 : Rat) / 15 := by
+      have hstart : factorialTailStart (2 : Rat) = 5 := by native_decide
+      rw [hstart] at htail
+      calc
+        factorialTailPartial 2 5 d <= 2 * factorialTailTerm 2 5 := htail
+        _ = (8 : Rat) / 15 := by native_decide
+    calc
+      factorialTailPartial 2 0 5 + factorialTailPartial 2 (0 + 5) d <=
+          7 + (8 : Rat) / 15 := by
+            apply rat_add_le_add
+            · native_decide
+            · simpa using htail'
+      _ <= 8 := by native_decide
+
+/- Absolute value commutes with every natural rational power. -/
+theorem qabs_pow_eq_pow_qabs (x : Rat) : forall n : Nat,
+    qabs (x ^ n) = qabs x ^ n
+  | 0 => by
+      have hzero : qabs (1 : Rat) = 1 := by
+        rw [qabs_eq_self_of_nonneg (by native_decide)]
+      simpa using hzero
+  | n + 1 => by
+      rw [Rat.pow_succ, qabs_mul, qabs_pow_eq_pow_qabs, Rat.pow_succ]
+
+/- A rational power is bounded by the corresponding power of any
+nonnegative absolute-value bound. -/
+theorem qabs_pow_le_pow {x B : Rat} (hB : 0 <= B)
+    (hx : qabs x <= B) (n : Nat) :
+    qabs (x ^ n) <= B ^ n := by
+  rw [qabs_pow_eq_pow_qabs]
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Rat.pow_succ, Rat.pow_succ]
+      calc
+        qabs x ^ n * qabs x <= B ^ n * qabs x :=
+          Rat.mul_le_mul_of_nonneg_right ih (qabs_nonneg x)
+        _ <= B ^ n * B :=
+          Rat.mul_le_mul_of_nonneg_left hx (Rat.pow_nonneg hB)
+
+/- The finite difference of two rational powers has an explicit
+Lipschitz bound on any symmetric rational box of radius at least one.
+The proof is a direct finite recurrence, with no completed-real mean-value
+theorem. -/
+theorem qabs_pow_sub_le_lipschitz {x y B : Rat}
+    (hB0 : 0 <= B) (hBone : 1 <= B)
+    (hx : qabs x <= B) (hy : qabs y <= B) (n : Nat) :
+    qabs (x ^ n - y ^ n) <=
+      qabs (x - y) * (n : Rat) * B ^ n := by
+  induction n with
+  | zero =>
+      have hdiff : x ^ 0 - y ^ 0 = (0 : Rat) := by
+        rw [Rat.pow_zero, Rat.pow_zero]
+        native_decide
+      rw [hdiff, qabs_eq_self_of_nonneg (by native_decide)]
+      change (0 : Rat) <= qabs (x - y) * (0 : Rat) * B ^ 0
+      rw [Rat.mul_zero, Rat.zero_mul]
+      exact Rat.le_refl
+  | succ n ih =>
+      have hyPow := qabs_pow_le_pow hB0 hy n
+      have hdelta : 0 <= qabs (x - y) := qabs_nonneg _
+      have hpow0 : 0 <= B ^ n := Rat.pow_nonneg hB0
+      have hleft0 : 0 <= qabs (x - y) * (n : Rat) * B ^ n := by
+        exact Rat.mul_nonneg (Rat.mul_nonneg hdelta
+          (by exact_mod_cast Nat.zero_le n)) hpow0
+      have hright0 : 0 <= B ^ n * qabs (x - y) :=
+        Rat.mul_nonneg hpow0 hdelta
+      have hdecompose :
+          x ^ (n + 1) - y ^ (n + 1) =
+            (x ^ n - y ^ n) * x + y ^ n * (x - y) := by
+        rw [Rat.pow_succ, Rat.pow_succ]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+          Rat.mul_comm]
+      rw [hdecompose]
+      calc
+        qabs ((x ^ n - y ^ n) * x + y ^ n * (x - y)) <=
+            qabs ((x ^ n - y ^ n) * x) + qabs (y ^ n * (x - y)) :=
+          qabs_add_le _ _
+        _ = qabs (x ^ n - y ^ n) * qabs x +
+              qabs (y ^ n) * qabs (x - y) := by
+            rw [qabs_mul, qabs_mul]
+        _ <= (qabs (x - y) * (n : Rat) * B ^ n) * B +
+              B ^ n * qabs (x - y) :=
+          rat_add_le_add
+            (Rat.le_trans
+              (Rat.mul_le_mul_of_nonneg_right ih (qabs_nonneg x))
+              (Rat.mul_le_mul_of_nonneg_left hx hleft0))
+            (Rat.mul_le_mul_of_nonneg_right hyPow hdelta)
+        _ <= (qabs (x - y) * (n : Rat) * B ^ n) * B +
+              (B ^ n * qabs (x - y)) * B :=
+          rat_add_le_add Rat.le_refl
+            (by
+              calc
+                B ^ n * qabs (x - y) = (B ^ n * qabs (x - y)) * 1 := by
+                  rw [Rat.mul_one]
+                _ <= (B ^ n * qabs (x - y)) * B :=
+                  Rat.mul_le_mul_of_nonneg_left hBone hright0)
+        _ = qabs (x - y) * ((n + 1 : Nat) : Rat) * B ^ (n + 1) := by
+          rw [Rat.pow_succ]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+/- Dividing the (n+1)-st power difference by its factorial leaves the
+shifted factorial majorant which will be summed in a rotation-prefix
+Lipschitz certificate. -/
+theorem qabs_power_div_factorial_sub_le_two {x y : Rat}
+    (hx : qabs x <= 2) (hy : qabs y <= 2) (n : Nat) :
+    qabs (x ^ (n + 1) / factorialRat (n + 1) -
+      y ^ (n + 1) / factorialRat (n + 1)) <=
+      qabs (x - y) * 2 * factorialTailTerm 2 n := by
+  have hpow := qabs_pow_sub_le_lipschitz
+    (x := x) (y := y) (B := (2 : Rat))
+    (by native_decide) (by native_decide) hx hy (n + 1)
+  have hfacpos : 0 < factorialRat (n + 1) := factorialRat_pos _
+  have hinv : 0 <= (factorialRat (n + 1))⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hfacpos)
+  have hrewrite :
+      x ^ (n + 1) / factorialRat (n + 1) -
+          y ^ (n + 1) / factorialRat (n + 1) =
+        (x ^ (n + 1) - y ^ (n + 1)) * (factorialRat (n + 1))⁻¹ := by
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+  rw [hrewrite, qabs_mul, qabs_eq_self_of_nonneg hinv]
+  calc
+    qabs (x ^ (n + 1) - y ^ (n + 1)) *
+        (factorialRat (n + 1))⁻¹ <=
+        (qabs (x - y) * ((n + 1 : Nat) : Rat) * 2 ^ (n + 1)) *
+          (factorialRat (n + 1))⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_right hpow hinv
+    _ = qabs (x - y) * 2 * factorialTailTerm 2 n := by
+      have hnpos : 0 < ((n + 1 : Nat) : Rat) := by
+        exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+      have hcancel : ((n + 1 : Nat) : Rat) *
+          ((n + 1 : Nat) : Rat)⁻¹ = 1 :=
+        Rat.mul_inv_cancel _ (Rat.ne_of_gt hnpos)
+      unfold factorialTailTerm
+      rw [Rat.pow_succ, FormalPowerSeries.factorialRat_succ, Rat.div_def,
+        Rat.inv_mul_rev]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
 end RationalMajorant
+
+/-!
+## Finite polynomial secants
+
+The analytic power-series derivative theorem ultimately reduces to finite
+polynomial difference quotients plus a separately certified tail.  This small
+namespace records that rational algebra directly.  It deliberately does not
+invoke a mean-value theorem or a completed real line.
+-/
+
+namespace FinitePolynomial
+
+/-- The exact finite secant recurrence for the monomial `x^n`.
+
+At successor degree it peels off the factor `x + h`; when `h` is nonzero,
+`powerSecant x h n` is literally `((x+h)^n - x^n) / h`. -/
+def powerSecant (x h : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => (x + h) ^ n + x * powerSecant x h n
+
+/-- The derivative polynomial associated with `x^n`, in recurrence form.
+Keeping the zero case explicit avoids a predecessor convention at degree zero. -/
+def powerDerivative (x : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => x ^ n + x * powerDerivative x n
+
+/-- A recursively accumulated error coefficient for the finite secant.
+For inputs bounded by `C`, the error is at most this coefficient times the
+absolute step. -/
+def powerSecantErrorBound (C : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => (n : Rat) * C ^ n + C * powerSecantErrorBound C n
+
+/-- The recurrence is the exact rational difference quotient of a monomial. -/
+theorem powerSecant_eq_differenceQuotient (x h : Rat) (hh : h ≠ 0) :
+    forall n : Nat,
+      ((x + h) ^ n - x ^ n) / h = powerSecant x h n
+  | 0 => by
+      simp only [Rat.pow_zero, powerSecant]
+      rw [Rat.sub_self]
+      rw [Rat.div_def]
+      exact Rat.zero_mul _
+  | n + 1 => by
+      rw [Rat.pow_succ, Rat.pow_succ, powerSecant,
+        ← powerSecant_eq_differenceQuotient x h hh n, Rat.div_def]
+      have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_comm]
+
+/-- The recurrence agrees with the familiar monomial derivative formula. -/
+theorem powerDerivative_succ (x : Rat) (n : Nat) :
+    powerDerivative x (n + 1) = ((n + 1 : Nat) : Rat) * x ^ n := by
+  induction n with
+  | zero =>
+      simp [powerDerivative]
+      grind
+  | succ n ih =>
+      rw [show n + 2 = (n + 1) + 1 by omega, powerDerivative,
+        ih, Rat.pow_succ]
+      have hcast : (((n + 2 : Nat) : Rat)) = (n : Rat) + 2 := by
+        exact_mod_cast (by omega : n + 2 = n + 2)
+      have hcast' : (((n + 1 : Nat) : Rat)) = (n : Rat) + 1 := by
+        exact_mod_cast (by omega : n + 1 = n + 1)
+      rw [hcast, hcast']
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem powerSecantErrorBound_nonneg {C : Rat} (hC : 0 <= C) :
+    forall n : Nat, 0 <= powerSecantErrorBound C n
+  | 0 => by simp [powerSecantErrorBound]
+  | n + 1 => by
+      rw [powerSecantErrorBound]
+      exact Rat.add_nonneg
+        (Rat.mul_nonneg
+          (by exact_mod_cast Nat.zero_le n)
+          (Rat.pow_nonneg hC))
+        (Rat.mul_nonneg hC (powerSecantErrorBound_nonneg hC n))
+
+/-- On a rational box of radius `C >= 1`, the finite monomial secant differs
+from its derivative polynomial by at most `|h|` times the explicit recursive
+coefficient.  This is the quantitative finite-difference estimate needed
+before taking any factorial-series tail into account. -/
+theorem qabs_powerSecant_sub_powerDerivative_le
+    {x h C : Rat} (hC0 : 0 <= C) (hC1 : 1 <= C)
+    (hx : qabs x <= C) (hxh : qabs (x + h) <= C) :
+    forall n : Nat,
+      qabs (powerSecant x h n - powerDerivative x n) <=
+        qabs h * powerSecantErrorBound C n
+  | 0 => by
+      simp only [powerSecant, powerDerivative, powerSecantErrorBound,
+        Rat.mul_zero]
+      rw [show (0 : Rat) - 0 = 0 by native_decide,
+        qabs_eq_self_of_nonneg (by native_decide)]
+      exact Rat.le_refl
+  | n + 1 => by
+      have hpow := RationalMajorant.qabs_pow_sub_le_lipschitz
+        (x := x + h) (y := x) (B := C) hC0 hC1 hxh hx n
+      have hstep : qabs ((x + h) - x) = qabs h := by
+        have heq : (x + h) - x = h := by
+          grind [Rat.sub_eq_add_neg]
+        rw [heq]
+      rw [hstep] at hpow
+      have hbound0 : 0 <= powerSecantErrorBound C n :=
+        powerSecantErrorBound_nonneg hC0 n
+      have hh0 : 0 <= qabs h := qabs_nonneg _
+      have hproduct0 : 0 <= qabs h * powerSecantErrorBound C n :=
+        Rat.mul_nonneg hh0 hbound0
+      have hrec := qabs_powerSecant_sub_powerDerivative_le
+        hC0 hC1 hx hxh n
+      have hscaled :
+          qabs x * qabs (powerSecant x h n - powerDerivative x n) <=
+            C * (qabs h * powerSecantErrorBound C n) := by
+        calc
+          qabs x * qabs (powerSecant x h n - powerDerivative x n) <=
+              qabs x * (qabs h * powerSecantErrorBound C n) :=
+            Rat.mul_le_mul_of_nonneg_left hrec (qabs_nonneg x)
+          _ <= C * (qabs h * powerSecantErrorBound C n) :=
+            Rat.mul_le_mul_of_nonneg_right hx hproduct0
+      have hdecompose :
+          powerSecant x h (n + 1) - powerDerivative x (n + 1) =
+            ((x + h) ^ n - x ^ n) +
+              x * (powerSecant x h n - powerDerivative x n) := by
+        rw [powerSecant, powerDerivative]
+        grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+          Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+      rw [hdecompose]
+      calc
+        qabs
+            ((x + h) ^ n - x ^ n +
+              x * (powerSecant x h n - powerDerivative x n)) <=
+            qabs ((x + h) ^ n - x ^ n) +
+              qabs (x * (powerSecant x h n - powerDerivative x n)) :=
+          qabs_add_le _ _
+        _ = qabs ((x + h) ^ n - x ^ n) +
+              qabs x * qabs (powerSecant x h n - powerDerivative x n) := by
+          rw [qabs_mul]
+        _ <= qabs h * (n : Rat) * C ^ n +
+              C * (qabs h * powerSecantErrorBound C n) :=
+          rat_add_le_add hpow hscaled
+        _ = qabs h * powerSecantErrorBound C (n + 1) := by
+          rw [powerSecantErrorBound]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The preceding estimate written directly for the literal rational quotient. -/
+theorem qabs_power_differenceQuotient_sub_derivative_le
+    {x h C : Rat} (hh : h ≠ 0) (hC0 : 0 <= C) (hC1 : 1 <= C)
+    (hx : qabs x <= C) (hxh : qabs (x + h) <= C) (n : Nat) :
+    qabs (((x + h) ^ n - x ^ n) / h - powerDerivative x n) <=
+      qabs h * powerSecantErrorBound C n := by
+  rw [powerSecant_eq_differenceQuotient x h hh n]
+  exact qabs_powerSecant_sub_powerDerivative_le hC0 hC1 hx hxh n
+
+/-- The conventional normalized monomial form of the finite secant estimate.
+Thus the rational polynomial `x^(n+1)/(n+1)` has derivative `x^n` with an
+explicit linear-in-`|h|` error on every supplied bounded box. -/
+theorem qabs_normalized_power_differenceQuotient_sub_monomial_le
+    {x h C : Rat} (hh : h ≠ 0) (hC0 : 0 <= C) (hC1 : 1 <= C)
+    (hx : qabs x <= C) (hxh : qabs (x + h) <= C) (n : Nat) :
+    qabs
+        ((((x + h) ^ (n + 1) / ((n + 1 : Nat) : Rat)) -
+          x ^ (n + 1) / ((n + 1 : Nat) : Rat)) / h - x ^ n) <=
+      qabs h * powerSecantErrorBound C (n + 1) := by
+  let d : Rat := ((n + 1 : Nat) : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hdne : d ≠ 0 := Rat.ne_of_gt hdpos
+  have hdone : (1 : Rat) <= d := by
+    dsimp [d]
+    exact_mod_cast (Nat.succ_le_succ (Nat.zero_le n))
+  have hinv0 : 0 <= d⁻¹ := Rat.le_of_lt ((Rat.inv_pos).2 hdpos)
+  have hinvle : d⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := d)
+    · calc
+        d⁻¹ * d = 1 := Rat.inv_mul_cancel d hdne
+        _ <= 1 * d := by simpa using hdone
+    · exact hdpos
+  have hraw := qabs_power_differenceQuotient_sub_derivative_le
+    (x := x) (h := h) (C := C) hh hC0 hC1 hx hxh (n + 1)
+  rw [powerDerivative_succ] at hraw
+  have hrewrite :
+      ((x + h) ^ (n + 1) / d - x ^ (n + 1) / d) / h - x ^ n =
+        (((x + h) ^ (n + 1) - x ^ (n + 1)) / h - d * x ^ n) * d⁻¹ := by
+    rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+    have hcancel : d * d⁻¹ = 1 := Rat.mul_inv_cancel d hdne
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_comm]
+  have hbound0 : 0 <= powerSecantErrorBound C (n + 1) :=
+    powerSecantErrorBound_nonneg hC0 _
+  have hright0 : 0 <= qabs h * powerSecantErrorBound C (n + 1) :=
+    Rat.mul_nonneg (qabs_nonneg _) hbound0
+  change qabs
+      (((x + h) ^ (n + 1) / d - x ^ (n + 1) / d) / h - x ^ n) <= _
+  rw [hrewrite, qabs_mul, qabs_eq_self_of_nonneg hinv0]
+  calc
+    qabs (((x + h) ^ (n + 1) - x ^ (n + 1)) / h - d * x ^ n) * d⁻¹ <=
+        (qabs h * powerSecantErrorBound C (n + 1)) * d⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_right hraw hinv0
+    _ <= (qabs h * powerSecantErrorBound C (n + 1)) * 1 :=
+      Rat.mul_le_mul_of_nonneg_left hinvle hright0
+    _ = qabs h * powerSecantErrorBound C (n + 1) := by rw [Rat.mul_one]
+
+end FinitePolynomial
 
 namespace ComplexSeries
 

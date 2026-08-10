@@ -459,6 +459,18 @@ theorem qabs_add_le (x y : Rat) : qabs (x + y) <= qabs x + qabs y := by
       _ <= x + y := rat_add_le_add (neg_qabs_le_self x) (neg_qabs_le_self y)
   · exact rat_add_le_add (self_le_qabs x) (self_le_qabs y)
 
+theorem triangle_inequality_rat (x y : Rat) :
+    qabs (x + y) <= qabs x + qabs y := by
+  exact qabs_add_le x y
+
+theorem triangle_inequality_rat_three (x y z : Rat) :
+    qabs (x + y + z) <= qabs x + qabs y + qabs z := by
+  calc
+    qabs (x + y + z) <= qabs (x + y) + qabs z := qabs_add_le (x + y) z
+    _ <= (qabs x + qabs y) + qabs z := by
+      exact (Rat.add_le_add_right).2 (qabs_add_le x y)
+    _ = qabs x + qabs y + qabs z := by rfl
+
 theorem qabs_sub_le (x y : Rat) : qabs (x - y) <= qabs x + qabs y := by
   rw [show x - y = x + (-y) by grind [Rat.sub_eq_add_neg]]
   calc
@@ -2674,6 +2686,73 @@ def scaleRat (r : Rat) (A : QBox) : QBox :=
     { lo := { re := r * A.hi.re, im := r * A.hi.im },
       hi := { re := r * A.lo.re, im := r * A.lo.im } }
 
+/-- The coordinatewise common part of two rational complex boxes.  As with
+real intervals, callers establish a common enclosed box before treating this
+as ordered. -/
+def intersection (A B : QBox) : QBox :=
+  { lo := { re := maxRat2 A.lo.re B.lo.re, im := maxRat2 A.lo.im B.lo.im },
+    hi := { re := minRat A.hi.re B.hi.re, im := minRat A.hi.im B.hi.im } }
+
+/-- Widen both real and imaginary coordinates of a complex box by the same
+rational radius.  This is the finite operation used to stabilize a Cauchy
+family of direct complex computations. -/
+def expand (A : QBox) (radius : Rat) : QBox :=
+  { lo := { re := A.lo.re - radius, im := A.lo.im - radius },
+    hi := { re := A.hi.re + radius, im := A.hi.im + radius } }
+
+/-- Enlarging a box by a larger rational radius can only enlarge it. -/
+theorem expand_mono_radius (A : QBox) {r s : Rat} (hrs : r <= s) :
+    (expand A r).NestedIn (expand A s) := by
+  unfold NestedIn expand
+  simp only [QComplex.le_def]
+  grind [Rat.sub_eq_add_neg]
+
+theorem intersection_contains {A B C : QBox}
+    (hA : C.NestedIn A) (hB : C.NestedIn B) :
+    C.NestedIn (intersection A B) := by
+  unfold NestedIn intersection at *
+  simp only [QComplex.le_def] at *
+  grind [minRat, maxRat2]
+
+theorem intersection_contained_left (A B : QBox) :
+    (intersection A B).NestedIn A := by
+  unfold NestedIn intersection
+  simp only [QComplex.le_def]
+  grind [minRat, maxRat2]
+
+theorem intersection_contained_right (A B : QBox) :
+    (intersection A B).NestedIn B := by
+  unfold NestedIn intersection
+  simp only [QComplex.le_def]
+  grind [minRat, maxRat2]
+
+theorem nested_trans {A B C : QBox}
+    (hAB : A.NestedIn B) (hBC : B.NestedIn C) :
+    A.NestedIn C := by
+  exact ⟨QComplex.le_trans hBC.1 hAB.1, QComplex.le_trans hAB.2 hBC.2⟩
+
+theorem ordered_of_nested {inner outer : QBox}
+    (hinner : inner.Ordered) (h : inner.NestedIn outer) : outer.Ordered := by
+  exact QComplex.le_trans h.1 (QComplex.le_trans hinner h.2)
+
+theorem width_height_le_of_nested {outer inner : QBox}
+    (h : inner.NestedIn outer) :
+    inner.width <= outer.width /\ inner.height <= outer.height := by
+  unfold NestedIn at h
+  simp only [QComplex.le_def] at h
+  unfold width height
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem expand_width (A : QBox) (radius : Rat) :
+    (expand A radius).width = A.width + 2 * radius := by
+  unfold expand width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem expand_height (A : QBox) (radius : Rat) :
+    (expand A radius).height = A.height + 2 * radius := by
+  unfold expand height
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 end QBox
 
 end ComputableAnalysis
@@ -3766,6 +3845,212 @@ instance : HMul Nat ComplexRaw ComplexRaw where
 
 instance : HMul Int ComplexRaw ComplexRaw where
   hMul n z := scaleRat (n : Rat) z
+
+/-- Stabilize a Cauchy family of direct complex-box computations by
+intersecting the finite prefix of their explicitly widened boxes.  The runtime
+uses only rational box arithmetic; a future-containment proof supplies the
+finite witness that keeps every prefix intersection ordered. -/
+def cauchyStabilizeCompute
+    (candidate : Nat -> QBox) (radius : Nat -> Rat) : Nat -> QBox
+  | 0 => QBox.expand (candidate 0) (radius 0)
+  | n + 1 => QBox.intersection
+      (cauchyStabilizeCompute candidate radius n)
+      (QBox.expand (candidate (n + 1)) (radius (n + 1)))
+
+/-- A direct complex Cauchy stabilization.  Its validity theorem below needs
+neither a pre-existing complex number nor a completeness principle: later
+candidate boxes themselves witness each finite intersection. -/
+def cauchyStabilize (candidate : ComplexRaw) (radius : Nat -> Rat) : ComplexRaw where
+  compute := cauchyStabilizeCompute candidate.compute radius
+
+private theorem cauchyStabilizeCompute_contains_future
+    {candidate : Nat -> QBox} {radius : Nat -> Rat}
+    (hfuture : forall k n, k <= n ->
+      (candidate n).NestedIn (QBox.expand (candidate k) (radius k))) :
+    forall k n, k <= n ->
+      (candidate n).NestedIn (cauchyStabilizeCompute candidate radius k) := by
+  intro k
+  induction k with
+  | zero =>
+      intro n _
+      simpa [cauchyStabilizeCompute] using hfuture 0 n (Nat.zero_le n)
+  | succ k ih =>
+      intro n hkn
+      rw [cauchyStabilizeCompute]
+      apply QBox.intersection_contains
+      · exact ih n (Nat.le_trans (Nat.le_succ k) hkn)
+      · exact hfuture (k + 1) n hkn
+
+/-- An external sequence is contained in a finite-prefix stabilization
+whenever each of its future boxes is contained in every widened candidate box.
+This is the finite common-witness principle used to compare two separately
+stabilized computations. -/
+theorem cauchyStabilize_contains_external
+    {candidate : ComplexRaw} {radius : Nat -> Rat} {external : Nat -> QBox}
+    (hexternal : forall k n, k <= n ->
+      (external n).NestedIn
+        (QBox.expand (candidate.compute k) (radius k))) :
+    forall k n, k <= n ->
+      (external n).NestedIn ((cauchyStabilize candidate radius).compute k) := by
+  intro k
+  change forall n, k <= n ->
+    (external n).NestedIn
+      (cauchyStabilizeCompute candidate.compute radius k)
+  induction k with
+  | zero =>
+      intro n _
+      simpa [cauchyStabilizeCompute] using hexternal 0 n (Nat.zero_le n)
+  | succ k ih =>
+      intro n hkn
+      rw [cauchyStabilizeCompute]
+      apply QBox.intersection_contains
+      · exact ih n (Nat.le_trans (Nat.le_succ k) hkn)
+      · exact hexternal (k + 1) n hkn
+
+private theorem cauchyStabilizeCompute_contained_in_current_expand
+    (candidate : Nat -> QBox) (radius : Nat -> Rat) :
+    forall n,
+      (cauchyStabilizeCompute candidate radius n).NestedIn
+        (QBox.expand (candidate n) (radius n))
+  | 0 => ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+  | n + 1 => by
+      rw [cauchyStabilizeCompute]
+      exact QBox.intersection_contained_right
+        (cauchyStabilizeCompute candidate radius n)
+        (QBox.expand (candidate (n + 1)) (radius (n + 1)))
+
+private theorem cauchyStabilizeCompute_nested
+    (candidate : Nat -> QBox) (radius : Nat -> Rat) :
+    forall n m, n <= m ->
+      (cauchyStabilizeCompute candidate radius m).NestedIn
+        (cauchyStabilizeCompute candidate radius n)
+  | n, 0, hnm => by
+      have hn : n = 0 := by omega
+      subst n
+      exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+  | n, m + 1, hnm => by
+      by_cases hlast : n = m + 1
+      · subst n
+        exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+      · have hnm' : n <= m := by omega
+        apply QBox.nested_trans
+        · rw [cauchyStabilizeCompute]
+          exact QBox.intersection_contained_left
+            (cauchyStabilizeCompute candidate radius m)
+            (QBox.expand (candidate (m + 1)) (radius (m + 1)))
+        · exact cauchyStabilizeCompute_nested candidate radius n m hnm'
+
+/-- At stage `n`, the stabilized box still contains the current direct
+candidate box.  This is the public finite-witness fact used by extensions of
+rational-input algorithms. -/
+theorem cauchyStabilize_contains_current
+    {candidate : ComplexRaw} {radius : Nat -> Rat}
+    (hfuture : forall k n, k <= n ->
+      (candidate.compute n).NestedIn
+        (QBox.expand (candidate.compute k) (radius k))) (n : Nat) :
+    (candidate.compute n).NestedIn ((cauchyStabilize candidate radius).compute n) := by
+  exact cauchyStabilizeCompute_contains_future hfuture n n (Nat.le_refl n)
+
+/-- The finite-prefix stabilization does not depend on a particular valid
+widening-radius schedule once the direct candidate is fixed.  At every stage
+both intersections contain that same ordered rational candidate box, hence
+their boxes overlap directly. -/
+theorem cauchyStabilize_equiv_of_common_candidate
+    {candidate : ComplexRaw} {radius sigma : Nat -> Rat}
+    (hordered : forall n, (candidate.compute n).Ordered)
+    (hfutureRadius : forall k n, k <= n ->
+      (candidate.compute n).NestedIn
+        (QBox.expand (candidate.compute k) (radius k)))
+    (hfutureSigma : forall k n, k <= n ->
+      (candidate.compute n).NestedIn
+        (QBox.expand (candidate.compute k) (sigma k))) :
+    (cauchyStabilize candidate radius).Equiv
+      (cauchyStabilize candidate sigma) := by
+  intro n
+  apply (compareAt_overlap_iff
+    (cauchyStabilize candidate radius)
+    (cauchyStabilize candidate sigma) n n).2
+  have hRadius := cauchyStabilize_contains_current hfutureRadius n
+  have hSigma := cauchyStabilize_contains_current hfutureSigma n
+  exact ⟨
+    QComplex.le_trans hRadius.1 (QComplex.le_trans (hordered n) hSigma.2),
+    QComplex.le_trans hSigma.1 (QComplex.le_trans (hordered n) hRadius.2)⟩
+
+/-- A Cauchy family of finite complex computations produces a valid raw
+complex number once its own widths and widening radii shrink.  The proof is
+the finite-prefix intersection argument: candidate `n` lies in every widened
+box through stage `n`, so that candidate is a rational-box witness for the
+intersection.  This is a computation-definition of the limit, not an appeal
+to completeness. -/
+theorem cauchyStabilize_valid
+    {candidate : ComplexRaw} {radius : Nat -> Rat}
+    (hcandidate_ordered : forall n, (candidate.compute n).Ordered)
+    (hcandidate_shrinks : WidthsShrinkToZero candidate.compute)
+    (hfuture : forall k n, k <= n ->
+      (candidate.compute n).NestedIn
+        (QBox.expand (candidate.compute k) (radius k)))
+    (hradius_shrinks : ShrinksToZero radius) :
+    (cauchyStabilize candidate radius).Valid := by
+  have hcontains := cauchyStabilizeCompute_contains_future hfuture
+  have hcurrent := cauchyStabilizeCompute_contained_in_current_expand
+    candidate.compute radius
+  have hnest := cauchyStabilizeCompute_nested candidate.compute radius
+  have hordered : forall n,
+      ((cauchyStabilize candidate radius).compute n).Ordered := by
+    intro n
+    exact QBox.ordered_of_nested (hcandidate_ordered n)
+      (hcontains n n (Nat.le_refl n))
+  constructor
+  · intro n
+    exact (QBox.ordered_iff_width_height_nonneg _).1 (hordered n)
+  · constructor
+    · intro n m hnm
+      have hbox := hnest n m hnm
+      exact ⟨hbox.1.1, hbox.2.1, hbox.1.2, hbox.2.2⟩
+    · intro eps
+      let half : QPos := ⟨eps.val / 2, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 2))⟩
+      let quarter : QPos := ⟨eps.val / 4, by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide : (0 : Rat) < 4))⟩
+      obtain ⟨Nc, hNc⟩ := hcandidate_shrinks half
+      obtain ⟨Nr, hNr⟩ := hradius_shrinks quarter
+      refine ⟨Nat.max Nc Nr, ?_⟩
+      intro n hn
+      have hcn : Nc <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+      have hrn : Nr <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+      have hc := hNc n hcn
+      have hr := hNr n hrn
+      have hcontained := hcurrent n
+      have hwidthHeight := QBox.width_height_le_of_nested hcontained
+      constructor
+      · rw [QBox.expand_width] at hwidthHeight
+        calc
+          ((cauchyStabilize candidate radius).compute n).width <=
+              (candidate.compute n).width + 2 * radius n := hwidthHeight.1
+          _ <= half.val + 2 * quarter.val :=
+            rat_add_le_add hc.1
+              (Rat.mul_le_mul_of_nonneg_left hr (by native_decide : (0 : Rat) <= 2))
+          _ = eps.val := by
+            dsimp [half, quarter]
+            rw [Rat.div_def, Rat.div_def]
+            grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+              Rat.mul_inv_cancel]
+      · rw [QBox.expand_height] at hwidthHeight
+        calc
+          ((cauchyStabilize candidate radius).compute n).height <=
+              (candidate.compute n).height + 2 * radius n := hwidthHeight.2
+          _ <= half.val + 2 * quarter.val :=
+            rat_add_le_add hc.2
+              (Rat.mul_le_mul_of_nonneg_left hr (by native_decide : (0 : Rat) <= 2))
+          _ = eps.val := by
+            dsimp [half, quarter]
+            rw [Rat.div_def, Rat.div_def]
+            grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+              Rat.mul_inv_cancel]
 
 private theorem half_pos_complex {q : Rat} (hq : 0 < q) : 0 < q / 2 := by
   rw [Rat.div_def]

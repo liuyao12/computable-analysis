@@ -10417,6 +10417,107 @@ theorem arctanEqualsGeom_finiteRiemannBridge
     (arctanEqualsRectangleRaw_finiteRiemannBridge hx0 hx1)
     (ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom hx0)
 
+/-- On the negative unit branch, the alternating-series evaluator is the
+literal interval negation of its value at the reflected positive input. -/
+private theorem arctan_neg_equiv_neg_arctan_of_neg
+    {x : Rat} (hxneg : x < 0)
+    (hvalid : (arctan x).Valid) :
+    (arctan x).Equiv (-(arctan (-x))) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff (arctan x) (-(arctan (-x))) n n).2
+  have hnot : ¬ (0 : Rat) <= x := by grind
+  have hneg0 : 0 <= -x := by grind
+  have hxnonpos : x <= 0 := by grind
+  have hqabsx : qabs x = -x := qabs_eq_neg_of_nonpos hxnonpos
+  have hqabsnegx : qabs (-x) = -x := qabs_eq_self_of_nonneg hneg0
+  have hstage : (arctan x).compute n = (-(arctan (-x))).compute n := by
+    change RealRaw.negCompute (ArctanValidity.positiveRaw (qabs x)) n =
+      RealRaw.negCompute (arctan (-x)) n
+    rw [ArctanValidity.arctan_compute_nonneg (-x) hneg0]
+    rw [hqabsx, hqabsnegx]
+  rw [← hstage]
+  exact (RealRaw.compareAt_overlap_iff (arctan x) (arctan x) n n).1
+    (RealRaw.equiv_refl (arctan x) hvalid n)
+
+/-- The geometric arctangent has the same literal negative-branch
+implementation as the power series. -/
+private theorem arctanGeom_neg_equiv_neg_arctanGeom_of_neg
+    {x : Rat} (hxneg : x < 0)
+    (hvalid : (ArctanGeometry.arctanGeom x).Valid) :
+    (ArctanGeometry.arctanGeom x).Equiv
+      (-(ArctanGeometry.arctanGeom (-x))) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (ArctanGeometry.arctanGeom x) (-(ArctanGeometry.arctanGeom (-x))) n n).2
+  have hnot : ¬ (0 : Rat) <= x := by grind
+  have hneg0 : 0 <= -x := by grind
+  have hxnonzero : x ≠ 0 := by grind
+  have hnonzero : -x ≠ 0 := by grind
+  have hstage : (ArctanGeometry.arctanGeom x).compute n =
+      (-(ArctanGeometry.arctanGeom (-x))).compute n := by
+    simp [ArctanGeometry.arctanGeom, hxnonzero, hnot, hneg0, hnonzero]
+  rw [← hstage]
+  exact (RealRaw.compareAt_overlap_iff
+    (ArctanGeometry.arctanGeom x) (ArctanGeometry.arctanGeom x) n n).1
+    (RealRaw.equiv_refl (ArctanGeometry.arctanGeom x) hvalid n)
+
+/-- The finite-Riemann bridge covers the whole unit domain of the
+alternating arctangent series.  The negative half is not a second integral
+argument: both raw evaluators simply reflect their already-checked positive
+branch. -/
+theorem arctanEqualsGeom_finiteRiemannBridge_on_unit
+    {x : Rat} (hx : Elementary.Arctan.powerSeriesDomain x) :
+    (arctan x).Equiv (ArctanGeometry.arctanGeom x) := by
+  by_cases hx0 : 0 <= x
+  · have hx1 : x <= 1 := by
+      have hnotlt : ¬ x < 0 := by grind
+      simpa [Elementary.Arctan.powerSeriesDomain, qabs, hnotlt] using hx
+    exact arctanEqualsGeom_finiteRiemannBridge hx0 hx1
+  · have hxneg : x < 0 := by grind
+    have hneg0 : 0 <= -x := by grind
+    have hneg1 : -x <= 1 := by
+      simpa [Elementary.Arctan.powerSeriesDomain, qabs, hxneg] using hx
+    have hseriesValid : (arctan x).Valid :=
+      arctan_valid_at arctanValid (by
+        unfold arctanDomain
+        constructor
+        · have hleft : -x <= 1 := by
+            simpa [Elementary.Arctan.powerSeriesDomain, qabs, hxneg] using hx
+          grind
+        · exact Rat.le_trans (Rat.le_of_lt hxneg) (by native_decide))
+    have hgeomValid : (ArctanGeometry.arctanGeom x).Valid :=
+      ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain hx
+    have hpositive := arctanEqualsGeom_finiteRiemannBridge hneg0 hneg1
+    exact RealRaw.equiv_trans
+      hseriesValid
+      (RealRaw.neg_valid
+        (arctan_valid_at arctanValid
+          (arctanDomain_of_nonnegativeUnit hneg0 hneg1)))
+      (ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain
+        (by
+          simpa [Elementary.Arctan.powerSeriesDomain, qabs, hneg0] using hx))
+      (arctan_neg_equiv_neg_arctan_of_neg hxneg hseriesValid)
+      (RealRaw.equiv_trans
+        (RealRaw.neg_valid
+          (arctan_valid_at arctanValid
+            (arctanDomain_of_nonnegativeUnit hneg0 hneg1)))
+        (RealRaw.neg_valid
+          (ArctanGeometry.arctanGeom_valid_on_unit hneg0 hneg1))
+        (ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain
+          (by
+            simpa [Elementary.Arctan.powerSeriesDomain, qabs, hneg0] using hx))
+        (RealRaw.neg_equiv hpositive)
+        (RealRaw.equiv_symm
+          (arctanGeom_neg_equiv_neg_arctanGeom_of_neg hxneg hgeomValid)))
+
+/-- The named geometric and alternating-series arctangent presentations agree
+at every rational input in their common unit domain. -/
+theorem arctanPowerSeriesGeomAgreement_finiteRiemannBridge :
+    ArctanGeometry.PowerSeriesAgreesOnUnit := by
+  intro x hxSeries _hxGeom
+  change (arctan x).Equiv (ArctanGeometry.arctanGeom x)
+  exact arctanEqualsGeom_finiteRiemannBridge_on_unit hxSeries
+
 /-- The named geometric and power-series arctangent presentations agree on
 the nonnegative unit branch.  This is the reusable function-level form of the
 finite-Riemann bridge: it compares the representations themselves, rather

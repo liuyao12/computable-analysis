@@ -6323,6 +6323,44 @@ theorem piAreaCompatibility : PiAreaCompatibility := by
     piCircleArea, piCircleAreaCompute, hstate,
     toPiAreaLoopState]
 
+/-- The geometric unit-sector computation, multiplied by four, has exactly
+the same rational box as the circle-area pi computation at every stage.
+This lives beside the two finite algorithms, so later consumers do not need
+the larger pi-presentation registry merely to use the geometric bridge. -/
+theorem four_arctanGeom_one_compute_eq_piCircleArea_compute (n : Nat) :
+    (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw).compute n) =
+      piCircleArea.compute n :=
+  piAreaCompatibility n
+
+/-- The unit-slope geometric arctangent is a valid raw real. -/
+theorem arctanGeom_one_valid : (arctanGeom (1 : Rat)).Valid :=
+  arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+
+/-- Four times the unit-slope geometric arctangent is a valid raw real. -/
+theorem four_arctanGeom_one_valid :
+    (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw).Valid) :=
+  RealRaw.natScale_valid 4 arctanGeom_one_valid
+
+/-- The geometric arctangent definition of pi agrees with the circle-area
+definition.  The proof uses the stronger stagewise equality above and the
+ordered boxes supplied by the geometric sector computation. -/
+theorem four_arctanGeom_one_equiv_piCircleArea :
+    (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw).Equiv piCircleArea) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ((4 : Nat) * arctanGeom (1 : Rat) : RealRaw) piCircleArea n n).2
+  rw [four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  have horder := RealRaw.interval_order_of_valid
+    ((4 : Nat) * arctanGeom (1 : Rat) : RealRaw)
+    four_arctanGeom_one_valid n
+  rw [four_arctanGeom_one_compute_eq_piCircleArea_compute n] at horder
+  exact ⟨horder, horder⟩
+
+/-- The symmetric form of the geometric arctangent pi bridge. -/
+theorem piCircleArea_equiv_four_arctanGeom_one :
+    piCircleArea.Equiv (((4 : Nat) * arctanGeom (1 : Rat) : RealRaw)) :=
+  RealRaw.equiv_symm four_arctanGeom_one_equiv_piCircleArea
+
 def functionRaw : PartialRealFunRaw where
   definedAt := fun _ => True
   compute := fun x _ => (arctanGeom x).compute
@@ -6401,6 +6439,51 @@ theorem arctanGeom_one_equiv_piCircleArea_quarter :
     exact horder
   · rw [hcancel]
     exact horder
+
+/-- Doubling the unit-slope sector computation and taking the geometric
+quarter turn produce literally the same rational interval at every stage. -/
+theorem two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute (n : Nat) :
+    (((2 : Nat) * arctanGeom (1 : Rat) : RealRaw).compute n) =
+      ((RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)).compute n) := by
+  change
+    ((RealRaw.scaleRat (2 : Rat) (arctanGeom (1 : Rat))).compute n)
+      = ((RealRaw.scaleRat ((1 : Rat) / 2) piCircleArea).compute n)
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= 2),
+    if_pos (by native_decide : (0 : Rat) <= (1 : Rat) / 2)]
+  rw [← piAreaCompatibility n]
+  have hhalfFour : ((1 : Rat) / 2) * 4 = 2 := by native_decide
+  have hscale (q : Rat) : ((1 : Rat) / 2) * (4 * q) = 2 * q := by
+    calc
+      ((1 : Rat) / 2) * (4 * q) = (((1 : Rat) / 2) * 4) * q :=
+        (Rat.mul_assoc _ _ _).symm
+      _ = 2 * q := by rw [hhalfFour]
+  change
+    ({ lo := 2 * ((arctanGeom (1 : Rat)).compute n).lo,
+       hi := 2 * ((arctanGeom (1 : Rat)).compute n).hi } : QInterval)
+      = ({ lo := ((1 : Rat) / 2) *
+          (4 * ((arctanGeom (1 : Rat)).compute n).lo),
+           hi := ((1 : Rat) / 2) *
+           (4 * ((arctanGeom (1 : Rat)).compute n).hi) } : QInterval)
+  rw [hscale, hscale]
+
+/-- Doubling the unit-slope sector computation gives the normalized geometric
+quarter turn.  This derives raw equivalence from the stronger stage equality. -/
+theorem two_arctanGeom_one_equiv_quarterTurnRaw_one :
+    (((2 : Nat) * arctanGeom (1 : Rat) : RealRaw).Equiv
+      (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat))) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw)
+    (RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)) n n).2
+  rw [← two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute]
+  have hvalid : (arctanGeom (1 : Rat)).Valid :=
+    arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have hscaledValid : ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw).Valid :=
+    RealRaw.natScale_valid 2 hvalid
+  have horder := RealRaw.interval_order_of_valid
+    ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw) hscaledValid n
+  exact ⟨horder, horder⟩
 
 end ArctanGeometry
 

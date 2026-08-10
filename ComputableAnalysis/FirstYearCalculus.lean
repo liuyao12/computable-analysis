@@ -18,17 +18,17 @@ namespace FirstYearCalculus
 
 abbrev Coeffs := FormalPowerSeries.Coeffs
 
-/-- A checked formal derivative table entry.
+/-- A checked coefficient-shift table entry.
 
-The proof says that differentiating the listed coefficient stream gives the
-listed derivative coefficient stream.  Analytic convergence and interval
-evaluation are handled separately by the concrete raw algorithms. -/
+The proof says that the listed coefficient stream has the displayed next
+Taylor-coefficient stream.  Analytic convergence and interval evaluation are
+handled separately by the concrete raw algorithms. -/
 structure PowerSeriesDerivativeEntry where
   functionName : String
   derivativeName : String
   function : Coeffs
   derivative : Coeffs
-  checked : FormalPowerSeries.HasFormalDerivative function derivative
+  checked : FormalPowerSeries.HasCoefficientShift function derivative
 
 namespace PowerSeriesDerivativeEntry
 
@@ -37,45 +37,45 @@ def monomial (k : Nat) : PowerSeriesDerivativeEntry where
   derivativeName := "x^n"
   function := FormalPowerSeries.monomialShiftedCoeff k
   derivative := FormalPowerSeries.monomialCoeff k
-  checked := FormalPowerSeries.monomialShiftedCoeff_derivative k
+  checked := FormalPowerSeries.monomialShiftedCoeff_hasCoefficientShift k
 
 def exp : PowerSeriesDerivativeEntry where
   functionName := "exp x"
   derivativeName := "exp x"
   function := FormalPowerSeries.expCoeff
   derivative := FormalPowerSeries.expCoeff
-  checked := FormalPowerSeries.expCoeff_hasFormalDerivative
+  checked := FormalPowerSeries.expCoeff_hasCoefficientShift
 
 def sin : PowerSeriesDerivativeEntry where
   functionName := "sin x"
   derivativeName := "cos x"
   function := FormalPowerSeries.sinCoeff
   derivative := FormalPowerSeries.cosCoeff
-  checked := FormalPowerSeries.sinCoeff_hasFormalDerivative
+  checked := FormalPowerSeries.sinCoeff_hasCoefficientShift
 
 def negCos : PowerSeriesDerivativeEntry where
   functionName := "-cos x"
   derivativeName := "sin x"
   function := FormalPowerSeries.neg FormalPowerSeries.cosCoeff
   derivative := FormalPowerSeries.sinCoeff
-  checked := FormalPowerSeries.neg_cosCoeff_hasFormalDerivative
+  checked := FormalPowerSeries.neg_cosCoeff_hasCoefficientShift
 
 def cosh : PowerSeriesDerivativeEntry where
   functionName := "cosh x"
   derivativeName := "sinh x"
   function := FormalPowerSeries.coshCoeff
   derivative := FormalPowerSeries.sinhCoeff
-  checked := FormalPowerSeries.coshCoeff_hasFormalDerivative
+  checked := FormalPowerSeries.coshCoeff_hasCoefficientShift
 
 def sinh : PowerSeriesDerivativeEntry where
   functionName := "sinh x"
   derivativeName := "cosh x"
   function := FormalPowerSeries.sinhCoeff
   derivative := FormalPowerSeries.coshCoeff
-  checked := FormalPowerSeries.sinhCoeff_hasFormalDerivative
+  checked := FormalPowerSeries.sinhCoeff_hasCoefficientShift
 
 def hasCheckedProof (entry : PowerSeriesDerivativeEntry) : Prop :=
-  FormalPowerSeries.HasFormalDerivative entry.function entry.derivative
+  FormalPowerSeries.HasCoefficientShift entry.function entry.derivative
 
 end PowerSeriesDerivativeEntry
 
