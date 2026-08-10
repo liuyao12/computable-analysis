@@ -32,27 +32,135 @@ It is a later identification theorem, not a definition of sine or cosine.
 \section{Finite time ordering}
 \label{sec:ode-construction-identification-route}
 
-\begin{theorem}[Two-by-two Cramer rule]
-\label{thm:cramer-two-by-two}
+\begin{theorem}[Finite Cramer certificates]
+\label{thm:cramer-finite}
 \lean{ComputableAnalysis.cramer_two_by_two}
 \lean{ComputableAnalysis.cramer_two_by_two_unique}
+\lean{ComputableAnalysis.LinearODE.threeVector}
+\lean{ComputableAnalysis.LinearODE.apply_threeByThree_explicit}
+\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_row_expansions}
+\lean{ComputableAnalysis.LinearODE.threeByThreeCramerSolution}
+\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_solves}
+\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_solves_of_determinant_ne_zero}
+\lean{ComputableAnalysis.cramer_2_1_1_3_determinant}
+\lean{ComputableAnalysis.cramer_2_1_1_3_solution}
+\lean{ComputableAnalysis.cramer_2_1_1_3_formula}
+\lean{ComputableAnalysis.cramer_2_1_1_3_certificate}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCramerSolution}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_determinant}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_inverse_witness}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solution}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solves}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solves_from_generic}
 \leanok
 For a rational (2\times2) system with nonzero determinant, the two
 solutions are the usual determinant quotients.  This is the finite linear
 algebra prerequisite for the later vector-valued differential-equation layer,
-and is the checked core of benchmark item 97.
+and is the checked core of benchmark item 97.  The adjacent finite
+three-dimensional package provides explicit matrix action, determinant
+numerators, and a Cramer solution whenever an inverse determinant witness is
+supplied, together with the standard nonzero-determinant corollary.  All of
+these are rational finite identities, and no general matrix determinant API
+is assumed.
+The diagonal instance \(\operatorname{diag}(2,3,4)u=(4,9,16)\) has
+determinant (24); the finite Cramer formulas return (u=(2,3,4)), and the
+matrix equation is checked directly and through the generic solver.
 \end{theorem}
 
 \begin{theorem}[Finite two-by-two Cayley--Hamilton certificate]
 \label{thm:two-by-two-cayley-hamilton}
 \lean{ComputableAnalysis.LinearODE.twoByTwo_cayley_hamilton}
+\lean{ComputableAnalysis.LinearODE.twoByTwo_mul_inverse}
+\lean{ComputableAnalysis.LinearODE.twoByTwo_inverse_mul}
+\lean{ComputableAnalysis.LinearODE.twoByTwo_inverse_unique_right}
+\lean{ComputableAnalysis.LinearODE.twoByTwo_inverse_unique_left}
+\lean{ComputableAnalysis.LinearODE.twoByTwo_inverse_solves}
+\lean{ComputableAnalysis.LinearODE.twoByTwo_solution_unique}
+\lean{ComputableAnalysis.LinearODE.ratMatrixTwoTrace}
+\lean{ComputableAnalysis.LinearODE.ratMatrixTwoDeterminant}
+\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_eq_explicit}
+\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_cayley_hamilton}
+\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_matrixPow_succ_succ_recurrence}
+\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_matrixPow_recurrence_unique}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.threeByThreeMatrix}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.threeByThreeTrace}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.threeByThreeSecondCoeff}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.threeByThreeDeterminant}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.threeByThree_cayley_hamilton}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrixThreeTrace}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrixThreeSecondCoeff}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrixThreeDeterminant}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrix_threeByThree_eq_explicit}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrix_threeByThree_cayley_hamilton}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrix_threeByThree_matrixPow_recurrence}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.twoByTwo_matrixPow_three}
+\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.twoByTwo_matrixPow_four}
+\lean{ComputableAnalysis.LinearODE.threeByThree_matrixPow_succ_succ_succ_recurrence}
+\lean{ComputableAnalysis.LinearODE.matrixPolynomialSum}
+\lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_mul_matrixPow}
+\lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_shifted_annihilation}
+\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate}
+\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.shifted_annihilates}
+\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.power_recurrence}
+\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix}
+\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_trace}
+\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_determinant}
+\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_identity}
+\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_identity_from_generic}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_trace}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_secondCoeff}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_determinant}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_identity}
+\lean{ComputableAnalysis.GeometricRotationODE.rotationGenerator_pow_four_cycle}
 \leanok
-For an explicit rational (2\times2) matrix (A), the finite matrix identity
+For an arbitrary rational (2\times2) matrix (A), the finite matrix identity
 \[
   A^2-\operatorname{tr}(A)A+\det(A)I=0
 \]
-is checked entry by entry.  This is the rational finite-matrix core of
-benchmark item 49; the general characteristic-polynomial theorem is deferred.
+is checked entry by entry after a finite extensionality reduction.  This is a
+general rational finite-matrix core of benchmark item 49.  The same chapter
+now checks the next finite dimension: for an explicit rational (3\times3)
+matrix, the identity
+\[
+A^3-\operatorname{tr}(A)A^2+s_2(A)A-\det(A)I=0
+\]
+ is verified by finite matrix multiplication and rational ring identities.  The
+ arbitrary-matrix bridge now transports this identity from nine named entries
+to every rational (3\times3) matrix.
+The concrete diagonal witness \(\operatorname{diag}(1,2,3)\) has
+trace (6), second coefficient (11), and determinant (6).  Its checked
+identity is
+\[
+  A^3-6A^2+11A-6I=0.
+\]
+This supplies an inspectable 3-by-3 rational instance of benchmark item 49.
+Multiplying that identity by each finite matrix power gives the reusable
+third-order recurrence
+\[
+ A^{n+3}=\operatorname{tr}(A)A^{n+2}-s_2(A)A^{n+1}+\det(A)A^n,
+\]
+which is now checked for every natural stage for an explicitly supplied
+rational matrix.  This strengthens the finite recurrence core without
+introducing an arbitrary-dimension characteristic-polynomial theorem.
+The worked matrix (left(egin{smallmatrix}1&2\\0&3\end{smallmatrix}ight))
+has trace (4), determinant (3), and its finite identity is checked
+independently and again through the generic two-by-two theorem.
+The unrestricted characteristic-polynomial theorem for arbitrary dimension
+remains deferred.  The new `FiniteCayleyHamiltonCertificate` separates the
+finite downstream recurrence from that missing construction: for any supplied
+monic annihilating polynomial in any finite dimension, Lean checks the shifted
+annihilation and the resulting matrix-power recurrence.
+\end{theorem}
+
+\begin{theorem}[Finite 3x3 matrix-power recurrence]
+\label{thm:three-by-three-matrix-power-recurrence}
+\lean{ComputableAnalysis.LinearODE.threeByThree_matrixPow_succ_succ_succ_recurrence}
+\leanok
+For every explicitly supplied rational \(3\times3\) matrix and every finite
+stage \(n\), its matrix powers satisfy the third-order recurrence obtained
+from the checked Cayley--Hamilton identity.  This is a finite rational
+certificate and does not assert the arbitrary-dimension theorem.
 \end{theorem}
 
 \begin{definition}[Rational sampled system]

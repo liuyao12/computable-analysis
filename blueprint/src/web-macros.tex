@@ -5,6 +5,9 @@
   urlcolor=blue
 }
 
+% Cross-chapter theorem links in the preface need explicit HTML targets.
+\newcommand{\benchmarklink}[3]{\href{#1.html\##2}{#3}}
+
 % Web macros use the looping GIF; the print macros deliberately select each
 % corresponding final PNG frame instead.
 \newcommand{\rationalCircleSubdivisionAnimation}{%

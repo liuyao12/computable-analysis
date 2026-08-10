@@ -24,6 +24,8 @@ Chapters~\ref{ch:rational-circle-trigonometry} and \ref{ch:integrals}.
 
 Before introducing an infinite-series representation, the project checks the
 finite identities that its tails and partial sums use:
+\begin{theorem}[Finite arithmetic-series sums]
+\label{thm:arithmetic-series-sum}
 \lean{ComputableAnalysis.Series.arithmeticSum}
 \lean{ComputableAnalysis.Series.arithmeticSum_succ}
 \lean{ComputableAnalysis.Series.arithmeticSum_eq}
@@ -32,24 +34,59 @@ finite identities that its tails and partial sums use:
 \lean{ComputableAnalysis.Series.arithmeticProgressionSum_eq}
 \lean{ComputableAnalysis.Series.arithmeticProgressionSum_constant}
 \lean{ComputableAnalysis.Series.arithmeticProgressionSum_le_succ}
+\lean{ComputableAnalysis.Series.arithmeticProgressionSum_le_of_le}
 \lean{ComputableAnalysis.Series.arithmeticProgressionSum_nonneg}
 \lean{ComputableAnalysis.Series.arithmeticProgressionSum_pos}
 \lean{ComputableAnalysis.Series.arithmeticSum_nonneg}
 \lean{ComputableAnalysis.Series.arithmeticSum_pos}
 \lean{ComputableAnalysis.Series.arithmeticSum_le_succ}
+\lean{ComputableAnalysis.Series.arithmeticSum_le_of_le}
+\lean{ComputableAnalysis.Series.arithmeticSum_reaches}
+\lean{ComputableAnalysis.Series.arithmeticSum_reaches_later}
+\lean{ComputableAnalysis.arithmeticProgression_3_2_stage5_sum}
+\lean{ComputableAnalysis.arithmeticProgression_3_2_stage5_closed_form}
+\lean{ComputableAnalysis.arithmeticProgression_3_2_stage5_certificate}
+\leanok
+These declarations give the executable finite arithmetic-progression sum and
+its monotonicity and reachability certificates.  The worked progression with
+initial term (3), difference (2), and five terms evaluates exactly to
+(35), with the closed-form identity checked over (mathbb Q).
+\end{theorem}
+
+\begin{theorem}[Finite sums of powers]
+\label{thm:finite-power-sums}
 \lean{ComputableAnalysis.Series.powerSum}
 \lean{ComputableAnalysis.Series.powerSum_zero}
 \lean{ComputableAnalysis.Series.powerSum_succ}
 \lean{ComputableAnalysis.Series.powerSum_nonneg}
+\lean{ComputableAnalysis.Series.powerSum_le_succ}
+\lean{ComputableAnalysis.Series.powerSum_le_of_le}
 \lean{ComputableAnalysis.Series.powerSum_pos}
 \lean{ComputableAnalysis.Series.powerSum_zero_exponent}
 \lean{ComputableAnalysis.Series.powerSum_one_exponent}
 \lean{ComputableAnalysis.Series.powerSum_two_exponent}
+\lean{ComputableAnalysis.Series.powerSum_two_closed_form}
 \lean{ComputableAnalysis.Series.powerSum_three_exponent}
+\lean{ComputableAnalysis.Series.powerSum_three_closed_form}
 \lean{ComputableAnalysis.Series.powerSum_four_exponent}
+\lean{ComputableAnalysis.Series.powerSum_four_closed_form}
 \lean{ComputableAnalysis.Series.powerSum_five_exponent}
+\lean{ComputableAnalysis.Series.powerSum_five_closed_form}
 \lean{ComputableAnalysis.Series.powerSum_six_exponent}
+\lean{ComputableAnalysis.Series.powerSum_six_closed_form}
 \lean{ComputableAnalysis.Series.powerSum_seven_exponent}
+\lean{ComputableAnalysis.Series.powerSum_seven_closed_form}
+\lean{ComputableAnalysis.Series.powerSum_eight_exponent}
+\lean{ComputableAnalysis.Series.powerSum_eight_finite_bridge}
+\lean{ComputableAnalysis.Series.eighthPowerSum_eq}
+\lean{ComputableAnalysis.Series.powerSum_eight_closed_form}
+\lean{ComputableAnalysis.fourthPowerSum_stage6}
+\lean{ComputableAnalysis.fifthPowerSum_stage6}
+\lean{ComputableAnalysis.powerSum_stage6_certificate}
+\lean{ComputableAnalysis.Series.powerSumBlock}
+\lean{ComputableAnalysis.Series.powerSumBlock_succ}
+\lean{ComputableAnalysis.Series.powerSum_add_block}
+\lean{ComputableAnalysis.Series.powerSum_le_mul_pow}
 \lean{ComputableAnalysis.Series.squareSum}
 \lean{ComputableAnalysis.Series.squareSum_succ}
 \lean{ComputableAnalysis.Series.squareSum_eq}
@@ -68,6 +105,16 @@ finite identities that its tails and partial sums use:
 \lean{ComputableAnalysis.Series.seventhPowerSum}
 \lean{ComputableAnalysis.Series.seventhPowerSum_succ}
 \lean{ComputableAnalysis.Series.seventhPowerSum_eq}
+\lean{ComputableAnalysis.Series.eighthPowerSum}
+\lean{ComputableAnalysis.Series.eighthPowerSum_succ}
+\leanok
+The listed square through eighth-power identities are finite rational
+polynomial-sum certificates, covering the exact-arithmetic core of benchmark
+77 without invoking an infinite summation theorem.
+\end{theorem}
+
+\begin{theorem}[Finite geometric-series sums]
+\label{thm:geometric-series-sum}
 \lean{ComputableAnalysis.Series.geometricSum}
 \lean{ComputableAnalysis.Series.geometricSum_succ}
 \lean{ComputableAnalysis.Series.geometricSum_zero}
@@ -83,6 +130,22 @@ finite identities that its tails and partial sums use:
 \lean{ComputableAnalysis.Series.geometricSum_tail_pos}
 \lean{ComputableAnalysis.Series.geometricSum_tail_le_one}
 \lean{ComputableAnalysis.Series.geometricSum_tail_lt_one}
+\lean{ComputableAnalysis.Series.geometricSum_gap_le_of_power_budget}
+\lean{ComputableAnalysis.Series.geometricSum_finiteApprox_reaches_of_power_budget}
+\lean{ComputableAnalysis.Series.geometricSum_finiteApprox_reaches}
+\lean{ComputableAnalysis.Series.geometricSum_add_block}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_stage8_exact}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_stage8_exceeds_two}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_stage8_certificate}
+\lean{ComputableAnalysis.geometricHalf_stage5_sum}
+\lean{ComputableAnalysis.geometricHalf_stage5_tail}
+\lean{ComputableAnalysis.geometricHalf_stage5_enclosure}
+\leanok
+The geometric sum is represented by finite rational prefixes together with
+explicit tail and power-budget bounds; the ratio-one branch is handled
+separately rather than hidden behind a division by zero.
+\end{theorem}
+
 \lean{ComputableAnalysis.Series.half_pow_eq_one_div_nat_two_pow}
 \lean{ComputableAnalysis.Series.half_pow_le_one_div_succ}
 \lean{ComputableAnalysis.Series.geometricSum_half_tail_le_one_div_succ}
@@ -91,12 +154,15 @@ finite identities that its tails and partial sums use:
 \lean{ComputableAnalysis.Series.geometricRaw}
 \lean{ComputableAnalysis.Series.geometricRaw_compute_eq}
 \lean{ComputableAnalysis.Series.geometricRaw_valid_of_le_half}
+\lean{ComputableAnalysis.Series.geometricRaw_reaches_of_positive_tolerance}
 \lean{ComputableAnalysis.Series.geometricRaw_equiv_inv_one_sub}
 \lean{ComputableAnalysis.Series.geometricHalfRaw}
 \lean{ComputableAnalysis.Series.geometricHalfRaw_compute_eq}
 \lean{ComputableAnalysis.Series.geometricHalfRaw_valid}
 \lean{ComputableAnalysis.Series.geometricHalfRaw_equiv_two}
 \lean{ComputableAnalysis.Series.geometricSum_eq}
+\lean{ComputableAnalysis.Series.geometricSum_le_of_le}
+\lean{ComputableAnalysis.Series.geometricSum_gap_le_of_le}
 \lean{ComputableAnalysis.ExpProofs.euler_binomial_prefix_nat_expansion}
 \lean{ComputableAnalysis.Series.binomialTerm}
 \lean{ComputableAnalysis.Series.binomialTerm_succ_succ_of_lt}
@@ -107,8 +173,14 @@ finite identities that its tails and partial sums use:
 \lean{ComputableAnalysis.Series.binomialTerm_succ_top}
 \lean{ComputableAnalysis.Series.binomialSum_extra}
 \lean{ComputableAnalysis.Series.binomialSum_eq_pow}
+\lean{ComputableAnalysis.Series.binomialSum_eq_pow_of_reached}
 \lean{ComputableAnalysis.Series.binomial_square}
 \lean{ComputableAnalysis.Series.binomial_cube}
+\lean{ComputableAnalysis.binomial_stage5_two_one}
+\lean{ComputableAnalysis.binomial_stage5_two_one_value}
+\lean{ComputableAnalysis.binomial_stage5_two_one_certificate}
+\begin{theorem}[Reciprocal triangular-number telescoping]
+\label{thm:reciprocal-triangular-sum}
 \lean{ComputableAnalysis.Series.triangularTelescopingSum}
 \lean{ComputableAnalysis.Series.triangularTelescopingSum_succ}
 \lean{ComputableAnalysis.Series.triangularTelescopingSum_eq}
@@ -119,8 +191,15 @@ finite identities that its tails and partial sums use:
 \lean{ComputableAnalysis.Series.triangularTelescopingRaw}
 \lean{ComputableAnalysis.Series.triangularTelescopingRaw_valid}
 \lean{ComputableAnalysis.Series.triangularTelescopingRaw_equiv_two}
+\lean{ComputableAnalysis.Series.triangularTelescopingRaw_reaches_of_positive_tolerance}
 \lean{ComputableAnalysis.Series.triangularTelescopingTerm}
 \lean{ComputableAnalysis.Series.triangularTelescopingTerm_eq_reciprocal}
+\leanok
+The reciprocal triangular-number sum is represented by a finite telescoping
+algorithm whose raw intervals are ordered, shrink effectively, and are
+equivalent to the exact rational value 2.  This is the checked core of
+benchmark 42.
+\end{theorem}
 These are the project's first direct formalizations of benchmark items 68
 (sum of an arithmetic series, including a general rational progression), 66 (sum of a geometric series), and 44 (the
 finite binomial theorem in the Euler-power form), and 42 (the reciprocal
@@ -140,16 +219,29 @@ certificate without invoking completed-real completeness.
 The ratio-one boundary `geometricSum_one` is checked separately so the finite
 interface remains total at the exceptional value excluded by the quotient
 formula.
+The theorem `geometricSum_finiteApprox_reaches_of_power_budget` packages the
+two endpoints of the finite approximation: whenever the explicit power budget
+\(r^n\le \varepsilon(1-r)\) holds for \(0\le r<1\), the computed partial sum
+lies below \(1/(1-r)\) and its remaining gap is at most \(\varepsilon\).
+This is the executable potential-infinity form of geometric convergence;
+the stage is finite and the error budget is rational.
+On the half-ratio branch, `geometricSum_finiteApprox_reaches` constructs the
+stage itself from the requested positive rational tolerance using the
+project's executable dyadic schedule, so the reachability theorem does not
+hide an Archimedean or completed-real existence argument.
 For a positive-length sum, `geometricSum_zero_ratio` similarly records the
 ratio-zero boundary.
 The exact finite remainder identity `geometricSum_tail_eq` records the
 geometric tail algebraically, before any limiting argument.
 For (0\le r<1), `geometricSum_le_inv_one_sub` gives the corresponding
 finite partial-sum majorant (1/(1-r)).
+The worked ratio-(1/2) certificate evaluates the stage-5 sum as (31/16)
+and records the exact remaining tail (1/16) to the upper value (2).
 On the wider range (0\le r\le1), the tail nonnegativity and upper-bound
 certificates enclose the normalized finite tail in [0,1].
 The square-, cube-, fourth-power, fifth-power, sixth-power, and seventh-power
-sum theorems are the (k=2) through (k=7) supporting cases of benchmark 77;
+sum theorems are the (k=2) through (k=7) closed-form supporting cases of
+benchmark 77, with the eighth-power accumulator exposed as a finite extension;
 the generic \texttt{powerSum} recurrence now supplies the executable finite sum for
 every fixed exponent, while no general Faulhaber formula is claimed here.
 Its exponent-zero and exponent-one bridge lemmas recover the counting sum and
@@ -161,6 +253,9 @@ the existing arithmetic-sum evaluator exactly.
 \lean{ComputableAnalysis.Logarithm.harmonicSum_succ}
 \lean{ComputableAnalysis.Logarithm.harmonicSum_double_lower}
 \lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_lower}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_reaches}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_le_of_le}
+\lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_reaches_later}
 \leanok
 The finite harmonic evaluator satisfies
 \[
@@ -170,6 +265,10 @@ Lean proves this by showing that each doubling block contributes at least
 one half.  This is the explicit finite-growth certificate underlying the
 divergence of the harmonic series (benchmark item 34); the project does not
 introduce a separate completed-real limit predicate here.
+More explicitly, for every natural target (m), the executable stage
+(2^{2m}) satisfies (H_{2^{2m}}\geq m).  Thus every finite target is
+reached by a returned finite computation, which is the project's effective
+potential-infinity formulation of divergence.
 \end{theorem}
 
 \begin{definition}[Alternating series intervals]
@@ -184,6 +283,10 @@ introduce a separate completed-real limit predicate here.
 \lean{ComputableAnalysis.Series.leibnizTerm_shrinks}
 \lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw}
 \lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_valid}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_width_le_one_div_succ}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_width_eq_reciprocal}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_width_le_of_budget}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_reaches_of_positive_tolerance}
 \lean{ComputableAnalysis.Series.AlternatingRaw.even_partialSum_mono}
 \lean{ComputableAnalysis.Series.AlternatingRaw.odd_partialSum_antitone}
 \lean{ComputableAnalysis.Series.AlternatingRaw.interval_eq_endpoints}
@@ -225,7 +328,11 @@ compatibility alias; the proof-facing function is \code{PiProofs.arctanFunction}
 \lean{ComputableAnalysis.PiProofs.leibnizSeries_equiv_arctanSeries_one}
 \lean{ComputableAnalysis.PiProofs.fourArctanSeriesOneValid}
 \lean{ComputableAnalysis.PiProofs.piLeibnizRate}
+\lean{ComputableAnalysis.Series.alternatingSign_add}
+\lean{ComputableAnalysis.Series.partialSum_add_block}
 \lean{ComputableAnalysis.PiProofs.four_arctanSeries_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.piLeibniz_stage10_enclosure}
+\lean{ComputableAnalysis.piLeibniz_stage10_width}
 \uses{def:arctan-series,def:raw-equiv}
 For the Leibniz algorithm, pi is computed as four times the arctangent series
 at \(1\):
@@ -301,6 +408,8 @@ It is deliberately not a Machin row: no arctangent addition formula is used.
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_odd_le_even_succ}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_zero_one}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_zero_one}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_error_budget}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_half_interval_budget}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelTermIntegralBetween_split}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_split}
 \lean{ComputableAnalysis.PiProofs.LeibnizValidity.endpoints_eq_kernelPartialIntegral}
@@ -886,6 +995,34 @@ identities:
 \]
 \end{theorem}
 
+\begin{theorem}[Finite Stirling-shaped ratio certificate]
+\label{thm:finite-stirling-certificate}
+\lean{ComputableAnalysis.finiteStirlingRatio}
+\lean{ComputableAnalysis.finiteStirlingEInterval}
+\lean{ComputableAnalysis.finiteStirlingPiInterval}
+\lean{ComputableAnalysis.finiteStirlingEApprox_mem_interval}
+\lean{ComputableAnalysis.finiteStirlingRootApprox_squared_bounds}
+\lean{ComputableAnalysis.finiteStirlingRatio_pos}
+\lean{ComputableAnalysis.finiteStirlingRatioAtTen_enclosure}
+\lean{ComputableAnalysis.finiteStirlingRatioAtTen_positive}
+\lean{ComputableAnalysis.finiteStirlingRatioAtTen_unit_enclosure}
+\lean{ComputableAnalysis.finiteStirlingRootApproxEight}
+\lean{ComputableAnalysis.finiteStirlingRootApproxEight_squared_bounds}
+\lean{ComputableAnalysis.finiteStirlingRatioAtEight_enclosure}
+\leanok
+For benchmark item 90, the project records a bounded, executable rational
+certificate at the concrete index (n=10).  It combines finite enclosures
+for (e) and (pi) with an explicit square-root bracket and places the
+resulting Stirling-shaped ratio in a rational interval.  This is a useful
+finite numerical exercise in the project's algorithmic style; the asymptotic
+limit and the usual full Stirling formula remain deferred.  The generic
+positivity theorem supplies the explicit denominator gate for arbitrary
+positive rational inputs.  The tighter checked enclosure places this concrete
+ratio in [1,101/100].
+The companion finite stage (n=8) uses a rational bracket for
+(sqrt{16pi}) and places the ratio in the broader interval ([1/2,2]).
+\end{theorem}
+
 \begin{theorem}[Finite factorial-prefix identity]
 \label{thm:finite-factorial-prefix}
 \lean{ComputableAnalysis.ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial}
@@ -964,6 +1101,8 @@ for \(n>0\), with a harmless coarse stage at \(n=0\).
 
 \begin{theorem}[Basel series validity]\label{thm:zeta-two-valid}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw_compute_eq}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw_validCompute}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_le_succ}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_le_of_le}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_le_tailBound}
@@ -977,6 +1116,17 @@ for \(n>0\), with a harmless coarse stage at \(n=0\).
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoTerm_le_telescopeStep}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_le_telescoping}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_lt_one_div}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_add_finiteTail_eq}
+\lean{ComputableAnalysis.DirichletSeries.FiniteBaselCertificate}
+\lean{ComputableAnalysis.DirichletSeries.finiteBaselCertificateOfBudget}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_add}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoTerm_antitone}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_le_firstTerm_block}
+\lean{ComputableAnalysis.DirichletSeries.finiteBaselCertificateOfBudget_stage}
+\lean{ComputableAnalysis.DirichletSeries.finiteBaselCertificateOfBudget_interval}
+\lean{ComputableAnalysis.DirichletSeries.FiniteBaselCertificate.contains_later}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_add_finiteTail_le_interval_hi}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_add_nonempty_finiteTail_lt_interval_hi}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width_le_one_div}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width_nonneg}
@@ -985,8 +1135,42 @@ for \(n>0\), with a harmless coarse stage at \(n=0\).
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_hi_pos}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_ordered}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_nested}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_contains_basel_decimal_1000}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_contains_basel_decimal_10000}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_contains_basel_decimal_100000}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_contains_rational_pi_squared_over_six_10000}
+\lean{ComputableAnalysis.BaselFiniteComparison.geometricPiSquaredOverSixCompute}
+\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_10000_8}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval_certificate}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval_width_le}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval_midpoint_certificate}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval}
+\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_100000_10}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_certificate}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_width_le}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_midpoint_certificate}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_later_inside_stage_10000}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_later_inside_stage_10000}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_later_near_basel_decimal_10000}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width_le_of_denominator_budget}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_reaches_of_positive_tolerance}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_later_contained_in_target_of_budget}
+\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_later_in_target_of_budget}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoWidthsShrinkToZero}
 \lean{ComputableAnalysis.DirichletSeries.zetaTwoRaw_validCompute}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatFiniteTail}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatFiniteTail_succ}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatPartial_add_finiteTail_eq}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatFiniteTail_le_zetaTwoFiniteTail}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatFiniteTail_le_tailBound}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatPartial_add_finiteTail_le_interval_hi}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatInterval_contains_partial_add_finiteTail}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatInterval_width_le_one_div}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatInterval_width_le_of_denominator_budget}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatInterval_reaches_of_positive_tolerance}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatInterval_later_contained_in_target_of_budget}
+\lean{ComputableAnalysis.DirichletSeries.zetaNatPartial_later_in_target_of_budget}
 \uses{def:zeta-two-raw,def:raw-real}
 \leanok
 The intervals \(Z_n\) form a real number.  The key finite estimate is the
@@ -996,14 +1180,69 @@ telescoping bound
 \]
 The two linked Dirichlet-series theorems check this estimate termwise and
 after finite summation, with an explicit tail budget.
+The partial-sum target propagator separately transports every later finite
+partial sum through a supplied rational target, keeping the Basel identity
+itself outside the verified boundary.
+The same decimal target is contained again at zeta stage (100{,}000), via
+`zetaTwoInterval_contains_basel_decimal_100000`, giving a deeper finite check.
+At stage \(10{,}000\), the independent rational certificate
+\(103993/33102\) also gives a finite enclosure of its squared-over-six value.
+This is a numerical bridge to a high-precision rational approximation of
+\(\pi\), not an identification of the zeta raw real with \(\pi^2/6\).
+The new finite cross-check goes one step further: at zeta stage $10{,}000$
+and the project's certified area evaluator at stage $8$, the two rational
+intervals for \(\zeta(2)\) and \(\pi^2/6\) overlap.  This is a comparison of
+finite algorithms, not a proof of the completed Basel identity.
+The refined comparison repeats the same construction at zeta stage
+$100{,}000$ and area stage $10$, producing an explicit common interval whose
+width is bounded by both source widths.  It is a tighter finite benchmark
+certificate while preserving the same potential-infinity boundary.
 For a nonempty finite tail, the derived strict bound is below $1/n$.
+The companion `zetaTwoPartial_add_nonempty_finiteTail_lt_interval_hi`
+transports that strictness to the earlier interval's padded upper endpoint,
+so every genuinely later finite partial sum is separated from that endpoint
+by a finite rational margin.  This remains a certificate about finite sums,
+not an identification with the completed Basel value.
 At the interval level, the public width theorem
 `zetaTwoInterval_width_le_one_div` gives the same coarse budget directly for
 every positive stage.  The linked nesting, orderedness, and
 `zetaTwoRaw_validCompute` declarations expose the complete finite validity
 certificate for the interval algorithm, including width shrinkage.
+The public selector `zetaTwoInterval_reaches_of_positive_tolerance` turns the
+denominator budget into an explicit finite stage for every positive rational
+requested width.
+The packaged `FiniteBaselCertificate` gathers these obligations into one
+finite witness and proves that every later stage remains inside its enclosure
+while retaining the requested precision budget.
 This is the checked interval-and-tail core of benchmark item 14; the final
 identification with \(\pi^2/6\) remains the separate Basel conjecture below.
+\end{theorem}
+
+\begin{theorem}[Refined finite Basel cross-check]\label{thm:basel-refined-cross-check}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval}
+\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_100000_10}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_certificate}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_width_le}
+\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_midpoint_certificate}
+\leanok
+At zeta stage \(100{,}000\) and project-\(\pi^2/6\) stage \(10\), the two
+independent rational enclosures have a nonempty intersection.  Its midpoint
+is an explicit rational witness lying in both intervals, and the common
+interval inherits the width bound of each source.  This is a finite
+algorithmic comparison for benchmark item 14; it is not the completed Basel
+identity.
+\end{theorem}
+
+\begin{theorem}[Supplied-target Basel containment]
+\label{thm:basel-supplied-target-containment}
+\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_100000_contained_in_expanded_geometricPiSquaredOverSix_10}
+\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_100000_target_certificate}
+\leanok
+The finite overlap at zeta stage \(100{,}000\) and geometric
+\(\pi^2/6\) stage \(10\) can be converted into an explicit containment:
+expanding the supplied geometric target by the zeta interval’s own rational
+width encloses the entire later zeta interval.  This is a finite target
+propagation certificate, not an identification of the completed Basel sum.
 \end{theorem}
 
 \begin{definition}[Basel right-hand side]\label{def:basel-geometric-rhs}

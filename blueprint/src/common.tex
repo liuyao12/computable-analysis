@@ -10,9 +10,10 @@
 
 \IfFileExists{blueprint.sty}{
   \usepackage{blueprint}
-}{
-  \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
-}
+}{}
+% Load hyperref explicitly after blueprint.sty so the web renderer also
+% recognizes external links such as Wiedijk's benchmark URL.
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 
 \providecommand{\hypersetup}[1]{}
 \providecommand{\texorpdfstring}[2]{#1}

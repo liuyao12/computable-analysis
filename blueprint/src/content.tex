@@ -32,52 +32,112 @@ obligations finite and inspectable.
 \leanok
 \input{pi-scoreboard-table.tex}
 
-\section*{Scoped benchmark theorem index}
-\label{sec:scoped-benchmark-index}
-The current scope contains 39 checked cores from the 100-theorem benchmark.
-The links below go directly to the relevant chapter statements or to the
-benchmark subsections that collect their Lean declarations.  They are cores
-in the project's rational, finite, or certificate language; a link does not
-claim the unrestricted classical theorem when the chapter marks that bridge
-as deferred.
+\section*{\href{https://www.cs.ru.nl/\%7Efreek/100/index.html}{Wiedijik's List}}
+\noindent\href{https://www.cs.ru.nl/\%7Efreek/100/index.html}{Official Wiedijk benchmark list.}
+\quad The theorem names below link to their corresponding statements in this
+blueprint.
+The following index gives the theorem names from the benchmark and links
+each scoped entry to its blueprint statement.  These are formalized
+rational, finite, or certificate-level cores; a link does not claim the
+unrestricted classical theorem when the chapter marks that bridge as
+deferred.
 
-\begin{description}
-\item[Foundations.] \ref{rem:algebraic-numbers-sqrt-two} (irrationality
-  of \(\sqrt2\)); \ref{thm:rational-code-surjection} (coding of
-  \(\mathbb Q\)); \ref{sec:benchmark-foundations} (38, 52, 58, 60, 69,
-  74, 78, 80, 85, 91} (AM--GM, counting, Bézout/gcd, induction,
-  Cauchy--Schwarz, factor certificates, divisibility, and triangle
-  inequalities).
-
-\item[Circle and trigonometry.] \ref{thm:rational-circle-pythagorean}
-  (Pythagorean and parametrization cores); \ref{thm:geometric-pi-validity}
-  (circle area); \ref{thm:rational-circle-group-law} (finite
-  de Moivre-style circle law); \ref{sec:benchmark-geometry} (27, 55, 57,
-  65, 95) (triangle orientation, chord power, Heron, isosceles geometry,
-  and Ptolemy); \ref{thm:law-of-cosines-equilateral} (law of
-  cosines).
-
-\item[Infinite series.] \ref{thm:zeta-two-valid} (Basel-series
-  interval/tail core); \ref{thm:leibniz-arctan} (Leibniz series);
-  \ref{thm:harmonic-dyadic-lower-bound} (harmonic growth);
-  \ref{sec:series-benchmark-foundations} (42, 44, 66, 68) (telescoping,
-  binomial, geometric, and arithmetic finite sums).
-
-\item[Effective calculus.] \ref{thm:effective-ftc-certificate}
-  (FTC endpoint certificate); \ref{thm:finite-monomial-secants}
-  (finite Taylor core); \ref{thm:cubic-secants} (quotient
-  cancellation); \ref{thm:square-midpoint-mean-value} (finite MVT
-  core); \ref{thm:constructive-inverse-function} (constructive
-  intermediate-value search).
-
-\item[Algebra and FTA.] \ref{thm:linear-factor-remainder-base} (37, 46,
-  89, 100) (cubic and quartic worked cores, factor/remainder certificates,
-  and sign-variation data).
-
-\item[Differential equations.] \ref{thm:two-by-two-cayley-hamilton}
-  (finite Cayley--Hamilton core); \ref{thm:cramer-two-by-two}
-  (two-by-two Cramer rule).
-\end{description}
+\begin{center}
+\small
+\begin{tabular}{p{0.08\textwidth}p{0.38\textwidth}p{0.42\textwidth}}
+\textbf{No.} & \textbf{Theorem} & \textbf{Blueprint location}\\
+\hline
+1 & \benchmarklink{ch-foundations}{rem:algebraic-numbers-sqrt-two}{Irrationality of \(\sqrt2\)}
+  & Foundations\\
+2 & \benchmarklink{sect0002}{thm:finite-factorized-fta}{Fundamental Theorem of Algebra}
+  & Algebra and FTA\\
+3 & \benchmarklink{ch-foundations}{thm:rational-code-surjection}{Denumerability of \(\mathbb Q\)}
+  & Foundations\\
+4 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-circle-pythagorean}{Pythagorean theorem}
+  & Circle and trigonometry\\
+9 & \benchmarklink{ch-rational-circle-trigonometry}{thm:geometric-pi-validity}{Area of a circle}
+  & Circle and integrals\\
+14 & \benchmarklink{ch-infinite-series}{conj:basel}{Euler's Basel sum}
+  & Infinite series (identity deferred)\\
+15 & \benchmarklink{ch-effective-calculus}{thm:convex-ftc}{Fundamental Theorem of Integral Calculus}
+  & Effective calculus\\
+16 & \benchmarklink{sect0002}{rem:abel-ruffini-boundary}{Abel--Ruffini theorem}
+  & Algebra and FTA (boundary)\\
+17 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-circle-powers}{de Moivre's formula}
+  & Circle and trigonometry\\
+23 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-circle-pythagorean}{Formula for Pythagorean triples}
+  & Circle and trigonometry\\
+26 & \benchmarklink{ch-infinite-series}{thm:leibniz-arctan}{Leibniz series for \(\pi\)}
+  & Infinite series\\
+27 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-triangle-orientation}{Sum of angles of a triangle}
+  & Circle and trigonometry\\
+34 & \benchmarklink{ch-infinite-series}{thm:harmonic-dyadic-lower-bound}{Divergence of the harmonic series}
+  & Infinite series\\
+35 & \benchmarklink{ch-effective-calculus}{thm:taylor-integral-remainder}{Taylor's theorem}
+  & Effective calculus\\
+37 & \benchmarklink{sect0002}{thm:rational-cubic-roots}{Solution of a cubic}
+  & Algebra and FTA\\
+44 & \benchmarklink{ch-foundations}{thm:finite-counting-recurrences}{Binomial theorem}
+  & Infinite series\\
+46 & \benchmarklink{sect0002}{thm:rational-quartic-roots}{General quartic equation}
+  & Algebra and FTA\\
+49 & \benchmarklink{ch-differential-equations}{thm:two-by-two-cayley-hamilton}{Cayley--Hamilton theorem}
+  & Differential equations\\
+55 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-chord-power}{Product of segments of chords}
+  & Circle and trigonometry\\
+57 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-heron}{Heron's formula}
+  & Circle and trigonometry\\
+60 & \benchmarklink{ch-foundations}{thm:bezout-certificate}{Bézout's identity}
+  & Foundations\\
+64 & \benchmarklink{ch-effective-calculus}{thm:cubic-secants}{L'Hopital's rule}
+  & Effective calculus\\
+65 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-isosceles}{Isosceles triangle theorem}
+  & Circle and trigonometry\\
+66 & \benchmarklink{ch-infinite-series}{thm:geometric-series-sum}{Sum of a geometric series}
+  & Infinite series\\
+68 & \benchmarklink{ch-infinite-series}{thm:arithmetic-series-sum}{Sum of an arithmetic series}
+  & Infinite series\\
+69 & \benchmarklink{ch-foundations}{thm:euclidean-gcd}{Greatest-common-divisor algorithm}
+  & Foundations\\
+74 & \benchmarklink{ch-foundations}{thm:nat-induction-schema}{Mathematical induction}
+  & Foundations\\
+75 & \benchmarklink{ch-effective-calculus}{thm:square-midpoint-mean-value}{Mean Value Theorem}
+  & Effective calculus\\
+79 & \benchmarklink{ch-foundations}{thm:constructive-inverse-function}{Intermediate Value Theorem}
+  & Foundations/effective calculus\\
+80 & \benchmarklink{ch-foundations}{rem:finite-factorization-certificates}{Fundamental Theorem of Arithmetic}
+  & Foundations\\
+89 & \benchmarklink{sect0002}{thm:descartes-sign-variation}{Factor and remainder theorems}
+  & Algebra and FTA\\
+91 & \benchmarklink{ch-foundations}{thm:rational-triangle-inequality}{Triangle inequality}
+  & Foundations\\
+94 & \benchmarklink{ch-rational-circle-trigonometry}{thm:law-of-cosines-equilateral}{Law of cosines}
+  & Circle and trigonometry\\
+95 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-ptolemy}{Ptolemy's theorem}
+  & Circle and trigonometry\\
+97 & \benchmarklink{ch-differential-equations}{thm:cramer-finite}{Cramer's rule}
+  & Differential equations\\
+100 & \benchmarklink{sect0002}{thm:finite-descartes-sign-count}{Descartes rule of signs}
+  & Algebra and FTA\\
+\hline
+38 & \benchmarklink{ch-foundations}{thm:rational-am-gm}{Arithmetic--geometric mean inequality}
+  & Supporting foundations lemma\\
+42 & \benchmarklink{ch-infinite-series}{thm:reciprocal-triangular-sum}{Reciprocal triangular numbers}
+  & Supporting series lemma\\
+52 & \benchmarklink{ch-foundations}{thm:finite-counting-recurrences}{Number of subsets}
+  & Supporting foundations lemma\\
+58 & \benchmarklink{ch-foundations}{thm:finite-counting-recurrences}{Binomial coefficients}
+  & Supporting series lemma\\
+77 & \benchmarklink{ch-infinite-series}{thm:finite-power-sums}{Sums of powers}
+  & Supporting series lemma\\
+78 & \benchmarklink{ch-foundations}{thm:rational-cauchy-schwarz}{Cauchy--Schwarz inequality}
+  & Supporting foundations lemma\\
+85 & \benchmarklink{ch-foundations}{thm:three-digit-divisibility}{Divisibility by 3}
+  & Supporting foundations lemma\\
+90 & \benchmarklink{ch-infinite-series}{thm:finite-stirling-certificate}{Stirling's formula (finite ratio certificate)}
+  & Supporting series lemma\\
+\end{tabular}
+\end{center}
 
 \clearpage
 

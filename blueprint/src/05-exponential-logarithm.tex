@@ -63,6 +63,7 @@ that two exponential representations agree also identifies their Euler bases.
 \lean{ComputableAnalysis.ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero}
 \lean{ComputableAnalysis.ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_stage_zero_differenceQuotient_near_one}
 \lean{ComputableAnalysis.ExpProofs.uniformExpRaw}
 \lean{ComputableAnalysis.ExpProofs.uniformExpRaw_equiv_expPowerSeries}
 \lean{ComputableAnalysis.ExpProofs.uniformExpOnUnit}
@@ -125,6 +126,27 @@ The finite comparison starts from
 \]
 It is rational polynomial algebra, with the coefficient-loss and factorial
 tail estimates supplying the interval budget at \(x=1/m\).
+\end{theorem}
+
+\begin{theorem}[Finite exponential Taylor remainder schedule]
+\label{thm:finite-exponential-taylor-remainder}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_eq_expTaylorPrefix_sub}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.remainderPartial_abs_le_factorialTailPartial}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.expTaylorPrefix_remainder_le_two_first_omitted}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledTailStart}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledPrefixDegree}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledTailStart_pos}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduledPrefixDegree_succ}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_remainder_le}
+\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
+\leanok
+For a rational point in a bounded rational box, the omitted exponential
+Taylor block is a finite rational sum.  Its absolute value is bounded by a
+finite factorial majorant, and an executable degree schedule makes every
+later finite prefix lie in an explicit rational interval around the selected
+prefix.  This is the potential-infinity form of the Taylor remainder needed
+for benchmark item 35: it never treats an infinite sum as an attained object.
 \end{theorem}
 
 \section{Three computations of \(e\)}
@@ -268,6 +290,7 @@ sums and their adjacent bracket.
 \lean{ComputableAnalysis.Logarithm.logTwoLo_eq_logTwoKernelRightRiemann}
 \label{prop:log-two-square-substitution}
 \lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesCandidateCompute_width_le_of_budget}
 \label{thm:log-two-square-pullback-integral}
 \lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_equiv_reciprocalIntegral}
 \leanok
@@ -348,6 +371,9 @@ connects this value to the chosen abstract \(\pi\) representation.
 \lean{ComputableAnalysis.ComplexRaw.imaginaryAxis_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_valid}
 \lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_equiv}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_ofQComplex}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_imaginaryUnit_compute}
+\lean{ComputableAnalysis.ComplexRaw.qcomplexLeftMul_imaginaryUnit_equiv}
 \lean{ComputableAnalysis.ComplexRaw.cauchyStabilize}
 \lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_contains_current}
 \lean{ComputableAnalysis.ComplexRaw.cauchyStabilize_valid}
@@ -411,6 +437,33 @@ The generic raw-representation transport now proves that the separately
 stabilized factorial rotations agree on these equivalent inputs.  The remaining
 quarter-turn work compares that resulting rotation with the geometric endpoint;
 it is not an unrecorded conversion of units or of \(\pi\)-representatives.
+The geometry-only route is independently available as a finite certificate:
+`GeometricPiRotation.halfPi` is a cofinally scheduled rational representative
+of (2\arctan_{\rm geom}(1)), with boxes in ([1,2]) and width at most
+(2/(n+1)).  It is equivalent to the normalized rational-circle quarter turn.
+The corresponding `rotation` is built by finite-prefix stabilization of
+rational factorial boxes; its current midpoint candidates are ordered and
+contained, and its imaginary-axis input is valid.  These certificates use the
+project's algorithmic representation directly and do not appeal to arbitrary
+Cauchy sequences or completed-real completeness.  They therefore strengthen
+the effective Euler route without closing the still-open identification of the
+geometric endpoint with the stabilized rotation.
+
+\lean{ComputableAnalysis.GeometricPiRotation.halfPi}
+\lean{ComputableAnalysis.GeometricPiRotation.halfPi_valid}
+\lean{ComputableAnalysis.GeometricPiRotation.halfPi_equiv_unscheduled}
+\lean{ComputableAnalysis.GeometricPiRotation.geometricQuarterTurnOne_valid}
+\lean{ComputableAnalysis.GeometricPiRotation.halfPi_equiv_geometricQuarterTurnOne}
+\lean{ComputableAnalysis.GeometricPiRotation.halfPiInput_certificate}
+\lean{ComputableAnalysis.GeometricPiRotation.halfPi_bounds}
+\lean{ComputableAnalysis.GeometricPiRotation.halfPi_width_le_two_div_succ}
+\lean{ComputableAnalysis.GeometricPiRotation.rotationCandidate_ordered}
+\lean{ComputableAnalysis.GeometricPiRotation.rotationCandidate_widths_shrink}
+\lean{ComputableAnalysis.GeometricPiRotation.rotationRadius_shrinks}
+\lean{ComputableAnalysis.GeometricPiRotation.rotation_valid}
+\lean{ComputableAnalysis.GeometricPiRotation.rotation_contains_current_candidate}
+\lean{ComputableAnalysis.GeometricPiRotation.imaginaryHalf_valid}
+
 For an exact rational input in the same bounded chart, the lift is already
 proved equivalent to the original common-schedule factorial evaluator; the
 represented construction therefore extends the rational exponential rather

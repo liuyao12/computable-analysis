@@ -7,6 +7,9 @@ The exact rational parametrization is checked before any positivity or
 primitive-integrality conditions are introduced:
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_identity}
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_three_four_five}
+\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_six_eight_ten}
+\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_parameter_two_one}
+\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_six_eight_ten_certificate}
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_positive}
 \lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
 \lean{ComputableAnalysis.RationalCircle.heron_product_nonneg}
@@ -16,16 +19,49 @@ primitive-integrality conditions are introduced:
 \lean{ComputableAnalysis.RationalCircle.heronAreaRaw_spec}
 \lean{ComputableAnalysis.RationalCircle.heron_three_four_five}
 \lean{ComputableAnalysis.RationalCircle.heron_three_four_five_area_witness}
+\lean{ComputableAnalysis.RationalCircle.heron_three_four_five_area_raw_equiv_six}
 \lean{ComputableAnalysis.RationalCircle.heron_three_four_five_strict_pos}
 \lean{ComputableAnalysis.sqrt_thirty_six_eq_six}
 \lean{ComputableAnalysis.RationalCircle.ptolemy_oriented_chord_numerator}
+\lean{ComputableAnalysis.RationalCircle.Stage.ptolemy_oriented_chord_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.ptolemy_squared_coordinate_certificate}
 \lean{ComputableAnalysis.RationalCircle.horizontalChord_power_identity}
-\lean{ComputableAnalysis.RationalCircle.rightTriangle_axis_pythagorean}
-\lean{ComputableAnalysis.RationalCircle.rightTriangle_pythagorean}
-\lean{ComputableAnalysis.RationalCircle.isosceles_axis_symmetry}
-\lean{ComputableAnalysis.RationalCircle.isosceles_equal_legs}
-\lean{ComputableAnalysis.RationalCircle.isosceles_axis_orthogonal}
-\lean{ComputableAnalysis.RationalCircle.isosceles_base_normSq}
+\lean{ComputableAnalysis.RationalCircle.horizontalChord_power_nonneg_of_outside}
+\lean{ComputableAnalysis.RationalCircle.horizontalChord_power_neg_of_inside}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_valid}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_spec}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_of_square}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_four_fifths}
+\lean{ComputableAnalysis.RationalCircle.Stage.rightTriangle_axis_pythagorean}
+\lean{ComputableAnalysis.RationalCircle.Stage.rightTriangle_pythagorean}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_symmetry}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_equal_legs}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_orthogonal}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_base_normSq}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_equal_legs}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_axis_orthogonal}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_base_squared}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_certificate}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointConj_reflection_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.heron_three_four_five_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.segmentNormSq_law_of_cosines_coordinate_certificate}
+\lean{ComputableAnalysis.QComplex.natPow_mul}
+\lean{ComputableAnalysis.QComplex.natPow_add}
+\lean{ComputableAnalysis.QComplex.conj}
+\lean{ComputableAnalysis.QComplex.conj_one}
+\lean{ComputableAnalysis.QComplex.conj_add}
+\lean{ComputableAnalysis.QComplex.conj_neg}
+\lean{ComputableAnalysis.QComplex.conj_scaleRat}
+\lean{ComputableAnalysis.QComplex.conj_mul}
+\lean{ComputableAnalysis.QComplex.conj_natPow}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointMul}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointConj}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_circleOne}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow_mul}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow_conj}
 \[
  (m^2-n^2)^2+(2mn)^2=(m^2+n^2)^2.
 \]
@@ -33,24 +69,80 @@ This is the finite polynomial and positive-rational core of benchmark item 23;
 primitive-integral classification remains a separate certificate.  The axis-coordinate
 version above is the corresponding rational-coordinate core of benchmark item
 4.  The arbitrary rational orthogonality identity strengthens that core to
-general rational-coordinate legs.  The isosceles symmetry and base-length
-identities are the rational-coordinate core of benchmark item 65; equality of
-the corresponding angles remains separate.  The
+general rational-coordinate legs.
+
+\begin{theorem}[Rational isosceles-triangle certificate]
+\label{thm:rational-isosceles}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_symmetry}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_equal_legs}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_orthogonal}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_base_normSq}
+\leanok
+The isosceles symmetry and base-length identities are the rational-coordinate
+core of benchmark item 65.  Equality of the corresponding geometric angles
+remains a separate representation-level bridge.
+\end{theorem}
+
+\begin{theorem}[Rational Heron area certificate]
+\label{thm:rational-heron}
+\lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
+\lean{ComputableAnalysis.RationalCircle.heron_product_nonneg}
+\lean{ComputableAnalysis.RationalCircle.heronAreaRaw}
+\lean{ComputableAnalysis.RationalCircle.heronAreaRaw_valid}
+\lean{ComputableAnalysis.RationalCircle.heronAreaRaw_spec}
+\lean{ComputableAnalysis.RationalCircle.heronAreaRaw_equiv_of_square}
+\lean{ComputableAnalysis.RationalCircle.heron_three_four_five_area_raw_equiv_six}
+\leanok
 The squared Heron identity together with the triangle-inequality certificate
 above covers the rational nonnegative-squared-area core of benchmark item 57.
 \texttt{heronAreaRaw} now packages the nonnegative square-root area as a valid raw
 real with its square-root specification; the geometric interpretation of that
 output as Euclidean area remains a separate bridge.
+\end{theorem}
 
+\begin{theorem}[Rational power of a point for a chord]
+\label{thm:rational-chord-power}
+\lean{ComputableAnalysis.RationalCircle.horizontalChord_power_identity}
+\lean{ComputableAnalysis.RationalCircle.horizontalChord_power_nonneg_of_outside}
+\lean{ComputableAnalysis.RationalCircle.horizontalChord_power_neg_of_inside}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_valid}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_spec}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_of_square}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_four_fifths}
+\leanok
 For a horizontal chord with endpoints ((-r,h)) and ((r,h)), the identity
 \[
  (t+r)(t-r)=t^2+h^2-1
 \]
 under the circle certificate (r^2+h^2=1) is the exact rational
 power-of-a-point core of benchmark item 55.  The theorem is stated with
-directed coordinate segments; converting to unsigned Euclidean lengths is a
-separate square-root/order layer.
+directed coordinate segments.  The companion
+`horizontalChord_power_nonneg_of_outside` proves the product is nonnegative
+when the external point lies outside the chord interval, while
+`horizontalChord_power_neg_of_inside` proves strict negativity between the
+endpoints. Converting to unsigned Euclidean lengths is still a separate
+square-root/order layer. The `horizontalChordPowerSqrtRaw` definition now
+applies the certified square-root algorithm to the nonnegative outside
+product, and `horizontalChordPowerSqrtRaw_valid` proves that it is a valid
+raw output. `horizontalChordPowerSqrtRaw_spec` exposes the corresponding
+square-root specification for later composition; identifying it with an
+unsigned Euclidean length remains a separate geometric bridge. When a rational
+square witness is supplied, `horizontalChordPowerSqrtRaw_equiv_of_square`
+identifies the output with the nonnegative rational representative. The
+specialization `horizontalChordPowerSqrtRaw_equiv_four_fifths` checks the
+concrete (16/25\mapsto4/5) outside-chord instance.
+\end{theorem}
 
+\lean{ComputableAnalysis.RationalCircle.linePoint}
+\lean{ComputableAnalysis.RationalCircle.point_power_line_parameter_identity}
+
+\begin{theorem}[Rational Ptolemy numerator certificate]
+\label{thm:rational-ptolemy}
+\lean{ComputableAnalysis.RationalCircle.ptolemy_oriented_chord_numerator}
+\lean{ComputableAnalysis.RationalCircle.Stage.ptolemy_oriented_chord_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.ptolemy_squared_coordinate_certificate}
+\leanok
 The identity
 \[
  (c-a)(d-b)=(b-a)(d-c)+(c-b)(d-a)
@@ -58,7 +150,25 @@ The identity
 is the common-denominator numerator identity behind Ptolemy's theorem for
 four cyclic points in the rational circle chart.  It is the checked oriented
 chord core of benchmark item 95; the full Euclidean chord-length statement
-still requires the project's square-root and ordering interfaces.
+still requires the project's square-root and ordering interfaces. The
+`ptolemy_squared_coordinate_certificate` adds a square-root-free shadow for
+the displayed cyclic quadrilateral, with an explicit rational cross-term
+witness.
+\end{theorem}
+
+\begin{theorem}[Finite Ptolemy length certificate]
+\label{thm:finite-ptolemy-length}
+\lean{ComputableAnalysis.FinitePtolemyLength.ptolemyPoint_square_coordinates}
+\lean{ComputableAnalysis.FinitePtolemyLength.pointSegmentLengthRaw_equiv_of_square}
+\lean{ComputableAnalysis.FinitePtolemyLength.finitePtolemyLength_certificate}
+\leanok
+For a concrete rational cyclic quadrilateral, all six squared chord lengths
+are rational squares.  The project’s raw square-root length algorithm is
+therefore equivalent to six explicit rational witnesses, and those witnesses
+satisfy Ptolemy’s length identity.  This is a fully finite constructive
+instance of benchmark item 95, extending the square-root-free coordinate
+shadow without asserting a general Euclidean length theorem.
+\end{theorem}
 
 \section{Archimedes' Method of Exhaustion}
 
@@ -696,6 +806,7 @@ geometric fact packaged by the incremental area corrections in
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_swap_neg}
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_zero_of_collinear}
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_pos_of_oriented}
+\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_quadrilateral_diagonal_additivity}
 \leanok
 The determinant-based twice-area certificate is invariant under cyclic
 permutation, changes sign when two vertices are exchanged, vanishes for
@@ -1018,6 +1129,7 @@ square-root specifications for \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\).
 \begin{theorem}[Law of cosines and the equilateral value]
 \label{thm:law-of-cosines-equilateral}
 \lean{ComputableAnalysis.RationalCircle.Stage.segmentNormSq_law_of_cosines}
+\lean{ComputableAnalysis.RationalCircle.Stage.segmentNormSq_law_of_cosines_coordinate_certificate}
 \lean{ComputableAnalysis.RationalCircle.Stage.dot_eq_half_of_unit_equilateral}
 \uses{rem:rational-circle-point}
 \leanok
@@ -1035,6 +1147,11 @@ angle-to-circle-point construction to identify the one-third input with the
 equilateral chord.
 This is the rational-coordinate core of benchmark item 94.
 \end{theorem}
+
+The reusable `PiProofs.pointSegmentLengthRaw` algorithm takes the square root
+of the rational squared distance between two coordinate points. Its validity
+and `SqrtRawSpec` declarations provide the computable length interface needed
+for a future Ptolemy theorem; no completed Euclidean length object is assumed.
 
 \begin{theorem}[Arctangent witnesses select sine and cosine coordinates]
 \label{thm:arctan-witness-coordinates}
@@ -1189,6 +1306,10 @@ For every rational slope coordinate \(u\),
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_eq_cos_chartAdd}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_eq_sin_chartAdd}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.composedPoint_eq_point_chartAdd}
+\lean{ComputableAnalysis.ArctanGeometry.chartAdd_cross_orientation_certificate}
+\lean{ComputableAnalysis.IntegralIdentities.chartAddLowerJacobian}
+\lean{ComputableAnalysis.IntegralIdentities.chartAddUpperJacobian}
+\lean{ComputableAnalysis.IntegralIdentities.chartAddPartition_transport_certificate}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.projectiveSlope_pointMul}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_composedPoint_eq_tanAdd}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_chartAddParameter_eq_tanAdd}
@@ -1463,9 +1584,33 @@ The missing-point case \(1-uv=0\) is the expected projective chart transition.
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_zero}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_succ}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_add}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_three}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_mul}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_normSq}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_normSq_of_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPow_conj}
+\lean{ComputableAnalysis.QComplex.natPow_mul}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_normSq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow_normSq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow_normSq_of_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw_valid}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw_equiv_natPow}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw_conj_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow_mul}
+\lean{ComputableAnalysis.eulerCenter_eq_natPow}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFiveSquare}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_square}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_square_coordinates}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_square_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_square_complex_bridge}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFiveCube}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_cube}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_cube_coordinates}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_cube_unit}
 \uses{thm:rational-circle-group-law}
 \leanok
 The rational circle multiplication has an executable natural power.  Lean
@@ -1474,9 +1619,36 @@ proves the exponent-addition law
   P^{{m+n}}=P^mP^n
 \]
 and tracks its squared norm as \(\lVert P\rVert^{2n}\).  For unit-circle
-points the unit-norm corollary makes the conclusion explicit.  This is the
-finite power-operation core of de Moivre's formula; identifying these powers
-with an angle multiplication or a complex exponential remains separate.
+points the unit-norm corollary makes the conclusion explicit.  The
+`toQComplex` embedding now identifies this power with the corresponding
+finite rational-complex power.  The norm-square transport and its unit-circle
+specialization, `toQComplex_pointPow_normSq` and
+`toQComplex_pointPow_normSq_of_unit`, preserve the same invariant on the
+finite complex side.  The theorem `toQComplex_pointPow_mul` gives the
+embedded de Moivre multiplication law.  Identifying these powers with an
+angle multiplication or a complex exponential remains separate.  The
+conjugation-commutes-with-power certificate adds the finite coordinate
+symmetry needed for inverse and reflected rotation routes.
+The `pointPowRaw` lift packages the same finite result as a valid represented
+complex raw, and `pointPowRaw_equiv_natPow` proves its exact equivalence to the
+finite rational-complex power. The companion `pointPowRaw_conj_equiv`
+transports conjugation through the represented power without introducing a
+completed complex exponential.
+The explicit `pointPow_three` identity gives the first nontrivial odd-power
+coordinate formula, namely the cubic triple-angle shadow of de Moivre's law.
+The concrete point \((3/5,4/5)\) now has an executable square certificate:
+\[
+  (3/5+4i/5)^2=-7/25+24i/25.
+\]
+The same witness is checked to have unit norm before and after powering, and
+the coordinate computation is identified with the finite `QComplex` power.
+The cubic instance is also checked explicitly, giving
+
+\[
+  (3/5+4i/5)^3=-117/125+44i/125,
+\]
+
+with the corresponding unit-norm certificate.
 \end{theorem}
 
 \begin{theorem}[Projected addition formulas]

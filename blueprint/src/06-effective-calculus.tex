@@ -22,8 +22,10 @@ is summed into an integral certificate.
 \lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_succ}
 \lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval}
 \lean{ComputableAnalysis.FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.secantSlope_product_transport}
 \leanok
 For every rational box of radius \(C\ge1\), Lean proves directly that the
 literal quotient of the normalized monomial has the form
@@ -44,7 +46,16 @@ The same quantified certificates are now closed under addition, rational
 scaling, and products.  The product coefficient carries the literal finite
 corner term from the two secant quotients, controlled by rational local
 majorants; this is the derivative-level input to a later product FTC and
-integration-by-parts theorem.
+integration-by-parts theorem.  The finite secant product transport gives the
+corresponding endpoint-weighted product-rule identity directly over rationals.
+The reusable interval quotient interface now packages the final enclosure
+step: given a rational center secant error, a common box radius, and explicit
+quotient and derivative width budgets, `QInterval.around_differenceQuotient_near_around`
+returns a literal two-sided `NearAt` certificate for the derivative box.  The
+positive-step and sign-reversed cases are both finite rational calculations;
+this is interval-level Mean Value support, not a classical limit.
+\lean{ComputableAnalysis.QInterval.around_differenceQuotient_near_around_of_pos}
+\lean{ComputableAnalysis.QInterval.around_differenceQuotient_near_around}
 \end{theorem}
 
 \begin{theorem}[Affine secant certificate]
@@ -62,6 +73,34 @@ benchmark item 75.
 \lean{ComputableAnalysis.ExactFunction.affine_root_of_nonzero_slope}
 \lean{ComputableAnalysis.ExactFunction.affine_root_between_of_sign_change}
 \lean{ComputableAnalysis.ExactFunction.affine_root_between_of_negative_sign_change}
+\lean{ComputableAnalysis.rationalBisectionWidth}
+\lean{ComputableAnalysis.rationalBisectionWidth_le_error_budget}
+\lean{ComputableAnalysis.monotoneBisectionStep}
+\lean{ComputableAnalysis.monotoneBisectionStep_ordered}
+\lean{ComputableAnalysis.monotoneBisectionStep_subinterval}
+\lean{ComputableAnalysis.monotoneBisectionStep_preserves_bracket}
+\lean{ComputableAnalysis.monotoneTargetBisectionStep}
+\lean{ComputableAnalysis.monotoneBisectionStep_preserves_target_bracket}
+\lean{ComputableAnalysis.monotoneTargetBisectionStep_subinterval}
+\lean{ComputableAnalysis.monotoneTargetBisectionStep_width}
+\lean{ComputableAnalysis.monotoneBisectionStep_width}
+\lean{ComputableAnalysis.monotoneBisectionIterate}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate}
+\lean{ComputableAnalysis.monotoneBisectionIterate_ordered}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_ordered}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_width_pos}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_subinterval}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_width}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_certificate}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_width_le_of_power_budget}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_width_le_one_div_succ}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_reaches_of_positive_tolerance}
+\lean{ComputableAnalysis.monotoneBisectionIterate_subinterval}
+\lean{ComputableAnalysis.monotoneBisectionIterate_preserves_bracket}
+\lean{ComputableAnalysis.monotoneBisectionIterate_preserves_target_bracket}
+\lean{ComputableAnalysis.monotoneBisectionIterate_width}
+\lean{ComputableAnalysis.monotoneBisectionIterate_width_pos}
+\lean{ComputableAnalysis.monotoneBisectionIterate_width_le_of_power_budget}
 \leanok
 If $m\ne0$, the rational affine function with formula $mx+c$ has the exact
 zero $-c/m$.  This is the finite rational root base case for constructive
@@ -70,21 +109,78 @@ claimed here.  For positive $m$, the companion sign-change certificate
 additionally proves that this zero lies between endpoint values of opposite
 sign; the negative-slope orientation is checked by the second companion
 certificate.
+The iterated bisection interface preserves these finite bracket invariants at
+every stage and gives the exact (2^{-n}) width schedule.  Its power-budget
+corollary turns a rational inequality (w(I)\le\varepsilon 2^n) into the
+executable final guarantee (w(I_n)\le\varepsilon).
 \end{theorem}
 
-\begin{theorem}[Cubic secant certificate]
+\begin{theorem}[Cubic secant and L'Hôpital cancellation certificate]
+\label{thm:constructive-lhopital}
 \label{thm:cubic-secants}
 \lean{ComputableAnalysis.ExactFunction.cube_differenceQuotient}
-\lean{ComputableAnalysis.Differential.cube_midpoint_secant}
+\lean{ComputableAnalysis.ExactFunction.cube_secant_derivative_bracket}
+\lean{ComputableAnalysis.ExactFunction.square_secant_derivative_bracket}
+\lean{ComputableAnalysis.cube_midpoint_secant}
+\lean{ComputableAnalysis.cubic_secant_unit_interval}
+\lean{ComputableAnalysis.cubic_midpoint_secant_unit_interval}
+\lean{ComputableAnalysis.cubic_midpoint_secant_unit_interval_remainder}
+\lean{ComputableAnalysis.cubic_mvt_unit_interval_certificate}
 \lean{ComputableAnalysis.ExactFunction.quartic_differenceQuotient}
 \lean{ComputableAnalysis.Differential.quartic_midpoint_secant}
+\lean{ComputableAnalysis.Differential.quartic_secant_derivative_bracket}
+\lean{ComputableAnalysis.ExactFunction.monomial_succ_secant_derivative_bracket}
 \lean{ComputableAnalysis.ExactFunction.quintic_differenceQuotient}
+\lean{ComputableAnalysis.ExactFunction.sextic_differenceQuotient}
 \lean{ComputableAnalysis.Differential.quintic_midpoint_secant}
+\lean{ComputableAnalysis.Differential.sextic_midpoint_secant}
+\lean{ComputableAnalysis.ExactFunction.secant_of_finite_derivative_bracket}
+\lean{ComputableAnalysis.common_linear_factor_quotient_cancel}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.affineResidual}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate.common_factor_cancel}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate.residual_remainder_identity}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.affine_residual_quotient_certificate}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.affine_residual_quotient_eq_base_of_cross_product_eq_zero}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.quadratic_linear_worked_remainder}
+\lean{ComputableAnalysis.FiniteLHopitalCertificate.quadratic_linear_worked_remainder_at_stage}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_cons}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_linear}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_quadratic}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_cubic}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_quartic}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_quintic}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_sextic}
+\lean{ComputableAnalysis.Polynomial.finiteDerivativeEval_septic}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finiteCubic_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finiteQuartic_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finiteQuintic_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finiteSextic_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finiteSeptic_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_gap}
+\lean{ComputableAnalysis.Polynomial.finiteCubic_secant_derivative_gap}
+\lean{ComputableAnalysis.Polynomial.finiteCubic_secant_derivative_gap_le}
+\lean{ComputableAnalysis.Polynomial.finiteQuartic_secant_derivative_gap}
+\lean{ComputableAnalysis.Polynomial.finiteQuartic_secant_derivative_gap_le}
+\lean{ComputableAnalysis.Polynomial.finiteQuintic_secant_derivative_gap}
+\lean{ComputableAnalysis.Polynomial.finiteQuintic_secant_derivative_gap_le}
+\lean{ComputableAnalysis.Polynomial.finiteSextic_secant_derivative_gap}
+\lean{ComputableAnalysis.Polynomial.finiteSextic_secant_derivative_gap_le}
+\lean{ComputableAnalysis.Polynomial.finiteSeptic_secant_derivative_gap}
 \lean{ComputableAnalysis.ExactFunction.square_quotient_by_id}
 \lean{ComputableAnalysis.ExactFunction.cube_quotient_by_id}
 \lean{ComputableAnalysis.ExactFunction.power_succ_quotient_by_id}
 \lean{ComputableAnalysis.ExactFunction.power_succ_quotient_by_power}
 \lean{ComputableAnalysis.ExactFunction.power_add_quotient_by_power}
+\lean{ComputableAnalysis.ExactFunction.mul_power_add_quotient_by_power}
+\lean{ComputableAnalysis.ExactFunction.mul_power_add_quotient_by_scaled_power}
+\lean{ComputableAnalysis.ExactFunction.differenceQuotient_affine_comp}
+\lean{ComputableAnalysis.ExactFunction.secant_bracket_affine_endpoint_transport}
+\lean{ComputableAnalysis.quadratic_linear_factored_quotient_derivative_ratio}
+\lean{ComputableAnalysis.cubic_linear_factored_quotient_derivative_ratio}
+\lean{ComputableAnalysis.factored_linear_quotient_cancel}
 \leanok
 For nonzero rational step $h$, the exact secant quotient of $x^3$ at
 $x$ is $3x^2+3xh+h^2$.  This is a finite polynomial certificate for the
@@ -97,17 +193,43 @@ finite algebraic base case for the optional L'Hôpital layer (benchmark item
 64).  Cancellation by an arbitrary nonzero power is checked as well, both
 for $x^{n+1}/x$, for $x^{n+1}/x^n$, and in the reusable form
 $x^{m+n}/x^m=x^n$.
+The cubic factored quotient
+`cubic_linear_factored_quotient_derivative_ratio` additionally records the
+explicit remainder after cancelling `(x-a)` from `(x^3-a^3)`, entirely over
+the rationals.
+The two-function certificate `common_linear_factor_quotient_cancel` now
+cancels a shared nonzero linear factor in a numerator/denominator pair,
+leaving the quotient of their remaining rational evaluators.  This is the
+finite algorithmic L'Hôpital interface; the usual limit theorem remains
+outside the current boundary.
+The packaged `FiniteLHopitalCertificate` strengthens this interface with an
+explicit affine residual and a cross-product remainder identity after
+cancellation.  The remainder is a finite rational error witness; it does not
+silently replace the deferred limit argument.
+The mesh-transport certificate `secant_of_finite_derivative_bracket` then
+telescopes a common finite derivative bracket across rational cells to the
+whole endpoint secant, providing a broader finite mean-value-style interface.
 No limiting theorem is claimed.
 \end{theorem}
 
 \begin{theorem}[Rational midpoint mean-value certificate]
 \label{thm:square-midpoint-mean-value}
 \lean{ComputableAnalysis.Differential.square_midpoint_mean_value}
+\lean{ComputableAnalysis.ExactFunction.secant_of_finite_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_bracket}
+\lean{ComputableAnalysis.Polynomial.finitePolynomial_secant_derivative_gap}
+\lean{ComputableAnalysis.Polynomial.finiteSeptic_derivative_mono}
+\lean{ComputableAnalysis.Polynomial.finiteCubic_secant_derivative_enclosure_of_budget}
 \leanok
 For $a\ne b$, the secant slope of the rational square function from $a$ to
 $b$ equals its derivative $2x$ at the rational midpoint $(a+b)/2$.  This is
 an exact finite certificate for the square-function core of benchmark item
-75; it does not assert the general analytic Mean Value Theorem.
+75.  More generally, the linked finite secant-bracket transport encloses a
+whole endpoint secant between rational derivative bounds and supplies an
+explicit gap budget.  The cubic enclosure theorem turns that budget into an
+explicit rational epsilon-neighborhood of the endpoint derivative.  It is the
+project's algorithmic Mean Value interface;
+it does not assert the general analytic Mean Value Theorem.
 \end{theorem}
 
 \lean{ComputableAnalysis.IntegralIdentities.coordinateOnUnitDerivative}
@@ -434,11 +556,113 @@ named for the piecewise-monotone operator; the finite-sum comparison proofs
 for an arbitrary monotone integrand remain the next formal step.
 \end{theorem}
 
+\begin{theorem}[Interval-regular integral certificate]
+\label{thm:interval-regular-integral-certificate}
+\lean{ComputableAnalysis.Integral.IntervalRegularIntegralCertificate}
+\lean{ComputableAnalysis.Integral.IntervalRegularIntegralCertificate.regular}
+\lean{ComputableAnalysis.Integral.IntervalRegularIntegralCertificate.construction}
+\lean{ComputableAnalysis.Integral.raw}
+\lean{ComputableAnalysis.Integral.raw_valid}
+\lean{ComputableAnalysis.Integral.exactRat_constant}
+\lean{ComputableAnalysis.Integral.exactRat_constant_raw_eq_ofRat}
+\lean{ComputableAnalysis.Integral.exactRat_constant_raw_valid}
+\lean{ComputableAnalysis.Integral.affineInterval}
+\lean{ComputableAnalysis.Integral.exactRat_affine_intervalRegularOn_of_unit_slope}
+\lean{ComputableAnalysis.Integral.exactRat_affine_unitSlope}
+\lean{ComputableAnalysis.Integral.exactRat_affine_unitSlope_raw_eq_ofRat}
+\lean{ComputableAnalysis.Integral.exactRat_affine_unitSlope_raw_valid}
+\lean{ComputableAnalysis.Integral.signedAffineInterval}
+\lean{ComputableAnalysis.Integral.exactRat_affine_intervalRegularOn_of_signed_unit_slope}
+\lean{ComputableAnalysis.Integral.exactRat_affine_signed_unitSlope}
+\lean{ComputableAnalysis.Integral.exactRat_affine_signed_unitSlope_raw_eq_ofRat}
+\lean{ComputableAnalysis.Integral.exactRat_affine_signed_unitSlope_raw_valid}
+\lean{ComputableAnalysis.Integral.exactSquareInterval}
+\lean{ComputableAnalysis.Integral.exactRat_square_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactSquare_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_square_integral_certificate}
+\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactSquare_uniformLeftSum_eq}
+\lean{ComputableAnalysis.Integral.exactSquare_uniformRightSum_eq}
+\lean{ComputableAnalysis.Integral.exactSquare_uniformLeftSum_le_one_third}
+\lean{ComputableAnalysis.Integral.exactSquare_uniformRightSum_ge_one_third}
+\lean{ComputableAnalysis.Integral.exactSquare_compute_contains_one_third}
+\lean{ComputableAnalysis.Integral.exactRat_square_integral_raw_equiv_one_third}
+\lean{ComputableAnalysis.Integral.exactCubeInterval}
+\lean{ComputableAnalysis.Integral.exactRat_cube_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactCube_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_cube_integral_certificate}
+\lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactCube_uniformLeftSum_eq}
+\lean{ComputableAnalysis.Integral.exactCube_uniformRightSum_eq}
+\lean{ComputableAnalysis.Integral.exactCube_uniformLeftSum_le_one_fourth}
+\lean{ComputableAnalysis.Integral.exactCube_uniformRightSum_ge_one_fourth}
+\lean{ComputableAnalysis.Integral.exactCube_compute_contains_one_fourth}
+\lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_one_fourth}
+\lean{ComputableAnalysis.Integral.exactQuarticInterval}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_certificate}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactQuartic_uniformLeftSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuartic_uniformRightSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuartic_uniformLeftSum_le_one_fifth}
+\lean{ComputableAnalysis.Integral.exactQuartic_uniformRightSum_ge_one_fifth}
+\lean{ComputableAnalysis.Integral.exactQuartic_compute_contains_one_fifth}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_equiv_one_fifth}
+\lean{ComputableAnalysis.Integral.exactQuinticInterval}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_certificate}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformLeftSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformRightSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformLeftSum_le_one_sixth}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformRightSum_ge_one_sixth}
+\lean{ComputableAnalysis.Integral.exactQuintic_compute_contains_one_sixth}
+\lean{ComputableAnalysis.Integral.exactQuintic_compute_contains_one_sixth_stage20}
+\uses{thm:monotone-integrable}
+\leanok
+The interval-regularity contract and the nested/shrinking integral
+certificate are recorded as separate finite fields.  The unrestricted theorem
+that every `IntervalRegularOn` function admits such a construction remains
+open; the exact rational constant instance is fully checked and computes to
+the expected interval length times the constant.  The same bridge is now checked
+for rational affine maps with slope in $[0,1]$: the evaluator maps a subinterval
+to its endpoint image, uses the explicit input schedule $n+1$, and computes the
+integral to the expected affine endpoint formula.
+The signed extension covers both increasing and decreasing affine maps with
+slope in $[-1,1]$, selecting the endpoint order algorithmically and using the
+same finite width schedule.
+The exact square function on $[0,1]$ is also interval-regular: its endpoint
+square interval has width at most twice the input width, and the executable
+schedule $2(n+1)$ supplies the required output precision.
+The rational Lipschitz bound $2$ then instantiates the finite
+Lipschitz--Darboux construction, producing a valid raw integral certificate
+for the exact square function.  The finite left and right endpoint sums are
+bounded on opposite sides by $1/3$, so every computed enclosure contains the
+singleton rational interval $[1/3,1/3]$ and the raw integral is equivalent to
+the exact rational value $1/3$.  The same finite construction is now checked
+for the cubic function on $[0,1]$: its interval modulus uses the explicit
+factor $3$, the left and right sums are expressed through the finite cube
+sum, and the resulting raw integral is equivalent to $1/4$.
+The same finite construction now covers $x^4$ and has a concrete $x^5$
+stage certificate on $[0,1]$:
+their endpoint sums reduce to `Series.fourthPowerSum` and
+`Series.fifthPowerSum`, and the computed raw integrals are equivalent to
+$1/5$; the quintic stage-10 enclosure contains $1/6$.  These are explicit
+polynomial instances, not a general regularity-to-integrability theorem.
+The quintic enclosure is now also checked directly at stage (20), giving a
+deeper executable finite witness for the same exact target (1/6).
+\end{theorem}
+
 \begin{theorem}[Effective FTC certificate]
 \label{thm:effective-ftc-certificate}
 \lean{ComputableAnalysis.EffectiveFTC}
 \lean{ComputableAnalysis.StaticDyadicEffectiveFTC}
 \lean{ComputableAnalysis.StaticDyadicEffectiveFTC.toEffectiveFTC}
+\lean{ComputableAnalysis.FTC.requestedPrecision_positive}
+\lean{ComputableAnalysis.FTC.requestedPrecision_le_one}
+\lean{ComputableAnalysis.FTC.requestedPrecision_antitone}
 \lean{ComputableAnalysis.FTC.EndpointScheduleAgreement}
 \lean{ComputableAnalysis.FTC.EndpointScheduleAgreement.endpoint_raw_valid}
 \lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_effectiveFTC_stageSchedule}
@@ -451,6 +675,7 @@ for an arbitrary monotone integrand remain the next formal step.
 \lean{ComputableAnalysis.FTC.effectiveFTC_equiv_endpoint}
 \lean{ComputableAnalysis.FTC.effectiveFTC_integral_equiv_scheduledEndpoint}
 \lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement}
+\lean{ComputableAnalysis.FTC.effectiveFTC_definiteIntegralEqualsEndpoint_of_stageSchedule}
 \lean{ComputableAnalysis.FTC.integralPlanOfStaticDyadicEffectiveFTC}
 \lean{ComputableAnalysis.FTC.integralPlanOfStaticDyadicEffectiveFTC_eq_toEffectiveFTC}
 \lean{ComputableAnalysis.FTC.staticDyadicEffectiveFTC_equiv_endpoint}
@@ -460,6 +685,9 @@ for an arbitrary monotone integrand remain the next formal step.
 \lean{ComputableAnalysis.endpointDifference_valid_of_fun_valid}
 \lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
 \lean{ComputableAnalysis.FunctionOnInterval.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.FTC.finitePartitionEndpointStageSum}
+\lean{ComputableAnalysis.FTC.finitePartitionEndpointStageSum_contains}
+\lean{ComputableAnalysis.FTC.finitePartitionEndpointStageSum_adjacent_contains}
 \lean{ComputableAnalysis.Integral.constructionFor_of_effectiveFTC}
 \lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC}
 \lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC_endpointAgreement}
@@ -518,7 +746,13 @@ An \code{EffectiveFTC} certificate is a finite schedule saying that, at every
 requested rational precision, a chosen Riemann-sum interval overlaps the
 endpoint-difference interval \(F(b)-F(a)\).  Lean proves that such a certificate
 gives raw-real equivalence between the scheduled integral and the scheduled
-endpoint raw real.  \code{StaticDyadicEffectiveFTC} is the specialization used
+endpoint raw real.  The public selector `requestedPrecision` is itself
+certified positive and bounded by one at every natural stage, via
+`requestedPrecision_positive` and `requestedPrecision_le_one`; these are the
+finite normalization facts used by the schedule-facing constructions. The
+additional `requestedPrecision_antitone` theorem proves that later finite
+stages request no larger tolerance than earlier stages.
+\code{StaticDyadicEffectiveFTC} is the specialization used
 by the first bounded-integral algorithms: the chosen subdivision count has the
 form \(2^s\), so the FTC schedule is the static dyadic mesh from
 Chapter~\ref{ch:integrals}.  It forgets to a general \code{EffectiveFTC}, but
@@ -565,7 +799,42 @@ endpoint differences, their sum reduces to the endpoint difference over the
 combined interval.
 \end{theorem}
 
+\begin{theorem}[Finite cubic FTC endpoint certificate]
+\label{thm:finite-cubic-ftc}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_eq}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_error_eq}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_error_nonneg}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_error_le_three_halves_div}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum_eq}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum_error_eq}
+\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum_error_nonneg}
+\leanok
+For the derivative (3x^2) of (x^3) on ([0,1]), the finite left-endpoint
+accumulator has the exact rational form
+[
+  S_n=\frac{(n-1)(2n-1)}{2n^2},qquad
+  0\le 1-S_n\le\frac{3}{2n}quad(n>0).
+]
+This is a finite FTC endpoint certificate: every requested precision is met
+by a finite rational stage, while no completed integral or classical limit is
+introduced.  The matching right-endpoint accumulator is also exposed with its
+exact rational error formula and nonnegativity certificate, so the two finite
+sums form a rational enclosure from both sides.
+\end{theorem}
+
 \begin{theorem}[Fundamental theorem of calculus]\label{thm:convex-ftc}
+\lean{ComputableAnalysis.ConvexFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.ConcaveFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.convexFTC}
+\lean{ComputableAnalysis.concaveFTC}
 \uses{def:exact-convexity,def:convex-right-derivative,thm:monotone-integrable,thm:effective-ftc-certificate,def:definite-integral-identity}
 If \(F\) is convex on a rational interval \([a,b]\), then the right
 derivative \(D_+F\) is integrable and
@@ -634,6 +903,16 @@ iterated-integral remainder.
 \end{definition}
 
 \begin{theorem}[Taylor's theorem with integral remainder]\label{thm:taylor-integral-remainder}
+\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_succ}
+\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_succ}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval}
+\lean{ComputableAnalysis.FinitePolynomial.expTaylorPrefix_endpointDifference_succ}
 \uses{def:taylor-iterated-ftc}
 If \(F\) has the required derivative-identification certificates through
 order \(n+1\) on a rational interval, then
@@ -646,11 +925,17 @@ order \(n+1\) on a rational interval, then
 \]
 where the remainder is represented by an iterated constructive integral of
 \(F^{(n+1)}\).  Bounding that final integral gives the usual effective
-Taylor estimate.
+Taylor estimate.  The linked Lean declarations provide the checked finite
+Taylor--Lagrange core: rational prefixes, translated prefixes, their explicit
+secant bounds, and the sine, cosine, and quadratic exponential instances.
+The iterated-integral remainder is available only when the separately stated
+effective FTC hypotheses are supplied.
 \end{theorem}
 
 \begin{theorem}[Arctangent kernel remainder]\label{thm:atan-kernel-rem}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.finiteRemainderRoute}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_error_budget}
+\lean{ComputableAnalysis.FirstYearCalculus.arctanKernel_error_box}
 \uses{def:taylor-iterated-ftc}
 \leanok
 For rational \(x\), the algebraic identity

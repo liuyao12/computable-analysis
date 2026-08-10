@@ -26,7 +26,12 @@
 \lean{ComputableAnalysis.rationalNatCode_injective}
 \lean{ComputableAnalysis.rationalNatCode_encode_surjective}
 \lean{ComputableAnalysis.rationalNatCode_existsUnique_canonical_index}
+\lean{ComputableAnalysis.rationalNatCode_existsUnique_canonical_decode_index}
 \lean{ComputableAnalysis.rationalNatCode_decode_surjective}
+\lean{ComputableAnalysis.rationalNatCode_index}
+\lean{ComputableAnalysis.rationalNatIndex}
+\lean{ComputableAnalysis.rationalNatIndex_injective}
+\lean{ComputableAnalysis.rationalNatCode_index}
 \leanok
 Every rational has a finite code consisting of an integer numerator and a
 positive natural denominator, and the normalization decoder is surjective
@@ -40,8 +45,13 @@ injective before decoding.  The stronger
 numerator--denominator code is hit exactly before decoding.  This is the
 `rationalNatCode_existsUnique_canonical_index` refinement of that statement:
 the canonical code has a unique natural-number index.  This is the
-constructive coding core of benchmark item 3 (denumerability of the rationals);
-injectivity after rational normalization remains a separate layer.
+constructive coding core of benchmark item 3 (denumerability of the rationals).
+The canonical decode-index theorem makes the normalization choice unique at
+the finite code level.  The explicit `rationalNatIndex` and
+`rationalNatIndex_injective` now provide the matching injection from canonical
+rationals to natural indices, while retaining the finite-code interface.  The
+surjection and injection together complete the project's coding-level
+denumerability boundary for benchmark item 3.
 \end{theorem}
 
 \begin{theorem}[Finite induction schema]
@@ -76,6 +86,12 @@ benchmark item 74.
 \lean{ComputableAnalysis.FiniteCounting.combination_five_rat}
 \lean{ComputableAnalysis.FiniteCounting.combination_six_rat}
 \lean{ComputableAnalysis.FiniteCounting.combination_seven_rat}
+\lean{ComputableAnalysis.FiniteCounting.combination_eight_rat}
+\lean{ComputableAnalysis.pascal_combination_8_3}
+\lean{ComputableAnalysis.pascal_combination_7_2}
+\lean{ComputableAnalysis.pascal_combination_7_3}
+\lean{ComputableAnalysis.pascal_combination_8_3_recurrence}
+\lean{ComputableAnalysis.pascal_combination_8_3_certificate}
 \leanok
 The finite recurrence \texttt{subsetCount(n+1)=2*subsetCount(n)} gives the
 certificate core of the number-of-subsets theorem (benchmark item 52), while
@@ -88,7 +104,8 @@ counting interfaces; a general finite-set cardinality library is intentionally
 not introduced here.
 \end{theorem}
 
-\begin{remark}[Finite multiplicative certificates for factorization]
+\begin{theorem}[Certificate-level fundamental theorem of arithmetic]
+\label{thm:finite-fta-factorization}
 \label{rem:finite-factorization-certificates}
 \lean{ComputableAnalysis.MultiplicativeCertificate}
 \lean{ComputableAnalysis.factorizationCertificate60}
@@ -121,7 +138,12 @@ not introduced here.
 \lean{ComputableAnalysis.PrimeFactorCertificate.append}
 \lean{ComputableAnalysis.primeFactorCertificate_exists}
 \lean{ComputableAnalysis.exists_basicPrime_dvd}
+\lean{ComputableAnalysis.exists_basicPrime_not_mem_of_all_basicPrime}
+\lean{ComputableAnalysis.shiftedRangeProduct}
+\lean{ComputableAnalysis.exists_basicPrime_gt}
 \lean{ComputableAnalysis.PrimeFactorCertificate.factor_dvd}
+\lean{ComputableAnalysis.PrimeFactorCertificate.factor_le}
+\lean{ComputableAnalysis.PrimeFactorCertificate.factor_le}
 \lean{ComputableAnalysis.PrimeFactorCertificate.factors_nonempty}
 \lean{ComputableAnalysis.PrimeFactorCertificate.exists_prime_dvd}
 \lean{ComputableAnalysis.PrimeFactorCertificate.exists_factor_dvd}
@@ -158,6 +180,9 @@ equation.  The companion theorem
 `PrimeFactorCertificate.factor_dvd` shows that every listed factor
 divides the certified number, giving the converse direction to the prime
 divisor extraction theorem.
+The finite bound `PrimeFactorCertificate.factor_le` further places every
+listed factor at or below the certified number whenever $1<n$, making the
+certificate list a bounded object for finite search and validation.
 The finite search and recursive constructor
 
 `primeFactorCertificate_exists`
@@ -167,10 +192,17 @@ level.  The list-level theorem
 `primeFactorList\_perm\_of\_same_product`, together with
 `PrimeFactorCertificate.factor_perm`, proves uniqueness of the full
 prime-labelled factor list up to permutation, including repeated factors.
+The Euclid construction
+`exists_basicPrime_not_mem_of_all_basicPrime` adds the finite
+infinitude-of-primes core: from any finite list of certified primes, the
+product-plus-one construction returns a certified prime outside that list.
+The specialized evaluator `shiftedRangeProduct` and theorem
+`exists_basicPrime_gt` sharpen this to an executable unboundedness statement:
+for every finite bound (n), a certified prime (p>n) is produced.
 This is the project's checked certificate-level core of benchmark item 80;
 the usual classical formulation over a separately developed prime library is
 outside the current scope.
-\end{remark}
+\end{theorem}
 
 \begin{theorem}[Three-digit divisibility by three]
 \label{thm:three-digit-divisibility}
@@ -180,7 +212,16 @@ outside the current scope.
 \lean{ComputableAnalysis.decimalDigitSum_eq_self_of_lt_ten}
 \lean{ComputableAnalysis.decimalDigitSum_succ_of_not_lt_ten}
 \lean{ComputableAnalysis.decimalDigitSum_mod_three}
+\lean{ComputableAnalysis.decimalDigitSum_mod_nine_proof}
+\lean{ComputableAnalysis.decimalDigitSum_mod_nine}
 \lean{ComputableAnalysis.three_dvd_iff_decimalDigitSum_dvd}
+\lean{ComputableAnalysis.decimal_123_digit_sum}
+\lean{ComputableAnalysis.decimal_123_divisible_by_three}
+\lean{ComputableAnalysis.decimal_123_digit_sum_certificate}
+\lean{ComputableAnalysis.decimal_124_not_divisible_by_three}
+\lean{ComputableAnalysis.basePositionalValue}
+\lean{ComputableAnalysis.basePositionalValue_mod_sub_one}
+\lean{ComputableAnalysis.decimalPositionalValue_mod_nine}
 \leanok
 For natural digits (a,b,c), the decimal number (100a+10b+c) is divisible
 by (3) exactly when its digit sum (a+b+c) is divisible by (3).  This is
@@ -189,6 +230,10 @@ digit-sum evaluator and its small-digit reduction are also exposed.  The
 global residue-preservation theorem is checked by well-founded recursion on
 the decimal reduction.
 \end{theorem}
+
+The list-based positional evaluator linked above generalizes the same finite
+digit-sum congruence to every base (b\ge2), modulo (b-1), without assuming
+a canonical digit expansion.
 
 \section{Inverval arithmetic and real numbers \humanchecked}
 
@@ -296,6 +341,7 @@ operation.
 {\footnotesize\raggedright
 \lean{ComputableAnalysis.QBox.mulRealInterval_of_nonneg}\par
 \lean{ComputableAnalysis.RealRaw.mul_valid_of_nonneg_bounded}\par
+\lean{ComputableAnalysis.RealRaw.le_mul_le_mul_of_nonneg}\par
 \lean{ComputableAnalysis.RealRaw.mul_equiv_of_nonneg}\par
 \lean{ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg}\par
 \lean{ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos}\par
@@ -349,6 +395,20 @@ are \emph{equivalent} if they overlap at every stage, i.e.,
 \lean{ComputableAnalysis.RealRaw.equiv_trans}
 \uses{def:raw-real,def:raw-equiv}
 Equivalence of real numbers is an equivalence relation.
+\end{proposition}
+
+\begin{proposition}[Raw-real order compatibility]
+\lean{ComputableAnalysis.RealRaw.le_add_le_add}
+\lean{ComputableAnalysis.RealRaw.le_neg_le_neg}
+\lean{ComputableAnalysis.RealRaw.le_sub_le_sub}
+\lean{ComputableAnalysis.RealRaw.le_antisymm}
+\lean{ComputableAnalysis.RealRaw.le_scaleRat_le_scaleRat}
+\lean{ComputableAnalysis.RealRaw.le_scaleRat_le_scaleRat_of_nonpos}
+The interval-defined raw-real order is preserved by addition and subtraction,
+and by
+nonnegative rational scaling, and reverses under nonpositive scaling.  These
+are finite endpoint inequalities on the underlying algorithms; no
+completed-real order or completeness principle is used.
 \end{proposition}
 
 \begin{proposition}[Finite-prefix interval stabilization]
@@ -456,72 +516,135 @@ nesting, and an explicit width-shrinking bound directly.
 
 The rational foundation already contains the exact triangle inequality for
 the project's absolute-value operation:
+\begin{theorem}[Rational triangle-inequality certificate]
+\label{thm:rational-triangle-inequality}
 \lean{ComputableAnalysis.qabs_add_le}
 \lean{ComputableAnalysis.qabs_add_le_three}
+\lean{ComputableAnalysis.qabs_three_term_triangle_certificate}
 \lean{ComputableAnalysis.ratListSum}
 \lean{ComputableAnalysis.ratListAbsSum}
 \lean{ComputableAnalysis.ratListSum_append}
 \lean{ComputableAnalysis.ratListAbsSum_append}
 \lean{ComputableAnalysis.qabs_ratListSum_le}
 \lean{ComputableAnalysis.qabs_sub_le}
+\lean{ComputableAnalysis.QInterval.intersection_ordered_of_overlaps}
+\leanok
 The three-term form is included explicitly for chained interval-width and
 finite error estimates; these are the rational certificate core of benchmark
 item 91.  The list-level theorem `qabs\_ratListSum_le` extends the
 same estimate to every finite rational error list.
 The append laws make these finite certificates compositional.
+These finite absolute-value and list-sum bounds are the project's constructive
+triangle-inequality interface for interval widths and error budgets.
+\end{theorem}
+
+\begin{theorem}[Rational AM--GM square certificate]
+\label{thm:rational-am-gm}
 \lean{ComputableAnalysis.rat_square_nonneg_basic}
 \lean{ComputableAnalysis.am_gm_square_bound}
 \lean{ComputableAnalysis.am_gm_rational_half}
 \lean{ComputableAnalysis.am_gm_rational_half_eq_iff}
+\lean{ComputableAnalysis.am_gm_four}
+\lean{ComputableAnalysis.amgm_2_8_certificate}
+\lean{ComputableAnalysis.amgm_3_3_equality}
+\lean{ComputableAnalysis.amgm_2_8_and_equality_certificate}
+\lean{ComputableAnalysis.DyadicAMGM}
+\lean{ComputableAnalysis.DyadicAMGM.sum}
+\lean{ComputableAnalysis.DyadicAMGM.product}
+\lean{ComputableAnalysis.DyadicAMGM.product_le_average_pow}
+\lean{ComputableAnalysis.DyadicAMGM.product_mul_card_pow_le_sum_pow}
 \lean{ComputableAnalysis.sqrtRaw_le_am_gm}
 \lean{ComputableAnalysis.sqrtRaw_am_gm_eq_of_eq}
 \lean{ComputableAnalysis.sqrtRaw_am_gm_eq_iff}
+\leanok
+The square bound and paired four-variable certificate are the exact rational
+core of benchmark 38 (AM--GM).  The certified square-root interface lifts the
+bound to the project's represented nonnegative values, and the equality
+certificate records that equality occurs exactly when the two inputs coincide.
+\end{theorem}
+
+\begin{theorem}[Finite rational Cauchy--Schwarz certificates]
+\label{thm:rational-cauchy-schwarz}
 \lean{ComputableAnalysis.cauchy_schwarz_2d}
 \lean{ComputableAnalysis.cauchy_schwarz_2d_eq_iff}
-This is benchmark item 91 in the form needed for interval-width and error
-estimates.  The square bound is the exact rational core of benchmark 38
-(AM--GM), and `sqrtRaw_le_am_gm` now lifts it to the project's certified
-nonnegative square-root representation.  The equality case is also exposed by
-`am\_gm\_rational\_half\_eq_iff`: equality holds exactly when the
-two inputs coincide.  The two-coordinate Cauchy--Schwarz inequality is the finite
-rational core of benchmark 78 and remains supporting infrastructure, not a
-functional-analysis chapter.  Mathematical induction is the recursion
+\lean{ComputableAnalysis.cauchy_schwarz_3d}
+\lean{ComputableAnalysis.cauchy_schwarz_3d_eq_iff}
+\lean{ComputableAnalysis.cauchy_schwarz_4d}
+\lean{ComputableAnalysis.cauchy_schwarz_4d_eq_iff}
+\lean{ComputableAnalysis.cauchy_schwarz_5d}
+\lean{ComputableAnalysis.cauchy_schwarz_5d_eq_iff}
+\lean{ComputableAnalysis.cauchy_schwarz_6d}
+\lean{ComputableAnalysis.cauchy_schwarz_6d_eq_of_minors}
+\lean{ComputableAnalysis.rationalDot}
+\lean{ComputableAnalysis.rationalSumSquares}
+\lean{ComputableAnalysis.rationalMinorSquareSum}
+\lean{ComputableAnalysis.rationalDot_cauchy_schwarz_of_length_eq}
+\lean{ComputableAnalysis.cauchy_schwarz_2d_example_equality}
+\lean{ComputableAnalysis.cauchy_schwarz_2d_example_proportional}
+\lean{ComputableAnalysis.cauchy_schwarz_2d_example_certificate}
+\leanok
+These finite rational Cauchy--Schwarz certificates cover benchmark 78 as
+supporting inequality infrastructure, without introducing a functional-analysis
+chapter.  The list-based certificate gives the same inequality for every
+finite equal-length rational vector, using an explicit sum of squared minors.
+\end{theorem}
+
+Mathematical induction is the recursion
 principle used to check
 these finite identities and the series identities in Chapter~\ref{ch:infinite-series};
 it is not reintroduced as a separate completed-real theorem.
 The public schema is
 \lean{ComputableAnalysis.nat_induction_schema}.
 
-The foundation also exposes an explicit terminating Euclidean loop and its
-correctness theorem:
+\begin{theorem}[Executable Euclidean gcd]
+\label{thm:euclidean-gcd}
 \lean{ComputableAnalysis.euclideanGcd}
 \lean{ComputableAnalysis.euclideanGcd_eq_gcd}
 \lean{ComputableAnalysis.euclideanGcd_step}
 \lean{ComputableAnalysis.euclideanGcd_zero_right}
 \lean{ComputableAnalysis.euclideanGcd_zero_left}
+\lean{ComputableAnalysis.euclideanGcd_pos_of_pos}
+\lean{ComputableAnalysis.euclideanGcd_pos_iff}
+\lean{ComputableAnalysis.euclideanGcd_eq_one_iff_coprime}
 \lean{ComputableAnalysis.euclideanGcd_comm}
 \lean{ComputableAnalysis.euclideanGcd_dvd_left}
 \lean{ComputableAnalysis.euclideanGcd_dvd_right}
 \lean{ComputableAnalysis.euclideanGcd_dvd_of_dvd}
+\lean{ComputableAnalysis.euclideanGcd_dvd_iff}
 \lean{ComputableAnalysis.gcd_remainder_swap}
-\lean{ComputableAnalysis.bezout_step_identity}
-\lean{ComputableAnalysis.bezout_exists}
-\lean{ComputableAnalysis.euclideanGcd_bezout_exists}
-The loop is definitionally the usual remainder descent, and its equality with
-the core gcd is checked by induction on the second argument.  The exact
-natural-number Euclidean primitive is also available from the Lean core and
-is used by the project's discrete modules:
 \lean{Nat.gcd}
 \lean{Nat.gcd_rec}
 \lean{Nat.gcd_dvd_left}
 \lean{Nat.gcd_dvd_right}
 \lean{Nat.dvd_gcd}
-These provide the algorithmic gcd milestone (benchmark 69).  The recursive
-coefficient certificate `bezout_exists` proves the signed Bézout identity for
-every natural input pair, covering benchmark item 60 in the exact-arithmetic
-representation.  The combined theorem
-`euclideanGcd_bezout_exists` identifies those coefficients with the executable
-Euclidean-loop result itself.
+\leanok
+The executable loop is definitionally the usual remainder descent, and its
+equality with the core gcd is checked by induction on the second argument.
+The exact natural-number Euclidean primitive is also available from the Lean
+core and is used by the project's discrete modules.  These declarations provide
+the algorithmic gcd milestone (benchmark 69).
+\end{theorem}
+
+\begin{theorem}[Executable Bézout certificate]
+\label{thm:bezout-certificate}
+\lean{ComputableAnalysis.bezout_step_identity}
+\lean{ComputableAnalysis.bezout_exists}
+\lean{ComputableAnalysis.euclideanGcd_bezout_exists}
+\lean{ComputableAnalysis.euclideanGcd_84_30}
+\lean{ComputableAnalysis.bezout_84_30}
+\lean{ComputableAnalysis.bezout_84_30_certificate}
+\lean{ComputableAnalysis.euclideanGcd_252_198}
+\lean{ComputableAnalysis.bezout_252_198}
+\lean{ComputableAnalysis.bezout_252_198_certificate}
+\leanok
+The recursive coefficient certificate \texttt{bezout\_exists} proves the signed
+Bézout identity for every natural input pair, covering benchmark item 60 in the
+exact-arithmetic representation.  The combined theorem
+\texttt{euclideanGcd\_bezout\_exists} identifies those coefficients with the
+executable Euclidean-loop result itself.
+The worked input pair (84,30) gives (gcd(84,30)=6) with the explicit
+certificate ((-1)84+3(30)=6).
+\end{theorem}
 
 \begin{remark}[Algebraic numbers, starting with \(\sqrt2\)]
 \label{rem:algebraic-numbers-sqrt-two}
@@ -884,6 +1007,7 @@ domain proof.
 
 \begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}
 \lean{ComputableAnalysis.RealFunRaw}
+\lean{ComputableAnalysis.RealFunRaw.add_valid}
 \lean{ComputableAnalysis.PartialRealFunRaw}
 \uses{def:function-raw,thm:rational-complex-field-square}
 A real-input real-valued function is the real-axis specialization of
@@ -980,6 +1104,26 @@ real line is part of the definition.
 \lean{ComputableAnalysis.HasInverse}
 \lean{ComputableAnalysis.HasBisectionSearch}
 \lean{ComputableAnalysis.inverse_function_from_bisection_search}
+\lean{ComputableAnalysis.monotoneBisectionIterate_preserves_target_bracket}
+\lean{ComputableAnalysis.monotoneBisectionIterate_certificate}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_tolerance_certificate}
+\lean{ComputableAnalysis.monotoneBisectionIterate_width}
+\lean{ComputableAnalysis.monotoneBisectionIterate_width_le_of_power_budget}
+\lean{ComputableAnalysis.affineHalf}
+\lean{ComputableAnalysis.affineHalfInitial}
+\lean{ComputableAnalysis.affineHalf_bisection_stage3}
+\lean{ComputableAnalysis.affineHalf_bisection_stage3_bracket}
+\lean{ComputableAnalysis.affineHalf_bisection_stage3_width}
+\lean{ComputableAnalysis.squareTarget}
+\lean{ComputableAnalysis.squareTargetInitial}
+\lean{ComputableAnalysis.squareTarget_bisection_stage4}
+\lean{ComputableAnalysis.squareTarget_bisection_stage4_bracket}
+\lean{ComputableAnalysis.squareTarget_bisection_stage4_width}
+\lean{ComputableAnalysis.induction_arithmeticSum_eq}
+\lean{ComputableAnalysis.induction_arithmeticSum_stage5}
+\lean{ComputableAnalysis.subsetCount_stage8}
+\lean{ComputableAnalysis.subsetCount_stage8_pow}
+\lean{ComputableAnalysis.subsetCount_stage8_certificate}
 \uses{def:function-on-interval,def:interval-regular}
 Fix an interval-regular monotone branch \(I\) on a rational source interval.
 In addition to monotonicity, it carries an effective inverse-separation
@@ -1014,6 +1158,10 @@ arbitrarily flat.
 \lean{ComputableAnalysis.squareOnUnit_invertible}
 \lean{ComputableAnalysis.squareOnUnitRationalTarget}
 \lean{ComputableAnalysis.sqrtOnUnitBisectionSearch}
+\lean{ComputableAnalysis.FirstYearCalculus.sqrtOnUnitBisectionSearch_stage_certificate}
+\lean{ComputableAnalysis.FirstYearCalculus.sqrtOnUnitBisectionSearch_nested_stage_certificate}
+\lean{ComputableAnalysis.sqrtOnUnitRepresentedTargetSearch}
+\lean{ComputableAnalysis.sqrtOnUnitRepresentedTargetSearch_stage_certificate}
 \lean{ComputableAnalysis.sqrtRaw_spec}
 \lean{ComputableAnalysis.sqrtOnUnit}
 \lean{ComputableAnalysis.sqrtOnUnit_intervalRegular}

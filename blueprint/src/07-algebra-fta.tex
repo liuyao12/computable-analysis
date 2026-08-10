@@ -27,6 +27,143 @@ such that the interval evaluation of \(p(z)\) is equivalent to zero:
 \]
 \end{definition}
 
+\begin{theorem}[Exact roots of a factorized quadratic]
+\label{thm:factorized-quadratic-roots}
+\label{thm:finite-factorized-fta}
+\lean{ComputableAnalysis.factorizedQuadraticPolynomial}
+\lean{ComputableAnalysis.factorizedQuadratic_left_exact_root}
+\lean{ComputableAnalysis.factorizedQuadratic_right_exact_root}
+\lean{ComputableAnalysis.factorizedQuadratic_has_computable_roots}
+\lean{ComputableAnalysis.factorizedCubicPolynomial}
+\lean{ComputableAnalysis.factorizedCubicPolynomial_eval_eq_product}
+\lean{ComputableAnalysis.factorizedCubicPolynomial_eval_eq_zero_iff}
+\lean{ComputableAnalysis.factorizedCubicPolynomial_hasExactRoot_iff}
+\lean{ComputableAnalysis.factorizedCubic_left_exact_root}
+\lean{ComputableAnalysis.factorizedCubic_middle_exact_root}
+\lean{ComputableAnalysis.factorizedCubic_right_exact_root}
+\lean{ComputableAnalysis.factorizedCubic_has_computable_roots}
+\lean{ComputableAnalysis.factorizedQuarticPolynomial}
+\lean{ComputableAnalysis.factorizedQuarticPolynomial_eval_eq_product}
+\lean{ComputableAnalysis.factorizedQuarticPolynomial_eval_eq_zero_iff}
+\lean{ComputableAnalysis.factorizedQuarticPolynomial_hasExactRoot_iff}
+\lean{ComputableAnalysis.factorizedQuartic_left_exact_root}
+\lean{ComputableAnalysis.factorizedQuartic_second_exact_root}
+\lean{ComputableAnalysis.factorizedQuartic_third_exact_root}
+\lean{ComputableAnalysis.factorizedQuartic_right_exact_root}
+\lean{ComputableAnalysis.factorizedQuartic_has_computable_roots}
+\lean{ComputableAnalysis.Polynomial.factorizedEval}
+\lean{ComputableAnalysis.Polynomial.factorizedEval_root_witness}
+\lean{ComputableAnalysis.Polynomial.factorizedEval_append}
+\lean{ComputableAnalysis.cpolyAdd}
+\lean{ComputableAnalysis.cpolyScale}
+\lean{ComputableAnalysis.cpolyShift}
+\lean{ComputableAnalysis.cpolyLinearMultiply}
+\lean{ComputableAnalysis.factorizedPolynomial}
+\lean{ComputableAnalysis.CPoly.eval_cons}
+\lean{ComputableAnalysis.CPoly.eval_cpolyAdd}
+\lean{ComputableAnalysis.CPoly.eval_cpolyScale}
+\lean{ComputableAnalysis.CPoly.eval_cpolyShift}
+\lean{ComputableAnalysis.CPoly.eval_cpolyLinearMultiply}
+\lean{ComputableAnalysis.factorizedPolynomial_eval_eq_product}
+\lean{ComputableAnalysis.factorizedPolynomial_exact_root_of_mem}
+\lean{ComputableAnalysis.factorizedPolynomial_computable_root_of_mem}
+\lean{ComputableAnalysis.factorizedPolynomial_all_computable_roots}
+\lean{ComputableAnalysis.factorizedPolynomial_has_algebraic_root_of_nonempty}
+\lean{ComputableAnalysis.factorizedPolynomial_has_computable_root_of_nonempty}
+\lean{ComputableAnalysis.factorizedPolynomial_algebraic_root_of_mem}
+\lean{ComputableAnalysis.QComplex.mul_eq_zero}
+\lean{ComputableAnalysis.factorizedPolynomial_eval_eq_zero_iff_mem}
+\lean{ComputableAnalysis.factorizedPolynomial_hasExactRoot_iff_mem}
+\begin{theorem}[Concrete finite quadratic root certificate]
+\label{thm:finite-fta-concrete-quadratic}
+\lean{ComputableAnalysis.finiteFTAQuadratic}
+\lean{ComputableAnalysis.finiteFTAUpperRoot}
+\lean{ComputableAnalysis.finiteFTALowerRoot}
+\lean{ComputableAnalysis.finiteFTAQuadratic_upper_root}
+\lean{ComputableAnalysis.finiteFTAQuadratic_lower_root}
+\lean{ComputableAnalysis.finiteFTAQuadratic_roots_are_distinct}
+\lean{ComputableAnalysis.finiteFTAQuadratic_point_eval_upper}
+\lean{ComputableAnalysis.finiteFTAQuadratic_point_eval_lower}
+\lean{ComputableAnalysis.finiteFTAQuadratic_root_search_upper}
+\lean{ComputableAnalysis.finiteFTAQuadratic_root_search_sound}
+\lean{ComputableAnalysis.finiteFTAQuadratic_root_search_skips_nonroot}
+\lean{ComputableAnalysis.finiteFTAQuadratic_zero_exclusion}
+\lean{ComputableAnalysis.finiteFTAQuadratic_zero_is_excluded}
+\end{theorem}
+\lean{ComputableAnalysis.factorizedQuadraticPolynomial_hasExactRoot_iff}
+\lean{ComputableAnalysis.exactRootSearch}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch}
+\lean{ComputableAnalysis.exactRootSearch_sound}
+\lean{ComputableAnalysis.exactRootSearch_complete}
+\lean{ComputableAnalysis.exactRootSearch_none_iff}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_sound}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_returns_supplied_root}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_complete}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_none_iff}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_self_some}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_complete_computable}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_self_some_computable}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_self_some_computable_mem}
+\lean{ComputableAnalysis.factorizedQuarticPolynomial_root_search_some_computable}
+\lean{ComputableAnalysis.factorizedCubicPolynomial_root_search_some_computable}
+\lean{ComputableAnalysis.factorizedPolynomialRootSearch_returns_computable_root}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_eval_eq_product}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_eval_eq_zero_iff}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_eval_eq_zero_iff_mem}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_hasExactRoot_iff_mem}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_exact_root_of_mem}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_computable_root_of_mem}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_has_computable_root}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_has_all_computable_roots}
+\lean{ComputableAnalysis.quinticBoundaryMinusTwo}
+\lean{ComputableAnalysis.quinticBoundaryMinusOne}
+\lean{ComputableAnalysis.quinticBoundaryZero}
+\lean{ComputableAnalysis.quinticBoundaryOne}
+\lean{ComputableAnalysis.quinticBoundaryTwo}
+\lean{ComputableAnalysis.quintic_boundary_example_roots}
+\lean{ComputableAnalysis.RootsOfUnity.qpow_mul}
+\lean{ComputableAnalysis.RootsOfUnity.isNthRoot_mul}
+\lean{ComputableAnalysis.RootsOfUnity.exactRoot_mul}
+\lean{ComputableAnalysis.RootsOfUnity.conjugate}
+\lean{ComputableAnalysis.RootsOfUnity.qpow_conjugate}
+\lean{ComputableAnalysis.RootsOfUnity.isNthRoot_conjugate}
+\lean{ComputableAnalysis.RootsOfUnity.exactRoot_conjugate}
+\leanok
+For a quadratic presented as $(z-r)(z-s)$ with rational-complex data, the
+two roots are explicit finite witnesses. This is an algebraic computability
+certificate, not a claim of an arbitrary-degree fundamental theorem.
+The list-based `factorizedEval_root_witness` generalizes the same finite
+pattern to any supplied finite list of rational roots: with nonzero constant,
+the zero set is exactly list membership.  It remains a supplied-factor
+certificate rather than a general FTA existence theorem.
+The theorem `factorizedPolynomial_has_algebraic_root_of_nonempty` packages the
+same construction directly as an algebraic-complex root witness whenever the
+supplied factor list is nonempty.
+The computable companion
+`factorizedPolynomial_has_computable_root_of_nonempty` supplies an explicit
+`ComplexCert` witness for the same nonempty list.  The positive search theorem
+`factorizedPolynomial_all_computable_roots` packages the stronger list-level
+fact that every supplied factor is a computable root of the constructed
+polynomial.  The positive search theorem
+`factorizedPolynomialRootSearch_self_some_computable_mem` goes one step
+further: the executable scan returns a member of the supplied factor list
+together with its computable-root certificate.
+The same search interface is specialized to the factorized cubic and quartic
+packages by
+`factorizedCubicPolynomial_root_search_some_computable` and
+`factorizedQuarticPolynomial_root_search_some_computable`; these are
+the executable finite cores used for benchmark items 37 and 46.
+The uniform form `factorizedPolynomial_algebraic_root_of_mem` gives the same
+algebraic witness for every member of the supplied factor list.
+The negative branch is now equally explicit: `exactRootSearch_none_iff` says
+that a finite scan returns `none` exactly when every candidate is not a root.
+For a supplied factor list, `factorizedPolynomialRootSearch_none_iff`
+specializes this to disjointness between the candidate list and the factor
+list.  These are finite exclusion certificates, not global rootlessness
+claims.
+\end{theorem}
+
 \begin{definition}[Algebraic complex number]\label{def:algebraic-complex}
 \lean{ComputableAnalysis.AlgebraicComplex}
 \uses{def:qcomplex-poly,def:computable-root}
@@ -64,8 +201,9 @@ unproved closure theorems.
 
 \section{Base cases}
 
-\begin{theorem}[Linear remainder and factor base case]
+\begin{theorem}[Linear remainder, factor, and sign-variation base cases]
 \label{thm:linear-factor-remainder-base}
+\label{thm:descartes-sign-variation}
 \lean{ComputableAnalysis.Polynomial.linear_remainder}
 \lean{ComputableAnalysis.Polynomial.linear_factor_of_root}
 \lean{ComputableAnalysis.Polynomial.linear_root_iff_constant_eq_neg_mul}
@@ -73,15 +211,27 @@ unproved closure theorems.
 \lean{ComputableAnalysis.Polynomial.quadratic_remainder}
 \lean{ComputableAnalysis.Polynomial.cubic_remainder}
 \lean{ComputableAnalysis.Polynomial.cubic_factor_of_root}
+\lean{ComputableAnalysis.Polynomial.quadratic_remainder_example_root}
+\lean{ComputableAnalysis.Polynomial.quadratic_remainder_example_value}
+\lean{ComputableAnalysis.Polynomial.quadratic_remainder_example_factor}
+\lean{ComputableAnalysis.Polynomial.quadratic_remainder_example_certificate}
 \lean{ComputableAnalysis.Polynomial.eval_derivative_linear}
+\lean{ComputableAnalysis.Polynomial.derivativeEvalAux}
+\lean{ComputableAnalysis.Polynomial.derivativeEval}
+\lean{ComputableAnalysis.Polynomial.pow_mul_eval_zipIdx_eq_derivativeEvalAux}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_eq_derivativeEval}
 \lean{ComputableAnalysis.Polynomial.eval_derivative_quadratic}
 \lean{ComputableAnalysis.Polynomial.eval_derivative_cubic}
 \lean{ComputableAnalysis.Polynomial.eval_derivative_quartic}
 \lean{ComputableAnalysis.Polynomial.eval_derivative_quintic}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_sextic}
+\lean{ComputableAnalysis.Polynomial.eval_derivative_septic}
 \lean{ComputableAnalysis.Polynomial.cubic_example_factorization}
 \lean{ComputableAnalysis.Polynomial.cubic_example_roots}
+\lean{ComputableAnalysis.Polynomial.cubic_example_root_iff}
 \lean{ComputableAnalysis.Polynomial.quartic_example_factorization}
 \lean{ComputableAnalysis.Polynomial.quartic_example_roots}
+\lean{ComputableAnalysis.Polynomial.quartic_example_root_iff}
 \lean{ComputableAnalysis.Polynomial.signChangeCount}
 \lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros}
 \lean{ComputableAnalysis.Polynomial.signChangeCount_zero_of_nonneg}
@@ -89,11 +239,16 @@ unproved closure theorems.
 \lean{ComputableAnalysis.Polynomial.signChangeCount_zero_of_nonpos}
 \lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_zero_of_nonpos_coeffs}
 \lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_quadratic}
+\lean{ComputableAnalysis.Polynomial.quadratic_root_discriminant_nonneg}
+\lean{ComputableAnalysis.Polynomial.no_rational_root_of_quadratic_discriminant_neg}
+\lean{ComputableAnalysis.Polynomial.quadratic_three_distinct_roots_impossible}
 \lean{ComputableAnalysis.Polynomial.eval_nonneg_of_nonneg_coeffs}
 \lean{ComputableAnalysis.Polynomial.eval_nonpos_of_nonpos_coeffs}
 \lean{ComputableAnalysis.Polynomial.eval_pos_of_nonneg_coeffs_of_pos}
 \lean{ComputableAnalysis.Polynomial.eval_ne_zero_of_nonneg_coeffs_of_pos}
 \lean{ComputableAnalysis.Polynomial.no_positive_root_of_nonneg_coeffs_of_pos}
+\lean{ComputableAnalysis.Polynomial.eval_pos_of_nonneg_cons_of_pos}
+\lean{ComputableAnalysis.Polynomial.no_nonnegative_root_of_nonneg_cons_of_pos}
 \lean{ComputableAnalysis.Polynomial.eval_neg_of_nonpos_coeffs_of_neg}
 \lean{ComputableAnalysis.Polynomial.no_positive_root_of_nonpos_coeffs_of_neg}
 \lean{ComputableAnalysis.Polynomial.signChangeCount_quadratic_example}
@@ -104,6 +259,41 @@ unproved closure theorems.
 \lean{ComputableAnalysis.Polynomial.syntheticDivide_remainder_eq_eval}
 \lean{ComputableAnalysis.Polynomial.syntheticDivide_remainder_eq_zero_iff}
 \lean{ComputableAnalysis.Polynomial.syntheticDivide_secant_quotient}
+\lean{ComputableAnalysis.Polynomial.RemainderCertificate}
+\lean{ComputableAnalysis.Polynomial.syntheticRemainderCertificate}
+\lean{ComputableAnalysis.Polynomial.RemainderCertificate.factor_remainder_at}
+\lean{ComputableAnalysis.Polynomial.RemainderCertificate.remainder_eq_eval}
+\lean{ComputableAnalysis.Polynomial.RemainderCertificate.factor_of_root}
+\lean{ComputableAnalysis.Polynomial.RemainderCertificate.remainder_eq_zero_iff}
+\lean{ComputableAnalysis.Polynomial.syntheticRemainderCertificate_factor_remainder}
+\lean{ComputableAnalysis.Polynomial.syntheticRemainderCertificate_factor_of_root}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDivide}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDivide_spec}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDivide_remainder_eq_eval}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDivide_remainder_eq_zero_iff}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDivide_quotient_length}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDivide_quotient_padded}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDivide_factor_of_root}
+\lean{ComputableAnalysis.FiniteFTABoundary.DeflationCertificate}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDeflationCertificate}
+\lean{ComputableAnalysis.FiniteFTABoundary.DeflationCertificate.factor_at}
+\lean{ComputableAnalysis.FiniteFTABoundary.DeflationCertificate.factor_of_root}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDeflationCertificate_factor_of_root}
+\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs}
+\lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
+\lean{ComputableAnalysis.FiniteDeflationChain.rootFactorProduct}
+\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs_length}
+\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_sound}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_complete}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_complete_of_mem}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_none_iff}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearchCertificate}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearchCertificate_sound}
+\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearchCertificate_complete}
+\lean{ComputableAnalysis.RootsOfUnity.isNthRoot_mul_conjugate}
+\lean{ComputableAnalysis.RootsOfUnity.exactRoot_mul_conjugate}
 \lean{ComputableAnalysis.RatFun.polynomial_defined_all}
 \lean{ComputableAnalysis.RatFun.polynomial_evalOnDomain_eq}
 \lean{ComputableAnalysis.RatFun.polynomialOnInterval}
@@ -122,12 +312,28 @@ solution formula.  The worked factorization and root certificate above give
 one explicit rational cubic solution within that boundary.  The quartic
 factorization and roots are the project's checked worked-example core for
 benchmark item 46; they do not claim a general quartic formula.
+For arbitrary finite rational-complex coefficient lists, the new
+`FiniteFTABoundary` module performs one synthetic deflation step from a
+supplied exact root.  It computes the quotient and remainder, proves the
+Horner remainder identity, and packages the zero-remainder factorization.
+This advances the finite root-peeling interface toward FTA while leaving root
+existence and algebraic closure as separate obligations.
 The coefficient sign-change counter and its zero-free quadratic example record
 the finite input data for benchmark item 100; the Descartes root-counting rule
 itself remains optional future work.  Zero coefficients are explicitly removed
 before the second example is counted, matching the usual sign-variation input
 convention.  The quadratic sign-pattern theorem generalizes this finite count
 to all positive--negative--positive rational coefficient triples.
+The discriminant certificate adds the corresponding executable root test:
+every rational quadratic root produces a nonnegative rational discriminant,
+while a negative discriminant excludes all rational roots.  This is a finite
+rational strengthening of the item-100 data, without asserting the full
+real-root-counting form of Descartes' rule.
+The degree-two certificate
+`quadratic_three_distinct_roots_impossible` also rules out three pairwise
+distinct rational roots by two finite difference factorizations.  In the
+positive--negative--positive pattern this supplies the exact quadratic
+“at most two” boundary behind the sign-variation count.
 The general finite lemma
 `signChangeCountIgnoringZeros_zero_of_nonneg_coeffs` proves that a list of
 nonnegative coefficients has zero sign variation after zero filtering.
@@ -141,6 +347,51 @@ With a positive input and one positive coefficient, the nonnegative case is
 strict, giving the corresponding positive-ray root exclusion.
 The packaged nonzero conclusion is available for direct root-search use.
 The strict negative dual completes the opposite coefficient-sign orientation.
+The combined `one_positive_variation_certificate` packages the one sign
+change and the resulting uniqueness of any positive rational root in a single
+finite witness.  This is the reusable certificate-level Descartes boundary;
+the unrestricted real-root counting theorem remains deferred.
+\end{theorem}
+
+\begin{theorem}[A finite two-variation Descartes certificate]
+\label{thm:finite-two-variation-descartes}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_eval}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_sign_count}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_positive_root_iff}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_certificate}
+\leanok
+The polynomial \(x^2-3x+2\) has two sign variations and, by exact rational
+factorization, its positive rational roots are precisely \(1\) and \(2\).
+This supplies a finite two-variation example for benchmark item 100 while
+leaving the general real-root-counting theorem outside the project boundary.
+\end{theorem}
+
+\begin{theorem}[A finite three-variation Descartes certificate]
+\label{thm:finite-three-variation-descartes}
+\lean{ComputableAnalysis.Polynomial.threeVariationCubic}
+\lean{ComputableAnalysis.Polynomial.threeVariationCubic_eval}
+\lean{ComputableAnalysis.Polynomial.threeVariationCubic_sign_count}
+\lean{ComputableAnalysis.Polynomial.threeVariationCubic_positive_root_iff}
+\lean{ComputableAnalysis.Polynomial.threeVariationCubic_certificate}
+\leanok
+The polynomial (x^3-6x^2+11x-6=(x-1)(x-2)(x-3)) has three sign
+variations, and its positive rational roots are exactly (1,2,3).  This is
+another finite rational certificate for item 100, not the unrestricted
+real-root-counting theorem.
+\end{theorem}
+
+\begin{theorem}[Finite coefficient-list bound for sign variations]
+\label{thm:finite-descartes-sign-count}
+\lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_add_one_le_filter_length}
+\uses{thm:finite-two-variation-descartes}
+\leanok
+For every nonempty finite rational coefficient list, zero filtering leaves a
+list whose sign-change count is at most its length minus one.  This is the
+combinatorial finite part of Descartes' rule and makes no claim about the
+number or existence of roots.
+\end{theorem}
+
 The rational-function wrapper for a polynomial is total on rational inputs:
 `RatFun.polynomial_defined_all` supplies the domain certificate and
 `RatFun.polynomial_evalOnDomain_eq` identifies its value with polynomial
@@ -149,10 +400,11 @@ same certificate as a total interval function, with its exact evaluator
 identified by `RatFun.polynomialOnInterval_compute_eq`.
 The finite coefficient derivative identities `eval_derivative_linear`,
 `eval_derivative_quadratic`, `eval_derivative_cubic`,
-`eval_derivative_quartic`, and `eval_derivative_quintic` connect the
-coefficient-level derivative list back to pointwise evaluation for degrees one
-through five. They support the finite Taylor boundary without asserting a
-general analytic derivative theorem.
+`eval_derivative_quartic`, `eval_derivative_quintic`,
+`eval_derivative_sextic`, and `eval_derivative_septic` connect the
+coefficient-level derivative list back to pointwise evaluation through degree
+seven. They support the finite Taylor boundary without asserting a general
+analytic derivative theorem.
 The general finite identity `syntheticDivide_secant_quotient` additionally
 identifies every nonzero-step polynomial secant quotient with the synthetic
 quotient evaluated at the right endpoint. This is the reusable finite
@@ -164,6 +416,36 @@ secant/Taylor bridge; no limiting theorem is hidden in it.
 \uses{def:computable-root}
 \leanok
 For every \(r\in\Qi\), the polynomial \(z-r\) has the computable root \(r\).
+\end{theorem}
+
+\begin{theorem}[Complex-coefficient linear polynomials]
+\label{thm:complex-linear-root}
+\lean{ComputableAnalysis.qcomplexLinearPolynomial}
+\lean{ComputableAnalysis.qcomplexLinear_positiveDegree}
+\lean{ComputableAnalysis.qcomplexLinear_exact_root_of_inverse}
+\lean{ComputableAnalysis.qcomplexLinear_has_computable_root_of_inverse}
+\lean{ComputableAnalysis.QComplex.exists_mul_inverse_of_normSq_ne_zero}
+\lean{ComputableAnalysis.QComplex.mul_assoc_cert}
+\lean{ComputableAnalysis.QComplex.mul_add_cert}
+\lean{ComputableAnalysis.QComplex.add_mul_cert}
+\lean{ComputableAnalysis.QComplex.mul_one_cert}
+\lean{ComputableAnalysis.QComplex.mul_neg_cert}
+\lean{ComputableAnalysis.QComplex.neg_mul_cert}
+\lean{ComputableAnalysis.qcomplexLinear_has_computable_root_of_normSq}
+\lean{ComputableAnalysis.QComplex.normSq_eq_zero_iff}
+\lean{ComputableAnalysis.qcomplexLinear_has_computable_root_of_ne_zero}
+\uses{def:computable-root}
+\leanok
+For rational-complex coefficients \(a\ne0\) and \(b\), a supplied finite
+inverse witness \(a^{-1}\) produces the exact root
+\(a^{-1}b\) of the constant-first polynomial \([-b,a]\).  The inverse is explicit input data; this theorem
+does not assume a global complex division operation or a completed field.
+The finite coordinate algebra laws `QComplex.mul_assoc`, `QComplex.mul_add`,
+and `QComplex.add_mul` expose the distributive rearrangements used by this
+root certificate without importing a general complex field.
+The coordinate identity `QComplex.normSq_eq_zero_iff` reduces the inverse
+condition to the natural hypothesis (a\ne0), yielding the public root
+theorem for every nonzero leading coefficient.
 \end{theorem}
 
 \begin{theorem}[Rational linear polynomials]\label{thm:rational-linear-root}
@@ -220,6 +502,30 @@ an arbitrary discriminant.
 The same two roots are also packaged as algebraic-complex witnesses.
 \end{theorem}
 
+\begin{theorem}[Complex quadratic from finite witnesses]
+\label{thm:complex-quadratic-discriminant}
+\lean{ComputableAnalysis.qcomplexQuadraticPolynomial}
+\lean{ComputableAnalysis.qcomplexQuadratic_positiveDegree}
+\lean{ComputableAnalysis.qcomplexQuadratic_root_of_discriminant}
+\lean{ComputableAnalysis.qcomplexQuadratic_has_computable_root_of_discriminant}
+\lean{ComputableAnalysis.qcomplexQuadratic_has_computable_root_of_discriminant_and_normSq}
+\lean{ComputableAnalysis.qcomplexQuadratic_other_root_of_discriminant}
+\lean{ComputableAnalysis.qcomplexQuadratic_has_computable_roots_of_discriminant}
+\lean{ComputableAnalysis.qcomplexQuadratic_has_computable_roots_of_discriminant_and_normSq}
+\uses{def:computable-root}
+\leanok
+The same quadratic-formula calculation works for rational-complex
+coefficients when the input supplies a rational-complex square-root witness
+for the discriminant and an inverse witness for \(2a\).  The resulting root is
+an exact finite coordinate certificate; constructing those witnesses remains
+the separate square-root and inverse algorithms.
+The norm-square specialization generates the inverse of \(2a\) automatically
+from \(\operatorname{normSq}(a)\ne0\), leaving only the discriminant witness as
+explicit input.
+The (-d) branch is certified by the same finite identity, and the paired
+theorem packages both computable roots.
+\end{theorem}
+
 \begin{theorem}[Factorized rational cubics]
 \label{thm:rational-cubic-roots}
 \lean{ComputableAnalysis.rationalCubicPolynomial}
@@ -240,6 +546,33 @@ computable-root certificate.  This is the reusable factorized cubic core of
 benchmark item 37; a general cubic formula remains outside the current scope.
 \end{theorem}
 
+\begin{theorem}[Finite cubic completion from a supplied root]
+\label{thm:finite-cubic-completion}
+\lean{ComputableAnalysis.Polynomial.quadratic_eval_root_of_discriminant}
+\lean{ComputableAnalysis.Polynomial.cubic_completion_roots_of_discriminant}
+\lean{ComputableAnalysis.Polynomial.cubic_completion_example_roots}
+\lean{ComputableAnalysis.Polynomial.cubic_completion_example_certificate}
+\uses{thm:rational-cubic-roots}
+\leanok
+For a cubic with a supplied rational root (r), synthetic factorization
+leaves a rational quadratic quotient.  If the quotient discriminant is
+provided with a rational square witness (d), the two remaining rational
+root certificates are computed as
+
+\[
+ \frac{-(c_2+c_3r)+d}{2c_3},
+ \qquad
+ \frac{-(c_2+c_3r)-d}{2c_3}.
+\]
+
+The Lean theorem checks these evaluations using only rational algebra.  It is
+the finite supplied-witness boundary of the cubic formula; constructing the
+initial root or a square witness remains a separate algorithmic problem.
+For the worked cubic (x^3-6x^2+11x-6), the supplied root (1) and square
+witness (d=1) are checked by `cubic_completion_example_certificate`, which
+recovers the remaining roots (2) and (3) by the displayed finite formulas.
+\end{theorem}
+
 \begin{theorem}[Factorized rational quartics]
 \label{thm:rational-quartic-roots}
 \lean{ComputableAnalysis.rationalQuarticPolynomial}
@@ -250,6 +583,43 @@ benchmark item 37; a general cubic formula remains outside the current scope.
 \lean{ComputableAnalysis.rationalQuartic_right_exact_root}
 \lean{ComputableAnalysis.rationalQuartic_has_computable_roots}
 \lean{ComputableAnalysis.rationalQuartic_has_algebraic_roots}
+\lean{ComputableAnalysis.Polynomial.quartic_factor_of_root}
+\lean{ComputableAnalysis.Polynomial.quartic_remainder}
+\lean{ComputableAnalysis.finiteQuarticQuadraticSplit}
+\lean{ComputableAnalysis.finiteQuarticQuadraticSplit_eval}
+\lean{ComputableAnalysis.finiteQuarticQuadraticSplit_hasExactRoots}
+\lean{ComputableAnalysis.quarticSplitOne}
+\lean{ComputableAnalysis.quarticSplitMinusOne}
+\lean{ComputableAnalysis.quarticSplitZero}
+\lean{ComputableAnalysis.quarticSplitMinusFour}
+\lean{ComputableAnalysis.quarticSplitTwo}
+\lean{ComputableAnalysis.quarticSplitMinusTwo}
+\lean{ComputableAnalysis.quartic_split_example_roots}
+\lean{ComputableAnalysis.quartic_split_example_certificate}
+\lean{ComputableAnalysis.Polynomial.monic_quadratic_root_iff}
+\lean{ComputableAnalysis.Polynomial.monic_quadratic_root_count_le_two}
+\lean{ComputableAnalysis.Polynomial.signChangeCount_cubic_one_variation}
+\lean{ComputableAnalysis.Polynomial.cubic_at_most_one_positive_root_of_sign_pattern}
+\lean{ComputableAnalysis.Polynomial.signChangeCount_quartic_one_variation}
+\lean{ComputableAnalysis.Polynomial.quartic_at_most_one_positive_root_of_sign_pattern}
+\lean{ComputableAnalysis.Polynomial.eval_nonincreasing_of_nonpos_coeffs}
+\lean{ComputableAnalysis.Polynomial.eval_strictly_decreasing_of_nonpos_tail}
+\lean{ComputableAnalysis.Polynomial.at_most_one_positive_rational_root_of_nonpos_tail}
+\lean{ComputableAnalysis.Polynomial.signChangeCount_one_of_pos_cons_of_neg}
+\lean{ComputableAnalysis.Polynomial.signChangeCountIgnoringZeros_one_of_pos_cons_nonpos_tail}
+\lean{ComputableAnalysis.Polynomial.one_positive_variation_certificate}
+\lean{ComputableAnalysis.Polynomial.zero_variation_root_exclusion_certificate}
+\lean{ComputableAnalysis.Polynomial.quadratic_two_variation_certificate}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_eval}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_sign_count}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_positive_root_iff}
+\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_certificate}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundaryPolynomial}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundaryCandidates}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundary_evaluation_certificate}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundary_no_candidate_root}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundary_rationalRootSearch_none}
 \uses{def:computable-root}
 \leanok
 The factorized quartic
@@ -258,7 +628,14 @@ The factorized quartic
 \]
 has four explicit rational roots, each packaged as a computable-root
 certificate.  This is the checked factorized quartic core of benchmark item
-46; a general quartic formula remains outside the current scope.
+46; the two-quadratic split certificate now gives a finite Ferrari-shaped
+interface when the factor coefficients and their quadratic root witnesses are
+supplied.  A general quartic formula and its witness-producing resolvent
+construction remain outside the current scope.
+The worked instance with factors (z^2-1) and (z^2-4) supplies the four
+rational roots (pm1,pm2) and is checked by
+`quartic_split_example_certificate`.  This makes the split interface
+inspectable without presenting it as a general Ferrari construction.
 \end{theorem}
 
 \begin{theorem}[The root of \(z^2+1\)]\label{thm:z2-plus-one-root}
@@ -270,6 +647,38 @@ The polynomial \(z^2+1\) has \(i\) as a computable root:
   i^2+1=0.
 \]
 \end{theorem}
+
+The degree-five boundary is represented by the finite quintic obstruction
+`x^5-x+2`. The supplied integer candidates are rejected by exact evaluation,
+and `quinticBoundary_rationalRootSearch_none` certifies the `none` result of
+the executable rational-root search on that finite list. This is an explicit
+algorithmic boundary certificate, not Abel--Ruffini and not a claim about all
+rational roots.  Independently, a supplied factorized quintic now exposes all
+five exact computable-root witnesses through
+\texttt{factorizedQuinticPolynomial\_has\_all\_computable\_roots}; this is the
+finite constructive quintic package used at the Abel--Ruffini boundary.
+
+\begin{remark}[Abel--Ruffini boundary]
+\label{rem:abel-ruffini-boundary}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundaryPolynomial}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundaryCandidates}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundary_evaluation_certificate}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundary_no_candidate_root}
+\lean{ComputableAnalysis.RootsOfUnity.quinticBoundary_rationalRootSearch_none}
+\lean{ComputableAnalysis.factorizedQuinticPolynomial_has_all_computable_roots}
+The classical Abel--Ruffini theorem says that there is no formula by radicals
+for the roots of a general quintic.  A full formalization would require a
+developed representation of radical extensions and solvability groups, which
+is not part of the present computable-analysis foundation.  The finite
+quintic certificate above records the current constructive boundary: exact
+evaluation, finite candidate search, and computable roots for explicitly
+factorized quintics are available, while the general impossibility theorem is
+deferred.  The reusable `FiniteDeflationChain` now iterates supplied-root
+deflation and proves one Horner factorization identity for the whole finite
+chain.  This is the project’s finite root-peeling interface at the
+Abel--Ruffini boundary; radical extensions and the general solvability
+obstruction remain deferred.
+\end{remark}
 
 \section{FTA statements}
 
@@ -287,6 +696,7 @@ root:
 
 \begin{conjecture}[Algebraic FTA]\label{conj:algebraic-fta}
 \lean{ComputableAnalysis.AlgebraicFTA}
+\lean{ComputableAnalysis.AlgebraicFTA_of_factorizedWitness}
 \uses{def:qcomplex-poly,def:algebraic-complex}
 Every positive-degree rational-complex polynomial has an algebraic complex
 root:
@@ -302,7 +712,11 @@ root:
 \lean{ComputableAnalysis.ComputableFTA_of_AlgebraicFTA}
 \uses{conj:computable-fta,conj:algebraic-fta}
 \leanok
-The algebraic FTA implies the computable FTA.
+The algebraic FTA implies the computable FTA.  The conditional bridge
+`AlgebraicFTA_of_factorizedWitness` makes the algorithmic boundary explicit:
+if each positive-degree input arrives with a finite nonempty factor-list
+certificate, one supplied factor yields the algebraic root witness.  The
+theorem does not supply the global factorization algorithm itself.
 \end{theorem}
 
 \section{Two constructive routes}
@@ -333,6 +747,82 @@ Then the winding number of \(p(\partial B)\) around zero is \(d\).  Subdivide
 does not meet zero and to keep a box whose root count is positive.  A nested
 sequence of such boxes is a computable root.
 \end{proposition}
+
+\begin{theorem}[Finite complex-box polynomial soundness]
+\label{thm:finite-box-polynomial-soundness}
+\lean{ComputableAnalysis.QBox.evalPoly}
+\lean{ComputableAnalysis.QBox.evalPoly_point}
+\lean{ComputableAnalysis.QBox.evalPoly_contains}
+\lean{ComputableAnalysis.QBox.evalPoly_no_root_of_not_overlaps_zero}
+\lean{ComputableAnalysis.QBox.FiniteRootExclusionCertificate}
+\lean{ComputableAnalysis.QBox.FiniteRootExclusionCertificate.no_root_in_domain}
+\lean{ComputableAnalysis.QBox.OneSurvivorCertificate}
+\lean{ComputableAnalysis.QBox.OneSurvivorCertificate.root_mem_survivor}
+\leanok
+The Horner evaluator on rational complex boxes is sound: whenever a rational
+point lies in the input box, the corresponding polynomial value lies in the
+output box.  This is the finite interval-arithmetic certificate used by the
+analytic search route to discard boxes whose image misses zero.  It is a
+containment theorem for finite rational data; its companion no-root theorem
+justifies discarding a box whose output does not overlap zero.  Neither result
+is the global fundamental theorem of algebra.  The finite covering structure
+packages the same discard step over a supplied rational domain: a finite cover
+whose images all miss zero certifies that the domain has no root.
+The one-survivor certificate gives the corresponding positive search step:
+if all discarded children miss zero, any root in the parent must lie in the
+retained child.
+\end{theorem}
+
+\begin{theorem}[Four-quadrant rational box subdivision]
+\label{thm:four-quadrant-box-subdivision}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren_ordered}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren_nested}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren_cover}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren_width_height}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingChildren}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingChildren_ordered}
+\lean{ComputableAnalysis.FiniteFTASubdivision.root_mem_survivingChildren}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide}
+\lean{ComputableAnalysis.FiniteFTASubdivision.root_mem_survivingSubdivide}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nonempty_of_root}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nestedIn_parent}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_ordered}
+\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_width_height_exact}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicSubdivide}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicSubdivide_nonempty}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicSubdivide_nestedIn_parent}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicSubdivide_ordered}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicSubdivide_width_height_le_parent}
+\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicSubdivide_width_height_exact}
+\uses{thm:finite-box-polynomial-soundness}
+\leanok
+An ordered rational complex box can be split at its coordinatewise midpoint
+into four closed rational quadrants.  The finite construction proves that the
+children are ordered, nested in the parent, and cover every point of the
+parent.  Combined with the polynomial-image exclusion certificate, this is
+the geometric subdivision step for the constructive FTA search route.
+The executable filter `survivingChildren` retains precisely the children whose
+polynomial-image boxes overlap zero, and `root_mem_survivingChildren` proves
+that a root in the parent cannot be discarded by this finite filter.
+The retained children remain ordered, so the recursive filter can continue
+to use the same box semantics at every stage.
+The recursive `survivingSubdivide` schedule applies this filter at every
+finite depth, and `root_mem_survivingSubdivide` proves that a supplied root
+remains in at least one retained box at each such depth.
+Consequently, a supplied root also gives nonemptiness of the survivor list;
+the survivor schedule preserves orderedness and nesting in the original
+parent at every finite depth.
+The filtered schedule inherits the exact (2^{-n}) width and height law, so
+pruning by polynomial-image overlap does not weaken the finite precision
+budget of the surviving boxes.
+The recursive `dyadicSubdivide` schedule is nonempty at every finite depth,
+and every generated box remains nested in the original ordered parent.  This
+is the finite potential-infinity scaffold for repeated root isolation.  The
+exact width theorem gives the sharper precision law: every depth-(n) box has
+width and height equal to the corresponding parent dimension divided by
+(2^n).
+\end{theorem}
 
 \begin{remark}
 The algebraic route is closer to pre-completeness algebra.  The analytic
