@@ -144,6 +144,20 @@ theorem matrixMul_matrixScale_right {dimension : Nat}
     _ = r * finiteSum (fun k => A i k * B k j) :=
       (finiteSum_mul_left r (fun k => A i k * B k j)).symm
 
+theorem matrixMul_matrixScale_left {dimension : Nat}
+    (A B : RatMatrix dimension) (r : Rat) :
+    matrixMul (matrixScale r A) B = matrixScale r (matrixMul A B) := by
+  funext i j
+  unfold matrixMul matrixScale
+  calc
+    finiteSum (fun k => (r * A i k) * B k j) =
+        finiteSum (fun k => r * (A i k * B k j)) := by
+          congr 1
+          funext k
+          exact Rat.mul_assoc _ _ _
+    _ = r * finiteSum (fun k => A i k * B k j) :=
+      (finiteSum_mul_left r (fun k => A i k * B k j)).symm
+
 theorem matrixScale_comp {dimension : Nat} (r s : Rat)
     (A : RatMatrix dimension) :
     matrixScale r (matrixScale s A) = matrixScale (r * s) A := by
@@ -826,6 +840,393 @@ private theorem finiteSum_two (f : Fin 2 -> Rat) :
   change f 0 + (f 1 + 0) = f 0 + f 1
   rw [Rat.add_zero]
 
+/-! ## A finite Cayley--Hamilton core -/
+
+/-- An explicit rational `2 x 2` matrix, used for small linear-algebra
+certificates without importing an ambient matrix library. -/
+def twoByTwoMatrix (a b c d : Rat) : RatMatrix 2 :=
+  fun i =>
+    Fin.cases
+      (fun j => Fin.cases a (fun _ => b) j)
+      (fun _ j => Fin.cases c (fun _ => d) j)
+      i
+
+@[simp] theorem twoByTwoMatrix_00 (a b c d : Rat) :
+    twoByTwoMatrix a b c d 0 0 = a := by rfl
+
+@[simp] theorem twoByTwoMatrix_01 (a b c d : Rat) :
+    twoByTwoMatrix a b c d 0 1 = b := by rfl
+
+@[simp] theorem twoByTwoMatrix_10 (a b c d : Rat) :
+    twoByTwoMatrix a b c d 1 0 = c := by rfl
+
+@[simp] theorem twoByTwoMatrix_11 (a b c d : Rat) :
+    twoByTwoMatrix a b c d 1 1 = d := by rfl
+
+def twoByTwoTrace (a _b _c d : Rat) : Rat := a + d
+
+def twoByTwoDeterminant (a b c d : Rat) : Rat := a * d - b * c
+
+/-- The adjugate of an explicit rational `2 x 2` matrix.  Keeping this
+construction at the concrete dimension two makes the inverse certificate
+executable and avoids importing a general determinant or inverse theory. -/
+def twoByTwoAdjugate (a b c d : Rat) : RatMatrix 2 :=
+  twoByTwoMatrix d (-b) (-c) a
+
+/-- The finite adjugate identity on the right.  This is the algebraic
+certificate behind reversing a nonsingular sampled transition. -/
+theorem twoByTwo_mul_adjugate (a b c d : Rat) :
+    matrixMul (twoByTwoMatrix a b c d) (twoByTwoAdjugate a b c d) =
+      matrixScale (twoByTwoDeterminant a b c d) (matrixIdentity 2) := by
+  funext i j
+  refine Fin.cases ?_ ?_ i
+  · refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoAdjugate, twoByTwoDeterminant,
+        matrixMul, matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      · simp [twoByTwoAdjugate, twoByTwoDeterminant, matrixMul, matrixScale, matrixIdentity,
+          finiteSum_two]
+        grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+          Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · intro i
+    refine Fin.cases ?_ (fun i => Fin.elim0 i) i
+    refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoAdjugate, twoByTwoDeterminant, matrixMul, matrixScale, matrixIdentity,
+        finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      simp [twoByTwoAdjugate, twoByTwoDeterminant, matrixMul, matrixScale, matrixIdentity,
+          finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-- The finite adjugate identity on the left. -/
+theorem twoByTwo_adjugate_mul (a b c d : Rat) :
+    matrixMul (twoByTwoAdjugate a b c d) (twoByTwoMatrix a b c d) =
+      matrixScale (twoByTwoDeterminant a b c d) (matrixIdentity 2) := by
+  funext i j
+  refine Fin.cases ?_ ?_ i
+  · refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoAdjugate, twoByTwoDeterminant,
+        matrixMul, matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      · simp [twoByTwoAdjugate, twoByTwoDeterminant, matrixMul, matrixScale, matrixIdentity,
+          finiteSum_two]
+        grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+          Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · intro i
+    refine Fin.cases ?_ (fun i => Fin.elim0 i) i
+    refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoAdjugate, twoByTwoDeterminant, matrixMul, matrixScale, matrixIdentity,
+        finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      simp [twoByTwoAdjugate, twoByTwoDeterminant, matrixMul, matrixScale, matrixIdentity,
+          finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-- The exact rational inverse of a nonsingular concrete `2 x 2` matrix. -/
+def twoByTwoInverse (a b c d : Rat) : RatMatrix 2 :=
+  matrixScale (twoByTwoDeterminant a b c d)⁻¹
+    (twoByTwoAdjugate a b c d)
+
+theorem twoByTwo_mul_inverse {a b c d : Rat}
+    (hdet : twoByTwoDeterminant a b c d ≠ 0) :
+    matrixMul (twoByTwoMatrix a b c d) (twoByTwoInverse a b c d) =
+      matrixIdentity 2 := by
+  unfold twoByTwoInverse
+  rw [matrixMul_matrixScale_right, twoByTwo_mul_adjugate,
+    matrixScale_comp]
+  have hcancel :
+      (twoByTwoDeterminant a b c d)⁻¹ * twoByTwoDeterminant a b c d = 1 := by
+    rw [Rat.mul_comm]
+    exact Rat.mul_inv_cancel _ hdet
+  rw [hcancel, matrixScale_one]
+
+theorem twoByTwo_inverse_mul {a b c d : Rat}
+    (hdet : twoByTwoDeterminant a b c d ≠ 0) :
+    matrixMul (twoByTwoInverse a b c d) (twoByTwoMatrix a b c d) =
+      matrixIdentity 2 := by
+  unfold twoByTwoInverse
+  rw [matrixMul_matrixScale_left, twoByTwo_adjugate_mul,
+    matrixScale_comp]
+  have hcancel :
+      (twoByTwoDeterminant a b c d)⁻¹ * twoByTwoDeterminant a b c d = 1 := by
+    rw [Rat.mul_comm]
+    exact Rat.mul_inv_cancel _ hdet
+  rw [hcancel, matrixScale_one]
+
+theorem twoByTwo_inverse_unique_right {a b c d : Rat}
+    (hdet : twoByTwoDeterminant a b c d ≠ 0)
+    (B : RatMatrix 2)
+    (hB : matrixMul (twoByTwoMatrix a b c d) B = matrixIdentity 2) :
+    B = twoByTwoInverse a b c d := by
+  calc
+    B = matrixMul (matrixIdentity 2) B :=
+      (matrixMul_identity_left B).symm
+    _ = matrixMul
+        (matrixMul (twoByTwoInverse a b c d)
+          (twoByTwoMatrix a b c d)) B := by
+      exact (congrArg (fun M => matrixMul M B)
+        (twoByTwo_inverse_mul hdet)).symm
+    _ = matrixMul (twoByTwoInverse a b c d)
+        (matrixMul (twoByTwoMatrix a b c d) B) :=
+      matrixMul_assoc _ _ _
+    _ = matrixMul (twoByTwoInverse a b c d) (matrixIdentity 2) := by
+      rw [hB]
+    _ = twoByTwoInverse a b c d := matrixMul_identity_right _
+
+theorem twoByTwo_inverse_unique_left {a b c d : Rat}
+    (hdet : twoByTwoDeterminant a b c d ≠ 0)
+    (B : RatMatrix 2)
+    (hB : matrixMul B (twoByTwoMatrix a b c d) = matrixIdentity 2) :
+    B = twoByTwoInverse a b c d := by
+  calc
+    B = matrixMul B (matrixIdentity 2) :=
+      (matrixMul_identity_right B).symm
+    _ = matrixMul B
+        (matrixMul (twoByTwoMatrix a b c d)
+          (twoByTwoInverse a b c d)) := by
+      exact (congrArg (fun M => matrixMul B M)
+        (twoByTwo_mul_inverse hdet)).symm
+    _ = matrixMul (matrixMul B (twoByTwoMatrix a b c d))
+        (twoByTwoInverse a b c d) :=
+      (matrixMul_assoc _ _ _).symm
+    _ = matrixMul (matrixIdentity 2) (twoByTwoInverse a b c d) := by
+      rw [hB]
+    _ = twoByTwoInverse a b c d := matrixMul_identity_left _
+
+theorem twoByTwo_inverse_solves {a b c d : Rat}
+    (hdet : twoByTwoDeterminant a b c d ≠ 0)
+    (x : RatVector 2) :
+    matrixApply (twoByTwoMatrix a b c d)
+        (matrixApply (twoByTwoInverse a b c d) x) = x := by
+  calc
+    matrixApply (twoByTwoMatrix a b c d)
+        (matrixApply (twoByTwoInverse a b c d) x) =
+        matrixApply
+          (matrixMul (twoByTwoMatrix a b c d)
+            (twoByTwoInverse a b c d)) x :=
+      (matrixApply_matrixMul _ _ _).symm
+    _ = matrixApply (matrixIdentity 2) x := by
+      rw [twoByTwo_mul_inverse hdet]
+    _ = x := matrixApply_identity x
+
+theorem twoByTwo_solution_unique {a b c d : Rat}
+    (hdet : twoByTwoDeterminant a b c d ≠ 0)
+    (rhs u v : RatVector 2)
+    (hu : matrixApply (twoByTwoMatrix a b c d) u = rhs)
+    (hv : matrixApply (twoByTwoMatrix a b c d) v = rhs) :
+    u = v := by
+  have huv : matrixApply (twoByTwoMatrix a b c d) u =
+      matrixApply (twoByTwoMatrix a b c d) v := hu.trans hv.symm
+  calc
+    u = matrixApply (matrixIdentity 2) u := (matrixApply_identity u).symm
+    _ = matrixApply
+        (matrixMul (twoByTwoInverse a b c d)
+          (twoByTwoMatrix a b c d)) u := by
+      rw [twoByTwo_inverse_mul hdet]
+    _ = matrixApply (twoByTwoInverse a b c d)
+        (matrixApply (twoByTwoMatrix a b c d) u) :=
+      matrixApply_matrixMul _ _ _
+    _ = matrixApply (twoByTwoInverse a b c d)
+        (matrixApply (twoByTwoMatrix a b c d) v) :=
+      congrArg (matrixApply (twoByTwoInverse a b c d)) huv
+    _ = matrixApply
+        (matrixMul (twoByTwoInverse a b c d)
+          (twoByTwoMatrix a b c d)) v :=
+      (matrixApply_matrixMul _ _ _).symm
+    _ = matrixApply (matrixIdentity 2) v := by
+      rw [twoByTwo_inverse_mul hdet]
+    _ = v := matrixApply_identity v
+
+/-- The Cayley--Hamilton identity for an explicit rational `2 x 2` matrix.
+This is the finite matrix core of benchmark item 49; arbitrary dimensions and
+an abstract characteristic-polynomial interface remain outside the project
+boundary. -/
+theorem twoByTwo_cayley_hamilton (a b c d : Rat) :
+    let A := twoByTwoMatrix a b c d
+    matrixAdd (matrixMul A A)
+        (matrixAdd
+          (matrixScale (-(twoByTwoTrace a b c d)) A)
+          (matrixScale (twoByTwoDeterminant a b c d)
+            (matrixIdentity 2))) =
+      matrixZero 2 := by
+  dsimp [twoByTwoTrace, twoByTwoDeterminant]
+  funext i j
+  refine Fin.cases ?_ ?_ i
+  · refine Fin.cases ?_ ?_ j
+    · simp [matrixAdd, matrixMul, matrixScale, matrixIdentity, matrixZero,
+        finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      · simp [matrixAdd, matrixMul, matrixScale, matrixIdentity, matrixZero,
+          finiteSum_two]
+        grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+          Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · intro i
+    refine Fin.cases ?_ (fun i => Fin.elim0 i) i
+    refine Fin.cases ?_ ?_ j
+    · simp [matrixAdd, matrixMul, matrixScale, matrixIdentity, matrixZero,
+        finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      simp [matrixAdd, matrixMul, matrixScale, matrixIdentity, matrixZero,
+          finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-- The trace read directly from an arbitrary rational `2 x 2` matrix. -/
+def ratMatrixTwoTrace (A : RatMatrix 2) : Rat := A 0 0 + A 1 1
+
+/-- The determinant read directly from an arbitrary rational `2 x 2` matrix.
+This is a finite four-entry formula, not an imported determinant API. -/
+def ratMatrixTwoDeterminant (A : RatMatrix 2) : Rat :=
+  A 0 0 * A 1 1 - A 0 1 * A 1 0
+
+/-- Every rational `2 x 2` matrix is extensionally its explicit four-entry
+presentation.  This finite extensionality bridge makes the concrete
+Cayley--Hamilton certificate reusable for arbitrary matrix data. -/
+theorem ratMatrix_twoByTwo_eq_explicit (A : RatMatrix 2) :
+    A = twoByTwoMatrix (A 0 0) (A 0 1) (A 1 0) (A 1 1) := by
+  funext i j
+  refine Fin.cases ?_ ?_ i
+  · refine Fin.cases ?_ ?_ j
+    · rfl
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      rfl
+  · intro i
+    refine Fin.cases ?_ (fun i => Fin.elim0 i) i
+    refine Fin.cases ?_ ?_ j
+    · rfl
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      rfl
+
+/-- General rational `2 x 2` Cayley--Hamilton certificate.  For arbitrary
+matrix data `A`, the finite characteristic polynomial identity is
+`A² - trace(A) A + det(A) I = 0`; no completed reals, limits, or continuous
+ODE theorem are involved. -/
+theorem ratMatrix_twoByTwo_cayley_hamilton (A : RatMatrix 2) :
+    matrixAdd (matrixMul A A)
+        (matrixAdd
+          (matrixScale (-(ratMatrixTwoTrace A)) A)
+          (matrixScale (ratMatrixTwoDeterminant A)
+            (matrixIdentity 2))) =
+      matrixZero 2 := by
+  have hA := ratMatrix_twoByTwo_eq_explicit A
+  unfold ratMatrixTwoTrace ratMatrixTwoDeterminant
+  rw [hA]
+  simpa only [twoByTwoMatrix_00, twoByTwoMatrix_01, twoByTwoMatrix_10,
+    twoByTwoMatrix_11] using
+    (twoByTwo_cayley_hamilton (A 0 0) (A 0 1) (A 1 0) (A 1 1))
+
+private theorem finiteSum_three (f : Fin 3 -> Rat) :
+    finiteSum f = f 0 + f 1 + f 2 := by
+  change f 0 + (f 1 + (f 2 + 0)) = f 0 + f 1 + f 2
+  grind [Rat.add_assoc]
+
+/-- An explicit rational `3 x 3` matrix for the next finite
+characteristic-polynomial certificate. -/
+def threeByThreeMatrix
+    (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) : RatMatrix 3 :=
+  fun i =>
+    Fin.cases
+      (fun j => Fin.cases a00 (fun j => Fin.cases a01 (fun _ => a02) j) j)
+      (fun i => Fin.cases
+        (fun j => Fin.cases a10 (fun j => Fin.cases a11 (fun _ => a12) j) j)
+        (fun i => Fin.cases
+          (fun j => Fin.cases a20 (fun j => Fin.cases a21 (fun _ => a22) j) j)
+          (fun i => Fin.elim0 i) i) i) i
+
+@[simp] theorem threeByThreeMatrix_00 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 0 0 = a00 := by rfl
+@[simp] theorem threeByThreeMatrix_01 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 0 1 = a01 := by rfl
+@[simp] theorem threeByThreeMatrix_02 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 0 2 = a02 := by rfl
+@[simp] theorem threeByThreeMatrix_10 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 1 0 = a10 := by rfl
+@[simp] theorem threeByThreeMatrix_11 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 1 1 = a11 := by rfl
+@[simp] theorem threeByThreeMatrix_12 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 1 2 = a12 := by rfl
+@[simp] theorem threeByThreeMatrix_20 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 2 0 = a20 := by rfl
+@[simp] theorem threeByThreeMatrix_21 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 2 1 = a21 := by rfl
+@[simp] theorem threeByThreeMatrix_22 (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22 2 2 = a22 := by rfl
+
+def threeByThreeTrace (a00 _a01 _a02 _a10 a11 _a12 _a20 _a21 a22 : Rat) : Rat :=
+  a00 + a11 + a22
+
+def threeByThreeSecondCoeff
+    (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) : Rat :=
+  a00 * a11 + a00 * a22 + a11 * a22 - a01 * a10 - a02 * a20 - a12 * a21
+
+def threeByThreeDeterminant
+    (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) : Rat :=
+  a00 * (a11 * a22 - a12 * a21) -
+    a01 * (a10 * a22 - a12 * a20) +
+    a02 * (a10 * a21 - a11 * a20)
+
+/-- The finite rational `3 x 3` Cayley--Hamilton identity
+`A^3 - tr(A) A^2 + s₂(A) A - det(A) I = 0`, where `s₂` is the second
+elementary characteristic coefficient.  This is a higher-dimensional
+certificate-level extension of the project's general `2 x 2` result; it
+still uses only explicit finite sums and rational ring identities. -/
+theorem threeByThree_cayley_hamilton
+    (a00 a01 a02 a10 a11 a12 a20 a21 a22 : Rat) :
+    let A := threeByThreeMatrix a00 a01 a02 a10 a11 a12 a20 a21 a22
+    matrixAdd (matrixMul A (matrixMul A A))
+        (matrixAdd
+          (matrixScale (-(threeByThreeTrace a00 a01 a02 a10 a11 a12 a20 a21 a22))
+            (matrixMul A A))
+          (matrixAdd
+            (matrixScale
+              (threeByThreeSecondCoeff a00 a01 a02 a10 a11 a12 a20 a21 a22) A)
+            (matrixScale
+              (-(threeByThreeDeterminant a00 a01 a02 a10 a11 a12 a20 a21 a22))
+              (matrixIdentity 3)))) =
+      matrixZero 3 := by
+  dsimp [threeByThreeTrace, threeByThreeSecondCoeff,
+    threeByThreeDeterminant]
+  funext i j
+  have hi : i = 0 \/ i = 1 \/ i = 2 := by omega
+  have hj : j = 0 \/ j = 1 \/ j = 2 := by omega
+  rcases hi with rfl | rfl | rfl <;>
+    rcases hj with rfl | rfl | rfl <;>
+      simp [matrixAdd, matrixMul, matrixScale,
+        matrixIdentity, matrixZero, finiteSum_three,
+        threeByThreeMatrix_00, threeByThreeMatrix_01,
+        threeByThreeMatrix_02, threeByThreeMatrix_10,
+        threeByThreeMatrix_11, threeByThreeMatrix_12,
+        threeByThreeMatrix_20, threeByThreeMatrix_21,
+        threeByThreeMatrix_22] <;>
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+def vectorScale {dimension : Nat} (r : Rat) (x : RatVector dimension) :
+    RatVector dimension :=
+  fun i => r * x i
+
 /-- The generator with rows `(0, 1)` and `(-omega^2, 0)`. -/
 def generator (omega : Rat) : RatMatrix 2 :=
   fun i =>
@@ -1070,6 +1471,164 @@ theorem matrixPow_add {dimension : Nat} (A : RatMatrix dimension) :
       rw [show (m + 1) + n = (m + n) + 1 by omega]
       rw [matrixPow, matrixPow, matrixPow_add A m n]
       exact (matrixMul_assoc _ _ _).symm
+
+/-- Every finite power of an arbitrary rational `2 x 2` matrix reduces by its
+characteristic polynomial.  This is the executable Cayley--Hamilton power
+recurrence
+
+`A^(n+2) = trace(A) A^(n+1) - det(A) A^n`.
+
+The statement is entirely finite: powers are natural recursive products and
+the coefficients are the four-entry rational trace and determinant above.
+It is a certificate for discrete matrix algebra, not a continuous ODE
+theorem or a convergence assertion. -/
+theorem ratMatrix_twoByTwo_matrixPow_succ_succ_recurrence (A : RatMatrix 2) :
+    forall n,
+      matrixPow A (n + 2) =
+        matrixAdd
+          (matrixScale (HarmonicOscillator.ratMatrixTwoTrace A)
+            (matrixPow A (n + 1)))
+          (matrixScale (-(HarmonicOscillator.ratMatrixTwoDeterminant A))
+            (matrixPow A n)) := by
+  have hbase :
+      matrixMul A A =
+        matrixAdd
+          (matrixScale (HarmonicOscillator.ratMatrixTwoTrace A) A)
+          (matrixScale (-(HarmonicOscillator.ratMatrixTwoDeterminant A))
+            (matrixIdentity 2)) := by
+    have hCH := HarmonicOscillator.ratMatrix_twoByTwo_cayley_hamilton A
+    funext i j
+    have hij := congrFun (congrFun hCH i) j
+    dsimp [matrixAdd, matrixScale, matrixZero] at hij ⊢
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+      Rat.mul_assoc, Rat.mul_comm]
+  intro n
+  rw [show n + 2 = 2 + n by omega, matrixPow_add A 2 n]
+  change matrixMul (matrixMul A (matrixMul A (matrixIdentity 2)))
+      (matrixPow A n) = _
+  rw [matrixMul_identity_right, hbase, matrixMul_add_left,
+    matrixMul_matrixScale_left, matrixMul_matrixScale_left,
+    matrixMul_identity_left]
+  rw [show n + 1 = 1 + n by omega, matrixPow_add A 1 n]
+  simp only [matrixPow, matrixMul_identity_right]
+
+/-- Any rational matrix sequence with the same first two values and the
+characteristic recurrence is the corresponding finite matrix-power sequence.
+This is a bounded induction certificate for the Cayley--Hamilton reduction:
+it compares only finitely many rational matrices at any requested stage. -/
+theorem ratMatrix_twoByTwo_matrixPow_recurrence_unique (A : RatMatrix 2)
+    (X : Nat -> RatMatrix 2)
+    (h0 : X 0 = matrixIdentity 2)
+    (h1 : X 1 = A)
+    (hrec : forall n,
+      X (n + 2) =
+        matrixAdd
+          (matrixScale (HarmonicOscillator.ratMatrixTwoTrace A) (X (n + 1)))
+          (matrixScale (-(HarmonicOscillator.ratMatrixTwoDeterminant A))
+            (X n))) :
+    forall n, X n = matrixPow A n
+  | 0 => h0
+  | 1 => by
+      change X 1 = matrixMul A (matrixIdentity 2)
+      rw [matrixMul_identity_right]
+      exact h1
+  | n + 2 => by
+      rw [hrec n, ratMatrix_twoByTwo_matrixPow_succ_succ_recurrence A n]
+      rw [ratMatrix_twoByTwo_matrixPow_recurrence_unique A X h0 h1 hrec (n + 1),
+        ratMatrix_twoByTwo_matrixPow_recurrence_unique A X h0 h1 hrec n]
+
+namespace HarmonicOscillator
+
+/-- The first nontrivial power reduction supplied by the explicit
+Cayley--Hamilton certificate.  This is a finite rational evaluation identity:
+the third power of a `2 x 2` matrix is reduced to the matrix itself and the
+identity, with coefficients given by its trace and determinant. -/
+theorem twoByTwo_matrixPow_three (a b c d : Rat) :
+    matrixPow (twoByTwoMatrix a b c d) 3 =
+      matrixAdd
+        (matrixScale
+          ((twoByTwoTrace a b c d) ^ 2 - twoByTwoDeterminant a b c d)
+          (twoByTwoMatrix a b c d))
+        (matrixScale
+          (-(twoByTwoTrace a b c d * twoByTwoDeterminant a b c d))
+          (matrixIdentity 2)) := by
+  change matrixMul (twoByTwoMatrix a b c d)
+      (matrixMul (twoByTwoMatrix a b c d)
+        (matrixMul (twoByTwoMatrix a b c d) (matrixIdentity 2))) = _
+  rw [matrixMul_identity_right]
+  funext i j
+  refine Fin.cases ?_ ?_ i
+  · refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+        matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      · simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+          matrixScale, matrixIdentity, finiteSum_two]
+        grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+          Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · intro i
+    refine Fin.cases ?_ (fun i => Fin.elim0 i) i
+    refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+        matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+          matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-! The next finite Cayley--Hamilton reduction, still entirely rational. -/
+
+theorem twoByTwo_matrixPow_four (a b c d : Rat) :
+    matrixPow (twoByTwoMatrix a b c d) 4 =
+      matrixAdd
+        (matrixScale
+          ((twoByTwoTrace a b c d) ^ 3 -
+            2 * twoByTwoTrace a b c d * twoByTwoDeterminant a b c d)
+          (twoByTwoMatrix a b c d))
+        (matrixScale
+          (twoByTwoDeterminant a b c d ^ 2 -
+            twoByTwoTrace a b c d ^ 2 * twoByTwoDeterminant a b c d)
+          (matrixIdentity 2)) := by
+  change matrixMul (twoByTwoMatrix a b c d)
+      (matrixMul (twoByTwoMatrix a b c d)
+        (matrixMul (twoByTwoMatrix a b c d)
+          (matrixMul (twoByTwoMatrix a b c d) (matrixIdentity 2)))) = _
+  rw [matrixMul_identity_right]
+  funext i j
+  refine Fin.cases ?_ ?_ i
+  · refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+        matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      · simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+          matrixScale, matrixIdentity, finiteSum_two]
+        grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+          Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · intro i
+    refine Fin.cases ?_ (fun i => Fin.elim0 i) i
+    refine Fin.cases ?_ ?_ j
+    · simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+        matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+    · intro j
+      refine Fin.cases ?_ (fun j => Fin.elim0 j) j
+      simp [twoByTwoTrace, twoByTwoDeterminant, matrixAdd, matrixMul,
+          matrixScale, matrixIdentity, finiteSum_two]
+      grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+        Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+end HarmonicOscillator
 
 /-- The degree-`r` ordered-simplex term for a constant coefficient matrix.
 The scalar factor `T^r/r!` is the exact rational volume of the ordered

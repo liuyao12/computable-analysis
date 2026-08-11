@@ -1,0 +1,148 @@
+Definition-complete means a valid raw real; registry-complete means that the
+corresponding raw presentation has a formal chain of \code{RealRaw.Equiv}
+theorems to the preferred area presentation.  The table is a compact
+release-style coverage suite, not a numerator for a calculus-completeness
+percentage.  It deliberately names natural theorem families rather than
+presenting a catalogue of rearranged equations for pi.  The checked registry
+corollaries are formalized by \code{PiProofs.PiCoverageBridge} and its
+\code{equivalent} theorem.
+The broader named registry is pairwise interoperable through
+\code{PiProofs.piPresentation\_equiv}; that library convenience theorem is not
+an additional scoreboard row.
+
+The suite asks whether a construction useful elsewhere in calculus agrees
+with an independently constructed value of the same constant.  Thus a row is
+evidence for a capability gate, rather than a claim that five successful pi
+proofs make five equal-sized contributions to scientific or engineering
+calculus.  In particular, a continuous Peano--Baker theorem and a proof that
+the selected exponential satisfies \(e^x{}'=e^x\) are major advances even
+though neither creates a new pi row.
+
+\begin{center}
+\begin{tabular}{@{}p{0.23\textwidth}p{0.31\textwidth}p{0.21\textwidth}cc@{}}
+\textbf{Theorem family} & \textbf{Content exercised} &
+\textbf{Width metric} & \textbf{Def.} & \textbf{Registry}\\
+\hline
+Finite Archimedes theorem &
+exact rational circle fans, square-root enclosures, and nested interval bounds &
+cross-fan: \(w_n\le 10/(n+1)\) &
+\(\checkmark\) & \(\checkmark\)\\
+Arctangent series theorem &
+circular inverse geometry against the alternating arctangent series &
+Leibniz: \(w_n=4/(4n+1)\) &
+\(\checkmark\) & \(\checkmark\)\\
+Arctangent integral &
+certified rectangle integration and its endpoint bridge &
+rectangle \(\pi\)-raw: \(w_n\le16/(n+1)\) &
+\(\checkmark\) & \(\checkmark\)\\
+Finite arctangent integration by parts &
+the supplied unit-branch triangle/strip reindexing, product FTC, and
+literal reciprocal-integral logarithm &
+triangle--reciprocal-log raw: \(w_n\le52/2^n\) &
+\(\checkmark\) & \(\checkmark\)\\
+Finite square substitution in the pi formula &
+the supplied product endpoint together with the checked finite
+\(t=x^2\) mesh correction and pullback integral &
+square-pullback pi raw: \(w_n\le56/2^n\) &
+\(\checkmark\) & \(\checkmark\)\\
+Cauchy integral &
+reciprocal-tail transport from a full line to a finite interval &
+Cauchy \(\pi\)-raw: \(w_n\le16/(n+1)\) &
+\(\checkmark\) & \(\checkmark\)\\
+Bounded symmetric Cauchy integral &
+the public two-piece monotone assembler, with an increasing branch on
+\([-1,0]\) and a decreasing branch on \([0,1]\) &
+symmetric Cauchy \(\pi\)-raw: \(w_n\le16/(n+1)\) &
+\(\checkmark\) & \(\checkmark\)\\
+Reciprocal-quartic integral &
+a nontrivial rational kernel, finite quadrature, and its integral identity &
+dyadic quadrature: \(w_n=64/2^n\) &
+\(\checkmark\) & \(\checkmark\)\\
+\end{tabular}
+\end{center}
+ 
+The width column belongs to the named checked \(\pi\)-raw evaluator in that
+row; an equivalence proof does not silently transfer a stage-by-stage rate to
+every other presentation.  It is therefore a useful cost/precision diagnostic
+for the constructive witness, not an additional measure of theorem importance.
+
+\paragraph{Named future coverage rows (unmarked).}
+These retain the stronger canonical formulations not supplied by the checked
+finite branch.  They remain visible so that a concrete equivalence is not
+mistaken for a completed general calculus theorem.
+\begin{center}
+\begin{tabular}{@{}p{0.23\textwidth}p{0.31\textwidth}p{0.21\textwidth}cc@{}}
+\textbf{Theorem family} & \textbf{Content to exercise} &
+\textbf{Planned certificate} & \textbf{Def.} & \textbf{Registry}\\
+\hline
+Canonical arctangent integration by parts &
+\(\pi=4\int_0^1\arctan(x)\,\dd x+2\log_{\mathrm{canonical}}2\);
+transport the checked reciprocal-log endpoint through exp/log uniqueness and
+generalize the supplied branch to common monotone pieces &
+canonical exp/log transport plus the certificate of
+\cref{def:integration-by-parts-certificate} &
+-- & --\\
+Euler identity and complex logarithm &
+for \(a=\arctangeom(1)\),
+\(\exp(2ia)=i\), hence
+\(\exp(i\pi/2)=i\) and \(\pi=-2i\log(i)\) &
+matrix Peano--Baker factorial tail, represented-input extension, rotation
+system and branch-agreement moduli &
+-- & --\\
+\end{tabular}
+\end{center}
+
+The primary \code{PiProofs.PiPresentation} registry retains supplementary
+checked evaluators as regression implementations: polygon area, the two
+perimeter normalizations (available as \code{pi.circumferenceStabilized} and
+\code{pi.circumferenceReboxed}), Nilakantha, and the single Machin power-series
+formula.  The Machin runtime has its own certified bound
+\(w_n\le20/2^n\), recorded by \code{PiProofs.piMachinRate}; it remains a
+series-regression implementation rather than another coverage row.  Its direct cross-fan view is \code{pi.circumference} (also
+\code{pi.circumferenceFan}).  The abstract \code{piCertified} handle additionally stores the
+separately named \code{pi.curvatureFan} and
+\code{pi.integrationByPartsMesh}, and \code{pi.triangleLogSeries}
+representatives.  They remain useful
+executable comparisons, but are not additional readiness cells: the former
+sharpens finite geometry, while the latter two are variants of the checked
+finite integration-by-parts bridge.  The primary named view
+\code{pi.integrationByParts} is the reciprocal-log formula itself; its rate
+\(w_n\le52/2^n\) is certified by
+\code{Logarithm.piTriangleLogReciprocalIntegralRate}.  In contrast,
+\code{pi.squareSubstitution} retains the square-pullback endpoint and is a
+separate coverage row: it invokes the finite \(t=x^2\) substitution theorem,
+with rate \(w_n\le56/2^n\), certified by
+\code{Logarithm.piTriangleLogSquareSubstitutionIntegralRate}.  None of these facts
+yet transports the logarithm to the canonical inverse-exponential
+presentation.
+
+The direct \code{piCircumference} evaluator remains a geometric diagnostic:
+its unresolved lower-endpoint refinement is a local square-root-enclosure
+problem, not a missing calculus gate.  Lean now states the sharper secant-margin
+condition: two cubic-scale rational secant certificates for the fine chords,
+less their explicit bisection widths, must dominate the coarse squared chord.
+Its checked reduction yields the original endpoint refinement.  The older
+curvature target and its positive polynomial numerator remain useful
+diagnostics, but the universal secant-margin inequality is now the direct open
+proof obligation.  This is diagnostic progress only, not a new row.
+The checked finite integration-by-parts and square-substitution rows are
+deliberately narrower than the future canonical formulation.  The former's
+exact finite acceptance contract is stated in
+\cref{def:integration-by-parts-certificate,thm:integration-by-parts-certificate}:
+every monotone piece must provide its product box, common refinement,
+corner-rectangle bound, and rational error schedule.  The concrete target is
+then isolated in \cref{cor:arctangent-logarithm-pi-route}.  The two-sided product derivative
+of the actual \(x\arctan x\) evaluator and its supplied finite FTC comparison
+are checked; general monotone-piece composition remains the calculus gate.
+The canonical refinement is deliberately the long elementary-function route:
+its \(\log 2\) endpoint must agree with the inverse
+of the canonical exponential.  The linear Peano--Baker/Picard--Lindel\"of
+uniqueness theorem will make that identification only after the individual
+exponential presentations have supplied their own derivative and initial-value
+certificates.  Thus the prospective refinement tests a capability the checked
+finite row does not.
+The Euler/complex-logarithm row above is a second, longer exp/log/ODE
+corroboration; it remains unmarked until its explicit complex certificates are
+present.  The arcsine/Newton and Gaussian rows remain future probes for
+inverse/square-root integration and the exponential/full-line layers; other
+advanced routes are intentionally omitted from this progress table.

@@ -18,6 +18,29 @@ theorem asPartialRealFunRaw_valid (f : RatFun) :
   intro x h
   exact RealRaw.ofRat_valid (f.evalOnDomain x h)
 
+theorem eval?_eq_some_of_defined (f : RatFun) (x : Rat)
+    (h : f.DefinedAt x) :
+    f.eval? x = some (f.evalOnDomain x h) := by
+  have hne : f.denominator x ≠ 0 := by
+    change ((f.denominator x != 0) = true) at h
+    intro hz
+    simp [hz] at h
+  unfold eval? evalOnDomain
+  simp [hne]
+
+theorem eval?_eq_none_of_undefined (f : RatFun) (x : Rat)
+    (h : ¬ f.DefinedAt x) :
+    f.eval? x = none := by
+  have hz : f.denominator x = 0 := by
+    by_cases hz : f.denominator x = 0
+    · exact hz
+    · exfalso
+      apply h
+      change ((f.denominator x != 0) = true)
+      simp [hz]
+  unfold eval?
+  simp [hz]
+
 /-- Certify a rational function on a whole interval by proving its denominator
 does not vanish anywhere on that interval. -/
 def onInterval (f : RatFun) (a b : Rat)
@@ -59,6 +82,37 @@ theorem rat_square_nonneg (x : Rat) : 0 <= x * x := by
     have heq : (-x) * (-x) = x * x := by
       grind [Rat.mul_neg, Rat.neg_mul, Rat.neg_neg]
     rwa [heq] at hsq
+
+theorem polynomial_defined_all (coeffs : List Rat) (x : Rat) :
+    (polynomial coeffs).DefinedAt x := by
+  change ((polynomial coeffs).denominator x != 0) = true
+  simp [polynomial, denominator, Polynomial.eval]
+  grind
+
+theorem polynomial_evalOnDomain_eq (coeffs : List Rat) (x : Rat) :
+    (polynomial coeffs).evalOnDomain x (polynomial_defined_all coeffs x) =
+      Polynomial.eval coeffs x := by
+  unfold evalOnDomain numerator denominator polynomial
+  simp [Polynomial.eval]
+  grind
+
+def polynomialOnInterval (coeffs : List Rat) (a b : Rat) : FunctionOnInterval :=
+  (polynomial coeffs).onInterval a b
+    (fun x _hx => polynomial_defined_all coeffs x)
+
+theorem polynomialOnInterval_compute_eq
+    (coeffs : List Rat) (a b x : Rat)
+    (hx : inDomainInterval a b x) (n : Nat) :
+    (polynomialOnInterval coeffs a b).compute x hx n =
+      { lo := Polynomial.eval coeffs x, hi := Polynomial.eval coeffs x } := by
+  unfold polynomialOnInterval onInterval asPartialRealFunRaw
+    FunctionOnInterval.compute
+  change (RealRaw.ofRat
+      ((polynomial coeffs).evalOnDomain x _)).compute n =
+    { lo := Polynomial.eval coeffs x, hi := Polynomial.eval coeffs x }
+  rw [show (polynomial coeffs).evalOnDomain x _ = Polynomial.eval coeffs x by
+    exact polynomial_evalOnDomain_eq coeffs x]
+  rfl
 
 theorem oneOverOnePlusSquare_denominator_eq (x : Rat) :
     oneOverOnePlusSquare.denominator x = 1 + x * x := by
@@ -169,11 +223,23 @@ theorem oneOverX_numerator_eq (x : Rat) :
   simp
   rw [Rat.add_zero]
 
+theorem oneOverX_defined_of_ne_zero {x : Rat} (hx : x ≠ 0) :
+    oneOverX.DefinedAt x := by
+  change ((oneOverX.denominator x != 0) = true)
+  rw [oneOverX_denominator_eq]
+  simp [hx]
+
 theorem oneOverX_defined_of_pos {x : Rat} (hx : 0 < x) :
     oneOverX.DefinedAt x := by
   change ((oneOverX.denominator x != 0) = true)
   rw [oneOverX_denominator_eq]
   simp [Rat.ne_of_gt hx]
+
+theorem oneOverX_defined_of_neg {x : Rat} (hx : x < 0) :
+    oneOverX.DefinedAt x := by
+  change ((oneOverX.denominator x != 0) = true)
+  rw [oneOverX_denominator_eq]
+  simp [Rat.ne_of_lt hx]
 
 theorem oneOverX_evalOnDomain_eq (x : Rat)
     (h : oneOverX.DefinedAt x) :
@@ -201,6 +267,25 @@ def oneOverX_denominator_apart_on_pos_interval (a b : Rat) (ha : 0 < a) :
     simp [hxnonneg]
     exact hax
 
+/-- On `[a,b]` with `b < 0`, the denominator of `1/x` is uniformly apart
+from zero by the rational bound `-b`. -/
+def oneOverX_denominator_apart_on_neg_interval (a b : Rat) (hb : b < 0) :
+    DenominatorApartOnInterval oneOverX a b where
+  bound := ⟨-b, by grind⟩
+  defined_on := by
+    intro x hx
+    rcases hx with ⟨_hax, hxb⟩
+    have hxneg : x < 0 := by grind
+    exact oneOverX_defined_of_neg hxneg
+  apart_on := by
+    intro x hx
+    rw [oneOverX_denominator_eq]
+    unfold qabs
+    rcases hx with ⟨_hax, hxb⟩
+    have hxneg : x < 0 := by grind
+    simp
+    grind
+
 /-- The rational function `1/x`, certified on a positive rational interval. -/
 def oneOverXOnPositiveInterval (a b : Rat) (ha : 0 < a) : FunctionOnInterval :=
   oneOverX.onRegularInterval a b
@@ -217,6 +302,26 @@ theorem oneOverXOnPositiveInterval_compute_eq
   have hxpos : 0 < x := by grind
   change (RealRaw.ofRat
       (oneOverX.evalOnDomain x (oneOverX_defined_of_pos hxpos))).compute n =
+    { lo := 1 / x, hi := 1 / x }
+  rw [oneOverX_evalOnDomain_eq]
+  rfl
+
+/-- The rational function `1/x`, certified on a negative rational interval. -/
+def oneOverXOnNegativeInterval (a b : Rat) (hb : b < 0) : FunctionOnInterval :=
+  oneOverX.onRegularInterval a b
+    (oneOverX_denominator_apart_on_neg_interval a b hb)
+
+theorem oneOverXOnNegativeInterval_compute_eq
+    (a b : Rat) (hb : b < 0)
+    (x : Rat) (hx : inDomainInterval a b x) (n : Nat) :
+    (oneOverXOnNegativeInterval a b hb).compute x hx n =
+      { lo := 1 / x, hi := 1 / x } := by
+  unfold oneOverXOnNegativeInterval onRegularInterval onInterval FunctionOnInterval.compute
+  unfold asPartialRealFunRaw
+  rcases hx with ⟨hax, hxb⟩
+  have hxneg : x < 0 := by grind
+  change (RealRaw.ofRat
+      (oneOverX.evalOnDomain x (oneOverX_defined_of_neg hxneg))).compute n =
     { lo := 1 / x, hi := 1 / x }
   rw [oneOverX_evalOnDomain_eq]
   rfl

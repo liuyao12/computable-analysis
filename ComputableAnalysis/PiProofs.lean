@@ -8154,6 +8154,24 @@ theorem pointSegmentNormSq_sqrtDomain (p q : PiCirclePoint) :
   have h := pointSegmentNormSq_nonneg p q
   grind
 
+/-! The Euclidean segment-length algorithm is the certified square root of
+the rational squared distance.  Its geometric interpretation is represented
+by the coordinates; the raw validity and square-root specification are the
+computable interface used by later polygon and Ptolemy certificates. -/
+
+def pointSegmentLengthRaw (p q : PiCirclePoint) : RealRaw :=
+  sqrtRaw (pointSegmentNormSq p q) (pointSegmentNormSq_sqrtDomain p q)
+
+theorem pointSegmentLengthRaw_valid (p q : PiCirclePoint) :
+    (pointSegmentLengthRaw p q).Valid := by
+  unfold pointSegmentLengthRaw
+  exact sqrtRaw_valid _ _
+
+theorem pointSegmentLengthRaw_spec (p q : PiCirclePoint) :
+    SqrtRawSpec (pointSegmentNormSq p q)
+      (pointSegmentNormSq_sqrtDomain p q) := by
+  exact sqrtRaw_spec _ _
+
 def pointSegmentLengthInterval
     (p q : PiCirclePoint) (n : Nat) : QInterval :=
   sqrtPartialRaw.compute (pointSegmentNormSq p q)
@@ -10431,10 +10449,16 @@ private theorem arctan_neg_equiv_neg_arctan_of_neg
   have hqabsx : qabs x = -x := qabs_eq_neg_of_nonpos hxnonpos
   have hqabsnegx : qabs (-x) = -x := qabs_eq_self_of_nonneg hneg0
   have hstage : (arctan x).compute n = (-(arctan (-x))).compute n := by
+    rw [ArctanValidity.arctan_compute_neg x hnot n]
     change RealRaw.negCompute (ArctanValidity.positiveRaw (qabs x)) n =
       RealRaw.negCompute (arctan (-x)) n
-    rw [ArctanValidity.arctan_compute_nonneg (-x) hneg0]
-    rw [hqabsx, hqabsnegx]
+    have hpositive :
+        (ArctanValidity.positiveRaw (qabs x)).compute n =
+          (arctan (-x)).compute n := by
+      rw [ArctanValidity.arctan_compute_nonneg (-x) hneg0 n]
+      rw [hqabsx, hqabsnegx]
+    unfold RealRaw.negCompute
+    rw [hpositive]
   rw [← hstage]
   exact (RealRaw.compareAt_overlap_iff (arctan x) (arctan x) n n).1
     (RealRaw.equiv_refl (arctan x) hvalid n)

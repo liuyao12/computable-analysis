@@ -13,9 +13,1333 @@ namespace ComputableAnalysis
 
 abbrev QPos := {q : Rat // 0 < q}
 
+/-- A finite numerator/positive-denominator code for a rational number. -/
+structure RationalCode where
+  num : Int
+  den : Nat
+  den_nz : den ≠ 0
+
+namespace RationalCode
+
+def encode (q : Rat) : RationalCode where
+  num := q.num
+  den := q.den
+  den_nz := q.den_nz
+
+def decode (c : RationalCode) : Rat :=
+  Rat.normalize c.num c.den c.den_nz
+
+theorem den_pos (c : RationalCode) : 0 < c.den :=
+  Nat.pos_of_ne_zero c.den_nz
+
+theorem decode_encode (q : Rat) : decode (encode q) = q := by
+  simpa [decode, encode] using Rat.normalize_self q
+
+theorem encode_injective {q r : Rat} :
+    encode q = encode r -> q = r := by
+  intro h
+  have hdecode := congrArg decode h
+  simpa [decode_encode] using hdecode
+
+theorem encode_eq_iff {q r : Rat} :
+    encode q = encode r ↔ q = r := by
+  constructor
+  · exact encode_injective
+  · intro h
+    simpa [h]
+
+end RationalCode
+
+theorem rationalCode_decode_surjective (q : Rat) :
+    Exists fun c : RationalCode => RationalCode.decode c = q := by
+  exact ⟨RationalCode.encode q, RationalCode.decode_encode q⟩
+
+/-! A finite diagonal pairing used by the rational-name enumeration. -/
+
+def triangular : Nat -> Nat
+  | 0 => 0
+  | n + 1 => triangular n + (n + 1)
+
+theorem triangular_succ (n : Nat) :
+    triangular (n + 1) = triangular n + (n + 1) := by
+  rfl
+
+theorem triangular_monotone {a b : Nat} (h : a <= b) :
+    triangular a <= triangular b := by
+  induction b generalizing a with
+  | zero =>
+      have ha : a = 0 := by omega
+      subst a
+      exact Nat.le_refl _
+  | succ b ih =>
+      by_cases hab : a <= b
+      · rw [triangular_succ]
+        exact Nat.le_trans (ih hab) (Nat.le_add_right _ _)
+      · have ha : a = b + 1 := by omega
+        subst a
+        rw [triangular_succ]
+        omega
+
+def diagonalPair (a b : Nat) : Nat :=
+  triangular (a + b) + a
+
+def diagonalUnpair (n k : Nat) : Nat × Nat :=
+  if h : n < k + 1 then (n, k - n)
+  else diagonalUnpair (n - (k + 1)) (k + 1)
+termination_by n
+decreasing_by
+  exact Nat.sub_lt (by omega) (by omega)
+
+def diagonalUnpair_spec (n k : Nat) :
+    diagonalPair (diagonalUnpair n k).1 (diagonalUnpair n k).2 =
+      triangular k + n := by
+  rw [diagonalUnpair]
+  split
+  · simp [diagonalPair]
+    have hle : n ≤ k := by omega
+    rw [Nat.add_sub_of_le hle]
+  · rw [diagonalUnpair_spec]
+    rw [triangular_succ]
+    have hle : k + 1 ≤ n := by omega
+    have hsub := Nat.sub_add_cancel hle
+    omega
+termination_by n
+decreasing_by
+  exact Nat.sub_lt (by omega) (by omega)
+
+theorem diagonalUnpair_diagonalPair (a b : Nat) :
+    diagonalUnpair (diagonalPair a b) 0 = (a, b) := by
+  have aux : ∀ d : Nat, ∀ s a k : Nat,
+      s - k = d -> a <= s -> k <= s ->
+        diagonalUnpair (triangular s + a - triangular k) k = (a, s - a) := by
+    intro d
+    induction d with
+    | zero =>
+        intro s a k hdiff ha hk
+        have hks : k = s := by omega
+        subst s
+        have hrem : triangular k + a - triangular k = a := by omega
+        rw [hrem, diagonalUnpair]
+        split
+        · simp
+        · omega
+    | succ d ih =>
+        intro s a k hdiff ha hk
+        by_cases hks : k = s
+        · subst s
+          have hrem : triangular k + a - triangular k = a := by omega
+          rw [hrem, diagonalUnpair]
+          split
+          · simp
+          · omega
+        · have hkslt : k < s := by omega
+          have htri : triangular (k + 1) <= triangular s :=
+            triangular_monotone (by omega)
+          have hrem : k + 1 <= triangular s + a - triangular k := by
+            rw [triangular_succ] at htri
+            omega
+          rw [diagonalUnpair]
+          split
+          · omega
+          · have hdecr : s - (k + 1) = d := by omega
+            have hnext :
+                diagonalUnpair
+                    (triangular s + a - triangular (k + 1)) (k + 1) =
+                  (a, s - a) := by
+              apply ih s a (k + 1) hdecr
+              · exact ha
+              · omega
+            have hrem_eq :
+                (triangular s + a - triangular k) - (k + 1) =
+                  triangular s + a - triangular (k + 1) := by
+              rw [triangular_succ]
+              omega
+            rw [hrem_eq]
+            exact hnext
+  have haux := aux (a + b) (a + b) a 0 (by omega) (by omega) (by omega)
+  simpa [diagonalPair, triangular] using haux
+
+theorem diagonalPair_injective {a b c d : Nat}
+    (h : diagonalPair a b = diagonalPair c d) :
+    (a, b) = (c, d) := by
+  have hunpair := congrArg (fun n => diagonalUnpair n 0) h
+  simpa [diagonalUnpair_diagonalPair] using hunpair
+
+theorem diagonalPair_surjective (n : Nat) :
+    Exists fun p : Nat × Nat => diagonalPair p.1 p.2 = n := by
+  let p := diagonalUnpair n 0
+  refine ⟨p, ?_⟩
+  have h := diagonalUnpair_spec n 0
+  simpa [p, triangular] using h
+
+def integerCode (n : Nat) : Int :=
+  if n % 2 = 0 then Int.ofNat (n / 2) else Int.negSucc (n / 2)
+
+theorem integerCode_injective {m n : Nat} :
+    integerCode m = integerCode n -> m = n := by
+  intro h
+  unfold integerCode at h
+  by_cases hm : m % 2 = 0 <;> by_cases hn : n % 2 = 0
+  · simp [hm, hn] at h
+    omega
+  · simp [hm, hn] at h
+    cases h
+  · simp [hm, hn] at h
+    cases h
+  · simp [hm, hn] at h
+    omega
+
+theorem integerCode_surjective (z : Int) :
+    Exists fun n : Nat => integerCode n = z := by
+  cases z with
+  | ofNat m =>
+      refine ⟨2 * m, ?_⟩
+      simp [integerCode]
+  | negSucc m =>
+      refine ⟨2 * m + 1, ?_⟩
+      simp [integerCode]
+      omega
+
+def integerIndex : Int -> Nat
+  | Int.ofNat m => 2 * m
+  | Int.negSucc m => 2 * m + 1
+
+theorem integerCode_integerIndex (z : Int) :
+    integerCode (integerIndex z) = z := by
+  cases z with
+  | ofNat m => simp [integerCode, integerIndex]
+  | negSucc m =>
+      simp [integerCode, integerIndex]
+      omega
+
+def rationalNatCode (n : Nat) : RationalCode :=
+  let p := diagonalUnpair n 0
+  { num := integerCode p.1
+    den := p.2 + 1
+    den_nz := by omega }
+
+theorem rationalNatCode_injective {m n : Nat} :
+    rationalNatCode m = rationalNatCode n -> m = n := by
+  intro hcode
+  have hnum := congrArg RationalCode.num hcode
+  have hden := congrArg RationalCode.den hcode
+  have hnum' :
+      integerCode (diagonalUnpair m 0).1 =
+        integerCode (diagonalUnpair n 0).1 := by
+    simpa [rationalNatCode] using hnum
+  have hden' :
+      (diagonalUnpair m 0).2 + 1 = (diagonalUnpair n 0).2 + 1 := by
+    simpa [rationalNatCode] using hden
+  have hp1 : (diagonalUnpair m 0).1 = (diagonalUnpair n 0).1 :=
+    integerCode_injective hnum'
+  have hp2 : (diagonalUnpair m 0).2 = (diagonalUnpair n 0).2 := by
+    omega
+  have hpair : diagonalUnpair m 0 = diagonalUnpair n 0 :=
+    Prod.ext hp1 hp2
+  have hdiag : diagonalPair (diagonalUnpair m 0).1 (diagonalUnpair m 0).2 =
+      diagonalPair (diagonalUnpair n 0).1 (diagonalUnpair n 0).2 := by
+    exact congrArg (fun p : Nat × Nat => diagonalPair p.1 p.2) hpair
+  have hm : diagonalPair (diagonalUnpair m 0).1 (diagonalUnpair m 0).2 = m := by
+    have hspec := diagonalUnpair_spec m 0
+    simpa [triangular] using hspec
+  have hn : diagonalPair (diagonalUnpair n 0).1 (diagonalUnpair n 0).2 = n := by
+    have hspec := diagonalUnpair_spec n 0
+    simpa [triangular] using hspec
+  omega
+
+theorem rationalNatCode_encode_surjective (q : Rat) :
+    Exists fun n : Nat => rationalNatCode n = RationalCode.encode q := by
+  let c := RationalCode.encode q
+  obtain ⟨u, hu⟩ := integerCode_surjective c.num
+  let n := diagonalPair u (c.den - 1)
+  refine ⟨n, ?_⟩
+  have hpair := diagonalUnpair_diagonalPair u (c.den - 1)
+  have hden : c.den - 1 + 1 = c.den := by
+    exact Nat.sub_add_cancel (Nat.one_le_iff_ne_zero.mpr c.den_nz)
+  have hcode : rationalNatCode n = c := by
+    simp [rationalNatCode, n, hpair, hden, hu, c]
+  exact hcode
+
+theorem rationalNatCode_existsUnique_canonical_index (q : Rat) :
+    ∃ n : Nat, rationalNatCode n = RationalCode.encode q ∧
+      ∀ m : Nat, rationalNatCode m = RationalCode.encode q -> m = n := by
+  obtain ⟨n, hn⟩ := rationalNatCode_encode_surjective q
+  refine ⟨n, hn, ?_⟩
+  intro m hm
+  exact rationalNatCode_injective (hm.trans hn.symm)
+
+theorem rationalNatCode_existsUnique_canonical_decode_index (q : Rat) :
+    ∃ n : Nat,
+      (rationalNatCode n = RationalCode.encode q ∧
+        RationalCode.decode (rationalNatCode n) = q) ∧
+      ∀ m : Nat,
+        (rationalNatCode m = RationalCode.encode q ∧
+          RationalCode.decode (rationalNatCode m) = q) -> m = n := by
+  obtain ⟨n, hn, huniq⟩ := rationalNatCode_existsUnique_canonical_index q
+  refine ⟨n, ⟨hn, ?_⟩, ?_⟩
+  · rw [hn]
+    exact RationalCode.decode_encode q
+  · intro m hm
+    exact huniq m hm.1
+
+theorem rationalNatCode_decode_surjective (q : Rat) :
+    Exists fun n : Nat => RationalCode.decode (rationalNatCode n) = q := by
+  obtain ⟨n, hcode⟩ := rationalNatCode_encode_surjective q
+  refine ⟨n, ?_⟩
+  rw [hcode]
+  exact RationalCode.decode_encode q
+
+def rationalNatIndex (q : Rat) : Nat :=
+  let c := RationalCode.encode q
+  diagonalPair (integerIndex c.num) (c.den - 1)
+
+theorem rationalNatCode_index (q : Rat) :
+    rationalNatCode (rationalNatIndex q) = RationalCode.encode q := by
+  let c := RationalCode.encode q
+  have hpair := diagonalUnpair_diagonalPair (integerIndex c.num) (c.den - 1)
+  have hden : c.den - 1 + 1 = c.den := by
+    exact Nat.sub_add_cancel (Nat.one_le_iff_ne_zero.mpr c.den_nz)
+  have hnum : integerCode (integerIndex c.num) = c.num :=
+    integerCode_integerIndex c.num
+  simp [rationalNatIndex, rationalNatCode, c, hpair, hden, hnum]
+
+theorem rationalNatIndex_injective {p q : Rat}
+    (h : rationalNatIndex p = rationalNatIndex q) : p = q := by
+  have hcode := congrArg rationalNatCode h
+  rw [rationalNatCode_index p, rationalNatCode_index q] at hcode
+  exact RationalCode.encode_injective hcode
+
 theorem one_div_nat_pos {n : Nat} (hn : 0 < n) : 0 < 1 / (n : Rat) := by
   rw [Rat.div_def, Rat.one_mul]
   exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)
+
+/-- The induction interface used by finite certificate constructions. -/
+theorem nat_induction_schema {P : Nat -> Prop} (hzero : P 0)
+    (hsucc : (n : Nat) -> P n -> P (n + 1)) : (n : Nat) -> P n := by
+  intro n
+  induction n with
+  | zero => exact hzero
+  | succ n ih =>
+      simpa [Nat.succ_eq_add_one] using hsucc n ih
+
+/-! A small finite-counting layer.  These recurrences are the certificate
+cores of the subset-count and binomial-coefficient benchmark entries; no
+finite-set or cardinality library is imported here. -/
+
+namespace FiniteCounting
+
+def subsetCount : Nat -> Nat
+  | 0 => 1
+  | n + 1 => 2 * subsetCount n
+
+theorem subsetCount_succ (n : Nat) :
+    subsetCount (n + 1) = 2 * subsetCount n := by
+  rfl
+
+theorem subsetCount_eq_pow (n : Nat) : subsetCount n = 2 ^ n := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [subsetCount_succ, ih, Nat.pow_succ]
+      omega
+
+def combination : Nat -> Nat -> Nat
+  | _, 0 => 1
+  | 0, _ + 1 => 0
+  | n + 1, k + 1 => combination n k + combination n (k + 1)
+
+theorem combination_zero_right (n : Nat) : combination n 0 = 1 := by
+  cases n <;> rfl
+
+theorem combination_zero_left (k : Nat) :
+    combination 0 (k + 1) = 0 := by
+  rfl
+
+theorem combination_pascal (n k : Nat) :
+    combination (n + 1) (k + 1) = combination n k + combination n (k + 1) := by
+  rfl
+
+theorem combination_rat_pascal (n k : Nat) :
+    (combination (n + 1) (k + 1) : Rat) =
+      (combination n k : Rat) + (combination n (k + 1) : Rat) := by
+  exact_mod_cast combination_pascal n k
+
+theorem combination_outside (n k : Nat) (h : n < k) :
+    combination n k = 0 := by
+  induction n generalizing k with
+  | zero =>
+      cases k with
+      | zero => omega
+      | succ k => rfl
+  | succ n ih =>
+      cases k with
+      | zero => omega
+      | succ k =>
+          rw [combination_pascal]
+          rw [ih k (by omega), ih (k + 1) (by omega)]
+
+theorem combination_rat_outside (n k : Nat) (h : n < k) :
+    (combination n k : Rat) = 0 := by
+  rw [combination_outside n k h]
+  rfl
+
+theorem combination_self (n : Nat) : combination n n = 1 := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [combination_pascal, ih, combination_outside n (n + 1) (by omega)]
+
+theorem combination_rat_self (n : Nat) :
+    (combination n n : Rat) = 1 := by
+  rw [combination_self]
+  rfl
+
+theorem combination_one (n : Nat) : combination n 1 = n := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [combination_pascal, combination_zero_right, ih]
+      omega
+
+theorem combination_two_rat (n : Nat) :
+    (combination n 2 : Rat) = (n : Rat) * ((n : Rat) - 1) / 2 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hpascal : combination (n + 1) 2 =
+          combination n 1 + combination n 2 := by
+        simpa using (combination_pascal n 1)
+      rw [hpascal]
+      simp only [Rat.natCast_add]
+      rw [combination_one, ih]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem combination_three_rat (n : Nat) :
+    (combination n 3 : Rat) =
+      (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) / 6 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hpascal : combination (n + 1) 3 =
+          combination n 2 + combination n 3 := by
+        simpa using (combination_pascal n 2)
+      rw [hpascal]
+      simp only [Rat.natCast_add]
+      rw [combination_two_rat, ih]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem combination_four_rat (n : Nat) :
+    (combination n 4 : Rat) =
+      (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) *
+        ((n : Rat) - 3) / 24 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hpascal : combination (n + 1) 4 =
+          combination n 3 + combination n 4 := by
+        simpa using (combination_pascal n 3)
+      rw [hpascal]
+      simp only [Rat.natCast_add]
+      rw [combination_three_rat, ih]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem combination_five_rat (n : Nat) :
+    (combination n 5 : Rat) =
+      (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) *
+        ((n : Rat) - 3) * ((n : Rat) - 4) / 120 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hpascal : combination (n + 1) 5 =
+          combination n 4 + combination n 5 := by
+        simpa using (combination_pascal n 4)
+      rw [hpascal]
+      simp only [Rat.natCast_add]
+      rw [combination_four_rat, ih]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem combination_six_rat (n : Nat) :
+    (combination n 6 : Rat) =
+      (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) *
+        ((n : Rat) - 3) * ((n : Rat) - 4) *
+        ((n : Rat) - 5) / 720 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hpascal : combination (n + 1) 6 =
+          combination n 5 + combination n 6 := by
+        simpa using (combination_pascal n 5)
+      rw [hpascal]
+      simp only [Rat.natCast_add]
+      rw [combination_five_rat, ih]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem combination_seven_rat (n : Nat) :
+    (combination n 7 : Rat) =
+      (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) *
+        ((n : Rat) - 3) * ((n : Rat) - 4) * ((n : Rat) - 5) *
+        ((n : Rat) - 6) / 5040 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hpascal : combination (n + 1) 7 =
+          combination n 6 + combination n 7 := by
+        simpa using (combination_pascal n 6)
+      rw [hpascal]
+      simp only [Rat.natCast_add]
+      rw [combination_six_rat, ih]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem combination_eight_rat (n : Nat) :
+    (combination n 8 : Rat) =
+      (n : Rat) * ((n : Rat) - 1) * ((n : Rat) - 2) *
+        ((n : Rat) - 3) * ((n : Rat) - 4) * ((n : Rat) - 5) *
+        ((n : Rat) - 6) * ((n : Rat) - 7) / 40320 := by
+  induction n with
+  | zero => native_decide
+  | succ n ih =>
+      have hpascal : combination (n + 1) 8 =
+          combination n 7 + combination n 8 := by
+        simpa using (combination_pascal n 7)
+      rw [hpascal]
+      simp only [Rat.natCast_add]
+      rw [combination_seven_rat, ih]
+      grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+end FiniteCounting
+
+/-! A finite multiplicative certificate for later arithmetic factorization.
+The factors are only required to be nontrivial here; primality, existence, and
+uniqueness are deliberately separate future layers for benchmark item 80. -/
+
+structure MultiplicativeCertificate (n : Nat) where
+  factors : List Nat
+  factors_ge_two : forall p, p ∈ factors -> 2 <= p
+  product_eq : factors.foldl (fun acc p => acc * p) 1 = n
+
+def factorizationCertificate60 : MultiplicativeCertificate 60 where
+  factors := [2, 2, 3, 5]
+  factors_ge_two := by
+    intro p hp
+    simp at hp
+    rcases hp with rfl | rfl | rfl | rfl <;> omega
+  product_eq := by native_decide
+
+def BasicPrime (p : Nat) : Prop :=
+  2 <= p /\ forall d, d ∣ p -> d = 1 \/ d = p
+
+theorem basicPrime_of_no_proper_divisor {p : Nat} (hp : 2 <= p)
+    (hproper : forall d, 2 <= d -> d < p -> ¬ d ∣ p) : BasicPrime p := by
+  constructor
+  · exact hp
+  · intro d hd
+    by_cases hd_one : d = 1
+    · exact Or.inl hd_one
+    by_cases hd_p : d = p
+    · exact Or.inr hd_p
+    exfalso
+    apply hproper d
+    · have hp_pos : 0 < p := by omega
+      have hd_pos : 0 < d := Nat.pos_of_dvd_of_pos hd hp_pos
+      omega
+    · have hp_pos : 0 < p := by omega
+      have hd_le : d <= p := Nat.le_of_dvd hp_pos hd
+      omega
+    · exact hd
+
+theorem basicPrime_iff_no_proper_divisor {p : Nat} :
+    BasicPrime p ↔
+      2 <= p ∧ forall d, 2 <= d -> d < p -> ¬ d ∣ p := by
+  constructor
+  · intro hp
+    refine ⟨hp.1, ?_⟩
+    intro d hd_two hd_lt hdvd
+    rcases hp.2 d hdvd with rfl | rfl
+    · omega
+    · omega
+  · rintro ⟨hp, hproper⟩
+    exact basicPrime_of_no_proper_divisor hp hproper
+
+def properDivisorSearch (p fuel : Nat) : Option Nat :=
+  match fuel with
+  | 0 => none
+  | fuel + 1 =>
+      let d := fuel + 1
+      if 2 <= d ∧ d < p ∧ d ∣ p then some d
+      else properDivisorSearch p fuel
+termination_by fuel
+decreasing_by
+  omega
+
+theorem properDivisorSearch_some_is_proper {p fuel d : Nat}
+    (h : properDivisorSearch p fuel = some d) :
+    2 <= d ∧ d < p ∧ d ∣ p := by
+  induction fuel generalizing d with
+  | zero => simp [properDivisorSearch] at h
+  | succ fuel ih =>
+      rw [properDivisorSearch] at h
+      split at h
+      · injection h with hd
+        subst d
+        assumption
+      · exact ih h
+
+theorem properDivisorSearch_some_of_proper {p fuel d : Nat}
+    (hd_two : 2 <= d) (hd_lt : d < p) (hdvd : d ∣ p)
+    (hdfuel : d <= fuel) : ∃ e, properDivisorSearch p fuel = some e := by
+  induction fuel generalizing d with
+  | zero => omega
+  | succ fuel ih =>
+      rw [properDivisorSearch]
+      by_cases hcond : 1 <= fuel ∧ fuel + 1 < p ∧ fuel + 1 ∣ p
+      · simp [hcond]
+      · simp [hcond]
+        by_cases hdfuel' : d <= fuel
+        · exact ih hd_two hd_lt hdvd hdfuel'
+        · have hd_eq : d = fuel + 1 := by
+            omega
+          subst d
+          exact (hcond ⟨by omega, hd_lt, hdvd⟩).elim
+
+theorem properDivisorSearch_none_of_no_proper {p fuel : Nat}
+    (hproper : forall d, 2 <= d -> d < p -> ¬ d ∣ p) :
+    properDivisorSearch p fuel = none := by
+  induction fuel with
+  | zero => simp [properDivisorSearch]
+  | succ fuel ih =>
+      rw [properDivisorSearch]
+      split
+      · rename_i hcond
+        exact (hproper _ hcond.1 hcond.2.1 hcond.2.2).elim
+      · exact ih
+
+theorem properDivisorSearch_none_iff_no_proper {p : Nat} :
+    properDivisorSearch p p = none ↔
+      forall d, 2 <= d -> d < p -> ¬ d ∣ p := by
+  constructor
+  · intro h d hd_two hd_lt hdvd
+    obtain ⟨e, he⟩ :=
+      properDivisorSearch_some_of_proper (fuel := p)
+        hd_two hd_lt hdvd (by omega)
+    rw [h] at he
+    cases he
+  · intro hproper
+    exact properDivisorSearch_none_of_no_proper hproper
+
+theorem basicPrime_of_properDivisorSearch_none {p : Nat} (hp : 2 <= p)
+    (h : properDivisorSearch p p = none) : BasicPrime p :=
+  basicPrime_of_no_proper_divisor hp
+    ((properDivisorSearch_none_iff_no_proper).1 h)
+
+theorem basicPrime_two : BasicPrime 2 := by
+  constructor
+  · omega
+  · intro d hd
+    have hdpos : 0 < d := Nat.pos_of_dvd_of_pos hd (by omega)
+    have hdle : d <= 2 := Nat.le_of_dvd (by omega) hd
+    have hcases : d = 1 \/ d = 2 := by omega
+    exact hcases
+
+theorem basicPrime_three : BasicPrime 3 := by
+  constructor
+  · omega
+  · intro d hd
+    have hdpos : 0 < d := Nat.pos_of_dvd_of_pos hd (by omega)
+    have hdle : d <= 3 := Nat.le_of_dvd (by omega) hd
+    have hcases : d = 1 \/ d = 2 \/ d = 3 := by omega
+    rcases hcases with rfl | rfl | rfl
+    · exact Or.inl rfl
+    · simp at hd
+    · exact Or.inr rfl
+
+theorem basicPrime_five : BasicPrime 5 := by
+  constructor
+  · omega
+  · intro d hd
+    have hdpos : 0 < d := Nat.pos_of_dvd_of_pos hd (by omega)
+    have hdle : d <= 5 := Nat.le_of_dvd (by omega) hd
+    have hcases : d = 1 \/ d = 2 \/ d = 3 \/ d = 4 \/ d = 5 := by omega
+    rcases hcases with rfl | rfl | rfl | rfl | rfl
+    · exact Or.inl rfl
+    · simp at hd
+    · simp at hd
+    · simp at hd
+    · exact Or.inr rfl
+
+theorem basicPrime_eq_of_dvd {p q : Nat}
+    (hp : BasicPrime p) (hq : BasicPrime q) (h : p ∣ q) : p = q := by
+  rcases hq.2 p h with hp_one | hp_eq
+  · have hp_two : 2 <= p := hp.1
+    omega
+  · exact hp_eq
+
+theorem basicPrime_coprime_of_not_dvd {p a : Nat} (hp : BasicPrime p)
+    (hpa : ¬ p ∣ a) : Nat.Coprime p a := by
+  show Nat.gcd p a = 1
+  have hgp : Nat.gcd p a ∣ p := Nat.gcd_dvd_left p a
+  have hga : Nat.gcd p a ∣ a := Nat.gcd_dvd_right p a
+  rcases hp.2 _ hgp with hg | hg
+  · exact hg
+  · exfalso
+    apply hpa
+    rw [← hg]
+    exact hga
+
+theorem basicPrime_dvd_of_dvd_mul {p a b : Nat} (hp : BasicPrime p)
+    (hab : p ∣ a * b) : p ∣ a ∨ p ∣ b := by
+  by_cases hpa : p ∣ a
+  · exact Or.inl hpa
+  · exact Or.inr ((basicPrime_coprime_of_not_dvd hp hpa).dvd_of_dvd_mul_left hab)
+
+theorem basicPrime_dvd_of_dvd_pow {p a n : Nat} (hp : BasicPrime p)
+    (h : p ∣ a ^ n) : p ∣ a := by
+  induction n with
+  | zero =>
+      have hp_one : p = 1 := Nat.dvd_one.mp (by simpa using h)
+      have hp_two : 2 <= p := hp.1
+      omega
+  | succ n ih =>
+      have hmul : p ∣ a ^ n * a := by
+        simpa [Nat.pow_succ] using h
+      rcases basicPrime_dvd_of_dvd_mul hp hmul with hpow | hpa
+      · exact ih hpow
+      · exact hpa
+
+def natProduct : List Nat -> Nat
+  | [] => 1
+  | a :: as => a * natProduct as
+
+theorem natProduct_perm {xs ys : List Nat} (h : xs.Perm ys) :
+    natProduct xs = natProduct ys := by
+  induction h with
+  | nil => rfl
+  | cons a h ih => simp [natProduct, ih]
+  | swap a b l =>
+      simp [natProduct, Nat.mul_left_comm]
+  | trans h₁ h₂ ih₁ ih₂ => exact ih₁.trans ih₂
+
+theorem list_mem_dvd_natProduct {a : Nat} {xs : List Nat}
+    (ha : a ∈ xs) : a ∣ natProduct xs := by
+  induction xs with
+  | nil => simp at ha
+  | cons b bs ih =>
+      simp only [List.mem_cons] at ha
+      rcases ha with rfl | ha
+      · exact ⟨natProduct bs, by simp [natProduct]⟩
+      · rcases ih ha with ⟨k, hk⟩
+        refine ⟨b * k, ?_⟩
+        simp [natProduct, hk, Nat.mul_left_comm]
+
+theorem foldl_mul_one_eq_natProduct (xs : List Nat) :
+    xs.foldl (fun acc a => acc * a) 1 = natProduct xs := by
+  have hfold : ∀ (ys : List Nat) (acc : Nat),
+      ys.foldl (fun acc a => acc * a) acc =
+        acc * ys.foldl (fun acc a => acc * a) 1 := by
+    intro ys
+    induction ys with
+    | nil => intro acc; simp
+    | cons b bs ih =>
+        intro acc
+        simp only [List.foldl_cons]
+        rw [ih (acc * b)]
+        simp only [Nat.one_mul]
+        rw [ih b]
+        exact Nat.mul_assoc _ _ _
+  induction xs with
+  | nil => rfl
+  | cons a as ih =>
+      simp only [List.foldl_cons]
+      calc
+        as.foldl (fun acc b => acc * b) (1 * a) =
+            as.foldl (fun acc b => acc * b) a := by simp
+        _ = a * as.foldl (fun acc b => acc * b) 1 := hfold as a
+        _ = a * natProduct as := by rw [ih]
+        _ = natProduct (a :: as) := by rfl
+
+theorem foldl_mul_acc_eq_acc_mul_foldl_one (xs : List Nat) (acc : Nat) :
+    xs.foldl (fun acc a => acc * a) acc =
+      acc * xs.foldl (fun acc a => acc * a) 1 := by
+  induction xs generalizing acc with
+  | nil => simp
+  | cons a as ih =>
+      simp only [List.foldl_cons]
+      rw [ih (acc * a)]
+      simp only [Nat.one_mul]
+      rw [ih a]
+      exact Nat.mul_assoc _ _ _
+
+def MultiplicativeCertificate.append {m n : Nat}
+    (c₁ : MultiplicativeCertificate m) (c₂ : MultiplicativeCertificate n) :
+    MultiplicativeCertificate (m * n) where
+  factors := c₁.factors ++ c₂.factors
+  factors_ge_two := by
+    intro p hp
+    simp only [List.mem_append] at hp
+    rcases hp with hp | hp
+    · exact c₁.factors_ge_two p hp
+    · exact c₂.factors_ge_two p hp
+  product_eq := by
+    rw [List.foldl_append, c₁.product_eq,
+      foldl_mul_acc_eq_acc_mul_foldl_one, c₂.product_eq]
+
+theorem MultiplicativeCertificate.factors_nonempty {n : Nat}
+    (c : MultiplicativeCertificate n) (hn : 1 < n) : c.factors ≠ [] := by
+  intro hnil
+  have hprod := c.product_eq
+  rw [hnil] at hprod
+  simp at hprod
+  omega
+
+theorem MultiplicativeCertificate.factor_dvd {n : Nat}
+    (c : MultiplicativeCertificate n) {p : Nat} (hp : p ∈ c.factors) :
+    p ∣ n := by
+  have hpProd : p ∣ natProduct c.factors := list_mem_dvd_natProduct hp
+  have hpFold : p ∣ c.factors.foldl (fun acc q => acc * q) 1 := by
+    rw [foldl_mul_one_eq_natProduct]
+    exact hpProd
+  simpa [c.product_eq] using hpFold
+
+theorem basicPrime_dvd_of_dvd_natProduct {p : Nat} (hp : BasicPrime p)
+    {xs : List Nat} (h : p ∣ natProduct xs) : ∃ a, a ∈ xs ∧ p ∣ a := by
+  induction xs with
+  | nil =>
+      have hp_one : p = 1 := Nat.dvd_one.mp (by simpa [natProduct] using h)
+      have hp_two : 2 <= p := hp.1
+      omega
+  | cons a as ih =>
+      have hmul : p ∣ a * natProduct as := by simpa [natProduct] using h
+      rcases basicPrime_dvd_of_dvd_mul hp hmul with ha | has
+      · exact ⟨a, by simp, ha⟩
+      · rcases ih has with ⟨b, hb, hpb⟩
+        exact ⟨b, by simp [hb], hpb⟩
+
+theorem natProduct_pos_of_pos {xs : List Nat}
+    (hpos : forall a, a ∈ xs -> 0 < a) : 0 < natProduct xs := by
+  induction xs with
+  | nil => simp [natProduct]
+  | cons a as ih =>
+      simp only [natProduct]
+      apply Nat.mul_pos
+      · exact hpos a (by simp)
+      · apply ih
+        intro b hb
+        exact hpos b (by simp [hb])
+
+structure PrimeFactorCertificate (n : Nat) where
+  factors : List Nat
+  factors_prime : forall p, p ∈ factors -> BasicPrime p
+  product_eq : factors.foldl (fun acc p => acc * p) 1 = n
+
+def PrimeFactorCertificate.append {m n : Nat}
+    (c₁ : PrimeFactorCertificate m) (c₂ : PrimeFactorCertificate n) :
+    PrimeFactorCertificate (m * n) where
+  factors := c₁.factors ++ c₂.factors
+  factors_prime := by
+    intro p hp
+    simp only [List.mem_append] at hp
+    rcases hp with hp | hp
+    · exact c₁.factors_prime p hp
+    · exact c₂.factors_prime p hp
+  product_eq := by
+    rw [List.foldl_append, c₁.product_eq,
+      foldl_mul_acc_eq_acc_mul_foldl_one, c₂.product_eq]
+
+def primeFactorCertificate_exists (n : Nat) (hn : 1 < n) :
+    Nonempty (PrimeFactorCertificate n) := by
+  by_cases hnone : properDivisorSearch n n = none
+  · have hp : BasicPrime n :=
+      basicPrime_of_properDivisorSearch_none (by omega) hnone
+    refine ⟨{ factors := [n]
+              factors_prime := by
+                intro p hp_mem
+                simp at hp_mem
+                subst p
+                exact hp
+              product_eq := by simp }⟩
+  · cases hs : properDivisorSearch n n with
+    | none => exact (hnone hs).elim
+    | some d =>
+        have hdprop : 2 <= d ∧ d < n ∧ d ∣ n :=
+          properDivisorSearch_some_is_proper hs
+        have hprod : d * (n / d) = n := Nat.mul_div_cancel' hdprop.2.2
+        have hq_pos : 0 < n / d := by
+          by_cases hq_zero : n / d = 0
+          · rw [hq_zero] at hprod
+            simp at hprod
+            omega
+          · exact Nat.pos_of_ne_zero hq_zero
+        have hq_gt : 1 < n / d := by
+          have hq_ge : 1 <= n / d := by omega
+          by_cases hq_le : n / d <= 1
+          · have hq_one : n / d = 1 := by omega
+            rw [hq_one] at hprod
+            omega
+          · omega
+        have hq_lt : n / d < n :=
+          Nat.div_lt_self (by omega) (by omega)
+        rcases primeFactorCertificate_exists d (by omega) with ⟨cd⟩
+        rcases primeFactorCertificate_exists (n / d) hq_gt with ⟨cq⟩
+        have hc : PrimeFactorCertificate (d * (n / d)) :=
+          PrimeFactorCertificate.append cd cq
+        rw [hprod] at hc
+        exact ⟨hc⟩
+termination_by n
+decreasing_by
+  · exact hdprop.2.1
+  · exact hq_lt
+
+theorem PrimeFactorCertificate.factor_dvd {n : Nat}
+    (c : PrimeFactorCertificate n) {p : Nat} (hp : p ∈ c.factors) :
+    p ∣ n := by
+  have hpProd : p ∣ natProduct c.factors := list_mem_dvd_natProduct hp
+  have hpFold : p ∣ c.factors.foldl (fun acc q => acc * q) 1 := by
+    rw [foldl_mul_one_eq_natProduct]
+    exact hpProd
+  simpa [c.product_eq] using hpFold
+
+theorem PrimeFactorCertificate.factor_le {n : Nat}
+    (c : PrimeFactorCertificate n) (hn : 1 < n)
+    {p : Nat} (hp : p ∈ c.factors) : p ≤ n := by
+  exact Nat.le_of_dvd (by omega) (c.factor_dvd hp)
+
+theorem PrimeFactorCertificate.factors_nonempty {n : Nat}
+    (c : PrimeFactorCertificate n) (hn : 1 < n) : c.factors ≠ [] := by
+  intro hnil
+  have hprod := c.product_eq
+  rw [hnil] at hprod
+  simp at hprod
+  omega
+
+theorem PrimeFactorCertificate.exists_prime_dvd {n : Nat}
+    (c : PrimeFactorCertificate n) (hn : 1 < n) :
+    ∃ p, p ∣ n ∧ BasicPrime p := by
+  have hne := c.factors_nonempty hn
+  cases hfac : c.factors with
+  | nil => exact (hne hfac).elim
+  | cons p ps =>
+      have hmem : p ∈ c.factors := by simp [hfac]
+      have hpProd : p ∣ natProduct c.factors := list_mem_dvd_natProduct hmem
+      have hpFold : p ∣ c.factors.foldl (fun acc q => acc * q) 1 := by
+        rw [foldl_mul_one_eq_natProduct]
+        exact hpProd
+      refine ⟨p, ?_, c.factors_prime p hmem⟩
+      simpa [c.product_eq] using hpFold
+
+theorem exists_basicPrime_dvd {n : Nat} (hn : 1 < n) :
+    ∃ p, p ∣ n ∧ BasicPrime p := by
+  rcases primeFactorCertificate_exists n hn with ⟨c⟩
+  exact c.exists_prime_dvd hn
+
+theorem exists_basicPrime_not_mem_of_all_basicPrime (xs : List Nat)
+    (hprime : ∀ p, p ∈ xs -> BasicPrime p) :
+    ∃ p, BasicPrime p ∧ p ∉ xs := by
+  have hprod_pos : 0 < natProduct xs :=
+    natProduct_pos_of_pos (by
+      intro p hp
+      have hp_two : 2 <= p := (hprime p hp).1
+      omega)
+  have htarget : 1 < natProduct xs + 1 := by omega
+  rcases exists_basicPrime_dvd htarget with ⟨p, hp_target, hp⟩
+  refine ⟨p, hp, ?_⟩
+  intro hmem
+  have hp_product : p ∣ natProduct xs := list_mem_dvd_natProduct hmem
+  have hp_one : p ∣ 1 := by
+    apply (Nat.dvd_add_iff_right hp_product).2
+    simpa [Nat.add_comm] using hp_target
+  have hp_eq_one : p = 1 := Nat.dvd_one.mp hp_one
+  have hp_two : 2 <= p := hp.1
+  omega
+
+def shiftedRangeProduct (n : Nat) : Nat :=
+  natProduct ((List.range n).map (fun k => k + 2))
+
+theorem exists_basicPrime_gt (n : Nat) :
+    ∃ p, BasicPrime p ∧ n < p := by
+  let xs := (List.range n).map (fun k => k + 2)
+  have hprod_pos : 0 < natProduct xs :=
+    natProduct_pos_of_pos (by
+      intro p hp
+      simp only [xs, List.mem_map] at hp
+      rcases hp with ⟨k, hk, rfl⟩
+      omega)
+  have htarget : 1 < natProduct xs + 1 := by omega
+  rcases exists_basicPrime_dvd htarget with ⟨p, hp_target, hp⟩
+  refine ⟨p, hp, ?_⟩
+  by_cases hlt : n < p
+  · exact hlt
+  · exfalso
+    have hp_le : p <= n := by omega
+    have hp_two : 2 <= p := hp.1
+    have hk_lt : p - 2 < n := by omega
+    have hk_mem : p - 2 ∈ List.range n := by
+      simpa using hk_lt
+    have hp_mem : p ∈ xs := by
+      apply List.mem_map.mpr
+      exact ⟨p - 2, hk_mem, by omega⟩
+    have hp_product : p ∣ natProduct xs := list_mem_dvd_natProduct hp_mem
+    have hp_one : p ∣ 1 := by
+      apply (Nat.dvd_add_iff_right hp_product).2
+      simpa [Nat.add_comm] using hp_target
+    have hp_eq_one : p = 1 := Nat.dvd_one.mp hp_one
+    omega
+
+theorem PrimeFactorCertificate.exists_factor_dvd {n : Nat}
+    (c : PrimeFactorCertificate n) (hn : 1 < n) :
+    ∃ p, p ∈ c.factors ∧ BasicPrime p ∧ p ∣ n := by
+  have hne := c.factors_nonempty hn
+  cases hfac : c.factors with
+  | nil => exact (hne hfac).elim
+  | cons p ps =>
+      have hmem : p ∈ c.factors := by simp [hfac]
+      exact ⟨p, by simp, c.factors_prime p hmem, c.factor_dvd hmem⟩
+
+theorem basicPrime_dvd_of_dvd_primeFactorization {p n : Nat}
+    (hp : BasicPrime p) (c : PrimeFactorCertificate n) (h : p ∣ n) :
+    ∃ a, a ∈ c.factors ∧ p ∣ a := by
+  apply basicPrime_dvd_of_dvd_natProduct hp
+  rw [← foldl_mul_one_eq_natProduct c.factors]
+  simpa [c.product_eq] using h
+
+theorem basicPrime_eq_factor_of_dvd_primeFactorization {p n : Nat}
+    (hp : BasicPrime p) (c : PrimeFactorCertificate n) (h : p ∣ n) :
+    ∃ a, a ∈ c.factors ∧ p = a := by
+  rcases basicPrime_dvd_of_dvd_primeFactorization hp c h with ⟨a, ha, hpa⟩
+  exact ⟨a, ha, basicPrime_eq_of_dvd hp (c.factors_prime a ha) hpa⟩
+
+theorem basicPrime_dvd_primeFactorization_iff {p n : Nat}
+    (hp : BasicPrime p) (c : PrimeFactorCertificate n) :
+    p ∣ n ↔ ∃ a, a ∈ c.factors ∧ p = a := by
+  constructor
+  · exact basicPrime_eq_factor_of_dvd_primeFactorization hp c
+  · rintro ⟨a, ha, hpa⟩
+    have haProd : a ∣ natProduct c.factors := list_mem_dvd_natProduct ha
+    have haFold : a ∣ c.factors.foldl (fun acc q => acc * q) 1 := by
+      rw [foldl_mul_one_eq_natProduct]
+      exact haProd
+    simpa [c.product_eq, hpa] using haFold
+
+theorem PrimeFactorCertificate.factor_mem_of_factor_mem {n : Nat}
+    (c₁ c₂ : PrimeFactorCertificate n) {p : Nat}
+    (hp : p ∈ c₁.factors) : ∃ q, q ∈ c₂.factors ∧ p = q := by
+  have hpdvd : p ∣ n := c₁.factor_dvd hp
+  exact basicPrime_eq_factor_of_dvd_primeFactorization
+    (c₁.factors_prime p hp) c₂ hpdvd
+
+theorem PrimeFactorCertificate.factor_mem_iff {n : Nat}
+    (c₁ c₂ : PrimeFactorCertificate n) {p : Nat} :
+    p ∈ c₁.factors ↔ p ∈ c₂.factors := by
+  constructor
+  · intro hp
+    rcases c₁.factor_mem_of_factor_mem c₂ hp with ⟨q, hq, hpq⟩
+    simpa [← hpq] using hq
+  · intro hp
+    rcases c₂.factor_mem_of_factor_mem c₁ hp with ⟨q, hq, hpq⟩
+    simpa [← hpq] using hq
+
+theorem natList_perm_cons_of_mem {a : Nat} {xs : List Nat}
+    (ha : a ∈ xs) : ∃ ys, xs.Perm (a :: ys) := by
+  induction xs with
+  | nil => simp at ha
+  | cons b bs ih =>
+      by_cases hab : a = b
+      · subst a
+        exact ⟨bs, List.Perm.refl _⟩
+      · have hbs : a ∈ bs := by
+          simpa [hab] using ha
+        rcases ih hbs with ⟨ys, hperm⟩
+        refine ⟨b :: ys, ?_⟩
+        exact hperm.cons b |>.trans (List.Perm.swap a b ys)
+
+theorem primeFactorList_perm_of_same_product
+    {xs ys : List Nat}
+    (hxs : forall p, p ∈ xs -> BasicPrime p)
+    (hys : forall p, p ∈ ys -> BasicPrime p)
+    (hprod : natProduct xs = natProduct ys) :
+    xs.Perm ys := by
+  induction xs generalizing ys with
+  | nil =>
+      cases ys with
+      | nil => exact List.Perm.nil
+      | cons q qs =>
+          have hq : BasicPrime q := hys q (by simp)
+          have hqge : 2 <= q := hq.1
+          have hqspos : 0 < natProduct qs :=
+            natProduct_pos_of_pos (fun a ha => by
+              have hge := (hys a (by simp [ha])).1
+              omega)
+          have hqprod : 2 <= q * natProduct qs := by
+            calc
+              2 <= q := hqge
+              _ = q * 1 := by simp
+              _ <= q * natProduct qs := Nat.mul_le_mul_left q (by omega)
+          have hbad : 1 = q * natProduct qs := by
+            simpa [natProduct] using hprod
+          omega
+  | cons p ps ih =>
+      have hp : BasicPrime p := hxs p (by simp)
+      have hpdiv : p ∣ natProduct ys := by
+        rw [← hprod]
+        exact ⟨natProduct ps, by simp [natProduct]
+        ⟩
+      rcases basicPrime_dvd_of_dvd_natProduct hp hpdiv with ⟨q, hq, hpq⟩
+      have hqprime : BasicPrime q := hys q hq
+      have hp_eq_q : p = q := basicPrime_eq_of_dvd hp hqprime hpq
+      subst q
+      rcases natList_perm_cons_of_mem hq with ⟨zs, hperm⟩
+      have hprod_tail : natProduct ps = natProduct zs := by
+        have hp_ge : 2 <= p := hp.1
+        have hp_pos : 0 < p := by omega
+        apply Nat.mul_left_cancel hp_pos
+        calc
+          p * natProduct ps = natProduct (p :: ps) := by rfl
+          _ = natProduct ys := hprod
+          _ = natProduct (p :: zs) := natProduct_perm hperm
+          _ = p * natProduct zs := by rfl
+      have hps : forall r, r ∈ ps -> BasicPrime r := by
+        intro r hr
+        exact hxs r (by simp [hr])
+      have hzs : forall r, r ∈ zs -> BasicPrime r := by
+        intro r hr
+        have hry : r ∈ ys := (List.Perm.mem_iff hperm).2 (by simp [hr])
+        exact hys r hry
+      have htail : ps.Perm zs := ih hps hzs hprod_tail
+      exact (List.Perm.cons p htail).trans hperm.symm
+
+theorem PrimeFactorCertificate.factor_perm {n : Nat}
+    (c₁ c₂ : PrimeFactorCertificate n) :
+    c₁.factors.Perm c₂.factors := by
+  apply primeFactorList_perm_of_same_product c₁.factors_prime c₂.factors_prime
+  calc
+    natProduct c₁.factors =
+        c₁.factors.foldl (fun acc p => acc * p) 1 :=
+      (foldl_mul_one_eq_natProduct c₁.factors).symm
+    _ = n := c₁.product_eq
+    _ = c₂.factors.foldl (fun acc p => acc * p) 1 := c₂.product_eq.symm
+    _ = natProduct c₂.factors := foldl_mul_one_eq_natProduct c₂.factors
+
+theorem natList_perm_of_nodup_of_mem_iff {xs ys : List Nat}
+    (hxs : xs.Nodup) (hys : ys.Nodup)
+    (hmem : forall a, a ∈ xs ↔ a ∈ ys) : xs.Perm ys := by
+  induction xs generalizing ys with
+  | nil =>
+      have hys_nil : ys = [] := by
+        cases ys with
+        | nil => rfl
+        | cons y ys =>
+            have hy : y ∈ ([] : List Nat) := (hmem y).2 (by simp)
+            simp at hy
+      simp [hys_nil]
+  | cons a as ih =>
+      have ha_ys : a ∈ ys := (hmem a).1 (by simp)
+      rcases natList_perm_cons_of_mem ha_ys with ⟨bs, hysperm⟩
+      have habs_nodup : (a :: bs).Nodup := hysperm.nodup hys
+      have hxs_cons : ¬ a ∈ as ∧ as.Nodup := List.nodup_cons.mp hxs
+      have habs_cons : ¬ a ∈ bs ∧ bs.Nodup := List.nodup_cons.mp habs_nodup
+      have hmem_rest : forall x, x ∈ as ↔ x ∈ bs := by
+        intro x
+        have hperm_mem : x ∈ ys ↔ x ∈ a :: bs :=
+          List.Perm.mem_iff hysperm
+        constructor
+        · intro hx
+          have hx_ys : x ∈ ys := (hmem x).1 (by simp [hx])
+          have hx_cons : x = a ∨ x ∈ bs := by
+            simpa using hperm_mem.1 hx_ys
+          rcases hx_cons with hxa | hxb
+          · subst x
+            exact (hxs_cons.1 hx).elim
+          · exact hxb
+        · intro hx_bs
+          have hx_cons : x ∈ a :: bs := by simp [hx_bs]
+          have hx_ys : x ∈ ys := hperm_mem.2 hx_cons
+          have hx_all : x ∈ a :: as := (hmem x).2 hx_ys
+          have hx_cases : x = a ∨ x ∈ as := by simpa using hx_all
+          rcases hx_cases with hxa | hxa
+          · subst x
+            exact (habs_cons.1 hx_bs).elim
+          · exact hxa
+      have hrest : as.Perm bs := ih hxs_cons.2 habs_cons.2 hmem_rest
+      exact hrest.cons a |>.trans hysperm.symm
+
+theorem PrimeFactorCertificate.factor_perm_of_nodup {n : Nat}
+    (c₁ c₂ : PrimeFactorCertificate n)
+    (h₁ : c₁.factors.Nodup) (h₂ : c₂.factors.Nodup) :
+    c₁.factors.Perm c₂.factors := by
+  exact natList_perm_of_nodup_of_mem_iff h₁ h₂
+    (fun p => PrimeFactorCertificate.factor_mem_iff c₁ c₂)
+
+def primeFactorizationCertificate60 : PrimeFactorCertificate 60 where
+  factors := [2, 2, 3, 5]
+  factors_prime := by
+    intro p hp
+    simp at hp
+    rcases hp with rfl | rfl | rfl
+    · exact basicPrime_two
+    · exact basicPrime_three
+    · exact basicPrime_five
+  product_eq := by native_decide
+
+/-! An explicit terminating Euclidean loop for the natural-number gcd. -/
+
+def euclideanGcd (a b : Nat) : Nat :=
+  if h : b = 0 then a else euclideanGcd b (a % b)
+termination_by b
+decreasing_by
+  exact Nat.mod_lt _ (Nat.pos_of_ne_zero h)
+
+def euclideanGcd_eq_gcd_proof (a b : Nat) :
+    euclideanGcd a b = Nat.gcd a b :=
+  match b with
+  | 0 => by simp [euclideanGcd]
+  | b + 1 => by
+      calc
+        euclideanGcd a (b + 1) = euclideanGcd (b + 1) (a % (b + 1)) := by
+          rw [euclideanGcd]
+          exact dif_neg (by omega)
+        _ = Nat.gcd (b + 1) (a % (b + 1)) :=
+          euclideanGcd_eq_gcd_proof (b + 1) (a % (b + 1))
+        _ = Nat.gcd (a % (b + 1)) (b + 1) := Nat.gcd_comm _ _
+        _ = Nat.gcd (b + 1) a := by
+          rw [← Nat.gcd_rec]
+        _ = Nat.gcd a (b + 1) := Nat.gcd_comm _ _
+termination_by b
+decreasing_by
+  exact Nat.mod_lt _ (by omega)
+
+theorem euclideanGcd_eq_gcd (a b : Nat) :
+    euclideanGcd a b = Nat.gcd a b := by
+  exact euclideanGcd_eq_gcd_proof a b
+
+theorem euclideanGcd_step (a b : Nat) (hb : b ≠ 0) :
+    euclideanGcd a b = euclideanGcd b (a % b) := by
+  rw [euclideanGcd]
+  exact dif_neg hb
+
+theorem euclideanGcd_zero_right (a : Nat) : euclideanGcd a 0 = a := by
+  rw [euclideanGcd_eq_gcd]
+  simp
+
+theorem euclideanGcd_zero_left (a : Nat) : euclideanGcd 0 a = a := by
+  rw [euclideanGcd_eq_gcd]
+  simp [Nat.gcd_comm]
+
+theorem euclideanGcd_pos_of_pos {a b : Nat}
+    (ha : 0 < a) :
+    0 < euclideanGcd a b := by
+  rw [euclideanGcd_eq_gcd]
+  exact Nat.gcd_pos_of_pos_left b ha
+
+theorem euclideanGcd_pos_iff {a b : Nat} :
+    0 < euclideanGcd a b ↔ a ≠ 0 ∨ b ≠ 0 := by
+  rw [euclideanGcd_eq_gcd, Nat.pos_iff_ne_zero]
+  constructor
+  · intro h
+    by_cases ha : a = 0
+    · right
+      intro hb
+      apply h
+      exact Nat.gcd_eq_zero_iff.mpr ⟨ha, hb⟩
+    · exact Or.inl ha
+  · intro h hg
+    rcases h with ha | hb
+    · exact ha (Nat.gcd_eq_zero_iff.mp hg).1
+    · exact hb (Nat.gcd_eq_zero_iff.mp hg).2
+
+theorem euclideanGcd_eq_one_iff_coprime {a b : Nat} :
+    euclideanGcd a b = 1 ↔ Nat.Coprime a b := by
+  rw [euclideanGcd_eq_gcd]
+
+theorem euclideanGcd_comm (a b : Nat) :
+    euclideanGcd a b = euclideanGcd b a := by
+  rw [euclideanGcd_eq_gcd, euclideanGcd_eq_gcd]
+  exact Nat.gcd_comm a b
+
+theorem euclideanGcd_dvd_left (a b : Nat) :
+    euclideanGcd a b ∣ a := by
+  rw [euclideanGcd_eq_gcd]
+  exact Nat.gcd_dvd_left a b
+
+theorem euclideanGcd_dvd_right (a b : Nat) :
+    euclideanGcd a b ∣ b := by
+  rw [euclideanGcd_eq_gcd]
+  exact Nat.gcd_dvd_right a b
+
+theorem euclideanGcd_dvd_of_dvd {a b d : Nat}
+    (hda : d ∣ a) (hdb : d ∣ b) : d ∣ euclideanGcd a b := by
+  rw [euclideanGcd_eq_gcd]
+  exact Nat.dvd_gcd hda hdb
+
+theorem euclideanGcd_dvd_iff {a b d : Nat} :
+    d ∣ euclideanGcd a b ↔ d ∣ a ∧ d ∣ b := by
+  constructor
+  · intro hd
+    exact ⟨Nat.dvd_trans hd (euclideanGcd_dvd_left a b),
+      Nat.dvd_trans hd (euclideanGcd_dvd_right a b)⟩
+  · rintro ⟨hda, hdb⟩
+    exact euclideanGcd_dvd_of_dvd hda hdb
+
+theorem gcd_remainder_swap (a b : Nat) :
+    Nat.gcd b (a % b) = Nat.gcd a b := by
+  calc
+    Nat.gcd b (a % b) = Nat.gcd (a % b) b := Nat.gcd_comm _ _
+    _ = Nat.gcd b a := by rw [← Nat.gcd_rec]
+    _ = Nat.gcd a b := Nat.gcd_comm _ _
+
+theorem bezout_step_identity (x y a q r B : Int) (h : a = r + B * q) :
+    y * a + (x - q * y) * B = x * B + y * r := by
+  grind [Int.mul_add, Int.add_mul, Int.mul_assoc, Int.mul_comm,
+    Int.add_assoc, Int.add_comm, Int.sub_eq_add_neg]
+
+def bezout_exists_proof (a b : Nat) :
+    Exists fun x : Int =>
+      Exists fun y : Int =>
+        x * (a : Int) + y * (b : Int) = (Nat.gcd a b : Int) :=
+  match b with
+  | 0 => by
+      exact ⟨1, 0, by simp⟩
+  | b + 1 => by
+      rcases bezout_exists_proof (b + 1) (a % (b + 1)) with
+        ⟨x, y, hxy⟩
+      refine ⟨y, x - ((a / (b + 1) : Nat) : Int) * y, ?_⟩
+      have hdiv :
+          (a : Int) = ((a % (b + 1) : Nat) : Int) +
+            (b + 1 : Int) * ((a / (b + 1) : Nat) : Int) := by
+        symm
+        exact_mod_cast (Nat.mod_add_div a (b + 1))
+      rw [gcd_remainder_swap] at hxy
+      calc
+        y * (a : Int) +
+              (x - ((a / (b + 1) : Nat) : Int) * y) * (b + 1 : Int) =
+            x * (b + 1 : Int) +
+              y * ((a % (b + 1) : Nat) : Int) := by
+          exact bezout_step_identity x y (a : Int)
+            ((a / (b + 1) : Nat) : Int)
+            ((a % (b + 1) : Nat) : Int) (b + 1 : Int) hdiv
+        _ = (Nat.gcd a (b + 1) : Int) := hxy
+termination_by b
+decreasing_by
+  exact Nat.mod_lt _ (by omega)
+
+theorem bezout_exists (a b : Nat) :
+    Exists fun x : Int =>
+      Exists fun y : Int =>
+        x * (a : Int) + y * (b : Int) = (Nat.gcd a b : Int) := by
+  exact bezout_exists_proof a b
+
+theorem euclideanGcd_bezout_exists (a b : Nat) :
+    Exists fun x : Int =>
+      Exists fun y : Int =>
+        x * (a : Int) + y * (b : Int) = (euclideanGcd a b : Int) := by
+  obtain ⟨x, y, hxy⟩ := bezout_exists a b
+  refine ⟨x, y, ?_⟩
+  rw [euclideanGcd_eq_gcd]
+  exact hxy
 
 structure QInterval where
   lo : Rat
@@ -86,6 +1410,16 @@ theorem intersection_contained_right (I J : QInterval) :
     J.lo <= (intersection I J).lo /\
       (intersection I J).hi <= J.hi := by
   unfold intersection
+  grind
+
+/-- Overlapping ordered rational intervals have an ordered explicit
+intersection.  The intersection is data, not a choice of a point. -/
+theorem intersection_ordered_of_overlaps
+    {I J : QInterval}
+    (hI : I.lo <= I.hi) (hJ : J.lo <= J.hi)
+    (hover : I.Overlaps J) :
+    (intersection I J).lo <= (intersection I J).hi := by
+  unfold intersection Overlaps at *
   grind
 
 theorem width_le_of_contains {outer inner : QInterval}
@@ -459,11 +1793,7 @@ theorem qabs_add_le (x y : Rat) : qabs (x + y) <= qabs x + qabs y := by
       _ <= x + y := rat_add_le_add (neg_qabs_le_self x) (neg_qabs_le_self y)
   · exact rat_add_le_add (self_le_qabs x) (self_le_qabs y)
 
-theorem triangle_inequality_rat (x y : Rat) :
-    qabs (x + y) <= qabs x + qabs y := by
-  exact qabs_add_le x y
-
-theorem triangle_inequality_rat_three (x y z : Rat) :
+theorem qabs_add_le_three (x y z : Rat) :
     qabs (x + y + z) <= qabs x + qabs y + qabs z := by
   calc
     qabs (x + y + z) <= qabs (x + y) + qabs z := qabs_add_le (x + y) z
@@ -471,11 +1801,550 @@ theorem triangle_inequality_rat_three (x y z : Rat) :
       exact (Rat.add_le_add_right).2 (qabs_add_le x y)
     _ = qabs x + qabs y + qabs z := by rfl
 
+def ratListSum : List Rat -> Rat
+  | [] => 0
+  | x :: xs => x + ratListSum xs
+
+def ratListAbsSum : List Rat -> Rat
+  | [] => 0
+  | x :: xs => qabs x + ratListAbsSum xs
+
+theorem ratListSum_append (xs ys : List Rat) :
+    ratListSum (xs ++ ys) = ratListSum xs + ratListSum ys := by
+  induction xs with
+  | nil => simp [ratListSum] <;> grind
+  | cons x xs ih =>
+      simp only [List.cons_append, ratListSum]
+      rw [ih]
+      grind
+
+theorem ratListAbsSum_append (xs ys : List Rat) :
+    ratListAbsSum (xs ++ ys) = ratListAbsSum xs + ratListAbsSum ys := by
+  induction xs with
+  | nil => simp [ratListAbsSum] <;> grind
+  | cons x xs ih =>
+      simp only [List.cons_append, ratListAbsSum]
+      rw [ih]
+      grind
+
+theorem qabs_ratListSum_le (xs : List Rat) :
+    qabs (ratListSum xs) <= ratListAbsSum xs := by
+  induction xs with
+  | nil => simp [ratListSum, ratListAbsSum, qabs]
+  | cons x xs ih =>
+      calc
+        qabs (ratListSum (x :: xs)) =
+            qabs (x + ratListSum xs) := by rfl
+        _ <= qabs x + qabs (ratListSum xs) := qabs_add_le x (ratListSum xs)
+        _ <= qabs x + ratListAbsSum xs := by
+          exact (Rat.add_le_add_left).2 ih
+        _ = ratListAbsSum (x :: xs) := by rfl
+
 theorem qabs_sub_le (x y : Rat) : qabs (x - y) <= qabs x + qabs y := by
   rw [show x - y = x + (-y) by grind [Rat.sub_eq_add_neg]]
   calc
     qabs (x + -y) <= qabs x + qabs (-y) := qabs_add_le x (-y)
     _ = qabs x + qabs y := by rw [qabs_neg]
+
+theorem rat_square_nonneg_basic (x : Rat) : 0 <= x * x := by
+  by_cases hx : 0 <= x
+  · exact Rat.mul_nonneg hx hx
+  · have hxneg : x <= 0 := by grind
+    have hq : qabs x = -x := qabs_eq_neg_of_nonpos hxneg
+    have hx' : x = -qabs x := by grind
+    rw [hx']
+    grind [Rat.mul_nonneg (qabs_nonneg x) (qabs_nonneg x)]
+
+theorem am_gm_square_bound (a b : Rat) :
+    4 * a * b <= (a + b) * (a + b) := by
+  have hsq := rat_square_nonneg_basic (a - b)
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem am_gm_rational_half {a b : Rat} :
+    a * b <= ((a + b) / 2) ^ 2 := by
+  rw [Rat.div_def]
+  apply Rat.le_of_mul_le_mul_right (c := (4 : Rat))
+  · have h := am_gm_square_bound a b
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.pow_succ, Rat.mul_inv_cancel]
+  · native_decide
+
+theorem am_gm_rational_half_eq_iff {a b : Rat} :
+    a * b = ((a + b) / 2) ^ 2 ↔ a = b := by
+  constructor
+  · intro h
+    have hsq : (a - b) * (a - b) = 0 := by
+      rw [Rat.div_def] at h
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ, Rat.mul_inv_cancel]
+    rcases Rat.mul_eq_zero.mp hsq with hzero | hzero
+    · grind
+    · grind
+  · intro hab
+    subst b
+    rw [Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.pow_succ, Rat.mul_inv_cancel]
+
+/-! A finite four-variable AM--GM certificate, assembled from the checked
+two-variable inequality by pairing the inputs. -/
+
+theorem am_gm_four {a b c d : Rat}
+    (ha : 0 <= a) (hb : 0 <= b) (hc : 0 <= c) (hd : 0 <= d) :
+    a * b * c * d <= ((a + b + c + d) / 4) ^ 4 := by
+  let x : Rat := (a + b) / 2
+  let y : Rat := (c + d) / 2
+  have hx : 0 <= x := by
+    dsimp [x]
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind) (by native_decide)
+  have hy : 0 <= y := by
+    dsimp [y]
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind) (by native_decide)
+  have hab : a * b <= x ^ 2 := by
+    simpa [x] using (am_gm_rational_half (a := a) (b := b))
+  have hcd : c * d <= y ^ 2 := by
+    simpa [y] using (am_gm_rational_half (a := c) (b := d))
+  have hcd0 : 0 <= c * d := Rat.mul_nonneg hc hd
+  have hxy : x * y <= ((x + y) / 2) ^ 2 :=
+    am_gm_rational_half (a := x) (b := y)
+  have hxy0 : 0 <= x * y := Rat.mul_nonneg hx hy
+  have hxyUpper : 0 <= ((x + y) / 2) ^ 2 := by
+    simpa [Rat.pow_succ] using rat_square_nonneg_basic ((x + y) / 2)
+  have hx2 : 0 <= x ^ 2 := by
+    simpa [Rat.pow_succ] using rat_square_nonneg_basic x
+  have hprod : a * b * (c * d) <= x ^ 2 * y ^ 2 := by
+    calc
+      a * b * (c * d) <= x ^ 2 * (c * d) := by
+        exact Rat.mul_le_mul_of_nonneg_right hab hcd0
+      _ <= x ^ 2 * y ^ 2 := by
+        exact Rat.mul_le_mul_of_nonneg_left hcd hx2
+  have hsquare : (x * y) ^ 2 <= (((x + y) / 2) ^ 2) ^ 2 := by
+    calc
+      (x * y) ^ 2 = (x * y) * (x * y) := by
+        grind [Rat.pow_succ]
+      _ <= ((x + y) / 2) ^ 2 * (x * y) :=
+        Rat.mul_le_mul_of_nonneg_right hxy hxy0
+      _ <= ((x + y) / 2) ^ 2 * ((x + y) / 2) ^ 2 :=
+        Rat.mul_le_mul_of_nonneg_left hxy hxyUpper
+      _ = (((x + y) / 2) ^ 2) ^ 2 := by
+        grind [Rat.pow_succ, Rat.mul_assoc]
+  have hpair : x ^ 2 * y ^ 2 <= (((x + y) / 2) ^ 2) ^ 2 := by
+    calc
+      x ^ 2 * y ^ 2 = (x * y) ^ 2 := by
+        grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm]
+      _ <= (((x + y) / 2) ^ 2) ^ 2 := hsquare
+  calc
+    a * b * c * d = a * b * (c * d) := by
+      grind [Rat.mul_assoc]
+    _ <= x ^ 2 * y ^ 2 := hprod
+    _ <= (((x + y) / 2) ^ 2) ^ 2 := hpair
+    _ = ((a + b + c + d) / 4) ^ 4 := by
+      dsimp [x, y]
+      rw [Rat.div_def]
+      grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
+        Rat.add_mul, Rat.mul_inv_cancel]
+
+theorem cauchy_schwarz_2d (a b c d : Rat) :
+    (a * b + c * d) ^ 2 <=
+      (a * a + c * c) * (b * b + d * d) := by
+  have hsq := rat_square_nonneg_basic (a * d - b * c)
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_2d_eq_iff (a b c d : Rat) :
+    (a * b + c * d) ^ 2 =
+        (a * a + c * c) * (b * b + d * d) ↔
+      a * d = b * c := by
+  constructor
+  · intro h
+    have hsq : (a * d - b * c) * (a * d - b * c) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    rcases Rat.mul_eq_zero.mp hsq with hzero | hzero
+    · grind
+    · grind
+  · intro h
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_3d (a b c x y z : Rat) :
+    (a * x + b * y + c * z) ^ 2 <=
+      (a * a + b * b + c * c) * (x * x + y * y + z * z) := by
+  have hxy := rat_square_nonneg_basic (a * y - b * x)
+  have hxz := rat_square_nonneg_basic (a * z - c * x)
+  have hyz := rat_square_nonneg_basic (b * z - c * y)
+  have hsum : 0 <=
+      (a * y - b * x) * (a * y - b * x) +
+        (a * z - c * x) * (a * z - c * x) +
+        (b * z - c * y) * (b * z - c * y) := by
+    grind
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_4d (a b c d w x y z : Rat) :
+    (a * w + b * x + c * y + d * z) ^ 2 <=
+      (a * a + b * b + c * c + d * d) *
+        (w * w + x * x + y * y + z * z) := by
+  have hab := rat_square_nonneg_basic (a * x - b * w)
+  have hac := rat_square_nonneg_basic (a * y - c * w)
+  have had := rat_square_nonneg_basic (a * z - d * w)
+  have hbc := rat_square_nonneg_basic (b * y - c * x)
+  have hbd := rat_square_nonneg_basic (b * z - d * x)
+  have hcd := rat_square_nonneg_basic (c * z - d * y)
+  have hsum : 0 <=
+      (a * x - b * w) * (a * x - b * w) +
+        (a * y - c * w) * (a * y - c * w) +
+        (a * z - d * w) * (a * z - d * w) +
+        (b * y - c * x) * (b * y - c * x) +
+        (b * z - d * x) * (b * z - d * x) +
+        (c * z - d * y) * (c * z - d * y) := by
+    grind
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_5d
+    (a b c d e w x y z u : Rat) :
+    (a * w + b * x + c * y + d * z + e * u) ^ 2 <=
+      (a * a + b * b + c * c + d * d + e * e) *
+        (w * w + x * x + y * y + z * z + u * u) := by
+  have hab := rat_square_nonneg_basic (a * x - b * w)
+  have hac := rat_square_nonneg_basic (a * y - c * w)
+  have had := rat_square_nonneg_basic (a * z - d * w)
+  have hae := rat_square_nonneg_basic (a * u - e * w)
+  have hbc := rat_square_nonneg_basic (b * y - c * x)
+  have hbd := rat_square_nonneg_basic (b * z - d * x)
+  have hbe := rat_square_nonneg_basic (b * u - e * x)
+  have hcd := rat_square_nonneg_basic (c * z - d * y)
+  have hce := rat_square_nonneg_basic (c * u - e * y)
+  have hde := rat_square_nonneg_basic (d * u - e * z)
+  have hsum : 0 <=
+      (a * x - b * w) * (a * x - b * w) +
+        (a * y - c * w) * (a * y - c * w) +
+        (a * z - d * w) * (a * z - d * w) +
+        (a * u - e * w) * (a * u - e * w) +
+        (b * y - c * x) * (b * y - c * x) +
+        (b * z - d * x) * (b * z - d * x) +
+        (b * u - e * x) * (b * u - e * x) +
+        (c * z - d * y) * (c * z - d * y) +
+        (c * u - e * y) * (c * u - e * y) +
+        (d * u - e * z) * (d * u - e * z) := by
+    grind
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_6d
+    (a b c d e f w x y z u v : Rat) :
+    (a * w + b * x + c * y + d * z + e * u + f * v) ^ 2 <=
+      (a * a + b * b + c * c + d * d + e * e + f * f) *
+        (w * w + x * x + y * y + z * z + u * u + v * v) := by
+  have hab := rat_square_nonneg_basic (a * x - b * w)
+  have hac := rat_square_nonneg_basic (a * y - c * w)
+  have had := rat_square_nonneg_basic (a * z - d * w)
+  have hae := rat_square_nonneg_basic (a * u - e * w)
+  have haf := rat_square_nonneg_basic (a * v - f * w)
+  have hbc := rat_square_nonneg_basic (b * y - c * x)
+  have hbd := rat_square_nonneg_basic (b * z - d * x)
+  have hbe := rat_square_nonneg_basic (b * u - e * x)
+  have hbf := rat_square_nonneg_basic (b * v - f * x)
+  have hcd := rat_square_nonneg_basic (c * z - d * y)
+  have hce := rat_square_nonneg_basic (c * u - e * y)
+  have hcf := rat_square_nonneg_basic (c * v - f * y)
+  have hde := rat_square_nonneg_basic (d * u - e * z)
+  have hdf := rat_square_nonneg_basic (d * v - f * z)
+  have hef := rat_square_nonneg_basic (e * v - f * u)
+  have hsum : 0 <=
+      (a * x - b * w) * (a * x - b * w) +
+        (a * y - c * w) * (a * y - c * w) +
+        (a * z - d * w) * (a * z - d * w) +
+        (a * u - e * w) * (a * u - e * w) +
+        (a * v - f * w) * (a * v - f * w) +
+        (b * y - c * x) * (b * y - c * x) +
+        (b * z - d * x) * (b * z - d * x) +
+        (b * u - e * x) * (b * u - e * x) +
+        (b * v - f * x) * (b * v - f * x) +
+        (c * z - d * y) * (c * z - d * y) +
+        (c * u - e * y) * (c * u - e * y) +
+        (c * v - f * y) * (c * v - f * y) +
+        (d * u - e * z) * (d * u - e * z) +
+        (d * v - f * z) * (d * v - f * z) +
+        (e * v - f * u) * (e * v - f * u) := by
+    grind
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+/-- A finite equality witness for the 6D certificate: if all fifteen
+pairwise minors vanish, the two rational coordinate lists are collinear and
+Cauchy--Schwarz is attained. -/
+theorem cauchy_schwarz_6d_eq_of_minors
+    (a b c d e f w x y z u v : Rat)
+    (hab : a * x = b * w) (hac : a * y = c * w)
+    (had : a * z = d * w) (hae : a * u = e * w)
+    (haf : a * v = f * w) (hbc : b * y = c * x)
+    (hbd : b * z = d * x) (hbe : b * u = e * x)
+    (hbf : b * v = f * x) (hcd : c * z = d * y)
+    (hce : c * u = e * y) (hcf : c * v = f * y)
+    (hde : d * u = e * z) (hdf : d * v = f * z)
+    (hef : e * v = f * u) :
+    (a * w + b * x + c * y + d * z + e * u + f * v) ^ 2 =
+      (a * a + b * b + c * c + d * d + e * e + f * f) *
+        (w * w + x * x + y * y + z * z + u * u + v * v) := by
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_5d_eq_iff
+    (a b c d e w x y z u : Rat) :
+    (a * w + b * x + c * y + d * z + e * u) ^ 2 =
+        (a * a + b * b + c * c + d * d + e * e) *
+          (w * w + x * x + y * y + z * z + u * u) ↔
+      a * x = b * w ∧ a * y = c * w ∧ a * z = d * w ∧
+        a * u = e * w ∧ b * y = c * x ∧ b * z = d * x ∧
+        b * u = e * x ∧ c * z = d * y ∧ c * u = e * y ∧
+        d * u = e * z := by
+  have hab := rat_square_nonneg_basic (a * x - b * w)
+  have hac := rat_square_nonneg_basic (a * y - c * w)
+  have had := rat_square_nonneg_basic (a * z - d * w)
+  have hae := rat_square_nonneg_basic (a * u - e * w)
+  have hbc := rat_square_nonneg_basic (b * y - c * x)
+  have hbd := rat_square_nonneg_basic (b * z - d * x)
+  have hbe := rat_square_nonneg_basic (b * u - e * x)
+  have hcd := rat_square_nonneg_basic (c * z - d * y)
+  have hce := rat_square_nonneg_basic (c * u - e * y)
+  have hde := rat_square_nonneg_basic (d * u - e * z)
+  constructor
+  · intro h
+    have hab0 : (a * x - b * w) * (a * x - b * w) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hac0 : (a * y - c * w) * (a * y - c * w) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have had0 : (a * z - d * w) * (a * z - d * w) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hae0 : (a * u - e * w) * (a * u - e * w) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hbc0 : (b * y - c * x) * (b * y - c * x) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hbd0 : (b * z - d * x) * (b * z - d * x) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hbe0 : (b * u - e * x) * (b * u - e * x) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hcd0 : (c * z - d * y) * (c * z - d * y) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hce0 : (c * u - e * y) * (c * u - e * y) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hde0 : (d * u - e * z) * (d * u - e * z) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hab' : a * x = b * w := by
+      rcases Rat.mul_eq_zero.mp hab0 with hzero | hzero <;> grind
+    have hac' : a * y = c * w := by
+      rcases Rat.mul_eq_zero.mp hac0 with hzero | hzero <;> grind
+    have had' : a * z = d * w := by
+      rcases Rat.mul_eq_zero.mp had0 with hzero | hzero <;> grind
+    have hae' : a * u = e * w := by
+      rcases Rat.mul_eq_zero.mp hae0 with hzero | hzero <;> grind
+    have hbc' : b * y = c * x := by
+      rcases Rat.mul_eq_zero.mp hbc0 with hzero | hzero <;> grind
+    have hbd' : b * z = d * x := by
+      rcases Rat.mul_eq_zero.mp hbd0 with hzero | hzero <;> grind
+    have hbe' : b * u = e * x := by
+      rcases Rat.mul_eq_zero.mp hbe0 with hzero | hzero <;> grind
+    have hcd' : c * z = d * y := by
+      rcases Rat.mul_eq_zero.mp hcd0 with hzero | hzero <;> grind
+    have hce' : c * u = e * y := by
+      rcases Rat.mul_eq_zero.mp hce0 with hzero | hzero <;> grind
+    have hde' : d * u = e * z := by
+      rcases Rat.mul_eq_zero.mp hde0 with hzero | hzero <;> grind
+    exact ⟨hab', hac', had', hae', hbc', hbd', hbe', hcd', hce', hde'⟩
+  · rintro ⟨hab', hac', had', hae', hbc', hbd', hbe', hcd', hce', hde'⟩
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_4d_eq_iff (a b c d w x y z : Rat) :
+    (a * w + b * x + c * y + d * z) ^ 2 =
+        (a * a + b * b + c * c + d * d) *
+          (w * w + x * x + y * y + z * z) ↔
+      a * x = b * w ∧ a * y = c * w ∧ a * z = d * w ∧
+        b * y = c * x ∧ b * z = d * x ∧ c * z = d * y := by
+  have hab := rat_square_nonneg_basic (a * x - b * w)
+  have hac := rat_square_nonneg_basic (a * y - c * w)
+  have had := rat_square_nonneg_basic (a * z - d * w)
+  have hbc := rat_square_nonneg_basic (b * y - c * x)
+  have hbd := rat_square_nonneg_basic (b * z - d * x)
+  have hcd := rat_square_nonneg_basic (c * z - d * y)
+  constructor
+  · intro h
+    have hab0 : (a * x - b * w) * (a * x - b * w) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hac0 : (a * y - c * w) * (a * y - c * w) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have had0 : (a * z - d * w) * (a * z - d * w) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hbc0 : (b * y - c * x) * (b * y - c * x) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hbd0 : (b * z - d * x) * (b * z - d * x) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hcd0 : (c * z - d * y) * (c * z - d * y) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    rcases Rat.mul_eq_zero.mp hab0 with hab0 | hab0
+    · rcases Rat.mul_eq_zero.mp hac0 with hac0 | hac0
+      · rcases Rat.mul_eq_zero.mp had0 with had0 | had0
+        · rcases Rat.mul_eq_zero.mp hbc0 with hbc0 | hbc0
+          · rcases Rat.mul_eq_zero.mp hbd0 with hbd0 | hbd0
+            · rcases Rat.mul_eq_zero.mp hcd0 with hcd0 | hcd0
+              · exact ⟨by grind, by grind, by grind, by grind, by grind, by grind⟩
+              · exact ⟨by grind, by grind, by grind, by grind, by grind, by grind⟩
+            · exact ⟨by grind, by grind, by grind, by grind, by grind, by grind⟩
+          · exact ⟨by grind, by grind, by grind, by grind, by grind, by grind⟩
+        · exact ⟨by grind, by grind, by grind, by grind, by grind, by grind⟩
+      · exact ⟨by grind, by grind, by grind, by grind, by grind, by grind⟩
+    · exact ⟨by grind, by grind, by grind, by grind, by grind, by grind⟩
+  · rintro ⟨hab, hac, had, hbc, hbd, hcd⟩
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cauchy_schwarz_3d_eq_iff (a b c x y z : Rat) :
+    (a * x + b * y + c * z) ^ 2 =
+        (a * a + b * b + c * c) * (x * x + y * y + z * z) ↔
+      a * y = b * x ∧ a * z = c * x ∧ b * z = c * y := by
+  have hxy := rat_square_nonneg_basic (a * y - b * x)
+  have hxz := rat_square_nonneg_basic (a * z - c * x)
+  have hyz := rat_square_nonneg_basic (b * z - c * y)
+  constructor
+  · intro h
+    have hxy0 : (a * y - b * x) * (a * y - b * x) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hxz0 : (a * z - c * x) * (a * z - c * x) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    have hyz0 : (b * z - c * y) * (b * z - c * y) = 0 := by
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+    rcases Rat.mul_eq_zero.mp hxy0 with hxy0 | hxy0
+    · rcases Rat.mul_eq_zero.mp hxz0 with hxz0 | hxz0
+      · rcases Rat.mul_eq_zero.mp hyz0 with hyz0 | hyz0
+        · grind
+        · grind
+      · rcases Rat.mul_eq_zero.mp hyz0 with hyz0 | hyz0 <;> grind
+    · rcases Rat.mul_eq_zero.mp hxz0 with hxz0 | hxz0 <;> grind
+  · rintro ⟨hxy, hxz, hyz⟩
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem cramer_two_by_two (a b c d x y : Rat)
+    (hdet : a * d - b * c ≠ 0) :
+    let det := a * d - b * c
+    let u := (x * d - b * y) / det
+    let v := (a * y - x * c) / det
+    a * u + b * v = x ∧ c * u + d * v = y := by
+  dsimp
+  rw [Rat.div_def, Rat.div_def]
+  have hdet_inv : (a * d - b * c) * (a * d - b * c)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hdet
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem cramer_two_by_two_unique (a b c d x y u v : Rat)
+    (hdet : a * d - b * c ≠ 0)
+    (hu : a * u + b * v = x) (hv : c * u + d * v = y) :
+    u = (x * d - b * y) / (a * d - b * c) ∧
+      v = (a * y - x * c) / (a * d - b * c) := by
+  rw [Rat.div_def, Rat.div_def]
+  have hdet_inv : (a * d - b * c) * (a * d - b * c)⁻¹ = 1 :=
+    Rat.mul_inv_cancel _ hdet
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem three_dvd_three_digit (a b c : Nat) :
+    3 ∣ 100 * a + 10 * b + c ↔ 3 ∣ a + b + c := by
+  omega
+
+def decimalDigitSum : Nat -> Nat
+  | 0 => 0
+  | n + 1 =>
+      if n + 1 < 10 then n + 1
+      else (n + 1) % 10 + decimalDigitSum ((n + 1) / 10)
+termination_by n => n
+decreasing_by
+  omega
+
+theorem decimalDigitSum_succ_of_lt_ten (n : Nat) (hsmall : n + 1 < 10) :
+    decimalDigitSum (n + 1) = n + 1 := by
+  simp [decimalDigitSum, hsmall]
+
+theorem decimalDigitSum_eq_self_of_lt_ten (n : Nat) (hsmall : n < 10) :
+    decimalDigitSum n = n := by
+  cases n with
+  | zero => simp [decimalDigitSum]
+  | succ n => exact decimalDigitSum_succ_of_lt_ten n hsmall
+
+theorem decimalDigitSum_succ_of_not_lt_ten (n : Nat)
+    (hlarge : ¬ n + 1 < 10) :
+    decimalDigitSum (n + 1) =
+      (n + 1) % 10 + decimalDigitSum ((n + 1) / 10) := by
+  simp [decimalDigitSum, hlarge]
+
+def decimalDigitSum_mod_three_proof : (n : Nat) ->
+    decimalDigitSum n % 3 = n % 3
+  | 0 => by simp [decimalDigitSum]
+  | n + 1 => by
+      by_cases hsmall : n + 1 < 10
+      · simp [decimalDigitSum, hsmall]
+      · have hlt : (n + 1) / 10 < n + 1 := by
+          omega
+        rw [decimalDigitSum]
+        simp only [hsmall, ↓reduceIte]
+        rw [Nat.add_mod, decimalDigitSum_mod_three_proof ((n + 1) / 10)]
+        omega
+termination_by n => n
+decreasing_by
+  omega
+
+theorem decimalDigitSum_mod_three (n : Nat) :
+    decimalDigitSum n % 3 = n % 3 := by
+  exact decimalDigitSum_mod_three_proof n
+
+def decimalDigitSum_mod_nine_proof : (n : Nat) ->
+    decimalDigitSum n % 9 = n % 9
+  | 0 => by simp [decimalDigitSum]
+  | n + 1 => by
+      by_cases hsmall : n + 1 < 10
+      · simp [decimalDigitSum, hsmall]
+      · have hlt : (n + 1) / 10 < n + 1 := by
+          omega
+        rw [decimalDigitSum]
+        simp only [hsmall, ↓reduceIte]
+        rw [Nat.add_mod, decimalDigitSum_mod_nine_proof ((n + 1) / 10)]
+        omega
+termination_by n => n
+decreasing_by
+  omega
+
+theorem decimalDigitSum_mod_nine (n : Nat) :
+    decimalDigitSum n % 9 = n % 9 := by
+  exact decimalDigitSum_mod_nine_proof n
+
+theorem three_dvd_iff_decimalDigitSum_dvd (n : Nat) :
+    3 ∣ n ↔ 3 ∣ decimalDigitSum n := by
+  rw [Nat.dvd_iff_mod_eq_zero, Nat.dvd_iff_mod_eq_zero,
+    decimalDigitSum_mod_three]
 
 namespace QInterval
 
@@ -1433,6 +3302,11 @@ theorem equiv_of_le_of_ge {x y : RealRaw}
   apply (compareAt_overlap_iff x y n n).2
   exact ⟨hxy n n, hyx n n⟩
 
+theorem le_antisymm {x y : RealRaw}
+    (hxy : x.Le y) (hyx : y.Le x) :
+    x.Equiv y := by
+  exact equiv_of_le_of_ge hxy hyx
+
 theorem equiv_iff_le_and_ge {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) :
     x.Equiv y ↔ x.Le y /\ y.Le x := by
@@ -1905,6 +3779,103 @@ def inv? (z : QComplex) : Option QComplex :=
   else
     some { re := z.re / n, im := -z.im / n }
 def div? (z w : QComplex) : Option QComplex := (inv? w).map (mul z)
+
+theorem normSq_eq_zero_iff {z : QComplex} :
+    normSq z = 0 ↔ z = zero := by
+  constructor
+  · intro h
+    cases z with
+    | mk re im =>
+      have hre_nonneg : 0 <= re * re := rat_square_nonneg_basic re
+      have him_nonneg : 0 <= im * im := rat_square_nonneg_basic im
+      simp [normSq] at h
+      have hre : re * re = 0 := by
+        grind
+      have him : im * im = 0 := by
+        grind
+      have hre0 : re = 0 := by
+        rcases Rat.mul_eq_zero.mp hre with hzero | hzero <;> exact hzero
+      have him0 : im = 0 := by
+        rcases Rat.mul_eq_zero.mp him with hzero | hzero <;> exact hzero
+      subst re
+      subst im
+      rfl
+  · intro h
+    subst z
+    simp only [normSq, QComplex.zero, Rat.zero_mul, Rat.mul_zero]
+    exact Rat.add_zero 0
+
+theorem mul_inv?_eq_one {z : QComplex} (hnorm : normSq z ≠ 0) :
+    (inv? z).map (mul z) = some one := by
+  cases z with
+  | mk re im =>
+    change re * re + im * im ≠ 0 at hnorm
+    simp [inv?, normSq, mul, one, hnorm]
+    constructor
+    · rw [Rat.div_def]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel]
+    · rw [Rat.div_def]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+        Rat.mul_inv_cancel]
+
+theorem exists_mul_inverse_of_normSq_ne_zero {z : QComplex}
+    (hnorm : normSq z ≠ 0) :
+    Exists fun zi : QComplex => mul z zi = one := by
+  have hmap := mul_inv?_eq_one hnorm
+  cases h : inv? z with
+  | none =>
+      rw [h] at hmap
+      simp at hmap
+  | some zi =>
+      refine ⟨zi, ?_⟩
+      simpa [h] using hmap
+
+theorem mul_assoc_cert (x y z : QComplex) :
+    mul (mul x y) z = mul x (mul y z) := by
+  cases x
+  cases y
+  cases z
+  simp [mul]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem mul_add_cert (x y z : QComplex) :
+    mul x (add y z) = add (mul x y) (mul x z) := by
+  cases x
+  cases y
+  cases z
+  simp [mul, add]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem add_mul_cert (x y z : QComplex) :
+    mul (add x y) z = add (mul x z) (mul y z) := by
+  cases x
+  cases y
+  cases z
+  simp [mul, add]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem mul_one_cert (x : QComplex) : mul x one = x := by
+  cases x
+  simp [mul, one]
+  exact ⟨by grind [Rat.sub_eq_add_neg], Rat.zero_add _⟩
+
+theorem mul_neg_cert (x y : QComplex) : mul x (neg y) = neg (mul x y) := by
+  cases x
+  cases y
+  simp [mul, neg]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem neg_mul_cert (x y : QComplex) : mul (neg x) y = neg (mul x y) := by
+  cases x
+  cases y
+  simp [mul, neg]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
 
 instance : OfNat QComplex n where
   ofNat := ofRat n
@@ -2810,6 +4781,63 @@ def scaleRat (r : Rat) (x : RealRaw) : RealRaw where
 def mul (x y : RealRaw) : RealRaw where
   compute := mulCompute x y
 
+theorem le_neg_le_neg {x y : RealRaw} (hxy : x.Le y) :
+    (RealRaw.neg y).Le (RealRaw.neg x) := by
+  intro n m
+  change -(y.compute n).hi <= -(x.compute m).lo
+  exact Rat.neg_le_neg (hxy m n)
+
+theorem le_sub_le_sub {x y z w : RealRaw}
+    (hxy : x.Le y) (hzw : z.Le w) :
+    (RealRaw.sub x w).Le (RealRaw.sub y z) := by
+  intro n m
+  change (x.compute n).lo - (w.compute n).hi <=
+    (y.compute m).hi - (z.compute m).lo
+  calc
+    (x.compute n).lo - (w.compute n).hi <=
+        (y.compute m).hi - (w.compute n).hi := by
+      simpa [Rat.sub_eq_add_neg] using
+        (Rat.add_le_add_right).2 (hxy n m)
+    _ <= (y.compute m).hi - (z.compute m).lo := by
+      simpa [Rat.sub_eq_add_neg] using
+        (Rat.add_le_add_left).2 (Rat.neg_le_neg (hzw m n))
+
+theorem le_add_le_add {x y z w : RealRaw}
+    (hxy : x.Le y) (hzw : z.Le w) :
+    (RealRaw.add x z).Le (RealRaw.add y w) := by
+  intro n m
+  change (x.compute n).lo + (z.compute n).lo <=
+    (y.compute m).hi + (w.compute m).hi
+  calc
+    (x.compute n).lo + (z.compute n).lo <=
+        (y.compute m).hi + (z.compute n).lo :=
+      (Rat.add_le_add_right).2 (hxy n m)
+    _ <= (y.compute m).hi + (w.compute m).hi :=
+      (Rat.add_le_add_left).2 (hzw n m)
+
+theorem le_scaleRat_le_scaleRat {x y : RealRaw} {r : Rat}
+    (hr : 0 <= r) (hxy : x.Le y) :
+    (RealRaw.scaleRat r x).Le (RealRaw.scaleRat r y) := by
+  intro n m
+  dsimp [RealRaw.scaleRat, scaleRatCompute]
+  rw [if_pos hr]
+  rw [if_pos hr]
+  exact Rat.mul_le_mul_of_nonneg_left (hxy n m) hr
+
+theorem le_scaleRat_le_scaleRat_of_nonpos {x y : RealRaw} {r : Rat}
+    (hr : r <= 0) (hxy : x.Le y) :
+    (RealRaw.scaleRat r y).Le (RealRaw.scaleRat r x) := by
+  intro n m
+  by_cases hr0 : 0 <= r
+  · have hrzero : r = 0 := Rat.le_antisymm hr hr0
+    simp [RealRaw.scaleRat, scaleRatCompute, hr0, hrzero]
+  · dsimp [RealRaw.scaleRat, scaleRatCompute]
+    rw [if_neg hr0]
+    rw [if_neg hr0]
+    have hrneg : 0 <= -r := by grind [Rat.sub_eq_add_neg]
+    have hmul := Rat.mul_le_mul_of_nonneg_left (hxy m n) hrneg
+    grind [Rat.neg_mul, Rat.mul_neg]
+
 def scaleRatNonneg (r : Rat) (_hr : 0 <= r) (x : RealRaw) : RealRaw where
   compute := fun n =>
     let X := x.compute n
@@ -3374,6 +5402,31 @@ theorem mul_valid_of_nonneg_bounded {x y : RealRaw}
           rw [Rat.div_def]
           have hne : (2 : Rat) * B ≠ 0 := Rat.ne_of_gt htwoB
           grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem le_mul_le_mul_of_nonneg
+    {x y z w : RealRaw}
+    (hx : x.Valid) (hy : y.Valid) (hz : z.Valid) (hw : w.Valid)
+    (hxnonneg : forall n, 0 <= (x.compute n).lo)
+    (hynonneg : forall n, 0 <= (y.compute n).lo)
+    (hznonneg : forall n, 0 <= (z.compute n).lo)
+    (hwnonneg : forall n, 0 <= (w.compute n).lo)
+    (hxy : x.Le y) (hzw : z.Le w) :
+    (x * z).Le (y * w) := by
+  intro n m
+  have hprodN := mul_compute_of_nonneg hx hz hxnonneg hznonneg n
+  have hprodM := mul_compute_of_nonneg hy hw hynonneg hwnonneg m
+  rw [hprodN, hprodM]
+  have hyhi : 0 <= (y.compute m).hi := by
+    have horder := RealRaw.interval_order_of_valid y hy m
+    grind
+  calc
+    (x.compute n).lo * (z.compute n).lo <=
+        (y.compute m).hi * (z.compute n).lo := by
+      exact Rat.mul_le_mul_of_nonneg_right (hxy n m) (hznonneg n)
+    _ <= (y.compute m).hi * (w.compute m).hi := by
+      have hzw' := hzw n m
+      have hzw_mul := Rat.mul_le_mul_of_nonneg_left hzw' hyhi
+      simpa [Rat.mul_comm] using hzw_mul
 
 /-- Nonnegative interval multiplication respects changes of certified raw
 representation.  Bounds are needed for validity, but not for this same-stage

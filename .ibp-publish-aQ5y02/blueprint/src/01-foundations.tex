@@ -1,0 +1,820 @@
+\chapter{Computable Numbers and Functions}\label{ch:foundations}
+
+\section{Inverval arithmetic and real numbers \humanchecked}
+
+\begin{definition}[Rational interval]\label{def:qinterval}
+\lean{ComputableAnalysis.QInterval}
+A \emph{rational interval} is a pair of rational numbers
+\[
+  [a,b]\in\Q\times\Q,\qquad a\le b.
+\]
+This is a formal interval object, not the set of rational points between
+\(a\) and \(b\).  The \emph{width} of the rational interval is defined as \(b-a\).
+
+Two rational intervals \([a, b]\) and \([c, d]\) \emph{overlap} when
+\[
+  a\le d\ \text{and}\ c\le b.
+\]
+\end{definition}
+
+\begin{definition}[Interval sequence]\label{def:interval-sequence}
+\uses{def:qinterval}
+An \emph{interval sequence} is a sequence of rational intervals
+\[
+  [a_n,b_n]_{n\in\N},
+  \qquad a_n \leq b_n\in\Q.
+\]
+\end{definition}
+
+\begin{definition}[Real number]\label{def:raw-real}
+\lean{ComputableAnalysis.RealRaw}
+\uses{def:interval-sequence}
+A \emph{real number} is an interval sequence \(x=[a_n,b_n]_{n\in\N}\) satisfying the
+following validity conditions:
+\[
+  n\le m\Rightarrow
+  a_n\le a_m\le b_m\le b_n,
+\]
+and for any $\eps\in\Q_{>0}$, there exists $N\in\N$ such that
+\[
+  b_N-a_N \le \eps.
+\]
+\end{definition}
+
+\begin{remark}[Computable number]\label{rem:computable-presentations}
+\uses{def:interval-sequence,def:raw-real}
+When the map 
+\[
+  n\mapsto [a_n,b_n]
+\]
+is given by a finite, terminating algorithm, as we always do in this project,
+the real number is said to be \emph{computable}. Storing all the rational numbers
+in an infinite table is not permitted. Evaluating at \(n\) is referred to as
+\emph{computing} the real number \emph{at stage} \(n\).
+\end{remark}
+
+\begin{definition}[Positive and negative real numbers]\label{def:raw-real-sign}
+\lean{ComputableAnalysis.RealRaw.Pos}
+\lean{ComputableAnalysis.RealRaw.Neg}
+\uses{def:raw-real}
+Let \(x=[a_n,b_n]_{n\in\N}\) be a real number.  We say that \(x\) is
+\emph{positive} (resp. \emph{negative}) if there is some \(N\in\N\) such that
+\( a_N > 0\) (resp. \( b_N<0 \)).
+The number \(x\) is \emph{nonzero} if it is either positive or negative.
+\end{definition}
+
+\begin{definition}[Interval Arithmetic]\label{def:raw-real-arithmetic}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.RealRaw.add}\par
+\lean{ComputableAnalysis.RealRaw.sub}\par
+\lean{ComputableAnalysis.RealRaw.mul}\par}
+\uses{def:raw-real,def:raw-real-sign}
+Let \(x\) and \(y\) be real numbers:
+\[
+  x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}.
+\]
+Their sum is defined stagewise:
+\[
+  x+y := [a_n+c_n,b_n+d_n]_{n\in\N},
+\]
+Negation of \([c_n,d_n]\) is given by \([-d_n,-c_n]\), so the difference is
+\[
+  x-y := [a_n-d_n,b_n-c_n]_{n\in\N},
+\]
+The product is defined by taking the bounding interval of all four
+products:
+\[
+  xy:=
+  \left[
+    \min S_n,\max S_n
+  \right]_{n\in\N},
+  \qquad
+  S_n=\{a_nc_n,a_nd_n,b_nc_n,b_nd_n\}.
+\]
+An inverse needs an explicit apartness schedule: from a stage at which
+\([a_N,b_N]\) avoids zero, the intended later construction is
+\[
+  x^{-1}:= [ b_{N+n}^{-1}, a_{N+n}^{-1} ]_{n\in\N}.
+\]
+The current formal layer records this as a future computable-inverse
+obligation rather than claiming a completed general inverse or division
+operation.
+\end{definition}
+
+
+\begin{proposition}[Arithmetic preserves real numbers]\label{prop:raw-arithmetic-valid}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.QBox.mulRealInterval_of_nonneg}\par
+\lean{ComputableAnalysis.RealRaw.mul_valid_of_nonneg_bounded}\par
+\lean{ComputableAnalysis.RealRaw.mul_equiv_of_nonneg}\par
+\lean{ComputableAnalysis.RealRaw.scaleRat_valid_of_nonneg}\par
+\lean{ComputableAnalysis.RealRaw.valid_of_scaleRat_valid_of_pos}\par
+\lean{ComputableAnalysis.RealRaw.valid_of_natScale_valid}\par
+\lean{ComputableAnalysis.RealRaw.add_width}\par
+\lean{ComputableAnalysis.RealRaw.sub_width}\par
+\lean{ComputableAnalysis.RealRaw.natScale_width}\par
+\lean{ComputableAnalysis.RealRaw.scaleRat_equiv_of_nonneg}\par
+\lean{ComputableAnalysis.RealRaw.equiv_of_scaleRat_equiv_of_pos}\par
+\lean{ComputableAnalysis.RealRaw.equiv_of_natScale_equiv}\par}
+\uses{def:raw-real,def:raw-real-arithmetic}
+Addition, subtraction, negation, and rational scaling preserve valid raw
+reals.  The first checked multiplication theorem is deliberately local and
+quantitative: if both factors have nonnegative interval enclosures and a
+positive rational upper bound, their four-corner product enclosure is valid.
+At stage \(n\) its width is bounded by
+\[
+ B_x\operatorname{width}(y_n)+B_y\operatorname{width}(x_n),
+\]
+so widths shrink by an explicit rational precision budget.  The same positive
+product computation respects proved raw equivalence.  This is the product
+case needed on positive bounded branches such as \([0,1]\); the fully
+sign-sensitive multiplication and an inverse construction remain separate
+foundational work, rather than consequences of an ambient completed field.
+Positive rational scaling is reversible at the level of validity and
+equivalence: if \(r>0\), then validity of \(rx\) implies validity of \(x\),
+and \(rx\sim ry\) implies \(x\sim y\).
+At each finite stage, addition and subtraction add interval widths exactly,
+and natural scaling multiplies them by the corresponding natural number; these
+finite identities support explicit precision budgets for composite
+computations.
+\end{proposition}
+
+\begin{definition}[Equivalence of real numbers]\label{def:raw-equiv}
+\lean{ComputableAnalysis.RealRaw.Equiv}
+\uses{def:raw-real}
+Two real numbers
+\[
+  x=[a_n,b_n]_{n\in\N},\qquad y=[c_n,d_n]_{n\in\N}
+\]
+are \emph{equivalent} if they overlap at every stage, i.e.,
+\[
+  [a_n,b_n] \mbox{ overlaps with } [c_n,d_n]
+  \qquad\text{for all }n.
+\]
+\end{definition}
+
+\begin{proposition}[Equivalence relation]\label{prop:raw-equiv-relation}
+\lean{ComputableAnalysis.RealRaw.equiv_refl}
+\lean{ComputableAnalysis.RealRaw.equiv_symm}
+\lean{ComputableAnalysis.RealRaw.equiv_trans}
+\uses{def:raw-real,def:raw-equiv}
+Equivalence of real numbers is an equivalence relation.
+\end{proposition}
+
+\begin{proposition}[Finite-prefix interval stabilization]
+\label{prop:raw-prefix-stabilization}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.RealRaw.prefixStabilize}\par
+\lean{ComputableAnalysis.RealRaw.prefixStabilize_valid}\par}
+\uses{def:raw-real,def:raw-equiv}
+Suppose a direct interval algorithm $C_n$ overlaps a valid anchor algorithm
+$A_n$ at every stage, both have explicit rational width moduli, and a public
+rational radius $r_n$ satisfies $\operatorname{width}(A_n)\le r_n$ and
+$r_n\to0$.  The stabilized algorithm takes the finite intersection
+
+\[
+  \bigcap_{k=0}^{n} [C_k^- - r_k,\;C_k^+ + r_k].
+\]
+
+It is a valid raw real and overlaps both $C$ and $A$.  Evaluation reads
+only the direct intervals and the public radii; the anchor appears only in the
+finite rational proof of the enclosure.  Thus this construction packages a
+known error bound into a nested evaluator without invoking a limit theorem or
+completeness.
+\end{proposition}
+
+\begin{definition}[Stage schedules]\label{def:stage-schedule}
+\lean{ComputableAnalysis.RealRaw.StageSchedule}
+\lean{ComputableAnalysis.RealRaw.schedule}
+\uses{def:raw-real,def:raw-equiv}
+A \emph{stage schedule} is an increasing function
+\[
+  \sigma:\N\to\N.
+\]
+If \(x=[a_n,b_n]_{n\in\N}\), then the scheduled real number is
+\[
+  \sigma\ldot x:=[a_{\sigma(n)},b_{\sigma(n)}]_{n\in\N}.
+\]
+\end{definition}
+
+\begin{proposition}[Using stage schedules]\label{prop:stage-schedule-equiv}
+\lean{ComputableAnalysis.RealRaw.schedule_equiv}
+\lean{ComputableAnalysis.RealRaw.equiv_of_schedule_equiv}
+\uses{def:stage-schedule,def:raw-equiv}
+For every stage schedule \(\sigma\), one has
+\[
+  x\sim \sigma\ldot x.
+\]
+Thus, to prove \(x\sim y\), it is enough to choose schedules
+\(\sigma,\tau\) that make
+\[
+  \sigma\ldot x\sim \tau\ldot y
+\]
+easier to show.
+\end{proposition}
+
+\begin{definition}[Certified real handles]\label{def:reals-quotient}
+\lean{ComputableAnalysis.Real}
+\uses{def:raw-real,def:raw-equiv}
+The current Lean-facing real type is a \emph{certified handle}, not a quotient
+or a completed field.  It stores one preferred valid raw interval algorithm
+and a finite list of alternative valid algorithms, each equipped with a proof
+of \(\Equiv\) to the preferred one.  This makes a chosen computation and its
+rate directly available while recording the representation changes that have
+already been proved.
+In particular, \code{Real.Representation.equiv} proves that any two certified
+representations of the same handle have equivalent raw evaluators.  This is an
+interoperability theorem about proved representations, not an identification
+of all raw algorithms by quotienting.
+For functions, the same distinction is kept at the appropriate level: named
+presentations use dot-qualified public names.  Thus \code{arctan.geom} and
+\code{arctan.series} are explicit domain-aware function representations, while
+the later integral and rectangle calculators are denoted
+\code{arctan.integral} and \code{arctan.integral.rectangle}.  At a certified rational
+input their raw outputs may be packaged as \code{Real} handles, and a proved
+pointwise agreement is then recorded with \code{Real.withAlternative}; no
+quotient or unproved global identification is introduced.
+\end{definition}
+
+\begin{proposition}[Raw arithmetic respects representations]\label{thm:raw-reals-field}
+\lean{ComputableAnalysis.Real.ofRat}
+\lean{ComputableAnalysis.RealRaw.add_equiv}
+\lean{ComputableAnalysis.RealRaw.sub_equiv}
+\lean{ComputableAnalysis.RealRaw.mul_equiv_of_nonneg}
+\uses{def:reals-quotient,def:raw-real-sign,def:raw-real-arithmetic,prop:raw-arithmetic-valid}
+The checked arithmetic operations preserve validity and are compatible with
+proved raw equivalence in their stated domains; in particular, the new
+nonnegative bounded product does not select a preferred representative.
+Constant rational intervals provide certified handles through
+\code{Real.ofRat}.  The development deliberately does not assert that these
+handles form a quotient, an ordered field, or a completed continuum; later
+theorems remain stated in terms of valid raw algorithms and explicit
+equivalence certificates.
+\end{proposition}
+
+\begin{remark}[No ambient completeness theorem]\label{rem:real-completeness}
+\uses{thm:raw-reals-field}
+No theorem identifies the raw interval representation with classical Cauchy
+reals or derives completeness.  When a proof needs existence or convergence,
+it constructs the relevant rational interval algorithm and proves orderedness,
+nesting, and an explicit width-shrinking bound directly.
+\end{remark}
+
+\section{Examples of real numbers \humanchecked}
+
+\begin{remark}[Algebraic numbers, starting with \(\sqrt2\)]
+\label{rem:algebraic-numbers-sqrt-two}
+\lean{ComputableAnalysis.sqrt}
+\lean{ComputableAnalysis.sqrtRaw}
+\lean{ComputableAnalysis.sqrtStageEps}
+\lean{ComputableAnalysis.one_div_natCast_den_eq}
+\lean{ComputableAnalysis.sqrtStageEps_den_eq}
+\lean{ComputableAnalysis.sqrtFuel_sqrtStageEps_eq}
+\lean{ComputableAnalysis.sqrtStageEps_den_mono}
+\lean{ComputableAnalysis.sqrtFuel_sqrtStageEps_mono}
+\lean{ComputableAnalysis.sqrtBisectStep_width_eq_half}
+\lean{ComputableAnalysis.sqrtBisect_width_eq}
+\lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq}
+\lean{ComputableAnalysis.sqrtApproxOnDomain_width_eq_positive_stage}
+\lean{ComputableAnalysis.sqrtBisectStep_contains}
+\lean{ComputableAnalysis.sqrtBisect_contains_of_le_fuel}
+\lean{ComputableAnalysis.sqrtApproxOnDomain_width_le_nat_over_succ}
+\lean{ComputableAnalysis.sqrtApproxOnDomain_valid}
+\lean{ComputableAnalysis.sqrtRaw_valid}
+\lean{ComputableAnalysis.sqrtRaw_spec}
+\lean{ComputableAnalysis.sqrtCertified_of_domain}
+\lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
+\uses{def:raw-real}
+The first nontrivial computable real number to keep in mind is \(\sqrt2\).
+In pseudocode, with all arithmetic performed in \(\Q\), the stage algorithm is:
+\begin{verbatim}
+def sqrt2(n):
+    a = 1
+    b = 2
+    for _ in range(n):
+        a = (2 + a*b) / (a + b)
+        b = (b + 2/b) / 2
+    return [a, b]
+\end{verbatim}
+This is the stage-based version of the precision loop: instead of looping
+until \(b-a\le\eps\), the raw-real algorithm returns the interval after the
+requested stage \(n\), and the proof later shows that the widths tend to
+zero.  The invariant is that \(a^2\le 2\le b^2\), so each returned interval
+contains the positive solution of
+\[
+  x^2-2=0.
+\]
+Algebraic numbers more generally are solutions of polynomial equations with
+rational coefficients.  They can be represented by interval algorithms that
+isolate a root and then refine the isolating interval.  The Lean square-root
+algorithm is the rational-input instance of this idea, and the finite square
+criterion proves that \(\sqrt2\) is not equivalent to any rational number.
+Lean now also records the exact bisection-width facts for the rational
+square-root subroutine: one bisection halves the interval width, \(k\)
+bisections divide the width by \(2^k\), each bisection stays inside the
+previous ordered interval, and the public staged square-root approximation has
+the corresponding explicit power-of-two width.  For positive stages, Lean also
+normalizes the precision denominator and the \(\code{sqrtFuel}\) schedule, so
+the public width unfolds to the concrete denominator
+\(2^{n+\code{den}(\code{sqrtUpperBound}\ q)+8}\).  The square-root raw real is
+now fully verified: later stages are obtained by extra bisections inside the
+same initial isolating interval, and the explicit width is bounded by a
+rational constant divided by \(n+1\).  Consequently every rational input in
+the square-root domain has a certified optional square-root computation.
+On the unit interval, a cofinal scheduled version additionally has a verified
+quadratic interval modulus and hence literal rational
+\(\varepsilon\)--\(\delta\) continuity.  These are the small interval-shrinking
+facts needed later for square-root path lengths such as the circumference
+computation and for inverse-trigonometric integral branches.
+\end{remark}
+
+\begin{remark}[Pseudocode convention]\label{rem:pseudocode-convention}
+\uses{rem:computable-presentations,rem:algebraic-numbers-sqrt-two}
+When an algorithm is displayed as a code block, it is Python-like pseudocode
+for rational arithmetic.  Variables such as \(a,b,x,y\) represent rational
+numbers unless the text explicitly says otherwise; assignments, loops, and
+lists are finite operations; and no floating-point approximation is being
+used.  A code block records the intended terminating stage algorithm, while
+the surrounding propositions prove that the returned rational intervals are
+nested and have widths tending to zero.
+\end{remark}
+
+\begin{remark}[Other types of real numbers]\label{rem:sources-of-raw-reals}
+\uses{def:interval-sequence,def:raw-real,rem:algebraic-numbers-sqrt-two}
+Beyond algebraic numbers, there are other useful ways of defining real
+numbers.  Most of the non-algebraic examples in this project fall into one of
+the following types:
+\begin{itemize}
+  \item Infinite series, for example,
+  \[
+    \frac{\pi}{4}
+    =
+    1-\frac{1}{3}+\frac{1}{5}-\frac{1}{7}+\cdots
+  \]
+  and
+  \[
+    \frac{\pi^2}{6}
+    =
+    1+\frac{1}{4}+\frac{1}{9}+\frac{1}{16}+\cdots .
+  \]
+  of Leibniz and Euler. These are easy to implement, though the latter requires a little
+  care with the upper bound (hint: telescoping sum).
+
+  \item Continued fractions, such as
+  \[
+    \frac{4}{\pi}
+    =
+    1+\cfrac{1^2}{2+\cfrac{3^2}{2+\cfrac{5^2}{2+\cfrac{7^2}{2+\ddots}}}}.
+  \]
+  and finite truncations work as rational bounds.
+
+  \item Periods, i.e., integrals of rational or algebraic functions:
+  \[
+    \frac{\pi}{4}
+    =
+    \int_0^1\frac{\dd x}{1+x^2},
+  \]
+  \[
+    \frac{\pi}{6}
+    =
+    \int_0^{1/2}\frac{\dd x}{\sqrt{1-x^2}},
+  \]
+  \[
+    \frac{\pi}{12}+\frac{\sqrt3}{8}
+    =
+    \int_0^{1/2}\sqrt{1-x^2}\,\dd x.
+  \]
+  and upper and lower Riemann sums work. (The last one is what Newton used to compute \(\pi\),
+  with binomial expansion.)
+
+  \item Integrals (proper or not) of transcendental functions are also
+  likely in play, for instance
+  \[
+    \sqrt{2\pi}
+    =
+    \int_{-\infty}^{\infty} e^{-x^2/2}\,\dd x.
+  \]
+\end{itemize}
+
+One may define \(\pi\) by one of these formulas, and the others would be
+theorems (of equivalence of two real numbers). Or perhaps one should
+define \(\pi\) by Archimedes' method of exhaustion.
+\end{remark}
+
+\begin{remark}[Calculus as equivalence]\label{rem:calculus-as-equivalence}
+\uses{def:raw-equiv,rem:sources-of-raw-reals}
+A great deal of calculus is the art of proving that independently constructed
+real numbers are equivalent. The great advance by Newton and Leibniz is
+to turn that art mechanical, by leveraging the fundamental formula
+\[
+  \int_a^b f'(x)\,\dd x = f(b)-f(a)
+\]
+which we shall establish, \emph{without} the completeness of real numbers.
+\end{remark}
+
+\begin{remark}[Algorithm with a variable]\label{rem:parameterized-constructions}
+\uses{rem:sources-of-raw-reals}
+In many of these algorithms, there is a natural variable that could assume
+different values (\(\sqrt{\phantom{x}}\), \(\arctan\), \(\arcsin\) in the
+examples above), so it makes sense to define the algorithms
+\[
+  n,t\longmapsto [a_n(t),b_n(t)]
+\]
+to be (computable) \emph{functions}. However, not all rational values of \(t\)
+need to result in a real number.
+
+This turns out to be crucial for establishing many of the equivalences of real
+numbers, and is how calculus appears to be the study of functions.
+\end{remark}
+
+\begin{remark}[Complex variable]\label{rem:complex-parameters}
+\uses{rem:parameterized-constructions,def:qcomplex,def:qbox}
+It turns out that often it makes sense for the variable to assume complex values
+(at least for \(t+si\), with \(t,s\in\Q\)).  For example, power series may be evaluated
+inside a disk in the complex plane, and integrals can be taken over paths in the complex plane.
+\end{remark}
+
+\section{Complex numbers \humanchecked}
+
+One could define complex numbers as pairs of real numbers.  Instead, we follow
+the interval arithmetic more closely, using rectangular boxes with rational corners
+from the start.
+
+\begin{definition}[Field \(\Q(i)\)]\label{def:qcomplex}
+\lean{ComputableAnalysis.QComplex}
+Let
+\[
+  \Q(i):=\{r+is:r,s\in\Q\},
+\]
+with the standard field operations:
+\[
+  (r+is)(u+iv)=(ru-sv)+i(rv+su),
+\]
+etc. We also use the coordinatewise (partial) order:
+\[
+  r+is \le u+iv
+  \quad\Longleftrightarrow\quad
+  r\le u\ \text{and}\ s\le v.
+\]
+Note that this is not a total/linear order on \(\Q(i)\).
+\end{definition}
+
+\begin{definition}[Rational box]\label{def:qbox}
+\lean{ComputableAnalysis.QBox}
+\uses{def:qcomplex}
+A \emph{rational box} is a pair
+\[
+  \cbox{a}{b}\in \Q(i)\times\Q(i),
+  \qquad a\le b.
+\]
+Two boxes \(\cbox{a}{b}\) and
+\(\cbox{c}{d}\) \emph{overlap} if
+\[
+  a\le d\ \text{and}\ c\le b.
+\]
+\end{definition}
+
+\begin{definition}[Box sequence]\label{def:box-sequence}
+\uses{def:qbox}
+A \emph{box sequence} is a sequence of rational boxes
+\[
+  \cbox{a_n}{b_n}_{n\in\N}.
+\]
+\end{definition}
+
+\begin{definition}[complex number]\label{def:complex-raw}
+\lean{ComputableAnalysis.ComplexRaw}
+\uses{def:box-sequence,def:raw-equiv}
+A \emph{complex number} is a nested box sequence
+\[
+  z=\cbox{a_n}{b_n}_{n\in\N}
+\]
+satisfying
+\[
+  n\le m\Rightarrow a_n\le a_m\le b_m\le b_n,
+\]
+and whose real and imaginary widths both shrink to \(0\).  Equivalently, its
+coordinate interval sequences are real numbers.  Two complex numbers are
+equivalent when their boxes overlap at every stage, i.e. coordinatewise
+equivalence of the real and imaginary parts.
+\end{definition}
+
+\begin{definition}[Complex arithmetic]\label{def:complex-arithmetic}
+\lean{ComputableAnalysis.ComplexRaw.add}
+\lean{ComputableAnalysis.ComplexRaw.mul}
+\uses{def:complex-raw,def:raw-real-arithmetic}
+For complex numbers as box sequences
+\[
+  z=\cbox{a_n}{b_n}_{n\in\N},\qquad
+  w=\cbox{c_n}{d_n}_{n\in\N},
+\]
+addition is stagewise:
+\[
+  z+w:=\cbox{a_n+c_n}{b_n+d_n}_{n\in\N}.
+\]
+Negation reverses the box:
+\[
+  -z:=\cbox{-b_n}{-a_n}_{n\in\N}.
+\]
+For multiplication, write the same box sequences in coordinates as
+\[
+  z=x+iy,\qquad w=u+iv,
+\]
+where \(x,y,u,v\) are real numbers.  Then define
+\[
+  zw:=(xu-yv)+i(xv+yu).
+\]
+At the level of rational boxes, multiplication is implemented by applying
+real interval arithmetic to these four real products and taking bounding
+intervals.
+\end{definition}
+
+\begin{definition}[Complex inverse]\label{def:complex-inverse}
+\lean{ComputableAnalysis.ComplexRaw.ApartZero}
+\lean{ComputableAnalysis.ComplexRaw.HasComputableInv}
+\uses{def:complex-arithmetic,def:raw-real-arithmetic,def:raw-real-sign}
+A complex number \(z=x+iy\) is \emph{nonzero} if
+\[
+  x^2+y^2
+\]
+is nonzero as a real number.  For nonzero \(z\), define
+\[
+  z^{-1}
+  :=
+  \frac{x}{x^2+y^2}
+  -
+  i\,\frac{y}{x^2+y^2}.
+\]
+\end{definition}
+
+\begin{definition}[Certified complex handles]\label{def:complex-quotient}
+\lean{ComputableAnalysis.Complex}
+\uses{def:complex-raw}
+The current Lean-facing complex type stores a preferred certified complex-box
+algorithm and a finite list of certified equivalent alternatives.  As for
+\code{Real}, this is a computation-oriented representation layer rather than
+a quotient construction.
+\end{definition}
+
+\begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}
+\uses{def:complex-quotient,def:complex-arithmetic,def:complex-inverse}
+The raw box operations carry validity and equivalence lemmas.  The project
+does not currently claim a quotient field structure for \code{Complex};
+scientific constructions use certified raw operations and their accompanying
+overlap proofs.
+\end{proposition}
+
+\begin{proposition}[Available rational and real embeddings]\label{thm:rational-complex-field-square}
+\lean{ComputableAnalysis.ComplexRaw.ofQComplex}
+\lean{ComputableAnalysis.Complex.ofQComplex}
+\lean{ComputableAnalysis.Complex.ofReal}
+\uses{def:qcomplex,def:complex-quotient,thm:raw-reals-field,thm:complex-field}
+Lean provides constant rational-complex boxes and embeds certified reals on the
+real axis.  At the representation level the intended diagram is
+\[
+\begin{array}{ccc}
+\Q & \longrightarrow & \Q(i)\\
+\downarrow & & \downarrow\\
+\R & \longrightarrow & \C
+\end{array}
+\]
+but no field-homomorphism or quotient claim is used by the present calculus.
+\end{proposition}
+
+\section{Functions and domains}
+
+\begin{definition}[Complex-valued function representation]\label{def:function-raw}
+\lean{ComputableAnalysis.FunctionRaw}
+\uses{def:qcomplex,def:complex-raw}
+A \emph{complex-valued function representation} consists of:
+\begin{enumerate}
+  \item a rational domain predicate \(D_f\subseteq\Q(i)\), and
+  \item a finite stage algorithm which, given \(z\in D_f\) and \(n\in\N\),
+  returns a rational complex box \(B_f(z,n)\).
+\end{enumerate}
+The pointwise validity requirement is:
+for every fixed rational input \(z\in D_f\), the sequence
+\[
+  n\longmapsto B_f(z,n)
+\]
+is a complex number in the sense of \cref{def:complex-raw}.  At the
+computational layer, an input is supplied by a rational name and evaluation is
+a stage-indexed box algorithm.  The domain may be all rational names in a
+region, or only names in a branch domain, and every evaluation carries the
+domain proof.
+\end{definition}
+
+\begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}
+\lean{ComputableAnalysis.RealFunRaw}
+\lean{ComputableAnalysis.PartialRealFunRaw}
+\uses{def:function-raw,thm:rational-complex-field-square}
+A real-input real-valued function is the real-axis specialization of
+\cref{def:function-raw}.  It consists of a rational domain predicate
+\(D_f\subseteq\Q\) and a stage algorithm
+\[
+  (x,n)\longmapsto [a_f(x,n),b_f(x,n)],
+  \qquad x\in D_f,\quad n\in\N,
+\]
+such that for every fixed rational \(x\in D_f\), the sequence
+\[
+  n\longmapsto [a_f(x,n),b_f(x,n)]
+\]
+is a real number in the sense of \cref{def:raw-real}.  In applications we often
+also require \(D_f\) to contain at least one nontrivial rational interval; this
+is recorded by the interval wrappers below rather than by changing the basic
+function definition.
+
+Lean has two presentations of this same idea.  \code{RealFunRaw} keeps the
+\code{compute} field total on rational inputs and stores a domain predicate
+saying where it is valid.  \code{PartialRealFunRaw} makes the domain proof an
+argument to \code{compute}.  In both cases, validity means exactly the
+pointwise condition above: for each fixed rational input in the domain, the
+stage sequence is a raw real.
+\end{definition}
+
+\begin{definition}[Rational segment]\label{def:rational-segment}
+\uses{def:qcomplex}
+A \emph{rational segment} in the complex plane is determined by two distinct
+rational complex points \(p,q\in\Q(i)\).  Its rational points are
+\[
+  (1-t)p+tq,\qquad t\in\Q,\quad 0\le t\le 1.
+\]
+The segment is real when \(p\) and \(q\) lie on the rational real axis.
+\end{definition}
+
+\begin{definition}[Agreement on an overlap]\label{def:function-agrees-on-overlap}
+\uses{def:function-raw,def:rational-segment,def:complex-raw}
+Let \(f\) and \(g\) be complex-valued function representations.  An
+\emph{agreement-on-overlap certificate} consists of a nontrivial rational
+segment \(S\) such that every rational point of \(S\) lies in both domains, and
+for every rational point \(q\in S\), the complex numbers \(f(q)\) and \(g(q)\)
+are equivalent.
+
+This is a local agreement statement with an explicit witness.  For arbitrary
+functions it is not promoted to a global equivalence relation; transitivity
+requires additional analytic structure.
+\end{definition}
+
+\begin{definition}[Function on an interval]\label{def:function-on-interval}
+\lean{ComputableAnalysis.FunctionOnInterval}
+\uses{def:qinterval,def:real-fun-raw,def:rational-segment}
+A function on a rational interval \([a,b]\) is the real-axis special case of
+the preceding setup: the interval is the rational segment from \(a+i0\) to
+\(b+i0\), the function is defined at every rational point of that segment, and
+the pointwise outputs are real numbers.
+\end{definition}
+
+\begin{definition}[Interval regularity]\label{def:interval-regular}
+\lean{ComputableAnalysis.IntervalRegularOn}
+\uses{def:function-on-interval}
+Let \(F\) be a real-valued function on \([a,b]\).  An interval-regularity
+certificate assigns to each rational subinterval
+\[
+  K=[r,s]\subseteq [a,b]
+\]
+and each stage \(n\) a rational output interval \(Y(K,n)\).  It supplies a
+modulus \(M:\N\to\N\), positive at every stage, such that whenever
+\[
+  s-r\le \frac{1}{M(n)},
+\]
+and \(Y(K,n)=[u,v]\), we have
+\[
+  0\le v-u\le \frac{1}{n+1},
+\]
+and for every rational point \(x\in K\), the point-value interval
+\(F(x,n)\) is enclosed by \(Y(K,n)\).  Thus this is genuinely
+interval-valued continuity: it controls both the separation of values and
+the widths of their rational enclosures.
+\end{definition}
+
+\begin{theorem}[Constructive monotone inverse-function theorem]
+\label{thm:constructive-inverse-function}
+\lean{ComputableAnalysis.EffectiveInverseSeparation}
+\lean{ComputableAnalysis.InvertibleFunctionOnInterval}
+\lean{ComputableAnalysis.InRangeRaw}
+\lean{ComputableAnalysis.InverseRaw}
+\lean{ComputableAnalysis.HasInverse}
+\lean{ComputableAnalysis.HasBisectionSearch}
+\lean{ComputableAnalysis.inverse_function_from_bisection_search}
+\uses{def:function-on-interval,def:interval-regular}
+Fix an interval-regular monotone branch \(I\) on a rational source interval.
+In addition to monotonicity, it carries an effective inverse-separation
+certificate: at every requested scale, inputs separated by a stated positive
+rational amount have disjointly ordered output boxes, in the one orientation
+(nondecreasing or nonincreasing) chosen for the branch.  That orientation is
+required to agree with the monotonicity witness.  For every valid raw target
+that is explicitly enclosed by the endpoint-value boxes of \(I\), suppose we
+give a certified finite bisection search.  Lean then proves the branch-local
+assembly theorem
+\[
+  \code{HasBisectionSearch}(I)
+  \Longrightarrow \code{HasInverse}(I).
+\]
+Thus, once a particular bisection/search is supplied for each computable
+target with a certified range witness, it gives a raw interval algorithm for
+the preimage.  Such a target is itself a valid raw real, and for every target
+stage it carries an explicit precision at which its output box lies between the
+correctly oriented endpoint-value boxes of \(I\).  The theorem does not obtain
+that finite search by a choice principle.
+Thus the inverse is another interval algorithm, not a choice of a point from
+a completed continuum.  Effective separation is essential: monotonicity alone
+does not give a usable finite inverse search for a function that may be
+arbitrarily flat.
+\end{theorem}
+
+\begin{example}[Algebraic branches]
+\label{ex:algebraic-inverse-branches}
+\lean{ComputableAnalysis.squareOnUnit_invertible}
+\lean{ComputableAnalysis.squareOnUnitRationalTarget}
+\lean{ComputableAnalysis.sqrtOnUnitBisectionSearch}
+\lean{ComputableAnalysis.sqrtRaw_spec}
+\lean{ComputableAnalysis.sqrtOnUnit}
+\lean{ComputableAnalysis.sqrtOnUnit_intervalRegular}
+\lean{ComputableAnalysis.sqrtOnUnit_epsilonDeltaContinuous}
+\uses{thm:constructive-inverse-function}
+The first concrete forward package is squaring on \([0,1]\): its evaluator is
+the exact rational box \([r^2,r^2]\), it has a direct rational interval
+modulus, is nondecreasing, and has a nondecreasing effective-separation
+certificate.  Lean's \code{squareOnUnit\_invertible} packages these data.
+The existing nonnegative square-root bisection intervals
+isolate the solution of \(w^2=q\), are valid raw reals, and satisfy the
+algebraic specification.  For every exact rational target \(q\in[0,1]\),
+Lean packages this exact-target bisection as
+\code{sqrtOnUnitBisectionSearch}: it remains inside the source interval and
+its squared interval overlaps the target box.  The exact target box is also
+formally enclosed by the square map's endpoint boxes at every stage, so it is
+a genuine certified range input to the inverse interface.  Extending that
+finite search uniformly to every represented target on the unit range is the
+next inverse-function step; no inverse is asserted merely from monotonicity.
+Separately, Lean now packages the scheduled bisection evaluator itself as the
+interval-regular function \code{sqrtOnUnit}.  For an input interval of width
+at most \(1/(16(n+1)^2)\), its endpoint boxes, enlarged by certified bisection
+errors, enclose every point box and have width at most \(1/(n+1)\).  Thus
+\(\sqrt{\phantom{x}}\) on \([0,1]\) already satisfies the literal rational
+\(\varepsilon\)--\(\delta\) continuity predicate, without a topology import.
+General algebraic functions will use isolating boxes, separation, and
+bisection or subdivision to construct selected branches.
+\end{example}
+
+\begin{remark}[Continuous extension of represented functions]
+\label{rem:continuous-extension-of-function-representations}
+Rational names are the finite interface of the representation, not the
+intended mathematical domain.  A continuous representation with an effective
+modulus can later be extended from rational names to all computable real
+inputs; the complex analogue extends it to a specified open computable domain.
+Only functions equipped with the necessary continuity and domain certificates
+admit this extension.  The present chapters use the rational-name interface
+until that extension theorem is constructed.
+\end{remark}
+
+
+\begin{remark}[How the later elementary functions fit]
+\label{rem:elementary-functions-are-function-representations}
+\uses{def:real-fun-raw,def:function-on-interval}
+The elementary functions constructed later all use this same shape.
+Power-series arctangent has domain \([-1,1]\) and sends \((x,n)\) to an
+alternating-series interval.  The next chapter is planned to obtain the first
+sine and cosine branch by applying the preceding inverse theorem to geometric
+arctangent, recovering the bounded tangent slope, and evaluating the rational
+circle chart at that slope.  Its two coordinate projections are cosine and
+sine.  Exponential is
+represented by power-series, compound-interest, and inverse-log-integral
+stage algorithms.  Logarithm is a \code{FunctionOnInterval} on positive
+branches, defined by the integral of \(1/x\).  In every case, fixing a
+rational name in the stated domain leaves an interval sequence in the stage
+variable, and the validity proof is precisely the proof that this sequence is
+a raw real.
+\end{remark}
+
+\begin{theorem}[Interval regularity implies rational continuity]
+\label{thm:interval-regular-implies-epsilon-delta}
+\lean{ComputableAnalysis.IntervalRegularOn.epsilonDeltaContinuous}
+\uses{def:interval-regular}
+\leanok
+Every interval-regular function satisfies the literal rational
+\(\varepsilon\)-\(\delta\) predicate used elsewhere in the project.  For a
+positive rational \(\varepsilon\), Lean takes the finite stage
+\(n=\operatorname{den}(\varepsilon)+1\), so \(1/n\le\varepsilon\), and
+uses \(\delta=1/M(n)\).  The smallest rational interval containing two
+inputs within \(\delta\) has an image enclosure of width at most
+\(1/n\).  Since both point-value boxes are contained in that one enclosure,
+they are \code{NearAt} within \(\varepsilon\), including their individual
+width bounds.  This is a direct finite rational proof, with no topology or
+real-number completeness principle.
+\end{theorem}
+
+\begin{remark}[Holomorphic branch equivalence]\label{rem:holomorphic-branch-equivalence}
+\uses{def:function-agrees-on-overlap}
+For later complex analysis, holomorphic function representations will carry
+stronger domain data.  On that layer, overlap should be witnessed by a
+nonempty open region, such as a rational disk contained in the intersection of
+the domains.  The identity principle can then turn local agreement on such an
+overlap into a transitive branch-equivalence relation.
+\end{remark}
+
+\begin{remark}[Completeness is replaced by moduli]\label{rem:completeness-replaced-by-moduli}
+\uses{def:interval-regular}
+Classical compactness, uniform continuity, and existence of suprema are not
+used as black boxes.  The project records the finite data that those theorems
+usually hide: interval images, rates, nesting, and enclosure proofs.
+\end{remark}

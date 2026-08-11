@@ -1,0 +1,14 @@
+name = "ComputableAnalysis"
+version = "0.1.0"
+defaultTargets = ["computableanalysis"]
+
+[[lean_lib]]
+name = "ComputableAnalysis"
+
+[[lean_exe]]
+name = "computableanalysis"
+root = "Main"
+
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"

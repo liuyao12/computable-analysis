@@ -2,6 +2,7 @@ import ComputableAnalysis.Calculus
 import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.PowerSeries
+import ComputableAnalysis.Series
 
 /-!
 # Taylor expansions by iterated FTC
@@ -842,6 +843,47 @@ theorem qabs_kernelRemainder_le_power (x : Rat) (n : Nat) :
   have hpow := neg_pow_between_pow hu (n + 1)
   have hdiv := div_between_of_between hp hd hpow.1 hpow.2
   exact qabs_le_of_between hdiv.1 hdiv.2
+
+/-- A finite error-budget certificate for the arctangent-kernel expansion.
+
+If a supplied rational power check bounds the next omitted finite power by
+`eps`, then the division identity and the kernel remainder are certified at
+that same explicit budget.  This is a finite rational implication: `eps` is
+not a limiting parameter and no completed value is introduced. -/
+theorem finite_remainder_error_budget
+    (x eps : Rat) (n : Nat)
+    (hbudget : (x * x) ^ (n + 1) <= eps) :
+    1 / (1 + x * x) = kernelPartial x n + kernelRemainder x n /\
+      qabs (kernelRemainder x n) <= eps := by
+  constructor
+  · exact one_div_one_add_square_eq_partial_add_remainder x n
+  · exact Rat.le_trans (qabs_kernelRemainder_le_power x n) hbudget
+
+/-- A fully executable remainder budget on the rational half-interval.
+
+For `0 <= x <= 1/2`, the omitted power is dominated by a half-power, so the
+generic finite remainder route reaches the explicit stage error `1/(n+2)`.
+This is a finite Taylor certificate; it does not use a limiting argument. -/
+theorem finite_remainder_half_interval_budget
+    {x : Rat} (hx0 : 0 <= x) (hxhalf : x <= (1 : Rat) / 2) (n : Nat) :
+    1 / (1 + x * x) = kernelPartial x n + kernelRemainder x n /\
+      qabs (kernelRemainder x n) <=
+        1 / (((n + 2 : Nat) : Rat)) := by
+  have hxx0 : 0 <= x * x := Rat.mul_nonneg hx0 hx0
+  have hxxhalf : x * x <= (1 : Rat) / 2 := by
+    have hleft : x * x <= x * ((1 : Rat) / 2) :=
+      Rat.mul_le_mul_of_nonneg_left hxhalf hx0
+    have hright : x * ((1 : Rat) / 2) <=
+        ((1 : Rat) / 2) * ((1 : Rat) / 2) :=
+      Rat.mul_le_mul_of_nonneg_right hxhalf (by native_decide)
+    have hquarter : ((1 : Rat) / 2) * ((1 : Rat) / 2) <=
+        (1 : Rat) / 2 := by native_decide
+    exact Rat.le_trans hleft (Rat.le_trans hright hquarter)
+  have hpow := Series.pow_le_half_pow hxx0 hxxhalf (n + 1)
+  have hhalf := Series.half_pow_le_one_div_succ (n + 1)
+  exact finite_remainder_error_budget x
+    (1 / (((n + 2 : Nat) : Rat))) n
+    (Rat.le_trans hpow hhalf)
 
 private theorem rat_mul_nonpos_of_nonneg_of_nonpos {a b : Rat}
     (ha : 0 <= a) (hb : b <= 0) : a * b <= 0 := by

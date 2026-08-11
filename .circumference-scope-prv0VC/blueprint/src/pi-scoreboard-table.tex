@@ -1,0 +1,59 @@
+Definition-complete means a valid raw real; equivalence-complete means a
+formal chain of \code{RealRaw.Equiv} theorems.  The table is a compact
+release-style coverage suite, not a numerator for a calculus-completeness
+percentage.  Its five rows are the deliberately distinct bridges formalized
+by the \code{PiProofs.PiCoverageBridge} type and its \code{equivalent}
+theorem.
+
+The suite asks whether a construction useful elsewhere in calculus agrees
+with an independently constructed value of the same constant.  Thus a row is
+evidence for a capability gate, rather than a claim that five successful pi
+proofs make five equal-sized contributions to scientific or engineering
+calculus.  In particular, a continuous Peano--Baker theorem and a proof that
+the selected exponential satisfies \(e^x{}'=e^x\) are major advances even
+though neither creates a new pi row.
+
+\begin{center}
+\begin{tabular}{p{0.21\textwidth}p{0.29\textwidth}p{0.27\textwidth}cc}
+\textbf{Capability exercised} & \textbf{Witnessed equivalence} &
+\textbf{What it regression-tests} & \textbf{Def.} & \textbf{Equiv.}\\
+\hline
+Finite Archimedean geometry &
+cross-fan circumference \(\sim\) area loop &
+exact rational circle fans, square-root enclosures, and nested interval bounds &
+\(\checkmark\) & \(\checkmark\)\\
+Arctangent and power series &
+geometric arctangent \(\sim\) Leibniz series &
+circular inverse geometry against the alternating arctangent series &
+\(\checkmark\) & \(\checkmark\)\\
+Finite definite integration &
+rectangle arctangent integral \(\sim\) Leibniz series &
+certified rectangle integration and its endpoint bridge &
+\(\checkmark\) & \(\checkmark\)\\
+Compactified improper integration &
+Cauchy full-line integral \(\sim\) area loop &
+reciprocal-tail transport from a full line to a finite interval &
+\(\checkmark\) & \(\checkmark\)\\
+Algebraic-kernel integration &
+reciprocal-quartic integral \(\sim\) Cauchy integral &
+a nontrivial rational kernel, finite quadrature, and its integral identity &
+\(\checkmark\) & \(\checkmark\)\\
+\end{tabular}
+\end{center}
+
+The full \code{PiProofs.PiPresentation} registry retains supplementary
+checked evaluators as regression implementations: polygon area, the two
+perimeter normalizations, Nilakantha, and the single Machin power-series
+formula.  They remain useful executable comparisons, but are not additional
+readiness cells because they reuse one of the bridges above.
+
+The direct \code{piCircumference} evaluator remains a geometric diagnostic:
+its unresolved lower-endpoint refinement is a local square-root-enclosure
+problem, not a missing calculus gate.  Lean now reduces it to
+\code{AdjacentChordCurvatureMarginCoversFineWidths}: an explicit rational
+margin comparing the two fine curvature certificates, their bisection widths,
+and the coarse squared chord.  The reduction from that margin to the original
+endpoint refinement is checked; the universal margin inequality remains open.
+The arcsine/Newton and Gaussian rows remain future probes for inverse/
+square-root integration and the exponential/full-line layers; advanced routes
+are intentionally omitted from this progress table.

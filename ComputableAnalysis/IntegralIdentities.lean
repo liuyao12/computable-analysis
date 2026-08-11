@@ -3167,6 +3167,27 @@ def arctanIntegralRectangleOnUnit_monotone :
   MonotoneOnInterval.ofNondecreasing
     arctanIntegralRectangleOnUnit_nondecreasing
 
+/-! The finite rectangle evaluator already has the strict separation data
+needed by a branch-local inverse search.  Keep this certificate attached to
+the same function object as its monotonicity witness; no inverse or attained
+real value is introduced here. -/
+
+def arctanIntegralRectangleOnUnit_effectiveInverseSeparation :
+    EffectiveInverseSeparation arctanIntegralRectangleOnUnit where
+  kind := .nondecreasing
+  inputPrecision := fun n => n + 1
+  inputPrecision_pos := fun n => Nat.succ_pos n
+  outputPrecision := fun n => 64 * (n + 1)
+  separated := by
+    intro x y hx hy n hsep
+    change
+      (ArctanGeometry.arctanIntegralRectangleCompute x
+        (64 * (n + 1))).hi <
+        (ArctanGeometry.arctanIntegralRectangleCompute y
+          (64 * (n + 1))).lo
+    exact ArctanGeometry.arctanIntegralRectangleCompute_boxes_strictly_separated
+      hx.1 hx.2 hy.1 hy.2 n hsep
+
 /-- A fixed-tolerance, fixed-stage form of rational continuity for the
 rectangle arctangent.  It exposes the literal schedule used by the later FTC
 cell construction: input distance at most `eps` and any rectangle stage at
@@ -15974,6 +15995,120 @@ theorem arctanKernelLipschitzIntegral_equiv_rectangleForAtOne :
     (LipschitzDyadic.compute (fun x : Rat => 1 / (1 + x * x)) 2 stage)
     (ArctanGeometry.arctanIntegralRectangleComputeAtOne stage)
   exact arctanKernelLipschitz_compute_overlaps_rectangle stage
+
+/-!
+## Finite tangent-chart substitution certificates
+
+The following declarations are deliberately one level below a substitution
+theorem. They transport a supplied finite rational partition cell by cell.
+The two displayed factors are the exact endpoint Jacobian ratios for the
+chart `p ↦ (u + p) / (1 - u*p)`. The final theorem records the resulting
+endpoint sums and the interval enclosure; it makes no claim about a limit or
+about a general integral substitution principle.
+-/
+
+/-- The lower-rectangle Jacobian factor for one admissible chart cell. -/
+def chartAddLowerJacobian (u p r : Rat) : Rat :=
+  RationalCircle.Trigonometry.chartAddDen u r /
+    RationalCircle.Trigonometry.chartAddDen u p
+
+/-- The upper-rectangle Jacobian factor for one admissible chart cell. -/
+def chartAddUpperJacobian (u p r : Rat) : Rat :=
+  RationalCircle.Trigonometry.chartAddDen u p /
+    RationalCircle.Trigonometry.chartAddDen u r
+
+/-- Fold the source lower cells with their explicit chart Jacobian factors. -/
+def chartAddLowerTransportSum (u : Rat) : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      ArctanGeometry.integralLowerStep p r *
+          chartAddLowerJacobian u p r +
+        chartAddLowerTransportSum u rest
+
+/-- Fold the source upper cells with their explicit chart Jacobian factors. -/
+def chartAddUpperTransportSum (u : Rat) : List (Rat × Rat) -> Rat
+  | [] => 0
+  | (p, r) :: rest =>
+      ArctanGeometry.integralUpperStep p r *
+          chartAddUpperJacobian u p r +
+        chartAddUpperTransportSum u rest
+
+/-- The charted lower-cell sum is exactly the source lower-cell sum with the
+explicit right-over-left endpoint Jacobian inserted in every cell. -/
+theorem chartAddLowerTransportSum_eq_charted
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hden : ArctanGeometry.ChartAddPositiveDenominators u intervals) :
+    ArctanGeometry.integralLowerSum
+        (ArctanGeometry.chartAddIntervals u intervals) =
+      chartAddLowerTransportSum u intervals := by
+  induction intervals with
+  | nil => rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hden with ⟨hpden, hrden, hdenrest⟩
+      have hpne :
+          RationalCircle.Trigonometry.chartAddDen u p ≠ 0 :=
+        Rat.ne_of_gt hpden
+      have hrne :
+          RationalCircle.Trigonometry.chartAddDen u r ≠ 0 :=
+        Rat.ne_of_gt hrden
+      simp only [ArctanGeometry.chartAddIntervals,
+        ArctanGeometry.integralLowerSum,
+        chartAddLowerTransportSum]
+      rw [ArctanGeometry.integralLowerStep_chartAddParameter_eq
+        hpne hrne]
+      rw [ih hdenrest]
+      rfl
+
+/-- The charted upper-cell sum is exactly the source upper-cell sum with the
+explicit left-over-right endpoint Jacobian inserted in every cell. -/
+theorem chartAddUpperTransportSum_eq_charted
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hden : ArctanGeometry.ChartAddPositiveDenominators u intervals) :
+    ArctanGeometry.integralUpperSum
+        (ArctanGeometry.chartAddIntervals u intervals) =
+      chartAddUpperTransportSum u intervals := by
+  induction intervals with
+  | nil => rfl
+  | cons cell rest ih =>
+      rcases cell with ⟨p, r⟩
+      rcases hden with ⟨hpden, hrden, hdenrest⟩
+      have hpne :
+          RationalCircle.Trigonometry.chartAddDen u p ≠ 0 :=
+        Rat.ne_of_gt hpden
+      have hrne :
+          RationalCircle.Trigonometry.chartAddDen u r ≠ 0 :=
+        Rat.ne_of_gt hrden
+      simp only [ArctanGeometry.chartAddIntervals,
+        ArctanGeometry.integralUpperSum,
+        chartAddUpperTransportSum]
+      rw [ArctanGeometry.integralUpperStep_chartAddParameter_eq
+        hpne hrne]
+      rw [ih hdenrest]
+      rfl
+
+/-- A checked finite rational substitution/partition certificate for the
+arctangent kernel. It exposes both endpoint-weighted cell sums, their exact
+Jacobian-factor folds, and the fact that the transported rectangle bracket
+contains the source bracket. This is a finite partition statement only. -/
+theorem chartAddPartition_transport_certificate
+    (u : Rat) (intervals : List (Rat × Rat))
+    (hu : 0 <= u)
+    (hintervals : ArctanGeometry.NonnegativeIntervals intervals)
+    (hden : ArctanGeometry.ChartAddPositiveDenominators u intervals) :
+    ArctanGeometry.integralLowerSum
+        (ArctanGeometry.chartAddIntervals u intervals) =
+        chartAddLowerTransportSum u intervals /\
+      ArctanGeometry.integralUpperSum
+        (ArctanGeometry.chartAddIntervals u intervals) =
+        chartAddUpperTransportSum u intervals /\
+      (ArctanGeometry.integralSumInterval
+        (ArctanGeometry.chartAddIntervals u intervals)).ContainsInterval
+        (ArctanGeometry.integralSumInterval intervals) := by
+  refine ⟨chartAddLowerTransportSum_eq_charted u intervals hden,
+    chartAddUpperTransportSum_eq_charted u intervals hden, ?_⟩
+  exact ArctanGeometry.chartAddIntervals_integralSum_contains
+    u intervals hu hintervals hden
 
 end IntegralIdentities
 

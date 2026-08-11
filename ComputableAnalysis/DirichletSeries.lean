@@ -20,6 +20,10 @@ def zetaTwoPartial : Nat -> Rat
   | 0 => 0
   | n + 1 => zetaTwoPartial n + zetaTwoTerm n
 
+theorem zetaTwoPartial_succ (n : Nat) :
+    zetaTwoPartial (n + 1) = zetaTwoPartial n + zetaTwoTerm n := by
+  rfl
+
 theorem zetaTwoTerm_nonneg (k : Nat) : 0 <= zetaTwoTerm k := by
   unfold zetaTwoTerm
   let m : Rat := ((k + 1 : Nat) : Rat)
@@ -30,10 +34,35 @@ theorem zetaTwoTerm_nonneg (k : Nat) : 0 <= zetaTwoTerm k := by
     rw [Rat.div_def, Rat.one_mul]
     exact (Rat.inv_pos).2 (Rat.mul_pos hmpos hmpos))
 
+theorem zetaTwoTerm_pos (k : Nat) : 0 < zetaTwoTerm k := by
+  unfold zetaTwoTerm
+  let m : Rat := ((k + 1 : Nat) : Rat)
+  have hmpos : 0 < m := by
+    dsimp [m]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos k)
+  rw [Rat.div_def, Rat.one_mul]
+  exact (Rat.inv_pos).2 (Rat.mul_pos hmpos hmpos)
+
+theorem zetaTwoPartial_nonneg (n : Nat) :
+    0 <= zetaTwoPartial n := by
+  induction n with
+  | zero => simp [zetaTwoPartial]
+  | succ n ih =>
+      rw [zetaTwoPartial_succ]
+      exact Rat.add_nonneg ih (zetaTwoTerm_nonneg n)
+
 theorem zetaTwoPartial_le_succ (n : Nat) :
     zetaTwoPartial n <= zetaTwoPartial (n + 1) := by
   change zetaTwoPartial n <= zetaTwoPartial n + zetaTwoTerm n
   grind [zetaTwoTerm_nonneg n]
+
+theorem zetaTwoPartial_lt_succ (n : Nat) :
+    zetaTwoPartial n < zetaTwoPartial (n + 1) := by
+  change zetaTwoPartial n < zetaTwoPartial n + zetaTwoTerm n
+  have h : zetaTwoPartial n + 0 <
+      zetaTwoPartial n + zetaTwoTerm n :=
+    (Rat.add_lt_add_left).2 (zetaTwoTerm_pos n)
+  grind
 
 theorem zetaTwoPartial_le_of_le {n m : Nat} :
     n <= m -> zetaTwoPartial n <= zetaTwoPartial m := by
@@ -48,6 +77,46 @@ theorem zetaTwoPartial_le_of_le {n m : Nat} :
 def zetaTwoFiniteTail (n : Nat) : Nat -> Rat
   | 0 => 0
   | count + 1 => zetaTwoFiniteTail n count + zetaTwoTerm (n + count)
+
+theorem zetaTwoFiniteTail_succ (n count : Nat) :
+    zetaTwoFiniteTail n (count + 1) =
+      zetaTwoFiniteTail n count + zetaTwoTerm (n + count) := by
+  rfl
+
+/-- Finite tails concatenate exactly at the shifted starting index.  This is
+the blockwise accounting law used when several finite error budgets are
+combined. -/
+theorem zetaTwoFiniteTail_add (n count extra : Nat) :
+    zetaTwoFiniteTail n (count + extra) =
+      zetaTwoFiniteTail n count +
+        zetaTwoFiniteTail (n + count) extra := by
+  induction extra with
+  | zero => grind [zetaTwoFiniteTail]
+  | succ extra ih =>
+      have hcount : count + (extra + 1) = (count + extra) + 1 := by omega
+      rw [hcount, zetaTwoFiniteTail_succ]
+      rw [ih]
+      have hshift : n + (count + extra) = (n + count) + extra := by omega
+      rw [hshift, zetaTwoFiniteTail_succ]
+      grind [Rat.add_assoc]
+
+theorem zetaTwoFiniteTail_nonneg (n count : Nat) :
+    0 <= zetaTwoFiniteTail n count := by
+  induction count with
+  | zero => simp [zetaTwoFiniteTail]
+  | succ count ih =>
+      rw [zetaTwoFiniteTail_succ]
+      exact Rat.add_nonneg ih (zetaTwoTerm_nonneg (n + count))
+
+theorem zetaTwoFiniteTail_pos (n count : Nat) (hcount : 0 < count) :
+    0 < zetaTwoFiniteTail n count := by
+  cases count with
+  | zero => omega
+  | succ count =>
+      rw [zetaTwoFiniteTail_succ]
+      have hterm := zetaTwoTerm_pos (n + count)
+      have htail := zetaTwoFiniteTail_nonneg n count
+      grind
 
 private theorem rat_add_le_add {a b c d : Rat}
     (hab : a <= b) (hcd : c <= d) :
@@ -149,6 +218,17 @@ theorem zetaTwoFiniteTail_le_tailBound (n : Nat) (hn : 0 < n) (count : Nat) :
     unfold telescopingTailBound
     grind [Rat.sub_eq_add_neg])
 
+theorem zetaTwoFiniteTail_lt_one_div
+    (n : Nat) (hn : 0 < n) (count : Nat) (hcount : 0 < count) :
+    zetaTwoFiniteTail n count < 1 / (n : Rat) := by
+  have hbound := zetaTwoFiniteTail_le_telescoping n hn count
+  have hsumpos : 0 < n + count := by omega
+  have htailpos : 0 < 1 / ((n + count : Nat) : Rat) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 hsumpos)
+  unfold telescopingTailBound at hbound
+  grind
+
 /-- The endpoint padding used by the Basel-series interval algorithm.
 
 This is part of the raw algorithm's definition.  The finite telescoping
@@ -220,6 +300,37 @@ theorem zetaTwoInterval_width_nonneg (n : Nat) :
       rw [Rat.div_def, Rat.one_mul]
       exact (Rat.inv_pos).2 ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn0)))
 
+theorem zetaTwoInterval_width_pos (n : Nat) (hn : 0 < n) :
+    0 < (zetaTwoInterval n).width := by
+  rw [zetaTwoInterval_width]
+  unfold zetaTwoTailBound
+  simp [Nat.ne_of_gt hn]
+  exact one_div_nat_pos hn
+
+theorem zetaTwoInterval_lo_nonneg (n : Nat) :
+    0 <= (zetaTwoInterval n).lo := by
+  change 0 <= zetaTwoPartial n
+  exact zetaTwoPartial_nonneg n
+
+theorem zetaTwoInterval_hi_pos (n : Nat) :
+    0 < (zetaTwoInterval n).hi := by
+  change 0 < zetaTwoPartial n + zetaTwoTailBound n
+  by_cases hn0 : n = 0
+  · simp [hn0, zetaTwoPartial, zetaTwoTailBound]
+    native_decide
+  · have hn : 0 < n := Nat.pos_of_ne_zero hn0
+    have htail : 0 < zetaTwoTailBound n := by
+      unfold zetaTwoTailBound
+      simp [hn0]
+      exact one_div_nat_pos hn
+    grind [zetaTwoPartial_nonneg n]
+
+theorem zetaTwoInterval_width_le_one_div (n : Nat) (hn : 0 < n) :
+    (zetaTwoInterval n).width <= 1 / (n : Rat) := by
+  rw [zetaTwoInterval_width]
+  unfold zetaTwoTailBound
+  simp [Nat.ne_of_gt hn]
+
 theorem zetaTwoInterval_ordered (n : Nat) :
     (zetaTwoInterval n).lo <= (zetaTwoInterval n).hi := by
   have h := zetaTwoInterval_width_nonneg n
@@ -247,6 +358,122 @@ theorem zetaTwoInterval_nested (n m : Nat) (hnm : n <= m) :
               rw [hn0]
               native_decide
       · exact zetaTwoUpper_le_of_le (Nat.pos_of_ne_zero hn0) hnm
+
+/-- Every later finite partial sum is enclosed by the earlier interval's
+upper endpoint.  The proof exposes the finite decomposition into the first
+`n` terms and the next `count` terms, then applies the explicit telescoping
+tail bound.  This is a finite convergence certificate; it does not identify
+the raw value with `pi^2 / 6`. -/
+theorem zetaTwoPartial_add_finiteTail_le_interval_hi
+    (n count : Nat) (hn : 0 < n) :
+    zetaTwoPartial (n + count) <= (zetaTwoInterval n).hi := by
+  have hsplit :
+    zetaTwoPartial (n + count) =
+        zetaTwoPartial n + zetaTwoFiniteTail n count := by
+    induction count with
+    | zero => simp [zetaTwoFiniteTail, Rat.add_zero]
+    | succ count ih =>
+        rw [show n + (count + 1) = (n + count) + 1 by omega]
+        rw [zetaTwoPartial_succ, ih, zetaTwoFiniteTail_succ]
+        grind [Rat.add_assoc]
+  rw [hsplit]
+  change zetaTwoPartial n + zetaTwoFiniteTail n count <=
+    zetaTwoPartial n + zetaTwoTailBound n
+  rw [show zetaTwoTailBound n = 1 / (n : Rat) by
+    simp [zetaTwoTailBound, Nat.ne_of_gt hn]]
+  exact (Rat.add_le_add_left).2
+    (zetaTwoFiniteTail_le_tailBound n hn count)
+
+/-- A nonempty finite tail lies strictly below the interval's padded upper
+endpoint.  This is the strict finite counterpart of
+`zetaTwoPartial_add_finiteTail_le_interval_hi`; it does not use a completed
+zeta value. -/
+theorem zetaTwoPartial_add_nonempty_finiteTail_lt_interval_hi
+    (n count : Nat) (hn : 0 < n) (hcount : 0 < count) :
+    zetaTwoPartial (n + count) < (zetaTwoInterval n).hi := by
+  have hsplit :
+      zetaTwoPartial (n + count) =
+        zetaTwoPartial n + zetaTwoFiniteTail n count := by
+    clear hcount
+    induction count with
+    | zero => simp [zetaTwoFiniteTail, Rat.add_zero]
+    | succ count ih =>
+        rw [show n + (count + 1) = (n + count) + 1 by omega]
+        rw [zetaTwoPartial_succ, ih, zetaTwoFiniteTail_succ]
+        grind [Rat.add_assoc]
+  rw [hsplit]
+  change zetaTwoPartial n + zetaTwoFiniteTail n count <
+    zetaTwoPartial n + zetaTwoTailBound n
+  rw [show zetaTwoTailBound n = 1 / (n : Rat) by
+    simp [zetaTwoTailBound, Nat.ne_of_gt hn]]
+  exact (Rat.add_lt_add_left).2
+    (zetaTwoFiniteTail_lt_one_div n hn count hcount)
+
+/-- A checked finite endpoint certificate for the Basel target.
+
+The stage-1000 interval contains the rational decimal `1.644934`.  This is
+only a finite comparison with a proposed target interval; it does not identify
+the raw zeta value with `pi^2 / 6`.
+-/
+theorem zetaTwoInterval_contains_basel_decimal_1000 :
+    (zetaTwoInterval 1000).lo <= (822467 : Rat) / 500000 /\
+      (822467 : Rat) / 500000 <= (zetaTwoInterval 1000).hi := by
+  native_decide
+
+/-- A tighter finite Basel target enclosure at stage 10,000.  This is an
+executable rational comparison only; it does not identify the limiting raw
+real with the target decimal or with pi squared over six. -/
+theorem zetaTwoInterval_contains_basel_decimal_10000 :
+    (zetaTwoInterval 10000).lo <= (4112335167 : Rat) / 2500000000 /\
+      (4112335167 : Rat) / 2500000000 <= (zetaTwoInterval 10000).hi := by
+  native_decide
+
+/-! A higher finite stage for the same rational target.  This remains a
+stagewise enclosure only; the Basel identity is intentionally not inferred. -/
+theorem zetaTwoInterval_contains_basel_decimal_100000 :
+    (zetaTwoInterval 100000).lo <= (4112335167 : Rat) / 2500000000 /\
+      (4112335167 : Rat) / 2500000000 <= (zetaTwoInterval 100000).hi := by
+  native_decide
+
+/-- A finite numerical bridge to a high-precision rational approximation of
+pi.  The rational `103993 / 33102` is only a supplied certificate here; this
+does not identify the zeta raw real with `pi^2 / 6`. -/
+theorem zetaTwoInterval_contains_rational_pi_squared_over_six_10000 :
+    (zetaTwoInterval 10000).lo <=
+        ((103993 : Rat) / 33102) * ((103993 : Rat) / 33102) / 6 /\
+      ((103993 : Rat) / 33102) * ((103993 : Rat) / 33102) / 6 <=
+        (zetaTwoInterval 10000).hi := by
+  native_decide
+
+theorem zetaTwoInterval_later_inside_stage_10000 {m : Nat}
+    (hm : 10000 <= m) :
+    (zetaTwoInterval 10000).lo <= (zetaTwoInterval m).lo /\
+      (zetaTwoInterval m).hi <= (zetaTwoInterval 10000).hi := by
+  have hnested := zetaTwoInterval_nested 10000 m hm
+  exact ⟨hnested.1, hnested.2.2⟩
+
+theorem zetaTwoPartial_later_inside_stage_10000 {m : Nat}
+    (hm : 10000 <= m) :
+    (zetaTwoInterval 10000).lo <= zetaTwoPartial m /\
+      zetaTwoPartial m <= (zetaTwoInterval 10000).hi := by
+  have hpartial_lo : zetaTwoPartial 10000 <= zetaTwoPartial m :=
+    zetaTwoPartial_le_of_le hm
+  have hpartial_hi : zetaTwoPartial m <= (zetaTwoInterval m).hi := by
+    change (zetaTwoInterval m).lo <= (zetaTwoInterval m).hi
+    exact zetaTwoInterval_ordered m
+  have hnested := zetaTwoInterval_later_inside_stage_10000 hm
+  constructor
+  · exact hpartial_lo
+  · exact Rat.le_trans hpartial_hi hnested.2
+
+theorem zetaTwoPartial_later_near_basel_decimal_10000 {m : Nat}
+    (hm : 10000 <= m) :
+    qabs (zetaTwoPartial m - (4112335167 : Rat) / 2500000000) <=
+      (zetaTwoInterval 10000).width := by
+  have hpartial := zetaTwoPartial_later_inside_stage_10000 hm
+  have htarget := zetaTwoInterval_contains_basel_decimal_10000
+  exact qabs_sub_le_of_common_bounds
+    hpartial.1 hpartial.2 htarget.1 htarget.2
 
 private theorem one_div_nat_le_one_div_nat_of_le
     {a b : Nat} (ha : 0 < a) (hab : a <= b) :
@@ -277,6 +504,83 @@ private theorem one_div_nat_le_one_div_nat_of_le
         have hcancel : A * A⁻¹= 1 := Rat.mul_inv_cancel A hAne
         grind [Rat.mul_assoc, Rat.mul_comm]
   · exact hABpos
+
+/-- An explicit denominator/stage budget turns the finite Basel interval width
+into a prescribed rational error bound.  The hypothesis
+`eps.den + 1 <= n` is a natural-number certificate: at stage `n`, the
+interval width is at most `eps`.  This is an endpoint/width estimate for the
+finite evaluator only; it does not assert a completed zeta sum or identify it
+with `pi^2 / 6`.
+-/
+theorem zetaTwoInterval_width_le_of_denominator_budget {n : Nat} {eps : Rat}
+    (heps : 0 < eps) (hbudget : eps.den + 1 <= n) :
+    (zetaTwoInterval n).width <= eps := by
+  have hbase : 0 < eps.den + 1 := Nat.succ_pos eps.den
+  have hn : 0 < n := Nat.lt_of_lt_of_le hbase hbudget
+  calc
+    (zetaTwoInterval n).width <= 1 / (n : Rat) :=
+      zetaTwoInterval_width_le_one_div n hn
+    _ <= 1 / (((eps.den + 1 : Nat) : Rat)) :=
+      one_div_nat_le_one_div_nat_of_le hbase hbudget
+    _ <= eps := FTC.one_div_den_succ_le_of_pos heps
+
+/-- The denominator budget has an executable stage-selector form.  For every
+positive rational tolerance, the finite reciprocal-square interval algorithm
+returns a natural stage whose width is below that tolerance; no completed
+zeta value is introduced. -/
+theorem zetaTwoInterval_reaches_of_positive_tolerance (eps : QPos) :
+    ∃ n : Nat, (zetaTwoInterval n).width <= eps.val := by
+  refine ⟨eps.val.den + 1, ?_⟩
+  exact zetaTwoInterval_width_le_of_denominator_budget
+    eps.property (Nat.le_refl (eps.val.den + 1))
+
+/-- A supplied rational target interval can be used as a finite comparison
+anchor for all later zeta-two stages.  The endpoint hypothesis says that the
+target contains the stage-`n` interval; nesting transports that comparison to
+stage `m`, while the denominator budget gives the requested finite width
+bound.  This is only a comparison of rational interval evaluators and makes
+no claim about a completed zeta value or the Basel identity. -/
+theorem zetaTwoInterval_later_contained_in_target_of_budget
+    (target : QInterval) {n m : Nat} {eps : Rat}
+    (heps : 0 < eps) (hbudget : eps.den + 1 <= n) (hnm : n <= m)
+    (htarget : target.ContainsInterval (zetaTwoInterval n)) :
+    target.ContainsInterval (zetaTwoInterval m) /\
+      (zetaTwoInterval m).width <= eps := by
+  have htarget_stage := zetaTwoInterval_nested n m hnm
+  have hmBudget : eps.den + 1 <= m := Nat.le_trans hbudget hnm
+  constructor
+  · unfold QInterval.ContainsInterval at htarget ⊢
+    constructor
+    · exact Rat.le_trans htarget.1 htarget_stage.1
+    · exact Rat.le_trans htarget_stage.2.2 htarget.2
+  · exact zetaTwoInterval_width_le_of_denominator_budget heps hmBudget
+
+/-- Every later finite partial sum lies inside a supplied rational target
+interval anchored at an earlier Basel-series stage.  This is the endpoint
+form of the interval propagation certificate: the lower endpoint comes from
+monotonicity of the partial sums, while the upper endpoint comes from the
+telescoping tail enclosure and the target's upper endpoint.  The same
+denominator budget records the width of the later rational interval. -/
+theorem zetaTwoPartial_later_in_target_of_budget
+    (target : QInterval) {n m : Nat} {eps : Rat}
+    (heps : 0 < eps) (hbudget : eps.den + 1 <= n) (hnm : n <= m)
+    (htarget : target.ContainsInterval (zetaTwoInterval n)) :
+    target.lo <= zetaTwoPartial m /\
+      zetaTwoPartial m <= target.hi /\
+      (zetaTwoInterval m).width <= eps := by
+  have htarget_stage := zetaTwoInterval_nested n m hnm
+  have hmBudget : eps.den + 1 <= m := Nat.le_trans hbudget hnm
+  have hwidth := zetaTwoInterval_width_le_of_denominator_budget heps hmBudget
+  have hordered := zetaTwoInterval_ordered m
+  have hpartial_hi : zetaTwoPartial m <= (zetaTwoInterval m).hi := by
+    change (zetaTwoInterval m).lo <= (zetaTwoInterval m).hi
+    exact hordered
+  constructor
+  · exact Rat.le_trans htarget.1 htarget_stage.1
+  · constructor
+    · exact Rat.le_trans hpartial_hi
+        (Rat.le_trans htarget_stage.2.2 htarget.2)
+    · exact hwidth
 
 theorem zetaTwoWidthsShrinkToZero :
     RealRaw.WidthsShrinkToZero zetaTwoInterval := by
@@ -336,6 +640,30 @@ def zetaNatTerm (p : Nat) (k : Nat) : Rat :=
 def zetaNatPartial (p : Nat) : Nat -> Rat
   | 0 => 0
   | n + 1 => zetaNatPartial p n + zetaNatTerm p n
+
+/-! The same finite-tail accumulator used for `zeta(2)`, now exposed for
+every fixed natural exponent. -/
+def zetaNatFiniteTail (p n : Nat) : Nat -> Rat
+  | 0 => 0
+  | count + 1 =>
+      zetaNatFiniteTail p n count + zetaNatTerm p (n + count)
+
+theorem zetaNatFiniteTail_succ (p n count : Nat) :
+    zetaNatFiniteTail p n (count + 1) =
+      zetaNatFiniteTail p n count + zetaNatTerm p (n + count) := by
+  rfl
+
+theorem zetaNatPartial_add_finiteTail_eq (p n count : Nat) :
+    zetaNatPartial p (n + count) =
+      zetaNatPartial p n + zetaNatFiniteTail p n count := by
+  induction count with
+  | zero => simp [zetaNatFiniteTail, Rat.add_zero]
+  | succ count ih =>
+      rw [show n + (count + 1) = (n + count) + 1 by omega]
+      rw [show zetaNatPartial p ((n + count) + 1) =
+        zetaNatPartial p (n + count) + zetaNatTerm p (n + count) by rfl]
+      rw [ih, zetaNatFiniteTail_succ]
+      grind [Rat.add_assoc]
 
 def zetaNatTailBound (n : Nat) : Rat :=
   if n = 0 then 2 else 1 / (n : Rat)
@@ -402,6 +730,53 @@ private theorem one_div_le_one_div_of_pos_of_le
         grind [Rat.mul_assoc, Rat.mul_comm]
   · exact hprod
 
+theorem zetaTwoTerm_antitone {n m : Nat} (hnm : n <= m) :
+    zetaTwoTerm m <= zetaTwoTerm n := by
+  unfold zetaTwoTerm
+  let a : Rat := ((n + 1 : Nat) : Rat)
+  let b : Rat := ((m + 1 : Nat) : Rat)
+  have ha : 0 < a := by
+    dsimp [a]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hb : 0 < b := by
+    dsimp [b]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos m)
+  have hab : a <= b := by
+    dsimp [a, b]
+    exact_mod_cast (Nat.add_le_add_right hnm 1)
+  have hsq : a * a <= b * b := by
+    calc
+      a * a <= b * a :=
+        Rat.mul_le_mul_of_nonneg_right hab (Rat.le_of_lt ha)
+      _ <= b * b :=
+        Rat.mul_le_mul_of_nonneg_left hab (Rat.le_of_lt hb)
+  exact one_div_le_one_div_of_pos_of_le (Rat.mul_pos ha ha) hsq
+
+/-- A finite rectangular certificate for a zeta(2) block.
+
+Every term in the block beginning after `n` is no larger than the first
+term, so the whole finite block is bounded by `count` copies of that first
+term.  This is a reusable rational block estimate; it uses only finite
+induction and order, with no limiting or completeness principle. -/
+theorem zetaTwoFiniteTail_le_firstTerm_block
+    (n count : Nat) :
+    zetaTwoFiniteTail n count <= (count : Rat) * zetaTwoTerm n := by
+  induction count with
+  | zero => simp [zetaTwoFiniteTail]
+  | succ count ih =>
+      rw [zetaTwoFiniteTail_succ]
+      have hterm := zetaTwoTerm_antitone (n := n) (m := n + count)
+        (Nat.le_add_right n count)
+      have hcount : (count : Rat) * zetaTwoTerm n + zetaTwoTerm n =
+          ((count + 1 : Nat) : Rat) * zetaTwoTerm n := by
+        rw [Rat.natCast_add]
+        simp [Rat.add_mul]
+      calc
+        zetaTwoFiniteTail n count + zetaTwoTerm (n + count)
+            <= (count : Rat) * zetaTwoTerm n + zetaTwoTerm n :=
+              rat_add_le_add ih hterm
+        _ = ((count + 1 : Nat) : Rat) * zetaTwoTerm n := hcount
+
 theorem zetaNatTerm_nonneg (p k : Nat) :
     0 <= zetaNatTerm p k := by
   unfold zetaNatTerm
@@ -434,6 +809,34 @@ theorem zetaNatTerm_le_zetaTwoTerm
   exact one_div_le_one_div_of_pos_of_le
     (Rat.pow_pos hmpos) hpow
 
+theorem zetaNatFiniteTail_le_zetaTwoFiniteTail
+    (p n count : Nat) (hp : 2 <= p) :
+    zetaNatFiniteTail p n count <= zetaTwoFiniteTail n count := by
+  induction count with
+  | zero => simp [zetaNatFiniteTail, zetaTwoFiniteTail]
+  | succ count ih =>
+      rw [zetaNatFiniteTail_succ, zetaTwoFiniteTail_succ]
+      exact rat_add_le_add ih
+        (zetaNatTerm_le_zetaTwoTerm p (n + count) hp)
+
+theorem zetaNatFiniteTail_le_tailBound
+    (p n count : Nat) (hp : 2 <= p) (hn : 0 < n) :
+    zetaNatFiniteTail p n count <= 1 / (n : Rat) := by
+  exact Rat.le_trans
+    (zetaNatFiniteTail_le_zetaTwoFiniteTail p n count hp)
+    (zetaTwoFiniteTail_le_tailBound n hn count)
+
+theorem zetaNatPartial_add_finiteTail_le_interval_hi
+    (p n count : Nat) (hp : 2 <= p) (hn : 0 < n) :
+    zetaNatPartial p (n + count) <= (zetaNatInterval p n).hi := by
+  rw [zetaNatPartial_add_finiteTail_eq]
+  change zetaNatPartial p n + zetaNatFiniteTail p n count <=
+    zetaNatPartial p n + zetaNatTailBound n
+  rw [show zetaNatTailBound n = 1 / (n : Rat) by
+    simp [zetaNatTailBound, Nat.ne_of_gt hn]]
+  exact (Rat.add_le_add_left).2
+    (zetaNatFiniteTail_le_tailBound p n count hp hn)
+
 theorem zetaNatPartial_le_succ (p n : Nat) :
     zetaNatPartial p n <= zetaNatPartial p (n + 1) := by
   change zetaNatPartial p n <=
@@ -447,6 +850,15 @@ theorem zetaNatPartial_le_of_le (p : Nat) {n m : Nat} :
   | refl => exact Rat.le_refl
   | step _ ih =>
       exact Rat.le_trans ih (zetaNatPartial_le_succ p _)
+
+theorem zetaNatInterval_contains_partial_add_finiteTail
+    (p n count : Nat) (hp : 2 <= p) (hn : 0 < n) :
+    (zetaNatInterval p n).lo <= zetaNatPartial p (n + count) /\
+      zetaNatPartial p (n + count) <= (zetaNatInterval p n).hi := by
+  constructor
+  · change zetaNatPartial p n <= zetaNatPartial p (n + count)
+    exact zetaNatPartial_le_of_le p (Nat.le_add_right n count)
+  · exact zetaNatPartial_add_finiteTail_le_interval_hi p n count hp hn
 
 theorem zetaNatUpper_succ_le
     (p n : Nat) (hp : 2 <= p) (hn : 0 < n) :
@@ -561,6 +973,71 @@ theorem zetaNatWidthsShrinkToZero (p : Nat) :
     exact Rat.le_trans
       (one_div_nat_le_one_div_nat_of_le (a := N) (b := n) hNpos hn)
       hsmallN⟩
+
+theorem zetaNatInterval_width_le_one_div (p n : Nat) (hn : 0 < n) :
+    (zetaNatInterval p n).width <= 1 / (n : Rat) := by
+  rw [zetaNatInterval_width]
+  unfold zetaNatTailBound
+  simp [Nat.ne_of_gt hn]
+
+theorem zetaNatInterval_width_le_of_denominator_budget
+    (p : Nat) {n : Nat} {eps : Rat}
+    (heps : 0 < eps) (hbudget : eps.den + 1 <= n) :
+    (zetaNatInterval p n).width <= eps := by
+  have hbase : 0 < eps.den + 1 := Nat.succ_pos eps.den
+  have hn : 0 < n := Nat.lt_of_lt_of_le hbase hbudget
+  calc
+    (zetaNatInterval p n).width <= 1 / (n : Rat) :=
+      zetaNatInterval_width_le_one_div p n hn
+    _ <= 1 / (((eps.den + 1 : Nat) : Rat)) :=
+      one_div_nat_le_one_div_nat_of_le hbase hbudget
+    _ <= eps := FTC.one_div_den_succ_le_of_pos heps
+
+theorem zetaNatInterval_reaches_of_positive_tolerance
+    (p : Nat) (eps : QPos) :
+    ∃ n : Nat, (zetaNatInterval p n).width <= eps.val := by
+  refine ⟨eps.val.den + 1, ?_⟩
+  exact zetaNatInterval_width_le_of_denominator_budget
+    p eps.property (Nat.le_refl (eps.val.den + 1))
+
+theorem zetaNatInterval_later_contained_in_target_of_budget
+    (p : Nat) (hp : 2 <= p) (target : QInterval)
+    {n m : Nat} {eps : Rat}
+    (heps : 0 < eps) (hbudget : eps.den + 1 <= n) (hnm : n <= m)
+    (htarget : target.ContainsInterval (zetaNatInterval p n)) :
+    target.ContainsInterval (zetaNatInterval p m) /\
+      (zetaNatInterval p m).width <= eps := by
+  have htarget_stage := zetaNatInterval_nested p hp n m hnm
+  have hmBudget : eps.den + 1 <= m := Nat.le_trans hbudget hnm
+  constructor
+  · unfold QInterval.ContainsInterval at htarget ⊢
+    constructor
+    · exact Rat.le_trans htarget.1 htarget_stage.1
+    · exact Rat.le_trans htarget_stage.2.2 htarget.2
+  · exact zetaNatInterval_width_le_of_denominator_budget p heps hmBudget
+
+theorem zetaNatPartial_later_in_target_of_budget
+    (p : Nat) (hp : 2 <= p) (target : QInterval)
+    {n m : Nat} {eps : Rat}
+    (heps : 0 < eps) (hbudget : eps.den + 1 <= n) (hnm : n <= m)
+    (htarget : target.ContainsInterval (zetaNatInterval p n)) :
+    target.lo <= zetaNatPartial p m /\
+      zetaNatPartial p m <= target.hi /\
+      (zetaNatInterval p m).width <= eps := by
+  have htarget_stage := zetaNatInterval_nested p hp n m hnm
+  have hmBudget : eps.den + 1 <= m := Nat.le_trans hbudget hnm
+  have hwidth := zetaNatInterval_width_le_of_denominator_budget p heps hmBudget
+  have hordered := zetaNatInterval_ordered p m
+  have hpartial_hi : zetaNatPartial p m <= (zetaNatInterval p m).hi := by
+    change (zetaNatInterval p m).lo <= (zetaNatInterval p m).hi
+    exact hordered
+  constructor
+  · exact Rat.le_trans htarget.1 htarget_stage.1
+  · constructor
+    · exact Rat.le_trans hpartial_hi
+        (Rat.le_trans htarget_stage.2.2 htarget.2)
+    · exact hwidth
+
 theorem zetaNatRaw_validCompute (p : Nat) (hp : 2 <= p) :
     RealRaw.ValidCompute (zetaNatInterval p) := by
   constructor

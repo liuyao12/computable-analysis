@@ -16,6 +16,333 @@ namespace ComputableAnalysis
 
 namespace RationalCircle
 
+/-! The determinant certificate used for rational triangle orientation and
+area.  It is the finite-coordinate core of the classical angle-sum theorem;
+angle-valued semantics are deliberately kept in the later circle layer. -/
+
+def triangleTwiceArea (p q r : PiCirclePoint) : Rat :=
+  (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x)
+
+theorem triangleTwiceArea_shoelace (p q r : PiCirclePoint) :
+    triangleTwiceArea p q r =
+      p.x * q.y + q.x * r.y + r.x * p.y -
+        (p.y * q.x + q.y * r.x + r.y * p.x) := by
+  unfold triangleTwiceArea
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+theorem triangleTwiceArea_cyclic (p q r : PiCirclePoint) :
+    triangleTwiceArea p q r = triangleTwiceArea q r p := by
+  rw [triangleTwiceArea_shoelace, triangleTwiceArea_shoelace]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem triangleTwiceArea_swap_neg (p q r : PiCirclePoint) :
+    triangleTwiceArea p q r = -triangleTwiceArea p r q := by
+  unfold triangleTwiceArea
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-! Signed area is additive when a quadrilateral is split along a diagonal.
+The orientation is retained by `triangleTwiceArea`, so this certificate does
+not require a convexity or point-order assumption; such assumptions can be
+added by a caller when converting the identity to positive areas. -/
+
+theorem triangleTwiceArea_quadrilateral_diagonal_additivity
+    (p q r s : PiCirclePoint) :
+    triangleTwiceArea p q r + triangleTwiceArea p r s =
+      triangleTwiceArea p q s + triangleTwiceArea q r s := by
+  unfold triangleTwiceArea
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+theorem triangleTwiceArea_zero_of_collinear
+    (p q r : PiCirclePoint)
+    (hcol : (q.x - p.x) * (r.y - p.y) =
+      (q.y - p.y) * (r.x - p.x)) :
+    triangleTwiceArea p q r = 0 := by
+  unfold triangleTwiceArea
+  grind
+
+theorem triangleTwiceArea_pos_of_oriented
+    (p q r : PiCirclePoint)
+    (horient : (q.y - p.y) * (r.x - p.x) <
+      (q.x - p.x) * (r.y - p.y)) :
+    0 < triangleTwiceArea p q r := by
+  unfold triangleTwiceArea
+  rw [← Rat.lt_iff_sub_pos]
+  exact horient
+
+/-! ## Exact rational geometry
+
+The classical Pythagorean-triple parametrization is first recorded as a
+finite rational polynomial identity.  Positivity and primitive-integrality
+conditions belong to a later number-theoretic layer.
+-/
+
+theorem pythagoreanTriple_identity (m n : Rat) :
+    (m * m - n * n) ^ 2 + (2 * m * n) ^ 2 =
+      (m * m + n * n) ^ 2 := by
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem pythagoreanTriple_three_four_five :
+    (3 : Rat) ^ 2 + 4 ^ 2 = 5 ^ 2 := by
+  native_decide
+
+theorem pythagoreanTriple_positive {m n : Rat} (hn : 0 < n) (hmn : n < m) :
+    0 < m * m - n * n ∧ 0 < 2 * m * n := by
+  have hm : 0 < m := by grind
+  have hsum : 0 < m + n := by grind
+  have hdiff : 0 < m - n := by grind
+  constructor
+  · have hprod : 0 < (m - n) * (m + n) := Rat.mul_pos hdiff hsum
+    grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+      Rat.mul_assoc, Rat.mul_comm]
+  · exact Rat.mul_pos (Rat.mul_pos (by native_decide) hm) hn
+
+theorem heron_squared_identity (a b c : Rat) :
+    16 * ((a + b + c) / 2) * ((-a + b + c) / 2) *
+        ((a - b + c) / 2) * ((a + b - c) / 2) =
+      2 * (a * a) * (b * b) + 2 * (a * a) * (c * c) +
+        2 * (b * b) * (c * c) -
+        (a * a) * (a * a) - (b * b) * (b * b) -
+        (c * c) * (c * c) := by
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem heron_product_nonneg
+    {a b c : Rat}
+    (ha : 0 <= a) (hb : 0 <= b) (hc : 0 <= c)
+    (hab : a <= b + c) (hac : b <= a + c) (hbc : c <= a + b) :
+    0 <= ((a + b + c) / 2) * ((-a + b + c) / 2) *
+      ((a - b + c) / 2) * ((a + b - c) / 2) := by
+  have hinv : 0 <= (2 : Rat)⁻¹ := by
+    exact Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide))
+  have h1 : 0 <= (a + b + c) / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind) hinv
+  have h2 : 0 <= (-a + b + c) / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind) hinv
+  have h3 : 0 <= (a - b + c) / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind) hinv
+  have h4 : 0 <= (a + b - c) / 2 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by grind) hinv
+  exact Rat.mul_nonneg (Rat.mul_nonneg (Rat.mul_nonneg h1 h2) h3) h4
+
+def heronProduct (a b c : Rat) : Rat :=
+  ((a + b + c) / 2) * ((-a + b + c) / 2) *
+    ((a - b + c) / 2) * ((a + b - c) / 2)
+
+def heronAreaRaw (a b c : Rat) (hprod : 0 <= heronProduct a b c) : RealRaw :=
+  sqrtRaw (heronProduct a b c) (by
+    unfold sqrtDomain
+    grind)
+
+theorem heronAreaRaw_valid (a b c : Rat) (hprod : 0 <= heronProduct a b c) :
+    (heronAreaRaw a b c hprod).Valid := by
+  unfold heronAreaRaw
+  exact sqrtRaw_valid _ _
+
+theorem heronAreaRaw_spec (a b c : Rat) (hprod : 0 <= heronProduct a b c) :
+    SqrtRawSpec (heronProduct a b c)
+      (by
+        unfold sqrtDomain
+        grind) := by
+  exact sqrtRaw_spec _ _
+
+theorem heronAreaRaw_equiv_of_square
+    (a b c r : Rat) (hprod : 0 <= heronProduct a b c)
+    (hsquare : sq r = heronProduct a b c) :
+    (heronAreaRaw a b c hprod).Equiv
+      (RealRaw.ofRat (qabs r)) := by
+  let hq : sqrtDomain (heronProduct a b c) := by
+    unfold sqrtDomain
+    grind
+  have hspec := sqrtRaw_spec (heronProduct a b c) hq
+  have hreal := sqrt_rational_of_square
+    (heronProduct a b c) r hq hspec hsquare
+  simpa [heronAreaRaw, sqrtReal, Real.ofRat, Real.ofRaw, Real.Equiv] using hreal
+
+theorem heron_three_four_five :
+    ((3 + 4 + 5 : Rat) / 2) * ((-3 + 4 + 5 : Rat) / 2) *
+        ((3 - 4 + 5 : Rat) / 2) * ((3 + 4 - 5 : Rat) / 2) = 36 := by
+  native_decide
+
+theorem heron_three_four_five_area_witness :
+    (6 : Rat) * 6 =
+      ((3 + 4 + 5 : Rat) / 2) * ((-3 + 4 + 5 : Rat) / 2) *
+        ((3 - 4 + 5 : Rat) / 2) * ((3 + 4 - 5 : Rat) / 2) := by
+  rw [heron_three_four_five]
+  native_decide
+
+theorem heron_three_four_five_area_raw_equiv_six :
+    (heronAreaRaw 3 4 5 (by native_decide)).Equiv
+      (RealRaw.ofRat 6) := by
+  let hq : sqrtDomain (heronProduct 3 4 5) := by
+    unfold sqrtDomain
+    native_decide
+  have hspec := sqrtRaw_spec (heronProduct 3 4 5) hq
+  have hsquare : sq (6 : Rat) = heronProduct 3 4 5 := by
+    simpa [sq] using heron_three_four_five_area_witness
+  have hreal := sqrt_rational_of_square
+    (heronProduct 3 4 5) 6 hq hspec hsquare
+  simpa [heronAreaRaw, sqrtReal, Real.ofRat, Real.ofRaw,
+    Real.Equiv] using hreal
+
+theorem heron_three_four_five_strict_pos :
+    0 < ((3 + 4 + 5 : Rat) / 2) * ((-3 + 4 + 5 : Rat) / 2) *
+      ((3 - 4 + 5 : Rat) / 2) * ((3 + 4 - 5 : Rat) / 2) := by
+  rw [heron_three_four_five]
+  native_decide
+
+/-! A coordinate-level Heron certificate.  The three rational points provide
+the side-square and signed-area data directly; the final equality is the
+finite rational form of `area^2 = heronProduct`.  No square root or completed
+triangle is introduced. -/
+
+theorem heron_three_four_five_coordinate_certificate :
+    let p : PiCirclePoint := { x := 0, y := 0 }
+    let q : PiCirclePoint := { x := 3, y := 0 }
+    let r : PiCirclePoint := { x := 0, y := 4 }
+    triangleTwiceArea p q r = 12 ∧
+      (q.x - p.x) * (q.x - p.x) + (q.y - p.y) * (q.y - p.y) = 9 ∧
+      (r.x - p.x) * (r.x - p.x) + (r.y - p.y) * (r.y - p.y) = 16 ∧
+      (r.x - q.x) * (r.x - q.x) + (r.y - q.y) * (r.y - q.y) = 25 ∧
+      heronProduct 3 4 5 = (triangleTwiceArea p q r / 2) ^ 2 := by
+  native_decide
+
+/-! The common-denominator numerator behind Ptolemy's cyclic identity. -/
+
+theorem ptolemy_oriented_chord_numerator (a b c d : Rat) :
+    (c - a) * (d - b) =
+      (b - a) * (d - c) + (c - b) * (d - a) := by
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-! The rational power-of-a-point identity for a horizontal circle chord. -/
+
+theorem horizontalChord_power_identity {r h t : Rat}
+    (hcircle : r * r + h * h = 1) :
+    (t + r) * (t - r) = t * t + h * h - 1 := by
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-! The directed product is nonnegative when the external point lies outside
+the chord interval.  This is an order certificate, not yet an unsigned
+length theorem. -/
+
+theorem horizontalChord_power_nonneg_of_outside {r t : Rat}
+    (hr : 0 <= r) (hout : r <= t ∨ t <= -r) :
+    0 <= (t + r) * (t - r) := by
+  rcases hout with hright | hleft
+  · exact Rat.mul_nonneg (by grind) (by grind)
+  · have hleft₁ : 0 <= -(t + r) := by grind
+    have hleft₂ : 0 <= -(t - r) := by grind
+    have hprod := Rat.mul_nonneg hleft₁ hleft₂
+    grind [Rat.mul_neg]
+
+theorem horizontalChord_power_neg_of_inside {r t : Rat}
+    (hr : 0 < r) (hinside : -r < t ∧ t < r) :
+    (t + r) * (t - r) < 0 := by
+  have hfirst : 0 < t + r := by grind
+  have hsecond : t - r < 0 := by grind
+  exact (Rat.mul_neg_iff_of_pos_left hfirst).2 hsecond
+
+/-! A certified square-root algorithm for the nonnegative outside-point
+power product.  The output is a raw real algorithm; identifying it with an
+unsigned Euclidean length is a later geometric bridge. -/
+
+def horizontalChordPowerSqrtRaw (r t : Rat)
+    (hr : 0 <= r) (hout : r <= t ∨ t <= -r) : RealRaw :=
+  let q := (t + r) * (t - r)
+  let hq : sqrtDomain q := by
+    unfold sqrtDomain
+    have hnonneg := horizontalChord_power_nonneg_of_outside hr hout
+    grind
+  sqrtRaw q hq
+
+theorem horizontalChordPowerSqrtRaw_valid (r t : Rat)
+    (hr : 0 <= r) (hout : r <= t ∨ t <= -r) :
+    (horizontalChordPowerSqrtRaw r t hr hout).Valid := by
+  unfold horizontalChordPowerSqrtRaw
+  dsimp
+  exact sqrtRaw_valid _ _
+
+theorem horizontalChordPowerSqrtRaw_spec (r t : Rat)
+    (hr : 0 <= r) (hout : r <= t ∨ t <= -r) :
+    SqrtRawSpec ((t + r) * (t - r))
+      (by
+        unfold sqrtDomain
+        have hnonneg := horizontalChord_power_nonneg_of_outside hr hout
+        grind) := by
+  let hq : sqrtDomain ((t + r) * (t - r)) := by
+    unfold sqrtDomain
+    have hnonneg := horizontalChord_power_nonneg_of_outside hr hout
+    grind
+  exact sqrtRaw_spec _ hq
+
+theorem horizontalChordPowerSqrtRaw_equiv_of_square
+    (r t s : Rat) (hr : 0 <= r) (hout : r <= t ∨ t <= -r)
+    (hsq : sq s = (t + r) * (t - r)) :
+    (horizontalChordPowerSqrtRaw r t hr hout).Equiv
+      (RealRaw.ofRat (qabs s)) := by
+  let hq : sqrtDomain ((t + r) * (t - r)) := by
+    unfold sqrtDomain
+    have hnonneg := horizontalChord_power_nonneg_of_outside hr hout
+    grind
+  have h := sqrt_rational_of_square
+    ((t + r) * (t - r)) s hq (sqrtRaw_spec _ hq) hsq
+  simpa [horizontalChordPowerSqrtRaw, sqrtReal, Real.ofRat,
+    Real.ofRaw, Real.Equiv] using h
+
+theorem horizontalChordPowerSqrtRaw_equiv_four_fifths :
+    (horizontalChordPowerSqrtRaw (3 / 5) 1
+      (by native_decide) (by native_decide)).Equiv
+      (RealRaw.ofRat (4 / 5)) := by
+  have h := horizontalChordPowerSqrtRaw_equiv_of_square
+    (3 / 5) 1 (4 / 5) (by native_decide) (by native_decide)
+      (by native_decide)
+  have hqabs : qabs (4 / 5 : Rat) = 4 / 5 := by native_decide
+  simpa [hqabs] using h
+
+/-! A general rational-coordinate power-of-a-point certificate.  The two
+parameters describe distinct intersections of a rational line with a circle;
+the conclusion is the signed secant product, without introducing angles or
+completed real points. -/
+
+def linePoint (p v : PiCirclePoint) (t : Rat) : PiCirclePoint :=
+  { x := p.x + t * v.x, y := p.y + t * v.y }
+
+theorem point_power_line_parameter_identity
+    {p v : PiCirclePoint} {r t₁ t₂ : Rat}
+    (hneq : t₁ ≠ t₂)
+    (h₁ : (linePoint p v t₁).x * (linePoint p v t₁).x +
+      (linePoint p v t₁).y * (linePoint p v t₁).y = r * r)
+    (h₂ : (linePoint p v t₂).x * (linePoint p v t₂).x +
+      (linePoint p v t₂).y * (linePoint p v t₂).y = r * r) :
+    (t₁ * t₂) * (v.x * v.x + v.y * v.y) =
+      p.x * p.x + p.y * p.y - r * r := by
+  unfold linePoint at h₁ h₂
+  have hdiff :
+      (t₁ - t₂) *
+          ((v.x * v.x + v.y * v.y) * (t₁ + t₂) +
+            2 * (p.x * v.x + p.y * v.y)) = 0 := by
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  have hsum :
+      (v.x * v.x + v.y * v.y) * (t₁ + t₂) +
+          2 * (p.x * v.x + p.y * v.y) = 0 := by
+    apply (Rat.mul_eq_zero.mp hdiff).resolve_left
+    intro hzero
+    apply hneq
+    grind
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
 def dyadicSubdivisions (n : Nat) : Nat :=
   2 ^ n
 
@@ -74,6 +401,49 @@ def segmentNormSq (p q : PiCirclePoint) : Rat :=
   let dx := q.x - p.x
   let dy := q.y - p.y
   dx * dx + dy * dy
+
+theorem rightTriangle_axis_pythagorean (a b : Rat) :
+    segmentNormSq origin { x := a, y := 0 } +
+        segmentNormSq origin { x := 0, y := b } =
+      segmentNormSq { x := a, y := 0 } { x := 0, y := b } := by
+  unfold segmentNormSq origin
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem rightTriangle_pythagorean
+    (u v : PiCirclePoint) (horth : dot u v = 0) :
+    segmentNormSq origin u + segmentNormSq origin v =
+      segmentNormSq u v := by
+  unfold segmentNormSq origin dot at *
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/- A rational-coordinate symmetry core of the isosceles-triangle theorem. -/
+theorem isosceles_axis_symmetry (h b : Rat) :
+    segmentNormSq { x := 0, y := h } { x := b, y := 0 } =
+        segmentNormSq { x := 0, y := h } { x := -b, y := 0 } ∧
+      dot { x := 0, y := h } { x := b, y := 0 } = 0 := by
+  constructor
+  · unfold segmentNormSq
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  · unfold dot
+    grind
+
+theorem isosceles_equal_legs (h b : Rat) :
+    segmentNormSq { x := 0, y := h } { x := b, y := 0 } =
+        segmentNormSq { x := 0, y := h } { x := -b, y := 0 } := by
+  exact (isosceles_axis_symmetry h b).1
+
+theorem isosceles_axis_orthogonal (h b : Rat) :
+    dot { x := 0, y := h } { x := b, y := 0 } = 0 := by
+  exact (isosceles_axis_symmetry h b).2
+
+theorem isosceles_base_normSq (h b : Rat) :
+    segmentNormSq { x := b, y := 0 } { x := -b, y := 0 } = 4 * b * b := by
+  unfold segmentNormSq
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
 
 def tangentIntersection (p q : PiCirclePoint) : PiCirclePoint :=
   { x := (q.y - p.y) / cross p q,
@@ -975,6 +1345,29 @@ theorem segmentNormSq_law_of_cosines (p q : PiCirclePoint) :
   unfold segmentNormSq normSq dot
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-! A concrete non-equilateral coordinate certificate for the preceding law.
+The final conjunct is obtained from the general identity, while the first
+four conjuncts expose the finite rational data used by the certificate. -/
+
+theorem segmentNormSq_law_of_cosines_coordinate_certificate :
+    let p : PiCirclePoint := { x := 1, y := 1 }
+    let q : PiCirclePoint := { x := 4, y := 5 }
+    segmentNormSq p q = 25 ∧
+      normSq p = 2 ∧
+      normSq q = 41 ∧
+      dot p q = 9 ∧
+      segmentNormSq p q = normSq p + normSq q - 2 * dot p q := by
+  dsimp
+  constructor
+  · native_decide
+  constructor
+  · native_decide
+  constructor
+  · native_decide
+  constructor
+  · native_decide
+  · exact segmentNormSq_law_of_cosines _ _
 
 /-- If two unit vectors and the chord between them all have squared length
 `1`, then their dot product is `1/2`.
@@ -1963,6 +2356,84 @@ theorem point_segmentNormSq_formula (u v : Rat) :
   rw [one_sub_point_dot_formula]
   rw [Rat.div_def]
   grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-! A concrete cyclic-quadrilateral certificate for the numerator identity
+above.  The four points are the rational-circle chart points at `0`, `1 / 2`,
+`1`, and `2`; the six squared chord lengths make the coordinate content
+explicit, while the final equality is the specialized Ptolemy numerator
+relation.  Thus no angle value, square-root choice, or completed real circle
+is being assumed. -/
+
+theorem ptolemy_oriented_chord_coordinate_certificate :
+    let p : PiCirclePoint := point 0
+    let q : PiCirclePoint := point (1 / 2)
+    let r : PiCirclePoint := point 1
+    let s : PiCirclePoint := point 2
+    normSq p = 1 ∧
+      normSq q = 1 ∧
+      normSq r = 1 ∧
+      normSq s = 1 ∧
+      segmentNormSq p q = 4 / 5 ∧
+      segmentNormSq q r = 2 / 5 ∧
+      segmentNormSq r s = 2 / 5 ∧
+      segmentNormSq s p = 16 / 5 ∧
+      segmentNormSq p r = 2 ∧
+      segmentNormSq q s = 36 / 25 ∧
+      ((1 : Rat) * (3 / 2)) =
+        (1 / 2) * 1 + (1 / 2) * 2 := by
+  dsimp
+  have hnum := ptolemy_oriented_chord_numerator
+    (0 : Rat) (1 / 2) (1 : Rat) (2 : Rat)
+  constructor
+  · exact point_normSq 0
+  constructor
+  · exact point_normSq (1 / 2)
+  constructor
+  · exact point_normSq 1
+  constructor
+  · exact point_normSq 2
+  constructor
+  · rw [point_segmentNormSq_formula]
+    native_decide
+  constructor
+  · rw [point_segmentNormSq_formula]
+    native_decide
+  constructor
+  · rw [point_segmentNormSq_formula]
+    native_decide
+  constructor
+  · rw [point_segmentNormSq_formula]
+    native_decide
+  constructor
+  · rw [point_segmentNormSq_formula]
+    native_decide
+  constructor
+  · rw [point_segmentNormSq_formula]
+    native_decide
+  · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
+/-! A square-root-free shadow of Ptolemy for the same finite cyclic
+quadrilateral.  The supplied `16 / 25` is the rational witness for the
+cross-term whose square is the product of the four squared side lengths. -/
+
+theorem ptolemy_squared_coordinate_certificate :
+    let p : PiCirclePoint := point 0
+    let q : PiCirclePoint := point (1 / 2)
+    let r : PiCirclePoint := point 1
+    let s : PiCirclePoint := point 2
+    segmentNormSq p r * segmentNormSq q s =
+        segmentNormSq p q * segmentNormSq r s +
+          segmentNormSq q r * segmentNormSq s p + 2 * (16 / 25) ∧
+      sq (16 / 25 : Rat) =
+        segmentNormSq p q * segmentNormSq q r *
+          segmentNormSq r s * segmentNormSq s p := by
+  dsimp
+  constructor
+  · repeat' rw [point_segmentNormSq_formula]
+    native_decide
+  · repeat' rw [point_segmentNormSq_formula]
+    native_decide
 
 /-- A midpoint split in the first-quadrant rational circle chart refines the
 coarse squared chord by the square of the two curvature-corrected fine
@@ -3434,6 +3905,22 @@ def circleOne : PiCirclePoint :=
 def pointConj (p : PiCirclePoint) : PiCirclePoint :=
   { x := p.x, y := -p.y }
 
+/-! Reflection in the horizontal axis is recorded directly on rational
+coordinates.  The first component preserves squared distance, while the
+second records the reversal of orientation; no angle-valued interpretation
+is needed. -/
+theorem pointConj_reflection_coordinate_certificate (p q : PiCirclePoint) :
+    Stage.segmentNormSq (pointConj p) (pointConj q) = Stage.segmentNormSq p q ∧
+      Stage.cross (pointConj p) (pointConj q) = -Stage.cross p q := by
+  cases p
+  cases q
+  simp [pointConj, Stage.segmentNormSq, Stage.cross]
+  constructor
+  · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+  · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.add_assoc, Rat.add_comm]
+
 def composedPoint (u v : Rat) : PiCirclePoint :=
   pointMul (point u) (point v)
 
@@ -3546,6 +4033,90 @@ theorem pointMul_one_right (p : PiCirclePoint) :
   cases p
   simp [pointMul, circleOne]
   grind [Rat.sub_eq_add_neg]
+
+def pointPow (p : PiCirclePoint) : Nat -> PiCirclePoint
+  | 0 => circleOne
+  | n + 1 => pointMul (pointPow p n) p
+
+theorem pointPow_zero (p : PiCirclePoint) : pointPow p 0 = circleOne := by
+  rfl
+
+theorem pointPow_succ (p : PiCirclePoint) (n : Nat) :
+    pointPow p (n + 1) = pointMul (pointPow p n) p := by
+  rfl
+
+theorem pointPow_add (p : PiCirclePoint) (m n : Nat) :
+    pointPow p (m + n) = pointMul (pointPow p m) (pointPow p n) := by
+  induction n with
+  | zero =>
+      simp [pointPow, pointMul_one_right]
+  | succ n ih =>
+      rw [show m + (n + 1) = (m + n) + 1 by omega, pointPow_succ, ih,
+        pointPow_succ, pointMul_assoc]
+
+/-! The first nontrivial odd power is recorded explicitly as a finite
+coordinate identity.  This is the rational-coordinate triple-angle shadow of
+de Moivre's formula; it does not introduce angles or a completed complex
+exponential. -/
+theorem pointPow_three (p : PiCirclePoint) :
+    pointPow p 3 =
+      { x := p.x ^ 3 - 3 * p.x * p.y ^ 2,
+        y := 3 * p.x ^ 2 * p.y - p.y ^ 3 } := by
+  cases p
+  simp [pointPow, pointMul, circleOne]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
+
+theorem pointPow_mul (p q : PiCirclePoint) (n : Nat) :
+    pointPow (pointMul p q) n =
+      pointMul (pointPow p n) (pointPow q n) := by
+  induction n with
+  | zero =>
+      simp [pointPow, pointMul_one_right]
+  | succ n ih =>
+      rw [pointPow_succ, ih, pointPow_succ, pointPow_succ]
+      rw [pointMul_assoc (pointPow p n) (pointPow q n)
+        (pointMul p q)]
+      rw [← pointMul_assoc (pointPow q n) p q]
+      rw [pointMul_comm (pointPow q n) p]
+      rw [pointMul_assoc p (pointPow q n) q]
+      rw [pointMul_assoc (pointPow p n) p
+        (pointMul (pointPow q n) q)]
+
+/-! Natural powers commute with coordinatewise conjugation.  This is the
+finite rational-coordinate form of the conjugation symmetry in de Moivre's
+law; unlike the norm-square power laws, it records the two coordinates of the
+power itself. -/
+theorem pointPow_conj (p : PiCirclePoint) (n : Nat) :
+    pointPow (pointConj p) n = pointConj (pointPow p n) := by
+  induction n generalizing p with
+  | zero =>
+      simp [pointPow, pointConj, circleOne]
+  | succ n ih =>
+      rw [pointPow_succ, ih, pointPow_succ]
+      cases pointPow p n <;> cases p
+      simp [pointMul, pointConj]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+        Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem pointPow_normSq (p : PiCirclePoint) (n : Nat) :
+    Stage.normSq (pointPow p n) = Stage.normSq p ^ n := by
+  induction n with
+  | zero =>
+      simp [pointPow, circleOne, Stage.normSq]
+      grind
+  | succ n ih =>
+      rw [pointPow_succ, pointMul_normSq, ih, Rat.pow_succ]
+
+theorem pointPow_normSq_of_unit {p : PiCirclePoint}
+    (hp : Stage.normSq p = 1) (n : Nat) :
+    Stage.normSq (pointPow p n) = 1 := by
+  rw [pointPow_normSq, hp]
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [Rat.pow_succ, ih]
+      native_decide
 
 theorem pointMul_conj_of_unit {p : PiCirclePoint}
     (hp : Stage.normSq p = 1) :

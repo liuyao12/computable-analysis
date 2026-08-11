@@ -64,6 +64,37 @@ def requestedPrecision (n : Nat) : QPos :=
   else
     { val := (1 / (n : Rat)), property := one_div_nat_pos (Nat.pos_of_ne_zero hn) }
 
+theorem requestedPrecision_positive (n : Nat) :
+    0 < (requestedPrecision n).val := by
+  by_cases hn : n = 0
+  · simp [requestedPrecision, hn]
+    native_decide
+  · simp [requestedPrecision, hn]
+    exact one_div_nat_pos (Nat.pos_of_ne_zero hn)
+
+theorem requestedPrecision_le_one (n : Nat) :
+    (requestedPrecision n).val <= 1 := by
+  by_cases hn : n = 0
+  · simp [requestedPrecision, hn]
+  · rw [requestedPrecision, dif_neg hn]
+    change 1 / (n : Rat) <= 1
+    have h := one_div_nat_antitone (n := 1) (m := n)
+      (by native_decide) (Nat.pos_of_ne_zero hn)
+      (Nat.one_le_iff_ne_zero.mpr hn)
+    calc
+      1 / (n : Rat) <= 1 / (1 : Rat) := h
+      _ = 1 := by native_decide
+
+theorem requestedPrecision_antitone {n m : Nat} (hnm : n <= m) :
+    (requestedPrecision m).val <= (requestedPrecision n).val := by
+  by_cases hn : n = 0
+  · simp [requestedPrecision, hn]
+    exact requestedPrecision_le_one m
+  · have hnpos : 0 < n := Nat.pos_of_ne_zero hn
+    have hmpos : 0 < m := Nat.lt_of_lt_of_le hnpos hnm
+    have h := one_div_nat_antitone hnpos hmpos hnm
+    simpa [requestedPrecision, hn, Nat.ne_of_gt hmpos] using h
+
 def riemannComputeOfEffectiveFTC
     {F dF : RealFunRaw} {a b : Rat}
     (h : EffectiveFTC F dF a b) : Nat -> QInterval :=
@@ -418,6 +449,30 @@ theorem effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
     h c endpoint.endpoint_valid hplan
     endpoint.scheduled_valid endpoint.equivalent
 
+/--
+Transport the effective FTC certificate directly from an explicit endpoint
+stage schedule to the canonical endpoint-difference computation.
+
+The schedule equality is a finite implementation certificate: at each
+requested stage it identifies the precision selected by `h` with the stage
+used by `sigma`.  This composes that transport with the existing Riemann-plan
+bridge, so callers need not manually unpack an `EndpointScheduleAgreement`.
+-/
+theorem effectiveFTC_definiteIntegralEqualsEndpoint_of_stageSchedule
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveFTC F dF a b)
+    (c : Integral.Construction dF a b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    (hplan : c.plan = integralPlanOfEffectiveFTC h)
+    (sigma : RealRaw.StageSchedule)
+    (hsigma :
+      forall n, h.chooseEvalPrecision (requestedPrecision n) = sigma.stage n) :
+    DefiniteIntegralEqualsEndpointDifference F dF a b c hendpoint := by
+  exact effectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
+    h c hplan
+    (endpointScheduleAgreement_of_effectiveFTC_stageSchedule
+      h hendpoint sigma hsigma)
+
 /-- Static-dyadic specialization of the definite-integral FTC bridge. -/
 theorem staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint
     {F dF : RealFunRaw} {a b : Rat}
@@ -452,6 +507,99 @@ theorem staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgree
   staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint
     h c endpoint.endpoint_valid hplan
     endpoint.scheduled_valid endpoint.equivalent
+
+/-!
+## Finite partition endpoint transport
+
+These declarations expose the finite telescoping step at the FTC layer.  A
+caller supplies one rational interval box for each cell; the boxes are folded
+in `Nat` order and the result is shown to contain the endpoint box for the
+whole partition.  The adjacent-interval theorem concatenates two such finite
+folds.  No limiting partition, completed real, or completeness principle is
+used.
+-/
+
+/-- Fold one supplied rational interval box for every cell of a finite
+partition.  The zero interval makes the computation total outside the finite
+`List.range` that is actually traversed. -/
+def finitePartitionEndpointStageSum
+    {a b : Rat} (P : RationalPartition a b)
+    (cellBox : (k : Nat) -> k < P.pieces -> QInterval) : QInterval :=
+  (List.range P.pieces).foldl
+    (fun acc k => QInterval.addInterval acc
+      (if hk : k < P.pieces then cellBox k hk else { lo := 0, hi := 0 }))
+    { lo := 0, hi := 0 }
+
+/-- A finite cellwise endpoint enclosure telescopes to the endpoint enclosure
+of the entire rational partition.  `cell_contains` is the only
+function-specific obligation; the assembly itself is a reusable finite
+certificate. -/
+theorem finitePartitionEndpointStageSum_contains
+    {F : RealFunRaw} {a b : Rat}
+    (P : RationalPartition a b) (prec : Nat)
+    (hF : F.Valid)
+    (hdomain : forall i, i <= P.pieces -> F.domain (P.point i))
+    (cellBox : (k : Nat) -> k < P.pieces -> QInterval)
+    (cell_contains : forall k (hk : k < P.pieces),
+      (cellBox k hk).ContainsInterval
+        (endpointDifferenceInterval F (P.point k) (P.point (k + 1)) prec)) :
+    (finitePartitionEndpointStageSum P cellBox).ContainsInterval
+      (endpointDifferenceInterval F a b prec) := by
+  have hsum : (finitePartitionEndpointStageSum P cellBox).ContainsInterval
+      (P.endpointDifferenceSum F prec) := by
+    unfold finitePartitionEndpointStageSum
+    apply RationalPartition.addInterval_fold_contains (List.range P.pieces)
+      (fun k => if hk : k < P.pieces then cellBox k hk else { lo := 0, hi := 0 })
+      (P.endpointDifferenceTerm F prec)
+      (QInterval.containsInterval_refl _)
+    intro k
+    unfold RationalPartition.endpointDifferenceTerm
+    split
+    · exact cell_contains k _
+    · exact QInterval.containsInterval_refl _
+  exact hsum.trans (by
+    simpa [P.left_endpoint, P.right_endpoint] using
+      (RationalPartition.endpointDifferenceSum_contains P F prec hF hdomain))
+
+/-- Concatenate two finite partition folds over adjacent rational intervals.
+The added boxes first telescope on `[a,b]` and `[b,c]`, then the shared
+endpoint box is handled by the finite adjacent-difference certificate. -/
+theorem finitePartitionEndpointStageSum_adjacent_contains
+    {F : RealFunRaw} {a b c : Rat}
+    (left : RationalPartition a b) (right : RationalPartition b c)
+    (prec : Nat) (hF : F.Valid)
+    (hleft_domain : forall i, i <= left.pieces -> F.domain (left.point i))
+    (hright_domain : forall i, i <= right.pieces -> F.domain (right.point i))
+    (leftBox : (k : Nat) -> k < left.pieces -> QInterval)
+    (rightBox : (k : Nat) -> k < right.pieces -> QInterval)
+    (hleft : forall k (hk : k < left.pieces),
+      (leftBox k hk).ContainsInterval
+        (endpointDifferenceInterval F (left.point k) (left.point (k + 1)) prec))
+    (hright : forall k (hk : k < right.pieces),
+      (rightBox k hk).ContainsInterval
+        (endpointDifferenceInterval F (right.point k) (right.point (k + 1)) prec)) :
+    (QInterval.addInterval
+      (finitePartitionEndpointStageSum left leftBox)
+      (finitePartitionEndpointStageSum right rightBox)).ContainsInterval
+        (endpointDifferenceInterval F a c prec) := by
+  have hleft_sum := finitePartitionEndpointStageSum_contains left prec hF
+    hleft_domain leftBox hleft
+  have hright_sum := finitePartitionEndpointStageSum_contains right prec hF
+    hright_domain rightBox hright
+  have hleft' : (finitePartitionEndpointStageSum left leftBox).ContainsInterval
+      (endpointDifferenceInterval F a b prec) := by
+    simpa [left.left_endpoint, left.right_endpoint] using hleft_sum
+  have hright' : (finitePartitionEndpointStageSum right rightBox).ContainsInterval
+      (endpointDifferenceInterval F b c prec) := by
+    simpa [right.left_endpoint, right.right_endpoint] using hright_sum
+  have hadd := QInterval.addInterval_contains hleft' hright'
+  have hmiddle : 0 <= (F.compute b prec).width := by
+    have hb : F.domain b := by
+      simpa [left.right_endpoint] using
+        (hleft_domain left.pieces (Nat.le_refl left.pieces))
+    exact (hF b hb).1 prec
+  exact hadd.trans (endpointDifferenceInterval_adjacent_additive_contains
+    (F := F) (a := a) (b := b) (c := c) (prec := prec) hmiddle)
 
 end FTC
 

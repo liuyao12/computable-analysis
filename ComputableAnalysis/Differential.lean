@@ -35,6 +35,7 @@ namespace ExactFunction
 def affine (m c : Rat) (x : Rat) : Rat := m * x + c
 def constant (m : Rat) (_x : Rat) : Rat := m
 def square (x : Rat) : Rat := x * x
+def cube (x : Rat) : Rat := x ^ 3
 def doubleId (x : Rat) : Rat := 2 * x
 
 /-- Effective derivative of an affine function:
@@ -84,6 +85,755 @@ theorem square_derivative_effective :
 identities below. -/
 def differenceQuotient (f : Rat -> Rat) (x h : Rat) : Rat :=
   (f (x + h) - f x) / h
+
+/- A finite L'Hopital-style cancellation certificate: away from the common
+zero `a`, the quotient of the factored numerator and denominator is the
+derivative ratio at `a`, namely `2 * a / 1`, plus its exact linear remainder.
+This is only a rational identity; it makes no assertion about a limit. -/
+theorem quadratic_linear_factored_quotient_derivative_ratio
+    {a x : Rat} (hx : x - a ≠ 0) :
+    (x ^ 2 - a ^ 2) / (x - a) = (2 * a) / 1 + (x - a) := by
+  rw [Rat.div_def]
+  have hcancel : (x - a) * (x - a)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x - a) hx
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/- The cubic companion records the exact finite remainder after cancelling
+the common linear factor.  It is the cubic L'Hopital-style certificate, not a
+statement about a limiting quotient. -/
+theorem cubic_linear_factored_quotient_derivative_ratio
+    {a x : Rat} (hx : x - a ≠ 0) :
+    (x ^ 3 - a ^ 3) / (x - a) =
+      3 * a ^ 2 + 3 * a * (x - a) + (x - a) ^ 2 := by
+  rw [Rat.div_def]
+  have hcancel : (x - a) * (x - a)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x - a) hx
+  grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/- A reusable finite cancellation certificate for a general factored
+polynomial evaluator.  The factor `g` may be any rational function here,
+and in particular may be a finite polynomial evaluator; the only required
+side condition is that the displayed linear factor is nonzero.  This is an
+exact rational identity, not a limit or a completed-real quotient theorem. -/
+theorem factored_linear_quotient_cancel
+    {a x : Rat} {g : Rat -> Rat} (hx : x - a ≠ 0) :
+    ((x - a) * g x) / (x - a) = g x := by
+  rw [Rat.div_def]
+  have hcancel : (x - a) * (x - a)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x - a) hx
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/- A two-function finite L'Hopital certificate: if numerator and denominator
+share the same nonzero linear factor, their quotient is exactly the quotient
+of the remaining rational evaluators.  The denominator remainder must also
+be nonzero; this is the finite algebraic analogue of cancelling a common
+vanishing factor before comparing derivative ratios. -/
+theorem common_linear_factor_quotient_cancel
+    {a x : Rat} {g h : Rat -> Rat}
+    (hx : x - a ≠ 0) (hh : h x ≠ 0) :
+    ((x - a) * g x) / ((x - a) * h x) = g x / h x := by
+  have hscaled : (x - a) * h x ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hleft | hright
+    · exact hx hleft
+    · exact hh hright
+  rw [Rat.div_def, Rat.div_def]
+  have hcancel : (x - a) * (x - a)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x - a) hx
+  have hscaled_inv : ((x - a) * h x)⁻¹ = (x - a)⁻¹ * (h x)⁻¹ := by
+    rw [Rat.inv_mul_rev]
+    grind [Rat.mul_comm]
+  have hhc : h x * (h x)⁻¹ = 1 := Rat.mul_inv_cancel (h x) hh
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem affine_differenceQuotient {m c x h : Rat} (hh : h ≠ 0) :
+    differenceQuotient (affine m c) x h = m := by
+  unfold differenceQuotient affine
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/- The exact finite chain-rule analogue for an affine inner map.  The
+composition is evaluated at rational points, and the inner difference
+quotient is transported by its slope; the only side conditions are the
+nonzero outer mesh and the nonzero affine slope.  This is a finite rational
+identity, with no limit or completed-real interpretation. -/
+theorem differenceQuotient_affine_comp
+    (f : Rat -> Rat) {m c x h : Rat} (hm : m ≠ 0) (hh : h ≠ 0) :
+    differenceQuotient (fun z => f (affine m c z)) x h =
+      m * differenceQuotient f (affine m c x) (m * h) := by
+  have hmh : m * h ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hmzero | hhzero
+    · exact hm hmzero
+    · exact hh hhzero
+  unfold differenceQuotient affine
+  rw [Rat.div_def, Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  have hmhcancel : (m * h) * (m * h)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (m * h) hmh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/- A positive affine change of endpoint coordinates transports a finite
+secant bracket.  The source bracket is stated at rational endpoints `a,b`,
+while `hxa` and `hyb` identify those endpoints with the translated/scaled
+coordinates `x,y`.  Thus this is an endpoint-level companion to
+`secant_of_finite_derivative_bracket`, not a second mesh theorem. -/
+theorem secant_bracket_affine_endpoint_transport
+    {f : Rat -> Rat} {a b x y m c lower upper : Rat}
+    (hm : 0 < m) (hab : b - a ≠ 0)
+    (hxa : affine m c x = a) (hyb : affine m c y = b)
+    (hbracket :
+      lower <= differenceQuotient f a (b - a) /\
+        differenceQuotient f a (b - a) <= upper) :
+    m * lower <=
+        differenceQuotient (fun z => f (affine m c z)) x (y - x) /\
+      differenceQuotient (fun z => f (affine m c z)) x (y - x) <=
+        m * upper := by
+  have hmne : m ≠ 0 := Rat.ne_of_gt hm
+  have hmstep : m * (y - x) = b - a := by
+    unfold affine at hxa hyb
+    grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg,
+      Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+  have hstep : y - x ≠ 0 := by
+    intro hzero
+    apply hab
+    rw [← hmstep, hzero, Rat.mul_zero]
+  have htransport := differenceQuotient_affine_comp
+    f (m := m) (c := c) (x := x) (h := y - x) hmne hstep
+  rw [htransport, hmstep, hxa]
+  have hnonneg : 0 <= m := Rat.le_of_lt hm
+  constructor
+  · exact (Rat.mul_le_mul_of_nonneg_left hbracket.1 hnonneg)
+  · exact (Rat.mul_le_mul_of_nonneg_left hbracket.2 hnonneg)
+
+theorem affine_root_of_nonzero_slope {m c : Rat} (hm : m ≠ 0) :
+    affine m c (-c / m) = 0 := by
+  unfold affine
+  rw [Rat.div_def]
+  have hcancel : m * m⁻¹ = 1 := Rat.mul_inv_cancel m hm
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem affine_root_between_of_sign_change
+    {m c a b : Rat} (hmpos : 0 < m)
+    (ha : affine m c a <= 0) (hb : 0 <= affine m c b) :
+    a <= -c / m ∧ -c / m <= b ∧ affine m c (-c / m) = 0 := by
+  have hma : m * a <= -c := by
+    unfold affine at ha
+    grind
+  have hmb : -c <= m * b := by
+    unfold affine at hb
+    grind
+  have hleft : a <= -c / m := by
+    apply Rat.le_of_mul_le_mul_right (c := m)
+    · calc
+        a * m = m * a := by rw [Rat.mul_comm]
+        _ <= -c := hma
+        _ = (-c / m) * m := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+            Rat.neg_mul]
+    · exact hmpos
+  have hright : -c / m <= b := by
+    apply Rat.le_of_mul_le_mul_right (c := m)
+    · calc
+        (-c / m) * m = -c := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+            Rat.neg_mul]
+        _ <= m * b := hmb
+        _ = b * m := by rw [Rat.mul_comm]
+    · exact hmpos
+  exact ⟨hleft, hright, affine_root_of_nonzero_slope (Rat.ne_of_gt hmpos)⟩
+
+theorem affine_root_between_of_negative_sign_change
+    {m c a b : Rat} (hmneg : m < 0)
+    (ha : 0 <= affine m c a) (hb : affine m c b <= 0) :
+    a <= -c / m ∧ -c / m <= b ∧ affine m c (-c / m) = 0 := by
+  have hma : -m * a <= c := by
+    unfold affine at ha
+    grind
+  have hmb : c <= -m * b := by
+    unfold affine at hb
+    grind
+  have hpos : 0 < -m := by grind
+  have hleft : a <= -c / m := by
+    apply Rat.le_of_mul_le_mul_right (c := -m)
+    · calc
+        a * (-m) = -m * a := by rw [Rat.mul_comm]
+        _ <= c := hma
+        _ = (-c / m) * (-m) := by
+          rw [Rat.div_def]
+          have hmne : m ≠ 0 := Rat.ne_of_lt hmneg
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+            Rat.neg_mul]
+    · exact hpos
+  have hright : -c / m <= b := by
+    apply Rat.le_of_mul_le_mul_right (c := -m)
+    · calc
+        (-c / m) * (-m) = c := by
+          rw [Rat.div_def]
+          have hmne : m ≠ 0 := Rat.ne_of_lt hmneg
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel,
+            Rat.neg_mul]
+        _ <= -m * b := hmb
+        _ = b * (-m) := by rw [Rat.mul_comm]
+    · exact hpos
+  exact ⟨hleft, hright, affine_root_of_nonzero_slope (Rat.ne_of_lt hmneg)⟩
+
+theorem cube_differenceQuotient {x h : Rat} (hh : h ≠ 0) :
+    differenceQuotient cube x h = 3 * x ^ 2 + 3 * x * h + h ^ 2 := by
+  unfold differenceQuotient cube
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem cube_midpoint_secant {a b : Rat} (hab : b - a ≠ 0) :
+    differenceQuotient cube a (b - a) =
+      3 * ((a + b) / 2) ^ 2 + (b - a) ^ 2 / 4 := by
+  rw [cube_differenceQuotient hab]
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem quartic_differenceQuotient {x h : Rat} (hh : h ≠ 0) :
+    differenceQuotient (fun z => z ^ 4) x h =
+      4 * x ^ 3 + 6 * x ^ 2 * h + 4 * x * h ^ 2 + h ^ 3 := by
+  unfold differenceQuotient
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem quartic_midpoint_secant {a b : Rat} (hab : b - a ≠ 0) :
+    differenceQuotient (fun z => z ^ 4) a (b - a) =
+      4 * ((a + b) / 2) ^ 3 + ((a + b) / 2) * (b - a) ^ 2 := by
+  rw [quartic_differenceQuotient hab]
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem quintic_differenceQuotient {x h : Rat} (hh : h ≠ 0) :
+    differenceQuotient (fun z => z ^ 5) x h =
+      5 * x ^ 4 + 10 * x ^ 3 * h + 10 * x ^ 2 * h ^ 2 +
+        5 * x * h ^ 3 + h ^ 4 := by
+  unfold differenceQuotient
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem sextic_differenceQuotient {x h : Rat} (hh : h ≠ 0) :
+    differenceQuotient (fun z => z ^ 6) x h =
+      6 * x ^ 5 + 15 * x ^ 4 * h + 20 * x ^ 3 * h ^ 2 +
+        15 * x ^ 2 * h ^ 3 + 6 * x * h ^ 4 + h ^ 5 := by
+  unfold differenceQuotient
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.pow_succ, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem quintic_midpoint_secant {a b : Rat} (hab : b - a ≠ 0) :
+    differenceQuotient (fun z => z ^ 5) a (b - a) =
+      5 * ((a + b) / 2) ^ 4 +
+        (5 / 2) * ((a + b) / 2) ^ 2 * (b - a) ^ 2 +
+        (b - a) ^ 4 / 16 := by
+  rw [quintic_differenceQuotient hab]
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem sextic_midpoint_secant {a b : Rat} (hab : b - a ≠ 0) :
+    differenceQuotient (fun z => z ^ 6) a (b - a) =
+      6 * ((a + b) / 2) ^ 5 +
+        5 * ((a + b) / 2) ^ 3 * (b - a) ^ 2 +
+        (3 / 8) * ((a + b) / 2) * (b - a) ^ 4 := by
+  rw [sextic_differenceQuotient hab]
+  grind [Rat.div_def, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem square_quotient_by_id {x : Rat} (hx : x ≠ 0) :
+    square x / x = x := by
+  unfold square
+  rw [Rat.div_def]
+  have hcancel : x * x⁻¹ = 1 := Rat.mul_inv_cancel x hx
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem cube_quotient_by_id {x : Rat} (hx : x ≠ 0) :
+    cube x / x = x ^ 2 := by
+  unfold cube
+  rw [Rat.div_def]
+  have hcancel : x * x⁻¹ = 1 := Rat.mul_inv_cancel x hx
+  grind [Rat.pow_succ, Rat.mul_assoc, Rat.mul_comm]
+
+theorem power_succ_quotient_by_id (n : Nat) {x : Rat} (hx : x ≠ 0) :
+    x ^ (n + 1) / x = x ^ n := by
+  rw [Rat.pow_succ, Rat.div_def]
+  have hcancel : x * x⁻¹ = 1 := Rat.mul_inv_cancel x hx
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem power_succ_quotient_by_power (n : Nat) {x : Rat} (hx : x ≠ 0) :
+    x ^ (n + 1) / x ^ n = x := by
+  have hpow : x ^ n ≠ 0 := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        rw [Rat.pow_succ]
+        intro hzero
+        rcases Rat.mul_eq_zero.mp hzero with hleft | hright
+        · exact ih hleft
+        · exact hx hright
+  rw [Rat.pow_succ, Rat.div_def]
+  have hcancel : x ^ n * (x ^ n)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x ^ n) hpow
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem power_add_quotient_by_power (m n : Nat) {x : Rat} (hx : x ≠ 0) :
+    x ^ (m + n) / x ^ m = x ^ n := by
+  have hpow : x ^ m ≠ 0 := by
+    induction m with
+    | zero => simp
+    | succ m ih =>
+        rw [Rat.pow_succ]
+        intro hzero
+        rcases Rat.mul_eq_zero.mp hzero with hleft | hright
+        · exact ih hleft
+        · exact hx hright
+  have hpowadd : x ^ (m + n) = x ^ m * x ^ n := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        rw [show m + (n + 1) = m + n + 1 by omega,
+          Rat.pow_succ, ih, Rat.pow_succ]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [hpowadd, Rat.div_def]
+  have hcancel : x ^ m * (x ^ m)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x ^ m) hpow
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+/-! Scalar-weighted form of the same finite cancellation. -/
+
+theorem mul_power_add_quotient_by_power (y : Rat) (m n : Nat)
+    {x : Rat} (hx : x ≠ 0) :
+    (y * x ^ (m + n)) / x ^ m = y * x ^ n := by
+  have hpow : x ^ m ≠ 0 := by
+    induction m with
+    | zero => simp
+    | succ m ih =>
+        rw [Rat.pow_succ]
+        intro hzero
+        rcases Rat.mul_eq_zero.mp hzero with hleft | hright
+        · exact ih hleft
+        · exact hx hright
+  have hpowadd : x ^ (m + n) = x ^ m * x ^ n := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        rw [show m + (n + 1) = m + n + 1 by omega,
+          Rat.pow_succ, ih, Rat.pow_succ]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  rw [hpowadd, Rat.div_def]
+  have hcancel : x ^ m * (x ^ m)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x ^ m) hpow
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem mul_power_add_quotient_by_scaled_power
+    (y z : Rat) (m n : Nat) {x : Rat} (hx : x ≠ 0) (hz : z ≠ 0) :
+    (y * x ^ (m + n)) / (z * x ^ m) = (y / z) * x ^ n := by
+  have hpow : x ^ m ≠ 0 := by
+    induction m with
+    | zero => simp
+    | succ m ih =>
+        rw [Rat.pow_succ]
+        intro hzero
+        rcases Rat.mul_eq_zero.mp hzero with hleft | hright
+        · exact ih hleft
+        · exact hx hright
+  have hpowadd : x ^ (m + n) = x ^ m * x ^ n := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        rw [show m + (n + 1) = m + n + 1 by omega,
+          Rat.pow_succ, ih, Rat.pow_succ]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hscaled : z * x ^ m ≠ 0 := by
+    intro hzero
+    rcases Rat.mul_eq_zero.mp hzero with hleft | hright
+    · exact hz hleft
+    · exact hpow hright
+  rw [hpowadd, Rat.div_def, Rat.div_def]
+  have hcancel : x ^ m * (x ^ m)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (x ^ m) hpow
+  have hzcancel : z * z⁻¹ = 1 := Rat.mul_inv_cancel z hz
+  have hscaled_inv : (z * x ^ m)⁻¹ = z⁻¹ * (x ^ m)⁻¹ := by
+    rw [Rat.inv_mul_rev]
+    grind [Rat.mul_comm]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem square_midpoint_mean_value {a b : Rat} (hab : b - a ≠ 0) :
+    differenceQuotient square a (b - a) = 2 * ((a + b) / 2) := by
+  unfold differenceQuotient square
+  rw [Rat.div_def]
+  have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (b - a) hab
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/- A finite mean-value certificate for the cubic on a nonnegative interval.
+The secant quotient is trapped between the endpoint derivatives; this is an
+explicit rational inequality, not an appeal to an attained intermediate
+point or to a completed real interval. -/
+theorem cube_secant_derivative_bracket {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    3 * a * a <= differenceQuotient cube a (b - a) /\
+      differenceQuotient cube a (b - a) <= 3 * b * b := by
+  have hcalc :
+      differenceQuotient cube a (b - a) = a * a + a * b + b * b := by
+    unfold differenceQuotient cube
+    rw [Rat.div_def]
+    have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (b - a) hne
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  rw [hcalc]
+  have hba : 0 <= b - a := by grind
+  have hb : 0 <= b := by grind
+  have hleft : 0 <= b + 2 * a := by grind
+  have hright : 0 <= 2 * b + a := by grind
+  have hleftprod : 0 <= (b - a) * (b + 2 * a) :=
+    Rat.mul_nonneg hba hleft
+  have hrightprod : 0 <= (b - a) * (2 * b + a) :=
+    Rat.mul_nonneg hba hright
+  constructor
+  · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+  · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+
+/- A finite mean-value certificate for the square on a nonnegative interval.
+The secant quotient is trapped between the endpoint derivatives by the
+identity `(b^2 - a^2) / (b - a) = a + b`; all quantities remain rational and
+finite. -/
+theorem square_secant_derivative_bracket {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    2 * a <= differenceQuotient square a (b - a) /\
+      differenceQuotient square a (b - a) <= 2 * b := by
+  have hcalc :
+      differenceQuotient square a (b - a) = a + b := by
+    unfold differenceQuotient square
+    rw [Rat.div_def]
+    have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (b - a) hne
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+      Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  rw [hcalc]
+  have hb : 0 <= b := by grind
+  constructor <;> grind
+
+/- A finite mean-value certificate for the quartic on a nonnegative interval.
+The secant quotient is trapped between the endpoint derivatives by two
+explicit factorizations; this records the finite certificate without
+selecting an intermediate real point. -/
+theorem quartic_secant_derivative_bracket {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    4 * a ^ 3 <= differenceQuotient (fun z => z ^ 4) a (b - a) /\
+      differenceQuotient (fun z => z ^ 4) a (b - a) <= 4 * b ^ 3 := by
+  have hcalc :
+      differenceQuotient (fun z => z ^ 4) a (b - a) =
+        a ^ 3 + a ^ 2 * b + a * b ^ 2 + b ^ 3 := by
+    unfold differenceQuotient
+    rw [Rat.div_def]
+    have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (b - a) hne
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  rw [hcalc]
+  have hba : 0 <= b - a := by grind
+  have hb : 0 <= b := by grind
+  have hleft : 0 <= b ^ 2 + 2 * a * b + 3 * a ^ 2 := by
+    have hbsq : 0 <= b ^ 2 := Rat.pow_nonneg hb
+    have habprod : 0 <= a * b := Rat.mul_nonneg ha hb
+    have hasq : 0 <= a ^ 2 := Rat.pow_nonneg ha
+    have htwoprod : 0 <= 2 * a * b := by
+      have htwoprod' : 0 <= 2 * (a * b) :=
+        Rat.mul_nonneg (by grind) habprod
+      grind [Rat.mul_assoc]
+    have hthreesq : 0 <= 3 * a ^ 2 :=
+      Rat.mul_nonneg (by grind) hasq
+    exact Rat.add_nonneg (Rat.add_nonneg hbsq htwoprod) hthreesq
+  have hright : 0 <= 3 * b ^ 2 + 2 * a * b + a ^ 2 := by
+    have hbsq : 0 <= b ^ 2 := Rat.pow_nonneg hb
+    have habprod : 0 <= a * b := Rat.mul_nonneg ha hb
+    have hasq : 0 <= a ^ 2 := Rat.pow_nonneg ha
+    have threebsq : 0 <= 3 * b ^ 2 :=
+      Rat.mul_nonneg (by grind) hbsq
+    have htwoprod : 0 <= 2 * a * b := by
+      have htwoprod' : 0 <= 2 * (a * b) :=
+        Rat.mul_nonneg (by grind) habprod
+      grind [Rat.mul_assoc]
+    exact Rat.add_nonneg (Rat.add_nonneg threebsq htwoprod) hasq
+  have hleftprod :
+      0 <= (b - a) * (b ^ 2 + 2 * a * b + 3 * a ^ 2) :=
+    Rat.mul_nonneg hba hleft
+  have hrightprod :
+      0 <= (b - a) * (3 * b ^ 2 + 2 * a * b + a ^ 2) :=
+    Rat.mul_nonneg hba hright
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+/- The finite kernel for the secant of the monomial `x^(n+1)`.  It is
+defined by the same recurrence as the finite factorization quotient, so its
+use below stays entirely within rational arithmetic. -/
+def monomialSecantKernel (a b : Rat) : Nat -> Rat
+  | 0 => 1
+  | n + 1 => a ^ (n + 1) + b * monomialSecantKernel a b n
+
+private theorem monomial_power_mono_nonneg {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (n : Nat) :
+    a ^ n <= b ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Rat.pow_succ, Rat.pow_succ]
+      have hleft := Rat.mul_le_mul_of_nonneg_right ih ha
+      have hb : 0 <= b := by grind
+      have hbn : 0 <= b ^ n := Rat.pow_nonneg hb
+      have hright := Rat.mul_le_mul_of_nonneg_left hab hbn
+      exact Rat.le_trans hleft hright
+
+private theorem monomialSecantKernel_factorization {a b : Rat} {n : Nat}
+    (hne : b - a ≠ 0) :
+    (b ^ (n + 1) - a ^ (n + 1)) / (b - a) =
+      monomialSecantKernel a b n := by
+  induction n with
+  | zero =>
+      unfold monomialSecantKernel
+      rw [Rat.div_def]
+      have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+        Rat.mul_inv_cancel (b - a) hne
+      grind [Rat.sub_eq_add_neg]
+  | succ n ih =>
+      rw [show n + 1 + 1 = (n + 1) + 1 by omega,
+        Rat.pow_succ, monomialSecantKernel]
+      rw [Rat.div_def]
+      have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+        Rat.mul_inv_cancel (b - a) hne
+      have hstep :
+          (b ^ (n + 1) - a ^ (n + 1)) * (b - a)⁻¹ =
+            monomialSecantKernel a b n := by
+        simpa [Rat.div_def] using ih
+      grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem monomialSecantKernel_lower {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (n : Nat) :
+    (n + 1 : Rat) * a ^ n <= monomialSecantKernel a b n := by
+  induction n with
+  | zero =>
+      unfold monomialSecantKernel
+      grind
+  | succ n ih =>
+      rw [monomialSecantKernel]
+      have hb : 0 <= b := by grind
+      have hpow : 0 <= a ^ n := Rat.pow_nonneg ha
+      have hstep : a ^ n * a <= a ^ n * b :=
+        Rat.mul_le_mul_of_nonneg_left hab hpow
+      have hscaled :
+          (n + 1 : Rat) * (a ^ n * a) <=
+            (n + 1 : Rat) * (a ^ n * b) :=
+        Rat.mul_le_mul_of_nonneg_left hstep (by grind)
+      have hihb :
+          (n + 1 : Rat) * (a ^ n * b) <=
+            b * monomialSecantKernel a b n := by
+        have hmul := Rat.mul_le_mul_of_nonneg_left ih hb
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      rw [Rat.pow_succ]
+      calc
+        (↑(n + 1) + 1) * (a ^ n * a) <=
+            (n + 1 : Rat) * (a ^ n * b) + a ^ n * a := by
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+        _ <= b * monomialSecantKernel a b n + a ^ n * a :=
+              (Rat.add_le_add_right).2 hihb
+        _ = a ^ n * a + b * monomialSecantKernel a b n := by
+              grind [Rat.add_comm]
+
+private theorem monomialSecantKernel_upper {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (n : Nat) :
+    monomialSecantKernel a b n <= (n + 1 : Rat) * b ^ n := by
+  induction n with
+  | zero =>
+      unfold monomialSecantKernel
+      grind
+  | succ n ih =>
+      rw [monomialSecantKernel]
+      have hb : 0 <= b := by grind
+      have hpow : 0 <= b ^ n := Rat.pow_nonneg hb
+      have hstep : a ^ (n + 1) <= b ^ (n + 1) :=
+        monomial_power_mono_nonneg ha hab (n + 1)
+      have hscaled := Rat.mul_le_mul_of_nonneg_left ih hb
+      have hstep' : a ^ n * a <= b ^ (n + 1) := by
+        simpa [Rat.pow_succ] using hstep
+      rw [Rat.pow_succ]
+      calc
+        a ^ n * a + b * monomialSecantKernel a b n <=
+            b ^ (n + 1) + b * monomialSecantKernel a b n :=
+              (Rat.add_le_add_right).2 hstep'
+        _ <= b ^ (n + 1) + b * ((n + 1 : Rat) * b ^ n) :=
+              (Rat.add_le_add_left).2 hscaled
+        _ = (↑(n + 1) + 1) * b ^ (n + 1) := by
+              rw [Rat.pow_succ]
+              grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
+/-- A finite monomial mean-value bracket.  For a nonnegative rational
+interval `[a,b]`, the secant quotient of `x^(n+1)` is bounded by the two
+endpoint finite-power derivatives `(n+1)*a^n` and `(n+1)*b^n`.
+
+The proof is a finite factorization and positivity induction: it selects no
+intermediate point and assumes neither a limit nor completeness. -/
+theorem monomial_succ_secant_derivative_bracket {a b : Rat} (n : Nat)
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    (n + 1 : Rat) * a ^ n <=
+        differenceQuotient (fun z => z ^ (n + 1)) a (b - a) /\
+      differenceQuotient (fun z => z ^ (n + 1)) a (b - a) <=
+        (n + 1 : Rat) * b ^ n := by
+  have hfactor :=
+    monomialSecantKernel_factorization (a := a) (b := b) (n := n) hne
+  have hkernelLower := monomialSecantKernel_lower ha hab n
+  have hkernelUpper := monomialSecantKernel_upper ha hab n
+  have hquotient :
+      differenceQuotient (fun z => z ^ (n + 1)) a (b - a) =
+        monomialSecantKernel a b n := by
+    unfold differenceQuotient
+    have habsum : a + (b - a) = b := by grind
+    rw [habsum]
+    exact hfactor
+  rw [hquotient]
+  exact ⟨hkernelLower, hkernelUpper⟩
+
+/- A finite mesh transport for a mean-value-style certificate.  Each cell
+supplies a rational bracket for its forward secant (the finite derivative
+certificate), and telescoping transports the common bracket to the whole
+endpoint secant.  The endpoint relation and positive mesh width are explicit;
+no intermediate point, limit, or completeness principle is used. -/
+theorem secant_of_finite_derivative_bracket
+    {f : Rat -> Rat} {a b h lower upper : Rat} {n : Nat}
+    (hn : 0 < n) (hh : 0 < h)
+    (hend : b = a + (n : Rat) * h)
+    (hcell : ∀ k : Nat, k < n →
+      lower <= differenceQuotient f (a + (k : Rat) * h) h /\
+        differenceQuotient f (a + (k : Rat) * h) h <= upper) :
+    lower <= differenceQuotient f a (b - a) /\
+      differenceQuotient f a (b - a) <= upper := by
+  have hmesh : ∀ m : Nat,
+      m <= n ->
+      lower * (m : Rat) * h <= f (a + (m : Rat) * h) - f a /\
+        f (a + (m : Rat) * h) - f a <= upper * (m : Rat) * h := by
+    intro m
+    induction m with
+    | zero =>
+        intro _
+        constructor <;> grind
+    | succ m ih =>
+        intro hm
+        have hlocal := hcell m (by omega)
+        have hprev := ih (by omega)
+        unfold differenceQuotient at hlocal
+        have hstep :
+            (a + (↑m : Rat) * h) + h = a + (↑(m + 1) : Rat) * h := by
+          rw [Rat.natCast_add]
+          grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+            Rat.mul_assoc, Rat.mul_comm]
+        rw [hstep] at hlocal
+        constructor
+        · have hscaled := Rat.mul_le_mul_of_nonneg_right hlocal.1
+            (Rat.le_of_lt hh)
+          rw [Rat.div_def] at hscaled
+          have hcancel : h⁻¹ * h = 1 := Rat.inv_mul_cancel _
+            (Rat.ne_of_gt hh)
+          have hinc :
+              lower * h <=
+                f (a + (↑(m + 1) : Rat) * h) - f (a + (↑m : Rat) * h) := by
+            calc
+              lower * h <=
+                  (f (a + (↑(m + 1) : Rat) * h) -
+                    f (a + (↑m : Rat) * h)) * h⁻¹ * h := hscaled
+              _ = f (a + (↑(m + 1) : Rat) * h) -
+                    f (a + (↑m : Rat) * h) := by
+                rw [Rat.mul_assoc, hcancel, Rat.mul_one]
+          have hadd := rat_add_le_add hprev.1 hinc
+          rw [Rat.natCast_add]
+          grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+            Rat.mul_assoc, Rat.mul_comm]
+        · have hscaled := Rat.mul_le_mul_of_nonneg_right hlocal.2
+            (Rat.le_of_lt hh)
+          rw [Rat.div_def] at hscaled
+          have hcancel : h⁻¹ * h = 1 := Rat.inv_mul_cancel _
+            (Rat.ne_of_gt hh)
+          have hinc :
+              f (a + (↑(m + 1) : Rat) * h) - f (a + (↑m : Rat) * h) <=
+                upper * h := by
+            calc
+              f (a + (↑(m + 1) : Rat) * h) -
+                    f (a + (↑m : Rat) * h) =
+                  (f (a + (↑(m + 1) : Rat) * h) -
+                    f (a + (↑m : Rat) * h)) * h⁻¹ * h := by
+                rw [Rat.mul_assoc, hcancel, Rat.mul_one]
+              _ <= upper * h := hscaled
+          have hadd := rat_add_le_add hprev.2 hinc
+          rw [Rat.natCast_add]
+          grind [Rat.mul_add, Rat.add_mul, Rat.add_assoc, Rat.add_comm,
+            Rat.mul_assoc, Rat.mul_comm]
+  have hba : b - a = (n : Rat) * h := by grind
+  rw [hba, differenceQuotient]
+  have hmeshN := hmesh n (Nat.le_refl n)
+  have hdenpos : 0 < (n : Rat) * h :=
+    Rat.mul_pos ((Rat.natCast_pos).2 hn) hh
+  rw [Rat.div_def]
+  have hcancel : ((n : Rat) * h)⁻¹ * ((n : Rat) * h) = 1 :=
+    Rat.inv_mul_cancel _ (Rat.ne_of_gt hdenpos)
+  constructor
+  · apply Rat.le_of_mul_le_mul_right (c := (n : Rat) * h)
+    · rw [Rat.mul_assoc, hcancel]
+      grind [hmeshN.1]
+    · exact hdenpos
+  · apply Rat.le_of_mul_le_mul_right (c := (n : Rat) * h)
+    · rw [Rat.mul_assoc, hcancel]
+      grind [hmeshN.2]
+    · exact hdenpos
+
+/- A generic finite bisection budget for rational brackets.  The denominator
+is the exact number of subintervals after `n` halvings, so the statement is
+an algorithmic termination/error certificate rather than a claim about a
+completed limit or an attained root. -/
+def rationalBisectionWidth (a b : Rat) (n : Nat) : Rat :=
+  (b - a) / (((2 ^ n : Nat) : Rat))
+
+theorem rationalBisectionWidth_le_error_budget
+    {a b eps : Rat} {n : Nat}
+    (hbudget : b - a <= eps * (((2 ^ n : Nat) : Rat))) :
+    rationalBisectionWidth a b n <= eps := by
+  unfold rationalBisectionWidth
+  have hpowNat : 0 < 2 ^ n := Nat.pow_pos (by omega)
+  have hpow : 0 < (((2 ^ n : Nat) : Rat)) :=
+    (Rat.natCast_pos).2 hpowNat
+  have hpowne : (((2 ^ n : Nat) : Rat)) ≠ 0 := Rat.ne_of_gt hpow
+  apply Rat.le_of_mul_le_mul_right
+    (c := (((2 ^ n : Nat) : Rat)))
+  · rw [Rat.div_def, Rat.mul_assoc]
+    have hcancel : (((2 ^ n : Nat) : Rat))⁻¹ *
+        (((2 ^ n : Nat) : Rat)) = 1 := by
+      rw [Rat.mul_comm]
+      exact Rat.mul_inv_cancel _ hpowne
+    rw [hcancel]
+    simpa using hbudget
+  · exact hpow
 
 /-- The exact finite-difference product decomposition with the second factor
 evaluated at the right endpoint.  This is the algebraic core of the product

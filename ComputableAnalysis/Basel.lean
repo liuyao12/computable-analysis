@@ -22,6 +22,14 @@ def baselSeriesRaw : RealRaw :=
 theorem baselSeriesRaw_valid : baselSeriesRaw.Valid := by
   simpa [baselSeriesRaw] using DirichletSeries.zetaTwoRaw_validCompute
 
+theorem baselSeriesRaw_compute_eq (n : Nat) :
+    baselSeriesRaw.compute n = DirichletSeries.zetaTwoInterval n := by
+  rfl
+
+theorem baselSeriesRaw_validCompute :
+    RealRaw.ValidCompute baselSeriesRaw.compute := by
+  simpa [baselSeriesRaw] using DirichletSeries.zetaTwoRaw_validCompute
+
 def baselSeries : Real :=
   Real.ofRaw baselSeriesRaw baselSeriesRaw_valid
 

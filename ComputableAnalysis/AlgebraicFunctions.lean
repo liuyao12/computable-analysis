@@ -1089,6 +1089,72 @@ def sqrtOnUnitBisectionSearch (q : Rat) (hq : inDomainInterval 0 1 q) :
       q <= sq (sqrtApproxOnDomain q (sqrtDomain_of_unit hq) n).hi
     exact ⟨hspec.2.2.1, hspec.2.2.2⟩
 
+/-- A represented target with an explicit rational anchor can reuse the
+existing square-root bisection trace.  The anchor is not a chosen exact real
+root: it is finite input data together with an `Equiv` certificate saying
+that the target representative and the rational point overlap at every
+stage.  The value-overlap field is then transported through the common
+rational point, so this remains a represented-target certificate rather than
+an appeal to a completed-real inverse or an IVT. -/
+def sqrtOnUnitRepresentedTargetSearch
+    (y : InRangeRaw squareOnUnit_invertible)
+    (q : Rat) (hq : inDomainInterval 0 1 q)
+    (heq : y.value.Equiv (RealRaw.ofRat q)) :
+    InverseBisectionSearch squareOnUnit_invertible y where
+  compute_preimage := (sqrtOnUnitBisectionSearch q hq).compute_preimage
+  valid_preimage := (sqrtOnUnitBisectionSearch q hq).valid_preimage
+  preimage_subinterval := (sqrtOnUnitBisectionSearch q hq).preimage_subinterval
+  value_overlaps := by
+    intro n
+    let E := squareOnUnit_invertible.continuous.regular.evalInterval
+      ((sqrtOnUnitBisectionSearch q hq).compute_preimage n)
+      ((sqrtOnUnitBisectionSearch q hq).preimage_subinterval n) n
+    have hEq : QInterval.Overlaps E ((RealRaw.ofRat q).compute n) := by
+      simpa [E] using (sqrtOnUnitBisectionSearch q hq).value_overlaps n
+    have hE : E.lo <= q /\ q <= E.hi := by
+      simpa [RealRaw.ofRat, QInterval.Overlaps] using hEq
+    have hTarget : QInterval.Overlaps
+        (y.value.compute n) ((RealRaw.ofRat q).compute n) := by
+      exact (RealRaw.compareAt_overlap_iff y.value (RealRaw.ofRat q) n n).1
+        (heq n)
+    have hY : (y.value.compute n).lo <= q /\ q <= (y.value.compute n).hi := by
+      simpa [RealRaw.ofRat, QInterval.Overlaps] using hTarget
+    change QInterval.Overlaps E (y.value.compute n)
+    unfold QInterval.Overlaps
+    exact ⟨Rat.le_trans hE.1 hY.2, Rat.le_trans hY.1 hE.2⟩
+
+/- A represented-target stage certificate.  The rational anchor supplies the
+endpoint-square bracket and width budget, while the transported target field
+supplies the actual overlap with the represented value. -/
+theorem sqrtOnUnitRepresentedTargetSearch_stage_certificate
+    (y : InRangeRaw squareOnUnit_invertible)
+    (q : Rat) (hq : inDomainInterval 0 1 q)
+    (heq : y.value.Equiv (RealRaw.ofRat q))
+    (n : Nat) (hn : n ≠ 0) (eps : Rat)
+    (hbudget : 1 / (((2 ^ (n + 9) : Nat) : Rat)) <= eps) :
+    let search := sqrtOnUnitRepresentedTargetSearch y q hq heq
+    let I := search.compute_preimage n
+    subintervalOf I 0 1 /\
+      I.lo * I.lo <= q /\
+      q <= I.hi * I.hi /\
+      I.width <= eps /\
+      QInterval.Overlaps
+        (squareOnUnit_invertible.continuous.regular.evalInterval I
+          (search.preimage_subinterval n) n)
+        (y.value.compute n) := by
+  have hdomain : sqrtDomain q := by
+    exact sqrtDomain_of_unit hq
+  have hsub := sqrtApproxOnUnit_subinterval q hq n
+  have hspec := sqrtApproxOnDomain_spec q hdomain n
+  have hwidth := sqrtApproxOnDomain_width_eq_unit hdomain hq.2 n hn
+  have hover :=
+    (sqrtOnUnitRepresentedTargetSearch y q hq heq).value_overlaps n
+  dsimp [sqrtOnUnitRepresentedTargetSearch]
+  refine ⟨hsub, hspec.2.2.1, hspec.2.2.2, ?_, hover⟩
+  change (sqrtApproxOnDomain q hdomain n).width <= eps
+  rw [hwidth]
+  exact hbudget
+
 /-- The square-root branch uses a fixed, cofinal fast schedule.  The extra
 factor is not a change of mathematical value: it leaves enough rational error
 budget to turn the pointwise bisection boxes into a uniform interval evaluator

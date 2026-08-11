@@ -1,0 +1,1524 @@
+\chapter{Circle and Trigonometry}
+\label{ch:rational-circle-trigonometry}
+
+\section{Archimedes' Method of Exhaustion}
+
+Archimedes' method of exhaustion computes the area of the unit disk by
+trapping it between an inscribed polygon and a circumscribed polygon, then
+refining the polygons until the two areas are forced close together.  The
+classical presentation starts with a hexagon and repeatedly doubles the number
+of sides, producing regular \(6\cdot2^n\)-gons.  That version is geometrically
+natural, but its vertices generally have coordinates involving square roots
+and other non-rational quantities.  It is therefore not the most transparent
+first algorithm for a blueprint whose basic data are rational intervals.
+
+We instead use the rational parametrization of the circle.  Put a vertical
+parameter segment from \((1,0)\) to \((1,2)\), and for \(u\in[0,1]\cap\Q\)
+let \(L(u)=(1,2u)\).  The line through \((-1,0)\) and \(L(u)\) meets the unit
+circle again at
+\[
+  P(u)=
+  \left(
+    \frac{1-u^2}{1+u^2},
+    \frac{2u}{1+u^2}
+  \right).
+\]
+This is the normalized version of the classical parametrization of
+Pythagorean triples: Euclid already knew that triples of the form
+\[
+  (r^2-s^2,\,2rs,\,r^2+s^2)
+\]
+satisfy the Pythagorean equation, and dividing by \(r^2+s^2\) gives a rational
+point on the unit circle.  Bisection on the vertical parameter segment keeps
+all data rational, and the corresponding points \(P(u)\) partition the
+quarter-circle.  Polygonal area is then especially convenient: determinants
+of rational coordinates are rational, so no square-root subroutine is needed.
+Thus the first computation of \(\pi\) in this development is an area
+computation, not a circumference computation.
+
+\begin{remark}[Rational circle parametrization]
+\label{rem:rational-circle-point}
+\lean{ComputableAnalysis.RationalCircle.Stage.point}
+In the pseudocode convention of this blueprint, the point construction is:
+\begin{verbatim}
+def circle_point(u):
+    d = 1 + u*u
+    return Point((1 - u*u) / d, (2*u) / d)
+\end{verbatim}
+The parameter \(u\) is not an angle.  It is the height coordinate on the
+vertical line, normalized so that \(L(u)=(1,2u)\).  The endpoint \(u=0\) gives
+\((1,0)\), and \(u=1\) gives \((0,1)\).
+\end{remark}
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}[scale=2.25, line cap=round, line join=round, >=stealth]
+  \coordinate (O) at (0,0);
+  \coordinate (W) at (-1,0);
+  \coordinate (L0) at (1,0);
+  \coordinate (L1) at (1,0.5);
+  \coordinate (L2) at (1,1);
+  \coordinate (L3) at (1,1.5);
+  \coordinate (L4) at (1,2);
+  \coordinate (P0) at (1,0);
+  \coordinate (P1) at (0.882,0.471);
+  \coordinate (P2) at (0.6,0.8);
+  \coordinate (P3) at (0.28,0.96);
+  \coordinate (P4) at (0,1);
+  \coordinate (Lx) at (1,1.2);
+  \coordinate (Px) at (0.471,0.882);
+
+  \fill[teal!18] (O) -- (P0) -- (P1) -- (P2) -- (P3) -- (P4) -- cycle;
+  \draw[->,gray!70] (-1.18,0) -- (1.25,0);
+  \draw[->,gray!70] (0,-0.08) -- (0,1.16);
+  \draw[thick] (P0) arc[start angle=0,end angle=90,radius=1];
+  \draw[teal!70!black,very thick] (P0) -- (P1) -- (P2) -- (P3) -- (P4);
+
+  \draw[blue!70!black,very thick] (L0) -- (L4);
+  \foreach \L in {L0,L1,L2,L3,L4} {
+    \draw[gray!50] (W) -- (\L);
+    \fill[black] (\L) circle (0.014);
+  }
+  \draw[orange!80!black,very thick] (W) -- (Lx);
+  \draw[orange!80!black,very thick] (W) -- (Px);
+
+  \foreach \P in {P0,P1,P2,P3,P4,Px}
+    \fill[black] (\P) circle (0.014);
+  \fill[black] (W) circle (0.014);
+  \fill[black] (O) circle (0.014);
+
+  \node[below left] at (O) {\scriptsize \(O\)};
+  \node[below left] at (W) {\scriptsize \((-1,0)\)};
+  \node[below right] at (L0) {\scriptsize \((1,0)\)};
+  \node[above right] at (L4) {\scriptsize \((1,2)\)};
+  \node[right] at (Lx) {\scriptsize \((1,2x)\)};
+  \node[above left] at (Px) {\scriptsize \(P(x)\)};
+  \node[below right] at (P0) {\scriptsize \(P(0)\)};
+  \node[left] at (P4) {\scriptsize \(P(1)\)};
+\end{tikzpicture}
+\caption{The rational parameter line for the quarter-circle.  Equally
+subdividing the vertical segment from \((1,0)\) to \((1,2)\), then projecting
+from \((-1,0)\), gives rational points \(P(u)\) which partition the arc from
+\((1,0)\) to \((0,1)\).}
+\label{fig:rational-parameter-line}
+\end{figure}
+
+\begin{definition}[Circle-area exhaustion algorithm]\label{def:circle-area-stage-algorithm}
+\lean{ComputableAnalysis.piCircleArea}
+\lean{ComputableAnalysis.circleAreaIncrement}
+\lean{ComputableAnalysis.circleAreaDecrement}
+\lean{ComputableAnalysis.refineAreaBounds}
+\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_compute_eq_piCircleArea_compute}
+\lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\uses{rem:pseudocode-convention}
+The loop form of the stage algorithm keeps a current lower bound \(a\), a
+current upper bound \(b\), and the list of rational parameter intervals still
+being refined.  On one interval \([p,r]\), let \(q=(p+r)/2\).  The lower-bound
+increment is the area of the new chord triangle, and the upper-bound decrement
+is the tangent triangle removed from the old outer cap:
+\[
+  \Delta(p,q,r)=
+    \frac{2(r-p)(q-p)(r-q)}
+      {(1+p^2)(1+q^2)(1+r^2)},
+\]
+\[
+  \nabla(p,q,r)=
+    \frac{(r-p)(q-p)(r-q)}
+      {(1+pr)(1+pq)(1+qr)}.
+\]
+The case \(p=0,r=1\) is the quarter circle.  The initial quarter-sector bounds
+are \(1/2\le\pi/4\le1\), and the final answer is multiplied by \(4\).
+\begin{verbatim}
+def piCircleArea(n):
+    a, b = 1/2, 1
+    intervals = [(0, 1)]
+
+    def increment(p, q, r):
+        return (2*(r-p)*(q-p)*(r-q) /
+                ((1+p*p)*(1+q*q)*(1+r*r)))
+
+    def decrement(p, q, r):
+        return ((r-p)*(q-p)*(r-q) /
+                ((1+p*r)*(1+p*q)*(1+q*r)))
+
+    for _ in range(n):
+        next_intervals = []
+        for p, r in intervals:
+            q = (p + r) / 2
+            a = a + increment(p, q, r)
+            b = b - decrement(p, q, r)
+            next_intervals.append((p, q))
+            next_intervals.append((q, r))
+        intervals = next_intervals
+
+    return [4*a, 4*b]
+\end{verbatim}
+Every operation in this pseudocode is a rational operation.  The returned pair
+for \code{piCircleArea} is meant to be the first raw interval algorithm for
+\(\pi\): the lower endpoint is the area of the refined inscribed rational
+polygon, and the upper endpoint is the area of the corresponding refined outer
+tangent polygon.  In Lean this increment/decrement loop is the single public
+\code{piCircleArea} definition.
+\end{definition}
+
+\section{Sector Area, Arctangent, and Normalized Angles}
+
+The second algorithm is not a new idea, but the same exhaustion procedure with
+a moving endpoint.  For \(0\le x\le1\), take the point \(L(x)=(1,2x)\) on the
+vertical parameter segment and project it from \((-1,0)\) to the unit-circle
+point \(P(x)\).  Refining the parameter interval \([0,x]\) gives rational
+inner and outer polygonal bounds for the sector from \(P(0)=(1,0)\) to
+\(P(x)\).  The geometric angle of this sector is \(2\arctan(x)\); since a unit
+sector has area equal to half its angle, the area computed by the algorithm is
+\(\arctan(x)\).  Thus \(x=1\) is exactly the quarter-circle case, and
+\[
+  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
+\]
+
+\begin{definition}[Geometric arctangent area algorithm]
+\label{def:geometric-arctan}
+\label{def:arctan-area-stage-algorithm}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_one_compute_eq}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaIncrement}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaDecrement}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_nonneg_compute_eq}
+\lean{ComputableAnalysis.ArctanGeometry.PiAreaCompatibility}
+\lean{ComputableAnalysis.ArctanGeometry.piAreaCompatibility}
+\uses{def:circle-area-stage-algorithm,rem:rational-circle-point,rem:pseudocode-convention}
+For \(0\le x\le1\), the arctangent algorithm starts with the chord-triangle
+lower bound \(x/(1+x^2)\) and the tangent-triangle upper bound \(x\).  It then
+bisects the current rational parameter intervals, using exactly the same
+increment and decrement formulas as \code{piCircleArea}.
+\begin{verbatim}
+def arctanGeom(x, n):
+    a = x / (1 + x*x)
+    b = x
+    intervals = [(0, x)]
+
+    def increment(p, q, r):
+        return (2*(r-p)*(q-p)*(r-q) /
+                ((1+p*p)*(1+q*q)*(1+r*r)))
+
+    def decrement(p, q, r):
+        return ((r-p)*(q-p)*(r-q) /
+                ((1+p*r)*(1+p*q)*(1+q*r)))
+
+    for _ in range(n):
+        next_intervals = []
+        for p, r in intervals:
+            q = (p + r) / 2
+            a = a + increment(p, q, r)
+            b = b - decrement(p, q, r)
+            next_intervals.append((p, q))
+            next_intervals.append((q, r))
+        intervals = next_intervals
+
+    return [a, b]
+\end{verbatim}
+The algorithm is packaged as its own raw function, not as a definitional
+alias of \code{piCircleArea}.  The special case \(x=1\) is related to
+\code{piCircleArea} by a theorem, which is the right proof obligation for the
+geometric identity \(\pi=4\arctan_{\mathrm{geom}}(1)\).
+\end{definition}
+
+\begin{theorem}[Sector-area density]
+\label{thm:sector-area-density}
+\lean{ComputableAnalysis.RationalCircle.Stage.pointDerivative}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaSpeed}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaDensity}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaSpeed_eq_two_over_one_plus_square}
+\lean{ComputableAnalysis.RationalCircle.Stage.sectorAreaDensity_eq_one_over_one_plus_square}
+\uses{rem:rational-circle-point}
+\leanok
+For the rational parametrization \(P(u)=(X(u),Y(u))\), the exact derivative is
+\[
+  P'(u)=
+  \left(
+    \frac{-4u}{(1+u^2)^2},
+    \frac{2(1-u^2)}{(1+u^2)^2}
+  \right).
+\]
+The signed area speed of the sector is
+\[
+  X(u)Y'(u)-Y(u)X'(u)=\frac{2}{1+u^2}.
+\]
+Therefore the unit-sector area density is
+\[
+  \frac12\bigl(X(u)Y'(u)-Y(u)X'(u)\bigr)
+  =
+  \frac{1}{1+u^2}.
+\]
+This explains the kernel used in Chapter~\ref{ch:integrals}.  The later
+comparison with the integral arctangent is carried by finite rational
+inequalities between rectangle sums and the same geometric sector sums, rather
+than by taking area or derivative facts as primitives.
+\end{theorem}
+
+\begin{theorem}[Geometric arctangent gives the area definition of pi]
+\label{thm:geometric-arctan-one-area-pi}
+\lean{ComputableAnalysis.PiProofs.fourArctanGeomOneValid}
+\lean{ComputableAnalysis.PiProofs.arctanGeomOneValid}
+\lean{ComputableAnalysis.PiProofs.four_arctanGeom_one_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircleArea_equiv_four_arctanGeom_one}
+\uses{def:circle-area-stage-algorithm,def:geometric-arctan}
+The geometric sector-area arctangent satisfies
+\[
+  4\arctan_{\mathrm{geom}}(1)\sim \pi_{\mathrm{area}}.
+\]
+Lean proves this by transporting the verified \code{piCircleArea} interval
+algorithm across the same-stage equality with \code{4 * arctanGeom(1)}.
+The positive-scaling converse in \cref{prop:raw-arithmetic-valid} then also
+certifies the unscaled raw real \code{arctanGeom(1)}.
+\end{theorem}
+
+\begin{theorem}[Arctangent validity and monotonicity]
+\label{thm:arctan-area-valid-monotone}
+\lean{ComputableAnalysis.ArctanGeometry.positiveLoopRaw_valid_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_valid_on_powerSeriesDomain}
+\uses{def:arctan-area-stage-algorithm,def:raw-real-order}
+For each rational \(x\in[0,1]\), \code{arctanGeom(x,n)} is a valid raw real:
+the geometric lower and upper sector bounds are ordered, nested, and shrinking.
+This has also been packaged on the symmetric power-series domain \(|x|\le1\),
+using oddness to reduce the negative branch to the positive loop.
+Moreover, the resulting function should be monotone: if
+\(0\le x\le y\le1\), then
+\[
+  \arctan_{\mathrm{geom}}(x)\le \arctan_{\mathrm{geom}}(y).
+\]
+The validity proof is finite: endpoint monotonicity comes from nonnegative
+increment/decrement triangles, while shrinking follows because the geometric
+intervals sit inside the already verified rectangle-sum intervals.  Strict
+monotonicity on apart rational inputs should follow from the positive area of
+the additional sector between \(P(x)\) and \(P(y)\).
+\end{theorem}
+
+\begin{definition}[Normalized quarter-turns as angles]
+\label{def:quarter-turn-angle}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.QuarterTurn}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.quarterTurnRaw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.unitIntervalBranch}
+\uses{def:circle-area-stage-algorithm}
+An input angle for the first sine and cosine algorithms is a rational number
+\(t\in\Q\), interpreted as \(t\pi/2\).  The raw real represented by this input is
+not the rational number \(t\); it is the product of \(t/2\) with whichever
+certified \(\pi\)-algorithm is being used.  Lean records this convention by the
+abbreviation \code{QuarterTurn} and by the raw representative
+\code{quarterTurnRaw}.
+\end{definition}
+
+\begin{definition}[Monotone inverse arctangent interface]
+\label{def:inverse-arctan-interface}
+{\scriptsize
+\par\noindent
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.firstOctantBranch}\par
+\lean{ComputableAnalysis.IntegralIdentities.ArctanInverseBisection}\par
+\lean{ComputableAnalysis.IntegralIdentities.ArctanInverseBisection.tangentRaw}
+}
+\uses{def:geometric-arctan,def:quarter-turn-angle,def:qbox,thm:constructive-inverse-function}
+The inverse-arctangent step is the first trigonometric consumer of the
+constructive inverse-function theorem.  The bounded slope branch is the first
+octant \(0\le t\le1/2\), whose angles lie in \([0,\pi/4]\); the second octant
+is then obtained by reciprocal/complement reduction.  Thus the search never
+pretends that tangent is bounded at a quarter turn.
+
+For a recovered slope \(u\in[0,1]\), the rational circle chart
+\[
+  P(u)=\left(\frac{1-u^2}{1+u^2},\frac{2u}{1+u^2}\right)
+\]
+supplies the intended first-octant point.  The two coordinate projections are
+therefore the planned definitions of \(\cos(t\pi/2)\) and
+\(\sin(t\pi/2)\).  This keeps the dependency direction explicit: geometric
+arctangent is inverted first, then the same rational chart that drove the
+circle exhaustion defines sine and cosine.
+
+Lean now has a checked bridge \code{ArctanInverseBisection}.  It requires an
+\code{InvertibleFunctionOnInterval} whose forward function is certified equal
+to \code{arctanGeomOnUnit}, a valid range-enclosed target for every first-octant
+quarter turn, and an \code{InverseBisectionSearch} for each target.  From this
+data it constructs the actual partial raw tangent function
+\code{tangentRaw}; its output boxes are valid, remain in the unit slope
+interval, and their forward interval evaluations overlap the target boxes at
+every stage.  The still-open analytic work is to construct this package for
+the geometric arctangent, not to postulate inverse laws.  The older
+\code{ArctanInverseConstruction} remains a downstream special-value contract.
+The checked bridge asks for:
+\begin{enumerate}
+\item the actual geometric arctangent branch and its interval inverse data,
+\item a valid target, with explicit endpoint range enclosure, for each angle,
+\item a bisection search whose output remains in the source interval and
+  overlaps the forward target evaluation, and
+\item an equivalence between each target and the selected quarter-turn
+  representative \(t\pi/2\).
+\end{enumerate}
+Constructing the interval evaluation of \(P(u)\) for the recovered raw slope,
+and then extending from the first octant by the stated reductions, is the next
+formal trigonometric step.  The bridge already fixes its required inverse data
+rather than assuming trigonometric inverse laws.
+\end{definition}
+
+\begin{definition}[Inverse arctangent search]
+\label{def:inverse-arctan-search}
+\uses{def:arctan-area-stage-algorithm,thm:arctan-area-valid-monotone}
+For an angle parameter \(t\) interpreted as \(t\pi/2\) and known on the
+principal first-octant branch \(0\le t\le 1/2\), define its tangent parameter
+\(u\in[0,1]\) by bisection against the monotone arctangent algorithm.
+\begin{verbatim}
+def inverse_arctan(t, n):
+    lo, hi = 0, 1
+    for i in range(n):
+        m = (lo + hi) / 2
+        am = arctanGeom(m, n+i)
+        if am.hi < t*pi/2:
+            lo = m
+        elif t*pi/2 < am.lo:
+            hi = m
+        else:
+            lo, hi = lo, hi
+    return [lo, hi]
+\end{verbatim}
+The stage used for \code{arctanGeom(m, n+i)} is intentionally allowed to
+increase inside the search: the comparison must be refined until it certifies
+which side of \(m\) contains the inverse, or else safely keeps the current
+bracket.  The output is a rational interval for \(u=\tan(t\pi/2)\).
+\end{definition}
+
+\begin{definition}[Sine and cosine from inverse arctangent]
+\label{def:sin-cos-from-inverse-arctan}
+\uses{def:inverse-arctan-search,rem:rational-circle-point}
+On the first octant, compute an interval for \(u=\tan(t\pi/2)\) by
+\cref{def:inverse-arctan-search} and then evaluate the rational circle
+coordinates
+\[
+  \cos(t\pi/2)=\frac{1-u^2}{1+u^2},
+  \qquad
+  \sin(t\pi/2)=\frac{2u}{1+u^2}.
+\]
+Interval evaluation of these rational formulas gives boxes for sine and
+cosine without ever computing a square root.  Quadrant, sign, and reciprocal
+reductions extend the construction to the full normalized interval \([0,1]\)
+once \(\pi/4=\arctan_{\mathrm{geom}}(1)\) and the endpoint at \(t=1\) have
+been identified.
+\end{definition}
+
+\begin{definition}[Sine and cosine from a circle-point algorithm]
+\label{def:sin-cos-from-circle-point}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction}
+\uses{def:inverse-arctan-interface}
+After inverse arctangent has located the point on the oriented unit circle, the
+trigonometric functions are projections:
+\[
+  \cos(t\pi/2)=X(t),\qquad \sin(t\pi/2)=Y(t).
+\]
+Lean packages this as a complex-valued point algorithm plus real-coordinate
+projection functions \code{cosFunctionRawOfPoint} and
+\code{sinFunctionRawOfPoint}.  The first identity theorem for these functions
+should be the unit-circle law; all addition, parity, double-angle, reciprocal,
+and tangent identities are then consequences of the circle law and point
+multiplication.
+\end{definition}
+
+\begin{remark}[Sine and cosine are instances of the function definition]
+\label{rem:sin-cos-function-instance}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint}
+\uses{def:real-fun-raw,def:sin-cos-from-circle-point}
+For a chosen circle-point algorithm \(C\), the functions \(\sin\) and \(\cos\)
+are instances of \cref{def:real-fun-raw}: their rational domain is the set of
+normalized quarter-turn inputs where \(C\) is defined, and their stage
+algorithms are
+\[
+  (t,n)\longmapsto \operatorname{re}(C(t,n)),
+  \qquad
+  (t,n)\longmapsto \operatorname{im}(C(t,n)).
+\]
+For fixed rational \(t\) in the domain, validity of the point algorithm implies
+that each projected sequence in \(n\) is a raw real.
+\end{remark}
+
+\begin{remark}[Rational circle equation]
+\label{rem:rational-circle-equation}
+\lean{ComputableAnalysis.RationalCircle.Stage.point_normSq}
+\uses{rem:rational-circle-point}
+For every \(u\in\Q\),
+\[
+  P(u)_x^2+P(u)_y^2=1.
+\]
+This is a rational identity after clearing the denominator \(1+u^2\).  Lean
+records it as \code{ComputableAnalysis.RationalCircle.Stage.point\_normSq}.
+\end{remark}
+
+\begin{remark}[Dyadic subdivision of a rational interval]
+\label{rem:dyadic-rational-circle-stages}
+\lean{ComputableAnalysis.RationalCircle.dyadicStage}
+\uses{rem:rational-circle-point,rem:pseudocode-convention}
+Start with a rational interval \([x,y]\).  Bisect every current interval
+\(n\) times, and then map the resulting rational parameters to the circle by
+the rational parametrization \(P\).  Equivalently, the rational parameters
+after \(n\) bisections are
+\[
+  x+\frac{k}{2^n}(y-x),
+  \qquad 0\le k\le 2^n.
+\]
+\begin{verbatim}
+def dyadic_subdivision(x, y, n):
+    s = [x, y]
+    for _ in range(n):
+        t = []
+        for i in range(len(s) - 1):
+            a = s[i]
+            b = s[i + 1]
+            t.append(a)
+            t.append((a + b) / 2)
+        t.append(s[-1])
+        s = t
+    return s
+
+def circle_subdivision(x, y, n):
+    return [circle_point(u) for u in dyadic_subdivision(x, y, n)]
+
+def circle_stage(n):
+    return circle_subdivision(0, 1, n)
+\end{verbatim}
+\end{remark}
+
+\begin{remark}[Projective parameter line and tangent]
+\label{rem:projective-parameter-line}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofOption}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.inv}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.neg_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.inv_inv}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.inv_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_finite_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_finite_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_infinity_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_infinity_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_finite_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_finite_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_infinity_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_infinity_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_zero_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_zero_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_comm}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_assoc}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_self}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_left_self}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_cancel_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_cancel_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_self}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_zero_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_zero_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_neg_right}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_neg_left}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_neg_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_anti_comm}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanSub_add_cancel}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_sub_cancel}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_finite}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_zero}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.num_den_nonzero}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_num_den}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanDouble_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_neg_neg}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.tanAdd_ofHom_ofHom}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_neg_num}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveRat.ofHom_swap_eq_inv}
+\lean{ComputableAnalysis.RationalCircle.projectiveSlope}
+\lean{ComputableAnalysis.RationalCircle.projectiveSlope_x_zero}
+\lean{ComputableAnalysis.RationalCircle.projectiveSlope_x_ne_zero}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.denom}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.denom_pos}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.toRat?}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.toRat?_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point_infinity}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point_normSq}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.point_finitePair_eq_stagePoint}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan_one}
+\lean{ComputableAnalysis.RationalCircle.ProjectiveParameter.tan_infinity}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_finite_of_cos_ne_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter_of_nonneg}
+\uses{rem:rational-circle-point,rem:dyadic-rational-circle-stages}
+For the full circle it is better to treat the parameter line projectively.
+Lean now has a homogeneous rational parameter \((a:b)\), with finite value
+\(a/b\) when \(b\ne0\) and a formal point \(\infty=(1:0)\) when \(b=0\).
+The circle map is polynomial-rational in the homogeneous coordinates:
+\[
+  (a:b)\longmapsto
+  \left(
+    \frac{b^2-a^2}{a^2+b^2},
+    \frac{2ab}{a^2+b^2}
+  \right).
+\]
+For \(b\ne0\) this agrees with the earlier affine parametrization
+\(P(a/b)\), while \(\infty\) maps to \((-1,0)\).  This gives the compactified
+parameter circle needed for full-circle constructions and for later
+``whole real line'' substitutions, where an endpoint at infinity should be a
+formal object rather than a special case.  The same projective line is now
+also the codomain of tangent.  Lean separates these two infinities: the
+projective parameter \(\infty\) is the point \((-1,0)\), whereas the tangent of
+the quarter-turn point is the formal projective value \(\infty\).  In the
+affine quarter-circle chart this is stated as \(\tan(1)=\infty\), with a
+compatibility theorem saying that \(\tan(u)\) is the finite rational quotient
+whenever \(\cos(u)\ne0\).  The negation, subtraction, and
+quarter-complement identities are therefore stated projectively, so that zero
+and infinity are exchanged without adding endpoint exceptions.
+\[
+  -(-x)=x,\qquad (x^{-1})^{-1}=x,\qquad (-x)^{-1}=-(x^{-1}),
+\]
+\[
+  0\oplus x=x=x\oplus0,\qquad
+  (x\oplus y)\oplus z=x\oplus(y\oplus z),
+\]
+\[
+  x\oplus(-x)=(-x)\oplus x=0,\qquad x\ominus x=0,
+\]
+\[
+  x\ominus0=x,\qquad 0\ominus x=-x,\qquad
+  x\ominus(-y)=x\oplus y,
+\]
+\[
+  (-x)\ominus y=-(x\oplus y),
+\]
+\[
+  (-x)\ominus(-y)=-(x\ominus y),\qquad
+  y\ominus x=-(x\ominus y),
+\]
+\[
+  (x\oplus y)\ominus y=x,\qquad
+  (x\ominus y)\oplus y=x.
+\]
+\[
+  2(-x)=-(2x),\qquad
+  (-x)\oplus(-y)=-(x\oplus y).
+\]
+The concrete tangent-addition chart formulas are also stated without deleting
+the exceptional denominator cases:
+\[
+  x\oplus y=[x+y:1-xy],\qquad
+  x\oplus\infty=\infty\oplus x=[1:-x],
+\]
+\[
+  \infty\oplus\infty=0,\qquad
+  2x=[2x:1-x^2],\qquad 2\infty=0.
+\]
+Likewise subtraction has the projective chart formulas
+\[
+  x\ominus y=[x-y:1+xy],\qquad
+  x\ominus\infty=[1:-x],\qquad
+  \infty\ominus x=[1:x],
+\]
+\[
+  \infty\ominus\infty=0.
+\]
+
+The circle and trigonometric constructions below use the dyadic
+rational-parameter refinements already described above, while the geometric
+arctangent keeps its own dynamic sector subdivision.
+\end{remark}
+
+\begin{remark}[What bisection refinement means]
+\label{rem:dyadic-rational-circle-refinement}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_point_refineIndex}
+\uses{rem:dyadic-rational-circle-stages}
+There is no separate abstract definition of refinement being used here.  The
+concrete fact is just that one more bisection keeps every old parameter and
+inserts one midpoint between adjacent old parameters.  Thus, after mapping to
+the circle, the even-indexed points in the next list are the old points:
+\[
+  C_{n+1,2k}=C_{n,k}.
+\]
+The odd indices are the new rational circle points coming from the inserted
+midpoints.  Lean records this concrete bookkeeping statement as
+\code{ComputableAnalysis.RationalCircle.Trigonometry.dyadic\_point\_refineIndex}.
+\end{remark}
+
+\section{Finite Area and Circumference Certificates}
+
+\begin{definition}[Rational triangle area]\label{def:rational-triangle-area}
+\uses{rem:pseudocode-convention}
+A rational triangle is a triangle whose vertices have rational coordinates.
+Its area is rational, because it is computed by the determinant formula:
+\begin{verbatim}
+def sub(p, q):
+    return Point(p.x - q.x, p.y - q.y)
+
+def cross(p, q):
+    return p.x*q.y - p.y*q.x
+
+def triangle_area(p, q, r):
+    return abs(cross(sub(q, p), sub(r, p)) / 2)
+\end{verbatim}
+Thus every line in the algorithm is a rational operation, followed only by
+the absolute value on \(\Q\).  This determinant calculation is the finite
+geometric fact packaged by the incremental area corrections in
+\cref{def:circle-area-stage-algorithm}.
+\end{definition}
+
+\begin{definition}[Circumference stage algorithm]\label{def:circle-circumference-stage-algorithm}
+\lean{ComputableAnalysis.piCircumference}
+\uses{def:circle-area-stage-algorithm}
+The circumference algorithm uses the same inner and outer rational boundaries,
+but replaces polygonal area by path length.  The square-root subroutine is
+therefore part of the proof interface: its stage choices must leave enough
+room for the finite chord and tangent inequalities to close.  In this
+definition, the function named \code{pi} is the circumference algorithm for
+pi.
+\begin{verbatim}
+def pi(n):
+    inner, outer = circle_boundaries(n)
+    inner_len = path_length_interval(inner, 2**n)
+    outer_len = path_length_interval(outer, 2**n)
+    return [(4*inner_len.lo)/2, (4*outer_len.hi)/2]
+\end{verbatim}
+\end{definition}
+
+\begin{theorem}[Finite Archimedes comparison]\label{thm:finite-archimedes}
+\uses{def:circle-area-stage-algorithm,def:circle-circumference-stage-algorithm,def:raw-equiv}
+At each rational sample stage, the polygon-area scaffolding interval overlaps
+the interval obtained from half-circumference.  Lean therefore proves the raw
+same-stage equivalence
+\code{PiProofs.piCircleAreaPolygon\_equiv\_piCircumference} directly from
+the finite inequalities.  The exact dyadic-stage bridge
+\code{ArctanGeometry.piCircleArea\_compute\_eq\_piCircleAreaPolygon\_compute}
+now identifies the polygon computation with the public increment/decrement
+\code{piCircleArea} loop, yielding
+\code{PiProofs.piCircumference\_equiv\_piCircleArea\_of\_verified\_area\_polygon}.
+It also promotes the polygon computation to a valid raw real through
+\code{PiProofs.areaPolygonValid}.  Validity of \code{piCircumference} remains
+open.
+The proof reduces to finite inequalities comparing inscribed chords and
+outer tangent segments.
+\end{theorem}
+
+\begin{theorem}[Geometric pi validity status]\label{thm:geometric-pi-validity}
+\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
+\lean{ComputableAnalysis.PiProofs.circumferenceWidthsShrink}
+\lean{ComputableAnalysis.PiProofs.CircumferenceQuarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefinesUpToAll_of_stepRefines}
+\lean{ComputableAnalysis.PiProofs.circumferenceQuarterLengthStepRefines_iff_upToAll}
+\lean{ComputableAnalysis.PiProofs.CircumferenceStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToAll_of_stepRefines}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefinesUpToAll_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_iff_upToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_stepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRefines_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_stepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceValid_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStepRemainders_of_quarterLengthStepRefinesUpToAll}
+\lean{ComputableAnalysis.PiProofs.circumferenceStabilizationRadius}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceStabilized_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_valid}
+\lean{ComputableAnalysis.PiProofs.piCircumferenceReboxed_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.PiPresentation}
+\lean{ComputableAnalysis.PiProofs.piPresentationRaw}
+\lean{ComputableAnalysis.PiProofs.piPresentation_valid}
+\lean{ComputableAnalysis.PiProofs.piPresentation_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piCertified}
+\lean{ComputableAnalysis.PiProofs.piCertifiedPresentation}
+\uses{thm:finite-archimedes,def:raw-real}
+The public area loop is a valid raw real.  The circumference computation is
+ordered and has a proved width-shrinking bound, but it is not yet certified as
+a raw real because the all-stage dyadic endpoint-refinement theorem remains
+open.  Lean packages that remaining target in finite-prefix form: proving all
+\code{CircumferenceQuarterLengthStepRefinesUpTo N} certificates is enough to
+obtain the public \code{CircumferenceValid} proof.  The all-prefix statement is
+now formalized as an iff with the global step-refinement predicate, so this is
+the same obligation in a finite-checkable presentation.
+
+The lower endpoint has a second, sharper finite reduction.  The rational
+curvature certificate \code{PiProofs.curvatureChordLower} is below the exact
+unit-circle chord on the first-quadrant chart, and its bisection lower endpoint
+loses only the displayed interval width.  Lean packages the remaining
+universal rational inequality as
+\code{PiProofs.AdjacentChordCurvatureMarginCoversFineWidths};
+\code{PiProofs.adjacentChordLowerRefinesByDoubling\_of\_curvatureMargin}
+proves that this one certificate would close the public direct lower-path
+refinement.  No completed-real square root or completeness principle occurs in
+this reduction.
+
+There is nevertheless a separately named certified representative,
+\code{piCircumferenceStabilized}. At stage \(n\), it takes the finite prefix
+of direct perimeter intervals, widens each by the public rational radius
+\(4/(n+1)\), and intersects them. Its evaluator never reads an area interval;
+the verified area loop is used only to prove that this radius contains the
+common value. The finite Archimedes overlap and the two proved width moduli
+make this stabilized representative valid and equivalent to both the direct
+perimeter raw algorithm and \code{piCircleArea}. It is a finite
+interval-normalization tool, not a proof of the direct perimeter
+endpoint-refinement theorem and not a new scoreboard row. The older
+\code{piCircumferenceReboxed} reads area intervals at evaluation time and is
+retained as a second certified alternative.
+The curvature-corrected cross-fan is retained only as an internal design
+note.  It is not a checked representative or a scoreboard row: its proposed
+second-order correction still needs a self-contained finite proof that it
+stays below the outer envelope and refines under dyadic subdivision.
+The project-facing certified value \code{PiProofs.piCertified} chooses the
+area loop as its evaluator and records the checked completed presentations
+as verified alternatives: the polygon area and cross-fan routes, the two
+perimeter normalizations, geometric and rectangle-integral arctangent, the
+Leibniz, Nilakantha, and single Machin series, and the Cauchy and compact
+reciprocal-quartic integrals.  The finite type \code{PiProofs.PiPresentation}
+gives these presentations stable names, while
+\code{PiProofs.piCertifiedPresentation} retrieves the corresponding certified
+raw representative.  This is a representation registry, not a score increase:
+the compact \code{PiProofs.PiCoverageBridge} suite records only distinct
+end-to-end capability bridges.  The unfinished direct perimeter computation
+is retained as a square-root-enclosure diagnostic, rather than as a missing
+unit of calculus progress.
+\end{theorem}
+
+\section{Trigonometric Functions}
+
+\begin{definition}[Rational-circle coordinates]
+\label{def:rational-circle-sin-cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin}
+\uses{rem:rational-circle-point}
+For a rational slope coordinate \(u\), define the exact rational coordinates
+\[
+  c(u)=P(u)_x,\qquad s(u)=P(u)_y.
+\]
+Equivalently,
+\[
+  c(u)=\frac{1-u^2}{1+u^2},
+  \qquad
+  s(u)=\frac{2u}{1+u^2}.
+\]
+These are finite-stage coordinates, not yet the full angle-input
+trigonometric functions.
+\end{definition}
+
+\begin{definition}[Other rational-circle coordinate functions]
+\label{def:rational-circle-other-trig}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc}
+\uses{def:rational-circle-sin-cos}
+On this rational circle layer, tangent is projective:
+\[
+  \tan(u)=\operatorname{Proj}\bigl(s(u):c(u)\bigr).
+\]
+The finite tangent chart and reciprocal coordinate functions are
+\[
+  t_{\mathrm{fin}}(u)=\frac{s(u)}{c(u)},\quad
+  \operatorname{ct}(u)=\frac{c(u)}{s(u)},
+\]
+\[
+  \operatorname{sc}(u)=\frac1{c(u)},\quad
+  \operatorname{cs}(u)=\frac1{s(u)}.
+\]
+The full partial functions will later carry explicit denominator-apartness
+domain data.
+\end{definition}
+
+\begin{theorem}[Rational-circle special values]
+\label{thm:rational-circle-special-values}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.specialValuePackage}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_zero}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_half}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cosRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sinRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tanRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cotRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.secRaw_half_equiv}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cscRaw_half_equiv}
+\uses{def:rational-circle-sin-cos}
+\leanok
+In the rational slope chart \(u=\tan(\theta/2)\), the endpoint values are
+\[
+  c(0)=1,\qquad s(0)=0,\qquad c(1)=0,\qquad s(1)=1.
+\]
+The first nontrivial rational sample is
+\[
+  c(1/2)=3/5,\qquad s(1/2)=4/5,
+\]
+with
+\[
+  \tan(1/2)=\operatorname{finite}(4/3),\quad
+  t_{\mathrm{fin}}(1/2)=4/3,\quad \cot(1/2)=3/4,\quad
+  \sec(1/2)=5/3,\quad \csc(1/2)=5/4.
+\]
+The same values are also recorded as exact raw-real equivalences for the
+corresponding raw functions.  These are not yet the usual angle special values:
+\(u=1/2\) is a Pythagorean-circle sample, not \(45^\circ\).
+\end{theorem}
+
+\begin{definition}[Geometric special-value targets]
+\label{def:geometric-trig-special-values}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleValueTargets}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleTangentValueTargets}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeHalfValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeThirdValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveHalfValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveQuarterValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSixtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanZeroValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFiveValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixtyValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtySixSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSeventyTwoSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtySixSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSeventyTwoSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeHalfValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeThirdValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveHalfValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveQuarterValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSixtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanZeroValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFiveValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixtyValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtySixSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSeventyTwoSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtySixSquareValue_valid_of_sqrtFiveSpec}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSeventyTwoSquareValue_valid_of_sqrtFiveSpec}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtySixSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSeventyTwoSquareValue_valid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.TanValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.TanSquareValue}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.rawSquare}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtHalfValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeHalfValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtThreeThirdValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveHalfValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sqrtFiveQuarterValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinFortyFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinThirtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.sinSixtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanZeroValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFiveValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixtyValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanThirty_square_scale_cosThirty_square_equiv_sinThirty_square}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanFortyFive_square_scale_cosFortyFive_square_equiv_sinFortyFive_square}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.tanSixty_square_scale_cosSixty_square_equiv_sinSixty_square}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySixValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwoValue_square_equiv}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosFortyFive_square_add_sinFortyFive_square_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirty_square_add_sinThirty_square_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSixty_square_add_sinSixty_square_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosThirtySix_square_add_sinThirtySixSquare_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.cosSeventyTwo_square_add_sinSeventyTwoSquare_equiv_one}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleSquareIdentities}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleSquareIdentities}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleDisplayedSquareIdentities}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedSquareIdentities}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.SpecialAngleDisplayedValuesValid}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid_of_sqrtSpecs}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.SpecialAngles.specialAngleDisplayedValuesValid}
+\uses{def:geometric-sin-cos-functionraw,rem:algebraic-numbers-sqrt-two}
+\leanok
+For the normalized angle input \(t\), the target formulas include
+\[
+  \cos(\tfrac12\cdot\tfrac\pi2)=
+  \sin(\tfrac12\cdot\tfrac\pi2)=\sqrt{1/2}.
+\]
+\[
+  \sin(30^\circ)=\cos(60^\circ)=\frac12,\qquad
+  \cos(30^\circ)=\sin(60^\circ)=\frac{\sqrt3}{2},
+\]
+\[
+  \tan(30^\circ)=\frac{\sqrt3}{3},\qquad
+  \tan(60^\circ)=\sqrt3,
+\]
+\[
+  \cos(36^\circ)=\frac{1+\sqrt5}{4},
+  \qquad
+  \cos(72^\circ)=\frac{\sqrt5-1}{4},
+\]
+\[
+  \sin^2(36^\circ)=\frac{5-\sqrt5}{8},
+  \qquad
+  \sin^2(72^\circ)=\frac{5+\sqrt5}{8}.
+\]
+\[
+  \tan^2(36^\circ)=5-2\sqrt5,
+  \qquad
+  \tan^2(72^\circ)=5+2\sqrt5.
+\]
+\[
+  (\sqrt{1/2})^2=1/2,\quad
+  (\sqrt3)^2=3,\quad
+  (\sqrt5)^2=5,\quad
+  (\sqrt3/2)^2=3/4,\quad
+  (\sqrt3/3)^2=1/3,\quad
+  (\sqrt5/2)^2=5/4,\quad
+  (\sqrt5/4)^2=5/16.
+\]
+\[
+  \cos^2(45^\circ)=\sin^2(45^\circ)=1/2,\quad
+  \sin^2(30^\circ)=\cos^2(60^\circ)=1/4,
+\]
+\[
+  \cos^2(30^\circ)=\sin^2(60^\circ)=3/4,\quad
+  \tan^2(30^\circ)=1/3,\quad
+  \tan^2(60^\circ)=3.
+\]
+\[
+  \cos^2(36^\circ)=\frac{3+\sqrt5}{8},\qquad
+  \cos^2(72^\circ)=\frac{3-\sqrt5}{8}.
+\]
+Lean verifies the displayed \(30^\circ\), \(45^\circ\), and \(60^\circ\)
+square data satisfy \(\cos^2+\sin^2\sim1\).
+Lean also verifies the displayed pentagon-angle square data satisfy
+\[
+  \left(\frac{1+\sqrt5}{4}\right)^2+\frac{5-\sqrt5}{8}\sim1,\qquad
+  \left(\frac{\sqrt5-1}{4}\right)^2+\frac{5+\sqrt5}{8}\sim1.
+\]
+The sine and cosine target package is stated for any completed
+\code{FunctionRawConstruction}; the tangent target package is stated for an
+\code{ArctanInverseConstruction}.
+The square-root computations \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\) use
+the rational square-root algorithm from Chapter~\ref{ch:foundations}; the full
+positive nested square-root formulas for the two sine and tangent values are
+postponed until the raw-real square-root operation is available.  Lean also packages the
+displayed raw values above as valid computable reals, using the now verified
+square-root specifications for \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\).
+\end{definition}
+
+\begin{theorem}[Law of cosines and the equilateral value]
+\label{thm:law-of-cosines-equilateral}
+\lean{ComputableAnalysis.RationalCircle.Stage.segmentNormSq_law_of_cosines}
+\lean{ComputableAnalysis.RationalCircle.Stage.dot_eq_half_of_unit_equilateral}
+\uses{rem:rational-circle-point}
+\leanok
+For rational coordinate points \(p,q\), the squared chord length satisfies the
+coordinate law of cosines
+\[
+  \|q-p\|^2=\|p\|^2+\|q\|^2-2(p\cdot q).
+\]
+Consequently, if \(p\) and \(q\) are unit-circle points and the chord between
+them also has squared length \(1\), then \(p\cdot q=1/2\).  This is the
+formalized equilateral-triangle core behind the familiar
+\(\cos(60^\circ)=1/2\), hence \(\sin(30^\circ)=1/2\).  Turning it into the
+actual normalized-angle statement for \(\sin_C(1/3)\) still requires the
+angle-to-circle-point construction to identify the one-third input with the
+equilateral chord.
+\end{theorem}
+
+\begin{center}
+\small
+\begin{tabular}{c c p{0.22\textwidth}p{0.22\textwidth}p{0.18\textwidth}}
+\textbf{\(t\)} & \textbf{degrees} &
+\textbf{\(\sin(t\pi/2)\)} &
+\textbf{\(\cos(t\pi/2)\)} &
+\textbf{\(\tan(t\pi/2)\)}\\
+\hline
+\(0\) & \(0\) &
+\(0^{\ast}\) &
+\(1^{\ast}\) &
+\(0^{\ast}\)\\
+\(1/3\) & \(30\) &
+\(1/2^{\S}\) &
+\((\sqrt3/2)^{\S}\) &
+\((\sqrt3/3)^{\S}\)\\
+\(2/5\) & \(36\) &
+\(\sqrt{(5-\sqrt5)/8}^{\S}\) &
+\(((1+\sqrt5)/4)^{\S}\) &
+\(\sqrt{5-2\sqrt5}^{\S}\)\\
+\(1/2\) & \(45\) &
+\(\sqrt{1/2}^{\S}\) &
+\(\sqrt{1/2}^{\S}\) &
+\(1^{\S}\)\\
+\(2/3\) & \(60\) &
+\((\sqrt3/2)^{\S}\) &
+\(1/2^{\S}\) &
+\(\sqrt3^{\S}\)\\
+\(4/5\) & \(72\) &
+\(\sqrt{(5+\sqrt5)/8}^{\S}\) &
+\(((\sqrt5-1)/4)^{\S}\) &
+\(\sqrt{5+2\sqrt5}^{\S}\)\\
+\(1\) & \(90\) &
+\(1^{\ast}\) &
+\(0^{\ast}\) &
+\(\infty^{\ast}\)\\
+\(4/17\) & \(360/17\) &
+\(\sqrt{1-C^2}^{\dagger}\) &
+\(C^{\dagger}\) &
+\((\sqrt{1-C^2}/C)^{\dagger}\)\\
+\end{tabular}
+\end{center}
+
+Here \(C\) denotes the Gauss nested radical for \(\cos(2\pi/17)\) displayed
+below.  A superscript \(\ast\) means that the displayed endpoint value is
+formalized in Lean at the currently available rational-circle layer; a
+superscript \(\S\) means Lean has formalized the displayed algebraic raw value,
+or the displayed square-value when only the square is currently represented,
+as a valid raw real with the corresponding square/Pythagorean checks; and a
+superscript \(\dagger\) means that the displayed value is available as an
+executable finite interval check.  These marks do not yet assert the completed
+normalized-angle theorem for every non-endpoint row.  For example, the
+equilateral dot-product lemma above is already formalized, but the
+normalized-angle theorem identifying \(t=1/3\) with the \(30^\circ\) value is
+still open.  The finite check for the \(17\)-gon is the executable interval
+overlap test in \code{GaussSeventeen}; it is deliberately weaker than a proof
+of Gauss's constructibility theorem.
+
+\begin{remark}[Gauss's 17-gon]
+\lean{ComputableAnalysis.GaussSeventeen.powerSeriesCheck_default}
+\lean{ComputableAnalysis.GaussSeventeen.cosPowerSeriesInterval}
+\lean{ComputableAnalysis.GaussSeventeen.sinPowerSeriesInterval}
+\lean{ComputableAnalysis.GaussSeventeen.cosRadicalInterval}
+\lean{ComputableAnalysis.GaussSeventeen.sinRadicalInterval}
+\leanok
+The pentagon values are the first hint that special angles naturally lead to
+small algebraic computations.  A much more striking example is Gauss's
+constructibility theorem for the regular \(17\)-gon.  In our normalized angle
+coordinate, one seventeenth of a full turn is \(t=4/17\), and the theorem says
+that \(\cos(2\pi/17)\) and \(\sin(2\pi/17)\) lie in a tower of quadratic
+extensions of \(\Q\), hence are given by nested square roots and are
+ruler-and-compass constructible.  For instance, one possible explicit
+certificate is
+\[
+\cos(2\pi/17)=
+\frac{-1+\sqrt{17}+\sqrt{34-2\sqrt{17}}
+  +2\sqrt{17+3\sqrt{17}-\sqrt{170+38\sqrt{17}}}}{16}.
+\]
+The corresponding sine is the positive square root of \(1-\cos^2(2\pi/17)\).
+This is a good eventual test case for the algebraic-number layer, but a proof
+is well outside the formal scope of this chapter.
+
+What we can already do is compute a finite consistency check.  The Lean code
+uses \code{piCircleArea} to enclose \(2\pi/17\), evaluates the sine and cosine
+power series by rational recurrence, separately evaluates the displayed
+nested radical by rational interval arithmetic, and checks that the resulting
+cosine and sine intervals overlap at the chosen stages.  This is only a
+precision check, not a formal proof of Gauss's theorem.
+\end{remark}
+
+\section{Trigonometric Identities}
+
+\begin{theorem}[Pythagorean identity on the rational circle]
+\label{thm:rational-circle-pythagorean}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_sq_add_sin_sq}
+\uses{def:rational-circle-sin-cos}
+\leanok
+For every rational slope coordinate \(u\),
+\[
+  c(u)^2+s(u)^2=1.
+\]
+\end{theorem}
+
+\begin{theorem}[Basic rational-circle identity package]
+\label{thm:rational-circle-basic-identities}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.basicIdentityPackage}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_cos_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_sin_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_normDen_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_normDen_pos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAddParameter_zero_right}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_square_chartAddParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.arctanKernel_chartAdd_jacobian}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAddParameter_sub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAddParameter_mono}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_cosNum_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_sinNum_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartPair_cos_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartPair_sin_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_eq_cos_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_eq_sin_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedPoint_eq_point_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.projectiveSlope_pointMul}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_composedPoint_eq_tanAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_chartAddParameter_eq_tanAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_chartSubParameter_eq_tanSub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_chartDoubleParameter_eq_tanDouble}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.double_cos_eq_sq_sub_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.double_sin_eq_two_mul}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_tan_sq_eq_sec_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.one_add_cot_sq_eq_csc_sq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_sq_sub_tan_sq_eq_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_sq_sub_cot_sq_eq_one}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_eq_sin_mul_sec}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_eq_cos_mul_csc}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_mul_cot}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_cos_sub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_sin_sub}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_cos_neg_left}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composed_sin_neg_left}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_self_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_self_neg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_cos_cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_sin}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_sin_cos}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.product_to_sum_cos_sin}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_add_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_sub_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_add_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_sub_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_double_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteTan_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.tan_quarterComplementParameter_of_nonneg}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cot_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sec_quarterComplementParameter}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.csc_quarterComplementParameter}
+\uses{def:rational-circle-other-trig,thm:rational-circle-pythagorean}
+\leanok
+The rational-circle coordinates satisfy:
+\[
+  t_{\mathrm{fin}}(u)c(u)=s(u)\quad(c(u)\ne0),
+\]
+\[
+  \operatorname{ct}(u)s(u)=c(u)\quad(s(u)\ne0),
+\]
+\[
+  \operatorname{sc}(u)c(u)=1\quad(c(u)\ne0),
+  \qquad
+  \operatorname{cs}(u)s(u)=1\quad(s(u)\ne0),
+\]
+\[
+  1+t_{\mathrm{fin}}(u)^2=\operatorname{sc}(u)^2\quad(c(u)\ne0),
+\]
+\[
+  1+\operatorname{ct}(u)^2=\operatorname{cs}(u)^2\quad(s(u)\ne0).
+\]
+Equivalently,
+\[
+  \operatorname{sc}(u)^2-t_{\mathrm{fin}}(u)^2=1\quad(c(u)\ne0),
+  \qquad
+  \operatorname{cs}(u)^2-\operatorname{ct}(u)^2=1\quad(s(u)\ne0).
+\]
+The quotient functions can also be written as
+\[
+  t_{\mathrm{fin}}(u)=s(u)\operatorname{sc}(u),
+  \qquad
+  \operatorname{ct}(u)=c(u)\operatorname{cs}(u),
+\]
+and \(t_{\mathrm{fin}}(u)\operatorname{ct}(u)=1\) whenever both denominators
+are nonzero.  The projective tangent satisfies the corresponding total
+endpoint-safe laws \(\tan(-u)=-\tan(u)\) and
+\(\tan((1-u)/(1+u))=\tan(u)^{-1}\) whenever the displayed parameter is
+defined; in particular zero and infinity are exchanged without a separate
+case split.  The coordinates also satisfy parity and the circle-composition formulas
+\[
+  (P(u)P(v))_x=c(u)c(v)-s(u)s(v),
+\]
+\[
+  (P(u)P(v))_y=c(u)s(v)+s(u)c(v),
+\]
+with the double-coordinate formulas as the case \(u=v\).
+The identity package also records the zero element and inverse laws for
+circle composition, the two complementary square identities, and the two
+alternate double-coordinate formulas
+\[
+  (P(u)^2)_x=1-2s(u)^2=2c(u)^2-1,
+  \qquad
+  (P(u)^2)_y=2s(u)c(u).
+\]
+The subtraction formulas and the four product-to-sum identities are also
+formalized as rational equalities in the same package.
+The quotient identities for tangent and cotangent addition, subtraction, and
+double angle are formalized in denominator-cleared form; this keeps the
+necessary nonzero hypotheses explicit and avoids introducing partial quotient
+functions at this rational stage.  The projective tangent version removes the
+endpoint exceptions:
+\[
+  \operatorname{slope}(PQ)=\operatorname{slope}(P)\oplus
+  \operatorname{slope}(Q),
+\]
+and, whenever the displayed chart denominator is nonzero,
+\[
+  \tan\!\left(\frac{u+v}{1-uv}\right)=\tan(u)\oplus\tan(v),\qquad
+  \tan\!\left(\frac{u-v}{1+uv}\right)=\tan(u)\ominus\tan(v),
+\]
+\[
+  \tan\!\left(\frac{2u}{1-u^2}\right)=2\tan(u).
+\]
+There is also an exact finite Jacobian identity for the tangent-addition
+chart.  When \(1-uv\ne0\), writing
+\(T_u(v)=(u+v)/(1-uv)\), Lean proves
+\[
+  \frac{1+u^2}{(1-uv)^2(1+T_u(v)^2)}=\frac{1}{1+v^2}.
+\]
+For chart-admissible endpoints it also proves the finite displacement identity
+\[
+ T_u(r)-T_u(p)=
+ \frac{(1+u^2)(r-p)}{(1-up)(1-ur)}
+\]
+and therefore preserves endpoint order when the two denominators are positive.
+These are rational algebra, rather than an integral substitution theorem: they
+record the kernel and interval transformations needed to transport the
+verified rectangle construction in the future principal-branch addition proof.
+The quarter-complement cofunction formulas for \(\tan,\cot,\sec,\csc\) are
+also proved.
+\end{theorem}
+
+\begin{theorem}[Dyadic samples are circle samples]
+\label{thm:dyadic-trig-samples}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.dyadic_cos_sq_add_sin_sq}
+\uses{rem:dyadic-rational-circle-stages,def:rational-circle-sin-cos}
+\leanok
+For every stage \(n\) and index \(k\), the dyadic sample coordinates satisfy
+\[
+  C_{n,k,x}^2+C_{n,k,y}^2=1.
+\]
+The endpoints are
+\[
+  C_{n,0}=(1,0),
+  \qquad
+  C_{n,N_n}=(0,1).
+\]
+\end{theorem}
+
+\section{The Geometric Point Algorithm}
+
+\begin{definition}[Angle-to-circle-point raw function]
+\label{def:geometric-point-functionraw}
+\uses{def:sin-cos-from-inverse-arctan}
+The central construction target is a raw function
+\[
+  C : \Q \to \hbox{boxes in }\Q^2
+\]
+whose value at a rational input \(t\), interpreted as \(t\pi/2\), encloses the
+corresponding oriented unit-circle point.  The construction is now routed
+through the monotone inverse of the arctangent area algorithm, not through a
+square-root normalization.
+\begin{verbatim}
+def geometric_point_stage(t, n):
+    t0, transform = reduce_period_quadrant_and_sign(t)
+    u = inverse_arctan(t0, n)
+    box = interval_eval(lambda t: Point((1-t*t)/(1+t*t), 2*t/(1+t*t)), u)
+    return apply_octant_transform(transform, box)
+\end{verbatim}
+Here each helper is a finite rational procedure: period and octant reduction
+uses the area definition of \(\pi\), inverse search uses monotonicity of
+\(\arctan\), interval evaluation uses rational formulas, and the final
+transform only changes signs and swaps coordinates.  The algorithm may be
+refactored internally, but its public output should be a single point raw
+function.
+\end{definition}
+
+\begin{definition}[Sine and cosine by coordinate projection]
+\label{def:geometric-sin-cos-functionraw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.cosFunctionRawOfPoint_compute_eq}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.sinFunctionRawOfPoint_compute_eq}
+\uses{def:geometric-point-functionraw}
+\leanok
+Given a circle-point raw function \(C\), define
+\[
+  \cos_C(t\pi/2)=\operatorname{re}(C(t)),
+  \qquad
+  \sin_C(t\pi/2)=\operatorname{im}(C(t)).
+\]
+In Lean this is a projection from a complex-valued `FunctionRaw` on the real
+axis to two `PartialRealFunRaw` coordinate algorithms.
+\end{definition}
+
+\begin{definition}[FunctionRaw construction package]
+\label{def:geometric-trig-functionraw-construction}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.cosFunctionRaw}
+\lean{ComputableAnalysis.RationalCircle.GeometricTrig.FunctionRawConstruction.sinFunctionRaw}
+\uses{def:geometric-sin-cos-functionraw}
+\leanok
+The theorem-facing construction package records:
+\[
+  C,\quad \cos_C,\quad \sin_C,
+\]
+validity of the point and coordinate algorithms, the unit-circle law, and the
+identity package to be proved for the projected functions.
+\end{definition}
+
+\section{Identity Proof Strategy}
+
+\begin{theorem}[Circle group law]
+\label{thm:rational-circle-group-law}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.circleOne}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointConj}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_normSq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_comm}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_assoc}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_one_left}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_one_right}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointMul_conj_of_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.chartAdd_normDen_eq}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.cos_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.sin_chartAdd_denominator_cleared}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedCos_eq_cos_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedSin_eq_sin_chartAdd}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.composedPoint_eq_point_chartAdd}
+\uses{rem:rational-circle-point}
+\leanok
+Let
+\[
+  P(u)\cdot P(v)
+  =
+  (P(u)_xP(v)_x-P(u)_yP(v)_y,\,
+   P(u)_xP(v)_y+P(u)_yP(v)_x)
+\]
+be multiplication of unit-circle points.  Lean now proves the point-level
+group laws for this operation: exact norm multiplication, commutativity,
+associativity, left and right identity for \((1,0)\), and the conjugate inverse
+law on unit points.  Lean also proves the denominator-cleared stereographic
+chart-change numerators:
+\[
+  ((1+u^2)(1+v^2))\,(P(u)P(v))_x
+    =(1-uv)^2-(u+v)^2,
+\]
+\[
+  ((1+u^2)(1+v^2))\,(P(u)P(v))_y
+    =2(u+v)(1-uv),
+\]
+together with
+\[
+  (1-uv)^2+(u+v)^2=(1+u^2)(1+v^2).
+\]
+Lean now also carries out the normalization division: when \(1-uv\ne0\), the
+composed point is exactly
+\[
+  P(u)\cdot P(v)=P\!\left(\frac{u+v}{1-uv}\right).
+\]
+The missing-point case \(1-uv=0\) is the expected projective chart transition.
+\end{theorem}
+
+\begin{theorem}[Projected addition formulas]
+\label{thm:geometric-addition-formulas}
+\uses{def:geometric-trig-functionraw-construction,thm:rational-circle-group-law}
+Once the point raw function is proved compatible with circle multiplication,
+the projected functions satisfy
+\[
+  \cos_C(a+b)=\cos_C(a)\cos_C(b)-\sin_C(a)\sin_C(b),
+\]
+\[
+  \sin_C(a+b)=\sin_C(a)\cos_C(b)+\cos_C(a)\sin_C(b).
+\]
+The proof should first be finite and rational on circle boxes, then lifted to
+the raw functions by validity and equivalence of the coordinate projections.
+\end{theorem}
+
+\begin{theorem}[Standard geometric trigonometric identities]
+\label{thm:geometric-trig-identities}
+\uses{thm:geometric-addition-formulas,thm:rational-circle-basic-identities}
+The final identity package for this chapter contains all the usual
+trigonometric identities: the Pythagorean identities
+\[
+  \sin_C^2 x+\cos_C^2 x=1,\quad
+  1+\tan_C^2 x=\sec_C^2 x,\quad
+  1+\cot_C^2 x=\csc_C^2 x,
+\]
+addition and subtraction formulas, parity formulas, double-angle formulas,
+half-angle formulas, cofunction formulas, reciprocal and quotient formulas,
+and period formulas.  Each identity should be proved from the circle point
+construction and its algebra, not by importing another trigonometric
+representation.
+\end{theorem}
+
+\section{Formalization Order}
+
+\begin{enumerate}
+  \item Formalize the rational parametrization of the circle, including its
+  Pythagorean-triple origin, dyadic refinement, determinant area formulas, and
+  the incremental inner and outer corrections.
+
+  \item Prove validity of the area-first \(\pi\) algorithm and then formalize
+  the analogous \(\arctan(x)\) algorithm on \([0,1]\): ordered bounds,
+  nesting, convergence, and monotonicity.
+
+  \item Invert \(\arctan\) by certified bisection.  This produces the tangent
+  parameter \(u\) for angles in the first octant using only rational interval
+  comparisons.
+
+  \item Define sine and cosine by evaluating the rational parametrization at
+  the inverse-arctangent parameter.  Extend by octant, quadrant, and period
+  transformations, still avoiding square roots.
+
+  \item Define the remaining trigonometric functions as partial quotient or
+  reciprocal raw functions with explicit apartness domains.
+
+  \item Prove all usual trigonometric identities for the projected algorithms.
+  The main proof inputs are the unit-circle law, circle multiplication, the
+  arctangent inverse specification, and the correctness of period and quadrant
+  reduction.
+
+  \item Put comparison with any other representation in a later comparison
+  chapter or file.  That later stage can import the other definitions it
+  needs; this chapter should not depend on them.
+\end{enumerate}
+
+The next chapter abstracts the same finite pattern.  Instead of circle-sector
+fans, it starts with a monotone rational function on a rational interval,
+forms dyadic lower and upper sums, and proves that these sums define the
+corresponding definite integral as a raw real.  The arctangent computation in
+this chapter is the motivating example: it is the integral of the monotone
+kernel \(1/(1+x^2)\), but here it has first been presented in geometric
+polygonal form.

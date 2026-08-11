@@ -4,6 +4,7 @@ import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.ScalarODEUniqueness
 import ComputableAnalysis.PowerSeries
+import ComputableAnalysis.ComplexMultiplication
 
 /-!
 # Elementary function representations
@@ -327,6 +328,31 @@ def eulerFuel (eps : QPos) : Nat := eps.val.den + 1
 def eulerCenter (z : QComplex) (eps : QPos) : QComplex :=
   let m := eulerFuel eps
   QComplex.pow (QComplex.add QComplex.one (QComplex.divRat z (m : Rat))) m
+
+/-! The Euler-center power is the same finite computation as the natural-power
+    implementation used by the algebraic complex layer.  This is a bridge
+    between the power-series-facing representation and the explicit
+    repeated-multiplication representation; it makes no statement about an
+    exponential value or a completed limit. -/
+theorem eulerCenter_eq_natPow (z : QComplex) (eps : QPos) :
+    eulerCenter z eps =
+      QComplex.natPow
+        (QComplex.add QComplex.one
+          (QComplex.divRat z (eulerFuel eps : Rat)))
+        (eulerFuel eps) := by
+  unfold eulerCenter
+  have hpow : forall (w : QComplex) (n : Nat),
+      QComplex.pow w n = QComplex.natPow w n := by
+    intro w n
+    induction n with
+    | zero => rfl
+    | succ n ih =>
+        rw [QComplex.pow, QComplex.natPow, ih]
+        cases w
+        simp only [QComplex.mul]
+        congr 1 <;> grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+          Rat.mul_comm, Rat.sub_eq_add_neg]
+  exact hpow _ _
 
 theorem eulerCenter_zero (eps : QPos) :
     eulerCenter QComplex.zero eps = QComplex.one := by

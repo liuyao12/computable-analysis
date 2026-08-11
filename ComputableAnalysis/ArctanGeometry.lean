@@ -3962,6 +3962,196 @@ theorem arctanIntegralRectangleCompute_width_le_four_div_succ
     _ = 4 / (((n + 1 : Nat) : Rat)) := by
           exact four_mul_one_div_eq_div (n + 1)
 
+private theorem arctanIntegralRectangleCompute_width_le_sixteenth_gap
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    (arctanIntegralRectangleCompute x (64 * (n + 1))).width <=
+      1 / (16 * (((n + 1 : Nat) : Rat))) := by
+  have hbound := arctanIntegralRectangleCompute_width_le_four_div_succ
+    hx0 hx1 (64 * (n + 1))
+  let d : Rat := ((n + 1 : Nat) : Rat)
+  let e : Rat := ((64 * (n + 1) + 1 : Nat) : Rat)
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have heq : e = 64 * d + 1 := by
+    dsimp [e, d]
+    rw [Rat.natCast_add, Rat.natCast_mul]
+    change (64 : Rat) * ((n + 1 : Nat) : Rat) + 1 =
+      64 * ((n + 1 : Nat) : Rat) + 1
+    rfl
+  have hepos : 0 < e := by
+    rw [heq]
+    have hnonneg : 0 <= 64 * d :=
+      Rat.mul_nonneg (by native_decide) (Rat.le_of_lt hdpos)
+    grind
+  have hscaledpos : 0 < e * (16 * d) :=
+    Rat.mul_pos hepos (Rat.mul_pos (by native_decide) hdpos)
+  change (arctanIntegralRectangleCompute x (64 * (n + 1))).width <=
+    4 / e at hbound
+  calc
+    (arctanIntegralRectangleCompute x (64 * (n + 1))).width <= 4 / e := hbound
+    _ <= 1 / (16 * d) := by
+      apply Rat.le_of_mul_le_mul_right (c := e * (16 * d))
+      · calc
+          (4 / e) * (e * (16 * d)) = 64 * d := by
+            rw [Rat.div_def]
+            have hcancel : e⁻¹ * e = 1 :=
+              Rat.inv_mul_cancel e (Rat.ne_of_gt hepos)
+            grind [Rat.mul_assoc, Rat.mul_comm]
+          _ <= 64 * d + 1 := by grind
+          _ = (1 / (16 * d)) * (e * (16 * d)) := by
+            rw [Rat.div_def]
+            have hcancel : (16 * d)⁻¹ * (16 * d) = 1 :=
+              Rat.inv_mul_cancel _
+                (Rat.ne_of_gt (Rat.mul_pos (by native_decide) hdpos))
+            rw [← heq]
+            grind [Rat.mul_assoc, Rat.mul_comm]
+      · exact hscaledpos
+    _ = 1 / (16 * (((n + 1 : Nat) : Rat))) := by rfl
+
+private theorem arctanIntegralRectangleCompute_kernel_half_lower
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) :
+    (1 : Rat) / 2 <= integralKernel x := by
+  let d : Rat := 1 + x * x
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact RationalCircle.Stage.one_add_square_pos x
+  have hdle : d <= 2 := by
+    dsimp [d]
+    have hsq := square_le_one_of_unit hx0 hx1
+    grind
+  unfold integralKernel
+  exact one_div_le_one_div_of_pos_of_le hdpos hdle
+
+/-- A finite effective-separation certificate for the rational arctangent
+branch on `[0,1]`.  If two rational inputs differ by at least `1/(n+1)`,
+the independently computed rectangle boxes are strictly disjoint at stage
+`64 * (n+1)`.  This is search data for a branch-local inverse algorithm; it
+does not assert an IVT or an inverse equality. -/
+theorem arctanIntegralRectangleCompute_boxes_strictly_separated
+    {x y : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hy0 : 0 <= y) (hy1 : y <= 1) (n : Nat)
+    (hsep : x + 1 / (((n + 1 : Nat) : Rat)) <= y) :
+    (arctanIntegralRectangleCompute x (64 * (n + 1))).hi <
+      (arctanIntegralRectangleCompute y (64 * (n + 1))).lo := by
+  let d : Rat := ((n + 1 : Nat) : Rat)
+  let delta : Rat := 1 / d
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hdeltaPos : 0 < delta := by
+    dsimp [delta]
+    rw [Rat.div_def, Rat.one_mul]
+    exact (Rat.inv_pos).2 hdpos
+  have hsep' : x + delta <= y := by
+    simpa [delta, d] using hsep
+  have hxy : x <= y := by
+    have hdeltaNonneg : 0 <= delta := Rat.le_of_lt hdeltaPos
+    grind
+  let left : List (Rat × Rat) :=
+    (arctanAreaLoopState x (64 * (n + 1))).intervals
+  let right : List (Rat × Rat) :=
+    (arctanAreaLoopState y (64 * (n + 1))).intervals
+  have hleft : CoversInterval 0 x left := by
+    dsimp [left]
+    exact arctanAreaLoopState_intervals_covers hx0 _
+  have hright : CoversInterval 0 y right := by
+    dsimp [right]
+    exact arctanAreaLoopState_intervals_covers hy0 _
+  have hcover : CoversInterval 0 y (left ++ [(x, y)]) :=
+    CoversInterval.extend_right hleft hxy
+  have hcompare :
+      integralLowerSum (left ++ [(x, y)]) <= integralUpperSum right :=
+    integralLowerSum_le_integralUpperSum_of_covers
+      (a := 0) (b := y) (by native_decide) (left ++ [(x, y)]) right
+      hcover hright
+  rw [integralLowerSum_append] at hcompare
+  have hcompareTail :
+      integralLowerSum left + integralLowerStep x y <= integralUpperSum right := by
+    simpa [integralLowerSum, Rat.add_zero] using hcompare
+  have hcompare' :
+      (arctanIntegralRectangleCompute x (64 * (n + 1))).lo +
+          (y - x) * integralKernel y <=
+        (arctanIntegralRectangleCompute y (64 * (n + 1))).hi := by
+    simpa [left, right, arctanIntegralRectangleCompute, integralLowerStep] using
+      hcompareTail
+  have hstep : delta <= y - x := by
+    grind [Rat.sub_eq_add_neg]
+  have htail : delta / 2 <= (y - x) * integralKernel y := by
+    have hkernel := arctanIntegralRectangleCompute_kernel_half_lower hy0 hy1
+    calc
+      delta / 2 = delta * ((1 : Rat) / 2) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc]
+      _ <= (y - x) * ((1 : Rat) / 2) :=
+        Rat.mul_le_mul_of_nonneg_right hstep (by native_decide)
+      _ <= (y - x) * integralKernel y :=
+        Rat.mul_le_mul_of_nonneg_left hkernel (by grind [Rat.sub_eq_add_neg])
+  have hwidthX := arctanIntegralRectangleCompute_width_le_sixteenth_gap hx0 hx1 n
+  have hwidthY := arctanIntegralRectangleCompute_width_le_sixteenth_gap hy0 hy1 n
+  have hsixteenth : 1 / (16 * d) = delta / 16 := by
+    dsimp [delta]
+    rw [Rat.div_def, Rat.inv_mul_rev]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hwidthX' :
+      (arctanIntegralRectangleCompute x (64 * (n + 1))).width <= delta / 16 := by
+    rw [← hsixteenth]
+    simpa [d] using hwidthX
+  have hwidthY' :
+      (arctanIntegralRectangleCompute y (64 * (n + 1))).width <= delta / 16 := by
+    rw [← hsixteenth]
+    simpa [d] using hwidthY
+  have herrors :
+      (arctanIntegralRectangleCompute x (64 * (n + 1))).width +
+          (arctanIntegralRectangleCompute y (64 * (n + 1))).width <= delta / 8 := by
+    calc
+      _ <= delta / 16 + delta / 16 := rat_add_le_add hwidthX' hwidthY'
+      _ = delta / 8 := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  have hmargin :
+      (arctanIntegralRectangleCompute x (64 * (n + 1))).width +
+          (arctanIntegralRectangleCompute y (64 * (n + 1))).width <
+        (y - x) * integralKernel y := by
+    have hsmall : delta / 8 < delta / 2 := by
+      calc
+        delta / 8 = delta * ((1 : Rat) / 8) := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc]
+        _ < delta * ((1 : Rat) / 2) := by
+          exact Rat.mul_lt_mul_of_pos_left (by native_decide) hdeltaPos
+        _ = delta / 2 := by
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc]
+    grind
+  have hupperX :
+      (arctanIntegralRectangleCompute x (64 * (n + 1))).hi <=
+        (arctanIntegralRectangleCompute x (64 * (n + 1))).lo +
+          (arctanIntegralRectangleCompute x (64 * (n + 1))).width := by
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  have hsum :
+      (arctanIntegralRectangleCompute x (64 * (n + 1))).hi +
+          (arctanIntegralRectangleCompute y (64 * (n + 1))).width <
+        (arctanIntegralRectangleCompute y (64 * (n + 1))).hi := by
+    have hfirst :
+        (arctanIntegralRectangleCompute x (64 * (n + 1))).hi +
+            (arctanIntegralRectangleCompute y (64 * (n + 1))).width <=
+          (arctanIntegralRectangleCompute x (64 * (n + 1))).lo +
+            (arctanIntegralRectangleCompute x (64 * (n + 1))).width +
+            (arctanIntegralRectangleCompute y (64 * (n + 1))).width :=
+      (Rat.add_le_add_right).2 hupperX
+    have hsecond :
+        (arctanIntegralRectangleCompute x (64 * (n + 1))).lo +
+            (arctanIntegralRectangleCompute x (64 * (n + 1))).width +
+            (arctanIntegralRectangleCompute y (64 * (n + 1))).width <
+          (arctanIntegralRectangleCompute x (64 * (n + 1))).lo +
+            (y - x) * integralKernel y := by
+      grind [Rat.sub_eq_add_neg]
+    grind [Rat.sub_eq_add_neg]
+  unfold QInterval.width at hsum
+  grind [Rat.sub_eq_add_neg]
+
 /-- Any rational interval algorithm with an explicit `C / (n + 1)` width
 bound is a shrinking raw-real representative.  Kept local because it is the
 rational convergence bridge used by the two midpoint rectangle schedules. -/
@@ -6484,6 +6674,31 @@ theorem two_arctanGeom_one_equiv_quarterTurnRaw_one :
   have horder := RealRaw.interval_order_of_valid
     ((2 : Nat) * arctanGeom (1 : Rat) : RealRaw) hscaledValid n
   exact ⟨horder, horder⟩
+
+/-! The next certificate is a chart-relative orientation statement.  It
+combines the exact endpoint displacement of the tangent-addition chart with
+the rational circle cross-product formula.  Thus the orientation of the
+translated chord is controlled by the finite rational increment `v`, without
+introducing an angle-valued quantity. -/
+
+theorem chartAdd_cross_orientation_certificate {u v : Rat}
+    (hden : RationalCircle.Trigonometry.chartAddDen u v ≠ 0) :
+    RationalCircle.Stage.cross
+        (RationalCircle.Trigonometry.point u)
+        (RationalCircle.Trigonometry.point
+          (RationalCircle.Trigonometry.chartAddParameter u v)) =
+      (2 * v) / (1 + v * v) := by
+  rw [← RationalCircle.Trigonometry.composedPoint_eq_point_chartAdd hden]
+  unfold RationalCircle.Trigonometry.composedPoint
+  unfold RationalCircle.Stage.cross RationalCircle.Trigonometry.pointMul
+  unfold RationalCircle.Trigonometry.point RationalCircle.Stage.point
+  simp [Rat.div_def]
+  have hu : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+  have hv : 1 + v * v ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos v)
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
 end ArctanGeometry
 

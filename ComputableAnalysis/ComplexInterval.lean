@@ -1,4 +1,5 @@
 import ComputableAnalysis.ComplexPolynomial
+import ComputableAnalysis.ComplexMultiplication
 
 namespace ComputableAnalysis
 
@@ -24,6 +25,44 @@ theorem evalPoly_point (coeffs : CPoly.Coeffs) (z : QComplex) :
         point (QComplex.add c (QComplex.mul z (CPoly.eval cs z)))
       rw [ih]
       rw [mul_point, add_point]
+
+/-- The finite Horner evaluator for a rational complex box contains the value
+of the polynomial at every rational point enclosed by that box.  This is the
+soundness interface needed by root-exclusion and subdivision certificates;
+it makes no claim about a global root theorem. -/
+theorem evalPoly_contains {coeffs : CPoly.Coeffs} {Z : QBox} {z : QComplex}
+    (hzlo : Z.lo <= z) (hzhi : z <= Z.hi) :
+    (evalPoly coeffs Z).lo <= CPoly.eval coeffs z /\
+      CPoly.eval coeffs z <= (evalPoly coeffs Z).hi := by
+  induction coeffs with
+  | nil =>
+      exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+  | cons c cs ih =>
+      change
+        (add (point c) (mul Z (evalPoly cs Z))).lo <=
+            QComplex.add c (QComplex.mul z (CPoly.eval cs z)) /\
+          QComplex.add c (QComplex.mul z (CPoly.eval cs z)) <=
+            (add (point c) (mul Z (evalPoly cs Z))).hi
+      have htail := ih
+      have hmul := mul_contains hzlo hzhi htail.1 htail.2
+      have hadd := add_contains (A := point c) (C := mul Z (evalPoly cs Z))
+        (QComplex.le_refl c) (QComplex.le_refl c) hmul.1 hmul.2
+      exact hadd
+
+/-- If the output box misses zero, the input box contains no root.  This is
+the finite discard step used by rational box subdivision. -/
+theorem evalPoly_no_root_of_not_overlaps_zero
+    {coeffs : CPoly.Coeffs} {Z : QBox} {z : QComplex}
+    (hzlo : Z.lo <= z) (hzhi : z <= Z.hi)
+    (hmiss : ¬ QBox.Overlaps (evalPoly coeffs Z) QBox.zero) :
+    CPoly.eval coeffs z ≠ QComplex.zero := by
+  intro hroot
+  apply hmiss
+  unfold QBox.Overlaps QBox.zero QBox.point
+  change (evalPoly coeffs Z).lo <= QComplex.zero /\
+    QComplex.zero <= (evalPoly coeffs Z).hi
+  have hcontains := evalPoly_contains (coeffs := coeffs) (Z := Z) (z := z) hzlo hzhi
+  simpa [hroot] using hcontains
 
 def zeroAround (eps : QPos) : QBox :=
   { lo := { re := -eps.val, im := -eps.val },

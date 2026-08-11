@@ -27,7 +27,8 @@ following are still open as *general* theorems:
 
 - product, chain, and quotient rules for arbitrary interval evaluators;
 - construction of an integral from every interval-regular function;
-- general FTC, substitution, and bounded piecewise integration-by-parts;
+- general FTC, substitution, and automatic construction of bounded
+  piecewise integration-by-parts certificates;
 - analytic certificates for the selected `exp`, `log`, `sin`, and `cos` raw
   functions, including `exp' = exp`;
 - continuous matrix Peano--Baker and constructive linear
@@ -67,6 +68,33 @@ blueprint compile in the selected Lean toolchain.  This audit is intentionally
 simple enough for an LLM or a contributor to repeat before treating the
 repository as a dependency.
 
+### Conformance status
+
+The concrete theorem cores in this repository follow the project's intended
+alternative foundation: rational algorithms produce interval boxes, and the
+proofs establish validity, nesting, overlap, and an explicit shrinking
+modulus.  They do not obtain values by invoking a completed real number,
+general Cauchy completeness, an infimum/supremum construction, or a Mathlib
+analysis theorem.
+
+This does not mean that every declaration is executable.  A few declarations
+are deliberately retained as provisional interface packaging and are marked
+`noncomputable`; in particular, the monotone-function wrappers in
+`Calculus.lean`, `IntegralIdentities.lean`, and
+`MonotonicityConvexity.lean`, the finite-partition refinement constructors in
+`Calculus.lean`, the general integral-identity packages in
+`IntegralIdentities.lean`, and algebraic-number operations in
+`AlgebraicNumbers.lean`.  These are not evidence that the corresponding
+general construction has been formalized.  They must either be replaced by
+explicit algorithms or remain clearly labelled as interfaces/targets before
+being used as computational results.
+
+The practical rule is therefore: a theorem counts as standard-compliant only
+when its public result is backed by an executable rational/finite constructor
+and a checked certificate.  A `structure`, a `Prop`, or a `noncomputable def`
+may organize the API, but does not by itself count as a completed
+formalization.
+
 ## Fast navigation
 
 Start with the smallest target module rather than importing
@@ -75,25 +103,48 @@ Start with the smallest target module rather than importing
 | Need | Import | Start with |
 | --- | --- | --- |
 | Rational interval arithmetic and raw reals | `ComputableAnalysis.Basic` | `QInterval`, `RealRaw`, `RealRaw.Valid`, `RealRaw.Equiv` |
-| Certified imaginary-axis input | `ComputableAnalysis.Basic` | `ComplexRaw.mulI`, `ComplexRaw.imaginaryAxis`, and their validity theorems |
-| Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
+| Certified complex multiplication | `ComputableAnalysis.ComplexMultiplication` | `ComplexRaw.mul_valid`, `ComplexRaw.mul_equiv`, and the finite `QBox` bounds |
+| Certified imaginary-axis input | `ComputableAnalysis.ComplexAffine` | `ComplexRaw.mulI`, `ComplexRaw.imaginaryAxis`, and exact rational complex-scalar actions |
+| Rational function with a certified domain | `ComputableAnalysis.FunctionDomains` | `RatFun`, `RatFun.polynomialOnInterval`, `RatFun.polynomialOnInterval_compute_eq`, `RatFun.eval?_eq_some_of_defined`, `RatFun.eval?_eq_none_of_undefined`, `RatFun.oneOverX_defined_of_ne_zero`, `RatFun.oneOverXOnPositiveInterval`, `RatFun.oneOverXOnNegativeInterval`, `RatFun.DenominatorApartOnInterval`, `RatFun.onRegularInterval` |
 | Interval functions, continuity, and integral certificates | `ComputableAnalysis.Calculus` | `FunctionOnInterval`, `IntervalRegularOn`, `Integral.nondecreasingDarbouxDyadicStage`, `Integral.ConstructionFor` |
 | Finite monotone decomposition with non-rational turns | `ComputableAnalysis.TurningPointIntegral` | `Integral.TurningPointBracket`, `Integral.TurningBracketIntegralCandidate` |
 | Rational finite-difference derivatives | `ComputableAnalysis.Differential` | `HasDerivativeOnInterval`, `HasForwardDerivativeAt` |
+| Sector-area time | `ComputableAnalysis.SectorAreaReparametrization` | `angleOnUnit`, `angleOnUnit_hasDerivative`, `angleOnUnitRegular_intervalRegular`, `angleOnUnitRegular_invertible`, `angleAt_equiv_two_arctanGeom` |
+| Finite rational circle powers | `ComputableAnalysis.RationalCircle` | `RationalCircle.Trigonometry.pointPow`, `pointPow_add`, `pointPow_mul`, and `pointPow_normSq_of_unit` |
 | Definite-integral-to-endpoint packages and concrete arctangent work | `ComputableAnalysis.IntegralIdentities` | `Integral.DefiniteIdentityFor`, `IntegralIdentities` |
+| Finite arithmetic, geometric, and power sums | `ComputableAnalysis.Series` | `Series.arithmeticSum_eq`, `Series.geometricSum_eq`, `Series.powerSum`, and the low-degree closed forms |
+| Finite Basel-series certificates | `ComputableAnalysis.DirichletSeries` | `zetaTwoPartial_nonneg`, `zetaTwoFiniteTail_le_telescoping`, `zetaTwoInterval_nested`, and `zetaTwoRaw_validCompute` |
 | Formal power series and rational tail bounds | `ComputableAnalysis.PowerSeries` | `FormalPowerSeries`, `RationalMajorant` |
 | Current first-year derivative ledger | `ComputableAnalysis.FirstYearCalculus` | `checked_power_series_table`, `RealElementary` |
 | Positive powers, exponential/log interfaces | `ComputableAnalysis.ElementaryFunctions` | `exp.PositiveRealRaw`, `exp.RationalPowerExtension`, `exp.ExponentialFunction` |
+| Direct scalar ODE uniqueness | `ComputableAnalysis.ScalarODEUniqueness` | `ScalarODE.DirectMeshHalvingCertificate`, `SelfDerivativeDirectMeshComparison` |
 | Discrete linear ODE / Peano--Baker core | `ComputableAnalysis.PeanoBaker` | `LinearODE.DiscreteLinearSystem`, `chronologicalProduct`, `peanoBakerDiscreteSum` |
 | Certified complex rotation series | `ComputableAnalysis.RotationSeries` | `rotationExpRaw`, `rotationCosRaw`, `rotationSinRaw`, and their validity/rate theorems |
+| Bounded rotation continuity | `ComputableAnalysis.RotationCalculus` | `uniformRotationCosOnTwo`, `uniformRotationSinOnTwo`, and their epsilon--delta theorems |
+| Common-prefix rotation IVP candidate | `ComputableAnalysis.RotationInitialValues` | `uniformRotationCosOnTwo_zero_equiv_one`, `uniformRotationSinOnTwo_zero_equiv_zero`, `uniformRotationNegSinOnTwo_equiv_neg_sin`, `uniformRotationOnTwo_rotationInitialCertificate` |
+| Represented-angle rotation lift | `ComputableAnalysis.RotationLift` | `RotationLift.HalfPiInput`, `rotation`, and its finite Cauchy certificate |
 | Algebraic branches and square roots | `ComputableAnalysis.AlgebraicFunctions` | source header and the unit-interval square-root examples |
 | Complex interval polynomial checks | `ComputableAnalysis.ComplexInterval` | `QBox.evalPoly`, `IsApproxRootAt` |
+| Finite FTA root certificates | `ComputableAnalysis.FTA` | `monicLinear_has_computable_root`, `rationalLinear_has_computable_root`, and the rational quadratic discriminant witnesses |
 
 For the mathematical status and intended dependency order, use
 [GOALS.md](GOALS.md).  For a readable, declaration-linked account, use the
 [blueprint](blueprint/README.md).  The derivative table is in
 [`blueprint/src/04-infinite-series.tex`](blueprint/src/04-infinite-series.tex),
 not in this guide.
+
+### Benchmark routing
+
+The benchmark alignment is maintained in
+[`blueprint/src/08-roadmap.tex`](blueprint/src/08-roadmap.tex).  It currently
+records 38 checked project-relevant finite, rational-coordinate, or
+certificate-level cores.  The easiest entries are distributed across
+Foundations, Circle and Trigonometry, Infinite Series, Effective Calculus,
+Algebra and FTA, and Linear Differential Equations; the remaining benchmark
+numbers have explicit supporting or out-of-scope dispositions there.  Use the
+roadmap number and chapter placement as the authoritative starting point
+rather than treating the benchmark as a claim of full classical library
+coverage.
 
 ### Module atlas
 
@@ -105,7 +156,7 @@ finished general theorem.
 | Foundation | `Basic`, `Algebraic`, `AlgebraicNumbers`, `AlgebraicFunctions`, `FunctionDomains`, `Extension`, `Calculus`, `Differential`, `MonotonicityConvexity`, `FTC` | Raw interval representations, domains, continuity, inverse branches, finite derivatives, integral/FTC certificate interfaces |
 | Elementary functions and series | `Elementary`, `ElementaryFunctions`, `Exp`, `ExpProofs`, `Logarithm`, `PowerSeries`, `Series`, `Taylor`, `FirstYearCalculus` | Power-series algorithms, rational majorants, exp/log comparison interfaces, and the current formal derivative ledger |
 | Integrals and special computations | `TurningPointIntegral`, `IntegralIdentities`, `ArctanGeometry`, `ArctanPresentations`, `AbelianIntegrals`, `ComplexPathIntegral`, `DirichletSeries`, `Basel`, `FTA` | Concrete interval constructions and theorems/targets connecting them to geometric or series algorithms |
-| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `PiComplex`, `Nilakantha`, `PeanoBaker`, `RotationSeries` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, the certified `i*pi/2` input bridge, finite ODE algebra, and the certified imaginary-axis complex series |
+| Geometry, Pi, and ODEs | `RationalCircle`, `TrigSpecialValues`, `GaussSeventeen`, `Pi`, `PiProofs`, `ComplexAffine`, `ComplexMultiplication`, `PiComplex`, `Nilakantha`, `PeanoBaker`, `RotationSeries`, `RotationLift`, `SectorAreaRotation` | Rational-circle geometry, explicitly status-marked special values, Pi coverage tests, certified raw complex multiplication and exact rational complex-scalar actions, the certified `i*pi/2` input bridge, finite ODE algebra, the certified imaginary-axis complex series, and the sector-clock endpoint's factorial-rotation transport |
 | Polynomial and complex checks | `Polynomial`, `ComplexPolynomial`, `ComplexInterval` | Exact polynomial algebra and rational complex-box root checks |
 
 `Playground`, `MembershipCheck`, and the repair/check files are development
@@ -203,22 +254,185 @@ There are also genuine full interval derivative certificates on `[0,1]` for:
 - `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative`
   (`d(x A_rect)/dx = A_rect + x/(1+x^2)`).
 
-`FirstYearCalculus.checked_power_series_table` proves the coefficient-level
-identities for exp, sin, cos, sinh, and cosh.  Those formal identities are not
-yet interval-analytic derivative theorems for the corresponding boxed raw
-functions.  This distinction must be preserved in downstream proofs.
+`FunctionOnInterval.scaleRat` and
+`HasDerivativeOnInterval.scaleRat_two` are the first reusable scalar rule:
+they multiply the finite quotient and its derivative boxes by two while
+requesting the explicit finer stage `2*(n+1)`.  The sector-area module applies
+that rule to the rectangle arctangent.  Its `angleOnUnit` has derivative
+`speedOnUnit`, whose exact rational value is
+`RationalCircle.Stage.sectorAreaSpeed t = 2/(1+t^2)`;
+`angleAt_equiv_two_arctanGeom` supplies the pointwise bridge to the geometric
+angle representation.  The same module now proves the quantitative finite
+gap `x + 1/(n+1) <= y -> Theta_x.hi < Theta_y.lo` at stage `64*(n+1)`,
+and packages it as `angleOnUnit_effectiveInverseSeparation`.
+`angleOnUnitRegular` is the cofinally accelerated presentation whose
+stage `n` uses that rectangle stage; its
+`angleOnUnitRegular_intervalRegular` endpoint-image evaluator and
+`angleOnUnitRegular_invertible` package now supply the interval
+regularity, monotonicity, and strict separation required by the constructive
+inverse interface.  The data-valued inverse search, followed by curve
+reparametrization and vector uniqueness, remain separate tasks.
+At the unit endpoint,
+`regularAngleAt_one_equiv_quarterTurnRaw_one` directly identifies the
+accelerated clock with the normalized geometric quarter-turn raw.
+At the unit endpoint,
+`PiProofs.pi.sectorAreaAngleOne_equiv_halfPi` now closes the finite transport
+`Theta(1) ≡ pi/2`; this is an endpoint equivalence, not yet a general inverse
+or reparameterized-curve construction.
+`SectorAreaRotation.halfPi` independently exposes that accelerated endpoint
+as a `RotationLift.HalfPiInput`: every rectangle box is checked in `[1,2]`
+from the rational endpoint-kernel bounds, while the accelerated width bound
+supplies the remaining input data.  `SectorAreaRotation.rotation_equiv_geometricRotation` then
+transports the resulting stabilized factorial rotation to
+`GeometricPiRotation.rotation`.  This closes the sector-clock input transport
+only; the separate geometric endpoint identity remains the vector-uniqueness
+step.
+
+`FirstYearCalculus.checked_power_series_table` proves the coefficient-shift
+identities for exp, sin, cos, sinh, and cosh. The primary series API calls
+this operation `FormalPowerSeries.coefficientShift` and its relation
+`HasCoefficientShift`; the older `derivative` names remain compatibility
+aliases. At a chosen expansion point this is linear Taylor-coefficient data,
+not yet an interval-analytic derivative theorem for the corresponding boxed
+raw functions. Downstream proofs must preserve that distinction.
+
+The finite polynomial bridge is now checked at the rational level:
+`FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`
+proves an explicit `|h|` error bound for the literal quotient of
+`x^(n+1)/(n+1)` against `x^n` on any supplied rational bounded box.
+`FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval` packages that
+bound as a full two-sided interval derivative certificate with an explicit
+dyadic half-decay step schedule.  It is also the right finite algebra for the
+termwise factorial-series bounds needed by exponential.
+`FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` materializes any
+formal coefficient stream as a finite rational Taylor polynomial and derives
+its interval derivative from `FormalPowerSeries.coefficientShift`. This is
+the intended hand-off from Chapter 4's algebra to Chapter 6's derivative
+certificates; no infinite-series tail is differentiated at this point.
+For a prefix containing a linear term,
+`FinitePolynomial.taylorPrefixShift_at_zero` identifies that certified
+derivative polynomial at zero with the original coefficient `c 1`.
+For an expansion centered at a rational `a`, use
+`FinitePolynomial.taylorPrefixAt` and
+`FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval`: the local box
+assumptions are `-C <= lower - a` and `upper - a <= C`, and
+`FinitePolynomial.taylorPrefixShiftAt_at_basepoint` proves that the certified
+derivative at `a` is again `c 1`.  Thus the coefficient interpretation is
+translation-invariant without invoking an ambient real line.
+At the quantitative level, `FinitePolynomial.SecantDerivativeBound.add`,
+`scaleRat`, and `mul` compose finite derivative certificates.  The product
+constructor asks for rational bounds for each factor and its proposed
+derivative on the local box; its explicit coefficient includes the finite
+secant corner term.  Supply those majorants rather than invoking an
+unqualified product-rule limit.
+`FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval` then closes
+this construction under every finite rational coefficient prefix. Its
+quantitative `SecantDerivativeBound` is the explicit Taylor-remainder bridge:
+only after that bound is supplied does a linear coefficient become an
+interval derivative.
+
+The series implementation is connected to this finite algebra without making
+an analytic derivative claim. `ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial`
+proves that the literal loop's next rational term is `x^N / N!`, while
+`ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix` identifies its finite
+center after `N + 1` terms with `FinitePolynomial.expTaylorPrefix N x`.
+`FinitePolynomial.expTaylorPrefix_succ` exposes the one-term recurrence, and
+`FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` puts every
+term under a common factorial-tail budget on a bounded rational box. Use
+these facts before attaching the separately certified geometric tail.
+`ExpProofs.uniformExpRaw` now carries out that attachment on `qabs x <= 2`:
+its fixed factorial stage is valid, nested, and geometrically shrinking;
+`ExpProofs.uniformExpRaw_equiv_expPowerSeries` proves it overlaps the selected
+adaptive series evaluator at every common stage. This is the representation
+to use when one proof must evaluate both `x` and `x + h` at the same prefix.
+`ExpProofs.uniformExpOnUnit` packages the same schedule on `[0,1]` and is
+pointwise equivalent to the selected exponential there. Its next finite
+prefix has exactly the common center as derivative, while
+`ExpProofs.uniformExpTaylorPrefix_secant_error` gives its finite secant error
+explicitly. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four`
+then proves the single bound `34` for every finite prefix on `|x| <= 2`, and
+`ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four` transfers it to
+the common schedule. For `h ≠ 0`, choose
+`ExpProofs.uniformExpQuotientPrecision h hh n`: its shared tail magnitude is
+at most `precisionAtStage n * |h| / 24`. Pair it with
+`uniformExpSelfDerivativeStepPrecision`, which spends at most half the
+requested tolerance on the `34 |h|` finite error.
+`uniformExpSelfDerivativeEvalPrecision` makes this stage choice total, and
+`uniformExpCenter_secant_error_le` combines the finite and tail errors before
+the interval quotient is assembled. The resulting
+`uniformExpOnUnit_hasDerivativeOnInterval` is a full two-sided certificate
+`E' = E` on `[0,1]`, and `uniformExpOnUnit_solvesSelfDerivative` adds the
+checked exact initial value `E(0) = 1`. It is intentionally a certificate for
+the common-prefix evaluator rather than an unproved derivative transfer to
+the pointwise-equivalent adaptive evaluator.
+The centered chart is now checked as well:
+`uniformExpOnSymmetricUnit_hasDerivativeOnInterval` proves the same
+certificate on `[-1,1]`, where the endpoint hypothesis gives `|h| <= 2`;
+`uniformExpOnSymmetricUnit_solvesSelfDerivative` packages its initial value.
+This is the useful local chart for identities that use both signs of the
+exponent.
+
+For finite trigonometric work, use
+`FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval` and
+`FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval`. They certify
+the actual interval derivative of a finite prefix only: an \(N+1\)-term source
+has the \(N\)-term shifted target. The exact dropped-edge calculation is
+`taylorPrefixShift_succ_eq_of_coefficientShift`; attach an independent tail
+certificate before claiming a derivative for an evaluated sine or cosine raw.
+
+For the tail-enclosed rotation evaluator,
+`ComputableAnalysis.RotationCalculus` provides the common factorial schedule
+and `ComputableAnalysis.RotationDerivative` supplies its first analytic
+derivative certificate. The schedule has
+checked literal rational epsilon--delta continuity on `[-2,2]` for both
+coordinates: `uniformRotationCosOnTwo_epsilonDeltaContinuous` and
+`uniformRotationSinOnTwo_epsilonDeltaContinuous` use the explicit modulus
+`delta = eps / 16` together with
+`uniformRotationBoxes_widths_shrink_uniform`.  This is already suitable as a
+continuity input to a concrete integral construction. It is deliberately not
+a derivative transfer. `RotationTaylorBridge` identifies the literal
+Peano--Baker centers with the finite formal Taylor prefixes
+(`sinePrefix_eq_taylorPrefix` and `cosinePrefix_eq_taylorPrefix`), identifies
+the finite shifted sine prefix with the cosine prefix
+(`sinePrefixShift_eq_cosinePrefix`), and supplies the fixed-stage rational
+secant certificate `uniformRotationSinCenter_secant_error`. Its direct odd
+prefix recurrence is majorized by the checked factorial exponential budget,
+yielding `uniformRotationSinCenter_secant_error_le_thirty_four`: a single
+`34 * |h|` bound on every finite common-stage sine center.
+`uniformRotationSinOnTwo_hasDerivativeOnInterval` now spends the remaining
+error budget on a stage chosen from `eps * |h| / 48`; together with the
+reusable symmetric-box quotient calculation in `IntervalQuotient`, this is a
+full two-sided literal certificate `sin' = cos` for the common-prefix
+evaluators on `[-2,2]`. The companion is now checked too:
+`uniformRotationCosOnTwo_hasDerivativeOnInterval` proves `cos' = -sin`
+against `uniformRotationNegSinOnTwo`. A finite cosine prefix drops its final
+sine term; Lean bounds that term by its own factorial schedule and evaluates
+at the maximum of this edge shift and the divided-tail shift. Neither theorem
+silently transfers across a pointwise-equivalent representation.
+`RotationInitialValues` also proves the finite initial boxes
+`C(0) = 1` and `S(0) = 0` for these exact evaluators, and packages the four
+facts as `uniformRotationOnTwo_rotationInitialCertificate`. This is the
+checked rotation IVP candidate, still short of its geometric identification or
+a continuous vector uniqueness theorem.
 
 The first exponential finite-difference brick is also available:
-`expTaylorQuadratic x = 1 + x + x^2/2`, and
-`ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` proves a
-`HasForwardDerivativeAt` certificate at zero with derivative `1`.
-Its literal quotient is `1 + h/2`.  The actual tail-enclosed evaluator has
+`expTaylorQuadratic x = 1 + x + x^2/2`.
+`FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` now proves its
+full two-sided interval derivative `1 + x` on every rational subinterval of a
+bounded symmetric box; it is assembled by the reusable quantitative
+`SecantDerivativeBound` constant/addition/rational-scaling interface.
+`ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` remains the small
+specialized forward certificate at zero, whose literal quotient is
+`1 + h/2`.  The actual tail-enclosed evaluator has
 now crossed the same local gate:
 `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` proves its forward
 derivative at zero is `1`.  Its proof uses the literal public stage-zero
 finite sum, whose positive tail and geometric radius are both bounded by
-`h^2` on positive half-unit steps.  This is not a global `exp' = exp`
-certificate on an interval.
+`h^2` on positive half-unit steps.  The companion
+`ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero` uses
+`expPowerSeries 0` itself as the derivative representative, so it certifies
+the precise local identity `D⁺ exp(0) = exp(0) = 1`.  Neither result is a
+global `exp' = exp` certificate on an interval.
 
 ## How to formalize a familiar integration formula
 
@@ -243,11 +457,12 @@ derivative alone:
 `FTC.EffectiveFTC` and `FTC.effectiveFTC_definiteIntegralEqualsEndpoint`
 describe one checked endpoint-bridge route.  The generic bridge from an
 arbitrary `HasDerivativeOnInterval` to that FTC certificate is not yet
-available.  The finite integration-by-parts construction in
-`IntegralIdentities.lean` is a benchmark and a source of reusable finite
-algebra, not a universal theorem.  Consequently, an LLM must currently
-either stay within an existing concrete construction or make the missing
-general theorem its explicit proof goal.
+available.  `Integral.IntegrationByPartsCertificate` now turns a certified
+paired finite-subdivision identity into the standard endpoint-minus-integral
+formula through `left_integral_equiv_endpoint_sub_right` (and its symmetric
+companion).  An LLM must still construct the two integrals and the common
+mesh/corner certificate for its particular functions; that is deliberately
+not inferred from a formal product rule alone.
 
 ### Increasing pieces: start with the literal finite stage
 
@@ -330,11 +545,32 @@ integration-by-parts rules.
 - `exp.LogIntegralInverseBranch` records the inverse-logarithmic-integral
   route.
 
-These are mostly interfaces and comparison targets.  Do not claim that the
-repository has proved a general rational-power construction, `exp' = exp`, or
-the full exp/log equivalence.  The next analytic milestone is an actual boxed
-exponential with a `HasDerivativeOnInterval` self-derivative certificate,
-then uniqueness from the Peano--Baker route.
+These are mostly interfaces and comparison targets. Do not claim that the
+repository has proved a general rational-power construction or the full
+exp/log equivalence. The common-prefix exponential does now have a local
+`HasDerivativeOnInterval` self-derivative certificate.  Scalar uniqueness
+uses the checked direct finite-mesh halving closure below, not a
+Peano--Baker or Picard argument; the remaining scalar task is to derive its
+finite cell estimates from arbitrary derivative certificates.
+
+For a direct scalar uniqueness proof, make one finite short-block sweep an
+instance of `ScalarODE.ShortBlockMeshSweep`: telescope the cell estimates to
+`next <= length * previous + residual`, choose `length <= 1/4`, and spend at
+most `previous/4` on the residual. The checked theorem `next_le_half`
+produces the dyadic contraction. Feed the sweep sequence to
+`DirectMeshHalvingCertificate.ofShortBlockSweeps`; its `error_eq_zero`
+theorem is preceded by `error_le_eps`, which chooses a concrete refinement
+count for any proposed rational error. This is the intended hand proof of
+scalar `f' = f` uniqueness.
+
+The cellwise form is now executable too. Use
+`FiniteMeshDifferenceBound` with rational endpoint envelopes `state j`,
+`state 0 = 0`, and a certified bound for each increment
+`state (j+1) - state j`. `FiniteMesh.sumUpTo_increments` proves the literal
+finite telescoping identity, and `toShortBlockMeshSweep` turns the total
+length/residual budgets into the contraction certificate. The open analytic
+work is therefore exactly to derive those finite increment bounds from
+`HasDerivativeOnInterval`, at the chosen mesh precision.
 
 The literal power-series computation itself is now fully certified at every
 rational input: `ExpProofs.expPowerSeries_valid x` proves the raw boxes for
@@ -354,9 +590,11 @@ a separate open bridge.
 
 There is one local derivative theorem for that representation:
 `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` proves the full
-power-series evaluator has forward derivative `1` at zero.  It is deliberately
-kept distinct from the still-open interval self-derivative certificate needed
-by `SolvesSelfDerivativeOnInterval`.
+power-series evaluator has forward derivative `1` at zero, while
+`ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero` proves the
+equivalent statement with `expPowerSeries 0` itself as derivative data.  Both
+are deliberately kept distinct from the still-open interval self-derivative
+certificate needed by `SolvesSelfDerivativeOnInterval`.
 
 When using `SelfDerivativeInitialValueUnique`, provide both pieces of common
 initial data explicitly: equality of the rational initial coordinates and a
@@ -417,10 +655,41 @@ open ComputableAnalysis
 #check ExpProofs.expPowerSeriesFunction_zero_equiv_one
 #check ExpProofs.expPowerSeriesOnInterval_zero_initial_value
 #check ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero
+#check ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero
+#check ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial
+#check ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix
+#check FinitePolynomial.expTaylorPrefix_succ
+#check FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm
+#check ExpProofs.uniformExpRaw
+#check ExpProofs.uniformExpRaw_valid
+#check ExpProofs.uniformExpRaw_equiv_expPowerSeries
+#check ExpProofs.uniformExpOnUnit
+#check ExpProofs.uniformExpOnUnit_equivalent_expPowerSeriesOnUnit
+#check ExpProofs.expTaylorDerivativePrefix_eq_powerSeriesCenterAtTerms
+#check ExpProofs.uniformExpTaylorPrefix_secant_error
+#check FinitePolynomial.expTaylorPrefixSecantCoefficient_le_thirty_four
+#check FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four
+#check ExpProofs.uniformExpTaylorPrefix_secant_error_le_thirty_four
+#check ExpProofs.uniformExpQuotientTailTolerance
+#check ExpProofs.uniformExpQuotientPrecision
+#check ExpProofs.uniformExpTailMagnitude_le_quotientTolerance
+#check ExpProofs.uniformExpSelfDerivativeStepPrecision
+#check ExpProofs.uniformExpSelfDerivative_finite_error_le_half_precision
 #check ExpProofs.expPowerSeries_zero_compute_eq
 #check ExpProofs.expPowerSeries_zero_valid
 #check ExpProofs.expPowerSeries_zero_equiv_one
 #check expTaylorQuadratic
+#check FinitePolynomial.taylorPrefixShift_at_zero
+#check FinitePolynomial.taylorPrefixShiftAt_at_basepoint
+#check FinitePolynomial.taylorPrefix_succ
+#check FinitePolynomial.taylorPrefixShift_succ_eq_of_coefficientShift
+#check FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
+#check FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
+#check FinitePolynomial.sineTaylorPrefix_hasDerivativeOnInterval
+#check FinitePolynomial.cosineTaylorPrefix_hasDerivativeOnInterval
+#check FinitePolynomial.SecantDerivativeBound.mul
+#check FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval
+#check FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval
 #check ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero
 #check ExpProofs.eulerCenter_zero
 #check ExpProofs.expEuler_zero_equiv_one
@@ -434,6 +703,21 @@ open ComputableAnalysis
 #check ExpProofs.eNaturalPower_valid
 #check ExpProofs.eNaturalPower_lower_bound
 #check ExpProofs.eNaturalPower_upper_bound
+#check ScalarODE.DirectMeshHalvingCertificate
+#check ScalarODE.FiniteMesh.sumUpTo
+#check ScalarODE.FiniteMesh.sumUpTo_increments
+#check ScalarODE.FiniteMeshDifferenceBound
+#check ScalarODE.FiniteMeshDifferenceBound.toShortBlockMeshSweep
+#check ScalarODE.FiniteMeshDifferenceBound.next_le_half
+#check ScalarODE.ShortBlockMeshSweep
+#check ScalarODE.ShortBlockMeshSweep.next_le_half
+#check ScalarODE.DirectMeshHalvingCertificate.ofShortBlockSweeps
+#check ScalarODE.DirectMeshHalvingCertificate.bound_le_geometric
+#check ScalarODE.DirectMeshHalvingCertificate.error_le_eps
+#check ScalarODE.DirectMeshHalvingCertificate.error_eq_zero
+#check ScalarODE.SelfDerivativeDirectMeshComparison
+#check ScalarODE.selfDerivativeInitialValueUnique_of_directMesh
+#check exp.powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh
 #check ExpProofs.eCompoundInterestRepresentation
 #check ExpProofs.eRepeatedMultiplicationRepresentation
 #check ExpProofs.eEulerNested_valid
@@ -446,8 +730,8 @@ open ComputableAnalysis
 
 This certifies both repeated multiplication and the factorial power series as
 representations of the same abstract value `e`.  Keep that constant-level
-agreement, the checked local forward derivative at zero, and the still-open
-global derivative/ODE certificate distinct.
+agreement, the checked local self-represented forward derivative at zero, and
+the still-open global derivative/ODE certificate distinct.
 
 ```lean
 import ComputableAnalysis.RotationSeries
@@ -462,19 +746,75 @@ open ComputableAnalysis
 #check RotationSeries.rotationSinRaw_valid
 #check RotationSeries.rotationCosRaw_compute
 #check RotationSeries.rotationSinRaw_compute
+#check RotationSeries.uniformRotationCenter_input_lipschitz
+#check RotationSeries.uniformRotationBox_future_contained_expand_of_input_near
+#check RotationSeries.uniformRotationCosOnTwo_zero_equiv_one
+#check RotationSeries.uniformRotationSinOnTwo_zero_equiv_zero
+#check RotationSeries.uniformRotationNegSinOnTwo_equiv_neg_sin
+#check RotationSeries.RotationDerivativeInitialCertificate
+#check RotationSeries.uniformRotationOnTwo_rotationInitialCertificate
 ```
 
-These names expose the certified complex series at rational imaginary inputs;
-their real and imaginary coordinates are certified rational-input power-series
-computations, not yet geometric trigonometry.
-
-To turn a certified real input into the complex input `i * x`, use the
-coordinate rotation below.  It is intentionally narrower than
-`ComplexRaw.mul`: general complex multiplication still awaits its own
-interval-validity proof.
+These names expose the certified complex series at rational imaginary inputs.
+The uniform schedule adds a finite Lipschitz certificate on `|T| <= 2`, which
+is the input-stability ingredient for represented angles. Their real and
+imaginary coordinates are still not identified with geometric trigonometry.
 
 ```lean
-import ComputableAnalysis.Basic
+import ComputableAnalysis.RotationLift
+
+open ComputableAnalysis
+
+#check RotationLift.HalfPiInput
+#check RotationLift.HalfPiInput.midpoint_qabs_le_two
+#check RotationLift.HalfPiInput.rotationCandidate
+#check RotationLift.HalfPiInput.rotationRadius
+#check RotationLift.HalfPiInput.rotation
+#check RotationLift.HalfPiInput.rotation_valid
+#check RotationLift.HalfPiInput.rotation_contains_current_candidate
+```
+
+`RotationLift` is the represented-input assembly step in isolation.  Supply a
+valid nested raw angle with boxes in `[1,2]` and width at most `2/(n+1)`; it
+then stabilizes the common rational factorial boxes with the explicit radius
+`16 * width`, and proves the result valid.  A particular pi presentation is
+an instantiation of this finite certificate, not an extra assumption in the
+generic complex proof.
+
+The literal four-corner complex product has finite containment, order,
+nesting, and a rational width estimate.  The width schedule is obtained from
+the two stage-zero boxes: nested validity keeps all later coordinates within
+their explicit rational radii.  Thus general `ComplexRaw.mul` is a valid raw
+computation and respects overlap equivalence.
+
+```lean
+import ComputableAnalysis.ComplexMultiplication
+
+open ComputableAnalysis
+
+#check QBox.mulRealInterval_contains
+#check QBox.mulRealInterval_ordered
+#check QBox.mulRealInterval_nested
+#check QBox.mul_contains
+#check QBox.mul_ordered
+#check QBox.mul_nested
+#check QBox.mulRealInterval_width_le_of_abs_bounded
+#check QBox.mul_width_height_le_of_coordinateBounded
+#check QBox.mul_overlaps_of_overlaps
+#check ComplexRaw.mul_compute_ordered
+#check ComplexRaw.mul_compute_nested
+#check ComplexRaw.mul_valid_of_widthsShrink
+#check ComplexRaw.mul_valid
+#check ComplexRaw.mul_equiv
+#check ComplexRaw.qcomplexLeftMul_equiv_mul_ofQComplex
+```
+
+To act on a certified complex input by any exact rational complex scalar, use
+the affine layer below.  It remains a particularly transparent exact
+implementation, even though the general product is now available.
+
+```lean
+import ComputableAnalysis.ComplexAffine
 
 open ComputableAnalysis
 
@@ -483,13 +823,30 @@ open ComputableAnalysis
 #check ComplexRaw.imaginaryAxis
 #check ComplexRaw.imaginaryAxis_valid
 #check ComplexRaw.imaginaryAxis_compute
+#check ComplexRaw.scaleRat_valid
+#check ComplexRaw.qcomplexLeftMul
+#check ComplexRaw.qcomplexLeftMul_valid
+#check ComplexRaw.qcomplexLeftMul_equiv
+#check ComplexRaw.cauchyStabilize
+#check ComplexRaw.cauchyStabilize_contains_current
+#check ComplexRaw.cauchyStabilize_equiv_of_common_candidate
+#check ComplexRaw.cauchyStabilize_valid
 ```
 
 For example, if `piRaw` has a proof `hpi : piRaw.Valid`, then
-`ComplexRaw.imaginaryAxis_valid hpi` is the certificate for `i * piRaw`;
-`ComplexRaw.scaleRat_valid` then certifies its rational rescaling by `1/2`.
-This supplies the represented input `i*pi/2`, but not a complex exponential
-algorithm at represented inputs.
+`ComplexRaw.qcomplexLeftMul_valid { re := 0, im := 1 / 2 } hpi` certifies the
+literal exact-scalar action `(i/2) * piRaw`; this agrees with the direct
+`imaginaryAxis` coordinate rotation and rational rescaling.  This supplies
+the represented input `i*pi/2`, but not a complex exponential algorithm at
+represented inputs.
+
+For a direct complex candidate whose stages are not yet nested, use
+`ComplexRaw.cauchyStabilize`.  Its proof contract is entirely finite: give
+ordered candidate boxes, widths that shrink, a radius schedule that shrinks,
+and show that every later candidate is contained in each earlier widened box.
+The evaluator is then the finite intersection of the widened prefix; the
+later candidate itself witnesses that every such intersection is ordered.  It
+is the intended final assembly step for the represented-angle rotation series.
 
 When the selected value is the project pi handle, import
 `ComputableAnalysis.PiComplex` and use the named input rather than choosing a
@@ -502,8 +859,54 @@ open ComputableAnalysis
 
 #check PiProofs.pi.imaginaryHalf
 #check PiProofs.pi.imaginaryHalf_valid
+#check PiProofs.pi.halfPi
+#check PiProofs.pi.halfPi_valid
+#check PiProofs.pi.halfPi_width_le_two_div_succ
+#check PiProofs.pi.halfPi_bounds
+#check PiProofs.pi.halfPiRotation
+#check PiProofs.pi.halfPiRotation_valid
+#check PiProofs.pi.halfPiRotation_contains_current_candidate
+#check RotationLift.HalfPiInput.midpoint_sub_le_width_add_width_of_equiv
+#check RotationLift.HalfPiInput.crossRadius
+#check RotationLift.HalfPiInput.crossRadius_shrinks
+#check RotationLift.HalfPiInput.rotationCandidate_sameStage_contained_expand_of_equiv
+#check RotationLift.HalfPiInput.rotation_equiv_of_input_equiv
+#check RotationLift.HalfPiInput.rationalInput
+#check RotationLift.HalfPiInput.rationalInput_rotation_equiv_uniformRotationExpRaw
+#check RotationLift.HalfPiInput.rotation_equiv_uniformRotationExpRaw_of_equiv_ofRat
+#check PiProofs.pi.halfPi_equiv_geometricHalfPi
+#check PiProofs.pi.halfPiRotationCandidate_contained_expand_geometricRotationCandidate
+#check PiProofs.pi.geometricRotationCandidate_contained_expand_halfPiRotationCandidate
+#check PiProofs.pi.halfPiRotation_equiv_geometricRotation
+#check SectorAreaRotation.halfPi
+#check SectorAreaRotation.halfPi_bounds
+#check SectorAreaRotation.piRaw_equiv_fourArctanGeomOne
+#check SectorAreaRotation.imaginaryHalf_equiv_geometricImaginaryHalf
+#check SectorAreaRotation.rotation_equiv_geometricRotation
+#check PiProofs.pi.halfPiRotation_equiv_sectorAreaRotation
+#check PiProofs.pi.imaginaryHalf_equiv_sectorAreaRotationImaginaryHalf
+#check PiProofs.pi.sectorAreaPiRaw_equiv_piCircleArea
+#check PiProofs.pi.imaginaryHalf_equiv_imaginaryAxis_halfPi
+#check PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf
+#check PiProofs.pi.imaginaryHalf_equiv_qcomplexLeftMul
+#check PiProofs.pi.imaginaryHalf_qcomplexLeftMul_equiv_presentation
+#check PiProofs.pi.negativeTwoImaginaryScalar_imaginaryHalf_equiv_piCircleArea
+#check PiProofs.pi.negativeTwoImaginaryRaw
+#check PiProofs.pi.negativeTwoImaginaryRaw_valid
+#check PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea
+#check PiProofs.pi.negativeTwoImaginary_logAtI_equiv_piCircleArea
+#check PiProofs.pi.negativeTwoImaginaryRaw_mul_logAtI_equiv_piCircleArea
 #check PiProofs.pi.imaginaryHalf_equiv_presentation
 ```
+
+`halfPi` is a certified raw angle with boxes in `[1,2]`.
+`halfPiRotation` is the valid complex raw obtained by
+stabilizing the bounded rational factorial rotations at the midpoint of those
+boxes. Its explicit input radius is at most `32 / (n + 1)`, and
+`halfPiRotation_contains_current_candidate` lets a later geometric
+quarter-turn enclosure lift from a direct factorial candidate to that raw.
+This is deliberately not yet `exp(i*pi/2) = i`: the missing proof is exactly
+the agreement of the factorial rotation with the geometric circle point.
 
 The rational-circle and arctangent code contains useful geometric and
 power-series computations, but normalized-angle sine/cosine/tangent special
@@ -523,6 +926,11 @@ open ComputableAnalysis
 
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness
 #check RationalCircle.GeometricTrig.FirstQuadrantArctanWitness.arctan_to_sine_cosine_coordinates
+#check ArctanGeometry.arctanGeom_one_valid
+#check ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute
+#check ArctanGeometry.four_arctanGeom_one_equiv_piCircleArea
+#check ArctanGeometry.two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute
+#check ArctanGeometry.two_arctanGeom_one_equiv_quarterTurnRaw_one
 ```
 
 This is why the special-values table colors only its arctangent-witness
@@ -530,6 +938,61 @@ column: the displayed sine and cosine entries follow by rational algebra once
 that one equation is certified. At present, only the two endpoint witness
 equations are fully proved; the non-endpoint rows remain computation-ready
 targets until their raw-slope equalities are formalized.
+
+At the nontrivial endpoint,
+`two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute` gives literal
+equality of the two rational interval boxes at every stage; its equivalence
+corollary records `2 * arctan.geom(1) = pi / 2` as the normalized geometric
+quarter turn.  `PiProofs.pi.halfPi_equiv_geometricHalfPi` now transports that
+geometric angle to the geometry-only half-angle consumed by the represented
+factorial rotation, and
+`PiProofs.pi.imaginaryHalf_equiv_geometricImaginaryHalf` does the same after
+embedding on the imaginary axis.  The generic theorem
+`RotationLift.HalfPiInput.rotation_equiv_of_input_equiv` now transports this
+input equivalence through the two separately stabilized factorial rotations;
+`PiProofs.pi.halfPiRotation_equiv_geometricRotation` specializes it to the
+registry and geometry-only half-angle inputs.  Its finite core bounds
+equivalent midpoint samples by the sum of their widths and uses the
+corresponding cross enclosure with radius at most `64/(n+1)`.  The remaining
+Euler bridge is the identification of that factorial rotation with its
+geometric endpoint, not a conversion of representatives.
+
+The lift has a checked rational compatibility law as well:
+`RotationLift.HalfPiInput.rationalInput_rotation_equiv_uniformRotationExpRaw`
+says that lifting an exact rational angle in `[1,2]` gives the pre-existing
+common-schedule rational factorial rotation.  Thus the represented evaluator
+extends, rather than replaces, the rational complex exponential algorithm.
+The companion theorem
+`rotation_equiv_uniformRotationExpRaw_of_equiv_ofRat` makes this independent
+of the selected valid raw representative of that rational angle.
+
+The same small geometry module also carries the full-area bridge directly:
+`four_arctanGeom_one_compute_eq_piCircleArea_compute` is stagewise equality
+of `4 * arctan.geom(1)` with `piCircleArea`, and
+`four_arctanGeom_one_equiv_piCircleArea` is its raw-real corollary.  Use
+these declarations for the geometric pi route instead of importing the larger
+presentation registry merely for that fact.
+
+## Arctangent on the full series chart
+
+The finite-Riemann comparison is now a reusable equality of represented
+functions, not only an endpoint fact.  For any rational `x` with `|x| <= 1`,
+the following declarations certify `arctan.series(x) ≡ arctan.geom(x)`:
+
+```lean
+import ComputableAnalysis.PiProofs
+
+open ComputableAnalysis
+
+#check PiProofs.arctanEqualsGeom_finiteRiemannBridge_on_unit
+#check PiProofs.arctanPowerSeriesGeomAgreement_finiteRiemannBridge
+```
+
+The finite quadrature proof supplies the nonnegative branch.  The negative
+branch is not a fresh integral argument: both raw evaluators are exactly the
+endpoint-reversed negation of their evaluation at `-x`, and Lean proves that
+reflection at the raw-interval level.  This broadens the arctangent API, but
+does not add a ninth pi-scoreboard row.
 
 For rational-circle chord refinements, do not select an exact square root.
 The direct evaluator is already certified in
@@ -612,13 +1075,14 @@ test needs; expose the natural integral, series, or geometry theorem in a
 downstream result.  When two named checked evaluators themselves must be
 compared, use `PiProofs.piPresentation_equiv source target`; it derives their
 raw-real equivalence through the certified area presentation, without
-pretending that the comparison adds a new calculus capability.  `pi.integrationByParts` is the checked supplied-unit
-formula using the literal reciprocal-integral logarithm, with runtime bound
-`52 / 2^n`; it is a finite calculus bridge, not the still-open general
-integration-by-parts theorem or canonical-exp/log transport.
-`pi.squareSubstitution` is a separate checked bridge with runtime bound
-`56 / 2^n`: its raw formula retains the pullback integral
-`2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
+pretending that the comparison adds a new calculus capability.
+`pi.integrationByParts` is the checked supplied-unit formula using the
+literal reciprocal-integral logarithm, with runtime bound `52 / 2^n`; it
+supplies one paired-mesh certificate for the checked general rebalancing
+theorem, but not the still-open automatic construction of such certificates
+or canonical-exp/log transport. `pi.squareSubstitution` is a separate checked
+bridge with runtime bound `56 / 2^n`: its raw formula retains the pullback
+integral `2 * ∫_0^1 2*x/(1+x*x) dx`, and its agreement with
 `pi.integrationByParts` is the finite `t = x*x` substitution certificate.
 It is likewise not a general substitution theorem.
 `pi.squareStieltjes` is the supplementary direct-mesh view: it evaluates
@@ -670,8 +1134,27 @@ encloses those even prefixes in valid nested complex boxes, and
 `rotationExpRaw_width_le_geometric` bounds both coordinate widths by
 `8 * rotationTailMagnitude T 0 * (1/2)^n`. This is a certified complex
 series computation at rational `i*T`; `rotationCosRaw` and `rotationSinRaw`
-are its valid coordinate raw reals. It is not yet a summed continuous matrix
-series, geometric trigonometry, or Euler identity.
+are its valid coordinate raw reals. `RotationCalculus` additionally turns the
+shared bounded-input prefix and its `16 * |x-y|` box transport into literal
+rational epsilon--delta continuity for each coordinate on `[-2,2]`.
+`RotationDerivative.uniformRotationSinOnTwo_hasDerivativeOnInterval` now
+adds the full raw interval derivative `sin' = cos` for that same
+common-prefix chart, and
+`RotationDerivative.uniformRotationCosOnTwo_hasDerivativeOnInterval` adds
+`cos' = -sin`. `RotationInitialValues.uniformRotationOnTwo_rotationInitialCertificate`
+also packages the literal boxes `C(0)=1`, `S(0)=0` with those derivatives.
+On the geometric side,
+`GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` now
+certifies the rational chart on `[0,1]` as
+`P' = (2 i / (1+t*t)) P`, with `P(0)=1` and `P(1)=i`, coordinate by
+coordinate.  `SectorAreaReparametrization.angleOnUnit_hasDerivative` now
+also certifies the represented sector-time coordinate
+`Theta(t) = 2 * arctan.rectangle(t)` with
+`Theta' = 2/(1+t*t)`, and
+`angleAt_equiv_two_arctanGeom` identifies its rational samples with the
+geometric angle. It is not yet a summed continuous matrix series, an inverse
+sector-area reparametrization of the curve, geometric trigonometry, or Euler
+identity.
 
 This is ideal for proving identities about a *given rational discretization*.
 It is not yet a theorem that a continuous ODE has a solution represented by a

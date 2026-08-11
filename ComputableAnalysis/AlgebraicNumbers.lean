@@ -261,6 +261,55 @@ def IsPrimitiveNthRoot (n : Nat) (z : QComplex) : Prop :=
   IsNthRoot n z /\
     forall k : Nat, 0 < k -> k < n -> qpow z k != QComplex.one
 
+/-! Coordinatewise conjugation is a finite operation on rational complex data.
+The following certificate records the root-pair symmetry of `X^n - 1` without
+selecting any non-rational root or invoking a general closure theorem. -/
+
+def conjugate (z : QComplex) : QComplex :=
+  { re := z.re, im := -z.im }
+
+theorem qpow_conjugate (z : QComplex) (n : Nat) :
+    qpow (conjugate z) n = conjugate (qpow z n) := by
+  induction n with
+  | zero =>
+      simp [qpow, conjugate, QComplex.one]
+  | succ n ih =>
+      rw [qpow, ih, qpow]
+      cases z with
+      | mk re im =>
+          cases hpow : qpow { re := re, im := im } n with
+          | mk pre pim =>
+              simp [conjugate, QComplex.mul]
+              grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+                Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem isNthRoot_conjugate {n : Nat} {z : QComplex}
+    (hz : IsNthRoot n z) : IsNthRoot n (conjugate z) := by
+  unfold IsNthRoot at *
+  rw [qpow_conjugate, hz]
+  simp [conjugate, QComplex.one]
+
+theorem qpow_mul (z w : QComplex) (n : Nat) :
+    qpow (QComplex.mul z w) n =
+      QComplex.mul (qpow z n) (qpow w n) := by
+  induction n with
+  | zero =>
+      simp [qpow, QComplex.one, QComplex.mul]
+      grind
+  | succ n ih =>
+      rw [qpow, ih, qpow, qpow]
+      simp only [QComplex.mul]
+      grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+        Rat.add_assoc, Rat.add_comm]
+
+theorem isNthRoot_mul {n : Nat} {z w : QComplex}
+    (hz : IsNthRoot n z) (hw : IsNthRoot n w) :
+    IsNthRoot n (QComplex.mul z w) := by
+  unfold IsNthRoot at *
+  rw [qpow_mul, hz, hw]
+  simp [QComplex.one, QComplex.mul]
+  grind
+
 theorem polynomial_nonzero {n : Nat} (hn : 0 < n) :
     RatPoly.Nonzero (polynomial n) := by
   cases n with
@@ -349,6 +398,18 @@ def exactRoot (n : Nat) (hn : 0 < n)
     simpa [exactAlgebraic]
       using (exactRoot_is_computable (coeffs := RatPoly.toComplexCoeffs (polynomial n)) (z := z)
         (exact_root_polynomial hz))
+
+/-- Multiplication of two certified `n`th roots stays certified by the same
+`X^n - 1` annihilator.  This is a finite closure certificate for a concrete
+algebraic operation; it does not choose a root or assert general FTA. -/
+def exactRoot_mul (n : Nat) (hn : 0 < n)
+    (z w : QComplex) (hz : IsNthRoot n z) (hw : IsNthRoot n w) : Root :=
+  exactRoot n hn (QComplex.mul z w) (isNthRoot_mul hz hw)
+
+/-- Package the conjugate root in the same finite `X^n - 1` witness. -/
+def exactRoot_conjugate (n : Nat) (hn : 0 < n)
+    (z : QComplex) (hz : IsNthRoot n z) : Root :=
+  exactRoot n hn (conjugate z) (isNthRoot_conjugate hz)
 
 def unity : Root :=
   exactRoot 1 (by native_decide) QComplex.one

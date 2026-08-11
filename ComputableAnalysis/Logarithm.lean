@@ -1089,6 +1089,19 @@ theorem logTwoSquareStieltjesCandidateCompute_width (stage : Nat) :
   rw [hzero]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+/-- A reusable finite error-budget interface for the square-mesh evaluator.
+
+Given a rational tolerance and a checked dyadic-stage budget, this turns the
+literal finite width computation into the bound consumed by downstream
+certificates.  The hypothesis is itself a finite rational inequality; no
+completed logarithm or limiting identity is involved. -/
+theorem logTwoSquareStieltjesCandidateCompute_width_le_of_budget
+    (stage : Nat) (eps : Rat)
+    (hbudget : 8 * (1 / (((2 ^ stage : Nat) : Rat))) <= eps) :
+    (logTwoSquareStieltjesCandidateCompute stage).width <= eps := by
+  rw [logTwoSquareStieltjesCandidateCompute_width]
+  exact hbudget
+
 /-- The wider candidate still has an executable shrink modulus: its width is
 twice the certified pullback-integral width at the same dyadic stage. -/
 theorem logTwoSquareStieltjesCandidate_widthsShrink :
@@ -2144,6 +2157,91 @@ private theorem harmonicSum_double_succ (n : Nat) :
         1 / ((2 * n + 2 : Nat) : Rat) := by
   have hindex : 2 * (n + 1) = (2 * n + 1) + 1 := by omega
   rw [hindex, harmonicSum_succ, harmonicSum_succ]
+
+private theorem reciprocal_pair_lower (n : Nat) :
+    1 / ((n + 1 : Nat) : Rat) <=
+      1 / ((2 * n + 1 : Nat) : Rat) +
+        1 / ((2 * n + 2 : Nat) : Rat) := by
+  have hb : 0 < ((2 * n + 1 : Nat) : Rat) := by
+    exact_mod_cast (by omega : 0 < 2 * n + 1)
+  have hc : 0 < ((2 * n + 2 : Nat) : Rat) := by
+    exact_mod_cast (by omega : 0 < 2 * n + 2)
+  have horder : ((2 * n + 1 : Nat) : Rat) <=
+      ((2 * n + 2 : Nat) : Rat) := by exact_mod_cast (by omega)
+  have hmono := one_div_antitone_of_pos hb horder
+  have hhalf : 1 / ((n + 1 : Nat) : Rat) / 2 =
+      1 / ((2 * n + 2 : Nat) : Rat) := by
+    have hsplit := one_div_nat_succ_eq_two_half_terms n
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm, Rat.add_assoc,
+      Rat.add_comm]
+  rw [← hhalf] at hmono
+  grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+theorem harmonicSum_double_lower (n : Nat) (hn : 0 < n) :
+    harmonicSum n + 1 / 2 <= harmonicSum (2 * n) := by
+  induction n with
+  | zero => omega
+  | succ n ih =>
+      by_cases hnzero : n = 0
+      · subst n
+        native_decide
+      · have hprev := ih (by omega)
+        rw [harmonicSum_double_succ, harmonicSum_succ]
+        have hpair := reciprocal_pair_lower n
+        grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+theorem harmonicSum_two_pow_lower (k : Nat) :
+    (k : Rat) / 2 <= harmonicSum (2 ^ k) := by
+  induction k with
+  | zero => native_decide
+  | succ k ih =>
+      rw [Nat.pow_succ]
+      have hdouble := harmonicSum_double_lower (2 ^ k)
+        (Nat.two_pow_pos k)
+      grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
+/-- Every natural target is reached by a computable dyadic harmonic stage.
+
+This is the effective divergence form used by the project: it quantifies over
+finite targets and returns an explicit finite index, without introducing a
+completed infinite sum. -/
+theorem harmonicSum_two_pow_reaches (target : Nat) :
+    (target : Rat) <= harmonicSum (2 ^ (2 * target)) := by
+  have h := harmonicSum_two_pow_lower (2 * target)
+  calc
+    (target : Rat) = ((2 * target : Nat) : Rat) / 2 := by
+      rw [Rat.div_def]
+      push_cast
+      grind [Rat.mul_assoc]
+    _ <= harmonicSum (2 ^ (2 * target)) := h
+
+theorem harmonicSum_le_of_le {n m : Nat} (hnm : n <= m) :
+    harmonicSum n <= harmonicSum m := by
+  induction m generalizing n with
+  | zero =>
+      have hnzero : n = 0 := by omega
+      subst n
+      exact Rat.le_refl
+  | succ m ih =>
+      by_cases hlast : n = m + 1
+      · subst n
+        exact Rat.le_refl
+      · have hnm' : n <= m := by omega
+        calc
+          harmonicSum n <= harmonicSum m := ih hnm'
+          _ <= harmonicSum (m + 1) := by
+            rw [harmonicSum_succ]
+            have hpos : 0 <= 1 / ((m + 1 : Nat) : Rat) := by
+              rw [Rat.div_def, Rat.one_mul]
+              exact Rat.le_of_lt ((Rat.inv_pos).2
+                ((Rat.natCast_pos).2 (Nat.succ_pos m)))
+            grind
+
+theorem harmonicSum_two_pow_reaches_later
+    (target n : Nat) (hstage : 2 ^ (2 * target) <= n) :
+    (target : Rat) <= harmonicSum n := by
+  exact Rat.le_trans (harmonicSum_two_pow_reaches target)
+    (harmonicSum_le_of_le hstage)
 
 /-- The tail of a finite harmonic sum, written as an explicit finite list
 sum.  It is the combinatorial reindexing that turns `H_(2n)-H_n` into a

@@ -77,10 +77,12 @@ forced second-order oscillator that practitioners recognize, convert it to an
 inhomogeneous first-order vector system, construct its general solution by
 Peano--Baker plus Duhamel, and prove uniqueness by iterating the zero-initial
 Volterra identity until its explicit factorial bound is below any requested
-rational tolerance.  The familiar sine/cosine and exponential formulae are
-then recovered by that uniqueness theorem, rather than used as definitions.
-For the scalar `E' = E`, `E(0) = 1` specialization this identifies the
-power-series, repeated-multiplication, and inverse-logarithmic-integral
+rational tolerance.  The familiar sine/cosine formulae are then recovered by
+that vector uniqueness theorem, rather than used as definitions.  The scalar
+`E' = E`, `E(0) = 1` specialization is deliberately different: a direct
+finite rational mesh telescopes short-block estimates and repeatedly halves
+the error envelope, with no Peano--Baker or Picard iteration.  It identifies
+the power-series, repeated-multiplication, and inverse-logarithmic-integral
 exponentials once each has its own derivative certificate.  The resulting
 canonical positive inverse is the logarithm needed by the deliberately long
 arctangent integration-by-parts Pi route.  This is a dependency route for one
@@ -107,7 +109,7 @@ the gates have different dependencies and none can substitute for another.
 | Continuity and extension | `IntervalRegularOn.epsilonDeltaContinuous` gives literal rational $\varepsilon$--$\delta$ continuity; scheduled `sqrtOnUnit`, the non-exact rectangle arctangent, and the concrete \(x\arctan x\) derivative candidate now have checked executable `EffectiveModulusFor` schedules | Representation-respecting extension needs general closure theorems, beyond the current certified-extension interface |
 | Finite integration and FTC | Certified integral constructions, a reusable rational-Lipschitz Darboux constructor, exact finite integration-by-parts on arbitrary certified rational partitions, and a coordinate-by-monotone-path endpoint bracket with explicit mesh-times-variation error are checked; `TwoStageCandidateDerivativeFTC.stabilizedRaw` turns any two-stage certificate plus explicit width/radius schedules into a public integral construction, exercised by \(x\arctan x\) | Supply schedules for interval-regular derivatives, then bounded piecewise integration by parts and substitution |
 | Monotone inverse functions | Branch-local inverse API and bisection are checked; `sqrt` supplies the concrete unit-interval rational-target example | General represented targets, then sine/arcsine and exponential/logarithm branches |
-| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, the two-sided derivative and public FTC identity of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]`, and a direct nested repeated-multiplication representation of `e` are checked | Prove an analytic certificate that the chosen exponential has derivative itself and the log/exp identities |
+| Differentiated elementary functions | Formal power-series derivative table, two-sided finite product-error algebra, interval-valued affine/square examples, the rectangle arctangent certificate `d(arctan x)/dx = 1/(1+x*x)`, the two-sided derivative and public FTC identity of its actual product evaluator `d(x*arctan x)/dx = arctan x + x/(1+x*x)` on `[0,1]`, the common-prefix exponential certificate `E'=E, E(0)=1`, the common-prefix rotation IVP candidate `S'=C, C'=-S, C(0)=1, S(0)=0`, and a direct nested repeated-multiplication representation of `e` are checked | Transport derivatives across equivalent representations, then prove the log/exp identities |
 | Linear ODEs | Finite Peano--Baker, chronological products, discrete variation of constants, and a factorial-tail majorant with an explicit rational epsilon modulus are checked | Interval-matrix simplex integrals and componentwise boxes yielding continuous variation of constants—the constructive linear Picard--Lindelöf theorem |
 
 The Pi suite remains useful as a secondary release test: add a row only when
@@ -132,13 +134,14 @@ capability—not a percentage for the whole foundation.
 | --- | --- | --- |
 | finite Archimedean theorem | perimeter and area presentations agree | cross-fan: $w_n\le10/(n+1)$ |
 | arctangent power-series theorem | geometric and series presentations agree | Leibniz: $w_n=4/(4n+1)$ |
+| Machin's single power-series formula | $\pi=16\arctan_{\rm series}(1/5)-4\arctan_{\rm series}(1/239)$ agrees with geometric area pi | Machin: $w_n\le20/2^n$ |
 | arctangent integral evaluation | integral and series presentations agree | rectangle $\pi$ raw: $w_n\le16/(n+1)$ |
 | finite arctangent integration by parts | supplied unit-branch triangle/strip reindexing, product FTC, and reciprocal-log endpoint agree with area pi | literal runtime: $w_n\le52/2^n$ |
 | finite square substitution in the pi formula | the same supplied product endpoint plus the checked $t=x^2$ mesh correction and pullback integral agree with the reciprocal-log formula | square-pullback pi raw: $w_n\le56/2^n$ |
 | Cauchy integral evaluation | full-line integral and area presentations agree | Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | bounded symmetric Cauchy integral | public two-piece monotone assembly, with an increasing `[-1,0]` branch and a decreasing `[0,1]` branch | symmetric Cauchy $\pi$ raw: $w_n\le16/(n+1)$ |
 | reciprocal-quartic integral evaluation | quartic and Cauchy integral presentations agree | dyadic quadrature: $w_n=64/2^n$ |
-| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | The input $i\pi/2$ is now a certified raw box through `PiProofs.pi.imaginaryHalf`; the represented-input exponential modulus and geometric identification remain planned |
+| Euler identity and complex logarithm (target) | $\exp(i\pi/2)=i$ and $\pi=-2i\log(i)$, tying complex exp/log to the rotation system and ODE uniqueness | `PiProofs.pi.halfPi` is a certified real parameter with every box in $[1,2]$ and width at most $2/(n+1)$. It is formally bridged to `2 * arctan.geom(1)`, the normalized geometric quarter-turn raw, and the geometry-only `GeometricPiRotation.halfPi`; its `imaginaryHalf` embedding likewise agrees with the geometry-only imaginary input. The finite rational rotation prefixes are Lipschitz on that range, so their midpoint candidates stabilize to the valid represented complex raw `pi.halfPiRotation` with radius at most $32/(n+1)$. `halfPiRotation_equiv_geometricRotation` now transports the equivalent inputs through those stabilizations. The return $(-2i)(i\pi/2)=\pi$ and, conditionally on `log(i)=i\pi/2`, the literal product $(-2i)\log(i)=\pi$ are checked. The remaining route is the power-series-to-geometric-quarter-turn endpoint and the logarithm branch identification. |
 
 This deliberately does not measure the primary application gaps: an
 exponential raw with `d/dx exp = exp`, reusable derivative/FTC constructions,
@@ -163,8 +166,9 @@ with the reciprocal-log formula exercises the explicit `t = x*x` mesh
 correction.  Neither is presented as the completed general theorem.  The
 stronger canonical textbook form still follows the long
 elementary-function route: identify `log 2` with the inverse of the canonical
-exponential, use linear Peano--Baker/Picard--Lindelöf uniqueness to prove the
-exponential representations agree, then use
+exponential, use direct scalar finite-mesh uniqueness (not linear
+Peano--Baker/Picard--Lindelöf) to prove the exponential representations agree,
+then use
 `pi = 4 * integral_0^1(arctan x) + 2 * log 2`.  The positive bounded product
 representation itself is now checked, including the concrete domain-aware
 `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit` evaluator:

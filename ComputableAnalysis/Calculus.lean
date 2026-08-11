@@ -139,6 +139,27 @@ theorem productIncrement_decomposition
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
     Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+/-! The corresponding finite product transport for rational secant slopes. -/
+
+/-- A product secant is the endpoint-weighted sum of the two factor secants.
+
+This is the exact rational, finite-difference analogue of the product rule:
+the first factor is sampled at the left endpoint and the second at the right
+endpoint.  The positivity hypothesis records that the quotient is taken over
+an actual forward cell; no completed real or limiting argument is involved. -/
+theorem secantSlope_product_transport
+    {x y f0 f1 g0 g1 : Rat} (hxy : x < y) :
+    (f1 * g1 - f0 * g0) / (y - x) =
+      f0 * ((g1 - g0) / (y - x)) +
+        g1 * ((f1 - f0) / (y - x)) := by
+  have hden_pos : 0 < y - x := (Rat.lt_iff_sub_pos x y).mp hxy
+  have hden : y - x ≠ 0 := Rat.ne_of_gt hden_pos
+  have hden_inv : (y - x) * (y - x)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (y - x) hden
+  rw [productIncrement_decomposition, Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.add_mul, Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+    Rat.add_assoc, Rat.add_comm]
+
 /-- Finite geometric integration by parts.  The two displayed sums tile the
 rectangle difference `f_n g_n-f_0 g_0`; on a subdivision `t_i` these are the
 samples `f(t_i)` and `g(t_i)`.  This is an exact rational identity, not a
@@ -205,6 +226,19 @@ theorem finiteIntegrationByParts_withVariation
         _ = f (n + 1) * g (n + 1) - f 0 * g 0 := by
             grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
               Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+theorem rightStieltjesSum_eq_left_swap_add_quadraticVariation
+    (f g : Nat -> Rat) (n : Nat) :
+    rightStieltjesSum f g n =
+      leftStieltjesSum g f n + quadraticVariationSum f g n := by
+  induction n with
+  | zero =>
+      grind [rightStieltjesSum, leftStieltjesSum, quadraticVariationSum]
+  | succ n ih =>
+      rw [rightStieltjesSum, leftStieltjesSum,
+        quadraticVariationSum, ih]
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
 /-- On an explicitly nondecreasing rational path, every endpoint displacement
 from the initial point is nonnegative.  This is the finite order fact used to
@@ -636,6 +670,19 @@ def add (f g : RealFunRaw) : RealFunRaw where
     let F := f.compute x n
     let G := g.compute x n
     { lo := F.lo + G.lo, hi := F.hi + G.hi }
+
+/-! Pointwise addition preserves the finite interval certificate interface. -/
+theorem add_valid {f g : RealFunRaw} (hf : f.Valid) (hg : g.Valid) :
+    (add f g).Valid := by
+  intro x hx
+  let X : RealRaw := { compute := f.compute x }
+  let Y : RealRaw := { compute := g.compute x }
+  have hX : X.Valid := by
+    simpa [X, RealRaw.Valid, RealFunRaw.applyCompute] using hf x hx.1
+  have hY : Y.Valid := by
+    simpa [Y, RealRaw.Valid, RealFunRaw.applyCompute] using hg x hx.2
+  have hsum : (X + Y).Valid := RealRaw.add_valid hX hY
+  simpa [add, X, Y, RealRaw.add, RealRaw.addCompute] using hsum
 
 def scaleRat (r : Rat) (f : RealFunRaw) : RealFunRaw where
   domain := f.domain
@@ -3961,6 +4008,47 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
         (evalInterval I hI n)
         (F.compute x hx n)
 
+/-- Exact constant functions satisfy the interval-regularity contract with a
+point-valued evaluator.  This is the first concrete bridge from the
+pointwise interval-function layer to the effective continuity/Riemann layer;
+no limit or completed-real argument is involved. -/
+def exactRat_constant_intervalRegularOn (c a b : Rat) :
+    IntervalRegularOn (FunctionOnInterval.exactRat (fun _ => c) a b) where
+  evalInterval := fun _I _hI _n => { lo := c, hi := c }
+  inputPrecision := fun _n => 1
+  inputPrecision_pos := by
+    intro n
+    omega
+  output_width := by
+    intro I hI n hsmall
+    simp only [QInterval.width, Rat.sub_self]
+    constructor
+    · exact Rat.le_refl
+    · exact Rat.le_of_lt (one_div_nat_pos (by omega))
+  contains_point_values := by
+    intro I hI x hx n hIlo hIhi
+    change QInterval.ContainsInterval
+      { lo := c, hi := c } { lo := c, hi := c }
+    exact ⟨Rat.le_refl, Rat.le_refl⟩
+
+/-- The same exact constant evaluator also satisfies the explicit modulus
+presentation used by effective continuity consumers. -/
+def exactRat_constant_effectiveModulusFor (c a b : Rat) :
+    EffectiveModulusFor (FunctionOnInterval.exactRat (fun _ => c) a b) where
+  inputPrecision := fun _n => 1
+  evalPrecision := fun _n => 0
+  close := by
+    intro x y n hx hy hxy
+    by_cases hn : n = 0
+    · simp [FunctionOnInterval.exactRat_compute, intervalNearAtPrecision,
+        QInterval.NearAt, QInterval.width, precisionAtStage, hn]
+      constructor <;> grind [Rat.sub_eq_add_neg]
+    · have hnonneg : 0 <= (1 / (n : Rat)) :=
+        Rat.le_of_lt (one_div_nat_pos (Nat.pos_of_ne_zero hn))
+      simp [FunctionOnInterval.exactRat_compute, intervalNearAtPrecision,
+        QInterval.NearAt, QInterval.width, precisionAtStage, hn]
+      constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-- An interval-regular evaluator supplies literal rational
 epsilon-delta continuity.  The output target at stage `n` is `1/(n+1)`, so
 stage zero is meaningful for non-exact interval algorithms.  The proof uses
@@ -4240,6 +4328,41 @@ structure MonotoneConstructionFor (F : FunctionOnInterval) where
   monotone : MonotoneOnInterval F
   construction : ConstructionFor F
 
+theorem exactRat_constant_nondecreasing (c a b : Rat) :
+    NondecreasingOnInterval
+      (FunctionOnInterval.exactRat (fun _ => c) a b) := by
+  intro x y hx hy hxy n
+  simp [FunctionOnInterval.exactRat_compute]
+
+theorem exactRat_affine_nondecreasing {r c a b : Rat} (hr : 0 <= r) :
+    NondecreasingOnInterval
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
+  intro x y hx hy hxy n
+  simp [FunctionOnInterval.exactRat_compute]
+  simpa only [Rat.add_comm] using
+    (Rat.add_le_add_left (c := c)).2
+      (Rat.mul_le_mul_of_nonneg_left hxy hr)
+
+theorem exactRat_affine_nonincreasing {r c a b : Rat} (hr : r <= 0) :
+    NonincreasingOnInterval
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
+  intro x y hx hy hxy n
+  simp [FunctionOnInterval.exactRat_compute]
+  have hmul := Rat.mul_le_mul_of_nonneg_left hxy (by grind : 0 <= -r)
+  have hneg := Rat.neg_le_neg hmul
+  simpa only [Rat.add_comm] using
+    (Rat.add_le_add_left (c := c)).2
+      (by grind [Rat.mul_neg, Rat.neg_mul] : r * y <= r * x)
+
+def constantMonotoneConstructionFor (c a b : Rat) :
+    MonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun _ => c) a b) where
+  monotone := MonotoneOnInterval.ofNondecreasing
+    (exactRat_constant_nondecreasing c a b)
+  construction :=
+    { compute := (RealRaw.ofRat ((b - a) * c)).compute
+      certificate := RealRaw.ofRat_valid ((b - a) * c) }
+
 namespace MonotoneConstructionFor
 
 def restrict {F : FunctionOnInterval}
@@ -4289,8 +4412,70 @@ theorem monotoneIntegralFor_valid (F : FunctionOnInterval)
     (monotoneIntegralFor F c).Valid :=
   integralFor_valid F c.construction
 
+theorem constantMonotoneIntegralFor_eq_ofRat (c a b : Rat) :
+    monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun _ => c) a b)
+      (constantMonotoneConstructionFor c a b) =
+      RealRaw.ofRat ((b - a) * c) := by
+  rfl
+
 def ExistsMonotoneConstructionFor (F : FunctionOnInterval) : Prop :=
   Nonempty (MonotoneConstructionFor F)
+
+theorem exists_constantMonotoneConstructionFor (c a b : Rat) :
+    ExistsMonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun _ => c) a b) := by
+  exact ⟨constantMonotoneConstructionFor c a b⟩
+
+def affineMonotoneConstructionFor {r c a b : Rat} (hr : 0 <= r) :
+    MonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) where
+  monotone := MonotoneOnInterval.ofNondecreasing
+    (exactRat_affine_nondecreasing hr)
+  construction :=
+    { compute :=
+        (RealRaw.ofRat
+          ((b - a) * (r * (a + b) / 2 + c))).compute
+      certificate := RealRaw.ofRat_valid
+        ((b - a) * (r * (a + b) / 2 + c)) }
+
+def affineMonotoneConstructionFor_of_nonpos {r c a b : Rat} (hr : r <= 0) :
+    MonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) where
+  monotone := MonotoneOnInterval.ofNonincreasing
+    (exactRat_affine_nonincreasing hr)
+  construction :=
+    { compute :=
+        (RealRaw.ofRat
+          ((b - a) * (r * (a + b) / 2 + c))).compute
+      certificate := RealRaw.ofRat_valid
+        ((b - a) * (r * (a + b) / 2 + c)) }
+
+theorem exists_affineMonotoneConstructionFor {r c a b : Rat} (hr : 0 <= r) :
+    ExistsMonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
+  exact ⟨affineMonotoneConstructionFor hr⟩
+
+theorem exists_affineMonotoneConstructionFor_of_nonpos
+    {r c a b : Rat} (hr : r <= 0) :
+    ExistsMonotoneConstructionFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
+  exact ⟨affineMonotoneConstructionFor_of_nonpos hr⟩
+
+theorem affineMonotoneIntegralFor_eq_ofRat {r c a b : Rat} (hr : 0 <= r) :
+    monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (affineMonotoneConstructionFor hr) =
+      RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
+  rfl
+
+theorem affineMonotoneIntegralFor_of_nonpos_eq_ofRat
+    {r c a b : Rat} (hr : r <= 0) :
+    monotoneIntegralFor
+      (FunctionOnInterval.exactRat (fun x => r * x + c) a b)
+      (affineMonotoneConstructionFor_of_nonpos hr) =
+      RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c)) := by
+  rfl
 
 def nondecreasingIntegralFor (F : FunctionOnInterval)
     (c : NondecreasingConstructionFor F) : RealRaw :=

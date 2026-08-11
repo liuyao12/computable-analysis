@@ -1,0 +1,1044 @@
+\chapter{Exponential and Logarithm}
+\label{ch:exponential-logarithm}
+
+This chapter develops exponential and logarithm after the integral and series
+chapters.  The intended order is important: the logarithmic-integral
+representation of exponential depends on Chapter~\ref{ch:integrals}, while the
+power-series representation depends on Chapter~\ref{ch:infinite-series}.
+The guiding sanity check is the same as for \(\pi\): independent computations
+of the same constant or function should be proved equivalent as raw reals.
+
+\section{Positive-base powers and the Euler base}
+
+\begin{definition}[Positive base and repeated multiplication]
+\label{def:positive-base-natural-powers}
+\lean{ComputableAnalysis.exp.PositiveRealRaw.natPow}
+\lean{ComputableAnalysis.exp.PositiveRealRaw.natPow_valid}
+\lean{ComputableAnalysis.exp.PositiveRealRaw.natPowPositive}
+\uses{def:raw-real}
+A positive computable real is represented by a valid raw real together with
+one positive rational lower bound that holds for every interval stage.  This
+is the constructive positivity condition needed to make powers meaningful;
+it does not appeal to an unrepresented completed real line.
+
+For any such base \(b\), natural powers are defined by repeated
+multiplication:
+\[
+ b^0=1,\qquad b^{n+1}=b^n b.
+\]
+The raw interval multiplication is the same finite rational interval
+arithmetic used throughout the foundation.  Thus this definition works for
+an arbitrary positive computable real base, not merely for a rational base.
+Lean now proves the resulting raw evaluator valid at every natural exponent.
+More precisely, if \(\ell>0\) is the supplied lower bound and \(U\) is the
+upper endpoint of the initial interval, then every stage of \(b^n\) lies in
+\[
+  [\ell^n,U^n].
+\]
+Thus repeated multiplication returns another positive computable real, via
+\code{PositiveRealRaw.natPowPositive}, rather than merely a syntactic raw
+algorithm.  This is the checked natural-exponent base of the later rational
+root construction; it does not pretend that arbitrary roots have already
+been constructed.
+\end{definition}
+
+\begin{definition}[Rational powers]
+\label{def:rational-powers}
+\lean{ComputableAnalysis.exp.RationalPowerExtension}
+\uses{def:positive-base-natural-powers}
+A rational-power extension for \(b\) supplies a valid positive raw real
+\(b^q\) for every \(q\in\mathbb Q\), with a certified positive rational
+lower bound at every interval stage; it agrees with repeated multiplication
+at natural exponents and satisfies
+\[
+ b^{p+q}=b^p b^q.
+\]
+For \(p\in\mathbb N\) and \(q>0\), its denominator law is the certified
+root equation
+\[
+ \left(b^{p/q}\right)^q=b^p.
+\]
+Negative rational exponents are then governed by the additive law.  This is
+an interface for a computation and its proof obligations: constructing the
+positive root algorithms and proving their validity remains explicit work,
+rather than being hidden in a completeness axiom.
+\end{definition}
+
+\begin{remark}[Continuity and extension from rational names]
+\label{rem:rational-power-continuity-extension}
+The Lean evaluator is presented on rational names, but this is not meant to
+restrict the mathematical domain of an exponential or power function.  The
+separate predicate
+\code{EpsilonDeltaContinuousOn} is the literal rational
+\(\varepsilon\)-\(\delta\) obligation: for every positive rational
+\(\varepsilon\), it supplies a positive rational \(\delta\) and an evaluation
+precision such that rational inputs within \(\delta\) have output boxes within
+\(\varepsilon\) of each other, each of width at most \(\varepsilon\).  The
+boxes need not overlap: nearby inputs of a nonconstant function can have
+distinct exact rational output values.  A rational-power exponential must
+carry this certificate on every rational interval.
+
+This is the data from which a later completion theorem may extend a continuous
+function from rational names to all computable real inputs, or, for the
+complex theory, to a specified open computable domain.  Discontinuous partial
+functions are not entitled to such an extension.  The extension construction
+itself remains later work; no topology or completeness theorem is used in the
+finite certificate stated here.
+\end{remark}
+
+\begin{definition}[Euler base from an exponential]
+\label{def:e-from-exponential-at-one}
+\lean{ComputableAnalysis.exp.ExponentialFunction.eAtOne}
+\uses{def:rational-powers}
+An exponential representation is a computational presentation at rational
+names that agrees with one rational-power extension and carries its
+continuity-in-exponent certificate.  Its Euler base is, by definition, its
+value at one:
+\[
+ e_E=E(1).
+\]
+This single definition applies to every eventual construction of the
+exponential function.  The power-series, compound-interest, and inverse-log
+constructions below are therefore intended to be compared as representatives
+of the same \(e_E\), not as unrelated constants.
+\end{definition}
+
+\begin{theorem}[Derivative characterizations of the Euler base]
+\label{thm:e-self-derivative-and-unit-slope}
+\uses{def:rational-powers,def:e-from-exponential-at-one}
+There are two complementary characterizations to prove constructively:
+\[
+ \frac{d}{dx}e^x=e^x,
+ \qquad
+ \left.\frac{d}{dx}b^x\right|_{x=0}=1
+ \Longleftrightarrow b=e.
+\]
+The first statement is represented by an interval-valued derivative
+certificate on each rational interval; the second uses rational difference
+quotients at zero.  Lean already proves the formal coefficient identity
+\(\exp' = \exp\).  The remaining analytic theorem is to turn the certified
+power-series tail bounds into the corresponding derivative certificate, whose
+finite-difference and derivative boxes are within the requested tolerance
+rather than required to overlap exactly, and then establish the displayed
+uniqueness statement by finite rational estimates.  Its evaluator schedule is
+allowed to depend on the rational basepoint and nonzero rational step as well
+as on the requested output precision: otherwise a fixed interval width would
+be magnified by division by an arbitrarily small step.  More generally, this is
+the scalar case of the linear Picard--Lindel\"of construction target in
+\cref{thm:linear-picard-lindelof}: the Peano--Baker series for the
+one-dimensional coefficient \(A=1\) provides the solution and its factorial
+tail, while the zero-initial homogeneous case proves uniqueness.  Lean now
+checks that exact zero-initial statement for every finite sampled recurrence.
+The continuous lift must still pass its bounded difference through the
+factorial tail schedule described in \cref{thm:linear-picard-lindelof}.
+Thus neither the existence construction nor the uniqueness argument needs
+completeness of an ambient real-number type.  A general nonlinear
+Picard--Lindel\"of theorem is a later extension requiring interval-certified
+Lipschitz maps and a separate contraction argument.
+\end{theorem}
+
+\begin{theorem}[Initial value of the two finite exponential evaluators]
+\label{thm:exponential-initial-value}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_zero_compute_eq}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_zero_valid}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_zero_equiv_one}
+\lean{ComputableAnalysis.ExpProofs.eulerCenter_zero}
+\lean{ComputableAnalysis.ExpProofs.expEuler_zero_equiv_one}
+\uses{def:positive-base-natural-powers}
+\leanok
+The two explicit rational algorithms already have the required initial
+condition.  For the power-series evaluator, every finite loop has processed
+the constant term and all later terms are literally zero at input \(0\).
+Thus its interval is exactly the rational point interval
+\[
+  \exp_{\mathrm{series}}(0)=[1,1]
+\]
+at every stage.  The repeated-multiplication evaluator has center
+\((1+0/m)^m=1\); its explicitly displayed radius remains, but its box
+overlaps the same point interval at every stage.  Lean records both facts as
+raw-real equivalences to \(1\), using only finite rational arithmetic.
+
+This is the initial-value part of the eventual theorem
+\(\exp'= \exp,\ \exp(0)=1\).  It is deliberately not presented as a
+derivative proof or as an identification of the series and Euler
+evaluators away from zero.
+\end{theorem}
+
+\begin{theorem}[Finite binomial bridge for Euler products]
+\label{thm:finite-euler-binomial-bridge}
+\lean{ComputableAnalysis.ExpProofs.fallingFactorialRat}
+\lean{ComputableAnalysis.ExpProofs.eulerBinomialTerm}
+\lean{ComputableAnalysis.ExpProofs.eulerBinomialPrefix}
+\lean{ComputableAnalysis.ExpProofs.euler_binomial_prefix_nat_expansion}
+\uses{def:positive-base-natural-powers}
+\leanok
+For a rational \(x\) and natural \(m\), Lean now proves the finite identity
+\[
+ (1+x)^m=
+ \sum_{k=0}^{m}
+   \frac{m(m-1)\cdots(m-k+1)}{k!}\,x^k.
+\]
+The sum is implemented as an explicitly recursive rational prefix, not
+imported as an analytic binomial theorem.  In particular, substituting
+\(x=1/m\) expresses the literal Euler product
+\(\left(1+1/m\right)^m\) in the same factorial coordinates used by the
+power-series evaluator.
+
+Lean now also checks the finite coefficient-loss estimate
+\[
+  0\le\frac1{k!}-\frac{m(m-1)\cdots(m-k+1)}{m^k k!}
+  \le\frac{k(k-1)}{2m\,k!},
+\]
+and sums it with the certified factorial tail.  At the square Euler mesh
+\(m=(n+1)^2\), its total \(3/m\) error fits inside the direct Euler radius
+\(8/(n+1)\).  This completes the raw-real equivalence
+\(e_{\mathrm{series}}\Equiv e_{\mathrm{compound}}\) without a limit theorem
+or completeness of a real-number type.
+\end{theorem}
+
+\section{Three definitions of \texorpdfstring{$e$}{e}}
+
+\begin{definition}[Power-series \texorpdfstring{$e$}{e}]
+\label{def:e-power-series}
+\lean{ComputableAnalysis.ePowerSeries}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_center_step_movement}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_widths_shrink}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeriesRate}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_valid}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eCompoundInterest}
+\uses{def:arctan-series}
+The power-series evaluator is now certified at \emph{every rational input}.
+For \(q\in\mathbb Q\), its stage \(n\) chooses the entirely computable prefix
+length
+\[
+  N_n=n+8+2\,|\operatorname{num}(q)|
+\]
+and encloses the finite sum through degree \(N_n-1\) by the usual rational
+geometric-tail radius.  Lean proves the resulting boxes nested and valid, not
+merely ordered.  Their public rate certificate is
+\[
+  \operatorname{width}(\exp_{\mathrm{series}}(q)_n)
+    \le4|t_{N_0}|\left(\frac12\right)^n,
+  \qquad t_N=\frac{q^N}{N!},
+\]
+where \(t_{N_0}\) is itself obtained by the finite rational loop.  The proof
+uses the fact that every later term ratio is at most \(1/2\); it invokes no
+completed real line or completeness principle.
+
+The same finite evaluator is now exposed as a total rational-input function
+with a checked rational-interval restriction.  This makes the valid boxes
+available to a derivative or ODE certificate without conflating this
+representation step with the still-open analytic theorem
+\(\exp'=\exp\).
+On every selected interval containing (0), Lean also transports the exact
+series value (1) to the function-level evaluator.  Thus its future ODE
+certificate already has the required domain, validity, and initial-value
+data; only the self-derivative field remains to be proved.
+
+The first constant definition is the specialization at \(1\):
+\[
+  e = \sum_{k=0}^{\infty}\frac{1}{k!}.
+\]
+The Lean raw representative is \code{ePowerSeries}.  Lean now identifies it
+with the compound-interest representative by a finite rational binomial
+coefficient comparison and an explicit factorial-tail budget.  This remains a
+constant-level agreement at input \(1\), not a proof of the analytic theorem
+\(\exp'=\exp\) for a rational-input function.
+\end{definition}
+
+\begin{definition}[Compound-interest \texorpdfstring{$e$}{e} intervals]
+\label{def:e-compound-interest}
+\lean{ComputableAnalysis.eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_compute_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_width_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_ordered}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_ordered}
+\lean{ComputableAnalysis.ExpProofs.ECompoundInterestStageBound}
+\lean{ComputableAnalysis.ExpProofs.ECompoundInterestNested}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_antitone_succ}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_le_four}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_eq}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_mono_succ}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_le_hi}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_lo_mono}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStage_hi_antitone}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_nested}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestStageBound_four}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_width_le_of_stageBound}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_widths_shrink_of_stageBound}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_widths_shrink}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid_of_nested_and_stageBound}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid_of_nested}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_valid}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_lower_bound_two}
+\lean{ComputableAnalysis.ExpProofs.ePositive}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower_valid}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower_lower_bound}
+\lean{ComputableAnalysis.ExpProofs.eNaturalPower_upper_bound}
+\uses{def:raw-real}
+The second definition uses the classical limit
+\[
+  e = \lim_{m\to\infty}\left(1+\frac1m\right)^m.
+\]
+At stage \(n\), let \(m=n+1\) and set
+\[
+  a_m=\left(1+\frac1m\right)^m,
+  \qquad
+  b_m=\left(1+\frac1m\right)^{m+1}.
+\]
+The finite interval is
+\[
+  [a_m,b_m].
+\]
+Lean verifies
+\[
+  b_m-a_m=\frac{a_m}{m}\ge0.
+\]
+\[
+  a_m\le a_{m+1}\le b_{m+1}\le b_m,\qquad
+  b_m\le4,\qquad a_m\le4.
+\]
+\[
+  b_m-a_m\le \frac4m\longrightarrow0.
+\]
+\code{eCompoundInterest} is a valid raw real.
+
+The checked lower sequence also starts at (2) and is nondecreasing, so Lean
+proves the uniform fact
+\[
+  2\le(e_{\mathrm{compound}})_n.\mathrm{lo}.
+\]
+It packages this particular certified representative as
+\code{ExpProofs.ePositive}, an instance of the general positive-base
+interface. Consequently literal repeated multiplication already supplies
+valid raw powers \code{ExpProofs.eNaturalPower} for every \(r\in\mathbb N\),
+with the fully explicit enclosure
+\[
+  2^r\le (e^r)_n.\mathrm{lo}\le(e^r)_n.\mathrm{hi}\le4^r.
+\]
+This is the checked natural-exponent portion of the requested positive-base
+exponential. It does \emph{not} construct positive rational roots or claim
+continuity in the exponent; those are still the explicit obligations of
+\cref{def:rational-powers,rem:rational-power-continuity-extension}.
+\end{definition}
+
+\begin{definition}[\texorpdfstring{$e$}{e} from the inverse logarithmic integral]
+\label{def:e-log-integral}
+\lean{ComputableAnalysis.exp.eFromLogIntegralBranchRaw}
+\uses{def:inverse-elementary-integral-identities}
+The third definition views exponential as the inverse of
+\[
+  \log x = \int_1^x \frac{dt}{t}
+\]
+on a positive branch.  Then \(e\) is the unique positive value whose
+logarithmic integral is \(1\).  Lean already packages finite branches of this
+construction as \code{LogIntegralInverseBranch}; evaluating such a branch at
+\(1\) gives \code{eFromLogIntegralBranchRaw}.
+\end{definition}
+
+\begin{theorem}[Agreement of the three \texorpdfstring{$e$}{e} definitions]
+\label{thm:e-three-way-agreement}
+\lean{ComputableAnalysis.ExpProofs.EThreeWayAgreement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eCompoundInterest}
+\uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:raw-equiv}
+The three raw representatives of \(e\) should be equivalent:
+\[
+  e_{\mathrm{series}} \Equiv e_{\mathrm{compound}}
+  \Equiv e_{\mathrm{log}^{-1}}.
+\]
+Lean now checks the power-series/compound-interest half directly.  The
+remaining logarithmic-integral bridge is an inverse-function theorem for the
+monotone integral of \(1/x\).  \code{EThreeWayRemainders} retains all three
+fields so a chosen log-inverse representative can be joined explicitly by
+\code{eThreeWayAgreement\_of\_remainders}.
+\end{theorem}
+
+\section{Exponential and logarithm}
+
+\begin{definition}[Exponential representations]
+\label{def:exp-representations}
+\lean{ComputableAnalysis.exp.realPowerSeries}
+\lean{ComputableAnalysis.exp.realEuler}
+\lean{ComputableAnalysis.exp.expFromLogIntegral}
+\lean{ComputableAnalysis.exp.representationsAgree}
+\lean{ComputableAnalysis.exp.representationsAgree_of_estimates}
+\lean{ComputableAnalysis.ExpProofs.EPowerSeriesRatioBound}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_ratio_bound}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_ratio_bound}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_tailRadius_nonneg}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_intervals_ordered}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_tailRadius_nonneg}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_ordered}
+\lean{ComputableAnalysis.ExpProofs.expPowerSeries_valid_of_nested_and_shrinking_autoRatio}
+\lean{ComputableAnalysis.ExpProofs.powerSeriesNested_of_centerMovement_autoRatio}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid_of_nested}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid_of_centerMovement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid_of_centerStepMovement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_center_step_movement}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_widths_shrink}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_valid}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eEulerNested}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_equiv_eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.EEulerEqCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eulerCenter_one_eq_compoundInterestStage_lo_square}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenter_mono}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenter_step_mono}
+\lean{ComputableAnalysis.ExpProofs.EEulerCenterForwardStepMovement}
+\lean{ComputableAnalysis.ExpProofs.EEulerCenterForwardStepMovementUpTo}
+\lean{ComputableAnalysis.ExpProofs.EEulerCenterStepMovementUpTo}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenter_reverse_step_bound}
+\lean{ComputableAnalysis.ExpProofs.eEuler_center_step_movement_of_forward_bound}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenterForwardStepMovementUpToFifty}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenterStepMovementUpTo_of_forward}
+\lean{ComputableAnalysis.ExpProofs.eEulerCenterStepMovementUpToFifty}
+\lean{ComputableAnalysis.ExpProofs.eEuler_eq_eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterest_eq_eEuler}
+\lean{ComputableAnalysis.ExpProofs.eEulerNestedRadius}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested_compute_eq}
+\lean{ComputableAnalysis.ExpProofs.eEulerNestedRadius_nonneg}
+\lean{ComputableAnalysis.ExpProofs.eEulerNestedRadius_antitone}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested_width_eq}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested_widths_shrink}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested_nested}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested_valid}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested_equiv_eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilizationRadius}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilizationRadius_covers_compoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilizationRadius_shrinks}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilized}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilized_valid}
+\lean{ComputableAnalysis.ExpProofs.eEuler_equiv_eEulerStabilized}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilized_equiv_eCompoundInterest}
+\lean{ComputableAnalysis.ExpProofs.eCertified}
+\lean{ComputableAnalysis.ExpProofs.e}
+\lean{ComputableAnalysis.ExpProofs.eEulerNested_mem_eCertified_alternatives}
+\lean{ComputableAnalysis.ExpProofs.eEulerStabilized_mem_eCertified_alternatives}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_mem_eCertified_alternatives}
+\lean{ComputableAnalysis.ExpProofs.eCompoundInterestRepresentation}
+\lean{ComputableAnalysis.ExpProofs.eRepeatedMultiplicationRepresentation}
+\lean{ComputableAnalysis.ExpProofs.eRepeatedMultiplicationStabilizedRepresentation}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeriesRepresentation}
+\lean{ComputableAnalysis.ExpProofs.ePowerSeries_eq_eCompoundInterest_of_complete}
+\lean{ComputableAnalysis.ExpProofs.ExpProofRemainders}
+\uses{def:e-power-series,def:e-compound-interest,def:e-log-integral,def:real-fun-raw}
+For general rational input, exponential has three representations: power
+series, Euler/compound-interest limit, and inverse logarithmic integral.  Each
+is an instance of \cref{def:real-fun-raw}: the stage algorithm sends \((x,n)\)
+to an interval or box enclosing the value of \(\exp(x)\), and for every fixed
+rational input in the representation domain the stages form a raw real.  The
+formal interface records agreement of these representations on common domains.
+\[
+  \frac{|x|}{N_n(x)+1}<1,\qquad
+  N_n(x)=n+8+2|\operatorname{num}(x)|.
+\]
+Thus the power-series ratio and order obligations are no longer remainder
+data.  Lean now also proves, for \(e_{\mathrm{series}}\), the center-step
+movement and shrinkage estimates, hence the power-series definition of \(e\)
+is a valid raw real:
+\[
+  e_{\mathrm{series}}.\Valid .
+\]
+Lean also proves that the Euler repeated-multiplication algorithm for \(e\)
+agrees with the verified compound-interest representative:
+\[
+  e_{\mathrm{Euler}}\Equiv e_{\mathrm{compound}}.
+\]
+It now exposes a certified direct repeated-multiplication view as well.  At
+stage \(n\), \code{eEulerNested} performs the single rational power
+\[
+  \left(1+\frac1{(n+1)^2}\right)^{(n+1)^2}
+\]
+and encloses it by the explicit radius \(8/(n+1)\).  Lean proves those boxes
+nested and shrinking, with width exactly \(16/(n+1)\), and proves them
+equivalent to \code{eCompoundInterest}.  The proof uses the sharp
+compound-interest interval only as an anchor: its width at the square stage
+fits inside the decrease of the displayed radius.  Thus
+\code{eRepeatedMultiplicationRepresentation} is a direct valid raw
+representative of \(e\), while \code{eEulerStabilized} remains available as
+an older prefix-normalized diagnostic representation.  This does not claim
+that the original narrower \code{eEuler} boxes have been proved nested.
+
+The center at stage \(n\) is the lower endpoint of the compound-interest
+interval at stage \((n+1)^2-1\), and compound-interest nesting supplies the
+same-stage overlap.  Lean also proves that these Euler centers are monotone, so
+the reverse half of the \emph{narrow} \code{eEuler} center-step movement estimate
+is automatic.  The new radius avoids relying on that remaining estimate.  For
+the original narrow boxes, validity is still reduced to the single forward
+estimate
+\[
+  c_{n+1}-c_n\le r_n-r_{n+1},
+\]
+and this forward estimate is checked through stage \(50\).  It remains a
+separate certification task for the deliberately narrower \code{eEuler}
+boxes.  It is no longer needed for the canonical constant: the finite
+coefficient/tail proof in \cref{thm:finite-euler-binomial-bridge} proves
+\[
+  e_{\mathrm{series}}\Equiv e_{\mathrm{EulerNested}}
+  \Equiv e_{\mathrm{compound}}.
+\]
+Accordingly \code{eCertified} now stores the factorial-series raw alongside
+both direct repeated-multiplication raws, and
+\code{ePowerSeriesRepresentation} exposes it to downstream formalizations.
+Only the inverse-logarithmic-integral agreement remains open.
+\end{definition}
+
+\begin{definition}[Logarithm]
+\label{def:logarithm-integral}
+\lean{ComputableAnalysis.exp.logFromIntegral}
+\uses{def:e-log-integral,def:real-fun-raw}
+The logarithm is first the positive-branch integral
+\[
+  \log x = \int_1^x \frac{dt}{t}.
+\]
+On any chosen positive branch this is a \code{FunctionOnInterval}, hence an
+instance of \cref{def:real-fun-raw}: for rational \(x\) in the branch interval
+and stage \(n\), the integral construction returns a rational interval, and for
+fixed \(x\) these intervals form a raw real.  Its inverse branch is
+exponential.  Later algebraic identities such as \(\log(xy)=\log x+\log y\)
+and \(\exp(x+y)=\exp(x)\exp(y)\) should be proved from uniqueness of the
+inverse and then transported between representations.
+\end{definition}
+
+\begin{proposition}[Positive reciprocal continuity at two]
+\label{prop:one-over-x-one-two-continuity}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_intervalRegular}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_epsilonDeltaContinuous}
+\uses{def:logarithm-integral}
+The kernel \(x\mapsto1/x\) on \([1,2]\) has a concrete interval evaluator:
+for a rational input interval \(I=[p,r]\subseteq[1,2]\), it returns
+\[
+ \left[\frac1r,\frac1p\right].
+\]
+It contains every exact rational point value in \(I\).  Its width is
+\[
+ \frac1p-\frac1r
+   =(r-p)\frac1{pr}\le r-p,
+\]
+so the input modulus \(r-p\le1/(n+1)\) produces an output box of width at
+most \(1/(n+1)\).  Lean therefore proves the literal rational
+\(\varepsilon\)--\(\delta\) continuity predicate for this kernel, without
+topology or real-number completeness.  This interval evaluator is a stronger
+domain-local continuity certificate than is needed for the first literal
+integral below.  Extending that integral construction to arbitrary
+\code{IntervalRegularOn} kernels remains later work.
+\end{proposition}
+
+\begin{definition}[Finite reciprocal Darboux integral at two]
+\label{def:log-two-reciprocal-darboux}
+\lean{ComputableAnalysis.Logarithm.logTwoKernel_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_width}
+\lean{ComputableAnalysis.Logarithm.logTwoReciprocalIntegral_valid}
+\uses{prop:one-over-x-one-two-continuity}
+Put \(g(t)=1/(1+t)\) on \([0,1]\), the affine translate of \(1/x\) on
+\([1,2]\).  Lean proves the entirely rational estimate
+
+\[
+ |g(s)-g(t)|\le |t-s|\qquad(0\le s,t\le1).
+\]
+
+For every rational kernel with a supplied natural Lipschitz constant \(L\),
+the generic constructor forms the lower and upper rectangles on each cell of
+the midpoint-refined dyadic mesh.  The resulting boxes are nested, valid raw
+real data, and have exact width
+\[
+ w_n=\frac{2L}{2^n}.
+\]
+For \(g\), the constant is \(L=1\); hence
+\code{logTwoReciprocalIntegral} is a genuine finite rectangle construction
+with \(w_n=2/2^n\).  It is the raw integral associated with
+\(\int_0^1dt/(1+t)=\int_1^2dx/x\), not a placeholder interface and not an
+appeal to a completed integral.  The change-of-variable and series comparison
+theorems are intentionally separate: this definition alone does not name the
+result \(\log 2\).
+\end{definition}
+
+\begin{definition}[The logarithmic series at two]
+\label{def:log-two-series}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries_valid}
+\uses{def:logarithm-integral}
+The alternating harmonic calculation gives a separate, fully certified raw
+real presentation
+\[
+  \log_{\mathrm{series}}2 :=
+    1-\frac12+\frac13-\frac14+\cdots.
+\]
+At stage \(n\), Lean uses the two adjacent paired partial sums as lower and
+upper rational endpoints.  They are nested and have the exact width
+\[
+  w_n=\frac{1}{2n+1},
+\]
+so in particular \(w_n\le 1/n\) for every positive stage.  This is a
+finite-rational convergence proof, with no appeal to a completed real line.
+\end{definition}
+
+\begin{proposition}[Finite logarithm-series/Riemann bridge]
+\label{prop:log-two-series-right-riemann}
+\lean{ComputableAnalysis.Logarithm.logTwoLo_eq_logTwoKernelRightRiemann}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_contains_uniformRightEndpointSum}
+\uses{def:log-two-series,def:log-two-reciprocal-darboux}
+\leanok
+For every positive integer \(n\), the lower endpoint of the alternating
+calculation is exactly the literal uniform right-endpoint Riemann sum
+\[
+  L_n
+  =\frac1n\sum_{k=0}^{n-1}
+    \frac1{1+(k+1)/n}.
+\]
+This is an equality of finite rational computations.  Lean first proves the
+harmonic normal form
+\(L_n=H_{2n}-H_n\), then reindexes the difference as
+\(\sum_{k<n}1/(n+k+1)\), and finally cancels the positive mesh factor in
+each summand.  It therefore supplies the series side of the intended
+logarithm integral identity without silently passing to a limit.
+\end{proposition}
+
+\begin{proposition}[Finite square-substitution bridge]
+\label{prop:log-two-square-substitution}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshStieltjesSum}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshWeightedSum}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshCorrection}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_substitution_identity}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMeshCorrection_le_one_div}
+\uses{def:log-two-reciprocal-darboux}
+\leanok
+Let \(x_k=k/n\) and \(g(t)=1/(1+t)\).  Lean now proves the literal
+finite rational identity
+\[
+ \sum_{k<n}g(x_k^2)(x_{k+1}^2-x_k^2)
+ =\sum_{k<n}\frac{2x_k}{n}g(x_k^2)+R_n,
+ \qquad 0\le R_n\le\frac1n
+\]
+for every positive \(n\).  The left side is the named left-endpoint
+Stieltjes sum for the path \(t=x^2\); the first term on the right is the
+ordinary left-mesh expression suggested by \(dt=2x\,dx\).  The correction is
+not discarded: its \(k\)-th exact contribution is
+\(g(x_k^2)/n^2\), the square part of
+\((x_k+1/n)^2-x_k^2\).  Positivity and \(g\le1\) give the displayed
+computable \(O(1/n)\) rate.
+
+This is the finite algebraic core of the endpoint bridge
+\(2\int_0^1x/(1+x^2)\,dx=\log2\).  It does not yet claim a general
+change-of-variables theorem or identify either finite sum with its raw
+integral: the necessary common-refinement/FTC promotion remains explicit.
+\end{proposition}
+
+\begin{theorem}[Certified square-pullback integral]
+\label{thm:log-two-square-pullback-integral}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullback_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareStieltjesRaw_equiv_pullbackIntegral}
+\lean{ComputableAnalysis.Logarithm.logTwoUniformLeftSquareBlocks_eq_uniformLeftEndpoint}
+\lean{ComputableAnalysis.Logarithm.logTwoSquareMesh_sub_uniformLeftEndpoint_bounds}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_equiv_reciprocalIntegral}
+\uses{prop:log-two-square-substitution}
+\leanok
+Put
+\[
+ h(x)=\frac{2x}{1+x^2}.
+\]
+Lean proves the rational factorization
+\[
+ h(s)-h(t)=
+ \frac{2(s-t)(1-st)}{(1+s^2)(1+t^2)}
+\]
+and hence the literal unit-interval Lipschitz bound
+\(\lvert h(s)-h(t)\rvert\le2\lvert s-t\rvert\).  The generic
+Lipschitz--Darboux constructor therefore supplies a valid raw integral
+\[
+  H=\int_0^1h(x)\,\dd x
+\]
+whose stage-\(n\) box has width exactly \(4/2^n\).
+
+The constructor now certifies both left- and right-endpoint uniform Riemann
+sums.  The checked finite identity of
+\cref{prop:log-two-square-substitution} identifies the left sum for \(h\)
+with the weighted square mesh.  Its nonnegative correction is at most
+\(1/2^n\), so the widened finite Stieltjes box overlaps the certified
+pullback box at every stage.  Prefix stabilization yields the direct raw
+\code{logTwoSquareStieltjesRaw}, and Lean proves
+\[
+ \code{logTwoSquareStieltjesRaw}\Equiv H.
+\]
+Thus the square substitution is already an executable integral
+representation, not merely a formal differential mnemonic.
+
+The final common-refinement comparison is now checked.  The uniform
+\(n^2\)-mesh splits into the successive index blocks
+\[0^2,1^2),\ [1^2,2^2),\ \ldots,\ [(n-1)^2,n^2),
+\]
+with block \(k\) containing \(2k+1\) cells.  Kernel monotonicity and the
+unit-interval Lipschitz bound give a nonnegative block error at most
+\(4/n^2\), hence the exact aggregate rational bound
+\[
+  0\le S_n-U_{n^2}\le\frac4n,
+\]
+where \(S_n\) is the square Stieltjes sum and \(U_{n^2}\) the ordinary
+uniform left reciprocal sum.  Lean widens the direct Stieltjes candidate by
+that same rational budget, compares it at doubled dyadic stages with the
+existing reciprocal integral boxes, and prefix-stabilizes the identical
+finite evaluator.  Consequently it now proves
+\[
+  \code{logTwoSquareStieltjesRaw}
+  \Equiv H
+  \Equiv \int_0^1\frac{\dd t}{1+t}
+  =\code{logTwoReciprocalIntegral}.
+\]
+This is a specialized, completely finite change-of-variables theorem for
+\(t=x^2\), not an appeal to real completeness or a general substitution axiom.
+\end{theorem}
+
+\begin{theorem}[First arctangent--logarithm strip]
+\label{thm:arctan-log-first-strip}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_natScale}
+\lean{ComputableAnalysis.Logarithm.arctanLogKernel}
+\lean{ComputableAnalysis.Logarithm.arctanLogKernel_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.arctanLogKernelIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_compute_width}
+\lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral}
+\lean{ComputableAnalysis.Logarithm.two_arctanLogKernelIntegral_equiv_logTwoSeries}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_valid}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSeries_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegralRate}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_equiv_four_arctanGeom_one}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegralRate}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSeries_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogReciprocalIntegral_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.piTriangleLogSquareSubstitutionIntegral_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.pi.triangleLogSeries}
+\lean{ComputableAnalysis.PiProofs.pi.triangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
+\lean{ComputableAnalysis.PiProofs.pi.squareSubstitution}
+\uses{thm:log-two-square-pullback-integral}
+\leanok
+Put
+\[
+ K=\int_0^1\frac{x}{1+x^2}\,\dd x.
+\]
+This is now a literal certified integral, not merely the formal half of the
+square-substitution formula.  Lean defines its rational kernel as
+\code{arctanLogKernel}, proves the exact relation
+\[
+ \frac{2x}{1+x^2}=2\frac{x}{1+x^2},
+\]
+and obtains the unit Lipschitz bound for the latter kernel by dividing the
+checked two-Lipschitz pullback estimate by two.  The generic Darboux
+constructor therefore gives a valid raw integral \(K\).
+
+More strongly, the finite lower and upper Darboux sums themselves respect
+natural rational scaling.  At every common stage, Lean proves the literal box
+identity
+\[
+\left(\int_0^1\frac{2x}{1+x^2}\,\dd x\right)_n
+ =2K_n.
+\]
+The scaled-strip box has the explicit dyadic width
+\[
+  \operatorname{width}(2K_n)=\frac4{2^n},
+\]
+which Lean obtains from that literal box identity, not from an abstract
+linearity assertion.
+Combining this stagewise identity with the checked square substitution yields
+the natural endpoint theorem
+\[
+ 2K\Equiv\int_0^1\frac{\dd t}{1+t}
+   =\log_{\mathrm{rec}}2.
+\]
+Here \(\log_{\mathrm{rec}}2\) is the project's already checked reciprocal-
+integral representative.  Transporting it to the inverse of the canonical
+exponential remains the separate exp/log agreement theorem; no such
+identification is assumed here.
+
+The two independently executable endpoint calculations now have a direct
+comparison as well:
+\[
+  2K\Equiv\log_{\mathrm{series}}2.
+\]
+Its Lean proof composes the finite square-substitution/strip comparison with
+the separately checked alternating-series--reciprocal-integral comparison.
+This is useful evidence that the logarithmic term in the later pi formula is
+not tied to one quadrature presentation.  It still concerns only the rational
+name \(2\), rather than a function-level identification with the inverse of
+the canonical exponential.
+
+The bridge now also supplies a supplementary executable pi formula using the
+supplied finite-triangle arctangent integral
+\(\arctanintegraltriangle\) from
+\cref{thm:finite-uniform-triangle-reindexing}:
+\[
+ P_{\triangle,\log\mathrm{series}}
+ =4\arctanintegraltriangle+2\log_{\mathrm{series}}2.
+\]
+Lean first proves the specific finite integration-by-parts chain
+\[
+ P_{\triangle,\log\mathrm{series}}
+ \Equiv 4I_{x\arctan x}^{\mathrm{FTC}}
+ \Equiv 4\arctangeom(1).
+\]
+The first equivalence is
+\code{piTriangleLogSeries\_equiv\_four\_coordinateTimesArctanForwardTwoStageMonotoneIntegral}:
+it scales the separately checked triangle-plus-strip/product-FTC bridge, then
+uses the independently checked logarithm-series comparison.  The direct theorem
+\code{piTriangleLogSeries\_equiv\_four\_arctanGeom\_one} identifies this
+raw evaluator with \(4\arctangeom(1)\), and
+\code{PiProofs.piTriangleLogSeries\_equiv\_piCircleArea} records the full
+circle-area pi equivalence.  The abstract pi handle exposes it as
+\code{PiProofs.pi.triangleLogSeries}.  This is an executable cross-check of
+the triangle integral, strip, product-FTC, and logarithm-series algorithms.
+It remains the supplementary series variant.  Replacing its alternating
+logarithm by the directly equivalent reciprocal-integral logarithm gives the
+checked coverage view \code{pi.integrationByParts}: the concrete formula
+\(4\arctanintegraltriangle+2\log_{\mathrm{rec}}2\) is equivalent to area
+pi and its literal runtime satisfies \(w_n\le52/2^n\), via
+\code{Logarithm.piTriangleLogReciprocalIntegralRate}.  This finite bridge does
+not establish a general function-level integration-by-parts theorem or
+transport the logarithm to the canonical inverse-exponential presentation.
+
+Keeping the endpoint in its square-pullback form adds a distinct checked
+substitution bridge:
+\[
+ P_{\triangle,x^2}
+ =4\arctanintegraltriangle+
+   2\int_0^1\frac{2x}{1+x^2}\,\dd x
+ =4\arctanintegraltriangle+4K.
+\]
+Lean exposes this as \code{pi.squareSubstitution}.  The theorem
+\code{piTriangleLogSquareSubstitutionIntegral\_equiv\_piTriangleLogReciprocalIntegral}
+is precisely the finite \(t=x^2\) transport to the preceding reciprocal-log
+formula; the independent raw runtime satisfies \(w_n\le56/2^n\).  It is a
+concrete substitution regression, not yet a general change-of-variables
+theorem.
+\end{theorem}
+
+\begin{theorem}[Rational two-strip decomposition]
+\label{thm:arctan-log-two-strip-decomposition}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.compute_add}
+\lean{ComputableAnalysis.Logarithm.arctanComplementKernel}
+\lean{ComputableAnalysis.Logarithm.arctanComplementKernel_lipschitz_on_unit}
+\lean{ComputableAnalysis.Logarithm.arctanComplementKernelIntegral_valid}
+\lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_compute_eq_arctanKernel}
+\lean{ComputableAnalysis.Logarithm.arctanStripIntegrals_add_equiv_arctanKernelIntegral}
+\uses{thm:arctan-log-first-strip}
+\leanok
+Put
+\[
+  J=\int_0^1\frac{1-x}{1+x^2}\,\dd x,
+  \qquad
+  K=\int_0^1\frac{x}{1+x^2}\,\dd x.
+\]
+Both are now literal rational Lipschitz--Darboux constructions.  The second
+kernel has the already checked constant \(1\); Lean proves the direct
+factorization
+\[
+ \frac{1-s}{1+s^2}-\frac{1-t}{1+t^2}
+ =\frac{(t-s)(1+s+t-st)}{(1+s^2)(1+t^2)},
+\]
+which gives the first one the rational Lipschitz constant \(3\) on the unit
+interval.  Pointwise, the two strips satisfy
+\[
+  \frac{1-x}{1+x^2}+\frac{x}{1+x^2}=\frac1{1+x^2}.
+\]
+
+More importantly, this is not recorded merely as a prospective integral
+linearity rule.  The generic finite Darboux lower and upper boxes add
+exactly, stage by stage, so Lean proves that the raw sum \(J+K\) is the
+four-Lipschitz box for \(1/(1+x^2)\).  That box and the existing sharper
+two-Lipschitz arctangent-kernel box contain the same literal uniform left
+Riemann sum at every stage.  Consequently,
+\[
+  J+K\Equiv\int_0^1\frac{\dd x}{1+x^2}.
+\]
+
+The direct unit triangle construction now supplies that particular
+identification: \code{arctan.integral.triangle} (implemented by
+\code{arctanIntegralTriangle}) is a monotone integral construction for
+\code{arctan.integral.rectangle}, has the literal triangle mesh as its
+runtime, and is equivalent to \(J\).  Its theorem
+\code{arctanIntegralTriangle\_add\_logKernelIntegral\_equiv\_productIntegral}
+then proves the supplied integration-by-parts formula against the product-FTC
+integral.  This remains deliberately narrower than a general integration by
+parts theorem: it does not provide a reusable additivity rule for arbitrary
+integrals, a canonical logarithm, or a new pi-scoreboard row.
+\end{theorem}
+
+\begin{theorem}[Series equals the finite reciprocal integral]
+\label{thm:log-two-series-reciprocal-integral}
+\lean{ComputableAnalysis.Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower}
+\lean{ComputableAnalysis.Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral}
+\uses{prop:log-two-series-right-riemann,def:log-two-reciprocal-darboux}
+\leanok
+The two raw algorithms now agree:
+\[
+  \log_{\mathrm{series}}2
+    \Equiv \int_1^2\frac{\dd t}{t},
+\]
+where the right side means the literal translated reciprocal
+Lipschitz--Darboux construction of
+\cref{def:log-two-reciprocal-darboux}.  At dyadic stage \(k\), Lean first
+identifies the area-loop cells with the ordinary uniform \(2^k\)-mesh.  The
+generic lower/right/upper rectangle comparison encloses that right Riemann
+sum in the Darboux box, while the preceding proposition identifies the same
+sum with the alternating-series lower endpoint.  For arbitrary stages, both
+valid algorithms are compared at a common refinement; the elementary rational
+bound \(k+1\le2^k\) makes the dyadic mesh cofinal.  Thus this is a direct
+finite interval-overlap proof, without completeness, topology, or a general
+FTC axiom.
+
+This settles the concrete endpoint bridge at two.  Identifying this local
+integral raw with the inverse branch of the project's selected canonical
+exponential remains a separate, later log/exp theorem.
+\end{theorem}
+
+\begin{remark}[A deliberately long ODE--exponential--logarithm--pi route]
+\label{rem:ode-exp-log-pi-route}
+\uses{sec:ode-construction-identification-route,thm:linear-ode-elementary-function-agreement}
+The project should make one pi equivalence exercise the elementary-function
+and ODE layers rather than obtain every pi row from arctangent alone.
+\Cref{thm:linear-ode-elementary-function-agreement} gives the common
+identification principle: Peano--Baker first constructs a solution, and its
+factorial-tail uniqueness certificate then makes every representation with the
+same derivative and initial data agree with it.  The natural pi specialization
+is the integration-by-parts identity
+\[
+  \pi
+   =4\int_0^1\arctan(x)\,\dd x+2\log 2.
+\]
+Its intended proof order is:
+\begin{enumerate}
+  \item apply that theorem to \(f'=f,\ f(0)=1\).  Once the power-series,
+  Euler-limit, and inverse-logarithmic-integral exponentials all satisfy this
+  problem, uniqueness proves that the three exponential representations
+  agree;
+  \item use the inverse-function and FTC certificates to identify the
+  positive logarithmic integral with the inverse of that canonical
+  exponential.  The concrete finite comparison at two is already checked by
+  \cref{thm:log-two-series-reciprocal-integral}; transport that equality to
+  the resulting canonical \(\log 2\);
+  \item prove the arctangent derivative and instantiate the common
+  increasing/decreasing-piece integration-by-parts certificate of
+  \cref{thm:integration-by-parts-certificate}.  The rational
+  identity
+  \[
+    \int_0^1\arctan(x)\,\dd x
+      =\frac{\pi}{4}-\frac12\log 2
+  \]
+  follows from \((x\arctan x)'=\arctan x+x/(1+x^2)\), its finite
+  corner-rectangle schedule, and the logarithmic endpoint calculation.  The
+  latter is now the checked literal strip theorem
+  \cref{thm:arctan-log-first-strip}, built from the finite square-substitution
+  core in \cref{prop:log-two-square-substitution};
+  \item package the right-hand side as a valid raw pi evaluator and prove it
+  equivalent to the geometric circle-area presentation.
+\end{enumerate}
+Thus this one final equality deliberately depends on exp/log agreement and
+therefore on linear ODE uniqueness.  It is not currently a scoreboard cell:
+every arrow above must be a checked finite certificate first.  A later,
+strictly longer complex corroboration is
+\(\pi=-2i\log(i)\); it additionally needs extension from rational names to
+represented complex inputs and the agreement of the circular and exponential
+solutions of the \(2\)-dimensional rotation system.
+
+The formal interface now records this dependency directly: the exp/log
+comparison theorem has a Volterra specialization which applies the
+finite-tail uniqueness provider to the power-series and inverse-logarithm
+candidate certificates.  Consequently no ambient ODE uniqueness axiom is
+silently used in this route.  What remains is concrete and local: construct
+the provider from certified integral boxes, then supply the derivative and
+initial-value certificates for each proposed exponential.
+\end{remark}
+
+\section{Complex logarithm at \texorpdfstring{$i$}{i}}
+
+\begin{definition}[Logarithm from local power-series continuation]
+\label{def:complex-log-series-at-i}
+\uses{def:exp-representations,rem:holomorphic-branch-equivalence}
+The first complex route to \(\pi\) computes a branch of \(\log(i)\) by local
+power-series data.  One starts with the local inverse to the complex
+exponential, represented by rational complex boxes, and transports that branch
+from \(1\) to \(i\) through overlapping certified neighborhoods.  This should
+produce a raw complex number denoted informally by
+\[
+  \log_{\mathrm{series}}(i).
+\]
+The intended \(\pi\)-algorithm is the real value
+\[
+  -2i\,\log_{\mathrm{series}}(i).
+\]
+\end{definition}
+
+\begin{definition}[Logarithm from the path integral]
+\label{def:complex-log-path-integral-at-i}
+\uses{def:logarithm-integral,rem:complex-parameters}
+The second route defines the same branch value by the path integral
+\[
+  \log_{\mathrm{path}}(i)=\int_{\gamma}\frac{dz}{z},
+\]
+where \(\gamma\) is a certified polygonal or circular path from \(1\) to \(i\)
+avoiding \(0\).  The existing complex path-integral layer is designed to supply
+finite rational box sums for this construction.  The corresponding
+\(\pi\)-algorithm is
+\[
+  -2i\,\log_{\mathrm{path}}(i).
+\]
+\end{definition}
+
+\begin{definition}[Logarithm as an inverse exponential branch]
+\label{def:complex-log-inv-exp-at-i}
+\uses{def:exp-representations,thm:euler-identity}
+The third route treats \(\log(i)\) as the chosen inverse branch of complex
+exponential.  The branch condition selects the point on the imaginary axis in
+the first quadrant, and Euler's identity is the essential proof that this
+chosen inverse takes \(i\) to a quarter turn:
+\[
+  \exp\!\left(i\frac{\pi}{2}\right)=i.
+\]
+The induced \(\pi\)-algorithm is
+\[
+  -2i\,\log_{\mathrm{invexp}}(i).
+\]
+\end{definition}
+
+\begin{theorem}[Logarithm-at-\texorpdfstring{$i$}{i} pi routes]
+\label{thm:log-at-i-pi-routes}
+\uses{def:complex-log-series-at-i,def:complex-log-path-integral-at-i,def:complex-log-inv-exp-at-i,thm:euler-identity}
+Each construction above should be a verified raw complex number with the same
+chosen branch value at \(i\).  Once the three branch agreements are proved, the
+real raw numbers
+\[
+  -2i\,\log_{\mathrm{series}}(i),\qquad
+  -2i\,\log_{\mathrm{path}}(i),\qquad
+  -2i\,\log_{\mathrm{invexp}}(i)
+\]
+become three independent \(\pi\)-computations.  Their comparison with
+\code{piCircleArea} is meant to test both Euler's identity and the branch
+equivalence machinery for complex logarithm.
+\end{theorem}
+
+\section{Euler's identity}
+
+\begin{theorem}[Euler identity]
+\label{thm:euler-identity}
+\uses{def:geometric-sin-cos-functionraw,def:exp-representations}
+The exponential power series over rational complex boxes should agree with the
+geometric sine and cosine functions from Chapter~\ref{ch:rational-circle-trigonometry}:
+\[
+  \exp(i\theta)=\cos(\theta)+i\sin(\theta).
+\]
+With the normalized quarter-turn convention this is stated for rational
+\(t\), where \(\theta=t\pi/2\).  The proof route is to first prove the formal
+power-series identity, then use the already established agreement between
+power-series and geometric trigonometry.
+\end{theorem}

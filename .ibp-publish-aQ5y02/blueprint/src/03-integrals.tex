@@ -1,0 +1,3039 @@
+\chapter{Integrals}
+\label{ch:integrals}
+
+\section{Constructive Definite Integrals}
+
+This chapter is the comparison layer.  The trigonometric functions constructed
+in Chapter~\ref{ch:rational-circle-trigonometry} remain the geometric
+algorithms.  Integral formulas enter only after those algorithms exist, as
+theorems saying that a Riemann-sum algorithm computes the same raw real as an
+endpoint expression or an inverse branch.
+
+This is deliberately a \emph{certificate layer}, not a table of integrals.
+The foundation must prove general substitution and integration-by-parts
+theorems, with their domain, orientation, and endpoint hypotheses explicit.
+After that, a user or an LLM may recall or propose a primitive, a
+partial-fraction decomposition, or another familiar calculation; the kernel
+checks its finite algebra and the relevant derivative theorem.  A derivative
+identity alone does not establish a definite-integral formula: one still
+needs a certified integral and a general FTC/substitution/integration-by-parts
+bridge to its endpoint difference.  The finite integration-by-parts material
+below is retained as a pi benchmark for this general interface, not as a
+template for accumulating named integration recipes.
+
+\begin{definition}[Interval function as a total raw evaluator]
+\label{def:function-on-interval-to-realfunraw}
+\lean{ComputableAnalysis.FunctionOnInterval.toRealFunRaw}
+\lean{ComputableAnalysis.FunctionOnInterval.toRealFunRaw_valid}
+\uses{def:real-fun-raw}
+\leanok
+A function certified on a rational interval \([a,b]\) can be exposed as a
+\code{RealFunRaw} whose domain is exactly that interval.  The total
+\code{compute} field has a dummy value outside the interval, but every
+mathematical statement carries the domain proof, so only interval-certified
+evaluations are used.
+\end{definition}
+
+\begin{definition}[Definite integral identity package]
+\label{def:definite-integral-identity}
+\lean{ComputableAnalysis.Integral.ConstructionFor}
+\lean{ComputableAnalysis.Integral.integralFor}
+\lean{ComputableAnalysis.Integral.integralFor_compute_eq}
+\lean{ComputableAnalysis.Integral.integralFor_valid}
+\lean{ComputableAnalysis.riemannLeftInterval_point_eq}
+\lean{ComputableAnalysis.riemannLeftInterval_point_width_zero}
+\lean{ComputableAnalysis.Integral.staticDyadicSubdivisions}
+\lean{ComputableAnalysis.Integral.staticDyadicPlan}
+\lean{ComputableAnalysis.Integral.staticDyadicAlgorithm}
+\lean{ComputableAnalysis.Integral.LipschitzOnUnit}
+\lean{ComputableAnalysis.Integral.lipschitzLowerCell}
+\lean{ComputableAnalysis.Integral.lipschitzUpperCell}
+\lean{ComputableAnalysis.Integral.lipschitzCells_refine}
+\lean{ComputableAnalysis.Integral.DefiniteIdentity}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityOnInterval}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_valid}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.endpoint_formula}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.endpoint_raw_valid}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.transportConstruction}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_equiv_integral}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.toDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_valid}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.endpoint_formula}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_valid}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.endpoint_raw_valid}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.endpoint_formula}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.toDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.transportConstruction}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.ofDefiniteIdentityFor}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_equiv_integral}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.integral_le_of_endpoint_le}
+\lean{ComputableAnalysis.Integral.GeneralDefiniteIdentityFor.ofMonotone}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_effectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentity_of_staticDyadicEffectiveFTC_endpointAgreement}
+\uses{def:endpoint-diff}
+\leanok
+For raw functions \(f\) and \(F\), a definite integral identity over
+\([a,b]\) consists of:
+\begin{enumerate}
+  \item a certified Riemann-sum construction for \(f\) on \([a,b]\);
+  \item a validity proof for the endpoint-difference raw real \(F(b)-F(a)\);
+  \item an equivalence proof, in the raw-real overlap sense, between the
+  constructed integral and that endpoint difference.
+\end{enumerate}
+The interval version packages the same statement when \(f\) and \(F\) are
+already certified as \code{FunctionOnInterval}s.  The
+\code{DefiniteIdentityFor} variant is the same endpoint-difference interface
+for newer domain-aware \code{ConstructionFor} algorithms.  It is stable under
+replacing the construction by an equivalent integral computation, via
+\code{transportConstruction}, and two endpoint identities for the same
+integrand and primitive have equivalent integral raw reals.  The
+\code{MonotoneDefiniteIdentityFor} variant records the same endpoint identity
+when the integral side is explicitly supplied by a monotone construction, and
+forgets back to \code{DefiniteIdentityFor}.  The
+\code{GeneralDefiniteIdentityFor} variant records the endpoint identity for
+the public piecewise-monotone integral \code{generalIntegralFor}; a one-piece
+monotone endpoint identity promotes to it by \code{ofMonotone}.  It can also
+be transported across equivalent general constructions, forgotten back to the
+ordinary endpoint-identity interface, or built from an ordinary
+\code{DefiniteIdentityFor} together with an equivalent general construction.
+The endpoint-additivity, linearity, scalar, and order-transfer laws are
+available at the ordinary, monotone, and general-integral levels.
+
+The default finite mesh for ordinary definite integrals is static dyadic:
+stage \(n\) uses the equal subdivision of \([a,b]\) into \(2^n\) intervals.
+This is deliberately different from the dynamic subdivision in
+\(\arctangeom\), where the next partition is chosen by repeatedly
+refining the rational circle parameters already present in the sector
+algorithm.  When an FTC proof uses this default mesh, the bridge to endpoint
+identities is \code{definiteIdentity\_of\_staticDyadicEffectiveFTC}.
+
+For an exact rational density \(f\) on \([0,1]\), a nonnegative rational
+constant \(L\), and the finite estimate
+\(\lvert f(s)-f(t)\rvert\le L\lvert t-s\rvert\), the elementary cell
+brackets are
+\[
+ (r-p)\bigl(f(p)-L(r-p)\bigr),\qquad
+ (r-p)\bigl(f(p)+L(r-p)\bigr).
+\]
+Lean now proves once and for all that splitting \([p,r]\) at its rational
+midpoint raises the lower bracket and lowers the upper bracket.  This
+\code{lipschitzCells\_refine} theorem is finite rational algebra; concrete
+dyadic-integral constructions supply only their density-specific Lipschitz
+estimate and their partition bookkeeping.
+\end{definition}
+
+\begin{definition}[The constant-integrand algorithm]
+\label{def:constant-integral-construction}
+\lean{ComputableAnalysis.Integral.constantFunRaw}
+\lean{ComputableAnalysis.Integral.linearPrimitiveFunRaw}
+\lean{ComputableAnalysis.Integral.constantPlan}
+\lean{ComputableAnalysis.Integral.riemannLeftInterval_constant_one}
+\lean{ComputableAnalysis.Integral.constant_algorithm_compute}
+\lean{ComputableAnalysis.Integral.constantConstruction}
+\lean{ComputableAnalysis.Integral.constantIntegral_compute}
+\lean{ComputableAnalysis.Integral.constantIntegral_valid}
+\uses{def:definite-integral-identity}
+\leanok
+As a first completely checked integral construction, take the exact rational
+integrand \(x\mapsto c\).  The plan uses one subinterval and no evaluation
+refinement:
+\[
+  h=b-a,\qquad
+  L_1=\sum_{k<1} h\,c=(b-a)c.
+\]
+Since every stage returns the exact interval
+\(\bigl[(b-a)c,(b-a)c\bigr]\), the boxes are ordered, nested, and shrink
+immediately.  Lean packages this as a certified
+\code{Integral.Construction} for every rational \(a,b,c\).
+\end{definition}
+
+\begin{theorem}[Constant-integrand endpoint identity and algebra laws]
+\label{thm:constant-integral-endpoint-identity}
+\lean{ComputableAnalysis.Integral.endpointDifference_linearPrimitive_compute}
+\lean{ComputableAnalysis.Integral.constantPrimitiveEndpoint_valid}
+\lean{ComputableAnalysis.Integral.constant_integral_equiv_endpoint}
+\lean{ComputableAnalysis.Integral.constantDefiniteIdentity}
+\lean{ComputableAnalysis.Integral.constantIntegral_add_equiv}
+\lean{ComputableAnalysis.Integral.constantIntegral_scaleRat_equiv}
+\lean{ComputableAnalysis.Integral.constantIntegral_adjacent_additive}
+\uses{def:constant-integral-construction,def:definite-integral-identity}
+\leanok
+For the primitive \(F(x)=cx\), the endpoint-difference raw real computes
+\[
+  F(b)-F(a)=cb-ca.
+\]
+The constant-integrand construction computes \((b-a)c\), and Lean proves the
+two exact rational intervals overlap at every stage.  Thus the first
+\code{DefiniteIdentity} is fully formalized:
+\[
+  \int_a^b c\,\dd x \Equiv cb-ca.
+\]
+The same exact computation checks the first algebra laws: constant integrals
+respect addition, rational scalar multiplication, and adjacent-interval
+additivity.
+\end{theorem}
+
+\begin{theorem}[Finite geometric integration by parts]
+\label{thm:finite-geometric-integration-by-parts}
+\lean{ComputableAnalysis.leftStieltjesSum}
+\lean{ComputableAnalysis.rightStieltjesSum}
+\lean{ComputableAnalysis.quadraticVariationSum}
+\lean{ComputableAnalysis.productIncrement_decomposition}
+\lean{ComputableAnalysis.finiteIntegrationByParts}
+\lean{ComputableAnalysis.finiteIntegrationByParts_withVariation}
+\lean{ComputableAnalysis.endpointDifference_nonneg_of_step_nonnegative}
+\lean{ComputableAnalysis.quadraticVariationSum_nonneg_of_step_nonnegative}
+\lean{ComputableAnalysis.quadraticVariationSum_le_stepBound_mul_endpointDifference}
+\lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonnegative}
+\lean{ComputableAnalysis.quadraticVariationSum_neg_neg}
+\lean{ComputableAnalysis.quadraticVariationSum_le_endpointVariationProduct_of_step_nonpositive}
+\lean{ComputableAnalysis.quadraticVariationSum_eq_nat_mul_of_constant_steps}
+\lean{ComputableAnalysis.unitMeshPath}
+\lean{ComputableAnalysis.unitMeshPath_zero}
+\lean{ComputableAnalysis.unitMeshPath_endpoint}
+\lean{ComputableAnalysis.unitMeshPath_quadraticVariation}
+\lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_epsilon}
+\lean{ComputableAnalysis.unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference}
+\lean{ComputableAnalysis.mesh_refine_mul_right}
+\lean{ComputableAnalysis.dyadic_leftPoint_refines}
+\lean{ComputableAnalysis.dyadic_mesh_refines}
+\lean{ComputableAnalysis.RationalPartition.uniform}
+\lean{ComputableAnalysis.RationalPartition.uniform_refines_right}
+\lean{ComputableAnalysis.RationalPartition.uniform_refines_left}
+\lean{ComputableAnalysis.RationalPartition.Refines}
+\lean{ComputableAnalysis.RationalPartition.Refines.point_between_consecutive}
+\lean{ComputableAnalysis.RationalPartition.Refines.refl}
+\lean{ComputableAnalysis.RationalPartition.Refines.trans}
+\lean{ComputableAnalysis.RationalPartition.CommonRefinement}
+\lean{ComputableAnalysis.RationalPartition.uniformCommonRefinement}
+\lean{ComputableAnalysis.RationalPartition.insertPointValue}
+\lean{ComputableAnalysis.RationalPartition.locateInsertionCellAux}
+\lean{ComputableAnalysis.RationalPartition.locateInsertionCell}
+\lean{ComputableAnalysis.RationalPartition.locateInsertionCellAux_spec}
+\lean{ComputableAnalysis.RationalPartition.locateInsertionCell_spec}
+\lean{ComputableAnalysis.RationalPartition.insertPoint}
+\lean{ComputableAnalysis.RationalPartition.insertPoint_refines}
+\lean{ComputableAnalysis.RationalPartition.insertPointCommonRefinement}
+\lean{ComputableAnalysis.RationalPartition.insertLocatedPoint}
+\lean{ComputableAnalysis.RationalPartition.insertLocatedPoint_refines}
+\lean{ComputableAnalysis.RationalPartition.insertLocatedPointCommonRefinement}
+\lean{ComputableAnalysis.RationalPartition.InsertionChain}
+\lean{ComputableAnalysis.RationalPartition.InsertionChain.insertLocated}
+\lean{ComputableAnalysis.RationalPartition.insertionChainOfPointList}
+\lean{ComputableAnalysis.RationalPartition.ContainsPoint}
+\lean{ComputableAnalysis.RationalPartition.insertionChainOfPointList_contains}
+\lean{ComputableAnalysis.RationalPartition.firstOccurrence}
+\lean{ComputableAnalysis.RationalPartition.firstOccurrence_spec}
+\lean{ComputableAnalysis.RationalPartition.refinementIndex}
+\lean{ComputableAnalysis.RationalPartition.refinesOfContainsAllPoints}
+\lean{ComputableAnalysis.RationalPartition.breakpointList}
+\lean{ComputableAnalysis.RationalPartition.commonRefinementOfPartitions}
+\lean{ComputableAnalysis.RationalPartition.InsertionChain.refines}
+\lean{ComputableAnalysis.RationalPartition.InsertionChain.commonRefinement}
+\lean{ComputableAnalysis.RationalPartition.clampedPath}
+\lean{ComputableAnalysis.RationalPartition.MaxStepAtMost}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_step_nonnegative}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_step_le_of_maxStep}
+\lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_onPartition}
+\lean{ComputableAnalysis.RationalPartition.finiteIntegrationByParts_withVariation_onPartition}
+\lean{ComputableAnalysis.RationalPartition.coordinateIntegrationByParts_onPartition_endpoint_bracket}
+\lean{ComputableAnalysis.RationalPartition.uniform_maxStepAtMost_mesh}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference}
+\lean{ComputableAnalysis.RationalPartition.uniform_clampedPath_quadraticVariation_le_mesh_mul_endpointDifference}
+\lean{ComputableAnalysis.RationalPartition.clampedPath_quadraticVariation_le_endpointSquare}
+\lean{ComputableAnalysis.RealFunRaw.mul}
+\lean{ComputableAnalysis.RealFunRaw.mul_valid_of_nonneg_bounded}
+\uses{def:definite-integral-identity}
+\leanok
+For rational sequences \((u_i,v_i)\), one partition cell has the exact
+rectangle decomposition
+\[
+ u_{i+1}v_{i+1}-u_iv_i
+ =u_i(v_{i+1}-v_i)+v_{i+1}(u_{i+1}-u_i).
+\]
+Summing the cells gives the finite integration-by-parts identity
+\[
+\sum_{i<n}u_i\Delta v_i+
+\sum_{i<n}v_{i+1}\Delta u_i
+=u_nv_n-u_0v_0.
+\]
+Thus the proof is literally a tiling of the endpoint-product rectangle by
+two oriented strips.  If both sums use left endpoints, Lean also records the
+exact corner-area correction
+\[
+ \sum_{i<n}u_i\Delta v_i+
+ \sum_{i<n}v_i\Delta u_i+
+\sum_{i<n}\Delta u_i\Delta v_i
+=u_nv_n-u_0v_0.
+\]
+The same two identities are now exposed for every supplied
+\code{RationalPartition} of a rational interval: sample two rational-valued
+functions at its clamped breakpoints, and the right-hand side is exactly
+\(u(b)v(b)-u(a)v(a)\).  Thus later monotone-piece certificates work with the
+project's explicit common-refinement API rather than having to re-express an
+arbitrary partition as a bare natural-number path.
+On an increasing piece each corner rectangle is nonnegative.  If
+\(\Delta u_i\leq\delta\) on the chosen common refinement, Lean proves the
+sharp finite estimate
+\[
+  \sum_{i<n}\Delta u_i\Delta v_i
+  \leq\delta\,(v_n-v_0).
+\]
+It also proves the coarser endpoint-variation bound
+\[
+  \sum_{i<n}\Delta u_i\Delta v_i
+  \leq (u_n-u_0)(v_n-v_0).
+\]
+Negating both paths preserves the corner sum, giving the corresponding bound
+for two decreasing pieces.  Thus the needed increasing/decreasing split is
+explicit finite rational data rather than a hidden global variation theorem.
+There is already one complete mesh-vanishing schedule: for the unit mesh
+\(u_i=v_i=i/n\), the corner sum is exactly \(1/n\).  Given a positive rational
+\(\varepsilon\), the fully explicit choice
+\(n=\varepsilon.\mathrm{den}+1\) makes that rational corner sum at most
+\(\varepsilon\).  This illustrates the intended limit discipline without
+asserting the general product theorem.
+The first common-refinement interface is now checked for uniform rational
+grids: the \(mn\)-piece grid contains the \(m\)-piece grid at indices
+\(i\mapsto in\), and contains the \(n\)-piece grid at indices
+\(j\mapsto jm\).  Its fine width is exactly the old \(m\)-mesh width divided
+by \(n\).  Lean packages the two index maps as a
+\code{CommonRefinement} certificate; refinement maps have checked identity
+and composition operations.  This is enough for the dyadic meshes used by the
+present rectangle algorithms: stage \(n+1\) keeps the old point \(k\) at
+\(2k\) and halves the mesh exactly.  Synchronizing arbitrary finite rational
+breakpoint lists now has a checked insertion primitive: any rational point in
+a specified cell gives a refined partition and an explicit embedding of every
+old breakpoint.  The next step no longer needs a caller to supply that cell:
+\code{locateInsertionCell} performs a bounded left-to-right scan of the
+finite rational partition and proves that the chosen cell encloses the point.
+Thus \code{insertionChainOfPointList} turns any finite in-range rational list
+into explicit scan-and-insert data.  A finite \code{InsertionChain} composes
+such insertions, and its endpoint is a certified refinement of the initial
+list.  Moreover, every fine point between embedded consecutive coarse points
+is proved to stay inside that coarse cell, so local bounds transfer cell by
+cell.  The general merge is now checked as well.  Lean forms
+\code{breakpointList} for the right partition, inserts that finite list into
+the left partition, and uses a second bounded \code{firstOccurrence} scan to
+recover the monotone embedding of every right breakpoint.  The resulting
+\code{commonRefinementOfPartitions} carries both index embeddings.  It is a
+deterministic finite merge of the supplied ordered data; it intentionally
+retains duplicate breakpoints rather than optimizing to a minimal union.  The
+clamped breakpoint path is nondecreasing, and its corner sum is bounded by the
+square of the endpoint variation.  The maximum-increment premise is now
+connected directly to partition data.  The finite predicate
+\code{MaxStepAtMost} records a nonnegative rational cell-width cap, and
+\code{clampedPath\_step\_le\_of\_maxStep} extends it to every increment of
+the total clamped path, including its zero tail.  Therefore
+\code{clampedPath\_quadraticVariation\_le\_stepBound\_mul\_endpointDifference}
+proves, for any nondecreasing second rational path, that the corner correction
+is at most that cap times its endpoint variation.  Uniform partitions
+instantiate the cap by their literal mesh.  On the unit mesh,
+\code{unitMeshPath\_quadraticVariation\_le\_one\_div\_mul\_endpointDifference}
+gives the checked finite estimate
+\[
+ \sum_{i<n}\Delta_i x\,\Delta_i v
+ \leq \frac1n\bigl(v_n-v_0\bigr)
+\]
+for every nondecreasing sampled path \(v\).  This is exactly the coordinate
+side of the corner estimate needed for \(x\arctan x\); the remaining
+arctangent monotonicity certificate is deliberately separate.
+The finite ingredients are now combined for every supplied certified
+partition.  If its maximum step is at most \(\delta\) and the sampled path
+\(v(P_i)\) is nondecreasing, Lean proves the literal endpoint bracket
+\[
+ b v(b)-a v(a)-\delta\bigl(v(b)-v(a)\bigr)
+ \leq
+ \sum_i P_i\Delta v_i+\sum_i v_i\Delta P_i
+ \leq b v(b)-a v(a).
+\]
+This is
+\code{coordinateIntegrationByParts\_onPartition\_endpoint\_bracket}.
+It is the finite, monotone-piece integration-by-parts theorem required by the
+\(x\arctan x\) route; calling either strip an integral still requires its
+separate effective-FTC certificate.
+For the later integral theorem, functions are supplied on explicit increasing
+or decreasing pieces and the two decompositions are replaced by a common
+rational refinement.  The corner correction is then bounded piece by piece
+by their signed variations.  This is a finite interval estimate, not an
+appeal to completeness or an implicit choice of a variation decomposition.
+The product representation needed to promote the finite identity is kept
+separate from the product rule.  On \([0,1]\), let \(X(x)=[x,x]\) be the
+exact coordinate box and let \(A(x,n)=[A_{\mathrm{lo}}(x,n),A_{\mathrm{hi}}(x,n)]\) be the
+rectangle evaluator for arctangent.  Both factors have certified endpoints
+in \([0,1]\).  Hence their literal interval product has the monotone
+corner form
+\[
+  P(x,n)=[xA_{\mathrm{lo}}(x,n),\,xA_{\mathrm{hi}}(x,n)].
+\]
+More generally, a pointwise product of two nonnegative rational-input
+functions is valid when each value carries a positive rational upper bound;
+its width is controlled by the two factor widths and those bounds.  The Lean
+development instantiates
+this construction as the concrete function \(P=xA\) on the unit interval,
+and proves that its evaluator reduces to the displayed two-corner box.
+This is an evaluator-level representation of \(x\arctan x\).  Its concrete
+two-sided product derivative is now checked below.  The remaining work is the
+effective FTC/logarithm endpoint certificates required before the resulting
+pi formula is claimed.
+
+The next certificate begins with an exact finite identity, rather than with
+an assumed product rule.  For rational \(h\ne0\), write
+\(D_hU(x)=(U(x+h)-U(x))/h\).  Then
+\[
+  D_h(UV)(x)=U(x)D_hV(x)+V(x+h)D_hU(x)
+\]
+and, equivalently,
+\[
+  D_h(UV)(x)=U(x)D_hV(x)+V(x)D_hU(x)
+    +h\,D_hU(x)D_hV(x).
+\]
+Thus a constructive product-derivative certificate must provide finite
+enclosures for the two difference quotients and point values, a rational
+continuity budget to replace \(V(x+h)\) by \(V(x)\), and a bound making the
+displayed \(h\)-remainder smaller than its allocated error.  The concrete
+positive product below now supplies these data for \(x\arctan x\) and
+positive steps; no general product rule is inferred from the evaluator alone.
+
+More specifically, if \(U'\) and \(V'\) are the proposed derivatives and
+\(h\ge0\), the finite identity gives the rational error allocation
+\[
+\begin{aligned}
+ \left|D_h(UV)(x)-\bigl(U(x)V'(x)+V(x)U'(x)\bigr)\right|
+ &\leq |U(x)|\,|D_hV(x)-V'(x)| \\
+ &\quad+|V(x)|\,|D_hU(x)-U'(x)|
+   +h\,|D_hU(x)|\,|D_hV(x)|.
+\end{aligned}
+\]
+The three summands are respectively the two supplied derivative-error
+budgets and the corner-remainder budget.  This finite inequality is the
+formal hand-off from the product algebra to the interval-continuity
+certificate; it does not assert that any particular elementary function has
+already met those budgets.
+
+The interval derivative interface permits signed rational steps.  The same
+checked finite calculation therefore has the genuinely two-sided form with
+\(\lvert h\rvert\) in the final summand; the displayed \(h\ge0\) formula is
+its forward-mesh specialization.  This matters when a derivative certificate
+is stated using arbitrary nearby rational inputs rather than only a right
+difference quotient.
+
+For an inexact interval evaluator, the evaluation precision in that
+certificate must also be allowed to depend on the rational basepoint and
+nonzero step.  A stage selected only from the requested output precision has
+a fixed positive box width; after division by an arbitrarily smaller
+\(\lvert h\rvert\), it cannot certify a quotient error bound.  Thus the
+derivative interface uses a rational step-aware schedule
+\[
+  E(x,h,n)
+\]
+for the two function evaluations and the derivative evaluation at requested
+precision \(n\).  This is finite scheduling data, not a limit operation.
+Exact rational functions may take \(E\equiv0\), which is why the affine and
+quadratic regression examples retain their simple proofs.  The chart
+transport of \cref{prop:arctangent-tangent-chart-increment} is the first
+non-exact case that requires this dependence explicitly.
+
+The coordinate factor has now crossed the first of those obligations.  For
+an exact rational affine function \(L(x)=mx+c\), the singleton interval
+quotient is literally
+
+\[
+ \frac{[L(x+h),L(x+h)]-[L(x),L(x)]}{h}=[m,m]
+ \qquad(h\ne0).
+\]
+
+Thus the unit coordinate \(X(x)=x\) has a checked interval-valued derivative
+certificate \(X'=1\), not merely an informal differentiation rule.  Together
+with the checked arctangent derivative, this is the first component certificate
+used by the concrete forward product rule below.  A reusable two-sided product
+closure remains a later theorem.
+
+There is also a first non-affine regression case for the interval definition:
+\[
+ D_h(x^2)=2x+h.
+\]
+At precision \(n\), the certificate asks for
+\(\lvert h\rvert\) no larger than the rational stage tolerance itself.  The
+two singleton quotient and derivative boxes are then near at that precision.
+This verifies a real error budget in the definition, rather than only the
+zero-error affine case, while still using only rational arithmetic.
+\end{theorem}
+
+\begin{theorem}[Forward product rule for the rectangle arctangent]
+\label{thm:coordinate-arctangent-forward-product-rule}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeRaw_compute}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt}
+\uses{prop:arctangent-tangent-chart-quotient}
+\leanok
+Let \(P=xA\) be the positive interval product on \([0,1]\), where \(A\)
+is the rectangle arctangent.  Lean now proves, at every rational
+\(0\le x\le1\), the forward derivative certificate
+\[
+  P'_+(x)=A(x)+\frac{x}{1+x^2}.
+\]
+The right-hand side is itself a raw interval evaluator: at stage \(N\) it is
+the rectangle box for \(A(x)\) shifted by the exact rational value
+\(x/(1+x^2)\).
+
+The proof uses no unproved product rule.  For a positive step \(h\), put
+\(Q=D_hA(x)\).  At the same evaluation stage the literal product quotient
+has the exact endpoint identity
+\[
+ D_hP(x)=
+ \bigl[A_{\mathrm{hi}}(x)+(x+h)Q_{\mathrm{lo}},\,
+       A_{\mathrm{lo}}(x)+(x+h)Q_{\mathrm{hi}}\bigr].
+\]
+For requested precision \(n\), the product certificate requires
+\(h\le1/(72(n+1))\), calls the arctangent derivative at the finer precision
+\(m=8(n+1)\), and uses its step-aware rectangle stage.  The checked bounds
+\[
+  \varepsilon_m\le\varepsilon_n/8,
+  \qquad 2h\le\varepsilon_n/4,
+  \qquad 0<\frac1{1+x^2}\le1
+\]
+bound the two displayed endpoint errors and both interval widths by
+\(\varepsilon_n\).  In particular, this is an end-to-end derivative theorem
+for the actual inexact product evaluator, not merely the algebraic identity
+for exact functions.
+
+The next theorem supplies the negative-step reversal and derivative-box
+transport.  The effective FTC comparison remains a separate gate for
+integration by parts.
+\end{theorem}
+
+\begin{theorem}[Two-sided product rule for the rectangle arctangent]
+\label{thm:coordinate-arctangent-product-rule}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nonneg_bounded}
+\lean{ComputableAnalysis.IntegralIdentities.coordinate_integralKernel_nondecreasing_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_monotone}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative}
+\uses{thm:coordinate-arctangent-forward-product-rule,prop:arctangent-tangent-chart-quotient}
+\leanok
+Lean now proves the full interval derivative certificate on \([0,1]\):
+\[
+  \frac{\dd}{\dd x}\bigl(xA(x)\bigr)=A(x)+\frac{x}{1+x^2}.
+\]
+For a negative rational step \(h\), write \(k=-h>0\) and reverse the
+quotient based at \(x+h\).  The forward product certificate supplies its
+finite box there.  A second, finer arctangent quotient controls the movement
+of the rectangle box, while the rational Lipschitz estimate
+\[
+  \left|\frac1{1+y^2}-\frac1{1+x^2}\right|\le2|y-x|
+\]
+transports the exact \(x/(1+x^2)\) summand.  The checked step budget is
+\( |h|\le1/(648(n+1)) \); it leaves room for all box widths and transport
+errors at requested precision \(n\).  This is a concrete product theorem,
+not a general product-rule closure theorem.
+
+The same finite evaluator is now certified in the derivative-bound form used
+by the FTC layer: every stage box for the right-hand side lies in
+\([0,2]\).  This is a usable bound on the candidate derivative, not yet the
+common cell bound required by the effective FTC.  The explicit forward secant
+enclosure below supplies the other local half of that certificate.
+It is also weakly nondecreasing on the positive unit piece.  The only new
+algebraic summand is ordered by clearing positive denominators:
+\[
+ \frac{x}{1+x^2}\leq\frac{y}{1+y^2}
+ \quad\Longleftrightarrow\quad
+ 0\leq(y-x)(1-xy)
+ \qquad(0\leq x\leq y\leq1).
+\]
+Together with geometric monotonicity of the rectangle arctangent, this gives
+endpoint derivative ranges on each positive rational cell.  It is useful
+input for the later monotone-piece derivative-bound construction, while still
+not a substitute for its finite secant containment.
+
+Only the effective FTC connection from this derivative certificate to the
+already finite integration-by-parts rectangles remains for this calculus
+bridge.
+\end{theorem}
+
+\begin{theorem}[Finite triangle reindexing on a uniform mesh]
+\label{thm:finite-uniform-triangle-reindexing}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum_at_mesh}
+\lean{ComputableAnalysis.IntegralIdentities.LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTriangleCandidateCompute}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTriangleCandidate_overlaps_complementKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_valid}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTriangleRaw_equiv_complementKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleConstruction}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangleMonotoneConstruction}
+\lean{ComputableAnalysis.arctan.integral.triangle}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_valid}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_compute_eq}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_equiv_complementKernelIntegral}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_valid}
+\lean{ComputableAnalysis.Logarithm.arctanKernelTrianglePlusLog_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.Logarithm.arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral}
+\uses{thm:finite-geometric-integration-by-parts}
+\leanok
+Let \(n>0\), \(h=1/n\), and let \(f\) be any rational-valued function on
+the unit mesh.  Lean proves the literal finite identity
+\[
+ h\sum_{i=1}^{n}\left(h\sum_{j=0}^{i-1}f(jh)\right)
+ =h\sum_{j=0}^{n-1}(1-jh)f(jh).
+\]
+The left side is the outer right rectangle sum of the growing inner left
+rectangle sums; the right side assigns each inner rectangle to the remaining
+height of the unit square.  Thus it is a finite triangle/Fubini reindexing
+whose proof is exactly the finite integration-by-parts rectangle identity,
+not an appeal to a continuous Fubini theorem.
+
+This is the reusable mesh fact behind the unit-branch construction
+\(\int_0^1\int_0^x f(t)\,\dd t\,\dd x
+=\int_0^1(1-x)f(x)\,\dd x\).  On its own, the mesh identity does not state a
+general Fubini or effective-FTC theorem: identifying each growing inner sum
+with an elementary function remains a separate certificate.
+
+There is now also a certified raw representative for the literal left side
+when \(f(t)=1/(1+t^2)\).  At dyadic stage \(n\), it executes precisely the
+outer triangular sum above, returns its rational value as a singleton, and
+uses the public radius \(6/2^n\).  The finite-triangle theorem shows that
+this singleton lies in the same certified box as the complementary-strip
+integral
+\[
+ \int_0^1\frac{1-x}{1+x^2}\,\dd x.
+\]
+Consequently Lean proves a raw-real equivalence between the executable
+triangle representative and that strip.  This is progress toward the
+arctangent integration-by-parts row, with an explicit convergence rate.  The
+raw algorithm retains the transparent implementation name
+\code{arctanKernelTriangleRaw}.  Lean now also exposes the certified monotone
+function as \code{arctan.integral.rectangle}, and its resulting unit-interval
+construction as \code{arctan.integral.triangle} (implemented by the legacy
+name \code{arctanIntegralTriangle}).  Its
+finite triangle reindexing theorem is the explicit provenance of this
+integral construction; no general Fubini or integral-linearity axiom has
+been introduced.
+
+Writing \(\arctanintegraltriangle\) for this supplied unit integral
+construction, putting it beside the already certified logarithmic strip for
+\(x/(1+x^2)\) now gives a public finite-mesh bridge to the independently
+constructed product-FTC integral:
+\[
+ \arctanintegraltriangle+L_{x/(1+x^2)}
+ \Equiv I_{x\arctan x}^{\mathrm{FTC}}.
+\]
+Both sides are separately certified constructions and the proof compares
+them through \(\arctangeom(1)\); it does not assume additivity of arbitrary
+integrals.  This is a useful finite Fubini/strip computation and an explicit
+test case for the later logarithm route.  It is deliberately not yet called
+\(4\int\arctan+2\log 2\): the logarithm still needs its canonical
+exponential transport, and the triangle construction still needs a
+generalized effective-FTC theorem before it can be used as a schema beyond
+this supplied unit branch.
+\end{theorem}
+
+\section{A constructive integration-by-parts certificate}
+
+The finite rectangle theorem above is not merely motivational.  It fixes the
+interface for the first function-level integration-by-parts result, and makes
+clear which parts of the usual textbook proof must become finite certificates.
+This avoids accidentally obtaining the theorem from an unintroduced general
+FTC, a completeness argument, or an unbounded-variation assertion.
+
+\begin{definition}[Integration-by-parts certificate on rational pieces]
+\label{def:integration-by-parts-certificate}
+\uses{thm:finite-geometric-integration-by-parts,def:definite-integral-identity}
+Let \(a=b_0<\cdots<b_r=b\) be a supplied finite list of rational
+breakpoints.  On every piece \([b_j,b_{j+1}]\), an
+integration-by-parts certificate for raw functions \(U,V\) consists of the
+following explicit data.
+\begin{enumerate}
+  \item Certified integral constructions for the two ordinary integrands
+  \(U V'\) and \(U' V\), together with endpoint-difference certificates for
+  \(U\) and \(V\).  Here \(U'\) and \(V'\) name supplied derivative algorithms;
+  they are not values chosen by a hidden limiting operation.
+  \item A valid product raw function for \(UV\), with its rational bounds on
+  the piece.  The first implementation may use the already checked positive
+  bounded product interface; signed products are obtained later by an explicit
+  finite sign split, not by changing the meaning of multiplication.
+  \item A declared direction for each factor on the piece (increasing or
+  decreasing), a common rational-refinement procedure, and rational moduli
+  \(\omega_U,\omega_V\) such that every refined cell of mesh at most \(h\)
+  has first increments bounded by the corresponding modulus.  The finite
+  rectangle correction is then bounded using the signed endpoint variations
+  of that particular piece.
+  \item A computable schedule which refines until the sum of the product-box,
+  quadrature, and corner-rectangle error budgets is below a requested positive
+  rational epsilon.
+\end{enumerate}
+The certificate records its breakpoints and its error schedule as finite
+rational data.  It does not quantify over an unspecified ``partition fine
+enough'', and it does not require a global Jordan decomposition.
+\end{definition}
+
+\begin{theorem}[Integration by parts from the certificate: construction target]
+\label{thm:integration-by-parts-certificate}
+\uses{def:integration-by-parts-certificate}
+For an integration-by-parts certificate, the intended theorem is the raw-real
+equivalence
+\[
+ \int_a^b U(x)V'(x)\,\dd x
+ \Equiv U(b)V(b)-U(a)V(a)-\int_a^b U'(x)V(x)\,\dd x.
+\]
+At a common rational refinement \(P\), the only new term in the finite
+identity is the sum of corner rectangles.  On an increasing piece it has the
+literal bound
+\[
+ 0\leq \sum_{I\in P}\Delta_IU\,\Delta_IV
+ \leq \max_{I\in P}\Delta_IU\,\bigl(V(b_{j+1})-V(b_j)\bigr),
+\]
+when both factors are increasing.  The corresponding decreasing or mixed-sign
+formula uses the declared nonnegative signed endpoint variation on that piece.
+Thus the refinement schedule makes this term
+smaller than its allocated rational error budget.  The finite identities on
+the pieces telescope, and the supplied endpoint/product certificates compare
+the resulting boxes.  Showing overlap at every requested precision is exactly
+the required \code{RealRaw.Equiv} proof.
+
+This is a construction target, not yet a Lean theorem.  Its deliberately
+small first scope is bounded functions with finitely many rational monotone
+pieces; that includes the positive branch needed below and is already broad
+enough for many tabulated engineering kernels.  Extensions to arbitrary
+piecewise-continuous functions should be separate theorems with their own
+finite regularity certificates.
+\end{theorem}
+
+\begin{definition}[Finite arctangent endpoint-order certificate]
+\label{def:arctangent-sampled-monotonicity}
+\uses{thm:finite-geometric-integration-by-parts}
+The integration-by-parts route needs an order fact about the \emph{input} of
+arctangent which is distinct from the already used fact that its reciprocal
+kernel decreases as the integration variable increases.  For the rectangle
+presentation \(A(x)\) of arctangent on the unit branch, the first finite
+certificate is
+\[
+  0\leq x\leq y\leq1
+  \quad\Longrightarrow\quad
+  \operatorname{lo}(A(x,n))\leq\operatorname{hi}(A(y,n))
+  \qquad\text{for every stage }n.
+\]
+This is the box-valued, same-stage form of the statement that \(A\) is
+nondecreasing, and is the right statement for a rational-input
+\code{FunctionOnInterval}.  It should not be obtained by first assuming the
+derivative theorem and then appealing to a classical mean-value theorem.
+The endpoint-order portion is now a checked theorem for the rectangle
+algorithm and is packaged as a weak nondecreasing
+\code{FunctionOnInterval} witness.
+
+For the geometric rectangle algorithm the proof has a literal finite
+covering shape.  The stage-\(n\) cells for \([0,x]\) cover that interval;
+append the one rational cell \([x,y]\).  Positivity of
+\(1/(1+t^2)\) says that this extension cannot decrease the lower rectangle
+sum.  The extended cells and the stage-\(n\) cells for \([0,y]\) are two
+finite covers of the same interval, so the lower sum of the former is at
+most the upper sum of the latter.  Their composite is precisely the displayed
+box inequality.  Thus the certificate needs only rational covers and
+nonnegative rectangle areas, not a completed real line or a geometric
+sector-limit argument.
+
+This endpoint-order lemma is necessary but is intentionally not confused
+with the entire corner-error input.  For a particular common partition
+\(x_0<\cdots<x_m\), the integration-by-parts construction must additionally
+produce compatible rational sample boxes whose widths are charged to the
+global error budget, and whose selected comparison path is nondecreasing.
+That \emph{monotone sampling lift} is what permits
+\(\sum_i\Delta x_i\,\Delta v_i\) to use the finite corner bound.  Merely
+knowing that lower and upper endpoints at adjacent samples overlap in the
+correct direction does not license treating one arbitrary choice of endpoints
+as an exactly nondecreasing rational path.  On a fixed unit mesh the lift is
+now checked by the canonical cumulative lower envelope
+\[
+  v_i=\max_{0\leq j\leq i}\operatorname{lo}(A(x_j,n)).
+\]
+The weak box order says that every earlier lower endpoint is at most the
+upper endpoint of the current box.  Consequently \(v_i\) lies in the
+\(i\)-th box, while its definition makes the rational path
+nondecreasing.  The exact finite unit-mesh corner estimate therefore applies
+to these samples.  This construction deliberately rules out arbitrary
+endpoint choices.
+
+There are two independent finite precision knobs.  Given a positive rational
+\(\varepsilon\), take
+\[
+  m=\varepsilon.\mathrm{den}+1,
+  \qquad
+  r=4(\varepsilon.\mathrm{den}+1).
+\]
+Here \(m\) is the number of unit-mesh cells and \(r\) is the rectangle
+evaluation stage.  The canonical path starts at \(0\), remains at most
+\(1\), and therefore has corner correction at most \(1/m\leq\varepsilon\).
+Independently, every rectangle box at stage \(r\) has width at most
+\(4/(r+1)\leq\varepsilon\), so the selected rational sample is within
+\(\varepsilon\) of either endpoint of its own box.  These are checked
+finite inequalities, not an appeal to a limiting partition.
+
+The two left-endpoint strip sums are now instantiated with this particular
+coordinate path and this particular arctangent sample path.  Write
+\[
+ S_{m,r}
+ =\sum_{i<m}x_i(v_{i+1}-v_i)
+   +\sum_{i<m}v_i(x_{i+1}-x_i),
+ \qquad
+ C_{m,r}=\sum_{i<m}(x_{i+1}-x_i)(v_{i+1}-v_i).
+\]
+Lean proves the exact finite identity
+\[
+ S_{m,r}+C_{m,r}=v_m,
+\]
+because \(x_0=v_0=0\) and \(x_m=1\).  Its already checked nonnegative
+corner bound gives the stronger endpoint bracket
+\[
+ v_m-\frac1m\leq S_{m,r}\leq v_m,
+\]
+and the explicit choice \(m=\varepsilon.\mathrm{den}+1\) replaces
+\(1/m\) by \(\varepsilon\).  Thus the concrete rectangle route now has a
+full finite integration-by-parts mesh certificate, including its endpoint
+and convergence-rate budget; the two summands are not yet claimed to be
+definite integrals.  Promoting them separately still requires the effective
+FTC comparison certificates needed by the later integration-by-parts theorem.
+
+There is nevertheless a useful checked \emph{supplementary computation} at
+this finite stage.  At stage \(n\), form the point interval at
+\(S_{n+1,n}\), enlarge it by \(1/(n+1)\), and intersect the finite prefix of
+these direct intervals after widening the \(k\)-th one by the public radius
+\(4/(k+1)\).  The endpoint bracket supplies the first enlargement, while the
+already verified rectangle arctangent width supplies the second.  Thus the
+result is a valid raw representative equivalent to the rectangle computation
+of \(\arctan(1)\); its direct candidate has width exactly \(2/(n+1)\).
+Multiplying it by four gives a rate-certified regression evaluator for
+\(\pi\).  This does \emph{not} promote either strip sum to a definite integral
+and does not mark the arctangent--logarithm scoreboard row: its purpose is to
+keep the actual finite integration-by-parts algebra executable while the
+effective-FTC and canonical-logarithm bridges are developed.
+\end{definition}
+
+\begin{proposition}[Monotonicity and endpoint anchoring of the positive arctangent product]
+\label{prop:coordinate-arctangent-monotonicity}
+\uses{def:arctangent-sampled-monotonicity}
+\leanok
+On the unit branch, let \(A_n(x)=[L_n(x),U_n(x)]\) be the geometric
+arctangent box and let \(P_n(x)\) be the certified product box for
+\(x\arctan(x)\).  Its nonnegative endpoint form is
+\[
+  P_n(x)=[xL_n(x),xU_n(x)].
+\]
+For \(0\le x\le y\le1\), the checked weak endpoint order gives
+\(L_n(x)\le U_n(y)\), while both lower endpoints are nonnegative.  Hence
+\[
+  xL_n(x)\le yL_n(x)\le yU_n(y).
+\]
+Lean packages this as a nondecreasing interval-function witness for the
+positive product branch \(x\arctan(x)\).
+
+The same explicit boxes also give the two endpoint facts needed by the
+finite rectangle identity:
+\[
+  P_n(0)=[0,0],
+  \qquad
+  P_n(1)=A_n(1).
+\]
+Consequently the endpoint-difference raw for this product on \([0,1]\) is a
+valid presentation equivalent to the geometric value
+\(\arctangeom(1)\).  This is boundary data only: it does not
+differentiate the product or identify an integral of the product with that
+endpoint difference.  The finite two-stage construction later in this
+chapter supplies both the product comparison and its public stabilized
+definite-integral packaging.
+\end{proposition}
+
+\begin{theorem}[Right derivative of the positive arctangent product at zero]
+\label{thm:coordinate-arctangent-forward-derivative-zero}
+\uses{prop:coordinate-arctangent-monotonicity,prop:arctangent-zero-tangent-bracket}
+\leanok
+The same positive product evaluator has a checked right derivative at the
+left endpoint:
+\[
+  \left.\frac{\dd}{\dd x}\bigl(x\arctan(x)\bigr)\right|_{0+}=0.
+\]
+This is proved directly from its finite boxes, rather than by invoking a
+general product rule.  If \(P_n(x)\) is the product box and \(0<h\le1\),
+then the exact rational interval calculation is
+\[
+  \frac{P_n(h)-P_n(0)}h=A_n(h).
+\]
+The lower endpoint of \(A_n(h)\) is nonnegative and its upper endpoint is at
+most \(h\).  Therefore, for \(0<h\le\varepsilon_n\), this quotient box is
+within the stage-\(n\) tolerance of \([0,0]\), and its width is at most that
+tolerance.
+
+This is an endpoint test of the concrete product representation and a
+genuine product-differentiation certificate at one boundary point.  It does
+not provide the two-sided derivative of the product at interior rational
+points, and so it is not the global product-derivative input required by
+integration by parts.
+\end{theorem}
+
+\begin{proposition}[Finite tangent-chart arctangent quotient]
+\label{prop:arctangent-tangent-chart-quotient}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_contains}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChartAreaLoopCompute_width_le_eps_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChart_transport_scaled_contains_chartQuotient_on_unit}
+\lean{ComputableAnalysis.ArctanGeometry.tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleTangentChartOnHalf_forwardDerivativeAtZero}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_forwardDerivativeAt}
+\lean{ComputableAnalysis.QInterval.differenceQuotient_reverse_of_pos}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_hasDerivative}
+Let \(0\le x\le1\), \(h>0\), and set
+\[
+ \tau=\frac{h}{1+x(x+h)},\qquad
+ \sigma=\frac1{1+x(x+h)}.
+\]
+For every rectangle stage \(n\), Lean now proves the literal interval
+enclosure
+\[
+ \frac{A_n(\tau)-A_n(0)}h
+ \ \subseteq\
+ [\,\sigma(1-\tau^2),\,\sigma\,],
+\]
+where \(A_n\) is the certified rectangle arctangent box.  This is not a
+formal rearrangement of a limit: it follows from the finite tangent box
+\([\,\tau-\tau^3,\tau\,]\) and the exact rational identity
+\(\tau/h=\sigma\).
+
+The strengthened checked enclosure combines this tangent box with the
+rational scale comparison \(0\le(1+x^2)^{-1}-\sigma\le h\):
+\[
+ \frac{A_n(\tau)-A_n(0)}h
+ \ \subseteq\
+ \left[\,\frac1{1+x^2}-(h+h^2),\,\frac1{1+x^2}\,\right].
+\]
+It holds at every rectangle stage \(n\), so this is already a genuine
+finite forward-quotient estimate with an explicit, stage-independent error
+modulus.  Lean now packages the resulting local statement as an actual
+forward derivative certificate.  On the increment interval \([0,1/2]\),
+put
+\[
+  T_x(h)=A\!\left(\frac{h}{1+x(x+h)}\right).
+\]
+Then
+\[
+  T_x'(0+)=\frac1{1+x^2}.
+\]
+For requested stage \(n\), the checked schedule takes
+\(0<h\le1/(2(n+1))\); the elementary rational estimate
+\(h+h^2\le\operatorname{precision}(n)\) closes all four interval-nearness
+obligations.  This is a derivative certificate for a real interval
+evaluator, not a statement about a limit in a completed function space.
+
+On the first half of the unit branch, tangent addition also gives the
+raw-real forward-difference identification
+\[
+\arctangeom(x+h)-\arctangeom(x)
+\Equiv\arctangeom(\tau).
+\]
+The finite transport has now been completed for the rectangle arctangent
+representation itself on the full unit branch.  For every rational
+\(0\le x<1\), Lean proves the nonvacuous forward certificate
+\[
+ A'(x)=\frac1{1+x^2},
+ \qquad A(x)=\int_0^x\frac{\dd t}{1+t^2},
+\]
+in the project's forward interval-derivative sense.  At requested stage
+\(n\), its evaluator chooses a finite chart/rectangle stage whose boxes have
+width at most \(h\operatorname{precision}(n)/16\).  The scaled transported
+chart interval contains the chart quotient and overlaps the ordinary endpoint
+quotient at that same stage; together with the \(h+h^2\) kernel error, these
+are a fully rational proof of the derivative certificate.
+
+The former half-unit restriction has been removed by a local finite estimate,
+not by a real-analysis extension theorem.  A chart cell based at \(x\) only
+needs the explicit pole-margin bound
+\[
+ x\,\tau(x,h)\le\frac12,
+\]
+which follows from \(x+h\le1\) and
+\(x(1-x)\le1/4\).  Lean proves that this bound gives the same factor-eight
+chart distortion and the same \(256/(n+1)\) transported width schedule as
+the old half-unit chart.  Thus the evaluator remains entirely rational and
+its precision still survives division by the positive step \(h\).
+
+The rectangle representative has now also crossed the two-sided step.  Lean
+packages it as a checked \code{HasDerivativeOnInterval} certificate on the
+entire rational unit branch:
+\[
+ A'(x)=\frac1{1+x^2}\qquad(0\le x\le1).
+\]
+For requested stage (n), it uses derivative stage (8(n+1)) and the
+signed-step budget (lvert hvertle1/(72(n+1))).  When (h<0), put
+(k=-h>0) and take the already checked positive quotient from the left
+endpoint (x+h).  The literal interval algebra is
+\[
+ \frac{A(x+h)-A(x)}{h}=
+ \frac{A(x)-A(x+h)}{k}.
+\]
+The kernel is rationally (2)-Lipschitz on the unit branch, so moving its
+value from (x+h) back to (x) costs at most (2k).  The selected schedule
+reserves that cost alongside the forward quotient box.  Thus the proof is a
+finite epsilon--delta argument over rational intervals, including the
+one-sided boundary cases, with no completeness or mean-value theorem.
+
+What remains for this route is the effective FTC certificate that turns the
+checked derivative into the required endpoint identity for integration by
+parts.  That bridge must preserve the requested quotient tolerance rather
+than merely assert equality of
+completed-real limits.
+\end{proposition}
+
+\begin{theorem}[Rational epsilon--delta continuity of the rectangle arctangent]
+\label{thm:arctangent-rectangle-epsilon-delta-continuity}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_valid_of_rightProduct_le_half}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_equiv_rectangleSub_of_lt}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_forward_difference_equiv_tangentChartIncrement}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_forward_lower_sub_upper_le_step}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_near_of_qabs_le}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleOnUnit_effectiveModulus}
+\uses{prop:arctangent-tangent-chart-quotient}
+\leanok
+Write \(A_n(x)\) for the concrete stage-\(n\) rectangle box.  For rational
+\(0\le x\le1\), \(h>0\), and \(x+h\le1\), Lean proves the common-stage
+one-sided estimate
+\[
+  A_n(x+h)_{\mathrm{lo}}-A_n(x)_{\mathrm{hi}}\le h.
+\]
+It is a finite chart calculation: the difference box is equivalent to the
+rectangle box at
+\(\tau=h/(1+x(x+h))\), whose upper endpoint is at most
+\(\tau\le h\).  The local product margin
+\(x\tau\le1/2\) supplies the raw-validity and shrinking-width certificate
+for this transport even in the right half of the unit branch.
+
+Consequently the domain-aware rectangle evaluator has the project's literal
+rational epsilon--delta continuity certificate on \([0,1]\).  Given positive
+rational \(\varepsilon\), choose
+\[
+  \delta=\varepsilon,\qquad
+  n=4\bigl(\varepsilon.\mathrm{den}+1\bigr).
+\]
+Both endpoint boxes at stage \(n\) have width at most \(\varepsilon\).  In
+either order of two inputs \(x,y\), weak rectangle monotonicity provides one
+cross-box inequality and the displayed forward estimate bounds the other by
+\(\lvert y-x\rvert\le\varepsilon\).  Thus the certificate says exactly
+that the two finite boxes are \(\varepsilon\)-near; it invokes neither a
+topology import nor a completed real line.
+
+The same estimate is also exposed in its fixed, computational form: any
+stage at least \(4(\varepsilon.\mathrm{den}+1)\) works whenever the input
+distance is at most \(\varepsilon\).  Hence the checked
+\texttt{EffectiveModulusFor} takes requested stage \(r\) to input precision
+\(r+1\), and evaluates the rectangle at
+\[
+  4\bigl((\varepsilon_r).\mathrm{den}+1\bigr),
+  \qquad \varepsilon_r=\texttt{precisionAtStage}(r).
+\]
+This is an executable schedule, rather than an existential witness which a
+later partition construction would have to recover.
+
+This is continuity data, not an FTC theorem.  In particular, it does not yet
+give the cellwise secant containment or the compatible shrinking partition
+schedule needed to turn the product derivative into the arctangent
+integration-by-parts endpoint identity.
+\end{theorem}
+
+\begin{theorem}[Rational continuity of the arctangent-product derivative]
+\label{thm:coordinate-arctangent-derivative-epsilon-delta-continuity}
+\lean{ComputableAnalysis.IntegralIdentities.coordinate_integralKernel_lipschitz_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus}
+\uses{thm:arctangent-rectangle-epsilon-delta-continuity,thm:coordinate-arctangent-product-rule}
+\leanok
+The checked product derivative is the non-exact interval function
+\[
+ D(x)=A(x)+\frac{x}{1+x^2}.
+\]
+Its rational correction is now formally three-Lipschitz on the unit branch.
+The finite proof writes its difference as
+\[
+ s\bigl(K(s)-K(t)\bigr)+(s-t)K(t),
+ \qquad K(u)=\frac1{1+u^2},
+\]
+and combines the already checked two-Lipschitz bound for \(K\),
+\(0\le s\le1\), and \(0\le K(t)\le1\).  The constant is intentionally
+slack; it is a transparent rational budget rather than a claim of optimality.
+
+Lean therefore proves literal rational epsilon--delta continuity for \(D\).
+For a requested \(\varepsilon\), the arctangent part uses
+\(\eta=\varepsilon/2\); the rational correction receives the input budget
+\(\rho=\varepsilon/6\), so its three-Lipschitz error is at most \(\eta\).
+The input radius is the smaller of the arctangent radius for \(\eta\) and
+\(\rho\).  Adding the two finite interval inequalities bounds each cross-box
+gap by \(\eta+\eta=\varepsilon\), while translation by the rational
+correction preserves the rectangle-box widths.
+
+There is no hidden search in this argument.  At output tolerance
+\(\varepsilon\), the fixed theorem takes input distance at most
+\(\varepsilon/6\) and rectangle stage
+\[
+  4\bigl((\varepsilon/2).\mathrm{den}+1\bigr).
+\]
+Equivalently, the executable modulus at requested stage \(r\) uses input
+precision \(6(r+1)\) and that displayed rectangle stage with
+\(\varepsilon=\varepsilon_r\).  Thus the cell radius and its
+derivative-continuity evaluation stage are computable rational data.
+
+This provides the needed shrinking-range datum for a derivative-bound FTC
+construction.  The following theorem now composes it with the forward secant
+certificate into one common local box.  The remaining task is global: choose
+a compatible shrinking partition and prove the resulting Riemann-width
+schedule.
+\end{theorem}
+
+\begin{theorem}[Finite forward secant enclosure for the arctangent product]
+\label{thm:coordinate-arctangent-forward-secant-enclosure}
+\lean{ComputableAnalysis.QInterval.expand_contains_right_of_near}
+\lean{ComputableAnalysis.QInterval.scaleByRat_expand_contains_subInterval_of_differenceQuotient_near}
+\lean{ComputableAnalysis.QInterval.common_secant_derivative_bound_of_near}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value_enclosure}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_range_enclosure}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_uniform_range_enclosure}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardContinuityRadius}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardContinuityStage}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardSecantBound}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uniform_range_enclosure}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartitionPieces}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartition_mesh_le_radius}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardPartition_mesh_le_forward_step}
+\uses{thm:coordinate-arctangent-forward-product-rule,thm:coordinate-arctangent-derivative-epsilon-delta-continuity}
+\leanok
+Let \(P(x)=xA(x)\), let \(D_N(x)\) be the finite stage-\(N\) box for
+\[
+  A(x)+\frac{x}{1+x^2},
+\]
+and take a positive rational step \(h\) within the checked forward-derivative
+budget.  Lean now proves the literal endpoint enclosure
+\[
+ P(x+h)-P(x)
+ \ \in\
+ h\bigl[D_N(x)_{\mathrm{lo}}-2\varepsilon_n,\,
+         D_N(x)_{\mathrm{hi}}+2\varepsilon_n\bigr].
+\]
+Here \(N\) is the existing step-aware rectangle precision and
+\(\varepsilon_n\) is the requested rational stage tolerance.  The generic
+finite lemma first observes that two \(\varepsilon_n\)-near quotient and
+derivative boxes have a quotient box contained in the derivative box widened
+by \(2\varepsilon_n\): one tolerance is for their separation and one for the
+quotient's width.  Positive scaling by \(h\) then recovers the endpoint
+difference exactly.
+
+This is now a common local certificate, not merely a secant estimate.
+For every requested forward-derivative stage \(n\), Lean defines the common
+cell data, rather than merely proving that they exist:
+\[
+ \delta_n=\frac{\varepsilon_n}{6},\qquad
+ m_n=4\bigl((\varepsilon_n/2).\mathrm{den}+1\bigr),
+ \qquad \varepsilon_n=\texttt{precisionAtStage}(n).
+\]
+Its named \texttt{coordinateTimesArctanForwardSecantBound} is the hull of
+the step-aware derivative box and the stage-\(m_n\) derivative box, each
+expanded by \(2\varepsilon_n\).  Every rational
+\(t\) with \(\lvert t-x\rvert\le\delta\) is enclosed together with the
+endpoint difference by
+\[
+ B=\operatorname{hull}\bigl(
+   D_N(x)^{+2\varepsilon_n},D_m(x)^{+2\varepsilon_n}\bigr),
+ \qquad \operatorname{width}(B)\le10\varepsilon_n.
+\]
+The hull accommodates the step-aware derivative stage \(N\) and the
+continuity stage \(m_n\), whose valid raw boxes overlap even when their indices
+differ.  It contains \(D_m(t)\), while \(hB\) contains
+\(P(x+h)-P(x)\).  Thus a cell whose width is at most \(\delta\) has precisely
+the common range-and-secant datum required by the FTC architecture.
+
+The uniform partition itself is now selected explicitly from this named
+radius:
+\[
+ N_{\delta,n}
+ =(\delta.\mathrm{den}+1)\,72(n+1).
+\]
+Its unit mesh is formally at most both \(\delta\) and
+\(1/(72(n+1))\).  Thus the remaining work is no longer the choice of a
+small partition either.  The next theorem instantiates the finite telescope,
+the uniform-width calculation, and the common endpoint stage with these
+literal cell data.
+\end{theorem}
+
+\begin{theorem}[Finite common-stage FTC assembly]
+\label{thm:finite-common-stage-ftc-assembly}
+\lean{ComputableAnalysis.QInterval.addInterval_contains}
+\lean{ComputableAnalysis.QInterval.overlaps_of_contains_right}
+\lean{ComputableAnalysis.endpointDifferenceInterval_adjacent_additive_contains}
+\lean{ComputableAnalysis.endpointDifferenceInterval_width}
+\lean{ComputableAnalysis.RationalPartition.addInterval_fold_contains}
+\lean{ComputableAnalysis.RationalPartition.addInterval_fold_width}
+\lean{ComputableAnalysis.RationalPartition.rat_add_fold_le_length_mul}
+\lean{ComputableAnalysis.RationalPartition.uniform_boundIntegralSum_width_le}
+\lean{ComputableAnalysis.RationalPartition.endpointDifferenceSum_contains}
+\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_contains_endpointDifference}
+\lean{ComputableAnalysis.RationalPartition.boundIntegralSum_overlaps_endpointDifference}
+\lean{ComputableAnalysis.SelectedStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.selectedStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.twoStageCandidateDerivativeFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
+\uses{thm:coordinate-arctangent-forward-secant-enclosure}
+\leanok
+Let a rational partition of \([a,b]\) be fixed, and suppose that at one
+common \emph{endpoint} computation stage each scaled derivative box on a
+cell contains the computed endpoint difference on that cell.  The candidate
+derivative values may use a distinct common continuity stage: the finite
+telescope consumes the certified boxes and endpoint stage, not the raw index
+at which the candidate values were obtained.  Lean now proves, by induction
+on the literal finite fold, that their sum contains the single box for
+\(F(b)-F(a)\).  The key adjacent calculation is
+\[
+ [F(b)-F(a)]+[F(c)-F(b)]\ \supseteq\ [F(c)-F(a)],
+\]
+where the excess is exactly the nonnegative width of the independently
+computed middle box.  Thus no cancellation of approximations, and no
+completeness principle, is hidden in ``telescoping.''
+
+For a uniform \(N\)-cell partition, if every derivative box has width at
+most \(e\), the same finite fold has width at most
+\[
+ (b-a)e.
+\]
+On the unit interval this is simply \(e\): the formal proof uses the exact
+rational identity \(N\,((b-a)/N)=b-a\).  The new
+\texttt{TwoStageCandidateDerivativeFTC} package matches the actual order of
+quantifiers.  At each requested outer precision it asks for a partition, a
+common derivative-continuity stage, and a common endpoint stage; its overlap
+field is a theorem derived from the finite telescope, rather than an unproved
+numerical side condition.  The older
+\texttt{SelectedStageCandidateDerivativeFTC} remains the special case in
+which those two schedules happen to coincide.
+
+For \(P(x)=x\arctan(x)\), the preceding local result supplies the required
+two-stage box of width at most \(10\varepsilon_n\), and the explicit uniform
+mesh supplies the cells.  The new concrete instantiation immediately below
+uses outer stage \(10(\varepsilon.\mathrm{den}+1)\), so those ten local
+tolerances fit the requested tolerance.  It uses the same tangent-transport
+stage for every cell and at the global endpoint.
+\end{theorem}
+
+\begin{theorem}[Concrete two-stage FTC raw for the arctangent product]
+\label{thm:coordinate-arctangent-two-stage-ftc}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardOuterStage}
+\lean{ComputableAnalysis.IntegralIdentities.ten_mul_precisionAtStage_coordinateTimesArctanForwardOuterStage_le}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCPartition}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeStage}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCEndpointStage}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeBound}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeBound_contains}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCDerivativeBound_contains_endpointDifference}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCRiemann_width_le}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardFTCEndpoint_width_le}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageFTC_equiv_endpoint}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.boundedIntegralRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.stabilizedRaw}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.stabilizedRaw_valid}
+\lean{ComputableAnalysis.TwoStageCandidateDerivativeFTC.stabilizedRaw_equiv_endpointDifference}
+\lean{ComputableAnalysis.Integral.constructionFor_of_twoStageCandidateDerivativeFTC_stabilized}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_widthsShrink}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageRaw_equiv_rectangleAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizationRadius}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_endpointDifference}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageStabilizedRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.four_coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_four_arctanGeom_one}
+\uses{thm:coordinate-arctangent-forward-secant-enclosure,thm:finite-common-stage-ftc-assembly}
+\leanok
+The product now has a fully assembled \emph{finite two-stage FTC raw}\ on
+\([0,1]\).  At requested tolerance \(\varepsilon\), select
+\[
+ n=10(\varepsilon.\mathrm{den}+1),\quad
+ \delta=\varepsilon_n/6,\quad
+ N=(\delta.\mathrm{den}+1)72(n+1).
+\]
+The uniform \(N\)-cell partition has mesh below both the local continuity
+radius and the forward step budget.  Its derivative boxes use the common
+stage \(4((\varepsilon_n/2).\mathrm{den}+1)\); the endpoint boxes use the
+single tangent-transport stage determined by that mesh.  Lean proves every
+cell enclosure, the global Riemann-box width, and the global endpoint-box
+width.  Consequently its two executable raw reals satisfy
+\[
+ \operatorname{BoundSum}_{x\arctan x}\ \Equiv\
+ \bigl(x\arctan x\bigr)(1)-\bigl(x\arctan x\bigr)(0).
+\]
+This is the finite FTC comparison itself, with no limit or completeness
+argument.  Lean now promotes its actual bounded-sum evaluator to a public
+definite integral.  Although the selected sum boxes need not be nested, their
+widths have an explicit rational modulus.  At each stage the finite telescope
+contains its selected endpoint box, and that box overlaps the canonical
+rectangle evaluator by the primitive's validated nestedness.  The public raw
+therefore takes the finite prefix intersection of these bounded-sum boxes,
+each widened by (4/(n+1)).  Its runtime reads only rational bounded sums
+and this radius schedule; the rectangle evaluator is used only in the proof
+that the intersections remain inhabited.  This yields a valid, shrinking,
+nested representative of the same computation, hence
+\[
+  \mathop{\int}_{0}^{1}\!\left(A(x)+\frac{x}{1+x^2}\right)\,dx
+  \ \Equiv\ A(1).
+\]
+The identity is available through the ordinary, monotone, and finite-piece
+integral interfaces.  This closes the product-specific public FTC bridge;
+its checked fourfold normalization is
+\[
+  4\mathop{\int}_{0}^{1}\!\left(A(x)+\frac{x}{1+x^2}\right)\,dx
+  \ \Equiv\ 4\arctangeom(1).
+\]
+This is an intermediate calculus corollary, not an additional pi-scoreboard
+row: the existing geometric normalization carries its right-hand side to the
+area presentation of pi.  The normalization is now also reusable: every
+two-stage certificate has a theorem relating its bounded sums directly to the
+canonical endpoint raw, and the generic stabilized constructor needs only a
+finite-sum width modulus plus an explicit shrinking radius covering that
+endpoint raw.  Formula-specific work remains in producing those two rational
+schedules.
+\end{theorem}
+
+\begin{corollary}[The arctangent--logarithm pi route: supplied branch and generalization target]
+\label{cor:arctangent-logarithm-pi-route}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogReciprocalIntegralRate}
+\lean{ComputableAnalysis.PiProofs.pi.integrationByParts}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_compute_width_le}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegralRate}
+\lean{ComputableAnalysis.Logarithm.piTriangleLogSquareSubstitutionIntegral_equiv_piTriangleLogReciprocalIntegral}
+\lean{ComputableAnalysis.PiProofs.pi.squareSubstitution}
+\uses{thm:integration-by-parts-certificate,thm:coordinate-arctangent-two-stage-ftc,thm:finite-uniform-triangle-reindexing,def:arctangent-sampled-monotonicity,prop:coordinate-arctangent-monotonicity,thm:coordinate-arctangent-forward-derivative-zero,prop:arctangent-tangent-chart-quotient,thm:log-two-series-reciprocal-integral,prop:log-two-square-substitution,thm:arctan-log-two-strip-decomposition}
+Apply the preceding certificate on the single positive piece \([0,1]\) with
+\(U(x)=x\) and \(V(x)=\arctan(x)\).  The checked sector-area derivative
+certificate gives
+\[
+ V'(x)=\frac{1}{1+x^2},
+\]
+the corner correction has the particularly transparent mesh bound
+\[
+\sum_{I\in P}\Delta_Ix\,\Delta_I\arctan
+ \leq \mesh(P)\bigl(\arctan(1)-\arctan(0)\bigr).
+\]
+The endpoint-order certificate and its canonical monotone-sampling lift now
+turn the unit-mesh statement into a checked finite rational corner estimate;
+the two explicit stages above also bound the rectangle sampling error.
+Thus the geometric unit-branch bounds are now an executable finite budget,
+rather than an asymptotic assertion.  The finite two-stage FTC comparison and
+its public definite-integral construction are now checked for the \emph{sum}
+of the two product-rule terms.  The direct Riemann/Darboux construction for
+the separate arctangent strip is now supplied by
+\(\arctanintegraltriangle\): its runtime is the finite outer triangle of
+inner kernel sums, and it is a certified monotone construction for
+\code{arctan.integral.rectangle}.  The checked splitting identity is
+\[
+ \arctanintegraltriangle+
+ \int_0^1\frac{x}{1+x^2}\,\dd x
+ \Equiv I_{x\arctan x}^{\mathrm{FTC}}
+ \Equiv \arctangeom(1).
+\]
+The final endpoint bridge is now checked for the concrete reciprocal-integral
+logarithm representative:
+\[
+ 2\int_0^1\frac{x}{1+x^2}\,\dd x
+ \Equiv \log_{\mathrm{rec}} 2.
+\]
+The checked theorem \cref{thm:arctan-log-first-strip} constructs the left
+integral directly with a unit Lipschitz Darboux algorithm and proves that its
+boxes are exactly half the square-pullback boxes at every stage.  Combined
+with the finite square substitution and common-refinement certificates, this
+is the promised endpoint equality without a general change-of-variables or
+integral-linearity axiom.  The remaining logarithm task is only the
+canonical-exponential/inverse-logarithm identification.  The already checked
+series-to-reciprocal-integral equality at \(2\) is therefore now a genuine
+endpoint bridge, while the function-level canonical-logarithm identification
+remains separate.
+\Cref{thm:arctan-log-two-strip-decomposition} additionally checks the exact
+rational-kernel decomposition of the arctangent kernel into this logarithmic
+strip and its complement.  The exact finite triangle comparison is now
+available as \cref{thm:finite-uniform-triangle-reindexing}; it reindexes the
+outer mesh of growing inner sums into this complementary kernel without a
+continuous Fubini theorem, and its certified triangle integral is equivalent
+to that complementary strip.  Combining the two certified endpoint bridges
+gives the formally proved supplied-branch statement
+\[
+  \pi_{\mathrm{area}}\Equiv
+  4\arctanintegraltriangle+2\log_{\mathrm{rec}}2.
+\]
+Lean stores this valid raw formula as the checked finite-calculus view
+\code{PiProofs.pi.integrationByParts} (with
+\code{pi.triangleLogReciprocalIntegral} retained as a descriptive alias).
+Its literal runtime satisfies \(w_n\le52/2^n\), certified independently
+from the triangle and reciprocal-integral boxes.  After the canonical exp/log
+agreement transports \(\log_{\mathrm{rec}}2\) to the canonical \(\log2\),
+the same formula will have the textbook logarithm; a reusable piecewise
+integration-by-parts theorem remains a separate generalization.
+
+There is also a distinct supplied substitution corollary, with the
+pullback retained rather than normalized away:
+\[
+ \pi_{\mathrm{area}}\Equiv
+ 4\arctanintegraltriangle+
+  2\int_0^1\frac{2x}{1+x^2}\,\dd x.
+\]
+The finite \(t=x^2\) mesh comparison proves this raw evaluator equivalent to
+the reciprocal-log formula above, and Lean exposes it as
+\code{PiProofs.pi.squareSubstitution}.  Its direct runtime has
+\(w_n\le56/2^n\).  This uses a concrete, fully checked substitution
+certificate; the general substitution theorem remains a later calculus gate.
+\end{corollary}
+
+\section{Nondecreasing integrands and piecewise monotone integrals}
+
+The first integral theorem should be for nondecreasing functions on rational
+intervals.  Their lower and upper Riemann sums are endpoint sums whose gap is
+controlled by endpoint variation times the mesh size, so the finite proof is
+especially transparent.  Nonincreasing functions are the signed/order-reversed
+variant, and the general integral is then a finite sum over monotone pieces.
+
+\begin{theorem}[Monotone integral construction]
+\label{thm:monotone-integral-construction}
+\lean{ComputableAnalysis.FunctionOnInterval.restrict}
+\lean{ComputableAnalysis.NondecreasingOnInterval}
+\lean{ComputableAnalysis.NonincreasingOnInterval}
+\lean{ComputableAnalysis.MonotoneOnInterval}
+\lean{ComputableAnalysis.MonotoneOnInterval.ofNondecreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.ofNonincreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.nondecreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.nonincreasing}
+\lean{ComputableAnalysis.MonotoneOnInterval.restrict}
+\lean{ComputableAnalysis.NondecreasingOnInterval.restrict}
+\lean{ComputableAnalysis.NonincreasingOnInterval.restrict}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor.toMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.NondecreasingConstructionFor.restrict}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.nondecreasingIntegralFor_eq_monotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.ExistsNondecreasingConstructionFor}
+\lean{ComputableAnalysis.Integral.MonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.MonotoneConstructionFor.restrict}
+\lean{ComputableAnalysis.Integral.monotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.monotoneIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.ExistsMonotoneConstructionFor}
+\uses{def:constant-integral-construction,def:definite-integral-identity}
+A function with certified monotonicity on \([a,b]\) has a valid rational
+Riemann-sum integral.  The construction uses left and right sums, or equivalent
+interval sums, and the width estimate is the finite monotone-variation bound.
+Lean now exposes the theorem-facing monotone integral interface:
+\code{NondecreasingOnInterval} is the preferred first case, with a dedicated
+\code{NondecreasingConstructionFor}.  These certificates are stable under
+restriction to rational subintervals.  The nondecreasing construction forgets
+to the broader
+\code{MonotoneOnInterval} interface, which records either the nondecreasing or
+nonincreasing case.  \code{MonotoneConstructionFor} packages this certificate
+together with a valid \code{ConstructionFor}, and
+\code{monotoneIntegralFor\_valid} proves that the packaged raw real is valid.
+The remaining task is the Darboux endpoint-sum constructor that turns
+monotonicity alone into such a package.
+\end{theorem}
+
+\begin{theorem}[Piecewise monotone integrals and algebra laws]
+\label{thm:piecewise-monotone-integral-laws}
+\lean{ComputableAnalysis.RealRaw.sub_add_sub_cancel_middle_equiv}
+\lean{ComputableAnalysis.RealRaw.scaleRat_valid}
+\lean{ComputableAnalysis.RealRaw.scaleRat_equiv}
+\lean{ComputableAnalysis.endpointDifference_valid_of_fun_valid}
+\lean{ComputableAnalysis.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.FunctionOnInterval.endpointDifferenceRaw_adjacent_additive}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_add_equiv_of_endpoint_additive}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_equiv_add_of_endpoint_add}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat}
+\lean{ComputableAnalysis.Integral.DefiniteIdentityFor.integral_le_of_endpoint_le}
+\lean{ComputableAnalysis.Integral.MonotoneDefiniteIdentityFor.integral_le_of_endpoint_le}
+\lean{ComputableAnalysis.FunctionOnInterval.PointwiseAdd}
+\lean{ComputableAnalysis.FunctionOnInterval.PointwiseScaleRat}
+\lean{ComputableAnalysis.FunctionOnInterval.PointwiseLe}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor.ofMonotone}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor.ofNondecreasing}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellIntegral}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneCellIntegral_valid}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_ofMonotone_equiv}
+\lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor_ofNondecreasing_equiv}
+\lean{ComputableAnalysis.Integral.ExistsPiecewiseMonotoneConstructionFor}
+\lean{ComputableAnalysis.Integral.GeneralConstructionFor}
+\lean{ComputableAnalysis.Integral.generalIntegralFor}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_valid}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_ofMonotone_equiv}
+\lean{ComputableAnalysis.Integral.generalIntegralFor_ofNondecreasing_equiv}
+\lean{ComputableAnalysis.Integral.ExistsGeneralConstructionFor}
+\lean{ComputableAnalysis.Integral.LinearFor}
+\lean{ComputableAnalysis.Integral.CompatibleWithScaleRatFor}
+\lean{ComputableAnalysis.Integral.AdditiveOnAdjacentIntervalsFor}
+\lean{ComputableAnalysis.Integral.OrderPreservingFor}
+\lean{ComputableAnalysis.Integral.BasicPropertiesFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneLinearFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneCompatibleWithScaleRatFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneAdditiveOnAdjacentIntervalsFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneOrderPreservingFor}
+\lean{ComputableAnalysis.Integral.PiecewiseMonotoneBasicPropertiesFor}
+\lean{ComputableAnalysis.Integral.GeneralLinearFor}
+\lean{ComputableAnalysis.Integral.GeneralCompatibleWithScaleRatFor}
+\lean{ComputableAnalysis.Integral.GeneralAdditiveOnAdjacentIntervalsFor}
+\lean{ComputableAnalysis.Integral.GeneralOrderPreservingFor}
+\lean{ComputableAnalysis.Integral.GeneralBasicPropertiesFor}
+\lean{ComputableAnalysis.Integral.ExactCellOrderPreservation}
+\uses{thm:monotone-integral-construction}
+The general definite integral is first defined on monotone pieces and then
+assembled by a finite rational partition.  A one-cell partition promotes any
+monotone construction, and in particular the preferred nondecreasing
+construction, to this piecewise interface.  The project-facing name
+\code{generalIntegralFor} is this finite sum of monotone-piece integrals.
+Lean proves that in the one-piece case this promotion is equivalent to the
+original monotone integral, and similarly for the preferred nondecreasing
+interface.
+
+The basic laws needed for calculus are additivity on adjacent intervals,
+rational scalar compatibility, linearity for pointwise sums on the common
+domain, and order preservation for pointwise inequalities.  The last property
+is the calculus input needed to turn the pointwise arctangent-kernel bounds in
+Chapter~\ref{ch:infinite-series} into cell-integral inequalities.  Lean records
+these laws both as generic domain-aware theorem targets and as a dedicated
+\code{PiecewiseMonotoneBasicPropertiesFor} package for the intended general
+integral operator, with \code{GeneralBasicPropertiesFor} as the public alias
+for this piecewise definition.  The finite sum of valid monotone-piece raw
+reals is already formalized as \code{piecewiseMonotoneIntegralFor}, with
+validity proved by \code{piecewiseMonotoneIntegralFor\_valid}; the corresponding
+public validity theorem is \code{generalIntegralFor\_valid}.  Lean also names
+\code{ExactCellOrderPreservation}, the finite rational-cell version of
+``pointwise bounds integrate to cell bounds'' used by the arctangent-series
+comparison.  On the FTC side,
+Lean now also
+has the raw telescoping identity
+\[
+  (F(b)-F(a))+(F(c)-F(b))\sim F(c)-F(a),
+\]
+both for total raw functions and for interval-certified primitives.  This is
+the endpoint algebra behind adjacent-interval additivity whenever the integral
+has already been identified with a primitive endpoint difference.  The
+\code{DefiniteIdentityFor} and \code{MonotoneDefiniteIdentityFor} bridge
+theorems now perform this transfer directly: endpoint telescoping implies
+additivity for the corresponding integral raw reals, while the
+\code{integral\_equiv\_add\_of\_endpoint\_add} orientation matches the
+linearity target for pointwise sums.  The same transfer is available for
+arbitrary rational scaling, using the signed raw-real scaling validity and
+equivalence theorems.  Order also transfers through FTC endpoint identities:
+once two integrals are identified with primitive endpoint differences,
+\code{integral\_le\_of\_endpoint\_le} reduces integral order to order between
+the endpoint differences.
+\end{theorem}
+
+\begin{theorem}[A computable single-turn integral construction]
+\label{thm:single-turn-integral-candidate}
+\lean{ComputableAnalysis.Integral.TurningPointBracket}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.left}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.right}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.width}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.widths_shrink}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.leftRestriction}
+\lean{ComputableAnalysis.Integral.TurningPointBracket.rightRestriction}
+\lean{ComputableAnalysis.Integral.IntervalAbsBound}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox_width}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox_widths_shrink}
+\lean{ComputableAnalysis.Integral.turningPointMiddleBox_contained_symmetric}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.leftBox}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleBox}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.rightBox}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_width}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.middleBox_contained_symmetric}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCandidate.compute_widths_shrink}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_valid}
+\lean{ComputableAnalysis.Integral.SingleTurnIntegralCompletion.stabilizedRaw_equiv_anchor}
+\uses{thm:monotone-integral-construction}
+\leanok
+For an integrand that increases and then decreases, the turning point need not
+be rational.  Instead, the particular construction supplies a valid shrinking
+rational bracket
+\[
+  [\ell_n,r_n]\subseteq[a,b].
+\]
+At stage \(n\), the left restriction \([a,\ell_n]\) is accompanied by its
+own monotone integral construction, and the right restriction
+\([r_n,b]\) by its own monotone integral construction in the opposite
+direction.  No monotonicity claim is made for the unresolved middle interval.
+
+Rather, a fixed rational value enclosure \(B=[L,U]\) for the integrand on
+\([\ell_n,r_n]\) gives the literal middle contribution box
+\[
+  M_n=(r_n-\ell_n)B.
+\]
+Lean proves
+\[
+  \operatorname{width}(M_n)
+  =(r_n-\ell_n)\operatorname{width}(B)\longrightarrow0.
+\]
+If \(B\subseteq[-K,K]\), it also proves
+\[
+  M_n\subseteq[-K(r_n-\ell_n),K(r_n-\ell_n)],
+\]
+so this is a genuine vanishing contribution, not merely a shrinking box around
+an uncontrolled value.  The runtime candidate is the finite interval sum
+\[
+  I_n^{\mathrm{left}}+M_n+I_n^{\mathrm{right}},
+\]
+and its width shrinks whenever the two supplied outer constructions do.
+
+This is a construction pattern for a \emph{particular} function, not a
+definition saying that every bounded or continuous function has an integral.
+The remaining proof for that function must establish that the three boxes
+enclose its intended integral value.  The
+\code{SingleTurnIntegralCompletion} certificate records exactly this
+function-specific comparison and then applies finite-prefix stabilization; the
+runtime reads only the three-part candidate and its rational radius schedule.
+\end{theorem}
+
+\begin{theorem}[Derivative-bound FTC package]
+\label{thm:derivative-bound-ftc-package}
+\lean{ComputableAnalysis.derivativeBoundFTC}
+\lean{ComputableAnalysis.candidateDerivativeFTC}
+\lean{ComputableAnalysis.CurvatureFTCCertificate}
+\lean{ComputableAnalysis.CurvatureFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.CurvatureFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.curvatureFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConvexFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.ConcaveFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toCurvatureFTCCertificate}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.toDerivativeBoundFTC}
+\lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
+\lean{ComputableAnalysis.Integral.constructionFor_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_derivativeBoundFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_effectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_staticDyadicEffectiveFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_concaveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_candidateDerivativeFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_candidateDerivativeFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_curvatureFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_curvatureFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_convexFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_convexFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.constructionFor_of_concaveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC_endpointAgreement}
+\lean{ComputableAnalysis.Integral.definiteIdentityFor_of_concaveFTC_stageSchedule}
+\lean{ComputableAnalysis.Integral.generalDefiniteIdentityFor_of_concaveFTC_stageSchedule}
+\lean{ComputableAnalysis.convexFTC}
+\lean{ComputableAnalysis.concaveFTC}
+\uses{thm:monotone-integral-construction}
+\leanok
+Monotone integrability supplies a valid integral algorithm.  The fundamental
+theorem of calculus supplies something different: an endpoint-equivalence proof
+for that integral algorithm.  The current Lean theorem packages the completed
+derivative-bound route: once finite local derivative bounds on rational
+partition cells enclose both candidate derivative values and primitive endpoint
+differences, the integral raw real is equivalent to the endpoint-difference raw
+real.  Lean also packages the derivative-bound cell-sum algorithm as a
+\code{ConstructionFor} and, once the remaining validity and endpoint-schedule
+bookkeeping is supplied, turns the certificate into a
+\code{DefiniteIdentityFor}.  Endpoint-agreement variants package the scheduled
+endpoint validity and comparison with the canonical endpoint difference.  The
+stage-schedule variants construct this agreement directly from a cofinal
+monotone endpoint precision schedule.  The corresponding
+\code{definiteIdentityFor} constructors whose names end in
+\code{stageSchedule} are the
+domain-aware bridge used by FTC pi routes when the schedule is explicit.
+When an equivalent public \code{generalIntegralFor} construction is also
+available, the matching
+\code{generalDefiniteIdentityFor} constructors whose names end in
+\code{stageSchedule}
+move the same FTC certificate directly into the public general-integral
+interface.
+The
+same domain-aware interface is now available directly for \code{EffectiveFTC},
+its static-dyadic specialization, and the candidate-derivative certificate.
+The curvature certificate
+\code{CurvatureFTCCertificate} is the version needed for both convex and
+concave primitives; the public convex and concave certificates
+\code{ConvexFTCCertificate} and \code{ConcaveFTCCertificate} are
+specializations that convert through it.  The concave specialization is the
+one naturally matched to the arctangent primitive on \([0,1]\).  This is the
+calculus-facing interface needed by the pi routes: an integral row in the
+scoreboard can measure genuine FTC content while still counting only the
+underlying pi computation.
+\end{theorem}
+
+\section{The arctangent integral}
+
+\begin{definition}[The kernel \texorpdfstring{$1/(1+x^2)$}{1/(1+x^2)}]
+\label{def:one-over-one-plus-square-kernel}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval_valid}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareOnInterval_toRealFunRaw_point}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw_compute_eq_sectorAreaDensity}
+\uses{def:function-on-interval-to-realfunraw,thm:sector-area-density}
+\leanok
+The rational kernel
+\[
+  x\longmapsto \frac{1}{1+x^2}
+\]
+is total on rational inputs, since \(1+x^2>0\).  Lean exposes it both as a
+partial raw function with trivial domain and as a certified
+\code{FunctionOnInterval} on any rational interval.  It also proves that this
+raw kernel computes the exact sector-area density of the rational circle
+parametrization from \cref{thm:sector-area-density}.
+\end{definition}
+
+\clearpage
+
+\begin{proposition}[A finite Lipschitz certificate for the arctangent kernel]
+\label{prop:arctangent-kernel-lipschitz}
+\uses{def:one-over-one-plus-square-kernel,def:definite-integral-identity}
+\leanok
+The existing geometric rectangle construction exploits that
+\(1/(1+x^2)\) decreases on the unit interval.  It is also important to
+record a direction-free estimate, because the generic finite
+Lipschitz--Darboux constructor is the integration interface intended for
+regular rational kernels more generally.  For rational \(s,t\in[0,1]\),
+the required estimate follows from the exact identity
+\[
+ \frac{1}{1+s^2}-\frac{1}{1+t^2}
+ =\frac{(t-s)(s+t)}{(1+s^2)(1+t^2)}.
+\]
+Here \(0\le s+t\le2\), while both denominator factors are at least one.
+Consequently
+\[
+ \left|\frac{1}{1+s^2}-\frac{1}{1+t^2}\right|
+ \le 2|t-s|.
+\]
+Every step is finite rational arithmetic: positivity of \(1+x^2\), the
+displayed factorization, and multiplication of ordered rational bounds.
+It neither asserts an arctangent derivative nor uses a mean-value theorem.
+
+The resulting dyadic boxes use the generic lower and upper Lipschitz
+rectangles with \(L=2\), so their exact width is \(4/2^n\) at stage \(n\).
+The comparison with the established circle rectangle boxes is also finite.
+On their common midpoint-refined mesh, the literal right-endpoint
+sum
+\[
+ \sum_{[p,r]}(r-p)\frac{1}{1+r^2}
+\]
+is both the generic box's certified interior point and the lower rectangle
+sum of the decreasing-kernel construction.  Lean proves that the two stage
+boxes contain this same rational computation, and therefore proves their
+raw-real overlap directly.  This comparison is useful evidence that the
+generic integration layer agrees
+with the geometric arctangent integral; it is not a further pi-scoreboard
+row, and it does not replace the later derivative/FTC identity
+\(\int_0^x(1+t^2)^{-1}\,\dd t=\arctan x\).
+\end{proposition}
+
+\begin{proposition}[Finite zero-tangent bracket for arctangent]
+\label{prop:arctangent-zero-tangent-bracket}
+\uses{def:one-over-one-plus-square-kernel,prop:arctangent-kernel-lipschitz}
+\leanok
+Let \(A_n(x)=[L_n(x),U_n(x)]\) be a finite geometric rectangle box for
+the arctangent integral on \([0,x]\), with \(0\le x\le1\).  The next
+derivative-facing certificate is the pair of finite bounds
+\[
+  \frac{x}{1+x^2}\le L_n(x)\le U_n(x)\le x.
+\]
+The upper bound is the familiar comparison with a rectangle of height one.
+For the lower bound, every right-endpoint kernel value on an ordered cover of
+\([0,x]\) is at least \(1/(1+x^2)\); summing the cell lengths gives the
+displayed left inequality.  Thus the whole finite box lies in
+\[
+  [\,x-x^3,\;x\,],
+\]
+because \(x-x/(1+x^2)\le x^3\).
+
+At \(x=0\) the rectangle box is exactly \([0,0]\).  Dividing the preceding
+enclosure by a positive rational \(h\le1\) produces the literal finite
+difference-quotient bracket
+\[
+  1-h^2\le \frac{A_n(h)-A_n(0)}{h}\le1.
+\]
+Its width is \(h^2\), independent of a completed-real limit.  This is the
+basepoint calculation needed to identify \(\arctan'(0)=1\).  The next
+one-sided certificate packages this exact statement.  It is not yet a global
+\code{HasDerivativeOnInterval} certificate: transporting the bracket to a
+nonzero rational basepoint requires the rational tangent-addition chart and
+compatible evaluation schedules.  That later transport is exactly where the
+project must account for the denominator \(1+x(x+h)\), rather than silently
+invoking the mean-value theorem.
+\end{proposition}
+
+\begin{definition}[Forward finite-difference derivative certificate]
+\label{def:forward-finite-difference-derivative}
+\uses{def:one-over-one-plus-square-kernel}
+\leanok
+For an interval-valued function \(F\), a rational basepoint \(x\), and a
+proposed derivative raw real \(d\), a forward certificate supplies a
+step-radius schedule \(R(n)\) and an evaluation schedule \(E(h,n)\).  For
+every positive rational step \(h\) that remains in the stated domain and
+satisfies
+\[
+  0<h\le\frac1{R(n)},
+\]
+the literal quotient box
+\[
+ \frac{F_{E(h,n)}(x+h)-F_{E(h,n)}(x)}h
+\]
+is within the requested stage-\(n\) rational tolerance of the stage-\(E(h,n)\)
+box for \(d\).  Both quotient and derivative boxes are required to have that
+tolerance as a width bound.
+
+This is a deliberately one-sided, pointwise interface.  It records a finite
+right-derivative estimate without implying a two-sided derivative, continuity,
+or any fundamental-theorem-of-calculus rule.  Its purpose is to make the
+zero-basepoint arctangent calculation usable while leaving the separate
+transport and endpoint work visible.
+\end{definition}
+
+\begin{theorem}[Right derivative of the rectangle arctangent at zero]
+\label{thm:arctangent-rectangle-forward-derivative-zero}
+\uses{def:forward-finite-difference-derivative,prop:arctangent-zero-tangent-bracket}
+\leanok
+The rectangle arctangent on \([0,1]\) has a checked forward derivative
+certificate at the rational endpoint \(0\), with derivative \(1\):
+\[
+  \left.\frac{\dd}{\dd x}\arctanintegralrect(x)\right|_{0+}=1.
+\]
+At requested tolerance \(\varepsilon_n\), take the positive step budget
+\(h\le\varepsilon_n\) and evaluate both rectangle boxes at their finite
+stage zero.  The preceding enclosure gives
+\[
+ [\,1-h^2,1\,]
+ \supseteq
+ \frac{A_0(h)-A_0(0)}h.
+\]
+Since \(0<h\le\varepsilon_n\le1\), its width and its gap from the singleton
+\([1,1]\) are at most \(h^2\le\varepsilon_n\).  This proves all four
+finite interval-nearness inequalities in the certificate.  No convergence
+claim is used: the special endpoint bracket itself already has the needed
+uniform control.
+\end{theorem}
+
+\begin{proposition}[Tangent-chart coordinate for derivative transport]
+\label{prop:arctangent-tangent-chart-increment}
+\uses{thm:arctangent-rectangle-forward-derivative-zero}
+\leanok
+For a basepoint \(x\) and an ordinary positive rational increment \(h\), put
+\[
+  \tau(x,h)=\frac{h}{1+x(x+h)}.
+\]
+This is the chart increment that represents the ordinary endpoint \(x+h\):
+whenever the displayed denominators are positive, the rational
+tangent-addition chart satisfies
+\[
+  \frac{x+\tau(x,h)}{1-x\tau(x,h)}=x+h,
+  \qquad
+  \frac{\tau(x,h)}h=\frac1{1+x(x+h)}.
+\]
+Thus, on the branch \(0\le x\le\tfrac12\), \(0<h\), and \(x+h\le1\), the
+finite chart-addition theorem gives
+\[
+  \arctangeom(x)+\arctangeom(\tau(x,h))
+  =\arctangeom(x+h).
+\]
+This is an equality of certified rational interval reals, obtained from the
+same finite rectangle transport used for tangent addition; it is not a
+continuity or mean-value argument.  Lean also records the equivalent
+endpoint-difference form
+\[
+ \arctangeom(x+h)-\arctangeom(x)
+ =\arctangeom(\tau(x,h)).
+\]
+
+The scale conversion is controlled directly by rational inequalities.  On
+\(0\le x\le1\), \(0<h\), and \(x+h\le1\),
+\[
+  0\le
+  \frac1{1+x^2}-\frac1{1+x(x+h)}
+  =\frac{xh}{(1+x^2)(1+x(x+h))}
+  \le h.
+\]
+In particular \(0<\tau(x,h)\le h\le1\).  Combined with the finite
+tangent box, this algebra is now part of the checked full-unit forward
+derivative certificate for the rectangle arctangent.  The same formulas are
+retained for the geometric transport; a full \code{HasDerivativeOnInterval}
+certificate still requires a compatible evaluation schedule for that
+equivalence and a separate two-sided endpoint treatment.
+\end{proposition}
+
+\begin{definition}[Arctangent as an integral]
+\label{def:arctan-integral}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_compute_width_zero}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_stages_constant}
+\lean{ComputableAnalysis.RealRaw.stage_eq_of_valid_zero_width}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralComputes}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralGeomFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegral_equiv_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitGeomFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.PiFromArctanIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.PiFromArctanIntegralAgrees}
+\uses{def:one-over-one-plus-square-kernel,def:inverse-elementary-integral-identities}
+Define another arctangent representative by
+\[
+  \arctanintegral(x)=\int_0^x \frac{dt}{1+t^2}.
+\]
+The preceding density calculation shows why this is the right kernel: it is
+the differential area swept by the same rational parametrized circle sectors
+used by \(\arctangeom\).
+This gives a new computation of \(\pi\) via
+\[
+  \pi \Equiv 4\arctanintegral(1).
+\]
+The comparison theorem should identify this integral arctangent with both the
+geometric-sector arctangent and the power-series arctangent.  Following the
+function-equivalence convention, the preferred Lean target is
+\code{ArctanIntegralGeomFunctionAgreement}: the integral representation and the
+geometric representation agree on the overlap of their domains.  The current
+integral representation is defined for \(0\le x\), while the geometric
+representation is total, so their overlap is the nonnegative rational branch.
+The pointwise-at-\(1\) statement needed for \(\pi\) is then a corollary.
+Lean also records a structural warning for the older point-Riemann
+\code{Integral.Construction} wrapper: because the kernel is evaluated by exact
+point intervals, every stage of \code{arctanIntegral x c} has width zero, and
+validity forces all stages to be equal.  Thus the completed refining integral
+routes in the scoreboard use the domain-aware \code{ConstructionFor} schedules
+below.
+\end{definition}
+
+\begin{theorem}[Finite arctangent--integral comparison]
+\label{thm:finite-arctan-integral-comparison}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel_chartAddParameter}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep_chartAddParameter_eq}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_chartAddParameter_eq}
+\lean{ComputableAnalysis.ArctanGeometry.chartAdd_integralLowerStep_le}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_le_chartAdd}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddParameter_width_le_eight_mul}
+\lean{ComputableAnalysis.ArctanGeometry.geometricLowerStep}
+\lean{ComputableAnalysis.ArctanGeometry.geometricUpperStep}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.geometricCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel_antitone_nonneg}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel_le_one}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep_refine}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_refine}
+\lean{ComputableAnalysis.ArctanGeometry.geometricLowerStep_refine}
+\lean{ComputableAnalysis.ArctanGeometry.geometricUpperStep_refine}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellInterval_contains_geometricCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellInterval_overlaps_geometricCellInterval}
+\lean{ComputableAnalysis.ArctanGeometry.NonnegativeIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.UnitIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.ChartAddPositiveDenominators}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_lowerSum_le}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperSum_le_chartAddIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_integralSum_contains}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_nonnegative}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_covers}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddDen_pos_of_unit}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddPositiveDenominators_of_unitIntervals}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddIntervals_squareSum_le_sixtyFour}
+\lean{ComputableAnalysis.ArctanGeometry.geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.intervalSquareSum}
+\lean{ComputableAnalysis.ArctanGeometry.integralKernel_pos}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_nonneg}
+\lean{ComputableAnalysis.ArctanGeometry.integralLowerStep_nonneg}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_left_subcell_le}
+\lean{ComputableAnalysis.ArctanGeometry.integralUpperStep_le_width}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.integralCellWidth_le_two_square}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_width_le_two_squareSum}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_contains_geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.integralSumInterval_overlaps_geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_nonnegative}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_intervals_unit}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopInitial_squareSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_squareSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_one_squareSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoopState_hi_eq_geometricUpperSum}
+\lean{ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage_eq_geometricSumInterval}
+\lean{ComputableAnalysis.ArctanGeometry.positiveLoopComputeAtStage_zero}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_contains_geometricSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_overlaps_geometricSum}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_contains_positiveLoop}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_overlaps_positiveLoop}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_step_refines}
+\lean{ComputableAnalysis.ArctanGeometry.arctanAreaLoop_integralSum_refines_add}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_covers}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_intervals_unit}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_squareSum_le_sixtyFour}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_integralSum_width_le}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoop_integralSum_contains}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_nested}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_width_le_twoFiveSix_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopCompute_overlaps_rectangleSub}
+\lean{ComputableAnalysis.ArctanGeometry.chartAddAreaLoopRaw_equiv_rectangleSub}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_chartAdd_add_of_half}
+\lean{ComputableAnalysis.ArctanGeometry.arctanGeom_chartAdd_add_three_of_half}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_nested}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangle_dyadicSquareMesh}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleCompute_widthsShrink}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_valid}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRaw_equiv_arctanGeom}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_ordered}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_nested}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleAtOne_dyadicSquareMesh}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleComputeAtOne_widthsShrink}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_valid}
+\lean{ComputableAnalysis.ArctanGeometry.arctanIntegralRectangleRawAtOne_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelInterval}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_raw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleRepresentation}
+\lean{ComputableAnalysis.arctan.integral.rectangle}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitFunctionRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.ArctanIntegralUnitGeomFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitComputes_arctanGeom_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralUnitGeomAgreement_one_of_functionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnit_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleUnitComputes_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_sub}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeom_one_sub_zero_equiv}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelInterval_monotone}
+\lean{ComputableAnalysis.IntegralIdentities.arctanKernelIntervalAtOne_monotone}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleConstructionAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_raw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_equiv_rectangleFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFor_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFunctionRaw}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFunctionRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneConstructionAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_valid}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_compute_eq}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneForAtOne_equiv_rectangleForAtOne}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleForAtOne_equiv_arctanGeom_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitData}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnit_equiv_arctanGeom}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitFunctionAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitComputes}
+\lean{ComputableAnalysis.IntegralIdentities.arctanIntegralRectangleMonotoneUnitComputes_one}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentityFor}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneTransportedDefiniteIdentity}
+\lean{ComputableAnalysis.IntegralIdentities.arctanGeomUnitRectangleMonotoneDefiniteIdentity_equiv_rectangle}
+\uses{def:one-over-one-plus-square-kernel,def:geometric-arctan}
+\leanok
+On a nonnegative cell \(0\le p\le r\), let
+\[
+  L_{p,r}=(r-p)\frac{1}{1+r^2},
+  \qquad
+  R_{p,r}=(r-p)\frac{1}{1+p^2}
+\]
+be the lower and upper rectangle contributions for the decreasing kernel
+\(1/(1+u^2)\).  Let
+\[
+  G_{p,r}=
+    \frac{(r-p)(1+pr)}{(1+p^2)(1+r^2)},
+  \qquad
+  U_{p,r}=\frac{r-p}{1+pr}
+\]
+be the corresponding inscribed and circumscribed geometric sector
+contributions.  Lean proves the local refinement identities saying that the
+increment/decrement update is exactly the change in the two geometric sums
+when \([p,r]\) is split at \(q\).  It proves the analogous monotone-kernel
+inequalities saying that lower rectangle sums increase and upper rectangle
+sums decrease under midpoint refinement.  It also proves the finite
+comparison inequalities
+\[
+  L_{p,r}\le G_{p,r},\qquad
+  U_{p,r}\le R_{p,r},
+  \qquad
+  L_{p,r}\le U_{p,r},\qquad
+  G_{p,r}\le R_{p,r}.
+\]
+The tangent-addition chart now has the corresponding finite transport layer.
+For \(T_u(t)=(u+t)/(1-ut)\), the kernel and the endpoint rectangles satisfy
+\[
+  \frac{1}{1+T_u(t)^2}
+  =
+  \frac{(1-ut)^2}{(1+u^2)(1+t^2)},
+\]
+\[
+  L_{T_u(p),T_u(r)}
+   =L_{p,r}\frac{1-ur}{1-up},
+  \qquad
+  R_{T_u(p),T_u(r)}
+   =R_{p,r}\frac{1-up}{1-ur}.
+\]
+Thus, on a nonnegative cell with positive chart denominators, the transported
+lower rectangle is no larger than the source lower rectangle, while the
+transported upper rectangle is no smaller.  Lean lifts these inequalities to
+finite partitions: the transported target bracket contains the source bracket,
+the transported endpoints remain ordered, and a midpoint-refinement partition
+of \([0,x]\) becomes an explicit cover of
+\([T_u(0),T_u(x)]\).  For \(0\le u<1\), positivity of all chart denominators
+on a source unit partition is also proved.
+For the half-unit chart range \(0\le u\le1/2\), Lean additionally proves
+\[
+  T_u(r)-T_u(p)\le 8(r-p),
+\]
+so the transported squared mesh is at most \(64\) times the source squared
+mesh.  When the chart image endpoint remains in the unit interval, the
+transported rectangle width therefore has an explicit dyadic bound
+\[
+  128\,\frac{x^2}{2^n}.
+\]
+This supplies the required mesh-decay estimate for the transported raw
+construction.  Lean now packages the charted brackets as
+\code{chartAddAreaLoopRaw}: the image of each source refinement is proved to
+refine the target rectangle bracket even though its image split point need not
+be a target midpoint.  Its stages are therefore ordered and nested, have the
+coarse explicit bound \(256/(n+1)\), and form a valid shrinking raw real.
+Moreover, this raw real is proved equivalent to the source midpoint rectangle
+raw, giving a construction-level rational change-of-variables certificate.
+
+The endpoint-difference comparison is now also formalized.  Lean appends the
+canonical midpoint partition of \([0,u]\) to the transported partition of
+\([u,T_u(x)]\), giving a second finite cover of \([0,T_u(x)]\).  The universal
+finite-cover inequalities then show that the transported raw overlaps the
+difference of the canonical \([0,T_u(x)]\) and \([0,u]\) rectangle raws.
+Together with the rectangle--geometric comparison, this proves
+\[
+  \operatorname{atanGeom}(u)+\operatorname{atanGeom}(x)
+    \sim \operatorname{atanGeom}(T_u(x))
+\]
+when \(0\le u\le 1/2\), \(0\le x\le1\), and the chart image remains in the
+unit interval.  This discharges the three bounded geometric additions later
+used by the series proof.
+It does not yet identify the power-series \code{piMachin} with area pi: the
+independent power-series/kernel comparisons at its two actual inputs (1/5)
+and (1/239) are still required.  The endpoint input (1) belongs to the
+separate Leibniz route.  This is supporting arctangent infrastructure only;
+it introduces no additional Machin pi computation.
+
+Consequently, for every finite nonnegative ordered partition, the rectangle
+sum interval contains the geometric sector-sum interval, and in particular the
+two finite intervals overlap.  Lean also proves that every nonnegative
+\code{arctanGeom} refinement stage has such a partition, and that the loop
+lower and upper bounds are exactly the corresponding geometric sums.  Thus the
+rectangle-sum interval contains, and overlaps, the actual \code{arctanGeom}
+stage interval.  The rectangle-sum intervals are themselves ordered and nested
+along the actual arctangent loop.  The same kernel is also certified
+nonincreasing on every interval \([0,x]\), so the rectangle computation is now
+packaged as a concrete instance of the monotone-integral interface throughout
+the rational unit branch.
+
+For every rational \(x\) with \(0\le x\le 1\), Lean also proves the mesh
+estimate needed for validity.  The sum of squared cell lengths is exactly
+\(x^2/2^n\) after \(n\) midpoint refinements, hence is bounded by \(2^{-n}\),
+and each rectangle gap is bounded by \(2(r-p)^2\).  This is the
+midpoint-dyadic mesh budget recorded by
+\code{arctanIntegralRectangle\_dyadicSquareMesh}; at \(x=1\) the specialized
+statement is \code{arctanIntegralRectangleAtOne\_dyadicSquareMesh}.  Therefore
+the concrete rectangle-sum raw real \code{arctanIntegralRectangleRaw x} is
+valid on the unit branch.  Lean packages the same schedule as
+\code{arctanIntegralRectangleFor x}, an \code{Integral.ConstructionFor} for
+the kernel on \([0,x]\), and proves this domain-aware construction equivalent
+to \code{arctanGeom x} throughout the rational unit branch.  The zero endpoint
+uses a small degenerate-loop invariant, while the positive endpoint proof is
+exactly the finite rectangle/geometric overlap.  This is the finite algebraic
+core of the comparison \(\arctanintegral=\arctangeom\).  Lean also
+wraps this construction under the public name
+\code{arctan.integral.rectangle} (implemented by
+\code{arctanIntegralRectangleRepresentation}) and proves the function-level
+overlap agreement \code{arctanIntegralRectangleFunctionAgreement}.  Lean now
+also packages the same construction as the unit-branch integral arctangent
+\code{arctanIntegralUnit}; the theorem
+\code{arctanIntegralRectangleUnitFunctionAgreement} proves the expected
+agreement on \(0\le x\le1\).  The older nonnegative point-Riemann
+\code{arctanIntegral(1)} API is kept only for conditional FTC bridge
+statements: Lean proves \code{arctanIntegral\_stages\_constant}, so that
+exact-evaluation wrapper has no canonical standalone refining lower/upper-sum
+schedule.  It is therefore not a separate scoreboard row.
+
+This midpoint-dyadic rectangle construction is not the foundational
+left-Riemann mesh of the chapter.  It is a comparison schedule deliberately
+synchronized with the dynamic subdivision already used by
+\(\arctangeom\).  The general integral interface above starts
+instead from the static dyadic mesh
+\([a+k(b-a)/2^n,a+(k+1)(b-a)/2^n]\).
+\end{theorem}
+
+\begin{theorem}[Integral arctangent gives another pi computation]
+\label{thm:arctan-integral-pi}
+{\footnotesize\raggedright
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegral_equiv_piCircleArea_of_geom_agreement}\par
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralFor_equiv_piCircleArea_of_effectiveFTC}\par
+\lean{ComputableAnalysis.PiProofs.four_arctanIntegralRectangleForAtOne_equiv_piCircleArea}\par
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_equiv_piCircleArea}\par
+\lean{ComputableAnalysis.PiProofs.piFromArctanIntegralRectangleUnitAtOne_width_le_sixteen_div_succ}\par}
+\uses{def:arctan-integral,thm:geometric-arctan-one-area-pi,thm:finite-arctan-integral-comparison}
+Any certified integral construction for
+\[
+  \arctanintegral(1)=\int_0^1 \frac{\dd t}{1+t^2}
+\]
+that agrees with the geometric sector arctangent gives a new raw-real
+representative of \(\pi\):
+\[
+  4\arctanintegral(1)\sim \pi_{\mathrm{area}}.
+\]
+Thus the remaining analytic work is the function-level arctangent-integral
+comparison \code{ArctanIntegralGeomFunctionAgreement}.  Independently, the
+concrete rectangle-sum schedule at \(1\) already gives a completed finite
+integral-style pi route:
+\[
+  4\,\code{arctanIntegralRectangleForAtOne}\sim \pi_{\mathrm{area}}.
+\]
+Because the kernel is nonincreasing on \([0,1]\), the same schedule is also
+available through the monotone-integral interface:
+\[
+  4\,\code{arctanIntegralRectangleMonotoneForAtOne}
+    \sim \pi_{\mathrm{area}}.
+\]
+Equivalently, the unit-branch construction
+\code{arctanIntegralRectangleUnitData} gives the table-facing raw real
+\code{piFromArctanIntegralRectangleUnitAtOne} and theorem
+\code{piFromArctanIntegralRectangleUnitAtOne\_equiv\_piCircleArea}; its
+certified interval width is at most \(16/(n+1)\) at stage \(n\), including
+the displayed outer factor of four.  The same
+rectangle schedule is also packaged as a \code{DefiniteIdentityFor} certificate
+\code{arctanGeomUnitRectangleDefiniteIdentity}; Lean proves the resulting pi
+raw real has the same stage computations as
+\code{piFromArctanIntegralRectangleUnitAtOne}.  The monotone-packaged version
+\code{arctanGeomUnitRectangleMonotoneDefiniteIdentity} records the same
+endpoint identity as a \code{MonotoneDefiniteIdentityFor}, and Lean checks
+that forgetting monotonicity, or transporting the construction by equivalence,
+lands back in the ordinary endpoint-identity interface.  The theorem
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_monotoneDefiniteIdentityFor}
+closes the pi equivalence directly from this monotone endpoint-identity
+interface.  Promoting this one-piece monotone identity to
+\code{GeneralDefiniteIdentityFor} gives the public \code{generalIntegralFor}
+version \code{piFromArctanGeomUnitRectangleGeneralDefiniteIdentity}, again
+with a completed equivalence to \(\pi_{\mathrm{area}}\).  More generally, an
+ordinary \code{DefiniteIdentityFor} can now feed this public general-integral
+pi route as soon as its construction is proved equivalent to a
+\code{generalIntegralFor} construction.
+
+The same pi benchmark can also be closed through calculus.  If a
+definite-integral identity proves that the arctangent kernel integral over
+\([0,1]\) is the endpoint difference of a primitive equivalent to
+\code{arctanGeom(1)}, then
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_definiteIdentityFor}
+closes the pi equivalence for the domain-aware \code{ConstructionFor}
+interface.  The more explicit
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_effectiveFTC} version
+uses an \code{EffectiveFTC} certificate, and
+\code{piFromArctanIntegralFor\_equiv\_piCircleArea\_of\_staticDyadicEffectiveFTC}
+is the same bridge specialized to the static dyadic mesh used by the ordinary
+bounded-integral interface.  Both have endpoint-agreement variants that
+package scheduled endpoint validity and equivalence to the canonical endpoint
+difference, and stage-schedule variants that construct this agreement from an
+explicit cofinal monotone endpoint precision schedule.  The
+candidate-derivative, curvature, and convex certificate routes now have the
+analogous direct pi bridges, endpoint-agreement variants, and stage-schedule
+variants.  The
+curvature route is the one suited to concave primitives such as arctangent on
+the unit interval.  These are supporting bridge theorems for the
+arctangent-integral rows, not additional rows in the pi scoreboard.  The older
+\code{piFromArctanIntegral\_equiv\_piCircleArea\_of\_effectiveFTC} theorem is
+kept for the legacy \code{Integral.Construction} wrapper.
+
+More concretely, any unit-branch integral
+arctangent data whose function representation agrees with \code{arctanGeom}
+gives
+\[
+  4\,\code{arctanIntegralUnit(1)}\sim\pi_{\mathrm{area}}.
+\]
+The completed table-facing instance is the rectangle one above.
+\end{theorem}
+
+\section{Projective and Improper Test Integrals}
+
+The first useful test, simpler than the Gaussian integral but still genuinely
+projective, is
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4+a x^2+1}.
+\]
+For \(a>-2\), the classical value is
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4+a x^2+1}
+    =\frac{\pi}{\sqrt{a+2}}.
+\]
+Thus when \(a=b^2-2\) with rational \(b>0\), the integral should give the
+rational pi multiple \(\pi/b\).  The especially clean benchmark is \(a=-1\):
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}=\pi.
+\]
+
+\begin{definition}[Reciprocal-tail compactification]
+\label{def:reciprocal-tail-compactification}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalTailCompactification}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.cauchyFullLineIntegral_width_le_sixteen_div_succ}
+\lean{ComputableAnalysis.PiProofs.cauchyFullLineIntegral_equiv_piCircleArea}
+\uses{def:arctan-integral}
+\leanok
+For an even rational kernel \(k\), reciprocal folding gives the finite
+unit-interval density
+\[
+  k(x)+\frac{1}{x^2}k(1/x),\qquad 0<x\leq1.
+\]
+When this expression has a rational removable value at zero and a certified
+finite integral construction, we \emph{define} its full-line integral by
+\[
+  2\int_0^1\left(k(x)+\frac{1}{x^2}k(1/x)\right)\,\dd x.
+\]
+This is an explicit rational compactification, not an appeal to an improper
+limit.  The first completed instance is the Cauchy kernel
+\(k(x)=1/(1+x^2)\): its folded density is exactly \(2/(1+x^2)\), including at
+zero.  Lean scales the verified rectangle bracket cellwise and obtains
+\[
+  \code{cauchyFullLineIntegral}
+    =4\int_0^1\frac{\dd x}{1+x^2}
+    \sim\pi_{\mathrm{area}}.
+\]
+Its public raw evaluator has certified width at most \(16/(n+1)\) at stage
+\(n\).  The coarser dyadic rate used in the reciprocal-quartic comparison is
+an auxiliary shrinking envelope, not a rate attached to this evaluator.
+The construction supplies the full-line target needed by the quartic route,
+without counting a tail limit as a primitive operation.
+\end{definition}
+
+\paragraph{A bounded symmetric Cauchy computation.}
+The same kernel also exercises the public finite piecewise-monotone integral
+interface directly.  Lean certifies that \(1/(1+x^2)\) is increasing on
+\([-1,0]\) and decreasing on \([0,1]\), assembles those two rectangle
+pieces at the partition \([-1,0,1]\), and proves the natural formula
+\[
+  2\left(\int_{-1}^{0}\frac{\dd x}{1+x^2}
+    +\int_0^1\frac{\dd x}{1+x^2}\right)
+  \sim \pi_{\mathrm{area}}.
+\]
+Its direct rational interval evaluator has width at most \(16/(n+1)\) at
+stage \(n\).  This is a regression of monotonicity splitting and finite
+integral assembly, not a second arctangent series formula.
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyKernelInterval}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyTwoPieceConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral_equiv_two_rectangle}
+\lean{ComputableAnalysis.IntegralIdentities.symmetricCauchyPiecewiseIntegral_compute_width_le_eight_div_succ}
+\lean{ComputableAnalysis.IntegralIdentities.piSymmetricCauchyPiecewiseIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.piSymmetricCauchyPiecewiseIntegral_compute_width_le_sixteen_div_succ}
+\lean{ComputableAnalysis.PiProofs.piSymmetricCauchyPiecewiseIntegral_equiv_piCircleArea}
+
+\begin{definition}[The reciprocal quartic test kernel]
+\label{def:reciprocal-quartic-test-kernel}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticKernel}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifference}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifferenceJacobian}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyKernel}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator_minus_one_eq_one_plus_square}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyKernel_minus_one_eq_integralKernel}
+\lean{ComputableAnalysis.IntegralIdentities.oneOverOnePlusSquareRaw_compute_eq_shiftedCauchyKernel_minus_one}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticExpectedPiMultiple}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneExpectedPi}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveAgreement}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticMinusOneProjectiveRoute}
+\lean{ComputableAnalysis.IntegralIdentities.ReciprocalQuarticPiParameter}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticPiParameter_minus_one}
+\uses{def:one-over-one-plus-square-kernel}
+\leanok
+Lean names the rational functions used in the substitution:
+\[
+  Q_a(x)=x^4+a x^2+1,\qquad
+  u=x-\frac1x,\qquad
+  \frac{\dd u}{\dd x}=1+\frac1{x^2}.
+\]
+The transformed kernel is the shifted Cauchy kernel
+\[
+  \frac{1}{u^2+a+2}.
+\]
+It also names the unit-folded density obtained by sending the tail
+\([1,\infty]\) back to \([0,1]\) by \(x\mapsto1/x\).
+The parameter predicate \code{ReciprocalQuarticPiParameter(a,b)} records the
+rational pi-multiple case \(a+2=b^2\) with \(b>0\); Lean checks the pi case
+\((a,b)=(-1,1)\).  For this clean case Lean also names the expected raw value
+\code{reciprocalQuarticMinusOneExpectedPi}.  A future full projective
+comparison is expected to supply a
+\code{ReciprocalQuarticMinusOneProjectiveRoute}, namely the already-available
+compact rational construction together with agreement with that expected
+value.
+\end{definition}
+
+\begin{theorem}[Projective substitution for the quartic test]
+\label{thm:reciprocal-quartic-projective-substitution}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifference_quartic_denominator}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_reciprocal_cleared}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalDifferenceJacobian_square_cleared}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuartic_projective_substitution_data}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_symmetric}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_eq_pullback_shiftedCauchy}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy}
+\lean{ComputableAnalysis.IntegralIdentities.shiftedCauchyDenominator_minus_one_pos}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_pos}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominator_minus_one_ge_three_quarters}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_nonneg}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_le_eight_thirds_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_even}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactTailUpperCell}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactTailUpperCell_le}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticDenominatorProduct_minus_one_inv_le_sixteen_ninths}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_lipschitz_on_unit}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_evalInterval}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_evalInterval_width}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_continuous}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous_from_intervalRegular}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.LipschitzOnUnit}
+\lean{ComputableAnalysis.Integral.lipschitzCells_refine}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitLeftRiemann_eq_finite_sum}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_step_refines}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_ordered}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_width}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_nested}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_widthsShrink}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicRaw}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicRaw_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactAffineIntervals}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactAffineIntervals_covers}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactAffineDyadicIntervals_covers}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzLowerSum_affine_eq_unitLowerSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzUpperSum_affine_eq_unitUpperSum}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicCompute_eq_affineCompact}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDyadicIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneUnitDensity_eq_affineCompact}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_valid}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompactDyadicIntegral_width}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticMinusOneCompact_existsConstruction}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy}
+\lean{ComputableAnalysis.IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDenominator_pos}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactOneAddMul_pos}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_cleared}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_strictMono}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_nonnegative}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_covers}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_nonnegative}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_le_lipschitz}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactIntervals_squareSum_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactAreaLoop_squareSum_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicEndpoint}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicEndpoint_denominator_ge}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_lipschitzFactor_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadic_schedule_squareSum_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicTailUpperCell_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicSymmetricTailError}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicSymmetricTailError_valid}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactDyadicSymmetricTailUpper_le}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_leftJacobian_add}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactCoordinate_sub_eq_rightJacobian_sub}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactJacobian_left_mul_le_coordinate_sub}
+\lean{ComputableAnalysis.IntegralIdentities.coordinate_sub_le_projectiveCompactJacobian_right_mul}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactLipschitzSum_overlaps_integralSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricLipschitzSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricIntegralSum}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompact_reflectedLowerCell_eq_rightCell}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompact_reflectedUpperCell_eq_rightCell}
+\lean{ComputableAnalysis.IntegralIdentities.projectiveCompactSymmetricLipschitzSum_overlaps_integralSum}
+\uses{def:reciprocal-quartic-test-kernel}
+\leanok
+The rational algebra behind the test integral is already formalized.  First,
+the quartic denominator is reciprocal after clearing the projective factor:
+\[
+  x^4 Q_a(1/x)=Q_a(x).
+\]
+Consequently, after the usual nonzero-denominator hypotheses are supplied, the
+positive half-line folded to the unit interval has density
+\[
+  \frac{1}{Q_a(x)}+\frac{1}{x^2Q_a(1/x)}
+    =\frac{1+x^2}{Q_a(x)}.
+\]
+Second, for \(x\ne0\),
+\[
+  x^2\left(\left(x-\frac1x\right)^2+a+2\right)
+    =x^4+a x^2+1,
+\]
+and
+\[
+  \left(1+\frac1{x^2}\right)x^2=1+x^2.
+\]
+Pairing the positive half-line point \(x\) with its reciprocal \(1/x\) gives
+\[
+  \int_0^\infty \frac{\dd x}{x^4+a x^2+1}
+   = \frac12\int_0^\infty
+      \frac{1+x^2}{x^4+a x^2+1}\,\dd x.
+\]
+With \(u=x-1/x\), the preceding identities convert the symmetrized density to
+\(\dd u/(u^2+a+2)\).  The reciprocal-tail compactification above now supplies
+the finite full-line Cauchy target in the pi case; the remaining work is to
+prove that this particular projective chart transports the quartic compact
+construction to that target:
+\[
+  \frac12\int_{-\infty}^{\infty}\frac{\dd u}{u^2+a+2}.
+\]
+There is also a compact chart for the clean case that avoids carrying an
+infinite endpoint through the finite algebra.  On \(-1<x<1\), put
+\[
+  u=\frac{x}{1-x^2},\qquad
+  \frac{\dd u}{\dd x}=\frac{1+x^2}{(1-x^2)^2}.
+\]
+Lean now proves directly that its Cauchy pullback is the everywhere-defined rational
+density
+\[
+  \frac{1+x^2}{x^4-x^2+1}
+  =\frac{1+x^2}{(1-x^2)^2}
+    \frac{1}{1+\bigl(x/(1-x^2)\bigr)^2}.
+\]
+The left side has the exact rational value \(2\) at each compact-chart
+endpoint \(x=\pm1\).  Thus the remaining analytic construction can use a
+finite interval with a removable-endpoint certificate, rather than treating a
+tail limit as primitive.  Its direct compact dyadic integral construction is
+now complete, and its finite projective rectangles have been compared directly
+with the completed Cauchy compactification through an explicit shrinking
+rational envelope.  Thus the reciprocal-quartic candidate is now an
+equivalence-complete scoreboard computation.  A general projective
+change-of-variables theorem remains a useful later abstraction, but is no
+longer needed for this concrete pi route.  The compact density itself is a
+total rational-name interval function on every rational interval; its
+interval-level regularity is proved below.  Its direct dyadic raw interval has
+the exact width \(64/2^n\) at stage \(n\).
+For rational chart endpoints away from \(\pm1\), Lean now also proves the
+denominator-cleared displacement identity
+\[
+ \left(\frac{y}{1-y^2}-\frac{x}{1-x^2}\right)
+ (1-y^2)(1-x^2)=(y-x)(1+xy).
+\]
+This is the finite algebra needed to prove that source partitions transport in
+the correct order.  Lean now proves the needed strict-order statement directly:
+if \(-1<x<y<1\), then
+\[
+  \frac{x}{1-x^2}<\frac{y}{1-y^2}.
+\]
+The positive-denominator and \(1+xy>0\) lemmas used in that proof are also
+checked.  Consequently, endpointwise transport carries every finite ordered
+rational cover of a compact subinterval of \((-1,1)\) to an ordered cover of
+its projective image.  On the nonnegative branch, the transported cover is
+also certified nonnegative, so it meets the admissibility condition of the
+existing Cauchy-kernel rectangle and geometric quadrature bounds.
+More precisely, for \(0\le x\le y\le s<1\), Lean proves the finite
+Lipschitz estimate
+\[
+  0\le \frac{y}{1-y^2}-\frac{x}{1-x^2}
+  \le \frac{2(y-x)}{(1-s^2)^2}.
+\]
+It lifts this to the squared mesh of every finite partition.  In particular,
+the midpoint-dyadic source partition of \([0,s]\) after \(n\) refinements has
+projective image mesh bounded by
+\[
+ \left(\frac{2}{(1-s^2)^2}\right)^2\frac{s^2}{2^n}.
+\]
+The endpoint/refinement part is now also explicit.  At outer stage \(m\),
+take
+\[
+  s_m=1-\frac1{2^m}
+  \quad\hbox{and}\quad 6m
+  \text{ midpoint refinements}.
+\]
+Lean proves both \(2^{-m}\le 1-s_m^2\) and the resulting transported
+squared-mesh estimate
+\[
+  \operatorname{mesh}_2\le \frac4{2^{2m}}.
+\]
+The finite cellwise comparison is now checked too.  If
+\(0\le p\le r<1\), the projective secant is squeezed between its two
+endpoint Jacobian evaluations,
+\[
+ J(p)(r-p)\le
+ \frac r{1-r^2}-\frac p{1-p^2}
+ \le J(r)(r-p).
+\]
+Together with the exact pullback identity and the checked \(8\)-Lipschitz
+bound for the compact density, Lean proves that the compact-density
+Lipschitz rectangle sum overlaps the Cauchy-kernel rectangle sum on the
+endpointwise projective image of every finite positive-branch partition.
+The new finite global ingredients are checked too.  The compact density is
+even, and Lean scales the positive-branch brackets by (2) to obtain a
+symmetric finite-core overlap.  Separately, on \(0\le s\le1\), the remaining
+compact endpoint cell has the explicit enclosure
+\[
+ (1-s)\bigl(f(s)+8(1-s)\bigr)\le \frac{32}{3}(1-s),
+\]
+so at \(s_m=1-2^{-m}\) it is at most
+\(\frac{32}{3}2^{-m}\).  This is a rational vanishing tail budget, not an
+improper-limit primitive.  Lean now packages twice this dyadic budget as a
+valid shrinking raw error interval, so the two endpoint cells can be carried
+by certified raw-real arithmetic.  What remains is to add that error to the
+finite projective cores in a single nested construction and identify it with
+the existing compact dyadic integral raw.  No general integral substitution
+theorem is asserted yet.
+That final identification is now tied directly to the existing candidate
+rather than to an abstract integral placeholder.  Lean proves that every
+cell of its affine dyadic bracket, under \(x=2t-1\), is exactly the
+compact-density \(8\)-Lipschitz cell; it lifts this identity to the entire
+finite lower and upper sums.  Hence the concrete candidate raw is literally
+the compact Lipschitz bracket of the affine dyadic partition.  The partition
+split is now an exact theorem as well: the affine image of concrete stage
+\(n+1\) is literally the reflected stage-\(n\) positive mesh followed by that
+positive mesh.  Its left-endpoint bracket is therefore exactly the sum of the
+positive right- and left-endpoint brackets, for both endpoints of the rational
+box.  This is the new oriented symmetric bracket, distinct from the earlier
+auxiliary factor-two bracket.  Reflection is independently proved to turn a
+cover of \([0,s]\) into a cover of \([-s,0]\), so the appended partition covers
+\([-s,s]\).  In particular Lean identifies the actual candidate computation
+at stage \(n+1\), not merely a proxy, with this oriented symmetric bracket on
+the preceding positive mesh.  It also proves that this literal bracket
+overlaps the earlier factor-two symmetric bracket on every dyadic stage.  Thus
+the already-checked positive-branch projective comparison is now connected to
+the actual candidate's finite boxes, rather than only to an auxiliary
+orientation convention.
+
+The remaining issue is now sharply localized at the two mesh cells touching
+\(\pm1\): the projective coordinate is used only on a trimmed core with
+\(s<1\), whereas the actual compact mesh includes its removable endpoint
+cells.  Lean now defines that core by deleting the last cell of the actual
+positive dyadic mesh.  It proves both that it covers
+\([0,1-2^{-n}]\) and that the full positive mesh is exactly this core followed
+by the single cell \([1-2^{-n},1]\).  The factor-two compact bracket of the
+literal trimmed core already overlaps its projective two-branch Cauchy
+rectangle bracket.  The checked dyadic tail raw bounds the two removed cells.
+Lean now also combines those facts at every finite stage: the differently
+oriented candidate endpoint cells are bounded by the same dyadic tail budget,
+and the actual candidate box at stage \(n+1\) overlaps the bracket whose lower
+endpoint is the factor-two trimmed-core lower sum and whose upper endpoint is
+the corresponding upper sum plus that budget.  Thus the literal candidate,
+not a proxy, has been connected through the trimmed projective core to a
+certified tail enclosure.  What remains is a single valid nested raw
+construction joining these core-and-tail brackets to the existing full-line
+Cauchy raw; no general integral substitution theorem or Pi equivalence is
+asserted.
+There is now also a direct finite transfer to the projective Cauchy core.
+It does not incorrectly treat interval overlap as transitive: Lean proves that
+the symmetric compact core has width at most \(32\,2^{-n}\), then widens the
+lower and upper Cauchy-core endpoints by that certified width (and the upper
+endpoint also by the removable-endpoint budget).  The actual compact candidate
+at stage \(n+1\) overlaps this widened projective-Cauchy envelope.  Thus the
+only missing assembly is between a fully explicit shrinking envelope and the
+completed full-line Cauchy raw itself.
+The earlier \(6m\)-refinement projective mesh estimate remains a separate
+resource for that assembly.  It is not silently identified with the literal
+uniform compact candidate at stage \(m\), which has only \(m\) source
+refinements; no equivalence is inferred merely by placing these schedules next
+to one another.
+The rational Cauchy-tail radius is now available independently: at compact
+stage \(n+1\), the reciprocal of the projective endpoint is at most
+\(2\,2^{-n}\).  Including the two symmetric branches gives a vanishing
+dyadic tail scale.  Lean now proves the finite reciprocal rectangle transport
+itself: on every positive cell \([p,r]\), the Cauchy rectangle on
+\([1/r,1/p]\) overlaps the original rectangle, and this lifts by rational
+sum algebra to every finite list of positive cells.  Lean also reverses these
+cells into an ordered cover of the reciprocal interval \([1/b,1/a]\), without
+changing either finite rectangle sum.  The remaining theorem is the
+sufficiently refined tail-partition assembly connecting that finite-list
+result to the already completed full-line Cauchy raw.  Its source-side mesh
+is now a concrete object: Lean affinely transports the midpoint mesh to every
+rational interval \([a,1]\), proves its ordered cover and strict positivity,
+then reverses the reciprocals into an ordered cover of \([1,1/a]\).  The two
+finite Cauchy rectangle brackets are proved to overlap.  The remaining step
+is therefore to join this tail mesh to the projective core, and package the
+certified shrinking boxes as a valid comparison with the existing full-line
+Cauchy raw.  The endpoint choice itself is now formal: using the compact
+endpoint at stage \(n+2\), its reciprocal projective coordinate is positive
+and at most one.  Inverting the resulting tail mesh produces an ordered cover
+from \(1\) exactly to that finite projective coordinate, with overlapping
+finite Cauchy rectangle brackets on its two sides.  Lean now also constructs
+the two finite assemblies needed for the next comparison: it splits the unit
+interval at the rational tail start, and independently appends the reversed
+reciprocal tail to the standard unit mesh.  The latter has exactly the same
+Cauchy endpoint as the projective image of the literal trimmed compact core,
+so their finite Cauchy brackets overlap by cover comparison.  The split unit
+mesh has squared mesh at most \(2^{-n}\) and Cauchy rectangle width at most
+\(2\,2^{-n}\).  The tail start is bounded below by \(2^{-(n+2)}\), giving the
+quantitative datum needed to select a sufficiently fine far-tail schedule.
+That estimate is now checked: source refinement at stage \(5n+8\) gives the
+reversed reciprocal Cauchy tail a rectangle width at most \(2\,2^{-n}\).
+The proof uses a global nonnegative Cauchy cell-width bound and a squared-mesh
+estimate for reciprocal cells.  The remaining task is to combine the
+shrinking core, unit, and tail envelopes with explicit width budgets and use
+them to construct the raw-level equivalence.  That Cauchy-side combination is
+now present: the rapidly refined projective core has width at most
+\(8\,2^{-2n}\), the unit-plus-tail assembly has width at most
+\(4\,2^{-n}\), and the hull of their overlapping rational brackets is a
+common bridge envelope of width at most \(12\,2^{-n}\).  The remaining finite
+comparison has now been reduced to explicit width accounting.  Lean proves
+that the literal trimmed compact core and the fast \(6n\)-refinement schedule
+overlap by applying the finite rational Lipschitz-partition comparison to
+their two covers of the same interval.  This is not an invalid transitive use
+of interval overlap.  Lean now spends both compact bracket widths and the
+removable-endpoint budget explicitly, scales the positive bridge by two for
+the two compact chart branches, and proves that the actual dyadic candidate
+overlaps that two-branch scheduled Cauchy envelope.  The remaining finite
+comparison is between this shrinking envelope and the completed full-line
+Cauchy raw; only then can the raw-level equivalence be packaged.  The
+Cauchy-side comparison has now been separated into a finite lemma of its own:
+the unit mesh appended to the reciprocal tail is enclosed by two standard unit
+meshes, with exactly the omitted near-zero length and the compact tail-mesh
+width as errors.  Lean proves that the relevant dyadic tail start and that
+tail-mesh width both vanish, so the remaining work is to combine these two
+explicit shrinking enclosures.  That finite combination is now checked:
+the literal reciprocal-quartic candidate overlaps a single rational envelope
+centred on the four-unit-mesh Cauchy calculation.  Its terms are precisely the
+near-zero and tail-mesh errors, the scheduled Cauchy bridge width, the two
+compact bracket widths, and the removable endpoint budget.  Lean bounds this
+full envelope by \(224\,2^{-n}\), proves that it contains the scheduled
+full-line Cauchy box, and applies the rational \(\varepsilon/2\) gap argument
+to package a \code{RealRaw.Equiv} between the literal compact dyadic integral
+and the completed Cauchy raw.  Chaining with the established Cauchy--area
+equivalence makes the reciprocal-quartic compact candidate a formal pi
+computation, without a completeness argument.
+For the pi case \(a=-1\), Lean proves the stronger uniform separation
+\[
+  \frac34\le x^4-x^2+1,
+\]
+as well as nonnegativity of the compact density.  In particular it proves the
+needed denominator positivity:
+\[
+  u^2+1>0,\qquad x^4-x^2+1>0.
+\]
+The finite-difference identity
+\[
+ f(x)-f(y)=
+ \frac{(y^2-x^2)\bigl(x^2+y^2+x^2y^2-2\bigr)}
+ {(x^4-x^2+1)(y^4-y^2+1)},
+ \qquad f(x)=\frac{1+x^2}{x^4-x^2+1},
+\]
+is formalized as well.  On the compact interval its factors now give the
+checked rational bound
+\[
+  |f(x)-f(y)|\le 8|x-y|\qquad(-1\le x,y\le1).
+\]
+Consequently the total compact-density evaluator has a literal rational
+\(\varepsilon\)-\(\delta\) certificate on \([-1,1]\), with
+\(\delta=\varepsilon/8\).  More strongly, it now has the checked
+interval-regular evaluator required by the general calculus interfaces: for
+an input interval \(I\), evaluate \(f\) at its rational midpoint \(m\) and
+return
+\[
+  [f(m)-8\operatorname{width}(I),\ f(m)+8\operatorname{width}(I)].
+\]
+This interval contains every rational point-value over \(I\), has width
+\(16\operatorname{width}(I)\), and therefore meets output precision
+\(1/n\) when the input width is at most \(1/(16n)\).  Thus the density is
+now a \code{ContinuousFunctionOnInterval}, with no appeal to topology or
+completed reals.  The generic checked bridge from interval regularity to
+rational \(\varepsilon\)-\(\delta\) continuity also recovers the stated
+continuity certificate.  The affine compact integral construction itself is
+now concrete:
+the affine chart \(x=2t-1\) turns the compact density into
+\[
+  g(t)=2\frac{1+(2t-1)^2}{(2t-1)^4-(2t-1)^2+1},\qquad 0\le t\le1.
+\]
+Lean proves directly that \(g\) is \(32\)-Lipschitz on rational unit inputs
+and names its exact left sums on the ordinary \(2^n\)-cell dyadic mesh.  On
+each rational cell \([p,r]\), it takes the left value \(g(p)\) and brackets
+the cell contribution using the proved oscillation bound
+\[
+ (r-p)\bigl(g(p)-32(r-p)\bigr)
+ \ \le\ \text{cell value}\ \le\
+ (r-p)\bigl(g(p)+32(r-p)\bigr).
+\]
+The density-specific estimate is passed to the generic finite theorem
+\code{Integral.lipschitzCells\_refine}, which proves that midpoint splitting
+raises the lower sum and lowers the upper sum.  The resulting raw boxes are
+nested and have exact width
+\(64/2^n\), hence shrink to zero using rational arithmetic alone.  This is a
+genuine domain-aware integral construction for the affine compact density,
+rather than an unconstrained raw-real witness.  Since Lean also proves
+\(g(t)=2f(2t-1)\) by rational algebra, the identical computation now packages
+an actual \code{ConstructionFor} for the compact density \(f\) on
+\([-1,1]\).  The finite projective/Cauchy comparison is now also checked:
+the literal compact dyadic boxes and scheduled full-line Cauchy boxes lie in
+an explicit shrinking rational envelope.  This proves the concrete compact
+integral equivalent to the area-loop \(\pi\), without an improper-integral
+limit or a completeness principle.
+Thus the full finite pullback identity for \(a=-1\) is now available without
+extra denominator hypotheses, under only \(x\ne0\).  Lean also identifies
+\[
+  \frac{1}{u^2+1}
+\]
+with the existing arctangent kernel \(\code{ArctanGeometry.integralKernel}(u)\),
+so the pi-case quartic test now lands directly in the same rational kernel used
+by the verified rectangle arctangent construction.
+\end{theorem}
+
+\begin{theorem}[Route package for the clean reciprocal quartic test]
+\label{thm:reciprocal-quartic-route-package}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_valid}
+\lean{ComputableAnalysis.PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_valid}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea}
+\lean{ComputableAnalysis.PiProofs.reciprocalQuarticMinusOneProjectiveRoute_equiv_piCircleArea}
+\uses{def:reciprocal-quartic-test-kernel,thm:reciprocal-quartic-projective-substitution,thm:geometric-pi-validity}
+\leanok
+The compact computation \code{piReciprocalQuarticCompact} is a valid raw real,
+computed by the displayed dyadic finite integral on \([-1,1]\), and Lean now
+proves it equivalent to \code{piCircleArea}.  The proof first compares its
+literal finite box with the completed full-line Cauchy raw in a common rational
+envelope, then uses the existing Cauchy--area equivalence.  The clean benchmark
+\[
+  \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}=\pi
+\]
+also has a theorem-facing package.  Lean proves that the expected raw value
+\code{reciprocalQuarticMinusOneExpectedPi} is valid and equivalent to the
+baseline \code{piCircleArea}.  Consequently, once the broader projective-line
+construction is shown to satisfy
+\code{ReciprocalQuarticMinusOneProjectiveAgreement}, the concrete
+\code{reciprocalQuarticMinusOneCompactDyadicConstruction} supplies the
+required compactified rational-density computation on \([-1,1]\), and the
+resulting
+\code{ReciprocalQuarticMinusOneProjectiveRoute} immediately gives a formal
+\(\pi\)-computation equivalent to \code{piCircleArea}.  That general route
+package remains useful, but its additional abstraction no longer blocks the
+concrete scoreboard equivalence.
+\end{theorem}
+
+\section{Trigonometric Functions as Integral Identities}
+
+\begin{definition}[Geometric sine and cosine on an interval]
+\label{def:geometric-trig-on-interval}
+\lean{ComputableAnalysis.IntegralIdentities.geometricCosOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.geometricSinOnInterval}
+\lean{ComputableAnalysis.IntegralIdentities.geometricCosOnInterval_valid}
+\lean{ComputableAnalysis.IntegralIdentities.geometricSinOnInterval_valid}
+\uses{def:geometric-point-functionraw}
+\leanok
+Once the geometric point algorithm is available on a rational interval, its
+coordinate projections restrict to interval-certified sine and cosine
+functions.  This is only a domain wrapper around the geometric algorithms; it
+does not introduce a new definition of sine or cosine.
+\end{definition}
+
+\begin{definition}[Geometric trigonometric integral identities]
+\label{def:geometric-trig-integral-identities}
+\lean{ComputableAnalysis.IntegralIdentities.GeometricTrigIntegralIdentities}
+\uses{def:geometric-trig-on-interval,def:definite-integral-identity}
+\leanok
+The integral identity target for the geometric trigonometric functions on
+\([a,b]\) is the pair of definite integral statements
+\[
+  \int_a^b \cos(t)\dd t
+  \quad\hbox{equals}\quad
+  \sin(b)-\sin(a),
+\]
+\[
+  \int_a^b \sin(t)\dd t
+  \quad\hbox{equals}\quad
+  -\cos(b)+\cos(a).
+\]
+In Lean this is a structure, not yet an existence theorem: it records the
+precise derivative, integral-construction, and endpoint-equivalence data that
+must be supplied by the later geometric proof.
+\end{definition}
+
+\begin{definition}[Inverse elementary integral identities]
+\label{def:inverse-elementary-integral-identities}
+\lean{ComputableAnalysis.IntegralIdentities.InverseElementaryIntegralIdentities}
+\uses{def:definite-integral-identity}
+\leanok
+The inverse trigonometric and logarithmic comparison targets are:
+\[
+  \int_0^x \frac{\dd t}{1+t^2}
+  \quad\hbox{equals the chosen arctangent branch at }x,
+\]
+\[
+  \int_0^x \frac{\dd t}{\sqrt{1-t^2}}
+  \quad\hbox{equals the chosen arcsine branch at }x,
+\]
+and
+\[
+  \int_1^x \frac{\dd t}{t}
+  \quad\hbox{equals the chosen logarithm branch at }x.
+\]
+These are branch-local statements.  They are not imported into the geometric
+definition of trigonometric functions; they are used to prove that different
+constructions agree.
+\end{definition}
+
+\section{Abelian Integrals Related to Trigonometry}
+
+\begin{definition}[Algebraic differentials and Abelian integral inverses]
+\label{def:abelian-trig-integral-representations}
+\lean{ComputableAnalysis.AbelianIntegral.DifferentialRaw}
+\lean{ComputableAnalysis.AbelianIntegral.Raw}
+\lean{ComputableAnalysis.AbelianIntegral.InverseRepresentation}
+\lean{ComputableAnalysis.IntegralIdentities.AbelianTrigIntegralRepresentations}
+\uses{def:inverse-elementary-integral-identities}
+\leanok
+An Abelian integral is represented by an algebraic branch, an algebraic
+differential, a path, and a certified Riemann-sum algorithm.  The elementary
+trigonometric comparison cases include:
+\[
+  \operatorname{arctan}(x)
+  \quad\hbox{from}\quad
+  \int_0^x \frac{\dd t}{1+t^2},
+\]
+\[
+  \operatorname{arcsin}(x)
+  \quad\hbox{from}\quad
+  \int_0^x \frac{\dd t}{w}
+  \quad\hbox{on the curve } w^2=1-t^2.
+\]
+The same infrastructure also records the next Abelian family beyond circular
+trigonometry, for example elliptic integrals such as
+\[
+  \int_0^x
+    \frac{\dd t}{\sqrt{(1-t^2)(1-k^2t^2)}}.
+\]
+This is the natural home for the comparison between circular functions,
+inverse trigonometric functions, logarithmic integrals, and later elliptic
+examples such as ellipse circumference.
+\end{definition}
+
+\section{Proof Order}
+
+The intended formalization order is:
+\begin{enumerate}
+  \item prove the geometric trigonometric algorithms valid and prove the
+  exact identities from Chapter~\ref{ch:rational-circle-trigonometry};
+  \item prove the derivative certificates for geometric sine and cosine from
+  the circle construction;
+  \item feed those certificates into the definite-integral identity package;
+  \item prove arctangent, arcsine, and logarithm integral identities on their
+  chosen branches;
+  \item prove the Abelian inverse representations agree with the corresponding
+  geometric or power-series algorithms.
+\end{enumerate}
+
+This keeps the definitions honest: geometry first, then integrals as
+comparison theorems.

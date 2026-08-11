@@ -566,6 +566,24 @@ def integratedTaylorPrefix (coeffs : Nat -> Rat) : Nat -> Rat -> Rat
       integratedTaylorPrefix coeffs n x +
         coeffs n * (x ^ (n + 1) / ((n + 1 : Nat) : Rat))
 
+/-- The finite endpoint contribution of the next integrated Taylor monomial.
+
+This is the exact rational FTC recurrence for a finite polynomial primitive:
+the endpoint difference of the extended prefix is the previous endpoint
+difference plus the new monomial's endpoint difference.  No limiting integral
+or completed real is involved. -/
+theorem integratedTaylorPrefix_endpointDifference_succ
+    (coeffs : Nat -> Rat) (n : Nat) (a b : Rat) :
+    integratedTaylorPrefix coeffs (n + 1) b -
+        integratedTaylorPrefix coeffs (n + 1) a =
+      (integratedTaylorPrefix coeffs n b -
+        integratedTaylorPrefix coeffs n a) +
+        coeffs n *
+          (b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+            a ^ (n + 1) / ((n + 1 : Nat) : Rat)) := by
+  simp only [integratedTaylorPrefix]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 /-- The corresponding finite derivative prefix `sum_{k<n} c_k x^k`. -/
 def taylorDerivativePrefix (coeffs : Nat -> Rat) : Nat -> Rat -> Rat
   | 0 => fun _x => 0
@@ -846,6 +864,22 @@ theorem expTaylorPrefix_succ (n : Nat) (x : Rat) :
       (integratedTaylorPrefix FormalPowerSeries.expCoeff n x +
         FormalPowerSeries.expCoeff n * (x ^ (n + 1) / ((n + 1 : Nat) : Rat))) = _
   rw [Rat.add_assoc]
+
+/-! The endpoint form of the finite exponential Taylor remainder recurrence.
+
+When one factorial term is appended, its contribution to the endpoint
+difference is exactly the corresponding rational monomial difference.  This
+is the finite endpoint identity used before any tail or integral estimate is
+introduced. -/
+theorem expTaylorPrefix_endpointDifference_succ
+    (n : Nat) (a b : Rat) :
+    expTaylorPrefix (n + 1) b - expTaylorPrefix (n + 1) a =
+      (expTaylorPrefix n b - expTaylorPrefix n a) +
+        FormalPowerSeries.expCoeff n *
+          (b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+            a ^ (n + 1) / ((n + 1 : Nat) : Rat)) := by
+  rw [expTaylorPrefix_succ, expTaylorPrefix_succ]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
 
 /-- On a rational box, every factorial-series monomial is bounded by the
 corresponding uniform factorial tail term.  This is the finite majorization

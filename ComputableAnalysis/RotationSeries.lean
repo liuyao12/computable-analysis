@@ -4,8 +4,10 @@ import ComputableAnalysis.PeanoBaker
 # Finite complex rotation-series algebra
 
 This module joins two already finite calculations: rational complex exponential
-prefixes and constant-coefficient Peano--Baker rotation prefixes.  It does not
-construct a valid complex raw exponential or a continuous ODE solution.
+prefixes and constant-coefficient Peano--Baker rotation prefixes.  It
+constructs a valid factorial-tail complex raw exponential on rational
+imaginary-axis inputs; extending that evaluator to represented inputs and
+identifying it with geometry remain separate work.
 -/
 
 namespace ComputableAnalysis
@@ -746,6 +748,745 @@ theorem rotationSinRaw_width_le_geometric (T : Rat) (n : Nat) :
     ((rotationSinRaw T).compute n).width <=
       (8 * rotationTailMagnitude T 0) * ((1 : Rat) / 2) ^ n :=
   rotationSinCompute_width_le_geometric T n
+
+/-!
+## A uniform bounded-input rotation schedule
+
+The preceding evaluator selects a factorial start from its particular rational
+input.  For a represented parameter, such as the interval computation of
+`pi/2`, it is more useful to have one schedule that works for every rational
+sample in a fixed certified range.  The following construction fixes the
+majorant at `2`; the later represented-input step need only control movement
+of the rational samples, not a changing factorial start.
+-/
+
+/-- The common factorial start for every imaginary-axis input of absolute
+value at most `2`. -/
+def uniformRotationTailStart : Nat :=
+  RationalMajorant.factorialTailStart 2
+
+/-- Each uniform stage advances by an even pair of exponential terms. -/
+def uniformRotationTailTerms (n : Nat) : Nat :=
+  2 * (uniformRotationTailStart + n)
+
+/-- The common scalar factorial majorant at the uniform stage. -/
+def uniformRotationTailMagnitude (n : Nat) : Rat :=
+  RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n)
+
+/-- Four times the common omitted-term bound, enough to absorb one paired
+center update and keep the rational boxes nested. -/
+def uniformRotationTailRadius (n : Nat) : Rat :=
+  4 * uniformRotationTailMagnitude n
+
+/-- The finite rotation prefix attached to the common bounded-input schedule. -/
+def uniformRotationCenter (T : Rat) (n : Nat) : QComplex :=
+  complexPrefix T (uniformRotationTailStart + n)
+
+/- The change in a nonconstant cosine coefficient is controlled by the
+shifted factorial majorant at radius two. -/
+private theorem cosineCoefficient_succ_input_lipschitz (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (k : Nat) :
+    qabs (LinearODE.RotationSystem.cosineCoefficient T (k + 1) -
+        LinearODE.RotationSystem.cosineCoefficient U (k + 1)) <=
+      qabs (T - U) * 2 *
+        RationalMajorant.factorialTailTerm 2 (2 * k + 1) := by
+  have hpower := RationalMajorant.qabs_power_div_factorial_sub_le_two
+    hT hU (2 * k + 1)
+  have hsign := qabs_neg_one_pow (k + 1)
+  have hrewrite :
+      LinearODE.RotationSystem.cosineCoefficient T (k + 1) -
+          LinearODE.RotationSystem.cosineCoefficient U (k + 1) =
+        (T ^ ((2 * k + 1) + 1) / factorialRat ((2 * k + 1) + 1) -
+          U ^ ((2 * k + 1) + 1) / factorialRat ((2 * k + 1) + 1)) *
+          ((-1 : Rat) ^ (k + 1)) := by
+    unfold LinearODE.RotationSystem.cosineCoefficient
+    rw [show 2 * (k + 1) = (2 * k + 1) + 1 by omega]
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+  rw [hrewrite, qabs_mul, hsign, Rat.mul_one]
+  exact hpower
+
+/- The change in a sine coefficient is controlled by the preceding
+factorial term at the same uniform radius. -/
+private theorem sineCoefficient_input_lipschitz (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (k : Nat) :
+    qabs (LinearODE.RotationSystem.sineCoefficient T k -
+        LinearODE.RotationSystem.sineCoefficient U k) <=
+      qabs (T - U) * 2 *
+        RationalMajorant.factorialTailTerm 2 (2 * k) := by
+  have hpower := RationalMajorant.qabs_power_div_factorial_sub_le_two
+    hT hU (2 * k)
+  have hsign := qabs_neg_one_pow k
+  have hrewrite :
+      LinearODE.RotationSystem.sineCoefficient T k -
+          LinearODE.RotationSystem.sineCoefficient U k =
+        (T ^ ((2 * k) + 1) / factorialRat ((2 * k) + 1) -
+          U ^ ((2 * k) + 1) / factorialRat ((2 * k) + 1)) *
+          ((-1 : Rat) ^ k) := by
+    unfold LinearODE.RotationSystem.sineCoefficient
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm]
+  rw [hrewrite, qabs_mul, hsign, Rat.mul_one]
+  exact hpower
+
+/- The coordinatewise rational distance between two finite rotation
+prefixes.  It is only a finite sum of rational absolute values. -/
+def rotationPrefixDistance (T U : Rat) (m : Nat) : Rat :=
+  qabs (LinearODE.RotationSystem.cosinePrefix T m -
+      LinearODE.RotationSystem.cosinePrefix U m) +
+    qabs (LinearODE.RotationSystem.sinePrefix T m -
+      LinearODE.RotationSystem.sinePrefix U m)
+
+/- The factorial budget for the first m rotation-prefix coefficient pairs. -/
+def rotationPrefixSensitivity (m : Nat) : Rat :=
+  2 * RationalMajorant.factorialTailPartial 2 0 (2 * m - 1)
+
+private theorem rotationPrefixDistance_zero (T U : Rat) :
+    rotationPrefixDistance T U 0 = 0 := by
+  unfold rotationPrefixDistance
+  change qabs ((0 : Rat) - 0) + qabs ((0 : Rat) - 0) = 0
+  have hzero : qabs (0 : Rat) = 0 := by
+    rw [qabs_eq_self_of_nonneg (by native_decide)]
+  have hdiff : (0 : Rat) - 0 = 0 := by native_decide
+  rw [hdiff, hzero]
+  native_decide
+
+private theorem rotationPrefixDistance_succ_le (T U : Rat) (m : Nat) :
+    rotationPrefixDistance T U (m + 1) <=
+      rotationPrefixDistance T U m +
+        qabs (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m) +
+        qabs (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m) := by
+  unfold rotationPrefixDistance
+  simp only [LinearODE.RotationSystem.cosinePrefix,
+    LinearODE.RotationSystem.sinePrefix]
+  have hre :
+      (LinearODE.RotationSystem.cosinePrefix T m +
+          LinearODE.RotationSystem.cosineCoefficient T m) -
+        (LinearODE.RotationSystem.cosinePrefix U m +
+          LinearODE.RotationSystem.cosineCoefficient U m) =
+        (LinearODE.RotationSystem.cosinePrefix T m -
+          LinearODE.RotationSystem.cosinePrefix U m) +
+        (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m) := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  have him :
+      (LinearODE.RotationSystem.sinePrefix T m +
+          LinearODE.RotationSystem.sineCoefficient T m) -
+        (LinearODE.RotationSystem.sinePrefix U m +
+          LinearODE.RotationSystem.sineCoefficient U m) =
+        (LinearODE.RotationSystem.sinePrefix T m -
+          LinearODE.RotationSystem.sinePrefix U m) +
+        (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m) := by
+    grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  rw [hre, him]
+  calc
+    qabs (LinearODE.RotationSystem.cosinePrefix T m -
+        LinearODE.RotationSystem.cosinePrefix U m +
+        (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m)) +
+      qabs (LinearODE.RotationSystem.sinePrefix T m -
+        LinearODE.RotationSystem.sinePrefix U m +
+        (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m)) <=
+        (qabs (LinearODE.RotationSystem.cosinePrefix T m -
+          LinearODE.RotationSystem.cosinePrefix U m) +
+          qabs (LinearODE.RotationSystem.cosineCoefficient T m -
+            LinearODE.RotationSystem.cosineCoefficient U m)) +
+          (qabs (LinearODE.RotationSystem.sinePrefix T m -
+            LinearODE.RotationSystem.sinePrefix U m) +
+            qabs (LinearODE.RotationSystem.sineCoefficient T m -
+              LinearODE.RotationSystem.sineCoefficient U m)) :=
+      rat_add_le_add (qabs_add_le _ _) (qabs_add_le _ _)
+    _ = rotationPrefixDistance T U m +
+        qabs (LinearODE.RotationSystem.cosineCoefficient T m -
+          LinearODE.RotationSystem.cosineCoefficient U m) +
+        qabs (LinearODE.RotationSystem.sineCoefficient T m -
+          LinearODE.RotationSystem.sineCoefficient U m) := by
+      unfold rotationPrefixDistance
+      grind [Rat.add_assoc, Rat.add_comm]
+
+private theorem rotationPrefixSensitivity_succ_succ (m : Nat) :
+    rotationPrefixSensitivity (m + 2) =
+      rotationPrefixSensitivity (m + 1) +
+        2 * RationalMajorant.factorialTailTerm 2 (2 * m + 1) +
+        2 * RationalMajorant.factorialTailTerm 2 (2 * m + 2) := by
+  unfold rotationPrefixSensitivity
+  rw [show 2 * (m + 2) - 1 = (2 * m + 2) + 1 by omega,
+    RationalMajorant.factorialTailPartial]
+  rw [show 2 * m + 2 = (2 * m + 1) + 1 by omega,
+    RationalMajorant.factorialTailPartial]
+  have hindex : 2 * (m + 1) - 1 = 2 * m + 1 := by omega
+  rw [hindex]
+  grind [Rat.mul_add, Rat.mul_assoc, Rat.add_assoc, Rat.add_comm]
+
+private theorem rotationPrefixDistance_le_sensitivity (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) :
+    forall m : Nat,
+      rotationPrefixDistance T U m <=
+        qabs (T - U) * rotationPrefixSensitivity m
+  | 0 => by
+      rw [rotationPrefixDistance_zero]
+      unfold rotationPrefixSensitivity
+      change (0 : Rat) <= qabs (T - U) * (2 * 0)
+      calc
+        (0 : Rat) <= 0 := Rat.le_refl
+        _ = qabs (T - U) * (2 * 0) := by
+          rw [Rat.mul_zero]
+          exact (Rat.mul_zero _).symm
+  | 1 => by
+      have hstep := rotationPrefixDistance_succ_le T U 0
+      have hinvOne : ((1 : Rat)⁻¹) = 1 := by native_decide
+      have hcosT : LinearODE.RotationSystem.cosineCoefficient T 0 = 1 := by
+        simp [LinearODE.RotationSystem.cosineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hcosU : LinearODE.RotationSystem.cosineCoefficient U 0 = 1 := by
+        simp [LinearODE.RotationSystem.cosineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hcos : qabs (LinearODE.RotationSystem.cosineCoefficient T 0 -
+          LinearODE.RotationSystem.cosineCoefficient U 0) = 0 := by
+        rw [hcosT, hcosU]
+        have hzero : qabs (0 : Rat) = 0 := by
+          rw [qabs_eq_self_of_nonneg (by native_decide)]
+        rw [show (1 : Rat) - 1 = 0 by native_decide, hzero]
+      have hsinT : LinearODE.RotationSystem.sineCoefficient T 0 = T := by
+        simp [LinearODE.RotationSystem.sineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hsinU : LinearODE.RotationSystem.sineCoefficient U 0 = U := by
+        simp [LinearODE.RotationSystem.sineCoefficient, factorialRat, factorial,
+          Rat.div_def, hinvOne]
+      have hsin : qabs (LinearODE.RotationSystem.sineCoefficient T 0 -
+          LinearODE.RotationSystem.sineCoefficient U 0) = qabs (T - U) := by
+        rw [hsinT, hsinU]
+      rw [rotationPrefixDistance_zero, hcos, hsin, Rat.add_zero,
+        Rat.zero_add] at hstep
+      have hsens : rotationPrefixSensitivity 1 = 2 := by native_decide
+      rw [hsens]
+      calc
+        rotationPrefixDistance T U 1 <= qabs (T - U) := hstep
+        _ = qabs (T - U) * 1 := by rw [Rat.mul_one]
+        _ <= qabs (T - U) * 2 :=
+          Rat.mul_le_mul_of_nonneg_left (by native_decide) (qabs_nonneg _)
+  | m + 2 => by
+      have ih := rotationPrefixDistance_le_sensitivity T U hT hU (m + 1)
+      have hstep := rotationPrefixDistance_succ_le T U (m + 1)
+      have hcos := cosineCoefficient_succ_input_lipschitz T U hT hU m
+      have hsin := sineCoefficient_input_lipschitz T U hT hU (m + 1)
+      have hsens := rotationPrefixSensitivity_succ_succ m
+      rw [hsens]
+      calc
+        rotationPrefixDistance T U (m + 2) <=
+            rotationPrefixDistance T U (m + 1) +
+              qabs (LinearODE.RotationSystem.cosineCoefficient T (m + 1) -
+                LinearODE.RotationSystem.cosineCoefficient U (m + 1)) +
+              qabs (LinearODE.RotationSystem.sineCoefficient T (m + 1) -
+                LinearODE.RotationSystem.sineCoefficient U (m + 1)) := hstep
+        _ <= qabs (T - U) * rotationPrefixSensitivity (m + 1) +
+              (qabs (T - U) * 2 *
+                RationalMajorant.factorialTailTerm 2 (2 * m + 1)) +
+              (qabs (T - U) * 2 *
+                RationalMajorant.factorialTailTerm 2 (2 * m + 2)) :=
+          rat_add_le_add (rat_add_le_add ih hcos) hsin
+        _ = qabs (T - U) *
+            (rotationPrefixSensitivity (m + 1) +
+              2 * RationalMajorant.factorialTailTerm 2 (2 * m + 1) +
+              2 * RationalMajorant.factorialTailTerm 2 (2 * m + 2)) := by
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.add_assoc]
+
+/- The finite sensitivity budget is uniformly bounded by sixteen on the
+fixed input range.  It is intentionally coarse: it buys one simple rational
+radius for a later represented-input construction. -/
+private theorem rotationPrefixSensitivity_le_sixteen (m : Nat) :
+    rotationPrefixSensitivity m <= 16 := by
+  unfold rotationPrefixSensitivity
+  calc
+    2 * RationalMajorant.factorialTailPartial 2 0 (2 * m - 1) <= 2 * 8 :=
+      Rat.mul_le_mul_of_nonneg_left
+        (RationalMajorant.factorialTailPartial_two_le_eight (2 * m - 1))
+        (by native_decide)
+    _ = 16 := by native_decide
+
+/- A common bounded-input factorial prefix is Lipschitz in its rational
+input.  The statement is still entirely finite: both sides refer only to a
+specified pair of rational prefixes. -/
+theorem uniformRotationCenter_input_lipschitz (T U : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (n : Nat) :
+    qabs ((uniformRotationCenter T n).re - (uniformRotationCenter U n).re) <=
+        16 * qabs (T - U) /\
+      qabs ((uniformRotationCenter T n).im - (uniformRotationCenter U n).im) <=
+        16 * qabs (T - U) := by
+  have hdistance := rotationPrefixDistance_le_sensitivity T U hT hU
+    (uniformRotationTailStart + n)
+  have hsensitivity := rotationPrefixSensitivity_le_sixteen
+    (uniformRotationTailStart + n)
+  have hsum : rotationPrefixDistance T U (uniformRotationTailStart + n) <=
+      qabs (T - U) * 16 := by
+    calc
+      rotationPrefixDistance T U (uniformRotationTailStart + n) <=
+          qabs (T - U) *
+            rotationPrefixSensitivity (uniformRotationTailStart + n) := hdistance
+      _ <= qabs (T - U) * 16 :=
+        Rat.mul_le_mul_of_nonneg_left hsensitivity (qabs_nonneg _)
+  have hre :
+      qabs (LinearODE.RotationSystem.cosinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.cosinePrefix U
+          (uniformRotationTailStart + n)) <=
+        rotationPrefixDistance T U (uniformRotationTailStart + n) := by
+    unfold rotationPrefixDistance
+    have himnonneg : 0 <= qabs (LinearODE.RotationSystem.sinePrefix T
+        (uniformRotationTailStart + n) -
+      LinearODE.RotationSystem.sinePrefix U
+        (uniformRotationTailStart + n)) := qabs_nonneg _
+    grind
+  have him :
+      qabs (LinearODE.RotationSystem.sinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.sinePrefix U
+          (uniformRotationTailStart + n)) <=
+        rotationPrefixDistance T U (uniformRotationTailStart + n) := by
+    unfold rotationPrefixDistance
+    have hrenonneg : 0 <= qabs (LinearODE.RotationSystem.cosinePrefix T
+        (uniformRotationTailStart + n) -
+      LinearODE.RotationSystem.cosinePrefix U
+        (uniformRotationTailStart + n)) := qabs_nonneg _
+    grind
+  constructor <;> unfold uniformRotationCenter complexPrefix
+  · calc
+      qabs (LinearODE.RotationSystem.cosinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.cosinePrefix U
+          (uniformRotationTailStart + n)) <=
+          rotationPrefixDistance T U (uniformRotationTailStart + n) := hre
+      _ <= qabs (T - U) * 16 := hsum
+      _ = 16 * qabs (T - U) := by grind [Rat.mul_comm]
+  · calc
+      qabs (LinearODE.RotationSystem.sinePrefix T
+          (uniformRotationTailStart + n) -
+        LinearODE.RotationSystem.sinePrefix U
+          (uniformRotationTailStart + n)) <=
+          rotationPrefixDistance T U (uniformRotationTailStart + n) := him
+      _ <= qabs (T - U) * 16 := hsum
+      _ = 16 * qabs (T - U) := by grind [Rat.mul_comm]
+
+/-- A symmetric complex box around the uniform bounded-input rotation
+prefix. -/
+def uniformRotationBox (T : Rat) (n : Nat) : QBox :=
+  let c := uniformRotationCenter T n
+  let r := uniformRotationTailRadius n
+  { lo := { re := c.re - r, im := c.im - r },
+    hi := { re := c.re + r, im := c.im + r } }
+
+private theorem uniform_rotation_tail_start (n : Nat) :
+    (2 : Rat) <= (((uniformRotationTailTerms n + 1 : Nat) : Rat) / 2) := by
+  let s := uniformRotationTailStart
+  have hs := RationalMajorant.factorialTailStart_satisfies (2 : Rat)
+  have hmono := RationalMajorant.factorialTailStart_mono (2 : Rat) s (s + 2 * n)
+    (by simpa [s, uniformRotationTailStart] using hs)
+  change (2 : Rat) <= (((2 * (s + n) + 1 : Nat) : Rat) / 2)
+  have hterms : s + (s + 2 * n) + 1 = 2 * (s + n) + 1 := by omega
+  rw [hterms] at hmono
+  exact hmono
+
+private theorem uniformRotationTailMagnitude_nonneg (n : Nat) :
+    0 <= uniformRotationTailMagnitude n := by
+  unfold uniformRotationTailMagnitude
+  exact RationalMajorant.factorialTailTerm_nonneg (by native_decide) _
+
+private theorem uniformRotationTailMagnitude_next_le_quarter (n : Nat) :
+    uniformRotationTailMagnitude (n + 1) <=
+      uniformRotationTailMagnitude n * ((1 : Rat) / 2) ^ 2 := by
+  have h := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    (C := (2 : Rat)) (N := uniformRotationTailTerms n)
+    (by native_decide) (uniform_rotation_tail_start n) 2
+  change RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms (n + 1)) <=
+    RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n) *
+      ((1 : Rat) / 2) ^ 2
+  have hterms : uniformRotationTailTerms (n + 1) =
+      uniformRotationTailTerms n + 2 := by
+    unfold uniformRotationTailTerms
+    omega
+  rw [hterms]
+  exact h
+
+private theorem uniformRotationTailRadius_drop_majorizes (n : Nat) :
+    uniformRotationTailMagnitude n <=
+      uniformRotationTailRadius n - uniformRotationTailRadius (n + 1) := by
+  have hnext := uniformRotationTailMagnitude_next_le_quarter n
+  have hmag0 := uniformRotationTailMagnitude_nonneg n
+  have hquarter : ((1 : Rat) / 2) ^ 2 = (1 : Rat) / 4 := by native_decide
+  rw [hquarter] at hnext
+  have hfour : 4 * uniformRotationTailMagnitude (n + 1) <=
+      uniformRotationTailMagnitude n := by
+    calc
+      4 * uniformRotationTailMagnitude (n + 1) <=
+          4 * (uniformRotationTailMagnitude n * ((1 : Rat) / 4)) :=
+        Rat.mul_le_mul_of_nonneg_left hnext (by native_decide)
+      _ = uniformRotationTailMagnitude n := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  unfold uniformRotationTailRadius
+  grind [Rat.sub_eq_add_neg]
+
+private theorem uniformRotationCenter_succ (T : Rat) (n : Nat) :
+    uniformRotationCenter T (n + 1) =
+      QComplex.add
+        (QComplex.add (uniformRotationCenter T n)
+          (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n)))
+        (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n + 1)) := by
+  unfold uniformRotationCenter uniformRotationTailTerms
+  rw [← expPartial_imaginary_even_split T (uniformRotationTailStart + (n + 1)),
+    ← expPartial_imaginary_even_split T (uniformRotationTailStart + n)]
+  rw [show 2 * (uniformRotationTailStart + (n + 1)) =
+      (2 * (uniformRotationTailStart + n) + 1) + 1 by omega]
+  rw [expPartial_succ, expPartial_succ]
+
+/-- The bounded-input center is still the literal even exponential prefix. -/
+theorem uniformRotationCenter_eq_expPartial (T : Rat) (n : Nat) :
+    uniformRotationCenter T n =
+      ComplexSeries.expPartial (imaginaryAxis T) (uniformRotationTailTerms n) := by
+  unfold uniformRotationCenter uniformRotationTailTerms
+  symm
+  exact expPartial_imaginary_even_split T (uniformRotationTailStart + n)
+
+private theorem uniformRotationTailMagnitude_middle_le (n : Nat) :
+    RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n + 1) <=
+      uniformRotationTailMagnitude n := by
+  have hhalf := RationalMajorant.factorialTailTerm_succ_le_half
+    (by native_decide : (0 : Rat) <= 2) (uniformRotationTailTerms n)
+    (RationalMajorant.factorialTailRatio_le_half_from_start
+      2 (uniformRotationTailTerms n) 0 (uniform_rotation_tail_start n))
+  have hmag0 := uniformRotationTailMagnitude_nonneg n
+  change RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n + 1) <=
+      RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n) *
+        ((1 : Rat) / 2)
+    at hhalf
+  calc
+    RationalMajorant.factorialTailTerm 2 (uniformRotationTailTerms n + 1) <=
+        uniformRotationTailMagnitude n * ((1 : Rat) / 2) := by
+      simpa [uniformRotationTailMagnitude] using hhalf
+    _ <= uniformRotationTailMagnitude n := by
+      have hhalf_le_one : (1 : Rat) / 2 <= 1 := by native_decide
+      calc
+        uniformRotationTailMagnitude n * ((1 : Rat) / 2) <=
+            uniformRotationTailMagnitude n * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hhalf_le_one hmag0
+        _ = uniformRotationTailMagnitude n := by rw [Rat.mul_one]
+
+private theorem uniform_rotation_even_term_coordinate_bounds (T : Rat)
+    (hT : qabs T <= 2) (n : Nat) :
+    -uniformRotationTailMagnitude n <=
+        (ComplexSeries.expTerm
+          (imaginaryAxis T) (uniformRotationTailTerms n)).re /\
+      (ComplexSeries.expTerm
+          (imaginaryAxis T) (uniformRotationTailTerms n)).re <=
+        uniformRotationTailMagnitude n := by
+  have hterm := even_term_coordinate_bounds T (uniformRotationTailStart + n)
+  have hmono := RationalMajorant.factorialTailTerm_mono (qabs_nonneg T) hT
+    (2 * (uniformRotationTailStart + n))
+  constructor
+  · change -RationalMajorant.factorialTailTerm 2
+        (2 * (uniformRotationTailStart + n)) <=
+      (ComplexSeries.expTerm
+        (imaginaryAxis T) (2 * (uniformRotationTailStart + n))).re
+    calc
+      -RationalMajorant.factorialTailTerm 2
+          (2 * (uniformRotationTailStart + n)) <=
+        -RationalMajorant.factorialTailTerm (qabs T)
+          (2 * (uniformRotationTailStart + n)) := Rat.neg_le_neg hmono
+      _ <= (ComplexSeries.expTerm
+        (imaginaryAxis T) (2 * (uniformRotationTailStart + n))).re := hterm.1
+  · change (ComplexSeries.expTerm
+        (imaginaryAxis T) (2 * (uniformRotationTailStart + n))).re <=
+      RationalMajorant.factorialTailTerm 2
+        (2 * (uniformRotationTailStart + n))
+    exact Rat.le_trans hterm.2 hmono
+
+private theorem uniform_rotation_odd_term_coordinate_bounds (T : Rat)
+    (hT : qabs T <= 2) (n : Nat) :
+    -uniformRotationTailMagnitude n <=
+        (ComplexSeries.expTerm
+          (imaginaryAxis T) (uniformRotationTailTerms n + 1)).im /\
+      (ComplexSeries.expTerm
+          (imaginaryAxis T) (uniformRotationTailTerms n + 1)).im <=
+        uniformRotationTailMagnitude n := by
+  have hterm := odd_term_coordinate_bounds T (uniformRotationTailStart + n)
+  have hmono := RationalMajorant.factorialTailTerm_mono (qabs_nonneg T) hT
+    (2 * (uniformRotationTailStart + n) + 1)
+  have hmiddle := uniformRotationTailMagnitude_middle_le n
+  constructor
+  · change -RationalMajorant.factorialTailTerm 2
+        (2 * (uniformRotationTailStart + n)) <=
+      (ComplexSeries.expTerm
+        (imaginaryAxis T) (2 * (uniformRotationTailStart + n) + 1)).im
+    calc
+      -RationalMajorant.factorialTailTerm 2
+          (2 * (uniformRotationTailStart + n)) <=
+        -RationalMajorant.factorialTailTerm 2
+          (2 * (uniformRotationTailStart + n) + 1) := by
+            apply Rat.neg_le_neg
+            simpa [uniformRotationTailMagnitude, uniformRotationTailTerms] using hmiddle
+      _ <= -RationalMajorant.factorialTailTerm (qabs T)
+          (2 * (uniformRotationTailStart + n) + 1) := Rat.neg_le_neg hmono
+      _ <= (ComplexSeries.expTerm
+        (imaginaryAxis T) (2 * (uniformRotationTailStart + n) + 1)).im := hterm.1
+  · change (ComplexSeries.expTerm
+        (imaginaryAxis T) (2 * (uniformRotationTailStart + n) + 1)).im <=
+      RationalMajorant.factorialTailTerm 2
+        (2 * (uniformRotationTailStart + n))
+    calc
+      (ComplexSeries.expTerm
+          (imaginaryAxis T) (2 * (uniformRotationTailStart + n) + 1)).im <=
+        RationalMajorant.factorialTailTerm (qabs T)
+          (2 * (uniformRotationTailStart + n) + 1) := hterm.2
+      _ <= RationalMajorant.factorialTailTerm 2
+          (2 * (uniformRotationTailStart + n) + 1) := hmono
+      _ <= RationalMajorant.factorialTailTerm 2
+          (2 * (uniformRotationTailStart + n)) := by
+        simpa [uniformRotationTailMagnitude, uniformRotationTailTerms] using hmiddle
+
+private theorem uniform_rotation_even_term_im_eq_zero (T : Rat) (n : Nat) :
+    (ComplexSeries.expTerm
+      (imaginaryAxis T) (uniformRotationTailTerms n)).im = 0 := by
+  change (ComplexSeries.expTerm
+    (imaginaryAxis T) (2 * (uniformRotationTailStart + n))).im = 0
+  rw [expTerm_imaginary_even]
+
+private theorem uniform_rotation_odd_term_re_eq_zero (T : Rat) (n : Nat) :
+    (ComplexSeries.expTerm
+      (imaginaryAxis T) (uniformRotationTailTerms n + 1)).re = 0 := by
+  change (ComplexSeries.expTerm
+    (imaginaryAxis T) (2 * (uniformRotationTailStart + n) + 1)).re = 0
+  rw [expTerm_imaginary_odd]
+
+private theorem uniformRotationCenter_step_re_bounds (T : Rat)
+    (hT : qabs T <= 2) (n : Nat) :
+    -uniformRotationTailMagnitude n <=
+        (uniformRotationCenter T (n + 1)).re - (uniformRotationCenter T n).re /\
+      (uniformRotationCenter T (n + 1)).re - (uniformRotationCenter T n).re <=
+        uniformRotationTailMagnitude n := by
+  have hcenter := uniformRotationCenter_succ T n
+  have heven := uniform_rotation_even_term_coordinate_bounds T hT n
+  have hoddzero := uniform_rotation_odd_term_re_eq_zero T n
+  rw [hcenter]
+  change -uniformRotationTailMagnitude n <=
+      ((uniformRotationCenter T n).re +
+        (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n)).re +
+          (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n + 1)).re) -
+        (uniformRotationCenter T n).re /\
+    ((uniformRotationCenter T n).re +
+        (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n)).re +
+          (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n + 1)).re) -
+        (uniformRotationCenter T n).re <= uniformRotationTailMagnitude n
+  rw [hoddzero]
+  grind [Rat.sub_eq_add_neg]
+
+private theorem uniformRotationCenter_step_im_bounds (T : Rat)
+    (hT : qabs T <= 2) (n : Nat) :
+    -uniformRotationTailMagnitude n <=
+        (uniformRotationCenter T (n + 1)).im - (uniformRotationCenter T n).im /\
+      (uniformRotationCenter T (n + 1)).im - (uniformRotationCenter T n).im <=
+        uniformRotationTailMagnitude n := by
+  have hcenter := uniformRotationCenter_succ T n
+  have hodd := uniform_rotation_odd_term_coordinate_bounds T hT n
+  have hevenzero := uniform_rotation_even_term_im_eq_zero T n
+  rw [hcenter]
+  change -uniformRotationTailMagnitude n <=
+      ((uniformRotationCenter T n).im +
+        (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n)).im +
+          (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n + 1)).im) -
+        (uniformRotationCenter T n).im /\
+    ((uniformRotationCenter T n).im +
+        (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n)).im +
+          (ComplexSeries.expTerm (imaginaryAxis T) (uniformRotationTailTerms n + 1)).im) -
+        (uniformRotationCenter T n).im <= uniformRotationTailMagnitude n
+  rw [hevenzero]
+  grind [Rat.sub_eq_add_neg]
+
+theorem uniformRotationBox_width (T : Rat) (n : Nat) :
+    (uniformRotationBox T n).width = 2 * uniformRotationTailRadius n := by
+  unfold uniformRotationBox QBox.width
+  dsimp
+  grind [Rat.sub_eq_add_neg]
+
+theorem uniformRotationBox_height (T : Rat) (n : Nat) :
+    (uniformRotationBox T n).height = 2 * uniformRotationTailRadius n := by
+  unfold uniformRotationBox QBox.height
+  dsimp
+  grind [Rat.sub_eq_add_neg]
+
+private theorem uniformRotationBox_ordered (T : Rat) (n : Nat) :
+    0 <= (uniformRotationBox T n).width /\
+      0 <= (uniformRotationBox T n).height := by
+  have hmag0 := uniformRotationTailMagnitude_nonneg n
+  rw [uniformRotationBox_width, uniformRotationBox_height]
+  unfold uniformRotationTailRadius
+  constructor <;>
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.mul_nonneg (by native_decide) hmag0)
+
+private theorem uniformRotationBox_nested_step (T : Rat)
+    (hT : qabs T <= 2) (n : Nat) :
+    QBox.NestedIn (uniformRotationBox T (n + 1)) (uniformRotationBox T n) := by
+  have hre := uniformRotationCenter_step_re_bounds T hT n
+  have him := uniformRotationCenter_step_im_bounds T hT n
+  have hdrop := uniformRotationTailRadius_drop_majorizes n
+  unfold QBox.NestedIn uniformRotationBox
+  dsimp
+  constructor
+  · constructor <;> grind [Rat.sub_eq_add_neg]
+  · constructor <;> grind [Rat.sub_eq_add_neg]
+
+private theorem uniformRotationBox_nested (T : Rat) (hT : qabs T <= 2) :
+    forall n m : Nat, n <= m ->
+      QBox.NestedIn (uniformRotationBox T m) (uniformRotationBox T n)
+  | n, 0, hnm => by
+      have hn : n = 0 := by omega
+      subst n
+      exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+  | n, m + 1, hnm => by
+      by_cases hlast : n = m + 1
+      · subst n
+        exact ⟨QComplex.le_refl _, QComplex.le_refl _⟩
+      · have hnm' : n <= m := by omega
+        exact qbox_nested_trans
+          (uniformRotationBox_nested_step T hT m)
+          (uniformRotationBox_nested T hT n m hnm')
+
+/-- At one common factorial stage, changing the rational input by at most
+`eps` only widens the rotation box by `16 * eps` in each coordinate. -/
+theorem uniformRotationBox_contained_expand_of_input_near (T U eps : Rat)
+    (hT : qabs T <= 2) (hU : qabs U <= 2) (n : Nat)
+    (hnear : qabs (T - U) <= eps) :
+    QBox.NestedIn (uniformRotationBox T n)
+      (QBox.expand (uniformRotationBox U n) (16 * eps)) := by
+  have hcenter := uniformRotationCenter_input_lipschitz T U hT hU n
+  have hfactor : 16 * qabs (T - U) <= 16 * eps :=
+    Rat.mul_le_mul_of_nonneg_left hnear (by native_decide)
+  have hreupper : (uniformRotationCenter T n).re -
+      (uniformRotationCenter U n).re <= 16 * eps :=
+    Rat.le_trans (self_le_qabs _) (Rat.le_trans hcenter.1 hfactor)
+  have hrelower : -(16 * eps) <= (uniformRotationCenter T n).re -
+      (uniformRotationCenter U n).re := by
+    calc
+      -(16 * eps) <= -qabs ((uniformRotationCenter T n).re -
+          (uniformRotationCenter U n).re) := Rat.neg_le_neg
+            (Rat.le_trans hcenter.1 hfactor)
+      _ <= (uniformRotationCenter T n).re -
+          (uniformRotationCenter U n).re := neg_qabs_le_self _
+  have himupper : (uniformRotationCenter T n).im -
+      (uniformRotationCenter U n).im <= 16 * eps :=
+    Rat.le_trans (self_le_qabs _) (Rat.le_trans hcenter.2 hfactor)
+  have himlower : -(16 * eps) <= (uniformRotationCenter T n).im -
+      (uniformRotationCenter U n).im := by
+    calc
+      -(16 * eps) <= -qabs ((uniformRotationCenter T n).im -
+          (uniformRotationCenter U n).im) := Rat.neg_le_neg
+            (Rat.le_trans hcenter.2 hfactor)
+      _ <= (uniformRotationCenter T n).im -
+          (uniformRotationCenter U n).im := neg_qabs_le_self _
+  unfold QBox.NestedIn QBox.expand uniformRotationBox
+  dsimp
+  constructor
+  · constructor <;> grind [Rat.sub_eq_add_neg]
+  · constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- A later finite rotation prefix at a nearby bounded rational input fits in
+the earlier box after the same explicit input-error enlargement.  This is the
+finite-prefix Cauchy certificate used for represented-angle evaluation. -/
+theorem uniformRotationBox_future_contained_expand_of_input_near
+    (T U eps : Rat) (hT : qabs T <= 2) (hU : qabs U <= 2)
+    (k n : Nat) (hkn : k <= n) (hnear : qabs (T - U) <= eps) :
+    QBox.NestedIn (uniformRotationBox T n)
+      (QBox.expand (uniformRotationBox U k) (16 * eps)) := by
+  apply QBox.nested_trans (uniformRotationBox_nested T hT k n hkn)
+  exact uniformRotationBox_contained_expand_of_input_near T U eps hT hU k hnear
+
+/-- Uniform bounded-input boxes have exactly the same coordinate widths as
+the ordinary rational-input evaluator at the endpoint 2. This reuses the
+already checked geometric width modulus while leaving the centers free to
+vary with the bounded rational input. -/
+private theorem uniformRotationBox_width_eq_rotationBox_two (T : Rat) (n : Nat) :
+    (uniformRotationBox T n).width = (rotationBox 2 n).width := by
+  rw [uniformRotationBox_width, rotationBox_width]
+  unfold uniformRotationTailRadius rotationTailRadius
+    uniformRotationTailMagnitude rotationTailMagnitude
+    uniformRotationTailTerms rotationTailTerms
+    uniformRotationTailStart rotationTailStart
+  have hqabs : qabs (2 : Rat) = 2 := by native_decide
+  rw [hqabs]
+
+private theorem uniformRotationBox_height_eq_rotationBox_two (T : Rat) (n : Nat) :
+    (uniformRotationBox T n).height = (rotationBox 2 n).height := by
+  rw [uniformRotationBox_height, rotationBox_height]
+  unfold uniformRotationTailRadius rotationTailRadius
+    uniformRotationTailMagnitude rotationTailMagnitude
+    uniformRotationTailTerms rotationTailTerms
+    uniformRotationTailStart rotationTailStart
+  have hqabs : qabs (2 : Rat) = 2 := by native_decide
+  rw [hqabs]
+
+theorem uniformRotationBox_widths_shrink (T : Rat) :
+    ComplexRaw.WidthsShrinkToZero (uniformRotationBox T) := by
+  intro eps
+  obtain ⟨N, hN⟩ := rotationBox_widths_shrink 2 eps
+  refine ⟨N, ?_⟩
+  intro n hn
+  have h := hN n hn
+  constructor
+  · rw [uniformRotationBox_width_eq_rotationBox_two]
+    exact h.1
+  · rw [uniformRotationBox_height_eq_rotationBox_two]
+    exact h.2
+
+/-- Every common-prefix rotation box is ordered in its real coordinate. -/
+theorem uniformRotationBox_width_nonneg (T : Rat) (n : Nat) :
+    0 <= (uniformRotationBox T n).width :=
+  (uniformRotationBox_ordered T n).1
+
+/-- Every common-prefix rotation box is ordered in its imaginary coordinate. -/
+theorem uniformRotationBox_height_nonneg (T : Rat) (n : Nat) :
+    0 <= (uniformRotationBox T n).height :=
+  (uniformRotationBox_ordered T n).2
+
+/-- One factorial stage works uniformly for the coordinate widths of every
+bounded-input rotation prefix.  The centers depend on the input, but the
+tail radius is the fixed radius-two majorant. -/
+theorem uniformRotationBoxes_widths_shrink_uniform (eps : QPos) :
+    Exists fun N : Nat => forall (T : Rat) (n : Nat), N <= n ->
+      (uniformRotationBox T n).width <= eps.val /\
+        (uniformRotationBox T n).height <= eps.val := by
+  obtain ⟨N, hN⟩ := rotationBox_widths_shrink 2 eps
+  refine ⟨N, ?_⟩
+  intro T n hn
+  have h := hN n hn
+  constructor
+  · rw [uniformRotationBox_width_eq_rotationBox_two]
+    exact h.1
+  · rw [uniformRotationBox_height_eq_rotationBox_two]
+    exact h.2
+
+/-- The rotation-series evaluator with one common tail schedule for all
+rational inputs satisfying the bound qabs T <= 2. It is the rational
+building block for represented-angle evaluation. -/
+def uniformRotationExpRaw (T : Rat) : ComplexRaw where
+  compute := uniformRotationBox T
+
+theorem uniformRotationExpRaw_compute (T : Rat) (n : Nat) :
+    (uniformRotationExpRaw T).compute n = uniformRotationBox T n := rfl
+
+theorem uniformRotationExpRaw_valid (T : Rat) (hT : qabs T <= 2) :
+    (uniformRotationExpRaw T).Valid := by
+  unfold ComplexRaw.Valid ComplexRaw.ValidCompute uniformRotationExpRaw
+  constructor
+  · exact uniformRotationBox_ordered T
+  · constructor
+    · intro n m hnm
+      have hnest := uniformRotationBox_nested T hT n m hnm
+      exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
+    · exact uniformRotationBox_widths_shrink T
 
 /-- Certified abstract real handles for the two rational-input rotation
 coordinates. -/

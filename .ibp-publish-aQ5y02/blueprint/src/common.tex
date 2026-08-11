@@ -1,0 +1,81 @@
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{xcolor}
+\usepackage{tikz}
+
+\IfFileExists{blueprint.sty}{
+  \usepackage{blueprint}
+}{
+  \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+}
+
+\providecommand{\hypersetup}[1]{}
+\providecommand{\texorpdfstring}[2]{#1}
+\providecommand{\lean}[1]{\texttt{\detokenize{#1}}}
+\providecommand{\uses}[1]{}
+\providecommand{\leanok}{}
+\providecommand{\mathlibok}{}
+\providecommand{\home}[1]{}
+\providecommand{\github}[1]{}
+\providecommand{\dochome}[1]{}
+
+\usepackage[capitalize,nameinlink,noabbrev]{cleveref}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}[definition]{Example}
+\newtheorem{remark}[definition]{Remark}
+
+\theoremstyle{plain}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{conjecture}[definition]{Conjecture}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Qi}{\Q[i]}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\dd}{\,d}
+\newcommand{\ldot}{\mathbin{\ldotp}}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\seq}[1]{\left(#1\right)_{n\in\N}}
+\newcommand{\interval}[2]{\left[#1,#2\right]}
+\newcommand{\cbox}[2]{\left[\!\left[ #1,#2\right]\!\right]}
+\newcommand{\overlap}{\operatorname{overlap}}
+\newcommand{\close}{\operatorname{Close}}
+\newcommand{\Equiv}{\operatorname{Equiv}}
+\newcommand{\Valid}{\operatorname{Valid}}
+\newcommand{\RealRaw}{\operatorname{RealRaw}}
+\newcommand{\ComplexRaw}{\operatorname{ComplexRaw}}
+\newcommand{\poly}{\operatorname{poly}}
+\newcommand{\Root}{\operatorname{Root}}
+\newcommand{\mesh}{\operatorname{mesh}}
+\newcommand{\riem}{\operatorname{Riemann}}
+\newcommand{\Sec}{\operatorname{Sec}}
+% Dot-qualified names distinguish certified presentations from a single
+% completed function.  They deliberately render as names rather than as
+% mathematical subscripts: arctan.geom and arctan.series are separate raw
+% algorithms until an explicit equivalence is proved.
+\newcommand{\arctangeom}{\mathop{\texttt{arctan.geom}}\nolimits}
+\newcommand{\arctanseries}{\mathop{\texttt{arctan.series}}\nolimits}
+\newcommand{\arctanintegral}{\mathop{\texttt{arctan.integral}}\nolimits}
+\newcommand{\arctanintegralrect}{\mathop{\texttt{arctan.integral.rectangle}}\nolimits}
+\newcommand{\arctanintegraltriangle}{\mathop{\texttt{arctan.integral.triangle}}\nolimits}
+\def\endpoint{\operatorname{Endpoint}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\humanchecked}{\textcolor{blue}{[human-checked]}}
+% Status colours always come with an explicit textual legend in the surrounding
+% table; colour is a visual aid, not the only proof-status signal.
+\newcommand{\formallyproved}[1]{\textcolor{green!45!black}{#1}}
+\newcommand{\computeverifiable}[1]{\textcolor{orange!85!black}{#1}}

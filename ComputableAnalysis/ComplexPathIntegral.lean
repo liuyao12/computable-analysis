@@ -1,4 +1,5 @@
 import ComputableAnalysis.ComplexInterval
+import ComputableAnalysis.ComplexMultiplication
 
 /-!
 # Complex path integrals over polygonal paths
@@ -186,6 +187,221 @@ structure EntireBoxFunctionRaw where
   point : FunctionRaw
   boxCompute : QBox -> QBox
 
+/-! Finite endpoint algebra for polygonal paths. -/
+
+def polygonalDisplacementTo (start : QComplex) : List QComplex -> QComplex
+  | [] => QComplex.zero
+  | stop :: rest =>
+      QComplex.add (QComplex.sub stop start)
+        (polygonalDisplacementTo stop rest)
+
+theorem polygonalDisplacementTo_append_endpoint
+    (start endpoint : QComplex) (vertices : List QComplex) :
+    polygonalDisplacementTo start (vertices ++ [endpoint]) =
+      QComplex.sub endpoint start := by
+  induction vertices generalizing start with
+  | nil =>
+      cases endpoint
+      cases start
+      simp [polygonalDisplacementTo, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.zero]
+      constructor <;> exact Rat.add_zero _
+  | cons vertex vertices ih =>
+      simp [polygonalDisplacementTo, ih, QComplex.sub, QComplex.add,
+        QComplex.neg]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+theorem polygonalDisplacementTo_closed
+    (start : QComplex) (vertices : List QComplex) :
+    polygonalDisplacementTo start (vertices ++ [start]) =
+      QComplex.zero := by
+  rw [polygonalDisplacementTo_append_endpoint]
+  cases start
+  simp [QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero]
+  grind [Rat.sub_eq_add_neg]
+
+/-- Finite primitive-cancellation value for the constant differential
+`c dz` along a polygonal path. -/
+def polygonalConstantDifferentialDisplacement
+    (c start : QComplex) (vertices : List QComplex) : QComplex :=
+  QComplex.mul c (polygonalDisplacementTo start vertices)
+
+theorem polygonalConstantDifferentialDisplacement_append_endpoint
+    (c start endpoint : QComplex) (vertices : List QComplex) :
+    polygonalConstantDifferentialDisplacement c start
+        (vertices ++ [endpoint]) =
+      QComplex.mul c (QComplex.sub endpoint start) := by
+  unfold polygonalConstantDifferentialDisplacement
+  rw [polygonalDisplacementTo_append_endpoint]
+
+theorem polygonalConstantDifferentialDisplacement_closed
+    (c start : QComplex) (vertices : List QComplex) :
+    polygonalConstantDifferentialDisplacement c start
+        (vertices ++ [start]) = QComplex.zero := by
+  unfold polygonalConstantDifferentialDisplacement
+  rw [polygonalDisplacementTo_closed]
+  cases c
+  simp [QComplex.mul, QComplex.zero]
+  constructor <;> grind
+
+/-- The exact rational increment of the quadratic primitive `z ↦ z^2/2`.
+This is a finite algebraic proxy for integrating the polynomial differential
+`z dz` along one polygonal edge. -/
+def quadraticPrimitiveIncrement (start stop : QComplex) : QComplex :=
+  QComplex.scaleRat (1 / 2)
+    (QComplex.sub (QComplex.mul stop stop) (QComplex.mul start start))
+
+def polygonalQuadraticPrimitiveTo (start : QComplex) : List QComplex -> QComplex
+  | [] => QComplex.zero
+  | stop :: rest =>
+      QComplex.add (quadraticPrimitiveIncrement start stop)
+        (polygonalQuadraticPrimitiveTo stop rest)
+
+theorem polygonalQuadraticPrimitiveTo_append_endpoint
+    (start endpoint : QComplex) (vertices : List QComplex) :
+    polygonalQuadraticPrimitiveTo start (vertices ++ [endpoint]) =
+      quadraticPrimitiveIncrement start endpoint := by
+  induction vertices generalizing start with
+  | nil =>
+      cases endpoint
+      cases start
+      simp [polygonalQuadraticPrimitiveTo, quadraticPrimitiveIncrement,
+        QComplex.sub, QComplex.add, QComplex.neg, QComplex.scaleRat,
+        QComplex.mul, QComplex.zero]
+      constructor <;> exact Rat.add_zero _
+  | cons vertex vertices ih =>
+      simp [polygonalQuadraticPrimitiveTo, ih]
+      cases endpoint
+      cases start
+      cases vertex
+      simp [quadraticPrimitiveIncrement, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.scaleRat, QComplex.mul]
+      constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm]
+
+theorem polygonalQuadraticPrimitiveTo_closed
+    (start : QComplex) (vertices : List QComplex) :
+    polygonalQuadraticPrimitiveTo start (vertices ++ [start]) =
+      QComplex.zero := by
+  rw [polygonalQuadraticPrimitiveTo_append_endpoint]
+  cases start
+  simp [quadraticPrimitiveIncrement, QComplex.sub, QComplex.add,
+    QComplex.neg, QComplex.scaleRat, QComplex.mul, QComplex.zero]
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- The finite endpoint increment for the monomial primitive
+`z^(degree+1)/(degree+1)`.  The power is the executable rational-complex
+natural power; no infinite series or analytic power function is involved. -/
+def monomialPrimitiveIncrement (degree : Nat) (start stop : QComplex) : QComplex :=
+  QComplex.scaleRat (((degree + 1 : Nat) : Rat)⁻¹)
+    (QComplex.sub
+      (QComplex.natPow stop (degree + 1))
+      (QComplex.natPow start (degree + 1)))
+
+def polygonalMonomialPrimitiveTo (degree : Nat) (start : QComplex) :
+    List QComplex -> QComplex
+  | [] => QComplex.zero
+  | stop :: rest =>
+      QComplex.add (monomialPrimitiveIncrement degree start stop)
+        (polygonalMonomialPrimitiveTo degree stop rest)
+
+theorem polygonalMonomialPrimitiveTo_append_endpoint
+    (degree : Nat) (start endpoint : QComplex) (vertices : List QComplex) :
+    polygonalMonomialPrimitiveTo degree start (vertices ++ [endpoint]) =
+      monomialPrimitiveIncrement degree start endpoint := by
+  induction vertices generalizing start with
+  | nil =>
+      cases endpoint
+      cases start
+      simp [polygonalMonomialPrimitiveTo, monomialPrimitiveIncrement,
+        QComplex.sub, QComplex.add, QComplex.neg, QComplex.scaleRat,
+        QComplex.natPow, QComplex.mul, QComplex.zero]
+      constructor <;> exact Rat.add_zero _
+  | cons vertex vertices ih =>
+      simp [polygonalMonomialPrimitiveTo, ih]
+      cases endpoint
+      cases start
+      cases vertex
+      simp [monomialPrimitiveIncrement, QComplex.sub, QComplex.add,
+        QComplex.neg, QComplex.scaleRat, QComplex.natPow, QComplex.mul]
+      constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.mul_assoc, Rat.mul_comm]
+
+theorem polygonalMonomialPrimitiveTo_closed
+    (degree : Nat) (start : QComplex) (vertices : List QComplex) :
+    polygonalMonomialPrimitiveTo degree start (vertices ++ [start]) =
+      QComplex.zero := by
+  rw [polygonalMonomialPrimitiveTo_append_endpoint]
+  cases start
+  simp [monomialPrimitiveIncrement, QComplex.sub, QComplex.add,
+    QComplex.neg, QComplex.scaleRat, QComplex.natPow, QComplex.mul,
+    QComplex.zero]
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+/-- Finite coefficient-list primitive evaluator.  A coefficient at index `k`
+contributes `c * z^(k+1)/(k+1)`; the recursion is an executable finite sum. -/
+def polynomialPrimitiveEvalAux : List QComplex -> QComplex -> Nat -> QComplex
+  | [], _z, _degree => QComplex.zero
+  | coefficient :: rest, z, degree =>
+      QComplex.add
+        (QComplex.mul coefficient
+          (QComplex.scaleRat (((degree + 1 : Nat) : Rat)⁻¹)
+            (QComplex.natPow z (degree + 1))))
+        (polynomialPrimitiveEvalAux rest z (degree + 1))
+
+def polynomialPrimitiveEval (coefficients : List QComplex) (z : QComplex) : QComplex :=
+  polynomialPrimitiveEvalAux coefficients z 0
+
+def polynomialPrimitiveIncrement
+    (coefficients : List QComplex) (start stop : QComplex) : QComplex :=
+  QComplex.sub (polynomialPrimitiveEval coefficients stop)
+    (polynomialPrimitiveEval coefficients start)
+
+def polygonalPolynomialPrimitiveTo
+    (coefficients : List QComplex) (start : QComplex) : List QComplex -> QComplex
+  | [] => QComplex.zero
+  | stop :: rest =>
+      QComplex.add (polynomialPrimitiveIncrement coefficients start stop)
+        (polygonalPolynomialPrimitiveTo coefficients stop rest)
+
+theorem polygonalPolynomialPrimitiveTo_append_endpoint
+    (coefficients : List QComplex) (start endpoint : QComplex)
+    (vertices : List QComplex) :
+    polygonalPolynomialPrimitiveTo coefficients start
+        (vertices ++ [endpoint]) =
+      polynomialPrimitiveIncrement coefficients start endpoint := by
+  have htel (x y z : QComplex) :
+      QComplex.add (QComplex.sub y x) (QComplex.sub z y) =
+        QComplex.sub z x := by
+    cases x
+    cases y
+    cases z
+    simp [QComplex.sub, QComplex.add, QComplex.neg]
+    constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+  have haddzero (x : QComplex) : QComplex.add x QComplex.zero = x := by
+    cases x
+    simp [QComplex.add, QComplex.zero]
+    constructor <;> exact Rat.add_zero _
+  induction vertices generalizing start with
+  | nil =>
+      simp [polygonalPolynomialPrimitiveTo]
+      exact haddzero _
+  | cons vertex vertices ih =>
+      simp only [List.cons_append, polygonalPolynomialPrimitiveTo]
+      rw [ih]
+      exact htel _ _ _
+
+theorem polygonalPolynomialPrimitiveTo_closed
+    (coefficients : List QComplex) (start : QComplex)
+    (vertices : List QComplex) :
+    polygonalPolynomialPrimitiveTo coefficients start
+        (vertices ++ [start]) = QComplex.zero := by
+  rw [polygonalPolynomialPrimitiveTo_append_endpoint]
+  cases start
+  simp [polynomialPrimitiveIncrement, polynomialPrimitiveEval,
+    QComplex.sub, QComplex.add, QComplex.neg, QComplex.zero]
+  constructor <;> grind
+
 /-- A point on the straight segment from `a` to `b`, with parameter `k/n`. -/
 def segmentPoint (a b : QComplex) (n : Nat) (k : Nat) : QComplex :=
   QComplex.add a
@@ -266,6 +482,34 @@ def polygonalIntegralRawEntire
     (f : EntireBoxFunctionRaw)
     (vertices : List QComplex) : ComplexRaw where
   compute := fun n => polygonalIntegralBoxEntire f vertices n
+
+/-- The finite certificate needed to promote a polygonal box computation to a
+computable complex raw.  The three fields are exactly the project's
+algorithmic validity obligations: every box is ordered, later stages refine
+earlier ones, and every requested positive coordinate tolerance is eventually
+met.  The certificate deliberately leaves those estimates as explicit finite
+data rather than deriving them from completed-real convergence. -/
+structure PolygonalIntegralCertificate
+    (f : EntireBoxFunctionRaw) (vertices : List QComplex) where
+  ordered : forall n, (polygonalIntegralBoxEntire f vertices n).Ordered
+  nested : forall n m, n <= m ->
+    QBox.NestedIn (polygonalIntegralBoxEntire f vertices m)
+      (polygonalIntegralBoxEntire f vertices n)
+  widths_shrink : ComplexRaw.WidthsShrinkToZero
+    (polygonalIntegralBoxEntire f vertices)
+
+theorem polygonalIntegralRawEntire_valid
+    {f : EntireBoxFunctionRaw} {vertices : List QComplex}
+    (certificate : PolygonalIntegralCertificate f vertices) :
+    (polygonalIntegralRawEntire f vertices).Valid := by
+  refine ⟨?_, ?_, certificate.widths_shrink⟩
+  · intro n
+    exact (QBox.ordered_iff_width_height_nonneg
+      (polygonalIntegralBoxEntire f vertices n)).1
+      (certificate.ordered n)
+  · intro n m hnm
+    have hnest := certificate.nested n m hnm
+    exact ⟨hnest.1.1, hnest.2.1, hnest.1.2, hnest.2.2⟩
 
 def zero : QComplex := QComplex.zero
 def one : QComplex := QComplex.one

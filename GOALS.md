@@ -15,6 +15,855 @@ not a description of the current module graph. The checked blueprint
 
 ## Ground Layer
 
+**Easy benchmark cluster — checked.**  The foundation exposes the rational
+triangle inequality through `qabs_add_le`, `qabs_add_le_three`, and
+`qabs_sub_le`; the list-level `qabs_ratListSum_le` now supplies the finite
+sum form, with append laws for composing finite error lists.  The series layer
+now exposes recursive finite arithmetic and geometric sums, including the
+general rational progression identities `Series.arithmeticProgressionSum_eq`
+and `Series.arithmeticProgressionSum_constant`/`Series.arithmeticProgressionSum_le_succ`/
+`Series.arithmeticProgressionSum_le_of_le`/
+`Series.arithmeticProgressionSum_nonneg`/`Series.arithmeticProgressionSum_pos`,
+with exact identities `Series.arithmeticSum_eq`,
+`Series.arithmeticSum_nonneg`/`Series.arithmeticSum_le_succ`,
+`Series.arithmeticSum_pos`,
+`Series.arithmeticSum_le_of_le`, `Series.arithmeticSum_reaches`, and
+`Series.arithmeticSum_reaches_later`,
+`Series.geometricSum_one`, `Series.geometricSum_zero_ratio`,
+`Series.geometricSum_mul_sub`, and
+`Series.geometricSum_tail_eq`, together with
+`Series.geometricSum_le_inv_one_sub`,
+`Series.geometricSum_tail_nonneg`,
+`Series.geometricSum_tail_pos`,
+`Series.geometricSum_tail_le_one`,
+`Series.geometricSum_tail_lt_one`,
+`Series.half_pow_eq_one_div_nat_two_pow`,
+`Series.half_pow_le_one_div_succ`, and
+`Series.geometricSum_half_tail_le_one_div_succ`, together with the comparison
+theorems `Series.pow_le_half_pow` and
+`Series.geometricSum_tail_le_one_div_succ_of_le_half`,
+and `Series.geometricHalfRaw`/`Series.geometricHalfRaw_valid` now package
+the ratio-half geometric series as an ordered, nested `RealRaw` with an
+explicit (2/(n+1)) width modulus.  The general
+`Series.geometricRaw` package extends this to every rational ratio
+`0 <= r <= 1/2`, with exact value `1/(1-r)` and the same explicit width
+schedule,
+and `Series.geometricHalfRaw_equiv_two` proves that this raw series represents
+the exact rational sum 2.
+`Series.geometricSum_nonneg`/`Series.geometricSum_le_succ`,
+`Series.geometricSum_pos`,
+`Series.geometricSum_eq`; the finite binomial
+identity is already exposed as
+`ExpProofs.euler_binomial_prefix_nat_expansion`.  These cover the finite
+certificate core of benchmark items 91, 68, 66, and 44; infinite convergence
+remains a separate obligation and is not claimed by these finite theorems.
+The worked identities `Series.binomial_square` and `Series.binomial_cube` give
+the first quadratic and cubic instances of the finite binomial theorem in the
+Infinite Series chapter.
+The rational term and partial-sum constructors, their interior and boundary
+recurrences, and `Series.binomialSum_eq_pow` now expose the full finite
+binomial identity over the rationals. `Series.binomialSum_eq_pow_of_reached`
+transports that identity to every later accumulator stage after the last
+nonzero coefficient. Infinite convergence remains a separate obligation.
+For benchmark item 14, `DirichletSeries.zetaTwoTerm_le_telescopeStep` and
+`DirichletSeries.zetaTwoFiniteTail_le_telescoping` expose the finite reciprocal-
+square telescoping and tail budget used by the certified Basel-series
+representation.  The public recurrences `zetaTwoPartial_succ` and
+`zetaTwoPartial_nonneg`,
+`zetaTwoTerm_pos` and `zetaTwoPartial_lt_succ`,
+`zetaTwoFiniteTail_succ`, together with `zetaTwoFiniteTail_nonneg`, expose the
+finite accumulator and sign certificates.  The strict-tail theorem
+`zetaTwoFiniteTail_pos` makes positive width explicit for every nonempty tail.
+The monotonicity lemmas
+`zetaTwoPartial_le_succ` and `zetaTwoPartial_le_of_le`, plus the coarse tail
+bound `zetaTwoFiniteTail_le_tailBound`, expose the interval-order data used by
+the representation.  The equality with pi^2/6 remains open.  The derived
+`zetaTwoFiniteTail_lt_one_div` gives the strict finite tail width used by the
+interval representation, and `zetaTwoInterval_width_le_one_div` exposes the
+corresponding bound directly at the interval level.  The interval-level
+certificate `zetaTwoInterval_width_pos` gives strict nondegeneracy at positive
+stages, while `zetaTwoInterval_lo_nonneg` and `zetaTwoInterval_hi_pos` expose
+the endpoint signs.  The interval-level certificates `zetaTwoInterval_nested` and
+`zetaTwoRaw_validCompute` now expose
+the complete ordered, shrinking finite representation boundary as well.
+The public selector `zetaTwoInterval_reaches_of_positive_tolerance` now turns
+the denominator budget into an explicit finite stage for every positive
+rational width request.
+The exact decomposition
+`DirichletSeries.zetaTwoPartial_add_finiteTail_eq` now exposes every later
+finite partial sum as its earlier partial sum plus the explicit intervening
+tail. This makes the finite accumulator/tail interface compositional while
+leaving the classical Basel equality unresolved.
+The strict companion
+`DirichletSeries.zetaTwoPartial_add_nonempty_finiteTail_lt_interval_hi` now
+places every genuinely later partial sum strictly below the earlier padded
+endpoint, preserving the same finite rational boundary.
+The new `DirichletSeries.zetaTwoFiniteTail_add` theorem gives an exact
+concatenation law for two finite tail blocks, shifting the second block to
+the correct denominator range. This supports compositional finite error
+accounting while leaving the classical Basel equality unresolved.
+The companion `DirichletSeries.zetaTwoTerm_antitone` and
+`DirichletSeries.zetaTwoFiniteTail_le_firstTerm_block` lemmas expose the
+monotone-term and rectangular block bounds used by finite error schedules.
+The stage-10000 enclosure
+`DirichletSeries.zetaTwoInterval_contains_basel_decimal_10000` tightens the
+earlier stage-1000 decimal certificate to the rational target `1.6449340668`.
+The higher-stage certificate
+`DirichletSeries.zetaTwoInterval_contains_basel_decimal_100000` contains the
+same target at stage 100,000, strengthening the finite evidence while leaving
+the Basel identity open.
+The integer-exponent family now has matching executable stage selectors
+`DirichletSeries.zetaNatInterval_width_le_of_denominator_budget` and
+`DirichletSeries.zetaNatInterval_reaches_of_positive_tolerance`: every fixed
+exponent `p >= 2` gets a rational interval stage for any requested positive
+tolerance, using the same potential-infinity denominator schedule. This is a
+finite strengthening of the Dirichlet-series boundary, not a claim that a
+completed zeta value has been constructed.
+The propagation certificates
+`DirichletSeries.zetaNatInterval_later_contained_in_target_of_budget` and
+`DirichletSeries.zetaNatPartial_later_in_target_of_budget` now transport an
+earlier target enclosure to every later stage, including its explicit width
+budget. This supplies the same compositional target interface for the
+integer-exponent family without introducing a completed infinite sum.
+The matching generic finite-tail accumulator
+`DirichletSeries.zetaNatFiniteTail` and decomposition
+`DirichletSeries.zetaNatPartial_add_finiteTail_eq` now make that family
+compositional at every fixed exponent, not only at `p = 2`.  The comparison
+theorems `DirichletSeries.zetaNatFiniteTail_le_zetaTwoFiniteTail` and
+`DirichletSeries.zetaNatFiniteTail_le_tailBound` transfer the explicit
+reciprocal-square tail budget to every `p >= 2`.
+The endpoint bridge
+`DirichletSeries.zetaNatPartial_add_finiteTail_le_interval_hi` then places
+each later finite partial sum directly below the corresponding generic
+interval upper endpoint.
+The paired enclosure theorem
+`DirichletSeries.zetaNatInterval_contains_partial_add_finiteTail` records both
+endpoints explicitly for each finite tail-extended partial sum.
+The finite triangular telescoping identity
+`Series.triangularTelescopingTerm_eq_reciprocal` and
+`Series.triangularTelescopingSum_eq` now cover benchmark item 42 at the finite
+certificate level.  The explicit remainder
+`Series.triangularTelescopingSum_tail_eq` and strict bound
+`Series.triangularTelescopingSum_lt_two` expose the finite convergence
+boundary.  The new
+`Series.triangularTelescopingRaw` packages the same sums as a valid raw-real
+interval algorithm, with exact value 2 certified by
+`Series.triangularTelescopingRaw_equiv_two`. The public selector
+`Series.triangularTelescopingRaw_reaches_of_positive_tolerance` now exposes a
+finite stage for every requested positive rational width.
+The alternating-series layer now also proves even partial sums are monotone,
+odd partial sums are antitone, and the endpoint intervals are explicitly
+nested via `Series.AlternatingRaw.intervals_nested`; this supplies the order
+half of the generic alternating interval construction used by the Leibniz
+route.  `Series.AlternatingRaw.toRealRaw` and
+`Series.AlternatingRaw.toRealRaw_valid` now package that construction directly
+as a valid `RealRaw`.  The concrete
+`Series.AlternatingRaw.leibnizAlternatingRaw` instance supplies the
+nonnegative, decreasing, shrinking term certificate for (1/(2n+1)), the
+finite alternating-series core of benchmark item 26.
+The exact square inequality `am_gm_square_bound` covers the rational core of
+benchmark item 38, and `sqrtRaw_le_am_gm` now lifts it to the certified
+nonnegative square-root representation.
+Its normalized form `am_gm_rational_half` now exposes the direct rational
+inequality `a*b <= ((a+b)/2)^2` used by later certificate estimates.
+The equality condition is also checked by
+`am_gm_rational_half_eq_iff`, namely equality exactly when `a=b`.  For the
+represented square-root branch, `sqrtRaw_am_gm_eq_of_eq` certifies the matching
+equality when the two inputs coincide, and `sqrtRaw_am_gm_eq_iff` proves that
+this is the only equality case.  The paired finite certificate `am_gm_four`
+extends the same rational boundary to four nonnegative inputs:
+  `a*b*c*d <= ((a+b+c+d)/4)^4`, without invoking a general real-valued AM--GM
+  theorem.
+  The new `DyadicAMGM` binary-tree certificate extends this to every finite
+  power-of-two number of nonnegative rational leaves:
+  `product_le_average_pow` proves the exact (2^k)-term bound by recursive
+  pairing.  It remains a finite rational theorem, not arbitrary-(n) AM--GM.
+The two-coordinate rational inequality `cauchy_schwarz_2d` covers the finite
+certificate core of benchmark item 78 without expanding the project's scope
+to functional analysis.  Its equality characterization
+`cauchy_schwarz_2d_eq_iff` is also checked: equality holds exactly when
+`a*d=b*c`.
+The three-coordinate extension `cauchy_schwarz_3d` is now checked by an
+explicit sum of three rational squares.  It deepens the finite inequality
+support for item 78 while remaining entirely coordinate-level and avoiding
+any functional-analysis infrastructure.
+Its equality characterization `cauchy_schwarz_3d_eq_iff` is also checked:
+equality is equivalent to vanishing of the three rational (2\times2) minors
+`a*y-b*x`, `a*z-c*x`, and `b*z-c*y`.
+The four-coordinate inequality `cauchy_schwarz_4d` is now checked by the
+corresponding six-minor rational sum-of-squares certificate, further extending
+the same finite support without introducing an inner-product space.  Its
+equality characterization `cauchy_schwarz_4d_eq_iff` records exactly the six
+vanishing rational minors.
+The five-coordinate extension `cauchy_schwarz_5d` adds the corresponding ten
+minor sum-of-squares certificate, still entirely rational and finite.
+The six-coordinate extension `cauchy_schwarz_6d` adds the corresponding
+fifteen-minor certificate, extending the same finite rational support without
+introducing a general vector-space layer.
+The companion `cauchy_schwarz_6d_eq_of_minors` records the corresponding
+fifteen-minor equality witness explicitly.
+The interval primitive `QInterval.intersection_ordered_of_overlaps` likewise
+proves that an explicit intersection of two ordered overlapping rational
+intervals is ordered, preserving the project's data-first treatment of finite
+common enclosures.
+Its equality form `cauchy_schwarz_5d_eq_iff` records the ten vanishing minors
+as the exact finite equality condition.
+The generic executable finite evaluator `Series.powerSum`, with its
+`powerSum_succ` recurrence, `powerSum_nonneg`, `powerSum_le_succ`, and
+`powerSum_le_of_le` certificates, now covers the
+finite recursive core of benchmark item 77 for every fixed exponent.  The
+strict certificate `Series.powerSum_pos` additionally records positivity for
+positive exponents and sums of length greater than one.  The
+bridge lemmas `Series.powerSum_zero_exponent` and
+`Series.powerSum_one_exponent` recover the counting sum and the existing
+arithmetic-sum evaluator from this common definition, while
+`Series.powerSum_two_exponent` through `Series.powerSum_eight_exponent`
+identify the generic evaluator with the named low-degree power sums.  The
+closed forms `Series.squareSum_eq`, `Series.cubeSum_eq`,
+`Series.fourthPowerSum_eq`, and
+`Series.fifthPowerSum_eq`/`Series.sixthPowerSum_eq`/`Series.seventhPowerSum_eq`
+remain the checked low-degree formulas. The new
+`Series.powerSum_four_closed_form` exposes the fourth-power formula directly
+through the generic executable evaluator. The matching
+`Series.powerSum_five_closed_form`, `Series.powerSum_six_closed_form`, and
+`Series.powerSum_eight_finite_bridge` now exposes the eighth-power finite
+accumulator through the generic evaluator.  The explicit eighth-power
+polynomial identity is now checked as `Series.eighthPowerSum_eq` and
+`Series.powerSum_eight_closed_form`.
+low-degree family; a general Faulhaber formula remains open.
+The exact rational identities `RationalCircle.pythagoreanTriple_identity` and
+`RationalCircle.pythagoreanTriple_positive` cover the polynomial and positive
+rational core of benchmark item 23; primitive-integral classification remains
+separate.
+The coordinate identities `RationalCircle.rightTriangle_axis_pythagorean` and
+`RationalCircle.rightTriangle_pythagorean` cover the rational orthogonality
+core of benchmark item 4; general Euclidean-space formulations remain outside
+the current boundary.
+The symmetry and base-length identities
+`RationalCircle.isosceles_axis_symmetry` and
+`RationalCircle.isosceles_base_normSq` are the rational-coordinate core of
+benchmark item 65; equality of the associated angles remains outside the
+current boundary.
+The existing squared-coordinate law of cosines
+`RationalCircle.Stage.segmentNormSq_law_of_cosines` covers the exact rational
+geometry core of benchmark item 94; the accompanying equilateral specialization
+`RationalCircle.Stage.dot_eq_half_of_unit_equilateral` is already formalized,
+while normalized-angle semantics remain a separate layer.
+The exact rational identities `RationalCircle.heron_squared_identity` and
+`RationalCircle.heron_product_nonneg` cover the squared algebraic and
+nonnegative rational core of benchmark item 57.  The new
+`RationalCircle.heronAreaRaw` packages the nonnegative square-root area as a
+valid raw-real output with an explicit square-root specification.  The concrete certificate
+`RationalCircle.heron_three_four_five` evaluates the Heron product for the
+3-4-5 triangle to 36 (squared area 36), while
+`RationalCircle.heron_three_four_five_area_witness` exposes the exact rational
+area witness 6 without claiming a general square-root construction, and
+`RationalCircle.heron_three_four_five_area_raw_equiv_six` transports the
+computed Heron square-root raw directly to that witness, while
+`RationalCircle.heron_three_four_five_strict_pos` records nondegeneracy.
+The algebraic bridge `sqrt_thirty_six_eq_six` now identifies the project’s
+certified square-root representation with that same rational witness.
+The exact rational identity
+`RationalCircle.ptolemy_oriented_chord_numerator` is the common-denominator
+oriented-chord core of benchmark item 95; the full chord-length statement
+remains open. `RationalCircle.ptolemy_squared_coordinate_certificate` now
+adds a square-root-free squared shadow for the concrete cyclic quadrilateral,
+including an explicit rational witness for the four-side cross-term.
+The rational power-of-a-point identity
+`RationalCircle.horizontalChord_power_identity` covers the directed-segment
+core of benchmark item 55. The new
+`RationalCircle.horizontalChord_power_nonneg_of_outside` supplies the finite
+sign certificate when the external point is outside the chord interval, and
+`RationalCircle.horizontalChord_power_neg_of_inside` supplies the strict
+interior sign. `RationalCircle.horizontalChordPowerSqrtRaw` and
+`RationalCircle.horizontalChordPowerSqrtRaw_valid` now lift the nonnegative
+outside product to a certified square-root raw algorithm; its Euclidean-length
+interpretation remains open. `RationalCircle.horizontalChordPowerSqrtRaw_spec`
+also exposes the square-root specification for later composition.
+`RationalCircle.horizontalChordPowerSqrtRaw_equiv_of_square` now identifies
+that output with the nonnegative rational representative whenever a supplied
+rational square witness exists. The concrete
+`horizontalChordPowerSqrtRaw_equiv_four_fifths` specialization checks the
+outside-point instance (16/25mapsto4/5) by exact rational arithmetic.
+The reusable `PiProofs.pointSegmentLengthRaw` interface now applies the same
+certified square-root algorithm to any rational-coordinate squared distance,
+with validity and `SqrtRawSpec` theorems for later Ptolemy and polygonal-length
+work. The full Euclidean Ptolemy identity remains open.
+The finite Ptolemy length certificate now closes that gap for one concrete
+rational cyclic quadrilateral: all six raw chord lengths are equivalent to
+explicit rational witnesses satisfying Ptolemy’s identity. The general
+Euclidean theorem remains outside the current boundary.
+The checked rational unit-circle group law and stereographic chart addition
+formulas in `RationalCircle.Trigonometry` are the finite geometric core of
+benchmark item 17; the represented complex-exponential bridge remains open.
+The executable point-power package `RationalCircle.Trigonometry.pointPow`,
+with `pointPow_add` and `pointPow_normSq`, now supplies the corresponding
+finite de Moivre-style power core: powers compose by exponent addition and
+preserve unit norm; `pointPow_normSq_of_unit` exposes that final unit-circle
+conclusion directly. The product-power law `pointPow_mul` now also checks
+the finite identity `(P*Q)^n = P^n*Q^n`.
+The explicit `pointPow_three` identity adds the first nontrivial odd-power
+coordinate formula, (P^3=(x^3-3xy^2,\;3x^2y-y^3)), as a finite rational
+triple-angle shadow of de Moivre's law.
+The new `FiniteDeMoivreExample` module makes item 17 concrete at the rational
+point `(3/5,4/5)`: its executable square is `(-7/25,24/25)`, with unit norm
+certificates and an exact bridge to the finite `QComplex` natural power. The
+angle/exponential interpretation remains deferred.
+The same module now checks the cubic witness
+`(3/5+4i/5)^3 = -117/125 + (44/125)i`, including coordinate and unit-norm
+certificates. This exercises the general `pointPow_three` identity at a
+fully explicit rational point.
+`RationalCode.encode`/`RationalCode.decode` round trip and
+`RationalCode.encode_injective`/`RationalCode.encode_eq_iff` show that the
+canonical code is unique, while
+`rationalCode_decode_surjective` gives every rational an explicit
+integer-numerator/positive-denominator code, covering the
+representation core of benchmark item 3.  The checked
+`diagonalPair`/`diagonalUnpair` inverse, `diagonalPair_injective`,
+`integerCode_injective`/`integerCode_surjective`, and
+`rationalNatCode_injective` now certify the code path itself, while
+`rationalNatCode_decode_surjective` now combine these components into an
+explicit natural-number surjection onto the project's rationals.
+The stronger `rationalNatCode_encode_surjective` theorem shows that every
+canonical `RationalCode.encode q` is hit exactly before decoding.
+The packaged `rationalNatCode_existsUnique_canonical_index` theorem records
+the corresponding unique natural-number index for each canonical code.
+The explicit `rationalNatIndex`, `rationalNatCode_index`, and
+`rationalNatIndex_injective` now provide the matching injection from canonical
+rationals to natural indices using the normalized numerator/denominator code;
+the finite coding-level denumerability interface is therefore complete.
+The certified rational circle-area exhaustion `piCircleArea`, together with
+`PiProofs.AreaLoopValidity.areaValid`, is the project's computable core of
+benchmark item 9; its interpretation as a classical Euclidean measure theorem
+is kept at the chapter's explicit algorithm/area bridge.
+The explicit terminating loop `euclideanGcd`, together with
+`euclideanGcd_eq_gcd`, `Nat.gcd_rec`, and the gcd divisibility laws covers the
+algorithmic part of benchmark item 69.  Its public recurrence
+`euclideanGcd_step` and zero-boundary theorems now expose the executable loop
+directly, together with its positivity certificate
+`euclideanGcd_pos_of_pos` (positive left input suffices) and its symmetry
+theorem `euclideanGcd_comm`.  The exact nondegeneracy characterization
+`euclideanGcd_pos_iff` additionally reduces positivity to the finite input
+condition `a ≠ 0 ∨ b ≠ 0`.  The
+coprimality bridge `euclideanGcd_eq_one_iff_coprime` identifies the executable
+unit-gcd test with Lean's finite `Nat.Coprime` predicate.  The
+direct divisibility theorems `euclideanGcd_dvd_left` and
+`euclideanGcd_dvd_right` expose the two input certificates directly.  The
+greatestness direction is exposed by `euclideanGcd_dvd_of_dvd`: every common
+divisor of the inputs divides the executable result.  The packaged iff
+`euclideanGcd_dvd_iff` identifies the executable gcd's divisors exactly with
+the common divisors of the two inputs.  The
+recursive certificate
+`bezout_exists` supplies integer coefficients for the exact identity
+`x*a + y*b = Nat.gcd a b`, covering benchmark item 60.
+The bridge `euclideanGcd_bezout_exists` identifies the same coefficient
+certificate with the executable Euclidean-loop result.
+The worked `FiniteGcdSecondExample` computes `gcd(252,198)=18` and checks the
+back-substitution identity `4*252 - 5*198 = 18` for item 69.
+The natural-number theorem `three_dvd_three_digit` is the three-digit decimal
+core of benchmark item 85. `decimalDigitSum` now supplies a terminating
+decimal digit-sum evaluator with its small-digit reduction lemmas, including
+`decimalDigitSum_eq_self_of_lt_ten` and
+`decimalDigitSum_succ_of_not_lt_ten`, and
+`decimalDigitSum_mod_three` proves global residue preservation modulo 3;
+`three_dvd_iff_decimalDigitSum_dvd` exposes the resulting divisibility test.
+The new `basePositionalValue_mod_sub_one` theorem generalizes this finite
+digit-sum congruence to arbitrary bases (b\ge2) modulo (b-1), with
+`decimalPositionalValue_mod_nine` as its decimal specialization.
+The list-based theorem `rationalDot_cauchy_schwarz_of_length_eq` now extends
+the fixed-dimensional Cauchy--Schwarz certificates to every finite rational
+vector of equal length, with the residual represented as a sum of squared
+two-by-two minors.
+The worked `FiniteCauchySchwarzExample` checks equality for the proportional
+rational vectors `(1,2)` and `(2,4)`, including the explicit minor-zero witness.
+The reusable induction principle `nat_induction_schema` is the checked finite
+proof/programming core of benchmark item 74.
+The worked `FiniteInductionExample` applies that schema to the arithmetic
+sum: it re-proves `arithmeticSum n = n*(n-1)/2` and checks the stage-5 value
+`10`.
+The finite-counting namespace now supplies `subsetCount_eq_pow` for benchmark
+item 52 and the Pascal recurrence/boundary lemmas
+`combination_pascal`/`combination_rat_pascal`/`combination_outside`/
+`combination_rat_outside` and the diagonal bridge
+`combination_rat_self` for the finite certificate core of
+benchmark item 58.  The boundary values `combination_self` and
+`combination_one` are now also checked, giving the diagonal and first-row
+binomial coefficients; `combination_two_rat` supplies the closed rational
+second-row formula, and `combination_three_rat`/`combination_four_rat`/
+`combination_five_rat`/`combination_six_rat`/`combination_seven_rat`/
+`combination_eight_rat` supply the corresponding third- through eighth-row
+formulas.  A general finite-set
+cardinality API remains out of scope.
+The worked `FiniteSubsetCountExample` evaluates the subset recurrence at stage
+8, checking `subsetCount 8 = 2^8 = 256` as a concrete item-52 certificate.
+The worked `FinitePascalExample` evaluates `C(8,3)=56` and checks the Pascal
+decomposition `C(8,3)=C(7,2)+C(7,3)=21+35` for item 58.
+The concrete theorem `sqrt_two_irrational` instantiates the certified square-root
+criterion at $2$, proving benchmark item 1 in the project's interval-real
+representation.  The stronger public classifications
+`sqrt_rational_iff_square` and `sqrt_rational_iff_lowest_terms_square`, along
+with the corresponding irrationality criterion in lowest terms, now expose
+the full finite square-test boundary in Foundations.
+The public finite-Riemann bridge
+`PiProofs.four_arctanSeries_one_equiv_piCircleArea` identifies the Leibniz
+series presentation with the certified circle-area presentation, covering the
+project-relevant core of benchmark item 26.
+The harmonic evaluator now has the explicit dyadic growth certificate
+`Logarithm.harmonicSum_two_pow_lower`, derived from
+`Logarithm.harmonicSum_double_lower`; this is the finite-growth core of
+benchmark item 34 (harmonic-series divergence).  The stronger
+`Logarithm.harmonicSum_two_pow_reaches` now returns an explicit stage
+`2^(2 * target)` reaching every natural target.  This is the project's
+effective, potential-infinity formulation of divergence: every requested
+finite height is reached by a finite computation, without asserting an
+attained infinite sum.
+The monotonicity theorem `Logarithm.harmonicSum_le_of_le` and its propagation
+corollary `Logarithm.harmonicSum_two_pow_reaches_later` now transport each
+finite target certificate to every later harmonic stage. This makes the
+divergence witness compositional rather than tied to one selected dyadic
+index.
+The geometric-series layer now has the matching finite reachability package
+`Series.geometricSum_finiteApprox_reaches_of_power_budget`: an explicit power
+budget on a rational stage returns both the finite partial-sum upper bound and
+the remaining error bound.  This strengthens benchmark item 66 in the same
+potential-infinity style, with no completed-real limit object.
+The public monotonicity certificates `Series.geometricSum_le_of_le` and
+`Series.geometricSum_gap_le_of_le` now make the finite approximation target
+stable under later stages: partial sums increase and their rational gaps to
+the endpoint decrease, for every nonnegative ratio below one.
+The half-ratio specialization `Series.geometricSum_finiteApprox_reaches` now
+constructs that stage from any requested positive rational tolerance using the
+executable dyadic schedule, so the budget is no longer an implicit supplied
+witness. The raw representation theorem
+`Series.geometricRaw_reaches_of_positive_tolerance` exposes the same finite
+stage selector directly at the `RealRaw` interface.
+The rational-circle determinant package
+`RationalCircle.triangleTwiceArea_cyclic`,
+`RationalCircle.triangleTwiceArea_swap_neg`, and
+`RationalCircle.triangleTwiceArea_zero_of_collinear` and
+`RationalCircle.triangleTwiceArea_pos_of_oriented` supply the finite
+orientation/area core of benchmark item 27; completed angle-sum semantics
+remain deferred.
+For benchmark item 80, `MultiplicativeCertificate` now records finite lists of
+nontrivial factors and their product, with the checked example
+`factorizationCertificate60`.  The finite primality search and recursive
+constructor `primeFactorCertificate_exists` now establish existence of a
+prime-labelled certificate for every `n>1`.
+The public corollary `exists_basicPrime_dvd` extracts the corresponding
+basic-prime divisor theorem for every `n>1`.
+The constructor `MultiplicativeCertificate.append` now composes two such
+finite certificates for a product.  The corresponding
+`factors_nonempty` lemmas for both certificate structures show that a
+certificate for `n>1` contains at least one factor.
+The companion `MultiplicativeCertificate.factor_dvd` theorem shows that every
+listed nontrivial factor divides the certified product.
+The reusable `natProduct_perm` lemma proves that finite factor products are
+invariant under list permutation.  The list-level theorem
+`primeFactorList_perm_of_same_product` and the packaged theorem
+`PrimeFactorCertificate.factor_perm` then prove full repeated-factor
+uniqueness up to permutation for prime-labelled certificates.
+The list-member divisibility theorem `list_mem_dvd_natProduct` and the
+corollary `PrimeFactorCertificate.exists_prime_dvd` then produce a certified
+basic-prime divisor for every nontrivial prime-labelled certificate.
+The packaged extraction theorem `PrimeFactorCertificate.exists_factor_dvd`
+also returns the factor's list membership, prime label, and divisibility in
+one result, ready for recursive certificate construction.
+The uniqueness groundwork `basicPrime_eq_of_dvd` proves that divisibility
+between two basic primes forces equality.
+The corollary `basicPrime_eq_factor_of_dvd_primeFactorization` upgrades this:
+a basic prime dividing a prime-labelled certificate equals one of its listed
+factors.
+The combined characterization `basicPrime_dvd_primeFactorization_iff` makes
+this an iff: prime divisors of the certified number are exactly the listed
+prime factors.
+The cross-certificate lemma
+`PrimeFactorCertificate.factor_mem_of_factor_mem` now shows that every factor
+in one prime-labelled certificate occurs with the same value in any other
+certificate for the same number.  Its symmetric package
+`PrimeFactorCertificate.factor_mem_iff` gives
+the corresponding occurrence-level iff.  The Nat-list helpers
+`natList_perm_cons_of_mem` and `natList_perm_of_nodup_of_mem_iff` now lift this
+to `PrimeFactorCertificate.factor_perm_of_nodup`: multiplicity-free
+prime-labelled certificates have the same factors up to permutation, and
+`PrimeFactorCertificate.factor_perm` extends this to repeated factors.
+The worked certificate is now also prime-labelled by `BasicPrime` proofs for
+2, 3, and 5 and `primeFactorizationCertificate60`.  The first reusable
+Euclid-lemma step is now present as `basicPrime_dvd_of_dvd_mul`; this remains
+a concrete example, not a general Fundamental Theorem of Arithmetic proof.
+The criterion `basicPrime_of_no_proper_divisor` now isolates the logical
+primality test that a future bounded divisor search must establish.
+The iff form `basicPrime_iff_no_proper_divisor` exposes that criterion in both
+directions for later executable-search correctness proofs.
+The finite evaluator `properDivisorSearch` now checks candidates through the
+input bound; its soundness, completeness, and `none` characterization are
+proved by `properDivisorSearch_some_is_proper`,
+`properDivisorSearch_some_of_proper`, and
+`properDivisorSearch_none_iff_no_proper`.  Consequently,
+`basicPrime_of_properDivisorSearch_none` converts a finite search miss into a
+certified basic-prime proof.  Together with
+`PrimeFactorCertificate.factor_perm`, the recursive existence layer
+`primeFactorCertificate_exists` now closes the certificate-level existence
+and uniqueness core of #80.
+Its immediate power consequence, `basicPrime_dvd_of_dvd_pow`, is also checked
+and will support later uniqueness arguments.
+The finite list product `natProduct` and
+`basicPrime_dvd_of_dvd_natProduct` lift this to a prime dividing one member of
+a finite factor list; this is still certificate-level FTA groundwork.
+The corollary `basicPrime_dvd_of_dvd_primeFactorization` connects it directly
+to a `PrimeFactorCertificate`.
+The construction `PrimeFactorCertificate.append` now composes certificates
+for `m` and `n` into one for `m*n`, preserving the prime labels and product
+equation.
+The converse certificate interface `PrimeFactorCertificate.factor_dvd` now
+shows that every listed factor divides the certified number, complementing
+the prime-divisor extraction and uniqueness groundwork.
+The companion bound `PrimeFactorCertificate.factor_le` places every listed
+factor below the certified number whenever `1 < n`, making the certificate
+list explicitly bounded for finite search and validation.
+The Euclid-style finite construction
+`exists_basicPrime_not_mem_of_all_basicPrime` now returns a certified prime
+outside every finite list whose members are certified prime: it factors the
+finite product plus one and rules out every listed factor by divisibility of 1.
+This is the potential-infinity core of the infinitude-of-primes theorem, with
+no completed infinite set or classical existence principle.
+The specialized `shiftedRangeProduct` construction now turns that list-level
+result into `exists_basicPrime_gt`: every finite bound `n` has a certified
+prime strictly above it.  This is the direct potential-infinity form of prime
+unboundedness.
+
+**Current benchmark count.** At this certificate boundary, 39 entries have a
+checked project-relevant core: 1, 3, 4, 9, 15, 17, 23, 26, 27, 34, 35, 37, 38, 42, 44, 46, 49, 52, 55, 57, 58, 60, 64, 65, 66, 68,
+69, 74, 75, 77, 78, 79, 80, 85, 89, 91, 94, 95, and 97. This counts finite and rational-coordinate cores
+honestly; it does not claim full classical theorem statements for every item.
+
+**Parallel formalization batch.** The series, effective-calculus, geometry,
+algebra, and finite-ODE workstreams have added the following potential-infinity
+certificates: `Series.powerSum_le_mul_pow`,
+`ExactFunction.cube_secant_derivative_bracket`,
+`RationalCircle.point_power_line_parameter_identity`,
+`Polynomial.quartic_factor_of_root`, and
+`LinearODE.twoByTwo_cayley_hamilton`. Each is a finite rational
+statement; none asserts an attained infinite limit.
+
+The next batch extends the same boundary with
+`DirichletSeries.zetaTwoPartial_add_finiteTail_le_interval_hi`,
+`ExactFunction.square_secant_derivative_bracket`,
+`RationalCircle.triangleTwiceArea_quadrilateral_diagonal_additivity`, and
+`Polynomial.quartic_remainder`. The Peano--Baker recurrence was attempted but
+is not counted until its shared-module proof succeeds.
+
+The latest batch adds five more finite certificates at the same boundary:
+`DirichletSeries.zetaTwoInterval_contains_basel_decimal_1000` records a
+stage-1000 rational enclosure containing the decimal $1.644934$;
+`Series.AlternatingRaw.leibnizAlternatingRaw_width_le_one_div_succ` gives an
+explicit finite width schedule for the Leibniz evaluator;
+`rationalBisectionWidth_le_error_budget` bounds a finite rational bisection
+width under a supplied budget;
+`Polynomial.eval_pos_of_nonneg_cons_of_pos` and
+`Polynomial.no_nonnegative_root_of_nonneg_cons_of_pos` provide a rational
+nonnegative-root exclusion certificate; and
+`factorizedQuadratic_has_computable_roots` supplies explicit roots for a
+factorized rational-complex quadratic. None uses completeness or an attained
+infinite object.
+
+The next formalization pass strengthens existing entries rather than inflating
+the benchmark count: `Series.geometricSum_gap_le_of_power_budget` turns a
+finite power budget into a geometric-tail error bound;
+`Series.AlternatingRaw.leibnizAlternatingRaw_width_eq_reciprocal` and its
+budget corollary expose the exact finite Leibniz width;
+`Series.AlternatingRaw.leibnizAlternatingRaw_reaches_of_positive_tolerance`
+now constructs a natural stage for every positive rational width request;
+`Differential.quartic_secant_derivative_bracket` gives a quartic finite
+mean-value bracket; `RationalCircle.heron_three_four_five_coordinate_certificate`
+checks Heron's identity against explicit 3--4--5 coordinates; and
+`Polynomial.monic_quadratic_root_iff` characterizes the rational roots of a
+monic quadratic by its two supplied factors. These remain certificate-level
+substitutes for the corresponding classical theorems.
+
+This pass also adds closed forms for the squared and cubed power sums, an
+exact rational factor-cancellation quotient certificate, a non-equilateral
+coordinate law-of-cosines example, the finite QComplex power law
+`QComplex.natPow_mul`, and explicit roots for a factorized QComplex cubic.
+These extend items 17, 37, 64, 77, and 94 without introducing completed
+trigonometric functions, limits, or completeness.
+
+The current boundary pass adds a denominator-budget modulus for the Basel
+interval evaluator, an explicit Taylor kernel remainder budget, a generic
+factorized QComplex quartic certificate, and the bridge
+`eulerCenter_eq_natPow` from Euler-center approximants to finite repeated
+multiplication. These sharpen items 2, 14, 17, 35, and 46 while preserving
+the project’s certificate-level interpretation.
+
+The next finite-schema pass adds a generic monomial secant/derivative bracket,
+a root-count-at-most-two consequence for a monic quadratic, a reusable
+stage-to-stage Basel target-interval propagation theorem, and an explicit
+Ptolemy coordinate certificate. These extend items 14, 75, 95, and 100 while
+remaining entirely rational and finite.
+
+The finite Mean Value interface is now sharpened by
+`Polynomial.finiteCubic_secant_derivative_enclosure_of_budget`: an explicit
+rational mesh budget places a cubic secant inside an epsilon-neighborhood of
+the endpoint derivative, without asserting an attained real intermediate
+point.  The dyadic AM--GM core also exposes
+`DyadicAMGM.product_mul_card_pow_le_sum_pow`, a denominator-free form useful
+for finite exact-arithmetic certificates.
+
+For benchmark item 90, `finiteStirlingRatio_pos` now makes the positivity of
+the finite Stirling-shaped ratio explicit for every natural index and every
+positive rational scale input.  This provides the denominator gate for a
+future finite interval transport.  The concrete n=10 certificate is now also
+sharpened by `finiteStirlingRatioAtTen_unit_enclosure`, which places the
+computed ratio in `[1, 101/100]` while leaving Stirling's asymptotic theorem
+deferred.
+The companion `FiniteStirlingStageEight` certificate repeats the bounded
+calculation at `n=8`, with a rational square-root bracket for `sqrt(16*pi)`
+and a checked ratio enclosure `[1/2,2]`.
+
+The matrix workstream also adds
+`LinearODE.HarmonicOscillator.twoByTwo_matrixPow_three`, reducing the third
+power of an explicit rational (2\times2) matrix to its trace, determinant,
+the matrix, and the identity. This advances the finite Cayley--Hamilton core
+without introducing a general matrix recurrence. The companion
+`LinearODE.HarmonicOscillator.twoByTwo_matrixPow_four` carries the same
+reduction through the fourth power, with coefficients generated by the finite
+Cayley--Hamilton recurrence.
+The new `HarmonicOscillator.ratMatrix_threeByThree_eq_explicit` bridge and
+`ratMatrix_threeByThree_cayley_hamilton` theorem transport the explicit
+3-by-3 identity to arbitrary rational matrix data, while keeping the
+characteristic coefficients as finite entry formulas.
+The worked `FiniteThreeByThreeCayleyExample` adds the diagonal rational
+matrix `diag(1,2,3)`: Lean checks trace `6`, second coefficient `11`,
+determinant `6`, and the explicit identity `A^3 - 6A^2 + 11A - 6I = 0`.
+The companion `ratMatrix_threeByThree_matrixPow_recurrence` transports the
+finite third-order power recurrence to the same arbitrary matrix input.
+The companion `LinearODE.HarmonicOscillator.twoByTwo_inverse_unique_right`
+proves uniqueness of the finite inverse certificate among all right inverses
+of a nonsingular rational two-by-two matrix.
+The symmetric `twoByTwo_inverse_unique_left` theorem supplies the corresponding
+left-inverse uniqueness certificate.
+The solution interface `twoByTwo_inverse_solves` then certifies that applying
+the executable inverse to any finite rational state solves the original system.
+`twoByTwo_solution_unique` completes the finite system interface by proving
+that two rational solutions with the same right-hand side coincide.
+
+The bridge pass also adds a logarithm mesh error budget, strict arctangent
+branch separation for inverse search, finite root-of-unity multiplication
+closure, exact (2\times2) inverse identities, and an explicit arctangent
+kernel error box. These advance the effective versions of items 17, 49, 64,
+75, and 79 without asserting a classical IVT, completed logarithm, or general
+algebraic closure theorem.
+
+The function-level pass now adds a finite exponential difference-quotient
+enclosure, represented-target square-root search, `RealFunRaw` addition
+closure, an FTC endpoint-stage transport theorem, and a four-step rational
+rotation cycle. These are constructive bridge lemmas for items 15, 17, 49,
+64, 75, and 79; they do not assert the corresponding completed-real theorems.
+
+The named-item pass accepts generic factored quotient cancellation for the
+L'Hopital boundary and a restricted one-variation cubic sign/root bound for
+Descartes. These are explicit finite substitutes for items 64 and 100.
+The worked `quadratic_linear_worked_remainder` example now instantiates the
+L'Hopital certificate with the finite quotient analogue of `(x^2-1)/(x-1)`:
+the residual error from the base value `2` is exactly the computable step, and
+the stage-indexed version makes that error `1/n`. No limit theorem is added.
+The Descartes examples now include `threeVariationCubic`: the finite list for
+`(x-1)(x-2)(x-3)` has three sign variations, and exact factorization proves
+that its positive rational roots are precisely `1`, `2`, and `3`.
+The finite Leibniz pass now also records the stage-10 rational enclosure
+`3 <= piLeibniz.compute 10 <= 16/5` and its width bound `1/10`. This is a
+concrete item-26 computation; the infinite alternating-series identity remains
+a separate theorem.
+The geometric-series pass now records the exact ratio-`1/2` stage-5 sum
+`31/16`, together with its exact tail `1/16` to the finite upper value `2`.
+This is the finite rational core of item 66.
+The harmonic-series pass now includes the inspectable stage-8 witness
+`H_8 = 761/280 > 2`, a concrete finite certificate for item 34 alongside the
+general dyadic lower-bound theorem.
+The item-79 bisection layer now has a concrete affine trace: for
+`f(x)=x-1/2` on `[0,1]`, stage 3 returns `[3/8,1/2]`, preserves the sign
+bracket, and has width `1/8`.
+The Cayley--Hamilton pass now includes the worked rational matrix
+`[[1,2],[0,3]]`, with trace `4`, determinant `3`, and an independently checked
+finite identity `A^2 - 4A + 3I = 0`, also transported through the generic
+two-by-two theorem. This is a concrete item-49 witness.
+The Bézout pass now includes the explicit Euclidean certificate
+`gcd(84,30)=6` with coefficients `(-1)*84 + 3*30 = 6`, a worked finite core
+for item 60.
+The binomial pass now includes the stage-5 instance
+`binomialSum 5 2 1 6 = 3^5 = 243`, a concrete finite certificate for item 44.
+The decimal divisibility pass now includes the executable examples
+`decimalDigitSum 123 = 6` and `3 | 123`, together with the contrasting
+non-divisibility of `124`. This is the worked finite core of item 85.
+The power-sum pass now includes the stage-6 evaluations
+`fourthPowerSum 6 = 979` and `fifthPowerSum 6 = 4425`, a concrete finite core
+for item 77.
+The AM--GM pass now includes the exact finite witness
+`2*8 <= ((2+8)/2)^2` and the equality case for equal inputs `3,3`, a worked
+certificate for item 38.
+The Pythagorean-triple pass now includes the scaled (6,8,10) witness and its
+parameter realization from (m=2,n=1), a concrete finite core for item 23.
+The isosceles-triangle pass now includes the coordinate witness with height
+`3` and half-base `4`: both squared legs are `25`, the axis dot product is
+`0`, and the squared base is `64`. This is a concrete item-65 certificate.
+The Cramer pass now includes the rational system `2u+v=5`, `u+3v=10`:
+the determinant is `5`, Cramer’s formulas return `u=1,v=3`, and direct
+substitution verifies both equations. This is a concrete item-97 certificate.
+The triangle-inequality pass now also has a concrete three-term rational
+witness: `qabs(-3+4-2)=1`, while the sum of termwise absolute values is `9`.
+This is the worked finite core of item 91.
+The arithmetic-series pass now includes the progression (3,5,7,9,11): its
+stage-5 evaluator is exactly `35`, and the closed-form identity is checked over
+the rationals. This is the worked finite core of item 68.
+The finite half-pi rotation-input certificate is now available as
+`GeometricPiRotation.halfPiInput_certificate`; it packages validity, the
+`[1,2]` enclosure, the `2/(n+1)` width modulus, and equivalence with the
+rational-circle quarter turn.  The missing shared `PiProofs.olean` artifact
+still prevents an authoritative aggregate-root build, but the standalone
+geometry module and certificate build successfully.  The full classical
+identities remain correctly marked as deferred.
+The supplied-target Basel candidate is now checked: the later zeta interval
+is contained in an explicitly widened geometric pi-squared-over-six target
+interval, with the widening equal to the zeta interval’s finite rational
+width. This turns overlap into a reusable finite target enclosure while the
+Basel identity itself remains deferred.
+
+The next strengthening pass accepts three more finite substitutes without
+inflating the benchmark count: `rationalNatCode_existsUnique_canonical_decode_index`
+gives a unique canonical natural code for each rational; `ExactFunction.secant_of_finite_derivative_bracket`
+telescopes cellwise rational derivative brackets to an endpoint secant; and
+`LinearODE.ratMatrix_twoByTwo_cayley_hamilton` extends the checked Cayley--Hamilton
+identity from explicit entries to arbitrary rational 2-by-2 matrices. The new
+`RationalCircle.Trigonometry.toQComplex` bridge identifies rational circle
+multiplication and powers with the finite `QComplex` operations, and
+`toQComplex_pointPow_mul` records the embedded de Moivre law. The new
+`toQComplex_normSq`, `toQComplex_pointPow_normSq`, and
+`toQComplex_pointPow_normSq_of_unit` declarations transport the circle
+norm-square invariant to the finite complex side. This remains a finite
+rational-coordinate theorem; the represented complex exponential and angle
+semantics are still separate bridges. The new `pointPowRaw` and
+`pointPowRaw_equiv_natPow` declarations lift that finite power into a valid
+represented complex raw and identify it stagewise with the corresponding
+finite rational-complex power. The companion `pointPowRaw_conj_equiv` now
+transports conjugation through the represented finite power as well.
+
+The next bridge pass adds four more finite certificates: a geometric block-sum
+identity, a reflection/signed-orientation coordinate certificate,
+conjugation closure for finite roots of unity, and a concatenable finite FTC
+partition fold. These strengthen items 17, 27/65, 66, and 15 without adding
+completed angles, limits, or completeness principles.
+
+The following pass adds four more finite strengthening certificates:
+`Polynomial.factorizedEval_root_witness` identifies the roots of any supplied
+finite rational factor list; `DirichletSeries.zetaTwoPartial_later_in_target_of_budget`
+propagates later Basel partial sums through a rational target;
+`secantSlope_product_transport` is the finite rational product-rule analogue;
+and `RationalCircle.pointPow_conj` records conjugation symmetry for natural
+circle powers. These deepen items 2, 14, 35/75, and 17 without introducing
+completed limits or angle-valued semantics.
+
+The complex-circle bridge now transports that symmetry as well:
+`QComplex.conj_add`, `QComplex.conj_neg`, `QComplex.conj_scaleRat`,
+`QComplex.conj_mul`, and `QComplex.conj_natPow` prove conjugation laws for
+finite rational-complex affine operations, rational scaling, multiplication,
+and powers, while
+`RationalCircle.Trigonometry.toQComplex_pointConj` and
+`toQComplex_pointPow_conj` connect them to circle coordinates. This is a
+finite reflection/de Moivre certificate, not a complex-analytic theorem.
+
+The current pass adds a finite remainder-certificate interface for arbitrary
+coefficient lists, a stage/error-budget package for constructive square-root
+bisection, conjugate-pair closure for finite root witnesses, and a chart-based
+cross-orientation identity. These strengthen items 2, 17, 27, 79, and 89 while
+remaining entirely rational and algorithmic.
+
+The transport pass adds `QComplex.natPow_add`, an exact affine-composition
+difference-quotient law, finite alternating-series block transport, and a
+chart-based Jacobian/partition substitution certificate. These advance the
+finite interfaces behind items 15, 17, 26, and 35 without asserting the
+completed exponential, convergence, or substitution theorems.
+
+The bounded endpoint pass adds quartic one-variation/root uniqueness data,
+nested-stage certificates for the constructive square-root search, affine
+transport of finite secant brackets, and a finite candidate-evaluation package
+for the quintic boundary. The last item is deliberately only a checked finite
+obstruction example; it is not Abel–Ruffini and does not claim absence of all
+rational roots. `RootsOfUnity.quinticBoundary_rationalRootSearch_none` now
+connects that obstruction to the executable finite rational-root search and
+certifies the `none` branch for the supplied candidate list.
+
+The latest exact-arithmetic pass adds a mod-9 decimal invariant, a generic
+block decomposition for finite power sums, and the Cayley--Hamilton
+second-order recurrence for arbitrary rational 2-by-2 matrix powers. These
+strengthen items 49, 77, and 85 without adding general Faulhaber, prime, or
+continuous-matrix claims.
+
+The FTA generalization pass adds a finite-list complex factorization layer:
+`factorizedPolynomial` builds a polynomial from supplied rational-complex
+roots, `factorizedPolynomial_eval_eq_product` exposes its finite product form,
+and list membership yields exact and computable root witnesses. The companion
+`Polynomial.factorizedEval_append` transports rational factor lists across
+concatenation. This advances items 2 and 46 without claiming unrestricted FTA
+or a general quartic formula.
+The direct package `factorizedPolynomial_has_algebraic_root_of_nonempty` also
+returns an algebraic-complex witness from any nonempty supplied factor list.
+Its uniform companion `factorizedPolynomial_algebraic_root_of_mem` certifies
+every supplied factor as an algebraic root, preserving the exact finite root
+set rather than selecting an arbitrary witness.
+
+The generic FTA layer is now root-set complete at the supplied-factor level:
+`QComplex.mul_eq_zero` supplies the finite coordinate zero-product law, and
+`factorizedPolynomial_eval_eq_zero_iff_mem` identifies exactly the roots in a
+finite supplied list. This remains a finite factorization theorem, not an
+existence or root-counting theorem for arbitrary polynomials.
+The bridge `AlgebraicFTA_of_factorizedWitness` now packages the exact project
+boundary: a supplied nonempty finite factorization witness for every
+positive-degree input is enough to extract an algebraic/computable root. The
+global factorization-existence algorithm remains a separate deferred target.
+The packaged theorem `factorizedPolynomial_hasExactRoot_iff_mem` exposes the
+same root-set result directly through `CPoly.hasExactRoot`, so downstream
+finite certificates do not need to unfold polynomial evaluation.
+The factorized quadratic package now reuses that generic boundary through
+`factorizedQuadraticPolynomial_hasExactRoot_iff`, giving the direct two-root
+exact predicate for the named degree-two certificate.
+
+The finite FTA search interface now also supplies `exactRootSearch` and its
+soundness/completeness certificates, together with the factorized-polynomial
+specialization and computable-root result. Search completeness is conditional
+on a supplied finite candidate list; it does not assert that arbitrary
+polynomials have roots or that a global root-search procedure exists.
+The companion negative certificates `exactRootSearch_none_iff` and
+`factorizedPolynomialRootSearch_none_iff` now characterize a `none` result as
+finite candidate exclusion (or candidate/factor-list disjointness).  This
+completes the finite search interface on both success and failure branches.
+The success-side corollary
+`factorizedPolynomialRootSearch_returns_supplied_root` makes the factor-list
+boundary explicit: every returned root is one of the supplied factors.
+The companion `factorizedPolynomialRootSearch_self_some` makes the positive
+finite case executable: every nonempty supplied factor list returns a
+certified root when searched against itself.
+
+The quintic boundary is now explicit as well: `factorizedQuinticPolynomial`
+packages five supplied complex roots, with finite product evaluation and exact
+and computable root witnesses. The direct package
+`factorizedQuinticPolynomial_has_computable_root` exposes the first supplied
+factor as an existential computable-root witness without requiring a separate
+membership argument. This is the project’s certificate-level edge
+for items 16 and 46; Abel–Ruffini and a general quintic formula remain outside
+the current computable scope.
+The matching root-set theorem
+`factorizedQuinticPolynomial_eval_eq_zero_iff` now excludes every candidate
+outside those five supplied roots, completing the finite success/exclusion
+interface at the quintic boundary.
+Its list-level form
+`factorizedQuinticPolynomial_eval_eq_zero_iff_mem` packages the same result in
+the project’s finite factor-list interface.
+The companion
+`factorizedQuinticPolynomial_hasExactRoot_iff_mem` lifts that membership test
+to the public exact-root predicate used by the computable-root certificates.
+The worked `FiniteQuinticBoundaryExample` instantiates the package with the
+five supplied roots `-2,-1,0,1,2`, checking all five exact rational-complex
+root witnesses while keeping the general radicals problem deferred.
+
 - Raw reals are interval algorithms `Nat -> QInterval`. `Real` packages a
   preferred valid `RealRaw` and finite, proven-equivalent alternatives. See
   `RealRaw` and `Real` in `ComputableAnalysis/Basic.lean`.
@@ -41,6 +890,14 @@ not a description of the current module graph. The checked blueprint
   `RealRaw.Equiv x y` means that `x.compute n` and `y.compute n` overlap for
   every `n`. Validity makes this relation transitive. The project-facing
   equality notion is this raw-level relation.
+- The interval-defined order now has explicit arithmetic compatibility:
+  `RealRaw.le_add_le_add` for addition, `RealRaw.le_neg_le_neg` for order
+  reversal under negation, and `RealRaw.le_sub_le_sub` for subtraction, and
+  `RealRaw.le_antisymm` for the two-sided order/equivalence bridge, and
+  `RealRaw.le_scaleRat_le_scaleRat` for nonnegative rational scaling, together
+  with `RealRaw.le_scaleRat_le_scaleRat_of_nonpos` for the order-reversing
+  nonpositive case. These are endpoint-level finite inequalities;
+  validity/equivalence transport is still handled separately.
 - `RealRaw.anchorRebox` is a finite rational normalization construction: given
   a shrinking, stagewise-overlapping raw algorithm and a valid nested anchor,
   it intersects the prefix of their stagewise hulls.  The result is a valid
@@ -67,6 +924,22 @@ not a description of the current module graph. The checked blueprint
   on the input and its domain proof.
 
 ## Calculus Readiness Ledger
+
+**Benchmark item 35 — finite Taylor core checked.** The public
+The potential-infinity remainder layer now adds an explicit factorial-tail
+schedule: every later finite exponential Taylor prefix stays within a
+requested rational tolerance of the selected prefix on a bounded rational
+box. This strengthens item 35 without introducing an infinite sum or a
+completeness principle.
+`FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` and centered variant
+formalize the finite polynomial/Taylor--Lagrange certificate, while
+`Taylor.ArctanKernel.finiteRemainderRoute` supplies an explicit finite
+remainder factorization. The completed Taylor theorem with integral remainder
+and its full analytic hypotheses remain a later effective-calculus milestone.
+The factorial exponential specialization now also exposes
+`FinitePolynomial.expTaylorPrefix_endpointDifference_succ`: appending one
+finite Taylor term changes an endpoint difference by the exact rational
+monomial contribution, before any tail or completeness argument is used.
 
 The Pi table is a release-style integration suite, not a completion score for
 the scientific-calculus objective.  It catches agreement failures across
@@ -101,7 +974,77 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   Its checked `arctanIntegralRectangleOnUnit_effectiveModulus` packages the
   same data as the executable schedule `inputPrecision n = n + 1`, with the
   displayed denominator-controlled rectangle stage at output tolerance
-  `precisionAtStage n`.
+  `precisionAtStage n`. The exact constant evaluator now has the concrete
+  witness `exactRat_constant_intervalRegularOn`, establishing the simplest
+  pointwise-to-interval-regular bridge used by the later Riemann construction.
+  The companion `exactRat_constant_effectiveModulusFor` packages the same
+  exact evaluator with the explicit modulus interface.
+  The same bridge is now checked for exact rational affine functions with slope
+  in `[0,1]`: `exactRat_affine_intervalRegularOn_of_unit_slope` uses the endpoint
+  image interval and the explicit input schedule `n+1`, while
+  `exactRat_affine_unitSlope` packages the affine monotone integral certificate
+  and its exact raw value.  This remains a certificate-level FTC slice; no
+  unrestricted interval-regular-to-integral closure is claimed.
+  The signed affine extension `exactRat_affine_intervalRegularOn_of_signed_unit_slope`
+  now handles both endpoint orientations for slopes in `[-1,1]`; its packaged
+  certificate `exactRat_affine_signed_unitSlope` computes the same affine
+  endpoint formula using the nondecreasing or nonincreasing construction as
+  appropriate.
+  The non-affine base case `exactRat_square_intervalRegularOn_unit` is now
+  checked as well, using the endpoint-square interval and the explicit schedule
+  `2*(n+1)` on `[0,1]`.  This adds a genuine finite polynomial interval
+  certificate without invoking completed-real limits.
+  `exactSquare_lipschitz_on_unit` supplies the rational Lipschitz bound needed
+  by `IntegralIdentities.LipschitzDyadic`; the packaged
+  `exactRat_square_integral_certificate` and
+  `exactRat_square_integral_raw_valid` now provide a valid finite raw integral.
+  Its identification with the closed form `1/3` remains a separate endpoint
+  equivalence target.
+  The public finite identity `exactSquare_uniformLeftSum_eq` now reduces the
+  uniform left square sum to `Series.squareSum n / n^3`, providing the exact
+  algebraic half of that endpoint-equivalence proof.
+  The matching public right-sum identity
+  `exactSquare_uniformRightSum_eq` is now also checked, reducing the right
+  endpoint sum to `Series.squareSum (n+1) / n^3`.  Together these two finite
+  formulas give the exact endpoint-sum data needed for the enclosure proof.
+  The public inequalities `exactSquare_uniformLeftSum_le_one_third` and
+  `exactSquare_uniformRightSum_ge_one_third` put the two endpoint sums on
+  opposite sides of `1/3`; consequently
+  `exactSquare_compute_contains_one_third` proves singleton containment at
+  every dyadic stage, and
+  `exactRat_square_integral_raw_equiv_one_third` identifies the finite raw
+  integral with the exact rational value `1/3`.
+  The next polynomial case is now complete as well:
+  `exactRat_cube_intervalRegularOn_unit` and `exactCube_lipschitz_on_unit`
+  give executable finite certificates for `x^3` on `[0,1]`; the endpoint
+  sums reduce to `Series.cubeSum`, and
+  `exactCube_compute_contains_one_fourth` together with
+  `exactRat_cube_integral_raw_equiv_one_fourth` identifies the resulting raw
+  integral with `1/4`.  This is a second concrete FTC example, still entirely
+rational and stagewise.
+The quartic FTC pass is now complete: `exactRat_quartic_integral_certificate`
+and its validity theorem provide the finite raw integral for `x^4` on
+`[0,1]`; the left/right endpoint sums reduce to
+`Series.fourthPowerSum`, and `exactQuartic_compute_contains_one_fifth` plus
+`exactRat_quartic_integral_raw_equiv_one_fifth` identify the result with the
+exact rational value `1/5`.
+The quintic finite pass is now checked as well: `FiniteFTCQuintic` supplies
+interval regularity, a rational Lipschitz bound, both finite endpoint-sum
+identities, and a concrete stage-10 enclosure containing `1/6`. The
+all-stage exact-value equivalence remains open, so this is a finite
+certificate-level FTC result, not a general regularity-to-integrability
+theorem.
+The same quintic computation now has a direct stage-20 containment certificate
+`exactQuintic_compute_contains_one_sixth_stage20`, strengthening the finite
+precision evidence while leaving the all-stage symbolic inequality open.
+
+The concrete FTA pass now also checks `z^2 + 1` directly at the two supplied
+rational-complex roots `0 + i` and `0 - i`, including distinctness and point
+Horner evaluation, and its executable candidate search returns the upper root.
+This is an explicit finite item-2 witness layered on the
+existing box soundness and subdivision interfaces; the accompanying singleton
+box exclusion certificate discards the non-root candidate at zero. Global root existence and
+arbitrary-degree isolation remain deferred.
   The concrete product-derivative candidate `arctan x + x/(1+x*x)` now also
   has literal epsilon--delta continuity. Its rational correction is checked
   3-Lipschitz; splitting the output budget as `eps/2` for arctangent and
@@ -208,9 +1151,63 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   to represented targets, then use it for the sine/arcsine and
   exponential/logarithm branches.
 - **Differentiated elementary functions — partly checked.** Formal
-  power-series derivatives and finite-difference examples are checked. The
-  next end-to-end gate is a selected exponential raw that proves `f' = f` on
-  an interval, followed by uniqueness and the logarithm relation. The literal rational-input
+  power-series coefficient shifts and finite-difference examples are checked.
+  The series-layer API now makes this staging explicit:
+  `FormalPowerSeries.coefficientShift` and `HasCoefficientShift` are the
+  primary names; legacy formal-derivative names are compatibility aliases,
+  not an assertion about evaluated raw functions.
+  `FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` now turns every
+  finite coefficient prefix into a two-sided rational-interval derivative
+  certificate for its coefficient-shift polynomial. This is the precise
+  finite Taylor--Lagrange hand-off; at zero,
+  `FinitePolynomial.taylorPrefixShift_at_zero` identifies that derivative
+  polynomial with the original linear coefficient.  The centered forms
+  `taylorPrefixAt_hasDerivativeOnInterval` and
+  `taylorPrefixShiftAt_at_basepoint` make the same statement at every
+  rational expansion point, using local `x-a` bounds. They still do not
+  differentiate an infinite tail.
+  The quantitative certificate algebra is now closed under finite addition,
+  rational scaling, and products via `SecantDerivativeBound.mul`; the product
+  rule retains the explicitly bounded secant-corner term needed by later FTC,
+  integration-by-parts, and ODE arguments.
+  The executable factorial loop is also now identified, term by term and at
+  every finite prefix, with its rational Taylor coefficients
+  (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
+  `ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix`). This is finite
+  algebra only. `FinitePolynomial.expTaylorPrefix_succ` records the literal
+  one-term extension, while
+  `FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` supplies the
+  common bounded-box factorial majorant for a uniform tail
+  certificate. `ExpProofs.uniformExpRaw` realizes that certificate on
+  `|x| <= 2`: its fixed-stage boxes are valid and geometrically shrinking,
+  and `uniformExpRaw_equiv_expPowerSeries` proves stagewise agreement with the
+  selected adaptive exponential evaluator. `ExpProofs.uniformExpOnUnit`
+  exposes this schedule as an
+  interval function, pointwise equivalent to the selected exponential. The
+  derivative of the next finite prefix is exactly its common center, and
+  `uniformExpTaylorPrefix_secant_error` bounds the residual finite secant
+  error. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four` now
+  proves the uniform coefficient `34` for every factorial prefix on
+  `|x| <= 2`, and the uniform schedule inherits it. The step-aware
+  tail transport has an executable stage selection:
+  `uniformExpQuotientPrecision h hh n` makes the shared factorial magnitude
+  no more than `precisionAtStage n * |h| / 24`, while
+  `uniformExpSelfDerivativeStepPrecision` reserves half the requested output
+  precision for the `34 |h|` finite secant error.
+  `uniformExpCenter_secant_error_le` and
+  `uniformExpOnUnit_hasDerivativeOnInterval` complete the interval-endpoint
+  algebra: the common-prefix evaluator proves the full two-sided
+  `E' = E` certificate on `[0,1]`. Its exact zero value is separately
+  certified, so `uniformExpOnUnit_solvesSelfDerivative` is the first
+  constructive initial-value solution record. The same construction is now
+  checked on the centered chart `[-1,1]`:
+  `uniformExpOnSymmetricUnit_hasDerivativeOnInterval` uses the explicit
+  endpoint consequence `|h| <= 2`, and
+  `uniformExpOnSymmetricUnit_solvesSelfDerivative` supplies the corresponding
+  initial-value record. This does not silently
+  transfer the derivative to the pointwise-equivalent adaptive evaluator;
+  that representation-closure theorem, uniqueness, and the logarithm
+  relation are the next gates. The literal rational-input
   evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for
   every `x : Rat`: its finite rational series boxes are nested and have the
   public geometric rate `ExpProofs.expPowerSeriesRate x`, with ratio `1/2`.
@@ -220,23 +1217,27 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   restriction. When zero is in that interval,
   `ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies the exact
   function-level initial equivalence required by the ODE interface. This is a
-  certified representation layer, not yet a global analytic self-derivative
-  theorem or a bridge to the other definitions. Its finite-difference bridge is
-  now explicit: `expTaylorQuadratic x = 1 + x + x*x/2`, and
-  `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero` certifies its forward
-  derivative `1` at zero by the exact quotient `1 + h/2`. More importantly,
+  certified representation layer, not yet a derivative-transport bridge to
+  the other definitions. Its finite-difference bridge is now explicit:
+  `expTaylorQuadratic x = 1 + x + x*x/2`, and
+  `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` certifies its
+  full two-sided interval derivative `1 + x` on every rational subinterval of
+  a supplied bounded symmetric box, using the reusable quantitative
+  finite-secant linear interface. `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero`
+  remains the specialized forward derivative `1` at zero by the exact quotient
+  `1 + h/2`. More importantly,
   `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` now certifies the
   tail-enclosed power-series evaluator itself has forward derivative `1` at
   zero. Its finite stage-zero loop has a positive-tail-plus-radius budget of
   `O(h^2)` on `0 < h <= 1/2`, so quotienting gives an explicit first-order
-  enclosure. This remains a local boundary theorem, not the missing global
-  self-derivative theorem for `expPowerSeries`. The
+  enclosure. This remains a local boundary theorem for the adaptive
+  representative. The
   constant-level compound-interest representative is now additionally packaged as the
   positive base `ExpProofs.ePositive`: its lower interval endpoint is always
   at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural
   powers between `2^n` and `4^n`. Rational roots, rational-exponent
   continuity, and the self-derivative theorem remain separate open bridges.
-- **Linear ODEs — finite core and scalar tail certificate checked; analytic layer open.**
+- **Linear ODEs — finite Peano--Baker core and direct scalar uniqueness closure checked; analytic layer open.**
   `PeanoBaker.lean` proves finite chronological products, the ordered-word
   expansion, discrete variation of constants, and recurrence uniqueness:
   the zero-initial forcing response is the explicit time-ordered Duhamel sum
@@ -267,19 +1268,65 @@ Peano--Baker, and broad numerical/PDE infrastructure remain open.
   rational complex boxes, with both coordinate widths bounded by
   `8 * rotationTailMagnitude T 0 * (1/2)^n`. Its
   `rotationCosRaw` and `rotationSinRaw` coordinate projections are valid raw
-  reals with the same rate. The continuous-simplex interpretation and the
-  rotation/geometric identification remain open.
+  reals with the same rate. The common bounded-input evaluator is now also
+  exposed as `RotationCalculus.uniformRotationCosOnTwo` and
+  `uniformRotationSinOnTwo`: both satisfy the project's literal rational
+  epsilon--delta continuity definition on `[-2,2]`, with the checked modulus
+  `delta = eps / 16` and one uniform factorial stage supplied by
+  `uniformRotationBoxes_widths_shrink_uniform`. `RotationTaylorBridge` now
+  identifies those literal centers with the corresponding finite formal
+  sine/cosine Taylor prefixes and checks the fixed-stage sine secant estimate
+  `uniformRotationSinCenter_secant_error`. Its odd-prefix recurrence is now
+  bounded by the exponential factorial budget, giving the uniform finite
+  theorem `uniformRotationSinCenter_secant_error_le_thirty_four`.
+  `RotationDerivative.uniformRotationSinOnTwo_hasDerivativeOnInterval` now
+  combines that finite `34 * |h|` error with a step-aware factorial stage
+  selected from `precisionAtStage n * |h| / 48`, proving the full two-sided
+  raw interval certificate `sin' = cos` on `[-2,2]`. The derivative belongs
+  to this common-prefix evaluator. Its companion
+  `RotationDerivative.uniformRotationCosOnTwo_hasDerivativeOnInterval`
+  now proves `cos' = -sin` against the explicit
+  `uniformRotationNegSinOnTwo` evaluator. The finite cosine prefix has one
+  dropped sine term, which is assigned a separate factorial shift and joined
+  to the divided-tail shift by `max`. `RotationInitialValues` now checks the
+  matching finite initial boxes `C(0)=1` and `S(0)=0`, then packages both
+  derivatives and those values as
+  `uniformRotationOnTwo_rotationInitialCertificate`. Derivative transport to
+  equivalent representations remains open. The continuous-simplex
+  interpretation, vector uniqueness, and the rotation/geometric
+  identification remain open.
   The scientific-calculus gate is the continuous
   interval-matrix Peano--Baker series with simplex integral boxes, that
   scalar tail certificate lifted to componentwise boxes, and variation of
   constants.
-  This is the intended constructive **linear Picard--Lindelöf** theorem:
+  This is the intended constructive **linear Picard--Lindelöf** theorem for
+  vector systems:
   Peano--Baker supplies the homogeneous resolvent, variation of constants
   supplies the affine solution, and a bounded zero-initial difference is
-  driven to the zero raw vector by an explicit factorial schedule. It includes
-  the scalar `f' = f` uniqueness route needed for exponential. General
-  nonlinear Picard--Lindelöf remains a later interval-Lipschitz/contraction
-  layer.
+  driven to the zero raw vector by an explicit factorial schedule.  Scalar
+  `f' = f` uniqueness is deliberately separate: the checked direct
+  finite-mesh closure reduces an error envelope by a factor of two per
+  refinement sweep.  Constructing that sweep from derivative certificates
+  remains open. General nonlinear Picard--Lindelöf remains a later
+  interval-Lipschitz/contraction layer.
+- **Scalar exponential uniqueness — direct mesh closure checked; analytic
+  bridge open.** `ScalarODEUniqueness.lean` does not use Peano--Baker or
+  Picard iteration.  A `DirectMeshHalvingCertificate` records rational error
+  envelopes from finite mesh sweeps, and its theorem `error_eq_zero` chooses
+  a computable dyadic sweep count to force the error to zero.  The
+  `SelfDerivativeDirectMeshComparison` wrapper then yields
+  `SelfDerivativeInitialValueUnique`; the exact comparison theorem for
+  power-series and inverse-logarithm exponentials is available as
+  `powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh`.
+  `ShortBlockMeshSweep.next_le_half` now checks the exact one-block algebra:
+  a telescoped bound `next <= length * previous + residual` with
+  `length <= 1/4` and `residual <= previous/4` halves the envelope.
+  The cell/telescoping part is now formalized as well:
+  `FiniteMesh.sumUpTo_increments` proves the finite endpoint identity and
+  `FiniteMeshDifferenceBound.toShortBlockMeshSweep` converts cellwise
+  rational increment bounds into that one-block sweep. What remains is only
+  to derive those finite increment estimates from two supplied interval
+  derivative certificates.
 
 There is intentionally no aggregate percentage: these gates have distinct
 dependencies, and a proof in one does not compensate for a missing proof in
@@ -301,6 +1348,23 @@ another. The Pi score stays useful only as secondary integration coverage.
 
 ## Integral
 
+**Benchmark item 15 — constructive FTC core checked.** The
+`EffectiveFTC`/`StaticDyadicEffectiveFTC` packages and their endpoint-
+agreement bridges formalize the finite schedule-to-endpoint identity in the
+effective-calculus chapter. This is the project’s certificate-level core;
+unrestricted classical hypotheses are not being smuggled into the interface.
+The finite selector `FTC.requestedPrecision` now has public certificates
+`FTC.requestedPrecision_positive` and `FTC.requestedPrecision_le_one`, making
+the normalization and boundedness of every requested schedule precision
+explicit. The companion `FTC.requestedPrecision_antitone` proves the selector
+is nonincreasing across finite stages, supplying the schedule-order invariant
+needed by later endpoint-transport arguments.
+The finite polynomial integration-by-parts module now exposes both endpoint
+orientations of the product-rule telescope on rational grids. Its
+quadratic/cubic specialization proves both sums equal one at every positive
+finite stage. This strengthens the item-15 integration-by-parts boundary
+without introducing a completed integral or a classical limit.
+
 - Public integral target: construct an `Integral.ConstructionFor F` from a
   `ContinuousFunctionOnInterval`.
   See `Integral.ConstructionFor` and `Integral.ExistsConstructionFor` in
@@ -308,6 +1372,26 @@ another. The Pi score stays useful only as secondary integration coverage.
 - Proved bridge: once the construction exists, the integral is a computable
   real.
   See `integral_construction_proves_well_defined_for`.
+- Concrete existence case: `Integral.constantMonotoneConstructionFor` gives a
+  valid point-valued integral algorithm for every constant exact-rational
+  function, and `Integral.exists_constantMonotoneConstructionFor` packages
+  the corresponding monotone construction witness.
+  `Integral.constantMonotoneIntegralFor_eq_ofRat` exposes the resulting raw
+  integral as exactly `RealRaw.ofRat ((b - a) * c)`.
+- Affine extension: `Integral.affineMonotoneConstructionFor` and
+  `Integral.exists_affineMonotoneConstructionFor` do the same for
+  `x ↦ r * x + c` when `0 ≤ r`, using the exact rational endpoint formula
+  `(b - a) * (r * (a + b) / 2 + c)`.
+- The opposite orientation is now covered by
+  `Integral.exactRat_affine_nonincreasing`,
+  `Integral.affineMonotoneConstructionFor_of_nonpos`, and
+  `Integral.exists_affineMonotoneConstructionFor_of_nonpos` for `r ≤ 0`,
+  with the same exact formula. Together these give the complete affine
+  monotone family while retaining finite rational certificates.
+  The matching identities
+  `Integral.affineMonotoneIntegralFor_eq_ofRat` and
+  `Integral.affineMonotoneIntegralFor_of_nonpos_eq_ofRat` expose the affine
+  raw integrals by their exact endpoint formula.
 - FTC route for ordinary functions: do not pursue a generic "effective FTC"
   whose hypotheses are derivative bounds and local controls.  The main theorem
   should be the exact convex FTC: exact convexity on `[a,b]` implies the
@@ -338,6 +1422,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   `leftStieltjesSum`, `rightStieltjesSum`, and
   `finiteIntegrationByParts_withVariation` now prove the exact rational
   rectangle decomposition, including its corner-area correction.
+  The companion identity
+  `rightStieltjesSum_eq_left_swap_add_quadraticVariation` identifies the
+  right-endpoint sum with the swapped left-endpoint sum plus exactly that
+  finite quadratic variation.
   `RationalPartition.finiteIntegrationByParts_onPartition` and its
   left-endpoint-with-variation counterpart now lift that identity to every
   supplied certified rational partition, with the actual interval endpoints
@@ -348,6 +1436,14 @@ another. The Pi score stays useful only as secondary integration coverage.
   the sampled second path is nondecreasing.  It is the finite
   monotone-piece form needed by the `x*arctan x` Pi route, not yet an FTC
   identification of either strip.  The checked
+  `Integral.IntegrationByPartsCertificate` now packages the next general
+  handoff: after a particular paired mesh has certified that its two
+  integral raws add to the product-endpoint raw,
+  `left_integral_equiv_endpoint_sub_right` and its symmetric companion
+  derive the usual endpoint-minus-other-integral formula by valid raw
+  interval cancellation.  Constructing that paired mesh from arbitrary
+  derivative data remains separate.
+  The checked
   `quadraticVariationSum` estimates bound that correction by a maximum first
   increment times the second endpoint variation, or by the product of the two
   endpoint variations; negating both paths supplies the decreasing-piece
@@ -428,6 +1524,8 @@ another. The Pi score stays useful only as secondary integration coverage.
   lower--lower and upper--upper products.  Given positive rational bounds,
   `RealRaw.mul_valid_of_nonneg_bounded` proves the product raw valid with
   width bounded by `Bx * width(y) + By * width(x)`, and
+  `RealRaw.le_mul_le_mul_of_nonneg` proves order monotonicity of products on
+  nonnegative valid representatives, while
   `RealRaw.mul_equiv_of_nonneg` preserves changes of certified
   representation.  `RealFunRaw.mul_valid_of_nonneg_bounded` lifts this
   pointwise to rational-input functions.  `FunctionOnInterval.mulOfNonnegBounded`
@@ -516,10 +1614,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   still requires an explicit separate arctangent strip, its monotone-piece
   refinement/splitting theorem, and canonical exponential/logarithm alignment.
   This is deliberately the long exp/log/ODE route: first identify the
-  logarithmic integral with the inverse of canonical exponential, use the
-  linear Peano--Baker/Picard--Lindelöf uniqueness theorem to equate the
-  power-series, Euler, and inverse-integral exponentials, then transport the
-  resulting `log 2` through the integration-by-parts identity.  A later
+  logarithmic integral with the inverse of canonical exponential, use direct
+  scalar finite-mesh uniqueness to equate the power-series, Euler, and
+  inverse-integral exponentials, then transport the resulting `log 2`
+  through the integration-by-parts identity.  A later
   complex corroboration can prove `pi = -2i * log(i)`, but it needs
   represented-input extension and the rotation-system bridge in addition.
   `Logarithm.logTwoSeries` now supplies a valid, rate-certified alternating
@@ -621,9 +1719,10 @@ another. The Pi score stays useful only as secondary integration coverage.
   endpoint and the circle-area pi.  The literal reciprocal-log formula is now
   the sixth `PiCoverageBridge` constructor: it tests a supplied finite
   triangle, Darboux-strip, product-FTC, and logarithm route, with direct rate
-  `52/2^n`.  It still does not establish a general effective
-  FTC/integration-by-parts theorem or canonical exp/log transport; those are
-  the stronger remaining refinement of this row.
+  `52/2^n`.  It instantiates the certificate-level integration-by-parts
+  rebalancing theorem, but does not yet construct such certificates from a
+  general effective FTC or identify the canonical exp/log transport; those
+  are the stronger remaining refinements of this row.
   The square-pullback companion
   `Logarithm.piTriangleLogSquareSubstitutionIntegral` is the seventh bridge:
   its endpoint is `2 * ∫_0^1 2*x/(1+x*x) dx`, it reaches the reciprocal-log
@@ -842,6 +1941,55 @@ another. The Pi score stays useful only as secondary integration coverage.
 
 ## Inverse Functions
 
+**Benchmark item 79 — branch-local bisection core checked.**
+`HasBisectionSearch` and `inverse_function_from_bisection_search` formalize
+the effective intermediate-value search for an interval-regular monotone
+branch with explicit range and separation certificates. A general classical
+IVT remains outside the representation boundary. The finite step interface
+`monotoneBisectionStep` now gives the corresponding local rational algorithm:
+it preserves endpoint signs and interval containment for a nondecreasing
+function and halves the width exactly. It is a reusable certificate for
+constructive IVT traces, not an assertion that a zero is attained.
+The recursive `monotoneBisectionIterate` now lifts this to every finite stage:
+ordering, subinterval containment, and endpoint signs are preserved, while
+`monotoneBisectionIterate_width` gives the exact (2^{-n}) width schedule.
+The companion `monotoneBisectionIterate_width_pos` proves that the ordinary
+finite bracket iterator also retains positive width whenever its initial
+interval does.
+The companion `monotoneBisectionIterate_width_le_of_power_budget` turns a
+supplied rational budget `I.width <= eps * 2^n` into the final guarantee that
+the iterated bracket has width at most `eps`.  This exposes the bisection
+iteration as an executable precision scheduler for the constructive IVT
+boundary.  The target-parametrized companion
+`monotoneTargetBisectionStep` and its iterated form
+`monotoneTargetBisectionIterate` preserve a supplied rational target bracket
+at every finite stage.  This is the inverse-search form of the certificate:
+the algorithm narrows an interval whose endpoint evaluations enclose the
+target, without asserting that a completed-real preimage has been attained.
+The target-aware step and iteration now also expose source containment and
+the exact width law `I.width / 2^n`.  These are the finite invariants needed to
+turn a separation oracle into a data-valued inverse search.  The companion
+`monotoneTargetBisectionIterate_certificate` packages orderedness, target
+enclosure, source containment, and this exact width in one reusable finite
+record.  The companion
+`monotoneTargetBisectionIterate_width_le_of_power_budget` converts a supplied
+rational initial-width budget into an explicit requested-tolerance guarantee.
+The companion `monotoneTargetBisectionIterate_width_pos` proves that every
+finite iterate still has positive width whenever the initial bracket does,
+making the potential-infinity interpretation explicit.
+The companion
+`monotoneTargetBisectionIterate_reaches_of_positive_tolerance` now removes the
+supplied power budget for initial intervals of width at most one: stage
+`eps.den` is certified to reach every positive rational tolerance. This is an
+executable inverse-search schedule for the finite bisection core, not an IVT
+or completeness principle. The new
+`monotoneTargetBisectionIterate_tolerance_certificate` packages that schedule
+together with target enclosure and source containment, giving an inverse
+client one finite certificate rather than separate bookkeeping lemmas.
+The worked `FiniteSquareRootBisectionExample` now applies the target search to
+`x^2 = 1/2` on `[0,1]`: stage 4 returns `[11/16,3/4]`, preserves the target
+bracket, and has width `1/16`. This is a non-affine finite witness for item 79.
+
 - Main calculus route: construct inverses on intervals where the function is
   interval-regular, monotone, and effectively separated.
   See `InvertibleFunctionOnInterval`, `InRangeRaw`, `InverseRaw.apply`, and
@@ -869,6 +2017,11 @@ another. The Pi score stays useful only as secondary integration coverage.
   for every exact rational target in `[0,1]`, including the explicit
   endpoint-range enclosure for that target.  Extending this to all
   represented unit-range targets remains future work.
+  For an anchored represented target, the new
+  `sqrtOnUnitRepresentedTargetSearch_stage_certificate` packages the same
+  subinterval, endpoint-square, width-budget, and target-overlap guarantees
+  at one finite stage.  The anchor is explicit data; no represented-target
+  existence or choice principle is inferred.
 - Proved bridge: `HasBisectionSearch I` is computational data assigning a
   certified finite bisection/search to every target in the stated range; it
   gives `HasInverse I` by
@@ -950,6 +2103,12 @@ another. The Pi score stays useful only as secondary integration coverage.
   `expEuler_zero_equiv_one` proves its explicit-radius boxes overlap that
   same point.  These initial-value facts are deliberately distinct from the
   pending self-derivative and nonzero-input comparison theorems.
+  There is now one checked local derivative instance for the literal series
+  evaluator: `ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero`
+  certifies `D⁺ exp(0) = exp(0)`, with the derivative represented by the
+  full raw `expPowerSeries 0`; the stagewise normalization above yields its
+  value `1`.  Its finite proof uses positive steps at the endpoint only, so it
+  is not the required two-sided interval theorem `exp' = exp`.
   The finite algebra for that nonzero comparison is now checked too:
   `fallingFactorialRat`, `eulerBinomialTerm`, and `eulerBinomialPrefix` expose
   the rational binomial coordinates, and
@@ -1015,39 +2174,89 @@ another. The Pi score stays useful only as secondary integration coverage.
   `CurvatureOnSubinterval`; the current implementation still has older
   declaration names such as `MonotoneDerivativeBoundMethod` and
   `DerivativeBoundFromCurvature`.
-- The first proved power-series brick is formal: the coefficient stream
-  `1/n!` is fixed by formal differentiation.  See
+- The first proved power-series brick is formal: coefficient shift fixes the
+  stream `1/n!`. See
   `FormalPowerSeries.expCoeff_derivative` in
   `ComputableAnalysis/PowerSeries.lean`.
-- The same formal layer now covers the standard differential identities for
-  trig and hyperbolic functions:
-  `sin' = cos`, `cos' = -sin`, `sinh' = cosh`, and `cosh' = sinh`.
+- The same formal layer now covers the coefficient-shift identities for trig
+  and hyperbolic streams:
+  `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
+  `cosh -> sinh`.
   See `FormalPowerSeries.sinCoeff_derivative`,
   `FormalPowerSeries.cosCoeff_derivative`,
   `FormalPowerSeries.sinhCoeff_derivative`, and
   `FormalPowerSeries.coshCoeff_derivative`.
+- The finite rational bridge below the formal table is now checked too:
+  `FinitePolynomial.powerSecant_eq_differenceQuotient` identifies the exact
+  quotient of every monomial, and
+  `FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`
+  bounds the quotient of `x^(n+1)/(n+1)` against `x^n` by an explicit
+  `|h|` coefficient on a supplied bounded box.  This avoids any mean-value
+  theorem and is the direct finite algebra needed for the exponential tail.
+  `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval` now packages
+  that bound as a two-sided rational interval derivative certificate, with a
+  computed dyadic step schedule, on every interval contained in `[-C,C]` for
+  `C >= 1`. `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval`
+  closes the same explicit remainder calculation under every finite rational
+  Taylor prefix. The exact finite FTC endpoint recurrence
+  `FinitePolynomial.integratedTaylorPrefix_endpointDifference_succ` records
+  how adjoining one integrated monomial changes the endpoint difference; it
+  is a rational telescoping identity, not an appeal to a completed integral.
+  The blueprint keeps these finite-difference derivative
+  certificates in the later calculus chapter; the series chapter records only
+  coefficient-shift data.
 - Next theorem for `exp.ps`: turn the formal coefficient identity plus
-  rational tail bounds into an effective derivative certificate for the boxed
-  algorithm, hence a witness for
+  rational tail bounds and a translated-series/addition estimate into an
+  effective derivative certificate for the boxed algorithm on an interval,
+  hence a witness for
   `exp.ExponentialFunction.SolvesSelfDerivativeOn`.  This can be specialized
   to exponential first; a general term-by-term differentiation theorem can
   come later.
 - To prove equality of the three exponential representations by calculus
-  rather than by ad hoc estimates, specialize the constructive linear
-  Picard--Lindelöf theorem to the scalar equation `f' = f` with `f(0) = 1`,
-  then prove the equivalent unit-slope characterization of the base at zero.
-  See
-  `SolvesSelfDerivativeOnInterval` and `SelfDerivativeInitialValueUnique` in
-  `ComputableAnalysis/Differential.lean`.  The reusable linear theorem is
-  built from continuous Peano--Baker simplex boxes and factorial tail boxes;
-  its uniqueness interface explicitly requires equality of the rational
-  initial coordinate and equivalence of the two certified initial raw values.
-  general nonlinear Picard--Lindelöf can later add interval-Lipschitz Picard
-  iterates, rational short-interval contraction, and finite subdivision.
-  Both are constructive existence-and-uniqueness data, not appeals to
-  real-number completeness.
+  rather than by ad hoc estimates, use the scalar equation `f' = f` with
+  `f(0) = 1` and the direct finite-mesh route in
+  `ComputableAnalysis/ScalarODEUniqueness.lean`. Its checked closure turns a
+  rational envelope with `B_(r+1) <= B_r/2` into zero error by an executable
+  dyadic stage; `SelfDerivativeDirectMeshComparison` then gives function
+  agreement. The remaining analytic theorem derives that envelope by
+  subtracting two derivative certificates on short rational blocks and
+  chaining finitely many blocks. This is intentionally independent of
+  Peano--Baker/Picard iteration. The vector linear theorem and a future
+  nonlinear interval-Lipschitz theory remain separate constructive
+  existence-and-uniqueness data.
 
 ## Linear Differential Equations
+
+**Benchmark item 97 — finite Cramer core checked.**
+`cramer_two_by_two` proves the rational (2\times2) Cramer rule under a
+nonzero determinant. It is placed here as the finite linear-algebra
+prerequisite, and `cramer_two_by_two_unique` proves that every rational
+solution agrees with the determinant quotients; general matrix dimensions and
+continuous ODE identification are separate milestones.
+The worked `FiniteThreeByThreeCramerExample` adds the diagonal system
+`diag(2,3,4)u=(4,9,16)`: determinant `24`, inverse witness `1/24`, and exact
+solution `(2,3,4)` are all checked.
+
+**Benchmark item 49 — finite Cayley--Hamilton core checked.**
+The 3x3 matrix-power recurrence is now also checked for every natural stage
+and every explicitly supplied rational matrix. It is obtained by multiplying
+the finite 3x3 Cayley--Hamilton identity by a finite matrix power; arbitrary
+dimensions remain deferred.
+`LinearODE.twoByTwo_cayley_hamilton` proves the Cayley--Hamilton identity for
+an explicit rational (2\times2) matrix by finite entrywise calculation.
+The finite `HarmonicOscillator.threeByThree_cayley_hamilton` certificate now
+checks the corresponding explicit (3\times3) identity using the trace, second
+characteristic coefficient, and determinant.  The companion
+`ThreeByThreeLinearAlgebra.threeByThree_cramer_solves` now packages the
+explicit (3\times3) Cramer solve from those determinant numerators whenever an
+inverse-determinant witness is supplied; its
+`threeByThree_cramer_solves_of_determinant_ne_zero` corollary constructs that
+witness canonically from a nonzero determinant.
+`LinearODE.ratMatrix_twoByTwo_matrixPow_recurrence_unique` now adds the finite
+uniqueness certificate: any rational matrix sequence with the same first two
+terms and the induced trace/determinant recurrence agrees stage by stage with
+the matrix-power sequence. Arbitrary dimensions and an abstract
+characteristic-polynomial interface remain deferred.
 
 - The finite noncommutative core for Peano--Baker is now checked in
   `ComputableAnalysis/PeanoBaker.lean`, without Mathlib. It defines local
@@ -1118,27 +2327,27 @@ another. The Pi score stays useful only as secondary integration coverage.
   interval. `CoefficientsRegular` asks for supplied componentwise
   `IntervalRegularOn` witnesses; it does not assume a completed-real
   function space.
-- The blueprint now fixes the chapter's proof direction: start from the
+- The blueprint now fixes the vector chapter's proof direction: start from the
   forced second-order oscillator, turn it into the general affine vector
   equation `x' = A(t)x + b(t)`, construct Peano--Baker plus Duhamel boxes for
   that general problem, and prove uniqueness by iterating the zero-initial
   Volterra identity until the factorial estimate is below an arbitrary
-  rational tolerance.  Only then specialize to the oscillator and to
-  `E' = E`, `E(0) = 1`.  This recovers sine/cosine and identifies every
-  exponential representative that has independently supplied the same
-  derivative and initial-value certificate.  The positive inverse is the
+  rational tolerance. This recovers sine/cosine and the vector rotation
+  route. Scalar `E' = E`, `E(0) = 1` uses direct mesh contraction instead;
+  after its presentation-agreement theorem, the positive inverse is the
   canonical logarithm used by the long arctangent integration-by-parts Pi
-  route; this is a named dependency chain, not an extra Pi-scoreboard row.
+  route. These are named dependency chains, not extra Pi-scoreboard rows.
 - Next analytic target: build interval matrices for ordered-simplex
   Peano--Baker terms, prove a factorial tail enclosure from a rational
   coefficient bound, and obtain state-transition and variation-of-constants
   formulas for `x' = A(t)x + b(t)`. Together these are the effective linear
   Picard--Lindelöf theorem: the zero-initial homogeneous case gives
   uniqueness, and the factorial tail is the explicit solution modulus. The
-  next specializations are the scalar `f'=f` exponential route, the analytic
-  commuting-exponential identification, scalar and piecewise-constant
-  systems, and higher-order nilpotent/triangular systems. Chapter `Linear
-  Differential Equations` gives the certificate plan.
+  next specializations are the analytic commuting-exponential identification,
+  scalar and piecewise-constant systems, and higher-order
+  nilpotent/triangular systems. The scalar `f'=f` exponential route is
+  already specified separately by direct mesh contraction. Chapter `Linear
+  Differential Equations` gives the vector certificate plan.
 
 ## Elementary Function Coverage
 
@@ -1164,9 +2373,169 @@ arguments.
   `ComplexPathIntegral.polygonalIntegralRawEntire` packages these finite sums
   as a `ComplexRaw` algorithm.  The current Cauchy sanity checks integrate
   `z^2` and `z^3 + 2z` around the unit square and check overlap with zero at
-  stages `10`, `100`, and `1000`.
+  stages `10`, `100`, and `1000`.  The new
+  `ComplexPathIntegral.PolygonalIntegralCertificate` and
+  `ComplexPathIntegral.polygonalIntegralRawEntire_valid` make the validity
+  boundary explicit: ordered boxes, stage nesting, and potential-infinity
+  width shrinkage must be supplied as finite certificates before the raw
+  algorithm is promoted to a valid represented complex number.
+  The finite displacement identities
+  `ComplexPathIntegral.polygonalDisplacementTo_append_endpoint` and
+  `ComplexPathIntegral.polygonalDisplacementTo_closed` now provide the exact
+  endpoint-cancellation seed for closed polygonal paths, still entirely in
+  rational complex arithmetic.
+  The constant-differential lift
+  `ComplexPathIntegral.polygonalConstantDifferentialDisplacement_append_endpoint`
+  identifies the finite primitive value `c * (z_end - z_start)`, and
+  `polygonalConstantDifferentialDisplacement_closed` proves its closed-path
+  cancellation exactly.
+  The quadratic primitive layer
+  `ComplexPathIntegral.polygonalQuadraticPrimitiveTo_append_endpoint` and
+  `polygonalQuadraticPrimitiveTo_closed` extends this to the polynomial
+  differential `z dz`, whose primitive is `z^2 / 2`, using only finite
+  rational-complex identities.
+  The general finite monomial extension
+  `ComplexPathIntegral.polygonalMonomialPrimitiveTo_append_endpoint` and
+  `polygonalMonomialPrimitiveTo_closed` covers `z^n dz` with the executable
+  natural power and primitive `z^(n+1)/(n+1)`. This is an algebraic finite
+  schema, not a claim about an infinite analytic power function.
+  The coefficient-list evaluator
+  `ComplexPathIntegral.polynomialPrimitiveEval` and its path fold
+  `polygonalPolynomialPrimitiveTo` now package the same endpoint cancellation
+  for every finite rational-complex polynomial primitive.
 
 ## Algebraic Numbers and FTA
+
+**Benchmark item 89 — linear factor/remainder base case checked.**
+The worked `FiniteRemainderExample` evaluates `x^2-3x+2` at the supplied root
+`1` and sample point `4`, checking the exact value `6` through the quadratic
+factor identity.
+`Polynomial.linear_remainder`, `Polynomial.linear_factor_of_root`,
+and `Polynomial.linear_root_iff_constant_eq_neg_mul`
+`Polynomial.quadratic_remainder`, and
+`Polynomial.quadratic_factor_of_root` provide exact rational degree-one and
+degree-two base cases. The cubic remainder/factor pair
+`Polynomial.cubic_remainder`/`Polynomial.cubic_factor_of_root` supplies the
+rational-root reduction step for benchmark item 37. The worked identity
+`Polynomial.cubic_example_factorization` and its checked roots
+`Polynomial.cubic_example_roots` provide an explicit rational cubic solution
+example within that boundary, while `Polynomial.cubic_example_root_iff`
+checks that these are all of its rational roots. More generally,
+`rationalCubicPolynomial` and `rationalCubic_has_computable_roots` now package
+the three-root factorized cubic interface in the FTA layer as well.
+The named complex factorization now also has the exact root-set theorem
+`factorizedCubicPolynomial_eval_eq_zero_iff`: a zero is precisely one of the
+three supplied rational-complex roots.  This is a finite exclusion certificate
+for the cubic core of item 37, not a general cubic formula.
+The public exact-root form `factorizedCubicPolynomial_hasExactRoot_iff` exposes
+the same three-way characterization without requiring clients to unfold
+evaluation.
+The new `Polynomial.quadratic_eval_root_of_discriminant` and
+`Polynomial.cubic_completion_roots_of_discriminant` theorems complete the
+finite supplied-root cubic boundary: a rational discriminant square witness
+produces both remaining rational roots. The construction of the initial root
+or square witness remains separate algorithmic work.
+The worked `FiniteCubicCompletionExample` now instantiates that boundary for
+`x^3 - 6x^2 + 11x - 6`: with supplied root `1` and discriminant square
+witness `1`, Lean computes and checks the remaining roots `2` and `3`.
+The parallel `rationalQuarticPolynomial` interface packages four exact
+rational roots and their computable witnesses, strengthening the checked
+factorized core of benchmark item 46 without claiming a general quartic
+formula.
+The supplied complex-factor quartic now also has the exact root-set theorem
+`factorizedQuarticPolynomial_eval_eq_zero_iff`, giving finite exclusion for
+every candidate outside the four supplied roots.
+The matching exact-root interface
+`factorizedQuarticPolynomial_hasExactRoot_iff` packages that four-way result
+for computable-root consumers.
+The checked worked examples `Polynomial.quartic_example_factorization` and
+`Polynomial.quartic_example_roots` supply four rational roots for a quartic,
+while `Polynomial.quartic_example_root_iff` checks that these are all of its
+rational roots. Together they cover the project's rational worked-example core
+of benchmark item 46; the general quartic formula remains outside the current
+boundary.
+The worked `FiniteQuarticSplitExample` now instantiates the two-quadratic
+interface with factors `z^2 - 1` and `z^2 - 4`, checking all four rational
+roots `-2`, `-1`, `1`, and `2` in the finite rational-complex model. The
+general Ferrari resolvent remains outside the boundary.
+The optional Descartes route now has a finite `Polynomial.signChangeCount`
+counter, a zero-filtered variant, the general zero-variation lemma
+`signChangeCountIgnoringZeros_zero_of_nonneg_coeffs`, a general quadratic sign-pattern theorem,
+the nonnegative/nonpositive-coefficient evaluation lemmas, and checked
+examples.  The strict positive-input theorem
+`eval_pos_of_nonneg_coeffs_of_pos` supplies a direct positive-ray root
+exclusion; the root-counting rule itself is not yet claimed.
+The packaged `eval_ne_zero_of_nonneg_coeffs_of_pos` form is available for
+direct root-search use; `no_positive_root_of_nonneg_coeffs_of_pos` packages
+the same fact as an existential root-exclusion certificate; and
+`eval_neg_of_nonpos_coeffs_of_neg` supplies the strict negative dual.
+`no_positive_root_of_nonpos_coeffs_of_neg` packages that dual as an
+existential root-exclusion certificate as well. The sign-symmetric zero-variation lemma
+`signChangeCountIgnoringZeros_zero_of_nonpos_coeffs` is also checked.
+The degree-independent finite extension now adds
+`eval_nonincreasing_of_nonpos_coeffs` and
+`eval_strictly_decreasing_of_nonpos_tail`. Consequently,
+`at_most_one_positive_rational_root_of_nonpos_tail` proves uniqueness of a
+positive rational root for any finite coefficient list with a positive
+constant term and a nonpositive, nonzero tail. The accompanying
+`signChangeCountIgnoringZeros_one_of_pos_cons_nonpos_tail` identifies the
+single sign variation after zero filtering. This is a finite one-variation
+Descartes certificate, now packaged directly as
+`Polynomial.one_positive_variation_certificate`; it is not the unrestricted
+classical root-counting theorem.
+The exact two-variation example now records that \(x^2-3x+2\) has sign count
+two and positive rational root set exactly \(\{1,2\}\). This is a finite
+Descartes example for item 100, not a claim of the general real-root-counting
+theorem.
+The companion `Polynomial.zero_variation_root_exclusion_certificate` now
+packages the zero-variation count with the corresponding positive-root
+exclusion whenever the finite list has nonnegative coefficients and a
+strictly positive supplied coefficient.
+The arbitrary finite-list combinatorial bound
+`Polynomial.signChangeCountIgnoringZeros_add_one_le_filter_length` now records
+that the zero-filtered sign-change count is at most the coefficient-list
+length minus one. This is the finite combinatorial component of item 100;
+general root counting remains deferred.
+`Polynomial.syntheticDivide_spec` and
+`Polynomial.syntheticDivide_factor_of_root` provide linear factor/remainder
+certificates for arbitrary finite rational coefficient lists, and
+`Polynomial.syntheticDivide_remainder_eq_eval` identifies the remainder with
+evaluation at the chosen point, while
+`Polynomial.syntheticDivide_remainder_eq_zero_iff` exposes the equivalent
+zero-remainder root test. The new finite
+`RationalRootSearch.rationalRootSearch` scans supplied rational candidates,
+with soundness, candidate-list completeness, and a
+`RemainderCertificate`-packaged result. This gives items 37 and 89 an
+executable rational-root interface without asserting that an arbitrary
+polynomial has a rational root. Division by higher-degree factors and
+closed-form cubic solving remain future algebra infrastructure.
+The general finite identity `Polynomial.syntheticDivide_secant_quotient`
+identifies the nonzero-step secant quotient of any finite rational polynomial
+with its synthetic quotient evaluated at the right endpoint. This supplies a
+reusable finite secant/Taylor bridge without asserting a limiting theorem.
+The finite coefficient derivative identities
+`Polynomial.derivativeEval` and
+`Polynomial.pow_mul_eval_zipIdx_eq_derivativeEvalAux` expose the exact
+power-weighted indexed coefficient identity, while
+`Polynomial.eval_derivative_eq_derivativeEval` now provide the generic
+recursive coefficient-level derivative evaluator; the named identities
+`Polynomial.eval_derivative_linear`,
+`Polynomial.eval_derivative_quadratic`, and
+`Polynomial.eval_derivative_cubic`,
+`Polynomial.eval_derivative_quartic`, and
+`Polynomial.eval_derivative_quintic`,
+`Polynomial.eval_derivative_sextic`, and
+`Polynomial.eval_derivative_septic` now connect the coefficient-level
+derivative list back to pointwise evaluation through degree seven.
+They support the finite Taylor boundary without asserting a general analytic
+derivative theorem.
+The rational-function wrapper is now also closed for polynomial numerators:
+`RatFun.polynomial_defined_all` certifies its denominator everywhere, and
+`RatFun.polynomial_evalOnDomain_eq` identifies the domain evaluation with
+`Polynomial.eval`. The packaged interval evaluator
+`RatFun.polynomialOnInterval` and its exact computation theorem
+`RatFun.polynomialOnInterval_compute_eq` make this a reusable
+interval-function certificate.
 
 - The algebraic-number layer is now proof-honest: exact rational-complex
   algebraic numbers and exact roots of unity are formalized, while arithmetic
@@ -1176,16 +2545,112 @@ arguments.
   `AlgebraicComplex.neg_annihilator_exists`,
   `AlgebraicComplex.mul_annihilator_exists`,
   `AlgebraicComplex.inv_exists`, and `AlgPoly.exists_root`.
-- Next finite algebra target: prove `ComplexRaw.mul` preserves validity, then
-  use resultant-style rational polynomial transformations to supply the
-  addition, negation, and multiplication annihilator witnesses.
-- The important Euler-route special case is now checked before that full
-  target: `ComplexRaw.mulI` is the direct coordinate rotation
-  \(x+iy\mapsto-y+ix\), and `ComplexRaw.imaginaryAxis` embeds any certified
-  real as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
-  already yields a valid raw \(i\pi/2\) after rational scaling.  This does not
-  yet extend the factorial-series exponential to represented complex inputs
-  or establish Euler's identity.
+- The four-corner product is now a certified raw operation.  The finite
+  containment/order/refinement facts are `QBox.mulRealInterval_contains`,
+  `mulRealInterval_ordered`, `mulRealInterval_nested`, `QBox.mul_contains`,
+  `mul_ordered`, and `mul_nested`.  The checked width bound
+  `QBox.mulRealInterval_width_le_of_abs_bounded`, lifted by
+  `mul_width_height_le_of_coordinateBounded`, uses the explicit stage-zero
+  coordinate radii to prove `ComplexRaw.mul_valid`.  The finite-intersection
+  proof `QBox.mul_overlaps_of_overlaps` gives `ComplexRaw.mul_equiv`, so this
+  product is representation-safe.  Consequently
+  `AlgebraicComplex.mulRaw_valid` has discharged the former raw-validity
+  premise; resultant-style rational polynomial transformations remain the
+  actual addition, negation, and multiplication-annihilator targets.
+- The important Euler-route exact-scalar implementation is also checked:
+  `ComplexRaw.qcomplexLeftMul` gives every rational complex
+  scalar a validity- and equivalence-preserving affine action on a certified
+  complex raw.  Its `i` specialization is the direct coordinate rotation
+  `ComplexRaw.mulI`, and `ComplexRaw.imaginaryAxis` embeds any certified real
+  as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
+  `ComplexRaw.qcomplexLeftMul_ofQComplex` now agrees with ordinary finite
+  `QComplex` multiplication on exact rational inputs.  The stagewise and
+  represented `imaginaryUnit` certificates likewise identify affine
+  multiplication by (i) with the direct coordinate rotation.  This is the
+  finite rational-coordinate bridge for item 17; it does not identify a
+  represented exponential with a completed complex exponential.
+  already yields the valid bounded real input `PiProofs.pi.halfPi`, whose
+  boxes stay in \([1,2]\), and a valid raw \(i\pi/2\) both by rational
+  scaling and as the literal exact \(i/2\)-scalar action.  The return scalar identity
+  \((-2i)(i\pi/2)=\pi\) is now available both as an exact stagewise affine
+  theorem and as the general-product theorem
+  `PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea`.
+  `PiProofs.pi.LogAtICertificate` isolates the remaining
+  branch-specific input: any valid complex logarithm raw agreeing with
+  \(i\pi/2\) now immediately yields the certified complex formula
+  \(-2i\log(i)=\pi\), both through the affine action and as the literal
+  `negativeTwoImaginaryRaw * logI.raw` product.  This does not yet extend the factorial-series
+  exponential to represented complex inputs or establish Euler's identity.
+  The generic last assembly step is now present as
+  `ComplexRaw.cauchyStabilize_valid`: finite intersections of widened direct
+  complex candidates become a valid raw box computation when every later
+  candidate is contained in every earlier widened box.  Those factorial-tail
+  and input-modulus obligations are now discharged for `halfPi`:
+  `PiProofs.pi.halfPiRotation` is valid, using the common bounded-input
+  rotation schedule, its finite Lipschitz bound, and a radius at most
+  `32 / (n + 1)`.  The input is also bridged to
+  `2 * arctan.geom(1)` and the geometric normalized quarter-turn raw.
+  `halfPi_equiv_geometricHalfPi` and
+  `imaginaryHalf_equiv_geometricImaginaryHalf` now carry this agreement to
+  the geometry-only represented half angle and its imaginary-axis input.
+  `RotationLift.HalfPiInput.rotation_equiv_of_input_equiv` now transports
+  equivalent half-angle raws through the separately stabilized factorial
+  rotations using a cross radius at most `64 / (n + 1)`, and
+  `halfPiRotation_equiv_geometricRotation` specializes that result to the
+  registry and geometry-only constructions.  The remaining Euler work is the
+  sector-area reparametrization and vector-uniqueness identification of that
+  rotation with the geometric endpoint, followed by the relevant logarithm
+  branch certificate.
+  The geometry-only implementation is now indexed separately as
+  `GeometricPiRotation`: its cofinal rational half-pi schedule has certified
+  bounds and width modulus, is equivalent to the normalized quarter-turn, and
+  feeds a valid finite-prefix-stabilized factorial rotation with ordered
+  candidates.  This is an algorithmic strengthening of the Euler/rotation
+  target, not a completed-real theorem; endpoint identification and the
+  logarithm branch remain open.
+  The rational chart side is now a checked variable-coefficient
+  rotation-system candidate:
+  `GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` gives
+  `P' = (2 i / (1+t*t)) P`, `P(0)=1`, and `P(1)=i` on `[0,1]`.
+  The scalar sector-time component is now checked as well:
+  `SectorAreaReparametrization.angleOnUnit_hasDerivative` gives
+  `Theta' = 2/(1+t*t)`, and
+  `angleAt_equiv_two_arctanGeom` identifies every rational chart value with
+  `2 * arctan.geom(t)`.  The finite lower-tail comparison now also gives
+  `angleOnUnit_effectiveInverseSeparation`: an input gap `1/(n+1)` produces
+  strictly separated output boxes at stage `64*(n+1)`.
+  The same finite certificate is now exposed directly on the unscaled
+  rectangle function as
+  `IntegralIdentities.arctanIntegralRectangleOnUnit_effectiveInverseSeparation`,
+  keeping the separation modulus attached to the evaluator that produced the
+  boxes.  This is an inverse-search prerequisite, not an inverse theorem.
+  `angleOnUnitRegular_intervalRegular` now gives the matching finite
+  interval-image certificate through the cofinal `64*(n+1)` schedule, and
+  `angleOnUnitRegular_invertible` packages it with monotonicity and effective
+  separation as the prerequisites for a constructive inverse branch.  The remaining
+  reparametrization work is the data-valued bisection search, then curve
+  composition and the vector uniqueness theorem, not the derivative,
+  interval regularity, or strict monotone separation of the sector-area
+  clock.
+  The corresponding endpoint has now been transported as well:
+  `PiProofs.pi.sectorAreaAngleOne_equiv_halfPi` proves
+  `Theta(1) ≡ pi/2` by the checked geometric arctangent bridge.
+  Independently of the pi registry,
+  `SectorAreaRotation.halfPi` packages the accelerated endpoint as a bounded
+  factorial-rotation input: every rectangle box is checked in `[1,2]` from
+  the kernel bounds, its width modulus is explicit, and
+  `SectorAreaRotation.rotation_equiv_geometricRotation` transports the
+  resulting stabilized rotation to the geometry-only rotation.  The remaining
+  Euler endpoint gap is therefore the stated reparametrized rotation-system
+  uniqueness theorem, rather than a disagreement between angle inputs.
+  `PiProofs.pi.halfPiRotation_equiv_sectorAreaRotation` also records the
+  transitive connection back to the project-level pi handle.
+  Its imaginary-axis input has the matching transport
+  `PiProofs.pi.imaginaryHalf_equiv_sectorAreaRotationImaginaryHalf`.
+  `PiProofs.pi.sectorAreaPiRaw_equiv_piCircleArea` doubles that endpoint to a
+  direct pi raw and transports it to the preferred circle-area representation;
+  it is intentionally a named alternate computation rather than a new
+  coverage score.
 
 ## First-Year Calculus Course
 
@@ -1195,15 +2660,20 @@ derivatives, and definite integration algorithms that covers the examples
 students actually compute.
 
 - New course module: `ComputableAnalysis/FirstYearCalculus.lean`.
-- Checked formal derivative table:
+- Checked formal coefficient-shift table:
   monomials `x^(n+1)/(n+1)`, `exp`, `sin`, `-cos`, `sinh`, and `cosh`.
   See `FirstYearCalculus.PowerSeriesDerivativeEntry` and
   `FirstYearCalculus.checked_power_series_table`.
+- The monomial row also has an executable finite-secant estimate, independent
+  of the formal stream: see
+  `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval`.
 - Linear closure for the table is now available at the formal coefficient
-  level.  See `FormalPowerSeries.derivative_add`,
-  `FormalPowerSeries.derivative_scaleRat`,
-  `FormalPowerSeries.HasFormalDerivative.add`, and
-  `FormalPowerSeries.HasFormalDerivative.scaleRat`.
+  level.  The primary declarations are
+  `FormalPowerSeries.coefficientShift_add`,
+  `FormalPowerSeries.coefficientShift_scaleRat`,
+  `FormalPowerSeries.hasCoefficientShift_add`, and
+  `FormalPowerSeries.hasCoefficientShift_scaleRat`; their older
+  formal-derivative counterparts remain compatibility API.
 - Real-axis wrappers for concrete functions are named:
   `FirstYearCalculus.RealElementary.expPS`, `sinPS`, `cosPS`,
   `sinhFromExp`, `coshFromExp`, `sqrtRat`, `invX`, and
@@ -1212,8 +2682,15 @@ students actually compute.
   `RatFun.oneOverOnePlusSquare_denominator_apart_on_interval` proves that
   `1/(1+x^2)` has denominator-apartness bound `1` on every rational interval,
   and `RatFun.oneOverX_denominator_apart_on_pos_interval` proves that `1/x`
-  is denominator-apart on every interval `[a,b]` with `0 < a`.  These expose
-  `1/(1+x^2)` and `1/x` as certified interval functions.
+  is denominator-apart on every interval `[a,b]` with `0 < a`.  The symmetric
+  `RatFun.oneOverX_denominator_apart_on_neg_interval` now covers intervals
+  with `b < 0`; `oneOverXOnPositiveInterval` and
+  `oneOverXOnNegativeInterval` expose both branches as certified interval
+  functions with exact computation theorems, while
+  `RatFun.oneOverX_defined_of_ne_zero` gives the general pointwise domain
+  criterion, while `RatFun.eval?_eq_some_of_defined` and
+  `RatFun.eval?_eq_none_of_undefined` expose the executable evaluator's
+  success/failure behavior. The pole at zero remains explicitly excluded.
 - Next concrete integral targets, beyond the checked unit-branch arctangent
   rectangle/Lipschitz comparison and without a general integrability theorem:
   `integral 1/x = log x` on positive intervals,
@@ -1261,7 +2738,13 @@ students actually compute.
   division theorem: `Taylor.ArctanKernel.finiteRemainderRoute` proves
   `1/(1+x^2) = kernelPartial x n + kernelRemainder x n`, with
   `|kernelRemainder x n| <= (x*x)^(n+1)`.  This is the exact theorem that
-  should feed the later definite-integral remainder estimate.
+should feed the later definite-integral remainder estimate.
+The specialized
+`Taylor.ArctanKernel.finite_remainder_half_interval_budget` now supplies an
+executable schedule on `0 <= x <= 1/2`: stage `n` has remainder at most
+`1/(n+2)`, obtained by a rational half-power comparison. This is the first
+explicit stage selector for the Taylor remainder route and remains entirely
+finite.
 - The finite Riemann-error core is now formalized without a completeness
   principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
   its endpoint-average bounds bracket each monomial primitive, and
@@ -1413,12 +2896,16 @@ count.  The reciprocal-log triangle formula is instead the primary
   canonical scorecard row.  The endpoint comparison at `1` belongs to the
   independent Leibniz route.  Machin remains solely a power-series
   computation, not a second integral-based pi representation.
-- The generic finite-Riemann theorem
-  `arctanEqualsGeom_finiteRiemannBridge` remains reusable series-to-geometry
-  infrastructure on nonnegative rational inputs in `[0,1]`.  The canonical
-  scoreboard deliberately uses it only for the Leibniz endpoint and the two
-  power-series inputs in the single Machin formula; auxiliary arctangent
-  addition identities are not separate pi computations.
+- The reusable finite-Riemann bridge now covers every rational input on the
+  series chart `|x| <= 1`:
+  `arctanEqualsGeom_finiteRiemannBridge_on_unit`, with presentation-level
+  certificate `arctanPowerSeriesGeomAgreement_finiteRiemannBridge`.  Its
+  nonnegative core remains `arctanEqualsGeom_finiteRiemannBridge`; the
+  negative half follows from the literal raw-interval negation implemented by
+  both evaluators.  The canonical scoreboard deliberately uses this one
+  capability only for the Leibniz endpoint and the two power-series inputs in
+  the single Machin formula; this extension is not an additional pi
+  computation.
 - The finite Archimedes comparison aligns the polygon and circumference
   computations.  `PiProofs.piCircumference_valid` now closes the original
   chord-path evaluator itself, and `PiProofs.piCircumferenceDirect` is its
@@ -1804,6 +3291,24 @@ scoreboard above.
   \(\zeta(2)=\pi^2/6\); a positive-normalization theorem may later expose a
   pi-presentation agreement as a registry corollary, rather than treating the
   squared identity itself as a scoreboard formula.
+- `BaselFiniteComparison.baselCommonInterval_certificate` strengthens the
+  finite cross-check at stages 10,000 and 8: it constructs an explicit
+  nonempty rational intersection contained in both independent enclosures.
+  This is a reusable finite comparison certificate, still deliberately short
+  of the completed Basel identity.
+- `BaselFiniteComparison.baselCommonInterval_width_le` records the precision
+  consequence: the common interval is no wider than either source enclosure,
+  so both finite error budgets transfer to the shared comparison object.
+- `BaselFiniteComparison.baselCommonInterval_midpoint_certificate` extracts
+  an explicit rational midpoint lying in both source enclosures, providing a
+  concrete finite witness for the cross-evaluator comparison.
+- `BaselFiniteComparison.baselRefinedCommonInterval_certificate` repeats the
+  comparison at the tighter stages 100,000 and 10, with an explicit common
+  rational interval.  `baselRefinedCommonInterval_width_le` transfers both
+  source precision budgets to that refined object.  This strengthens the
+  finite benchmark evidence without claiming the infinite Basel identity.
+  `baselRefinedCommonInterval_midpoint_certificate` additionally exports a
+  concrete rational witness lying in both refined enclosures.
 
 ## Long-Term Theorems
 
@@ -1824,6 +3329,122 @@ scoreboard above.
   quotient is its slope, while
   `FunctionOnInterval.exactRatSquareDerivative` proves that the signed
   quotient error for `x^2` is the step itself and fits the stage precision.
+  The exact identity `Differential.square_midpoint_mean_value` additionally
+  gives the rational square-function secant slope at the midpoint, a finite
+ Mean Value Theorem core for benchmark item 75.
+The worked `FiniteCubicMVTExample` adds the exact cubic interval witness:
+the secant slope of `x^3` on `[0,1]` is `1`, decomposed as midpoint derivative
+value `3/4` plus finite remainder `1/4`.
+  The companion `ExactFunction.affine_differenceQuotient` proves the exact
+  constant slope of every rational affine secant, supplying the corresponding
+  finite base case.
+  `ExactFunction.affine_root_of_nonzero_slope` also gives the exact rational
+  zero of every nonconstant affine function, a finite root-search base case
+  for benchmark item 79.
+  Its positive-slope companion
+  `ExactFunction.affine_root_between_of_sign_change` proves that this zero
+  lies inside a certified endpoint sign-change bracket.
+  The corresponding negative-slope orientation is checked by
+  `ExactFunction.affine_root_between_of_negative_sign_change`.
+`ExactFunction.cube_differenceQuotient` adds the exact rational cubic secant
+expansion used by the finite Taylor/polynomial layer.
+`Differential.cube_midpoint_secant` rewrites that cubic secant around the
+interval midpoint, adding an explicit quadratic remainder certificate for the
+finite Mean Value/Taylor route.
+The companion `Differential.quartic_midpoint_secant` extends the same exact
+midpoint expansion to degree four.
+`Differential.quintic_midpoint_secant` completes the corresponding degree-five
+finite midpoint expansion.
+`Differential.sextic_midpoint_secant` extends the same centered finite
+secant decomposition through degree six, with the explicit fourth-power
+remainder term.
+  `ExactFunction.quartic_differenceQuotient` checks the analogous quartic
+  expansion as the next finite monomial case.
+  `ExactFunction.quintic_differenceQuotient` extends the same exact secant
+  family through degree five. The new
+  `ExactFunction.sextic_differenceQuotient` carries the exact finite secant
+  expansion through degree six, matching the sextic polynomial bracket layer.
+  `ExactFunction.square_quotient_by_id` and
+  `ExactFunction.cube_quotient_by_id` add finite quotient-cancellation support
+  for the optional L'Hôpital layer (benchmark item 64), without claiming a
+  limit theorem.  The reusable
+  `ExactFunction.power_succ_quotient_by_id` generalizes this cancellation to
+  every natural power, and `ExactFunction.power_succ_quotient_by_power`
+  cancels the full nonzero power denominator `x^n` in
+  `x^(n+1)/x^n = x`; the reusable
+  `ExactFunction.power_add_quotient_by_power` proves
+  `x^(m+n)/x^m = x^n`. No limiting theorem is claimed.
+  `Differential.cubic_linear_factored_quotient_derivative_ratio` adds the
+  cubic common-factor identity
+  `(x^3-a^3)/(x-a)=3*a^2+3*a*(x-a)+(x-a)^2`, extending the finite algebraic
+  L'Hôpital boundary without introducing a limit theorem.
+  The scalar-weighted companion
+  `ExactFunction.mul_power_add_quotient_by_power` cancels the same nonzero
+  power inside `y*x^(m+n)/x^m = y*x^n`, making the certificate compositional
+  for endpoint and affine factors.
+  The scaled-denominator extension
+  `ExactFunction.mul_power_add_quotient_by_scaled_power` also cancels a
+  nonzero scalar factor in the denominator, yielding
+  `(y*x^(m+n))/(z*x^m) = (y/z)*x^n` under explicit nonzero hypotheses.
+  The new `Polynomial.finiteDerivativeEval` together with its public Horner
+  recurrence `Polynomial.finiteDerivativeEval_cons` and exact linear and
+  quadratic base cases `Polynomial.finiteDerivativeEval_linear` and
+  `Polynomial.finiteDerivativeEval_quadratic` and
+  `Polynomial.finiteDerivativeEval_cubic`,
+  `Polynomial.finiteDerivativeEval_quartic`, and
+  `Polynomial.finiteDerivativeEval_quintic`, and
+  `Polynomial.finiteDerivativeEval_sextic`, and
+  `Polynomial.finitePolynomial_secant_derivative_bracket` and its direct cubic
+  specialization `Polynomial.finiteCubic_secant_derivative_bracket` and its
+  quartic-through-sextic specializations
+  `Polynomial.finiteQuartic_secant_derivative_bracket` and
+  `Polynomial.finiteQuintic_secant_derivative_bracket`, together with the new
+  `Polynomial.finiteSextic_secant_derivative_bracket`, assemble a finite
+  endpoint secant bracket for any Horner polynomial with nonnegative rational
+  coefficients on a nonnegative rational interval. The companion
+  `Polynomial.finitePolynomial_secant_derivative_gap` turns that bracket into
+  an explicit rational width budget for the secant error. This strengthens the
+  finite core of benchmark item 75 without selecting an intermediate point or
+  invoking a completed-real Mean Value Theorem.
+  The named specialization `Polynomial.finiteCubic_secant_derivative_gap`
+  now exposes the same budget directly in the cubic derivative formula used by
+  the low-degree calculus examples.
+  The new `Polynomial.finiteCubic_secant_derivative_gap_le` makes that budget
+  explicit as `(2*c₂ + 6*c₃*b)*(b-a)`, so a requested rational tolerance can
+  be converted directly into a mesh-width condition.
+  The new `Polynomial.finiteQuintic_secant_derivative_gap_le` extends this
+  explicit scheduler through degree five with budget
+  `(2*c₂ + 6*c₃*b + 12*c₄*b^2 + 20*c₅*b^3)*(b-a)`.
+  The new `Polynomial.finiteQuintic_secant_derivative_gap_le` extends this
+  explicit scheduler through degree five with budget
+  `(2*c₂ + 6*c₃*b + 12*c₄*b^2 + 20*c₅*b^3)*(b-a)`.
+  The matching `Polynomial.finiteQuartic_secant_derivative_gap` and
+  `Polynomial.finiteQuintic_secant_derivative_gap` declarations now carry the
+  explicit budget through the quartic and quintic formulas as well. The new
+  `Polynomial.finiteQuartic_secant_derivative_gap_le` makes the quartic budget
+  explicit as `(2*c₂ + 6*c₃*b + 12*c₄*b^2)*(b-a)`.
+  The new
+  `Polynomial.finiteSextic_secant_derivative_bracket` and
+  `Polynomial.finiteSextic_secant_derivative_gap` extend the same finite
+  certificate one degree further, without changing the nonnegative-coefficient
+  or rational-interval hypotheses.
+  The new `Polynomial.finiteSextic_secant_derivative_gap_le` makes the degree-
+  six mesh budget explicit as
+  `(2*c₂ + 6*c₃*b + 12*c₄*b^2 + 20*c₅*b^3 + 30*c₆*b^4)*(b-a)`.
+  The matching `Polynomial.finiteDerivativeEval_septic`,
+  `Polynomial.finiteSeptic_secant_derivative_bracket`, and
+  `Polynomial.finiteSeptic_secant_derivative_gap` extend the public finite
+  endpoint certificate to degree seven, still using only rational coefficients
+  and a finite endpoint comparison.
+  `Polynomial.finiteSeptic_derivative_mono` additionally proves that the
+  septic derivative evaluator is monotone on nonnegative rational intervals
+  under the same coefficient certificate.
+  `QInterval.around_differenceQuotient_near_around_of_pos` and its signed-step
+  wrapper `QInterval.around_differenceQuotient_near_around` now package the
+  interval-level hand-off: a finite center-secant error plus explicit box,
+  quotient, and derivative budgets yields a literal `NearAt` certificate.
+  This closes another reusable algorithmic layer for item 75 while retaining
+  the project's rational-box semantics.
 - First checked non-affine FTC estimate: for `F(x)=x^2`, `f(x)=2x` on
   `[0,1]`, the left-sum FTC error at stage `m+1` is exactly `1/(m+1)`.
   See `FTC.ftcError_square_doubleId_zero_one_succ` and
@@ -1841,6 +3462,16 @@ scoreboard above.
   This is the first theorem in the exact form of the original project goal:
   an integral computed by finite rational sums equals `F(b)-F(a)` as a
   computable real.
+- The cubic finite FTC package in `FiniteFTCPolynomial.lean` adds the explicit
+  accumulator `FiniteFTC.cubeDerivativeLeftSum` for (3x^2) on `[0,1]`.
+  Its exact form is certified by `cubeDerivativeLeftSum_eq`, and the error
+  identities `cubeDerivativeLeftSum_error_eq` and
+  `cubeDerivativeLeftSum_error_le_three_halves_div` give the potential-infinity
+  schedule (0\le 1-S_n\le 3/(2n)) for every positive finite stage.  This is
+  a cubic endpoint certificate, not an unrestricted classical FTC theorem.
+  The matching `FiniteFTC.cubeDerivativeRightSum` has the exact form
+  `((n+1)(2n+1))/(2n^2)` and exposes its positive error over the endpoint,
+  giving the corresponding right-hand finite enclosure.
 - Constructive FTA: a rational-complex polynomial of positive degree has a
   computable complex root.
   See `ComputableAnalysis/FTA.lean`.
@@ -1848,11 +3479,159 @@ scoreboard above.
   exact rational-complex roots lift to computable roots
   (`exactRoot_is_computable`), monic linear polynomials `X - r` have the
   computable root `r` (`monicLinear_has_computable_root`), and `z^2 + 1`
-  has the computable root `i` (`zSqPlusOne_has_computable_root`).
+  has the computable root `i` (`zSqPlusOne_has_computable_root`).  The
+  rational-coefficient extension
+  (`rationalLinear_positiveDegree`, `rationalLinear_exact_root`, and
+  `rationalLinear_has_computable_root`) now checks every `a*z+b` with
+  `a != 0`, whose root is `-b/a`.
+  The next FTA boundary is now checked as well: `qcomplexLinearPolynomial`
+  accepts arbitrary rational-complex coefficients, and a supplied finite
+  inverse witness for the leading coefficient yields an exact computable root
+  through `qcomplexLinear_has_computable_root_of_inverse`.  This is the
+  constant-first `[-b,a]` convention, so the root is `a⁻¹*b`; general division remains a
+  separate representation task.
+  The reusable finite rearrangement laws
+  `QComplex.mul_assoc_cert`, `QComplex.mul_add_cert`,
+  `QComplex.add_mul_cert`, `QComplex.mul_one_cert`,
+  `QComplex.mul_neg_cert`, and `QComplex.neg_mul_cert` expose the coordinate
+  algebra used by this certificate without importing a completed complex field.
+  The finite evaluator `QComplex.exists_mul_inverse_of_normSq_ne_zero` now
+  constructs the needed inverse witness from the nonzero rational norm-square,
+  and `qcomplexLinear_has_computable_root_of_normSq` packages the resulting
+  executable root.  Thus this linear case is no longer merely conditional on
+  an abstractly supplied inverse.
+  The coordinate identity `QComplex.normSq_eq_zero_iff` identifies nonzero
+  norm-square with a nonzero complex coefficient, and
+  `qcomplexLinear_has_computable_root_of_ne_zero` packages the resulting
+  theorem under the natural leading-coefficient hypothesis.
+The factorized monic quadratic package
+(`rationalQuadratic_left_exact_root`,
+`rationalQuadratic_right_exact_root`, and
+`rationalQuadratic_has_computable_roots`) likewise certifies both roots of
+`(z-r)*(z-s)` for rational `r` and `s`.
+  The theorem `rationalQuadratic_positiveDegree` certifies the matching
+  positive-degree premise.  The theorem `rationalQuadratic_root_of_discriminant`
+  checks the usual quadratic-formula root for arbitrary rational `a`, `b`, and `c` whenever a
+  rational witness `d^2 = b^2 - 4*a*c` is supplied; constructing such a
+  witness remains the separate square-root task.  Its companion
+  `rationalQuadratic_has_computable_root_of_discriminant` packages that exact
+  root as a `ComplexCert`; the paired theorem
+  `rationalQuadratic_has_computable_roots_of_discriminant` packages both
+  quadratic-formula roots, and
+  `rationalQuadratic_has_algebraic_roots_of_discriminant` gives the parallel
+  `AlgebraicComplex` witnesses.
+  The complex-coefficient quadratic boundary is now checked as well:
+  `qcomplexQuadratic_root_of_discriminant` accepts a rational-complex
+  discriminant square-root witness and an inverse witness for `2*a`, and
+  `qcomplexQuadratic_has_computable_root_of_discriminant` packages the exact
+  root.  The witness-producing square-root algorithm remains separate.
+  Its norm-square specialization
+  `qcomplexQuadratic_has_computable_root_of_discriminant_and_normSq` now
+  constructs the inverse of `2*a` automatically from nonzero `normSq a`, so
+  only the discriminant square-root witness remains explicit.
+  The companion `qcomplexQuadratic_other_root_of_discriminant` and paired
+  `qcomplexQuadratic_has_computable_roots_of_discriminant` now certify both
+  quadratic-formula branches in the same finite witness model.
+  The norm-square specialization now packages both branches automatically as
+  `qcomplexQuadratic_has_computable_roots_of_discriminant_and_normSq`.
+- The latest Wiedijk-list pass adds `FiniteFTABoundary.syntheticDivide` and
+  `DeflationCertificate`: arbitrary finite rational-complex coefficient lists
+  can be deflated at a supplied exact root, with a checked Horner remainder
+  identity and factorization theorem.  This advances item 2 without claiming
+  root existence or algebraic closure.
+- The arbitrary-dimension Cayley--Hamilton consumer is now isolated in
+  `FiniteCayleyHamiltonCertificate`: supplied monic annihilating-polynomial
+  data for any finite `RatMatrix dimension` yields shifted annihilation and a
+  finite matrix-power recurrence.  The characteristic-polynomial construction
+  remains deferred.
+- The quartic boundary now also has `finiteQuarticQuadraticSplit`: two
+  supplied quadratic factors are multiplied in constant-first QComplex form,
+  their Horner evaluations multiply exactly, and supplied roots of either
+  factor become roots of the quartic.  This is a Ferrari-shaped finite
+  interface; the general resolvent and witness-producing quartic formula remain
+  deferred.
+- `FiniteDeflationChain` now iterates supplied-root synthetic deflation and
+  proves a single Horner factorization identity for the complete finite chain.
+  This strengthens the finite root-peeling boundary behind items 2 and 16;
+  root existence, radical extensions, and general solvability remain deferred.
+- `FiniteFTABoundary.syntheticDivide_quotient_length` now exposes the exact
+  finite coefficient-count invariant of one supplied-root deflation.  The
+  quotient remains padded in the constant-first representation, while the
+  deflation chain supplies the corresponding factorization invariant.
+The stronger `syntheticDivide_quotient_padded` theorem identifies that
+padding explicitly and proves that trimming it lowers the coefficient count
+by one for every nonempty input.
+  `FiniteDeflationChain.deflatedCoeffs_length` lifts the padded coefficient
+  count through an arbitrary finite chain, making the shape invariant
+  explicit without claiming that padding removal or radical solvability is
+  already formalized.
+- `QBox.evalPoly_contains` now proves soundness of finite Horner evaluation on
+  rational complex boxes: every enclosed rational point has its polynomial
+  value enclosed by the output box.  This supplies the interval-arithmetic
+  kernel needed for finite FTA root-exclusion/subdivision certificates,
+  without asserting global root existence.  Its companion
+  `QBox.evalPoly_no_root_of_not_overlaps_zero` packages the corresponding
+  finite box-discard step.  `FiniteRootExclusionCertificate` now packages a
+  finite rational cover of a supplied domain and proves `no_root_in_domain`
+  when every covered box misses zero.
+  `OneSurvivorCertificate.root_mem_survivor` adds the complementary finite
+  search step: after excluding all other children, any root in the parent is
+  forced into the retained child.
+- `FiniteFTASubdivision.dyadicChildren` now supplies the geometric four-way
+  split used by that search: ordered children are nested in the parent and
+  cover it coordinatewise, all over rational endpoints.
+  `dyadicChildren_width_height` proves the exact half-width/half-height
+  shrinkage for every child.
+  `survivingChildren` and `root_mem_survivingChildren` connect this geometry
+  to polynomial-image overlap, proving that the finite filter cannot discard
+  a root; `survivingChildren_ordered` preserves the box invariant after
+  filtering.
+  `survivingSubdivide` applies the filter recursively at every finite depth,
+  while `root_mem_survivingSubdivide` proves that a supplied root remains in
+  at least one retained box throughout that finite schedule.
+  `survivingSubdivide_nonempty_of_root` makes the corresponding list
+  nonemptiness explicit, and `survivingSubdivide_nestedIn_parent` together
+  with `survivingSubdivide_ordered` preserves nesting and orderedness at every
+  finite depth.
+  `survivingSubdivide_width_height_exact` transfers the exact (2^{-n})
+  width/height precision law to every retained box, so polynomial-image
+  pruning preserves the finite mesh budget.
+  `dyadicSubdivide` now iterates the four-way split to any finite depth;
+  `dyadicSubdivide_nonempty` and `dyadicSubdivide_nestedIn_parent` provide the
+  finite potential-infinity scaffold for repeated root search.
+  `dyadicSubdivide_ordered` and `dyadicSubdivide_width_height_le_parent`
+  additionally preserve orderedness and give an explicit non-expansion bound
+  on both dimensions at every finite depth.
+  `dyadicSubdivide_width_height_exact` sharpens this to the exact finite mesh
+  law: every depth-(n) box has both dimensions divided by (2^n).  This is
+  the explicit precision scheduler for the potential-infinity root-search
+  route.
+- `FiniteStirlingCertificate` adds a bounded item-90 exercise: finite rational
+  enclosures for (e) and π, an explicit square-root bracket, and a certified
+  Stirling-shaped ratio at (n=10).  The asymptotic Stirling limit remains
+  outside the current theorem boundary.
+- `FiniteComplexPathCertificate` packages the first closed-polygon exactness
+  certificate for a constant differential: a finite rational-complex path is
+  closed by construction, and its exact displacement is proved to be zero.
+  This is a finite primitive/cancellation layer, not a general Cauchy theorem
+  or a limit of polygonal integrals.
+  The same certificate interface now covers arbitrary finite polynomial
+  differentials through `finitePolynomialDifferentialExactness_closed` and
+  `FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero`.
+  The planned left-sum layer is now explicit as
+  `polygonalLeftSumRawEntire`; `PolygonalLeftSumCertificate` and
+  `polygonalLeftSumRawEntire_valid` promote it to a valid `ComplexRaw` only
+  when orderedness, nesting, and shrinking widths are supplied as finite
+  certificates.
 - Next FTC extensions: exact polynomial derivative facts, then interval-valued
   Riemann-sum convergence under `IntervalRegularOn`.
-- Next FTA extensions: general linear polynomials using certified complex
-  division away from zero, quadratic examples via computable square root, then
+  `Integral.IntervalRegularIntegralCertificate` now names the honest bridge
+  boundary: it stores both interval regularity and a separate valid integral
+  construction.  Its exact constant instance is checked, while the general
+  regularity-to-integrability construction remains an explicit future theorem.
+- Next FTA extensions: complex-coefficient linear polynomials using certified
+  complex division away from zero, arbitrary quadratics via a computable
+  discriminant square root, then
   the constructive root-search/argument-principle route for arbitrary degree.
 - Next complex integral extensions: package polygonal left sums as valid
   `ComplexRaw`s, prove endpoint-primitive cancellation for polynomial
