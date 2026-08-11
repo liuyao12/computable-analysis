@@ -1134,7 +1134,7 @@ theorem ratMatrix_twoByTwo_cayley_hamilton (A : RatMatrix 2) :
   unfold ratMatrixTwoTrace ratMatrixTwoDeterminant
   rw [hA]
   simpa only [twoByTwoMatrix_00, twoByTwoMatrix_01, twoByTwoMatrix_10,
-    twoByTwoMatrix_11] using
+    twoByTwoMatrix_11, twoByTwoTrace, twoByTwoDeterminant] using
     (twoByTwo_cayley_hamilton (A 0 0) (A 0 1) (A 1 0) (A 1 1))
 
 private theorem finiteSum_three (f : Fin 3 -> Rat) :

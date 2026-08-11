@@ -395,7 +395,7 @@ def exactRoot (n : Nat) (hn : 0 < n)
   order_pos := hn
   number := exactAlgebraic n hn z hz
   unity_witness := by
-    simpa [exactAlgebraic]
+    simpa [exactAlgebraic, ComplexRootWitness, IsComputableRoot]
       using (exactRoot_is_computable (coeffs := RatPoly.toComplexCoeffs (polynomial n)) (z := z)
         (exact_root_polynomial hz))
 

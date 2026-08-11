@@ -32,6 +32,28 @@ theorem quadratic_remainder_example_certificate :
   exact ⟨quadratic_remainder_example_value,
     quadratic_remainder_example_factor⟩
 
+/-! The signed companion uses the negative root `-1`. -/
+
+theorem quadratic_signed_remainder_example_root :
+    eval [2, 3, 1] (-1 : Rat) = 0 := by
+  native_decide
+
+theorem quadratic_signed_remainder_example_value :
+    eval [2, 3, 1] (-4 : Rat) = 6 := by
+  native_decide
+
+theorem quadratic_signed_remainder_example_factor :
+    eval [2, 3, 1] (-4 : Rat) =
+      ((-4 : Rat) - (-1)) * ((1 : Rat) * (-4) + 3 + 1 * (-1)) := by
+  exact quadratic_factor_of_root quadratic_signed_remainder_example_root
+
+theorem quadratic_signed_remainder_example_certificate :
+    eval [2, 3, 1] (-4 : Rat) = 6 /\
+      eval [2, 3, 1] (-4 : Rat) =
+        ((-4 : Rat) - (-1)) * ((1 : Rat) * (-4) + 3 + 1 * (-1)) := by
+  exact ⟨quadratic_signed_remainder_example_value,
+    quadratic_signed_remainder_example_factor⟩
+
 end Polynomial
 
 end ComputableAnalysis

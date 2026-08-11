@@ -56,11 +56,11 @@ Use the following convention for every new algorithm animation:
 | Rational-circle subdivision | The `Stage` points for (1,2,4,8) equal parameter cells, their projections, and the inscribed/circumscribed polygon bounds | `scripts/generate_rational_circle_animation.py` |
 | Arctangent rectangle enclosure | The lower/right and upper/left endpoint rectangles for (1/(1+t^2)) on the midpoint partitions with (1,2,4,8) cells | `scripts/generate_arctan_rectangle_animation.py` |
 | Exact rational monotone stage | The lower/right and upper/left endpoint rectangles for the decreasing rational function (1/(1+t^2)) | `scripts/generate_monotone_integral_animation.py` |
-| Interval-valued sine stage | Rational alternating-series boxes with a retained halving error radius at the dyadic inputs of sin(pi*t); lower-left and upper-right Darboux rectangles use those same endpoints | `scripts/generate_interval_sine_integral_animation.py` |
+| Interval-valued sine stage | \(2^n\) equal subintervals; every dyadic sample gets its own nested-radical/Taylor interval for sin(pi*t), and the lower-left/upper-right Darboux rectangles use those pointwise boxes | `scripts/generate_interval_sine_integral_animation.py` |
 | Square-root secant--tangent | The rational secant and tangent intersections defining four successive brackets for `sqrt(2)` | `scripts/generate_sqrt_secant_tangent_animation.py` |
 | Substitution partition | Equal rational divisions of a fixed `t0`--`t1` parameter interval and their unequal exact images under `x=phi(t)` | `scripts/generate_substitution_partition_animation.py` |
 | Integration-by-parts paired partition | One equal `t0`--`t1` parameter mesh, equal `f(t_i)` steps, unequal `g(t_i)` steps, and the horizontal-first/vertical-first zigzags through the same samples | `scripts/generate_integration_by_parts_animation.py` |
-| Turning-bracket integral illustration | A normalized-sinc local minimum with a shrinking rational bracket, two monotone tails, and a bounded middle gap | `scripts/generate_single_turn_integral_animation.py` |
+| Turning-bracket integral illustration | Equal cells classified as decreasing, increasing, or containing the finitely bracketed turn; endpoint order and the turn range determine each signed rectangle | `scripts/generate_single_turn_integral_animation.py` |
 | FTC endpoint comparison | Dyadic lower/right and upper/left derivative rectangles for `F(t)=t^2` and `F'(t)=2t`, beside the exact endpoint rise | `scripts/generate_ftc_endpoint_animation.py` |
 | Peano--Baker words | The exact `orderedIndexWords` recursion for 0, 1, 2, and 3 samples, preserving newest-to-oldest matrix-factor order | `scripts/generate_peano_baker_words_animation.py` |
 

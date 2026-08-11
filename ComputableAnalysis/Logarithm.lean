@@ -128,11 +128,301 @@ theorem oneOverXOnOneTwo_epsilonDeltaContinuous :
       (RatFun.oneOverXOnPositiveInterval 1 2 (by native_decide)) :=
   oneOverXOnOneTwo_intervalRegular.epsilonDeltaContinuous
 
+private theorem oneOverXEvalInterval_width_of_one_le
+    {I : QInterval} {b : Rat} (hb : 1 <= b)
+    (hI : subintervalOf I 1 b) :
+    (oneOverXOneTwoEvalInterval I).width =
+      I.width * (1 / (I.lo * I.hi)) := by
+  rcases hI with ⟨hlo, _hord, _hhi⟩
+  have hlopos : 0 < I.lo := by grind
+  have hhipos : 0 < I.hi := by grind
+  have hlone : I.lo ≠ 0 := Rat.ne_of_gt hlopos
+  have hhine : I.hi ≠ 0 := Rat.ne_of_gt hhipos
+  unfold oneOverXOneTwoEvalInterval QInterval.width
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have hlocancel : I.lo * I.lo⁻¹ = 1 := Rat.mul_inv_cancel I.lo hlone
+  have hhicancel : I.hi * I.hi⁻¹ = 1 := Rat.mul_inv_cancel I.hi hhine
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The reciprocal kernel has the same interval-regular certificate on every
+positive rational interval `[1,b]`.  The upper endpoint affects only the
+domain gate; the reciprocal width is controlled by the lower bound `1`. -/
+def oneOverXOnOneTo_intervalRegular {b : Rat} (hb : 1 <= b) :
+    IntervalRegularOn
+      (RatFun.oneOverXOnPositiveInterval 1 b (by grind)) := by
+  refine
+    { evalInterval := fun I _ _ => oneOverXOneTwoEvalInterval I
+      inputPrecision := fun n => n + 1
+      inputPrecision_pos := by
+        intro n
+        omega
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hwidth
+    change 1 <= I.lo /\ I.lo <= I.hi /\ I.hi <= b at hI
+    rcases hI with ⟨hlo, hord, hhi⟩
+    have hlopos : 0 < I.lo := by grind
+    have hhipos : 0 < I.hi := by grind
+    have hwidth_nonneg : 0 <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hprod_ge_one : 1 <= I.lo * I.hi := by
+      calc
+        (1 : Rat) = 1 * 1 := by native_decide
+        _ <= I.lo * 1 := Rat.mul_le_mul_of_nonneg_right hlo (by native_decide)
+        _ <= I.lo * I.hi := Rat.mul_le_mul_of_nonneg_left
+          (Rat.le_trans hlo hord) (Rat.le_of_lt hlopos)
+    have hrecip_le_one : 1 / (I.lo * I.hi) <= 1 := by
+      have h := one_div_antitone_of_pos
+        (a := (1 : Rat)) (b := I.lo * I.hi) (by native_decide) hprod_ge_one
+      simpa only [show (1 : Rat) / 1 = 1 by native_decide] using h
+    constructor
+    · rw [oneOverXEvalInterval_width_of_one_le hb ⟨hlo, hord, hhi⟩]
+      have hrecip_nonneg : 0 <= 1 / (I.lo * I.hi) := by
+        rw [Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos hlopos hhipos))
+      exact Rat.mul_nonneg hwidth_nonneg hrecip_nonneg
+    · rw [oneOverXEvalInterval_width_of_one_le hb ⟨hlo, hord, hhi⟩]
+      calc
+        I.width * (1 / (I.lo * I.hi)) <= I.width * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hrecip_le_one hwidth_nonneg
+        _ = I.width := by grind
+        _ <= 1 / (((n + 1 : Nat) : Rat)) := hwidth
+  · intro I hI x hx n hxlo hxhi
+    change 1 <= I.lo /\ I.lo <= I.hi /\ I.hi <= b at hI
+    rcases hI with ⟨hlo, _hord, _hhi⟩
+    change 1 <= x /\ x <= b at hx
+    have hxpos : 0 < x := by grind
+    change (oneOverXOneTwoEvalInterval I).ContainsInterval
+      ((RatFun.oneOverXOnPositiveInterval 1 b (by grind)).compute x hx n)
+    rw [RatFun.oneOverXOnPositiveInterval_compute_eq 1 b (by grind) x hx n]
+    unfold oneOverXOneTwoEvalInterval QInterval.ContainsInterval
+    constructor
+    · exact one_div_antitone_of_pos hxpos hxhi
+    · exact one_div_antitone_of_pos (by grind) hxlo
+
+private theorem oneOverXEvalInterval_width_of_lower_ge_one
+    {I : QInterval} {alower bupper : Rat}
+    (halower : 1 <= alower)
+    (hI : subintervalOf I alower bupper) :
+    (oneOverXOneTwoEvalInterval I).width =
+      I.width * (1 / (I.lo * I.hi)) := by
+  rcases hI with ⟨hlo, _hord, _hhi⟩
+  have hlopos : 0 < I.lo := by grind
+  have hhipos : 0 < I.hi := by grind
+  have hlone : I.lo ≠ 0 := Rat.ne_of_gt hlopos
+  have hhine : I.hi ≠ 0 := Rat.ne_of_gt hhipos
+  unfold oneOverXOneTwoEvalInterval QInterval.width
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have hlocancel : I.lo * I.lo⁻¹ = 1 := Rat.mul_inv_cancel I.lo hlone
+  have hhicancel : I.hi * I.hi⁻¹ = 1 := Rat.mul_inv_cancel I.hi hhine
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The reciprocal enclosure works on any rational interval `[a,b]` whose
+lower endpoint is at least `1`.  This is the normalized positive-interval
+case needed before transporting the certificate by a rational scale. -/
+def oneOverXOnInterval_lower_ge_one_intervalRegular
+    {a b : Rat} (ha : 1 <= a) (hab : a <= b) :
+    IntervalRegularOn
+      (RatFun.oneOverXOnPositiveInterval a b (by grind)) := by
+  refine
+    { evalInterval := fun I _ _ => oneOverXOneTwoEvalInterval I
+      inputPrecision := fun n => n + 1
+      inputPrecision_pos := by
+        intro n
+        omega
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hwidth
+    change a <= I.lo /\ I.lo <= I.hi /\ I.hi <= b at hI
+    rcases hI with ⟨hlo, hord, hhi⟩
+    have hlopos : 0 < I.lo := by grind
+    have hhipos : 0 < I.hi := by grind
+    have hwidth_nonneg : 0 <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hprod_ge_one : 1 <= I.lo * I.hi := by
+      calc
+        (1 : Rat) <= 1 * a := by simpa using ha
+        _ <= a * a := Rat.mul_le_mul_of_nonneg_right ha (by grind)
+        _ <= I.lo * a := Rat.mul_le_mul_of_nonneg_right hlo (by grind)
+        _ <= I.lo * I.hi :=
+          Rat.mul_le_mul_of_nonneg_left (Rat.le_trans hlo hord) (by grind)
+    have hrecip_le_one : 1 / (I.lo * I.hi) <= 1 := by
+      have h := one_div_antitone_of_pos
+        (a := (1 : Rat)) (b := I.lo * I.hi) (by native_decide) hprod_ge_one
+      simpa only [show (1 : Rat) / 1 = 1 by native_decide] using h
+    constructor
+    · rw [oneOverXEvalInterval_width_of_lower_ge_one ha ⟨hlo, hord, hhi⟩]
+      have hrecip_nonneg : 0 <= 1 / (I.lo * I.hi) := by
+        rw [Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos hlopos hhipos))
+      exact Rat.mul_nonneg hwidth_nonneg hrecip_nonneg
+    · rw [oneOverXEvalInterval_width_of_lower_ge_one ha ⟨hlo, hord, hhi⟩]
+      calc
+        I.width * (1 / (I.lo * I.hi)) <= I.width * 1 :=
+          Rat.mul_le_mul_of_nonneg_left hrecip_le_one hwidth_nonneg
+        _ = I.width := by grind
+        _ <= 1 / (((n + 1 : Nat) : Rat)) := hwidth
+  · intro I hI x hx n hxlo hxhi
+    change a <= I.lo /\ I.lo <= I.hi /\ I.hi <= b at hI
+    rcases hI with ⟨hlo, _hord, _hhi⟩
+    change a <= x /\ x <= b at hx
+    have hxpos : 0 < x := by grind
+    change (oneOverXOneTwoEvalInterval I).ContainsInterval
+      ((RatFun.oneOverXOnPositiveInterval a b (by grind)).compute x hx n)
+    rw [RatFun.oneOverXOnPositiveInterval_compute_eq a b (by grind) x hx n]
+    unfold oneOverXOneTwoEvalInterval QInterval.ContainsInterval
+    constructor
+    · exact one_div_antitone_of_pos hxpos hxhi
+    · exact one_div_antitone_of_pos (by grind) hxlo
+
+private theorem oneOverXEvalInterval_width_of_positive
+    {I : QInterval} {a b : Rat} (ha : 0 < a)
+    (hI : subintervalOf I a b) :
+    (oneOverXOneTwoEvalInterval I).width =
+      I.width * (1 / (I.lo * I.hi)) := by
+  rcases hI with ⟨hlo, _hord, _hhi⟩
+  have hlopos : 0 < I.lo := by grind
+  have hhipos : 0 < I.hi := by grind
+  have hlone : I.lo ≠ 0 := Rat.ne_of_gt hlopos
+  have hhine : I.hi ≠ 0 := Rat.ne_of_gt hhipos
+  unfold oneOverXOneTwoEvalInterval QInterval.width
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  have hlocancel : I.lo * I.lo⁻¹ = 1 := Rat.mul_inv_cancel I.lo hlone
+  have hhicancel : I.hi * I.hi⁻¹ = 1 := Rat.mul_inv_cancel I.hi hhine
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- A fully general positive reciprocal interval certificate.  The natural
+number `L` is an explicit computable Lipschitz budget with `1/a^2 <= L`; the
+chosen input precision is `(n+1)*L`, so no hidden ceiling or real modulus is
+used. -/
+def oneOverXOnPositiveInterval_intervalRegular_of_budget
+    {a b : Rat} (ha : 0 < a) (hab : a <= b)
+    {L : Nat} (hLpos : 0 < L)
+    (hL : 1 / (a * a) <= (L : Rat)) :
+    IntervalRegularOn
+      (RatFun.oneOverXOnPositiveInterval a b (by grind)) := by
+  refine
+    { evalInterval := fun I _ _ => oneOverXOneTwoEvalInterval I
+      inputPrecision := fun n => (n + 1) * L
+      inputPrecision_pos := by
+        intro n
+        exact Nat.mul_pos (by omega) hLpos
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hwidth
+    change a <= I.lo /\ I.lo <= I.hi /\ I.hi <= b at hI
+    rcases hI with ⟨hlo, hord, hhi⟩
+    have hlopos : 0 < I.lo := by grind
+    have hhipos : 0 < I.hi := by grind
+    have hwidth_nonneg : 0 <= I.width := by
+      unfold QInterval.width
+      grind [Rat.sub_eq_add_neg]
+    have hprod_ge : a * a <= I.lo * I.hi := by
+      calc
+        a * a <= I.lo * a :=
+          Rat.mul_le_mul_of_nonneg_right hlo (Rat.le_of_lt ha)
+        _ <= I.lo * I.hi :=
+          Rat.mul_le_mul_of_nonneg_left (Rat.le_trans hlo hord)
+            (Rat.le_of_lt hlopos)
+    have hrecip_le : 1 / (I.lo * I.hi) <= (L : Rat) := by
+      have hanti := one_div_antitone_of_pos
+        (a := a * a) (b := I.lo * I.hi)
+        (Rat.mul_pos ha ha) hprod_ge
+      exact Rat.le_trans hanti hL
+    constructor
+    · rw [oneOverXEvalInterval_width_of_positive ha ⟨hlo, hord, hhi⟩]
+      have hrecip_nonneg : 0 <= 1 / (I.lo * I.hi) := by
+        rw [Rat.div_def, Rat.one_mul]
+        exact Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos hlopos hhipos))
+      exact Rat.mul_nonneg hwidth_nonneg hrecip_nonneg
+    · rw [oneOverXEvalInterval_width_of_positive ha ⟨hlo, hord, hhi⟩]
+      have hscaled := Rat.mul_le_mul_of_nonneg_left hrecip_le hwidth_nonneg
+      have hwidthL : I.width * (L : Rat) <=
+          (1 / (((n + 1) * L : Nat) : Rat)) * (L : Rat) := by
+        exact Rat.mul_le_mul_of_nonneg_right hwidth (by
+          exact Rat.natCast_nonneg)
+      calc
+        I.width * (1 / (I.lo * I.hi)) <= I.width * (L : Rat) := hscaled
+        _ <= (1 / (((n + 1) * L : Nat) : Rat)) * (L : Rat) := hwidthL
+        _ = 1 / (((n + 1 : Nat) : Rat)) := by
+          rw [Rat.natCast_mul, Rat.div_def]
+          have hLrat : (L : Rat) ≠ 0 := by
+            exact Rat.ne_of_gt ((Rat.natCast_pos).2 hLpos)
+          have hnrat : ((n + 1 : Nat) : Rat) ≠ 0 :=
+            Rat.ne_of_gt ((Rat.natCast_pos).2 (by omega))
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+  · intro I hI x hx n hxlo hxhi
+    change a <= I.lo /\ I.lo <= I.hi /\ I.hi <= b at hI
+    rcases hI with ⟨hlo, _hord, _hhi⟩
+    change a <= x /\ x <= b at hx
+    have hxpos : 0 < x := by grind
+    change (oneOverXOneTwoEvalInterval I).ContainsInterval
+      ((RatFun.oneOverXOnPositiveInterval a b (by grind)).compute x hx n)
+    rw [RatFun.oneOverXOnPositiveInterval_compute_eq a b (by grind) x hx n]
+    unfold oneOverXOneTwoEvalInterval QInterval.ContainsInterval
+    constructor
+    · exact one_div_antitone_of_pos hxpos hxhi
+    · exact one_div_antitone_of_pos (by grind) hxlo
+
 /-- The translated positive reciprocal kernel.  Its unit-interval integral is
 the constructive candidate for `∫_1^2 dx/x`, under the affine substitution
 `x = 1 + t`. -/
 def logTwoKernel (t : Rat) : Rat :=
   1 / (1 + t)
+
+/-! The affine substitution `x = 1 + t` is recorded before any raw-real
+interpretation: it is an exact rational identity on the positive interval. -/
+theorem logTwoKernel_shift_eq_oneOverX {x : Rat}
+    (hx0 : 1 <= x) (hx1 : x <= 2) :
+    logTwoKernel (x - 1) = 1 / x := by
+  unfold logTwoKernel
+  have hxne : x ≠ 0 := by
+    exact Rat.ne_of_gt (by grind)
+  congr 1
+  grind [Rat.sub_eq_add_neg]
+
+theorem logTwo_rightRiemann_term_as_oneOverX
+    (n k : Nat) (hn : 0 < n) (hk : k < n) :
+    (1 / (n : Rat)) *
+        (1 / (1 + ((k + 1 : Nat) : Rat) / (n : Rat))) =
+      1 / ((n + k + 1 : Nat) : Rat) := by
+  have hNpos : 0 < (n : Rat) := (Rat.natCast_pos).2 hn
+  have hKpos : 0 < ((k + 1 : Nat) : Rat) :=
+    (Rat.natCast_pos).2 (by omega)
+  have hNne : (n : Rat) ≠ 0 := Rat.ne_of_gt hNpos
+  have hKne : ((k + 1 : Nat) : Rat) ≠ 0 := Rat.ne_of_gt hKpos
+  have hsum : ((n + k + 1 : Nat) : Rat) =
+      (n : Rat) + ((k + 1 : Nat) : Rat) := by
+    exact_mod_cast (by omega : n + k + 1 = n + (k + 1))
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  rw [show 1 + ((k + 1 : Nat) : Rat) * (n : Rat)⁻¹ =
+      ((n : Rat) + ((k + 1 : Nat) : Rat)) / (n : Rat) by
+    rw [Rat.div_def]
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel]]
+  rw [hsum]
+  rw [Rat.div_def, Rat.div_def, Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+/-! The multiplicative normalization for a positive interval `[a,2a]` is
+also exact over the rationals: the Jacobian `a` cancels the scale in `x`. -/
+theorem reciprocal_scale_kernel_eq_logTwoKernel {a t : Rat}
+    (ha : 0 < a) :
+    a * (1 / (a * (1 + t))) = logTwoKernel t := by
+  unfold logTwoKernel
+  have hane : a ≠ 0 := Rat.ne_of_gt ha
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem reciprocal_scale_point_positive {a t : Rat}
+    (ha : 0 < a) (ht0 : 0 <= t) :
+    0 < a * (1 + t) := by
+  exact Rat.mul_pos ha (by grind)
 
 /-- The left-endpoint Stieltjes sum for the square substitution `t = x^2`
 on a uniform unit mesh.  Its limiting target is the reciprocal integral

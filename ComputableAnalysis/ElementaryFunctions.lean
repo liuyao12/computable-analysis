@@ -86,8 +86,8 @@ theorem natPow_valid_and_bounds (base : PositiveRealRaw) :
             ((natPow base n).compute k).hi <= upperBound base ^ n
   | 0 => by
       constructor
-      · simpa [natPow, natPowRaw, RealRaw.one] using
-          (RealRaw.ofRat_valid (1 : Rat))
+      · change RealRaw.ValidCompute (RealRaw.ofRat (1 : Rat)).compute
+        exact RealRaw.ofRat_valid (1 : Rat)
       · intro k
         change base.lower_bound ^ 0 <= (1 : Rat) /\
           (1 : Rat) <= upperBound base ^ 0

@@ -843,7 +843,8 @@ theorem halfDecayShift_spec {bound : Rat} (hbound : 0 <= bound)
   let shift : Nat := B * D
   have hboundNat : bound <= (B : Rat) := by
     dsimp [B]
-    simpa only [Rat.natCast_add] using rat_le_num_natAbs_succ bound
+    rw [Rat.natCast_add]
+    exact rat_le_num_natAbs_succ bound
   have hBpos : 0 < (B : Rat) := by
     dsimp [B]
     exact (Rat.natCast_pos).2 (Nat.succ_pos _)

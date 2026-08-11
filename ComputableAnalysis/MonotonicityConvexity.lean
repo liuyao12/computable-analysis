@@ -72,10 +72,9 @@ theorem secantRaw_valid
       (RealRaw.scaleRat (1 / (y - x)) (Y - X)).Valid :=
     RealRaw.scaleRat_valid_of_nonneg hscale_nonneg
       (RealRaw.sub_valid hY hX)
-  simpa [secantRaw, secantSlopeIntervalOfRealFun, RealFunRaw.applyCompute,
-    X, Y, RealRaw.scaleRat, RealRaw.scaleRatCompute, RealRaw.sub,
-    RealRaw.subCompute, QInterval.slopeBetween, QInterval.divByRat,
-    QInterval.subInterval, QInterval.scaleByRat] using hscale
+  change RealRaw.ValidCompute
+    (RealRaw.scaleRatCompute (1 / (y - x)) (Y - X))
+  exact hscale
 
 end ExactConvexOn
 
@@ -183,6 +182,74 @@ theorem rightDerivativeAt_mono
       (secantRaw F q1 q2).Valid :=
     hF.secantRaw_valid hq1_mem hq2_mem hq12
   exact RealRaw.le_trans hsec_valid hq1_to_q2_le hsec_le
+
+/-- The supplied left derivatives of a convex function are monotone.  The
+finite proof transports every left secant ending at `q₁` through the bridge
+secant from `q₁` to `q₂`, then applies the least-upper-bound certificate at
+`q₂`; no supremum or completed limit is constructed. -/
+theorem leftDerivativeAt_mono
+    {F : RealFunRaw} {a b q1 q2 : Rat}
+    {hF : ExactConvexOn F a b}
+    (D1 : LeftDerivativeAt hF q1)
+    (D2 : LeftDerivativeAt hF q2)
+    (hq12 : q1 < q2) :
+    D1.raw.Le D2.raw := by
+  refine D1.isLeftDerivative.least_upper_bound D2.raw ?_
+  intro h1 hh1_pos hq1h1_le
+  have hq1_mem := D1.isLeftDerivative.q_mem
+  have hq2_mem := D2.isLeftDerivative.q_mem
+  have hq1h1_mem : inDomainInterval a b (q1 - h1) := by
+    unfold inDomainInterval at *
+    constructor <;> grind
+  have hleft_le_bridge :
+      (leftSecantRaw F q1 h1).Le (secantRaw F q1 q2) := by
+    have hq1h1_lt_q1 : q1 - h1 < q1 := by grind
+    simpa [leftSecantRaw] using
+      hF.secant_le_secant hq1h1_mem hq1_mem hq1_mem hq2_mem
+        hq1h1_lt_q1 (Rat.le_refl : q1 <= q1) hq12
+  have hbridge_valid :
+      (secantRaw F q1 q2).Valid :=
+    hF.secantRaw_valid hq1_mem hq2_mem hq12
+  have hbridge_le_right :
+      (secantRaw F q1 q2).Le D2.raw := by
+    have hstep_pos : 0 < q2 - q1 := by
+      rw [← Rat.lt_iff_sub_pos]
+      exact hq12
+    have hstep_lower : a <= q2 - (q2 - q1) := by
+      unfold inDomainInterval at hq1_mem
+      grind
+    have hendpoint : q2 - (q2 - q1) = q1 := by grind
+    simpa [leftSecantRaw, hendpoint] using
+      D2.isLeftDerivative.upper_bound (q2 - q1) hstep_pos hstep_lower
+  exact RealRaw.le_trans hbridge_valid hleft_le_bridge hbridge_le_right
+
+/-! At a convex corner, the supplied left derivative cannot exceed the
+supplied right derivative.  The proof uses one finite right secant as an
+upper bound for every left secant; it does not identify either derivative
+with an attained limiting value. -/
+theorem leftDerivativeAt_le_rightDerivativeAt
+    {F : RealFunRaw} {a b q : Rat}
+    {hF : ExactConvexOn F a b}
+    (Dleft : LeftDerivativeAt hF q)
+    (Dright : RightDerivativeAt hF q) :
+    Dleft.raw.Le Dright.raw := by
+  refine Dleft.isLeftDerivative.least_upper_bound Dright.raw ?_
+  intro hleft hleft_pos hleft_lower
+  have hq_mem := Dleft.isLeftDerivative.q_mem
+  have hq_left_mem : inDomainInterval a b (q - hleft) := by
+    unfold inDomainInterval at *
+    constructor <;> grind
+  refine Dright.isRightDerivative.greatest_lower_bound
+    (leftSecantRaw F q hleft) ?_
+  intro hright hright_pos _hright_upper
+  have hright_endpoint_mem : inDomainInterval a b (q + hright) := by
+    unfold inDomainInterval at *
+    constructor <;> grind
+  have hleft_lt : q - hleft < q := by grind
+  have hright_lt : q < q + hright := by grind
+  simpa [leftSecantRaw, rightSecantRaw] using
+    hF.secant_le_secant hq_left_mem hq_mem hq_mem hright_endpoint_mem
+      hleft_lt (Rat.le_refl : q <= q) hright_lt
 
 /-- Exact concavity is convexity with the secant order reversed. -/
 structure ExactConcaveOn (F : RealFunRaw) (a b : Rat) where
@@ -364,7 +431,9 @@ def raw {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
 theorem raw_valid {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
     {H : CurvatureOnSubinterval F C} {q : Rat}
     (D : Pointwise H q) : D.raw.Valid := by
-  simpa [raw, compute, RealRaw.Valid] using D.valid
+  change RealRaw.ValidCompute
+    (fun n => centeredInterval F q (D.step n) (H.evalPrecision n))
+  exact D.valid
 
 theorem left_mem {F : RealFunRaw} {a b : Rat} {C : RationalSubinterval a b}
     {H : CurvatureOnSubinterval F C} {q : Rat}
@@ -476,7 +545,10 @@ theorem valid {F : RealFunRaw} {a b : Rat}
     funext n
     simp [toRealFunRaw, RealFunRaw.applyCompute, hqD, Pointwise.compute]
   rw [hcompute]
-  simpa [Pointwise.compute] using (D.derivAt q hqD).valid
+  change RealRaw.ValidCompute
+    (fun n => centeredInterval F q
+      ((D.derivAt q hqD).step n) (H.evalPrecision n))
+  exact (D.derivAt q hqD).valid
 
 end PointwiseFunction
 

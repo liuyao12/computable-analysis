@@ -147,7 +147,9 @@ theorem sqrt_thirty_six_eq_six :
     native_decide
   have h := sqrt_rational_of_square (36 : Rat) (6 : Rat) hq
     (sqrtRaw_spec (36 : Rat) hq) (by native_decide)
-  simpa [sqrtReal, qabs] using h
+  have hqabs : qabs (6 : Rat) = 6 := by
+    native_decide
+  simpa [sqrtReal, hqabs] using h
 
 theorem sqrtRaw_le_am_gm {a b : Rat} (ha : 0 <= a) (hb : 0 <= b)
     (hq : sqrtDomain (a * b)) :

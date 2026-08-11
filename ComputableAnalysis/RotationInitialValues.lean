@@ -134,8 +134,8 @@ theorem uniformRotationNegSinOnTwo_equiv_neg_sin
   change (RealRaw.neg (ComplexRaw.imagPart (uniformRotationExpRaw x))).Equiv
     (RealRaw.neg (ComplexRaw.imagPart (uniformRotationExpRaw x)))
   apply RealRaw.equiv_refl
-  have hx : (-2 : Rat) <= x /\ x <= 2 := by
-    simpa [inDomainInterval] using hxSin
+  change (-2 : Rat) <= x /\ x <= 2 at hxSin
+  have hx : (-2 : Rat) <= x /\ x <= 2 := hxSin
   exact RealRaw.neg_valid (ComplexRaw.imagPart_valid
     (uniformRotationExpRaw_valid x (qabs_le_of_neg_le_le hx.1 hx.2)))
 

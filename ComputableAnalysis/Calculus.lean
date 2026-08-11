@@ -41,6 +41,17 @@ theorem mesh_nonneg_of_le {a b : Rat} {n : Nat}
     Rat.le_of_lt (Rat.inv_pos.mpr ((Rat.natCast_pos).2 hn))
   exact Rat.mul_nonneg (by grind [Rat.sub_eq_add_neg]) hden
 
+/-- The total width of a positive uniform mesh is exactly the interval width.
+This is the finite algebraic normalization behind replacing a common value
+range budget by a global rectangle-gap budget. -/
+theorem natCast_mul_mesh_eq_sub {a b : Rat} {n : Nat} (hn : 0 < n) :
+    (n : Rat) * mesh a b n = b - a := by
+  have hnat : (n : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt hn), Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 /-- An ordered interval gives an ordered uniform rational mesh. -/
 theorem leftPoint_monotone {a b : Rat} {n i j : Nat}
     (hn : 0 < n) (hab : a <= b) (hij : i <= j) :
@@ -682,7 +693,9 @@ theorem add_valid {f g : RealFunRaw} (hf : f.Valid) (hg : g.Valid) :
   have hY : Y.Valid := by
     simpa [Y, RealRaw.Valid, RealFunRaw.applyCompute] using hg x hx.2
   have hsum : (X + Y).Valid := RealRaw.add_valid hX hY
-  simpa [add, X, Y, RealRaw.add, RealRaw.addCompute] using hsum
+  change RealRaw.ValidCompute (RealRaw.addCompute X Y) at hsum
+  change RealRaw.ValidCompute (RealRaw.addCompute X Y)
+  exact hsum
 
 def scaleRat (r : Rat) (f : RealFunRaw) : RealFunRaw where
   domain := f.domain
@@ -728,7 +741,9 @@ theorem mul_valid_of_nonneg_bounded
     simpa [Y, RealRaw.Valid, RealFunRaw.applyCompute] using hg x hx.2
   have hproduct : (X * Y).Valid :=
     RealRaw.mul_valid_of_nonneg_bounded hX hY hBx hBy hxbounds hybounds
-  simpa [mul, X, Y, RealRaw.mul, RealRaw.mulCompute] using hproduct
+  change RealRaw.ValidCompute (RealRaw.mulCompute X Y) at hproduct
+  change RealRaw.ValidCompute (RealRaw.mulCompute X Y)
+  exact hproduct
 
 end RealFunRaw
 
@@ -1339,8 +1354,9 @@ theorem endpointDifference_valid_of_fun_valid
     simpa [B, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
       hF b hb
   have hsub := RealRaw.subCompute_valid hB hA
-  simpa [A, B, endpointDifferenceCompute, endpointDifferenceInterval,
-    RealFunRaw.apply, RealFunRaw.applyCompute, RealRaw.subCompute] using hsub
+  change RealRaw.ValidCompute (RealRaw.subCompute B A) at hsub
+  change RealRaw.ValidCompute (RealRaw.subCompute B A)
+  exact hsub
 
 /-- Endpoint differences telescope over adjacent intervals:
 \((F(b)-F(a))+(F(c)-F(b))\sim F(c)-F(a)\). -/
@@ -1365,10 +1381,8 @@ theorem endpointDifferenceRaw_adjacent_additive
   have hC : C.Valid := by
     simpa [C, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
       hF c hc
-  simpa [A, B, C, endpointDifferenceRaw, endpointDifferenceCompute,
-    endpointDifferenceInterval, RealFunRaw.apply, RealFunRaw.applyCompute,
-    RealRaw.sub, RealRaw.subCompute] using
-      (RealRaw.sub_add_sub_cancel_middle_equiv hA hB hC)
+  change (B - A + (C - B)).Equiv (C - A)
+  exact RealRaw.sub_add_sub_cancel_middle_equiv hA hB hC
 
 /-- Preferred computable-number form of the definite-integral conclusion:
 the integral of `dF` over the specific interval `[a,b]` is equal, as a
@@ -3744,16 +3758,19 @@ def mulOfNonnegBounded
     have hXbounds : forall n,
         0 <= (X.compute n).lo /\ (X.compute n).hi <= BF := by
       intro n
-      simpa [X] using hFbounds n
+      have hproof : F.defined_on x hxF = hx.2.1 := Subsingleton.elim _ _
+      simpa [X, FunctionOnInterval.compute, hproof] using hFbounds n
     have hYbounds : forall n,
         0 <= (Y.compute n).lo /\ (Y.compute n).hi <= BG := by
       intro n
-      simpa [Y] using hGbounds n
+      have hproof : G.defined_on x hxG = hx.2.2 := Subsingleton.elim _ _
+      simpa [Y, FunctionOnInterval.compute, hproof] using hGbounds n
     have hproduct : (X * Y).Valid :=
       RealRaw.mul_valid_of_nonneg_bounded
         hX hY hBF hBG hXbounds hYbounds
-    simpa [X, Y, RealRaw.mul, RealRaw.mulCompute] using
-      hproduct
+    change RealRaw.ValidCompute (RealRaw.mulCompute X Y) at hproduct
+    change RealRaw.ValidCompute (RealRaw.mulCompute X Y)
+    exact hproduct
 
 def secantSlopeInterval (F : FunctionOnInterval)
     (x y : Rat)
@@ -4040,14 +4057,16 @@ def exactRat_constant_effectiveModulusFor (c a b : Rat) :
   close := by
     intro x y n hx hy hxy
     by_cases hn : n = 0
-    · simp [FunctionOnInterval.exactRat_compute, intervalNearAtPrecision,
-        QInterval.NearAt, QInterval.width, precisionAtStage, hn]
-      constructor <;> grind [Rat.sub_eq_add_neg]
+    · change QInterval.NearAt { lo := c, hi := c } { lo := c, hi := c }
+        (precisionAtStage n)
+      unfold QInterval.NearAt QInterval.width
+      simp [precisionAtStage, hn] <;> grind [Rat.sub_eq_add_neg]
     · have hnonneg : 0 <= (1 / (n : Rat)) :=
         Rat.le_of_lt (one_div_nat_pos (Nat.pos_of_ne_zero hn))
-      simp [FunctionOnInterval.exactRat_compute, intervalNearAtPrecision,
-        QInterval.NearAt, QInterval.width, precisionAtStage, hn]
-      constructor <;> grind [Rat.sub_eq_add_neg]
+      change QInterval.NearAt { lo := c, hi := c } { lo := c, hi := c }
+        (precisionAtStage n)
+      unfold QInterval.NearAt QInterval.width
+      simp [precisionAtStage, hn, hnonneg] <;> grind [Rat.sub_eq_add_neg]
 
 /-- An interval-regular evaluator supplies literal rational
 epsilon-delta continuity.  The output target at stage `n` is `1/(n+1)`, so
@@ -4297,6 +4316,48 @@ theorem nondecreasingDarbouxRange_width_nonneg
     (F.compute C.lower hlower prec).lo
   grind [Rat.sub_eq_add_neg]
 
+/-! Interval regularity supplies a common image box for both endpoints of a
+cell.  Consequently the endpoint range used by the finite Darboux sum has
+the same output-width budget. -/
+theorem nondecreasingDarbouxRange_width_le_of_intervalRegular
+    (F : FunctionOnInterval)
+    (hregular : IntervalRegularOn F)
+    (P : RationalPartition F.lower F.upper)
+    (k : Nat) (hk : k < P.pieces) (prec : Nat)
+    (hsmall : (P.cell k hk).width <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat)) :
+    (nondecreasingDarbouxRange F P k hk prec).width <=
+      1 / ((prec + 1 : Nat) : Rat) := by
+  let C := P.cell k hk
+  have hlower : inDomainInterval F.lower F.upper C.lower :=
+    And.intro C.lower_mem (Rat.le_trans C.ordered C.upper_mem)
+  have hupper : inDomainInterval F.lower F.upper C.upper :=
+    And.intro (Rat.le_trans C.lower_mem C.ordered) C.upper_mem
+  let I : QInterval := { lo := C.lower, hi := C.upper }
+  have hI : subintervalOf I F.lower F.upper := by
+    exact ⟨C.lower_mem, C.ordered, C.upper_mem⟩
+  have houtput := hregular.output_width I hI prec (by
+    change C.width <= _
+    exact hsmall)
+  have hleft := hregular.contains_point_values I hI C.lower hlower prec
+    (by simp [I]) (by simpa [I] using C.ordered)
+  have hright := hregular.contains_point_values I hI C.upper hupper prec
+    (by simpa [I] using C.ordered) (by simp [I])
+  change (F.compute C.upper hupper prec).hi -
+    (F.compute C.lower hlower prec).lo <= 1 / ((prec + 1 : Nat) : Rat)
+  have himage :
+      (hregular.evalInterval I hI prec).width <=
+        1 / ((prec + 1 : Nat) : Rat) := houtput.2
+  have hlower_bound :
+      (hregular.evalInterval I hI prec).lo <=
+        (F.compute C.lower hlower prec).lo :=
+    hleft.1
+  have hupper_bound :
+      (F.compute C.upper hupper prec).hi <=
+        (hregular.evalInterval I hI prec).hi :=
+    hright.2
+  grind [QInterval.width, Rat.sub_eq_add_neg]
+
 /-- The exact finite lower/upper Darboux bracket on a supplied rational
 partition.  Its `k`th summand is the cell width times the endpoint range.
 This direct finite calculation is intentionally exposed before a general
@@ -4317,6 +4378,78 @@ def nondecreasingDarbouxDyadicStage (F : FunctionOnInterval)
     (Nat.pow_pos (by omega : 0 < 2)) hinterval
   nondecreasingDarbouxStage F P (evalPrecision n)
 
+/-! The cell estimate composes with the finite uniform-partition fold. -/
+theorem nondecreasingDarbouxStage_width_le_of_uniform_input_budget
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
+    (prec : Nat)
+    (hsmall : mesh F.lower F.upper pieces <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat)) :
+    (nondecreasingDarbouxStage F
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec).width <=
+      (F.upper - F.lower) * (1 / ((prec + 1 : Nat) : Rat)) := by
+  unfold nondecreasingDarbouxStage
+  apply RationalPartition.uniform_boundIntegralSum_width_le
+    pieces hpieces hab
+    (fun k hk => nondecreasingDarbouxRange F
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) k hk prec)
+    (1 / ((prec + 1 : Nat) : Rat))
+  intro k hk
+  apply nondecreasingDarbouxRange_width_le_of_intervalRegular
+    F hregular (RationalPartition.uniform F.lower F.upper pieces hpieces hab) k hk prec
+  simpa [RationalPartition.uniform_cell_width F.lower F.upper pieces hpieces hab k hk]
+    using hsmall
+
+theorem nondecreasingDarbouxStage_width_le_of_uniform_input_budget_and_tolerance
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : F.lower <= F.upper)
+    (prec : Nat)
+    (hsmall : mesh F.lower F.upper pieces <=
+      1 / ((hregular.inputPrecision prec : Nat) : Rat))
+    (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((prec + 1 : Nat) : Rat)) <= eps) :
+    (nondecreasingDarbouxStage F
+      (RationalPartition.uniform F.lower F.upper pieces hpieces hab) prec).width <=
+      eps := by
+  exact Rat.le_trans
+    (nondecreasingDarbouxStage_width_le_of_uniform_input_budget
+      F hregular pieces hpieces hab prec hsmall)
+    hbudget
+
+/-! The dyadic presentation is just the uniform certificate at pieces `2^n`.
+The input-budget premise remains explicit: dyadic mesh refinement alone does
+not justify a completed integral when the evaluator's input schedule is
+unspecified. -/
+theorem nondecreasingDarbouxDyadicStage_width_le_of_input_budget
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat) (n : Nat)
+    (hsmall : mesh F.lower F.upper (2 ^ n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat)) :
+    (nondecreasingDarbouxDyadicStage F hinterval evalPrecision n).width <=
+      (F.upper - F.lower) *
+        (1 / ((evalPrecision n + 1 : Nat) : Rat)) := by
+  unfold nondecreasingDarbouxDyadicStage
+  apply nondecreasingDarbouxStage_width_le_of_uniform_input_budget
+    F hregular (2 ^ n) (Nat.pow_pos (by omega : 0 < 2)) hinterval
+    (evalPrecision n)
+  exact hsmall
+
+theorem nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hinterval : F.lower <= F.upper) (evalPrecision : Nat -> Nat) (n : Nat)
+    (hsmall : mesh F.lower F.upper (2 ^ n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat))
+    (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    (nondecreasingDarbouxDyadicStage F hinterval evalPrecision n).width <=
+      eps := by
+  exact Rat.le_trans
+    (nondecreasingDarbouxDyadicStage_width_le_of_input_budget
+      F hregular hinterval evalPrecision n hsmall)
+    hbudget
+
 /-- The first-class integral object for monotone interval functions.
 
 The intended construction is by lower and upper endpoint sums on a static
@@ -4332,13 +4465,14 @@ theorem exactRat_constant_nondecreasing (c a b : Rat) :
     NondecreasingOnInterval
       (FunctionOnInterval.exactRat (fun _ => c) a b) := by
   intro x y hx hy hxy n
-  simp [FunctionOnInterval.exactRat_compute]
+  change c <= c
+  exact Rat.le_refl
 
 theorem exactRat_affine_nondecreasing {r c a b : Rat} (hr : 0 <= r) :
     NondecreasingOnInterval
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
   intro x y hx hy hxy n
-  simp [FunctionOnInterval.exactRat_compute]
+  change r * x + c <= r * y + c
   simpa only [Rat.add_comm] using
     (Rat.add_le_add_left (c := c)).2
       (Rat.mul_le_mul_of_nonneg_left hxy hr)
@@ -4347,7 +4481,7 @@ theorem exactRat_affine_nonincreasing {r c a b : Rat} (hr : r <= 0) :
     NonincreasingOnInterval
       (FunctionOnInterval.exactRat (fun x => r * x + c) a b) := by
   intro x y hx hy hxy n
-  simp [FunctionOnInterval.exactRat_compute]
+  change r * y + c <= r * x + c
   have hmul := Rat.mul_le_mul_of_nonneg_left hxy (by grind : 0 <= -r)
   have hneg := Rat.neg_le_neg hmul
   simpa only [Rat.add_comm] using
@@ -4872,6 +5006,37 @@ structure ExactCellOrderPreservation
     forall {p r c : Rat}, a <= p -> p <= r -> r <= b ->
       (forall {x : Rat}, p <= x -> x <= r -> eval x <= c) ->
         integralBetween p r <= (r - p) * c
+
+/-! The integral-average layer of the Mean Value story.  This is stated over
+the rational endpoint quantity supplied by the cell certificate; no completed
+real average or attainment claim is involved. -/
+
+theorem ExactCellOrderPreservation.integral_average_between_bounds
+    {eval : Rat -> Rat} {integralBetween : Rat -> Rat -> Rat}
+    {a b : Rat} (h : ExactCellOrderPreservation eval integralBetween a b)
+    {p r lower upper : Rat}
+    (hap : a <= p) (hpr : p < r) (hrb : r <= b)
+    (hlower : forall {x : Rat}, p <= x -> x <= r -> lower <= eval x)
+    (hupper : forall {x : Rat}, p <= x -> x <= r -> eval x <= upper) :
+    lower <= integralBetween p r / (r - p) /\
+      integralBetween p r / (r - p) <= upper := by
+  have hlength : 0 < r - p := by
+    grind [Rat.sub_eq_add_neg]
+  have hinv : 0 <= (r - p)⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hlength)
+  have hlow := h.lower_const hap (Rat.le_of_lt hpr) hrb hlower
+  have hupp := h.upper_const hap (Rat.le_of_lt hpr) hrb hupper
+  have hlow' := Rat.mul_le_mul_of_nonneg_right hlow hinv
+  have hupp' := Rat.mul_le_mul_of_nonneg_right hupp hinv
+  have hcancel : (r - p)⁻¹ * (r - p) = 1 :=
+    Rat.inv_mul_cancel _ (Rat.ne_of_gt hlength)
+  have hcancel' : (r - p) * (r - p)⁻¹ = 1 := by
+    rw [Rat.mul_comm, hcancel]
+  constructor
+  · simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+      hcancel, hcancel'] using hlow'
+  · simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+      hcancel, hcancel'] using hupp'
 
 /-- Exact rational-cell order preservation for a constant integrand.
 

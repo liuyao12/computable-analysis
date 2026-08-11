@@ -215,6 +215,10 @@ unproved closure theorems.
 \lean{ComputableAnalysis.Polynomial.quadratic_remainder_example_value}
 \lean{ComputableAnalysis.Polynomial.quadratic_remainder_example_factor}
 \lean{ComputableAnalysis.Polynomial.quadratic_remainder_example_certificate}
+\lean{ComputableAnalysis.Polynomial.quadratic_signed_remainder_example_root}
+\lean{ComputableAnalysis.Polynomial.quadratic_signed_remainder_example_value}
+\lean{ComputableAnalysis.Polynomial.quadratic_signed_remainder_example_factor}
+\lean{ComputableAnalysis.Polynomial.quadratic_signed_remainder_example_certificate}
 \lean{ComputableAnalysis.Polynomial.eval_derivative_linear}
 \lean{ComputableAnalysis.Polynomial.derivativeEvalAux}
 \lean{ComputableAnalysis.Polynomial.derivativeEval}
@@ -284,6 +288,13 @@ unproved closure theorems.
 \lean{ComputableAnalysis.FiniteDeflationChain.rootFactorProduct}
 \lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs_length}
 \lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
+\lean{ComputableAnalysis.FiniteDeflationChain.exactRoot_of_exactRoot_of_ne}
+\lean{ComputableAnalysis.quinticBoundaryPolynomial}
+\lean{ComputableAnalysis.quintic_boundary_polynomial_coeffs}
+\lean{ComputableAnalysis.quintic_boundary_eval_at_two}
+\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
+\lean{ComputableAnalysis.quintic_boundary_deflated_coeffs}
+\lean{ComputableAnalysis.quintic_boundary_horner_factorization}
 \lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch}
 \lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_sound}
 \lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_complete}
@@ -309,7 +320,10 @@ finite rational coefficient lists.  Division by higher-degree factors remains
 future algebra infrastructure.  The cubic identity also provides the
 rational-root reduction step for benchmark item 37, not a general cubic
 solution formula.  The worked factorization and root certificate above give
-one explicit rational cubic solution within that boundary.  The quartic
+one explicit rational cubic solution within that boundary.  The signed
+companion polynomial \(x^2+3x+2\) is evaluated at the supplied root \(-1\)
+and sample point \(-4\), again giving the exact value \(6\) through the same
+factor identity.  The quartic
 factorization and roots are the project's checked worked-example core for
 benchmark item 46; they do not claim a general quartic formula.
 For arbitrary finite rational-complex coefficient lists, the new
@@ -353,6 +367,101 @@ finite witness.  This is the reusable certificate-level Descartes boundary;
 the unrestricted real-root counting theorem remains deferred.
 \end{theorem}
 
+\begin{theorem}[Concrete supplied-root deflation chain]
+\label{thm:finite-deflation-example}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic}
+\lean{ComputableAnalysis.FiniteDeflationExample.rootOne}
+\lean{ComputableAnalysis.FiniteDeflationExample.rootTwo}
+\lean{ComputableAnalysis.FiniteDeflationExample.rootThree}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_root_one}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_one}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_one_remainder}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_factor_at_one}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_chain}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflated_coeffs}
+\lean{ComputableAnalysis.FiniteDeflationExample.cubic_horner_factorization}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_ordered}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_exclusion}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_is_root_free}
+\lean{ComputableAnalysis.finiteFTARootSearchDomain}
+\lean{ComputableAnalysis.finiteFTARootSearchDomain_ordered}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_two}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_two}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_three}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_three}
+\uses{thm:linear-factor-remainder-base}
+\leanok
+The constant-first cubic (z^3-6z^2+11z-6) is deflated at the supplied
+rational roots (1,2,3).  The quotient and remainder at the first step are
+checked by finite computation, and the complete chain supplies a worked
+certificate for the root-peeling interface behind benchmark items 2 and 16.
+As with the generic chain theorem, the roots are input witnesses; this is not
+a general root-finding or algebraic-closure theorem.
+\end{theorem}
+
+\begin{theorem}[Concrete finite root-exclusion box]
+\label{thm:finite-fta-isolation-example}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_ordered}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_exclusion}
+\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_is_root_free}
+\uses{thm:finite-fta-concrete-quadratic}
+\leanok
+For (z^2+1), the rational square with coordinates in
+([-1/2,1/2]) is certified root-free by finite interval Horner evaluation:
+its polynomial image misses zero.  This is the discard step used by the
+finite FTA subdivision interface, complementing the supplied exact roots
+(i) and (-i); it does not assert global root isolation or existence.
+\end{theorem}
+
+\begin{theorem}[Concrete finite subdivision survivor]
+\label{thm:finite-fta-subdivision-example}
+\lean{ComputableAnalysis.finiteFTARootSearchDomain}
+\lean{ComputableAnalysis.finiteFTARootSearchDomain_ordered}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_two}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_two}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_three}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_three}
+\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_four}
+\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_four}
+\uses{thm:finite-fta-isolation-example}
+\leanok
+Starting from the rational square ([-1,1]^2), the supplied root (i) has
+a surviving child after two dyadic subdivision stages.  The child is still
+certified to contain (i), and both its rational width and height are
+(1/2).  This is the finite enclosure invariant used by the subdivision
+algorithm, not a claim that a completed limit or a unique root has been
+constructed.
+The symmetric supplied root (-i) now has the same depth-two survivor
+certificate, so both exact roots of (z^2+1) are covered by the finite
+subdivision trace.
+The same trace is checked through depths three and four; every surviving box
+containing either supplied root has width and height (1/4) and (1/8),
+respectively.  This makes the dyadic precision schedule explicit while
+preserving the finite, witness-driven boundary.
+\end{theorem}
+
+\begin{theorem}[Concrete supplied-root quintic deflation]
+\label{thm:finite-quintic-deflation}
+\lean{ComputableAnalysis.quinticBoundaryPolynomial}
+\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
+\lean{ComputableAnalysis.quintic_boundary_deflated_coeffs}
+\lean{ComputableAnalysis.quintic_boundary_horner_factorization}
+\lean{ComputableAnalysis.quintic_boundary_exact_factorization}
+\uses{thm:finite-deflation-example}
+\leanok
+For the factorized quintic with supplied roots (-2,-1,0,1,2), each distinct
+root is transported through the preceding synthetic-division quotient.  The
+result is a complete finite deflation chain, strengthening the certificate
+boundary for benchmark items 16 and 46.  Root construction, radical
+extensions, and a general quintic solver remain outside the scope.
+Because the final padded quotient is the constant polynomial (1), the chain
+also exports an exact product factorization through
+\texttt{quintic\_boundary\_exact\_factorization}; this is the finite
+root-peeling endpoint, not a general quintic formula.
+\end{theorem}
+
 \begin{theorem}[A finite two-variation Descartes certificate]
 \label{thm:finite-two-variation-descartes}
 \lean{ComputableAnalysis.Polynomial.twoVariationQuadratic}
@@ -379,6 +488,66 @@ The polynomial (x^3-6x^2+11x-6=(x-1)(x-2)(x-3)) has three sign
 variations, and its positive rational roots are exactly (1,2,3).  This is
 another finite rational certificate for item 100, not the unrestricted
 real-root-counting theorem.
+\end{theorem}
+
+\begin{theorem}[A finite four-variation Descartes certificate]
+\label{thm:finite-four-variation-descartes}
+\lean{ComputableAnalysis.Polynomial.fourVariationQuartic}
+\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_eval}
+\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_sign_count}
+\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_positive_root_iff}
+\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_certificate}
+\leanok
+The polynomial
+\((x-1)(x-2)(x-3)(x-4)=x^4-10x^3+35x^2-50x+24\)
+has four sign variations, and exact factorization identifies its positive
+rational roots as (1,2,3,4).  This extends the finite Descartes pattern
+without asserting unrestricted real-root counting.
+\end{theorem}
+
+\begin{theorem}[A finite five-variation Descartes certificate]
+\label{thm:finite-five-variation-descartes}
+\lean{ComputableAnalysis.Polynomial.fiveVariationQuintic}
+\lean{ComputableAnalysis.Polynomial.fiveVariationQuintic_eval}
+\lean{ComputableAnalysis.Polynomial.fiveVariationQuintic_sign_count}
+\lean{ComputableAnalysis.Polynomial.fiveVariationQuintic_positive_root_iff}
+\lean{ComputableAnalysis.Polynomial.fiveVariationQuintic_certificate}
+\leanok
+The polynomial
+\((x-1)(x-2)(x-3)(x-4)(x-5)\) has five sign variations, and its
+positive rational roots are exactly (1,2,3,4,5).  This is a finite
+certificate-level extension of the Descartes examples; unrestricted
+real-root counting remains deferred.
+\end{theorem}
+
+\begin{theorem}[A finite six-variation Descartes certificate]
+\label{thm:finite-six-variation-descartes}
+\lean{ComputableAnalysis.Polynomial.sixVariationSextic}
+\lean{ComputableAnalysis.Polynomial.sixVariationSextic_eval}
+\lean{ComputableAnalysis.Polynomial.sixVariationSextic_sign_count}
+\lean{ComputableAnalysis.Polynomial.sixVariationSextic_positive_root_iff}
+\lean{ComputableAnalysis.Polynomial.sixVariationSextic_certificate}
+\leanok
+The polynomial
+\((x-1)(x-2)(x-3)(x-4)(x-5)(x-6)
+=x^6-21x^5+175x^4-735x^3+1624x^2-1764x+720\)
+has six sign variations, and exact factorization identifies its positive
+rational roots as (1,2,3,4,5,6).  This extends the finite certificate ladder
+for item 100 while keeping unrestricted real-root counting deferred.
+\end{theorem}
+
+\begin{theorem}[A finite one-variation root certificate]
+\label{thm:finite-one-variation-descartes}
+\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic}
+\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic_sign_count}
+\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic_endpoint_bracket}
+\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic_unique_positive_root}
+\leanok
+The polynomial (1-2x-x^2) has one sign variation.  Its values at
+(3/8) and (1/2) have opposite signs, giving a finite bracket for its
+positive branch, while the one-variation certificate proves uniqueness of
+any positive rational root.  Root existence in a completed real line is not
+asserted.
 \end{theorem}
 
 \begin{theorem}[Finite coefficient-list bound for sign variations]
@@ -434,6 +603,12 @@ For every \(r\in\Qi\), the polynomial \(z-r\) has the computable root \(r\).
 \lean{ComputableAnalysis.qcomplexLinear_has_computable_root_of_normSq}
 \lean{ComputableAnalysis.QComplex.normSq_eq_zero_iff}
 \lean{ComputableAnalysis.qcomplexLinear_has_computable_root_of_ne_zero}
+\lean{ComputableAnalysis.finiteComplexLinear}
+\lean{ComputableAnalysis.finiteComplexLinearInverse}
+\lean{ComputableAnalysis.finiteComplexLinearRoot}
+\lean{ComputableAnalysis.finiteComplexLinear_leading_inverse}
+\lean{ComputableAnalysis.finiteComplexLinear_root_eval}
+\lean{ComputableAnalysis.finiteComplexLinear_root_from_inverse}
 \uses{def:computable-root}
 \leanok
 For rational-complex coefficients \(a\ne0\) and \(b\), a supplied finite
@@ -486,6 +661,12 @@ quadratics still require a discriminant and square-root layer.
 \lean{ComputableAnalysis.rationalQuadratic_other_root_of_discriminant}
 \lean{ComputableAnalysis.rationalQuadratic_has_computable_roots_of_discriminant}
 \lean{ComputableAnalysis.rationalQuadratic_has_algebraic_roots_of_discriminant}
+\lean{ComputableAnalysis.affineQInterval}
+\lean{ComputableAnalysis.affineQInterval_ordered}
+\lean{ComputableAnalysis.affineQInterval_mem}
+\lean{ComputableAnalysis.finiteQuadraticRootSqrtInterval}
+\lean{ComputableAnalysis.finiteQuadraticRootInterval}
+\lean{ComputableAnalysis.finiteQuadraticRootInterval_spec}
 \uses{def:computable-root}
 \leanok
 For \(a\ne0\), the coefficient list is certified positive-degree; if a
@@ -526,6 +707,26 @@ The (-d) branch is certified by the same finite identity, and the paired
 theorem packages both computable roots.
 \end{theorem}
 
+\begin{theorem}[Worked nonreal quadratic root certificate]
+\label{thm:worked-complex-quadratic}
+\lean{ComputableAnalysis.finiteComplexQuadratic}
+\lean{ComputableAnalysis.finiteComplexQuadraticUpper}
+\lean{ComputableAnalysis.finiteComplexQuadraticLower}
+\lean{ComputableAnalysis.finiteComplexQuadratic_upper_root}
+\lean{ComputableAnalysis.finiteComplexQuadratic_lower_root}
+\lean{ComputableAnalysis.finiteComplexQuadratic_roots_distinct}
+\lean{ComputableAnalysis.finiteComplexQuadratic_factorization}
+\lean{ComputableAnalysis.finiteComplexQuadratic_root_search_upper}
+\lean{ComputableAnalysis.finiteComplexQuadratic_root_search_sound}
+\uses{thm:complex-quadratic-discriminant}
+\leanok
+The polynomial (z^2-2z+5) is checked over rational complex coordinates.
+Its two distinct roots are (1+2i) and (1-2i), and the finite Horner
+evaluation agrees with the product of the two supplied linear factors.  The
+example exercises the discriminant/root-search boundary without turning a
+finite supplied-witness calculation into a general algebraic-closure claim.
+\end{theorem}
+
 \begin{theorem}[Factorized rational cubics]
 \label{thm:rational-cubic-roots}
 \lean{ComputableAnalysis.rationalCubicPolynomial}
@@ -535,6 +736,20 @@ theorem packages both computable roots.
 \lean{ComputableAnalysis.rationalCubic_right_exact_root}
 \lean{ComputableAnalysis.rationalCubic_has_computable_roots}
 \lean{ComputableAnalysis.rationalCubic_has_algebraic_roots}
+\lean{ComputableAnalysis.mixedCubicOne}
+\lean{ComputableAnalysis.mixedCubicImaginary}
+\lean{ComputableAnalysis.mixedCubicMinusImaginary}
+\lean{ComputableAnalysis.mixedCubicPolynomial}
+\lean{ComputableAnalysis.mixedCubicPolynomial_coefficients}
+\lean{ComputableAnalysis.mixed_cubic_example_roots}
+\lean{ComputableAnalysis.mixed_cubic_example_explicit_certificate}
+\lean{ComputableAnalysis.mixedCubicTwo}
+\lean{ComputableAnalysis.mixedCubicTwoImaginary}
+\lean{ComputableAnalysis.mixedCubicTwoMinusImaginary}
+\lean{ComputableAnalysis.mixedCubicTwoPolynomial}
+\lean{ComputableAnalysis.mixedCubicTwoPolynomial_coefficients}
+\lean{ComputableAnalysis.mixed_cubic_two_example_roots}
+\lean{ComputableAnalysis.mixed_cubic_two_example_explicit_certificate}
 \uses{def:computable-root}
 \leanok
 The factorized cubic
@@ -544,6 +759,8 @@ The factorized cubic
 has the three explicit rational roots \(r,s,t\), each packaged as a
 computable-root certificate.  This is the reusable factorized cubic core of
 benchmark item 37; a general cubic formula remains outside the current scope.
+The scaled mixed example ((z-2)(z-2i)(z+2i)=z^3-2z^2+4z-8) is also checked,
+including its real root (2), conjugate roots (2i,-2i), and exact evaluations.
 \end{theorem}
 
 \begin{theorem}[Finite cubic completion from a supplied root]
@@ -573,6 +790,45 @@ witness (d=1) are checked by `cubic_completion_example_certificate`, which
 recovers the remaining roots (2) and (3) by the displayed finite formulas.
 \end{theorem}
 
+\begin{theorem}[Finite cubic with a square-root residual branch]
+\label{thm:finite-cubic-sqrt-two}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_factorization}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_one_root}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_sqrtTwo_interval_bracket}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_bracket_matches_sqrtTwo_stage4}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_sqrtTwo_stage24_interval_bracket}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_bracket_matches_sqrtTwo_stage24}
+\leanok
+The cubic (x^3-x^2-2x+2=(x-1)(x^2-2)) has one exact rational root and
+a second branch represented by the finite stage-four enclosure
+([11/8,23/16]) for (sqrt2).  Evaluating the cubic at these endpoints
+gives the corresponding finite sign bracket.  This is an algorithmic cubic
+certificate, not a completed cubic formula or a root-existence theorem.
+The same factorization is checked against the stage-24 (sqrt2) interval
+([11863283/8388608,23726567/16777216]), giving a substantially finer
+finite sign bracket for the two non-rational roots.
+\end{theorem}
+
+\begin{theorem}[Finite quartic with exact and square-root branches]
+\label{thm:finite-quartic-sqrt-two}
+\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo}
+\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_factorization}
+\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_exact_roots}
+\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_positive_sqrt_interval_bracket}
+\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_negative_sqrt_interval_bracket}
+\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_positive_sqrt_stage24_interval_bracket}
+\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_negative_sqrt_stage24_interval_bracket}
+\leanok
+The quartic (x^4-3x^2+2=(x^2-1)(x^2-2)) has exact roots (-1,1),
+while the remaining branches are represented by the positive and negative
+finite (sqrt2) intervals.  Endpoint evaluation gives both sign brackets;
+this is the computational quartic boundary, not a general Ferrari formula.
+The positive and negative square-root branches are also checked against the
+stage-24 enclosure, giving the corresponding signed endpoint brackets at the
+finer rational precision.
+\end{theorem}
+
 \begin{theorem}[Factorized rational quartics]
 \label{thm:rational-quartic-roots}
 \lean{ComputableAnalysis.rationalQuarticPolynomial}
@@ -596,6 +852,14 @@ recovers the remaining roots (2) and (3) by the displayed finite formulas.
 \lean{ComputableAnalysis.quarticSplitMinusTwo}
 \lean{ComputableAnalysis.quartic_split_example_roots}
 \lean{ComputableAnalysis.quartic_split_example_certificate}
+\lean{ComputableAnalysis.quartic_mixed_split_example_roots}
+\lean{ComputableAnalysis.quartic_mixed_split_example_certificate}
+\lean{ComputableAnalysis.quarticMixedScaledTwoImaginary}
+\lean{ComputableAnalysis.quarticMixedScaledMinusTwoImaginary}
+\lean{ComputableAnalysis.quarticMixedScaledThree}
+\lean{ComputableAnalysis.quarticMixedScaledMinusThree}
+\lean{ComputableAnalysis.quartic_mixed_scaled_split_example_roots}
+\lean{ComputableAnalysis.quartic_mixed_scaled_split_example_certificate}
 \lean{ComputableAnalysis.Polynomial.monic_quadratic_root_iff}
 \lean{ComputableAnalysis.Polynomial.monic_quadratic_root_count_le_two}
 \lean{ComputableAnalysis.Polynomial.signChangeCount_cubic_one_variation}
@@ -636,6 +900,8 @@ The worked instance with factors (z^2-1) and (z^2-4) supplies the four
 rational roots (pm1,pm2) and is checked by
 `quartic_split_example_certificate`.  This makes the split interface
 inspectable without presenting it as a general Ferrari construction.
+The scaled mixed split uses (z^2+4) and (z^2-9), with supplied roots
+(2i,-2i,3,-3); Lean checks the four root certificates and exact evaluations.
 \end{theorem}
 
 \begin{theorem}[The root of \(z^2+1\)]\label{thm:z2-plus-one-root}

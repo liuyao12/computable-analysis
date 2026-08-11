@@ -4407,7 +4407,8 @@ interval computation. -/
 theorem expPowerSeriesFunction_valid (x : Rat)
     (hx : expPowerSeriesFunction.definedAt x) :
     RealRaw.ValidCompute (expPowerSeriesFunction.compute x hx) := by
-  simpa [expPowerSeriesFunction, PowerSeriesValid] using expPowerSeries_valid x
+  change RealRaw.ValidCompute ((expPowerSeries x).compute)
+  exact expPowerSeries_valid x
 
 /-- Restrict the certified power-series exponential to a rational closed
 interval.  This is the input object for a future proof of `d/dx exp = exp`.
@@ -4448,8 +4449,8 @@ theorem uniformExpOnUnit_equivalent_expPowerSeriesOnUnit :
   refine ⟨rfl, rfl, ?_⟩
   intro x hxuniform hxadaptive
   change (uniformExpRaw x).Equiv (expPowerSeries x)
-  have hx : (0 : Rat) <= x /\ x <= 1 := by
-    simpa [inDomainInterval] using hxuniform
+  change (0 : Rat) <= x /\ x <= 1 at hxuniform
+  have hx : (0 : Rat) <= x /\ x <= 1 := hxuniform
   apply uniformExpRaw_equiv_expPowerSeries x
   rw [qabs_eq_self_of_nonneg hx.1]
   exact Rat.le_trans hx.2 (by native_decide)
@@ -4467,10 +4468,10 @@ def uniformExpOnUnit_hasDerivativeOnInterval :
   evalPrecision := fun _x h n => uniformExpSelfDerivativeEvalPrecision h n
   close := by
     intro x h n hx hxh _hdx hh hsmall
-    have hx' : (0 : Rat) <= x /\ x <= 1 := by
-      simpa [inDomainInterval] using hx
-    have hxh' : (0 : Rat) <= x + h /\ x + h <= 1 := by
-      simpa [inDomainInterval] using hxh
+    change (0 : Rat) <= x /\ x <= 1 at hx
+    change (0 : Rat) <= x + h /\ x + h <= 1 at hxh
+    have hx' : (0 : Rat) <= x /\ x <= 1 := hx
+    have hxh' : (0 : Rat) <= x + h /\ x + h <= 1 := hxh
     have hqx : qabs x <= 2 := by
       rw [qabs_eq_self_of_nonneg hx'.1]
       exact Rat.le_trans hx'.2 (by native_decide)
@@ -4570,7 +4571,8 @@ theorem uniformExpOnUnit_zero_equiv_one :
         constructor <;> native_decide))).Equiv (RealRaw.ofRat 1) := by
   change (uniformExpRaw (0 : Rat)).Equiv (RealRaw.ofRat 1)
   have hone : (RealRaw.ofRat (1 : Rat)).Valid := by
-    simpa [RealRaw.ofRat] using RealRaw.ofRat_valid (1 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid (1 : Rat)
   apply RealRaw.equiv_trans
     (uniformExpRaw_valid 0 (by native_decide))
     (expPowerSeries_valid 0)
@@ -4589,7 +4591,8 @@ def uniformExpOnUnit_solvesSelfDerivative :
     constructor <;> native_decide
   initial_value := RealRaw.ofRat 1
   initial_value_valid := by
-    simpa [RealRaw.ofRat] using RealRaw.ofRat_valid (1 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid (1 : Rat)
   initial_value_equiv := by
     exact uniformExpOnUnit_zero_equiv_one
 
@@ -4623,8 +4626,8 @@ theorem uniformExpOnSymmetricUnit_equivalent_expPowerSeries :
   refine ⟨rfl, rfl, ?_⟩
   intro x hxuniform hxadaptive
   change (uniformExpRaw x).Equiv (expPowerSeries x)
-  have hx : (-1 : Rat) <= x /\ x <= 1 := by
-    simpa [inDomainInterval] using hxuniform
+  change (-1 : Rat) <= x /\ x <= 1 at hxuniform
+  have hx : (-1 : Rat) <= x /\ x <= 1 := hxuniform
   apply uniformExpRaw_equiv_expPowerSeries x
   exact Rat.le_trans (qabs_le_of_neg_le_le hx.1 hx.2) (by native_decide)
 
@@ -4640,10 +4643,10 @@ def uniformExpOnSymmetricUnit_hasDerivativeOnInterval :
   evalPrecision := fun _x h n => uniformExpSelfDerivativeEvalPrecision h n
   close := by
     intro x h n hx hxh _hdx hh hsmall
-    have hx' : (-1 : Rat) <= x /\ x <= 1 := by
-      simpa [inDomainInterval] using hx
-    have hxh' : (-1 : Rat) <= x + h /\ x + h <= 1 := by
-      simpa [inDomainInterval] using hxh
+    change (-1 : Rat) <= x /\ x <= 1 at hx
+    change (-1 : Rat) <= x + h /\ x + h <= 1 at hxh
+    have hx' : (-1 : Rat) <= x /\ x <= 1 := hx
+    have hxh' : (-1 : Rat) <= x + h /\ x + h <= 1 := hxh
     have hqx : qabs x <= 2 :=
       Rat.le_trans (qabs_le_of_neg_le_le hx'.1 hx'.2) (by native_decide)
     have hqxh : qabs (x + h) <= 2 :=
@@ -4749,7 +4752,8 @@ def uniformExpOnSymmetricUnit_solvesSelfDerivative :
     constructor <;> native_decide
   initial_value := RealRaw.ofRat 1
   initial_value_valid := by
-    simpa [RealRaw.ofRat] using RealRaw.ofRat_valid (1 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid (1 : Rat)
   initial_value_equiv := by
     exact uniformExpOnSymmetricUnit_zero_equiv_one
 
@@ -4758,7 +4762,7 @@ value at zero. -/
 theorem expPowerSeriesFunction_zero_equiv_one :
     (expPowerSeriesFunction.evalRaw (0 : Rat) trivial).Equiv
       (RealRaw.ofRat 1) := by
-  rw [expPowerSeriesFunction_evalRaw_eq]
+  change (expPowerSeries (0 : Rat)).Equiv (RealRaw.ofRat 1)
   exact expPowerSeries_zero_equiv_one
 
 /-- On every rational interval that contains zero, the packaged series
@@ -5095,7 +5099,8 @@ def expTaylorQuadratic_forwardDerivativeAtZero :
     · subst n
       calc
         h <= 1 / (1 : Rat) := by
-          simpa only [if_pos rfl] using hsmall
+          change h <= 1 / (1 : Rat) at hsmall
+          exact hsmall
         _ = (precisionAtStage 0).val := by native_decide
     · simpa [precisionAtStage, hn] using hsmall
   have hhalf_le_h : h / 2 <= h := by
@@ -5175,7 +5180,13 @@ def expPowerSeriesOnUnit_forwardDerivativeAtZero :
     change (expPowerSeries (0 : Rat)).compute 0 = _
     rw [expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
   simp only [Rat.zero_add]
-  rw [hvalue, hzero]
+  rw [hvalue]
+  change intervalNearAtPrecision
+    (QInterval.differenceQuotient
+      (intervalAround (powerSeriesCenter h 0) (powerSeriesTailRadius h 0))
+      ((expPowerSeries (0 : Rat)).compute 0) h)
+    (RealRaw.one.compute 0) n
+  rw [expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
   simpa only [intervalNearAtPrecision, RealRaw.one, RealRaw.ofRat_compute]
     using hgoal
 
@@ -5220,20 +5231,26 @@ def expPowerSeriesOnUnit_forwardSelfDerivativeAtZero :
     change (expPowerSeries (0 : Rat)).compute 0 = _
     rw [expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
   simp only [Rat.zero_add]
-  rw [hvalue, hzero, expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
+  rw [hvalue]
+  change intervalNearAtPrecision
+    (QInterval.differenceQuotient
+      (intervalAround (powerSeriesCenter h 0) (powerSeriesTailRadius h 0))
+      ((expPowerSeries (0 : Rat)).compute 0) h)
+    ((expPowerSeries 0).compute 0) n
+  rw [expPowerSeries_zero_compute_eq, RealRaw.ofRat_compute]
   simpa only [intervalNearAtPrecision] using hgoal
 
 theorem ePowerSeries_valid_of_nested
     (hnested : EPowerSeriesNested)
     (hshrink : EPowerSeriesWidthsShrink) : EPowerSeriesValid := by
-  simpa [EPowerSeriesValid, EPowerSeriesNested, ePowerSeries] using
-    expPowerSeries_valid_of_nested_and_shrinking_autoRatio
-      (1 : Rat) hnested hshrink
+  change PowerSeriesValid 1
+  exact expPowerSeries_valid_of_nested_and_shrinking_autoRatio
+    (1 : Rat) hnested hshrink
 
 theorem eEuler_valid_of_nested
     (hnested : EEulerNested) : EEulerValid := by
-  simpa [EEulerValid, EEulerNested, eEuler] using
-    expEuler_valid_of_nested 1 hnested
+  change EulerValid 1
+  exact expEuler_valid_of_nested 1 hnested
 
 theorem ePowerSeries_valid_of_centerMovement
     (hmove : EPowerSeriesCenterMovement)

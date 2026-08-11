@@ -46,12 +46,26 @@ It is a later identification theorem, not a definition of sine or cosine.
 \lean{ComputableAnalysis.cramer_2_1_1_3_solution}
 \lean{ComputableAnalysis.cramer_2_1_1_3_formula}
 \lean{ComputableAnalysis.cramer_2_1_1_3_certificate}
+\lean{ComputableAnalysis.cramer_3_2_1_2_determinant}
+\lean{ComputableAnalysis.cramer_3_2_1_2_solution}
+\lean{ComputableAnalysis.cramer_3_2_1_2_formula}
+\lean{ComputableAnalysis.cramer_3_2_1_2_certificate}
+\lean{ComputableAnalysis.cramer_signed_determinant}
+\lean{ComputableAnalysis.cramer_signed_formula}
+\lean{ComputableAnalysis.cramer_signed_solution}
+\lean{ComputableAnalysis.cramer_signed_certificate}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramerSolution}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_determinant}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_inverse_witness}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solution}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solves}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solves_from_generic}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramerSolution}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_determinant}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_inverse_witness}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_solution}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_solves}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_solves_from_generic}
 \leanok
 For a rational (2\times2) system with nonzero determinant, the two
 solutions are the usual determinant quotients.  This is the finite linear
@@ -65,6 +79,19 @@ is assumed.
 The diagonal instance \(\operatorname{diag}(2,3,4)u=(4,9,16)\) has
 determinant (24); the finite Cramer formulas return (u=(2,3,4)), and the
 matrix equation is checked directly and through the generic solver.
+The second two-by-two instance uses the matrix
+\(\begin{pmatrix}3&2\\1&2\end{pmatrix}\) and right-hand side
+\((12,8)).  Its determinant is (4), and the finite Cramer quotients
+return ((2,3)).
+The signed witness with matrix
+\(\begin{pmatrix}1&-2\\3&4\end{pmatrix}\) and right-hand side \((5,6)\)
+has determinant \(10\), and the rational Cramer quotients return
+\((16/5,-9/10)\).  Direct substitution is checked exactly.
+The non-diagonal 3-by-3 instance with matrix
+\(\begin{pmatrix}2&1&0\\0&3&1\\1&0&2\end{pmatrix}\) and right-hand side
+\((4,9,7)) has determinant (13); its finite Cramer solution is
+\((1,2,3)), and direct substitution is checked both concretely and through
+the generic solver.
 \end{theorem}
 
 \begin{theorem}[Finite two-by-two Cayley--Hamilton certificate]
@@ -112,6 +139,15 @@ matrix equation is checked directly and through the generic solver.
 \lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_secondCoeff}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_determinant}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_identity}
+\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_fourth_power}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_trace}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_secondCoeff}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_determinant}
+\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_identity}
+\lean{ComputableAnalysis.LinearODE.concreteFourCayleyMatrix}
+\lean{ComputableAnalysis.LinearODE.concreteFourCayleyCertificate}
+\lean{ComputableAnalysis.LinearODE.concreteFourCayleyMatrix_annihilates}
 \lean{ComputableAnalysis.GeometricRotationODE.rotationGenerator_pow_four_cycle}
 \leanok
 For an arbitrary rational (2\times2) matrix (A), the finite matrix identity
@@ -135,6 +171,19 @@ identity is
   A^3-6A^2+11A-6I=0.
 \]
 This supplies an inspectable 3-by-3 rational instance of benchmark item 49.
+The same diagonal witness computes its fourth finite power exactly as
+\(A^4=\operatorname{diag}(1,16,81)\), giving a concrete consumer of the
+finite matrix-power recurrence.
+The next finite exercise is a supplied-annihilator certificate in dimension
+four.  For the diagonal matrix \(\operatorname{diag}(1,2,3,4)\), the monic
+polynomial
+\[
+  x^4-10x^3+35x^2-50x+24
+\]
+annihilates the matrix, and the certificate is checked entry by entry.  This
+keeps the benchmark in the computable scope: it exercises a larger finite
+matrix and a supplied recurrence, without claiming a general determinant or
+characteristic-polynomial construction.
 Multiplying that identity by each finite matrix power gives the reusable
 third-order recurrence
 \[

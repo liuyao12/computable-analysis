@@ -133,11 +133,29 @@ For the mathematical status and intended dependency order, use
 [`blueprint/src/04-infinite-series.tex`](blueprint/src/04-infinite-series.tex),
 not in this guide.
 
+### Benchmark admission rule
+
+The Wiedijk benchmark is a source of targets, not a license to import the
+classical real-analysis universe. An entry is admitted to the project
+scoreboard only if its Lean statement is native to this repository: its real
+values must be `RealRaw`/abstract `Real` values, rational interval algorithms,
+or finite algebraic certificates. A theorem that Mathlib states over completed
+`ℝ` must be rewritten here over the project's abstract computable-real
+interface.
+
+When the classical theorem genuinely needs completeness, arbitrary limits,
+Lebesgue measure, or another noncomputable object, we record a scoped
+constructive replacement with the hypotheses and conclusion visibly
+restricted. The replacement counts only under that scoped name; it must not
+be presented as a proof of the unrestricted classical statement. Routine
+finite lemmas are reused from the available foundation (or Mathlib only when
+doing so does not import classical real or infinitary objects).
+
 ### Benchmark routing
 
 The benchmark alignment is maintained in
 [`blueprint/src/08-roadmap.tex`](blueprint/src/08-roadmap.tex).  It currently
-records 38 checked project-relevant finite, rational-coordinate, or
+records 47 checked project-relevant finite, rational-coordinate, or
 certificate-level cores.  The easiest entries are distributed across
 Foundations, Circle and Trigonometry, Infinite Series, Effective Calculus,
 Algebra and FTA, and Linear Differential Equations; the remaining benchmark

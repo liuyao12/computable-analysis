@@ -274,6 +274,31 @@ theorem zetaTwoUpper_le_of_le {n m : Nat}
       have hmpos : 0 < _ := Nat.lt_of_lt_of_le hn h
       exact Rat.le_trans (zetaTwoUpper_succ_le _ hmpos) ih
 
+/-- Every finite reciprocal-square partial sum stays below the initial
+stage-one padded endpoint.  This is a global finite bound for the Basel
+certificate, not an assertion of the infinite sum. -/
+theorem zetaTwoPartial_le_two (n : Nat) :
+    zetaTwoPartial n ≤ 2 := by
+  by_cases hn0 : n = 0
+  · simp [hn0, zetaTwoPartial]
+    native_decide
+  · have hn : 0 < n := Nat.pos_of_ne_zero hn0
+    have hpartial_upper : zetaTwoPartial n ≤ zetaTwoUpper n := by
+      unfold zetaTwoUpper zetaTwoTailBound
+      simp [hn0]
+      have htail_pos : 0 < 1 / (n : Rat) := one_div_nat_pos hn
+      have htail_nonneg : 0 ≤ 1 / (n : Rat) := Rat.le_of_lt htail_pos
+      simpa only [Rat.add_zero] using (Rat.add_le_add_left (a := (0 : Rat))
+        (b := 1 / (n : Rat)) (c := zetaTwoPartial n)).2 htail_nonneg
+    have hupper : zetaTwoUpper n ≤ zetaTwoUpper 1 :=
+      zetaTwoUpper_le_of_le (by omega : 0 < (1 : Nat)) hn
+    have hstage_one : zetaTwoUpper 1 = 2 := by
+      native_decide
+    calc
+      zetaTwoPartial n ≤ zetaTwoUpper n := hpartial_upper
+      _ ≤ zetaTwoUpper 1 := hupper
+      _ = 2 := hstage_one
+
 /-- Computable interval for `zeta(2)` at stage `n`.
 
 The lower endpoint is the first `n` terms.  The upper endpoint adds the

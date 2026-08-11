@@ -104,4 +104,15 @@ theorem finiteStirlingRatioAtTen_unit_enclosure :
         101 / 100 := by
   native_decide
 
+theorem finiteStirlingRatioAtTen_unit_error :
+    qabs (finiteStirlingRatio 10 finiteStirlingEApprox
+      finiteStirlingRootApprox - 1) <= 1 / 100 := by
+  have h := finiteStirlingRatioAtTen_unit_enclosure
+  have hnonneg :
+      0 <= finiteStirlingRatio 10 finiteStirlingEApprox
+        finiteStirlingRootApprox - 1 := by
+    grind [h.1]
+  rw [qabs_eq_self_of_nonneg hnonneg]
+  grind [h.2]
+
 end ComputableAnalysis

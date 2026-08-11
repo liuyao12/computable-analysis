@@ -28,5 +28,19 @@ theorem isosceles_3_4_certificate :
     isosceles_3_4_axis_orthogonal,
     isosceles_3_4_base_squared⟩
 
+theorem isosceles_5_12_certificate :
+    segmentNormSq { x := 0, y := 5 } { x := 12, y := 0 } = 169 /\
+      segmentNormSq { x := 0, y := 5 } { x := -12, y := 0 } = 169 /\
+      dot { x := 0, y := 5 } { x := 12, y := 0 } = 0 /\
+      segmentNormSq { x := 12, y := 0 } { x := -12, y := 0 } = 576 := by
+  native_decide
+
+theorem isosceles_7_24_certificate :
+    segmentNormSq { x := 0, y := 7 } { x := 24, y := 0 } = 625 /\
+      segmentNormSq { x := 0, y := 7 } { x := -24, y := 0 } = 625 /\
+      dot { x := 0, y := 7 } { x := 24, y := 0 } = 0 /\
+      segmentNormSq { x := 24, y := 0 } { x := -24, y := 0 } = 2304 := by
+  native_decide
+
 end RationalCircle.Stage
 end ComputableAnalysis

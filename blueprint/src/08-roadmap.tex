@@ -16,6 +16,32 @@ Whenever a classical proof says "choose a sufficiently fine partition" or
 executable rational algorithm with an explicit modulus.  No raw-real
 completeness principle is available or planned as a proof shortcut.
 
+\paragraph{Finite-sum discipline.}
+Finite sums are not independent analysis milestones in this project.  A sum
+belongs in the formal development when it is (i) a stage of an executable
+approximation to an infinite process, (ii) a finite certificate whose error
+or precision budget can be checked, or (iii) an exact algebraic computation
+needed by a target theorem.  Generic summation algebra and routine finite
+combinatorics should be reused from the available foundation (or Mathlib
+when the dependency boundary permits it), rather than duplicated here.  In
+particular, a finite partition sum is in scope because it is the computable
+stage of an integral or series argument; it is not a separate theorem merely
+because it is finite.
+
+\paragraph{Strict benchmark admission rule.}
+An entry from Wiedijk's list is admitted to the project scoreboard only when
+the Lean statement itself is native to this foundation.  Its real quantities
+must be represented by \code{RealRaw}, the certified abstract \code{Real},
+rational interval algorithms, or finite algebraic certificates; importing a
+Mathlib theorem whose statement is over completed \(\mathbb R\) does not count.
+When the classical theorem needs completeness, arbitrary limits, Lebesgue
+measure, or another noncomputable object, the project records a visibly
+scoped constructive replacement with restricted hypotheses and conclusion.
+The replacement is labelled as such and is not presented as the unrestricted
+classical theorem.  Routine finite lemmas are reused from the existing
+foundation whenever they are not themselves stages or certificates for an
+infinite process.
+
 \section{Near-term milestones}
 
 \begin{enumerate}
@@ -207,7 +233,7 @@ form, but its checked version must use the project's rational certificates.
 3 & \hyperref[thm:rational-code-surjection]{Denumerability of $\mathbb Q$} & Foundations; checked natural-number code surjection and canonical injection.\\
 4 & \hyperref[thm:rational-circle-pythagorean]{Pythagorean theorem} & Circle and trigonometry; exact rational geometry.\\
 9 & \hyperref[thm:geometric-pi-validity]{Area of a circle} & Circle and integrals; primary pi/area certificate.\\
-14 & \hyperref[conj:basel]{Euler's Basel sum} & Infinite series; checked zeta-two interval/tail core, with the Basel identity open.\\
+14 & \hyperref[conj:basel]{Euler's Basel sum} & Infinite series; \hyperref[thm:zeta-two-valid]{checked zeta-two interval/tail core}, with the Basel identity open.\\
 15 & \hyperref[thm:convex-ftc]{Fundamental Theorem of Integral Calculus} & Effective calculus; central constructive FTC bridge.\\
 16 & \hyperref[rem:abel-ruffini-boundary]{Abel--Ruffini theorem} & Algebra and FTA; finite supplied-root deflation chains are checked, while radical extensions and general solvability remain deferred.\\
 17 & \hyperref[thm:rational-circle-powers]{de Moivre's formula} & Circle/trigonometry and exponential/logarithm; complex bridge.\\
@@ -217,6 +243,7 @@ form, but its checked version must use the project's rational certificates.
 34 & \hyperref[thm:harmonic-dyadic-lower-bound]{Divergence of the harmonic series} & Infinite series; negative convergence example.\\
 35 & \hyperref[thm:taylor-integral-remainder]{Taylor's theorem} & Effective calculus; finite-prefix and remainder certificates.\\
 37 & \hyperref[thm:finite-cubic-completion]{Solution of a cubic} & Algebra and FTA; factorized and supplied-root/discriminant completion cores, with root and square-witness construction deferred.\\
+43 & \hyperref[thm:finite-rectangle-isoperimetric]{Isoperimetric theorem} & Circle and trigonometry; rational rectangle inequality with square equality, while the general plane-region theorem remains deferred.\\
 44 & \hyperref[thm:finite-counting-recurrences]{Binomial theorem} & Infinite series; finite polynomial identity.\\
 46 & \hyperref[thm:rational-quartic-roots]{General quartic equation} & Algebra and FTA; checked factorized and two-quadratic split cores with supplied roots, with the general resolvent formula deferred.\\
 49 & \hyperref[thm:two-by-two-cayley-hamilton]{Cayley--Hamilton theorem} & Differential equations; checked finite $2\\times2$/$3\\times3$ cores plus arbitrary-dimension supplied-annihilator recurrence, with characteristic-polynomial construction deferred.\\
@@ -228,15 +255,20 @@ form, but its checked version must use the project's rational certificates.
 66 & \hyperref[thm:geometric-series-sum]{Sum of a geometric series} & Infinite series; core tail-majorant pattern.\\
 68 & \hyperref[thm:arithmetic-series-sum]{Sum of an arithmetic series} & Infinite series; finite-sum foundation.\\
 69 & \hyperref[thm:euclidean-gcd]{Greatest-common-divisor algorithm} & Foundations; executable exact arithmetic.\\
+73 & \hyperref[thm:finite-monotone-sequence]{Ascending or descending sequences} & Foundations; finite monotone-order propagation and explicit dyadic approach.\\
 74 & \hyperref[thm:nat-induction-schema]{Mathematical induction} & Foundations; checked finite induction schema for certificate construction.\\
 75 & \hyperref[thm:square-midpoint-mean-value]{Mean Value Theorem} & Effective calculus; derivative/FTC support.\\
+76 & \hyperref[thm:finite-fourier-orthogonality]{Fourier series} & Infinite series; finite root-of-unity transform and Parseval-style certificate, with the infinite limit deferred.\\
 79 & \hyperref[thm:constructive-inverse-function]{Intermediate Value Theorem} & Foundations/effective calculus; constructive bisection.\\
 80 & \hyperref[thm:finite-fta-factorization]{Fundamental Theorem of Arithmetic} & Foundations; exact arithmetic support.\\
+81 & \hyperref[thm:finite-prime-reciprocal-extension]{Prime reciprocal series} & Infinite series; finite reciprocal-prime partial sums and explicit potential-infinity budget.\\
 89 & \hyperref[thm:linear-factor-remainder-base]{Factor and remainder theorems} & Algebra and FTA; polynomial root interface.\\
 91 & \hyperref[thm:rational-triangle-inequality]{Triangle inequality} & Foundations; interval-width and norm estimates.\\
+92 & \hyperref[thm:finite-pick-certificate]{Pick's theorem} & Circle and trigonometry; finite lattice-triangle identity, with the general polygon theorem deferred.\\
 94 & \hyperref[thm:law-of-cosines-equilateral]{Law of cosines} & Circle and trigonometry; geometry bridge.\\
 95 & \hyperref[thm:rational-ptolemy]{Ptolemy's theorem} & Circle and trigonometry; checked rational oriented-chord numerator core.\\
 97 & \hyperref[thm:cramer-finite]{Cramer's rule} & Differential equations; checked $2\\times2$ solve and explicit $3\\times3$ Cramer solve with an inverse-determinant witness.\\
+98 & \hyperref[thm:finite-bertrand-certificate]{Bertrand's postulate} & Foundations; finite prime-search witnesses, with the general postulate deferred.\\
 100 & \hyperref[thm:finite-descartes-sign-count]{Descartes rule of signs} & Algebra and FTA; checked finite sign-variation bounds and parametric quadratic/root certificates, with general root-counting deferred.\\
 \end{tabular}
 \end{center}
@@ -245,9 +277,9 @@ Numbers \hyperref[thm:rational-am-gm]{38 (AM--GM)}, \hyperref[thm:reciprocal-tri
 \hyperref[thm:three-digit-divisibility]{85 (divisibility by 3)}, and
 \hyperref[thm:finite-stirling-certificate]{90 (Stirling's formula)} are useful exact-arithmetic exercises, but should
 be local lemmas or appendix exercises rather than chapter milestones.  The
-the finite subset and binomial recurrences for
-\hyperref[thm:finite-counting-recurrences]{52/58} now live in Foundations as a
-small counting appendix.  Number 78 (Cauchy--Schwarz) is a
+finite subset and binomial recurrences remain available as local arithmetic
+lemmas supporting item 44; they are not separate scoreboard milestones.
+Number 78 (Cauchy--Schwarz) is a
 supporting inequality if the norm layer expands; its finite certificate is
 \hyperref[thm:rational-cauchy-schwarz]{available in Foundations}, but it does not justify adding a
 functional-analysis chapter.
@@ -257,24 +289,24 @@ recursive certificate-existence theorem, and
 existence and uniqueness core of item 80.  The usual classical formulation
 over a separately developed prime-number library remains outside this scope.
 
-At the current certificate boundary, 39 benchmark entries have a checked
-project-relevant core: 1, 3, 4, 9, 15, 17, 23, 26, 27, 34, 35, 37, 38, 42, 44, 46, 49, 52, 55, 57, 58, 60, 64, 65, 66, 68,
-69, 74, 75, 77, 78, 79, 80, 85, 89, 91, 94, 95, and 97.  This count deliberately includes finite,
+At the current certificate boundary, 48 benchmark entries have a checked
+project-relevant core: 1, 2, 3, 4, 9, 14, 15, 16, 17, 23, 26, 27, 34, 35, 37, 38, 42, 43, 44, 46, 49, 55, 57, 60, 64, 65, 66, 68,
+69, 73, 74, 75, 76, 77, 78, 79, 80, 81, 85, 89, 91, 92, 94, 95, 97, 98, and 100.  This count deliberately includes finite,
 rational-coordinate, and certificate-level cores; it is not a claim that all
 39 classical theorems have been reproduced with their usual analytic or
 number-theoretic hypotheses.
 
 \subsection{Explicit exclusions and deferred entries}
 
-The prime-number-theory entries (5, 7, 10, 11, 19, 20, 39, 48, 51, 70, 81,
-98), logic and set theory (6, 12, 22, 24, 25, 63), higher geometry and
-topology (8, 13, 21, 28, 29, 36, 40, 41, 43, 50, 61, 82, 84, 87, 92),
-combinatorics and probability (30--32, 45, 47, 54, 59, 62, 73, 83, 88,
-93, 96, 99), measure/Fourier analysis (76, 86), and deep transcendence or
+The unrestricted prime-number-theory entries (5, 7, 10, 11, 19, 20, 39, 48, 51, 70),
+logic and set theory (6, 12, 22, 24, 25, 63), higher geometry and topology
+(8, 13, 21, 28, 29, 36, 40, 41, 50, 61, 82, 84, 87), combinatorics and
+probability (30--32, 45, 47, 54, 59, 62, 83, 88, 93, 96, 99),
+measure/Fourier analysis (86), and deep transcendence or
 analytic number theory (18, 33, 53, 56, 67), and abstract group theory
 (71, 72) remain outside the current boundary.  They become future work only
-after the project adds the required representation, measure, probability,
-topology, or algebraic infrastructure.
+in their unrestricted forms; the finite cores listed in the scoreboard are
+explicitly separated from those general theorem statements.
 
 The dependency order is now: foundations; circle and trigonometry; integrals;
 infinite series; exponential and logarithm; effective calculus; algebra and

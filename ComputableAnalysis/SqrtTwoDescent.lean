@@ -1,4 +1,4 @@
-import ComputableAnalysis.Basic
+import ComputableAnalysis.IrrationalSqrt
 
 namespace ComputableAnalysis
 
@@ -55,5 +55,31 @@ theorem sqrtTwo_descent_core :
     exact (Nat.pow_lt_pow_iff_left (by decide : 2 ≠ 0)).mp hlt
   have hc : c = 0 := ih c hcb b hsq'
   simpa [hc] using hsq'
+
+private theorem nat_square_two_impossible_via_descent {k : Nat}
+    (hk : k * k = 2) : False := by
+  have hsq : k ^ 2 = 2 * 1 ^ 2 := by
+    simpa [Nat.pow_two] using hk
+  have hzero : (1 : Nat) = 0 := sqrtTwo_descent_core k 1 hsq
+  omega
+
+/-- The rational-square obstruction for `2`, now explicitly routed through
+the classical infinite-descent kernel above. -/
+theorem two_not_rat_square_via_descent : ¬ Rat.IsSquare (2 : Rat) := by
+  intro hsquare
+  have hlowest := Rat.isSquareInLowestTerms_of_isSquare hsquare
+  rcases hlowest.1 with ⟨_, hnum⟩
+  rcases hnum with ⟨k, hk⟩
+  have hnumabs : ((2 : Rat).num).natAbs = 2 := by native_decide
+  rw [hnumabs] at hk
+  apply nat_square_two_impossible_via_descent
+  simpa using hk
+
+/-- Benchmark item 1, with the computable square-root representation and the
+infinite-descent proof of the nonsquare input. -/
+theorem sqrt_two_irrational_via_descent :
+    RealRaw.Irrational (sqrtRat (2 : Rat) (by native_decide)) := by
+  apply (irrational_sqrt_ratCast_iff_of_nonneg (by native_decide)).2
+  exact two_not_rat_square_via_descent
 
 end ComputableAnalysis

@@ -715,15 +715,23 @@ def rotationSinRaw (T : Rat) : RealRaw where
   compute := rotationSinCompute T
   rate := rotationSinRate T
 
+set_option maxHeartbeats 1000000 in
 theorem rotationCosRaw_valid (T : Rat) : (rotationCosRaw T).Valid := by
+  have hcompute : rotationCosCompute T = (fun n =>
+      { lo := (rotationBox T n).lo.re, hi := (rotationBox T n).hi.re }) := by
+    rfl
   change RealRaw.ValidCompute (rotationCosCompute T)
-  have hvalid := ComplexRaw.realPart_valid (rotationExpRaw_valid T)
-  simpa [rotationCosCompute, ComplexRaw.realPart, rotationExpRaw] using hvalid
+  rw [hcompute]
+  exact ComplexRaw.realPart_valid (rotationExpRaw_valid T)
 
+set_option maxHeartbeats 1000000 in
 theorem rotationSinRaw_valid (T : Rat) : (rotationSinRaw T).Valid := by
+  have hcompute : rotationSinCompute T = (fun n =>
+      { lo := (rotationBox T n).lo.im, hi := (rotationBox T n).hi.im }) := by
+    rfl
   change RealRaw.ValidCompute (rotationSinCompute T)
-  have hvalid := ComplexRaw.imagPart_valid (rotationExpRaw_valid T)
-  simpa [rotationSinCompute, ComplexRaw.imagPart, rotationExpRaw] using hvalid
+  rw [hcompute]
+  exact ComplexRaw.imagPart_valid (rotationExpRaw_valid T)
 
 theorem rotationCosRaw_compute (T : Rat) (n : Nat) :
     (rotationCosRaw T).compute n =

@@ -56,7 +56,6 @@ theorem matrixPolynomialSum_shifted_annihilation {dimension : Nat}
     (steps : Nat) :
     matrixPolynomialSum A (coefficients ++ [1]) steps = matrixZero dimension := by
   have hmul := congrArg (fun M => matrixMul M (matrixPow A steps)) hannihilates
-  dsimp at hmul
   rw [matrixPolynomialSum_mul_matrixPow, matrixMul_zero_left] at hmul
   simpa [Nat.zero_add] using hmul
 

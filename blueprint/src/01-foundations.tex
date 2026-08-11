@@ -29,6 +29,9 @@
 \lean{ComputableAnalysis.rationalNatCode_existsUnique_canonical_decode_index}
 \lean{ComputableAnalysis.rationalNatCode_decode_surjective}
 \lean{ComputableAnalysis.rationalNatCode_index}
+\lean{ComputableAnalysis.rationalNatIndex_three_fifths}
+\lean{ComputableAnalysis.rationalNatCode_index_three_fifths}
+\lean{ComputableAnalysis.rationalNatCode_decode_three_fifths}
 \lean{ComputableAnalysis.rationalNatIndex}
 \lean{ComputableAnalysis.rationalNatIndex_injective}
 \lean{ComputableAnalysis.rationalNatCode_index}
@@ -52,6 +55,8 @@ the finite code level.  The explicit `rationalNatIndex` and
 rationals to natural indices, while retaining the finite-code interface.  The
 surjection and injection together complete the project's coding-level
 denumerability boundary for benchmark item 3.
+As a concrete audit point, the canonical index of (3/5) is (61), and Lean
+checks that decoding the enumerated code at (61) returns (3/5).
 \end{theorem}
 
 \begin{theorem}[Finite induction schema]
@@ -63,6 +68,37 @@ and a proof step from $n$ to $n+1$ produce a proof at every natural number.
 This is the checked proof/programming principle used by the project's finite
 certificate constructions, and is the project's scoped formalization of
 benchmark item 74.
+\end{theorem}
+
+\begin{theorem}[Finite monotone-sequence propagation]
+\label{thm:finite-monotone-sequence}
+\lean{ComputableAnalysis.monotone_of_succ_le}
+\lean{ComputableAnalysis.antitone_of_succ_ge}
+\lean{ComputableAnalysis.ascendingNaturalSequence}
+\lean{ComputableAnalysis.ascendingNaturalSequence_monotone}
+\lean{ComputableAnalysis.ascendingNaturalSequence_stage64}
+\lean{ComputableAnalysis.ascendingNaturalSequence_stage128}
+\lean{ComputableAnalysis.dyadicApproach}
+\lean{ComputableAnalysis.dyadicApproach_succ_le}
+\lean{ComputableAnalysis.dyadicApproach_le_one}
+\lean{ComputableAnalysis.dyadicApproach_error}
+\lean{ComputableAnalysis.dyadicApproach_error_shrinks}
+\lean{ComputableAnalysis.dyadicApproach_stage8_certificate}
+\lean{ComputableAnalysis.dyadicApproach_stage16_certificate}
+\lean{ComputableAnalysis.dyadicApproach_stage32_certificate}
+\lean{ComputableAnalysis.dyadicApproach_stage64_certificate}
+\lean{ComputableAnalysis.dyadicApproach_stage128_certificate}
+\leanok
+If each successor step of a rational sequence is nondecreasing, the same
+order is propagated to every finite pair of indices; the dual successor
+condition gives an antitone sequence.  The executable sequence
+\texttt{ascendingNaturalSequence} supplies a concrete ascending witness at
+stages 64 and 128.  The bounded dyadic sequence
+\(1-2^{-n}\) is also checked stage by stage: it is nondecreasing, bounded by
+1, and has an explicit rational error certificate (at stage 8, the error is
+\(1/256\)).  This is the project's potential-infinity core for benchmark item
+73.  The error-shrinking theorem supplies a denominator-derived stage for
+every positive rational tolerance, while no attained real limit is asserted.
 \end{theorem}
 
 \begin{theorem}[Finite subset and binomial recurrences]
@@ -92,6 +128,31 @@ benchmark item 74.
 \lean{ComputableAnalysis.pascal_combination_7_3}
 \lean{ComputableAnalysis.pascal_combination_8_3_recurrence}
 \lean{ComputableAnalysis.pascal_combination_8_3_certificate}
+\lean{ComputableAnalysis.pascal_combination_10_3}
+\lean{ComputableAnalysis.pascal_combination_9_2}
+\lean{ComputableAnalysis.pascal_combination_9_3}
+\lean{ComputableAnalysis.pascal_combination_10_3_recurrence}
+\lean{ComputableAnalysis.pascal_combination_10_3_certificate}
+\lean{ComputableAnalysis.pascal_combination_15_3}
+\lean{ComputableAnalysis.pascal_combination_14_2}
+\lean{ComputableAnalysis.pascal_combination_14_3}
+\lean{ComputableAnalysis.pascal_combination_15_3_recurrence}
+\lean{ComputableAnalysis.pascal_combination_15_3_certificate}
+\lean{ComputableAnalysis.pascal_combination_20_3}
+\lean{ComputableAnalysis.pascal_combination_19_2}
+\lean{ComputableAnalysis.pascal_combination_19_3}
+\lean{ComputableAnalysis.pascal_combination_20_3_recurrence}
+\lean{ComputableAnalysis.pascal_combination_20_3_certificate}
+\lean{ComputableAnalysis.pascal_combination_25_3}
+\lean{ComputableAnalysis.pascal_combination_24_2}
+\lean{ComputableAnalysis.pascal_combination_24_3}
+\lean{ComputableAnalysis.pascal_combination_25_3_recurrence}
+\lean{ComputableAnalysis.pascal_combination_25_3_certificate}
+\lean{ComputableAnalysis.pascal_combination_32_3}
+\lean{ComputableAnalysis.pascal_combination_31_2}
+\lean{ComputableAnalysis.pascal_combination_31_3}
+\lean{ComputableAnalysis.pascal_combination_32_3_recurrence}
+\lean{ComputableAnalysis.pascal_combination_32_3_certificate}
 \leanok
 The finite recurrence \texttt{subsetCount(n+1)=2*subsetCount(n)} gives the
 certificate core of the number-of-subsets theorem (benchmark item 52), while
@@ -102,6 +163,17 @@ outside-range and diagonal boundaries and the first-row identity
 `combination_one`.  These are finite
 counting interfaces; a general finite-set cardinality library is intentionally
 not introduced here.
+The worked subset counter now also reaches stage 16, with exact value
+\(2^{16}=65536\), giving a finer finite checkpoint for item 52.
+It now also reaches stage 64, with exact value
+\(2^{64}=18446744073709551616\), extending the terminating recurrence
+certificate.
+The Pascal witness now reaches \(\binom{20}{3}=1140\), with the checked
+decomposition \(1140=171+969\) from the two predecessor coefficients.
+It now also reaches \(\binom{32}{3}=4960\), with the checked decomposition
+\(4960=465+4495\), extending the finite recurrence schedule.
+It now also reaches \(\binom{25}{3}=2300\), with the decomposition
+\(2300=276+2024\) checked from its two predecessor coefficients.
 \end{theorem}
 
 \begin{theorem}[Certificate-level fundamental theorem of arithmetic]
@@ -109,6 +181,25 @@ not introduced here.
 \label{rem:finite-factorization-certificates}
 \lean{ComputableAnalysis.MultiplicativeCertificate}
 \lean{ComputableAnalysis.factorizationCertificate60}
+\lean{ComputableAnalysis.primeFactorizationCertificate360}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_factors}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_product}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_factor_dvd}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_alternative}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_alternative_factors}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_factor_order_unique}
+\lean{ComputableAnalysis.primeFactorizationCertificate720}
+\lean{ComputableAnalysis.primeFactorizationCertificate720_product}
+\lean{ComputableAnalysis.primeFactorizationCertificate720_factor_dvd}
+\lean{ComputableAnalysis.primeFactorizationCertificate600}
+\lean{ComputableAnalysis.primeFactorizationCertificate600_product}
+\lean{ComputableAnalysis.primeFactorizationCertificate600_factor_dvd}
+\lean{ComputableAnalysis.primeFactorizationCertificate126}
+\lean{ComputableAnalysis.primeFactorizationCertificate126_product}
+\lean{ComputableAnalysis.primeFactorizationCertificate126_factor_dvd}
+\lean{ComputableAnalysis.primeFactorizationCertificate27720}
+\lean{ComputableAnalysis.primeFactorizationCertificate27720_product}
+\lean{ComputableAnalysis.primeFactorizationCertificate27720_factor_dvd}
 \lean{ComputableAnalysis.BasicPrime}
 \lean{ComputableAnalysis.basicPrime_of_no_proper_divisor}
 \lean{ComputableAnalysis.basicPrime_iff_no_proper_divisor}
@@ -158,6 +249,10 @@ not introduced here.
 \lean{ComputableAnalysis.natList_perm_of_nodup_of_mem_iff}
 \lean{ComputableAnalysis.PrimeFactorCertificate.factor_perm_of_nodup}
 \lean{ComputableAnalysis.primeFactorizationCertificate60}
+\lean{ComputableAnalysis.primeFactorizationCertificate360}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_factors}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_product}
+\lean{ComputableAnalysis.primeFactorizationCertificate360_factor_dvd}
 The foundation now has a finite certificate interface recording a list of
 nontrivial factors and its product, with the worked certificate
 \texttt{60=2\cdot2\cdot3\cdot5}.  The small primality predicate and its
@@ -202,6 +297,38 @@ for every finite bound (n), a certified prime (p>n) is produced.
 This is the project's checked certificate-level core of benchmark item 80;
 the usual classical formulation over a separately developed prime library is
 outside the current scope.
+The worked certificate `primeFactorizationCertificate360` supplies the list
+\([2,2,2,3,3,5]), checks its product as (360), and records the resulting
+divisibility witnesses for (2,3,5).
+The companion certificates check the prime-labelled decompositions
+\(720=2^4\cdot3^2\cdot5\) and
+\(600=2^3\cdot3\cdot5^2\), with their products and distinct-prime
+divisibility witnesses verified directly.
+The additional certificate factors (126) as (2\cdot3^2\cdot7), with
+the product and divisibility witnesses checked by terminating computation.
+The larger certificate factors (27720) as
+(2^3\cdot3^2\cdot5\cdot7\cdot11), exercising the finite prime-search
+certificates for both (7) and (11).
+\end{theorem}
+
+\begin{theorem}[Finite Bertrand witnesses]
+\label{thm:finite-bertrand-certificate}
+\lean{ComputableAnalysis.bertrand_stage10}
+\lean{ComputableAnalysis.bertrand_stage20}
+\lean{ComputableAnalysis.bertrand_stage30}
+\lean{ComputableAnalysis.bertrand_stage40}
+\lean{ComputableAnalysis.bertrand_stage50}
+\lean{ComputableAnalysis.bertrand_stage60}
+\lean{ComputableAnalysis.bertrand_finite_certificate}
+\lean{ComputableAnalysis.bertrand_extended_finite_certificate}
+\leanok
+The executable primality search verifies a prime between \(10\) and \(20\),
+namely \(11\), and a prime between \(20\) and \(40\), namely \(23\).  These
+are finite instances of benchmark item 98.  The extended ladder also checks
+\(31\in(30,60)\), \(41\in(40,80)\), and \(53\in(50,100)\), giving five
+exact finite intervals;
+the general Bertrand postulate remains outside the current number-theory
+boundary.
 \end{theorem}
 
 \begin{theorem}[Three-digit divisibility by three]
@@ -219,6 +346,17 @@ outside the current scope.
 \lean{ComputableAnalysis.decimal_123_divisible_by_three}
 \lean{ComputableAnalysis.decimal_123_digit_sum_certificate}
 \lean{ComputableAnalysis.decimal_124_not_divisible_by_three}
+\lean{ComputableAnalysis.decimal_321_digit_sum}
+\lean{ComputableAnalysis.decimal_321_divisible_by_three}
+\lean{ComputableAnalysis.decimal_321_digit_sum_certificate}
+\lean{ComputableAnalysis.decimal_322_not_divisible_by_three}
+\lean{ComputableAnalysis.decimal_999_digit_sum}
+\lean{ComputableAnalysis.decimal_999_divisible_by_three}
+\lean{ComputableAnalysis.decimal_1000_not_divisible_by_three}
+\lean{ComputableAnalysis.decimal_123456_digit_sum}
+\lean{ComputableAnalysis.decimal_123456_divisible_by_three}
+\lean{ComputableAnalysis.decimal_123456_digit_sum_certificate}
+\lean{ComputableAnalysis.decimal_123457_not_divisible_by_three}
 \lean{ComputableAnalysis.basePositionalValue}
 \lean{ComputableAnalysis.basePositionalValue_mod_sub_one}
 \lean{ComputableAnalysis.decimalPositionalValue_mod_nine}
@@ -229,6 +367,11 @@ the finite arithmetic core of benchmark item 85.  The terminating decimal
 digit-sum evaluator and its small-digit reduction are also exposed.  The
 global residue-preservation theorem is checked by well-founded recursion on
 the decimal reduction.
+The worked examples now also include the boundary pair (999) and (1000):
+the former has digit sum (27) and is divisible by (3), while the latter is
+not, providing a larger finite decision checkpoint.
+The six-digit checkpoint (123456) has digit sum (21) and is divisible by (3);
+the neighboring value (123457) supplies a terminating non-divisibility case.
 \end{theorem}
 
 The list-based positional evaluator linked above generalizes the same finite
@@ -521,6 +664,17 @@ the project's absolute-value operation:
 \lean{ComputableAnalysis.qabs_add_le}
 \lean{ComputableAnalysis.qabs_add_le_three}
 \lean{ComputableAnalysis.qabs_three_term_triangle_certificate}
+\lean{ComputableAnalysis.qabs_five_term_triangle_certificate}
+\lean{ComputableAnalysis.qabs_perturbed_sub_le}
+\lean{ComputableAnalysis.complexTriangleZ}
+\lean{ComputableAnalysis.complexTriangleW}
+\lean{ComputableAnalysis.complexTriangle_norms}
+\lean{ComputableAnalysis.complexTriangle_squared_norm_bound}
+\lean{ComputableAnalysis.complexTriangle_certificate}
+\lean{ComputableAnalysis.rational_coordinate_cauchy_schwarz}
+\lean{ComputableAnalysis.qcomplex_coordinate_cauchy_schwarz}
+\lean{ComputableAnalysis.qcomplex_normSq_add_expansion}
+\lean{ComputableAnalysis.qcomplex_normSq_add_le_coordinate_abs}
 \lean{ComputableAnalysis.ratListSum}
 \lean{ComputableAnalysis.ratListAbsSum}
 \lean{ComputableAnalysis.ratListSum_append}
@@ -533,9 +687,22 @@ The three-term form is included explicitly for chained interval-width and
 finite error estimates; these are the rational certificate core of benchmark
 item 91.  The list-level theorem `qabs\_ratListSum_le` extends the
 same estimate to every finite rational error list.
+The five-term worked list ((-3,4,-2,7,-5)) has sum (1), absolute-value
+sum (21), and satisfies the same list-level triangle certificate.
 The append laws make these finite certificates compositional.
 These finite absolute-value and list-sum bounds are the project's constructive
 triangle-inequality interface for interval widths and error budgets.
+The perturbation form \texttt{qabs\_perturbed\_sub\_le} makes the error-budget
+use explicit: replacing \(x,y\) by \(x+e,y+f\) adds at most the certified
+rational error bounds for \(e\) and \(f\) to the original separation.
+The worked rational-complex certificate adds vectors ((3,4)) and ((5,12)):
+their squared norms are (25) and (169), the squared norm of their sum is
+(320), and (320le(5+13)^2).
+The reusable coordinate Cauchy--Schwarz theorem is proved by the explicit
+Lagrange remainder `(a*d-b*c)^2`.  Its `QComplex` specialization bounds the
+dot product by the product of squared norms, and the accompanying expansion
+of the squared norm of a sum exposes the finite algebra used by later norm
+and triangle certificates.
 \end{theorem}
 
 \begin{theorem}[Rational AM--GM square certificate]
@@ -548,11 +715,35 @@ triangle-inequality interface for interval widths and error budgets.
 \lean{ComputableAnalysis.amgm_2_8_certificate}
 \lean{ComputableAnalysis.amgm_3_3_equality}
 \lean{ComputableAnalysis.amgm_2_8_and_equality_certificate}
+\lean{ComputableAnalysis.amgm_four_equal_certificate}
+\lean{ComputableAnalysis.amgm_four_strict_certificate}
+\lean{ComputableAnalysis.amgm_four_certificate}
 \lean{ComputableAnalysis.DyadicAMGM}
 \lean{ComputableAnalysis.DyadicAMGM.sum}
 \lean{ComputableAnalysis.DyadicAMGM.product}
 \lean{ComputableAnalysis.DyadicAMGM.product_le_average_pow}
 \lean{ComputableAnalysis.DyadicAMGM.product_mul_card_pow_le_sum_pow}
+\lean{ComputableAnalysis.dyadicAMGMExample}
+\lean{ComputableAnalysis.dyadicAMGMExample_sum}
+\lean{ComputableAnalysis.dyadicAMGMExample_product}
+\lean{ComputableAnalysis.dyadicAMGMExample_certificate}
+\lean{ComputableAnalysis.dyadicAMGMExample_numeric_bound}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_sum}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_product}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_certificate}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthThree_numeric_bound}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_sum}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_product}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_certificate}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFour_numeric_bound}
+\lean{ComputableAnalysis.consecutiveDyadic}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_sum}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_product}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_certificate}
+\lean{ComputableAnalysis.dyadicAMGMExampleDepthFive_numeric_bound}
 \lean{ComputableAnalysis.sqrtRaw_le_am_gm}
 \lean{ComputableAnalysis.sqrtRaw_am_gm_eq_of_eq}
 \lean{ComputableAnalysis.sqrtRaw_am_gm_eq_iff}
@@ -561,6 +752,19 @@ The square bound and paired four-variable certificate are the exact rational
 core of benchmark 38 (AM--GM).  The certified square-root interface lifts the
 bound to the project's represented nonnegative values, and the equality
 certificate records that equality occurs exactly when the two inputs coincide.
+The direct four-variable witnesses check equality for \((3,3,3,3)\) and a
+strict inequality for \((2,3,4,5)\), making the paired four-variable interface
+executable on both equality and non-equality data.
+The depth-three worked tree has leaves (1,\ldots,8), sum (36), product
+(40320), and satisfies the corresponding eight-term dyadic bound.
+The depth-four worked tree has leaves (1,\ldots,16), sum (136), product
+(20922789888000), and satisfies the corresponding sixteen-term dyadic bound.
+The generic finite constructor `consecutiveDyadic` now produces the depth-five
+tree with leaves (1,\ldots,32), sum (528), product
+(263130836933693530167218012160000000), and its corresponding thirty-two-term bound.
+The worked depth-two tree with leaves (1,2,3,4) has sum (10), product
+(24), and satisfies the generic bound (24le(10/4)^4).  This is an
+executable finite witness for the recursive dyadic interface.
 \end{theorem}
 
 \begin{theorem}[Finite rational Cauchy--Schwarz certificates]
@@ -582,11 +786,35 @@ certificate records that equality occurs exactly when the two inputs coincide.
 \lean{ComputableAnalysis.cauchy_schwarz_2d_example_equality}
 \lean{ComputableAnalysis.cauchy_schwarz_2d_example_proportional}
 \lean{ComputableAnalysis.cauchy_schwarz_2d_example_certificate}
+\lean{ComputableAnalysis.cauchyThreeXs}
+\lean{ComputableAnalysis.cauchyThreeYs}
+\lean{ComputableAnalysis.cauchyThree_dot}
+\lean{ComputableAnalysis.cauchyThree_sum_squares}
+\lean{ComputableAnalysis.cauchyThree_minor_residual}
+\lean{ComputableAnalysis.cauchyThree_certificate}
+\lean{ComputableAnalysis.cauchyFourXs}
+\lean{ComputableAnalysis.cauchyFourYs}
+\lean{ComputableAnalysis.cauchyFour_dot}
+\lean{ComputableAnalysis.cauchyFour_sum_squares}
+\lean{ComputableAnalysis.cauchyFour_minor_residual}
+\lean{ComputableAnalysis.cauchyFour_certificate}
+\lean{ComputableAnalysis.cauchySixXs}
+\lean{ComputableAnalysis.cauchySixYs}
+\lean{ComputableAnalysis.cauchySix_dot}
+\lean{ComputableAnalysis.cauchySix_sum_squares}
+\lean{ComputableAnalysis.cauchySix_minor_residual}
+\lean{ComputableAnalysis.cauchySix_certificate}
 \leanok
 These finite rational Cauchy--Schwarz certificates cover benchmark 78 as
 supporting inequality infrastructure, without introducing a functional-analysis
 chapter.  The list-based certificate gives the same inequality for every
 finite equal-length rational vector, using an explicit sum of squared minors.
+The worked four-coordinate example uses ((1,2,3,4)) and ((4,3,2,1)):
+both squared norms are (30), the dot product is (20), and the residual is
+(500).
+The six-coordinate example uses ((1,2,3,4,5,6)) and ((6,5,4,3,2,1)):
+both squared norms are (91), the dot product is (56), and the residual is
+(5145).
 \end{theorem}
 
 Mathematical induction is the recursion
@@ -636,6 +864,15 @@ the algorithmic gcd milestone (benchmark 69).
 \lean{ComputableAnalysis.euclideanGcd_252_198}
 \lean{ComputableAnalysis.bezout_252_198}
 \lean{ComputableAnalysis.bezout_252_198_certificate}
+\lean{ComputableAnalysis.euclideanGcd_1071_462}
+\lean{ComputableAnalysis.bezout_1071_462}
+\lean{ComputableAnalysis.bezout_1071_462_certificate}
+\lean{ComputableAnalysis.euclideanGcd_12345_6789}
+\lean{ComputableAnalysis.bezout_12345_6789}
+\lean{ComputableAnalysis.bezout_12345_6789_certificate}
+\lean{ComputableAnalysis.euclideanGcd_99991_12345}
+\lean{ComputableAnalysis.bezout_99991_12345}
+\lean{ComputableAnalysis.bezout_99991_12345_certificate}
 \leanok
 The recursive coefficient certificate \texttt{bezout\_exists} proves the signed
 Bézout identity for every natural input pair, covering benchmark item 60 in the
@@ -644,6 +881,8 @@ exact-arithmetic representation.  The combined theorem
 executable Euclidean-loop result itself.
 The worked input pair (84,30) gives (gcd(84,30)=6) with the explicit
 certificate ((-1)84+3(30)=6).
+The pair (99991,12345) supplies a further terminating certificate: its gcd is
+(1), witnessed by \(2116\cdot99991-17139\cdot12345=1\).
 \end{theorem}
 
 \begin{remark}[Algebraic numbers, starting with \(\sqrt2\)]
@@ -667,11 +906,35 @@ certificate ((-1)84+3(30)=6).
 \lean{ComputableAnalysis.sqrtRaw_valid}
 \lean{ComputableAnalysis.sqrtRaw_spec}
 \lean{ComputableAnalysis.sqrtCertified_of_domain}
+\lean{ComputableAnalysis.sqrtRat}
+\lean{ComputableAnalysis.irrational_sqrt_ratCast_iff_of_nonneg}
+\lean{ComputableAnalysis.irrational_sqrt_rat_iff_not_square}
+\lean{ComputableAnalysis.sqrtTwo_descent_core}
+\lean{ComputableAnalysis.two_not_rat_square_via_descent}
+\lean{ComputableAnalysis.sqrt_two_irrational_via_descent}
 \lean{ComputableAnalysis.sqrt_rational_iff_square}
 \lean{ComputableAnalysis.sqrt_rational_iff_lowest_terms_square}
 \lean{ComputableAnalysis.sqrt_irrational_iff_not_square}
 \lean{ComputableAnalysis.sqrt_irrational_iff_lowest_terms_nonsquare}
 \lean{ComputableAnalysis.sqrt_two_irrational}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage4}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage4_bracket}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage4_width}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage8}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage8_bracket}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage8_width}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage12}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage12_bracket}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage12_width}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage16}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage16_bracket}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage16_width}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage20}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage20_bracket}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage20_width}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage24}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage24_bracket}
+\lean{ComputableAnalysis.sqrtTwo_bisection_stage24_width}
 \uses{def:raw-real}
 The first nontrivial computable real number to keep in mind is \(\sqrt2\).
 For \(\sqrt2\), use rational secant--tangent updates:
@@ -690,8 +953,27 @@ def sqrt2(n):
 \caption{Secant--tangent rational enclosure for \(\sqrt2\).}
 \label{fig:sqrt-secant-tangent}
 \end{figure}
-The named theorem `sqrt_two_irrational` instantiates the general criterion at
-the benchmark value $2$, with the finite proof that $2$ is not a natural square.
+The named theorem `sqrt_two_irrational_via_descent` instantiates the general
+criterion at the benchmark value $2$.  Its nonsquare input is connected to the
+classical infinite-descent kernel `sqrtTwo_descent_core`, so the historical
+proof is visible while the resulting irrationality statement remains entirely
+over the project's `RealRaw` representation.
+The companion theorem `sqrtTwo_bisection_stage4` gives the explicit stage-four
+enclosure $[11/8,23/16]$ for the target equation $x^2=2$, with width $1/16$.
+Its bracket certificate records the two finite rational comparisons directly.
+At stage eight the same evaluator returns the tighter interval
+([181/128,363/256]), whose width is (1/256); this is another finite
+comparison checkpoint rather than an attained square root.
+At stage twelve the interval is ([181/128,5793/4096]), with width
+(1/4096), giving a still finer finite enclosure.
+At stage sixteen it is ([92681/65536,46341/32768]), with width
+(1/65536), extending the exact finite precision schedule.
+At stage twenty it is ([741455/524288,1482911/1048576]), with width
+(1/1048576), extending the same finite schedule without treating the limit as
+an attained endpoint.
+At stage twenty-four it is
+([11863283/8388608,23726567/16777216]), with width (1/16777216),
+continuing the exact rational bisection schedule.
 Algebraic numbers are represented by rational isolating intervals.  Lean
 proves this computation's nesting, explicit width schedule, irrationality
 criterion, and unit-interval rational \(\varepsilon\)--\(\delta\) modulus.
@@ -764,6 +1046,31 @@ the following types:
 One may define \(\pi\) by one of these formulas, and the others would be
 theorems (of equivalence of two real numbers). Or perhaps one should
 define \(\pi\) by Archimedes' method of exhaustion.
+\end{remark}
+
+\begin{remark}[Newton and the space of computations]
+\label{rem:newton-space-of-computations}
+The general lesson is not that one should work directly toward the best
+approximation of $\pi$.  Since Archimedes, many computations of area were
+available: polygonal exhaustions, rectangle sums, series, continued
+fractions, and integral representations.  A breakthrough can come from
+understanding this space of computations, fast and slow alike, and the
+relations that connect one computation to another, rather than from directly
+optimizing the original procedure.
+
+The Newton-era route from binomial series and term-by-term integration to a
+rapidly convergent series for $\pi$ is a useful mathematical example of this
+pattern; it soon surpassed the speed of direct Archimedean exhaustion.  This
+remark makes no claim about Newton's private reasoning or the exact order of
+his discoveries.  It extracts a broader methodological principle: progress
+often comes from moving through equivalent representations until a new
+connection reveals a better computation.
+
+This is the methodological model for the present project.  We formalize
+individual algorithms together with their validity, rates, common enclosures,
+and equivalence maps.  A slow rectangle computation remains mathematically
+valuable because it can be the bridge to a faster series or integral
+computation.
 \end{remark}
 
 \begin{remark}[Calculus as equivalence]\label{rem:calculus-as-equivalence}
@@ -1106,6 +1413,8 @@ real line is part of the definition.
 \lean{ComputableAnalysis.inverse_function_from_bisection_search}
 \lean{ComputableAnalysis.monotoneBisectionIterate_preserves_target_bracket}
 \lean{ComputableAnalysis.monotoneBisectionIterate_certificate}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_add}
+\lean{ComputableAnalysis.monotoneTargetBisectionIterate_later_subinterval}
 \lean{ComputableAnalysis.monotoneTargetBisectionIterate_tolerance_certificate}
 \lean{ComputableAnalysis.monotoneBisectionIterate_width}
 \lean{ComputableAnalysis.monotoneBisectionIterate_width_le_of_power_budget}
@@ -1119,11 +1428,69 @@ real line is part of the definition.
 \lean{ComputableAnalysis.squareTarget_bisection_stage4}
 \lean{ComputableAnalysis.squareTarget_bisection_stage4_bracket}
 \lean{ComputableAnalysis.squareTarget_bisection_stage4_width}
+\lean{ComputableAnalysis.cubeTarget}
+\lean{ComputableAnalysis.cubeTargetInitial}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage4}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage4_bracket}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage4_width}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage8}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage8_bracket}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage8_width}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage16}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage16_bracket}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage16_width}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage24}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage24_bracket}
+\lean{ComputableAnalysis.cubeTarget_bisection_stage24_width}
+\lean{ComputableAnalysis.fourthTarget}
+\lean{ComputableAnalysis.fourthTargetInitial}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage8}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage8_bracket}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage8_width}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage16}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage16_bracket}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage16_width}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage24}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage24_bracket}
+\lean{ComputableAnalysis.fourthTarget_bisection_stage24_width}
+The cubic target (x^3=2) now has a stage-eight rational trace
+([161/128,323/256]), with width (1/256), and a stage-sixteen trace
+([41285/32768,82571/65536]) with width (1/65536); both have certified
+endpoint comparisons.  These are finite inverse-search witnesses, not an
+attained cube root.
+The fourth-power target (x^4=2) now has corresponding stage-eight and
+stage-sixteen traces, with widths (1/256) and (1/65536).  This extends the
+nonlinear inverse-search ladder without asserting an attained fourth root.
+Both traces now also reach stage 24, with width (1/16777216), and retain
+their exact endpoint bracket proofs.
 \lean{ComputableAnalysis.induction_arithmeticSum_eq}
 \lean{ComputableAnalysis.induction_arithmeticSum_stage5}
+\lean{ComputableAnalysis.induction_arithmeticSum_stage10}
+\lean{ComputableAnalysis.induction_arithmeticSum_stage20}
+\lean{ComputableAnalysis.induction_arithmeticSum_stage40}
+\lean{ComputableAnalysis.induction_arithmeticSum_stage80}
+\lean{ComputableAnalysis.induction_arithmeticSum_stage160}
 \lean{ComputableAnalysis.subsetCount_stage8}
 \lean{ComputableAnalysis.subsetCount_stage8_pow}
 \lean{ComputableAnalysis.subsetCount_stage8_certificate}
+\lean{ComputableAnalysis.subsetCount_stage10}
+\lean{ComputableAnalysis.subsetCount_stage10_pow}
+\lean{ComputableAnalysis.subsetCount_stage10_certificate}
+\lean{ComputableAnalysis.subsetCount_stage12}
+\lean{ComputableAnalysis.subsetCount_stage12_pow}
+\lean{ComputableAnalysis.subsetCount_stage12_certificate}
+\lean{ComputableAnalysis.subsetCount_stage16}
+\lean{ComputableAnalysis.subsetCount_stage16_pow}
+\lean{ComputableAnalysis.subsetCount_stage16_certificate}
+\lean{ComputableAnalysis.subsetCount_stage20}
+\lean{ComputableAnalysis.subsetCount_stage20_pow}
+\lean{ComputableAnalysis.subsetCount_stage20_certificate}
+\lean{ComputableAnalysis.subsetCount_stage32}
+\lean{ComputableAnalysis.subsetCount_stage32_pow}
+\lean{ComputableAnalysis.subsetCount_stage32_certificate}
+\lean{ComputableAnalysis.subsetCount_stage64}
+\lean{ComputableAnalysis.subsetCount_stage64_pow}
+\lean{ComputableAnalysis.subsetCount_stage64_certificate}
 \uses{def:function-on-interval,def:interval-regular}
 Fix an interval-regular monotone branch \(I\) on a rational source interval.
 In addition to monotonicity, it carries an effective inverse-separation
@@ -1189,6 +1556,10 @@ errors, enclose every point box and have width at most \(1/(n+1)\).  Thus
 \(\varepsilon\)--\(\delta\) continuity predicate, without a topology import.
 General algebraic functions will use isolating boxes, separation, and
 bisection or subdivision to construct selected branches.
+The companion finite cube-root trace applies the same target search to
+(x^3=2) on ([1,2]): stage four returns ([5/4,21/16]), preserves the
+target bracket, and has width (1/16).  This supplies a second nonlinear
+inverse trace without introducing a completed cube-root value.
 \end{example}
 
 \begin{remark}[Continuous extension of represented functions]

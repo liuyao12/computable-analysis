@@ -38,8 +38,12 @@ the preceding recursion at \(q\in\mathbb N\), and certifies
 \[
  b^{p+q}=b^p b^q,\qquad (b^{p/q})^q=b^p\quad(q>0).
 \]
-It is an interface: root construction is a separate algorithm, not an appeal
-to an unrepresented real number.
+It is not a replacement for ordinary algebraic rational-power lemmas: those
+may be imported from mathlib when their dependencies fit the project.  The
+project-specific contribution is the executable representation layer—valid
+positive interval boxes, lower bounds, and a supplied root certificate.  Root
+construction is therefore a separate algorithm, not an appeal to an
+unrepresented real number.
 \end{definition}
 
 \begin{remark}[Continuity on rational names]
@@ -262,10 +266,25 @@ construction of \(\lambda\).
 \begin{proposition}[Reciprocal evaluator]
 \label{prop:one-over-x-one-two-continuity}
 \lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_intervalRegular}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnOneTo_intervalRegular}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnInterval_lower_ge_one_intervalRegular}
+\lean{ComputableAnalysis.Logarithm.oneOverXOnPositiveInterval_intervalRegular_of_budget}
 \lean{ComputableAnalysis.Logarithm.oneOverXOnOneTwo_epsilonDeltaContinuous}
+\lean{ComputableAnalysis.Logarithm.logTwoKernel_shift_eq_oneOverX}
+\lean{ComputableAnalysis.Logarithm.logTwo_rightRiemann_term_as_oneOverX}
+\lean{ComputableAnalysis.Logarithm.reciprocal_scale_kernel_eq_logTwoKernel}
+\lean{ComputableAnalysis.Logarithm.reciprocal_scale_point_positive}
 \leanok
 The reciprocal kernel on \([1,2]\) has interval-regular and rational
 \(\varepsilon\)--\(\delta\) certificates.
+The same enclosure generalizes to every \([1,b]\) with (1\le b), because
+the reciprocal width is controlled solely by the lower bound (1).
+The affine substitution (x=1+t) is also checked directly over the rationals:
+the translated kernel is exactly (1/x), and each finite right-mesh term is
+the corresponding reciprocal sample on \([1,2]\).
+The multiplicative substitution (x=a(1+t)) is likewise checked: for
+positive (a), the Jacobian-weighted kernel reduces exactly to the same
+\(\log 2\) kernel on \([0,1]\).
 \end{proposition}
 
 \begin{definition}[Darboux and alternating-series boxes]

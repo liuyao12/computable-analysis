@@ -41,12 +41,16 @@ theorem affineQInterval_mem
   · have hk' : k <= 0 := by grind
     have hhi : c + k * I.hi <= c + k * x := by
       have h := Rat.mul_le_mul_of_nonneg_left hxhi (show 0 <= -k by grind)
-      have h' : -(k * I.hi) <= -(k * x) := by simpa [neg_mul] using h
-      exact (neg_le_neg_iff.mp h')
+      have h' : -((-k) * I.hi) <= -((-k) * x) := Rat.neg_le_neg h
+      have h'' : k * I.hi <= k * x := by
+        simpa [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg] using h'
+      exact (Rat.add_le_add_left).2 h''
     have hlo : c + k * x <= c + k * I.lo := by
       have h := Rat.mul_le_mul_of_nonneg_left hxlo (show 0 <= -k by grind)
-      have h' : -(k * x) <= -(k * I.lo) := by simpa [neg_mul] using h
-      exact (neg_le_neg_iff.mp h')
+      have h' : -((-k) * x) <= -((-k) * I.lo) := Rat.neg_le_neg h
+      have h'' : k * x <= k * I.lo := by
+        simpa [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg] using h'
+      exact (Rat.add_le_add_left).2 h''
     constructor <;> grind
 
 /-- The finite square-root interval used by a quadratic branch. -/

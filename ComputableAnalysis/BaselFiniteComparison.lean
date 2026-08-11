@@ -144,6 +144,67 @@ theorem baselRefinedCommonInterval_midpoint_certificate :
     Rat.le_trans hpi.1 hmid.1,
     Rat.le_trans hmid.2 hpi.2⟩
 
+/-! A further finite cross-check at the next available precision stages. -/
+
+def baselHighCommonInterval : QInterval :=
+  QInterval.intersection
+    (DirichletSeries.zetaTwoInterval 200000)
+    (geometricPiSquaredOverSixCompute 12)
+
+theorem zetaTwoInterval_overlaps_projectPiSquaredOverSix_200000_12 :
+    (DirichletSeries.zetaTwoInterval 200000).lo <=
+        (geometricPiSquaredOverSixCompute 12).hi /\
+      (geometricPiSquaredOverSixCompute 12).lo <=
+        (DirichletSeries.zetaTwoInterval 200000).hi := by
+  native_decide
+
+theorem baselHighCommonInterval_certificate :
+    baselHighCommonInterval.lo <= baselHighCommonInterval.hi /\
+      (DirichletSeries.zetaTwoInterval 200000).ContainsInterval
+        baselHighCommonInterval /\
+      (geometricPiSquaredOverSixCompute 12).ContainsInterval
+        baselHighCommonInterval := by
+  refine ⟨?_, ?_, ?_⟩
+  · exact QInterval.intersection_ordered_of_overlaps
+      (DirichletSeries.zetaTwoInterval_ordered 200000)
+      (by native_decide)
+      zetaTwoInterval_overlaps_projectPiSquaredOverSix_200000_12
+  · exact QInterval.intersection_contained_left _ _
+  · exact QInterval.intersection_contained_right _ _
+
+theorem baselHighCommonInterval_width_le :
+    baselHighCommonInterval.width <=
+        (DirichletSeries.zetaTwoInterval 200000).width /\
+      baselHighCommonInterval.width <=
+        (geometricPiSquaredOverSixCompute 12).width := by
+  constructor
+  · exact QInterval.width_le_of_contains
+      (QInterval.intersection_contained_left _ _)
+  · exact QInterval.width_le_of_contains
+      (QInterval.intersection_contained_right _ _)
+
+/-! The highest checked finite overlap also exports a concrete rational
+midpoint, so downstream comparisons need not carry an abstract intersection
+object. -/
+theorem baselHighCommonInterval_midpoint_certificate :
+    let q := baselHighCommonInterval.midpoint
+    (DirichletSeries.zetaTwoInterval 200000).lo <= q /\
+      q <= (DirichletSeries.zetaTwoInterval 200000).hi /\
+      (geometricPiSquaredOverSixCompute 12).lo <= q /\
+      q <= (geometricPiSquaredOverSixCompute 12).hi := by
+  let q := baselHighCommonInterval.midpoint
+  have hordered : baselHighCommonInterval.lo <=
+      baselHighCommonInterval.hi := by
+    exact (baselHighCommonInterval_certificate).1
+  have hmid := QInterval.midpoint_mem hordered
+  have hzeta := (baselHighCommonInterval_certificate).2.1
+  have hpi := (baselHighCommonInterval_certificate).2.2
+  dsimp [q]
+  exact ⟨Rat.le_trans hzeta.1 hmid.1,
+    Rat.le_trans hmid.2 hzeta.2,
+    Rat.le_trans hpi.1 hmid.1,
+    Rat.le_trans hmid.2 hpi.2⟩
+
 end BaselFiniteComparison
 
 end ComputableAnalysis

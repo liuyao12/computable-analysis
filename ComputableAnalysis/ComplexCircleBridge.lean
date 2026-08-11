@@ -83,6 +83,16 @@ theorem pointPowRaw_equiv_natPow (p : PiCirclePoint) (n : Nat) :
   rw [← toQComplex_pointPow p n]
   exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
 
+/-- The represented-complex form of the finite de Moivre product law. -/
+theorem pointPowRaw_mul_equiv (p q : PiCirclePoint) (n : Nat) :
+    (pointPowRaw (pointMul p q) n).Equiv
+      (ComplexRaw.ofQComplex
+        (QComplex.mul (QComplex.natPow (toQComplex p) n)
+          (QComplex.natPow (toQComplex q) n))) := by
+  unfold pointPowRaw
+  rw [toQComplex_pointPow, toQComplex_pointMul, QComplex.natPow_mul]
+  exact ComplexRaw.equiv_refl _ (ComplexRaw.ofQComplex_valid _)
+
 /-- Finite de Moivre law in embedded rational coordinates: the power of a
 circle product is the product of the corresponding finite complex powers. -/
 theorem toQComplex_pointPow_mul (p q : PiCirclePoint) (n : Nat) :

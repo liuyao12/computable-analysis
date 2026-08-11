@@ -737,7 +737,8 @@ theorem sqrtApproxOnDomain_valid (q : Rat) (h : sqrtDomain q) :
 
 theorem sqrtRaw_valid (q : Rat) (h : sqrtDomain q) :
     (sqrtRaw q h).Valid := by
-  simpa [sqrtRaw] using sqrtApproxOnDomain_valid q h
+  change RealRaw.ValidCompute (sqrtApproxOnDomain q h)
+  exact sqrtApproxOnDomain_valid q h
 
 theorem sqrtRaw_spec (q : Rat) (h : sqrtDomain q) :
     SqrtRawSpec q h :=
@@ -880,7 +881,8 @@ theorem sq_eq_of_sqrt_spec_equiv_rat {q r : Rat} {x : RealRaw}
     dsimp [C]
     grind
   have hratValid : (RealRaw.ofRat r).Valid := by
-    simpa [RealRaw.ofRat] using RealRaw.ofRat_valid r
+    change RealRaw.ValidCompute (RealRaw.ofRat r).compute
+    exact RealRaw.ofRat_valid r
   have hover := RealRaw.sameStageOverlap_of_equiv hx.1 hratValid heq
   exact eq_of_qabs_sub_le_width_mul_of_valid hx.1 hCpos (by
     intro n
@@ -984,8 +986,10 @@ def squareOnUnit_intervalRegular : IntervalRegularOn squareOnUnit := by
       sq_le_sq_of_nonneg_le hx_nonneg hxhi
     change squareUnitEvalInterval I |>.ContainsInterval
       (squareOnUnit.compute x hx n)
-    simpa [squareUnitEvalInterval, squareOnUnit, squareRaw] using
-      And.intro hlo_sq hhi_sq
+    change QInterval.ContainsInterval
+      { lo := sq I.lo, hi := sq I.hi }
+      { lo := sq x, hi := sq x }
+    exact ⟨hlo_sq, hhi_sq⟩
 
 /-- The concrete continuous squaring map used by the unit square-root
 inverse example. -/
@@ -1003,7 +1007,8 @@ theorem squareOnUnit_nondecreasing : NondecreasingOnInterval squareOnUnit := by
   intro x y hx hy hxy _
   have hx_nonneg : 0 <= x := hx.1
   have hsq : sq x <= sq y := sq_le_sq_of_nonneg_le hx_nonneg hxy
-  simpa [squareOnUnit, squareRaw] using hsq
+  change sq x <= sq y
+  exact hsq
 
 /-- On `[0,1]`, a separation of `1/(n+1)` in the input strictly separates the
 exact output boxes after squaring.  This is the nondecreasing effective
@@ -1022,7 +1027,8 @@ def squareOnUnit_effectiveInverseSeparation :
     have hxy : x < y := by
       grind
     have hsq : sq x < sq y := sq_lt_sq_of_nonneg_lt hx_nonneg hxy
-    simpa [squareOnUnit, squareRaw] using hsq
+    change sq x < sq y
+    exact hsq
 
 /-- The unit-interval square map supplies the constructive data required by
 the monotone inverse-function interface. -/
@@ -1040,10 +1046,12 @@ def squareOnUnitRationalTarget (q : Rat) (hq : inDomainInterval 0 1 q) :
     InRangeRaw squareOnUnit_invertible where
   value := RealRaw.ofRat q
   value_valid := by
-    simpa [RealRaw.ofRat] using RealRaw.ofRat_valid q
+    change RealRaw.ValidCompute (RealRaw.ofRat q).compute
+    exact RealRaw.ofRat_valid q
   rangePrecision := fun _ => 0
   in_range := by
     intro n
+    change 0 <= q ∧ q <= 1 at hq
     simpa [InvertibleFunctionOnInterval.EndpointRangeContains,
       InvertibleFunctionOnInterval.function,
       InvertibleFunctionOnInterval.lowerValueBox,
@@ -1110,7 +1118,8 @@ def sqrtOnUnitRepresentedTargetSearch
       ((sqrtOnUnitBisectionSearch q hq).compute_preimage n)
       ((sqrtOnUnitBisectionSearch q hq).preimage_subinterval n) n
     have hEq : QInterval.Overlaps E ((RealRaw.ofRat q).compute n) := by
-      simpa [E] using (sqrtOnUnitBisectionSearch q hq).value_overlaps n
+      change QInterval.Overlaps E ((RealRaw.ofRat q).compute n)
+      exact (sqrtOnUnitBisectionSearch q hq).value_overlaps n
     have hE : E.lo <= q /\ q <= E.hi := by
       simpa [RealRaw.ofRat, QInterval.Overlaps] using hEq
     have hTarget : QInterval.Overlaps
@@ -1187,7 +1196,9 @@ def sqrtOnUnit : FunctionOnInterval where
     intro q hq
     have hscheduled := RealRaw.schedule_valid
       (sqrtRaw q hq) (sqrtRaw_valid q hq) sqrtOnUnitSchedule
-    simpa [sqrtRaw, RealRaw.schedule] using hscheduled
+    change RealRaw.ValidCompute
+      (fun n => sqrtApproxOnDomain q hq (sqrtOnUnitSchedule.stage n)) at hscheduled
+    exact hscheduled
 
 /-- Point evaluation of the unit square-root branch is exactly the scheduled
 rational bisection box. -/

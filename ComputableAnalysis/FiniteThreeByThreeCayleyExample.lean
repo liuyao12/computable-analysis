@@ -45,6 +45,48 @@ theorem concreteThreeCayleyMatrix_identity :
     (HarmonicOscillator.threeByThree_cayley_hamilton
       1 0 0 0 2 0 0 0 3)
 
+def concreteThreeNonDiagonalCayleyMatrix : RatMatrix 3 :=
+  threeByThreeMatrix 1 1 0 0 2 1 0 0 3
+
+theorem concreteThreeNonDiagonalCayleyMatrix_trace :
+    threeByThreeTrace 1 1 0 0 2 1 0 0 3 = 6 := by
+  native_decide
+
+theorem concreteThreeNonDiagonalCayleyMatrix_secondCoeff :
+    threeByThreeSecondCoeff 1 1 0 0 2 1 0 0 3 = 11 := by
+  native_decide
+
+theorem concreteThreeNonDiagonalCayleyMatrix_determinant :
+    threeByThreeDeterminant 1 1 0 0 2 1 0 0 3 = 6 := by
+  native_decide
+
+theorem concreteThreeNonDiagonalCayleyMatrix_identity :
+    matrixAdd (matrixMul concreteThreeNonDiagonalCayleyMatrix
+        (matrixMul concreteThreeNonDiagonalCayleyMatrix
+          concreteThreeNonDiagonalCayleyMatrix))
+        (matrixAdd
+          (matrixScale (-6) (matrixMul concreteThreeNonDiagonalCayleyMatrix
+            concreteThreeNonDiagonalCayleyMatrix))
+          (matrixAdd
+            (matrixScale 11 concreteThreeNonDiagonalCayleyMatrix)
+            (matrixScale (-6) (matrixIdentity 3)))) =
+      matrixZero 3 := by
+  simpa [concreteThreeNonDiagonalCayleyMatrix,
+    concreteThreeNonDiagonalCayleyMatrix_trace,
+    concreteThreeNonDiagonalCayleyMatrix_secondCoeff,
+    concreteThreeNonDiagonalCayleyMatrix_determinant] using
+    (HarmonicOscillator.threeByThree_cayley_hamilton
+      1 1 0 0 2 1 0 0 3)
+
+theorem concreteThreeCayleyMatrix_fourth_power :
+    matrixPow concreteThreeCayleyMatrix 4 =
+      threeByThreeMatrix 1 0 0 0 16 0 0 0 81 := by
+  funext i j
+  have hi : i = 0 \/ i = 1 \/ i = 2 := by omega
+  have hj : j = 0 \/ j = 1 \/ j = 2 := by omega
+  rcases hi with rfl | rfl | rfl <;>
+    rcases hj with rfl | rfl | rfl <;> native_decide
+
 end LinearODE
 
 end ComputableAnalysis

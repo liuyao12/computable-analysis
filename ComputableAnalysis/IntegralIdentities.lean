@@ -817,11 +817,14 @@ theorem integral_add_equiv_of_endpoint_additive
     ((Integral.generalIntegralFor integrandAB Iab.construction) +
       (Integral.generalIntegralFor integrandBC Ibc.construction)).Equiv
         (Integral.generalIntegralFor integrandAC Iac.construction) := by
-  simpa [GeneralDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.integralFor] using
-    DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive
-      Iab.toDefiniteIdentityFor Ibc.toDefiniteIdentityFor
-      Iac.toDefiniteIdentityFor hendpoint
+  have h := DefiniteIdentityFor.integral_add_equiv_of_endpoint_additive
+    Iab.toDefiniteIdentityFor Ibc.toDefiniteIdentityFor
+    Iac.toDefiniteIdentityFor hendpoint
+  change (RealRaw.add
+      (Integral.generalIntegralFor integrandAB Iab.construction)
+      (Integral.generalIntegralFor integrandBC Ibc.construction)).Equiv
+    (Integral.generalIntegralFor integrandAC Iac.construction)
+  exact h
 
 /-- General-integral version of
 `DefiniteIdentityFor.integral_equiv_add_of_endpoint_add`. -/
@@ -841,11 +844,14 @@ theorem integral_equiv_add_of_endpoint_add
     (Integral.generalIntegralFor integrandH IH.construction).Equiv
       ((Integral.generalIntegralFor integrandF IF.construction) +
         (Integral.generalIntegralFor integrandG IG.construction)) := by
-  simpa [GeneralDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.integralFor] using
-    DefiniteIdentityFor.integral_equiv_add_of_endpoint_add
-      IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor
-      IH.toDefiniteIdentityFor hendpoint
+  have h := DefiniteIdentityFor.integral_equiv_add_of_endpoint_add
+    IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor
+    IH.toDefiniteIdentityFor hendpoint
+  change (Integral.generalIntegralFor integrandH IH.construction).Equiv
+    (RealRaw.add
+      (Integral.generalIntegralFor integrandF IF.construction)
+      (Integral.generalIntegralFor integrandG IG.construction))
+  exact h
 
 /-- General-integral version of
 `DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat`. -/
@@ -863,10 +869,12 @@ theorem integral_scaleRat_equiv_of_endpoint_scaleRat
     (Integral.generalIntegralFor scaledIntegrand J.construction).Equiv
       (RealRaw.scaleRat r
         (Integral.generalIntegralFor integrand I.construction)) := by
-  simpa [GeneralDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.integralFor] using
-    DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat
-      I.toDefiniteIdentityFor J.toDefiniteIdentityFor hendpoint
+  have h := DefiniteIdentityFor.integral_scaleRat_equiv_of_endpoint_scaleRat
+    I.toDefiniteIdentityFor J.toDefiniteIdentityFor hendpoint
+  change (Integral.generalIntegralFor scaledIntegrand J.construction).Equiv
+    (RealRaw.scaleRat r
+      (Integral.generalIntegralFor integrand I.construction))
+  exact h
 
 /-- General-integral version of
 `DefiniteIdentityFor.integral_le_of_endpoint_le`. -/
@@ -881,10 +889,11 @@ theorem integral_le_of_endpoint_le
           integrandG.lower integrandG.upper IG.endpoint_valid)) :
     (Integral.generalIntegralFor integrandF IF.construction).Le
       (Integral.generalIntegralFor integrandG IG.construction) := by
-  simpa [GeneralDefiniteIdentityFor.toDefiniteIdentityFor,
-    Integral.integralFor] using
-    DefiniteIdentityFor.integral_le_of_endpoint_le
-      IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor hendpoint
+  have h := DefiniteIdentityFor.integral_le_of_endpoint_le
+    IF.toDefiniteIdentityFor IG.toDefiniteIdentityFor hendpoint
+  change (Integral.generalIntegralFor integrandF IF.construction).Le
+    (Integral.generalIntegralFor integrandG IG.construction)
+  exact h
 
 /-- Promote a one-piece monotone endpoint identity to the public general
 integral interface. -/
@@ -1988,8 +1997,10 @@ def arctanIntegralRectangleConstruction
     Integral.ConstructionFor (arctanKernelInterval x) where
   compute := ArctanGeometry.arctanIntegralRectangleCompute x
   certificate := by
-    simpa [ArctanGeometry.arctanIntegralRectangleRaw] using
-      ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1
+    have hvalid := ArctanGeometry.arctanIntegralRectangleRaw_valid hx0 hx1
+    change RealRaw.ValidCompute
+      (ArctanGeometry.arctanIntegralRectangleCompute x)
+    exact hvalid
 
 /-- The domain-aware integral raw real supplied by the rectangle construction
 for the arctangent kernel on `[0, x]`, with `0 <= x <= 1`. -/
@@ -2134,8 +2145,10 @@ theorem arctanIntegralRectangleFunctionRaw_valid :
     forall x h, RealRaw.ValidCompute
       (arctanIntegralRectangleFunctionRaw.compute x h) := by
   intro x hx
-  simpa [arctanIntegralRectangleFunctionRaw] using
-    arctanIntegralRectangleFor_valid x hx.1 hx.2
+  have hvalid := arctanIntegralRectangleFor_valid x hx.1 hx.2
+  change RealRaw.ValidCompute
+    (arctanIntegralRectangleFor x hx.1 hx.2).compute
+  exact hvalid
 
 /-- The rectangle arctangent as a domain-aware function on the unit slope
 interval.  This keeps upper-endpoint monotonicity separate from the
@@ -2149,8 +2162,10 @@ def arctanIntegralRectangleOnUnit : FunctionOnInterval where
     exact hx
   valid_on := by
     intro x hx
-    simpa [arctanIntegralRectangleFunctionRaw] using
-      arctanIntegralRectangleFor_valid x hx.1 hx.2
+    have hvalid := arctanIntegralRectangleFor_valid x hx.1 hx.2
+    change RealRaw.ValidCompute
+      (arctanIntegralRectangleFor x hx.1 hx.2).compute
+    exact hvalid
 
 /-- The rectangle arctangent evaluated in the tangent-addition chart based at
 `x`.  Its input is the ordinary positive increment `h`; restricting it to a
@@ -2682,12 +2697,17 @@ def arctanIntegralRectangleOnUnit_forwardDerivativeAt
   rw [hN]
   change intervalNearAtPrecision
     (QInterval.differenceQuotient
-      ((arctanIntegralRectangleFor (x + h) hxh0 hmem.2).compute N)
-      ((arctanIntegralRectangleFor x hx0 hx1).compute N) h)
-    ((RealRaw.ofRat (ArctanGeometry.integralKernel x)).compute N) n
-  rw [arctanIntegralRectangleFor_compute_eq,
-    arctanIntegralRectangleFor_compute_eq]
-  simpa [Q, RealRaw.ofRat_compute] using hnear
+      (arctanIntegralRectangleOnUnit.compute (x + h) hmem N)
+      (arctanIntegralRectangleOnUnit.compute x ⟨hx0, hx1⟩ N) h)
+    { lo := ArctanGeometry.integralKernel x,
+      hi := ArctanGeometry.integralKernel x } n
+  change intervalNearAtPrecision
+    (QInterval.differenceQuotient
+      (arctanIntegralRectangleOnUnit.compute (x + h) hmem N)
+      (arctanIntegralRectangleOnUnit.compute x ⟨hx0, hx1⟩ N) h)
+    { lo := ArctanGeometry.integralKernel x,
+      hi := ArctanGeometry.integralKernel x } n at hnear
+  exact hnear
 
 /-! The next three finite estimates reserve precision for transporting the
 forward rectangle certificate across a negative step.  They use only rational
@@ -2823,7 +2843,8 @@ def arctanIntegralRectangleOnUnit_forwardDerivativeAtZero :
     · subst n
       calc
         h <= 1 / (1 : Rat) := by
-          simpa only [if_pos rfl] using hsmall
+          change h <= 1 / (1 : Rat) at hsmall
+          exact hsmall
         _ = (precisionAtStage 0).val := by native_decide
     · simpa [precisionAtStage, hn] using hsmall
   have hprecision_le_one : (precisionAtStage n).val <= 1 := by
@@ -2998,7 +3019,16 @@ def arctanIntegralRectangleOnUnit_hasDerivative :
         { lo := ArctanGeometry.integralKernel x,
           hi := ArctanGeometry.integralKernel x }
         (8 * (n + 1)) := by
-      simpa [RealRaw.ofRat_compute] using hforward
+      change intervalNearAtPrecision
+        (QInterval.differenceQuotient
+          (arctanIntegralRectangleOnUnit.compute (x + h) hxh
+            (arctanRectangleTangentTransportPrecision h (8 * (n + 1))))
+          (arctanIntegralRectangleOnUnit.compute x hx
+            (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))) h)
+        { lo := ArctanGeometry.integralKernel x,
+          hi := ArctanGeometry.integralKernel x }
+        (8 * (n + 1)) at hforward
+      exact hforward
     exact intervalNearAtPrecision_weaken hforward' hstageLe
   · have hneg : h < 0 := by grind
     let k : Rat := -h
@@ -3027,8 +3057,10 @@ def arctanIntegralRectangleOnUnit_hasDerivative :
         { lo := ArctanGeometry.integralKernel (x + h),
           hi := ArctanGeometry.integralKernel (x + h) }
         (8 * (n + 1)) := by
-      simpa [show x + h + k = x by dsimp [k]; grind, RealRaw.ofRat_compute]
-        using hforward
+      have hsum : x + h + k = x := by
+        dsimp [k]
+        grind
+      simpa only [hsum] using hforward
     have hkernelLip := oneOverOnePlusSquare_lipschitz_on_unit.2
       (x + h) x hy.1 hy.2 hx.1 hx.2
     have hkernelDiff :
@@ -3156,8 +3188,9 @@ theorem arctanIntegralRectangleOnUnit_nondecreasing :
   change
     ((arctanIntegralRectangleFor x hx.1 hx.2).compute n).lo <=
       ((arctanIntegralRectangleFor y hy.1 hy.2).compute n).hi
-  rw [arctanIntegralRectangleFor_compute_eq,
-    arctanIntegralRectangleFor_compute_eq]
+  change
+    (ArctanGeometry.arctanIntegralRectangleCompute x n).lo <=
+      (ArctanGeometry.arctanIntegralRectangleCompute y n).hi
   exact ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
     hx.1 hxy n
 
@@ -3212,10 +3245,8 @@ theorem arctanIntegralRectangleOnUnit_near_of_qabs_le
     ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
       hy.1 hy.2 eps n hn
   change QInterval.NearAt
-    ((arctanIntegralRectangleFor x hx.1 hx.2).compute n)
-    ((arctanIntegralRectangleFor y hy.1 hy.2).compute n) eps
-  rw [arctanIntegralRectangleFor_compute_eq,
-    arctanIntegralRectangleFor_compute_eq]
+    (ArctanGeometry.arctanIntegralRectangleCompute x n)
+    (ArctanGeometry.arctanIntegralRectangleCompute y n) eps
   unfold QInterval.NearAt
   rcases (Rat.le_total : x <= y \/ y <= x) with hxy | hyx
   · have hstep0 : 0 <= y - x := by grind [Rat.sub_eq_add_neg]
@@ -3343,9 +3374,16 @@ def arctanIntegralRectangleOnUnit_effectiveModulus :
               1 / (((n + 2 : Nat) : Rat)) <= 1 / (((n + 1 : Nat) : Rat)) :=
             FTC.one_div_nat_antitone (by omega) (by omega) (by omega)
           simpa [eps, precisionAtStage] using Rat.le_trans hclose hreciprocal
-    simpa [eps, N] using
-      (arctanIntegralRectangleOnUnit_near_of_qabs_le eps N (by omega)
-        hx hy hinput)
+    have hnear := arctanIntegralRectangleOnUnit_near_of_qabs_le
+      eps N (by omega) hx hy hinput
+    change intervalNearAtPrecision
+      (arctanIntegralRectangleOnUnit.compute x hx N)
+      (arctanIntegralRectangleOnUnit.compute y hy N) n
+    change QInterval.NearAt
+      (arctanIntegralRectangleOnUnit.compute x hx N)
+      (arctanIntegralRectangleOnUnit.compute y hy N)
+      (precisionAtStage n)
+    simpa [eps, N] using hnear
 
 /-- The exact coordinate evaluator on the unit interval.  It is the first
 factor in the literal product `x * arctan x` used by the constructive
@@ -3686,7 +3724,10 @@ def coordinateTimesArctanIntegralRectangleDerivativeOnUnit : FunctionOnInterval 
   defined_on := fun _ hx => hx
   valid_on := by
     intro x hx
-    simpa using coordinateTimesArctanIntegralRectangleDerivativeRaw_valid x hx
+    have hvalid := coordinateTimesArctanIntegralRectangleDerivativeRaw_valid x hx
+    change RealRaw.ValidCompute
+      (coordinateTimesArctanIntegralRectangleDerivativeRaw x hx).compute
+    exact hvalid
 
 theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute
     (x : Rat)
@@ -3715,7 +3756,16 @@ theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range
         (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx n).lo /\
       (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx n).hi <= 2 := by
   change 0 <= x /\ x <= 1 at hx
-  rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+  have hcompute := coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute
+    x ⟨hx.1, hx.2⟩ n
+  change
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x
+      ⟨hx.1, hx.2⟩ n =
+      { lo := (arctanIntegralRectangleOnUnit.compute x hx n).lo +
+          x * ArctanGeometry.integralKernel x,
+        hi := (arctanIntegralRectangleOnUnit.compute x hx n).hi +
+          x * ArctanGeometry.integralKernel x } at hcompute
+  rw [hcompute]
   have hAlo : 0 <= (arctanIntegralRectangleOnUnit.compute x hx n).lo := by
     change 0 <= (ArctanGeometry.arctanIntegralRectangleCompute x n).lo
     exact ArctanGeometry.arctanIntegralRectangleCompute_lower_nonnegative hx.1 n
@@ -3898,8 +3948,17 @@ theorem coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing :
   intro x y hx hy hxy n
   change 0 <= x /\ x <= 1 at hx
   change 0 <= y /\ y <= 1 at hy
-  rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
-    coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+  have hcomputex := coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute
+    x ⟨hx.1, hx.2⟩ n
+  have hcomputey := coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute
+    y ⟨hy.1, hy.2⟩ n
+  change
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x
+      ⟨hx.1, hx.2⟩ n = _ at hcomputex
+  change
+    coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute y
+      ⟨hy.1, hy.2⟩ n = _ at hcomputey
+  rw [hcomputex, hcomputey]
   exact rat_add_le_add
     (ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
       hx.1 hxy n)
@@ -4107,9 +4166,14 @@ def coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus :
     have hinput : qabs (y - x) <= eps.val / 6 := by
       exact Rat.le_trans hclose (by simpa [eps] using
         one_div_six_mul_succ_le_precision_div_six n)
-    simpa [eps] using
-      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le
-        eps hx hy hinput)
+    have hnear := coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le
+      eps hx hy hinput
+    change intervalNearAtPrecision
+      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx
+        (4 * (((precisionAtStage n).val / 2).den + 1)))
+      (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute y hy
+        (4 * (((precisionAtStage n).val / 2).den + 1))) n at hnear
+    simpa [eps] using hnear
 
 /-- The literal rational radius selected for the product derivative at a
 requested forward-derivative stage.  This is deliberately a definition, so a
@@ -4400,7 +4464,15 @@ def coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt
       { lo := ArctanGeometry.integralKernel x,
         hi := ArctanGeometry.integralKernel x }
       (8 * (n + 1)) := by
-    simpa [RealRaw.ofRat_compute] using hforward
+    change intervalNearAtPrecision
+      (QInterval.differenceQuotient
+        (arctanIntegralRectangleOnUnit.compute (x + h) hmem
+          (arctanRectangleTangentTransportPrecision h (8 * (n + 1))))
+        (arctanIntegralRectangleOnUnit.compute x ⟨hx0, hx1⟩
+          (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))) h)
+      { lo := ArctanGeometry.integralKernel x,
+        hi := ArctanGeometry.integralKernel x } (8 * (n + 1)) at hforward
+    exact hforward
   have hAwidth :
       (arctanIntegralRectangleOnUnit.compute x ⟨hx0, hx1⟩
         (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))).width <=
@@ -6754,12 +6826,9 @@ theorem arctanIntegralRectangleFunctionAgreement :
       arctanIntegralRectangleRepresentation
       ArctanGeometry.representation := by
   intro x hx _hgeom
-  simpa [Elementary.Arctan.Equivalent,
-    arctanIntegralRectangleRepresentation,
-    arctanIntegralRectangleFunctionRaw,
-    ArctanGeometry.representation, ArctanGeometry.functionRaw,
-    PartialRealFunRaw.evalRaw] using
-    arctanIntegralRectangleFor_equiv_arctanGeom x hx.1 hx.2
+  change (arctanIntegralRectangleFor x hx.1 hx.2).Equiv
+    (ArctanGeometry.arctanGeom x)
+  exact arctanIntegralRectangleFor_equiv_arctanGeom x hx.1 hx.2
 
 /-- The rectangle-integral arctangent as a monotone-integral partial function
 on the rational unit branch. -/
@@ -6779,20 +6848,18 @@ theorem arctanIntegralRectangleMonotoneFunctionRaw_valid :
     forall x h, RealRaw.ValidCompute
       (arctanIntegralRectangleMonotoneFunctionRaw.compute x h) := by
   intro x hx
-  simpa [arctanIntegralRectangleMonotoneFunctionRaw] using
-    arctanIntegralRectangleMonotoneFor_valid x hx.1 hx.2
+  change RealRaw.ValidCompute
+    ((arctanIntegralRectangleMonotoneFor x hx.1 hx.2).compute)
+  exact arctanIntegralRectangleMonotoneFor_valid x hx.1 hx.2
 
 theorem arctanIntegralRectangleMonotoneFunctionAgreement :
     Elementary.Arctan.Equivalent
       arctanIntegralRectangleMonotoneRepresentation
       ArctanGeometry.representation := by
   intro x hx _hgeom
-  simpa [Elementary.Arctan.Equivalent,
-    arctanIntegralRectangleMonotoneRepresentation,
-    arctanIntegralRectangleMonotoneFunctionRaw,
-    ArctanGeometry.representation, ArctanGeometry.functionRaw,
-    PartialRealFunRaw.evalRaw] using
-    arctanIntegralRectangleMonotoneFor_equiv_arctanGeom x hx.1 hx.2
+  change (arctanIntegralRectangleMonotoneFor x hx.1 hx.2).Equiv
+    (ArctanGeometry.arctanGeom x)
+  exact arctanIntegralRectangleMonotoneFor_equiv_arctanGeom x hx.1 hx.2
 
 /-- A unit-branch integral arctangent construction.  This is the domain-aware
 version of the integral route currently proved by rectangle sums: it only asks
@@ -6834,9 +6901,10 @@ theorem arctanIntegralUnitFunctionRaw_valid
     forall x h, RealRaw.ValidCompute
       ((arctanIntegralUnitFunctionRaw data).compute x h) := by
   intro x hx
-  simpa [arctanIntegralUnitFunctionRaw, arctanIntegralUnit] using
-    Integral.integralFor_valid (arctanKernelInterval x)
-      (data.constructionAt x hx.1 hx.2)
+  change RealRaw.ValidCompute
+    ((arctanIntegralUnit x (data.constructionAt x hx.1 hx.2)).compute)
+  exact Integral.integralFor_valid (arctanKernelInterval x)
+    (data.constructionAt x hx.1 hx.2)
 
 def ArctanIntegralUnitGeomFunctionAgreement
     (data : ArctanIntegralUnitData) : Prop :=
@@ -6853,11 +6921,10 @@ theorem arctanIntegralUnit_equiv_arctanGeom_of_functionAgreement
         (ArctanGeometry.arctanGeom x) := by
   have hgeom : ArctanGeometry.representation.raw.definedAt x := by
     simp [ArctanGeometry.representation, ArctanGeometry.functionRaw]
-  simpa [ArctanIntegralUnitGeomFunctionAgreement,
-    arctanIntegralUnitRepresentation, arctanIntegralUnitFunctionRaw,
-    ArctanGeometry.representation, ArctanGeometry.functionRaw,
-    PartialRealFunRaw.evalRaw] using
-    h x ⟨hx0, hx1⟩ hgeom
+  have h' := h x ⟨hx0, hx1⟩ hgeom
+  change (arctanIntegralUnit x (data.constructionAt x hx0 hx1)).Equiv
+    (ArctanGeometry.arctanGeom x) at h'
+  exact h'
 
 theorem arctanIntegralUnitComputes_arctanGeom_of_functionAgreement
     (data : ArctanIntegralUnitData)
@@ -6888,20 +6955,19 @@ theorem arctanIntegralRectangleUnit_equiv_arctanGeom
     (arctanIntegralUnit x
       (arctanIntegralRectangleUnitData.constructionAt x hx0 hx1)).Equiv
         (ArctanGeometry.arctanGeom x) := by
-  simpa [arctanIntegralUnit, arctanIntegralRectangleUnitData,
-    arctanIntegralRectangleFor] using
-    arctanIntegralRectangleFor_equiv_arctanGeom x hx0 hx1
+  change (arctanIntegralUnit x
+      (arctanIntegralRectangleUnitData.constructionAt x hx0 hx1)).Equiv
+    (ArctanGeometry.arctanGeom x)
+  exact arctanIntegralRectangleFor_equiv_arctanGeom x hx0 hx1
 
 theorem arctanIntegralRectangleUnitFunctionAgreement :
     ArctanIntegralUnitGeomFunctionAgreement
       arctanIntegralRectangleUnitData := by
   intro x hx _hgeom
-  simpa [ArctanIntegralUnitGeomFunctionAgreement,
-    arctanIntegralUnitRepresentation, arctanIntegralUnitFunctionRaw,
-    arctanIntegralUnit, arctanIntegralRectangleUnitData,
-    arctanIntegralRectangleFor, ArctanGeometry.representation,
-    ArctanGeometry.functionRaw, PartialRealFunRaw.evalRaw] using
-    arctanIntegralRectangleFor_equiv_arctanGeom x hx.1 hx.2
+  change (arctanIntegralUnit x
+      (arctanIntegralRectangleUnitData.constructionAt x hx.1 hx.2)).Equiv
+    (ArctanGeometry.arctanGeom x)
+  exact arctanIntegralRectangleUnit_equiv_arctanGeom x hx.1 hx.2
 
 theorem arctanIntegralRectangleUnitComputes
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
@@ -6938,13 +7004,10 @@ theorem arctanIntegralRectangleMonotoneUnitFunctionAgreement :
     ArctanIntegralUnitGeomFunctionAgreement
       arctanIntegralRectangleMonotoneUnitData := by
   intro x hx _hgeom
-  simpa [ArctanIntegralUnitGeomFunctionAgreement,
-    arctanIntegralUnitRepresentation, arctanIntegralUnitFunctionRaw,
-    arctanIntegralUnit, arctanIntegralRectangleMonotoneUnitData,
-    arctanIntegralRectangleMonotoneFor,
-    Integral.monotoneIntegralFor, ArctanGeometry.representation,
-    ArctanGeometry.functionRaw, PartialRealFunRaw.evalRaw] using
-    arctanIntegralRectangleMonotoneFor_equiv_arctanGeom x hx.1 hx.2
+  change (arctanIntegralUnit x
+      (arctanIntegralRectangleMonotoneUnitData.constructionAt x hx.1 hx.2)).Equiv
+    (ArctanGeometry.arctanGeom x)
+  exact arctanIntegralRectangleMonotoneUnit_equiv_arctanGeom x hx.1 hx.2
 
 theorem arctanIntegralRectangleMonotoneUnitComputes
     (x : Rat) (hx0 : 0 <= x) (hx1 : x <= 1) :
@@ -7023,7 +7086,8 @@ theorem tangentAt_valid (B : ArctanInverseBisection)
 theorem tangentRaw_valid (B : ArctanInverseBisection) :
     forall t ht, RealRaw.ValidCompute (B.tangentRaw.compute t ht) := by
   intro t ht
-  simpa [tangentRaw] using B.tangentAt_valid t ht
+  change RealRaw.ValidCompute ((B.tangentAt t ht).compute)
+  exact B.tangentAt_valid t ht
 
 theorem tangentAt_stays_in_source (B : ArctanInverseBisection)
     (t : RationalCircle.GeometricTrig.QuarterTurn)
@@ -7193,8 +7257,9 @@ def arctanIntegralRectangleConstructionAtOne :
     Integral.ConstructionFor arctanKernelIntervalAtOne where
   compute := ArctanGeometry.arctanIntegralRectangleComputeAtOne
   certificate := by
-    simpa [ArctanGeometry.arctanIntegralRectangleRawAtOne] using
-      ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
+    change RealRaw.ValidCompute
+      ArctanGeometry.arctanIntegralRectangleComputeAtOne
+    exact ArctanGeometry.arctanIntegralRectangleRawAtOne_valid
 
 /-- The domain-aware integral raw real supplied by the rectangle construction
 for the arctangent kernel on `[0, 1]`. -/
@@ -7490,11 +7555,10 @@ theorem arctanIntegral_equiv_arctanGeom_of_functionAgreement
       (ArctanGeometry.arctanGeom x) := by
   have hgeom : ArctanGeometry.representation.raw.definedAt x := by
     simp [ArctanGeometry.representation, ArctanGeometry.functionRaw]
-  simpa [ArctanIntegralGeomFunctionAgreement,
-    arctanIntegralRepresentation, arctanIntegralFunctionRaw,
-    ArctanGeometry.representation, ArctanGeometry.functionRaw,
-    PartialRealFunRaw.AgreeOnOverlap, RealRaw.Equiv] using
-    h x hx hgeom
+  have h' := h x hx hgeom
+  change (arctanIntegral x (data.constructionAt x hx)).Equiv
+    (ArctanGeometry.arctanGeom x) at h'
+  exact h'
 
 theorem arctanIntegralGeomAgreement_one_of_functionAgreement
     (data : ArctanIntegralData)
@@ -8594,9 +8658,11 @@ def cauchyReciprocalTailConstruction :
       (FunctionOnInterval.exactRat cauchyReciprocalTailDensity 0 1) where
   compute := RealRaw.scaleRatCompute 2 arctanIntegralRectangleForAtOne
   certificate := by
-    simpa [RealRaw.scaleRat] using
-      (RealRaw.scaleRat_valid (r := (2 : Rat))
-        arctanIntegralRectangleForAtOne_valid)
+    have hvalid := RealRaw.scaleRat_valid (r := (2 : Rat))
+      arctanIntegralRectangleForAtOne_valid
+    change RealRaw.ValidCompute
+      (RealRaw.scaleRatCompute 2 arctanIntegralRectangleForAtOne)
+    exact hvalid
 
 /-- The completed rational compactification of the Cauchy full-line integral.
 Its outer factor accounts for the negative half-line, and its density's inner
@@ -13834,7 +13900,8 @@ theorem reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_fullC
       (reciprocalQuarticMinusOneUnitDyadicCompute (n + 2 + 1))
       { lo := 2 * bridge.lo - (scheduled.width + literal.width),
         hi := 2 * bridge.hi + scheduled.width + literal.width + endpoint.hi } := by
-    simpa [bridge, scheduled, literal, endpoint] using hcandidate
+    simpa [bridge, scheduled, literal, endpoint,
+      projectiveCompactDyadicScheduledCauchyCandidateEnvelope] using hcandidate
   have hassembly' : QInterval.Overlaps assembly
       { lo := 2 * unit.lo - (a + tail.width),
         hi := 2 * unit.hi + tail.width } := by

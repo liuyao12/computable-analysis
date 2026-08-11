@@ -83,6 +83,27 @@ theorem finiteDerivativeEval_septic
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.pow_succ]
 
+theorem finiteDerivativeEval_octic
+    (c₀ c₁ c₂ c₃ c₄ c₅ c₆ c₇ c₈ x : Rat) :
+    finiteDerivativeEval [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈] x =
+      c₁ + 2 * c₂ * x + 3 * c₃ * x ^ 2 +
+        4 * c₄ * x ^ 3 + 5 * c₅ * x ^ 4 + 6 * c₆ * x ^ 5 +
+        7 * c₇ * x ^ 6 + 8 * c₈ * x ^ 7 := by
+  simp [finiteDerivativeEval, eval]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.pow_succ]
+
+theorem finiteDerivativeEval_nonic
+    (c₀ c₁ c₂ c₃ c₄ c₅ c₆ c₇ c₈ c₉ x : Rat) :
+    finiteDerivativeEval
+        [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈, c₉] x =
+      c₁ + 2 * c₂ * x + 3 * c₃ * x ^ 2 +
+        4 * c₄ * x ^ 3 + 5 * c₅ * x ^ 4 + 6 * c₆ * x ^ 5 +
+        7 * c₇ * x ^ 6 + 8 * c₈ * x ^ 7 + 9 * c₉ * x ^ 8 := by
+  simp [finiteDerivativeEval, eval]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.pow_succ]
+
 private theorem eval_mono_of_nonneg_coeffs
     {coeffs : List Rat} {a b : Rat}
     (hcoeffs : forall c, c ∈ coeffs -> 0 <= c)
@@ -184,6 +205,23 @@ theorem finitePolynomial_secant_derivative_bracket
           finiteDerivativeEval_nonneg_of_nonneg_coeffs hcs hb
         have hscaled' := Rat.mul_le_mul_of_nonneg_right hab hderiv_nonneg
         grind
+
+/-- A generic finite Mean Value error bound: the secant's distance from the
+left endpoint derivative is no larger than the derivative bracket width. -/
+theorem finitePolynomial_secant_qabs_error_le_derivative_gap
+    {coeffs : List Rat} {a b : Rat}
+    (hcoeffs : forall c, c ∈ coeffs -> 0 <= c)
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    qabs (ExactFunction.differenceQuotient
+      (fun z => eval coeffs z) a (b - a) - finiteDerivativeEval coeffs a) ≤
+      finiteDerivativeEval coeffs b - finiteDerivativeEval coeffs a := by
+  have hbracket := finitePolynomial_secant_derivative_bracket
+    (coeffs := coeffs) (a := a) (b := b) hcoeffs ha hab hne
+  have hderiv_order : finiteDerivativeEval coeffs a ≤
+      finiteDerivativeEval coeffs b :=
+    Rat.le_trans hbracket.1 hbracket.2
+  exact qabs_sub_le_of_common_bounds
+    hbracket.1 hbracket.2 Rat.le_refl hderiv_order
 
 theorem finiteCubic_secant_derivative_bracket
     {c₀ c₁ c₂ c₃ a b : Rat}
@@ -734,6 +772,50 @@ theorem finiteSeptic_secant_derivative_bracket
     (coeffs := [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇]) (a := a) (b := b)
     hcoeffs ha hab hne
   simpa only [finiteDerivativeEval_septic] using hgap
+
+theorem finiteOctic_secant_derivative_bracket
+    {c₀ c₁ c₂ c₃ c₄ c₅ c₆ c₇ c₈ a b : Rat}
+    (hcoeffs : forall c,
+      c ∈ [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈] -> 0 <= c)
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    ExactFunction.differenceQuotient
+          (fun z => eval [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈] z)
+          a (b - a) -
+        (c₁ + 2 * c₂ * a + 3 * c₃ * a ^ 2 + 4 * c₄ * a ^ 3 +
+          5 * c₅ * a ^ 4 + 6 * c₆ * a ^ 5 + 7 * c₇ * a ^ 6 +
+          8 * c₈ * a ^ 7) <=
+      (c₁ + 2 * c₂ * b + 3 * c₃ * b ^ 2 + 4 * c₄ * b ^ 3 +
+          5 * c₅ * b ^ 4 + 6 * c₆ * b ^ 5 + 7 * c₇ * b ^ 6 +
+          8 * c₈ * b ^ 7) -
+        (c₁ + 2 * c₂ * a + 3 * c₃ * a ^ 2 + 4 * c₄ * a ^ 3 +
+          5 * c₅ * a ^ 4 + 6 * c₆ * a ^ 5 + 7 * c₇ * a ^ 6 +
+          8 * c₈ * a ^ 7) := by
+  have hgap := finitePolynomial_secant_derivative_gap
+    (coeffs := [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈])
+    (a := a) (b := b) hcoeffs ha hab hne
+  simpa only [finiteDerivativeEval_octic] using hgap
+
+theorem finiteNonic_secant_derivative_bracket
+    {c₀ c₁ c₂ c₃ c₄ c₅ c₆ c₇ c₈ c₉ a b : Rat}
+    (hcoeffs : forall c,
+      c ∈ [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈, c₉] -> 0 <= c)
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    ExactFunction.differenceQuotient
+          (fun z => eval [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈, c₉] z)
+          a (b - a) -
+        (c₁ + 2 * c₂ * a + 3 * c₃ * a ^ 2 + 4 * c₄ * a ^ 3 +
+          5 * c₅ * a ^ 4 + 6 * c₆ * a ^ 5 + 7 * c₇ * a ^ 6 +
+          8 * c₈ * a ^ 7 + 9 * c₉ * a ^ 8) <=
+      (c₁ + 2 * c₂ * b + 3 * c₃ * b ^ 2 + 4 * c₄ * b ^ 3 +
+          5 * c₅ * b ^ 4 + 6 * c₆ * b ^ 5 + 7 * c₇ * b ^ 6 +
+          8 * c₈ * b ^ 7 + 9 * c₉ * b ^ 8) -
+        (c₁ + 2 * c₂ * a + 3 * c₃ * a ^ 2 + 4 * c₄ * a ^ 3 +
+          5 * c₅ * a ^ 4 + 6 * c₆ * a ^ 5 + 7 * c₇ * a ^ 6 +
+          8 * c₈ * a ^ 7 + 9 * c₉ * a ^ 8) := by
+  have hgap := finitePolynomial_secant_derivative_gap
+    (coeffs := [c₀, c₁, c₂, c₃, c₄, c₅, c₆, c₇, c₈, c₉])
+    (a := a) (b := b) hcoeffs ha hab hne
+  simpa only [finiteDerivativeEval_nonic] using hgap
 
 theorem finiteSeptic_secant_derivative_gap
     {c₀ c₁ c₂ c₃ c₄ c₅ c₆ c₇ a b : Rat}

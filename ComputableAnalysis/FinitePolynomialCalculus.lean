@@ -286,7 +286,7 @@ def mul {C : Rat} {f df g dg : Rat -> Rat}
           qabs (f x) * qabs (qg - dg x) +
             qabs (g x) * qabs (qf - df x) +
               qabs h * qabs qf * qabs qg := by
-            simpa [qf, qg] using hproduct
+            simpa [qf, qg, ExactFunction.differenceQuotient] using hproduct
       _ <= qabs h * (fMajorant * G.errorCoefficient) +
             qabs h * (gMajorant * F.errorCoefficient) +
               qabs h * ((dfMajorant + 2 * C * F.errorCoefficient) *
@@ -803,6 +803,7 @@ def cosineTaylorPrefix_hasDerivativeOnInterval
   have hshift : FormalPowerSeries.HasCoefficientShift
       FormalPowerSeries.cosCoeff
       (FormalPowerSeries.neg FormalPowerSeries.sinCoeff) := by
+    unfold FormalPowerSeries.HasCoefficientShift
     simpa [FormalPowerSeries.derivative] using
       FormalPowerSeries.cosCoeff_derivative
   have h := taylorPrefix_hasDerivativeOnInterval
@@ -822,9 +823,11 @@ def taylorPrefixAtSecantBound (C basepoint : Rat)
     CenteredSecantDerivativeBound basepoint C
       (taylorPrefixAt basepoint coeffs terms)
       (taylorPrefixShiftAt basepoint coeffs terms) := by
-  simpa [taylorPrefixAt, taylorPrefixShiftAt] using
-    SecantDerivativeBound.translate basepoint
-      (taylorPrefixSecantBound C coeffs hC1 terms)
+  change CenteredSecantDerivativeBound basepoint C
+    (fun x => taylorPrefix coeffs terms (x - basepoint))
+    (fun x => taylorPrefixShift coeffs terms (x - basepoint))
+  exact SecantDerivativeBound.translate basepoint
+    (taylorPrefixSecantBound C coeffs hC1 terms)
 
 /-- A finite Taylor polynomial centered at any rational basepoint has the
 coefficient-shift polynomial as its interval derivative.  Together with
@@ -1117,10 +1120,13 @@ theorem expTaylorPrefix_secant_error_le_thirty_four
 one-degree-lower prefix as its derivative. -/
 def expTaylorPrefixSecantBound (C : Rat) (n : Nat) (hC1 : 1 <= C) :
     SecantDerivativeBound C (expTaylorPrefix n) (expTaylorDerivativePrefix n) := by
-  simpa [expTaylorPrefix, expTaylorDerivativePrefix, Rat.zero_add] using
-    SecantDerivativeBound.add
+  change SecantDerivativeBound C
+    (fun x => 1 + integratedTaylorPrefix FormalPowerSeries.expCoeff n x)
+    (fun x => taylorDerivativePrefix FormalPowerSeries.expCoeff n x)
+  simpa only [Rat.zero_add] using
+    (SecantDerivativeBound.add
       (SecantDerivativeBound.constant C 1)
-      (integratedTaylorPrefixSecantBound C FormalPowerSeries.expCoeff hC1 n)
+      (integratedTaylorPrefixSecantBound C FormalPowerSeries.expCoeff hC1 n))
 
 /-- The finite factorial Taylor prefixes used by exponential satisfy the
 two-sided interval derivative interface before the separately certified

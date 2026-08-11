@@ -1,6 +1,68 @@
 \chapter{Circle and Trigonometry}
 \label{ch:rational-circle-trigonometry}
 
+\begin{theorem}[Finite Pick identity]
+\label{thm:finite-pick-certificate}
+\lean{ComputableAnalysis.pickTriangleA}
+\lean{ComputableAnalysis.pickTriangleB}
+\lean{ComputableAnalysis.pickTriangleC}
+\lean{ComputableAnalysis.pickTriangle_twice_area}
+\lean{ComputableAnalysis.pickTriangle_area}
+\lean{ComputableAnalysis.pickTriangle_boundary}
+\lean{ComputableAnalysis.pickTriangle_interior}
+\lean{ComputableAnalysis.pickTriangle_pick_identity}
+\lean{ComputableAnalysis.pickTriangle_certificate}
+\lean{ComputableAnalysis.pickTriangleTwoA}
+\lean{ComputableAnalysis.pickTriangleTwoB}
+\lean{ComputableAnalysis.pickTriangleTwoC}
+\lean{ComputableAnalysis.pickTriangleTwoArea}
+\lean{ComputableAnalysis.pickTriangleTwoBoundary}
+\lean{ComputableAnalysis.pickTriangleTwoInterior}
+\lean{ComputableAnalysis.pickTriangleTwo_certificate}
+\lean{ComputableAnalysis.pickTriangleThreeA}
+\lean{ComputableAnalysis.pickTriangleThreeB}
+\lean{ComputableAnalysis.pickTriangleThreeC}
+\lean{ComputableAnalysis.pickTriangleThreeArea}
+\lean{ComputableAnalysis.pickTriangleThreeBoundary}
+\lean{ComputableAnalysis.pickTriangleThreeInterior}
+\lean{ComputableAnalysis.pickTriangleThree_certificate}
+\lean{ComputableAnalysis.pickTriangleFour_certificate}
+\leanok
+For the lattice triangle with vertices \((0,0)\), \((4,0)\), and \((0,3)\),
+the shoelace area is \(6\), the boundary count is \(8\), and the interior
+count is \(3\).  Lean verifies the finite identity
+\[A=I+\frac{B}{2}-1.\]
+The independent triangle with vertices \((0,0)\), \((5,0)\), and \((0,2)\)
+has area \(5\), boundary count \(8\), and interior count \(2\), and satisfies
+the same identity.  These are finite lattice-coordinate certificates for
+benchmark item 92; the unrestricted lattice-polygon theorem remains deferred.
+The third example is deliberately non-axis-aligned: its vertices
+((0,0),(4,1),(1,4)) give area (15/2), boundary count (5), and interior
+count (6), exercising the edge-gcd calculation rather than only horizontal
+and vertical edges.
+This is the rational-coordinate core of benchmark item 92; the general
+lattice-polygon theorem remains outside the current boundary.
+\end{theorem}
+
+\begin{theorem}[Finite rectangle isoperimetric inequality]
+\label{thm:finite-rectangle-isoperimetric}
+\lean{ComputableAnalysis.rectanglePerimeter}
+\lean{ComputableAnalysis.rectangleArea}
+\lean{ComputableAnalysis.rectangle_isoperimetric}
+\lean{ComputableAnalysis.rectangle_isoperimetric_gap}
+\lean{ComputableAnalysis.rectangle_isoperimetric_eq_iff}
+\lean{ComputableAnalysis.rectangle_three_by_four_certificate}
+\lean{ComputableAnalysis.rectangle_five_by_twelve_certificate}
+\leanok
+For rational rectangle side lengths \(a,b\), the perimeter and area satisfy
+\[16A\le P^2.\]
+Equality holds exactly when \(a=b\), and the \(3\times4\) instance is checked
+explicitly.  This is the rectangle-level rational core of benchmark item 43;
+the general plane-region isoperimetric theorem remains deferred.  The larger
+\(5\times12\) rectangle has area \(60\), perimeter \(34\), and strict gap
+\(34^2-16\cdot60=196\), making the equality defect explicit.
+\end{theorem}
+
 \subsection{Benchmark geometry: Pythagorean triples}\label{sec:benchmark-geometry}
 
 The exact rational parametrization is checked before any positivity or
@@ -10,6 +72,9 @@ primitive-integrality conditions are introduced:
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_six_eight_ten}
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_parameter_two_one}
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_six_eight_ten_certificate}
+\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_five_twelve_thirteen}
+\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_five_twelve_thirteen_parameter_three_two}
+\lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_five_twelve_thirteen_certificate}
 \lean{ComputableAnalysis.RationalCircle.pythagoreanTriple_positive}
 \lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
 \lean{ComputableAnalysis.RationalCircle.heron_product_nonneg}
@@ -33,19 +98,38 @@ primitive-integrality conditions are introduced:
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_spec}
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_of_square}
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_four_fifths}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_three_fifths}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPower_inside_three_fifths_certificate}
 \lean{ComputableAnalysis.RationalCircle.Stage.rightTriangle_axis_pythagorean}
 \lean{ComputableAnalysis.RationalCircle.Stage.rightTriangle_pythagorean}
+\lean{ComputableAnalysis.RationalCircle.Stage.rightTriangle_rotated_three_four_six_eight_certificate}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_symmetry}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_equal_legs}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_orthogonal}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_base_normSq}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_pythagorean}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_equal_legs}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_axis_orthogonal}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_base_squared}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_5_12_certificate}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointConj_reflection_coordinate_certificate}
 \lean{ComputableAnalysis.RationalCircle.heron_three_four_five_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.heronFiveFiveSixLeft}
+\lean{ComputableAnalysis.RationalCircle.heronFiveFiveSixRight}
+\lean{ComputableAnalysis.RationalCircle.heronFiveFiveSixApex}
+\lean{ComputableAnalysis.RationalCircle.heron_five_five_six_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.heron_five_five_six_product}
+\lean{ComputableAnalysis.RationalCircle.heron_five_five_six_area_raw_equiv_twelve}
+\lean{ComputableAnalysis.RationalCircle.heronThirteenFourteenFifteenLeft}
+\lean{ComputableAnalysis.RationalCircle.heronThirteenFourteenFifteenRight}
+\lean{ComputableAnalysis.RationalCircle.heronThirteenFourteenFifteenApex}
+\lean{ComputableAnalysis.RationalCircle.heron_thirteen_fourteen_fifteen_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.heron_thirteen_fourteen_fifteen_product}
+\lean{ComputableAnalysis.RationalCircle.heron_thirteen_fourteen_fifteen_area_raw_equiv_eighty_four}
 \lean{ComputableAnalysis.RationalCircle.Stage.segmentNormSq_law_of_cosines_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_orthogonal_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_antipodal_certificate}
 \lean{ComputableAnalysis.QComplex.natPow_mul}
 \lean{ComputableAnalysis.QComplex.natPow_add}
 \lean{ComputableAnalysis.QComplex.conj}
@@ -69,7 +153,8 @@ This is the finite polynomial and positive-rational core of benchmark item 23;
 primitive-integral classification remains a separate certificate.  The axis-coordinate
 version above is the corresponding rational-coordinate core of benchmark item
 4.  The arbitrary rational orthogonality identity strengthens that core to
-general rational-coordinate legs.
+general rational-coordinate legs.  The worked (5\text{-}12\text{-}13) instance
+is checked both directly and through the parameters ((m,n)=(3,2)).
 
 \begin{theorem}[Rational isosceles-triangle certificate]
 \label{thm:rational-isosceles}
@@ -77,10 +162,20 @@ general rational-coordinate legs.
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_equal_legs}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_orthogonal}
 \lean{ComputableAnalysis.RationalCircle.Stage.isosceles_base_normSq}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_equal_legs}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_axis_orthogonal}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_base_squared}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_5_12_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_7_24_certificate}
 \leanok
 The isosceles symmetry and base-length identities are the rational-coordinate
 core of benchmark item 65.  Equality of the corresponding geometric angles
 remains a separate representation-level bridge.
+The worked rational-coordinate instances with heights and half-bases
+\((3,4)\), \((5,12)\), and \((7,24)\) verify equal legs, axis orthogonality,
+and the corresponding squared bases; the angle-identification bridge remains
+deferred.
 \end{theorem}
 
 \begin{theorem}[Rational Heron area certificate]
@@ -92,12 +187,24 @@ remains a separate representation-level bridge.
 \lean{ComputableAnalysis.RationalCircle.heronAreaRaw_spec}
 \lean{ComputableAnalysis.RationalCircle.heronAreaRaw_equiv_of_square}
 \lean{ComputableAnalysis.RationalCircle.heron_three_four_five_area_raw_equiv_six}
+\lean{ComputableAnalysis.RationalCircle.heronFiveFiveSixLeft}
+\lean{ComputableAnalysis.RationalCircle.heronFiveFiveSixRight}
+\lean{ComputableAnalysis.RationalCircle.heronFiveFiveSixApex}
+\lean{ComputableAnalysis.RationalCircle.heron_five_five_six_coordinate_certificate}
+\lean{ComputableAnalysis.RationalCircle.heron_five_five_six_product}
+\lean{ComputableAnalysis.RationalCircle.heron_five_five_six_area_raw_equiv_twelve}
 \leanok
 The squared Heron identity together with the triangle-inequality certificate
 above covers the rational nonnegative-squared-area core of benchmark item 57.
 \texttt{heronAreaRaw} now packages the nonnegative square-root area as a valid raw
 real with its square-root specification; the geometric interpretation of that
 output as Euclidean area remains a separate bridge.
+The second worked instance uses the rational triangle with vertices
+\((-3,0),(3,0),(0,4)\).  Its sides are (6,5,5), its twice-area is (24),
+and the Heron product is (144), so the raw area is transported to (12).
+The additional (13	ext{-}14	ext{-}15) instance uses rational vertices
+((0,0),(14,0),(5,12)).  Its twice-area is (168), its Heron product is
+(7056), and the certified square-root raw is equivalent to (84).
 \end{theorem}
 
 \begin{theorem}[Rational power of a point for a chord]
@@ -110,6 +217,7 @@ output as Euclidean area remains a separate bridge.
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_spec}
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_of_square}
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_four_fifths}
+\lean{ComputableAnalysis.RationalCircle.horizontalChordPowerSqrtRaw_equiv_three_fifths}
 \leanok
 For a horizontal chord with endpoints ((-r,h)) and ((r,h)), the identity
 \[
@@ -161,6 +269,13 @@ witness.
 \lean{ComputableAnalysis.FinitePtolemyLength.ptolemyPoint_square_coordinates}
 \lean{ComputableAnalysis.FinitePtolemyLength.pointSegmentLengthRaw_equiv_of_square}
 \lean{ComputableAnalysis.FinitePtolemyLength.finitePtolemyLength_certificate}
+\lean{ComputableAnalysis.FinitePtolemySecondExample.secondPtolemyPointA}
+\lean{ComputableAnalysis.FinitePtolemySecondExample.secondPtolemyPointB}
+\lean{ComputableAnalysis.FinitePtolemySecondExample.secondPtolemyPointC}
+\lean{ComputableAnalysis.FinitePtolemySecondExample.secondPtolemyPointD}
+\lean{ComputableAnalysis.FinitePtolemySecondExample.secondPtolemy_square_coordinates}
+\lean{ComputableAnalysis.FinitePtolemySecondExample.secondPtolemy_rational_length_identity}
+\lean{ComputableAnalysis.FinitePtolemySecondExample.secondPtolemy_length_certificate}
 \leanok
 For a concrete rational cyclic quadrilateral, all six squared chord lengths
 are rational squares.  The project’s raw square-root length algorithm is
@@ -168,6 +283,11 @@ therefore equivalent to six explicit rational witnesses, and those witnesses
 satisfy Ptolemy’s length identity.  This is a fully finite constructive
 instance of benchmark item 95, extending the square-root-free coordinate
 shadow without asserting a general Euclidean length theorem.
+The second parameter quadruple \((0,5/12,3/4,4/3)\) supplies an independent
+finite check: its six squared chord lengths are rational squares with length
+witnesses (10/13,32/65,14/25,8/5,6/5,66/65), and these satisfy Ptolemy's
+rational length identity exactly.  The new certificate also transports all
+six witnesses through the same raw square-root length interface.
 \end{theorem}
 
 \section{Archimedes' Method of Exhaustion}
@@ -239,6 +359,10 @@ direct circumference proof below.
 
 \begin{definition}[Circle-area exhaustion algorithm]\label{def:circle-area-stage-algorithm}
 \lean{ComputableAnalysis.piCircleArea}
+\lean{ComputableAnalysis.piCircleArea_stage_one}
+\lean{ComputableAnalysis.piCircleArea_stage_two}
+\lean{ComputableAnalysis.piCircleArea_stage_three}
+\lean{ComputableAnalysis.piCircleArea_stage_four}
 \lean{ComputableAnalysis.circleAreaIncrement}
 \lean{ComputableAnalysis.circleAreaDecrement}
 \lean{ComputableAnalysis.refineAreaBounds}
@@ -263,7 +387,10 @@ and outer polygon bounds by
     \frac{(r-p)(q-p)(r-q)}
       {(1+pr)(1+pq)(1+qr)}.
 \]
-The initial bounds are \([1/2,1]\) on the quarter circle.
+The initial bounds are \([1/2,1]\) on the quarter circle.  The first four
+executable stages are exposed as exact rational intervals; stage four has
+width approximately \(0.008505\), while the endpoint values remain rational
+data throughout.
 \begin{verbatim}
 def piCircleArea(n):
     a, b = 1/2, 1
@@ -291,6 +418,8 @@ def piCircleArea(n):
 \end{verbatim}
 The returned endpoints are the inscribed and circumscribed polygon areas;
 Lean exposes this rational loop as \code{piCircleArea}.
+The worked \code{FiniteCircleAreaExample} evaluates the same enclosure exactly
+at stages 1, 2, and 3, keeping the item-9 checkpoint finite and rational.
 \end{definition}
 
 \section{Sector Area, Arctangent, and Normalized Angles}
@@ -482,6 +611,33 @@ The checked bridge asks for:
 Constructing the interval evaluation of \(P(u)\) for the recovered raw slope
 is the next formal trigonometric step.  The bridge already fixes its required
 inverse data rather than assuming trigonometric inverse laws.
+\end{definition}
+
+\begin{definition}[Scheduled rectangle evaluator for arctangent]
+\label{def:scheduled-arctan-rectangle}
+\lean{ComputableAnalysis.arctanScheduledStage}
+\lean{ComputableAnalysis.arctanScheduledStageSchedule}
+\lean{ComputableAnalysis.arctanScheduledRectangleRaw}
+\lean{ComputableAnalysis.arctanScheduledRectangleRaw_eq_schedule}
+\lean{ComputableAnalysis.arctanScheduledRectangleRaw_valid}
+\lean{ComputableAnalysis.arctanScheduledRectangleRaw_equiv_arctanGeom}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_compute_eq}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_width_le}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_nondecreasing}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_monotone}
+\lean{ComputableAnalysis.arctanScheduledRectangleOnUnit_effectiveInverseSeparation}
+The geometric rectangle evaluator already computes the intended arctangent
+branch, but its native stage index is not itself an input/output precision
+budget.  The scheduled evaluator reindexes it by (64(n+1)), retaining the
+same finite rectangle computation while making the explicit bound
+[
+  \operatorname{width}(A_n(x))\leq \frac{1}{16(n+1)}.
+]
+This is a representation-level preparation for interval inverse search; it
+now also proves equivalence of the scheduled raw with the geometric
+arctangent by a cofinal stage schedule.  The interval-regularity package for
+endpoint images remains a separate obligation.
 \end{definition}
 
 \begin{definition}[Inverse arctangent search]
@@ -807,6 +963,13 @@ geometric fact packaged by the incremental area corrections in
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_zero_of_collinear}
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_pos_of_oriented}
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_quadrilateral_diagonal_additivity}
+\lean{ComputableAnalysis.RationalCircle.orientationPointP}
+\lean{ComputableAnalysis.RationalCircle.orientationPointQ}
+\lean{ComputableAnalysis.RationalCircle.orientationPointR}
+\lean{ComputableAnalysis.RationalCircle.orientation_triangle_twice_area}
+\lean{ComputableAnalysis.RationalCircle.orientation_triangle_cyclic}
+\lean{ComputableAnalysis.RationalCircle.orientation_triangle_swap_neg}
+\lean{ComputableAnalysis.RationalCircle.orientation_triangle_positive}
 \leanok
 The determinant-based twice-area certificate is invariant under cyclic
 permutation, changes sign when two vertices are exchanged, vanishes for
@@ -815,6 +978,9 @@ inequality.  This is the finite rational-coordinate
 orientation core of benchmark item 27 (the sum of the angles of a triangle);
 the project does not yet identify arbitrary represented angles with a completed
 real angle-sum theorem.
+The worked rational triangle ((1,0),(0,1),(-1,0)) has signed twice-area
+(2).  Lean checks its cyclic invariance, sign reversal under a swap, and
+positive orientation directly; no angle-valued interpretation is introduced.
 \end{theorem}
 
 \begin{definition}[Circumference stage algorithm]\label{def:circle-circumference-stage-algorithm}
@@ -1131,6 +1297,9 @@ square-root specifications for \(\sqrt{1/2}\), \(\sqrt3\), and \(\sqrt5\).
 \lean{ComputableAnalysis.RationalCircle.Stage.segmentNormSq_law_of_cosines}
 \lean{ComputableAnalysis.RationalCircle.Stage.segmentNormSq_law_of_cosines_coordinate_certificate}
 \lean{ComputableAnalysis.RationalCircle.Stage.dot_eq_half_of_unit_equilateral}
+\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_orthogonal_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_antipodal_certificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_three_four_five_certificate}
 \uses{rem:rational-circle-point}
 \leanok
 For rational coordinate points \(p,q\), the squared chord length satisfies the
@@ -1141,11 +1310,20 @@ coordinate law of cosines
 Consequently, if \(p\) and \(q\) are unit-circle points and the chord between
 them also has squared length \(1\), then \(p\cdot q=1/2\).  This is the
 formalized equilateral-triangle core behind the familiar
+The rational-coordinate witness \(p=(3,0)\), \(q=(0,4)\) has squared norms
+\(9\) and \(16\), zero dot product, and squared separation \(25\), so Lean
+also checks the familiar \(3\!-!4\!-!5\) specialization.
 \(\cos(60^\circ)=1/2\), hence \(\sin(30^\circ)=1/2\).  Turning it into the
 actual normalized-angle statement for \(\sin_C(1/3)\) still requires the
 angle-to-circle-point construction to identify the one-third input with the
 equilateral chord.
 This is the rational-coordinate core of benchmark item 94.
+The worked unit-circle checkpoints make the identity executable: the
+orthogonal pair \((3/5,4/5),(-4/5,3/5)\) has squared separation (2), while
+the antipodal pair \((3/5,4/5),(-3/5,-4/5)\) has squared separation (4).
+The antipodal worked checkpoint uses ((3/5,4/5)) and ((-3/5,-4/5)):
+their dot product is (-1), their squared separation is (4), and the same
+law-of-cosines identity is verified by exact rational computation.
 \end{theorem}
 
 The reusable `PiProofs.pointSegmentLengthRaw` algorithm takes the square root
@@ -1597,6 +1775,7 @@ The missing-point case \(1-uv=0\) is the expected projective chart transition.
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw_valid}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw_equiv_natPow}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw_mul_equiv}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.pointPowRaw_conj_equiv}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.toQComplex_pointPow_mul}
 \lean{ComputableAnalysis.eulerCenter_eq_natPow}
@@ -1608,9 +1787,29 @@ The missing-point case \(1-uv=0\) is the expected projective chart transition.
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_square_unit}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_square_complex_bridge}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFiveCube}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFiveFourth}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFiveFifth}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_cube}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_cube_coordinates}
 \lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_cube_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fourth}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fourth_coordinates}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fourth_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fourth_complex_bridge}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fifth}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fifth_coordinates}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fifth_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fifth_complex_bridge}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFiveSixth}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_sixth}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_sixth_coordinates}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_sixth_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_sixth_complex_bridge}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFiveSeventh}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_seventh}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_seventh_coordinates}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_seventh_unit}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_seventh_complex_bridge}
 \uses{thm:rational-circle-group-law}
 \leanok
 The rational circle multiplication has an executable natural power.  Lean
@@ -1631,11 +1830,26 @@ conjugation-commutes-with-power certificate adds the finite coordinate
 symmetry needed for inverse and reflected rotation routes.
 The `pointPowRaw` lift packages the same finite result as a valid represented
 complex raw, and `pointPowRaw_equiv_natPow` proves its exact equivalence to the
-finite rational-complex power. The companion `pointPowRaw_conj_equiv`
-transports conjugation through the represented power without introducing a
-completed complex exponential.
+finite rational-complex power. The new `pointPowRaw_mul_equiv` gives the
+product form of this represented finite de Moivre bridge. The companion
+`pointPowRaw_conj_equiv` transports conjugation through the represented power
+without introducing a completed complex exponential.
 The explicit `pointPow_three` identity gives the first nontrivial odd-power
 coordinate formula, namely the cubic triple-angle shadow of de Moivre's law.
+The worked point ((3/5,4/5)) now also has an explicit fourth power
+((-527/625,-336/625)), with unit norm and a direct finite
+(QComplex.natPow) bridge.
+The fifth power is checked in the same way:
+\((3/5+4i/5)^5=-237/3125-(3116/3125)i\), again with unit norm and a
+finite natural-power bridge.  No angle or completed complex exponential is
+introduced by this computation.
+The sixth power is checked in the same finite model:
+((3/5+4i/5)^6=11753/15625-(10296/15625)i), with unit norm and a direct
+finite natural-power bridge.  The angle and exponential interpretations remain
+deferred.
+The seventh-power witness continues the same chain:
+\((3/5+4i/5)^7=76443/78125+(16124/78125)i\), with exact coordinates,
+unit norm, and a finite `QComplex.natPow` bridge.
 The concrete point \((3/5,4/5)\) now has an executable square certificate:
 \[
   (3/5+4i/5)^2=-7/25+24i/25.

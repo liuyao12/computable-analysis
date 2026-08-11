@@ -486,6 +486,17 @@ theorem square_midpoint_mean_value {a b : Rat} (hab : b - a ≠ 0) :
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
     Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
 
+theorem quadratic_midpoint_mean_value
+    (c₀ c₁ c₂ a b : Rat) (hab : b - a ≠ 0) :
+    differenceQuotient (fun z => c₀ + c₁ * z + c₂ * z * z) a (b - a) =
+      c₁ + 2 * c₂ * ((a + b) / 2) := by
+  unfold differenceQuotient
+  rw [Rat.div_def]
+  have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+    Rat.mul_inv_cancel (b - a) hab
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.add_assoc,
+    Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
 /- A finite mean-value certificate for the cubic on a nonnegative interval.
 The secant quotient is trapped between the endpoint derivatives; this is an
 explicit rational inequality, not an appeal to an attained intermediate
@@ -516,6 +527,29 @@ theorem cube_secant_derivative_bracket {a b : Rat}
       Rat.mul_comm]
   · grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
       Rat.mul_comm]
+
+/-- A pointwise computable MVT witness for the cubic.
+
+The witness is supplied as a rational `t`; the only equation to check is that
+the cubic secant slope agrees with the derivative value `3 * t^2`.  This is
+the project-style replacement for asserting an existential intermediate real
+point: the interval location and the secant identity are both finite data. -/
+theorem cube_secant_supplied_mvt_witness {a b t : Rat}
+    (hab : a < b) (hat : a < t) (htb : t < b)
+    (hsec : a * a + a * b + b * b = 3 * t * t) :
+    a < t /\ t < b /\
+      differenceQuotient cube a (b - a) = 3 * t * t := by
+  have hne : b - a ≠ 0 := by
+    exact Rat.ne_of_gt (by grind)
+  have hcalc :
+      differenceQuotient cube a (b - a) = a * a + a * b + b * b := by
+    unfold differenceQuotient cube
+    rw [Rat.div_def]
+    have hcancel : (b - a) * (b - a)⁻¹ = 1 :=
+      Rat.mul_inv_cancel (b - a) hne
+    grind [Rat.sub_eq_add_neg, Rat.pow_succ, Rat.mul_add, Rat.add_mul,
+      Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+  exact ⟨hat, htb, hcalc.trans hsec⟩
 
 /- A finite mean-value certificate for the square on a nonnegative interval.
 The secant quotient is trapped between the endpoint derivatives by the
@@ -1281,8 +1315,8 @@ def scaleRat (r : Rat) (F : FunctionOnInterval) : FunctionOnInterval where
       exact F.valid_on x hraw
     change RealRaw.ValidCompute
       (fun n => QInterval.scaleRat r (F.raw.compute x hraw n))
-    simpa [X, QInterval.scaleRat, RealRaw.scaleRatCompute] using
-      (RealRaw.scaleRatCompute_valid (r := r) hX)
+    change RealRaw.ValidCompute (RealRaw.scaleRatCompute r X)
+    exact RealRaw.scaleRatCompute_valid (r := r) hX
 
 /-- The pointwise evaluator for a rationally scaled interval function. -/
 theorem scaleRat_compute (r : Rat) (F : FunctionOnInterval)
@@ -1358,7 +1392,7 @@ def exactRatSquareDerivative (a b : Rat) :
       by_cases hn : n = 0
       · subst n
         have hsmall' : qabs h <= 1 / (1 : Rat) := by
-          simpa only [if_pos rfl] using hsmall
+          simpa [if_pos rfl] using hsmall
         calc
           qabs h <= 1 / (1 : Rat) := hsmall'
           _ = (precisionAtStage 0).val := by native_decide

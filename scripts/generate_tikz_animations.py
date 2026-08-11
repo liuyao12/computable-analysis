@@ -172,27 +172,73 @@ def partial_sine(value: Fraction, last: int) -> Fraction:
     )
 
 
-def sine_box(value: Fraction, last: int, guard: Fraction) -> tuple[Fraction, Fraction]:
-    # These two endpoint samples are exact: sin(0) = 0 and sin(pi / 2) = 1.
-    # All interior samples remain interval evaluations, even though the curve
-    # itself is drawn smoothly as a visual guide.
+def rational_sqrt_bounds(value: Fraction, bits: int) -> tuple[Fraction, Fraction]:
+    """A rational enclosing interval for sqrt(value), via integer arithmetic."""
     if value == 0:
         return Fraction(0), Fraction(0)
+    scale = 1 << bits
+    numerator = value.numerator * scale * scale
+    quotient = numerator // value.denominator
+    lower_int = math.isqrt(quotient)
+    return Fraction(lower_int, scale), Fraction(lower_int + 1, scale)
+
+
+def viete_pi_bounds(depth: int) -> tuple[Fraction, Fraction]:
+    """Return the consecutive Viète nested-radical bounds used at a stage.
+
+    The animation is deliberately schematic about the underlying evaluator,
+    but the pointwise boxes now come from a genuine nested-radical precision
+    schedule rather than one shared arbitrary guard.
+    """
+    radical_lo, radical_hi = rational_sqrt_bounds(Fraction(2), 24)
+    factor_lo, factor_hi = rational_sqrt_bounds(radical_lo / 2, 24)
+    product_lo, product_hi = factor_lo, factor_hi
+    for _ in range(max(0, depth - 1)):
+        radical_lo, _ = rational_sqrt_bounds(2 + radical_lo, 24)
+        _, radical_hi = rational_sqrt_bounds(2 + radical_hi, 24)
+        factor_lo, _ = rational_sqrt_bounds((2 + radical_lo) / 4, 24)
+        _, factor_hi = rational_sqrt_bounds((2 + radical_hi) / 4, 24)
+        product_lo *= factor_lo
+        product_hi *= factor_hi
+    lower = 2 / product_hi
+    upper = 2 / product_lo
+    return lower, upper
+
+
+def sine_box(value: Fraction, stage: int) -> tuple[float, float]:
+    # These two endpoint samples are exact: sin(0) = 0 and sin(pi / 2) = 1.
+    # Interior samples use the stage's nested-radical pi enclosure.  The
+    # propagated input uncertainty is point-dependent, so the bars visibly
+    # widen with x instead of pretending every sample costs the same amount.
+    if value == 0:
+        return 0.0, 0.0
     if value == Fraction(1, 2):
-        return Fraction(1), Fraction(1)
-    lower = partial_sine(Fraction(333, 106) * value, last)
-    upper = partial_sine(Fraction(355, 113) * value, last + 1)
-    return max(Fraction(0), lower - guard), min(Fraction(1), upper + guard)
+        return 1.0, 1.0
+    pi_lower, pi_upper = viete_pi_bounds(stage + 2)
+    pi_mid = (pi_lower + pi_upper) / 2
+    angle = value * pi_mid
+    terms = stage + 2
+    estimate = sum(
+        (1 if index % 2 == 0 else -1)
+        * angle ** (2 * index + 1)
+        / math.factorial(2 * index + 1)
+        for index in range(terms + 1)
+    )
+    input_error = value * (pi_upper - pi_lower)
+    remainder = abs(angle) ** (2 * terms + 3) / math.factorial(2 * terms + 3)
+    guard = input_error + remainder
+    return float(max(Fraction(0), estimate - guard)), float(min(Fraction(1), estimate + guard))
 
 
-def sine_frame(cells: int, last: int, guard: Fraction) -> str:
+def sine_frame(stage: int) -> str:
     x0, y0, xunit, yunit = 58, 35, 224, 155
     out = [
         rf"\draw[axis,line width=.75pt] ({x0-12},{y0}) -- ({x0+xunit+13},{y0});",
         rf"\draw[axis,line width=.75pt] ({x0},{y0-11}) -- ({x0},{y0+yunit+13});",
     ]
-    mesh = [Fraction(i, 2 * cells) for i in range(cells + 1)]
-    boxes = {t: sine_box(t, last, guard) for t in mesh}
+    cells = 2 ** stage
+    mesh = [Fraction(i, cells) for i in range(cells + 1)]
+    boxes = {t: sine_box(t, stage) for t in mesh}
     for t in mesh:
         x = x0 + 2 * float(t) * xunit
         out += [
@@ -227,13 +273,16 @@ def sine_frame(cells: int, last: int, guard: Fraction) -> str:
         n(x0 - 10, y0 + yunit, r"$1$", "anchor=east"),
         n(x0 + xunit + 12, y0 - 2, r"$x$", "anchor=west"),
         n(x0 + 160, y0 + 109, r"$\sin(\pi x)$"),
+        n(x0 + xunit, y0 + yunit + 19,
+          rf"stage $n={stage}$: $2^n={cells}$ equal subintervals",
+          "anchor=south"),
     ]
     return "\n".join(out)
 
 
 def sine_animation() -> Animation:
-    stages = ((1, 1, Fraction(1, 2)), (2, 3, Fraction(1, 4)), (4, 5, Fraction(1, 8)), (8, 7, Fraction(1, 16)))
-    return Animation("interval-sine-integral-stage", 360, 230, tuple(sine_frame(*stage) for stage in stages), (1200, 1200, 1200, 1900), 1)
+    stages = (0, 1, 2, 3)
+    return Animation("interval-sine-integral-stage", 360, 230, tuple(sine_frame(stage) for stage in stages), (1200, 1200, 1200, 1900), 1)
 
 
 def circle(value: float) -> tuple[float, float]:
@@ -494,44 +543,52 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
         out.append(rf"\draw[grid,line width=.3pt] ({q(x(value))},{q(y(-.9))}) -- ({q(x(value))},{q(y(3.65))});")
     for value in (-.75, -.5, -.25, .5, 1, 2, 3):
         out.append(rf"\draw[grid,line width=.3pt] ({left},{q(y(value))}) -- ({q(x(2))},{q(y(value))});")
-    def tail(start: Fraction, stop: Fraction) -> None:
-        mesh = [start+(stop-start)*Fraction(i,cells) for i in range(cells+1)]
-        for a, b in zip(mesh, mesh[1:]):
-            lo, hi = sorted((sinc(float(a)), sinc(float(b))))
+    mesh = [Fraction(2*i, cells) for i in range(cells+1)]
+    turn = 1.430296653
+    gap_values = (sinc(float(turn_left)), sinc(turn), sinc(float(turn_right)))
+    gap_lo, gap_hi = min(gap_values), max(gap_values)
+    for a, b in zip(mesh, mesh[1:]):
+            va, vb = sinc(float(a)), sinc(float(b))
+            if b <= turn_left:
+                # The function is decreasing before the unique interior turn.
+                lo, hi = vb, va
+                kind = "decreasing"
+            elif a >= turn_right:
+                # It is increasing after the turn.
+                lo, hi = va, vb
+                kind = "increasing"
+            else:
+                # This is the one cell whose finite critical-point bracket is
+                # needed.  Include the turn value with both endpoints.
+                lo, hi = min(va, vb, sinc(turn)), max(va, vb, sinc(turn))
+                kind = "turn"
             # A signed lower/upper cell has a common part and, away from the
             # axis, exactly one exclusive strip.  Draw that partition
             # explicitly.  This preserves the under/over semantics while
             # keeping the shared green unmistakable in the GIF's negative
             # lobe; alpha compositing alone was too close to blue there.
-            left, right, zero = q(x(a)), q(x(b)), q(y(0))
+            left_px, right_px, zero = q(x(a)), q(x(b)), q(y(0))
             if lo >= 0:
                 out.extend([
-                    rf"\path[fill=sharedfill] ({left},{zero}) rectangle ({right},{q(y(lo))});",
-                    rf"\path[fill=overfill] ({left},{q(y(lo))}) rectangle ({right},{q(y(hi))});",
+                    rf"\path[fill=sharedfill] ({left_px},{zero}) rectangle ({right_px},{q(y(lo))});",
+                    rf"\path[fill=overfill] ({left_px},{q(y(lo))}) rectangle ({right_px},{q(y(hi))});",
                 ])
             elif hi <= 0:
                 out.extend([
-                    rf"\path[fill=sharedfill] ({left},{zero}) rectangle ({right},{q(y(hi))});",
-                    rf"\path[fill=underfill] ({left},{q(y(hi))}) rectangle ({right},{q(y(lo))});",
+                    rf"\path[fill=sharedfill] ({left_px},{zero}) rectangle ({right_px},{q(y(hi))});",
+                    rf"\path[fill=underfill] ({left_px},{q(y(hi))}) rectangle ({right_px},{q(y(lo))});",
                 ])
             else:
                 out.extend([
-                    rf"\path[fill=overfill] ({left},{zero}) rectangle ({right},{q(y(hi))});",
-                    rf"\path[fill=underfill] ({left},{zero}) rectangle ({right},{q(y(lo))});",
+                    rf"\path[fill=overfill] ({left_px},{zero}) rectangle ({right_px},{q(y(hi))});",
+                    rf"\path[fill=underfill] ({left_px},{zero}) rectangle ({right_px},{q(y(lo))});",
                 ])
             out.extend([
-                rf"\draw[over,draw opacity=.8,line width=.3pt] ({left},{zero}) rectangle ({right},{q(y(hi))});",
-                rf"\draw[under,draw opacity=.8,line width=.3pt] ({left},{zero}) rectangle ({right},{q(y(lo))});",
+                rf"\draw[over,draw opacity=.8,line width=.3pt] ({left_px},{zero}) rectangle ({right_px},{q(y(hi))});",
+                rf"\draw[under,draw opacity=.8,line width=.3pt] ({left_px},{zero}) rectangle ({right_px},{q(y(lo))});",
             ])
-    tail(Fraction(0), turn_left)
-    tail(turn_right, Fraction(2))
-    # The middle box is bounded by exactly the three relevant values: the two
-    # bracket endpoints and the turning value.  It deliberately spans only
-    # that value range, never the whole height of the plot.
-    turn = 1.430296653
-    gap_values = (sinc(float(turn_left)), sinc(turn), sinc(float(turn_right)))
-    gap_lo, gap_hi = min(gap_values), max(gap_values)
-    out.append(rf"\path[fill=gapfill,draw=gap,line width=.55pt] ({q(x(turn_left))},{q(y(gap_lo))}) rectangle ({q(x(turn_right))},{q(y(gap_hi))});")
+            if kind == "turn":
+                out.append(rf"\draw[gap,line width=.55pt] ({left_px},{q(y(lo))}) rectangle ({right_px},{q(y(hi))});")
     curve = [(x(i/300), y(sinc(i/300))) for i in range(601)]
     out += [
         rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};",
@@ -545,6 +602,9 @@ def single_turn_frame(turn_left: Fraction, turn_right: Fraction, cells: int) -> 
         n(x(turn_right)+4, y(0)-23, r"$r$", "anchor=north west,text=gap"),
         n(x(2)+10, y(0), r"$x$", "anchor=west"),
         n(x(Fraction(1,4)), y(3.36), r"$\frac{\sin(\pi x)}{x}$", "anchor=west"),
+        n(x(Fraction(1,4)), y(-.75),
+          r"equal cells: decreasing / turn-cell / increasing",
+          "anchor=west,text=ink"),
     ]
     return "\n".join(out)
 

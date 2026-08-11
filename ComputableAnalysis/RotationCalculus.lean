@@ -174,7 +174,7 @@ theorem uniformRotationCosOnTwo_epsilonDeltaContinuous :
   rw [hscale] at hxy hyx
   have hwidthX := (hn x n (Nat.le_refl n)).1
   have hwidthY := (hn y n (Nat.le_refl n)).1
-  simpa [uniformRotationCosOnTwo] using
+  simpa [uniformRotationCosOnTwo, FunctionOnInterval.compute] using
     coordinate_near_of_box_near hxy hyx hwidthX hwidthY
 
 /-- The common-prefix sine coordinate is continuous on `[-2,2]` in the same
@@ -213,7 +213,7 @@ theorem uniformRotationSinOnTwo_epsilonDeltaContinuous :
   rw [hscale] at hxy hyx
   have hheightX := (hn x n (Nat.le_refl n)).2
   have hheightY := (hn y n (Nat.le_refl n)).2
-  simpa [uniformRotationSinOnTwo] using
+  simpa [uniformRotationSinOnTwo, FunctionOnInterval.compute] using
     coordinate_near_of_box_near_imaginary hxy hyx hheightX hheightY
 
 end RotationSeries

@@ -3770,6 +3770,67 @@ def sub (z w : QComplex) : QComplex := add z (neg w)
 def scaleRat (r : Rat) (z : QComplex) : QComplex :=
   { re := r * z.re, im := r * z.im }
 def mul (z w : QComplex) : QComplex := { re := z.re * w.re - z.im * w.im, im := z.re * w.im + z.im * w.re }
+def conj (z : QComplex) : QComplex := { re := z.re, im := -z.im }
+
+/-- The executable natural power of a rational-complex coordinate pair. -/
+def natPow (z : QComplex) : Nat -> QComplex
+  | 0 => one
+  | n + 1 => mul (natPow z n) z
+
+theorem natPow_succ (z : QComplex) (n : Nat) :
+    natPow z (n + 1) = mul (natPow z n) z := by
+  rfl
+
+theorem conj_mul (z w : QComplex) :
+    conj (mul z w) = mul (conj z) (conj w) := by
+  cases z
+  cases w
+  simp [conj, mul]
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.mul_assoc,
+    Rat.mul_comm, Rat.mul_add, Rat.add_mul, Rat.neg_mul, Rat.mul_neg,
+    Rat.neg_neg, Rat.sub_eq_add_neg]
+
+theorem conj_one : conj one = one := by
+  native_decide
+
+theorem conj_add (z w : QComplex) :
+    conj (add z w) = add (conj z) (conj w) := by
+  cases z
+  cases w
+  simp [conj, add]
+  grind [Rat.neg_add]
+
+theorem conj_neg (z : QComplex) : conj (neg z) = neg (conj z) := by
+  cases z
+  simp [conj, neg]
+
+theorem conj_scaleRat (r : Rat) (z : QComplex) :
+    conj (scaleRat r z) = scaleRat r (conj z) := by
+  cases z
+  simp [conj, scaleRat]
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem conj_natPow (z : QComplex) (n : Nat) :
+    conj (natPow z n) = natPow (conj z) n := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [natPow_succ, conj_mul, ih, natPow_succ]
+
+theorem natPow_mul (z w : QComplex) (n : Nat) :
+    natPow (mul z w) n = mul (natPow z n) (natPow w n) := by
+  induction n with
+  | zero =>
+      change QComplex.one = QComplex.mul QComplex.one QComplex.one
+      native_decide
+  | succ n ih =>
+      rw [natPow_succ, ih, natPow_succ, natPow_succ]
+      cases z
+      cases w
+      simp [mul]
+      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.mul_assoc,
+        Rat.mul_comm, Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg]
+
 def coordDist (z w : QComplex) : Rat := max (qabs (z.re - w.re)) (qabs (z.im - w.im))
 def normSq (z : QComplex) : Rat := z.re * z.re + z.im * z.im
 def inv? (z : QComplex) : Option QComplex :=
@@ -3862,6 +3923,17 @@ theorem mul_one_cert (x : QComplex) : mul x one = x := by
   cases x
   simp [mul, one]
   exact ⟨by grind [Rat.sub_eq_add_neg], Rat.zero_add _⟩
+
+theorem natPow_add (z : QComplex) (m n : Nat) :
+    natPow z (m + n) = mul (natPow z m) (natPow z n) := by
+  induction n with
+  | zero =>
+      simp only [Nat.add_zero, natPow]
+      exact (mul_one_cert _).symm
+  | succ n ih =>
+      rw [show m + (n + 1) = (m + n) + 1 by omega,
+        natPow_succ, ih, natPow_succ]
+      exact mul_assoc_cert _ _ _
 
 theorem mul_neg_cert (x y : QComplex) : mul x (neg y) = neg (mul x y) := by
   cases x

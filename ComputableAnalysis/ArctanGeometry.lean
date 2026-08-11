@@ -4073,8 +4073,9 @@ theorem arctanIntegralRectangleCompute_boxes_strictly_separated
       (arctanIntegralRectangleCompute x (64 * (n + 1))).lo +
           (y - x) * integralKernel y <=
         (arctanIntegralRectangleCompute y (64 * (n + 1))).hi := by
-    simpa [left, right, arctanIntegralRectangleCompute, integralLowerStep] using
-      hcompareTail
+    change integralLowerSum left + (y - x) * integralKernel y <=
+      integralUpperSum right
+    exact hcompareTail
   have hstep : delta <= y - x := by
     grind [Rat.sub_eq_add_neg]
   have htail : delta / 2 <= (y - x) * integralKernel y := by
@@ -4784,7 +4785,8 @@ theorem arctanGeom_valid_on_unit
     (arctanGeom x).Valid := by
   by_cases hzero : x = 0
   · subst x
-    simpa [arctanGeom] using RealRaw.ofRat_valid (0 : Rat)
+    change RealRaw.ValidCompute (RealRaw.ofRat (0 : Rat)).compute
+    exact RealRaw.ofRat_valid (0 : Rat)
   · simpa [arctanGeom, positiveLoopRaw, hzero, hx0] using
       positiveLoopRaw_valid_on_unit hx0 hx1
 
@@ -5565,7 +5567,7 @@ theorem arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains
         (QInterval.differenceQuotient
             (arctanIntegralRectangleCompute t n)
             (arctanIntegralRectangleCompute 0 n) h).hi <= scale := by
-    simpa [t, d, scale] using hbase
+    simpa [t, d, scale, QInterval.ContainsInterval] using hbase
   have hxh : 0 <= x + h := by
     exact Rat.add_nonneg hx0 (Rat.le_of_lt hpos)
   have hscaleError := integralKernel_sub_tangentChartScale_le_step
@@ -5696,7 +5698,14 @@ theorem tangentChart_transport_scaled_overlaps_forwardQuotient
     rw [Rat.div_def]
     simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
   have hscaled := QInterval.scaleRat_overlaps_of_nonneg hinv hover
-  simpa [QInterval.differenceQuotient, QInterval.divRat] using hscaled
+  change QInterval.Overlaps
+    (QInterval.scaleRat (1 / h)
+      (chartAddAreaLoopCompute x (tangentChartIncrement x h) n))
+    (QInterval.scaleRat (1 / h)
+      (QInterval.subInterval
+        (arctanIntegralRectangleCompute (x + h) n)
+        (arctanIntegralRectangleCompute x n)))
+  exact hscaled
 
 /-- The finite tangent-chart containment applies throughout the unit branch;
 the right-half case uses the local pole margin rather than a global
@@ -5765,7 +5774,14 @@ theorem tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit
     rw [Rat.div_def]
     simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
   have hscaled := QInterval.scaleRat_overlaps_of_nonneg hinv hover
-  simpa [QInterval.differenceQuotient, QInterval.divRat] using hscaled
+  change QInterval.Overlaps
+    (QInterval.scaleRat (1 / h)
+      (chartAddAreaLoopCompute x (tangentChartIncrement x h) n))
+    (QInterval.scaleRat (1 / h)
+      (QInterval.subInterval
+        (arctanIntegralRectangleCompute (x + h) n)
+        (arctanIntegralRectangleCompute x n)))
+  exact hscaled
 
 /-- On the whole rational unit branch, a forward difference of the canonical
 rectangle arctangent is equivalent to the rectangle construction at its
@@ -6574,9 +6590,9 @@ theorem powerSeries_equiv_geometric_of_agreement
     (arctan x).Equiv (arctanGeom x) := by
   have hgeom : representation.raw.definedAt x := by
     simp [representation, functionRaw]
-  simpa [Elementary.Arctan.powerSeries, representation, functionRaw,
-    Elementary.Arctan.powerSeriesFunctionRaw, PartialRealFunRaw.AgreeOnOverlap,
-    RealRaw.Equiv] using h x hx hgeom
+  have hagree := h x hx hgeom
+  change (arctan x).Equiv (arctanGeom x) at hagree
+  exact hagree
 
 theorem geometric_equiv_powerSeries_of_agreement
     (h : PowerSeriesAgreesOnUnit) {x : Rat}

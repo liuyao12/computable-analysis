@@ -92,8 +92,12 @@ No general integrability theorem is used here.
 \begin{example}[Interval-valued monotone sine stages]
 On \([0,\tfrac12]\), \(\sin(\pi x)\) is increasing.  The endpoint samples
 are exact singletons \(0\) and \(1\); every interior dyadic sample is a
-rational error bar.  The lower sum uses left lower ends and the upper sum
-right upper ends:
+rational stage-\(n\) interval evaluation.  At stage \(n\) there are exactly
+\(2^n\) equal subintervals, and every mesh point is evaluated at that same
+nested-radical/Taylor precision.  The propagated uncertainty is point-dependent
+(in particular, uncertainty in the input \(\pi x\) grows with \(x\)), so the
+displayed bars are not artificially identical.  The lower sum uses left lower
+ends and the upper sum right upper ends:
 \begin{figure}[!htbp]
 \centering
 \intervalSineIntegralStageAnimation
@@ -101,7 +105,7 @@ right upper ends:
 only the interior function values carry shrinking error bars.}
 \label{fig:interval-sine-integral-stage}
 \end{figure}
-Its monotonicity, alternating-series boxes, and common width schedule are
+Its monotonicity, alternating-series boxes, and pointwise width schedule are
 function-specific finite certificates to prove directly.  Only afterwards is
 the general monotone pattern useful; the target identity is
 \(\pi\int_0^{1/2}\sin(\pi x)\,\dd x=1\).
@@ -119,6 +123,8 @@ the general monotone pattern useful; the target identity is
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxRange_width_nonneg}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxStage}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicStage}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxStage_width_le_of_uniform_input_budget_and_tolerance}
+\lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance}
 \uses{rem:arctan-geom-general-integral,def:arctan-integral,def:interval-regular}
 For a nondecreasing \(F\), retain endpoint value boxes on a dyadic mesh:
 \begin{verbatim}
@@ -148,6 +154,8 @@ covering all continuous monotone functions remains subsequent work.
 \label{def:piecewise-monotone-stage}
 \lean{ComputableAnalysis.Integral.PiecewiseMonotoneConstructionFor}
 \lean{ComputableAnalysis.Integral.piecewiseMonotoneIntegralFor}
+\lean{ComputableAnalysis.piecewiseRectangleAreaSum_constant}
+\lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_le_common_range}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_width_le_length_mul}
 \lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
@@ -157,24 +165,33 @@ The animation uses the rational-input sinc example
 \[
  s(x)=\frac{\sin(\pi x)}{x},\qquad s(0)=\pi,\qquad 0\le x\le2
 \]
-with one decreasing and one increasing piece.  Its nonrational turn is held
-in shrinking rational brackets \([\ell_n,r_n]\):
+with a finite critical-point classification.  On each equal dyadic cell we
+certify, by function-specific means, one of three cases: decreasing, increasing,
+or containing the (nonrational) turn.  In the first two cases the endpoint
+values determine the lower and upper rectangles in the appropriate order; in
+the third case we include the turn value range supplied by its shrinking
+rational bracket \([\ell_n,r_n]\):
 \begin{verbatim}
 def piecewise_monotone_stage(F, monotone_pieces, turn_brackets, n):
-    tails = [monotone_stage(F, P.left(n), P.right(n), n, P.direction)
-             for P in monotone_pieces]
-    gaps  = [(T.right(n)-T.left(n)) * T.value_range
-             for T in turn_brackets]
-    return sum(tails) + sum(gaps)
+    P = uniform_partition(0, 2, 2**n)
+    for cell in P:
+        if cell.right <= turn.left(n):
+            use_endpoint_order(cell, decreasing=True)
+        elif turn.right(n) <= cell.left:
+            use_endpoint_order(cell, decreasing=False)
+        else:
+            use_endpoint_order_and_turn_range(cell, turn_bracket(n))
 \end{verbatim}
 \begin{figure}[!htbp]
 \centering
 \singleTurnIntegralAnimation
-\caption{One \(\sin(\pi x)/x\) turn illustrates the general finite-piece
-stage: two refined tails and one shrinking rational gap.}
+\caption{Equal-cell rectangles for \(\sin(\pi x)/x\): decreasing cells,
+one turn-containing cell, and increasing cells are handled by their local
+classification.}
 \label{fig:single-turn-integral}
 \end{figure}
-The gap budget vanishes with \(r_n-\ell_n\).  The generic finite assembler is
+The only extra information beyond endpoint evaluation is the finite critical
+point certificate and its shrinking bracket.  The generic finite assembler is
 checked; the monotonicity, range, and turn-bracketing certificates remain
 specific to the chosen function.
 \end{definition}
@@ -343,6 +360,14 @@ pair of functions.
 \lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicRightLeftSum_eq_endpoint_difference}
 \lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicLeftRightSum_eq_one}
 \lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicRightLeftSum_eq_one}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_endpoint_difference}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_endpoint_difference}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_one}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_one}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_stage4}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_stage4}
 \leanok
 On the rational unit grid, the two endpoint-weighted finite sums for
 \(f(x)=x^2\) and \(g(x)=x^3\) telescope exactly to
@@ -352,6 +377,78 @@ On the rational unit grid, the two endpoint-weighted finite sums for
 This is the project’s finite polynomial integration-by-parts certificate:
 it exposes the product-rule cancellation at every finite stage without
 introducing a completed integral or a limiting argument.
+The same telescope is now instantiated one degree higher, for (f(x)=x^4)
+and (g(x)=x^5).  Both endpoint-weighted orientations compute to (1) on
+every positive rational grid, with stage four recorded as an executable
+checkpoint.  The extension remains a finite product-rule identity, rather
+than a claim about a completed integral.
+\end{theorem}
+
+\begin{theorem}[Finite quartic FTC checkpoint]
+\label{thm:finite-quartic-ftc-checkpoint}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_certificate}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactQuartic_uniformLeftSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuartic_uniformRightSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuartic_compute_contains_one_fifth}
+\lean{ComputableAnalysis.Integral.exactRat_quartic_integral_raw_equiv_one_fifth}
+\uses{thm:finite-polynomial-integration-by-parts}
+\leanok
+For the rational function (x\mapsto x^4) on ([0,1]), the interval-regular
+and Lipschitz certificates produce a finite dyadic integral enclosure.  At
+every stage the left and right endpoint sums bracket the exact rational value
+(1/5), so the represented integral is equivalent to
+`RealRaw.ofRat (1/5)`.  This is a concrete FTC checkpoint: the enclosure is
+constructed from finite rational sums rather than from a completed real
+integral.
+\end{theorem}
+
+\begin{theorem}[Finite quintic FTC checkpoint]
+\label{thm:finite-quintic-ftc-checkpoint}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_intervalRegularOn_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_lipschitz_on_unit}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_certificate}
+\lean{ComputableAnalysis.Integral.exactRat_quintic_integral_raw_valid}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformLeftSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuintic_uniformRightSum_eq}
+\lean{ComputableAnalysis.Integral.exactQuintic_compute_contains_one_sixth}
+\lean{ComputableAnalysis.Integral.exactQuintic_compute_contains_one_sixth_stage20}
+\uses{thm:finite-quartic-ftc-checkpoint}
+\leanok
+For the rational function (x\mapsto x^5) on ([0,1]), the finite interval
+regularity and Lipschitz certificates produce endpoint sums enclosing the
+exact rational value (1/6).  Stage twenty is recorded explicitly as an
+executable precision checkpoint.  The construction remains a finite
+rational enclosure; no completed integral or limit is invoked.
+\end{theorem}
+
+\begin{theorem}[Finite sextic FTC endpoint checkpoint]
+\label{thm:finite-sextic-ftc-checkpoint}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage8}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage8_le_integral_value}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage16}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage16_le_integral_value}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage32}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage32_le_one}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage64}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage64_le_one}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage128}
+\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage128_le_one}
+\uses{thm:finite-quartic-ftc-checkpoint}
+\leanok
+For the derivative (6x^5) of (x^6) on the unit interval, the stage-eight
+left endpoint sum is the exact rational value
+\(5439/8192\).  It is checked to lie below the endpoint value (6/7) of
+the corresponding finite antiderivative.  This is a single finite FTC
+checkpoint, not an assertion of a completed integral or a limiting theorem.
+Stage sixteen evaluates the same finite sum to (107775/131072), and the
+same endpoint comparison remains certified below (6/7).
+Stage thirty-two evaluates it to (1905663/2097152), with the exact coarse
+upper bound (1) retained for this finer finite stage.
+Stages sixty-four and one hundred twenty-eight continue the same rational
+certificate, evaluating to (32002047/33554432) and
+(524369919/536870912), respectively; both remain certified below (1).
 \end{theorem}
 
 \begin{theorem}[Checked arctangent product FTC]
@@ -522,6 +619,107 @@ rational envelope; hence the compact quartic evaluator is equivalent to
 \[
  \int_{-\infty}^{\infty}\frac{\dd x}{x^4-x^2+1}\ \Equiv\ \pi_{\rm area}.
 \]
+\end{theorem}
+
+\begin{definition}[Finite product-integral core for Gaussian volume]
+\label{def:finite-product-integral-gaussian-volume}
+\lean{ComputableAnalysis.finiteProductSum2D}
+\lean{ComputableAnalysis.finiteProductSum2D_factorized}
+\lean{ComputableAnalysis.finiteProductIntegralSum2D}
+\lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
+\lean{ComputableAnalysis.finiteProductSum2D_separable_stage}
+\lean{ComputableAnalysis.finiteProductSum2D_separable_stage_factorized}
+\lean{ComputableAnalysis.gaussianProductModel}
+\lean{ComputableAnalysis.gaussianProductModel_split}
+\lean{ComputableAnalysis.nBallCoeff}
+\lean{ComputableAnalysis.nBallVolumeModel}
+\lean{ComputableAnalysis.nBallVolumeModel_two}
+\lean{ComputableAnalysis.nBallVolumeModel_three}
+\lean{ComputableAnalysis.nBallVolumeModel_four}
+\lean{ComputableAnalysis.nBallVolumeModel_five}
+\lean{ComputableAnalysis.nBallVolumeModel_six}
+\lean{ComputableAnalysis.nBallVolumeModel_seven}
+\lean{ComputableAnalysis.nBallVolumeModel_eight}
+\lean{ComputableAnalysis.nBallVolumeModel_nine}
+\lean{ComputableAnalysis.nBallVolumeModel_recurrence}
+\lean{ComputableAnalysis.nBallVolumeModel_scale}
+\lean{ComputableAnalysis.nBallVolumeModel_stage_six}
+\lean{ComputableAnalysis.nBallVolumeModel_stage_seven}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six_minus_four}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four_nonnegative}
+\leanok
+The first multiple-integral layer is a literal finite product sum over two
+rational sample lists.  The weighted version
+\lean{ComputableAnalysis.finiteProductIntegralSum2D} attaches a rational cell
+width to every sample, making the object a genuine finite rectangle
+approximation.  Its general separable-kernel theorem
+\lean{ComputableAnalysis.finiteProductSum2D_factorized} factorizes every such
+finite unweighted rectangle, and
+\lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized} does the same
+for the weighted rectangle, into the product of its two one-dimensional sums;
+the checked
+stage below is only a named regression example, not a separate mathematical
+milestone.  The same finite
+product law is represented symbolically by
+(mathcal G_{m+n}=mathcal G_mmathcal G_n), where (mathcal G_n) is the
+product of (n) one-dimensional Gaussian approximants.  The (n)-ball model
+then uses the radial recurrence
+[
+ V_0(r)=1,qquad V_1(r)=2r,qquad
+ V_{n+2}(r)=\frac{2\,\pi\,r^2}{n+2}V_n(r).
+]
+This is the computable finite core of the Gaussian route.  A future bridge must
+construct the one-dimensional Gaussian integral, prove its square is the
+chosen (pi) presentation, and then supply effective tail and radial-shell
+estimates; no Lebesgue measure or completed improper integral is asserted here.
+\end{definition}
+
+\begin{theorem}[Bounded Gaussian prefix certificate]
+\label{thm:bounded-gaussian-prefix}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
+\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six_minus_four}
+\lean{ComputableAnalysis.reciprocalSquareTailPartial}
+\lean{ComputableAnalysis.reciprocalSquareTailPartial_stage_four}
+\lean{ComputableAnalysis.reciprocalSquareTailPartial_stage_four_below_one}
+\lean{ComputableAnalysis.reciprocalSquareTailPartial_stage_six}
+\lean{ComputableAnalysis.reciprocalSquareTailPartial_stage_eight}
+\lean{ComputableAnalysis.reciprocalSquareTailPartial_stage_eight_below_one}
+\lean{ComputableAnalysis.expPowerSeries_neg_four_stage_twenty_upper}
+\lean{ComputableAnalysis.expPowerSeries_neg_nine_stage_twenty_upper}
+\lean{ComputableAnalysis.expPowerSeries_neg_sixteen_stage_twenty_upper}
+\lean{ComputableAnalysis.expPowerSeries_neg_twenty_five_stage_twenty_upper}
+\lean{ComputableAnalysis.gaussianTailPointLadder_stage_twenty}
+\lean{ComputableAnalysis.gaussianTailBoxUpper}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder_four}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder_eight}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_three_point_sum}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_four_point_sum}
+\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_eight_point_sum}
+\leanok
+The even Taylor prefix for (e^{-x^2}) can be integrated term by term on a
+bounded symmetric interval using only rational arithmetic.  At radius (1),
+the four-term and six-term prefixes are respectively
+[
+  \frac{52}{35},qquad \frac{31049}{20790}.
+]
+The eight-term prefix is (1009219/675675), and the exact refinement gap
+from four to six terms is (23/2970).  These are finite Gaussian approximants,
+not the completed value
+(int_{-\infty}^{\infty}e^{-x^2}\,dx).  The next bridge must combine Taylor
+remainder bounds on bounded intervals with an effective tail bound.
+For that tail layer, the finite reciprocal-square majorant at cutoff (1) and
+four terms is (1669/3600<1).  It becomes a Gaussian tail bound only after the
+separate pointwise domination (e^{-x^2}\le x^{-2}) has been proved.
+At the concrete point (x=2), the existing tail-enclosed exponential box
+already verifies (e^{-4}\le1/4) at stage (20).
 \end{theorem}
 
 \section{Future identity interfaces}

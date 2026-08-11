@@ -15,6 +15,11 @@ not a description of the current module graph. The checked blueprint
 
 ## Ground Layer
 
+The finite `sqrt 2` bisection trace now reaches stage 24 with the exact
+interval `[11863283/8388608, 23726567/16777216]` and width `1/16777216`.
+This extends the isolating-interval evidence for benchmark item 1 without
+treating the irrational value as an attained rational endpoint.
+
 **Easy benchmark cluster — checked.**  The foundation exposes the rational
 triangle inequality through `qabs_add_le`, `qabs_add_le_three`, and
 `qabs_sub_le`; the list-level `qabs_ratListSum_le` now supplies the finite
@@ -60,6 +65,9 @@ remains a separate obligation and is not claimed by these finite theorems.
 The worked identities `Series.binomial_square` and `Series.binomial_cube` give
 the first quadratic and cubic instances of the finite binomial theorem in the
 Infinite Series chapter.
+The named finite witness now also checks the stage-10 expansion
+`(2+1)^10 = 59049` and the independent stage-8 expansion
+`(2+3)^8 = 390625`, extending the exact rational checkpoints for item 44.
 The rational term and partial-sum constructors, their interior and boundary
 recurrences, and `Series.binomialSum_eq_pow` now expose the full finite
 binomial identity over the rationals. `Series.binomialSum_eq_pow_of_reached`
@@ -102,6 +110,28 @@ The new `DirichletSeries.zetaTwoFiniteTail_add` theorem gives an exact
 concatenation law for two finite tail blocks, shifting the second block to
 the correct denominator range. This supports compositional finite error
 accounting while leaving the classical Basel equality unresolved.
+The new `DirichletSeries.zetaTwoPartial_le_two` gives a uniform finite bound
+for every reciprocal-square partial sum, transported from the stage-one
+padded endpoint. This strengthens the Basel certificate's boundedness
+interface without identifying the completed sum with pi^2/6.
+The convex-calculus interface now also exports
+`leftDerivativeAt_mono`, the dual one-sided derivative monotonicity theorem:
+the supplied least upper bound at a later point dominates every earlier left
+secant through the finite bridge secant. It complements
+`rightDerivativeAt_mono` without constructing a supremum or a completed
+real-valued limit.
+The geometric arctangent layer now exports the finite quotient bridge
+`arctanIntegralRectangleCompute_tangentChart_quotient_contains` and its
+kernel form `arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains`.
+For positive rational steps on [0,1], the latter bounds the rectangle
+difference quotient below by `integralKernel x - (h + h^2)` and above by
+`integralKernel x`. This is the next finite certificate toward item 15's
+derivative/FTC bridge, not a classical limit claim.
+The companion `leftDerivativeAt_le_rightDerivativeAt` now formalizes the
+convex-corner inequality: every left secant is a lower bound for every right
+secant, so the supplied left derivative lies below the supplied right
+derivative. This preserves the project's explicit one-sided treatment of
+corners such as `abs x`.
 The companion `DirichletSeries.zetaTwoTerm_antitone` and
 `DirichletSeries.zetaTwoFiniteTail_le_firstTerm_block` lemmas expose the
 monotone-term and rectangular block bounds used by finite error schedules.
@@ -112,6 +142,15 @@ The higher-stage certificate
 `DirichletSeries.zetaTwoInterval_contains_basel_decimal_100000` contains the
 same target at stage 100,000, strengthening the finite evidence while leaving
 the Basel identity open.
+The worked `FiniteBaselExample` now packages the tolerance `1/1000` at stage
+`1001` and checks that stage `2000` remains inside its rational enclosure.
+The same finite certificate also contains the stage-100000 reciprocal-square
+interval while retaining the `1/1000` width budget.
+This makes the item-14 potential-infinity schedule executable as a named
+certificate, without asserting the completed Basel sum.
+The high-precision companion repeats the construction at width `1/100000`,
+with stage `100001` and a verified later-stage containment at `200000`.
+Euler's completed identity remains deferred.
 The integer-exponent family now has matching executable stage selectors
 `DirichletSeries.zetaNatInterval_width_le_of_denominator_budget` and
 `DirichletSeries.zetaNatInterval_reaches_of_positive_tolerance`: every fixed
@@ -151,6 +190,19 @@ interval algorithm, with exact value 2 certified by
 `Series.triangularTelescopingRaw_equiv_two`. The public selector
 `Series.triangularTelescopingRaw_reaches_of_positive_tolerance` now exposes a
 finite stage for every requested positive rational width.
+The worked `FiniteTriangularExample` instantiates stage four with exact sum
+`8/5` and tail `2/5`, making the reciprocal-triangular boundary directly
+checkable as a named finite witness.
+The same witness now includes stage eight: the exact sum is `16/9` and the
+remaining finite tail is `2/9`, giving a second explicit checkpoint for item
+42 while preserving the potential-infinity interpretation.
+It now also includes stage 16: the exact sum is `32/17` and the remaining
+tail is `2/17`, extending the same finite error schedule to a third checkpoint.
+It now also includes stage 32: the exact sum is `64/33` and the remaining
+tail is `2/33`, extending the same finite error schedule once more.
+It now also includes stage 64: the exact sum is `128/65` and the remaining
+tail is `2/65`, providing the next explicit rational precision checkpoint
+while preserving the potential-infinity interpretation.
 The alternating-series layer now also proves even partial sums are monotone,
 odd partial sums are antitone, and the endpoint intervals are explicitly
 nested via `Series.AlternatingRaw.intervals_nested`; this supplies the order
@@ -174,10 +226,22 @@ this is the only equality case.  The paired finite certificate `am_gm_four`
 extends the same rational boundary to four nonnegative inputs:
   `a*b*c*d <= ((a+b+c+d)/4)^4`, without invoking a general real-valued AM--GM
   theorem.
-  The new `DyadicAMGM` binary-tree certificate extends this to every finite
+The worked four-variable checkpoints now verify equality for `(3,3,3,3)` and
+strictness for `(2,3,4,5)`, exercising the same finite interface on both
+branches.
+The new `DyadicAMGM` binary-tree certificate extends this to every finite
   power-of-two number of nonnegative rational leaves:
   `product_le_average_pow` proves the exact (2^k)-term bound by recursive
   pairing.  It remains a finite rational theorem, not arbitrary-(n) AM--GM.
+The worked `dyadicAMGMExample` instantiates the depth-two tree with leaves
+`1,2,3,4`, checks sum `10` and product `24`, and invokes the generic bound.
+The same worked layer now includes a depth-three tree with leaves `1` through
+`8`, sum `36`, product `40320`, and its exact eight-term dyadic AM--GM bound.
+The depth-four witness now uses leaves `1` through `16`, checks sum `136`,
+product `20922789888000`, and its exact sixteen-term dyadic AM--GM bound.
+The generic `consecutiveDyadic` constructor now supplies a depth-five witness
+with leaves `1` through `32`, sum `528`, product `263130836933693530167218012160000000`,
+and the corresponding thirty-two-term AM--GM bound.
 The two-coordinate rational inequality `cauchy_schwarz_2d` covers the finite
 certificate core of benchmark item 78 without expanding the project's scope
 to functional analysis.  Its equality characterization
@@ -239,16 +303,40 @@ The coordinate identities `RationalCircle.rightTriangle_axis_pythagorean` and
 `RationalCircle.rightTriangle_pythagorean` cover the rational orthogonality
 core of benchmark item 4; general Euclidean-space formulations remain outside
 the current boundary.
+The worked `rightTriangle_rotated_three_four_six_eight_certificate` instantiates
+the same identity on the non-axis legs `(3,4)` and `(-8,6)`: their dot product
+is zero, their squared lengths are `25` and `100`, and the squared hypotenuse
+is `125`.
 The symmetry and base-length identities
 `RationalCircle.isosceles_axis_symmetry` and
 `RationalCircle.isosceles_base_normSq` are the rational-coordinate core of
 benchmark item 65; equality of the associated angles remains outside the
 current boundary.
+The companion `isosceles_axis_pythagorean` identifies the equal-leg square as
+the sum of the squared axis and half-base segments, making the perpendicular
+median calculation explicit in rational coordinates.
+The worked isosceles certificate now includes a third rational instance with
+height/half-base `(7,24)`: both legs have squared length `625`, the axis is
+orthogonal to a leg, and the base has squared length `2304`.  The equality of
+the associated geometric angles remains a separate deferred bridge.
 The existing squared-coordinate law of cosines
 `RationalCircle.Stage.segmentNormSq_law_of_cosines` covers the exact rational
 geometry core of benchmark item 94; the accompanying equilateral specialization
 `RationalCircle.Stage.dot_eq_half_of_unit_equilateral` is already formalized,
 while normalized-angle semantics remain a separate layer.
+The worked `finiteLawOfCosines_unit_orthogonal_certificate` adds a second
+coordinate checkpoint: the unit rational points `(3/5,4/5)` and `(-4/5,3/5)`
+have dot product `0` and squared separation `2`, with the law-of-cosines
+identity checked by exact rational computation.
+The same worked module now checks the antipodal pair `(3/5,4/5)` and
+`(-3/5,-4/5)`, with dot product `-1` and squared separation `4`, providing a
+non-orthogonal finite checkpoint for item 94.
+It also checks the coordinate pair `(3,0)` and `(0,4)`: squared norms `9` and
+`16`, dot product `0`, and squared separation `25`, making the `3-4-5` law of
+cosines specialization explicit.
+The Heron witness now adds the `13-14-15` triangle with vertices
+`(0,0),(14,0),(5,12)`: twice-area `168`, Heron product `7056`, and finite
+square-root raw equivalent to area `84`.
 The exact rational identities `RationalCircle.heron_squared_identity` and
 `RationalCircle.heron_product_nonneg` cover the squared algebraic and
 nonnegative rational core of benchmark item 57.  The new
@@ -261,6 +349,9 @@ area witness 6 without claiming a general square-root construction, and
 `RationalCircle.heron_three_four_five_area_raw_equiv_six` transports the
 computed Heron square-root raw directly to that witness, while
 `RationalCircle.heron_three_four_five_strict_pos` records nondegeneracy.
+The new `FiniteHeronExample` adds a non-3-4-5 instance: the rational triangle
+with vertices `(-3,0)`, `(3,0)`, and `(0,4)` has sides `6,5,5`, area `12`,
+and Heron product `144`; Lean transports its finite square-root raw to `12`.
 The algebraic bridge `sqrt_thirty_six_eq_six` now identifies the project’s
 certified square-root representation with that same rational witness.
 The exact rational identity
@@ -269,6 +360,12 @@ oriented-chord core of benchmark item 95; the full chord-length statement
 remains open. `RationalCircle.ptolemy_squared_coordinate_certificate` now
 adds a square-root-free squared shadow for the concrete cyclic quadrilateral,
 including an explicit rational witness for the four-side cross-term.
+The second finite Ptolemy example uses the ordered parameters
+`(0,5/12,3/4,4/3)`. Its six squared chord lengths are rational squares with
+length witnesses `10/13, 32/65, 14/25, 8/5, 6/5, 66/65`, and Lean checks the
+corresponding rational Ptolemy identity independently.  The new
+`secondPtolemy_length_certificate` also transports all six witnesses through
+the raw square-root length interface.
 The rational power-of-a-point identity
 `RationalCircle.horizontalChord_power_identity` covers the directed-segment
 core of benchmark item 55. The new
@@ -285,6 +382,82 @@ that output with the nonnegative rational representative whenever a supplied
 rational square witness exists. The concrete
 `horizontalChordPowerSqrtRaw_equiv_four_fifths` specialization checks the
 outside-point instance (16/25mapsto4/5) by exact rational arithmetic.
+The companion `FiniteChordPowerExample` checks the second rational instance
+with radius `4/5`: the external point `1` gives product `9/25`, whose certified
+square-root output is `3/5`.
+It now also records the interior point `t=1/2`, where the directed product is
+`-39/100`; this concrete sign witness keeps item 55's directed-segment core
+distinct from the later unsigned-length interpretation.
+
+**Additional computable-analysis target — Gaussian route to (n)-ball volume.**
+The `FiniteNBallVolume` module adds a literal finite two-dimensional
+product-sum evaluator.  The reusable theorem
+`finiteProductSum2D_factorized` proves the separable-kernel identity for
+arbitrary finite sample lists; the concrete sample-grid calculation is only a
+regression witness, not a standalone finite-sum milestone.  This is the
+rectangular algebra needed before attaching cell widths and error schedules to
+a genuine multiple-integral construction.  Its weighted companion
+`finiteProductIntegralSum2D` attaches rational cell widths and
+`finiteProductIntegralSum2D_factorized` proves the corresponding weighted
+rectangle factorization.  The module also records the exact finite product law for (n) independent
+one-dimensional Gaussian approximants and the rational coefficient recurrence
+for the (n)-ball volume model.  The one-dimensional Gaussian integral, its
+square-to-π bridge, radial shell estimates, and unbounded tails remain explicit
+future interfaces rather than being smuggled in as Lebesgue integration.
+The first low-dimensional recurrence cases are now explicit: the disk and
+3-ball identities are joined by `nBallVolumeModel_four`, giving
+`(1/2) * piApprox^2 * radius^4`, and `nBallVolumeModel_five`, giving
+`(8/15) * piApprox^2 * radius^5`. These remain finite recurrence identities;
+the Gaussian integral and square-to-π bridge are separate targets.
+The next parity pair is now checked as well: `nBallVolumeModel_six` gives
+`(1/6) * piApprox^3 * radius^6`, while `nBallVolumeModel_seven` gives
+`(16/105) * piApprox^3 * radius^7`. The Gaussian integral and radial
+shell/tail bridge remain separate computable targets.
+The following pair is explicit too: `nBallVolumeModel_eight` gives
+`(1/24) * piApprox^4 * radius^8`, while `nBallVolumeModel_nine` gives
+`(32/945) * piApprox^4 * radius^9`. These are still finite recurrence
+checkpoints, not a claim about Gaussian integration or unbounded volume.
+The homogeneity theorem `nBallVolumeModel_scale` now records the expected
+radius-scaling law exactly: scaling the radius by `s` scales the finite model
+by `s^n`. This is the algebraic volume property needed before any analytic
+Gaussian or radial-shell bridge is introduced.
+
+The companion `FiniteGaussianIntegral` module now supplies the bounded analytic
+prefix: it integrates the even Taylor polynomial for `exp (-x^2)` term by term
+over `[-1,1]`.  The four-term and six-term prefixes are exactly `52/35` and
+`31049/20790`.  This is the first concrete Gaussian integral object in the
+project; the full-line tail and square-to-π theorem remain the next bridges.
+The stage-eight prefix is additionally `1009219/675675`, and the exact
+stage-six-minus-stage-four refinement gap is `23/2970`.
+The same file adds the finite reciprocal-square tail partial sum at cutoff `1`:
+four terms give `1669/3600 < 1`.  This is deliberately a transport layer,
+not yet a Gaussian claim; it awaits the pointwise proof
+`exp (-x^2) ≤ 1/x^2` for `x ≥ 1`.
+The reciprocal-square prefix now also reaches six terms (`90281/176400`) and
+eight terms (`3427741/6350400`), with the latter still below `1`.
+The existing tail-enclosed exponential evaluator also now checks the concrete
+point `x=2`: its stage-20 upper endpoint for `exp (-4)` is at most `1/4`.
+The same stage also verifies `exp (-9) ≤ 1/9` and `exp (-16) ≤ 1/16`, packaged
+as `gaussianTailPointLadder_stage_twenty`.
+The reusable `gaussianTailBoxUpper` interface packages each certified upper
+endpoint as a function of the rational tail point and stage, with the same
+three-point ladder exported by `gaussianTailBoxUpper_stage_twenty_ladder`.
+The finite transport theorem
+`gaussianTailBoxUpper_stage_twenty_three_point_sum` sums those three certified
+upper boxes into the rational tail budget `61/144`.
+The seven-point ladder now extends the stage-20 checks through `x=5` and uses
+stage 100 for `x=6,7,8`, where the tighter evaluator precision is needed.
+`gaussianTailBoxUpper_stage_twenty_eight_point_sum` packages their combined
+rational bound. This lengthens the finite tail evidence while the
+general inequality `exp(-x^2) ≤ 1/x^2` and the completed Gaussian integral
+remain separate bridges.
+The finite (n)-ball recurrence now exposes its first geometric cases:
+`nBallVolumeModel_two` gives the disk model (pi r^2), and
+`nBallVolumeModel_three` gives the 3-ball model ((4/3)pi r^3), with the
+symbol `piApprox` still an explicit rational approximation rather than a
+completed real constant.
+The ladder now includes `x=5`, with `exp (-25) ≤ 1/25`; the four-point sum is
+bounded by `1669/3600`, exactly matching the reciprocal-square tail prefix.
 The reusable `PiProofs.pointSegmentLengthRaw` interface now applies the same
 certified square-root algorithm to any rational-coordinate squared distance,
 with validity and `SqrtRawSpec` theorems for later Ptolemy and polygonal-length
@@ -313,6 +486,22 @@ The same module now checks the cubic witness
 `(3/5+4i/5)^3 = -117/125 + (44/125)i`, including coordinate and unit-norm
 certificates. This exercises the general `pointPow_three` identity at a
 fully explicit rational point.
+The fourth-power witness is now checked as well:
+`(3/5+4i/5)^4 = -527/625 - (336/625)i`, with unit norm and a direct
+`QComplex.natPow` bridge.  The angle/exponential interpretation remains
+deferred.
+The fifth-power witness is now checked too:
+`(3/5+4i/5)^5 = -237/3125 - (3116/3125)i`, with its unit-norm and finite
+`QComplex.natPow` bridge.  This extends the rational de Moivre computation
+without adding the deferred angle/exponential interpretation.
+The sixth-power witness is now checked as well:
+`(3/5+4i/5)^6 = 11753/15625 - (10296/15625)i`, with the same unit-norm and
+finite natural-power bridges. The angle/exponential interpretation remains
+deferred.
+The seventh-power witness continues the same finite chain:
+`(3/5+4i/5)^7 = 76443/78125 + (16124/78125)i`, with exact coordinates,
+unit norm, and a finite `QComplex.natPow` bridge. The angle/exponential
+interpretation remains deferred.
 `RationalCode.encode`/`RationalCode.decode` round trip and
 `RationalCode.encode_injective`/`RationalCode.encode_eq_iff` show that the
 canonical code is unique, while
@@ -332,10 +521,16 @@ The explicit `rationalNatIndex`, `rationalNatCode_index`, and
 `rationalNatIndex_injective` now provide the matching injection from canonical
 rationals to natural indices using the normalized numerator/denominator code;
 the finite coding-level denumerability interface is therefore complete.
+The worked `FiniteRationalCodeExample` makes this interface concrete:
+`rationalNatIndex (3/5) = 61`, and decoding the code at index `61` returns
+`3/5`.
 The certified rational circle-area exhaustion `piCircleArea`, together with
 `PiProofs.AreaLoopValidity.areaValid`, is the project's computable core of
 benchmark item 9; its interpretation as a classical Euclidean measure theorem
 is kept at the chapter's explicit algorithm/area bridge.
+The worked `FiniteCircleAreaExample` now evaluates the area enclosure exactly
+at stages 1, 2, 3, and 4, with rational endpoints, giving a concrete finite
+checkpoint schedule for item 9 without asserting a completed area limit.
 The explicit terminating loop `euclideanGcd`, together with
 `euclideanGcd_eq_gcd`, `Nat.gcd_rec`, and the gcd divisibility laws covers the
 algorithmic part of benchmark item 69.  Its public recurrence
@@ -360,6 +555,11 @@ The bridge `euclideanGcd_bezout_exists` identifies the same coefficient
 certificate with the executable Euclidean-loop result.
 The worked `FiniteGcdSecondExample` computes `gcd(252,198)=18` and checks the
 back-substitution identity `4*252 - 5*198 = 18` for item 69.
+The same worked module now checks `gcd(1071,462)=21` with the independent
+back-substitution identity `-3*1071 + 7*462 = 21`, strengthening the finite
+Euclidean/Bézout evidence for items 60 and 69.
+It now also checks `gcd(12345,6789)=3` with the explicit identity
+`-903*12345 + 1642*6789 = 3`, adding a larger remainder-chain example.
 The natural-number theorem `three_dvd_three_digit` is the three-digit decimal
 core of benchmark item 85. `decimalDigitSum` now supplies a terminating
 decimal digit-sum evaluator with its small-digit reduction lemmas, including
@@ -367,6 +567,14 @@ decimal digit-sum evaluator with its small-digit reduction lemmas, including
 `decimalDigitSum_succ_of_not_lt_ten`, and
 `decimalDigitSum_mod_three` proves global residue preservation modulo 3;
 `three_dvd_iff_decimalDigitSum_dvd` exposes the resulting divisibility test.
+The worked decimal certificate now includes a second pattern, `321`, whose
+digit sum is `6` and which is divisible by 3, alongside the negative control
+`322`.  This gives item 85 two distinct finite decision checkpoints.
+The same certificate now checks the boundary pair `999` and `1000`: digit sum
+`999 = 27` gives divisibility by 3, while `1000` is not divisible by 3.
+The worked decimal certificate now also checks `decimalDigitSum 123456 = 21`
+and `3 ∣ 123456`, together with the neighboring non-divisibility witness
+`¬3 ∣ 123457`, extending item 85 to a six-digit terminating checkpoint.
 The new `basePositionalValue_mod_sub_one` theorem generalizes this finite
 digit-sum congruence to arbitrary bases (b\ge2) modulo (b-1), with
 `decimalPositionalValue_mod_nine` as its decimal specialization.
@@ -376,11 +584,31 @@ vector of equal length, with the residual represented as a sum of squared
 two-by-two minors.
 The worked `FiniteCauchySchwarzExample` checks equality for the proportional
 rational vectors `(1,2)` and `(2,4)`, including the explicit minor-zero witness.
+The companion `FiniteCauchySchwarzThreeExample` checks the non-proportional
+vectors `(1,2,3)` and `(3,1,2)`: the dot product is `11`, both squared norms
+are `14`, and the explicit minor-square residual is `75`. This gives item 78
+both an equality and a strict finite certificate.
+The new `FiniteCauchySchwarzFourExample` checks vectors `(1,2,3,4)` and
+`(4,3,2,1)`: both squared norms are `30`, the dot product is `20`, and the
+explicit minor-square residual is `500`.
+The new `FiniteCauchySchwarzSixExample` checks vectors `(1,2,3,4,5,6)` and
+`(6,5,4,3,2,1)`: both squared norms are `91`, the dot product is `56`, and
+the explicit minor-square residual is `5145`.
 The reusable induction principle `nat_induction_schema` is the checked finite
 proof/programming core of benchmark item 74.
 The worked `FiniteInductionExample` applies that schema to the arithmetic
 sum: it re-proves `arithmeticSum n = n*(n-1)/2` and checks the stage-5 value
 `10`.
+The same induction witness now checks stage 10 exactly as `45`, providing a
+larger executable checkpoint for item 74.
+The same induction witness now checks stage 20 exactly as `190`, extending the
+finite arithmetic-sum checkpoint.
+It now also checks stage 40 exactly as `780`, extending the explicit induction
+witness while keeping the conclusion entirely finite and rational.
+It now also checks stage 80 exactly as `3160`, extending the finite item-74
+induction schedule.
+The same induction witness now checks stage 160 exactly as `12720`, extending
+the finite schedule while retaining the terminating proof.
 The finite-counting namespace now supplies `subsetCount_eq_pow` for benchmark
 item 52 and the Pascal recurrence/boundary lemmas
 `combination_pascal`/`combination_rat_pascal`/`combination_outside`/
@@ -396,14 +624,55 @@ formulas.  A general finite-set
 cardinality API remains out of scope.
 The worked `FiniteSubsetCountExample` evaluates the subset recurrence at stage
 8, checking `subsetCount 8 = 2^8 = 256` as a concrete item-52 certificate.
+The same recurrence now has a stage-10 checkpoint,
+`subsetCount 10 = 2^10 = 1024`, making the finite counting refinement
+explicit.
+It now also has stage 12, with `subsetCount 12 = 2^12 = 4096`, extending the
+same executable finite-counting checkpoint.
+It now also has stage 16, with `subsetCount 16 = 2^16 = 65536`, extending the
+same finite recurrence witness.
+It now also has stage 20, with `subsetCount 20 = 2^20 = 1048576`, extending
+the executable item-52 counting schedule.
+It now also has stage 32, with `subsetCount 32 = 2^32 = 4294967296`, extending
+the same finite recurrence witness.
+The stage-64 witness now checks `subsetCount 64 = 2^64 = 18446744073709551616`,
+continuing the terminating recurrence certificate without introducing a
+general finite-set cardinality API.
 The worked `FinitePascalExample` evaluates `C(8,3)=56` and checks the Pascal
 decomposition `C(8,3)=C(7,2)+C(7,3)=21+35` for item 58.
+The Pascal witness now also checks `C(10,3)=120` through
+`C(10,3)=C(9,2)+C(9,3)=36+84`, extending the finite recurrence checkpoint.
+The same witness now checks `C(15,3)=455` through
+`C(15,3)=C(14,2)+C(14,3)=91+364`, adding a larger finite Pascal checkpoint.
+It now also checks `C(20,3)=1140` through
+`C(20,3)=C(19,2)+C(19,3)=171+969`, extending the finite item-58 recurrence
+checkpoint.
+It now also checks `C(25,3)=2300` through
+`C(25,3)=C(24,2)+C(24,3)=276+2024`, extending the finite Pascal schedule.
+The Pascal witness now also checks
+`C(32,3)=C(31,2)+C(31,3)=465+4495=4960`, extending the terminating
+finite recurrence schedule.
 The concrete theorem `sqrt_two_irrational` instantiates the certified square-root
-criterion at $2$, proving benchmark item 1 in the project's interval-real
+criterion at $2$, proving benchmark item 1 in the project's `RealRaw`
 representation.  The stronger public classifications
 `sqrt_rational_iff_square` and `sqrt_rational_iff_lowest_terms_square`, along
 with the corresponding irrationality criterion in lowest terms, now expose
 the full finite square-test boundary in Foundations.
+The worked `FiniteSqrtTwoBisectionExample` adds the matching executable trace:
+after four exact dyadic comparisons, the target $x^2=2$ is enclosed by
+`[11/8, 23/16]` with width `1/16`.  This is the project's computational
+alternative to invoking a general completeness theorem.
+The same trace now exports stage eight, enclosing the target in
+`[181/128,363/256]` with width `1/256`. This gives item 1 a tighter exact
+rational checkpoint without changing the potential-infinity semantics.
+The same trace now exports stage twelve, enclosing the target in
+`[181/128,5793/4096]` with width `1/4096`, strengthening the finite item-1
+precision schedule.
+The same trace now exports stage sixteen, enclosing the target in
+`[92681/65536,46341/32768]` with width `1/65536`.
+It now also exports stage twenty, enclosing the target in
+`[741455/524288,1482911/1048576]` with width `1/1048576`, extending the
+potential-infinity schedule without treating the limit as an attained value.
 The public finite-Riemann bridge
 `PiProofs.four_arctanSeries_one_equiv_piCircleArea` identifies the Leibniz
 series presentation with the certified circle-area presentation, covering the
@@ -417,6 +686,15 @@ benchmark item 34 (harmonic-series divergence).  The stronger
 effective, potential-infinity formulation of divergence: every requested
 finite height is reached by a finite computation, without asserting an
 attained infinite sum.
+The named witness now instantiates the next checkpoint explicitly:
+`harmonicSum_stage1024_reaches_five` proves `H_1024 >= 5`, extending the
+dyadic potential-infinity schedule beyond the stage-256 height-four witness.
+The next named witness `harmonicSum_stage4096_reaches_six` proves
+`H_4096 >= 6`, extending the same finite height schedule once more.
+The new `harmonicSum_stage16384_reaches_seven` witness proves `H_16384 >= 7`,
+continuing the explicit finite growth schedule.
+The new `harmonicSum_stage65536_reaches_eight` witness proves
+`H_65536 >= 8`, extending the same potential-infinity ladder.
 The monotonicity theorem `Logarithm.harmonicSum_le_of_le` and its propagation
 corollary `Logarithm.harmonicSum_two_pow_reaches_later` now transport each
 finite target certificate to every later harmonic stage. This makes the
@@ -444,6 +722,10 @@ The rational-circle determinant package
 `RationalCircle.triangleTwiceArea_pos_of_oriented` supply the finite
 orientation/area core of benchmark item 27; completed angle-sum semantics
 remain deferred.
+The worked `FiniteTriangleOrientationExample` instantiates this package at
+`(1,0)`, `(0,1)`, and `(-1,0)`: the signed twice-area is `2`, cyclic
+permutation preserves it, swapping two vertices negates it, and the positive
+orientation certificate is checked directly.
 For benchmark item 80, `MultiplicativeCertificate` now records finite lists of
 nontrivial factors and their product, with the checked example
 `factorizationCertificate60`.  The finite primality search and recursive
@@ -490,6 +772,13 @@ The worked certificate is now also prime-labelled by `BasicPrime` proofs for
 2, 3, and 5 and `primeFactorizationCertificate60`.  The first reusable
 Euclid-lemma step is now present as `basicPrime_dvd_of_dvd_mul`; this remains
 a concrete example, not a general Fundamental Theorem of Arithmetic proof.
+The new `FinitePrimeFactorExample` adds the prime-labelled factor list
+`[2,2,2,3,3,5]` for `360`, verifies its product, and records divisibility by
+each distinct prime.  This makes the certificate-level item-80 boundary
+concrete beyond the earlier `60` example.
+The same worked module now checks the larger certificate
+`27720 = 2^3 * 3^2 * 5 * 7 * 11`, including terminating primality searches
+for the newly introduced factors `7` and `11`.
 The criterion `basicPrime_of_no_proper_divisor` now isolates the logical
 primality test that a future bounded divisor search must establish.
 The iff form `basicPrime_iff_no_proper_divisor` exposes that criterion in both
@@ -531,10 +820,92 @@ result into `exists_basicPrime_gt`: every finite bound `n` has a certified
 prime strictly above it.  This is the direct potential-infinity form of prime
 unboundedness.
 
-**Current benchmark count.** At this certificate boundary, 39 entries have a
-checked project-relevant core: 1, 3, 4, 9, 15, 17, 23, 26, 27, 34, 35, 37, 38, 42, 44, 46, 49, 52, 55, 57, 58, 60, 64, 65, 66, 68,
-69, 74, 75, 77, 78, 79, 80, 85, 89, 91, 94, 95, and 97. This counts finite and rational-coordinate cores
+**Current benchmark count.** At this certificate boundary, 48 entries have a
+checked project-relevant core: 1, 2, 3, 4, 9, 14, 15, 16, 17, 23, 26, 27, 34, 35, 37, 38, 42, 43, 44, 46, 49, 55, 57, 60, 64, 65, 66, 68,
+69, 73, 74, 75, 76, 77, 78, 79, 80, 81, 85, 89, 91, 92, 94, 95, 97, 98, and 100. This counts finite and rational-coordinate cores
 honestly; it does not claim full classical theorem statements for every item.
+The admission rule is strict: every counted entry must have a project-native
+statement over `RealRaw`/abstract `Real`, rational interval data, or a finite
+certificate. A scoped constructive replacement is counted under its scoped
+statement, never as an unrestricted theorem over completed real numbers.
+
+The new `monotone_of_succ_le` and `antitone_of_succ_ge` lemmas propagate a
+successor-step rational order bound across every finite index interval.  The
+explicit `ascendingNaturalSequence` stages 64 and 128 provide the executable
+checkpoint for item 73.  The bounded dyadic sequence `1 - (1/2)^n` adds a
+computable potential-infinity witness: it is monotone, bounded by 1, and its
+stage-8 error is exactly `1/256`; convergence as an attained real limit is
+intentionally left outside this finite boundary.
+Stages 16 and 32 now extend this ladder with exact errors `1/65536` and
+`1/4294967296`, still without asserting an attained limit.
+Stages 64 and 128 extend it further, with errors `1/2^64` and `1/2^128`.
+The new `dyadicApproach_error_shrinks` theorem upgrades these checkpoints to
+an explicit potential-infinity schedule: for every positive rational tolerance,
+the denominator-derived stage bound makes the remaining error small enough.
+It still produces no attained limit or completeness principle.
+
+The finite four-point transform in `FiniteFourierCertificate.lean` adds the
+item-76 core: the zero mode sums to `4`, modes `1`, `2`, and `3` cancel exactly,
+and mode `4` returns to `4` at the rational quarter-turn roots.  This is a
+finite Fourier orthogonality and periodicity certificate, not a claim about
+convergence of an infinite Fourier series.
+The same module now adds a Parseval-style finite energy check for the signal
+`(1,2,3,4)`: its unnormalized quarter-turn coefficients have energies
+`100, 8, 4, 8`, summing to `120 = 4*(1+4+9+16)`.  This strengthens the finite
+transform core without introducing an infinite Fourier limit.
+The transform checkpoint now also verifies mode `5`, whose four-point sum is
+again zero. This extends the finite periodicity evidence beyond one complete
+mode cycle while remaining a rational-complex calculation.
+
+The exact lattice triangles in `FinitePickCertificate.lean` add item 92's
+finite coordinate core.  The `(4,3)` triangle has area `6`, boundary count `8`,
+and interior count `3`; the independent `(5,2)` triangle has area `5`,
+boundary count `8`, and interior count `2`.  A non-axis-aligned triangle with
+vertices `(0,0),(4,1),(1,4)` has area `15/2`, boundary count `5`, and
+interior count `6`; all three satisfy Pick's identity.
+The fourth finite witness uses vertices `(0,0),(6,0),(2,5)`: area `15`,
+boundary count `8`, and interior count `12`, again satisfying Pick's identity
+with a different non-primitive edge pattern.
+The unrestricted lattice-polygon theorem remains deferred.
+
+The prime-reciprocal accumulator in `FinitePrimeReciprocalCertificate.lean`
+adds item 81's potential-infinity core: every finite certified prime list has
+a new certified prime whose positive reciprocal strictly increases the exact
+rational sum.  The explicit six-prime checkpoint reaches `40361/30030`
+through prime `13`, with a strict increase from the five-prime stage.  This
+does not claim the completed infinite divergence theorem.  The eight-prime
+checkpoint through `19` now reaches `14117683/9699690`, with a strict increase
+from the six-prime stage.  The ten-prime checkpoint through `29` now reaches
+`9920878441/6469693230`, with a structural strict increase from the eight-prime
+stage.
+The twelve-prime checkpoint now verifies that the explicit accumulator exceeds
+`3/2`, extending the finite growth ladder without asserting divergence of an
+infinite prime series.
+
+The finite primality-search witnesses in `FiniteBertrandCertificate.lean`
+add item 98's core at (n=10), (n=20), (n=30), (n=40), (n=50), and (n=60):
+primes 11, 23, 31, 41, 53, and 61 are checked inside the corresponding
+doubled intervals.
+`bertrand_extended_finite_certificate` packages all six interval witnesses as
+one reusable finite proposition, including the new `(60,120)` stage.
+The general postulate remains deferred.
+
+The rational rectangle inequality in `FiniteIsoperimetricCertificate.lean`
+adds item 43's finite geometric core: \(16A\le P^2\), with equality exactly
+for a square and an explicit \(3\times4\) certificate.  The general
+plane-region isoperimetric theorem remains deferred.  The companion (5\times12)
+certificate records area (60), perimeter (34), and strict defect
+`34^2 - 16*60 = 196`.
+The quantitative defect identity `rectangle_isoperimetric_gap` strengthens
+this core: the perimeter-square excess is exactly `4 * (a-b)^2`, making the
+equal-side equality case an explicit rational stability statement.
+
+The finite occupancy evaluator in `FiniteBirthdayCertificate.lean` adds item
+93's core: 4 people over 10 days give 5040 collision-free assignments and
+4960 collision assignments, with exact ratios `63/125` and `62/125`.  The
+five-person extension gives 30240 collision-free assignments and 69760
+collisions out of 100000, with ratios `189/625` and `436/625` that again
+partition the total exactly.
 
 **Parallel formalization batch.** The series, effective-calculus, geometry,
 algebra, and finite-ODE workstreams have added the following potential-infinity
@@ -607,6 +978,43 @@ the endpoint derivative, without asserting an attained real intermediate
 point.  The dyadic AM--GM core also exposes
 `DyadicAMGM.product_mul_card_pow_le_sum_pow`, a denominator-free form useful
 for finite exact-arithmetic certificates.
+The generic `Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap`
+now packages the corresponding absolute secant error for every
+nonnegative-coefficient Horner polynomial: the secant's distance from the
+left endpoint derivative is bounded by the finite derivative bracket width.
+This is the reusable rational MVT error interface behind the degree-specific
+budget theorems.
+
+The Mean Value target is now explicitly layered: the constructive FTC
+endpoint identity comes first, followed by an integral-average derivative
+certificate, with a pointwise Lagrange witness reserved for an effectively
+continuous monotone derivative (or an effectively differentiable convex
+function).  Mere convexity is handled through one-sided derivatives or subgradients rather
+than an unjustified exact value of `f'` at an intermediate point.
+The reusable theorem
+`Integral.ExactCellOrderPreservation.integral_average_between_bounds` now
+formalizes that middle layer: on a positive rational cell, lower and upper
+pointwise bounds imply that the certified endpoint integral divided by the
+cell length lies between the same bounds.  It is an average-value enclosure,
+not an assertion that a point attaining the average exists.
+For the unit cubic, the new `cubicUnit_mvt_bisection_search` packages the
+corresponding potential-infinity witness: the secant slope is `1`, the
+normalized derivative target is `1/3`, and the existing certified square
+bisection searches an interval whose squared values enclose that target.  This
+is an approximate MVT witness for the generally irrational intermediate point,
+not a rational exact-root claim.
+The quartic companion now uses the generic monotone-target bisection interface:
+`quarticUnit_mvt_bisection_tolerance_certificate` accepts every positive
+rational tolerance and returns a rational interval bracketing the normalized
+derivative target `1/4`, with the width budget proved explicitly.  This is a
+reusable higher-degree MVT search pattern, still expressed through potential
+infinity rather than an attained irrational point.
+The general `FiniteMonomialMVTSearch` module now packages this pattern for
+every monomial `x^(n+1)` on `[0,1]`: its normalized derivative average is
+`1/(n+1)`, the endpoint target bracket is proved uniformly, and
+`monomialUnit_mvt_bisection_tolerance_certificate` supplies a rational
+interval of any requested positive width.  This promotes the cubic and
+quartic examples to a reusable higher-degree MVT certificate.
 
 For benchmark item 90, `finiteStirlingRatio_pos` now makes the positivity of
 the finite Stirling-shaped ratio explicit for every natural index and every
@@ -615,9 +1023,27 @@ future finite interval transport.  The concrete n=10 certificate is now also
 sharpened by `finiteStirlingRatioAtTen_unit_enclosure`, which places the
 computed ratio in `[1, 101/100]` while leaving Stirling's asymptotic theorem
 deferred.
+The companion `finiteStirlingRatioAtTen_unit_error` exports this as the
+explicit rational error budget `qabs (R₁₀ - 1) <= 1/100`.
 The companion `FiniteStirlingStageEight` certificate repeats the bounded
 calculation at `n=8`, with a rational square-root bracket for `sqrt(16*pi)`
 and a checked ratio enclosure `[1/2,2]`.
+The new `FiniteStirlingStageTwelve` certificate repeats the same finite
+transport at `n=12`, using the rational square-root bracket anchored at
+`217/25` for `sqrt(24*pi)` and the enclosure `[1/2,2]`.
+The new `FiniteStirlingStageSixteen` certificate extends the same bounded
+transport to `n=16`, using the bracket `1003/100` for `sqrt(32*pi)` and again
+checking the ratio enclosure `[1/2,2]`.
+The new `FiniteStirlingStageTwenty` certificate continues this bounded
+transport to `n=20`, using the bracket `1121/100` for `sqrt(40*pi)` and again
+checking the ratio enclosure `[1/2,2]`; Stirling's asymptotic limit remains
+deferred.
+The new `FiniteStirlingStageTwentyFour` certificate extends the same bounded
+transport to `n=24`, using the bracket `12279/1000` for `sqrt(48*pi)` and again
+checking the ratio enclosure `[1/2,2]`.
+The `FiniteStirlingStageThirtyTwo` certificate continues the same finite
+transport to `n=32`, using the bracket `1418/100` for `sqrt(64*pi)` and again
+checking the ratio enclosure `[1/2,2]`; the asymptotic limit remains deferred.
 
 The matrix workstream also adds
 `LinearODE.HarmonicOscillator.twoByTwo_matrixPow_three`, reducing the third
@@ -634,6 +1060,12 @@ characteristic coefficients as finite entry formulas.
 The worked `FiniteThreeByThreeCayleyExample` adds the diagonal rational
 matrix `diag(1,2,3)`: Lean checks trace `6`, second coefficient `11`,
 determinant `6`, and the explicit identity `A^3 - 6A^2 + 11A - 6I = 0`.
+The same module now checks the non-diagonal upper-triangular matrix
+`[[1,1,0],[0,2,1],[0,0,3]]` with the same coefficients and Cayley--Hamilton
+identity, demonstrating the finite matrix layer beyond diagonal data.
+The diagonal witness also computes its fourth finite power exactly:
+`A^4 = diag(1,16,81)`, providing a concrete consumer of the finite
+matrix-power recurrence.
 The companion `ratMatrix_threeByThree_matrixPow_recurrence` transports the
 finite third-order power recurrence to the same arbitrary matrix input.
 The companion `LinearODE.HarmonicOscillator.twoByTwo_inverse_unique_right`
@@ -666,22 +1098,198 @@ The worked `quadratic_linear_worked_remainder` example now instantiates the
 L'Hopital certificate with the finite quotient analogue of `(x^2-1)/(x-1)`:
 the residual error from the base value `2` is exactly the computable step, and
 the stage-indexed version makes that error `1/n`. No limit theorem is added.
+The companion cubic certificate records the finite residual `3*step + step^2`
+after cancelling `(x-1)` from `x^3-1`, together with its stage-indexed form at
+`step = 1/n`.  This strengthens item 64 without adding the deferred limit
+theorem.
+The new `cubic_linear_worked_remainder_at_stage_error_le_four_div` turns that
+identity into an explicit precision schedule:
+`qabs (R_n - 3) <= 4/n` for every positive stage `n`. This is the finite
+algorithmic remainder bound needed before any future limit assembly.
+The quartic companion now has the matching bound
+`qabs (Q_n - 4) <= 11/n`, certifying the finite residual
+`6/n + 4/n^2 + 1/n^3` at every positive stage. This extends the precision
+schedule across the next cancellation degree without claiming a limit.
+The worked `FiniteSepticMVTExample` now instantiates the finite Mean Value
+interface at degree seven: Lean computes the secant of `x^7` on `[0,1]` as
+`1` and checks the endpoint derivative enclosure `[0,7]`.  This is a concrete
+item-75 benchmark witness while retaining the project's finite, rational
+algorithmic boundary.
+The new `FiniteNonicMVTExample` extends the finite polynomial ladder to degree
+nine: the secant of `x^9` is `1` on `[0,1]` with derivative bracket `[0,9]`,
+and is `511` on `[1,2]` with endpoint bracket `[9,2304]`. No intermediate
+real point is selected.
+The cubic MVT pass now also checks the signed interval `[-1,1]`: the secant
+is `1`, and the finite derivative enclosure is `[0,3]`. This broadens item
+75's rational-domain coverage without selecting an intermediate point.
+It now also includes a genuine pointwise checkpoint on `[2,11]`: the cubic
+secant slope is `147`, attained by the monotone derivative `3*x^2` at the
+rational interior witness `t = 7`. This is the first explicit pointwise MVT
+certificate in the project's monotone-derivative direction.
+The reusable `Differential.cube_secant_supplied_mvt_witness` now packages this
+pattern for arbitrary rational endpoints and a supplied rational interior
+point: checking `a^2 + a*b + b^2 = 3*t^2` is enough to certify the cubic
+secant identity at `t`. This makes the pointwise witness an interface rather
+than a one-off numerical example, while still avoiding an existential real
+intermediate-point theorem.
+The new `FiniteQuinticMVTExample` adds the intermediate degree-five witness:
+the secant of `x^5` on `[0,1]` is `1`, and the finite derivative bracket is
+`[0,5]`. This extends item 75’s worked polynomial ladder without selecting an
+intermediate point.
+The new `FiniteQuarticMVTExample` fills the intermediate degree-four case:
+the secant of `x^4` on `[0,1]` is `1`, with finite derivative bracket `[0,4]`.
 The Descartes examples now include `threeVariationCubic`: the finite list for
 `(x-1)(x-2)(x-3)` has three sign variations, and exact factorization proves
 that its positive rational roots are precisely `1`, `2`, and `3`.
+The finite integration-by-parts ladder now includes
+`FiniteQuarticQuinticIntegrationByParts`: the two endpoint-weighted rational
+grid sums for `x^4` and `x^5` telescope to the endpoint product `1` at every
+positive stage, with stage four checked explicitly.  This extends the finite
+FTC/product-rule core of item 15 without introducing a completed integral or
+a real-number limit.
+The existing `FiniteFTCQuintic` certificate is now surfaced as the next
+item-15 checkpoint: finite left and right endpoint sums for `x^5` on `[0,1]`
+enclose `1/6`, with stage twenty linked explicitly in the Blueprint.  This
+keeps the quintic FTC construction discoverable alongside the quartic and
+sextic checkpoints.
+The new `FiniteComplexQuadraticExample` supplies the next worked FTA
+boundary: Lean checks both distinct rational-coordinate roots of
+`z^2 - 2*z + 5`, the factorization into the two supplied linear factors, and
+the exact finite root-search result.  This strengthens items 2 and 37 while
+keeping arbitrary-polynomial root existence deferred.
+The new `FiniteComplexLinearExample` adds the explicit non-real linear base
+case `-2 + (1+i)z`, with inverse witness `(1-i)/2` and exact root `1-i`.
+This instantiates the general complex-linear FTA interface entirely in
+rational coordinates, without adding a completed complex division operation.
+The new `FiniteCoordinateInequality` module adds the reusable rational
+Cauchy--Schwarz certificate, its `QComplex` dot-product specialization, and
+the squared-norm addition expansion.  The proof exposes the finite
+sum-of-squares remainder and strengthens supporting item 78 and the norm
+kernel behind item 91 without introducing a completed Euclidean norm.
+The item-80 witness now includes a second prime-labelled factor ordering for
+`360`, and `PrimeFactorCertificate.factor_perm` proves the two finite lists
+are permutation-equivalent.  This makes the certificate-level uniqueness
+boundary executable rather than merely documented.
+The same witness now includes `720 = 2^4 * 3^2 * 5`, with its prime-labelled
+factor list, product identity, and divisibility checks verified directly.
+It now also includes `600 = 2^3 * 3 * 5^2`, with an independent
+prime-labelled factor list, product identity, and divisibility checks.
+The same finite factorization pass now includes `126 = 2 * 3^2 * 7`, with
+its product and divisibility witnesses checked by terminating computation.
+The new `FiniteMonotoneSquareIntegral` module promotes the exact square
+integral on `[0,1]` to a `MonotoneConstructionFor`: Lean checks the rational
+monotonicity factorization, validity of the resulting monotone integral, and
+its equivalence to `1/3`.  This advances the constructive FTC core of item 15.
+The same bridge now covers `x^3` on `[0,1]`: its finite difference factorization
+proves nondecreasingness, and the promoted monotone construction is valid and
+equivalent to `1/4`.  Together the square and cubic cases establish the first
+non-affine polynomial instances of the monotone-integrability interface.
+The ladder now reaches `x^4`: its rational difference factorization proves
+monotonicity, and the promoted finite construction is valid and equivalent to
+`1/5`.  This extends the item-15 monotone bridge through the quartic FTC
+checkpoint.
+The new `FiniteMonomialMonotonicity` module generalizes the order component
+of that ladder: `exactRat_monomial_nondecreasing` proves that every rational
+monomial `x^n` is nondecreasing on `[0,1]`.  This is a reusable finite-input
+lemma for later monomial integral and MVT certificates, not a standalone
+finite-sum milestone or a completed-real limit theorem.
+The new `fourVariationQuartic` continues the finite certificate ladder with
+`(x-1)(x-2)(x-3)(x-4)`: Lean checks sign count four and identifies all four
+positive rational roots.  This strengthens item 100 without claiming general
+real-root counting.
+The new `fiveVariationQuintic` extends the same finite pattern to
+`(x-1)(x-2)(x-3)(x-4)(x-5)`: Lean checks five sign variations and identifies
+all five positive rational roots, while unrestricted Descartes root counting
+remains deferred.
+- The new `sixVariationSextic` extends the item-100 certificate ladder once
+  more: Lean checks six sign variations for
+  `(x-1)(x-2)(x-3)(x-4)(x-5)(x-6)` and identifies all six positive rational
+  roots.  The unrestricted Descartes theorem remains deferred.
 The finite Leibniz pass now also records the stage-10 rational enclosure
 `3 <= piLeibniz.compute 10 <= 16/5` and its width bound `1/10`. This is a
 concrete item-26 computation; the infinite alternating-series identity remains
 a separate theorem.
+The same evaluator now has a stage-20 enclosure with width at most `1/20`,
+making the potential-infinity refinement explicit while keeping every stage
+finite and rational.
+The evaluator now also exports a stage-40 enclosure inside `[3,16/5]` with
+width at most `1/40`, adding a third explicit potential-infinity checkpoint
+for item 26.
+The harmonic certificate now also exposes stage 32 exactly as
+`586061125622639/144403552893600`, with the explicit lower witness
+`H_32 >= 2`.  This extends the finite divergence checkpoints for item 34.
 The geometric-series pass now records the exact ratio-`1/2` stage-5 sum
 `31/16`, together with its exact tail `1/16` to the finite upper value `2`.
+It now also includes the unequal-ratio checkpoint
+`geometricSum (2/3) 4 = 65/27`, whose finite tail to the rational target `3`
+is `16/27`.
+The arithmetic-progression witness now also checks stage 10: the progression
+with initial term `3` and difference `2` sums to `120`, with its closed form
+and finite upper checkpoint `121` verified over the rationals.
+The ratio-`1/2` certificate now also records stage 10:
+`geometricSum (1/2) 10 = 1023/512` with exact tail `1/512`.  This strengthens
+the finite refinement evidence for item 66 without treating the limit as an
+attained infinite sum.
+The same certificate now reaches stage 20, with exact sum `1048575/524288`
+and tail `1/524288`, making the geometric error schedule visible at a third
+finite precision checkpoint.
+It now also reaches stage 40, with exact sum `1099511627775/549755813888`
+and tail `1/549755813888`, providing a substantially finer finite error budget
+for item 66 while retaining the potential-infinity interpretation.
+It now also reaches stage 80, with exact sum
+`1208925819614629174706175/604462909807314587353088` and tail
+`1/604462909807314587353088`.
+It now also reaches stage 160, with exact sum
+`1461501637330902918203684832716283019655932542975/730750818665451459101842416358141509827966271488`
+and tail `1/730750818665451459101842416358141509827966271488`, extending the
+same finite geometric error schedule.
+It now also reaches stage 320, with the exact dyadic tail
+`1/1067993517960455041197510853084776057301352261178326384973520803911109862890320275011481043468288`,
+extending the finite item-66 precision schedule.
+The stage-640 witness now uses the reusable tail formula: the gap to `2` is
+exactly `(1/2)^639`, and the finite sum remains below `2`.
+The Pythagorean-triple example now also checks the classic `5-12-13` witness,
+both directly and from the parametrization at `(m,n)=(3,2)`.  This gives the
+rational-coordinate core of items 4 and 23 a second independent finite
+checkpoint.
+The arithmetic-progression certificate now reaches stage 40 as well:
+`arithmeticProgressionSum 3 2 40 = 1680`, with its closed form and finite
+upper checkpoint `1681`.  This extends the explicit potential-infinity error
+schedule for item 68 beyond stage 20.
+The same certificate now reaches stage 320:
+`arithmeticProgressionSum 3 2 320 = 103040`, with closed form and upper
+checkpoint `103041`, extending the finite item-68 schedule.
+It now also reaches stage 640:
+`arithmeticProgressionSum 3 2 640 = 410880`, with closed form and upper
+checkpoint `410881`, continuing the finite potential-infinity schedule.
+The Basel comparison example now also exports the exact stage-8 partial sum
+`1077749/705600` and checks its elementary positive/below-two bounds.  This
+is an explicit finite reciprocal-square computation for item 14; Euler's
+completed Basel identity remains deferred.
 This is the finite rational core of item 66.
 The harmonic-series pass now includes the inspectable stage-8 witness
 `H_8 = 761/280 > 2`, a concrete finite certificate for item 34 alongside the
 general dyadic lower-bound theorem.
+The same finite checkpoint is now extended to stage 16:
+`H_16 = 2436559/720720 >= 2`.  This is another inspectable potential-infinity
+witness for item 34, not a completed infinite-sum argument.
+The harmonic witness now also instantiates the general reachability theorem at
+target `3`: stage `64 = 2^(2*3)` satisfies `H_64 >= 3`, adding a height-three
+potential-infinity checkpoint without evaluating an attained infinite sum.
+The same stage now has an exact inspectable value,
+`H_64 = 623171679694215690971693339/131362987122535807501262400`,
+with the direct inequality `H_64 >= 3` checked by finite rational arithmetic.
+It now also reaches target `4` at stage `256 = 2^(2*4)`, extending the finite
+height schedule without asserting an attained infinite sum.
 The item-79 bisection layer now has a concrete affine trace: for
 `f(x)=x-1/2` on `[0,1]`, stage 3 returns `[3/8,1/2]`, preserves the sign
 bracket, and has width `1/8`.
+The cubic target witness now reaches stage 8 for `x^3 = 2`: the rational
+bracket is `[161/128,323/256]`, its width is `1/256`, and both endpoint
+comparisons with the target are checked.
+The same witness now reaches stage 16 with bracket
+`[41285/32768,82571/65536]` and width `1/65536`, strengthening the finite
+item-79 precision schedule without introducing an attained real root.
 The Cayley--Hamilton pass now includes the worked rational matrix
 `[[1,2],[0,3]]`, with trace `4`, determinant `3`, and an independently checked
 finite identity `A^2 - 4A + 3I = 0`, also transported through the generic
@@ -689,14 +1297,49 @@ two-by-two theorem. This is a concrete item-49 witness.
 The Bézout pass now includes the explicit Euclidean certificate
 `gcd(84,30)=6` with coefficients `(-1)*84 + 3*30 = 6`, a worked finite core
 for item 60.
+The Bézout certificate now also checks `gcd(99991,12345)=1` through the
+explicit identity `2116*99991 - 17139*12345 = 1`.
 The binomial pass now includes the stage-5 instance
 `binomialSum 5 2 1 6 = 3^5 = 243`, a concrete finite certificate for item 44.
+The same worked layer now checks the larger stage-8 evaluation
+`binomialSum 8 2 1 9 = 3^8 = 6561`, extending the finite binomial witness.
+It now also checks the stage-12 evaluation
+`binomialSum 12 2 1 13 = 3^12 = 531441`, making the precision ladder explicit.
+The same `2+1` ladder now reaches stage 16:
+`binomialSum 16 2 1 17 = 3^16 = 43046721`, another exact finite checkpoint.
+The same ladder now reaches stage 20:
+`binomialSum 20 2 1 21 = 3^20 = 3486784401`.
+It also checks a distinct base pair: `binomialSum 6 2 3 7 = 5^6 = 15625`,
+showing the finite identity beyond the `2+1` specialization.  The stage-5
+`(4+3)` instance, `binomialSum 5 4 3 6 = 7^5 = 16807`, adds a second
+independent base pair.
 The decimal divisibility pass now includes the executable examples
 `decimalDigitSum 123 = 6` and `3 | 123`, together with the contrasting
 non-divisibility of `124`. This is the worked finite core of item 85.
 The power-sum pass now includes the stage-6 evaluations
 `fourthPowerSum 6 = 979` and `fifthPowerSum 6 = 4425`, a concrete finite core
 for item 77.
+The same worked certificate now checks `eighthPowerSum 6 = 462979`, extending
+the finite power-sum witness to the highest closed-form power currently in
+the series layer.
+The generic recurrence also checks the ninth-power stage directly:
+`powerSum 9 6 = 2235465`.  This is a finite item-77 computation; no infinite
+power-series identity is being asserted.
+The ninth-power witness now reaches stage 32 as well, with exact sum
+`powerSum 9 32 = 95821687265536`, extending the finite item-77 checkpoint.
+The same certificate now checks `powerSum 9 8 = 52666768`, adding a larger
+exact finite checkpoint for the power-sum family.
+The ninth-power witness now reaches stage 64 as well, with exact sum
+`powerSum 9 64 = 106496009343230976`, extending the terminating rational
+item-77 checkpoint schedule.
+It now also checks `powerSum 9 10 = 574304985`, extending the ninth-power
+finite checkpoint while retaining the fixed-stage interpretation.
+The next checkpoint is `powerSum 9 12 = 3932252676`, extending the same
+finite ninth-power computation without introducing an infinite identity.
+The next checkpoint now reaches `powerSum 9 16 = 78800938560`, extending the
+same exact finite evaluator while retaining the fixed-stage interpretation.
+The schedule now reaches `powerSum 9 128 = 113501516170343845888`, continuing
+the terminating rational checkpoint family.
 The AM--GM pass now includes the exact finite witness
 `2*8 <= ((2+8)/2)^2` and the equality case for equal inputs `3,3`, a worked
 certificate for item 38.
@@ -705,15 +1348,34 @@ parameter realization from (m=2,n=1), a concrete finite core for item 23.
 The isosceles-triangle pass now includes the coordinate witness with height
 `3` and half-base `4`: both squared legs are `25`, the axis dot product is
 `0`, and the squared base is `64`. This is a concrete item-65 certificate.
+The companion `5-12-13` coordinate instance checks equal squared legs `169`,
+axis dot product `0`, and squared base `576`.
 The Cramer pass now includes the rational system `2u+v=5`, `u+3v=10`:
 the determinant is `5`, Cramer’s formulas return `u=1,v=3`, and direct
 substitution verifies both equations. This is a concrete item-97 certificate.
 The triangle-inequality pass now also has a concrete three-term rational
 witness: `qabs(-3+4-2)=1`, while the sum of termwise absolute values is `9`.
 This is the worked finite core of item 91.
+The same list-level certificate now checks the five-term list `(-3,4,-2,7,-5)`:
+its sum is `1`, its absolute-value sum is `21`, and the triangle bound holds.
+The reusable `qabs_perturbed_sub_le` corollary now propagates two rational
+perturbation budgets: replacing `x,y` by `x+e,y+f` increases the separation
+bound by at most the certified bounds for `e` and `f`. This is the interval
+error-budget form of item 91's finite triangle inequality.
+The new `FiniteComplexTriangleExample` lifts the worked layer to rational
+complex coordinates: `(3,4)` and `(5,12)` have squared norms `25` and `169`,
+their sum has squared norm `320`, and the squared triangle bound is checked
+against `(5+13)^2`.
 The arithmetic-series pass now includes the progression (3,5,7,9,11): its
 stage-5 evaluator is exactly `35`, and the closed-form identity is checked over
 the rationals. This is the worked finite core of item 68.
+The same progression now has a stage-20 checkpoint: the sum is `440`, its
+closed form is checked, and the finite certificate records the upper bound
+`441`. This extends the potential-infinity arithmetic-series witness.
+The same progression now reaches stage 80: the exact sum is `6560`, the
+closed form is checked, and the finite upper checkpoint is `6561`.
+It now also reaches stage 160: the exact sum is `25920`, the closed form is
+checked, and the finite upper checkpoint is `25921`.
 The finite half-pi rotation-input certificate is now available as
 `GeometricPiRotation.halfPiInput_certificate`; it packages validity, the
 `[1,2]` enclosure, the `2/(n+1)` width modulus, and equivalence with the
@@ -743,8 +1405,11 @@ rational-coordinate theorem; the represented complex exponential and angle
 semantics are still separate bridges. The new `pointPowRaw` and
 `pointPowRaw_equiv_natPow` declarations lift that finite power into a valid
 represented complex raw and identify it stagewise with the corresponding
-finite rational-complex power. The companion `pointPowRaw_conj_equiv` now
-transports conjugation through the represented finite power as well.
+finite rational-complex power. The new `pointPowRaw_mul_equiv` supplies the
+general product form: the power of a rational circle product is equivalent,
+at the represented-complex level, to the product of the two finite complex
+powers. The companion `pointPowRaw_conj_equiv` still transports conjugation
+through the represented finite power as well.
 
 The next bridge pass adds four more finite certificates: a geometric block-sum
 identity, a reflection/signed-orientation coordinate certificate,
@@ -940,6 +1605,22 @@ The factorial exponential specialization now also exposes
 `FinitePolynomial.expTaylorPrefix_endpointDifference_succ`: appending one
 finite Taylor term changes an endpoint difference by the exact rational
 monomial contribution, before any tail or completeness argument is used.
+The worked `FiniteExponentialTaylorExample` now checks the literal values
+`P_5(1)=163/60` and `P_6(1)=1957/720`, then specializes the schedule to
+`C=1`, error `1/100`, and seven additional finite terms.  Its enclosure is a
+finite rational comparison, not an assertion that an infinite sum has been
+attained.
+The same worked object now checks the tighter stage-8 prefix
+`P_8(1)=109601/40320`, extending the exact finite Taylor checkpoints.
+It now also records stage 10 exactly as `P_10(1)=9864101/3628800`, providing a
+further finite prefix checkpoint under the same potential-infinity
+interpretation.
+The exponential Taylor prefix now reaches stage 12 as well:
+`P_12(1)=260412269/95800320`, extending the exact rational precision ladder.
+The same finite checkpoint now reaches stages 14 and 16:
+`P_14(1)=47395032961/17435658240` and
+`P_16(1)=56874039553217/20922789888000`.  These extend the exact prefix
+ladder while retaining the potential-infinity interpretation.
 
 The Pi table is a release-style integration suite, not a completion score for
 the scientific-calculus objective.  It catches agreement failures across
@@ -1037,6 +1718,16 @@ theorem.
 The same quintic computation now has a direct stage-20 containment certificate
 `exactQuintic_compute_contains_one_sixth_stage20`, strengthening the finite
 precision evidence while leaving the all-stage symbolic inequality open.
+The FTC endpoint layer now also records the stage-eight left sum for the
+derivative `6*x^5`: `5439/8192 <= 6/7`.  This extends the finite polynomial
+checkpoint pattern to the sextic case without adding a completed-limit claim.
+The same sextic endpoint-sum witness now reaches stage 32 exactly,
+`1905663/2097152 <= 1`, extending the finite item-15 precision schedule.
+The cubic FTC endpoint layer now also exports
+`cubeDerivativeLeftSum_le_one_le_rightSum`: at every positive stage, the
+left and right sums enclose the exact endpoint difference `1`. The companion
+`cubeDerivativeLeftSum_rightSum_gap_le_three_div` bounds their enclosure width
+by `3/n`, making the finite FTC bridge an explicit shrinking rational schedule.
 
 The concrete FTA pass now also checks `z^2 + 1` directly at the two supplied
 rational-complex roots `0 + i` and `0 - i`, including distinctness and point
@@ -1098,11 +1789,72 @@ arbitrary-degree isolation remain deferred.
   FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact
   reciprocal-quartic computations exercise them concretely. The reusable
   `Integral.nondecreasingDarbouxRange`, `...Stage`, and
-  `...DyadicStage` now expose the literal increasing-function endpoint-box
-  calculation from the blueprint.  Weak monotonicity proves each cell range
-  ordered; interval regularity, stage compatibility, and a function-specific
-  shrinking-width estimate remain deliberately separate requirements before
-  a `ConstructionFor` can be claimed.  The reusable
+`...DyadicStage` now expose the literal increasing-function endpoint-box
+calculation from the blueprint.  Weak monotonicity proves each cell range
+ordered; interval regularity, stage compatibility, and a function-specific
+shrinking-width estimate remain deliberately separate requirements before
+a `ConstructionFor` can be claimed.  The reusable
+`Integral.nondecreasingDarbouxRange_width_le_of_intervalRegular` now proves
+the local width estimate: when a cell is within the evaluator's input budget,
+one common image interval bounds both endpoint values and bounds the Darboux
+range by `1/(n+1)`.  The global partition schedule and construction proof
+remain separate requirements.
+The aggregate
+`Integral.nondecreasingDarbouxStage_width_le_of_uniform_input_budget` now
+propagates that bound through a uniform finite partition, giving the explicit
+global stage budget `(F.upper - F.lower)/(n+1)`.
+The companion
+`Integral.nondecreasingDarbouxStage_width_le_of_uniform_input_budget_and_tolerance`
+hands that explicit budget directly to an arbitrary requested rational
+tolerance. It is the finite precision handoff needed by an eventual
+`ConstructionFor` proof; it introduces no limit or completed integral.
+The dyadic specialization
+`Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget` now exposes
+the corresponding `2^n`-cell bound, while retaining the input-budget premise
+needed before a shrinking-width construction can be claimed.
+Its companion
+`Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance`
+provides the same direct requested-tolerance handoff for the textbook's
+stage-indexed dyadic algorithm.
+The independent `FinitePiecewiseRectangles` module now records the local
+equal-cell rule needed for a finite piecewise-monotone stage:
+`PieceCellKind.increasing` and `.decreasing` select endpoint order, while
+`.turning` encloses both endpoint values and a supplied turn bracket.  Its
+width formulas and a two-cell quadratic turn witness are checked entirely over
+`Rat`.  This is the finite local mechanism behind the sinc animation; it does
+not claim a universal monotonicity classifier or a completed integral.
+The same module now turns those value intervals into literal rectangle areas:
+`pieceCellLowerArea_le_upper` proves the lower area is below the upper
+area for every nonnegative cell width, and the quadratic two-cell witness
+exports the coarse enclosure `[0,2]`.  Refinement and function-specific
+classification remain the separate steps needed to obtain a shrinking integral
+construction.
+For a turn cell, `pieceCellBounds_turning_width_le` now proves that a
+common certified value range controls the entire unresolved rectangle width.
+The area version `pieceCellTurningAreaGap_le` multiplies that bound by
+the nonnegative cell width, making explicit the two budgets that must shrink:
+value-range uncertainty and geometric mesh width.
+The aggregate lemmas `piecewiseRectangleAreaSum_gap_eq_width_sum` and
+`piecewiseRectangleAreaSum_gap_nonneg` now lift this cellwise estimate to an
+entire finite mesh: the global upper-minus-lower rectangle gap is exactly the
+sum of domain widths times value-range widths, and is nonnegative for ordered
+cells.  This is a finite rational bridge toward the constructive FTC, not an
+appeal to an attained integral or completeness.
+The companion `piecewiseRectangleAreaSum_gap_le_common_range_budget` theorem
+packages the common-range form: a uniform value-width certificate bounds the
+whole mesh gap by the sum of the domain widths times that range budget.  This
+separates the two refinement obligations cleanly—geometric mesh width and
+function-value uncertainty—before any potential-infinity schedule is added.
+The new `piecewiseRectangleAreaSum_constant` evaluates that constant per-cell
+budget exactly as `(cells.length : Rat) * value`.  Its companion
+`piecewiseRectangleAreaSum_gap_le_common_range` therefore gives the closed
+form global bound by the number of cells, the cell width, and the common value
+range.  This is the finite equal-mesh bridge needed by the constructive FTC
+story and does not introduce an infinite sum.
+The mesh identity `natCast_mul_mesh_eq_sub` now closes the geometric part for
+an equal rational partition: a positive `n`-cell mesh has total width exactly
+`b - a`.  Thus a common value-range budget can be normalized to the interval
+width without invoking a completed real or a limiting sum.
   turning-bracket helper in `TurningPointIntegral` supplies one component of
   a finite monotone decomposition: every possibly non-rational turn is
   represented by a shrinking rational bracket, while stagewise monotone
@@ -1364,6 +2116,24 @@ orientations of the product-rule telescope on rational grids. Its
 quadratic/cubic specialization proves both sums equal one at every positive
 finite stage. This strengthens the item-15 integration-by-parts boundary
 without introducing a completed integral or a classical limit.
+The newly integrated `FiniteFTCQuartic` module adds a concrete quartic FTC
+checkpoint: dyadic left and right sums for `x^4` on `[0,1]` enclose the exact
+rational value `1/5` at every finite stage, and the resulting raw integral is
+proved equivalent to `RealRaw.ofRat (1/5)`.
+The sextic-derivative endpoint-sum witness now also reaches stage 16 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage16` evaluates the finite sum to
+`107775/131072`, and its companion upper-bound theorem keeps the result below
+`6/7`. This tightens the item-15 finite schedule without treating the
+integral as an attained infinite limit.
+The same sextic derivative schedule now reaches stage 64 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage64` evaluates to
+`32002047/33554432`, with the corresponding finite upper-bound check.
+It now also reaches stage 128 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage128` evaluates to
+`524369919/536870912`, again with the finite upper-bound check below `1`.
+The same schedule now reaches stage 256 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage256` evaluates to
+`8489598975/8589934592`, with its explicit finite upper-bound check below `1`.
 
 - Public integral target: construct an `Integral.ConstructionFor F` from a
   `ContinuousFunctionOnInterval`.
@@ -1941,6 +2711,15 @@ without introducing a completed integral or a classical limit.
 
 ## Inverse Functions
 
+The scheduled arctangent branch now provides a cofinal stage schedule
+`arctanScheduledStageSchedule`. `arctanScheduledRectangleRaw` is definitionally
+the corresponding rescheduling of the finite geometric rectangle raw, and
+`arctanScheduledRectangleRaw_equiv_arctanGeom` proves that it represents the
+same abstract arctangent. Its explicit rectangle width budget is
+`1/(16*(n+1))`. The remaining inverse-function obligation is the interval
+image/containment certificate for endpoint boxes, not a hidden appeal to a
+completed real-valued arctangent.
+
 **Benchmark item 79 — branch-local bisection core checked.**
 `HasBisectionSearch` and `inverse_function_from_bisection_search` formalize
 the effective intermediate-value search for an interval-regular monotone
@@ -1986,9 +2765,27 @@ or completeness principle. The new
 `monotoneTargetBisectionIterate_tolerance_certificate` packages that schedule
 together with target enclosure and source containment, giving an inverse
 client one finite certificate rather than separate bookkeeping lemmas.
+The composition lemma `monotoneTargetBisectionIterate_add` identifies a later
+finite stage with the same iterator started from an earlier stage's interval.
+Consequently `monotoneTargetBisectionIterate_later_subinterval` proves that
+every later target bracket is nested inside every earlier one.  This makes
+refinement explicit in the certificate API while keeping the IVT replacement
+a finite rational statement rather than a hidden appeal to a limit point.
 The worked `FiniteSquareRootBisectionExample` now applies the target search to
 `x^2 = 1/2` on `[0,1]`: stage 4 returns `[11/16,3/4]`, preserves the target
 bracket, and has width `1/16`. This is a non-affine finite witness for item 79.
+The companion `FiniteCubeRootBisectionExample` applies the same target search
+to `x^3 = 2` on `[1,2]`: stage 4 returns `[5/4,21/16]`, preserves the target
+bracket, and has width `1/16`. This gives item 79 a second nonlinear inverse
+trace while retaining the project's finite, potential-infinity semantics.
+The new `FiniteFourthRootBisectionExample` applies the same search to
+`x^4 = 2` on `[1,2]`: stage 8 returns `[19/16,305/256]` with width `1/256`,
+and stage 16 returns `[77935/65536,4871/4096]` with width `1/65536`.
+This extends item 79's nonlinear finite inverse-search ladder while retaining
+the potential-infinity interpretation.
+The cube-root and fourth-root traces now also reach stage 24, each with exact
+width `1/16777216` and certified endpoint comparisons, extending the same
+potential-infinity precision schedule.
 
 - Main calculus route: construct inverses on intervals where the function is
   interval-regular, monotone, and effectively separated.
@@ -2041,7 +2838,20 @@ bracket, and has width `1/16`. This is a non-affine finite witness for item 79.
   special-value contract.  The next analytic task is to construct the new
   bridge by proving interval regularity, monotonicity, and effective
   separation for `arctanGeomOnUnit`; no inverse law is assumed as a bare
-  proposition.
+  proposition.  The monotonicity and separation certificates are now
+  formalized in `ArctanGeomInverseData`: they transport the rectangle
+  evaluator's finite order bounds through the certified containment of each
+  positive-loop box.  This keeps the inverse route entirely interval-valued
+  and executable.  The matching box-valued continuity theorem is
+  `arctanGeomOnUnit_near_of_qabs_le`, with the explicit modulus packaged as
+  `arctanGeomOnUnit_effectiveModulus`; interval regularity and the data-valued
+  bisection search are the remaining pieces of this branch.  The native
+  positive-loop evaluator is now also exposed through the cofinal finite
+  schedule `arctanGeomScheduledStage`; `arctanGeomScheduledOnUnit` retains
+  the same geometric boxes while satisfying the literal width estimate
+  `arctanGeomScheduledOnUnit_width_le`.  This is the intended evaluator for
+  the interval-image certificate, rather than silently changing the native
+  algorithm's precision convention.
 - The completed rational-slope half of that route is now exposed as
   `RationalCircle.GeometricTrig.FirstQuadrantArctanWitness`.
   `arctan_to_sine_cosine_coordinates` packages one arctangent equation
@@ -2155,6 +2965,24 @@ bracket, and has width `1/16`. This is a non-affine finite witness for item 79.
   equivalence.  This is a finite rational comparison, not a continuity or
   topology assumption; aligning it with the selected canonical exp/log
   inverse branch remains the next distinct theorem.
+  The interval certificate now generalizes to
+  `Logarithm.oneOverXOnOneTo_intervalRegular` for every rational `b` with
+  `1 <= b`; this isolates the upper-endpoint-independent part of the positive
+  reciprocal transport.
+  The stronger `oneOverXOnInterval_lower_ge_one_intervalRegular` form now
+  handles arbitrary `[a,b]` with `1 <= a <= b`, making the lower-bound
+  dependence explicit before the final rational scaling argument.
+  The fully positive version
+  `oneOverXOnPositiveInterval_intervalRegular_of_budget` now accepts any
+  `0 < a <= b` together with a natural budget `L` satisfying `1/a^2 <= L`;
+  its input schedule is explicitly `(n+1)*L`.
+  The companion `reciprocal_scale_kernel_eq_logTwoKernel` and
+  `reciprocal_scale_point_positive` lemmas check the exact multiplicative
+  normalization on `[a,2a]`, including positivity of the transformed points.
+  The new `logTwoKernel_shift_eq_oneOverX` and
+  `logTwo_rightRiemann_term_as_oneOverX` lemmas make the affine transport
+  explicit at the finite rational level, before any general positive-interval
+  endpoint theorem is attempted.
 - Power-series representations of `sin` and `cos` are named in
   `ComputableAnalysis/ElementaryFunctions.lean`.
 - Hyperbolic sine and cosine have constructive exponential representations
@@ -2236,6 +3064,17 @@ continuous ODE identification are separate milestones.
 The worked `FiniteThreeByThreeCramerExample` adds the diagonal system
 `diag(2,3,4)u=(4,9,16)`: determinant `24`, inverse witness `1/24`, and exact
 solution `(2,3,4)` are all checked.
+The non-diagonal 3-by-3 instance with matrix `[[2,1,0],[0,3,1],[1,0,2]]`
+and right-hand side `(4,9,7)` has determinant `13`; Lean checks the inverse
+witness `1/13`, recovers `(1,2,3)`, and verifies the system through the
+generic Cramer solver.
+The additional two-by-two witness uses
+`[[3,2],[1,2]](2,3)=(12,8)`: its determinant is `4`, and the Cramer
+quotients recover `(2,3)` exactly.
+The signed two-by-two witness `[[1,-2],[3,4]](16/5,-9/10)=(5,6)` has
+determinant `10`; Lean checks both nonintegral Cramer quotients and direct
+substitution.  This extends item 97's finite rational coverage beyond
+positive-integral examples.
 
 **Benchmark item 49 — finite Cayley--Hamilton core checked.**
 The 3x3 matrix-power recurrence is now also checked for every natural stage
@@ -2257,6 +3096,10 @@ uniqueness certificate: any rational matrix sequence with the same first two
 terms and the induced trace/determinant recurrence agrees stage by stage with
 the matrix-power sequence. Arbitrary dimensions and an abstract
 characteristic-polynomial interface remain deferred.
+The new `concreteFourCayleyCertificate` supplies a checked 4x4 diagonal
+annihilator for `diag(1,2,3,4)` with polynomial
+`x^4 - 10*x^3 + 35*x^2 - 50*x + 24`. This extends the finite-dimensional
+exercise without introducing a determinant construction.
 
 - The finite noncommutative core for Peano--Baker is now checked in
   `ComputableAnalysis/PeanoBaker.lean`, without Mathlib. It defines local
@@ -2410,6 +3253,9 @@ arguments.
 The worked `FiniteRemainderExample` evaluates `x^2-3x+2` at the supplied root
 `1` and sample point `4`, checking the exact value `6` through the quadratic
 factor identity.
+Its signed companion evaluates `x^2+3x+2` at root `-1` and sample point `-4`,
+again obtaining `6` by the exact factor identity. This extends item 89's
+worked rational coverage across negative inputs.
 `Polynomial.linear_remainder`, `Polynomial.linear_factor_of_root`,
 and `Polynomial.linear_root_iff_constant_eq_neg_mul`
 `Polynomial.quadratic_remainder`, and
@@ -2438,10 +3284,22 @@ or square witness remains separate algorithmic work.
 The worked `FiniteCubicCompletionExample` now instantiates that boundary for
 `x^3 - 6x^2 + 11x - 6`: with supplied root `1` and discriminant square
 witness `1`, Lean computes and checks the remaining roots `2` and `3`.
+The new `FiniteCubicSqrtTwoExample` connects the same cubic boundary to a
+non-rational residual branch: `x^3-x^2-2x+2=(x-1)(x^2-2)`, with the exact
+root `1` and a finite sign bracket for the `sqrt 2` branch on
+`[11/8,23/16]`.
+The same cubic branch now consumes the stage-24 square-root enclosure
+`[11863283/8388608,23726567/16777216]`, preserving the exact sign bracket
+with a much finer rational width.
 The parallel `rationalQuarticPolynomial` interface packages four exact
 rational roots and their computable witnesses, strengthening the checked
 factorized core of benchmark item 46 without claiming a general quartic
 formula.
+The new `FiniteQuarticSqrtTwoExample` adds the irrational branch: it checks
+`x^4-3*x^2+2=(x^2-1)(x^2-2)`, exact roots `-1,1`, and both signed endpoint
+brackets for the finite `sqrt 2` enclosure.
+The same quartic now consumes the stage-24 `sqrt 2` enclosure and checks both
+positive and negative signed endpoint brackets at that finer precision.
 The supplied complex-factor quartic now also has the exact root-set theorem
 `factorizedQuarticPolynomial_eval_eq_zero_iff`, giving finite exclusion for
 every candidate outside the four supplied roots.
@@ -2458,6 +3316,20 @@ The worked `FiniteQuarticSplitExample` now instantiates the two-quadratic
 interface with factors `z^2 - 1` and `z^2 - 4`, checking all four rational
 roots `-2`, `-1`, `1`, and `2` in the finite rational-complex model. The
 general Ferrari resolvent remains outside the boundary.
+The new `FiniteMixedCubicExample` supplies the conjugate pair `i,-i` together
+with the real root `1` for `(z-1)(z-i)(z+i)=z^3-z^2+z-1`. Lean checks both the
+coefficient expansion and all three exact root evaluations, extending the
+finite cubic/FTA boundary to a mixed real/complex example.
+The scaled companion example checks
+`(z-2)(z-2i)(z+2i)=z^3-2z^2+4z-8`, including the real root `2`, conjugate
+roots `2i,-2i`, coefficient expansion, and all three exact evaluations.
+The companion `FiniteQuarticMixedSplitExample` uses `z^2 + 1` and `z^2 - 4`,
+checking the nonreal rational-coordinate roots `i` and `-i` alongside `2` and
+`-2`. This extends the finite quartic boundary to a mixed real/complex split
+without adding a general quartic formula or algebraic-closure claim.
+The scaled mixed quartic companion uses `z^2 + 4` and `z^2 - 9`, checking the
+four supplied roots `2i,-2i,3,-3` and exact evaluations through the same
+two-quadratic split interface.
 The optional Descartes route now has a finite `Polynomial.signChangeCount`
 counter, a zero-filtered variant, the general zero-variation lemma
 `signChangeCountIgnoringZeros_zero_of_nonneg_coeffs`, a general quadratic sign-pattern theorem,
@@ -2487,6 +3359,10 @@ The exact two-variation example now records that \(x^2-3x+2\) has sign count
 two and positive rational root set exactly \(\{1,2\}\). This is a finite
 Descartes example for item 100, not a claim of the general real-root-counting
 theorem.
+The new one-variation example `1 - 2x - x^2` has sign count one, a finite
+positive-root bracket `[3/8,1/2]`, and a certificate that any two positive
+rational roots must coincide. This adds a non-rational-root-shaped test of the
+finite Descartes boundary without claiming classical real root existence.
 The companion `Polynomial.zero_variation_root_exclusion_certificate` now
 packages the zero-variation count with the corresponding positive-root
 exclusion whenever the finite list has nonnegative coefficients and a
@@ -3265,6 +4141,16 @@ scoreboard above.
   `PiProofs.piMachin_compute_width_le_geometric_half` gives the simple public
   bound `20/2^n`.  This rate belongs to the Machin runtime boxes themselves,
   not to a width transported across its equivalence with area pi.
+- The finite Leibniz evaluator now has an explicit stage-80 checkpoint:
+  `piLeibniz_stage80_enclosure` keeps the rational interval inside `[3,16/5]`,
+  while `piLeibniz_stage80_width` certifies width at most `1/80`.  This is a
+  stronger finite error budget for the project’s computable series route.
+The same evaluator now also exports stage 160, keeping the interval inside
+`[3,16/5]` with width at most `1/160`.
+It now also exports stage 320, keeping the same rational enclosure with width
+at most `1/320`, extending the finite item-26 precision ladder.
+It now also exports stage 640, keeping the same rational enclosure with width
+at most `1/640`, extending the finite item-26 precision ladder.
 - The series layer now owns the natural alternating-stage representation:
   `Series.evenOddInterval partials n` returns the interval between the `2n`th
   and `(2n+1)`st partial sums, and `Series.AlternatingRaw.interval` uses this
@@ -3305,10 +4191,27 @@ scoreboard above.
 - `BaselFiniteComparison.baselRefinedCommonInterval_certificate` repeats the
   comparison at the tighter stages 100,000 and 10, with an explicit common
   rational interval.  `baselRefinedCommonInterval_width_le` transfers both
-  source precision budgets to that refined object.  This strengthens the
-  finite benchmark evidence without claiming the infinite Basel identity.
+source precision budgets to that refined object.  This strengthens the
+finite benchmark evidence without claiming the infinite Basel identity.
   `baselRefinedCommonInterval_midpoint_certificate` additionally exports a
   concrete rational witness lying in both refined enclosures.
+The new `baselHighCommonInterval` repeats the independent comparison at zeta
+stage `200000` and geometric stage `12`, with a certified nonempty
+intersection and inherited width bounds. This deepens the finite Basel
+cross-check while keeping Euler's identity itself deferred. The new
+`baselHighCommonInterval_midpoint_certificate` exports an explicit rational
+midpoint in both highest-stage enclosures.
+The named `FiniteBaselComparisonExample` packages the earlier stage-10000/
+stage-8 midpoint as a reusable rational witness and carries forward both
+source width bounds.
+The worked `FiniteBaselExample` now also supplies a refined executable
+certificate with `epsilon = 1/10000` at stage `10001`, retaining containment
+of stage `100000` and tightening the finite width budget by a factor of ten.
+It now also contains stage `200000` under the same `1/10000` width budget,
+extending the finite potential-infinity schedule while leaving the Basel
+identity deferred.
+The named stage-16 checkpoint additionally records the exact partial sum
+`822968714749/519437318400` and its explicit `1/16` tail interval.
 
 ## Long-Term Theorems
 
@@ -3331,7 +4234,9 @@ scoreboard above.
   quotient error for `x^2` is the step itself and fits the stage precision.
   The exact identity `Differential.square_midpoint_mean_value` additionally
   gives the rational square-function secant slope at the midpoint, a finite
- Mean Value Theorem core for benchmark item 75.
+ Mean Value Theorem core for benchmark item 75.  The new
+ `Differential.quadratic_midpoint_mean_value` generalizes this exact witness
+ to every rational quadratic `c₀+c₁x+c₂x²`, with the same midpoint witness.
 The worked `FiniteCubicMVTExample` adds the exact cubic interval witness:
 the secant slope of `x^3` on `[0,1]` is `1`, decomposed as midpoint derivative
 value `3/4` plus finite remainder `1/4`.
@@ -3378,6 +4283,20 @@ remainder term.
   cubic common-factor identity
   `(x^3-a^3)/(x-a)=3*a^2+3*a*(x-a)+(x-a)^2`, extending the finite algebraic
   L'Hôpital boundary without introducing a limit theorem.
+The quartic worked certificate now records the residual
+`6*step + 4*step^2 + step^3` after cancelling the common linear factor from
+`x^4 - 1`, together with its reciprocal-stage form. This extends item 64's
+finite cancellation ladder without introducing an attained limit.
+The quintic worked certificate now records the residual
+`10*step + 10*step^2 + 5*step^3 + step^4` after cancelling the common factor
+from `x^5 - 1`, together with its reciprocal-stage form.
+The sextic worked certificate now records the residual
+`15*step + 20*step^2 + 15*step^3 + 6*step^4 + step^5` after cancelling the
+common factor from `x^6 - 1`, together with its reciprocal-stage form.
+The septic worked certificate now records the residual
+`21*step + 35*step^2 + 35*step^3 + 21*step^4 + 7*step^5 + step^6` after
+cancelling the common factor from `x^7 - 1`, extending item 64's finite
+cancellation ladder without introducing a limit theorem.
   The scalar-weighted companion
   `ExactFunction.mul_power_add_quotient_by_power` cancels the same nonzero
   power inside `y*x^(m+n)/x^m = y*x^n`, making the certificate compositional
@@ -3436,9 +4355,24 @@ remainder term.
   `Polynomial.finiteSeptic_secant_derivative_gap` extend the public finite
   endpoint certificate to degree seven, still using only rational coefficients
   and a finite endpoint comparison.
+  The same finite interface now extends one step further to degree eight via
+  `Polynomial.finiteDerivativeEval_octic` and
+  `Polynomial.finiteOctic_secant_derivative_bracket`; this remains a rational
+  endpoint enclosure rather than a completed-real Mean Value Theorem.
+  It now also reaches degree nine, matching the worked `FiniteNonicMVTExample`,
+  through `Polynomial.finiteDerivativeEval_nonic` and
+  `Polynomial.finiteNonic_secant_derivative_bracket`.
+  The new `Polynomial.monomialCoeffs`, `eval_monomialCoeffs`, and
+  `finiteDerivativeEval_monomialCoeffs_succ` give the arbitrary-degree
+  monomial version directly: the generated finite coefficient list evaluates
+  to `x^n`, and its Horner derivative evaluates to `(n+1) * x^n`.
   `Polynomial.finiteSeptic_derivative_mono` additionally proves that the
   septic derivative evaluator is monotone on nonnegative rational intervals
   under the same coefficient certificate.
+  The worked septic witness now also evaluates `x^7` on the shifted interval
+  `[1,2]`: the finite secant is `127`, and the endpoint derivative bracket is
+  `[7,448]`. This supplies a translated finite item-75 checkpoint without
+  selecting an intermediate point.
   `QInterval.around_differenceQuotient_near_around_of_pos` and its signed-step
   wrapper `QInterval.around_differenceQuotient_near_around` now package the
   interval-level hand-off: a finite center-secant error plus explicit box,
@@ -3534,6 +4468,11 @@ The factorized monic quadratic package
   quadratic-formula branches in the same finite witness model.
   The norm-square specialization now packages both branches automatically as
   `qcomplexQuadratic_has_computable_roots_of_discriminant_and_normSq`.
+  The new `FiniteQuadraticRootInterval` bridge transports any finite
+  square-root interval through both signed quadratic-formula branches using
+  `affineQInterval_mem`; it is now root-imported and linked in the Algebra/FTA
+  chapter.  It remains a finite interval transport theorem, not an arbitrary
+  discriminant square-root existence theorem.
 - The latest Wiedijk-list pass adds `FiniteFTABoundary.syntheticDivide` and
   `DeflationCertificate`: arbitrary finite rational-complex coefficient lists
   can be deflated at a supplied exact root, with a checked Horner remainder
@@ -3554,6 +4493,54 @@ The factorized monic quadratic package
   proves a single Horner factorization identity for the complete finite chain.
   This strengthens the finite root-peeling boundary behind items 2 and 16;
   root existence, radical extensions, and general solvability remain deferred.
+- The chain API now also proves `exactRoot_of_exactRoot_of_ne`: a supplied
+  root distinct from the deflated root remains an exact root of the quotient.
+  This is the reusable algebraic step needed to turn a list of distinct
+  supplied roots into a certified deflation chain.
+- `FiniteQuinticDeflationExample` now instantiates that preservation lemma on
+  the supplied roots `-2,-1,0,1,2`, proving a complete five-step finite
+  deflation chain.  This strengthens the item-16/item-46 certificate boundary
+  without claiming a quintic formula or root-finding algorithm.
+- The quintic example now also checks its final padded quotient and exports
+  the complete generic Horner factorization identity, making the supplied
+  five-root certificate compositional rather than a list of isolated root
+  equalities.
+- `quintic_boundary_exact_factorization` specializes that final padded quotient
+  to the constant polynomial `1`, exposing the complete product of the five
+  supplied linear factors as an executable finite factorization. This is the
+  finite endpoint of the item-2/item-16 root-peeling boundary; radicals and
+  general quintic solvability remain deferred.
+- The worked quintic now exposes its expanded constant-first coefficient list
+  `0 + 4x - 5x^3 + x^5` and checks the direct evaluation at the supplied root
+  `2`. This makes the item-16 boundary concrete both before and after the
+  deflation chain, while keeping root construction and general solvability
+  deferred.
+- The worked cubic chain now also exposes its final padded quotient and the
+  complete `horner_factorization` identity.  Thus the finite computation not
+  only verifies each supplied root, but records the entire factor-peeling
+  certificate in the generic chain interface.
+- `FiniteFTAIsolationExample` now checks a nontrivial rational square around
+  the origin for (z^2+1): interval Horner evaluation proves that its image
+  misses zero, yielding a finite root-exclusion certificate.  This advances
+  the FTA subdivision boundary from supplied roots toward executable
+  isolation while keeping root existence and completeness deferred.
+- The same worked example now instantiates the recursive dyadic subdivision:
+  the supplied root (i) survives two stages inside a rational child box of
+  width and height (1/2).  This records an explicit finite enclosure budget
+  without passing to an attained limiting box.
+- The symmetric supplied root (-i) now has the matching depth-two survivor
+certificate, so both exact roots of (z^2+1) are covered by the finite
+subdivision trace.
+The same subdivision trace now has depth-three survivors for both `i` and
+`-i`, with rational child width and height `1/4`. This sharpens the finite FTA
+isolation budget while retaining the supplied-root, no-completeness boundary.
+It now also checks depth four for both supplied roots, with child width and
+height `1/8`, extending the explicit dyadic precision schedule without
+claiming unique or globally constructed roots.
+- `FiniteDeflationExample` makes that boundary concrete on the cubic
+  (z^3-6z^2+11z-6): finite computation checks the quotient at the supplied
+  root (1), its zero remainder, and the complete supplied-root chain
+  (1,2,3).  This is a worked certificate, not an automatic root solver.
 - `FiniteFTABoundary.syntheticDivide_quotient_length` now exposes the exact
   finite coefficient-count invariant of one supplied-root deflation.  The
   quotient remains padded in the constant-first representation, while the
@@ -3610,6 +4597,22 @@ by one for every nonempty input.
   enclosures for (e) and π, an explicit square-root bracket, and a certified
   Stirling-shaped ratio at (n=10).  The asymptotic Stirling limit remains
   outside the current theorem boundary.
+- `FiniteStirlingStageSixtyFour` extends the same bounded item-90 schedule to
+  (n=64), using the rational anchor `2005/100` for the square-root bracket of
+  `128π` and retaining the explicit ratio enclosure `[1/2,2]`.
+- `FiniteStirlingStageOneTwentyEight` extends the same bounded item-90 schedule
+  to (n=128), using the rational anchor `2836/100` for the square-root bracket
+  of `256π` and retaining the explicit ratio enclosure `[1/2,2]`; the
+  asymptotic limit remains deferred.
+- `FiniteStirlingStageTwoFiftySix` continues the same bounded item-90 schedule
+  to (n=256), using the rational anchor `401/10` for the square-root bracket
+  of `512π` and retaining the explicit ratio enclosure `[1/2,2]`; the
+  asymptotic limit remains deferred.
+- `FiniteStirlingStageFiveTwelve` extends the same bounded item-90 schedule to
+  (n=512), using the rational anchor `567/10` for the square-root bracket of
+  `1024π`.  Its sharper finite transport places the ratio in `[99/100,102/100]`
+  and exports the explicit error budget `2/100`; the asymptotic limit remains
+  deferred.
 - `FiniteComplexPathCertificate` packages the first closed-polygon exactness
   certificate for a constant differential: a finite rational-complex path is
   closed by construction, and its exact displacement is proved to be zero.

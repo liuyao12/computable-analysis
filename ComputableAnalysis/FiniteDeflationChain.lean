@@ -1,4 +1,5 @@
 import ComputableAnalysis.FiniteFTABoundary
+import ComputableAnalysis.FTA
 
 /-!
 # Finite deflation chains over supplied rational-complex roots
@@ -93,6 +94,34 @@ theorem rootFactorProduct_cons (root : QComplex) (roots : List QComplex)
     (x : QComplex) :
     rootFactorProduct (root :: roots) x =
       QComplex.mul (QComplex.sub x root) (rootFactorProduct roots x) := rfl
+
+theorem exactRoot_of_exactRoot_of_ne
+    {coeffs : CPoly.Coeffs} {root x : QComplex}
+    (hroot : CPoly.hasExactRoot coeffs root)
+    (hx : CPoly.hasExactRoot coeffs x)
+    (hne : x ≠ root) :
+    CPoly.hasExactRoot (syntheticDivide root coeffs).1 x := by
+  have hfactor := syntheticDivide_factor_of_root (x := x) hroot
+  have hproduct :
+      QComplex.mul (QComplex.sub x root)
+          (CPoly.eval (syntheticDivide root coeffs).1 x) = QComplex.zero := by
+    rw [← hfactor, hx]
+  have hsub : QComplex.sub x root ≠ QComplex.zero := by
+    intro hsub
+    apply hne
+    cases x with
+    | mk xr xi =>
+      cases root with
+      | mk rr ri =>
+        have hre := congrArg QComplex.re hsub
+        have him := congrArg QComplex.im hsub
+        simp [QComplex.sub, QComplex.zero, QComplex.add, QComplex.neg] at hre him
+        have hxr : xr = rr := by grind [Rat.sub_eq_add_neg]
+        have hxi : xi = ri := by grind [Rat.sub_eq_add_neg]
+        subst rr
+        subst ri
+        rfl
+  exact (QComplex.mul_eq_zero.mp hproduct).resolve_left hsub
 
 theorem horner_factorization (coeffs : CPoly.Coeffs)
     (roots : List QComplex) (x : QComplex)

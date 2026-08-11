@@ -172,7 +172,9 @@ theorem endpointScheduleAgreement_of_effectiveFTC_stageSchedule
           fun n => endpointDifferenceCompute F a b (sigma.stage n) := by
       funext n
       simp [endpointComputeOfEffectiveFTC, endpointDifferenceCompute, hsigma]
-    simpa [endpointRawOfEffectiveFTC, RealRaw.Valid, hcompute] using hsched
+    simpa [endpointRawOfEffectiveFTC, RealRaw.Valid, RealRaw.schedule,
+      endpoint, endpointDifferenceRaw, endpointDifferenceCompute,
+      hcompute] using hsched
   · intro n
     have hall := RealRaw.allStagesOverlap_refl endpoint hendpointValid
       (sigma.stage n) n
@@ -182,7 +184,8 @@ theorem endpointScheduleAgreement_of_effectiveFTC_stageSchedule
       (endpointRawOfEffectiveFTC h)
       (endpointDifferenceRaw F a b hendpoint) n n).2
     simpa [endpointRawOfEffectiveFTC, endpointComputeOfEffectiveFTC,
-      endpoint, endpointDifferenceRaw, hsigma] using hover
+      endpoint, endpointDifferenceRaw, endpointDifferenceCompute,
+      endpointDifferenceInterval, hsigma] using hover
 
 /-- Static-dyadic endpoint-schedule agreement is the same endpoint schedule
 agreement after forgetting to `EffectiveFTC`. -/
@@ -223,7 +226,9 @@ theorem endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
       funext n
       simp [DerivativeBoundFTC.endpointCompute,
         DerivativeBoundFTC.endpointInterval, endpointDifferenceCompute, hsigma]
-    simpa [DerivativeBoundFTC.endpointRaw, RealRaw.Valid, hcompute] using hsched
+    simpa [DerivativeBoundFTC.endpointRaw, RealRaw.Valid, RealRaw.schedule,
+      endpoint, endpointDifferenceRaw, endpointDifferenceCompute,
+      hcompute] using hsched
   · intro n
     have hall := RealRaw.allStagesOverlap_refl endpoint hendpointValid
       (sigma.stage n) n
@@ -234,7 +239,7 @@ theorem endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule
       (endpointDifferenceRaw F a b hendpoint) n n).2
     simpa [DerivativeBoundFTC.endpointRaw, DerivativeBoundFTC.endpointCompute,
       DerivativeBoundFTC.endpointInterval, endpoint, endpointDifferenceRaw,
-      hsigma] using hover
+      endpointDifferenceCompute, endpointDifferenceInterval, hsigma] using hover
 
 /-- Candidate-derivative endpoint-schedule agreement, by conversion to the
 derivative-bound FTC certificate. -/
@@ -346,8 +351,9 @@ theorem integral_valid_of_construction
     {f : RealFunRaw} {a b : Rat}
     (c : Integral.Construction f a b) :
     (Integral.integral f a b c).Valid := by
-  simpa [RealRaw.Valid, Integral.integral, Integral.Certificate.realRaw,
-    Integral.Raw.toRealRaw] using c.certificate.valid
+  have hv := c.certificate.valid
+  change RealRaw.ValidCompute (Integral.algorithm f a b c.plan).compute at hv
+  exact hv
 
 /-- General effective FTC, in computable-real form.
 

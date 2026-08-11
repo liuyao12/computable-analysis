@@ -326,19 +326,23 @@ theorem sqrtFiveQuarterValue_valid_of_sqrtFiveSpec
 
 theorem sinThirtyValue_valid :
     sinThirtyValue.Valid := by
-  simpa [sinThirtyValue] using RealRaw.ofRat_valid ((1 : Rat) / 2)
+  change RealRaw.ValidCompute (fun _ => { lo := (1 : Rat) / 2, hi := 1 / 2 })
+  exact RealRaw.ofRat_valid ((1 : Rat) / 2)
 
 theorem cosSixtyValue_valid :
     cosSixtyValue.Valid := by
-  simpa [cosSixtyValue] using RealRaw.ofRat_valid ((1 : Rat) / 2)
+  change RealRaw.ValidCompute (fun _ => { lo := (1 : Rat) / 2, hi := 1 / 2 })
+  exact RealRaw.ofRat_valid ((1 : Rat) / 2)
 
 theorem tanZeroValue_valid :
     tanZeroValue.Valid := by
-  simpa [tanZeroValue] using RealRaw.ofRat_valid (0 : Rat)
+  change RealRaw.ValidCompute (fun _ => { lo := 0, hi := 0 })
+  exact RealRaw.ofRat_valid (0 : Rat)
 
 theorem tanFortyFiveValue_valid :
     tanFortyFiveValue.Valid := by
-  simpa [tanFortyFiveValue] using RealRaw.ofRat_valid (1 : Rat)
+  change RealRaw.ValidCompute (fun _ => { lo := 1, hi := 1 })
+  exact RealRaw.ofRat_valid (1 : Rat)
 
 theorem cosThirtyValue_valid_of_sqrtThreeSpec
     (h : SqrtRawSpec (3 : Rat) sqrtThreeDomain) :
@@ -375,7 +379,8 @@ theorem cosThirtySixValue_valid_of_sqrtFiveSpec
     cosThirtySixValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hone : (RealRaw.ofRat (1 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (1 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid (1 : Rat)
   unfold cosThirtySixValue
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
     (RealRaw.add_valid hsqrt hone)
@@ -385,7 +390,8 @@ theorem cosSeventyTwoValue_valid_of_sqrtFiveSpec
     cosSeventyTwoValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hone : (RealRaw.ofRat (1 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (1 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid (1 : Rat)
   unfold cosSeventyTwoValue
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
     (RealRaw.sub_valid hsqrt hone)
@@ -395,7 +401,8 @@ theorem cosThirtySixSquareValue_valid_of_sqrtFiveSpec
     cosThirtySixSquareValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hthree : (RealRaw.ofRat (3 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (3 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 3, hi := 3 })
+    exact RealRaw.ofRat_valid (3 : Rat)
   unfold cosThirtySixSquareValue
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
     (RealRaw.add_valid hthree hsqrt)
@@ -405,7 +412,8 @@ theorem cosSeventyTwoSquareValue_valid_of_sqrtFiveSpec
     cosSeventyTwoSquareValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hthree : (RealRaw.ofRat (3 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (3 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 3, hi := 3 })
+    exact RealRaw.ofRat_valid (3 : Rat)
   unfold cosSeventyTwoSquareValue
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
     (RealRaw.sub_valid hthree hsqrt)
@@ -415,7 +423,8 @@ theorem sinThirtySixSquareValue_valid_of_sqrtFiveSpec
     sinThirtySixSquareValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hfive : (RealRaw.ofRat (5 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (5 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 5, hi := 5 })
+    exact RealRaw.ofRat_valid (5 : Rat)
   unfold sinThirtySixSquareValue
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
     (RealRaw.sub_valid hfive hsqrt)
@@ -425,7 +434,8 @@ theorem sinSeventyTwoSquareValue_valid_of_sqrtFiveSpec
     sinSeventyTwoSquareValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hfive : (RealRaw.ofRat (5 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (5 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 5, hi := 5 })
+    exact RealRaw.ofRat_valid (5 : Rat)
   unfold sinSeventyTwoSquareValue
   exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
     (RealRaw.add_valid hfive hsqrt)
@@ -435,7 +445,8 @@ theorem tanThirtySixSquareValue_valid_of_sqrtFiveSpec
     tanThirtySixSquareValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hfive : (RealRaw.ofRat (5 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (5 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 5, hi := 5 })
+    exact RealRaw.ofRat_valid (5 : Rat)
   have htwoSqrt : (RealRaw.scaleRat (2 : Rat) sqrtFiveValue).Valid :=
     RealRaw.scaleRat_valid_of_nonneg (by native_decide) hsqrt
   unfold tanThirtySixSquareValue
@@ -446,7 +457,8 @@ theorem tanSeventyTwoSquareValue_valid_of_sqrtFiveSpec
     tanSeventyTwoSquareValue.Valid := by
   have hsqrt : sqrtFiveValue.Valid := sqrtFiveValue_valid_of_spec h
   have hfive : (RealRaw.ofRat (5 : Rat)).Valid := by
-    simpa using RealRaw.ofRat_valid (5 : Rat)
+    change RealRaw.ValidCompute (fun _ => { lo := 5, hi := 5 })
+    exact RealRaw.ofRat_valid (5 : Rat)
   have htwoSqrt : (RealRaw.scaleRat (2 : Rat) sqrtFiveValue).Valid :=
     RealRaw.scaleRat_valid_of_nonneg (by native_decide) hsqrt
   unfold tanSeventyTwoSquareValue

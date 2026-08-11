@@ -92,6 +92,29 @@ theorem monotoneTargetBisectionIterate_subinterval
       exact ⟨Rat.le_trans hprev.1 hstep.1,
         Rat.le_trans hstep.2 hprev.2⟩
 
+theorem monotoneTargetBisectionIterate_add
+    {f : Rat -> Rat} (y : Rat) (m n : Nat) (I : QInterval) :
+    monotoneTargetBisectionIterate f y (m + n) I =
+      monotoneTargetBisectionIterate f y n
+        (monotoneTargetBisectionIterate f y m I) := by
+  induction n with
+  | zero => simp [monotoneTargetBisectionIterate]
+  | succ n ih =>
+      simp only [monotoneTargetBisectionIterate]
+      exact congrArg (monotoneTargetBisectionStep f y) ih
+
+theorem monotoneTargetBisectionIterate_later_subinterval
+    {f : Rat -> Rat} {I : QInterval} (y : Rat)
+    (hI : I.lo ≤ I.hi) {m n : Nat} (hmn : m ≤ n) :
+    (monotoneTargetBisectionIterate f y n I).lo ≥
+        (monotoneTargetBisectionIterate f y m I).lo /\
+      (monotoneTargetBisectionIterate f y n I).hi ≤
+        (monotoneTargetBisectionIterate f y m I).hi := by
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hmn
+  rw [monotoneTargetBisectionIterate_add]
+  exact monotoneTargetBisectionIterate_subinterval y
+    (monotoneTargetBisectionIterate_ordered (f := f) y hI m) k
+
 theorem monotoneTargetBisectionIterate_width
     {f : Rat -> Rat} {I : QInterval} (y : Rat) (n : Nat) :
     (monotoneTargetBisectionIterate f y n I).width =

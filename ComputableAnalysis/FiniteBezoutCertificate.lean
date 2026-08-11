@@ -22,4 +22,23 @@ theorem bezout_84_30_certificate :
     rw [euclideanGcd_84_30] at h
     exact h
 
+theorem euclideanGcd_99991_12345 :
+    euclideanGcd 99991 12345 = 1 := by
+  native_decide
+
+theorem bezout_99991_12345 :
+    (2116 : Int) * 99991 + (-17139) * 12345 =
+      (euclideanGcd 99991 12345 : Int) := by
+  rw [euclideanGcd_99991_12345]
+  native_decide
+
+theorem bezout_99991_12345_certificate :
+    euclideanGcd 99991 12345 = 1 /\
+      (2116 : Int) * 99991 + (-17139) * 12345 = 1 := by
+  constructor
+  · exact euclideanGcd_99991_12345
+  · have h := bezout_99991_12345
+    rw [euclideanGcd_99991_12345] at h
+    exact h
+
 end ComputableAnalysis

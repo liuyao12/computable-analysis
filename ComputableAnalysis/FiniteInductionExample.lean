@@ -28,4 +28,29 @@ theorem induction_arithmeticSum_stage5 :
   rw [induction_arithmeticSum_eq]
   native_decide
 
+theorem induction_arithmeticSum_stage10 :
+    Series.arithmeticSum 10 = 45 := by
+  rw [induction_arithmeticSum_eq]
+  native_decide
+
+theorem induction_arithmeticSum_stage20 :
+    Series.arithmeticSum 20 = 190 := by
+  rw [induction_arithmeticSum_eq]
+  native_decide
+
+theorem induction_arithmeticSum_stage40 :
+    Series.arithmeticSum 40 = 780 := by
+  rw [induction_arithmeticSum_eq]
+  native_decide
+
+theorem induction_arithmeticSum_stage80 :
+    Series.arithmeticSum 80 = 3160 := by
+  rw [induction_arithmeticSum_eq]
+  native_decide
+
+theorem induction_arithmeticSum_stage160 :
+    Series.arithmeticSum 160 = 12720 := by
+  rw [induction_arithmeticSum_eq]
+  native_decide
+
 end ComputableAnalysis

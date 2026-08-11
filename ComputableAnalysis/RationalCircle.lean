@@ -187,11 +187,12 @@ theorem heron_three_four_five_area_raw_equiv_six :
     native_decide
   have hspec := sqrtRaw_spec (heronProduct 3 4 5) hq
   have hsquare : sq (6 : Rat) = heronProduct 3 4 5 := by
-    simpa [sq] using heron_three_four_five_area_witness
+    simpa [sq, heronProduct] using heron_three_four_five_area_witness
   have hreal := sqrt_rational_of_square
     (heronProduct 3 4 5) 6 hq hspec hsquare
+  have hqabs : qabs (6 : Rat) = 6 := by native_decide
   simpa [heronAreaRaw, sqrtReal, Real.ofRat, Real.ofRaw,
-    Real.Equiv] using hreal
+    Real.Equiv, hqabs] using hreal
 
 theorem heron_three_four_five_strict_pos :
     0 < ((3 + 4 + 5 : Rat) / 2) * ((-3 + 4 + 5 : Rat) / 2) *
@@ -441,6 +442,14 @@ theorem isosceles_axis_orthogonal (h b : Rat) :
 
 theorem isosceles_base_normSq (h b : Rat) :
     segmentNormSq { x := b, y := 0 } { x := -b, y := 0 } = 4 * b * b := by
+  unfold segmentNormSq
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem isosceles_axis_pythagorean (h b : Rat) :
+    segmentNormSq { x := 0, y := h } { x := b, y := 0 } =
+      segmentNormSq { x := 0, y := h } { x := 0, y := 0 } +
+        segmentNormSq { x := 0, y := 0 } { x := b, y := 0 } := by
   unfold segmentNormSq
   grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
     Rat.mul_assoc, Rat.mul_comm]
@@ -4397,7 +4406,9 @@ theorem composedPoint_eq_point_chartAdd {u v : Rat}
 
 theorem composed_cos_sq_add_sin_sq (u v : Rat) :
     sq (composedCos u v) + sq (composedSin u v) = 1 := by
-  simpa [composedCos, composedSin, sq] using composedPoint_normSq u v
+  change composedCos u v * composedCos u v +
+    composedSin u v * composedSin u v = 1
+  exact composedPoint_normSq u v
 
 theorem double_cos_eq_sq_sub_sq (u : Rat) :
     doubleCos u = sq (cos u) - sq (sin u) := by
@@ -4926,27 +4937,33 @@ theorem tan_quarterComplementParameter_of_nonneg {u : Rat}
 
 theorem cosRaw_valid (u : Rat) :
     (cosRaw u).Valid := by
-  simpa [cosRaw] using RealRaw.ofRat_valid (cos u)
+  change RealRaw.ValidCompute (RealRaw.ofRat (cos u)).compute
+  exact RealRaw.ofRat_valid (cos u)
 
 theorem sinRaw_valid (u : Rat) :
     (sinRaw u).Valid := by
-  simpa [sinRaw] using RealRaw.ofRat_valid (sin u)
+  change RealRaw.ValidCompute (RealRaw.ofRat (sin u)).compute
+  exact RealRaw.ofRat_valid (sin u)
 
 theorem tanRaw_valid (u : Rat) :
     (tanRaw u).Valid := by
-  simpa [tanRaw] using RealRaw.ofRat_valid (finiteTan u)
+  change RealRaw.ValidCompute (RealRaw.ofRat (finiteTan u)).compute
+  exact RealRaw.ofRat_valid (finiteTan u)
 
 theorem cotRaw_valid (u : Rat) :
     (cotRaw u).Valid := by
-  simpa [cotRaw] using RealRaw.ofRat_valid (cot u)
+  change RealRaw.ValidCompute (RealRaw.ofRat (cot u)).compute
+  exact RealRaw.ofRat_valid (cot u)
 
 theorem secRaw_valid (u : Rat) :
     (secRaw u).Valid := by
-  simpa [secRaw] using RealRaw.ofRat_valid (sec u)
+  change RealRaw.ValidCompute (RealRaw.ofRat (sec u)).compute
+  exact RealRaw.ofRat_valid (sec u)
 
 theorem cscRaw_valid (u : Rat) :
     (cscRaw u).Valid := by
-  simpa [cscRaw] using RealRaw.ofRat_valid (csc u)
+  change RealRaw.ValidCompute (RealRaw.ofRat (csc u)).compute
+  exact RealRaw.ofRat_valid (csc u)
 
 theorem dyadic_point_refineIndex (n k : Nat) :
     dyadicPoint (n + 1) (Stage.refineIndex k) =

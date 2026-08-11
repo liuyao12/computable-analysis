@@ -56,10 +56,10 @@ theorem ratMatrix_threeByThree_cayley_hamilton (A : RatMatrix 3) :
               (matrixIdentity 3)))) =
       matrixZero 3 := by
   have hA := ratMatrix_threeByThree_eq_explicit A
-  unfold ratMatrixThreeTrace ratMatrixThreeSecondCoeff
-    ratMatrixThreeDeterminant
   rw [hA]
-  simpa only [threeByThreeMatrix_00, threeByThreeMatrix_01,
+  simpa [ratMatrixThreeTrace, ratMatrixThreeSecondCoeff,
+    ratMatrixThreeDeterminant, threeByThreeTrace, threeByThreeSecondCoeff,
+    threeByThreeDeterminant, threeByThreeMatrix_00, threeByThreeMatrix_01,
     threeByThreeMatrix_02, threeByThreeMatrix_10,
     threeByThreeMatrix_11, threeByThreeMatrix_12,
     threeByThreeMatrix_20, threeByThreeMatrix_21,

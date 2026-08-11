@@ -61,7 +61,8 @@ theorem geometricQuarterTurnOne_valid :
     ((RationalCircle.GeometricTrig.quarterTurnRaw (1 : Rat)).compute)
   rw [← funext (fun n =>
     ArctanGeometry.two_arctanGeom_one_compute_eq_quarterTurnRaw_one_compute n)]
-  simpa [halfPiUnscheduled] using halfPiUnscheduled_valid
+  change RealRaw.ValidCompute (halfPiUnscheduled.compute)
+  exact halfPiUnscheduled_valid
 
 /-- The cofinally scheduled geometric half angle is equivalent to the
 normalized rational-circle quarter turn. -/
@@ -168,8 +169,9 @@ def rotationRadius (n : Nat) : Rat :=
   RotationLift.HalfPiInput.rotationRadius halfPiInput n
 
 theorem rotationRadius_shrinks : ShrinksToZero rotationRadius := by
-  simpa [rotationRadius] using
-    RotationLift.HalfPiInput.rotationRadius_shrinks halfPiInput
+  change ShrinksToZero
+    (RotationLift.HalfPiInput.rotationRadius halfPiInput)
+  exact RotationLift.HalfPiInput.rotationRadius_shrinks halfPiInput
 
 /-- A valid represented complex rotation at the geometric angle `pi / 2`.
 Its construction is finite prefix stabilization of rational factorial boxes. -/
