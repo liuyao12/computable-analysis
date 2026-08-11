@@ -87,4 +87,34 @@ theorem fourPointWeightedFourier_parseval_certificate :
       4 * (1 ^ 2 + 2 ^ 2 + 3 ^ 2 + 4 ^ 2) := by
   native_decide
 
+/-! The concrete certificate above is an instance of a reusable finite
+Parseval identity.  The statement is deliberately only four-point: it is an
+exact rational-coordinate transform identity, not an infinite Fourier
+convergence theorem. -/
+
+def fourPointFourierTransform (x₀ x₁ x₂ x₃ : Rat) (mode : Nat) : QComplex :=
+  QComplex.add
+    (QComplex.add
+      (QComplex.add
+        (QComplex.mul (QComplex.ofRat x₀)
+          (QComplex.natPow RotationSeries.imaginaryUnit (mode * 0)))
+        (QComplex.mul (QComplex.ofRat x₁)
+          (QComplex.natPow RotationSeries.imaginaryUnit (mode * 1))))
+      (QComplex.mul (QComplex.ofRat x₂)
+        (QComplex.natPow RotationSeries.imaginaryUnit (mode * 2))))
+    (QComplex.mul (QComplex.ofRat x₃)
+      (QComplex.natPow RotationSeries.imaginaryUnit (mode * 3)))
+
+theorem fourPointFourierTransform_parseval (x₀ x₁ x₂ x₃ : Rat) :
+    QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 2) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 3) =
+      4 * (x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2) := by
+  simp [fourPointFourierTransform, QComplex.natPow,
+    RotationSeries.imaginaryUnit, QComplex.ofRat, QComplex.mul,
+    QComplex.add, QComplex.one, QComplex.normSq]
+  grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 end ComputableAnalysis

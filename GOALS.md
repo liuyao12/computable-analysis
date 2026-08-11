@@ -856,6 +856,9 @@ transform core without introducing an infinite Fourier limit.
 The transform checkpoint now also verifies mode `5`, whose four-point sum is
 again zero. This extends the finite periodicity evidence beyond one complete
 mode cycle while remaining a rational-complex calculation.
+The parameterized `fourPointFourierTransform_parseval` theorem now proves the
+same unnormalized energy identity for arbitrary rational samples, extending
+the concrete `(1,2,3,4)` check to a reusable four-point transform law.
 
 The exact lattice triangles in `FinitePickCertificate.lean` add item 92's
 finite coordinate core.  The `(4,3)` triangle has area `6`, boundary count `8`,

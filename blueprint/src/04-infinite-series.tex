@@ -32,6 +32,8 @@ Chapters~\ref{ch:rational-circle-trigonometry} and \ref{ch:integrals}.
 \lean{ComputableAnalysis.fourPointWeightedFourierSum}
 \lean{ComputableAnalysis.fourPointWeightedFourierSum_modes}
 \lean{ComputableAnalysis.fourPointWeightedFourier_parseval_certificate}
+\lean{ComputableAnalysis.fourPointFourierTransform}
+\lean{ComputableAnalysis.fourPointFourierTransform_parseval}
 \leanok
 The four rational quarter-turn roots form a finite Fourier transform: the
 zero mode has total mass (4), the first three nonzero modes cancel exactly,
@@ -42,6 +44,10 @@ nonconstant rational signal ((1,2,3,4)), the unnormalized transform has
 coefficient energies (100,8,4,8), summing to (120=4(1+4+9+16)).
 This is a finite Parseval-style identity, not an infinite Fourier-series
 theorem.
+The parameterized certificate
+`fourPointFourierTransform_parseval` proves the same energy identity for
+arbitrary rational samples $(x_0,x_1,x_2,x_3)$, so the checked result is a
+reusable finite transform law rather than only a numerical example.
 \end{theorem}
 
 \begin{theorem}[Finite prime-reciprocal extension]
