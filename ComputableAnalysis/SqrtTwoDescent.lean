@@ -2,11 +2,14 @@ import ComputableAnalysis.Basic
 
 namespace ComputableAnalysis
 
-/-! A deliberately low-level infinite-descent core for √2 irrationality.
+/-! A deliberately low-level Diophantine descent kernel.
 
-This file does not use real numbers, rationals, factorisation, or any
-library theorem about irrationality.  It proves the Diophantine kernel that
-such a bridge needs: a² = 2b² forces b = 0.
+This file does not provide the public square-root irrationality API.  For the
+general rational criterion used by comparison projects, use
+`ComputableAnalysis.IrrationalSqrt.irrational_sqrt_rat_iff_not_square`.
+This module remains as a pedagogical elementary-descent example: it proves
+the Diophantine kernel `a² = 2b² → b = 0` without real numbers, rationals,
+factorisation, or library irrationality theorems.
 -/
 
 private theorem odd_square_mod_two (k : Nat) :
