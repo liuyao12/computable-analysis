@@ -4358,6 +4358,47 @@ theorem nondecreasingDarbouxRange_width_le_of_intervalRegular
     hright.2
   grind [QInterval.width, Rat.sub_eq_add_neg]
 
+theorem nondecreasingDarbouxStage_width_nonneg
+    (F : FunctionOnInterval) (hF : NondecreasingOnInterval F)
+    (P : RationalPartition F.lower F.upper) (prec : Nat) :
+    0 <= (P.boundIntegralSum
+      (fun k hk => nondecreasingDarbouxRange F P k hk prec)).width := by
+  unfold RationalPartition.boundIntegralSum
+  rw [RationalPartition.addInterval_fold_width]
+  have hterm : forall k, k ∈ List.range P.pieces ->
+      0 <= (P.boundIntegralTerm
+        (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width := by
+    intro k hk
+    have hklt : k < P.pieces := List.mem_range.mp hk
+    simp only [RationalPartition.boundIntegralTerm, dif_pos hklt]
+    rw [RationalSubinterval.scaleBound,
+      QInterval.scaleByRat_width_of_nonneg]
+    · exact nondecreasingDarbouxRange_width_nonneg F hF P k hklt prec
+    · unfold RationalSubinterval.width
+      exact Rat.le_of_lt (by
+        have hcell := (P.cell k hklt).ordered
+        grind)
+  have hsum : 0 <= (List.range P.pieces).foldl
+      (fun total k => total +
+        (P.boundIntegralTerm
+          (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width) 0 := by
+    induction List.range P.pieces with
+    | nil => simp
+    | cons k xs ih =>
+      simp only [List.foldl]
+      rw [show (0 : Rat) +
+          (P.boundIntegralTerm
+            (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width =
+          (P.boundIntegralTerm
+            (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width by
+            grind]
+      exact Rat.add_nonneg (hterm k (by simp)) ih
+  have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  rw [hzero]
+  exact hsum
+
 /-- The exact finite lower/upper Darboux bracket on a supplied rational
 partition.  Its `k`th summand is the cell width times the endpoint range.
 This direct finite calculation is intentionally exposed before a general
@@ -4476,9 +4517,6 @@ structure MonotoneDarbouxSchedule
   input_budget : forall n,
     mesh F.lower F.upper (pieces n) <=
       1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat)
-  width_nonneg : forall n,
-    0 <= (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
-      pieces_pos n).width
   nested : forall n m, n <= m ->
     (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
       pieces_pos n).lo <=
@@ -4507,10 +4545,21 @@ theorem monotoneDarbouxScheduleRaw_valid
     {hinterval : F.lower <= F.upper}
     (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
     (monotoneDarbouxScheduleRaw s).Valid := by
+  have hwidth : forall n,
+      0 <= (monotoneDarbouxScheduleCompute F hinterval s.pieces
+        s.evalPrecision s.pieces_pos n).width := by
+    intro n
+    change 0 <=
+      ((RationalPartition.uniform F.lower F.upper (s.pieces n)
+        (s.pieces_pos n) hinterval).boundIntegralSum
+        (fun k hk => nondecreasingDarbouxRange F
+          (RationalPartition.uniform F.lower F.upper (s.pieces n)
+            (s.pieces_pos n) hinterval) k hk (s.evalPrecision n))).width
+    exact nondecreasingDarbouxStage_width_nonneg F hmonotone _ _
   change RealRaw.ValidCompute
     (monotoneDarbouxScheduleCompute F hinterval s.pieces
       s.evalPrecision s.pieces_pos)
-  refine ⟨s.width_nonneg, ?_, s.widths_shrink⟩
+  refine ⟨hwidth, ?_, s.widths_shrink⟩
   intro n m hnm
   rcases s.nested n m hnm with ⟨hlo, hhi⟩
   refine ⟨hlo, ?_⟩

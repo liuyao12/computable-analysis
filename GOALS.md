@@ -1823,8 +1823,9 @@ Its companion
 provides the same direct requested-tolerance handoff for the textbook's
 stage-indexed dyadic algorithm.
 `Integral.MonotoneDarbouxSchedule` now packages the remaining finite schedule
-certificates—input budget, nonnegative widths, nesting, and a
-potential-infinity shrinking witness—and
+certificates—input budget, nesting, and a potential-infinity shrinking
+witness—while deriving nonnegative widths from the finite endpoint-range
+lemma—and
 `Integral.monotoneDarbouxScheduleRaw_valid` turns them into a valid
 `RealRaw` integral algorithm.  This closes the schedule-to-raw bridge while
 leaving the construction of those certificates and primitive identification

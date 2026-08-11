@@ -916,7 +916,8 @@ intentional: mesh refinement by itself does not establish convergence for an
 unspecified evaluator schedule.
 `MonotoneDarbouxSchedule` now packages the remaining schedule-level data:
 mesh/input budgets, nesting, nonnegative interval widths, and a
-potential-infinity shrinking witness.  `monotoneDarbouxScheduleRaw_valid`
+potential-infinity shrinking witness; nonnegative widths are derived from the
+finite endpoint-range lemma.  `monotoneDarbouxScheduleRaw_valid`
 turns those finite certificates into a valid `RealRaw` integral algorithm;
 the theorem deliberately leaves schedule construction and primitive
 identification explicit rather than invoking completeness.
