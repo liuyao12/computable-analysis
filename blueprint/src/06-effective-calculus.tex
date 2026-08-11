@@ -825,6 +825,10 @@ grounded in completeness, supports the general FTC.
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxRange_width_le_of_intervalRegular}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxStage_width_le_of_uniform_input_budget}
 \lean{ComputableAnalysis.Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleCompute}
+\lean{ComputableAnalysis.Integral.MonotoneDarbouxSchedule}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw}
+\lean{ComputableAnalysis.Integral.monotoneDarbouxScheduleRaw_valid}
 \lean{ComputableAnalysis.Integral.exactRat_square_nondecreasing}
 \lean{ComputableAnalysis.Integral.exactRat_square_monotone_construction}
 \lean{ComputableAnalysis.Integral.exactRat_square_monotone_integral_valid}
@@ -909,6 +913,12 @@ The dyadic specialization
 bound for stage `n` with `2^n` cells.  Its explicit input-budget premise is
 intentional: mesh refinement by itself does not establish convergence for an
 unspecified evaluator schedule.
+`MonotoneDarbouxSchedule` now packages the remaining schedule-level data:
+mesh/input budgets, nesting, nonnegative interval widths, and a
+potential-infinity shrinking witness.  `monotoneDarbouxScheduleRaw_valid`
+turns those finite certificates into a valid `RealRaw` integral algorithm;
+the theorem deliberately leaves schedule construction and primitive
+identification explicit rather than invoking completeness.
 The square on `[0,1]` is now promoted from an interval-regular certificate to
 an explicit monotone construction: its rational factorization proves
 nondecreasingness, while the existing dyadic construction supplies validity

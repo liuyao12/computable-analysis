@@ -4450,6 +4450,80 @@ theorem nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance
       F hregular hinterval evalPrecision n hsmall)
     hbudget
 
+/-! A schedule-level bridge for the monotone Darboux algorithm.  The
+finite width theorem above is useful only once its stages are assembled into
+a valid raw computation.  This structure records precisely the remaining
+finite data: the mesh/input-precision budget, stage nesting, and the
+potential-infinity width witness.  No completed integral or completeness
+principle is hidden in the package. -/
+
+def monotoneDarbouxScheduleCompute
+    (F : FunctionOnInterval) (hinterval : F.lower <= F.upper)
+    (pieces evalPrecision : Nat -> Nat)
+    (hpieces : forall n, 0 < pieces n) (n : Nat) : QInterval :=
+  nondecreasingDarbouxStage F
+    (RationalPartition.uniform F.lower F.upper (pieces n)
+      (hpieces n) hinterval)
+    (evalPrecision n)
+
+structure MonotoneDarbouxSchedule
+    (F : FunctionOnInterval) (hregular : IntervalRegularOn F)
+    (hmonotone : NondecreasingOnInterval F)
+    (hinterval : F.lower <= F.upper) where
+  pieces : Nat -> Nat
+  evalPrecision : Nat -> Nat
+  pieces_pos : forall n, 0 < pieces n
+  input_budget : forall n,
+    mesh F.lower F.upper (pieces n) <=
+      1 / ((hregular.inputPrecision (evalPrecision n) : Nat) : Rat)
+  width_nonneg : forall n,
+    0 <= (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos n).width
+  nested : forall n m, n <= m ->
+    (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos n).lo <=
+      (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
+        pieces_pos m).lo /\
+    (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos m).hi <=
+      (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
+        pieces_pos n).hi
+  widths_shrink : RealRaw.WidthsShrinkToZero
+    (monotoneDarbouxScheduleCompute F hinterval pieces evalPrecision
+      pieces_pos)
+
+def monotoneDarbouxScheduleRaw
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) : RealRaw :=
+  { compute := monotoneDarbouxScheduleCompute F hinterval s.pieces
+      s.evalPrecision s.pieces_pos
+    rate := .unknown }
+
+theorem monotoneDarbouxScheduleRaw_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
+    (monotoneDarbouxScheduleRaw s).Valid := by
+  change RealRaw.ValidCompute
+    (monotoneDarbouxScheduleCompute F hinterval s.pieces
+      s.evalPrecision s.pieces_pos)
+  refine ⟨s.width_nonneg, ?_, s.widths_shrink⟩
+  intro n m hnm
+  rcases s.nested n m hnm with ⟨hlo, hhi⟩
+  refine ⟨hlo, ?_⟩
+  constructor
+  · have hm := s.width_nonneg m
+    change 0 <=
+      (monotoneDarbouxScheduleCompute F hinterval s.pieces
+        s.evalPrecision s.pieces_pos m).hi -
+      (monotoneDarbouxScheduleCompute F hinterval s.pieces
+        s.evalPrecision s.pieces_pos m).lo at hm
+    grind [Rat.sub_eq_add_neg]
+  · exact hhi
+
 /-- The first-class integral object for monotone interval functions.
 
 The intended construction is by lower and upper endpoint sums on a static

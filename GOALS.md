@@ -1822,6 +1822,13 @@ Its companion
 `Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance`
 provides the same direct requested-tolerance handoff for the textbook's
 stage-indexed dyadic algorithm.
+`Integral.MonotoneDarbouxSchedule` now packages the remaining finite schedule
+certificates—input budget, nonnegative widths, nesting, and a
+potential-infinity shrinking witness—and
+`Integral.monotoneDarbouxScheduleRaw_valid` turns them into a valid
+`RealRaw` integral algorithm.  This closes the schedule-to-raw bridge while
+leaving the construction of those certificates and primitive identification
+explicit.
 The independent `FinitePiecewiseRectangles` module now records the local
 equal-cell rule needed for a finite piecewise-monotone stage:
 `PieceCellKind.increasing` and `.decreasing` select endpoint order, while
