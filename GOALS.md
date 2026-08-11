@@ -1829,6 +1829,9 @@ potential-infinity shrinking witness—and
 `RealRaw` integral algorithm.  This closes the schedule-to-raw bridge while
 leaving the construction of those certificates and primitive identification
 explicit.
+The companion `Integral.monotoneDarbouxScheduleRaw_width_le_of_tolerance`
+hands a supplied rational tolerance directly to any scheduled stage, making
+the finite width budget available to downstream FTC and MVT certificates.
 The independent `FinitePiecewiseRectangles` module now records the local
 equal-cell rule needed for a finite piecewise-monotone stage:
 `PieceCellKind.increasing` and `.decreasing` select endpoint order, while

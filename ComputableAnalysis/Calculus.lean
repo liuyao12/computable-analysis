@@ -4524,6 +4524,23 @@ theorem monotoneDarbouxScheduleRaw_valid
     grind [Rat.sub_eq_add_neg]
   · exact hhi
 
+theorem monotoneDarbouxScheduleRaw_width_le_of_tolerance
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval)
+    (n : Nat) (eps : Rat)
+    (hbudget : (F.upper - F.lower) *
+        (1 / ((s.evalPrecision n + 1 : Nat) : Rat)) <= eps) :
+    ((monotoneDarbouxScheduleRaw s).compute n).width <= eps := by
+  change (monotoneDarbouxScheduleCompute F hinterval s.pieces
+    s.evalPrecision s.pieces_pos n).width <= eps
+  exact Rat.le_trans
+    (nondecreasingDarbouxStage_width_le_of_uniform_input_budget
+      F hregular (s.pieces n) (s.pieces_pos n) hinterval
+      (s.evalPrecision n) (s.input_budget n))
+    hbudget
+
 /-- The first-class integral object for monotone interval functions.
 
 The intended construction is by lower and upper endpoint sums on a static
