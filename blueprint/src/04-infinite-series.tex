@@ -33,6 +33,7 @@ Chapters~\ref{ch:rational-circle-trigonometry} and \ref{ch:integrals}.
 \lean{ComputableAnalysis.fourPointWeightedFourierSum_modes}
 \lean{ComputableAnalysis.fourPointWeightedFourier_parseval_certificate}
 \lean{ComputableAnalysis.fourPointFourierTransform}
+\lean{ComputableAnalysis.fourPointFourierTransform_modes}
 \lean{ComputableAnalysis.fourPointFourierTransform_parseval}
 \leanok
 The four rational quarter-turn roots form a finite Fourier transform: the
@@ -48,6 +49,9 @@ The parameterized certificate
 `fourPointFourierTransform_parseval` proves the same energy identity for
 arbitrary rational samples $(x_0,x_1,x_2,x_3)$, so the checked result is a
 reusable finite transform law rather than only a numerical example.
+The companion `fourPointFourierTransform_modes` gives the four exact rational
+coordinate formulas, making the cancellation and energy calculation
+inspectable without unfolding the evaluator.
 \end{theorem}
 
 \begin{theorem}[Finite prime-reciprocal extension]

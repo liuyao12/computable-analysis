@@ -105,6 +105,21 @@ def fourPointFourierTransform (x₀ x₁ x₂ x₃ : Rat) (mode : Nat) : QComple
     (QComplex.mul (QComplex.ofRat x₃)
       (QComplex.natPow RotationSeries.imaginaryUnit (mode * 3)))
 
+theorem fourPointFourierTransform_modes (x₀ x₁ x₂ x₃ : Rat) :
+    fourPointFourierTransform x₀ x₁ x₂ x₃ 0 =
+        { re := x₀ + x₁ + x₂ + x₃, im := 0 } /\
+    fourPointFourierTransform x₀ x₁ x₂ x₃ 1 =
+        { re := x₀ - x₂, im := x₁ - x₃ } /\
+    fourPointFourierTransform x₀ x₁ x₂ x₃ 2 =
+        { re := x₀ - x₁ + x₂ - x₃, im := 0 } /\
+    fourPointFourierTransform x₀ x₁ x₂ x₃ 3 =
+        { re := x₀ - x₂, im := x₃ - x₁ } := by
+  simp [fourPointFourierTransform, QComplex.natPow,
+    RotationSeries.imaginaryUnit, QComplex.ofRat, QComplex.mul,
+    QComplex.add, QComplex.one, QComplex.normSq]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 theorem fourPointFourierTransform_parseval (x₀ x₁ x₂ x₃ : Rat) :
     QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
         QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) +
