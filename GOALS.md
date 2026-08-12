@@ -3415,6 +3415,11 @@ recursive coefficient-level derivative evaluator; the named identities
 `Polynomial.eval_derivative_linear`,
 `Polynomial.eval_derivative_quadratic`, and
 `Polynomial.eval_derivative_cubic`,
+and the new `Polynomial.quadratic_secant_quotient` and
+`Polynomial.quadratic_secant_minus_derivative` expose the exact finite
+quadratic difference quotient and its rational step error.  This is the
+computable MVT content used before any claim about an attained intermediate
+point.
 `Polynomial.eval_derivative_quartic`, and
 `Polynomial.eval_derivative_quintic`,
 `Polynomial.eval_derivative_sextic`, and
@@ -3595,6 +3600,14 @@ students actually compute.
   tangent/secant formulas on intervals whose cosine denominator is apart from
   zero, and polynomial/rational examples via domain-specific interval
   certificates.
+
+  The new `FiniteSineIntegral` module begins the half-period route with the
+  finite primitive `halfAnglePrefix`: after substituting `u = pi*x`, it is
+  the rational Taylor-prefix value at `u = piApprox/2`. The endpoint
+  recurrence and stage-four/stage-six certificates are exact finite rational
+  identities; the stage-six value is within `1/1000` of `1`. This is a
+  computable prefix toward the normalized formula, not yet a completed
+  integral or a claim that the rational approximation is exact pi.
 - A later noncompact benchmark is the Dirichlet sinc integral
   `∫ sin(π t)/t dt = π`, using the project's rational-angle convention.  The
   first local illustration is its decreasing-then-increasing branch around
