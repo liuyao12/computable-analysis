@@ -32,6 +32,7 @@ import ComputableAnalysis.FinitePiecewiseRectangles
 import ComputableAnalysis.FiniteFTCQuintic
 import ComputableAnalysis.FiniteFTCQuartic
 import ComputableAnalysis.FiniteFTCPolynomial
+import ComputableAnalysis.FiniteSineIntegral
 import ComputableAnalysis.FinitePolynomialIntegrationByParts
 import ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts
 import ComputableAnalysis.ComplexPolynomial
