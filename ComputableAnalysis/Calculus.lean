@@ -4373,31 +4373,46 @@ theorem nondecreasingDarbouxStage_width_nonneg
     simp only [RationalPartition.boundIntegralTerm, dif_pos hklt]
     rw [RationalSubinterval.scaleBound,
       QInterval.scaleByRat_width_of_nonneg]
-    · exact nondecreasingDarbouxRange_width_nonneg F hF P k hklt prec
-    · unfold RationalSubinterval.width
-      exact Rat.le_of_lt (by
+    · exact Rat.mul_nonneg (by
+        unfold RationalSubinterval.width
         have hcell := (P.cell k hklt).ordered
         grind)
-  have hsum : 0 <= (List.range P.pieces).foldl
-      (fun total k => total +
+        (nondecreasingDarbouxRange_width_nonneg F hF P k hklt prec)
+    · unfold RationalSubinterval.width
+      have hcell := (P.cell k hklt).ordered
+      grind
+  have fold_nonneg : forall xs : List Nat, forall initial : Rat,
+      (forall k, k ∈ xs ->
+        0 <= (P.boundIntegralTerm
+          (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width) ->
+      0 <= initial ->
+      0 <= xs.foldl (fun total k => total +
         (P.boundIntegralTerm
-          (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width) 0 := by
-    induction List.range P.pieces with
-    | nil => simp
+          (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width) initial := by
+    intro xs initial
+    induction xs generalizing initial with
+    | nil =>
+      intro _hterms hinit
+      simpa using hinit
     | cons k xs ih =>
-      simp only [List.foldl]
-      rw [show (0 : Rat) +
-          (P.boundIntegralTerm
-            (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width =
-          (P.boundIntegralTerm
-            (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width by
-            grind]
-      exact Rat.add_nonneg (hterm k (by simp)) ih
+      intro hterms hinit
+      have hk := hterms k (by simp)
+      have hrest := ih (initial +
+        (P.boundIntegralTerm
+          (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width)
+        (fun j hj => hterms j (by simp [hj]))
+        (Rat.add_nonneg hinit hk)
+      exact hrest
+  have hsum := fold_nonneg (List.range P.pieces) 0 hterm (by native_decide)
   have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
     unfold QInterval.width
     grind
   rw [hzero]
-  exact hsum
+  change 0 <= 0 + (List.range P.pieces).foldl
+    (fun total k => total +
+      (P.boundIntegralTerm
+        (fun j hj => nondecreasingDarbouxRange F P j hj prec) k).width) 0
+  simpa only [Rat.zero_add] using hsum
 
 /-- The exact finite lower/upper Darboux bracket on a supplied rational
 partition.  Its `k`th summand is the cell width times the endpoint range.
@@ -4564,7 +4579,7 @@ theorem monotoneDarbouxScheduleRaw_valid
   rcases s.nested n m hnm with ⟨hlo, hhi⟩
   refine ⟨hlo, ?_⟩
   constructor
-  · have hm := s.width_nonneg m
+  · have hm := hwidth m
     change 0 <=
       (monotoneDarbouxScheduleCompute F hinterval s.pieces
         s.evalPrecision s.pieces_pos m).hi -
