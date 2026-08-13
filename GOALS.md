@@ -466,6 +466,10 @@ symbol `piApprox` still an explicit rational approximation rather than a
 completed real constant.
 The ladder now includes `x=5`, with `exp (-25) ≤ 1/25`; the four-point sum is
 bounded by `1669/3600`, exactly matching the reciprocal-square tail prefix.
+The finite ladder now extends to `x=9` and `x=10` at exponential stage 200,
+with upper boxes bounded by `1/81` and `1/100`; their combined budget is
+`181/8100`. This remains finite tail evidence, not the general inequality
+`exp(-x^2) ≤ 1/x^2` or a completed full-line Gaussian integral.
 The reusable `PiProofs.pointSegmentLengthRaw` interface now applies the same
 certified square-root algorithm to any rational-coordinate squared distance,
 with validity and `SqrtRawSpec` theorems for later Ptolemy and polygonal-length
