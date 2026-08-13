@@ -458,6 +458,39 @@ theorem nonic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
   have h := nonic_linear_worked_remainder (1 / (n : Rat)) hstep
   simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
 
+/-! The degree-ten analogue extends the same finite quotient certificate. -/
+
+theorem decic_linear_worked_remainder (step : Rat) (hstep : step ≠ 0) :
+    (step * (10 + 45 * step + 120 * step ^ 2 + 210 * step ^ 3 +
+        252 * step ^ 4 + 210 * step ^ 5 + 120 * step ^ 6 +
+        45 * step ^ 7 + 10 * step ^ 8 + step ^ 9)) / (step * 1) - 10 =
+      45 * step + 120 * step ^ 2 + 210 * step ^ 3 + 252 * step ^ 4 +
+        210 * step ^ 5 + 120 * step ^ 6 + 45 * step ^ 7 +
+        10 * step ^ 8 + step ^ 9 := by
+  have hcancel : step * step⁻¹ = 1 := Rat.mul_inv_cancel _ hstep
+  rw [Rat.div_def]
+  grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem decic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
+    ((1 / (n : Rat)) * (10 + 45 * (1 / (n : Rat)) +
+        120 * (1 / (n : Rat)) ^ 2 + 210 * (1 / (n : Rat)) ^ 3 +
+        252 * (1 / (n : Rat)) ^ 4 + 210 * (1 / (n : Rat)) ^ 5 +
+        120 * (1 / (n : Rat)) ^ 6 + 45 * (1 / (n : Rat)) ^ 7 +
+        10 * (1 / (n : Rat)) ^ 8 + (1 / (n : Rat)) ^ 9)) /
+        ((1 / (n : Rat)) * 1) - 10 =
+      45 / (n : Rat) + 120 * (1 / (n : Rat)) ^ 2 +
+        210 * (1 / (n : Rat)) ^ 3 + 252 * (1 / (n : Rat)) ^ 4 +
+        210 * (1 / (n : Rat)) ^ 5 + 120 * (1 / (n : Rat)) ^ 6 +
+        45 * (1 / (n : Rat)) ^ 7 + 10 * (1 / (n : Rat)) ^ 8 +
+        (1 / (n : Rat)) ^ 9 := by
+  have hstep : (1 / (n : Rat)) ≠ 0 := by
+    rw [Rat.div_def]
+    exact Rat.ne_of_gt (Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)))
+  have h := decic_linear_worked_remainder (1 / (n : Rat)) hstep
+  simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
+
 end FiniteLHopitalCertificate
 
 end ComputableAnalysis
