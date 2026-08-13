@@ -13,6 +13,7 @@ mesh -> cell certificates -> lower/upper rectangles -> overlap
 \lean{ComputableAnalysis.pieceCellBounds}
 \lean{ComputableAnalysis.pieceCellTurningAreaGap_le}
 \lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_le_common_range}
+\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
 \begin{figure}[!htbp]\centering
 \arctanRectangleEnclosureAnimation
 \caption{Certified lower and upper rectangles.}
@@ -27,6 +28,8 @@ stage-dependent brackets.
 \lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_compute}
 \lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_valid}
 \lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_reaches_of_positive_tolerance}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_width_le_geometric}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_ten_near_one}
 
 \section{Finite identities}
 \label{def:integration-by-parts-certificate}
@@ -40,6 +43,8 @@ finite sum -> algebraic identity -> endpoint difference -> error budget
 \lean{ComputableAnalysis.finiteIntegrationByParts}
 \lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.finiteRatSum_ibp_left_right}
 \lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_endpoint_difference}
+\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicLeftRightSum_eq_one}
+\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_stage4}
 \label{cor:arctangent-logarithm-pi-route}
 
 \section{Tails and products}
