@@ -151,6 +151,7 @@ import ComputableAnalysis.FinitePythagoreanExample
 import ComputableAnalysis.FiniteIsoscelesExample
 import ComputableAnalysis.FiniteCramerExample
 import ComputableAnalysis.FiniteDeMoivreExample
+import ComputableAnalysis.FiniteRotationQuarterTurnExample
 import ComputableAnalysis.FinitePtolemyLength
 import ComputableAnalysis.FinitePtolemySecondExample
 import ComputableAnalysis.PiComplex
