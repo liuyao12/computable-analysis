@@ -71,6 +71,7 @@ import ComputableAnalysis.FiniteBaselComparisonExample
 import ComputableAnalysis.FiniteFTASubdivision
 import ComputableAnalysis.FiniteDeflationChain
 import ComputableAnalysis.FiniteDeflationExample
+import ComputableAnalysis.CubicRootWitnessCertificate
 import ComputableAnalysis.FiniteQuarticQuadraticSplit
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.IntegralIdentities
