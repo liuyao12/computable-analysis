@@ -264,6 +264,41 @@ theorem kernelPartialIntegralBetween_half_even_odd_gap_le_one_div
       exact this)))
   simpa [Rat.div_def, Rat.mul_one] using hbound
 
+theorem kernelPartialIntegralBetween_half_alternating_enclosure
+    (n : Nat) :
+    kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) <=
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n) /\
+      kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n) -
+          kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) <=
+        1 / (((4 * n + 3 : Nat) : Rat)) := by
+  constructor
+  · have hgap := kernelPartialIntegralBetween_half_even_odd_gap n
+    have hpow : 0 <= ((1 : Rat) / 2) ^ (4 * n + 3) := by
+      exact Rat.pow_nonneg (by native_decide)
+    have hden : 0 < (4 * (n : Rat) + 3) := by
+      have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+      grind
+    have hmul := Rat.mul_nonneg hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+    have hnonpos :
+        -((1 : Rat) / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) <= 0 := by
+      rw [Rat.div_def]
+      grind
+    grind [Rat.sub_eq_add_neg]
+  · have hwidth := kernelPartialIntegralBetween_half_even_odd_gap_le_one_div n
+    rw [qabs_eq_neg_of_nonpos] at hwidth
+    · grind
+    · have hgap := kernelPartialIntegralBetween_half_even_odd_gap n
+      have hpow : 0 <= ((1 : Rat) / 2) ^ (4 * n + 3) := by
+        exact Rat.pow_nonneg (by native_decide)
+      have hden : 0 < (4 * (n : Rat) + 3) := by
+        have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+        grind
+      rw [hgap, Rat.div_def]
+      have hmul := Rat.mul_nonneg hpow
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+      grind
+
 private theorem one_pow_rat (m : Nat) : (1 : Rat) ^ m = 1 := by
   induction m with
   | zero => simp
