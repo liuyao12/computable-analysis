@@ -19,7 +19,17 @@ vector and satisfies a finite Parseval identity; no infinite series is hidden.
 \label{thm:finite-power-sums}\label{thm:geometric-series-sum}
 \label{thm:finite-geometric-series-interface}
 \emph{Geometric interface.} Compute the finite prefix recursively and carry
-an explicit tail bound; the completed sum is a later identification.
+an explicit rational tail bound.  The certificate exposes only a finite stage;
+the completed sum is a later identification.
+\begin{verbatim}
+prefix := geometricSum ratio stage
+endpoint := 1 / (1 - ratio)
+require ratio^stage <= tolerance * (1 - ratio)
+\end{verbatim}
+\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
+\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.prefix_le_endpoint}
+\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
+\lean{ComputableAnalysis.Series.finiteGeometricSeriesCertificate}
 \label{thm:reciprocal-triangular-sum}\label{thm:harmonic-dyadic-lower-bound}
 \label{thm:finite-reciprocal-triangular-interface}
 \lean{ComputableAnalysis.Series.ReciprocalTriangularCertificate}
