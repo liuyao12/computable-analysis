@@ -155,6 +155,7 @@ import ComputableAnalysis.FiniteDeMoivreExample
 import ComputableAnalysis.FiniteRotationQuarterTurnExample
 import ComputableAnalysis.FinitePtolemyLength
 import ComputableAnalysis.FinitePtolemySecondExample
+import ComputableAnalysis.PtolemyLengthCertificate
 import ComputableAnalysis.PiComplex
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.ThreeByThreeLinearAlgebra
