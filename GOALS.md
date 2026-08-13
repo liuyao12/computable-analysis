@@ -3621,6 +3621,8 @@ students actually compute.
   The public theorem `halfPeriodSineRaw_reaches_of_positive_tolerance` exposes
   the corresponding potential-infinity stage selector for every positive
   rational tolerance.
+  The enclosure theorem `halfPeriodSineRaw_contains_halfAnglePrefix` now
+  identifies the exact finite prefix contained in each later factorial box.
 - A later noncompact benchmark is the Dirichlet sinc integral
   `∫ sin(π t)/t dt = π`, using the project's rational-angle convention.  The
   first local illustration is its decreasing-then-increasing branch around
