@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 76221)
-Total output lines: 4717
+Warning: truncated output (original token count: 76285)
+Total output lines: 4721
 
 # Computable Analysis Goalposts
 
@@ -1873,7 +1873,599 @@ sum of domain widths times value-range widths, and is nonnegative for ordered
 cells.  This is a finite rational bridge toward the constructive FTC, not an
 appeal to an attained integral or completeness.
 The companion `piecewiseRectangleAreaSum_gap_le_common_range_budget` theorem
-packages the common-range fo…16221 tokens truncated… and
+packages the common-range form: a uniform value-width certificate bounds the
+whole mesh gap by the sum of the domain widths times that range budget.  This
+separates the two refinement obligations cleanly—geometric mesh width and
+function-value uncertainty—before any potential-infinity schedule is added.
+The new `piecewiseRectangleAreaSum_constant` evaluates that constant per-cell
+budget exactly as `(cells.length : Rat) * value`.  Its companion
+`piecewiseRectangleAreaSum_gap_le_common_range` therefore gives the closed
+form global bound by the number of cells, the cell width, and the common value
+range.  This is the finite equal-mesh bridge needed by the constructive FTC
+story and does not introduce an infinite sum.
+The mesh identity `natCast_mul_mesh_eq_sub` now closes the geometric part for
+an equal rational partition: a positive `n`-cell mesh has total width exactly
+`b - a`.  Thus a common value-range budget can be normalized to the interval
+width without invoking a completed real or a limiting sum.
+  turning-bracket helper in `TurningPointIntegral` supplies one component of
+  a finite monotone decomposition: every possibly non-rational turn is
+  represented by a shrinking rational bracket, while stagewise monotone
+  pieces and fixed range boxes cover the complement and the unresolved gaps.
+  Lean proves the one-gap component's width shrinks, and
+  `FinitePiecewiseStageAssembly` now proves the finite rational aggregation
+  has shrinking width; its common-rate estimate is the literal number of
+  boxes times the supplied per-box width bound. Supplying the individual boxes
+  and proving that their combined stage encloses the intended integral remain
+  function-by-function work. This is consciously not a universal existence definition for
+  integrals. The reusable
+  `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
+  Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new
+  arctangent-kernel specialization has a checked rational Lipschitz constant
+  `2`, exact width `4/2^n`, and a stagewise common-right-sum comparison with
+  the existing geometric rectangle integral.  The same rectangle construction
+  now also has the finite tangent enclosure `x - x^3 <= A_n(x) <= x` for
+  every nonnegative rational endpoint, and its zero-endpoint quotient box is
+  `[1 - h^2, 1]` for `h > 0`.  This supplies the basepoint finite estimate.
+  The new `HasForwardDerivativeAt` interface now packages this endpoint fact
+  as the checked one-sided certificate
+  `arctanIntegralRectangleOnUnit_forwardDerivativeAtZero`, with derivative
+  `1` and exact stage-zero evaluation. The tangent-chart algebra is checked
+  as well: at `x`, ordinary step
+  `h` is represented by `h / (1 + x * (x + h))`, which the chart sends exactly
+  to `x + h`; its scale differs from the kernel at `x` by at most `h` on the
+  unit branch.  These estimates now close the full two-sided certificate
+  `arctanIntegralRectangleOnUnit_hasDerivative` on `[0,1]`: negative steps are
+  reversed to a positive step at the left endpoint and the kernel's rational
+  Lipschitz bound transports the derivative back to the requested point.  The
+  checked schedule uses derivative stage `8*(n+1)` and signed step budget
+  `1/(72*(n+1))`.  This is not an FTC theorem.  What remains is extension to
+  interval-regular functions, an effective FTC closure, and then the
+  standard function table.
+- **Derivative scheduling — corrected interface.** `HasDerivativeOnInterval`
+  and the rational-power `HasDerivativeAt` certificate now choose evaluator
+  precision from the rational point, nonzero rational step, and requested
+  output precision.  This is necessary for an inexact interval evaluator:
+  quotienting a fixed-width box by an arbitrarily smaller step cannot have a
+  uniform error bound.  Exact rational examples still use the constant stage
+  zero; the correction creates the finite scheduling slot needed by the
+  arctangent and exponential derivative constructions.
+- **Monotone inverse functions — partly checked.** The branch-local
+  `InvertibleFunctionOnInterval`/`InverseRaw`/bisection API is checked, with
+  the unit-interval square-root search for exact rational targets. Extend it
+  to represented targets, then use it for the sine/arcsine and
+  exponential/logarithm branches.
+- **Differentiated elementary functions — partly checked.** Formal
+  power-series coefficient shifts and finite-difference examples are checked.
+  The series-layer API now makes this staging explicit:
+  `FormalPowerSeries.coefficientShift` and `HasCoefficientShift` are the
+  primary names; legacy formal-derivative names are compatibility aliases,
+  not an assertion about evaluated raw functions.
+  `FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` now turns every
+  finite coefficient prefix into a two-sided rational-interval derivative
+  certificate for its coefficient-shift polynomial. This is the precise
+  finite Taylor--Lagrange hand-off; at zero,
+  `FinitePolynomial.taylorPrefixShift_at_zero` identifies that derivative
+  polynomial with the original linear coefficient.  The centered forms
+  `taylorPrefixAt_hasDerivativeOnInterval` and
+  `taylorPrefixShiftAt_at_basepoint` make the same statement at every
+  rational expansion point, using local `x-a` bounds. They still do not
+  differentiate an infinite tail.
+  The quantitative certificate algebra is now closed under finite addition,
+  rational scaling, and products via `SecantDerivativeBound.mul`; the product
+  rule retains the explicitly bounded secant-corner term needed by later FTC,
+  integration-by-parts, and ODE arguments.
+  The executable factorial loop is also now identified, term by term and at
+  every finite prefix, with its rational Taylor coefficients
+  (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
+  `ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix`). This is finite
+  algebra only. `FinitePolynomial.expTaylorPrefix_succ` records the literal
+  one-term extension, while
+  `FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` supplies the
+  common bounded-box factorial majorant for a uniform tail
+  certificate. `ExpProofs.uniformExpRaw` realizes that certificate on
+  `|x| <= 2`: its fixed-stage boxes are valid and geometrically shrinking,
+  and `uniformExpRaw_equiv_expPowerSeries` proves stagewise agreement with the
+  selected adaptive exponential evaluator. `ExpProofs.uniformExpOnUnit`
+  exposes this schedule as an
+  interval function, pointwise equivalent to the selected exponential. The
+  derivative of the next finite prefix is exactly its common center, and
+  `uniformExpTaylorPrefix_secant_error` bounds the residual finite secant
+  error. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four` now
+  proves the uniform coefficient `34` for every factorial prefix on
+  `|x| <= 2`, and the uniform schedule inherits it. The step-aware
+  tail transport has an executable stage selection:
+  `uniformExpQuotientPrecision h hh n` makes the shared factorial magnitude
+  no more than `precisionAtStage n * |h| / 24`, while
+  `uniformExpSelfDerivativeStepPrecision` reserves half the requested output
+  precision for the `34 |h|` finite secant error.
+  `uniformExpCenter_secant_error_le` and
+  `uniformExpOnUnit_hasDerivativeOnInterval` complete the interval-endpoint
+  algebra: the common-prefix evaluator proves the full two-sided
+  `E' = E` certificate on `[0,1]`. Its exact zero value is separately
+  certified, so `uniformExpOnUnit_solvesSelfDerivative` is the first
+  constructive initial-value solution record. The same construction is now
+  checked on the centered chart `[-1,1]`:
+  `uniformExpOnSymmetricUnit_hasDerivativeOnInterval` uses the explicit
+  endpoint consequence `|h| <= 2`, and
+  `uniformExpOnSymmetricUnit_solvesSelfDerivative` supplies the corresponding
+  initial-value record. This does not silently
+  transfer the derivative to the pointwise-equivalent adaptive evaluator;
+  that representation-closure theorem, uniqueness, and the logarithm
+  relation are the next gates. The literal rational-input
+  evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for
+  every `x : Rat`: its finite rational series boxes are nested and have the
+  public geometric rate `ExpProofs.expPowerSeriesRate x`, with ratio `1/2`.
+  The same evaluator is now the total `PartialRealFunRaw`
+  `ExpProofs.expPowerSeriesFunction`, and
+  `ExpProofs.expPowerSeriesOnInterval a b` gives its valid rational-interval
+  restriction. When zero is in that interval,
+  `ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies the exact
+  function-level initial equivalence required by the ODE interface. This is a
+  certified representation layer, not yet a derivative-transport bridge to
+  the other definitions. Its finite-difference bridge is now explicit:
+  `expTaylorQuadratic x = 1 + x + x*x/2`, and
+  `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` certifies its
+  full two-sided interval derivative `1 + x` on every rational subinterval of
+  a supplied bounded symmetric box, using the reusable quantitative
+  finite-secant linear interface. `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero`
+  remains the specialized forward derivative `1` at zero by the exact quotient
+  `1 + h/2`. More importantly,
+  `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` now certifies the
+  tail-enclosed power-series evaluator itself has forward derivative `1` at
+  zero. Its finite stage-zero loop has a positive-tail-plus-radius budget of
+  `O(h^2)` on `0 < h <= 1/2`, so quotienting gives an explicit first-order
+  enclosure. This remains a local boundary theorem for the adaptive
+  representative. The
+  constant-level compound-interest representative is now additionally packaged as the
+  positive base `ExpProofs.ePositive`: its lower interval endpoint is always
+  at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural
+  powers between `2^n` and `4^n`. Rational roots, rational-exponent
+  continuity, and the self-derivative theorem remain separate open bridges.
+- **Linear ODEs — finite Peano--Baker core and direct scalar uniqueness closure checked; analytic layer open.**
+  `PeanoBaker.lean` proves finite chronological products, the ordered-word
+  expansion, discrete variation of constants, and recurrence uniqueness:
+  the zero-initial forcing response is the explicit time-ordered Duhamel sum
+  sum_(k<N) S_(N-1) * ... * S_(k+1) * g_k; every sampled candidate is the
+  recursive trajectory, while a zero-initial homogeneous sampled candidate is
+  identically zero. Its checked forced
+  harmonic-oscillator instance derives the exact second-order Euler recurrence
+  after vectorizing position and velocity. `RationalMajorant.factorialTailTerm`
+  and `...factorialTailPartial_bound_at_start` now prove the finite rational
+  factorial-tail engine: at the computable start
+  `2 * C.num.natAbs + 1`, every finite prefix of `sum C^r/r!` is bounded by
+  twice its first omitted term, and the shifted version has an additional
+  `1/2^shift` factor. `LinearODE.peanoBakerFactorialTail_bound` specializes
+  that estimate to `C = M*T`, the coefficient-norm and interval-length
+  product in the continuous Peano--Baker plan. The new executable shift
+  `peanoBakerFactorialTailShift` and theorem
+  `peanoBakerFactorialTail_shifted_le_eps` now turn the geometric tail into
+  any requested positive rational tolerance, uniformly over every finite
+  remaining prefix. The constant-coefficient degree term
+  `constantPeanoBakerSimplexTerm A T r = (T^r/r!) * A^r` and its checked
+  one-step recurrence now give the finite algebraic bridge to the exponential
+  series. For the quarter-turn generator, the checked finite identity
+  `RotationSystem.simplexPartial_even_split` groups the first `2*n` terms as
+  `C_n(T) * I + S_n(T) * J`, with executable alternating rational prefixes.
+  `RotationSeries.expPartial_imaginary_even_split` proves that the literal
+  complex prefix at `i*T` has those same `C_n(T)` and `S_n(T)` coordinates.
+  `RotationSeries.rotationExpRaw_valid` now encloses those prefixes in nested
+  rational complex boxes, with both coordinate widths bounded by
+  `8 * rotationTailMagnitude T 0 * (1/2)^n`. Its
+  `rotationCosRaw` and `rotationSinRaw` coordinate projections are valid raw
+  reals with the same rate. The common bounded-input evaluator is now also
+  exposed as `RotationCalculus.uniformRotationCosOnTwo` and
+  `uniformRotationSinOnTwo`: both satisfy the project's literal rational
+  epsilon--delta continuity definition on `[-2,2]`, with the checked modulus
+  `delta = eps / 16` and one uniform factorial stage supplied by
+  `uniformRotationBoxes_widths_shrink_uniform`. `RotationTaylorBridge` now
+  identifies those literal centers with the corresponding finite formal
+  sine/cosine Taylor prefixes and checks the fixed-stage sine secant estimate
+  `uniformRotationSinCenter_secant_error`. Its odd-prefix recurrence is now
+  bounded by the exponential factorial budget, giving the uniform finite
+  theorem `uniformRotationSinCenter_secant_error_le_thirty_four`.
+  `RotationDerivative.uniformRotationSinOnTwo_hasDerivativeOnInterval` now
+  combines that finite `34 * |h|` error with a step-aware factorial stage
+  selected from `precisionAtStage n * |h| / 48`, proving the full two-sided
+  raw interval certificate `sin' = cos` on `[-2,2]`. The derivative belongs
+  to this common-prefix evaluator. Its companion
+  `RotationDerivative.uniformRotationCosOnTwo_hasDerivativeOnInterval`
+  now proves `cos' = -sin` against the explicit
+  `uniformRotationNegSinOnTwo` evaluator. The finite cosine prefix has one
+  dropped sine term, which is assigned a separate factorial shift and joined
+  to the divided-tail shift by `max`. `RotationInitialValues` now checks the
+  matching finite initial boxes `C(0)=1` and `S(0)=0`, then packages both
+  derivatives and those values as
+  `uniformRotationOnTwo_rotationInitialCertificate`. Derivative transport to
+  equivalent representations remains open. The continuous-simplex
+  interpretation, vector uniqueness, and the rotation/geometric
+  identification remain open.
+  The scientific-calculus gate is the continuous
+  interval-matrix Peano--Baker series with simplex integral boxes, that
+  scalar tail certificate lifted to componentwise boxes, and variation of
+  constants.
+  This is the intended constructive **linear Picard--Lindelöf** theorem for
+  vector systems:
+  Peano--Baker supplies the homogeneous resolvent, variation of constants
+  supplies the affine solution, and a bounded zero-initial difference is
+  driven to the zero raw vector by an explicit factorial schedule.  Scalar
+  `f' = f` uniqueness is deliberately separate: the checked direct
+  finite-mesh closure reduces an error envelope by a factor of two per
+  refinement sweep.  Constructing that sweep from derivative certificates
+  remains open. General nonlinear Picard--Lindelöf remains a later
+  interval-Lipschitz/contraction layer.
+- **Scalar exponential uniqueness — direct mesh closure checked; analytic
+  bridge open.** `ScalarODEUniqueness.lean` does not use Peano--Baker or
+  Picard iteration.  A `DirectMeshHalvingCertificate` records rational error
+  envelopes from finite mesh sweeps, and its theorem `error_eq_zero` chooses
+  a computable dyadic sweep count to force the error to zero.  The
+  `SelfDerivativeDirectMeshComparison` wrapper then yields
+  `SelfDerivativeInitialValueUnique`; the exact comparison theorem for
+  power-series and inverse-logarithm exponentials is available as
+  `powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh`.
+  `ShortBlockMeshSweep.next_le_half` now checks the exact one-block algebra:
+  a telescoped bound `next <= length * previous + residual` with
+  `length <= 1/4` and `residual <= previous/4` halves the envelope.
+  The cell/telescoping part is now formalized as well:
+  `FiniteMesh.sumUpTo_increments` proves the finite endpoint identity and
+  `FiniteMeshDifferenceBound.toShortBlockMeshSweep` converts cellwise
+  rational increment bounds into that one-block sweep. What remains is only
+  to derive those finite increment estimates from two supplied interval
+  derivative certificates.
+
+There is intentionally no aggregate percentage: these gates have distinct
+dependencies, and a proof in one does not compensate for a missing proof in
+another. The Pi score stays useful only as secondary integration coverage.
+
+## Continuity Replacement
+
+- Replace pointwise continuity on an interval by interval regularity:
+  every small rational subinterval has a computable narrow output interval
+  containing all point-value intervals, with a positive modulus at every
+  positive requested precision.  The checked bridge
+  `IntervalRegularOn.epsilonDeltaContinuous` derives the literal rational
+  epsilon-delta predicate from this enclosure data.
+  See `IntervalRegularOn` in `ComputableAnalysis/Calculus.lean`.
+- Rational-function denominator apartness is only a sufficient certificate,
+  not the general definition.
+  See `RatFun.DenominatorApartOnInterval` in
+  `ComputableAnalysis/FunctionDomains.lean`.
+
+## Integral
+
+**Benchmark item 15 — constructive FTC core checked.** The
+`EffectiveFTC`/`StaticDyadicEffectiveFTC` packages and their endpoint-
+agreement bridges formalize the finite schedule-to-endpoint identity in the
+effective-calculus chapter. This is the project’s certificate-level core;
+unrestricted classical hypotheses are not being smuggled into the interface.
+The finite selector `FTC.requestedPrecision` now has public certificates
+`FTC.requestedPrecision_positive` and `FTC.requestedPrecision_le_one`, making
+the normalization and boundedness of every requested schedule precision
+explicit. The companion `FTC.requestedPrecision_antitone` proves the selector
+is nonincreasing across finite stages, supplying the schedule-order invariant
+needed by later endpoint-transport arguments.
+The finite polynomial integration-by-parts module now exposes both endpoint
+orientations of the product-rule telescope on rational grids. Its
+quadratic/cubic specialization proves both sums equal one at every positive
+finite stage. This strengthens the item-15 integration-by-parts boundary
+without introducing a completed integral or a classical limit.
+The newly integrated `FiniteFTCQuartic` module adds a concrete quartic FTC
+checkpoint: dyadic left and right sums for `x^4` on `[0,1]` enclose the exact
+rational value `1/5` at every finite stage, and the resulting raw integral is
+proved equivalent to `RealRaw.ofRat (1/5)`.
+The sextic-derivative endpoint-sum witness now also reaches stage 16 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage16` evaluates the finite sum to
+`107775/131072`, and its companion upper-bound theorem keeps the result below
+`6/7`. This tightens the item-15 finite schedule without treating the
+integral as an attained infinite limit.
+The same sextic derivative schedule now reaches stage 64 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage64` evaluates to
+`32002047/33554432`, with the corresponding finite upper-bound check.
+It now also reaches stage 128 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage128` evaluates to
+`524369919/536870912`, again with the finite upper-bound check below `1`.
+The same schedule now reaches stage 256 exactly:
+`FiniteFTC.sexticDerivativeLeftSum_stage256` evaluates to
+`8489598975/8589934592`, with its explicit finite upper-bound check below `1`.
+
+- Public integral target: construct an `Integral.ConstructionFor F` from a
+  `ContinuousFunctionOnInterval`.
+  See `Integral.ConstructionFor` and `Integral.ExistsConstructionFor` in
+  `ComputableAnalysis/Calculus.lean`.
+- Proved bridge: once the construction exists, the integral is a computable
+  real.
+  See `integral_construction_proves_well_defined_for`.
+- Concrete existence case: `Integral.constantMonotoneConstructionFor` gives a
+  valid point-valued integral algorithm for every constant exact-rational
+  function, and `Integral.exists_constantMonotoneConstructionFor` packages
+  the co…6285 tokens truncated…`
+  proves `3/4 ≤ x^4-x^2+1` for every rational `x`, and the compact density is
+  proved nonnegative.  Its checked finite-difference factorization is
+  `IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub`.
+  Lean now proves the resulting `8`-Lipschitz estimate on `[-1,1]` and the
+  literal epsilon-delta theorem
+  `IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous`,
+  using `delta = epsilon/8`.  It now also has a completed
+  `IntervalRegularOn` witness,
+  `IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular`:
+  midpoint evaluation widened by `8 * width(I)` contains every point value,
+  and an input width of `1/(16*n)` gives output width at most `1/n`.
+  The theorem-facing package
+  `reciprocalQuarticMinusOneCompact_continuous` can therefore be consumed by
+  the finite-interval calculus and ODE interfaces.  The concrete finite
+  integral and projective/Cauchy comparison are now complete: the literal
+  dyadic raw `reciprocalQuarticMinusOneCompactDyadicIntegral` is valid and
+  equivalent to `cauchyFullLineIntegral`, and therefore
+  `PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea` makes the `a=-1`
+  case another counted computation of `piCircleArea`.  The expected-value
+  side remains packaged as
+  `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, with theorem
+  `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The
+  general `ReciprocalQuarticMinusOneProjectiveRoute` is still useful as a
+  parameterized interface for future projective constructions, but it is no
+  longer a prerequisite for the concrete route or its scoreboard equality.
+  The new denominator-cleared endpoint identity
+  `projectiveCompactCoordinate_sub_cleared` supplies the finite rational
+  displacement calculation for transporting a partition through
+  `x / (1 - x^2)`.  The checked positivity lemmas and
+  `projectiveCompactCoordinate_strictMono` now prove that this chart preserves
+  strict rational order on `(-1,1)`.  `projectiveCompactIntervals_covers`
+  lifts that fact to finite rational partitions of every compact source
+  subinterval, and `projectiveCompactIntervals_nonnegative` gives the
+  nonnegative-branch admissibility needed for the Cauchy quadrature bounds.
+  The new pointwise and squared-mesh bounds
+  `projectiveCompactCoordinate_sub_le_lipschitz` and
+  `projectiveCompactAreaLoop_squareSum_le` quantify the distortion on every
+  source branch `[0,s]` with `s < 1`.  The endpoint/refinement schedule is now
+  checked too: `projectiveCompactDyadicEndpoint n = 1 - 1/2^n` stays in the
+  positive compact chart and has `1 / 2^n <= 1 - s_n^2`;
+  `projectiveCompactDyadic_lipschitzFactor_le` bounds the resulting chart
+  distortion, and
+  `projectiveCompactDyadic_schedule_squareSum_le` proves that `6*n` source
+  refinements give transported squared mesh at most `4 / 2^(2*n)`.  The
+  quadrature-substitution proof was thereby reduced to a finite cellwise
+  comparison and its assembly across the two compact branches.  The cellwise
+  comparison is now checked: the exact left and right secant expansions
+  'projectiveCompactCoordinate_sub_eq_leftJacobian_add' and
+  'projectiveCompactCoordinate_sub_eq_rightJacobian_sub' give the endpoint
+  Jacobian bounds on every '0 <= p <= r < 1' source cell.  With the projective
+  pullback identity and the compact density's 8-Lipschitz bound, Lean proves
+  both cross inequalities between a compact Lipschitz cell and its transported
+  Cauchy rectangle.  The finite induction
+  'projectiveCompactLipschitzSum_overlaps_integralSum' packages these into
+  interval overlap for every positive-branch cover.  The finite global
+  ingredients are checked too: the compact density is even, and
+  'projectiveCompactSymmetricLipschitzSum_overlaps_integralSum' scales the
+  positive branch to a symmetric finite-core overlap.  The endpoint cell is
+  bounded by 'projectiveCompactTailUpperCell_le'; at the dyadic endpoint,
+  'projectiveCompactDyadicTailUpperCell_le' makes this at most
+  '(32 / 3) * 2^(-n)'.  Twice that endpoint budget is now packaged as the
+  valid shrinking raw 'projectiveCompactDyadicSymmetricTailError', with the
+  stagewise absorption theorem
+  'projectiveCompactDyadicSymmetricTailUpper_le'.  What remains is one nested
+  raw construction that combines these finite core and tail boxes and agrees
+  with the existing compact dyadic integral raw.  That agreement is now tied
+  to the actual candidate brackets: the affine map `x = 2*t - 1` carries
+  every concrete unit-dyadic lower and upper cell exactly to the compact
+  density's 8-Lipschitz cell, and the two sum identities package this for the
+  whole stage.  The next finite task is to split these affine dyadic
+  partitions into their symmetric positive cores and two endpoint cells,
+  while accounting for the reflected cells' right-endpoint convention.  The
+  affine transport is now formally an ordered cover of `[-1, 1]`, so that
+  remaining split is a finite partition calculation.  The orientation itself
+  is now checked cellwise: a reflected negative left-endpoint cell is exactly
+  the positive right-endpoint cell, for both compact Lipschitz brackets.
+  `projectiveCompactReflectedIntervals_covers` and
+  `projectiveCompactReflected_append_covers` now certify the corresponding
+  ordered symmetric cover, while the two
+  `projectiveCompactLipschitz*Sum_reflected_append_eq_right_add_left` theorems
+  identify its complete left-endpoint sums with the positive right- plus
+  left-endpoint sums.  The remaining finite identity is now proved too:
+  `reciprocalQuarticMinusOneCompactAffineDyadicIntervals_succ_eq_reflected_append`
+  shows that the literal affine image of stage `n + 1` is the reflected
+  stage-`n` mesh followed by that mesh, and
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_eq_orientedSymmetric`
+  identifies the actual candidate box with the resulting oriented symmetric
+  bracket, and
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_symmetric`
+  connects that literal box to the existing factor-two projective core at the
+  same finite stage.  The only remaining analytic assembly is to trim its two cells
+  touching `±1`, couple the interior bracket to the scheduled projective
+  Cauchy bracket, and absorb them using the already-valid dyadic tail raw.
+  That trim is now literal rather than schematic:
+  `reciprocalQuarticUnitDyadicCoreIntervals` deletes the final cell of the
+  actual positive mesh, `reciprocalQuarticUnitDyadicCoreIntervals_covers`
+  proves it covers `[0, 1 - 2^(-n)]`, and
+  `reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail` recovers the full
+  mesh by appending exactly the endpoint cell.  Its factor-two compact bracket
+  already overlaps the two-branch projective Cauchy bracket by
+  `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective`.  The
+  formerly separate endpoint assembly is now checked at each finite stage:
+  `projectiveCompactDyadicOrientedTailUpper_le` bounds the two oriented
+  candidate endpoint cells by the existing tail raw,
+  `projectiveCompactOrientedSymmetric_append_overlaps_tailEnclosure` is the
+  finite bracket-combination lemma, and
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_coreTail` proves
+  that the actual candidate box at stage `n+1` overlaps the literal trimmed
+  core bracket enlarged by that error budget.  What remains is the raw-level
+  nesting/shrinkage construction that joins these core-and-tail boxes to the
+  existing full-line Cauchy raw; this is not yet a Pi equivalence.  The next
+  transfer is now direct rather than an invalid transitive use of interval
+  overlap: the compact symmetric core has exact width at most `32 * 2^(-n)`,
+  and `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_projectiveCauchyCoreTail`
+  proves that the literal candidate overlaps the projective Cauchy core after
+  widening both compact-core sides by that proved width and the upper side by
+  the endpoint budget.  The remaining analytic task is specifically to join
+  this shrinking envelope to the completed full-line Cauchy raw.  The
+  separately proved `6*n` midpoint-refinement schedule for the projective
+  chart is now connected to the literal trimmed core by a genuine finite
+  comparison: `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_scheduled`
+  applies a general rational Lipschitz-partition comparison to the two ordered
+  covers of the same compact interval.  This is deliberately not transitivity
+  of interval overlap.  That bridge step is now proved: the actual candidate
+  reaches the two-branch scheduled Cauchy hull after adding the literal-core
+  width, the scheduled-core width, and the removable-endpoint budget.  The
+  remaining task is the separate finite comparison between that hull and the
+  completed full-line Cauchy raw.
+  The rational endpoint side of that assembly is now explicit too:
+  `projectiveCompactDyadicCauchyTailRadius_le` proves that the reciprocal
+  projective endpoint at compact stage `n + 1` is at most `2 * 2^(-n)`.
+  After the two-branch factor this gives the intended dyadically vanishing
+  Cauchy-tail scale.  Its finite reciprocal rectangle transport is now
+  checked cellwise and for arbitrary finite lists of strictly positive cells:
+  `cauchyReciprocalIntegralSum_overlaps` compares the original and inverted
+  rectangle brackets without invoking a completed integral.  The necessary
+  order bookkeeping is now checked too:
+  `cauchyReciprocalReversedIntervals_covers` sends a positive ordered cover
+  of `[a,b]` to one of `[1/b,1/a]`, and its reordered sum has the same
+  overlap.  The refined source tail is now explicit rather than an intended
+  construction: `cauchyTailDyadicIntervals a n` affinely transports the
+  midpoint mesh to `[a,1]`; Lean proves its cover and strict positivity, and
+  `cauchyReciprocalTailDyadicIntervals_covers` reverses it into the ordered
+  far-side cover `[1,1/a]`.  Its two finite Cauchy brackets overlap by
+  `cauchyReciprocalTailDyadicIntervals_overlaps`.  The projective endpoint
+  selection is now checked as well: at compact stage `n+2`,
+  `projectiveCompactDyadicCauchyTailStart n` is positive and at most one;
+  its reciprocal is exactly the finite projective coordinate.  Consequently
+  `projectiveCompactDyadicCauchyTailIntervals_covers` supplies an explicit
+  ordered mesh from `1` to that coordinate, and its finite brackets overlap
+  the compact-side tail.  The two finite assembly covers are now formalized:
+  `cauchySplitDyadicIntervals` partitions `[0,1]` at any rational tail start
+  and has a Cauchy bracket overlapping the canonical unit mesh; meanwhile
+  `cauchyUnitReciprocalTailDyadicIntervals` joins that canonical unit mesh to
+  the ordered reciprocal tail.  At compact stage `n+2`,
+  `projectiveCompactDyadicCoreIntervals_overlaps_cauchyAssembly` proves that
+  this latter mesh and the literal projective core cover exactly the same
+  Cauchy interval.  The split source mesh has squared mesh at most `2^(-n)`
+  and integral-box width at most `2 * 2^(-n)`.  Finally the tail start has a
+  matching lower dyadic bound `2^(-(n+2))`.  The corresponding far-tail
+  estimate is now proved as well: refining its source at stage `5*n + 8`
+  gives a reciprocal Cauchy rectangle width at most `2 * 2^(-n)`.  This uses
+  a new global nonnegative Cauchy cell-width estimate and a reciprocal mesh
+  squared-sum bound; it does not appeal to an improper integral.  What
+  now-shrinking scheduled core and the unit-plus-tail assembly have also been
+  combined: `projectiveCompactDyadicCauchyCore_integral_width_le` gives the
+  former an `8 * 2^(-2n)` Cauchy width bound, the assembly has width at most
+  `4 * 2^(-n)`, and their `QInterval.hull` is a common bridge envelope with
+  width at most `12 * 2^(-n)`.  Lean now scales that positive bridge for the
+  two chart branches and proves
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_scheduledCauchy`:
+  the actual candidate reaches it after paying the literal-core width, the
+  scheduled-core width, and the endpoint budget.  The remaining comparison is
+  between this two-branch finite Cauchy hull and the completed full-line raw.
+  The first half of that comparison is now formalized independently:
+  `cauchyUnitReciprocalTailDyadicIntervals_overlaps_twoUnitEnvelope` encloses
+  the positive unit-plus-reciprocal-tail mesh by two standard unit meshes.  It
+  pays only the rational near-zero length and the compact tail-mesh width;
+  `projectiveCompactDyadicCauchyTailStart_le_dyadic` and
+  `cauchyTailDyadicIntervals_integral_width_le_dyadic` prove that both vanish
+  at a certified dyadic rate.  These two sides are now combined in
+  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_fullCauchy`:
+  the actual candidate overlaps one explicit rational envelope centred on the
+  four-unit-mesh Cauchy calculation.  Remaining work is raw-level enclosure
+  shrinkage, not any unproved finite change-of-variables identity.
+- Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
+  They are handled before calculus by denominator-apartness or
+  interval-regularity certificates on the rational interval.
+
+## Inverse Functions
+
+The scheduled arctangent branch now provides a cofinal stage schedule
+`arctanScheduledStageSchedule`. `arctanScheduledRectangleRaw` is definitionally
+the corresponding rescheduling of the finite geometric rectangle raw, and
+`arctanScheduledRectangleRaw_equiv_arctanGeom` proves that it represents the
+same abstract arctangent. Its explicit rectangle width budget is
+`1/(16*(n+1))`. The remaining inverse-function obligation is the interval
+image/containment certificate for endpoint boxes, not a hidden appeal to a
+completed real-valued arctangent.
+
+**Benchmark item 79 — branch-local bisection core checked.**
+`HasBisectionSearch` and `inverse_function_from_bisection_search` formalize
+the effective intermediate-value search for an interval-regular monotone
+branch with explicit range and separation certificates. A general classical
+IVT remains outside the representation boundary. The finite step interface
+`monotoneBisectionStep` now gives the corresponding local rational algorithm:
+it preserves endpoint signs and interval containment for a nondecreasing
+function and halves the width exactly. It is a reusable certificate for
+constructive IVT traces, not an assertion that a zero is attained.
+The recursive `monotoneBisectionIterate` now lifts this to every finite stage:
+ordering, subinterval containment, and endpoint signs are preserved, while
+`monotoneBisectionIterate_width` gives the exact (2^{-n}) width schedule.
+The companion `monotoneBisectionIterate_width_pos` proves that the ordinary
+finite bracket iterator also retains positive width whenever its initial
+interval does.
+The companion `monotoneBisectionIterate_width_le_of_power_budget` turns a
+supplied rational budget `I.width <= eps * 2^n` into the final guarantee that
+the iterated bracket has width at most `eps`.  This exposes the bisection
+iteration as an executable precision scheduler for the constructive IVT
+boundary.  The target-parametrized companion
+`monotoneTargetBisectionStep` and its iterated form
+`monotoneTargetBisectionIterate` preserve a supplied rational target bracket
+at every finite stage.  This is the inverse-search form of the certificate:
+the algorithm narrows an interval whose endpoint evaluations enclose the
+target, without asserting that a completed-real preimage has been attained.
+The target-aware step and iteration now also expose source containment and
+the exact width law `I.width / 2^n`.  These are the finite invariants needed to
+turn a separation oracle into a data-valued inverse search.  The companion
+`monotoneTargetBisectionIterate_certificate` packages orderedness, target
+enclosure, source containment, and this exact width in one reusable finite
+record.  The companion
+`monotoneTargetBisectionIterate_width_le_of_power_budget` converts a supplied
+rational initial-width budget into an explicit requested-tolerance guarantee.
+The companion `monotoneTargetBisectionIterate_width_pos` proves that every
+finite iterate still has positive width whenever the initial bracket does,
+making the potential-infinity interpretation explicit.
+The companion
+`monotoneTargetBisectionIterate_reaches_of_positive_tolerance` now removes the
+supplied power budget for initial intervals of width at most one: stage
+`eps.den` is certified to reach every positive rational tolerance. This is an
+executable inverse-search schedule for the finite bisection core, not an IVT
+or completeness principle. The new
+`monotoneTargetBisectionIterate_tolerance_certificate` packages that schedule
+together with target enclosure and source containment, giving an inverse
+client one finite certificate rather than separate bookkeeping lemmas.
+The composition lemma `monotoneTargetBisectionIterate_add` identifies a later
+finite stage with the same iterator started from an earlier stage's interval.
+Consequently `monotoneTargetBisectionIterate_later_subinterval` proves that
+every later target bracket is nested inside every earlier one.  This makes
+refinement explicit in the certificate API while keeping the IVT replacement
+a finite rational statement rather than a hidden appeal to a limit point.
+The worked `FiniteSquareRootBisectionExample` now applies the target search to
+`x^2 = 1/2` on `[0,1]`: stage 4 returns `[11/16,3/4]`, preserves the target
+bracket, and has width `1/16`. This is a non-affine finite witness for item 79.
+The companion `FiniteCubeRootBisectionExample` applies the same target search
+to `x^3 = 2` on `[1,2]`: stage 4 returns `[5/4,21/16]`, preserves the target
+bracket, and has width `1/16`. This gives item 79 a second nonlinear inverse
+trace while retaining the project's finite, potential-infinity semantics.
+The new `FiniteFourthRootBisectionExample` applies the same search to
+`x^4 = 2` on `[1,2]`: stage 8 returns `[19/16,305/256]` with width `1/256`,
+and stage 16 returns `[77935/65536,4871/4096]` with width `1/65536`.
+This extends item 79's nonlinear finite inverse-search ladder while retaining
+the potential-infinity interpretation.
+The cube-root and fourth-root traces now also reach stage 24, each with exact
+width `1/16777216` and certified endpoint comparisons, extending the same
+potential-infinity precision schedule.
+
+- Main calculus route: construct inverses on intervals where the function is
+  interval-regular, monotone, and effectively separated.
+  See `InvertibleFunctionOnInterval`, `InRangeRaw`, `InverseRaw.apply`, and
+  `HasInverse` in `ComputableAnalysis/Calculus.lean`.  `HasInverse I` is now
+  explicitly branch-local: its source interval, orientation, and certified
+  output range are all fixed by `I`.
+- `InRangeRaw` now has computational range content: it carries a validity
+  proof for the target raw real and, at every target stage, a named endpoint
+  precision whose oriented endpoint boxes enclose the target box.  An
+  invertible branch also records that its source endpoints are ordered.  This
+  replaces the former unconstrained `in_range : Prop`, which could not guide a
+  finite bisection search.
+- The separation certificate now chooses exactly one orientation
+  (`nondecreasing` or `nonincreasing`), and `InvertibleFunctionOnInterval`
+  requires it to match the monotonicity witness.  A certificate must not
+  prove both opposing strict endpoint-separation inequalities for the same nonconstant
+  function.
+- Concrete forward data: `squareOnUnit` on `[0,1]` has exact rational point
+  boxes, an interval-regularity modulus (hence an explicit rational
+  epsilon--delta certificate), nondecreasing order, and nondecreasing
+  effective separation.  `squareOnUnit_epsilonDeltaContinuous` and
   `squareOnUnit_invertible` expose these facts.
   The existing `sqrtRaw` bisection has its algebraic raw-real specification,
   and `sqrtOnUnitBisectionSearch` packages it as an `InverseBisectionSearch`
@@ -2726,6 +3318,10 @@ finite.
   the even prefix, and their difference is bounded by `1/(4n+3)`. This is the
   interval-shaped certificate needed to connect the integrated Taylor route
   to the existing Leibniz raw evaluator.
+- The general theorem
+  `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_alternating_enclosure`
+  extends the same enclosure to every rational endpoint `0 <= y <= 1`, with
+  the sharper finite gap `y^(4n+3)/(4n+3)` behind the uniform reciprocal bound.
 - The finite Riemann-error core is now formalized without a completeness
   principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
   its endpoint-average bounds bracket each monomial primitive, and
