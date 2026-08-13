@@ -143,6 +143,7 @@ import ComputableAnalysis.FiniteIsoscelesExample
 import ComputableAnalysis.FiniteCramerExample
 import ComputableAnalysis.FiniteDeMoivreExample
 import ComputableAnalysis.FinitePtolemyLength
+import ComputableAnalysis.FinitePtolemySecondExample
 import ComputableAnalysis.PiComplex
 import ComputableAnalysis.PeanoBaker
 import ComputableAnalysis.ThreeByThreeLinearAlgebra
