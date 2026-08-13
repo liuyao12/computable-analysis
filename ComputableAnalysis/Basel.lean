@@ -30,6 +30,17 @@ theorem baselSeriesRaw_validCompute :
     RealRaw.ValidCompute baselSeriesRaw.compute := by
   simpa [baselSeriesRaw] using DirichletSeries.zetaTwoRaw_validCompute
 
+/-- The project-facing Basel evaluator reaches every positive rational
+precision request through an explicit finite stage.  This is a potential-
+infinity statement about the interval algorithm, not an attained zeta value
+or Euler's Basel identity. -/
+theorem baselSeriesRaw_reaches_of_positive_tolerance (eps : QPos) :
+    ∃ n : Nat, (baselSeriesRaw.compute n).width <= eps.val := by
+  refine ⟨eps.val.den + 1, ?_⟩
+  rw [baselSeriesRaw_compute_eq]
+  exact DirichletSeries.zetaTwoInterval_width_le_of_denominator_budget
+    eps.property (Nat.le_refl (eps.val.den + 1))
+
 def baselSeries : Real :=
   Real.ofRaw baselSeriesRaw baselSeriesRaw_valid
 

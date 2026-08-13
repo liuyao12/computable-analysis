@@ -97,6 +97,10 @@ the complete ordered, shrinking finite representation boundary as well.
 The public selector `zetaTwoInterval_reaches_of_positive_tolerance` now turns
 the denominator budget into an explicit finite stage for every positive
 rational width request.
+The project-facing bridge `Basel.baselSeriesRaw_reaches_of_positive_tolerance`
+exposes the same stage selector directly on the public Basel raw evaluator.
+Thus the admitted item-14 core has an explicit potential-infinity precision
+interface at its boundary, while the completed Basel identity remains open.
 The exact decomposition
 `DirichletSeries.zetaTwoPartial_add_finiteTail_eq` now exposes every later
 finite partial sum as its earlier partial sum plus the explicit intervening
