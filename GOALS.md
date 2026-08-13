@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 76285)
-Total output lines: 4721
-
 # Computable Analysis Goalposts
 
 This file is the prose roadmap. Lean files contain definitions, certificates,
@@ -2177,7 +2174,381 @@ The same schedule now reaches stage 256 exactly:
 - Concrete existence case: `Integral.constantMonotoneConstructionFor` gives a
   valid point-valued integral algorithm for every constant exact-rational
   function, and `Integral.exists_constantMonotoneConstructionFor` packages
-  the co…6285 tokens truncated…`
+  the corresponding monotone construction witness.
+  `Integral.constantMonotoneIntegralFor_eq_ofRat` exposes the resulting raw
+  integral as exactly `RealRaw.ofRat ((b - a) * c)`.
+- Affine extension: `Integral.affineMonotoneConstructionFor` and
+  `Integral.exists_affineMonotoneConstructionFor` do the same for
+  `x ↦ r * x + c` when `0 ≤ r`, using the exact rational endpoint formula
+  `(b - a) * (r * (a + b) / 2 + c)`.
+- The opposite orientation is now covered by
+  `Integral.exactRat_affine_nonincreasing`,
+  `Integral.affineMonotoneConstructionFor_of_nonpos`, and
+  `Integral.exists_affineMonotoneConstructionFor_of_nonpos` for `r ≤ 0`,
+  with the same exact formula. Together these give the complete affine
+  monotone family while retaining finite rational certificates.
+  The matching identities
+  `Integral.affineMonotoneIntegralFor_eq_ofRat` and
+  `Integral.affineMonotoneIntegralFor_of_nonpos_eq_ofRat` expose the affine
+  raw integrals by their exact endpoint formula.
+- FTC route for ordinary functions: do not pursue a generic "effective FTC"
+  whose hypotheses are derivative bounds and local controls.  The main theorem
+  should be the exact convex FTC: exact convexity on `[a,b]` implies the
+  one-sided convex derivative is monotone, integrable, and has integral
+  `F b - F a`.
+- Exact convexity is now stated through `RealRaw.Le` and rational secants.
+  See `RealRaw.Le`, `secantRaw`, and `ExactConvexOn`.
+- Convex derivative: a construction supplies a valid raw interval algorithm
+  for the right or left derivative.  `IsRightDerivative` and
+  `IsLeftDerivative` then verify it by the rational-secant lower-bound /
+  greatest-lower-bound or upper-bound / least-upper-bound laws.  These are
+  certificates for an explicit algorithm, not constructions by infimum or
+  supremum.  The full two-sided derivative exists only where the two supplied
+  one-sided algorithms agree; corners such as `abs` should not block the
+  universal one-sided FTC.
+- Convex FTC proof step: for each partition cell `[x_i,x_{i+1}]`, convexity
+  gives
+  `D_+F(x_i) <= Sec_F(x_i,x_{i+1}) <= D_-F(x_{i+1})`.
+  Multiplying by the cell width and summing gives Darboux sums around the
+  telescoping endpoint difference `F b - F a`. A finite rational mesh together
+  with an explicit modulus must shrink the Darboux gap; no appeal to
+  completeness of an ambient real-number type is permitted.
+- Piecewise convexity: if a function switches convexity, split the interval at
+  rational breakpoints, apply the exact convex FTC on each piece, and combine
+  endpoint equalities by raw-real arithmetic and transitivity.  Do not add a
+  separate piecewise theorem unless the examples force a reusable abstraction.
+- Integration by parts should follow the same explicit-piece discipline.
+  `leftStieltjesSum`, `rightStieltjesSum`, and
+  `finiteIntegrationByParts_withVariation` now prove the exact rational
+  rectangle decomposition, including its corner-area correction.
+  The companion identity
+  `rightStieltjesSum_eq_left_swap_add_quadraticVariation` identifies the
+  right-endpoint sum with the swapped left-endpoint sum plus exactly that
+  finite quadratic variation.
+  `RationalPartition.finiteIntegrationByParts_onPartition` and its
+  left-endpoint-with-variation counterpart now lift that identity to every
+  supplied certified rational partition, with the actual interval endpoints
+  on the right-hand side.  The combined coordinate theorem
+  `coordinateIntegrationByParts_onPartition_endpoint_bracket` now turns the
+  exact identity and maximum-step corner bound into the usable finite bracket
+  `b*v(b)-a*v(a)-delta*(v(b)-v(a)) <= left strips <= b*v(b)-a*v(a)` whenever
+  the sampled second path is nondecreasing.  It is the finite
+  monotone-piece form needed by the `x*arctan x` Pi route, not yet an FTC
+  identification of either strip.  The checked
+  `Integral.IntegrationByPartsCertificate` now packages the next general
+  handoff: after a particular paired mesh has certified that its two
+  integral raws add to the product-endpoint raw,
+  `left_integral_equiv_endpoint_sub_right` and its symmetric companion
+  derive the usual endpoint-minus-other-integral formula by valid raw
+  interval cancellation.  Constructing that paired mesh from arbitrary
+  derivative data remains separate.
+  The checked
+  `quadraticVariationSum` estimates bound that correction by a maximum first
+  increment times the second endpoint variation, or by the product of the two
+  endpoint variations; negating both paths supplies the decreasing-piece
+  version.  `RationalPartition.uniform` now gives the first explicit common
+  refinement: the `m*n` rational grid contains both uniform input grids, and
+  `mesh_refine_mul_right` proves its width is the old mesh divided by the
+  positive refinement factor.  `RationalPartition.Refines` and
+  `CommonRefinement` package the two endpoint-preserving index embeddings as
+  finite data; `uniformCommonRefinement` constructs the certified uniform
+  case, and `Refines.refl`/`Refines.trans` make staged rational refinements
+  compositional.  The literal dyadic grids used by the current Riemann
+  constructors inherit this interface directly: `dyadic_leftPoint_refines`
+  keeps old index `k` at `2*k`, and `dyadic_mesh_refines` halves its mesh.
+  Arbitrary rational breakpoints now have a checked local insertion step:
+  `insertPoint_refines` embeds the old partition.  The finite scan
+  `locateInsertionCell` chooses and certifies the containing cell of any
+  in-range rational point, and `insertionChainOfPointList` converts any
+  finite in-range rational list into successive scan-and-insert data.
+  `InsertionChain.refines` composes those steps, and
+  `Refines.point_between_consecutive` keeps every fine point in its parent
+  coarse cell.  `clampedPath_quadraticVariation_le_endpointSquare` applies
+  the corner estimate directly to partition data.  The maximum-increment
+  premise is now also a checked partition interface.  MaxStepAtMost carries a
+  nonnegative rational cap on every genuine cell; clampedPath_step_le_of_maxStep
+  extends it to the clamped total path; and
+  clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference bounds
+  that coordinate-path corner correction against any nondecreasing second
+  rational path.  Uniform grids instantiate the cap by their literal mesh,
+  while unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference is
+  the exact one-over-n endpoint-variation bound needed for sampled
+  x-times-arctangent.  The arctangent subcertificate is deliberately split
+  in two.  Lean now proves the same-stage box order
+  lo(arctan(x), n) <= hi(arctan(y), n) for 0 <= x <= y <= 1 by extending
+  the finite rectangle cover of [0,x] with [x,y] and comparing lower and
+  upper sums on [0,y]; it is packaged as a weak nondecreasing
+  FunctionOnInterval witness.  The compatible nondecreasing rational
+  sampling path is now also checked: `QInterval.lowerEnvelope` takes the
+  cumulative maximum of the lower endpoints of any weakly ordered box family.
+  It stays in every corresponding box, is nondecreasing, and
+  `arctanIntegralRectangleMeshSamples_cornerBound` instantiates the unit-mesh
+  corner estimate for the fixed-stage rectangle arctangent boxes.  The
+  endpoint-order fact is not the kernel's monotonicity in its integration
+  variable, and the lower-envelope construction is precisely what prevents
+  arbitrary box endpoints from being treated as an exact nondecreasing path.
+  The first explicit two-parameter error schedule is now the target:
+  at mesh `eps.den + 1` the endpoint variation lies in `[0,1]`, so the
+  corner correction is at most `1/(eps.den + 1) <= eps`; independently,
+  rectangle evaluation stage `4 * (eps.den + 1)` makes every sampled box
+  have width at most `eps`.  These samples now instantiate the exact finite
+  integration-by-parts equality: the two left strip sums plus the corner
+  correction equal the final sample, and their total is bracketed within
+  `1/mesh` (or the requested epsilon under the denominator-plus-one
+  schedule) of that endpoint.  The bracket now additionally feeds a valid
+  direct-only regression raw: stage `n` uses the point interval at
+  `S_(n+1,n)` widened by `1/(n+1)`, and finite-prefix stabilization uses the
+  public `4/(n+1)` rectangle-width radius.  Its candidate width is exactly
+  `2/(n+1)`, it is equivalent to the rectangle arctangent at one, and four
+  times it is a checked supplementary pi evaluator.  It is intentionally not
+  a scoreboard completion: the two finite strip sums have not been promoted
+  to definite integrals and no canonical logarithm has entered this proof.
+  What remains is to connect these finite
+  estimates through the product-derivative and FTC certificates.  The
+  general finite merge
+  is now checked: `commonRefinementOfPartitions` inserts the right
+  `breakpointList` into the left partition and recovers the second ordered
+  embedding with a bounded `firstOccurrence` scan.  It is deterministic and
+  preserves both index embeddings; duplicate breakpoints are retained, so a
+  later minimal-union optimization is optional rather than a theorem gap.
+  The model unit path has a fully checked vanishing schedule:
+  `unitMeshPath_quadraticVariation` is exactly `1/n`, and choosing
+  `eps.den + 1` makes it at most any positive rational epsilon.  For the
+  integral theorem, extend this interface from the coordinate factor to
+  increasing/decreasing function pieces with arbitrary rational breakpoints,
+  then supply product/derivative/FTC comparison certificates.  Do not invoke
+  a nonconstructive global variation or Jordan decomposition.
+- The first raw product bridge is now checked on positive bounded branches.
+  `QBox.mulRealInterval_of_nonneg` reduces the four-corner enclosure to the
+  lower--lower and upper--upper products.  Given positive rational bounds,
+  `RealRaw.mul_valid_of_nonneg_bounded` proves the product raw valid with
+  width bounded by `Bx * width(y) + By * width(x)`, and
+  `RealRaw.le_mul_le_mul_of_nonneg` proves order monotonicity of products on
+  nonnegative valid representatives, while
+  `RealRaw.mul_equiv_of_nonneg` preserves changes of certified
+  representation.  `RealFunRaw.mul_valid_of_nonneg_bounded` lifts this
+  pointwise to rational-input functions.  `FunctionOnInterval.mulOfNonnegBounded`
+  now turns that into a domain-aware interval function.  Its first concrete
+  use is `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit`:
+  the exact coordinate factor and the geometric arctangent rectangle factor
+  are uniformly bounded in `[0,1]`, and its stage box is proved to be
+  `[x * A.lo, x * A.hi]`.  This is the product representation needed for
+  the positive `x * arctan x` branch on `[0,1]`.
+  `coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing` now also
+  proves its declared increasing direction from the weak arctangent endpoint
+  order and nonnegative product endpoints. A general signed product and its
+  FTC comparison are still open; the concrete two-sided derivative below is
+  checked separately. The
+  product endpoint anchors are now checked as well: the box is exactly zero
+  at `0`, agrees with the rectangle evaluator at `1`, and its endpoint
+  difference is a valid raw equivalent to `arctanGeom 1`.  This is the
+  boundary term needed by the finite integration-by-parts identity, not an
+  integral identity for the product.  The
+  same concrete positive product evaluator now has a checked forward
+  derivative at every rational unit-branch point:
+  `coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt` uses
+  the raw derivative box `arctan(x) + x/(1+x*x)`. Its positive quotient is
+  decomposed exactly into the arctangent quotient and a bounded product term;
+  the arctangent stage `8*(n+1)` and step budget `1/(72*(n+1))` close the
+  finite error. The earlier zero theorem is its endpoint specialization.
+  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit` packages that raw
+  box as an interval function, and
+  `coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative` proves its
+  full signed-step derivative on `[0,1]`: a negative quotient is reversed at
+  `x+h`, and a finer rectangle arctangent quotient plus the kernel's
+  rational 2-Lipschitz estimate transports the derivative box back to `x`.
+  Its explicit step budget is `|h| <= 1/(648*(n+1))`. The derivative boxes
+  are now also certified uniformly inside `[0,2]` by
+  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range` and its
+  `..._nonneg_bounded` packaging, supplying the first range datum for a
+  derivative-bound FTC certificate. They are also weakly nondecreasing on
+  `[0,1]`: the rational term uses the explicit factor
+  `(y-x)*(1-x*y)` after clearing positive denominators, and the arctangent
+  box uses its geometric endpoint order. Thus
+  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing`
+  supplies endpoint derivative ranges on every positive rational cell. The
+  checked forward-range enclosure now supplies one common box for every
+  derivative value within its continuity radius and the endpoint difference,
+  with an explicit ten-tolerance width bound. Its radius, derivative stage,
+  and hull bound are now named computable definitions. The derivative-continuity
+  radius and evaluation stage now come from the checked effective modulus,
+  not a choice extracted from epsilon--delta existence. The compatible uniform rational
+  partition is now selected by the finite denominator product
+  `(delta.den + 1) * 72 * (n + 1)`. Its cell containment, common endpoint
+  transport stage, global Riemann-width and endpoint-width schedules are
+  now all checked in `coordinateTimesArctanForwardTwoStageFTC`, which proves
+  the bounded-sum raw equivalent to the product endpoint raw. That raw is now
+  normalized by `coordinateTimesArctanForwardTwoStageStabilizedRaw`: finite
+  intersections of its widened bounded-sum boxes are valid and shrinking,
+  while the rectangle anchor is proof-side only. Thus the actual finite-sum
+  computation supplies `coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity`,
+  a public definite-integral identity equivalent to `arctanGeom 1`.
+  The
+  exact algebraic core is now formalized for arbitrary rational functions:
+  `ExactFunction.product_differenceQuotient_right` keeps the second factor
+  at the right endpoint, while `..._corner` exposes the explicit
+  `h * D_h(u) * D_h(v)` remainder.  The checked theorem
+  `..._error_le` also gives the exact three-term absolute-error allocation:
+  the two component derivative errors weighted by the opposite point value
+  plus that corner remainder.  The concrete product certificate now bounds
+  that remainder and the endpoint replacement through interval continuity
+  data, and stabilizes the resulting two-stage finite sum into a public FTC
+  construction; no limit or completeness principle is being assumed.  The
+  first component certificate is now checked in the actual interval-valued
+  derivative interface: `FunctionOnInterval.exactRatAffineDerivative` proves
+  the finite quotient of every exact affine rational function is its constant
+  slope, and `IntegralIdentities.coordinateOnUnitDerivative` specializes it
+  to `d/dx x = 1` on `[0,1]`.  The arctangent certificate, its remainder
+  budget, the product closure, and the product-specific FTC are now checked.
+  The error
+  algebra is now two-sided:
+  `ExactFunction.product_differenceQuotient_error_le_qabs` carries `qabs h`
+  in the corner budget, with the earlier nonnegative-step theorem as its
+  forward-mesh corollary.  This matches the interval derivative interface's
+  signed rational steps.
+- A future pi coverage bridge should exercise this theorem rather than merely
+  mention it: prove
+  `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
+  The product FTC bridge and arctangent derivative are now available; this
+  still requires an explicit separate arctangent strip, its monotone-piece
+  refinement/splitting theorem, and canonical exponential/logarithm alignment.
+  This is deliberately the long exp/log/ODE route: first identify the
+  logarithmic integral with the inverse of canonical exponential, use direct
+  scalar finite-mesh uniqueness to equate the power-series, Euler, and
+  inverse-integral exponentials, then transport the resulting `log 2`
+  through the integration-by-parts identity.  A later
+  complex corroboration can prove `pi = -2i * log(i)`, but it needs
+  represented-input extension and the rotation-system bridge in addition.
+  `Logarithm.logTwoSeries` now supplies a valid, rate-certified alternating
+  harmonic raw presentation of `log 2`.  Its lower endpoint is now proved
+  exactly equal, for every positive mesh count, to the literal uniform right
+  Riemann sum for `t ↦ 1/(1+t)`:
+  `Logarithm.logTwoLo_eq_logTwoKernelRightRiemann` factors the calculation
+  through `H_(2*n) - H_n` and cancels the mesh term by term.  The generic
+  finite right-sum/Darboux containment and the public uniform-mesh identity
+  now give `Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower`; common
+  dyadic refinements then prove the final raw-real theorem
+  `Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral`.  This discharges
+  the concrete endpoint bridge using rational boxes alone.  The distinct
+  remaining logarithm gate is to identify that integral raw with the inverse
+  branch of the selected canonical exponential.  The elementary
+  change-of-variables algebra is now checked as well:
+  `Logarithm.logTwoSquareMesh_substitution_identity` writes the finite
+  left-Stieltjes sum for `t = x*x` as the ordinary left mesh sum for
+  `2*x/(1+x*x)` plus `Logarithm.logTwoSquareMeshCorrection`; the correction
+  is nonnegative and at most `1/n` on the `n`-cell mesh
+  (`logTwoSquareMeshCorrection_le_one_div`).  This finite
+  square-substitution core is now promoted all the way to the reciprocal
+  integral: 
+  logTwoSquarePullback_lipschitz_on_unit certifies 2*x/(1+x*x) as
+  2-Lipschitz, and logTwoSquareStieltjesRaw_equiv_pullbackIntegral identifies
+  the stabilized finite Stieltjes evaluator with its valid
+  Lipschitz--Darboux integral.  The checked square-block reindexing compares
+  it with the ordinary reciprocal t-mesh: each block contributes at most
+  `4/n^2`, so `logTwoSquareMesh_sub_uniformLeftEndpoint_bounds` gives the
+  aggregate `4/n` bound, and
+  `logTwoSquarePullbackIntegral_equiv_reciprocalIntegral` proves the
+  pullback integral equal to the existing `logTwoReciprocalIntegral`.
+  The new direct raw pi evaluator
+  `PiProofs.piTriangleLogSquareStieltjes` combines that stabilized
+  Stieltjes logarithm with the finite arctangent triangle.  Its validity and
+  equivalence to both the reciprocal-log formula and area pi are checked in
+  `PiProofs.lean`; `pi.squareStieltjes` exposes it as a
+  supplementary algorithmic view, not another coverage row.
+  The first arctangent--logarithm integration-by-parts strip is now a
+  separate literal certified integral, not just a scaled notation:
+  `arctanLogKernelIntegral` integrates `x/(1+x*x)` with Lipschitz constant
+  one. `LipschitzDyadic.compute_natScale` proves the finite Darboux boxes
+  respect natural scaling exactly, so the stagewise theorem
+  `logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral` and
+  the endpoint theorem
+  `two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral` establish
+  `2 * ∫₀¹ x/(1+x*x) dx ≡ log_rec 2`; its composition with the independent
+  alternating-harmonic comparison now also gives the direct theorem
+  `two_arctanLogKernelIntegral_equiv_logTwoSeries` to `log_series 2`.  The
+  scaled strip has exact dyadic width `4/2^stage`, recorded by
+  `two_arctanLogKernelIntegral_compute_width`.
+  These are endpoint equivalences at the rational name two, not the pending
+  function-level canonical-logarithm theorem. The remaining Pi-route gates
+  are a general effective-FTC extension beyond the supplied unit arctangent
+  triangle construction and the later canonical exp/log identification.  The
+  finite predecessor and its unit construction are now checked:
+  `arctanComplementKernelIntegral` is the literal 3-Lipschitz integral of
+  `(1-x)/(1+x*x)`, and the exact Darboux-box addition theorem
+  `LipschitzDyadic.compute_add` proves that this strip plus
+  `arctanLogKernelIntegral` is stagewise the 4-Lipschitz box for
+  `1/(1+x*x)`. Common uniform-left sums yield
+  `arctanStripIntegrals_add_equiv_arctanKernelIntegral`. The supplied unit
+  triangle construction now identifies the complementary strip with its
+  arctangent integral; this is still not a new Pi-scoreboard row because the
+  result is not a reusable effective-FTC theorem. The mesh-level triangle/Fubini
+  reindexing is separately checked:
+  `LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum`
+  proves the exact identity between an outer right sum of fixed-mesh inner
+  left prefixes and the complementary left sum `(1-x)*f(x)`. It is obtained
+  from `finiteIntegrationByParts`, so it supplies the required finite
+  rectangle geometry without importing continuous Fubini. The supplied
+  direct dyadic specialization is now
+  packaged as `arctanKernelTriangleRaw`: its runtime evaluator is only the
+  finite triangle sum for `1/(1+x*x)`, its public stabilization radius is
+  `6/2^n`, and Lean proves it equivalent to
+  `arctanComplementKernelIntegral`.  Lean now also packages that exact runtime
+  as `arctanIntegralTriangle`, a monotone integral construction for the
+  certified `arctan.integral.rectangle` unit function.  Its finite triangle
+  reindexing is recorded as the construction's explicit provenance; it does
+  not assume general Fubini or integral-linearity.
+  The companion raw `arctanKernelTrianglePlusLog` now adds this triangle
+  computation to the certified `x/(1+x*x)` logarithmic strip.  Its proved
+  equivalence to `arctanGeom(1)` makes it a finite strip/Fubini regression of
+  the same arctangent endpoint.  The public theorem
+  `arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral` further
+  identifies the supplied triangle integral plus that strip with the
+  independently certified product-FTC integral.  This is not yet the pending
+  calculus theorem `4 * ∫ arctan + 2 * log 2 = pi`: canonical exp/log
+  transport and a general effective-FTC extension beyond the supplied unit
+  construction remain separate work.
+  The direct endpoint now packages two supplementary raw formulas:
+  `Logarithm.piTriangleLogReciprocalIntegral =
+  4 * arctan.integral.triangle + 2 * log_rec(2)` and
+  `Logarithm.piTriangleLogSeries =
+  4 * arctan.integral.triangle + 2 * log_series(2)`.
+  Their formal product-FTC bridge is
+  `piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`
+  (and its series counterpart); both then reach the geometric arctangent
+  endpoint and the circle-area pi.  The literal reciprocal-log formula is now
+  the sixth `PiCoverageBridge` constructor: it tests a supplied finite
+  triangle, Darboux-strip, product-FTC, and logarithm route, with direct rate
+  `52/2^n`.  It instantiates the certificate-level integration-by-parts
+  rebalancing theorem, but does not yet construct such certificates from a
+  general effective FTC or identify the canonical exp/log transport; those
+  are the stronger remaining refinements of this row.
+  The square-pullback companion
+  `Logarithm.piTriangleLogSquareSubstitutionIntegral` is the seventh bridge:
+  its endpoint is `2 * ∫_0^1 2*x/(1+x*x) dx`, it reaches the reciprocal-log
+  formula by the finite `t = x*x` mesh correction, and its direct rate is
+  `56/2^n`.  It is the concrete substitution regression, not a general
+  change-of-variables theorem.
+- Formula-identification route: to identify a proposed kernel, prove that it
+  lies in the same shrinking enclosures as the pointwise derivative produced
+  by secants.  For arctangent, this means proving finite sector-area secant
+  inequalities and comparing them with `1/(1+x^2)`.
+- Projective-line test integral: use the reciprocal quartic
+  `∫_(-∞)^∞ dx/(x^4+a*x^2+1)` as a simpler full-line benchmark before the
+  Gaussian integral.  The exact rational folding and substitution identities
+  for `x ↦ 1/x` and `u=x-1/x` are formalized through
+  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
+  the clean pi case has its denominator side conditions discharged as
+  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy`.
+  Lean also identifies that shifted Cauchy kernel with the existing arctangent
+  kernel through
+  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
+  A second finite bridge now compactifies the line by
+  `x ↦ x/(1-x^2)`: the checked theorem
+  `reciprocalQuarticSymmetricDensity_minus_one_eq_projectiveCompactPullback`
+  identifies its Cauchy pullback with the everywhere-defined density
+  `(1+x^2)/(x^4-x^2+1)`, whose two endpoint values are exactly `2`.
+  The uniform rational estimate
+  `IntegralIdentities.reciprocalQuarticDenominator_minus_one_ge_three_quarters`
   proves `3/4 ≤ x^4-x^2+1` for every rational `x`, and the compact density is
   proved nonnegative.  Its checked finite-difference factorization is
   `IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub`.
@@ -3322,6 +3693,11 @@ finite.
   `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_alternating_enclosure`
   extends the same enclosure to every rational endpoint `0 <= y <= 1`, with
   the sharper finite gap `y^(4n+3)/(4n+3)` behind the uniform reciprocal bound.
+- The interval-valued evaluator
+  `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval` packages
+  the odd/even prefixes as a `QInterval`; its orderedness and width theorems
+  provide the direct finite box interface for later rectangle/`RealRaw`
+  comparisons.
 - The finite Riemann-error core is now formalized without a completeness
   principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
   its endpoint-average bounds bracket each monomial primitive, and
