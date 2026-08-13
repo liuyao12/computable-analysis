@@ -205,6 +205,7 @@ import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
 import ComputableAnalysis.FinitePowerSumInterface
 import ComputableAnalysis.FiniteReciprocalTriangularInterface
+import ComputableAnalysis.FiniteGeometricSeriesInterface
 import ComputableAnalysis.SqrtTwoDescent
 import ComputableAnalysis.Taylor
 import ComputableAnalysis.TrigSpecialValues
