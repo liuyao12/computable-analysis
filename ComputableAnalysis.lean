@@ -12,6 +12,7 @@ import ComputableAnalysis.ArctanGeomInverseData
 import ComputableAnalysis.ArctanRectanglePi
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.Basic
+import ComputableAnalysis.FiniteLawOfCosinesInterface
 import ComputableAnalysis.FinitePickInterface
 import ComputableAnalysis.FiniteHarmonicGrowthInterface
 import ComputableAnalysis.FinitePrimeIntervalInterface
