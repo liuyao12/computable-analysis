@@ -12,6 +12,7 @@ import ComputableAnalysis.ArctanGeomInverseData
 import ComputableAnalysis.ArctanRectanglePi
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.Basic
+import ComputableAnalysis.FiniteAlternatingSeriesInterface
 import ComputableAnalysis.FiniteDeMoivreInterface
 import ComputableAnalysis.FiniteLawOfCosinesInterface
 import ComputableAnalysis.FinitePickInterface
