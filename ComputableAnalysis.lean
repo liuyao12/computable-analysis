@@ -33,6 +33,8 @@ import ComputableAnalysis.FiniteFTCQuintic
 import ComputableAnalysis.FiniteFTCQuartic
 import ComputableAnalysis.FiniteFTCPolynomial
 import ComputableAnalysis.FiniteSineIntegral
+import ComputableAnalysis.FiniteNBallVolume
+import ComputableAnalysis.FiniteGaussianIntegral
 import ComputableAnalysis.FinitePolynomialIntegrationByParts
 import ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts
 import ComputableAnalysis.ComplexPolynomial

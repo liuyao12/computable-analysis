@@ -429,6 +429,11 @@ The homogeneity theorem `nBallVolumeModel_scale` now records the expected
 radius-scaling law exactly: scaling the radius by `s` scales the finite model
 by `s^n`. This is the algebraic volume property needed before any analytic
 Gaussian or radial-shell bridge is introduced.
+The `FiniteNBallVolume` and `FiniteGaussianIntegral` modules are now included
+in the umbrella `ComputableAnalysis` import. Their finite product, recurrence,
+and bounded Gaussian-prefix certificates are therefore available through the
+public project build; no Lebesgue measure or completed improper integral has
+been added.
 
 The companion `FiniteGaussianIntegral` module now supplies the bounded analytic
 prefix: it integrates the even Taylor polynomial for `exp (-x^2)` term by term
