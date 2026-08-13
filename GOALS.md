@@ -1153,6 +1153,10 @@ The finite L'Hôpital ladder now also reaches degree eight: the octic quotient
 has the exact residual `28/n + 56/n^2 + 70/n^3 + 56/n^4 + 28/n^5 + 8/n^6 + 1/n^7`
 at stage `1/n`. This is another rational cancellation certificate, not a
 statement about a completed limit.
+The same ladder now reaches degree nine, with residual
+`36/n + 84/n^2 + 126/n^3 + 126/n^4 + 84/n^5 + 36/n^6 + 9/n^7 + 1/n^8`.
+This matches the project’s finite nonic polynomial checkpoint while keeping
+L'Hôpital’s classical limit theorem deferred.
 The worked `FiniteSepticMVTExample` now instantiates the finite Mean Value
 interface at degree seven: Lean computes the secant of `x^7` on `[0,1]` as
 `1` and checks the endpoint derivative enclosure `[0,7]`.  This is a concrete
