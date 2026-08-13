@@ -208,6 +208,62 @@ theorem kernelPartialIntegralBetween_zero_even_succ (y : Rat) (n : Nat) :
   simp
   grind [Rat.sub_eq_add_neg]
 
+/-! On the half interval, the consecutive even/odd primitive prefixes differ
+by exactly the omitted alternating monomial.  This is the finite enclosure
+width used by the computable arctangent primitive; it is not an attained
+integral or an infinite-series limit. -/
+
+theorem kernelPartialIntegralBetween_half_even_odd_gap (n : Nat) :
+    kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) -
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n) =
+      -((1 : Rat) / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) := by
+  have h := kernelPartialIntegralBetween_zero_odd_succ (1 / 2) n
+  grind [Rat.sub_eq_add_neg]
+
+theorem kernelPartialIntegralBetween_half_even_odd_gap_width (n : Nat) :
+    qabs (kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) -
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n)) =
+      ((1 : Rat) / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) := by
+  rw [kernelPartialIntegralBetween_half_even_odd_gap]
+  have hpow : 0 <= ((1 : Rat) / 2) ^ (4 * n + 3) := by
+    exact Rat.pow_nonneg (by native_decide)
+  have hden : 0 < (4 * (n : Rat) + 3) := by
+    have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+    grind
+  have hneg : -(1 / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) <= 0 := by
+    rw [Rat.div_def]
+    have hmul := Rat.mul_nonneg hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+    grind
+  rw [qabs_eq_neg_of_nonpos hneg]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+theorem kernelPartialIntegralBetween_half_even_odd_gap_le_one_div
+    (n : Nat) :
+    qabs (kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) -
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n)) <=
+      1 / (((4 * n + 3 : Nat) : Rat)) := by
+  rw [kernelPartialIntegralBetween_half_even_odd_gap_width]
+  have hpow : ((1 : Rat) / 2) ^ (4 * n + 3) <= 1 := by
+    have hbase : ((1 : Rat) / 2) <= 1 := by native_decide
+    have hnonneg : 0 <= ((1 : Rat) / 2) := by native_decide
+    induction 4 * n + 3 with
+    | zero => simp
+    | succ k ih =>
+        rw [Rat.pow_succ]
+        calc
+          ((1 : Rat) / 2) ^ k * ((1 : Rat) / 2) <=
+              ((1 : Rat) / 2) ^ k * 1 :=
+            Rat.mul_le_mul_of_nonneg_left hbase (Rat.pow_nonneg hnonneg)
+          _ = ((1 : Rat) / 2) ^ k := by rw [Rat.mul_one]
+          _ <= 1 := ih
+  have hbound := Rat.mul_le_mul_of_nonneg_right hpow
+    (Rat.le_of_lt ((Rat.inv_pos).2 (by
+      have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+      have : 0 < (4 : Rat) * (n : Rat) + 3 := by grind
+      exact this)))
+  simpa [Rat.div_def, Rat.mul_one] using hbound
+
 private theorem one_pow_rat (m : Nat) : (1 : Rat) ^ m = 1 := by
   induction m with
   | zero => simp
