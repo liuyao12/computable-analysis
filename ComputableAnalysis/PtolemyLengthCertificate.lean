@@ -66,6 +66,53 @@ theorem LengthWitnessCertificate.raw_lengths_and_ptolemy
   · simpa [qabs_eq_self_of_nonneg certificate.hac_nonneg] using hac
   · simpa [qabs_eq_self_of_nonneg certificate.hbd_nonneg] using hbd
 
+def ptolemyLengthWitness : LengthWitnessCertificate where
+  a := ptolemyPointA
+  b := ptolemyPointB
+  c := ptolemyPointC
+  d := ptolemyPointD
+  ab := 16 / 17
+  bc := 26 / 85
+  cd := 14 / 25
+  da := 8 / 5
+  ac := 6 / 5
+  bd := 72 / 85
+  hab := by
+    have h := ptolemyPoint_square_coordinates
+    rw [h.1]
+    native_decide
+  hbc := by
+    have h := ptolemyPoint_square_coordinates
+    rw [h.2.1]
+    native_decide
+  hcd := by
+    have h := ptolemyPoint_square_coordinates
+    rw [h.2.2.1]
+    native_decide
+  hda := by
+    have h := ptolemyPoint_square_coordinates
+    rw [h.2.2.2.1]
+    native_decide
+  hac := by
+    have h := ptolemyPoint_square_coordinates
+    rw [h.2.2.2.2.1]
+    native_decide
+  hbd := by
+    have h := ptolemyPoint_square_coordinates
+    rw [h.2.2.2.2.2]
+    native_decide
+  hab_nonneg := by native_decide
+  hbc_nonneg := by native_decide
+  hcd_nonneg := by native_decide
+  hda_nonneg := by native_decide
+  hac_nonneg := by native_decide
+  hbd_nonneg := by native_decide
+  ptolemy := by native_decide
+
+theorem ptolemyLengthWitness_raw_lengths_and_ptolemy :
+    ptolemyLengthWitness.raw_lengths_and_ptolemy := by
+  exact LengthWitnessCertificate.raw_lengths_and_ptolemy ptolemyLengthWitness
+
 end FinitePtolemyLength
 
 end ComputableAnalysis
