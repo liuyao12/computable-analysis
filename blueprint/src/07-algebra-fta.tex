@@ -11,6 +11,11 @@ boxes -> interval Horner evaluation
 \end{verbatim}
 Quadratic, cubic, quartic, Descartes, and finite deflation certificates are
 included.  Global termination requires an explicit modulus.
+\begin{verbatim}
+remove zero coefficients
+count sign changes
+check count + 1 <= surviving length
+\end{verbatim}
 \label{thm:factorized-quadratic-roots}\label{thm:finite-factorized-fta}
 \label{thm:finite-fta-concrete-quadratic}\label{def:algebraic-arithmetic-targets}
 \label{thm:linear-factor-remainder-base}\label{thm:descartes-sign-variation}
@@ -21,6 +26,13 @@ included.  Global termination requires an explicit modulus.
 \label{thm:finite-six-variation-descartes}\label{thm:finite-one-variation-descartes}
 \label{thm:finite-descartes-sign-count}\label{thm:complex-linear-root}
 \label{thm:finite-factor-remainder-interface}
+\label{thm:finite-descartes-sign-interface}
+The reusable certificate records the coefficient list, its zero-free length,
+the exact variation count, and the finite bound on that count.
+\lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate}
+\lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate.variation_eq_count}
+\lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate.variation_bound}
+\lean{ComputableAnalysis.Polynomial.finiteDescartesSignCertificate}
 \label{thm:rational-quadratic-discriminant}\label{thm:complex-quadratic-discriminant}
 \label{thm:worked-complex-quadratic}\label{thm:rational-cubic-roots}
 \label{thm:finite-cubic-completion}\label{thm:finite-cubic-sqrt-two}
@@ -29,7 +41,9 @@ included.  Global termination requires an explicit modulus.
 \section{Boundary}
 
 There is no general radical formula in degree five.  Effective isolation is
-the computable substitute; classical root-count statements are bridges.
+the computable substitute.  The finite sign-count interface does not claim
+the classical “number of positive roots is at most the variations” theorem;
+one-/zero-variation root certificates are supplied separately.
 \label{rem:abel-ruffini-boundary}\label{thm:computable-fta-of-algebraic-fta}
 \label{thm:finite-box-polynomial-soundness}\label{thm:four-quadrant-box-subdivision}
 \label{thm:finite-deflation-soundness}
