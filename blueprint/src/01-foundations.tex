@@ -868,6 +868,11 @@ The public schema is
 \lean{ComputableAnalysis.euclideanGcd_dvd_of_dvd}
 \lean{ComputableAnalysis.euclideanGcd_dvd_iff}
 \lean{ComputableAnalysis.gcd_remainder_swap}
+\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate}
+\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate.divides_left}
+\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate.divides_right}
+\lean{ComputableAnalysis.FiniteEuclideanGcdCertificate.is_coprime_of_value_one}
+\lean{ComputableAnalysis.finiteEuclideanGcdCertificate}
 \lean{Nat.gcd}
 \lean{Nat.gcd_rec}
 \lean{Nat.gcd_dvd_left}
@@ -907,6 +912,8 @@ Bézout identity for every natural input pair, covering benchmark item 60 in the
 exact-arithmetic representation.  The combined theorem
 \texttt{euclideanGcd\_bezout\_exists} identifies those coefficients with the
 executable Euclidean-loop result itself.
+The reusable finite interface packages the terminating gcd output with its
+integer witness and derives divisibility and coprimality from that certificate.
 The worked input pair (84,30) gives (gcd(84,30)=6) with the explicit
 certificate ((-1)84+3(30)=6).
 The pair (99991,12345) supplies a further terminating certificate: its gcd is
