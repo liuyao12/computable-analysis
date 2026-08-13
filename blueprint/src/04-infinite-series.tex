@@ -19,7 +19,13 @@ The same interface handles geometric, alternating, power-sum, Fourier, and
 prime-reciprocal examples. Divergence means that no terminal stage meets the
 requested bound.
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
+\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.prefix_le_endpoint}
+\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
+\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate.closed_form}
+\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate.succ_step}
+\lean{ComputableAnalysis.Series.FiniteBinomialSeriesCertificate.power_identity}
 \lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate}
+\lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate.width_eq}
 \lean{ComputableAnalysis.Series.FinitePowerSumCertificate}
 \lean{ComputableAnalysis.finitePrimeIntervalCertificate}
 \lean{ComputableAnalysis.FinitePrimeIntervalCertificate.in_interval}
@@ -45,5 +51,8 @@ choose route -> compute prefix -> compare enclosures -> refine
 Finite comparison and factorial-ratio certificates prepare the shared rational
 anchors needed for stronger limit theorems.
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate}
+\lean{ComputableAnalysis.FiniteStirlingRatioCertificate.mem_interval}
+\lean{ComputableAnalysis.FiniteStirlingRatioCertificate.abs_error_le}
 \lean{ComputableAnalysis.finiteStirlingRatioAtTwentyFour_enclosure}
 \lean{ComputableAnalysis.cauchy_schwarz_6d}
+\lean{ComputableAnalysis.RealRaw.allStagesOverlap_of_eventually_shared_rational_anchor}
