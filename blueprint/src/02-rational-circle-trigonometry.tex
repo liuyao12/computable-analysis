@@ -33,6 +33,14 @@ area value is exposed only after a rational square witness is checked.
 The isosceles theorem is a rational coordinate certificate: equal legs force
 an orthogonal symmetry axis and a Pythagorean base relation.
 \label{thm:finite-law-of-cosines-interface}
+\emph{Law-of-cosines interface.} Compute squared distances and dot products over rational coordinates; square-root length transport is a separate certificate.
+\begin{verbatim}
+sqDist := (q.x-p.x)^2 + (q.y-p.y)^2
+assert sqDist = normSq(p) + normSq(q) - 2*dot(p,q)
+\end{verbatim}
+\lean{ComputableAnalysis.RationalCircle.Stage.FiniteLawOfCosinesCertificate}
+\lean{ComputableAnalysis.RationalCircle.Stage.FiniteLawOfCosinesCertificate.identity}
+\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosinesCertificate}
 \label{thm:finite-ptolemy-interface}
 Law of cosines and Ptolemy are carried first as squared-length and rational
 length-witness identities; square-root transport is an explicit certificate.
