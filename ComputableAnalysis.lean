@@ -192,6 +192,7 @@ import ComputableAnalysis.PolynomialDescartes
 import ComputableAnalysis.FiniteDescartesExamples
 import ComputableAnalysis.FiniteDescartesQuadratic
 import ComputableAnalysis.FiniteDyadicAMGM
+import ComputableAnalysis.FiniteAMGMInterface
 import ComputableAnalysis.RationalRootSearch
 import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteCubicCompletion
