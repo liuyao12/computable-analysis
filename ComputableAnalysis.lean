@@ -203,6 +203,7 @@ import ComputableAnalysis.FiniteBisection
 import ComputableAnalysis.FiniteBisectionIteration
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
+import ComputableAnalysis.FiniteBinomialSeriesInterface
 import ComputableAnalysis.FiniteArithmeticSeriesInterface
 import ComputableAnalysis.FinitePowerSumInterface
 import ComputableAnalysis.FiniteReciprocalTriangularInterface
