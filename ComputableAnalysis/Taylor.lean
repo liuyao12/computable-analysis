@@ -299,6 +299,68 @@ theorem kernelPartialIntegralBetween_half_alternating_enclosure
         (Rat.le_of_lt ((Rat.inv_pos).2 hden))
       grind
 
+theorem kernelPartialIntegralBetween_unit_alternating_enclosure
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) (n : Nat) :
+    kernelPartialIntegralBetween 0 y (2 * n + 1) <=
+        kernelPartialIntegralBetween 0 y (2 * n) /\
+      kernelPartialIntegralBetween 0 y (2 * n) -
+          kernelPartialIntegralBetween 0 y (2 * n + 1) <=
+        1 / (((4 * n + 3 : Nat) : Rat)) := by
+  constructor
+  · have hgap := kernelPartialIntegralBetween_zero_odd_succ y n
+    have hpow : 0 <= y ^ (4 * n + 3) := Rat.pow_nonneg hy0
+    have hden : 0 < (4 * (n : Rat) + 3) := by
+      have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+      grind
+    have hmul := Rat.mul_nonneg hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+    have hnonpos : -y ^ (4 * n + 3) / (4 * (n : Rat) + 3) <= 0 := by
+      rw [Rat.div_def]
+      grind
+    grind [Rat.sub_eq_add_neg]
+  · have hpow : y ^ (4 * n + 3) <= 1 := by
+      induction 4 * n + 3 with
+      | zero => simp
+      | succ k ih =>
+          rw [Rat.pow_succ]
+          calc
+            y ^ k * y <= y ^ k * 1 :=
+              Rat.mul_le_mul_of_nonneg_left hy1 (Rat.pow_nonneg hy0)
+            _ = y ^ k := by rw [Rat.mul_one]
+            _ <= 1 := ih
+    have hbound := Rat.mul_le_mul_of_nonneg_right hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 (by
+        have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+        have : 0 < (4 : Rat) * (n : Rat) + 3 := by grind
+        exact this)))
+    have hgap := kernelPartialIntegralBetween_zero_odd_succ y n
+    have hwidth :
+        qabs (kernelPartialIntegralBetween 0 y (2 * n + 1) -
+          kernelPartialIntegralBetween 0 y (2 * n)) <=
+          1 / (((4 * n + 3 : Nat) : Rat)) := by
+      rw [hgap, qabs_eq_neg_of_nonpos]
+      · rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+      · rw [Rat.div_def]
+        have hpow0 : 0 <= y ^ (4 * n + 3) := Rat.pow_nonneg hy0
+        have hden : 0 < (4 * (n : Rat) + 3) := by
+          have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+          grind
+        have hmul := Rat.mul_nonneg hpow0
+          (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+        grind
+    rw [qabs_eq_neg_of_nonpos] at hwidth
+    · grind
+    · have hgap := kernelPartialIntegralBetween_zero_odd_succ y n
+      rw [hgap, Rat.div_def]
+      have hpow0 : 0 <= y ^ (4 * n + 3) := Rat.pow_nonneg hy0
+      have hden : 0 < (4 * (n : Rat) + 3) := by
+        have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+        grind
+      have hmul := Rat.mul_nonneg hpow0
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+      grind
+
 private theorem one_pow_rat (m : Nat) : (1 : Rat) ^ m = 1 := by
   induction m with
   | zero => simp
