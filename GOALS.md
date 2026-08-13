@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 76130)
-Total output lines: 4712
+Warning: truncated output (original token count: 76221)
+Total output lines: 4717
 
 # Computable Analysis Goalposts
 
@@ -1873,12 +1873,7 @@ sum of domain widths times value-range widths, and is nonnegative for ordered
 cells.  This is a finite rational bridge toward the constructive FTC, not an
 appeal to an attained integral or completeness.
 The companion `piecewiseRectangleAreaSum_gap_le_common_range_budget` theorem
-packages the common-range fo…16130 tokens truncated…th opposing strict endpoint-separation inequalities for the same nonconstant
-  function.
-- Concrete forward data: `squareOnUnit` on `[0,1]` has exact rational point
-  boxes, an interval-regularity modulus (hence an explicit rational
-  epsilon--delta certificate), nondecreasing order, and nondecreasing
-  effective separation.  `squareOnUnit_epsilonDeltaContinuous` and
+packages the common-range fo…16221 tokens truncated… and
   `squareOnUnit_invertible` expose these facts.
   The existing `sqrtRaw` bisection has its algebraic raw-real specification,
   and `sqrtOnUnitBisectionSearch` packages it as an `InverseBisectionSearch`
@@ -2726,6 +2721,11 @@ finite.
   Its absolute-width and reciprocal bounds give a computable finite enclosure
   budget for the arctangent primitive, without asserting an attained integral
   or an infinite-series limit.
+- The companion `Taylor.ArctanKernel.kernelPartialIntegralBetween_half_alternating_enclosure`
+  packages that gap as an ordered finite enclosure: the odd prefix is below
+  the even prefix, and their difference is bounded by `1/(4n+3)`. This is the
+  interval-shaped certificate needed to connect the integrated Taylor route
+  to the existing Leibniz raw evaluator.
 - The finite Riemann-error core is now formalized without a completeness
   principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
   its endpoint-average bounds bracket each monomial primitive, and
