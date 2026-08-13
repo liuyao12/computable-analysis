@@ -510,6 +510,29 @@ theorem kernelPartialIntegralAtOneRaw_valid :
     rw [kernelPartialIntegralAtOneRawInterval_width_eq]
     exact hN (2 * n + 1) (by omega)
 
+theorem kernelPartialIntegralAtOneRaw_width_eq_reciprocal (n : Nat) :
+    (kernelPartialIntegralAtOneRaw.compute n).width =
+      1 / (((4 * n + 3 : Nat) : Rat)) := by
+  change (kernelPartialIntegralAtOneRawInterval n).width = _
+  rw [kernelPartialIntegralAtOneRawInterval_width_eq]
+  simp [Series.leibnizTerm]
+  congr 1
+  grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+theorem kernelPartialIntegralAtOneRaw_width_le_of_budget {n : Nat} {eps : Rat}
+    (hbudget : 1 / (((4 * n + 3 : Nat) : Rat)) <= eps) :
+    (kernelPartialIntegralAtOneRaw.compute n).width <= eps := by
+  rw [kernelPartialIntegralAtOneRaw_width_eq_reciprocal n]
+  exact hbudget
+
+theorem kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance (eps : QPos) :
+    ∃ n : Nat, (kernelPartialIntegralAtOneRaw.compute n).width <= eps.val := by
+  refine ⟨eps.val.den, ?_⟩
+  rw [kernelPartialIntegralAtOneRaw_width_eq_reciprocal]
+  apply Rat.le_trans
+    (Series.one_div_nat_antitone_series (by omega) (by omega) (by omega))
+    (one_div_den_succ_le_of_pos eps.property)
+
 theorem kernelPartialIntegralAtOneRaw_compute_eq (n : Nat) :
     kernelPartialIntegralAtOneRaw.compute n =
       kernelPartialIntegralAtOneRawInterval n := by

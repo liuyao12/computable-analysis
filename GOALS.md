@@ -3706,6 +3706,11 @@ finite.
   the adjacent-prefix interval is exposed as the valid raw object
   `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid` with bridge
   `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_compute_eq_kernel`.
+  Its exact width is
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_width_eq_reciprocal`,
+  and `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance`
+  turns every positive rational precision request into an explicit natural
+  stage.
   This establishes the required potential-infinity shrinking behavior
   without introducing an attained limit.
 - The finite Riemann-error core is now formalized without a completeness
