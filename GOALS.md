@@ -3618,6 +3618,9 @@ students actually compute.
   has the inherited geometric width bound.  This is the first actual shrinking
   interval algorithm for the sine endpoint, while the pi-input enclosure and
   change-of-variables theorem remain separate bridges.
+  The public theorem `halfPeriodSineRaw_reaches_of_positive_tolerance` exposes
+  the corresponding potential-infinity stage selector for every positive
+  rational tolerance.
 - A later noncompact benchmark is the Dirichlet sinc integral
   `∫ sin(π t)/t dt = π`, using the project's rational-angle convention.  The
   first local illustration is its decreasing-then-increasing branch around
