@@ -3611,6 +3611,13 @@ students actually compute.
   The same finite evaluator now reaches stages eight and ten, with explicit
   rational values within `1/10000` and `1/1000000` of `1`. These are sharper
   potential-infinity checkpoints, still not the completed sine integral.
+  The finite complement identity `halfAnglePrefix_cosine_complement` rewrites
+  each sine primitive as `1` minus a matching cosine Taylor prefix.  The raw
+  evaluator `halfPeriodSineRaw` then transports the existing factorial cosine
+  interval algorithm to the normalized half-period quantity; it is valid and
+  has the inherited geometric width bound.  This is the first actual shrinking
+  interval algorithm for the sine endpoint, while the pi-input enclosure and
+  change-of-variables theorem remain separate bridges.
 - A later noncompact benchmark is the Dirichlet sinc integral
   `∫ sin(π t)/t dt = π`, using the project's rational-angle convention.  The
   first local illustration is its decreasing-then-increasing branch around
