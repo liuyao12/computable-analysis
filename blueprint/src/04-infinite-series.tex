@@ -16,6 +16,15 @@ tail   := explicit rational bound
 \emph{Fourier interface.} A finite rational transform reconstructs its sample
 vector and satisfies a finite Parseval identity; no infinite series is hidden.
 \label{thm:finite-prime-reciprocal-extension}\label{thm:arithmetic-series-sum}
+\emph{Arithmetic interface.} A finite progression is folded exactly and checked against its closed form.
+\begin{verbatim}
+prefix := arithmeticProgressionSum initial difference stage
+closed := stage * (2*initial + (stage-1)*difference) / 2
+\end{verbatim}
+\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate}
+\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate.closed_form}
+\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate.succ_step}
+\lean{ComputableAnalysis.Series.finiteArithmeticSeriesCertificate}
 \label{thm:finite-power-sums}\label{thm:geometric-series-sum}
 \label{thm:finite-geometric-series-interface}
 \emph{Geometric interface.} Compute the finite prefix recursively and carry
