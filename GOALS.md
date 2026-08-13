@@ -1149,6 +1149,10 @@ The quartic companion now has the matching bound
 `qabs (Q_n - 4) <= 11/n`, certifying the finite residual
 `6/n + 4/n^2 + 1/n^3` at every positive stage. This extends the precision
 schedule across the next cancellation degree without claiming a limit.
+The finite L'Hôpital ladder now also reaches degree eight: the octic quotient
+has the exact residual `28/n + 56/n^2 + 70/n^3 + 56/n^4 + 28/n^5 + 8/n^6 + 1/n^7`
+at stage `1/n`. This is another rational cancellation certificate, not a
+statement about a completed limit.
 The worked `FiniteSepticMVTExample` now instantiates the finite Mean Value
 interface at degree seven: Lean computes the secant of `x^7` on `[0,1]` as
 `1` and checks the endpoint derivative enclosure `[0,7]`.  This is a concrete

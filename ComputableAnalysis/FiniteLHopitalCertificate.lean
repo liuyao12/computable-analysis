@@ -396,6 +396,37 @@ theorem septic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
   have h := septic_linear_worked_remainder (1 / (n : Rat)) hstep
   simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
 
+/-! The octic analogue continues the finite cancellation ladder without
+introducing an attained limit. -/
+
+theorem octic_linear_worked_remainder (step : Rat) (hstep : step ≠ 0) :
+    (step * (8 + 28 * step + 56 * step ^ 2 + 70 * step ^ 3 +
+        56 * step ^ 4 + 28 * step ^ 5 + 8 * step ^ 6 + step ^ 7)) /
+        (step * 1) - 8 =
+      28 * step + 56 * step ^ 2 + 70 * step ^ 3 +
+        56 * step ^ 4 + 28 * step ^ 5 + 8 * step ^ 6 + step ^ 7 := by
+  have hcancel : step * step⁻¹ = 1 := Rat.mul_inv_cancel _ hstep
+  rw [Rat.div_def]
+  grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem octic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
+    ((1 / (n : Rat)) * (8 + 28 * (1 / (n : Rat)) +
+        56 * (1 / (n : Rat)) ^ 2 + 70 * (1 / (n : Rat)) ^ 3 +
+        56 * (1 / (n : Rat)) ^ 4 + 28 * (1 / (n : Rat)) ^ 5 +
+        8 * (1 / (n : Rat)) ^ 6 + (1 / (n : Rat)) ^ 7)) /
+        ((1 / (n : Rat)) * 1) - 8 =
+      28 / (n : Rat) + 56 * (1 / (n : Rat)) ^ 2 +
+        70 * (1 / (n : Rat)) ^ 3 + 56 * (1 / (n : Rat)) ^ 4 +
+        28 * (1 / (n : Rat)) ^ 5 + 8 * (1 / (n : Rat)) ^ 6 +
+        (1 / (n : Rat)) ^ 7 := by
+  have hstep : (1 / (n : Rat)) ≠ 0 := by
+    rw [Rat.div_def]
+    exact Rat.ne_of_gt (Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)))
+  have h := octic_linear_worked_remainder (1 / (n : Rat)) hstep
+  simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
+
 end FiniteLHopitalCertificate
 
 end ComputableAnalysis
