@@ -361,6 +361,30 @@ theorem kernelPartialIntegralBetween_unit_alternating_enclosure
         (Rat.le_of_lt ((Rat.inv_pos).2 hden))
       grind
 
+def kernelPartialIntegralBetween_unit_interval (y : Rat) (n : Nat) : QInterval :=
+  { lo := kernelPartialIntegralBetween 0 y (2 * n + 1),
+    hi := kernelPartialIntegralBetween 0 y (2 * n) }
+
+theorem kernelPartialIntegralBetween_unit_interval_ordered
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) (n : Nat) :
+    0 <= (kernelPartialIntegralBetween_unit_interval y n).width := by
+  unfold kernelPartialIntegralBetween_unit_interval QInterval.width
+  change 0 <=
+    kernelPartialIntegralBetween 0 y (2 * n) -
+      kernelPartialIntegralBetween 0 y (2 * n + 1)
+  grind [Rat.sub_eq_add_neg,
+    (kernelPartialIntegralBetween_unit_alternating_enclosure hy0 hy1 n).1]
+
+theorem kernelPartialIntegralBetween_unit_interval_width_le
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) (n : Nat) :
+    (kernelPartialIntegralBetween_unit_interval y n).width <=
+      1 / (((4 * n + 3 : Nat) : Rat)) := by
+  unfold kernelPartialIntegralBetween_unit_interval QInterval.width
+  change kernelPartialIntegralBetween 0 y (2 * n) -
+      kernelPartialIntegralBetween 0 y (2 * n + 1) <=
+    1 / (((4 * n + 3 : Nat) : Rat))
+  exact (kernelPartialIntegralBetween_unit_alternating_enclosure hy0 hy1 n).2
+
 private theorem one_pow_rat (m : Nat) : (1 : Rat) ^ m = 1 := by
   induction m with
   | zero => simp
