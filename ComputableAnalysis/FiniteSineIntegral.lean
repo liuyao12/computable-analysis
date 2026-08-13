@@ -1,4 +1,5 @@
 import ComputableAnalysis.FinitePolynomialCalculus
+import ComputableAnalysis.RotationTaylorBridge
 
 /-!
 # Finite half-period sine integral certificates
@@ -51,6 +52,70 @@ theorem halfAnglePrefix_endpointDifference_succ
             a ^ (terms + 1) / ((terms + 1 : Nat) : Rat)) := by
   exact FinitePolynomial.integratedTaylorPrefix_endpointDifference_succ
     FormalPowerSeries.sinCoeff terms a b
+
+/-! The finite sine primitive is exactly the complement of the matching
+cosine prefix.  This is the algebraic change-of-variable identity behind the
+later interval evaluator; no infinite series or completed integral is used. -/
+
+theorem halfAnglePrefix_cosine_complement (piApprox : Rat) (terms : Nat) :
+    halfAnglePrefix piApprox terms =
+      1 - FinitePolynomial.taylorPrefix FormalPowerSeries.cosCoeff
+        (terms + 1) (piApprox / 2) := by
+  induction terms with
+  | zero =>
+      change 0 = 1 - (1 + 0)
+      grind
+  | succ terms ih =>
+      rw [halfAnglePrefix_succ, ih]
+      have hleft := FinitePolynomial.taylorPrefix_succ
+        FormalPowerSeries.cosCoeff terms (piApprox / 2)
+      have hright := FinitePolynomial.taylorPrefix_succ
+        FormalPowerSeries.cosCoeff (terms + 1) (piApprox / 2)
+      rw [hleft]
+      rw [show terms + 1 + 1 = (terms + 1) + 1 by omega, hright]
+      rw [FormalPowerSeries.cosCoeff]
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.sub_eq_add_neg]
+
+/-! A rotation-scheduled version uses the even Taylor prefixes already covered
+by the factorial rotation evaluator.  The extra `+1` is precisely the finite
+primitive needed to turn cosine back into sine. -/
+
+def halfPeriodSineRaw (piApprox : Rat) : RealRaw :=
+  RealRaw.one - RotationSeries.rotationCosRaw (piApprox / 2)
+
+theorem halfPeriodSineRaw_valid (piApprox : Rat) :
+    (halfPeriodSineRaw piApprox).Valid := by
+  unfold halfPeriodSineRaw
+  exact RealRaw.sub_valid (RealRaw.ofRat_valid 1)
+    (RotationSeries.rotationCosRaw_valid (piApprox / 2))
+
+theorem halfPeriodSineRaw_compute (piApprox : Rat) (stage : Nat) :
+    (halfPeriodSineRaw piApprox).compute stage =
+      RealRaw.subCompute RealRaw.one
+        (RotationSeries.rotationCosRaw (piApprox / 2)) stage := by
+  rfl
+
+theorem halfPeriodSineRaw_width_le_geometric (piApprox : Rat) (stage : Nat) :
+    ((halfPeriodSineRaw piApprox).compute stage).width <=
+      (8 * RotationSeries.rotationTailMagnitude (piApprox / 2) 0) *
+        ((1 : Rat) / 2) ^ stage := by
+  rw [halfPeriodSineRaw, RealRaw.sub_width]
+  have hone : (RealRaw.one.compute stage).width = 0 := by
+    simp [RealRaw.one, RealRaw.ofRat, RealRaw.ofRat_compute,
+      QInterval.width]
+    grind
+  rw [hone, Rat.zero_add]
+  exact RotationSeries.rotationCosRaw_width_le_geometric (piApprox / 2) stage
+
+theorem halfAnglePrefix_rotation_complement (piApprox : Rat) (stage : Nat) :
+    halfAnglePrefix piApprox (2 * stage + 1) =
+      1 - LinearODE.RotationSystem.cosinePrefix
+        (piApprox / 2) (stage + 1) := by
+  rw [halfAnglePrefix_cosine_complement]
+  rw [RotationSeries.cosinePrefix_eq_taylorPrefix]
+  have hterms : 2 * stage + 1 + 1 = 2 * (stage + 1) := by omega
+  rw [hterms]
 
 theorem halfAnglePrefix_stage_four :
     halfAnglePrefix (355 / 113) 4 =
