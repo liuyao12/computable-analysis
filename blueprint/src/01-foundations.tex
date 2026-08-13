@@ -41,17 +41,17 @@ positive natural denominator, and the normalization decoder is surjective
 onto the project's rational type.  The diagonal pairing, signed-integer code,
 and positive-denominator shift combine into the explicit natural-number
 decoder \texttt{rationalNatCode}, whose surjectivity is checked by
-`rationalNatCode_decode_surjective`; `diagonalPair_injective` and
-`rationalNatCode_injective` also certify that the natural-number code path is
+\texttt{rationalNatCode\_decode\_surjective}; \texttt{diagonalPair\_injective} and
+\texttt{rationalNatCode\_injective} also certify that the natural-number code path is
 injective before decoding.  The stronger
-`rationalNatCode_encode_surjective` statement shows that every canonical
+\texttt{rationalNatCode\_encode\_surjective} statement shows that every canonical
 numerator--denominator code is hit exactly before decoding.  This is the
-`rationalNatCode_existsUnique_canonical_index` refinement of that statement:
+\texttt{rationalNatCode\_existsUnique\_canonical\_index} refinement of that statement:
 the canonical code has a unique natural-number index.  This is the
 constructive coding core of benchmark item 3 (denumerability of the rationals).
 The canonical decode-index theorem makes the normalization choice unique at
-the finite code level.  The explicit `rationalNatIndex` and
-`rationalNatIndex_injective` now provide the matching injection from canonical
+the finite code level.  The explicit \texttt{rationalNatIndex} and
+\texttt{rationalNatIndex\_injective} now provide the matching injection from canonical
 rationals to natural indices, while retaining the finite-code interface.  The
 surjection and injection together complete the project's coding-level
 denumerability boundary for benchmark item 3.
@@ -157,10 +157,10 @@ every positive rational tolerance, while no attained real limit is asserted.
 The finite recurrence \texttt{subsetCount(n+1)=2*subsetCount(n)} gives the
 certificate core of the number-of-subsets theorem (benchmark item 52), while
 \texttt{combination} supplies Pascal's recurrence, its rational bridge
-`combination\_rat_pascal`, and its zero-outside-range boundary for
+\texttt{combination\textbackslash{}\_rat\_pascal}, and its zero-outside-range boundary for
 binomial coefficients (benchmark item 58), together with rationally cast
 outside-range and diagonal boundaries and the first-row identity
-`combination_one`.  These are finite
+\texttt{combination\_one}.  These are finite
 counting interfaces; a general finite-set cardinality library is intentionally
 not introduced here.
 The worked subset counter now also reaches stage 16, with exact value
@@ -179,6 +179,7 @@ It now also reaches \(\binom{25}{3}=2300\), with the decomposition
 \begin{theorem}[Certificate-level fundamental theorem of arithmetic]
 \label{thm:finite-fta-factorization}
 \label{rem:finite-factorization-certificates}
+\label{thm:finite-fta-factorization}
 \lean{ComputableAnalysis.MultiplicativeCertificate}
 \lean{ComputableAnalysis.factorizationCertificate60}
 \lean{ComputableAnalysis.primeFactorizationCertificate360}
@@ -255,60 +256,60 @@ It now also reaches \(\binom{25}{3}=2300\), with the decomposition
 \lean{ComputableAnalysis.primeFactorizationCertificate360_factor_dvd}
 The foundation now has a finite certificate interface recording a list of
 nontrivial factors and its product, with the worked certificate
-\texttt{60=2\cdot2\cdot3\cdot5}.  The small primality predicate and its
+$60=2\cdot2\cdot3\cdot5$.  The small primality predicate and its
 certificates for \(2,3,5\) now make the worked certificate prime-labelled.
 The constructor \texttt{MultiplicativeCertificate.append} composes the
 non-prime certificate layer for products before primality is imposed.
-The accompanying Euclid lemma, `basicPrime\_dvd\_of\_dvd_mul`, is the
+The accompanying Euclid lemma, \texttt{basicPrime\textbackslash{}\_dvd\textbackslash{}\_of\textbackslash{}\_dvd\_mul}, is the
 first reusable step toward general factorization arguments: a certified basic
 prime dividing a product divides one of its factors.
 The finite list product \texttt{natProduct} and
-`basicPrime\_dvd\_of\_dvd_natProduct` lift this to a prime dividing
+\texttt{basicPrime\textbackslash{}\_dvd\textbackslash{}\_of\textbackslash{}\_dvd\_natProduct} lift this to a prime dividing
 one member of a finite factor list, providing the next reusable FTA
 certificate step.
 The certificate-level corollary
-`basicPrime\_dvd\_of\_dvd_primeFactorization` connects this list
+\texttt{basicPrime\textbackslash{}\_dvd\textbackslash{}\_of\textbackslash{}\_dvd\_primeFactorization} connects this list
 theorem directly to a \texttt{PrimeFactorCertificate}.
 The constructor \texttt{PrimeFactorCertificate.append} composes certificates
 for two factors while preserving both the prime labels and the product
 equation.  The companion theorem
-`PrimeFactorCertificate.factor_dvd` shows that every listed factor
+\texttt{PrimeFactorCertificate.factor\_dvd} shows that every listed factor
 divides the certified number, giving the converse direction to the prime
 divisor extraction theorem.
-The finite bound `PrimeFactorCertificate.factor_le` further places every
+The finite bound \texttt{PrimeFactorCertificate.factor\_le} further places every
 listed factor at or below the certified number whenever $1<n$, making the
 certificate list a bounded object for finite search and validation.
 The finite search and recursive constructor
 
-`primeFactorCertificate_exists`
+\texttt{primeFactorCertificate\_exists}
 
 now establish factorization existence for every $n>1$ at the certificate
 level.  The list-level theorem
-`primeFactorList\_perm\_of\_same_product`, together with
-`PrimeFactorCertificate.factor_perm`, proves uniqueness of the full
+\texttt{primeFactorList\textbackslash{}\_perm\textbackslash{}\_of\textbackslash{}\_same\_product}, together with
+\texttt{PrimeFactorCertificate.factor\_perm}, proves uniqueness of the full
 prime-labelled factor list up to permutation, including repeated factors.
 The Euclid construction
-`exists_basicPrime_not_mem_of_all_basicPrime` adds the finite
+\texttt{exists\_basicPrime\_not\_mem\_of\_all\_basicPrime} adds the finite
 infinitude-of-primes core: from any finite list of certified primes, the
 product-plus-one construction returns a certified prime outside that list.
-The specialized evaluator `shiftedRangeProduct` and theorem
-`exists_basicPrime_gt` sharpen this to an executable unboundedness statement:
+The specialized evaluator \texttt{shiftedRangeProduct} and theorem
+\texttt{exists\_basicPrime\_gt} sharpen this to an executable unboundedness statement:
 for every finite bound (n), a certified prime (p>n) is produced.
 This is the project's checked certificate-level core of benchmark item 80;
 the usual classical formulation over a separately developed prime library is
 outside the current scope.
-The worked certificate `primeFactorizationCertificate360` supplies the list
-\([2,2,2,3,3,5]), checks its product as (360), and records the resulting
-divisibility witnesses for (2,3,5).
+The worked certificate \texttt{primeFactorizationCertificate360} supplies the list
+$(2,2,2,3,3,5)$, checks its product as $360$, and records the resulting
+divisibility witnesses for $2,3,5$.
 The companion certificates check the prime-labelled decompositions
-\(720=2^4\cdot3^2\cdot5\) and
-\(600=2^3\cdot3\cdot5^2\), with their products and distinct-prime
+$(720=2^4\cdot3^2\cdot5)$ and
+$(600=2^3\cdot3\cdot5^2)$, with their products and distinct-prime
 divisibility witnesses verified directly.
-The additional certificate factors (126) as (2\cdot3^2\cdot7), with
+The additional certificate factors $126$ as $2\cdot3^2\cdot7$, with
 the product and divisibility witnesses checked by terminating computation.
-The larger certificate factors (27720) as
-(2^3\cdot3^2\cdot5\cdot7\cdot11), exercising the finite prime-search
-certificates for both (7) and (11).
+The larger certificate factors $27720$ as
+$2^3\cdot3^2\cdot5\cdot7\cdot11$, exercising the finite prime-search
+certificates for both $7$ and $11$.
 \end{theorem}
 
 \begin{theorem}[Finite Bertrand witnesses]
@@ -319,14 +320,19 @@ certificates for both (7) and (11).
 \lean{ComputableAnalysis.bertrand_stage40}
 \lean{ComputableAnalysis.bertrand_stage50}
 \lean{ComputableAnalysis.bertrand_stage60}
+\lean{ComputableAnalysis.bertrand_stage70}
+\lean{ComputableAnalysis.bertrand_stage80}
+\lean{ComputableAnalysis.bertrand_stage100}
 \lean{ComputableAnalysis.bertrand_finite_certificate}
 \lean{ComputableAnalysis.bertrand_extended_finite_certificate}
+\lean{ComputableAnalysis.bertrand_further_finite_certificate}
 \leanok
 The executable primality search verifies a prime between \(10\) and \(20\),
 namely \(11\), and a prime between \(20\) and \(40\), namely \(23\).  These
 are finite instances of benchmark item 98.  The extended ladder also checks
-\(31\in(30,60)\), \(41\in(40,80)\), and \(53\in(50,100)\), giving five
-exact finite intervals;
+\(31\in(30,60)\), \(41\in(40,80)\), \(53\in(50,100)\),
+\(61\in(60,120)\), \(71\in(70,140)\), \(83\in(80,160)\), and
+\(101\in(100,200)\), giving nine exact finite intervals;
 the general Bertrand postulate remains outside the current number-theory
 boundary.
 \end{theorem}
@@ -367,15 +373,15 @@ the finite arithmetic core of benchmark item 85.  The terminating decimal
 digit-sum evaluator and its small-digit reduction are also exposed.  The
 global residue-preservation theorem is checked by well-founded recursion on
 the decimal reduction.
-The worked examples now also include the boundary pair (999) and (1000):
-the former has digit sum (27) and is divisible by (3), while the latter is
+The worked examples now also include the boundary pair $999$ and $1000$:
+the former has digit sum $27$ and is divisible by $3$, while the latter is
 not, providing a larger finite decision checkpoint.
-The six-digit checkpoint (123456) has digit sum (21) and is divisible by (3);
-the neighboring value (123457) supplies a terminating non-divisibility case.
+The six-digit checkpoint $123456$ has digit sum $21$ and is divisible by $3$;
+the neighboring value $123457$ supplies a terminating non-divisibility case.
 \end{theorem}
 
 The list-based positional evaluator linked above generalizes the same finite
-digit-sum congruence to every base (b\ge2), modulo (b-1), without assuming
+digit-sum congruence to every base $(b\ge2)$, modulo $(b-1)$, without assuming
 a canonical digit expansion.
 
 \section{Inverval arithmetic and real numbers \humanchecked}
@@ -661,6 +667,9 @@ The rational foundation already contains the exact triangle inequality for
 the project's absolute-value operation:
 \begin{theorem}[Rational triangle-inequality certificate]
 \label{thm:rational-triangle-inequality}
+\label{thm:finite-triangle-inequality-interface}
+The rational absolute-value inequality is the reusable finite interface for
+error budgets; completed metric-space formulations are separate bridges.
 \lean{ComputableAnalysis.qabs_add_le}
 \lean{ComputableAnalysis.qabs_add_le_three}
 \lean{ComputableAnalysis.qabs_three_term_triangle_certificate}
@@ -685,7 +694,7 @@ the project's absolute-value operation:
 \leanok
 The three-term form is included explicitly for chained interval-width and
 finite error estimates; these are the rational certificate core of benchmark
-item 91.  The list-level theorem `qabs\_ratListSum_le` extends the
+item 91.  The list-level theorem \texttt{qabs\textbackslash{}\_ratListSum\_le} extends the
 same estimate to every finite rational error list.
 The five-term worked list ((-3,4,-2,7,-5)) has sum (1), absolute-value
 sum (21), and satisfies the same list-level triangle certificate.
@@ -695,11 +704,11 @@ triangle-inequality interface for interval widths and error budgets.
 The perturbation form \texttt{qabs\_perturbed\_sub\_le} makes the error-budget
 use explicit: replacing \(x,y\) by \(x+e,y+f\) adds at most the certified
 rational error bounds for \(e\) and \(f\) to the original separation.
-The worked rational-complex certificate adds vectors ((3,4)) and ((5,12)):
-their squared norms are (25) and (169), the squared norm of their sum is
-(320), and (320le(5+13)^2).
+The worked rational-complex certificate adds vectors $(3,4)$ and $(5,12)$:
+their squared norms are $25$ and $169$, the squared norm of their sum is
+$320$, and $320\le(5+13)^2$.
 The reusable coordinate Cauchy--Schwarz theorem is proved by the explicit
-Lagrange remainder `(a*d-b*c)^2`.  Its `QComplex` specialization bounds the
+Lagrange remainder $(a d-b c)^2$.  Its \texttt{QComplex} specialization bounds the
 dot product by the product of squared norms, and the accompanying expansion
 of the squared norm of a sum exposes the finite algebra used by later norm
 and triangle certificates.
@@ -759,16 +768,19 @@ The depth-three worked tree has leaves (1,\ldots,8), sum (36), product
 (40320), and satisfies the corresponding eight-term dyadic bound.
 The depth-four worked tree has leaves (1,\ldots,16), sum (136), product
 (20922789888000), and satisfies the corresponding sixteen-term dyadic bound.
-The generic finite constructor `consecutiveDyadic` now produces the depth-five
+The generic finite constructor \texttt{consecutiveDyadic} now produces the depth-five
 tree with leaves (1,\ldots,32), sum (528), product
 (263130836933693530167218012160000000), and its corresponding thirty-two-term bound.
-The worked depth-two tree with leaves (1,2,3,4) has sum (10), product
-(24), and satisfies the generic bound (24le(10/4)^4).  This is an
+The worked depth-two tree with leaves $(1,2,3,4)$ has sum $10$, product
+$24$, and satisfies the generic bound $24\le(10/4)^4$.  This is an
 executable finite witness for the recursive dyadic interface.
 \end{theorem}
 
 \begin{theorem}[Finite rational Cauchy--Schwarz certificates]
 \label{thm:rational-cauchy-schwarz}
+\label{thm:finite-cauchy-schwarz-interface}
+The list-level theorem is the finite project interface: dot products and sums
+of squares are rational folds, and the residual is a sum of squared minors.
 \lean{ComputableAnalysis.cauchy_schwarz_2d}
 \lean{ComputableAnalysis.cauchy_schwarz_2d_eq_iff}
 \lean{ComputableAnalysis.cauchy_schwarz_3d}
@@ -953,12 +965,12 @@ def sqrt2(n):
 \caption{Secant--tangent rational enclosure for \(\sqrt2\).}
 \label{fig:sqrt-secant-tangent}
 \end{figure}
-The named theorem `sqrt_two_irrational_via_descent` instantiates the general
+The named theorem \texttt{sqrt\_two\_irrational\_via\_descent} instantiates the general
 criterion at the benchmark value $2$.  Its nonsquare input is connected to the
-classical infinite-descent kernel `sqrtTwo_descent_core`, so the historical
+classical infinite-descent kernel \texttt{sqrtTwo\_descent\_core}, so the historical
 proof is visible while the resulting irrationality statement remains entirely
-over the project's `RealRaw` representation.
-The companion theorem `sqrtTwo_bisection_stage4` gives the explicit stage-four
+over the project's \texttt{RealRaw} representation.
+The companion theorem \texttt{sqrtTwo\_bisection\_stage4} gives the explicit stage-four
 enclosure $[11/8,23/16]$ for the target equation $x^2=2$, with width $1/16$.
 Its bracket certificate records the two finite rational comparisons directly.
 At stage eight the same evaluator returns the tighter interval
