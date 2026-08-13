@@ -35,4 +35,18 @@ Mesh transitions give variation of constants and finite uniqueness.
 For rotations, the word expansion splits into cosine and sine prefixes.
 \lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
+\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
+\lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_eq_expPartial}
 \label{thm:linear-ode-elementary-function-agreement}
+
+\section{Finite complex paths}
+
+Polygonal paths carry displacement certificates; closed paths have zero
+displacement for constant and polynomial differentials.
+\begin{verbatim}
+path -> segment increments -> finite sum -> endpoint/displacement certificate
+\end{verbatim}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate.exactDisplacement_eq_zero}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate}
+\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero}
