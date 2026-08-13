@@ -3608,6 +3608,9 @@ students actually compute.
   identities; the stage-six value is within `1/1000` of `1`. This is a
   computable prefix toward the normalized formula, not yet a completed
   integral or a claim that the rational approximation is exact pi.
+  The same finite evaluator now reaches stages eight and ten, with explicit
+  rational values within `1/10000` and `1/1000000` of `1`. These are sharper
+  potential-infinity checkpoints, still not the completed sine integral.
 - A later noncompact benchmark is the Dirichlet sinc integral
   `∫ sin(π t)/t dt = π`, using the project's rational-angle convention.  The
   first local illustration is its decreasing-then-increasing branch around
