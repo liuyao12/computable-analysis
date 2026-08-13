@@ -1,13 +1,12 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Approximate a linear ODE by finite time-ordered matrix words.  Rational
-arithmetic handles each stage; a norm bound handles the tail.
+Approximate a linear ODE by finite time-ordered matrix words; bound the tail.
 
-\section{Finite construction}
+\section{Construction}
 \begin{verbatim}
 state := initial vector
 add time-ordered matrix words
-bound the next word by a geometric tail
+bound next word by geometric tail
 \end{verbatim}
 \label{sec:ode-construction-identification-route}\label{thm:cramer-finite}
 \label{thm:two-by-two-cayley-hamilton}\label{thm:three-by-three-matrix-power-recurrence}
@@ -15,8 +14,7 @@ bound the next word by a geometric tail
 
 \section{Peano--Baker and uniqueness}
 
-Refinement turns the word sum into a computable evolution operator.  Mesh
-estimates give variation of constants, state transitions, and uniqueness.
+Mesh estimates give state transitions, variation of constants, and uniqueness.
 \label{def:finite-peano-baker-word-sum}\label{thm:finite-peano-baker-enumeration}
 \label{fig:peano-baker-words}\label{thm:discrete-variation-of-constants}
 \label{thm:sampled-linear-uniqueness}\label{def:interval-linear-system}
@@ -25,7 +23,7 @@ estimates give variation of constants, state transitions, and uniqueness.
 
 \section{Special cases}
 
-Commuting or constant coefficients agree with familiar formulas through a
+Commuting and constant coefficients agree with familiar formulas through a
 shared refinement certificate.
 \label{thm:linear-ode-elementary-function-agreement}\label{thm:direct-scalar-mesh-uniqueness}
 \label{def:constant-commuting-samples}\label{thm:peano-baker-specializations}

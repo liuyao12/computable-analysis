@@ -1,27 +1,27 @@
 \chapter{Integrals}\label{ch:integrals}
 
-An integral is a program returning nested rational bounds.  No Lebesgue
-measure or completed-real integral is required.
+An integral is a program returning nested rational bounds.  Lebesgue measure
+and completed-real integration are outside scope.
 
 \section{Rectangle algorithm}
 
-Use endpoint rectangles on monotone pieces.  For finitely many turns, first
-certify the pieces.
+Classify each cell as increasing, decreasing, or containing a finitely
+bracketed turn.
 \begin{verbatim}
 mesh := equal dyadic subdivision
-pieces := certify up, down, or turning behavior
-return sum of lower and upper rectangles
+pieces := certify cell behavior
+return sum(lower rectangles), sum(upper rectangles)
 \end{verbatim}
 \begin{figure}[!htbp]\centering
 \arctanRectangleEnclosureAnimation
-\caption{The bounds matter; optimal sampling does not.}
+\caption{Certified lower and upper rectangles.}
 \label{fig:arctan-rectangle-enclosure}\end{figure}
 
-For sin(pi x) on [0,1/2], the endpoints are exact.  Interior values are
-interval computations with input-dependent widths.
+For $\sin(\pi x)$ on $[0,1/2]$, endpoints are exact; interior values have
+precision-dependent intervals.
 \begin{figure}[!htbp]\centering
 \intervalSineIntegralStageAnimation
-\caption{Value intervals and rectangle bounds for the sine integral.}
+\caption{Value intervals and rectangle bounds.}
 \label{fig:interval-sine-integral-stage}\end{figure}
 \label{def:arctan-integral}\label{rem:arctan-geom-general-integral}
 \label{thm:reciprocal-domain-certificates}\label{def:increasing-integral-stage}
@@ -32,9 +32,8 @@ interval computations with input-dependent widths.
 
 \section{Identities}
 
-Substitution, integration by parts, and telescoping are finite rearrangements
-followed by a shared error budget.  This covers the polynomial, reciprocal,
-and pi routes.
+Substitution, integration by parts, telescoping, and polynomial FTC are finite
+rearrangements plus one shared error budget.
 \label{def:finite-substitution-stage}\label{thm:finite-geometric-integration-by-parts}
 \label{def:integration-by-parts-certificate}\label{thm:integration-by-parts-certificate}
 \label{thm:finite-polynomial-integration-by-parts}\label{thm:finite-quartic-ftc-checkpoint}
@@ -43,9 +42,8 @@ and pi routes.
 
 \section{Tails and products}
 
-Compactify an improper interval and certify its tail.  Products of
-one-dimensional programs handle the Gaussian kernel and computable n-ball
-volume; arbitrary measure theory is outside scope.
+Compactify improper intervals; certify tails.  Finite products give the
+Gaussian kernel and computable $n$-ball volume.
 \label{def:reciprocal-tail-compactification}\label{thm:cauchy-full-line-pi}
 \label{thm:bounded-symmetric-cauchy-pi}\label{def:reciprocal-quartic-test-kernel}
 \label{thm:reciprocal-quartic-projective-substitution}\label{thm:reciprocal-quartic-route-package}
@@ -53,5 +51,5 @@ volume; arbitrary measure theory is outside scope.
 
 \section{Proof order}
 
-Interval evaluation, monotone pieces, finite identities, then general
-certified function interfaces.  Details live in Lean.
+Intervals $\to$ monotone pieces $\to$ finite identities $\to$ certified
+function interfaces.

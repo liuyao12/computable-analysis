@@ -1,19 +1,16 @@
 \chapter{The Fundamental Theorem of Algebra}\label{ch:algebra-fta}
 
-A root is a box whose polynomial image can meet zero.  Subdivision, sign
-variation, and deflation are finite algorithms; global completeness needs a
-termination modulus.
+A root is a rational box whose polynomial image can meet zero.
 
-\section{Targets and isolation}
+\section{Isolation and deflation}
 
-Factorized quadratics, discriminants, cubic and quartic examples, and finite
-deflation are exact algebraic certificates.  Descartes' rule chooses where
-to search.
 \begin{verbatim}
-boxes := initial rational boxes
-discard sign-separated images
-subdivide survivors until the requested width
+boxes -> interval polynomial evaluation
+      -> discard sign-separated boxes
+      -> subdivide survivors / deflate known factors
 \end{verbatim}
+Quadratic, cubic, quartic, Descartes, and finite deflation certificates are
+included; global termination needs an explicit modulus.
 \label{thm:factorized-quadratic-roots}\label{thm:finite-factorized-fta}
 \label{thm:finite-fta-concrete-quadratic}\label{def:algebraic-arithmetic-targets}
 \label{thm:linear-factor-remainder-base}\label{thm:descartes-sign-variation}
@@ -28,10 +25,9 @@ subdivide survivors until the requested width
 \label{thm:finite-cubic-completion}\label{thm:finite-cubic-sqrt-two}
 \label{thm:finite-quartic-sqrt-two}\label{thm:rational-quartic-roots}
 
-\section{Scope}
+\section{Boundary}
 
-There is no general radical formula in degree five.  The project therefore
-formalizes effective evaluation and isolation, with classical root-count
-theorems treated as explicit bridges.
+There is no general radical formula in degree five.  Effective isolation is
+the computable substitute; classical root-count statements are bridges.
 \label{rem:abel-ruffini-boundary}\label{thm:computable-fta-of-algebraic-fta}
 \label{thm:finite-box-polynomial-soundness}\label{thm:four-quadrant-box-subdivision}

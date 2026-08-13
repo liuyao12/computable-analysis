@@ -1,18 +1,15 @@
 \chapter{Fundamental Theorem of Calculus}\label{ch:effective-calculus}
 
-The historical reversal is the point: area is intuitive, the mean value
-theorem exposes the underlying order principle, and finite certificates then
-reconstruct the FTC.
+Area is intuitive; the mean-value property exposes the order principle; finite
+certificates reconstruct the FTC.
 
 \section{Secants before completeness}
 
 \begin{verbatim}
-make a rational mesh
-bound secants and rectangles
-refine until the identity's interval has requested width
+mesh -> secant/rectangle bounds -> shrinking slope box
+     -> certified endpoint increment
 \end{verbatim}
-For convex functions, secant slopes are ordered; a shrinking box supplies
-the slope witness.  The square case is the first certificate.
+Convexity orders secant slopes.  The square is the first witness.
 \label{thm:uniform-mesh-width}\label{thm:finite-monomial-secants}
 \label{thm:affine-secants}\label{thm:affine-zero}\label{thm:constructive-lhopital}
 \label{thm:cubic-secants}\label{thm:square-midpoint-mean-value}
@@ -22,9 +19,8 @@ the slope witness.  The square case is the first certificate.
 
 \section{FTC reconstruction}
 
-Derivative bounds trap the endpoint increment between lower and upper sums.
-Overlap gives the integral identity.  This is the constructive core; broad
-classical hypotheses are added only when they provide the same data.
+Derivative bounds trap endpoint increments between rectangle sums; overlap is
+the integral identity.
 \label{rem:effective-ftc-reconstruction}\label{thm:monotone-integrable}
 \label{thm:interval-regular-integral-certificate}\label{thm:effective-ftc-certificate}
 \label{thm:finite-cubic-ftc}\label{thm:formula-identification-ftc}
@@ -32,4 +28,4 @@ classical hypotheses are added only when they provide the same data.
 
 \section{Taylor and finite L'Hôpital}
 
-Factor the known polynomial part, bound the remainder, and refine.
+Factor the known polynomial part, bound the remainder, refine.

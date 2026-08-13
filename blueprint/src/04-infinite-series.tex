@@ -1,43 +1,26 @@
 \chapter{Infinite Series}\label{ch:infinite-series}
 
-An infinite series is a sequence of finite computations with a certified
-tail.  We compare slow rectangles with fast series.
+An infinite object is a sequence of finite computations with a certified tail.
 
 \section{Finite stages}
 
-Finite rational samples provide Fourier orthogonality, Parseval stages,
-power sums, geometric sums, and certified prime-reciprocal prefixes.  They
-are stages, not a completed transform or divergence theorem.
-The checked prime-reciprocal prefix now passes (5/3) at sixteen explicit prime terms; this is a finite threshold certificate, not the infinite divergence theorem.
-The geometric-series layer also has a non-half-ratio worked instance: at ratio 1/3, stage 6 is 364/243 with exact tail 1/486 to 3/2.\\label{thm:finite-geometric-third}
-For the four-point transform, the same modes reconstruct the four samples:
-\\begin{verbatim}
-forward := four exact quarter-turn sums
-inverse := combine real/imaginary coordinates, divide by 4
-\\end{verbatim}
+Fourier, Parseval, power sums, geometric sums, and prime-reciprocal prefixes
+are finite certificates, not completed limits.
+\begin{verbatim}
+forward := finite mode sums
+inverse := recombine coordinates / sample count
+tail   := explicit rational bound
+\end{verbatim}
 \label{sec:series-benchmark-foundations}\label{thm:finite-fourier-orthogonality}
-The circle-area loop has an exact stage-five checkpoint; it is a finite rational enclosure, not an attained area limit.
-The reciprocal-triangular schedule now includes stage 64, with exact sum 128/65 and tail 2/65; this is another finite potential-infinity checkpoint.
-Stage 128 extends the same certificate to exact sum 256/129 and tail 2/129.
-\\label{thm:reciprocal-triangular-stage-one-twenty-eight}
-\\label{thm:reciprocal-triangular-stage-sixty-four}
-\label{thm:finite-circle-area-stage-five}
 \label{thm:finite-prime-reciprocal-extension}\label{thm:arithmetic-series-sum}
 \label{thm:finite-power-sums}\label{thm:geometric-series-sum}
-The ninth-power evaluator now has a stage-256 checkpoint, (118545233581053040803840), extending the finite item-77 schedule.
-\\label{thm:power-sum-ninth-stage-256}
 \label{thm:reciprocal-triangular-sum}\label{thm:harmonic-dyadic-lower-bound}
 
 \section{Pi and power series}
 
-Archimedean subdivisions, binomial series, termwise integration, and Machin
-identities are routes through one computation space.  This is a general
-pattern, not a claim about Newton's motives.
-\begin{verbatim}
-stage := finite sum
-tail  := explicit rational bound
-return stage +/- tail
-\end{verbatim}
+Archimedean rectangles, binomial series, termwise integration, and Machin
+identities are different routes through one space of computations.  This is
+a methodological remark, not a claim about Newton's motives.
 \label{def:alternating-series-intervals}\label{thm:nilakantha-pi}
 \label{thm:power-series-arctan-area-pi}\label{thm:leibniz-arctan}
 \label{def:formal-power-series}\label{def:effective-derivative}
@@ -45,8 +28,8 @@ return stage +/- tail
 
 \section{Basel and factorial growth}
 
-Basel is interval containment; Stirling begins with finite ratio certificates.
-The full limits wait for constructive moduli.
+Finite ratio and comparison certificates precede constructive moduli for the
+full limits.
 \label{thm:finite-stirling-certificate}\label{thm:finite-factorial-prefix}
 \label{thm:basel-comparison-example}\label{thm:basel-supplied-target-containment}
 \label{thm:basel-geometric-rhs-valid}\label{conj:basel}

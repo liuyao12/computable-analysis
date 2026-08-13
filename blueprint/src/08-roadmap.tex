@@ -2,28 +2,24 @@
 
 \section{Admission rule}
 
-Admit a result when it ends in a rational certificate, a shrinking `realRaw`
+Keep a result when it yields a rational certificate, a shrinking `realRaw`
 algorithm, a valid `real`, or an overlap statement.  Reuse routine finite
-combinatorics unless it is a stage of an infinite process or an error bound.
+combinatorics unless it controls an infinite process or an error.
 
-\section{Order of work}
+\section{Order}
 
-\begin{enumerate}
-\item interval arithmetic and equality of names;
-\item circle, rectangles, and trigonometry;
-\item tails, termwise identities, and pi;
-\item convex secants, MVT, and FTC;
-\item algebraic isolation and linear ODEs.
-\end{enumerate}
+\begin{verbatim}
+intervals -> circle/rectangles -> tails/series/pi
+          -> secants/MVT/FTC -> algebraic isolation -> linear ODEs
+\end{verbatim}
 
-\section{Wiedijk's list}
+\section{Wiedijk's List}
 \label{sec:100-theorem-alignment}
 
-The preface indexes the list of 100 Theorem Formalization Challenge results.
-It marks exact inclusions, finite cores, and deferred classical bridges.
+The preface indexes the scoped entries in Freek Wiedijk's benchmark, linking
+each to its rational, finite, or certificate-level blueprint statement.
 
-\section{Style rule}
+\section{Style}
 
-The blueprint gives the idea, pseudocode, and GIF.  Lean carries hypotheses,
-moduli, names, and proofs.  Only `realRaw` and `real` are named here to
-distinguish the project's foundation from standard real numbers.
+The blueprint gives only the idea, pseudocode, and GIF.  Lean carries names,
+hypotheses, moduli, and proofs.  Only `realRaw` and `real` are named here.

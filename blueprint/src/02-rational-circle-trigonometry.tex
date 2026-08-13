@@ -1,42 +1,39 @@
 \chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}
 
-Start with rational coordinates and nested boxes.  `realRaw` is the
-algorithm; `real` is its certified value.  No completed real plane is
-assumed.
+Rational points, boxes, and refinement.  `realRaw` computes; `real` certifies.
 
 \section{Finite geometry}
 
-Rational certificates cover the checked forms of Pick, the rectangle
-isoperimetric inequality, Pythagoras, Heron, the cosine law, Ptolemy, and
-chord products.  The unrestricted classical theorems remain bridges.
+Pythagoras, Heron, cosine law, Ptolemy, chord products, Pick, and the
+rectangle isoperimetric inequality are rational certificates.  Classical
+completion is a separate bridge.
 \label{thm:finite-pick-certificate}\label{thm:finite-rectangle-isoperimetric}
 \label{thm:rational-circle-pythagorean}\label{thm:rational-isosceles}
 \label{thm:rational-heron}\label{thm:rational-chord-power}
 \label{thm:rational-ptolemy}\label{thm:law-of-cosines-equilateral}
 \label{thm:rational-triangle-orientation}
 
-\section{Archimedes: area before functions}
+\section{Archimedes: crude rectangles}
 
-The point is not ever-finer computation.  Crude rectangles are enough when
-we understand every subdivision and relate its upper and lower bounds.
-
+The aim is not the best subdivision, but a theory of all certified
+subdivisions.
 \begin{verbatim}
-subdivide rational parameter interval
-make upper/lower cells
-return their enclosing interval
+subdivide rational interval
+make lower/upper cells
+return enclosing interval
 \end{verbatim}
 \begin{figure}[!htbp]\centering
 \rationalCircleSubdivisionAnimation
-\caption{A crude subdivision with a certified enclosure.}
+\caption{A crude subdivision and its enclosure.}
 \label{fig:rational-parameter-line}\end{figure}
 \label{def:geometric-arctan}\label{thm:geometric-pi-validity}
 
-\section{Angles and trigonometry}
+\section{Angles}
 
-Invert the certified area search, then read sine and cosine from rational
-circle points.  Refinement supplies the identities.
+Invert certified sector area; read sine and cosine from rational circle
+points; refine the identities.
 \begin{verbatim}
-angle := binary_search(certified area, requested precision)
+angle := binary_search(certified area, precision)
 point := rational circle point(angle)
 return coordinate intervals
 \end{verbatim}
@@ -47,13 +44,10 @@ return coordinate intervals
 
 \begin{theorem}[Finite quarter-turn checkpoint]
 \label{thm:finite-quarter-turn}
-The factorial rotation at the rational input (355/226) contains the unit
-imaginary point after a rational (1/100) tolerance expansion.  Stages 8, 12,
-and 16 are checked directly; the limiting angle/exponential identification
-remains a separate bridge.
+Factorial rotation at input $355/226$ contains the unit imaginary point within
+$1/100$ at stages 8, 12, and 16.  The limiting identification is separate.
 \end{theorem}
 
 \section{Boundary}
 
-This chart does not represent arbitrary discontinuous or non-effective
-functions.  Its certified outputs feed the integral and series chapters.
+Arbitrary discontinuous or noneffective functions are outside this chart.
