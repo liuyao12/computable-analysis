@@ -108,6 +108,12 @@ theorem halfPeriodSineRaw_width_le_geometric (piApprox : Rat) (stage : Nat) :
   rw [hone, Rat.zero_add]
   exact RotationSeries.rotationCosRaw_width_le_geometric (piApprox / 2) stage
 
+theorem halfPeriodSineRaw_reaches_of_positive_tolerance
+    (piApprox : Rat) (eps : QPos) :
+    ∃ stage : Nat, ((halfPeriodSineRaw piApprox).compute stage).width <= eps.val := by
+  rcases (halfPeriodSineRaw_valid piApprox).2.2 eps with ⟨N, hN⟩
+  exact ⟨N, hN N (Nat.le_refl N)⟩
+
 theorem halfAnglePrefix_rotation_complement (piApprox : Rat) (stage : Nat) :
     halfAnglePrefix piApprox (2 * stage + 1) =
       1 - LinearODE.RotationSystem.cosinePrefix
