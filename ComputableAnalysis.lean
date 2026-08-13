@@ -199,6 +199,7 @@ import ComputableAnalysis.FiniteBisection
 import ComputableAnalysis.FiniteBisectionIteration
 import ComputableAnalysis.PowerSeries
 import ComputableAnalysis.Series
+import ComputableAnalysis.FiniteReciprocalTriangularInterface
 import ComputableAnalysis.SqrtTwoDescent
 import ComputableAnalysis.Taylor
 import ComputableAnalysis.TrigSpecialValues
