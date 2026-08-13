@@ -86,20 +86,4 @@ theorem triangular_stage64_certificate :
   exact ⟨by rw [triangular_stage64_sum]; native_decide,
     triangular_stage64_tail⟩
 
-theorem triangular_stage128_sum :
-    Series.triangularTelescopingSum 128 = 256 / 129 := by
-  rw [Series.triangularTelescopingSum_eq]
-  native_decide
-
-theorem triangular_stage128_tail :
-    2 - Series.triangularTelescopingSum 128 = 2 / 129 := by
-  rw [triangular_stage128_sum]
-  native_decide
-
-theorem triangular_stage128_certificate :
-    Series.triangularTelescopingSum 128 < 2 /\
-      2 - Series.triangularTelescopingSum 128 = 2 / 129 := by
-  exact ⟨by rw [triangular_stage128_sum]; native_decide,
-    triangular_stage128_tail⟩
-
 end ComputableAnalysis

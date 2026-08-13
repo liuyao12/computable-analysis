@@ -84,6 +84,7 @@ import ComputableAnalysis.Pi
 import ComputableAnalysis.PiProofs
 import ComputableAnalysis.FiniteLeibnizCertificate
 import ComputableAnalysis.FiniteGeometricCertificate
+import ComputableAnalysis.FiniteGeometricNonHalfExample
 import ComputableAnalysis.FiniteArithmeticCertificate
 import ComputableAnalysis.FiniteHarmonicCertificate
 import ComputableAnalysis.FiniteBisectionCertificate
