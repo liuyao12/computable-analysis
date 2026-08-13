@@ -6,6 +6,14 @@ prefix -> finite identity -> tail bound -> nested enclosure
 \end{verbatim}
 
 \section{Series as computation}
+\label{thm:arithmetic-series-sum}
+\label{thm:finite-geometric-series-interface}
+\label{thm:harmonic-dyadic-lower-bound}
+\label{thm:finite-fourier-interface}
+\label{thm:finite-prime-reciprocal-interface}
+\label{thm:finite-reciprocal-triangular-interface}
+\label{thm:finite-power-sum-interface}
+\label{thm:finite-stirling-certificate}
 
 The same interface handles geometric, alternating, power-sum, Fourier, and
 prime-reciprocal examples. Divergence means that no terminal stage meets the
@@ -14,8 +22,12 @@ requested bound.
 \lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate}
 \lean{ComputableAnalysis.Series.FinitePowerSumCertificate}
 \lean{ComputableAnalysis.finitePrimeIntervalCertificate}
+\lean{ComputableAnalysis.fourPointFourierTransform_reconstruct}
+\lean{ComputableAnalysis.fourPointFourierTransform_parseval}
 
 \section{Pi and power series}
+\label{thm:shared-rational-anchor}
+\label{thm:leibniz-arctan}
 
 Crude rectangles, binomial expansions, termwise integration, and Machin-type
 identities are different routes through the same space of computations. This

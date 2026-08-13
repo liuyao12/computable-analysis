@@ -1,6 +1,7 @@
 \chapter{Fundamental Theorem of Calculus}\label{ch:effective-calculus}
 
 \section{Secants before completeness}
+\label{thm:finite-quadrature-mean-value}
 
 The historical core is the mean-value relation, treated here as a finite
 certificate rather than as a consequence of completed real numbers.
@@ -13,6 +14,7 @@ direct: the endpoint increment lies between the two derivative bounds.
 \lean{ComputableAnalysis.quarticUnit_mvt_bisection_tolerance_certificate}
 
 \section{FTC reconstruction}
+\label{thm:convex-ftc}
 
 Rectangle sums and derivative bounds are two descriptions of the same finite
 increment. Refine until their intervals overlap; then package the result as
@@ -24,8 +26,12 @@ partition -> lower/upper sums -> derivative comparison -> overlap
 \lean{ComputableAnalysis.Integral.exactRat_cube_integral_certificate}
 
 \section{Taylor and finite L'Hôpital}
+\label{thm:finite-taylor-ftc-prefix}
+\label{thm:finite-lhopital-interface}
 
 Factor the known part, bound the remainder, and refine the quotient or
 remainder interval.
 \lean{ComputableAnalysis.FiniteTaylorCertificate}
 \lean{ComputableAnalysis.finiteTaylorCertificate}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance}
