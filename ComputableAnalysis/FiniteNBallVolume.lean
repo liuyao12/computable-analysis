@@ -246,6 +246,36 @@ theorem nBallVolumeModel_nine (piApprox radius : Rat) :
   simp [nBallCoeff]
   grind [Rat.mul_assoc, Rat.mul_comm]
 
+theorem nBallVolumeModel_ten (piApprox radius : Rat) :
+    nBallVolumeModel 10 piApprox radius =
+      (1 / 120 : Rat) * piApprox ^ 5 * radius ^ 10 := by
+  unfold nBallVolumeModel nBallPiExponent
+  simp [nBallCoeff]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem nBallVolumeModel_eleven (piApprox radius : Rat) :
+    nBallVolumeModel 11 piApprox radius =
+      (64 / 10395 : Rat) * piApprox ^ 5 * radius ^ 11 := by
+  have hc : nBallCoeff 11 = (64 / 10395 : Rat) := by
+    native_decide
+  unfold nBallVolumeModel nBallPiExponent
+  rw [hc]
+
+theorem nBallVolumeModel_twelve (piApprox radius : Rat) :
+    nBallVolumeModel 12 piApprox radius =
+      (1 / 720 : Rat) * piApprox ^ 6 * radius ^ 12 := by
+  unfold nBallVolumeModel nBallPiExponent
+  simp [nBallCoeff]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem nBallVolumeModel_thirteen (piApprox radius : Rat) :
+    nBallVolumeModel 13 piApprox radius =
+      (128 / 135135 : Rat) * piApprox ^ 6 * radius ^ 13 := by
+  have hc : nBallCoeff 13 = (128 / 135135 : Rat) := by
+    native_decide
+  unfold nBallVolumeModel nBallPiExponent
+  rw [hc]
+
 theorem nBallVolumeModel_recurrence (n : Nat) (piApprox radius : Rat) :
     nBallVolumeModel (n + 2) piApprox radius =
       (2 * piApprox * radius * radius / (n + 2)) *
@@ -276,6 +306,24 @@ theorem nBallVolumeModel_stage_six :
 
 theorem nBallVolumeModel_stage_seven :
     nBallVolumeModel 7 (355 / 113) 1 = 143164400 / 30300837 := by
+  native_decide
+
+theorem nBallVolumeModel_stage_ten :
+    nBallVolumeModel 10 (355 / 113) 1 = 1127643344375 / 442184443032 := by
+  native_decide
+
+theorem nBallVolumeModel_stage_eleven :
+    nBallVolumeModel 11 (355 / 113) 1 = 72169174040000 / 38304227377647 := by
+  native_decide
+
+theorem nBallVolumeModel_stage_twelve :
+    nBallVolumeModel 12 (355 / 113) 1 =
+      400313387253125 / 299801052375696 := by
+  native_decide
+
+theorem nBallVolumeModel_stage_thirteen :
+    nBallVolumeModel 13 (355 / 113) 1 =
+      51240113568400000 / 56268910017763443 := by
   native_decide
 
 end ComputableAnalysis

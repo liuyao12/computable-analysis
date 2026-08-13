@@ -208,6 +208,183 @@ theorem kernelPartialIntegralBetween_zero_even_succ (y : Rat) (n : Nat) :
   simp
   grind [Rat.sub_eq_add_neg]
 
+/-! On the half interval, the consecutive even/odd primitive prefixes differ
+by exactly the omitted alternating monomial.  This is the finite enclosure
+width used by the computable arctangent primitive; it is not an attained
+integral or an infinite-series limit. -/
+
+theorem kernelPartialIntegralBetween_half_even_odd_gap (n : Nat) :
+    kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) -
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n) =
+      -((1 : Rat) / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) := by
+  have h := kernelPartialIntegralBetween_zero_odd_succ (1 / 2) n
+  grind [Rat.sub_eq_add_neg]
+
+theorem kernelPartialIntegralBetween_half_even_odd_gap_width (n : Nat) :
+    qabs (kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) -
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n)) =
+      ((1 : Rat) / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) := by
+  rw [kernelPartialIntegralBetween_half_even_odd_gap]
+  have hpow : 0 <= ((1 : Rat) / 2) ^ (4 * n + 3) := by
+    exact Rat.pow_nonneg (by native_decide)
+  have hden : 0 < (4 * (n : Rat) + 3) := by
+    have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+    grind
+  have hneg : -(1 / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) <= 0 := by
+    rw [Rat.div_def]
+    have hmul := Rat.mul_nonneg hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+    grind
+  rw [qabs_eq_neg_of_nonpos hneg]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+theorem kernelPartialIntegralBetween_half_even_odd_gap_le_one_div
+    (n : Nat) :
+    qabs (kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) -
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n)) <=
+      1 / (((4 * n + 3 : Nat) : Rat)) := by
+  rw [kernelPartialIntegralBetween_half_even_odd_gap_width]
+  have hpow : ((1 : Rat) / 2) ^ (4 * n + 3) <= 1 := by
+    have hbase : ((1 : Rat) / 2) <= 1 := by native_decide
+    have hnonneg : 0 <= ((1 : Rat) / 2) := by native_decide
+    induction 4 * n + 3 with
+    | zero => simp
+    | succ k ih =>
+        rw [Rat.pow_succ]
+        calc
+          ((1 : Rat) / 2) ^ k * ((1 : Rat) / 2) <=
+              ((1 : Rat) / 2) ^ k * 1 :=
+            Rat.mul_le_mul_of_nonneg_left hbase (Rat.pow_nonneg hnonneg)
+          _ = ((1 : Rat) / 2) ^ k := by rw [Rat.mul_one]
+          _ <= 1 := ih
+  have hbound := Rat.mul_le_mul_of_nonneg_right hpow
+    (Rat.le_of_lt ((Rat.inv_pos).2 (by
+      have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+      have : 0 < (4 : Rat) * (n : Rat) + 3 := by grind
+      exact this)))
+  simpa [Rat.div_def, Rat.mul_one] using hbound
+
+theorem kernelPartialIntegralBetween_half_alternating_enclosure
+    (n : Nat) :
+    kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) <=
+        kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n) /\
+      kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n) -
+          kernelPartialIntegralBetween 0 ((1 : Rat) / 2) (2 * n + 1) <=
+        1 / (((4 * n + 3 : Nat) : Rat)) := by
+  constructor
+  · have hgap := kernelPartialIntegralBetween_half_even_odd_gap n
+    have hpow : 0 <= ((1 : Rat) / 2) ^ (4 * n + 3) := by
+      exact Rat.pow_nonneg (by native_decide)
+    have hden : 0 < (4 * (n : Rat) + 3) := by
+      have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+      grind
+    have hmul := Rat.mul_nonneg hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+    have hnonpos :
+        -((1 : Rat) / 2) ^ (4 * n + 3) / (4 * (n : Rat) + 3) <= 0 := by
+      rw [Rat.div_def]
+      grind
+    grind [Rat.sub_eq_add_neg]
+  · have hwidth := kernelPartialIntegralBetween_half_even_odd_gap_le_one_div n
+    rw [qabs_eq_neg_of_nonpos] at hwidth
+    · grind
+    · have hgap := kernelPartialIntegralBetween_half_even_odd_gap n
+      have hpow : 0 <= ((1 : Rat) / 2) ^ (4 * n + 3) := by
+        exact Rat.pow_nonneg (by native_decide)
+      have hden : 0 < (4 * (n : Rat) + 3) := by
+        have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+        grind
+      rw [hgap, Rat.div_def]
+      have hmul := Rat.mul_nonneg hpow
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+      grind
+
+theorem kernelPartialIntegralBetween_unit_alternating_enclosure
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) (n : Nat) :
+    kernelPartialIntegralBetween 0 y (2 * n + 1) <=
+        kernelPartialIntegralBetween 0 y (2 * n) /\
+      kernelPartialIntegralBetween 0 y (2 * n) -
+          kernelPartialIntegralBetween 0 y (2 * n + 1) <=
+        1 / (((4 * n + 3 : Nat) : Rat)) := by
+  constructor
+  · have hgap := kernelPartialIntegralBetween_zero_odd_succ y n
+    have hpow : 0 <= y ^ (4 * n + 3) := Rat.pow_nonneg hy0
+    have hden : 0 < (4 * (n : Rat) + 3) := by
+      have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+      grind
+    have hmul := Rat.mul_nonneg hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+    have hnonpos : -y ^ (4 * n + 3) / (4 * (n : Rat) + 3) <= 0 := by
+      rw [Rat.div_def]
+      grind
+    grind [Rat.sub_eq_add_neg]
+  · have hpow : y ^ (4 * n + 3) <= 1 := by
+      induction 4 * n + 3 with
+      | zero => simp
+      | succ k ih =>
+          rw [Rat.pow_succ]
+          calc
+            y ^ k * y <= y ^ k * 1 :=
+              Rat.mul_le_mul_of_nonneg_left hy1 (Rat.pow_nonneg hy0)
+            _ = y ^ k := by rw [Rat.mul_one]
+            _ <= 1 := ih
+    have hbound := Rat.mul_le_mul_of_nonneg_right hpow
+      (Rat.le_of_lt ((Rat.inv_pos).2 (by
+        have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+        have : 0 < (4 : Rat) * (n : Rat) + 3 := by grind
+        exact this)))
+    have hgap := kernelPartialIntegralBetween_zero_odd_succ y n
+    have hwidth :
+        qabs (kernelPartialIntegralBetween 0 y (2 * n + 1) -
+          kernelPartialIntegralBetween 0 y (2 * n)) <=
+          1 / (((4 * n + 3 : Nat) : Rat)) := by
+      rw [hgap, qabs_eq_neg_of_nonpos]
+      · rw [Rat.div_def]
+        grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm]
+      · rw [Rat.div_def]
+        have hpow0 : 0 <= y ^ (4 * n + 3) := Rat.pow_nonneg hy0
+        have hden : 0 < (4 * (n : Rat) + 3) := by
+          have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+          grind
+        have hmul := Rat.mul_nonneg hpow0
+          (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+        grind
+    rw [qabs_eq_neg_of_nonpos] at hwidth
+    · grind
+    · have hgap := kernelPartialIntegralBetween_zero_odd_succ y n
+      rw [hgap, Rat.div_def]
+      have hpow0 : 0 <= y ^ (4 * n + 3) := Rat.pow_nonneg hy0
+      have hden : 0 < (4 * (n : Rat) + 3) := by
+        have hn : 0 <= (n : Rat) := Rat.natCast_nonneg
+        grind
+      have hmul := Rat.mul_nonneg hpow0
+        (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+      grind
+
+def kernelPartialIntegralBetween_unit_interval (y : Rat) (n : Nat) : QInterval :=
+  { lo := kernelPartialIntegralBetween 0 y (2 * n + 1),
+    hi := kernelPartialIntegralBetween 0 y (2 * n) }
+
+theorem kernelPartialIntegralBetween_unit_interval_ordered
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) (n : Nat) :
+    0 <= (kernelPartialIntegralBetween_unit_interval y n).width := by
+  unfold kernelPartialIntegralBetween_unit_interval QInterval.width
+  change 0 <=
+    kernelPartialIntegralBetween 0 y (2 * n) -
+      kernelPartialIntegralBetween 0 y (2 * n + 1)
+  grind [Rat.sub_eq_add_neg,
+    (kernelPartialIntegralBetween_unit_alternating_enclosure hy0 hy1 n).1]
+
+theorem kernelPartialIntegralBetween_unit_interval_width_le
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) (n : Nat) :
+    (kernelPartialIntegralBetween_unit_interval y n).width <=
+      1 / (((4 * n + 3 : Nat) : Rat)) := by
+  unfold kernelPartialIntegralBetween_unit_interval QInterval.width
+  change kernelPartialIntegralBetween 0 y (2 * n) -
+      kernelPartialIntegralBetween 0 y (2 * n + 1) <=
+    1 / (((4 * n + 3 : Nat) : Rat))
+  exact (kernelPartialIntegralBetween_unit_alternating_enclosure hy0 hy1 n).2
+
 private theorem one_pow_rat (m : Nat) : (1 : Rat) ^ m = 1 := by
   induction m with
   | zero => simp
@@ -235,6 +412,140 @@ theorem kernelPartialIntegralBetween_zero_one (n : Nat) :
   | succ n ih =>
       simp [kernelPartialIntegralBetween, kernelPartialIntegralAtOne]
       rw [ih, kernelTermIntegralBetween_zero_one]
+
+private theorem kernelTermIntegralAtOne_eq_signedLeibniz (j : Nat) :
+    kernelTermIntegralAtOne j = Series.signedTerm Series.leibnizTerm j := by
+  unfold kernelTermIntegralAtOne Series.signedTerm Series.leibnizTerm
+  by_cases h : j % 2 = 0
+  · have hpow : (-1 : Rat) ^ j = 1 := by
+      rw [show j = 2 * (j / 2) by omega]
+      exact neg_one_pow_even (j / 2)
+    simp [Series.alternatingSign, h, hpow]
+  · have hpow : (-1 : Rat) ^ j = -1 := by
+      rw [show j = 2 * (j / 2) + 1 by omega]
+      exact neg_one_pow_odd (j / 2)
+    simp [Series.alternatingSign, h, hpow]
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+theorem kernelPartialIntegralAtOne_eq_series_partialSum (n : Nat) :
+    kernelPartialIntegralAtOne n =
+      Series.partialSum Series.leibnizTerm (n + 1) := by
+  induction n with
+  | zero =>
+      change 1 = Series.partialSum Series.leibnizTerm 1
+      simp [Series.partialSum, Series.signedTerm, Series.alternatingSign,
+        Series.leibnizTerm]
+      native_decide
+  | succ n ih =>
+      rw [kernelPartialIntegralAtOne, ih]
+      rw [show n + 1 + 1 = (n + 1) + 1 by omega]
+      simp [Series.partialSum, kernelTermIntegralAtOne_eq_signedLeibniz]
+
+def kernelPartialIntegralAtOneRawInterval (n : Nat) : QInterval :=
+  { lo := Series.partialSum Series.leibnizTerm (2 * n + 2),
+    hi := Series.partialSum Series.leibnizTerm (2 * n + 1) }
+
+def kernelPartialIntegralAtOneRaw : RealRaw where
+  compute := kernelPartialIntegralAtOneRawInterval
+
+theorem kernelPartialIntegralAtOneRawInterval_width_eq (n : Nat) :
+    (kernelPartialIntegralAtOneRawInterval n).width =
+      Series.leibnizTerm (2 * n + 1) := by
+  unfold kernelPartialIntegralAtOneRawInterval QInterval.width
+  change Series.partialSum Series.leibnizTerm (2 * n + 1) -
+    Series.partialSum Series.leibnizTerm (2 * n + 2) = _
+  rw [show 2 * n + 2 = 2 * (n + 1) by omega,
+    Series.partialSum_even_step]
+  rw [Series.partialSum_even_succ]
+  simp [Series.AlternatingRaw.leibnizAlternatingRaw,
+    Series.leibnizTerm]
+  grind [Rat.sub_eq_add_neg]
+
+theorem kernelPartialIntegralAtOneRaw_valid :
+    kernelPartialIntegralAtOneRaw.Valid := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    change 0 <= (kernelPartialIntegralAtOneRawInterval n).width
+    rw [kernelPartialIntegralAtOneRawInterval_width_eq]
+    exact Series.leibnizTerm_nonneg _
+  · intro n m hnm
+    change (kernelPartialIntegralAtOneRawInterval n).lo <=
+      (kernelPartialIntegralAtOneRawInterval m).lo ∧
+      (kernelPartialIntegralAtOneRawInterval m).lo <=
+        (kernelPartialIntegralAtOneRawInterval m).hi ∧
+      (kernelPartialIntegralAtOneRawInterval m).hi <=
+        (kernelPartialIntegralAtOneRawInterval n).hi
+    unfold kernelPartialIntegralAtOneRawInterval
+    have hlow :=
+      Series.AlternatingRaw.even_partialSum_mono
+        (n := n + 1) (m := m + 1)
+        Series.AlternatingRaw.leibnizAlternatingRaw (by omega)
+    have hhi :=
+      Series.AlternatingRaw.odd_partialSum_antitone
+        Series.AlternatingRaw.leibnizAlternatingRaw hnm
+    have hordered :
+        Series.partialSum Series.leibnizTerm (2 * m + 2) <=
+          Series.partialSum Series.leibnizTerm (2 * m + 1) := by
+      rw [show 2 * m + 2 = (2 * m + 1) + 1 by omega, Series.partialSum]
+      simp [Series.signedTerm, Series.alternatingSign]
+      have hterm := Series.leibnizTerm_nonneg (2 * m + 1)
+      grind [Rat.sub_eq_add_neg]
+    have hlow' :
+        Series.partialSum Series.leibnizTerm (2 * n + 2) <=
+          Series.partialSum Series.leibnizTerm (2 * m + 2) := by
+      simpa [Series.AlternatingRaw.leibnizAlternatingRaw,
+        show 2 * (n + 1) = 2 * n + 2 by omega,
+        show 2 * (m + 1) = 2 * m + 2 by omega] using hlow
+    have hhi' :
+        Series.partialSum Series.leibnizTerm (2 * m + 1) <=
+          Series.partialSum Series.leibnizTerm (2 * n + 1) := by
+      simpa [Series.AlternatingRaw.leibnizAlternatingRaw] using hhi
+    exact ⟨hlow', hordered, hhi'⟩
+  · intro eps
+    rcases Series.leibnizTerm_shrinks eps with ⟨N, hN⟩
+    refine ⟨N, ?_⟩
+    intro n hn
+    change (kernelPartialIntegralAtOneRawInterval n).width <= eps.val
+    change (kernelPartialIntegralAtOneRawInterval n).width <= eps.val
+    rw [kernelPartialIntegralAtOneRawInterval_width_eq]
+    exact hN (2 * n + 1) (by omega)
+
+theorem kernelPartialIntegralAtOneRaw_width_eq_reciprocal (n : Nat) :
+    (kernelPartialIntegralAtOneRaw.compute n).width =
+      1 / (((4 * n + 3 : Nat) : Rat)) := by
+  change (kernelPartialIntegralAtOneRawInterval n).width = _
+  rw [kernelPartialIntegralAtOneRawInterval_width_eq]
+  simp [Series.leibnizTerm]
+  congr 1
+  grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
+
+theorem kernelPartialIntegralAtOneRaw_width_le_of_budget {n : Nat} {eps : Rat}
+    (hbudget : 1 / (((4 * n + 3 : Nat) : Rat)) <= eps) :
+    (kernelPartialIntegralAtOneRaw.compute n).width <= eps := by
+  rw [kernelPartialIntegralAtOneRaw_width_eq_reciprocal n]
+  exact hbudget
+
+theorem kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance (eps : QPos) :
+    ∃ n : Nat, (kernelPartialIntegralAtOneRaw.compute n).width <= eps.val := by
+  refine ⟨eps.val.den, ?_⟩
+  rw [kernelPartialIntegralAtOneRaw_width_eq_reciprocal]
+  apply Rat.le_trans
+    (Series.one_div_nat_antitone_series (by omega) (by omega) (by omega))
+    (one_div_den_succ_le_of_pos eps.property)
+
+theorem kernelPartialIntegralAtOneRaw_compute_eq (n : Nat) :
+    kernelPartialIntegralAtOneRaw.compute n =
+      kernelPartialIntegralAtOneRawInterval n := by
+  rfl
+
+theorem kernelPartialIntegralAtOneRaw_compute_eq_kernel (n : Nat) :
+    kernelPartialIntegralAtOneRaw.compute n =
+      { lo := kernelPartialIntegralAtOne (2 * n + 1),
+        hi := kernelPartialIntegralAtOne (2 * n) } := by
+  rw [kernelPartialIntegralAtOneRaw_compute_eq]
+  unfold kernelPartialIntegralAtOneRawInterval
+  rw [← kernelPartialIntegralAtOne_eq_series_partialSum (2 * n + 1),
+    ← kernelPartialIntegralAtOne_eq_series_partialSum (2 * n)]
 
 /-- Finite monomial integrals add across an intermediate point. -/
 theorem kernelTermIntegralBetween_split (p q r : Rat) (j : Nat) :
@@ -609,6 +920,22 @@ theorem kernelPartialIntegralBetween_odd_le_even_succ
   simp [kernelPartialIntegralBetween]
   have hterm := kernelTermIntegralBetween_nonneg_even hp hpr (n + 1)
   grind
+
+theorem kernelPartialIntegralBetween_unit_interval_width_shrinks
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) :
+    ShrinksToZero
+      (fun n => (kernelPartialIntegralBetween_unit_interval y n).width) := by
+  apply shrinksToZero_of_natOverSuccBound (C := 1)
+  intro n
+  calc
+    (kernelPartialIntegralBetween_unit_interval y n).width <=
+        1 / (((4 * n + 3 : Nat) : Rat)) :=
+      kernelPartialIntegralBetween_unit_interval_width_le hy0 hy1 n
+    _ <= 1 / (((n + 1 : Nat) : Rat)) := by
+      apply Series.one_div_nat_antitone_series
+      · omega
+      · omega
+      · omega
 
 theorem qabs_le_of_between {r b : Rat}
     (hlo : -b <= r) (hhi : r <= b) :

@@ -206,10 +206,12 @@ def viete_pi_bounds(depth: int) -> tuple[Fraction, Fraction]:
 
 
 def sine_box(value: Fraction, stage: int) -> tuple[float, float]:
-    # These two endpoint samples are exact: sin(0) = 0 and sin(pi / 2) = 1.
-    # Interior samples use the stage's nested-radical pi enclosure.  The
-    # propagated input uncertainty is point-dependent, so the bars visibly
-    # widen with x instead of pretending every sample costs the same amount.
+    # The integral is restricted to [0, 1/2].  At dyadic inputs in this
+    # interval, the sine values can be evaluated by the usual half-angle
+    # nested-radical chain.  The drawing suppresses that implementation and
+    # shows only its stage-dependent output enclosure.  The deliberately
+    # visible guard represents the finite radical depth at the current stage;
+    # it also grows mildly with the angle, so all bars are not identical.
     if value == 0:
         return 0.0, 0.0
     if value == Fraction(1, 2):
@@ -224,20 +226,27 @@ def sine_box(value: Fraction, stage: int) -> tuple[float, float]:
         / math.factorial(2 * index + 1)
         for index in range(terms + 1)
     )
-    input_error = value * (pi_upper - pi_lower)
+    # The half-angle/nested-radical work is performed only to the current
+    # finite stage.  Keep a visible, location-dependent guard in the drawing:
+    # later stages narrow it, while points farther from zero carry slightly
+    # more propagated angle uncertainty.  This is a visual enclosure budget,
+    # not a claim that the displayed irrational value has been attained.
+    radical_guard = Fraction(3, 2 ** (stage + 5)) * (1 + 2 * value)
+    input_error = value * (pi_upper - pi_lower) + radical_guard
     remainder = abs(angle) ** (2 * terms + 3) / math.factorial(2 * terms + 3)
-    guard = input_error + remainder
+    guard = max(input_error + remainder, Fraction(1, 2 ** (stage + 5)))
     return float(max(Fraction(0), estimate - guard)), float(min(Fraction(1), estimate + guard))
 
 
 def sine_frame(stage: int) -> str:
-    x0, y0, xunit, yunit = 58, 35, 224, 155
+    # This is the integral on [0, 1/2], not the whole sine arch on [0, 1].
+    x0, y0, xunit, yunit = 52, 35, 280, 155
     out = [
         rf"\draw[axis,line width=.75pt] ({x0-12},{y0}) -- ({x0+xunit+13},{y0});",
         rf"\draw[axis,line width=.75pt] ({x0},{y0-11}) -- ({x0},{y0+yunit+13});",
     ]
     cells = 2 ** stage
-    mesh = [Fraction(i, cells) for i in range(cells + 1)]
+    mesh = [Fraction(i, 2 * cells) for i in range(cells + 1)]
     boxes = {t: sine_box(t, stage) for t in mesh}
     for t in mesh:
         x = x0 + 2 * float(t) * xunit
@@ -247,13 +256,23 @@ def sine_frame(stage: int) -> str:
         ]
     for left, right in zip(mesh, mesh[1:]):
         lx, rx = x0 + 2 * float(left) * xunit, x0 + 2 * float(right) * xunit
+        lower = min(boxes[left][0], boxes[right][0])
+        upper = max(boxes[left][1], boxes[right][1])
+        # sin(pi*x) has one known turning point.  A cell containing x=1/2
+        # must include the peak in its upper rectangle even when the mesh has
+        # not yet placed a sample point at that turn.
+        if left <= Fraction(1, 2) <= right:
+            upper = 1.0
         out += positive_estimate_cell(
             lx, rx, y0,
-            y0 + float(boxes[left][0]) * yunit,
-            y0 + float(boxes[right][1]) * yunit,
+            y0 + lower * yunit,
+            y0 + upper * yunit,
             .45,
         )
-    curve = [(x0 + xunit * i / 150, y0 + yunit * math.sin(math.pi * i / 300)) for i in range(151)]
+    curve = [
+        (x0 + xunit * i / 150, y0 + yunit * math.sin(math.pi * i / 300))
+        for i in range(151)
+    ]
     out.append(rf"\draw[ink,line width=1.05pt] plot[smooth] coordinates {{{path(curve)}}};")
     for t in mesh:
         x = x0 + 2 * float(t) * xunit
@@ -269,12 +288,13 @@ def sine_frame(stage: int) -> str:
         ]
     out += [
         n(x0, y0 - 12, r"$0$", "anchor=north"),
+        n(x0 + xunit / 2, y0 - 12, r"$\frac14$", "anchor=north"),
         n(x0 + xunit, y0 - 12, r"$\frac12$", "anchor=north"),
         n(x0 - 10, y0 + yunit, r"$1$", "anchor=east"),
         n(x0 + xunit + 12, y0 - 2, r"$x$", "anchor=west"),
-        n(x0 + 160, y0 + 109, r"$\sin(\pi x)$"),
-        n(x0 + xunit, y0 + yunit + 19,
-          rf"stage $n={stage}$: $2^n={cells}$ equal subintervals",
+        n(x0 + 125, y0 + 109, r"$\sin(\pi x)$"),
+        n(x0 + xunit / 2, y0 + yunit + 19,
+          rf"$\int_0^{{1/2}}\sin(\pi x)\,dx$",
           "anchor=south"),
     ]
     return "\n".join(out)

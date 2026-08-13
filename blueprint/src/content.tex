@@ -14,11 +14,8 @@ space.  They are algorithms
   \qquad a_n,b_n\in\Q,\qquad a_n\le b_n,
 \]
 whose intervals are nested and whose widths shrink to zero.  Equality means
-overlap at every requested precision, possibly after cofinal changes of
-stage.  This is strong enough for the fundamental theorem of calculus, the
-fundamental theorem of algebra, Archimedes' computation of pi, Euler's
-series arguments, and the elementary functions, but it keeps the proof
-obligations finite and inspectable.
+overlap at every requested precision, possibly after cofinal changes of stage.  This is strong enough for the fundamental theorem of calculus, the fundamental theorem of algebra, Archimedes' computation of pi, Euler's
+series arguments, and the elementary functions, but it keeps the proof obligations finite and inspectable.
 
 \section*{\texorpdfstring{\(\pi\)}{Pi} scoreboard}
 \label{sec:pi-scoreboard}
@@ -49,7 +46,7 @@ deferred.
 \hline
 1 & \benchmarklink{ch-foundations}{rem:algebraic-numbers-sqrt-two}{Irrationality of \(\sqrt2\)}
   & Foundations\\
-2 & \benchmarklink{sect0002}{thm:finite-factorized-fta}{Fundamental Theorem of Algebra}
+2 & \\benchmarklink{sect0002}{thm:finite-box-polynomial-soundness}{Fundamental Theorem of Algebra (box-isolation core)}
   & Algebra and FTA\\
 3 & \benchmarklink{ch-foundations}{thm:rational-code-surjection}{Denumerability of \(\mathbb Q\)}
   & Foundations\\
@@ -61,9 +58,9 @@ deferred.
   & Infinite series (identity deferred)\\
 15 & \benchmarklink{ch-effective-calculus}{thm:convex-ftc}{Fundamental Theorem of Integral Calculus}
   & Effective calculus\\
-16 & \benchmarklink{sect0002}{rem:abel-ruffini-boundary}{Abel--Ruffini theorem}
+16 & \\benchmarklink{sect0002}{thm:finite-deflation-soundness}{Abel--Ruffini theorem (deflation boundary)}
   & Algebra and FTA (boundary)\\
-17 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-circle-powers}{de Moivre's formula}
+17 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-quarter-turn}{de Moivre's formula}
   & Circle and trigonometry\\
 23 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-circle-pythagorean}{Formula for Pythagorean triples}
   & Circle and trigonometry\\
@@ -73,30 +70,30 @@ deferred.
   & Circle and trigonometry\\
 34 & \benchmarklink{ch-infinite-series}{thm:harmonic-dyadic-lower-bound}{Divergence of the harmonic series}
   & Infinite series\\
-35 & \benchmarklink{ch-effective-calculus}{thm:taylor-integral-remainder}{Taylor's theorem}
+35 & \\benchmarklink{ch-effective-calculus}{thm:finite-taylor-ftc-prefix}{Taylor's theorem (finite prefix)}
   & Effective calculus\\
 37 & \benchmarklink{sect0002}{thm:rational-cubic-roots}{Solution of a cubic}
   & Algebra and FTA\\
 43 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-rectangle-isoperimetric}{Isoperimetric theorem}
-  & Circle and trigonometry (rectangle core)\\
-44 & \benchmarklink{ch-foundations}{thm:finite-counting-recurrences}{Binomial theorem}
-  & Infinite series\\
+  & Circle and trigonometry (finite triangle core)\\
+44 & \\benchmarklink{ch-infinite-series}{thm:finite-counting-recurrences}{Binomial theorem (finite-row identity)}
+  & Infinite series (finite core)\\
 46 & \benchmarklink{sect0002}{thm:rational-quartic-roots}{General quartic equation}
   & Algebra and FTA\\
-49 & \benchmarklink{ch-differential-equations}{thm:two-by-two-cayley-hamilton}{Cayley--Hamilton theorem}
-  & Differential equations\\
-55 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-chord-power}{Product of segments of chords}
+49 & \benchmarklink{ch-differential-equations}{thm:finite-cayley-hamilton-boundary}{Cayley--Hamilton theorem (finite certificate)}
+  & Differential equations (computable boundary)\\
+55 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-chord-power-interface}{Product of segments of chords (signed finite core)}
   & Circle and trigonometry\\
-57 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-heron}{Heron's formula}
+57 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-heron-interface}{Heron's formula (coordinate certificate)}
   & Circle and trigonometry\\
 60 & \benchmarklink{ch-foundations}{thm:bezout-certificate}{Bézout's identity}
   & Foundations\\
-64 & \benchmarklink{ch-effective-calculus}{thm:cubic-secants}{L'Hopital's rule}
-  & Effective calculus\\
-65 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-isosceles}{Isosceles triangle theorem}
-  & Circle and trigonometry\\
-66 & \benchmarklink{ch-infinite-series}{thm:geometric-series-sum}{Sum of a geometric series}
-  & Infinite series\\
+64 & \benchmarklink{ch-effective-calculus}{thm:finite-lhopital-interface}{L'Hopital's rule (finite cancellation core)}
+  & Effective calculus (computable boundary)\\
+65 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-isosceles-interface}{Isosceles triangle theorem (coordinate certificate)}
+  & Circle and trigonometry (finite core)\\
+66 & \benchmarklink{ch-infinite-series}{thm:finite-geometric-series-interface}{Sum of a geometric series (finite sums and tail)}
+  & Infinite series (potential-infinity core)\\
 68 & \benchmarklink{ch-infinite-series}{thm:arithmetic-series-sum}{Sum of an arithmetic series}
   & Infinite series\\
 69 & \benchmarklink{ch-foundations}{thm:euclidean-gcd}{Greatest-common-divisor algorithm}
@@ -105,44 +102,44 @@ deferred.
   & Foundations (finite order core)\\
 74 & \benchmarklink{ch-foundations}{thm:nat-induction-schema}{Mathematical induction}
   & Foundations\\
-75 & \benchmarklink{ch-effective-calculus}{thm:square-midpoint-mean-value}{Mean Value Theorem}
+75 & \\benchmarklink{ch-effective-calculus}{thm:finite-quadrature-mean-value}{Mean Value Theorem (average bracket)}
   & Effective calculus\\
-76 & \benchmarklink{ch-infinite-series}{thm:finite-fourier-orthogonality}{Fourier series}
+76 & \benchmarklink{ch-infinite-series}{thm:finite-fourier-interface}{Fourier series (finite transform core)}
   & Infinite series (finite transform core)\\
 79 & \benchmarklink{ch-foundations}{thm:constructive-inverse-function}{Intermediate Value Theorem}
   & Foundations/effective calculus\\
-80 & \benchmarklink{ch-foundations}{rem:finite-factorization-certificates}{Fundamental Theorem of Arithmetic}
-  & Foundations\\
-81 & \benchmarklink{ch-infinite-series}{thm:finite-prime-reciprocal-extension}{Prime reciprocal series}
+80 & \benchmarklink{ch-foundations}{thm:finite-fta-factorization}{Fundamental Theorem of Arithmetic (factor certificate)}
+  & Foundations (finite core)\\
+81 & \benchmarklink{ch-infinite-series}{thm:finite-prime-reciprocal-interface}{Prime reciprocal series (extension core)}
   & Infinite series (potential-infinity core)\\
-89 & \benchmarklink{sect0002}{thm:descartes-sign-variation}{Factor and remainder theorems}
-  & Algebra and FTA\\
-91 & \benchmarklink{ch-foundations}{thm:rational-triangle-inequality}{Triangle inequality}
-  & Foundations\\
-92 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-pick-certificate}{Pick's theorem}
+89 & \benchmarklink{sect0002}{thm:finite-factor-remainder-interface}{Factor and remainder theorems (finite core)}
+  & Algebra and FTA (computable boundary)\\
+91 & \benchmarklink{ch-foundations}{thm:finite-triangle-inequality-interface}{Triangle inequality (rational absolute value)}
+  & Foundations (finite core)\\
+92 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-pick-rectangle-family}{Pick's theorem}
   & Circle and trigonometry (finite lattice core)\\
-94 & \benchmarklink{ch-rational-circle-trigonometry}{thm:law-of-cosines-equilateral}{Law of cosines}
-  & Circle and trigonometry\\
-95 & \benchmarklink{ch-rational-circle-trigonometry}{thm:rational-ptolemy}{Ptolemy's theorem}
-  & Circle and trigonometry\\
-97 & \benchmarklink{ch-differential-equations}{thm:cramer-finite}{Cramer's rule}
-  & Differential equations\\
+94 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-law-of-cosines-interface}{Law of cosines (squared-length core)}
+  & Circle and trigonometry (finite core)\\
+95 & \benchmarklink{ch-rational-circle-trigonometry}{thm:finite-ptolemy-interface}{Ptolemy's theorem (length certificate)}
+  & Circle and trigonometry (finite core)\\
+97 & \benchmarklink{ch-differential-equations}{thm:finite-cramer-interface}{Cramer's rule (rational solver)}
+  & Differential equations (finite core)\\
 98 & \benchmarklink{ch-foundations}{thm:finite-bertrand-certificate}{Bertrand's postulate}
   & Foundations (finite prime-search core)\\
-100 & \benchmarklink{sect0002}{thm:finite-descartes-sign-count}{Descartes rule of signs}
+100 & \benchmarklink{sect0002}{thm:finite-descartes-sign-count}{Descartes rule of signs (finite sign count)}
   & Algebra and FTA\\
 \hline
-38 & \benchmarklink{ch-foundations}{thm:rational-am-gm}{Arithmetic--geometric mean inequality}
+38 & \benchmarklink{ch-foundations}{thm:finite-am-gm-interface}{Arithmetic--geometric mean inequality (dyadic certificate)}
+  & Supporting foundations interface\\
+42 & \benchmarklink{ch-infinite-series}{thm:finite-reciprocal-triangular-interface}{Reciprocal triangular numbers (certificate)}
+  & Supporting series interface\\
+77 & \benchmarklink{ch-infinite-series}{thm:finite-power-sum-interface}{Sums of powers (finite certificate)}
+  & Supporting series boundary\\
+78 & \benchmarklink{ch-foundations}{thm:finite-cauchy-schwarz-interface}{Cauchy--Schwarz inequality (list certificate)}
   & Supporting foundations lemma\\
-42 & \benchmarklink{ch-infinite-series}{thm:reciprocal-triangular-sum}{Reciprocal triangular numbers}
-  & Supporting series lemma\\
-77 & \benchmarklink{ch-infinite-series}{thm:finite-power-sums}{Sums of powers}
-  & Supporting series lemma\\
-78 & \benchmarklink{ch-foundations}{thm:rational-cauchy-schwarz}{Cauchy--Schwarz inequality}
+85 & \benchmarklink{ch-foundations}{thm:finite-digit-divisibility-interface}{Divisibility by 3 (digit-sum certificate)}
   & Supporting foundations lemma\\
-85 & \benchmarklink{ch-foundations}{thm:three-digit-divisibility}{Divisibility by 3}
-  & Supporting foundations lemma\\
-90 & \benchmarklink{ch-infinite-series}{thm:finite-stirling-certificate}{Stirling's formula (finite ratio certificate)}
+90 & \benchmarklink{ch-infinite-series}{thm:finite-stirling-interface}{Stirling's formula (bounded ratio certificate)}
   & Supporting series lemma\\
 \end{tabular}
 \end{center}

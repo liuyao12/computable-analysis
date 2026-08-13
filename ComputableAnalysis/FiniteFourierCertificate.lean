@@ -120,6 +120,25 @@ theorem fourPointFourierTransform_modes (x₀ x₁ x₂ x₃ : Rat) :
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
+/-! The four modes also reconstruct the original four samples.  This is the
+finite inverse-transform statement behind the orthogonality certificate. -/
+
+theorem fourPointFourierTransform_reconstruct (x₀ x₁ x₂ x₃ : Rat) :
+    let f₀ := fourPointFourierTransform x₀ x₁ x₂ x₃ 0
+    let f₁ := fourPointFourierTransform x₀ x₁ x₂ x₃ 1
+    let f₂ := fourPointFourierTransform x₀ x₁ x₂ x₃ 2
+    let f₃ := fourPointFourierTransform x₀ x₁ x₂ x₃ 3
+    f₀.re + f₁.re + f₂.re + f₃.re = 4 * x₀ /\
+      f₀.re - f₂.re + f₁.im - f₃.im = 4 * x₁ /\
+      f₀.re - f₁.re + f₂.re - f₃.re = 4 * x₂ /\
+      f₀.re - f₂.re - f₁.im + f₃.im = 4 * x₃ := by
+  dsimp
+  rcases fourPointFourierTransform_modes x₀ x₁ x₂ x₃ with
+    ⟨h₀, h₁, h₂, h₃⟩
+  rw [h₀, h₁, h₂, h₃]
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 theorem fourPointFourierTransform_parseval (x₀ x₁ x₂ x₃ : Rat) :
     QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
         QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) +

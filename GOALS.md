@@ -1,4666 +1,421 @@
-# Computable Analysis Goalposts
-
-This file is the prose roadmap. Lean files contain definitions, certificates,
-and proved bridges; broad mathematical milestones live here with references to
-the relevant declarations.
-
-**Current source map.** The checked foundation is
-`ComputableAnalysis/Basic.lean`, with calculus in `Calculus.lean`/`FTC.lean`
-and the pi comparison layer in `PiProofs.lean`. There is no Mathlib import:
-the only non-project import is Lean's rational-number support
-`Init.Grind.Ordered.Rat`. Older paragraphs below that name removed files such
-as `Base.lean`, `Core.lean`, or `RealEquiv.lean` are historical planning notes,
-not a description of the current module graph. The checked blueprint
-(`blueprint/lean_decls`) and current Lean declarations take precedence.
-
-## Ground Layer
-
-The finite `sqrt 2` bisection trace now reaches stage 24 with the exact
-interval `[11863283/8388608, 23726567/16777216]` and width `1/16777216`.
-This extends the isolating-interval evidence for benchmark item 1 without
-treating the irrational value as an attained rational endpoint.
-
-**Easy benchmark cluster â€” checked.**  The foundation exposes the rational
-triangle inequality through `qabs_add_le`, `qabs_add_le_three`, and
-`qabs_sub_le`; the list-level `qabs_ratListSum_le` now supplies the finite
-sum form, with append laws for composing finite error lists.  The series layer
-now exposes recursive finite arithmetic and geometric sums, including the
-general rational progression identities `Series.arithmeticProgressionSum_eq`
-and `Series.arithmeticProgressionSum_constant`/`Series.arithmeticProgressionSum_le_succ`/
-`Series.arithmeticProgressionSum_le_of_le`/
-`Series.arithmeticProgressionSum_nonneg`/`Series.arithmeticProgressionSum_pos`,
-with exact identities `Series.arithmeticSum_eq`,
-`Series.arithmeticSum_nonneg`/`Series.arithmeticSum_le_succ`,
-`Series.arithmeticSum_pos`,
-`Series.arithmeticSum_le_of_le`, `Series.arithmeticSum_reaches`, and
-`Series.arithmeticSum_reaches_later`,
-`Series.geometricSum_one`, `Series.geometricSum_zero_ratio`,
-`Series.geometricSum_mul_sub`, and
-`Series.geometricSum_tail_eq`, together with
-`Series.geometricSum_le_inv_one_sub`,
-`Series.geometricSum_tail_nonneg`,
-`Series.geometricSum_tail_pos`,
-`Series.geometricSum_tail_le_one`,
-`Series.geometricSum_tail_lt_one`,
-`Series.half_pow_eq_one_div_nat_two_pow`,
-`Series.half_pow_le_one_div_succ`, and
-`Series.geometricSum_half_tail_le_one_div_succ`, together with the comparison
-theorems `Series.pow_le_half_pow` and
-`Series.geometricSum_tail_le_one_div_succ_of_le_half`,
-and `Series.geometricHalfRaw`/`Series.geometricHalfRaw_valid` now package
-the ratio-half geometric series as an ordered, nested `RealRaw` with an
-explicit (2/(n+1)) width modulus.  The general
-`Series.geometricRaw` package extends this to every rational ratio
-`0 <= r <= 1/2`, with exact value `1/(1-r)` and the same explicit width
-schedule,
-and `Series.geometricHalfRaw_equiv_two` proves that this raw series represents
-the exact rational sum 2.
-`Series.geometricSum_nonneg`/`Series.geometricSum_le_succ`,
-`Series.geometricSum_pos`,
-`Series.geometricSum_eq`; the finite binomial
-identity is already exposed as
-`ExpProofs.euler_binomial_prefix_nat_expansion`.  These cover the finite
-certificate core of benchmark items 91, 68, 66, and 44; infinite convergence
-remains a separate obligation and is not claimed by these finite theorems.
-The worked identities `Series.binomial_square` and `Series.binomial_cube` give
-the first quadratic and cubic instances of the finite binomial theorem in the
-Infinite Series chapter.
-The named finite witness now also checks the stage-10 expansion
-`(2+1)^10 = 59049` and the independent stage-8 expansion
-`(2+3)^8 = 390625`, extending the exact rational checkpoints for item 44.
-The rational term and partial-sum constructors, their interior and boundary
-recurrences, and `Series.binomialSum_eq_pow` now expose the full finite
-binomial identity over the rationals. `Series.binomialSum_eq_pow_of_reached`
-transports that identity to every later accumulator stage after the last
-nonzero coefficient. Infinite convergence remains a separate obligation.
-For benchmark item 14, `DirichletSeries.zetaTwoTerm_le_telescopeStep` and
-`DirichletSeries.zetaTwoFiniteTail_le_telescoping` expose the finite reciprocal-
-square telescoping and tail budget used by the certified Basel-series
-representation.  The public recurrences `zetaTwoPartial_succ` and
-`zetaTwoPartial_nonneg`,
-`zetaTwoTerm_pos` and `zetaTwoPartial_lt_succ`,
-`zetaTwoFiniteTail_succ`, together with `zetaTwoFiniteTail_nonneg`, expose the
-finite accumulator and sign certificates.  The strict-tail theorem
-`zetaTwoFiniteTail_pos` makes positive width explicit for every nonempty tail.
-The monotonicity lemmas
-`zetaTwoPartial_le_succ` and `zetaTwoPartial_le_of_le`, plus the coarse tail
-bound `zetaTwoFiniteTail_le_tailBound`, expose the interval-order data used by
-the representation.  The equality with pi^2/6 remains open.  The derived
-`zetaTwoFiniteTail_lt_one_div` gives the strict finite tail width used by the
-interval representation, and `zetaTwoInterval_width_le_one_div` exposes the
-corresponding bound directly at the interval level.  The interval-level
-certificate `zetaTwoInterval_width_pos` gives strict nondegeneracy at positive
-stages, while `zetaTwoInterval_lo_nonneg` and `zetaTwoInterval_hi_pos` expose
-the endpoint signs.  The interval-level certificates `zetaTwoInterval_nested` and
-`zetaTwoRaw_validCompute` now expose
-the complete ordered, shrinking finite representation boundary as well.
-The public selector `zetaTwoInterval_reaches_of_positive_tolerance` now turns
-the denominator budget into an explicit finite stage for every positive
-rational width request.
-The exact decomposition
-`DirichletSeries.zetaTwoPartial_add_finiteTail_eq` now exposes every later
-finite partial sum as its earlier partial sum plus the explicit intervening
-tail. This makes the finite accumulator/tail interface compositional while
-leaving the classical Basel equality unresolved.
-The strict companion
-`DirichletSeries.zetaTwoPartial_add_nonempty_finiteTail_lt_interval_hi` now
-places every genuinely later partial sum strictly below the earlier padded
-endpoint, preserving the same finite rational boundary.
-The new `DirichletSeries.zetaTwoFiniteTail_add` theorem gives an exact
-concatenation law for two finite tail blocks, shifting the second block to
-the correct denominator range. This supports compositional finite error
-accounting while leaving the classical Basel equality unresolved.
-The new `DirichletSeries.zetaTwoPartial_le_two` gives a uniform finite bound
-for every reciprocal-square partial sum, transported from the stage-one
-padded endpoint. This strengthens the Basel certificate's boundedness
-interface without identifying the completed sum with pi^2/6.
-The convex-calculus interface now also exports
-`leftDerivativeAt_mono`, the dual one-sided derivative monotonicity theorem:
-the supplied least upper bound at a later point dominates every earlier left
-secant through the finite bridge secant. It complements
-`rightDerivativeAt_mono` without constructing a supremum or a completed
-real-valued limit.
-The geometric arctangent layer now exports the finite quotient bridge
-`arctanIntegralRectangleCompute_tangentChart_quotient_contains` and its
-kernel form `arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains`.
-For positive rational steps on [0,1], the latter bounds the rectangle
-difference quotient below by `integralKernel x - (h + h^2)` and above by
-`integralKernel x`. This is the next finite certificate toward item 15's
-derivative/FTC bridge, not a classical limit claim.
-The companion `leftDerivativeAt_le_rightDerivativeAt` now formalizes the
-convex-corner inequality: every left secant is a lower bound for every right
-secant, so the supplied left derivative lies below the supplied right
-derivative. This preserves the project's explicit one-sided treatment of
-corners such as `abs x`.
-The companion `DirichletSeries.zetaTwoTerm_antitone` and
-`DirichletSeries.zetaTwoFiniteTail_le_firstTerm_block` lemmas expose the
-monotone-term and rectangular block bounds used by finite error schedules.
-The stage-10000 enclosure
-`DirichletSeries.zetaTwoInterval_contains_basel_decimal_10000` tightens the
-earlier stage-1000 decimal certificate to the rational target `1.6449340668`.
-The higher-stage certificate
-`DirichletSeries.zetaTwoInterval_contains_basel_decimal_100000` contains the
-same target at stage 100,000, strengthening the finite evidence while leaving
-the Basel identity open.
-The worked `FiniteBaselExample` now packages the tolerance `1/1000` at stage
-`1001` and checks that stage `2000` remains inside its rational enclosure.
-The same finite certificate also contains the stage-100000 reciprocal-square
-interval while retaining the `1/1000` width budget.
-This makes the item-14 potential-infinity schedule executable as a named
-certificate, without asserting the completed Basel sum.
-The high-precision companion repeats the construction at width `1/100000`,
-with stage `100001` and a verified later-stage containment at `200000`.
-Euler's completed identity remains deferred.
-The integer-exponent family now has matching executable stage selectors
-`DirichletSeries.zetaNatInterval_width_le_of_denominator_budget` and
-`DirichletSeries.zetaNatInterval_reaches_of_positive_tolerance`: every fixed
-exponent `p >= 2` gets a rational interval stage for any requested positive
-tolerance, using the same potential-infinity denominator schedule. This is a
-finite strengthening of the Dirichlet-series boundary, not a claim that a
-completed zeta value has been constructed.
-The propagation certificates
-`DirichletSeries.zetaNatInterval_later_contained_in_target_of_budget` and
-`DirichletSeries.zetaNatPartial_later_in_target_of_budget` now transport an
-earlier target enclosure to every later stage, including its explicit width
-budget. This supplies the same compositional target interface for the
-integer-exponent family without introducing a completed infinite sum.
-The matching generic finite-tail accumulator
-`DirichletSeries.zetaNatFiniteTail` and decomposition
-`DirichletSeries.zetaNatPartial_add_finiteTail_eq` now make that family
-compositional at every fixed exponent, not only at `p = 2`.  The comparison
-theorems `DirichletSeries.zetaNatFiniteTail_le_zetaTwoFiniteTail` and
-`DirichletSeries.zetaNatFiniteTail_le_tailBound` transfer the explicit
-reciprocal-square tail budget to every `p >= 2`.
-The endpoint bridge
-`DirichletSeries.zetaNatPartial_add_finiteTail_le_interval_hi` then places
-each later finite partial sum directly below the corresponding generic
-interval upper endpoint.
-The paired enclosure theorem
-`DirichletSeries.zetaNatInterval_contains_partial_add_finiteTail` records both
-endpoints explicitly for each finite tail-extended partial sum.
-The finite triangular telescoping identity
-`Series.triangularTelescopingTerm_eq_reciprocal` and
-`Series.triangularTelescopingSum_eq` now cover benchmark item 42 at the finite
-certificate level.  The explicit remainder
-`Series.triangularTelescopingSum_tail_eq` and strict bound
-`Series.triangularTelescopingSum_lt_two` expose the finite convergence
-boundary.  The new
-`Series.triangularTelescopingRaw` packages the same sums as a valid raw-real
-interval algorithm, with exact value 2 certified by
-`Series.triangularTelescopingRaw_equiv_two`. The public selector
-`Series.triangularTelescopingRaw_reaches_of_positive_tolerance` now exposes a
-finite stage for every requested positive rational width.
-The worked `FiniteTriangularExample` instantiates stage four with exact sum
-`8/5` and tail `2/5`, making the reciprocal-triangular boundary directly
-checkable as a named finite witness.
-The same witness now includes stage eight: the exact sum is `16/9` and the
-remaining finite tail is `2/9`, giving a second explicit checkpoint for item
-42 while preserving the potential-infinity interpretation.
-It now also includes stage 16: the exact sum is `32/17` and the remaining
-tail is `2/17`, extending the same finite error schedule to a third checkpoint.
-It now also includes stage 32: the exact sum is `64/33` and the remaining
-tail is `2/33`, extending the same finite error schedule once more.
-It now also includes stage 64: the exact sum is `128/65` and the remaining
-tail is `2/65`, providing the next explicit rational precision checkpoint
-while preserving the potential-infinity interpretation.
-The alternating-series layer now also proves even partial sums are monotone,
-odd partial sums are antitone, and the endpoint intervals are explicitly
-nested via `Series.AlternatingRaw.intervals_nested`; this supplies the order
-half of the generic alternating interval construction used by the Leibniz
-route.  `Series.AlternatingRaw.toRealRaw` and
-`Series.AlternatingRaw.toRealRaw_valid` now package that construction directly
-as a valid `RealRaw`.  The concrete
-`Series.AlternatingRaw.leibnizAlternatingRaw` instance supplies the
-nonnegative, decreasing, shrinking term certificate for (1/(2n+1)), the
-finite alternating-series core of benchmark item 26.
-The exact square inequality `am_gm_square_bound` covers the rational core of
-benchmark item 38, and `sqrtRaw_le_am_gm` now lifts it to the certified
-nonnegative square-root representation.
-Its normalized form `am_gm_rational_half` now exposes the direct rational
-inequality `a*b <= ((a+b)/2)^2` used by later certificate estimates.
-The equality condition is also checked by
-`am_gm_rational_half_eq_iff`, namely equality exactly when `a=b`.  For the
-represented square-root branch, `sqrtRaw_am_gm_eq_of_eq` certifies the matching
-equality when the two inputs coincide, and `sqrtRaw_am_gm_eq_iff` proves that
-this is the only equality case.  The paired finite certificate `am_gm_four`
-extends the same rational boundary to four nonnegative inputs:
-  `a*b*c*d <= ((a+b+c+d)/4)^4`, without invoking a general real-valued AM--GM
-  theorem.
-The worked four-variable checkpoints now verify equality for `(3,3,3,3)` and
-strictness for `(2,3,4,5)`, exercising the same finite interface on both
-branches.
-The new `DyadicAMGM` binary-tree certificate extends this to every finite
-  power-of-two number of nonnegative rational leaves:
-  `product_le_average_pow` proves the exact (2^k)-term bound by recursive
-  pairing.  It remains a finite rational theorem, not arbitrary-(n) AM--GM.
-The worked `dyadicAMGMExample` instantiates the depth-two tree with leaves
-`1,2,3,4`, checks sum `10` and product `24`, and invokes the generic bound.
-The same worked layer now includes a depth-three tree with leaves `1` through
-`8`, sum `36`, product `40320`, and its exact eight-term dyadic AM--GM bound.
-The depth-four witness now uses leaves `1` through `16`, checks sum `136`,
-product `20922789888000`, and its exact sixteen-term dyadic AM--GM bound.
-The generic `consecutiveDyadic` constructor now supplies a depth-five witness
-with leaves `1` through `32`, sum `528`, product `263130836933693530167218012160000000`,
-and the corresponding thirty-two-term AM--GM bound.
-The two-coordinate rational inequality `cauchy_schwarz_2d` covers the finite
-certificate core of benchmark item 78 without expanding the project's scope
-to functional analysis.  Its equality characterization
-`cauchy_schwarz_2d_eq_iff` is also checked: equality holds exactly when
-`a*d=b*c`.
-The three-coordinate extension `cauchy_schwarz_3d` is now checked by an
-explicit sum of three rational squares.  It deepens the finite inequality
-support for item 78 while remaining entirely coordinate-level and avoiding
-any functional-analysis infrastructure.
-Its equality characterization `cauchy_schwarz_3d_eq_iff` is also checked:
-equality is equivalent to vanishing of the three rational (2\times2) minors
-`a*y-b*x`, `a*z-c*x`, and `b*z-c*y`.
-The four-coordinate inequality `cauchy_schwarz_4d` is now checked by the
-corresponding six-minor rational sum-of-squares certificate, further extending
-the same finite support without introducing an inner-product space.  Its
-equality characterization `cauchy_schwarz_4d_eq_iff` records exactly the six
-vanishing rational minors.
-The five-coordinate extension `cauchy_schwarz_5d` adds the corresponding ten
-minor sum-of-squares certificate, still entirely rational and finite.
-The six-coordinate extension `cauchy_schwarz_6d` adds the corresponding
-fifteen-minor certificate, extending the same finite rational support without
-introducing a general vector-space layer.
-The companion `cauchy_schwarz_6d_eq_of_minors` records the corresponding
-fifteen-minor equality witness explicitly.
-The interval primitive `QInterval.intersection_ordered_of_overlaps` likewise
-proves that an explicit intersection of two ordered overlapping rational
-intervals is ordered, preserving the project's data-first treatment of finite
-common enclosures.
-Its equality form `cauchy_schwarz_5d_eq_iff` records the ten vanishing minors
-as the exact finite equality condition.
-The generic executable finite evaluator `Series.powerSum`, with its
-`powerSum_succ` recurrence, `powerSum_nonneg`, `powerSum_le_succ`, and
-`powerSum_le_of_le` certificates, now covers the
-finite recursive core of benchmark item 77 for every fixed exponent.  The
-strict certificate `Series.powerSum_pos` additionally records positivity for
-positive exponents and sums of length greater than one.  The
-bridge lemmas `Series.powerSum_zero_exponent` and
-`Series.powerSum_one_exponent` recover the counting sum and the existing
-arithmetic-sum evaluator from this common definition, while
-`Series.powerSum_two_exponent` through `Series.powerSum_eight_exponent`
-identify the generic evaluator with the named low-degree power sums.  The
-closed forms `Series.squareSum_eq`, `Series.cubeSum_eq`,
-`Series.fourthPowerSum_eq`, and
-`Series.fifthPowerSum_eq`/`Series.sixthPowerSum_eq`/`Series.seventhPowerSum_eq`
-remain the checked low-degree formulas. The new
-`Series.powerSum_four_closed_form` exposes the fourth-power formula directly
-through the generic executable evaluator. The matching
-`Series.powerSum_five_closed_form`, `Series.powerSum_six_closed_form`, and
-`Series.powerSum_eight_finite_bridge` now exposes the eighth-power finite
-accumulator through the generic evaluator.  The explicit eighth-power
-polynomial identity is now checked as `Series.eighthPowerSum_eq` and
-`Series.powerSum_eight_closed_form`.
-low-degree family; a general Faulhaber formula remains open.
-The exact rational identities `RationalCircle.pythagoreanTriple_identity` and
-`RationalCircle.pythagoreanTriple_positive` cover the polynomial and positive
-rational core of benchmark item 23; primitive-integral classification remains
-separate.
-The coordinate identities `RationalCircle.rightTriangle_axis_pythagorean` and
-`RationalCircle.rightTriangle_pythagorean` cover the rational orthogonality
-core of benchmark item 4; general Euclidean-space formulations remain outside
-the current boundary.
-The worked `rightTriangle_rotated_three_four_six_eight_certificate` instantiates
-the same identity on the non-axis legs `(3,4)` and `(-8,6)`: their dot product
-is zero, their squared lengths are `25` and `100`, and the squared hypotenuse
-is `125`.
-The symmetry and base-length identities
-`RationalCircle.isosceles_axis_symmetry` and
-`RationalCircle.isosceles_base_normSq` are the rational-coordinate core of
-benchmark item 65; equality of the associated angles remains outside the
-current boundary.
-The companion `isosceles_axis_pythagorean` identifies the equal-leg square as
-the sum of the squared axis and half-base segments, making the perpendicular
-median calculation explicit in rational coordinates.
-The worked isosceles certificate now includes a third rational instance with
-height/half-base `(7,24)`: both legs have squared length `625`, the axis is
-orthogonal to a leg, and the base has squared length `2304`.  The equality of
-the associated geometric angles remains a separate deferred bridge.
-The existing squared-coordinate law of cosines
-`RationalCircle.Stage.segmentNormSq_law_of_cosines` covers the exact rational
-geometry core of benchmark item 94; the accompanying equilateral specialization
-`RationalCircle.Stage.dot_eq_half_of_unit_equilateral` is already formalized,
-while normalized-angle semantics remain a separate layer.
-The worked `finiteLawOfCosines_unit_orthogonal_certificate` adds a second
-coordinate checkpoint: the unit rational points `(3/5,4/5)` and `(-4/5,3/5)`
-have dot product `0` and squared separation `2`, with the law-of-cosines
-identity checked by exact rational computation.
-The same worked module now checks the antipodal pair `(3/5,4/5)` and
-`(-3/5,-4/5)`, with dot product `-1` and squared separation `4`, providing a
-non-orthogonal finite checkpoint for item 94.
-It also checks the coordinate pair `(3,0)` and `(0,4)`: squared norms `9` and
-`16`, dot product `0`, and squared separation `25`, making the `3-4-5` law of
-cosines specialization explicit.
-The Heron witness now adds the `13-14-15` triangle with vertices
-`(0,0),(14,0),(5,12)`: twice-area `168`, Heron product `7056`, and finite
-square-root raw equivalent to area `84`.
-The exact rational identities `RationalCircle.heron_squared_identity` and
-`RationalCircle.heron_product_nonneg` cover the squared algebraic and
-nonnegative rational core of benchmark item 57.  The new
-`RationalCircle.heronAreaRaw` packages the nonnegative square-root area as a
-valid raw-real output with an explicit square-root specification.  The concrete certificate
-`RationalCircle.heron_three_four_five` evaluates the Heron product for the
-3-4-5 triangle to 36 (squared area 36), while
-`RationalCircle.heron_three_four_five_area_witness` exposes the exact rational
-area witness 6 without claiming a general square-root construction, and
-`RationalCircle.heron_three_four_five_area_raw_equiv_six` transports the
-computed Heron square-root raw directly to that witness, while
-`RationalCircle.heron_three_four_five_strict_pos` records nondegeneracy.
-The new `FiniteHeronExample` adds a non-3-4-5 instance: the rational triangle
-with vertices `(-3,0)`, `(3,0)`, and `(0,4)` has sides `6,5,5`, area `12`,
-and Heron product `144`; Lean transports its finite square-root raw to `12`.
-The algebraic bridge `sqrt_thirty_six_eq_six` now identifies the projectâ€™s
-certified square-root representation with that same rational witness.
-The exact rational identity
-`RationalCircle.ptolemy_oriented_chord_numerator` is the common-denominator
-oriented-chord core of benchmark item 95; the full chord-length statement
-remains open. `RationalCircle.ptolemy_squared_coordinate_certificate` now
-adds a square-root-free squared shadow for the concrete cyclic quadrilateral,
-including an explicit rational witness for the four-side cross-term.
-The second finite Ptolemy example uses the ordered parameters
-`(0,5/12,3/4,4/3)`. Its six squared chord lengths are rational squares with
-length witnesses `10/13, 32/65, 14/25, 8/5, 6/5, 66/65`, and Lean checks the
-corresponding rational Ptolemy identity independently.  The new
-`secondPtolemy_length_certificate` also transports all six witnesses through
-the raw square-root length interface.
-The rational power-of-a-point identity
-`RationalCircle.horizontalChord_power_identity` covers the directed-segment
-core of benchmark item 55. The new
-`RationalCircle.horizontalChord_power_nonneg_of_outside` supplies the finite
-sign certificate when the external point is outside the chord interval, and
-`RationalCircle.horizontalChord_power_neg_of_inside` supplies the strict
-interior sign. `RationalCircle.horizontalChordPowerSqrtRaw` and
-`RationalCircle.horizontalChordPowerSqrtRaw_valid` now lift the nonnegative
-outside product to a certified square-root raw algorithm; its Euclidean-length
-interpretation remains open. `RationalCircle.horizontalChordPowerSqrtRaw_spec`
-also exposes the square-root specification for later composition.
-`RationalCircle.horizontalChordPowerSqrtRaw_equiv_of_square` now identifies
-that output with the nonnegative rational representative whenever a supplied
-rational square witness exists. The concrete
-`horizontalChordPowerSqrtRaw_equiv_four_fifths` specialization checks the
-outside-point instance (16/25mapsto4/5) by exact rational arithmetic.
-The companion `FiniteChordPowerExample` checks the second rational instance
-with radius `4/5`: the external point `1` gives product `9/25`, whose certified
-square-root output is `3/5`.
-It now also records the interior point `t=1/2`, where the directed product is
-`-39/100`; this concrete sign witness keeps item 55's directed-segment core
-distinct from the later unsigned-length interpretation.
-
-**Additional computable-analysis target â€” Gaussian route to (n)-ball volume.**
-The `FiniteNBallVolume` module adds a literal finite two-dimensional
-product-sum evaluator.  The reusable theorem
-`finiteProductSum2D_factorized` proves the separable-kernel identity for
-arbitrary finite sample lists; the concrete sample-grid calculation is only a
-regression witness, not a standalone finite-sum milestone.  This is the
-rectangular algebra needed before attaching cell widths and error schedules to
-a genuine multiple-integral construction.  Its weighted companion
-`finiteProductIntegralSum2D` attaches rational cell widths and
-`finiteProductIntegralSum2D_factorized` proves the corresponding weighted
-rectangle factorization.  The module also records the exact finite product law for (n) independent
-one-dimensional Gaussian approximants and the rational coefficient recurrence
-for the (n)-ball volume model.  The one-dimensional Gaussian integral, its
-square-to-Ï€ bridge, radial shell estimates, and unbounded tails remain explicit
-future interfaces rather than being smuggled in as Lebesgue integration.
-The first low-dimensional recurrence cases are now explicit: the disk and
-3-ball identities are joined by `nBallVolumeModel_four`, giving
-`(1/2) * piApprox^2 * radius^4`, and `nBallVolumeModel_five`, giving
-`(8/15) * piApprox^2 * radius^5`. These remain finite recurrence identities;
-the Gaussian integral and square-to-Ï€ bridge are separate targets.
-The next parity pair is now checked as well: `nBallVolumeModel_six` gives
-`(1/6) * piApprox^3 * radius^6`, while `nBallVolumeModel_seven` gives
-`(16/105) * piApprox^3 * radius^7`. The Gaussian integral and radial
-shell/tail bridge remain separate computable targets.
-The following pair is explicit too: `nBallVolumeModel_eight` gives
-`(1/24) * piApprox^4 * radius^8`, while `nBallVolumeModel_nine` gives
-`(32/945) * piApprox^4 * radius^9`. These are still finite recurrence
-checkpoints, not a claim about Gaussian integration or unbounded volume.
-The homogeneity theorem `nBallVolumeModel_scale` now records the expected
-radius-scaling law exactly: scaling the radius by `s` scales the finite model
-by `s^n`. This is the algebraic volume property needed before any analytic
-Gaussian or radial-shell bridge is introduced.
-
-The companion `FiniteGaussianIntegral` module now supplies the bounded analytic
-prefix: it integrates the even Taylor polynomial for `exp (-x^2)` term by term
-over `[-1,1]`.  The four-term and six-term prefixes are exactly `52/35` and
-`31049/20790`.  This is the first concrete Gaussian integral object in the
-project; the full-line tail and square-to-Ï€ theorem remain the next bridges.
-The stage-eight prefix is additionally `1009219/675675`, and the exact
-stage-six-minus-stage-four refinement gap is `23/2970`.
-The same file adds the finite reciprocal-square tail partial sum at cutoff `1`:
-four terms give `1669/3600 < 1`.  This is deliberately a transport layer,
-not yet a Gaussian claim; it awaits the pointwise proof
-`exp (-x^2) â‰¤ 1/x^2` for `x â‰¥ 1`.
-The reciprocal-square prefix now also reaches six terms (`90281/176400`) and
-eight terms (`3427741/6350400`), with the latter still below `1`.
-The existing tail-enclosed exponential evaluator also now checks the concrete
-point `x=2`: its stage-20 upper endpoint for `exp (-4)` is at most `1/4`.
-The same stage also verifies `exp (-9) â‰¤ 1/9` and `exp (-16) â‰¤ 1/16`, packaged
-as `gaussianTailPointLadder_stage_twenty`.
-The reusable `gaussianTailBoxUpper` interface packages each certified upper
-endpoint as a function of the rational tail point and stage, with the same
-three-point ladder exported by `gaussianTailBoxUpper_stage_twenty_ladder`.
-The finite transport theorem
-`gaussianTailBoxUpper_stage_twenty_three_point_sum` sums those three certified
-upper boxes into the rational tail budget `61/144`.
-The seven-point ladder now extends the stage-20 checks through `x=5` and uses
-stage 100 for `x=6,7,8`, where the tighter evaluator precision is needed.
-`gaussianTailBoxUpper_stage_twenty_eight_point_sum` packages their combined
-rational bound. This lengthens the finite tail evidence while the
-general inequality `exp(-x^2) â‰¤ 1/x^2` and the completed Gaussian integral
-remain separate bridges.
-The finite (n)-ball recurrence now exposes its first geometric cases:
-`nBallVolumeModel_two` gives the disk model (pi r^2), and
-`nBallVolumeModel_three` gives the 3-ball model ((4/3)pi r^3), with the
-symbol `piApprox` still an explicit rational approximation rather than a
-completed real constant.
-The ladder now includes `x=5`, with `exp (-25) â‰¤ 1/25`; the four-point sum is
-bounded by `1669/3600`, exactly matching the reciprocal-square tail prefix.
-The reusable `PiProofs.pointSegmentLengthRaw` interface now applies the same
-certified square-root algorithm to any rational-coordinate squared distance,
-with validity and `SqrtRawSpec` theorems for later Ptolemy and polygonal-length
-work. The full Euclidean Ptolemy identity remains open.
-The finite Ptolemy length certificate now closes that gap for one concrete
-rational cyclic quadrilateral: all six raw chord lengths are equivalent to
-explicit rational witnesses satisfying Ptolemyâ€™s identity. The general
-Euclidean theorem remains outside the current boundary.
-The checked rational unit-circle group law and stereographic chart addition
-formulas in `RationalCircle.Trigonometry` are the finite geometric core of
-benchmark item 17; the represented complex-exponential bridge remains open.
-The executable point-power package `RationalCircle.Trigonometry.pointPow`,
-with `pointPow_add` and `pointPow_normSq`, now supplies the corresponding
-finite de Moivre-style power core: powers compose by exponent addition and
-preserve unit norm; `pointPow_normSq_of_unit` exposes that final unit-circle
-conclusion directly. The product-power law `pointPow_mul` now also checks
-the finite identity `(P*Q)^n = P^n*Q^n`.
-The explicit `pointPow_three` identity adds the first nontrivial odd-power
-coordinate formula, (P^3=(x^3-3xy^2,\;3x^2y-y^3)), as a finite rational
-triple-angle shadow of de Moivre's law.
-The new `FiniteDeMoivreExample` module makes item 17 concrete at the rational
-point `(3/5,4/5)`: its executable square is `(-7/25,24/25)`, with unit norm
-certificates and an exact bridge to the finite `QComplex` natural power. The
-angle/exponential interpretation remains deferred.
-The same module now checks the cubic witness
-`(3/5+4i/5)^3 = -117/125 + (44/125)i`, including coordinate and unit-norm
-certificates. This exercises the general `pointPow_three` identity at a
-fully explicit rational point.
-The fourth-power witness is now checked as well:
-`(3/5+4i/5)^4 = -527/625 - (336/625)i`, with unit norm and a direct
-`QComplex.natPow` bridge.  The angle/exponential interpretation remains
-deferred.
-The fifth-power witness is now checked too:
-`(3/5+4i/5)^5 = -237/3125 - (3116/3125)i`, with its unit-norm and finite
-`QComplex.natPow` bridge.  This extends the rational de Moivre computation
-without adding the deferred angle/exponential interpretation.
-The sixth-power witness is now checked as well:
-`(3/5+4i/5)^6 = 11753/15625 - (10296/15625)i`, with the same unit-norm and
-finite natural-power bridges. The angle/exponential interpretation remains
-deferred.
-The seventh-power witness continues the same finite chain:
-`(3/5+4i/5)^7 = 76443/78125 + (16124/78125)i`, with exact coordinates,
-unit norm, and a finite `QComplex.natPow` bridge. The angle/exponential
-interpretation remains deferred.
-`RationalCode.encode`/`RationalCode.decode` round trip and
-`RationalCode.encode_injective`/`RationalCode.encode_eq_iff` show that the
-canonical code is unique, while
-`rationalCode_decode_surjective` gives every rational an explicit
-integer-numerator/positive-denominator code, covering the
-representation core of benchmark item 3.  The checked
-`diagonalPair`/`diagonalUnpair` inverse, `diagonalPair_injective`,
-`integerCode_injective`/`integerCode_surjective`, and
-`rationalNatCode_injective` now certify the code path itself, while
-`rationalNatCode_decode_surjective` now combine these components into an
-explicit natural-number surjection onto the project's rationals.
-The stronger `rationalNatCode_encode_surjective` theorem shows that every
-canonical `RationalCode.encode q` is hit exactly before decoding.
-The packaged `rationalNatCode_existsUnique_canonical_index` theorem records
-the corresponding unique natural-number index for each canonical code.
-The explicit `rationalNatIndex`, `rationalNatCode_index`, and
-`rationalNatIndex_injective` now provide the matching injection from canonical
-rationals to natural indices using the normalized numerator/denominator code;
-the finite coding-level denumerability interface is therefore complete.
-The worked `FiniteRationalCodeExample` makes this interface concrete:
-`rationalNatIndex (3/5) = 61`, and decoding the code at index `61` returns
-`3/5`.
-The certified rational circle-area exhaustion `piCircleArea`, together with
-`PiProofs.AreaLoopValidity.areaValid`, is the project's computable core of
-benchmark item 9; its interpretation as a classical Euclidean measure theorem
-is kept at the chapter's explicit algorithm/area bridge.
-The worked `FiniteCircleAreaExample` now evaluates the area enclosure exactly
-at stages 1, 2, 3, and 4, with rational endpoints, giving a concrete finite
-checkpoint schedule for item 9 without asserting a completed area limit.
-The explicit terminating loop `euclideanGcd`, together with
-`euclideanGcd_eq_gcd`, `Nat.gcd_rec`, and the gcd divisibility laws covers the
-algorithmic part of benchmark item 69.  Its public recurrence
-`euclideanGcd_step` and zero-boundary theorems now expose the executable loop
-directly, together with its positivity certificate
-`euclideanGcd_pos_of_pos` (positive left input suffices) and its symmetry
-theorem `euclideanGcd_comm`.  The exact nondegeneracy characterization
-`euclideanGcd_pos_iff` additionally reduces positivity to the finite input
-condition `a â‰  0 âˆ¨ b â‰  0`.  The
-coprimality bridge `euclideanGcd_eq_one_iff_coprime` identifies the executable
-unit-gcd test with Lean's finite `Nat.Coprime` predicate.  The
-direct divisibility theorems `euclideanGcd_dvd_left` and
-`euclideanGcd_dvd_right` expose the two input certificates directly.  The
-greatestness direction is exposed by `euclideanGcd_dvd_of_dvd`: every common
-divisor of the inputs divides the executable result.  The packaged iff
-`euclideanGcd_dvd_iff` identifies the executable gcd's divisors exactly with
-the common divisors of the two inputs.  The
-recursive certificate
-`bezout_exists` supplies integer coefficients for the exact identity
-`x*a + y*b = Nat.gcd a b`, covering benchmark item 60.
-The bridge `euclideanGcd_bezout_exists` identifies the same coefficient
-certificate with the executable Euclidean-loop result.
-The worked `FiniteGcdSecondExample` computes `gcd(252,198)=18` and checks the
-back-substitution identity `4*252 - 5*198 = 18` for item 69.
-The same worked module now checks `gcd(1071,462)=21` with the independent
-back-substitution identity `-3*1071 + 7*462 = 21`, strengthening the finite
-Euclidean/BÃ©zout evidence for items 60 and 69.
-It now also checks `gcd(12345,6789)=3` with the explicit identity
-`-903*12345 + 1642*6789 = 3`, adding a larger remainder-chain example.
-The natural-number theorem `three_dvd_three_digit` is the three-digit decimal
-core of benchmark item 85. `decimalDigitSum` now supplies a terminating
-decimal digit-sum evaluator with its small-digit reduction lemmas, including
-`decimalDigitSum_eq_self_of_lt_ten` and
-`decimalDigitSum_succ_of_not_lt_ten`, and
-`decimalDigitSum_mod_three` proves global residue preservation modulo 3;
-`three_dvd_iff_decimalDigitSum_dvd` exposes the resulting divisibility test.
-The worked decimal certificate now includes a second pattern, `321`, whose
-digit sum is `6` and which is divisible by 3, alongside the negative control
-`322`.  This gives item 85 two distinct finite decision checkpoints.
-The same certificate now checks the boundary pair `999` and `1000`: digit sum
-`999 = 27` gives divisibility by 3, while `1000` is not divisible by 3.
-The worked decimal certificate now also checks `decimalDigitSum 123456 = 21`
-and `3 âˆ£ 123456`, together with the neighboring non-divisibility witness
-`Â¬3 âˆ£ 123457`, extending item 85 to a six-digit terminating checkpoint.
-The new `basePositionalValue_mod_sub_one` theorem generalizes this finite
-digit-sum congruence to arbitrary bases (b\ge2) modulo (b-1), with
-`decimalPositionalValue_mod_nine` as its decimal specialization.
-The list-based theorem `rationalDot_cauchy_schwarz_of_length_eq` now extends
-the fixed-dimensional Cauchy--Schwarz certificates to every finite rational
-vector of equal length, with the residual represented as a sum of squared
-two-by-two minors.
-The worked `FiniteCauchySchwarzExample` checks equality for the proportional
-rational vectors `(1,2)` and `(2,4)`, including the explicit minor-zero witness.
-The companion `FiniteCauchySchwarzThreeExample` checks the non-proportional
-vectors `(1,2,3)` and `(3,1,2)`: the dot product is `11`, both squared norms
-are `14`, and the explicit minor-square residual is `75`. This gives item 78
-both an equality and a strict finite certificate.
-The new `FiniteCauchySchwarzFourExample` checks vectors `(1,2,3,4)` and
-`(4,3,2,1)`: both squared norms are `30`, the dot product is `20`, and the
-explicit minor-square residual is `500`.
-The new `FiniteCauchySchwarzSixExample` checks vectors `(1,2,3,4,5,6)` and
-`(6,5,4,3,2,1)`: both squared norms are `91`, the dot product is `56`, and
-the explicit minor-square residual is `5145`.
-The reusable induction principle `nat_induction_schema` is the checked finite
-proof/programming core of benchmark item 74.
-The worked `FiniteInductionExample` applies that schema to the arithmetic
-sum: it re-proves `arithmeticSum n = n*(n-1)/2` and checks the stage-5 value
-`10`.
-The same induction witness now checks stage 10 exactly as `45`, providing a
-larger executable checkpoint for item 74.
-The same induction witness now checks stage 20 exactly as `190`, extending the
-finite arithmetic-sum checkpoint.
-It now also checks stage 40 exactly as `780`, extending the explicit induction
-witness while keeping the conclusion entirely finite and rational.
-It now also checks stage 80 exactly as `3160`, extending the finite item-74
-induction schedule.
-The same induction witness now checks stage 160 exactly as `12720`, extending
-the finite schedule while retaining the terminating proof.
-The finite-counting namespace now supplies `subsetCount_eq_pow` for benchmark
-item 52 and the Pascal recurrence/boundary lemmas
-`combination_pascal`/`combination_rat_pascal`/`combination_outside`/
-`combination_rat_outside` and the diagonal bridge
-`combination_rat_self` for the finite certificate core of
-benchmark item 58.  The boundary values `combination_self` and
-`combination_one` are now also checked, giving the diagonal and first-row
-binomial coefficients; `combination_two_rat` supplies the closed rational
-second-row formula, and `combination_three_rat`/`combination_four_rat`/
-`combination_five_rat`/`combination_six_rat`/`combination_seven_rat`/
-`combination_eight_rat` supply the corresponding third- through eighth-row
-formulas.  A general finite-set
-cardinality API remains out of scope.
-The worked `FiniteSubsetCountExample` evaluates the subset recurrence at stage
-8, checking `subsetCount 8 = 2^8 = 256` as a concrete item-52 certificate.
-The same recurrence now has a stage-10 checkpoint,
-`subsetCount 10 = 2^10 = 1024`, making the finite counting refinement
-explicit.
-It now also has stage 12, with `subsetCount 12 = 2^12 = 4096`, extending the
-same executable finite-counting checkpoint.
-It now also has stage 16, with `subsetCount 16 = 2^16 = 65536`, extending the
-same finite recurrence witness.
-It now also has stage 20, with `subsetCount 20 = 2^20 = 1048576`, extending
-the executable item-52 counting schedule.
-It now also has stage 32, with `subsetCount 32 = 2^32 = 4294967296`, extending
-the same finite recurrence witness.
-The stage-64 witness now checks `subsetCount 64 = 2^64 = 18446744073709551616`,
-continuing the terminating recurrence certificate without introducing a
-general finite-set cardinality API.
-The worked `FinitePascalExample` evaluates `C(8,3)=56` and checks the Pascal
-decomposition `C(8,3)=C(7,2)+C(7,3)=21+35` for item 58.
-The Pascal witness now also checks `C(10,3)=120` through
-`C(10,3)=C(9,2)+C(9,3)=36+84`, extending the finite recurrence checkpoint.
-The same witness now checks `C(15,3)=455` through
-`C(15,3)=C(14,2)+C(14,3)=91+364`, adding a larger finite Pascal checkpoint.
-It now also checks `C(20,3)=1140` through
-`C(20,3)=C(19,2)+C(19,3)=171+969`, extending the finite item-58 recurrence
-checkpoint.
-It now also checks `C(25,3)=2300` through
-`C(25,3)=C(24,2)+C(24,3)=276+2024`, extending the finite Pascal schedule.
-The Pascal witness now also checks
-`C(32,3)=C(31,2)+C(31,3)=465+4495=4960`, extending the terminating
-finite recurrence schedule.
-The concrete theorem `sqrt_two_irrational` instantiates the certified square-root
-criterion at $2$, proving benchmark item 1 in the project's `RealRaw`
-representation.  The stronger public classifications
-`sqrt_rational_iff_square` and `sqrt_rational_iff_lowest_terms_square`, along
-with the corresponding irrationality criterion in lowest terms, now expose
-the full finite square-test boundary in Foundations.
-The worked `FiniteSqrtTwoBisectionExample` adds the matching executable trace:
-after four exact dyadic comparisons, the target $x^2=2$ is enclosed by
-`[11/8, 23/16]` with width `1/16`.  This is the project's computational
-alternative to invoking a general completeness theorem.
-The same trace now exports stage eight, enclosing the target in
-`[181/128,363/256]` with width `1/256`. This gives item 1 a tighter exact
-rational checkpoint without changing the potential-infinity semantics.
-The same trace now exports stage twelve, enclosing the target in
-`[181/128,5793/4096]` with width `1/4096`, strengthening the finite item-1
-precision schedule.
-The same trace now exports stage sixteen, enclosing the target in
-`[92681/65536,46341/32768]` with width `1/65536`.
-It now also exports stage twenty, enclosing the target in
-`[741455/524288,1482911/1048576]` with width `1/1048576`, extending the
-potential-infinity schedule without treating the limit as an attained value.
-The public finite-Riemann bridge
-`PiProofs.four_arctanSeries_one_equiv_piCircleArea` identifies the Leibniz
-series presentation with the certified circle-area presentation, covering the
-project-relevant core of benchmark item 26.
-The harmonic evaluator now has the explicit dyadic growth certificate
-`Logarithm.harmonicSum_two_pow_lower`, derived from
-`Logarithm.harmonicSum_double_lower`; this is the finite-growth core of
-benchmark item 34 (harmonic-series divergence).  The stronger
-`Logarithm.harmonicSum_two_pow_reaches` now returns an explicit stage
-`2^(2 * target)` reaching every natural target.  This is the project's
-effective, potential-infinity formulation of divergence: every requested
-finite height is reached by a finite computation, without asserting an
-attained infinite sum.
-The named witness now instantiates the next checkpoint explicitly:
-`harmonicSum_stage1024_reaches_five` proves `H_1024 >= 5`, extending the
-dyadic potential-infinity schedule beyond the stage-256 height-four witness.
-The next named witness `harmonicSum_stage4096_reaches_six` proves
-`H_4096 >= 6`, extending the same finite height schedule once more.
-The new `harmonicSum_stage16384_reaches_seven` witness proves `H_16384 >= 7`,
-continuing the explicit finite growth schedule.
-The new `harmonicSum_stage65536_reaches_eight` witness proves
-`H_65536 >= 8`, extending the same potential-infinity ladder.
-The monotonicity theorem `Logarithm.harmonicSum_le_of_le` and its propagation
-corollary `Logarithm.harmonicSum_two_pow_reaches_later` now transport each
-finite target certificate to every later harmonic stage. This makes the
-divergence witness compositional rather than tied to one selected dyadic
-index.
-The geometric-series layer now has the matching finite reachability package
-`Series.geometricSum_finiteApprox_reaches_of_power_budget`: an explicit power
-budget on a rational stage returns both the finite partial-sum upper bound and
-the remaining error bound.  This strengthens benchmark item 66 in the same
-potential-infinity style, with no completed-real limit object.
-The public monotonicity certificates `Series.geometricSum_le_of_le` and
-`Series.geometricSum_gap_le_of_le` now make the finite approximation target
-stable under later stages: partial sums increase and their rational gaps to
-the endpoint decrease, for every nonnegative ratio below one.
-The half-ratio specialization `Series.geometricSum_finiteApprox_reaches` now
-constructs that stage from any requested positive rational tolerance using the
-executable dyadic schedule, so the budget is no longer an implicit supplied
-witness. The raw representation theorem
-`Series.geometricRaw_reaches_of_positive_tolerance` exposes the same finite
-stage selector directly at the `RealRaw` interface.
-The rational-circle determinant package
-`RationalCircle.triangleTwiceArea_cyclic`,
-`RationalCircle.triangleTwiceArea_swap_neg`, and
-`RationalCircle.triangleTwiceArea_zero_of_collinear` and
-`RationalCircle.triangleTwiceArea_pos_of_oriented` supply the finite
-orientation/area core of benchmark item 27; completed angle-sum semantics
-remain deferred.
-The worked `FiniteTriangleOrientationExample` instantiates this package at
-`(1,0)`, `(0,1)`, and `(-1,0)`: the signed twice-area is `2`, cyclic
-permutation preserves it, swapping two vertices negates it, and the positive
-orientation certificate is checked directly.
-For benchmark item 80, `MultiplicativeCertificate` now records finite lists of
-nontrivial factors and their product, with the checked example
-`factorizationCertificate60`.  The finite primality search and recursive
-constructor `primeFactorCertificate_exists` now establish existence of a
-prime-labelled certificate for every `n>1`.
-The public corollary `exists_basicPrime_dvd` extracts the corresponding
-basic-prime divisor theorem for every `n>1`.
-The constructor `MultiplicativeCertificate.append` now composes two such
-finite certificates for a product.  The corresponding
-`factors_nonempty` lemmas for both certificate structures show that a
-certificate for `n>1` contains at least one factor.
-The companion `MultiplicativeCertificate.factor_dvd` theorem shows that every
-listed nontrivial factor divides the certified product.
-The reusable `natProduct_perm` lemma proves that finite factor products are
-invariant under list permutation.  The list-level theorem
-`primeFactorList_perm_of_same_product` and the packaged theorem
-`PrimeFactorCertificate.factor_perm` then prove full repeated-factor
-uniqueness up to permutation for prime-labelled certificates.
-The list-member divisibility theorem `list_mem_dvd_natProduct` and the
-corollary `PrimeFactorCertificate.exists_prime_dvd` then produce a certified
-basic-prime divisor for every nontrivial prime-labelled certificate.
-The packaged extraction theorem `PrimeFactorCertificate.exists_factor_dvd`
-also returns the factor's list membership, prime label, and divisibility in
-one result, ready for recursive certificate construction.
-The uniqueness groundwork `basicPrime_eq_of_dvd` proves that divisibility
-between two basic primes forces equality.
-The corollary `basicPrime_eq_factor_of_dvd_primeFactorization` upgrades this:
-a basic prime dividing a prime-labelled certificate equals one of its listed
-factors.
-The combined characterization `basicPrime_dvd_primeFactorization_iff` makes
-this an iff: prime divisors of the certified number are exactly the listed
-prime factors.
-The cross-certificate lemma
-`PrimeFactorCertificate.factor_mem_of_factor_mem` now shows that every factor
-in one prime-labelled certificate occurs with the same value in any other
-certificate for the same number.  Its symmetric package
-`PrimeFactorCertificate.factor_mem_iff` gives
-the corresponding occurrence-level iff.  The Nat-list helpers
-`natList_perm_cons_of_mem` and `natList_perm_of_nodup_of_mem_iff` now lift this
-to `PrimeFactorCertificate.factor_perm_of_nodup`: multiplicity-free
-prime-labelled certificates have the same factors up to permutation, and
-`PrimeFactorCertificate.factor_perm` extends this to repeated factors.
-The worked certificate is now also prime-labelled by `BasicPrime` proofs for
-2, 3, and 5 and `primeFactorizationCertificate60`.  The first reusable
-Euclid-lemma step is now present as `basicPrime_dvd_of_dvd_mul`; this remains
-a concrete example, not a general Fundamental Theorem of Arithmetic proof.
-The new `FinitePrimeFactorExample` adds the prime-labelled factor list
-`[2,2,2,3,3,5]` for `360`, verifies its product, and records divisibility by
-each distinct prime.  This makes the certificate-level item-80 boundary
-concrete beyond the earlier `60` example.
-The same worked module now checks the larger certificate
-`27720 = 2^3 * 3^2 * 5 * 7 * 11`, including terminating primality searches
-for the newly introduced factors `7` and `11`.
-The criterion `basicPrime_of_no_proper_divisor` now isolates the logical
-primality test that a future bounded divisor search must establish.
-The iff form `basicPrime_iff_no_proper_divisor` exposes that criterion in both
-directions for later executable-search correctness proofs.
-The finite evaluator `properDivisorSearch` now checks candidates through the
-input bound; its soundness, completeness, and `none` characterization are
-proved by `properDivisorSearch_some_is_proper`,
-`properDivisorSearch_some_of_proper`, and
-`properDivisorSearch_none_iff_no_proper`.  Consequently,
-`basicPrime_of_properDivisorSearch_none` converts a finite search miss into a
-certified basic-prime proof.  Together with
-`PrimeFactorCertificate.factor_perm`, the recursive existence layer
-`primeFactorCertificate_exists` now closes the certificate-level existence
-and uniqueness core of #80.
-Its immediate power consequence, `basicPrime_dvd_of_dvd_pow`, is also checked
-and will support later uniqueness arguments.
-The finite list product `natProduct` and
-`basicPrime_dvd_of_dvd_natProduct` lift this to a prime dividing one member of
-a finite factor list; this is still certificate-level FTA groundwork.
-The corollary `basicPrime_dvd_of_dvd_primeFactorization` connects it directly
-to a `PrimeFactorCertificate`.
-The construction `PrimeFactorCertificate.append` now composes certificates
-for `m` and `n` into one for `m*n`, preserving the prime labels and product
-equation.
-The converse certificate interface `PrimeFactorCertificate.factor_dvd` now
-shows that every listed factor divides the certified number, complementing
-the prime-divisor extraction and uniqueness groundwork.
-The companion bound `PrimeFactorCertificate.factor_le` places every listed
-factor below the certified number whenever `1 < n`, making the certificate
-list explicitly bounded for finite search and validation.
-The Euclid-style finite construction
-`exists_basicPrime_not_mem_of_all_basicPrime` now returns a certified prime
-outside every finite list whose members are certified prime: it factors the
-finite product plus one and rules out every listed factor by divisibility of 1.
-This is the potential-infinity core of the infinitude-of-primes theorem, with
-no completed infinite set or classical existence principle.
-The specialized `shiftedRangeProduct` construction now turns that list-level
-result into `exists_basicPrime_gt`: every finite bound `n` has a certified
-prime strictly above it.  This is the direct potential-infinity form of prime
-unboundedness.
-
-**Current benchmark count.** At this certificate boundary, 48 entries have a
-checked project-relevant core: 1, 2, 3, 4, 9, 14, 15, 16, 17, 23, 26, 27, 34, 35, 37, 38, 42, 43, 44, 46, 49, 55, 57, 60, 64, 65, 66, 68,
-69, 73, 74, 75, 76, 77, 78, 79, 80, 81, 85, 89, 91, 92, 94, 95, 97, 98, and 100. This counts finite and rational-coordinate cores
-honestly; it does not claim full classical theorem statements for every item.
-The admission rule is strict: every counted entry must have a project-native
-statement over `RealRaw`/abstract `Real`, rational interval data, or a finite
-certificate. A scoped constructive replacement is counted under its scoped
-statement, never as an unrestricted theorem over completed real numbers.
-
-The new `monotone_of_succ_le` and `antitone_of_succ_ge` lemmas propagate a
-successor-step rational order bound across every finite index interval.  The
-explicit `ascendingNaturalSequence` stages 64 and 128 provide the executable
-checkpoint for item 73.  The bounded dyadic sequence `1 - (1/2)^n` adds a
-computable potential-infinity witness: it is monotone, bounded by 1, and its
-stage-8 error is exactly `1/256`; convergence as an attained real limit is
-intentionally left outside this finite boundary.
-Stages 16 and 32 now extend this ladder with exact errors `1/65536` and
-`1/4294967296`, still without asserting an attained limit.
-Stages 64 and 128 extend it further, with errors `1/2^64` and `1/2^128`.
-The new `dyadicApproach_error_shrinks` theorem upgrades these checkpoints to
-an explicit potential-infinity schedule: for every positive rational tolerance,
-the denominator-derived stage bound makes the remaining error small enough.
-It still produces no attained limit or completeness principle.
-
-The finite four-point transform in `FiniteFourierCertificate.lean` adds the
-item-76 core: the zero mode sums to `4`, modes `1`, `2`, and `3` cancel exactly,
-and mode `4` returns to `4` at the rational quarter-turn roots.  This is a
-finite Fourier orthogonality and periodicity certificate, not a claim about
-convergence of an infinite Fourier series.
-The same module now adds a Parseval-style finite energy check for the signal
-`(1,2,3,4)`: its unnormalized quarter-turn coefficients have energies
-`100, 8, 4, 8`, summing to `120 = 4*(1+4+9+16)`.  This strengthens the finite
-transform core without introducing an infinite Fourier limit.
-The transform checkpoint now also verifies mode `5`, whose four-point sum is
-again zero. This extends the finite periodicity evidence beyond one complete
-mode cycle while remaining a rational-complex calculation.
-The parameterized `fourPointFourierTransform_parseval` theorem now proves the
-same unnormalized energy identity for arbitrary rational samples, extending
-the concrete `(1,2,3,4)` check to a reusable four-point transform law.
-The companion `fourPointFourierTransform_modes` exposes the four exact mode
-formulas in rational coordinates, so the finite cancellation is available as
-an explicit computational interface.
-
-The exact lattice triangles in `FinitePickCertificate.lean` add item 92's
-finite coordinate core.  The `(4,3)` triangle has area `6`, boundary count `8`,
-and interior count `3`; the independent `(5,2)` triangle has area `5`,
-boundary count `8`, and interior count `2`.  A non-axis-aligned triangle with
-vertices `(0,0),(4,1),(1,4)` has area `15/2`, boundary count `5`, and
-interior count `6`; all three satisfy Pick's identity.
-The fourth finite witness uses vertices `(0,0),(6,0),(2,5)`: area `15`,
-boundary count `8`, and interior count `12`, again satisfying Pick's identity
-with a different non-primitive edge pattern.
-The unrestricted lattice-polygon theorem remains deferred.
-
-The prime-reciprocal accumulator in `FinitePrimeReciprocalCertificate.lean`
-adds item 81's potential-infinity core: every finite certified prime list has
-a new certified prime whose positive reciprocal strictly increases the exact
-rational sum.  The explicit six-prime checkpoint reaches `40361/30030`
-through prime `13`, with a strict increase from the five-prime stage.  This
-does not claim the completed infinite divergence theorem.  The eight-prime
-checkpoint through `19` now reaches `14117683/9699690`, with a strict increase
-from the six-prime stage.  The ten-prime checkpoint through `29` now reaches
-`9920878441/6469693230`, with a structural strict increase from the eight-prime
-stage.
-The twelve-prime checkpoint now verifies that the explicit accumulator exceeds
-`3/2`, extending the finite growth ladder without asserting divergence of an
-infinite prime series.
-
-The finite primality-search witnesses in `FiniteBertrandCertificate.lean`
-add item 98's core at (n=10), (n=20), (n=30), (n=40), (n=50), and (n=60):
-primes 11, 23, 31, 41, 53, and 61 are checked inside the corresponding
-doubled intervals.
-`bertrand_extended_finite_certificate` packages all six interval witnesses as
-one reusable finite proposition, including the new `(60,120)` stage.
-The general postulate remains deferred.
-
-The rational rectangle inequality in `FiniteIsoperimetricCertificate.lean`
-adds item 43's finite geometric core: \(16A\le P^2\), with equality exactly
-for a square and an explicit \(3\times4\) certificate.  The general
-plane-region isoperimetric theorem remains deferred.  The companion (5\times12)
-certificate records area (60), perimeter (34), and strict defect
-`34^2 - 16*60 = 196`.
-The quantitative defect identity `rectangle_isoperimetric_gap` strengthens
-this core: the perimeter-square excess is exactly `4 * (a-b)^2`, making the
-equal-side equality case an explicit rational stability statement.
-
-The finite occupancy evaluator in `FiniteBirthdayCertificate.lean` adds item
-93's core: 4 people over 10 days give 5040 collision-free assignments and
-4960 collision assignments, with exact ratios `63/125` and `62/125`.  The
-five-person extension gives 30240 collision-free assignments and 69760
-collisions out of 100000, with ratios `189/625` and `436/625` that again
-partition the total exactly.
-
-**Parallel formalization batch.** The series, effective-calculus, geometry,
-algebra, and finite-ODE workstreams have added the following potential-infinity
-certificates: `Series.powerSum_le_mul_pow`,
-`ExactFunction.cube_secant_derivative_bracket`,
-`RationalCircle.point_power_line_parameter_identity`,
-`Polynomial.quartic_factor_of_root`, and
-`LinearODE.twoByTwo_cayley_hamilton`. Each is a finite rational
-statement; none asserts an attained infinite limit.
-
-The next batch extends the same boundary with
-`DirichletSeries.zetaTwoPartial_add_finiteTail_le_interval_hi`,
-`ExactFunction.square_secant_derivative_bracket`,
-`RationalCircle.triangleTwiceArea_quadrilateral_diagonal_additivity`, and
-`Polynomial.quartic_remainder`. The Peano--Baker recurrence was attempted but
-is not counted until its shared-module proof succeeds.
-
-The latest batch adds five more finite certificates at the same boundary:
-`DirichletSeries.zetaTwoInterval_contains_basel_decimal_1000` records a
-stage-1000 rational enclosure containing the decimal $1.644934$;
-`Series.AlternatingRaw.leibnizAlternatingRaw_width_le_one_div_succ` gives an
-explicit finite width schedule for the Leibniz evaluator;
-`rationalBisectionWidth_le_error_budget` bounds a finite rational bisection
-width under a supplied budget;
-`Polynomial.eval_pos_of_nonneg_cons_of_pos` and
-`Polynomial.no_nonnegative_root_of_nonneg_cons_of_pos` provide a rational
-nonnegative-root exclusion certificate; and
-`factorizedQuadratic_has_computable_roots` supplies explicit roots for a
-factorized rational-complex quadratic. None uses completeness or an attained
-infinite object.
-
-The next formalization pass strengthens existing entries rather than inflating
-the benchmark count: `Series.geometricSum_gap_le_of_power_budget` turns a
-finite power budget into a geometric-tail error bound;
-`Series.AlternatingRaw.leibnizAlternatingRaw_width_eq_reciprocal` and its
-budget corollary expose the exact finite Leibniz width;
-`Series.AlternatingRaw.leibnizAlternatingRaw_reaches_of_positive_tolerance`
-now constructs a natural stage for every positive rational width request;
-`Differential.quartic_secant_derivative_bracket` gives a quartic finite
-mean-value bracket; `RationalCircle.heron_three_four_five_coordinate_certificate`
-checks Heron's identity against explicit 3--4--5 coordinates; and
-`Polynomial.monic_quadratic_root_iff` characterizes the rational roots of a
-monic quadratic by its two supplied factors. These remain certificate-level
-substitutes for the corresponding classical theorems.
-
-This pass also adds closed forms for the squared and cubed power sums, an
-exact rational factor-cancellation quotient certificate, a non-equilateral
-coordinate law-of-cosines example, the finite QComplex power law
-`QComplex.natPow_mul`, and explicit roots for a factorized QComplex cubic.
-These extend items 17, 37, 64, 77, and 94 without introducing completed
-trigonometric functions, limits, or completeness.
-
-The current boundary pass adds a denominator-budget modulus for the Basel
-interval evaluator, an explicit Taylor kernel remainder budget, a generic
-factorized QComplex quartic certificate, and the bridge
-`eulerCenter_eq_natPow` from Euler-center approximants to finite repeated
-multiplication. These sharpen items 2, 14, 17, 35, and 46 while preserving
-the projectâ€™s certificate-level interpretation.
-
-The next finite-schema pass adds a generic monomial secant/derivative bracket,
-a root-count-at-most-two consequence for a monic quadratic, a reusable
-stage-to-stage Basel target-interval propagation theorem, and an explicit
-Ptolemy coordinate certificate. These extend items 14, 75, 95, and 100 while
-remaining entirely rational and finite.
-
-The finite Mean Value interface is now sharpened by
-`Polynomial.finiteCubic_secant_derivative_enclosure_of_budget`: an explicit
-rational mesh budget places a cubic secant inside an epsilon-neighborhood of
-the endpoint derivative, without asserting an attained real intermediate
-point.  The dyadic AM--GM core also exposes
-`DyadicAMGM.product_mul_card_pow_le_sum_pow`, a denominator-free form useful
-for finite exact-arithmetic certificates.
-The generic `Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap`
-now packages the corresponding absolute secant error for every
-nonnegative-coefficient Horner polynomial: the secant's distance from the
-left endpoint derivative is bounded by the finite derivative bracket width.
-This is the reusable rational MVT error interface behind the degree-specific
-budget theorems.
-
-The Mean Value target is now explicitly layered: the constructive FTC
-endpoint identity comes first, followed by an integral-average derivative
-certificate, with a pointwise Lagrange witness reserved for an effectively
-continuous monotone derivative (or an effectively differentiable convex
-function).  Mere convexity is handled through one-sided derivatives or subgradients rather
-than an unjustified exact value of `f'` at an intermediate point.
-The reusable theorem
-`Integral.ExactCellOrderPreservation.integral_average_between_bounds` now
-formalizes that middle layer: on a positive rational cell, lower and upper
-pointwise bounds imply that the certified endpoint integral divided by the
-cell length lies between the same bounds.  It is an average-value enclosure,
-not an assertion that a point attaining the average exists.
-For the unit cubic, the new `cubicUnit_mvt_bisection_search` packages the
-corresponding potential-infinity witness: the secant slope is `1`, the
-normalized derivative target is `1/3`, and the existing certified square
-bisection searches an interval whose squared values enclose that target.  This
-is an approximate MVT witness for the generally irrational intermediate point,
-not a rational exact-root claim.
-The quartic companion now uses the generic monotone-target bisection interface:
-`quarticUnit_mvt_bisection_tolerance_certificate` accepts every positive
-rational tolerance and returns a rational interval bracketing the normalized
-derivative target `1/4`, with the width budget proved explicitly.  This is a
-reusable higher-degree MVT search pattern, still expressed through potential
-infinity rather than an attained irrational point.
-The general `FiniteMonomialMVTSearch` module now packages this pattern for
-every monomial `x^(n+1)` on `[0,1]`: its normalized derivative average is
-`1/(n+1)`, the endpoint target bracket is proved uniformly, and
-`monomialUnit_mvt_bisection_tolerance_certificate` supplies a rational
-interval of any requested positive width.  This promotes the cubic and
-quartic examples to a reusable higher-degree MVT certificate.
-
-For benchmark item 90, `finiteStirlingRatio_pos` now makes the positivity of
-the finite Stirling-shaped ratio explicit for every natural index and every
-positive rational scale input.  This provides the denominator gate for a
-future finite interval transport.  The concrete n=10 certificate is now also
-sharpened by `finiteStirlingRatioAtTen_unit_enclosure`, which places the
-computed ratio in `[1, 101/100]` while leaving Stirling's asymptotic theorem
-deferred.
-The companion `finiteStirlingRatioAtTen_unit_error` exports this as the
-explicit rational error budget `qabs (Râ‚â‚€ - 1) <= 1/100`.
-The companion `FiniteStirlingStageEight` certificate repeats the bounded
-calculation at `n=8`, with a rational square-root bracket for `sqrt(16*pi)`
-and a checked ratio enclosure `[1/2,2]`.
-The new `FiniteStirlingStageTwelve` certificate repeats the same finite
-transport at `n=12`, using the rational square-root bracket anchored at
-`217/25` for `sqrt(24*pi)` and the enclosure `[1/2,2]`.
-The new `FiniteStirlingStageSixteen` certificate extends the same bounded
-transport to `n=16`, using the bracket `1003/100` for `sqrt(32*pi)` and again
-checking the ratio enclosure `[1/2,2]`.
-The new `FiniteStirlingStageTwenty` certificate continues this bounded
-transport to `n=20`, using the bracket `1121/100` for `sqrt(40*pi)` and again
-checking the ratio enclosure `[1/2,2]`; Stirling's asymptotic limit remains
-deferred.
-The new `FiniteStirlingStageTwentyFour` certificate extends the same bounded
-transport to `n=24`, using the bracket `12279/1000` for `sqrt(48*pi)` and again
-checking the ratio enclosure `[1/2,2]`.
-The `FiniteStirlingStageThirtyTwo` certificate continues the same finite
-transport to `n=32`, using the bracket `1418/100` for `sqrt(64*pi)` and again
-checking the ratio enclosure `[1/2,2]`; the asymptotic limit remains deferred.
-
-The matrix workstream also adds
-`LinearODE.HarmonicOscillator.twoByTwo_matrixPow_three`, reducing the third
-power of an explicit rational (2\times2) matrix to its trace, determinant,
-the matrix, and the identity. This advances the finite Cayley--Hamilton core
-without introducing a general matrix recurrence. The companion
-`LinearODE.HarmonicOscillator.twoByTwo_matrixPow_four` carries the same
-reduction through the fourth power, with coefficients generated by the finite
-Cayley--Hamilton recurrence.
-The new `HarmonicOscillator.ratMatrix_threeByThree_eq_explicit` bridge and
-`ratMatrix_threeByThree_cayley_hamilton` theorem transport the explicit
-3-by-3 identity to arbitrary rational matrix data, while keeping the
-characteristic coefficients as finite entry formulas.
-The worked `FiniteThreeByThreeCayleyExample` adds the diagonal rational
-matrix `diag(1,2,3)`: Lean checks trace `6`, second coefficient `11`,
-determinant `6`, and the explicit identity `A^3 - 6A^2 + 11A - 6I = 0`.
-The same module now checks the non-diagonal upper-triangular matrix
-`[[1,1,0],[0,2,1],[0,0,3]]` with the same coefficients and Cayley--Hamilton
-identity, demonstrating the finite matrix layer beyond diagonal data.
-The diagonal witness also computes its fourth finite power exactly:
-`A^4 = diag(1,16,81)`, providing a concrete consumer of the finite
-matrix-power recurrence.
-The companion `ratMatrix_threeByThree_matrixPow_recurrence` transports the
-finite third-order power recurrence to the same arbitrary matrix input.
-The companion `LinearODE.HarmonicOscillator.twoByTwo_inverse_unique_right`
-proves uniqueness of the finite inverse certificate among all right inverses
-of a nonsingular rational two-by-two matrix.
-The symmetric `twoByTwo_inverse_unique_left` theorem supplies the corresponding
-left-inverse uniqueness certificate.
-The solution interface `twoByTwo_inverse_solves` then certifies that applying
-the executable inverse to any finite rational state solves the original system.
-`twoByTwo_solution_unique` completes the finite system interface by proving
-that two rational solutions with the same right-hand side coincide.
-
-The bridge pass also adds a logarithm mesh error budget, strict arctangent
-branch separation for inverse search, finite root-of-unity multiplication
-closure, exact (2\times2) inverse identities, and an explicit arctangent
-kernel error box. These advance the effective versions of items 17, 49, 64,
-75, and 79 without asserting a classical IVT, completed logarithm, or general
-algebraic closure theorem.
-
-The function-level pass now adds a finite exponential difference-quotient
-enclosure, represented-target square-root search, `RealFunRaw` addition
-closure, an FTC endpoint-stage transport theorem, and a four-step rational
-rotation cycle. These are constructive bridge lemmas for items 15, 17, 49,
-64, 75, and 79; they do not assert the corresponding completed-real theorems.
-
-The named-item pass accepts generic factored quotient cancellation for the
-L'Hopital boundary and a restricted one-variation cubic sign/root bound for
-Descartes. These are explicit finite substitutes for items 64 and 100.
-The worked `quadratic_linear_worked_remainder` example now instantiates the
-L'Hopital certificate with the finite quotient analogue of `(x^2-1)/(x-1)`:
-the residual error from the base value `2` is exactly the computable step, and
-the stage-indexed version makes that error `1/n`. No limit theorem is added.
-The companion cubic certificate records the finite residual `3*step + step^2`
-after cancelling `(x-1)` from `x^3-1`, together with its stage-indexed form at
-`step = 1/n`.  This strengthens item 64 without adding the deferred limit
-theorem.
-The new `cubic_linear_worked_remainder_at_stage_error_le_four_div` turns that
-identity into an explicit precision schedule:
-`qabs (R_n - 3) <= 4/n` for every positive stage `n`. This is the finite
-algorithmic remainder bound needed before any future limit assembly.
-The quartic companion now has the matching bound
-`qabs (Q_n - 4) <= 11/n`, certifying the finite residual
-`6/n + 4/n^2 + 1/n^3` at every positive stage. This extends the precision
-schedule across the next cancellation degree without claiming a limit.
-The worked `FiniteSepticMVTExample` now instantiates the finite Mean Value
-interface at degree seven: Lean computes the secant of `x^7` on `[0,1]` as
-`1` and checks the endpoint derivative enclosure `[0,7]`.  This is a concrete
-item-75 benchmark witness while retaining the project's finite, rational
-algorithmic boundary.
-The new `FiniteNonicMVTExample` extends the finite polynomial ladder to degree
-nine: the secant of `x^9` is `1` on `[0,1]` with derivative bracket `[0,9]`,
-and is `511` on `[1,2]` with endpoint bracket `[9,2304]`. No intermediate
-real point is selected.
-The cubic MVT pass now also checks the signed interval `[-1,1]`: the secant
-is `1`, and the finite derivative enclosure is `[0,3]`. This broadens item
-75's rational-domain coverage without selecting an intermediate point.
-It now also includes a genuine pointwise checkpoint on `[2,11]`: the cubic
-secant slope is `147`, attained by the monotone derivative `3*x^2` at the
-rational interior witness `t = 7`. This is the first explicit pointwise MVT
-certificate in the project's monotone-derivative direction.
-The reusable `Differential.cube_secant_supplied_mvt_witness` now packages this
-pattern for arbitrary rational endpoints and a supplied rational interior
-point: checking `a^2 + a*b + b^2 = 3*t^2` is enough to certify the cubic
-secant identity at `t`. This makes the pointwise witness an interface rather
-than a one-off numerical example, while still avoiding an existential real
-intermediate-point theorem.
-The new `FiniteQuinticMVTExample` adds the intermediate degree-five witness:
-the secant of `x^5` on `[0,1]` is `1`, and the finite derivative bracket is
-`[0,5]`. This extends item 75â€™s worked polynomial ladder without selecting an
-intermediate point.
-The new `FiniteQuarticMVTExample` fills the intermediate degree-four case:
-the secant of `x^4` on `[0,1]` is `1`, with finite derivative bracket `[0,4]`.
-The Descartes examples now include `threeVariationCubic`: the finite list for
-`(x-1)(x-2)(x-3)` has three sign variations, and exact factorization proves
-that its positive rational roots are precisely `1`, `2`, and `3`.
-The finite integration-by-parts ladder now includes
-`FiniteQuarticQuinticIntegrationByParts`: the two endpoint-weighted rational
-grid sums for `x^4` and `x^5` telescope to the endpoint product `1` at every
-positive stage, with stage four checked explicitly.  This extends the finite
-FTC/product-rule core of item 15 without introducing a completed integral or
-a real-number limit.
-The existing `FiniteFTCQuintic` certificate is now surfaced as the next
-item-15 checkpoint: finite left and right endpoint sums for `x^5` on `[0,1]`
-enclose `1/6`, with stage twenty linked explicitly in the Blueprint.  This
-keeps the quintic FTC construction discoverable alongside the quartic and
-sextic checkpoints.
-The new `FiniteComplexQuadraticExample` supplies the next worked FTA
-boundary: Lean checks both distinct rational-coordinate roots of
-`z^2 - 2*z + 5`, the factorization into the two supplied linear factors, and
-the exact finite root-search result.  This strengthens items 2 and 37 while
-keeping arbitrary-polynomial root existence deferred.
-The new `FiniteComplexLinearExample` adds the explicit non-real linear base
-case `-2 + (1+i)z`, with inverse witness `(1-i)/2` and exact root `1-i`.
-This instantiates the general complex-linear FTA interface entirely in
-rational coordinates, without adding a completed complex division operation.
-The new `FiniteCoordinateInequality` module adds the reusable rational
-Cauchy--Schwarz certificate, its `QComplex` dot-product specialization, and
-the squared-norm addition expansion.  The proof exposes the finite
-sum-of-squares remainder and strengthens supporting item 78 and the norm
-kernel behind item 91 without introducing a completed Euclidean norm.
-The item-80 witness now includes a second prime-labelled factor ordering for
-`360`, and `PrimeFactorCertificate.factor_perm` proves the two finite lists
-are permutation-equivalent.  This makes the certificate-level uniqueness
-boundary executable rather than merely documented.
-The same witness now includes `720 = 2^4 * 3^2 * 5`, with its prime-labelled
-factor list, product identity, and divisibility checks verified directly.
-It now also includes `600 = 2^3 * 3 * 5^2`, with an independent
-prime-labelled factor list, product identity, and divisibility checks.
-The same finite factorization pass now includes `126 = 2 * 3^2 * 7`, with
-its product and divisibility witnesses checked by terminating computation.
-The new `FiniteMonotoneSquareIntegral` module promotes the exact square
-integral on `[0,1]` to a `MonotoneConstructionFor`: Lean checks the rational
-monotonicity factorization, validity of the resulting monotone integral, and
-its equivalence to `1/3`.  This advances the constructive FTC core of item 15.
-The same bridge now covers `x^3` on `[0,1]`: its finite difference factorization
-proves nondecreasingness, and the promoted monotone construction is valid and
-equivalent to `1/4`.  Together the square and cubic cases establish the first
-non-affine polynomial instances of the monotone-integrability interface.
-The ladder now reaches `x^4`: its rational difference factorization proves
-monotonicity, and the promoted finite construction is valid and equivalent to
-`1/5`.  This extends the item-15 monotone bridge through the quartic FTC
-checkpoint.
-The new `FiniteMonomialMonotonicity` module generalizes the order component
-of that ladder: `exactRat_monomial_nondecreasing` proves that every rational
-monomial `x^n` is nondecreasing on `[0,1]`.  This is a reusable finite-input
-lemma for later monomial integral and MVT certificates, not a standalone
-finite-sum milestone or a completed-real limit theorem.
-The new `fourVariationQuartic` continues the finite certificate ladder with
-`(x-1)(x-2)(x-3)(x-4)`: Lean checks sign count four and identifies all four
-positive rational roots.  This strengthens item 100 without claiming general
-real-root counting.
-The new `fiveVariationQuintic` extends the same finite pattern to
-`(x-1)(x-2)(x-3)(x-4)(x-5)`: Lean checks five sign variations and identifies
-all five positive rational roots, while unrestricted Descartes root counting
-remains deferred.
-- The new `sixVariationSextic` extends the item-100 certificate ladder once
-  more: Lean checks six sign variations for
-  `(x-1)(x-2)(x-3)(x-4)(x-5)(x-6)` and identifies all six positive rational
-  roots.  The unrestricted Descartes theorem remains deferred.
-The finite Leibniz pass now also records the stage-10 rational enclosure
-`3 <= piLeibniz.compute 10 <= 16/5` and its width bound `1/10`. This is a
-concrete item-26 computation; the infinite alternating-series identity remains
-a separate theorem.
-The same evaluator now has a stage-20 enclosure with width at most `1/20`,
-making the potential-infinity refinement explicit while keeping every stage
-finite and rational.
-The evaluator now also exports a stage-40 enclosure inside `[3,16/5]` with
-width at most `1/40`, adding a third explicit potential-infinity checkpoint
-for item 26.
-The harmonic certificate now also exposes stage 32 exactly as
-`586061125622639/144403552893600`, with the explicit lower witness
-`H_32 >= 2`.  This extends the finite divergence checkpoints for item 34.
-The geometric-series pass now records the exact ratio-`1/2` stage-5 sum
-`31/16`, together with its exact tail `1/16` to the finite upper value `2`.
-It now also includes the unequal-ratio checkpoint
-`geometricSum (2/3) 4 = 65/27`, whose finite tail to the rational target `3`
-is `16/27`.
-The arithmetic-progression witness now also checks stage 10: the progression
-with initial term `3` and difference `2` sums to `120`, with its closed form
-and finite upper checkpoint `121` verified over the rationals.
-The ratio-`1/2` certificate now also records stage 10:
-`geometricSum (1/2) 10 = 1023/512` with exact tail `1/512`.  This strengthens
-the finite refinement evidence for item 66 without treating the limit as an
-attained infinite sum.
-The same certificate now reaches stage 20, with exact sum `1048575/524288`
-and tail `1/524288`, making the geometric error schedule visible at a third
-finite precision checkpoint.
-It now also reaches stage 40, with exact sum `1099511627775/549755813888`
-and tail `1/549755813888`, providing a substantially finer finite error budget
-for item 66 while retaining the potential-infinity interpretation.
-It now also reaches stage 80, with exact sum
-`1208925819614629174706175/604462909807314587353088` and tail
-`1/604462909807314587353088`.
-It now also reaches stage 160, with exact sum
-`1461501637330902918203684832716283019655932542975/730750818665451459101842416358141509827966271488`
-and tail `1/730750818665451459101842416358141509827966271488`, extending the
-same finite geometric error schedule.
-It now also reaches stage 320, with the exact dyadic tail
-`1/1067993517960455041197510853084776057301352261178326384973520803911109862890320275011481043468288`,
-extending the finite item-66 precision schedule.
-The stage-640 witness now uses the reusable tail formula: the gap to `2` is
-exactly `(1/2)^639`, and the finite sum remains below `2`.
-The Pythagorean-triple example now also checks the classic `5-12-13` witness,
-both directly and from the parametrization at `(m,n)=(3,2)`.  This gives the
-rational-coordinate core of items 4 and 23 a second independent finite
-checkpoint.
-The arithmetic-progression certificate now reaches stage 40 as well:
-`arithmeticProgressionSum 3 2 40 = 1680`, with its closed form and finite
-upper checkpoint `1681`.  This extends the explicit potential-infinity error
-schedule for item 68 beyond stage 20.
-The same certificate now reaches stage 320:
-`arithmeticProgressionSum 3 2 320 = 103040`, with closed form and upper
-checkpoint `103041`, extending the finite item-68 schedule.
-It now also reaches stage 640:
-`arithmeticProgressionSum 3 2 640 = 410880`, with closed form and upper
-checkpoint `410881`, continuing the finite potential-infinity schedule.
-The Basel comparison example now also exports the exact stage-8 partial sum
-`1077749/705600` and checks its elementary positive/below-two bounds.  This
-is an explicit finite reciprocal-square computation for item 14; Euler's
-completed Basel identity remains deferred.
-This is the finite rational core of item 66.
-The harmonic-series pass now includes the inspectable stage-8 witness
-`H_8 = 761/280 > 2`, a concrete finite certificate for item 34 alongside the
-general dyadic lower-bound theorem.
-The same finite checkpoint is now extended to stage 16:
-`H_16 = 2436559/720720 >= 2`.  This is another inspectable potential-infinity
-witness for item 34, not a completed infinite-sum argument.
-The harmonic witness now also instantiates the general reachability theorem at
-target `3`: stage `64 = 2^(2*3)` satisfies `H_64 >= 3`, adding a height-three
-potential-infinity checkpoint without evaluating an attained infinite sum.
-The same stage now has an exact inspectable value,
-`H_64 = 623171679694215690971693339/131362987122535807501262400`,
-with the direct inequality `H_64 >= 3` checked by finite rational arithmetic.
-It now also reaches target `4` at stage `256 = 2^(2*4)`, extending the finite
-height schedule without asserting an attained infinite sum.
-The item-79 bisection layer now has a concrete affine trace: for
-`f(x)=x-1/2` on `[0,1]`, stage 3 returns `[3/8,1/2]`, preserves the sign
-bracket, and has width `1/8`.
-The cubic target witness now reaches stage 8 for `x^3 = 2`: the rational
-bracket is `[161/128,323/256]`, its width is `1/256`, and both endpoint
-comparisons with the target are checked.
-The same witness now reaches stage 16 with bracket
-`[41285/32768,82571/65536]` and width `1/65536`, strengthening the finite
-item-79 precision schedule without introducing an attained real root.
-The Cayley--Hamilton pass now includes the worked rational matrix
-`[[1,2],[0,3]]`, with trace `4`, determinant `3`, and an independently checked
-finite identity `A^2 - 4A + 3I = 0`, also transported through the generic
-two-by-two theorem. This is a concrete item-49 witness.
-The BÃ©zout pass now includes the explicit Euclidean certificate
-`gcd(84,30)=6` with coefficients `(-1)*84 + 3*30 = 6`, a worked finite core
-for item 60.
-The BÃ©zout certificate now also checks `gcd(99991,12345)=1` through the
-explicit identity `2116*99991 - 17139*12345 = 1`.
-The binomial pass now includes the stage-5 instance
-`binomialSum 5 2 1 6 = 3^5 = 243`, a concrete finite certificate for item 44.
-The same worked layer now checks the larger stage-8 evaluation
-`binomialSum 8 2 1 9 = 3^8 = 6561`, extending the finite binomial witness.
-It now also checks the stage-12 evaluation
-`binomialSum 12 2 1 13 = 3^12 = 531441`, making the precision ladder explicit.
-The same `2+1` ladder now reaches stage 16:
-`binomialSum 16 2 1 17 = 3^16 = 43046721`, another exact finite checkpoint.
-The same ladder now reaches stage 20:
-`binomialSum 20 2 1 21 = 3^20 = 3486784401`.
-It also checks a distinct base pair: `binomialSum 6 2 3 7 = 5^6 = 15625`,
-showing the finite identity beyond the `2+1` specialization.  The stage-5
-`(4+3)` instance, `binomialSum 5 4 3 6 = 7^5 = 16807`, adds a second
-independent base pair.
-The decimal divisibility pass now includes the executable examples
-`decimalDigitSum 123 = 6` and `3 | 123`, together with the contrasting
-non-divisibility of `124`. This is the worked finite core of item 85.
-The power-sum pass now includes the stage-6 evaluations
-`fourthPowerSum 6 = 979` and `fifthPowerSum 6 = 4425`, a concrete finite core
-for item 77.
-The same worked certificate now checks `eighthPowerSum 6 = 462979`, extending
-the finite power-sum witness to the highest closed-form power currently in
-the series layer.
-The generic recurrence also checks the ninth-power stage directly:
-`powerSum 9 6 = 2235465`.  This is a finite item-77 computation; no infinite
-power-series identity is being asserted.
-The ninth-power witness now reaches stage 32 as well, with exact sum
-`powerSum 9 32 = 95821687265536`, extending the finite item-77 checkpoint.
-The same certificate now checks `powerSum 9 8 = 52666768`, adding a larger
-exact finite checkpoint for the power-sum family.
-The ninth-power witness now reaches stage 64 as well, with exact sum
-`powerSum 9 64 = 106496009343230976`, extending the terminating rational
-item-77 checkpoint schedule.
-It now also checks `powerSum 9 10 = 574304985`, extending the ninth-power
-finite checkpoint while retaining the fixed-stage interpretation.
-The next checkpoint is `powerSum 9 12 = 3932252676`, extending the same
-finite ninth-power computation without introducing an infinite identity.
-The next checkpoint now reaches `powerSum 9 16 = 78800938560`, extending the
-same exact finite evaluator while retaining the fixed-stage interpretation.
-The schedule now reaches `powerSum 9 128 = 113501516170343845888`, continuing
-the terminating rational checkpoint family.
-The AM--GM pass now includes the exact finite witness
-`2*8 <= ((2+8)/2)^2` and the equality case for equal inputs `3,3`, a worked
-certificate for item 38.
-The Pythagorean-triple pass now includes the scaled (6,8,10) witness and its
-parameter realization from (m=2,n=1), a concrete finite core for item 23.
-The isosceles-triangle pass now includes the coordinate witness with height
-`3` and half-base `4`: both squared legs are `25`, the axis dot product is
-`0`, and the squared base is `64`. This is a concrete item-65 certificate.
-The companion `5-12-13` coordinate instance checks equal squared legs `169`,
-axis dot product `0`, and squared base `576`.
-The Cramer pass now includes the rational system `2u+v=5`, `u+3v=10`:
-the determinant is `5`, Cramerâ€™s formulas return `u=1,v=3`, and direct
-substitution verifies both equations. This is a concrete item-97 certificate.
-The triangle-inequality pass now also has a concrete three-term rational
-witness: `qabs(-3+4-2)=1`, while the sum of termwise absolute values is `9`.
-This is the worked finite core of item 91.
-The same list-level certificate now checks the five-term list `(-3,4,-2,7,-5)`:
-its sum is `1`, its absolute-value sum is `21`, and the triangle bound holds.
-The reusable `qabs_perturbed_sub_le` corollary now propagates two rational
-perturbation budgets: replacing `x,y` by `x+e,y+f` increases the separation
-bound by at most the certified bounds for `e` and `f`. This is the interval
-error-budget form of item 91's finite triangle inequality.
-The new `FiniteComplexTriangleExample` lifts the worked layer to rational
-complex coordinates: `(3,4)` and `(5,12)` have squared norms `25` and `169`,
-their sum has squared norm `320`, and the squared triangle bound is checked
-against `(5+13)^2`.
-The arithmetic-series pass now includes the progression (3,5,7,9,11): its
-stage-5 evaluator is exactly `35`, and the closed-form identity is checked over
-the rationals. This is the worked finite core of item 68.
-The same progression now has a stage-20 checkpoint: the sum is `440`, its
-closed form is checked, and the finite certificate records the upper bound
-`441`. This extends the potential-infinity arithmetic-series witness.
-The same progression now reaches stage 80: the exact sum is `6560`, the
-closed form is checked, and the finite upper checkpoint is `6561`.
-It now also reaches stage 160: the exact sum is `25920`, the closed form is
-checked, and the finite upper checkpoint is `25921`.
-The finite half-pi rotation-input certificate is now available as
-`GeometricPiRotation.halfPiInput_certificate`; it packages validity, the
-`[1,2]` enclosure, the `2/(n+1)` width modulus, and equivalence with the
-rational-circle quarter turn.  The missing shared `PiProofs.olean` artifact
-still prevents an authoritative aggregate-root build, but the standalone
-geometry module and certificate build successfully.  The full classical
-identities remain correctly marked as deferred.
-The supplied-target Basel candidate is now checked: the later zeta interval
-is contained in an explicitly widened geometric pi-squared-over-six target
-interval, with the widening equal to the zeta intervalâ€™s finite rational
-width. This turns overlap into a reusable finite target enclosure while the
-Basel identity itself remains deferred.
-
-The next strengthening pass accepts three more finite substitutes without
-inflating the benchmark count: `rationalNatCode_existsUnique_canonical_decode_index`
-gives a unique canonical natural code for each rational; `ExactFunction.secant_of_finite_derivative_bracket`
-telescopes cellwise rational derivative brackets to an endpoint secant; and
-`LinearODE.ratMatrix_twoByTwo_cayley_hamilton` extends the checked Cayley--Hamilton
-identity from explicit entries to arbitrary rational 2-by-2 matrices. The new
-`RationalCircle.Trigonometry.toQComplex` bridge identifies rational circle
-multiplication and powers with the finite `QComplex` operations, and
-`toQComplex_pointPow_mul` records the embedded de Moivre law. The new
-`toQComplex_normSq`, `toQComplex_pointPow_normSq`, and
-`toQComplex_pointPow_normSq_of_unit` declarations transport the circle
-norm-square invariant to the finite complex side. This remains a finite
-rational-coordinate theorem; the represented complex exponential and angle
-semantics are still separate bridges. The new `pointPowRaw` and
-`pointPowRaw_equiv_natPow` declarations lift that finite power into a valid
-represented complex raw and identify it stagewise with the corresponding
-finite rational-complex power. The new `pointPowRaw_mul_equiv` supplies the
-general product form: the power of a rational circle product is equivalent,
-at the represented-complex level, to the product of the two finite complex
-powers. The companion `pointPowRaw_conj_equiv` still transports conjugation
-through the represented finite power as well.
-
-The next bridge pass adds four more finite certificates: a geometric block-sum
-identity, a reflection/signed-orientation coordinate certificate,
-conjugation closure for finite roots of unity, and a concatenable finite FTC
-partition fold. These strengthen items 17, 27/65, 66, and 15 without adding
-completed angles, limits, or completeness principles.
-
-The following pass adds four more finite strengthening certificates:
-`Polynomial.factorizedEval_root_witness` identifies the roots of any supplied
-finite rational factor list; `DirichletSeries.zetaTwoPartial_later_in_target_of_budget`
-propagates later Basel partial sums through a rational target;
-`secantSlope_product_transport` is the finite rational product-rule analogue;
-and `RationalCircle.pointPow_conj` records conjugation symmetry for natural
-circle powers. These deepen items 2, 14, 35/75, and 17 without introducing
-completed limits or angle-valued semantics.
-
-The complex-circle bridge now transports that symmetry as well:
-`QComplex.conj_add`, `QComplex.conj_neg`, `QComplex.conj_scaleRat`,
-`QComplex.conj_mul`, and `QComplex.conj_natPow` prove conjugation laws for
-finite rational-complex affine operations, rational scaling, multiplication,
-and powers, while
-`RationalCircle.Trigonometry.toQComplex_pointConj` and
-`toQComplex_pointPow_conj` connect them to circle coordinates. This is a
-finite reflection/de Moivre certificate, not a complex-analytic theorem.
-
-The current pass adds a finite remainder-certificate interface for arbitrary
-coefficient lists, a stage/error-budget package for constructive square-root
-bisection, conjugate-pair closure for finite root witnesses, and a chart-based
-cross-orientation identity. These strengthen items 2, 17, 27, 79, and 89 while
-remaining entirely rational and algorithmic.
-
-The transport pass adds `QComplex.natPow_add`, an exact affine-composition
-difference-quotient law, finite alternating-series block transport, and a
-chart-based Jacobian/partition substitution certificate. These advance the
-finite interfaces behind items 15, 17, 26, and 35 without asserting the
-completed exponential, convergence, or substitution theorems.
-
-The bounded endpoint pass adds quartic one-variation/root uniqueness data,
-nested-stage certificates for the constructive square-root search, affine
-transport of finite secant brackets, and a finite candidate-evaluation package
-for the quintic boundary. The last item is deliberately only a checked finite
-obstruction example; it is not Abelâ€“Ruffini and does not claim absence of all
-rational roots. `RootsOfUnity.quinticBoundary_rationalRootSearch_none` now
-connects that obstruction to the executable finite rational-root search and
-certifies the `none` branch for the supplied candidate list.
-
-The latest exact-arithmetic pass adds a mod-9 decimal invariant, a generic
-block decomposition for finite power sums, and the Cayley--Hamilton
-second-order recurrence for arbitrary rational 2-by-2 matrix powers. These
-strengthen items 49, 77, and 85 without adding general Faulhaber, prime, or
-continuous-matrix claims.
-
-The FTA generalization pass adds a finite-list complex factorization layer:
-`factorizedPolynomial` builds a polynomial from supplied rational-complex
-roots, `factorizedPolynomial_eval_eq_product` exposes its finite product form,
-and list membership yields exact and computable root witnesses. The companion
-`Polynomial.factorizedEval_append` transports rational factor lists across
-concatenation. This advances items 2 and 46 without claiming unrestricted FTA
-or a general quartic formula.
-The direct package `factorizedPolynomial_has_algebraic_root_of_nonempty` also
-returns an algebraic-complex witness from any nonempty supplied factor list.
-Its uniform companion `factorizedPolynomial_algebraic_root_of_mem` certifies
-every supplied factor as an algebraic root, preserving the exact finite root
-set rather than selecting an arbitrary witness.
-
-The generic FTA layer is now root-set complete at the supplied-factor level:
-`QComplex.mul_eq_zero` supplies the finite coordinate zero-product law, and
-`factorizedPolynomial_eval_eq_zero_iff_mem` identifies exactly the roots in a
-finite supplied list. This remains a finite factorization theorem, not an
-existence or root-counting theorem for arbitrary polynomials.
-The bridge `AlgebraicFTA_of_factorizedWitness` now packages the exact project
-boundary: a supplied nonempty finite factorization witness for every
-positive-degree input is enough to extract an algebraic/computable root. The
-global factorization-existence algorithm remains a separate deferred target.
-The packaged theorem `factorizedPolynomial_hasExactRoot_iff_mem` exposes the
-same root-set result directly through `CPoly.hasExactRoot`, so downstream
-finite certificates do not need to unfold polynomial evaluation.
-The factorized quadratic package now reuses that generic boundary through
-`factorizedQuadraticPolynomial_hasExactRoot_iff`, giving the direct two-root
-exact predicate for the named degree-two certificate.
-
-The finite FTA search interface now also supplies `exactRootSearch` and its
-soundness/completeness certificates, together with the factorized-polynomial
-specialization and computable-root result. Search completeness is conditional
-on a supplied finite candidate list; it does not assert that arbitrary
-polynomials have roots or that a global root-search procedure exists.
-The companion negative certificates `exactRootSearch_none_iff` and
-`factorizedPolynomialRootSearch_none_iff` now characterize a `none` result as
-finite candidate exclusion (or candidate/factor-list disjointness).  This
-completes the finite search interface on both success and failure branches.
-The success-side corollary
-`factorizedPolynomialRootSearch_returns_supplied_root` makes the factor-list
-boundary explicit: every returned root is one of the supplied factors.
-The companion `factorizedPolynomialRootSearch_self_some` makes the positive
-finite case executable: every nonempty supplied factor list returns a
-certified root when searched against itself.
-
-The quintic boundary is now explicit as well: `factorizedQuinticPolynomial`
-packages five supplied complex roots, with finite product evaluation and exact
-and computable root witnesses. The direct package
-`factorizedQuinticPolynomial_has_computable_root` exposes the first supplied
-factor as an existential computable-root witness without requiring a separate
-membership argument. This is the projectâ€™s certificate-level edge
-for items 16 and 46; Abelâ€“Ruffini and a general quintic formula remain outside
-the current computable scope.
-The matching root-set theorem
-`factorizedQuinticPolynomial_eval_eq_zero_iff` now excludes every candidate
-outside those five supplied roots, completing the finite success/exclusion
-interface at the quintic boundary.
-Its list-level form
-`factorizedQuinticPolynomial_eval_eq_zero_iff_mem` packages the same result in
-the projectâ€™s finite factor-list interface.
-The companion
-`factorizedQuinticPolynomial_hasExactRoot_iff_mem` lifts that membership test
-to the public exact-root predicate used by the computable-root certificates.
-The worked `FiniteQuinticBoundaryExample` instantiates the package with the
-five supplied roots `-2,-1,0,1,2`, checking all five exact rational-complex
-root witnesses while keeping the general radicals problem deferred.
-
-- Raw reals are interval algorithms `Nat -> QInterval`. `Real` packages a
-  preferred valid `RealRaw` and finite, proven-equivalent alternatives. See
-  `RealRaw` and `Real` in `ComputableAnalysis/Basic.lean`.
-- `RealRaw.ValidCompute` no longer means â€œwidth at stage `n` is at most
-  `1/n`. It means: every stage is an ordered interval, later stages are
-  nested inside earlier stages, and widths shrink to zero.  Any clean bound
-  such as `C/n^r` or `C*rho^n` is evidence for this, not the definition.
-  `ComplexRaw.ValidCompute` has the same shape for rectangular boxes.
-- `RealRaw.Rate` is optional rate metadata that a concrete evaluator may
-  expose alongside its validity theorem.  It is not a field of `RealRaw` and
-  not a second kind of real number: it is either unknown, eventually
-  polynomial, or eventually geometric.  See `RealRaw.Rate` in
-  `ComputableAnalysis/Basic.lean`.
-- For concrete algorithms, record public rate information as eventual upper
-  bounds, not necessarily exact widths.  For pi,
-  `PiProofs.piLeibnizRate` records width `<= 4/n`, while
-  `PiProofs.piMachinRate` records width `<= 20*(1/2)^n`, i.e. `20/2^n`.
-  The literal reciprocal-log integration-by-parts evaluator similarly has
-  `Logarithm.piTriangleLogReciprocalIntegralRate`, with width
-  `<= 52*(1/2)^n`.  Its square-pullback substitution companion has
-  `Logarithm.piTriangleLogSquareSubstitutionIntegralRate`, with width
-  `<= 56*(1/2)^n`.
-- Equality of raw representatives is same-stage rational-interval overlap:
-  `RealRaw.Equiv x y` means that `x.compute n` and `y.compute n` overlap for
-  every `n`. Validity makes this relation transitive. The project-facing
-  equality notion is this raw-level relation.
-- The interval-defined order now has explicit arithmetic compatibility:
-  `RealRaw.le_add_le_add` for addition, `RealRaw.le_neg_le_neg` for order
-  reversal under negation, and `RealRaw.le_sub_le_sub` for subtraction, and
-  `RealRaw.le_antisymm` for the two-sided order/equivalence bridge, and
-  `RealRaw.le_scaleRat_le_scaleRat` for nonnegative rational scaling, together
-  with `RealRaw.le_scaleRat_le_scaleRat_of_nonpos` for the order-reversing
-  nonpositive case. These are endpoint-level finite inequalities;
-  validity/equivalence transport is still handled separately.
-- `RealRaw.anchorRebox` is a finite rational normalization construction: given
-  a shrinking, stagewise-overlapping raw algorithm and a valid nested anchor,
-  it intersects the prefix of their stagewise hulls.  The result is a valid
-  representative equivalent to both inputs, proved by
-  `RealRaw.anchorRebox_valid` without any completed-real or completeness
-  principle.
-- The stronger all-stages notion is now formalized as
-  `RealRaw.AllStagesOverlap`: every interval from one algorithm compares as
-  `overlap` with every interval from the other. For valid raw algorithms it is
-  equivalent to `RealRaw.Equiv`; see `RealRaw.equiv_iff_allStagesOverlap` in
-  `ComputableAnalysis/Basic.lean`.
-- For computation with a higher-level real number, use `Real`: it keeps a
-  preferred certified representative for evaluation plus a list of certified
-  equivalent alternatives.  The preferred representative should be the best
-  available algorithm/rate. See `Real.compute`, `Real.rate`,
-  `Real.representations`, and `Real.withAlternative` in
-  `ComputableAnalysis/Basic.lean`.
-- Complex numbers mirror the same foundation: `ComplexRaw` has optional
-  coordinate-rate metadata, and `Complex` keeps a preferred certified raw
-  representative with optional equivalent alternatives. See `ComplexRaw.Rate`,
-  `ComplexCert`, and `Complex` in `ComputableAnalysis/Basic.lean`.
-- Function layers are representation/domain layers.  Real and complex function
-  raws carry a domain and pointwise output-rate metadata; the rate may depend
-  on the input and its domain proof.
-
-## Calculus Readiness Ledger
-
-**Benchmark item 35 â€” finite Taylor core checked.** The public
-The potential-infinity remainder layer now adds an explicit factorial-tail
-schedule: every later finite exponential Taylor prefix stays within a
-requested rational tolerance of the selected prefix on a bounded rational
-box. This strengthens item 35 without introducing an infinite sum or a
-completeness principle.
-`FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` and centered variant
-formalize the finite polynomial/Taylor--Lagrange certificate, while
-`Taylor.ArctanKernel.finiteRemainderRoute` supplies an explicit finite
-remainder factorization. The completed Taylor theorem with integral remainder
-and its full analytic hypotheses remain a later effective-calculus milestone.
-The factorial exponential specialization now also exposes
-`FinitePolynomial.expTaylorPrefix_endpointDifference_succ`: appending one
-finite Taylor term changes an endpoint difference by the exact rational
-monomial contribution, before any tail or completeness argument is used.
-The worked `FiniteExponentialTaylorExample` now checks the literal values
-`P_5(1)=163/60` and `P_6(1)=1957/720`, then specializes the schedule to
-`C=1`, error `1/100`, and seven additional finite terms.  Its enclosure is a
-finite rational comparison, not an assertion that an infinite sum has been
-attained.
-The same worked object now checks the tighter stage-8 prefix
-`P_8(1)=109601/40320`, extending the exact finite Taylor checkpoints.
-It now also records stage 10 exactly as `P_10(1)=9864101/3628800`, providing a
-further finite prefix checkpoint under the same potential-infinity
-interpretation.
-The exponential Taylor prefix now reaches stage 12 as well:
-`P_12(1)=260412269/95800320`, extending the exact rational precision ladder.
-The same finite checkpoint now reaches stages 14 and 16:
-`P_14(1)=47395032961/17435658240` and
-`P_16(1)=56874039553217/20922789888000`.  These extend the exact prefix
-ladder while retaining the potential-infinity interpretation.
-
-The Pi table is a release-style integration suite, not a completion score for
-the scientific-calculus objective.  It catches agreement failures across
-independent finite constructions, but several rows can share one analytic
-bridge, and a major capability such as continuous Peano--Baker need not add a
-Pi representation.  Do not optimize the Pi numerator at the expense of these
-gates.
-
-The integration policy is deliberately narrow: prove the general FTC,
-substitution, and integration-by-parts theorems with explicit constructive
-certificates, but do not build a catalogue of antiderivatives or named
-``techniques.''  An LLM (or a user) may supply a proposed primitive or
-decomposition; the project should check its derivative, domain, and endpoint
-certificate through those general theorems.  This is not yet a replacement for
-Mathlib in arbitrary scientific or engineering proofs: general calculus
-closure, analytic exp/log and trigonometric bridges, continuous matrix
-Peano--Baker, and broad numerical/PDE infrastructure remain open.
-
-- **Rational interval foundation â€” checked.** `RealRaw.Valid`, interval
-  overlap equivalence, and the source audit excluding Mathlib analysis and
-  completed-real completeness are the non-negotiable base.  Re-audit imports
-  whenever this module graph changes.
-- **Continuity and extension â€” partly checked.** `IntervalRegularOn` and
-  `IntervalRegularOn.epsilonDeltaContinuous` give the literal rational
-  epsilon--delta theorem. The scheduled `sqrtOnUnit` bisection branch is now
-  a concrete non-exact interval-regular function, with a quadratic rational
-  input modulus on `[0,1]`. The non-exact rectangle arctangent now has its
-  own literal continuity theorem
-  `arctanIntegralRectangleOnUnit_epsilonDeltaContinuous`: its finite tangent
-  chart proves `A.lo(x+h) - A.hi(x) <= h`, so `delta = eps` and common stage
-  `4 * (eps.den + 1)` make both cross-box gaps and both widths at most `eps`.
-  Its checked `arctanIntegralRectangleOnUnit_effectiveModulus` packages the
-  same data as the executable schedule `inputPrecision n = n + 1`, with the
-  displayed denominator-controlled rectangle stage at output tolerance
-  `precisionAtStage n`. The exact constant evaluator now has the concrete
-  witness `exactRat_constant_intervalRegularOn`, establishing the simplest
-  pointwise-to-interval-regular bridge used by the later Riemann construction.
-  The companion `exactRat_constant_effectiveModulusFor` packages the same
-  exact evaluator with the explicit modulus interface.
-  The same bridge is now checked for exact rational affine functions with slope
-  in `[0,1]`: `exactRat_affine_intervalRegularOn_of_unit_slope` uses the endpoint
-  image interval and the explicit input schedule `n+1`, while
-  `exactRat_affine_unitSlope` packages the affine monotone integral certificate
-  and its exact raw value.  This remains a certificate-level FTC slice; no
-  unrestricted interval-regular-to-integral closure is claimed.
-  The signed affine extension `exactRat_affine_intervalRegularOn_of_signed_unit_slope`
-  now handles both endpoint orientations for slopes in `[-1,1]`; its packaged
-  certificate `exactRat_affine_signed_unitSlope` computes the same affine
-  endpoint formula using the nondecreasing or nonincreasing construction as
-  appropriate.
-  The non-affine base case `exactRat_square_intervalRegularOn_unit` is now
-  checked as well, using the endpoint-square interval and the explicit schedule
-  `2*(n+1)` on `[0,1]`.  This adds a genuine finite polynomial interval
-  certificate without invoking completed-real limits.
-  `exactSquare_lipschitz_on_unit` supplies the rational Lipschitz bound needed
-  by `IntegralIdentities.LipschitzDyadic`; the packaged
-  `exactRat_square_integral_certificate` and
-  `exactRat_square_integral_raw_valid` now provide a valid finite raw integral.
-  Its identification with the closed form `1/3` remains a separate endpoint
-  equivalence target.
-  The public finite identity `exactSquare_uniformLeftSum_eq` now reduces the
-  uniform left square sum to `Series.squareSum n / n^3`, providing the exact
-  algebraic half of that endpoint-equivalence proof.
-  The matching public right-sum identity
-  `exactSquare_uniformRightSum_eq` is now also checked, reducing the right
-  endpoint sum to `Series.squareSum (n+1) / n^3`.  Together these two finite
-  formulas give the exact endpoint-sum data needed for the enclosure proof.
-  The public inequalities `exactSquare_uniformLeftSum_le_one_third` and
-  `exactSquare_uniformRightSum_ge_one_third` put the two endpoint sums on
-  opposite sides of `1/3`; consequently
-  `exactSquare_compute_contains_one_third` proves singleton containment at
-  every dyadic stage, and
-  `exactRat_square_integral_raw_equiv_one_third` identifies the finite raw
-  integral with the exact rational value `1/3`.
-  The next polynomial case is now complete as well:
-  `exactRat_cube_intervalRegularOn_unit` and `exactCube_lipschitz_on_unit`
-  give executable finite certificates for `x^3` on `[0,1]`; the endpoint
-  sums reduce to `Series.cubeSum`, and
-  `exactCube_compute_contains_one_fourth` together with
-  `exactRat_cube_integral_raw_equiv_one_fourth` identifies the resulting raw
-  integral with `1/4`.  This is a second concrete FTC example, still entirely
-rational and stagewise.
-The quartic FTC pass is now complete: `exactRat_quartic_integral_certificate`
-and its validity theorem provide the finite raw integral for `x^4` on
-`[0,1]`; the left/right endpoint sums reduce to
-`Series.fourthPowerSum`, and `exactQuartic_compute_contains_one_fifth` plus
-`exactRat_quartic_integral_raw_equiv_one_fifth` identify the result with the
-exact rational value `1/5`.
-The quintic finite pass is now checked as well: `FiniteFTCQuintic` supplies
-interval regularity, a rational Lipschitz bound, both finite endpoint-sum
-identities, and a concrete stage-10 enclosure containing `1/6`. The
-all-stage exact-value equivalence remains open, so this is a finite
-certificate-level FTC result, not a general regularity-to-integrability
-theorem.
-The same quintic computation now has a direct stage-20 containment certificate
-`exactQuintic_compute_contains_one_sixth_stage20`, strengthening the finite
-precision evidence while leaving the all-stage symbolic inequality open.
-The FTC endpoint layer now also records the stage-eight left sum for the
-derivative `6*x^5`: `5439/8192 <= 6/7`.  This extends the finite polynomial
-checkpoint pattern to the sextic case without adding a completed-limit claim.
-The same sextic endpoint-sum witness now reaches stage 32 exactly,
-`1905663/2097152 <= 1`, extending the finite item-15 precision schedule.
-The cubic FTC endpoint layer now also exports
-`cubeDerivativeLeftSum_le_one_le_rightSum`: at every positive stage, the
-left and right sums enclose the exact endpoint difference `1`. The companion
-`cubeDerivativeLeftSum_rightSum_gap_le_three_div` bounds their enclosure width
-by `3/n`, making the finite FTC bridge an explicit shrinking rational schedule.
-
-The concrete FTA pass now also checks `z^2 + 1` directly at the two supplied
-rational-complex roots `0 + i` and `0 - i`, including distinctness and point
-Horner evaluation, and its executable candidate search returns the upper root.
-This is an explicit finite item-2 witness layered on the
-existing box soundness and subdivision interfaces; the accompanying singleton
-box exclusion certificate discards the non-root candidate at zero. Global root existence and
-arbitrary-degree isolation remain deferred.
-  The concrete product-derivative candidate `arctan x + x/(1+x*x)` now also
-  has literal epsilon--delta continuity. Its rational correction is checked
-  3-Lipschitz; splitting the output budget as `eps/2` for arctangent and
-  `eps/6` for the input correction gives a finite modulus for the whole
-  derivative box. Its fixed theorem uses exactly that radius and stage
-  `4 * ((eps / 2).den + 1)`; the checked
-  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_effectiveModulus`
-  makes this a computable schedule with `inputPrecision n = 6 * (n + 1)`.
-  Its checked positive product secants now also satisfy
-  `coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_enclosure`:
-  the endpoint difference lies in the cell width times the left derivative
-  box widened by twice the requested stage tolerance.
-  `...forward_secant_uniform_range_enclosure` now composes this with
-  epsilon--delta continuity: every derivative value in a selected rational
-  radius and the endpoint secant share a box of width at most ten stage
-  tolerances. The local data are now definitions rather than extracted
-  witnesses: `coordinateTimesArctanForwardContinuityRadius n` is
-  `precisionAtStage n / 6`, its companion stage is
-  `4 * ((precisionAtStage n / 2).den + 1)`, and
-  `coordinateTimesArctanForwardSecantBound` has the corresponding checked
-  explicit enclosure theorem. The generic finite global assembly is now checked: adjacent
-  common-stage endpoint boxes telescope by interval containment, and a
-  uniform partition turns a per-cell width bound `e` into total width at
-  most `(b-a)*e`. `TwoStageCandidateDerivativeFTC` now packages the actual
-  order of quantifiers: a common derivative-continuity stage may differ from
-  the common endpoint stage used by the telescope. Its overlap is derived
-  rather than postulated; `SelectedStageCandidateDerivativeFTC` remains the
-  coincident-stage special case. The product-specific cell family, common
-  endpoint stage, Riemann-width budget, and endpoint-width budget are now
-  assembled in `coordinateTimesArctanForwardTwoStageFTC`; Lean proves its
-  bounded-sum raw equivalent to the product endpoint raw. The uniform cell
-  count `coordinateTimesArctanForwardPartitionPieces` remains the explicit
-  finite mesh selector. The product-specific public FTC bridge is now
-  complete: `coordinateTimesArctanForwardTwoStageStabilizedRaw` applies
-  finite-prefix stabilization to the actual bounded-sum evaluator, with the
-  `4/(n+1)` radius proved against the rectangle anchor but not read at
-  runtime. Its `..._valid` theorem provides the public construction, and
-  `coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity` exposes the
-  endpoint formula through the monotone, ordinary, and finite-piece integral
-  interfaces. The normalization pattern is now generalized as
-  `TwoStageCandidateDerivativeFTC.stabilizedRaw`: any two-stage certificate
-  supplies a public construction after its bounded-sum width modulus and an
-  explicit shrinking endpoint-radius schedule have been given. The remaining
-  task is to supply those schedules for further calculus formulas, not to
-  reprove the product FTC.
-  `UniformRealFun.CertifiedExtension` states the representation-safe extension
-  contract. General closure and extension theorems remain work, so this gate
-  is not yet a general function-calculus package.
-- **Finite integration and FTC â€” partly checked.**
-  `Integral.ConstructionFor`, its validity bridge, and the derivative-bound
-  FTC-to-endpoint theorems are checked; the rectangle, Cauchy, and compact
-  reciprocal-quartic computations exercise them concretely. The reusable
-  `Integral.nondecreasingDarbouxRange`, `...Stage`, and
-`...DyadicStage` now expose the literal increasing-function endpoint-box
-calculation from the blueprint.  Weak monotonicity proves each cell range
-ordered; interval regularity, stage compatibility, and a function-specific
-shrinking-width estimate remain deliberately separate requirements before
-a `ConstructionFor` can be claimed.  The reusable
-`Integral.nondecreasingDarbouxRange_width_le_of_intervalRegular` now proves
-the local width estimate: when a cell is within the evaluator's input budget,
-one common image interval bounds both endpoint values and bounds the Darboux
-range by `1/(n+1)`.  The global partition schedule and construction proof
-remain separate requirements.
-The aggregate
-`Integral.nondecreasingDarbouxStage_width_le_of_uniform_input_budget` now
-propagates that bound through a uniform finite partition, giving the explicit
-global stage budget `(F.upper - F.lower)/(n+1)`.
-The companion
-`Integral.nondecreasingDarbouxStage_width_le_of_uniform_input_budget_and_tolerance`
-hands that explicit budget directly to an arbitrary requested rational
-tolerance. It is the finite precision handoff needed by an eventual
-`ConstructionFor` proof; it introduces no limit or completed integral.
-The dyadic specialization
-`Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget` now exposes
-the corresponding `2^n`-cell bound, while retaining the input-budget premise
-needed before a shrinking-width construction can be claimed.
-Its companion
-`Integral.nondecreasingDarbouxDyadicStage_width_le_of_input_budget_and_tolerance`
-provides the same direct requested-tolerance handoff for the textbook's
-stage-indexed dyadic algorithm.
-`Integral.MonotoneDarbouxSchedule` now packages the remaining finite schedule
-certificatesâ€”input budget, nesting, and a potential-infinity shrinking
-witnessâ€”while deriving nonnegative widths from the finite endpoint-range
-lemmaâ€”and
-`Integral.monotoneDarbouxScheduleRaw_valid` turns them into a valid
-`RealRaw` integral algorithm.  This closes the schedule-to-raw bridge while
-leaving the construction of those certificates and primitive identification
-explicit.
-The companion `Integral.monotoneDarbouxScheduleRaw_width_le_of_tolerance`
-hands a supplied rational tolerance directly to any scheduled stage, making
-the finite width budget available to downstream FTC and MVT certificates.
-The independent `FinitePiecewiseRectangles` module now records the local
-equal-cell rule needed for a finite piecewise-monotone stage:
-`PieceCellKind.increasing` and `.decreasing` select endpoint order, while
-`.turning` encloses both endpoint values and a supplied turn bracket.  Its
-width formulas and a two-cell quadratic turn witness are checked entirely over
-`Rat`.  This is the finite local mechanism behind the sinc animation; it does
-not claim a universal monotonicity classifier or a completed integral.
-The same module now turns those value intervals into literal rectangle areas:
-`pieceCellLowerArea_le_upper` proves the lower area is below the upper
-area for every nonnegative cell width, and the quadratic two-cell witness
-exports the coarse enclosure `[0,2]`.  Refinement and function-specific
-classification remain the separate steps needed to obtain a shrinking integral
-construction.
-For a turn cell, `pieceCellBounds_turning_width_le` now proves that a
-common certified value range controls the entire unresolved rectangle width.
-The area version `pieceCellTurningAreaGap_le` multiplies that bound by
-the nonnegative cell width, making explicit the two budgets that must shrink:
-value-range uncertainty and geometric mesh width.
-The aggregate lemmas `piecewiseRectangleAreaSum_gap_eq_width_sum` and
-`piecewiseRectangleAreaSum_gap_nonneg` now lift this cellwise estimate to an
-entire finite mesh: the global upper-minus-lower rectangle gap is exactly the
-sum of domain widths times value-range widths, and is nonnegative for ordered
-cells.  This is a finite rational bridge toward the constructive FTC, not an
-appeal to an attained integral or completeness.
-The companion `piecewiseRectangleAreaSum_gap_le_common_range_budget` theorem
-packages the common-range form: a uniform value-width certificate bounds the
-whole mesh gap by the sum of the domain widths times that range budget.  This
-separates the two refinement obligations cleanlyâ€”geometric mesh width and
-function-value uncertaintyâ€”before any potential-infinity schedule is added.
-The new `piecewiseRectangleAreaSum_constant` evaluates that constant per-cell
-budget exactly as `(cells.length : Rat) * value`.  Its companion
-`piecewiseRectangleAreaSum_gap_le_common_range` therefore gives the closed
-form global bound by the number of cells, the cell width, and the common value
-range.  This is the finite equal-mesh bridge needed by the constructive FTC
-story and does not introduce an infinite sum.
-The mesh identity `natCast_mul_mesh_eq_sub` now closes the geometric part for
-an equal rational partition: a positive `n`-cell mesh has total width exactly
-`b - a`.  Thus a common value-range budget can be normalized to the interval
-width without invoking a completed real or a limiting sum.
-  turning-bracket helper in `TurningPointIntegral` supplies one component of
-  a finite monotone decomposition: every possibly non-rational turn is
-  represented by a shrinking rational bracket, while stagewise monotone
-  pieces and fixed range boxes cover the complement and the unresolved gaps.
-  Lean proves the one-gap component's width shrinks, and
-  `FinitePiecewiseStageAssembly` now proves the finite rational aggregation
-  has shrinking width; its common-rate estimate is the literal number of
-  boxes times the supplied per-box width bound. Supplying the individual boxes
-  and proving that their combined stage encloses the intended integral remain
-  function-by-function work. This is consciously not a universal existence definition for
-  integrals. The reusable
-  `IntegralIdentities.LipschitzDyadic` constructor now turns a rational
-  Lipschitz kernel on `[0,1]` into literal nested Darboux boxes. Its new
-  arctangent-kernel specialization has a checked rational Lipschitz constant
-  `2`, exact width `4/2^n`, and a stagewise common-right-sum comparison with
-  the existing geometric rectangle integral.  The same rectangle construction
-  now also has the finite tangent enclosure `x - x^3 <= A_n(x) <= x` for
-  every nonnegative rational endpoint, and its zero-endpoint quotient box is
-  `[1 - h^2, 1]` for `h > 0`.  This supplies the basepoint finite estimate.
-  The new `HasForwardDerivativeAt` interface now packages this endpoint fact
-  as the checked one-sided certificate
-  `arctanIntegralRectangleOnUnit_forwardDerivativeAtZero`, with derivative
-  `1` and exact stage-zero evaluation. The tangent-chart algebra is checked
-  as well: at `x`, ordinary step
-  `h` is represented by `h / (1 + x * (x + h))`, which the chart sends exactly
-  to `x + h`; its scale differs from the kernel at `x` by at most `h` on the
-  unit branch.  These estimates now close the full two-sided certificate
-  `arctanIntegralRectangleOnUnit_hasDerivative` on `[0,1]`: negative steps are
-  reversed to a positive step at the left endpoint and the kernel's rational
-  Lipschitz bound transports the derivative back to the requested point.  The
-  checked schedule uses derivative stage `8*(n+1)` and signed step budget
-  `1/(72*(n+1))`.  This is not an FTC theorem.  What remains is extension to
-  interval-regular functions, an effective FTC closure, and then the
-  standard function table.
-- **Derivative scheduling â€” corrected interface.** `HasDerivativeOnInterval`
-  and the rational-power `HasDerivativeAt` certificate now choose evaluator
-  precision from the rational point, nonzero rational step, and requested
-  output precision.  This is necessary for an inexact interval evaluator:
-  quotienting a fixed-width box by an arbitrarily smaller step cannot have a
-  uniform error bound.  Exact rational examples still use the constant stage
-  zero; the correction creates the finite scheduling slot needed by the
-  arctangent and exponential derivative constructions.
-- **Monotone inverse functions â€” partly checked.** The branch-local
-  `InvertibleFunctionOnInterval`/`InverseRaw`/bisection API is checked, with
-  the unit-interval square-root search for exact rational targets. Extend it
-  to represented targets, then use it for the sine/arcsine and
-  exponential/logarithm branches.
-- **Differentiated elementary functions â€” partly checked.** Formal
-  power-series coefficient shifts and finite-difference examples are checked.
-  The series-layer API now makes this staging explicit:
-  `FormalPowerSeries.coefficientShift` and `HasCoefficientShift` are the
-  primary names; legacy formal-derivative names are compatibility aliases,
-  not an assertion about evaluated raw functions.
-  `FinitePolynomial.taylorPrefix_hasDerivativeOnInterval` now turns every
-  finite coefficient prefix into a two-sided rational-interval derivative
-  certificate for its coefficient-shift polynomial. This is the precise
-  finite Taylor--Lagrange hand-off; at zero,
-  `FinitePolynomial.taylorPrefixShift_at_zero` identifies that derivative
-  polynomial with the original linear coefficient.  The centered forms
-  `taylorPrefixAt_hasDerivativeOnInterval` and
-  `taylorPrefixShiftAt_at_basepoint` make the same statement at every
-  rational expansion point, using local `x-a` bounds. They still do not
-  differentiate an infinite tail.
-  The quantitative certificate algebra is now closed under finite addition,
-  rational scaling, and products via `SecantDerivativeBound.mul`; the product
-  rule retains the explicitly bounded secant-corner term needed by later FTC,
-  integration-by-parts, and ODE arguments.
-  The executable factorial loop is also now identified, term by term and at
-  every finite prefix, with its rational Taylor coefficients
-  (`ExpProofs.powerSeriesTermAtTerms_eq_expCoeff_monomial` and
-  `ExpProofs.powerSeriesCenterAtTerms_eq_expTaylorPrefix`). This is finite
-  algebra only. `FinitePolynomial.expTaylorPrefix_succ` records the literal
-  one-term extension, while
-  `FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm` supplies the
-  common bounded-box factorial majorant for a uniform tail
-  certificate. `ExpProofs.uniformExpRaw` realizes that certificate on
-  `|x| <= 2`: its fixed-stage boxes are valid and geometrically shrinking,
-  and `uniformExpRaw_equiv_expPowerSeries` proves stagewise agreement with the
-  selected adaptive exponential evaluator. `ExpProofs.uniformExpOnUnit`
-  exposes this schedule as an
-  interval function, pointwise equivalent to the selected exponential. The
-  derivative of the next finite prefix is exactly its common center, and
-  `uniformExpTaylorPrefix_secant_error` bounds the residual finite secant
-  error. `FinitePolynomial.expTaylorPrefix_secant_error_le_thirty_four` now
-  proves the uniform coefficient `34` for every factorial prefix on
-  `|x| <= 2`, and the uniform schedule inherits it. The step-aware
-  tail transport has an executable stage selection:
-  `uniformExpQuotientPrecision h hh n` makes the shared factorial magnitude
-  no more than `precisionAtStage n * |h| / 24`, while
-  `uniformExpSelfDerivativeStepPrecision` reserves half the requested output
-  precision for the `34 |h|` finite secant error.
-  `uniformExpCenter_secant_error_le` and
-  `uniformExpOnUnit_hasDerivativeOnInterval` complete the interval-endpoint
-  algebra: the common-prefix evaluator proves the full two-sided
-  `E' = E` certificate on `[0,1]`. Its exact zero value is separately
-  certified, so `uniformExpOnUnit_solvesSelfDerivative` is the first
-  constructive initial-value solution record. The same construction is now
-  checked on the centered chart `[-1,1]`:
-  `uniformExpOnSymmetricUnit_hasDerivativeOnInterval` uses the explicit
-  endpoint consequence `|h| <= 2`, and
-  `uniformExpOnSymmetricUnit_solvesSelfDerivative` supplies the corresponding
-  initial-value record. This does not silently
-  transfer the derivative to the pointwise-equivalent adaptive evaluator;
-  that representation-closure theorem, uniqueness, and the logarithm
-  relation are the next gates. The literal rational-input
-  evaluator `ExpProofs.expPowerSeries x` is now already a valid raw real for
-  every `x : Rat`: its finite rational series boxes are nested and have the
-  public geometric rate `ExpProofs.expPowerSeriesRate x`, with ratio `1/2`.
-  The same evaluator is now the total `PartialRealFunRaw`
-  `ExpProofs.expPowerSeriesFunction`, and
-  `ExpProofs.expPowerSeriesOnInterval a b` gives its valid rational-interval
-  restriction. When zero is in that interval,
-  `ExpProofs.expPowerSeriesOnInterval_zero_initial_value` supplies the exact
-  function-level initial equivalence required by the ODE interface. This is a
-  certified representation layer, not yet a derivative-transport bridge to
-  the other definitions. Its finite-difference bridge is now explicit:
-  `expTaylorQuadratic x = 1 + x + x*x/2`, and
-  `FinitePolynomial.expTaylorQuadratic_hasDerivativeOnInterval` certifies its
-  full two-sided interval derivative `1 + x` on every rational subinterval of
-  a supplied bounded symmetric box, using the reusable quantitative
-  finite-secant linear interface. `ExpProofs.expTaylorQuadratic_forwardDerivativeAtZero`
-  remains the specialized forward derivative `1` at zero by the exact quotient
-  `1 + h/2`. More importantly,
-  `ExpProofs.expPowerSeriesOnUnit_forwardDerivativeAtZero` now certifies the
-  tail-enclosed power-series evaluator itself has forward derivative `1` at
-  zero. Its finite stage-zero loop has a positive-tail-plus-radius budget of
-  `O(h^2)` on `0 < h <= 1/2`, so quotienting gives an explicit first-order
-  enclosure. This remains a local boundary theorem for the adaptive
-  representative. The
-  constant-level compound-interest representative is now additionally packaged as the
-  positive base `ExpProofs.ePositive`: its lower interval endpoint is always
-  at least `2`, and `ExpProofs.eNaturalPower` gives valid literal natural
-  powers between `2^n` and `4^n`. Rational roots, rational-exponent
-  continuity, and the self-derivative theorem remain separate open bridges.
-- **Linear ODEs â€” finite Peano--Baker core and direct scalar uniqueness closure checked; analytic layer open.**
-  `PeanoBaker.lean` proves finite chronological products, the ordered-word
-  expansion, discrete variation of constants, and recurrence uniqueness:
-  the zero-initial forcing response is the explicit time-ordered Duhamel sum
-  sum_(k<N) S_(N-1) * ... * S_(k+1) * g_k; every sampled candidate is the
-  recursive trajectory, while a zero-initial homogeneous sampled candidate is
-  identically zero. Its checked forced
-  harmonic-oscillator instance derives the exact second-order Euler recurrence
-  after vectorizing position and velocity. `RationalMajorant.factorialTailTerm`
-  and `...factorialTailPartial_bound_at_start` now prove the finite rational
-  factorial-tail engine: at the computable start
-  `2 * C.num.natAbs + 1`, every finite prefix of `sum C^r/r!` is bounded by
-  twice its first omitted term, and the shifted version has an additional
-  `1/2^shift` factor. `LinearODE.peanoBakerFactorialTail_bound` specializes
-  that estimate to `C = M*T`, the coefficient-norm and interval-length
-  product in the continuous Peano--Baker plan. The new executable shift
-  `peanoBakerFactorialTailShift` and theorem
-  `peanoBakerFactorialTail_shifted_le_eps` now turn the geometric tail into
-  any requested positive rational tolerance, uniformly over every finite
-  remaining prefix. The constant-coefficient degree term
-  `constantPeanoBakerSimplexTerm A T r = (T^r/r!) * A^r` and its checked
-  one-step recurrence now give the finite algebraic bridge to the exponential
-  series. For the quarter-turn generator, the checked finite identity
-  `RotationSystem.simplexPartial_even_split` groups the first `2*n` terms as
-  `C_n(T) * I + S_n(T) * J`, with executable alternating rational prefixes.
-  `RotationSeries.expPartial_imaginary_even_split` proves that the literal
-  complex prefix at `i*T` has those same `C_n(T)` and `S_n(T)` coordinates.
-  `RotationSeries.rotationExpRaw_valid` now encloses those prefixes in nested
-  rational complex boxes, with both coordinate widths bounded by
-  `8 * rotationTailMagnitude T 0 * (1/2)^n`. Its
-  `rotationCosRaw` and `rotationSinRaw` coordinate projections are valid raw
-  reals with the same rate. The common bounded-input evaluator is now also
-  exposed as `RotationCalculus.uniformRotationCosOnTwo` and
-  `uniformRotationSinOnTwo`: both satisfy the project's literal rational
-  epsilon--delta continuity definition on `[-2,2]`, with the checked modulus
-  `delta = eps / 16` and one uniform factorial stage supplied by
-  `uniformRotationBoxes_widths_shrink_uniform`. `RotationTaylorBridge` now
-  identifies those literal centers with the corresponding finite formal
-  sine/cosine Taylor prefixes and checks the fixed-stage sine secant estimate
-  `uniformRotationSinCenter_secant_error`. Its odd-prefix recurrence is now
-  bounded by the exponential factorial budget, giving the uniform finite
-  theorem `uniformRotationSinCenter_secant_error_le_thirty_four`.
-  `RotationDerivative.uniformRotationSinOnTwo_hasDerivativeOnInterval` now
-  combines that finite `34 * |h|` error with a step-aware factorial stage
-  selected from `precisionAtStage n * |h| / 48`, proving the full two-sided
-  raw interval certificate `sin' = cos` on `[-2,2]`. The derivative belongs
-  to this common-prefix evaluator. Its companion
-  `RotationDerivative.uniformRotationCosOnTwo_hasDerivativeOnInterval`
-  now proves `cos' = -sin` against the explicit
-  `uniformRotationNegSinOnTwo` evaluator. The finite cosine prefix has one
-  dropped sine term, which is assigned a separate factorial shift and joined
-  to the divided-tail shift by `max`. `RotationInitialValues` now checks the
-  matching finite initial boxes `C(0)=1` and `S(0)=0`, then packages both
-  derivatives and those values as
-  `uniformRotationOnTwo_rotationInitialCertificate`. Derivative transport to
-  equivalent representations remains open. The continuous-simplex
-  interpretation, vector uniqueness, and the rotation/geometric
-  identification remain open.
-  The scientific-calculus gate is the continuous
-  interval-matrix Peano--Baker series with simplex integral boxes, that
-  scalar tail certificate lifted to componentwise boxes, and variation of
-  constants.
-  This is the intended constructive **linear Picard--LindelÃ¶f** theorem for
-  vector systems:
-  Peano--Baker supplies the homogeneous resolvent, variation of constants
-  supplies the affine solution, and a bounded zero-initial difference is
-  driven to the zero raw vector by an explicit factorial schedule.  Scalar
-  `f' = f` uniqueness is deliberately separate: the checked direct
-  finite-mesh closure reduces an error envelope by a factor of two per
-  refinement sweep.  Constructing that sweep from derivative certificates
-  remains open. General nonlinear Picard--LindelÃ¶f remains a later
-  interval-Lipschitz/contraction layer.
-- **Scalar exponential uniqueness â€” direct mesh closure checked; analytic
-  bridge open.** `ScalarODEUniqueness.lean` does not use Peano--Baker or
-  Picard iteration.  A `DirectMeshHalvingCertificate` records rational error
-  envelopes from finite mesh sweeps, and its theorem `error_eq_zero` chooses
-  a computable dyadic sweep count to force the error to zero.  The
-  `SelfDerivativeDirectMeshComparison` wrapper then yields
-  `SelfDerivativeInitialValueUnique`; the exact comparison theorem for
-  power-series and inverse-logarithm exponentials is available as
-  `powerSeries_equiv_logIntegralInverse_on_interval_of_directMesh`.
-  `ShortBlockMeshSweep.next_le_half` now checks the exact one-block algebra:
-  a telescoped bound `next <= length * previous + residual` with
-  `length <= 1/4` and `residual <= previous/4` halves the envelope.
-  The cell/telescoping part is now formalized as well:
-  `FiniteMesh.sumUpTo_increments` proves the finite endpoint identity and
-  `FiniteMeshDifferenceBound.toShortBlockMeshSweep` converts cellwise
-  rational increment bounds into that one-block sweep. What remains is only
-  to derive those finite increment estimates from two supplied interval
-  derivative certificates.
-
-There is intentionally no aggregate percentage: these gates have distinct
-dependencies, and a proof in one does not compensate for a missing proof in
-another. The Pi score stays useful only as secondary integration coverage.
-
-## Continuity Replacement
-
-- Replace pointwise continuity on an interval by interval regularity:
-  every small rational subinterval has a computable narrow output interval
-  containing all point-value intervals, with a positive modulus at every
-  positive requested precision.  The checked bridge
-  `IntervalRegularOn.epsilonDeltaContinuous` derives the literal rational
-  epsilon-delta predicate from this enclosure data.
-  See `IntervalRegularOn` in `ComputableAnalysis/Calculus.lean`.
-- Rational-function denominator apartness is only a sufficient certificate,
-  not the general definition.
-  See `RatFun.DenominatorApartOnInterval` in
-  `ComputableAnalysis/FunctionDomains.lean`.
-
-## Integral
-
-**Benchmark item 15 â€” constructive FTC core checked.** The
-`EffectiveFTC`/`StaticDyadicEffectiveFTC` packages and their endpoint-
-agreement bridges formalize the finite schedule-to-endpoint identity in the
-effective-calculus chapter. This is the projectâ€™s certificate-level core;
-unrestricted classical hypotheses are not being smuggled into the interface.
-The finite selector `FTC.requestedPrecision` now has public certificates
-`FTC.requestedPrecision_positive` and `FTC.requestedPrecision_le_one`, making
-the normalization and boundedness of every requested schedule precision
-explicit. The companion `FTC.requestedPrecision_antitone` proves the selector
-is nonincreasing across finite stages, supplying the schedule-order invariant
-needed by later endpoint-transport arguments.
-The finite polynomial integration-by-parts module now exposes both endpoint
-orientations of the product-rule telescope on rational grids. Its
-quadratic/cubic specialization proves both sums equal one at every positive
-finite stage. This strengthens the item-15 integration-by-parts boundary
-without introducing a completed integral or a classical limit.
-The newly integrated `FiniteFTCQuartic` module adds a concrete quartic FTC
-checkpoint: dyadic left and right sums for `x^4` on `[0,1]` enclose the exact
-rational value `1/5` at every finite stage, and the resulting raw integral is
-proved equivalent to `RealRaw.ofRat (1/5)`.
-The sextic-derivative endpoint-sum witness now also reaches stage 16 exactly:
-`FiniteFTC.sexticDerivativeLeftSum_stage16` evaluates the finite sum to
-`107775/131072`, and its companion upper-bound theorem keeps the result below
-`6/7`. This tightens the item-15 finite schedule without treating the
-integral as an attained infinite limit.
-The same sextic derivative schedule now reaches stage 64 exactly:
-`FiniteFTC.sexticDerivativeLeftSum_stage64` evaluates to
-`32002047/33554432`, with the corresponding finite upper-bound check.
-It now also reaches stage 128 exactly:
-`FiniteFTC.sexticDerivativeLeftSum_stage128` evaluates to
-`524369919/536870912`, again with the finite upper-bound check below `1`.
-The same schedule now reaches stage 256 exactly:
-`FiniteFTC.sexticDerivativeLeftSum_stage256` evaluates to
-`8489598975/8589934592`, with its explicit finite upper-bound check below `1`.
-
-- Public integral target: construct an `Integral.ConstructionFor F` from a
-  `ContinuousFunctionOnInterval`.
-  See `Integral.ConstructionFor` and `Integral.ExistsConstructionFor` in
-  `ComputableAnalysis/Calculus.lean`.
-- Proved bridge: once the construction exists, the integral is a computable
-  real.
-  See `integral_construction_proves_well_defined_for`.
-- Concrete existence case: `Integral.constantMonotoneConstructionFor` gives a
-  valid point-valued integral algorithm for every constant exact-rational
-  function, and `Integral.exists_constantMonotoneConstructionFor` packages
-  the corresponding monotone construction witness.
-  `Integral.constantMonotoneIntegralFor_eq_ofRat` exposes the resulting raw
-  integral as exactly `RealRaw.ofRat ((b - a) * c)`.
-- Affine extension: `Integral.affineMonotoneConstructionFor` and
-  `Integral.exists_affineMonotoneConstructionFor` do the same for
-  `x â†¦ r * x + c` when `0 â‰¤ r`, using the exact rational endpoint formula
-  `(b - a) * (r * (a + b) / 2 + c)`.
-- The opposite orientation is now covered by
-  `Integral.exactRat_affine_nonincreasing`,
-  `Integral.affineMonotoneConstructionFor_of_nonpos`, and
-  `Integral.exists_affineMonotoneConstructionFor_of_nonpos` for `r â‰¤ 0`,
-  with the same exact formula. Together these give the complete affine
-  monotone family while retaining finite rational certificates.
-  The matching identities
-  `Integral.affineMonotoneIntegralFor_eq_ofRat` and
-  `Integral.affineMonotoneIntegralFor_of_nonpos_eq_ofRat` expose the affine
-  raw integrals by their exact endpoint formula.
-- FTC route for ordinary functions: do not pursue a generic "effective FTC"
-  whose hypotheses are derivative bounds and local controls.  The main theorem
-  should be the exact convex FTC: exact convexity on `[a,b]` implies the
-  one-sided convex derivative is monotone, integrable, and has integral
-  `F b - F a`.
-- Exact convexity is now stated through `RealRaw.Le` and rational secants.
-  See `RealRaw.Le`, `secantRaw`, and `ExactConvexOn`.
-- Convex derivative: a construction supplies a valid raw interval algorithm
-  for the right or left derivative.  `IsRightDerivative` and
-  `IsLeftDerivative` then verify it by the rational-secant lower-bound /
-  greatest-lower-bound or upper-bound / least-upper-bound laws.  These are
-  certificates for an explicit algorithm, not constructions by infimum or
-  supremum.  The full two-sided derivative exists only where the two supplied
-  one-sided algorithms agree; corners such as `abs` should not block the
-  universal one-sided FTC.
-- Convex FTC proof step: for each partition cell `[x_i,x_{i+1}]`, convexity
-  gives
-  `D_+F(x_i) <= Sec_F(x_i,x_{i+1}) <= D_-F(x_{i+1})`.
-  Multiplying by the cell width and summing gives Darboux sums around the
-  telescoping endpoint difference `F b - F a`. A finite rational mesh together
-  with an explicit modulus must shrink the Darboux gap; no appeal to
-  completeness of an ambient real-number type is permitted.
-- Piecewise convexity: if a function switches convexity, split the interval at
-  rational breakpoints, apply the exact convex FTC on each piece, and combine
-  endpoint equalities by raw-real arithmetic and transitivity.  Do not add a
-  separate piecewise theorem unless the examples force a reusable abstraction.
-- Integration by parts should follow the same explicit-piece discipline.
-  `leftStieltjesSum`, `rightStieltjesSum`, and
-  `finiteIntegrationByParts_withVariation` now prove the exact rational
-  rectangle decomposition, including its corner-area correction.
-  The companion identity
-  `rightStieltjesSum_eq_left_swap_add_quadraticVariation` identifies the
-  right-endpoint sum with the swapped left-endpoint sum plus exactly that
-  finite quadratic variation.
-  `RationalPartition.finiteIntegrationByParts_onPartition` and its
-  left-endpoint-with-variation counterpart now lift that identity to every
-  supplied certified rational partition, with the actual interval endpoints
-  on the right-hand side.  The combined coordinate theorem
-  `coordinateIntegrationByParts_onPartition_endpoint_bracket` now turns the
-  exact identity and maximum-step corner bound into the usable finite bracket
-  `b*v(b)-a*v(a)-delta*(v(b)-v(a)) <= left strips <= b*v(b)-a*v(a)` whenever
-  the sampled second path is nondecreasing.  It is the finite
-  monotone-piece form needed by the `x*arctan x` Pi route, not yet an FTC
-  identification of either strip.  The checked
-  `Integral.IntegrationByPartsCertificate` now packages the next general
-  handoff: after a particular paired mesh has certified that its two
-  integral raws add to the product-endpoint raw,
-  `left_integral_equiv_endpoint_sub_right` and its symmetric companion
-  derive the usual endpoint-minus-other-integral formula by valid raw
-  interval cancellation.  Constructing that paired mesh from arbitrary
-  derivative data remains separate.
-  The checked
-  `quadraticVariationSum` estimates bound that correction by a maximum first
-  increment times the second endpoint variation, or by the product of the two
-  endpoint variations; negating both paths supplies the decreasing-piece
-  version.  `RationalPartition.uniform` now gives the first explicit common
-  refinement: the `m*n` rational grid contains both uniform input grids, and
-  `mesh_refine_mul_right` proves its width is the old mesh divided by the
-  positive refinement factor.  `RationalPartition.Refines` and
-  `CommonRefinement` package the two endpoint-preserving index embeddings as
-  finite data; `uniformCommonRefinement` constructs the certified uniform
-  case, and `Refines.refl`/`Refines.trans` make staged rational refinements
-  compositional.  The literal dyadic grids used by the current Riemann
-  constructors inherit this interface directly: `dyadic_leftPoint_refines`
-  keeps old index `k` at `2*k`, and `dyadic_mesh_refines` halves its mesh.
-  Arbitrary rational breakpoints now have a checked local insertion step:
-  `insertPoint_refines` embeds the old partition.  The finite scan
-  `locateInsertionCell` chooses and certifies the containing cell of any
-  in-range rational point, and `insertionChainOfPointList` converts any
-  finite in-range rational list into successive scan-and-insert data.
-  `InsertionChain.refines` composes those steps, and
-  `Refines.point_between_consecutive` keeps every fine point in its parent
-  coarse cell.  `clampedPath_quadraticVariation_le_endpointSquare` applies
-  the corner estimate directly to partition data.  The maximum-increment
-  premise is now also a checked partition interface.  MaxStepAtMost carries a
-  nonnegative rational cap on every genuine cell; clampedPath_step_le_of_maxStep
-  extends it to the clamped total path; and
-  clampedPath_quadraticVariation_le_stepBound_mul_endpointDifference bounds
-  that coordinate-path corner correction against any nondecreasing second
-  rational path.  Uniform grids instantiate the cap by their literal mesh,
-  while unitMeshPath_quadraticVariation_le_one_div_mul_endpointDifference is
-  the exact one-over-n endpoint-variation bound needed for sampled
-  x-times-arctangent.  The arctangent subcertificate is deliberately split
-  in two.  Lean now proves the same-stage box order
-  lo(arctan(x), n) <= hi(arctan(y), n) for 0 <= x <= y <= 1 by extending
-  the finite rectangle cover of [0,x] with [x,y] and comparing lower and
-  upper sums on [0,y]; it is packaged as a weak nondecreasing
-  FunctionOnInterval witness.  The compatible nondecreasing rational
-  sampling path is now also checked: `QInterval.lowerEnvelope` takes the
-  cumulative maximum of the lower endpoints of any weakly ordered box family.
-  It stays in every corresponding box, is nondecreasing, and
-  `arctanIntegralRectangleMeshSamples_cornerBound` instantiates the unit-mesh
-  corner estimate for the fixed-stage rectangle arctangent boxes.  The
-  endpoint-order fact is not the kernel's monotonicity in its integration
-  variable, and the lower-envelope construction is precisely what prevents
-  arbitrary box endpoints from being treated as an exact nondecreasing path.
-  The first explicit two-parameter error schedule is now the target:
-  at mesh `eps.den + 1` the endpoint variation lies in `[0,1]`, so the
-  corner correction is at most `1/(eps.den + 1) <= eps`; independently,
-  rectangle evaluation stage `4 * (eps.den + 1)` makes every sampled box
-  have width at most `eps`.  These samples now instantiate the exact finite
-  integration-by-parts equality: the two left strip sums plus the corner
-  correction equal the final sample, and their total is bracketed within
-  `1/mesh` (or the requested epsilon under the denominator-plus-one
-  schedule) of that endpoint.  The bracket now additionally feeds a valid
-  direct-only regression raw: stage `n` uses the point interval at
-  `S_(n+1,n)` widened by `1/(n+1)`, and finite-prefix stabilization uses the
-  public `4/(n+1)` rectangle-width radius.  Its candidate width is exactly
-  `2/(n+1)`, it is equivalent to the rectangle arctangent at one, and four
-  times it is a checked supplementary pi evaluator.  It is intentionally not
-  a scoreboard completion: the two finite strip sums have not been promoted
-  to definite integrals and no canonical logarithm has entered this proof.
-  What remains is to connect these finite
-  estimates through the product-derivative and FTC certificates.  The
-  general finite merge
-  is now checked: `commonRefinementOfPartitions` inserts the right
-  `breakpointList` into the left partition and recovers the second ordered
-  embedding with a bounded `firstOccurrence` scan.  It is deterministic and
-  preserves both index embeddings; duplicate breakpoints are retained, so a
-  later minimal-union optimization is optional rather than a theorem gap.
-  The model unit path has a fully checked vanishing schedule:
-  `unitMeshPath_quadraticVariation` is exactly `1/n`, and choosing
-  `eps.den + 1` makes it at most any positive rational epsilon.  For the
-  integral theorem, extend this interface from the coordinate factor to
-  increasing/decreasing function pieces with arbitrary rational breakpoints,
-  then supply product/derivative/FTC comparison certificates.  Do not invoke
-  a nonconstructive global variation or Jordan decomposition.
-- The first raw product bridge is now checked on positive bounded branches.
-  `QBox.mulRealInterval_of_nonneg` reduces the four-corner enclosure to the
-  lower--lower and upper--upper products.  Given positive rational bounds,
-  `RealRaw.mul_valid_of_nonneg_bounded` proves the product raw valid with
-  width bounded by `Bx * width(y) + By * width(x)`, and
-  `RealRaw.le_mul_le_mul_of_nonneg` proves order monotonicity of products on
-  nonnegative valid representatives, while
-  `RealRaw.mul_equiv_of_nonneg` preserves changes of certified
-  representation.  `RealFunRaw.mul_valid_of_nonneg_bounded` lifts this
-  pointwise to rational-input functions.  `FunctionOnInterval.mulOfNonnegBounded`
-  now turns that into a domain-aware interval function.  Its first concrete
-  use is `IntegralIdentities.coordinateTimesArctanIntegralRectangleOnUnit`:
-  the exact coordinate factor and the geometric arctangent rectangle factor
-  are uniformly bounded in `[0,1]`, and its stage box is proved to be
-  `[x * A.lo, x * A.hi]`.  This is the product representation needed for
-  the positive `x * arctan x` branch on `[0,1]`.
-  `coordinateTimesArctanIntegralRectangleOnUnit_nondecreasing` now also
-  proves its declared increasing direction from the weak arctangent endpoint
-  order and nonnegative product endpoints. A general signed product and its
-  FTC comparison are still open; the concrete two-sided derivative below is
-  checked separately. The
-  product endpoint anchors are now checked as well: the box is exactly zero
-  at `0`, agrees with the rectangle evaluator at `1`, and its endpoint
-  difference is a valid raw equivalent to `arctanGeom 1`.  This is the
-  boundary term needed by the finite integration-by-parts identity, not an
-  integral identity for the product.  The
-  same concrete positive product evaluator now has a checked forward
-  derivative at every rational unit-branch point:
-  `coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt` uses
-  the raw derivative box `arctan(x) + x/(1+x*x)`. Its positive quotient is
-  decomposed exactly into the arctangent quotient and a bounded product term;
-  the arctangent stage `8*(n+1)` and step budget `1/(72*(n+1))` close the
-  finite error. The earlier zero theorem is its endpoint specialization.
-  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit` packages that raw
-  box as an interval function, and
-  `coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative` proves its
-  full signed-step derivative on `[0,1]`: a negative quotient is reversed at
-  `x+h`, and a finer rectangle arctangent quotient plus the kernel's
-  rational 2-Lipschitz estimate transports the derivative box back to `x`.
-  Its explicit step budget is `|h| <= 1/(648*(n+1))`. The derivative boxes
-  are now also certified uniformly inside `[0,2]` by
-  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_range` and its
-  `..._nonneg_bounded` packaging, supplying the first range datum for a
-  derivative-bound FTC certificate. They are also weakly nondecreasing on
-  `[0,1]`: the rational term uses the explicit factor
-  `(y-x)*(1-x*y)` after clearing positive denominators, and the arctangent
-  box uses its geometric endpoint order. Thus
-  `coordinateTimesArctanIntegralRectangleDerivativeOnUnit_nondecreasing`
-  supplies endpoint derivative ranges on every positive rational cell. The
-  checked forward-range enclosure now supplies one common box for every
-  derivative value within its continuity radius and the endpoint difference,
-  with an explicit ten-tolerance width bound. Its radius, derivative stage,
-  and hull bound are now named computable definitions. The derivative-continuity
-  radius and evaluation stage now come from the checked effective modulus,
-  not a choice extracted from epsilon--delta existence. The compatible uniform rational
-  partition is now selected by the finite denominator product
-  `(delta.den + 1) * 72 * (n + 1)`. Its cell containment, common endpoint
-  transport stage, global Riemann-width and endpoint-width schedules are
-  now all checked in `coordinateTimesArctanForwardTwoStageFTC`, which proves
-  the bounded-sum raw equivalent to the product endpoint raw. That raw is now
-  normalized by `coordinateTimesArctanForwardTwoStageStabilizedRaw`: finite
-  intersections of its widened bounded-sum boxes are valid and shrinking,
-  while the rectangle anchor is proof-side only. Thus the actual finite-sum
-  computation supplies `coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity`,
-  a public definite-integral identity equivalent to `arctanGeom 1`.
-  The
-  exact algebraic core is now formalized for arbitrary rational functions:
-  `ExactFunction.product_differenceQuotient_right` keeps the second factor
-  at the right endpoint, while `..._corner` exposes the explicit
-  `h * D_h(u) * D_h(v)` remainder.  The checked theorem
-  `..._error_le` also gives the exact three-term absolute-error allocation:
-  the two component derivative errors weighted by the opposite point value
-  plus that corner remainder.  The concrete product certificate now bounds
-  that remainder and the endpoint replacement through interval continuity
-  data, and stabilizes the resulting two-stage finite sum into a public FTC
-  construction; no limit or completeness principle is being assumed.  The
-  first component certificate is now checked in the actual interval-valued
-  derivative interface: `FunctionOnInterval.exactRatAffineDerivative` proves
-  the finite quotient of every exact affine rational function is its constant
-  slope, and `IntegralIdentities.coordinateOnUnitDerivative` specializes it
-  to `d/dx x = 1` on `[0,1]`.  The arctangent certificate, its remainder
-  budget, the product closure, and the product-specific FTC are now checked.
-  The error
-  algebra is now two-sided:
-  `ExactFunction.product_differenceQuotient_error_le_qabs` carries `qabs h`
-  in the corner budget, with the earlier nonnegative-step theorem as its
-  forward-mesh corollary.  This matches the interval derivative interface's
-  signed rational steps.
-- A future pi coverage bridge should exercise this theorem rather than merely
-  mention it: prove
-  `pi = 4 * integral_0^1(arctan x) + 2 * log 2` from integration by parts.
-  The product FTC bridge and arctangent derivative are now available; this
-  still requires an explicit separate arctangent strip, its monotone-piece
-  refinement/splitting theorem, and canonical exponential/logarithm alignment.
-  This is deliberately the long exp/log/ODE route: first identify the
-  logarithmic integral with the inverse of canonical exponential, use direct
-  scalar finite-mesh uniqueness to equate the power-series, Euler, and
-  inverse-integral exponentials, then transport the resulting `log 2`
-  through the integration-by-parts identity.  A later
-  complex corroboration can prove `pi = -2i * log(i)`, but it needs
-  represented-input extension and the rotation-system bridge in addition.
-  `Logarithm.logTwoSeries` now supplies a valid, rate-certified alternating
-  harmonic raw presentation of `log 2`.  Its lower endpoint is now proved
-  exactly equal, for every positive mesh count, to the literal uniform right
-  Riemann sum for `t â†¦ 1/(1+t)`:
-  `Logarithm.logTwoLo_eq_logTwoKernelRightRiemann` factors the calculation
-  through `H_(2*n) - H_n` and cancels the mesh term by term.  The generic
-  finite right-sum/Darboux containment and the public uniform-mesh identity
-  now give `Logarithm.logTwoDarbouxCompute_contains_dyadicSeriesLower`; common
-  dyadic refinements then prove the final raw-real theorem
-  `Logarithm.logTwoSeries_equiv_logTwoReciprocalIntegral`.  This discharges
-  the concrete endpoint bridge using rational boxes alone.  The distinct
-  remaining logarithm gate is to identify that integral raw with the inverse
-  branch of the selected canonical exponential.  The elementary
-  change-of-variables algebra is now checked as well:
-  `Logarithm.logTwoSquareMesh_substitution_identity` writes the finite
-  left-Stieltjes sum for `t = x*x` as the ordinary left mesh sum for
-  `2*x/(1+x*x)` plus `Logarithm.logTwoSquareMeshCorrection`; the correction
-  is nonnegative and at most `1/n` on the `n`-cell mesh
-  (`logTwoSquareMeshCorrection_le_one_div`).  This finite
-  square-substitution core is now promoted all the way to the reciprocal
-  integral: 
-  logTwoSquarePullback_lipschitz_on_unit certifies 2*x/(1+x*x) as
-  2-Lipschitz, and logTwoSquareStieltjesRaw_equiv_pullbackIntegral identifies
-  the stabilized finite Stieltjes evaluator with its valid
-  Lipschitz--Darboux integral.  The checked square-block reindexing compares
-  it with the ordinary reciprocal t-mesh: each block contributes at most
-  `4/n^2`, so `logTwoSquareMesh_sub_uniformLeftEndpoint_bounds` gives the
-  aggregate `4/n` bound, and
-  `logTwoSquarePullbackIntegral_equiv_reciprocalIntegral` proves the
-  pullback integral equal to the existing `logTwoReciprocalIntegral`.
-  The new direct raw pi evaluator
-  `PiProofs.piTriangleLogSquareStieltjes` combines that stabilized
-  Stieltjes logarithm with the finite arctangent triangle.  Its validity and
-  equivalence to both the reciprocal-log formula and area pi are checked in
-  `PiProofs.lean`; `pi.squareStieltjes` exposes it as a
-  supplementary algorithmic view, not another coverage row.
-  The first arctangent--logarithm integration-by-parts strip is now a
-  separate literal certified integral, not just a scaled notation:
-  `arctanLogKernelIntegral` integrates `x/(1+x*x)` with Lipschitz constant
-  one. `LipschitzDyadic.compute_natScale` proves the finite Darboux boxes
-  respect natural scaling exactly, so the stagewise theorem
-  `logTwoSquarePullbackIntegral_compute_eq_two_arctanLogKernelIntegral` and
-  the endpoint theorem
-  `two_arctanLogKernelIntegral_equiv_logTwoReciprocalIntegral` establish
-  `2 * âˆ«â‚€Â¹ x/(1+x*x) dx â‰¡ log_rec 2`; its composition with the independent
-  alternating-harmonic comparison now also gives the direct theorem
-  `two_arctanLogKernelIntegral_equiv_logTwoSeries` to `log_series 2`.  The
-  scaled strip has exact dyadic width `4/2^stage`, recorded by
-  `two_arctanLogKernelIntegral_compute_width`.
-  These are endpoint equivalences at the rational name two, not the pending
-  function-level canonical-logarithm theorem. The remaining Pi-route gates
-  are a general effective-FTC extension beyond the supplied unit arctangent
-  triangle construction and the later canonical exp/log identification.  The
-  finite predecessor and its unit construction are now checked:
-  `arctanComplementKernelIntegral` is the literal 3-Lipschitz integral of
-  `(1-x)/(1+x*x)`, and the exact Darboux-box addition theorem
-  `LipschitzDyadic.compute_add` proves that this strip plus
-  `arctanLogKernelIntegral` is stagewise the 4-Lipschitz box for
-  `1/(1+x*x)`. Common uniform-left sums yield
-  `arctanStripIntegrals_add_equiv_arctanKernelIntegral`. The supplied unit
-  triangle construction now identifies the complementary strip with its
-  arctangent integral; this is still not a new Pi-scoreboard row because the
-  result is not a reusable effective-FTC theorem. The mesh-level triangle/Fubini
-  reindexing is separately checked:
-  `LipschitzDyadic.uniformTriangleRightSum_eq_complementUniformLeftEndpointSum`
-  proves the exact identity between an outer right sum of fixed-mesh inner
-  left prefixes and the complementary left sum `(1-x)*f(x)`. It is obtained
-  from `finiteIntegrationByParts`, so it supplies the required finite
-  rectangle geometry without importing continuous Fubini. The supplied
-  direct dyadic specialization is now
-  packaged as `arctanKernelTriangleRaw`: its runtime evaluator is only the
-  finite triangle sum for `1/(1+x*x)`, its public stabilization radius is
-  `6/2^n`, and Lean proves it equivalent to
-  `arctanComplementKernelIntegral`.  Lean now also packages that exact runtime
-  as `arctanIntegralTriangle`, a monotone integral construction for the
-  certified `arctan.integral.rectangle` unit function.  Its finite triangle
-  reindexing is recorded as the construction's explicit provenance; it does
-  not assume general Fubini or integral-linearity.
-  The companion raw `arctanKernelTrianglePlusLog` now adds this triangle
-  computation to the certified `x/(1+x*x)` logarithmic strip.  Its proved
-  equivalence to `arctanGeom(1)` makes it a finite strip/Fubini regression of
-  the same arctangent endpoint.  The public theorem
-  `arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral` further
-  identifies the supplied triangle integral plus that strip with the
-  independently certified product-FTC integral.  This is not yet the pending
-  calculus theorem `4 * âˆ« arctan + 2 * log 2 = pi`: canonical exp/log
-  transport and a general effective-FTC extension beyond the supplied unit
-  construction remain separate work.
-  The direct endpoint now packages two supplementary raw formulas:
-  `Logarithm.piTriangleLogReciprocalIntegral =
-  4 * arctan.integral.triangle + 2 * log_rec(2)` and
-  `Logarithm.piTriangleLogSeries =
-  4 * arctan.integral.triangle + 2 * log_series(2)`.
-  Their formal product-FTC bridge is
-  `piTriangleLogReciprocalIntegral_equiv_four_coordinateTimesArctanForwardTwoStageMonotoneIntegral`
-  (and its series counterpart); both then reach the geometric arctangent
-  endpoint and the circle-area pi.  The literal reciprocal-log formula is now
-  the sixth `PiCoverageBridge` constructor: it tests a supplied finite
-  triangle, Darboux-strip, product-FTC, and logarithm route, with direct rate
-  `52/2^n`.  It instantiates the certificate-level integration-by-parts
-  rebalancing theorem, but does not yet construct such certificates from a
-  general effective FTC or identify the canonical exp/log transport; those
-  are the stronger remaining refinements of this row.
-  The square-pullback companion
-  `Logarithm.piTriangleLogSquareSubstitutionIntegral` is the seventh bridge:
-  its endpoint is `2 * âˆ«_0^1 2*x/(1+x*x) dx`, it reaches the reciprocal-log
-  formula by the finite `t = x*x` mesh correction, and its direct rate is
-  `56/2^n`.  It is the concrete substitution regression, not a general
-  change-of-variables theorem.
-- Formula-identification route: to identify a proposed kernel, prove that it
-  lies in the same shrinking enclosures as the pointwise derivative produced
-  by secants.  For arctangent, this means proving finite sector-area secant
-  inequalities and comparing them with `1/(1+x^2)`.
-- Projective-line test integral: use the reciprocal quartic
-  `âˆ«_(-âˆž)^âˆž dx/(x^4+a*x^2+1)` as a simpler full-line benchmark before the
-  Gaussian integral.  The exact rational folding and substitution identities
-  for `x â†¦ 1/x` and `u=x-1/x` are formalized through
-  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_eq_pullback_shiftedCauchy`;
-  the clean pi case has its denominator side conditions discharged as
-  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_shiftedCauchy`.
-  Lean also identifies that shifted Cauchy kernel with the existing arctangent
-  kernel through
-  `IntegralIdentities.reciprocalQuarticUnitFoldDensity_minus_one_eq_pullback_integralKernel`.
-  A second finite bridge now compactifies the line by
-  `x â†¦ x/(1-x^2)`: the checked theorem
-  `reciprocalQuarticSymmetricDensity_minus_one_eq_projectiveCompactPullback`
-  identifies its Cauchy pullback with the everywhere-defined density
-  `(1+x^2)/(x^4-x^2+1)`, whose two endpoint values are exactly `2`.
-  The uniform rational estimate
-  `IntegralIdentities.reciprocalQuarticDenominator_minus_one_ge_three_quarters`
-  proves `3/4 â‰¤ x^4-x^2+1` for every rational `x`, and the compact density is
-  proved nonnegative.  Its checked finite-difference factorization is
-  `IntegralIdentities.reciprocalQuarticSymmetricDensity_minus_one_sub`.
-  Lean now proves the resulting `8`-Lipschitz estimate on `[-1,1]` and the
-  literal epsilon-delta theorem
-  `IntegralIdentities.reciprocalQuarticMinusOneCompact_epsilonDeltaContinuous`,
-  using `delta = epsilon/8`.  It now also has a completed
-  `IntervalRegularOn` witness,
-  `IntegralIdentities.reciprocalQuarticMinusOneCompact_intervalRegular`:
-  midpoint evaluation widened by `8 * width(I)` contains every point value,
-  and an input width of `1/(16*n)` gives output width at most `1/n`.
-  The theorem-facing package
-  `reciprocalQuarticMinusOneCompact_continuous` can therefore be consumed by
-  the finite-interval calculus and ODE interfaces.  The concrete finite
-  integral and projective/Cauchy comparison are now complete: the literal
-  dyadic raw `reciprocalQuarticMinusOneCompactDyadicIntegral` is valid and
-  equivalent to `cauchyFullLineIntegral`, and therefore
-  `PiProofs.piReciprocalQuarticCompact_equiv_piCircleArea` makes the `a=-1`
-  case another counted computation of `piCircleArea`.  The expected-value
-  side remains packaged as
-  `IntegralIdentities.reciprocalQuarticMinusOneExpectedPi`, with theorem
-  `PiProofs.reciprocalQuarticMinusOneExpectedPi_equiv_piCircleArea`.  The
-  general `ReciprocalQuarticMinusOneProjectiveRoute` is still useful as a
-  parameterized interface for future projective constructions, but it is no
-  longer a prerequisite for the concrete route or its scoreboard equality.
-  The new denominator-cleared endpoint identity
-  `projectiveCompactCoordinate_sub_cleared` supplies the finite rational
-  displacement calculation for transporting a partition through
-  `x / (1 - x^2)`.  The checked positivity lemmas and
-  `projectiveCompactCoordinate_strictMono` now prove that this chart preserves
-  strict rational order on `(-1,1)`.  `projectiveCompactIntervals_covers`
-  lifts that fact to finite rational partitions of every compact source
-  subinterval, and `projectiveCompactIntervals_nonnegative` gives the
-  nonnegative-branch admissibility needed for the Cauchy quadrature bounds.
-  The new pointwise and squared-mesh bounds
-  `projectiveCompactCoordinate_sub_le_lipschitz` and
-  `projectiveCompactAreaLoop_squareSum_le` quantify the distortion on every
-  source branch `[0,s]` with `s < 1`.  The endpoint/refinement schedule is now
-  checked too: `projectiveCompactDyadicEndpoint n = 1 - 1/2^n` stays in the
-  positive compact chart and has `1 / 2^n <= 1 - s_n^2`;
-  `projectiveCompactDyadic_lipschitzFactor_le` bounds the resulting chart
-  distortion, and
-  `projectiveCompactDyadic_schedule_squareSum_le` proves that `6*n` source
-  refinements give transported squared mesh at most `4 / 2^(2*n)`.  The
-  quadrature-substitution proof was thereby reduced to a finite cellwise
-  comparison and its assembly across the two compact branches.  The cellwise
-  comparison is now checked: the exact left and right secant expansions
-  'projectiveCompactCoordinate_sub_eq_leftJacobian_add' and
-  'projectiveCompactCoordinate_sub_eq_rightJacobian_sub' give the endpoint
-  Jacobian bounds on every '0 <= p <= r < 1' source cell.  With the projective
-  pullback identity and the compact density's 8-Lipschitz bound, Lean proves
-  both cross inequalities between a compact Lipschitz cell and its transported
-  Cauchy rectangle.  The finite induction
-  'projectiveCompactLipschitzSum_overlaps_integralSum' packages these into
-  interval overlap for every positive-branch cover.  The finite global
-  ingredients are checked too: the compact density is even, and
-  'projectiveCompactSymmetricLipschitzSum_overlaps_integralSum' scales the
-  positive branch to a symmetric finite-core overlap.  The endpoint cell is
-  bounded by 'projectiveCompactTailUpperCell_le'; at the dyadic endpoint,
-  'projectiveCompactDyadicTailUpperCell_le' makes this at most
-  '(32 / 3) * 2^(-n)'.  Twice that endpoint budget is now packaged as the
-  valid shrinking raw 'projectiveCompactDyadicSymmetricTailError', with the
-  stagewise absorption theorem
-  'projectiveCompactDyadicSymmetricTailUpper_le'.  What remains is one nested
-  raw construction that combines these finite core and tail boxes and agrees
-  with the existing compact dyadic integral raw.  That agreement is now tied
-  to the actual candidate brackets: the affine map `x = 2*t - 1` carries
-  every concrete unit-dyadic lower and upper cell exactly to the compact
-  density's 8-Lipschitz cell, and the two sum identities package this for the
-  whole stage.  The next finite task is to split these affine dyadic
-  partitions into their symmetric positive cores and two endpoint cells,
-  while accounting for the reflected cells' right-endpoint convention.  The
-  affine transport is now formally an ordered cover of `[-1, 1]`, so that
-  remaining split is a finite partition calculation.  The orientation itself
-  is now checked cellwise: a reflected negative left-endpoint cell is exactly
-  the positive right-endpoint cell, for both compact Lipschitz brackets.
-  `projectiveCompactReflectedIntervals_covers` and
-  `projectiveCompactReflected_append_covers` now certify the corresponding
-  ordered symmetric cover, while the two
-  `projectiveCompactLipschitz*Sum_reflected_append_eq_right_add_left` theorems
-  identify its complete left-endpoint sums with the positive right- plus
-  left-endpoint sums.  The remaining finite identity is now proved too:
-  `reciprocalQuarticMinusOneCompactAffineDyadicIntervals_succ_eq_reflected_append`
-  shows that the literal affine image of stage `n + 1` is the reflected
-  stage-`n` mesh followed by that mesh, and
-  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_eq_orientedSymmetric`
-  identifies the actual candidate box with the resulting oriented symmetric
-  bracket, and
-  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_symmetric`
-  connects that literal box to the existing factor-two projective core at the
-  same finite stage.  The only remaining analytic assembly is to trim its two cells
-  touching `Â±1`, couple the interior bracket to the scheduled projective
-  Cauchy bracket, and absorb them using the already-valid dyadic tail raw.
-  That trim is now literal rather than schematic:
-  `reciprocalQuarticUnitDyadicCoreIntervals` deletes the final cell of the
-  actual positive mesh, `reciprocalQuarticUnitDyadicCoreIntervals_covers`
-  proves it covers `[0, 1 - 2^(-n)]`, and
-  `reciprocalQuarticUnitDyadicIntervals_eq_core_append_tail` recovers the full
-  mesh by appending exactly the endpoint cell.  Its factor-two compact bracket
-  already overlaps the two-branch projective Cauchy bracket by
-  `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_projective`.  The
-  formerly separate endpoint assembly is now checked at each finite stage:
-  `projectiveCompactDyadicOrientedTailUpper_le` bounds the two oriented
-  candidate endpoint cells by the existing tail raw,
-  `projectiveCompactOrientedSymmetric_append_overlaps_tailEnclosure` is the
-  finite bracket-combination lemma, and
-  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_coreTail` proves
-  that the actual candidate box at stage `n+1` overlaps the literal trimmed
-  core bracket enlarged by that error budget.  What remains is the raw-level
-  nesting/shrinkage construction that joins these core-and-tail boxes to the
-  existing full-line Cauchy raw; this is not yet a Pi equivalence.  The next
-  transfer is now direct rather than an invalid transitive use of interval
-  overlap: the compact symmetric core has exact width at most `32 * 2^(-n)`,
-  and `reciprocalQuarticMinusOneUnitDyadicCompute_succ_overlaps_projectiveCauchyCoreTail`
-  proves that the literal candidate overlaps the projective Cauchy core after
-  widening both compact-core sides by that proved width and the upper side by
-  the endpoint budget.  The remaining analytic task is specifically to join
-  this shrinking envelope to the completed full-line Cauchy raw.  The
-  separately proved `6*n` midpoint-refinement schedule for the projective
-  chart is now connected to the literal trimmed core by a genuine finite
-  comparison: `reciprocalQuarticUnitDyadicCore_symmetric_overlaps_scheduled`
-  applies a general rational Lipschitz-partition comparison to the two ordered
-  covers of the same compact interval.  This is deliberately not transitivity
-  of interval overlap.  That bridge step is now proved: the actual candidate
-  reaches the two-branch scheduled Cauchy hull after adding the literal-core
-  width, the scheduled-core width, and the removable-endpoint budget.  The
-  remaining task is the separate finite comparison between that hull and the
-  completed full-line Cauchy raw.
-  The rational endpoint side of that assembly is now explicit too:
-  `projectiveCompactDyadicCauchyTailRadius_le` proves that the reciprocal
-  projective endpoint at compact stage `n + 1` is at most `2 * 2^(-n)`.
-  After the two-branch factor this gives the intended dyadically vanishing
-  Cauchy-tail scale.  Its finite reciprocal rectangle transport is now
-  checked cellwise and for arbitrary finite lists of strictly positive cells:
-  `cauchyReciprocalIntegralSum_overlaps` compares the original and inverted
-  rectangle brackets without invoking a completed integral.  The necessary
-  order bookkeeping is now checked too:
-  `cauchyReciprocalReversedIntervals_covers` sends a positive ordered cover
-  of `[a,b]` to one of `[1/b,1/a]`, and its reordered sum has the same
-  overlap.  The refined source tail is now explicit rather than an intended
-  construction: `cauchyTailDyadicIntervals a n` affinely transports the
-  midpoint mesh to `[a,1]`; Lean proves its cover and strict positivity, and
-  `cauchyReciprocalTailDyadicIntervals_covers` reverses it into the ordered
-  far-side cover `[1,1/a]`.  Its two finite Cauchy brackets overlap by
-  `cauchyReciprocalTailDyadicIntervals_overlaps`.  The projective endpoint
-  selection is now checked as well: at compact stage `n+2`,
-  `projectiveCompactDyadicCauchyTailStart n` is positive and at most one;
-  its reciprocal is exactly the finite projective coordinate.  Consequently
-  `projectiveCompactDyadicCauchyTailIntervals_covers` supplies an explicit
-  ordered mesh from `1` to that coordinate, and its finite brackets overlap
-  the compact-side tail.  The two finite assembly covers are now formalized:
-  `cauchySplitDyadicIntervals` partitions `[0,1]` at any rational tail start
-  and has a Cauchy bracket overlapping the canonical unit mesh; meanwhile
-  `cauchyUnitReciprocalTailDyadicIntervals` joins that canonical unit mesh to
-  the ordered reciprocal tail.  At compact stage `n+2`,
-  `projectiveCompactDyadicCoreIntervals_overlaps_cauchyAssembly` proves that
-  this latter mesh and the literal projective core cover exactly the same
-  Cauchy interval.  The split source mesh has squared mesh at most `2^(-n)`
-  and integral-box width at most `2 * 2^(-n)`.  Finally the tail start has a
-  matching lower dyadic bound `2^(-(n+2))`.  The corresponding far-tail
-  estimate is now proved as well: refining its source at stage `5*n + 8`
-  gives a reciprocal Cauchy rectangle width at most `2 * 2^(-n)`.  This uses
-  a new global nonnegative Cauchy cell-width estimate and a reciprocal mesh
-  squared-sum bound; it does not appeal to an improper integral.  What
-  now-shrinking scheduled core and the unit-plus-tail assembly have also been
-  combined: `projectiveCompactDyadicCauchyCore_integral_width_le` gives the
-  former an `8 * 2^(-2n)` Cauchy width bound, the assembly has width at most
-  `4 * 2^(-n)`, and their `QInterval.hull` is a common bridge envelope with
-  width at most `12 * 2^(-n)`.  Lean now scales that positive bridge for the
-  two chart branches and proves
-  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_scheduledCauchy`:
-  the actual candidate reaches it after paying the literal-core width, the
-  scheduled-core width, and the endpoint budget.  The remaining comparison is
-  between this two-branch finite Cauchy hull and the completed full-line raw.
-  The first half of that comparison is now formalized independently:
-  `cauchyUnitReciprocalTailDyadicIntervals_overlaps_twoUnitEnvelope` encloses
-  the positive unit-plus-reciprocal-tail mesh by two standard unit meshes.  It
-  pays only the rational near-zero length and the compact tail-mesh width;
-  `projectiveCompactDyadicCauchyTailStart_le_dyadic` and
-  `cauchyTailDyadicIntervals_integral_width_le_dyadic` prove that both vanish
-  at a certified dyadic rate.  These two sides are now combined in
-  `reciprocalQuarticMinusOneUnitDyadicCompute_succ_succ_succ_overlaps_fullCauchy`:
-  the actual candidate overlaps one explicit rational envelope centred on the
-  four-unit-mesh Cauchy calculation.  Remaining work is raw-level enclosure
-  shrinkage, not any unproved finite change-of-variables identity.
-- Hidden singularities such as `1/(x^2 - 2)` are not handled by an FTC theorem.
-  They are handled before calculus by denominator-apartness or
-  interval-regularity certificates on the rational interval.
-
-## Inverse Functions
-
-The scheduled arctangent branch now provides a cofinal stage schedule
-`arctanScheduledStageSchedule`. `arctanScheduledRectangleRaw` is definitionally
-the corresponding rescheduling of the finite geometric rectangle raw, and
-`arctanScheduledRectangleRaw_equiv_arctanGeom` proves that it represents the
-same abstract arctangent. Its explicit rectangle width budget is
-`1/(16*(n+1))`. The remaining inverse-function obligation is the interval
-image/containment certificate for endpoint boxes, not a hidden appeal to a
-completed real-valued arctangent.
-
-**Benchmark item 79 â€” branch-local bisection core checked.**
-`HasBisectionSearch` and `inverse_function_from_bisection_search` formalize
-the effective intermediate-value search for an interval-regular monotone
-branch with explicit range and separation certificates. A general classical
-IVT remains outside the representation boundary. The finite step interface
-`monotoneBisectionStep` now gives the corresponding local rational algorithm:
-it preserves endpoint signs and interval containment for a nondecreasing
-function and halves the width exactly. It is a reusable certificate for
-constructive IVT traces, not an assertion that a zero is attained.
-The recursive `monotoneBisectionIterate` now lifts this to every finite stage:
-ordering, subinterval containment, and endpoint signs are preserved, while
-`monotoneBisectionIterate_width` gives the exact (2^{-n}) width schedule.
-The companion `monotoneBisectionIterate_width_pos` proves that the ordinary
-finite bracket iterator also retains positive width whenever its initial
-interval does.
-The companion `monotoneBisectionIterate_width_le_of_power_budget` turns a
-supplied rational budget `I.width <= eps * 2^n` into the final guarantee that
-the iterated bracket has width at most `eps`.  This exposes the bisection
-iteration as an executable precision scheduler for the constructive IVT
-boundary.  The target-parametrized companion
-`monotoneTargetBisectionStep` and its iterated form
-`monotoneTargetBisectionIterate` preserve a supplied rational target bracket
-at every finite stage.  This is the inverse-search form of the certificate:
-the algorithm narrows an interval whose endpoint evaluations enclose the
-target, without asserting that a completed-real preimage has been attained.
-The target-aware step and iteration now also expose source containment and
-the exact width law `I.width / 2^n`.  These are the finite invariants needed to
-turn a separation oracle into a data-valued inverse search.  The companion
-`monotoneTargetBisectionIterate_certificate` packages orderedness, target
-enclosure, source containment, and this exact width in one reusable finite
-record.  The companion
-`monotoneTargetBisectionIterate_width_le_of_power_budget` converts a supplied
-rational initial-width budget into an explicit requested-tolerance guarantee.
-The companion `monotoneTargetBisectionIterate_width_pos` proves that every
-finite iterate still has positive width whenever the initial bracket does,
-making the potential-infinity interpretation explicit.
-The companion
-`monotoneTargetBisectionIterate_reaches_of_positive_tolerance` now removes the
-supplied power budget for initial intervals of width at most one: stage
-`eps.den` is certified to reach every positive rational tolerance. This is an
-executable inverse-search schedule for the finite bisection core, not an IVT
-or completeness principle. The new
-`monotoneTargetBisectionIterate_tolerance_certificate` packages that schedule
-together with target enclosure and source containment, giving an inverse
-client one finite certificate rather than separate bookkeeping lemmas.
-The composition lemma `monotoneTargetBisectionIterate_add` identifies a later
-finite stage with the same iterator started from an earlier stage's interval.
-Consequently `monotoneTargetBisectionIterate_later_subinterval` proves that
-every later target bracket is nested inside every earlier one.  This makes
-refinement explicit in the certificate API while keeping the IVT replacement
-a finite rational statement rather than a hidden appeal to a limit point.
-The worked `FiniteSquareRootBisectionExample` now applies the target search to
-`x^2 = 1/2` on `[0,1]`: stage 4 returns `[11/16,3/4]`, preserves the target
-bracket, and has width `1/16`. This is a non-affine finite witness for item 79.
-The companion `FiniteCubeRootBisectionExample` applies the same target search
-to `x^3 = 2` on `[1,2]`: stage 4 returns `[5/4,21/16]`, preserves the target
-bracket, and has width `1/16`. This gives item 79 a second nonlinear inverse
-trace while retaining the project's finite, potential-infinity semantics.
-The new `FiniteFourthRootBisectionExample` applies the same search to
-`x^4 = 2` on `[1,2]`: stage 8 returns `[19/16,305/256]` with width `1/256`,
-and stage 16 returns `[77935/65536,4871/4096]` with width `1/65536`.
-This extends item 79's nonlinear finite inverse-search ladder while retaining
-the potential-infinity interpretation.
-The cube-root and fourth-root traces now also reach stage 24, each with exact
-width `1/16777216` and certified endpoint comparisons, extending the same
-potential-infinity precision schedule.
-
-- Main calculus route: construct inverses on intervals where the function is
-  interval-regular, monotone, and effectively separated.
-  See `InvertibleFunctionOnInterval`, `InRangeRaw`, `InverseRaw.apply`, and
-  `HasInverse` in `ComputableAnalysis/Calculus.lean`.  `HasInverse I` is now
-  explicitly branch-local: its source interval, orientation, and certified
-  output range are all fixed by `I`.
-- `InRangeRaw` now has computational range content: it carries a validity
-  proof for the target raw real and, at every target stage, a named endpoint
-  precision whose oriented endpoint boxes enclose the target box.  An
-  invertible branch also records that its source endpoints are ordered.  This
-  replaces the former unconstrained `in_range : Prop`, which could not guide a
-  finite bisection search.
-- The separation certificate now chooses exactly one orientation
-  (`nondecreasing` or `nonincreasing`), and `InvertibleFunctionOnInterval`
-  requires it to match the monotonicity witness.  A certificate must not
-  prove both opposing strict endpoint-separation inequalities for the same nonconstant
-  function.
-- Concrete forward data: `squareOnUnit` on `[0,1]` has exact rational point
-  boxes, an interval-regularity modulus (hence an explicit rational
-  epsilon--delta certificate), nondecreasing order, and nondecreasing
-  effective separation.  `squareOnUnit_epsilonDeltaContinuous` and
-  `squareOnUnit_invertible` expose these facts.
-  The existing `sqrtRaw` bisection has its algebraic raw-real specification,
-  and `sqrtOnUnitBisectionSearch` packages it as an `InverseBisectionSearch`
-  for every exact rational target in `[0,1]`, including the explicit
-  endpoint-range enclosure for that target.  Extending this to all
-  represented unit-range targets remains future work.
-  For an anchored represented target, the new
-  `sqrtOnUnitRepresentedTargetSearch_stage_certificate` packages the same
-  subinterval, endpoint-square, width-budget, and target-overlap guarantees
-  at one finite stage.  The anchor is explicit data; no represented-target
-  existence or choice principle is inferred.
-- Proved bridge: `HasBisectionSearch I` is computational data assigning a
-  certified finite bisection/search to every target in the stated range; it
-  gives `HasInverse I` by
-  `inverse_function_from_bisection_search`.  Its data-valued formulation
-  prevents a hidden choice step when assembling the inverse.
-- The sine/cosine route is intentionally next.  The first-octant bridge
-  `IntegralIdentities.ArctanInverseBisection` now ties the geometric
-  trigonometry chapter to the actual inverse-function interfaces: it requires
-  a branch certified equal to `arctanGeomOnUnit`, certified
-  `InRangeRaw` quarter-turn targets, and an `InverseBisectionSearch` for each
-  target.  It produces `tangentRaw`, a valid partial slope function whose
-  outputs stay in `[0,1]` and whose forward evaluator overlaps each target.
-  The intended next construction evaluates the rational circle chart
-  `((1-u^2)/(1+u^2), 2u/(1+u^2))` at that recovered slope `u`; its coordinate
-  projections are the first-octant cosine and sine functions.
-  The old `ArctanInverseConstruction` remains only the downstream
-  special-value contract.  The next analytic task is to construct the new
-  bridge by proving interval regularity, monotonicity, and effective
-  separation for `arctanGeomOnUnit`; no inverse law is assumed as a bare
-  proposition.  The monotonicity and separation certificates are now
-  formalized in `ArctanGeomInverseData`: they transport the rectangle
-  evaluator's finite order bounds through the certified containment of each
-  positive-loop box.  This keeps the inverse route entirely interval-valued
-  and executable.  The matching box-valued continuity theorem is
-  `arctanGeomOnUnit_near_of_qabs_le`, with the explicit modulus packaged as
-  `arctanGeomOnUnit_effectiveModulus`; interval regularity and the data-valued
-  bisection search are the remaining pieces of this branch.  The native
-  positive-loop evaluator is now also exposed through the cofinal finite
-  schedule `arctanGeomScheduledStage`; `arctanGeomScheduledOnUnit` retains
-  the same geometric boxes while satisfying the literal width estimate
-  `arctanGeomScheduledOnUnit_width_le`.  This is the intended evaluator for
-  the interval-image certificate, rather than silently changing the native
-  algorithm's precision convention.
-- The completed rational-slope half of that route is now exposed as
-  `RationalCircle.GeometricTrig.FirstQuadrantArctanWitness`.
-  `arctan_to_sine_cosine_coordinates` packages one arctangent equation
-  `arctanGeom(u) ~ t*pi/4`, the exact stereographic formulas
-  `cos = (1-u^2)/(1+u^2)` and `sin = 2u/(1+u^2)`, and the unit-circle
-  identity. The special-values table consequently treats that arctangent
-  equation as the only colored proof-status obligation; extending the
-  witness from a rational slope to a bisection-produced raw slope remains
-  the non-endpoint task.
-- `asin` is the inverse of sine on a chosen monotone branch, and `log` is the
-  inverse of exponential on a chosen monotone branch.
-  See `Elementary.ArcsinFromMonotoneSin`, `Elementary.LogFromMonotoneExp`,
-  `ArcsinViaInverseFunction`, and `LogViaInverseFunction` in
-  `ComputableAnalysis/Elementary.lean`.
-- Conditional well-definedness is proved: such branch data produces certified
-  computable `asin` and `log` raw functions.
-  See `ArcsinFromMonotoneSin.asin_well_defined` and
-  `LogFromMonotoneExp.log_well_defined`.
-
-## Elementary Functions
-
-- Positive-base powers now have a constructive interface: a positive raw base
-  has a uniform positive rational lower bound; natural powers are repeated
-  interval multiplication; and a rational-power extension records valid
-  values, the additive law, and certified denominator/root equations. An
-  exponential representation also requires `ContinuousInExponent`: the
-  explicit rational epsilon-delta predicate
-  `EpsilonDeltaContinuousOn` on every rational interval. Its output condition
-  is `QInterval.NearAt`, not literal overlap: it bounds the rational
-  separation of two evaluation boxes by epsilon while bounding each box's
-  width. This certificate is
-  the intended gateway for extending continuous functions from rational names
-  to computable-real or open complex domains; the extension theorem itself
-  remains future work.
-  `exp.ExponentialFunction.eAtOne` defines the Euler base as the value at `1`
-  of any exponential representation.  See `PositiveRealRaw`,
-  `PositiveRealRaw.natPow`, `RationalPowerExtension`, and
-  `ExponentialFunction.eAtOne` in
-  `ComputableAnalysis/ElementaryFunctions.lean`. Repeated multiplication is
-  now itself checked: `PositiveRealRaw.natPow_valid_and_bounds` proves every
-  natural power valid and enclosed between the corresponding powers of the
-  supplied positive lower bound and initial upper endpoint, and
-  `natPowPositive` packages it as a new positive raw real. Constructing the
-  non-integral root layer and its epsilon--delta exponent-continuity proof
-  remains the next rational-power task.
-  At the constant level, `ExpProofs.eEulerNested` now gives a direct valid
-  repeated-multiplication representative of (e): stage `n` evaluates
-  ((1+1/(n+1)^2)^{(n+1)^2}) and carries the nested radius `8/(n+1)`.
-  Its exact width is `16/(n+1)`, and it is proved equivalent to the sharp
-  compound-interest evaluator before being stored in the abstract
-  `ExpProofs.e` handle. This is a certified constant construction, not yet a
-  function-level `exp' = exp` theorem.
-  The generic rational-input power-series raw now also has its exact
-  zero-input normalization checked: every series stage at `0` is precisely
-  `[1,1]`, via `ExpProofs.expPowerSeries_zero_compute_eq`;
-  `expPowerSeries_zero_equiv_one` packages the raw equivalence and
-  `expPowerSeries_zero_valid` supplies validity.  The finite
-  repeated-multiplication evaluator has center exactly `1` at zero and
-  `expEuler_zero_equiv_one` proves its explicit-radius boxes overlap that
-  same point.  These initial-value facts are deliberately distinct from the
-  pending self-derivative and nonzero-input comparison theorems.
-  There is now one checked local derivative instance for the literal series
-  evaluator: `ExpProofs.expPowerSeriesOnUnit_forwardSelfDerivativeAtZero`
-  certifies `Dâº exp(0) = exp(0)`, with the derivative represented by the
-  full raw `expPowerSeries 0`; the stagewise normalization above yields its
-  value `1`.  Its finite proof uses positive steps at the endpoint only, so it
-  is not the required two-sided interval theorem `exp' = exp`.
-  The finite algebra for that nonzero comparison is now checked too:
-  `fallingFactorialRat`, `eulerBinomialTerm`, and `eulerBinomialPrefix` expose
-  the rational binomial coordinates, and
-  `euler_binomial_prefix_nat_expansion` proves the exact expansion of
-  `(1 + x)^m`.  At `x = 1/m` this is the literal Euler product in
-  factorial-series coordinates. The coefficient-error bound is now checked:
-  each gap is bounded by `k*(k-1)/(2*m*k!)`, its finite sum by `3/m`, and
-  the square-mesh error fits the nested Euler radius. Consequently
-  `ePowerSeries_equiv_eCompoundInterest` is a completed constant-level
-  series/compound equivalence, and `eCertified` stores the series raw as an
-  alternative alongside both repeated-multiplication raws. No completeness or
-  analytic binomial theorem is assumed.
-- The two intended characterizations of the Euler base are now explicit
-  obligations: the exponential solves `f' = f` on rational intervals, and a
-  positive base is Euler exactly when its rational powers have derivative `1`
-  at exponent zero.  `RationalPowerExtension.HasDerivativeAt`,
-  `RationalPowerExtension.HasUnitDerivativeAtZero`,
-  `ExponentialFunction.SolvesSelfDerivativeOn`, and
-  `ExponentialFunction.UnitDerivativeCharacterizesE` record the
-  rational-interval statements.  Their analytic proof remains to be supplied;
-  only the formal coefficient identity is proved so far.
-- Exponential has three constructive representations to compare: power series
-  `exp.ps`, Euler limit `exp.euler`, and inverse to the logarithmic integral
-  `int_1^x dt/t`.  The first two are concrete `FunctionRaw`s now.  The
-  inverse-log-integral route is concrete on finite real intervals via
-  `exp.LogIntegralInverseBranch` and `exp.fromLogIntegral`; a global real
-  branch can be assembled later by effectively choosing a source interval for
-  each rational input.
-  See `exp.ePowerSeriesRaw`, `exp.eEulerRaw`,
-  `exp.eFromLogIntegralBranchRaw`, `exp.representationsAgree`, and
-  `exp.powerSeries_equiv_logIntegralInverse_on_interval` in
-  `ComputableAnalysis/ElementaryFunctions.lean`.
-- Logarithm has two constructive representations to compare: inverse to
-  exponential and the integral `âˆ«_1^x dt/t`.
-  See `Elementary.LogFromMonotoneExp`, `Elementary.LogFromIntegralInv`, and
-  `Elementary.LogIntegralAgreesWithInverseExp` in
-  `ComputableAnalysis/Elementary.lean`.
-  The concrete reciprocal kernel is now interval-regular, and hence has
-  literal rational epsilon--delta continuity, on `[1,2]`:
-  `Logarithm.oneOverXOnOneTwo_intervalRegular` uses the exact enclosure
-  `[1/r, 1/p]` for each rational `[p,r]`.  The logarithm-at-two bridge is now
-  checked: the uniform right mesh is enclosed by the nested dyadic Darboux
-  boxes and `logTwoSeries_equiv_logTwoReciprocalIntegral` completes the raw
-  equivalence.  This is a finite rational comparison, not a continuity or
-  topology assumption; aligning it with the selected canonical exp/log
-  inverse branch remains the next distinct theorem.
-  The interval certificate now generalizes to
-  `Logarithm.oneOverXOnOneTo_intervalRegular` for every rational `b` with
-  `1 <= b`; this isolates the upper-endpoint-independent part of the positive
-  reciprocal transport.
-  The stronger `oneOverXOnInterval_lower_ge_one_intervalRegular` form now
-  handles arbitrary `[a,b]` with `1 <= a <= b`, making the lower-bound
-  dependence explicit before the final rational scaling argument.
-  The fully positive version
-  `oneOverXOnPositiveInterval_intervalRegular_of_budget` now accepts any
-  `0 < a <= b` together with a natural budget `L` satisfying `1/a^2 <= L`;
-  its input schedule is explicitly `(n+1)*L`.
-  The companion `reciprocal_scale_kernel_eq_logTwoKernel` and
-  `reciprocal_scale_point_positive` lemmas check the exact multiplicative
-  normalization on `[a,2a]`, including positivity of the transformed points.
-  The new `logTwoKernel_shift_eq_oneOverX` and
-  `logTwo_rightRiemann_term_as_oneOverX` lemmas make the affine transport
-  explicit at the finite rational level, before any general positive-interval
-  endpoint theorem is attempted.
-- Power-series representations of `sin` and `cos` are named in
-  `ComputableAnalysis/ElementaryFunctions.lean`.
-- Hyperbolic sine and cosine have constructive exponential representations
-  `(exp z - exp (-z)) / 2` and `(exp z + exp (-z)) / 2`.
-  See `sinh.fromExp` and `cosh.fromExp` in
-  `ComputableAnalysis/ElementaryFunctions.lean`.
-- Power-series machinery and convergence certificate targets live in
-  `ComputableAnalysis/PowerSeries.lean`.
-
-## Constructive Differential Calculus
-
-- Derivatives are extracted from shrinking finite-difference intervals on
-  rational cells, not assumed as limits in a classical real topology.  See
-  `HasDerivativeOnInterval` in `ComputableAnalysis/Differential.lean`.
-- Convexity and concavity are helper certificates for producing slope
-  enclosures on short intervals.  The rational secant-slope layer is
-  `CurvatureOnSubinterval`; the current implementation still has older
-  declaration names such as `MonotoneDerivativeBoundMethod` and
-  `DerivativeBoundFromCurvature`.
-- The first proved power-series brick is formal: coefficient shift fixes the
-  stream `1/n!`. See
-  `FormalPowerSeries.expCoeff_derivative` in
-  `ComputableAnalysis/PowerSeries.lean`.
-- The same formal layer now covers the coefficient-shift identities for trig
-  and hyperbolic streams:
-  `sin -> cos`, `cos -> -sin`, `sinh -> cosh`, and
-  `cosh -> sinh`.
-  See `FormalPowerSeries.sinCoeff_derivative`,
-  `FormalPowerSeries.cosCoeff_derivative`,
-  `FormalPowerSeries.sinhCoeff_derivative`, and
-  `FormalPowerSeries.coshCoeff_derivative`.
-- The finite rational bridge below the formal table is now checked too:
-  `FinitePolynomial.powerSecant_eq_differenceQuotient` identifies the exact
-  quotient of every monomial, and
-  `FinitePolynomial.qabs_normalized_power_differenceQuotient_sub_monomial_le`
-  bounds the quotient of `x^(n+1)/(n+1)` against `x^n` by an explicit
-  `|h|` coefficient on a supplied bounded box.  This avoids any mean-value
-  theorem and is the direct finite algebra needed for the exponential tail.
-  `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval` now packages
-  that bound as a two-sided rational interval derivative certificate, with a
-  computed dyadic step schedule, on every interval contained in `[-C,C]` for
-  `C >= 1`. `FinitePolynomial.integratedTaylorPrefix_hasDerivativeOnInterval`
-  closes the same explicit remainder calculation under every finite rational
-  Taylor prefix. The exact finite FTC endpoint recurrence
-  `FinitePolynomial.integratedTaylorPrefix_endpointDifference_succ` records
-  how adjoining one integrated monomial changes the endpoint difference; it
-  is a rational telescoping identity, not an appeal to a completed integral.
-  The blueprint keeps these finite-difference derivative
-  certificates in the later calculus chapter; the series chapter records only
-  coefficient-shift data.
-- Next theorem for `exp.ps`: turn the formal coefficient identity plus
-  rational tail bounds and a translated-series/addition estimate into an
-  effective derivative certificate for the boxed algorithm on an interval,
-  hence a witness for
-  `exp.ExponentialFunction.SolvesSelfDerivativeOn`.  This can be specialized
-  to exponential first; a general term-by-term differentiation theorem can
-  come later.
-- To prove equality of the three exponential representations by calculus
-  rather than by ad hoc estimates, use the scalar equation `f' = f` with
-  `f(0) = 1` and the direct finite-mesh route in
-  `ComputableAnalysis/ScalarODEUniqueness.lean`. Its checked closure turns a
-  rational envelope with `B_(r+1) <= B_r/2` into zero error by an executable
-  dyadic stage; `SelfDerivativeDirectMeshComparison` then gives function
-  agreement. The remaining analytic theorem derives that envelope by
-  subtracting two derivative certificates on short rational blocks and
-  chaining finitely many blocks. This is intentionally independent of
-  Peano--Baker/Picard iteration. The vector linear theorem and a future
-  nonlinear interval-Lipschitz theory remain separate constructive
-  existence-and-uniqueness data.
-
-## Linear Differential Equations
-
-**Benchmark item 97 â€” finite Cramer core checked.**
-`cramer_two_by_two` proves the rational (2\times2) Cramer rule under a
-nonzero determinant. It is placed here as the finite linear-algebra
-prerequisite, and `cramer_two_by_two_unique` proves that every rational
-solution agrees with the determinant quotients; general matrix dimensions and
-continuous ODE identification are separate milestones.
-The worked `FiniteThreeByThreeCramerExample` adds the diagonal system
-`diag(2,3,4)u=(4,9,16)`: determinant `24`, inverse witness `1/24`, and exact
-solution `(2,3,4)` are all checked.
-The non-diagonal 3-by-3 instance with matrix `[[2,1,0],[0,3,1],[1,0,2]]`
-and right-hand side `(4,9,7)` has determinant `13`; Lean checks the inverse
-witness `1/13`, recovers `(1,2,3)`, and verifies the system through the
-generic Cramer solver.
-The additional two-by-two witness uses
-`[[3,2],[1,2]](2,3)=(12,8)`: its determinant is `4`, and the Cramer
-quotients recover `(2,3)` exactly.
-The signed two-by-two witness `[[1,-2],[3,4]](16/5,-9/10)=(5,6)` has
-determinant `10`; Lean checks both nonintegral Cramer quotients and direct
-substitution.  This extends item 97's finite rational coverage beyond
-positive-integral examples.
-
-**Benchmark item 49 â€” finite Cayley--Hamilton core checked.**
-The 3x3 matrix-power recurrence is now also checked for every natural stage
-and every explicitly supplied rational matrix. It is obtained by multiplying
-the finite 3x3 Cayley--Hamilton identity by a finite matrix power; arbitrary
-dimensions remain deferred.
-`LinearODE.twoByTwo_cayley_hamilton` proves the Cayley--Hamilton identity for
-an explicit rational (2\times2) matrix by finite entrywise calculation.
-The finite `HarmonicOscillator.threeByThree_cayley_hamilton` certificate now
-checks the corresponding explicit (3\times3) identity using the trace, second
-characteristic coefficient, and determinant.  The companion
-`ThreeByThreeLinearAlgebra.threeByThree_cramer_solves` now packages the
-explicit (3\times3) Cramer solve from those determinant numerators whenever an
-inverse-determinant witness is supplied; its
-`threeByThree_cramer_solves_of_determinant_ne_zero` corollary constructs that
-witness canonically from a nonzero determinant.
-`LinearODE.ratMatrix_twoByTwo_matrixPow_recurrence_unique` now adds the finite
-uniqueness certificate: any rational matrix sequence with the same first two
-terms and the induced trace/determinant recurrence agrees stage by stage with
-the matrix-power sequence. Arbitrary dimensions and an abstract
-characteristic-polynomial interface remain deferred.
-The new `concreteFourCayleyCertificate` supplies a checked 4x4 diagonal
-annihilator for `diag(1,2,3,4)` with polynomial
-`x^4 - 10*x^3 + 35*x^2 - 50*x + 24`. This extends the finite-dimensional
-exercise without introducing a determinant construction.
-
-- The finite noncommutative core for Peano--Baker is now checked in
-  `ComputableAnalysis/PeanoBaker.lean`, without Mathlib. It defines local
-  rational vectors/matrices, explicit finite matrix sums/products, sampled
-  linear recurrences, and the ordered-word enumerator
-  `LinearODE.peanoBakerDiscreteSum`. The enumerator has exactly `2^N` terms
-  after `N` samples (`LinearODE.orderedIndexWords_length`); its two-step
-  expansion contains `B_1 * B_0`, preserving chronology.
-- `LinearODE.discretePeanoBakerExpansion` now proves the purely rational
-  algebra theorem equating that word sum with
-  `(I + B_(N-1)) * ... * (I + B_0)`. Its proof establishes the local matrix
-  identity, distributivity, and finite induction before touching convergence.
-- The same finite layer now gives the homogeneous action a concrete transition
-  matrix: `chronologicalStepProduct S 0 N = S_(N-1) * ... * S_0`, and
-  `homogeneousTrajectory_eq_chronologicalStepProduct` proves that this matrix
-  acts on the initial state exactly. The Euler specialization
-  `chronologicalStepProduct_eulerIncrement` is the already-checked
-  Peano--Baker chronological product. The strengthened sampled
-  variation-of-constants theorem
-  DiscreteLinearSystem.trajectory_eq_transition_add_duhamelSum now splits
-  an inhomogeneous trajectory into that finite transition of its initial state
-  and the literal time-ordered forcing sum
-  sum_(k<N) S_(N-1) * ... * S_(k+1) * g_k.
-  trajectory_zeroInitial_eq_duhamelSum separately identifies the latter
-  with the recursive zero-initial response. ForcingZero makes that response
-  vanish. `chronologicalStepProduct_split` additionally proves the
-  time-shifted finite semigroup law
-  `T(s,m+n) = T(s+m,n) * T(s,m)`, the exact sampled predecessor of the
-  continuous state-transition composition law.
-  The new `SolvesRecurrence` and `SolvesHomogeneousRecurrence` witnesses
-  separate the recurrence specification from its recursive evaluator.
-  `solvesRecurrence_eq_trajectory` proves every sampled candidate is the
-  unique trajectory, and `solvesHomogeneousRecurrence_zero` proves the
-  zero-initial homogeneous candidate is identically zero. This is the
-  exact discrete seed for the later factorial-tail uniqueness estimate.
-  `LinearODE.HarmonicOscillator` now instantiates that generic system for
-  `q'' + omega^2 q = r`: `eulerStep_position` and `eulerStep_velocity`
-  give the two coordinate updates, and
-  `trajectory_position_secondDifference` eliminates velocity to prove the
-  exact scalar Euler recurrence. This is the checked finite bridge from the
-  chapter's familiar second-order model to general vector-valued
-  inhomogeneous Peano--Baker; it is not a continuous convergence theorem.
-  Constant increments are checked exactly by
-  `chronologicalProduct_constant` and `peanoBakerDiscreteSum_constant`, giving
-  `(I + B)^N`; `peanoBakerDiscreteSum_zeroCoefficient` supplies the zero
-  coefficient identity case. The new `PairwiseProductZero` specialization is
-  a proved finite nilpotent case: when every `B_i * B_j` is zero,
-  `chronologicalProduct_pairwiseProductZero` and
-  `peanoBakerDiscreteSum_pairwiseProductZero` collapse the exact transition
-  to `I + matrixSequenceSum B N`.
-  The constant-coefficient rotation specialization is now checked as well:
-  `LinearODE.RotationSystem.generator_square` proves that the rational
-  quarter-turn matrix squares to `-I`, while `generator_pow_even`,
-  `generator_pow_odd`, `simplexTerm_even`, and `simplexTerm_odd` put every
-  finite Peano--Baker coefficient into its alternating cosine-type or
-  sine-type form. This is a finite algebraic precursor of the intended Euler
-  identity, not a continuous series or ODE-identification theorem.
-- The local matrix product is now proved associative by a finite double-sum
-  interchange (`matrixMul_assoc`). Consequently
-  `chronologicalProduct_split` proves the exact chronological composition law
-  across adjacent sampled intervals. `PairwiseCommuting` and
-  `matrixMul_commutes_chronologicalProduct` supply the finite reordering
-  lemma for commuting samples. This is the algebraic prerequisite for the
-  later commuting-exponential formula, not a claim that the continuous
-  formula has already been constructed.
-- The continuous input is `LinearODE.IntervalLinearSystem`, whose scalar
-  entries are existing `FunctionOnInterval`s on a common rational time
-  interval. `CoefficientsRegular` asks for supplied componentwise
-  `IntervalRegularOn` witnesses; it does not assume a completed-real
-  function space.
-- The blueprint now fixes the vector chapter's proof direction: start from the
-  forced second-order oscillator, turn it into the general affine vector
-  equation `x' = A(t)x + b(t)`, construct Peano--Baker plus Duhamel boxes for
-  that general problem, and prove uniqueness by iterating the zero-initial
-  Volterra identity until the factorial estimate is below an arbitrary
-  rational tolerance. This recovers sine/cosine and the vector rotation
-  route. Scalar `E' = E`, `E(0) = 1` uses direct mesh contraction instead;
-  after its presentation-agreement theorem, the positive inverse is the
-  canonical logarithm used by the long arctangent integration-by-parts Pi
-  route. These are named dependency chains, not extra Pi-scoreboard rows.
-- Next analytic target: build interval matrices for ordered-simplex
-  Peano--Baker terms, prove a factorial tail enclosure from a rational
-  coefficient bound, and obtain state-transition and variation-of-constants
-  formulas for `x' = A(t)x + b(t)`. Together these are the effective linear
-  Picard--LindelÃ¶f theorem: the zero-initial homogeneous case gives
-  uniqueness, and the factorial tail is the explicit solution modulus. The
-  next specializations are the analytic commuting-exponential identification,
-  scalar and piecewise-constant systems, and higher-order
-  nilpotent/triangular systems. The scalar `f'=f` exponential route is
-  already specified separately by direct mesh contraction. Chapter `Linear
-  Differential Equations` gives the vector certificate plan.
-
-## Elementary Function Coverage
-
-The library should use familiar functions as examples and regression tests for
-the formulation.  Each entry should eventually have a raw algorithm, a domain
-certificate when partial, and enough calculus facts to participate in FTC/FTA
-arguments.
-
-- Algebraic: polynomials, rational functions with domain certificates, square
-  roots, and algebraic functions.
-- Power-series families: exponential, sine, cosine, hyperbolic sine/cosine,
-  and later functions obtained from these by algebraic operations and
-  composition.
-- Inverse/integral families: logarithm, arctangent, arcsine, and branch-based
-  inverse trig/hyperbolic functions.
-- Standard calculus/science examples: tangent/secant on certified domains,
-  polar and complex exponential identities, and special functions that are
-  naturally defined by effective power series or effective integrals.
-- Complex path integrals now have a first polygonal finite-sum layer:
-  `ComplexPathIntegral.segmentLeftSum` integrates a complex `FunctionRaw` along
-  one rational segment, and `ComplexPathIntegral.polygonalLeftSumEntire`
-  sums over consecutive vertices of a polygonal path.  The wrapper
-  `ComplexPathIntegral.polygonalIntegralRawEntire` packages these finite sums
-  as a `ComplexRaw` algorithm.  The current Cauchy sanity checks integrate
-  `z^2` and `z^3 + 2z` around the unit square and check overlap with zero at
-  stages `10`, `100`, and `1000`.  The new
-  `ComplexPathIntegral.PolygonalIntegralCertificate` and
-  `ComplexPathIntegral.polygonalIntegralRawEntire_valid` make the validity
-  boundary explicit: ordered boxes, stage nesting, and potential-infinity
-  width shrinkage must be supplied as finite certificates before the raw
-  algorithm is promoted to a valid represented complex number.
-  The finite displacement identities
-  `ComplexPathIntegral.polygonalDisplacementTo_append_endpoint` and
-  `ComplexPathIntegral.polygonalDisplacementTo_closed` now provide the exact
-  endpoint-cancellation seed for closed polygonal paths, still entirely in
-  rational complex arithmetic.
-  The constant-differential lift
-  `ComplexPathIntegral.polygonalConstantDifferentialDisplacement_append_endpoint`
-  identifies the finite primitive value `c * (z_end - z_start)`, and
-  `polygonalConstantDifferentialDisplacement_closed` proves its closed-path
-  cancellation exactly.
-  The quadratic primitive layer
-  `ComplexPathIntegral.polygonalQuadraticPrimitiveTo_append_endpoint` and
-  `polygonalQuadraticPrimitiveTo_closed` extends this to the polynomial
-  differential `z dz`, whose primitive is `z^2 / 2`, using only finite
-  rational-complex identities.
-  The general finite monomial extension
-  `ComplexPathIntegral.polygonalMonomialPrimitiveTo_append_endpoint` and
-  `polygonalMonomialPrimitiveTo_closed` covers `z^n dz` with the executable
-  natural power and primitive `z^(n+1)/(n+1)`. This is an algebraic finite
-  schema, not a claim about an infinite analytic power function.
-  The coefficient-list evaluator
-  `ComplexPathIntegral.polynomialPrimitiveEval` and its path fold
-  `polygonalPolynomialPrimitiveTo` now package the same endpoint cancellation
-  for every finite rational-complex polynomial primitive.
-
-## Algebraic Numbers and FTA
-
-**Benchmark item 89 â€” linear factor/remainder base case checked.**
-The worked `FiniteRemainderExample` evaluates `x^2-3x+2` at the supplied root
-`1` and sample point `4`, checking the exact value `6` through the quadratic
-factor identity.
-Its signed companion evaluates `x^2+3x+2` at root `-1` and sample point `-4`,
-again obtaining `6` by the exact factor identity. This extends item 89's
-worked rational coverage across negative inputs.
-`Polynomial.linear_remainder`, `Polynomial.linear_factor_of_root`,
-and `Polynomial.linear_root_iff_constant_eq_neg_mul`
-`Polynomial.quadratic_remainder`, and
-`Polynomial.quadratic_factor_of_root` provide exact rational degree-one and
-degree-two base cases. The cubic remainder/factor pair
-`Polynomial.cubic_remainder`/`Polynomial.cubic_factor_of_root` supplies the
-rational-root reduction step for benchmark item 37. The worked identity
-`Polynomial.cubic_example_factorization` and its checked roots
-`Polynomial.cubic_example_roots` provide an explicit rational cubic solution
-example within that boundary, while `Polynomial.cubic_example_root_iff`
-checks that these are all of its rational roots. More generally,
-`rationalCubicPolynomial` and `rationalCubic_has_computable_roots` now package
-the three-root factorized cubic interface in the FTA layer as well.
-The named complex factorization now also has the exact root-set theorem
-`factorizedCubicPolynomial_eval_eq_zero_iff`: a zero is precisely one of the
-three supplied rational-complex roots.  This is a finite exclusion certificate
-for the cubic core of item 37, not a general cubic formula.
-The public exact-root form `factorizedCubicPolynomial_hasExactRoot_iff` exposes
-the same three-way characterization without requiring clients to unfold
-evaluation.
-The new `Polynomial.quadratic_eval_root_of_discriminant` and
-`Polynomial.cubic_completion_roots_of_discriminant` theorems complete the
-finite supplied-root cubic boundary: a rational discriminant square witness
-produces both remaining rational roots. The construction of the initial root
-or square witness remains separate algorithmic work.
-The worked `FiniteCubicCompletionExample` now instantiates that boundary for
-`x^3 - 6x^2 + 11x - 6`: with supplied root `1` and discriminant square
-witness `1`, Lean computes and checks the remaining roots `2` and `3`.
-The new `FiniteCubicSqrtTwoExample` connects the same cubic boundary to a
-non-rational residual branch: `x^3-x^2-2x+2=(x-1)(x^2-2)`, with the exact
-root `1` and a finite sign bracket for the `sqrt 2` branch on
-`[11/8,23/16]`.
-The same cubic branch now consumes the stage-24 square-root enclosure
-`[11863283/8388608,23726567/16777216]`, preserving the exact sign bracket
-with a much finer rational width.
-The parallel `rationalQuarticPolynomial` interface packages four exact
-rational roots and their computable witnesses, strengthening the checked
-factorized core of benchmark item 46 without claiming a general quartic
-formula.
-The new `FiniteQuarticSqrtTwoExample` adds the irrational branch: it checks
-`x^4-3*x^2+2=(x^2-1)(x^2-2)`, exact roots `-1,1`, and both signed endpoint
-brackets for the finite `sqrt 2` enclosure.
-The same quartic now consumes the stage-24 `sqrt 2` enclosure and checks both
-positive and negative signed endpoint brackets at that finer precision.
-The supplied complex-factor quartic now also has the exact root-set theorem
-`factorizedQuarticPolynomial_eval_eq_zero_iff`, giving finite exclusion for
-every candidate outside the four supplied roots.
-The matching exact-root interface
-`factorizedQuarticPolynomial_hasExactRoot_iff` packages that four-way result
-for computable-root consumers.
-The checked worked examples `Polynomial.quartic_example_factorization` and
-`Polynomial.quartic_example_roots` supply four rational roots for a quartic,
-while `Polynomial.quartic_example_root_iff` checks that these are all of its
-rational roots. Together they cover the project's rational worked-example core
-of benchmark item 46; the general quartic formula remains outside the current
-boundary.
-The worked `FiniteQuarticSplitExample` now instantiates the two-quadratic
-interface with factors `z^2 - 1` and `z^2 - 4`, checking all four rational
-roots `-2`, `-1`, `1`, and `2` in the finite rational-complex model. The
-general Ferrari resolvent remains outside the boundary.
-The new `FiniteMixedCubicExample` supplies the conjugate pair `i,-i` together
-with the real root `1` for `(z-1)(z-i)(z+i)=z^3-z^2+z-1`. Lean checks both the
-coefficient expansion and all three exact root evaluations, extending the
-finite cubic/FTA boundary to a mixed real/complex example.
-The scaled companion example checks
-`(z-2)(z-2i)(z+2i)=z^3-2z^2+4z-8`, including the real root `2`, conjugate
-roots `2i,-2i`, coefficient expansion, and all three exact evaluations.
-The companion `FiniteQuarticMixedSplitExample` uses `z^2 + 1` and `z^2 - 4`,
-checking the nonreal rational-coordinate roots `i` and `-i` alongside `2` and
-`-2`. This extends the finite quartic boundary to a mixed real/complex split
-without adding a general quartic formula or algebraic-closure claim.
-The scaled mixed quartic companion uses `z^2 + 4` and `z^2 - 9`, checking the
-four supplied roots `2i,-2i,3,-3` and exact evaluations through the same
-two-quadratic split interface.
-The optional Descartes route now has a finite `Polynomial.signChangeCount`
-counter, a zero-filtered variant, the general zero-variation lemma
-`signChangeCountIgnoringZeros_zero_of_nonneg_coeffs`, a general quadratic sign-pattern theorem,
-the nonnegative/nonpositive-coefficient evaluation lemmas, and checked
-examples.  The strict positive-input theorem
-`eval_pos_of_nonneg_coeffs_of_pos` supplies a direct positive-ray root
-exclusion; the root-counting rule itself is not yet claimed.
-The packaged `eval_ne_zero_of_nonneg_coeffs_of_pos` form is available for
-direct root-search use; `no_positive_root_of_nonneg_coeffs_of_pos` packages
-the same fact as an existential root-exclusion certificate; and
-`eval_neg_of_nonpos_coeffs_of_neg` supplies the strict negative dual.
-`no_positive_root_of_nonpos_coeffs_of_neg` packages that dual as an
-existential root-exclusion certificate as well. The sign-symmetric zero-variation lemma
-`signChangeCountIgnoringZeros_zero_of_nonpos_coeffs` is also checked.
-The degree-independent finite extension now adds
-`eval_nonincreasing_of_nonpos_coeffs` and
-`eval_strictly_decreasing_of_nonpos_tail`. Consequently,
-`at_most_one_positive_rational_root_of_nonpos_tail` proves uniqueness of a
-positive rational root for any finite coefficient list with a positive
-constant term and a nonpositive, nonzero tail. The accompanying
-`signChangeCountIgnoringZeros_one_of_pos_cons_nonpos_tail` identifies the
-single sign variation after zero filtering. This is a finite one-variation
-Descartes certificate, now packaged directly as
-`Polynomial.one_positive_variation_certificate`; it is not the unrestricted
-classical root-counting theorem.
-The exact two-variation example now records that \(x^2-3x+2\) has sign count
-two and positive rational root set exactly \(\{1,2\}\). This is a finite
-Descartes example for item 100, not a claim of the general real-root-counting
-theorem.
-The new one-variation example `1 - 2x - x^2` has sign count one, a finite
-positive-root bracket `[3/8,1/2]`, and a certificate that any two positive
-rational roots must coincide. This adds a non-rational-root-shaped test of the
-finite Descartes boundary without claiming classical real root existence.
-The companion `Polynomial.zero_variation_root_exclusion_certificate` now
-packages the zero-variation count with the corresponding positive-root
-exclusion whenever the finite list has nonnegative coefficients and a
-strictly positive supplied coefficient.
-The arbitrary finite-list combinatorial bound
-`Polynomial.signChangeCountIgnoringZeros_add_one_le_filter_length` now records
-that the zero-filtered sign-change count is at most the coefficient-list
-length minus one. This is the finite combinatorial component of item 100;
-general root counting remains deferred.
-`Polynomial.syntheticDivide_spec` and
-`Polynomial.syntheticDivide_factor_of_root` provide linear factor/remainder
-certificates for arbitrary finite rational coefficient lists, and
-`Polynomial.syntheticDivide_remainder_eq_eval` identifies the remainder with
-evaluation at the chosen point, while
-`Polynomial.syntheticDivide_remainder_eq_zero_iff` exposes the equivalent
-zero-remainder root test. The new finite
-`RationalRootSearch.rationalRootSearch` scans supplied rational candidates,
-with soundness, candidate-list completeness, and a
-`RemainderCertificate`-packaged result. This gives items 37 and 89 an
-executable rational-root interface without asserting that an arbitrary
-polynomial has a rational root. Division by higher-degree factors and
-closed-form cubic solving remain future algebra infrastructure.
-The general finite identity `Polynomial.syntheticDivide_secant_quotient`
-identifies the nonzero-step secant quotient of any finite rational polynomial
-with its synthetic quotient evaluated at the right endpoint. This supplies a
-reusable finite secant/Taylor bridge without asserting a limiting theorem.
-The finite coefficient derivative identities
-`Polynomial.derivativeEval` and
-`Polynomial.pow_mul_eval_zipIdx_eq_derivativeEvalAux` expose the exact
-power-weighted indexed coefficient identity, while
-`Polynomial.eval_derivative_eq_derivativeEval` now provide the generic
-recursive coefficient-level derivative evaluator; the named identities
-`Polynomial.eval_derivative_linear`,
-`Polynomial.eval_derivative_quadratic`, and
-`Polynomial.eval_derivative_cubic`,
-`Polynomial.eval_derivative_quartic`, and
-`Polynomial.eval_derivative_quintic`,
-`Polynomial.eval_derivative_sextic`, and
-`Polynomial.eval_derivative_septic` now connect the coefficient-level
-derivative list back to pointwise evaluation through degree seven.
-They support the finite Taylor boundary without asserting a general analytic
-derivative theorem.
-The rational-function wrapper is now also closed for polynomial numerators:
-`RatFun.polynomial_defined_all` certifies its denominator everywhere, and
-`RatFun.polynomial_evalOnDomain_eq` identifies the domain evaluation with
-`Polynomial.eval`. The packaged interval evaluator
-`RatFun.polynomialOnInterval` and its exact computation theorem
-`RatFun.polynomialOnInterval_compute_eq` make this a reusable
-interval-function certificate.
-
-- The algebraic-number layer is now proof-honest: exact rational-complex
-  algebraic numbers and exact roots of unity are formalized, while arithmetic
-  closure and algebraic closure are explicit targets rather than theorem
-  placeholders.  See `AlgebraicComplex.MulRawValid`,
-  `AlgebraicComplex.add_annihilator_exists`,
-  `AlgebraicComplex.neg_annihilator_exists`,
-  `AlgebraicComplex.mul_annihilator_exists`,
-  `AlgebraicComplex.inv_exists`, and `AlgPoly.exists_root`.
-- The four-corner product is now a certified raw operation.  The finite
-  containment/order/refinement facts are `QBox.mulRealInterval_contains`,
-  `mulRealInterval_ordered`, `mulRealInterval_nested`, `QBox.mul_contains`,
-  `mul_ordered`, and `mul_nested`.  The checked width bound
-  `QBox.mulRealInterval_width_le_of_abs_bounded`, lifted by
-  `mul_width_height_le_of_coordinateBounded`, uses the explicit stage-zero
-  coordinate radii to prove `ComplexRaw.mul_valid`.  The finite-intersection
-  proof `QBox.mul_overlaps_of_overlaps` gives `ComplexRaw.mul_equiv`, so this
-  product is representation-safe.  Consequently
-  `AlgebraicComplex.mulRaw_valid` has discharged the former raw-validity
-  premise; resultant-style rational polynomial transformations remain the
-  actual addition, negation, and multiplication-annihilator targets.
-- The important Euler-route exact-scalar implementation is also checked:
-  `ComplexRaw.qcomplexLeftMul` gives every rational complex
-  scalar a validity- and equivalence-preserving affine action on a certified
-  complex raw.  Its `i` specialization is the direct coordinate rotation
-  `ComplexRaw.mulI`, and `ComplexRaw.imaginaryAxis` embeds any certified real
-  as the certified complex handle \(ix\).  Thus the selected raw \(\pi\)
-  `ComplexRaw.qcomplexLeftMul_ofQComplex` now agrees with ordinary finite
-  `QComplex` multiplication on exact rational inputs.  The stagewise and
-  represented `imaginaryUnit` certificates likewise identify affine
-  multiplication by (i) with the direct coordinate rotation.  This is the
-  finite rational-coordinate bridge for item 17; it does not identify a
-  represented exponential with a completed complex exponential.
-  already yields the valid bounded real input `PiProofs.pi.halfPi`, whose
-  boxes stay in \([1,2]\), and a valid raw \(i\pi/2\) both by rational
-  scaling and as the literal exact \(i/2\)-scalar action.  The return scalar identity
-  \((-2i)(i\pi/2)=\pi\) is now available both as an exact stagewise affine
-  theorem and as the general-product theorem
-  `PiProofs.pi.negativeTwoImaginaryRaw_mul_imaginaryHalf_equiv_piCircleArea`.
-  `PiProofs.pi.LogAtICertificate` isolates the remaining
-  branch-specific input: any valid complex logarithm raw agreeing with
-  \(i\pi/2\) now immediately yields the certified complex formula
-  \(-2i\log(i)=\pi\), both through the affine action and as the literal
-  `negativeTwoImaginaryRaw * logI.raw` product.  This does not yet extend the factorial-series
-  exponential to represented complex inputs or establish Euler's identity.
-  The generic last assembly step is now present as
-  `ComplexRaw.cauchyStabilize_valid`: finite intersections of widened direct
-  complex candidates become a valid raw box computation when every later
-  candidate is contained in every earlier widened box.  Those factorial-tail
-  and input-modulus obligations are now discharged for `halfPi`:
-  `PiProofs.pi.halfPiRotation` is valid, using the common bounded-input
-  rotation schedule, its finite Lipschitz bound, and a radius at most
-  `32 / (n + 1)`.  The input is also bridged to
-  `2 * arctan.geom(1)` and the geometric normalized quarter-turn raw.
-  `halfPi_equiv_geometricHalfPi` and
-  `imaginaryHalf_equiv_geometricImaginaryHalf` now carry this agreement to
-  the geometry-only represented half angle and its imaginary-axis input.
-  `RotationLift.HalfPiInput.rotation_equiv_of_input_equiv` now transports
-  equivalent half-angle raws through the separately stabilized factorial
-  rotations using a cross radius at most `64 / (n + 1)`, and
-  `halfPiRotation_equiv_geometricRotation` specializes that result to the
-  registry and geometry-only constructions.  The remaining Euler work is the
-  sector-area reparametrization and vector-uniqueness identification of that
-  rotation with the geometric endpoint, followed by the relevant logarithm
-  branch certificate.
-  The geometry-only implementation is now indexed separately as
-  `GeometricPiRotation`: its cofinal rational half-pi schedule has certified
-  bounds and width modulus, is equivalent to the normalized quarter-turn, and
-  feeds a valid finite-prefix-stabilized factorial rotation with ordered
-  candidates.  This is an algorithmic strengthening of the Euler/rotation
-  target, not a completed-real theorem; endpoint identification and the
-  logarithm branch remain open.
-  The rational chart side is now a checked variable-coefficient
-  rotation-system candidate:
-  `GeometricRotationODE.pointOnUnit_geometricRotationSystemCertificate` gives
-  `P' = (2 i / (1+t*t)) P`, `P(0)=1`, and `P(1)=i` on `[0,1]`.
-  The scalar sector-time component is now checked as well:
-  `SectorAreaReparametrization.angleOnUnit_hasDerivative` gives
-  `Theta' = 2/(1+t*t)`, and
-  `angleAt_equiv_two_arctanGeom` identifies every rational chart value with
-  `2 * arctan.geom(t)`.  The finite lower-tail comparison now also gives
-  `angleOnUnit_effectiveInverseSeparation`: an input gap `1/(n+1)` produces
-  strictly separated output boxes at stage `64*(n+1)`.
-  The same finite certificate is now exposed directly on the unscaled
-  rectangle function as
-  `IntegralIdentities.arctanIntegralRectangleOnUnit_effectiveInverseSeparation`,
-  keeping the separation modulus attached to the evaluator that produced the
-  boxes.  This is an inverse-search prerequisite, not an inverse theorem.
-  `angleOnUnitRegular_intervalRegular` now gives the matching finite
-  interval-image certificate through the cofinal `64*(n+1)` schedule, and
-  `angleOnUnitRegular_invertible` packages it with monotonicity and effective
-  separation as the prerequisites for a constructive inverse branch.  The remaining
-  reparametrization work is the data-valued bisection search, then curve
-  composition and the vector uniqueness theorem, not the derivative,
-  interval regularity, or strict monotone separation of the sector-area
-  clock.
-  The corresponding endpoint has now been transported as well:
-  `PiProofs.pi.sectorAreaAngleOne_equiv_halfPi` proves
-  `Theta(1) â‰¡ pi/2` by the checked geometric arctangent bridge.
-  Independently of the pi registry,
-  `SectorAreaRotation.halfPi` packages the accelerated endpoint as a bounded
-  factorial-rotation input: every rectangle box is checked in `[1,2]` from
-  the kernel bounds, its width modulus is explicit, and
-  `SectorAreaRotation.rotation_equiv_geometricRotation` transports the
-  resulting stabilized rotation to the geometry-only rotation.  The remaining
-  Euler endpoint gap is therefore the stated reparametrized rotation-system
-  uniqueness theorem, rather than a disagreement between angle inputs.
-  `PiProofs.pi.halfPiRotation_equiv_sectorAreaRotation` also records the
-  transitive connection back to the project-level pi handle.
-  Its imaginary-axis input has the matching transport
-  `PiProofs.pi.imaginaryHalf_equiv_sectorAreaRotationImaginaryHalf`.
-  `PiProofs.pi.sectorAreaPiRaw_equiv_piCircleArea` doubles that endpoint to a
-  direct pi raw and transports it to the preferred circle-area representation;
-  it is intentionally a named alternate computation rather than a new
-  coverage score.
-
-## First-Year Calculus Course
-
-The course layer should avoid broad classical theorem dependencies such as IVT
-and MVT.  Instead, it should grow a concrete table of functions, domains,
-derivatives, and definite integration algorithms that covers the examples
-students actually compute.
-
-- New course module: `ComputableAnalysis/FirstYearCalculus.lean`.
-- Checked formal coefficient-shift table:
-  monomials `x^(n+1)/(n+1)`, `exp`, `sin`, `-cos`, `sinh`, and `cosh`.
-  See `FirstYearCalculus.PowerSeriesDerivativeEntry` and
-  `FirstYearCalculus.checked_power_series_table`.
-- The monomial row also has an executable finite-secant estimate, independent
-  of the formal stream: see
-  `FinitePolynomial.normalizedMonomial_hasDerivativeOnInterval`.
-- Linear closure for the table is now available at the formal coefficient
-  level.  The primary declarations are
-  `FormalPowerSeries.coefficientShift_add`,
-  `FormalPowerSeries.coefficientShift_scaleRat`,
-  `FormalPowerSeries.hasCoefficientShift_add`, and
-  `FormalPowerSeries.hasCoefficientShift_scaleRat`; their older
-  formal-derivative counterparts remain compatibility API.
-- Real-axis wrappers for concrete functions are named:
-  `FirstYearCalculus.RealElementary.expPS`, `sinPS`, `cosPS`,
-  `sinhFromExp`, `coshFromExp`, `sqrtRat`, `invX`, and
-  `invOnePlusSquare`.
-- Rational-function kernels ready for calculus:
-  `RatFun.oneOverOnePlusSquare_denominator_apart_on_interval` proves that
-  `1/(1+x^2)` has denominator-apartness bound `1` on every rational interval,
-  and `RatFun.oneOverX_denominator_apart_on_pos_interval` proves that `1/x`
-  is denominator-apart on every interval `[a,b]` with `0 < a`.  The symmetric
-  `RatFun.oneOverX_denominator_apart_on_neg_interval` now covers intervals
-  with `b < 0`; `oneOverXOnPositiveInterval` and
-  `oneOverXOnNegativeInterval` expose both branches as certified interval
-  functions with exact computation theorems, while
-  `RatFun.oneOverX_defined_of_ne_zero` gives the general pointwise domain
-  criterion, while `RatFun.eval?_eq_some_of_defined` and
-  `RatFun.eval?_eq_none_of_undefined` expose the executable evaluator's
-  success/failure behavior. The pole at zero remains explicitly excluded.
-- Next concrete integral targets, beyond the checked unit-branch arctangent
-  rectangle/Lipschitz comparison and without a general integrability theorem:
-  `integral 1/x = log x` on positive intervals,
-  `integral 1/(1+x^2) = arctan x` on general certified branch intervals,
-  the half-period sine endpoint `Ï€ * integral_0^(1/2) sin(Ï€ t) dt = 1`,
-  using interval-valued alternating-series sine evaluations rather than exact
-  samples,
-  `integral 1/sqrt(1-x^2) = asin x` on certified subintervals of `[-1,1]`,
-  tangent/secant formulas on intervals whose cosine denominator is apart from
-  zero, and polynomial/rational examples via domain-specific interval
-  certificates.
-- A later noncompact benchmark is the Dirichlet sinc integral
-  `âˆ« sin(Ï€ t)/t dt = Ï€`, using the project's rational-angle convention.  The
-  first local illustration is its decreasing-then-increasing branch around
-  the irrational solution of `tan(Ï€ t) = Ï€ t`.  This does not justify a
-  special one-turn integral: the intended algorithm is a finite list of
-  monotone pieces and shrinking rational turn brackets, followed by a
-  separately certified oscillatory tail cancellation.  No sine/tangent
-  sign-bisection certificate or full-line sinc integral is checked yet.
-- For each target, the desired endpoint is a named raw algorithm with an
-  optional `RealRaw.Rate`, plus a checked definite-integral formula on its
-  natural certified domain.
-
-## Taylor Expansions
-
-- Taylor's formula should be generated by iterated definite-integral FTC:
-  first prove `F(x) = F(a) + integral_a^x F'(t) dt`, then apply the same
-  statement to `F'`, then to `F''`, and so on.  The shape is recorded by
-  `Taylor.FTCStepAt` and `Taylor.IteratedFTCChain` in
-  `ComputableAnalysis/Taylor.lean`.
-- The coefficient-level operation for one step from `0` is
-  `FormalPowerSeries.coeffsFromDerivativeAtZero`; the theorem
-  `FormalPowerSeries.coeffsFromDerivativeAtZero_hasFormalDerivative` proves
-  that differentiating the constructed coefficient stream gives the supplied
-  derivative stream.
-- First checked Taylor coefficient route for arctangent:
-  `FormalPowerSeries.atanTaylorCoeff_hasFormalDerivative` proves that the
-  arctangent coefficient stream differentiates to the coefficient stream for
-  `1/(1+x^2)`, and `Taylor.arctanTaylorCoefficientRoute` records the odd
-  coefficients `(-1)^k/(2k+1)`.
-- The analytic input for that route is now a certified rational function:
-  `Taylor.arctanKernelOnInterval` is `1/(1+x^2)` as a function on any rational
-  interval, backed by `Taylor.arctanKernel_regular_on_every_interval`.
-- The higher-derivative problem for arctangent is avoided by a finite rational
-  division theorem: `Taylor.ArctanKernel.finiteRemainderRoute` proves
-  `1/(1+x^2) = kernelPartial x n + kernelRemainder x n`, with
-  `|kernelRemainder x n| <= (x*x)^(n+1)`.  This is the exact theorem that
-should feed the later definite-integral remainder estimate.
-The specialized
-`Taylor.ArctanKernel.finite_remainder_half_interval_budget` now supplies an
-executable schedule on `0 <= x <= 1/2`: stage `n` has remainder at most
-`1/(n+2)`, obtained by a rational half-power comparison. This is the first
-explicit stage selector for the Taylor remainder route and remains entirely
-finite.
-- The finite Riemann-error core is now formalized without a completeness
-  principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
-  its endpoint-average bounds bracket each monomial primitive, and
-  `monomialIntegralBetween_endpoint_error_le` gives each left/right
-  rectangle an explicit `k * (r-p)^2` error on the unit interval.  The
-  remaining series bridge work is to sum these finite polynomial bounds over
-  the dyadic area mesh and combine that schedule with the Taylor remainder.
-
-## Iteration-Based Construction Layers
-
-- Alternating series now have a first iteration-style raw layer.  See
-  `Series.AlternatingRaw` in `ComputableAnalysis/Series.lean`.
-- Proved: if the magnitudes of an alternating series shrink to zero, then the
-  intervals between consecutive partial sums shrink to zero.  See
-  `Series.AlternatingRaw.intervals_shrink`.
-- Next step for alternating series: prove nestedness/enclosure from
-  nonnegative decreasing terms, then instantiate Leibniz/arctangent series.
-
-## Pi Representations
-
-- `PiProofs.PiCoverageBridge` is the Ï€ progress measure in
-  `blueprint/src/pi-scoreboard-table.tex`.  Its eight constructors have one
-  checked `RealRaw.Equiv` witness per distinct bridge: Archimedean geometry,
-  arctangent versus alternating series, finite definite integration, the
-  supplied finite integration-by-parts formula, its finite square-substitution
-  companion, compactified improper integration, the nontrivial
-  reciprocal-quartic kernel, and bounded symmetric Cauchy assembly.  The theorem
-  `PiCoverageBridge.equivalent` derives each witness from
-  the certified presentation registry.  This is a coverage suite, not a
-  completion percentage: multiple implementations can share a bridge, and a
-  continuous Peano--Baker theorem or an analytic proof that `exp' = exp` would
-  be major calculus progress without adding a Ï€ row.  For ordinary downstream
-  use, `PiProofs.piPresentation_equiv source target` directly compares any two
-  named checked presentations through the certified area representative.  It
-  is a registry interoperability theorem, not an extra scoreboard witness.
-  The generic `Real.Representation.equiv` compares any two certified views of
-one abstract real; its pi specialization `PiProofs.pi.representations_equiv`
-therefore also covers the supplementary finite integration-by-parts-mesh and
-triangle-log-series views that intentionally
-sit outside `PiPresentation`.
-  The now-certified `pi.dirichletBeta` view records the natural Dirichlet
-  formula `pi = 4 * L(1, chi4)`; its literal boxes are stagewise the Leibniz
-  boxes, so it is deliberately not a ninth alternating-series capability.
-  `PiPresentation.integrationFamily` and the primary registry retain the
-  polygonal, stabilized, Nilakantha, and single Machin variants as executable
-regressions.  `piCertified.alternatives` also literally carries the checked
-`pi.integrationByPartsMesh` and `pi.triangleLogSeries` raw evaluators; those
-remain outside the coverage
-count.  The reciprocal-log triangle formula is instead the primary
-  `pi.integrationByParts` view and the sixth finite-calculus bridge.  It is
-  not a substitute for the pending general arctangent--logarithm effective-FTC
-  bridge or canonical-logarithm transport.  The primary
-  canonical handoff is now formalized separately:
-  `PiProofs.CanonicalLogTwoCertificate` packages a valid raw value at two
-  together with its equivalence to `Logarithm.logTwoReciprocalIntegral`, and
-  `piFromCanonicalLogTwo_equiv_piCircleArea` then proves the canonical-form
-  pi formula.  Constructing that certificate from an inverse-exponential
-  logarithm remains the one explicit analytic gap; it is not an additional
-  scorecard row.
-  `pi.squareSubstitution` view is the seventh bridge: it preserves the
-  square-pullback integral and verifies its finite substitution transport to
-  the reciprocal-log view.
-  The eighth bridge is `pi.symmetricCauchy`: the public general integral
-  construction folds the explicitly certified increasing `[-1,0]` and
-  decreasing `[0,1]` Cauchy-kernel branches.  Its direct pi raw evaluator has
-  width at most `16 / (n + 1)`.  This is a concrete piecewise-monotone
-  assembly regression, not another arctangent-series entry.
-  The original direct perimeter is now a certified square-root-enclosure
-  computation;
-  arcsine/Newton and Gaussian are future inverse/integral and
-  exponential/full-line probes.  Basel and Brouncker are advanced-analysis
-  topics outside the scientific-calculus progress board.  Euler identity with
-  the complex logarithm is instead a named but unmarked long scoreboard
-  target: it should establish `exp(i * pi / 2) = i` and
-  `pi = -2i * log(i)` by the complex rotation-system extension of the linear
-  Peano--Baker uniqueness theorem.  Its rational imaginary-axis factorial
-  tail is now a valid complex raw (`RotationSeries.rotationExpRaw_valid`),
-  while rotation/geometric and branch bridges remain. The primary gates remain
-  the
-  no-completeness audit,
-  epsilon--delta continuity and extension, finite integration/FTC, inverse
-  functions, differentiated elementary functions, and continuous ODE
-  solution operators.
-- Direct `piCircumference` is now complete.  `CircumferenceBridge.innerChordLowerRefinement`
-  combines exact rational checks at stages `1, 2, 4, 8` with a uniform
-  fourth-order secant--curvature budget for every later dyadic stage.
-  `PiProofs.piCircumference_valid` then certifies the original evaluator,
-  and `PiProofs.piCircumferenceDirect_equiv_piCircleArea` supplies its
-  finite Archimedean equivalence.  The named view
-  `PiProofs.pi.circumferenceDirect` makes this literal path evaluator
-  available through the abstract pi handle.
-  `piCircumferenceDirect_equiv_piCircumferenceFan` and
-  `pi.circumferenceDirect_equiv_circumference` now make its agreement with
-  the default cross-fan circumference view explicit.  This is one geometry
-  capability, not a new scoreboard row.
-
-
-- The canonical Leibniz series equivalence is proved by the finite Riemann
-  bridge `leibnizEqualsRectangleRawAtOne_finiteRiemannBridge`, which schedules
-  a finer dyadic rectangle mesh, absorbs its finite polynomial error in a
-  shrinking dyadic-zero interval, and cancels the padding in raw-real
-  arithmetic.  Its public consequence is
-  `four_arctanSeries_one_equiv_piCircleArea`.  The exact-order route remains
-  an independent stronger quadrature API and needs the uniform all-partials bridge
-  `PiProofs.LeibnizRectangleBridge.KernelPartialExactCellOrderPreservationOnUnit`.
-  Pointwise kernel bounds and finite certificates through the indicated
-  prefixes are checked. Exact cell-order preservation is now proved for the
-  constant partial, `1 - x^2`, `1 - x^2 + x^4`,
-  `1 - x^2 + x^4 - x^6`, and `1 - x^2 + x^4 - x^6 + x^8`. The first
-  nonconstant case uses explicit nonnegative rational endpoint-gap factors;
-  the degree-four case uses Boole quadrature and the degree-six and
-  degree-eight cases use positive seven-point and eleven-point rational
-  Newton--Cotes identities.  Neither route uses completeness.
-- `piMachin` previously needed a principal-branch addition certificate.  The
-  required three bounded rational additions are now proved:
-  `2*atanGeom(1/5) = atanGeom(5/12)`,
-  `atanGeom(7/17) + atanGeom(1/239) = atanGeom(5/12)`, and
-  `atanGeom(5/12) + atanGeom(7/17) = atanGeom(1)`.
-  `geometricMachinUnitAdditions_of_chartTransport` obtains this certificate
-  from finite rational rectangle transport, and
-  `geometricBranchIdentity_of_chartTransport` formally assembles it into
-  The universal `GeometricUnitAdditionLaw` remains a useful stronger API, but
-  is no longer a prerequisite for the concrete Machin branch.
-  The finite Gaussian/rational calculation is complete.  The rational
-  kernel-Jacobian identity
-  `RationalCircle.Trigonometry.arctanKernel_chartAdd_jacobian`, its exact
-  endpoint displacement law
-  `RationalCircle.Trigonometry.chartAddParameter_sub`, and its
-  chart-admissible order-preservation law
-  `RationalCircle.Trigonometry.chartAddParameter_mono` are also proved;
-  `ArctanGeometry` now lifts this algebra to every finite rectangle partition:
-  the chart-transformed target bracket contains the source bracket and maps
-  each area-loop stage to a verified finite target cover.  On the
-  Machin-relevant half-unit chart, transformed endpoint widths are bounded by
-  eight times their source widths and squared meshes by a factor of \(64\);
-  this gives a \(128 x^2/2^n\) transported rectangle-width bound whenever the
-  image endpoint stays in the unit interval.  The transformed brackets are now
-  a valid nested shrinking raw construction with width at most \(256/(n+1)\),
-  and `arctanIntegralRectangleRaw_equiv_chartAddAreaLoopRaw` proves its
-  construction-level equivalence to the source rectangle raw.  Appending the
-  source prefix partition to the transported interval partition proves the
-  canonical endpoint-difference comparison, and
-  `arctanGeom_chartAdd_add_of_half` now proves the bounded geometric addition
-  law needed at all three Machin instances.  Consequently
-  `MachinIdentity.geometricMachinUnitAdditions_of_chartTransport` and the
-  resulting geometric Machin branch identity are proved.  The finite Riemann
-  bridge now proves the needed power-series/kernel comparisons at `1/5` and
-  `1/239`, so `piMachin_equiv_piCircleArea_finiteRiemannBridge` is a completed
-  canonical scorecard row.  The endpoint comparison at `1` belongs to the
-  independent Leibniz route.  Machin remains solely a power-series
-  computation, not a second integral-based pi representation.
-- The reusable finite-Riemann bridge now covers every rational input on the
-  series chart `|x| <= 1`:
-  `arctanEqualsGeom_finiteRiemannBridge_on_unit`, with presentation-level
-  certificate `arctanPowerSeriesGeomAgreement_finiteRiemannBridge`.  Its
-  nonnegative core remains `arctanEqualsGeom_finiteRiemannBridge`; the
-  negative half follows from the literal raw-interval negation implemented by
-  both evaluators.  The canonical scoreboard deliberately uses this one
-  capability only for the Leibniz endpoint and the two power-series inputs in
-  the single Machin formula; this extension is not an additional pi
-  computation.
-- The finite Archimedes comparison aligns the polygon and circumference
-  computations.  `PiProofs.piCircumference_valid` now closes the original
-  chord-path evaluator itself, and `PiProofs.piCircumferenceDirect` is its
-  certified `Real` handle.  The cross-fan, stabilization, and reboxing
-  remain useful regression views.  `PiProofs.piCertified` continues to use
-  the area loop as its preferred representation and records the checked
-  alternatives without treating implementation variants as extra score rows.
-
-
-### Archived pre-refactor notes (not current source)
-
-The following notes, through the next top-level heading, describe modules and
-names from an earlier architecture (`CirclePi.lean`, `CircleArea.lean`, and
-related polygon files) that are no longer in this repository.  They are kept
-only as historical design context.  They are not a roadmap, should not be used
-to measure progress, and must not override the checked source map or the pi
-scoreboard above.
-
-- Pi should be represented by several independent computable algorithms:
-  Leibniz series, Machin/arctangent formulas, geometric constructions,
-  integrals such as `4 * âˆ«_0^1 1/(1+x^2) dx`, and continued fractions.
-  See `Pi.Representation`, `Pi.Integral`, `Pi.Geometric`,
-  `Pi.ContinuedFraction`, and `Pi.RepresentationsAgree` in
-  `ComputableAnalysis/Pi.lean`.
-- These equivalence proofs should be consequences of the constructive calculus
-  layer: arctangent as inverse/integral, trig branch identities, integral
-  substitution/additivity, and direct finite interval estimates where needed.
-  They should not invoke classical real completeness or mathlib analysis.
-- Proved algebraic core for Leibniz/Machin: the rational tangent formulas give
-  `tan (4 atan(1/5) - atan(1/239)) = 1`.  See
-  `Machin.quarter_tangent_identity` in `ComputableAnalysis/Pi.lean`.
-- The same algebraic fact is also recorded as the Gaussian-rational identity
-  `(5 + i)^4 = (2 + 2i) * (239 + i)`.  See `Machin.gaussian_identity`.
-- Arctangent now has a formal rational branch layer for expressions generated
-  by `atan x`, addition, and subtraction.  This proves, without real numbers,
-  that the selected-branch expression `4 * atan(1/5) - atan(1/239)` has tangent
-  slope `1`, i.e. the same formal branch value as `atan(1)`.  See
-  `Arctan.evalBranch_add_of_pos`, `Arctan.evalBranch_sub_of_pos`, and
-  `Arctan.machinQuarter_eq_atan_one` in `ComputableAnalysis/Pi.lean`.
-- The arctangent power series is now connected to the shared formal
-  power-series coefficient layer.  See
-  `FormalPowerSeries.atanOddCoeff_derivative_term` in
-  `ComputableAnalysis/PowerSeries.lean`, and
-  `Arctan.psTerm` and `Arctan.psIterate_eq_arctanInterval` in
-  `ComputableAnalysis/Pi.lean`.
-- The named arctangent power-series function is now complex-first:
-  `ComputableAnalysis.Arctan.powerSeriesFunctionRaw` is a complex
-  `FunctionRaw` for `z - z^3/3 + z^5/5 - ...`, and
-  `Elementary.Arctan.powerSeriesFunctionRaw` is its real-axis projection via
-  `FunctionRaw.realPartOnRealAxis`.  The older real alternating enclosure
-  `Arctan.psIterate` remains available for the Leibniz pi series, where the
-  even/odd real alternating bounds are convenient.
-- The arctangent branch layer is now tied to rational complex-plane geometry:
-  `Arctan.HasSlope` says a rational complex vector represents the branch value
-  `atan x`, and multiplication/conjugation prove the geometric
-  addition/subtraction laws.  See `Arctan.mul_slope_add`,
-  `Arctan.mul_slope_sub`, `Arctan.evalBranch_hasSlope`, and
-  `Machin.gaussian_identity_subtract_slope`.
-- Exact series bookkeeping: the Leibniz finite sums are precisely
-  `4 * arctanOfOne n`.  This is mainly definitional cleanup, not the
-  Leibniz/Machin equivalence proof.  See
-  `leibnizPartial_eq_four_arctan_of_one` in
-  `ComputableAnalysis/Pi.lean`.
-- Leibniz's finite intervals are now identified only with the power-series
-  representative `4 * atan_series(1)`, not with geometric pi.  See
-  `Pi.arctanSeriesPi`, `Pi.leibnizSeries_is_arctanSeriesPi`, and
-  `Pi.leibniz_agrees_with_arctanSeriesPi`.
-- Polygon definitions are geometric support layers, not prerequisites for the
-  primary quarter-disk pi route.  `ComputableAnalysis/Archimedes.lean` records
-  the theorem skeleton relating polygon-area pi and half-circumference pi,
-  while `ComputableAnalysis/RationalPolygon.lean` and
-  `ComputableAnalysis/ComputablePolygon.lean` record finite shoelace geometry.
-- Rational-coordinate polygons are now finite objects with shoelace area.
-  See `RationalPolygon.QPolygon` in
-  `ComputableAnalysis/RationalPolygon.lean`.  The proved theorem
-  `RationalPolygon.QPolygon.area_mapMul` says that multiplying every vertex
-  by a rational complex number rotates/stretches the polygon and scales its
-  area by the squared norm of that complex number.  This is the elementary
-  geometry layer behind rational polygon triangulations and regular polygon
-  area computations.
-- The finite Archimedes rearrangement step is proved sorry-free in
-  `ComputableAnalysis/Archimedes.lean`.  `Archimedes.Slices.horizontalSlice_area`
-  proves that a triangle slice at height `h` with base width `w` has area
-  `h*w/2`, `Archimedes.Slices.horizontalSlice_area_mapMul` records the
-  rotation/stretch compatibility via complex multiplication, and
-  `Archimedes.Slices.sliceAreaSum_eq_half_perimeter_mul_height` proves that
-  finitely many same-height slices have total area `height * totalBase / 2`,
-  i.e. the rectangle-rearrangement algebra in Archimedes' proof.
-- Regular polygons on the unit circle are generally not rational-coordinate
-  polygons after repeated bisection.  The non-rational layer is
-  `Polygon.CPolygon` in `ComputableAnalysis/ComputablePolygon.lean`: vertices
-  are `ComplexRaw`s, and `CPolygon.areaCompute` is the interval shoelace
-  algorithm on their rational boxes.  Rational polygons embed by
-  `Polygon.fromRational`, with exact area represented by
-  `Polygon.rationalAreaRaw`.
-- First-quadrant box exhaustion is the primary circle-area route.  It uses
-  only the two corners of each rational grid box, avoiding any need to define
-  polygon area or circumference for pi.  See
-  `ComputableAnalysis/QuarterCircle.lean`: `QuarterCircle.gridCell_inner_sound`
-  proves that a box whose upper-right corner satisfies `x^2+y^2 <= 1` lies
-  inside the quarter disk, and `QuarterCircle.gridCell_outer_false_sound`
-  proves that a box whose lower-left corner is outside is entirely outside.
-  `QuarterCircle.piAreaInterval` is the resulting finite rational interval
-  algorithm for pi from four times the quarter-disk area.
-- The first quantitative exhaustion step for the quarter-disk route is now
-  proved sorry-free.  `QuarterCircle.OuterColumnHeight` records the exact
-  height of an outer grid column; `outerColumnHeight_left_edge`,
-  `outerColumnHeight_right_edge`, and their uniqueness lemmas prove that the
-  actual circle grid has endpoint heights `n` and `1`.  In
-  `QuarterCircle.Staircase`, `boundaryCells_eq_two_mul_sub_one` proves the
-  telescoping `2n-1` boundary-cell count, and
-  `fullDiskBoundaryGap_at_exhaustionFuel_le_one_div` proves that using
-  `8n` subdivisions makes this full-disk boundary gap at most `1/n`.  The
-  remaining certificate for `QuarterCircle.PiAreaBoxCertified` is to connect
-  these column-height facts to the concrete `List` sum in
-  `QuarterCircle.piAreaInterval` and prove nestedness across refinements.
-- The standalone Archimedes area theorem now has its own package in
-  `ComputableAnalysis/CircleArea.lean`.  `CircleArea.unitDiskAreaCompute` is
-  the unit-disk area algorithm, `CircleArea.ArchimedesAreaOfUnitCircle` is the
-  theorem statement saying this area real equals a chosen pi representative,
-  and `CircleArea.piByUnitDiskArea_equiv_of_archimedes` is the proved
-  corollary that this standalone theorem implies equivalence between the
-  area definition of pi and that chosen pi definition.
-- The circumference exhaustion layer is now explicit and sorry-free in
-  `ComputableAnalysis/Circumference.lean`.  `Circumference.Bounds` packages
-  inscribed/circumscribed perimeter interval algorithms,
-  `Bounds.halfPiValid_of_circumferenceValid` proves that a certified
-  circumference exhaustion gives a certified half-circumference pi
-  representative, and
-  `Circumference.unitDiskArea_equiv_halfCircumference` is the direct theorem
-  saying the unit-disk area pi equals the half-circumference pi once their
-  interval algorithms are coupled at every precision.  The finite sector
-  lemmas `FiniteSectors.circumscribed_area_eq_half_perimeter` and
-  `FiniteSectors.inscribed_area_le_half_perimeter` prove the algebraic
-  Archimedes relation between tangent/inscribed sector fans and perimeter.
-  `Circumference.SectorBounds.Stage` now packages the exact finite sector data
-  and automatically derives the area/perimeter comparison.  The theorem
-  `Circumference.SectorBounds.Exhaustion.archimedes_of_conditions` is the
-  current sharp Archimedes endpoint: for any concrete sector exhaustion whose
-  area and perimeter intervals are nested and shrink to zero, the area
-  definition of pi is equivalent to the half-circumference definition.
-  `Circumference.polygon_area_equiv_half_circumference` restates the existing
-  certified polygon theorem in this area/circumference language.
-- The unit-sector theorem is now stated directly in
-  `ComputableAnalysis/CircularSector.lean`.
-  `CircularSector.area_eq_halfArcLength` proves that any certified
-  unit-sector exhaustion has sector area equal to half its boundary arc length
-  as computable reals.  The angle-parametrized shadow is also recorded:
-  `CircularSector.ByAngle.area_eq_arcLength_div_two` proves
-  `area(theta) = arcLength(theta)/2` for rational angles, and
-  `CircularSector.ByAngle.sameDerivativeAndInitial` stores the exact
-  derivative certificates saying both sides have derivative `1/2` and agree
-  at `theta = 0`.
-- Arc sample points are now an explicit certified layer in
-  `ComputableAnalysis/ArcSamples.lean`.  `ArcSamples.ComplexCert.ofRealPair`
-  turns two certified coordinate `RealCert`s into a certified `ComplexCert`,
-  `ArcSamples.Stage` and `ArcSamples.Family` turn finite sample lists into
-  polygons, and `ArcSamples.UnitQuarterArcFamily` records the
-  first-quadrant/unit-circle box conditions expected from a concrete arc
-  algorithm.  The exact endpoints `(1,0)` and `(0,1)` are certified, and
-  `ArcSamples.quarterArcEndpointChordNormSq` checks that the squared chord
-  length between them is exactly `2`.
-- The rational Pythagorean parametrization is now the concrete quarter-arc
-  sampling route.  In `ComputableAnalysis/ArcSamples.lean`,
-  `ArcSamples.Pythagorean.point u =
-  ((1-u^2)/(1+u^2), 2u/(1+u^2))` gives rational points on the unit circle,
-  and `ArcSamples.Pythagorean.rationalVertices n` samples the arc at
-  `u = k/n`.  Theorems `point_normSq`, `point_re_antitone`, and
-  `point_im_monotone` prove that these rational points lie exactly on the
-  unit circle and move monotonically through the first quadrant.  The inner
-  and outer staircase corners are also certified:
-  `adjacent_inner_corner_normSq_le_one` puts every lower staircase corner
-  inside the unit disk, while `adjacent_outer_corner_normSq_ge_one` puts every
-  upper staircase corner outside it.  The adjacent-step estimates
-  `adjacent_re_gap_le_four_over_n` and `adjacent_im_gap_le_two_over_n` give
-  the first quantitative shrinking bounds for this exhaustion.  This is the
-  current concrete foundation for a rational Archimedes exhaustion.
-- The current project-facing Archimedes interface is now the smaller
-  `ComputableAnalysis/CirclePi.lean`, not the older arbitrary-polygon layer.
-  `CirclePi.areaRaw` is the unit-disk-area definition of pi from the rational
-  arc samples: the lower area is the inscribed chord sector and the upper area
-  is the adjacent-tangent sector.  `CirclePi.CircumferenceExhaustion.piRaw` is
-  the half-circumference definition of pi, and `CirclePi.archimedes` is the
-  theorem form saying these two `RealRaw`s are equivalent once the concrete
-  rational-arc/tangent coupling has been proved.  The root module imports this
-  direct route; the older `Archimedes.lean`, `Circumference.lean`, and
-  `CircularSector.lean` files are legacy scaffolding for comparison, not the
-  main path.
-- The circumference route now uses the right outer object: tangent
-  intersections, not staircases.  In `ComputableAnalysis/CirclePi.lean`,
-  `CirclePi.PythagoreanCircumference.tangentIntersection p q` has coordinates
-  `((q.im-p.im)/(p.re*q.im-p.im*q.re),
-  (p.re-q.re)/(p.re*q.im-p.im*q.re))`, and
-  `adjacent_tangentDet_pos` proves adjacent rational samples do not hit a zero
-  denominator.  `outerTangentBoundaryVertices` is the outer polyline from
-  `(1,0)` through adjacent tangent intersections to `(0,1)`.
-- The area pi raw algorithm is named by `CirclePi.areaAlgorithm`, with the
-  concrete implementation under
-  `CirclePi.PythagoreanCircumference.areaAlgorithm`.  This is no longer the
-  coarse grid-box algorithm from `CircleArea.lean`; the same rational samples
-  used for circumference now drive the area interval too.
-- The circumference pi raw algorithm is named in
-  `ComputableAnalysis/CirclePi.lean`:
-  `CirclePi.PythagoreanCircumference.piAlgorithm` is the `RealRaw` for pi as
-  half the full circumference.  Its lower bound uses the inscribed chord
-  polyline directly, and its upper bound uses the tangent polyline directly;
-  each adjacent segment length is evaluated by the existing rational `sqrt`
-  interval function inside the pi module.  The remaining proof target is
-  `CirclePi.PythagoreanCircumference.CircumferenceCertified`.
-- A third geometric pi definition is now named:
-  `CirclePi.fourArctanOnePiRawAlgorithm` is `4 * arctan(1)`, where arctangent
-  is the Pythagorean dyadic sector-area construction, not the power series.
-  The theorem `CirclePi.fourArctanOnePi_compute_eq_areaPi` proves that this
-  algorithm has exactly the same stage outputs as the unit-disk area pi.
-  Theorems `CirclePi.fourArctanOnePi_equiv_areaPi` and
-  `CirclePi.fourArctanOnePi_equiv_circumferencePi` prove the raw equivalences
-  to the previous two geometric definitions.  The first uses the exact
-  quarter-sector identification plus `innerQuarterArea_le_outerQuarterArea`;
-  the second transports the Archimedes equivalence.
-- The concrete Archimedes endpoint now goes through the classical finite
-  rearrangement picture, not direct inequality hammering.  In
-  `CirclePi.PythagoreanCircumference.RearrangedFan`,
-  `area_eq_height_mul_half_perimeter` proves that a finite fan of same-height
-  triangles rearranges to a rectangle of width half the total base perimeter.
-  `VariableRearrangedSectorStage` records the non-uniform sector-fan data at
-  one Pythagorean sample stage, and
-  `archimedesBounds_of_variableRearrangedStages` derives the two endpoint
-  overlap inequalities from rearranged fans.  The concrete rational-sample
-  bridge is now `SectorFanBounds`: `archimedesBounds_of_sectorFanBounds` and
-  `areaAlgorithm_equiv_piAlgorithm_of_sectorFanBounds` prove, sorry-free, that
-  the concrete area and half-circumference `RealRaw`s are equivalent once the
-  finite sector fan bounds are supplied.  The finite geometry is now
-  discharged by the direct Archimedes/Riemann-sum estimate:
-  `chordCross_le_tangentCrossSum` proves the per-edge chord-vs-tangent bound,
-  `adjacentChordLengthLo_le_tangentCrossSum` compares the computed chord lower
-  interval with the same tangent pieces, and
-  `innerEdgeCrosses_le_outerTangentEdgeCrosses` sums the inequalities.  The
-  public raw Archimedes theorem is `CirclePi.archimedes_raw`: the
-  unit-disk-area `RealRaw` and the half-circumference `RealRaw` are equivalent
-  with no certification assumptions.  Internally this is
-  `PythagoreanCircumference.areaAlgorithm_equiv_piAlgorithm`.  The certified
-  theorem `pythagorean_area_pi_equiv_circumference_pi` still assumes
-  `AreaCertified` and `CircumferenceCertified`.
-  The remaining certification task is not this finite Archimedes comparison
-  but proving `RealRaw.ValidCompute` for the chosen algorithms.  The public
-  algorithms now use dyadic refinement: `dyadicStage n` means `2^n`
-  Pythagorean arc subdivisions.  The finite geometry remains stage-local, but
-  the raw-real stage parameter now refines naturally.
-  The working method for the remaining inequalities is: freeze a stage `n`,
-  write the exact finite inequality in rational expressions, solve it on paper,
-  then formalize that isolated lemma before returning to the raw-real
-  certificate.  For the current Pythagorean sample stage, the local variables
-  are adjacent unit points `p_k`, `p_{k+1}` and their tangent intersection
-  `t_k`.  The finite Archimedes comparison is already reduced to and proved
-  from the per-edge inequalities
-  `cross p_k p_{k+1} <= cross p_k t_k + cross t_k p_{k+1}` and
-  `sqrtLower (|p_{k+1}-p_k|^2) <= cross p_k t_k + cross t_k p_{k+1}`.
-  The remaining public-stage certification inequalities are explicit shrinking
-  bounds, for example a convenient estimate like
-  `4 * (outerQuarterArea (dyadicStage n) - innerQuarterArea (dyadicStage n)) <= C/n^r`
-  or any other bound that tends to zero, and the analogous circumference
-  bound.  The remaining cross-stage
-  certification inequalities are nesting statements; dyadic stages reduce
-  these to one-step refinement from a stage to its doubled stage.
-  The sqrt bisection layer now proves `sqrtApproxOnDomain_spec`, and
-  `CirclePi` turns it into segment-length endpoint lemmas, including the
-  tangent-line identity `tangent_segment_normSq_eq_cross_sq` and the chord
-  estimate `chordCross_le_segment_hi`.  The first local orientation lemma is
-  also in place: `point_cross_nonneg_of_order` proves that ordered rational
-  Pythagorean arc points have nonnegative cross product.
-- The power-series arctangent pi representative is now named separately:
-  `CirclePi.powerSeriesArctanOnePiRawAlgorithm` is `4 * arctan.series(1)`, where
-  `arctan.series(x) = x - x^3/3 + x^5/5 - ...`.  This is intentionally not a
-  geometric definition.  The theorem
-  `CirclePi.powerSeriesArctanOnePi_equiv_fourArctanOnePi_of_directInequalities`
-  proves that the direct finite arctangent inequalities on `[0,1]` would
-  identify it with the geometric `4 * arctan(1)` definition.  The remaining
-  non-tautological target is
-  `CirclePi.PowerSeriesArctanOnePiAgreesWithGeometric`.
-- Geometric arctangent is now represented by sector area data in
-  `ComputableAnalysis/CirclePi.lean`.  `CirclePi.GeometricArctan.SectorAreaBySlope`
-  asks for the signed unit-sector area swept from `(1,0)` to the ray `(1,x)`,
-  and `CirclePi.GeometricArctan.raw` turns it into an `Elementary.ArctanRaw` by
-  doubling the sector area.  This avoids defining arctangent by its Taylor
-  series.
-- The more arithmetic geometric arctangent route now uses the Pythagorean
-  parameter: the point `((1-x^2)/(1+x^2), 2x/(1+x^2))` has angle
-  `2 atan(x)`, so its unit-sector area is `atan(x)` directly.  The concrete
-  raw algorithm is now dyadic: `CirclePi.PythagoreanArctan.sectorAreaCompute`
-  evaluates the sector using `2^n` subdivisions at public stage `n`, exactly
-  matching the circle-area route.  The named comparison target is
-  `CirclePi.PythagoreanArctan.DyadicAgreesWithPowerSeries`.
-  The naive direct-inequality reduction is also now formal:
-  `CirclePi.PythagoreanArctan.DirectNonnegativeUnitInequalities` is precisely
-  the endpoint-overlap problem on `0 <= x <= 1`, and
-  `nonnegativeUnit_allStagesOverlap_of_directInequalities` proves that solving
-  those finite inequalities gives all-stage overlap of the two concrete
-  `FunctionRaw` outputs on that interval.
-  The finite derivative algebra is proved in `ComputableAnalysis/Pi.lean`:
-  `Arctan.pythagoreanPoint_normSq`,
-  `Arctan.pythagoreanPoint_det_step`, and `Arctan.pythagoreanPoint_dot_step`
-  identify the exact unit-circle/determinant/dot-product formulas; the inner
-  triangle quotient is `Arctan.pythagoreanSectorLowerQuotient`, and
-  `Arctan.pythagoreanSectorLower_error_eq` plus
-  `Arctan.pythagoreanSectorUpper_error_eq` prove that the rational lower and
-  upper sector quotients both collapse to the derivative kernel
-  `1/(1+x^2)`.  The remaining theorem is the geometric squeeze that puts the
-  actual sector-area difference quotient between those two finite formulas.
-- Arctangent now has named function representations.  The generic
-  representation equivalence is `PartialRealFunRaw.AgreeOnOverlap` in
-  `ComputableAnalysis/Core.lean`; `Elementary.Arctan.powerSeries` is the
-  alternating power-series representation on `|x| <= 1`; and
-  `CirclePi.GeometricArctan.functionRepresentation` turns sector-area data into
-  the geometric representation.  The next comparison theorem is
-  `CirclePi.GeometricArctan.AgreesWithPowerSeries`: geometric arctangent agrees
-  with the power-series arctangent on the common rational domain.
-  A stronger comparison target is also available:
-  `CirclePi.GeometricArctan.AgreesWithPowerSeriesAllStages`, based on
-  `RealRaw.AllStagesOverlap`.  It says every geometric interval at every stage
-  compares as `overlap` with every power-series interval at every stage, and it immediately
-  implies ordinary function-representation equivalence.  This is often the
-  cleaner theorem when both algorithms are proved to enclose the same sector
-  integral.
-- The honest geometric target is now explicit:
-  `Pi.GeometricAtanOneRaw` represents the angle from `(1,0)` to `(1,1)`,
-  while `Pi.GeometricAtanOneTaylorRemainderSound` is the missing
-  Taylor-with-remainder theorem saying that this independently geometric or
-  integral arctangent overlaps the arctangent power-series intervals.
-  `Pi.leibniz_agrees_with_geometricAtanOne_of_taylor_remainder` proves that
-  this bridge is enough to derive Leibniz's formula for geometric pi.
-- Main unproved Leibniz/Machin theorem: prove `Pi.LeibnizMachinOverlap`, which
-  is exactly the `RealRaw.Equiv` content for the current raw algorithms.  The
-  remaining route is to prove that the Taylor/integral interval algorithm
-  `arctanInterval` agrees with the geometric branch relation
-  `Arctan.HasSlope`.  More precisely, prove
-  `Arctan.PowerSeriesRespectsBranchEquality`, then combine it with the proved
-  Gaussian slope identity, the Machin branch equality, and alternating-series
-  enclosure certificates.
-- The pi-level plumbing is now done conditionally and sorry-free:
-  `Arctan.piLeibniz_machin_overlap_of_arctan_sound` proves overlap of the
-  concrete Leibniz and Machin interval algorithms from
-  `Arctan.PowerSeriesRespectsBranchEquality`, and
-  `Pi.leibniz_machin_overlap_of_arctan_sound` restates this as
-  `Pi.LeibnizMachinOverlap`.  This uses the proved rescaling identities
-  `Arctan.piLeibnizInterval_eq_scaled_one` and
-  `Arctan.piMachinInterval_eq_scaled_machinQuarter`.
-- The honest theorem target is the safe version
-  `Arctan.PowerSeriesRespectsSafeBranchEquality`, where every atom being
-  Taylor-expanded is certified to lie in `[-1, 1]`.  Machin's expression and
-  `atan(1)` are proved safe by `Arctan.machinQuarter_atomsInClosedUnit` and
-  `Arctan.one_atomsInClosedUnit`, and
-  `Pi.leibniz_machin_overlap_of_safe_arctan_sound` connects that safe analytic
-  theorem to `Pi.LeibnizMachinOverlap`.
-- Quantitative convergence is now measured for the concrete algorithms:
-  `PiProofs.piMachin_compute_width_eq` gives the exact width of the one Machin
-  evaluator as the sum of its two literal alternating-series widths, and
-  `PiProofs.piMachin_compute_width_le_geometric_half` gives the simple public
-  bound `20/2^n`.  This rate belongs to the Machin runtime boxes themselves,
-  not to a width transported across its equivalence with area pi.
-- The finite Leibniz evaluator now has an explicit stage-80 checkpoint:
-  `piLeibniz_stage80_enclosure` keeps the rational interval inside `[3,16/5]`,
-  while `piLeibniz_stage80_width` certifies width at most `1/80`.  This is a
-  stronger finite error budget for the projectâ€™s computable series route.
-The same evaluator now also exports stage 160, keeping the interval inside
-`[3,16/5]` with width at most `1/160`.
-It now also exports stage 320, keeping the same rational enclosure with width
-at most `1/320`, extending the finite item-26 precision ladder.
-It now also exports stage 640, keeping the same rational enclosure with width
-at most `1/640`, extending the finite item-26 precision ladder.
-- The series layer now owns the natural alternating-stage representation:
-  `Series.evenOddInterval partials n` returns the interval between the `2n`th
-  and `(2n+1)`st partial sums, and `Series.AlternatingRaw.interval` uses this
-  convention.  The pi and arctangent series algorithms are wired to this shape.
-
-## Basel Problem
-
-- `DirichletSeries.zetaTwoRaw` is the checked interval algorithm for
-  \(\zeta(2)\); `Basel.baselSeriesRaw` is its project-facing name, and
-  `Basel.baselSeriesRaw_valid` proves validity.
-- `Basel.piSquaredOverSixRaw pi` computes \(\pi^2/6\) from any valid bounded
-  raw pi representative.  The current geometric specialization is
-  `Basel.geometricPiSquaredOverSixRaw`, built from `piCircleArea`, with
-  validity theorem `Basel.geometricPiSquaredOverSixRaw_valid`.  The original
-  chord-path specialization `Basel.circumferencePiSquaredOverSixRaw` is also
-  valid, and `circumferencePiSquaredOverSixRaw_equiv_geometric` proves that
-  the two geometric right-hand sides agree by finite nonnegative interval
-  multiplication.  The conditional theorem
-  `eulerBasel_circumference_iff_geometric` therefore transfers any future
-  Basel proof between the direct circumference and area formulations.
-- `Basel.eulerBasel_geometricPi` is the remaining constructive theorem
-  statement relating these two valid computations.  It is not yet a proved
-  equivalence.  Its public mathematical form is the Basel identity
-  \(\zeta(2)=\pi^2/6\); a positive-normalization theorem may later expose a
-  pi-presentation agreement as a registry corollary, rather than treating the
-  squared identity itself as a scoreboard formula.
-- `BaselFiniteComparison.baselCommonInterval_certificate` strengthens the
-  finite cross-check at stages 10,000 and 8: it constructs an explicit
-  nonempty rational intersection contained in both independent enclosures.
-  This is a reusable finite comparison certificate, still deliberately short
-  of the completed Basel identity.
-- `BaselFiniteComparison.baselCommonInterval_width_le` records the precision
-  consequence: the common interval is no wider than either source enclosure,
-  so both finite error budgets transfer to the shared comparison object.
-- `BaselFiniteComparison.baselCommonInterval_midpoint_certificate` extracts
-  an explicit rational midpoint lying in both source enclosures, providing a
-  concrete finite witness for the cross-evaluator comparison.
-- `BaselFiniteComparison.baselRefinedCommonInterval_certificate` repeats the
-  comparison at the tighter stages 100,000 and 10, with an explicit common
-  rational interval.  `baselRefinedCommonInterval_width_le` transfers both
-source precision budgets to that refined object.  This strengthens the
-finite benchmark evidence without claiming the infinite Basel identity.
-  `baselRefinedCommonInterval_midpoint_certificate` additionally exports a
-  concrete rational witness lying in both refined enclosures.
-The new `baselHighCommonInterval` repeats the independent comparison at zeta
-stage `200000` and geometric stage `12`, with a certified nonempty
-intersection and inherited width bounds. This deepens the finite Basel
-cross-check while keeping Euler's identity itself deferred. The new
-`baselHighCommonInterval_midpoint_certificate` exports an explicit rational
-midpoint in both highest-stage enclosures.
-The named `FiniteBaselComparisonExample` packages the earlier stage-10000/
-stage-8 midpoint as a reusable rational witness and carries forward both
-source width bounds.
-The worked `FiniteBaselExample` now also supplies a refined executable
-certificate with `epsilon = 1/10000` at stage `10001`, retaining containment
-of stage `100000` and tightening the finite width budget by a factor of ten.
-It now also contains stage `200000` under the same `1/10000` width budget,
-extending the finite potential-infinity schedule while leaving the Basel
-identity deferred.
-The named stage-16 checkpoint additionally records the exact partial sum
-`822968714749/519437318400` and its explicit `1/16` tail interval.
-
-## Long-Term Theorems
-
-- Convex FTC: for the examples in Chapter 2, the main calculus theorem is the
-  convex/concave secant route.  Define the pointwise derivative from shrinking
-  centered secant hulls, form Riemann sums of that derivative, and prove the
-  endpoint identity by neighboring-secant enclosures plus telescoping.
-- Legacy exact FTC facts remain useful as sanity checks, but they are no
-  longer the main dependency for elementary functions.  The affine exact
-  certificate is `FTC.affineExactCertificate` / `FTC.affine_exact` in
-  `ComputableAnalysis/FTC.lean`.
-- First checked exact derivative facts: the derivative of an affine function
-  is its constant slope, and the derivative of `x^2` is `2x`.
-  See `ExactFunction.affine_derivative_effective` and
-  `ExactFunction.square_derivative_effective` in
-  `ComputableAnalysis/Differential.lean`.  The same examples now inhabit the
-  newer interval-valued derivative interface: the exact singleton affine
-  quotient is its slope, while
-  `FunctionOnInterval.exactRatSquareDerivative` proves that the signed
-  quotient error for `x^2` is the step itself and fits the stage precision.
-  The exact identity `Differential.square_midpoint_mean_value` additionally
-  gives the rational square-function secant slope at the midpoint, a finite
- Mean Value Theorem core for benchmark item 75.  The new
- `Differential.quadratic_midpoint_mean_value` generalizes this exact witness
- to every rational quadratic `câ‚€+câ‚x+câ‚‚xÂ²`, with the same midpoint witness.
-The worked `FiniteCubicMVTExample` adds the exact cubic interval witness:
-the secant slope of `x^3` on `[0,1]` is `1`, decomposed as midpoint derivative
-value `3/4` plus finite remainder `1/4`.
-  The companion `ExactFunction.affine_differenceQuotient` proves the exact
-  constant slope of every rational affine secant, supplying the corresponding
-  finite base case.
-  `ExactFunction.affine_root_of_nonzero_slope` also gives the exact rational
-  zero of every nonconstant affine function, a finite root-search base case
-  for benchmark item 79.
-  Its positive-slope companion
-  `ExactFunction.affine_root_between_of_sign_change` proves that this zero
-  lies inside a certified endpoint sign-change bracket.
-  The corresponding negative-slope orientation is checked by
-  `ExactFunction.affine_root_between_of_negative_sign_change`.
-`ExactFunction.cube_differenceQuotient` adds the exact rational cubic secant
-expansion used by the finite Taylor/polynomial layer.
-`Differential.cube_midpoint_secant` rewrites that cubic secant around the
-interval midpoint, adding an explicit quadratic remainder certificate for the
-finite Mean Value/Taylor route.
-The companion `Differential.quartic_midpoint_secant` extends the same exact
-midpoint expansion to degree four.
-`Differential.quintic_midpoint_secant` completes the corresponding degree-five
-finite midpoint expansion.
-`Differential.sextic_midpoint_secant` extends the same centered finite
-secant decomposition through degree six, with the explicit fourth-power
-remainder term.
-  `ExactFunction.quartic_differenceQuotient` checks the analogous quartic
-  expansion as the next finite monomial case.
-  `ExactFunction.quintic_differenceQuotient` extends the same exact secant
-  family through degree five. The new
-  `ExactFunction.sextic_differenceQuotient` carries the exact finite secant
-  expansion through degree six, matching the sextic polynomial bracket layer.
-  `ExactFunction.square_quotient_by_id` and
-  `ExactFunction.cube_quotient_by_id` add finite quotient-cancellation support
-  for the optional L'HÃ´pital layer (benchmark item 64), without claiming a
-  limit theorem.  The reusable
-  `ExactFunction.power_succ_quotient_by_id` generalizes this cancellation to
-  every natural power, and `ExactFunction.power_succ_quotient_by_power`
-  cancels the full nonzero power denominator `x^n` in
-  `x^(n+1)/x^n = x`; the reusable
-  `ExactFunction.power_add_quotient_by_power` proves
-  `x^(m+n)/x^m = x^n`. No limiting theorem is claimed.
-  `Differential.cubic_linear_factored_quotient_derivative_ratio` adds the
-  cubic common-factor identity
-  `(x^3-a^3)/(x-a)=3*a^2+3*a*(x-a)+(x-a)^2`, extending the finite algebraic
-  L'HÃ´pital boundary without introducing a limit theorem.
-The quartic worked certificate now records the residual
-`6*step + 4*step^2 + step^3` after cancelling the common linear factor from
-`x^4 - 1`, together with its reciprocal-stage form. This extends item 64's
-finite cancellation ladder without introducing an attained limit.
-The quintic worked certificate now records the residual
-`10*step + 10*step^2 + 5*step^3 + step^4` after cancelling the common factor
-from `x^5 - 1`, together with its reciprocal-stage form.
-The sextic worked certificate now records the residual
-`15*step + 20*step^2 + 15*step^3 + 6*step^4 + step^5` after cancelling the
-common factor from `x^6 - 1`, together with its reciprocal-stage form.
-The septic worked certificate now records the residual
-`21*step + 35*step^2 + 35*step^3 + 21*step^4 + 7*step^5 + step^6` after
-cancelling the common factor from `x^7 - 1`, extending item 64's finite
-cancellation ladder without introducing a limit theorem.
-  The scalar-weighted companion
-  `ExactFunction.mul_power_add_quotient_by_power` cancels the same nonzero
-  power inside `y*x^(m+n)/x^m = y*x^n`, making the certificate compositional
-  for endpoint and affine factors.
-  The scaled-denominator extension
-  `ExactFunction.mul_power_add_quotient_by_scaled_power` also cancels a
-  nonzero scalar factor in the denominator, yielding
-  `(y*x^(m+n))/(z*x^m) = (y/z)*x^n` under explicit nonzero hypotheses.
-  The new `Polynomial.finiteDerivativeEval` together with its public Horner
-  recurrence `Polynomial.finiteDerivativeEval_cons` and exact linear and
-  quadratic base cases `Polynomial.finiteDerivativeEval_linear` and
-  `Polynomial.finiteDerivativeEval_quadratic` and
-  `Polynomial.finiteDerivativeEval_cubic`,
-  `Polynomial.finiteDerivativeEval_quartic`, and
-  `Polynomial.finiteDerivativeEval_quintic`, and
-  `Polynomial.finiteDerivativeEval_sextic`, and
-  `Polynomial.finitePolynomial_secant_derivative_bracket` and its direct cubic
-  specialization `Polynomial.finiteCubic_secant_derivative_bracket` and its
-  quartic-through-sextic specializations
-  `Polynomial.finiteQuartic_secant_derivative_bracket` and
-  `Polynomial.finiteQuintic_secant_derivative_bracket`, together with the new
-  `Polynomial.finiteSextic_secant_derivative_bracket`, assemble a finite
-  endpoint secant bracket for any Horner polynomial with nonnegative rational
-  coefficients on a nonnegative rational interval. The companion
-  `Polynomial.finitePolynomial_secant_derivative_gap` turns that bracket into
-  an explicit rational width budget for the secant error. This strengthens the
-  finite core of benchmark item 75 without selecting an intermediate point or
-  invoking a completed-real Mean Value Theorem.
-  The named specialization `Polynomial.finiteCubic_secant_derivative_gap`
-  now exposes the same budget directly in the cubic derivative formula used by
-  the low-degree calculus examples.
-  The new `Polynomial.finiteCubic_secant_derivative_gap_le` makes that budget
-  explicit as `(2*câ‚‚ + 6*câ‚ƒ*b)*(b-a)`, so a requested rational tolerance can
-  be converted directly into a mesh-width condition.
-  The new `Polynomial.finiteQuintic_secant_derivative_gap_le` extends this
-  explicit scheduler through degree five with budget
-  `(2*câ‚‚ + 6*câ‚ƒ*b + 12*câ‚„*b^2 + 20*câ‚…*b^3)*(b-a)`.
-  The new `Polynomial.finiteQuintic_secant_derivative_gap_le` extends this
-  explicit scheduler through degree five with budget
-  `(2*câ‚‚ + 6*câ‚ƒ*b + 12*câ‚„*b^2 + 20*câ‚…*b^3)*(b-a)`.
-  The matching `Polynomial.finiteQuartic_secant_derivative_gap` and
-  `Polynomial.finiteQuintic_secant_derivative_gap` declarations now carry the
-  explicit budget through the quartic and quintic formulas as well. The new
-  `Polynomial.finiteQuartic_secant_derivative_gap_le` makes the quartic budget
-  explicit as `(2*câ‚‚ + 6*câ‚ƒ*b + 12*câ‚„*b^2)*(b-a)`.
-  The new
-  `Polynomial.finiteSextic_secant_derivative_bracket` and
-  `Polynomial.finiteSextic_secant_derivative_gap` extend the same finite
-  certificate one degree further, without changing the nonnegative-coefficient
-  or rational-interval hypotheses.
-  The new `Polynomial.finiteSextic_secant_derivative_gap_le` makes the degree-
-  six mesh budget explicit as
-  `(2*câ‚‚ + 6*câ‚ƒ*b + 12*câ‚„*b^2 + 20*câ‚…*b^3 + 30*câ‚†*b^4)*(b-a)`.
-  The matching `Polynomial.finiteDerivativeEval_septic`,
-  `Polynomial.finiteSeptic_secant_derivative_bracket`, and
-  `Polynomial.finiteSeptic_secant_derivative_gap` extend the public finite
-  endpoint certificate to degree seven, still using only rational coefficients
-  and a finite endpoint comparison.
-  The same finite interface now extends one step further to degree eight via
-  `Polynomial.finiteDerivativeEval_octic` and
-  `Polynomial.finiteOctic_secant_derivative_bracket`; this remains a rational
-  endpoint enclosure rather than a completed-real Mean Value Theorem.
-  It now also reaches degree nine, matching the worked `FiniteNonicMVTExample`,
-  through `Polynomial.finiteDerivativeEval_nonic` and
-  `Polynomial.finiteNonic_secant_derivative_bracket`.
-  The new `Polynomial.monomialCoeffs`, `eval_monomialCoeffs`, and
-  `finiteDerivativeEval_monomialCoeffs_succ` give the arbitrary-degree
-  monomial version directly: the generated finite coefficient list evaluates
-  to `x^n`, and its Horner derivative evaluates to `(n+1) * x^n`.
-  `Polynomial.finiteSeptic_derivative_mono` additionally proves that the
-  septic derivative evaluator is monotone on nonnegative rational intervals
-  under the same coefficient certificate.
-  The worked septic witness now also evaluates `x^7` on the shifted interval
-  `[1,2]`: the finite secant is `127`, and the endpoint derivative bracket is
-  `[7,448]`. This supplies a translated finite item-75 checkpoint without
-  selecting an intermediate point.
-  `QInterval.around_differenceQuotient_near_around_of_pos` and its signed-step
-  wrapper `QInterval.around_differenceQuotient_near_around` now package the
-  interval-level hand-off: a finite center-secant error plus explicit box,
-  quotient, and derivative budgets yields a literal `NearAt` certificate.
-  This closes another reusable algorithmic layer for item 75 while retaining
-  the project's rational-box semantics.
-- First checked non-affine FTC estimate: for `F(x)=x^2`, `f(x)=2x` on
-  `[0,1]`, the left-sum FTC error at stage `m+1` is exactly `1/(m+1)`.
-  See `FTC.ftcError_square_doubleId_zero_one_succ` and
-  `FTC.ftcCheck_square_doubleId_zero_one_succ` in
-  `ComputableAnalysis/FTC.lean`.
-- This estimate is packaged in the older effective FTC style:
-  `FTC.square_doubleId_zero_one_effective` chooses `eps.den + 1`
-  subdivisions for any positive rational `eps`.
-- First checked non-affine computable-number FTC theorem:
-  `FTC.square_doubleId_zero_one_integral_equiv_endpoint` proves that the
-  nested Riemann-sum integral raw algorithm
-  `FTC.squareDoubleIdIntegralRaw`, with intervals `[1 - 1/n, 1]`, is
-  `RealRaw.Equiv` to the endpoint difference `1^2 - 0^2`.
-  The validity proof is `FTC.squareDoubleIdIntegral_valid`.
-  This is the first theorem in the exact form of the original project goal:
-  an integral computed by finite rational sums equals `F(b)-F(a)` as a
-  computable real.
-- The cubic finite FTC package in `FiniteFTCPolynomial.lean` adds the explicit
-  accumulator `FiniteFTC.cubeDerivativeLeftSum` for (3x^2) on `[0,1]`.
-  Its exact form is certified by `cubeDerivativeLeftSum_eq`, and the error
-  identities `cubeDerivativeLeftSum_error_eq` and
-  `cubeDerivativeLeftSum_error_le_three_halves_div` give the potential-infinity
-  schedule (0\le 1-S_n\le 3/(2n)) for every positive finite stage.  This is
-  a cubic endpoint certificate, not an unrestricted classical FTC theorem.
-  The matching `FiniteFTC.cubeDerivativeRightSum` has the exact form
-  `((n+1)(2n+1))/(2n^2)` and exposes its positive error over the endpoint,
-  giving the corresponding right-hand finite enclosure.
-- Constructive FTA: a rational-complex polynomial of positive degree has a
-  computable complex root.
-  See `ComputableAnalysis/FTA.lean`.
-- First checked FTA base cases:
-  exact rational-complex roots lift to computable roots
-  (`exactRoot_is_computable`), monic linear polynomials `X - r` have the
-  computable root `r` (`monicLinear_has_computable_root`), and `z^2 + 1`
-  has the computable root `i` (`zSqPlusOne_has_computable_root`).  The
-  rational-coefficient extension
-  (`rationalLinear_positiveDegree`, `rationalLinear_exact_root`, and
-  `rationalLinear_has_computable_root`) now checks every `a*z+b` with
-  `a != 0`, whose root is `-b/a`.
-  The next FTA boundary is now checked as well: `qcomplexLinearPolynomial`
-  accepts arbitrary rational-complex coefficients, and a supplied finite
-  inverse witness for the leading coefficient yields an exact computable root
-  through `qcomplexLinear_has_computable_root_of_inverse`.  This is the
-  constant-first `[-b,a]` convention, so the root is `aâ»Â¹*b`; general division remains a
-  separate representation task.
-  The reusable finite rearrangement laws
-  `QComplex.mul_assoc_cert`, `QComplex.mul_add_cert`,
-  `QComplex.add_mul_cert`, `QComplex.mul_one_cert`,
-  `QComplex.mul_neg_cert`, and `QComplex.neg_mul_cert` expose the coordinate
-  algebra used by this certificate without importing a completed complex field.
-  The finite evaluator `QComplex.exists_mul_inverse_of_normSq_ne_zero` now
-  constructs the needed inverse witness from the nonzero rational norm-square,
-  and `qcomplexLinear_has_computable_root_of_normSq` packages the resulting
-  executable root.  Thus this linear case is no longer merely conditional on
-  an abstractly supplied inverse.
-  The coordinate identity `QComplex.normSq_eq_zero_iff` identifies nonzero
-  norm-square with a nonzero complex coefficient, and
-  `qcomplexLinear_has_computable_root_of_ne_zero` packages the resulting
-  theorem under the natural leading-coefficient hypothesis.
-The factorized monic quadratic package
-(`rationalQuadratic_left_exact_root`,
-`rationalQuadratic_right_exact_root`, and
-`rationalQuadratic_has_computable_roots`) likewise certifies both roots of
-`(z-r)*(z-s)` for rational `r` and `s`.
-  The theorem `rationalQuadratic_positiveDegree` certifies the matching
-  positive-degree premise.  The theorem `rationalQuadratic_root_of_discriminant`
-  checks the usual quadratic-formula root for arbitrary rational `a`, `b`, and `c` whenever a
-  rational witness `d^2 = b^2 - 4*a*c` is supplied; constructing such a
-  witness remains the separate square-root task.  Its companion
-  `rationalQuadratic_has_computable_root_of_discriminant` packages that exact
-  root as a `ComplexCert`; the paired theorem
-  `rationalQuadratic_has_computable_roots_of_discriminant` packages both
-  quadratic-formula roots, and
-  `rationalQuadratic_has_algebraic_roots_of_discriminant` gives the parallel
-  `AlgebraicComplex` witnesses.
-  The complex-coefficient quadratic boundary is now checked as well:
-  `qcomplexQuadratic_root_of_discriminant` accepts a rational-complex
-  discriminant square-root witness and an inverse witness for `2*a`, and
-  `qcomplexQuadratic_has_computable_root_of_discriminant` packages the exact
-  root.  The witness-producing square-root algorithm remains separate.
-  Its norm-square specialization
-  `qcomplexQuadratic_has_computable_root_of_discriminant_and_normSq` now
-  constructs the inverse of `2*a` automatically from nonzero `normSq a`, so
-  only the discriminant square-root witness remains explicit.
-  The companion `qcomplexQuadratic_other_root_of_discriminant` and paired
-  `qcomplexQuadratic_has_computable_roots_of_discriminant` now certify both
-  quadratic-formula branches in the same finite witness model.
-  The norm-square specialization now packages both branches automatically as
-  `qcomplexQuadratic_has_computable_roots_of_discriminant_and_normSq`.
-  The new `FiniteQuadraticRootInterval` bridge transports any finite
-  square-root interval through both signed quadratic-formula branches using
-  `affineQInterval_mem`; it is now root-imported and linked in the Algebra/FTA
-  chapter.  It remains a finite interval transport theorem, not an arbitrary
-  discriminant square-root existence theorem.
-- The latest Wiedijk-list pass adds `FiniteFTABoundary.syntheticDivide` and
-  `DeflationCertificate`: arbitrary finite rational-complex coefficient lists
-  can be deflated at a supplied exact root, with a checked Horner remainder
-  identity and factorization theorem.  This advances item 2 without claiming
-  root existence or algebraic closure.
-- The arbitrary-dimension Cayley--Hamilton consumer is now isolated in
-  `FiniteCayleyHamiltonCertificate`: supplied monic annihilating-polynomial
-  data for any finite `RatMatrix dimension` yields shifted annihilation and a
-  finite matrix-power recurrence.  The characteristic-polynomial construction
-  remains deferred.
-- The quartic boundary now also has `finiteQuarticQuadraticSplit`: two
-  supplied quadratic factors are multiplied in constant-first QComplex form,
-  their Horner evaluations multiply exactly, and supplied roots of either
-  factor become roots of the quartic.  This is a Ferrari-shaped finite
-  interface; the general resolvent and witness-producing quartic formula remain
-  deferred.
-- `FiniteDeflationChain` now iterates supplied-root synthetic deflation and
-  proves a single Horner factorization identity for the complete finite chain.
-  This strengthens the finite root-peeling boundary behind items 2 and 16;
-  root existence, radical extensions, and general solvability remain deferred.
-- The chain API now also proves `exactRoot_of_exactRoot_of_ne`: a supplied
-  root distinct from the deflated root remains an exact root of the quotient.
-  This is the reusable algebraic step needed to turn a list of distinct
-  supplied roots into a certified deflation chain.
-- `FiniteQuinticDeflationExample` now instantiates that preservation lemma on
-  the supplied roots `-2,-1,0,1,2`, proving a complete five-step finite
-  deflation chain.  This strengthens the item-16/item-46 certificate boundary
-  without claiming a quintic formula or root-finding algorithm.
-- The quintic example now also checks its final padded quotient and exports
-  the complete generic Horner factorization identity, making the supplied
-  five-root certificate compositional rather than a list of isolated root
-  equalities.
-- `quintic_boundary_exact_factorization` specializes that final padded quotient
-  to the constant polynomial `1`, exposing the complete product of the five
-  supplied linear factors as an executable finite factorization. This is the
-  finite endpoint of the item-2/item-16 root-peeling boundary; radicals and
-  general quintic solvability remain deferred.
-- The worked quintic now exposes its expanded constant-first coefficient list
-  `0 + 4x - 5x^3 + x^5` and checks the direct evaluation at the supplied root
-  `2`. This makes the item-16 boundary concrete both before and after the
-  deflation chain, while keeping root construction and general solvability
-  deferred.
-- The worked cubic chain now also exposes its final padded quotient and the
-  complete `horner_factorization` identity.  Thus the finite computation not
-  only verifies each supplied root, but records the entire factor-peeling
-  certificate in the generic chain interface.
-- `FiniteFTAIsolationExample` now checks a nontrivial rational square around
-  the origin for (z^2+1): interval Horner evaluation proves that its image
-  misses zero, yielding a finite root-exclusion certificate.  This advances
-  the FTA subdivision boundary from supplied roots toward executable
-  isolation while keeping root existence and completeness deferred.
-- The same worked example now instantiates the recursive dyadic subdivision:
-  the supplied root (i) survives two stages inside a rational child box of
-  width and height (1/2).  This records an explicit finite enclosure budget
-  without passing to an attained limiting box.
-- The symmetric supplied root (-i) now has the matching depth-two survivor
-certificate, so both exact roots of (z^2+1) are covered by the finite
-subdivision trace.
-The same subdivision trace now has depth-three survivors for both `i` and
-`-i`, with rational child width and height `1/4`. This sharpens the finite FTA
-isolation budget while retaining the supplied-root, no-completeness boundary.
-It now also checks depth four for both supplied roots, with child width and
-height `1/8`, extending the explicit dyadic precision schedule without
-claiming unique or globally constructed roots.
-- `FiniteDeflationExample` makes that boundary concrete on the cubic
-  (z^3-6z^2+11z-6): finite computation checks the quotient at the supplied
-  root (1), its zero remainder, and the complete supplied-root chain
-  (1,2,3).  This is a worked certificate, not an automatic root solver.
-- `FiniteFTABoundary.syntheticDivide_quotient_length` now exposes the exact
-  finite coefficient-count invariant of one supplied-root deflation.  The
-  quotient remains padded in the constant-first representation, while the
-  deflation chain supplies the corresponding factorization invariant.
-The stronger `syntheticDivide_quotient_padded` theorem identifies that
-padding explicitly and proves that trimming it lowers the coefficient count
-by one for every nonempty input.
-  `FiniteDeflationChain.deflatedCoeffs_length` lifts the padded coefficient
-  count through an arbitrary finite chain, making the shape invariant
-  explicit without claiming that padding removal or radical solvability is
-  already formalized.
-- `QBox.evalPoly_contains` now proves soundness of finite Horner evaluation on
-  rational complex boxes: every enclosed rational point has its polynomial
-  value enclosed by the output box.  This supplies the interval-arithmetic
-  kernel needed for finite FTA root-exclusion/subdivision certificates,
-  without asserting global root existence.  Its companion
-  `QBox.evalPoly_no_root_of_not_overlaps_zero` packages the corresponding
-  finite box-discard step.  `FiniteRootExclusionCertificate` now packages a
-  finite rational cover of a supplied domain and proves `no_root_in_domain`
-  when every covered box misses zero.
-  `OneSurvivorCertificate.root_mem_survivor` adds the complementary finite
-  search step: after excluding all other children, any root in the parent is
-  forced into the retained child.
-- `FiniteFTASubdivision.dyadicChildren` now supplies the geometric four-way
-  split used by that search: ordered children are nested in the parent and
-  cover it coordinatewise, all over rational endpoints.
-  `dyadicChildren_width_height` proves the exact half-width/half-height
-  shrinkage for every child.
-  `survivingChildren` and `root_mem_survivingChildren` connect this geometry
-  to polynomial-image overlap, proving that the finite filter cannot discard
-  a root; `survivingChildren_ordered` preserves the box invariant after
-  filtering.
-  `survivingSubdivide` applies the filter recursively at every finite depth,
-  while `root_mem_survivingSubdivide` proves that a supplied root remains in
-  at least one retained box throughout that finite schedule.
-  `survivingSubdivide_nonempty_of_root` makes the corresponding list
-  nonemptiness explicit, and `survivingSubdivide_nestedIn_parent` together
-  with `survivingSubdivide_ordered` preserves nesting and orderedness at every
-  finite depth.
-  `survivingSubdivide_width_height_exact` transfers the exact (2^{-n})
-  width/height precision law to every retained box, so polynomial-image
-  pruning preserves the finite mesh budget.
-  `dyadicSubdivide` now iterates the four-way split to any finite depth;
-  `dyadicSubdivide_nonempty` and `dyadicSubdivide_nestedIn_parent` provide the
-  finite potential-infinity scaffold for repeated root search.
-  `dyadicSubdivide_ordered` and `dyadicSubdivide_width_height_le_parent`
-  additionally preserve orderedness and give an explicit non-expansion bound
-  on both dimensions at every finite depth.
-  `dyadicSubdivide_width_height_exact` sharpens this to the exact finite mesh
-  law: every depth-(n) box has both dimensions divided by (2^n).  This is
-  the explicit precision scheduler for the potential-infinity root-search
-  route.
-- `FiniteStirlingCertificate` adds a bounded item-90 exercise: finite rational
-  enclosures for (e) and Ï€, an explicit square-root bracket, and a certified
-  Stirling-shaped ratio at (n=10).  The asymptotic Stirling limit remains
-  outside the current theorem boundary.
-- `FiniteStirlingStageSixtyFour` extends the same bounded item-90 schedule to
-  (n=64), using the rational anchor `2005/100` for the square-root bracket of
-  `128Ï€` and retaining the explicit ratio enclosure `[1/2,2]`.
-- `FiniteStirlingStageOneTwentyEight` extends the same bounded item-90 schedule
-  to (n=128), using the rational anchor `2836/100` for the square-root bracket
-  of `256Ï€` and retaining the explicit ratio enclosure `[1/2,2]`; the
-  asymptotic limit remains deferred.
-- `FiniteStirlingStageTwoFiftySix` continues the same bounded item-90 schedule
-  to (n=256), using the rational anchor `401/10` for the square-root bracket
-  of `512Ï€` and retaining the explicit ratio enclosure `[1/2,2]`; the
-  asymptotic limit remains deferred.
-- `FiniteStirlingStageFiveTwelve` extends the same bounded item-90 schedule to
-  (n=512), using the rational anchor `567/10` for the square-root bracket of
-  `1024Ï€`.  Its sharper finite transport places the ratio in `[99/100,102/100]`
-  and exports the explicit error budget `2/100`; the asymptotic limit remains
-  deferred.
-- `FiniteComplexPathCertificate` packages the first closed-polygon exactness
-  certificate for a constant differential: a finite rational-complex path is
-  closed by construction, and its exact displacement is proved to be zero.
-  This is a finite primitive/cancellation layer, not a general Cauchy theorem
-  or a limit of polygonal integrals.
-  The same certificate interface now covers arbitrary finite polynomial
-  differentials through `finitePolynomialDifferentialExactness_closed` and
-  `FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero`.
-  The planned left-sum layer is now explicit as
-  `polygonalLeftSumRawEntire`; `PolygonalLeftSumCertificate` and
-  `polygonalLeftSumRawEntire_valid` promote it to a valid `ComplexRaw` only
-  when orderedness, nesting, and shrinking widths are supplied as finite
-  certificates.
-- Next FTC extensions: exact polynomial derivative facts, then interval-valued
-  Riemann-sum convergence under `IntervalRegularOn`.
-  `Integral.IntervalRegularIntegralCertificate` now names the honest bridge
-  boundary: it stores both interval regularity and a separate valid integral
-  construction.  Its exact constant instance is checked, while the general
-  regularity-to-integrability construction remains an explicit future theorem.
-- Next FTA extensions: complex-coefficient linear polynomials using certified
-  complex division away from zero, arbitrary quadratics via a computable
-  discriminant square root, then
-  the constructive root-search/argument-principle route for arbitrary degree.
-- Next complex integral extensions: package polygonal left sums as valid
-  `ComplexRaw`s, prove endpoint-primitive cancellation for polynomial
-  differentials, then use that as the first sorry-free Cauchy theorem for
-  closed polygonal paths.
-
-## Metrics
-
-- Rough proof-size metrics can be generated with:
-  `python3 scripts/decl_metrics.py --kind proofs --min-lines 3`.
-- For timing, use Lean/Lake profiling on the file being worked on; the size
-  report is only a rough line-count companion to the profiler.
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×N4ãdèµ©hºÚn¶X§zÍHÈÛÛ\]X›H[˜[\Ú\ÈÛØ[ÜÝÂ‚•\Èš[H\ÈH›ÜÙH›ØYX\ˆX[ˆš[\ÈÛÛZ[ˆYš[š][ÛœËÙ\YšXØ]\Ë˜[™›Ý™YœšYÙ\ÎÈœ›ØYX][X]XØ[Z[\ÝÛ™\È]™H\™HÚ]™Y™\™[˜Ù\ÈÂH™[]˜[XÛ\˜][ÛœË‚‚ŠŠÝ\œ™[ÛÝ\˜ÙHX\ŠŠˆHÚXÚÙY›Ý[™][Ûˆ\Â˜ÛÛ\]X›P[˜[\Ú\ËÐ˜\ÚXË›X[˜Ú]Ø[Ý[\È[ˆØ[Ý[\Ë›X[˜Ø•Ë›X[˜˜[™HHÛÛ\\š\ÛÛˆ^Y\ˆ[ˆT›ÛÙœË›X[˜ˆ\™H\È›ÈX]Xˆ[\Ü‚HÛ›H›Û‹\›Ú™XÝ[\Ü\ÈX[‰ÜÈ˜][Û˜[[[X™\ˆÝ\Ü˜[š]‘Üš[™“Ü™\™Y”˜]ˆÛ\ˆ\˜YÜ˜\È™[ÝÈ]˜[YH™[[Ý™Yš[\ÈÝXÚ˜\È˜\ÙK›X[˜ÛÜ™K›X[˜Üˆ™X[\]Z]‹›X[˜\™H\ÝÜšXØ[[›š[™È›Ý\Ë››ÝH\ØÜš\[ÛˆÙˆHÝ\œ™[[Ù[HÜ˜\ˆHÚXÚÙY›Y\š[Š›Y\š[ÛX[—ÙXÛØ
+H[™Ý\œ™[X[ˆXÛ\˜][ÛœÈZÙH™XÙY[˜ÙK‚‚ˆÈÈÜ›Ý[™^Y\‚‚•Hš[š]HÜ\˜š\ÙXÝ[Ûˆ˜XÙH›ÝÈ™XXÚ\ÈÝYÙHÚ]H^XÝš[\˜[ÌLNŒÌŽËÎÎŒŒÍÌMËÌMÍÍÌŒM—X[™ÚYKÌMÍÍÌŒM˜‚•\È^[™ÈH\ÛÛ][™ËZ[\˜[]šY[˜ÙH›Üˆ™[˜ÚX\šÈ][HHÚ]Ý]™X][™ÈH\œ˜][Û˜[˜[YH\È[ˆ]Z[™Y˜][Û˜[[™Ú[‚‚ŠŠ‘X\ÞH™[˜ÚX\šÈÛ\Ý\ˆ8 %ÚXÚÙYŠŠˆH›Ý[™][Ûˆ^ÜÙ\ÈH˜][Û˜[šX[™ÛH[™\]X[]H›ÝYÚXXœ×ØYÛXXXœ×ØYÛWÝ™YX[™˜XXœ×ÜÝX—ÛXÈH\Ý[]™[XXœ×Ü˜]\ÝÝ[WÛX›ÝÈÝ\Y\ÈHš[š]BœÝ[H›Ü›KÚ]\[™]ÜÈ›ÜˆÛÛ\ÜÚ[™Èš[š]H\œ›Üˆ\ÝËˆHÙ\šY\È^Y\‚››ÝÈ^ÜÙ\È™XÝ\œÚ]™Hš[š]H\š]Y]XÈ[™Ù[ÛY]šXÈÝ[\Ë[˜ÛY[™ÈB™Ù[™\˜[˜][Û˜[›ÙÜ™\ÜÚ[ÛˆY[]Y\ÈÙ\šY\Ë˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[WÙ\X˜[™Ù\šY\Ë˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[WØÛÛœÝ[ØÙ\šY\Ë˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[WÛWÜÝXØØÂ˜Ù\šY\Ë˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[WÛWÛÙ—ÛXÂ˜Ù\šY\Ë˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[WÛ›Û›™YØØÙ\šY\Ë˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[WÜÜØÚ]^XÝY[]Y\ÈÙ\šY\Ë˜\š]Y]XÔÝ[WÙ\X˜Ù\šY\Ë˜\š]Y]XÔÝ[WÛ›Û›™YØØÙ\šY\Ë˜\š]Y]XÔÝ[WÛWÜÝXØØ˜Ù\šY\Ë˜\š]Y]XÔÝ[WÜÜØ˜Ù\šY\Ë˜\š]Y]XÔÝ[WÛWÛÙ—ÛXÙ\šY\Ë˜\š]Y]XÔÝ[WÜ™XXÚ\Ø[™˜Ù\šY\Ë˜\š]Y]XÔÝ[WÜ™XXÚ\×Û]\˜˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÛÛ™XÙ\šY\Ë™Ù[ÛY]šXÔÝ[WÞ™\›×Ü˜][Ø˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÛ][ÜÝX˜[™˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÝZ[Ù\XÙÙ]\ˆÚ]˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÛWÚ[—ÛÛ™WÜÝX˜˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÝZ[Û›Û›™YØ˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÝZ[ÜÜØ˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÝZ[ÛWÛÛ™X˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÝZ[ÛÛÛ™X˜Ù\šY\Ëš[—ÜÝ×Ù\WÛÛ™WÙ]—Û˜]ÝÛ×ÜÝØ˜Ù\šY\Ëš[—ÜÝ×ÛWÛÛ™WÙ]—ÜÝXØØ[™˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÚ[—ÝZ[ÛWÛÛ™WÙ]—ÜÝXØØÙÙ]\ˆÚ]HÛÛ\\š\ÛÛ‚[Ü™[\ÈÙ\šY\ËœÝ×ÛWÚ[—ÜÝØ[™˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÝZ[ÛWÛÛ™WÙ]—ÜÝXØ×ÛÙ—ÛWÚ[˜˜[™Ù\šY\Ë™Ù[ÛY]šXÒ[”˜]ØØÙ\šY\Ë™Ù[ÛY]šXÒ[”˜]×Ý˜[Y›ÝÈXÚØYÙBH˜][ËZ[ˆÙ[ÛY]šXÈÙ\šY\È\È[ˆÜ™\™Y™\ÝY™X[˜]ØÚ][‚™^XÚ]
+‹ÊŠÌJJHÚY[Ù[\ËˆHÙ[™\˜[˜Ù\šY\Ë™Ù[ÛY]šXÔ˜]ØXÚØYÙH^[™È\ÈÈ]™\žH˜][Û˜[˜][Â˜HˆHKÌ˜Ú]^XÝ˜[YHKÊK\ŠX[™HØ[YH^XÚ]ÚYœØÚY[K˜[™Ù\šY\Ë™Ù[ÛY]šXÒ[”˜]×Ù\]Z]—ÝÛØ›Ý™\È]\È˜]ÈÙ\šY\È™\™\Ù[ÂH^XÝ˜][Û˜[Ý[H‹‚˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÛ›Û›™YØØÙ\šY\Ë™Ù[ÛY]šXÔÝ[WÛWÜÝXØØ˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÜÜØ˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÙ\XÈHš[š]Hš[›ÛZX[šY[]H\È[™XYH^ÜÙY\Â˜^›ÛÙœË™][\—Øš[›ÛZX[Ü™Yš^Û˜]Ù^[œÚ[Û˜ˆ\ÙHÛÝ™\ˆHš[š]B˜Ù\YšXØ]HÛÜ™HÙˆ™[˜ÚX\šÈ][\ÈLKŽ‹[™È[™š[š]HÛÛ™\™Ù[˜ÙBœ™[XZ[œÈHÙ\\˜]HØ›YØ][Ûˆ[™\È›ÝÛZ[YYžH\ÙHš[š]H[Ü™[\Ë‚•HÛÜšÙYY[]Y\ÈÙ\šY\Ë˜š[›ÛZX[ÜÜ]X\™X[™Ù\šY\Ë˜š[›ÛZX[ØÝX™XÚ]™BHš\œÝ]XY˜]XÈ[™ÝXšXÈ[œÝ[˜Ù\ÈÙˆHš[š]Hš[›ÛZX[[Ü™[H[ˆB’[™š[š]HÙ\šY\ÈÚ\\‹‚•H˜[YYš[š]HÚ]™\ÜÈ›ÝÈ[ÛÈÚXÚÜÈHÝYÙKLL^[œÚ[Û‚˜
+ŠÌJWŒLHNLX[™H[™\[™[ÝYÙKN^[œÚ[Û‚˜
+ŠÌÊWŽHÎLŒX^[™[™ÈH^XÝ˜][Û˜[ÚXÚÜÚ[È›Üˆ][H‚•H˜][Û˜[\›H[™\X[\Ý[HÛÛœÝXÝÜœËZ\ˆ[\š[Üˆ[™›Ý[™\žBœ™XÝ\œ™[˜Ù\Ë[™Ù\šY\Ë˜š[›ÛZX[Ý[WÙ\WÜÝØ›ÝÈ^ÜÙHH[š[š]B˜š[›ÛZX[Y[]HÝ™\ˆH˜][Û˜[ËˆÙ\šY\Ë˜š[›ÛZX[Ý[WÙ\WÜÝ×ÛÙ—Ü™XXÚY˜[œÜÜÈ]Y[]HÈ]™\žH]\ˆXØÝ[][]ÜˆÝYÙHY\ˆH\Ý››Ûž™\›ÈÛÙY™šXÚY[ˆ[™š[š]HÛÛ™\™Ù[˜ÙH™[XZ[œÈHÙ\\˜]HØ›YØ][Û‹‚‘›Üˆ™[˜ÚX\šÈ][HM\šXÚ]Ù\šY\Ëž™]UÛÕ\›WÛWÝ[\ØÛÜTÝ\[™˜\šXÚ]Ù\šY\Ëž™]UÛÑš[š]UZ[ÛWÝ[\ØÛÜ[™Ø^ÜÙHHš[š]H™XÚ\›ØØ[BœÜ]X\™H[\ØÛÜ[™È[™Z[YÙ]\ÙYžHHÙ\YšYY˜\Ù[\Ù\šY\Âœ™\™\Ù[][Û‹ˆHX›XÈ™XÝ\œ™[˜Ù\È™]UÛÔ\X[ÜÝXØØ[™˜™]UÛÔ\X[Û›Û›™YØ˜™]UÛÕ\›WÜÜØ[™™]UÛÔ\X[ÛÜÝXØØ˜™]UÛÑš[š]UZ[ÜÝXØØÙÙ]\ˆÚ]™]UÛÑš[š]UZ[Û›Û›™YØ^ÜÙHB™š[š]HXØÝ[][]Üˆ[™ÚYÛˆÙ\YšXØ]\ËˆHÝšXÝ]Z[[Ü™[B˜™]UÛÑš[š]UZ[ÜÜØXZÙ\ÈÜÚ]]™HÚY^XÚ]›Üˆ]™\žH›Û™[\HZ[‚•H[Û›ÝÛšXÚ]H[[X\Â˜™]UÛÔ\X[ÛWÜÝXØØ[™™]UÛÔ\X[ÛWÛÙ—ÛX\ÈHÛØ\œÙHZ[˜›Ý[™™]UÛÑš[š]UZ[ÛWÝZ[›Ý[™^ÜÙHH[\˜[[Ü™\ˆ]H\ÙYžBH™\™\Ù[][Û‹ˆH\]X[]HÚ]WŒ‹Íˆ™[XZ[œÈÜ[‹ˆH\š]™Y˜™]UÛÑš[š]UZ[ÛÛÛ™WÙ]˜Ú]™\ÈHÝšXÝš[š]HZ[ÚY\ÙYžHBš[\˜[™\™\Ù[][Û‹[™™]UÛÒ[\˜[ÝÚYÛWÛÛ™WÙ]˜^ÜÙ\ÈB˜ÛÜœ™\ÜÛ™[™È›Ý[™\™XÝH]H[\˜[]™[ˆH[\˜[[]™[˜Ù\YšXØ]H™]UÛÒ[\˜[ÝÚYÜÜØÚ]™\ÈÝšXÝ›Û™YÙ[™\˜XÞH]ÜÚ]]™BœÝYÙ\ËÚ[H™]UÛÒ[\˜[Û×Û›Û›™YØ[™™]UÛÒ[\˜[ÚWÜÜØ^ÜÙBH[™Ú[ÚYÛœËˆH[\˜[[]™[Ù\YšXØ]\È™]UÛÒ[\˜[Û™\ÝY[™˜™]UÛÔ˜]×Ý˜[YÛÛ\]X›ÝÈ^ÜÙBHÛÛ\]HÜ™\™YÚš[šÚ[™Èš[š]H™\™\Ù[][Ûˆ›Ý[™\žH\ÈÙ[‚•HX›XÈÙ[XÝÜˆ™]UÛÒ[\˜[Ü™XXÚ\×ÛÙ—ÜÜÚ]]™WÝÛ\˜[˜ÙX›ÝÈ\›œÂH[›ÛZ[˜]ÜˆYÙ][È[ˆ^XÚ]š[š]HÝYÙH›Üˆ]™\žHÜÚ]]™Bœ˜][Û˜[ÚY™\]Y\Ý‚•H›Ú™XÝY˜XÚ[™ÈœšYÙH˜\Ù[˜˜\Ù[Ù\šY\Ô˜]×Ü™XXÚ\×ÛÙ—ÜÜÚ]]™WÝÛ\˜[˜ÙX™^ÜÙ\ÈHØ[YHÝYÙHÙ[XÝÜˆ\™XÝHÛˆHX›XÈ˜\Ù[˜]È]˜[X]Ü‹‚•\ÈHYZ]Y][KLMÛÜ™H\È[ˆ^XÚ]Ý[X[Z[™š[š]H™XÚ\Ú[Û‚š[\™˜XÙH]]È›Ý[™\žKÚ[HHÛÛ\]Y˜\Ù[Y[]H™[XZ[œÈÜ[‹‚•HÜ˜\\œÈ˜\Ù[™][\˜\Ù[ÙÙ[ÛY]šX×ÚY™—Ø[ÝYÙ\ÓÝ™\›\[™˜˜\Ù[™][\˜\Ù[ØÚ\˜Ý[Y™\™[˜ÙWÚY™—Ø[ÝYÙ\ÓÝ™\›\›ÝÈ^™\ÜÈH™[XZ[š[™Â˜\Ù[[Ü™[H\È[ˆ[Yš[š]K\ÝYÙ\ÈÝ™\›\Ø›YØ][Ûˆ™]ÙY[ˆHÛÈ˜[Yœ˜]È[ÛÜš]\Ëˆ\È\ÈH›Ú™XÝ[˜]]™H\™Ù]›ÜˆH]\™H[˜[]XÂœ›ÛÙ‹›ÝHY[ˆ\X[ÈÛ\ÜÚXØ[ÛÛ\][™\ÜË‚•H^XÝXÛÛ\ÜÚ][Û‚˜\šXÚ]Ù\šY\Ëž™]UÛÔ\X[ØYÙš[š]UZ[Ù\X›ÝÈ^ÜÙ\È]™\žH]\‚™š[š]H\X[Ý[H\È]ÈX\›Y\ˆ\X[Ý[H\ÈH^XÚ][\™[š[™ÂZ[ˆ\ÈXZÙ\ÈHš[š]HXØÝ[][]Ü‹ÝZ[[\™˜XÙHÛÛ\ÜÚ][Û˜[Ú[B›X]š[™ÈHÛ\ÜÚXØ[˜\Ù[\]X[]H[œ™\ÛÛ™Y‚•HÝšXÝÛÛ\[š[Û‚˜\šXÚ]Ù\šY\Ëž™]UÛÔ\X[ØYÛ›Û™[\WÙš[š]UZ[ÛÚ[\˜[ÚX›ÝÂœXÙ\È]™\žHÙ[Z[™[H]\ˆ\X[Ý[HÝšXÝH™[ÝÈHX\›Y\ˆYY™[™Ú[™\Ù\š[™ÈHØ[YHš[š]H˜][Û˜[›Ý[™\žK‚•H™]È\šXÚ]Ù\šY\Ëž™]UÛÑš[š]UZ[ØY[Ü™[HÚ]™\È[ˆ^XÝ˜ÛÛ˜Ø][˜][Ûˆ]È›ÜˆÛÈš[š]HZ[›ØÚÜËÚY[™ÈHÙXÛÛ™›ØÚÈÂHÛÜœ™XÝ[›ÛZ[˜]Üˆ˜[™ÙKˆ\ÈÝ\ÜÈÛÛ\ÜÚ][Û˜[š[š]H\œ›Ü‚˜XØÛÝ[[™ÈÚ[HX]š[™ÈHÛ\ÜÚXØ[˜\Ù[\]X[]H[œ™\ÛÛ™Y‚•H™]È\šXÚ]Ù\šY\Ëž™]UÛÔ\X[ÛWÝÛØÚ]™\ÈH[šY›Ü›Hš[š]H›Ý[™™›Üˆ]™\žH™XÚ\›ØØ[\Ü]X\™H\X[Ý[K˜[œÜÜYœ›ÛHHÝYÙK[Û™BœYY[™Ú[ˆ\ÈÝ™[™Ý[œÈH˜\Ù[Ù\YšXØ]IÜÈ›Ý[™Y™\ÜÂš[\™˜XÙHÚ]Ý]Y[YžZ[™ÈHÛÛ\]YÝ[HÚ]WŒ‹Í‹‚•HÛÛ™^XØ[Ý[\È[\™˜XÙH›ÝÈ[ÛÈ^ÜÂ˜Y\š]˜]]™P]Û[Û›ØHX[Û™K\ÚYY\š]˜]]™H[Û›ÝÛšXÚ]H[Ü™[N‚HÝ\YYX\Ý\\ˆ›Ý[™]H]\ˆÚ[ÛZ[˜]\È]™\žHX\›Y\ˆYœÙXØ[›ÝYÚHš[š]HœšYÙHÙXØ[ˆ]ÛÛ\[Y[Â˜šYÚ\š]˜]]™P]Û[Û›ØÚ]Ý]ÛÛœÝXÝ[™ÈHÝ\™[][HÜˆHÛÛ\]Yœ™X[]˜[YY[Z]‚•HÙ[ÛY]šXÈ\˜Ý[™Ù[^Y\ˆ›ÝÈ^ÜÈHš[š]H][ÝY[œšYÙB˜\˜Ý[’[YÜ˜[™XÝ[™ÛPÛÛ\]WÝ[™Ù[Ú\Ü][ÝY[ØÛÛZ[œØ[™]ÂšÙ\›™[›Ü›H\˜Ý[’[YÜ˜[™XÝ[™ÛPÛÛ\]WÝ[™Ù[Ú\Ü][ÝY[ÚÙ\›™[ØÛÛZ[œØ‚‘›ÜˆÜÚ]]™H˜][Û˜[Ý\ÈÛˆÌWKH]\ˆ›Ý[™ÈH™XÝ[™ÛB™Y™™\™[˜ÙH][ÝY[™[ÝÈžH[YÜ˜[Ù\›™[H
+
+ÈŒŠX[™X›Ý™HžB˜[YÜ˜[Ù\›™[ˆ\È\ÈH™^š[š]HÙ\YšXØ]HÝØ\™][HMIÜÂ™\š]˜]]™KÑ•ÈœšYÙK›ÝHÛ\ÜÚXØ[[Z]ÛZ[K‚•HÛÛ\[š[ÛˆY\š]˜]]™P]ÛWÜšYÚ\š]˜]]™P]›ÝÈ›Ü›X[^™\ÈB˜ÛÛ™^XÛÜ›™\ˆ[™\]X[]Nˆ]™\žHYÙXØ[\ÈHÝÙ\ˆ›Ý[™›Üˆ]™\žHšYÚœÙXØ[ÛÈHÝ\YYY\š]˜]]™HY\È™[ÝÈHÝ\YYšYÚ™\š]˜]]™Kˆ\È™\Ù\™\ÈH›Ú™XÝ	ÜÈ^XÚ]Û™K\ÚYY™X]Y[Ù‚˜ÛÜ›™\œÈÝXÚ\ÈXœÈ‚•HÛÛ\[š[Ûˆ\šXÚ]Ù\šY\Ëž™]UÛÕ\›WØ[]Û™X[™˜\šXÚ]Ù\šY\Ëž™]UÛÑš[š]UZ[ÛWÙš\œÝ\›WØ›ØÚØ[[X\È^ÜÙHB›[Û›ÝÛ™K]\›H[™™XÝ[™Ý[\ˆ›ØÚÈ›Ý[™È\ÙYžHš[š]H\œ›ÜˆØÚY[\Ë‚•HÝYÙKLL[˜ÛÜÝ\™B˜\šXÚ]Ù\šY\Ëž™]UÛÒ[\˜[ØÛÛZ[œ×Ø˜\Ù[ÙXÚ[X[ÌLYÚ[œÈB™X\›Y\ˆÝYÙKLLXÚ[X[Ù\YšXØ]HÈH˜][Û˜[\™Ù]KLÍŽ‚•HYÚ\‹\ÝYÙHÙ\YšXØ]B˜\šXÚ]Ù\šY\Ëž™]UÛÒ[\˜[ØÛÛZ[œ×Ø˜\Ù[ÙXÚ[X[ÌLÛÛZ[œÈBœØ[YH\™Ù]]ÝYÙHLÝ™[™Ý[š[™ÈHš[š]H]šY[˜ÙHÚ[HX]š[™ÂH˜\Ù[Y[]HÜ[‹‚•HÛÜšÙYš[š]P˜\Ù[^[\X›ÝÈXÚØYÙ\ÈHÛ\˜[˜ÙHKÌL]ÝYÙB˜LX[™ÚXÚÜÈ]ÝYÙHŒ™[XZ[œÈ[œÚYH]È˜][Û˜[[˜ÛÜÝ\™K‚•HØ[YHš[š]HÙ\YšXØ]H[ÛÈÛÛZ[œÈHÝYÙKLL™XÚ\›ØØ[\Ü]X\™Bš[\˜[Ú[H™]Z[š[™ÈHKÌLÚYYÙ]‚•\ÈXZÙ\ÈH][KLMÝ[X[Z[™š[š]HØÚY[H^XÝ]X›H\ÈH˜[YY˜Ù\YšXØ]KÚ]Ý]\ÜÙ\[™ÈHÛÛ\]Y˜\Ù[Ý[K‚•HYÚ\™XÚ\Ú[ÛˆÛÛ\[š[Ûˆ™\X]ÈHÛÛœÝXÝ[Ûˆ]ÚYKÌLÚ]ÝYÙHLX[™H™\šYšYY]\‹\ÝYÙHÛÛZ[›Y[]Œ‚‘][\‰ÜÈÛÛ\]YY[]H™[XZ[œÈY™\œ™Y‚•H[YÙ\‹Y^Û™[˜[Z[H›ÝÈ\ÈX]Ú[™È^XÝ]X›HÝYÙHÙ[XÝÜœÂ˜\šXÚ]Ù\šY\Ëž™]S˜][\˜[ÝÚYÛWÛÙ—Ù[›ÛZ[˜]Ü—ØYÙ][™˜\šXÚ]Ù\šY\Ëž™]S˜][\˜[Ü™XXÚ\×ÛÙ—ÜÜÚ]]™WÝÛ\˜[˜ÙXˆ]™\žHš^Y™^Û™[H˜Ù]ÈH˜][Û˜[[\˜[ÝYÙH›Üˆ[žH™\]Y\ÝYÜÚ]]™BÛ\˜[˜ÙK\Ú[™ÈHØ[YHÝ[X[Z[™š[š]H[›ÛZ[˜]ÜˆØÚY[Kˆ\È\ÈB™š[š]HÝ™[™Ý[š[™ÈÙˆH\šXÚ]\Ù\šY\È›Ý[™\žK›ÝHÛZ[H]B˜ÛÛ\]Y™]H˜[YH\È™Y[ˆÛÛœÝXÝY‚•H›ÜYØ][ÛˆÙ\YšXØ]\Â˜\šXÚ]Ù\šY\Ëž™]S˜][\˜[Û]\—ØÛÛZ[™YÚ[—Ý\™Ù]ÛÙ—ØYÙ][™˜\šXÚ]Ù\šY\Ëž™]S˜]\X[Û]\—Ú[—Ý\™Ù]ÛÙ—ØYÙ]›ÝÈ˜[œÜÜ[‚™X\›Y\ˆ\™Ù][˜ÛÜÝ\™HÈ]™\žH]\ˆÝYÙK[˜ÛY[™È]È^XÚ]ÚY˜YÙ]ˆ\ÈÝ\Y\ÈHØ[YHÛÛ\ÜÚ][Û˜[\™Ù][\™˜XÙH›ÜˆBš[YÙ\‹Y^Û™[˜[Z[HÚ]Ý][›ÙXÚ[™ÈHÛÛ\]Y[™š[š]HÝ[K‚•HX]Ú[™ÈÙ[™\šXÈš[š]K]Z[XØÝ[][]Ü‚˜\šXÚ]Ù\šY\Ëž™]S˜]š[š]UZ[[™XÛÛ\ÜÚ][Û‚˜\šXÚ]Ù\šY\Ëž™]S˜]\X[ØYÙš[š]UZ[Ù\X›ÝÈXZÙH]˜[Z[B˜ÛÛ\ÜÚ][Û˜[]]™\žHš^Y^Û™[›ÝÛ›H]H˜ˆHÛÛ\\š\ÛÛ‚[Ü™[\È\šXÚ]Ù\šY\Ëž™]S˜]š[š]UZ[ÛWÞ™]UÛÑš[š]UZ[[™˜\šXÚ]Ù\šY\Ëž™]S˜]š[š]UZ[ÛWÝZ[›Ý[™˜[œÙ™\ˆH^XÚ]œ™XÚ\›ØØ[\Ü]X\™HZ[YÙ]È]™\žHH˜‚•H[™Ú[œšYÙB˜\šXÚ]Ù\šY\Ëž™]S˜]\X[ØYÙš[š]UZ[ÛWÚ[\˜[ÚX[ˆXÙ\Â™XXÚ]\ˆš[š]H\X[Ý[H\™XÝH™[ÝÈHÛÜœ™\ÜÛ™[™ÈÙ[™\šXÂš[\˜[\\ˆ[™Ú[‚•HZ\™Y[˜ÛÜÝ\™H[Ü™[B˜\šXÚ]Ù\šY\Ëž™]S˜][\˜[ØÛÛZ[œ×Ü\X[ØYÙš[š]UZ[™XÛÜ™È›Ý™[™Ú[È^XÚ]H›ÜˆXXÚš[š]HZ[Y^[™Y\X[Ý[K‚•Hš[š]HšX[™Ý[\ˆ[\ØÛÜ[™ÈY[]B˜Ù\šY\ËšX[™Ý[\•[\ØÛÜ[™Õ\›WÙ\WÜ™XÚ\›ØØ[[™˜Ù\šY\ËšX[™Ý[\•[\ØÛÜ[™ÔÝ[WÙ\X›ÝÈÛÝ™\ˆ™[˜ÚX\šÈ][Hˆ]Hš[š]B˜Ù\YšXØ]H]™[ˆH^XÚ]™[XZ[™\‚˜Ù\šY\ËšX[™Ý[\•[\ØÛÜ[™ÔÝ[WÝZ[Ù\X[™ÝšXÝ›Ý[™˜Ù\šY\ËšX[™Ý[\•[\ØÛÜ[™ÔÝ[WÛÝÛØ^ÜÙHHš[š]HÛÛ™\™Ù[˜ÙB˜›Ý[™\žKˆH™]Â˜Ù\šY\ËšX[™Ý[\•[\ØÛÜ[™Ô˜]ØXÚØYÙ\ÈHØ[YHÝ[\È\ÈH˜[Y˜]Ë\™X[š[\˜[[ÛÜš]KÚ]^XÝ˜[YHˆÙ\YšYYžB˜Ù\šY\ËšX[™Ý[\•[\ØÛÜ[™Ô˜]×Ù\]Z]—ÝÛØˆHX›XÈÙ[XÝÜ‚˜Ù\šY\ËšX[™Ý[\•[\ØÛÜ[™Ô˜]×Ü™XXÚ\×ÛÙ—ÜÜÚ]]™WÝÛ\˜[˜ÙX›ÝÈ^ÜÙ\ÈB™š[š]HÝYÙH›Üˆ]™\žH™\]Y\ÝYÜÚ]]™H˜][Û˜[ÚY‚•HÛÜšÙYš[š]UšX[™Ý[\‘^[\X[œÝ[X]\ÈÝYÙH›Ý\ˆÚ]^XÝÝ[B˜ÍX[™Z[‹ÍXXZÚ[™ÈH™XÚ\›ØØ[]šX[™Ý[\ˆ›Ý[™\žH\™XÝB˜ÚXÚØX›H\ÈH˜[YYš[š]HÚ]™\ÜË‚•HØ[YHÚ]™\ÜÈ›ÝÈ[˜ÛY\ÈÝYÙHZYÚˆH^XÝÝ[H\ÈM‹ÎX[™Bœ™[XZ[š[™Èš[š]HZ[\È‹ÎXÚ]š[™ÈHÙXÛÛ™^XÚ]ÚXÚÜÚ[›Üˆ][BˆÚ[H™\Ù\š[™ÈHÝ[X[Z[™š[š]H[\œ™]][Û‹‚’]›ÝÈ[ÛÈ[˜ÛY\ÈÝYÙHMŽˆH^XÝÝ[H\ÈÌ‹ÌMØ[™H™[XZ[š[™ÂZ[\È‹ÌMØ^[™[™ÈHØ[YHš[š]H\œ›ÜˆØÚY[HÈH\™ÚXÚÜÚ[‚’]›ÝÈ[ÛÈ[˜ÛY\ÈÝYÙHÌŽˆH^XÝÝ[H\ÈÌÌØ[™H™[XZ[š[™ÂZ[\È‹ÌÌØ^[™[™ÈHØ[YHš[š]H\œ›ÜˆØÚY[HÛ˜ÙH[Ü™K‚’]›ÝÈ[ÛÈ[˜ÛY\ÈÝYÙHˆH^XÝÝ[H\ÈLŽÍX[™H™[XZ[š[™ÂZ[\È‹ÍX›ÝšY[™ÈH™^^XÚ]˜][Û˜[™XÚ\Ú[ÛˆÚXÚÜÚ[Ú[H™\Ù\š[™ÈHÝ[X[Z[™š[š]H[\œ™]][Û‹‚•H[\›˜][™Ë\Ù\šY\È^Y\ˆ›ÝÈ[ÛÈ›Ý™\È]™[ˆ\X[Ý[\È\™H[Û›ÝÛ™K›Ù\X[Ý[\È\™H[]Û™K[™H[™Ú[[\˜[È\™H^XÚ]B›™\ÝYšXHÙ\šY\Ë[\›˜][™Ô˜]Ëš[\˜[×Û™\ÝYÈ\ÈÝ\Y\ÈHÜ™\‚š[ˆÙˆHÙ[™\šXÈ[\›˜][™È[\˜[ÛÛœÝXÝ[Ûˆ\ÙYžHHZX›š^‚œ›Ý]KˆÙ\šY\Ë[\›˜][™Ô˜]ËÔ™X[˜]Ø[™˜Ù\šY\Ë[\›˜][™Ô˜]ËÔ™X[˜]×Ý˜[Y›ÝÈXÚØYÙH]ÛÛœÝXÝ[Ûˆ\™XÝB˜\ÈH˜[Y™X[˜]ØˆHÛÛ˜Ü™]B˜Ù\šY\Ë[\›˜][™Ô˜]Ë›ZX›š^[\›˜][™Ô˜]Ø[œÝ[˜ÙHÝ\Y\ÈB››Û›™YØ]]™KXÜ™X\Ú[™ËÚš[šÚ[™È\›HÙ\YšXØ]H›Üˆ
+KÊ›ŠÌJJKB™š[š]H[\›˜][™Ë\Ù\šY\ÈÛÜ™HÙˆ™[˜ÚX\šÈ][H‹‚•H^XÝÜ]X\™H[™\]X[]H[WÙÛWÜÜ]X\™WØ›Ý[™ÛÝ™\œÈH˜][Û˜[ÛÜ™HÙ‚˜™[˜ÚX\šÈ][HÎ[™Ü\˜]×ÛWØ[WÙÛX›ÝÈYÈ]ÈHÙ\YšYY››Û›™YØ]]™HÜ]X\™K\›ÛÝ™\™\Ù[][Û‹‚’]È›Ü›X[^™Y›Ü›H[WÙÛWÜ˜][Û˜[Ú[˜›ÝÈ^ÜÙ\ÈH\™XÝ˜][Û˜[š[™\]X[]HJ˜ˆH
+
+JØŠKÌŠWŒ˜\ÙYžH]\ˆÙ\YšXØ]H\Ý[X]\Ë‚•H\]X[]HÛÛ™][Ûˆ\È[ÛÈÚXÚÙYžB˜[WÙÛWÜ˜][Û˜[Ú[—Ù\WÚY™˜˜[Y[H\]X[]H^XÝHÚ[ˆOX˜ˆ›ÜˆBœ™\™\Ù[YÜ]X\™K\›ÛÝœ˜[˜ÚÜ\˜]×Ø[WÙÛWÙ\WÛÙ—Ù\XÙ\YšY\ÈHX]Ú[™Â™\]X[]HÚ[ˆHÛÈ[œ]ÈÛÚ[˜ÚYK[™Ü\˜]×Ø[WÙÛWÙ\WÚY™˜›Ý™\È]\È\ÈHÛ›H\]X[]HØ\ÙKˆHZ\™Yš[š]HÙ\YšXØ]H[WÙÛWÙ›Ý\˜™^[™ÈHØ[YH˜][Û˜[›Ý[™\žHÈ›Ý\ˆ›Û›™YØ]]™H[œ]Î‚ˆJ˜Š˜Ê™H
+
+JØŠØÊÙ
+KÍ
+WÚ]Ý][›ÚÚ[™ÈHÙ[™\˜[™X[]˜[YYSKKQÓBˆ[Ü™[K‚•HÛÜšÙY›Ý\‹]˜\šXX›HÚXÚÜÚ[È›ÝÈ™\šYžH\]X[]H›Üˆ
+ËËËÊX[™œÝšXÝ™\ÜÈ›Üˆ
+‹ËJX^\˜Ú\Ú[™ÈHØ[YHš[š]H[\™˜XÙHÛˆ›Ý˜œ˜[˜Ú\Ë‚•H™]ÈXYXÐSQÓXš[˜\žK]™YHÙ\YšXØ]H^[™È\ÈÈ]™\žHš[š]BˆÝÙ\‹[Ù‹]ÛÈ[X™\ˆÙˆ›Û›™YØ]]™H˜][Û˜[X]™\Î‚ˆ›ÙXÝÛWØ]™\˜YÙWÜÝØ›Ý™\ÈH^XÝ
+—šÊK]\›H›Ý[™žH™XÝ\œÚ]™BˆZ\š[™Ëˆ]™[XZ[œÈHš[š]H˜][Û˜[[Ü™[K›Ý\˜š]˜\žKJŠHSKKQÓK‚•HÛÜšÙYXYXÐSQÓQ^[\X[œÝ[X]\ÈH\]ÛÈ™YHÚ]X]™\Â˜K‹ËÚXÚÜÈÝ[HL[™›ÙXÝ[™[›ÚÙ\ÈHÙ[™\šXÈ›Ý[™‚•HØ[YHÛÜšÙY^Y\ˆ›ÝÈ[˜ÛY\ÈH\]™YH™YHÚ]X]™\ÈX›ÝYÚ˜Ý[HÍ˜›ÙXÝÌŒ[™]È^XÝZYÚ]\›HXYXÈSKKQÓH›Ý[™‚•H\Y›Ý\ˆÚ]™\ÜÈ›ÝÈ\Ù\ÈX]™\ÈX›ÝYÚM˜ÚXÚÜÈÝ[HLÍ˜œ›ÙXÝŒLŒÎN[™]È^XÝÚ^Y[‹]\›HXYXÈSKKQÓH›Ý[™‚•HÙ[™\šXÈÛÛœÙXÝ]]™QXYXØÛÛœÝXÝÜˆ›ÝÈÝ\Y\ÈH\Yš]™HÚ]™\ÜÂÚ]X]™\ÈX›ÝYÚÌ˜Ý[HLŽ›ÙXÝŒÌLÌÍŽLÌÍŽLÍLÌMÌŒNLŒMŒ˜[™HÛÜœ™\ÜÛ™[™È\K]ÛË]\›HSKKQÓH›Ý[™‚•HÛËXÛÛÜ™[˜]H˜][Û˜[[™\]X[]HØ]XÚWÜØÚØ\ž—Ì™ÛÝ™\œÈHš[š]B˜Ù\YšXØ]HÛÜ™HÙˆ™[˜ÚX\šÈ][HÎÚ]Ý]^[™[™ÈH›Ú™XÝ	ÜÈØÛÜBÈ[˜Ý[Û˜[[˜[\Ú\Ëˆ]È\]X[]HÚ\˜XÝ\š^˜][Û‚˜Ø]XÚWÜØÚØ\ž—Ì™Ù\WÚY™˜\È[ÛÈÚXÚÙYˆ\]X[]HÛÈ^XÝHÚ[‚˜J™XŠ˜Ø‚•H™YKXÛÛÜ™[˜]H^[œÚ[ÛˆØ]XÚWÜØÚØ\ž—ÌÙ\È›ÝÈÚXÚÙYžH[‚™^XÚ]Ý[HÙˆ™YH˜][Û˜[Ü]X\™\Ëˆ]Y\[œÈHš[š]H[™\]X[]BœÝ\Ü›Üˆ][HÎÚ[H™[XZ[š[™È[\™[HÛÛÜ™[˜]K[]™[[™]›ÚY[™Â˜[žH[˜Ý[Û˜[X[˜[\Ú\È[™œ˜\ÝXÝ\™K‚’]È\]X[]HÚ\˜XÝ\š^˜][ÛˆØ]XÚWÜØÚØ\ž—ÌÙÙ\WÚY™˜\È[ÛÈÚXÚÙY‚™\]X[]H\È\]Z]˜[[È˜[š\Ú[™ÈÙˆH™YH˜][Û˜[
+—[Y\ÌŠHZ[›ÜœÂ˜JžKXŠžJž‹XÊž[™Šž‹XÊžX‚•H›Ý\‹XÛÛÜ™[˜]H[™\]X[]HØ]XÚWÜØÚØ\ž—Í\È›ÝÈÚXÚÙYžHB˜ÛÜœ™\ÜÛ™[™ÈÚ^[Z[›Üˆ˜][Û˜[Ý[K[Ù‹\Ü]X\™\ÈÙ\YšXØ]K\\ˆ^[™[™ÂHØ[YHš[š]HÝ\ÜÚ]Ý][›ÙXÚ[™È[ˆ[›™\‹\›ÙXÝÜXÙKˆ]Â™\]X[]HÚ\˜XÝ\š^˜][ÛˆØ]XÚWÜØÚØ\ž—ÍÙ\WÚY™˜™XÛÜ™È^XÝHHÚ^˜[š\Ú[™È˜][Û˜[Z[›ÜœË‚•Hš]™KXÛÛÜ™[˜]H^[œÚ[ÛˆØ]XÚWÜØÚØ\ž—ÍYYÈHÛÜœ™\ÜÛ™[™È[‚›Z[›ÜˆÝ[K[Ù‹\Ü]X\™\ÈÙ\YšXØ]KÝ[[\™[H˜][Û˜[[™š[š]K‚•HÚ^XÛÛÜ™[˜]H^[œÚ[ÛˆØ]XÚWÜØÚØ\ž—Í™YÈHÛÜœ™\ÜÛ™[™Â™šYY[‹[Z[›ÜˆÙ\YšXØ]K^[™[™ÈHØ[YHš[š]H˜][Û˜[Ý\ÜÚ]Ý]š[›ÙXÚ[™ÈHÙ[™\˜[™XÝÜ‹\ÜXÙH^Y\‹‚•HÛÛ\[š[ÛˆØ]XÚWÜØÚØ\ž—Í™Ù\WÛÙ—ÛZ[›ÜœØ™XÛÜ™ÈHÛÜœ™\ÜÛ™[™Â™šYY[‹[Z[›Üˆ\]X[]HÚ]™\ÜÈ^XÚ]K‚•H[\˜[š[Z]]™HR[\˜[š[\œÙXÝ[Û—ÛÜ™\™YÛÙ—ÛÝ™\›\ØZÙ]Ú\ÙBœ›Ý™\È][ˆ^XÚ][\œÙXÝ[ÛˆÙˆÛÈÜ™\™YÝ™\›\[™È˜][Û˜[š[\˜[È\ÈÜ™\™Y™\Ù\š[™ÈH›Ú™XÝ	ÜÈ]KYš\œÝ™X]Y[Ùˆš[š]B˜ÛÛ[[Ûˆ[˜ÛÜÝ\™\Ë‚’]È\]X[]H›Ü›HØ]XÚWÜØÚØ\ž—ÍYÙ\WÚY™˜™XÛÜ™ÈH[ˆ˜[š\Ú[™ÈZ[›ÜœÂ˜\ÈH^XÝš[š]H\]X[]HÛÛ™][Û‹‚•HÙ[™\šXÈ^XÝ]X›Hš[š]H]˜[X]ÜˆÙ\šY\ËœÝÙ\”Ý[XÚ]]Â˜ÝÙ\”Ý[WÜÝXØØ™XÝ\œ™[˜ÙKÝÙ\”Ý[WÛ›Û›™YØÝÙ\”Ý[WÛWÜÝXØØ[™˜ÝÙ\”Ý[WÛWÛÙ—ÛXÙ\YšXØ]\Ë›ÝÈÛÝ™\œÈB™š[š]H™XÝ\œÚ]™HÛÜ™HÙˆ™[˜ÚX\šÈ][HÍÈ›Üˆ]™\žHš^Y^Û™[ˆBœÝšXÝÙ\YšXØ]HÙ\šY\ËœÝÙ\”Ý[WÜÜØY][Û˜[H™XÛÜ™ÈÜÚ]]š]H›Ü‚œÜÚ]]™H^Û™[È[™Ý[\ÈÙˆ[™ÝÜ™X]\ˆ[ˆÛ™KˆB˜œšYÙH[[X\ÈÙ\šY\ËœÝÙ\”Ý[WÞ™\›×Ù^Û™[[™˜Ù\šY\ËœÝÙ\”Ý[WÛÛ™WÙ^Û™[™XÛÝ™\ˆHÛÝ[[™ÈÝ[H[™H^\Ý[™Â˜\š]Y]XË\Ý[H]˜[X]Üˆœ›ÛH\ÈÛÛ[[ÛˆYš[š][Û‹Ú[B˜Ù\šY\ËœÝÙ\”Ý[WÝÛ×Ù^Û™[›ÝYÚÙ\šY\ËœÝÙ\”Ý[WÙZYÚÙ^Û™[šY[YžHHÙ[™\šXÈ]˜[X]ÜˆÚ]H˜[YYÝËYYÜ™YHÝÙ\ˆÝ[\ËˆB˜ÛÜÙY›Ü›\ÈÙ\šY\ËœÜ]X\™TÝ[WÙ\XÙ\šY\Ë˜ÝX™TÝ[WÙ\X˜Ù\šY\Ë™›Ý\ÝÙ\”Ý[WÙ\X[™˜Ù\šY\Ë™šYÝÙ\”Ý[WÙ\XØÙ\šY\ËœÚ^ÝÙ\”Ý[WÙ\XØÙ\šY\ËœÙ]™[ÝÙ\”Ý[WÙ\Xœ™[XZ[ˆHÚXÚÙYÝËYYÜ™YH›Ü›][\ËˆH™]Â˜Ù\šY\ËœÝÙ\”Ý[WÙ›Ý\—ØÛÜÙYÙ›Ü›X^ÜÙ\ÈH›Ý\\ÝÙ\ˆ›Ü›][H\™XÝB›ÝYÚHÙ[™\šXÈ^XÝ]X›H]˜[X]Ü‹ˆHX]Ú[™Â˜Ù\šY\ËœÝÙ\”Ý[WÙš]™WØÛÜÙYÙ›Ü›XÙ\šY\ËœÝÙ\”Ý[WÜÚ^ØÛÜÙYÙ›Ü›X[™˜Ù\šY\ËœÝÙ\”Ý[WÙZYÚÙš[š]WØœšYÙX›ÝÈ^ÜÙ\ÈHZYÚ\ÝÙ\ˆš[š]B˜XØÝ[][]Üˆ›ÝYÚHÙ[™\šXÈ]˜[X]Ü‹ˆH^XÚ]ZYÚ\ÝÙ\‚œÛ[›ÛZX[Y[]H\È›ÝÈÚXÚÙY\ÈÙ\šY\Ë™ZYÚÝÙ\”Ý[WÙ\X[™˜Ù\šY\ËœÝÙ\”Ý[WÙZYÚØÛÜÙYÙ›Ü›X‚›ÝËYYÜ™YH˜[Z[NÈHÙ[™\˜[˜][X™\ˆ›Ü›][H™[XZ[œÈÜ[‹‚•H^XÝ˜][Û˜[Y[]Y\È˜][Û˜[Ú\˜ÛKœ]YÛÜ™X[•š\WÚY[]X[™˜˜][Û˜[Ú\˜ÛKœ]YÛÜ™X[•š\WÜÜÚ]]™XÛÝ™\ˆHÛ[›ÛZX[[™ÜÚ]]™Bœ˜][Û˜[ÛÜ™HÙˆ™[˜ÚX\šÈ][HŒÎÈš[Z]]™KZ[YÜ˜[Û\ÜÚYšXØ][Ûˆ™[XZ[œÂœÙ\\˜]K‚•HÛÛÜ™[˜]HY[]Y\È˜][Û˜[Ú\˜ÛKœšYÚšX[™ÛWØ^\×Ü]YÛÜ™X[˜[™˜˜][Û˜[Ú\˜ÛKœšYÚšX[™ÛWÜ]YÛÜ™X[˜ÛÝ™\ˆH˜][Û˜[ÜÙÛÛ˜[]B˜ÛÜ™HÙˆ™[˜ÚX\šÈ][HÈÙ[™\˜[]XÛYX[‹\ÜXÙH›Ü›][][ÛœÈ™[XZ[ˆÝ]ÚYBHÝ\œ™[›Ý[™\žK‚•HÛÜšÙYšYÚšX[™ÛWÜ›Ý]YÝ™YWÙ›Ý\—ÜÚ^ÙZYÚØÙ\YšXØ]X[œÝ[X]\ÂHØ[YHY[]HÛˆH›Û‹X^\ÈYÜÈ
+Ë
+X[™
+NŠXˆZ\ˆÝ›ÙXÝš\È™\›ËZ\ˆÜ]X\™Y[™ÝÈ\™HX[™L[™HÜ]X\™Y\Ý[\ÙBš\ÈLX‚•HÞ[[Y]žH[™˜\ÙK[[™ÝY[]Y\Â˜˜][Û˜[Ú\˜ÛKš\ÛÜØÙ[\×Ø^\×ÜÞ[[Y]žX[™˜˜][Û˜[Ú\˜ÛKš\ÛÜØÙ[\×Ø˜\ÙWÛ›Ü›TÜX\™HH˜][Û˜[XÛÛÜ™[˜]HÛÜ™HÙ‚˜™[˜ÚX\šÈ][HNÈ\]X[]HÙˆH\ÜÛØÚX]Y[™Û\È™[XZ[œÈÝ]ÚYHB˜Ý\œ™[›Ý[™\žK‚•HÛÛ\[š[Ûˆ\ÛÜØÙ[\×Ø^\×Ü]YÛÜ™X[˜Y[YšY\ÈH\]X[[YÈÜ]X\™H\ÂHÝ[HÙˆHÜ]X\™Y^\È[™[‹X˜\ÙHÙYÛY[ËXZÚ[™ÈH\œ[™XÝ[\‚›YYX[ˆØ[Ý[][Ûˆ^XÚ][ˆ˜][Û˜[ÛÛÜ™[˜]\Ë‚•HÛÜšÙY\ÛÜØÙ[\ÈÙ\YšXØ]H›ÝÈ[˜ÛY\ÈH\™˜][Û˜[[œÝ[˜ÙHÚ]šZYÚÚ[‹X˜\ÙH
+Ë
+Xˆ›ÝYÜÈ]™HÜ]X\™Y[™ÝŒXH^\È\Â›ÜÙÛÛ˜[ÈHYË[™H˜\ÙH\ÈÜ]X\™Y[™ÝŒÌˆH\]X[]HÙ‚H\ÜÛØÚX]YÙ[ÛY]šXÈ[™Û\È™[XZ[œÈHÙ\\˜]HY™\œ™YœšYÙK‚•H^\Ý[™ÈÜ]X\™YXÛÛÜ™[˜]H]ÈÙˆÛÜÚ[™\Â˜˜][Û˜[Ú\˜ÛK”ÝYÙKœÙYÛY[›Ü›TÜWÛ]×ÛÙ—ØÛÜÚ[™\ØÛÝ™\œÈH^XÝ˜][Û˜[™Ù[ÛY]žHÛÜ™HÙˆ™[˜ÚX\šÈ][HMÈHXØÛÛ\[žZ[™È\]Z[]\˜[ÜXÚX[^˜][Û‚˜˜][Û˜[Ú\˜ÛK”ÝYÙK™ÝÙ\WÚ[—ÛÙ—Ý[š]Ù\]Z[]\˜[\È[™XYH›Ü›X[^™YÚ[H›Ü›X[^™YX[™ÛHÙ[X[XÜÈ™[XZ[ˆHÙ\\˜]H^Y\‹‚•HÛÜšÙYš[š]S]ÓÙÛÜÚ[™\×Ý[š]ÛÜÙÛÛ˜[ØÙ\YšXØ]XYÈHÙXÛÛ™˜ÛÛÜ™[˜]HÚXÚÜÚ[ˆH[š]˜][Û˜[Ú[È
+ËÍKÍJX[™
+MÍKËÍJXš]™HÝ›ÙXÝ[™Ü]X\™YÙ\\˜][Ûˆ˜Ú]H]Ë[Ù‹XÛÜÚ[™\ÂšY[]HÚXÚÙYžH^XÝ˜][Û˜[ÛÛ\]][Û‹‚•HØ[YHÛÜšÙY[Ù[H›ÝÈÚXÚÜÈH[\Ù[Z\ˆ
+ËÍKÍJX[™˜
+LËÍKMÍJXÚ]Ý›ÙXÝLX[™Ü]X\™YÙ\\˜][Ûˆ›ÝšY[™ÈB››Û‹[ÜÙÛÛ˜[š[š]HÚXÚÜÚ[›Üˆ][HM‚’][ÛÈÚXÚÜÈHÛÛÜ™[˜]HZ\ˆ
+Ë
+X[™
+
+XˆÜ]X\™Y›Ü›\ÈX[™˜M˜Ý›ÙXÝ[™Ü]X\™YÙ\\˜][ÛˆXXZÚ[™ÈHËMMX]ÈÙ‚˜ÛÜÚ[™\ÈÜXÚX[^˜][Ûˆ^XÚ]‚•H\›ÛˆÚ]™\ÜÈ›ÝÈYÈHLËLMLMXšX[™ÛHÚ]™\XÙ\Â˜
+
+K
+M
+K
+KLŠXˆÚXÙKX\™XHMŽ\›Ûˆ›ÙXÝÌM˜[™š[š]BœÜ]X\™K\›ÛÝ˜]È\]Z]˜[[È\™XH‚•H^XÝ˜][Û˜[Y[]Y\È˜][Û˜[Ú\˜ÛKš\›Û—ÜÜ]X\™YÚY[]X[™˜˜][Û˜[Ú\˜ÛKš\›Û—Ü›ÙXÝÛ›Û›™YØÛÝ™\ˆHÜ]X\™Y[ÙXœ˜ZXÈ[™››Û›™YØ]]™H˜][Û˜[ÛÜ™HÙˆ™[˜ÚX\šÈ][HMËˆH™]Â˜˜][Û˜[Ú\˜ÛKš\›Û\™XT˜]ØXÚØYÙ\ÈH›Û›™YØ]]™HÜ]X\™K\›ÛÝ\™XH\ÈB˜[Y˜]Ë\™X[Ý]]Ú][ˆ^XÚ]Ü]X\™K\›ÛÝÜXÚYšXØ][Û‹ˆHÛÛ˜Ü™]HÙ\YšXØ]B˜˜][Û˜[Ú\˜ÛKš\›Û—Ý™YWÙ›Ý\—Ùš]™X]˜[X]\ÈH\›Ûˆ›ÙXÝ›ÜˆBŒËMMHšX[™ÛHÈÍˆ
+Ü]X\™Y\™XHÍŠKÚ[B˜˜][Û˜[Ú\˜ÛKš\›Û—Ý™YWÙ›Ý\—Ùš]™WØ\™XWÝÚ]™\ÜØ^ÜÙ\ÈH^XÝ˜][Û˜[˜\™XHÚ]™\ÜÈˆÚ]Ý]ÛZ[Z[™ÈHÙ[™\˜[Ü]X\™K\›ÛÝÛÛœÝXÝ[Û‹[™˜˜][Û˜[Ú\˜ÛKš\›Û—Ý™YWÙ›Ý\—Ùš]™WØ\™XWÜ˜]×Ù\]Z]—ÜÚ^˜[œÜÜÈB˜ÛÛ\]Y\›ÛˆÜ]X\™K\›ÛÝ˜]È\™XÝHÈ]Ú]™\ÜËÚ[B˜˜][Û˜[Ú\˜ÛKš\›Û—Ý™YWÙ›Ý\—Ùš]™WÜÝšXÝÜÜØ™XÛÜ™È›Û™YÙ[™\˜XÞK‚•H™]Èš[š]R\›Û‘^[\XYÈH›Û‹LËMMH[œÝ[˜ÙNˆH˜][Û˜[šX[™ÛBÚ]™\XÙ\È
+LË
+X
+Ë
+X[™
+
+X\ÈÚY\È‹KX\™XHL˜˜[™\›Ûˆ›ÙXÝMÈX[ˆ˜[œÜÜÈ]Èš[š]HÜ]X\™K\›ÛÝ˜]ÈÈL˜‚•H[ÙXœ˜ZXÈœšYÙHÜ\Ý\WÜÚ^Ù\WÜÚ^›ÝÈY[YšY\ÈH›Ú™XÝ8 &\Â˜Ù\YšYYÜ]X\™K\›ÛÝ™\™\Ù[][ÛˆÚ]]Ø[YH˜][Û˜[Ú]™\ÜË‚•H^XÝ˜][Û˜[Y[]B˜˜][Û˜[Ú\˜ÛKœÛ[^WÛÜšY[YØÚÜ™Û[Y\˜]Ü˜\ÈHÛÛ[[Û‹Y[›ÛZ[˜]Ü‚›ÜšY[YXÚÜ™ÛÜ™HÙˆ™[˜ÚX\šÈ][HMNÈH[ÚÜ™[[™ÝÝ][Y[œ™[XZ[œÈÜ[‹ˆ˜][Û˜[Ú\˜ÛKœÛ[^WÜÜ]X\™YØÛÛÜ™[˜]WØÙ\YšXØ]X›ÝÂ˜YÈHÜ]X\™K\›ÛÝYœ™YHÜ]X\™YÚYÝÈ›ÜˆHÛÛ˜Ü™]HÞXÛXÈ]XYš[]\˜[š[˜ÛY[™È[ˆ^XÚ]˜][Û˜[Ú]™\ÜÈ›ÜˆH›Ý\‹\ÚYHÜ›ÜÜË]\›K‚•HÙXÛÛ™š[š]HÛ[^H^[\H\Ù\ÈHÜ™\™Y\˜[Y]\œÂ˜
+KÌL‹ËÍÌÊXˆ]ÈÚ^Ü]X\™YÚÜ™[™ÝÈ\™H˜][Û˜[Ü]X\™\ÈÚ]›[™ÝÚ]™\ÜÙ\ÈLÌLËÌ‹ÍKMÌKÍK‹ÍK‹ÍX[™X[ˆÚXÚÜÈB˜ÛÜœ™\ÜÛ™[™È˜][Û˜[Û[^HY[]H[™\[™[KˆH™]Â˜ÙXÛÛ™Û[^WÛ[™ÝØÙ\YšXØ]X[ÛÈ˜[œÜÜÈ[Ú^Ú]™\ÜÙ\È›ÝYÚH˜]ÈÜ]X\™K\›ÛÝ[™Ý[\™˜XÙK‚•H˜][Û˜[ÝÙ\‹[Ù‹XK\Ú[Y[]B˜˜][Û˜[Ú\˜ÛKšÜš^›Û[ÚÜ™ÜÝÙ\—ÚY[]XÛÝ™\œÈH\™XÝY\ÙYÛY[˜ÛÜ™HÙˆ™[˜ÚX\šÈ][HMKˆH™]Â˜˜][Û˜[Ú\˜ÛKšÜš^›Û[ÚÜ™ÜÝÙ\—Û›Û›™Y×ÛÙ—ÛÝ]ÚYXÝ\Y\ÈHš[š]BœÚYÛˆÙ\YšXØ]HÚ[ˆH^\›˜[Ú[\ÈÝ]ÚYHHÚÜ™[\˜[[™˜˜][Û˜[Ú\˜ÛKšÜš^›Û[ÚÜ™ÜÝÙ\—Û™Y×ÛÙ—Ú[œÚYXÝ\Y\ÈHÝšXÝš[\š[ÜˆÚYÛ‹ˆ˜][Û˜[Ú\˜ÛKšÜš^›Û[ÚÜ™ÝÙ\”Ü\˜]Ø[™˜˜][Û˜[Ú\˜ÛKšÜš^›Û[ÚÜ™ÝÙ\”Ü\˜]×Ý˜[Y›ÝÈYH›Û›™YØ]]™B›Ý]ÚYH›ÙXÝÈHÙ\YšYYÜ]X\™K\›ÛÝ˜]È[ÛÜš]NÈ]È]XÛYX[‹[[™Ýš[\œ™]][Ûˆ™[XZ[œÈÜ[‹ˆ˜][Û˜[Ú\˜ÛKšÜš^›Û[ÚÜ™ÝÙ\”Ü\˜]×ÜÜXØ˜[ÛÈ^ÜÙ\ÈHÜ]X\™K\›ÛÝÜXÚYšXØ][Ûˆ›Üˆ]\ˆÛÛ\ÜÚ][Û‹‚˜˜][Û˜[Ú\˜ÛKšÜš^›Û[ÚÜ™ÝÙ\”Ü\˜]×Ù\]Z]—ÛÙ—ÜÜ]X\™X›ÝÈY[YšY\Â]Ý]]Ú]H›Û›™YØ]]™H˜][Û˜[™\™\Ù[]]™HÚ[™]™\ˆHÝ\YYœ˜][Û˜[Ü]X\™HÚ]™\ÜÈ^\ÝËˆHÛÛ˜Ü™]B˜Üš^›Û[ÚÜ™ÝÙ\”Ü\˜]×Ù\]Z]—Ù›Ý\—ÙšYØÜXÚX[^˜][ÛˆÚXÚÜÈB›Ý]ÚYK\Ú[[œÝ[˜ÙH
+M‹Ì[X\ÝÍÍJHžH^XÝ˜][Û˜[\š]Y]XË‚•HÛÛ\[š[Ûˆš[š]PÚÜ™ÝÙ\‘^[\XÚXÚÜÈHÙXÛÛ™˜][Û˜[[œÝ[˜ÙBÚ]˜Y]\ÈÍXˆH^\›˜[Ú[XÚ]™\È›ÙXÝKÌXÚÜÙHÙ\YšYYœÜ]X\™K\›ÛÝÝ]]\ÈËÍX‚’]›ÝÈ[ÛÈ™XÛÜ™ÈH[\š[ÜˆÚ[LKÌ˜Ú\™HH\™XÝY›ÙXÝ\Â˜LÎKÌLÈ\ÈÛÛ˜Ü™]HÚYÛˆÚ]™\ÜÈÙY\È][HMIÜÈ\™XÝY\ÙYÛY[ÛÜ™B™\Ý[˜Ýœ›ÛHH]\ˆ[œÚYÛ™Y[[™Ý[\œ™]][Û‹‚‚ŠŠY][Û˜[ÛÛ\]X›KX[˜[\Ú\È\™Ù]8 %Ø]\ÜÚX[ˆ›Ý]HÈ
+ŠKX˜[›Û[YKŠŠ‚•Hš[š]S˜[›Û[YX[Ù[HYÈH]\˜[š[š]HÛËY[Y[œÚ[Û˜[œ›ÙXÝ\Ý[H]˜[X]Ü‹ˆH™]\ØX›H[Ü™[B˜š[š]T›ÙXÝÝ[L‘Ù˜XÝÜš^™Y›Ý™\ÈHÙ\\˜X›KZÙ\›™[Y[]H›Ü‚˜\˜š]˜\žHš[š]HØ[\H\ÝÎÈHÛÛ˜Ü™]HØ[\KYÜšYØ[Ý[][Ûˆ\ÈÛ›HBœ™YÜ™\ÜÚ[ÛˆÚ]™\ÜË›ÝHÝ[™[Û™Hš[š]K\Ý[HZ[\ÝÛ™Kˆ\È\ÈBœ™XÝ[™Ý[\ˆ[ÙXœ˜H™YYY™Y›Ü™H]XÚ[™ÈÙ[ÚYÈ[™\œ›ÜˆØÚY[\ÈÂ˜HÙ[Z[™H][\KZ[YÜ˜[ÛÛœÝXÝ[Û‹ˆ]ÈÙZYÚYÛÛ\[š[Û‚˜š[š]T›ÙXÝ[YÜ˜[Ý[L‘]XÚ\È˜][Û˜[Ù[ÚYÈ[™˜š[š]T›ÙXÝ[YÜ˜[Ý[L‘Ù˜XÝÜš^™Y›Ý™\ÈHÛÜœ™\ÜÛ™[™ÈÙZYÚYœ™XÝ[™ÛH˜XÝÜš^˜][Û‹ˆH[Ù[H[ÛÈ™XÛÜ™ÈH^XÝš[š]H›ÙXÝ]È›Üˆ
+ŠH[™\[™[›Û™KY[Y[œÚ[Û˜[Ø]\ÜÚX[ˆ\›Þ[X[È[™H˜][Û˜[ÛÙY™šXÚY[™XÝ\œ™[˜ÙB™›ÜˆH
+ŠKX˜[›Û[YH[Ù[ˆHÛ™KY[Y[œÚ[Û˜[Ø]\ÜÚX[ˆ[YÜ˜[]ÂœÜ]X\™K]ËsàœšYÙK˜YX[Ú[\Ý[X]\Ë[™[˜›Ý[™YZ[È™[XZ[ˆ^XÚ]™]\™H[\™˜XÙ\È˜]\ˆ[ˆ™Z[™ÈÛ]YÙÛY[ˆ\ÈX™\ÙÝYH[YÜ˜][Û‹‚•Hš\œÝÝËY[Y[œÚ[Û˜[™XÝ\œ™[˜ÙHØ\Ù\È\™H›ÝÈ^XÚ]ˆH\ÚÈ[™ŒËX˜[Y[]Y\È\™H›Ú[™YžH˜[›Û[YS[Ù[Ù›Ý\˜Ú]š[™Â˜
+KÌŠH
+ˆP\›ÞŒˆ
+ˆ˜Y]\×[™˜[›Û[YS[Ù[Ùš]™XÚ]š[™Â˜
+ÌMJH
+ˆP\›ÞŒˆ
+ˆ˜Y]\×Xˆ\ÙH™[XZ[ˆš[š]H™XÝ\œ™[˜ÙHY[]Y\ÎÂHØ]\ÜÚX[ˆ[YÜ˜[[™Ü]X\™K]ËsàœšYÙH\™HÙ\\˜]H\™Ù]Ë‚•H™^\š]HZ\ˆ\È›ÝÈÚXÚÙY\ÈÙ[ˆ˜[›Û[YS[Ù[ÜÚ^Ú]™\Â˜
+KÍŠH
+ˆP\›ÞŒÈ
+ˆ˜Y]\×˜Ú[H˜[›Û[YS[Ù[ÜÙ]™[˜Ú]™\Â˜
+M‹ÌLJH
+ˆP\›ÞŒÈ
+ˆ˜Y]\×ØˆHØ]\ÜÚX[ˆ[YÜ˜[[™˜YX[œÚ[ÝZ[œšYÙH™[XZ[ˆÙ\\˜]HÛÛ\]X›H\™Ù]Ë‚•H›ÛÝÚ[™ÈZ\ˆ\È^XÚ]ÛÎˆ˜[›Û[YS[Ù[ÙZYÚÚ]™\Â˜
+KÌ
+H
+ˆP\›Þ
+ˆ˜Y]\×ŽÚ[H˜[›Û[YS[Ù[Ûš[™XÚ]™\Â˜
+Ì‹ÎMJH
+ˆP\›Þ
+ˆ˜Y]\×ŽXˆ\ÙH\™HÝ[š[š]H™XÝ\œ™[˜ÙB˜ÚXÚÜÚ[Ë›ÝHÛZ[HX›Ý]Ø]\ÜÚX[ˆ[YÜ˜][ÛˆÜˆ[˜›Ý[™Y›Û[YK‚•Hš[š]H™XÝ\œ™[˜ÙH›ÝÈ™XXÚ\È[Y[œÚ[ÛœÈ[ˆ[™[]™[ˆ\ÈÙ[Ú]˜˜[›Û[YS[Ù[Ý[˜[™˜[›Û[YS[Ù[Ù[]™[˜\È^XÝÍMKÌLLØœÝYÙHÚ]™\ÜÙ\Ëˆ\ÙH™[XZ[ˆš[š]H˜][Û˜[[Ù[ÎÈHØ]\ÜÚX[ˆÜ]X\™KBËsàœšYÙH[™[žH[˜›Ý[™Y›Û[YH[Ü™[H\™HÝ[Ù\\˜]H\™Ù]Ë‚’]›ÝÈ™XXÚ\È[Y[œÚ[ÛœÈÙ[™H[™\Y[ˆ\ÈÙ[Ú]^XÝ™XÝ\œ™[˜ÙBšY[]Y\È[™ÍMKÌLLØÝYÙHÚ]™\ÜÙ\ËˆH^[œÚ[Ûˆ™[XZ[œÈ[ˆ[ÙXœ˜ZXÂ™š[š]H[Ù[›ÝHÛZ[H]HØ]\ÜÚX[ˆ[YÜ˜[Üˆ[˜›Ý[™Y›Û[YH\Â˜™Y[ˆÛÛœÝXÝY‚•HÛ[ÙÙ[™Z]H[Ü™[H˜[›Û[YS[Ù[ÜØØ[X›ÝÈ™XÛÜ™ÈH^XÝYœ˜Y]\Ë\ØØ[[™È]È^XÝNˆØØ[[™ÈH˜Y]\ÈžHØØØ[\ÈHš[š]H[Ù[˜žH×›˜ˆ\È\ÈH[ÙXœ˜ZXÈ›Û[YH›Ü\H™YYY™Y›Ü™H[žH[˜[]XÂ‘Ø]\ÜÚX[ˆÜˆ˜YX[\Ú[œšYÙH\È[›ÙXÙY‚•Hš[š]S˜[›Û[YX[™š[š]QØ]\ÜÚX[’[YÜ˜[[Ù[\È\™H›ÝÈ[˜ÛYYš[ˆH[Xœ™[HÛÛ\]X›P[˜[\Ú\Ø[\ÜˆZ\ˆš[š]H›ÙXÝ™XÝ\œ™[˜ÙK˜[™›Ý[™YØ]\ÜÚX[‹\™Yš^Ù\YšXØ]\È\™H\™Y›Ü™H]˜Z[X›H›ÝYÚBœX›XÈ›Ú™XÝZ[È›ÈX™\ÙÝYHYX\Ý\™HÜˆÛÛ\]Y[\›Ü\ˆ[YÜ˜[\Â˜™Y[ˆYY‚‚•HÛÛ\[š[Ûˆš[š]QØ]\ÜÚX[’[YÜ˜[[Ù[H›ÝÈÝ\Y\ÈH›Ý[™Y[˜[]XÂœ™Yš^ˆ][YÜ˜]\ÈH]™[ˆ^[ÜˆÛ[›ÛZX[›Üˆ^
+^ŒŠX\›HžH\›B›Ý™\ˆËLKWXˆH›Ý\‹]\›H[™Ú^]\›H™Yš^\È\™H^XÝHL‹ÌÍX[™˜ÌLKÌŒÎLˆ\È\ÈHš\œÝÛÛ˜Ü™]HØ]\ÜÚX[ˆ[YÜ˜[Øš™XÝ[ˆBœ›Ú™XÝÈH[[[™HZ[[™Ü]X\™K]Ësà[Ü™[H™[XZ[ˆH™^œšYÙ\Ë‚•HÝYÙKYZYÚ™Yš^\ÈY][Û˜[HLLŒNKÍÍMÍX[™H^XÝœÝYÙK\Ú^[Z[\Ë\ÝYÙKY›Ý\ˆ™Yš[™[Y[Ø\\ÈŒËÌŽMÌ‚•HØ[YHš[HYÈHš[š]H™XÚ\›ØØ[\Ü]X\™HZ[\X[Ý[H]Ý]Ù™ˆX‚™›Ý\ˆ\›\ÈÚ]™HMŽKÌÍŒXˆ\È\È[X™\˜][HH˜[œÜÜ^Y\‹››ÝY]HØ]\ÜÚX[ˆÛZ[NÈ]]ØZ]ÈHÚ[Ú\ÙH›ÛÙ‚˜^
+^ŒŠH8¢iKÞŒ˜›Üˆ8¢iHX‚•H™XÚ\›ØØ[\Ü]X\™H™Yš^›ÝÈ[ÛÈ™XXÚ\ÈÚ^\›\È
+LŽKÌMÍ
+H[™™ZYÚ\›\È
+ÍÍÍKÍŒÍL
+KÚ]H]\ˆÝ[™[ÝÈX‚•H^\Ý[™ÈZ[Y[˜ÛÜÙY^Û™[X[]˜[X]Üˆ[ÛÈ›ÝÈÚXÚÜÈHÛÛ˜Ü™]BœÚ[L˜ˆ]ÈÝYÙKLŒ\\ˆ[™Ú[›Üˆ^
+M
+X\È][ÜÝKÍ‚•HØ[YHÝYÙH[ÛÈ™\šYšY\È^
+NJH8¢iKÎX[™^
+LMŠH8¢iKÌM˜XÚØYÙY˜\ÈØ]\ÜÚX[•Z[Ú[Y\—ÜÝYÙWÝÙ[X‚•H™]\ØX›HØ]\ÜÚX[•Z[›Þ\\˜[\™˜XÙHXÚØYÙ\ÈXXÚÙ\YšYY\\‚™[™Ú[\ÈH[˜Ý[ÛˆÙˆH˜][Û˜[Z[Ú[[™ÝYÙKÚ]HØ[YB™YK\Ú[Y\ˆ^ÜYžHØ]\ÜÚX[•Z[›Þ\\—ÜÝYÙWÝÙ[WÛY\˜‚•Hš[š]H˜[œÜÜ[Ü™[B˜Ø]\ÜÚX[•Z[›Þ\\—ÜÝYÙWÝÙ[WÝ™YWÜÚ[ÜÝ[XÝ[\ÈÜÙH™YHÙ\YšYY\\ˆ›Þ\È[ÈH˜][Û˜[Z[YÙ]ŒKÌM‚•HÙ]™[‹\Ú[Y\ˆ›ÝÈ^[™ÈHÝYÙKLŒÚXÚÜÈ›ÝYÚMX[™\Ù\ÂœÝYÙHL›ÜˆM‹ËÚ\™HHYÚ\ˆ]˜[X]Üˆ™XÚ\Ú[Ûˆ\È™YYY‚˜Ø]\ÜÚX[•Z[›Þ\\—ÜÝYÙWÝÙ[WÙZYÚÜÚ[ÜÝ[XXÚØYÙ\ÈZ\ˆÛÛXš[™Yœ˜][Û˜[›Ý[™ˆ\È[™Ý[œÈHš[š]HZ[]šY[˜ÙHÚ[HB™Ù[™\˜[[™\]X[]H^
+^ŒŠH8¢iKÞŒ˜[™HÛÛ\]YØ]\ÜÚX[ˆ[YÜ˜[œ™[XZ[ˆÙ\\˜]HœšYÙ\Ë‚•Hš[š]H
+ŠKX˜[™XÝ\œ™[˜ÙH›ÝÈ^ÜÙ\È]Èš\œÝÙ[ÛY]šXÈØ\Ù\Î‚˜˜[›Û[YS[Ù[ÝÛØÚ]™\ÈH\ÚÈ[Ù[
+H—ŒŠK[™˜˜[›Û[YS[Ù[Ý™YXÚ]™\ÈHËX˜[[Ù[
+
+ÌÊ\H—ŒÊKÚ]BœÞ[X›ÛP\›ÞÝ[[ˆ^XÚ]˜][Û˜[\›Þ[X][Ûˆ˜]\ˆ[ˆB˜ÛÛ\]Y™X[ÛÛœÝ[‚•HY\ˆ›ÝÈ[˜ÛY\ÈMXÚ]^
+LJH8¢iKÌXÈH›Ý\‹\Ú[Ý[H\Â˜›Ý[™YžHMŽKÌÍŒ^XÝHX]Ú[™ÈH™XÚ\›ØØ[\Ü]X\™HZ[™Yš^‚•Hš[š]HY\ˆ›ÝÈ^[™ÈÈNX[™LL]^Û™[X[ÝYÙHŒÚ]\\ˆ›Þ\È›Ý[™YžHKÎX[™KÌLÈZ\ˆÛÛXš[™YYÙ]\Â˜NKÎLˆ\È™[XZ[œÈš[š]HZ[]šY[˜ÙK›ÝHÙ[™\˜[[™\]X[]B˜^
+^ŒŠH8¢iKÞŒ˜ÜˆHÛÛ\]Y[[[™HØ]\ÜÚX[ˆ[YÜ˜[‚•H™]\ØX›HT›ÛÙœËœÚ[ÙYÛY[[™Ý˜]Ø[\™˜XÙH›ÝÈ\Y\ÈHØ[YB˜Ù\YšYYÜ]X\™K\›ÛÝ[ÛÜš]HÈ[žH˜][Û˜[XÛÛÜ™[˜]HÜ]X\™Y\Ý[˜ÙKÚ]˜[Y]H[™Ü\˜]ÔÜXØ[Ü™[\È›Üˆ]\ˆÛ[^H[™ÛYÛÛ˜[[[™ÝÛÜšËˆH[]XÛYX[ˆÛ[^HY[]H™[XZ[œÈÜ[‹‚•Hš[š]HÛ[^H[™ÝÙ\YšXØ]H›ÝÈÛÜÙ\È]Ø\›ÜˆÛ™HÛÛ˜Ü™]Bœ˜][Û˜[ÞXÛXÈ]XYš[]\˜[ˆ[Ú^˜]ÈÚÜ™[™ÝÈ\™H\]Z]˜[[Â™^XÚ]˜][Û˜[Ú]™\ÜÙ\ÈØ]\ÙžZ[™ÈÛ[^x &\ÈY[]KˆHÙ[™\˜[‘]XÛYX[ˆ[Ü™[H™[XZ[œÈÝ]ÚYHHÝ\œ™[›Ý[™\žK‚˜Û[^S[™ÝÙ\YšXØ]K“[™ÝÚ]™\ÜÐÙ\YšXØ]X›ÝÈXÚØYÙ\ÈH™]\ØX›B™š[š]H[\™˜XÙNˆÝ\YY›Û›™YØ]]™H˜][Û˜[ÚÜ™[™ÝËÚ^Ü]X\™BšY[]Y\Ë[™H˜][Û˜[Û[^H\]X[]HY]]ÛX]XØ[HÈÚ^˜[Y˜™X[˜]Ø[™Ý™\™\Ù[][ÛœÈ[™Hš[˜[Y[]KˆH[œ™\ÝšXÝY‘]XÛYX[ˆ[Ü™[HÝ[™\]Z\™\ÈHÛÛœÝXÝ]™HÚYÛˆ[™Ü]X\™K\›ÛÝ\™Ý[Y[‚•HÚXÚÙY˜][Û˜[[š]XÚ\˜ÛHÜ›Ý\]È[™Ý\™[ÙÜ˜\XÈÚ\Y][Û‚™›Ü›][\È[ˆ˜][Û˜[Ú\˜ÛK•šYÛÛ›ÛY]žX\™HHš[š]HÙ[ÛY]šXÈÛÜ™HÙ‚˜™[˜ÚX\šÈ][HMÎÈH™\™\Ù[YÛÛ\^Y^Û™[X[œšYÙH™[XZ[œÈÜ[‹‚•H^XÝ]X›HÚ[\ÝÙ\ˆXÚØYÙH˜][Û˜[Ú\˜ÛK•šYÛÛ›ÛY]žKœÚ[ÝØÚ]Ú[Ý×ØY[™Ú[Ý×Û›Ü›TÜX›ÝÈÝ\Y\ÈHÛÜœ™\ÜÛ™[™Â™š[š]HH[Ú]œ™K\Ý[HÝÙ\ˆÛÜ™NˆÝÙ\œÈÛÛ\ÜÙHžH^Û™[Y][Ûˆ[™œ™\Ù\™H[š]›Ü›NÈÚ[Ý×Û›Ü›TÜWÛÙ—Ý[š]^ÜÙ\È]š[˜[[š]XÚ\˜ÛB˜ÛÛ˜Û\Ú[Ûˆ\™XÝKˆH›ÙXÝ\ÝÙ\ˆ]ÈÚ[Ý×Û][›ÝÈ[ÛÈÚXÚÜÂHš[š]HY[]H
+
+”JW›ˆH›Š”W›˜‚•H^XÚ]Ú[Ý×Ý™YXY[]HYÈHš\œÝ›Ûš]šX[Ù\ÝÙ\‚˜ÛÛÜ™[˜]H›Ü›][K
+ŒÏJŒËLÞWŒ‹ÌÞŒžK^WŒÊJK\ÈHš[š]H˜][Û˜[š\KX[™ÛHÚYÝÈÙˆH[Ú]œ™IÜÈ]Ë‚•H™]Èš[š]QS[Ú]œ™Q^[\X[Ù[HXZÙ\È][HMÈÛÛ˜Ü™]H]H˜][Û˜[œÚ[
+ËÍKÍJXˆ]È^XÝ]X›HÜ]X\™H\È
+MËÌKÌJXÚ][š]›Ü›B˜Ù\YšXØ]\È[™[ˆ^XÝœšYÙHÈHš[š]HPÛÛ\^˜]\˜[ÝÙ\‹ˆB˜[™ÛKÙ^Û™[X[[\œ™]][Ûˆ™[XZ[œÈY™\œ™Y‚•HØ[YH[Ù[H›ÝÈÚXÚÜÈHÝXšXÈÚ]™\ÜÂ˜
+ËÍJÍKÍJWŒÈHLLMËÌLH
+È
+ÌLJZX[˜ÛY[™ÈÛÛÜ™[˜]H[™[š][›Ü›B˜Ù\YšXØ]\Ëˆ\È^\˜Ú\Ù\ÈHÙ[™\˜[Ú[Ý×Ý™YXY[]H]B™[H^XÚ]˜][Û˜[Ú[‚•H›Ý\\ÝÙ\ˆÚ]™\ÜÈ\È›ÝÈÚXÚÙY\ÈÙ[‚˜
+ËÍJÍKÍJWHMLËÍŒHH
+ÌÍ‹ÍŒJZXÚ][š]›Ü›H[™H\™XÝ˜PÛÛ\^›˜]ÝØœšYÙKˆH[™ÛKÙ^Û™[X[[\œ™]][Ûˆ™[XZ[œÂ™Y™\œ™Y‚•HšY\ÝÙ\ˆÚ]™\ÜÈ\È›ÝÈÚXÚÙYÛÎ‚˜
+ËÍJÍKÍJWHHLŒÍËÌÌLHH
+ÌLM‹ÌÌLJZXÚ]]È[š][›Ü›H[™š[š]B˜PÛÛ\^›˜]ÝØœšYÙKˆ\È^[™ÈH˜][Û˜[H[Ú]œ™HÛÛ\]][Û‚Ú]Ý]Y[™ÈHY™\œ™Y[™ÛKÙ^Û™[X[[\œ™]][Û‹‚•HÚ^\ÝÙ\ˆÚ]™\ÜÈ\È›ÝÈÚXÚÙY\ÈÙ[‚˜
+ËÍJÍKÍJWˆHLMÍLËÌMMŒHH
+LŽM‹ÌMMŒJZXÚ]HØ[YH[š][›Ü›H[™™š[š]H˜]\˜[\ÝÙ\ˆœšYÙ\ËˆH[™ÛKÙ^Û™[X[[\œ™]][Ûˆ™[XZ[œÂ™Y™\œ™Y‚•HÙ]™[\ÝÙ\ˆÚ]™\ÜÈÛÛ[Y\ÈHØ[YHš[š]HÚZ[Ž‚˜
+ËÍJÍKÍJWÈHÍËÍÎLH
+È
+MŒLÍÎLJZXÚ]^XÝÛÛÜ™[˜]\Ë[š]›Ü›K[™Hš[š]HPÛÛ\^›˜]ÝØœšYÙKˆH[™ÛKÙ^Û™[X[š[\œ™]][Ûˆ™[XZ[œÈY™\œ™Y‚•HZYÚ\ÝÙ\ˆÚ]™\ÜÈ›ÝÈÛÛ[Y\È]Û˜ÙH[Ü™N‚˜
+ËÍJÍKÍJWŽHMÌËÌÎLŒH
+È
+ÍMMÌÎLŒJZXYØZ[ˆÚ]^XÝ˜ÛÛÜ™[˜]\Ë[š]›Ü›K[™Hš[š]H˜]\˜[\ÝÙ\ˆœšYÙKˆ\È™[XZ[œÈBœ˜][Û˜[H[Ú]œ™HÙ\YšXØ]K›Ý[ˆ[™ÛKÙ^Û™[X[[Ü™[K‚•Hš[H[™[\ÝÙ\ˆÚ]™\ÜÙ\È›ÝÈ^[™HØ[YHš[š]HÚZ[Ž‚˜
+NLŒŒÍÊÌMÌŒMÍJKÌNMLÌLX[™˜
+NMLÌŽÊÌMÍŽNJKÎMÍMŒX™\ÜXÝ]™[KÚ]^XÝÛÛÜ™[˜]K[š]››Ü›K[™š[š]H˜]\˜[\ÝÙ\ˆÙ\YšXØ]\ËˆH[™ÛKÙ^Û™[X[œšYÙBœ™[XZ[œÈY™\œ™Y‚˜˜][Û˜[ÛÙK™[˜ÛÙXØ˜][Û˜[ÛÙK™XÛÙX›Ý[™š\[™˜˜][Û˜[ÛÙK™[˜ÛÙWÚ[š™XÝ]™XØ˜][Û˜[ÛÙK™[˜ÛÙWÙ\WÚY™˜ÚÝÈ]B˜Ø[›ÛšXØ[ÛÙH\È[š\]YKÚ[B˜˜][Û˜[ÛÙWÙXÛÙWÜÝ\š™XÝ]™XÚ]™\È]™\žH˜][Û˜[[ˆ^XÚ]š[YÙ\‹[[Y\˜]Ü‹ÜÜÚ]]™KY[›ÛZ[˜]ÜˆÛÙKÛÝ™\š[™ÈBœ™\™\Ù[][ÛˆÛÜ™HÙˆ™[˜ÚX\šÈ][HËˆHÚXÚÙY˜XYÛÛ˜[Z\˜ØXYÛÛ˜[[œZ\˜[™\œÙKXYÛÛ˜[Z\—Ú[š™XÝ]™X˜[YÙ\ÛÙWÚ[š™XÝ]™XØ[YÙ\ÛÙWÜÝ\š™XÝ]™X[™˜˜][Û˜[˜]ÛÙWÚ[š™XÝ]™X›ÝÈÙ\YžHHÛÙH]]Ù[‹Ú[B˜˜][Û˜[˜]ÛÙWÙXÛÙWÜÝ\š™XÝ]™X›ÝÈÛÛXš[™H\ÙHÛÛ\Û™[È[È[‚™^XÚ]˜]\˜[[[X™\ˆÝ\š™XÝ[ÛˆÛÈH›Ú™XÝ	ÜÈ˜][Û˜[Ë‚•HÝ›Û™Ù\ˆ˜][Û˜[˜]ÛÙWÙ[˜ÛÙWÜÝ\š™XÝ]™X[Ü™[HÚÝÜÈ]]™\žB˜Ø[›ÛšXØ[˜][Û˜[ÛÙK™[˜ÛÙHX\È]^XÝH™Y›Ü™HXÛÙ[™Ë‚•HXÚØYÙY˜][Û˜[˜]ÛÙWÙ^\ÝÕ[š\]YWØØ[›ÛšXØ[Ú[™^[Ü™[H™XÛÜ™ÂHÛÜœ™\ÜÛ™[™È[š\]YH˜]\˜[[[X™\ˆ[™^›ÜˆXXÚØ[›ÛšXØ[ÛÙK‚•H^XÚ]˜][Û˜[˜][™^˜][Û˜[˜]ÛÙWÚ[™^[™˜˜][Û˜[˜][™^Ú[š™XÝ]™X›ÝÈ›ÝšYHHX]Ú[™È[š™XÝ[Ûˆœ›ÛHØ[›ÛšXØ[œ˜][Û˜[ÈÈ˜]\˜[[™XÙ\È\Ú[™ÈH›Ü›X[^™Y[Y\˜]Ü‹Ù[›ÛZ[˜]ÜˆÛÙNÂHš[š]HÛÙ[™Ë[]™[[[Y\˜Xš[]H[\™˜XÙH\È\™Y›Ü™HÛÛ\]K‚•HÛÜšÙYš[š]T˜][Û˜[ÛÙQ^[\XXZÙ\È\È[\™˜XÙHÛÛ˜Ü™]N‚˜˜][Û˜[˜][™^
+ËÍJHHŒX[™XÛÙ[™ÈHÛÙH][™^ŒX™]\›œÂ˜ËÍX‚•HÙ\YšYY˜][Û˜[Ú\˜ÛKX\™XH^]\Ý[ÛˆPÚ\˜ÛP\™XXÙÙ]\ˆÚ]˜T›ÛÙœË\™XSÛÜ˜[Y]K˜\™XU˜[Y\ÈH›Ú™XÝ	ÜÈÛÛ\]X›HÛÜ™HÙ‚˜™[˜ÚX\šÈ][HNÈ]È[\œ™]][Ûˆ\ÈHÛ\ÜÚXØ[]XÛYX[ˆYX\Ý\™H[Ü™[Bš\ÈÙ\]HÚ\\‰ÜÈ^XÚ][ÛÜš]KØ\™XHœšYÙK‚•HÛÜšÙYš[š]PÚ\˜ÛP\™XQ^[\X›ÝÈ]˜[X]\ÈH\™XH[˜ÛÜÝ\™H^XÝB˜]ÝYÙ\ÈK‹Ë[™Ú]˜][Û˜[[™Ú[ËÚ]š[™ÈHÛÛ˜Ü™]Hš[š]B˜ÚXÚÜÚ[ØÚY[H›Üˆ][HHÚ]Ý]\ÜÙ\[™ÈHÛÛ\]Y\™XH[Z]‚•H^XÚ]\›Z[˜][™ÈÛÜ]XÛYX[‘ØÙÙÙ]\ˆÚ]˜]XÛYX[‘ØÙÙ\WÙØÙ˜]™ØÙÜ™XØ[™HØÙ]š\ÚXš[]H]ÜÈÛÝ™\œÈB˜[ÛÜš]ZXÈ\Ùˆ™[˜ÚX\šÈ][HŽKˆ]ÈX›XÈ™XÝ\œ™[˜ÙB˜]XÛYX[‘ØÙÜÝ\[™™\›ËX›Ý[™\žH[Ü™[\È›ÝÈ^ÜÙHH^XÝ]X›HÛÜ™\™XÝKÙÙ]\ˆÚ]]ÈÜÚ]]š]HÙ\YšXØ]B˜]XÛYX[‘ØÙÜÜ×ÛÙ—ÜÜØ
+ÜÚ]]™HY[œ]ÝY™šXÙ\ÊH[™]ÈÞ[[Y]žB[Ü™[H]XÛYX[‘ØÙØÛÛ[XˆH^XÝ›Û™YÙ[™\˜XÞHÚ\˜XÝ\š^˜][Û‚˜]XÛYX[‘ØÙÜÜ×ÚY™˜Y][Û˜[H™YXÙ\ÈÜÚ]]š]HÈHš[š]H[œ]˜ÛÛ™][ÛˆH8¢h8¢*ˆ8¢hˆB˜ÛÜš[X[]HœšYÙH]XÛYX[‘ØÙÙ\WÛÛ™WÚY™—ØÛÜš[YXY[YšY\ÈH^XÝ]X›B[š]YØÙ\ÝÚ]X[‰ÜÈš[š]H˜]ÛÜš[YX™YXØ]KˆB™\™XÝ]š\ÚXš[]H[Ü™[\È]XÛYX[‘ØÙÙ™ÛY[™˜]XÛYX[‘ØÙÙ™ÜšYÚ^ÜÙHHÛÈ[œ]Ù\YšXØ]\È\™XÝKˆB™Ü™X]\Ý™\ÜÈ\™XÝ[Ûˆ\È^ÜÙYžH]XÛYX[‘ØÙÙ™ÛÙ—Ù™ˆ]™\žHÛÛ[[Û‚™]š\ÛÜˆÙˆH[œ]È]šY\ÈH^XÝ]X›H™\Ý[ˆHXÚØYÙYY™‚˜]XÛYX[‘ØÙÙ™ÚY™˜Y[YšY\ÈH^XÝ]X›HØÙ	ÜÈ]š\ÛÜœÈ^XÝHÚ]HÛÛ[[Ûˆ]š\ÛÜœÈÙˆHÛÈ[œ]ËˆBœ™XÝ\œÚ]™HÙ\YšXØ]B˜™^›Ý]Ù^\ÝØÝ\Y\È[YÙ\ˆÛÙY™šXÚY[È›ÜˆH^XÝY[]B˜
+˜H
+ÈJ˜ˆH˜]™ØÙH˜ÛÝ™\š[™È™[˜ÚX\šÈ][HŒ‚•HœšYÙH]XÛYX[‘ØÙØ™^›Ý]Ù^\ÝØY[YšY\ÈHØ[YHÛÙY™šXÚY[˜Ù\YšXØ]HÚ]H^XÝ]X›H]XÛYX[‹[ÛÜ™\Ý[‚•HÛÜšÙYš[š]QØÙÙXÛÛ™^[\XÛÛ\]\ÈØÙ
+L‹NN
+OLN[™ÚXÚÜÈB˜˜XÚË\ÝXœÝ]][ÛˆY[]H
+ŒLˆHJŒNNHN›Üˆ][HŽK‚•HØ[YHÛÜšÙY[Ù[H›ÝÈÚXÚÜÈØÙ
+LÌKŒŠOLŒXÚ]H[™\[™[˜˜XÚË\ÝXœÝ]][ÛˆY[]HLÊŒLÌH
+ÈÊŒˆHŒXÝ™[™Ý[š[™ÈHš[š]B‘]XÛYX[‹Ð°ê^›Ý]]šY[˜ÙH›Üˆ][\ÈŒ[™ŽK‚’]›ÝÈ[ÛÈÚXÚÜÈØÙ
+LŒÍKÎJOLØÚ]H^XÚ]Y[]B˜NLÊŒLŒÍH
+ÈMŠÎHHØY[™ÈH\™Ù\ˆ™[XZ[™\‹XÚZ[ˆ^[\K‚•H˜]\˜[[[X™\ˆ[Ü™[H™YWÙ™Ý™YWÙYÚ]\ÈH™YKYYÚ]XÚ[X[˜ÛÜ™HÙˆ™[˜ÚX\šÈ][HKˆXÚ[X[YÚ]Ý[X›ÝÈÝ\Y\ÈH\›Z[˜][™Â™XÚ[X[YÚ]\Ý[H]˜[X]ÜˆÚ]]ÈÛX[YYÚ]™YXÝ[Ûˆ[[X\Ë[˜ÛY[™Â˜XÚ[X[YÚ]Ý[WÙ\WÜÙ[—ÛÙ—ÛÝ[˜[™˜XÚ[X[YÚ]Ý[WÜÝXØ×ÛÙ—Û›ÝÛÝ[˜[™˜XÚ[X[YÚ]Ý[WÛ[ÙÝ™YX›Ý™\ÈÛØ˜[™\ÚYYH™\Ù\˜][Ûˆ[Ù[ÈÎÂ˜™YWÙ™ÚY™—ÙXÚ[X[YÚ]Ý[WÙ™^ÜÙ\ÈH™\Ý[[™È]š\ÚXš[]H\Ý‚•HÛÜšÙYXÚ[X[Ù\YšXØ]H›ÝÈ[˜ÛY\ÈHÙXÛÛ™]\›‹ÌŒXÚÜÙB™YÚ]Ý[H\È˜[™ÚXÚ\È]š\ÚX›HžHË[Û™ÜÚYHH™YØ]]™HÛÛ›Û˜ÌŒ˜ˆ\ÈÚ]™\È][HHÛÈ\Ý[˜Ýš[š]HXÚ\Ú[ÛˆÚXÚÜÚ[Ë‚•HØ[YHÙ\YšXØ]H›ÝÈÚXÚÜÈH›Ý[™\žHZ\ˆNNX[™LˆYÚ]Ý[B˜NNHHØÚ]™\È]š\ÚXš[]HžHËÚ[HL\È›Ý]š\ÚX›HžHË‚•HÛÜšÙYXÚ[X[Ù\YšXØ]H›ÝÈ[ÛÈÚXÚÜÈXÚ[X[YÚ]Ý[HLŒÍMˆHŒX˜[™È8¢(ÈLŒÍM˜ÙÙ]\ˆÚ]H™ZYÚ›Üš[™È›Û‹Y]š\ÚXš[]HÚ]™\ÜÂ˜0«È8¢(ÈLŒÍMØ^[™[™È][HHÈHÚ^YYÚ]\›Z[˜][™ÈÚXÚÜÚ[‚•H™]È˜\ÙTÜÚ][Û˜[˜[YWÛ[ÙÜÝX—ÛÛ™X[Ü™[HÙ[™\˜[^™\È\Èš[š]B™YÚ]\Ý[HÛÛ™ÜY[˜ÙHÈ\˜š]˜\žH˜\Ù\È
+—ÙLŠH[Ù[È
+‹LJKÚ]˜XÚ[X[ÜÚ][Û˜[˜[YWÛ[ÙÛš[™X\È]ÈXÚ[X[ÜXÚX[^˜][Û‹‚•H\ÝX˜\ÙY[Ü™[H˜][Û˜[ÝØØ]XÚWÜØÚØ\ž—ÛÙ—Û[™ÝÙ\X›ÝÈ^[™ÂHš^YY[Y[œÚ[Û˜[Ø]XÚKKTØÚØ\žˆÙ\YšXØ]\ÈÈ]™\žHš[š]H˜][Û˜[™XÝÜˆÙˆ\]X[[™ÝÚ]H™\ÚYX[™\™\Ù[Y\ÈHÝ[HÙˆÜ]X\™YÛËXžK]ÛÈZ[›ÜœË‚•HÛÜšÙYš[š]PØ]XÚTØÚØ\ž‘^[\XÚXÚÜÈ\]X[]H›ÜˆH›ÜÜ[Û˜[œ˜][Û˜[™XÝÜœÈ
+KŠX[™
+‹
+X[˜ÛY[™ÈH^XÚ]Z[›Ü‹^™\›ÈÚ]™\ÜË‚•HÛÛ\[š[Ûˆš[š]PØ]XÚTØÚØ\ž•™YQ^[\XÚXÚÜÈH›Û‹\›ÜÜ[Û˜[™XÝÜœÈ
+K‹ÊX[™
+ËKŠXˆHÝ›ÙXÝ\ÈLX›ÝÜ]X\™Y›Ü›\Â˜\™HM[™H^XÚ]Z[›Ü‹\Ü]X\™H™\ÚYX[\ÈÍXˆ\ÈÚ]™\È][HÎ˜›Ý[ˆ\]X[]H[™HÝšXÝš[š]HÙ\YšXØ]K‚•H™]Èš[š]PØ]XÚTØÚØ\ž‘›Ý\‘^[\XÚXÚÜÈ™XÝÜœÈ
+K‹Ë
+X[™˜
+Ë‹JXˆ›ÝÜ]X\™Y›Ü›\È\™HÌHÝ›ÙXÝ\ÈŒ[™B™^XÚ]Z[›Ü‹\Ü]X\™H™\ÚYX[\ÈL‚•H™]Èš[š]PØ]XÚTØÚØ\ž”Ú^^[\XÚXÚÜÈ™XÝÜœÈ
+K‹ËKŠX[™˜
+‹KË‹JXˆ›ÝÜ]X\™Y›Ü›\È\™HLXHÝ›ÙXÝ\ÈM˜[™H^XÚ]Z[›Ü‹\Ü]X\™H™\ÚYX[\ÈLMX‚•H™]\ØX›H[™XÝ[Ûˆš[˜Ú\H˜]Ú[™XÝ[Û—ÜØÚ[XX\ÈHÚXÚÙYš[š]Bœ›ÛÙ‹Ü›ÙÜ˜[[Z[™ÈÛÜ™HÙˆ™[˜ÚX\šÈ][HÍ‚•HÛÜšÙYš[š]R[™XÝ[Û‘^[\X\Y\È]ØÚ[XHÈH\š]Y]XÂœÝ[Nˆ]™K\›Ý™\È\š]Y]XÔÝ[HˆHŠŠ‹LJKÌ˜[™ÚXÚÜÈHÝYÙKMH˜[YB˜L‚•HØ[YH[™XÝ[ÛˆÚ]™\ÜÈ›ÝÈÚXÚÜÈÝYÙHL^XÝH\ÈX›ÝšY[™ÈB›\™Ù\ˆ^XÝ]X›HÚXÚÜÚ[›Üˆ][HÍ‚•HØ[YH[™XÝ[ÛˆÚ]™\ÜÈ›ÝÈÚXÚÜÈÝYÙHŒ^XÝH\ÈNL^[™[™ÈB™š[š]H\š]Y]XË\Ý[HÚXÚÜÚ[‚’]›ÝÈ[ÛÈÚXÚÜÈÝYÙH^XÝH\ÈÎ^[™[™ÈH^XÚ][™XÝ[Û‚Ú]™\ÜÈÚ[HÙY\[™ÈHÛÛ˜Û\Ú[Ûˆ[\™[Hš[š]H[™˜][Û˜[‚’]›ÝÈ[ÛÈÚXÚÜÈÝYÙH^XÝH\ÈÌMŒ^[™[™ÈHš[š]H][KMÍš[™XÝ[ÛˆØÚY[K‚•HØ[YH[™XÝ[ÛˆÚ]™\ÜÈ›ÝÈÚXÚÜÈÝYÙHMŒ^XÝH\ÈLÌŒ^[™[™ÂHš[š]HØÚY[HÚ[H™]Z[š[™ÈH\›Z[˜][™È›ÛÙ‹‚•Hš[š]KXÛÝ[[™È˜[Y\ÜXÙH›ÝÈÝ\Y\ÈÝXœÙ]ÛÝ[Ù\WÜÝØ›Üˆ™[˜ÚX\šÂš][HLˆ[™H\ØØ[™XÝ\œ™[˜ÙKØ›Ý[™\žH[[X\Â˜ÛÛXš[˜][Û—Ü\ØØ[ØÛÛXš[˜][Û—Ü˜]Ü\ØØ[ØÛÛXš[˜][Û—ÛÝ]ÚYXÂ˜ÛÛXš[˜][Û—Ü˜]ÛÝ]ÚYX[™HXYÛÛ˜[œšYÙB˜ÛÛXš[˜][Û—Ü˜]ÜÙ[˜›ÜˆHš[š]HÙ\YšXØ]HÛÜ™HÙ‚˜™[˜ÚX\šÈ][HNˆH›Ý[™\žH˜[Y\ÈÛÛXš[˜][Û—ÜÙ[˜[™˜ÛÛXš[˜][Û—ÛÛ™X\™H›ÝÈ[ÛÈÚXÚÙYÚ]š[™ÈHXYÛÛ˜[[™š\œÝ\›ÝÂ˜š[›ÛZX[ÛÙY™šXÚY[ÎÈÛÛXš[˜][Û—ÝÛ×Ü˜]Ý\Y\ÈHÛÜÙY˜][Û˜[œÙXÛÛ™\›ÝÈ›Ü›][K[™ÛÛXš[˜][Û—Ý™YWÜ˜]ØÛÛXš[˜][Û—Ù›Ý\—Ü˜]Â˜ÛÛXš[˜][Û—Ùš]™WÜ˜]ØÛÛXš[˜][Û—ÜÚ^Ü˜]ØÛÛXš[˜][Û—ÜÙ]™[—Ü˜]Â˜ÛÛXš[˜][Û—ÙZYÚÜ˜]Ý\HHÛÜœ™\ÜÛ™[™È\™H›ÝYÚZYÚ\›ÝÂ™›Ü›][\ËˆHÙ[™\˜[š[š]K\Ù]˜Ø\™[˜[]HTH™[XZ[œÈÝ]ÙˆØÛÜK‚•HÛÜšÙYš[š]TÝXœÙ]ÛÝ[^[\X]˜[X]\ÈHÝXœÙ]™XÝ\œ™[˜ÙH]ÝYÙBŽÚXÚÚ[™ÈÝXœÙ]ÛÝ[H—ŽHM˜\ÈHÛÛ˜Ü™]H][KMLˆÙ\YšXØ]K‚•HØ[YH™XÝ\œ™[˜ÙH›ÝÈ\ÈHÝYÙKLLÚXÚÜÚ[˜ÝXœÙ]ÛÝ[LH—ŒLHLXZÚ[™ÈHš[š]HÛÝ[[™È™Yš[™[Y[™^XÚ]‚’]›ÝÈ[ÛÈ\ÈÝYÙHL‹Ú]ÝXœÙ]ÛÝ[LˆH—ŒLˆHM˜^[™[™ÈBœØ[YH^XÝ]X›Hš[š]KXÛÝ[[™ÈÚXÚÜÚ[‚’]›ÝÈ[ÛÈ\ÈÝYÙHM‹Ú]ÝXœÙ]ÛÝ[MˆH—ŒMˆHMLÍ˜^[™[™ÈBœØ[YHš[š]H™XÝ\œ™[˜ÙHÚ]™\ÜË‚’]›ÝÈ[ÛÈ\ÈÝYÙHŒÚ]ÝXœÙ]ÛÝ[ŒH—ŒŒHLMÍ˜^[™[™ÂH^XÝ]X›H][KMLˆÛÝ[[™ÈØÚY[K‚’]›ÝÈ[ÛÈ\ÈÝYÙHÌ‹Ú]ÝXœÙ]ÛÝ[ÌˆH—ŒÌˆHŽMMÌŽM˜^[™[™ÂHØ[YHš[š]H™XÝ\œ™[˜ÙHÚ]™\ÜË‚•HÝYÙKMÚ]™\ÜÈ›ÝÈÚXÚÜÈÝXœÙ]ÛÝ[H—HNÍÌÍÌMMLMŒM˜˜ÛÛ[Z[™ÈH\›Z[˜][™È™XÝ\œ™[˜ÙHÙ\YšXØ]HÚ]Ý][›ÙXÚ[™ÈB™Ù[™\˜[š[š]K\Ù]Ø\™[˜[]HTK‚•HÛÜšÙYš[š]T\ØØ[^[\X]˜[X]\ÈÊÊOMM˜[™ÚXÚÜÈH\ØØ[™XÛÛ\ÜÚ][ÛˆÊÊOPÊËŠJÐÊËÊOLŒJÌÍX›Üˆ][HN‚•H\ØØ[Ú]™\ÜÈ›ÝÈ[ÛÈÚXÚÜÈÊLÊOLLŒ›ÝYÚ˜ÊLÊOPÊKŠJÐÊKÊOLÍŠÎ^[™[™ÈHš[š]H™XÝ\œ™[˜ÙHÚXÚÜÚ[‚•HØ[YHÚ]™\ÜÈ›ÝÈÚXÚÜÈÊMKÊOMMX›ÝYÚ˜ÊMKÊOPÊMŠJÐÊMÊONLJÌÍY[™ÈH\™Ù\ˆš[š]H\ØØ[ÚXÚÜÚ[‚’]›ÝÈ[ÛÈÚXÚÜÈÊŒÊOLLM›ÝYÚ˜ÊŒÊOPÊNKŠJÐÊNKÊOLMÌJÎMŽX^[™[™ÈHš[š]H][KMN™XÝ\œ™[˜ÙB˜ÚXÚÜÚ[‚’]›ÝÈ[ÛÈÚXÚÜÈÊKÊOLŒÌ›ÝYÚ˜ÊKÊOPÊŠJÐÊÊOLÍŠÌŒ^[™[™ÈHš[š]H\ØØ[ØÚY[K‚•H\ØØ[Ú]™\ÜÈ›ÝÈ[ÛÈÚXÚÜÂ˜ÊÌ‹ÊOPÊÌKŠJÐÊÌKÊOMJÍMOMMŒ^[™[™ÈH\›Z[˜][™Â™š[š]H™XÝ\œ™[˜ÙHØÚY[K‚•HÛÛ˜Ü™]H[Ü™[HÜ\ÝÛ×Ú\œ˜][Û˜[[œÝ[X]\ÈHÙ\YšYYÜ]X\™K\›ÛÝ˜Üš]\š[Ûˆ]	‰›Ýš[™È™[˜ÚX\šÈ][HH[ˆH›Ú™XÝ	ÜÈ™X[˜]Øœ™\™\Ù[][Û‹ˆHÝ›Û™Ù\ˆX›XÈÛ\ÜÚYšXØ][ÛœÂ˜Ü\Ü˜][Û˜[ÚY™—ÜÜ]X\™X[™Ü\Ü˜][Û˜[ÚY™—ÛÝÙ\ÝÝ\›\×ÜÜ]X\™X[Û™ÂÚ]HÛÜœ™\ÜÛ™[™È\œ˜][Û˜[]HÜš]\š[Ûˆ[ˆÝÙ\Ý\›\Ë›ÝÈ^ÜÙBH[š[š]HÜ]X\™K]\Ý›Ý[™\žH[ˆ›Ý[™][ÛœË‚•HÛÜšÙYš[š]TÜ\ÛÐš\ÙXÝ[Û‘^[\XYÈHX]Ú[™È^XÝ]X›H˜XÙN‚˜Y\ˆ›Ý\ˆ^XÝXYXÈÛÛ\\š\ÛÛœËH\™Ù]	ŒL‰\È[˜ÛÜÙYžB˜ÌLKÎŒËÌM—XÚ]ÚYKÌM˜ˆ\È\ÈH›Ú™XÝ	ÜÈÛÛ\]][Û˜[˜[\›˜]]™HÈ[›ÚÚ[™ÈHÙ[™\˜[ÛÛ\][™\ÜÈ[Ü™[K‚•HØ[YH˜XÙH›ÝÈ^ÜÈÝYÙHZYÚ[˜ÛÜÚ[™ÈH\™Ù][‚˜ÌNKÌLŽÍŒËÌM—XÚ]ÚYKÌM˜ˆ\ÈÚ]™\È][HHHYÚ\ˆ^XÝœ˜][Û˜[ÚXÚÜÚ[Ú]Ý]Ú[™Ú[™ÈHÝ[X[Z[™š[š]HÙ[X[XÜË‚•HØ[YH˜XÙH›ÝÈ^ÜÈÝYÙHÙ[™K[˜ÛÜÚ[™ÈH\™Ù][‚˜ÌNKÌLŽMÎLËÍM—XÚ]ÚYKÍM˜Ý™[™Ý[š[™ÈHš[š]H][KLBœ™XÚ\Ú[ÛˆØÚY[K‚•HØ[YH˜XÙH›ÝÈ^ÜÈÝYÙHÚ^Y[‹[˜ÛÜÚ[™ÈH\™Ù][‚˜ÎLŽKÍMLÍ‹ŒÍKÌÌÍŽXÚ]ÚYKÍMLÍ˜‚’]›ÝÈ[ÛÈ^ÜÈÝYÙHÙ[K[˜ÛÜÚ[™ÈH\™Ù][‚˜ÍÍMMKÍLŽMŽLLKÌLMÍ—XÚ]ÚYKÌLMÍ˜^[™[™ÈBœÝ[X[Z[™š[š]HØÚY[HÚ]Ý]™X][™ÈH[Z]\È[ˆ]Z[™Y˜[YK‚•HX›XÈš[š]KTšY[X[›ˆœšYÙB˜T›ÛÙœË™›Ý\—Ø\˜Ý[”Ù\šY\×ÛÛ™WÙ\]Z]—ÜPÚ\˜ÛP\™XXY[YšY\ÈHZX›š^‚œÙ\šY\È™\Ù[][ÛˆÚ]HÙ\YšYYÚ\˜ÛKX\™XH™\Ù[][Û‹ÛÝ™\š[™ÈBœ›Ú™XÝ\™[]˜[ÛÜ™HÙˆ™[˜ÚX\šÈ][H‹‚•H\›[ÛšXÈ]˜[X]Üˆ›ÝÈ\ÈH^XÚ]XYXÈÜ›ÝÝÙ\YšXØ]B˜ÙØ\š]Kš\›[ÛšXÔÝ[WÝÛ×ÜÝ×ÛÝÙ\˜\š]™Yœ›ÛB˜ÙØ\š]Kš\›[ÛšXÔÝ[WÙÝX›WÛÝÙ\˜È\È\ÈHš[š]KYÜ›ÝÝÛÜ™HÙ‚˜™[˜ÚX\šÈ][HÍ
+\›[ÛšXË\Ù\šY\È]™\™Ù[˜ÙJKˆHÝ›Û™Ù\‚˜ÙØ\š]Kš\›[ÛšXÔÝ[WÝÛ×ÜÝ×Ü™XXÚ\Ø›ÝÈ™]\›œÈ[ˆ^XÚ]ÝYÙB˜—Šˆ
+ˆ\™Ù]
+X™XXÚ[™È]™\žH˜]\˜[\™Ù]ˆ\È\ÈH›Ú™XÝ	ÜÂ™Y™™XÝ]™KÝ[X[Z[™š[š]H›Ü›][][ÛˆÙˆ]™\™Ù[˜ÙNˆ]™\žH™\]Y\ÝY™š[š]HZYÚ\È™XXÚYžHHš[š]HÛÛ\]][Û‹Ú]Ý]\ÜÙ\[™È[‚˜]Z[™Y[™š[š]HÝ[K‚•H˜[YYÚ]™\ÜÈ›ÝÈ[œÝ[X]\ÈH™^ÚXÚÜÚ[^XÚ]N‚˜\›[ÛšXÔÝ[WÜÝYÙLLÜ™XXÚ\×Ùš]™X›Ý™\ÈÌLHX^[™[™ÈB™XYXÈÝ[X[Z[™š[š]HØÚY[H™^[Û™HÝYÙKLMˆZYÚY›Ý\ˆÚ]™\ÜË‚•H™^˜[YYÚ]™\ÜÈ\›[ÛšXÔÝ[WÜÝYÙMM—Ü™XXÚ\×ÜÚ^›Ý™\Â˜ÍMˆH˜^[™[™ÈHØ[YHš[š]HZYÚØÚY[HÛ˜ÙH[Ü™K‚•H™]È\›[ÛšXÔÝ[WÜÝYÙLMŒÎÜ™XXÚ\×ÜÙ]™[˜Ú]™\ÜÈ›Ý™\ÈÌMŒÎHØ˜ÛÛ[Z[™ÈH^XÚ]š[š]HÜ›ÝÝØÚY[K‚•H™]È\›[ÛšXÔÝ[WÜÝYÙMMLÍ—Ü™XXÚ\×ÙZYÚÚ]™\ÜÈ›Ý™\Â˜ÍMLÍˆH^[™[™ÈHØ[YHÝ[X[Z[™š[š]HY\‹‚•H[Û›ÝÛšXÚ]H[Ü™[HÙØ\š]Kš\›[ÛšXÔÝ[WÛWÛÙ—ÛX[™]È›ÜYØ][Û‚˜ÛÜ›Û\žHÙØ\š]Kš\›[ÛšXÔÝ[WÝÛ×ÜÝ×Ü™XXÚ\×Û]\˜›ÝÈ˜[œÜÜXXÚ™š[š]H\™Ù]Ù\YšXØ]HÈ]™\žH]\ˆ\›[ÛšXÈÝYÙKˆ\ÈXZÙ\ÈB™]™\™Ù[˜ÙHÚ]™\ÜÈÛÛ\ÜÚ][Û˜[˜]\ˆ[ˆYYÈÛ™HÙ[XÝYXYXÂš[™^‚•HÙ[ÛY]šXË\Ù\šY\È^Y\ˆ›ÝÈ\ÈHX]Ú[™Èš[š]H™XXÚXš[]HXÚØYÙB˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÙš[š]P\›ÞÜ™XXÚ\×ÛÙ—ÜÝÙ\—ØYÙ]ˆ[ˆ^XÚ]ÝÙ\‚˜YÙ]ÛˆH˜][Û˜[ÝYÙH™]\›œÈ›ÝHš[š]H\X[\Ý[H\\ˆ›Ý[™[™H™[XZ[š[™È\œ›Üˆ›Ý[™ˆ\ÈÝ™[™Ý[œÈ™[˜ÚX\šÈ][Hˆ[ˆHØ[YBœÝ[X[Z[™š[š]HÝ[KÚ]›ÈÛÛ\]Y\™X[[Z]Øš™XÝ‚•HX›XÈ[Û›ÝÛšXÚ]HÙ\YšXØ]\ÈÙ\šY\Ë™Ù[ÛY]šXÔÝ[WÛWÛÙ—ÛX[™˜Ù\šY\Ë™Ù[ÛY]šXÔÝ[WÙØ\ÛWÛÙ—ÛX›ÝÈXZÙHHš[š]H\›Þ[X][Ûˆ\™Ù]œÝX›H[™\ˆ]\ˆÝYÙ\Îˆ\X[Ý[\È[˜Ü™X\ÙH[™Z\ˆ˜][Û˜[Ø\ÈÂH[™Ú[XÜ™X\ÙK›Üˆ]™\žH›Û›™YØ]]™H˜][È™[ÝÈÛ™K‚•H[‹\˜][ÈÜXÚX[^˜][ÛˆÙ\šY\Ë™Ù[ÛY]šXÔÝ[WÙš[š]P\›ÞÜ™XXÚ\Ø›ÝÂ˜ÛÛœÝXÝÈ]ÝYÙHœ›ÛH[žH™\]Y\ÝYÜÚ]]™H˜][Û˜[Û\˜[˜ÙH\Ú[™ÈB™^XÝ]X›HXYXÈØÚY[KÛÈHYÙ]\È›ÈÛ™Ù\ˆ[ˆ[\XÚ]Ý\YYÚ]™\ÜËˆH˜]È™\™\Ù[][Ûˆ[Ü™[B˜Ù\šY\Ë™Ù[ÛY]šXÔ˜]×Ü™XXÚ\×ÛÙ—ÜÜÚ]]™WÝÛ\˜[˜ÙX^ÜÙ\ÈHØ[YHš[š]BœÝYÙHÙ[XÝÜˆ\™XÝH]H™X[˜]Ø[\™˜XÙK‚•H˜][Û˜[XÚ\˜ÛH]\›Z[˜[XÚØYÙB˜˜][Û˜[Ú\˜ÛKšX[™ÛUÚXÙP\™XWØÞXÛXØ˜˜][Û˜[Ú\˜ÛKšX[™ÛUÚXÙP\™XWÜÝØ\Û™YØ[™˜˜][Û˜[Ú\˜ÛKšX[™ÛUÚXÙP\™XWÞ™\›×ÛÙ—ØÛÛ[™X\˜[™˜˜][Û˜[Ú\˜ÛKšX[™ÛUÚXÙP\™XWÜÜ×ÛÙ—ÛÜšY[YÝ\HHš[š]B›ÜšY[][Û‹Ø\™XHÛÜ™HÙˆ™[˜ÚX\šÈ][HÎÈÛÛ\]Y[™ÛK\Ý[HÙ[X[XÜÂœ™[XZ[ˆY™\œ™Y‚•HÛÜšÙYš[š]UšX[™ÛSÜšY[][Û‘^[\X[œÝ[X]\È\ÈXÚØYÙH]˜
+K
+X
+JX[™
+LK
+XˆHÚYÛ™YÚXÙKX\™XH\È˜ÞXÛXÂœ\›]]][Ûˆ™\Ù\™\È]ÝØ\[™ÈÛÈ™\XÙ\È™YØ]\È][™HÜÚ]]™B›ÜšY[][ÛˆÙ\YšXØ]H\ÈÚXÚÙY\™XÝK‚‘›Üˆ™[˜ÚX\šÈ][H][\XØ]]™PÙ\YšXØ]X›ÝÈ™XÛÜ™Èš[š]H\ÝÈÙ‚››Ûš]šX[˜XÝÜœÈ[™Z\ˆ›ÙXÝÚ]HÚXÚÙY^[\B˜˜XÝÜš^˜][ÛÙ\YšXØ]MŒˆHš[š]Hš[X[]HÙX\˜Ú[™™XÝ\œÚ]™B˜ÛÛœÝXÝÜˆš[YQ˜XÝÜÙ\YšXØ]WÙ^\ÝØ›ÝÈ\ÝX›\Ú^\Ý[˜ÙHÙˆBœš[YK[X™[YÙ\YšXØ]H›Üˆ]™\žHŒX‚•HX›XÈÛÜ›Û\žH^\Ý×Ø˜\ÚXÔš[YWÙ™^˜XÝÈHÛÜœ™\ÜÛ™[™Â˜˜\ÚXË\š[YH]š\ÛÜˆ[Ü™[H›Üˆ]™\žHŒX‚•HÛÛœÝXÝÜˆ][\XØ]]™PÙ\YšXØ]K˜\[™›ÝÈÛÛ\ÜÙ\ÈÛÈÝXÚ™š[š]HÙ\YšXØ]\È›ÜˆH›ÙXÝˆHÛÜœ™\ÜÛ™[™Â˜˜XÝÜœ×Û›Û™[\X[[X\È›Üˆ›ÝÙ\YšXØ]HÝXÝ\™\ÈÚÝÈ]B˜Ù\YšXØ]H›ÜˆŒXÛÛZ[œÈ]X\ÝÛ™H˜XÝÜ‹‚•HÛÛ\[š[Ûˆ][\XØ]]™PÙ\YšXØ]K™˜XÝÜ—Ù™[Ü™[HÚÝÜÈ]]™\žB›\ÝY›Ûš]šX[˜XÝÜˆ]šY\ÈHÙ\YšYY›ÙXÝ‚•H™]\ØX›H˜]›ÙXÝÜ\›X[[XH›Ý™\È]š[š]H˜XÝÜˆ›ÙXÝÈ\™Bš[˜\šX[[™\ˆ\Ý\›]]][Û‹ˆH\Ý[]™[[Ü™[B˜š[YQ˜XÝÜ“\ÝÜ\›WÛÙ—ÜØ[YWÜ›ÙXÝ[™HXÚØYÙY[Ü™[B˜š[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—Ü\›X[ˆ›Ý™H[™\X]YY˜XÝÜ‚[š\]Y[™\ÜÈ\È\›]]][Ûˆ›Üˆš[YK[X™[YÙ\YšXØ]\Ë‚•H\Ý[Y[X™\ˆ]š\ÚXš[]H[Ü™[H\ÝÛY[WÙ™Û˜]›ÙXÝ[™B˜ÛÜ›Û\žHš[YQ˜XÝÜÙ\YšXØ]K™^\Ý×Üš[YWÙ™[ˆ›ÙXÙHHÙ\YšYY˜˜\ÚXË\š[YH]š\ÛÜˆ›Üˆ]™\žH›Ûš]šX[š[YK[X™[YÙ\YšXØ]K‚•HXÚØYÙY^˜XÝ[Ûˆ[Ü™[Hš[YQ˜XÝÜÙ\YšXØ]K™^\Ý×Ù˜XÝÜ—Ù™˜[ÛÈ™]\›œÈH˜XÝÜ‰ÜÈ\ÝY[X™\œÚ\š[YHX™[[™]š\ÚXš[]H[‚›Û™H™\Ý[™XYH›Üˆ™XÝ\œÚ]™HÙ\YšXØ]HÛÛœÝXÝ[Û‹‚•H[š\]Y[™\ÜÈÜ›Ý[™ÛÜšÈ˜\ÚXÔš[YWÙ\WÛÙ—Ù™›Ý™\È]]š\ÚXš[]B˜™]ÙY[ˆÛÈ˜\ÚXÈš[Y\È›Ü˜Ù\È\]X[]K‚•HÛÜ›Û\žH˜\ÚXÔš[YWÙ\WÙ˜XÝÜ—ÛÙ—Ù™Üš[YQ˜XÝÜš^˜][Û˜\Ü˜Y\È\Î‚˜H˜\ÚXÈš[YH]šY[™ÈHš[YK[X™[YÙ\YšXØ]H\]X[ÈÛ™HÙˆ]È\ÝY™˜XÝÜœË‚•HÛÛXš[™YÚ\˜XÝ\š^˜][Ûˆ˜\ÚXÔš[YWÙ™Üš[YQ˜XÝÜš^˜][Û—ÚY™˜XZÙ\Â\È[ˆY™Žˆš[YH]š\ÛÜœÈÙˆHÙ\YšYY[X™\ˆ\™H^XÝHH\ÝYœš[YH˜XÝÜœË‚•HÜ›ÜÜËXÙ\YšXØ]H[[XB˜š[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—ÛY[WÛÙ—Ù˜XÝÜ—ÛY[X›ÝÈÚÝÜÈ]]™\žH˜XÝÜ‚š[ˆÛ™Hš[YK[X™[YÙ\YšXØ]HØØÝ\œÈÚ]HØ[YH˜[YH[ˆ[žHÝ\‚˜Ù\YšXØ]H›ÜˆHØ[YH[X™\‹ˆ]ÈÞ[[Y]šXÈXÚØYÙB˜š[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—ÛY[WÚY™˜Ú]™\ÂHÛÜœ™\ÜÛ™[™ÈØØÝ\œ™[˜ÙK[]™[Y™‹ˆH˜][\Ý[\œÂ˜˜]\ÝÜ\›WØÛÛœ×ÛÙ—ÛY[X[™˜]\ÝÜ\›WÛÙ—Û›Ù\ÛÙ—ÛY[WÚY™˜›ÝÈY\ÂÈš[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—Ü\›WÛÙ—Û›Ù\ˆ][\XÚ]KYœ™YBœš[YK[X™[YÙ\YšXØ]\È]™HHØ[YH˜XÝÜœÈ\È\›]]][Û‹[™˜š[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—Ü\›X^[™È\ÈÈ™\X]Y˜XÝÜœË‚•HÛÜšÙYÙ\YšXØ]H\È›ÝÈ[ÛÈš[YK[X™[YžH˜\ÚXÔš[YX›ÛÙœÈ›Ü‚Œ‹Ë[™H[™š[YQ˜XÝÜš^˜][ÛÙ\YšXØ]MŒˆHš\œÝ™]\ØX›B‘]XÛY[[[XHÝ\\È›ÝÈ™\Ù[\È˜\ÚXÔš[YWÙ™ÛÙ—Ù™Û][È\È™[XZ[œÂ˜HÛÛ˜Ü™]H^[\K›ÝHÙ[™\˜[[™[Y[[[Ü™[HÙˆ\š]Y]XÈ›ÛÙ‹‚•H™]Èš[š]Tš[YQ˜XÝÜ‘^[\XYÈHš[YK[X™[Y˜XÝÜˆ\Ý˜Ì‹‹‹ËËWX›ÜˆÍŒ™\šYšY\È]È›ÙXÝ[™™XÛÜ™È]š\ÚXš[]HžB™XXÚ\Ý[˜Ýš[YKˆ\ÈXZÙ\ÈHÙ\YšXØ]K[]™[][KN›Ý[™\žB˜ÛÛ˜Ü™]H™^[Û™HX\›Y\ˆŒ^[\K‚•HØ[YHÛÜšÙY[Ù[H›ÝÈÚXÚÜÈH\™Ù\ˆÙ\YšXØ]B˜ÍÌŒH—ŒÈ
+ˆ×Œˆ
+ˆH
+ˆÈ
+ˆLX[˜ÛY[™È\›Z[˜][™Èš[X[]HÙX\˜Ú\Â™›ÜˆH™]ÛH[›ÙXÙY˜XÝÜœÈØ[™LX‚•HÜš]\š[Ûˆ˜\ÚXÔš[YWÛÙ—Û›×Ü›Ü\—Ù]š\ÛÜ˜›ÝÈ\ÛÛ]\ÈHÙÚXØ[œš[X[]H\Ý]H]\™H›Ý[™Y]š\ÛÜˆÙX\˜Ú]\Ý\ÝX›\Ú‚•HY™ˆ›Ü›H˜\ÚXÔš[YWÚY™—Û›×Ü›Ü\—Ù]š\ÛÜ˜^ÜÙ\È]Üš]\š[Ûˆ[ˆ›Ý™\™XÝ[ÛœÈ›Üˆ]\ˆ^XÝ]X›K\ÙX\˜ÚÛÜœ™XÝ™\ÜÈ›ÛÙœË‚•Hš[š]H]˜[X]Üˆ›Ü\‘]š\ÛÜ”ÙX\˜Ú›ÝÈÚXÚÜÈØ[™Y]\È›ÝYÚBš[œ]›Ý[™È]ÈÛÝ[™™\ÜËÛÛ\][™\ÜË[™›Û™XÚ\˜XÝ\š^˜][Ûˆ\™Bœ›Ý™YžH›Ü\‘]š\ÛÜ”ÙX\˜ÚÜÛÛYWÚ\×Ü›Ü\˜˜›Ü\‘]š\ÛÜ”ÙX\˜ÚÜÛÛYWÛÙ—Ü›Ü\˜[™˜›Ü\‘]š\ÛÜ”ÙX\˜ÚÛ›Û™WÚY™—Û›×Ü›Ü\˜ˆÛÛœÙ\]Y[K˜˜\ÚXÔš[YWÛÙ—Ü›Ü\‘]š\ÛÜ”ÙX\˜ÚÛ›Û™XÛÛ™\ÈHš[š]HÙX\˜ÚZ\ÜÈ[ÈB˜Ù\YšYY˜\ÚXË\š[YH›ÛÙ‹ˆÙÙ]\ˆÚ]˜š[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—Ü\›XH™XÝ\œÚ]™H^\Ý[˜ÙH^Y\‚˜š[YQ˜XÝÜÙ\YšXØ]WÙ^\ÝØ›ÝÈÛÜÙ\ÈHÙ\YšXØ]K[]™[^\Ý[˜ÙB˜[™[š\]Y[™\ÜÈÛÜ™HÙˆÎ‚’]È[[YYX]HÝÙ\ˆÛÛœÙ\]Y[˜ÙK˜\ÚXÔš[YWÙ™ÛÙ—Ù™ÜÝØ\È[ÛÈÚXÚÙY˜[™Ú[Ý\Ü]\ˆ[š\]Y[™\ÜÈ\™Ý[Y[Ë‚•Hš[š]H\Ý›ÙXÝ˜]›ÙXÝ[™˜˜\ÚXÔš[YWÙ™ÛÙ—Ù™Û˜]›ÙXÝY\ÈÈHš[YH]šY[™ÈÛ™HY[X™\ˆÙ‚˜Hš[š]H˜XÝÜˆ\ÝÈ\È\ÈÝ[Ù\YšXØ]K[]™[•HÜ›Ý[™ÛÜšË‚•HÛÜ›Û\žH˜\ÚXÔš[YWÙ™ÛÙ—Ù™Üš[YQ˜XÝÜš^˜][Û˜ÛÛ›™XÝÈ]\™XÝBÈHš[YQ˜XÝÜÙ\YšXØ]X‚•HÛÛœÝXÝ[Ûˆš[YQ˜XÝÜÙ\YšXØ]K˜\[™›ÝÈÛÛ\ÜÙ\ÈÙ\YšXØ]\Â™›ÜˆX[™˜[ÈÛ™H›ÜˆJ›˜™\Ù\š[™ÈHš[YHX™[È[™›ÙXÝ™\]X][Û‹‚•HÛÛ™\œÙHÙ\YšXØ]H[\™˜XÙHš[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—Ù™›ÝÂœÚÝÜÈ]]™\žH\ÝY˜XÝÜˆ]šY\ÈHÙ\YšYY[X™\‹ÛÛ\[Y[[™ÂHš[YKY]š\ÛÜˆ^˜XÝ[Ûˆ[™[š\]Y[™\ÜÈÜ›Ý[™ÛÜšË‚•HÛÛ\[š[Ûˆ›Ý[™š[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—ÛXXÙ\È]™\žH\ÝY™˜XÝÜˆ™[ÝÈHÙ\YšYY[X™\ˆÚ[™]™\ˆH˜XZÚ[™ÈHÙ\YšXØ]B›\Ý^XÚ]H›Ý[™Y›Üˆš[š]HÙX\˜Ú[™˜[Y][Û‹‚•H]XÛY\Ý[Hš[š]HÛÛœÝXÝ[Û‚˜^\Ý×Ø˜\ÚXÔš[YWÛ›ÝÛY[WÛÙ—Ø[Ø˜\ÚXÔš[YX›ÝÈ™]\›œÈHÙ\YšYYš[YB›Ý]ÚYH]™\žHš[š]H\ÝÚÜÙHY[X™\œÈ\™HÙ\YšYYš[YNˆ]˜XÝÜœÈB™š[š]H›ÙXÝ\ÈÛ™H[™[\ÈÝ]]™\žH\ÝY˜XÝÜˆžH]š\ÚXš[]HÙˆK‚•\È\ÈHÝ[X[Z[™š[š]HÛÜ™HÙˆH[™š[š]YK[Ù‹\š[Y\È[Ü™[KÚ]››ÈÛÛ\]Y[™š[š]HÙ]ÜˆÛ\ÜÚXØ[^\Ý[˜ÙHš[˜Ú\K‚•HÜXÚX[^™YÚYY˜[™ÙT›ÙXÝÛÛœÝXÝ[Ûˆ›ÝÈ\›œÈ]\Ý[]™[œ™\Ý[[È^\Ý×Ø˜\ÚXÔš[YWÙÝˆ]™\žHš[š]H›Ý[™˜\ÈHÙ\YšYYœš[YHÝšXÝHX›Ý™H]ˆ\È\ÈH\™XÝÝ[X[Z[™š[š]H›Ü›HÙˆš[YB[˜›Ý[™Y™\ÜË‚‚ŠŠÝ\œ™[™[˜ÚX\šÈÛÝ[ŠŠˆ]\ÈÙ\YšXØ]H›Ý[™\žK[šY\È]™HB˜ÚXÚÙY›Ú™XÝ\™[]˜[ÛÜ™NˆK‹ËKMMKM‹MËŒË‹ËÍÍKÍËÎ‹Ë‹KMKMËŒK‹ŽŽKÌËÍÍKÍ‹ÍËÎÎKKKKLKL‹MMKMËN[™Lˆ\ÈÛÝ[Èš[š]H[™˜][Û˜[XÛÛÜ™[˜]HÛÜ™\ÂšÛ™\ÝNÈ]Ù\È›ÝÛZ[H[Û\ÜÚXØ[[Ü™[HÝ][Y[È›Üˆ]™\žH][K‚•HYZ\ÜÚ[Ûˆ[H\ÈÝšXÝˆ]™\žHÛÝ[Y[žH]\Ý]™HH›Ú™XÝ[˜]]™BœÝ][Y[Ý™\ˆ™X[˜]ØØXœÝ˜XÝ™X[˜][Û˜[[\˜[]KÜˆHš[š]B˜Ù\YšXØ]KˆHØÛÜYÛÛœÝXÝ]™H™\XÙ[Y[\ÈÛÝ[Y[™\ˆ]ÈØÛÜYœÝ][Y[™]™\ˆ\È[ˆ[œ™\ÝšXÝY[Ü™[HÝ™\ˆÛÛ\]Y™X[[X™\œË‚‚•H™]È[Û›ÝÛ™WÛÙ—ÜÝXØ×ÛX[™[]Û™WÛÙ—ÜÝXØ×ÙÙX[[X\È›ÜYØ]HBœÝXØÙ\ÜÛÜ‹\Ý\˜][Û˜[Ü™\ˆ›Ý[™XÜ›ÜÜÈ]™\žHš[š]H[™^[\˜[ˆB™^XÚ]\ØÙ[™[™Ó˜]\˜[Ù\]Y[˜ÙXÝYÙ\È[™LŽ›ÝšYHH^XÝ]X›B˜ÚXÚÜÚ[›Üˆ][HÌËˆH›Ý[™YXYXÈÙ\]Y[˜ÙHHH
+KÌŠW›˜YÈB˜ÛÛ\]X›HÝ[X[Z[™š[š]HÚ]™\ÜÎˆ]\È[Û›ÝÛ™K›Ý[™YžHK[™]ÂœÝYÙKN\œ›Üˆ\È^XÝHKÌM˜ÈÛÛ™\™Ù[˜ÙH\È[ˆ]Z[™Y™X[[Z]\Âš[[[Û˜[HYÝ]ÚYH\Èš[š]H›Ý[™\žK‚”ÝYÙ\ÈMˆ[™Ìˆ›ÝÈ^[™\ÈY\ˆÚ]^XÝ\œ›ÜœÈKÍMLÍ˜[™˜KÍŽMMÌŽM˜Ý[Ú]Ý]\ÜÙ\[™È[ˆ]Z[™Y[Z]‚”ÝYÙ\È[™LŽ^[™]\\‹Ú]\œ›ÜœÈKÌ—[™KÌ—ŒLŽ‚•H™]ÈXYXÐ\›ØXÚÙ\œ›Ü—ÜÚš[šÜØ[Ü™[H\Ü˜Y\È\ÙHÚXÚÜÚ[ÈÂ˜[ˆ^XÚ]Ý[X[Z[™š[š]HØÚY[Nˆ›Üˆ]™\žHÜÚ]]™H˜][Û˜[Û\˜[˜ÙKH[›ÛZ[˜]Ü‹Y\š]™YÝYÙH›Ý[™XZÙ\ÈH™[XZ[š[™È\œ›ÜˆÛX[[›ÝYÚ‚’]Ý[›ÙXÙ\È›È]Z[™Y[Z]ÜˆÛÛ\][™\ÜÈš[˜Ú\K‚‚•Hš[š]H›Ý\‹\Ú[˜[œÙ›Ü›H[ˆš[š]Q›Ý\šY\Ù\YšXØ]K›X[˜YÈBš][KMÍˆÛÜ™NˆH™\›È[ÙHÝ[\ÈÈ[Ù\ÈX˜[™ØØ[˜Ù[^XÝK˜[™[ÙH™]\›œÈÈ]H˜][Û˜[]X\\‹]\›ˆ›ÛÝËˆ\È\ÈB™š[š]H›Ý\šY\ˆÜÙÛÛ˜[]H[™\š[ÙXÚ]HÙ\YšXØ]K›ÝHÛZ[HX›Ý]˜ÛÛ™\™Ù[˜ÙHÙˆ[ˆ[™š[š]H›Ý\šY\ˆÙ\šY\Ë‚•HØ[YH[Ù[H›ÝÈYÈH\œÙ]˜[\Ý[Hš[š]H[™\™ÞHÚXÚÈ›ÜˆHÚYÛ˜[˜
+K‹Ë
+Xˆ]È[››Ü›X[^™Y]X\\‹]\›ˆÛÙY™šXÚY[È]™H[™\™ÚY\Â˜LÝ[[Z[™ÈÈLŒH
+ŠJÍ
+ÎJÌMŠXˆ\ÈÝ™[™Ý[œÈHš[š]B˜[œÙ›Ü›HÛÜ™HÚ]Ý][›ÙXÚ[™È[ˆ[™š[š]H›Ý\šY\ˆ[Z]‚•H˜[œÙ›Ü›HÚXÚÜÚ[›ÝÈ[ÛÈ™\šYšY\È[ÙHXÚÜÙH›Ý\‹\Ú[Ý[H\Â˜YØZ[ˆ™\›Ëˆ\È^[™ÈHš[š]H\š[ÙXÚ]H]šY[˜ÙH™^[Û™Û™HÛÛ\]B›[ÙHÞXÛHÚ[H™[XZ[š[™ÈH˜][Û˜[XÛÛ\^Ø[Ý[][Û‹‚•H\˜[Y]\š^™Y›Ý\”Ú[›Ý\šY\•˜[œÙ›Ü›WÜ\œÙ]˜[[Ü™[H›ÝÈ›Ý™\ÈBœØ[YH[››Ü›X[^™Y[™\™ÞHY[]H›Üˆ\˜š]˜\žH˜][Û˜[Ø[\\Ë^[™[™ÂHÛÛ˜Ü™]H
+K‹Ë
+XÚXÚÈÈH™]\ØX›H›Ý\‹\Ú[˜[œÙ›Ü›H]Ë‚•HÛÛ\[š[Ûˆ›Ý\”Ú[›Ý\šY\•˜[œÙ›Ü›WÛ[Ù\Ø^ÜÙ\ÈH›Ý\ˆ^XÝ[ÙB™›Ü›][\È[ˆ˜][Û˜[ÛÛÜ™[˜]\ËÛÈHš[š]HØ[˜Ù[][Ûˆ\È]˜Z[X›H\Â˜[ˆ^XÚ]ÛÛ\]][Û˜[[\™˜XÙK‚‚•H^XÝ]XÙHšX[™Û\È[ˆš[š]TXÚÐÙ\YšXØ]K›X[˜Y][HL‰ÜÂ™š[š]HÛÛÜ™[˜]HÛÜ™KˆH
+ÊXšX[™ÛH\È\™XH˜›Ý[™\žHÛÝ[˜[™[\š[ÜˆÛÝ[ØÈH[™\[™[
+KŠXšX[™ÛH\È\™XHX˜›Ý[™\žHÛÝ[[™[\š[ÜˆÛÝ[˜ˆH›Û‹X^\ËX[YÛ™YšX[™ÛHÚ]™\XÙ\È
+
+K
+JK
+K
+X\È\™XHMKÌ˜›Ý[™\žHÛÝ[X[™š[\š[ÜˆÛÝ[˜È[™YHØ]\ÙžHXÚÉÜÈY[]K‚•H›Ý\š[š]HÚ]™\ÜÈ\Ù\È™\XÙ\È
+
+K
+‹
+K
+‹JXˆ\™XHMX˜›Ý[™\žHÛÝ[[™[\š[ÜˆÛÝ[L˜YØZ[ˆØ]\ÙžZ[™ÈXÚÉÜÈY[]BÚ]HY™™\™[›Û‹\š[Z]]™HYÙH]\›‹‚•H[œ™\ÝšXÝY]XÙK\ÛYÛÛˆ[Ü™[H™[XZ[œÈY™\œ™Y‚‚•Hš[YK\™XÚ\›ØØ[XØÝ[][]Üˆ[ˆš[š]Tš[YT™XÚ\›ØØ[Ù\YšXØ]K›X[˜˜YÈ][HIÜÈÝ[X[Z[™š[š]HÛÜ™Nˆ]™\žHš[š]HÙ\YšYYš[YH\Ý\Â˜H™]ÈÙ\YšYYš[YHÚÜÙHÜÚ]]™H™XÚ\›ØØ[ÝšXÝH[˜Ü™X\Ù\ÈH^XÝœ˜][Û˜[Ý[KˆH^XÚ]Ú^\š[YHÚXÚÜÚ[™XXÚ\ÈÍŒKÌÌÌ›ÝYÚš[YHLØÚ]HÝšXÝ[˜Ü™X\ÙHœ›ÛHHš]™K\š[YHÝYÙKˆ\Â™Ù\È›ÝÛZ[HHÛÛ\]Y[™š[š]H]™\™Ù[˜ÙH[Ü™[KˆHZYÚ\š[YB˜ÚXÚÜÚ[›ÝYÚNX›ÝÈ™XXÚ\ÈMLMÍŽËÎMŽNMŽLÚ]HÝšXÝ[˜Ü™X\ÙB™œ›ÛHHÚ^\š[YHÝYÙKˆH[‹\š[YHÚXÚÜÚ[›ÝYÚŽX›ÝÈ™XXÚ\Â˜NLŒÎKÍŽMŽLÌŒÌÚ]HÝXÝ\˜[ÝšXÝ[˜Ü™X\ÙHœ›ÛHHZYÚ\š[YBœÝYÙK‚•HÙ[™K\š[YHÚXÚÜÚ[›ÝÈ™\šYšY\È]H^XÚ]XØÝ[][]Üˆ^ÙYYÂ˜ËÌ˜^[™[™ÈHš[š]HÜ›ÝÝY\ˆÚ]Ý]\ÜÙ\[™È]™\™Ù[˜ÙHÙˆ[‚š[™š[š]Hš[YHÙ\šY\Ë‚‚•Hš[š]Hš[X[]K\ÙX\˜ÚÚ]™\ÜÙ\È[ˆš[š]P™\˜[™Ù\YšXØ]K›X[˜˜Y][HN	ÜÈÛÜ™H]
+LL
+K
+LŒ
+K
+LÌ
+K
+M
+K
+ML
+K
+MŒ
+KŠMÌ
+K
+N
+K[™
+LL
+Nˆš[Y\ÈLKŒËÌKKLËŒKÌKË[™ŒLH\™HÚXÚÙYš[œÚYHHÛÜœ™\ÜÛ™[™Â™ÝX›Y[\˜[Ë‚˜™\˜[™Ù^[™YÙš[š]WØÙ\YšXØ]XXÚØYÙ\ÈHš\œÝÚ^[\˜[Ú]™\ÜÙ\È\ÈÛ™H™]\ØX›Hš[š]H›ÜÜÚ][Û‹[˜ÛY[™ÈH
+ŒLŒ
+XÝYÙNÂ˜™\˜[™Ù\\—Ùš[š]WØÙ\YšXØ]XXÚØYÙ\ÈHÝXœÙ\]Y[
+ÌM
+X[™˜
+MŒ
+X[™
+LŒ
+XÝYÙ\Ë‚•HÙ[™\˜[ÜÝ[]H™[XZ[œÈY™\œ™Y‚‚•H˜][Û˜[™XÝ[™ÛH[™\]X[]H[ˆš[š]R\ÛÜ\š[Y]šXÐÙ\YšXØ]K›X[˜˜YÈ][HÉÜÈš[š]HÙ[ÛY]šXÈÛÜ™Nˆ
+MWHŒ—
+KÚ]\]X[]H^XÝB™›ÜˆHÜ]X\™H[™[ˆ^XÚ]
+×[Y\Í
+HÙ\YšXØ]KˆHÙ[™\˜[œ[™K\™YÚ[Ûˆ\ÛÜ\š[Y]šXÈ[Ü™[H™[XZ[œÈY™\œ™YˆHÛÛ\[š[Ûˆ
+W[Y\ÌLŠB˜Ù\YšXØ]H™XÛÜ™È\™XH
+Œ
+K\š[Y]\ˆ
+Í
+K[™ÝšXÝY™XÝ˜ÍŒˆHMŠŒHNM˜‚•H]X[]]]™HY™XÝY[]H™XÝ[™ÛWÚ\ÛÜ\š[Y]šX×ÙØ\Ý™[™Ý[œÂ\ÈÛÜ™NˆH\š[Y]\‹\Ü]X\™H^Ù\ÜÈ\È^XÝH
+ˆ
+KXŠWŒ˜XZÚ[™ÈB™\]X[\ÚYH\]X[]HØ\ÙH[ˆ^XÚ]˜][Û˜[ÝXš[]HÝ][Y[‚‚•Hš[š]HØØÝ\[˜ÞH]˜[X]Üˆ[ˆš[š]Pš\^PÙ\YšXØ]K›X[˜YÈ][BŽLÉÜÈÛÜ™Nˆ[ÜHÝ™\ˆL^\ÈÚ]™HLÛÛ\Ú[Û‹Yœ™YH\ÜÚYÛ›Y[È[™MŒÛÛ\Ú[Ûˆ\ÜÚYÛ›Y[ËÚ]^XÝ˜][ÜÈŒËÌLX[™Œ‹ÌLXˆB™š]™K\\œÛÛˆ^[œÚ[ÛˆÚ]™\ÈÌÛÛ\Ú[Û‹Yœ™YH\ÜÚYÛ›Y[È[™ŽMÍŒ˜ÛÛ\Ú[ÛœÈÝ]ÙˆLÚ]˜][ÜÈNKÍŒX[™Í‹ÍŒX]YØZ[‚œ\][ÛˆHÝ[^XÝK‚‚ŠŠ”\˜[[›Ü›X[^˜][Ûˆ˜]ÚŠŠˆHÙ\šY\ËY™™XÝ]™KXØ[Ý[\ËÙ[ÛY]žK˜[ÙXœ˜K[™š[š]KSÑHÛÜšÜÝ™X[\È]™HYYH›ÛÝÚ[™ÈÝ[X[Z[™š[š]B˜Ù\YšXØ]\ÎˆÙ\šY\ËœÝÙ\”Ý[WÛWÛ][ÜÝØ˜^XÝ[˜Ý[Û‹˜ÝX™WÜÙXØ[Ù\š]˜]]™WØœ˜XÚÙ]˜˜][Û˜[Ú\˜ÛKœÚ[ÜÝÙ\—Û[™WÜ\˜[Y]\—ÚY[]X˜Û[›ÛZX[œ]X\X×Ù˜XÝÜ—ÛÙ—Ü›ÛÝ[™˜[™X\“ÑKÛÐžUÛ×ØØ^[^WÚ[Z[Û˜ˆXXÚ\ÈHš[š]H˜][Û˜[œÝ][Y[È›Û™H\ÜÙ\È[ˆ]Z[™Y[™š[š]H[Z]‚‚•H™^˜]Ú^[™ÈHØ[YH›Ý[™\žHÚ]˜\šXÚ]Ù\šY\Ëž™]UÛÔ\X[ØYÙš[š]UZ[ÛWÚ[\˜[ÚX˜^XÝ[˜Ý[Û‹œÜ]X\™WÜÙXØ[Ù\š]˜]]™WØœ˜XÚÙ]˜˜][Û˜[Ú\˜ÛKšX[™ÛUÚXÙP\™XWÜ]XYš[]\˜[ÙXYÛÛ˜[ØY]]š]X[™˜Û[›ÛZX[œ]X\X×Ü™[XZ[™\˜ˆHX[›ËKP˜ZÙ\ˆ™XÝ\œ™[˜ÙHØ\È][\Y]š\È›ÝÛÝ[Y[[]ÈÚ\™Y[[Ù[H›ÛÙˆÝXØÙYYË‚‚•H]\Ý˜]ÚYÈš]™H[Ü™Hš[š]HÙ\YšXØ]\È]HØ[YH›Ý[™\žN‚˜\šXÚ]Ù\šY\Ëž™]UÛÒ[\˜[ØÛÛZ[œ×Ø˜\Ù[ÙXÚ[X[ÌL™XÛÜ™ÈBœÝYÙKLL˜][Û˜[[˜ÛÜÝ\™HÛÛZ[š[™ÈHXÚ[X[	KLÍ	Â˜Ù\šY\Ë[\›˜][™Ô˜]Ë›ZX›š^[\›˜][™Ô˜]×ÝÚYÛWÛÛ™WÙ]—ÜÝXØØÚ]™\È[‚™^XÚ]š[š]HÚYØÚY[H›ÜˆHZX›š^ˆ]˜[X]ÜŽÂ˜˜][Û˜[š\ÙXÝ[Û•ÚYÛWÙ\œ›Ü—ØYÙ]›Ý[™ÈHš[š]H˜][Û˜[š\ÙXÝ[Û‚ÚY[™\ˆHÝ\YYYÙ]Â˜Û[›ÛZX[™]˜[ÜÜ×ÛÙ—Û›Û›™Y×ØÛÛœ×ÛÙ—ÜÜØ[™˜Û[›ÛZX[››×Û›Û›™YØ]]™WÜ›ÛÝÛÙ—Û›Û›™Y×ØÛÛœ×ÛÙ—ÜÜØ›ÝšYHH˜][Û˜[››Û›™YØ]]™K\›ÛÝ^Û\Ú[ÛˆÙ\YšXØ]NÈ[™˜˜XÝÜš^™Y]XY˜]X×Ú\×ØÛÛ\]X›WÜ›ÛÝØÝ\Y\È^XÚ]›ÛÝÈ›ÜˆB™˜XÝÜš^™Y˜][Û˜[XÛÛ\^]XY˜]XËˆ›Û™H\Ù\ÈÛÛ\][™\ÜÈÜˆ[ˆ]Z[™Yš[™š[š]HØš™XÝ‚‚•H™^›Ü›X[^˜][Ûˆ\ÜÈÝ™[™Ý[œÈ^\Ý[™È[šY\È˜]\ˆ[ˆ[™›][™ÂH™[˜ÚX\šÈÛÝ[ˆÙ\šY\Ë™Ù[ÛY]šXÔÝ[WÙØ\ÛWÛÙ—ÜÝÙ\—ØYÙ]\›œÈB™š[š]HÝÙ\ˆYÙ][ÈHÙ[ÛY]šXË]Z[\œ›Üˆ›Ý[™Â˜Ù\šY\Ë[\›˜][™Ô˜]Ë›ZX›š^[\›˜][™Ô˜]×ÝÚYÙ\WÜ™XÚ\›ØØ[[™]Â˜YÙ]ÛÜ›Û\žH^ÜÙHH^XÝš[š]HZX›š^ˆÚYÂ˜Ù\šY\Ë[\›˜][™Ô˜]Ë›ZX›š^[\›˜][™Ô˜]×Ü™XXÚ\×ÛÙ—ÜÜÚ]]™WÝÛ\˜[˜ÙX››ÝÈÛÛœÝXÝÈH˜]\˜[ÝYÙH›Üˆ]™\žHÜÚ]]™H˜][Û˜[ÚY™\]Y\ÝÂ˜Y™™\™[X[œ]X\X×ÜÙXØ[Ù\š]˜]]™WØœ˜XÚÙ]Ú]™\ÈH]X\XÈš[š]B›YX[‹]˜[YHœ˜XÚÙ]È˜][Û˜[Ú\˜ÛKš\›Û—Ý™YWÙ›Ý\—Ùš]™WØÛÛÜ™[˜]WØÙ\YšXØ]X˜ÚXÚÜÈ\›Û‰ÜÈY[]HYØZ[œÝ^XÚ]ËKMKMHÛÛÜ™[˜]\ÎÈ[™˜Û[›ÛZX[›[ÛšX×Ü]XY˜]X×Ü›ÛÝÚY™˜Ú\˜XÝ\š^™\ÈH˜][Û˜[›ÛÝÈÙˆB›[ÛšXÈ]XY˜]XÈžH]ÈÛÈÝ\YY˜XÝÜœËˆ\ÙH™[XZ[ˆÙ\YšXØ]K[]™[œÝXœÝ]]\È›ÜˆHÛÜœ™\ÜÛ™[™ÈÛ\ÜÚXØ[[Ü™[\Ë‚‚•\È\ÜÈ[ÛÈYÈÛÜÙY›Ü›\È›ÜˆHÜ]X\™Y[™ÝX™YÝÙ\ˆÝ[\Ë[‚™^XÝ˜][Û˜[˜XÝÜ‹XØ[˜Ù[][Ûˆ][ÝY[Ù\YšXØ]KH›Û‹Y\]Z[]\˜[˜ÛÛÜ™[˜]H]Ë[Ù‹XÛÜÚ[™\È^[\KHš[š]HPÛÛ\^ÝÙ\ˆ]Â˜PÛÛ\^›˜]Ý×Û][[™^XÚ]›ÛÝÈ›ÜˆH˜XÝÜš^™YPÛÛ\^ÝXšXË‚•\ÙH^[™][\ÈMËÍËÍË[™MÚ]Ý][›ÙXÚ[™ÈÛÛ\]YšYÛÛ›ÛY]šXÈ[˜Ý[ÛœË[Z]ËÜˆÛÛ\][™\ÜË‚‚•HÝ\œ™[›Ý[™\žH\ÜÈYÈH[›ÛZ[˜]Ü‹XYÙ][Ù[\È›ÜˆH˜\Ù[š[\˜[]˜[X]Ü‹[ˆ^XÚ]^[ÜˆÙ\›™[™[XZ[™\ˆYÙ]HÙ[™\šXÂ™˜XÝÜš^™YPÛÛ\^]X\XÈÙ\YšXØ]K[™HœšYÙB˜][\Ù[\—Ù\WÛ˜]ÝØœ›ÛH][\‹XÙ[\ˆ\›Þ[X[ÈÈš[š]H™\X]Y›][\XØ][Û‹ˆ\ÙHÚ\œ[ˆ][\È‹MMËÍK[™ˆÚ[H™\Ù\š[™ÂH›Ú™XÝ8 &\ÈÙ\YšXØ]K[]™[[\œ™]][Û‹‚‚•H™^š[š]K\ØÚ[XH\ÜÈYÈHÙ[™\šXÈ[Û›ÛZX[ÙXØ[Ù\š]˜]]™Hœ˜XÚÙ]˜H›ÛÝXÛÝ[X][[ÜÝ]ÛÈÛÛœÙ\]Y[˜ÙH›ÜˆH[ÛšXÈ]XY˜]XËH™]\ØX›BœÝYÙK]Ë\ÝYÙH˜\Ù[\™Ù]Z[\˜[›ÜYØ][Ûˆ[Ü™[K[™[ˆ^XÚ]”Û[^HÛÛÜ™[˜]HÙ\YšXØ]Kˆ\ÙH^[™][\ÈMÍKMK[™LÚ[Bœ™[XZ[š[™È[\™[H˜][Û˜[[™š[š]K‚‚•Hš[š]HYX[ˆ˜[YH[\™˜XÙH\È›ÝÈÚ\œ[™YžB˜Û[›ÛZX[™š[š]PÝXšX×ÜÙXØ[Ù\š]˜]]™WÙ[˜ÛÜÝ\™WÛÙ—ØYÙ]ˆ[ˆ^XÚ]œ˜][Û˜[Y\ÚYÙ]XÙ\ÈHÝXšXÈÙXØ[[œÚYH[ˆ\Ú[Û‹[™ZYÚ›ÜšÛÙÙ‚H[™Ú[\š]˜]]™KÚ]Ý]\ÜÙ\[™È[ˆ]Z[™Y™X[[\›YYX]BœÚ[ˆHXYXÈSKKQÓHÛÜ™H[ÛÈ^ÜÙ\Â˜XYXÐSQÓKœ›ÙXÝÛ][ØØ\™ÜÝ×ÛWÜÝ[WÜÝØH[›ÛZ[˜]Ü‹Yœ™YH›Ü›H\ÙY[™›Üˆš[š]H^XÝX\š]Y]XÈÙ\YšXØ]\Ë‚•HÙ[™\šXÈÛ[›ÛZX[™š[š]TÛ[›ÛZX[ÜÙXØ[ÜXXœ×Ù\œ›Ü—ÛWÙ\š]˜]]™WÙØ\››ÝÈXÚØYÙ\ÈHÛÜœ™\ÜÛ™[™ÈXœÛÛ]HÙXØ[\œ›Üˆ›Üˆ]™\žB››Û›™YØ]]™KXÛÙY™šXÚY[Ü›™\ˆÛ[›ÛZX[ˆHÙXØ[	ÜÈ\Ý[˜ÙHœ›ÛHB›Y[™Ú[\š]˜]]™H\È›Ý[™YžHHš[š]H\š]˜]]™Hœ˜XÚÙ]ÚY‚•\È\ÈH™]\ØX›H˜][Û˜[U•\œ›Üˆ[\™˜XÙH™Z[™HYÜ™YK\ÜXÚYšXÂ˜YÙ][Ü™[\Ë‚‚•HYX[ˆ˜[YH\™Ù]\È›ÝÈ^XÚ]H^Y\™YˆHÛÛœÝXÝ]™H•Â™[™Ú[Y[]HÛÛY\Èš\œÝ›ÛÝÙYžH[ˆ[YÜ˜[X]™\˜YÙH\š]˜]]™B˜Ù\YšXØ]KÚ]HÚ[Ú\ÙHYÜ˜[™ÙHÚ]™\ÜÈ™\Ù\™Y›Üˆ[ˆY™™XÝ]™[B˜ÛÛ[[Ý\È[Û›ÝÛ™H\š]˜]]™H
+Üˆ[ˆY™™XÝ]™[HY™™\™[XX›HÛÛ™^™[˜Ý[ÛŠKˆY\™HÛÛ™^]H\È[™Y›ÝYÚÛ™K\ÚYY\š]˜]]™\ÈÜˆÝX™Ü˜YY[È˜]\‚[ˆ[ˆ[š\ÝYšYY^XÝ˜[YHÙˆ‰Ø][ˆ[\›YYX]HÚ[‚•H™]\ØX›H[Ü™[B˜[YÜ˜[‘^XÝÙ[Ü™\”™\Ù\˜][Û‹š[YÜ˜[Ø]™\˜YÙWØ™]ÙY[—Ø›Ý[™Ø›ÝÂ™›Ü›X[^™\È]ZYH^Y\ŽˆÛˆHÜÚ]]™H˜][Û˜[Ù[ÝÙ\ˆ[™\\‚œÚ[Ú\ÙH›Ý[™È[\H]HÙ\YšYY[™Ú[[YÜ˜[]šYYžHB˜Ù[[™ÝY\È™]ÙY[ˆHØ[YH›Ý[™Ëˆ]\È[ˆ]™\˜YÙK]˜[YH[˜ÛÜÝ\™K››Ý[ˆ\ÜÙ\[Ûˆ]HÚ[]Z[š[™ÈH]™\˜YÙH^\ÝË‚‘›ÜˆH[š]ÝXšXËH™]ÈÝXšXÕ[š]Û]Øš\ÙXÝ[Û—ÜÙX\˜ÚXÚØYÙ\ÈB˜ÛÜœ™\ÜÛ™[™ÈÝ[X[Z[™š[š]HÚ]™\ÜÎˆHÙXØ[ÛÜH\ÈXB››Ü›X[^™Y\š]˜]]™H\™Ù]\ÈKÌØ[™H^\Ý[™ÈÙ\YšYYÜ]X\™B˜š\ÙXÝ[ÛˆÙX\˜Ú\È[ˆ[\˜[ÚÜÙHÜ]X\™Y˜[Y\È[˜ÛÜÙH]\™Ù]ˆ\Âš\È[ˆ\›Þ[X]HU•Ú]™\ÜÈ›ÜˆHÙ[™\˜[H\œ˜][Û˜[[\›YYX]HÚ[››ÝH˜][Û˜[^XÝ\›ÛÝÛZ[K‚•H]X\XÈÛÛ\[š[Ûˆ›ÝÈ\Ù\ÈHÙ[™\šXÈ[Û›ÝÛ™K]\™Ù]š\ÙXÝ[Ûˆ[\™˜XÙN‚˜]X\XÕ[š]Û]Øš\ÙXÝ[Û—ÝÛ\˜[˜ÙWØÙ\YšXØ]XXØÙ\È]™\žHÜÚ]]™Bœ˜][Û˜[Û\˜[˜ÙH[™™]\›œÈH˜][Û˜[[\˜[œ˜XÚÙ][™ÈH›Ü›X[^™Y™\š]˜]]™H\™Ù]KÍÚ]HÚYYÙ]›Ý™Y^XÚ]Kˆ\È\ÈBœ™]\ØX›HYÚ\‹YYÜ™YHU•ÙX\˜Ú]\›‹Ý[^™\ÜÙY›ÝYÚÝ[X[š[™š[š]H˜]\ˆ[ˆ[ˆ]Z[™Y\œ˜][Û˜[Ú[‚•HÙ[™\˜[š[š]S[Û›ÛZX[U•ÙX\˜Ú[Ù[H›ÝÈXÚØYÙ\È\È]\›ˆ›Ü‚™]™\žH[Û›ÛZX[ŠŠÌJXÛˆÌWXˆ]È›Ü›X[^™Y\š]˜]]™H]™\˜YÙH\Â˜KÊŠÌJXH[™Ú[\™Ù]œ˜XÚÙ]\È›Ý™Y[šY›Ü›[K[™˜[Û›ÛZX[[š]Û]Øš\ÙXÝ[Û—ÝÛ\˜[˜ÙWØÙ\YšXØ]XÝ\Y\ÈH˜][Û˜[š[\˜[Ùˆ[žH™\]Y\ÝYÜÚ]]™HÚYˆ\È›Û[Ý\ÈHÝXšXÈ[™œ]X\XÈ^[\\ÈÈH™]\ØX›HYÚ\‹YYÜ™YHU•Ù\YšXØ]K‚•HÛÛ\[š[Ûˆ\š]˜]]™H]˜[X]Ü‹˜][Û˜[Z[œ][Û›ÝÛšXÚ]H[[XB˜^XÝ˜]Û[Û›ÛZX[Û›Û™XÜ™X\Ú[™Ø[™YÜ™YK[š[™HÛÜšÙYU•Ù\YšXØ]H\™B˜[ÛÈ[˜ÛYY[ˆHX›XÈ[Xœ™[H[\ÜˆH›ÛšXÈ™\Ý[™[XZ[œÈB™š[š]HÙXØ[[™\š]˜]]™Hœ˜XÚÙ]›Ý[ˆ]Z[™Y™X[[\›YYX]HÚ[‚•H[Ù[H\È›ÝÈ\ÙˆH[Xœ™[HÛÛ\]X›P[˜[\Ú\Ø[\ÜÛÈB™Ù[™\˜[™[˜ÚX\šË[]™[U•Ù\YšXØ]H\È]˜Z[X›H›ÝYÚH›Ú™XÝ8 &\ÂœX›XÈZ[˜]\ˆ[ˆÛ›H\È[ˆ\ÛÛ]Yš[K‚‚‘›Üˆ™[˜ÚX\šÈ][HLš[š]TÝ\›[™Ô˜][×ÜÜØ›ÝÈXZÙ\ÈHÜÚ]]š]HÙ‚Hš[š]HÝ\›[™Ë\Ú\Y˜][È^XÚ]›Üˆ]™\žH˜]\˜[[™^[™]™\žBœÜÚ]]™H˜][Û˜[ØØ[H[œ]ˆ\È›ÝšY\ÈH[›ÛZ[˜]ÜˆØ]H›ÜˆB™]\™Hš[š]H[\˜[˜[œÜÜˆHÛÛ˜Ü™]HLLÙ\YšXØ]H\È›ÝÈ[ÛÂœÚ\œ[™YžHš[š]TÝ\›[™Ô˜][Ð][—Ý[š]Ù[˜ÛÜÝ\™XÚXÚXÙ\ÈB˜ÛÛ\]Y˜][È[ˆÌKLKÌLXÚ[HX]š[™ÈÝ\›[™ÉÜÈ\Þ[\ÝXÈ[Ü™[B™Y™\œ™Y‚•HÛÛ\[š[Ûˆš[š]TÝ\›[™Ô˜][Ð][—Ý[š]Ù\œ›Ü˜^ÜÈ\È\ÈB™^XÚ]˜][Û˜[\œ›ÜˆYÙ]XXœÈ
+¸  x  HJHHKÌL‚•HÛÛ\[š[Ûˆš[š]TÝ\›[™ÔÝYÙQZYÚÙ\YšXØ]H™\X]ÈH›Ý[™Y˜Ø[Ý[][Ûˆ]NÚ]H˜][Û˜[Ü]X\™K\›ÛÝœ˜XÚÙ]›ÜˆÜ\
+MŠœJX˜[™HÚXÚÙY˜][È[˜ÛÜÝ\™HÌKÌ‹—X‚•H™]Èš[š]TÝ\›[™ÔÝYÙUÙ[™XÙ\YšXØ]H™\X]ÈHØ[YHš[š]B˜[œÜÜ]LL˜\Ú[™ÈH˜][Û˜[Ü]X\™K\›ÛÝœ˜XÚÙ][˜ÚÜ™Y]˜ŒMËÌX›ÜˆÜ\
+
+œJX[™H[˜ÛÜÝ\™HÌKÌ‹—X‚•H™]Èš[š]TÝ\›[™ÔÝYÙTÚ^Y[˜Ù\YšXØ]H^[™ÈHØ[YH›Ý[™Y˜[œÜÜÈLM˜\Ú[™ÈHœ˜XÚÙ]LËÌL›ÜˆÜ\
+ÌŠœJX[™YØZ[‚˜ÚXÚÚ[™ÈH˜][È[˜ÛÜÝ\™HÌKÌ‹—X‚•H™]Èš[š]TÝ\›[™ÔÝYÙUÙ[XÙ\YšXØ]HÛÛ[Y\È\È›Ý[™Y˜[œÜÜÈLŒ\Ú[™ÈHœ˜XÚÙ]LLŒKÌL›ÜˆÜ\
+
+œJX[™YØZ[‚˜ÚXÚÚ[™ÈH˜][È[˜ÛÜÝ\™HÌKÌ‹—XÈÝ\›[™ÉÜÈ\Þ[\ÝXÈ[Z]™[XZ[œÂ™Y™\œ™Y‚•H™]Èš[š]TÝ\›[™ÔÝYÙUÙ[Q›Ý\˜Ù\YšXØ]H^[™ÈHØ[YH›Ý[™Y˜[œÜÜÈL\Ú[™ÈHœ˜XÚÙ]LŒÎKÌL›ÜˆÜ\
+
+œJX[™YØZ[‚˜ÚXÚÚ[™ÈH˜][È[˜ÛÜÝ\™HÌKÌ‹—X‚•Hš[š]TÝ\›[™ÔÝYÙU\UÛØÙ\YšXØ]HÛÛ[Y\ÈHØ[YHš[š]B˜[œÜÜÈLÌ˜\Ú[™ÈHœ˜XÚÙ]MNÌL›ÜˆÜ\
+
+œJX[™YØZ[‚˜ÚXÚÚ[™ÈH˜][È[˜ÛÜÝ\™HÌKÌ‹—XÈH\Þ[\ÝXÈ[Z]™[XZ[œÈY™\œ™Y‚‚•HX]š^ÛÜšÜÝ™X[H[ÛÈYÂ˜[™X\“ÑK’\›[ÛšXÓÜØÚ[]Ü‹ÛÐžUÛ×ÛX]š^Ý×Ý™YX™YXÚ[™ÈH\™œÝÙ\ˆÙˆ[ˆ^XÚ]˜][Û˜[
+—[Y\ÌŠHX]š^È]È˜XÙK]\›Z[˜[HX]š^[™HY[]Kˆ\ÈY˜[˜Ù\ÈHš[š]HØ^[^KKR[Z[ÛˆÛÜ™BÚ]Ý][›ÙXÚ[™ÈHÙ[™\˜[X]š^™XÝ\œ™[˜ÙKˆHÛÛ\[š[Û‚˜[™X\“ÑK’\›[ÛšXÓÜØÚ[]Ü‹ÛÐžUÛ×ÛX]š^Ý×Ù›Ý\˜Ø\œšY\ÈHØ[YBœ™YXÝ[Ûˆ›ÝYÚH›Ý\ÝÙ\‹Ú]ÛÙY™šXÚY[ÈÙ[™\˜]YžHHš[š]BØ^[^KKR[Z[Ûˆ™XÝ\œ™[˜ÙK‚•H™]È\›[ÛšXÓÜØÚ[]Ü‹œ˜]X]š^Ý™YPžU™YWÙ\WÙ^XÚ]œšYÙH[™˜˜]X]š^Ý™YPžU™YWØØ^[^WÚ[Z[Û˜[Ü™[H˜[œÜÜH^XÚ]ŒËXžKLÈY[]HÈ\˜š]˜\žH˜][Û˜[X]š^]KÚ[HÙY\[™ÈB˜Ú\˜XÝ\š\ÝXÈÛÙY™šXÚY[È\Èš[š]H[žH›Ü›][\Ë‚•HÛÜšÙYš[š]U™YPžU™YPØ^[^Q^[\XYÈHXYÛÛ˜[˜][Û˜[›X]š^XYÊK‹ÊXˆX[ˆÚXÚÜÈ˜XÙH˜ÙXÛÛ™ÛÙY™šXÚY[LX™]\›Z[˜[˜[™H^XÚ]Y[]HWŒÈHWŒˆ
+ÈLPHH’HH‚•HØ[YH[Ù[H›ÝÈÚXÚÜÈH›Û‹YXYÛÛ˜[\\‹]šX[™Ý[\ˆX]š^˜ÖÌKKKÌ‹WKÌ×WXÚ]HØ[YHÛÙY™šXÚY[È[™Ø^[^KKR[Z[Û‚šY[]K[[ÛœÝ˜][™ÈHš[š]HX]š^^Y\ˆ™^[Û™XYÛÛ˜[]K‚•HXYÛÛ˜[Ú]™\ÜÈ[ÛÈÛÛ\]\È]È›Ý\š[š]HÝÙ\ˆ^XÝN‚˜WHXYÊKM‹JX›ÝšY[™ÈHÛÛ˜Ü™]HÛÛœÝ[Y\ˆÙˆHš[š]B›X]š^\ÝÙ\ˆ™XÝ\œ™[˜ÙK‚•HÛÛ\[š[Ûˆ˜]X]š^Ý™YPžU™YWÛX]š^Ý×Ü™XÝ\œ™[˜ÙX˜[œÜÜÈB™š[š]H\™[Ü™\ˆÝÙ\ˆ™XÝ\œ™[˜ÙHÈHØ[YH\˜š]˜\žHX]š^[œ]‚•HÛÛ\[š[Ûˆ[™X\“ÑK’\›[ÛšXÓÜØÚ[]Ü‹ÛÐžUÛ×Ú[™\œÙWÝ[š\]YWÜšYÚœ›Ý™\È[š\]Y[™\ÜÈÙˆHš[š]H[™\œÙHÙ\YšXØ]H[[Û™È[šYÚ[™\œÙ\Â›ÙˆH›ÛœÚ[™Ý[\ˆ˜][Û˜[ÛËXžK]ÛÈX]š^‚•HÞ[[Y]šXÈÛÐžUÛ×Ú[™\œÙWÝ[š\]YWÛY[Ü™[HÝ\Y\ÈHÛÜœ™\ÜÛ™[™Â›YZ[™\œÙH[š\]Y[™\ÜÈÙ\YšXØ]K‚•HÛÛ][Ûˆ[\™˜XÙHÛÐžUÛ×Ú[™\œÙWÜÛÛ™\Ø[ˆÙ\YšY\È]\Z[™ÂH^XÝ]X›H[™\œÙHÈ[žHš[š]H˜][Û˜[Ý]HÛÛ™\ÈHÜšYÚ[˜[Þ\Ý[K‚˜ÛÐžUÛ×ÜÛÛ][Û—Ý[š\]YXÛÛ\]\ÈHš[š]HÞ\Ý[H[\™˜XÙHžH›Ýš[™Â]ÛÈ˜][Û˜[ÛÛ][ÛœÈÚ]HØ[YHšYÚZ[™ÚYHÛÚ[˜ÚYK‚‚•HœšYÙH\ÜÈ[ÛÈYÈHÙØ\š]HY\Ú\œ›ÜˆYÙ]ÝšXÝ\˜Ý[™Ù[˜œ˜[˜ÚÙ\\˜][Ûˆ›Üˆ[™\œÙHÙX\˜Úš[š]H›ÛÝ[Ù‹][š]H][\XØ][Û‚˜ÛÜÝ\™K^XÝ
+—[Y\ÌŠH[™\œÙHY[]Y\Ë[™[ˆ^XÚ]\˜Ý[™Ù[šÙ\›™[\œ›Üˆ›Þˆ\ÙHY˜[˜ÙHHY™™XÝ]™H™\œÚ[ÛœÈÙˆ][\ÈMËKÍK[™ÎHÚ]Ý]\ÜÙ\[™ÈHÛ\ÜÚXØ[U•ÛÛ\]YÙØ\š]KÜˆÙ[™\˜[˜[ÙXœ˜ZXÈÛÜÝ\™H[Ü™[K‚‚•H[˜Ý[Û‹[]™[\ÜÈ›ÝÈYÈHš[š]H^Û™[X[Y™™\™[˜ÙK\][ÝY[™[˜ÛÜÝ\™K™\™\Ù[Y]\™Ù]Ü]X\™K\›ÛÝÙX\˜Ú™X[[”˜]ØY][Û‚˜ÛÜÝ\™K[ˆ•È[™Ú[\ÝYÙH˜[œÜÜ[Ü™[K[™H›Ý\‹\Ý\˜][Û˜[œ›Ý][ÛˆÞXÛKˆ\ÙH\™HÛÛœÝXÝ]™HœšYÙH[[X\È›Üˆ][\ÈMKMËKÍK[™ÎNÈ^HÈ›Ý\ÜÙ\HÛÜœ™\ÜÛ™[™ÈÛÛ\]Y\™X[[Ü™[\Ë‚‚•H˜[YYZ][H\ÜÈXØÙ\ÈÙ[™\šXÈ˜XÝÜ™Y][ÝY[Ø[˜Ù[][Ûˆ›ÜˆB“	ÒÜ][›Ý[™\žH[™H™\ÝšXÝYÛ™K]˜\šX][ÛˆÝXšXÈÚYÛ‹Ü›ÛÝ›Ý[™›Ü‚‘\ØØ\\Ëˆ\ÙH\™H^XÚ]š[š]HÝXœÝ]]\È›Üˆ][\È[™L‚•HÛÜšÙY]XY˜]X×Û[™X\—ÝÛÜšÙYÜ™[XZ[™\˜^[\H›ÝÈ[œÝ[X]\ÈB“	ÒÜ][Ù\YšXØ]HÚ]Hš[š]H][ÝY[[˜[ÙÝYHÙˆ
+Œ‹LJKÊLJX‚H™\ÚYX[\œ›Üˆœ›ÛHH˜\ÙH˜[YH˜\È^XÝHHÛÛ\]X›HÝ\[™HÝYÙKZ[™^Y™\œÚ[ÛˆXZÙ\È]\œ›ÜˆKÛ˜ˆ›È[Z][Ü™[H\ÈYY‚•HÛÛ\[š[ÛˆÝXšXÈÙ\YšXØ]H™XÛÜ™ÈHš[š]H™\ÚYX[ÊœÝ\
+ÈÝ\Œ˜˜Y\ˆØ[˜Ù[[™È
+LJXœ›ÛHŒËLXÙÙ]\ˆÚ]]ÈÝYÙKZ[™^Y›Ü›H]˜Ý\HKÛ˜ˆ\ÈÝ™[™Ý[œÈ][HÚ]Ý]Y[™ÈHY™\œ™Y[Z][Ü™[K‚•H™]ÈÝXšX×Û[™X\—ÝÛÜšÙYÜ™[XZ[™\—Ø]ÜÝYÙWÙ\œ›Ü—ÛWÙ›Ý\—Ù]˜\›œÈ]šY[]H[È[ˆ^XÚ]™XÚ\Ú[ÛˆØÚY[N‚˜XXœÈ
+—ÛˆHÊHHÛ˜›Üˆ]™\žHÜÚ]]™HÝYÙH˜ˆ\È\ÈHš[š]B˜[ÛÜš]ZXÈ™[XZ[™\ˆ›Ý[™™YYY™Y›Ü™H[žH]\™H[Z]\ÜÙ[X›K‚•H]X\XÈÛÛ\[š[Ûˆ›ÝÈ\ÈHX]Ú[™È›Ý[™˜XXœÈ
+WÛˆH
+HHLKÛ˜Ù\YžZ[™ÈHš[š]H™\ÚYX[˜‹Ûˆ
+ÈÛ—Œˆ
+ÈKÛ—ŒØ]]™\žHÜÚ]]™HÝYÙKˆ\È^[™ÈH™XÚ\Ú[Û‚œØÚY[HXÜ›ÜÜÈH™^Ø[˜Ù[][ÛˆYÜ™YHÚ]Ý]ÛZ[Z[™ÈH[Z]‚•Hš[š]H	Ò0í][Y\ˆ›ÝÈ[ÛÈ™XXÚ\ÈYÜ™YHZYÚˆHØÝXÈ][ÝY[š\ÈH^XÝ™\ÚYX[ŽÛˆ
+ÈM‹Û—Œˆ
+ÈÌÛ—ŒÈ
+ÈM‹Û—
+ÈŽÛ—H
+ÈÛ—ˆ
+ÈKÛ—Ø˜]ÝYÙHKÛ˜ˆ\È\È[›Ý\ˆ˜][Û˜[Ø[˜Ù[][ÛˆÙ\YšXØ]K›ÝBœÝ][Y[X›Ý]HÛÛ\]Y[Z]‚•HØ[YHY\ˆ›ÝÈ™XXÚ\ÈYÜ™YHš[™KÚ]™\ÚYX[˜Í‹Ûˆ
+ÈÛ—Œˆ
+ÈL‹Û—ŒÈ
+ÈL‹Û—
+ÈÛ—H
+ÈÍ‹Û—ˆ
+ÈKÛ—È
+ÈKÛ—Ž‚•\ÈX]Ú\ÈH›Ú™XÝ8 &\Èš[š]H›ÛšXÈÛ[›ÛZX[ÚXÚÜÚ[Ú[HÙY\[™Â“	Ò0í][8 &\ÈÛ\ÜÚXØ[[Z][Ü™[HY™\œ™Y‚’]›ÝÈ™XXÚ\ÈYÜ™YH[ˆ\ÈÙ[Ú]H^XÝÝYÙH™\ÚYX[˜KÛˆ
+ÈLŒÛ—Œˆ
+ÈŒLÛ—ŒÈ
+ÈL‹Û—
+ÈŒLÛ—H
+ÈLŒÛ—ˆ
+ÈKÛ—È
+ÈLÛ—Ž
+ÈKÛ—ŽX‚•HÛÜšÙYY\ˆÛÜÙ\È]YÜ™YH[]™[ˆÚ]™\ÚYX[˜MKÛˆ
+ÈMKÛ—Œˆ
+ÈÌÌÛ—ŒÈ
+ÈŒ‹Û—
+ÈŒ‹Û—H
+ÈÌÌÛ—ˆ
+ÈMKÛ—È
+ÈMKÛ—Ž
+ÈLKÛ—ŽH
+ÈKÛ—ŒL‚[Ùˆ\ÙH™[XZ[ˆš[š]H˜][Û˜[Ø[˜Ù[][ÛˆY[]Y\ÎÈHÛ\ÜÚXØ[›[Z][\œ™]][Ûˆ™[XZ[œÈY™\œ™Y‚•HÛÜšÙYš[š]TÙ\XÓU•^[\X›ÝÈ[œÝ[X]\ÈHš[š]HYX[ˆ˜[YBš[\™˜XÙH]YÜ™YHÙ]™[ŽˆX[ˆÛÛ\]\ÈHÙXØ[ÙˆØÛˆÌWX\Â˜X[™ÚXÚÜÈH[™Ú[\š]˜]]™H[˜ÛÜÝ\™HÌ×Xˆ\È\ÈHÛÛ˜Ü™]Bš][KMÍH™[˜ÚX\šÈÚ]™\ÜÈÚ[H™]Z[š[™ÈH›Ú™XÝ	ÜÈš[š]K˜][Û˜[˜[ÛÜš]ZXÈ›Ý[™\žK‚•H™]Èš[š]S›ÛšXÓU•^[\X^[™ÈHš[š]HÛ[›ÛZX[Y\ˆÈYÜ™YB›š[™NˆHÙXØ[ÙˆŽX\ÈXÛˆÌWXÚ]\š]˜]]™Hœ˜XÚÙ]ÌWX˜[™\ÈLLXÛˆÌK—XÚ][™Ú[œ˜XÚÙ]ÎKŒÌXˆ›È[\›YYX]Bœ™X[Ú[\ÈÙ[XÝY‚•HÝXšXÈU•\ÜÈ›ÝÈ[ÛÈÚXÚÜÈHÚYÛ™Y[\˜[ËLKWXˆHÙXØ[š\ÈX[™Hš[š]H\š]˜]]™H[˜ÛÜÝ\™H\ÈÌ×Xˆ\Èœ›ØY[œÈ][BÍIÜÈ˜][Û˜[YÛXZ[ˆÛÝ™\˜YÙHÚ]Ý]Ù[XÝ[™È[ˆ[\›YYX]HÚ[‚’]›ÝÈ[ÛÈ[˜ÛY\ÈHÙ[Z[™HÚ[Ú\ÙHÚXÚÜÚ[ÛˆÌ‹LWXˆHÝXšXÂœÙXØ[ÛÜH\ÈMØ]Z[™YžHH[Û›ÝÛ™H\š]˜]]™HÊžŒ˜]Bœ˜][Û˜[[\š[ÜˆÚ]™\ÜÈHØˆ\È\ÈHš\œÝ^XÚ]Ú[Ú\ÙHU•˜Ù\YšXØ]H[ˆH›Ú™XÝ	ÜÈ[Û›ÝÛ™KY\š]˜]]™H\™XÝ[Û‹‚•H™]\ØX›HY™™\™[X[˜ÝX™WÜÙXØ[ÜÝ\YYÛ]ÝÚ]™\ÜØ›ÝÈXÚØYÙ\È\Âœ]\›ˆ›Üˆ\˜š]˜\žH˜][Û˜[[™Ú[È[™HÝ\YY˜][Û˜[[\š[Ü‚œÚ[ˆÚXÚÚ[™ÈWŒˆ
+ÈJ˜ˆ
+È—ŒˆHÊŒ˜\È[›ÝYÚÈÙ\YžHHÝXšXÂœÙXØ[Y[]H]ˆ\ÈXZÙ\ÈHÚ[Ú\ÙHÚ]™\ÜÈ[ˆ[\™˜XÙH˜]\‚[ˆHÛ™K[Ù™ˆ[Y\šXØ[^[\KÚ[HÝ[]›ÚY[™È[ˆ^\Ý[X[™X[š[\›YYX]K\Ú[[Ü™[K‚•H™]Èš[š]T]Z[XÓU•^[\XYÈH[\›YYX]HYÜ™YKYš]™HÚ]™\ÜÎ‚HÙXØ[ÙˆXÛˆÌWX\ÈX[™Hš[š]H\š]˜]]™Hœ˜XÚÙ]\Â˜ÌWXˆ\È^[™È][HÍx &\ÈÛÜšÙYÛ[›ÛZX[Y\ˆÚ]Ý]Ù[XÝ[™È[‚š[\›YYX]HÚ[‚•H™]Èš[š]T]X\XÓU•^[\Xš[ÈH[\›YYX]HYÜ™YKY›Ý\ˆØ\ÙN‚HÙXØ[ÙˆÛˆÌWX\ÈXÚ]š[š]H\š]˜]]™Hœ˜XÚÙ]ÌX‚•H\ØØ\\È^[\\È›ÝÈ[˜ÛYH™YU˜\šX][ÛÝXšXØˆHš[š]H\Ý›Ü‚˜
+LJJLŠJLÊX\È™YHÚYÛˆ˜\šX][ÛœË[™^XÝ˜XÝÜš^˜][Ûˆ›Ý™\Â]]ÈÜÚ]]™H˜][Û˜[›ÛÝÈ\™H™XÚ\Ù[HX˜[™Ø‚•Hš[š]H[YÜ˜][Û‹XžK\\ÈY\ˆ›ÝÈ[˜ÛY\Â˜š[š]T]X\XÔ]Z[XÒ[YÜ˜][ÛžT\ØˆHÛÈ[™Ú[]ÙZYÚY˜][Û˜[™ÜšYÝ[\È›Üˆ[™X[\ØÛÜHÈH[™Ú[›ÙXÝX]]™\žBœÜÚ]]™HÝYÙKÚ]ÝYÙH›Ý\ˆÚXÚÙY^XÚ]Kˆ\È^[™ÈHš[š]B‘•ËÜ›ÙXÝ\[HÛÜ™HÙˆ][HMHÚ]Ý][›ÙXÚ[™ÈHÛÛ\]Y[YÜ˜[Ü‚˜H™X[[[X™\ˆ[Z]‚•H^\Ý[™Èš[š]Q•Ô]Z[XØÙ\YšXØ]H\È›ÝÈÝ\™˜XÙY\ÈH™^š][KLMHÚXÚÜÚ[ˆš[š]HY[™šYÚ[™Ú[Ý[\È›ÜˆXÛˆÌWX™[˜ÛÜÙHKÍ˜Ú]ÝYÙHÙ[H[šÙY^XÚ]H[ˆH›Y\š[ˆ\ÂšÙY\ÈH]Z[XÈ•ÈÛÛœÝXÝ[Ûˆ\ØÛÝ™\˜X›H[Û™ÜÚYHH]X\XÈ[™œÙ^XÈÚXÚÜÚ[Ë‚•H™]Èš[š]PÛÛ\^]XY˜]XÑ^[\XÝ\Y\ÈH™^ÛÜšÙY•B˜›Ý[™\žNˆX[ˆÚXÚÜÈ›Ý\Ý[˜Ý˜][Û˜[XÛÛÜ™[˜]H›ÛÝÈÙ‚˜—ŒˆHŠžˆ
+ÈXH˜XÝÜš^˜][Ûˆ[ÈHÛÈÝ\YY[™X\ˆ˜XÝÜœË[™H^XÝš[š]H›ÛÝ\ÙX\˜Ú™\Ý[ˆ\ÈÝ™[™Ý[œÈ][\Èˆ[™ÍÈÚ[BšÙY\[™È\˜š]˜\žK\Û[›ÛZX[›ÛÝ^\Ý[˜ÙHY™\œ™Y‚•H™]Èš[š]PÛÛ\^[™X\‘^[\XYÈH^XÚ]›Û‹\™X[[™X\ˆ˜\ÙB˜Ø\ÙHLˆ
+È
+JÚJ^˜Ú][™\œÙHÚ]™\ÜÈ
+KZJKÌ˜[™^XÝ›ÛÝKZX‚•\È[œÝ[X]\ÈHÙ[™\˜[ÛÛ\^[[™X\ˆ•H[\™˜XÙH[\™[H[‚œ˜][Û˜[ÛÛÜ™[˜]\ËÚ]Ý]Y[™ÈHÛÛ\]YÛÛ\^]š\Ú[ÛˆÜ\˜][Û‹‚•H™]Èš[š]PÛÛÜ™[˜]R[™\]X[]X[Ù[HYÈH™]\ØX›H˜][Û˜[Ø]XÚKKTØÚØ\žˆÙ\YšXØ]K]ÈPÛÛ\^Ý\›ÙXÝÜXÚX[^˜][Û‹[™HÜ]X\™Y[›Ü›HY][Ûˆ^[œÚ[Û‹ˆH›ÛÙˆ^ÜÙ\ÈHš[š]BœÝ[K[Ù‹\Ü]X\™\È™[XZ[™\ˆ[™Ý™[™Ý[œÈÝ\Ü[™È][HÎ[™H›Ü›BšÙ\›™[™Z[™][HLHÚ]Ý][›ÙXÚ[™ÈHÛÛ\]Y]XÛYX[ˆ›Ü›K‚•H][KNÚ]™\ÜÈ›ÝÈ[˜ÛY\ÈHÙXÛÛ™š[YK[X™[Y˜XÝÜˆÜ™\š[™È›Ü‚˜ÍŒ[™š[YQ˜XÝÜÙ\YšXØ]K™˜XÝÜ—Ü\›X›Ý™\ÈHÛÈš[š]H\ÝÂ˜\™H\›]]][Û‹Y\]Z]˜[[ˆ\ÈXZÙ\ÈHÙ\YšXØ]K[]™[[š\]Y[™\ÜÂ˜›Ý[™\žH^XÝ]X›H˜]\ˆ[ˆY\™[HØÝ[Y[Y‚•HØ[YHÚ]™\ÜÈ›ÝÈ[˜ÛY\ÈÌŒH—
+ˆ×Œˆ
+ˆXÚ]]Èš[YK[X™[Y™˜XÝÜˆ\Ý›ÙXÝY[]K[™]š\ÚXš[]HÚXÚÜÈ™\šYšYY\™XÝK‚’]›ÝÈ[ÛÈ[˜ÛY\ÈŒH—ŒÈ
+ˆÈ
+ˆWŒ˜Ú][ˆ[™\[™[œš[YK[X™[Y˜XÝÜˆ\Ý›ÙXÝY[]K[™]š\ÚXš[]HÚXÚÜË‚•HØ[YHš[š]H˜XÝÜš^˜][Ûˆ\ÜÈ›ÝÈ[˜ÛY\ÈLˆHˆ
+ˆ×Œˆ
+ˆØÚ]š]È›ÙXÝ[™]š\ÚXš[]HÚ]™\ÜÙ\ÈÚXÚÙYžH\›Z[˜][™ÈÛÛ\]][Û‹‚•H™]Èš[š]S[Û›ÝÛ™TÜ]X\™R[YÜ˜[[Ù[H›Û[Ý\ÈH^XÝÜ]X\™Bš[YÜ˜[ÛˆÌWXÈH[Û›ÝÛ™PÛÛœÝXÝ[Û‘›Ü˜ˆX[ˆÚXÚÜÈH˜][Û˜[›[Û›ÝÛšXÚ]H˜XÝÜš^˜][Û‹˜[Y]HÙˆH™\Ý[[™È[Û›ÝÛ™H[YÜ˜[[™š]È\]Z]˜[[˜ÙHÈKÌØˆ\ÈY˜[˜Ù\ÈHÛÛœÝXÝ]™H•ÈÛÜ™HÙˆ][HMK‚•HØ[YHœšYÙH›ÝÈÛÝ™\œÈŒØÛˆÌWXˆ]Èš[š]HY™™\™[˜ÙH˜XÝÜš^˜][Û‚œ›Ý™\È›Û™XÜ™X\Ú[™Û™\ÜË[™H›Û[ÝY[Û›ÝÛ™HÛÛœÝXÝ[Ûˆ\È˜[Y[™™\]Z]˜[[ÈKÍˆÙÙ]\ˆHÜ]X\™H[™ÝXšXÈØ\Ù\È\ÝX›\ÚHš\œÝ››Û‹XY™š[™HÛ[›ÛZX[[œÝ[˜Ù\ÈÙˆH[Û›ÝÛ™KZ[YÜ˜Xš[]H[\™˜XÙK‚•HY\ˆ›ÝÈ™XXÚ\Èˆ]È˜][Û˜[Y™™\™[˜ÙH˜XÝÜš^˜][Ûˆ›Ý™\Â›[Û›ÝÛšXÚ]K[™H›Û[ÝYš[š]HÛÛœÝXÝ[Ûˆ\È˜[Y[™\]Z]˜[[Â˜KÍXˆ\È^[™ÈH][KLMH[Û›ÝÛ™HœšYÙH›ÝYÚH]X\XÈ•Â˜ÚXÚÜÚ[‚•H™]Èš[š]S[Û›ÛZX[[Û›ÝÛšXÚ]X[Ù[HÙ[™\˜[^™\ÈHÜ™\ˆÛÛ\Û™[›Ùˆ]Y\Žˆ^XÝ˜]Û[Û›ÛZX[Û›Û™XÜ™X\Ú[™Ø›Ý™\È]]™\žH˜][Û˜[›[Û›ÛZX[›˜\È›Û™XÜ™X\Ú[™ÈÛˆÌWXˆ\È\ÈH™]\ØX›Hš[š]KZ[œ]›[[XH›Üˆ]\ˆ[Û›ÛZX[[YÜ˜[[™U•Ù\YšXØ]\Ë›ÝHÝ[™[Û™B™š[š]K\Ý[HZ[\ÝÛ™HÜˆHÛÛ\]Y\™X[[Z][Ü™[K‚•H™]È›Ý\•˜\šX][Û”]X\XØÛÛ[Y\ÈHš[š]HÙ\YšXØ]HY\ˆÚ]˜
+LJJLŠJLÊJM
+XˆX[ˆÚXÚÜÈÚYÛˆÛÝ[›Ý\ˆ[™Y[YšY\È[›Ý\‚œÜÚ]]™H˜][Û˜[›ÛÝËˆ\ÈÝ™[™Ý[œÈ][HLÚ]Ý]ÛZ[Z[™ÈÙ[™\˜[œ™X[\›ÛÝÛÝ[[™Ë‚•H™]Èš]™U˜\šX][Û”]Z[XØ^[™ÈHØ[YHš[š]H]\›ˆÂ˜
+LJJLŠJLÊJM
+JMJXˆX[ˆÚXÚÜÈš]™HÚYÛˆ˜\šX][ÛœÈ[™Y[YšY\Â˜[š]™HÜÚ]]™H˜][Û˜[›ÛÝËÚ[H[œ™\ÝšXÝY\ØØ\\È›ÛÝÛÝ[[™Âœ™[XZ[œÈY™\œ™Y‚‹HH™]ÈÚ^˜\šX][Û”Ù^XØ^[™ÈH][KLLÙ\YšXØ]HY\ˆÛ˜ÙBˆ[Ü™NˆX[ˆÚXÚÜÈÚ^ÚYÛˆ˜\šX][ÛœÈ›Ü‚ˆ
+LJJLŠJLÊJM
+JMJJMŠX[™Y[YšY\È[Ú^ÜÚ]]™H˜][Û˜[ˆ›ÛÝËˆH[œ™\ÝšXÝY\ØØ\\È[Ü™[H™[XZ[œÈY™\œ™Y‚‹HH™]ÈÙ]™[•˜\šX][Û”Ù\XØÛÛ[Y\ÈHš[š]HY\ŽˆX[ˆÚXÚÜÂˆÙ]™[ˆÚYÛˆ˜\šX][ÛœÈ›Üˆ
+LJX›ÝYÚ
+MÊX[™Y[YšY\È[Ù]™[‚ˆÜÚ]]™H˜][Û˜[›ÛÝËˆH[œ™\ÝšXÝY\ØØ\\È[Ü™[H™[XZ[œÂˆY™\œ™Y‚•Hš[š]HZX›š^ˆ\ÜÈ›ÝÈ[ÛÈ™XÛÜ™ÈHÝYÙKLL˜][Û˜[[˜ÛÜÝ\™B˜ÈHSZX›š^‹˜ÛÛ\]HLHM‹ÍX[™]ÈÚY›Ý[™KÌLˆ\È\ÈB˜ÛÛ˜Ü™]H][KLˆÛÛ\]][ÛŽÈH[™š[š]H[\›˜][™Ë\Ù\šY\ÈY[]H™[XZ[œÂ˜HÙ\\˜]H[Ü™[K‚•HØ[YH]˜[X]Üˆ›ÝÈ\ÈHÝYÙKLŒ[˜ÛÜÝ\™HÚ]ÚY][ÜÝKÌŒ›XZÚ[™ÈHÝ[X[Z[™š[š]H™Yš[™[Y[^XÚ]Ú[HÙY\[™È]™\žHÝYÙB™š[š]H[™˜][Û˜[‚•H]˜[X]Üˆ›ÝÈ[ÛÈ^ÜÈHÝYÙKM[˜ÛÜÝ\™H[œÚYHÌËM‹ÍWXÚ]ÚY][ÜÝKÍY[™ÈH\™^XÚ]Ý[X[Z[™š[š]HÚXÚÜÚ[™›Üˆ][H‹‚•H\›[ÛšXÈÙ\YšXØ]H›ÝÈ[ÛÈ^ÜÙ\ÈÝYÙHÌˆ^XÝH\Â˜NŒŒLLMŒŒŒÎKÌMÍMLŽLÍŒÚ]H^XÚ]ÝÙ\ˆÚ]™\ÜÂ˜ÌÌˆH˜ˆ\È^[™ÈHš[š]H]™\™Ù[˜ÙHÚXÚÜÚ[È›Üˆ][HÍ‚•HÙ[ÛY]šXË\Ù\šY\È\ÜÈ›ÝÈ™XÛÜ™ÈH^XÝ˜][ËXKÌ˜ÝYÙKMHÝ[B˜ÌKÌM˜ÙÙ]\ˆÚ]]È^XÝZ[KÌM˜ÈHš[š]H\\ˆ˜[YH˜‚’]›ÝÈ[ÛÈ[˜ÛY\ÈH[™\]X[\˜][ÈÚXÚÜÚ[˜Ù[ÛY]šXÔÝ[H
+‹ÌÊHHKÌØÚÜÙHš[š]HZ[ÈH˜][Û˜[\™Ù]Øš\ÈM‹ÌØ‚•H\š]Y]XË\›ÙÜ™\ÜÚ[ÛˆÚ]™\ÜÈ›ÝÈ[ÛÈÚXÚÜÈÝYÙHLˆH›ÙÜ™\ÜÚ[Û‚Ú][š]X[\›HØ[™Y™™\™[˜ÙH˜Ý[\ÈÈLŒÚ]]ÈÛÜÙY›Ü›B˜[™š[š]H\\ˆÚXÚÜÚ[LŒX™\šYšYYÝ™\ˆH˜][Û˜[Ë‚•H˜][ËXKÌ˜Ù\YšXØ]H›ÝÈ[ÛÈ™XÛÜ™ÈÝYÙHL‚˜Ù[ÛY]šXÔÝ[H
+KÌŠHLHLŒËÍLL˜Ú]^XÝZ[KÍLL˜ˆ\ÈÝ™[™Ý[œÂHš[š]H™Yš[™[Y[]šY[˜ÙH›Üˆ][HˆÚ]Ý]™X][™ÈH[Z]\È[‚˜]Z[™Y[™š[š]HÝ[K‚•HØ[YHÙ\YšXØ]H›ÝÈ™XXÚ\ÈÝYÙHŒÚ]^XÝÝ[HLMÍKÍLŽ˜[™Z[KÍLŽXZÚ[™ÈHÙ[ÛY]šXÈ\œ›ÜˆØÚY[Hš\ÚX›H]H\™™š[š]H™XÚ\Ú[ÛˆÚXÚÜÚ[‚’]›ÝÈ[ÛÈ™XXÚ\ÈÝYÙHÚ]^XÝÝ[HLNMLLMŒÍÍÍKÍMMÍMNLÎ˜[™Z[KÍMMÍMNLÎ›ÝšY[™ÈHÝXœÝ[X[Hš[™\ˆš[š]H\œ›ÜˆYÙ]™›Üˆ][HˆÚ[H™]Z[š[™ÈHÝ[X[Z[™š[š]H[\œ™]][Û‹‚’]›ÝÈ[ÛÈ™XXÚ\ÈÝYÙHÚ]^XÝÝ[B˜LŒLNNMŒMŒŽLMÍÌŒMÍKÍŒŒŽLNÌÌMNÌÍLÌ[™Z[˜KÍŒŒŽLNÌÌMNÌÍLÌ‚’]›ÝÈ[ÛÈ™XXÚ\ÈÝYÙHMŒÚ]^XÝÝ[B˜MŒMLMŒÍÌÌÌLŽLNŒÍŽÌÌMŒŽÌNMMNLÌMŽMÍKÍÌÌÍLNMLMNLLNMŒÍNMMLNÎMŒÌM˜[™Z[KÍÌÌÍLNMLMNLLNMŒÍNMMLNÎMŒÌM^[™[™ÈBœØ[YHš[š]HÙ[ÛY]šXÈ\œ›ÜˆØÚY[K‚’]›ÝÈ[ÛÈ™XXÚ\ÈÝYÙHÌŒÚ]H^XÝXYXÈZ[˜KÌLÎNLÍLMÎMŒMLLNMÍLLLÌÍÍŒMÌÌLÍLŒŒLMÎÌŒÎMÌÍLŒÎLLLLNŒŽLÌŒÍLLMLÍŽŽ™^[™[™ÈHš[š]H][KMˆ™XÚ\Ú[ÛˆØÚY[K‚•HÝYÙKMÚ]™\ÜÈ›ÝÈ\Ù\ÈH™]\ØX›HZ[›Ü›][NˆHØ\È˜\Â™^XÝH
+KÌŠWŒÎX[™Hš[š]HÝ[H™[XZ[œÈ™[ÝÈ˜‚•H]YÛÜ™X[‹]š\H^[\H›ÝÈ[ÛÈÚXÚÜÈHÛ\ÜÚXÈKLL‹LLØÚ]™\ÜË˜›Ý\™XÝH[™œ›ÛHH\˜[Y]š^˜][Ûˆ]
+KŠOJËŠXˆ\ÈÚ]™\ÈBœ˜][Û˜[XÛÛÜ™[˜]HÛÜ™HÙˆ][\È[™ŒÈHÙXÛÛ™[™\[™[š[š]B˜ÚXÚÜÚ[‚•H\š]Y]XË\›ÙÜ™\ÜÚ[ÛˆÙ\YšXØ]H›ÝÈ™XXÚ\ÈÝYÙH\ÈÙ[‚˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[HÈˆHMŽÚ]]ÈÛÜÙY›Ü›H[™š[š]B\\ˆÚXÚÜÚ[MŽXˆ\È^[™ÈH^XÚ]Ý[X[Z[™š[š]H\œ›Ü‚œØÚY[H›Üˆ][HŽ™^[Û™ÝYÙHŒ‚•HØ[YHÙ\YšXØ]H›ÝÈ™XXÚ\ÈÝYÙHÌŒ‚˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[HÈˆÌŒHLÌÚ]ÛÜÙY›Ü›H[™\\‚˜ÚXÚÜÚ[LÌX^[™[™ÈHš[š]H][KMŽØÚY[K‚’]›ÝÈ[ÛÈ™XXÚ\ÈÝYÙH‚˜\š]Y]XÔ›ÙÜ™\ÜÚ[Û”Ý[HÈˆHLÚ]ÛÜÙY›Ü›H[™\\‚˜ÚXÚÜÚ[LXÛÛ[Z[™ÈHš[š]HÝ[X[Z[™š[š]HØÚY[K‚•H˜\Ù[ÛÛ\\š\ÛÛˆ^[\H›ÝÈ[ÛÈ^ÜÈH^XÝÝYÙKN\X[Ý[B˜LÍÍÍKÍÌMŒ[™ÚXÚÜÈ]È[[Y[\žHÜÚ]]™KØ™[ÝË]ÛÈ›Ý[™Ëˆ\Âš\È[ˆ^XÚ]š[š]H™XÚ\›ØØ[\Ü]X\™HÛÛ\]][Ûˆ›Üˆ][HMÈ][\‰ÜÂ˜ÛÛ\]Y˜\Ù[Y[]H™[XZ[œÈY™\œ™Y‚•\È\ÈHš[š]H˜][Û˜[ÛÜ™HÙˆ][H‹‚•H\›[ÛšXË\Ù\šY\È\ÜÈ›ÝÈ[˜ÛY\ÈH[œÜXÝX›HÝYÙKNÚ]™\ÜÂ˜ÎHÍŒKÌŽˆ˜HÛÛ˜Ü™]Hš[š]HÙ\YšXØ]H›Üˆ][HÍ[Û™ÜÚYHB™Ù[™\˜[XYXÈÝÙ\‹X›Ý[™[Ü™[K‚•HØ[YHš[š]HÚXÚÜÚ[\È›ÝÈ^[™YÈÝYÙHMŽ‚˜ÌMˆHÍMNKÍÌŒÌŒH˜ˆ\È\È[›Ý\ˆ[œÜXÝX›HÝ[X[Z[™š[š]BÚ]™\ÜÈ›Üˆ][HÍ›ÝHÛÛ\]Y[™š[š]K\Ý[H\™Ý[Y[‚•H\›[ÛšXÈÚ]™\ÜÈ›ÝÈ[ÛÈ[œÝ[X]\ÈHÙ[™\˜[™XXÚXš[]H[Ü™[H]\™Ù]ØˆÝYÙHH—ŠŠŒÊXØ]\ÙšY\ÈÍHØY[™ÈHZYÚ]™YBœÝ[X[Z[™š[š]HÚXÚÜÚ[Ú]Ý]]˜[X][™È[ˆ]Z[™Y[™š[š]HÝ[K‚•HØ[YHÝYÙH›ÝÈ\È[ˆ^XÝ[œÜXÝX›H˜[YK˜ÍHŒŒÌMÌMÎMŽMŒMMŽLMÌMŽLÌÌÎKÌLÌLÍŒŽNÌLŒLÍNÍLLŒÚ]H\™XÝ[™\]X[]HÍHØÚXÚÙYžHš[š]H˜][Û˜[\š]Y]XË‚’]›ÝÈ[ÛÈ™XXÚ\È\™Ù]]ÝYÙHMˆH—ŠŠ
+X^[™[™ÈHš[š]BšZYÚØÚY[HÚ]Ý]\ÜÙ\[™È[ˆ]Z[™Y[™š[š]HÝ[K‚•H][KMÎHš\ÙXÝ[Ûˆ^Y\ˆ›ÝÈ\ÈHÛÛ˜Ü™]HY™š[™H˜XÙNˆ›Ü‚˜Š
+O^LKÌ˜ÛˆÌWXÝYÙHÈ™]\›œÈÌËÎKÌ—X™\Ù\™\ÈHÚYÛ‚˜œ˜XÚÙ][™\ÈÚYKÎ‚•HÝXšXÈ\™Ù]Ú]™\ÜÈ›ÝÈ™XXÚ\ÈÝYÙH›ÜˆŒÈH˜ˆH˜][Û˜[˜œ˜XÚÙ]\ÈÌMŒKÌLŽÌŒËÌM—X]ÈÚY\ÈKÌM˜[™›Ý[™Ú[˜ÛÛ\\š\ÛÛœÈÚ]H\™Ù]\™HÚXÚÙY‚•HØ[YHÚ]™\ÜÈ›ÝÈ™XXÚ\ÈÝYÙHMˆÚ]œ˜XÚÙ]˜ÍLŽKÌÌÍŽMÌKÍMLÍ—X[™ÚYKÍMLÍ˜Ý™[™Ý[š[™ÈHš[š]Bš][KMÎH™XÚ\Ú[ÛˆØÚY[HÚ]Ý][›ÙXÚ[™È[ˆ]Z[™Y™X[›ÛÝ‚•HØ^[^KKR[Z[Ûˆ\ÜÈ›ÝÈ[˜ÛY\ÈHÛÜšÙY˜][Û˜[X]š^˜ÖÌK—KÌ×WXÚ]˜XÙH]\›Z[˜[Ø[™[ˆ[™\[™[HÚXÚÙY™š[š]HY[]HWŒˆHH
+ÈÒHH[ÛÈ˜[œÜÜY›ÝYÚHÙ[™\šXÂÛËXžK]ÛÈ[Ü™[Kˆ\È\ÈHÛÛ˜Ü™]H][KMHÚ]™\ÜË‚•H°ê^›Ý]\ÜÈ›ÝÈ[˜ÛY\ÈH^XÚ]]XÛYX[ˆÙ\YšXØ]B˜ØÙ
+Ì
+OM˜Ú]ÛÙY™šXÚY[È
+LJJŽ
+ÈÊŒÌH˜HÛÜšÙYš[š]HÛÜ™B™›Üˆ][HŒ‚•H°ê^›Ý]Ù\YšXØ]H›ÝÈ[ÛÈÚXÚÜÈØÙ
+NNNLKLŒÍJOLX›ÝYÚB™^XÚ]Y[]HŒLMŠŽNNNLHHMÌLÎJŒLŒÍHHX‚•Hš[›ÛZX[\ÜÈ›ÝÈ[˜ÛY\ÈHÝYÙKMH[œÝ[˜ÙB˜š[›ÛZX[Ý[HHˆHˆH×HHØHÛÛ˜Ü™]Hš[š]HÙ\YšXØ]H›Üˆ][H‚•HØ[YHÛÜšÙY^Y\ˆ›ÝÈÚXÚÜÈH\™Ù\ˆÝYÙKN]˜[X][Û‚˜š[›ÛZX[Ý[HˆHHH×ŽHMŒX^[™[™ÈHš[š]Hš[›ÛZX[Ú]™\ÜË‚’]›ÝÈ[ÛÈÚXÚÜÈHÝYÙKLLˆ]˜[X][Û‚˜š[›ÛZX[Ý[HLˆˆHLÈH×ŒLˆHLÌMXXZÚ[™ÈH™XÚ\Ú[ÛˆY\ˆ^XÚ]‚•HØ[YHŠÌXY\ˆ›ÝÈ™XXÚ\ÈÝYÙHMŽ‚˜š[›ÛZX[Ý[HMˆˆHMÈH×ŒMˆHÌÌŒX[›Ý\ˆ^XÝš[š]HÚXÚÜÚ[‚•HØ[YHY\ˆ›ÝÈ™XXÚ\ÈÝYÙHŒ‚˜š[›ÛZX[Ý[HŒˆHŒHH×ŒŒHÍÎX‚’][ÛÈÚXÚÜÈH\Ý[˜Ý˜\ÙHZ\Žˆš[›ÛZX[Ý[HˆˆÈÈHWˆHMMŒXœÚÝÚ[™ÈHš[š]HY[]H™^[Û™HŠÌXÜXÚX[^˜][Û‹ˆHÝYÙKMB˜
+
+ÌÊX[œÝ[˜ÙKš[›ÛZX[Ý[HHÈˆH×HHMŽØYÈHÙXÛÛ™š[™\[™[˜\ÙHZ\‹‚•HXÚ[X[]š\ÚXš[]H\ÜÈ›ÝÈ[˜ÛY\ÈH^XÝ]X›H^[\\Â˜XÚ[X[YÚ]Ý[HLŒÈH˜[™ÈLŒØÙÙ]\ˆÚ]HÛÛ˜\Ý[™Â››Û‹Y]š\ÚXš[]HÙˆLˆ\È\ÈHÛÜšÙYš[š]HÛÜ™HÙˆ][HK‚•HÝÙ\‹\Ý[H\ÜÈ›ÝÈ[˜ÛY\ÈHÝYÙKMˆ]˜[X][ÛœÂ˜›Ý\ÝÙ\”Ý[HˆHMÎX[™šYÝÙ\”Ý[HˆHXHÛÛ˜Ü™]Hš[š]HÛÜ™B™›Üˆ][HÍË‚•HØ[YHÛÜšÙYÙ\YšXØ]H›ÝÈÚXÚÜÈZYÚÝÙ\”Ý[HˆHŒŽMÎX^[™[™ÂHš[š]HÝÙ\‹\Ý[HÚ]™\ÜÈÈHYÚ\ÝÛÜÙYY›Ü›HÝÙ\ˆÝ\œ™[H[‚HÙ\šY\È^Y\‹‚•HÙ[™\šXÈ™XÝ\œ™[˜ÙH[ÛÈÚXÚÜÈHš[\ÝÙ\ˆÝYÙH\™XÝN‚˜ÝÙ\”Ý[HHˆHŒŒÍMXˆ\È\ÈHš[š]H][KMÍÈÛÛ\]][ÛŽÈ›È[™š[š]BœÝÙ\‹\Ù\šY\ÈY[]H\È™Z[™È\ÜÙ\Y‚•Hš[\ÝÙ\ˆÚ]™\ÜÈ›ÝÈ™XXÚ\ÈÝYÙHÌˆ\ÈÙ[Ú]^XÝÝ[B˜ÝÙ\”Ý[HHÌˆHMNŒMŽÌMLÍ˜^[™[™ÈHš[š]H][KMÍÈÚXÚÜÚ[‚•HØ[YHÙ\YšXØ]H›ÝÈÚXÚÜÈÝÙ\”Ý[HHHLÍŽY[™ÈH\™Ù\‚™^XÝš[š]HÚXÚÜÚ[›ÜˆHÝÙ\‹\Ý[H˜[Z[K‚•Hš[\ÝÙ\ˆÚ]™\ÜÈ›ÝÈ™XXÚ\ÈÝYÙH\ÈÙ[Ú]^XÝÝ[B˜ÝÙ\”Ý[HHHLMŒLÍÌŒÌMÍ˜^[™[™ÈH\›Z[˜][™È˜][Û˜[š][KMÍÈÚXÚÜÚ[ØÚY[K‚’]›ÝÈ[ÛÈÚXÚÜÈÝÙ\”Ý[HHLHMÍÌNX^[™[™ÈHš[\ÝÙ\‚™š[š]HÚXÚÜÚ[Ú[H™]Z[š[™ÈHš^Y\ÝYÙH[\œ™]][Û‹‚•H™^ÚXÚÜÚ[\ÈÝÙ\”Ý[HHLˆHÎLÌŒLÍ˜^[™[™ÈHØ[YB™š[š]Hš[\ÝÙ\ˆÛÛ\]][ÛˆÚ]Ý][›ÙXÚ[™È[ˆ[™š[š]HY[]K‚•H™^ÚXÚÜÚ[›ÝÈ™XXÚ\ÈÝÙ\”Ý[HHMˆHÎLÎMŒ^[™[™ÈBœØ[YH^XÝš[š]H]˜[X]ÜˆÚ[H™]Z[š[™ÈHš^Y\ÝYÙH[\œ™]][Û‹‚•HØÚY[H›ÝÈ™XXÚ\ÈÝÙ\”Ý[HHLŽHLLÍLMLMŒMÌÍÎNÛÛ[Z[™ÂH\›Z[˜][™È˜][Û˜[ÚXÚÜÚ[˜[Z[K‚•HSKKQÓH\ÜÈ›ÝÈ[˜ÛY\ÈH^XÝš[š]HÚ]™\ÜÂ˜ŠŽH
+
+ŠÎ
+KÌŠWŒ˜[™H\]X[]HØ\ÙH›Üˆ\]X[[œ]ÈËØHÛÜšÙY˜Ù\YšXØ]H›Üˆ][HÎ‚•H]YÛÜ™X[‹]š\H\ÜÈ›ÝÈ[˜ÛY\ÈHØØ[Y
+‹L
+HÚ]™\ÜÈ[™]Âœ\˜[Y]\ˆ™X[^˜][Ûˆœ›ÛH
+OL‹LJKHÛÛ˜Ü™]Hš[š]HÛÜ™H›Üˆ][HŒË‚•H\ÛÜØÙ[\Ë]šX[™ÛH\ÜÈ›ÝÈ[˜ÛY\ÈHÛÛÜ™[˜]HÚ]™\ÜÈÚ]ZYÚ˜Ø[™[‹X˜\ÙHˆ›ÝÜ]X\™YYÜÈ\™HXH^\ÈÝ›ÙXÝ\Â˜[™HÜ]X\™Y˜\ÙH\Èˆ\È\ÈHÛÛ˜Ü™]H][KMHÙ\YšXØ]K‚•HÛÛ\[š[ÛˆKLL‹LLØÛÛÜ™[˜]H[œÝ[˜ÙHÚXÚÜÈ\]X[Ü]X\™YYÜÈMŽX˜^\ÈÝ›ÙXÝ[™Ü]X\™Y˜\ÙHMÍ˜‚•HÜ˜[Y\ˆ\ÜÈ›ÝÈ[˜ÛY\ÈH˜][Û˜[Þ\Ý[HJÝMXJÌÝLL‚H]\›Z[˜[\ÈXÜ˜[Y\¸ &\È›Ü›][\È™]\›ˆOLKLØ[™\™XÝœÝXœÝ]][Ûˆ™\šYšY\È›Ý\]X][ÛœËˆ\È\ÈHÛÛ˜Ü™]H][KNMÈÙ\YšXØ]K‚•HšX[™ÛKZ[™\]X[]H\ÜÈ›ÝÈ[ÛÈ\ÈHÛÛ˜Ü™]H™YK]\›H˜][Û˜[Ú]™\ÜÎˆXXœÊLÊÍLŠOLXÚ[HHÝ[HÙˆ\›]Ú\ÙHXœÛÛ]H˜[Y\È\ÈX‚•\È\ÈHÛÜšÙYš[š]HÛÜ™HÙˆ][HLK‚•HØ[YH\Ý[]™[Ù\YšXØ]H›ÝÈÚXÚÜÈHš]™K]\›H\Ý
+LËL‹ËMJX‚š]ÈÝ[H\ÈX]ÈXœÛÛ]K]˜[YHÝ[H\ÈŒX[™HšX[™ÛH›Ý[™ÛË‚•H™]\ØX›HXXœ×Ü\\˜™YÜÝX—ÛXÛÜ›Û\žH›ÝÈ›ÜYØ]\ÈÛÈ˜][Û˜[œ\\˜˜][ÛˆYÙ]Îˆ™\XÚ[™ÈXžH
+ÙKJÙ˜[˜Ü™X\Ù\ÈHÙ\\˜][Û‚˜›Ý[™žH][ÜÝHÙ\YšYY›Ý[™È›ÜˆX[™˜ˆ\È\ÈH[\˜[™\œ›Ü‹XYÙ]›Ü›HÙˆ][HLIÜÈš[š]HšX[™ÛH[™\]X[]K‚•H™]Èš[š]PÛÛ\^šX[™ÛQ^[\XYÈHÛÜšÙY^Y\ˆÈ˜][Û˜[˜ÛÛ\^ÛÛÜ™[˜]\Îˆ
+Ë
+X[™
+KLŠX]™HÜ]X\™Y›Ü›\ÈX[™MŽXZ\ˆÝ[H\ÈÜ]X\™Y›Ü›HÌŒ[™HÜ]X\™YšX[™ÛH›Ý[™\ÈÚXÚÙY˜YØZ[œÝ
+JÌLÊWŒ˜‚•H\š]Y]XË\Ù\šY\È\ÜÈ›ÝÈ[˜ÛY\ÈH›ÙÜ™\ÜÚ[Ûˆ
+ËKËKLJNˆ]ÂœÝYÙKMH]˜[X]Üˆ\È^XÝHÍX[™HÛÜÙYY›Ü›HY[]H\ÈÚXÚÙYÝ™\‚H˜][Û˜[Ëˆ\È\ÈHÛÜšÙYš[š]HÛÜ™HÙˆ][HŽ‚•HØ[YH›ÙÜ™\ÜÚ[Ûˆ›ÝÈ\ÈHÝYÙKLŒÚXÚÜÚ[ˆHÝ[H\È]Â˜ÛÜÙY›Ü›H\ÈÚXÚÙY[™Hš[š]HÙ\YšXØ]H™XÛÜ™ÈH\\ˆ›Ý[™˜Xˆ\È^[™ÈHÝ[X[Z[™š[š]H\š]Y]XË\Ù\šY\ÈÚ]™\ÜË‚•HØ[YH›ÙÜ™\ÜÚ[Ûˆ›ÝÈ™XXÚ\ÈÝYÙHˆH^XÝÝ[H\ÈMŒB˜ÛÜÙY›Ü›H\ÈÚXÚÙY[™Hš[š]H\\ˆÚXÚÜÚ[\ÈMŒX‚’]›ÝÈ[ÛÈ™XXÚ\ÈÝYÙHMŒˆH^XÝÝ[H\ÈNLŒHÛÜÙY›Ü›H\Â˜ÚXÚÙY[™Hš[š]H\\ˆÚXÚÜÚ[\ÈNLŒX‚•Hš[š]H[‹\H›Ý][Û‹Z[œ]Ù\YšXØ]H\È›ÝÈ]˜Z[X›H\Â˜Ù[ÛY]šXÔT›Ý][Û‹š[”R[œ]ØÙ\YšXØ]XÈ]XÚØYÙ\È˜[Y]KB˜ÌK—X[˜ÛÜÝ\™KH‹ÊŠÌJXÚY[Ù[\Ë[™\]Z]˜[[˜ÙHÚ]Bœ˜][Û˜[XÚ\˜ÛH]X\\ˆ\›‹ˆHZ\ÜÚ[™ÈÚ\™YT›ÛÙœË›ÛX[˜\Y˜XÝœÝ[™]™[È[ˆ]]Üš]]]™HYÙÜ™YØ]K\›ÛÝZ[]HÝ[™[Û™B™Ù[ÛY]žH[Ù[H[™Ù\YšXØ]HZ[ÝXØÙ\ÜÙ[KˆH[Û\ÜÚXØ[šY[]Y\È™[XZ[ˆÛÜœ™XÝHX\šÙY\ÈY™\œ™Y‚•HÝ\YY]\™Ù]˜\Ù[Ø[™Y]H\È›ÝÈÚXÚÙYˆH]\ˆ™]H[\˜[š\ÈÛÛZ[™Y[ˆ[ˆ^XÚ]HÚY[™YÙ[ÛY]šXÈK\Ü]X\™Y[Ý™\‹\Ú^\™Ù]š[\˜[Ú]HÚY[š[™È\]X[ÈH™]H[\˜[8 &\Èš[š]H˜][Û˜[ÚYˆ\È\›œÈÝ™\›\[ÈH™]\ØX›Hš[š]H\™Ù][˜ÛÜÝ\™HÚ[HB˜\Ù[Y[]H]Ù[ˆ™[XZ[œÈY™\œ™Y‚‚•H™^Ý™[™Ý[š[™È\ÜÈXØÙ\È™YH[Ü™Hš[š]HÝXœÝ]]\ÈÚ]Ý]š[™›][™ÈH™[˜ÚX\šÈÛÝ[ˆ˜][Û˜[˜]ÛÙWÙ^\ÝÕ[š\]YWØØ[›ÛšXØ[ÙXÛÙWÚ[™^™Ú]™\ÈH[š\]YHØ[›ÛšXØ[˜]\˜[ÛÙH›ÜˆXXÚ˜][Û˜[È^XÝ[˜Ý[Û‹œÙXØ[ÛÙ—Ùš[š]WÙ\š]˜]]™WØœ˜XÚÙ][\ØÛÜ\ÈÙ[Ú\ÙH˜][Û˜[\š]˜]]™Hœ˜XÚÙ]ÈÈ[ˆ[™Ú[ÙXØ[È[™˜[™X\“ÑKœ˜]X]š^ÝÛÐžUÛ×ØØ^[^WÚ[Z[Û˜^[™ÈHÚXÚÙYØ^[^KKR[Z[Û‚šY[]Hœ›ÛH^XÚ][šY\ÈÈ\˜š]˜\žH˜][Û˜[‹XžKLˆX]šXÙ\ËˆH™]Â˜˜][Û˜[Ú\˜ÛK•šYÛÛ›ÛY]žKÔPÛÛ\^œšYÙHY[YšY\È˜][Û˜[Ú\˜ÛB›][\XØ][Ûˆ[™ÝÙ\œÈÚ]Hš[š]HPÛÛ\^Ü\˜][ÛœË[™˜ÔPÛÛ\^ÜÚ[Ý×Û][™XÛÜ™ÈH[X™YYH[Ú]œ™H]ËˆH™]Â˜ÔPÛÛ\^Û›Ü›TÜXÔPÛÛ\^ÜÚ[Ý×Û›Ü›TÜX[™˜ÔPÛÛ\^ÜÚ[Ý×Û›Ü›TÜWÛÙ—Ý[š]XÛ\˜][ÛœÈ˜[œÜÜHÚ\˜ÛB››Ü›K\Ü]X\™H[˜\šX[ÈHš[š]HÛÛ\^ÚYKˆ\È™[XZ[œÈHš[š]Bœ˜][Û˜[XÛÛÜ™[˜]H[Ü™[NÈH™\™\Ù[YÛÛ\^^Û™[X[[™[™ÛBœÙ[X[XÜÈ\™HÝ[Ù\\˜]HœšYÙ\ËˆH™]ÈÚ[ÝÔ˜]Ø[™˜Ú[ÝÔ˜]×Ù\]Z]—Û˜]ÝØXÛ\˜][ÛœÈY]š[š]HÝÙ\ˆ[ÈH˜[Yœ™\™\Ù[YÛÛ\^˜]È[™Y[YžH]ÝYÙ]Ú\ÙHÚ]HÛÜœ™\ÜÛ™[™Â™š[š]H˜][Û˜[XÛÛ\^ÝÙ\‹ˆH™]ÈÚ[ÝÔ˜]×Û][Ù\]Z]˜Ý\Y\ÈB™Ù[™\˜[›ÙXÝ›Ü›NˆHÝÙ\ˆÙˆH˜][Û˜[Ú\˜ÛH›ÙXÝ\È\]Z]˜[[˜]H™\™\Ù[YXÛÛ\^]™[ÈH›ÙXÝÙˆHÛÈš[š]HÛÛ\^œÝÙ\œËˆHÛÛ\[š[ÛˆÚ[ÝÔ˜]×ØÛÛš—Ù\]Z]˜Ý[˜[œÜÜÈÛÛšYØ][Û‚›ÝYÚH™\™\Ù[Yš[š]HÝÙ\ˆ\ÈÙ[‚‚•H™^œšYÙH\ÜÈYÈ›Ý\ˆ[Ü™Hš[š]HÙ\YšXØ]\ÎˆHÙ[ÛY]šXÈ›ØÚË\Ý[BšY[]KH™Y›XÝ[Û‹ÜÚYÛ™Y[ÜšY[][ÛˆÛÛÜ™[˜]HÙ\YšXØ]K˜ÛÛšYØ][ÛˆÛÜÝ\™H›Üˆš[š]H›ÛÝÈÙˆ[š]K[™HÛÛ˜Ø][˜X›Hš[š]H•Âœ\][Ûˆ›Ûˆ\ÙHÝ™[™Ý[ˆ][\ÈMËËÍK‹[™MHÚ]Ý]Y[™Â˜ÛÛ\]Y[™Û\Ë[Z]ËÜˆÛÛ\][™\ÜÈš[˜Ú\\Ë‚‚•H›ÛÝÚ[™È\ÜÈYÈ›Ý\ˆ[Ü™Hš[š]HÝ™[™Ý[š[™ÈÙ\YšXØ]\Î‚˜Û[›ÛZX[™˜XÝÜš^™Y]˜[Ü›ÛÝÝÚ]™\ÜØY[YšY\ÈH›ÛÝÈÙˆ[žHÝ\YY™š[š]H˜][Û˜[˜XÝÜˆ\ÝÈ\šXÚ]Ù\šY\Ëž™]UÛÔ\X[Û]\—Ú[—Ý\™Ù]ÛÙ—ØYÙ]œ›ÜYØ]\È]\ˆ˜\Ù[\X[Ý[\È›ÝYÚH˜][Û˜[\™Ù]Â˜ÙXØ[ÛÜWÜ›ÙXÝÝ˜[œÜÜ\ÈHš[š]H˜][Û˜[›ÙXÝ\[H[˜[ÙÝYNÂ˜[™˜][Û˜[Ú\˜ÛKœÚ[Ý×ØÛÛš˜™XÛÜ™ÈÛÛšYØ][ÛˆÞ[[Y]žH›Üˆ˜]\˜[˜Ú\˜ÛHÝÙ\œËˆ\ÙHY\[ˆ][\È‹MÍKÍÍK[™MÈÚ]Ý][›ÙXÚ[™Â˜ÛÛ\]Y[Z]ÈÜˆ[™ÛK]˜[YYÙ[X[XÜË‚‚•HÛÛ\^XÚ\˜ÛHœšYÙH›ÝÈ˜[œÜÜÈ]Þ[[Y]žH\ÈÙ[‚˜PÛÛ\^˜ÛÛš—ØYPÛÛ\^˜ÛÛš—Û™YØPÛÛ\^˜ÛÛš—ÜØØ[T˜]˜PÛÛ\^˜ÛÛš—Û][[™PÛÛ\^˜ÛÛš—Û˜]ÝØ›Ý™HÛÛšYØ][Ûˆ]ÜÈ›Ü‚™š[š]H˜][Û˜[XÛÛ\^Y™š[™HÜ\˜][ÛœË˜][Û˜[ØØ[[™Ë][\XØ][Û‹˜[™ÝÙ\œËÚ[B˜˜][Û˜[Ú\˜ÛK•šYÛÛ›ÛY]žKÔPÛÛ\^ÜÚ[ÛÛš˜[™˜ÔPÛÛ\^ÜÚ[Ý×ØÛÛš˜ÛÛ›™XÝ[HÈÚ\˜ÛHÛÛÜ™[˜]\Ëˆ\È\ÈB™š[š]H™Y›XÝ[Û‹ÙH[Ú]œ™HÙ\YšXØ]K›ÝHÛÛ\^X[˜[]XÈ[Ü™[K‚‚•HÝ\œ™[\ÜÈYÈHš[š]H™[XZ[™\‹XÙ\YšXØ]H[\™˜XÙH›Üˆ\˜š]˜\žB˜ÛÙY™šXÚY[\ÝËHÝYÙKÙ\œ›Ü‹XYÙ]XÚØYÙH›ÜˆÛÛœÝXÝ]™HÜ]X\™K\›ÛÝ˜š\ÙXÝ[Û‹ÛÛšYØ]K\Z\ˆÛÜÝ\™H›Üˆš[š]H›ÛÝÚ]™\ÜÙ\Ë[™HÚ\X˜\ÙY˜Ü›ÜÜË[ÜšY[][ÛˆY[]Kˆ\ÙHÝ™[™Ý[ˆ][\È‹MËËÎK[™HÚ[Bœ™[XZ[š[™È[\™[H˜][Û˜[[™[ÛÜš]ZXË‚‚•H˜[œÜÜ\ÜÈYÈPÛÛ\^›˜]Ý×ØY[ˆ^XÝY™š[™KXÛÛ\ÜÚ][Û‚™Y™™\™[˜ÙK\][ÝY[]Ëš[š]H[\›˜][™Ë\Ù\šY\È›ØÚÈ˜[œÜÜ[™B˜Ú\X˜\ÙY˜XÛØšX[‹Ü\][ÛˆÝXœÝ]][ÛˆÙ\YšXØ]Kˆ\ÙHY˜[˜ÙHB™š[š]H[\™˜XÙ\È™Z[™][\ÈMKMË‹[™ÍHÚ]Ý]\ÜÙ\[™ÈB˜ÛÛ\]Y^Û™[X[ÛÛ™\™Ù[˜ÙKÜˆÝXœÝ]][Ûˆ[Ü™[\Ë‚‚•H›Ý[™Y[™Ú[\ÜÈYÈ]X\XÈÛ™K]˜\šX][Û‹Ü›ÛÝ[š\]Y[™\ÜÈ]K›™\ÝY\ÝYÙHÙ\YšXØ]\È›ÜˆHÛÛœÝXÝ]™HÜ]X\™K\›ÛÝÙX\˜ÚY™š[™B˜[œÜÜÙˆš[š]HÙXØ[œ˜XÚÙ]Ë[™Hš[š]HØ[™Y]KY]˜[X][ÛˆXÚØYÙB™›ÜˆH]Z[XÈ›Ý[™\žKˆH\Ý][H\È[X™\˜][HÛ›HHÚXÚÙYš[š]B›ØœÝXÝ[Ûˆ^[\NÈ]\È›ÝX™[8 $ÔY™š[šH[™Ù\È›ÝÛZ[HXœÙ[˜ÙHÙˆ[œ˜][Û˜[›ÛÝËˆ›ÛÝÓÙ•[š]Kœ]Z[XÐ›Ý[™\žWÜ˜][Û˜[›ÛÝÙX\˜ÚÛ›Û™X›ÝÂ˜ÛÛ›™XÝÈ]ØœÝXÝ[ÛˆÈH^XÝ]X›Hš[š]H˜][Û˜[\›ÛÝÙX\˜Ú[™˜Ù\YšY\ÈH›Û™Xœ˜[˜Ú›ÜˆHÝ\YYØ[™Y]H\Ý‚‚•H]\Ý^XÝX\š]Y]XÈ\ÜÈYÈH[ÙNHXÚ[X[[˜\šX[HÙ[™\šXÂ˜›ØÚÈXÛÛ\ÜÚ][Ûˆ›Üˆš[š]HÝÙ\ˆÝ[\Ë[™HØ^[^KKR[Z[Û‚œÙXÛÛ™[Ü™\ˆ™XÝ\œ™[˜ÙH›Üˆ\˜š]˜\žH˜][Û˜[‹XžKLˆX]š^ÝÙ\œËˆ\ÙBœÝ™[™Ý[ˆ][\ÈKÍË[™HÚ]Ý]Y[™ÈÙ[™\˜[˜][X™\‹š[YKÜ‚˜ÛÛ[[Ý\Ë[X]š^ÛZ[\Ë‚‚•H•HÙ[™\˜[^˜][Ûˆ\ÜÈYÈHš[š]K[\ÝÛÛ\^˜XÝÜš^˜][Ûˆ^Y\Ž‚˜˜XÝÜš^™YÛ[›ÛZX[Z[ÈHÛ[›ÛZX[œ›ÛHÝ\YY˜][Û˜[XÛÛ\^œ›ÛÝË˜XÝÜš^™YÛ[›ÛZX[Ù]˜[Ù\WÜ›ÙXÝ^ÜÙ\È]Èš[š]H›ÙXÝ›Ü›K˜[™\ÝY[X™\œÚ\ZY[È^XÝ[™ÛÛ\]X›H›ÛÝÚ]™\ÜÙ\ËˆHÛÛ\[š[Û‚˜Û[›ÛZX[™˜XÝÜš^™Y]˜[Ø\[™˜[œÜÜÈ˜][Û˜[˜XÝÜˆ\ÝÈXÜ›ÜÜÂ˜ÛÛ˜Ø][˜][Û‹ˆ\ÈY˜[˜Ù\È][\Èˆ[™ˆÚ]Ý]ÛZ[Z[™È[œ™\ÝšXÝY•B›ÜˆHÙ[™\˜[]X\XÈ›Ü›][K‚•H\™XÝXÚØYÙH˜XÝÜš^™YÛ[›ÛZX[Ú\×Ø[ÙXœ˜ZX×Ü›ÛÝÛÙ—Û›Û™[\X[ÛÂœ™]\›œÈ[ˆ[ÙXœ˜ZXËXÛÛ\^Ú]™\ÜÈœ›ÛH[žH›Û™[\HÝ\YY˜XÝÜˆ\Ý‚’]È[šY›Ü›HÛÛ\[š[Ûˆ˜XÝÜš^™YÛ[›ÛZX[Ø[ÙXœ˜ZX×Ü›ÛÝÛÙ—ÛY[XÙ\YšY\Â™]™\žHÝ\YY˜XÝÜˆ\È[ˆ[ÙXœ˜ZXÈ›ÛÝ™\Ù\š[™ÈH^XÝš[š]H›ÛÝœÙ]˜]\ˆ[ˆÙ[XÝ[™È[ˆ\˜š]˜\žHÚ]™\ÜË‚‚•HÙ[™\šXÈ•H^Y\ˆ\È›ÝÈ›ÛÝ\Ù]ÛÛ\]H]HÝ\YYY˜XÝÜˆ]™[‚˜PÛÛ\^›][Ù\WÞ™\›ØÝ\Y\ÈHš[š]HÛÛÜ™[˜]H™\›Ë\›ÙXÝ]Ë[™˜˜XÝÜš^™YÛ[›ÛZX[Ù]˜[Ù\WÞ™\›×ÚY™—ÛY[XY[YšY\È^XÝHH›ÛÝÈ[ˆB™š[š]HÝ\YY\Ýˆ\È™[XZ[œÈHš[š]H˜XÝÜš^˜][Ûˆ[Ü™[K›Ý[‚™^\Ý[˜ÙHÜˆ›ÛÝXÛÝ[[™È[Ü™[H›Üˆ\˜š]˜\žHÛ[›ÛZX[Ë‚•HœšYÙH[ÙXœ˜ZXÑ•WÛÙ—Ù˜XÝÜš^™YÚ]™\ÜØ›ÝÈXÚØYÙ\ÈH^XÝ›Ú™XÝ˜›Ý[™\žNˆHÝ\YY›Û™[\Hš[š]H˜XÝÜš^˜][ÛˆÚ]™\ÜÈ›Üˆ]™\žBœÜÚ]]™KYYÜ™YH[œ]\È[›ÝYÚÈ^˜XÝ[ˆ[ÙXœ˜ZXËØÛÛ\]X›H›ÛÝˆB™ÛØ˜[˜XÝÜš^˜][Û‹Y^\Ý[˜ÙH[ÛÜš]H™[XZ[œÈHÙ\\˜]HY™\œ™Y\™Ù]‚•HXÚØYÙY[Ü™[H˜XÝÜš^™YÛ[›ÛZX[Ú\Ñ^XÝ›ÛÝÚY™—ÛY[X^ÜÙ\ÈBœØ[YH›ÛÝ\Ù]™\Ý[\™XÝH›ÝYÚÔÛKš\Ñ^XÝ›ÛÝÛÈÝÛœÝ™X[B™š[š]HÙ\YšXØ]\ÈÈ›Ý™YYÈ[™›ÛÛ[›ÛZX[]˜[X][Û‹‚•H˜XÝÜš^™Y]XY˜]XÈXÚØYÙH›ÝÈ™]\Ù\È]Ù[™\šXÈ›Ý[™\žH›ÝYÚ˜˜XÝÜš^™Y]XY˜]XÔÛ[›ÛZX[Ú\Ñ^XÝ›ÛÝÚY™˜Ú]š[™ÈH\™XÝÛË\›ÛÝ™^XÝ™YXØ]H›ÜˆH˜[YYYÜ™YK]ÛÈÙ\YšXØ]K‚‚•Hš[š]H•HÙX\˜Ú[\™˜XÙH›ÝÈ[ÛÈÝ\Y\È^XÝ›ÛÝÙX\˜Ú[™]ÂœÛÝ[™™\ÜËØÛÛ\][™\ÜÈÙ\YšXØ]\ËÙÙ]\ˆÚ]H˜XÝÜš^™Y\Û[›ÛZX[œÜXÚX[^˜][Ûˆ[™ÛÛ\]X›K\›ÛÝ™\Ý[ˆÙX\˜ÚÛÛ\][™\ÜÈ\ÈÛÛ™][Û˜[›ÛˆHÝ\YYš[š]HØ[™Y]H\ÝÈ]Ù\È›Ý\ÜÙ\]\˜š]˜\žBœÛ[›ÛZX[È]™H›ÛÝÈÜˆ]HÛØ˜[›ÛÝ\ÙX\˜Ú›ØÙY\™H^\ÝË‚•HÛÛ\[š[Ûˆ™YØ]]™HÙ\YšXØ]\È^XÝ›ÛÝÙX\˜ÚÛ›Û™WÚY™˜[™˜˜XÝÜš^™YÛ[›ÛZX[›ÛÝÙX\˜ÚÛ›Û™WÚY™˜›ÝÈÚ\˜XÝ\š^™HH›Û™X™\Ý[\Â™š[š]HØ[™Y]H^Û\Ú[Ûˆ
+ÜˆØ[™Y]KÙ˜XÝÜ‹[\Ý\Ú›Ú[™\ÜÊKˆ\Â˜ÛÛ\]\ÈHš[š]HÙX\˜Ú[\™˜XÙHÛˆ›ÝÝXØÙ\ÜÈ[™˜Z[\™Hœ˜[˜Ú\Ë‚•HÝXØÙ\ÜË\ÚYHÛÜ›Û\žB˜˜XÝÜš^™YÛ[›ÛZX[›ÛÝÙX\˜ÚÜ™]\›œ×ÜÝ\YYÜ›ÛÝXZÙ\ÈH˜XÝÜ‹[\Ý˜›Ý[™\žH^XÚ]ˆ]™\žH™]\›™Y›ÛÝ\ÈÛ™HÙˆHÝ\YY˜XÝÜœË‚•HÛÛ\[š[Ûˆ˜XÝÜš^™YÛ[›ÛZX[›ÛÝÙX\˜ÚÜÙ[—ÜÛÛYXXZÙ\ÈHÜÚ]]™B™š[š]HØ\ÙH^XÝ]X›Nˆ]™\žH›Û™[\HÝ\YY˜XÝÜˆ\Ý™]\›œÈB˜Ù\YšYY›ÛÝÚ[ˆÙX\˜ÚYYØZ[œÝ]Ù[‹‚‚•H]Z[XÈ›Ý[™\žH\È›ÝÈ^XÚ]\ÈÙ[ˆ˜XÝÜš^™Y]Z[XÔÛ[›ÛZX[œXÚØYÙ\Èš]™HÝ\YYÛÛ\^›ÛÝËÚ]š[š]H›ÙXÝ]˜[X][Ûˆ[™^XÝ˜[™ÛÛ\]X›H›ÛÝÚ]™\ÜÙ\ËˆH\™XÝXÚØYÙB˜˜XÝÜš^™Y]Z[XÔÛ[›ÛZX[Ú\×ØÛÛ\]X›WÜ›ÛÝ^ÜÙ\ÈHš\œÝÝ\YY™˜XÝÜˆ\È[ˆ^\Ý[X[ÛÛ\]X›K\›ÛÝÚ]™\ÜÈÚ]Ý]™\]Z\š[™ÈHÙ\\˜]B›Y[X™\œÚ\\™Ý[Y[ˆ\È\ÈH›Ú™XÝ8 &\ÈÙ\YšXØ]K[]™[YÙB™›Üˆ][\ÈMˆ[™ŽÈX™[8 $ÔY™š[šH[™HÙ[™\˜[]Z[XÈ›Ü›][H™[XZ[ˆÝ]ÚYBHÝ\œ™[ÛÛ\]X›HØÛÜK‚•HX]Ú[™È›ÛÝ\Ù][Ü™[B˜˜XÝÜš^™Y]Z[XÔÛ[›ÛZX[Ù]˜[Ù\WÞ™\›×ÚY™˜›ÝÈ^ÛY\È]™\žHØ[™Y]B›Ý]ÚYHÜÙHš]™HÝ\YY›ÛÝËÛÛ\][™ÈHš[š]HÝXØÙ\ÜËÙ^Û\Ú[Û‚š[\™˜XÙH]H]Z[XÈ›Ý[™\žK‚’]È\Ý[]™[›Ü›B˜˜XÝÜš^™Y]Z[XÔÛ[›ÛZX[Ù]˜[Ù\WÞ™\›×ÚY™—ÛY[XXÚØYÙ\ÈHØ[YH™\Ý[[‚H›Ú™XÝ8 &\Èš[š]H˜XÝÜ‹[\Ý[\™˜XÙK‚•HÛÛ\[š[Û‚˜˜XÝÜš^™Y]Z[XÔÛ[›ÛZX[Ú\Ñ^XÝ›ÛÝÚY™—ÛY[XYÈ]Y[X™\œÚ\\ÝÈHX›XÈ^XÝ\›ÛÝ™YXØ]H\ÙYžHHÛÛ\]X›K\›ÛÝÙ\YšXØ]\Ë‚•HÛÜšÙYš[š]T]Z[XÐ›Ý[™\žQ^[\X[œÝ[X]\ÈHXÚØYÙHÚ]B™š]™HÝ\YY›ÛÝÈL‹LKK˜ÚXÚÚ[™È[š]™H^XÝ˜][Û˜[XÛÛ\^œ›ÛÝÚ]™\ÜÙ\ÈÚ[HÙY\[™ÈHÙ[™\˜[˜YXØ[È›Ø›[HY™\œ™Y‚‚‹H˜]È™X[È\™H[\˜[[ÛÜš]\È˜]OˆR[\˜[ˆ™X[XÚØYÙ\ÈBˆ™Y™\œ™Y˜[Y™X[˜]Ø[™š[š]K›Ý™[‹Y\]Z]˜[[[\›˜]]™\ËˆÙYBˆ™X[˜]Ø[™™X[[ˆÛÛ\]X›P[˜[\Ú\ËÐ˜\ÚXË›X[˜‚‹H™X[˜]Ë•˜[YÛÛ\]X›ÈÛ™Ù\ˆYX[œÈ8 'ÚY]ÝYÙH˜\È][ÜÝˆKÛ˜ˆ]YX[œÎˆ]™\žHÝYÙH\È[ˆÜ™\™Y[\˜[]\ˆÝYÙ\È\™Bˆ™\ÝY[œÚYHX\›Y\ˆÝYÙ\Ë[™ÚYÈÚš[šÈÈ™\›Ëˆ[žHÛX[ˆ›Ý[™ˆÝXÚ\ÈËÛ—œ˜ÜˆÊœš×›˜\È]šY[˜ÙH›Üˆ\Ë›ÝHYš[š][Û‹‚ˆÛÛ\^˜]Ë•˜[YÛÛ\]X\ÈHØ[YHÚ\H›Üˆ™XÝ[™Ý[\ˆ›Þ\Ë‚‹H™X[˜]Ë”˜]X\ÈÜ[Û˜[˜]HY]Y]H]HÛÛ˜Ü™]H]˜[X]ÜˆX^Bˆ^ÜÙH[Û™ÜÚYH]È˜[Y]H[Ü™[Kˆ]\È›ÝHšY[Ùˆ™X[˜]Ø[™ˆ›ÝHÙXÛÛ™Ú[™Ùˆ™X[[X™\Žˆ]\ÈZ]\ˆ[šÛ›ÝÛ‹]™[X[BˆÛ[›ÛZX[Üˆ]™[X[HÙ[ÛY]šXËˆÙYH™X[˜]Ë”˜]X[‚ˆÛÛ\]X›P[˜[\Ú\ËÐ˜\ÚXË›X[˜‚‹H›ÜˆÛÛ˜Ü™]H[ÛÜš]\Ë™XÛÜ™X›XÈ˜]H[™›Ü›X][Ûˆ\È]™[X[\\‚ˆ›Ý[™Ë›Ý™XÙ\ÜØ\š[H^XÝÚYËˆ›ÜˆKˆT›ÛÙœËœSZX›š^”˜]X™XÛÜ™ÈÚYHÛ˜Ú[BˆT›ÛÙœËœSXXÚ[”˜]X™XÛÜ™ÈÚYHŒ
+ŠKÌŠW›˜K™KˆŒÌ—›˜‚ˆH]\˜[™XÚ\›ØØ[[ÙÈ[YÜ˜][Û‹XžK\\È]˜[X]ÜˆÚ[Z[\›H\ÂˆÙØ\š]KœUšX[™ÛSÙÔ™XÚ\›ØØ[[YÜ˜[˜]XÚ]ÚYˆHLŠŠKÌŠW›˜ˆ]ÈÜ]X\™K\[˜XÚÈÝXœÝ]][ÛˆÛÛ\[š[Ûˆ\ÂˆÙØ\š]KœUšX[™ÛSÙÔÜ]X\™TÝXœÝ]][Û’[YÜ˜[˜]XÚ]ÚYˆHMŠŠKÌŠW›˜‚‹H\]X[]HÙˆ˜]È™\™\Ù[]]™\È\ÈØ[YK\ÝYÙH˜][Û˜[Z[\˜[Ý™\›\‚ˆ™X[˜]Ë‘\]Z]ˆXYX[œÈ]˜ÛÛ\]H˜[™K˜ÛÛ\]H˜Ý™\›\›Ü‚ˆ]™\žH˜ˆ˜[Y]HXZÙ\È\È™[][Ûˆ˜[œÚ]]™KˆH›Ú™XÝY˜XÚ[™Âˆ\]X[]H›Ý[Ûˆ\È\È˜]Ë[]™[™[][Û‹‚‹HH[\˜[YYš[™YÜ™\ˆ›ÝÈ\È^XÚ]\š]Y]XÈÛÛ\]Xš[]N‚ˆ™X[˜]Ë›WØYÛWØY›ÜˆY][Û‹™X[˜]Ë›WÛ™Y×ÛWÛ™YØ›ÜˆÜ™\‚ˆ™]™\œØ[[™\ˆ™YØ][Û‹[™™X[˜]Ë›WÜÝX—ÛWÜÝX˜›ÜˆÝX˜XÝ[Û‹[™ˆ™X[˜]Ë›WØ[\Þ[[X›ÜˆHÛË\ÚYYÜ™\‹Ù\]Z]˜[[˜ÙHœšYÙK[™ˆ™X[˜]Ë›WÜØØ[T˜]ÛWÜØØ[T˜]›Üˆ›Û›™YØ]]™H˜][Û˜[ØØ[[™ËÙÙ]\‚ˆÚ]™X[˜]Ë›WÜØØ[T˜]ÛWÜØØ[T˜]ÛÙ—Û›ÛœÜØ›ÜˆHÜ™\‹\™]™\œÚ[™Âˆ›ÛœÜÚ]]™HØ\ÙKˆ\ÙH\™H[™Ú[[]™[š[š]H[™\]X[]Y\ÎÂˆ˜[Y]KÙ\]Z]˜[[˜ÙH˜[œÜÜ\ÈÝ[[™YÙ\\˜][K‚‹H™X[˜]Ë˜[˜ÚÜ”™X›Þ\ÈHš[š]H˜][Û˜[›Ü›X[^˜][ÛˆÛÛœÝXÝ[ÛŽˆÚ]™[‚ˆHÚš[šÚ[™ËÝYÙ]Ú\ÙK[Ý™\›\[™È˜]È[ÛÜš]H[™H˜[Y™\ÝY[˜ÚÜ‹ˆ][\œÙXÝÈH™Yš^ÙˆZ\ˆÝYÙ]Ú\ÙH[ËˆH™\Ý[\ÈH˜[Yˆ™\™\Ù[]]™H\]Z]˜[[È›Ý[œ]Ë›Ý™YžBˆ™X[˜]Ë˜[˜ÚÜ”™X›ÞÝ˜[YÚ]Ý][žHÛÛ\]Y\™X[ÜˆÛÛ\][™\ÜÂˆš[˜Ú\K‚‹HHÝ›Û™Ù\ˆ[\ÝYÙ\È›Ý[Ûˆ\È›ÝÈ›Ü›X[^™Y\Âˆ™X[˜]Ë[ÝYÙ\ÓÝ™\›\ˆ]™\žH[\˜[œ›ÛHÛ™H[ÛÜš]HÛÛ\\™\È\ÂˆÝ™\›\Ú]]™\žH[\˜[œ›ÛHHÝ\‹ˆ›Üˆ˜[Y˜]È[ÛÜš]\È]\Âˆ\]Z]˜[[È™X[˜]Ë‘\]Z]˜ÈÙYH™X[˜]Ë™\]Z]—ÚY™—Ø[ÝYÙ\ÓÝ™\›\[‚ˆÛÛ\]X›P[˜[\Ú\ËÐ˜\ÚXË›X[˜‚‹H›ÜˆÛÛ\]][ÛˆÚ]HYÚ\‹[]™[™X[[X™\‹\ÙH™X[ˆ]ÙY\ÈBˆ™Y™\œ™YÙ\YšYY™\™\Ù[]]™H›Üˆ]˜[X][Ûˆ\ÈH\ÝÙˆÙ\YšYYˆ\]Z]˜[[[\›˜]]™\ËˆH™Y™\œ™Y™\™\Ù[]]™HÚÝ[™HH™\Ýˆ]˜Z[X›H[ÛÜš]KÜ˜]KˆÙYH™X[˜ÛÛ\]X™X[œ˜]Xˆ™X[œ™\™\Ù[][ÛœØ[™™X[Ú][\›˜]]™X[‚ˆÛÛ\]X›P[˜[\Ú\ËÐ˜\ÚXË›X[˜‚‹HÛÛ\^[X™\œÈZ\œ›ÜˆHØ[YH›Ý[™][ÛŽˆÛÛ\^˜]Ø\ÈÜ[Û˜[ˆÛÛÜ™[˜]K\˜]HY]Y]K[™ÛÛ\^ÙY\ÈH™Y™\œ™YÙ\YšYY˜]Âˆ™\™\Ù[]]™HÚ]Ü[Û˜[\]Z]˜[[[\›˜]]™\ËˆÙYHÛÛ\^˜]Ë”˜]XˆÛÛ\^Ù\[™ÛÛ\^[ˆÛÛ\]X›P[˜[\Ú\ËÐ˜\ÚXË›X[˜‚‹H[˜Ý[Ûˆ^Y\œÈ\™H™\™\Ù[][Û‹ÙÛXZ[ˆ^Y\œËˆ™X[[™ÛÛ\^[˜Ý[Û‚ˆ˜]ÜÈØ\œžHHÛXZ[ˆ[™Ú[Ú\ÙHÝ]]\˜]HY]Y]NÈH˜]HX^H\[™ˆÛˆH[œ][™]ÈÛXZ[ˆ›ÛÙ‹‚‚ˆÈÈØ[Ý[\È™XY[™\ÜÈYÙ\‚‚ŠŠ™[˜ÚX\šÈ][HÍH8 %š[š]H^[ÜˆÛÜ™HÚXÚÙYŠŠˆHX›XÂ•HÝ[X[Z[™š[š]H™[XZ[™\ˆ^Y\ˆ›ÝÈYÈ[ˆ^XÚ]˜XÝÜšX[]Z[œØÚY[Nˆ]™\žH]\ˆš[š]H^Û™[X[^[Üˆ™Yš^Ý^\ÈÚ][ˆBœ™\]Y\ÝY˜][Û˜[Û\˜[˜ÙHÙˆHÙ[XÝY™Yš^ÛˆH›Ý[™Y˜][Û˜[˜›Þˆ\ÈÝ™[™Ý[œÈ][HÍHÚ]Ý][›ÙXÚ[™È[ˆ[™š[š]HÝ[HÜˆB˜ÛÛ\][™\ÜÈš[˜Ú\K‚˜š[š]TÛ[›ÛZX[^[Ü”™Yš^Ú\Ñ\š]˜]]™SÛ’[\˜[[™Ù[\™Y˜\šX[™›Ü›X[^™HHš[š]HÛ[›ÛZX[Õ^[Ü‹KSYÜ˜[™ÙHÙ\YšXØ]KÚ[B˜^[Ü‹\˜Ý[’Ù\›™[™š[š]T™[XZ[™\”›Ý]XÝ\Y\È[ˆ^XÚ]š[š]Bœ™[XZ[™\ˆ˜XÝÜš^˜][Û‹ˆHÛÛ\]Y^[Üˆ[Ü™[HÚ][YÜ˜[™[XZ[™\‚˜[™]È[[˜[]XÈ\Ý\Ù\È™[XZ[ˆH]\ˆY™™XÝ]™KXØ[Ý[\ÈZ[\ÝÛ™K‚•H˜XÝÜšX[^Û™[X[ÜXÚX[^˜][Ûˆ›ÝÈ[ÛÈ^ÜÙ\Â˜š[š]TÛ[›ÛZX[™^^[Ü”™Yš^Ù[™Ú[Y™™\™[˜ÙWÜÝXØØˆ\[™[™ÈÛ™B™š[š]H^[Üˆ\›HÚ[™Ù\È[ˆ[™Ú[Y™™\™[˜ÙHžHH^XÝ˜][Û˜[›[Û›ÛZX[ÛÛšX][Û‹™Y›Ü™H[žHZ[ÜˆÛÛ\][™\ÜÈ\™Ý[Y[\È\ÙY‚•HÛÜšÙYš[š]Q^Û™[X[^[Ü‘^[\X›ÝÈÚXÚÜÈH]\˜[˜[Y\Â˜ÍJJOLMŒËÍŒ[™ÍŠJOLNMMËÍÌŒ[ˆÜXÚX[^™\ÈHØÚY[HÂ˜ÏLX\œ›ÜˆKÌL[™Ù]™[ˆY][Û˜[š[š]H\›\Ëˆ]È[˜ÛÜÝ\™H\ÈB™š[š]H˜][Û˜[ÛÛ\\š\ÛÛ‹›Ý[ˆ\ÜÙ\[Ûˆ][ˆ[™š[š]HÝ[H\È™Y[‚˜]Z[™Y‚•HØ[YHÛÜšÙYØš™XÝ›ÝÈÚXÚÜÈHYÚ\ˆÝYÙKN™Yš^˜Î
+JOLLMŒKÍÌŒ^[™[™ÈH^XÝš[š]H^[ÜˆÚXÚÜÚ[Ë‚’]›ÝÈ[ÛÈ™XÛÜ™ÈÝYÙHL^XÝH\ÈÌL
+JONNLKÌÍŒŽ›ÝšY[™ÈB™\\ˆš[š]H™Yš^ÚXÚÜÚ[[™\ˆHØ[YHÝ[X[Z[™š[š]Bš[\œ™]][Û‹‚•H^Û™[X[^[Üˆ™Yš^›ÝÈ™XXÚ\ÈÝYÙHLˆ\ÈÙ[‚˜ÌLŠJOLŒLŒŽKÎMNÌŒ^[™[™ÈH^XÝ˜][Û˜[™XÚ\Ú[ÛˆY\‹‚•HØ[YHš[š]HÚXÚÜÚ[›ÝÈ™XXÚ\ÈÝYÙ\ÈM[™MŽ‚˜ÌM
+JOMÌÎMLÌŽMŒKÌMÍÍMN[™˜ÌMŠJOMMŽÍÎMMLÌŒMËÌŒLŒÎNˆ\ÙH^[™H^XÝ™Yš^›Y\ˆÚ[H™]Z[š[™ÈHÝ[X[Z[™š[š]H[\œ™]][Û‹‚‚•HHX›H\ÈH™[X\ÙK\Ý[H[YÜ˜][ÛˆÝZ]K›ÝHÛÛ\][ÛˆØÛÜ™H›Ü‚HØÚY[YšXËXØ[Ý[\ÈØš™XÝ]™Kˆ]Ø]Ú\ÈYÜ™Y[Y[˜Z[\™\ÈXÜ›ÜÜÂš[™\[™[š[š]HÛÛœÝXÝ[ÛœË]Ù]™\˜[›ÝÜÈØ[ˆÚ\™HÛ™H[˜[]XÂ˜œšYÙK[™HXZ›ÜˆØ\Xš[]HÝXÚ\ÈÛÛ[[Ý\ÈX[›ËKP˜ZÙ\ˆ™YY›ÝYB”H™\™\Ù[][Û‹ˆÈ›ÝÜ[Z^™HHH[Y\˜]Üˆ]H^[œÙHÙˆ\ÙB™Ø]\Ë‚‚•H[YÜ˜][ÛˆÛXÞH\È[X™\˜][H˜\œ›ÝÎˆ›Ý™HHÙ[™\˜[•ËœÝXœÝ]][Û‹[™[YÜ˜][Û‹XžK\\È[Ü™[\ÈÚ]^XÚ]ÛÛœÝXÝ]™B˜Ù\YšXØ]\Ë]È›ÝZ[HØ][ÙÝYHÙˆ[Y\š]˜]]™\ÈÜˆ˜[YY˜XÚš\]Y\Ë‰ÉÈ[ˆH
+ÜˆH\Ù\ŠHX^HÝ\HH›ÜÜÙYš[Z]]™HÜ‚™XÛÛ\ÜÚ][ÛŽÈH›Ú™XÝÚÝ[ÚXÚÈ]È\š]˜]]™KÛXZ[‹[™[™Ú[˜Ù\YšXØ]H›ÝYÚÜÙHÙ[™\˜[[Ü™[\Ëˆ\È\È›ÝY]H™\XÙ[Y[›Ü‚“X]Xˆ[ˆ\˜š]˜\žHØÚY[YšXÈÜˆ[™Ú[™Y\š[™È›ÛÙœÎˆÙ[™\˜[Ø[Ý[\Â˜ÛÜÝ\™K[˜[]XÈ^ÛÙÈ[™šYÛÛ›ÛY]šXÈœšYÙ\ËÛÛ[[Ý\ÈX]š^”X[›ËKP˜ZÙ\‹[™œ›ØY[Y\šXØ[ÔH[™œ˜\ÝXÝ\™H™[XZ[ˆÜ[‹‚‚‹H
+Š”˜][Û˜[[\˜[›Ý[™][Ûˆ8 %ÚXÚÙYŠŠˆ™X[˜]Ë•˜[Y[\˜[ˆÝ™\›\\]Z]˜[[˜ÙK[™HÛÝ\˜ÙH]Y]^ÛY[™ÈX]Xˆ[˜[\Ú\È[™ˆÛÛ\]Y\™X[ÛÛ\][™\ÜÈ\™HH›Û‹[™YÛÝXX›H˜\ÙKˆ™KX]Y][\ÜÂˆÚ[™]™\ˆ\È[Ù[HÜ˜\Ú[™Ù\Ë‚‹H
+ŠÛÛ[Z]H[™^[œÚ[Ûˆ8 %\HÚXÚÙYŠŠˆ[\˜[™YÝ[\“Û˜[™ˆ[\˜[™YÝ[\“Û‹™\Ú[Û‘[PÛÛ[[Ý\ØÚ]™HH]\˜[˜][Û˜[ˆ\Ú[Û‹KY[H[Ü™[KˆHØÚY[YÜ\Û•[š]š\ÙXÝ[Ûˆœ˜[˜Ú\È›ÝÂˆHÛÛ˜Ü™]H›Û‹Y^XÝ[\˜[\™YÝ[\ˆ[˜Ý[Û‹Ú]H]XY˜]XÈ˜][Û˜[ˆ[œ][Ù[\ÈÛˆÌWXˆH›Û‹Y^XÝ™XÝ[™ÛH\˜Ý[™Ù[›ÝÈ\È]ÂˆÝÛˆ]\˜[ÛÛ[Z]H[Ü™[Bˆ\˜Ý[’[YÜ˜[™XÝ[™ÛSÛ•[š]Ù\Ú[Û‘[PÛÛ[[Ý\Øˆ]Èš[š]H[™Ù[ˆÚ\›Ý™\ÈK›Ê
+Ú
+HHKšJ
+HHÛÈ[HH\Ø[™ÛÛ[[ÛˆÝYÙBˆ
+ˆ
+\Ë™[ˆ
+ÈJXXZÙH›ÝÜ›ÜÜËX›ÞØ\È[™›ÝÚYÈ][ÜÝ\Ø‚ˆ]ÈÚXÚÙY\˜Ý[’[YÜ˜[™XÝ[™ÛSÛ•[š]ÙY™™XÝ]™S[Ù[\ØXÚØYÙ\ÈBˆØ[YH]H\ÈH^XÝ]X›HØÚY[H[œ]™XÚ\Ú[ÛˆˆHˆ
+ÈXÚ]Bˆ\Ü^YY[›ÛZ[˜]Ü‹XÛÛ›ÛY™XÝ[™ÛHÝYÙH]Ý]]Û\˜[˜ÙBˆ™XÚ\Ú[Û]ÝYÙH˜ˆH^XÝÛÛœÝ[]˜[X]Üˆ›ÝÈ\ÈHÛÛ˜Ü™]BˆÚ]™\ÜÈ^XÝ˜]ØÛÛœÝ[Ú[\˜[™YÝ[\“Û˜\ÝX›\Ú[™ÈHÚ[\\ÝˆÚ[Ú\ÙK]ËZ[\˜[\™YÝ[\ˆœšYÙH\ÙYžHH]\ˆšY[X[›ˆÛÛœÝXÝ[Û‹‚ˆHÛÛ\[š[Ûˆ^XÝ˜]ØÛÛœÝ[ÙY™™XÝ]™S[Ù[\Ñ›Ü˜XÚØYÙ\ÈHØ[YBˆ^XÝ]˜[X]ÜˆÚ]H^XÚ][Ù[\È[\™˜XÙK‚ˆHØ[YHœšYÙH\È›ÝÈÚXÚÙY›Üˆ^XÝ˜][Û˜[Y™š[™H[˜Ý[ÛœÈÚ]ÛÜBˆ[ˆÌWXˆ^XÝ˜]ØY™š[™WÚ[\˜[™YÝ[\“Û—ÛÙ—Ý[š]ÜÛÜX\Ù\ÈH[™Ú[ˆ[XYÙH[\˜[[™H^XÚ][œ]ØÚY[HŠÌXÚ[Bˆ^XÝ˜]ØY™š[™WÝ[š]ÛÜXXÚØYÙ\ÈHY™š[™H[Û›ÝÛ™H[YÜ˜[Ù\YšXØ]Bˆ[™]È^XÝ˜]È˜[YKˆ\È™[XZ[œÈHÙ\YšXØ]K[]™[•ÈÛXÙNÈ›Âˆ[œ™\ÝšXÝY[\˜[\™YÝ[\‹]ËZ[YÜ˜[ÛÜÝ\™H\ÈÛZ[YY‚ˆHÚYÛ™YY™š[™H^[œÚ[Ûˆ^XÝ˜]ØY™š[™WÚ[\˜[™YÝ[\“Û—ÛÙ—ÜÚYÛ™YÝ[š]ÜÛÜXˆ›ÝÈ[™\È›Ý[™Ú[ÜšY[][ÛœÈ›ÜˆÛÜ\È[ˆËLKWXÈ]ÈXÚØYÙYˆÙ\YšXØ]H^XÝ˜]ØY™š[™WÜÚYÛ™YÝ[š]ÛÜXÛÛ\]\ÈHØ[YHY™š[™Bˆ[™Ú[›Ü›][H\Ú[™ÈH›Û™XÜ™X\Ú[™ÈÜˆ›Ûš[˜Ü™X\Ú[™ÈÛÛœÝXÝ[Ûˆ\Âˆ\›ÜšX]K‚ˆH›Û‹XY™š[™H˜\ÙHØ\ÙH^XÝ˜]ÜÜ]X\™WÚ[\˜[™YÝ[\“Û—Ý[š]\È›ÝÂˆÚXÚÙY\ÈÙ[\Ú[™ÈH[™Ú[\Ü]X\™H[\˜[[™H^XÚ]ØÚY[BˆŠŠŠÌJXÛˆÌWXˆ\ÈYÈHÙ[Z[™Hš[š]HÛ[›ÛZX[[\˜[ˆÙ\YšXØ]HÚ]Ý][›ÚÚ[™ÈÛÛ\]Y\™X[[Z]Ë‚ˆ^XÝÜ]X\™WÛ\ØÚ]—ÛÛ—Ý[š]Ý\Y\ÈH˜][Û˜[\ØÚ]ˆ›Ý[™™YYYˆžH[YÜ˜[Y[]Y\Ë“\ØÚ]‘XYXØÈHXÚØYÙYˆ^XÝ˜]ÜÜ]X\™WÚ[YÜ˜[ØÙ\YšXØ]X[™ˆ^XÝ˜]ÜÜ]X\™WÚ[YÜ˜[Ü˜]×Ý˜[Y›ÝÈ›ÝšYHH˜[Yš[š]H˜]È[YÜ˜[‚ˆ]ÈY[YšXØ][ÛˆÚ]HÛÜÙY›Ü›HKÌØ™[XZ[œÈHÙ\\˜]H[™Ú[ˆ\]Z]˜[[˜ÙH\™Ù]‚ˆHX›XÈš[š]HY[]H^XÝÜ]X\™WÝ[šY›Ü›SYÝ[WÙ\X›ÝÈ™YXÙ\ÈBˆ[šY›Ü›HYÜ]X\™HÝ[HÈÙ\šY\ËœÜ]X\™TÝ[HˆÈ—ŒØ›ÝšY[™ÈH^XÝˆ[ÙXœ˜ZXÈ[ˆÙˆ][™Ú[Y\]Z]˜[[˜ÙH›ÛÙ‹‚ˆHX]Ú[™ÈX›XÈšYÚ\Ý[HY[]Bˆ^XÝÜ]X\™WÝ[šY›Ü›TšYÚÝ[WÙ\X\È›ÝÈ[ÛÈÚXÚÙY™YXÚ[™ÈHšYÚˆ[™Ú[Ý[HÈÙ\šY\ËœÜ]X\™TÝ[H
+ŠÌJHÈ—ŒØˆÙÙ]\ˆ\ÙHÛÈš[š]Bˆ›Ü›][\ÈÚ]™HH^XÝ[™Ú[\Ý[H]H™YYY›ÜˆH[˜ÛÜÝ\™H›ÛÙ‹‚ˆHX›XÈ[™\]X[]Y\È^XÝÜ]X\™WÝ[šY›Ü›SYÝ[WÛWÛÛ™WÝ\™[™ˆ^XÝÜ]X\™WÝ[šY›Ü›TšYÚÝ[WÙÙWÛÛ™WÝ\™]HÛÈ[™Ú[Ý[\ÈÛ‚ˆÜÜÚ]HÚY\ÈÙˆKÌØÈÛÛœÙ\]Y[Bˆ^XÝÜ]X\™WØÛÛ\]WØÛÛZ[œ×ÛÛ™WÝ\™›Ý™\ÈÚ[™Û]ÛˆÛÛZ[›Y[]ˆ]™\žHXYXÈÝYÙK[™ˆ^XÝ˜]ÜÜ]X\™WÚ[YÜ˜[Ü˜]×Ù\]Z]—ÛÛ™WÝ\™Y[YšY\ÈHš[š]H˜]Âˆ[YÜ˜[Ú]H^XÝ˜][Û˜[˜[YHKÌØ‚ˆH™^Û[›ÛZX[Ø\ÙH\È›ÝÈÛÛ\]H\ÈÙ[‚ˆ^XÝ˜]ØÝX™WÚ[\˜[™YÝ[\“Û—Ý[š][™^XÝÝX™WÛ\ØÚ]—ÛÛ—Ý[š]ˆÚ]™H^XÝ]X›Hš[š]HÙ\YšXØ]\È›ÜˆŒØÛˆÌWXÈH[™Ú[ˆÝ[\È™YXÙHÈÙ\šY\Ë˜ÝX™TÝ[X[™ˆ^XÝÝX™WØÛÛ\]WØÛÛZ[œ×ÛÛ™WÙ›Ý\ÙÙ]\ˆÚ]ˆ^XÝ˜]ØÝX™WÚ[YÜ˜[Ü˜]×Ù\]Z]—ÛÛ™WÙ›Ý\Y[YšY\ÈH™\Ý[[™È˜]Âˆ[YÜ˜[Ú]KÍˆ\È\ÈHÙXÛÛ™ÛÛ˜Ü™]H•È^[\KÝ[[\™[Bœ˜][Û˜[[™ÝYÙ]Ú\ÙK‚•H]X\XÈ•È\ÜÈ\È›ÝÈÛÛ\]Nˆ^XÝ˜]Ü]X\X×Ú[YÜ˜[ØÙ\YšXØ]X˜[™]È˜[Y]H[Ü™[H›ÝšYHHš[š]H˜]È[YÜ˜[›ÜˆÛ‚˜ÌWXÈHYÜšYÚ[™Ú[Ý[\È™YXÙHÂ˜Ù\šY\Ë™›Ý\ÝÙ\”Ý[X[™^XÝ]X\X×ØÛÛ\]WØÛÛZ[œ×ÛÛ™WÙšY\Â˜^XÝ˜]Ü]X\X×Ú[YÜ˜[Ü˜]×Ù\]Z]—ÛÛ™WÙšYY[YžHH™\Ý[Ú]B™^XÝ˜][Û˜[˜[YHKÍX‚•H]Z[XÈš[š]H\ÜÈ\È›ÝÈÚXÚÙY\ÈÙ[ˆš[š]Q•Ô]Z[XØÝ\Y\Âš[\˜[™YÝ[\š]KH˜][Û˜[\ØÚ]ˆ›Ý[™›Ýš[š]H[™Ú[\Ý[BšY[]Y\Ë[™HÛÛ˜Ü™]HÝYÙKLL[˜ÛÜÝ\™HÛÛZ[š[™ÈKÍ˜ˆB˜[\ÝYÙH^XÝ]˜[YH\]Z]˜[[˜ÙH™[XZ[œÈÜ[‹ÛÈ\È\ÈHš[š]B˜Ù\YšXØ]K[]™[•È™\Ý[›ÝHÙ[™\˜[™YÝ[\š]K]ËZ[YÜ˜Xš[]B[Ü™[K‚•HØ[YH]Z[XÈÛÛ\]][Ûˆ›ÝÈ\ÈH\™XÝÝYÙKLŒÛÛZ[›Y[Ù\YšXØ]B˜^XÝ]Z[X×ØÛÛ\]WØÛÛZ[œ×ÛÛ™WÜÚ^ÜÝYÙLŒÝ™[™Ý[š[™ÈHš[š]Bœ™XÚ\Ú[Ûˆ]šY[˜ÙHÚ[HX]š[™ÈH[\ÝYÙHÞ[X›ÛXÈ[™\]X[]HÜ[‹‚•H•È[™Ú[^Y\ˆ›ÝÈ[ÛÈ™XÛÜ™ÈHÝYÙKYZYÚYÝ[H›ÜˆB™\š]˜]]™HŠžXˆMÎKÎNLˆH‹ÍØˆ\È^[™ÈHš[š]HÛ[›ÛZX[˜ÚXÚÜÚ[]\›ˆÈHÙ^XÈØ\ÙHÚ]Ý]Y[™ÈHÛÛ\]Y[[Z]ÛZ[K‚•HØ[YHÙ^XÈ[™Ú[\Ý[HÚ]™\ÜÈ›ÝÈ™XXÚ\ÈÝYÙHÌˆ^XÝK˜NLMŒËÌŒMÌMLˆHX^[™[™ÈHš[š]H][KLMH™XÚ\Ú[ÛˆØÚY[K‚•HÝXšXÈ•È[™Ú[^Y\ˆ›ÝÈ[ÛÈ^ÜÂ˜ÝX™Q\š]˜]]™SYÝ[WÛWÛÛ™WÛWÜšYÚÝ[Xˆ]]™\žHÜÚ]]™HÝYÙKB›Y[™šYÚÝ[\È[˜ÛÜÙHH^XÝ[™Ú[Y™™\™[˜ÙHXˆHÛÛ\[š[Û‚˜ÝX™Q\š]˜]]™SYÝ[WÜšYÚÝ[WÙØ\ÛWÝ™YWÙ]˜›Ý[™ÈZ\ˆ[˜ÛÜÝ\™HÚY˜žHËÛ˜XZÚ[™ÈHš[š]H•ÈœšYÙH[ˆ^XÚ]Úš[šÚ[™È˜][Û˜[ØÚY[K‚‚•HÛÛ˜Ü™]H•H\ÜÈ›ÝÈ[ÛÈÚXÚÜÈ—Œˆ
+ÈX\™XÝH]HÛÈÝ\YYœ˜][Û˜[XÛÛ\^›ÛÝÈ
+ÈX[™HX[˜ÛY[™È\Ý[˜Ý™\ÜÈ[™Ú[’Ü›™\ˆ]˜[X][Û‹[™]È^XÝ]X›HØ[™Y]HÙX\˜Ú™]\›œÈH\\ˆ›ÛÝ‚•\È\È[ˆ^XÚ]š[š]H][KLˆÚ]™\ÜÈ^Y\™YÛˆB™^\Ý[™È›ÞÛÝ[™™\ÜÈ[™ÝX™]š\Ú[Ûˆ[\™˜XÙ\ÎÈHXØÛÛ\[žZ[™ÈÚ[™Û]Û‚˜›Þ^Û\Ú[ÛˆÙ\YšXØ]H\ØØ\™ÈH›Û‹\›ÛÝØ[™Y]H]™\›ËˆÛØ˜[›ÛÝ^\Ý[˜ÙH[™˜\˜š]˜\žKYYÜ™YH\ÛÛ][Ûˆ™[XZ[ˆY™\œ™Y‚ˆHÛÛ˜Ü™]H›ÙXÝY\š]˜]]™HØ[™Y]H\˜Ý[ˆ
+ÈÊJÞ
+ž
+X›ÝÈ[ÛÂˆ\È]\˜[\Ú[Û‹KY[HÛÛ[Z]Kˆ]È˜][Û˜[ÛÜœ™XÝ[Ûˆ\ÈÚXÚÙYˆËS\ØÚ]ŽÈÜ][™ÈHÝ]]YÙ]\È\ËÌ˜›Üˆ\˜Ý[™Ù[[™ˆ\ËÍ˜›ÜˆH[œ]ÛÜœ™XÝ[ÛˆÚ]™\ÈHš[š]H[Ù[\È›ÜˆHÚÛBˆ\š]˜]]™H›Þˆ]Èš^Y[Ü™[H\Ù\È^XÝH]˜Y]\È[™ÝYÙBˆ
+ˆ
+
+\ÈÈŠK™[ˆ
+ÈJXÈHÚXÚÙYˆÛÛÜ™[˜]U[Y\Ð\˜Ý[’[YÜ˜[™XÝ[™ÛQ\š]˜]]™SÛ•[š]ÙY™™XÝ]™S[Ù[\ØˆXZÙ\È\ÈHÛÛ\]X›HØÚY[HÚ][œ]™XÚ\Ú[ÛˆˆHˆ
+ˆ
+ˆ
+ÈJX‚ˆ]ÈÚXÚÙYÜÚ]]™H›ÙXÝÙXØ[È›ÝÈ[ÛÈØ]\ÙžBˆÛÛÜ™[˜]U[Y\Ð\˜Ý[’[YÜ˜[™XÝ[™ÛSÛ•[š]Ù›ÜØ\™ÜÙXØ[Ù[˜ÛÜÝ\™X‚ˆH[™Ú[Y™™\™[˜ÙHY\È[ˆHÙ[ÚY[Y\ÈHY\š]˜]]™Bˆ›ÞÚY[™YžHÚXÙHH™\]Y\ÝYÝYÙHÛ\˜[˜ÙK‚ˆ‹‹™›ÜØ\™ÜÙXØ[Ý[šY›Ü›WÜ˜[™ÙWÙ[˜ÛÜÝ\™X›ÝÈÛÛ\ÜÙ\È\ÈÚ]ˆ\Ú[Û‹KY[HÛÛ[Z]Nˆ]™\žH\š]˜]]™H˜[YH[ˆHÙ[XÝY˜][Û˜[ˆ˜Y]\È[™H[™Ú[ÙXØ[Ú\™HH›ÞÙˆÚY][ÜÝ[ˆÝYÙBˆÛ\˜[˜Ù\ËˆHØØ[]H\™H›ÝÈYš[š][ÛœÈ˜]\ˆ[ˆ^˜XÝYˆÚ]™\ÜÙ\ÎˆÛÛÜ™[˜]U[Y\Ð\˜Ý[‘›ÜØ\™ÛÛ[Z]T˜Y]\È˜\Âˆ™XÚ\Ú[Û]ÝYÙHˆÈ˜]ÈÛÛ\[š[ÛˆÝYÙH\Âˆ
+ˆ
+
+™XÚ\Ú[Û]ÝYÙHˆÈŠK™[ˆ
+ÈJX[™ˆÛÛÜ™[˜]U[Y\Ð\˜Ý[‘›ÜØ\™ÙXØ[›Ý[™\ÈHÛÜœ™\ÜÛ™[™ÈÚXÚÙYˆ^XÚ][˜ÛÜÝ\™H[Ü™[KˆHÙ[™\šXÈš[š]HÛØ˜[\ÜÙ[X›H\È›ÝÈÚXÚÙYˆY˜XÙ[ˆÛÛ[[Û‹\ÝYÙH[™Ú[›Þ\È[\ØÛÜHžH[\˜[ÛÛZ[›Y[[™Bˆ[šY›Ü›H\][Ûˆ\›œÈH\‹XÙ[ÚY›Ý[™X[ÈÝ[ÚY]ˆ[ÜÝ
+‹XJJ™XˆÛÔÝYÙPØ[™Y]Q\š]˜]]™Q•Ø›ÝÈXÚØYÙ\ÈHXÝX[ˆÜ™\ˆÙˆ]X[YšY\œÎˆHÛÛ[[Ûˆ\š]˜]]™KXÛÛ[Z]HÝYÙHX^HY™™\ˆœ›ÛBˆHÛÛ[[Ûˆ[™Ú[ÝYÙH\ÙYžHH[\ØÛÜKˆ]ÈÝ™\›\\È\š]™Yˆ˜]\ˆ[ˆÜÝ[]YÈÙ[XÝYÝYÙPØ[™Y]Q\š]˜]]™Q•Ø™[XZ[œÈBˆÛÚ[˜ÚY[\ÝYÙHÜXÚX[Ø\ÙKˆH›ÙXÝ\ÜXÚYšXÈÙ[˜[Z[KÛÛ[[Û‚ˆ[™Ú[ÝYÙKšY[X[›‹]ÚYYÙ][™[™Ú[]ÚYYÙ]\™H›ÝÂˆ\ÜÙ[X›Y[ˆÛÛÜ™[˜]U[Y\Ð\˜Ý[‘›ÜØ\™ÛÔÝYÙQ•ØÈX[ˆ›Ý™\È]Âˆ›Ý[™Y\Ý[H˜]È\]Z]˜[[ÈH›ÙXÝ[™Ú[˜]ËˆH[šY›Ü›HÙ[ˆÛÝ[ÛÛÜ™[˜]U[Y\Ð\˜Ý[‘›ÜØ\™\][Û”YXÙ\Ø™[XZ[œÈH^XÚ]ˆš[š]HY\ÚÙ[XÝÜ‹ˆH›ÙXÝ\ÜXÚYšXÈX›XÈ•ÈœšYÙH\È›ÝÂˆÛÛ\]NˆÛÛÜ™[˜]U[Y\Ð\˜Ý[‘›ÜØ\™ÛÔÝYÙTÝXš[^™Y˜]Ø\Y\Âˆš[š]K\™Yš^ÝXš[^˜][ÛˆÈHXÝX[›Ý[™Y\Ý[H]˜[X]Ü‹Ú]BˆÊŠÌJX˜Y]\È›Ý™YYØZ[œÝH™XÝ[™ÛH[˜ÚÜˆ]›Ý™XY]ˆ[[YKˆ]È‹‹—Ý˜[Y[Ü™[H›ÝšY\ÈHX›XÈÛÛœÝXÝ[Û‹[™ˆÛÛÜ™[˜]U[Y\Ð\˜Ý[‘›ÜØ\™ÛÔÝYÙS[Û›ÝÛ™QYš[š]RY[]X^ÜÙ\ÈBˆ[™Ú[›Ü›][H›ÝYÚH[Û›ÝÛ™KÜ™[˜\žK[™š[š]K\YXÙH[YÜ˜[ˆ[\™˜XÙ\ËˆH›Ü›X[^˜][Ûˆ]\›ˆ\È›ÝÈÙ[™\˜[^™Y\ÂˆÛÔÝYÙPØ[™Y]Q\š]˜]]™Q•ËœÝXš[^™Y˜]Øˆ[žHÛË\ÝYÙHÙ\YšXØ]BˆÝ\Y\ÈHX›XÈÛÛœÝXÝ[ÛˆY\ˆ]È›Ý[™Y\Ý[HÚY[Ù[\È[™[‚ˆ^XÚ]Úš[šÚ[™È[™Ú[\˜Y]\ÈØÚY[H]™H™Y[ˆÚ]™[‹ˆH™[XZ[š[™Âˆ\ÚÈ\ÈÈÝ\HÜÙHØÚY[\È›Üˆ\\ˆØ[Ý[\È›Ü›][\Ë›ÝÂˆ™\›Ý™HH›ÙXÝ•Ë‚ˆ[šY›Ü›T™X[[‹Ù\YšYY^[œÚ[Û˜Ý]\ÈH™\™\Ù[][Û‹\ØY™H^[œÚ[Û‚ˆÛÛ˜XÝˆÙ[™\˜[ÛÜÝ\™H[™^[œÚ[Ûˆ[Ü™[\È™[XZ[ˆÛÜšËÛÈ\ÈØ]Bˆ\È›ÝY]HÙ[™\˜[[˜Ý[Û‹XØ[Ý[\ÈXÚØYÙK‚‹H
+Š‘š[š]H[YÜ˜][Ûˆ[™•È8 %\HÚXÚÙYŠŠ‚ˆ[YÜ˜[ÛÛœÝXÝ[Û‘›Ü˜]È˜[Y]HœšYÙK[™H\š]˜]]™KX›Ý[™ˆ•Ë]ËY[™Ú[[Ü™[\È\™HÚXÚÙYÈH™XÝ[™ÛKØ]XÚK[™ÛÛ\XÝˆ™XÚ\›ØØ[\]X\XÈÛÛ\]][ÛœÈ^\˜Ú\ÙH[HÛÛ˜Ü™][KˆH™]\ØX›Bˆ[YÜ˜[››Û™XÜ™X\Ú[™Ñ\˜›Ý^˜[™ÙX‹‹”ÝYÙX[™˜‹‹‘XYXÔÝYÙX›ÝÈ^ÜÙHH]\˜[[˜Ü™X\Ú[™ËY[˜Ý[Ûˆ[™Ú[X›Þ˜Ø[Ý[][Ûˆœ›ÛHH›Y\š[ˆÙXZÈ[Û›ÝÛšXÚ]H›Ý™\ÈXXÚÙ[˜[™ÙB›Ü™\™YÈ[\˜[™YÝ[\š]KÝYÙHÛÛ\]Xš[]K[™H[˜Ý[Û‹\ÜXÚYšXÂœÚš[šÚ[™Ë]ÚY\Ý[X]H™[XZ[ˆ[X™\˜][HÙ\\˜]H™\]Z\™[Y[È™Y›Ü™B˜HÛÛœÝXÝ[Û‘›Ü˜Ø[ˆ™HÛZ[YYˆH™]\ØX›B˜[YÜ˜[››Û™XÜ™X\Ú[™Ñ\˜›Ý^˜[™ÙWÝÚYÛWÛÙ—Ú[\˜[™YÝ[\˜›ÝÈ›Ý™\ÂHØØ[ÚY\Ý[X]NˆÚ[ˆHÙ[\ÈÚ][ˆH]˜[X]Ü‰ÜÈ[œ]YÙ]›Û™HÛÛ[[Ûˆ[XYÙH[\˜[›Ý[™È›Ý[™Ú[˜[Y\È[™›Ý[™ÈH\˜›Ý^œ˜[™ÙHžHKÊŠÌJXˆHÛØ˜[\][ÛˆØÚY[H[™ÛÛœÝXÝ[Ûˆ›ÛÙ‚œ™[XZ[ˆÙ\\˜]H™\]Z\™[Y[Ë‚•HYÙÜ™YØ]B˜[YÜ˜[››Û™XÜ™X\Ú[™Ñ\˜›Ý^ÝYÙWÝÚYÛWÛÙ—Ý[šY›Ü›WÚ[œ]ØYÙ]›ÝÂœ›ÜYØ]\È]›Ý[™›ÝYÚH[šY›Ü›Hš[š]H\][Û‹Ú]š[™ÈH^XÚ]™ÛØ˜[ÝYÙHYÙ]
+‹\\ˆH‹›ÝÙ\ŠKÊŠÌJX‚•HÛÛ\[š[Û‚˜[YÜ˜[››Û™XÜ™X\Ú[™Ñ\˜›Ý^ÝYÙWÝÚYÛWÛÙ—Ý[šY›Ü›WÚ[œ]ØYÙ]Ø[™ÝÛ\˜[˜ÙXš[™È]^XÚ]YÙ]\™XÝHÈ[ˆ\˜š]˜\žH™\]Y\ÝY˜][Û˜[Û\˜[˜ÙKˆ]\ÈHš[š]H™XÚ\Ú[Ûˆ[™Ù™ˆ™YYYžH[ˆ]™[X[˜ÛÛœÝXÝ[Û‘›Ü˜›ÛÙŽÈ][›ÙXÙ\È›È[Z]ÜˆÛÛ\]Y[YÜ˜[‚•HXYXÈÜXÚX[^˜][Û‚˜[YÜ˜[››Û™XÜ™X\Ú[™Ñ\˜›Ý^XYXÔÝYÙWÝÚYÛWÛÙ—Ú[œ]ØYÙ]›ÝÈ^ÜÙ\ÂHÛÜœ™\ÜÛ™[™È—›˜XÙ[›Ý[™Ú[H™]Z[š[™ÈH[œ]XYÙ]™[Z\ÙB›™YYY™Y›Ü™HHÚš[šÚ[™Ë]ÚYÛÛœÝXÝ[ÛˆØ[ˆ™HÛZ[YY‚’]ÈÛÛ\[š[Û‚˜[YÜ˜[››Û™XÜ™X\Ú[™Ñ\˜›Ý^XYXÔÝYÙWÝÚYÛWÛÙ—Ú[œ]ØYÙ]Ø[™ÝÛ\˜[˜ÙXœ›ÝšY\ÈHØ[YH\™XÝ™\]Y\ÝY]Û\˜[˜ÙH[™Ù™ˆ›ÜˆH^›ÛÚÉÜÂœÝYÙKZ[™^YXYXÈ[ÛÜš]K‚˜[YÜ˜[“[Û›ÝÛ™Q\˜›Ý^ØÚY[X›ÝÈXÚØYÙ\ÈH™[XZ[š[™Èš[š]HØÚY[B˜Ù\YšXØ]\ø %[œ]YÙ]™\Ý[™Ë[™HÝ[X[Z[™š[š]HÚš[šÚ[™ÂÚ]™\Üø %Ú[H\š]š[™È›Û›™YØ]]™HÚYÈœ›ÛHHš[š]H[™Ú[\˜[™ÙB›[[Xx %[™˜[YÜ˜[›[Û›ÝÛ™Q\˜›Ý^ØÚY[T˜]×Ý˜[Y\›œÈ[H[ÈH˜[Y˜™X[˜]Ø[YÜ˜[[ÛÜš]Kˆ\ÈÛÜÙ\ÈHØÚY[K]Ë\˜]ÈœšYÙHÚ[B›X]š[™ÈHÛÛœÝXÝ[ÛˆÙˆÜÙHÙ\YšXØ]\È[™š[Z]]™HY[YšXØ][Û‚™^XÚ]‚•HÛÛ\[š[Ûˆ[YÜ˜[›[Û›ÝÛ™Q\˜›Ý^ØÚY[T˜]×ÝÚYÛWÛÙ—ÝÛ\˜[˜ÙXš[™ÈHÝ\YY˜][Û˜[Û\˜[˜ÙH\™XÝHÈ[žHØÚY[YÝYÙKXZÚ[™ÂHš[š]HÚYYÙ]]˜Z[X›HÈÝÛœÝ™X[H•È[™U•Ù\YšXØ]\Ë‚•H[™\[™[š[š]TYXÙ]Ú\ÙT™XÝ[™Û\Ø[Ù[H›ÝÈ™XÛÜ™ÈHØØ[™\]X[XÙ[[H™YYY›ÜˆHš[š]HYXÙ]Ú\ÙK[[Û›ÝÛ™HÝYÙN‚˜YXÙPÙ[Ú[™š[˜Ü™X\Ú[™Ø[™™XÜ™X\Ú[™ØÙ[XÝ[™Ú[Ü™\‹Ú[B˜\›š[™Ø[˜ÛÜÙ\È›Ý[™Ú[˜[Y\È[™HÝ\YY\›ˆœ˜XÚÙ]ˆ]ÂÚY›Ü›][\È[™HÛËXÙ[]XY˜]XÈ\›ˆÚ]™\ÜÈ\™HÚXÚÙY[\™[HÝ™\‚˜˜]ˆ\È\ÈHš[š]HØØ[YXÚ[š\ÛH™Z[™HÚ[˜È[š[X][ÛŽÈ]Ù\Â››ÝÛZ[HH[š]™\œØ[[Û›ÝÛšXÚ]HÛ\ÜÚYšY\ˆÜˆHÛÛ\]Y[YÜ˜[‚•HØ[YH[Ù[H›ÝÈ\›œÈÜÙH˜[YH[\˜[È[È]\˜[™XÝ[™ÛH\™X\Î‚˜YXÙPÙ[ÝÙ\\™XWÛWÝ\\˜›Ý™\ÈHÝÙ\ˆ\™XH\È™[ÝÈH\\‚˜\™XH›Üˆ]™\žH›Û›™YØ]]™HÙ[ÚY[™H]XY˜]XÈÛËXÙ[Ú]™\ÜÂ™^ÜÈHÛØ\œÙH[˜ÛÜÝ\™HÌ—Xˆ™Yš[™[Y[[™[˜Ý[Û‹\ÜXÚYšXÂ˜Û\ÜÚYšXØ][Ûˆ™[XZ[ˆHÙ\\˜]HÝ\È™YYYÈØZ[ˆHÚš[šÚ[™È[YÜ˜[˜ÛÛœÝXÝ[Û‹‚‘›ÜˆH\›ˆÙ[YXÙPÙ[›Ý[™×Ý\›š[™×ÝÚYÛX›ÝÈ›Ý™\È]B˜ÛÛ[[ÛˆÙ\YšYY˜[YH˜[™ÙHÛÛ›ÛÈH[\™H[œ™\ÛÛ™Y™XÝ[™ÛHÚY‚•H\™XH™\œÚ[ÛˆYXÙPÙ[\›š[™Ð\™XQØ\ÛX][\Y\È]›Ý[™žBH›Û›™YØ]]™HÙ[ÚYXZÚ[™È^XÚ]HÛÈYÙ]È]]\ÝÚš[šÎ‚˜[YK\˜[™ÙH[˜Ù\Z[H[™Ù[ÛY]šXÈY\ÚÚY‚•HYÙÜ™YØ]H[[X\ÈYXÙ]Ú\ÙT™XÝ[™ÛP\™XTÝ[WÙØ\Ù\WÝÚYÜÝ[X[™˜YXÙ]Ú\ÙT™XÝ[™ÛP\™XTÝ[WÙØ\Û›Û›™YØ›ÝÈY\ÈÙ[Ú\ÙH\Ý[X]HÈ[‚™[\™Hš[š]HY\ÚˆHÛØ˜[\\‹[Z[\Ë[ÝÙ\ˆ™XÝ[™ÛHØ\\È^XÝHBœÝ[HÙˆÛXZ[ˆÚYÈ[Y\È˜[YK\˜[™ÙHÚYË[™\È›Û›™YØ]]™H›ÜˆÜ™\™Y˜Ù[Ëˆ\È\ÈHš[š]H˜][Û˜[œšYÙHÝØ\™HÛÛœÝXÝ]™H•Ë›Ý[‚˜\X[È[ˆ]Z[™Y[YÜ˜[ÜˆÛÛ\][™\ÜË‚•HÛÛ\[š[ÛˆYXÙ]Ú\ÙT™XÝ[™ÛP\™XTÝ[WÙØ\ÛWØÛÛ[[Û—Ü˜[™ÙWØYÙ][Ü™[BœXÚØYÙ\ÈHÛÛ[[Û‹\˜[™ÙH›Ü›NˆH[šY›Ü›H˜[YK]ÚYÙ\YšXØ]H›Ý[™ÈBÚÛHY\ÚØ\žHHÝ[HÙˆHÛXZ[ˆÚYÈ[Y\È]˜[™ÙHYÙ]ˆ\ÂœÙ\\˜]\ÈHÛÈ™Yš[™[Y[Ø›YØ][ÛœÈÛX[›x %Ù[ÛY]šXÈY\ÚÚY[™™[˜Ý[Û‹]˜[YH[˜Ù\Z[x %™Y›Ü™H[žHÝ[X[Z[™š[š]HØÚY[H\ÈYY‚•H™]ÈYXÙ]Ú\ÙT™XÝ[™ÛP\™XTÝ[WØÛÛœÝ[]˜[X]\È]ÛÛœÝ[\‹XÙ[˜YÙ]^XÝH\È
+Ù[Ë›[™Ýˆ˜]
+H
+ˆ˜[YXˆ]ÈÛÛ\[š[Û‚˜YXÙ]Ú\ÙT™XÝ[™ÛP\™XTÝ[WÙØ\ÛWØÛÛ[[Û—Ü˜[™ÙX\™Y›Ü™HÚ]™\ÈHÛÜÙY™›Ü›HÛØ˜[›Ý[™žHH[X™\ˆÙˆÙ[ËHÙ[ÚY[™HÛÛ[[Ûˆ˜[YBœ˜[™ÙKˆ\È\ÈHš[š]H\]X[[Y\ÚœšYÙH™YYYžHHÛÛœÝXÝ]™H•ÂœÝÜžH[™Ù\È›Ý[›ÙXÙH[ˆ[™š[š]HÝ[K‚•HY\ÚY[]H˜]Ø\ÝÛ][ÛY\ÚÙ\WÜÝX˜›ÝÈÛÜÙ\ÈHÙ[ÛY]šXÈ\›Ü‚˜[ˆ\]X[˜][Û˜[\][ÛŽˆHÜÚ]]™H˜XÙ[Y\Ú\ÈÝ[ÚY^XÝB˜ˆHXˆ\ÈHÛÛ[[Ûˆ˜[YK\˜[™ÙHYÙ]Ø[ˆ™H›Ü›X[^™YÈH[\˜[ÚYÚ]Ý][›ÚÚ[™ÈHÛÛ\]Y™X[ÜˆH[Z][™ÈÝ[K‚ˆ\›š[™ËXœ˜XÚÙ][\ˆ[ˆ\›š[™ÔÚ[[YÜ˜[Ý\Y\ÈÛ™HÛÛ\Û™[Ù‚ˆHš[š]H[Û›ÝÛ™HXÛÛ\ÜÚ][ÛŽˆ]™\žHÜÜÚX›H›Û‹\˜][Û˜[\›ˆ\Âˆ™\™\Ù[YžHHÚš[šÚ[™È˜][Û˜[œ˜XÚÙ]Ú[HÝYÙ]Ú\ÙH[Û›ÝÛ™BˆYXÙ\È[™š^Y˜[™ÙH›Þ\ÈÛÝ™\ˆHÛÛ\[Y[[™H[œ™\ÛÛ™YØ\Ë‚ˆX[ˆ›Ý™\ÈHÛ™KYØ\ÛÛ\Û™[	ÜÈÚYÚš[šÜË[™ˆš[š]TYXÙ]Ú\ÙTÝYÙP\ÜÙ[X›X›ÝÈ›Ý™\ÈHš[š]H˜][Û˜[YÙÜ™YØ][Û‚ˆ\ÈÚš[šÚ[™ÈÚYÈ]ÈÛÛ[[Û‹\˜]H\Ý[X]H\ÈH]\˜[[X™\ˆÙ‚ˆ›Þ\È[Y\ÈHÝ\YY\‹X›ÞÚY›Ý[™ˆÝ\Z[™ÈH[™]šYX[›Þ\Âˆ[™›Ýš[™È]Z\ˆÛÛXš[™YÝYÙH[˜ÛÜÙ\ÈH[[™Y[YÜ˜[™[XZ[‚ˆ[˜Ý[Û‹XžKY[˜Ý[ÛˆÛÜšËˆ\È\ÈÛÛœØÚ[Ý\ÛH›ÝH[š]™\œØ[^\Ý[˜ÙHYš[š][Ûˆ›Ü‚ˆ[YÜ˜[ËˆH™]\ØX›Bˆ[YÜ˜[Y[]Y\Ë“\ØÚ]‘XYXØÛÛœÝXÝÜˆ›ÝÈ\›œÈH˜][Û˜[ˆ\ØÚ]ˆÙ\›™[ÛˆÌWX[È]\˜[™\ÝY\˜›Ý^›Þ\Ëˆ]È™]Âˆ\˜Ý[™Ù[ZÙ\›™[ÜXÚX[^˜][Ûˆ\ÈHÚXÚÙY˜][Û˜[\ØÚ]ˆÛÛœÝ[ˆ˜^XÝÚYÌ—›˜[™HÝYÙ]Ú\ÙHÛÛ[[Û‹\šYÚ\Ý[HÛÛ\\š\ÛÛˆÚ]ˆH^\Ý[™ÈÙ[ÛY]šXÈ™XÝ[™ÛH[YÜ˜[ˆHØ[YH™XÝ[™ÛHÛÛœÝXÝ[Û‚ˆ›ÝÈ[ÛÈ\ÈHš[š]H[™Ù[[˜ÛÜÝ\™HHŒÈHWÛŠ
+HH›Ü‚ˆ]™\žH›Û›™YØ]]™H˜][Û˜[[™Ú[[™]È™\›ËY[™Ú[][ÝY[›Þ\ÂˆÌHHŒ‹WX›Üˆˆˆ\ÈÝ\Y\ÈH˜\Ù\Ú[š[š]H\Ý[X]K‚ˆH™]È\Ñ›ÜØ\™\š]˜]]™P][\™˜XÙH›ÝÈXÚØYÙ\È\È[™Ú[˜XÝˆ\ÈHÚXÚÙYÛ™K\ÚYYÙ\YšXØ]Bˆ\˜Ý[’[YÜ˜[™XÝ[™ÛSÛ•[š]Ù›ÜØ\™\š]˜]]™P]™\›ØÚ]\š]˜]]™BˆX[™^XÝÝYÙK^™\›È]˜[X][Û‹ˆH[™Ù[XÚ\[ÙXœ˜H\ÈÚXÚÙYˆ\ÈÙ[ˆ]Ü™[˜\žHÝ\ˆ\È™\™\Ù[YžHÈ
+H
+È
+ˆ
+
+È
+JXÚXÚHÚ\Ù[™È^XÝBˆÈ
+ÈÈ]ÈØØ[HY™™\œÈœ›ÛHHÙ\›™[]žH][ÜÝÛˆBˆ[š]œ˜[˜Úˆ\ÙH\Ý[X]\È›ÝÈÛÜÙHH[ÛË\ÚYYÙ\YšXØ]Bˆ\˜Ý[’[YÜ˜[™XÝ[™ÛSÛ•[š]Ú\Ñ\š]˜]]™XÛˆÌWXˆ™YØ]]™HÝ\È\™Bˆ™]™\œÙYÈHÜÚ]]™HÝ\]HY[™Ú[[™HÙ\›™[	ÜÈ˜][Û˜[ˆ\ØÚ]ˆ›Ý[™˜[œÜÜÈH\š]˜]]™H˜XÚÈÈH™\]Y\ÝYÚ[ˆBˆÚXÚÙYØÚY[H\Ù\È\š]˜]]™HÝYÙH
+ŠŠÌJX[™ÚYÛ™YÝ\YÙ]ˆKÊÌŠŠŠÌJJXˆ\È\È›Ý[ˆ•È[Ü™[KˆÚ]™[XZ[œÈ\È^[œÚ[ÛˆÂˆ[\˜[\™YÝ[\ˆ[˜Ý[ÛœË[ˆY™™XÝ]™H•ÈÛÜÝ\™K[™[ˆBˆÝ[™\™[˜Ý[ÛˆX›K‚‹H
+Š‘\š]˜]]™HØÚY[[™È8 %ÛÜœ™XÝY[\™˜XÙKŠŠˆ\Ñ\š]˜]]™SÛ’[\˜[ˆ[™H˜][Û˜[\ÝÙ\ˆ\Ñ\š]˜]]™P]Ù\YšXØ]H›ÝÈÚÛÜÙH]˜[X]Ü‚ˆ™XÚ\Ú[Ûˆœ›ÛHH˜][Û˜[Ú[›Ûž™\›È˜][Û˜[Ý\[™™\]Y\ÝYˆÝ]]™XÚ\Ú[Û‹ˆ\È\È™XÙ\ÜØ\žH›Üˆ[ˆ[™^XÝ[\˜[]˜[X]ÜŽ‚ˆ][ÝY[[™ÈHš^Y]ÚY›ÞžH[ˆ\˜š]˜\š[HÛX[\ˆÝ\Ø[››Ý]™HBˆ[šY›Ü›H\œ›Üˆ›Ý[™ˆ^XÝ˜][Û˜[^[\\ÈÝ[\ÙHHÛÛœÝ[ÝYÙBˆ™\›ÎÈHÛÜœ™XÝ[ÛˆÜ™X]\ÈHš[š]HØÚY[[™ÈÛÝ™YYYžHBˆ\˜Ý[™Ù[[™^Û™[X[\š]˜]]™HÛÛœÝXÝ[ÛœË‚‹H
+Š“[Û›ÝÛ™H[™\œÙH[˜Ý[ÛœÈ8 %\HÚXÚÙYŠŠˆHœ˜[˜Ú[ØØ[ˆ[™\X›Q[˜Ý[Û“Û’[\˜[Ø[™\œÙT˜]ØØš\ÙXÝ[ÛˆTH\ÈÚXÚÙYÚ]ˆH[š]Z[\˜[Ü]X\™K\›ÛÝÙX\˜Ú›Üˆ^XÝ˜][Û˜[\™Ù]Ëˆ^[™]ˆÈ™\™\Ù[Y\™Ù]Ë[ˆ\ÙH]›ÜˆHÚ[™KØ\˜ÜÚ[™H[™ˆ^Û™[X[ÛÙØ\š]Hœ˜[˜Ú\Ë‚‹H
+Š‘Y™™\™[X]Y[[Y[\žH[˜Ý[ÛœÈ8 %\HÚXÚÙYŠŠˆ›Ü›X[ˆÝÙ\‹\Ù\šY\ÈÛÙY™šXÚY[ÚYÈ[™š[š]KYY™™\™[˜ÙH^[\\È\™HÚXÚÙY‚ˆHÙ\šY\Ë[^Y\ˆTH›ÝÈXZÙ\È\ÈÝYÚ[™È^XÚ]‚ˆ›Ü›X[ÝÙ\”Ù\šY\Ë˜ÛÙY™šXÚY[ÚY[™\ÐÛÙY™šXÚY[ÚY\™HBˆš[X\žH˜[Y\ÎÈYØXÞH›Ü›X[Y\š]˜]]™H˜[Y\È\™HÛÛ\]Xš[]H[X\Ù\Ëˆ›Ý[ˆ\ÜÙ\[ÛˆX›Ý]]˜[X]Y˜]È[˜Ý[ÛœË‚ˆš[š]TÛ[›ÛZX[^[Ü”™Yš^Ú\Ñ\š]˜]]™SÛ’[\˜[›ÝÈ\›œÈ]™\žBˆš[š]HÛÙY™šXÚY[™Yš^[ÈHÛË\ÚYY˜][Û˜[Z[\˜[\š]˜]]™BˆÙ\YšXØ]H›Üˆ]ÈÛÙY™šXÚY[\ÚYÛ[›ÛZX[ˆ\È\ÈH™XÚ\ÙBˆš[š]H^[Ü‹KSYÜ˜[™ÙH[™[Ù™ŽÈ]™\›Ëˆš[š]TÛ[›ÛZX[^[Ü”™Yš^ÚYØ]Þ™\›ØY[YšY\È]\š]˜]]™BˆÛ[›ÛZX[Ú]HÜšYÚ[˜[[™X\ˆÛÙY™šXÚY[ˆHÙ[\™Y›Ü›\Âˆ^[Ü”™Yš^]Ú\Ñ\š]˜]]™SÛ’[\˜[[™ˆ^[Ü”™Yš^ÚY]Ø]Ø˜\Ù\Ú[XZÙHHØ[YHÝ][Y[]]™\žBˆ˜][Û˜[^[œÚ[ÛˆÚ[\Ú[™ÈØØ[XX›Ý[™Ëˆ^HÝ[È›ÝˆY™™\™[X]H[ˆ[™š[š]HZ[‚ˆH]X[]]]™HÙ\YšXØ]H[ÙXœ˜H\È›ÝÈÛÜÙY[™\ˆš[š]HY][Û‹ˆ˜][Û˜[ØØ[[™Ë[™›ÙXÝÈšXHÙXØ[\š]˜]]™P›Ý[™›][ÈH›ÙXÝˆ[H™]Z[œÈH^XÚ]H›Ý[™YÙXØ[XÛÜ›™\ˆ\›H™YYYžH]\ˆ•Ëˆ[YÜ˜][Û‹XžK\\Ë[™ÑH\™Ý[Y[Ë‚ˆH^XÝ]X›H˜XÝÜšX[ÛÜ\È[ÛÈ›ÝÈY[YšYY\›HžH\›H[™]ˆ]™\žHš[š]H™Yš^Ú]]È˜][Û˜[^[ÜˆÛÙY™šXÚY[Âˆ
+^›ÛÙœËœÝÙ\”Ù\šY\Õ\›P]\›\×Ù\WÙ^ÛÙY™—Û[Û›ÛZX[[™ˆ^›ÛÙœËœÝÙ\”Ù\šY\ÐÙ[\]\›\×Ù\WÙ^^[Ü”™Yš^
+Kˆ\È\Èš[š]Bˆ[ÙXœ˜HÛ›Kˆš[š]TÛ[›ÛZX[™^^[Ü”™Yš^ÜÝXØØ™XÛÜ™ÈH]\˜[ˆÛ™K]\›H^[œÚ[Û‹Ú[Bˆš[š]TÛ[›ÛZX[œXXœ×Ù^ÛÙY™—Û[Û›ÛZX[ÛWÙ˜XÝÜšX[Z[\›XÝ\Y\ÈBˆÛÛ[[Ûˆ›Ý[™YX›Þ˜XÝÜšX[XZ›Ü˜[›ÜˆH[šY›Ü›HZ[ˆÙ\YšXØ]Kˆ^›ÛÙœË[šY›Ü›Q^˜]Ø™X[^™\È]Ù\YšXØ]HÛ‚ˆH˜ˆ]Èš^Y\ÝYÙH›Þ\È\™H˜[Y[™Ù[ÛY]šXØ[HÚš[šÚ[™Ëˆ[™[šY›Ü›Q^˜]×Ù\]Z]—Ù^ÝÙ\”Ù\šY\Ø›Ý™\ÈÝYÙ]Ú\ÙHYÜ™Y[Y[Ú]BˆÙ[XÝYY\]™H^Û™[X[]˜[X]Ü‹ˆ^›ÛÙœË[šY›Ü›Q^Û•[š]ˆ^ÜÙ\È\ÈØÚY[H\È[‚ˆ[\˜[[˜Ý[Û‹Ú[Ú\ÙH\]Z]˜[[ÈHÙ[XÝY^Û™[X[ˆBˆ\š]˜]]™HÙˆH™^š[š]H™Yš^\È^XÝH]ÈÛÛ[[ÛˆÙ[\‹[™ˆ[šY›Ü›Q^^[Ü”™Yš^ÜÙXØ[Ù\œ›Ü˜›Ý[™ÈH™\ÚYX[š[š]HÙXØ[ˆ\œ›Ü‹ˆš[š]TÛ[›ÛZX[™^^[Ü”™Yš^ÜÙXØ[Ù\œ›Ü—ÛWÝ\WÙ›Ý\˜›ÝÂˆ›Ý™\ÈH[šY›Ü›HÛÙY™šXÚY[Í›Üˆ]™\žH˜XÝÜšX[™Yš^Û‚ˆH˜[™H[šY›Ü›HØÚY[H[š\š]È]ˆHÝ\X]Ø\™BˆZ[˜[œÜÜ\È[ˆ^XÝ]X›HÝYÙHÙ[XÝ[ÛŽ‚ˆ[šY›Ü›Q^][ÝY[™XÚ\Ú[Ûˆ˜XZÙ\ÈHÚ\™Y˜XÝÜšX[XYÛš]YBˆ›È[Ü™H[ˆ™XÚ\Ú[Û]ÝYÙHˆ
+ˆÈÚ[Bˆ[šY›Ü›Q^Ù[‘\š]˜]]™TÝ\™XÚ\Ú[Û˜™\Ù\™\È[ˆH™\]Y\ÝYÝ]]ˆ™XÚ\Ú[Ûˆ›ÜˆHÍš[š]HÙXØ[\œ›Ü‹‚ˆ[šY›Ü›Q^Ù[\—ÜÙXØ[Ù\œ›Ü—ÛX[™ˆ[šY›Ü›Q^Û•[š]Ú\Ñ\š]˜]]™SÛ’[\˜[ÛÛ\]HH[\˜[Y[™Ú[ˆ[ÙXœ˜NˆHÛÛ[[Û‹\™Yš^]˜[X]Üˆ›Ý™\ÈH[ÛË\ÚYYˆIÈHXÙ\YšXØ]HÛˆÌWXˆ]È^XÝ™\›È˜[YH\ÈÙ\\˜][BˆÙ\YšYYÛÈ[šY›Ü›Q^Û•[š]ÜÛÛ™\ÔÙ[‘\š]˜]]™X\ÈHš\œÝˆÛÛœÝXÝ]™H[š]X[]˜[YHÛÛ][Ûˆ™XÛÜ™ˆHØ[YHÛÛœÝXÝ[Ûˆ\È›ÝÂˆÚXÚÙYÛˆHÙ[\™YÚ\ËLKWX‚ˆ[šY›Ü›Q^Û”Þ[[Y]šXÕ[š]Ú\Ñ\š]˜]]™SÛ’[\˜[\Ù\ÈH^XÚ]ˆ[™Ú[ÛÛœÙ\]Y[˜ÙHH˜[™ˆ[šY›Ü›Q^Û”Þ[[Y]šXÕ[š]ÜÛÛ™\ÔÙ[‘\š]˜]]™XÝ\Y\ÈHÛÜœ™\ÜÛ™[™Âˆ[š]X[]˜[YH™XÛÜ™ˆ\ÈÙ\È›ÝÚ[[Bˆ˜[œÙ™\ˆH\š]˜]]™HÈHÚ[Ú\ÙKY\]Z]˜[[Y\]™H]˜[X]ÜŽÂˆ]™\™\Ù[][Û‹XÛÜÝ\™H[Ü™[K[š\]Y[™\ÜË[™HÙØ\š]Bˆ™[][Ûˆ\™HH™^Ø]\ËˆH]\˜[˜][Û˜[Z[œ]ˆ]˜[X]Üˆ^›ÛÙœË™^ÝÙ\”Ù\šY\È\È›ÝÈ[™XYHH˜[Y˜]È™X[›Ü‚ˆ]™\žHˆ˜]ˆ]Èš[š]H˜][Û˜[Ù\šY\È›Þ\È\™H™\ÝY[™]™HBˆX›XÈÙ[ÛY]šXÈ˜]H^›ÛÙœË™^ÝÙ\”Ù\šY\Ô˜]HÚ]˜][ÈKÌ˜‚ˆHØ[YH]˜[X]Üˆ\È›ÝÈHÝ[\X[™X[[”˜]Øˆ^›ÛÙœË™^ÝÙ\”Ù\šY\Ñ[˜Ý[Û˜[™ˆ^›ÛÙœË™^ÝÙ\”Ù\šY\ÓÛ’[\˜[H˜Ú]™\È]È˜[Y˜][Û˜[Z[\˜[ˆ™\ÝšXÝ[Û‹ˆÚ[ˆ™\›È\È[ˆ][\˜[ˆ^›ÛÙœË™^ÝÙ\”Ù\šY\ÓÛ’[\˜[Þ™\›×Ú[š]X[Ý˜[YXÝ\Y\ÈH^XÝˆ[˜Ý[Û‹[]™[[š]X[\]Z]˜[[˜ÙH™\]Z\™YžHHÑH[\™˜XÙKˆ\È\ÈBˆÙ\YšYY™\™\Ù[][Ûˆ^Y\‹›ÝY]H\š]˜]]™K]˜[œÜÜœšYÙHÂˆHÝ\ˆYš[š][ÛœËˆ]Èš[š]KYY™™\™[˜ÙHœšYÙH\È›ÝÈ^XÚ]‚ˆ^^[Ü”]XY˜]XÈHH
+È
+È
+žÌ˜[™ˆš[š]TÛ[›ÛZX[™^^[Ü”]XY˜]X×Ú\Ñ\š]˜]]™SÛ’[\˜[Ù\YšY\È]Âˆ[ÛË\ÚYY[\˜[\š]˜]]™HH
+ÈÛˆ]™\žH˜][Û˜[ÝXš[\˜[Ù‚ˆHÝ\YY›Ý[™YÞ[[Y]šXÈ›Þ\Ú[™ÈH™]\ØX›H]X[]]]™Bˆš[š]K\ÙXØ[[™X\ˆ[\™˜XÙKˆ^›ÛÙœË™^^[Ü”]XY˜]X×Ù›ÜØ\™\š]˜]]™P]™\›Øˆ™[XZ[œÈHÜXÚX[^™Y›ÜØ\™\š]˜]]™HX]™\›ÈžHH^XÝ][ÝY[ˆH
+ÈÌ˜ˆ[Ü™H[\Ü[Kˆ^›ÛÙœË™^ÝÙ\”Ù\šY\ÓÛ•[š]Ù›ÜØ\™\š]˜]]™P]™\›Ø›ÝÈÙ\YšY\ÈBˆZ[Y[˜ÛÜÙYÝÙ\‹\Ù\šY\È]˜[X]Üˆ]Ù[ˆ\È›ÜØ\™\š]˜]]™HX]ˆ™\›Ëˆ]Èš[š]HÝYÙK^™\›ÈÛÜ\ÈHÜÚ]]™K]Z[\\Ë\˜Y]\ÈYÙ]Ù‚ˆÊŒŠXÛˆHKÌ˜ÛÈ][ÝY[[™ÈÚ]™\È[ˆ^XÚ]š\œÝ[Ü™\‚ˆ[˜ÛÜÝ\™Kˆ\È™[XZ[œÈHØØ[›Ý[™\žH[Ü™[H›ÜˆHY\]™Bˆ™\™\Ù[]]™KˆBˆÛÛœÝ[[]™[ÛÛ\Ý[™Z[\™\Ý™\™\Ù[]]™H\È›ÝÈY][Û˜[HXÚØYÙY\ÈBˆÜÚ]]™H˜\ÙH^›ÛÙœË™TÜÚ]]™Xˆ]ÈÝÙ\ˆ[\˜[[™Ú[\È[Ø^\Âˆ]X\Ý˜[™^›ÛÙœË™S˜]\˜[ÝÙ\˜Ú]™\È˜[Y]\˜[˜]\˜[ˆÝÙ\œÈ™]ÙY[ˆ—›˜[™›˜ˆ˜][Û˜[›ÛÝË˜][Û˜[Y^Û™[ˆÛÛ[Z]K[™HÙ[‹Y\š]˜]]™H[Ü™[H™[XZ[ˆÙ\\˜]HÜ[ˆœšYÙ\Ë‚‹H
+Š“[™X\ˆÑ\È8 %š[š]HX[›ËKP˜ZÙ\ˆÛÜ™H[™\™XÝØØ[\ˆ[š\]Y[™\ÜÈÛÜÝ\™HÚXÚÙYÈ[˜[]XÈ^Y\ˆÜ[‹ŠŠ‚ˆX[›Ð˜ZÙ\‹›X[˜›Ý™\Èš[š]HÚ›Û›ÛÙÚXØ[›ÙXÝËHÜ™\™Y]ÛÜ™ˆ^[œÚ[Û‹\ØÜ™]H˜\šX][ÛˆÙˆÛÛœÝ[Ë[™™XÝ\œ™[˜ÙH[š\]Y[™\ÜÎ‚ˆH™\›ËZ[š]X[›Ü˜Ú[™È™\ÜÛœÙH\ÈH^XÚ][YK[Ü™\™YZ[Y[Ý[BˆÝ[WÊÏŠH×Ê‹LJH
+ˆ‹‹ˆ
+ˆ×ÊÊÌJH
+ˆ×ÚÎÈ]™\žHØ[\YØ[™Y]H\ÈBˆ™XÝ\œÚ]™H˜Z™XÝÜžKÚ[HH™\›ËZ[š]X[Û[ÙÙ[™[Ý\ÈØ[\YØ[™Y]H\ÂˆY[XØ[H™\›Ëˆ]ÈÚXÚÙY›Ü˜ÙYˆ\›[ÛšXË[ÜØÚ[]Üˆ[œÝ[˜ÙH\š]™\ÈH^XÝÙXÛÛ™[Ü™\ˆ][\ˆ™XÝ\œ™[˜ÙBˆY\ˆ™XÝÜš^š[™ÈÜÚ][Ûˆ[™™[ØÚ]Kˆ˜][Û˜[XZ›Ü˜[™˜XÝÜšX[Z[\›Xˆ[™‹‹™˜XÝÜšX[Z[\X[Ø›Ý[™Ø]ÜÝ\›ÝÈ›Ý™HHš[š]H˜][Û˜[ˆ˜XÝÜšX[]Z[[™Ú[™Nˆ]HÛÛ\]X›HÝ\ˆˆ
+ˆË›[K›˜]XœÈ
+ÈX]™\žHš[š]H™Yš^ÙˆÝ[H×œ‹ÜˆX\È›Ý[™YžBˆÚXÙH]Èš\œÝÛZ]Y\›K[™HÚYY™\œÚ[Ûˆ\È[ˆY][Û˜[ˆKÌ—œÚY˜XÝÜ‹ˆ[™X\“ÑKœX[›Ð˜ZÙ\‘˜XÝÜšX[Z[Ø›Ý[™ÜXÚX[^™\Âˆ]\Ý[X]HÈÈHJ•HÛÙY™šXÚY[[›Ü›H[™[\˜[[[™Ýˆ›ÙXÝ[ˆHÛÛ[[Ý\ÈX[›ËKP˜ZÙ\ˆ[‹ˆH™]È^XÝ]X›HÚYˆX[›Ð˜ZÙ\‘˜XÝÜšX[Z[ÚY[™[Ü™[BˆX[›Ð˜ZÙ\‘˜XÝÜšX[Z[ÜÚYYÛWÙ\Ø›ÝÈ\›ˆHÙ[ÛY]šXÈZ[[Âˆ[žH™\]Y\ÝYÜÚ]]™H˜][Û˜[Û\˜[˜ÙK[šY›Ü›[HÝ™\ˆ]™\žHš[š]Bˆ™[XZ[š[™È™Yš^ˆHÛÛœÝ[XÛÙY™šXÚY[YÜ™YH\›BˆÛÛœÝ[X[›Ð˜ZÙ\”Ú[\^\›HHˆH
+œ‹ÜˆJH
+ˆWœ˜[™]ÈÚXÚÙYˆÛ™K\Ý\™XÝ\œ™[˜ÙH›ÝÈÚ]™HHš[š]H[ÙXœ˜ZXÈœšYÙHÈH^Û™[X[ˆÙ\šY\Ëˆ›ÜˆH]X\\‹]\›ˆÙ[™\˜]Ü‹HÚXÚÙYš[š]HY[]Bˆ›Ý][Û”Þ\Ý[KœÚ[\^\X[Ù]™[—ÜÜ]Ü›Ý\ÈHš\œÝŠ›˜\›\È\Âˆ×ÛŠ
+H
+ˆH
+È×ÛŠ
+H
+ˆ˜Ú]^XÝ]X›H[\›˜][™È˜][Û˜[™Yš^\Ë‚ˆ›Ý][Û”Ù\šY\Ë™^\X[Ú[XYÚ[˜\žWÙ]™[—ÜÜ]›Ý™\È]H]\˜[ˆÛÛ\^™Yš^]J•\ÈÜÙHØ[YH×ÛŠ
+X[™×ÛŠ
+XÛÛÜ™[˜]\Ë‚ˆ›Ý][Û”Ù\šY\Ëœ›Ý][Û‘^˜]×Ý˜[Y›ÝÈ[˜ÛÜÙ\ÈÜÙH™Yš^\È[ˆ™\ÝYˆ˜][Û˜[ÛÛ\^›Þ\ËÚ]›ÝÛÛÜ™[˜]HÚYÈ›Ý[™YžBˆ
+ˆ›Ý][Û•Z[XYÛš]YH
+ˆ
+KÌŠW›˜ˆ]Âˆ›Ý][ÛÛÜÔ˜]Ø[™›Ý][Û”Ú[”˜]ØÛÛÜ™[˜]H›Ú™XÝ[ÛœÈ\™H˜[Y˜]Âˆ™X[ÈÚ]HØ[YH˜]KˆHÛÛ[[Ûˆ›Ý[™YZ[œ]]˜[X]Üˆ\È›ÝÈ[ÛÂˆ^ÜÙY\È›Ý][ÛØ[Ý[\Ë[šY›Ü›T›Ý][ÛÛÜÓÛ•ÛØ[™ˆ[šY›Ü›T›Ý][Û”Ú[“Û•ÛØˆ›ÝØ]\ÙžHH›Ú™XÝ	ÜÈ]\˜[˜][Û˜[ˆ\Ú[Û‹KY[HÛÛ[Z]HYš[š][ÛˆÛˆËL‹—XÚ]HÚXÚÙY[Ù[\Âˆ[HH\ÈÈM˜[™Û™H[šY›Ü›H˜XÝÜšX[ÝYÙHÝ\YYžBˆ[šY›Ü›T›Ý][Û›Þ\×ÝÚY×ÜÚš[š×Ý[šY›Ü›Xˆ›Ý][Û•^[ÜœšYÙX›ÝÂˆY[YšY\ÈÜÙH]\˜[Ù[\œÈÚ]HÛÜœ™\ÜÛ™[™Èš[š]H›Ü›X[ˆÚ[™KØÛÜÚ[™H^[Üˆ™Yš^\È[™ÚXÚÜÈHš^Y\ÝYÙHÚ[™HÙXØ[\Ý[X]Bˆ[šY›Ü›T›Ý][Û”Ú[Ù[\—ÜÙXØ[Ù\œ›Ü˜ˆ]ÈÙ\™Yš^™XÝ\œ™[˜ÙH\È›ÝÂˆ›Ý[™YžHH^Û™[X[˜XÝÜšX[YÙ]Ú]š[™ÈH[šY›Ü›Hš[š]Bˆ[Ü™[H[šY›Ü›T›Ý][Û”Ú[Ù[\—ÜÙXØ[Ù\œ›Ü—ÛWÝ\WÙ›Ý\˜‚ˆ›Ý][Û‘\š]˜]]™K[šY›Ü›T›Ý][Û”Ú[“Û•Û×Ú\Ñ\š]˜]]™SÛ’[\˜[›ÝÂˆÛÛXš[™\È]š[š]HÍ
+ˆ\œ›ÜˆÚ]HÝ\X]Ø\™H˜XÝÜšX[ÝYÙBˆÙ[XÝYœ›ÛH™XÚ\Ú[Û]ÝYÙHˆ
+ˆÈ›Ýš[™ÈH[ÛË\ÚYYˆ˜]È[\˜[Ù\YšXØ]HÚ[‰ÈHÛÜØÛˆËL‹—XˆH\š]˜]]™H™[Û™ÜÂˆÈ\ÈÛÛ[[Û‹\™Yš^]˜[X]Ü‹ˆ]ÈÛÛ\[š[Û‚ˆ›Ý][Û‘\š]˜]]™K[šY›Ü›T›Ý][ÛÛÜÓÛ•Û×Ú\Ñ\š]˜]]™SÛ’[\˜[ˆ›ÝÈ›Ý™\ÈÛÜÉÈH\Ú[˜YØZ[œÝH^XÚ]ˆ[šY›Ü›T›Ý][Û“™YÔÚ[“Û•ÛØ]˜[X]Ü‹ˆHš[š]HÛÜÚ[™H™Yš^\ÈÛ™Bˆ›ÜYÚ[™H\›KÚXÚ\È\ÜÚYÛ™YHÙ\\˜]H˜XÝÜšX[ÚY[™›Ú[™YˆÈH]šYY]Z[ÚYžHX^ˆ›Ý][Û’[š]X[˜[Y\Ø›ÝÈÚXÚÜÈBˆX]Ú[™Èš[š]H[š]X[›Þ\ÈÊ
+OLX[™Ê
+OL[ˆXÚØYÙ\È›Ýˆ\š]˜]]™\È[™ÜÙH˜[Y\È\Âˆ[šY›Ü›T›Ý][Û“Û•Û×Ü›Ý][Û’[š]X[Ù\YšXØ]Xˆ\š]˜]]™H˜[œÜÜÂˆ\]Z]˜[[™\™\Ù[][ÛœÈ™[XZ[œÈÜ[‹ˆHÛÛ[[Ý\Ë\Ú[\^ˆ[\œ™]][Û‹™XÝÜˆ[š\]Y[™\ÜË[™H›Ý][Û‹ÙÙ[ÛY]šXÂˆY[YšXØ][Ûˆ™[XZ[ˆÜ[‹‚ˆHØÚY[YšXËXØ[Ý[\ÈØ]H\ÈHÛÛ[[Ý\Âˆ[\˜[[X]š^X[›ËKP˜ZÙ\ˆÙ\šY\ÈÚ]Ú[\^[YÜ˜[›Þ\Ë]ˆØØ[\ˆZ[Ù\YšXØ]HYYÈÛÛ\Û™[Ú\ÙH›Þ\Ë[™˜\šX][ÛˆÙ‚ˆÛÛœÝ[Ë‚ˆ\È\ÈH[[™YÛÛœÝXÝ]™H
+Š›[™X\ˆXØ\™KS[™[0í™ŠŠˆ[Ü™[H›Ü‚ˆ™XÝÜˆÞ\Ý[\Î‚ˆX[›ËKP˜ZÙ\ˆÝ\Y\ÈHÛ[ÙÙ[™[Ý\È™\ÛÛ™[˜\šX][ÛˆÙˆÛÛœÝ[ÂˆÝ\Y\ÈHY™š[™HÛÛ][Û‹[™H›Ý[™Y™\›ËZ[š]X[Y™™\™[˜ÙH\Âˆš]™[ˆÈH™\›È˜]È™XÝÜˆžH[ˆ^XÚ]˜XÝÜšX[ØÚY[KˆØØ[\‚ˆ‰ÈH˜[š\]Y[™\ÜÈ\È[X™\˜][HÙ\\˜]NˆHÚXÚÙY\™XÝˆš[š]K[Y\ÚÛÜÝ\™H™YXÙ\È[ˆ\œ›Üˆ[™[ÜHžHH˜XÝÜˆÙˆÛÈ\‚ˆ™Yš[™[Y[ÝÙY\ˆÛÛœÝXÝ[™È]ÝÙY\œ›ÛH\š]˜]]™HÙ\YšXØ]\Âˆ™[XZ[œÈÜ[‹ˆÙ[™\˜[›Û›[™X\ˆXØ\™KS[™[0í™ˆ™[XZ[œÈH]\‚ˆ[\˜[S\ØÚ]‹ØÛÛ˜XÝ[Ûˆ^Y\‹‚‹H
+Š”ØØ[\ˆ^Û™[X[[š\]Y[™\ÜÈ8 %\™XÝY\ÚÛÜÝ\™HÚXÚÙYÈ[˜[]XÂˆœšYÙHÜ[‹ŠŠˆØØ[\“ÑU[š\]Y[™\ÜË›X[˜Ù\È›Ý\ÙHX[›ËKP˜ZÙ\ˆÜ‚ˆXØ\™]\˜][Û‹ˆH\™XÝY\Ú[š[™ÐÙ\YšXØ]X™XÛÜ™È˜][Û˜[\œ›Ü‚ˆ[™[Ü\Èœ›ÛHš[š]HY\ÚÝÙY\Ë[™]È[Ü™[H\œ›Ü—Ù\WÞ™\›ØÚÛÜÙ\ÂˆHÛÛ\]X›HXYXÈÝÙY\ÛÝ[È›Ü˜ÙHH\œ›ÜˆÈ™\›ËˆBˆÙ[‘\š]˜]]™Q\™XÝY\ÚÛÛ\\š\ÛÛ˜Ü˜\\ˆ[ˆZY[ÂˆÙ[‘\š]˜]]™R[š]X[˜[YU[š\]YXÈH^XÝÛÛ\\š\ÛÛˆ[Ü™[H›Ü‚ˆÝÙ\‹\Ù\šY\È[™[™\œÙK[ÙØ\š]H^Û™[X[È\È]˜Z[X›H\ÂˆÝÙ\”Ù\šY\×Ù\]Z]—ÛÙÒ[YÜ˜[[™\œÙWÛÛ—Ú[\˜[ÛÙ—Ù\™XÝY\Ú‚ˆÚÜ›ØÚÓY\ÚÝÙY\›™^ÛWÚ[˜›ÝÈÚXÚÜÈH^XÝÛ™KX›ØÚÈ[ÙXœ˜N‚ˆH[\ØÛÜY›Ý[™™^H[™Ý
+ˆ™]š[Ý\È
+È™\ÚYX[Ú]ˆ[™ÝHKÍ[™™\ÚYX[H™]š[Ý\ËÍ[™\ÈH[™[ÜK‚ˆHÙ[Ý[\ØÛÜ[™È\\È›ÝÈ›Ü›X[^™Y\ÈÙ[‚ˆš[š]SY\ÚœÝ[U\×Ú[˜Ü™[Y[Ø›Ý™\ÈHš[š]H[™Ú[Y[]H[™ˆš[š]SY\ÚY™™\™[˜ÙP›Ý[™ÔÚÜ›ØÚÓY\ÚÝÙY\ÛÛ™\ÈÙ[Ú\ÙBˆ˜][Û˜[[˜Ü™[Y[›Ý[™È[È]Û™KX›ØÚÈÝÙY\ˆÚ]™[XZ[œÈ\ÈÛ›BˆÈ\š]™HÜÙHš[š]H[˜Ü™[Y[\Ý[X]\Èœ›ÛHÛÈÝ\YY[\˜[ˆ\š]˜]]™HÙ\YšXØ]\Ë‚‚•\™H\È[[[Û˜[H›ÈYÙÜ™YØ]H\˜Ù[YÙNˆ\ÙHØ]\È]™H\Ý[˜Ý™\[™[˜ÚY\Ë[™H›ÛÙˆ[ˆÛ™HÙ\È›ÝÛÛ\[œØ]H›ÜˆHZ\ÜÚ[™È›ÛÙˆ[‚˜[›Ý\‹ˆHHØÛÜ™HÝ^\È\ÙY[Û›H\ÈÙXÛÛ™\žH[YÜ˜][ÛˆÛÝ™\˜YÙK‚‚ˆÈÈÛÛ[Z]H™\XÙ[Y[‚‹H™\XÙHÚ[Ú\ÙHÛÛ[Z]HÛˆ[ˆ[\˜[žH[\˜[™YÝ[\š]N‚ˆ]™\žHÛX[˜][Û˜[ÝXš[\˜[\ÈHÛÛ\]X›H˜\œ›ÝÈÝ]][\˜[ˆÛÛZ[š[™È[Ú[]˜[YH[\˜[ËÚ]HÜÚ]]™H[Ù[\È]]™\žBˆÜÚ]]™H™\]Y\ÝY™XÚ\Ú[Û‹ˆHÚXÚÙYœšYÙBˆ[\˜[™YÝ[\“Û‹™\Ú[Û‘[PÛÛ[[Ý\Ø\š]™\ÈH]\˜[˜][Û˜[ˆ\Ú[Û‹Y[H™YXØ]Hœ›ÛH\È[˜ÛÜÝ\™H]K‚ˆÙYH[\˜[™YÝ[\“Û˜[ˆÛÛ\]X›P[˜[\Ú\ËÐØ[Ý[\Ë›X[˜‚‹H˜][Û˜[Y[˜Ý[Ûˆ[›ÛZ[˜]Üˆ\\™\ÜÈ\ÈÛ›HHÝY™šXÚY[Ù\YšXØ]Kˆ›ÝHÙ[™\˜[Yš[š][Û‹‚ˆÙYH˜][‹‘[›ÛZ[˜]Ü\\Û’[\˜[[‚ˆÛÛ\]X›P[˜[\Ú\ËÑ[˜Ý[Û‘ÛXZ[œË›X[˜‚‚ˆÈÈ[YÜ˜[‚ŠŠ™[˜ÚX\šÈ][HMH8 %ÛÛœÝXÝ]™H•ÈÛÜ™HÚXÚÙYŠŠˆB˜Y™™XÝ]™Q•ØØÝ]XÑXYXÑY™™XÝ]™Q•ØXÚØYÙ\È[™Z\ˆ[™Ú[B˜YÜ™Y[Y[œšYÙ\È›Ü›X[^™HHš[š]HØÚY[K]ËY[™Ú[Y[]H[ˆB™Y™™XÝ]™KXØ[Ý[\ÈÚ\\‹ˆ\È\ÈH›Ú™XÝ8 &\ÈÙ\YšXØ]K[]™[ÛÜ™NÂ[œ™\ÝšXÝYÛ\ÜÚXØ[\Ý\Ù\È\™H›Ý™Z[™ÈÛ]YÙÛY[ÈH[\™˜XÙK‚•Hš[š]HÙ[XÝÜˆ•Ëœ™\]Y\ÝY™XÚ\Ú[Û˜›ÝÈ\ÈX›XÈÙ\YšXØ]\Â˜•Ëœ™\]Y\ÝY™XÚ\Ú[Û—ÜÜÚ]]™X[™•Ëœ™\]Y\ÝY™XÚ\Ú[Û—ÛWÛÛ™XXZÚ[™ÂH›Ü›X[^˜][Ûˆ[™›Ý[™Y™\ÜÈÙˆ]™\žH™\]Y\ÝYØÚY[H™XÚ\Ú[Û‚™^XÚ]ˆHÛÛ\[š[Ûˆ•Ëœ™\]Y\ÝY™XÚ\Ú[Û—Ø[]Û™X›Ý™\ÈHÙ[XÝÜ‚š\È›Ûš[˜Ü™X\Ú[™ÈXÜ›ÜÜÈš[š]HÝYÙ\ËÝ\Z[™ÈHØÚY[K[Ü™\ˆ[˜\šX[›™YYYžH]\ˆ[™Ú[]˜[œÜÜ\™Ý[Y[Ë‚•Hš[š]HÛ[›ÛZX[[YÜ˜][Û‹XžK\\È[Ù[H›ÝÈ^ÜÙ\È›Ý[™Ú[›ÜšY[][ÛœÈÙˆH›ÙXÝ\[H[\ØÛÜHÛˆ˜][Û˜[ÜšYËˆ]Âœ]XY˜]XËØÝXšXÈÜXÚX[^˜][Ûˆ›Ý™\È›ÝÝ[\È\]X[Û™H]]™\žHÜÚ]]™B™š[š]HÝYÙKˆ\ÈÝ™[™Ý[œÈH][KLMH[YÜ˜][Û‹XžK\\È›Ý[™\žBÚ]Ý][›ÙXÚ[™ÈHÛÛ\]Y[YÜ˜[ÜˆHÛ\ÜÚXØ[[Z]‚•H™]ÛH[YÜ˜]Yš[š]Q•Ô]X\XØ[Ù[HYÈHÛÛ˜Ü™]H]X\XÈ•Â˜ÚXÚÜÚ[ˆXYXÈY[™šYÚÝ[\È›ÜˆÛˆÌWX[˜ÛÜÙHH^XÝœ˜][Û˜[˜[YHKÍX]]™\žHš[š]HÝYÙK[™H™\Ý[[™È˜]È[YÜ˜[\Âœ›Ý™Y\]Z]˜[[È™X[˜]Ë›Ù”˜]
+KÍJX‚•HÙ^XËY\š]˜]]™H[™Ú[\Ý[HÚ]™\ÜÈ›ÝÈ[ÛÈ™XXÚ\ÈÝYÙHMˆ^XÝN‚˜š[š]Q•ËœÙ^XÑ\š]˜]]™SYÝ[WÜÝYÙLM˜]˜[X]\ÈHš[š]HÝ[HÂ˜LÍÍÍKÌLÌLÌ˜[™]ÈÛÛ\[š[Ûˆ\\‹X›Ý[™[Ü™[HÙY\ÈH™\Ý[™[ÝÂ˜‹ÍØˆ\ÈYÚ[œÈH][KLMHš[š]HØÚY[HÚ]Ý]™X][™ÈBš[YÜ˜[\È[ˆ]Z[™Y[™š[š]H[Z]‚•HØ[YHÙ^XÈ\š]˜]]™HØÚY[H›ÝÈ™XXÚ\ÈÝYÙH^XÝN‚˜š[š]Q•ËœÙ^XÑ\š]˜]]™SYÝ[WÜÝYÙM]˜[X]\ÈÂ˜ÌŒŒËÌÌÍMMÌ˜Ú]HÛÜœ™\ÜÛ™[™Èš[š]H\\‹X›Ý[™ÚXÚË‚’]›ÝÈ[ÛÈ™XXÚ\ÈÝYÙHLŽ^XÝN‚˜š[š]Q•ËœÙ^XÑ\š]˜]]™SYÝ[WÜÝYÙLLŽ]˜[X]\ÈÂ˜LÍŽNLNKÍLÍŽÌLL˜YØZ[ˆÚ]Hš[š]H\\‹X›Ý[™ÚXÚÈ™[ÝÈX‚•HØ[YHØÚY[H›ÝÈ™XXÚ\ÈÝYÙHMˆ^XÝN‚˜š[š]Q•ËœÙ^XÑ\š]˜]]™SYÝ[WÜÝYÙLM˜]˜[X]\ÈÂ˜MNNMÍKÎNNLÍNL˜Ú]]È^XÚ]š[š]H\\‹X›Ý[™ÚXÚÈ™[ÝÈX‚‚‹HX›XÈ[YÜ˜[\™Ù]ˆÛÛœÝXÝ[ˆ[YÜ˜[ÛÛœÝXÝ[Û‘›Üˆ˜œ›ÛHBˆÛÛ[[Ý\Ñ[˜Ý[Û“Û’[\˜[‚ˆÙYH[YÜ˜[ÛÛœÝXÝ[Û‘›Ü˜[™[YÜ˜[‘^\ÝÐÛÛœÝXÝ[Û‘›Ü˜[‚ˆÛÛ\]X›P[˜[\Ú\ËÐØ[Ý[\Ë›X[˜‚‹H›Ý™YœšYÙNˆÛ˜ÙHHÛÛœÝXÝ[Ûˆ^\ÝËH[YÜ˜[\ÈHÛÛ\]X›Bˆ™X[‚ˆÙYH[YÜ˜[ØÛÛœÝXÝ[Û—Ü›Ý™\×ÝÙ[ÙYš[™YÙ›Ü˜‚‹HÛÛ˜Ü™]H^\Ý[˜ÙHØ\ÙNˆ[YÜ˜[˜ÛÛœÝ[[Û›ÝÛ™PÛÛœÝXÝ[Û‘›Ü˜Ú]™\ÈBˆ˜[YÚ[]˜[YY[YÜ˜[[ÛÜš]H›Üˆ]™\žHÛÛœÝ[^XÝ\˜][Û˜[ˆ[˜Ý[Û‹[™[YÜ˜[™^\Ý×ØÛÛœÝ[[Û›ÝÛ™PÛÛœÝXÝ[Û‘›Ü˜XÚØYÙ\ÂˆHÛÜœ™\ÜÛ™[™È[Û›ÝÛ™HÛÛœÝXÝ[ÛˆÚ]™\ÜË‚ˆ[YÜ˜[˜ÛÛœÝ[[Û›ÝÛ™R[YÜ˜[›Ü—Ù\WÛÙ”˜]^ÜÙ\ÈH™\Ý[[™È˜]Âˆ[YÜ˜[\È^XÝH™X[˜]Ë›Ù”˜]
+
+ˆHJH
+ˆÊX‚‹HY™š[™H^[œÚ[ÛŽˆ[YÜ˜[˜Y™š[™S[Û›ÝÛ™PÛÛœÝXÝ[Û‘›Ü˜[™ˆ[YÜ˜[™^\Ý×ØY™š[™S[Û›ÝÛ™PÛÛœÝXÝ[Û‘›Ü˜ÈHØ[YH›Ü‚ˆ8¡©ˆˆ
+ˆ
+ÈØÚ[ˆ8¢i˜\Ú[™ÈH^XÝ˜][Û˜[[™Ú[›Ü›][Bˆ
+ˆHJH
+ˆ
+ˆ
+ˆ
+H
+ÈŠHÈˆ
+ÈÊX‚‹HHÜÜÚ]HÜšY[][Ûˆ\È›ÝÈÛÝ™\™YžBˆ[YÜ˜[™^XÝ˜]ØY™š[™WÛ›Ûš[˜Ü™X\Ú[™Øˆ[YÜ˜[˜Y™š[™S[Û›ÝÛ™PÛÛœÝXÝ[Û‘›Ü—ÛÙ—Û›ÛœÜØ[™ˆ[YÜ˜[™^\Ý×ØY™š[™S[Û›ÝÛ™PÛÛœÝXÝ[Û‘›Ü—ÛÙ—Û›ÛœÜØ›Üˆˆ8¢iˆÚ]HØ[YH^XÝ›Ü›][KˆÙÙ]\ˆ\ÙHÚ]™HHÛÛ\]HY™š[™Bˆ[Û›ÝÛ™H˜[Z[HÚ[H™]Z[š[™Èš[š]H˜][Û˜[Ù\YšXØ]\Ë‚ˆHX]Ú[™ÈY[]Y\Âˆ[YÜ˜[˜Y™š[™S[Û›ÝÛ™R[YÜ˜[›Ü—Ù\WÛÙ”˜][™ˆ[YÜ˜[˜Y™š[™S[Û›ÝÛ™R[YÜ˜[›Ü—ÛÙ—Û›ÛœÜ×Ù\WÛÙ”˜]^ÜÙHHY™š[™Bˆ˜]È[YÜ˜[ÈžHZ\ˆ^XÝ[™Ú[›Ü›][K‚‹H•È›Ý]H›ÜˆÜ™[˜\žH[˜Ý[ÛœÎˆÈ›Ý\œÝYHHÙ[™\šXÈ™Y™™XÝ]™H•È‚ˆÚÜÙH\Ý\Ù\È\™H\š]˜]]™H›Ý[™È[™ØØ[ÛÛ›ÛËˆHXZ[ˆ[Ü™[BˆÚÝ[™HH^XÝÛÛ™^•Îˆ^XÝÛÛ™^]HÛˆØK—X[\Y\ÈBˆÛ™K\ÚYYÛÛ™^\š]˜]]™H\È[Û›ÝÛ™K[YÜ˜X›K[™\È[YÜ˜[ˆˆˆHˆX‚‹H^XÝÛÛ™^]H\È›ÝÈÝ]Y›ÝYÚ™X[˜]Ë“X[™˜][Û˜[ÙXØ[Ë‚ˆÙYH™X[˜]Ë“XÙXØ[˜]Ø[™^XÝÛÛ™^Û˜‚‹HÛÛ™^\š]˜]]™NˆHÛÛœÝXÝ[ÛˆÝ\Y\ÈH˜[Y˜]È[\˜[[ÛÜš]Bˆ›ÜˆHšYÚÜˆY\š]˜]]™Kˆ\ÔšYÚ\š]˜]]™X[™ˆ\ÓY\š]˜]]™X[ˆ™\šYžH]žHH˜][Û˜[\ÙXØ[ÝÙ\‹X›Ý[™ÂˆÜ™X]\Ý[ÝÙ\‹X›Ý[™Üˆ\\‹X›Ý[™ÈX\Ý]\\‹X›Ý[™]ÜËˆ\ÙH\™BˆÙ\YšXØ]\È›Üˆ[ˆ^XÚ][ÛÜš]K›ÝÛÛœÝXÝ[ÛœÈžH[™š[][HÜ‚ˆÝ\™[][KˆH[ÛË\ÚYY\š]˜]]™H^\ÝÈÛ›HÚ\™HHÛÈÝ\YYˆÛ™K\ÚYY[ÛÜš]\ÈYÜ™YNÈÛÜ›™\œÈÝXÚ\ÈXœØÚÝ[›Ý›ØÚÈBˆ[š]™\œØ[Û™K\ÚYY•Ë‚‹HÛÛ™^•È›ÛÙˆÝ\ˆ›ÜˆXXÚ\][ÛˆÙ[ÞÚKÞÚJÌ_WXÛÛ™^]BˆÚ]™\ÂˆÊÑŠÚJHHÙX×ÑŠÚKÞÚJÌ_JHHËQŠÞÚJÌ_JX‚ˆ][\Z[™ÈžHHÙ[ÚY[™Ý[[Z[™ÈÚ]™\È\˜›Ý^Ý[\È\›Ý[™Bˆ[\ØÛÜ[™È[™Ú[Y™™\™[˜ÙHˆˆHˆXˆHš[š]H˜][Û˜[Y\ÚÙÙ]\‚ˆÚ][ˆ^XÚ][Ù[\È]\ÝÚš[šÈH\˜›Ý^Ø\È›È\X[ÂˆÛÛ\][™\ÜÈÙˆ[ˆ[XšY[™X[[[X™\ˆ\H\È\›Z]Y‚‹HYXÙ]Ú\ÙHÛÛ™^]NˆYˆH[˜Ý[ÛˆÝÚ]Ú\ÈÛÛ™^]KÜ]H[\˜[]ˆ˜][Û˜[œ™XZÜÚ[Ë\HH^XÝÛÛ™^•ÈÛˆXXÚYXÙK[™ÛÛXš[™Bˆ[™Ú[\]X[]Y\ÈžH˜]Ë\™X[\š]Y]XÈ[™˜[œÚ]]š]KˆÈ›ÝYBˆÙ\\˜]HYXÙ]Ú\ÙH[Ü™[H[›\ÜÈH^[\\È›Ü˜ÙHH™]\ØX›HXœÝ˜XÝ[Û‹‚‹H[YÜ˜][ÛˆžH\ÈÚÝ[›ÛÝÈHØ[YH^XÚ]\YXÙH\ØÚ\[™K‚ˆYÝY[™\ÔÝ[XšYÚÝY[™\ÔÝ[X[™ˆš[š]R[YÜ˜][ÛžT\×ÝÚ]˜\šX][Û˜›ÝÈ›Ý™HH^XÝ˜][Û˜[ˆ™XÝ[™ÛHXÛÛ\ÜÚ][Û‹[˜ÛY[™È]ÈÛÜ›™\‹X\™XHÛÜœ™XÝ[Û‹‚ˆHÛÛ\[š[ÛˆY[]BˆšYÚÝY[™\ÔÝ[WÙ\WÛYÜÝØ\ØYÜ]XY˜]XÕ˜\šX][Û˜Y[YšY\ÈBˆšYÚY[™Ú[Ý[HÚ]HÝØ\YYY[™Ú[Ý[H\È^XÝH]ˆš[š]H]XY˜]XÈ˜\šX][Û‹‚ˆ˜][Û˜[\][Û‹™š[š]R[YÜ˜][ÛžT\×ÛÛ”\][Û˜[™]ÂˆYY[™Ú[]Ú]]˜\šX][ÛˆÛÝ[\œ\›ÝÈY]Y[]HÈ]™\žBˆÝ\YYÙ\YšYY˜][Û˜[\][Û‹Ú]HXÝX[[\˜[[™Ú[ÂˆÛˆHšYÚZ[™ÚYKˆHÛÛXš[™YÛÛÜ™[˜]H[Ü™[BˆÛÛÜ™[˜]R[YÜ˜][ÛžT\×ÛÛ”\][Û—Ù[™Ú[Øœ˜XÚÙ]›ÝÈ\›œÈBˆ^XÝY[]H[™X^[][K\Ý\ÛÜ›™\ˆ›Ý[™[ÈH\ØX›Hš[š]Hœ˜XÚÙ]ˆŠŠŠKXJŠJKY[JŠŠŠK]ŠJJHHYÝš\ÈHŠŠŠKXJŠJXÚ[™]™\‚ˆHØ[\YÙXÛÛ™]\È›Û™XÜ™X\Ú[™Ëˆ]\ÈHš[š]Bˆ[Û›ÝÛ™K\YXÙH›Ü›H™YYYžHH
+˜\˜Ý[ˆH›Ý]K›ÝY][ˆ•ÂˆY[YšXØ][ÛˆÙˆZ]\ˆÝš\ˆHÚXÚÙYˆ[YÜ˜[’[YÜ˜][ÛžT\ÐÙ\YšXØ]X›ÝÈXÚØYÙ\ÈH™^Ù[™\˜[ˆ[™Ù™ŽˆY\ˆH\XÝ[\ˆZ\™YY\Ú\ÈÙ\YšYY]]ÈÛÂˆ[YÜ˜[˜]ÜÈYÈH›ÙXÝY[™Ú[˜]ËˆYÚ[YÜ˜[Ù\]Z]—Ù[™Ú[ÜÝX—ÜšYÚ[™]ÈÞ[[Y]šXÈÛÛ\[š[Û‚ˆ\š]™HH\ÝX[[™Ú[[Z[\Ë[Ý\‹Z[YÜ˜[›Ü›][HžH˜[Y˜]Âˆ[\˜[Ø[˜Ù[][Û‹ˆÛÛœÝXÝ[™È]Z\™YY\Úœ›ÛH\˜š]˜\žBˆ\š]˜]]™H]H™[XZ[œÈÙ\\˜]K‚ˆHÚXÚÙYˆ]XY˜]XÕ˜\šX][Û”Ý[X\Ý[X]\È›Ý[™]ÛÜœ™XÝ[ÛˆžHHX^[][Hš\œÝˆ[˜Ü™[Y[[Y\ÈHÙXÛÛ™[™Ú[˜\šX][Û‹ÜˆžHH›ÙXÝÙˆHÛÂˆ[™Ú[˜\šX][ÛœÎÈ™YØ][™È›Ý]ÈÝ\Y\ÈHXÜ™X\Ú[™Ë\YXÙBˆ™\œÚ[Û‹ˆ˜][Û˜[\][Û‹[šY›Ü›X›ÝÈÚ]™\ÈHš\œÝ^XÚ]ÛÛ[[Û‚ˆ™Yš[™[Y[ˆHJ›˜˜][Û˜[ÜšYÛÛZ[œÈ›Ý[šY›Ü›H[œ]ÜšYË[™ˆY\ÚÜ™Yš[™WÛ][ÜšYÚ›Ý™\È]ÈÚY\ÈHÛY\Ú]šYYžHBˆÜÚ]]™H™Yš[™[Y[˜XÝÜ‹ˆ˜][Û˜[\][Û‹”™Yš[™\Ø[™ˆÛÛ[[Û”™Yš[™[Y[XÚØYÙHHÛÈ[™Ú[\™\Ù\š[™È[™^[X™Y[™ÜÈ\Âˆš[š]H]NÈ[šY›Ü›PÛÛ[[Û”™Yš[™[Y[ÛÛœÝXÝÈHÙ\YšYY[šY›Ü›BˆØ\ÙK[™™Yš[™\Ëœ™Y›Ø™Yš[™\Ë˜[œØXZÙHÝYÙY˜][Û˜[™Yš[™[Y[ÂˆÛÛ\ÜÚ][Û˜[ˆH]\˜[XYXÈÜšYÈ\ÙYžHHÝ\œ™[šY[X[›‚ˆÛÛœÝXÝÜœÈ[š\š]\È[\™˜XÙH\™XÝNˆXYX×ÛYÚ[Ü™Yš[™\ØˆÙY\ÈÛ[™^Ø]ŠšØ[™XYX×ÛY\ÚÜ™Yš[™\Ø[™\È]ÈY\Ú‚ˆ\˜š]˜\žH˜][Û˜[œ™XZÜÚ[È›ÝÈ]™HHÚXÚÙYØØ[[œÙ\[ÛˆÝ\‚ˆ[œÙ\Ú[Ü™Yš[™\Ø[X™YÈHÛ\][Û‹ˆHš[š]HØØ[‚ˆØØ]R[œÙ\[ÛÙ[ÚÛÜÙ\È[™Ù\YšY\ÈHÛÛZ[š[™ÈÙ[Ùˆ[žBˆ[‹\˜[™ÙH˜][Û˜[Ú[[™[œÙ\[ÛÚZ[“Ù”Ú[\ÝÛÛ™\È[žBˆš[š]H[‹\˜[™ÙH˜][Û˜[\Ý[ÈÝXØÙ\ÜÚ]™HØØ[‹X[™Z[œÙ\]K‚ˆ[œÙ\[ÛÚZ[‹œ™Yš[™\ØÛÛ\ÜÙ\ÈÜÙHÝ\Ë[™ˆ™Yš[™\ËœÚ[Ø™]ÙY[—ØÛÛœÙXÝ]]™XÙY\È]™\žHš[™HÚ[[ˆ]È\™[ˆÛØ\œÙHÙ[ˆÛ[\Y]Ü]XY˜]XÕ˜\šX][Û—ÛWÙ[™Ú[Ü]X\™X\Y\ÂˆHÛÜ›™\ˆ\Ý[X]H\™XÝHÈ\][Ûˆ]KˆHX^[][KZ[˜Ü™[Y[ˆ™[Z\ÙH\È›ÝÈ[ÛÈHÚXÚÙY\][Ûˆ[\™˜XÙKˆX^Ý\][ÜÝØ\œšY\ÈBˆ›Û›™YØ]]™H˜][Û˜[Ø\Ûˆ]™\žHÙ[Z[™HÙ[ÈÛ[\Y]ÜÝ\ÛWÛÙ—ÛX^Ý\ˆ^[™È]ÈHÛ[\YÝ[]È[™ˆÛ[\Y]Ü]XY˜]XÕ˜\šX][Û—ÛWÜÝ\›Ý[™Û][Ù[™Ú[Y™™\™[˜ÙH›Ý[™Âˆ]ÛÛÜ™[˜]K\]ÛÜ›™\ˆÛÜœ™XÝ[ÛˆYØZ[œÝ[žH›Û™XÜ™X\Ú[™ÈÙXÛÛ™ˆ˜][Û˜[]ˆ[šY›Ü›HÜšYÈxÓ­¢G§²ÚîÆ­yÕ¹Ñ•É…±}•ÅÕ¥Ù}É•¥ÁÉ½…±%¹Ñ•É…±€ÁÉ½Ù•ÌÑ¡”(€ÁÕ±±‰…¬¥¹Ñ•É…°•ÅÕ…°Ñ¼Ñ¡”•á¥ÍÑ¥¹œ±½QÝ½I•¥ÁÉ½…±%¹Ñ•É…±€¸(€Q¡”¹•Ü‘¥É•ÐÉ…ÜÁ¤•Ù…±Õ…Ñ½È(€A¥AÉ½½™Ì¹Á¥QÉ¥…¹±•1½MÅÕ…É•MÑ¥•±Ñ©•Í€½µ‰¥¹•ÌÑ¡…ÐÍÑ…‰¥±¥é•(€MÑ¥•±Ñ©•Ì±½…É¥Ñ¡´Ý¥Ñ Ñ¡”™¥¹¥Ñ”…ÉÑ…¹•¹ÐÑÉ¥…¹±”¸€%ÑÌÙ…±¥‘¥Ñä…¹(€•ÅÕ¥Ù…±•¹”Ñ¼‰½Ñ Ñ¡”É•¥ÁÉ½…°µ±½œ™½ÉµÕ±„…¹…É•„Á¤…É”¡•­•¥¸(€A¥AÉ½½™Ì¹±•…¹€ìÁ¤¹ÍÅÕ…É•MÑ¥•±Ñ©•Í€•áÁ½Í•Ì¥Ð…Ì„(€ÍÕÁÁ±•µ•¹Ñ…Éä…±½É¥Ñ¡µ¥ŒÙ¥•Ü°¹½Ð…¹½Ñ¡•È½Ù•É…”É½Ü¸(€Q¡”™¥ÉÍÐ…ÉÑ…¹•¹Ð´µ±½…É¥Ñ¡´¥¹Ñ•É…Ñ¥½¸µ‰äµÁ…ÉÑÌÍÑÉ¥À¥Ì¹½Ü„(€Í•Á…É…Ñ”±¥Ñ•É…°•ÉÑ¥™¥•¥¹Ñ•É…°°¹½Ð©ÕÍÐ„Í…±•¹½Ñ…Ñ¥½¸è(€…ÉÑ…¹1½-•É¹•±%¹Ñ•É…±€¥¹Ñ•É…Ñ•Ìà¼ Ä­à©à¥€Ý¥Ñ 1¥ÁÍ¡¥Ñè½¹ÍÑ…¹Ð(€½¹”¸1¥ÁÍ¡¥Ñéå…‘¥Œ¹½µÁÕÑ•}¹…ÑM…±•€ÁÉ½Ù•ÌÑ¡”™¥¹¥Ñ”…É‰½Õà‰½á•Ì(€É•ÍÁ•Ð¹…ÑÕÉ…°Í…±¥¹œ•á…Ñ±ä°Í¼Ñ¡”ÍÑ…•Ý¥Í”Ñ¡•½É•´(€±½QÝ½MÅÕ…É•AÕ±±‰…­%¹Ñ•É…±}½µÁÕÑ•}•Å}ÑÝ½}…ÉÑ…¹1½-•É¹•±%¹Ñ•É…±€…¹(€Ñ¡”•¹‘Á½¥¹ÐÑ¡•½É•´(€ÑÝ½}…ÉÑ…¹1½-•É¹•±%¹Ñ•É…±}•ÅÕ¥Ù}±½QÝ½I•¥ÁÉ½…±%¹Ñ•É…±€•ÍÑ…‰±¥Í (€€È€¨ƒŠ"¯Š
+
+äà¼ Ä­à©à¤‘àƒŠ&„±½}É•Œ€É€ì¥ÑÌ½µÁ½Í¥Ñ¥½¸Ý¥Ñ Ñ¡”¥¹‘•Á•¹‘•¹Ð(€…±Ñ•É¹…Ñ¥¹œµ¡…Éµ½¹¥Œ½µÁ…É¥Í½¸¹½Ü…±Í¼¥Ù•ÌÑ¡”‘¥É•ÐÑ¡•½É•´(€ÑÝ½}…ÉÑ…¹1½-•É¹•±%¹Ñ•É…±}•ÅÕ¥Ù}±½QÝ½M•É¥•Í€Ñ¼±½}Í•É¥•Ì€É€¸€Q¡”(€Í…±•ÍÑÉ¥À¡…Ì•á…Ð‘å…‘¥ŒÝ¥‘Ñ €Ð¼ÉyÍÑ…•€°É•½É‘•‰ä(€ÑÝ½}…ÉÑ…¹1½-•É¹•±%¹Ñ•É…±}½µÁÕÑ•}Ý¥‘Ñ¡€¸(€Q¡•Í”…É”•¹‘Á½¥¹Ð•ÅÕ¥Ù…±•¹•Ì…ÐÑ¡”É…Ñ¥½¹…°¹…µ”ÑÝ¼°¹½ÐÑ¡”Á•¹‘¥¹œ(€™Õ¹Ñ¥½¸µ±•Ù•°…¹½¹¥…°µ±½…É¥Ñ¡´Ñ¡•½É•´¸Q¡”É•µ…¥¹¥¹œA¤µÉ½ÕÑ”…Ñ•Ì(€…É”„•¹•É…°•™™•Ñ¥Ù”µQ•áÑ•¹Í¥½¸‰•å½¹Ñ¡”ÍÕÁÁ±¥•Õ¹¥Ð…ÉÑ…¹•¹Ð(€ÑÉ¥…¹±”½¹ÍÑÉÕÑ¥½¸…¹Ñ¡”±…Ñ•È…¹½¹¥…°•áÀ½±½œ¥‘•¹Ñ¥™¥…Ñ¥½¸¸€Q¡”(€™¥¹¥Ñ”ÁÉ•‘••ÍÍ½È…¹¥ÑÌÕ¹¥Ð½¹ÍÑÉÕÑ¥½¸…É”¹½Ü¡•­•è(€…ÉÑ…¹½µÁ±•µ•¹Ñ-•É¹•±%¹Ñ•É…±€¥ÌÑ¡”±¥Ñ•É…°€Ìµ1¥ÁÍ¡¥Ñè¥¹Ñ•É…°½˜(€€ Äµà¤¼ Ä­à©à¥€°…¹Ñ¡”•á…Ð…É‰½Õàµ‰½à…‘‘¥Ñ¥½¸Ñ¡•½É•´(€1¥ÁÍ¡¥Ñéå…‘¥Œ¹½µÁÕÑ•}…‘‘€ÁÉ½Ù•ÌÑ¡…ÐÑ¡¥ÌÍÑÉ¥ÀÁ±ÕÌ(€…ÉÑ…¹1½-•É¹•±%¹Ñ•É…±€¥ÌÍÑ…•Ý¥Í”Ñ¡”€Ðµ1¥ÁÍ¡¥Ñè‰½à™½È(€€Ä¼ Ä­à©à¥€¸½µµ½¸Õ¹¥™½É´µ±•™ÐÍÕµÌå¥•±(€…ÉÑ…¹MÑÉ¥Á%¹Ñ•É…±Í}…‘‘}•ÅÕ¥Ù}…ÉÑ…¹-•É¹•±%¹Ñ•É…±€¸Q¡”ÍÕÁÁ±¥•Õ¹¥Ð(€ÑÉ¥…¹±”½¹ÍÑÉÕÑ¥½¸¹½Ü¥‘•¹Ñ¥™¥•ÌÑ¡”½µÁ±•µ•¹Ñ…ÉäÍÑÉ¥ÀÝ¥Ñ ¥ÑÌ(€…ÉÑ…¹•¹Ð¥¹Ñ•É…°ìÑ¡¥Ì¥ÌÍÑ¥±°¹½Ð„¹•ÜA¤µÍ½É•‰½…ÉÉ½Ü‰•…ÕÍ”Ñ¡”(€É•ÍÕ±Ð¥Ì¹½Ð„É•ÕÍ…‰±”•™™•Ñ¥Ù”µQÑ¡•½É•´¸Q¡”µ•Í µ±•Ù•°ÑÉ¥…¹±”½Õ‰¥¹¤(€É•¥¹‘•á¥¹œ¥ÌÍ•Á…É…Ñ•±ä¡•­•è(€1¥ÁÍ¡¥Ñéå…‘¥Œ¹Õ¹¥™½ÉµQÉ¥…¹±•I¥¡ÑMÕµ}•Å}½µÁ±•µ•¹ÑU¹¥™½Éµ1•™Ñ¹‘Á½¥¹ÑMÕµ€(€ÁÉ½Ù•ÌÑ¡”•á…Ð¥‘•¹Ñ¥Ñä‰•ÑÝ••¸…¸½ÕÑ•ÈÉ¥¡ÐÍÕ´½˜™¥á•µµ•Í ¥¹¹•È(€±•™ÐÁÉ•™¥á•Ì…¹Ñ¡”½µÁ±•µ•¹Ñ…Éä±•™ÐÍÕ´€ Äµà¤©˜¡à¥€¸%Ð¥Ì½‰Ñ…¥¹•(€™É½´™¥¹¥Ñ•%¹Ñ•É…Ñ¥½¹	åA…ÉÑÍ€°Í¼¥ÐÍÕÁÁ±¥•ÌÑ¡”É•ÅÕ¥É•™¥¹¥Ñ”(€É•Ñ…¹±”•½µ•ÑÉäÝ¥Ñ¡½ÕÐ¥µÁ½ÉÑ¥¹œ½¹Ñ¥¹Õ½ÕÌÕ‰¥¹¤¸Q¡”ÍÕÁÁ±¥•(€‘¥É•Ð‘å…‘¥ŒÍÁ•¥…±¥é…Ñ¥½¸¥Ì¹½Ü(€Á…­…•…Ì…ÉÑ…¹-•É¹•±QÉ¥…¹±•I…Ý€è¥ÑÌÉÕ¹Ñ¥µ”•Ù…±Õ…Ñ½È¥Ì½¹±äÑ¡”(€™¥¹¥Ñ”ÑÉ¥…¹±”ÍÕ´™½È€Ä¼ Ä­à©à¥€°¥ÑÌÁÕ‰±¥ŒÍÑ…‰¥±¥é…Ñ¥½¸É…‘¥ÕÌ¥Ì(€€Ø¼Éy¹€°…¹1•…¸ÁÉ½Ù•Ì¥Ð•ÅÕ¥Ù…±•¹ÐÑ¼(€…ÉÑ…¹½µÁ±•µ•¹Ñ-•É¹•±%¹Ñ•É…±€¸€1•…¸¹½Ü…±Í¼Á…­…•ÌÑ¡…Ð•á…ÐÉÕ¹Ñ¥µ”(€…Ì…ÉÑ…¹%¹Ñ•É…±QÉ¥…¹±•€°„µ½¹½Ñ½¹”¥¹Ñ•É…°½¹ÍÑÉÕÑ¥½¸™½ÈÑ¡”(€•ÉÑ¥™¥•…ÉÑ…¸¹¥¹Ñ•É…°¹É•Ñ…¹±•€Õ¹¥Ð™Õ¹Ñ¥½¸¸€%ÑÌ™¥¹¥Ñ”ÑÉ¥…¹±”(€É•¥¹‘•á¥¹œ¥ÌÉ•½É‘•…ÌÑ¡”½¹ÍÑÉÕÑ¥½¸Ì•áÁ±¥¥ÐÁÉ½Ù•¹…¹”ì¥Ð‘½•Ì(€¹½Ð…ÍÍÕµ”•¹•É…°Õ‰¥¹¤½È¥¹Ñ•É…°µ±¥¹•…É¥Ñä¸(€Q¡”½µÁ…¹¥½¸É…Ü…ÉÑ…¹-•É¹•±QÉ¥…¹±•A±ÕÍ1½€¹½Ü…‘‘ÌÑ¡¥ÌÑÉ¥…¹±”(€½µÁÕÑ…Ñ¥½¸Ñ¼Ñ¡”•ÉÑ¥™¥•à¼ Ä­à©à¥€±½…É¥Ñ¡µ¥ŒÍÑÉ¥À¸€%ÑÌÁÉ½Ù•(€•ÅÕ¥Ù…±•¹”Ñ¼…ÉÑ…¹•½´ Ä¥€µ…­•Ì¥Ð„™¥¹¥Ñ”ÍÑÉ¥À½Õ‰¥¹¤É•É•ÍÍ¥½¸½˜(€Ñ¡”Í…µ”…ÉÑ…¹•¹Ð•¹‘Á½¥¹Ð¸€Q¡”ÁÕ‰±¥ŒÑ¡•½É•´(€…ÉÑ…¹%¹Ñ•É…±QÉ¥…¹±•}…‘‘}±½-•É¹•±%¹Ñ•É…±}•ÅÕ¥Ù}ÁÉ½‘ÕÑ%¹Ñ•É…±€™ÕÉÑ¡•È(€¥‘•¹Ñ¥™¥•ÌÑ¡”ÍÕÁÁ±¥•ÑÉ¥…¹±”¥¹Ñ•É…°Á±ÕÌÑ¡…ÐÍÑÉ¥ÀÝ¥Ñ Ñ¡”(€¥¹‘•Á•¹‘•¹Ñ±ä•ÉÑ¥™¥•ÁÉ½‘ÕÐµQ¥¹Ñ•É…°¸€Q¡¥Ì¥Ì¹½Ðå•ÐÑ¡”Á•¹‘¥¹œ(€…±Õ±ÕÌÑ¡•½É•´€Ð€¨ƒŠ"¬…ÉÑ…¸€¬€È€¨±½œ€È€ôÁ¥€è…¹½¹¥…°•áÀ½±½œ(€ÑÉ…¹ÍÁ½ÉÐ…¹„•¹•É…°•™™•Ñ¥Ù”µQ•áÑ•¹Í¥½¸‰•å½¹Ñ¡”ÍÕÁÁ±¥•Õ¹¥Ð(€½¹ÍÑÉÕÑ¥½¸É•µ…¥¸Í•Á…É…Ñ”Ý½É¬¸(€Q¡”‘¥É•Ð•¹‘Á½¥¹Ð¹½ÜÁ…­…•ÌÑÝ¼ÍÕÁÁ±•µ•¹Ñ…ÉäÉ…Ü™½ÉµÕ±…Ìè(€1½…É¥Ñ¡´¹Á¥QÉ¥…¹±•1½I•¥ÁÉ½…±%¹Ñ•É…°€ô(€€Ð€¨…ÉÑ…¸¹¥¹Ñ•É…°¹ÑÉ¥…¹±”€¬€È€¨±½}É•Œ È¥€…¹(€1½…É¥Ñ¡´¹Á¥QÉ¥…¹±•1½M•É¥•Ì€ô(€€Ð€¨…ÉÑ…¸¹¥¹Ñ•É…°¹ÑÉ¥…¹±”€¬€È€¨±½}Í•É¥•Ì È¥€¸(€Q¡•¥È™½Éµ…°ÁÉ½‘ÕÐµQ‰É¥‘”¥Ì(€Á¥QÉ¥…¹±•1½I•¥ÁÉ½…±%¹Ñ•É…±}•ÅÕ¥Ù}™½ÕÉ}½½É‘¥¹…Ñ•Q¥µ•ÍÉÑ…¹½ÉÝ…É‘QÝ½MÑ…•5½¹½Ñ½¹•%¹Ñ•É…±€(€€¡…¹¥ÑÌÍ•É¥•Ì½Õ¹Ñ•ÉÁ…ÉÐ¤ì‰½Ñ Ñ¡•¸É•… Ñ¡”•½µ•ÑÉ¥Œ…ÉÑ…¹•¹Ð(€•¹‘Á½¥¹Ð…¹Ñ¡”¥É±”µ…É•„Á¤¸€Q¡”±¥Ñ•É…°É•¥ÁÉ½…°µ±½œ™½ÉµÕ±„¥Ì¹½Ü(€Ñ¡”Í¥áÑ A¥½Ù•É…•	É¥‘•€½¹ÍÑÉÕÑ½Èè¥ÐÑ•ÍÑÌ„ÍÕÁÁ±¥•™¥¹¥Ñ”(€ÑÉ¥…¹±”°…É‰½ÕàµÍÑÉ¥À°ÁÉ½‘ÕÐµQ°…¹±½…É¥Ñ¡´É½ÕÑ”°Ý¥Ñ ‘¥É•ÐÉ…Ñ”(€€ÔÈ¼Éy¹€¸€%Ð¥¹ÍÑ…¹Ñ¥…Ñ•ÌÑ¡”•ÉÑ¥™¥…Ñ”µ±•Ù•°¥¹Ñ•É…Ñ¥½¸µ‰äµÁ…ÉÑÌ(€É•‰…±…¹¥¹œÑ¡•½É•´°‰ÕÐ‘½•Ì¹½Ðå•Ð½¹ÍÑÉÕÐÍÕ •ÉÑ¥™¥…Ñ•Ì™É½´„(€•¹•É…°•™™•Ñ¥Ù”Q½È¥‘•¹Ñ¥™äÑ¡”…¹½¹¥…°•áÀ½±½œÑÉ…¹ÍÁ½ÉÐìÑ¡½Í”(€…É”Ñ¡”ÍÑÉ½¹•ÈÉ•µ…¥¹¥¹œÉ•™¥¹•µ•¹ÑÌ½˜Ñ¡¥ÌÉ½Ü¸(€Q¡”ÍÅÕ…É”µÁÕ±±‰…¬½µÁ…¹¥½¸(€1½…É¥Ñ¡´¹Á¥QÉ¥…¹±•1½MÅÕ…É•MÕ‰ÍÑ¥ÑÕÑ¥½¹%¹Ñ•É…±€¥ÌÑ¡”Í•Ù•¹Ñ ‰É¥‘”è(€¥ÑÌ•¹‘Á½¥¹Ð¥Ì€È€¨ƒŠ"­|ÁxÄ€È©à¼ Ä­à©à¤‘á€°¥ÐÉ•…¡•ÌÑ¡”É•¥ÁÉ½…°µ±½œ(€™½ÉµÕ±„‰äÑ¡”™¥¹¥Ñ”Ð€ôà©á€µ•Í ½ÉÉ•Ñ¥½¸°…¹¥ÑÌ‘¥É•ÐÉ…Ñ”¥Ì(€€ÔØ¼Éy¹€¸€%Ð¥ÌÑ¡”½¹É•Ñ”ÍÕ‰ÍÑ¥ÑÕÑ¥½¸É•É•ÍÍ¥½¸°¹½Ð„•¹•É…°(€¡…¹”µ½˜µÙ…É¥…‰±•ÌÑ¡•½É•´¸(´½ÉµÕ±„µ¥‘•¹Ñ¥™¥…Ñ¥½¸É½ÕÑ”èÑ¼¥‘•¹Ñ¥™ä„ÁÉ½Á½Í•­•É¹•°°ÁÉ½Ù”Ñ¡…Ð¥Ð(€±¥•Ì¥¸Ñ¡”Í…µ”Í¡É¥¹­¥¹œ•¹±½ÍÕÉ•Ì…ÌÑ¡”Á½¥¹ÑÝ¥Í”‘•É¥Ù…Ñ¥Ù”ÁÉ½‘Õ•(€‰äÍ•…¹ÑÌ¸€½È…ÉÑ…¹•¹Ð°Ñ¡¥Ìµ•…¹ÌÁÉ½Ù¥¹œ™¥¹¥Ñ”Í•Ñ½Èµ…É•„Í•…¹Ð(€¥¹•ÅÕ…±¥Ñ¥•Ì…¹½µÁ…É¥¹œÑ¡•´Ý¥Ñ €Ä¼ Ä­áxÈ¥€¸(´AÉ½©•Ñ¥Ù”µ±¥¹”Ñ•ÍÐ¥¹Ñ•É…°èÕÍ”Ñ¡”É•¥ÁÉ½…°ÅÕ…ÉÑ¥Œ(€ƒŠ"­| ·Š"x¥{Š"x‘à¼¡áxÐ­„©áxÈ¬Ä¥€…Ì„Í¥µÁ±•È™Õ±°µ±¥¹”‰•¹¡µ…É¬‰•™½É”Ñ¡”(€…ÕÍÍ¥…¸¥¹Ñ•É…°¸€Q¡”•á…ÐÉ…Ñ¥½¹…°™½±‘¥¹œ…¹ÍÕ‰ÍÑ¥ÑÕÑ¥½¸¥‘•¹Ñ¥Ñ¥•Ì(€™½ÈàƒŠ˜€Ä½á€…¹Ôõà´Ä½á€…É”™½Éµ…±¥é•Ñ¡É½Õ (€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñ½±‘•¹Í¥Ñå}•Å}ÁÕ±±‰…­}Í¡¥™Ñ•‘…Õ¡å€ì(€Ñ¡”±•…¸Á¤…Í”¡…Ì¥ÑÌ‘•¹½µ¥¹…Ñ½ÈÍ¥‘”½¹‘¥Ñ¥½¹Ì‘¥Í¡…É•…Ì(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñ½±‘•¹Í¥Ñå}µ¥¹ÕÍ}½¹•}•Å}ÁÕ±±‰…­}Í¡¥™Ñ•‘…Õ¡å€¸(€1•…¸…±Í¼¥‘•¹Ñ¥™¥•ÌÑ¡…ÐÍ¡¥™Ñ•…Õ¡ä­•É¹•°Ý¥Ñ Ñ¡”•á¥ÍÑ¥¹œ…ÉÑ…¹•¹Ð(€­•É¹•°Ñ¡É½Õ (€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñ½±‘•¹Í¥Ñå}µ¥¹ÕÍ}½¹•}•Å}ÁÕ±±‰…­}¥¹Ñ•É…±-•É¹•±€¸(€Í•½¹™¥¹¥Ñ”‰É¥‘”¹½Ü½µÁ…Ñ¥™¥•ÌÑ¡”±¥¹”‰ä(€àƒŠ˜à¼ ÄµáxÈ¥€èÑ¡”¡•­•Ñ¡•½É•´(€É•¥ÁÉ½…±EÕ…ÉÑ¥Måµµ•ÑÉ¥•¹Í¥Ñå}µ¥¹ÕÍ}½¹•}•Å}ÁÉ½©•Ñ¥Ù•½µÁ…ÑAÕ±±‰…­€(€¥‘•¹Ñ¥™¥•Ì¥ÑÌ…Õ¡äÁÕ±±‰…¬Ý¥Ñ Ñ¡”•Ù•ÉåÝ¡•É”µ‘•™¥¹•‘•¹Í¥Ñä(€€ Ä­áxÈ¤¼¡áxÐµáxÈ¬Ä¥€°Ý¡½Í”ÑÝ¼•¹‘Á½¥¹ÐÙ…±Õ•Ì…É”•á…Ñ±ä€É€¸(€Q¡”Õ¹¥™½É´É…Ñ¥½¹…°•ÍÑ¥µ…Ñ”(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥•¹½µ¥¹…Ñ½É}µ¥¹ÕÍ}½¹•}•}Ñ¡É••}ÅÕ…ÉÑ•ÉÍ€(€ÁÉ½Ù•Ì€Ì¼ÐƒŠ&áxÐµáxÈ¬Å€™½È•Ù•ÉäÉ…Ñ¥½¹…°á€°…¹Ñ¡”½µÁ…Ð‘•¹Í¥Ñä¥Ì(€ÁÉ½Ù•¹½¹¹•…Ñ¥Ù”¸€%ÑÌ¡•­•™¥¹¥Ñ”µ‘¥™™•É•¹”™…Ñ½É¥é…Ñ¥½¸¥Ì(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥Måµµ•ÑÉ¥•¹Í¥Ñå}µ¥¹ÕÍ}½¹•}ÍÕ‰€¸(€1•…¸¹½ÜÁÉ½Ù•ÌÑ¡”É•ÍÕ±Ñ¥¹œ€á€µ1¥ÁÍ¡¥Ñè•ÍÑ¥µ…Ñ”½¸l´Ä°Åu€…¹Ñ¡”(€±¥Ñ•É…°•ÁÍ¥±½¸µ‘•±Ñ„Ñ¡•½É•´(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•½µÁ…Ñ}•ÁÍ¥±½¹•±Ñ…½¹Ñ¥¹Õ½ÕÍ€°(€ÕÍ¥¹œ‘•±Ñ„€ô•ÁÍ¥±½¸¼á€¸€%Ð¹½Ü…±Í¼¡…Ì„½µÁ±•Ñ•(€%¹Ñ•ÉÙ…±I•Õ±…É=¹€Ý¥Ñ¹•ÍÌ°(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•½µÁ…Ñ}¥¹Ñ•ÉÙ…±I•Õ±…É€è(€µ¥‘Á½¥¹Ð•Ù…±Õ…Ñ¥½¸Ý¥‘•¹•‰ä€à€¨Ý¥‘Ñ ¡$¥€½¹Ñ…¥¹Ì•Ù•ÉäÁ½¥¹ÐÙ…±Õ”°(€…¹…¸¥¹ÁÕÐÝ¥‘Ñ ½˜€Ä¼ ÄØ©¸¥€¥Ù•Ì½ÕÑÁÕÐÝ¥‘Ñ …Ðµ½ÍÐ€Ä½¹€¸(€Q¡”Ñ¡•½É•´µ™…¥¹œÁ…­…”(€É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•½µÁ…Ñ}½¹Ñ¥¹Õ½ÕÍ€…¸Ñ¡•É•™½É”‰”½¹ÍÕµ•‰ä(€Ñ¡”™¥¹¥Ñ”µ¥¹Ñ•ÉÙ…°…±Õ±ÕÌ…¹=¥¹Ñ•É™…•Ì¸€Q¡”½¹É•Ñ”™¥¹¥Ñ”(€¥¹Ñ•É…°…¹ÁÉ½©•Ñ¥Ù”½…Õ¡ä½µÁ…É¥Í½¸…É”¹½Ü½µÁ±•Ñ”èÑ¡”±¥Ñ•É…°(€‘å…‘¥ŒÉ…ÜÉ•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•½µÁ…Ñå…‘¥%¹Ñ•É…±€¥ÌÙ…±¥…¹(€•ÅÕ¥Ù…±•¹ÐÑ¼…Õ¡åÕ±±1¥¹•%¹Ñ•É…±€°…¹Ñ¡•É•™½É”(€A¥AÉ½½™Ì¹Á¥I•¥ÁÉ½…±EÕ…ÉÑ¥½µÁ…Ñ}•ÅÕ¥Ù}Á¥¥É±•É•…€µ…­•ÌÑ¡”„ô´Å€(€…Í”…¹½Ñ¡•È½Õ¹Ñ•½µÁÕÑ…Ñ¥½¸½˜Á¥¥É±•É•…€¸€Q¡”•áÁ•Ñ•µÙ…±Õ”(€Í¥‘”É•µ…¥¹ÌÁ…­…•…Ì(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•áÁ•Ñ•‘A¥€°Ý¥Ñ Ñ¡•½É•´(€A¥AÉ½½™Ì¹É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•áÁ•Ñ•‘A¥}•ÅÕ¥Ù}Á¥¥É±•É•…€¸€Q¡”(€•¹•É…°I•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•AÉ½©•Ñ¥Ù•I½ÕÑ•€¥ÌÍÑ¥±°ÕÍ•™Õ°…Ì„(€Á…É…µ•Ñ•É¥é•¥¹Ñ•É™…”™½È™ÕÑÕÉ”ÁÉ½©•Ñ¥Ù”½¹ÍÑÉÕÑ¥½¹Ì°‰ÕÐ¥Ð¥Ì¹¼(€±½¹•È„ÁÉ•É•ÅÕ¥Í¥Ñ”™½ÈÑ¡”½¹É•Ñ”É½ÕÑ”½È¥ÑÌÍ½É•‰½…É•ÅÕ…±¥Ñä¸(€Q¡”¹•Ü‘•¹½µ¥¹…Ñ½Èµ±•…É••¹‘Á½¥¹Ð¥‘•¹Ñ¥Ñä(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ½½É‘¥¹…Ñ•}ÍÕ‰}±•…É•‘€ÍÕÁÁ±¥•ÌÑ¡”™¥¹¥Ñ”É…Ñ¥½¹…°(€‘¥ÍÁ±…•µ•¹Ð…±Õ±…Ñ¥½¸™½ÈÑÉ…¹ÍÁ½ÉÑ¥¹œ„Á…ÉÑ¥Ñ¥½¸Ñ¡É½Õ (€à€¼€ Ä€´áxÈ¥€¸€Q¡”¡•­•Á½Í¥Ñ¥Ù¥Ñä±•µµ…Ì…¹(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ½½É‘¥¹…Ñ•}ÍÑÉ¥Ñ5½¹½€¹½ÜÁÉ½Ù”Ñ¡…ÐÑ¡¥Ì¡…ÉÐÁÉ•Í•ÉÙ•Ì(€ÍÑÉ¥ÐÉ…Ñ¥½¹…°½É‘•È½¸€ ´Ä°Ä¥€¸€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ%¹Ñ•ÉÙ…±Í}½Ù•ÉÍ€(€±¥™ÑÌÑ¡…Ð™…ÐÑ¼™¥¹¥Ñ”É…Ñ¥½¹…°Á…ÉÑ¥Ñ¥½¹Ì½˜•Ù•Éä½µÁ…ÐÍ½ÕÉ”(€ÍÕ‰¥¹Ñ•ÉÙ…°°…¹ÁÉ½©•Ñ¥Ù•½µÁ…Ñ%¹Ñ•ÉÙ…±Í}¹½¹¹•…Ñ¥Ù•€¥Ù•ÌÑ¡”(€¹½¹¹•…Ñ¥Ù”µ‰É…¹ …‘µ¥ÍÍ¥‰¥±¥Ñä¹••‘•™½ÈÑ¡”…Õ¡äÅÕ…‘É…ÑÕÉ”‰½Õ¹‘Ì¸(€Q¡”¹•ÜÁ½¥¹ÑÝ¥Í”…¹ÍÅÕ…É•µµ•Í ‰½Õ¹‘Ì(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ½½É‘¥¹…Ñ•}ÍÕ‰}±•}±¥ÁÍ¡¥Ñé€…¹(€ÁÉ½©•Ñ¥Ù•½µÁ…ÑÉ•…1½½Á}ÍÅÕ…É•MÕµ}±•€ÅÕ…¹Ñ¥™äÑ¡”‘¥ÍÑ½ÉÑ¥½¸½¸•Ù•Éä(€Í½ÕÉ”‰É…¹ lÀ±Íu€Ý¥Ñ Ì€ð€Å€¸€Q¡”•¹‘Á½¥¹Ð½É•™¥¹•µ•¹ÐÍ¡•‘Õ±”¥Ì¹½Ü(€¡•­•Ñ½¼èÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥¹‘Á½¥¹Ð¸€ô€Ä€´€Ä¼Éy¹€ÍÑ…åÌ¥¸Ñ¡”(€Á½Í¥Ñ¥Ù”½µÁ…Ð¡…ÉÐ…¹¡…Ì€Ä€¼€Éy¸€ðô€Ä€´Í}¹xÉ€ì(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥}±¥ÁÍ¡¥Ñé…Ñ½É}±•€‰½Õ¹‘ÌÑ¡”É•ÍÕ±Ñ¥¹œ¡…ÉÐ(€‘¥ÍÑ½ÉÑ¥½¸°…¹(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥}Í¡•‘Õ±•}ÍÅÕ…É•MÕµ}±•€ÁÉ½Ù•ÌÑ¡…Ð€Ø©¹€Í½ÕÉ”(€É•™¥¹•µ•¹ÑÌ¥Ù”ÑÉ…¹ÍÁ½ÉÑ•ÍÅÕ…É•µ•Í …Ðµ½ÍÐ€Ð€¼€Éx È©¸¥€¸€Q¡”(€ÅÕ…‘É…ÑÕÉ”µÍÕ‰ÍÑ¥ÑÕÑ¥½¸ÁÉ½½˜Ý…ÌÑ¡•É•‰äÉ•‘Õ•Ñ¼„™¥¹¥Ñ”•±±Ý¥Í”(€½µÁ…É¥Í½¸…¹¥ÑÌ…ÍÍ•µ‰±ä…É½ÍÌÑ¡”ÑÝ¼½µÁ…Ð‰É…¹¡•Ì¸€Q¡”•±±Ý¥Í”(€½µÁ…É¥Í½¸¥Ì¹½Ü¡•­•èÑ¡”•á…Ð±•™Ð…¹É¥¡ÐÍ•…¹Ð•áÁ…¹Í¥½¹Ì(€€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ½½É‘¥¹…Ñ•}ÍÕ‰}•Å}±•™Ñ)…½‰¥…¹}…‘œ…¹(€€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ½½É‘¥¹…Ñ•}ÍÕ‰}•Å}É¥¡Ñ)…½‰¥…¹}ÍÕˆœ¥Ù”Ñ¡”•¹‘Á½¥¹Ð(€)…½‰¥…¸‰½Õ¹‘Ì½¸•Ù•Éä€œÀ€ðôÀ€ðôÈ€ð€ÄœÍ½ÕÉ”•±°¸€]¥Ñ Ñ¡”ÁÉ½©•Ñ¥Ù”(€ÁÕ±±‰…¬¥‘•¹Ñ¥Ñä…¹Ñ¡”½µÁ…Ð‘•¹Í¥ÑäÌ€àµ1¥ÁÍ¡¥Ñè‰½Õ¹°1•…¸ÁÉ½Ù•Ì(€‰½Ñ É½ÍÌ¥¹•ÅÕ…±¥Ñ¥•Ì‰•ÑÝ••¸„½µÁ…Ð1¥ÁÍ¡¥Ñè•±°…¹¥ÑÌÑÉ…¹ÍÁ½ÉÑ•(€…Õ¡äÉ•Ñ…¹±”¸€Q¡”™¥¹¥Ñ”¥¹‘ÕÑ¥½¸(€€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ1¥ÁÍ¡¥ÑéMÕµ}½Ù•É±…ÁÍ}¥¹Ñ•É…±MÕ´œÁ…­…•ÌÑ¡•Í”¥¹Ñ¼(€¥¹Ñ•ÉÙ…°½Ù•É±…À™½È•Ù•ÉäÁ½Í¥Ñ¥Ù”µ‰É…¹ ½Ù•È¸€Q¡”™¥¹¥Ñ”±½‰…°(€¥¹É•‘¥•¹ÑÌ…É”¡•­•Ñ½¼èÑ¡”½µÁ…Ð‘•¹Í¥Ñä¥Ì•Ù•¸°…¹(€€ÁÉ½©•Ñ¥Ù•½µÁ…ÑMåµµ•ÑÉ¥1¥ÁÍ¡¥ÑéMÕµ}½Ù•É±…ÁÍ}¥¹Ñ•É…±MÕ´œÍ…±•ÌÑ¡”(€Á½Í¥Ñ¥Ù”‰É…¹ Ñ¼„Íåµµ•ÑÉ¥Œ™¥¹¥Ñ”µ½É”½Ù•É±…À¸€Q¡”•¹‘Á½¥¹Ð•±°¥Ì(€‰½Õ¹‘•‰ä€ÁÉ½©•Ñ¥Ù•½µÁ…ÑQ…¥±UÁÁ•É•±±}±”œì…ÐÑ¡”‘å…‘¥Œ•¹‘Á½¥¹Ð°(€€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥Q…¥±UÁÁ•É•±±}±”œµ…­•ÌÑ¡¥Ì…Ðµ½ÍÐ(€€œ ÌÈ€¼€Ì¤€¨€Éx µ¸¤œ¸€QÝ¥”Ñ¡…Ð•¹‘Á½¥¹Ð‰Õ‘•Ð¥Ì¹½ÜÁ…­…•…ÌÑ¡”(€Ù…±¥Í¡É¥¹­¥¹œÉ…Ü€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥Måµµ•ÑÉ¥Q…¥±ÉÉ½Èœ°Ý¥Ñ Ñ¡”(€ÍÑ…•Ý¥Í”…‰Í½ÉÁÑ¥½¸Ñ¡•½É•´(€€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥Måµµ•ÑÉ¥Q…¥±UÁÁ•É}±”œ¸€]¡…ÐÉ•µ…¥¹Ì¥Ì½¹”¹•ÍÑ•(€É…Ü½¹ÍÑÉÕÑ¥½¸Ñ¡…Ð½µ‰¥¹•ÌÑ¡•Í”™¥¹¥Ñ”½É”…¹Ñ…¥°‰½á•Ì…¹…É••Ì(€Ý¥Ñ Ñ¡”•á¥ÍÑ¥¹œ½µÁ…Ð‘å…‘¥Œ¥¹Ñ•É…°É…Ü¸€Q¡…Ð…É••µ•¹Ð¥Ì¹½ÜÑ¥•(€Ñ¼Ñ¡”…ÑÕ…°…¹‘¥‘…Ñ”‰É…­•ÑÌèÑ¡”…™™¥¹”µ…Àà€ô€È©Ð€´€Å€…ÉÉ¥•Ì(€•Ù•Éä½¹É•Ñ”Õ¹¥Ðµ‘å…‘¥Œ±½Ý•È…¹ÕÁÁ•È•±°•á…Ñ±äÑ¼Ñ¡”½µÁ…Ð(€‘•¹Í¥ÑäÌ€àµ1¥ÁÍ¡¥Ñè•±°°…¹Ñ¡”ÑÝ¼ÍÕ´¥‘•¹Ñ¥Ñ¥•ÌÁ…­…”Ñ¡¥Ì™½ÈÑ¡”(€Ý¡½±”ÍÑ…”¸€Q¡”¹•áÐ™¥¹¥Ñ”Ñ…Í¬¥ÌÑ¼ÍÁ±¥ÐÑ¡•Í”…™™¥¹”‘å…‘¥Œ(€Á…ÉÑ¥Ñ¥½¹Ì¥¹Ñ¼Ñ¡•¥ÈÍåµµ•ÑÉ¥ŒÁ½Í¥Ñ¥Ù”½É•Ì…¹ÑÝ¼•¹‘Á½¥¹Ð•±±Ì°(€Ý¡¥±”…½Õ¹Ñ¥¹œ™½ÈÑ¡”É•™±•Ñ••±±ÌœÉ¥¡Ðµ•¹‘Á½¥¹Ð½¹Ù•¹Ñ¥½¸¸€Q¡”(€…™™¥¹”ÑÉ…¹ÍÁ½ÉÐ¥Ì¹½Ü™½Éµ…±±ä…¸½É‘•É•½Ù•È½˜l´Ä°€Åu€°Í¼Ñ¡…Ð(€É•µ…¥¹¥¹œÍÁ±¥Ð¥Ì„™¥¹¥Ñ”Á…ÉÑ¥Ñ¥½¸…±Õ±…Ñ¥½¸¸€Q¡”½É¥•¹Ñ…Ñ¥½¸¥ÑÍ•±˜(€¥Ì¹½Ü¡•­••±±Ý¥Í”è„É•™±•Ñ•¹•…Ñ¥Ù”±•™Ðµ•¹‘Á½¥¹Ð•±°¥Ì•á…Ñ±ä(€Ñ¡”Á½Í¥Ñ¥Ù”É¥¡Ðµ•¹‘Á½¥¹Ð•±°°™½È‰½Ñ ½µÁ…Ð1¥ÁÍ¡¥Ñè‰É…­•ÑÌ¸(€ÁÉ½©•Ñ¥Ù•½µÁ…ÑI•™±•Ñ•‘%¹Ñ•ÉÙ…±Í}½Ù•ÉÍ€…¹(€ÁÉ½©•Ñ¥Ù•½µÁ…ÑI•™±•Ñ•‘}…ÁÁ•¹‘}½Ù•ÉÍ€¹½Ü•ÉÑ¥™äÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ(€½É‘•É•Íåµµ•ÑÉ¥Œ½Ù•È°Ý¡¥±”Ñ¡”ÑÝ¼(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ1¥ÁÍ¡¥Ñè©MÕµ}É•™±•Ñ•‘}…ÁÁ•¹‘}•Å}É¥¡Ñ}…‘‘}±•™Ñ€Ñ¡•½É•µÌ(€¥‘•¹Ñ¥™ä¥ÑÌ½µÁ±•Ñ”±•™Ðµ•¹‘Á½¥¹ÐÍÕµÌÝ¥Ñ Ñ¡”Á½Í¥Ñ¥Ù”É¥¡Ð´Á±ÕÌ(€±•™Ðµ•¹‘Á½¥¹ÐÍÕµÌ¸€Q¡”É•µ…¥¹¥¹œ™¥¹¥Ñ”¥‘•¹Ñ¥Ñä¥Ì¹½ÜÁÉ½Ù•Ñ½¼è(€É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•½µÁ…Ñ™™¥¹•å…‘¥%¹Ñ•ÉÙ…±Í}ÍÕ}•Å}É•™±•Ñ•‘}…ÁÁ•¹‘€(€Í¡½ÝÌÑ¡…ÐÑ¡”±¥Ñ•É…°…™™¥¹”¥µ…”½˜ÍÑ…”¸€¬€Å€¥ÌÑ¡”É•™±•Ñ•(€ÍÑ…”µ¹€µ•Í ™½±±½Ý•‰äÑ¡…Ðµ•Í °…¹(€É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•U¹¥Ñå…‘¥½µÁÕÑ•}ÍÕ}•Å}½É¥•¹Ñ•‘Måµµ•ÑÉ¥€(€¥‘•¹Ñ¥™¥•ÌÑ¡”…ÑÕ…°…¹‘¥‘…Ñ”‰½àÝ¥Ñ Ñ¡”É•ÍÕ±Ñ¥¹œ½É¥•¹Ñ•Íåµµ•ÑÉ¥Œ(€‰É…­•Ð°…¹(€É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•U¹¥Ñå…‘¥½µÁÕÑ•}ÍÕ}½Ù•É±…ÁÍ}Íåµµ•ÑÉ¥€(€½¹¹•ÑÌÑ¡…Ð±¥Ñ•É…°‰½àÑ¼Ñ¡”•á¥ÍÑ¥¹œ™…Ñ½ÈµÑÝ¼ÁÉ½©•Ñ¥Ù”½É”…ÐÑ¡”(€Í…µ”™¥¹¥Ñ”ÍÑ…”¸€Q¡”½¹±äÉ•µ…¥¹¥¹œ…¹…±åÑ¥Œ…ÍÍ•µ‰±ä¥ÌÑ¼ÑÉ¥´¥ÑÌÑÝ¼•±±Ì(€Ñ½Õ¡¥¹œƒ
+ÄÅ€°½ÕÁ±”Ñ¡”¥¹Ñ•É¥½È‰É…­•ÐÑ¼Ñ¡”Í¡•‘Õ±•ÁÉ½©•Ñ¥Ù”(€…Õ¡ä‰É…­•Ð°…¹…‰Í½ÉˆÑ¡•´ÕÍ¥¹œÑ¡”…±É•…‘äµÙ…±¥‘å…‘¥ŒÑ…¥°É…Ü¸(€Q¡…ÐÑÉ¥´¥Ì¹½Ü±¥Ñ•É…°É…Ñ¡•ÈÑ¡…¸Í¡•µ…Ñ¥Œè(€É•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñå…‘¥½É•%¹Ñ•ÉÙ…±Í€‘•±•Ñ•ÌÑ¡”™¥¹…°•±°½˜Ñ¡”(€…ÑÕ…°Á½Í¥Ñ¥Ù”µ•Í °É•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñå…‘¥½É•%¹Ñ•ÉÙ…±Í}½Ù•ÉÍ€(€ÁÉ½Ù•Ì¥Ð½Ù•ÉÌlÀ°€Ä€´€Éx µ¸¥u€°…¹(€É•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñå…‘¥%¹Ñ•ÉÙ…±Í}•Å}½É•}…ÁÁ•¹‘}Ñ…¥±€É•½Ù•ÉÌÑ¡”™Õ±°(€µ•Í ‰ä…ÁÁ•¹‘¥¹œ•á…Ñ±äÑ¡”•¹‘Á½¥¹Ð•±°¸€%ÑÌ™…Ñ½ÈµÑÝ¼½µÁ…Ð‰É…­•Ð(€…±É•…‘ä½Ù•É±…ÁÌÑ¡”ÑÝ¼µ‰É…¹ ÁÉ½©•Ñ¥Ù”…Õ¡ä‰É…­•Ð‰ä(€É•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñå…‘¥½É•}Íåµµ•ÑÉ¥}½Ù•É±…ÁÍ}ÁÉ½©•Ñ¥Ù•€¸€Q¡”(€™½Éµ•É±äÍ•Á…É…Ñ”•¹‘Á½¥¹Ð…ÍÍ•µ‰±ä¥Ì¹½Ü¡•­•…Ð•… ™¥¹¥Ñ”ÍÑ…”è(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥=É¥•¹Ñ•‘Q…¥±UÁÁ•É}±•€‰½Õ¹‘ÌÑ¡”ÑÝ¼½É¥•¹Ñ•(€…¹‘¥‘…Ñ”•¹‘Á½¥¹Ð•±±Ì‰äÑ¡”•á¥ÍÑ¥¹œÑ…¥°É…Ü°(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñ=É¥•¹Ñ•‘Måµµ•ÑÉ¥}…ÁÁ•¹‘}½Ù•É±…ÁÍ}Ñ…¥±¹±½ÍÕÉ•€¥ÌÑ¡”(€™¥¹¥Ñ”‰É…­•Ðµ½µ‰¥¹…Ñ¥½¸±•µµ„°…¹(€É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•U¹¥Ñå…‘¥½µÁÕÑ•}ÍÕ}½Ù•É±…ÁÍ}½É•Q…¥±€ÁÉ½Ù•Ì(€Ñ¡…ÐÑ¡”…ÑÕ…°…¹‘¥‘…Ñ”‰½à…ÐÍÑ…”¸¬Å€½Ù•É±…ÁÌÑ¡”±¥Ñ•É…°ÑÉ¥µµ•(€½É”‰É…­•Ð•¹±…É•‰äÑ¡…Ð•ÉÉ½È‰Õ‘•Ð¸€]¡…ÐÉ•µ…¥¹Ì¥ÌÑ¡”É…Üµ±•Ù•°(€¹•ÍÑ¥¹œ½Í¡É¥¹­…”½¹ÍÑÉÕÑ¥½¸Ñ¡…Ð©½¥¹ÌÑ¡•Í”½É”µ…¹µÑ…¥°‰½á•ÌÑ¼Ñ¡”(€•á¥ÍÑ¥¹œ™Õ±°µ±¥¹”…Õ¡äÉ…ÜìÑ¡¥Ì¥Ì¹½Ðå•Ð„A¤•ÅÕ¥Ù…±•¹”¸€Q¡”¹•áÐ(€ÑÉ…¹Í™•È¥Ì¹½Ü‘¥É•ÐÉ…Ñ¡•ÈÑ¡…¸…¸¥¹Ù…±¥ÑÉ…¹Í¥Ñ¥Ù”ÕÍ”½˜¥¹Ñ•ÉÙ…°(€½Ù•É±…ÀèÑ¡”½µÁ…ÐÍåµµ•ÑÉ¥Œ½É”¡…Ì•á…ÐÝ¥‘Ñ …Ðµ½ÍÐ€ÌÈ€¨€Éx µ¸¥€°(€…¹É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•U¹¥Ñå…‘¥½µÁÕÑ•}ÍÕ}½Ù•É±…ÁÍ}ÁÉ½©•Ñ¥Ù•…Õ¡å½É•Q…¥±€(€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”±¥Ñ•É…°…¹‘¥‘…Ñ”½Ù•É±…ÁÌÑ¡”ÁÉ½©•Ñ¥Ù”…Õ¡ä½É”…™Ñ•È(€Ý¥‘•¹¥¹œ‰½Ñ ½µÁ…Ðµ½É”Í¥‘•Ì‰äÑ¡…ÐÁÉ½Ù•Ý¥‘Ñ …¹Ñ¡”ÕÁÁ•ÈÍ¥‘”‰ä(€Ñ¡”•¹‘Á½¥¹Ð‰Õ‘•Ð¸€Q¡”É•µ…¥¹¥¹œ…¹…±åÑ¥ŒÑ…Í¬¥ÌÍÁ•¥™¥…±±äÑ¼©½¥¸(€Ñ¡¥ÌÍ¡É¥¹­¥¹œ•¹Ù•±½Á”Ñ¼Ñ¡”½µÁ±•Ñ•™Õ±°µ±¥¹”…Õ¡äÉ…Ü¸€Q¡”(€Í•Á…É…Ñ•±äÁÉ½Ù•€Ø©¹€µ¥‘Á½¥¹ÐµÉ•™¥¹•µ•¹ÐÍ¡•‘Õ±”™½ÈÑ¡”ÁÉ½©•Ñ¥Ù”(€¡…ÉÐ¥Ì¹½Ü½¹¹•Ñ•Ñ¼Ñ¡”±¥Ñ•É…°ÑÉ¥µµ•½É”‰ä„•¹Õ¥¹”™¥¹¥Ñ”(€½µÁ…É¥Í½¸èÉ•¥ÁÉ½…±EÕ…ÉÑ¥U¹¥Ñå…‘¥½É•}Íåµµ•ÑÉ¥}½Ù•É±…ÁÍ}Í¡•‘Õ±•‘€(€…ÁÁ±¥•Ì„•¹•É…°É…Ñ¥½¹…°1¥ÁÍ¡¥ÑèµÁ…ÉÑ¥Ñ¥½¸½µÁ…É¥Í½¸Ñ¼Ñ¡”ÑÝ¼½É‘•É•(€½Ù•ÉÌ½˜Ñ¡”Í…µ”½µÁ…Ð¥¹Ñ•ÉÙ…°¸€Q¡¥Ì¥Ì‘•±¥‰•É…Ñ•±ä¹½ÐÑÉ…¹Í¥Ñ¥Ù¥Ñä(€½˜¥¹Ñ•ÉÙ…°½Ù•É±…À¸€Q¡…Ð‰É¥‘”ÍÑ•À¥Ì¹½ÜÁÉ½Ù•èÑ¡”…ÑÕ…°…¹‘¥‘…Ñ”(€É•…¡•ÌÑ¡”ÑÝ¼µ‰É…¹ Í¡•‘Õ±•…Õ¡ä¡Õ±°…™Ñ•È…‘‘¥¹œÑ¡”±¥Ñ•É…°µ½É”(€Ý¥‘Ñ °Ñ¡”Í¡•‘Õ±•µ½É”Ý¥‘Ñ °…¹Ñ¡”É•µ½Ù…‰±”µ•¹‘Á½¥¹Ð‰Õ‘•Ð¸€Q¡”(€É•µ…¥¹¥¹œÑ…Í¬¥ÌÑ¡”Í•Á…É…Ñ”™¥¹¥Ñ”½µÁ…É¥Í½¸‰•ÑÝ••¸Ñ¡…Ð¡Õ±°…¹Ñ¡”(€½µÁ±•Ñ•™Õ±°µ±¥¹”…Õ¡äÉ…Ü¸(€Q¡”É…Ñ¥½¹…°•¹‘Á½¥¹ÐÍ¥‘”½˜Ñ¡…Ð…ÍÍ•µ‰±ä¥Ì¹½Ü•áÁ±¥¥ÐÑ½¼è(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥…Õ¡åQ…¥±I…‘¥ÕÍ}±•€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”É•¥ÁÉ½…°(€ÁÉ½©•Ñ¥Ù”•¹‘Á½¥¹Ð…Ð½µÁ…ÐÍÑ…”¸€¬€Å€¥Ì…Ðµ½ÍÐ€È€¨€Éx µ¸¥€¸(€™Ñ•ÈÑ¡”ÑÝ¼µ‰É…¹ ™…Ñ½ÈÑ¡¥Ì¥Ù•ÌÑ¡”¥¹Ñ•¹‘•‘å…‘¥…±±äÙ…¹¥Í¡¥¹œ(€…Õ¡äµÑ…¥°Í…±”¸€%ÑÌ™¥¹¥Ñ”É•¥ÁÉ½…°É•Ñ…¹±”ÑÉ…¹ÍÁ½ÉÐ¥Ì¹½Ü(€¡•­••±±Ý¥Í”…¹™½È…É‰¥ÑÉ…Éä™¥¹¥Ñ”±¥ÍÑÌ½˜ÍÑÉ¥Ñ±äÁ½Í¥Ñ¥Ù”•±±Ìè(€…Õ¡åI•¥ÁÉ½…±%¹Ñ•É…±MÕµ}½Ù•É±…ÁÍ€½µÁ…É•ÌÑ¡”½É¥¥¹…°…¹¥¹Ù•ÉÑ•(€É•Ñ…¹±”‰É…­•ÑÌÝ¥Ñ¡½ÕÐ¥¹Ù½­¥¹œ„½µÁ±•Ñ•¥¹Ñ•É…°¸€Q¡”¹••ÍÍ…Éä(€½É‘•È‰½½­­••Á¥¹œ¥Ì¹½Ü¡•­•Ñ½¼è(€…Õ¡åI•¥ÁÉ½…±I•Ù•ÉÍ•‘%¹Ñ•ÉÙ…±Í}½Ù•ÉÍ€Í•¹‘Ì„Á½Í¥Ñ¥Ù”½É‘•É•½Ù•È(€½˜m„±‰u€Ñ¼½¹”½˜lÄ½ˆ°Ä½…u€°…¹¥ÑÌÉ•½É‘•É•ÍÕ´¡…ÌÑ¡”Í…µ”(€½Ù•É±…À¸€Q¡”É•™¥¹•Í½ÕÉ”Ñ…¥°¥Ì¹½Ü•áÁ±¥¥ÐÉ…Ñ¡•ÈÑ¡…¸…¸¥¹Ñ•¹‘•(€½¹ÍÑÉÕÑ¥½¸è…Õ¡åQ…¥±å…‘¥%¹Ñ•ÉÙ…±Ì„¹€…™™¥¹•±äÑÉ…¹ÍÁ½ÉÑÌÑ¡”(€µ¥‘Á½¥¹Ðµ•Í Ñ¼m„°Åu€ì1•…¸ÁÉ½Ù•Ì¥ÑÌ½Ù•È…¹ÍÑÉ¥ÐÁ½Í¥Ñ¥Ù¥Ñä°…¹(€…Õ¡åI•¥ÁÉ½…±Q…¥±å…‘¥%¹Ñ•ÉÙ…±Í}½Ù•ÉÍ€É•Ù•ÉÍ•Ì¥Ð¥¹Ñ¼Ñ¡”½É‘•É•(€™…ÈµÍ¥‘”½Ù•ÈlÄ°Ä½…u€¸€%ÑÌÑÝ¼™¥¹¥Ñ”…Õ¡ä‰É…­•ÑÌ½Ù•É±…À‰ä(€…Õ¡åI•¥ÁÉ½…±Q…¥±å…‘¥%¹Ñ•ÉÙ…±Í}½Ù•É±…ÁÍ€¸€Q¡”ÁÉ½©•Ñ¥Ù”•¹‘Á½¥¹Ð(€Í•±•Ñ¥½¸¥Ì¹½Ü¡•­•…ÌÝ•±°è…Ð½µÁ…ÐÍÑ…”¸¬É€°(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥…Õ¡åQ…¥±MÑ…ÉÐ¹€¥ÌÁ½Í¥Ñ¥Ù”…¹…Ðµ½ÍÐ½¹”ì(€¥ÑÌÉ•¥ÁÉ½…°¥Ì•á…Ñ±äÑ¡”™¥¹¥Ñ”ÁÉ½©•Ñ¥Ù”½½É‘¥¹…Ñ”¸€½¹Í•ÅÕ•¹Ñ±ä(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥…Õ¡åQ…¥±%¹Ñ•ÉÙ…±Í}½Ù•ÉÍ€ÍÕÁÁ±¥•Ì…¸•áÁ±¥¥Ð(€½É‘•É•µ•Í ™É½´€Å€Ñ¼Ñ¡…Ð½½É‘¥¹…Ñ”°…¹¥ÑÌ™¥¹¥Ñ”‰É…­•ÑÌ½Ù•É±…À(€Ñ¡”½µÁ…ÐµÍ¥‘”Ñ…¥°¸€Q¡”ÑÝ¼™¥¹¥Ñ”…ÍÍ•µ‰±ä½Ù•ÉÌ…É”¹½Ü™½Éµ…±¥é•è(€…Õ¡åMÁ±¥Ñå…‘¥%¹Ñ•ÉÙ…±Í€Á…ÉÑ¥Ñ¥½¹ÌlÀ°Åu€…Ð…¹äÉ…Ñ¥½¹…°Ñ…¥°ÍÑ…ÉÐ(€…¹¡…Ì„…Õ¡ä‰É…­•Ð½Ù•É±…ÁÁ¥¹œÑ¡”…¹½¹¥…°Õ¹¥Ðµ•Í ìµ•…¹Ý¡¥±”(€…Õ¡åU¹¥ÑI•¥ÁÉ½…±Q…¥±å…‘¥%¹Ñ•ÉÙ…±Í€©½¥¹ÌÑ¡…Ð…¹½¹¥…°Õ¹¥Ðµ•Í Ñ¼(€Ñ¡”½É‘•É•É•¥ÁÉ½…°Ñ…¥°¸€Ð½µÁ…ÐÍÑ…”¸¬É€°(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥½É•%¹Ñ•ÉÙ…±Í}½Ù•É±…ÁÍ}…Õ¡åÍÍ•µ‰±å€ÁÉ½Ù•ÌÑ¡…Ð(€Ñ¡¥Ì±…ÑÑ•Èµ•Í …¹Ñ¡”±¥Ñ•É…°ÁÉ½©•Ñ¥Ù”½É”½Ù•È•á…Ñ±äÑ¡”Í…µ”(€…Õ¡ä¥¹Ñ•ÉÙ…°¸€Q¡”ÍÁ±¥ÐÍ½ÕÉ”µ•Í ¡…ÌÍÅÕ…É•µ•Í …Ðµ½ÍÐ€Éx µ¸¥€(€…¹¥¹Ñ•É…°µ‰½àÝ¥‘Ñ …Ðµ½ÍÐ€È€¨€Éx µ¸¥€¸€¥¹…±±äÑ¡”Ñ…¥°ÍÑ…ÉÐ¡…Ì„(€µ…Ñ¡¥¹œ±½Ý•È‘å…‘¥Œ‰½Õ¹€Éx ´¡¸¬È¤¥€¸€Q¡”½ÉÉ•ÍÁ½¹‘¥¹œ™…ÈµÑ…¥°(€•ÍÑ¥µ…Ñ”¥Ì¹½ÜÁÉ½Ù•…ÌÝ•±°èÉ•™¥¹¥¹œ¥ÑÌÍ½ÕÉ”…ÐÍÑ…”€Ô©¸€¬€á€(€¥Ù•Ì„É•¥ÁÉ½…°…Õ¡äÉ•Ñ…¹±”Ý¥‘Ñ …Ðµ½ÍÐ€È€¨€Éx µ¸¥€¸€Q¡¥ÌÕÍ•Ì(€„¹•Ü±½‰…°¹½¹¹•…Ñ¥Ù”…Õ¡ä•±°µÝ¥‘Ñ •ÍÑ¥µ…Ñ”…¹„É•¥ÁÉ½…°µ•Í (€ÍÅÕ…É•µÍÕ´‰½Õ¹ì¥Ð‘½•Ì¹½Ð…ÁÁ•…°Ñ¼…¸¥µÁÉ½Á•È¥¹Ñ•É…°¸€]¡…Ð(€¹½ÜµÍ¡É¥¹­¥¹œÍ¡•‘Õ±•½É”…¹Ñ¡”Õ¹¥ÐµÁ±ÕÌµÑ…¥°…ÍÍ•µ‰±ä¡…Ù”…±Í¼‰••¸(€½µ‰¥¹•èÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥…Õ¡å½É•}¥¹Ñ•É…±}Ý¥‘Ñ¡}±•€¥Ù•ÌÑ¡”(€™½Éµ•È…¸€à€¨€Éx ´É¸¥€…Õ¡äÝ¥‘Ñ ‰½Õ¹°Ñ¡”…ÍÍ•µ‰±ä¡…ÌÝ¥‘Ñ …Ðµ½ÍÐ(€€Ð€¨€Éx µ¸¥€°…¹Ñ¡•¥ÈE%¹Ñ•ÉÙ…°¹¡Õ±±€¥Ì„½µµ½¸‰É¥‘”•¹Ù•±½Á”Ý¥Ñ (€Ý¥‘Ñ …Ðµ½ÍÐ€ÄÈ€¨€Éx µ¸¥€¸€1•…¸¹½ÜÍ…±•ÌÑ¡…ÐÁ½Í¥Ñ¥Ù”‰É¥‘”™½ÈÑ¡”(€ÑÝ¼¡…ÉÐ‰É…¹¡•Ì…¹ÁÉ½Ù•Ì(€É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•U¹¥Ñå…‘¥½µÁÕÑ•}ÍÕ}ÍÕ}ÍÕ}½Ù•É±…ÁÍ}Í¡•‘Õ±•‘…Õ¡å€è(€Ñ¡”…ÑÕ…°…¹‘¥‘…Ñ”É•…¡•Ì¥Ð…™Ñ•ÈÁ…å¥¹œÑ¡”±¥Ñ•É…°µ½É”Ý¥‘Ñ °Ñ¡”(€Í¡•‘Õ±•µ½É”Ý¥‘Ñ °…¹Ñ¡”•¹‘Á½¥¹Ð‰Õ‘•Ð¸€Q¡”É•µ…¥¹¥¹œ½µÁ…É¥Í½¸¥Ì(€‰•ÑÝ••¸Ñ¡¥ÌÑÝ¼µ‰É…¹ ™¥¹¥Ñ”…Õ¡ä¡Õ±°…¹Ñ¡”½µÁ±•Ñ•™Õ±°µ±¥¹”É…Ü¸(€Q¡”™¥ÉÍÐ¡…±˜½˜Ñ¡…Ð½µÁ…É¥Í½¸¥Ì¹½Ü™½Éµ…±¥é•¥¹‘•Á•¹‘•¹Ñ±äè(€…Õ¡åU¹¥ÑI•¥ÁÉ½…±Q…¥±å…‘¥%¹Ñ•ÉÙ…±Í}½Ù•É±…ÁÍ}ÑÝ½U¹¥Ñ¹Ù•±½Á•€•¹±½Í•Ì(€Ñ¡”Á½Í¥Ñ¥Ù”Õ¹¥ÐµÁ±ÕÌµÉ•¥ÁÉ½…°µÑ…¥°µ•Í ‰äÑÝ¼ÍÑ…¹‘…ÉÕ¹¥Ðµ•Í¡•Ì¸€%Ð(€Á…åÌ½¹±äÑ¡”É…Ñ¥½¹…°¹•…Èµé•É¼±•¹Ñ …¹Ñ¡”½µÁ…ÐÑ…¥°µµ•Í Ý¥‘Ñ ì(€ÁÉ½©•Ñ¥Ù•½µÁ…Ñå…‘¥…Õ¡åQ…¥±MÑ…ÉÑ}±•}‘å…‘¥€…¹(€…Õ¡åQ…¥±å…‘¥%¹Ñ•ÉÙ…±Í}¥¹Ñ•É…±}Ý¥‘Ñ¡}±•}‘å…‘¥€ÁÉ½Ù”Ñ¡…Ð‰½Ñ Ù…¹¥Í (€…Ð„•ÉÑ¥™¥•‘å…‘¥ŒÉ…Ñ”¸€Q¡•Í”ÑÝ¼Í¥‘•Ì…É”¹½Ü½µ‰¥¹•¥¸(€É•¥ÁÉ½…±EÕ…ÉÑ¥5¥¹ÕÍ=¹•U¹¥Ñå…‘¥½µÁÕÑ•}ÍÕ}ÍÕ}ÍÕ}½Ù•É±…ÁÍ}™Õ±±…Õ¡å€è(€Ñ¡”…ÑÕ…°…¹‘¥‘…Ñ”½Ù•É±…ÁÌ½¹”•áÁ±¥¥ÐÉ…Ñ¥½¹…°•¹Ù•±½Á”•¹ÑÉ•½¸Ñ¡”(€™½ÕÈµÕ¹¥Ðµµ•Í …Õ¡ä…±Õ±…Ñ¥½¸¸€I•µ…¥¹¥¹œÝ½É¬¥ÌÉ…Üµ±•Ù•°•¹±½ÍÕÉ”(€Í¡É¥¹­…”°¹½Ð…¹äÕ¹ÁÉ½Ù•™¥¹¥Ñ”¡…¹”µ½˜µÙ…É¥…‰±•Ì¥‘•¹Ñ¥Ñä¸(´!¥‘‘•¸Í¥¹Õ±…É¥Ñ¥•ÌÍÕ …Ì€Ä¼¡áxÈ€´€È¥€…É”¹½Ð¡…¹‘±•‰ä…¸QÑ¡•½É•´¸(€Q¡•ä…É”¡…¹‘±•‰•™½É”…±Õ±ÕÌ‰ä‘•¹½µ¥¹…Ñ½Èµ…Á…ÉÑ¹•ÍÌ½È(€¥¹Ñ•ÉÙ…°µÉ•Õ±…É¥Ñä•ÉÑ¥™¥…Ñ•Ì½¸Ñ¡”É…Ñ¥½¹…°¥¹Ñ•ÉÙ…°¸((ŒŒ%¹Ù•ÉÍ”Õ¹Ñ¥½¹Ì()Q¡”Í¡•‘Õ±•…ÉÑ…¹•¹Ð‰É…¹ ¹½ÜÁÉ½Ù¥‘•Ì„½™¥¹…°ÍÑ…”Í¡•‘Õ±”)…ÉÑ…¹M¡•‘Õ±•‘MÑ…•M¡•‘Õ±•€¸…ÉÑ…¹M¡•‘Õ±•‘I•Ñ…¹±•I…Ý€¥Ì‘•™¥¹¥Ñ¥½¹…±±ä)Ñ¡”½ÉÉ•ÍÁ½¹‘¥¹œÉ•Í¡•‘Õ±¥¹œ½˜Ñ¡”™¥¹¥Ñ”•½µ•ÑÉ¥ŒÉ•Ñ…¹±”É…Ü°…¹)…ÉÑ…¹M¡•‘Õ±•‘I•Ñ…¹±•I…Ý}•ÅÕ¥Ù}…ÉÑ…¹•½µ€ÁÉ½Ù•ÌÑ¡…Ð¥ÐÉ•ÁÉ•Í•¹ÑÌÑ¡”)Í…µ”…‰ÍÑÉ…Ð…ÉÑ…¹•¹Ð¸%ÑÌ•áÁ±¥¥ÐÉ•Ñ…¹±”Ý¥‘Ñ ‰Õ‘•Ð¥Ì)€Ä¼ ÄØ¨¡¸¬Ä¤¥€¸Q¡”É•µ…¥¹¥¹œ¥¹Ù•ÉÍ”µ™Õ¹Ñ¥½¸½‰±¥…Ñ¥½¸¥ÌÑ¡”¥¹Ñ•ÉÙ…°)¥µ…”½½¹Ñ…¥¹µ•¹Ð•ÉÑ¥™¥…Ñ”™½È•¹‘Á½¥¹Ð‰½á•Ì°¹½Ð„¡¥‘‘•¸…ÁÁ•…°Ñ¼„)½µÁ±•Ñ•É•…°µÙ…±Õ•…ÉÑ…¹•¹Ð¸((¨©	•¹¡µ…É¬¥Ñ•´€ÜäƒŠP‰É…¹ µ±½…°‰¥Í•Ñ¥½¸½É”¡•­•¸¨¨)!…Í	¥Í•Ñ¥½¹M•…É¡€…¹¥¹Ù•ÉÍ•}™Õ¹Ñ¥½¹}™É½µ}‰¥Í•Ñ¥½¹}Í•…É¡€™½Éµ…±¥é”)Ñ¡”•™™•Ñ¥Ù”¥¹Ñ•Éµ•‘¥…Ñ”µÙ…±Õ”Í•…É ™½È…¸¥¹Ñ•ÉÙ…°µÉ•Õ±…Èµ½¹½Ñ½¹”)‰É…¹ Ý¥Ñ •áÁ±¥¥ÐÉ…¹”…¹Í•Á…É…Ñ¥½¸•ÉÑ¥™¥…Ñ•Ì¸•¹•É…°±…ÍÍ¥…°)%YPÉ•µ…¥¹Ì½ÕÑÍ¥‘”Ñ¡”É•ÁÉ•Í•¹Ñ…Ñ¥½¸‰½Õ¹‘…Éä¸Q¡”™¥¹¥Ñ”ÍÑ•À¥¹Ñ•É™…”)µ½¹½Ñ½¹•	¥Í•Ñ¥½¹MÑ•Á€¹½Ü¥Ù•ÌÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ±½…°É…Ñ¥½¹…°…±½É¥Ñ¡´è)¥ÐÁÉ•Í•ÉÙ•Ì•¹‘Á½¥¹ÐÍ¥¹Ì…¹¥¹Ñ•ÉÙ…°½¹Ñ…¥¹µ•¹Ð™½È„¹½¹‘•É•…Í¥¹œ)™Õ¹Ñ¥½¸…¹¡…±Ù•ÌÑ¡”Ý¥‘Ñ •á…Ñ±ä¸%Ð¥Ì„É•ÕÍ…‰±”•ÉÑ¥™¥…Ñ”™½È)½¹ÍÑÉÕÑ¥Ù”%YPÑÉ…•Ì°¹½Ð…¸…ÍÍ•ÉÑ¥½¸Ñ¡…Ð„é•É¼¥Ì…ÑÑ…¥¹•¸)Q¡”É•ÕÉÍ¥Ù”µ½¹½Ñ½¹•	¥Í•Ñ¥½¹%Ñ•É…Ñ•€¹½Ü±¥™ÑÌÑ¡¥ÌÑ¼•Ù•Éä™¥¹¥Ñ”ÍÑ…”è)½É‘•É¥¹œ°ÍÕ‰¥¹Ñ•ÉÙ…°½¹Ñ…¥¹µ•¹Ð°…¹•¹‘Á½¥¹ÐÍ¥¹Ì…É”ÁÉ•Í•ÉÙ•°Ý¡¥±”)µ½¹½Ñ½¹•	¥Í•Ñ¥½¹%Ñ•É…Ñ•}Ý¥‘Ñ¡€¥Ù•ÌÑ¡”•á…Ð€ Éyìµ¹ô¤Ý¥‘Ñ Í¡•‘Õ±”¸)Q¡”½µÁ…¹¥½¸µ½¹½Ñ½¹•	¥Í•Ñ¥½¹%Ñ•É…Ñ•}Ý¥‘Ñ¡}Á½Í€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”½É‘¥¹…Éä)™¥¹¥Ñ”‰É…­•Ð¥Ñ•É…Ñ½È…±Í¼É•Ñ…¥¹ÌÁ½Í¥Ñ¥Ù”Ý¥‘Ñ Ý¡•¹•Ù•È¥ÑÌ¥¹¥Ñ¥…°)¥¹Ñ•ÉÙ…°‘½•Ì¸)Q¡”½µÁ…¹¥½¸µ½¹½Ñ½¹•	¥Í•Ñ¥½¹%Ñ•É…Ñ•}Ý¥‘Ñ¡}±•}½™}Á½Ý•É}‰Õ‘•Ñ€ÑÕÉ¹Ì„)ÍÕÁÁ±¥•É…Ñ¥½¹…°‰Õ‘•Ð$¹Ý¥‘Ñ €ðô•ÁÌ€¨€Éy¹€¥¹Ñ¼Ñ¡”™¥¹…°Õ…É…¹Ñ•”Ñ¡…Ð)Ñ¡”¥Ñ•É…Ñ•‰É…­•Ð¡…ÌÝ¥‘Ñ …Ðµ½ÍÐ•ÁÍ€¸€Q¡¥Ì•áÁ½Í•ÌÑ¡”‰¥Í•Ñ¥½¸)¥Ñ•É…Ñ¥½¸…Ì…¸•á•ÕÑ…‰±”ÁÉ•¥Í¥½¸Í¡•‘Õ±•È™½ÈÑ¡”½¹ÍÑÉÕÑ¥Ù”%YP)‰½Õ¹‘…Éä¸€Q¡”Ñ…É•ÐµÁ…É…µ•ÑÉ¥é•½µÁ…¹¥½¸)µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹MÑ•Á€…¹¥ÑÌ¥Ñ•É…Ñ•™½É´)µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•€ÁÉ•Í•ÉÙ”„ÍÕÁÁ±¥•É…Ñ¥½¹…°Ñ…É•Ð‰É…­•Ð)…Ð•Ù•Éä™¥¹¥Ñ”ÍÑ…”¸€Q¡¥Ì¥ÌÑ¡”¥¹Ù•ÉÍ”µÍ•…É ™½É´½˜Ñ¡”•ÉÑ¥™¥…Ñ”è)Ñ¡”…±½É¥Ñ¡´¹…ÉÉ½ÝÌ…¸¥¹Ñ•ÉÙ…°Ý¡½Í”•¹‘Á½¥¹Ð•Ù…±Õ…Ñ¥½¹Ì•¹±½Í”Ñ¡”)Ñ…É•Ð°Ý¥Ñ¡½ÕÐ…ÍÍ•ÉÑ¥¹œÑ¡…Ð„½µÁ±•Ñ•µÉ•…°ÁÉ•¥µ…”¡…Ì‰••¸…ÑÑ…¥¹•¸)Q¡”Ñ…É•Ðµ…Ý…É”ÍÑ•À…¹¥Ñ•É…Ñ¥½¸¹½Ü…±Í¼•áÁ½Í”Í½ÕÉ”½¹Ñ…¥¹µ•¹Ð…¹)Ñ¡”•á…ÐÝ¥‘Ñ ±…Ü$¹Ý¥‘Ñ €¼€Éy¹€¸€Q¡•Í”…É”Ñ¡”™¥¹¥Ñ”¥¹Ù…É¥…¹ÑÌ¹••‘•Ñ¼)ÑÕÉ¸„Í•Á…É…Ñ¥½¸½É…±”¥¹Ñ¼„‘…Ñ„µÙ…±Õ•¥¹Ù•ÉÍ”Í•…É ¸€Q¡”½µÁ…¹¥½¸)µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•}•ÉÑ¥™¥…Ñ•€Á…­…•Ì½É‘•É•‘¹•ÍÌ°Ñ…É•Ð)•¹±½ÍÕÉ”°Í½ÕÉ”½¹Ñ…¥¹µ•¹Ð°…¹Ñ¡¥Ì•á…ÐÝ¥‘Ñ ¥¸½¹”É•ÕÍ…‰±”™¥¹¥Ñ”)É•½É¸€Q¡”½µÁ…¹¥½¸)µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•}Ý¥‘Ñ¡}±•}½™}Á½Ý•É}‰Õ‘•Ñ€½¹Ù•ÉÑÌ„ÍÕÁÁ±¥•)É…Ñ¥½¹…°¥¹¥Ñ¥…°µÝ¥‘Ñ ‰Õ‘•Ð¥¹Ñ¼…¸•áÁ±¥¥ÐÉ•ÅÕ•ÍÑ•µÑ½±•É…¹”Õ…É…¹Ñ•”¸)Q¡”½µÁ…¹¥½¸µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•}Ý¥‘Ñ¡}Á½Í€ÁÉ½Ù•ÌÑ¡…Ð•Ù•Éä)™¥¹¥Ñ”¥Ñ•É…Ñ”ÍÑ¥±°¡…ÌÁ½Í¥Ñ¥Ù”Ý¥‘Ñ Ý¡•¹•Ù•ÈÑ¡”¥¹¥Ñ¥…°‰É…­•Ð‘½•Ì°)µ…­¥¹œÑ¡”Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥Ñä¥¹Ñ•ÉÁÉ•Ñ…Ñ¥½¸•áÁ±¥¥Ð¸)Q¡”½µÁ…¹¥½¸)µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•}É•…¡•Í}½™}Á½Í¥Ñ¥Ù•}Ñ½±•É…¹•€¹½ÜÉ•µ½Ù•ÌÑ¡”)ÍÕÁÁ±¥•Á½Ý•È‰Õ‘•Ð™½È¥¹¥Ñ¥…°¥¹Ñ•ÉÙ…±Ì½˜Ý¥‘Ñ …Ðµ½ÍÐ½¹”èÍÑ…”)•ÁÌ¹‘•¹€¥Ì•ÉÑ¥™¥•Ñ¼É•… •Ù•ÉäÁ½Í¥Ñ¥Ù”É…Ñ¥½¹…°Ñ½±•É…¹”¸Q¡¥Ì¥Ì…¸)•á•ÕÑ…‰±”¥¹Ù•ÉÍ”µÍ•…É Í¡•‘Õ±”™½ÈÑ¡”™¥¹¥Ñ”‰¥Í•Ñ¥½¸½É”°¹½Ð…¸%YP)½È½µÁ±•Ñ•¹•ÍÌÁÉ¥¹¥Á±”¸Q¡”¹•Ü)µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•}Ñ½±•É…¹•}•ÉÑ¥™¥…Ñ•€Á…­…•ÌÑ¡…ÐÍ¡•‘Õ±”)Ñ½•Ñ¡•ÈÝ¥Ñ Ñ…É•Ð•¹±½ÍÕÉ”…¹Í½ÕÉ”½¹Ñ…¥¹µ•¹Ð°¥Ù¥¹œ…¸¥¹Ù•ÉÍ”)±¥•¹Ð½¹”™¥¹¥Ñ”•ÉÑ¥™¥…Ñ”É…Ñ¡•ÈÑ¡…¸Í•Á…É…Ñ”‰½½­­••Á¥¹œ±•µµ…Ì¸)Q¡”½µÁ½Í¥Ñ¥½¸±•µµ„µ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•}…‘‘€¥‘•¹Ñ¥™¥•Ì„±…Ñ•È)™¥¹¥Ñ”ÍÑ…”Ý¥Ñ Ñ¡”Í…µ”¥Ñ•É…Ñ½ÈÍÑ…ÉÑ•™É½´…¸•…É±¥•ÈÍÑ…”Ì¥¹Ñ•ÉÙ…°¸)½¹Í•ÅÕ•¹Ñ±äµ½¹½Ñ½¹•Q…É•Ñ	¥Í•Ñ¥½¹%Ñ•É…Ñ•}±…Ñ•É}ÍÕ‰¥¹Ñ•ÉÙ…±€ÁÉ½Ù•ÌÑ¡…Ð)•Ù•Éä±…Ñ•ÈÑ…É•Ð‰É…­•Ð¥Ì¹•ÍÑ•¥¹Í¥‘”•Ù•Éä•…É±¥•È½¹”¸€Q¡¥Ìµ…­•Ì)É•™¥¹•µ•¹Ð•áÁ±¥¥Ð¥¸Ñ¡”•ÉÑ¥™¥…Ñ”A$Ý¡¥±”­••Á¥¹œÑ¡”%YPÉ•Á±…•µ•¹Ð)„™¥¹¥Ñ”É…Ñ¥½¹…°ÍÑ…Ñ•µ•¹ÐÉ…Ñ¡•ÈÑ¡…¸„¡¥‘‘•¸…ÁÁ•…°Ñ¼„±¥µ¥ÐÁ½¥¹Ð¸)Q¡”Ý½É­•¥¹¥Ñ•MÅÕ…É•I½½Ñ	¥Í•Ñ¥½¹á…µÁ±•€¹½Ü…ÁÁ±¥•ÌÑ¡”Ñ…É•ÐÍ•…É Ñ¼)áxÈ€ô€Ä¼É€½¸lÀ°Åu€èÍÑ…”€ÐÉ•ÑÕÉ¹ÌlÄÄ¼ÄØ°Ì¼Ñu€°ÁÉ•Í•ÉÙ•ÌÑ¡”Ñ…É•Ð)‰É…­•Ð°…¹¡…ÌÝ¥‘Ñ €Ä¼ÄÙ€¸Q¡¥Ì¥Ì„¹½¸µ…™™¥¹”™¥¹¥Ñ”Ý¥Ñ¹•ÍÌ™½È¥Ñ•´€Üä¸)Q¡”½µÁ…¹¥½¸¥¹¥Ñ•Õ‰•I½½Ñ	¥Í•Ñ¥½¹á…µÁ±•€…ÁÁ±¥•ÌÑ¡”Í…µ”Ñ…É•ÐÍ•…É )Ñ¼áxÌ€ô€É€½¸lÄ°Éu€èÍÑ…”€ÐÉ•ÑÕÉ¹ÌlÔ¼Ð°ÈÄ¼ÄÙu€°ÁÉ•Í•ÉÙ•ÌÑ¡”Ñ…É•Ð)‰É…­•Ð°…¹¡…ÌÝ¥‘Ñ €Ä¼ÄÙ€¸Q¡¥Ì¥Ù•Ì¥Ñ•´€Üä„Í•½¹¹½¹±¥¹•…È¥¹Ù•ÉÍ”)ÑÉ…”Ý¡¥±”É•Ñ…¥¹¥¹œÑ¡”ÁÉ½©•ÐÌ™¥¹¥Ñ”°Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥ÑäÍ•µ…¹Ñ¥Ì¸)Q¡”¹•Ü¥¹¥Ñ•½ÕÉÑ¡I½½Ñ	¥Í•Ñ¥½¹á…µÁ±•€…ÁÁ±¥•ÌÑ¡”Í…µ”Í•…É Ñ¼)áxÐ€ô€É€½¸lÄ°Éu€èÍÑ…”€àÉ•ÑÕÉ¹ÌlÄä¼ÄØ°ÌÀÔ¼ÈÔÙu€Ý¥Ñ Ý¥‘Ñ €Ä¼ÈÔÙ€°)…¹ÍÑ…”€ÄØÉ•ÑÕÉ¹ÌlÜÜäÌÔ¼ØÔÔÌØ°ÐàÜÄ¼ÐÀäÙu€Ý¥Ñ Ý¥‘Ñ €Ä¼ØÔÔÌÙ€¸)Q¡¥Ì•áÑ•¹‘Ì¥Ñ•´€ÜäÌ¹½¹±¥¹•…È™¥¹¥Ñ”¥¹Ù•ÉÍ”µÍ•…É ±…‘‘•ÈÝ¡¥±”É•Ñ…¥¹¥¹œ)Ñ¡”Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥Ñä¥¹Ñ•ÉÁÉ•Ñ…Ñ¥½¸¸)Q¡”Õ‰”µÉ½½Ð…¹™½ÕÉÑ µÉ½½ÐÑÉ…•Ì¹½Ü…±Í¼É•… ÍÑ…”€ÈÐ°•… Ý¥Ñ •á…Ð)Ý¥‘Ñ €Ä¼ÄØÜÜÜÈÄÙ€…¹•ÉÑ¥™¥••¹‘Á½¥¹Ð½µÁ…É¥Í½¹Ì°•áÑ•¹‘¥¹œÑ¡”Í…µ”)Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥ÑäÁÉ•¥Í¥½¸Í¡•‘Õ±”¸((´5…¥¸…±Õ±ÕÌÉ½ÕÑ”è½¹ÍÑÉÕÐ¥¹Ù•ÉÍ•Ì½¸¥¹Ñ•ÉÙ…±ÌÝ¡•É”Ñ¡”™Õ¹Ñ¥½¸¥Ì(€¥¹Ñ•ÉÙ…°µÉ•Õ±…È°µ½¹½Ñ½¹”°…¹•™™•Ñ¥Ù•±äÍ•Á…É…Ñ•¸(€M•”%¹Ù•ÉÑ¥‰±•Õ¹Ñ¥½¹=¹%¹Ñ•ÉÙ…±€°%¹I…¹•I…Ý€°%¹Ù•ÉÍ•I…Ü¹…ÁÁ±å€°…¹(€!…Í%¹Ù•ÉÍ•€¥¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½…±Õ±ÕÌ¹±•…¹€¸€!…Í%¹Ù•ÉÍ”%€¥Ì¹½Ü(€•áÁ±¥¥Ñ±ä‰É…¹ µ±½…°è¥ÑÌÍ½ÕÉ”¥¹Ñ•ÉÙ…°°½É¥•¹Ñ…Ñ¥½¸°…¹•ÉÑ¥™¥•(€½ÕÑÁÕÐÉ…¹”…É”…±°™¥á•‰ä%€¸(´%¹I…¹•I…Ý€¹½Ü¡…Ì½µÁÕÑ…Ñ¥½¹…°É…¹”½¹Ñ•¹Ðè¥Ð…ÉÉ¥•Ì„Ù…±¥‘¥Ñä(€ÁÉ½½˜™½ÈÑ¡”Ñ…É•ÐÉ…ÜÉ•…°…¹°…Ð•Ù•ÉäÑ…É•ÐÍÑ…”°„¹…µ••¹‘Á½¥¹Ð(€ÁÉ•¥Í¥½¸Ý¡½Í”½É¥•¹Ñ••¹‘Á½¥¹Ð‰½á•Ì•¹±½Í”Ñ¡”Ñ…É•Ð‰½à¸€¸(€¥¹Ù•ÉÑ¥‰±”‰É…¹ …±Í¼É•½É‘ÌÑ¡…Ð¥ÑÌÍ½ÕÉ”•¹‘Á½¥¹ÑÌ…É”½É‘•É•¸€Q¡¥Ì(€É•Á±…•ÌÑ¡”™½Éµ•ÈÕ¹½¹ÍÑÉ…¥¹•¥¹}É…¹”€èAÉ½Á€°Ý¡¥ ½Õ±¹½ÐÕ¥‘”„(€™¥¹¥Ñ”‰¥Í•Ñ¥½¸Í•…É ¸(´Q¡”Í•Á…É…Ñ¥½¸•ÉÑ¥™¥…Ñ”¹½Ü¡½½Í•Ì•á…Ñ±ä½¹”½É¥•¹Ñ…Ñ¥½¸(€€¡¹½¹‘•É•…Í¥¹€½È¹½¹¥¹É•…Í¥¹€¤°…¹%¹Ù•ÉÑ¥‰±•Õ¹Ñ¥½¹=¹%¹Ñ•ÉÙ…±€(€É•ÅÕ¥É•Ì¥ÐÑ¼µ…Ñ Ñ¡”µ½¹½Ñ½¹¥¥ÑäÝ¥Ñ¹•ÍÌ¸€•ÉÑ¥™¥…Ñ”µÕÍÐ¹½Ð(€ÁÉ½Ù”‰½Ñ ½ÁÁ½Í¥¹œÍÑÉ¥Ð•¹‘Á½¥¹ÐµÍ•Á…É…Ñ¥½¸¥¹•ÅÕ…±¥Ñ¥•Ì™½ÈÑ¡”Í…µ”¹½¹½¹ÍÑ…¹Ð(€™Õ¹Ñ¥½¸¸(´½¹É•Ñ”™½ÉÝ…É‘…Ñ„èÍÅÕ…É•=¹U¹¥Ñ€½¸lÀ°Åu€¡…Ì•á…ÐÉ…Ñ¥½¹…°Á½¥¹Ð(€‰½á•Ì°…¸¥¹Ñ•ÉÙ…°µÉ•Õ±…É¥Ñäµ½‘Õ±ÕÌ€¡¡•¹”…¸•áÁ±¥¥ÐÉ…Ñ¥½¹…°(€•ÁÍ¥±½¸´µ‘•±Ñ„•ÉÑ¥™¥…Ñ”¤°¹½¹‘•É•…Í¥¹œ½É‘•È°…¹¹½¹‘•É•…Í¥¹œ(€•™™•Ñ¥Ù”Í•Á…É…Ñ¥½¸¸€ÍÅÕ…É•=¹U¹¥Ñ}•ÁÍ¥±½¹•±Ñ…½¹Ñ¥¹Õ½ÕÍ€…¹(€ÍÅÕ…É•=¹U¹¥Ñ}¥¹Ù•ÉÑ¥‰±•€•áÁ½Í”Ñ¡•Í”™…ÑÌ¸(€Q¡”•á¥ÍÑ¥¹œÍÅÉÑI…Ý€‰¥Í•Ñ¥½¸¡…Ì¥ÑÌ…±•‰É…¥ŒÉ…ÜµÉ•…°ÍÁ•¥™¥…Ñ¥½¸°(€…¹ÍÅÉÑ=¹U¹¥Ñ	¥Í•Ñ¥½¹M•…É¡€Á…­…•Ì¥Ð…Ì…¸%¹Ù•ÉÍ•	¥Í•Ñ¥½¹M•…É¡€(€™½È•Ù•Éä•á…ÐÉ…Ñ¥½¹…°Ñ…É•Ð¥¸lÀ°Åu€°¥¹±Õ‘¥¹œÑ¡”•áÁ±¥¥Ð(€•¹‘Á½¥¹ÐµÉ…¹”•¹±½ÍÕÉ”™½ÈÑ¡…ÐÑ…É•Ð¸€áÑ•¹‘¥¹œÑ¡¥ÌÑ¼…±°(€É•ÁÉ•Í•¹Ñ•Õ¹¥ÐµÉ…¹”Ñ…É•ÑÌÉ•µ…¥¹Ì™ÕÑÕÉ”Ý½É¬¸(€½È…¸…¹¡½É•É•ÁÉ•Í•¹Ñ•Ñ…É•Ð°Ñ¡”¹•Ü(€ÍÅÉÑ=¹U¹¥ÑI•ÁÉ•Í•¹Ñ•‘Q…É•ÑM•…É¡}ÍÑ…•}•ÉÑ¥™¥…Ñ•€Á…­…•ÌÑ¡”Í…µ”(€ÍÕ‰¥¹Ñ•ÉÙ…°°•¹‘Á½¥¹ÐµÍÅÕ…É”°Ý¥‘Ñ µ‰Õ‘•Ð°…¹Ñ…É•Ðµ½Ù•É±…ÀÕ…É…¹Ñ••Ì(€…Ð½¹”™¥¹¥Ñ”ÍÑ…”¸€Q¡”…¹¡½È¥Ì•áÁ±¥¥Ð‘…Ñ„ì¹¼É•ÁÉ•Í•¹Ñ•µÑ…É•Ð(€•á¥ÍÑ•¹”½È¡½¥”ÁÉ¥¹¥Á±”¥Ì¥¹™•ÉÉ•¸(´AÉ½Ù•‰É¥‘”è!…Í	¥Í•Ñ¥½¹M•…É %€¥Ì½µÁÕÑ…Ñ¥½¹…°‘…Ñ„…ÍÍ¥¹¥¹œ„(€•ÉÑ¥™¥•™¥¹¥Ñ”‰¥Í•Ñ¥½¸½Í•…É Ñ¼•Ù•ÉäÑ…É•Ð¥¸Ñ¡”ÍÑ…Ñ•É…¹”ì¥Ð(€¥Ù•Ì!…Í%¹Ù•ÉÍ”%€‰ä(€¥¹Ù•ÉÍ•}™Õ¹Ñ¥½¹}™É½µ}‰¥Í•Ñ¥½¹}Í•…É¡€¸€%ÑÌ‘…Ñ„µÙ…±Õ•™½ÉµÕ±…Ñ¥½¸(€ÁÉ•Ù•¹ÑÌ„¡¥‘‘•¸¡½¥”ÍÑ•ÀÝ¡•¸…ÍÍ•µ‰±¥¹œÑ¡”¥¹Ù•ÉÍ”¸(´Q¡”Í¥¹”½½Í¥¹”É½ÕÑ”¥Ì¥¹Ñ•¹Ñ¥½¹…±±ä¹•áÐ¸€Q¡”™¥ÉÍÐµ½Ñ…¹Ð‰É¥‘”(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹ÉÑ…¹%¹Ù•ÉÍ•	¥Í•Ñ¥½¹€¹½ÜÑ¥•ÌÑ¡”•½µ•ÑÉ¥Œ(€ÑÉ¥½¹½µ•ÑÉä¡…ÁÑ•ÈÑ¼Ñ¡”…ÑÕ…°¥¹Ù•ÉÍ”µ™Õ¹Ñ¥½¸¥¹Ñ•É™…•Ìè¥ÐÉ•ÅÕ¥É•Ì(€„‰É…¹ •ÉÑ¥™¥••ÅÕ…°Ñ¼…ÉÑ…¹•½µ=¹U¹¥Ñ€°•ÉÑ¥™¥•(€%¹I…¹•I…Ý€ÅÕ…ÉÑ•ÈµÑÕÉ¸Ñ…É•ÑÌ°…¹…¸%¹Ù•ÉÍ•	¥Í•Ñ¥½¹M•…É¡€™½È•… (€Ñ…É•Ð¸€%ÐÁÉ½‘Õ•ÌÑ…¹•¹ÑI…Ý€°„Ù…±¥Á…ÉÑ¥…°Í±½Á”™Õ¹Ñ¥½¸Ý¡½Í”(€½ÕÑÁÕÑÌÍÑ…ä¥¸lÀ°Åu€…¹Ý¡½Í”™½ÉÝ…É•Ù…±Õ…Ñ½È½Ù•É±…ÁÌ•… Ñ…É•Ð¸(€Q¡”¥¹Ñ•¹‘•¹•áÐ½¹ÍÑÉÕÑ¥½¸•Ù…±Õ…Ñ•ÌÑ¡”É…Ñ¥½¹…°¥É±”¡…ÉÐ(€€  ÄµÕxÈ¤¼ Ä­ÕxÈ¤°€ÉÔ¼ Ä­ÕxÈ¤¥€…ÐÑ¡…ÐÉ•½Ù•É•Í±½Á”Õ€ì¥ÑÌ½½É‘¥¹…Ñ”(€ÁÉ½©•Ñ¥½¹Ì…É”Ñ¡”™¥ÉÍÐµ½Ñ…¹Ð½Í¥¹”…¹Í¥¹”™Õ¹Ñ¥½¹Ì¸(€Q¡”½±ÉÑ…¹%¹Ù•ÉÍ•½¹ÍÑÉÕÑ¥½¹€É•µ…¥¹Ì½¹±äÑ¡”‘½Ý¹ÍÑÉ•…´(€ÍÁ•¥…°µÙ…±Õ”½¹ÑÉ…Ð¸€Q¡”¹•áÐ…¹…±åÑ¥ŒÑ…Í¬¥ÌÑ¼½¹ÍÑÉÕÐÑ¡”¹•Ü(€‰É¥‘”‰äÁÉ½Ù¥¹œ¥¹Ñ•ÉÙ…°É•Õ±…É¥Ñä°µ½¹½Ñ½¹¥¥Ñä°…¹•™™•Ñ¥Ù”(€Í•Á…É…Ñ¥½¸™½È…ÉÑ…¹•½µ=¹U¹¥Ñ€ì¹¼¥¹Ù•ÉÍ”±…Ü¥Ì…ÍÍÕµ•…Ì„‰…É”(€ÁÉ½Á½Í¥Ñ¥½¸¸€Q¡”µ½¹½Ñ½¹¥¥Ñä…¹Í•Á…É…Ñ¥½¸•ÉÑ¥™¥…Ñ•Ì…É”¹½Ü(€™½Éµ…±¥é•¥¸ÉÑ…¹•½µ%¹Ù•ÉÍ•…Ñ…€èÑ¡•äÑÉ…¹ÍÁ½ÉÐÑ¡”É•Ñ…¹±”(€•Ù…±Õ…Ñ½ÈÌ™¥¹¥Ñ”½É‘•È‰½Õ¹‘ÌÑ¡É½Õ Ñ¡”•ÉÑ¥™¥•½¹Ñ…¥¹µ•¹Ð½˜•… (€Á½Í¥Ñ¥Ù”µ±½½À‰½à¸€Q¡¥Ì­••ÁÌÑ¡”¥¹Ù•ÉÍ”É½ÕÑ”•¹Ñ¥É•±ä¥¹Ñ•ÉÙ…°µÙ…±Õ•(€…¹•á•ÕÑ…‰±”¸€Q¡”µ…Ñ¡¥¹œ‰½àµÙ…±Õ•½¹Ñ¥¹Õ¥ÑäÑ¡•½É•´¥Ì(€…ÉÑ…¹•½µ=¹U¹¥Ñ}¹•…É}½™}Å…‰Í}±•€°Ý¥Ñ Ñ¡”•áÁ±¥¥Ðµ½‘Õ±ÕÌÁ…­…•…Ì(€…ÉÑ…¹•½µ=¹U¹¥Ñ}•™™•Ñ¥Ù•5½‘Õ±ÕÍ€ì¥¹Ñ•ÉÙ…°É•Õ±…É¥Ñä…¹Ñ¡”‘…Ñ„µÙ…±Õ•(€‰¥Í•Ñ¥½¸Í•…É …É”Ñ¡”É•µ…¥¹¥¹œÁ¥••Ì½˜Ñ¡¥Ì‰É…¹ ¸€Q¡”¹…Ñ¥Ù”(€Á½Í¥Ñ¥Ù”µ±½½À•Ù…±Õ…Ñ½È¥Ì¹½Ü…±Í¼•áÁ½Í•Ñ¡É½Õ Ñ¡”½™¥¹…°™¥¹¥Ñ”(€Í¡•‘Õ±”…ÉÑ…¹•½µM¡•‘Õ±•‘MÑ…•€ì…ÉÑ…¹•½µM¡•‘Õ±•‘=¹U¹¥Ñ€É•Ñ…¥¹Ì(€Ñ¡”Í…µ”•½µ•ÑÉ¥Œ‰½á•ÌÝ¡¥±”Í…Ñ¥Í™å¥¹œÑ¡”±¥Ñ•É…°Ý¥‘Ñ •ÍÑ¥µ…Ñ”(€…ÉÑ…¹•½µM¡•‘Õ±•‘=¹U¹¥Ñ}Ý¥‘Ñ¡}±•€¸€Q¡¥Ì¥ÌÑ¡”¥¹Ñ•¹‘••Ù…±Õ…Ñ½È™½È(€Ñ¡”¥¹Ñ•ÉÙ…°µ¥µ…”•ÉÑ¥™¥…Ñ”°É…Ñ¡•ÈÑ¡…¸Í¥±•¹Ñ±ä¡…¹¥¹œÑ¡”¹…Ñ¥Ù”(€…±½É¥Ñ¡´ÌÁÉ•¥Í¥½¸½¹Ù•¹Ñ¥½¸¸(´Q¡”½µÁ±•Ñ•É…Ñ¥½¹…°µÍ±½Á”¡…±˜½˜Ñ¡…ÐÉ½ÕÑ”¥Ì¹½Ü•áÁ½Í•…Ì(€I…Ñ¥½¹…±¥É±”¹•½µ•ÑÉ¥QÉ¥œ¹¥ÉÍÑEÕ…‘É…¹ÑÉÑ…¹]¥Ñ¹•ÍÍ€¸(€…ÉÑ…¹}Ñ½}Í¥¹•}½Í¥¹•}½½É‘¥¹…Ñ•Í€Á…­…•Ì½¹”…ÉÑ…¹•¹Ð•ÅÕ…Ñ¥½¸(€…ÉÑ…¹•½´¡Ô¤øÐ©Á¤¼Ñ€°Ñ¡”•á…ÐÍÑ•É•½É…Á¡¥Œ™½ÉµÕ±…Ì(€½Ì€ô€ ÄµÕxÈ¤¼ Ä­ÕxÈ¥€…¹Í¥¸€ô€ÉÔ¼ Ä­ÕxÈ¥€°…¹Ñ¡”Õ¹¥Ðµ¥É±”(€¥‘•¹Ñ¥Ñä¸Q¡”ÍÁ•¥…°µÙ…±Õ•ÌÑ…‰±”½¹Í•ÅÕ•¹Ñ±äÑÉ•…ÑÌÑ¡…Ð…ÉÑ…¹•¹Ð(€•ÅÕ…Ñ¥½¸…ÌÑ¡”½¹±ä½±½É•ÁÉ½½˜µÍÑ…ÑÕÌ½‰±¥…Ñ¥½¸ì•áÑ•¹‘¥¹œÑ¡”(€Ý¥Ñ¹•ÍÌ™É½´„É…Ñ¥½¹…°Í±½Á”Ñ¼„‰¥Í•Ñ¥½¸µÁÉ½‘Õ•É…ÜÍ±½Á”É•µ…¥¹Ì(€Ñ¡”¹½¸µ•¹‘Á½¥¹ÐÑ…Í¬¸(´…Í¥¹€¥ÌÑ¡”¥¹Ù•ÉÍ”½˜Í¥¹”½¸„¡½Í•¸µ½¹½Ñ½¹”‰É…¹ °…¹±½€¥ÌÑ¡”(€¥¹Ù•ÉÍ”½˜•áÁ½¹•¹Ñ¥…°½¸„¡½Í•¸µ½¹½Ñ½¹”‰É…¹ ¸(€M•”±•µ•¹Ñ…Éä¹ÉÍ¥¹É½µ5½¹½Ñ½¹•M¥¹€°±•µ•¹Ñ…Éä¹1½É½µ5½¹½Ñ½¹•áÁ€°(€ÉÍ¥¹Y¥…%¹Ù•ÉÍ•Õ¹Ñ¥½¹€°…¹1½Y¥…%¹Ù•ÉÍ•Õ¹Ñ¥½¹€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½±•µ•¹Ñ…Éä¹±•…¹€¸(´½¹‘¥Ñ¥½¹…°Ý•±°µ‘•™¥¹•‘¹•ÍÌ¥ÌÁÉ½Ù•èÍÕ ‰É…¹ ‘…Ñ„ÁÉ½‘Õ•Ì•ÉÑ¥™¥•(€½µÁÕÑ…‰±”…Í¥¹€…¹±½€É…Ü™Õ¹Ñ¥½¹Ì¸(€M•”ÉÍ¥¹É½µ5½¹½Ñ½¹•M¥¸¹…Í¥¹}Ý•±±}‘•™¥¹•‘€…¹(€1½É½µ5½¹½Ñ½¹•áÀ¹±½}Ý•±±}‘•™¥¹•‘€¸((ŒŒ±•µ•¹Ñ…ÉäÕ¹Ñ¥½¹Ì((´A½Í¥Ñ¥Ù”µ‰…Í”Á½Ý•ÉÌ¹½Ü¡…Ù”„½¹ÍÑÉÕÑ¥Ù”¥¹Ñ•É™…”è„Á½Í¥Ñ¥Ù”É…Ü‰…Í”(€¡…Ì„Õ¹¥™½É´Á½Í¥Ñ¥Ù”É…Ñ¥½¹…°±½Ý•È‰½Õ¹ì¹…ÑÕÉ…°Á½Ý•ÉÌ…É”É•Á•…Ñ•(€¥¹Ñ•ÉÙ…°µÕ±Ñ¥Á±¥…Ñ¥½¸ì…¹„É…Ñ¥½¹…°µÁ½Ý•È•áÑ•¹Í¥½¸É•½É‘ÌÙ…±¥(€Ù…±Õ•Ì°Ñ¡”…‘‘¥Ñ¥Ù”±…Ü°…¹•ÉÑ¥™¥•‘•¹½µ¥¹…Ñ½È½É½½Ð•ÅÕ…Ñ¥½¹Ì¸¸(€•áÁ½¹•¹Ñ¥…°É•ÁÉ•Í•¹Ñ…Ñ¥½¸…±Í¼É•ÅÕ¥É•Ì½¹Ñ¥¹Õ½ÕÍ%¹áÁ½¹•¹Ñ€èÑ¡”(€•áÁ±¥¥ÐÉ…Ñ¥½¹…°•ÁÍ¥±½¸µ‘•±Ñ„ÁÉ•‘¥…Ñ”(€ÁÍ¥±½¹•±Ñ…½¹Ñ¥¹Õ½ÕÍ=¹€½¸•Ù•ÉäÉ…Ñ¥½¹…°¥¹Ñ•ÉÙ…°¸%ÑÌ½ÕÑÁÕÐ½¹‘¥Ñ¥½¸(€¥ÌE%¹Ñ•ÉÙ…°¹9•…ÉÑ€°¹½Ð±¥Ñ•É…°½Ù•É±…Àè¥Ð‰½Õ¹‘ÌÑ¡”É…Ñ¥½¹…°(€Í•Á…É…Ñ¥½¸½˜ÑÝ¼•Ù…±Õ…Ñ¥½¸‰½á•Ì‰ä•ÁÍ¥±½¸Ý¡¥±”‰½Õ¹‘¥¹œ•… ‰½àÌ(€Ý¥‘Ñ ¸Q¡¥Ì•ÉÑ¥™¥…Ñ”¥Ì(€Ñ¡”¥¹Ñ•¹‘•…Ñ•Ý…ä™½È•áÑ•¹‘¥¹œ½¹Ñ¥¹Õ½ÕÌ™Õ¹Ñ¥½¹Ì™É½´É…Ñ¥½¹…°¹…µ•Ì(€Ñ¼½µÁÕÑ…‰±”µÉ•…°½È½Á•¸½µÁ±•à‘½µ…¥¹ÌìÑ¡”•áÑ•¹Í¥½¸Ñ¡•½É•´¥ÑÍ•±˜(€É•µ…¥¹Ì™ÕÑÕÉ”Ý½É¬¸(€•áÀ¹áÁ½¹•¹Ñ¥…±Õ¹Ñ¥½¸¹•Ñ=¹•€‘•™¥¹•ÌÑ¡”Õ±•È‰…Í”…ÌÑ¡”Ù…±Õ”…Ð€Å€(€½˜…¹ä•áÁ½¹•¹Ñ¥…°É•ÁÉ•Í•¹Ñ…Ñ¥½¸¸€M•”A½Í¥Ñ¥Ù•I•…±I…Ý€°(€A½Í¥Ñ¥Ù•I•…±I…Ü¹¹…ÑA½Ý€°I…Ñ¥½¹…±A½Ý•ÉáÑ•¹Í¥½¹€°…¹(€áÁ½¹•¹Ñ¥…±Õ¹Ñ¥½¸¹•Ñ=¹•€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½±•µ•¹Ñ…ÉåÕ¹Ñ¥½¹Ì¹±•…¹€¸I•Á•…Ñ•µÕ±Ñ¥Á±¥…Ñ¥½¸¥Ì(€¹½Ü¥ÑÍ•±˜¡•­•èA½Í¥Ñ¥Ù•I•…±I…Ü¹¹…ÑA½Ý}Ù…±¥‘}…¹‘}‰½Õ¹‘Í€ÁÉ½Ù•Ì•Ù•Éä(€¹…ÑÕÉ…°Á½Ý•ÈÙ…±¥…¹•¹±½Í•‰•ÑÝ••¸Ñ¡”½ÉÉ•ÍÁ½¹‘¥¹œÁ½Ý•ÉÌ½˜Ñ¡”(€ÍÕÁÁ±¥•Á½Í¥Ñ¥Ù”±½Ý•È‰½Õ¹…¹¥¹¥Ñ¥…°ÕÁÁ•È•¹‘Á½¥¹Ð°…¹(€¹…ÑA½ÝA½Í¥Ñ¥Ù•€Á…­…•Ì¥Ð…Ì„¹•ÜÁ½Í¥Ñ¥Ù”É…ÜÉ•…°¸½¹ÍÑÉÕÑ¥¹œÑ¡”(€¹½¸µ¥¹Ñ•É…°É½½Ð±…å•È…¹¥ÑÌ•ÁÍ¥±½¸´µ‘•±Ñ„•áÁ½¹•¹Ðµ½¹Ñ¥¹Õ¥ÑäÁÉ½½˜(€É•µ…¥¹ÌÑ¡”¹•áÐÉ…Ñ¥½¹…°µÁ½Ý•ÈÑ…Í¬¸(€ÐÑ¡”½¹ÍÑ…¹Ð±•Ù•°°áÁAÉ½½™Ì¹•Õ±•É9•ÍÑ•‘€¹½Ü¥Ù•Ì„‘¥É•ÐÙ…±¥(€É•Á•…Ñ•µµÕ±Ñ¥Á±¥…Ñ¥½¸É•ÁÉ•Í•¹Ñ…Ñ¥Ù”½˜€¡”¤èÍÑ…”¹€•Ù…±Õ…Ñ•Ì(€€  Ä¬Ä¼¡¸¬Ä¥xÈ¥yì¡¸¬Ä¥xÉô¤…¹…ÉÉ¥•ÌÑ¡”¹•ÍÑ•É…‘¥ÕÌ€à¼¡¸¬Ä¥€¸(€%ÑÌ•á…ÐÝ¥‘Ñ ¥Ì€ÄØ¼¡¸¬Ä¥€°…¹¥Ð¥ÌÁÉ½Ù••ÅÕ¥Ù…±•¹ÐÑ¼Ñ¡”Í¡…ÉÀ(€½µÁ½Õ¹µ¥¹Ñ•É•ÍÐ•Ù…±Õ…Ñ½È‰•™½É”‰•¥¹œÍÑ½É•¥¸Ñ¡”…‰ÍÑÉ…Ð(€áÁAÉ½½™Ì¹•€¡…¹‘±”¸Q¡¥Ì¥Ì„•ÉÑ¥™¥•½¹ÍÑ…¹Ð½¹ÍÑÉÕÑ¥½¸°¹½Ðå•Ð„(€™Õ¹Ñ¥½¸µ±•Ù•°•áÀœ€ô•áÁ€Ñ¡•½É•´¸(€Q¡”•¹•É¥ŒÉ…Ñ¥½¹…°µ¥¹ÁÕÐÁ½Ý•ÈµÍ•É¥•ÌÉ…Ü¹½Ü…±Í¼¡…Ì¥ÑÌ•á…Ð(€é•É¼µ¥¹ÁÕÐ¹½Éµ…±¥é…Ñ¥½¸¡•­•è•Ù•ÉäÍ•É¥•ÌÍÑ…”…Ð€Á€¥ÌÁÉ•¥Í•±ä(€lÄ°Åu€°Ù¥„áÁAÉ½½™Ì¹•áÁA½Ý•ÉM•É¥•Í}é•É½}½µÁÕÑ•}•Å€ì(€•áÁA½Ý•ÉM•É¥•Í}é•É½}•ÅÕ¥Ù}½¹•€Á…­…•ÌÑ¡”É…Ü•ÅÕ¥Ù…±•¹”…¹(€•áÁA½Ý•ÉM•É¥•Í}é•É½}Ù…±¥‘€ÍÕÁÁ±¥•ÌÙ…±¥‘¥Ñä¸€Q¡”™¥¹¥Ñ”(€É•Á•…Ñ•µµÕ±Ñ¥Á±¥…Ñ¥½¸•Ù…±Õ…Ñ½È¡…Ì•¹Ñ•È•á…Ñ±ä€Å€…Ðé•É¼…¹(€•áÁÕ±•É}é•É½}•ÅÕ¥Ù}½¹•€ÁÉ½Ù•Ì¥ÑÌ•áÁ±¥¥ÐµÉ…‘¥ÕÌ‰½á•Ì½Ù•É±…ÀÑ¡…Ð(€Í…µ”Á½¥¹Ð¸€Q¡•Í”¥¹¥Ñ¥…°µÙ…±Õ”™…ÑÌ…É”‘•±¥‰•É…Ñ•±ä‘¥ÍÑ¥¹Ð™É½´Ñ¡”(€Á•¹‘¥¹œÍ•±˜µ‘•É¥Ù…Ñ¥Ù”…¹¹½¹é•É¼µ¥¹ÁÕÐ½µÁ…É¥Í½¸Ñ¡•½É•µÌ¸(€Q¡•É”¥Ì¹½Ü½¹”¡•­•±½…°‘•É¥Ù…Ñ¥Ù”¥¹ÍÑ…¹”™½ÈÑ¡”±¥Ñ•É…°Í•É¥•Ì(€•Ù…±Õ…Ñ½ÈèáÁAÉ½½™Ì¹•áÁA½Ý•ÉM•É¥•Í=¹U¹¥Ñ}™½ÉÝ…É‘M•±™•É¥Ù…Ñ¥Ù•Ñi•É½€(€•ÉÑ¥™¥•ÌŠè•áÀ À¤€ô•áÀ À¥€°Ý¥Ñ Ñ¡”‘•É¥Ù…Ñ¥Ù”É•ÁÉ•Í•¹Ñ•‰äÑ¡”(€™Õ±°É…Ü•áÁA½Ý•ÉM•É¥•Ì€Á€ìÑ¡”ÍÑ…•Ý¥Í”¹½Éµ…±¥é…Ñ¥½¸…‰½Ù”å¥•±‘Ì¥ÑÌ(€Ù…±Õ”€Å€¸€%ÑÌ™¥¹¥Ñ”ÁÉ½½˜ÕÍ•ÌÁ½Í¥Ñ¥Ù”ÍÑ•ÁÌ…ÐÑ¡”•¹‘Á½¥¹Ð½¹±ä°Í¼¥Ð(€¥Ì¹½ÐÑ¡”É•ÅÕ¥É•ÑÝ¼µÍ¥‘•¥¹Ñ•ÉÙ…°Ñ¡•½É•´•áÀœ€ô•áÁ€¸(€Q¡”™¥¹¥Ñ”…±•‰É„™½ÈÑ¡…Ð¹½¹é•É¼½µÁ…É¥Í½¸¥Ì¹½Ü¡•­•Ñ½¼è(€™…±±¥¹…Ñ½É¥…±I…Ñ€°•Õ±•É	¥¹½µ¥…±Q•Éµ€°…¹•Õ±•É	¥¹½µ¥…±AÉ•™¥á€•áÁ½Í”(€Ñ¡”É…Ñ¥½¹…°‰¥¹½µ¥…°½½É‘¥¹…Ñ•Ì°…¹(€•Õ±•É}‰¥¹½µ¥…±}ÁÉ•™¥á}¹…Ñ}•áÁ…¹Í¥½¹€ÁÉ½Ù•ÌÑ¡”•á…Ð•áÁ…¹Í¥½¸½˜(€€ Ä€¬à¥yµ€¸€Ðà€ô€Ä½µ€Ñ¡¥Ì¥ÌÑ¡”±¥Ñ•É…°Õ±•ÈÁÉ½‘ÕÐ¥¸(€™…Ñ½É¥…°µÍ•É¥•Ì½½É‘¥¹…Ñ•Ì¸Q¡”½•™™¥¥•¹Ðµ•ÉÉ½È‰½Õ¹¥Ì¹½Ü¡•­•è(€•… …À¥Ì‰½Õ¹‘•‰ä¬¨¡¬´Ä¤¼ È©´©¬„¥€°¥ÑÌ™¥¹¥Ñ”ÍÕ´‰ä€Ì½µ€°…¹(€Ñ¡”ÍÅÕ…É”µµ•Í •ÉÉ½È™¥ÑÌÑ¡”¹•ÍÑ•Õ±•ÈÉ…‘¥ÕÌ¸½¹Í•ÅÕ•¹Ñ±ä(€•A½Ý•ÉM•É¥•Í}•ÅÕ¥Ù}•½µÁ½Õ¹‘%¹Ñ•É•ÍÑ€¥Ì„½µÁ±•Ñ•½¹ÍÑ…¹Ðµ±•Ù•°(€Í•É¥•Ì½½µÁ½Õ¹•ÅÕ¥Ù…±•¹”°…¹••ÉÑ¥™¥•‘€ÍÑ½É•ÌÑ¡”Í•É¥•ÌÉ…Ü…Ì…¸(€…±Ñ•É¹…Ñ¥Ù”…±½¹Í¥‘”‰½Ñ É•Á•…Ñ•µµÕ±Ñ¥Á±¥…Ñ¥½¸É…ÝÌ¸9¼½µÁ±•Ñ•¹•ÍÌ½È(€…¹…±åÑ¥Œ‰¥¹½µ¥…°Ñ¡•½É•´¥Ì…ÍÍÕµ•¸(´Q¡”ÑÝ¼¥¹Ñ•¹‘•¡…É…Ñ•É¥é…Ñ¥½¹Ì½˜Ñ¡”Õ±•È‰…Í”…É”¹½Ü•áÁ±¥¥Ð(€½‰±¥…Ñ¥½¹ÌèÑ¡”•áÁ½¹•¹Ñ¥…°Í½±Ù•Ì˜œ€ô™€½¸É…Ñ¥½¹…°¥¹Ñ•ÉÙ…±Ì°…¹„(€Á½Í¥Ñ¥Ù”‰…Í”¥ÌÕ±•È•á…Ñ±äÝ¡•¸¥ÑÌÉ…Ñ¥½¹…°Á½Ý•ÉÌ¡…Ù”‘•É¥Ù…Ñ¥Ù”€Å€(€…Ð•áÁ½¹•¹Ðé•É¼¸€I…Ñ¥½¹…±A½Ý•ÉáÑ•¹Í¥½¸¹!…Í•É¥Ù…Ñ¥Ù•Ñ€°(€I…Ñ¥½¹…±A½Ý•ÉáÑ•¹Í¥½¸¹!…ÍU¹¥Ñ•É¥Ù…Ñ¥Ù•Ñi•É½€°(€áÁ½¹•¹Ñ¥…±Õ¹Ñ¥½¸¹M½±Ù•ÍM•±™•É¥Ù…Ñ¥Ù•=¹€°…¹(€áÁ½¹•¹Ñ¥…±Õ¹Ñ¥½¸¹U¹¥Ñ•É¥Ù…Ñ¥Ù•¡…É…Ñ•É¥é•Í€É•½ÉÑ¡”(€É…Ñ¥½¹…°µ¥¹Ñ•ÉÙ…°ÍÑ…Ñ•µ•¹ÑÌ¸€Q¡•¥È…¹…±åÑ¥ŒÁÉ½½˜É•µ…¥¹ÌÑ¼‰”ÍÕÁÁ±¥•ì(€½¹±äÑ¡”™½Éµ…°½•™™¥¥•¹Ð¥‘•¹Ñ¥Ñä¥ÌÁÉ½Ù•Í¼™…È¸(´áÁ½¹•¹Ñ¥…°¡…ÌÑ¡É•”½¹ÍÑÉÕÑ¥Ù”É•ÁÉ•Í•¹Ñ…Ñ¥½¹ÌÑ¼½µÁ…É”èÁ½Ý•ÈÍ•É¥•Ì(€•áÀ¹ÁÍ€°Õ±•È±¥µ¥Ð•áÀ¹•Õ±•É€°…¹¥¹Ù•ÉÍ”Ñ¼Ñ¡”±½…É¥Ñ¡µ¥Œ¥¹Ñ•É…°(€¥¹Ñ|Åyà‘Ð½Ñ€¸€Q¡”™¥ÉÍÐÑÝ¼…É”½¹É•Ñ”Õ¹Ñ¥½¹I…ÝÌ¹½Ü¸€Q¡”(€¥¹Ù•ÉÍ”µ±½œµ¥¹Ñ•É…°É½ÕÑ”¥Ì½¹É•Ñ”½¸™¥¹¥Ñ”É•…°¥¹Ñ•ÉÙ…±ÌÙ¥„(€•áÀ¹1½%¹Ñ•É…±%¹Ù•ÉÍ•	É…¹¡€…¹•áÀ¹™É½µ1½%¹Ñ•É…±€ì„±½‰…°É•…°(€‰É…¹ …¸‰”…ÍÍ•µ‰±•±…Ñ•È‰ä•™™•Ñ¥Ù•±ä¡½½Í¥¹œ„Í½ÕÉ”¥¹Ñ•ÉÙ…°™½È(€•… É…Ñ¥½¹…°¥¹ÁÕÐ¸(€M•”•áÀ¹•A½Ý•ÉM•É¥•ÍI…Ý€°•áÀ¹•Õ±•ÉI…Ý€°(€•áÀ¹•É½µ1½%¹Ñ•É…±	É…¹¡I…Ý€°•áÀ¹É•ÁÉ•Í•¹Ñ…Ñ¥½¹ÍÉ••€°…¹(€•áÀ¹Á½Ý•ÉM•É¥•Í}•ÅÕ¥Ù}±½%¹Ñ•É…±%¹Ù•ÉÍ•}½¹}¥¹Ñ•ÉÙ…±€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½±•µ•¹Ñ…ÉåÕ¹Ñ¥½¹Ì¹±•…¹€¸(´1½…É¥Ñ¡´¡…ÌÑÝ¼½¹ÍÑÉÕÑ¥Ù”É•ÁÉ•Í•¹Ñ…Ñ¥½¹ÌÑ¼½µÁ…É”è¥¹Ù•ÉÍ”Ñ¼(€•áÁ½¹•¹Ñ¥…°…¹Ñ¡”¥¹Ñ•É…°ƒŠ"­|Åyà‘Ð½Ñ€¸(€M•”±•µ•¹Ñ…Éä¹1½É½µ5½¹½Ñ½¹•áÁ€°±•µ•¹Ñ…Éä¹1½É½µ%¹Ñ•É…±%¹Ù€°…¹(€±•µ•¹Ñ…Éä¹1½%¹Ñ•É…±É••Í]¥Ñ¡%¹Ù•ÉÍ•áÁ€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½±•µ•¹Ñ…Éä¹±•…¹€¸(€Q¡”½¹É•Ñ”É•¥ÁÉ½…°­•É¹•°¥Ì¹½Ü¥¹Ñ•ÉÙ…°µÉ•Õ±…È°…¹¡•¹”¡…Ì(€±¥Ñ•É…°É…Ñ¥½¹…°•ÁÍ¥±½¸´µ‘•±Ñ„½¹Ñ¥¹Õ¥Ñä°½¸lÄ°Éu€è(€1½…É¥Ñ¡´¹½¹•=Ù•Éa=¹=¹•QÝ½}¥¹Ñ•ÉÙ…±I•Õ±…É€ÕÍ•ÌÑ¡”•á…Ð•¹±½ÍÕÉ”(€lÄ½È°€Ä½Áu€™½È•… É…Ñ¥½¹…°mÀ±Éu€¸€Q¡”±½…É¥Ñ¡´µ…ÐµÑÝ¼‰É¥‘”¥Ì¹½Ü(€¡•­•èÑ¡”Õ¹¥™½É´É¥¡Ðµ•Í ¥Ì•¹±½Í•‰äÑ¡”¹•ÍÑ•‘å…‘¥Œ…É‰½Õà(€‰½á•Ì…¹±½QÝ½M•É¥•Í}•ÅÕ¥Ù}±½QÝ½I•¥ÁÉ½…±%¹Ñ•É…±€½µÁ±•Ñ•ÌÑ¡”É…Ü(€•ÅÕ¥Ù…±•¹”¸€Q¡¥Ì¥Ì„™¥¹¥Ñ”É…Ñ¥½¹…°½µÁ…É¥Í½¸°¹½Ð„½¹Ñ¥¹Õ¥Ñä½È(€Ñ½Á½±½ä…ÍÍÕµÁÑ¥½¸ì…±¥¹¥¹œ¥ÐÝ¥Ñ Ñ¡”Í•±•Ñ•…¹½¹¥…°•áÀ½±½œ(€¥¹Ù•ÉÍ”‰É…¹ É•µ…¥¹ÌÑ¡”¹•áÐ‘¥ÍÑ¥¹ÐÑ¡•½É•´¸(€Q¡”¥¹Ñ•ÉÙ…°•ÉÑ¥™¥…Ñ”¹½Ü•¹•É…±¥é•ÌÑ¼(€1½…É¥Ñ¡´¹½¹•=Ù•Éa=¹=¹•Q½}¥¹Ñ•ÉÙ…±I•Õ±…É€™½È•Ù•ÉäÉ…Ñ¥½¹…°‰€Ý¥Ñ (€€Ä€ðô‰€ìÑ¡¥Ì¥Í½±…Ñ•ÌÑ¡”ÕÁÁ•Èµ•¹‘Á½¥¹Ðµ¥¹‘•Á•¹‘•¹ÐÁ…ÉÐ½˜Ñ¡”Á½Í¥Ñ¥Ù”(€É•¥ÁÉ½…°ÑÉ…¹ÍÁ½ÉÐ¸(€Q¡”ÍÑÉ½¹•È½¹•=Ù•Éa=¹%¹Ñ•ÉÙ…±}±½Ý•É}•}½¹•}¥¹Ñ•ÉÙ…±I•Õ±…É€™½É´¹½Ü(€¡…¹‘±•Ì…É‰¥ÑÉ…Éäm„±‰u€Ý¥Ñ €Ä€ðô„€ðô‰€°µ…­¥¹œÑ¡”±½Ý•Èµ‰½Õ¹(€‘•Á•¹‘•¹”•áÁ±¥¥Ð‰•™½É”Ñ¡”™¥¹…°É…Ñ¥½¹…°Í…±¥¹œ…ÉÕµ•¹Ð¸(€Q¡”™Õ±±äÁ½Í¥Ñ¥Ù”Ù•ÉÍ¥½¸(€½¹•=Ù•Éa=¹A½Í¥Ñ¥Ù•%¹Ñ•ÉÙ…±}¥¹Ñ•ÉÙ…±I•Õ±…É}½™}‰Õ‘•Ñ€¹½Ü…•ÁÑÌ…¹ä(€€À€ð„€ðô‰€Ñ½•Ñ¡•ÈÝ¥Ñ „¹…ÑÕÉ…°‰Õ‘•Ð1€Í…Ñ¥Í™å¥¹œ€Ä½…xÈ€ðô1€ì(€¥ÑÌ¥¹ÁÕÐÍ¡•‘Õ±”¥Ì•áÁ±¥¥Ñ±ä€¡¸¬Ä¤©1€¸(€Q¡”½µÁ…¹¥½¸É•¥ÁÉ½…±}Í…±•}­•É¹•±}•Å}±½QÝ½-•É¹•±€…¹(€É•¥ÁÉ½…±}Í…±•}Á½¥¹Ñ}Á½Í¥Ñ¥Ù•€±•µµ…Ì¡•¬Ñ¡”•á…ÐµÕ±Ñ¥Á±¥…Ñ¥Ù”(€¹½Éµ…±¥é…Ñ¥½¸½¸m„°É…u€°¥¹±Õ‘¥¹œÁ½Í¥Ñ¥Ù¥Ñä½˜Ñ¡”ÑÉ…¹Í™½Éµ•Á½¥¹ÑÌ¸(€Q¡”¹•Ü±½QÝ½-•É¹•±}Í¡¥™Ñ}•Å}½¹•=Ù•Éa€…¹(€±½QÝ½}É¥¡ÑI¥•µ…¹¹}Ñ•Éµ}…Í}½¹•=Ù•Éa€±•µµ…Ìµ…­”Ñ¡”…™™¥¹”ÑÉ…¹ÍÁ½ÉÐ(€•áÁ±¥¥Ð…ÐÑ¡”™¥¹¥Ñ”É…Ñ¥½¹…°±•Ù•°°‰•™½É”…¹ä•¹•É…°Á½Í¥Ñ¥Ù”µ¥¹Ñ•ÉÙ…°(€•¹‘Á½¥¹ÐÑ¡•½É•´¥Ì…ÑÑ•µÁÑ•¸(´A½Ý•ÈµÍ•É¥•ÌÉ•ÁÉ•Í•¹Ñ…Ñ¥½¹Ì½˜Í¥¹€…¹½Í€…É”¹…µ•¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½±•µ•¹Ñ…ÉåÕ¹Ñ¥½¹Ì¹±•…¹€¸(´!åÁ•É‰½±¥ŒÍ¥¹”…¹½Í¥¹”¡…Ù”½¹ÍÑÉÕÑ¥Ù”•áÁ½¹•¹Ñ¥…°É•ÁÉ•Í•¹Ñ…Ñ¥½¹Ì(€€¡•áÀè€´•áÀ€ µè¤¤€¼€É€…¹€¡•áÀè€¬•áÀ€ µè¤¤€¼€É€¸(€M•”Í¥¹ ¹™É½µáÁ€…¹½Í ¹™É½µáÁ€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½±•µ•¹Ñ…ÉåÕ¹Ñ¥½¹Ì¹±•…¹€¸(´A½Ý•ÈµÍ•É¥•Ìµ…¡¥¹•Éä…¹½¹Ù•É•¹”•ÉÑ¥™¥…Ñ”Ñ…É•ÑÌ±¥Ù”¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½A½Ý•ÉM•É¥•Ì¹±•…¹€¸((ŒŒ½¹ÍÑÉÕÑ¥Ù”¥™™•É•¹Ñ¥…°…±Õ±ÕÌ((´•É¥Ù…Ñ¥Ù•Ì…É”•áÑÉ…Ñ•™É½´Í¡É¥¹­¥¹œ™¥¹¥Ñ”µ‘¥™™•É•¹”¥¹Ñ•ÉÙ…±Ì½¸(€É…Ñ¥½¹…°•±±Ì°¹½Ð…ÍÍÕµ•…Ì±¥µ¥ÑÌ¥¸„±…ÍÍ¥…°É•…°Ñ½Á½±½ä¸€M•”(€!…Í•É¥Ù…Ñ¥Ù•=¹%¹Ñ•ÉÙ…±€¥¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥™™•É•¹Ñ¥…°¹±•…¹€¸(´½¹Ù•á¥Ñä…¹½¹…Ù¥Ñä…É”¡•±Á•È•ÉÑ¥™¥…Ñ•Ì™½ÈÁÉ½‘Õ¥¹œÍ±½Á”(€•¹±½ÍÕÉ•Ì½¸Í¡½ÉÐ¥¹Ñ•ÉÙ…±Ì¸€Q¡”É…Ñ¥½¹…°Í•…¹ÐµÍ±½Á”±…å•È¥Ì(€ÕÉÙ…ÑÕÉ•=¹MÕ‰¥¹Ñ•ÉÙ…±€ìÑ¡”ÕÉÉ•¹Ð¥µÁ±•µ•¹Ñ…Ñ¥½¸ÍÑ¥±°¡…Ì½±‘•È(€‘•±…É…Ñ¥½¸¹…µ•ÌÍÕ …Ì5½¹½Ñ½¹••É¥Ù…Ñ¥Ù•	½Õ¹‘5•Ñ¡½‘€…¹(€•É¥Ù…Ñ¥Ù•	½Õ¹‘É½µÕÉÙ…ÑÕÉ•€¸(´Q¡”™¥ÉÍÐÁÉ½Ù•Á½Ý•ÈµÍ•É¥•Ì‰É¥¬¥Ì™½Éµ…°è½•™™¥¥•¹ÐÍ¡¥™Ð™¥á•ÌÑ¡”(€ÍÑÉ•…´€Ä½¸…€¸M•”(€½Éµ…±A½Ý•ÉM•É¥•Ì¹•áÁ½•™™}‘•É¥Ù…Ñ¥Ù•€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½A½Ý•ÉM•É¥•Ì¹±•…¹€¸(´Q¡”Í…µ”™½Éµ…°±…å•È¹½Ü½Ù•ÉÌÑ¡”½•™™¥¥•¹ÐµÍ¡¥™Ð¥‘•¹Ñ¥Ñ¥•Ì™½ÈÑÉ¥œ(€…¹¡åÁ•É‰½±¥ŒÍÑÉ•…µÌè(€Í¥¸€´ø½Í€°½Ì€´ø€µÍ¥¹€°Í¥¹ €´ø½Í¡€°…¹(€½Í €´øÍ¥¹¡€¸(€M•”½Éµ…±A½Ý•ÉM•É¥•Ì¹Í¥¹½•™™}‘•É¥Ù…Ñ¥Ù•€°(€½Éµ…±A½Ý•ÉM•É¥•Ì¹½Í½•™™}‘•É¥Ù…Ñ¥Ù•€°(€½Éµ…±A½Ý•ÉM•É¥•Ì¹Í¥¹¡½•™™}‘•É¥Ù…Ñ¥Ù•€°…¹(€½Éµ…±A½Ý•ÉM•É¥•Ì¹½Í¡½•™™}‘•É¥Ù…Ñ¥Ù•€¸(´Q¡”™¥¹¥Ñ”É…Ñ¥½¹…°‰É¥‘”‰•±½ÜÑ¡”™½Éµ…°Ñ…‰±”¥Ì¹½Ü¡•­•Ñ½¼è(€¥¹¥Ñ•A½±å¹½µ¥…°¹Á½Ý•ÉM•…¹Ñ}•Å}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ€¥‘•¹Ñ¥™¥•ÌÑ¡”•á…Ð(€ÅÕ½Ñ¥•¹Ð½˜•Ù•Éäµ½¹½µ¥…°°…¹(€¥¹¥Ñ•A½±å¹½µ¥…°¹Å…‰Í}¹½Éµ…±¥é•‘}Á½Ý•É}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ}ÍÕ‰}µ½¹½µ¥…±}±•€(€‰½Õ¹‘ÌÑ¡”ÅÕ½Ñ¥•¹Ð½˜áx¡¸¬Ä¤¼¡¸¬Ä¥€……¥¹ÍÐáy¹€‰ä…¸•áÁ±¥¥Ð(€ñ¡ñ€½•™™¥¥•¹Ð½¸„ÍÕÁÁ±¥•‰½Õ¹‘•‰½à¸€Q¡¥Ì…Ù½¥‘Ì…¹äµ•…¸µÙ…±Õ”(€Ñ¡•½É•´…¹¥ÌÑ¡”‘¥É•Ð™¥¹¥Ñ”…±•‰É„¹••‘•™½ÈÑ¡”•áÁ½¹•¹Ñ¥…°Ñ…¥°¸(€¥¹¥Ñ•A½±å¹½µ¥…°¹¹½Éµ…±¥é•‘5½¹½µ¥…±}¡…Í•É¥Ù…Ñ¥Ù•=¹%¹Ñ•ÉÙ…±€¹½ÜÁ…­…•Ì(€Ñ¡…Ð‰½Õ¹…Ì„ÑÝ¼µÍ¥‘•É…Ñ¥½¹…°¥¹Ñ•ÉÙ…°‘•É¥Ù…Ñ¥Ù”•ÉÑ¥™¥…Ñ”°Ý¥Ñ „(€½µÁÕÑ•‘å…‘¥ŒÍÑ•ÀÍ¡•‘Õ±”°½¸•Ù•Éä¥¹Ñ•ÉÙ…°½¹Ñ…¥¹•¥¸lµ±u€™½È(€€øô€Å€¸¥¹¥Ñ•A½±å¹½µ¥…°¹¥¹Ñ•É…Ñ•‘Q…å±½ÉAÉ•™¥á}¡…Í•É¥Ù…Ñ¥Ù•=¹%¹Ñ•ÉÙ…±€(€±½Í•ÌÑ¡”Í…µ”•áÁ±¥¥ÐÉ•µ…¥¹‘•È…±Õ±…Ñ¥½¸Õ¹‘•È•Ù•Éä™¥¹¥Ñ”É…Ñ¥½¹…°(€Q…å±½ÈÁÉ•™¥à¸Q¡”•á…Ð™¥¹¥Ñ”Q•¹‘Á½¥¹ÐÉ•ÕÉÉ•¹”(€¥¹¥Ñ•A½±å¹½µ¥…°¹¥¹Ñ•É…Ñ•‘Q…å±½ÉAÉ•™¥á}•¹‘Á½¥¹Ñ¥™™•É•¹•}ÍÕ€É•½É‘Ì(€¡½Ü…‘©½¥¹¥¹œ½¹”¥¹Ñ•É…Ñ•µ½¹½µ¥…°¡…¹•ÌÑ¡”•¹‘Á½¥¹Ð‘¥™™•É•¹”ì¥Ð(€¥Ì„É…Ñ¥½¹…°Ñ•±•Í½Á¥¹œ¥‘•¹Ñ¥Ñä°¹½Ð…¸…ÁÁ•…°Ñ¼„½µÁ±•Ñ•¥¹Ñ•É…°¸(€Q¡”‰±Õ•ÁÉ¥¹Ð­••ÁÌÑ¡•Í”™¥¹¥Ñ”µ‘¥™™•É•¹”‘•É¥Ù…Ñ¥Ù”(€•ÉÑ¥™¥…Ñ•Ì¥¸Ñ¡”±…Ñ•È…±Õ±ÕÌ¡…ÁÑ•ÈìÑ¡”Í•É¥•Ì¡…ÁÑ•ÈÉ•½É‘Ì½¹±ä(€½•™™¥¥•¹ÐµÍ¡¥™Ð‘…Ñ„¸(´9•áÐÑ¡•½É•´™½È•áÀ¹ÁÍ€èÑÕÉ¸Ñ¡”™½Éµ…°½•™™¥¥•¹Ð¥‘•¹Ñ¥ÑäÁ±ÕÌ(€É…Ñ¥½¹…°Ñ…¥°‰½Õ¹‘Ì…¹„ÑÉ…¹Í±…Ñ•µÍ•É¥•Ì½…‘‘¥Ñ¥½¸•ÍÑ¥µ…Ñ”¥¹Ñ¼…¸(€•™™•Ñ¥Ù”‘•É¥Ù…Ñ¥Ù”•ÉÑ¥™¥…Ñ”™½ÈÑ¡”‰½á•…±½É¥Ñ¡´½¸…¸¥¹Ñ•ÉÙ…°°(€¡•¹”„Ý¥Ñ¹•ÍÌ™½È(€•áÀ¹áÁ½¹•¹Ñ¥…±Õ¹Ñ¥½¸¹M½±Ù•ÍM•±™•É¥Ù…Ñ¥Ù•=¹€¸€Q¡¥Ì…¸‰”ÍÁ•¥…±¥é•(€Ñ¼•áÁ½¹•¹Ñ¥…°™¥ÉÍÐì„•¹•É…°Ñ•É´µ‰äµÑ•É´‘¥™™•É•¹Ñ¥…Ñ¥½¸Ñ¡•½É•´…¸(€½µ”±…Ñ•È¸(´Q¼ÁÉ½Ù”•ÅÕ…±¥Ñä½˜Ñ¡”Ñ¡É•”•áÁ½¹•¹Ñ¥…°É•ÁÉ•Í•¹Ñ…Ñ¥½¹Ì‰ä…±Õ±ÕÌ(€É…Ñ¡•ÈÑ¡…¸‰ä…¡½Œ•ÍÑ¥µ…Ñ•Ì°ÕÍ”Ñ¡”Í…±…È•ÅÕ…Ñ¥½¸˜œ€ô™€Ý¥Ñ (€˜ À¤€ô€Å€…¹Ñ¡”‘¥É•Ð™¥¹¥Ñ”µµ•Í É½ÕÑ”¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½M…±…É=U¹¥ÅÕ•¹•ÍÌ¹±•…¹€¸%ÑÌ¡•­•±½ÍÕÉ”ÑÕÉ¹Ì„(€É…Ñ¥½¹…°•¹Ù•±½Á”Ý¥Ñ 	|¡È¬Ä¤€ðô	}È¼É€¥¹Ñ¼é•É¼•ÉÉ½È‰ä…¸•á•ÕÑ…‰±”(€‘å…‘¥ŒÍÑ…”ìM•±™•É¥Ù…Ñ¥Ù•¥É•Ñ5•Í¡½µÁ…É¥Í½¹€Ñ¡•¸¥Ù•Ì™Õ¹Ñ¥½¸(€…É••µ•¹Ð¸Q¡”É•µ…¥¹¥¹œ…¹…±åÑ¥ŒÑ¡•½É•´‘•É¥Ù•ÌÑ¡…Ð•¹Ù•±½Á”‰ä(€ÍÕ‰ÑÉ…Ñ¥¹œÑÝ¼‘•É¥Ù…Ñ¥Ù”•ÉÑ¥™¥…Ñ•Ì½¸Í¡½ÉÐÉ…Ñ¥½¹…°‰±½­Ì…¹(€¡…¥¹¥¹œ™¥¹¥Ñ•±äµ…¹ä‰±½­Ì¸Q¡¥Ì¥Ì¥¹Ñ•¹Ñ¥½¹…±±ä¥¹‘•Á•¹‘•¹Ð½˜(€A•…¹¼´µ	…­•È½A¥…É¥Ñ•É…Ñ¥½¸¸Q¡”Ù•Ñ½È±¥¹•…ÈÑ¡•½É•´…¹„™ÕÑÕÉ”(€¹½¹±¥¹•…È¥¹Ñ•ÉÙ…°µ1¥ÁÍ¡¥ÑèÑ¡•½ÉäÉ•µ…¥¸Í•Á…É…Ñ”½¹ÍÑÉÕÑ¥Ù”(€•á¥ÍÑ•¹”µ…¹µÕ¹¥ÅÕ•¹•ÍÌ‘…Ñ„¸((ŒŒ1¥¹•…È¥™™•É•¹Ñ¥…°ÅÕ…Ñ¥½¹Ì((¨©	•¹¡µ…É¬¥Ñ•´€äÜƒŠP™¥¹¥Ñ”É…µ•È½É”¡•­•¸¨¨)É…µ•É}ÑÝ½}‰å}ÑÝ½€ÁÉ½Ù•ÌÑ¡”É…Ñ¥½¹…°€ ÉqÑ¥µ•ÌÈ¤É…µ•ÈÉÕ±”Õ¹‘•È„)¹½¹é•É¼‘•Ñ•Éµ¥¹…¹Ð¸%Ð¥ÌÁ±…•¡•É”…ÌÑ¡”™¥¹¥Ñ”±¥¹•…Èµ…±•‰É„)ÁÉ•É•ÅÕ¥Í¥Ñ”°…¹É…µ•É}ÑÝ½}‰å}ÑÝ½}Õ¹¥ÅÕ•€ÁÉ½Ù•ÌÑ¡…Ð•Ù•ÉäÉ…Ñ¥½¹…°)Í½±ÕÑ¥½¸…É••ÌÝ¥Ñ Ñ¡”‘•Ñ•Éµ¥¹…¹ÐÅÕ½Ñ¥•¹ÑÌì•¹•É…°µ…ÑÉ¥à‘¥µ•¹Í¥½¹Ì…¹)½¹Ñ¥¹Õ½ÕÌ=¥‘•¹Ñ¥™¥…Ñ¥½¸…É”Í•Á…É…Ñ”µ¥±•ÍÑ½¹•Ì¸)Q¡”Ý½É­•¥¹¥Ñ•Q¡É••	åQ¡É••É…µ•Éá…µÁ±•€…‘‘ÌÑ¡”‘¥…½¹…°ÍåÍÑ•´)‘¥…œ È°Ì°Ð¥Ôô Ð°ä°ÄØ¥€è‘•Ñ•Éµ¥¹…¹Ð€ÈÑ€°¥¹Ù•ÉÍ”Ý¥Ñ¹•ÍÌ€Ä¼ÈÑ€°…¹•á…Ð)Í½±ÕÑ¥½¸€ È°Ì°Ð¥€…É”…±°¡•­•¸)Q¡”¹½¸µ‘¥…½¹…°€Ìµ‰ä´Ì¥¹ÍÑ…¹”Ý¥Ñ µ…ÑÉ¥àmlÈ°Ä°Át±lÀ°Ì°Åt±lÄ°À°Éuu€)…¹É¥¡Ðµ¡…¹Í¥‘”€ Ð°ä°Ü¥€¡…Ì‘•Ñ•Éµ¥¹…¹Ð€ÄÍ€ì1•…¸¡•­ÌÑ¡”¥¹Ù•ÉÍ”)Ý¥Ñ¹•ÍÌ€Ä¼ÄÍ€°É•½Ù•ÉÌ€ Ä°È°Ì¥€°…¹Ù•É¥™¥•ÌÑ¡”ÍåÍÑ•´Ñ¡É½Õ Ñ¡”)•¹•É¥ŒÉ…µ•ÈÍ½±Ù•È¸)Q¡”…‘‘¥Ñ¥½¹…°ÑÝ¼µ‰äµÑÝ¼Ý¥Ñ¹•ÍÌÕÍ•Ì)mlÌ°Ét±lÄ°Éut È°Ì¤ô ÄÈ°à¥€è¥ÑÌ‘•Ñ•Éµ¥¹…¹Ð¥Ì€Ñ€°…¹Ñ¡”É…µ•È)ÅÕ½Ñ¥•¹ÑÌÉ•½Ù•È€ È°Ì¥€•á…Ñ±ä¸)Q¡”Í¥¹•ÑÝ¼µ‰äµÑÝ¼Ý¥Ñ¹•ÍÌmlÄ°´Ét±lÌ°Ñut ÄØ¼Ô°´ä¼ÄÀ¤ô Ô°Ø¥€¡…Ì)‘•Ñ•Éµ¥¹…¹Ð€ÄÁ€ì1•…¸¡•­Ì‰½Ñ ¹½¹¥¹Ñ•É…°É…µ•ÈÅÕ½Ñ¥•¹ÑÌ…¹‘¥É•Ð)ÍÕ‰ÍÑ¥ÑÕÑ¥½¸¸€Q¡¥Ì•áÑ•¹‘Ì¥Ñ•´€äÜÌ™¥¹¥Ñ”É…Ñ¥½¹…°½Ù•É…”‰•å½¹)Á½Í¥Ñ¥Ù”µ¥¹Ñ•É…°•á…µÁ±•Ì¸((¨©	•¹¡µ…É¬¥Ñ•´€ÐäƒŠP™¥¹¥Ñ”…å±•ä´µ!…µ¥±Ñ½¸½É”¡•­•¸¨¨)Q¡”€ÍàÌµ…ÑÉ¥àµÁ½Ý•ÈÉ•ÕÉÉ•¹”¥Ì¹½Ü…±Í¼¡•­•™½È•Ù•Éä¹…ÑÕÉ…°ÍÑ…”)…¹•Ù•Éä•áÁ±¥¥Ñ±äÍÕÁÁ±¥•É…Ñ¥½¹…°µ…ÑÉ¥à¸%Ð¥Ì½‰Ñ…¥¹•‰äµÕ±Ñ¥Á±å¥¹œ)Ñ¡”™¥¹¥Ñ”€ÍàÌ…å±•ä´µ!…µ¥±Ñ½¸¥‘•¹Ñ¥Ñä‰ä„™¥¹¥Ñ”µ…ÑÉ¥àÁ½Ý•Èì…É‰¥ÑÉ…Éä)‘¥µ•¹Í¥½¹ÌÉ•µ…¥¸‘•™•ÉÉ•¸)1¥¹•…É=¹ÑÝ½	åQÝ½}…å±•å}¡…µ¥±Ñ½¹€ÁÉ½Ù•ÌÑ¡”…å±•ä´µ!…µ¥±Ñ½¸¥‘•¹Ñ¥Ñä™½È)…¸•áÁ±¥¥ÐÉ…Ñ¥½¹…°€ ÉqÑ¥µ•ÌÈ¤µ…ÑÉ¥à‰ä™¥¹¥Ñ”•¹ÑÉåÝ¥Í”…±Õ±…Ñ¥½¸¸)Q¡”™¥¹¥Ñ”!…Éµ½¹¥=Í¥±±…Ñ½È¹Ñ¡É••	åQ¡É••}…å±•å}¡…µ¥±Ñ½¹€•ÉÑ¥™¥…Ñ”¹½Ü)¡•­ÌÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ•áÁ±¥¥Ð€ ÍqÑ¥µ•ÌÌ¤¥‘•¹Ñ¥ÑäÕÍ¥¹œÑ¡”ÑÉ…”°Í•½¹)¡…É…Ñ•É¥ÍÑ¥Œ½•™™¥¥•¹Ð°…¹‘•Ñ•Éµ¥¹…¹Ð¸€Q¡”½µÁ…¹¥½¸)Q¡É••	åQ¡É••1¥¹•…É±•‰É„¹Ñ¡É••	åQ¡É••}É…µ•É}Í½±Ù•Í€¹½ÜÁ…­…•ÌÑ¡”)•áÁ±¥¥Ð€ ÍqÑ¥µ•ÌÌ¤É…µ•ÈÍ½±Ù”™É½´Ñ¡½Í”‘•Ñ•Éµ¥¹…¹Ð¹Õµ•É…Ñ½ÉÌÝ¡•¹•Ù•È…¸)¥¹Ù•ÉÍ”µ‘•Ñ•Éµ¥¹…¹ÐÝ¥Ñ¹•ÍÌ¥ÌÍÕÁÁ±¥•ì¥ÑÌ)Ñ¡É••	åQ¡É••}É…µ•É}Í½±Ù•Í}½™}‘•Ñ•Éµ¥¹…¹Ñ}¹•}é•É½€½É½±±…Éä½¹ÍÑÉÕÑÌÑ¡…Ð)Ý¥Ñ¹•ÍÌ…¹½¹¥…±±ä™É½´„¹½¹é•É¼‘•Ñ•Éµ¥¹…¹Ð¸)1¥¹•…É=¹É…Ñ5…ÑÉ¥á}ÑÝ½	åQÝ½}µ…ÑÉ¥áA½Ý}É•ÕÉÉ•¹•}Õ¹¥ÅÕ•€¹½Ü…‘‘ÌÑ¡”™¥¹¥Ñ”)Õ¹¥ÅÕ•¹•ÍÌ•ÉÑ¥™¥…Ñ”è…¹äÉ…Ñ¥½¹…°µ…ÑÉ¥àÍ•ÅÕ•¹”Ý¥Ñ Ñ¡”Í…µ”™¥ÉÍÐÑÝ¼)Ñ•ÉµÌ…¹Ñ¡”¥¹‘Õ•ÑÉ…”½‘•Ñ•Éµ¥¹…¹ÐÉ•ÕÉÉ•¹”…É••ÌÍÑ…”‰äÍÑ…”Ý¥Ñ )Ñ¡”µ…ÑÉ¥àµÁ½Ý•ÈÍ•ÅÕ•¹”¸É‰¥ÑÉ…Éä‘¥µ•¹Í¥½¹Ì…¹…¸…‰ÍÑÉ…Ð)¡…É…Ñ•É¥ÍÑ¥ŒµÁ½±å¹½µ¥…°¥¹Ñ•É™…”É•µ…¥¸‘•™•ÉÉ•¸)Q¡”¹•Ü½¹É•Ñ•½ÕÉ…å±•å•ÉÑ¥™¥…Ñ•€ÍÕÁÁ±¥•Ì„¡•­•€ÑàÐ‘¥…½¹…°)…¹¹¥¡¥±…Ñ½È™½È‘¥…œ Ä°È°Ì°Ð¥€Ý¥Ñ Á½±å¹½µ¥…°)áxÐ€´€ÄÀ©áxÌ€¬€ÌÔ©áxÈ€´€ÔÀ©à€¬€ÈÑ€¸Q¡¥Ì•áÑ•¹‘ÌÑ¡”™¥¹¥Ñ”µ‘¥µ•¹Í¥½¹…°)•á•É¥Í”Ý¥Ñ¡½ÕÐ¥¹ÑÉ½‘Õ¥¹œ„‘•Ñ•Éµ¥¹…¹Ð½¹ÍÑÉÕÑ¥½¸¸((´Q¡”™¥¹¥Ñ”¹½¹½µµÕÑ…Ñ¥Ù”½É”™½ÈA•…¹¼´µ	…­•È¥Ì¹½Ü¡•­•¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½A•…¹½	…­•È¹±•…¹€°Ý¥Ñ¡½ÕÐ5…Ñ¡±¥ˆ¸%Ð‘•™¥¹•Ì±½…°(€É…Ñ¥½¹…°Ù•Ñ½ÉÌ½µ…ÑÉ¥•Ì°•áÁ±¥¥Ð™¥¹¥Ñ”µ…ÑÉ¥àÍÕµÌ½ÁÉ½‘ÕÑÌ°Í…µÁ±•(€±¥¹•…ÈÉ•ÕÉÉ•¹•Ì°…¹Ñ¡”½É‘•É•µÝ½É•¹Õµ•É…Ñ½È(€1¥¹•…É=¹Á•…¹½	…­•É¥ÍÉ•Ñ•MÕµ€¸Q¡”•¹Õµ•É…Ñ½È¡…Ì•á…Ñ±ä€Éy9€Ñ•ÉµÌ(€…™Ñ•È9€Í…µÁ±•Ì€¡1¥¹•…É=¹½É‘•É•‘%¹‘•á]½É‘Í}±•¹Ñ¡€¤ì¥ÑÌÑÝ¼µÍÑ•À(€•áÁ…¹Í¥½¸½¹Ñ…¥¹Ì	|Ä€¨	|Á€°ÁÉ•Í•ÉÙ¥¹œ¡É½¹½±½ä¸(´1¥¹•…É=¹‘¥ÍÉ•Ñ•A•…¹½	…­•ÉáÁ…¹Í¥½¹€¹½ÜÁÉ½Ù•ÌÑ¡”ÁÕÉ•±äÉ…Ñ¥½¹…°(€…±•‰É„Ñ¡•½É•´•ÅÕ…Ñ¥¹œÑ¡…ÐÝ½ÉÍÕ´Ý¥Ñ (€€¡$€¬	|¡8´Ä¤¤€¨€¸¸¸€¨€¡$€¬	|À¥€¸%ÑÌÁÉ½½˜•ÍÑ…‰±¥Í¡•ÌÑ¡”±½…°µ…ÑÉ¥à(€¥‘•¹Ñ¥Ñä°‘¥ÍÑÉ¥‰ÕÑ¥Ù¥Ñä°…¹™¥¹¥Ñ”¥¹‘ÕÑ¥½¸‰•™½É”Ñ½Õ¡¥¹œ½¹Ù•É•¹”¸(´Q¡”Í…µ”™¥¹¥Ñ”±…å•È¹½Ü¥Ù•ÌÑ¡”¡½µ½•¹•½ÕÌ…Ñ¥½¸„½¹É•Ñ”ÑÉ…¹Í¥Ñ¥½¸(€µ…ÑÉ¥àè¡É½¹½±½¥…±MÑ•ÁAÉ½‘ÕÐL€À8€ôM|¡8´Ä¤€¨€¸¸¸€¨M|Á€°…¹(€¡½µ½•¹•½ÕÍQÉ…©•Ñ½Éå}•Å}¡É½¹½±½¥…±MÑ•ÁAÉ½‘ÕÑ€ÁÉ½Ù•ÌÑ¡…ÐÑ¡¥Ìµ…ÑÉ¥à(€…ÑÌ½¸Ñ¡”¥¹¥Ñ¥…°ÍÑ…Ñ”•á…Ñ±ä¸Q¡”Õ±•ÈÍÁ•¥…±¥é…Ñ¥½¸(€¡É½¹½±½¥…±MÑ•ÁAÉ½‘ÕÑ}•Õ±•É%¹É•µ•¹Ñ€¥ÌÑ¡”…±É•…‘äµ¡•­•(€A•…¹¼´µ	…­•È¡É½¹½±½¥…°ÁÉ½‘ÕÐ¸Q¡”ÍÑÉ•¹Ñ¡•¹•Í…µÁ±•(€Ù…É¥…Ñ¥½¸µ½˜µ½¹ÍÑ…¹ÑÌÑ¡•½É•´(€¥ÍÉ•Ñ•1¥¹•…ÉMåÍÑ•´¹ÑÉ…©•Ñ½Éå}•Å}ÑÉ…¹Í¥Ñ¥½¹}…‘‘}‘Õ¡…µ•±MÕ´¹½ÜÍÁ±¥ÑÌ(€…¸¥¹¡½µ½•¹•½ÕÌÑÉ…©•Ñ½Éä¥¹Ñ¼Ñ¡…Ð™¥¹¥Ñ”ÑÉ…¹Í¥Ñ¥½¸½˜¥ÑÌ¥¹¥Ñ¥…°ÍÑ…Ñ”(€…¹Ñ¡”±¥Ñ•É…°Ñ¥µ”µ½É‘•É•™½É¥¹œÍÕ´(€ÍÕµ|¡¬ñ8¤M|¡8´Ä¤€¨€¸¸¸€¨M|¡¬¬Ä¤€¨}¬¸(€ÑÉ…©•Ñ½Éå}é•É½%¹¥Ñ¥…±}•Å}‘Õ¡…µ•±MÕ´Í•Á…É…Ñ•±ä¥‘•¹Ñ¥™¥•ÌÑ¡”±…ÑÑ•È(€Ý¥Ñ Ñ¡”É•ÕÉÍ¥Ù”é•É¼µ¥¹¥Ñ¥…°É•ÍÁ½¹Í”¸½É¥¹i•É¼µ…­•ÌÑ¡…ÐÉ•ÍÁ½¹Í”(€Ù…¹¥Í ¸¡É½¹½±½¥…±MÑ•ÁAÉ½‘ÕÑ}ÍÁ±¥Ñ€…‘‘¥Ñ¥½¹…±±äÁÉ½Ù•ÌÑ¡”(€Ñ¥µ”µÍ¡¥™Ñ•™¥¹¥Ñ”Í•µ¥É½ÕÀ±…Ü(€P¡Ì±´­¸¤€ôP¡Ì­´±¸¤€¨P¡Ì±´¥€°Ñ¡”•á…ÐÍ…µÁ±•ÁÉ•‘••ÍÍ½È½˜Ñ¡”(€½¹Ñ¥¹Õ½ÕÌÍÑ…Ñ”µÑÉ…¹Í¥Ñ¥½¸½µÁ½Í¥Ñ¥½¸±…Ü¸(€Q¡”¹•ÜM½±Ù•ÍI•ÕÉÉ•¹•€…¹M½±Ù•Í!½µ½•¹•½ÕÍI•ÕÉÉ•¹•€Ý¥Ñ¹•ÍÍ•Ì(€Í•Á…É…Ñ”Ñ¡”É•ÕÉÉ•¹”ÍÁ•¥™¥…Ñ¥½¸™É½´¥ÑÌÉ•ÕÉÍ¥Ù”•Ù…±Õ…Ñ½È¸(€Í½±Ù•ÍI•ÕÉÉ•¹•}•Å}ÑÉ…©•Ñ½Éå€ÁÉ½Ù•Ì•Ù•ÉäÍ…µÁ±•…¹‘¥‘…Ñ”¥ÌÑ¡”(€Õ¹¥ÅÕ”ÑÉ…©•Ñ½Éä°…¹Í½±Ù•Í!½µ½•¹•½ÕÍI•ÕÉÉ•¹•}é•É½€ÁÉ½Ù•ÌÑ¡”(€é•É¼µ¥¹¥Ñ¥…°¡½µ½•¹•½ÕÌ…¹‘¥‘…Ñ”¥Ì¥‘•¹Ñ¥…±±äé•É¼¸Q¡¥Ì¥ÌÑ¡”(€•á…Ð‘¥ÍÉ•Ñ”Í••™½ÈÑ¡”±…Ñ•È™…Ñ½É¥…°µÑ…¥°Õ¹¥ÅÕ•¹•ÍÌ•ÍÑ¥µ…Ñ”¸(€1¥¹•…É=¹!…Éµ½¹¥=Í¥±±…Ñ½É€¹½Ü¥¹ÍÑ…¹Ñ¥…Ñ•ÌÑ¡…Ð•¹•É¥ŒÍåÍÑ•´™½È(€Äœœ€¬½µ•…xÈÄ€ôÉ€è•Õ±•ÉMÑ•Á}Á½Í¥Ñ¥½¹€…¹•Õ±•ÉMÑ•Á}Ù•±½¥Ñå€(€¥Ù”Ñ¡”ÑÝ¼½½É‘¥¹…Ñ”ÕÁ‘…Ñ•Ì°…¹(€ÑÉ…©•Ñ½Éå}Á½Í¥Ñ¥½¹}Í•½¹‘¥™™•É•¹•€•±¥µ¥¹…Ñ•ÌÙ•±½¥ÑäÑ¼ÁÉ½Ù”Ñ¡”(€•á…ÐÍ…±…ÈÕ±•ÈÉ•ÕÉÉ•¹”¸Q¡¥Ì¥ÌÑ¡”¡•­•™¥¹¥Ñ”‰É¥‘”™É½´Ñ¡”(€¡…ÁÑ•ÈÌ™…µ¥±¥…ÈÍ•½¹µ½É‘•Èµ½‘•°Ñ¼•¹•É…°Ù•Ñ½ÈµÙ…±Õ•(€¥¹¡½µ½•¹•½ÕÌA•…¹¼´µ	…­•Èì¥Ð¥Ì¹½Ð„½¹Ñ¥¹Õ½ÕÌ½¹Ù•É•¹”Ñ¡•½É•´¸(€½¹ÍÑ…¹Ð¥¹É•µ•¹ÑÌ…É”¡•­••á…Ñ±ä‰ä(€¡É½¹½±½¥…±AÉ½‘ÕÑ}½¹ÍÑ…¹Ñ€…¹Á•…¹½	…­•É¥ÍÉ•Ñ•MÕµ}½¹ÍÑ…¹Ñ€°¥Ù¥¹œ(€€¡$€¬¥y9€ìÁ•…¹½	…­•É¥ÍÉ•Ñ•MÕµ}é•É½½•™™¥¥•¹Ñ€ÍÕÁÁ±¥•ÌÑ¡”é•É¼(€½•™™¥¥•¹Ð¥‘•¹Ñ¥Ñä…Í”¸Q¡”¹•ÜA…¥ÉÝ¥Í•AÉ½‘ÕÑi•É½€ÍÁ•¥…±¥é…Ñ¥½¸¥Ì(€„ÁÉ½Ù•™¥¹¥Ñ”¹¥±Á½Ñ•¹Ð…Í”èÝ¡•¸•Ù•Éä	}¤€¨	}©€¥Ìé•É¼°(€¡É½¹½±½¥…±AÉ½‘ÕÑ}Á…¥ÉÝ¥Í•AÉ½‘ÕÑi•É½€…¹(€Á•…¹½	…­•É¥ÍÉ•Ñ•MÕµ}Á…¥ÉÝ¥Í•AÉ½‘ÕÑi•É½€½±±…ÁÍ”Ñ¡”•á…ÐÑÉ…¹Í¥Ñ¥½¸(€Ñ¼$€¬µ…ÑÉ¥áM•ÅÕ•¹•MÕ´9€¸(€Q¡”½¹ÍÑ…¹Ðµ½•™™¥¥•¹ÐÉ½Ñ…Ñ¥½¸ÍÁ•¥…±¥é…Ñ¥½¸¥Ì¹½Ü¡•­•…ÌÝ•±°è(€1¥¹•…É=¹I½Ñ…Ñ¥½¹MåÍÑ•´¹•¹•É…Ñ½É}ÍÅÕ…É•€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”É…Ñ¥½¹…°(€ÅÕ…ÉÑ•ÈµÑÕÉ¸µ…ÑÉ¥àÍÅÕ…É•ÌÑ¼€µ%€°Ý¡¥±”•¹•É…Ñ½É}Á½Ý}•Ù•¹€°(€•¹•É…Ñ½É}Á½Ý}½‘‘€°Í¥µÁ±•áQ•Éµ}•Ù•¹€°…¹Í¥µÁ±•áQ•Éµ}½‘‘€ÁÕÐ•Ù•Éä(€™¥¹¥Ñ”A•…¹¼´µ	…­•È½•™™¥¥•¹Ð¥¹Ñ¼¥ÑÌ…±Ñ•É¹…Ñ¥¹œ½Í¥¹”µÑåÁ”½È(€Í¥¹”µÑåÁ”™½É´¸Q¡¥Ì¥Ì„™¥¹¥Ñ”…±•‰É…¥ŒÁÉ•ÕÉÍ½È½˜Ñ¡”¥¹Ñ•¹‘•Õ±•È(€¥‘•¹Ñ¥Ñä°¹½Ð„½¹Ñ¥¹Õ½ÕÌÍ•É¥•Ì½È=µ¥‘•¹Ñ¥™¥…Ñ¥½¸Ñ¡•½É•´¸(´Q¡”±½…°µ…ÑÉ¥àÁÉ½‘ÕÐ¥Ì¹½ÜÁÉ½Ù•…ÍÍ½¥…Ñ¥Ù”‰ä„™¥¹¥Ñ”‘½Õ‰±”µÍÕ´(€¥¹Ñ•É¡…¹”€¡µ…ÑÉ¥á5Õ±}…ÍÍ½€¤¸½¹Í•ÅÕ•¹Ñ±ä(€¡É½¹½±½¥…±AÉ½‘ÕÑ}ÍÁ±¥Ñ€ÁÉ½Ù•ÌÑ¡”•á…Ð¡É½¹½±½¥…°½µÁ½Í¥Ñ¥½¸±…Ü(€…É½ÍÌ…‘©…•¹ÐÍ…µÁ±•¥¹Ñ•ÉÙ…±Ì¸A…¥ÉÝ¥Í•½µµÕÑ¥¹€…¹(€µ…ÑÉ¥á5Õ±}½µµÕÑ•Í}¡É½¹½±½¥…±AÉ½‘ÕÑ€ÍÕÁÁ±äÑ¡”™¥¹¥Ñ”É•½É‘•É¥¹œ(€±•µµ„™½È½µµÕÑ¥¹œÍ…µÁ±•Ì¸Q¡¥Ì¥ÌÑ¡”…±•‰É…¥ŒÁÉ•É•ÅÕ¥Í¥Ñ”™½ÈÑ¡”(€±…Ñ•È½µµÕÑ¥¹œµ•áÁ½¹•¹Ñ¥…°™½ÉµÕ±„°¹½Ð„±…¥´Ñ¡…ÐÑ¡”½¹Ñ¥¹Õ½ÕÌ(€™½ÉµÕ±„¡…Ì…±É•…‘ä‰••¸½¹ÍÑÉÕÑ•¸(´Q¡”½¹Ñ¥¹Õ½ÕÌ¥¹ÁÕÐ¥Ì1¥¹•…É=¹%¹Ñ•ÉÙ…±1¥¹•…ÉMåÍÑ•µ€°Ý¡½Í”Í…±…È(€•¹ÑÉ¥•Ì…É”•á¥ÍÑ¥¹œÕ¹Ñ¥½¹=¹%¹Ñ•ÉÙ…±Ì½¸„½µµ½¸É…Ñ¥½¹…°Ñ¥µ”(€¥¹Ñ•ÉÙ…°¸½•™™¥¥•¹ÑÍI•Õ±…É€…Í­Ì™½ÈÍÕÁÁ±¥•½µÁ½¹•¹ÑÝ¥Í”(€%¹Ñ•ÉÙ…±I•Õ±…É=¹€Ý¥Ñ¹•ÍÍ•Ìì¥Ð‘½•Ì¹½Ð…ÍÍÕµ”„½µÁ±•Ñ•µÉ•…°(€™Õ¹Ñ¥½¸ÍÁ…”¸(´Q¡”‰±Õ•ÁÉ¥¹Ð¹½Ü™¥á•ÌÑ¡”Ù•Ñ½È¡…ÁÑ•ÈÌÁÉ½½˜‘¥É•Ñ¥½¸èÍÑ…ÉÐ™É½´Ñ¡”(€™½É•Í•½¹µ½É‘•È½Í¥±±…Ñ½È°ÑÕÉ¸¥Ð¥¹Ñ¼Ñ¡”•¹•É…°…™™¥¹”Ù•Ñ½È(€•ÅÕ…Ñ¥½¸àœ€ô¡Ð¥à€¬ˆ¡Ð¥€°½¹ÍÑÉÕÐA•…¹¼´µ	…­•ÈÁ±ÕÌÕ¡…µ•°‰½á•Ì™½È(€Ñ¡…Ð•¹•É…°ÁÉ½‰±•´°…¹ÁÉ½Ù”Õ¹¥ÅÕ•¹•ÍÌ‰ä¥Ñ•É…Ñ¥¹œÑ¡”é•É¼µ¥¹¥Ñ¥…°(€Y½±Ñ•ÉÉ„¥‘•¹Ñ¥ÑäÕ¹Ñ¥°Ñ¡”™…Ñ½É¥…°•ÍÑ¥µ…Ñ”¥Ì‰•±½Ü…¸…É‰¥ÑÉ…Éä(€É…Ñ¥½¹…°Ñ½±•É…¹”¸Q¡¥ÌÉ•½Ù•ÉÌÍ¥¹”½½Í¥¹”…¹Ñ¡”Ù•Ñ½ÈÉ½Ñ…Ñ¥½¸(€É½ÕÑ”¸M…±…Èœ€ô€° À¤€ô€Å€ÕÍ•Ì‘¥É•Ðµ•Í ½¹ÑÉ…Ñ¥½¸¥¹ÍÑ•…ì(€…™Ñ•È¥ÑÌÁÉ•Í•¹Ñ…Ñ¥½¸µ…É••µ•¹ÐÑ¡•½É•´°Ñ¡”Á½Í¥Ñ¥Ù”¥¹Ù•ÉÍ”¥ÌÑ¡”(€…¹½¹¥…°±½…É¥Ñ¡´ÕÍ•‰äÑ¡”±½¹œ…ÉÑ…¹•¹Ð¥¹Ñ•É…Ñ¥½¸µ‰äµÁ…ÉÑÌA¤(€É½ÕÑ”¸Q¡•Í”…É”¹…µ•‘•Á•¹‘•¹ä¡…¥¹Ì°¹½Ð•áÑÉ„A¤µÍ½É•‰½…ÉÉ½ÝÌ¸(´9•áÐ…¹…±åÑ¥ŒÑ…É•Ðè‰Õ¥±¥¹Ñ•ÉÙ…°µ…ÑÉ¥•Ì™½È½É‘•É•µÍ¥µÁ±•à(€A•…¹¼´µ	…­•ÈÑ•ÉµÌ°ÁÉ½Ù”„™…Ñ½É¥…°Ñ…¥°•¹±½ÍÕÉ”™É½´„É…Ñ¥½¹…°(€½•™™¥¥•¹Ð‰½Õ¹°…¹½‰Ñ…¥¸ÍÑ…Ñ”µÑÉ…¹Í¥Ñ¥½¸…¹Ù…É¥…Ñ¥½¸µ½˜µ½¹ÍÑ…¹ÑÌ(€™½ÉµÕ±…Ì™½Èàœ€ô¡Ð¥à€¬ˆ¡Ð¥€¸Q½•Ñ¡•ÈÑ¡•Í”…É”Ñ¡”•™™•Ñ¥Ù”±¥¹•…È(€A¥…É´µ1¥¹‘•³Ù˜Ñ¡•½É•´èÑ¡”é•É¼µ¥¹¥Ñ¥…°¡½µ½•¹•½ÕÌ…Í”¥Ù•Ì(€Õ¹¥ÅÕ•¹•ÍÌ°…¹Ñ¡”™…Ñ½É¥…°Ñ…¥°¥ÌÑ¡”•áÁ±¥¥ÐÍ½±ÕÑ¥½¸µ½‘Õ±ÕÌ¸Q¡”(€¹•áÐÍÁ•¥…±¥é…Ñ¥½¹Ì…É”Ñ¡”…¹…±åÑ¥Œ½µµÕÑ¥¹œµ•áÁ½¹•¹Ñ¥…°¥‘•¹Ñ¥™¥…Ñ¥½¸°(€Í…±…È…¹Á¥••Ý¥Í”µ½¹ÍÑ…¹ÐÍåÍÑ•µÌ°…¹¡¥¡•Èµ½É‘•È(€¹¥±Á½Ñ•¹Ð½ÑÉ¥…¹Õ±…ÈÍåÍÑ•µÌ¸Q¡”Í…±…È˜œõ™€•áÁ½¹•¹Ñ¥…°É½ÕÑ”¥Ì(€…±É•…‘äÍÁ•¥™¥•Í•Á…É…Ñ•±ä‰ä‘¥É•Ðµ•Í ½¹ÑÉ…Ñ¥½¸¸¡…ÁÑ•È1¥¹•…È(€¥™™•É•¹Ñ¥…°ÅÕ…Ñ¥½¹Í€¥Ù•ÌÑ¡”Ù•Ñ½È•ÉÑ¥™¥…Ñ”Á±…¸¸((ŒŒ±•µ•¹Ñ…ÉäÕ¹Ñ¥½¸½Ù•É…”()Q¡”±¥‰É…ÉäÍ¡½Õ±ÕÍ”™…µ¥±¥…È™Õ¹Ñ¥½¹Ì…Ì•á…µÁ±•Ì…¹É•É•ÍÍ¥½¸Ñ•ÍÑÌ™½È)Ñ¡”™½ÉµÕ±…Ñ¥½¸¸€… •¹ÑÉäÍ¡½Õ±•Ù•¹ÑÕ…±±ä¡…Ù”„É…Ü…±½É¥Ñ¡´°„‘½µ…¥¸)•ÉÑ¥™¥…Ñ”Ý¡•¸Á…ÉÑ¥…°°…¹•¹½Õ …±Õ±ÕÌ™…ÑÌÑ¼Á…ÉÑ¥¥Á…Ñ”¥¸Q½Q)…ÉÕµ•¹ÑÌ¸((´±•‰É…¥ŒèÁ½±å¹½µ¥…±Ì°É…Ñ¥½¹…°™Õ¹Ñ¥½¹ÌÝ¥Ñ ‘½µ…¥¸•ÉÑ¥™¥…Ñ•Ì°ÍÅÕ…É”(€É½½ÑÌ°…¹…±•‰É…¥Œ™Õ¹Ñ¥½¹Ì¸(´A½Ý•ÈµÍ•É¥•Ì™…µ¥±¥•Ìè•áÁ½¹•¹Ñ¥…°°Í¥¹”°½Í¥¹”°¡åÁ•É‰½±¥ŒÍ¥¹”½½Í¥¹”°(€…¹±…Ñ•È™Õ¹Ñ¥½¹Ì½‰Ñ…¥¹•™É½´Ñ¡•Í”‰ä…±•‰É…¥Œ½Á•É…Ñ¥½¹Ì…¹(€½µÁ½Í¥Ñ¥½¸¸(´%¹Ù•ÉÍ”½¥¹Ñ•É…°™…µ¥±¥•Ìè±½…É¥Ñ¡´°…ÉÑ…¹•¹Ð°…ÉÍ¥¹”°…¹‰É…¹ µ‰…Í•(€¥¹Ù•ÉÍ”ÑÉ¥œ½¡åÁ•É‰½±¥Œ™Õ¹Ñ¥½¹Ì¸(´MÑ…¹‘…É…±Õ±ÕÌ½Í¥•¹”•á…µÁ±•ÌèÑ…¹•¹Ð½Í•…¹Ð½¸•ÉÑ¥™¥•‘½µ…¥¹Ì°(€Á½±…È…¹½µÁ±•à•áÁ½¹•¹Ñ¥…°¥‘•¹Ñ¥Ñ¥•Ì°…¹ÍÁ•¥…°™Õ¹Ñ¥½¹ÌÑ¡…Ð…É”(€¹…ÑÕÉ…±±ä‘•™¥¹•‰ä•™™•Ñ¥Ù”Á½Ý•ÈÍ•É¥•Ì½È•™™•Ñ¥Ù”¥¹Ñ•É…±Ì¸(´½µÁ±•àÁ…Ñ ¥¹Ñ•É…±Ì¹½Ü¡…Ù”„™¥ÉÍÐÁ½±å½¹…°™¥¹¥Ñ”µÍÕ´±…å•Èè(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Í•µ•¹Ñ1•™ÑMÕµ€¥¹Ñ•É…Ñ•Ì„½µÁ±•àÕ¹Ñ¥½¹I…Ý€…±½¹œ(€½¹”É…Ñ¥½¹…°Í•µ•¹Ð°…¹½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±1•™ÑMÕµ¹Ñ¥É•€(€ÍÕµÌ½Ù•È½¹Í•ÕÑ¥Ù”Ù•ÉÑ¥•Ì½˜„Á½±å½¹…°Á…Ñ ¸€Q¡”ÝÉ…ÁÁ•È(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±%¹Ñ•É…±I…Ý¹Ñ¥É•€Á…­…•ÌÑ¡•Í”™¥¹¥Ñ”ÍÕµÌ(€…Ì„½µÁ±•áI…Ý€…±½É¥Ñ¡´¸€Q¡”ÕÉÉ•¹Ð…Õ¡äÍ…¹¥Ñä¡•­Ì¥¹Ñ•É…Ñ”(€éxÉ€…¹éxÌ€¬€Éé€…É½Õ¹Ñ¡”Õ¹¥ÐÍÅÕ…É”…¹¡•¬½Ù•É±…ÀÝ¥Ñ é•É¼…Ð(€ÍÑ…•Ì€ÄÁ€°€ÄÀÁ€°…¹€ÄÀÀÁ€¸€Q¡”¹•Ü(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹A½±å½¹…±%¹Ñ•É…±•ÉÑ¥™¥…Ñ•€…¹(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±%¹Ñ•É…±I…Ý¹Ñ¥É•}Ù…±¥‘€µ…­”Ñ¡”Ù…±¥‘¥Ñä(€‰½Õ¹‘…Éä•áÁ±¥¥Ðè½É‘•É•‰½á•Ì°ÍÑ…”¹•ÍÑ¥¹œ°…¹Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥Ñä(€Ý¥‘Ñ Í¡É¥¹­…”µÕÍÐ‰”ÍÕÁÁ±¥•…Ì™¥¹¥Ñ”•ÉÑ¥™¥…Ñ•Ì‰•™½É”Ñ¡”É…Ü(€…±½É¥Ñ¡´¥ÌÁÉ½µ½Ñ•Ñ¼„Ù…±¥É•ÁÉ•Í•¹Ñ•½µÁ±•à¹Õµ‰•È¸(€Q¡”™¥¹¥Ñ”‘¥ÍÁ±…•µ•¹Ð¥‘•¹Ñ¥Ñ¥•Ì(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±¥ÍÁ±…•µ•¹ÑQ½}…ÁÁ•¹‘}•¹‘Á½¥¹Ñ€…¹(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±¥ÍÁ±…•µ•¹ÑQ½}±½Í•‘€¹½ÜÁÉ½Ù¥‘”Ñ¡”•á…Ð(€•¹‘Á½¥¹Ðµ…¹•±±…Ñ¥½¸Í••™½È±½Í•Á½±å½¹…°Á…Ñ¡Ì°ÍÑ¥±°•¹Ñ¥É•±ä¥¸(€É…Ñ¥½¹…°½µÁ±•à…É¥Ñ¡µ•Ñ¥Œ¸(€Q¡”½¹ÍÑ…¹Ðµ‘¥™™•É•¹Ñ¥…°±¥™Ð(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±½¹ÍÑ…¹Ñ¥™™•É•¹Ñ¥…±¥ÍÁ±…•µ•¹Ñ}…ÁÁ•¹‘}•¹‘Á½¥¹Ñ€(€¥‘•¹Ñ¥™¥•ÌÑ¡”™¥¹¥Ñ”ÁÉ¥µ¥Ñ¥Ù”Ù…±Õ”Œ€¨€¡é}•¹€´é}ÍÑ…ÉÐ¥€°…¹(€Á½±å½¹…±½¹ÍÑ…¹Ñ¥™™•É•¹Ñ¥…±¥ÍÁ±…•µ•¹Ñ}±½Í•‘€ÁÉ½Ù•Ì¥ÑÌ±½Í•µÁ…Ñ (€…¹•±±…Ñ¥½¸•á…Ñ±ä¸(€Q¡”ÅÕ…‘É…Ñ¥ŒÁÉ¥µ¥Ñ¥Ù”±…å•È(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±EÕ…‘É…Ñ¥AÉ¥µ¥Ñ¥Ù•Q½}…ÁÁ•¹‘}•¹‘Á½¥¹Ñ€…¹(€Á½±å½¹…±EÕ…‘É…Ñ¥AÉ¥µ¥Ñ¥Ù•Q½}±½Í•‘€•áÑ•¹‘ÌÑ¡¥ÌÑ¼Ñ¡”Á½±å¹½µ¥…°(€‘¥™™•É•¹Ñ¥…°è‘é€°Ý¡½Í”ÁÉ¥µ¥Ñ¥Ù”¥ÌéxÈ€¼€É€°ÕÍ¥¹œ½¹±ä™¥¹¥Ñ”(€É…Ñ¥½¹…°µ½µÁ±•à¥‘•¹Ñ¥Ñ¥•Ì¸(€Q¡”•¹•É…°™¥¹¥Ñ”µ½¹½µ¥…°•áÑ•¹Í¥½¸(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å½¹…±5½¹½µ¥…±AÉ¥µ¥Ñ¥Ù•Q½}…ÁÁ•¹‘}•¹‘Á½¥¹Ñ€…¹(€Á½±å½¹…±5½¹½µ¥…±AÉ¥µ¥Ñ¥Ù•Q½}±½Í•‘€½Ù•ÉÌéy¸‘é€Ý¥Ñ Ñ¡”•á•ÕÑ…‰±”(€¹…ÑÕÉ…°Á½Ý•È…¹ÁÉ¥µ¥Ñ¥Ù”éx¡¸¬Ä¤¼¡¸¬Ä¥€¸Q¡¥Ì¥Ì…¸…±•‰É…¥Œ™¥¹¥Ñ”(€Í¡•µ„°¹½Ð„±…¥´…‰½ÕÐ…¸¥¹™¥¹¥Ñ”…¹…±åÑ¥ŒÁ½Ý•È™Õ¹Ñ¥½¸¸(€Q¡”½•™™¥¥•¹Ðµ±¥ÍÐ•Ù…±Õ…Ñ½È(€½µÁ±•áA…Ñ¡%¹Ñ•É…°¹Á½±å¹½µ¥…±AÉ¥µ¥Ñ¥Ù•Ù…±€…¹¥ÑÌÁ…Ñ ™½±(€Á½±å½¹…±A½±å¹½µ¥…±AÉ¥µ¥Ñ¥Ù•Q½€¹½ÜÁ…­…”Ñ¡”Í…µ”•¹‘Á½¥¹Ð…¹•±±…Ñ¥½¸(€™½È•Ù•Éä™¥¹¥Ñ”É…Ñ¥½¹…°µ½µÁ±•àÁ½±å¹½µ¥…°ÁÉ¥µ¥Ñ¥Ù”¸((ŒŒ±•‰É…¥Œ9Õµ‰•ÉÌ…¹Q((¨©	•¹¡µ…É¬¥Ñ•´€àäƒŠP±¥¹•…È™…Ñ½È½É•µ…¥¹‘•È‰…Í”…Í”¡•­•¸¨¨)Q¡”Ý½É­•¥¹¥Ñ•I•µ…¥¹‘•Éá…µÁ±•€•Ù…±Õ…Ñ•ÌáxÈ´Íà¬É€…ÐÑ¡”ÍÕÁÁ±¥•É½½Ð)€Å€…¹Í…µÁ±”Á½¥¹Ð€Ñ€°¡•­¥¹œÑ¡”•á…ÐÙ…±Õ”€Ù€Ñ¡É½Õ Ñ¡”ÅÕ…‘É…Ñ¥Œ)™…Ñ½È¥‘•¹Ñ¥Ñä¸)%ÑÌÍ¥¹•½µÁ…¹¥½¸•Ù…±Õ…Ñ•ÌáxÈ¬Íà¬É€…ÐÉ½½Ð€´Å€…¹Í…µÁ±”Á½¥¹Ð€´Ñ€°)……¥¸½‰Ñ…¥¹¥¹œ€Ù€‰äÑ¡”•á…Ð™…Ñ½È¥‘•¹Ñ¥Ñä¸Q¡¥Ì•áÑ•¹‘Ì¥Ñ•´€àäÌ)Ý½É­•É…Ñ¥½¹…°½Ù•É…”…É½ÍÌ¹•…Ñ¥Ù”¥¹ÁÕÑÌ¸)A½±å¹½µ¥…°¹±¥¹•…É}É•µ…¥¹‘•É€°A½±å¹½µ¥…°¹±¥¹•…É}™…Ñ½É}½™}É½½Ñ€°)…¹A½±å¹½µ¥…°¹±¥¹•…É}É½½Ñ}¥™™}½¹ÍÑ…¹Ñ}•Å}¹•}µÕ±€)A½±å¹½µ¥…°¹ÅÕ…‘É…Ñ¥}É•µ…¥¹‘•É€°…¹)A½±å¹½µ¥…°¹ÅÕ…‘É…Ñ¥}™…Ñ½É}½™}É½½Ñ€ÁÉ½Ù¥‘”•á…ÐÉ…Ñ¥½¹…°‘•É•”µ½¹”…¹)‘•É•”µÑÝ¼‰…Í”…Í•Ì¸Q¡”Õ‰¥ŒÉ•µ…¥¹‘•È½™…Ñ½ÈÁ…¥È)A½±å¹½µ¥…°¹Õ‰¥}É•µ…¥¹‘•É€½A½±å¹½µ¥…°¹Õ‰¥}™…Ñ½É}½™}É½½Ñ€ÍÕÁÁ±¥•ÌÑ¡”)É…Ñ¥½¹…°µÉ½½ÐÉ•‘ÕÑ¥½¸ÍÑ•À™½È‰•¹¡µ…É¬¥Ñ•´€ÌÜ¸Q¡”Ý½É­•¥‘•¹Ñ¥Ñä)A½±å¹½µ¥…°¹Õ‰¥}•á…µÁ±•}™…Ñ½É¥é…Ñ¥½¹€…¹¥ÑÌ¡•­•É½½ÑÌ)A½±å¹½µ¥…°¹Õ‰¥}•á…µÁ±•}É½½ÑÍ€ÁÉ½Ù¥‘”…¸•áÁ±¥¥ÐÉ…Ñ¥½¹…°Õ‰¥ŒÍ½±ÕÑ¥½¸)•á…µÁ±”Ý¥Ñ¡¥¸Ñ¡…Ð‰½Õ¹‘…Éä°Ý¡¥±”A½±å¹½µ¥…°¹Õ‰¥}•á…µÁ±•}É½½Ñ}¥™™€)¡•­ÌÑ¡…ÐÑ¡•Í”…É”…±°½˜¥ÑÌÉ…Ñ¥½¹…°É½½ÑÌ¸5½É”•¹•É…±±ä°)É…Ñ¥½¹…±Õ‰¥A½±å¹½µ¥…±€…¹É…Ñ¥½¹…±Õ‰¥}¡…Í}½µÁÕÑ…‰±•}É½½ÑÍ€¹½ÜÁ…­…”)Ñ¡”Ñ¡É•”µÉ½½Ð™…Ñ½É¥é•Õ‰¥Œ¥¹Ñ•É™…”¥¸Ñ¡”Q±…å•È…ÌÝ•±°¸)Q¡”¹…µ•½µÁ±•à™…Ñ½É¥é…Ñ¥½¸¹½Ü…±Í¼¡…ÌÑ¡”•á…ÐÉ½½ÐµÍ•ÐÑ¡•½É•´)™…Ñ½É¥é•‘Õ‰¥A½±å¹½µ¥…±}•Ù…±}•Å}é•É½}¥™™€è„é•É¼¥ÌÁÉ•¥Í•±ä½¹”½˜Ñ¡”)Ñ¡É•”ÍÕÁÁ±¥•É…Ñ¥½¹…°µ½µÁ±•àÉ½½ÑÌ¸€Q¡¥Ì¥Ì„™¥¹¥Ñ”•á±ÕÍ¥½¸•ÉÑ¥™¥…Ñ”)™½ÈÑ¡”Õ‰¥Œ½É”½˜¥Ñ•´€ÌÜ°¹½Ð„•¹•É…°Õ‰¥Œ™½ÉµÕ±„¸)Q¡”ÁÕ‰±¥Œ•á…ÐµÉ½½Ð™½É´™…Ñ½É¥é•‘Õ‰¥A½±å¹½µ¥…±}¡…Íá…ÑI½½Ñ}¥™™€•áÁ½Í•Ì)Ñ¡”Í…µ”Ñ¡É•”µÝ…ä¡…É…Ñ•É¥é…Ñ¥½¸Ý¥Ñ¡½ÕÐÉ•ÅÕ¥É¥¹œ±¥•¹ÑÌÑ¼Õ¹™½±)•Ù…±Õ…Ñ¥½¸¸)Q¡”¹•ÜA½±å¹½µ¥…°¹ÅÕ…‘É…Ñ¥}•Ù…±}É½½Ñ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€…¹)A½±å¹½µ¥…°¹Õ‰¥}½µÁ±•Ñ¥½¹}É½½ÑÍ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€Ñ¡•½É•µÌ½µÁ±•Ñ”Ñ¡”)™¥¹¥Ñ”ÍÕÁÁ±¥•µÉ½½ÐÕ‰¥Œ‰½Õ¹‘…Éäè„É…Ñ¥½¹…°‘¥ÍÉ¥µ¥¹…¹ÐÍÅÕ…É”Ý¥Ñ¹•ÍÌ)ÁÉ½‘Õ•Ì‰½Ñ É•µ…¥¹¥¹œÉ…Ñ¥½¹…°É½½ÑÌ¸Q¡”½¹ÍÑÉÕÑ¥½¸½˜Ñ¡”¥¹¥Ñ¥…°É½½Ð)½ÈÍÅÕ…É”Ý¥Ñ¹•ÍÌÉ•µ…¥¹ÌÍ•Á…É…Ñ”…±½É¥Ñ¡µ¥ŒÝ½É¬¸)Õ‰¥I½½Ñ]¥Ñ¹•ÍÍ•ÉÑ¥™¥…Ñ•€¹½ÜÁ…­…•ÌÑ¡”ÍÕÁÁ±¥•µÉ½½ÐÙ•ÉÍ¥½¸¥¸½¹”)É•ÕÍ…‰±”ÍÑÉÕÑÕÉ”èÑ¡É•”•á…ÐÉ½½ÑÌÁ±ÕÌ„™¥¹¥Ñ”‘•™±…Ñ¥½¸¡…¥¸å¥•±)Ñ¡É•”½µÁÕÑ…‰±”µÉ½½Ð•ÉÑ¥™¥…Ñ•Ì…¹Ñ¡”½µÁ±•Ñ”!½É¹•È™…Ñ½É¥é…Ñ¥½¸¸)Q¡¥ÌÍÑÉ•¹Ñ¡•¹Ì¥Ñ•´€ÌÜÌ™¥¹¥Ñ”Õ‰¥Œ¥¹Ñ•É™…”Ý¥Ñ¡½ÕÐ±…¥µ¥¹œ„•¹•É…°)Õ‰¥Œ™½ÉµÕ±„½È…É‰¥ÑÉ…ÉäÉ½½Ð•á¥ÍÑ•¹”¸)Q¡”Ý½É­•¥¹¥Ñ•Õ‰¥½µÁ±•Ñ¥½¹á…µÁ±•€¹½Ü¥¹ÍÑ…¹Ñ¥…Ñ•ÌÑ¡…Ð‰½Õ¹‘…Éä™½È)áxÌ€´€ÙáxÈ€¬€ÄÅà€´€Ù€èÝ¥Ñ ÍÕÁÁ±¥•É½½Ð€Å€…¹‘¥ÍÉ¥µ¥¹…¹ÐÍÅÕ…É”)Ý¥Ñ¹•ÍÌ€Å€°1•…¸½µÁÕÑ•Ì…¹¡•­ÌÑ¡”É•µ…¥¹¥¹œÉ½½ÑÌ€É€…¹€Í€¸)Q¡”¹•Ü¥¹¥Ñ•Õ‰¥MÅÉÑQÝ½á…µÁ±•€½¹¹•ÑÌÑ¡”Í…µ”Õ‰¥Œ‰½Õ¹‘…ÉäÑ¼„)¹½¸µÉ…Ñ¥½¹…°É•Í¥‘Õ…°‰É…¹ èáxÌµáxÈ´Éà¬Èô¡à´Ä¤¡áxÈ´È¥€°Ý¥Ñ Ñ¡”•á…Ð)É½½Ð€Å€…¹„™¥¹¥Ñ”Í¥¸‰É…­•Ð™½ÈÑ¡”ÍÅÉÐ€É€‰É…¹ ½¸)lÄÄ¼à°ÈÌ¼ÄÙu€¸)Q¡”Í…µ”Õ‰¥Œ‰É…¹ ¹½Ü½¹ÍÕµ•ÌÑ¡”ÍÑ…”´ÈÐÍÅÕ…É”µÉ½½Ð•¹±½ÍÕÉ”)lÄÄàØÌÈàÌ¼àÌààØÀà°ÈÌÜÈØÔØÜ¼ÄØÜÜÜÈÄÙu€°ÁÉ•Í•ÉÙ¥¹œÑ¡”•á…ÐÍ¥¸‰É…­•Ð)Ý¥Ñ „µÕ ™¥¹•ÈÉ…Ñ¥½¹…°Ý¥‘Ñ ¸)Q¡”Á…É…±±•°É…Ñ¥½¹…±EÕ…ÉÑ¥A½±å¹½µ¥…±€¥¹Ñ•É™…”Á…­…•Ì™½ÕÈ•á…Ð)É…Ñ¥½¹…°É½½ÑÌ…¹Ñ¡•¥È½µÁÕÑ…‰±”Ý¥Ñ¹•ÍÍ•Ì°ÍÑÉ•¹Ñ¡•¹¥¹œÑ¡”¡•­•)™…Ñ½É¥é•½É”½˜‰•¹¡µ…É¬¥Ñ•´€ÐØÝ¥Ñ¡½ÕÐ±…¥µ¥¹œ„•¹•É…°ÅÕ…ÉÑ¥Œ)™½ÉµÕ±„¸)Q¡”¹•Ü¥¹¥Ñ•EÕ…ÉÑ¥MÅÉÑQÝ½á…µÁ±•€…‘‘ÌÑ¡”¥ÉÉ…Ñ¥½¹…°‰É…¹ è¥Ð¡•­Ì)áxÐ´Ì©áxÈ¬Èô¡áxÈ´Ä¤¡áxÈ´È¥€°•á…ÐÉ½½ÑÌ€´Ä°Å€°…¹‰½Ñ Í¥¹••¹‘Á½¥¹Ð)‰É…­•ÑÌ™½ÈÑ¡”™¥¹¥Ñ”ÍÅÉÐ€É€•¹±½ÍÕÉ”¸)Q¡”Í…µ”ÅÕ…ÉÑ¥Œ¹½Ü½¹ÍÕµ•ÌÑ¡”ÍÑ…”´ÈÐÍÅÉÐ€É€•¹±½ÍÕÉ”…¹¡•­Ì‰½Ñ )Á½Í¥Ñ¥Ù”…¹¹•…Ñ¥Ù”Í¥¹••¹‘Á½¥¹Ð‰É…­•ÑÌ…ÐÑ¡…Ð™¥¹•ÈÁÉ•¥Í¥½¸¸)Q¡”ÍÕÁÁ±¥•½µÁ±•àµ™…Ñ½ÈÅÕ…ÉÑ¥Œ¹½Ü…±Í¼¡…ÌÑ¡”•á…ÐÉ½½ÐµÍ•ÐÑ¡•½É•´)™…Ñ½É¥é•‘EÕ…ÉÑ¥A½±å¹½µ¥…±}•Ù…±}•Å}é•É½}¥™™€°¥Ù¥¹œ™¥¹¥Ñ”•á±ÕÍ¥½¸™½È)•Ù•Éä…¹‘¥‘…Ñ”½ÕÑÍ¥‘”Ñ¡”™½ÕÈÍÕÁÁ±¥•É½½ÑÌ¸)Q¡”µ…Ñ¡¥¹œ•á…ÐµÉ½½Ð¥¹Ñ•É™…”)™…Ñ½É¥é•‘EÕ…ÉÑ¥A½±å¹½µ¥…±}¡…Íá…ÑI½½Ñ}¥™™€Á…­…•ÌÑ¡…Ð™½ÕÈµÝ…äÉ•ÍÕ±Ð)™½È½µÁÕÑ…‰±”µÉ½½Ð½¹ÍÕµ•ÉÌ¸)Q¡”¡•­•Ý½É­••á…µÁ±•ÌA½±å¹½µ¥…°¹ÅÕ…ÉÑ¥}•á…µÁ±•}™…Ñ½É¥é…Ñ¥½¹€…¹)A½±å¹½µ¥…°¹ÅÕ…ÉÑ¥}•á…µÁ±•}É½½ÑÍ€ÍÕÁÁ±ä™½ÕÈÉ…Ñ¥½¹…°É½½ÑÌ™½È„ÅÕ…ÉÑ¥Œ°)Ý¡¥±”A½±å¹½µ¥…°¹ÅÕ…ÉÑ¥}•á…µÁ±•}É½½Ñ}¥™™€¡•­ÌÑ¡…ÐÑ¡•Í”…É”…±°½˜¥ÑÌ)É…Ñ¥½¹…°É½½ÑÌ¸Q½•Ñ¡•ÈÑ¡•ä½Ù•ÈÑ¡”ÁÉ½©•ÐÌÉ…Ñ¥½¹…°Ý½É­•µ•á…µÁ±”½É”)½˜‰•¹¡µ…É¬¥Ñ•´€ÐØìÑ¡”•¹•É…°ÅÕ…ÉÑ¥Œ™½ÉµÕ±„É•µ…¥¹Ì½ÕÑÍ¥‘”Ñ¡”ÕÉÉ•¹Ð)‰½Õ¹‘…Éä¸)Q¡”Ý½É­•¥¹¥Ñ•EÕ…ÉÑ¥MÁ±¥Ñá…µÁ±•€¹½Ü¥¹ÍÑ…¹Ñ¥…Ñ•ÌÑ¡”ÑÝ¼µÅÕ…‘É…Ñ¥Œ)¥¹Ñ•É™…”Ý¥Ñ ™…Ñ½ÉÌéxÈ€´€Å€…¹éxÈ€´€Ñ€°¡•­¥¹œ…±°™½ÕÈÉ…Ñ¥½¹…°)É½½ÑÌ€´É€°€´Å€°€Å€°…¹€É€¥¸Ñ¡”™¥¹¥Ñ”É…Ñ¥½¹…°µ½µÁ±•àµ½‘•°¸Q¡”)•¹•É…°•ÉÉ…É¤É•Í½±Ù•¹ÐÉ•µ…¥¹Ì½ÕÑÍ¥‘”Ñ¡”‰½Õ¹‘…Éä¸)Q¡”¹•Ü¥¹¥Ñ•5¥á•‘Õ‰¥á…µÁ±•€ÍÕÁÁ±¥•ÌÑ¡”½¹©Õ…Ñ”Á…¥È¤°µ¥€Ñ½•Ñ¡•È)Ý¥Ñ Ñ¡”É•…°É½½Ð€Å€™½È€¡è´Ä¤¡èµ¤¤¡è­¤¤õéxÌµéxÈ­è´Å€¸1•…¸¡•­Ì‰½Ñ Ñ¡”)½•™™¥¥•¹Ð•áÁ…¹Í¥½¸…¹…±°Ñ¡É•”•á…ÐÉ½½Ð•Ù…±Õ…Ñ¥½¹Ì°•áÑ•¹‘¥¹œÑ¡”)™¥¹¥Ñ”Õ‰¥Œ½Q‰½Õ¹‘…ÉäÑ¼„µ¥á•É•…°½½µÁ±•à•á…µÁ±”¸)Q¡”Í…±•½µÁ…¹¥½¸•á…µÁ±”¡•­Ì)€¡è´È¤¡è´É¤¤¡è¬É¤¤õéxÌ´ÉéxÈ¬Ñè´á€°¥¹±Õ‘¥¹œÑ¡”É•…°É½½Ð€É€°½¹©Õ…Ñ”)É½½ÑÌ€É¤°´É¥€°½•™™¥¥•¹Ð•áÁ…¹Í¥½¸°…¹…±°Ñ¡É•”•á…Ð•Ù…±Õ…Ñ¥½¹Ì¸)Q¡”½µÁ…¹¥½¸¥¹¥Ñ•EÕ…ÉÑ¥5¥á•‘MÁ±¥Ñá…µÁ±•€ÕÍ•ÌéxÈ€¬€Å€…¹éxÈ€´€Ñ€°)¡•­¥¹œÑ¡”¹½¹É•…°É…Ñ¥½¹…°µ½½É‘¥¹…Ñ”É½½ÑÌ¥€…¹€µ¥€…±½¹Í¥‘”€É€…¹)€´É€¸Q¡¥Ì•áÑ•¹‘ÌÑ¡”™¥¹¥Ñ”ÅÕ…ÉÑ¥Œ‰½Õ¹‘…ÉäÑ¼„µ¥á•É•…°½½µÁ±•àÍÁ±¥Ð)Ý¥Ñ¡½ÕÐ…‘‘¥¹œ„•¹•É…°ÅÕ…ÉÑ¥Œ™½ÉµÕ±„½È…±•‰É…¥Œµ±½ÍÕÉ”±…¥´¸)Q¡”Í…±•µ¥á•ÅÕ…ÉÑ¥Œ½µÁ…¹¥½¸ÕÍ•ÌéxÈ€¬€Ñ€…¹éxÈ€´€å€°¡•­¥¹œÑ¡”)™½ÕÈÍÕÁÁ±¥•É½½ÑÌ€É¤°´É¤°Ì°´Í€…¹•á…Ð•Ù…±Õ…Ñ¥½¹ÌÑ¡É½Õ Ñ¡”Í…µ”)ÑÝ¼µÅÕ…‘É…Ñ¥ŒÍÁ±¥Ð¥¹Ñ•É™…”¸)Q¡”½ÁÑ¥½¹…°•Í…ÉÑ•ÌÉ½ÕÑ”¹½Ü¡…Ì„™¥¹¥Ñ”A½±å¹½µ¥…°¹Í¥¹¡…¹•½Õ¹Ñ€)½Õ¹Ñ•È°„é•É¼µ™¥±Ñ•É•Ù…É¥…¹Ð°Ñ¡”•¹•É…°é•É¼µÙ…É¥…Ñ¥½¸±•µµ„)Í¥¹¡…¹•½Õ¹Ñ%¹½É¥¹i•É½Í}é•É½}½™}¹½¹¹•}½•™™Í€°„•¹•É…°ÅÕ…‘É…Ñ¥ŒÍ¥¸µÁ…ÑÑ•É¸Ñ¡•½É•´°)Ñ¡”¹½¹¹•…Ñ¥Ù”½¹½¹Á½Í¥Ñ¥Ù”µ½•™™¥¥•¹Ð•Ù…±Õ…Ñ¥½¸±•µµ…Ì°…¹¡•­•)•á…µÁ±•Ì¸€Q¡”ÍÑÉ¥ÐÁ½Í¥Ñ¥Ù”µ¥¹ÁÕÐÑ¡•½É•´)•Ù…±}Á½Í}½™}¹½¹¹•}½•™™Í}½™}Á½Í€ÍÕÁÁ±¥•Ì„‘¥É•ÐÁ½Í¥Ñ¥Ù”µÉ…äÉ½½Ð)•á±ÕÍ¥½¸ìÑ¡”É½½Ðµ½Õ¹Ñ¥¹œÉÕ±”¥ÑÍ•±˜¥Ì¹½Ðå•Ð±…¥µ•¸)Q¡”Á…­…••Ù…±}¹•}é•É½}½™}¹½¹¹•}½•™™Í}½™}Á½Í€™½É´¥Ì…Ù…¥±…‰±”™½È)‘¥É•ÐÉ½½ÐµÍ•…É ÕÍ”ì¹½}Á½Í¥Ñ¥Ù•}É½½Ñ}½™}¹½¹¹•}½•™™Í}½™}Á½Í€Á…­…•Ì)Ñ¡”Í…µ”™…Ð…Ì…¸•á¥ÍÑ•¹Ñ¥…°É½½Ðµ•á±ÕÍ¥½¸•ÉÑ¥™¥…Ñ”ì…¹)•Ù…±}¹•}½™}¹½¹Á½Í}½•™™Í}½™}¹•€ÍÕÁÁ±¥•ÌÑ¡”ÍÑÉ¥Ð¹•…Ñ¥Ù”‘Õ…°¸)¹½}Á½Í¥Ñ¥Ù•}É½½Ñ}½™}¹½¹Á½Í}½•™™Í}½™}¹•€Á…­…•ÌÑ¡…Ð‘Õ…°…Ì…¸)•á¥ÍÑ•¹Ñ¥…°É½½Ðµ•á±ÕÍ¥½¸•ÉÑ¥™¥…Ñ”…ÌÝ•±°¸Q¡”Í¥¸µÍåµµ•ÑÉ¥Œé•É¼µÙ…É¥…Ñ¥½¸±•µµ„)Í¥¹¡…¹•½Õ¹Ñ%¹½É¥¹i•É½Í}é•É½}½™}¹½¹Á½Í}½•™™Í€¥Ì…±Í¼¡•­•¸)Q¡”‘•É•”µ¥¹‘•Á•¹‘•¹Ð™¥¹¥Ñ”•áÑ•¹Í¥½¸¹½Ü…‘‘Ì)•Ù…±}¹½¹¥¹É•…Í¥¹}½™}¹½¹Á½Í}½•™™Í€…¹)•Ù…±}ÍÑÉ¥Ñ±å}‘•É•…Í¥¹}½™}¹½¹Á½Í}Ñ…¥±€¸½¹Í•ÅÕ•¹Ñ±ä°)…Ñ}µ½ÍÑ}½¹•}Á½Í¥Ñ¥Ù•}É…Ñ¥½¹…±}É½½Ñ}½™}¹½¹Á½Í}Ñ…¥±€ÁÉ½Ù•ÌÕ¹¥ÅÕ•¹•ÍÌ½˜„)Á½Í¥Ñ¥Ù”É…Ñ¥½¹…°É½½Ð™½È…¹ä™¥¹¥Ñ”½•™™¥¥•¹Ð±¥ÍÐÝ¥Ñ „Á½Í¥Ñ¥Ù”)½¹ÍÑ…¹ÐÑ•É´…¹„¹½¹Á½Í¥Ñ¥Ù”°¹½¹é•É¼Ñ…¥°¸Q¡”…½µÁ…¹å¥¹œ)Í¥¹¡…¹•½Õ¹Ñ%¹½É¥¹i•É½Í}½¹•}½™}Á½Í}½¹Í}¹½¹Á½Í}Ñ…¥±€¥‘•¹Ñ¥™¥•ÌÑ¡”)Í¥¹±”Í¥¸Ù…É¥…Ñ¥½¸…™Ñ•Èé•É¼™¥±Ñ•É¥¹œ¸Q¡¥Ì¥Ì„™¥¹¥Ñ”½¹”µÙ…É¥…Ñ¥½¸)•Í…ÉÑ•Ì•ÉÑ¥™¥…Ñ”°¹½ÜÁ…­…•‘¥É•Ñ±ä…Ì)A½±å¹½µ¥…°¹½¹•}Á½Í¥Ñ¥Ù•}Ù…É¥…Ñ¥½¹}•ÉÑ¥™¥…Ñ•€ì¥Ð¥Ì¹½ÐÑ¡”Õ¹É•ÍÑÉ¥Ñ•)±…ÍÍ¥…°É½½Ðµ½Õ¹Ñ¥¹œÑ¡•½É•´¸)Q¡”•á…ÐÑÝ¼µÙ…É¥…Ñ¥½¸•á…µÁ±”¹½ÜÉ•½É‘ÌÑ¡…Ðp¡áxÈ´Íà¬Ép¤¡…ÌÍ¥¸½Õ¹Ð)ÑÝ¼…¹Á½Í¥Ñ¥Ù”É…Ñ¥½¹…°É½½ÐÍ•Ð•á…Ñ±äp¡qìÄ°Éqõp¤¸Q¡¥Ì¥Ì„™¥¹¥Ñ”)•Í…ÉÑ•Ì•á…µÁ±”™½È¥Ñ•´€ÄÀÀ°¹½Ð„±…¥´½˜Ñ¡”•¹•É…°É•…°µÉ½½Ðµ½Õ¹Ñ¥¹œ)Ñ¡•½É•´¸)Q¡”¹•Ü½¹”µÙ…É¥…Ñ¥½¸•á…µÁ±”€Ä€´€Éà€´áxÉ€¡…ÌÍ¥¸½Õ¹Ð½¹”°„™¥¹¥Ñ”)Á½Í¥Ñ¥Ù”µÉ½½Ð‰É…­•ÐlÌ¼à°Ä¼Éu€°…¹„•ÉÑ¥™¥…Ñ”Ñ¡…Ð…¹äÑÝ¼Á½Í¥Ñ¥Ù”)É…Ñ¥½¹…°É½½ÑÌµÕÍÐ½¥¹¥‘”¸Q¡¥Ì…‘‘Ì„¹½¸µÉ…Ñ¥½¹…°µÉ½½ÐµÍ¡…Á•Ñ•ÍÐ½˜Ñ¡”)™¥¹¥Ñ”•Í…ÉÑ•Ì‰½Õ¹‘…ÉäÝ¥Ñ¡½ÕÐ±…¥µ¥¹œ±…ÍÍ¥…°É•…°É½½Ð•á¥ÍÑ•¹”¸)Q¡”½µÁ…¹¥½¸A½±å¹½µ¥…°¹é•É½}Ù…É¥…Ñ¥½¹}É½½Ñ}•á±ÕÍ¥½¹}•ÉÑ¥™¥…Ñ•€¹½Ü)Á…­…•ÌÑ¡”é•É¼µÙ…É¥…Ñ¥½¸½Õ¹ÐÝ¥Ñ Ñ¡”½ÉÉ•ÍÁ½¹‘¥¹œÁ½Í¥Ñ¥Ù”µÉ½½Ð)•á±ÕÍ¥½¸Ý¡•¹•Ù•ÈÑ¡”™¥¹¥Ñ”±¥ÍÐ¡…Ì¹½¹¹•…Ñ¥Ù”½•™™¥¥•¹ÑÌ…¹„)ÍÑÉ¥Ñ±äÁ½Í¥Ñ¥Ù”ÍÕÁÁ±¥•½•™™¥¥•¹Ð¸)Q¡”…É‰¥ÑÉ…Éä™¥¹¥Ñ”µ±¥ÍÐ½µ‰¥¹…Ñ½É¥…°‰½Õ¹)A½±å¹½µ¥…°¹Í¥¹¡…¹•½Õ¹Ñ%¹½É¥¹i•É½Í}…‘‘}½¹•}±•}™¥±Ñ•É}±•¹Ñ¡€¹½ÜÉ•½É‘Ì)Ñ¡…ÐÑ¡”é•É¼µ™¥±Ñ•É•Í¥¸µ¡…¹”½Õ¹Ð¥Ì…Ðµ½ÍÐÑ¡”½•™™¥¥•¹Ðµ±¥ÍÐ)±•¹Ñ µ¥¹ÕÌ½¹”¸Q¡¥Ì¥ÌÑ¡”™¥¹¥Ñ”½µ‰¥¹…Ñ½É¥…°½µÁ½¹•¹Ð½˜¥Ñ•´€ÄÀÀì)•¹•É…°É½½Ð½Õ¹Ñ¥¹œÉ•µ…¥¹Ì‘•™•ÉÉ•¸)Q¡”1•…¸€Ð¸ÌÌ™¥¹¥Ñ”Í•ÁÑ¥ŒÝ¥Ñ¹•ÍÌ¥Ì¹½ÜÉ•Á…¥É•…ÌÝ•±°èÑ¡”Á½±å¹½µ¥…°)Ý¥Ñ É½½ÑÌp Ä°È°Ì°Ð°Ô°Ø°Ýp¤¡…ÌÍ•Ù•¸Í¥¸Ù…É¥…Ñ¥½¹Ì°…¹¥ÑÌÁ½Í¥Ñ¥Ù”)É…Ñ¥½¹…°é•É¼Í•Ð¥Ì•ÉÑ¥™¥•‰ä™¥¹¥Ñ”™…Ñ½ÈÍÁ±¥ÑÑ¥¹œ¸Q¡¥Ì±½Í•ÌÑ¡”)¡•­•‘•É•”µÍ•Ù•¸•á…µÁ±”Ý¥Ñ¡½ÕÐ¡…¹¥¹œÑ¡”½¹ÍÑÉÕÑ¥Ù”‰½Õ¹‘…Éä¸)A½±å¹½µ¥…°¹Íå¹Ñ¡•Ñ¥¥Ù¥‘•}ÍÁ•€…¹)A½±å¹½µ¥…°¹Íå¹Ñ¡•Ñ¥¥Ù¥‘•}™…Ñ½É}½™}É½½Ñ€ÁÉ½Ù¥‘”±¥¹•…È™…Ñ½È½É•µ…¥¹‘•È)•ÉÑ¥™¥…Ñ•Ì™½È…É‰¥ÑÉ…Éä™¥¹¥Ñ”É…Ñ¥½¹…°½•™™¥¥•¹Ð±¥ÍÑÌ°…¹)A½±å¹½µ¥…°¹Íå¹Ñ¡•Ñ¥¥Ù¥‘•}É•µ…¥¹‘•É}•Å}•Ù…±€¥‘•¹Ñ¥™¥•ÌÑ¡”É•µ…¥¹‘•ÈÝ¥Ñ )•Ù…±Õ…Ñ¥½¸…ÐÑ¡”¡½Í•¸Á½¥¹Ð°Ý¡¥±”)A½±å¹½µ¥…°¹Íå¹Ñ¡•Ñ¥¥Ù¥‘•}É•µ…¥¹‘•É}•Å}é•É½}¥™™€•áÁ½Í•ÌÑ¡”•ÅÕ¥Ù…±•¹Ð)é•É¼µÉ•µ…¥¹‘•ÈÉ½½ÐÑ•ÍÐ¸Q¡”¹•Ü™¥¹¥Ñ”)I…Ñ¥½¹…±I½½ÑM•…É ¹É…Ñ¥½¹…±I½½ÑM•…É¡€Í…¹ÌÍÕÁÁ±¥•É…Ñ¥½¹…°…¹‘¥‘…Ñ•Ì°)Ý¥Ñ Í½Õ¹‘¹•ÍÌ°…¹‘¥‘…Ñ”µ±¥ÍÐ½µÁ±•Ñ•¹•ÍÌ°…¹„)I•µ…¥¹‘•É•ÉÑ¥™¥…Ñ•€µÁ…­…•É•ÍÕ±Ð¸Q¡¥Ì¥Ù•Ì¥Ñ•µÌ€ÌÜ…¹€àä…¸)•á•ÕÑ…‰±”É…Ñ¥½¹…°µÉ½½Ð¥¹Ñ•É™…”Ý¥Ñ¡½ÕÐ…ÍÍ•ÉÑ¥¹œÑ¡…Ð…¸…É‰¥ÑÉ…Éä)Á½±å¹½µ¥…°¡…Ì„É…Ñ¥½¹…°É½½Ð¸¥Ù¥Í¥½¸‰ä¡¥¡•Èµ‘•É•”™…Ñ½ÉÌ…¹)±½Í•µ™½É´Õ‰¥ŒÍ½±Ù¥¹œÉ•µ…¥¸™ÕÑÕÉ”…±•‰É„¥¹™É…ÍÑÉÕÑÕÉ”¸)Q¡”•¹•É…°™¥¹¥Ñ”¥‘•¹Ñ¥ÑäA½±å¹½µ¥…°¹Íå¹Ñ¡•Ñ¥¥Ù¥‘•}Í•…¹Ñ}ÅÕ½Ñ¥•¹Ñ€)¥‘•¹Ñ¥™¥•ÌÑ¡”¹½¹é•É¼µÍÑ•ÀÍ•…¹ÐÅÕ½Ñ¥•¹Ð½˜…¹ä™¥¹¥Ñ”É…Ñ¥½¹…°Á½±å¹½µ¥…°)Ý¥Ñ ¥ÑÌÍå¹Ñ¡•Ñ¥ŒÅÕ½Ñ¥•¹Ð•Ù…±Õ…Ñ•…ÐÑ¡”É¥¡Ð•¹‘Á½¥¹Ð¸Q¡¥ÌÍÕÁÁ±¥•Ì„)É•ÕÍ…‰±”™¥¹¥Ñ”Í•…¹Ð½Q…å±½È‰É¥‘”Ý¥Ñ¡½ÕÐ…ÍÍ•ÉÑ¥¹œ„±¥µ¥Ñ¥¹œÑ¡•½É•´¸)Q¡”™¥¹¥Ñ”½•™™¥¥•¹Ð‘•É¥Ù…Ñ¥Ù”¥‘•¹Ñ¥Ñ¥•Ì)A½±å¹½µ¥…°¹‘•É¥Ù…Ñ¥Ù•Ù…±€…¹)A½±å¹½µ¥…°¹Á½Ý}µÕ±}•Ù…±}é¥Á%‘á}•Å}‘•É¥Ù…Ñ¥Ù•Ù…±Õá€•áÁ½Í”Ñ¡”•á…Ð)Á½Ý•ÈµÝ•¥¡Ñ•¥¹‘•á•½•™™¥¥•¹Ð¥‘•¹Ñ¥Ñä°Ý¡¥±”)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}•Å}‘•É¥Ù…Ñ¥Ù•Ù…±€¹½ÜÁÉ½Ù¥‘”Ñ¡”•¹•É¥Œ)É•ÕÉÍ¥Ù”½•™™¥¥•¹Ðµ±•Ù•°‘•É¥Ù…Ñ¥Ù”•Ù…±Õ…Ñ½ÈìÑ¡”¹…µ•¥‘•¹Ñ¥Ñ¥•Ì)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}±¥¹•…É€°)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}ÅÕ…‘É…Ñ¥€°…¹)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}Õ‰¥€°)…¹Ñ¡”¹•ÜA½±å¹½µ¥…°¹ÅÕ…‘É…Ñ¥}Í•…¹Ñ}ÅÕ½Ñ¥•¹Ñ€…¹)A½±å¹½µ¥…°¹ÅÕ…‘É…Ñ¥}Í•…¹Ñ}µ¥¹ÕÍ}‘•É¥Ù…Ñ¥Ù•€•áÁ½Í”Ñ¡”•á…Ð™¥¹¥Ñ”)ÅÕ…‘É…Ñ¥Œ‘¥™™•É•¹”ÅÕ½Ñ¥•¹Ð…¹¥ÑÌÉ…Ñ¥½¹…°ÍÑ•À•ÉÉ½È¸€Q¡¥Ì¥ÌÑ¡”)½µÁÕÑ…‰±”5YP½¹Ñ•¹ÐÕÍ•‰•™½É”…¹ä±…¥´…‰½ÕÐ…¸…ÑÑ…¥¹•¥¹Ñ•Éµ•‘¥…Ñ”)Á½¥¹Ð¸)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}ÅÕ…ÉÑ¥€°…¹)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}ÅÕ¥¹Ñ¥€°)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}Í•áÑ¥€°…¹)A½±å¹½µ¥…°¹•Ù…±}‘•É¥Ù…Ñ¥Ù•}Í•ÁÑ¥€¹½Ü½¹¹•ÐÑ¡”½•™™¥¥•¹Ðµ±•Ù•°)‘•É¥Ù…Ñ¥Ù”±¥ÍÐ‰…¬Ñ¼Á½¥¹ÑÝ¥Í”•Ù…±Õ…Ñ¥½¸Ñ¡É½Õ ‘•É•”Í•Ù•¸¸)Q¡•äÍÕÁÁ½ÉÐÑ¡”™¥¹¥Ñ”Q…å±½È‰½Õ¹‘…ÉäÝ¥Ñ¡½ÕÐ…ÍÍ•ÉÑ¥¹œ„•¹•É…°…¹…±åÑ¥Œ)‘•É¥Ù…Ñ¥Ù”Ñ¡•½É•´¸)Q¡”É…Ñ¥½¹…°µ™Õ¹Ñ¥½¸ÝÉ…ÁÁ•È¥Ì¹½Ü…±Í¼±½Í•™½ÈÁ½±å¹½µ¥…°¹Õµ•É…Ñ½ÉÌè)I…ÑÕ¸¹Á½±å¹½µ¥…±}‘•™¥¹•‘}…±±€•ÉÑ¥™¥•Ì¥ÑÌ‘•¹½µ¥¹…Ñ½È•Ù•ÉåÝ¡•É”°…¹)I…ÑÕ¸¹Á½±å¹½µ¥…±}•Ù…±=¹½µ…¥¹}•Å€¥‘•¹Ñ¥™¥•ÌÑ¡”‘½µ…¥¸•Ù…±Õ…Ñ¥½¸Ý¥Ñ )A½±å¹½µ¥…°¹•Ù…±€¸Q¡”Á…­…•¥¹Ñ•ÉÙ…°•Ù…±Õ…Ñ½È)I…ÑÕ¸¹Á½±å¹½µ¥…±=¹%¹Ñ•ÉÙ…±€…¹¥ÑÌ•á…Ð½µÁÕÑ…Ñ¥½¸Ñ¡•½É•´)I…ÑÕ¸¹Á½±å¹½µ¥…±=¹%¹Ñ•ÉÙ…±}½µÁÕÑ•}•Å€µ…­”Ñ¡¥Ì„É•ÕÍ…‰±”)¥¹Ñ•ÉÙ…°µ™Õ¹Ñ¥½¸•ÉÑ¥™¥…Ñ”¸((´Q¡”…±•‰É…¥Œµ¹Õµ‰•È±…å•È¥Ì¹½ÜÁÉ½½˜µ¡½¹•ÍÐè•á…ÐÉ…Ñ¥½¹…°µ½µÁ±•à(€…±•‰É…¥Œ¹Õµ‰•ÉÌ…¹•á…ÐÉ½½ÑÌ½˜Õ¹¥Ñä…É”™½Éµ…±¥é•°Ý¡¥±”…É¥Ñ¡µ•Ñ¥Œ(€±½ÍÕÉ”…¹…±•‰É…¥Œ±½ÍÕÉ”…É”•áÁ±¥¥ÐÑ…É•ÑÌÉ…Ñ¡•ÈÑ¡…¸Ñ¡•½É•´(€Á±…•¡½±‘•ÉÌ¸€M•”±•‰É…¥½µÁ±•à¹5Õ±I…ÝY…±¥‘€°(€±•‰É…¥½µÁ±•à¹…‘‘}…¹¹¥¡¥±…Ñ½É}•á¥ÍÑÍ€°(€±•‰É…¥½µÁ±•à¹¹•}…¹¹¥¡¥±…Ñ½É}•á¥ÍÑÍ€°(€±•‰É…¥½µÁ±•à¹µÕ±}…¹¹¥¡¥±…Ñ½É}•á¥ÍÑÍ€°(€±•‰É…¥½µÁ±•à¹¥¹Ù}•á¥ÍÑÍ€°…¹±A½±ä¹•á¥ÍÑÍ}É½½Ñ€¸(´Q¡”™½ÕÈµ½É¹•ÈÁÉ½‘ÕÐ¥Ì¹½Ü„•ÉÑ¥™¥•É…Ü½Á•É…Ñ¥½¸¸€Q¡”™¥¹¥Ñ”(€½¹Ñ…¥¹µ•¹Ð½½É‘•È½É•™¥¹•µ•¹Ð™…ÑÌ…É”E	½à¹µÕ±I•…±%¹Ñ•ÉÙ…±}½¹Ñ…¥¹Í€°(€µÕ±I•…±%¹Ñ•ÉÙ…±}½É‘•É•‘€°µÕ±I•…±%¹Ñ•ÉÙ…±}¹•ÍÑ•‘€°E	½à¹µÕ±}½¹Ñ…¥¹Í€°(€µÕ±}½É‘•É•‘€°…¹µÕ±}¹•ÍÑ•‘€¸€Q¡”¡•­•Ý¥‘Ñ ‰½Õ¹(€E	½à¹µÕ±I•…±%¹Ñ•ÉÙ…±}Ý¥‘Ñ¡}±•}½™}…‰Í}‰½Õ¹‘•‘€°±¥™Ñ•‰ä(€µÕ±}Ý¥‘Ñ¡}¡•¥¡Ñ}±•}½™}½½É‘¥¹…Ñ•	½Õ¹‘•‘€°ÕÍ•ÌÑ¡”•áÁ±¥¥ÐÍÑ…”µé•É¼(€½½É‘¥¹…Ñ”É…‘¥¤Ñ¼ÁÉ½Ù”½µÁ±•áI…Ü¹µÕ±}Ù…±¥‘€¸€Q¡”™¥¹¥Ñ”µ¥¹Ñ•ÉÍ•Ñ¥½¸(€ÁÉ½½˜E	½à¹µÕ±}½Ù•É±…ÁÍ}½™}½Ù•É±…ÁÍ€¥Ù•Ì½µÁ±•áI…Ü¹µÕ±}•ÅÕ¥Ù€°Í¼Ñ¡¥Ì(€ÁÉ½‘ÕÐ¥ÌÉ•ÁÉ•Í•¹Ñ…Ñ¥½¸µÍ…™”¸€½¹Í•ÅÕ•¹Ñ±ä(€±•‰É…¥½µÁ±•à¹µÕ±I…Ý}Ù…±¥‘€¡…Ì‘¥Í¡…É•Ñ¡”™½Éµ•ÈÉ…ÜµÙ…±¥‘¥Ñä(€ÁÉ•µ¥Í”ìÉ•ÍÕ±Ñ…¹ÐµÍÑå±”É…Ñ¥½¹…°Á½±å¹½µ¥…°ÑÉ…¹Í™½Éµ…Ñ¥½¹ÌÉ•µ…¥¸Ñ¡”(€…ÑÕ…°…‘‘¥Ñ¥½¸°¹•…Ñ¥½¸°…¹µÕ±Ñ¥Á±¥…Ñ¥½¸µ…¹¹¥¡¥±…Ñ½ÈÑ…É•ÑÌ¸(´Q¡”¥µÁ½ÉÑ…¹ÐÕ±•ÈµÉ½ÕÑ”•á…ÐµÍ…±…È¥µÁ±•µ•¹Ñ…Ñ¥½¸¥Ì…±Í¼¡•­•è(€½µÁ±•áI…Ü¹Å½µÁ±•á1•™Ñ5Õ±€¥Ù•Ì•Ù•ÉäÉ…Ñ¥½¹…°½µÁ±•à(€Í…±…È„Ù…±¥‘¥Ñä´…¹•ÅÕ¥Ù…±•¹”µÁÉ•Í•ÉÙ¥¹œ…™™¥¹”…Ñ¥½¸½¸„•ÉÑ¥™¥•(€½µÁ±•àÉ…Ü¸€%ÑÌ¥€ÍÁ•¥…±¥é…Ñ¥½¸¥ÌÑ¡”‘¥É•Ð½½É‘¥¹…Ñ”É½Ñ…Ñ¥½¸(€½µÁ±•áI…Ü¹µÕ±%€°…¹½µÁ±•áI…Ü¹¥µ…¥¹…Éåá¥Í€•µ‰•‘Ì…¹ä•ÉÑ¥™¥•É•…°(€…ÌÑ¡”•ÉÑ¥™¥•½µÁ±•à¡…¹‘±”p¡¥áp¤¸€Q¡ÕÌÑ¡”Í•±•Ñ•É…Üp¡qÁ¥p¤(€½µÁ±•áI…Ü¹Å½µÁ±•á1•™Ñ5Õ±}½™E½µÁ±•á€¹½Ü…É••ÌÝ¥Ñ ½É‘¥¹…Éä™¥¹¥Ñ”(€E½µÁ±•á€µÕ±Ñ¥Á±¥…Ñ¥½¸½¸•á…ÐÉ…Ñ¥½¹…°¥¹ÁÕÑÌ¸€Q¡”ÍÑ…•Ý¥Í”…¹(€É•ÁÉ•Í•¹Ñ•¥µ…¥¹…ÉåU¹¥Ñ€•ÉÑ¥™¥…Ñ•Ì±¥­•Ý¥Í”¥‘•¹Ñ¥™ä…™™¥¹”(€µÕ±Ñ¥Á±¥…Ñ¥½¸‰ä€¡¤¤Ý¥Ñ Ñ¡”‘¥É•Ð½½É‘¥¹…Ñ”É½Ñ…Ñ¥½¸¸€Q¡¥Ì¥ÌÑ¡”(€™¥¹¥Ñ”É…Ñ¥½¹…°µ½½É‘¥¹…Ñ”‰É¥‘”™½È¥Ñ•´€ÄÜì¥Ð‘½•Ì¹½Ð¥‘•¹Ñ¥™ä„(€É•ÁÉ•Í•¹Ñ••áÁ½¹•¹Ñ¥…°Ý¥Ñ „½µÁ±•Ñ•½µÁ±•à•áÁ½¹•¹Ñ¥…°¸(€…±É•…‘äå¥•±‘ÌÑ¡”Ù…±¥‰½Õ¹‘•É•…°¥¹ÁÕÐA¥AÉ½½™Ì¹Á¤¹¡…±™A¥€°Ý¡½Í”(€‰½á•ÌÍÑ…ä¥¸p¡lÄ°Éup¤°…¹„Ù…±¥É…Üp¡¥qÁ¤¼Ép¤‰½Ñ ‰äÉ…Ñ¥½¹…°(€Í…±¥¹œ…¹…ÌÑ¡”±¥Ñ•É…°•á…Ðp¡¤¼Ép¤µÍ…±…È…Ñ¥½¸¸€Q¡”É•ÑÕÉ¸Í…±…È¥‘•¹Ñ¥Ñä(€p  ´É¤¤¡¥qÁ¤¼È¤õqÁ¥p¤¥Ì¹½Ü…Ù…¥±…‰±”‰½Ñ …Ì…¸•á…ÐÍÑ…•Ý¥Í”…™™¥¹”(€Ñ¡•½É•´…¹…ÌÑ¡”•¹•É…°µÁÉ½‘ÕÐÑ¡•½É•´(€A¥AÉ½½™Ì¹Á¤¹¹•…Ñ¥Ù•QÝ½%µ…¥¹…ÉåI…Ý}µÕ±}¥µ…¥¹…Éå!…±™}•ÅÕ¥Ù}Á¥¥É±•É•…€¸(€A¥AÉ½½™Ì¹Á¤¹1½Ñ%•ÉÑ¥™¥…Ñ•€¥Í½±…Ñ•ÌÑ¡”É•µ…¥¹¥¹œ(€‰É…¹ µÍÁ•¥™¥Œ¥¹ÁÕÐè…¹äÙ…±¥½µÁ±•à±½…É¥Ñ¡´É…Ü…É••¥¹œÝ¥Ñ (€p¡¥qÁ¤¼Ép¤¹½Ü¥µµ•‘¥…Ñ•±äå¥•±‘ÌÑ¡”•ÉÑ¥™¥•½µÁ±•à™½ÉµÕ±„(€p ´É¥q±½œ¡¤¤õqÁ¥p¤°‰½Ñ Ñ¡É½Õ Ñ¡”…™™¥¹”…Ñ¥½¸…¹…ÌÑ¡”±¥Ñ•É…°(€¹•…Ñ¥Ù•QÝ½%µ…¥¹…ÉåI…Ü€¨±½$¹É…Ý€ÁÉ½‘ÕÐ¸€Q¡¥Ì‘½•Ì¹½Ðå•Ð•áÑ•¹Ñ¡”™…Ñ½É¥…°µÍ•É¥•Ì(€•áÁ½¹•¹Ñ¥…°Ñ¼É•ÁÉ•Í•¹Ñ•½µÁ±•à¥¹ÁÕÑÌ½È•ÍÑ…‰±¥Í Õ±•ÈÌ¥‘•¹Ñ¥Ñä¸(€Q¡”•¹•É¥Œ±…ÍÐ…ÍÍ•µ‰±äÍÑ•À¥Ì¹½ÜÁÉ•Í•¹Ð…Ì(€½µÁ±•áI…Ü¹…Õ¡åMÑ…‰¥±¥é•}Ù…±¥‘€è™¥¹¥Ñ”¥¹Ñ•ÉÍ•Ñ¥½¹Ì½˜Ý¥‘•¹•‘¥É•Ð(€½µÁ±•à…¹‘¥‘…Ñ•Ì‰•½µ”„Ù…±¥É…Ü‰½à½µÁÕÑ…Ñ¥½¸Ý¡•¸•Ù•Éä±…Ñ•È(€…¹‘¥‘…Ñ”¥Ì½¹Ñ…¥¹•¥¸•Ù•Éä•…É±¥•ÈÝ¥‘•¹•‰½à¸€Q¡½Í”™…Ñ½É¥…°µÑ…¥°(€…¹¥¹ÁÕÐµµ½‘Õ±ÕÌ½‰±¥…Ñ¥½¹Ì…É”¹½Ü‘¥Í¡…É•™½È¡…±™A¥€è(€A¥AÉ½½™Ì¹Á¤¹¡…±™A¥I½Ñ…Ñ¥½¹€¥ÌÙ…±¥°ÕÍ¥¹œÑ¡”½µµ½¸‰½Õ¹‘•µ¥¹ÁÕÐ(€É½Ñ…Ñ¥½¸Í¡•‘Õ±”°¥ÑÌ™¥¹¥Ñ”1¥ÁÍ¡¥Ñè‰½Õ¹°…¹„É…‘¥ÕÌ…Ðµ½ÍÐ(€€ÌÈ€¼€¡¸€¬€Ä¥€¸€Q¡”¥¹ÁÕÐ¥Ì…±Í¼‰É¥‘•Ñ¼(€€È€¨…ÉÑ…¸¹•½´ Ä¥€…¹Ñ¡”•½µ•ÑÉ¥Œ¹½Éµ…±¥é•ÅÕ…ÉÑ•ÈµÑÕÉ¸É…Ü¸(€¡…±™A¥}•ÅÕ¥Ù}•½µ•ÑÉ¥!…±™A¥€…¹(€¥µ…¥¹…Éå!…±™}•ÅÕ¥Ù}•½µ•ÑÉ¥%µ…¥¹…Éå!…±™€¹½Ü…ÉÉäÑ¡¥Ì…É••µ•¹ÐÑ¼(€Ñ¡”•½µ•ÑÉäµ½¹±äÉ•ÁÉ•Í•¹Ñ•¡…±˜…¹±”…¹¥ÑÌ¥µ…¥¹…Éäµ…á¥Ì¥¹ÁÕÐ¸(€I½Ñ…Ñ¥½¹1¥™Ð¹!…±™A¥%¹ÁÕÐ¹É½Ñ…Ñ¥½¹}•ÅÕ¥Ù}½™}¥¹ÁÕÑ}•ÅÕ¥Ù€¹½ÜÑÉ…¹ÍÁ½ÉÑÌ(€•ÅÕ¥Ù…±•¹Ð¡…±˜µ…¹±”É…ÝÌÑ¡É½Õ Ñ¡”Í•Á…É…Ñ•±äÍÑ…‰¥±¥é•™…Ñ½É¥…°(€É½Ñ…Ñ¥½¹ÌÕÍ¥¹œ„É½ÍÌÉ…‘¥ÕÌ…Ðµ½ÍÐ€ØÐ€¼€¡¸€¬€Ä¥€°…¹(€¡…±™A¥I½Ñ…Ñ¥½¹}•ÅÕ¥Ù}•½µ•ÑÉ¥I½Ñ…Ñ¥½¹€ÍÁ•¥…±¥é•ÌÑ¡…ÐÉ•ÍÕ±ÐÑ¼Ñ¡”(€É•¥ÍÑÉä…¹•½µ•ÑÉäµ½¹±ä½¹ÍÑÉÕÑ¥½¹Ì¸€Q¡”É•µ…¥¹¥¹œÕ±•ÈÝ½É¬¥ÌÑ¡”(€Í•Ñ½Èµ…É•„É•Á…É…µ•ÑÉ¥é…Ñ¥½¸…¹Ù•Ñ½ÈµÕ¹¥ÅÕ•¹•ÍÌ¥‘•¹Ñ¥™¥…Ñ¥½¸½˜Ñ¡…Ð(€É½Ñ…Ñ¥½¸Ý¥Ñ Ñ¡”•½µ•ÑÉ¥Œ•¹‘Á½¥¹Ð°™½±±½Ý•‰äÑ¡”É•±•Ù…¹Ð±½…É¥Ñ¡´(€‰É…¹ •ÉÑ¥™¥…Ñ”¸(€Q¡”•½µ•ÑÉäµ½¹±ä¥µÁ±•µ•¹Ñ…Ñ¥½¸¥Ì¹½Ü¥¹‘•á•Í•Á…É…Ñ•±ä…Ì(€•½µ•ÑÉ¥A¥I½Ñ…Ñ¥½¹€è¥ÑÌ½™¥¹…°É…Ñ¥½¹…°¡…±˜µÁ¤Í¡•‘Õ±”¡…Ì•ÉÑ¥™¥•(€‰½Õ¹‘Ì…¹Ý¥‘Ñ µ½‘Õ±ÕÌ°¥Ì•ÅÕ¥Ù…±•¹ÐÑ¼Ñ¡”¹½Éµ…±¥é•ÅÕ…ÉÑ•ÈµÑÕÉ¸°…¹(€™••‘Ì„Ù…±¥™¥¹¥Ñ”µÁÉ•™¥àµÍÑ…‰¥±¥é•™…Ñ½É¥…°É½Ñ…Ñ¥½¸Ý¥Ñ ½É‘•É•(€…¹‘¥‘…Ñ•Ì¸€Q¡¥Ì¥Ì…¸…±½É¥Ñ¡µ¥ŒÍÑÉ•¹Ñ¡•¹¥¹œ½˜Ñ¡”Õ±•È½É½Ñ…Ñ¥½¸(€Ñ…É•Ð°¹½Ð„½µÁ±•Ñ•µÉ•…°Ñ¡•½É•´ì•¹‘Á½¥¹Ð¥‘•¹Ñ¥™¥…Ñ¥½¸…¹Ñ¡”(€±½…É¥Ñ¡´‰É…¹ É•µ…¥¸½Á•¸¸(€Q¡”É…Ñ¥½¹…°¡…ÉÐÍ¥‘”¥Ì¹½Ü„¡•­•Ù…É¥…‰±”µ½•™™¥¥•¹Ð(€É½Ñ…Ñ¥½¸µÍåÍÑ•´…¹‘¥‘…Ñ”è(€•½µ•ÑÉ¥I½Ñ…Ñ¥½¹=¹Á½¥¹Ñ=¹U¹¥Ñ}•½µ•ÑÉ¥I½Ñ…Ñ¥½¹MåÍÑ•µ•ÉÑ¥™¥…Ñ•€¥Ù•Ì(€@œ€ô€ È¤€¼€ Ä­Ð©Ð¤¤A€°@ À¤ôÅ€°…¹@ Ä¤õ¥€½¸lÀ°Åu€¸(€Q¡”Í…±…ÈÍ•Ñ½ÈµÑ¥µ”½µÁ½¹•¹Ð¥Ì¹½Ü¡•­•…ÌÝ•±°è(€M•Ñ½ÉÉ•…I•Á…É…µ•ÑÉ¥é…Ñ¥½¸¹…¹±•=¹U¹¥Ñ}¡…Í•É¥Ù…Ñ¥Ù•€¥Ù•Ì(€Q¡•Ñ„œ€ô€È¼ Ä­Ð©Ð¥€°…¹(€…¹±•Ñ}•ÅÕ¥Ù}ÑÝ½}…ÉÑ…¹•½µ€¥‘•¹Ñ¥™¥•Ì•Ù•ÉäÉ…Ñ¥½¹…°¡…ÉÐÙ…±Õ”Ý¥Ñ (€€È€¨…ÉÑ…¸¹•½´¡Ð¥€¸€Q¡”™¥¹¥Ñ”±½Ý•ÈµÑ…¥°½µÁ…É¥Í½¸¹½Ü…±Í¼¥Ù•Ì(€…¹±•=¹U¹¥Ñ}•™™•Ñ¥Ù•%¹Ù•ÉÍ•M•Á…É…Ñ¥½¹€è…¸¥¹ÁÕÐ…À€Ä¼¡¸¬Ä¥€ÁÉ½‘Õ•Ì(€ÍÑÉ¥Ñ±äÍ•Á…É…Ñ•½ÕÑÁÕÐ‰½á•Ì…ÐÍÑ…”€ØÐ¨¡¸¬Ä¥€¸(€Q¡”Í…µ”™¥¹¥Ñ”•ÉÑ¥™¥…Ñ”¥Ì¹½Ü•áÁ½Í•‘¥É•Ñ±ä½¸Ñ¡”Õ¹Í…±•(€É•Ñ…¹±”™Õ¹Ñ¥½¸…Ì(€%¹Ñ•É…±%‘•¹Ñ¥Ñ¥•Ì¹…ÉÑ…¹%¹Ñ•É…±I•Ñ…¹±•=¹U¹¥Ñ}•™™•Ñ¥Ù•%¹Ù•ÉÍ•M•Á…É…Ñ¥½¹€°(€­••Á¥¹œÑ¡”Í•Á…É…Ñ¥½¸µ½‘Õ±ÕÌ…ÑÑ…¡•Ñ¼Ñ¡”•Ù…±Õ…Ñ½ÈÑ¡…ÐÁÉ½‘Õ•Ñ¡”(€‰½á•Ì¸€Q¡¥Ì¥Ì…¸¥¹Ù•ÉÍ”µÍ•…É ÁÉ•É•ÅÕ¥Í¥Ñ”°¹½Ð…¸¥¹Ù•ÉÍ”Ñ¡•½É•´¸(€…¹±•=¹U¹¥ÑI•Õ±…É}¥¹Ñ•ÉÙ…±I•Õ±…É€¹½Ü¥Ù•ÌÑ¡”µ…Ñ¡¥¹œ™¥¹¥Ñ”(€¥¹Ñ•ÉÙ…°µ¥µ…”•ÉÑ¥™¥…Ñ”Ñ¡É½Õ Ñ¡”½™¥¹…°€ØÐ¨¡¸¬Ä¥€Í¡•‘Õ±”°…¹(€…¹±•=¹U¹¥ÑI•Õ±…É}¥¹Ù•ÉÑ¥‰±•€Á…­…•Ì¥ÐÝ¥Ñ µ½¹½Ñ½¹¥¥Ñä…¹•™™•Ñ¥Ù”(€Í•Á…É…Ñ¥½¸…ÌÑ¡”ÁÉ•É•ÅÕ¥Í¥Ñ•Ì™½È„½¹ÍÑÉÕÑ¥Ù”¥¹Ù•ÉÍ”‰É…¹ ¸€Q¡”É•µ…¥¹¥¹œ(€É•Á…É…µ•ÑÉ¥é…Ñ¥½¸Ý½É¬¥ÌÑ¡”‘…Ñ„µÙ…±Õ•‰¥Í•Ñ¥½¸Í•…É °Ñ¡•¸ÕÉÙ”(€½µÁ½Í¥Ñ¥½¸…¹Ñ¡”Ù•Ñ½ÈÕ¹¥ÅÕ•¹•ÍÌÑ¡•½É•´°¹½ÐÑ¡”‘•É¥Ù…Ñ¥Ù”°(€¥¹Ñ•ÉÙ…°É•Õ±…É¥Ñä°½ÈÍÑÉ¥Ðµ½¹½Ñ½¹”Í•Á…É…Ñ¥½¸½˜Ñ¡”Í•Ñ½Èµ…É•„(€±½¬¸(€Q¡”½ÉÉ•ÍÁ½¹‘¥¹œ•¹‘Á½¥¹Ð¡…Ì¹½Ü‰••¸ÑÉ…¹ÍÁ½ÉÑ•…ÌÝ•±°è(€A¥AÉ½½™Ì¹Á¤¹Í•Ñ½ÉÉ•…¹±•=¹•}•ÅÕ¥Ù}¡…±™A¥€ÁÉ½Ù•Ì(€Q¡•Ñ„ Ä¤ƒŠ&„Á¤¼É€‰äÑ¡”¡•­••½µ•ÑÉ¥Œ…ÉÑ…¹•¹Ð‰É¥‘”¸(€%¹‘•Á•¹‘•¹Ñ±ä½˜Ñ¡”Á¤É•¥ÍÑÉä°(€M•Ñ½ÉÉ•…I½Ñ…Ñ¥½¸¹¡…±™A¥€Á…­…•ÌÑ¡”…•±•É…Ñ••¹‘Á½¥¹Ð…Ì„‰½Õ¹‘•(€™…Ñ½É¥…°µÉ½Ñ…Ñ¥½¸¥¹ÁÕÐè•Ù•ÉäÉ•Ñ…¹±”‰½à¥Ì¡•­•¥¸lÄ°Éu€™É½´(€Ñ¡”­•É¹•°‰½Õ¹‘Ì°¥ÑÌÝ¥‘Ñ µ½‘Õ±ÕÌ¥Ì•áÁ±¥¥Ð°…¹(€M•Ñ½ÉÉ•…I½Ñ…Ñ¥½¸¹É½Ñ…Ñ¥½¹}•ÅÕ¥Ù}•½µ•ÑÉ¥I½Ñ…Ñ¥½¹€ÑÉ…¹ÍÁ½ÉÑÌÑ¡”(€É•ÍÕ±Ñ¥¹œÍÑ…‰¥±¥é•É½Ñ…Ñ¥½¸Ñ¼Ñ¡”•½µ•ÑÉäµ½¹±äÉ½Ñ…Ñ¥½¸¸€Q¡”É•µ…¥¹¥¹œ(€Õ±•È•¹‘Á½¥¹Ð…À¥ÌÑ¡•É•™½É”Ñ¡”ÍÑ…Ñ•É•Á…É…µ•ÑÉ¥é•É½Ñ…Ñ¥½¸µÍåÍÑ•´(€Õ¹¥ÅÕ•¹•ÍÌÑ¡•½É•´°É…Ñ¡•ÈÑ¡…¸„‘¥Í…É••µ•¹Ð‰•ÑÝ••¸…¹±”¥¹ÁÕÑÌ¸(€A¥AÉ½½™Ì¹Á¤¹¡…±™A¥I½Ñ…Ñ¥½¹}•ÅÕ¥Ù}Í•Ñ½ÉÉ•…I½Ñ…Ñ¥½¹€…±Í¼É•½É‘ÌÑ¡”(€ÑÉ…¹Í¥Ñ¥Ù”½¹¹•Ñ¥½¸‰…¬Ñ¼Ñ¡”ÁÉ½©•Ðµ±•Ù•°Á¤¡…¹‘±”¸(€%ÑÌ¥µ…¥¹…Éäµ…á¥Ì¥¹ÁÕÐ¡…ÌÑ¡”µ…Ñ¡¥¹œÑÉ…¹ÍÁ½ÉÐ(€A¥AÉ½½™Ì¹Á¤¹¥µ…¥¹…Éå!…±™}•ÅÕ¥Ù}Í•Ñ½ÉÉ•…I½Ñ…Ñ¥½¹%µ…¥¹…Éå!…±™€¸(€A¥AÉ½½™Ì¹Á¤¹Í•Ñ½ÉÉ•…A¥I…Ý}•ÅÕ¥Ù}Á¥¥É±•É•…€‘½Õ‰±•ÌÑ¡…Ð•¹‘Á½¥¹ÐÑ¼„(€‘¥É•ÐÁ¤É…Ü…¹ÑÉ…¹ÍÁ½ÉÑÌ¥ÐÑ¼Ñ¡”ÁÉ•™•ÉÉ•¥É±”µ…É•„É•ÁÉ•Í•¹Ñ…Ñ¥½¸ì(€¥Ð¥Ì¥¹Ñ•¹Ñ¥½¹…±±ä„¹…µ•…±Ñ•É¹…Ñ”½µÁÕÑ…Ñ¥½¸É…Ñ¡•ÈÑ¡…¸„¹•Ü(€½Ù•É…”Í½É”¸((ŒŒ¥ÉÍÐµe•…È…±Õ±ÕÌ½ÕÉÍ”()Q¡”½ÕÉÍ”±…å•ÈÍ¡½Õ±…Ù½¥‰É½…±…ÍÍ¥…°Ñ¡•½É•´‘•Á•¹‘•¹¥•ÌÍÕ …Ì%YP)…¹5YP¸€%¹ÍÑ•…°¥ÐÍ¡½Õ±É½Ü„½¹É•Ñ”Ñ…‰±”½˜™Õ¹Ñ¥½¹Ì°‘½µ…¥¹Ì°)‘•É¥Ù…Ñ¥Ù•Ì°…¹‘•™¥¹¥Ñ”¥¹Ñ•É…Ñ¥½¸…±½É¥Ñ¡µÌÑ¡…Ð½Ù•ÉÌÑ¡”•á…µÁ±•Ì)ÍÑÕ‘•¹ÑÌ…ÑÕ…±±ä½µÁÕÑ”¸((´9•Ü½ÕÉÍ”µ½‘Õ±”è½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥ÉÍÑe•…É…±Õ±ÕÌ¹±•…¹€¸(´¡•­•™½Éµ…°½•™™¥¥•¹ÐµÍ¡¥™ÐÑ…‰±”è(€µ½¹½µ¥…±Ìáx¡¸¬Ä¤¼¡¸¬Ä¥€°•áÁ€°Í¥¹€°€µ½Í€°Í¥¹¡€°…¹½Í¡€¸(€M•”¥ÉÍÑe•…É…±Õ±ÕÌ¹A½Ý•ÉM•É¥•Í•É¥Ù…Ñ¥Ù•¹ÑÉå€…¹(€¥ÉÍÑe•…É…±Õ±ÕÌ¹¡•­•‘}Á½Ý•É}Í•É¥•Í}Ñ…‰±•€¸(´Q¡”µ½¹½µ¥…°É½Ü…±Í¼¡…Ì…¸•á•ÕÑ…‰±”™¥¹¥Ñ”µÍ•…¹Ð•ÍÑ¥µ…Ñ”°¥¹‘•Á•¹‘•¹Ð(€½˜Ñ¡”™½Éµ…°ÍÑÉ•…´èÍ•”(€¥¹¥Ñ•A½±å¹½µ¥…°¹¹½Éµ…±¥é•‘5½¹½µ¥…±}¡…Í•É¥Ù…Ñ¥Ù•=¹%¹Ñ•ÉÙ…±€¸(´1¥¹•…È±½ÍÕÉ”™½ÈÑ¡”Ñ…‰±”¥Ì¹½Ü…Ù…¥±…‰±”…ÐÑ¡”™½Éµ…°½•™™¥¥•¹Ð(€±•Ù•°¸€Q¡”ÁÉ¥µ…Éä‘•±…É…Ñ¥½¹Ì…É”(€½Éµ…±A½Ý•ÉM•É¥•Ì¹½•™™¥¥•¹ÑM¡¥™Ñ}…‘‘€°(€½Éµ…±A½Ý•ÉM•É¥•Ì¹½•™™¥¥•¹ÑM¡¥™Ñ}Í…±•I…Ñ€°(€½Éµ…±A½Ý•ÉM•É¥•Ì¹¡…Í½•™™¥¥•¹ÑM¡¥™Ñ}…‘‘€°…¹(€½Éµ…±A½Ý•ÉM•É¥•Ì¹¡…Í½•™™¥¥•¹ÑM¡¥™Ñ}Í…±•I…Ñ€ìÑ¡•¥È½±‘•È(€™½Éµ…°µ‘•É¥Ù…Ñ¥Ù”½Õ¹Ñ•ÉÁ…ÉÑÌÉ•µ…¥¸½µÁ…Ñ¥‰¥±¥ÑäA$¸(´I•…°µ…á¥ÌÝÉ…ÁÁ•ÉÌ™½È½¹É•Ñ”™Õ¹Ñ¥½¹Ì…É”¹…µ•è(€¥ÉÍÑe•…É…±Õ±ÕÌ¹I•…±±•µ•¹Ñ…Éä¹•áÁAM€°Í¥¹AM€°½ÍAM€°(€Í¥¹¡É½µáÁ€°½Í¡É½µáÁ€°ÍÅÉÑI…Ñ€°¥¹Ùa€°…¹(€¥¹Ù=¹•A±ÕÍMÅÕ…É•€¸(´I…Ñ¥½¹…°µ™Õ¹Ñ¥½¸­•É¹•±ÌÉ•…‘ä™½È…±Õ±ÕÌè(€I…ÑÕ¸¹½¹•=Ù•É=¹•A±ÕÍMÅÕ…É•}‘•¹½µ¥¹…Ñ½É}…Á…ÉÑ}½¹}¥¹Ñ•ÉÙ…±€ÁÉ½Ù•ÌÑ¡…Ð(€€Ä¼ Ä­áxÈ¥€¡…Ì‘•¹½µ¥¹…Ñ½Èµ…Á…ÉÑ¹•ÍÌ‰½Õ¹€Å€½¸•Ù•ÉäÉ…Ñ¥½¹…°¥¹Ñ•ÉÙ…°°(€…¹I…ÑÕ¸¹½¹•=Ù•Éa}‘•¹½µ¥¹…Ñ½É}…Á…ÉÑ}½¹}Á½Í}¥¹Ñ•ÉÙ…±€ÁÉ½Ù•ÌÑ¡…Ð€Ä½á€(€¥Ì‘•¹½µ¥¹…Ñ½Èµ…Á…ÉÐ½¸•Ù•Éä¥¹Ñ•ÉÙ…°m„±‰u€Ý¥Ñ €À€ð…€¸€Q¡”Íåµµ•ÑÉ¥Œ(€I…ÑÕ¸¹½¹•=Ù•Éa}‘•¹½µ¥¹…Ñ½É}…Á…ÉÑ}½¹}¹•}¥¹Ñ•ÉÙ…±€¹½Ü½Ù•ÉÌ¥¹Ñ•ÉÙ…±Ì(€Ý¥Ñ ˆ€ð€Á€ì½¹•=Ù•Éa=¹A½Í¥Ñ¥Ù•%¹Ñ•ÉÙ…±€…¹(€½¹•=Ù•Éa=¹9•…Ñ¥Ù•%¹Ñ•ÉÙ…±€•áÁ½Í”‰½Ñ ‰É…¹¡•Ì…Ì•ÉÑ¥™¥•¥¹Ñ•ÉÙ…°(€™Õ¹Ñ¥½¹ÌÝ¥Ñ •á…Ð½µÁÕÑ…Ñ¥½¸Ñ¡•½É•µÌ°Ý¡¥±”(€I…ÑÕ¸¹½¹•=Ù•Éa}‘•™¥¹•‘}½™}¹•}é•É½€¥Ù•ÌÑ¡”•¹•É…°Á½¥¹ÑÝ¥Í”‘½µ…¥¸(€É¥Ñ•É¥½¸°Ý¡¥±”I…ÑÕ¸¹•Ù…°ý}•Å}Í½µ•}½™}‘•™¥¹•‘€…¹(€I…ÑÕ¸¹•Ù…°ý}•Å}¹½¹•}½™}Õ¹‘•™¥¹•‘€•áÁ½Í”Ñ¡”•á•ÕÑ…‰±”•Ù…±Õ…Ñ½ÈÌ(€ÍÕ•ÍÌ½™…¥±ÕÉ”‰•¡…Ù¥½È¸Q¡”Á½±”…Ðé•É¼É•µ…¥¹Ì•áÁ±¥¥Ñ±ä•á±Õ‘•¸(´9•áÐ½¹É•Ñ”¥¹Ñ•É…°Ñ…É•ÑÌ°‰•å½¹Ñ¡”¡•­•Õ¹¥Ðµ‰É…¹ …ÉÑ…¹•¹Ð(€É•Ñ…¹±”½1¥ÁÍ¡¥Ñè½µÁ…É¥Í½¸…¹Ý¥Ñ¡½ÕÐ„•¹•É…°¥¹Ñ•É…‰¥±¥ÑäÑ¡•½É•´è(€¥¹Ñ•É…°€Ä½à€ô±½œá€½¸Á½Í¥Ñ¥Ù”¥¹Ñ•ÉÙ…±Ì°(€¥¹Ñ•É…°€Ä¼ Ä­áxÈ¤€ô…ÉÑ…¸á€½¸•¹•É…°•ÉÑ¥™¥•‰É…¹ ¥¹Ñ•ÉÙ…±Ì°(€Ñ¡”¡…±˜µÁ•É¥½Í¥¹”•¹‘Á½¥¹Ðƒ> €¨¥¹Ñ•É…±|Áx Ä¼È¤Í¥¸£> Ð¤‘Ð€ô€Å€°(€ÕÍ¥¹œ¥¹Ñ•ÉÙ…°µÙ…±Õ•…±Ñ•É¹…Ñ¥¹œµÍ•É¥•ÌÍ¥¹”•Ù…±Õ…Ñ¥½¹ÌÉ…Ñ¡•ÈÑ¡…¸•á…Ð(€Í…µÁ±•Ì°(€¥¹Ñ•É…°€Ä½ÍÅÉÐ ÄµáxÈ¤€ô…Í¥¸á€½¸•ÉÑ¥™¥•ÍÕ‰¥¹Ñ•ÉÙ…±Ì½˜l´Ä°Åu€°(€Ñ…¹•¹Ð½Í•…¹Ð™½ÉµÕ±…Ì½¸¥¹Ñ•ÉÙ…±ÌÝ¡½Í”½Í¥¹”‘•¹½µ¥¹…Ñ½È¥Ì…Á…ÉÐ™É½´(€é•É¼°…¹Á½±å¹½µ¥…°½É…Ñ¥½¹…°•á…µÁ±•ÌÙ¥„‘½µ…¥¸µÍÁ•¥™¥Œ¥¹Ñ•ÉÙ…°(€•ÉÑ¥™¥…Ñ•Ì¸((€Q¡”¹•Ü¥¹¥Ñ•M¥¹•%¹Ñ•É…±€µ½‘Õ±”‰•¥¹ÌÑ¡”¡…±˜µÁ•É¥½É½ÕÑ”Ý¥Ñ Ñ¡”(€™¥¹¥Ñ”ÁÉ¥µ¥Ñ¥Ù”¡…±™¹±•AÉ•™¥á€è…™Ñ•ÈÍÕ‰ÍÑ¥ÑÕÑ¥¹œÔ€ôÁ¤©á€°¥Ð¥Ì(€Ñ¡”É…Ñ¥½¹…°Q…å±½ÈµÁÉ•™¥àÙ…±Õ”…ÐÔ€ôÁ¥ÁÁÉ½à¼É€¸Q¡”•¹‘Á½¥¹Ð(€É•ÕÉÉ•¹”…¹ÍÑ…”µ™½ÕÈ½ÍÑ…”µÍ¥à•ÉÑ¥™¥…Ñ•Ì…É”•á…Ð™¥¹¥Ñ”É…Ñ¥½¹…°(€¥‘•¹Ñ¥Ñ¥•ÌìÑ¡”ÍÑ…”µÍ¥àÙ…±Õ”¥ÌÝ¥Ñ¡¥¸€Ä¼ÄÀÀÁ€½˜€Å€¸Q¡¥Ì¥Ì„(€½µÁÕÑ…‰±”ÁÉ•™¥àÑ½Ý…ÉÑ¡”¹½Éµ…±¥é•™½ÉµÕ±„°¹½Ðå•Ð„½µÁ±•Ñ•(€¥¹Ñ•É…°½È„±…¥´Ñ¡…ÐÑ¡”É…Ñ¥½¹…°…ÁÁÉ½á¥µ…Ñ¥½¸¥Ì•á…ÐÁ¤¸(€Q¡”Í…µ”™¥¹¥Ñ”•Ù…±Õ…Ñ½È¹½ÜÉ•…¡•ÌÍÑ…•Ì•¥¡Ð…¹Ñ•¸°Ý¥Ñ •áÁ±¥¥Ð(€É…Ñ¥½¹…°Ù…±Õ•ÌÝ¥Ñ¡¥¸€Ä¼ÄÀÀÀÁ€…¹€Ä¼ÄÀÀÀÀÀÁ€½˜€Å€¸Q¡•Í”…É”Í¡…ÉÁ•È(€Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥Ñä¡•­Á½¥¹ÑÌ°ÍÑ¥±°¹½ÐÑ¡”½µÁ±•Ñ•Í¥¹”¥¹Ñ•É…°¸(€Q¡”™¥¹¥Ñ”½µÁ±•µ•¹Ð¥‘•¹Ñ¥Ñä¡…±™¹±•AÉ•™¥á}½Í¥¹•}½µÁ±•µ•¹Ñ€É•ÝÉ¥Ñ•Ì(€•… Í¥¹”ÁÉ¥µ¥Ñ¥Ù”…Ì€Å€µ¥¹ÕÌ„µ…Ñ¡¥¹œ½Í¥¹”Q…å±½ÈÁÉ•™¥à¸€Q¡”É…Ü(€•Ù…±Õ…Ñ½È¡…±™A•É¥½‘M¥¹•I…Ý€Ñ¡•¸ÑÉ…¹ÍÁ½ÉÑÌÑ¡”•á¥ÍÑ¥¹œ™…Ñ½É¥…°½Í¥¹”(€¥¹Ñ•ÉÙ…°…±½É¥Ñ¡´Ñ¼Ñ¡”¹½Éµ…±¥é•¡…±˜µÁ•É¥½ÅÕ…¹Ñ¥Ñäì¥Ð¥ÌÙ…±¥…¹(€¡…ÌÑ¡”¥¹¡•É¥Ñ••½µ•ÑÉ¥ŒÝ¥‘Ñ ‰½Õ¹¸€Q¡¥Ì¥ÌÑ¡”™¥ÉÍÐ…ÑÕ…°Í¡É¥¹­¥¹œ(€¥¹Ñ•ÉÙ…°…±½É¥Ñ¡´™½ÈÑ¡”Í¥¹”•¹‘Á½¥¹Ð°Ý¡¥±”Ñ¡”Á¤µ¥¹ÁÕÐ•¹±½ÍÕÉ”…¹(€¡…¹”µ½˜µÙ…É¥…‰±•ÌÑ¡•½É•´É•µ…¥¸Í•Á…É…Ñ”‰É¥‘•Ì¸(€Q¡”ÁÕ‰±¥ŒÑ¡•½É•´¡…±™A•É¥½‘M¥¹•I…Ý}É•…¡•Í}½™}Á½Í¥Ñ¥Ù•}Ñ½±•É…¹•€•áÁ½Í•Ì(€Ñ¡”½ÉÉ•ÍÁ½¹‘¥¹œÁ½Ñ•¹Ñ¥…°µ¥¹™¥¹¥ÑäÍÑ…”Í•±•Ñ½È™½È•Ù•ÉäÁ½Í¥Ñ¥Ù”(€É…Ñ¥½¹…°Ñ½±•É…¹”¸)Q¡”•¹±½ÍÕÉ”Ñ¡•½É•´¡…±™A•É¥½‘M¥¹•I…Ý}½¹Ñ…¥¹Í}¡…±™¹±•AÉ•™¥á€¹½Ü)¥‘•¹Ñ¥™¥•ÌÑ¡”•á…Ð™¥¹¥Ñ”ÁÉ•™¥à½¹Ñ…¥¹•¥¸•… ±…Ñ•È™…Ñ½É¥…°‰½à¸)%ÑÌ1•…¸€Ð¸ÌÌÁÉ½½˜¹½ÜÕÍ•ÌÑ¡”ÁÕ‰±¥Œ™…Ñ½É¥…°µÑ…¥°¹½¹¹•…Ñ¥Ù¥Ñä)•ÉÑ¥™¥…Ñ”‘¥É•Ñ±ä°É…Ñ¡•ÈÑ¡…¸É•…¡¥¹œÑ¡É½Õ „ÁÉ¥Ù…Ñ”É½Ñ…Ñ¥½¸±•µµ„ì)Ñ¡”™½ÕÍ•¥¹¥Ñ•M¥¹•%¹Ñ•É…±€µ½‘Õ±”‰Õ¥±‘Ì±•…¹±ä¸(´±…Ñ•È¹½¹½µÁ…Ð‰•¹¡µ…É¬¥ÌÑ¡”¥É¥¡±•ÐÍ¥¹Œ¥¹Ñ•É…°(€ƒŠ"¬Í¥¸£> Ð¤½Ð‘Ð€ôƒ>€°ÕÍ¥¹œÑ¡”ÁÉ½©•ÐÌÉ…Ñ¥½¹…°µ…¹±”½¹Ù•¹Ñ¥½¸¸€Q¡”(€™¥ÉÍÐ±½…°¥±±ÕÍÑÉ…Ñ¥½¸¥Ì¥ÑÌ‘•É•…Í¥¹œµÑ¡•¸µ¥¹É•…Í¥¹œ‰É…¹ …É½Õ¹(€Ñ¡”¥ÉÉ…Ñ¥½¹…°Í½±ÕÑ¥½¸½˜Ñ…¸£> Ð¤€ôƒ> Ñ€¸€Q¡¥Ì‘½•Ì¹½Ð©ÕÍÑ¥™ä„(€ÍÁ•¥…°½¹”µÑÕÉ¸¥¹Ñ•É…°èÑ¡”¥¹Ñ•¹‘•…±½É¥Ñ¡´¥Ì„™¥¹¥Ñ”±¥ÍÐ½˜(€µ½¹½Ñ½¹”Á¥••Ì…¹Í¡É¥¹­¥¹œÉ…Ñ¥½¹…°ÑÕÉ¸‰É…­•ÑÌ°™½±±½Ý•‰ä„(€Í•Á…É…Ñ•±ä•ÉÑ¥™¥•½Í¥±±…Ñ½ÉäÑ…¥°…¹•±±…Ñ¥½¸¸€9¼Í¥¹”½Ñ…¹•¹Ð(€Í¥¸µ‰¥Í•Ñ¥½¸•ÉÑ¥™¥…Ñ”½È™Õ±°µ±¥¹”Í¥¹Œ¥¹Ñ•É…°¥Ì¡•­•å•Ð¸(´½È•… Ñ…É•Ð°Ñ¡”‘•Í¥É••¹‘Á½¥¹Ð¥Ì„¹…µ•É…Ü…±½É¥Ñ¡´Ý¥Ñ …¸(€½ÁÑ¥½¹…°I•…±I…Ü¹I…Ñ•€°Á±ÕÌ„¡•­•‘•™¥¹¥Ñ”µ¥¹Ñ•É…°™½ÉµÕ±„½¸¥ÑÌ(€¹…ÑÕÉ…°•ÉÑ¥™¥•‘½µ…¥¸¸((ŒŒQ…å±½ÈáÁ…¹Í¥½¹Ì((´Q…å±½ÈÌ™½ÉµÕ±„Í¡½Õ±‰”•¹•É…Ñ•‰ä¥Ñ•É…Ñ•‘•™¥¹¥Ñ”µ¥¹Ñ•É…°Qè(€™¥ÉÍÐÁÉ½Ù”¡à¤€ô¡„¤€¬¥¹Ñ•É…±}…yàœ¡Ð¤‘Ñ€°Ñ¡•¸…ÁÁ±äÑ¡”Í…µ”(€ÍÑ…Ñ•µ•¹ÐÑ¼€°Ñ¡•¸Ñ¼œ€°…¹Í¼½¸¸€Q¡”Í¡…Á”¥ÌÉ•½É‘•‰ä(€Q…å±½È¹QMÑ•ÁÑ€…¹Q…å±½È¹%Ñ•É…Ñ•‘Q¡…¥¹€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½Q…å±½È¹±•…¹€¸(´Q¡”½•™™¥¥•¹Ðµ±•Ù•°½Á•É…Ñ¥½¸™½È½¹”ÍÑ•À™É½´€Á€¥Ì(€½Éµ…±A½Ý•ÉM•É¥•Ì¹½•™™ÍÉ½µ•É¥Ù…Ñ¥Ù•Ñi•É½€ìÑ¡”Ñ¡•½É•´(€½Éµ…±A½Ý•ÉM•É¥•Ì¹½•™™ÍÉ½µ•É¥Ù…Ñ¥Ù•Ñi•É½}¡…Í½Éµ…±•É¥Ù…Ñ¥Ù•€ÁÉ½Ù•Ì(€Ñ¡…Ð‘¥™™•É•¹Ñ¥…Ñ¥¹œÑ¡”½¹ÍÑÉÕÑ•½•™™¥¥•¹ÐÍÑÉ•…´¥Ù•ÌÑ¡”ÍÕÁÁ±¥•(€‘•É¥Ù…Ñ¥Ù”ÍÑÉ•…´¸(´¥ÉÍÐ¡•­•Q…å±½È½•™™¥¥•¹ÐÉ½ÕÑ”™½È…ÉÑ…¹•¹Ðè(€½Éµ…±A½Ý•ÉM•É¥•Ì¹…Ñ…¹Q…å±½É½•™™}¡…Í½Éµ…±•É¥Ù…Ñ¥Ù•€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”(€…ÉÑ…¹•¹Ð½•™™¥¥•¹ÐÍÑÉ•…´‘¥™™•É•¹Ñ¥…Ñ•ÌÑ¼Ñ¡”½•™™¥¥•¹ÐÍÑÉ•…´™½È(€€Ä¼ Ä­áxÈ¥€°…¹Q…å±½È¹…ÉÑ…¹Q…å±½É½•™™¥¥•¹ÑI½ÕÑ•€É•½É‘ÌÑ¡”½‘(€½•™™¥¥•¹ÑÌ€ ´Ä¥y¬¼ É¬¬Ä¥€¸(´Q¡”…¹…±åÑ¥Œ¥¹ÁÕÐ™½ÈÑ¡…ÐÉ½ÕÑ”¥Ì¹½Ü„•ÉÑ¥™¥•É…Ñ¥½¹…°™Õ¹Ñ¥½¸è(€Q…å±½È¹…ÉÑ…¹-•É¹•±=¹%¹Ñ•ÉÙ…±€¥Ì€Ä¼ Ä­áxÈ¥€…Ì„™Õ¹Ñ¥½¸½¸…¹äÉ…Ñ¥½¹…°(€¥¹Ñ•ÉÙ…°°‰…­•‰äQ…å±½È¹…ÉÑ…¹-•É¹•±}É•Õ±…É}½¹}•Ù•Éå}¥¹Ñ•ÉÙ…±€¸(´Q¡”¡¥¡•Èµ‘•É¥Ù…Ñ¥Ù”ÁÉ½‰±•´™½È…ÉÑ…¹•¹Ð¥Ì…Ù½¥‘•‰ä„™¥¹¥Ñ”É…Ñ¥½¹…°(€‘¥Ù¥Í¥½¸Ñ¡•½É•´èQ…å±½È¹ÉÑ…¹-•É¹•°¹™¥¹¥Ñ•I•µ…¥¹‘•ÉI½ÕÑ•€ÁÉ½Ù•Ì(€€Ä¼ Ä­áxÈ¤€ô­•É¹•±A…ÉÑ¥…°à¸€¬­•É¹•±I•µ…¥¹‘•Èà¹€°Ý¥Ñ (€ñ­•É¹•±I•µ…¥¹‘•Èà¹ð€ðô€¡à©à¥x¡¸¬Ä¥€¸€Q¡¥Ì¥ÌÑ¡”•á…ÐÑ¡•½É•´Ñ¡…Ð)Í¡½Õ±™••Ñ¡”±…Ñ•È‘•™¥¹¥Ñ”µ¥¹Ñ•É…°É•µ…¥¹‘•È•ÍÑ¥µ…Ñ”¸)Q¡”ÍÁ•¥…±¥é•)Q…å±½È¹ÉÑ…¹-•É¹•°¹™¥¹¥Ñ•}É•µ…¥¹‘•É}¡…±™}¥¹Ñ•ÉÙ…±}‰Õ‘•Ñ€¹½ÜÍÕÁÁ±¥•Ì…¸)•á•ÕÑ…‰±”Í¡•‘Õ±”½¸€À€ðôà€ðô€Ä¼É€èÍÑ…”¹€¡…ÌÉ•µ…¥¹‘•È…Ðµ½ÍÐ)€Ä¼¡¸¬È¥€°½‰Ñ…¥¹•‰ä„É…Ñ¥½¹…°¡…±˜µÁ½Ý•È½µÁ…É¥Í½¸¸Q¡¥Ì¥ÌÑ¡”™¥ÉÍÐ)•áÁ±¥¥ÐÍÑ…”Í•±•Ñ½È™½ÈÑ¡”Q…å±½ÈÉ•µ…¥¹‘•ÈÉ½ÕÑ”…¹É•µ…¥¹Ì•¹Ñ¥É•±ä)™¥¹¥Ñ”¸(´Q¡”¥¹Ñ•É…Ñ•­•É¹•°ÁÉ•™¥á•Ì¹½Ü•áÁ½Í”Ñ¡”•á…Ð…À‰•ÑÝ••¸½¹Í•ÕÑ¥Ù”(€•Ù•¸…¹½‘ÍÑ…•Ì½¸lÀ°€Ä¼Éu€Ñ¡É½Õ (€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±	•ÑÝ••¹}¡…±™}•Ù•¹}½‘‘}…Á€¸(€%ÑÌ…‰Í½±ÕÑ”µÝ¥‘Ñ …¹É•¥ÁÉ½…°‰½Õ¹‘Ì¥Ù”„½µÁÕÑ…‰±”™¥¹¥Ñ”•¹±½ÍÕÉ”(€‰Õ‘•Ð™½ÈÑ¡”…ÉÑ…¹•¹ÐÁÉ¥µ¥Ñ¥Ù”°Ý¥Ñ¡½ÕÐ…ÍÍ•ÉÑ¥¹œ…¸…ÑÑ…¥¹•¥¹Ñ•É…°(€½È…¸¥¹™¥¹¥Ñ”µÍ•É¥•Ì±¥µ¥Ð¸(´Q¡”½µÁ…¹¥½¸Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±	•ÑÝ••¹}¡…±™}…±Ñ•É¹…Ñ¥¹}•¹±½ÍÕÉ•€(€Á…­…•ÌÑ¡…Ð…À…Ì…¸½É‘•É•™¥¹¥Ñ”•¹±½ÍÕÉ”èÑ¡”½‘ÁÉ•™¥à¥Ì‰•±½Ü(€Ñ¡”•Ù•¸ÁÉ•™¥à°…¹Ñ¡•¥È‘¥™™•É•¹”¥Ì‰½Õ¹‘•‰ä€Ä¼ Ñ¸¬Ì¥€¸Q¡¥Ì¥ÌÑ¡”(€¥¹Ñ•ÉÙ…°µÍ¡…Á••ÉÑ¥™¥…Ñ”¹••‘•Ñ¼½¹¹•ÐÑ¡”¥¹Ñ•É…Ñ•Q…å±½ÈÉ½ÕÑ”(€Ñ¼Ñ¡”•á¥ÍÑ¥¹œ1•¥‰¹¥èÉ…Ü•Ù…±Õ…Ñ½È¸(´Q¡”•¹•É…°Ñ¡•½É•´(€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±	•ÑÝ••¹}Õ¹¥Ñ}…±Ñ•É¹…Ñ¥¹}•¹±½ÍÕÉ•€(€•áÑ•¹‘ÌÑ¡”Í…µ”•¹±½ÍÕÉ”Ñ¼•Ù•ÉäÉ…Ñ¥½¹…°•¹‘Á½¥¹Ð€À€ðôä€ðô€Å€°Ý¥Ñ (€Ñ¡”Í¡…ÉÁ•È™¥¹¥Ñ”…Àåx Ñ¸¬Ì¤¼ Ñ¸¬Ì¥€‰•¡¥¹Ñ¡”Õ¹¥™½É´É•¥ÁÉ½…°‰½Õ¹¸(´Q¡”¥¹Ñ•ÉÙ…°µÙ…±Õ••Ù…±Õ…Ñ½È(€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±	•ÑÝ••¹}Õ¹¥Ñ}¥¹Ñ•ÉÙ…±€Á…­…•Ì(€Ñ¡”½‘½•Ù•¸ÁÉ•™¥á•Ì…Ì„E%¹Ñ•ÉÙ…±€ì¥ÑÌ½É‘•É•‘¹•ÍÌ…¹Ý¥‘Ñ Ñ¡•½É•µÌ(€ÁÉ½Ù¥‘”Ñ¡”‘¥É•Ð™¥¹¥Ñ”‰½à¥¹Ñ•É™…”™½È±…Ñ•ÈÉ•Ñ…¹±”½I•…±I…Ý€(€½µÁ…É¥Í½¹Ì¸(´%ÑÌÝ¥‘Ñ ™Õ¹Ñ¥½¸¹½Ü¡…Ì…¸•áÁ±¥¥Ð(€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±	•ÑÝ••¹}Õ¹¥Ñ}¥¹Ñ•ÉÙ…±}Ý¥‘Ñ¡}Í¡É¥¹­Í€(€•ÉÑ¥™¥…Ñ”°ÕÍ¥¹œÑ¡”É…Ñ¥½¹…°€Ä¼¡¸¬Ä¥€Í¡•‘Õ±”¸Q¡”­•É¹•°ÁÉ•™¥à¥Ì(€…±Í¼¥‘•¹Ñ¥™¥•Ý¥Ñ Ñ¡”™¥¹¥Ñ”1•¥‰¹¥èÁ…ÉÑ¥…°ÍÕ´‰ä(€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±Ñ=¹•}•Å}Í•É¥•Í}Á…ÉÑ¥…±MÕµ€°…¹(€Ñ¡”…‘©…•¹ÐµÁÉ•™¥à¥¹Ñ•ÉÙ…°¥Ì•áÁ½Í•…ÌÑ¡”Ù…±¥É…Ü½‰©•Ð(€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±Ñ=¹•I…Ý}Ù…±¥‘€Ý¥Ñ ‰É¥‘”(€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±Ñ=¹•I…Ý}½µÁÕÑ•}•Å}­•É¹•±€¸(€%ÑÌ•á…ÐÝ¥‘Ñ ¥Ì(€Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±Ñ=¹•I…Ý}Ý¥‘Ñ¡}•Å}É•¥ÁÉ½…±€°(€…¹Q…å±½È¹ÉÑ…¹-•É¹•°¹­•É¹•±A…ÉÑ¥…±%¹Ñ•É…±Ñ=¹•I…Ý}É•…¡•Í}½™}Á½Í¥Ñ¥Ù•}Ñ½±•É…¹•€(€ÑÕÉ¹Ì•Ù•ÉäÁ½Í¥Ñ¥Ù”É…Ñ¥½¹…°ÁÉ•¥Í¥½¸É•ÅÕ•ÍÐ¥¹Ñ¼…¸•áÁ±¥¥Ð¹…ÑÕÉ…°(€ÍÑ…”¸(€Q¡¥Ì•ÍÑ…‰±¥Í¡•ÌÑ¡”É•ÅÕ¥É•Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥ÑäÍ¡É¥¹­¥¹œ‰•¡…Ù¥½È(€Ý¥Ñ¡½ÕÐ¥¹ÑÉ½‘Õ¥¹œ…¸…ÑÑ…¥¹•±¥µ¥Ð¸(´Q¡”™¥¹¥Ñ”I¥•µ…¹¸µ•ÉÉ½È½É”¥Ì¹½Ü™½Éµ…±¥é•Ý¥Ñ¡½ÕÐ„½µÁ±•Ñ•¹•ÍÌ(€ÁÉ¥¹¥Á±”¸€Á½Ý¥™™•É•¹•…Ñ½É€™…Ñ½ÉÌÉy¸µÁy¹€‰äÈµÁ€°(€¥ÑÌ•¹‘Á½¥¹Ðµ…Ù•É…”‰½Õ¹‘Ì‰É…­•Ð•… µ½¹½µ¥…°ÁÉ¥µ¥Ñ¥Ù”°…¹(€µ½¹½µ¥…±%¹Ñ•É…±	•ÑÝ••¹}•¹‘Á½¥¹Ñ}•ÉÉ½É}±•€¥Ù•Ì•… ±•™Ð½É¥¡Ð(€É•Ñ…¹±”…¸•áÁ±¥¥Ð¬€¨€¡ÈµÀ¥xÉ€•ÉÉ½È½¸Ñ¡”Õ¹¥Ð¥¹Ñ•ÉÙ…°¸€Q¡”(€É•µ…¥¹¥¹œÍ•É¥•Ì‰É¥‘”Ý½É¬¥ÌÑ¼ÍÕ´Ñ¡•Í”™¥¹¥Ñ”Á½±å¹½µ¥…°‰½Õ¹‘Ì½Ù•È(€Ñ¡”‘å…‘¥Œ…É•„µ•Í …¹½µ‰¥¹”Ñ¡…ÐÍ¡•‘Õ±”Ý¥Ñ Ñ¡”Q…å±½ÈÉ•µ…¥¹‘•È¸((ŒŒ%Ñ•É…Ñ¥½¸µ	…Í•½¹ÍÑÉÕÑ¥½¸1…å•ÉÌ((´±Ñ•É¹…Ñ¥¹œÍ•É¥•Ì¹½Ü¡…Ù”„™¥ÉÍÐ¥Ñ•É…Ñ¥½¸µÍÑå±”É…Ü±…å•È¸€M•”(€M•É¥•Ì¹±Ñ•É¹…Ñ¥¹I…Ý€¥¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½M•É¥•Ì¹±•…¹€¸(´AÉ½Ù•è¥˜Ñ¡”µ…¹¥ÑÕ‘•Ì½˜…¸…±Ñ•É¹…Ñ¥¹œÍ•É¥•ÌÍ¡É¥¹¬Ñ¼é•É¼°Ñ¡•¸Ñ¡”(€¥¹Ñ•ÉÙ…±Ì‰•ÑÝ••¸½¹Í•ÕÑ¥Ù”Á…ÉÑ¥…°ÍÕµÌÍ¡É¥¹¬Ñ¼é•É¼¸€M•”(€M•É¥•Ì¹±Ñ•É¹…Ñ¥¹I…Ü¹¥¹Ñ•ÉÙ…±Í}Í¡É¥¹­€¸(´9•áÐÍÑ•À™½È…±Ñ•É¹…Ñ¥¹œÍ•É¥•ÌèÁÉ½Ù”¹•ÍÑ•‘¹•ÍÌ½•¹±½ÍÕÉ”™É½´(€¹½¹¹•…Ñ¥Ù”‘•É•…Í¥¹œÑ•ÉµÌ°Ñ¡•¸¥¹ÍÑ…¹Ñ¥…Ñ”1•¥‰¹¥è½…ÉÑ…¹•¹ÐÍ•É¥•Ì¸((ŒŒA¤I•ÁÉ•Í•¹Ñ…Ñ¥½¹Ì((´A¥AÉ½½™Ì¹A¥½Ù•É…•	É¥‘•€¥ÌÑ¡”ƒ> ÁÉ½É•ÍÌµ•…ÍÕÉ”¥¸(€‰±Õ•ÁÉ¥¹Ð½ÍÉŒ½Á¤µÍ½É•‰½…ÉµÑ…‰±”¹Ñ•á€¸€%ÑÌ•¥¡Ð½¹ÍÑÉÕÑ½ÉÌ¡…Ù”½¹”(€¡•­•I•…±I…Ü¹ÅÕ¥Ù€Ý¥Ñ¹•ÍÌÁ•È‘¥ÍÑ¥¹Ð‰É¥‘”èÉ¡¥µ•‘•…¸•½µ•ÑÉä°(€…ÉÑ…¹•¹ÐÙ•ÉÍÕÌ…±Ñ•É¹…Ñ¥¹œÍ•É¥•Ì°™¥¹¥Ñ”‘•™¥¹¥Ñ”¥¹Ñ•É…Ñ¥½¸°Ñ¡”(€ÍÕÁÁ±¥•™¥¹¥Ñ”¥¹Ñ•É…Ñ¥½¸µ‰äµÁ…ÉÑÌ™½ÉµÕ±„°¥ÑÌ™¥¹¥Ñ”ÍÅÕ…É”µÍÕ‰ÍÑ¥ÑÕÑ¥½¸(€½µÁ…¹¥½¸°½µÁ…Ñ¥™¥•¥µÁÉ½Á•È¥¹Ñ•É…Ñ¥½¸°Ñ¡”¹½¹ÑÉ¥Ù¥…°(€É•¥ÁÉ½…°µÅÕ…ÉÑ¥Œ­•É¹•°°…¹‰½Õ¹‘•Íåµµ•ÑÉ¥Œ…Õ¡ä…ÍÍ•µ‰±ä¸€Q¡”Ñ¡•½É•´(€A¥½Ù•É…•	É¥‘”¹•ÅÕ¥Ù…±•¹Ñ€‘•É¥Ù•Ì•… Ý¥Ñ¹•ÍÌ™É½´(€Ñ¡”•ÉÑ¥™¥•ÁÉ•Í•¹Ñ…Ñ¥½¸É•¥ÍÑÉä¸€Q¡¥Ì¥Ì„½Ù•É…”ÍÕ¥Ñ”°¹½Ð„(€½µÁ±•Ñ¥½¸Á•É•¹Ñ…”èµÕ±Ñ¥Á±”¥µÁ±•µ•¹Ñ…Ñ¥½¹Ì…¸Í¡…É”„‰É¥‘”°…¹„(€½¹Ñ¥¹Õ½ÕÌA•…¹¼´µ	…­•ÈÑ¡•½É•´½È…¸…¹…±åÑ¥ŒÁÉ½½˜Ñ¡…Ð•áÀœ€ô•áÁ€Ý½Õ±(€‰”µ…©½È…±Õ±ÕÌÁÉ½É•ÍÌÝ¥Ñ¡½ÕÐ…‘‘¥¹œ„ƒ> É½Ü¸€½È½É‘¥¹…Éä‘½Ý¹ÍÑÉ•…´(€ÕÍ”°A¥AÉ½½™Ì¹Á¥AÉ•Í•¹Ñ…Ñ¥½¹}•ÅÕ¥ØÍ½ÕÉ”Ñ…É•Ñ€‘¥É•Ñ±ä½µÁ…É•Ì…¹äÑÝ¼(€¹…µ•¡•­•ÁÉ•Í•¹Ñ…Ñ¥½¹ÌÑ¡É½Õ Ñ¡”•ÉÑ¥™¥•…É•„É•ÁÉ•Í•¹Ñ…Ñ¥Ù”¸€%Ð(€¥Ì„É•¥ÍÑÉä¥¹Ñ•É½Á•É…‰¥±¥ÑäÑ¡•½É•´°¹½Ð…¸•áÑÉ„Í½É•‰½…ÉÝ¥Ñ¹•ÍÌ¸(€Q¡”•¹•É¥ŒI•…°¹I•ÁÉ•Í•¹Ñ…Ñ¥½¸¹•ÅÕ¥Ù€½µÁ…É•Ì…¹äÑÝ¼•ÉÑ¥™¥•Ù¥•ÝÌ½˜)½¹”…‰ÍÑÉ…ÐÉ•…°ì¥ÑÌÁ¤ÍÁ•¥…±¥é…Ñ¥½¸A¥AÉ½½™Ì¹Á¤¹É•ÁÉ•Í•¹Ñ…Ñ¥½¹Í}•ÅÕ¥Ù€)Ñ¡•É•™½É”…±Í¼½Ù•ÉÌÑ¡”ÍÕÁÁ±•µ•¹Ñ…Éä™¥¹¥Ñ”¥¹Ñ•É…Ñ¥½¸µ‰äµÁ…ÉÑÌµµ•Í …¹)ÑÉ¥…¹±”µ±½œµÍ•É¥•ÌÙ¥•ÝÌÑ¡…Ð¥¹Ñ•¹Ñ¥½¹…±±ä)Í¥Ð½ÕÑÍ¥‘”A¥AÉ•Í•¹Ñ…Ñ¥½¹€¸(€Q¡”¹½Üµ•ÉÑ¥™¥•Á¤¹‘¥É¥¡±•Ñ	•Ñ…€Ù¥•ÜÉ•½É‘ÌÑ¡”¹…ÑÕÉ…°¥É¥¡±•Ð(€™½ÉµÕ±„Á¤€ô€Ð€¨0 Ä°¡¤Ð¥€ì¥ÑÌ±¥Ñ•É…°‰½á•Ì…É”ÍÑ…•Ý¥Í”Ñ¡”1•¥‰¹¥è(€‰½á•Ì°Í¼¥Ð¥Ì‘•±¥‰•É…Ñ•±ä¹½Ð„¹¥¹Ñ …±Ñ•É¹…Ñ¥¹œµÍ•É¥•Ì…Á…‰¥±¥Ñä¸(€A¥AÉ•Í•¹Ñ…Ñ¥½¸¹¥¹Ñ•É…Ñ¥½¹…µ¥±å€…¹Ñ¡”ÁÉ¥µ…ÉäÉ•¥ÍÑÉäÉ•Ñ…¥¸Ñ¡”(€Á½±å½¹…°°ÍÑ…‰¥±¥é•°9¥±…­…¹Ñ¡„°…¹Í¥¹±”5…¡¥¸Ù…É¥…¹ÑÌ…Ì•á•ÕÑ…‰±”)É•É•ÍÍ¥½¹Ì¸€Á¥•ÉÑ¥™¥•¹…±Ñ•É¹…Ñ¥Ù•Í€…±Í¼±¥Ñ•É…±±ä…ÉÉ¥•ÌÑ¡”¡•­•)Á¤¹¥¹Ñ•É…Ñ¥½¹	åA…ÉÑÍ5•Í¡€…¹Á¤¹ÑÉ¥…¹±•1½M•É¥•Í€É…Ü•Ù…±Õ…Ñ½ÉÌìÑ¡½Í”)É•µ…¥¸½ÕÑÍ¥‘”Ñ¡”½Ù•É…”)½Õ¹Ð¸€Q¡”É•¥ÁÉ½…°µ±½œÑÉ¥…¹±”™½ÉµÕ±„¥Ì¥¹ÍÑ•…Ñ¡”ÁÉ¥µ…Éä(€Á¤¹¥¹Ñ•É…Ñ¥½¹	åA…ÉÑÍ€Ù¥•Ü…¹Ñ¡”Í¥áÑ ™¥¹¥Ñ”µ…±Õ±ÕÌ‰É¥‘”¸€%Ð¥Ì(€¹½Ð„ÍÕ‰ÍÑ¥ÑÕÑ”™½ÈÑ¡”Á•¹‘¥¹œ•¹•É…°…ÉÑ…¹•¹Ð´µ±½…É¥Ñ¡´•™™•Ñ¥Ù”µQ(€‰É¥‘”½È…¹½¹¥…°µ±½…É¥Ñ¡´ÑÉ…¹ÍÁ½ÉÐ¸€Q¡”ÁÉ¥µ…Éä(€…¹½¹¥…°¡…¹‘½™˜¥Ì¹½Ü™½Éµ…±¥é•Í•Á…É…Ñ•±äè(€A¥AÉ½½™Ì¹…¹½¹¥…±1½QÝ½•ÉÑ¥™¥…Ñ•€Á…­…•Ì„Ù…±¥É…ÜÙ…±Õ”…ÐÑÝ¼(€Ñ½•Ñ¡•ÈÝ¥Ñ ¥ÑÌ•ÅÕ¥Ù…±•¹”Ñ¼1½…É¥Ñ¡´¹±½QÝ½I•¥ÁÉ½…±%¹Ñ•É…±€°…¹(€Á¥É½µ…¹½¹¥…±1½QÝ½}•ÅÕ¥Ù}Á¥¥É±•É•…€Ñ¡•¸ÁÉ½Ù•ÌÑ¡”…¹½¹¥…°µ™½É´(€Á¤™½ÉµÕ±„¸€½¹ÍÑÉÕÑ¥¹œÑ¡…Ð•ÉÑ¥™¥…Ñ”™É½´…¸¥¹Ù•ÉÍ”µ•áÁ½¹•¹Ñ¥…°(€±½…É¥Ñ¡´É•µ…¥¹ÌÑ¡”½¹”•áÁ±¥¥Ð…¹…±åÑ¥Œ…Àì¥Ð¥Ì¹½Ð…¸…‘‘¥Ñ¥½¹…°(€Í½É•…ÉÉ½Ü¸(€Á¤¹ÍÅÕ…É•MÕ‰ÍÑ¥ÑÕÑ¥½¹€Ù¥•Ü¥ÌÑ¡”Í•Ù•¹Ñ ‰É¥‘”è¥ÐÁÉ•Í•ÉÙ•ÌÑ¡”(€ÍÅÕ…É”µÁÕ±±‰…¬¥¹Ñ•É…°…¹Ù•É¥™¥•Ì¥ÑÌ™¥¹¥Ñ”ÍÕ‰ÍÑ¥ÑÕÑ¥½¸ÑÉ…¹ÍÁ½ÉÐÑ¼(€Ñ¡”É•¥ÁÉ½…°µ±½œÙ¥•Ü¸(€Q¡”•¥¡Ñ ‰É¥‘”¥ÌÁ¤¹Íåµµ•ÑÉ¥…Õ¡å€èÑ¡”ÁÕ‰±¥Œ•¹•É…°¥¹Ñ•É…°(€½¹ÍÑÉÕÑ¥½¸™½±‘ÌÑ¡”•áÁ±¥¥Ñ±ä•ÉÑ¥™¥•¥¹É•…Í¥¹œl´Ä°Áu€…¹(€‘•É•…Í¥¹œlÀ°Åu€…Õ¡äµ­•É¹•°‰É…¹¡•Ì¸€%ÑÌ‘¥É•ÐÁ¤É…Ü•Ù…±Õ…Ñ½È¡…Ì(€Ý¥‘Ñ …Ðµ½ÍÐ€ÄØ€¼€¡¸€¬€Ä¥€¸€Q¡¥Ì¥Ì„½¹É•Ñ”Á¥••Ý¥Í”µµ½¹½Ñ½¹”(€…ÍÍ•µ‰±äÉ•É•ÍÍ¥½¸°¹½Ð…¹½Ñ¡•È…ÉÑ…¹•¹ÐµÍ•É¥•Ì•¹ÑÉä¸(€Q¡”½É¥¥¹…°‘¥É•ÐÁ•É¥µ•Ñ•È¥Ì¹½Ü„•ÉÑ¥™¥•ÍÅÕ…É”µÉ½½Ðµ•¹±½ÍÕÉ”(€½µÁÕÑ…Ñ¥½¸ì(€…ÉÍ¥¹”½9•ÝÑ½¸…¹…ÕÍÍ¥…¸…É”™ÕÑÕÉ”¥¹Ù•ÉÍ”½¥¹Ñ•É…°…¹(€•áÁ½¹•¹Ñ¥…°½™Õ±°µ±¥¹”ÁÉ½‰•Ì¸€	…Í•°…¹	É½Õ¹­•È…É”…‘Ù…¹•µ…¹…±åÍ¥Ì(€Ñ½Á¥Ì½ÕÑÍ¥‘”Ñ¡”Í¥•¹Ñ¥™¥Œµ…±Õ±ÕÌÁÉ½É•ÍÌ‰½…É¸€Õ±•È¥‘•¹Ñ¥ÑäÝ¥Ñ (€Ñ¡”½µÁ±•à±½…É¥Ñ¡´¥Ì¥¹ÍÑ•…„¹…µ•‰ÕÐÕ¹µ…É­•±½¹œÍ½É•‰½…É(€Ñ…É•Ðè¥ÐÍ¡½Õ±•ÍÑ…‰±¥Í •áÀ¡¤€¨Á¤€¼€È¤€ô¥€…¹(€Á¤€ô€´É¤€¨±½œ¡¤¥€‰äÑ¡”½µÁ±•àÉ½Ñ…Ñ¥½¸µÍåÍÑ•´•áÑ•¹Í¥½¸½˜Ñ¡”±¥¹•…È(€A•…¹¼´µ	…­•ÈÕ¹¥ÅÕ•¹•ÍÌÑ¡•½É•´¸€%ÑÌÉ…Ñ¥½¹…°¥µ…¥¹…Éäµ…á¥Ì™…Ñ½É¥…°(€Ñ…¥°¥Ì¹½Ü„Ù…±¥½µÁ±•àÉ…Ü€¡I½Ñ…Ñ¥½¹M•É¥•Ì¹É½Ñ…Ñ¥½¹áÁI…Ý}Ù…±¥‘€¤°(€Ý¡¥±”É½Ñ…Ñ¥½¸½•½µ•ÑÉ¥Œ…¹‰É…¹ ‰É¥‘•ÌÉ•µ…¥¸¸Q¡”ÁÉ¥µ…Éä…Ñ•ÌÉ•µ…¥¸(€Ñ¡”(€¹¼µ½µÁ±•Ñ•¹•ÍÌ…Õ‘¥Ð°(€•ÁÍ¥±½¸´µ‘•±Ñ„½¹Ñ¥¹Õ¥Ñä…¹•áÑ•¹Í¥½¸°™¥¹¥Ñ”¥¹Ñ•É…Ñ¥½¸½Q°¥¹Ù•ÉÍ”(€™Õ¹Ñ¥½¹Ì°‘¥™™•É•¹Ñ¥…Ñ••±•µ•¹Ñ…Éä™Õ¹Ñ¥½¹Ì°…¹½¹Ñ¥¹Õ½ÕÌ=(€Í½±ÕÑ¥½¸½Á•É…Ñ½ÉÌ¸(´¥É•ÐÁ¥¥ÉÕµ™•É•¹•€¥Ì¹½Ü½µÁ±•Ñ”¸€¥ÉÕµ™•É•¹•	É¥‘”¹¥¹¹•É¡½É‘1½Ý•ÉI•™¥¹•µ•¹Ñ€(€½µ‰¥¹•Ì•á…ÐÉ…Ñ¥½¹…°¡•­Ì…ÐÍÑ…•Ì€Ä°€È°€Ð°€á€Ý¥Ñ „Õ¹¥™½É´(€™½ÕÉÑ µ½É‘•ÈÍ•…¹Ð´µÕÉÙ…ÑÕÉ”‰Õ‘•Ð™½È•Ù•Éä±…Ñ•È‘å…‘¥ŒÍÑ…”¸(€A¥AÉ½½™Ì¹Á¥¥ÉÕµ™•É•¹•}Ù…±¥‘€Ñ¡•¸•ÉÑ¥™¥•ÌÑ¡”½É¥¥¹…°•Ù…±Õ…Ñ½È°(€…¹A¥AÉ½½™Ì¹Á¥¥ÉÕµ™•É•¹•¥É•Ñ}•ÅÕ¥Ù}Á¥¥É±•É•…€ÍÕÁÁ±¥•Ì¥ÑÌ(€™¥¹¥Ñ”É¡¥µ•‘•…¸•ÅÕ¥Ù…±•¹”¸€Q¡”¹…µ•Ù¥•Ü(€A¥AÉ½½™Ì¹Á¤¹¥ÉÕµ™•É•¹•¥É•Ñ€µ…­•ÌÑ¡¥Ì±¥Ñ•É…°Á…Ñ •Ù…±Õ…Ñ½È(€…Ù…¥±…‰±”Ñ¡É½Õ Ñ¡”…‰ÍÑÉ…ÐÁ¤¡…¹‘±”¸(€Á¥¥ÉÕµ™•É•¹•¥É•Ñ}•ÅÕ¥Ù}Á¥¥ÉÕµ™•É•¹•…¹€…¹(€Á¤¹¥ÉÕµ™•É•¹•¥É•Ñ}•ÅÕ¥Ù}¥ÉÕµ™•É•¹•€¹½Üµ…­”¥ÑÌ…É••µ•¹ÐÝ¥Ñ (€Ñ¡”‘•™…Õ±ÐÉ½ÍÌµ™…¸¥ÉÕµ™•É•¹”Ù¥•Ü•áÁ±¥¥Ð¸€Q¡¥Ì¥Ì½¹”•½µ•ÑÉä(€…Á…‰¥±¥Ñä°¹½Ð„¹•ÜÍ½É•‰½…ÉÉ½Ü¸(((´Q¡”…¹½¹¥…°1•¥‰¹¥èÍ•É¥•Ì•ÅÕ¥Ù…±•¹”¥ÌÁÉ½Ù•‰äÑ¡”™¥¹¥Ñ”I¥•µ…¹¸(€‰É¥‘”±•¥‰¹¥éÅÕ…±ÍI•Ñ…¹±•I…ÝÑ=¹•}™¥¹¥Ñ•I¥•µ…¹¹	É¥‘•€°Ý¡¥ Í¡•‘Õ±•Ì(€„™¥¹•È‘å…‘¥ŒÉ•Ñ…¹±”µ•Í °…‰Í½É‰Ì¥ÑÌ™¥¹¥Ñ”Á½±å¹½µ¥…°•ÉÉ½È¥¸„(€Í¡É¥¹­¥¹œ‘å…‘¥Œµé•É¼¥¹Ñ•ÉÙ…°°…¹…¹•±ÌÑ¡”Á…‘‘¥¹œ¥¸É…ÜµÉ•…°(€…É¥Ñ¡µ•Ñ¥Œ¸€%ÑÌÁÕ‰±¥Œ½¹Í•ÅÕ•¹”¥Ì(€™½ÕÉ}…ÉÑ…¹M•É¥•Í}½¹•}•ÅÕ¥Ù}Á¥¥É±•É•…€¸€Q¡”•á…Ðµ½É‘•ÈÉ½ÕÑ”É•µ…¥¹Ì(€…¸¥¹‘•Á•¹‘•¹ÐÍÑÉ½¹•ÈÅÕ…‘É…ÑÕÉ”A$…¹¹••‘ÌÑ¡”Õ¹¥™½É´…±°µÁ…ÉÑ¥…±Ì‰É¥‘”(€A¥AÉ½½™Ì¹1•¥‰¹¥éI•Ñ…¹±•	É¥‘”¹-•É¹•±A…ÉÑ¥…±á…Ñ•±±=É‘•ÉAÉ•Í•ÉÙ…Ñ¥½¹=¹U¹¥Ñ€¸(€A½¥¹ÑÝ¥Í”­•É¹•°‰½Õ¹‘Ì…¹™¥¹¥Ñ”•ÉÑ¥™¥…Ñ•ÌÑ¡É½Õ Ñ¡”¥¹‘¥…Ñ•(€ÁÉ•™¥á•Ì…É”¡•­•¸á…Ð•±°µ½É‘•ÈÁÉ•Í•ÉÙ…Ñ¥½¸¥Ì¹½ÜÁÉ½Ù•™½ÈÑ¡”(€½¹ÍÑ…¹ÐÁ…ÉÑ¥…°°€Ä€´áxÉ€°€Ä€´áxÈ€¬áxÑ€°(€€Ä€´áxÈ€¬áxÐ€´áxÙ€°…¹€Ä€´áxÈ€¬áxÐ€´áxØ€¬áxá€¸Q¡”™¥ÉÍÐ(€¹½¹½¹ÍÑ…¹Ð…Í”ÕÍ•Ì•áÁ±¥¥Ð¹½¹¹•…Ñ¥Ù”É…Ñ¥½¹…°•¹‘Á½¥¹Ðµ…À™…Ñ½ÉÌì(€Ñ¡”‘•É•”µ™½ÕÈ…Í”ÕÍ•Ì	½½±”ÅÕ…‘É…ÑÕÉ”…¹Ñ¡”‘•É•”µÍ¥à…¹(€‘•É•”µ•¥¡Ð…Í•ÌÕÍ”Á½Í¥Ñ¥Ù”Í•Ù•¸µÁ½¥¹Ð…¹•±•Ù•¸µÁ½¥¹ÐÉ…Ñ¥½¹…°(€9•ÝÑ½¸´µ½Ñ•Ì¥‘•¹Ñ¥Ñ¥•Ì¸€9•¥Ñ¡•ÈÉ½ÕÑ”ÕÍ•Ì½µÁ±•Ñ•¹•ÍÌ¸(´Á¥5…¡¥¹€ÁÉ•Ù¥½ÕÍ±ä¹••‘•„ÁÉ¥¹¥Á…°µ‰É…¹ …‘‘¥Ñ¥½¸•ÉÑ¥™¥…Ñ”¸€Q¡”(€É•ÅÕ¥É•Ñ¡É•”‰½Õ¹‘•É…Ñ¥½¹…°…‘‘¥Ñ¥½¹Ì…É”¹½ÜÁÉ½Ù•è(€€È©…Ñ…¹•½´ Ä¼Ô¤€ô…Ñ…¹•½´ Ô¼ÄÈ¥€°(€…Ñ…¹•½´ Ü¼ÄÜ¤€¬…Ñ…¹•½´ Ä¼ÈÌä¤€ô…Ñ…¹•½´ Ô¼ÄÈ¥€°…¹(€…Ñ…¹•½´ Ô¼ÄÈ¤€¬…Ñ…¹•½´ Ü¼ÄÜ¤€ô…Ñ…¹•½´ Ä¥€¸(€•½µ•ÑÉ¥5…¡¥¹U¹¥Ñ‘‘¥Ñ¥½¹Í}½™}¡…ÉÑQÉ…¹ÍÁ½ÉÑ€½‰Ñ…¥¹ÌÑ¡¥Ì•ÉÑ¥™¥…Ñ”(€™É½´™¥¹¥Ñ”É…Ñ¥½¹…°É•Ñ…¹±”ÑÉ…¹ÍÁ½ÉÐ°…¹(€•½µ•ÑÉ¥	É…¹¡%‘•¹Ñ¥Ñå}½™}¡…ÉÑQÉ…¹ÍÁ½ÉÑ€™½Éµ…±±ä…ÍÍ•µ‰±•Ì¥Ð¥¹Ñ¼(€Q¡”Õ¹¥Ù•ÉÍ…°•½µ•ÑÉ¥U¹¥Ñ‘‘¥Ñ¥½¹1…Ý€É•µ…¥¹Ì„ÕÍ•™Õ°ÍÑÉ½¹•ÈA$°‰ÕÐ(€¥Ì¹¼±½¹•È„ÁÉ•É•ÅÕ¥Í¥Ñ”™½ÈÑ¡”½¹É•Ñ”5…¡¥¸‰É…¹ ¸(€Q¡”™¥¹¥Ñ”…ÕÍÍ¥…¸½É…Ñ¥½¹…°…±Õ±…Ñ¥½¸¥Ì½µÁ±•Ñ”¸€Q¡”É…Ñ¥½¹…°(€­•É¹•°µ)…½‰¥…¸¥‘•¹Ñ¥Ñä(€I…Ñ¥½¹…±¥É±”¹QÉ¥½¹½µ•ÑÉä¹…ÉÑ…¹-•É¹•±}¡…ÉÑ‘‘}©…½‰¥…¹€°¥ÑÌ•á…Ð(€•¹‘Á½¥¹Ð‘¥ÍÁ±…•µ•¹Ð±…Ü(€I…Ñ¥½¹…±¥É±”¹QÉ¥½¹½µ•ÑÉä¹¡…ÉÑ‘‘A…É…µ•Ñ•É}ÍÕ‰€°…¹¥ÑÌ(€¡…ÉÐµ…‘µ¥ÍÍ¥‰±”½É‘•ÈµÁÉ•Í•ÉÙ…Ñ¥½¸±…Ü(€I…Ñ¥½¹…±¥É±”¹QÉ¥½¹½µ•ÑÉä¹¡…ÉÑ‘‘A…É…µ•Ñ•É}µ½¹½€…É”…±Í¼ÁÉ½Ù•ì(€ÉÑ…¹•½µ•ÑÉå€¹½Ü±¥™ÑÌÑ¡¥Ì…±•‰É„Ñ¼•Ù•Éä™¥¹¥Ñ”É•Ñ…¹±”Á…ÉÑ¥Ñ¥½¸è(€Ñ¡”¡…ÉÐµÑÉ…¹Í™½Éµ•Ñ…É•Ð‰É…­•Ð½¹Ñ…¥¹ÌÑ¡”Í½ÕÉ”‰É…­•Ð…¹µ…ÁÌ(€•… …É•„µ±½½ÀÍÑ…”Ñ¼„Ù•É¥™¥•™¥¹¥Ñ”Ñ…É•Ð½Ù•È¸€=¸Ñ¡”(€5…¡¥¸µÉ•±•Ù…¹Ð¡…±˜µÕ¹¥Ð¡…ÉÐ°ÑÉ…¹Í™½Éµ••¹‘Á½¥¹ÐÝ¥‘Ñ¡Ì…É”‰½Õ¹‘•‰ä(€•¥¡ÐÑ¥µ•ÌÑ¡•¥ÈÍ½ÕÉ”Ý¥‘Ñ¡Ì…¹ÍÅÕ…É•µ•Í¡•Ì‰ä„™…Ñ½È½˜p ØÑp¤ì(€Ñ¡¥Ì¥Ù•Ì„p ÄÈàáxÈ¼Éy¹p¤ÑÉ…¹ÍÁ½ÉÑ•É•Ñ…¹±”µÝ¥‘Ñ ‰½Õ¹Ý¡•¹•Ù•ÈÑ¡”(€¥µ…”•¹‘Á½¥¹ÐÍÑ…åÌ¥¸Ñ¡”Õ¹¥Ð¥¹Ñ•ÉÙ…°¸€Q¡”ÑÉ…¹Í™½Éµ•‰É…­•ÑÌ…É”¹½Ü(€„Ù…±¥¹•ÍÑ•Í¡É¥¹­¥¹œÉ…Ü½¹ÍÑÉÕÑ¥½¸Ý¥Ñ Ý¥‘Ñ …Ðµ½ÍÐp ÈÔØ¼¡¸¬Ä¥p¤°(€…¹…ÉÑ…¹%¹Ñ•É…±I•Ñ…¹±•I…Ý}•ÅÕ¥Ù}¡…ÉÑ‘‘É•…1½½ÁI…Ý€ÁÉ½Ù•Ì¥ÑÌ(€½¹ÍÑÉÕÑ¥½¸µ±•Ù•°•ÅÕ¥Ù…±•¹”Ñ¼Ñ¡”Í½ÕÉ”É•Ñ…¹±”É…Ü¸€ÁÁ•¹‘¥¹œÑ¡”(€Í½ÕÉ”ÁÉ•™¥àÁ…ÉÑ¥Ñ¥½¸Ñ¼Ñ¡”ÑÉ…¹ÍÁ½ÉÑ•¥¹Ñ•ÉÙ…°Á…ÉÑ¥Ñ¥½¸ÁÉ½Ù•ÌÑ¡”(€…¹½¹¥…°•¹‘Á½¥¹Ðµ‘¥™™•É•¹”½µÁ…É¥Í½¸°…¹(€…ÉÑ…¹•½µ}¡…ÉÑ‘‘}…‘‘}½™}¡…±™€¹½ÜÁÉ½Ù•ÌÑ¡”‰½Õ¹‘••½µ•ÑÉ¥Œ…‘‘¥Ñ¥½¸(€±…Ü¹••‘•…Ð…±°Ñ¡É•”5…¡¥¸¥¹ÍÑ…¹•Ì¸€½¹Í•ÅÕ•¹Ñ±ä(€5…¡¥¹%‘•¹Ñ¥Ñä¹•½µ•ÑÉ¥5…¡¥¹U¹¥Ñ‘‘¥Ñ¥½¹Í}½™}¡…ÉÑQÉ…¹ÍÁ½ÉÑ€…¹Ñ¡”(€É•ÍÕ±Ñ¥¹œ•½µ•ÑÉ¥Œ5…¡¥¸‰É…¹ ¥‘•¹Ñ¥Ñä…É”ÁÉ½Ù•¸€Q¡”™¥¹¥Ñ”I¥•µ…¹¸(€‰É¥‘”¹½ÜÁÉ½Ù•ÌÑ¡”¹••‘•Á½Ý•ÈµÍ•É¥•Ì½­•É¹•°½µÁ…É¥Í½¹Ì…Ð€Ä¼Õ€…¹(€€Ä¼ÈÌå€°Í¼Á¥5…¡¥¹}•ÅÕ¥Ù}Á¥¥É±•É•…}™¥¹¥Ñ•I¥•µ…¹¹	É¥‘•€¥Ì„½µÁ±•Ñ•(€…¹½¹¥…°Í½É•…ÉÉ½Ü¸€Q¡”•¹‘Á½¥¹Ð½µÁ…É¥Í½¸…Ð€Å€‰•±½¹ÌÑ¼Ñ¡”(€¥¹‘•Á•¹‘•¹Ð1•¥‰¹¥èÉ½ÕÑ”¸€5…¡¥¸É•µ…¥¹ÌÍ½±•±ä„Á½Ý•ÈµÍ•É¥•Ì(€½µÁÕÑ…Ñ¥½¸°¹½Ð„Í•½¹¥¹Ñ•É…°µ‰…Í•Á¤É•ÁÉ•Í•¹Ñ…Ñ¥½¸¸(´Q¡”É•ÕÍ…‰±”™¥¹¥Ñ”µI¥•µ…¹¸‰É¥‘”¹½Ü½Ù•ÉÌ•Ù•ÉäÉ…Ñ¥½¹…°¥¹ÁÕÐ½¸Ñ¡”(€Í•É¥•Ì¡…ÉÐñáð€ðô€Å€è(€…ÉÑ…¹ÅÕ…±Í•½µ}™¥¹¥Ñ•I¥•µ…¹¹	É¥‘•}½¹}Õ¹¥Ñ€°Ý¥Ñ ÁÉ•Í•¹Ñ…Ñ¥½¸µ±•Ù•°(€•ÉÑ¥™¥…Ñ”…ÉÑ…¹A½Ý•ÉM•É¥•Í•½µÉ••µ•¹Ñ}™¥¹¥Ñ•I¥•µ…¹¹	É¥‘•€¸€%ÑÌ(€¹½¹¹•…Ñ¥Ù”½É”É•µ…¥¹Ì…ÉÑ…¹ÅÕ…±Í•½µ}™¥¹¥Ñ•I¥•µ…¹¹	É¥‘•€ìÑ¡”(€¹•…Ñ¥Ù”¡…±˜™½±±½ÝÌ™É½´Ñ¡”±¥Ñ•É…°É…Üµ¥¹Ñ•ÉÙ…°¹•…Ñ¥½¸¥µÁ±•µ•¹Ñ•‰ä(€‰½Ñ •Ù…±Õ…Ñ½ÉÌ¸€Q¡”…¹½¹¥…°Í½É•‰½…É‘•±¥‰•É…Ñ•±äÕÍ•ÌÑ¡¥Ì½¹”(€…Á…‰¥±¥Ñä½¹±ä™½ÈÑ¡”1•¥‰¹¥è•¹‘Á½¥¹Ð…¹Ñ¡”ÑÝ¼Á½Ý•ÈµÍ•É¥•Ì¥¹ÁÕÑÌ¥¸(€Ñ¡”Í¥¹±”5…¡¥¸™½ÉµÕ±„ìÑ¡¥Ì•áÑ•¹Í¥½¸¥Ì¹½Ð…¸…‘‘¥Ñ¥½¹…°Á¤(€½µÁÕÑ…Ñ¥½¸¸(´Q¡”™¥¹¥Ñ”É¡¥µ•‘•Ì½µÁ…É¥Í½¸…±¥¹ÌÑ¡”Á½±å½¸…¹¥ÉÕµ™•É•¹”(€½µÁÕÑ…Ñ¥½¹Ì¸€A¥AÉ½½™Ì¹Á¥¥ÉÕµ™•É•¹•}Ù…±¥‘€¹½Ü±½Í•ÌÑ¡”½É¥¥¹…°(€¡½ÉµÁ…Ñ •Ù…±Õ…Ñ½È¥ÑÍ•±˜°…¹A¥AÉ½½™Ì¹Á¥¥ÉÕµ™•É•¹•¥É•Ñ€¥Ì¥ÑÌ(€•ÉÑ¥™¥•I•…±€¡…¹‘±”¸€Q¡”É½ÍÌµ™…¸°ÍÑ…‰¥±¥é…Ñ¥½¸°…¹É•‰½á¥¹œ(€É•µ…¥¸ÕÍ•™Õ°É•É•ÍÍ¥½¸Ù¥•ÝÌ¸€A¥AÉ½½™Ì¹Á¥•ÉÑ¥™¥•‘€½¹Ñ¥¹Õ•ÌÑ¼ÕÍ”(€Ñ¡”…É•„±½½À…Ì¥ÑÌÁÉ•™•ÉÉ•É•ÁÉ•Í•¹Ñ…Ñ¥½¸…¹É•½É‘ÌÑ¡”¡•­•(€…±Ñ•É¹…Ñ¥Ù•ÌÝ¥Ñ¡½ÕÐÑÉ•…Ñ¥¹œ¥µÁ±•µ•¹Ñ…Ñ¥½¸Ù…É¥…¹ÑÌ…Ì•áÑÉ„Í½É”É½ÝÌ¸(((ŒŒŒÉ¡¥Ù•ÁÉ”µÉ•™…Ñ½È¹½Ñ•Ì€¡¹½ÐÕÉÉ•¹ÐÍ½ÕÉ”¤()Q¡”™½±±½Ý¥¹œ¹½Ñ•Ì°Ñ¡É½Õ Ñ¡”¹•áÐÑ½Àµ±•Ù•°¡•…‘¥¹œ°‘•ÍÉ¥‰”µ½‘Õ±•Ì…¹)¹…µ•Ì™É½´…¸•…É±¥•È…É¡¥Ñ•ÑÕÉ”€¡¥É±•A¤¹±•…¹€°¥É±•É•„¹±•…¹€°…¹)É•±…Ñ•Á½±å½¸™¥±•Ì¤Ñ¡…Ð…É”¹¼±½¹•È¥¸Ñ¡¥ÌÉ•Á½Í¥Ñ½Éä¸€Q¡•ä…É”­•ÁÐ)½¹±ä…Ì¡¥ÍÑ½É¥…°‘•Í¥¸½¹Ñ•áÐ¸€Q¡•ä…É”¹½Ð„É½…‘µ…À°Í¡½Õ±¹½Ð‰”ÕÍ•)Ñ¼µ•…ÍÕÉ”ÁÉ½É•ÍÌ°…¹µÕÍÐ¹½Ð½Ù•ÉÉ¥‘”Ñ¡”¡•­•Í½ÕÉ”µ…À½ÈÑ¡”Á¤)Í½É•‰½…É…‰½Ù”¸((´A¤Í¡½Õ±‰”É•ÁÉ•Í•¹Ñ•‰äÍ•Ù•É…°¥¹‘•Á•¹‘•¹Ð½µÁÕÑ…‰±”…±½É¥Ñ¡µÌè(€1•¥‰¹¥èÍ•É¥•Ì°5…¡¥¸½…ÉÑ…¹•¹Ð™½ÉµÕ±…Ì°•½µ•ÑÉ¥Œ½¹ÍÑÉÕÑ¥½¹Ì°(€¥¹Ñ•É…±ÌÍÕ …Ì€Ð€¨ƒŠ"­|ÁxÄ€Ä¼ Ä­áxÈ¤‘á€°…¹½¹Ñ¥¹Õ•™É…Ñ¥½¹Ì¸(€M•”A¤¹I•ÁÉ•Í•¹Ñ…Ñ¥½¹€°A¤¹%¹Ñ•É…±€°A¤¹•½µ•ÑÉ¥€°(€A¤¹½¹Ñ¥¹Õ•‘É…Ñ¥½¹€°…¹A¤¹I•ÁÉ•Í•¹Ñ…Ñ¥½¹ÍÉ••€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½A¤¹±•…¹€¸(´Q¡•Í”•ÅÕ¥Ù…±•¹”ÁÉ½½™ÌÍ¡½Õ±‰”½¹Í•ÅÕ•¹•Ì½˜Ñ¡”½¹ÍÑÉÕÑ¥Ù”…±Õ±ÕÌ(€±…å•Èè…ÉÑ…¹•¹Ð…Ì¥¹Ù•ÉÍ”½¥¹Ñ•É…°°ÑÉ¥œ‰É…¹ ¥‘•¹Ñ¥Ñ¥•Ì°¥¹Ñ•É…°(€ÍÕ‰ÍÑ¥ÑÕÑ¥½¸½…‘‘¥Ñ¥Ù¥Ñä°…¹‘¥É•Ð™¥¹¥Ñ”¥¹Ñ•ÉÙ…°•ÍÑ¥µ…Ñ•ÌÝ¡•É”¹••‘•¸(€Q¡•äÍ¡½Õ±¹½Ð¥¹Ù½­”±…ÍÍ¥…°É•…°½µÁ±•Ñ•¹•ÍÌ½Èµ…Ñ¡±¥ˆ…¹…±åÍ¥Ì¸(´AÉ½Ù•…±•‰É…¥Œ½É”™½È1•¥‰¹¥è½5…¡¥¸èÑ¡”É…Ñ¥½¹…°Ñ…¹•¹Ð™½ÉµÕ±…Ì¥Ù”(€Ñ…¸€ Ð…Ñ…¸ Ä¼Ô¤€´…Ñ…¸ Ä¼ÈÌä¤¤€ô€Å€¸€M•”(€5…¡¥¸¹ÅÕ…ÉÑ•É}Ñ…¹•¹Ñ}¥‘•¹Ñ¥Ñå€¥¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½A¤¹±•…¹€¸(´Q¡”Í…µ”…±•‰É…¥Œ™…Ð¥Ì…±Í¼É•½É‘•…ÌÑ¡”…ÕÍÍ¥…¸µÉ…Ñ¥½¹…°¥‘•¹Ñ¥Ñä(€€ Ô€¬¤¥xÐ€ô€ È€¬€É¤¤€¨€ ÈÌä€¬¤¥€¸€M•”5…¡¥¸¹…ÕÍÍ¥…¹}¥‘•¹Ñ¥Ñå€¸(´ÉÑ…¹•¹Ð¹½Ü¡…Ì„™½Éµ…°É…Ñ¥½¹…°‰É…¹ ±…å•È™½È•áÁÉ•ÍÍ¥½¹Ì•¹•É…Ñ•(€‰ä…Ñ…¸á€°…‘‘¥Ñ¥½¸°…¹ÍÕ‰ÑÉ…Ñ¥½¸¸€Q¡¥ÌÁÉ½Ù•Ì°Ý¥Ñ¡½ÕÐÉ•…°¹Õµ‰•ÉÌ°(€Ñ¡…ÐÑ¡”Í•±•Ñ•µ‰É…¹ •áÁÉ•ÍÍ¥½¸€Ð€¨…Ñ…¸ Ä¼Ô¤€´…Ñ…¸ Ä¼ÈÌä¥€¡…ÌÑ…¹•¹Ð(€Í±½Á”€Å€°¤¹”¸Ñ¡”Í…µ”™½Éµ…°‰É…¹ Ù…±Õ”…Ì…Ñ…¸ Ä¥€¸€M•”(€ÉÑ…¸¹•Ù…±	É…¹¡}…‘‘}½™}Á½Í€°ÉÑ…¸¹•Ù…±	É…¹¡}ÍÕ‰}½™}Á½Í€°…¹(€ÉÑ…¸¹µ…¡¥¹EÕ…ÉÑ•É}•Å}…Ñ…¹}½¹•€¥¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½A¤¹±•…¹€¸(´Q¡”…ÉÑ…¹•¹ÐÁ½Ý•ÈÍ•É¥•Ì¥Ì¹½Ü½¹¹•Ñ•Ñ¼Ñ¡”Í¡…É•™½Éµ…°(€Á½Ý•ÈµÍ•É¥•Ì½•™™¥¥•¹Ð±…å•È¸€M•”(€½Éµ…±A½Ý•ÉM•É¥•Ì¹…Ñ…¹=‘‘½•™™}‘•É¥Ù…Ñ¥Ù•}Ñ•Éµ€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½A½Ý•ÉM•É¥•Ì¹±•…¹€°…¹(€ÉÑ…¸¹ÁÍQ•Éµ€…¹ÉÑ…¸¹ÁÍ%Ñ•É…Ñ•}•Å}…ÉÑ…¹%¹Ñ•ÉÙ…±€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½A¤¹±•…¹€¸(´Q¡”¹…µ•…ÉÑ…¹•¹ÐÁ½Ý•ÈµÍ•É¥•Ì™Õ¹Ñ¥½¸¥Ì¹½Ü½µÁ±•àµ™¥ÉÍÐè(€½µÁÕÑ…‰±•¹…±åÍ¥Ì¹ÉÑ…¸¹Á½Ý•ÉM•É¥•ÍÕ¹Ñ¥½¹I…Ý€¥Ì„½µÁ±•à(€Õ¹Ñ¥½¹I…Ý€™½Èè€´éxÌ¼Ì€¬éxÔ¼Ô€´€¸¸¹€°…¹(€±•µ•¹Ñ…Éä¹ÉÑ…¸¹Á½Ý•ÉM•É¥•ÍÕ¹Ñ¥½¹I…Ý€¥Ì¥ÑÌÉ•…°µ…á¥ÌÁÉ½©•Ñ¥½¸Ù¥„(€Õ¹Ñ¥½¹I…Ü¹É•…±A…ÉÑ=¹I•…±á¥Í€¸€Q¡”½±‘•ÈÉ•…°…±Ñ•É¹…Ñ¥¹œ•¹±½ÍÕÉ”(€ÉÑ…¸¹ÁÍ%Ñ•É…Ñ•€É•µ…¥¹Ì…Ù…¥±…‰±”™½ÈÑ¡”1•¥‰¹¥èÁ¤Í•É¥•Ì°Ý¡•É”Ñ¡”(€•Ù•¸½½‘É•…°…±Ñ•É¹…Ñ¥¹œ‰½Õ¹‘Ì…É”½¹Ù•¹¥•¹Ð¸(´Q¡”…ÉÑ…¹•¹Ð‰É…¹ ±…å•È¥Ì¹½ÜÑ¥•Ñ¼É…Ñ¥½¹…°½µÁ±•àµÁ±…¹”•½µ•ÑÉäè(€ÉÑ…¸¹!…ÍM±½Á•€Í…åÌ„É…Ñ¥½¹…°½µÁ±•àÙ•Ñ½ÈÉ•ÁÉ•Í•¹ÑÌÑ¡”‰É…¹ Ù…±Õ”(€…Ñ…¸á€°…¹µÕ±Ñ¥Á±¥…Ñ¥½¸½½¹©Õ…Ñ¥½¸ÁÉ½Ù”Ñ¡”•½µ•ÑÉ¥Œ(€…‘‘¥Ñ¥½¸½ÍÕ‰ÑÉ…Ñ¥½¸±…ÝÌ¸€M•”ÉÑ…¸¹µÕ±}Í±½Á•}…‘‘€°(€ÉÑ…¸¹µÕ±}Í±½Á•}ÍÕ‰€°ÉÑ…¸¹•Ù…±	É…¹¡}¡…ÍM±½Á•€°…¹(€5…¡¥¸¹…ÕÍÍ¥…¹}¥‘•¹Ñ¥Ñå}ÍÕ‰ÑÉ…Ñ}Í±½Á•€¸(´á…ÐÍ•É¥•Ì‰½½­­••Á¥¹œèÑ¡”1•¥‰¹¥è™¥¹¥Ñ”ÍÕµÌ…É”ÁÉ•¥Í•±ä(€€Ð€¨…ÉÑ…¹=™=¹”¹€¸€Q¡¥Ì¥Ìµ…¥¹±ä‘•™¥¹¥Ñ¥½¹…°±•…¹ÕÀ°¹½ÐÑ¡”(€1•¥‰¹¥è½5…¡¥¸•ÅÕ¥Ù…±•¹”ÁÉ½½˜¸€M•”(€±•¥‰¹¥éA…ÉÑ¥…±}•Å}™½ÕÉ}…ÉÑ…¹}½™}½¹•€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½A¤¹±•…¹€¸(´1•¥‰¹¥èÌ™¥¹¥Ñ”¥¹Ñ•ÉÙ…±Ì…É”¹½Ü¥‘•¹Ñ¥™¥•½¹±äÝ¥Ñ Ñ¡”Á½Ý•ÈµÍ•É¥•Ì(€É•ÁÉ•Í•¹Ñ…Ñ¥Ù”€Ð€¨…Ñ…¹}Í•É¥•Ì Ä¥€°¹½ÐÝ¥Ñ •½µ•ÑÉ¥ŒÁ¤¸€M•”(€A¤¹…ÉÑ…¹M•É¥•ÍA¥€°A¤¹±•¥‰¹¥éM•É¥•Í}¥Í}…ÉÑ…¹M•É¥•ÍA¥€°…¹(€A¤¹±•¥‰¹¥é}…É••Í}Ý¥Ñ¡}…ÉÑ…¹M•É¥•ÍA¥€¸(´A½±å½¸‘•™¥¹¥Ñ¥½¹Ì…É”•½µ•ÑÉ¥ŒÍÕÁÁ½ÉÐ±…å•ÉÌ°¹½ÐÁÉ•É•ÅÕ¥Í¥Ñ•Ì™½ÈÑ¡”(€ÁÉ¥µ…ÉäÅÕ…ÉÑ•Èµ‘¥Í¬Á¤É½ÕÑ”¸€½µÁÕÑ…‰±•¹…±åÍ¥Ì½É¡¥µ•‘•Ì¹±•…¹€É•½É‘Ì(€Ñ¡”Ñ¡•½É•´Í­•±•Ñ½¸É•±…Ñ¥¹œÁ½±å½¸µ…É•„Á¤…¹¡…±˜µ¥ÉÕµ™•É•¹”Á¤°(€Ý¡¥±”½µÁÕÑ…‰±•¹…±åÍ¥Ì½I…Ñ¥½¹…±A½±å½¸¹±•…¹€…¹(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½½µÁÕÑ…‰±•A½±å½¸¹±•…¹€É•½É™¥¹¥Ñ”Í¡½•±…”•½µ•ÑÉä¸(´I…Ñ¥½¹…°µ½½É‘¥¹…Ñ”Á½±å½¹Ì…É”¹½Ü™¥¹¥Ñ”½‰©•ÑÌÝ¥Ñ Í¡½•±…”…É•„¸(€M•”I…Ñ¥½¹…±A½±å½¸¹EA½±å½¹€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½I…Ñ¥½¹…±A½±å½¸¹±•…¹€¸€Q¡”ÁÉ½Ù•Ñ¡•½É•´(€I…Ñ¥½¹…±A½±å½¸¹EA½±å½¸¹…É•…}µ…Á5Õ±€Í…åÌÑ¡…ÐµÕ±Ñ¥Á±å¥¹œ•Ù•ÉäÙ•ÉÑ•à(€‰ä„É…Ñ¥½¹…°½µÁ±•à¹Õµ‰•ÈÉ½Ñ…Ñ•Ì½ÍÑÉ•Ñ¡•ÌÑ¡”Á½±å½¸…¹Í…±•Ì¥ÑÌ(€…É•„‰äÑ¡”ÍÅÕ…É•¹½É´½˜Ñ¡…Ð½µÁ±•à¹Õµ‰•È¸€Q¡¥Ì¥ÌÑ¡”•±•µ•¹Ñ…Éä(€•½µ•ÑÉä±…å•È‰•¡¥¹É…Ñ¥½¹…°Á½±å½¸ÑÉ¥…¹Õ±…Ñ¥½¹Ì…¹É•Õ±…ÈÁ½±å½¸(€…É•„½µÁÕÑ…Ñ¥½¹Ì¸(´Q¡”™¥¹¥Ñ”É¡¥µ•‘•ÌÉ•…ÉÉ…¹•µ•¹ÐÍÑ•À¥ÌÁÉ½Ù•Í½ÉÉäµ™É•”¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½É¡¥µ•‘•Ì¹±•…¹€¸€É¡¥µ•‘•Ì¹M±¥•Ì¹¡½É¥é½¹Ñ…±M±¥•}…É•…€(€ÁÉ½Ù•ÌÑ¡…Ð„ÑÉ¥…¹±”Í±¥”…Ð¡•¥¡Ð¡€Ý¥Ñ ‰…Í”Ý¥‘Ñ Ý€¡…Ì…É•„(€ ©Ü¼É€°É¡¥µ•‘•Ì¹M±¥•Ì¹¡½É¥é½¹Ñ…±M±¥•}…É•…}µ…Á5Õ±€É•½É‘ÌÑ¡”(€É½Ñ…Ñ¥½¸½ÍÑÉ•Ñ ½µÁ…Ñ¥‰¥±¥ÑäÙ¥„½µÁ±•àµÕ±Ñ¥Á±¥…Ñ¥½¸°…¹(€É¡¥µ•‘•Ì¹M±¥•Ì¹Í±¥•É•…MÕµ}•Å}¡…±™}Á•É¥µ•Ñ•É}µÕ±}¡•¥¡Ñ€ÁÉ½Ù•ÌÑ¡…Ð(€™¥¹¥Ñ•±äµ…¹äÍ…µ”µ¡•¥¡ÐÍ±¥•Ì¡…Ù”Ñ½Ñ…°…É•„¡•¥¡Ð€¨Ñ½Ñ…±	…Í”€¼€É€°(€¤¹”¸Ñ¡”É•Ñ…¹±”µÉ•…ÉÉ…¹•µ•¹Ð…±•‰É„¥¸É¡¥µ•‘•ÌœÁÉ½½˜¸(´I•Õ±…ÈÁ½±å½¹Ì½¸Ñ¡”Õ¹¥Ð¥É±”…É”•¹•É…±±ä¹½ÐÉ…Ñ¥½¹…°µ½½É‘¥¹…Ñ”(€Á½±å½¹Ì…™Ñ•ÈÉ•Á•…Ñ•‰¥Í•Ñ¥½¸¸€Q¡”¹½¸µÉ…Ñ¥½¹…°±…å•È¥Ì(€A½±å½¸¹A½±å½¹€¥¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½½µÁÕÑ…‰±•A½±å½¸¹±•…¹€èÙ•ÉÑ¥•Ì(€…É”½µÁ±•áI…ÝÌ°…¹A½±å½¸¹…É•…½µÁÕÑ•€¥ÌÑ¡”¥¹Ñ•ÉÙ…°Í¡½•±…”(€…±½É¥Ñ¡´½¸Ñ¡•¥ÈÉ…Ñ¥½¹…°‰½á•Ì¸€I…Ñ¥½¹…°Á½±å½¹Ì•µ‰•‰ä(€A½±å½¸¹™É½µI…Ñ¥½¹…±€°Ý¥Ñ •á…Ð…É•„É•ÁÉ•Í•¹Ñ•‰ä(€A½±å½¸¹É…Ñ¥½¹…±É•…I…Ý€¸(´¥ÉÍÐµÅÕ…‘É…¹Ð‰½à•á¡…ÕÍÑ¥½¸¥ÌÑ¡”ÁÉ¥µ…Éä¥É±”µ…É•„É½ÕÑ”¸€%ÐÕÍ•Ì(€½¹±äÑ¡”ÑÝ¼½É¹•ÉÌ½˜•… É…Ñ¥½¹…°É¥‰½à°…Ù½¥‘¥¹œ…¹ä¹••Ñ¼‘•™¥¹”(€Á½±å½¸…É•„½È¥ÉÕµ™•É•¹”™½ÈÁ¤¸€M•”(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½EÕ…ÉÑ•É¥É±”¹±•…¹€èEÕ…ÉÑ•É¥É±”¹É¥‘•±±}¥¹¹•É}Í½Õ¹‘€(€ÁÉ½Ù•ÌÑ¡…Ð„‰½àÝ¡½Í”ÕÁÁ•ÈµÉ¥¡Ð½É¹•ÈÍ…Ñ¥Í™¥•ÌáxÈ­åxÈ€ðô€Å€±¥•Ì(€¥¹Í¥‘”Ñ¡”ÅÕ…ÉÑ•È‘¥Í¬°…¹EÕ…ÉÑ•É¥É±”¹É¥‘•±±}½ÕÑ•É}™…±Í•}Í½Õ¹‘€(€ÁÉ½Ù•ÌÑ¡…Ð„‰½àÝ¡½Í”±½Ý•Èµ±•™Ð½É¹•È¥Ì½ÕÑÍ¥‘”¥Ì•¹Ñ¥É•±ä½ÕÑÍ¥‘”¸(€EÕ…ÉÑ•É¥É±”¹Á¥É•…%¹Ñ•ÉÙ…±€¥ÌÑ¡”É•ÍÕ±Ñ¥¹œ™¥¹¥Ñ”É…Ñ¥½¹…°¥¹Ñ•ÉÙ…°(€…±½É¥Ñ¡´™½ÈÁ¤™É½´™½ÕÈÑ¥µ•ÌÑ¡”ÅÕ…ÉÑ•Èµ‘¥Í¬…É•„¸(´Q¡”™¥ÉÍÐÅÕ…¹Ñ¥Ñ…Ñ¥Ù”•á¡…ÕÍÑ¥½¸ÍÑ•À™½ÈÑ¡”ÅÕ…ÉÑ•Èµ‘¥Í¬É½ÕÑ”¥Ì¹½Ü(€ÁÉ½Ù•Í½ÉÉäµ™É•”¸€EÕ…ÉÑ•É¥É±”¹=ÕÑ•É½±Õµ¹!•¥¡Ñ€É•½É‘ÌÑ¡”•á…Ð(€¡•¥¡Ð½˜…¸½ÕÑ•ÈÉ¥½±Õµ¸ì½ÕÑ•É½±Õµ¹!•¥¡Ñ}±•™Ñ}•‘•€°(€½ÕÑ•É½±Õµ¹!•¥¡Ñ}É¥¡Ñ}•‘•€°…¹Ñ¡•¥ÈÕ¹¥ÅÕ•¹•ÍÌ±•µµ…ÌÁÉ½Ù”Ñ¡…ÐÑ¡”(€…ÑÕ…°¥É±”É¥¡…Ì•¹‘Á½¥¹Ð¡•¥¡ÑÌ¹€…¹€Å€¸€%¸(€EÕ…ÉÑ•É¥É±”¹MÑ…¥É…Í•€°‰½Õ¹‘…Éå•±±Í}•Å}ÑÝ½}µÕ±}ÍÕ‰}½¹•€ÁÉ½Ù•ÌÑ¡”(€Ñ•±•Í½Á¥¹œ€É¸´Å€‰½Õ¹‘…Éäµ•±°½Õ¹Ð°…¹(€™Õ±±¥Í­	½Õ¹‘…Éå…Á}…Ñ}•á¡…ÕÍÑ¥½¹Õ•±}±•}½¹•}‘¥Ù€ÁÉ½Ù•ÌÑ¡…ÐÕÍ¥¹œ(€€á¹€ÍÕ‰‘¥Ù¥Í¥½¹Ìµ…­•ÌÑ¡¥Ì™Õ±°µ‘¥Í¬‰½Õ¹‘…Éä…À…Ðµ½ÍÐ€Ä½¹€¸€Q¡”(€É•µ…¥¹¥¹œ•ÉÑ¥™¥…Ñ”™½ÈEÕ…ÉÑ•É¥É±”¹A¥É•…	½á•ÉÑ¥™¥•‘€¥ÌÑ¼½¹¹•Ð(€Ñ¡•Í”½±Õµ¸µ¡•¥¡Ð™…ÑÌÑ¼Ñ¡”½¹É•Ñ”1¥ÍÑ€ÍÕ´¥¸(€EÕ…ÉÑ•É¥É±”¹Á¥É•…%¹Ñ•ÉÙ…±€…¹ÁÉ½Ù”¹•ÍÑ•‘¹•ÍÌ…É½ÍÌÉ•™¥¹•µ•¹ÑÌ¸(´Q¡”ÍÑ…¹‘…±½¹”É¡¥µ•‘•Ì…É•„Ñ¡•½É•´¹½Ü¡…Ì¥ÑÌ½Ý¸Á…­…”¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥É±•É•„¹±•…¹€¸€¥É±•É•„¹Õ¹¥Ñ¥Í­É•…½µÁÕÑ•€¥Ì(€Ñ¡”Õ¹¥Ðµ‘¥Í¬…É•„…±½É¥Ñ¡´°¥É±•É•„¹É¡¥µ•‘•ÍÉ•…=™U¹¥Ñ¥É±•€¥ÌÑ¡”(€Ñ¡•½É•´ÍÑ…Ñ•µ•¹ÐÍ…å¥¹œÑ¡¥Ì…É•„É•…°•ÅÕ…±Ì„¡½Í•¸Á¤É•ÁÉ•Í•¹Ñ…Ñ¥Ù”°(€…¹¥É±•É•„¹Á¥	åU¹¥Ñ¥Í­É•…}•ÅÕ¥Ù}½™}…É¡¥µ•‘•Í€¥ÌÑ¡”ÁÉ½Ù•(€½É½±±…ÉäÑ¡…ÐÑ¡¥ÌÍÑ…¹‘…±½¹”Ñ¡•½É•´¥µÁ±¥•Ì•ÅÕ¥Ù…±•¹”‰•ÑÝ••¸Ñ¡”(€…É•„‘•™¥¹¥Ñ¥½¸½˜Á¤…¹Ñ¡…Ð¡½Í•¸Á¤‘•™¥¹¥Ñ¥½¸¸(´Q¡”¥ÉÕµ™•É•¹”•á¡…ÕÍÑ¥½¸±…å•È¥Ì¹½Ü•áÁ±¥¥Ð…¹Í½ÉÉäµ™É•”¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥ÉÕµ™•É•¹”¹±•…¹€¸€¥ÉÕµ™•É•¹”¹	½Õ¹‘Í€Á…­…•Ì(€¥¹ÍÉ¥‰•½¥ÉÕµÍÉ¥‰•Á•É¥µ•Ñ•È¥¹Ñ•ÉÙ…°…±½É¥Ñ¡µÌ°(€	½Õ¹‘Ì¹¡…±™A¥Y…±¥‘}½™}¥ÉÕµ™•É•¹•Y…±¥‘€ÁÉ½Ù•ÌÑ¡…Ð„•ÉÑ¥™¥•(€¥ÉÕµ™•É•¹”•á¡…ÕÍÑ¥½¸¥Ù•Ì„•ÉÑ¥™¥•¡…±˜µ¥ÉÕµ™•É•¹”Á¤(€É•ÁÉ•Í•¹Ñ…Ñ¥Ù”°…¹(€¥ÉÕµ™•É•¹”¹Õ¹¥Ñ¥Í­É•…}•ÅÕ¥Ù}¡…±™¥ÉÕµ™•É•¹•€¥ÌÑ¡”‘¥É•ÐÑ¡•½É•´(€Í…å¥¹œÑ¡”Õ¹¥Ðµ‘¥Í¬…É•„Á¤•ÅÕ…±ÌÑ¡”¡…±˜µ¥ÉÕµ™•É•¹”Á¤½¹”Ñ¡•¥È(€¥¹Ñ•ÉÙ…°…±½É¥Ñ¡µÌ…É”½ÕÁ±•…Ð•Ù•ÉäÁÉ•¥Í¥½¸¸€Q¡”™¥¹¥Ñ”Í•Ñ½È(€±•µµ…Ì¥¹¥Ñ•M•Ñ½ÉÌ¹¥ÉÕµÍÉ¥‰•‘}…É•…}•Å}¡…±™}Á•É¥µ•Ñ•É€…¹(€¥¹¥Ñ•M•Ñ½ÉÌ¹¥¹ÍÉ¥‰•‘}…É•…}±•}¡…±™}Á•É¥µ•Ñ•É€ÁÉ½Ù”Ñ¡”…±•‰É…¥Œ(€É¡¥µ•‘•ÌÉ•±…Ñ¥½¸‰•ÑÝ••¸Ñ…¹•¹Ð½¥¹ÍÉ¥‰•Í•Ñ½È™…¹Ì…¹Á•É¥µ•Ñ•È¸(€¥ÉÕµ™•É•¹”¹M•Ñ½É	½Õ¹‘Ì¹MÑ…•€¹½ÜÁ…­…•ÌÑ¡”•á…Ð™¥¹¥Ñ”Í•Ñ½È‘…Ñ„(€…¹…ÕÑ½µ…Ñ¥…±±ä‘•É¥Ù•ÌÑ¡”…É•„½Á•É¥µ•Ñ•È½µÁ…É¥Í½¸¸€Q¡”Ñ¡•½É•´(€¥ÉÕµ™•É•¹”¹M•Ñ½É	½Õ¹‘Ì¹á¡…ÕÍÑ¥½¸¹…É¡¥µ•‘•Í}½™}½¹‘¥Ñ¥½¹Í€¥ÌÑ¡”(€ÕÉÉ•¹ÐÍ¡…ÉÀÉ¡¥µ•‘•Ì•¹‘Á½¥¹Ðè™½È…¹ä½¹É•Ñ”Í•Ñ½È•á¡…ÕÍÑ¥½¸Ý¡½Í”(€…É•„…¹Á•É¥µ•Ñ•È¥¹Ñ•ÉÙ…±Ì…É”¹•ÍÑ•…¹Í¡É¥¹¬Ñ¼é•É¼°Ñ¡”…É•„(€‘•™¥¹¥Ñ¥½¸½˜Á¤¥Ì•ÅÕ¥Ù…±•¹ÐÑ¼Ñ¡”¡…±˜µ¥ÉÕµ™•É•¹”‘•™¥¹¥Ñ¥½¸¸(€¥ÉÕµ™•É•¹”¹Á½±å½¹}…É•…}•ÅÕ¥Ù}¡…±™}¥ÉÕµ™•É•¹•€É•ÍÑ…Ñ•ÌÑ¡”•á¥ÍÑ¥¹œ(€•ÉÑ¥™¥•Á½±å½¸Ñ¡•½É•´¥¸Ñ¡¥Ì…É•„½¥ÉÕµ™•É•¹”±…¹Õ…”¸(´Q¡”Õ¹¥ÐµÍ•Ñ½ÈÑ¡•½É•´¥Ì¹½ÜÍÑ…Ñ•‘¥É•Ñ±ä¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥ÉÕ±…ÉM•Ñ½È¹±•…¹€¸(€¥ÉÕ±…ÉM•Ñ½È¹…É•…}•Å}¡…±™É1•¹Ñ¡€ÁÉ½Ù•ÌÑ¡…Ð…¹ä•ÉÑ¥™¥•(€Õ¹¥ÐµÍ•Ñ½È•á¡…ÕÍÑ¥½¸¡…ÌÍ•Ñ½È…É•„•ÅÕ…°Ñ¼¡…±˜¥ÑÌ‰½Õ¹‘…Éä…ÉŒ±•¹Ñ (€…Ì½µÁÕÑ…‰±”É•…±Ì¸€Q¡”…¹±”µÁ…É…µ•ÑÉ¥é•Í¡…‘½Ü¥Ì…±Í¼É•½É‘•è(€¥ÉÕ±…ÉM•Ñ½È¹	å¹±”¹…É•…}•Å}…É1•¹Ñ¡}‘¥Ù}ÑÝ½€ÁÉ½Ù•Ì(€…É•„¡Ñ¡•Ñ„¤€ô…É1•¹Ñ ¡Ñ¡•Ñ„¤¼É€™½ÈÉ…Ñ¥½¹…°…¹±•Ì°…¹(€¥ÉÕ±…ÉM•Ñ½È¹	å¹±”¹Í…µ••É¥Ù…Ñ¥Ù•¹‘%¹¥Ñ¥…±€ÍÑ½É•ÌÑ¡”•á…Ð(€‘•É¥Ù…Ñ¥Ù”•ÉÑ¥™¥…Ñ•ÌÍ…å¥¹œ‰½Ñ Í¥‘•Ì¡…Ù”‘•É¥Ù…Ñ¥Ù”€Ä¼É€…¹…É•”(€…ÐÑ¡•Ñ„€ô€Á€¸(´ÉŒÍ…µÁ±”Á½¥¹ÑÌ…É”¹½Ü…¸•áÁ±¥¥Ð•ÉÑ¥™¥•±…å•È¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½ÉM…µÁ±•Ì¹±•…¹€¸€ÉM…µÁ±•Ì¹½µÁ±•á•ÉÐ¹½™I•…±A…¥É€(€ÑÕÉ¹ÌÑÝ¼•ÉÑ¥™¥•½½É‘¥¹…Ñ”I•…±•ÉÑÌ¥¹Ñ¼„•ÉÑ¥™¥•½µÁ±•á•ÉÑ€°(€ÉM…µÁ±•Ì¹MÑ…•€…¹ÉM…µÁ±•Ì¹…µ¥±å€ÑÕÉ¸™¥¹¥Ñ”Í…µÁ±”±¥ÍÑÌ¥¹Ñ¼(€Á½±å½¹Ì°…¹ÉM…µÁ±•Ì¹U¹¥ÑEÕ…ÉÑ•ÉÉ…µ¥±å€É•½É‘ÌÑ¡”(€™¥ÉÍÐµÅÕ…‘É…¹Ð½Õ¹¥Ðµ¥É±”‰½à½¹‘¥Ñ¥½¹Ì•áÁ•Ñ•™É½´„½¹É•Ñ”…ÉŒ(€…±½É¥Ñ¡´¸€Q¡”•á…Ð•¹‘Á½¥¹ÑÌ€ Ä°À¥€…¹€ À°Ä¥€…É”•ÉÑ¥™¥•°…¹(€ÉM…µÁ±•Ì¹ÅÕ…ÉÑ•ÉÉ¹‘Á½¥¹Ñ¡½É‘9½ÉµMÅ€¡•­ÌÑ¡…ÐÑ¡”ÍÅÕ…É•¡½É(€±•¹Ñ ‰•ÑÝ••¸Ñ¡•´¥Ì•á…Ñ±ä€É€¸(´Q¡”É…Ñ¥½¹…°AåÑ¡…½É•…¸Á…É…µ•ÑÉ¥é…Ñ¥½¸¥Ì¹½ÜÑ¡”½¹É•Ñ”ÅÕ…ÉÑ•Èµ…ÉŒ(€Í…µÁ±¥¹œÉ½ÕÑ”¸€%¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½ÉM…µÁ±•Ì¹±•…¹€°(€ÉM…µÁ±•Ì¹AåÑ¡…½É•…¸¹Á½¥¹ÐÔ€ô(€€  ÄµÕxÈ¤¼ Ä­ÕxÈ¤°€ÉÔ¼ Ä­ÕxÈ¤¥€¥Ù•ÌÉ…Ñ¥½¹…°Á½¥¹ÑÌ½¸Ñ¡”Õ¹¥Ð¥É±”°(€…¹ÉM…µÁ±•Ì¹AåÑ¡…½É•…¸¹É…Ñ¥½¹…±Y•ÉÑ¥•Ì¹€Í…µÁ±•ÌÑ¡”…ÉŒ…Ð(€Ô€ô¬½¹€¸€Q¡•½É•µÌÁ½¥¹Ñ}¹½ÉµMÅ€°Á½¥¹Ñ}É•}…¹Ñ¥Ñ½¹•€°…¹(€Á½¥¹Ñ}¥µ}µ½¹½Ñ½¹•€ÁÉ½Ù”Ñ¡…ÐÑ¡•Í”É…Ñ¥½¹…°Á½¥¹ÑÌ±¥”•á…Ñ±ä½¸Ñ¡”(€Õ¹¥Ð¥É±”…¹µ½Ù”µ½¹½Ñ½¹¥…±±äÑ¡É½Õ Ñ¡”™¥ÉÍÐÅÕ…‘É…¹Ð¸€Q¡”¥¹¹•È(€…¹½ÕÑ•ÈÍÑ…¥É…Í”½É¹•ÉÌ…É”…±Í¼•ÉÑ¥™¥•è(€…‘©…•¹Ñ}¥¹¹•É}½É¹•É}¹½ÉµMÅ}±•}½¹•€ÁÕÑÌ•Ù•Éä±½Ý•ÈÍÑ…¥É…Í”½É¹•È(€¥¹Í¥‘”Ñ¡”Õ¹¥Ð‘¥Í¬°Ý¡¥±”…‘©…•¹Ñ}½ÕÑ•É}½É¹•É}¹½ÉµMÅ}•}½¹•€ÁÕÑÌ•Ù•Éä(€ÕÁÁ•ÈÍÑ…¥É…Í”½É¹•È½ÕÑÍ¥‘”¥Ð¸€Q¡”…‘©…•¹ÐµÍÑ•À•ÍÑ¥µ…Ñ•Ì(€…‘©…•¹Ñ}É•}…Á}±•}™½ÕÉ}½Ù•É}¹€…¹…‘©…•¹Ñ}¥µ}…Á}±•}ÑÝ½}½Ù•É}¹€¥Ù”(€Ñ¡”™¥ÉÍÐÅÕ…¹Ñ¥Ñ…Ñ¥Ù”Í¡É¥¹­¥¹œ‰½Õ¹‘Ì™½ÈÑ¡¥Ì•á¡…ÕÍÑ¥½¸¸€Q¡¥Ì¥ÌÑ¡”(€ÕÉÉ•¹Ð½¹É•Ñ”™½Õ¹‘…Ñ¥½¸™½È„É…Ñ¥½¹…°É¡¥µ•‘•Ì•á¡…ÕÍÑ¥½¸¸(´Q¡”ÕÉÉ•¹ÐÁÉ½©•Ðµ™…¥¹œÉ¡¥µ•‘•Ì¥¹Ñ•É™…”¥Ì¹½ÜÑ¡”Íµ…±±•È(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥É±•A¤¹±•…¹€°¹½ÐÑ¡”½±‘•È…É‰¥ÑÉ…ÉäµÁ½±å½¸±…å•È¸(€¥É±•A¤¹…É•…I…Ý€¥ÌÑ¡”Õ¹¥Ðµ‘¥Í¬µ…É•„‘•™¥¹¥Ñ¥½¸½˜Á¤™É½´Ñ¡”É…Ñ¥½¹…°(€…ÉŒÍ…µÁ±•ÌèÑ¡”±½Ý•È…É•„¥ÌÑ¡”¥¹ÍÉ¥‰•¡½ÉÍ•Ñ½È…¹Ñ¡”ÕÁÁ•È…É•„(€¥ÌÑ¡”…‘©…•¹ÐµÑ…¹•¹ÐÍ•Ñ½È¸€¥É±•A¤¹¥ÉÕµ™•É•¹•á¡…ÕÍÑ¥½¸¹Á¥I…Ý€¥Ì(€Ñ¡”¡…±˜µ¥ÉÕµ™•É•¹”‘•™¥¹¥Ñ¥½¸½˜Á¤°…¹¥É±•A¤¹…É¡¥µ•‘•Í€¥ÌÑ¡”(€Ñ¡•½É•´™½É´Í…å¥¹œÑ¡•Í”ÑÝ¼I•…±I…ÝÌ…É”•ÅÕ¥Ù…±•¹Ð½¹”Ñ¡”½¹É•Ñ”(€É…Ñ¥½¹…°µ…ÉŒ½Ñ…¹•¹Ð½ÕÁ±¥¹œ¡…Ì‰••¸ÁÉ½Ù•¸€Q¡”É½½Ðµ½‘Õ±”¥µÁ½ÉÑÌÑ¡¥Ì(€‘¥É•ÐÉ½ÕÑ”ìÑ¡”½±‘•ÈÉ¡¥µ•‘•Ì¹±•…¹€°¥ÉÕµ™•É•¹”¹±•…¹€°…¹(€¥ÉÕ±…ÉM•Ñ½È¹±•…¹€™¥±•Ì…É”±•…äÍ…™™½±‘¥¹œ™½È½µÁ…É¥Í½¸°¹½ÐÑ¡”(€µ…¥¸Á…Ñ ¸(´Q¡”¥ÉÕµ™•É•¹”É½ÕÑ”¹½ÜÕÍ•ÌÑ¡”É¥¡Ð½ÕÑ•È½‰©•ÐèÑ…¹•¹Ð(€¥¹Ñ•ÉÍ•Ñ¥½¹Ì°¹½ÐÍÑ…¥É…Í•Ì¸€%¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥É±•A¤¹±•…¹€°(€¥É±•A¤¹AåÑ¡…½É•…¹¥ÉÕµ™•É•¹”¹Ñ…¹•¹Ñ%¹Ñ•ÉÍ•Ñ¥½¸ÀÅ€¡…Ì½½É‘¥¹…Ñ•Ì(€€ ¡Ä¹¥´µÀ¹¥´¤¼¡À¹É”©Ä¹¥´µÀ¹¥´©Ä¹É”¤°(€€¡À¹É”µÄ¹É”¤¼¡À¹É”©Ä¹¥´µÀ¹¥´©Ä¹É”¤¥€°…¹(€…‘©…•¹Ñ}Ñ…¹•¹Ñ•Ñ}Á½Í€ÁÉ½Ù•Ì…‘©…•¹ÐÉ…Ñ¥½¹…°Í…µÁ±•Ì‘¼¹½Ð¡¥Ð„é•É¼(€‘•¹½µ¥¹…Ñ½È¸€½ÕÑ•ÉQ…¹•¹Ñ	½Õ¹‘…ÉåY•ÉÑ¥•Í€¥ÌÑ¡”½ÕÑ•ÈÁ½±å±¥¹”™É½´(€€ Ä°À¥€Ñ¡É½Õ …‘©…•¹ÐÑ…¹•¹Ð¥¹Ñ•ÉÍ•Ñ¥½¹ÌÑ¼€ À°Ä¥€¸(´Q¡”…É•„Á¤É…Ü…±½É¥Ñ¡´¥Ì¹…µ•‰ä¥É±•A¤¹…É•…±½É¥Ñ¡µ€°Ý¥Ñ Ñ¡”(€½¹É•Ñ”¥µÁ±•µ•¹Ñ…Ñ¥½¸Õ¹‘•È(€¥É±•A¤¹AåÑ¡…½É•…¹¥ÉÕµ™•É•¹”¹…É•…±½É¥Ñ¡µ€¸€Q¡¥Ì¥Ì¹¼±½¹•ÈÑ¡”(€½…ÉÍ”É¥µ‰½à…±½É¥Ñ¡´™É½´¥É±•É•„¹±•…¹€ìÑ¡”Í…µ”É…Ñ¥½¹…°Í…µÁ±•Ì(€ÕÍ•™½È¥ÉÕµ™•É•¹”¹½Ü‘É¥Ù”Ñ¡”…É•„¥¹Ñ•ÉÙ…°Ñ½¼¸(´Q¡”¥ÉÕµ™•É•¹”Á¤É…Ü…±½É¥Ñ¡´¥Ì¹…µ•¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥É±•A¤¹±•…¹€è(€¥É±•A¤¹AåÑ¡…½É•…¹¥ÉÕµ™•É•¹”¹Á¥±½É¥Ñ¡µ€¥ÌÑ¡”I•…±I…Ý€™½ÈÁ¤…Ì(€¡…±˜Ñ¡”™Õ±°¥ÉÕµ™•É•¹”¸€%ÑÌ±½Ý•È‰½Õ¹ÕÍ•ÌÑ¡”¥¹ÍÉ¥‰•¡½É(€Á½±å±¥¹”‘¥É•Ñ±ä°…¹¥ÑÌÕÁÁ•È‰½Õ¹ÕÍ•ÌÑ¡”Ñ…¹•¹ÐÁ½±å±¥¹”‘¥É•Ñ±äì(€•… …‘©…•¹ÐÍ•µ•¹Ð±•¹Ñ ¥Ì•Ù…±Õ…Ñ•‰äÑ¡”•á¥ÍÑ¥¹œÉ…Ñ¥½¹…°ÍÅÉÑ€(€¥¹Ñ•ÉÙ…°™Õ¹Ñ¥½¸¥¹Í¥‘”Ñ¡”Á¤µ½‘Õ±”¸€Q¡”É•µ…¥¹¥¹œÁÉ½½˜Ñ…É•Ð¥Ì(€¥É±•A¤¹AåÑ¡…½É•…¹¥ÉÕµ™•É•¹”¹¥ÉÕµ™•É•¹••ÉÑ¥™¥•‘€¸(´Ñ¡¥É•½µ•ÑÉ¥ŒÁ¤‘•™¥¹¥Ñ¥½¸¥Ì¹½Ü¹…µ•è(€¥É±•A¤¹™½ÕÉÉÑ…¹=¹•A¥I…Ý±½É¥Ñ¡µ€¥Ì€Ð€¨…ÉÑ…¸ Ä¥€°Ý¡•É”…ÉÑ…¹•¹Ð(€¥ÌÑ¡”AåÑ¡…½É•…¸‘å…‘¥ŒÍ•Ñ½Èµ…É•„½¹ÍÑÉÕÑ¥½¸°¹½ÐÑ¡”Á½Ý•ÈÍ•É¥•Ì¸(€Q¡”Ñ¡•½É•´¥É±•A¤¹™½ÕÉÉÑ…¹=¹•A¥}½µÁÕÑ•}•Å}…É•…A¥€ÁÉ½Ù•ÌÑ¡…ÐÑ¡¥Ì(€…±½É¥Ñ¡´¡…Ì•á…Ñ±äÑ¡”Í…µ”ÍÑ…”½ÕÑÁÕÑÌ…ÌÑ¡”Õ¹¥Ðµ‘¥Í¬…É•„Á¤¸(€Q¡•½É•µÌ¥É±•A¤¹™½ÕÉÉÑ…¹=¹•A¥}•ÅÕ¥Ù}…É•…A¥€…¹(€¥É±•A¤¹™½ÕÉÉÑ…¹=¹•A¥}•ÅÕ¥Ù}¥ÉÕµ™•É•¹•A¥€ÁÉ½Ù”Ñ¡”É…Ü•ÅÕ¥Ù…±•¹•Ì(€Ñ¼Ñ¡”ÁÉ•Ù¥½ÕÌÑÝ¼•½µ•ÑÉ¥Œ‘•™¥¹¥Ñ¥½¹Ì¸€Q¡”™¥ÉÍÐÕÍ•ÌÑ¡”•á…Ð(€ÅÕ…ÉÑ•ÈµÍ•Ñ½È¥‘•¹Ñ¥™¥…Ñ¥½¸Á±ÕÌ¥¹¹•ÉEÕ…ÉÑ•ÉÉ•…}±•}½ÕÑ•ÉEÕ…ÉÑ•ÉÉ•…€ì(€Ñ¡”Í•½¹ÑÉ…¹ÍÁ½ÉÑÌÑ¡”É¡¥µ•‘•Ì•ÅÕ¥Ù…±•¹”¸(´Q¡”½¹É•Ñ”É¡¥µ•‘•Ì•¹‘Á½¥¹Ð¹½Ü½•ÌÑ¡É½Õ Ñ¡”±…ÍÍ¥…°™¥¹¥Ñ”(€É•…ÉÉ…¹•µ•¹ÐÁ¥ÑÕÉ”°¹½Ð‘¥É•Ð¥¹•ÅÕ…±¥Ñä¡…µµ•É¥¹œ¸€%¸(€¥É±•A¤¹AåÑ¡…½É•…¹¥ÉÕµ™•É•¹”¹I•…ÉÉ…¹•‘…¹€°(€…É•…}•Å}¡•¥¡Ñ}µÕ±}¡…±™}Á•É¥µ•Ñ•É€ÁÉ½Ù•ÌÑ¡…Ð„™¥¹¥Ñ”™…¸½˜Í…µ”µ¡•¥¡Ð(€ÑÉ¥…¹±•ÌÉ•…ÉÉ…¹•ÌÑ¼„É•Ñ…¹±”½˜Ý¥‘Ñ ¡…±˜Ñ¡”Ñ½Ñ…°‰…Í”Á•É¥µ•Ñ•È¸(€Y…É¥…‰±•I•…ÉÉ…¹•‘M•Ñ½ÉMÑ…•€É•½É‘ÌÑ¡”¹½¸µÕ¹¥™½É´Í•Ñ½Èµ™…¸‘…Ñ„…Ð(€½¹”AåÑ¡…½É•…¸Í…µÁ±”ÍÑ…”°…¹(€…É¡¥µ•‘•Í	½Õ¹‘Í}½™}Ù…É¥…‰±•I•…ÉÉ…¹•‘MÑ…•Í€‘•É¥Ù•ÌÑ¡”ÑÝ¼•¹‘Á½¥¹Ð(€½Ù•É±…À¥¹•ÅÕ…±¥Ñ¥•Ì™É½´É•…ÉÉ…¹•™…¹Ì¸€Q¡”½¹É•Ñ”É…Ñ¥½¹…°µÍ…µÁ±”(€‰É¥‘”¥Ì¹½ÜM•Ñ½É…¹	½Õ¹‘Í€è…É¡¥µ•‘•Í	½Õ¹‘Í}½™}Í•Ñ½É…¹	½Õ¹‘Í€…¹(€…É•…±½É¥Ñ¡µ}•ÅÕ¥Ù}Á¥±½É¥Ñ¡µ}½™}Í•Ñ½É…¹	½Õ¹‘Í€ÁÉ½Ù”°Í½ÉÉäµ™É•”°Ñ¡…Ð(€Ñ¡”½¹É•Ñ”…É•„…¹¡…±˜µ¥ÉÕµ™•É•¹”I•…±I…ÝÌ…É”•ÅÕ¥Ù…±•¹Ð½¹”Ñ¡”(€™¥¹¥Ñ”Í•Ñ½È™…¸‰½Õ¹‘Ì…É”ÍÕÁÁ±¥•¸€Q¡”™¥¹¥Ñ”•½µ•ÑÉä¥Ì¹½Ü(€‘¥Í¡…É•‰äÑ¡”‘¥É•ÐÉ¡¥µ•‘•Ì½I¥•µ…¹¸µÍÕ´•ÍÑ¥µ…Ñ”è(€¡½É‘É½ÍÍ}±•}Ñ…¹•¹ÑÉ½ÍÍMÕµ€ÁÉ½Ù•ÌÑ¡”Á•Èµ•‘”¡½ÉµÙÌµÑ…¹•¹Ð‰½Õ¹°(€…‘©…•¹Ñ¡½É‘1•¹Ñ¡1½}±•}Ñ…¹•¹ÑÉ½ÍÍMÕµ€½µÁ…É•ÌÑ¡”½µÁÕÑ•¡½É±½Ý•È(€¥¹Ñ•ÉÙ…°Ý¥Ñ Ñ¡”Í…µ”Ñ…¹•¹ÐÁ¥••Ì°…¹(€¥¹¹•É‘•É½ÍÍ•Í}±•}½ÕÑ•ÉQ…¹•¹Ñ‘•É½ÍÍ•Í€ÍÕµÌÑ¡”¥¹•ÅÕ…±¥Ñ¥•Ì¸€Q¡”(€ÁÕ‰±¥ŒÉ…ÜÉ¡¥µ•‘•ÌÑ¡•½É•´¥Ì¥É±•A¤¹…É¡¥µ•‘•Í}É…Ý€èÑ¡”(€Õ¹¥Ðµ‘¥Í¬µ…É•„I•…±I…Ý€…¹Ñ¡”¡…±˜µ¥ÉÕµ™•É•¹”I•…±I…Ý€…É”•ÅÕ¥Ù…±•¹Ð(€Ý¥Ñ ¹¼•ÉÑ¥™¥…Ñ¥½¸…ÍÍÕµÁÑ¥½¹Ì¸€%¹Ñ•É¹…±±äÑ¡¥Ì¥Ì(€AåÑ¡…½É•…¹¥ÉÕµ™•É•¹”¹…É•…±½É¥Ñ¡µ}•ÅÕ¥Ù}Á¥±½É¥Ñ¡µ€¸€Q¡”•ÉÑ¥™¥•(€Ñ¡•½É•´ÁåÑ¡…½É•…¹}…É•…}Á¥}•ÅÕ¥Ù}¥ÉÕµ™•É•¹•}Á¥€ÍÑ¥±°…ÍÍÕµ•Ì(€É•…•ÉÑ¥™¥•‘€…¹¥ÉÕµ™•É•¹••ÉÑ¥™¥•‘€¸(€Q¡”É•µ…¥¹¥¹œ•ÉÑ¥™¥…Ñ¥½¸Ñ…Í¬¥Ì¹½ÐÑ¡¥Ì™¥¹¥Ñ”É¡¥µ•‘•Ì½µÁ…É¥Í½¸(€‰ÕÐÁÉ½Ù¥¹œI•…±I…Ü¹Y…±¥‘½µÁÕÑ•€™½ÈÑ¡”¡½Í•¸…±½É¥Ñ¡µÌ¸€Q¡”ÁÕ‰±¥Œ(€…±½É¥Ñ¡µÌ¹½ÜÕÍ”‘å…‘¥ŒÉ•™¥¹•µ•¹Ðè‘å…‘¥MÑ…”¹€µ•…¹Ì€Éy¹€(€AåÑ¡…½É•…¸…ÉŒÍÕ‰‘¥Ù¥Í¥½¹Ì¸€Q¡”™¥¹¥Ñ”•½µ•ÑÉäÉ•µ…¥¹ÌÍÑ…”µ±½…°°‰ÕÐ(€Ñ¡”É…ÜµÉ•…°ÍÑ…”Á…É…µ•Ñ•È¹½ÜÉ•™¥¹•Ì¹…ÑÕÉ…±±ä¸(€Q¡”Ý½É­¥¹œµ•Ñ¡½™½ÈÑ¡”É•µ…¥¹¥¹œ¥¹•ÅÕ…±¥Ñ¥•Ì¥Ìè™É••é”„ÍÑ…”¹€°(€ÝÉ¥Ñ”Ñ¡”•á…Ð™¥¹¥Ñ”¥¹•ÅÕ…±¥Ñä¥¸É…Ñ¥½¹…°•áÁÉ•ÍÍ¥½¹Ì°Í½±Ù”¥Ð½¸Á…Á•È°(€Ñ¡•¸™½Éµ…±¥é”Ñ¡…Ð¥Í½±…Ñ•±•µµ„‰•™½É”É•ÑÕÉ¹¥¹œÑ¼Ñ¡”É…ÜµÉ•…°(€•ÉÑ¥™¥…Ñ”¸€½ÈÑ¡”ÕÉÉ•¹ÐAåÑ¡…½É•…¸Í…µÁ±”ÍÑ…”°Ñ¡”±½…°Ù…É¥…‰±•Ì(€…É”…‘©…•¹ÐÕ¹¥ÐÁ½¥¹ÑÌÁ}­€°Á}í¬¬Åõ€…¹Ñ¡•¥ÈÑ…¹•¹Ð¥¹Ñ•ÉÍ•Ñ¥½¸(€Ñ}­€¸€Q¡”™¥¹¥Ñ”É¡¥µ•‘•Ì½µÁ…É¥Í½¸¥Ì…±É•…‘äÉ•‘Õ•Ñ¼…¹ÁÉ½Ù•(€™É½´Ñ¡”Á•Èµ•‘”¥¹•ÅÕ…±¥Ñ¥•Ì(€É½ÍÌÁ}¬Á}í¬¬Åô€ðôÉ½ÍÌÁ}¬Ñ}¬€¬É½ÍÌÑ}¬Á}í¬¬Åõ€…¹(€ÍÅÉÑ1½Ý•È€¡ñÁ}í¬¬ÅôµÁ}­ñxÈ¤€ðôÉ½ÍÌÁ}¬Ñ}¬€¬É½ÍÌÑ}¬Á}í¬¬Åõ€¸(€Q¡”É•µ…¥¹¥¹œÁÕ‰±¥ŒµÍÑ…”•ÉÑ¥™¥…Ñ¥½¸¥¹•ÅÕ…±¥Ñ¥•Ì…É”•áÁ±¥¥ÐÍ¡É¥¹­¥¹œ(€‰½Õ¹‘Ì°™½È•á…µÁ±”„½¹Ù•¹¥•¹Ð•ÍÑ¥µ…Ñ”±¥­”(€€Ð€¨€¡½ÕÑ•ÉEÕ…ÉÑ•ÉÉ•„€¡‘å…‘¥MÑ…”¸¤€´¥¹¹•ÉEÕ…ÉÑ•ÉÉ•„€¡‘å…‘¥MÑ…”¸¤¤€ðô½¹yÉ€(€½È…¹ä½Ñ¡•È‰½Õ¹Ñ¡…ÐÑ•¹‘ÌÑ¼é•É¼°…¹Ñ¡”…¹…±½½ÕÌ¥ÉÕµ™•É•¹”(€‰½Õ¹¸€Q¡”É•µ…¥¹¥¹œÉ½ÍÌµÍÑ…”(€•ÉÑ¥™¥…Ñ¥½¸¥¹•ÅÕ…±¥Ñ¥•Ì…É”¹•ÍÑ¥¹œÍÑ…Ñ•µ•¹ÑÌì‘å…‘¥ŒÍÑ…•ÌÉ•‘Õ”(€Ñ¡•Í”Ñ¼½¹”µÍÑ•ÀÉ•™¥¹•µ•¹Ð™É½´„ÍÑ…”Ñ¼¥ÑÌ‘½Õ‰±•ÍÑ…”¸(€Q¡”ÍÅÉÐ‰¥Í•Ñ¥½¸±…å•È¹½ÜÁÉ½Ù•ÌÍÅÉÑÁÁÉ½á=¹½µ…¥¹}ÍÁ•€°…¹(€¥É±•A¥€ÑÕÉ¹Ì¥Ð¥¹Ñ¼Í•µ•¹Ðµ±•¹Ñ •¹‘Á½¥¹Ð±•µµ…Ì°¥¹±Õ‘¥¹œÑ¡”(€Ñ…¹•¹Ðµ±¥¹”¥‘•¹Ñ¥ÑäÑ…¹•¹Ñ}Í•µ•¹Ñ}¹½ÉµMÅ}•Å}É½ÍÍ}ÍÅ€…¹Ñ¡”¡½É(€•ÍÑ¥µ…Ñ”¡½É‘É½ÍÍ}±•}Í•µ•¹Ñ}¡¥€¸€Q¡”™¥ÉÍÐ±½…°½É¥•¹Ñ…Ñ¥½¸±•µµ„¥Ì(€…±Í¼¥¸Á±…”èÁ½¥¹Ñ}É½ÍÍ}¹½¹¹•}½™}½É‘•É€ÁÉ½Ù•ÌÑ¡…Ð½É‘•É•É…Ñ¥½¹…°(€AåÑ¡…½É•…¸…ÉŒÁ½¥¹ÑÌ¡…Ù”¹½¹¹•…Ñ¥Ù”É½ÍÌÁÉ½‘ÕÐ¸(´Q¡”Á½Ý•ÈµÍ•É¥•Ì…ÉÑ…¹•¹ÐÁ¤É•ÁÉ•Í•¹Ñ…Ñ¥Ù”¥Ì¹½Ü¹…µ•Í•Á…É…Ñ•±äè(€¥É±•A¤¹Á½Ý•ÉM•É¥•ÍÉÑ…¹=¹•A¥I…Ý±½É¥Ñ¡µ€¥Ì€Ð€¨…ÉÑ…¸¹Í•É¥•Ì Ä¥€°Ý¡•É”(€…ÉÑ…¸¹Í•É¥•Ì¡à¤€ôà€´áxÌ¼Ì€¬áxÔ¼Ô€´€¸¸¹€¸€Q¡¥Ì¥Ì¥¹Ñ•¹Ñ¥½¹…±±ä¹½Ð„(€•½µ•ÑÉ¥Œ‘•™¥¹¥Ñ¥½¸¸€Q¡”Ñ¡•½É•´(€¥É±•A¤¹Á½Ý•ÉM•É¥•ÍÉÑ…¹=¹•A¥}•ÅÕ¥Ù}™½ÕÉÉÑ…¹=¹•A¥}½™}‘¥É•Ñ%¹•ÅÕ…±¥Ñ¥•Í€(€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”‘¥É•Ð™¥¹¥Ñ”…ÉÑ…¹•¹Ð¥¹•ÅÕ…±¥Ñ¥•Ì½¸lÀ°Åu€Ý½Õ±(€¥‘•¹Ñ¥™ä¥ÐÝ¥Ñ Ñ¡”•½µ•ÑÉ¥Œ€Ð€¨…ÉÑ…¸ Ä¥€‘•™¥¹¥Ñ¥½¸¸€Q¡”É•µ…¥¹¥¹œ(€¹½¸µÑ…ÕÑ½±½¥…°Ñ…É•Ð¥Ì(€¥É±•A¤¹A½Ý•ÉM•É¥•ÍÉÑ…¹=¹•A¥É••Í]¥Ñ¡•½µ•ÑÉ¥€¸(´•½µ•ÑÉ¥Œ…ÉÑ…¹•¹Ð¥Ì¹½ÜÉ•ÁÉ•Í•¹Ñ•‰äÍ•Ñ½È…É•„‘…Ñ„¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥É±•A¤¹±•…¹€¸€¥É±•A¤¹•½µ•ÑÉ¥ÉÑ…¸¹M•Ñ½ÉÉ•…	åM±½Á•€(€…Í­Ì™½ÈÑ¡”Í¥¹•Õ¹¥ÐµÍ•Ñ½È…É•„ÍÝ•ÁÐ™É½´€ Ä°À¥€Ñ¼Ñ¡”É…ä€ Ä±à¥€°(€…¹¥É±•A¤¹•½µ•ÑÉ¥ÉÑ…¸¹É…Ý€ÑÕÉ¹Ì¥Ð¥¹Ñ¼…¸±•µ•¹Ñ…Éä¹ÉÑ…¹I…Ý€‰ä(€‘½Õ‰±¥¹œÑ¡”Í•Ñ½È…É•„¸€Q¡¥Ì…Ù½¥‘Ì‘•™¥¹¥¹œ…ÉÑ…¹•¹Ð‰ä¥ÑÌQ…å±½È(€Í•É¥•Ì¸(´Q¡”µ½É”…É¥Ñ¡µ•Ñ¥Œ•½µ•ÑÉ¥Œ…ÉÑ…¹•¹ÐÉ½ÕÑ”¹½ÜÕÍ•ÌÑ¡”AåÑ¡…½É•…¸(€Á…É…µ•Ñ•ÈèÑ¡”Á½¥¹Ð€  ÄµáxÈ¤¼ Ä­áxÈ¤°€Éà¼ Ä­áxÈ¤¥€¡…Ì…¹±”(€€È…Ñ…¸¡à¥€°Í¼¥ÑÌÕ¹¥ÐµÍ•Ñ½È…É•„¥Ì…Ñ…¸¡à¥€‘¥É•Ñ±ä¸€Q¡”½¹É•Ñ”(€É…Ü…±½É¥Ñ¡´¥Ì¹½Ü‘å…‘¥Œè¥É±•A¤¹AåÑ¡…½É•…¹ÉÑ…¸¹Í•Ñ½ÉÉ•…½µÁÕÑ•€(€•Ù…±Õ…Ñ•ÌÑ¡”Í•Ñ½ÈÕÍ¥¹œ€Éy¹€ÍÕ‰‘¥Ù¥Í¥½¹Ì…ÐÁÕ‰±¥ŒÍÑ…”¹€°•á…Ñ±ä(€µ…Ñ¡¥¹œÑ¡”¥É±”µ…É•„É½ÕÑ”¸€Q¡”¹…µ•½µÁ…É¥Í½¸Ñ…É•Ð¥Ì(€¥É±•A¤¹AåÑ¡…½É•…¹ÉÑ…¸¹å…‘¥É••Í]¥Ñ¡A½Ý•ÉM•É¥•Í€¸(€Q¡”¹…¥Ù”‘¥É•Ðµ¥¹•ÅÕ…±¥ÑäÉ•‘ÕÑ¥½¸¥Ì…±Í¼¹½Ü™½Éµ…°è(€¥É±•A¤¹AåÑ¡…½É•…¹ÉÑ…¸¹¥É•Ñ9½¹¹•…Ñ¥Ù•U¹¥Ñ%¹•ÅÕ…±¥Ñ¥•Í€¥ÌÁÉ•¥Í•±ä(€Ñ¡”•¹‘Á½¥¹Ðµ½Ù•É±…ÀÁÉ½‰±•´½¸€À€ðôà€ðô€Å€°…¹(€¹½¹¹•…Ñ¥Ù•U¹¥Ñ}…±±MÑ…•Í=Ù•É±…Á}½™}‘¥É•Ñ%¹•ÅÕ…±¥Ñ¥•Í€ÁÉ½Ù•ÌÑ¡…ÐÍ½±Ù¥¹œ(€Ñ¡½Í”™¥¹¥Ñ”¥¹•ÅÕ…±¥Ñ¥•Ì¥Ù•Ì…±°µÍÑ…”½Ù•É±…À½˜Ñ¡”ÑÝ¼½¹É•Ñ”(€Õ¹Ñ¥½¹I…Ý€½ÕÑÁÕÑÌ½¸Ñ¡…Ð¥¹Ñ•ÉÙ…°¸(€Q¡”™¥¹¥Ñ”‘•É¥Ù…Ñ¥Ù”…±•‰É„¥ÌÁÉ½Ù•¥¸½µÁÕÑ…‰±•¹…±åÍ¥Ì½A¤¹±•…¹€è(€ÉÑ…¸¹ÁåÑ¡…½É•…¹A½¥¹Ñ}¹½ÉµMÅ€°(€ÉÑ…¸¹ÁåÑ¡…½É•…¹A½¥¹Ñ}‘•Ñ}ÍÑ•Á€°…¹ÉÑ…¸¹ÁåÑ¡…½É•…¹A½¥¹Ñ}‘½Ñ}ÍÑ•Á€(€¥‘•¹Ñ¥™äÑ¡”•á…ÐÕ¹¥Ðµ¥É±”½‘•Ñ•Éµ¥¹…¹Ð½‘½ÐµÁÉ½‘ÕÐ™½ÉµÕ±…ÌìÑ¡”¥¹¹•È(€ÑÉ¥…¹±”ÅÕ½Ñ¥•¹Ð¥ÌÉÑ…¸¹ÁåÑ¡…½É•…¹M•Ñ½É1½Ý•ÉEÕ½Ñ¥•¹Ñ€°…¹(€ÉÑ…¸¹ÁåÑ¡…½É•…¹M•Ñ½É1½Ý•É}•ÉÉ½É}•Å€Á±ÕÌ(€ÉÑ…¸¹ÁåÑ¡…½É•…¹M•Ñ½ÉUÁÁ•É}•ÉÉ½É}•Å€ÁÉ½Ù”Ñ¡…ÐÑ¡”É…Ñ¥½¹…°±½Ý•È…¹(€ÕÁÁ•ÈÍ•Ñ½ÈÅÕ½Ñ¥•¹ÑÌ‰½Ñ ½±±…ÁÍ”Ñ¼Ñ¡”‘•É¥Ù…Ñ¥Ù”­•É¹•°(€€Ä¼ Ä­áxÈ¥€¸€Q¡”É•µ…¥¹¥¹œÑ¡•½É•´¥ÌÑ¡”•½µ•ÑÉ¥ŒÍÅÕ••é”Ñ¡…ÐÁÕÑÌÑ¡”(€…ÑÕ…°Í•Ñ½Èµ…É•„‘¥™™•É•¹”ÅÕ½Ñ¥•¹Ð‰•ÑÝ••¸Ñ¡½Í”ÑÝ¼™¥¹¥Ñ”™½ÉµÕ±…Ì¸(´ÉÑ…¹•¹Ð¹½Ü¡…Ì¹…µ•™Õ¹Ñ¥½¸É•ÁÉ•Í•¹Ñ…Ñ¥½¹Ì¸€Q¡”•¹•É¥Œ(€É•ÁÉ•Í•¹Ñ…Ñ¥½¸•ÅÕ¥Ù…±•¹”¥ÌA…ÉÑ¥…±I•…±Õ¹I…Ü¹É••=¹=Ù•É±…Á€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½½É”¹±•…¹€ì±•µ•¹Ñ…Éä¹ÉÑ…¸¹Á½Ý•ÉM•É¥•Í€¥ÌÑ¡”(€…±Ñ•É¹…Ñ¥¹œÁ½Ý•ÈµÍ•É¥•ÌÉ•ÁÉ•Í•¹Ñ…Ñ¥½¸½¸ñáð€ðô€Å€ì…¹(€¥É±•A¤¹•½µ•ÑÉ¥ÉÑ…¸¹™Õ¹Ñ¥½¹I•ÁÉ•Í•¹Ñ…Ñ¥½¹€ÑÕÉ¹ÌÍ•Ñ½Èµ…É•„‘…Ñ„¥¹Ñ¼(€Ñ¡”•½µ•ÑÉ¥ŒÉ•ÁÉ•Í•¹Ñ…Ñ¥½¸¸€Q¡”¹•áÐ½µÁ…É¥Í½¸Ñ¡•½É•´¥Ì(€¥É±•A¤¹•½µ•ÑÉ¥ÉÑ…¸¹É••Í]¥Ñ¡A½Ý•ÉM•É¥•Í€è•½µ•ÑÉ¥Œ…ÉÑ…¹•¹Ð…É••Ì(€Ý¥Ñ Ñ¡”Á½Ý•ÈµÍ•É¥•Ì…ÉÑ…¹•¹Ð½¸Ñ¡”½µµ½¸É…Ñ¥½¹…°‘½µ…¥¸¸(€ÍÑÉ½¹•È½µÁ…É¥Í½¸Ñ…É•Ð¥Ì…±Í¼…Ù…¥±…‰±”è(€¥É±•A¤¹•½µ•ÑÉ¥ÉÑ…¸¹É••Í]¥Ñ¡A½Ý•ÉM•É¥•Í±±MÑ…•Í€°‰…Í•½¸(€I•…±I…Ü¹±±MÑ…•Í=Ù•É±…Á€¸€%ÐÍ…åÌ•Ù•Éä•½µ•ÑÉ¥Œ¥¹Ñ•ÉÙ…°…Ð•Ù•ÉäÍÑ…”(€½µÁ…É•Ì…Ì½Ù•É±…Á€Ý¥Ñ •Ù•ÉäÁ½Ý•ÈµÍ•É¥•Ì¥¹Ñ•ÉÙ…°…Ð•Ù•ÉäÍÑ…”°…¹¥Ð¥µµ•‘¥…Ñ•±ä(€¥µÁ±¥•Ì½É‘¥¹…Éä™Õ¹Ñ¥½¸µÉ•ÁÉ•Í•¹Ñ…Ñ¥½¸•ÅÕ¥Ù…±•¹”¸€Q¡¥Ì¥Ì½™Ñ•¸Ñ¡”(€±•…¹•ÈÑ¡•½É•´Ý¡•¸‰½Ñ …±½É¥Ñ¡µÌ…É”ÁÉ½Ù•Ñ¼•¹±½Í”Ñ¡”Í…µ”Í•Ñ½È(€¥¹Ñ•É…°¸(´Q¡”¡½¹•ÍÐ•½µ•ÑÉ¥ŒÑ…É•Ð¥Ì¹½Ü•áÁ±¥¥Ðè(€A¤¹•½µ•ÑÉ¥Ñ…¹=¹•I…Ý€É•ÁÉ•Í•¹ÑÌÑ¡”…¹±”™É½´€ Ä°À¥€Ñ¼€ Ä°Ä¥€°(€Ý¡¥±”A¤¹•½µ•ÑÉ¥Ñ…¹=¹•Q…å±½ÉI•µ…¥¹‘•ÉM½Õ¹‘€¥ÌÑ¡”µ¥ÍÍ¥¹œ(€Q…å±½ÈµÝ¥Ñ µÉ•µ…¥¹‘•ÈÑ¡•½É•´Í…å¥¹œÑ¡…ÐÑ¡¥Ì¥¹‘•Á•¹‘•¹Ñ±ä•½µ•ÑÉ¥Œ½È(€¥¹Ñ•É…°…ÉÑ…¹•¹Ð½Ù•É±…ÁÌÑ¡”…ÉÑ…¹•¹ÐÁ½Ý•ÈµÍ•É¥•Ì¥¹Ñ•ÉÙ…±Ì¸(€A¤¹±•¥‰¹¥é}…É••Í}Ý¥Ñ¡}•½µ•ÑÉ¥Ñ…¹=¹•}½™}Ñ…å±½É}É•µ…¥¹‘•É€ÁÉ½Ù•ÌÑ¡…Ð(€Ñ¡¥Ì‰É¥‘”¥Ì•¹½Õ Ñ¼‘•É¥Ù”1•¥‰¹¥èÌ™½ÉµÕ±„™½È•½µ•ÑÉ¥ŒÁ¤¸(´5…¥¸Õ¹ÁÉ½Ù•1•¥‰¹¥è½5…¡¥¸Ñ¡•½É•´èÁÉ½Ù”A¤¹1•¥‰¹¥é5…¡¥¹=Ù•É±…Á€°Ý¡¥ (€¥Ì•á…Ñ±äÑ¡”I•…±I…Ü¹ÅÕ¥Ù€½¹Ñ•¹Ð™½ÈÑ¡”ÕÉÉ•¹ÐÉ…Ü…±½É¥Ñ¡µÌ¸€Q¡”(€É•µ…¥¹¥¹œÉ½ÕÑ”¥ÌÑ¼ÁÉ½Ù”Ñ¡…ÐÑ¡”Q…å±½È½¥¹Ñ•É…°¥¹Ñ•ÉÙ…°…±½É¥Ñ¡´(€…ÉÑ…¹%¹Ñ•ÉÙ…±€…É••ÌÝ¥Ñ Ñ¡”•½µ•ÑÉ¥Œ‰É…¹ É•±…Ñ¥½¸(€ÉÑ…¸¹!…ÍM±½Á•€¸€5½É”ÁÉ•¥Í•±ä°ÁÉ½Ù”(€ÉÑ…¸¹A½Ý•ÉM•É¥•ÍI•ÍÁ•ÑÍ	É…¹¡ÅÕ…±¥Ñå€°Ñ¡•¸½µ‰¥¹”¥ÐÝ¥Ñ Ñ¡”ÁÉ½Ù•(€…ÕÍÍ¥…¸Í±½Á”¥‘•¹Ñ¥Ñä°Ñ¡”5…¡¥¸‰É…¹ •ÅÕ…±¥Ñä°…¹…±Ñ•É¹…Ñ¥¹œµÍ•É¥•Ì(€•¹±½ÍÕÉ”•ÉÑ¥™¥…Ñ•Ì¸(´Q¡”Á¤µ±•Ù•°Á±Õµ‰¥¹œ¥Ì¹½Ü‘½¹”½¹‘¥Ñ¥½¹…±±ä…¹Í½ÉÉäµ™É•”è(€ÉÑ…¸¹Á¥1•¥‰¹¥é}µ…¡¥¹}½Ù•É±…Á}½™}…ÉÑ…¹}Í½Õ¹‘€ÁÉ½Ù•Ì½Ù•É±…À½˜Ñ¡”(€½¹É•Ñ”1•¥‰¹¥è…¹5…¡¥¸¥¹Ñ•ÉÙ…°…±½É¥Ñ¡µÌ™É½´(€ÉÑ…¸¹A½Ý•ÉM•É¥•ÍI•ÍÁ•ÑÍ	É…¹¡ÅÕ…±¥Ñå€°…¹(€A¤¹±•¥‰¹¥é}µ…¡¥¹}½Ù•É±…Á}½™}…ÉÑ…¹}Í½Õ¹‘€É•ÍÑ…Ñ•ÌÑ¡¥Ì…Ì(€A¤¹1•¥‰¹¥é5…¡¥¹=Ù•É±…Á€¸€Q¡¥ÌÕÍ•ÌÑ¡”ÁÉ½Ù•É•Í…±¥¹œ¥‘•¹Ñ¥Ñ¥•Ì(€ÉÑ…¸¹Á¥1•¥‰¹¥é%¹Ñ•ÉÙ…±}•Å}Í…±•‘}½¹•€…¹(€ÉÑ…¸¹Á¥5…¡¥¹%¹Ñ•ÉÙ…±}•Å}Í…±•‘}µ…¡¥¹EÕ…ÉÑ•É€¸(´Q¡”¡½¹•ÍÐÑ¡•½É•´Ñ…É•Ð¥ÌÑ¡”Í…™”Ù•ÉÍ¥½¸(€ÉÑ…¸¹A½Ý•ÉM•É¥•ÍI•ÍÁ•ÑÍM…™•	É…¹¡ÅÕ…±¥Ñå€°Ý¡•É”•Ù•Éä…Ñ½´‰•¥¹œ(€Q…å±½Èµ•áÁ…¹‘•¥Ì•ÉÑ¥™¥•Ñ¼±¥”¥¸l´Ä°€Åu€¸€5…¡¥¸Ì•áÁÉ•ÍÍ¥½¸…¹(€…Ñ…¸ Ä¥€…É”ÁÉ½Ù•Í…™”‰äÉÑ…¸¹µ…¡¥¹EÕ…ÉÑ•É}…Ñ½µÍ%¹±½Í•‘U¹¥Ñ€…¹(€ÉÑ…¸¹½¹•}…Ñ½µÍ%¹±½Í•‘U¹¥Ñ€°…¹(€A¤¹±•¥‰¹¥é}µ…¡¥¹}½Ù•É±…Á}½™}Í…™•}…ÉÑ…¹}Í½Õ¹‘€½¹¹•ÑÌÑ¡…ÐÍ…™”…¹…±åÑ¥Œ(€Ñ¡•½É•´Ñ¼A¤¹1•¥‰¹¥é5…¡¥¹=Ù•É±…Á€¸(´EÕ…¹Ñ¥Ñ…Ñ¥Ù”½¹Ù•É•¹”¥Ì¹½Üµ•…ÍÕÉ•™½ÈÑ¡”½¹É•Ñ”…±½É¥Ñ¡µÌè(€A¥AÉ½½™Ì¹Á¥5…¡¥¹}½µÁÕÑ•}Ý¥‘Ñ¡}•Å€¥Ù•ÌÑ¡”•á…ÐÝ¥‘Ñ ½˜Ñ¡”½¹”5…¡¥¸(€•Ù…±Õ…Ñ½È…ÌÑ¡”ÍÕ´½˜¥ÑÌÑÝ¼±¥Ñ•É…°…±Ñ•É¹…Ñ¥¹œµÍ•É¥•ÌÝ¥‘Ñ¡Ì°…¹(€A¥AÉ½½™Ì¹Á¥5…¡¥¹}½µÁÕÑ•}Ý¥‘Ñ¡}±•}•½µ•ÑÉ¥}¡…±™€¥Ù•ÌÑ¡”Í¥µÁ±”ÁÕ‰±¥Œ(€‰½Õ¹€ÈÀ¼Éy¹€¸€Q¡¥ÌÉ…Ñ”‰•±½¹ÌÑ¼Ñ¡”5…¡¥¸ÉÕ¹Ñ¥µ”‰½á•ÌÑ¡•µÍ•±Ù•Ì°(€¹½ÐÑ¼„Ý¥‘Ñ ÑÉ…¹ÍÁ½ÉÑ•…É½ÍÌ¥ÑÌ•ÅÕ¥Ù…±•¹”Ý¥Ñ …É•„Á¤¸(´Q¡”™¥¹¥Ñ”1•¥‰¹¥è•Ù…±Õ…Ñ½È¹½Ü¡…Ì…¸•áÁ±¥¥ÐÍÑ…”´àÀ¡•­Á½¥¹Ðè(€Á¥1•¥‰¹¥é}ÍÑ…”àÁ}•¹±½ÍÕÉ•€­••ÁÌÑ¡”É…Ñ¥½¹…°¥¹Ñ•ÉÙ…°¥¹Í¥‘”lÌ°ÄØ¼Õu€°(€Ý¡¥±”Á¥1•¥‰¹¥é}ÍÑ…”àÁ}Ý¥‘Ñ¡€•ÉÑ¥™¥•ÌÝ¥‘Ñ …Ðµ½ÍÐ€Ä¼àÁ€¸€Q¡¥Ì¥Ì„(€ÍÑÉ½¹•È™¥¹¥Ñ”•ÉÉ½È‰Õ‘•Ð™½ÈÑ¡”ÁÉ½©•ÓŠeÌ½µÁÕÑ…‰±”Í•É¥•ÌÉ½ÕÑ”¸)Q¡”Í…µ”•Ù…±Õ…Ñ½È¹½Ü…±Í¼•áÁ½ÉÑÌÍÑ…”€ÄØÀ°­••Á¥¹œÑ¡”¥¹Ñ•ÉÙ…°¥¹Í¥‘”)lÌ°ÄØ¼Õu€Ý¥Ñ Ý¥‘Ñ …Ðµ½ÍÐ€Ä¼ÄØÁ€¸)%Ð¹½Ü…±Í¼•áÁ½ÉÑÌÍÑ…”€ÌÈÀ°­••Á¥¹œÑ¡”Í…µ”É…Ñ¥½¹…°•¹±½ÍÕÉ”Ý¥Ñ Ý¥‘Ñ )…Ðµ½ÍÐ€Ä¼ÌÈÁ€°•áÑ•¹‘¥¹œÑ¡”™¥¹¥Ñ”¥Ñ•´´ÈØÁÉ•¥Í¥½¸±…‘‘•È¸)%Ð¹½Ü…±Í¼•áÁ½ÉÑÌÍÑ…”€ØÐÀ°­••Á¥¹œÑ¡”Í…µ”É…Ñ¥½¹…°•¹±½ÍÕÉ”Ý¥Ñ Ý¥‘Ñ )…Ðµ½ÍÐ€Ä¼ØÐÁ€°•áÑ•¹‘¥¹œÑ¡”™¥¹¥Ñ”¥Ñ•´´ÈØÁÉ•¥Í¥½¸±…‘‘•È¸(´Q¡”Í•É¥•Ì±…å•È¹½Ü½Ý¹ÌÑ¡”¹…ÑÕÉ…°…±Ñ•É¹…Ñ¥¹œµÍÑ…”É•ÁÉ•Í•¹Ñ…Ñ¥½¸è(€M•É¥•Ì¹•Ù•¹=‘‘%¹Ñ•ÉÙ…°Á…ÉÑ¥…±Ì¹€É•ÑÕÉ¹ÌÑ¡”¥¹Ñ•ÉÙ…°‰•ÑÝ••¸Ñ¡”€É¹Ñ (€…¹€ É¸¬Ä¥ÍÐÁ…ÉÑ¥…°ÍÕµÌ°…¹M•É¥•Ì¹±Ñ•É¹…Ñ¥¹I…Ü¹¥¹Ñ•ÉÙ…±€ÕÍ•ÌÑ¡¥Ì(€½¹Ù•¹Ñ¥½¸¸€Q¡”Á¤…¹…ÉÑ…¹•¹ÐÍ•É¥•Ì…±½É¥Ñ¡µÌ…É”Ý¥É•Ñ¼Ñ¡¥ÌÍ¡…Á”¸((ŒŒ	…Í•°AÉ½‰±•´((´¥É¥¡±•ÑM•É¥•Ì¹é•Ñ…QÝ½I…Ý€¥ÌÑ¡”¡•­•¥¹Ñ•ÉÙ…°…±½É¥Ñ¡´™½È(€p¡qé•Ñ„ È¥p¤ì	…Í•°¹‰…Í•±M•É¥•ÍI…Ý€¥Ì¥ÑÌÁÉ½©•Ðµ™…¥¹œ¹…µ”°…¹(€	…Í•°¹‰…Í•±M•É¥•ÍI…Ý}Ù…±¥‘€ÁÉ½Ù•ÌÙ…±¥‘¥Ñä¸(´	…Í•°¹Á¥MÅÕ…É•‘=Ù•ÉM¥áI…ÜÁ¥€½µÁÕÑ•Ìp¡qÁ¥xÈ¼Ùp¤™É½´…¹äÙ…±¥‰½Õ¹‘•(€É…ÜÁ¤É•ÁÉ•Í•¹Ñ…Ñ¥Ù”¸€Q¡”ÕÉÉ•¹Ð•½µ•ÑÉ¥ŒÍÁ•¥…±¥é…Ñ¥½¸¥Ì(€	…Í•°¹•½µ•ÑÉ¥A¥MÅÕ…É•‘=Ù•ÉM¥áI…Ý€°‰Õ¥±Ð™É½´Á¥¥É±•É•…€°Ý¥Ñ (€Ù…±¥‘¥ÑäÑ¡•½É•´	…Í•°¹•½µ•ÑÉ¥A¥MÅÕ…É•‘=Ù•ÉM¥áI…Ý}Ù…±¥‘€¸€Q¡”½É¥¥¹…°(€¡½ÉµÁ…Ñ ÍÁ•¥…±¥é…Ñ¥½¸	…Í•°¹¥ÉÕµ™•É•¹•A¥MÅÕ…É•‘=Ù•ÉM¥áI…Ý€¥Ì…±Í¼(€Ù…±¥°…¹¥ÉÕµ™•É•¹•A¥MÅÕ…É•‘=Ù•ÉM¥áI…Ý}•ÅÕ¥Ù}•½µ•ÑÉ¥€ÁÉ½Ù•ÌÑ¡…Ð(€Ñ¡”ÑÝ¼•½µ•ÑÉ¥ŒÉ¥¡Ðµ¡…¹Í¥‘•Ì…É•”‰ä™¥¹¥Ñ”¹½¹¹•…Ñ¥Ù”¥¹Ñ•ÉÙ…°(€µÕ±Ñ¥Á±¥…Ñ¥½¸¸€Q¡”½¹‘¥Ñ¥½¹…°Ñ¡•½É•´(€•Õ±•É	…Í•±}¥ÉÕµ™•É•¹•}¥™™}•½µ•ÑÉ¥€Ñ¡•É•™½É”ÑÉ…¹Í™•ÉÌ…¹ä™ÕÑÕÉ”(€	…Í•°ÁÉ½½˜‰•ÑÝ••¸Ñ¡”‘¥É•Ð¥ÉÕµ™•É•¹”…¹…É•„™½ÉµÕ±…Ñ¥½¹Ì¸(´	…Í•°¹•Õ±•É	…Í•±}•½µ•ÑÉ¥A¥€¥ÌÑ¡”É•µ…¥¹¥¹œ½¹ÍÑÉÕÑ¥Ù”Ñ¡•½É•´(€ÍÑ…Ñ•µ•¹ÐÉ•±…Ñ¥¹œÑ¡•Í”ÑÝ¼Ù…±¥½µÁÕÑ…Ñ¥½¹Ì¸€%Ð¥Ì¹½Ðå•Ð„ÁÉ½Ù•(€•ÅÕ¥Ù…±•¹”¸€%ÑÌÁÕ‰±¥Œµ…Ñ¡•µ…Ñ¥…°™½É´¥ÌÑ¡”	…Í•°¥‘•¹Ñ¥Ñä(€p¡qé•Ñ„ È¤õqÁ¥xÈ¼Ùp¤ì„Á½Í¥Ñ¥Ù”µ¹½Éµ…±¥é…Ñ¥½¸Ñ¡•½É•´µ…ä±…Ñ•È•áÁ½Í”„(€Á¤µÁÉ•Í•¹Ñ…Ñ¥½¸…É••µ•¹Ð…Ì„É•¥ÍÑÉä½É½±±…Éä°É…Ñ¡•ÈÑ¡…¸ÑÉ•…Ñ¥¹œÑ¡”(€ÍÅÕ…É•¥‘•¹Ñ¥Ñä¥ÑÍ•±˜…Ì„Í½É•‰½…É™½ÉµÕ±„¸(´	…Í•±¥¹¥Ñ•½µÁ…É¥Í½¸¹‰…Í•±½µµ½¹%¹Ñ•ÉÙ…±}•ÉÑ¥™¥…Ñ•€ÍÑÉ•¹Ñ¡•¹ÌÑ¡”(€™¥¹¥Ñ”É½ÍÌµ¡•¬…ÐÍÑ…•Ì€ÄÀ°ÀÀÀ…¹€àè¥Ð½¹ÍÑÉÕÑÌ…¸•áÁ±¥¥Ð(€¹½¹•µÁÑäÉ…Ñ¥½¹…°¥¹Ñ•ÉÍ•Ñ¥½¸½¹Ñ…¥¹•¥¸‰½Ñ ¥¹‘•Á•¹‘•¹Ð•¹±½ÍÕÉ•Ì¸(€Q¡¥Ì¥Ì„É•ÕÍ…‰±”™¥¹¥Ñ”½µÁ…É¥Í½¸•ÉÑ¥™¥…Ñ”°ÍÑ¥±°‘•±¥‰•É…Ñ•±äÍ¡½ÉÐ(€½˜Ñ¡”½µÁ±•Ñ•	…Í•°¥‘•¹Ñ¥Ñä¸(´	…Í•±¥¹¥Ñ•½µÁ…É¥Í½¸¹‰…Í•±½µµ½¹%¹Ñ•ÉÙ…±}Ý¥‘Ñ¡}±•€É•½É‘ÌÑ¡”ÁÉ•¥Í¥½¸(€½¹Í•ÅÕ•¹”èÑ¡”½µµ½¸¥¹Ñ•ÉÙ…°¥Ì¹¼Ý¥‘•ÈÑ¡…¸•¥Ñ¡•ÈÍ½ÕÉ”•¹±½ÍÕÉ”°(€Í¼‰½Ñ ™¥¹¥Ñ”•ÉÉ½È‰Õ‘•ÑÌÑÉ…¹Í™•ÈÑ¼Ñ¡”Í¡…É•½µÁ…É¥Í½¸½‰©•Ð¸(´	…Í•±¥¹¥Ñ•½µÁ…É¥Í½¸¹‰…Í•±½µµ½¹%¹Ñ•ÉÙ…±}µ¥‘Á½¥¹Ñ}•ÉÑ¥™¥…Ñ•€•áÑÉ…ÑÌ(€…¸•áÁ±¥¥ÐÉ…Ñ¥½¹…°µ¥‘Á½¥¹Ð±å¥¹œ¥¸‰½Ñ Í½ÕÉ”•¹±½ÍÕÉ•Ì°ÁÉ½Ù¥‘¥¹œ„(€½¹É•Ñ”™¥¹¥Ñ”Ý¥Ñ¹•ÍÌ™½ÈÑ¡”É½ÍÌµ•Ù…±Õ…Ñ½È½µÁ…É¥Í½¸¸(´	…Í•±¥¹¥Ñ•½µÁ…É¥Í½¸¹‰…Í•±I•™¥¹•‘½µµ½¹%¹Ñ•ÉÙ…±}•ÉÑ¥™¥…Ñ•€É•Á•…ÑÌÑ¡”(€½µÁ…É¥Í½¸…ÐÑ¡”Ñ¥¡Ñ•ÈÍÑ…•Ì€ÄÀÀ°ÀÀÀ…¹€ÄÀ°Ý¥Ñ …¸•áÁ±¥¥Ð½µµ½¸(€É…Ñ¥½¹…°¥¹Ñ•ÉÙ…°¸€‰…Í•±I•™¥¹•‘½µµ½¹%¹Ñ•ÉÙ…±}Ý¥‘Ñ¡}±•€ÑÉ…¹Í™•ÉÌ‰½Ñ )Í½ÕÉ”ÁÉ•¥Í¥½¸‰Õ‘•ÑÌÑ¼Ñ¡…ÐÉ•™¥¹•½‰©•Ð¸€Q¡¥ÌÍÑÉ•¹Ñ¡•¹ÌÑ¡”)™¥¹¥Ñ”‰•¹¡µ…É¬•Ù¥‘•¹”Ý¥Ñ¡½ÕÐ±…¥µ¥¹œÑ¡”¥¹™¥¹¥Ñ”	…Í•°¥‘•¹Ñ¥Ñä¸(€‰…Í•±I•™¥¹•‘½µµ½¹%¹Ñ•ÉÙ…±}µ¥‘Á½¥¹Ñ}•ÉÑ¥™¥…Ñ•€…‘‘¥Ñ¥½¹…±±ä•áÁ½ÉÑÌ„(€½¹É•Ñ”É…Ñ¥½¹…°Ý¥Ñ¹•ÍÌ±å¥¹œ¥¸‰½Ñ É•™¥¹••¹±½ÍÕÉ•Ì¸)Q¡”¹•Ü‰…Í•±!¥¡½µµ½¹%¹Ñ•ÉÙ…±€É•Á•…ÑÌÑ¡”¥¹‘•Á•¹‘•¹Ð½µÁ…É¥Í½¸…Ðé•Ñ„)ÍÑ…”€ÈÀÀÀÀÁ€…¹•½µ•ÑÉ¥ŒÍÑ…”€ÄÉ€°Ý¥Ñ „•ÉÑ¥™¥•¹½¹•µÁÑä)¥¹Ñ•ÉÍ•Ñ¥½¸…¹¥¹¡•É¥Ñ•Ý¥‘Ñ ‰½Õ¹‘Ì¸Q¡¥Ì‘••Á•¹ÌÑ¡”™¥¹¥Ñ”	…Í•°)É½ÍÌµ¡•¬Ý¡¥±”­••Á¥¹œÕ±•ÈÌ¥‘•¹Ñ¥Ñä¥ÑÍ•±˜‘•™•ÉÉ•¸Q¡”¹•Ü)‰…Í•±!¥¡½µµ½¹%¹Ñ•ÉÙ…±}µ¥‘Á½¥¹Ñ}•ÉÑ¥™¥…Ñ•€•áÁ½ÉÑÌ…¸•áÁ±¥¥ÐÉ…Ñ¥½¹…°)µ¥‘Á½¥¹Ð¥¸‰½Ñ ¡¥¡•ÍÐµÍÑ…”•¹±½ÍÕÉ•Ì¸)Q¡”¹…µ•¥¹¥Ñ•	…Í•±½µÁ…É¥Í½¹á…µÁ±•€Á…­…•ÌÑ¡”•…É±¥•ÈÍÑ…”´ÄÀÀÀÀ¼)ÍÑ…”´àµ¥‘Á½¥¹Ð…Ì„É•ÕÍ…‰±”É…Ñ¥½¹…°Ý¥Ñ¹•ÍÌ…¹…ÉÉ¥•Ì™½ÉÝ…É‰½Ñ )Í½ÕÉ”Ý¥‘Ñ ‰½Õ¹‘Ì¸)¥¹¥Ñ•	…Í•±MÑ…•5¥±±¥½¹€¹½Ü…‘‘Ì„ÍÑ…”´Ä°ÀÀÀ°ÀÀÀÉ•¥ÁÉ½…°µÍÅÕ…É”)•¹±½ÍÕÉ”……¥¹ÍÐÑ¡”ÍÑ…”´ÄØ•½µ•ÑÉ¥ŒÁ¥xÈ¼Ù€•¹±½ÍÕÉ”¸€%ÑÌ•áÁ±¥¥Ð)¥¹Ñ•ÉÍ•Ñ¥½¸°¥¹¡•É¥Ñ•Ý¥‘Ñ ‰½Õ¹‘Ì°…¹µ¥‘Á½¥¹ÐÝ¥Ñ¹•ÍÌ‘••Á•¸Ñ¡”™¥¹¥Ñ”)¥Ñ•´´ÄÐ½µÁ…É¥Í½¸Ý¥Ñ¡½ÕÐ¡…¹¥¹œÑ¡”‰½Õ¹‘…ÉäèÕ±•ÈÌ…±°µÍÑ…”¥‘•¹Ñ¥Ñä)É•µ…¥¹Ì‘•™•ÉÉ•¸)Q¡”Ý½É­•¥¹¥Ñ•	…Í•±á…µÁ±•€¹½Ü…±Í¼ÍÕÁÁ±¥•Ì„É•™¥¹••á•ÕÑ…‰±”)•ÉÑ¥™¥…Ñ”Ý¥Ñ •ÁÍ¥±½¸€ô€Ä¼ÄÀÀÀÁ€…ÐÍÑ…”€ÄÀÀÀÅ€°É•Ñ…¥¹¥¹œ½¹Ñ…¥¹µ•¹Ð)½˜ÍÑ…”€ÄÀÀÀÀÁ€…¹Ñ¥¡Ñ•¹¥¹œÑ¡”™¥¹¥Ñ”Ý¥‘Ñ ‰Õ‘•Ð‰ä„™…Ñ½È½˜Ñ•¸¸)%Ð¹½Ü…±Í¼½¹Ñ…¥¹ÌÍÑ…”€ÈÀÀÀÀÁ€Õ¹‘•ÈÑ¡”Í…µ”€Ä¼ÄÀÀÀÁ€Ý¥‘Ñ ‰Õ‘•Ð°)•áÑ•¹‘¥¹œÑ¡”™¥¹¥Ñ”Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥ÑäÍ¡•‘Õ±”Ý¡¥±”±•…Ù¥¹œÑ¡”	…Í•°)¥‘•¹Ñ¥Ñä‘•™•ÉÉ•¸)Q¡”¹…µ•ÍÑ…”´ÄØ¡•­Á½¥¹Ð…‘‘¥Ñ¥½¹…±±äÉ•½É‘ÌÑ¡”•á…ÐÁ…ÉÑ¥…°ÍÕ´)€àÈÈäØàÜÄÐÜÐä¼ÔÄäÐÌÜÌÄàÐÀÁ€…¹¥ÑÌ•áÁ±¥¥Ð€Ä¼ÄÙ€Ñ…¥°¥¹Ñ•ÉÙ…°¸((ŒŒ1½¹œµQ•É´Q¡•½É•µÌ((´½¹Ù•àQè™½ÈÑ¡”•á…µÁ±•Ì¥¸¡…ÁÑ•È€È°Ñ¡”µ…¥¸…±Õ±ÕÌÑ¡•½É•´¥ÌÑ¡”(€½¹Ù•à½½¹…Ù”Í•…¹ÐÉ½ÕÑ”¸€•™¥¹”Ñ¡”Á½¥¹ÑÝ¥Í”‘•É¥Ù…Ñ¥Ù”™É½´Í¡É¥¹­¥¹œ(€•¹Ñ•É•Í•…¹Ð¡Õ±±Ì°™½É´I¥•µ…¹¸ÍÕµÌ½˜Ñ¡…Ð‘•É¥Ù…Ñ¥Ù”°…¹ÁÉ½Ù”Ñ¡”(€•¹‘Á½¥¹Ð¥‘•¹Ñ¥Ñä‰ä¹•¥¡‰½É¥¹œµÍ•…¹Ð•¹±½ÍÕÉ•ÌÁ±ÕÌÑ•±•Í½Á¥¹œ¸(´1•…ä•á…ÐQ™…ÑÌÉ•µ…¥¸ÕÍ•™Õ°…ÌÍ…¹¥Ñä¡•­Ì°‰ÕÐÑ¡•ä…É”¹¼(€±½¹•ÈÑ¡”µ…¥¸‘•Á•¹‘•¹ä™½È•±•µ•¹Ñ…Éä™Õ¹Ñ¥½¹Ì¸€Q¡”…™™¥¹”•á…Ð(€•ÉÑ¥™¥…Ñ”¥ÌQ¹…™™¥¹•á…Ñ•ÉÑ¥™¥…Ñ•€€¼Q¹…™™¥¹•}•á…Ñ€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½Q¹±•…¹€¸(´¥ÉÍÐ¡•­••á…Ð‘•É¥Ù…Ñ¥Ù”™…ÑÌèÑ¡”‘•É¥Ù…Ñ¥Ù”½˜…¸…™™¥¹”™Õ¹Ñ¥½¸(€¥Ì¥ÑÌ½¹ÍÑ…¹ÐÍ±½Á”°…¹Ñ¡”‘•É¥Ù…Ñ¥Ù”½˜áxÉ€¥Ì€Éá€¸(€M•”á…ÑÕ¹Ñ¥½¸¹…™™¥¹•}‘•É¥Ù…Ñ¥Ù•}•™™•Ñ¥Ù•€…¹(€á…ÑÕ¹Ñ¥½¸¹ÍÅÕ…É•}‘•É¥Ù…Ñ¥Ù•}•™™•Ñ¥Ù•€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½¥™™•É•¹Ñ¥…°¹±•…¹€¸€Q¡”Í…µ”•á…µÁ±•Ì¹½Ü¥¹¡…‰¥ÐÑ¡”(€¹•Ý•È¥¹Ñ•ÉÙ…°µÙ…±Õ•‘•É¥Ù…Ñ¥Ù”¥¹Ñ•É™…”èÑ¡”•á…ÐÍ¥¹±•Ñ½¸…™™¥¹”(€ÅÕ½Ñ¥•¹Ð¥Ì¥ÑÌÍ±½Á”°Ý¡¥±”(€Õ¹Ñ¥½¹=¹%¹Ñ•ÉÙ…°¹•á…ÑI…ÑMÅÕ…É••É¥Ù…Ñ¥Ù•€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”Í¥¹•(€ÅÕ½Ñ¥•¹Ð•ÉÉ½È™½ÈáxÉ€¥ÌÑ¡”ÍÑ•À¥ÑÍ•±˜…¹™¥ÑÌÑ¡”ÍÑ…”ÁÉ•¥Í¥½¸¸(€Q¡”•á…Ð¥‘•¹Ñ¥Ñä¥™™•É•¹Ñ¥…°¹ÍÅÕ…É•}µ¥‘Á½¥¹Ñ}µ•…¹}Ù…±Õ•€…‘‘¥Ñ¥½¹…±±ä(€¥Ù•ÌÑ¡”É…Ñ¥½¹…°ÍÅÕ…É”µ™Õ¹Ñ¥½¸Í•…¹ÐÍ±½Á”…ÐÑ¡”µ¥‘Á½¥¹Ð°„™¥¹¥Ñ”(5•…¸Y…±Õ”Q¡•½É•´½É”™½È‰•¹¡µ…É¬¥Ñ•´€ÜÔ¸€Q¡”¹•Ü(¥™™•É•¹Ñ¥…°¹ÅÕ…‘É…Ñ¥}µ¥‘Á½¥¹Ñ}µ•…¹}Ù…±Õ•€•¹•É…±¥é•ÌÑ¡¥Ì•á…ÐÝ¥Ñ¹•ÍÌ(Ñ¼•Ù•ÉäÉ…Ñ¥½¹…°ÅÕ…‘É…Ñ¥ŒŠ
+ ­Š
+à­Š
+	ã
+É€°Ý¥Ñ Ñ¡”Í…µ”µ¥‘Á½¥¹ÐÝ¥Ñ¹•ÍÌ¸)Q¡”Ý½É­•¥¹¥Ñ•Õ‰¥5YQá…µÁ±•€…‘‘ÌÑ¡”•á…ÐÕ‰¥Œ¥¹Ñ•ÉÙ…°Ý¥Ñ¹•ÍÌè)Ñ¡”Í•…¹ÐÍ±½Á”½˜áxÍ€½¸lÀ°Åu€¥Ì€Å€°‘•½µÁ½Í•…Ìµ¥‘Á½¥¹Ð‘•É¥Ù…Ñ¥Ù”)Ù…±Õ”€Ì¼Ñ€Á±ÕÌ™¥¹¥Ñ”É•µ…¥¹‘•È€Ä¼Ñ€¸(€Q¡”½µÁ…¹¥½¸á…ÑÕ¹Ñ¥½¸¹…™™¥¹•}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ€ÁÉ½Ù•ÌÑ¡”•á…Ð(€½¹ÍÑ…¹ÐÍ±½Á”½˜•Ù•ÉäÉ…Ñ¥½¹…°…™™¥¹”Í•…¹Ð°ÍÕÁÁ±å¥¹œÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ(€™¥¹¥Ñ”‰…Í”…Í”¸(€á…ÑÕ¹Ñ¥½¸¹…™™¥¹•}É½½Ñ}½™}¹½¹é•É½}Í±½Á•€…±Í¼¥Ù•ÌÑ¡”•á…ÐÉ…Ñ¥½¹…°(€é•É¼½˜•Ù•Éä¹½¹½¹ÍÑ…¹Ð…™™¥¹”™Õ¹Ñ¥½¸°„™¥¹¥Ñ”É½½ÐµÍ•…É ‰…Í”…Í”(€™½È‰•¹¡µ…É¬¥Ñ•´€Üä¸(€%ÑÌÁ½Í¥Ñ¥Ù”µÍ±½Á”½µÁ…¹¥½¸(€á…ÑÕ¹Ñ¥½¸¹…™™¥¹•}É½½Ñ}‰•ÑÝ••¹}½™}Í¥¹}¡…¹•€ÁÉ½Ù•ÌÑ¡…ÐÑ¡¥Ìé•É¼(€±¥•Ì¥¹Í¥‘”„•ÉÑ¥™¥••¹‘Á½¥¹ÐÍ¥¸µ¡…¹”‰É…­•Ð¸(€Q¡”½ÉÉ•ÍÁ½¹‘¥¹œ¹•…Ñ¥Ù”µÍ±½Á”½É¥•¹Ñ…Ñ¥½¸¥Ì¡•­•‰ä(€á…ÑÕ¹Ñ¥½¸¹…™™¥¹•}É½½Ñ}‰•ÑÝ••¹}½™}¹•…Ñ¥Ù•}Í¥¹}¡…¹•€¸)á…ÑÕ¹Ñ¥½¸¹Õ‰•}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ€…‘‘ÌÑ¡”•á…ÐÉ…Ñ¥½¹…°Õ‰¥ŒÍ•…¹Ð)•áÁ…¹Í¥½¸ÕÍ•‰äÑ¡”™¥¹¥Ñ”Q…å±½È½Á½±å¹½µ¥…°±…å•È¸)¥™™•É•¹Ñ¥…°¹Õ‰•}µ¥‘Á½¥¹Ñ}Í•…¹Ñ€É•ÝÉ¥Ñ•ÌÑ¡…ÐÕ‰¥ŒÍ•…¹Ð…É½Õ¹Ñ¡”)¥¹Ñ•ÉÙ…°µ¥‘Á½¥¹Ð°…‘‘¥¹œ…¸•áÁ±¥¥ÐÅÕ…‘É…Ñ¥ŒÉ•µ…¥¹‘•È•ÉÑ¥™¥…Ñ”™½ÈÑ¡”)™¥¹¥Ñ”5•…¸Y…±Õ”½Q…å±½ÈÉ½ÕÑ”¸)Q¡”½µÁ…¹¥½¸¥™™•É•¹Ñ¥…°¹ÅÕ…ÉÑ¥}µ¥‘Á½¥¹Ñ}Í•…¹Ñ€•áÑ•¹‘ÌÑ¡”Í…µ”•á…Ð)µ¥‘Á½¥¹Ð•áÁ…¹Í¥½¸Ñ¼‘•É•”™½ÕÈ¸)¥™™•É•¹Ñ¥…°¹ÅÕ¥¹Ñ¥}µ¥‘Á½¥¹Ñ}Í•…¹Ñ€½µÁ±•Ñ•ÌÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ‘•É•”µ™¥Ù”)™¥¹¥Ñ”µ¥‘Á½¥¹Ð•áÁ…¹Í¥½¸¸)¥™™•É•¹Ñ¥…°¹Í•áÑ¥}µ¥‘Á½¥¹Ñ}Í•…¹Ñ€•áÑ•¹‘ÌÑ¡”Í…µ”•¹Ñ•É•™¥¹¥Ñ”)Í•…¹Ð‘•½µÁ½Í¥Ñ¥½¸Ñ¡É½Õ ‘•É•”Í¥à°Ý¥Ñ Ñ¡”•áÁ±¥¥Ð™½ÕÉÑ µÁ½Ý•È)É•µ…¥¹‘•ÈÑ•É´¸(€á…ÑÕ¹Ñ¥½¸¹ÅÕ…ÉÑ¥}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ€¡•­ÌÑ¡”…¹…±½½ÕÌÅÕ…ÉÑ¥Œ(€•áÁ…¹Í¥½¸…ÌÑ¡”¹•áÐ™¥¹¥Ñ”µ½¹½µ¥…°…Í”¸(€á…ÑÕ¹Ñ¥½¸¹ÅÕ¥¹Ñ¥}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ€•áÑ•¹‘ÌÑ¡”Í…µ”•á…ÐÍ•…¹Ð(€™…µ¥±äÑ¡É½Õ ‘•É•”™¥Ù”¸Q¡”¹•Ü(€á…ÑÕ¹Ñ¥½¸¹Í•áÑ¥}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ€…ÉÉ¥•ÌÑ¡”•á…Ð™¥¹¥Ñ”Í•…¹Ð(€•áÁ…¹Í¥½¸Ñ¡É½Õ ‘•É•”Í¥à°µ…Ñ¡¥¹œÑ¡”Í•áÑ¥ŒÁ½±å¹½µ¥…°‰É…­•Ð±…å•È¸(€á…ÑÕ¹Ñ¥½¸¹ÍÅÕ…É•}ÅÕ½Ñ¥•¹Ñ}‰å}¥‘€…¹(€á…ÑÕ¹Ñ¥½¸¹Õ‰•}ÅÕ½Ñ¥•¹Ñ}‰å}¥‘€…‘™¥¹¥Ñ”ÅÕ½Ñ¥•¹Ðµ…¹•±±…Ñ¥½¸ÍÕÁÁ½ÉÐ(€™½ÈÑ¡”½ÁÑ¥½¹…°0#ÑÁ¥Ñ…°±…å•È€¡‰•¹¡µ…É¬¥Ñ•´€ØÐ¤°Ý¥Ñ¡½ÕÐ±…¥µ¥¹œ„(€±¥µ¥ÐÑ¡•½É•´¸€Q¡”É•ÕÍ…‰±”(€á…ÑÕ¹Ñ¥½¸¹Á½Ý•É}ÍÕ}ÅÕ½Ñ¥•¹Ñ}‰å}¥‘€•¹•É…±¥é•ÌÑ¡¥Ì…¹•±±…Ñ¥½¸Ñ¼(€•Ù•Éä¹…ÑÕÉ…°Á½Ý•È°…¹á…ÑÕ¹Ñ¥½¸¹Á½Ý•É}ÍÕ}ÅÕ½Ñ¥•¹Ñ}‰å}Á½Ý•É€(€…¹•±ÌÑ¡”™Õ±°¹½¹é•É¼Á½Ý•È‘•¹½µ¥¹…Ñ½Èáy¹€¥¸(€áx¡¸¬Ä¤½áy¸€ôá€ìÑ¡”É•ÕÍ…‰±”(€á…ÑÕ¹Ñ¥½¸¹Á½Ý•É}…‘‘}ÅÕ½Ñ¥•¹Ñ}‰å}Á½Ý•É€ÁÉ½Ù•Ì(€áx¡´­¸¤½áy´€ôáy¹€¸9¼±¥µ¥Ñ¥¹œÑ¡•½É•´¥Ì±…¥µ•¸(€¥™™•É•¹Ñ¥…°¹Õ‰¥}±¥¹•…É}™…Ñ½É•‘}ÅÕ½Ñ¥•¹Ñ}‘•É¥Ù…Ñ¥Ù•}É…Ñ¥½€…‘‘ÌÑ¡”(€Õ‰¥Œ½µµ½¸µ™…Ñ½È¥‘•¹Ñ¥Ñä(€€¡áxÌµ…xÌ¤¼¡àµ„¤ôÌ©…xÈ¬Ì©„¨¡àµ„¤¬¡àµ„¥xÉ€°•áÑ•¹‘¥¹œÑ¡”™¥¹¥Ñ”…±•‰É…¥Œ(€0#ÑÁ¥Ñ…°‰½Õ¹‘…ÉäÝ¥Ñ¡½ÕÐ¥¹ÑÉ½‘Õ¥¹œ„±¥µ¥ÐÑ¡•½É•´¸)Q¡”ÅÕ…ÉÑ¥ŒÝ½É­••ÉÑ¥™¥…Ñ”¹½ÜÉ•½É‘ÌÑ¡”É•Í¥‘Õ…°)€Ø©ÍÑ•À€¬€Ð©ÍÑ•ÁxÈ€¬ÍÑ•ÁxÍ€…™Ñ•È…¹•±±¥¹œÑ¡”½µµ½¸±¥¹•…È™…Ñ½È™É½´)áxÐ€´€Å€°Ñ½•Ñ¡•ÈÝ¥Ñ ¥ÑÌÉ•¥ÁÉ½…°µÍÑ…”™½É´¸Q¡¥Ì•áÑ•¹‘Ì¥Ñ•´€ØÐÌ)™¥¹¥Ñ”…¹•±±…Ñ¥½¸±…‘‘•ÈÝ¥Ñ¡½ÕÐ¥¹ÑÉ½‘Õ¥¹œ…¸…ÑÑ…¥¹•±¥µ¥Ð¸)Q¡”ÅÕ¥¹Ñ¥ŒÝ½É­••ÉÑ¥™¥…Ñ”¹½ÜÉ•½É‘ÌÑ¡”É•Í¥‘Õ…°)€ÄÀ©ÍÑ•À€¬€ÄÀ©ÍÑ•ÁxÈ€¬€Ô©ÍÑ•ÁxÌ€¬ÍÑ•ÁxÑ€…™Ñ•È…¹•±±¥¹œÑ¡”½µµ½¸™…Ñ½È)™É½´áxÔ€´€Å€°Ñ½•Ñ¡•ÈÝ¥Ñ ¥ÑÌÉ•¥ÁÉ½…°µÍÑ…”™½É´¸)Q¡”Í•áÑ¥ŒÝ½É­••ÉÑ¥™¥…Ñ”¹½ÜÉ•½É‘ÌÑ¡”É•Í¥‘Õ…°)€ÄÔ©ÍÑ•À€¬€ÈÀ©ÍÑ•ÁxÈ€¬€ÄÔ©ÍÑ•ÁxÌ€¬€Ø©ÍÑ•ÁxÐ€¬ÍÑ•ÁxÕ€…™Ñ•È…¹•±±¥¹œÑ¡”)½µµ½¸™…Ñ½È™É½´áxØ€´€Å€°Ñ½•Ñ¡•ÈÝ¥Ñ ¥ÑÌÉ•¥ÁÉ½…°µÍÑ…”™½É´¸)Q¡”Í•ÁÑ¥ŒÝ½É­••ÉÑ¥™¥…Ñ”¹½ÜÉ•½É‘ÌÑ¡”É•Í¥‘Õ…°)€ÈÄ©ÍÑ•À€¬€ÌÔ©ÍÑ•ÁxÈ€¬€ÌÔ©ÍÑ•ÁxÌ€¬€ÈÄ©ÍÑ•ÁxÐ€¬€Ü©ÍÑ•ÁxÔ€¬ÍÑ•ÁxÙ€…™Ñ•È)…¹•±±¥¹œÑ¡”½µµ½¸™…Ñ½È™É½´áxÜ€´€Å€°•áÑ•¹‘¥¹œ¥Ñ•´€ØÐÌ™¥¹¥Ñ”)…¹•±±…Ñ¥½¸±…‘‘•ÈÝ¥Ñ¡½ÕÐ¥¹ÑÉ½‘Õ¥¹œ„±¥µ¥ÐÑ¡•½É•´¸(€Q¡”Í…±…ÈµÝ•¥¡Ñ•½µÁ…¹¥½¸(€á…ÑÕ¹Ñ¥½¸¹µÕ±}Á½Ý•É}…‘‘}ÅÕ½Ñ¥•¹Ñ}‰å}Á½Ý•É€…¹•±ÌÑ¡”Í…µ”¹½¹é•É¼(€Á½Ý•È¥¹Í¥‘”ä©áx¡´­¸¤½áy´€ôä©áy¹€°µ…­¥¹œÑ¡”•ÉÑ¥™¥…Ñ”½µÁ½Í¥Ñ¥½¹…°(€™½È•¹‘Á½¥¹Ð…¹…™™¥¹”™…Ñ½ÉÌ¸(€Q¡”Í…±•µ‘•¹½µ¥¹…Ñ½È•áÑ•¹Í¥½¸(€á…ÑÕ¹Ñ¥½¸¹µÕ±}Á½Ý•É}…‘‘}ÅÕ½Ñ¥•¹Ñ}‰å}Í…±•‘}Á½Ý•É€…±Í¼…¹•±Ì„(€¹½¹é•É¼Í…±…È™…Ñ½È¥¸Ñ¡”‘•¹½µ¥¹…Ñ½È°å¥•±‘¥¹œ(€€¡ä©áx¡´­¸¤¤¼¡è©áy´¤€ô€¡ä½è¤©áy¹€Õ¹‘•È•áÁ±¥¥Ð¹½¹é•É¼¡åÁ½Ñ¡•Í•Ì¸(€Q¡”¹•ÜA½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±€Ñ½•Ñ¡•ÈÝ¥Ñ ¥ÑÌÁÕ‰±¥Œ!½É¹•È(€É•ÕÉÉ•¹”A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}½¹Í€…¹•á…Ð±¥¹•…È…¹(€ÅÕ…‘É…Ñ¥Œ‰…Í”…Í•ÌA½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}±¥¹•…É€…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}ÅÕ…‘É…Ñ¥€…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}Õ‰¥€°(€A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}ÅÕ…ÉÑ¥€°…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}ÅÕ¥¹Ñ¥€°…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}Í•áÑ¥€°…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ•A½±å¹½µ¥…±}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€…¹¥ÑÌ‘¥É•ÐÕ‰¥Œ(€ÍÁ•¥…±¥é…Ñ¥½¸A½±å¹½µ¥…°¹™¥¹¥Ñ•Õ‰¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€…¹¥ÑÌ(€ÅÕ…ÉÑ¥ŒµÑ¡É½Õ µÍ•áÑ¥ŒÍÁ•¥…±¥é…Ñ¥½¹Ì(€A½±å¹½µ¥…°¹™¥¹¥Ñ•EÕ…ÉÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ•EÕ¥¹Ñ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€°Ñ½•Ñ¡•ÈÝ¥Ñ Ñ¡”¹•Ü(€A½±å¹½µ¥…°¹™¥¹¥Ñ•M•áÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€°…ÍÍ•µ‰±”„™¥¹¥Ñ”(€•¹‘Á½¥¹ÐÍ•…¹Ð‰É…­•Ð™½È…¹ä!½É¹•ÈÁ½±å¹½µ¥…°Ý¥Ñ ¹½¹¹•…Ñ¥Ù”É…Ñ¥½¹…°(€½•™™¥¥•¹ÑÌ½¸„¹½¹¹•…Ñ¥Ù”É…Ñ¥½¹…°¥¹Ñ•ÉÙ…°¸Q¡”½µÁ…¹¥½¸(€A½±å¹½µ¥…°¹™¥¹¥Ñ•A½±å¹½µ¥…±}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á€ÑÕÉ¹ÌÑ¡…Ð‰É…­•Ð¥¹Ñ¼(€…¸•áÁ±¥¥ÐÉ…Ñ¥½¹…°Ý¥‘Ñ ‰Õ‘•Ð™½ÈÑ¡”Í•…¹Ð•ÉÉ½È¸Q¡¥ÌÍÑÉ•¹Ñ¡•¹ÌÑ¡”(€™¥¹¥Ñ”½É”½˜‰•¹¡µ…É¬¥Ñ•´€ÜÔÝ¥Ñ¡½ÕÐÍ•±•Ñ¥¹œ…¸¥¹Ñ•Éµ•‘¥…Ñ”Á½¥¹Ð½È(€¥¹Ù½­¥¹œ„½µÁ±•Ñ•µÉ•…°5•…¸Y…±Õ”Q¡•½É•´¸(€Q¡”¹…µ•ÍÁ•¥…±¥é…Ñ¥½¸A½±å¹½µ¥…°¹™¥¹¥Ñ•Õ‰¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á€(€¹½Ü•áÁ½Í•ÌÑ¡”Í…µ”‰Õ‘•Ð‘¥É•Ñ±ä¥¸Ñ¡”Õ‰¥Œ‘•É¥Ù…Ñ¥Ù”™½ÉµÕ±„ÕÍ•‰ä(€Ñ¡”±½Üµ‘•É•”…±Õ±ÕÌ•á…µÁ±•Ì¸(€Q¡”¹•ÜA½±å¹½µ¥…°¹™¥¹¥Ñ•Õ‰¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á}±•€µ…­•ÌÑ¡…Ð‰Õ‘•Ð(€•áÁ±¥¥Ð…Ì€ È©Š
+€¬€Ø©Š
+©ˆ¤¨¡ˆµ„¥€°Í¼„É•ÅÕ•ÍÑ•É…Ñ¥½¹…°Ñ½±•É…¹”…¸(€‰”½¹Ù•ÉÑ•‘¥É•Ñ±ä¥¹Ñ¼„µ•Í µÝ¥‘Ñ ½¹‘¥Ñ¥½¸¸(€Q¡”¹•ÜA½±å¹½µ¥…°¹™¥¹¥Ñ•EÕ¥¹Ñ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á}±•€•áÑ•¹‘ÌÑ¡¥Ì(€•áÁ±¥¥ÐÍ¡•‘Õ±•ÈÑ¡É½Õ ‘•É•”™¥Ù”Ý¥Ñ ‰Õ‘•Ð(€€ È©Š
+€¬€Ø©Š
+©ˆ€¬€ÄÈ©Š
+©‰xÈ€¬€ÈÀ©Š
+©‰xÌ¤¨¡ˆµ„¥€¸(€Q¡”¹•ÜA½±å¹½µ¥…°¹™¥¹¥Ñ•EÕ¥¹Ñ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á}±•€•áÑ•¹‘ÌÑ¡¥Ì(€•áÁ±¥¥ÐÍ¡•‘Õ±•ÈÑ¡É½Õ ‘•É•”™¥Ù”Ý¥Ñ ‰Õ‘•Ð(€€ È©Š
+€¬€Ø©Š
+©ˆ€¬€ÄÈ©Š
+©‰xÈ€¬€ÈÀ©Š
+©‰xÌ¤¨¡ˆµ„¥€¸(€Q¡”µ…Ñ¡¥¹œA½±å¹½µ¥…°¹™¥¹¥Ñ•EÕ…ÉÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á€…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ•EÕ¥¹Ñ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á€‘•±…É…Ñ¥½¹Ì¹½Ü…ÉÉäÑ¡”(€•áÁ±¥¥Ð‰Õ‘•ÐÑ¡É½Õ Ñ¡”ÅÕ…ÉÑ¥Œ…¹ÅÕ¥¹Ñ¥Œ™½ÉµÕ±…Ì…ÌÝ•±°¸Q¡”¹•Ü(€A½±å¹½µ¥…°¹™¥¹¥Ñ•EÕ…ÉÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á}±•€µ…­•ÌÑ¡”ÅÕ…ÉÑ¥Œ‰Õ‘•Ð(€•áÁ±¥¥Ð…Ì€ È©Š
+€¬€Ø©Š
+©ˆ€¬€ÄÈ©Š
+©‰xÈ¤¨¡ˆµ„¥€¸(€Q¡”¹•Ü(€A½±å¹½µ¥…°¹™¥¹¥Ñ•M•áÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ•M•áÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á€•áÑ•¹Ñ¡”Í…µ”™¥¹¥Ñ”(€•ÉÑ¥™¥…Ñ”½¹”‘•É•”™ÕÉÑ¡•È°Ý¥Ñ¡½ÕÐ¡…¹¥¹œÑ¡”¹½¹¹•…Ñ¥Ù”µ½•™™¥¥•¹Ð(€½ÈÉ…Ñ¥½¹…°µ¥¹Ñ•ÉÙ…°¡åÁ½Ñ¡•Í•Ì¸(€Q¡”¹•ÜA½±å¹½µ¥…°¹™¥¹¥Ñ•M•áÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á}±•€µ…­•ÌÑ¡”‘•É•”´(€Í¥àµ•Í ‰Õ‘•Ð•áÁ±¥¥Ð…Ì(€€ È©Š
+€¬€Ø©Š
+©ˆ€¬€ÄÈ©Š
+©‰xÈ€¬€ÈÀ©Š
+©‰xÌ€¬€ÌÀ©Š
+©‰xÐ¤¨¡ˆµ„¥€¸(€Q¡”µ…Ñ¡¥¹œA½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}Í•ÁÑ¥€°(€A½±å¹½µ¥…°¹™¥¹¥Ñ•M•ÁÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€°…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ•M•ÁÑ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}…Á€•áÑ•¹Ñ¡”ÁÕ‰±¥Œ™¥¹¥Ñ”(€•¹‘Á½¥¹Ð•ÉÑ¥™¥…Ñ”Ñ¼‘•É•”Í•Ù•¸°ÍÑ¥±°ÕÍ¥¹œ½¹±äÉ…Ñ¥½¹…°½•™™¥¥•¹ÑÌ(€…¹„™¥¹¥Ñ”•¹‘Á½¥¹Ð½µÁ…É¥Í½¸¸(€Q¡”Í…µ”™¥¹¥Ñ”¥¹Ñ•É™…”¹½Ü•áÑ•¹‘Ì½¹”ÍÑ•À™ÕÉÑ¡•ÈÑ¼‘•É•”•¥¡ÐÙ¥„(€A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}½Ñ¥€…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ•=Ñ¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€ìÑ¡¥ÌÉ•µ…¥¹Ì„É…Ñ¥½¹…°(€•¹‘Á½¥¹Ð•¹±½ÍÕÉ”É…Ñ¡•ÈÑ¡…¸„½µÁ±•Ñ•µÉ•…°5•…¸Y…±Õ”Q¡•½É•´¸(€%Ð¹½Ü…±Í¼É•…¡•Ì‘•É•”¹¥¹”°µ…Ñ¡¥¹œÑ¡”Ý½É­•¥¹¥Ñ•9½¹¥5YQá…µÁ±•€°(€Ñ¡É½Õ A½±å¹½µ¥…°¹™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}¹½¹¥€…¹(€A½±å¹½µ¥…°¹™¥¹¥Ñ•9½¹¥}Í•…¹Ñ}‘•É¥Ù…Ñ¥Ù•}‰É…­•Ñ€¸(€Q¡”¹•ÜA½±å¹½µ¥…°¹µ½¹½µ¥…±½•™™Í€°•Ù…±}µ½¹½µ¥…±½•™™Í€°…¹(€™¥¹¥Ñ••É¥Ù…Ñ¥Ù•Ù…±}µ½¹½µ¥…±½•™™Í}ÍÕ€¥Ù”Ñ¡”…É‰¥ÑÉ…Éäµ‘•É•”(€µ½¹½µ¥…°Ù•ÉÍ¥½¸‘¥É•Ñ±äèÑ¡”•¹•É…Ñ•™¥¹¥Ñ”½•™™¥¥•¹Ð±¥ÍÐ•Ù…±Õ…Ñ•Ì(€Ñ¼áy¹€°…¹¥ÑÌ!½É¹•È‘•É¥Ù…Ñ¥Ù”•Ù…±Õ…Ñ•ÌÑ¼€¡¸¬Ä¤€¨áy¹€¸(€A½±å¹½µ¥…°¹™¥¹¥Ñ•M•ÁÑ¥}‘•É¥Ù…Ñ¥Ù•}µ½¹½€…‘‘¥Ñ¥½¹…±±äÁÉ½Ù•ÌÑ¡…ÐÑ¡”(€Í•ÁÑ¥Œ‘•É¥Ù…Ñ¥Ù”•Ù…±Õ…Ñ½È¥Ìµ½¹½Ñ½¹”½¸¹½¹¹•…Ñ¥Ù”É…Ñ¥½¹…°¥¹Ñ•ÉÙ…±Ì(€Õ¹‘•ÈÑ¡”Í…µ”½•™™¥¥•¹Ð•ÉÑ¥™¥…Ñ”¸(€Q¡”Ý½É­•Í•ÁÑ¥ŒÝ¥Ñ¹•ÍÌ¹½Ü…±Í¼•Ù…±Õ…Ñ•ÌáxÝ€½¸Ñ¡”Í¡¥™Ñ•¥¹Ñ•ÉÙ…°(€lÄ°Éu€èÑ¡”™¥¹¥Ñ”Í•…¹Ð¥Ì€ÄÈÝ€°…¹Ñ¡”•¹‘Á½¥¹Ð‘•É¥Ù…Ñ¥Ù”‰É…­•Ð¥Ì(€lÜ°ÐÐáu€¸Q¡¥ÌÍÕÁÁ±¥•Ì„ÑÉ…¹Í±…Ñ•™¥¹¥Ñ”¥Ñ•´´ÜÔ¡•­Á½¥¹ÐÝ¥Ñ¡½ÕÐ(€Í•±•Ñ¥¹œ…¸¥¹Ñ•Éµ•‘¥…Ñ”Á½¥¹Ð¸(€E%¹Ñ•ÉÙ…°¹…É½Õ¹‘}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ}¹•…É}…É½Õ¹‘}½™}Á½Í€…¹¥ÑÌÍ¥¹•µÍÑ•À(€ÝÉ…ÁÁ•ÈE%¹Ñ•ÉÙ…°¹…É½Õ¹‘}‘¥™™•É•¹•EÕ½Ñ¥•¹Ñ}¹•…É}…É½Õ¹‘€¹½ÜÁ…­…”Ñ¡”(€¥¹Ñ•ÉÙ…°µ±•Ù•°¡…¹µ½™˜è„™¥¹¥Ñ”•¹Ñ•ÈµÍ•…¹Ð•ÉÉ½ÈÁ±ÕÌ•áÁ±¥¥Ð‰½à°(€ÅÕ½Ñ¥•¹Ð°…¹‘•É¥Ù…Ñ¥Ù”‰Õ‘•ÑÌå¥•±‘Ì„±¥Ñ•É…°9•…ÉÑ€•ÉÑ¥™¥…Ñ”¸(€Q¡¥Ì±½Í•Ì…¹½Ñ¡•ÈÉ•ÕÍ…‰±”…±½É¥Ñ¡µ¥Œ±…å•È™½È¥Ñ•´€ÜÔÝ¡¥±”É•Ñ…¥¹¥¹œ(€Ñ¡”ÁÉ½©•ÐÌÉ…Ñ¥½¹…°µ‰½àÍ•µ…¹Ñ¥Ì¸(´¥ÉÍÐ¡•­•¹½¸µ…™™¥¹”Q•ÍÑ¥µ…Ñ”è™½È¡à¤õáxÉ€°˜¡à¤ôÉá€½¸(€lÀ°Åu€°Ñ¡”±•™ÐµÍÕ´Q•ÉÉ½È…ÐÍÑ…”´¬Å€¥Ì•á…Ñ±ä€Ä¼¡´¬Ä¥€¸(€M•”Q¹™ÑÉÉ½É}ÍÅÕ…É•}‘½Õ‰±•%‘}é•É½}½¹•}ÍÕ€…¹(€Q¹™Ñ¡•­}ÍÅÕ…É•}‘½Õ‰±•%‘}é•É½}½¹•}ÍÕ€¥¸(€½µÁÕÑ…‰±•¹…±åÍ¥Ì½Q¹±•…¹€¸(´Q¡¥Ì•ÍÑ¥µ…Ñ”¥ÌÁ…­…•¥¸Ñ¡”½±‘•È•™™•Ñ¥Ù”QÍÑå±”è(€Q¹ÍÅÕ…É•}‘½Õ‰±•%‘}é•É½}½¹•}•™™•Ñ¥Ù•€¡½½Í•Ì•ÁÌ¹‘•¸€¬€Å€(€ÍÕ‰‘¥Ù¥Í¥½¹Ì™½È…¹äÁ½Í¥Ñ¥Ù”É…Ñ¥½¹…°•ÁÍ€¸(´¥ÉÍÐ¡•­•¹½¸µ…™™¥¹”½µÁÕÑ…‰±”µ¹Õµ‰•ÈQÑ¡•½É•´è(€Q¹ÍÅÕ…É•}‘½Õ‰±•%‘}é•É½}½¹•}¥¹Ñ•É…±}•ÅÕ¥Ù}•¹‘Á½¥¹Ñ€ÁÉ½Ù•ÌÑ¡…ÐÑ¡”(€¹•ÍÑ•I¥•µ…¹¸µÍÕ´¥¹Ñ•É…°É…Ü…±½É¥Ñ¡´(€Q¹ÍÅÕ…É•½Õ‰±•%‘%¹Ñ•É…±I…Ý€°Ý¥Ñ ¥¹Ñ•ÉÙ…±ÌlÄ€´€Ä½¸°€Åu€°¥Ì(€I•…±I…Ü¹ÅÕ¥Ù€Ñ¼Ñ¡”•¹‘Á½¥¹Ð‘¥™™•É•¹”€ÅxÈ€´€ÁxÉ€¸(€Q¡”Ù…±¥‘¥ÑäÁÉ½½˜¥ÌQ¹ÍÅÕ…É•½Õ‰±•%‘%¹Ñ•É…±}Ù…±¥‘€¸(€Q¡¥Ì¥ÌÑ¡”™¥ÉÍÐÑ¡•½É•´¥¸Ñ¡”•á…Ð™½É´½˜Ñ¡”½É¥¥¹…°ÁÉ½©•Ð½…°è(€…¸¥¹Ñ•É…°½µÁÕÑ•‰ä™¥¹¥Ñ”É…Ñ¥½¹…°ÍÕµÌ•ÅÕ…±Ì¡ˆ¤µ¡„¥€…Ì„(€½µÁÕÑ…‰±”É•…°¸(´Q¡”Õ‰¥Œ™¥¹¥Ñ”QÁ…­…”¥¸¥¹¥Ñ•QA½±å¹½µ¥…°¹±•…¹€…‘‘ÌÑ¡”•áÁ±¥¥Ð(€…ÕµÕ±…Ñ½È¥¹¥Ñ•Q¹Õ‰••É¥Ù…Ñ¥Ù•1•™ÑMÕµ€™½È€ ÍáxÈ¤½¸lÀ°Åu€¸(€%ÑÌ•á…Ð™½É´¥Ì•ÉÑ¥™¥•‰äÕ‰••É¥Ù…Ñ¥Ù•1•™ÑMÕµ}•Å€°…¹Ñ¡”•ÉÉ½È(€¥‘•¹Ñ¥Ñ¥•ÌÕ‰••É¥Ù…Ñ¥Ù•1•™ÑMÕµ}•ÉÉ½É}•Å€…¹(€Õ‰••É¥Ù…Ñ¥Ù•1•™ÑMÕµ}•ÉÉ½É}±•}Ñ¡É••}¡…±Ù•Í}‘¥Ù€¥Ù”Ñ¡”Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥Ñä(€Í¡•‘Õ±”€ Áq±”€ÄµM}¹q±”€Ì¼ É¸¤¤™½È•Ù•ÉäÁ½Í¥Ñ¥Ù”™¥¹¥Ñ”ÍÑ…”¸€Q¡¥Ì¥Ì(€„Õ‰¥Œ•¹‘Á½¥¹Ð•ÉÑ¥™¥…Ñ”°¹½Ð…¸Õ¹É•ÍÑÉ¥Ñ•±…ÍÍ¥…°QÑ¡•½É•´¸(€Q¡”µ…Ñ¡¥¹œ¥¹¥Ñ•Q¹Õ‰••É¥Ù…Ñ¥Ù•I¥¡ÑMÕµ€¡…ÌÑ¡”•á…Ð™½É´(€€ ¡¸¬Ä¤ É¸¬Ä¤¤¼ É¹xÈ¥€…¹•áÁ½Í•Ì¥ÑÌÁ½Í¥Ñ¥Ù”•ÉÉ½È½Ù•ÈÑ¡”•¹‘Á½¥¹Ð°(€¥Ù¥¹œÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œÉ¥¡Ðµ¡…¹™¥¹¥Ñ”•¹±½ÍÕÉ”¸(´½¹ÍÑÉÕÑ¥Ù”Qè„É…Ñ¥½¹…°µ½µÁ±•àÁ½±å¹½µ¥…°½˜Á½Í¥Ñ¥Ù”‘•É•”¡…Ì„(€½µÁÕÑ…‰±”½µÁ±•àÉ½½Ð¸(€M•”½µÁÕÑ…‰±•¹…±åÍ¥Ì½Q¹±•…¹€¸(´¥ÉÍÐ¡•­•Q‰…Í”…Í•Ìè(€•á…ÐÉ…Ñ¥½¹…°µ½µÁ±•àÉ½½ÑÌ±¥™ÐÑ¼½µÁÕÑ…‰±”É½½ÑÌ(€€¡•á…ÑI½½Ñ}¥Í}½µÁÕÑ…‰±•€¤°µ½¹¥Œ±¥¹•…ÈÁ½±å¹½µ¥…±Ì`€´É€¡…Ù”Ñ¡”(€½µÁÕÑ…‰±”É½½ÐÉ€€¡µ½¹¥1¥¹•…É}¡…Í}½µÁÕÑ…‰±•}É½½Ñ€¤°…¹éxÈ€¬€Å€(€¡…ÌÑ¡”½µÁÕÑ…‰±”É½½Ð¥€€¡éMÅA±ÕÍ=¹•}¡…Í}½µÁÕÑ…‰±•}É½½Ñ€¤¸€Q¡”(€É…Ñ¥½¹…°µ½•™™¥¥•¹Ð•áÑ•¹Í¥½¸(€€¡É…Ñ¥½¹…±1¥¹•…É}Á½Í¥Ñ¥Ù••É••€°É…Ñ¥½¹…±1¥¹•…É}•á…Ñ}É½½Ñ€°…¹(€É…Ñ¥½¹…±1¥¹•…É}¡…Í}½µÁÕÑ…‰±•}É½½Ñ€¤¹½Ü¡•­Ì•Ù•Éä„©è­‰€Ý¥Ñ (€„€„ô€Á€°Ý¡½Í”É½½Ð¥Ì€µˆ½…€¸(€Q¡”¹•áÐQ‰½Õ¹‘…Éä¥Ì¹½Ü¡•­•…ÌÝ•±°èÅ½µÁ±•á1¥¹•…ÉA½±å¹½µ¥…±€(€…•ÁÑÌ…É‰¥ÑÉ…ÉäÉ…Ñ¥½¹…°µ½µÁ±•à½•™™¥¥•¹ÑÌ°…¹„ÍÕÁÁ±¥•™¥¹¥Ñ”(€¥¹Ù•ÉÍ”Ý¥Ñ¹•ÍÌ™½ÈÑ¡”±•…‘¥¹œ½•™™¥¥•¹Ðå¥•±‘Ì…¸•á…Ð½µÁÕÑ…‰±”É½½Ð(€Ñ¡É½Õ Å½µÁ±•á1¥¹•…É}¡…Í}½µÁÕÑ…‰±•}É½½Ñ}½™}¥¹Ù•ÉÍ•€¸€Q¡¥Ì¥ÌÑ¡”(€½¹ÍÑ…¹Ðµ™¥ÉÍÐlµˆ±…u€½¹Ù•¹Ñ¥½¸°Í¼Ñ¡”É½½Ð¥Ì‡Šï
+ä©‰€ì•¹•É…°‘¥Ù¥Í¥½¸É•µ…¥¹Ì„(€Í•Á…É…Ñ”É•ÁÉ•Í•¹Ñ…Ñ¥½¸Ñ…Í¬¸(€Q¡”É•ÕÍ…‰±”™¥¹¥Ñ”É•…ÉÉ…¹•µ•¹Ð±…ÝÌ(€E½µÁ±•à¹µÕ±}…ÍÍ½}•ÉÑ€°E½µÁ±•à¹µÕ±}…‘‘}•ÉÑ€°(€E½µÁ±•à¹…‘‘}µÕ±}•ÉÑ€°E½µÁ±•à¹µÕ±}½¹•}•ÉÑ€°(€E½µÁ±•à¹µÕ±}¹•}•ÉÑ€°…¹E½µÁ±•à¹¹•}µÕ±}•ÉÑ€•áÁ½Í”Ñ¡”½½É‘¥¹…Ñ”(€…±•‰É„ÕÍ•‰äÑ¡¥Ì•ÉÑ¥™¥…Ñ”Ý¥Ñ¡½ÕÐ¥µÁ½ÉÑ¥¹œ„½µÁ±•Ñ•½µÁ±•à™¥•±¸(€Q¡”™¥¹¥Ñ”•Ù…±Õ…Ñ½ÈE½µÁ±•à¹•á¥ÍÑÍ}µÕ±}¥¹Ù•ÉÍ•}½™}¹½ÉµMÅ}¹•}é•É½€¹½Ü(€½¹ÍÑÉÕÑÌÑ¡”¹••‘•¥¹Ù•ÉÍ”Ý¥Ñ¹•ÍÌ™É½´Ñ¡”¹½¹é•É¼É…Ñ¥½¹…°¹½É´µÍÅÕ…É”°(€…¹Å½µÁ±•á1¥¹•…É}¡…Í}½µÁÕÑ…‰±•}É½½Ñ}½™}¹½ÉµMÅ€Á…­…•ÌÑ¡”É•ÍÕ±Ñ¥¹œ(€•á•ÕÑ…‰±”É½½Ð¸€Q¡ÕÌÑ¡¥Ì±¥¹•…È…Í”¥Ì¹¼±½¹•Èµ•É•±ä½¹‘¥Ñ¥½¹…°½¸(€…¸…‰ÍÑÉ…Ñ±äÍÕÁÁ±¥•¥¹Ù•ÉÍ”¸(€Q¡”½½É‘¥¹…Ñ”¥‘•¹Ñ¥ÑäE½µÁ±•à¹¹½ÉµMÅ}•Å}é•É½}¥™™€¥‘•¹Ñ¥™¥•Ì¹½¹é•É¼(€¹½É´µÍÅÕ…É”Ý¥Ñ „¹½¹é•É¼½µÁ±•à½•™™¥¥•¹Ð°…¹(€Å½µÁ±•á1¥¹•…É}¡…Í}½µÁÕÑ…‰±•}É½½Ñ}½™}¹•}é•É½€Á…­…•ÌÑ¡”É•ÍÕ±Ñ¥¹œ(€Ñ¡•½É•´Õ¹‘•ÈÑ¡”¹…ÑÕÉ…°±•…‘¥¹œµ½•™™¥¥•¹Ð¡åÁ½Ñ¡•Í¥Ì¸)Q¡”™…Ñ½É¥é•µ½¹¥ŒÅÕ…‘É…Ñ¥ŒÁ…­…”(¡É…Ñ¥½¹…±EÕ…‘É…Ñ¥}±•™Ñ}•á…Ñ}É½½Ñ€°)É…Ñ¥½¹…±EÕ…‘É…Ñ¥}É¥¡Ñ}•á…Ñ}É½½Ñ€°…¹)É…Ñ¥½¹…±EÕ…‘É…Ñ¥}¡…Í}½µÁÕÑ…‰±•}É½½ÑÍ€¤±¥­•Ý¥Í”•ÉÑ¥™¥•Ì‰½Ñ É½½ÑÌ½˜)€¡èµÈ¤¨¡èµÌ¥€™½ÈÉ…Ñ¥½¹…°É€…¹Í€¸(€Q¡”Ñ¡•½É•´É…Ñ¥½¹…±EÕ…‘É…Ñ¥}Á½Í¥Ñ¥Ù••É••€•ÉÑ¥™¥•ÌÑ¡”µ…Ñ¡¥¹œ(€Á½Í¥Ñ¥Ù”µ‘•É•”ÁÉ•µ¥Í”¸€Q¡”Ñ¡•½É•´É…Ñ¥½¹…±EÕ…‘É…Ñ¥}É½½Ñ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€(€¡•­ÌÑ¡”ÕÍÕ…°ÅÕ…‘É…Ñ¥Œµ™½ÉµÕ±„É½½Ð™½È…É‰¥ÑÉ…ÉäÉ…Ñ¥½¹…°…€°‰€°…¹€Ý¡•¹•Ù•È„(€É…Ñ¥½¹…°Ý¥Ñ¹•ÍÌ‘xÈ€ô‰xÈ€´€Ð©„©€¥ÌÍÕÁÁ±¥•ì½¹ÍÑÉÕÑ¥¹œÍÕ „(€Ý¥Ñ¹•ÍÌÉ•µ…¥¹ÌÑ¡”Í•Á…É…Ñ”ÍÅÕ…É”µÉ½½ÐÑ…Í¬¸€%ÑÌ½µÁ…¹¥½¸(€É…Ñ¥½¹…±EÕ…‘É…Ñ¥}¡…Í}½µÁÕÑ…‰±•}É½½Ñ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€Á…­…•ÌÑ¡…Ð•á…Ð(€É½½Ð…Ì„½µÁ±•á•ÉÑ€ìÑ¡”Á…¥É•Ñ¡•½É•´(€É…Ñ¥½¹…±EÕ…‘É…Ñ¥}¡…Í}½µÁÕÑ…‰±•}É½½ÑÍ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€Á…­…•Ì‰½Ñ (€ÅÕ…‘É…Ñ¥Œµ™½ÉµÕ±„É½½ÑÌ°…¹(€É…Ñ¥½¹…±EÕ…‘É…Ñ¥}¡…Í}…±•‰É…¥}É½½ÑÍ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€¥Ù•ÌÑ¡”Á…É…±±•°(€±•‰É…¥½µÁ±•á€Ý¥Ñ¹•ÍÍ•Ì¸(€Q¡”½µÁ±•àµ½•™™¥¥•¹ÐÅÕ…‘É…Ñ¥Œ‰½Õ¹‘…Éä¥Ì¹½Ü¡•­•…ÌÝ•±°è(€Å½µÁ±•áEÕ…‘É…Ñ¥}É½½Ñ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€…•ÁÑÌ„É…Ñ¥½¹…°µ½µÁ±•à(€‘¥ÍÉ¥µ¥¹…¹ÐÍÅÕ…É”µÉ½½ÐÝ¥Ñ¹•ÍÌ…¹…¸¥¹Ù•ÉÍ”Ý¥Ñ¹•ÍÌ™½È€È©…€°…¹(€Å½µÁ±•áEÕ…‘É…Ñ¥}¡…Í}½µÁÕÑ…‰±•}É½½Ñ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€Á…­…•ÌÑ¡”•á…Ð(€É½½Ð¸€Q¡”Ý¥Ñ¹•ÍÌµÁÉ½‘Õ¥¹œÍÅÕ…É”µÉ½½Ð…±½É¥Ñ¡´É•µ…¥¹ÌÍ•Á…É…Ñ”¸(€%ÑÌ¹½É´µÍÅÕ…É”ÍÁ•¥…±¥é…Ñ¥½¸(€Å½µÁ±•áEÕ…‘É…Ñ¥}¡…Í}½µÁÕÑ…‰±•}É½½Ñ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ}…¹‘}¹½ÉµMÅ€¹½Ü(€½¹ÍÑÉÕÑÌÑ¡”¥¹Ù•ÉÍ”½˜€È©…€…ÕÑ½µ…Ñ¥…±±ä™É½´¹½¹é•É¼¹½ÉµMÄ…€°Í¼(€½¹±äÑ¡”‘¥ÍÉ¥µ¥¹…¹ÐÍÅÕ…É”µÉ½½ÐÝ¥Ñ¹•ÍÌÉ•µ…¥¹Ì•áÁ±¥¥Ð¸(€Q¡”½µÁ…¹¥½¸Å½µÁ±•áEÕ…‘É…Ñ¥}½Ñ¡•É}É½½Ñ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€…¹Á…¥É•(€Å½µÁ±•áEÕ…‘É…Ñ¥}¡…Í}½µÁÕÑ…‰±•}É½½ÑÍ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ€¹½Ü•ÉÑ¥™ä‰½Ñ (€ÅÕ…‘É…Ñ¥Œµ™½ÉµÕ±„‰É…¹¡•Ì¥¸Ñ¡”Í…µ”™¥¹¥Ñ”Ý¥Ñ¹•ÍÌµ½‘•°¸(€Q¡”¹½É´µÍÅÕ…É”ÍÁ•¥…±¥é…Ñ¥½¸¹½ÜÁ…­…•Ì‰½Ñ ‰É…¹¡•Ì…ÕÑ½µ…Ñ¥…±±ä…Ì(€Å½µÁ±•áEÕ…‘É…Ñ¥}¡…Í}½µÁÕÑ…‰±•}É½½ÑÍ}½™}‘¥ÍÉ¥µ¥¹…¹Ñ}…¹‘}¹½ÉµMÅ€¸(€Q¡”¹•Ü¥¹¥Ñ•EÕ…‘É…Ñ¥I½½Ñ%¹Ñ•ÉÙ…±€‰É¥‘”ÑÉ…¹ÍÁ½ÉÑÌ…¹ä™¥¹¥Ñ”(€ÍÅÕ…É”µÉ½½Ð¥¹Ñ•ÉÙ…°Ñ¡É½Õ ‰½Ñ Í¥¹•ÅÕ…‘É…Ñ¥Œµ™½ÉµÕ±„‰É…¹¡•ÌÕÍ¥¹œ(€…™™¥¹•E%¹Ñ•ÉÙ…±}µ•µ€ì¥Ð¥Ì¹½ÜÉ½½Ðµ¥µÁ½ÉÑ•…¹±¥¹­•¥¸Ñ¡”±•‰É„½Q(€¡…ÁÑ•È¸€%ÐÉ•µ…¥¹Ì„™¥¹¥Ñ”¥¹Ñ•ÉÙ…°ÑÉ…¹ÍÁ½ÉÐÑ¡•½É•´°¹½Ð…¸…É‰¥ÑÉ…Éä(€‘¥ÍÉ¥µ¥¹…¹ÐÍÅÕ…É”µÉ½½Ð•á¥ÍÑ•¹”Ñ¡•½É•´¸(´Q¡”±…Ñ•ÍÐ]¥•‘¥©¬µ±¥ÍÐÁ…ÍÌ…‘‘Ì¥¹¥Ñ•Q	½Õ¹‘…Éä¹Íå¹Ñ¡•Ñ¥¥Ù¥‘•€…¹(€•™±…Ñ¥½¹•ÉÑ¥™¥…Ñ•€è…É‰¥ÑÉ…Éä™¥¹¥Ñ”É…Ñ¥½¹…°µ½µÁ±•à½•™™¥¥•¹Ð±¥ÍÑÌ(€…¸‰”‘•™±…Ñ•…Ð„ÍÕÁÁ±¥••á…ÐÉ½½Ð°Ý¥Ñ „¡•­•!½É¹•ÈÉ•µ…¥¹‘•È(€¥‘•¹Ñ¥Ñä…¹™…Ñ½É¥é…Ñ¥½¸Ñ¡•½É•´¸€Q¡¥Ì…‘Ù…¹•Ì¥Ñ•´€ÈÝ¥Ñ¡½ÕÐ±…¥µ¥¹œ(€É½½Ð•á¥ÍÑ•¹”½È…±•‰É…¥Œ±½ÍÕÉ”¸(´Q¡”…É‰¥ÑÉ…Éäµ‘¥µ•¹Í¥½¸…å±•ä´µ!…µ¥±Ñ½¸½¹ÍÕµ•È¥Ì¹½Ü¥Í½±…Ñ•¥¸(€¥¹¥Ñ•…å±•å!…µ¥±Ñ½¹•ÉÑ¥™¥…Ñ•€èÍÕÁÁ±¥•µ½¹¥Œ…¹¹¥¡¥±…Ñ¥¹œµÁ½±å¹½µ¥…°(€‘…Ñ„™½È…¹ä™¥¹¥Ñ”I…Ñ5…ÑÉ¥à‘¥µ•¹Í¥½¹€å¥•±‘ÌÍ¡¥™Ñ•…¹¹¥¡¥±…Ñ¥½¸…¹„(€™¥¹¥Ñ”µ…ÑÉ¥àµÁ½Ý•ÈÉ•ÕÉÉ•¹”¸€Q¡”¡…É…Ñ•É¥ÍÑ¥ŒµÁ½±å¹½µ¥…°½¹ÍÑÉÕÑ¥½¸(€É•µ…¥¹Ì‘•™•ÉÉ•¸(´Q¡”ÅÕ…ÉÑ¥Œ‰½Õ¹‘…Éä¹½Ü…±Í¼¡…Ì™¥¹¥Ñ•EÕ…ÉÑ¥EÕ…‘É…Ñ¥MÁ±¥Ñ€èÑÝ¼(€ÍÕÁÁ±¥•ÅÕ…‘É…Ñ¥Œ™…Ñ½ÉÌ…É”µÕ±Ñ¥Á±¥•¥¸½¹ÍÑ…¹Ðµ™¥ÉÍÐE½µÁ±•à™½É´°(€Ñ¡•¥È!½É¹•È•Ù…±Õ…Ñ¥½¹ÌµÕ±Ñ¥Á±ä•á…Ñ±ä°…¹ÍÕÁÁ±¥•É½½ÑÌ½˜•¥Ñ¡•È(€™…Ñ½È‰•½µ”É½½ÑÌ½˜Ñ¡”ÅÕ…ÉÑ¥Œ¸€Q¡¥Ì¥Ì„•ÉÉ…É¤µÍ¡…Á•™¥¹¥Ñ”(€¥¹Ñ•É™…”ìÑ¡”•¹•É…°É•Í½±Ù•¹Ð…¹Ý¥Ñ¹•ÍÌµÁÉ½‘Õ¥¹œÅÕ…ÉÑ¥Œ™½ÉµÕ±„É•µ…¥¸(€‘•™•ÉÉ•¸(´¥¹¥Ñ••™±…Ñ¥½¹¡…¥¹€¹½Ü¥Ñ•É…Ñ•ÌÍÕÁÁ±¥•µÉ½½ÐÍå¹Ñ¡•Ñ¥Œ‘•™±…Ñ¥½¸…¹(€ÁÉ½Ù•Ì„Í¥¹±”!½É¹•È™…Ñ½É¥é…Ñ¥½¸¥‘•¹Ñ¥Ñä™½ÈÑ¡”½µÁ±•Ñ”™¥¹¥Ñ”¡…¥¸¸(€Q¡¥ÌÍÑÉ•¹Ñ¡•¹ÌÑ¡”™¥¹¥Ñ”É½½ÐµÁ••±¥¹œ‰½Õ¹‘…Éä‰•¡¥¹¥Ñ•µÌ€È…¹€ÄØì(€É½½Ð•á¥ÍÑ•¹”°É…‘¥…°•áÑ•¹Í¥½¹Ì°…¹•¹•É…°Í½±Ù…‰¥±¥ÑäÉ•µ…¥¸‘•™•ÉÉ•¸(´Q¡”¡…¥¸A$¹½Ü…±Í¼ÁÉ½Ù•Ì•á…ÑI½½Ñ}½™}•á…ÑI½½Ñ}½™}¹•€è„ÍÕÁÁ±¥•(€É½½Ð‘¥ÍÑ¥¹Ð™É½´Ñ¡”‘•™±…Ñ•É½½ÐÉ•µ…¥¹Ì…¸•á…ÐÉ½½Ð½˜Ñ¡”ÅÕ½Ñ¥•¹Ð¸(€Q¡¥Ì¥ÌÑ¡”É•ÕÍ…‰±”…±•‰É…¥ŒÍÑ•À¹••‘•Ñ¼ÑÕÉ¸„±¥ÍÐ½˜‘¥ÍÑ¥¹Ð(€ÍÕÁÁ±¥•É½½ÑÌ¥¹Ñ¼„•ÉÑ¥™¥•‘•™±…Ñ¥½¸¡…¥¸¸(´¥¹¥Ñ•EÕ¥¹Ñ¥•™±…Ñ¥½¹á…µÁ±•€¹½Ü¥¹ÍÑ…¹Ñ¥…Ñ•ÌÑ¡…ÐÁÉ•Í•ÉÙ…Ñ¥½¸±•µµ„½¸(€Ñ¡”ÍÕÁÁ±¥•É½½ÑÌ€´È°´Ä°À°Ä°É€°ÁÉ½Ù¥¹œ„½µÁ±•Ñ”™¥Ù”µÍÑ•À™¥¹¥Ñ”(€‘•™±…Ñ¥½¸¡…¥¸¸€Q¡¥ÌÍÑÉ•¹Ñ¡•¹ÌÑ¡”¥Ñ•´´ÄØ½¥Ñ•´´ÐØ•ÉÑ¥™¥…Ñ”‰½Õ¹‘…Éä(€Ý¥Ñ¡½ÕÐ±…¥µ¥¹œ„ÅÕ¥¹Ñ¥Œ™½ÉµÕ±„½ÈÉ½½Ðµ™¥¹‘¥¹œ…±½É¥Ñ¡´¸(´Q¡”ÅÕ¥¹Ñ¥Œ•á…µÁ±”¹½Ü…±Í¼¡•­Ì¥ÑÌ™¥¹…°Á…‘‘•ÅÕ½Ñ¥•¹Ð…¹•áÁ½ÉÑÌ(€Ñ¡”½µÁ±•Ñ”•¹•É¥Œ!½É¹•È™…Ñ½É¥é…Ñ¥½¸¥‘•¹Ñ¥Ñä°µ…­¥¹œÑ¡”ÍÕÁÁ±¥•(€™¥Ù”µÉ½½Ð•ÉÑ¥™¥…Ñ”½µÁ½Í¥Ñ¥½¹…°É…Ñ¡•ÈÑ¡…¸„±¥ÍÐ½˜¥Í½±…Ñ•É½½Ð(€•ÅÕ…±¥Ñ¥•Ì¸(´ÅÕ¥¹Ñ¥}‰½Õ¹‘…Éå}•á…Ñ}™…Ñ½É¥é…Ñ¥½¹€ÍÁ•¥…±¥é•ÌÑ¡…Ð™¥¹…°Á…‘‘•ÅÕ½Ñ¥•¹Ð(€Ñ¼Ñ¡”½¹ÍÑ…¹ÐÁ½±å¹½µ¥…°€Å€°•áÁ½Í¥¹œÑ¡”½µÁ±•Ñ”ÁÉ½‘ÕÐ½˜Ñ¡”™¥Ù”(€ÍÕÁÁ±¥•±¥¹•…È™…Ñ½ÉÌ…Ì…¸•á•ÕÑ…‰±”™¥¹¥Ñ”™…Ñ½É¥é…Ñ¥½¸¸Q¡¥Ì¥ÌÑ¡”(€™¥¹¥Ñ”•¹‘Á½¥¹Ð½˜Ñ¡”¥Ñ•´´È½¥Ñ•´´ÄØÉ½½ÐµÁ••±¥¹œ‰½Õ¹‘…ÉäìÉ…‘¥…±Ì…¹(€•¹•É…°ÅÕ¥¹Ñ¥ŒÍ½±Ù…‰¥±¥ÑäÉ•µ…¥¸‘•™•ÉÉ•¸(´Q¡”Ý½É­•ÅÕ¥¹Ñ¥Œ¹½Ü•áÁ½Í•Ì¥ÑÌ•áÁ…¹‘•½¹ÍÑ…¹Ðµ™¥ÉÍÐ½•™™¥¥•¹Ð±¥ÍÐ(€€À€¬€Ñà€´€ÕáxÌ€¬áxÕ€…¹¡•­ÌÑ¡”‘¥É•Ð•Ù…±Õ…Ñ¥½¸…ÐÑ¡”ÍÕÁÁ±¥•É½½Ð(€€É€¸Q¡¥Ìµ…­•ÌÑ¡”¥Ñ•´´ÄØ‰½Õ¹‘…Éä½¹É•Ñ”‰½Ñ ‰•™½É”…¹…™Ñ•ÈÑ¡”(€‘•™±…Ñ¥½¸¡…¥¸°Ý¡¥±”­••Á¥¹œÉ½½Ð½¹ÍÑÉÕÑ¥½¸…¹•¹•É…°Í½±Ù…‰¥±¥Ñä(€‘•™•ÉÉ•¸(´Q¡”Ý½É­•Õ‰¥Œ¡…¥¸¹½Ü…±Í¼•áÁ½Í•Ì¥ÑÌ™¥¹…°Á…‘‘•ÅÕ½Ñ¥•¹Ð…¹Ñ¡”(€½µÁ±•Ñ”¡½É¹•É}™…Ñ½É¥é…Ñ¥½¹€¥‘•¹Ñ¥Ñä¸€Q¡ÕÌÑ¡”™¥¹¥Ñ”½µÁÕÑ…Ñ¥½¸¹½Ð(€½¹±äÙ•É¥™¥•Ì•… ÍÕÁÁ±¥•É½½Ð°‰ÕÐÉ•½É‘ÌÑ¡”•¹Ñ¥É”™…Ñ½ÈµÁ••±¥¹œ(€•ÉÑ¥™¥…Ñ”¥¸Ñ¡”•¹•É¥Œ¡…¥¸¥¹Ñ•É™…”¸(´¥¹¥Ñ•Q%Í½±…Ñ¥½¹á…µÁ±•€¹½Ü¡•­Ì„¹½¹ÑÉ¥Ù¥…°É…Ñ¥½¹…°ÍÅÕ…É”…É½Õ¹(€Ñ¡”½É¥¥¸™½È€¡éxÈ¬Ä¤è¥¹Ñ•ÉÙ…°!½É¹•È•Ù…±Õ…Ñ¥½¸ÁÉ½Ù•ÌÑ¡…Ð¥ÑÌ¥µ…”(€µ¥ÍÍ•Ìé•É¼°å¥•±‘¥¹œ„™¥¹¥Ñ”É½½Ðµ•á±ÕÍ¥½¸•ÉÑ¥™¥…Ñ”¸€Q¡¥Ì…‘Ù…¹•Ì(€Ñ¡”QÍÕ‰‘¥Ù¥Í¥½¸‰½Õ¹‘…Éä™É½´ÍÕÁÁ±¥•É½½ÑÌÑ½Ý…É•á•ÕÑ…‰±”(€¥Í½±…Ñ¥½¸Ý¡¥±”­••Á¥¹œÉ½½Ð•á¥ÍÑ•¹”…¹½µÁ±•Ñ•¹•ÍÌ‘•™•ÉÉ•¸(´Q¡”Í…µ”Ý½É­••á…µÁ±”¹½Ü¥¹ÍÑ…¹Ñ¥…Ñ•ÌÑ¡”É•ÕÉÍ¥Ù”‘å…‘¥ŒÍÕ‰‘¥Ù¥Í¥½¸è(€Ñ¡”ÍÕÁÁ±¥•É½½Ð€¡¤¤ÍÕÉÙ¥Ù•ÌÑÝ¼ÍÑ…•Ì¥¹Í¥‘”„É…Ñ¥½¹…°¡¥±‰½à½˜(€Ý¥‘Ñ …¹¡•¥¡Ð€ Ä¼È¤¸€Q¡¥ÌÉ•½É‘Ì…¸•áÁ±¥¥Ð™¥¹¥Ñ”•¹±½ÍÕÉ”‰Õ‘•Ð(€Ý¥Ñ¡½ÕÐÁ…ÍÍ¥¹œÑ¼…¸…ÑÑ…¥¹•±¥µ¥Ñ¥¹œ‰½à¸(´Q¡”Íåµµ•ÑÉ¥ŒÍÕÁÁ±¥•É½½Ð€ µ¤¤¹½Ü¡…ÌÑ¡”µ…Ñ¡¥¹œ‘•ÁÑ µÑÝ¼ÍÕÉÙ¥Ù½È)•ÉÑ¥™¥…Ñ”°Í¼‰½Ñ •á…ÐÉ½½ÑÌ½˜€¡éxÈ¬Ä¤…É”½Ù•É•‰äÑ¡”™¥¹¥Ñ”)ÍÕ‰‘¥Ù¥Í¥½¸ÑÉ…”¸)Q¡”Í…µ”ÍÕ‰‘¥Ù¥Í¥½¸ÑÉ…”¹½Ü¡…Ì‘•ÁÑ µÑ¡É•”ÍÕÉÙ¥Ù½ÉÌ™½È‰½Ñ ¥€…¹)€µ¥€°Ý¥Ñ É…Ñ¥½¹…°¡¥±Ý¥‘Ñ …¹¡•¥¡Ð€Ä¼Ñ€¸Q¡¥ÌÍ¡…ÉÁ•¹ÌÑ¡”™¥¹¥Ñ”Q)¥Í½±…Ñ¥½¸‰Õ‘•ÐÝ¡¥±”É•Ñ…¥¹¥¹œÑ¡”ÍÕÁÁ±¥•µÉ½½Ð°¹¼µ½µÁ±•Ñ•¹•ÍÌ‰½Õ¹‘…Éä¸)%Ð¹½Ü…±Í¼¡•­Ì‘•ÁÑ ™½ÕÈ™½È‰½Ñ ÍÕÁÁ±¥•É½½ÑÌ°Ý¥Ñ ¡¥±Ý¥‘Ñ …¹)¡•¥¡Ð€Ä¼á€°•áÑ•¹‘¥¹œÑ¡”•áÁ±¥¥Ð‘å…‘¥ŒÁÉ•¥Í¥½¸Í¡•‘Õ±”Ý¥Ñ¡½ÕÐ)±…¥µ¥¹œÕ¹¥ÅÕ”½È±½‰…±±ä½¹ÍÑÉÕÑ•É½½ÑÌ¸)Q¡”Í…µ”™¥¹¥Ñ”QÍ•…É ¹½ÜÉ•…¡•Ì‘•ÁÑ ™¥Ù”™½È‰½Ñ ÍÕÁÁ±¥•É½½ÑÌ°)Ý¥Ñ ¡¥±Ý¥‘Ñ …¹¡•¥¡Ð€Ä¼ÄÙ€¸Q¡¥Ì¥Ì„Í¡…ÉÁ•È•á•ÕÑ…‰±”¥Í½±…Ñ¥½¸)‰Õ‘•Ð°ÍÑ¥±°‘•±¥‰•É…Ñ•±äÍÑ½ÁÁ¥¹œÍ¡½ÉÐ½˜„±½‰…°É½½Ðµ•á¥ÍÑ•¹”½È)½µÁ±•Ñ•¹•ÍÌÑ¡•½É•´¸)%Ð¹½ÜÉ•…¡•Ì‘•ÁÑ Í¥à…ÌÝ•±°°Ý¥Ñ ‰½Ñ ¡¥±Ý¥‘Ñ¡Ì…¹¡•¥¡ÑÌ€Ä¼ÌÉ€¸)Q¡”É•ÍÕ±ÐÉ•µ…¥¹Ì„™¥¹¥Ñ”ÍÕÉÙ¥Ù…°•ÉÑ¥™¥…Ñ”™½ÈÑ¡”ÍÕÁÁ±¥•É½½ÑÌ¥€)…¹€µ¥€°¹½Ð„½µÁ±•Ñ•¹•ÍÌ½ÈÕ¹¥ÅÕ•¹•ÍÌÑ¡•½É•´¸(´¥¹¥Ñ••™±…Ñ¥½¹á…µÁ±•€µ…­•ÌÑ¡…Ð‰½Õ¹‘…Éä½¹É•Ñ”½¸Ñ¡”Õ‰¥Œ(€€¡éxÌ´ÙéxÈ¬ÄÅè´Ø¤è™¥¹¥Ñ”½µÁÕÑ…Ñ¥½¸¡•­ÌÑ¡”ÅÕ½Ñ¥•¹Ð…ÐÑ¡”ÍÕÁÁ±¥•(€É½½Ð€ Ä¤°¥ÑÌé•É¼É•µ…¥¹‘•È°…¹Ñ¡”½µÁ±•Ñ”ÍÕÁÁ±¥•µÉ½½Ð¡…¥¸(€€ Ä°È°Ì¤¸€Q¡¥Ì¥Ì„Ý½É­••ÉÑ¥™¥…Ñ”°¹½Ð…¸…ÕÑ½µ…Ñ¥ŒÉ½½ÐÍ½±Ù•È¸(´¥¹¥Ñ•Q	½Õ¹‘…Éä¹Íå¹Ñ¡•Ñ¥¥Ù¥‘•}ÅÕ½Ñ¥•¹Ñ}±•¹Ñ¡€¹½Ü•áÁ½Í•ÌÑ¡”•á…Ð(€™¥¹¥Ñ”½•™™¥¥•¹Ðµ½Õ¹Ð¥¹Ù…É¥…¹Ð½˜½¹”ÍÕÁÁ±¥•µÉ½½Ð‘•™±…Ñ¥½¸¸€Q¡”(€ÅÕ½Ñ¥•¹ÐÉ•µ…¥¹ÌÁ…‘‘•¥¸Ñ¡”½¹ÍÑ…¹Ðµ™¥ÉÍÐÉ•ÁÉ•Í•¹Ñ…Ñ¥½¸°Ý¡¥±”Ñ¡”(€‘•™±…Ñ¥½¸¡…¥¸ÍÕÁÁ±¥•ÌÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ™…Ñ½É¥é…Ñ¥½¸¥¹Ù…É¥…¹Ð¸)Q¡”ÍÑÉ½¹•ÈÍå¹Ñ¡•Ñ¥¥Ù¥‘•}ÅÕ½Ñ¥•¹Ñ}Á…‘‘•‘€Ñ¡•½É•´¥‘•¹Ñ¥™¥•ÌÑ¡…Ð)Á…‘‘¥¹œ•áÁ±¥¥Ñ±ä…¹ÁÉ½Ù•ÌÑ¡…ÐÑÉ¥µµ¥¹œ¥Ð±½Ý•ÉÌÑ¡”½•™™¥¥•¹Ð½Õ¹Ð)‰ä½¹”™½È•Ù•Éä¹½¹•µÁÑä¥¹ÁÕÐ¸(€¥¹¥Ñ••™±…Ñ¥½¹¡…¥¸¹‘•™±…Ñ•‘½•™™Í}±•¹Ñ¡€±¥™ÑÌÑ¡”Á…‘‘•½•™™¥¥•¹Ð(€½Õ¹ÐÑ¡É½Õ …¸…É‰¥ÑÉ…Éä™¥¹¥Ñ”¡…¥¸°µ…­¥¹œÑ¡”Í¡…Á”¥¹Ù…É¥…¹Ð(€•áÁ±¥¥ÐÝ¥Ñ¡½ÕÐ±…¥µ¥¹œÑ¡…ÐÁ…‘‘¥¹œÉ•µ½Ù…°½ÈÉ…‘¥…°Í½±Ù…‰¥±¥Ñä¥Ì(€…±É•…‘ä™½Éµ…±¥é•¸(´E	½à¹•Ù…±A½±å}½¹Ñ…¥¹Í€¹½ÜÁÉ½Ù•ÌÍ½Õ¹‘¹•ÍÌ½˜™¥¹¥Ñ”!½É¹•È•Ù…±Õ…Ñ¥½¸½¸(€É…Ñ¥½¹…°½µÁ±•à‰½á•Ìè•Ù•Éä•¹±½Í•É…Ñ¥½¹…°Á½¥¹Ð¡…Ì¥ÑÌÁ½±å¹½µ¥…°(€Ù…±Õ”•¹±½Í•‰äÑ¡”½ÕÑÁÕÐ‰½à¸€Q¡¥ÌÍÕÁÁ±¥•ÌÑ¡”¥¹Ñ•ÉÙ…°µ…É¥Ñ¡µ•Ñ¥Œ(€­•É¹•°¹••‘•™½È™¥¹¥Ñ”QÉ½½Ðµ•á±ÕÍ¥½¸½ÍÕ‰‘¥Ù¥Í¥½¸•ÉÑ¥™¥…Ñ•Ì°(€Ý¥Ñ¡½ÕÐ…ÍÍ•ÉÑ¥¹œ±½‰…°É½½Ð•á¥ÍÑ•¹”¸€%ÑÌ½µÁ…¹¥½¸(€E	½à¹•Ù…±A½±å}¹½}É½½Ñ}½™}¹½Ñ}½Ù•É±…ÁÍ}é•É½€Á…­…•ÌÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ(€™¥¹¥Ñ”‰½àµ‘¥Í…ÉÍÑ•À¸€¥¹¥Ñ•I½½Ñá±ÕÍ¥½¹•ÉÑ¥™¥…Ñ•€¹½ÜÁ…­…•Ì„(€™¥¹¥Ñ”É…Ñ¥½¹…°½Ù•È½˜„ÍÕÁÁ±¥•‘½µ…¥¸…¹ÁÉ½Ù•Ì¹½}É½½Ñ}¥¹}‘½µ…¥¹€(€Ý¡•¸•Ù•Éä½Ù•É•‰½àµ¥ÍÍ•Ìé•É¼¸(€=¹•MÕÉÙ¥Ù½É•ÉÑ¥™¥…Ñ”¹É½½Ñ}µ•µ}ÍÕÉÙ¥Ù½É€…‘‘ÌÑ¡”½µÁ±•µ•¹Ñ…Éä™¥¹¥Ñ”(€Í•…É ÍÑ•Àè…™Ñ•È•á±Õ‘¥¹œ…±°½Ñ¡•È¡¥±‘É•¸°…¹äÉ½½Ð¥¸Ñ¡”Á…É•¹Ð¥Ì(€™½É•¥¹Ñ¼Ñ¡”É•Ñ…¥¹•¡¥±¸(´¥¹¥Ñ•QMÕ‰‘¥Ù¥Í¥½¸¹‘å…‘¥¡¥±‘É•¹€¹½ÜÍÕÁÁ±¥•ÌÑ¡”•½µ•ÑÉ¥Œ™½ÕÈµÝ…ä(€ÍÁ±¥ÐÕÍ•‰äÑ¡…ÐÍ•…É è½É‘•É•¡¥±‘É•¸…É”¹•ÍÑ•¥¸Ñ¡”Á…É•¹Ð…¹(€½Ù•È¥Ð½½É‘¥¹…Ñ•Ý¥Í”°…±°½Ù•ÈÉ…Ñ¥½¹…°•¹‘Á½¥¹ÑÌ¸(€‘å…‘¥¡¥±‘É•¹}Ý¥‘Ñ¡}¡•¥¡Ñ€ÁÉ½Ù•ÌÑ¡”•á…Ð¡…±˜µÝ¥‘Ñ ½¡…±˜µ¡•¥¡Ð(€Í¡É¥¹­…”™½È•Ù•Éä¡¥±¸(€ÍÕÉÙ¥Ù¥¹¡¥±‘É•¹€…¹É½½Ñ}µ•µ}ÍÕÉÙ¥Ù¥¹¡¥±‘É•¹€½¹¹•ÐÑ¡¥Ì•½µ•ÑÉä(€Ñ¼Á½±å¹½µ¥…°µ¥µ…”½Ù•É±…À°ÁÉ½Ù¥¹œÑ¡…ÐÑ¡”™¥¹¥Ñ”™¥±Ñ•È…¹¹½Ð‘¥Í…É(€„É½½ÐìÍÕÉÙ¥Ù¥¹¡¥±‘É•¹}½É‘•É•‘€ÁÉ•Í•ÉÙ•ÌÑ¡”‰½à¥¹Ù…É¥…¹Ð…™Ñ•È(€™¥±Ñ•É¥¹œ¸(€ÍÕÉÙ¥Ù¥¹MÕ‰‘¥Ù¥‘•€…ÁÁ±¥•ÌÑ¡”™¥±Ñ•ÈÉ•ÕÉÍ¥Ù•±ä…Ð•Ù•Éä™¥¹¥Ñ”‘•ÁÑ °(€Ý¡¥±”É½½Ñ}µ•µ}ÍÕÉÙ¥Ù¥¹MÕ‰‘¥Ù¥‘•€ÁÉ½Ù•ÌÑ¡…Ð„ÍÕÁÁ±¥•É½½ÐÉ•µ…¥¹Ì¥¸(€…Ð±•…ÍÐ½¹”É•Ñ…¥¹•‰½àÑ¡É½Õ¡½ÕÐÑ¡…Ð™¥¹¥Ñ”Í¡•‘Õ±”¸(€ÍÕÉÙ¥Ù¥¹MÕ‰‘¥Ù¥‘•}¹½¹•µÁÑå}½™}É½½Ñ€µ…­•ÌÑ¡”½ÉÉ•ÍÁ½¹‘¥¹œ±¥ÍÐ(€¹½¹•µÁÑ¥¹•ÍÌ•áÁ±¥¥Ð°…¹ÍÕÉÙ¥Ù¥¹MÕ‰‘¥Ù¥‘•}¹•ÍÑ•‘%¹}Á…É•¹Ñ€Ñ½•Ñ¡•È(€Ý¥Ñ ÍÕÉÙ¥Ù¥¹MÕ‰‘¥Ù¥‘•}½É‘•É•‘€ÁÉ•Í•ÉÙ•Ì¹•ÍÑ¥¹œ…¹½É‘•É•‘¹•ÍÌ…Ð•Ù•Éä(€™¥¹¥Ñ”‘•ÁÑ ¸)ÍÕÉÙ¥Ù¥¹MÕ‰‘¥Ù¥‘•}Ý¥‘Ñ¡}¡•¥¡Ñ}•á…Ñ€ÑÉ…¹Í™•ÉÌÑ¡”•á…Ð€ Éyìµ¹ô¤(€Ý¥‘Ñ ½¡•¥¡ÐÁÉ•¥Í¥½¸±…ÜÑ¼•Ù•ÉäÉ•Ñ…¥¹•‰½à°Í¼Á½±å¹½µ¥…°µ¥µ…”(€ÁÉÕ¹¥¹œÁÉ•Í•ÉÙ•ÌÑ¡”™¥¹¥Ñ”µ•Í ‰Õ‘•Ð¸(€‘å…‘¥MÕ‰‘¥Ù¥‘•€¹½Ü¥Ñ•É…Ñ•ÌÑ¡”™½ÕÈµÝ…äÍÁ±¥ÐÑ¼…¹ä™¥¹¥Ñ”‘•ÁÑ ì(€‘å…‘¥MÕ‰‘¥Ù¥‘•}¹½¹•µÁÑå€…¹‘å…‘¥MÕ‰‘¥Ù¥‘•}¹•ÍÑ•‘%¹}Á…É•¹Ñ€ÁÉ½Ù¥‘”Ñ¡”(€™¥¹¥Ñ”Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥ÑäÍ…™™½±™½ÈÉ•Á•…Ñ•É½½ÐÍ•…É ¸(€‘å…‘¥MÕ‰‘¥Ù¥‘•}½É‘•É•‘€…¹‘å…‘¥MÕ‰‘¥Ù¥‘•}Ý¥‘Ñ¡}¡•¥¡Ñ}±•}Á…É•¹Ñ€(€…‘‘¥Ñ¥½¹…±±äÁÉ•Í•ÉÙ”½É‘•É•‘¹•ÍÌ…¹¥Ù”…¸•áÁ±¥¥Ð¹½¸µ•áÁ…¹Í¥½¸‰½Õ¹(€½¸‰½Ñ ‘¥µ•¹Í¥½¹Ì…Ð•Ù•Éä™¥¹¥Ñ”‘•ÁÑ ¸(€‘å…‘¥MÕ‰‘¥Ù¥‘•}Ý¥‘Ñ¡}¡•¥¡Ñ}•á…Ñ€Í¡…ÉÁ•¹ÌÑ¡¥ÌÑ¼Ñ¡”•á…Ð™¥¹¥Ñ”µ•Í (€±…Üè•Ù•Éä‘•ÁÑ ´¡¸¤‰½à¡…Ì‰½Ñ ‘¥µ•¹Í¥½¹Ì‘¥Ù¥‘•‰ä€ Éy¸¤¸€Q¡¥Ì¥Ì(€Ñ¡”•áÁ±¥¥ÐÁÉ•¥Í¥½¸Í¡•‘Õ±•È™½ÈÑ¡”Á½Ñ•¹Ñ¥…°µ¥¹™¥¹¥ÑäÉ½½ÐµÍ•…É (€É½ÕÑ”¸(´¥¹¥Ñ•MÑ¥É±¥¹•ÉÑ¥™¥…Ñ•€…‘‘Ì„‰½Õ¹‘•¥Ñ•´´äÀ•á•É¥Í”è™¥¹¥Ñ”É…Ñ¥½¹…°(€•¹±½ÍÕÉ•Ì™½È€¡”¤…¹ƒ> °…¸•áÁ±¥¥ÐÍÅÕ…É”µÉ½½Ð‰É…­•Ð°…¹„•ÉÑ¥™¥•(€MÑ¥É±¥¹œµÍ¡…Á•É…Ñ¥¼…Ð€¡¸ôÄÀ¤¸€Q¡”…ÍåµÁÑ½Ñ¥ŒMÑ¥É±¥¹œ±¥µ¥ÐÉ•µ…¥¹Ì(€½ÕÑÍ¥‘”Ñ¡”ÕÉÉ•¹ÐÑ¡•½É•´‰½Õ¹‘…Éä¸(´¥¹¥Ñ•MÑ¥É±¥¹MÑ…•M¥áÑå½ÕÉ€•áÑ•¹‘ÌÑ¡”Í…µ”‰½Õ¹‘•¥Ñ•´´äÀÍ¡•‘Õ±”Ñ¼(€€¡¸ôØÐ¤°ÕÍ¥¹œÑ¡”É…Ñ¥½¹…°…¹¡½È€ÈÀÀÔ¼ÄÀÁ€™½ÈÑ¡”ÍÅÕ…É”µÉ½½Ð‰É…­•Ð½˜(€€ÄÈã>€…¹É•Ñ…¥¹¥¹œÑ¡”•áÁ±¥¥ÐÉ…Ñ¥¼•¹±½ÍÕÉ”lÄ¼È°Éu€¸(´¥¹¥Ñ•MÑ¥É±¥¹MÑ…•=¹•QÝ•¹Ñå¥¡Ñ€•áÑ•¹‘ÌÑ¡”Í…µ”‰½Õ¹‘•¥Ñ•´´äÀÍ¡•‘Õ±”(€Ñ¼€¡¸ôÄÈà¤°ÕÍ¥¹œÑ¡”É…Ñ¥½¹…°…¹¡½È€ÈàÌØ¼ÄÀÁ€™½ÈÑ¡”ÍÅÕ…É”µÉ½½Ð‰É…­•Ð(€½˜€ÈÔÛ>€…¹É•Ñ…¥¹¥¹œÑ¡”•áÁ±¥¥ÐÉ…Ñ¥¼•¹±½ÍÕÉ”lÄ¼È°Éu€ìÑ¡”(€…ÍåµÁÑ½Ñ¥Œ±¥µ¥ÐÉ•µ…¥¹Ì‘•™•ÉÉ•¸(´¥¹¥Ñ•MÑ¥É±¥¹MÑ…•QÝ½¥™ÑåM¥á€½¹Ñ¥¹Õ•ÌÑ¡”Í…µ”‰½Õ¹‘•¥Ñ•´´äÀÍ¡•‘Õ±”(€Ñ¼€¡¸ôÈÔØ¤°ÕÍ¥¹œÑ¡”É…Ñ¥½¹…°…¹¡½È€ÐÀÄ¼ÄÁ€™½ÈÑ¡”ÍÅÕ…É”µÉ½½Ð‰É…­•Ð(€½˜€ÔÄË>€…¹É•Ñ…¥¹¥¹œÑ¡”•áÁ±¥¥ÐÉ…Ñ¥¼•¹±½ÍÕÉ”lÄ¼È°Éu€ìÑ¡”(€…ÍåµÁÑ½Ñ¥Œ±¥µ¥ÐÉ•µ…¥¹Ì‘•™•ÉÉ•¸(´¥¹¥Ñ•MÑ¥É±¥¹MÑ…•¥Ù•QÝ•±Ù•€•áÑ•¹‘ÌÑ¡”Í…µ”‰½Õ¹‘•¥Ñ•´´äÀÍ¡•‘Õ±”Ñ¼(€€¡¸ôÔÄÈ¤°ÕÍ¥¹œÑ¡”É…Ñ¥½¹…°…¹¡½È€ÔØÜ¼ÄÁ€™½ÈÑ¡”ÍÅÕ…É”µÉ½½Ð‰É…­•Ð½˜(€€ÄÀÈÓ>€¸€%ÑÌÍ¡…ÉÁ•È™¥¹¥Ñ”ÑÉ…¹ÍÁ½ÉÐÁ±…•ÌÑ¡”É…Ñ¥¼¥¸lää¼ÄÀÀ°ÄÀÈ¼ÄÀÁu€(€…¹•áÁ½ÉÑÌÑ¡”•áÁ±¥¥Ð•ÉÉ½È‰Õ‘•Ð€È¼ÄÀÁ€ìÑ¡”…ÍåµÁÑ½Ñ¥Œ±¥µ¥ÐÉ•µ…¥¹Ì(€‘•™•ÉÉ•¸(´¥¹¥Ñ•½µÁ±•áA…Ñ¡•ÉÑ¥™¥…Ñ•€Á…­…•ÌÑ¡”™¥ÉÍÐ±½Í•µÁ½±å½¸•á…Ñ¹•ÍÌ(€•ÉÑ¥™¥…Ñ”™½È„½¹ÍÑ…¹Ð‘¥™™•É•¹Ñ¥…°è„™¥¹¥Ñ”É…Ñ¥½¹…°µ½µÁ±•àÁ…Ñ ¥Ì(€±½Í•‰ä½¹ÍÑÉÕÑ¥½¸°…¹¥ÑÌ•á…Ð‘¥ÍÁ±…•µ•¹Ð¥ÌÁÉ½Ù•Ñ¼‰”é•É¼¸(€Q¡¥Ì¥Ì„™¥¹¥Ñ”ÁÉ¥µ¥Ñ¥Ù”½…¹•±±…Ñ¥½¸±…å•È°¹½Ð„•¹•É…°…Õ¡äÑ¡•½É•´(€½È„±¥µ¥Ð½˜Á½±å½¹…°¥¹Ñ•É…±Ì¸(€Q¡”Í…µ”•ÉÑ¥™¥…Ñ”¥¹Ñ•É™…”¹½Ü½Ù•ÉÌ…É‰¥ÑÉ…Éä™¥¹¥Ñ”Á½±å¹½µ¥…°(€‘¥™™•É•¹Ñ¥…±ÌÑ¡É½Õ ™¥¹¥Ñ•A½±å¹½µ¥…±¥™™•É•¹Ñ¥…±á…Ñ¹•ÍÍ}±½Í•‘€…¹(€¥¹¥Ñ•±½Í•‘A½±å¹½µ¥…±A…Ñ¡•ÉÑ¥™¥…Ñ”¹•á…Ñ¥ÍÁ±…•µ•¹Ñ}•Å}é•É½€¸(€Q¡”Á±…¹¹•±•™ÐµÍÕ´±…å•È¥Ì¹½Ü•áÁ±¥¥Ð…Ì(€Á½±å½¹…±1•™ÑMÕµI…Ý¹Ñ¥É•€ìA½±å½¹…±1•™ÑMÕµ•ÉÑ¥™¥…Ñ•€…¹(€Á½±å½¹…±1•™ÑMÕµI…Ý¹Ñ¥É•}Ù…±¥‘€ÁÉ½µ½Ñ”¥ÐÑ¼„Ù…±¥½µÁ±•áI…Ý€½¹±ä(€Ý¡•¸½É‘•É•‘¹•ÍÌ°¹•ÍÑ¥¹œ°…¹Í¡É¥¹­¥¹œÝ¥‘Ñ¡Ì…É”ÍÕÁÁ±¥•…Ì™¥¹¥Ñ”(€•ÉÑ¥™¥…Ñ•Ì¸(´9•áÐQ•áÑ•¹Í¥½¹Ìè•á…ÐÁ½±å¹½µ¥…°‘•É¥Ù…Ñ¥Ù”™…ÑÌ°Ñ¡•¸¥¹Ñ•ÉÙ…°µÙ…±Õ•(€I¥•µ…¹¸µÍÕ´½¹Ù•É•¹”Õ¹‘•È%¹Ñ•ÉÙ…±I•Õ±…É=¹€¸(€%¹Ñ•É…°¹%¹Ñ•ÉÙ…±I•Õ±…É%¹Ñ•É…±•ÉÑ¥™¥…Ñ•€¹½Ü¹…µ•ÌÑ¡”¡½¹•ÍÐ‰É¥‘”(€‰½Õ¹‘…Éäè¥ÐÍÑ½É•Ì‰½Ñ ¥¹Ñ•ÉÙ…°É•Õ±…É¥Ñä…¹„Í•Á…É…Ñ”Ù…±¥¥¹Ñ•É…°(€½¹ÍÑÉÕÑ¥½¸¸€%ÑÌ•á…Ð½¹ÍÑ…¹Ð¥¹ÍÑ…¹”¥Ì¡•­•°Ý¡¥±”Ñ¡”•¹•É…°(€É•Õ±…É¥ÑäµÑ¼µ¥¹Ñ•É…‰¥±¥Ñä½¹ÍÑÉÕÑ¥½¸É•µ…¥¹Ì…¸•áÁ±¥¥Ð™ÕÑÕÉ”Ñ¡•½É•´¸(´9•áÐQ•áÑ•¹Í¥½¹Ìè½µÁ±•àµ½•™™¥¥•¹Ð±¥¹•…ÈÁ½±å¹½µ¥…±ÌÕÍ¥¹œ•ÉÑ¥™¥•(€½µÁ±•à‘¥Ù¥Í¥½¸…Ý…ä™É½´é•É¼°…É‰¥ÑÉ…ÉäÅÕ…‘É…Ñ¥ÌÙ¥„„½µÁÕÑ…‰±”(€‘¥ÍÉ¥µ¥¹…¹ÐÍÅÕ…É”É½½Ð°Ñ¡•¸(€Ñ¡”½¹ÍÑÉÕÑ¥Ù”É½½ÐµÍ•…É ½…ÉÕµ•¹ÐµÁÉ¥¹¥Á±”É½ÕÑ”™½È…É‰¥ÑÉ…Éä‘•É•”¸(´9•áÐ½µÁ±•à¥¹Ñ•É…°•áÑ•¹Í¥½¹ÌèÁ…­…”Á½±å½¹…°±•™ÐÍÕµÌ…ÌÙ…±¥(€½µÁ±•áI…ÝÌ°ÁÉ½Ù”•¹‘Á½¥¹ÐµÁÉ¥µ¥Ñ¥Ù”…¹•±±…Ñ¥½¸™½ÈÁ½±å¹½µ¥…°(€‘¥™™•É•¹Ñ¥…±Ì°Ñ¡•¸ÕÍ”Ñ¡…Ð…ÌÑ¡”™¥ÉÍÐÍ½ÉÉäµ™É•”…Õ¡äÑ¡•½É•´™½È(€±½Í•Á½±å½¹…°Á…Ñ¡Ì¸((´Q¡”™¥¹¥Ñ”ÅÕ…ÉÑ•ÈµÑÕÉ¸¡•­Á½¥¹Ð¹½Ü…‘Ù…¹•Ì‰•¹¡µ…É¬¥Ñ•´€ÄÜè(€¥¹¥Ñ•I½Ñ…Ñ¥½¹EÕ…ÉÑ•ÉQÕÉ¹á…µÁ±•€•Ù…±Õ…Ñ•ÌÑ¡”½µµ½¸™…Ñ½É¥…°É½Ñ…Ñ¥½¸(€…ÐÑ¡”É…Ñ¥½¹…°¥¹ÁÕÐ€ÌÔÔ¼ÈÈÙ€°…¹ÍÑ…•Ì€à°€ÄÈ°…¹€ÄØ•… Á±…”Ñ¡”(€Õ¹¥Ð¥µ…¥¹…ÉäÁ½¥¹Ð¥¹Í¥‘”Ñ¡”É½Ñ…Ñ¥½¸‰½à…™Ñ•ÈÑ¡”•áÁ±¥¥ÐÉ…Ñ¥½¹…°(€Ñ½±•É…¹”•áÁ…¹Í¥½¸€Ä¼ÄÀÁ€¸€Q¡¥Ì¥Ì„™¥¹¥Ñ”‘”5½¥ÙÉ”½Õ±•ÈµÉ½ÕÑ”(€•ÉÑ¥™¥…Ñ”ì¥Ð‘½•Ì¹½Ð¥‘•¹Ñ¥™ä„½µÁ±•Ñ••áÁ½¹•¹Ñ¥…°Ý¥Ñ Ñ¡”(€•½µ•ÑÉ¥ŒÅÕ…ÉÑ•ÈµÑÕÉ¸¸((ŒŒ5•ÑÉ¥Ì((´I½Õ ÁÉ½½˜µÍ¥é”µ•ÑÉ¥Ì…¸‰”•¹•É…Ñ•Ý¥Ñ è(€ÁåÑ¡½¸ÌÍÉ¥ÁÑÌ½‘•±}µ•ÑÉ¥Ì¹Áä€´µ­¥¹ÁÉ½½™Ì€´µµ¥¸µ±¥¹•Ì€Í€¸(´½ÈÑ¥µ¥¹œ°ÕÍ”1•…¸½1…­”ÁÉ½™¥±¥¹œ½¸Ñ¡”™¥±”‰•¥¹œÝ½É­•½¸ìÑ¡”Í¥é”(€É•Á½ÉÐ¥Ì½¹±ä„É½Õ ±¥¹”µ½Õ¹Ð½µÁ…¹¥½¸Ñ¼Ñ¡”ÁÉ½™¥±•È¸(

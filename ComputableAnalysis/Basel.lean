@@ -30,6 +30,17 @@ theorem baselSeriesRaw_validCompute :
     RealRaw.ValidCompute baselSeriesRaw.compute := by
   simpa [baselSeriesRaw] using DirichletSeries.zetaTwoRaw_validCompute
 
+/-- The project-facing Basel evaluator reaches every positive rational
+precision request through an explicit finite stage.  This is a potential-
+infinity statement about the interval algorithm, not an attained zeta value
+or Euler's Basel identity. -/
+theorem baselSeriesRaw_reaches_of_positive_tolerance (eps : QPos) :
+    ∃ n : Nat, (baselSeriesRaw.compute n).width <= eps.val := by
+  refine ⟨eps.val.den + 1, ?_⟩
+  rw [baselSeriesRaw_compute_eq]
+  exact DirichletSeries.zetaTwoInterval_width_le_of_denominator_budget
+    eps.property (Nat.le_refl (eps.val.den + 1))
+
 def baselSeries : Real :=
   Real.ofRaw baselSeriesRaw baselSeriesRaw_valid
 
@@ -135,6 +146,30 @@ def eulerBasel_geometricPi : Prop :=
 circumference computation. -/
 def eulerBasel_circumferencePi : Prop :=
   EulerBaselStatement piCircumference
+
+/-- The geometric Basel target can be proved by showing that the two valid
+raw algorithms overlap at every pair of finite stages.  This is the native
+computable-real form of the remaining theorem; it does not invoke a
+completed zeta value or classical completeness. -/
+theorem eulerBasel_geometric_iff_allStagesOverlap :
+    eulerBasel_geometricPi ↔
+      DirichletSeries.zetaTwoRaw.AllStagesOverlap
+        (piSquaredOverSixRaw piCircleArea) := by
+  unfold eulerBasel_geometricPi EulerBaselStatement
+  exact RealRaw.equiv_iff_allStagesOverlap
+    DirichletSeries.zetaTwoRaw_validCompute
+    geometricPiSquaredOverSixRaw_valid
+
+/-- The circumference-based Basel target has the same all-stage-overlap
+criterion, independently of the chosen certified pi representative. -/
+theorem eulerBasel_circumference_iff_allStagesOverlap :
+    eulerBasel_circumferencePi ↔
+      DirichletSeries.zetaTwoRaw.AllStagesOverlap
+        (piSquaredOverSixRaw piCircumference) := by
+  unfold eulerBasel_circumferencePi EulerBaselStatement
+  exact RealRaw.equiv_iff_allStagesOverlap
+    DirichletSeries.zetaTwoRaw_validCompute
+    circumferencePiSquaredOverSixRaw_valid
 
 /-- The unresolved Basel theorem is independent of which certified geometric
 pi evaluator supplies its squared right-hand side. -/

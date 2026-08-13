@@ -14,9 +14,10 @@ theorem exactRat_monomial_nondecreasing (n : Nat) :
     NondecreasingOnInterval
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ n) 0 1) := by
   intro x y hx hy hxy stage
-  simp [FunctionOnInterval.exactRat_compute]
-  have hx0 : 0 <= x := by simpa using hx.1
-  have hy0 : 0 <= y := by simpa using hy.1
+  rw [FunctionOnInterval.exactRat_compute (fun x : Rat => x ^ n) 0 1 x hx stage]
+  rw [FunctionOnInterval.exactRat_compute (fun x : Rat => x ^ n) 0 1 y hy stage]
+  have hx0 : 0 <= x := by simpa [FunctionOnInterval.exactRat] using hx.1
+  have hy0 : 0 <= y := by simpa [FunctionOnInterval.exactRat] using hy.1
   have hpow : ∀ k : Nat, x ^ k <= y ^ k := by
     intro k
     induction k with
