@@ -1,7 +1,6 @@
 \chapter{The Fundamental Theorem of Algebra}\label{ch:algebra-fta}
 
-An algebraic value is represented by a rational box and a certificate about
-the polynomial image.
+An algebraic value is a rational box with a polynomial-image certificate.
 
 \section{Isolation and deflation}
 \label{thm:finite-box-polynomial-soundness}
@@ -15,8 +14,7 @@ the polynomial image.
 box -> interval Horner evaluation -> discard or subdivide
     -> optionally deflate a supplied exact factor
 \end{verbatim}
-Rational-root search is finite and conditional on its candidate list;
-isolation supplies the computable substitute for a radical formula.
+Rational-root search is finite; isolation replaces radical formulas.
 \lean{ComputableAnalysis.QBox.FiniteRootExclusionCertificate}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide}
 \lean{ComputableAnalysis.RationalRootSearch.rationalRootSearchCertificate}
@@ -28,6 +26,5 @@ isolation supplies the computable substitute for a radical formula.
 
 \section{Boundary}
 
-There is no general degree-five radical formula. Global termination and a
-completed algebraic closure require separate bridges; the finite certificates
-remain the computational core.
+Degree five has no general radical formula. Global termination and algebraic
+closure are separate bridges.

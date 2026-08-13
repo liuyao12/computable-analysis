@@ -3,13 +3,12 @@
 \section{Secants before completeness}
 \label{thm:finite-quadrature-mean-value}
 
-The historical core is the mean-value relation, treated here as a finite
-certificate rather than as a consequence of completed real numbers.
+The historical core is the mean-value relation, here a finite certificate.
 \begin{verbatim}
 endpoint increment -> derivative bounds -> rational witness interval
 \end{verbatim}
-For monotone derivatives or convex functions, the witness is especially
-direct: the endpoint increment lies between the two derivative bounds.
+For monotone derivatives or convex functions, the endpoint increment lies
+between the derivative bounds.
 \lean{ComputableAnalysis.monomialUnit_mvt_bisection_tolerance_certificate}
 \lean{ComputableAnalysis.quarticUnit_mvt_bisection_tolerance_certificate}
 \lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
@@ -17,9 +16,8 @@ direct: the endpoint increment lies between the two derivative bounds.
 \section{FTC reconstruction}
 \label{thm:convex-ftc}
 
-Rectangle sums and derivative bounds are two descriptions of the same finite
-increment. Refine until their intervals overlap; then package the result as
-the computable FTC.
+Rectangle sums and derivative bounds describe the same increment. Refine until
+their intervals overlap.
 \begin{verbatim}
 partition -> lower/upper sums -> derivative comparison -> overlap
 \end{verbatim}
@@ -30,8 +28,7 @@ partition -> lower/upper sums -> derivative comparison -> overlap
 \label{thm:finite-taylor-ftc-prefix}
 \label{thm:finite-lhopital-interface}
 
-Factor the known part, bound the remainder, and refine the quotient or
-remainder interval.
+Factor the known part, bound the remainder, and refine the quotient interval.
 \lean{ComputableAnalysis.FiniteTaylorCertificate}
 \lean{ComputableAnalysis.finiteTaylorCertificate}
 \lean{ComputableAnalysis.FiniteTaylorCertificate.fold_identity}

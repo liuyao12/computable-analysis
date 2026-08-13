@@ -1,6 +1,6 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Approximate a linear ODE by time-ordered matrix words and a factorial tail.
+Approximate a linear ODE by matrix words and a factorial tail.
 
 \section{Construction}
 \label{thm:finite-cramer-interface}
@@ -11,23 +11,21 @@ state := initial vector
 add finite time-ordered matrix words
 bound the next words by a geometric/factorial tail
 \end{verbatim}
-Finite determinants, Cramer's rule, and Cayley--Hamilton supply the algebraic
-certificates.
+Determinants, Cramer's rule, and Cayley--Hamilton supply the certificates.
 \lean{ComputableAnalysis.cramer_two_by_two}
 \lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate}
 \lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_append_one}
 
 \section{Evolution and uniqueness}
 
-Mesh transitions give variation of constants and a finite uniqueness test.
+Mesh transitions give variation of constants and finite uniqueness.
 \lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_bound}
 \lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
 
 \section{Special cases}
 
-For rotations, the word expansion splits into cosine and sine prefixes. Commuting
-and constant-coefficient cases are shared refinements, not separate foundations.
+For rotations, the word expansion splits into cosine and sine prefixes.
 \lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
 \label{thm:linear-ode-elementary-function-agreement}

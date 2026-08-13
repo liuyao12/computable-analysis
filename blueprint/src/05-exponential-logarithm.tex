@@ -2,7 +2,7 @@
 
 \section{Exponential}
 
-Evaluate by a finite Taylor prefix and a scheduled remainder.
+Evaluate by a finite Taylor prefix and remainder.
 \begin{verbatim}
 prefix := 1 + x + ... + x^n/n!
 return prefix +/- certified remainder
@@ -12,7 +12,7 @@ return prefix +/- certified remainder
 
 \section{Logarithm and Euler identity}
 
-Use reciprocal bounds and finite composition; identify a classical function only
-after the computable enclosure is established.
+Use reciprocal bounds and finite composition; identify the classical function
+after enclosure.
 \lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_reaches}
 \lean{ComputableAnalysis.Series.FiniteBinomialSeriesCertificate}

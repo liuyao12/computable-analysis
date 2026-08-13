@@ -1,12 +1,12 @@
 \chapter{Integrals}\label{ch:integrals}
 
-An integral is a program returning nested rational bounds. Lebesgue measure and
-completed-real integration are outside scope.
+An integral is a program returning nested rational bounds. Lebesgue measure is
+outside scope.
 
 \section{Rectangle algorithm}
 
-Use equal subdivisions, but classify cells before choosing their rectangles:
-increasing, decreasing, or containing finitely many certified turns.
+Classify each equal-mesh cell as increasing, decreasing, or containing a
+certified finite turn set before choosing its rectangles.
 \begin{verbatim}
 mesh -> cell certificates -> lower/upper rectangles -> overlap
 \end{verbatim}
@@ -18,8 +18,8 @@ mesh -> cell certificates -> lower/upper rectangles -> overlap
 \caption{Certified lower and upper rectangles.}
 \label{fig:arctan-rectangle-enclosure}\end{figure}
 
-For $\sin(\pi x)$ on $[0,1/2]$, the endpoints are exact rational values;
-interior values carry stage-dependent brackets.
+For $\sin(\pi x)$ on $[0,1/2]$, endpoints are exact; interior values have
+stage-dependent brackets.
 \begin{figure}[!htbp]\centering
 \intervalSineIntegralStageAnimation
 \caption{Value brackets and rectangle bounds.}
@@ -44,8 +44,8 @@ finite sum -> algebraic identity -> endpoint difference -> error budget
 
 \section{Tails and products}
 
-Compactify improper intervals, bound the tail, and use finite products for
-Gaussian and $n$-ball certificates.
+Compactify, bound the tail, and use finite products for Gaussian and $n$-ball
+certificates.
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
 \lean{ComputableAnalysis.gaussianTailBoxUpper}
 \lean{ComputableAnalysis.gaussianTailBoxUpper_stage_two_hundred_nine_ten_ladder}
@@ -56,6 +56,5 @@ Gaussian and $n$-ball certificates.
 
 \section{Proof order}
 
-Intervals $\to$ monotone pieces $\to$ finite identities $\to$ certified
-function interfaces. The finite primitive is formalized first; a classical
-limit identification is a separate bridge.
+Intervals $\to$ monotone pieces $\to$ finite identities $\to$ function
+interfaces. Classical limit identification is a separate bridge.

@@ -1,7 +1,7 @@
 \chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}
 
-Geometry starts with rational coordinates, squared lengths, and explicit
-interval witnesses. `realRaw` computes; `real` records a convergent result.
+Rational coordinates and squared lengths are the geometric primitives.
+`realRaw` computes; `real` records the result.
 
 \section{Finite geometry}
 \label{thm:rational-circle-pythagorean}
@@ -18,8 +18,7 @@ interval witnesses. `realRaw` computes; `real` records a convergent result.
 coordinates -> rational identities -> square-root bracket
                          -> refine only when needed
 \end{verbatim}
-The formalization covers oriented area, Heron, Pythagoras, cosine, Ptolemy,
-and Pick-style certificates.
+The certificates cover Pythagoras, Heron, cosine, Ptolemy, and Pick.
 \lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
 \lean{ComputableAnalysis.RationalCircle.FiniteTriangleOrientationCertificate.oriented}
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPower_certificate}
@@ -40,8 +39,7 @@ and Pick-style certificates.
 \section{Archimedes and rational circles}
 \label{thm:geometric-pi-validity}
 
-The point is not an optimal polygon. It is a family of crude subdivisions whose
-lower and upper bounds are related and eventually overlap.
+Use crude subdivisions; relate their lower and upper bounds.
 \begin{verbatim}
 subdivide -> certify each cell -> sum bounds -> refine
 \end{verbatim}
@@ -56,9 +54,8 @@ subdivide -> certify each cell -> sum bounds -> refine
 \section{Angles and rotations}
 \label{thm:finite-quarter-turn}
 
-Invert a certified sector-area bracket, sample the rational circle, and refine
-the coordinate box. Finite rotation identities supply the bridge to
-trigonometric addition and power-series computations.
+Invert an area bracket, sample the rational circle, and refine the box.
+Finite rotations bridge to trigonometric series.
 \begin{verbatim}
 area bracket -> angle bracket -> circle coordinates -> identities
 \end{verbatim}
@@ -70,5 +67,4 @@ area bracket -> angle bracket -> circle coordinates -> identities
 
 \section{Boundary}
 
-Arbitrarily discontinuous functions and non-effective measure constructions
-are outside this chapter.
+Arbitrarily discontinuous functions and non-effective measure are outside scope.

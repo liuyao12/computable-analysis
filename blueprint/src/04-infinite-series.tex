@@ -15,9 +15,8 @@ prefix -> finite identity -> tail bound -> nested enclosure
 \label{thm:finite-power-sum-interface}
 \label{thm:finite-stirling-certificate}
 
-The same interface handles geometric, alternating, power-sum, Fourier, and
-prime-reciprocal examples. Divergence means that no terminal stage meets the
-requested bound.
+The interface handles geometric, alternating, power-sum, Fourier, and
+prime-reciprocal examples. Divergence is finite reachability failure.
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.prefix_le_endpoint}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
@@ -43,8 +42,8 @@ requested bound.
 \label{thm:leibniz-arctan}
 
 Crude rectangles, binomial expansions, termwise integration, and Machin-type
-identities are different routes through the same space of computations. This
-is a methodological observation, not a claim about Newton's motives.
+identities are routes through the same space of computations—not a claim about
+Newton's motives.
 \begin{verbatim}
 choose route -> compute prefix -> compare enclosures -> refine
 \end{verbatim}
@@ -54,8 +53,7 @@ choose route -> compute prefix -> compare enclosures -> refine
 
 \section{Basel and factorial growth}
 
-Finite comparison and factorial-ratio certificates prepare the shared rational
-anchors needed for stronger limit theorems.
+Finite comparison and factorial ratios prepare shared rational anchors.
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate}
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate.mem_interval}
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate.abs_error_le}
