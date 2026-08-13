@@ -8,6 +8,17 @@ Pythagoras, Heron, cosine law, Ptolemy, chord products, Pick, and finite
 isoperimetric bounds are rational certificates.  Classical completion is a
 separate bridge.
 \label{thm:finite-pick-certificate}\label{thm:finite-pick-rectangle-family}
+\emph{Pick interface.} Supply integer vertices and a finite interior count; compute shoelace area and gcd boundary contributions, then check the identity.
+\begin{verbatim}
+area := abs(shoelace(vertices)) / 2
+boundary := sum gcd(abs(dx), abs(dy)) over edges
+assert area = interior + boundary/2 - 1
+\end{verbatim}
+\lean{ComputableAnalysis.FiniteLatticePoint}
+\lean{ComputableAnalysis.FiniteLatticePoint.toRat}
+\lean{ComputableAnalysis.FinitePickTriangleCertificate}
+\lean{ComputableAnalysis.FinitePickTriangleCertificate.identity}
+\lean{ComputableAnalysis.finitePickTriangleCertificate}
 \label{thm:finite-rectangle-isoperimetric}
 \label{thm:triangle-isoperimetric-heron-bound}
 \label{thm:rational-circle-pythagorean}\label{thm:rational-isosceles}
