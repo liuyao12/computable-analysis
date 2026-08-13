@@ -27,6 +27,13 @@ The computable MVT output is an average bracket: a positive finite quadrature
 rule traps the integral average between rational lower and upper value bounds.
 It does not select an attained intermediate point.
 \label{thm:finite-quadrature-mean-value}
+\emph{Finite MVT interface.} A positive quadrature rule traps the average between rational lower and upper value bounds; it does not select a hidden intermediate point.
+\begin{verbatim}
+require weights >= 0 and sum(weights) = 1
+require lower <= f(x) <= upper on [a,b]
+return lower <= average(f) <= upper
+\end{verbatim}
+\lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
 
 \section{FTC reconstruction}
 
