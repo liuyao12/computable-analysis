@@ -53,4 +53,8 @@ theorem powerSum_nine_stage128 :
     Series.powerSum 9 128 = 113501516170343845888 := by
   native_decide
 
+theorem powerSum_nine_stage256 :
+    Series.powerSum 9 256 = 118545233581053040803840 := by
+  native_decide
+
 end ComputableAnalysis
