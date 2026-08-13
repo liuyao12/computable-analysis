@@ -49,6 +49,14 @@ require ratio^stage <= tolerance * (1 - ratio)
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
 \lean{ComputableAnalysis.Series.finiteGeometricSeriesCertificate}
 \label{thm:reciprocal-triangular-sum}\label{thm:harmonic-dyadic-lower-bound}
+\emph{Harmonic growth interface.} For each natural target, compute an explicit dyadic stage whose finite harmonic prefix reaches it.
+\begin{verbatim}
+stage := 2^(2*target)
+assert target <= harmonicSum stage
+\end{verbatim}
+\lean{ComputableAnalysis.FiniteHarmonicGrowthCertificate}
+\lean{ComputableAnalysis.FiniteHarmonicGrowthCertificate.explicit_stage}
+\lean{ComputableAnalysis.finiteHarmonicGrowthCertificate}
 \label{thm:finite-reciprocal-triangular-interface}
 \lean{ComputableAnalysis.Series.ReciprocalTriangularCertificate}
 \lean{ComputableAnalysis.Series.ReciprocalTriangularCertificate.exact_prefix}
