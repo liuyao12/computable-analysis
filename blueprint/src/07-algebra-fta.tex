@@ -1,144 +1,25 @@
 \chapter{The Fundamental Theorem of Algebra}\label{ch:algebra-fta}
 
-A root is a rational box whose polynomial image meets zero.
+An algebraic value is represented by a rational box and a certificate about
+the polynomial image.
 
 \section{Isolation and deflation}
 
 \begin{verbatim}
-boxes -> interval Horner evaluation
-      -> discard boxes missing zero
-      -> subdivide survivors / deflate supplied factors
+box -> interval Horner evaluation -> discard or subdivide
+    -> optionally deflate a supplied exact factor
 \end{verbatim}
-Quadratic, cubic, quartic, Descartes, and deflation certificates are included.
-Global termination requires a modulus.
-\begin{verbatim}
-remove zero coefficients
-count sign changes
-check count + 1 <= surviving length
-\end{verbatim}
-\label{thm:factorized-quadratic-roots}\label{thm:finite-factorized-fta}
-\label{thm:finite-fta-concrete-quadratic}\label{def:algebraic-arithmetic-targets}
-\label{thm:linear-factor-remainder-base}\label{thm:descartes-sign-variation}
-\label{thm:finite-deflation-example}\label{thm:finite-fta-isolation-example}
-\label{thm:finite-fta-subdivision-example}\label{thm:finite-quintic-deflation}
-\label{thm:finite-two-variation-descartes}\label{thm:finite-three-variation-descartes}
-\label{thm:finite-four-variation-descartes}\label{thm:finite-five-variation-descartes}
-\label{thm:finite-six-variation-descartes}\label{thm:finite-one-variation-descartes}
-\label{thm:finite-descartes-sign-count}\label{thm:complex-linear-root}
-\label{thm:finite-factor-remainder-interface}
-\label{thm:finite-descartes-sign-interface}
-\lean{ComputableAnalysis.finiteFTAZeroNeighborhood}
-\lean{ComputableAnalysis.finiteFTAZeroNeighborhood_exclusion}
+Rational-root search is finite and conditional on its candidate list;
+isolation supplies the computable substitute for a radical formula.
 \lean{ComputableAnalysis.QBox.FiniteRootExclusionCertificate}
-\lean{ComputableAnalysis.QBox.FiniteRootExclusionCertificate.no_root_in_domain}
-\lean{ComputableAnalysis.FiniteFTASubdivision.dyadicChildren}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide}
-\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nonempty_of_root}
-\lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_width_height_exact}
-\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch}
-\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_sound}
-\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_complete}
-\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_complete_of_mem}
-\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearch_none_iff}
 \lean{ComputableAnalysis.RationalRootSearch.rationalRootSearchCertificate}
-\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearchCertificate_sound}
-\lean{ComputableAnalysis.RationalRootSearch.rationalRootSearchCertificate_complete}
-\lean{ComputableAnalysis.finiteFTARootSearchDomain}
-\lean{ComputableAnalysis.finiteFTARootSearchDomain_ordered}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_two}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_two}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_four}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_four}
-\lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_six}
-\lean{ComputableAnalysis.finiteFTALowerRoot_survives_depth_six}
-The certificate records coefficients, zero-free length, variation count, and
-its finite bound.
-Rational-root search is conditional on the supplied finite candidate list:
-success returns a certified root and remainder certificate; `none` certifies
-only that no supplied candidate is a root.
 \lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate}
-\lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate.variation_eq_count}
-\lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate.variation_bound}
-\lean{ComputableAnalysis.Polynomial.finiteDescartesSignCertificate}
-\lean{ComputableAnalysis.Polynomial.syntheticDivide}
 \lean{ComputableAnalysis.Polynomial.syntheticDivide_spec}
-\lean{ComputableAnalysis.Polynomial.syntheticDivide_remainder_eq_eval}
-\lean{ComputableAnalysis.Polynomial.syntheticDivide_remainder_eq_zero_iff}
-\lean{ComputableAnalysis.Polynomial.RemainderCertificate}
-\lean{ComputableAnalysis.Polynomial.syntheticRemainderCertificate}
-\lean{ComputableAnalysis.Polynomial.RemainderCertificate.factor_remainder_at}
-\lean{ComputableAnalysis.Polynomial.RemainderCertificate.remainder_eq_eval}
-\lean{ComputableAnalysis.Polynomial.RemainderCertificate.factor_of_root}
-\lean{ComputableAnalysis.Polynomial.RemainderCertificate.remainder_eq_zero_iff}
-\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic}
-\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_eval}
-\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_sign_count}
-\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_positive_root_iff}
-\lean{ComputableAnalysis.Polynomial.twoVariationQuadratic_certificate}
-\lean{ComputableAnalysis.Polynomial.threeVariationCubic}
-\lean{ComputableAnalysis.Polynomial.threeVariationCubic_eval}
-\lean{ComputableAnalysis.Polynomial.threeVariationCubic_sign_count}
-\lean{ComputableAnalysis.Polynomial.threeVariationCubic_positive_root_iff}
-\lean{ComputableAnalysis.Polynomial.threeVariationCubic_certificate}
-\lean{ComputableAnalysis.Polynomial.fourVariationQuartic}
-\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_eval}
-\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_sign_count}
-\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_positive_root_iff}
-\lean{ComputableAnalysis.Polynomial.fourVariationQuartic_certificate}
-\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic}
-\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic_sign_count}
-\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic_endpoint_bracket}
-\lean{ComputableAnalysis.Polynomial.oneVariationQuadratic_unique_positive_root}
-\lean{ComputableAnalysis.Polynomial.cubic_completion_example_roots}
-\lean{ComputableAnalysis.Polynomial.cubic_completion_example_certificate}
-\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_factorization}
-\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_one_root}
-\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_sqrtTwo_stage24_interval_bracket}
-\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_bracket_matches_sqrtTwo_stage24}
-\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_factorization}
-\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_exact_roots}
-\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_positive_sqrt_stage24_interval_bracket}
-\lean{ComputableAnalysis.Polynomial.quarticSqrtTwo_negative_sqrt_stage24_interval_bracket}
-\label{thm:rational-quadratic-discriminant}\label{thm:complex-quadratic-discriminant}
-\label{thm:worked-complex-quadratic}\label{thm:rational-cubic-roots}
-\label{thm:finite-cubic-completion}\label{thm:finite-cubic-sqrt-two}
-\label{thm:finite-quartic-sqrt-two}\label{thm:rational-quartic-roots}
-\lean{ComputableAnalysis.FiniteDeflationChain.CubicRootWitnessCertificate}
-\lean{ComputableAnalysis.FiniteDeflationChain.CubicRootWitnessCertificate.computable_roots_and_factorization}
-\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs}
 \lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
-\lean{ComputableAnalysis.FiniteDeflationChain.rootFactorProduct}
-\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs_length}
-\lean{ComputableAnalysis.FiniteDeflationChain.exactRoot_of_exactRoot_of_ne}
-\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
-Deflation takes supplied exact roots as input: each step transfers distinct
-remaining roots and records the resulting finite factorization.  It does not
-assert that roots exist or that a completed algebraic closure has been built.
-\lean{ComputableAnalysis.rationalCubic_has_computable_roots}
-\lean{ComputableAnalysis.rationalCubic_has_algebraic_roots}
-\lean{ComputableAnalysis.Polynomial.quartic_factor_of_root}
-\lean{ComputableAnalysis.finiteQuarticQuadraticSplit}
-\lean{ComputableAnalysis.finiteQuarticQuadraticSplit_eval}
-\lean{ComputableAnalysis.finiteQuarticQuadraticSplit_hasExactRoots}
-\lean{ComputableAnalysis.quartic_split_example_roots}
-\lean{ComputableAnalysis.quartic_split_example_certificate}
-\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
-\lean{ComputableAnalysis.quintic_boundary_exact_factorization}
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_deflation_chain}
-\lean{ComputableAnalysis.FiniteDeflationExample.cubic_horner_factorization}
-\lean{ComputableAnalysis.Polynomial.sevenVariationSeptic}
-\lean{ComputableAnalysis.Polynomial.sevenVariationSeptic_eval}
-\lean{ComputableAnalysis.Polynomial.sevenVariationSeptic_sign_count}
-\lean{ComputableAnalysis.Polynomial.sevenVariationSeptic_positive_root_iff}
-\lean{ComputableAnalysis.Polynomial.sevenVariationSeptic_certificate}
 
 \section{Boundary}
 
-There is no general degree-five radical formula.  Effective isolation is the
-computable substitute; sign-count boundaries remain explicit.
-\label{rem:abel-ruffini-boundary}\label{thm:computable-fta-of-algebraic-fta}
-\label{thm:finite-box-polynomial-soundness}\label{thm:four-quadrant-box-subdivision}
-\label{thm:finite-deflation-soundness}
-\lean{ComputableAnalysis.ComputableFTA}
-\lean{ComputableAnalysis.AlgebraicFTA}
-\lean{ComputableAnalysis.ComputableFTA_of_AlgebraicFTA}
+There is no general degree-five radical formula. Global termination and a
+completed algebraic closure require separate bridges; the finite certificates
+remain the computational core.

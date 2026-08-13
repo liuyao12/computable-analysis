@@ -1,117 +1,56 @@
 \chapter{Integrals}\label{ch:integrals}
 
-An integral is a program returning nested rational bounds.  Lebesgue measure
-and completed-real integration are outside scope.
+An integral is a program returning nested rational bounds. Lebesgue measure and
+completed-real integration are outside scope.
 
 \section{Rectangle algorithm}
 
-Classify each cell as increasing, decreasing, or containing finitely many
-certified turns.
+Use equal subdivisions, but classify cells before choosing their rectangles:
+increasing, decreasing, or containing finitely many certified turns.
 \begin{verbatim}
-mesh := equal dyadic subdivision
-pieces := certify cell behavior
-return lower-rectangle sum, upper-rectangle sum
+mesh -> cell certificates -> lower/upper rectangles -> overlap
 \end{verbatim}
+\lean{ComputableAnalysis.pieceCellBounds}
+\lean{ComputableAnalysis.pieceCellTurningAreaGap_le}
+\lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_le_common_range}
 \begin{figure}[!htbp]\centering
 \arctanRectangleEnclosureAnimation
 \caption{Certified lower and upper rectangles.}
 \label{fig:arctan-rectangle-enclosure}\end{figure}
 
-For $\sin(\pi x)$ on $[0,1/2]$, endpoints are exact; interior values are
-stage-dependent brackets.
+For $\sin(\pi x)$ on $[0,1/2]$, the endpoints are exact rational values;
+interior values carry stage-dependent brackets.
 \begin{figure}[!htbp]\centering
 \intervalSineIntegralStageAnimation
 \caption{Value brackets and rectangle bounds.}
 \label{fig:interval-sine-integral-stage}\end{figure}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_succ}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_endpointDifference_succ}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_cosine_complement}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_valid}
 \lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_compute}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_width_le_geometric}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_reaches_of_positive_tolerance}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_contains_halfAnglePrefix}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_rotation_complement}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_four}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_six}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_six_near_one}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_eight}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_eight_near_one}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_ten}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_ten_near_one}
-The finite primitive is the formalized object; identifying its limit with a
-classical integral is a separate bridge.
-\label{def:arctan-integral}\label{rem:arctan-geom-general-integral}
-\label{thm:reciprocal-domain-certificates}\label{def:increasing-integral-stage}
-\label{prop:monotone-integral-well-defined}\label{def:piecewise-monotone-stage}
-\label{def:function-on-interval-to-realfunraw}\label{def:definite-integral-identity}
-\label{def:constant-integral-construction}\label{thm:constant-integral-endpoint-identity}
-\label{thm:monotone-integrable}
+\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_valid}
 
-\section{Identities}
+\section{Finite identities}
+\label{def:integration-by-parts-certificate}
+\label{thm:integration-by-parts-certificate}
 
-Substitution, parts, telescoping, and polynomial FTC are finite rearrangements
-under one error budget.
-\label{def:finite-substitution-stage}\label{thm:finite-geometric-integration-by-parts}
-\label{def:integration-by-parts-certificate}\label{thm:integration-by-parts-certificate}
-\label{thm:finite-polynomial-integration-by-parts}\label{thm:finite-quartic-ftc-checkpoint}
-\label{thm:finite-quintic-ftc-checkpoint}\label{thm:finite-sextic-ftc-checkpoint}
-\label{thm:coordinate-arctangent-two-stage-ftc}\label{cor:arctangent-logarithm-pi-route}
+Substitution, telescoping, integration by parts, and polynomial FTC are finite
+rearrangements under one error budget.
+\begin{verbatim}
+finite sum -> algebraic identity -> endpoint difference -> error budget
+\end{verbatim}
 \lean{ComputableAnalysis.finiteIntegrationByParts}
-\lean{ComputableAnalysis.finiteIntegrationByParts_withVariation}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.finiteRatSum_add}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.finiteRatSum_telescope}
 \lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.finiteRatSum_ibp_left_right}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.finiteRatSum_ibp_right_left}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadratic_derivative_eq}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.cubic_derivative_eq}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicLeftRightSum_eq_endpoint_difference}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicRightLeftSum_eq_endpoint_difference}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicLeftRightSum_eq_one}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicRightLeftSum_eq_one}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum}
 \lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_endpoint_difference}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_endpoint_difference}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_one}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_eq_one}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_stage4}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_stage4}
+\label{cor:arctangent-logarithm-pi-route}
 
 \section{Tails and products}
 
-Compactify improper intervals and certify tails.  Finite products give
-Gaussian and computable $n$-ball-volume certificates.
-\label{def:reciprocal-tail-compactification}\label{thm:cauchy-full-line-pi}
-\label{thm:bounded-symmetric-cauchy-pi}\label{def:reciprocal-quartic-test-kernel}
-\label{thm:reciprocal-quartic-projective-substitution}\label{thm:reciprocal-quartic-route-package}
-\label{def:finite-product-integral-gaussian-volume}\label{thm:bounded-gaussian-prefix}
-\lean{ComputableAnalysis.finiteProductSum2D}
-\lean{ComputableAnalysis.finiteProductSum2D_factorized}
-\lean{ComputableAnalysis.finiteProductIntegralSum2D}
-\lean{ComputableAnalysis.finiteProductIntegralSum2D_factorized}
-\lean{ComputableAnalysis.gaussianProductModel}
-\lean{ComputableAnalysis.gaussianProductModel_split}
+Compactify improper intervals, bound the tail, and use finite products for
+Gaussian and $n$-ball certificates.
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six_minus_four}
 \lean{ComputableAnalysis.gaussianTailBoxUpper}
-\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_ladder}
-\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_four_point_sum}
-\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_twenty_eight_point_sum}
-\lean{ComputableAnalysis.nBallCoeff}
-\lean{ComputableAnalysis.nBallVolumeModel}
 \lean{ComputableAnalysis.nBallVolumeModel_recurrence}
-\lean{ComputableAnalysis.nBallVolumeModel_scale}
-\lean{ComputableAnalysis.nBallVolumeModel_stage_six}
-\lean{ComputableAnalysis.nBallVolumeModel_stage_ten}
-\lean{ComputableAnalysis.nBallVolumeModel_stage_thirteen}
 
 \section{Proof order}
 
 Intervals $\to$ monotone pieces $\to$ finite identities $\to$ certified
-function interfaces.
+function interfaces. The finite primitive is formalized first; a classical
+limit identification is a separate bridge.

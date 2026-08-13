@@ -1,119 +1,31 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Approximate a linear ODE by time-ordered matrix words plus a tail bound.
+Approximate a linear ODE by time-ordered matrix words and a factorial tail.
 
-\section{Construction and algebra}
+\section{Construction}
+
 \begin{verbatim}
 state := initial vector
-add time-ordered matrix words
-bound next word by geometric tail
+add finite time-ordered matrix words
+bound the next words by a geometric/factorial tail
 \end{verbatim}
-\label{sec:ode-construction-identification-route}\label{thm:cramer-finite}
-\label{thm:finite-cramer-interface}
-Nonzero rational determinants give checked coordinate formulas.
+Finite determinants, Cramer's rule, and Cayley--Hamilton supply the algebraic
+certificates.
 \lean{ComputableAnalysis.cramer_two_by_two}
-\lean{ComputableAnalysis.cramer_two_by_two_unique}
-\lean{ComputableAnalysis.cramer_2_1_1_3_determinant}
-\lean{ComputableAnalysis.cramer_2_1_1_3_solution}
-\lean{ComputableAnalysis.cramer_2_1_1_3_formula}
-\lean{ComputableAnalysis.cramer_2_1_1_3_certificate}
-\lean{ComputableAnalysis.cramer_3_2_1_2_determinant}
-\lean{ComputableAnalysis.cramer_3_2_1_2_solution}
-\lean{ComputableAnalysis.cramer_3_2_1_2_formula}
-\lean{ComputableAnalysis.cramer_3_2_1_2_certificate}
-\lean{ComputableAnalysis.cramer_signed_determinant}
-\lean{ComputableAnalysis.cramer_signed_formula}
-\lean{ComputableAnalysis.cramer_signed_solution}
-\lean{ComputableAnalysis.cramer_signed_certificate}
-\lean{ComputableAnalysis.LinearODE.threeByThreeCramerSolution}
-\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_solves}
-\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_solves_of_determinant_ne_zero}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramerSolution}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_determinant}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solution}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solves}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramerSolution}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_determinant}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_solution}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_solves}
-\label{thm:two-by-two-cayley-hamilton}\label{thm:three-by-three-matrix-power-recurrence}
-\label{thm:finite-cayley-hamilton-boundary}
-The Cayley--Hamilton certificate supplies an annihilating polynomial and finite
-power recurrence; constructing the characteristic polynomial is separate.
 \lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate}
-\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.shifted_annihilates}
-\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.power_recurrence}
 \lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_append_one}
-\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_cayley_hamilton}
-\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrix_threeByThree_cayley_hamilton}
-\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix}
-\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_trace}
-\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_determinant}
-\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_identity}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_identity}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_fourth_power}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_trace}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_secondCoeff}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_determinant}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCayleyMatrix_identity}
-\lean{ComputableAnalysis.LinearODE.concreteFourCayleyMatrix}
-\lean{ComputableAnalysis.LinearODE.concreteFourCayleyCertificate}
-\lean{ComputableAnalysis.LinearODE.concreteFourCayleyMatrix_annihilates}
-\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_matrixPow_succ_succ_recurrence}
-\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_matrixPow_recurrence_unique}
-\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.ratMatrix_threeByThree_matrixPow_recurrence}
-\lean{ComputableAnalysis.LinearODE.threeByThree_matrixPow_succ_succ_succ_recurrence}
-\label{def:rational-linear-system}\label{thm:forced-oscillator-finite-seed}
 
 \section{Evolution and uniqueness}
 
-Mesh estimates give transitions, variation of constants, and uniqueness.
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords}
-\lean{ComputableAnalysis.LinearODE.orderedIndexWords_length}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_split}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_constant}
+Mesh transitions give variation of constants and a finite uniqueness test.
 \lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_succ}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_constant}
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum_pairwiseProductZero}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_square}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_pow_two}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_pow_even}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.generator_pow_odd}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexTerm_even}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexTerm_odd}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.cosineCoefficient}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.sineCoefficient}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.simplexPartial_even_split}
-\lean{ComputableAnalysis.LinearODE.chronologicalProduct_pairwiseProductZero}
-\lean{ComputableAnalysis.LinearODE.discretePeanoBakerExpansion}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail}
 \lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_bound}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_bound}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
-\lean{ComputableAnalysis.LinearODE.ZeroInitialVolterraIterationBound}
-\lean{ComputableAnalysis.LinearODE.zeroInitialVolterraIterationBound_eq_zero}
-\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison}
-\lean{ComputableAnalysis.LinearODE.SelfDerivativeVolterraComparison.equivalent}
 \lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
-\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_matrixPow_succ_succ_recurrence}
-\lean{ComputableAnalysis.LinearODE.ratMatrix_twoByTwo_matrixPow_recurrence_unique}
-\lean{ComputableAnalysis.LinearODE.HarmonicOscillator.twoByTwo_matrixPow_three}
-\label{def:finite-peano-baker-word-sum}\label{thm:finite-peano-baker-enumeration}
-\label{fig:peano-baker-words}\label{thm:discrete-variation-of-constants}
-\label{thm:sampled-linear-uniqueness}\label{def:interval-linear-system}
-\label{thm:peano-baker-state-transition}\label{thm:variation-of-constants}
-\label{thm:linear-picard-lindelof}\label{rem:peano-baker-uniqueness-certificate}
 
 \section{Special cases}
 
-Commuting and constant coefficients agree through a shared refinement
-certificate.
-\label{thm:linear-ode-elementary-function-agreement}\label{thm:direct-scalar-mesh-uniqueness}
-\label{def:constant-commuting-samples}\label{thm:peano-baker-specializations}
-\label{rem:ode-error-certificates}
+For rotations, the word expansion splits into cosine and sine prefixes. Commuting
+and constant-coefficient cases are shared refinements, not separate foundations.
+\lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
+\lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
+\label{thm:linear-ode-elementary-function-agreement}

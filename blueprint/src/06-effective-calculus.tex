@@ -1,115 +1,31 @@
 \chapter{Fundamental Theorem of Calculus}\label{ch:effective-calculus}
 
-The mean-value property exposes the order principle; finite certificates
-reconstruct the FTC.
-
 \section{Secants before completeness}
 
+The historical core is the mean-value relation, treated here as a finite
+certificate rather than as a consequence of completed real numbers.
 \begin{verbatim}
-mesh -> secant/rectangle bounds -> shrinking slope box
-     -> certified endpoint increment
+endpoint increment -> derivative bounds -> rational witness interval
 \end{verbatim}
-Convexity orders secant slopes.  The computable MVT returns an average bracket,
-not an attained point.
-\label{thm:uniform-mesh-width}\label{thm:finite-monomial-secants}
-\label{thm:affine-secants}\label{thm:affine-zero}\label{thm:constructive-lhopital}
-\label{thm:cubic-secants}\label{thm:square-midpoint-mean-value}
-\label{def:convex-right-derivative}\label{def:convex-left-derivative}
-\label{thm:convex-right-derivative-increasing}\label{thm:convex-left-derivative-increasing}
-\label{thm:convex-left-le-right-derivative}\label{thm:finite-lhopital-interface}
-\label{thm:finite-quadrature-mean-value}
-\lean{ComputableAnalysis.Integral.quadratureWeightSum}
-\lean{ComputableAnalysis.Integral.quadratureEvalSum}
-\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_of_positive_quadrature}
-\lean{ComputableAnalysis.Integral.exactCellOrderPreservation_of_boole}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate.common_factor_cancel}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate.residual_remainder_identity}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.affine_residual_quotient_certificate}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.affine_residual_quotient_eq_base_of_cross_product_eq_zero}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.quadratic_linear_worked_remainder}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.cubic_linear_worked_remainder}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.quartic_linear_worked_remainder}
-\lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
-\lean{ComputableAnalysis.cubic_secant_signed_interval}
-\lean{ComputableAnalysis.cubic_mvt_signed_interval_certificate}
-\lean{ComputableAnalysis.cubic_secant_rational_witness_interval}
-\lean{ComputableAnalysis.cubic_mvt_rational_witness_interval}
-\lean{ComputableAnalysis.monomialUnitNormalizedDerivativeAverage}
-\lean{ComputableAnalysis.monomialUnitDerivativeTarget}
-\lean{ComputableAnalysis.quarticUnitDerivativeTarget}
-\lean{ComputableAnalysis.monomialUnit_target_endpoint_bracket}
-\lean{ComputableAnalysis.monomialUnit_secant_eq_succ_mul_normalizedDerivativeAverage}
+For monotone derivatives or convex functions, the witness is especially
+direct: the endpoint increment lies between the two derivative bounds.
 \lean{ComputableAnalysis.monomialUnit_mvt_bisection_tolerance_certificate}
-\lean{ComputableAnalysis.DerivativeBoundFTC}
-\lean{ComputableAnalysis.DerivativeBoundFTC.equiv_endpoint}
-\lean{ComputableAnalysis.derivativeBoundFTC}
-\lean{ComputableAnalysis.CurvatureFTCCertificate}
-\lean{ComputableAnalysis.CurvatureFTCCertificate.toDerivativeBoundFTC}
-\lean{ComputableAnalysis.CurvatureFTCCertificate.equiv_endpoint}
-\lean{ComputableAnalysis.ConvexFTCCertificate}
-\lean{ComputableAnalysis.ConvexFTCCertificate.toCurvatureFTCCertificate}
-\lean{ComputableAnalysis.ConvexFTCCertificate.toDerivativeBoundFTC}
-\lean{ComputableAnalysis.ConvexFTCCertificate.equiv_endpoint}
-\lean{ComputableAnalysis.convexFTC}
-\lean{ComputableAnalysis.ConcaveFTCCertificate}
-\lean{ComputableAnalysis.ConcaveFTCCertificate.toCurvatureFTCCertificate}
-\lean{ComputableAnalysis.ConcaveFTCCertificate.toDerivativeBoundFTC}
-\lean{ComputableAnalysis.ConcaveFTCCertificate.equiv_endpoint}
-\lean{ComputableAnalysis.concaveFTC}
-\lean{ComputableAnalysis.curvatureFTC}
-\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_derivativeBoundFTC_stageSchedule}
-\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_curvatureFTC_stageSchedule}
-\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_convexFTC_stageSchedule}
-\lean{ComputableAnalysis.FTC.endpointScheduleAgreement_of_concaveFTC_stageSchedule}
-\lean{ComputableAnalysis.FTC.effectiveFTC_integral_equiv_scheduledEndpoint}
-\lean{ComputableAnalysis.FTC.finitePartitionEndpointStageSum}
-\lean{ComputableAnalysis.FTC.finitePartitionEndpointStageSum_contains}
-\lean{ComputableAnalysis.FTC.finitePartitionEndpointStageSum_adjacent_contains}
+\lean{ComputableAnalysis.quarticUnit_mvt_bisection_tolerance_certificate}
 
 \section{FTC reconstruction}
 
-Derivative bounds trap endpoint increments between rectangle sums; overlap is
-the identity.
-\label{rem:effective-ftc-reconstruction}\label{thm:monotone-integrable}
-\label{thm:interval-regular-integral-certificate}\label{thm:effective-ftc-certificate}
-\label{thm:finite-cubic-ftc}\label{thm:formula-identification-ftc}
-\label{thm:convex-ftc}\label{thm:taylor-integral-remainder}
-\lean{ComputableAnalysis.Integral.exactCubeInterval}
-\lean{ComputableAnalysis.Integral.exactRat_cube_intervalRegularOn_unit}
-\lean{ComputableAnalysis.Integral.exactRat_cube_integral_certificate}
-\lean{ComputableAnalysis.Integral.exactCube_uniformLeftSum_eq}
-\lean{ComputableAnalysis.Integral.exactCube_uniformRightSum_eq}
-\lean{ComputableAnalysis.Integral.exactCube_compute_contains_one_fourth}
-\lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_one_fourth}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage8}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage16}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage32}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage64}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage128}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage256}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_eq}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_error_eq}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_error_nonneg}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_error_le_three_halves_div}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum_eq}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum_error_eq}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeRightSum_error_nonneg}
+Rectangle sums and derivative bounds are two descriptions of the same finite
+increment. Refine until their intervals overlap; then package the result as
+the computable FTC.
+\begin{verbatim}
+partition -> lower/upper sums -> derivative comparison -> overlap
+\end{verbatim}
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_le_one_le_rightSum}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_rightSum_gap_le_three_div}
+\lean{ComputableAnalysis.Integral.exactRat_cube_integral_certificate}
 
 \section{Taylor and finite L'Hôpital}
 
-Factor the known part, bound the remainder, and refine.  The tail has its own
-rational budget.
-\label{thm:finite-taylor-ftc-prefix}
-\lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
-\lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
+Factor the known part, bound the remainder, and refine the quotient or
+remainder interval.
 \lean{ComputableAnalysis.FiniteTaylorCertificate}
-\lean{ComputableAnalysis.FiniteTaylorCertificate.fold_identity}
 \lean{ComputableAnalysis.finiteTaylorCertificate}
-\lean{ComputableAnalysis.FinitePolynomial.integratedTaylorPrefix_endpointDifference_succ}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_error_budget}

@@ -1,242 +1,36 @@
 \chapter{Infinite Series}\label{ch:infinite-series}
 
-An infinite object is finite computation plus a certified tail.
-
-\section{Finite stages}
-
+An infinite object is a finite prefix plus a certified tail.
 \begin{verbatim}
-compute finite prefix
-prove its identity
-bound the omitted tail
+prefix -> finite identity -> tail bound -> nested enclosure
 \end{verbatim}
-Fourier, Parseval, geometric, power-sum, and prime-reciprocal results use this
-interface; no completed sum is assumed.
-\label{sec:series-benchmark-foundations}\label{thm:finite-fourier-orthogonality}
-\label{thm:finite-fourier-interface}\label{thm:finite-prime-reciprocal-extension}
-\lean{ComputableAnalysis.fourPointFourierSum}
-\lean{ComputableAnalysis.fourPointFourierSum_zero_mode}
-\lean{ComputableAnalysis.fourPointFourierSum_first_mode}
-\lean{ComputableAnalysis.fourPointFourierSum_second_mode}
-\lean{ComputableAnalysis.fourPointFourierSum_third_mode}
-\lean{ComputableAnalysis.fourPointFourier_orthogonality_certificate}
-\lean{ComputableAnalysis.fourPointWeightedFourierSum}
-\lean{ComputableAnalysis.fourPointWeightedFourierSum_modes}
-\lean{ComputableAnalysis.fourPointWeightedFourier_parseval_certificate}
-\lean{ComputableAnalysis.fourPointFourierTransform}
-\lean{ComputableAnalysis.fourPointFourierTransform_modes}
-\lean{ComputableAnalysis.fourPointFourierTransform_reconstruct}
-\lean{ComputableAnalysis.fourPointFourierTransform_parseval}
-\label{thm:arithmetic-series-sum}\label{thm:finite-power-sums}
-\label{thm:geometric-series-sum}\label{thm:finite-geometric-series-interface}
-\label{thm:reciprocal-triangular-sum}\label{thm:harmonic-dyadic-lower-bound}
-\label{thm:finite-reciprocal-triangular-interface}\label{thm:finite-power-sum-interface}
-\label{thm:finite-prime-reciprocal-interface}
-Extend a finite prime list; each new reciprocal raises the accumulator.
-“Divergence” means no terminal stage exists.
-\lean{ComputableAnalysis.primeReciprocalSum_append}
-\lean{ComputableAnalysis.primeReciprocalSum_cons_gt}
-\lean{ComputableAnalysis.exists_prime_reciprocal_extension}
-\lean{ComputableAnalysis.primeReciprocalSum_four_primes}
-\lean{ComputableAnalysis.primeReciprocalSum_five_primes}
-\lean{ComputableAnalysis.primeReciprocalSum_six_primes}
-\lean{ComputableAnalysis.primeReciprocalSum_eight_primes}
-\lean{ComputableAnalysis.primeReciprocalSum_ten_primes}
-\lean{ComputableAnalysis.primeReciprocalSum_twelve_primes_gt_three_halves}
-\lean{ComputableAnalysis.primeReciprocalSum_sixteen_primes_gt_five_thirds}
-\lean{ComputableAnalysis.FinitePrimeIntervalCertificate}
-\lean{ComputableAnalysis.FinitePrimeIntervalCertificate.in_interval}
-\lean{ComputableAnalysis.finitePrimeIntervalCertificate}
 
-Supporting interfaces reuse prefix-and-bound:
-\lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_reaches}
-\lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_lower}
-\lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_reaches_later}
-\lean{ComputableAnalysis.FiniteHarmonicGrowthCertificate}
-\lean{ComputableAnalysis.finiteHarmonicGrowthCertificate}
-\lean{ComputableAnalysis.Series.arithmeticSum_eq}
-\lean{ComputableAnalysis.Series.arithmeticSum_reaches}
-\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate}
-\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate.closed_form}
-\lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate.succ_step}
-\lean{ComputableAnalysis.Series.finiteArithmeticSeriesCertificate}
-\lean{ComputableAnalysis.Series.geometricSum_eq}
-\lean{ComputableAnalysis.Series.geometricSum_tail_eq}
-\lean{ComputableAnalysis.Series.geometricSum_gap_le_of_le}
-\lean{ComputableAnalysis.Series.geometricSum_finiteApprox_reaches}
+\section{Series as computation}
+
+The same interface handles geometric, alternating, power-sum, Fourier, and
+prime-reciprocal examples. Divergence means that no terminal stage meets the
+requested bound.
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
-\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.prefix_le_endpoint}
-\lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
-\lean{ComputableAnalysis.Series.finiteGeometricSeriesCertificate}
-\lean{ComputableAnalysis.geometricThird_stage6_sum}
-\lean{ComputableAnalysis.geometricThird_stage6_tail}
-\lean{ComputableAnalysis.geometricThird_stage6_enclosure}
-\lean{ComputableAnalysis.Series.FiniteBinomialSeriesCertificate}
-\lean{ComputableAnalysis.Series.FiniteBinomialSeriesCertificate.power_identity}
-\lean{ComputableAnalysis.Series.finiteBinomialSeriesCertificate}
-\lean{ComputableAnalysis.ExpProofs.euler_binomial_prefix_nat_expansion}
-\lean{ComputableAnalysis.Series.powerSum_two_closed_form}
+\lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate}
 \lean{ComputableAnalysis.Series.FinitePowerSumCertificate}
-\lean{ComputableAnalysis.Series.FinitePowerSumCertificate.succ_step}
-\lean{ComputableAnalysis.Series.FinitePowerSumCertificate.growth_bound}
-\lean{ComputableAnalysis.Series.powerSum_add_block_certificate}
-\lean{ComputableAnalysis.Series.finitePowerSumCertificate}
-\lean{ComputableAnalysis.Series.finitePowerSumCertificate_value}
-\lean{ComputableAnalysis.fourthPowerSum_stage6}
-\lean{ComputableAnalysis.fifthPowerSum_stage6}
-\lean{ComputableAnalysis.powerSum_stage6_certificate}
-\lean{ComputableAnalysis.eighthPowerSum_stage6}
-\lean{ComputableAnalysis.powerSum_nine_stage6}
-\lean{ComputableAnalysis.powerSum_nine_stage8}
-\lean{ComputableAnalysis.powerSum_nine_stage10}
-\lean{ComputableAnalysis.powerSum_nine_stage12}
-\lean{ComputableAnalysis.powerSum_nine_stage16}
-\lean{ComputableAnalysis.powerSum_nine_stage32}
-\lean{ComputableAnalysis.powerSum_nine_stage64}
-\lean{ComputableAnalysis.powerSum_nine_stage128}
-\lean{ComputableAnalysis.powerSum_nine_stage256}
-\lean{ComputableAnalysis.Series.triangularTelescopingTerm_eq_reciprocal}
-\lean{ComputableAnalysis.Series.triangularTelescopingSum_eq}
-\lean{ComputableAnalysis.Series.triangularTelescopingSum_tail_eq}
-\lean{ComputableAnalysis.Series.triangularTelescopingSum_mono}
-\lean{ComputableAnalysis.Series.triangularTelescopingRaw_equiv_two}
-\lean{ComputableAnalysis.Series.ReciprocalTriangularCertificate}
-\lean{ComputableAnalysis.Series.ReciprocalTriangularCertificate.prefix_mem_target}
-\lean{ComputableAnalysis.Series.ReciprocalTriangularCertificate.exact_prefix}
-\lean{ComputableAnalysis.Series.ReciprocalTriangularCertificate.tail_formula}
-\lean{ComputableAnalysis.Series.reciprocalTriangularCertificate}
-\lean{ComputableAnalysis.Series.reciprocalTriangularCertificate_tail_formula}
-\lean{ComputableAnalysis.triangular_stage4_sum}
-\lean{ComputableAnalysis.triangular_stage4_tail}
-\lean{ComputableAnalysis.triangular_stage4_certificate}
-\lean{ComputableAnalysis.triangular_stage8_sum}
-\lean{ComputableAnalysis.triangular_stage8_tail}
-\lean{ComputableAnalysis.triangular_stage8_certificate}
-\lean{ComputableAnalysis.triangular_stage16_sum}
-\lean{ComputableAnalysis.triangular_stage16_tail}
-\lean{ComputableAnalysis.triangular_stage16_certificate}
-\lean{ComputableAnalysis.triangular_stage32_sum}
-\lean{ComputableAnalysis.triangular_stage32_tail}
-\lean{ComputableAnalysis.triangular_stage32_certificate}
-\lean{ComputableAnalysis.triangular_stage64_sum}
-\lean{ComputableAnalysis.triangular_stage64_tail}
-\lean{ComputableAnalysis.triangular_stage64_certificate}
-\lean{ComputableAnalysis.triangular_stage128_sum}
-\lean{ComputableAnalysis.triangular_stage128_tail}
-\lean{ComputableAnalysis.triangular_stage128_certificate}
-\lean{ComputableAnalysis.Series.binomialSum_eq_pow}
-\lean{ComputableAnalysis.cauchy_schwarz_6d}
-\lean{ComputableAnalysis.FinitePolynomial.expTaylorPrefix_succ}
-\lean{ComputableAnalysis.FinitePolynomial.qabs_expCoeff_monomial_le_factorialTailTerm}
-\lean{ComputableAnalysis.finiteStirlingRatioAtTwentyFour_enclosure}
+\lean{ComputableAnalysis.finitePrimeIntervalCertificate}
 
 \section{Pi and power series}
 
-Rectangles, binomial series, termwise integration, and Machin identities are
-different routes through one space of computations; this is methodological,
-not a claim about Newton's motives.
-\label{def:alternating-series-intervals}\label{thm:nilakantha-pi}
-\label{thm:power-series-arctan-area-pi}\label{thm:leibniz-arctan}
-\lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate}
-\lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate.width_eq}
-\lean{ComputableAnalysis.Series.finiteAlternatingSeriesCertificate}
+Crude rectangles, binomial expansions, termwise integration, and Machin-type
+identities are different routes through the same space of computations. This
+is a methodological observation, not a claim about Newton's motives.
+\begin{verbatim}
+choose route -> compute prefix -> compare enclosures -> refine
+\end{verbatim}
 \lean{ComputableAnalysis.PiProofs.piLeibnizRate}
-\lean{ComputableAnalysis.piLeibniz_stage10_enclosure}
-\lean{ComputableAnalysis.piLeibniz_stage20_enclosure}
-\lean{ComputableAnalysis.piLeibniz_stage40_enclosure}
-\lean{ComputableAnalysis.piLeibniz_stage80_enclosure}
-\lean{ComputableAnalysis.piLeibniz_stage160_enclosure}
-\lean{ComputableAnalysis.piLeibniz_stage320_enclosure}
-\lean{ComputableAnalysis.piLeibniz_stage640_enclosure}
-\lean{ComputableAnalysis.PiProofs.piMachin_compute_width_eq}
-\lean{ComputableAnalysis.PiProofs.piMachin_compute_width_le_geometric_half}
 \lean{ComputableAnalysis.PiProofs.piMachinRate}
-The Leibniz entry is therefore a shrinking interval algorithm: monotone
-nonnegative term magnitudes give consecutive partial sums, and the next term
-is the complete finite error budget.
-\label{def:formal-power-series}\label{def:effective-derivative}
-\label{def:power-series-geometric-majorant}\label{def:complex-power-series-evaluators}
+\lean{ComputableAnalysis.Series.binomialSum_eq_pow}
 
 \section{Basel and factorial growth}
 
-Finite comparison and ratio certificates precede a full-limit modulus.  Basel
-still needs a persistent shared rational anchor.
-\label{thm:finite-stirling-certificate}\label{thm:finite-factorial-prefix}
-\lean{ComputableAnalysis.FiniteFactorialCertificate}
-\lean{ComputableAnalysis.FiniteFactorialCertificate.succ_step}
-\lean{ComputableAnalysis.FiniteFactorialCertificate.positive}
-\lean{ComputableAnalysis.finiteFactorialCertificate}
-\lean{ComputableAnalysis.finiteFactorialCertificate_value}
+Finite comparison and factorial-ratio certificates prepare the shared rational
+anchors needed for stronger limit theorems.
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate}
-\lean{ComputableAnalysis.FiniteStirlingRatioCertificate.mem_interval}
-\lean{ComputableAnalysis.FiniteStirlingRatioCertificate.positive}
-\lean{ComputableAnalysis.FiniteStirlingRatioCertificate.abs_error_le}
-\lean{ComputableAnalysis.finiteStirlingTenCertificate}
-\lean{ComputableAnalysis.finiteStirlingTenCertificate_unit_error}
-\lean{ComputableAnalysis.finiteStirlingRootApproxEight}
-\lean{ComputableAnalysis.finiteStirlingRootApproxEight_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtEight_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwelve}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwelve_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtTwelve_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxSixteen}
-\lean{ComputableAnalysis.finiteStirlingRootApproxSixteen_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtSixteen_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwenty}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwenty_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtTwenty_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwentyFour}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwentyFour_squared_bounds}
 \lean{ComputableAnalysis.finiteStirlingRatioAtTwentyFour_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxThirtyTwo}
-\lean{ComputableAnalysis.finiteStirlingRootApproxThirtyTwo_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtThirtyTwo_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxSixtyFour}
-\lean{ComputableAnalysis.finiteStirlingRootApproxSixtyFour_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtSixtyFour_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxOneTwentyEight}
-\lean{ComputableAnalysis.finiteStirlingRootApproxOneTwentyEight_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtOneTwentyEight_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwoFiftySix}
-\lean{ComputableAnalysis.finiteStirlingRootApproxTwoFiftySix_squared_bounds}
-\lean{ComputableAnalysis.finiteStirlingRatioAtTwoFiftySix_enclosure}
-\lean{ComputableAnalysis.finiteStirlingRatioAtFiveTwelve_two_percent_enclosure}
-Stirling remains a finite ratio enclosure; no asymptotic limit is claimed.
-\label{thm:basel-comparison-example}\label{thm:basel-supplied-target-containment}
-\label{thm:basel-geometric-rhs-valid}\label{conj:basel}
-\label{thm:shared-rational-anchor}
-\lean{ComputableAnalysis.DirichletSeries.FiniteBaselCertificate}
-\lean{ComputableAnalysis.DirichletSeries.finiteBaselCertificateOfBudget}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoPartial_add_finiteTail_eq}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoFiniteTail_le_tailBound}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_ordered}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_nested}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_width_le_of_denominator_budget}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_reaches_of_positive_tolerance}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoInterval_later_contained_in_target_of_budget}
-\lean{ComputableAnalysis.DirichletSeries.FiniteBaselCertificate.contains_later}
-\lean{ComputableAnalysis.DirichletSeries.zetaTwoWidthsShrinkToZero}
-\lean{ComputableAnalysis.BaselFiniteComparison.geometricPiSquaredOverSixCompute}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval}
-\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_10000_8}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval_width_le}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselCommonInterval_midpoint_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval}
-\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_100000_10}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_width_le}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselRefinedCommonInterval_midpoint_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselHighCommonInterval}
-\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_200000_12}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselHighCommonInterval_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselHighCommonInterval_width_le}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselHighCommonInterval_midpoint_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_100000_contained_in_expanded_geometricPiSquaredOverSix_10}
-\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_100000_target_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselMillionCommonInterval}
-\lean{ComputableAnalysis.BaselFiniteComparison.zetaTwoInterval_overlaps_projectPiSquaredOverSix_1000000_16}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselMillionCommonInterval_certificate}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselMillionCommonInterval_width_le}
-\lean{ComputableAnalysis.BaselFiniteComparison.baselMillionCommonInterval_midpoint_certificate}
-\lean{ComputableAnalysis.Basel.circumferencePiSquaredOverSixRaw_equiv_geometric}
-\lean{ComputableAnalysis.Basel.eulerBasel_circumference_iff_geometric}
+\lean{ComputableAnalysis.cauchy_schwarz_6d}

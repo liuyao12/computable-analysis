@@ -3,14 +3,14 @@
 \section{Admission rule}
 
 Keep a result when it yields a rational certificate, a shrinking `realRaw`
-algorithm, a valid `real`, or an overlap statement.  Reuse routine finite
+algorithm, a valid `real`, or an overlap statement. Reuse routine finite
 combinatorics unless it controls refinement, tails, or error.
 
 \section{Order}
 
 \begin{verbatim}
-intervals -> circle/rectangles -> tails/series/pi
-          -> secants/MVT/FTC -> algebraic isolation -> linear ODEs
+intervals -> geometry -> rectangles -> series/pi
+          -> MVT/FTC -> algebraic isolation -> linear ODEs
 \end{verbatim}
 
 \section{List of 100 Theorem Formalization Challenge}
@@ -20,5 +20,6 @@ The preface indexes the scoped entries and links each to its computable core.
 
 \section{Style}
 
-The blueprint gives ideas, pseudocode, and GIFs.  Lean carries names,
-hypotheses, moduli, and proofs; only `realRaw` and `real` appear here.
+The blueprint gives the idea, pseudocode, and figures. Lean carries names,
+hypotheses, moduli, and proofs. Only `realRaw` and `real` distinguish this
+development from standard real-number presentations.

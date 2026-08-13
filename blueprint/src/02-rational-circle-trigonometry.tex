@@ -1,154 +1,49 @@
 \chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}
 
-Rational points and nested boxes are the basic geometric data.  `realRaw`
-computes; `real` certifies convergence.
+Geometry starts with rational coordinates, squared lengths, and explicit
+interval witnesses. `realRaw` computes; `real` records a convergent result.
 
 \section{Finite geometry}
 
-Lengths, areas, angles, and incidence are first rational identities.  Square
-roots enter only through explicit witnesses.
-\label{thm:finite-pick-certificate}\label{thm:finite-pick-rectangle-family}
-\label{thm:finite-rectangle-isoperimetric}
-\label{thm:triangle-isoperimetric-heron-bound}
-\label{thm:rational-circle-pythagorean}\label{thm:rational-isosceles}
-\label{thm:rational-heron}\label{thm:rational-chord-power}
-\label{thm:rational-ptolemy}\label{thm:law-of-cosines-equilateral}
-\label{thm:rational-triangle-orientation}
-\label{thm:finite-isosceles-interface}
-\label{thm:finite-law-of-cosines-interface}
-\label{thm:finite-ptolemy-interface}
-\lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
-\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_cyclic}
-\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_swap_neg}
-\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_pos_of_oriented}
-\lean{ComputableAnalysis.RationalCircle.Stage.rightTriangle_axis_pythagorean}
-\lean{ComputableAnalysis.RationalCircle.Stage.rightTriangle_pythagorean}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_symmetry}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_equal_legs}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_orthogonal}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_base_normSq}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_axis_pythagorean}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_equal_legs}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_axis_orthogonal}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_base_squared}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_3_4_certificate}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_5_12_certificate}
-\lean{ComputableAnalysis.RationalCircle.Stage.isosceles_7_24_certificate}
-\lean{ComputableAnalysis.FiniteTriangleOrientationCertificate}
-\lean{ComputableAnalysis.RationalCircle.FiniteTriangleOrientationCertificate.oriented}
-\lean{ComputableAnalysis.RationalCircle.finiteTriangleOrientationCertificate}
-\lean{ComputableAnalysis.RationalCircle.heronAreaRaw}
-\lean{ComputableAnalysis.RationalCircle.heronAreaRaw_valid}
-\lean{ComputableAnalysis.RationalCircle.heronAreaRaw_spec}
-\lean{ComputableAnalysis.RationalCircle.ptolemy_oriented_chord_numerator}
-\lean{ComputableAnalysis.RationalCircle.Stage.ptolemy_squared_coordinate_certificate}
-\lean{ComputableAnalysis.FinitePtolemyLength.LengthWitnessCertificate}
-\lean{ComputableAnalysis.FinitePtolemyLength.LengthWitnessCertificate.raw_lengths_and_ptolemy}
-\lean{ComputableAnalysis.FinitePickTriangleCertificate}
-\lean{ComputableAnalysis.FiniteLatticePoint}
-\lean{ComputableAnalysis.FiniteLatticePoint.toRat}
-\lean{ComputableAnalysis.FinitePickTriangleCertificate.identity}
-\lean{ComputableAnalysis.finitePickTriangleCertificate}
-\lean{ComputableAnalysis.pickTriangleA}
-\lean{ComputableAnalysis.pickTriangleB}
-\lean{ComputableAnalysis.pickTriangleC}
-\lean{ComputableAnalysis.pickTriangle_twice_area}
-\lean{ComputableAnalysis.pickTriangle_pick_identity}
-\lean{ComputableAnalysis.pickTriangle_certificate}
-\lean{ComputableAnalysis.pickTriangleTwo_certificate}
-\lean{ComputableAnalysis.pickTriangleThree_certificate}
-\lean{ComputableAnalysis.pickTriangleFour_certificate}
-\lean{ComputableAnalysis.pickRectangleArea}
-\lean{ComputableAnalysis.pickRectangleBoundary}
-\lean{ComputableAnalysis.pickRectangleInterior}
-\lean{ComputableAnalysis.pickRectangle_pick_identity}
-\lean{ComputableAnalysis.pickRectangle_3_4_certificate}
-\lean{ComputableAnalysis.RationalCircle.Stage.FiniteLawOfCosinesCertificate}
-\lean{ComputableAnalysis.RationalCircle.Stage.FiniteLawOfCosinesCertificate.identity}
-\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosinesCertificate}
-\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_orthogonal_certificate}
-\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_antipodal_certificate}
-\lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_three_four_five_certificate}
-\lean{ComputableAnalysis.rectangle_isoperimetric}
-\lean{ComputableAnalysis.rectangle_isoperimetric_gap}
-\lean{ComputableAnalysis.RationalCircle.triangle_isoperimetric_heron_bound}
-\lean{ComputableAnalysis.RationalCircle.triangle_isoperimetric_345_certificate}
-
-\section{Archimedes: crude rectangles}
-
-The goal is not the best subdivision, but relations among all certified
-subdivisions.
 \begin{verbatim}
-subdivide rational interval
-certify lower/upper cells
-return enclosing interval
+coordinates -> rational identities -> square-root bracket
+                         -> refine only when needed
+\end{verbatim}
+The formalization covers oriented area, Heron, Pythagoras, cosine, Ptolemy,
+and Pick-style certificates.
+\lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
+\lean{ComputableAnalysis.RationalCircle.ptolemy_oriented_chord_numerator}
+\lean{ComputableAnalysis.finitePickTriangleCertificate}
+\lean{ComputableAnalysis.rectangle_isoperimetric}
+
+\section{Archimedes and rational circles}
+
+The point is not an optimal polygon. It is a family of crude subdivisions whose
+lower and upper bounds are related and eventually overlap.
+\begin{verbatim}
+subdivide -> certify each cell -> sum bounds -> refine
 \end{verbatim}
 \lean{ComputableAnalysis.piCircleArea}
-\lean{ComputableAnalysis.piCircleArea_stage_one}
-\lean{ComputableAnalysis.piCircleArea_stage_two}
-\lean{ComputableAnalysis.piCircleArea_stage_three}
-\lean{ComputableAnalysis.piCircleArea_stage_four}
-\lean{ComputableAnalysis.piCircleArea_stage_five}
-\lean{ComputableAnalysis.circleAreaIncrement}
-\lean{ComputableAnalysis.circleAreaDecrement}
 \lean{ComputableAnalysis.refineAreaBounds}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.refineAreaBounds_wellFormed}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.refineAreaBounds_lo_mono}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.refineAreaBounds_hi_anti}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.refineAreaBounds_gapSum}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.refineAreaBounds_cubeSum}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.state_wellFormed}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.state_gapSum}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.state_cubeSum}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaOrdered}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaStepRefines}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaWidthLinearBound_four}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaWidthsShrink}
-\lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaNested}
 \lean{ComputableAnalysis.PiProofs.AreaLoopValidity.areaValid}
 \begin{figure}[!htbp]\centering
 \rationalCircleSubdivisionAnimation
-\caption{Crude subdivisions converge by certified enclosure.}
+\caption{Crude subdivisions become a certified enclosure.}
 \label{fig:rational-parameter-line}\end{figure}
-\label{def:geometric-arctan}\label{thm:geometric-pi-validity}
-\lean{ComputableAnalysis.ArctanGeometry.four_arctanGeom_one_equiv_piCircleArea}
-\lean{ComputableAnalysis.ArctanGeometry.piCircleArea_equiv_four_arctanGeom_one}
 
-\section{Angles}
+\section{Angles and rotations}
 
-Invert certified sector area; read circle coordinates; refine identities.
+Invert a certified sector-area bracket, sample the rational circle, and refine
+the coordinate box. Finite rotation identities supply the bridge to
+trigonometric addition and power-series computations.
 \begin{verbatim}
-angle := search area bracket
-point := rational circle sample
-return coordinate brackets
+area bracket -> angle bracket -> circle coordinates -> identities
 \end{verbatim}
-\label{thm:sector-area-density}\label{thm:rational-circle-powers}
-\label{thm:geometric-arctan-one-area-pi}\label{thm:rational-circle-basic-identities}
-\label{thm:dyadic-trig-samples}\label{thm:geometric-addition-formulas}
-\label{thm:rational-circle-group-law}
-
-\begin{theorem}[Finite quarter-turn checkpoint]
-\label{thm:finite-quarter-turn}
-The factorial rotation at $355/226$ contains the unit imaginary point within
-$1/100$ at stages 8, 12, and 16.  Identification of the limit is separate.
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_unit}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.FiniteDeMoivreCertificate}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.FiniteDeMoivreCertificate.power_identity}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_square_coordinates}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_fourth_coordinates}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_tenth_coordinates}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.deMoivreThreeFive_tenth_unit}
-\lean{ComputableAnalysis.FiniteRotationQuarterTurnExample.quarterTurnInput}
+\lean{ComputableAnalysis.ArctanGeometry.four_arctanGeom_one_equiv_piCircleArea}
 \lean{ComputableAnalysis.FiniteRotationQuarterTurnExample.quarterTurnBox}
-\lean{ComputableAnalysis.FiniteRotationQuarterTurnExample.quarterTurnBox_contains_unit_imaginary_stage_eight}
-\lean{ComputableAnalysis.FiniteRotationQuarterTurnExample.quarterTurnBox_contains_unit_imaginary_stage_twelve}
-\lean{ComputableAnalysis.FiniteRotationQuarterTurnExample.quarterTurnBox_contains_unit_imaginary_stage_sixteen}
-\lean{ComputableAnalysis.FiniteRotationQuarterTurnExample.quarterTurnBox_width_stage_sixteen}
-\lean{ComputableAnalysis.GeometricPiRotation.halfPiInput_certificate}
-\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteDeMoivreCertificate}
-\end{theorem}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.FiniteDeMoivreCertificate}
 
 \section{Boundary}
 
-Non-effective and arbitrarily discontinuous functions are outside this chart.
+Arbitrarily discontinuous functions and non-effective measure constructions
+are outside this chapter.
