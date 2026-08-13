@@ -3698,6 +3698,11 @@ finite.
   the odd/even prefixes as a `QInterval`; its orderedness and width theorems
   provide the direct finite box interface for later rectangle/`RealRaw`
   comparisons.
+- Its width function now has an explicit
+  `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_shrinks`
+  certificate, using the rational `1/(n+1)` schedule. This establishes the
+  required potential-infinity shrinking behavior without introducing an
+  attained limit.
 - The finite Riemann-error core is now formalized without a completeness
   principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
   its endpoint-average bounds bracket each monomial primitive, and
