@@ -4668,6 +4668,10 @@ isolation budget while retaining the supplied-root, no-completeness boundary.
 It now also checks depth four for both supplied roots, with child width and
 height `1/8`, extending the explicit dyadic precision schedule without
 claiming unique or globally constructed roots.
+The same finite FTA search now reaches depth five for both supplied roots,
+with child width and height `1/16`. This is a sharper executable isolation
+budget, still deliberately stopping short of a global root-existence or
+completeness theorem.
 - `FiniteDeflationExample` makes that boundary concrete on the cubic
   (z^3-6z^2+11z-6): finite computation checks the quotient at the supplied
   root (1), its zero remainder, and the complete supplied-root chain
@@ -4711,7 +4715,7 @@ by one for every nonempty input.
   nonemptiness explicit, and `survivingSubdivide_nestedIn_parent` together
   with `survivingSubdivide_ordered` preserves nesting and orderedness at every
   finite depth.
-  `survivingSubdivide_width_height_exact` transfers the exact (2^{-n})
+`survivingSubdivide_width_height_exact` transfers the exact (2^{-n})
   width/height precision law to every retained box, so polynomial-image
   pruning preserves the finite mesh budget.
   `dyadicSubdivide` now iterates the four-way split to any finite depth;

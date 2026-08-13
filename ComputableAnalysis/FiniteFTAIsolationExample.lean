@@ -183,4 +183,48 @@ theorem finiteFTALowerRoot_survives_depth_four :
       Z.height = finiteFTARootSearchDomain.height / ((2 ^ 4 : Nat) : Rat) := hsize.2
       _ = 1 / 8 := by native_decide
 
+theorem finiteFTAUpperRoot_survives_depth_five :
+    ∃ Z, Z ∈
+        FiniteFTASubdivision.survivingSubdivide finiteFTAQuadratic 5
+          finiteFTARootSearchDomain ∧
+      Z.lo <= finiteFTAUpperRoot ∧ finiteFTAUpperRoot <= Z.hi ∧
+      Z.width = 1 / 16 ∧ Z.height = 1 / 16 := by
+  obtain ⟨Z, hZ, hZlo, hZhi⟩ :=
+    FiniteFTASubdivision.root_mem_survivingSubdivide
+      finiteFTARootSearchDomain_ordered (z := finiteFTAUpperRoot)
+      (by native_decide) (by native_decide)
+      finiteFTAQuadratic_upper_root
+  have hsize := FiniteFTASubdivision.survivingSubdivide_width_height_exact
+    finiteFTARootSearchDomain_ordered hZ
+  refine ⟨Z, hZ, hZlo, hZhi, ?_⟩
+  constructor
+  · calc
+      Z.width = finiteFTARootSearchDomain.width / ((2 ^ 5 : Nat) : Rat) := hsize.1
+      _ = 1 / 16 := by native_decide
+  · calc
+      Z.height = finiteFTARootSearchDomain.height / ((2 ^ 5 : Nat) : Rat) := hsize.2
+      _ = 1 / 16 := by native_decide
+
+theorem finiteFTALowerRoot_survives_depth_five :
+    ∃ Z, Z ∈
+        FiniteFTASubdivision.survivingSubdivide finiteFTAQuadratic 5
+          finiteFTARootSearchDomain ∧
+      Z.lo <= finiteFTALowerRoot ∧ finiteFTALowerRoot <= Z.hi ∧
+      Z.width = 1 / 16 ∧ Z.height = 1 / 16 := by
+  obtain ⟨Z, hZ, hZlo, hZhi⟩ :=
+    FiniteFTASubdivision.root_mem_survivingSubdivide
+      finiteFTARootSearchDomain_ordered (z := finiteFTALowerRoot)
+      (by native_decide) (by native_decide)
+      finiteFTAQuadratic_lower_root
+  have hsize := FiniteFTASubdivision.survivingSubdivide_width_height_exact
+    finiteFTARootSearchDomain_ordered hZ
+  refine ⟨Z, hZ, hZlo, hZhi, ?_⟩
+  constructor
+  · calc
+      Z.width = finiteFTARootSearchDomain.width / ((2 ^ 5 : Nat) : Rat) := hsize.1
+      _ = 1 / 16 := by native_decide
+  · calc
+      Z.height = finiteFTARootSearchDomain.height / ((2 ^ 5 : Nat) : Rat) := hsize.2
+      _ = 1 / 16 := by native_decide
+
 end ComputableAnalysis
