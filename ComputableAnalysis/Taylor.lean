@@ -787,6 +787,22 @@ theorem kernelPartialIntegralBetween_odd_le_even_succ
   have hterm := kernelTermIntegralBetween_nonneg_even hp hpr (n + 1)
   grind
 
+theorem kernelPartialIntegralBetween_unit_interval_width_shrinks
+    {y : Rat} (hy0 : 0 <= y) (hy1 : y <= 1) :
+    ShrinksToZero
+      (fun n => (kernelPartialIntegralBetween_unit_interval y n).width) := by
+  apply shrinksToZero_of_natOverSuccBound (C := 1)
+  intro n
+  calc
+    (kernelPartialIntegralBetween_unit_interval y n).width <=
+        1 / (((4 * n + 3 : Nat) : Rat)) :=
+      kernelPartialIntegralBetween_unit_interval_width_le hy0 hy1 n
+    _ <= 1 / (((n + 1 : Nat) : Rat)) := by
+      apply Series.one_div_nat_antitone_series
+      · omega
+      · omega
+      · omega
+
 theorem qabs_le_of_between {r b : Rat}
     (hlo : -b <= r) (hhi : r <= b) :
     qabs r <= b := by
