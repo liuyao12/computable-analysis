@@ -421,6 +421,10 @@ The finite recurrence now reaches dimensions ten and eleven as well, with
 `nBallVolumeModel_ten` and `nBallVolumeModel_eleven`, plus exact `355/113`
 stage witnesses. These remain finite rational models; the Gaussian square-
 to-π bridge and any unbounded volume theorem are still separate targets.
+It now reaches dimensions twelve and thirteen as well, with exact recurrence
+identities and `355/113` stage witnesses. The extension remains an algebraic
+finite model, not a claim that the Gaussian integral or unbounded volume has
+been constructed.
 The homogeneity theorem `nBallVolumeModel_scale` now records the expected
 radius-scaling law exactly: scaling the radius by `s` scales the finite model
 by `s^n`. This is the algebraic volume property needed before any analytic
