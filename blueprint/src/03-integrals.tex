@@ -1,1 +1,57 @@
-\chapter{Integrals}\label{ch:integrals}\n\nAn integral is a program returning nested rational bounds.  The proof is a\nfinite width estimate for each stage; no Lebesgue measure or completed-real\nintegral is used.\n\n\section{The rectangle algorithm}\n\nFor a monotone piece, use endpoint rectangles.  For a function with finitely\nmany turns, split at certified critical points and apply the same rule on\neach piece:\n\begin{verbatim}\npartition := equal_dyadic_mesh(n)\npieces := classify_each_interval_as_up_down_or_turning\nreturn [sum(lower_rectangle(piece)), sum(upper_rectangle(piece))]\n\end{verbatim}\n\n\begin{figure}[!htbp]\centering\n\arctanRectangleEnclosureAnimation\n\caption{Crude rectangles: the bounds, not optimal samples, are the object.}\n\label{fig:arctan-rectangle-enclosure}\end{figure}\n\n\begin{example}[Sine with realistic value uncertainty]\nFor (sin(pi x)) on ([0,1/2]), the endpoints are exact and interior\ndyadic values are interval computations.  Their widths vary with the input\nand stage; the bars are not identical.\n\begin{figure}[!htbp]\centering\n\intervalSineIntegralStageAnimation\n\caption{Nested value intervals and rectangle bounds for the sine integral.}\n\label{fig:interval-sine-integral-stage}\end{figure}\n\end{example}\n\n\begin{definition}[Finite integral interfaces]\label{def:arctan-integral}\n`realRaw` is an algorithm plus orderedness and shrinking-width certificates;\n`real` is its extensional value.  A definite integral is an identity between\nsuch certified objects.\n\end{definition}\n\label{rem:arctan-geom-general-integral}\label{thm:reciprocal-domain-certificates}\n\label{def:increasing-integral-stage}\label{prop:monotone-integral-well-defined}\n\label{def:piecewise-monotone-stage}\label{def:function-on-interval-to-realfunraw}\n\label{def:definite-integral-identity}\label{def:constant-integral-construction}\n\label{thm:constant-integral-endpoint-identity}\label{thm:monotone-integrable}\n\n\section{Identities as finite rearrangements}\n\nSubstitution reindexes cells; integration by parts pairs neighboring cells;\ntelescoping is checked before taking a limit.  The same pattern handles\npolynomials, reciprocal kernels, and the pi routes.\n\label{def:finite-substitution-stage}\label{thm:finite-geometric-integration-by-parts}\n\label{def:integration-by-parts-certificate}\label{thm:integration-by-parts-certificate}\n\label{thm:finite-polynomial-integration-by-parts}\label{thm:finite-quartic-ftc-checkpoint}\n\label{thm:finite-quintic-ftc-checkpoint}\label{thm:finite-sextic-ftc-checkpoint}\n\label{thm:coordinate-arctangent-two-stage-ftc}\label{cor:arctangent-logarithm-pi-route}\n\n\section{Improper and multiple integrals}\n\nCompactify an improper interval, then certify a tail bound.  A product\nintegral is a finite product of one-dimensional rectangle programs, with a\nseparate error budget.  This is enough for the Gaussian kernel and the\ncomputable volume of an (n)-ball; arbitrary measure theory is not imported.\n\label{def:reciprocal-tail-compactification}\label{thm:cauchy-full-line-pi}\n\label{thm:bounded-symmetric-cauchy-pi}\label{def:reciprocal-quartic-test-kernel}\n\label{thm:reciprocal-quartic-projective-substitution}\label{thm:reciprocal-quartic-route-package}\n\label{def:finite-product-integral-gaussian-volume}\label{thm:bounded-gaussian-prefix}\n\n\section{Proof order}\n\nFirst prove interval evaluation, then monotone-piece integration, then\nsubstitution and telescoping, and only then generalize to certified function\ninterfaces.  The details belong in Lean.\n
+\chapter{Integrals}\label{ch:integrals}
+
+An integral is a program returning nested rational bounds.  No Lebesgue
+measure or completed-real integral is required.
+
+\section{Rectangle algorithm}
+
+Use endpoint rectangles on monotone pieces.  For finitely many turns, first
+certify the pieces.
+\begin{verbatim}
+mesh := equal dyadic subdivision
+pieces := certify up, down, or turning behavior
+return sum of lower and upper rectangles
+\end{verbatim}
+\begin{figure}[!htbp]\centering
+\arctanRectangleEnclosureAnimation
+\caption{The bounds matter; optimal sampling does not.}
+\label{fig:arctan-rectangle-enclosure}\end{figure}
+
+For sin(pi x) on [0,1/2], the endpoints are exact.  Interior values are
+interval computations with input-dependent widths.
+\begin{figure}[!htbp]\centering
+\intervalSineIntegralStageAnimation
+\caption{Value intervals and rectangle bounds for the sine integral.}
+\label{fig:interval-sine-integral-stage}\end{figure}
+\label{def:arctan-integral}\label{rem:arctan-geom-general-integral}
+\label{thm:reciprocal-domain-certificates}\label{def:increasing-integral-stage}
+\label{prop:monotone-integral-well-defined}\label{def:piecewise-monotone-stage}
+\label{def:function-on-interval-to-realfunraw}\label{def:definite-integral-identity}
+\label{def:constant-integral-construction}\label{thm:constant-integral-endpoint-identity}
+\label{thm:monotone-integrable}
+
+\section{Identities}
+
+Substitution, integration by parts, and telescoping are finite rearrangements
+followed by a shared error budget.  This covers the polynomial, reciprocal,
+and pi routes.
+\label{def:finite-substitution-stage}\label{thm:finite-geometric-integration-by-parts}
+\label{def:integration-by-parts-certificate}\label{thm:integration-by-parts-certificate}
+\label{thm:finite-polynomial-integration-by-parts}\label{thm:finite-quartic-ftc-checkpoint}
+\label{thm:finite-quintic-ftc-checkpoint}\label{thm:finite-sextic-ftc-checkpoint}
+\label{thm:coordinate-arctangent-two-stage-ftc}\label{cor:arctangent-logarithm-pi-route}
+
+\section{Tails and products}
+
+Compactify an improper interval and certify its tail.  Products of
+one-dimensional programs handle the Gaussian kernel and computable n-ball
+volume; arbitrary measure theory is outside scope.
+\label{def:reciprocal-tail-compactification}\label{thm:cauchy-full-line-pi}
+\label{thm:bounded-symmetric-cauchy-pi}\label{def:reciprocal-quartic-test-kernel}
+\label{thm:reciprocal-quartic-projective-substitution}\label{thm:reciprocal-quartic-route-package}
+\label{def:finite-product-integral-gaussian-volume}\label{thm:bounded-gaussian-prefix}
+
+\section{Proof order}
+
+Interval evaluation, monotone pieces, finite identities, then general
+certified function interfaces.  Details live in Lean.

@@ -1,1 +1,35 @@
-\chapter{Fundamental Theorem of Calculus}\label{ch:effective-calculus}\n\n\section{The revisionist order}\n\nThe first FTC is the intuitive area theorem.  The mean value theorem then\nisolates the real-number principle behind it: a continuous change has a\nwitnessed intermediate slope.  We prove the computable MVT/FTC package from\nfinite secant and rectangle certificates.\n\begin{verbatim}\nmesh(n) -> rational secants and rectangle bounds\ncertificate(n) -> nested interval for the identity\nrefine until width <= requested precision\n\end{verbatim}\n\label{thm:uniform-mesh-width}\label{thm:finite-monomial-secants}\n\label{thm:affine-secants}\label{thm:affine-zero}\n\label{thm:constructive-lhopital}\label{thm:cubic-secants}\n\n\section{Mean value theorem before completeness}\n\nFor a convex function, secant slopes are monotone.  A finite search locates a\npoint or shrinking box whose slope witnesses the endpoint difference.\n\begin{theorem}[Computable mean-value core]\label{thm:square-midpoint-mean-value}\nFor the certified square map, the endpoint difference equals the derivative\nat the midpoint times the interval width.  Monotone-derivative and convex\nversions are the target interface.\n\end{theorem}\n\label{def:convex-right-derivative}\label{def:convex-left-derivative}\n\label{thm:convex-right-derivative-increasing}\label{thm:convex-left-derivative-increasing}\n\label{thm:convex-left-le-right-derivative}\n\n\section{FTC reconstruction}\n\nDefine the integral by monotone pieces.  Derivative bounds trap the endpoint\nincrement between matching lower and upper sums; overlap gives the identity.\nThis reverses the textbook order into a constructive proof architecture.\n\label{rem:effective-ftc-reconstruction}\label{thm:monotone-integrable}\n\label{thm:interval-regular-integral-certificate}\label{thm:effective-ftc-certificate}\n\label{thm:finite-cubic-ftc}\label{thm:formula-identification-ftc}\n\label{thm:convex-ftc}\label{thm:taylor-integral-remainder}\n\n\section{Taylor and finite L'Hôpital}\n\nFactor the polynomial part, bound the remainder, and refine.  Unrestricted\nclassical statements enter only when the same data can be supplied.\n
+\chapter{Fundamental Theorem of Calculus}\label{ch:effective-calculus}
+
+The historical reversal is the point: area is intuitive, the mean value
+theorem exposes the underlying order principle, and finite certificates then
+reconstruct the FTC.
+
+\section{Secants before completeness}
+
+\begin{verbatim}
+make a rational mesh
+bound secants and rectangles
+refine until the identity's interval has requested width
+\end{verbatim}
+For convex functions, secant slopes are ordered; a shrinking box supplies
+the slope witness.  The square case is the first certificate.
+\label{thm:uniform-mesh-width}\label{thm:finite-monomial-secants}
+\label{thm:affine-secants}\label{thm:affine-zero}\label{thm:constructive-lhopital}
+\label{thm:cubic-secants}\label{thm:square-midpoint-mean-value}
+\label{def:convex-right-derivative}\label{def:convex-left-derivative}
+\label{thm:convex-right-derivative-increasing}\label{thm:convex-left-derivative-increasing}
+\label{thm:convex-left-le-right-derivative}
+
+\section{FTC reconstruction}
+
+Derivative bounds trap the endpoint increment between lower and upper sums.
+Overlap gives the integral identity.  This is the constructive core; broad
+classical hypotheses are added only when they provide the same data.
+\label{rem:effective-ftc-reconstruction}\label{thm:monotone-integrable}
+\label{thm:interval-regular-integral-certificate}\label{thm:effective-ftc-certificate}
+\label{thm:finite-cubic-ftc}\label{thm:formula-identification-ftc}
+\label{thm:convex-ftc}\label{thm:taylor-integral-remainder}
+
+\section{Taylor and finite L'Hôpital}
+
+Factor the known polynomial part, bound the remainder, and refine.

@@ -1,1 +1,32 @@
-\chapter{Linear Differential Equations}\label{ch:differential-equations}\n\nSolve a linear ODE by finite time-ordered words, then refine the mesh.  Each\nstage is rational matrix arithmetic; a norm bound controls the omitted words.\n\n\section{Model and finite algebra}\n\label{sec:ode-construction-identification-route}\label{thm:cramer-finite}\n\label{thm:two-by-two-cayley-hamilton}\label{thm:three-by-three-matrix-power-recurrence}\n\label{def:rational-linear-system}\label{thm:forced-oscillator-finite-seed}\n\n\begin{verbatim}\nstate := initial_vector\nfor word in time_ordered_matrix_samples:\n    state := state + product(word) * initial_vector\nbound := norm(next_word) / (1 - norm(step_matrix))\n\end{verbatim}\n\n\section{Peano--Baker construction}\n\nThe word sum is the computable replacement for an abstract evolution\noperator.  Refinement supplies a Cauchy-style precision schedule without\npostulating a completed function space.\n\label{def:finite-peano-baker-word-sum}\label{thm:finite-peano-baker-enumeration}\n\label{fig:peano-baker-words}\label{thm:discrete-variation-of-constants}\n\label{thm:sampled-linear-uniqueness}\label{def:interval-linear-system}\n\label{thm:peano-baker-state-transition}\label{thm:variation-of-constants}\n\label{thm:linear-picard-lindelof}\label{rem:peano-baker-uniqueness-certificate}\n\n\section{Identification and special cases}\n\nWhen the coefficients commute or are constant, the finite construction is\nidentified with the familiar elementary expression by a shared refinement\ncertificate.  Scalar uniqueness can be proved directly from mesh estimates.\n\label{thm:linear-ode-elementary-function-agreement}\label{thm:direct-scalar-mesh-uniqueness}\n\label{def:constant-commuting-samples}\label{thm:peano-baker-specializations}\n\label{rem:ode-error-certificates}\n
+\chapter{Linear Differential Equations}\label{ch:differential-equations}
+
+Approximate a linear ODE by finite time-ordered matrix words.  Rational
+arithmetic handles each stage; a norm bound handles the tail.
+
+\section{Finite construction}
+\begin{verbatim}
+state := initial vector
+add time-ordered matrix words
+bound the next word by a geometric tail
+\end{verbatim}
+\label{sec:ode-construction-identification-route}\label{thm:cramer-finite}
+\label{thm:two-by-two-cayley-hamilton}\label{thm:three-by-three-matrix-power-recurrence}
+\label{def:rational-linear-system}\label{thm:forced-oscillator-finite-seed}
+
+\section{Peano--Baker and uniqueness}
+
+Refinement turns the word sum into a computable evolution operator.  Mesh
+estimates give variation of constants, state transitions, and uniqueness.
+\label{def:finite-peano-baker-word-sum}\label{thm:finite-peano-baker-enumeration}
+\label{fig:peano-baker-words}\label{thm:discrete-variation-of-constants}
+\label{thm:sampled-linear-uniqueness}\label{def:interval-linear-system}
+\label{thm:peano-baker-state-transition}\label{thm:variation-of-constants}
+\label{thm:linear-picard-lindelof}\label{rem:peano-baker-uniqueness-certificate}
+
+\section{Special cases}
+
+Commuting or constant coefficients agree with familiar formulas through a
+shared refinement certificate.
+\label{thm:linear-ode-elementary-function-agreement}\label{thm:direct-scalar-mesh-uniqueness}
+\label{def:constant-commuting-samples}\label{thm:peano-baker-specializations}
+\label{rem:ode-error-certificates}

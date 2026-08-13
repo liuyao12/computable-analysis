@@ -1,1 +1,37 @@
-\chapter{The Fundamental Theorem of Algebra}\label{ch:algebra-fta}\n\nRoots are not opaque points: they are boxes whose polynomial image is\ncertified to contain zero.  Subdivision, sign variation, and deflation are\nfinite algorithms; a global root-count theorem requires an additional\ntermination modulus.\n\n\section{Algebraic targets}\n\label{thm:factorized-quadratic-roots}\label{thm:finite-factorized-fta}\n\label{thm:finite-fta-concrete-quadratic}\label{def:algebraic-arithmetic-targets}\n\label{thm:linear-factor-remainder-base}\label{thm:descartes-sign-variation}\n\label{thm:finite-deflation-example}\label{thm:finite-fta-isolation-example}\n\label{thm:finite-fta-subdivision-example}\label{thm:finite-quintic-deflation}\n\n\section{Counting and isolating roots}\n\nUse Descartes' sign count to choose a box, subdivide it, and retain only boxes\nwhose certified polynomial ranges can meet zero:\n\begin{verbatim}\nboxes := initial_box\nwhile width(box) > epsilon:\n  discard boxes with sign-separated image\n  subdivide survivors\nreturn surviving boxes\n\end{verbatim}\n\label{thm:finite-two-variation-descartes}\label{thm:finite-three-variation-descartes}\n\label{thm:finite-four-variation-descartes}\label{thm:finite-five-variation-descartes}\n\label{thm:finite-six-variation-descartes}\label{thm:finite-one-variation-descartes}\n\label{thm:finite-descartes-sign-count}\label{thm:complex-linear-root}\n\label{thm:rational-quadratic-discriminant}\label{thm:complex-quadratic-discriminant}\n\label{thm:worked-complex-quadratic}\label{thm:rational-cubic-roots}\n\label{thm:finite-cubic-completion}\label{thm:finite-cubic-sqrt-two}\n\label{thm:finite-quartic-sqrt-two}\label{thm:rational-quartic-roots}\n\n\section{Scope}\n\n\begin{remark}[Abel--Ruffini boundary]\label{rem:abel-ruffini-boundary}\nDegree five has no general radical formula.  The project instead formalizes\neffective isolation and algebraic evaluation.\n\end{remark}\n\label{thm:computable-fta-of-algebraic-fta}\label{thm:finite-box-polynomial-soundness}\n\label{thm:four-quadrant-box-subdivision}\n
+\chapter{The Fundamental Theorem of Algebra}\label{ch:algebra-fta}
+
+A root is a box whose polynomial image can meet zero.  Subdivision, sign
+variation, and deflation are finite algorithms; global completeness needs a
+termination modulus.
+
+\section{Targets and isolation}
+
+Factorized quadratics, discriminants, cubic and quartic examples, and finite
+deflation are exact algebraic certificates.  Descartes' rule chooses where
+to search.
+\begin{verbatim}
+boxes := initial rational boxes
+discard sign-separated images
+subdivide survivors until the requested width
+\end{verbatim}
+\label{thm:factorized-quadratic-roots}\label{thm:finite-factorized-fta}
+\label{thm:finite-fta-concrete-quadratic}\label{def:algebraic-arithmetic-targets}
+\label{thm:linear-factor-remainder-base}\label{thm:descartes-sign-variation}
+\label{thm:finite-deflation-example}\label{thm:finite-fta-isolation-example}
+\label{thm:finite-fta-subdivision-example}\label{thm:finite-quintic-deflation}
+\label{thm:finite-two-variation-descartes}\label{thm:finite-three-variation-descartes}
+\label{thm:finite-four-variation-descartes}\label{thm:finite-five-variation-descartes}
+\label{thm:finite-six-variation-descartes}\label{thm:finite-one-variation-descartes}
+\label{thm:finite-descartes-sign-count}\label{thm:complex-linear-root}
+\label{thm:rational-quadratic-discriminant}\label{thm:complex-quadratic-discriminant}
+\label{thm:worked-complex-quadratic}\label{thm:rational-cubic-roots}
+\label{thm:finite-cubic-completion}\label{thm:finite-cubic-sqrt-two}
+\label{thm:finite-quartic-sqrt-two}\label{thm:rational-quartic-roots}
+
+\section{Scope}
+
+There is no general radical formula in degree five.  The project therefore
+formalizes effective evaluation and isolation, with classical root-count
+theorems treated as explicit bridges.
+\label{rem:abel-ruffini-boundary}\label{thm:computable-fta-of-algebraic-fta}
+\label{thm:finite-box-polynomial-soundness}\label{thm:four-quadrant-box-subdivision}

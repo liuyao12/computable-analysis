@@ -1,1 +1,29 @@
-\chapter{Formalization Roadmap}\n\n\section{Admission rule}\n\nAn admitted theorem ends in a rational certificate, a shrinking `realRaw`\nalgorithm, a valid `real`, or an overlap statement.  Finite sums belong here\nonly as stages of an infinite process, exact algebra, or an error certificate.\nRoutine finite combinatorics is reused, not rebuilt.\n\n\section{Order of work}\n\n\begin{enumerate}\n\item interval arithmetic and equality of `realRaw` names;\n\item circle, trigonometric, and rectangle algorithms;\n\item series tails, termwise identities, and pi routes;\n\item convex secants, MVT, and FTC;\n\item algebraic root isolation and linear ODE state transitions.\n\end{enumerate}\n\n\section{Wiedijk's list}\n\label{sec:100-theorem-alignment}\n\nThe preface is the index.  It distinguishes exact inclusions, finite cores,\nand deferred classical bridges.  The current scoreboard is intentionally\nsmaller than the list: computability and proof transparency determine scope.\n\n\section{Style rule}\n\nThe blueprint states the idea, shows the computation, and points to a GIF.\nLean carries names, hypotheses, moduli, and proof details.  The only names\nused here to distinguish foundations are `realRaw` and `real`.\n
+\chapter{Formalization Roadmap}
+
+\section{Admission rule}
+
+Admit a result when it ends in a rational certificate, a shrinking `realRaw`
+algorithm, a valid `real`, or an overlap statement.  Reuse routine finite
+combinatorics unless it is a stage of an infinite process or an error bound.
+
+\section{Order of work}
+
+\begin{enumerate}
+\item interval arithmetic and equality of names;
+\item circle, rectangles, and trigonometry;
+\item tails, termwise identities, and pi;
+\item convex secants, MVT, and FTC;
+\item algebraic isolation and linear ODEs.
+\end{enumerate}
+
+\section{Wiedijk's list}
+\label{sec:100-theorem-alignment}
+
+The preface indexes the list of 100 Theorem Formalization Challenge results.
+It marks exact inclusions, finite cores, and deferred classical bridges.
+
+\section{Style rule}
+
+The blueprint gives the idea, pseudocode, and GIF.  Lean carries hypotheses,
+moduli, names, and proofs.  Only `realRaw` and `real` are named here to
+distinguish the project's foundation from standard real numbers.

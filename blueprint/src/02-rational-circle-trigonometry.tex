@@ -1,1 +1,51 @@
-\chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}\n\nThis chapter builds geometry from rational coordinates.  A point is refined\nby nested boxes; `realRaw` records the algorithm and `real` records a valid\nequivalence class.  No completed real plane is assumed.\n\n\section{Finite geometry}\n\n\begin{theorem}[Lattice certificates]\label{thm:finite-pick-certificate}\nFor the checked rational triangles, shoelace area, edge-gcd boundary count,\nand interior count satisfy Pick's identity.  The project keeps these as\nfinite certificates; the unrestricted lattice-polygon theorem is deferred.\n\end{theorem}\n\n\begin{theorem}[Rectangle core of the isoperimetric inequality]\n\label{thm:finite-rectangle-isoperimetric}\nFor rational sides (a,b), (16A\le P^2), with equality exactly at\n(a=b).  This is the admitted finite core of benchmark item 43.\n\end{theorem}\n\n\begin{theorem}[Triangle geometry]\n\label{thm:rational-circle-pythagorean}\nRational coordinates verify Pythagoras, Heron's formula, the isosceles and\nequilateral cases, the law of cosines, Ptolemy, and the chord-product rule.\n\end{theorem}\n\label{thm:rational-isosceles}\label{thm:rational-heron}\n\label{thm:rational-chord-power}\label{thm:rational-ptolemy}\n\label{thm:law-of-cosines-equilateral}\label{thm:rational-triangle-orientation}\n\n\section{Archimedes: area before functions}\n\nThe useful historical lesson is not “compute with ever finer shapes.”  Use\ncrude rectangles, understand every subdivision, and prove how their bounds\nrelate.  This turns approximation into a reusable theory of computations.\n\n\begin{definition}[Circle subdivision]\label{def:geometric-arctan}\nAt stage (n), subdivide a rational parameter interval, produce rational\nupper and lower cells, and return the enclosing interval.\n\end{definition}\n\begin{theorem}[Circle area]\label{thm:geometric-pi-validity}\nThe subdivision bounds are nested, rational, and shrink with an explicit\nmodulus; their common value is the project's `realRaw` circle area.\n\end{theorem}\n\begin{figure}[!htbp]\centering\n\rationalCircleSubdivisionAnimation\n\caption{Crude rational subdivisions and their certified enclosure.}\n\label{fig:rational-parameter-line}\end{figure}\n\n\section{Angles and trigonometry}\n\nDefine a quarter turn by the circle area, invert the monotone area search,\nthen define sine and cosine from rational circle points.  The essential\npseudocode is:\n\begin{verbatim}\nangle(x,n) := binary_search(area, x, n)\npoint(x,n) := circle_point(angle(x,n))\nsin, cos := coordinate intervals of point\n\end{verbatim}\n\n\begin{theorem}[Sector density and pi]\label{thm:sector-area-density}\nSector area, inverse arctangent, and circle area agree at every requested\nprecision; the endpoint bridge yields the project's (pi).\n\end{theorem}\n\begin{theorem}[Rational circle functions]\label{thm:rational-circle-powers}\nThe point algorithm supplies addition, reflection, Pythagorean, and de\nMoivre identities as finite interval certificates.\n\end{theorem}\n\label{thm:geometric-pi-validity}\label{thm:geometric-arctan-one-area-pi}\n\label{thm:rational-circle-basic-identities}\label{thm:dyadic-trig-samples}\n\label{thm:geometric-addition-formulas}\label{thm:rational-circle-group-law}\n\n\section{Boundary of the chapter}\n\nThe rational parameter line is a computational chart, not a claim that every\nclassical real function has a rational-name representation.  Discontinuities,\nnon-effective inverses, and arbitrary measurable functions remain outside\nscope.  The constructions are exported to the integral and series chapters.\n
+\chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}
+
+Start with rational coordinates and nested boxes.  `realRaw` is the
+algorithm; `real` is its certified value.  No completed real plane is
+assumed.
+
+\section{Finite geometry}
+
+Rational certificates cover the checked forms of Pick, the rectangle
+isoperimetric inequality, Pythagoras, Heron, the cosine law, Ptolemy, and
+chord products.  The unrestricted classical theorems remain bridges.
+\label{thm:finite-pick-certificate}\label{thm:finite-rectangle-isoperimetric}
+\label{thm:rational-circle-pythagorean}\label{thm:rational-isosceles}
+\label{thm:rational-heron}\label{thm:rational-chord-power}
+\label{thm:rational-ptolemy}\label{thm:law-of-cosines-equilateral}
+\label{thm:rational-triangle-orientation}
+
+\section{Archimedes: area before functions}
+
+The point is not ever-finer computation.  Crude rectangles are enough when
+we understand every subdivision and relate its upper and lower bounds.
+
+\begin{verbatim}
+subdivide rational parameter interval
+make upper/lower cells
+return their enclosing interval
+\end{verbatim}
+\begin{figure}[!htbp]\centering
+\rationalCircleSubdivisionAnimation
+\caption{A crude subdivision with a certified enclosure.}
+\label{fig:rational-parameter-line}\end{figure}
+\label{def:geometric-arctan}\label{thm:geometric-pi-validity}
+
+\section{Angles and trigonometry}
+
+Invert the certified area search, then read sine and cosine from rational
+circle points.  Refinement supplies the identities.
+\begin{verbatim}
+angle := binary_search(certified area, requested precision)
+point := rational circle point(angle)
+return coordinate intervals
+\end{verbatim}
+\label{thm:sector-area-density}\label{thm:rational-circle-powers}
+\label{thm:geometric-arctan-one-area-pi}\label{thm:rational-circle-basic-identities}
+\label{thm:dyadic-trig-samples}\label{thm:geometric-addition-formulas}
+\label{thm:rational-circle-group-law}
+
+\section{Boundary}
+
+This chart does not represent arbitrary discontinuous or non-effective
+functions.  Its certified outputs feed the integral and series chapters.

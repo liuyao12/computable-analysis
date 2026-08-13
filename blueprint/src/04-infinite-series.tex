@@ -1,1 +1,37 @@
-\chapter{Infinite Series}\label{ch:infinite-series}\n\nAn infinite series is a sequence of finite computations with a certified tail\nbound.  We study the space of computations—slow rectangles and fast series—\nand the relations between them.\n\n\section{Finite stages and Fourier data}\n\begin{theorem}[Finite Fourier orthogonality]\label{thm:finite-fourier-orthogonality}\nFinite rational samples verify orthogonality and Parseval identities.  They\nare stages of a potential-infinity transform, not a completed Fourier theory.\n\end{theorem}\n\begin{theorem}[Prime reciprocal stages]\label{thm:finite-prime-reciprocal-extension}\nEach certified prime adds a positive rational term; the accumulator and its\nprecision are checked.  Divergence is a later target.\n\end{theorem}\n\label{sec:series-benchmark-foundations}\label{thm:arithmetic-series-sum}\n\label{thm:finite-power-sums}\label{thm:geometric-series-sum}\n\label{thm:reciprocal-triangular-sum}\label{thm:harmonic-dyadic-lower-bound}\n\n\section{Pi: exploring computations}\n\nArchimedes' subdivisions, binomial expansions, termwise integration, and\nMachin identities are different routes through the same computation space.\nThis records a general pattern, not a claim about Newton's motives.\n\begin{verbatim}\nstage(n) := finite_sum(first n terms)\ntail(n)  := explicit rational enclosure\nreturn stage(n) +/- tail(n)\n\end{verbatim}\n\label{def:alternating-series-intervals}\label{thm:nilakantha-pi}\n\label{thm:power-series-arctan-area-pi}\label{thm:leibniz-arctan}\n\n\section{Power series}\n\nRepresent coefficients and derivative data rationally; compose only when a\nmajorant gives a computable tail.  Termwise integration is a finite identity\nplus a shared error budget.\n\label{def:formal-power-series}\label{def:effective-derivative}\n\label{def:power-series-geometric-majorant}\label{def:complex-power-series-evaluators}\n\n\section{Basel and factorial growth}\n\nThe Basel target is an interval-containment problem.  Stirling's formula is\nadmitted first through finite ratio certificates; the full limit waits for a\nconstructive modulus.\n\label{thm:finite-stirling-certificate}\label{thm:finite-factorial-prefix}\n\label{thm:basel-comparison-example}\label{thm:basel-supplied-target-containment}\n\label{thm:basel-geometric-rhs-valid}\label{conj:basel}\n
+\chapter{Infinite Series}\label{ch:infinite-series}
+
+An infinite series is a sequence of finite computations with a certified
+tail.  We compare slow rectangles with fast series.
+
+\section{Finite stages}
+
+Finite rational samples provide Fourier orthogonality, Parseval stages,
+power sums, geometric sums, and certified prime-reciprocal prefixes.  They
+are stages, not a completed transform or divergence theorem.
+\label{sec:series-benchmark-foundations}\label{thm:finite-fourier-orthogonality}
+\label{thm:finite-prime-reciprocal-extension}\label{thm:arithmetic-series-sum}
+\label{thm:finite-power-sums}\label{thm:geometric-series-sum}
+\label{thm:reciprocal-triangular-sum}\label{thm:harmonic-dyadic-lower-bound}
+
+\section{Pi and power series}
+
+Archimedean subdivisions, binomial series, termwise integration, and Machin
+identities are routes through one computation space.  This is a general
+pattern, not a claim about Newton's motives.
+\begin{verbatim}
+stage := finite sum
+tail  := explicit rational bound
+return stage +/- tail
+\end{verbatim}
+\label{def:alternating-series-intervals}\label{thm:nilakantha-pi}
+\label{thm:power-series-arctan-area-pi}\label{thm:leibniz-arctan}
+\label{def:formal-power-series}\label{def:effective-derivative}
+\label{def:power-series-geometric-majorant}\label{def:complex-power-series-evaluators}
+
+\section{Basel and factorial growth}
+
+Basel is interval containment; Stirling begins with finite ratio certificates.
+The full limits wait for constructive moduli.
+\label{thm:finite-stirling-certificate}\label{thm:finite-factorial-prefix}
+\label{thm:basel-comparison-example}\label{thm:basel-supplied-target-containment}
+\label{thm:basel-geometric-rhs-valid}\label{conj:basel}
