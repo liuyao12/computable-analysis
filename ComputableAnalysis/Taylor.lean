@@ -413,6 +413,117 @@ theorem kernelPartialIntegralBetween_zero_one (n : Nat) :
       simp [kernelPartialIntegralBetween, kernelPartialIntegralAtOne]
       rw [ih, kernelTermIntegralBetween_zero_one]
 
+private theorem kernelTermIntegralAtOne_eq_signedLeibniz (j : Nat) :
+    kernelTermIntegralAtOne j = Series.signedTerm Series.leibnizTerm j := by
+  unfold kernelTermIntegralAtOne Series.signedTerm Series.leibnizTerm
+  by_cases h : j % 2 = 0
+  · have hpow : (-1 : Rat) ^ j = 1 := by
+      rw [show j = 2 * (j / 2) by omega]
+      exact neg_one_pow_even (j / 2)
+    simp [Series.alternatingSign, h, hpow]
+  · have hpow : (-1 : Rat) ^ j = -1 := by
+      rw [show j = 2 * (j / 2) + 1 by omega]
+      exact neg_one_pow_odd (j / 2)
+    simp [Series.alternatingSign, h, hpow]
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
+theorem kernelPartialIntegralAtOne_eq_series_partialSum (n : Nat) :
+    kernelPartialIntegralAtOne n =
+      Series.partialSum Series.leibnizTerm (n + 1) := by
+  induction n with
+  | zero =>
+      change 1 = Series.partialSum Series.leibnizTerm 1
+      simp [Series.partialSum, Series.signedTerm, Series.alternatingSign,
+        Series.leibnizTerm]
+      native_decide
+  | succ n ih =>
+      rw [kernelPartialIntegralAtOne, ih]
+      rw [show n + 1 + 1 = (n + 1) + 1 by omega]
+      simp [Series.partialSum, kernelTermIntegralAtOne_eq_signedLeibniz]
+
+def kernelPartialIntegralAtOneRawInterval (n : Nat) : QInterval :=
+  { lo := Series.partialSum Series.leibnizTerm (2 * n + 2),
+    hi := Series.partialSum Series.leibnizTerm (2 * n + 1) }
+
+def kernelPartialIntegralAtOneRaw : RealRaw where
+  compute := kernelPartialIntegralAtOneRawInterval
+
+theorem kernelPartialIntegralAtOneRawInterval_width_eq (n : Nat) :
+    (kernelPartialIntegralAtOneRawInterval n).width =
+      Series.leibnizTerm (2 * n + 1) := by
+  unfold kernelPartialIntegralAtOneRawInterval QInterval.width
+  change Series.partialSum Series.leibnizTerm (2 * n + 1) -
+    Series.partialSum Series.leibnizTerm (2 * n + 2) = _
+  rw [show 2 * n + 2 = 2 * (n + 1) by omega,
+    Series.partialSum_even_step]
+  rw [Series.partialSum_even_succ]
+  simp [Series.AlternatingRaw.leibnizAlternatingRaw,
+    Series.leibnizTerm]
+  grind [Rat.sub_eq_add_neg]
+
+theorem kernelPartialIntegralAtOneRaw_valid :
+    kernelPartialIntegralAtOneRaw.Valid := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    change 0 <= (kernelPartialIntegralAtOneRawInterval n).width
+    rw [kernelPartialIntegralAtOneRawInterval_width_eq]
+    exact Series.leibnizTerm_nonneg _
+  · intro n m hnm
+    change (kernelPartialIntegralAtOneRawInterval n).lo <=
+      (kernelPartialIntegralAtOneRawInterval m).lo ∧
+      (kernelPartialIntegralAtOneRawInterval m).lo <=
+        (kernelPartialIntegralAtOneRawInterval m).hi ∧
+      (kernelPartialIntegralAtOneRawInterval m).hi <=
+        (kernelPartialIntegralAtOneRawInterval n).hi
+    unfold kernelPartialIntegralAtOneRawInterval
+    have hlow :=
+      Series.AlternatingRaw.even_partialSum_mono
+        (n := n + 1) (m := m + 1)
+        Series.AlternatingRaw.leibnizAlternatingRaw (by omega)
+    have hhi :=
+      Series.AlternatingRaw.odd_partialSum_antitone
+        Series.AlternatingRaw.leibnizAlternatingRaw hnm
+    have hordered :
+        Series.partialSum Series.leibnizTerm (2 * m + 2) <=
+          Series.partialSum Series.leibnizTerm (2 * m + 1) := by
+      rw [show 2 * m + 2 = (2 * m + 1) + 1 by omega, Series.partialSum]
+      simp [Series.signedTerm, Series.alternatingSign]
+      have hterm := Series.leibnizTerm_nonneg (2 * m + 1)
+      grind [Rat.sub_eq_add_neg]
+    have hlow' :
+        Series.partialSum Series.leibnizTerm (2 * n + 2) <=
+          Series.partialSum Series.leibnizTerm (2 * m + 2) := by
+      simpa [Series.AlternatingRaw.leibnizAlternatingRaw,
+        show 2 * (n + 1) = 2 * n + 2 by omega,
+        show 2 * (m + 1) = 2 * m + 2 by omega] using hlow
+    have hhi' :
+        Series.partialSum Series.leibnizTerm (2 * m + 1) <=
+          Series.partialSum Series.leibnizTerm (2 * n + 1) := by
+      simpa [Series.AlternatingRaw.leibnizAlternatingRaw] using hhi
+    exact ⟨hlow', hordered, hhi'⟩
+  · intro eps
+    rcases Series.leibnizTerm_shrinks eps with ⟨N, hN⟩
+    refine ⟨N, ?_⟩
+    intro n hn
+    change (kernelPartialIntegralAtOneRawInterval n).width <= eps.val
+    change (kernelPartialIntegralAtOneRawInterval n).width <= eps.val
+    rw [kernelPartialIntegralAtOneRawInterval_width_eq]
+    exact hN (2 * n + 1) (by omega)
+
+theorem kernelPartialIntegralAtOneRaw_compute_eq (n : Nat) :
+    kernelPartialIntegralAtOneRaw.compute n =
+      kernelPartialIntegralAtOneRawInterval n := by
+  rfl
+
+theorem kernelPartialIntegralAtOneRaw_compute_eq_kernel (n : Nat) :
+    kernelPartialIntegralAtOneRaw.compute n =
+      { lo := kernelPartialIntegralAtOne (2 * n + 1),
+        hi := kernelPartialIntegralAtOne (2 * n) } := by
+  rw [kernelPartialIntegralAtOneRaw_compute_eq]
+  unfold kernelPartialIntegralAtOneRawInterval
+  rw [← kernelPartialIntegralAtOne_eq_series_partialSum (2 * n + 1),
+    ← kernelPartialIntegralAtOne_eq_series_partialSum (2 * n)]
+
 /-- Finite monomial integrals add across an intermediate point. -/
 theorem kernelTermIntegralBetween_split (p q r : Rat) (j : Nat) :
     kernelTermIntegralBetween p r j =

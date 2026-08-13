@@ -3700,9 +3700,14 @@ finite.
   comparisons.
 - Its width function now has an explicit
   `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_shrinks`
-  certificate, using the rational `1/(n+1)` schedule. This establishes the
-  required potential-infinity shrinking behavior without introducing an
-  attained limit.
+  certificate, using the rational `1/(n+1)` schedule. The kernel prefix is
+  also identified with the finite Leibniz partial sum by
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOne_eq_series_partialSum`, and
+  the adjacent-prefix interval is exposed as the valid raw object
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid` with bridge
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_compute_eq_kernel`.
+  This establishes the required potential-infinity shrinking behavior
+  without introducing an attained limit.
 - The finite Riemann-error core is now formalized without a completeness
   principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
   its endpoint-average bounds bracket each monomial primitive, and
