@@ -43,3 +43,12 @@ Factor the known polynomial part, bound the remainder, refine.
 Finite Taylor stages integrate term by term through an exact endpoint
 recurrence; the omitted tail is handled separately by a rational budget.
 \label{thm:finite-taylor-ftc-prefix}
+\emph{Taylor interface.} Integrate a finite coefficient prefix exactly; treat every omitted remainder as a separate rational error budget.
+\begin{verbatim}
+prefix := integratedTaylorPrefix coefficients terms
+increment := prefix(b) - prefix(a)
+fold := sum_{k < terms} c[k] * (b^(k+1)-a^(k+1))/(k+1)
+\end{verbatim}
+\lean{ComputableAnalysis.FiniteTaylorCertificate}
+\lean{ComputableAnalysis.FiniteTaylorCertificate.fold_identity}
+\lean{ComputableAnalysis.finiteTaylorCertificate}
