@@ -1258,6 +1258,10 @@ remains deferred.
   more: Lean checks six sign variations for
   `(x-1)(x-2)(x-3)(x-4)(x-5)(x-6)` and identifies all six positive rational
   roots.  The unrestricted Descartes theorem remains deferred.
+- The new `sevenVariationSeptic` continues the finite ladder: Lean checks
+  seven sign variations for `(x-1)` through `(x-7)` and identifies all seven
+  positive rational roots. The unrestricted Descartes theorem remains
+  deferred.
 The finite Leibniz pass now also records the stage-10 rational enclosure
 `3 <= piLeibniz.compute 10 <= 16/5` and its width bound `1/10`. This is a
 concrete item-26 computation; the infinite alternating-series identity remains
