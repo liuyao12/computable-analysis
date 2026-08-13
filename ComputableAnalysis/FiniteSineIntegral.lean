@@ -68,6 +68,30 @@ theorem halfAnglePrefix_stage_six_near_one :
   rw [halfAnglePrefix_stage_six]
   native_decide
 
+theorem halfAnglePrefix_stage_eight :
+    halfAnglePrefix (355 / 113) 8 =
+      (54879146292205975874675 : Rat) /
+        54880496567289519243264 := by
+  native_decide
+
+theorem halfAnglePrefix_stage_eight_near_one :
+    qabs (halfAnglePrefix (355 / 113) 8 - 1) <=
+      1 / 10000 := by
+  rw [halfAnglePrefix_stage_eight]
+  native_decide
+
+theorem halfAnglePrefix_stage_ten :
+    halfAnglePrefix (355 / 113) 10 =
+      (50455402547884936862792346025 : Rat) /
+        50455372368075830727641137152 := by
+  native_decide
+
+theorem halfAnglePrefix_stage_ten_near_one :
+    qabs (halfAnglePrefix (355 / 113) 10 - 1) <=
+      1 / 1000000 := by
+  rw [halfAnglePrefix_stage_ten]
+  native_decide
+
 end FiniteSineIntegral
 
 end ComputableAnalysis
