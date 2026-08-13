@@ -61,6 +61,12 @@ theorem primeReciprocalSum_twelve_primes_gt_three_halves :
       primeReciprocalSum [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] := by
   native_decide
 
+theorem primeReciprocalSum_sixteen_primes_gt_five_thirds :
+    (5 : Rat) / 3 <
+      primeReciprocalSum
+        [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53] := by
+  native_decide
+
 theorem primeReciprocalSum_five_gt_four :
     primeReciprocalSum [2, 3, 5, 7] <
       primeReciprocalSum [11, 2, 3, 5, 7] := by
