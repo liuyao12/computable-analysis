@@ -94,6 +94,7 @@ import ComputableAnalysis.FiniteCubicMVTExample
 import ComputableAnalysis.FiniteSepticMVTExample
 import ComputableAnalysis.FiniteQuinticMVTExample
 import ComputableAnalysis.FiniteQuarticMVTExample
+import ComputableAnalysis.FiniteMonomialMVTSearch
 import ComputableAnalysis.FiniteChordPowerExample
 import ComputableAnalysis.FiniteStirlingStageEight
 import ComputableAnalysis.FiniteStirlingStageTwelve

@@ -1033,6 +1033,9 @@ every monomial `x^(n+1)` on `[0,1]`: its normalized derivative average is
 `monomialUnit_mvt_bisection_tolerance_certificate` supplies a rational
 interval of any requested positive width.  This promotes the cubic and
 quartic examples to a reusable higher-degree MVT certificate.
+The module is now part of the umbrella `ComputableAnalysis` import, so the
+general benchmark-level MVT certificate is available through the project’s
+public build rather than only as an isolated file.
 
 For benchmark item 90, `finiteStirlingRatio_pos` now makes the positivity of
 the finite Stirling-shaped ratio explicit for every natural index and every
