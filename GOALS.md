@@ -1038,6 +1038,10 @@ every monomial `x^(n+1)` on `[0,1]`: its normalized derivative average is
 `monomialUnit_mvt_bisection_tolerance_certificate` supplies a rational
 interval of any requested positive width.  This promotes the cubic and
 quartic examples to a reusable higher-degree MVT certificate.
+The companion derivative evaluator, rational-input monotonicity lemma
+`exactRat_monomial_nondecreasing`, and degree-nine worked MVT certificate are
+also included in the public umbrella import. The nonic result remains a
+finite secant and derivative bracket, not an attained real intermediate point.
 The module is now part of the umbrella `ComputableAnalysis` import, so the
 general benchmark-level MVT certificate is available through the project’s
 public build rather than only as an isolated file.
