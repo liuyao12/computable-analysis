@@ -417,6 +417,10 @@ The following pair is explicit too: `nBallVolumeModel_eight` gives
 `(1/24) * piApprox^4 * radius^8`, while `nBallVolumeModel_nine` gives
 `(32/945) * piApprox^4 * radius^9`. These are still finite recurrence
 checkpoints, not a claim about Gaussian integration or unbounded volume.
+The finite recurrence now reaches dimensions ten and eleven as well, with
+`nBallVolumeModel_ten` and `nBallVolumeModel_eleven`, plus exact `355/113`
+stage witnesses. These remain finite rational models; the Gaussian square-
+to-π bridge and any unbounded volume theorem are still separate targets.
 The homogeneity theorem `nBallVolumeModel_scale` now records the expected
 radius-scaling law exactly: scaling the radius by `s` scales the finite model
 by `s^n`. This is the algebraic volume property needed before any analytic
