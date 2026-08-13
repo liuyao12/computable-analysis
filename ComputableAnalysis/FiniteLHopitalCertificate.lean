@@ -491,6 +491,40 @@ theorem decic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
   have h := decic_linear_worked_remainder (1 / (n : Rat)) hstep
   simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
 
+/-! The degree-eleven analogue closes this finite worked ladder. -/
+
+theorem undecic_linear_worked_remainder (step : Rat) (hstep : step ≠ 0) :
+    (step * (11 + 55 * step + 165 * step ^ 2 + 330 * step ^ 3 +
+        462 * step ^ 4 + 462 * step ^ 5 + 330 * step ^ 6 +
+        165 * step ^ 7 + 55 * step ^ 8 + 11 * step ^ 9 + step ^ 10)) /
+        (step * 1) - 11 =
+      55 * step + 165 * step ^ 2 + 330 * step ^ 3 + 462 * step ^ 4 +
+        462 * step ^ 5 + 330 * step ^ 6 + 165 * step ^ 7 +
+        55 * step ^ 8 + 11 * step ^ 9 + step ^ 10 := by
+  have hcancel : step * step⁻¹ = 1 := Rat.mul_inv_cancel _ hstep
+  rw [Rat.div_def]
+  grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+    Rat.pow_succ]
+
+theorem undecic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
+    ((1 / (n : Rat)) * (11 + 55 * (1 / (n : Rat)) +
+        165 * (1 / (n : Rat)) ^ 2 + 330 * (1 / (n : Rat)) ^ 3 +
+        462 * (1 / (n : Rat)) ^ 4 + 462 * (1 / (n : Rat)) ^ 5 +
+        330 * (1 / (n : Rat)) ^ 6 + 165 * (1 / (n : Rat)) ^ 7 +
+        55 * (1 / (n : Rat)) ^ 8 + 11 * (1 / (n : Rat)) ^ 9 +
+        (1 / (n : Rat)) ^ 10)) / ((1 / (n : Rat)) * 1) - 11 =
+      55 / (n : Rat) + 165 * (1 / (n : Rat)) ^ 2 +
+        330 * (1 / (n : Rat)) ^ 3 + 462 * (1 / (n : Rat)) ^ 4 +
+        462 * (1 / (n : Rat)) ^ 5 + 330 * (1 / (n : Rat)) ^ 6 +
+        165 * (1 / (n : Rat)) ^ 7 + 55 * (1 / (n : Rat)) ^ 8 +
+        11 * (1 / (n : Rat)) ^ 9 + (1 / (n : Rat)) ^ 10 := by
+  have hstep : (1 / (n : Rat)) ≠ 0 := by
+    rw [Rat.div_def]
+    exact Rat.ne_of_gt (Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)))
+  have h := undecic_linear_worked_remainder (1 / (n : Rat)) hstep
+  simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
+
 end FiniteLHopitalCertificate
 
 end ComputableAnalysis

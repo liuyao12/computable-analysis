@@ -1159,6 +1159,10 @@ This matches the project’s finite nonic polynomial checkpoint while keeping
 L'Hôpital’s classical limit theorem deferred.
 It now reaches degree ten as well, with the exact stage residual
 `45/n + 120/n^2 + 210/n^3 + 252/n^4 + 210/n^5 + 120/n^6 + 45/n^7 + 10/n^8 + 1/n^9`.
+The worked ladder closes at degree eleven with residual
+`55/n + 165/n^2 + 330/n^3 + 462/n^4 + 462/n^5 + 330/n^6 + 165/n^7 + 55/n^8 + 11/n^9 + 1/n^10`.
+All of these remain finite rational cancellation identities; the classical
+limit interpretation remains deferred.
 The worked `FiniteSepticMVTExample` now instantiates the finite Mean Value
 interface at degree seven: Lean computes the secant of `x^7` on `[0,1]` as
 `1` and checks the endpoint derivative enclosure `[0,7]`.  This is a concrete
