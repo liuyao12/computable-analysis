@@ -29,6 +29,14 @@ valid with an outside certificate. Heron is a rational product identity; an
 area value is exposed only after a rational square witness is checked.
 \label{thm:rational-ptolemy}\label{thm:law-of-cosines-equilateral}
 \label{thm:rational-triangle-orientation}
+\emph{Triangle orientation interface.} Compute the signed shoelace determinant over rational vertices; positivity records the oriented triangle, while angle semantics remain separate.
+\begin{verbatim}
+twiceArea := shoelace(p,q,r)
+require 0 < twiceArea
+\end{verbatim}
+\lean{ComputableAnalysis.RationalCircle.FiniteTriangleOrientationCertificate}
+\lean{ComputableAnalysis.RationalCircle.FiniteTriangleOrientationCertificate.oriented}
+\lean{ComputableAnalysis.RationalCircle.finiteTriangleOrientationCertificate}
 \label{thm:finite-isosceles-interface}
 The isosceles theorem is a rational coordinate certificate: equal legs force
 an orthogonal symmetry axis and a Pythagorean base relation.
