@@ -79,6 +79,14 @@ identities are different routes through one space of computations.  This is
 a methodological remark, not a claim about Newton's motives.
 \label{def:alternating-series-intervals}\label{thm:nilakantha-pi}
 \label{thm:power-series-arctan-area-pi}\label{thm:leibniz-arctan}
+\emph{Alternating interface.} Keep the finite interval between consecutive partial sums; its width is the current term magnitude.
+\begin{verbatim}
+interval := between(partialSum(2*stage), partialSum(2*stage+1))
+width := term(2*stage)
+\end{verbatim}
+\lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate}
+\lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate.width_eq}
+\lean{ComputableAnalysis.Series.finiteAlternatingSeriesCertificate}
 \label{def:formal-power-series}\label{def:effective-derivative}
 \label{def:power-series-geometric-majorant}\label{def:complex-power-series-evaluators}
 
