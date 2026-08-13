@@ -22,6 +22,7 @@ import ComputableAnalysis.BaselTargetContainment
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.Calculus
 import ComputableAnalysis.FiniteQuadratureMeanValue
+import ComputableAnalysis.FiniteTaylorFTCInterface
 import ComputableAnalysis.ComplexAffine
 import ComputableAnalysis.ComplexMultiplication
 import ComputableAnalysis.ComplexCircleBridge
