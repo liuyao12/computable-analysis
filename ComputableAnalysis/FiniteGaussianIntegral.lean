@@ -151,4 +151,15 @@ theorem gaussianTailBoxUpper_stage_twenty_eight_point_sum :
   have h := gaussianTailBoxUpper_stage_twenty_ladder_eight
   grind
 
+theorem gaussianTailBoxUpper_stage_two_hundred_nine_ten_ladder :
+    gaussianTailBoxUpper 9 200 <= 1 / 81 /\
+      gaussianTailBoxUpper 10 200 <= 1 / 100 := by
+  native_decide
+
+theorem gaussianTailBoxUpper_stage_two_hundred_nine_ten_sum :
+    gaussianTailBoxUpper 9 200 + gaussianTailBoxUpper 10 200 <=
+      181 / 8100 := by
+  have h := gaussianTailBoxUpper_stage_two_hundred_nine_ten_ladder
+  grind
+
 end ComputableAnalysis
