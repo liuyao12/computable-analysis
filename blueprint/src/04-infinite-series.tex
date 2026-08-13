@@ -26,6 +26,15 @@ closed := stage * (2*initial + (stage-1)*difference) / 2
 \lean{ComputableAnalysis.Series.FiniteArithmeticSeriesCertificate.succ_step}
 \lean{ComputableAnalysis.Series.finiteArithmeticSeriesCertificate}
 \label{thm:finite-power-sums}\label{thm:geometric-series-sum}
+\emph{Binomial interface.} A finite row is evaluated until all coefficients are present; the exact fold equals the corresponding power.
+\begin{verbatim}
+row := binomialSum exponent left right stage
+require exponent + 1 <= stage
+assert row = (left + right)^exponent
+\end{verbatim}
+\lean{ComputableAnalysis.Series.FiniteBinomialSeriesCertificate}
+\lean{ComputableAnalysis.Series.FiniteBinomialSeriesCertificate.power_identity}
+\lean{ComputableAnalysis.Series.finiteBinomialSeriesCertificate}
 \label{thm:finite-geometric-series-interface}
 \emph{Geometric interface.} Compute the finite prefix recursively and carry
 an explicit rational tail bound.  The certificate exposes only a finite stage;
