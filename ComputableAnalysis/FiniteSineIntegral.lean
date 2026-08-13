@@ -114,6 +114,31 @@ theorem halfPeriodSineRaw_reaches_of_positive_tolerance
   rcases (halfPeriodSineRaw_valid piApprox).2.2 eps with ⟨N, hN⟩
   exact ⟨N, hN N (Nat.le_refl N)⟩
 
+theorem halfPeriodSineRaw_contains_halfAnglePrefix
+    (piApprox : Rat) (stage : Nat) :
+    ((halfPeriodSineRaw piApprox).compute (stage + 1)).ContainsInterval
+      { lo := halfAnglePrefix piApprox
+          (2 * (RotationSeries.rotationTailStart (piApprox / 2) + stage) + 1),
+        hi := halfAnglePrefix piApprox
+          (2 * (RotationSeries.rotationTailStart (piApprox / 2) + stage) + 1) } := by
+  unfold halfPeriodSineRaw
+  change (RealRaw.subCompute RealRaw.one
+      (RotationSeries.rotationCosRaw (piApprox / 2)) (stage + 1)).ContainsInterval _
+  unfold RealRaw.subCompute
+  rw [RotationSeries.rotationCosRaw_compute]
+  unfold QInterval.ContainsInterval
+  have hprefix := halfAnglePrefix_cosine_complement piApprox
+    (2 * (RotationSeries.rotationTailStart (piApprox / 2) + stage) + 1)
+  rw [hprefix]
+  rw [RotationSeries.cosinePrefix_eq_taylorPrefix]
+  have hradius : 0 <= RotationSeries.rotationTailRadius
+      (piApprox / 2) (stage + 1) := by
+    unfold RotationSeries.rotationTailRadius
+    exact Rat.mul_nonneg (by native_decide)
+      (RotationSeries.rotationTailMagnitude_nonneg (piApprox / 2) (stage + 1))
+  dsimp [RealRaw.one, RealRaw.ofRat]
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 theorem halfAnglePrefix_rotation_complement (piApprox : Rat) (stage : Nat) :
     halfAnglePrefix piApprox (2 * stage + 1) =
       1 - LinearODE.RotationSystem.cosinePrefix
