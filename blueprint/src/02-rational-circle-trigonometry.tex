@@ -76,6 +76,14 @@ return coordinate intervals
 
 \begin{theorem}[Finite quarter-turn checkpoint]
 \label{thm:finite-quarter-turn}
+\emph{De Moivre interface.} Natural powers distribute over rational-circle multiplication; angle semantics are a later interpretation.
+\begin{verbatim}
+(power p*q) := pointPow (pointMul p q) n
+assert power p*q = pointMul (pointPow p n) (pointPow q n)
+\end{verbatim}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.FiniteDeMoivreCertificate}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.FiniteDeMoivreCertificate.power_identity}
+\lean{ComputableAnalysis.RationalCircle.Trigonometry.finiteDeMoivreCertificate}
 Factorial rotation at input $355/226$ contains the unit imaginary point within
 $1/100$ at stages 8, 12, and 16.  The limiting identification is separate.
 \end{theorem}
