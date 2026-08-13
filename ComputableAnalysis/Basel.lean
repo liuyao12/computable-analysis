@@ -147,6 +147,30 @@ circumference computation. -/
 def eulerBasel_circumferencePi : Prop :=
   EulerBaselStatement piCircumference
 
+/-- The geometric Basel target can be proved by showing that the two valid
+raw algorithms overlap at every pair of finite stages.  This is the native
+computable-real form of the remaining theorem; it does not invoke a
+completed zeta value or classical completeness. -/
+theorem eulerBasel_geometric_iff_allStagesOverlap :
+    eulerBasel_geometricPi ↔
+      DirichletSeries.zetaTwoRaw.AllStagesOverlap
+        (piSquaredOverSixRaw piCircleArea) := by
+  unfold eulerBasel_geometricPi EulerBaselStatement
+  exact RealRaw.equiv_iff_allStagesOverlap
+    DirichletSeries.zetaTwoRaw_validCompute
+    geometricPiSquaredOverSixRaw_valid
+
+/-- The circumference-based Basel target has the same all-stage-overlap
+criterion, independently of the chosen certified pi representative. -/
+theorem eulerBasel_circumference_iff_allStagesOverlap :
+    eulerBasel_circumferencePi ↔
+      DirichletSeries.zetaTwoRaw.AllStagesOverlap
+        (piSquaredOverSixRaw piCircumference) := by
+  unfold eulerBasel_circumferencePi EulerBaselStatement
+  exact RealRaw.equiv_iff_allStagesOverlap
+    DirichletSeries.zetaTwoRaw_validCompute
+    circumferencePiSquaredOverSixRaw_valid
+
 /-- The unresolved Basel theorem is independent of which certified geometric
 pi evaluator supplies its squared right-hand side. -/
 theorem eulerBasel_circumference_iff_geometric :

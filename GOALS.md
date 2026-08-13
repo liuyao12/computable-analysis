@@ -101,6 +101,11 @@ The project-facing bridge `Basel.baselSeriesRaw_reaches_of_positive_tolerance`
 exposes the same stage selector directly on the public Basel raw evaluator.
 Thus the admitted item-14 core has an explicit potential-infinity precision
 interface at its boundary, while the completed Basel identity remains open.
+The wrappers `Basel.eulerBasel_geometric_iff_allStagesOverlap` and
+`Basel.eulerBasel_circumference_iff_allStagesOverlap` now express the remaining
+Basel theorem as an all-finite-stages overlap obligation between the two valid
+raw algorithms. This is the project-native target for the future analytic
+proof, not a hidden appeal to classical completeness.
 The exact decomposition
 `DirichletSeries.zetaTwoPartial_add_finiteTail_eq` now exposes every later
 finite partial sum as its earlier partial sum plus the explicit intervening
