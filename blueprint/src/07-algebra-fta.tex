@@ -55,6 +55,15 @@ its finite bound.
 \label{thm:finite-quartic-sqrt-two}\label{thm:rational-quartic-roots}
 \lean{ComputableAnalysis.FiniteDeflationChain.CubicRootWitnessCertificate}
 \lean{ComputableAnalysis.FiniteDeflationChain.CubicRootWitnessCertificate.computable_roots_and_factorization}
+\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs}
+\lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
+\lean{ComputableAnalysis.FiniteDeflationChain.rootFactorProduct}
+\lean{ComputableAnalysis.FiniteDeflationChain.deflatedCoeffs_length}
+\lean{ComputableAnalysis.FiniteDeflationChain.exactRoot_of_exactRoot_of_ne}
+\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
+Deflation takes supplied exact roots as input: each step transfers distinct
+remaining roots and records the resulting finite factorization.  It does not
+assert that roots exist or that a completed algebraic closure has been built.
 \lean{ComputableAnalysis.rationalCubic_has_computable_roots}
 \lean{ComputableAnalysis.rationalCubic_has_algebraic_roots}
 \lean{ComputableAnalysis.Polynomial.quartic_factor_of_root}
