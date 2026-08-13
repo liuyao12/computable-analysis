@@ -53,6 +53,7 @@ import ComputableAnalysis.ElementaryFunctions
 import ComputableAnalysis.Exp
 import ComputableAnalysis.ExpProofs
 import ComputableAnalysis.FiniteStirlingCertificate
+import ComputableAnalysis.FiniteStirlingInterface
 import ComputableAnalysis.Extension
 import ComputableAnalysis.FinitePolynomialCalculus
 import ComputableAnalysis.FiniteExponentialTaylor
