@@ -1,6 +1,6 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Approximate a linear ODE by finite time-ordered matrix words and a tail bound.
+Approximate a linear ODE by time-ordered matrix words plus a tail bound.
 
 \section{Construction and algebra}
 \begin{verbatim}
@@ -10,7 +10,7 @@ bound next word by geometric tail
 \end{verbatim}
 \label{sec:ode-construction-identification-route}\label{thm:cramer-finite}
 \label{thm:finite-cramer-interface}
-Nonzero rational determinants give coordinate formulas and checked solutions.
+Nonzero rational determinants give checked coordinate formulas.
 \lean{ComputableAnalysis.cramer_two_by_two}
 \lean{ComputableAnalysis.cramer_two_by_two_unique}
 \lean{ComputableAnalysis.LinearODE.threeByThreeCramerSolution}
@@ -18,9 +18,8 @@ Nonzero rational determinants give coordinate formulas and checked solutions.
 \lean{ComputableAnalysis.LinearODE.threeByThree_cramer_solves_of_determinant_ne_zero}
 \label{thm:two-by-two-cayley-hamilton}\label{thm:three-by-three-matrix-power-recurrence}
 \label{thm:finite-cayley-hamilton-boundary}
-The Cayley--Hamilton certificate supplies an annihilating polynomial and hence
-a finite power recurrence.  Constructing the characteristic polynomial is a
-separate bridge.
+The Cayley--Hamilton certificate supplies an annihilating polynomial and finite
+power recurrence; constructing the characteristic polynomial is separate.
 \lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate}
 \lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.shifted_annihilates}
 \lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.power_recurrence}
@@ -30,7 +29,7 @@ separate bridge.
 
 \section{Evolution and uniqueness}
 
-Mesh estimates give state transitions, variation of constants, and uniqueness.
+Mesh estimates give transitions, variation of constants, and uniqueness.
 \lean{ComputableAnalysis.LinearODE.orderedIndexWords}
 \lean{ComputableAnalysis.LinearODE.chronologicalProduct}
 \lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
@@ -51,8 +50,8 @@ Mesh estimates give state transitions, variation of constants, and uniqueness.
 
 \section{Special cases}
 
-Commuting and constant coefficients agree with familiar formulas through a
-shared refinement certificate.
+Commuting and constant coefficients agree through a shared refinement
+certificate.
 \label{thm:linear-ode-elementary-function-agreement}\label{thm:direct-scalar-mesh-uniqueness}
 \label{def:constant-commuting-samples}\label{thm:peano-baker-specializations}
 \label{rem:ode-error-certificates}

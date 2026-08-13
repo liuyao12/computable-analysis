@@ -1,6 +1,6 @@
 \chapter{The Fundamental Theorem of Algebra}\label{ch:algebra-fta}
 
-A root is a rational box whose polynomial image can meet zero.
+A root is a rational box whose polynomial image meets zero.
 
 \section{Isolation and deflation}
 
@@ -9,8 +9,8 @@ boxes -> interval Horner evaluation
       -> discard boxes missing zero
       -> subdivide survivors / deflate supplied factors
 \end{verbatim}
-Quadratic, cubic, quartic, Descartes, and finite deflation certificates are
-included.  Global termination requires an explicit modulus.
+Quadratic, cubic, quartic, Descartes, and deflation certificates are included.
+Global termination requires a modulus.
 \begin{verbatim}
 remove zero coefficients
 count sign changes
@@ -33,8 +33,8 @@ check count + 1 <= surviving length
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nonempty_of_root}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_width_height_exact}
-The reusable certificate records the coefficient list, its zero-free length,
-the exact variation count, and the finite bound on that count.
+The certificate records coefficients, zero-free length, variation count, and
+its finite bound.
 \lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate}
 \lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate.variation_eq_count}
 \lean{ComputableAnalysis.Polynomial.FiniteDescartesSignCertificate.variation_bound}
@@ -64,10 +64,8 @@ the exact variation count, and the finite bound on that count.
 
 \section{Boundary}
 
-There is no general radical formula in degree five.  Effective isolation is
-the computable substitute.  The finite sign-count interface does not claim
-the classical “number of positive roots is at most the variations” theorem;
-one-/zero-variation root certificates are supplied separately.
+There is no general degree-five radical formula.  Effective isolation is the
+computable substitute; sign-count boundaries remain explicit.
 \label{rem:abel-ruffini-boundary}\label{thm:computable-fta-of-algebraic-fta}
 \label{thm:finite-box-polynomial-soundness}\label{thm:four-quadrant-box-subdivision}
 \label{thm:finite-deflation-soundness}

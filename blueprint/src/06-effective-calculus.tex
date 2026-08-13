@@ -1,7 +1,7 @@
 \chapter{Fundamental Theorem of Calculus}\label{ch:effective-calculus}
 
-Area is intuitive.  The mean-value property exposes the order principle;
-finite certificates reconstruct the FTC.
+The mean-value property exposes the order principle; finite certificates
+reconstruct the FTC.
 
 \section{Secants before completeness}
 
@@ -10,7 +10,7 @@ mesh -> secant/rectangle bounds -> shrinking slope box
      -> certified endpoint increment
 \end{verbatim}
 Convexity orders secant slopes.  The computable MVT returns an average bracket,
-not necessarily an attained point.
+not an attained point.
 \label{thm:uniform-mesh-width}\label{thm:finite-monomial-secants}
 \label{thm:affine-secants}\label{thm:affine-zero}\label{thm:constructive-lhopital}
 \label{thm:cubic-secants}\label{thm:square-midpoint-mean-value}
@@ -31,7 +31,7 @@ not necessarily an attained point.
 \section{FTC reconstruction}
 
 Derivative bounds trap endpoint increments between rectangle sums; overlap is
-the integral identity.
+the identity.
 \label{rem:effective-ftc-reconstruction}\label{thm:monotone-integrable}
 \label{thm:interval-regular-integral-certificate}\label{thm:effective-ftc-certificate}
 \label{thm:finite-cubic-ftc}\label{thm:formula-identification-ftc}
@@ -39,8 +39,8 @@ the integral identity.
 
 \section{Taylor and finite L'Hôpital}
 
-Factor the known polynomial part, bound the remainder, and refine.  The
-omitted tail is a separate rational budget.
+Factor the known part, bound the remainder, and refine.  The tail has its own
+rational budget.
 \label{thm:finite-taylor-ftc-prefix}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}

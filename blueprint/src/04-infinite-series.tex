@@ -1,6 +1,6 @@
 \chapter{Infinite Series}\label{ch:infinite-series}
 
-An infinite object is a sequence of finite computations with a certified tail.
+An infinite object is finite computation plus a certified tail.
 
 \section{Finite stages}
 
@@ -10,7 +10,7 @@ prove its identity
 bound the omitted tail
 \end{verbatim}
 Fourier, Parseval, geometric, power-sum, and prime-reciprocal results use this
-interface; no completed infinite sum is hidden.
+interface; no completed sum is assumed.
 \label{sec:series-benchmark-foundations}\label{thm:finite-fourier-orthogonality}
 \label{thm:finite-fourier-interface}\label{thm:finite-prime-reciprocal-extension}
 \lean{ComputableAnalysis.fourPointFourierTransform}
@@ -22,13 +22,13 @@ interface; no completed infinite sum is hidden.
 \label{thm:reciprocal-triangular-sum}\label{thm:harmonic-dyadic-lower-bound}
 \label{thm:finite-reciprocal-triangular-interface}\label{thm:finite-power-sum-interface}
 \label{thm:finite-prime-reciprocal-interface}
-Extend any finite certified prime list; each new reciprocal strictly raises the
-accumulator.  “Divergence” means this extension has no terminal stage.
+Extend a finite prime list; each new reciprocal raises the accumulator.
+“Divergence” means no terminal stage exists.
 \lean{ComputableAnalysis.primeReciprocalSum_append}
 \lean{ComputableAnalysis.primeReciprocalSum_cons_gt}
 \lean{ComputableAnalysis.exists_prime_reciprocal_extension}
 
-The supporting finite interfaces use the same prefix-and-bound pattern:
+Supporting interfaces reuse prefix-and-bound:
 \lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_reaches}
 \lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_lower}
 \lean{ComputableAnalysis.Logarithm.harmonicSum_two_pow_reaches_later}
@@ -65,8 +65,8 @@ The supporting finite interfaces use the same prefix-and-bound pattern:
 \section{Pi and power series}
 
 Rectangles, binomial series, termwise integration, and Machin identities are
-different routes through one space of computations.  This is a methodological
-remark, not a claim about Newton's motives.
+different routes through one space of computations; this is methodological,
+not a claim about Newton's motives.
 \label{def:alternating-series-intervals}\label{thm:nilakantha-pi}
 \label{thm:power-series-arctan-area-pi}\label{thm:leibniz-arctan}
 \lean{ComputableAnalysis.PiProofs.piLeibnizRate}
@@ -77,8 +77,8 @@ remark, not a claim about Newton's motives.
 
 \section{Basel and factorial growth}
 
-Finite comparison and ratio certificates come before a modulus for the full
-limit.  The Basel equality still needs a persistent shared rational anchor.
+Finite comparison and ratio certificates precede a full-limit modulus.  Basel
+still needs a persistent shared rational anchor.
 \label{thm:finite-stirling-certificate}\label{thm:finite-factorial-prefix}
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate}
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate.mem_interval}

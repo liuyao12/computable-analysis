@@ -5,7 +5,8 @@ and completed-real integration are outside scope.
 
 \section{Rectangle algorithm}
 
-On each cell, certify increasing, decreasing, or finitely many turns.
+Classify each cell as increasing, decreasing, or containing finitely many
+certified turns.
 \begin{verbatim}
 mesh := equal dyadic subdivision
 pieces := certify cell behavior
@@ -16,8 +17,8 @@ return lower-rectangle sum, upper-rectangle sum
 \caption{Certified lower and upper rectangles.}
 \label{fig:arctan-rectangle-enclosure}\end{figure}
 
-For $\sin(\pi x)$ on $[0,1/2]$, the endpoints are exact and interior values
-carry precision-dependent brackets.
+For $\sin(\pi x)$ on $[0,1/2]$, endpoints are exact; interior values are
+stage-dependent brackets.
 \begin{figure}[!htbp]\centering
 \intervalSineIntegralStageAnimation
 \caption{Value brackets and rectangle bounds.}
@@ -32,7 +33,7 @@ carry precision-dependent brackets.
 \section{Identities}
 
 Substitution, parts, telescoping, and polynomial FTC are finite rearrangements
-with one shared error budget.
+under one error budget.
 \label{def:finite-substitution-stage}\label{thm:finite-geometric-integration-by-parts}
 \label{def:integration-by-parts-certificate}\label{thm:integration-by-parts-certificate}
 \label{thm:finite-polynomial-integration-by-parts}\label{thm:finite-quartic-ftc-checkpoint}
@@ -41,8 +42,8 @@ with one shared error budget.
 
 \section{Tails and products}
 
-Compactify improper intervals; certify tails.  Finite products give Gaussian
-and computable $n$-ball volume certificates.
+Compactify improper intervals and certify tails.  Finite products give
+Gaussian and computable $n$-ball-volume certificates.
 \label{def:reciprocal-tail-compactification}\label{thm:cauchy-full-line-pi}
 \label{thm:bounded-symmetric-cauchy-pi}\label{def:reciprocal-quartic-test-kernel}
 \label{thm:reciprocal-quartic-projective-substitution}\label{thm:reciprocal-quartic-route-package}
