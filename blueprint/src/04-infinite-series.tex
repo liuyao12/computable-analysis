@@ -52,12 +52,20 @@ prime-reciprocal examples. Divergence is finite reachability failure.
 \label{thm:leibniz-arctan}
 
 Crude rectangles, binomial expansions, and termwise integration are routes
-through the same space of computations. The classical Leibniz/Machin identity
-is a deferred bridge, not a completed theorem here.
+through the same space of computations. The Leibniz evaluator is a finite
+alternating prefix with an explicit reciprocal tail; identifying it with the
+geometric \(\pi\) remains a separate bridge.
 \begin{verbatim}
 choose route -> compute prefix -> compare enclosures -> refine
 \end{verbatim}
 \lean{ComputableAnalysis.Series.binomialSum_eq_pow}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_valid}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_width_eq_reciprocal}
+\lean{ComputableAnalysis.Series.AlternatingRaw.leibnizAlternatingRaw_reaches_of_positive_tolerance}
+\lean{ComputableAnalysis.piLeibniz_stage10_enclosure}
+\lean{ComputableAnalysis.piLeibniz_stage40_width}
+\lean{ComputableAnalysis.piLeibniz_stage160_width}
+\lean{ComputableAnalysis.piLeibniz_stage640_enclosure}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance}
 
