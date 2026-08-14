@@ -18,11 +18,18 @@ Rational coordinates and squared lengths are the geometric primitives.
 coordinates -> rational identities -> square-root bracket
                          -> refine only when needed
 \end{verbatim}
-The certificates cover Pythagoras, Heron, cosine, Ptolemy, and Pick.
+The certificates cover Pythagoras, Heron, cosine, Ptolemy, and Pick.  For the
+angle-sum row, only the rational signed-area core is claimed: angle-valued
+semantics remain a separate bridge.
+\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_shoelace}
+\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_cyclic}
+\lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_swap_neg}
 \lean{ComputableAnalysis.RationalCircle.heron_squared_identity}
 \lean{ComputableAnalysis.RationalCircle.heron_three_four_five_coordinate_certificate}
 \lean{ComputableAnalysis.RationalCircle.heron_three_four_five_area_raw_equiv_six}
 \lean{ComputableAnalysis.RationalCircle.FiniteTriangleOrientationCertificate.oriented}
+\lean{ComputableAnalysis.RationalCircle.orientation_triangle_twice_area}
+\lean{ComputableAnalysis.RationalCircle.orientation_triangle_positive}
 \lean{ComputableAnalysis.RationalCircle.horizontalChordPower_certificate}
 \lean{ComputableAnalysis.RationalCircle.heronAreaRaw_equiv_of_coordinate_certificate}
 \lean{ComputableAnalysis.RationalCircle.ptolemy_oriented_chord_numerator}
