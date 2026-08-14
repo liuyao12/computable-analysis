@@ -99,6 +99,26 @@ theorem eval_derivative_septic (c₀ c₁ c₂ c₃ c₄ c₅ c₆ c₇ x : Rat)
   simp [derivative, eval]
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.pow_succ]
 
+/-! Exact finite secant identities expose the constructive content behind the
+quadratic mean-value example.  The error from the left derivative is a
+literal rational multiple of the step; no intermediate real point is used. -/
+
+theorem quadratic_secant_quotient (c₀ c₁ c₂ x h : Rat) (hh : h ≠ 0) :
+    (eval [c₀, c₁, c₂] (x + h) - eval [c₀, c₁, c₂] x) / h =
+      c₁ + c₂ * (2 * x + h) := by
+  simp [eval]
+  rw [Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm, Rat.pow_succ]
+
+theorem quadratic_secant_minus_derivative (c₀ c₁ c₂ x h : Rat) (hh : h ≠ 0) :
+    ((eval [c₀, c₁, c₂] (x + h) - eval [c₀, c₁, c₂] x) / h) -
+        eval (derivative [c₀, c₁, c₂]) x = c₂ * h := by
+  rw [quadratic_secant_quotient c₀ c₁ c₂ x h hh,
+    eval_derivative_quadratic]
+  grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 def asFunRaw (coeffs : List Rat) : RealFunRaw := RealFunRaw.exact (eval coeffs)
 
 def syntheticDivide (r : Rat) : List Rat -> List Rat × Rat

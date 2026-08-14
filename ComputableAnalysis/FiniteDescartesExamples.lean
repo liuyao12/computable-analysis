@@ -287,6 +287,56 @@ theorem oneVariationQuadratic_unique_positive_root
   · simpa [oneVariationQuadratic] using hxroot
   · simpa [oneVariationQuadratic] using hyroot
 
+def sevenVariationSeptic : List Rat :=
+  [-5040, 13068, -13132, 6769, -1960, 322, -28, 1]
+
+theorem sevenVariationSeptic_eval (x : Rat) :
+    eval sevenVariationSeptic x =
+      (x - 1) * (x - 2) * (x - 3) * (x - 4) *
+        (x - 5) * (x - 6) * (x - 7) := by
+  simp [sevenVariationSeptic, eval]
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem sevenVariationSeptic_sign_count :
+    signChangeCountIgnoringZeros sevenVariationSeptic = 7 := by
+  native_decide
+
+theorem sevenVariationSeptic_positive_root_iff (x : Rat) :
+    0 < x -> (eval sevenVariationSeptic x = 0 ↔
+      x = 1 ∨ x = 2 ∨ x = 3 ∨ x = 4 ∨ x = 5 ∨ x = 6 ∨ x = 7) := by
+  intro hx
+  rw [sevenVariationSeptic_eval]
+  constructor
+  · intro h
+    rcases Rat.mul_eq_zero.mp h with h123456 | h7
+    · rcases Rat.mul_eq_zero.mp h123456 with h12345 | h6
+      · rcases Rat.mul_eq_zero.mp h12345 with h1234 | h5
+        · rcases Rat.mul_eq_zero.mp h1234 with h123 | h4
+          · rcases Rat.mul_eq_zero.mp h123 with h12 | h3
+            · rcases Rat.mul_eq_zero.mp h12 with h1 | h2
+              all_goals grind [Rat.sub_eq_add_neg]
+            · right
+              right
+              left
+              grind [Rat.sub_eq_add_neg]
+          all_goals grind [Rat.sub_eq_add_neg]
+        all_goals grind [Rat.sub_eq_add_neg]
+      all_goals grind [Rat.sub_eq_add_neg]
+    all_goals grind [Rat.sub_eq_add_neg]
+  · intro h
+    rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> native_decide
+
+theorem sevenVariationSeptic_certificate :
+    signChangeCountIgnoringZeros sevenVariationSeptic = 7 /\
+      (forall x : Rat, 0 < x ->
+        (eval sevenVariationSeptic x = 0 ↔
+          x = 1 ∨ x = 2 ∨ x = 3 ∨ x = 4 ∨ x = 5 ∨ x = 6 ∨ x = 7)) := by
+  constructor
+  · exact sevenVariationSeptic_sign_count
+  · intro x hx
+    exact sevenVariationSeptic_positive_root_iff x hx
+
 end Polynomial
 
 end ComputableAnalysis

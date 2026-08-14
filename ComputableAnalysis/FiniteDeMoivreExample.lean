@@ -158,6 +158,78 @@ theorem deMoivreThreeFive_seventh_complex_bridge :
       QComplex.natPow (toQComplex deMoivreThreeFive) 7 := by
   exact toQComplex_pointPow deMoivreThreeFive 7
 
+def deMoivreThreeFiveEighth : PiCirclePoint :=
+  { x := 164833 / 390625, y := 354144 / 390625 }
+
+theorem deMoivreThreeFive_eighth :
+    pointPow deMoivreThreeFive 8 = deMoivreThreeFiveEighth := by
+  rw [show 8 = 7 + 1 by omega, pointPow_succ]
+  rw [deMoivreThreeFive_seventh]
+  native_decide
+
+theorem deMoivreThreeFive_eighth_coordinates :
+    (pointPow deMoivreThreeFive 8).x = 164833 / 390625 /\
+      (pointPow deMoivreThreeFive 8).y = 354144 / 390625 := by
+  rw [deMoivreThreeFive_eighth]
+  constructor <;> rfl
+
+theorem deMoivreThreeFive_eighth_unit :
+    Stage.normSq (pointPow deMoivreThreeFive 8) = 1 := by
+  exact pointPow_normSq_of_unit deMoivreThreeFive_unit 8
+
+theorem deMoivreThreeFive_eighth_complex_bridge :
+    toQComplex (pointPow deMoivreThreeFive 8) =
+      QComplex.natPow (toQComplex deMoivreThreeFive) 8 := by
+  exact toQComplex_pointPow deMoivreThreeFive 8
+
+def deMoivreThreeFiveNinth : PiCirclePoint :=
+  { x := -922077 / 1953125, y := 1721764 / 1953125 }
+
+theorem deMoivreThreeFive_ninth :
+    pointPow deMoivreThreeFive 9 = deMoivreThreeFiveNinth := by
+  rw [show 9 = 8 + 1 by omega, pointPow_succ]
+  rw [deMoivreThreeFive_eighth]
+  native_decide
+
+theorem deMoivreThreeFive_ninth_coordinates :
+    (pointPow deMoivreThreeFive 9).x = -922077 / 1953125 /\
+      (pointPow deMoivreThreeFive 9).y = 1721764 / 1953125 := by
+  rw [deMoivreThreeFive_ninth]
+  constructor <;> rfl
+
+theorem deMoivreThreeFive_ninth_unit :
+    Stage.normSq (pointPow deMoivreThreeFive 9) = 1 := by
+  exact pointPow_normSq_of_unit deMoivreThreeFive_unit 9
+
+theorem deMoivreThreeFive_ninth_complex_bridge :
+    toQComplex (pointPow deMoivreThreeFive 9) =
+      QComplex.natPow (toQComplex deMoivreThreeFive) 9 := by
+  exact toQComplex_pointPow deMoivreThreeFive 9
+
+def deMoivreThreeFiveTenth : PiCirclePoint :=
+  { x := -9653287 / 9765625, y := 1476984 / 9765625 }
+
+theorem deMoivreThreeFive_tenth :
+    pointPow deMoivreThreeFive 10 = deMoivreThreeFiveTenth := by
+  rw [show 10 = 9 + 1 by omega, pointPow_succ]
+  rw [deMoivreThreeFive_ninth]
+  native_decide
+
+theorem deMoivreThreeFive_tenth_coordinates :
+    (pointPow deMoivreThreeFive 10).x = -9653287 / 9765625 /\
+      (pointPow deMoivreThreeFive 10).y = 1476984 / 9765625 := by
+  rw [deMoivreThreeFive_tenth]
+  constructor <;> rfl
+
+theorem deMoivreThreeFive_tenth_unit :
+    Stage.normSq (pointPow deMoivreThreeFive 10) = 1 := by
+  exact pointPow_normSq_of_unit deMoivreThreeFive_unit 10
+
+theorem deMoivreThreeFive_tenth_complex_bridge :
+    toQComplex (pointPow deMoivreThreeFive 10) =
+      QComplex.natPow (toQComplex deMoivreThreeFive) 10 := by
+  exact toQComplex_pointPow deMoivreThreeFive 10
+
 end Trigonometry
 
 end RationalCircle

@@ -97,6 +97,15 @@ the complete ordered, shrinking finite representation boundary as well.
 The public selector `zetaTwoInterval_reaches_of_positive_tolerance` now turns
 the denominator budget into an explicit finite stage for every positive
 rational width request.
+The project-facing bridge `Basel.baselSeriesRaw_reaches_of_positive_tolerance`
+exposes the same stage selector directly on the public Basel raw evaluator.
+Thus the admitted item-14 core has an explicit potential-infinity precision
+interface at its boundary, while the completed Basel identity remains open.
+The wrappers `Basel.eulerBasel_geometric_iff_allStagesOverlap` and
+`Basel.eulerBasel_circumference_iff_allStagesOverlap` now express the remaining
+Basel theorem as an all-finite-stages overlap obligation between the two valid
+raw algorithms. This is the project-native target for the future analytic
+proof, not a hidden appeal to classical completeness.
 The exact decomposition
 `DirichletSeries.zetaTwoPartial_add_finiteTail_eq` now exposes every later
 finite partial sum as its earlier partial sum plus the explicit intervening
@@ -417,10 +426,23 @@ The following pair is explicit too: `nBallVolumeModel_eight` gives
 `(1/24) * piApprox^4 * radius^8`, while `nBallVolumeModel_nine` gives
 `(32/945) * piApprox^4 * radius^9`. These are still finite recurrence
 checkpoints, not a claim about Gaussian integration or unbounded volume.
+The finite recurrence now reaches dimensions ten and eleven as well, with
+`nBallVolumeModel_ten` and `nBallVolumeModel_eleven`, plus exact `355/113`
+stage witnesses. These remain finite rational models; the Gaussian square-
+to-π bridge and any unbounded volume theorem are still separate targets.
+It now reaches dimensions twelve and thirteen as well, with exact recurrence
+identities and `355/113` stage witnesses. The extension remains an algebraic
+finite model, not a claim that the Gaussian integral or unbounded volume has
+been constructed.
 The homogeneity theorem `nBallVolumeModel_scale` now records the expected
 radius-scaling law exactly: scaling the radius by `s` scales the finite model
 by `s^n`. This is the algebraic volume property needed before any analytic
 Gaussian or radial-shell bridge is introduced.
+The `FiniteNBallVolume` and `FiniteGaussianIntegral` modules are now included
+in the umbrella `ComputableAnalysis` import. Their finite product, recurrence,
+and bounded Gaussian-prefix certificates are therefore available through the
+public project build; no Lebesgue measure or completed improper integral has
+been added.
 
 The companion `FiniteGaussianIntegral` module now supplies the bounded analytic
 prefix: it integrates the even Taylor polynomial for `exp (-x^2)` term by term
@@ -458,6 +480,10 @@ symbol `piApprox` still an explicit rational approximation rather than a
 completed real constant.
 The ladder now includes `x=5`, with `exp (-25) ≤ 1/25`; the four-point sum is
 bounded by `1669/3600`, exactly matching the reciprocal-square tail prefix.
+The finite ladder now extends to `x=9` and `x=10` at exponential stage 200,
+with upper boxes bounded by `1/81` and `1/100`; their combined budget is
+`181/8100`. This remains finite tail evidence, not the general inequality
+`exp(-x^2) ≤ 1/x^2` or a completed full-line Gaussian integral.
 The reusable `PiProofs.pointSegmentLengthRaw` interface now applies the same
 certified square-root algorithm to any rational-coordinate squared distance,
 with validity and `SqrtRawSpec` theorems for later Ptolemy and polygonal-length
@@ -466,6 +492,11 @@ The finite Ptolemy length certificate now closes that gap for one concrete
 rational cyclic quadrilateral: all six raw chord lengths are equivalent to
 explicit rational witnesses satisfying Ptolemy’s identity. The general
 Euclidean theorem remains outside the current boundary.
+`PtolemyLengthCertificate.LengthWitnessCertificate` now packages the reusable
+finite interface: supplied nonnegative rational chord lengths, six square
+identities, and the rational Ptolemy equality lift automatically to six valid
+`RealRaw` length representations and the final identity. The unrestricted
+Euclidean theorem still requires a constructive sign and square-root argument.
 The checked rational unit-circle group law and stereographic chart addition
 formulas in `RationalCircle.Trigonometry` are the finite geometric core of
 benchmark item 17; the represented complex-exponential bridge remains open.
@@ -502,6 +533,15 @@ The seventh-power witness continues the same finite chain:
 `(3/5+4i/5)^7 = 76443/78125 + (16124/78125)i`, with exact coordinates,
 unit norm, and a finite `QComplex.natPow` bridge. The angle/exponential
 interpretation remains deferred.
+The eighth-power witness now continues it once more:
+`(3/5+4i/5)^8 = 164833/390625 + (354144/390625)i`, again with exact
+coordinates, unit norm, and a finite natural-power bridge. This remains a
+rational de Moivre certificate, not an angle/exponential theorem.
+The ninth- and tenth-power witnesses now extend the same finite chain:
+`(-922077+1721764i)/1953125` and
+`(-9653287+1476984i)/9765625`, respectively, with exact coordinate, unit
+norm, and finite natural-power certificates. The angle/exponential bridge
+remains deferred.
 `RationalCode.encode`/`RationalCode.decode` round trip and
 `RationalCode.encode_injective`/`RationalCode.encode_eq_iff` show that the
 canonical code is unique, while
@@ -861,7 +901,11 @@ same unnormalized energy identity for arbitrary rational samples, extending
 the concrete `(1,2,3,4)` check to a reusable four-point transform law.
 The companion `fourPointFourierTransform_modes` exposes the four exact mode
 formulas in rational coordinates, so the finite cancellation is available as
-an explicit computational interface.
+an explicit computational interface. The new
+`fourPointFourierTransform_reconstruct` theorem recovers all four input samples
+from those four modes by exact rational combinations of their real and
+imaginary coordinates. This completes the finite inverse-transform checkpoint
+for item 76; infinite Fourier convergence and completeness remain deferred.
 
 The exact lattice triangles in `FinitePickCertificate.lean` add item 92's
 finite coordinate core.  The `(4,3)` triangle has area `6`, boundary count `8`,
@@ -889,11 +933,15 @@ The twelve-prime checkpoint now verifies that the explicit accumulator exceeds
 infinite prime series.
 
 The finite primality-search witnesses in `FiniteBertrandCertificate.lean`
-add item 98's core at (n=10), (n=20), (n=30), (n=40), (n=50), and (n=60):
-primes 11, 23, 31, 41, 53, and 61 are checked inside the corresponding
+add item 98's core at (n=10), (n=20), (n=30), (n=40), (n=50), (n=60),
+(n=70), (n=80), and (n=100): primes 11, 23, 31, 41, 53, 61, 71, 83, and
+101 are checked
+inside the corresponding
 doubled intervals.
-`bertrand_extended_finite_certificate` packages all six interval witnesses as
-one reusable finite proposition, including the new `(60,120)` stage.
+`bertrand_extended_finite_certificate` packages the first six interval
+witnesses as one reusable finite proposition, including the `(60,120)` stage;
+`bertrand_further_finite_certificate` packages the subsequent `(70,140)` and
+`(80,160)`, and `(100,200)` stages.
 The general postulate remains deferred.
 
 The rational rectangle inequality in `FiniteIsoperimetricCertificate.lean`
@@ -1021,6 +1069,13 @@ every monomial `x^(n+1)` on `[0,1]`: its normalized derivative average is
 `monomialUnit_mvt_bisection_tolerance_certificate` supplies a rational
 interval of any requested positive width.  This promotes the cubic and
 quartic examples to a reusable higher-degree MVT certificate.
+The companion derivative evaluator, rational-input monotonicity lemma
+`exactRat_monomial_nondecreasing`, and degree-nine worked MVT certificate are
+also included in the public umbrella import. The nonic result remains a
+finite secant and derivative bracket, not an attained real intermediate point.
+The module is now part of the umbrella `ComputableAnalysis` import, so the
+general benchmark-level MVT certificate is available through the project’s
+public build rather than only as an isolated file.
 
 For benchmark item 90, `finiteStirlingRatio_pos` now makes the positivity of
 the finite Stirling-shaped ratio explicit for every natural index and every
@@ -1116,6 +1171,20 @@ The quartic companion now has the matching bound
 `qabs (Q_n - 4) <= 11/n`, certifying the finite residual
 `6/n + 4/n^2 + 1/n^3` at every positive stage. This extends the precision
 schedule across the next cancellation degree without claiming a limit.
+The finite L'Hôpital ladder now also reaches degree eight: the octic quotient
+has the exact residual `28/n + 56/n^2 + 70/n^3 + 56/n^4 + 28/n^5 + 8/n^6 + 1/n^7`
+at stage `1/n`. This is another rational cancellation certificate, not a
+statement about a completed limit.
+The same ladder now reaches degree nine, with residual
+`36/n + 84/n^2 + 126/n^3 + 126/n^4 + 84/n^5 + 36/n^6 + 9/n^7 + 1/n^8`.
+This matches the project’s finite nonic polynomial checkpoint while keeping
+L'Hôpital’s classical limit theorem deferred.
+It now reaches degree ten as well, with the exact stage residual
+`45/n + 120/n^2 + 210/n^3 + 252/n^4 + 210/n^5 + 120/n^6 + 45/n^7 + 10/n^8 + 1/n^9`.
+The worked ladder closes at degree eleven with residual
+`55/n + 165/n^2 + 330/n^3 + 462/n^4 + 462/n^5 + 330/n^6 + 165/n^7 + 55/n^8 + 11/n^9 + 1/n^10`.
+All of these remain finite rational cancellation identities; the classical
+limit interpretation remains deferred.
 The worked `FiniteSepticMVTExample` now instantiates the finite Mean Value
 interface at degree seven: Lean computes the secant of `x^7` on `[0,1]` as
 `1` and checks the endpoint derivative enclosure `[0,7]`.  This is a concrete
@@ -1211,6 +1280,10 @@ remains deferred.
   more: Lean checks six sign variations for
   `(x-1)(x-2)(x-3)(x-4)(x-5)(x-6)` and identifies all six positive rational
   roots.  The unrestricted Descartes theorem remains deferred.
+- The new `sevenVariationSeptic` continues the finite ladder: Lean checks
+  seven sign variations for `(x-1)` through `(x-7)` and identifies all seven
+  positive rational roots. The unrestricted Descartes theorem remains
+  deferred.
 The finite Leibniz pass now also records the stage-10 rational enclosure
 `3 <= piLeibniz.compute 10 <= 16/5` and its width bound `1/10`. This is a
 concrete item-26 computation; the infinite alternating-series identity remains
@@ -3298,6 +3371,11 @@ The new `Polynomial.quadratic_eval_root_of_discriminant` and
 finite supplied-root cubic boundary: a rational discriminant square witness
 produces both remaining rational roots. The construction of the initial root
 or square witness remains separate algorithmic work.
+`CubicRootWitnessCertificate` now packages the supplied-root version in one
+reusable structure: three exact roots plus a finite deflation chain yield
+three computable-root certificates and the complete Horner factorization.
+This strengthens item 37's finite cubic interface without claiming a general
+cubic formula or arbitrary root existence.
 The worked `FiniteCubicCompletionExample` now instantiates that boundary for
 `x^3 - 6x^2 + 11x - 6`: with supplied root `1` and discriminant square
 witness `1`, Lean computes and checks the remaining roots `2` and `3`.
@@ -3389,6 +3467,10 @@ The arbitrary finite-list combinatorial bound
 that the zero-filtered sign-change count is at most the coefficient-list
 length minus one. This is the finite combinatorial component of item 100;
 general root counting remains deferred.
+The Lean 4.33 finite septic witness is now repaired as well: the polynomial
+with roots \(1,2,3,4,5,6,7\) has seven sign variations, and its positive
+rational zero set is certified by finite factor splitting. This closes the
+checked degree-seven example without changing the constructive boundary.
 `Polynomial.syntheticDivide_spec` and
 `Polynomial.syntheticDivide_factor_of_root` provide linear factor/remainder
 certificates for arbitrary finite rational coefficient lists, and
@@ -3415,6 +3497,11 @@ recursive coefficient-level derivative evaluator; the named identities
 `Polynomial.eval_derivative_linear`,
 `Polynomial.eval_derivative_quadratic`, and
 `Polynomial.eval_derivative_cubic`,
+and the new `Polynomial.quadratic_secant_quotient` and
+`Polynomial.quadratic_secant_minus_derivative` expose the exact finite
+quadratic difference quotient and its rational step error.  This is the
+computable MVT content used before any claim about an attained intermediate
+point.
 `Polynomial.eval_derivative_quartic`, and
 `Polynomial.eval_derivative_quintic`,
 `Polynomial.eval_derivative_sextic`, and
@@ -3595,6 +3682,32 @@ students actually compute.
   tangent/secant formulas on intervals whose cosine denominator is apart from
   zero, and polynomial/rational examples via domain-specific interval
   certificates.
+
+  The new `FiniteSineIntegral` module begins the half-period route with the
+  finite primitive `halfAnglePrefix`: after substituting `u = pi*x`, it is
+  the rational Taylor-prefix value at `u = piApprox/2`. The endpoint
+  recurrence and stage-four/stage-six certificates are exact finite rational
+  identities; the stage-six value is within `1/1000` of `1`. This is a
+  computable prefix toward the normalized formula, not yet a completed
+  integral or a claim that the rational approximation is exact pi.
+  The same finite evaluator now reaches stages eight and ten, with explicit
+  rational values within `1/10000` and `1/1000000` of `1`. These are sharper
+  potential-infinity checkpoints, still not the completed sine integral.
+  The finite complement identity `halfAnglePrefix_cosine_complement` rewrites
+  each sine primitive as `1` minus a matching cosine Taylor prefix.  The raw
+  evaluator `halfPeriodSineRaw` then transports the existing factorial cosine
+  interval algorithm to the normalized half-period quantity; it is valid and
+  has the inherited geometric width bound.  This is the first actual shrinking
+  interval algorithm for the sine endpoint, while the pi-input enclosure and
+  change-of-variables theorem remain separate bridges.
+  The public theorem `halfPeriodSineRaw_reaches_of_positive_tolerance` exposes
+  the corresponding potential-infinity stage selector for every positive
+  rational tolerance.
+The enclosure theorem `halfPeriodSineRaw_contains_halfAnglePrefix` now
+identifies the exact finite prefix contained in each later factorial box.
+Its Lean 4.33 proof now uses the public factorial-tail nonnegativity
+certificate directly, rather than reaching through a private rotation lemma;
+the focused `FiniteSineIntegral` module builds cleanly.
 - A later noncompact benchmark is the Dirichlet sinc integral
   `∫ sin(π t)/t dt = π`, using the project's rational-angle convention.  The
   first local illustration is its decreasing-then-increasing branch around
@@ -3638,6 +3751,41 @@ executable schedule on `0 <= x <= 1/2`: stage `n` has remainder at most
 `1/(n+2)`, obtained by a rational half-power comparison. This is the first
 explicit stage selector for the Taylor remainder route and remains entirely
 finite.
+- The integrated kernel prefixes now expose the exact gap between consecutive
+  even and odd stages on `[0, 1/2]` through
+  `Taylor.ArctanKernel.kernelPartialIntegralBetween_half_even_odd_gap`.
+  Its absolute-width and reciprocal bounds give a computable finite enclosure
+  budget for the arctangent primitive, without asserting an attained integral
+  or an infinite-series limit.
+- The companion `Taylor.ArctanKernel.kernelPartialIntegralBetween_half_alternating_enclosure`
+  packages that gap as an ordered finite enclosure: the odd prefix is below
+  the even prefix, and their difference is bounded by `1/(4n+3)`. This is the
+  interval-shaped certificate needed to connect the integrated Taylor route
+  to the existing Leibniz raw evaluator.
+- The general theorem
+  `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_alternating_enclosure`
+  extends the same enclosure to every rational endpoint `0 <= y <= 1`, with
+  the sharper finite gap `y^(4n+3)/(4n+3)` behind the uniform reciprocal bound.
+- The interval-valued evaluator
+  `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval` packages
+  the odd/even prefixes as a `QInterval`; its orderedness and width theorems
+  provide the direct finite box interface for later rectangle/`RealRaw`
+  comparisons.
+- Its width function now has an explicit
+  `Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_shrinks`
+  certificate, using the rational `1/(n+1)` schedule. The kernel prefix is
+  also identified with the finite Leibniz partial sum by
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOne_eq_series_partialSum`, and
+  the adjacent-prefix interval is exposed as the valid raw object
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid` with bridge
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_compute_eq_kernel`.
+  Its exact width is
+  `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_width_eq_reciprocal`,
+  and `Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance`
+  turns every positive rational precision request into an explicit natural
+  stage.
+  This establishes the required potential-infinity shrinking behavior
+  without introducing an attained limit.
 - The finite Riemann-error core is now formalized without a completeness
   principle.  `powDifferenceFactor` factors `r^n-p^n` by `r-p`,
   its endpoint-average bounds bracket each monomial primitive, and
@@ -4221,6 +4369,11 @@ midpoint in both highest-stage enclosures.
 The named `FiniteBaselComparisonExample` packages the earlier stage-10000/
 stage-8 midpoint as a reusable rational witness and carries forward both
 source width bounds.
+`FiniteBaselStageMillion` now adds a stage-1,000,000 reciprocal-square
+enclosure against the stage-16 geometric `pi^2/6` enclosure.  Its explicit
+intersection, inherited width bounds, and midpoint witness deepen the finite
+item-14 comparison without changing the boundary: Euler's all-stage identity
+remains deferred.
 The worked `FiniteBaselExample` now also supplies a refined executable
 certificate with `epsilon = 1/10000` at stage `10001`, retaining containment
 of stage `100000` and tightening the finite width budget by a factor of ten.
@@ -4554,6 +4707,13 @@ isolation budget while retaining the supplied-root, no-completeness boundary.
 It now also checks depth four for both supplied roots, with child width and
 height `1/8`, extending the explicit dyadic precision schedule without
 claiming unique or globally constructed roots.
+The same finite FTA search now reaches depth five for both supplied roots,
+with child width and height `1/16`. This is a sharper executable isolation
+budget, still deliberately stopping short of a global root-existence or
+completeness theorem.
+It now reaches depth six as well, with both child widths and heights `1/32`.
+The result remains a finite survival certificate for the supplied roots `i`
+and `-i`, not a completeness or uniqueness theorem.
 - `FiniteDeflationExample` makes that boundary concrete on the cubic
   (z^3-6z^2+11z-6): finite computation checks the quotient at the supplied
   root (1), its zero remainder, and the complete supplied-root chain
@@ -4597,7 +4757,7 @@ by one for every nonempty input.
   nonemptiness explicit, and `survivingSubdivide_nestedIn_parent` together
   with `survivingSubdivide_ordered` preserves nesting and orderedness at every
   finite depth.
-  `survivingSubdivide_width_height_exact` transfers the exact (2^{-n})
+`survivingSubdivide_width_height_exact` transfers the exact (2^{-n})
   width/height precision law to every retained box, so polynomial-image
   pruning preserves the finite mesh budget.
   `dyadicSubdivide` now iterates the four-way split to any finite depth;
@@ -4657,6 +4817,14 @@ by one for every nonempty input.
   `ComplexRaw`s, prove endpoint-primitive cancellation for polynomial
   differentials, then use that as the first sorry-free Cauchy theorem for
   closed polygonal paths.
+
+- The finite quarter-turn checkpoint now advances benchmark item 17:
+  `FiniteRotationQuarterTurnExample` evaluates the common factorial rotation
+  at the rational input `355/226`, and stages 8, 12, and 16 each place the
+  unit imaginary point inside the rotation box after the explicit rational
+  tolerance expansion `1/100`.  This is a finite de Moivre/Euler-route
+  certificate; it does not identify a completed exponential with the
+  geometric quarter-turn.
 
 ## Metrics
 
