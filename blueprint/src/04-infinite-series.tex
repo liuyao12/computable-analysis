@@ -16,7 +16,8 @@ prefix -> finite identity -> tail bound -> nested enclosure
 \label{thm:finite-stirling-certificate}
 
 The interface handles geometric, alternating, power-sum, Fourier, and
-prime-reciprocal examples. Divergence is finite reachability failure.
+prime-reciprocal examples.  For harmonic growth, divergence means that every
+finite target is reached at an explicit dyadic stage.
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.prefix_le_endpoint}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
@@ -26,6 +27,7 @@ prime-reciprocal examples. Divergence is finite reachability failure.
 \lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate}
 \lean{ComputableAnalysis.Series.FiniteAlternatingSeriesCertificate.width_eq}
 \lean{ComputableAnalysis.FiniteHarmonic.harmonicSum_two_pow_reaches}
+\lean{ComputableAnalysis.FiniteHarmonic.harmonicSum_two_pow_lower}
 \lean{ComputableAnalysis.FiniteHarmonic.Certificate.explicit_stage}
 \lean{ComputableAnalysis.Series.FinitePowerSumCertificate}
 \lean{ComputableAnalysis.Series.FinitePowerSumCertificate.growth_bound}
