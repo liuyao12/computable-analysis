@@ -34,13 +34,22 @@ Rational-root search is finite; isolation replaces radical formulas.
 \lean{ComputableAnalysis.Polynomial.syntheticDivide_spec}
 \lean{ComputableAnalysis.Polynomial.syntheticDivide_secant_quotient}
 \lean{ComputableAnalysis.Polynomial.syntheticRemainderCertificate_factor_remainder}
+\lean{ComputableAnalysis.FiniteFTABoundary.syntheticDeflationCertificate_factor_of_root}
+\lean{ComputableAnalysis.FiniteDeflationChain.horner_factorization}
 \lean{ComputableAnalysis.FiniteDeflationChain.IsDeflationChain}
 \lean{ComputableAnalysis.FiniteDeflationChain.CubicRootWitnessCertificate}
 \lean{ComputableAnalysis.FiniteDeflationChain.CubicRootWitnessCertificate.computable_roots_and_factorization}
+\lean{ComputableAnalysis.quinticBoundaryPolynomial}
+\lean{ComputableAnalysis.quintic_boundary_example_roots}
+\lean{ComputableAnalysis.quintic_boundary_polynomial_coeffs}
+\lean{ComputableAnalysis.quintic_boundary_deflation_chain}
+\lean{ComputableAnalysis.quintic_boundary_deflated_coeffs}
+\lean{ComputableAnalysis.quintic_boundary_exact_factorization}
 
 \section{Boundary}
 
-Degree five has no general radical formula.  The finite certificate is the
-computable core of the cubic, quartic, factor/remainder, Descartes, and
-Abel--Ruffini entries in the theorem list.  Global termination, algebraic
-closure, and a radical presentation are separate bridges.
+Degree five has no general radical formula.  The supplied-root quintic
+certificate peels five exact rational-complex factors and records the
+quotient after each step.  This is the computable Abel--Ruffini boundary, not
+a general quintic solver.  Global termination, algebraic closure, and a
+radical presentation are separate bridges.
