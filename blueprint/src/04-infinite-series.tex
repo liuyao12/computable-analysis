@@ -62,8 +62,17 @@ choose route -> compute prefix -> compare enclosures -> refine
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance}
 
 \section{Basel and factorial growth}
+\label{thm:basel-geometric-overlap}
 
-Finite comparison and factorial ratios prepare shared rational anchors.
+The computable Basel target is an overlap of two raw interval algorithms:
+finite reciprocal-square prefixes on one side and geometric area on the
+other.  Euler's completed identity remains a separate analytic bridge.
+\lean{ComputableAnalysis.Basel.baselSeriesRaw}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
+\lean{ComputableAnalysis.Basel.baselSeriesRaw_reaches_of_positive_tolerance}
+\lean{ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw}
+\lean{ComputableAnalysis.Basel.geometricPiSquaredOverSixRaw_valid}
+\lean{ComputableAnalysis.Basel.eulerBasel_geometric_iff_allStagesOverlap}
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate}
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate.mem_interval}
 \lean{ComputableAnalysis.FiniteStirlingRatioCertificate.abs_error_le}

@@ -1,7 +1,6 @@
 import ComputableAnalysis.DirichletSeries
 import ComputableAnalysis.Pi
-import ComputableAnalysis.PiProofs
-import ComputableAnalysis.CircumferenceBridge
+import ComputableAnalysis.ArctanGeometry
 
 /-!
 # Euler Basel problem
@@ -20,7 +19,8 @@ def baselSeriesRaw : RealRaw :=
   DirichletSeries.zetaTwoRaw
 
 theorem baselSeriesRaw_valid : baselSeriesRaw.Valid := by
-  simpa [baselSeriesRaw] using DirichletSeries.zetaTwoRaw_validCompute
+  change RealRaw.ValidCompute DirichletSeries.zetaTwoInterval
+  exact DirichletSeries.zetaTwoRaw_validCompute
 
 theorem baselSeriesRaw_compute_eq (n : Nat) :
     baselSeriesRaw.compute n = DirichletSeries.zetaTwoInterval n := by
@@ -28,7 +28,19 @@ theorem baselSeriesRaw_compute_eq (n : Nat) :
 
 theorem baselSeriesRaw_validCompute :
     RealRaw.ValidCompute baselSeriesRaw.compute := by
-  simpa [baselSeriesRaw] using DirichletSeries.zetaTwoRaw_validCompute
+  change RealRaw.ValidCompute DirichletSeries.zetaTwoInterval
+  exact DirichletSeries.zetaTwoRaw_validCompute
+
+/-- The project-facing Basel evaluator reaches every positive rational
+precision request through an explicit finite stage.  This is a potential-
+infinity statement about the interval algorithm, not an attained zeta value
+or Euler's Basel identity. -/
+theorem baselSeriesRaw_reaches_of_positive_tolerance (eps : QPos) :
+    ∃ n : Nat, (baselSeriesRaw.compute n).width <= eps.val := by
+  refine ⟨eps.val.den + 1, ?_⟩
+  rw [baselSeriesRaw_compute_eq]
+  exact DirichletSeries.zetaTwoInterval_width_le_of_denominator_budget
+    eps.property (Nat.le_refl (eps.val.den + 1))
 
 def baselSeries : Real :=
   Real.ofRaw baselSeriesRaw baselSeriesRaw_valid
@@ -66,15 +78,17 @@ of pi. -/
 def geometricPiSquaredOverSixRaw : RealRaw :=
   piSquaredOverSixRaw piCircleArea
 
-/-- The Basel right-hand side computed from the original square-root
-circumference evaluator. -/
-def circumferencePiSquaredOverSixRaw : RealRaw :=
-  piSquaredOverSixRaw piCircumference
-
 theorem piCircleArea_nonneg_bounded_by_four (n : Nat) :
     0 <= (piCircleArea.compute n).lo ∧ (piCircleArea.compute n).hi <= 4 := by
   have hvalid : piCircleArea.Valid := by
-    simpa [PiProofs.AreaValid] using PiProofs.AreaLoopValidity.areaValid
+    change RealRaw.ValidCompute piCircleArea.compute
+    have hcompute :
+        (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute) =
+          piCircleArea.compute := by
+      funext k
+      exact ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute k
+    rw [← hcompute]
+    exact ArctanGeometry.four_arctanGeom_one_valid
   have hnested := hvalid.2.1 0 n (Nat.zero_le n)
   constructor
   · have hlow : (piCircleArea.compute 0).lo <= (piCircleArea.compute n).lo :=
@@ -90,29 +104,17 @@ theorem geometricPiSquaredOverSixRaw_valid :
     geometricPiSquaredOverSixRaw.Valid := by
   unfold geometricPiSquaredOverSixRaw
   exact piSquaredOverSixRaw_valid_of_nonneg_bounded
-    (by simpa [PiProofs.AreaValid] using PiProofs.AreaLoopValidity.areaValid)
+    (by
+      change RealRaw.ValidCompute piCircleArea.compute
+      have hcompute :
+          (((4 : Nat) * ArctanGeometry.arctanGeom (1 : Rat) : RealRaw).compute) =
+            piCircleArea.compute := by
+        funext n
+        exact ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute n
+      rw [← hcompute]
+      exact ArctanGeometry.four_arctanGeom_one_valid)
     (by native_decide : (0 : Rat) < 4)
     piCircleArea_nonneg_bounded_by_four
-
-theorem circumferencePiSquaredOverSixRaw_valid :
-    circumferencePiSquaredOverSixRaw.Valid := by
-  unfold circumferencePiSquaredOverSixRaw
-  exact piSquaredOverSixRaw_valid_of_nonneg_bounded
-    PiProofs.piCircumference_valid
-    (by native_decide : (0 : Rat) < 4)
-    PiProofs.piCircumference_nonneg_bounded_by_four
-
-/-- The two certified geometric pi computations give the same Basel
-right-hand side.  This is not Euler's Basel theorem: the independent zeta-two
-series comparison remains a separate analytic result. -/
-theorem circumferencePiSquaredOverSixRaw_equiv_geometric :
-    circumferencePiSquaredOverSixRaw.Equiv geometricPiSquaredOverSixRaw := by
-  exact piSquaredOverSixRaw_equiv_of_nonneg
-    PiProofs.piCircumference_valid
-    (by simpa [PiProofs.AreaValid] using PiProofs.AreaLoopValidity.areaValid)
-    (fun n => (PiProofs.piCircumference_nonneg_bounded_by_four n).1)
-    (fun n => (piCircleArea_nonneg_bounded_by_four n).1)
-    PiProofs.piCircumferenceDirect_equiv_piCircleArea
 
 /- Put the cursor here to compare with the zeta-side interval above. -/
 #eval! geometricPiSquaredOverSixRaw.decimalAt 12
@@ -131,30 +133,18 @@ function theory layer is mature. -/
 def eulerBasel_geometricPi : Prop :=
   EulerBaselStatement piCircleArea
 
-/-- Euler's Basel statement with pi supplied by the original certified
-circumference computation. -/
-def eulerBasel_circumferencePi : Prop :=
-  EulerBaselStatement piCircumference
-
-/-- The unresolved Basel theorem is independent of which certified geometric
-pi evaluator supplies its squared right-hand side. -/
-theorem eulerBasel_circumference_iff_geometric :
-    eulerBasel_circumferencePi ↔ eulerBasel_geometricPi := by
-  constructor
-  · intro h
-    exact RealRaw.equiv_trans
-      DirichletSeries.zetaTwoRaw_validCompute
-      circumferencePiSquaredOverSixRaw_valid
-      geometricPiSquaredOverSixRaw_valid
-      h
-      circumferencePiSquaredOverSixRaw_equiv_geometric
-  · intro h
-    exact RealRaw.equiv_trans
-      DirichletSeries.zetaTwoRaw_validCompute
-      geometricPiSquaredOverSixRaw_valid
-      circumferencePiSquaredOverSixRaw_valid
-      h
-      (RealRaw.equiv_symm circumferencePiSquaredOverSixRaw_equiv_geometric)
+/-- The geometric Basel target can be proved by showing that the two valid
+raw algorithms overlap at every pair of finite stages.  This is the native
+computable-real form of the remaining theorem; it does not invoke a
+completed zeta value or classical completeness. -/
+theorem eulerBasel_geometric_iff_allStagesOverlap :
+    eulerBasel_geometricPi ↔
+      DirichletSeries.zetaTwoRaw.AllStagesOverlap
+        (piSquaredOverSixRaw piCircleArea) := by
+  unfold eulerBasel_geometricPi EulerBaselStatement
+  exact RealRaw.equiv_iff_allStagesOverlap
+    DirichletSeries.zetaTwoRaw_validCompute
+    geometricPiSquaredOverSixRaw_valid
 
 end Basel
 
