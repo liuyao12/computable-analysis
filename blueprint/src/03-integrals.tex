@@ -32,8 +32,23 @@ stage-dependent brackets.
 \lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_ten_near_one}
 
 \section{Finite identities}
+\label{thm:finite-green-rectangle}
 \label{def:integration-by-parts-certificate}
 \label{thm:integration-by-parts-certificate}
+
+Green's theorem begins with the finite rectangle identity:
+\begin{verbatim}
+boundary circulation of x dy -> signed area
+\end{verbatim}
+\lean{ComputableAnalysis.greenRectangleBoundary}
+\lean{ComputableAnalysis.greenRectangleArea}
+\lean{ComputableAnalysis.FiniteGreenRectangleCertificate}
+\lean{ComputableAnalysis.FiniteGreenRectangleCertificate.boundary}
+\lean{ComputableAnalysis.FiniteGreenRectangleCertificate.area}
+\lean{ComputableAnalysis.greenRectangleBoundary_eq_area}
+\lean{ComputableAnalysis.FiniteGreenRectangleCertificate.boundary_eq_area}
+\lean{ComputableAnalysis.finiteGreenRectangleCertificate}
+\lean{ComputableAnalysis.finiteGreenRectangleCertificate_unit}
 
 Substitution, telescoping, integration by parts, and polynomial FTC are finite
 rearrangements under one error budget.
