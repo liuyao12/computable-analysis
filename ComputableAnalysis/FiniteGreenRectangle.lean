@@ -43,6 +43,42 @@ theorem greenRectangleBoundary_eq_area
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
 
+theorem greenRectangleBoundary_split_horizontal
+    (left middle right bottom top : Rat) :
+    greenRectangleBoundary left middle bottom top +
+        greenRectangleBoundary middle right bottom top =
+      greenRectangleBoundary left right bottom top := by
+  unfold greenRectangleBoundary
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem greenRectangleBoundary_split_vertical
+    (left right bottom middle top : Rat) :
+    greenRectangleBoundary left right bottom middle +
+        greenRectangleBoundary left right middle top =
+      greenRectangleBoundary left right bottom top := by
+  unfold greenRectangleBoundary
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem greenRectangleArea_split_horizontal
+    (left middle right bottom top : Rat) :
+    greenRectangleArea left middle bottom top +
+        greenRectangleArea middle right bottom top =
+      greenRectangleArea left right bottom top := by
+  unfold greenRectangleArea
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem greenRectangleArea_split_vertical
+    (left right bottom middle top : Rat) :
+    greenRectangleArea left right bottom middle +
+        greenRectangleArea left right middle top =
+      greenRectangleArea left right bottom top := by
+  unfold greenRectangleArea
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 theorem FiniteGreenRectangleCertificate.boundary_eq_area
     (certificate : FiniteGreenRectangleCertificate) :
     certificate.boundary = certificate.area := by
