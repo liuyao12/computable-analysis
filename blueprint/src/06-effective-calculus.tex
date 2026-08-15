@@ -30,6 +30,8 @@ their intervals overlap.
 \begin{verbatim}
 partition -> lower/upper sums -> derivative comparison -> overlap
 \end{verbatim}
+For a function that goes up, down, or makes finitely many certified turns,
+classify each mesh cell and use its endpoint/turn bracket for both rectangles.
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_le_one_le_rightSum}
 \lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_rightSum_gap_le_three_div}
 \lean{ComputableAnalysis.Integral.exactRat_cube_integral_certificate}
@@ -41,6 +43,10 @@ partition -> lower/upper sums -> derivative comparison -> overlap
 \lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage128}
 \lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage256}
 \lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage256_le_one}
+\lean{ComputableAnalysis.pieceCellBounds_turning_contains_range}
+\lean{ComputableAnalysis.pieceCellTurningAreaGap_le}
+\lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_eq_width_sum}
+\lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_nonneg}
 
 \section{Taylor}
 \label{thm:finite-taylor-ftc-prefix}
