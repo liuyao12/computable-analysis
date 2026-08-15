@@ -5611,7 +5611,8 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
     let PX : QInterval := coordinateTimesArctanIntegralRectangleOnUnit.compute x hx N
     let PY : QInterval := coordinateTimesArctanIntegralRectangleOnUnit.compute y hy N
     let DX : QInterval := coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx N
-    let DY : QInterval := coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute y hy N
+    let DY : QInterval :=
+      (coordinateTimesArctanIntegralRectangleDerivativeRaw y hy).compute N
     have hproductNear : intervalNearAtPrecision
         (QInterval.differenceQuotient PX PY k)
         ((coordinateTimesArctanIntegralRectangleDerivativeRaw y hy).compute
@@ -5862,15 +5863,52 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
             grind [Rat.sub_eq_add_neg]
       grind [Rat.sub_eq_add_neg]
     have hBwidth : B.width <= (precisionAtStage m).val := by
-      dsimp [DY] at hDYwidth
-      rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute] at hDYwidth
-      unfold QInterval.width at hDYwidth ⊢
-      grind [Rat.sub_eq_add_neg]
+      have hBwidthFine : B.width <=
+          k * (precisionAtStage t).val / 16 := by
+        let eps : QPos :=
+          { val := k * (precisionAtStage t).val / 16
+            property := by
+              rw [Rat.div_def]
+              apply Rat.mul_pos
+              · exact Rat.mul_pos hkpos (precisionAtStage t).property
+              · exact (Rat.inv_pos).2 (by native_decide) }
+        let M : Nat := 256 * (eps.val.den + 1)
+        have hN : N = M := by
+          dsimp [N, t]
+          simp only [arctanRectangleTangentTransportPrecision, dif_pos hkpos]
+          rfl
+        have hMrect : 4 * (eps.val.den + 1) <= M := by
+          dsimp [M]
+          omega
+        change (ArctanGeometry.arctanIntegralRectangleCompute y N).width <= _
+        rw [hN]
+        exact ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+          hy.1 hy.2 eps M hMrect
+      calc
+        B.width <= k * (precisionAtStage t).val / 16 := hBwidthFine
+        _ <= (precisionAtStage t).val := by
+          calc
+            k * (precisionAtStage t).val / 16 =
+                k * ((precisionAtStage t).val / 16) := by
+                  grind [Rat.div_def]
+            _ <= 1 * ((precisionAtStage t).val / 16) :=
+              Rat.mul_le_mul_of_nonneg_right hkLeOne (by
+                rw [Rat.div_def]
+                exact Rat.mul_nonneg hptNonneg (by native_decide))
+            _ = (precisionAtStage t).val / 16 := by grind
+            _ <= (precisionAtStage t).val := by
+              rw [Rat.div_def]
+              grind
+        _ <= (precisionAtStage m).val / 8 := hptLePm
+        _ <= (precisionAtStage m).val := by
+          grind [Rat.div_def]
     have hDyToDx : DY.hi <= DX.hi +
         ((precisionAtStage m).val + k * (precisionAtStage m).val + 2 * k) := by
-      dsimp [DX, DY]
-      rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
-        coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+      change ((coordinateTimesArctanIntegralRectangleDerivativeRaw y hy).compute N).hi <=
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw x hx).compute N).hi +
+          ((precisionAtStage m).val + k * (precisionAtStage m).val + 2 * k)
+      rw [coordinateTimesArctanIntegralRectangleDerivativeRaw_compute y hy N,
+        coordinateTimesArctanIntegralRectangleDerivativeRaw_compute x hx N]
       have hBhi : B.hi <= A.hi + k * (precisionAtStage m).val +
           (precisionAtStage m).val := by
         calc
@@ -5895,9 +5933,11 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
               grind [Rat.add_assoc, Rat.add_comm]
     have hDxToDy : DX.lo <= DY.hi +
         (4 * k + k * (precisionAtStage m).val) := by
-      dsimp [DX, DY]
-      rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
-        coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+      change ((coordinateTimesArctanIntegralRectangleDerivativeRaw x hx).compute N).lo <=
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw y hy).compute N).hi +
+          (4 * k + k * (precisionAtStage m).val)
+      rw [coordinateTimesArctanIntegralRectangleDerivativeRaw_compute x hx N,
+        coordinateTimesArctanIntegralRectangleDerivativeRaw_compute y hy N]
       dsimp [A, B] at hAtoB
       calc
         (arctanIntegralRectangleOnUnit.compute x hx N).lo +
@@ -5956,8 +5996,9 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
             _ <= (precisionAtStage n).val := by
               grind [Rat.div_def]
     have hDXwidth : DX.width <= (precisionAtStage n).val := by
-      dsimp [DX]
-      rw [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
+      change ((coordinateTimesArctanIntegralRectangleDerivativeRaw x hx).compute N).width <=
+        (precisionAtStage n).val
+      rw [coordinateTimesArctanIntegralRectangleDerivativeRaw_compute x hx N]
       calc
         ({ lo := (arctanIntegralRectangleOnUnit.compute x hx N).lo +
               x * ArctanGeometry.integralKernel x,
