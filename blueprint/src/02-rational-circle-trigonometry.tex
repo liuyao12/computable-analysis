@@ -1,7 +1,7 @@
 \chapter{Circle and Trigonometry}\label{ch:rational-circle-trigonometry}
 
-Rational coordinates and squared lengths are the geometric primitives.
-`realRaw` computes; `real` records the result.
+Rational coordinates and squared lengths are the primitives.
+`realRaw` computes; `real` records.
 
 \section{Finite geometry}
 \label{thm:rational-circle-pythagorean}
@@ -18,11 +18,8 @@ Rational coordinates and squared lengths are the geometric primitives.
 coordinates -> rational identities -> square-root bracket
                          -> refine only when needed
 \end{verbatim}
-The certificates cover Pythagoras, Heron, cosine, Ptolemy, and Pick.  The
-isoperimetric core is the exact rectangle gap and a Heron/AM--GM triangle
-bound.  For the
-angle-sum row, only the rational signed-area core is claimed: angle-valued
-semantics remain a separate bridge.
+These certificates cover Pythagoras, Heron, cosine, Ptolemy, Pick, and the
+signed-area core of the triangle-angle row. Angle semantics remain a bridge.
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_shoelace}
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_cyclic}
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_swap_neg}
@@ -64,7 +61,8 @@ semantics remain a separate bridge.
 \section{Archimedes and rational circles}
 \label{thm:geometric-pi-validity}
 
-Use crude subdivisions; relate their lower and upper bounds.
+Use crude subdivisions and relate their bounds; the point is to understand
+the space of computations, not to select the fastest one.
 \begin{verbatim}
 subdivide -> certify each cell -> sum bounds -> refine
 \end{verbatim}
@@ -81,7 +79,6 @@ subdivide -> certify each cell -> sum bounds -> refine
 \label{thm:finite-quarter-turn}
 
 Invert an area bracket, sample the rational circle, and refine the box.
-Finite rotations bridge to trigonometric series.
 \begin{verbatim}
 area bracket -> angle bracket -> circle coordinates -> identities
 \end{verbatim}

@@ -15,9 +15,9 @@ prefix -> finite identity -> tail bound -> nested enclosure
 \label{thm:finite-power-sum-interface}
 \label{thm:finite-stirling-certificate}
 
-The interface handles geometric, alternating, power-sum, Fourier, and
-prime-reciprocal examples.  For harmonic growth, divergence means that every
-finite target is reached at an explicit dyadic stage.
+The same interface handles geometric, alternating, power-sum, Fourier, and
+prime-reciprocal examples. Harmonic divergence means reaching every finite
+target at an explicit dyadic stage.
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.prefix_le_endpoint}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
@@ -53,10 +53,9 @@ finite target is reached at an explicit dyadic stage.
 \label{thm:shared-rational-anchor}
 \label{thm:leibniz-arctan}
 
-Crude rectangles, binomial expansions, and termwise integration are routes
-through the same space of computations. The Leibniz evaluator is a finite
-alternating prefix with an explicit reciprocal tail; identifying it with the
-geometric \(\pi\) remains a separate bridge.
+Crude rectangles, binomial expansions, and termwise integration explore the
+same space of computations. Leibniz is a finite alternating prefix with a
+reciprocal tail; its identification with geometric \(\pi\) is a bridge.
 \begin{verbatim}
 choose route -> compute prefix -> compare enclosures -> refine
 \end{verbatim}
@@ -79,9 +78,8 @@ choose route -> compute prefix -> compare enclosures -> refine
 \section{Basel and factorial growth}
 \label{thm:basel-geometric-overlap}
 
-The computable Basel target is an overlap of two raw interval algorithms:
-finite reciprocal-square prefixes on one side and geometric area on the
-other.  Euler's completed identity remains a separate analytic bridge.
+Basel is an overlap of two raw interval algorithms: reciprocal-square prefixes
+and geometric area. Euler's completed identity is a bridge.
 \lean{ComputableAnalysis.Basel.baselSeriesRaw}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_reaches_of_positive_tolerance}

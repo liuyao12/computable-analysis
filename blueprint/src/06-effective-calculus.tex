@@ -38,12 +38,10 @@ partition -> lower/upper sums -> derivative comparison -> overlap
 \lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage256}
 \lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage256_le_one}
 
-\section{Taylor and finite L'Hôpital}
+\section{Taylor}
 \label{thm:finite-taylor-ftc-prefix}
-\label{thm:finite-lhopital-interface}
 
-Factor the known part, record the exact finite prefix, bound the remainder,
-and refine the interval.
+Record the finite prefix, bound the remainder, and refine the interval.
 \lean{ComputableAnalysis.FiniteTaylorCertificate}
 \lean{ComputableAnalysis.finiteTaylorCertificate}
 \lean{ComputableAnalysis.FiniteTaylorCertificate.fold_identity}
@@ -63,3 +61,12 @@ and refine the interval.
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_le}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_shrinks}
+
+\section{Finite L'Hôpital}
+\label{thm:finite-lhopital-interface}
+
+Cancel a common factor and expose the finite remainder. No attained limit is
+asserted.
+\begin{verbatim}
+factor -> cancel -> cross-product remainder -> rational error bound
+\end{verbatim}

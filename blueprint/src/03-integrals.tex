@@ -5,8 +5,8 @@ outside scope.
 
 \section{Rectangle algorithm}
 
-Classify each equal-mesh cell as increasing, decreasing, or containing a
-certified finite turn set before choosing its rectangles.
+Classify each cell as increasing, decreasing, or containing a certified finite
+turn set, then choose its rectangles.
 \begin{verbatim}
 mesh -> cell certificates -> lower/upper rectangles -> overlap
 \end{verbatim}
@@ -50,7 +50,7 @@ finite sum -> algebraic identity -> endpoint difference -> error budget
 \section{Tails and products}
 
 Compactify, bound the tail, and use finite products for Gaussian and $n$-ball
-certificates.
+certificates; multiple integration is represented by iterated finite bounds.
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
 \lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
@@ -68,5 +68,5 @@ certificates.
 
 \section{Proof order}
 
-Intervals $\to$ monotone pieces $\to$ finite identities $\to$ function
-interfaces. Classical limit identification is a separate bridge.
+Intervals $\to$ monotone pieces $\to$ finite identities $\to$ interfaces.
+Classical limit identification is a bridge.
