@@ -18,7 +18,9 @@ Rational coordinates and squared lengths are the geometric primitives.
 coordinates -> rational identities -> square-root bracket
                          -> refine only when needed
 \end{verbatim}
-The certificates cover Pythagoras, Heron, cosine, Ptolemy, and Pick.  For the
+The certificates cover Pythagoras, Heron, cosine, Ptolemy, and Pick.  The
+isoperimetric core is the exact rectangle gap and a Heron/AM--GM triangle
+bound.  For the
 angle-sum row, only the rational signed-area core is claimed: angle-valued
 semantics remain a separate bridge.
 \lean{ComputableAnalysis.RationalCircle.triangleTwiceArea_shoelace}
@@ -47,6 +49,7 @@ semantics remain a separate bridge.
 \lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_orthogonal_certificate}
 \lean{ComputableAnalysis.RationalCircle.Stage.finiteLawOfCosines_unit_antipodal_certificate}
 \lean{ComputableAnalysis.rectangle_isoperimetric}
+\lean{ComputableAnalysis.rectangle_isoperimetric_gap}
 \lean{ComputableAnalysis.RationalCircle.triangle_isoperimetric_heron_bound}
 \lean{ComputableAnalysis.RationalCircle.triangle_isoperimetric_345_certificate}
 
