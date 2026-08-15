@@ -16,7 +16,9 @@ silently identify those certificates with a completed complex number.
 box -> interval Horner evaluation -> discard or subdivide
     -> optionally deflate a supplied exact factor
 \end{verbatim}
-Rational-root search is finite; isolation replaces radical formulas.
+Rational-root search is finite; isolation replaces radical formulas.  A
+supplied rational root plus a rational discriminant witness completes a cubic
+without invoking a completed real or a general cubic formula.
 \lean{ComputableAnalysis.QBox.FiniteRootExclusionCertificate}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide}
 \lean{ComputableAnalysis.finiteFTAUpperRoot_survives_depth_five}
@@ -29,6 +31,11 @@ Rational-root search is finite; isolation replaces radical formulas.
 \lean{ComputableAnalysis.Polynomial.sevenVariationSeptic_positive_root_iff}
 \lean{ComputableAnalysis.Polynomial.sevenVariationSeptic_certificate}
 \lean{ComputableAnalysis.Polynomial.cubic_completion_example_certificate}
+\lean{ComputableAnalysis.Polynomial.cubic_completion_roots_of_discriminant}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_factorization}
+\lean{ComputableAnalysis.Polynomial.cubicSqrtTwo_bracket_matches_sqrtTwo_stage24}
+\lean{ComputableAnalysis.mixed_cubic_example_explicit_certificate}
+\lean{ComputableAnalysis.mixed_cubic_two_example_explicit_certificate}
 \lean{ComputableAnalysis.quartic_split_example_certificate}
 \lean{ComputableAnalysis.quartic_mixed_split_example_certificate}
 \lean{ComputableAnalysis.Polynomial.syntheticDivide_spec}
