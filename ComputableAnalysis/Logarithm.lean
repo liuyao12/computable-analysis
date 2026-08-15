@@ -1170,8 +1170,13 @@ rational strip.  This is the public unit-integral form of the exact finite
 triangle reindexing computation. -/
 theorem arctanIntegralTriangle_equiv_complementKernelIntegral :
     arctanIntegralTriangle.Equiv arctanComplementKernelIntegral := by
-  simpa [arctanIntegralTriangle] using
-    arctanKernelTriangleRaw_equiv_complementKernelIntegral
+  intro stage
+  apply (RealRaw.compareAt_overlap_iff
+    arctanIntegralTriangle arctanComplementKernelIntegral stage stage).2
+  rw [arctanIntegralTriangle_compute_eq]
+  exact (RealRaw.compareAt_overlap_iff
+    arctanKernelTriangleRaw arctanComplementKernelIntegral stage stage).1
+    (arctanKernelTriangleRaw_equiv_complementKernelIntegral stage)
 
 /-- The raw sum of the two literal strip integrals is, stage by stage, the
 four-Lipschitz Darboux box for the arctangent kernel.  This is the finite
@@ -1295,11 +1300,34 @@ theorem arctanIntegralTriangle_add_logKernelIntegral_equiv_productIntegral :
   have hproduct :
       IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral.Valid :=
     IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_valid
+  have hgeom : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have htriangle :
+      arctanIntegralTriangle.Equiv arctanKernelTriangleRaw := by
+    intro stage
+    apply (RealRaw.compareAt_overlap_iff
+      arctanIntegralTriangle arctanKernelTriangleRaw stage stage).2
+    rw [arctanIntegralTriangle_compute_eq]
+    exact (RealRaw.compareAt_overlap_iff
+      arctanKernelTriangleRaw arctanKernelTriangleRaw stage stage).1
+      (RealRaw.equiv_refl arctanKernelTriangleRaw
+        arctanKernelTriangleRaw_valid stage)
+  have htrianglePlusLog :
+      (arctanIntegralTriangle + arctanLogKernelIntegral).Equiv
+        arctanKernelTrianglePlusLog := by
+    unfold arctanKernelTrianglePlusLog
+    exact RealRaw.add_equiv arctanIntegralTriangle_valid
+      arctanKernelTriangleRaw_valid arctanLogKernelIntegral_valid
+      arctanLogKernelIntegral_valid
+      htriangle
+      (RealRaw.equiv_refl arctanLogKernelIntegral
+        arctanLogKernelIntegral_valid)
   exact RealRaw.equiv_trans hleft
     (ArctanGeometry.arctanGeom_valid_on_unit
       (x := (1 : Rat)) (by native_decide) (by native_decide))
     hproduct
-    (by simpa [arctanIntegralTriangle, arctanKernelTrianglePlusLog] using
+    (RealRaw.equiv_trans hleft arctanKernelTrianglePlusLog_valid
+      hgeom htrianglePlusLog
       arctanKernelTrianglePlusLog_equiv_arctanGeom_one)
     (RealRaw.equiv_symm
       IntegralIdentities.coordinateTimesArctanForwardTwoStageMonotoneIntegral_equiv_arctanGeom_one)
@@ -1465,8 +1493,9 @@ theorem logTwoSquareStieltjesCandidate_overlaps_pullbackIntegral
   have hweighted :
       (logTwoSquarePullbackIntegral.compute stage).lo <= weighted /\
         weighted <= (logTwoSquarePullbackIntegral.compute stage).hi := by
-    simpa [weighted] using
-      logTwoSquarePullbackIntegral_contains_weightedMesh stage
+    have h := logTwoSquarePullbackIntegral_contains_weightedMesh stage
+    unfold QInterval.ContainsInterval at h
+    simpa [meshStage, weighted] using h
   unfold logTwoSquareStieltjesCandidate
     logTwoSquareStieltjesCandidateCompute
   dsimp only
@@ -2214,8 +2243,9 @@ theorem logTwoSquareStieltjesCandidate_overlaps_reciprocalSquareScheduled
   have huniform :
       (logTwoReciprocalSquareScheduled.compute stage).lo <= uniform /\
         uniform <= (logTwoReciprocalSquareScheduled.compute stage).hi := by
-    simpa [uniform] using
-      logTwoReciprocalSquareScheduled_contains_uniformLeftEndpoint stage
+    have h := logTwoReciprocalSquareScheduled_contains_uniformLeftEndpoint stage
+    unfold QInterval.ContainsInterval at h
+    simpa [meshStage, uniform] using h
   have hradius0 : 0 <= radius := by
     dsimp [radius]
     apply Rat.mul_nonneg
@@ -2943,6 +2973,13 @@ theorem piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonot
     have hcompose := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
       (2 : Rat) (2 : Rat) (by native_decide) (by native_decide)
       arctanLogKernelIntegral hstripValid
+    have hscale2 (x : RealRaw) :
+        ((2 : Nat) * x : RealRaw) = RealRaw.scaleRat 2 x := by
+      rfl
+    have hscale4 (x : RealRaw) :
+        ((4 : Nat) * x : RealRaw) = RealRaw.scaleRat 4 x := by
+      rfl
+    rw [hscale2, hscale4]
     simpa only [show (2 : Rat) * (2 : Rat) = 4 by native_decide] using hcompose
   have hreplace : piTriangleLogSeries.Equiv
       ((4 : Nat) * arctanIntegralTriangle +
@@ -2964,7 +3001,15 @@ theorem piTriangleLogSeries_equiv_four_coordinateTimesArctanForwardTwoStageMonot
     have h := RealRaw.scaleRat_add_equiv_of_nonneg
       (4 : Rat) (by native_decide) arctanIntegralTriangle
       arctanLogKernelIntegral htriangleValid hstripValid
-    simpa using RealRaw.equiv_symm h
+    have hscale4 (x : RealRaw) :
+        ((4 : Nat) * x : RealRaw) = RealRaw.scaleRat 4 x := by
+      rfl
+    rw [hscale4, hscale4, hscale4]
+    change (RealRaw.add (RealRaw.scaleRat 4 arctanIntegralTriangle)
+      (RealRaw.scaleRat 4 arctanLogKernelIntegral)).Equiv
+      (RealRaw.scaleRat 4
+        (RealRaw.add arctanIntegralTriangle arctanLogKernelIntegral))
+    exact RealRaw.equiv_symm h
   have hsumToProduct :
       ((4 : Nat) *
         (arctanIntegralTriangle + arctanLogKernelIntegral)).Equiv
