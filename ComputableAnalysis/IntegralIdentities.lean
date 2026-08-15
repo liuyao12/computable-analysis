@@ -5275,7 +5275,9 @@ theorem coordinateTimesArctanForwardFTCDerivativeBound_contains
   rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
     coordinateTimesArctanIntegralRectangleDerivativeOnUnit htDomain]
   simpa [coordinateTimesArctanForwardFTCDerivativeBound,
-    coordinateTimesArctanForwardFTCDerivativeStage, P, n, h] using hvalue
+    coordinateTimesArctanForwardFTCDerivativeStage,
+    coordinateTimesArctanIntegralRectangleDerivativeRaw,
+    FunctionOnInterval.toRealFunRaw_compute_of_mem, P, n, h] using hvalue
 
 /-- The same selected cell bound contains the primitive's endpoint
 difference when scaled by that cell's width.  Because the partition is
@@ -5388,16 +5390,20 @@ theorem coordinateTimesArctanForwardFTCRiemann_width_le (eps : QPos) :
   have hsum := RationalPartition.uniform_boundIntegralSum_width_le
     (a := (0 : Rat)) (b := (1 : Rat)) pieces hpieces (by native_decide)
     (fun k hk => coordinateTimesArctanForwardFTCDerivativeBound eps k
-      (by simpa [pieces, delta, n] using hk))
+      (by simpa [coordinateTimesArctanForwardFTCPartition, RationalPartition.uniform,
+        pieces, delta, n] using hk))
     (10 * (precisionAtStage n).val) (by
       intro k hk
-      simpa [pieces, delta, n] using
+      simpa [coordinateTimesArctanForwardFTCPartition, RationalPartition.uniform,
+        pieces, delta, n] using
         coordinateTimesArctanForwardFTCDerivativeBound_width_le eps k
-          (by simpa [pieces, delta, n] using hk))
+          (by simpa [coordinateTimesArctanForwardFTCPartition, RationalPartition.uniform,
+            pieces, delta, n] using hk))
   have houter := ten_mul_precisionAtStage_coordinateTimesArctanForwardOuterStage_le eps
   change ((RationalPartition.uniform 0 1 pieces hpieces (by native_decide)).boundIntegralSum
     (fun k hk => coordinateTimesArctanForwardFTCDerivativeBound eps k
-      (by simpa [pieces, delta, n] using hk))).width <= eps.val
+      (by simpa [coordinateTimesArctanForwardFTCPartition, RationalPartition.uniform,
+        pieces, delta, n] using hk))).width <= eps.val
   calc
     _ <= (1 - 0) * (10 * (precisionAtStage n).val) := hsum
     _ = 10 * (precisionAtStage n).val := by grind
