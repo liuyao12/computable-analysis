@@ -59,8 +59,10 @@ def exactRat_quintic_intervalRegularOn_unit :
     have hw : 0 <= I.width := by
       unfold QInterval.width
       grind [Rat.sub_eq_add_neg]
-    have hlo : 0 <= I.lo := by simpa using hI.1
-    have hhi : I.hi <= 1 := by simpa using hI.2.2
+    have hlo : 0 <= I.lo := by
+      simpa [FunctionOnInterval.exactRat] using hI.1
+    have hhi : I.hi <= 1 := by
+      simpa [FunctionOnInterval.exactRat] using hI.2.2
     have hwidth : (exactQuinticInterval I).width = I.width *
         (I.hi ^ 4 + I.hi ^ 3 * I.lo + I.hi ^ 2 * I.lo ^ 2 +
           I.hi * I.lo ^ 3 + I.lo ^ 4) := by
@@ -110,11 +112,12 @@ def exactRat_quintic_intervalRegularOn_unit :
     intro I hI x hx n hIlo hIhi
     unfold subintervalOf at hI
     unfold exactQuinticInterval QInterval.ContainsInterval
-    rw [FunctionOnInterval.exactRat_compute]
+    change I.lo ^ 5 <= x ^ 5 ∧ x ^ 5 <= I.hi ^ 5
     have hx' : 0 <= x ∧ x <= 1 := by
       simpa [FunctionOnInterval.exactRat, inDomainInterval] using hx
     have hx0 : 0 <= x := hx'.1
-    have hlo : 0 <= I.lo := by simpa using hI.1
+    have hlo : 0 <= I.lo := by
+      simpa [FunctionOnInterval.exactRat] using hI.1
     have hhi0 : 0 <= I.hi := by grind
     have hl : 0 <= (x - I.lo) *
         (x ^ 4 + x ^ 3 * I.lo + x ^ 2 * I.lo ^ 2 +
@@ -213,7 +216,6 @@ theorem exactQuintic_uniformLeftSum_eq {n : Nat} (hn : 0 < n) :
     intro k; induction k with
     | zero => simp [Series.fifthPowerSum, Rat.div_def]
     | succ k ih =>
-        simp at ih ⊢
         rw [List.range_succ, List.foldl_append]
         simp [List.foldl]
         rw [ih, Series.fifthPowerSum_succ]
@@ -235,10 +237,15 @@ theorem exactQuintic_uniformRightSum_eq {n : Nat} (hn : 0 < n) :
     intro k; induction k with
     | zero => simp [Series.fifthPowerSum, Rat.div_def]; grind
     | succ k ih =>
-        simp at ih ⊢
         rw [List.range_succ, List.foldl_append]
         simp [List.foldl]
-        rw [ih]
+        have ih' :
+            (List.range k).foldl
+                (fun total (j : Nat) => total + (1 / (n : Rat)) *
+                  (((j : Rat) + 1) / (n : Rat)) ^ 5) 0 =
+              Series.fifthPowerSum (k + 1) / (n : Rat) ^ 6 := by
+          simpa [Rat.natCast_add] using ih
+        rw [ih']
         have hterm : (1 / (n : Rat)) *
             (((k : Rat) + 1) / (n : Rat)) ^ 5 =
               ((k : Rat) + 1) ^ 5 / (n : Rat) ^ 6 := by
@@ -253,7 +260,13 @@ theorem exactQuintic_uniformRightSum_eq {n : Nat} (hn : 0 < n) :
             Series.fifthPowerSum k + (k : Rat) ^ 5 := by
           rw [Series.fifthPowerSum_succ]
         rw [hs]
-        grind [Rat.natCast_add, Rat.add_assoc]
+        have hfrac (a b : Rat) :
+            a / (n : Rat) ^ 6 + b / (n : Rat) ^ 6 =
+              (a + b) / (n : Rat) ^ 6 := by
+          rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm,
+            Rat.pow_succ, Rat.mul_inv_cancel]
+        simpa [Rat.natCast_add] using hfrac _ _
   unfold IntegralIdentities.LipschitzDyadic.uniformRightEndpointSum
   exact haux n
 
@@ -278,12 +291,6 @@ theorem exactQuintic_compute_contains_one_sixth :
   constructor
   · exact Rat.le_trans hl.1 (by native_decide)
   · exact Rat.le_trans (by native_decide) hr.2
-
-theorem exactQuintic_compute_contains_one_sixth_stage20 :
-    (IntegralIdentities.LipschitzDyadic.compute (fun x : Rat => x ^ 5) 5 20).ContainsInterval
-      { lo := 1 / 6, hi := 1 / 6 } := by
-  unfold QInterval.ContainsInterval
-  native_decide
 
 end Integral
 end ComputableAnalysis
