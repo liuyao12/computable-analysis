@@ -84,7 +84,8 @@ def exactRat_affine_intervalRegularOn_of_unit_slope
   contains_point_values := by
     intro I hI x hx n hIlo hIhi
     unfold affineInterval QInterval.ContainsInterval
-    rw [FunctionOnInterval.exactRat_compute]
+    change r * I.lo + c <= r * x + c ∧
+      r * x + c <= r * I.hi + c
     constructor
     · grind [Rat.mul_le_mul_of_nonneg_left hIlo hr0]
     · grind [Rat.mul_le_mul_of_nonneg_left hIhi hr0]
@@ -171,12 +172,14 @@ def exactRat_affine_intervalRegularOn_of_signed_unit_slope
     by_cases hr : 0 <= r
     · simp only [if_pos hr]
       unfold affineInterval QInterval.ContainsInterval
-      rw [FunctionOnInterval.exactRat_compute]
+      change r * I.lo + c <= r * x + c ∧
+        r * x + c <= r * I.hi + c
       constructor <;> grind [Rat.mul_le_mul_of_nonneg_left hIlo hr,
         Rat.mul_le_mul_of_nonneg_left hIhi hr]
     · simp only [if_neg hr]
       unfold QInterval.ContainsInterval
-      rw [FunctionOnInterval.exactRat_compute]
+      change r * I.hi + c <= r * x + c ∧
+        r * x + c <= r * I.lo + c
       have hminus : 0 <= -r := by grind
       have hhi' := Rat.mul_le_mul_of_nonneg_left hIhi hminus
       have hlo' := Rat.mul_le_mul_of_nonneg_left hIlo hminus
@@ -255,12 +258,21 @@ def exactRat_square_intervalRegularOn_unit :
       unfold QInterval.width
       grind [Rat.sub_eq_add_neg]
     have hsum_nonneg : 0 <= I.hi + I.lo := by
-      have hlo_nonneg : 0 <= I.lo := by simpa using hI.1
+      have hlo_nonneg : 0 <= I.lo := by
+        have h := hI.1
+        change (0 : Rat) <= I.lo at h
+        exact h
       have hhi_nonneg : 0 <= I.hi := by grind
       exact Rat.add_nonneg hhi_nonneg hlo_nonneg
     have hsum_le_two : I.hi + I.lo <= 2 := by
-      have hlo_nonneg : 0 <= I.lo := by simpa using hI.1
-      have hhi_le_one : I.hi <= 1 := by simpa using hI.2.2
+      have hlo_nonneg : 0 <= I.lo := by
+        have h := hI.1
+        change (0 : Rat) <= I.lo at h
+        exact h
+      have hhi_le_one : I.hi <= 1 := by
+        have h := hI.2.2
+        change I.hi <= (1 : Rat) at h
+        exact h
       grind
     have hwidth : (exactSquareInterval I).width =
         I.width * (I.hi + I.lo) := by
@@ -281,7 +293,7 @@ def exactRat_square_intervalRegularOn_unit :
     intro I hI x hx n hIlo hIhi
     unfold subintervalOf at hI
     unfold exactSquareInterval QInterval.ContainsInterval
-    rw [FunctionOnInterval.exactRat_compute]
+    change I.lo * I.lo <= x * x ∧ x * x <= I.hi * I.hi
     have hlo_nonneg : 0 <= I.lo := by
       simpa [FunctionOnInterval.exactRat] using hI.1
     have hhi_nonneg : 0 <= I.hi := by
@@ -344,7 +356,6 @@ theorem exactSquare_uniformLeftSum_eq
     | zero =>
         simp [Series.squareSum, Rat.div_def]
     | succ k ih =>
-        simp at ih ⊢
         rw [List.range_succ, List.foldl_append]
         simp [List.foldl]
         rw [ih, Series.squareSum_succ]
@@ -560,8 +571,14 @@ def exactRat_cube_intervalRegularOn_unit :
     have hwidth_nonneg : 0 <= I.width := by
       unfold QInterval.width
       grind [Rat.sub_eq_add_neg]
-    have hlo_nonneg : 0 <= I.lo := by simpa using hI.1
-    have hhi_le_one : I.hi <= 1 := by simpa using hI.2.2
+    have hlo_nonneg : 0 <= I.lo := by
+      have h := hI.1
+      change (0 : Rat) <= I.lo at h
+      exact h
+    have hhi_le_one : I.hi <= 1 := by
+      have h := hI.2.2
+      change I.hi <= (1 : Rat) at h
+      exact h
     have hwidth : (exactCubeInterval I).width =
         I.width * (I.hi ^ 2 + I.hi * I.lo + I.lo ^ 2) := by
       unfold exactCubeInterval QInterval.width
@@ -594,11 +611,14 @@ def exactRat_cube_intervalRegularOn_unit :
     intro I hI x hx n hIlo hIhi
     unfold subintervalOf at hI
     unfold exactCubeInterval QInterval.ContainsInterval
-    rw [FunctionOnInterval.exactRat_compute]
+    change I.lo ^ 3 <= x ^ 3 ∧ x ^ 3 <= I.hi ^ 3
     have hx' : 0 <= x ∧ x <= 1 := by
       simpa [FunctionOnInterval.exactRat, inDomainInterval] using hx
     have hx_nonneg : 0 <= x := hx'.1
-    have hlo_nonneg : 0 <= I.lo := by simpa using hI.1
+    have hlo_nonneg : 0 <= I.lo := by
+      have h := hI.1
+      change (0 : Rat) <= I.lo at h
+      exact h
     have hhi_nonneg : 0 <= I.hi := by grind
     have hsum_lo : 0 <= x ^ 2 + x * I.lo + I.lo ^ 2 := by
       exact Rat.add_nonneg (Rat.add_nonneg (Rat.pow_nonneg hx_nonneg)
@@ -683,7 +703,6 @@ theorem exactCube_uniformLeftSum_eq
     | zero =>
         simp [Series.cubeSum, Rat.div_def]
     | succ k ih =>
-        simp at ih ⊢
         rw [List.range_succ, List.foldl_append]
         simp [List.foldl]
         rw [ih, Series.cubeSum_succ]

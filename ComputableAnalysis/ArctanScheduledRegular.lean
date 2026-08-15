@@ -115,7 +115,9 @@ theorem arctanScheduledRectangleOnUnit_width_le
     (arctanScheduledRectangleOnUnit.compute x
       ⟨hx0, hx1⟩ n).width <=
       1 / (((16 * (n + 1) : Nat) : Rat)) := by
-  rw [arctanScheduledRectangleOnUnit_compute_eq]
+  change (ArctanGeometry.arctanIntegralRectangleCompute x
+      (arctanScheduledStage n)).width <=
+    1 / (((16 * (n + 1) : Nat) : Rat))
   have h := ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ
     hx0 hx1 (arctanScheduledStage n)
   have hmain :
