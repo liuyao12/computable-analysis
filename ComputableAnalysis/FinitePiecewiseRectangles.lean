@@ -339,6 +339,51 @@ theorem piecewiseRectangleAreaSum_gap_le_common_range
     _ = (cells.length : Rat) * (domainWidth * rangeWidth) :=
       piecewiseRectangleAreaSum_constant cells (domainWidth * rangeWidth)
 
+/-! A reusable finite certificate for the piecewise-monotone rectangle stage.
+The certificate carries only rational data and the cell-order proof; later
+FTC constructions may add a function representation and a refinement rule. -/
+
+structure PiecewiseRectangleCertificate where
+  domainWidth : Rat
+  cells : List QInterval
+  domain_nonneg : 0 ≤ domainWidth
+  cells_ordered : ∀ I, I ∈ cells → I.lo ≤ I.hi
+
+def PiecewiseRectangleCertificate.lowerSum
+    (certificate : PiecewiseRectangleCertificate) : Rat :=
+  piecewiseRectangleAreaSum
+    (certificate.cells.map (fun I => certificate.domainWidth * I.lo))
+
+def PiecewiseRectangleCertificate.upperSum
+    (certificate : PiecewiseRectangleCertificate) : Rat :=
+  piecewiseRectangleAreaSum
+    (certificate.cells.map (fun I => certificate.domainWidth * I.hi))
+
+theorem PiecewiseRectangleCertificate.gap_eq_width_sum
+    (certificate : PiecewiseRectangleCertificate) :
+    certificate.upperSum - certificate.lowerSum =
+      piecewiseRectangleAreaSum
+        (certificate.cells.map
+          (fun I => certificate.domainWidth * I.width)) := by
+  unfold PiecewiseRectangleCertificate.upperSum
+    PiecewiseRectangleCertificate.lowerSum
+  exact piecewiseRectangleAreaSum_gap_eq_width_sum
+    certificate.domainWidth certificate.cells
+
+theorem PiecewiseRectangleCertificate.gap_nonneg
+    (certificate : PiecewiseRectangleCertificate) :
+    0 ≤ certificate.upperSum - certificate.lowerSum := by
+  unfold PiecewiseRectangleCertificate.upperSum
+    PiecewiseRectangleCertificate.lowerSum
+  exact piecewiseRectangleAreaSum_gap_nonneg certificate.domainWidth
+    certificate.cells certificate.domain_nonneg certificate.cells_ordered
+
+theorem PiecewiseRectangleCertificate.lower_le_upper
+    (certificate : PiecewiseRectangleCertificate) :
+    certificate.lowerSum ≤ certificate.upperSum := by
+  have hgap := certificate.gap_nonneg
+  grind [Rat.sub_eq_add_neg]
+
 def quadraticTurnExample : List QInterval :=
   [ pieceCellBounds .increasing 0 1 0 0
   , pieceCellBounds .decreasing 1 0 0 0 ]
