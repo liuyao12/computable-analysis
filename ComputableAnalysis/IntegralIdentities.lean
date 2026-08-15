@@ -5549,12 +5549,9 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
             (arctanRectangleTangentTransportPrecision h (8 * (m + 1))))
           (coordinateTimesArctanIntegralRectangleOnUnit.compute x hx
             (arctanRectangleTangentTransportPrecision h (8 * (m + 1)))) h)
-        (coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw x hx).compute
           (arctanRectangleTangentTransportPrecision h (8 * (m + 1)))) m := by
-      simpa [m, coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute]
-        using (by
-          rw [coordinateTimesArctanIntegralRectangleDerivativeRaw_compute] at hforward
-          exact hforward)
+      simpa [m] using hforward
     have hstage' : (precisionAtStage m).val <= (precisionAtStage n).val := by
       dsimp [m]
       exact Rat.le_trans hstage (by
@@ -5616,8 +5613,9 @@ def coordinateTimesArctanIntegralRectangleOnUnit_hasDerivative :
     let DX : QInterval := coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute x hx N
     let DY : QInterval := coordinateTimesArctanIntegralRectangleDerivativeOnUnit.compute y hy N
     have hproductNear : intervalNearAtPrecision
-        (QInterval.differenceQuotient PX PY k) DY m := by
-      rw [coordinateTimesArctanIntegralRectangleDerivativeRaw_compute] at hproductForward
+        (QInterval.differenceQuotient PX PY k)
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw y hy).compute
+          (arctanRectangleTangentTransportPrecision k (8 * (m + 1)))) m := by
       simpa [hyplusEq, A, B, PX, PY, DX, DY, N, t, m, y,
         coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute] using hproductForward
     have harctanNear : intervalNearAtPrecision
