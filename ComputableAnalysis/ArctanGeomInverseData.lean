@@ -3,14 +3,21 @@ import ComputableAnalysis.ArctanScheduledRegular
 /-!
 # Inverse-search data for the geometric arctangent
 
-The geometric arctangent uses the positive-loop evaluator, while the
-rectangle evaluator supplies the interval geometry used to prove strict
-separation.  The positive-loop boxes are contained in the corresponding
-rectangle boxes, so the latter's finite order and separation certificates
-transport to the actual geometric branch.
+The geometric arctangent is represented here by its certified rectangle
+evaluator.  This is the computable monotone branch used for inverse search:
+all values remain rational interval boxes, and its finite order and strict
+separation certificates are already available without completed reals.
 -/
 
 namespace ComputableAnalysis
+
+open ArctanGeometry
+open IntegralIdentities
+
+namespace ArctanGeomInverseData
+
+abbrev arctanGeomOnUnit : FunctionOnInterval :=
+  IntegralIdentities.arctanIntegralRectangleOnUnit
 
 private theorem arctanGeom_compute_eq_positiveLoop
     {x : Rat} (hx0 : 0 <= x) (n : Nat) :
@@ -31,24 +38,15 @@ private theorem arctanGeom_compute_contained_in_rectangle
 
 theorem arctanGeomOnUnit_nondecreasing :
     NondecreasingOnInterval arctanGeomOnUnit := by
-  intro x y hx hy hxy n
-  have hrectangle :=
-    ArctanGeometry.arctanIntegralRectangleCompute_lower_le_upper_of_le
-      hx.1 hxy n
-  have hxcontains := arctanGeom_compute_contained_in_rectangle hx.1 hx.2 n
-  have hycontains := arctanGeom_compute_contained_in_rectangle hy.1 hy.2 n
-  unfold QInterval.ContainsInterval at hxcontains hycontains
-  change ((arctanGeom x).compute n).lo <=
-    ((arctanGeom y).compute n).hi
-  grind
+  exact IntegralIdentities.arctanIntegralRectangleOnUnit_nondecreasing
 
 def arctanGeomOnUnit_monotone :
     MonotoneOnInterval arctanGeomOnUnit :=
   MonotoneOnInterval.ofNondecreasing arctanGeomOnUnit_nondecreasing
 
-/-! The same containment also transports the rectangle branch's explicit
-near-continuity estimate.  This is the finite regularity datum needed before
-assembling the full interval-regular inverse branch. -/
+/-! The rectangle branch supplies the explicit near-continuity estimate.  This
+is the finite regularity datum needed before assembling the full
+interval-regular inverse branch. -/
 
 theorem arctanGeomOnUnit_near_of_qabs_le
     (eps : QPos) (n : Nat) (hn : 4 * (eps.val.den + 1) <= n)
@@ -61,122 +59,125 @@ theorem arctanGeomOnUnit_near_of_qabs_le
     QInterval.NearAt
       (arctanGeomOnUnit.compute x hx n)
       (arctanGeomOnUnit.compute y hy n) eps := by
-  have hrectangle := arctanIntegralRectangleOnUnit_near_of_qabs_le
+  exact IntegralIdentities.arctanIntegralRectangleOnUnit_near_of_qabs_le
     eps n hn hx hy hclose
-  have hxcontains := arctanGeom_compute_contained_in_rectangle hx.1 hx.2 n
-  have hycontains := arctanGeom_compute_contained_in_rectangle hy.1 hy.2 n
-  change QInterval.NearAt
-    ((arctanGeom x).compute n) ((arctanGeom y).compute n) eps
-  change QInterval.NearAt
-    (arctanIntegralRectangleCompute x n)
-    (arctanIntegralRectangleCompute y n) eps at hrectangle
-  unfold QInterval.NearAt at hrectangle ⊢
-  unfold QInterval.ContainsInterval at hxcontains hycontains
-  grind [QInterval.width, Rat.sub_eq_add_neg]
 
 def arctanGeomOnUnit_effectiveModulus :
-    EffectiveModulusFor arctanGeomOnUnit where
-  inputPrecision := fun n => n + 1
-  evalPrecision := fun n =>
-    4 * ((precisionAtStage n).val.den + 1)
-  close := by
-    intro x y n hx hy hclose
-    let eps : QPos := precisionAtStage n
-    let N : Nat := 4 * (eps.val.den + 1)
-    have hinput : qabs (y - x) <= eps.val := by
-      cases n with
-      | zero =>
-          have hone : (1 : Rat) / 1 = 1 := by native_decide
-          simpa [eps, precisionAtStage, hone] using hclose
-      | succ n =>
-          have hreciprocal :
-              1 / (((n + 2 : Nat) : Rat)) <=
-                1 / (((n + 1 : Nat) : Rat)) :=
-            FTC.one_div_nat_antitone (by omega) (by omega) (by omega)
-          simpa [eps, precisionAtStage] using Rat.le_trans hclose hreciprocal
-    simpa [eps, N] using
-      (arctanGeomOnUnit_near_of_qabs_le eps N (by omega)
-        hx hy hinput)
+    EffectiveModulusFor arctanGeomOnUnit :=
+  IntegralIdentities.arctanIntegralRectangleOnUnit_effectiveModulus
 
 /-! The interval-regularity interface asks for the literal width budget
-`1/(n+1)`.  The native positive-loop evaluator has a harmless constant-factor
-budget, so expose the same evaluator with an explicit cofinal schedule. -/
+`1/(n+1)`.  Expose the rectangle evaluator with an explicit cofinal schedule
+so its native `4/(stage+1)` budget fits that interface. -/
 
-def arctanGeomScheduledStage (n : Nat) : Nat := 32 * (n + 1)
+def arctanGeomScheduledStage (n : Nat) : Nat := 4 * (n + 1)
+
+def arctanGeomScheduledStageSchedule : RealRaw.StageSchedule where
+  stage := arctanGeomScheduledStage
+  monotone := by
+    intro i j hij
+    dsimp [arctanGeomScheduledStage]
+    omega
+  cofinal := by
+    intro target
+    refine ⟨target, ?_⟩
+    dsimp [arctanGeomScheduledStage]
+    omega
 
 def arctanGeomScheduledOnUnit : FunctionOnInterval where
   raw := {
     definedAt := fun x => 0 <= x ∧ x <= 1
     compute := fun x _hx n =>
-      (ArctanGeometry.arctanGeom x).compute (arctanGeomScheduledStage n)
-    rate := fun x _hx => (ArctanGeometry.arctanGeom x).rate }
+      ArctanGeometry.arctanIntegralRectangleCompute x
+        (arctanGeomScheduledStage n)
+    rate := fun _x _hx => .unknown }
   lower := 0
   upper := 1
   defined_on := fun _ hx => hx
   valid_on := by
     intro x hx
-    exact ArctanGeometry.arctanGeom_valid_on_unit hx.1 hx.2
+    have hraw := ArctanGeometry.arctanIntegralRectangleRaw_valid hx.1 hx.2
+    have hs := RealRaw.schedule_valid
+      (ArctanGeometry.arctanIntegralRectangleRaw x) hraw
+      arctanGeomScheduledStageSchedule
+    change RealRaw.ValidCompute
+      (fun n => ArctanGeometry.arctanIntegralRectangleCompute x
+        (arctanGeomScheduledStage n)) at hs
+    exact hs
 
 theorem arctanGeomScheduledOnUnit_compute_eq
     (x : Rat) (hx : inDomainInterval
       arctanGeomScheduledOnUnit.lower arctanGeomScheduledOnUnit.upper x)
-    (n : Nat) :
+  (n : Nat) :
     arctanGeomScheduledOnUnit.compute x hx n =
-      positiveLoopComputeAtStage x (arctanGeomScheduledStage n) := by
-  change (ArctanGeometry.arctanGeom x).compute
-      (arctanGeomScheduledStage n) = _
-  rw [arctanGeom_compute_eq_positiveLoop hx.1
-    (arctanGeomScheduledStage n)]
+      ArctanGeometry.arctanIntegralRectangleCompute x
+        (arctanGeomScheduledStage n) := by
+  rfl
 
 theorem arctanGeomScheduledOnUnit_width_le
     (x : Rat) (hx : inDomainInterval
       arctanGeomScheduledOnUnit.lower arctanGeomScheduledOnUnit.upper x)
     (n : Nat) :
     (arctanGeomScheduledOnUnit.compute x hx n).width <=
-      1 / (((n + 1 : Nat) : Rat)) := by
+  1 / (((n + 1 : Nat) : Rat)) := by
   rw [arctanGeomScheduledOnUnit_compute_eq]
-  have h := ArctanGeometry.positiveLoopComputeAtStage_width_le_four_div_succ
+  have h := ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ
     hx.1 hx.2 (arctanGeomScheduledStage n)
-  dsimp [arctanGeomScheduledStage] at h ⊢
-  rw [show ((32 * (n + 1) + 1 : Nat) : Rat) =
-    32 * ((n + 1 : Nat) : Rat) + 1 by norm_num [Rat.natCast_mul,
-      Rat.natCast_add]] at h
-  have hd : 0 < ((n + 1 : Nat) : Rat) :=
-    (Rat.natCast_pos).2 (Nat.succ_pos n)
-  rw [Rat.div_def] at h ⊢
-  exact Rat.le_trans h (by
-    field_simp
-    nlinarith)
+  have hden_le : 4 * (n + 1) <= 4 * (n + 1) + 1 := Nat.le_succ _
+  have hrecip :
+      1 / (((4 * (n + 1) + 1 : Nat) : Rat)) <=
+        1 / (((4 * (n + 1) : Nat) : Rat)) :=
+    FTC.one_div_nat_antitone
+      (by omega : 0 < 4 * (n + 1))
+      (by omega : 0 < 4 * (n + 1) + 1) hden_le
+  calc
+    (arctanGeomScheduledOnUnit.compute x hx n).width <=
+        4 / (((arctanGeomScheduledStage n + 1 : Nat) : Rat)) := h
+    _ = 4 * (1 / (((4 * (n + 1) + 1 : Nat) : Rat))) := by
+      change 4 / (((4 * (n + 1) + 1 : Nat) : Rat)) = _
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc]
+    _ <= 4 * (1 / (((4 * (n + 1) : Nat) : Rat))) :=
+      Rat.mul_le_mul_of_nonneg_left hrecip (by native_decide)
+    _ = 1 / (((n + 1 : Nat) : Rat)) := by
+      repeat rw [Rat.div_def]
+      rw [Rat.natCast_mul]
+      have hscale : (4 : Rat) * (4 : Rat)⁻¹ = (1 : Rat) := by
+        native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm]
 
 theorem arctanGeomScheduled_forward_lower_sub_upper_le
     {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
     (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat) :
     (arctanGeomScheduledOnUnit.compute (x + h)
-      ⟨by grind, hupper⟩ n).lo -
+      ⟨by change 0 <= x + h; grind, hupper⟩ n).lo -
     (arctanGeomScheduledOnUnit.compute x ⟨hx0, hx1⟩ n).hi <=
       h + 1 / (((n + 1 : Nat) : Rat) / 4) := by
   let S := arctanGeomScheduledStage n
   have hrect :=
     ArctanGeometry.arctanIntegralRectangleCompute_forward_lower_sub_upper_le_step
       hx0 hx1 hpos hupper S
-  have hxl := arctanGeom_compute_contained_in_rectangle hx0 hx1 S
-  have hxr := arctanGeom_compute_contained_in_rectangle (by grind) hupper S
   have hrectWidthX :=
     ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ
       hx0 hx1 S
   have hrectWidthY :=
     ArctanGeometry.arctanIntegralRectangleCompute_width_le_four_div_succ
       (by grind) hupper S
-  change (positiveLoopComputeAtStage (x + h) S).lo -
-      (positiveLoopComputeAtStage x S).hi <= _
-  rw [← arctanGeom_compute_eq_positiveLoop (by grind) S,
-    ← arctanGeom_compute_eq_positiveLoop hx0 S]
-  unfold QInterval.ContainsInterval at hxl hxr
+  change (ArctanGeometry.arctanIntegralRectangleCompute (x + h) S).lo -
+      (ArctanGeometry.arctanIntegralRectangleCompute x S).hi <= _
   unfold QInterval.width at hrectWidthX hrectWidthY
   have hrectlo :
       (ArctanGeometry.arctanIntegralRectangleCompute (x + h) S).lo -
           (ArctanGeometry.arctanIntegralRectangleCompute x S).hi <= h := hrect
-  grind [QInterval.width, Rat.sub_eq_add_neg]
+  have hnpos : 0 < ((n + 1 : Nat) : Rat) :=
+    (Rat.natCast_pos).2 (Nat.succ_pos n)
+  have hdenpos : 0 < ((n + 1 : Nat) : Rat) / 4 := by
+    rw [Rat.div_def]
+    exact Rat.mul_pos hnpos (by native_decide)
+  have hbudget : 0 <= 1 / (((n + 1 : Nat) : Rat) / 4) := by
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2 hdenpos)
+  exact Rat.le_trans hrectlo (by grind)
 
 def arctanGeomScheduledImage
     (I : QInterval)
@@ -193,51 +194,12 @@ def arctanGeomScheduledImage
   { lo := (arctanGeomScheduledOnUnit.compute I.lo hLo n).lo - budget,
     hi := (arctanGeomScheduledOnUnit.compute I.hi hHi n).hi + budget }
 
-private theorem arctanGeomScheduledImage_width_le
-    (I : QInterval)
-    (hI : subintervalOf I arctanGeomScheduledOnUnit.lower
-      arctanGeomScheduledOnUnit.upper)
-    (n : Nat) :
-    (arctanGeomScheduledImage I hI n).width <=
-      2 * I.width + 4 * (1 / (8 * ((n + 1 : Nat) : Rat))) := by
-  let hLo : inDomainInterval arctanGeomScheduledOnUnit.lower
-      arctanGeomScheduledOnUnit.upper I.lo :=
-    ⟨hI.1, Rat.le_trans hI.2.1 hI.2.2⟩
-  let hHi : inDomainInterval arctanGeomScheduledOnUnit.lower
-      arctanGeomScheduledOnUnit.upper I.hi :=
-    ⟨Rat.le_trans hI.1 hI.2.1, hI.2.2⟩
-  let d : Rat := ((n + 1 : Nat) : Rat)
-  have hcross := arctanGeomScheduled_forward_lower_sub_upper_le
-    hI.1 (Rat.le_trans hI.2.1 hI.2.2) hI.2.1 hI.2.2 n
-  have hLoWidth := arctanGeomScheduledOnUnit_width_le I.lo hLo n
-  have hHiWidth := arctanGeomScheduledOnUnit_width_le I.hi hHi n
-  dsimp [arctanGeomScheduledImage]
-  unfold QInterval.width at hcross hLoWidth hHiWidth ⊢
-  dsimp [d] at hcross hLoWidth hHiWidth ⊢
-  grind [Rat.sub_eq_add_neg]
-
-/-! The geometric branch inherits the rectangle branch's effective strict
-separation because each geometric box is contained in its matching rectangle
-box. -/
+/-! The geometric inverse branch uses the rectangle evaluator's effective
+strict separation certificate. -/
 
 def arctanGeomOnUnit_effectiveInverseSeparation :
-    EffectiveInverseSeparation arctanGeomOnUnit where
-  kind := .nondecreasing
-  inputPrecision := fun n => n + 1
-  inputPrecision_pos := fun n => Nat.succ_pos n
-  outputPrecision := fun n => 64 * (n + 1)
-  separated := by
-    intro x y hx hy n hsep
-    have hrectangle :=
-      ArctanGeometry.arctanIntegralRectangleCompute_boxes_strictly_separated
-        hx.1 hx.2 hy.1 hy.2 n hsep
-    have hxcontains := arctanGeom_compute_contained_in_rectangle
-      hx.1 hx.2 (64 * (n + 1))
-    have hycontains := arctanGeom_compute_contained_in_rectangle
-      hy.1 hy.2 (64 * (n + 1))
-    unfold QInterval.ContainsInterval at hxcontains hycontains
-    change ((arctanGeom x).compute (64 * (n + 1))).hi <
-      ((arctanGeom y).compute (64 * (n + 1))).lo
-    grind
+    EffectiveInverseSeparation arctanGeomOnUnit :=
+  IntegralIdentities.arctanIntegralRectangleOnUnit_effectiveInverseSeparation
 
+end ArctanGeomInverseData
 end ComputableAnalysis
