@@ -19,9 +19,15 @@ theorem exactRat_square_nondecreasing :
     NondecreasingOnInterval
       (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1) := by
   intro x y hx hy hxy n
-  simp [FunctionOnInterval.exactRat_compute]
-  have hx0 : 0 <= x := by simpa using hx.1
-  have hy0 : 0 <= y := by simpa using hy.1
+  change x * x <= y * y
+  have hx0 : 0 <= x := by
+    have h := hx.1
+    change (0 : Rat) <= x at h
+    exact h
+  have hy0 : 0 <= y := by
+    have h := hy.1
+    change (0 : Rat) <= y at h
+    exact h
   have hfactor : y * y - x * x = (y - x) * (y + x) := by
     grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul]
   have hsum : 0 <= y + x := Rat.add_nonneg hy0 hx0
@@ -55,9 +61,15 @@ theorem exactRat_cube_nondecreasing :
     NondecreasingOnInterval
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1) := by
   intro x y hx hy hxy n
-  simp [FunctionOnInterval.exactRat_compute]
-  have hx0 : 0 <= x := by simpa using hx.1
-  have hy0 : 0 <= y := by simpa using hy.1
+  change x ^ 3 <= y ^ 3
+  have hx0 : 0 <= x := by
+    have h := hx.1
+    change (0 : Rat) <= x at h
+    exact h
+  have hy0 : 0 <= y := by
+    have h := hy.1
+    change (0 : Rat) <= y at h
+    exact h
   have hfactor : y ^ 3 - x ^ 3 =
       (y - x) * (y ^ 2 + y * x + x ^ 2) := by
     grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
@@ -93,9 +105,15 @@ theorem exactRat_quartic_nondecreasing :
     NondecreasingOnInterval
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1) := by
   intro x y hx hy hxy n
-  simp [FunctionOnInterval.exactRat_compute]
-  have hx0 : 0 <= x := by simpa using hx.1
-  have hy0 : 0 <= y := by simpa using hy.1
+  change x ^ 4 <= y ^ 4
+  have hx0 : 0 <= x := by
+    have h := hx.1
+    change (0 : Rat) <= x at h
+    exact h
+  have hy0 : 0 <= y := by
+    have h := hy.1
+    change (0 : Rat) <= y at h
+    exact h
   have hfactor : y ^ 4 - x ^ 4 =
       (y - x) * (y ^ 3 + y ^ 2 * x + y * x ^ 2 + x ^ 3) := by
     grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,

@@ -160,6 +160,13 @@ theorem piRaw_equiv_fourArctanGeomOne :
     have h := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
       (2 : Rat) (2 : Rat) (by native_decide) (by native_decide)
       (ArctanGeometry.arctanGeom (1 : Rat)) hgeom
+    have hscale (x : RealRaw) :
+        ((2 : Nat) * x : RealRaw) = RealRaw.scaleRat 2 x := by
+      rfl
+    have hscale4 (x : RealRaw) :
+        ((4 : Nat) * x : RealRaw) = RealRaw.scaleRat 4 x := by
+      rfl
+    rw [hscale, hscale, hscale4]
     simpa only [show (2 : Rat) * (2 : Rat) = 4 by native_decide] using h
   exact RealRaw.equiv_trans piRaw_valid
     (RealRaw.natScale_valid 2
