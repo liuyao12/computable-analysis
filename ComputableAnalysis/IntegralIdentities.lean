@@ -3028,7 +3028,7 @@ def arctanIntegralRectangleOnUnit_hasDerivative :
         { lo := ArctanGeometry.integralKernel x,
           hi := ArctanGeometry.integralKernel x }
         (8 * (n + 1)) at hforward
-      exact hforward
+      simpa [RealRaw.ofRat_compute] using hforward
     exact intervalNearAtPrecision_weaken hforward' hstageLe
   · have hneg : h < 0 := by grind
     let k : Rat := -h
@@ -3060,7 +3060,8 @@ def arctanIntegralRectangleOnUnit_hasDerivative :
       have hsum : x + h + k = x := by
         dsimp [k]
         grind
-      simpa only [hsum] using hforward
+      simpa [hsum, arctanIntegralRectangleOnUnit_forwardDerivativeAt,
+        RealRaw.ofRat_compute] using hforward
     have hkernelLip := oneOverOnePlusSquare_lipschitz_on_unit.2
       (x + h) x hy.1 hy.2 hx.1 hx.2
     have hkernelDiff :
@@ -4524,8 +4525,10 @@ def coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt
     (ArctanGeometry.integralKernel_le_one x) hnear
   rw [coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg
     (x + h) hmem,
-    coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg x ⟨hx0, hx1⟩,
-    coordinateTimesArctanIntegralRectangleDerivativeRaw_compute]
+    coordinateTimesArctanIntegralRectangleOnUnit_compute_of_nonneg x ⟨hx0, hx1⟩]
+  rw [coordinateTimesArctanIntegralRectangleDerivativeRaw_compute x
+    (by exact ⟨hx0, hx1⟩)
+    (arctanRectangleTangentTransportPrecision h (8 * (n + 1)))]
   exact hcore
 
 /-- The finite forward derivative certificate for `x * arctan(x)` also gives
@@ -4642,6 +4645,11 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value
         (coordinateTimesArctanIntegralRectangleOnUnit.compute (x + h) hmem N)
         (coordinateTimesArctanIntegralRectangleOnUnit.compute x ⟨hx0, hx1⟩ N) h).NearAt
       (Dleft.compute N) (precisionAtStage n) := by
+    change QInterval.NearAt
+      (QInterval.differenceQuotient
+        (coordinateTimesArctanIntegralRectangleOnUnit.compute (x + h) hmem N)
+        (coordinateTimesArctanIntegralRectangleOnUnit.compute x ⟨hx0, hx1⟩ N) h)
+      (Dleft.compute N) (precisionAtStage n) at hnearRaw
     simpa only [coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAt,
       N, Dleft] using hnearRaw
   have hvalue' : (Dleft.compute m).NearAt (Dvalue.compute m)
@@ -4726,14 +4734,17 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_explicit_uni
     intro t ht hclose
     have hvalueFunction :=
       coordinateTimesArctanIntegralRectangleDerivativeOnUnit_near_of_qabs_le
-        eps ⟨hx0, hx1⟩ ht (by simpa [eps, delta] using hclose)
+        eps ⟨hx0, hx1⟩ ht (by
+          simpa [eps, delta, coordinateTimesArctanForwardContinuityRadius] using hclose)
     have hvalue :
         ((coordinateTimesArctanIntegralRectangleDerivativeRaw x ⟨hx0, hx1⟩).compute m).NearAt
           ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)
           (precisionAtStage n) := by
-      simpa only [eps, m,
-        coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
-        coordinateTimesArctanIntegralRectangleDerivativeRaw_compute] using hvalueFunction
+      change ((coordinateTimesArctanIntegralRectangleDerivativeRaw x
+          ⟨hx0, hx1⟩).compute m).NearAt
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)
+        (precisionAtStage n) at hvalueFunction
+      exact hvalueFunction
     simpa only [m, coordinateTimesArctanForwardSecantBound] using
       coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value_enclosure
         hx0 hx1 hpos hupper ht n m hsmall hvalue
@@ -4888,9 +4899,11 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_range_enclos
       ((coordinateTimesArctanIntegralRectangleDerivativeRaw x ⟨hx0, hx1⟩).compute m).NearAt
         ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)
         (precisionAtStage n) := by
-    simpa only [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
-      coordinateTimesArctanIntegralRectangleDerivativeRaw_compute] using
-      hvalueFunction
+    change ((coordinateTimesArctanIntegralRectangleDerivativeRaw x
+        ⟨hx0, hx1⟩).compute m).NearAt
+      ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)
+      (precisionAtStage n) at hvalueFunction
+    exact hvalueFunction
   let N : Nat := arctanRectangleTangentTransportPrecision h (8 * (n + 1))
   let bound : QInterval :=
     QInterval.hull
@@ -5006,9 +5019,11 @@ theorem coordinateTimesArctanIntegralRectangleOnUnit_forward_secant_uniform_rang
         ((coordinateTimesArctanIntegralRectangleDerivativeRaw x ⟨hx0, hx1⟩).compute m).NearAt
           ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)
           (precisionAtStage n) := by
-      simpa only [coordinateTimesArctanIntegralRectangleDerivativeOnUnit_compute,
-        coordinateTimesArctanIntegralRectangleDerivativeRaw_compute] using
-        hvalueFunction
+      change ((coordinateTimesArctanIntegralRectangleDerivativeRaw x
+          ⟨hx0, hx1⟩).compute m).NearAt
+        ((coordinateTimesArctanIntegralRectangleDerivativeRaw t ht).compute m)
+        (precisionAtStage n) at hvalueFunction
+      exact hvalueFunction
     have hlocal :=
       coordinateTimesArctanIntegralRectangleOnUnit_forward_common_secant_value_enclosure
         hx0 hx1 hpos hupper ht n m hsmall hvalue
