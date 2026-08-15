@@ -1,4 +1,4 @@
-import ComputableAnalysis.Basic
+import ComputableAnalysis.RationalCircle
 
 /-!
 # A finite Green theorem certificate
@@ -10,6 +10,20 @@ no measure or completed line integral.
 -/
 
 namespace ComputableAnalysis
+
+def greenTriangleBoundary
+    (p q r : PiCirclePoint) : Rat :=
+  (p.x + q.x) / 2 * (q.y - p.y) +
+    (q.x + r.x) / 2 * (r.y - q.y) +
+    (r.x + p.x) / 2 * (p.y - r.y)
+
+theorem greenTriangleBoundary_eq_half_shoelace
+    (p q r : PiCirclePoint) :
+    greenTriangleBoundary p q r =
+      RationalCircle.triangleTwiceArea p q r / 2 := by
+  unfold greenTriangleBoundary RationalCircle.triangleTwiceArea
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+    Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
 
 def greenRectangleBoundary (left right bottom top : Rat) : Rat :=
   right * (top - bottom) + left * (bottom - top)
