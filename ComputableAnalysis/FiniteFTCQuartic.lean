@@ -48,8 +48,14 @@ def exactRat_quartic_intervalRegularOn_unit :
     have hwidth_nonneg : 0 <= I.width := by
       unfold QInterval.width
       grind [Rat.sub_eq_add_neg]
-    have hlo_nonneg : 0 <= I.lo := by simpa using hI.1
-    have hhi_le_one : I.hi <= 1 := by simpa using hI.2.2
+    have hlo_nonneg : 0 <= I.lo := by
+      have h := hI.1
+      change (0 : Rat) <= I.lo at h
+      exact h
+    have hhi_le_one : I.hi <= 1 := by
+      have h := hI.2.2
+      change I.hi <= (1 : Rat) at h
+      exact h
     have hwidth : (exactQuarticInterval I).width =
         I.width * (I.hi ^ 3 + I.hi ^ 2 * I.lo +
           I.hi * I.lo ^ 2 + I.lo ^ 3) := by
@@ -114,11 +120,14 @@ def exactRat_quartic_intervalRegularOn_unit :
     intro I hI x hx n hIlo hIhi
     unfold subintervalOf at hI
     unfold exactQuarticInterval QInterval.ContainsInterval
-    rw [FunctionOnInterval.exactRat_compute]
+    change I.lo ^ 4 <= x ^ 4 ∧ x ^ 4 <= I.hi ^ 4
     have hx' : 0 <= x ∧ x <= 1 := by
       simpa [FunctionOnInterval.exactRat, inDomainInterval] using hx
     have hx_nonneg : 0 <= x := hx'.1
-    have hlo_nonneg : 0 <= I.lo := by simpa using hI.1
+    have hlo_nonneg : 0 <= I.lo := by
+      have h := hI.1
+      change (0 : Rat) <= I.lo at h
+      exact h
     have hhi_nonneg : 0 <= I.hi := by grind
     have hsum_lo : 0 <= x ^ 3 + x ^ 2 * I.lo +
         x * I.lo ^ 2 + I.lo ^ 3 := by
@@ -232,7 +241,6 @@ theorem exactQuartic_uniformLeftSum_eq
     induction k with
     | zero => simp [Series.fourthPowerSum, Rat.div_def]
     | succ k ih =>
-        simp at ih ⊢
         rw [List.range_succ, List.foldl_append]
         simp [List.foldl]
         rw [ih, Series.fourthPowerSum_succ]

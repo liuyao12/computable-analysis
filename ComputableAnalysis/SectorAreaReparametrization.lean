@@ -173,7 +173,8 @@ private theorem arctan_rectangle_boxes_strictly_separated
         (y - x) * ArctanGeometry.integralKernel y <=
       (ArctanGeometry.arctanIntegralRectangleCompute y (64 * (n + 1))).hi := by
     simpa [left, right, ArctanGeometry.arctanIntegralRectangleCompute,
-      ArctanGeometry.integralLowerStep] using hcompareTail
+      ArctanGeometry.integralLowerStep, ArctanGeometry.integralSumInterval] using
+      hcompareTail
   have hstep : delta <= y - x := by
     grind [Rat.sub_eq_add_neg]
   have htail : delta / 2 <= (y - x) * ArctanGeometry.integralKernel y := by
@@ -337,15 +338,23 @@ completion or extension to an irrational domain is used. -/
 theorem angleAt_equiv_two_arctanGeom
     (t : Rat) (ht : inDomainInterval angleOnUnit.lower angleOnUnit.upper t) :
     (angleAt t ht).Equiv ((2 : Nat) * ArctanGeometry.arctanGeom t) := by
-  have ht' : 0 <= t /\ t <= 1 := by
-    simpa [angleOnUnit, FunctionOnInterval.scaleRat, inDomainInterval] using ht
+  have ht0 : 0 <= t := by
+    have h := ht.1
+    change (0 : Rat) <= t at h
+    exact h
+  have ht1 : t <= 1 := by
+    have h := ht.2
+    change t <= (1 : Rat) at h
+    exact h
   have hrect := IntegralIdentities.arctanIntegralRectangleFor_equiv_arctanGeom
-    t ht'.1 ht'.2
+    t ht0 ht1
   have hscaled := RealRaw.scaleRat_equiv_of_nonneg (r := (2 : Rat))
     (by native_decide) hrect
-  change (RealRaw.scaleRat 2
-      (IntegralIdentities.arctanIntegralRectangleFor t ht'.1 ht'.2)).Equiv _
-  simpa using hscaled
+  have hscale (z : RealRaw) :
+      ((2 : Nat) * z : RealRaw) = RealRaw.scaleRat 2 z := by
+    rfl
+  rw [hscale]
+  exact hscaled
 
 /-- At each rational input, the scaled exact kernel evaluator is literally
 the rational-circle sector-area speed. -/
@@ -355,9 +364,17 @@ theorem speedOnUnit_compute_eq_sectorAreaSpeed
     speedOnUnit.compute t ht n =
       { lo := RationalCircle.Stage.sectorAreaSpeed t,
         hi := RationalCircle.Stage.sectorAreaSpeed t } := by
+  have ht' : inDomainInterval
+      IntegralIdentities.arctanKernelIntervalAtOne.lower
+      IntegralIdentities.arctanKernelIntervalAtOne.upper t := by
+    have h := ht
+    change IntegralIdentities.arctanKernelIntervalAtOne.lower <= t /\
+      t <= IntegralIdentities.arctanKernelIntervalAtOne.upper at h
+    exact h
   change (FunctionOnInterval.scaleRat 2
-      IntegralIdentities.arctanKernelIntervalAtOne).compute t ht n = _
-  rw [FunctionOnInterval.scaleRat_compute]
+      IntegralIdentities.arctanKernelIntervalAtOne).compute t ht' n = _
+  rw [FunctionOnInterval.scaleRat_compute 2
+    IntegralIdentities.arctanKernelIntervalAtOne t ht' n]
   change QInterval.scaleRat 2
       { lo := 1 / (1 + t * t), hi := 1 / (1 + t * t) } = _
   rw [RationalCircle.Stage.sectorAreaSpeed_eq_two_over_one_plus_square]
@@ -406,8 +423,12 @@ def angleOnUnitRegular : FunctionOnInterval where
     change RealRaw.ValidCompute
       (fun n => (angleAt x hx).compute
         (angleOnUnitRegularSchedule.stage n))
-    simpa [RealRaw.schedule] using
-      RealRaw.schedule_valid (angleAt x hx) hvalid angleOnUnitRegularSchedule
+    have hs := RealRaw.schedule_valid (angleAt x hx) hvalid
+      angleOnUnitRegularSchedule
+    change RealRaw.ValidCompute
+      (fun n => (angleAt x hx).compute
+        (angleOnUnitRegularSchedule.stage n)) at hs
+    exact hs
 
 /-- The accelerated clock is exactly the positive rational scaling of the
 underlying rectangle-arctangent box at its scheduled stage. -/
@@ -516,7 +537,11 @@ private theorem angleOnUnitRegular_forward_lower_sub_upper_le
       simpa [hsum] using hforward
   have hscaled := Rat.mul_le_mul_of_nonneg_left hbase
     (by native_decide : (0 : Rat) <= 2)
-  rw [angleOnUnitRegular_compute, angleOnUnitRegular_compute]
+  change (QInterval.scaleRat 2
+      (ArctanGeometry.arctanIntegralRectangleCompute y N)).lo -
+      (QInterval.scaleRat 2
+        (ArctanGeometry.arctanIntegralRectangleCompute x N)).hi <=
+        2 * (y - x)
   change 2 * (ArctanGeometry.arctanIntegralRectangleCompute y N).lo -
       2 * (ArctanGeometry.arctanIntegralRectangleCompute x N).hi <=
         2 * (y - x)

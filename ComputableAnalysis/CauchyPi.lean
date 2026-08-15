@@ -98,6 +98,10 @@ theorem symmetricRaw_equiv_rectangleRaw : symmetricRaw.Equiv rectangleRaw := by
     have h := RealRaw.scaleRat_scaleRat_equiv_of_nonneg
       (2 : Rat) (2 : Rat) (by native_decide) (by native_decide)
       IntegralIdentities.arctanIntegralRectangleForAtOne hA
+    have hscale (x : RealRaw) :
+        ((2 : Nat) * x : RealRaw) = RealRaw.scaleRat 2 x := by
+      rfl
+    rw [hscale, hscale]
     simpa only [rectangleRaw, IntegralIdentities.PiFromArctanIntegral,
       show (2 : Rat) * (2 : Rat) = 4 by native_decide] using h
   exact RealRaw.equiv_trans symmetricRaw_valid
