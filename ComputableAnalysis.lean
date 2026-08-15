@@ -102,6 +102,7 @@ import ComputableAnalysis.FinitePrimeIntervalInterface
 import ComputableAnalysis.FinitePrimeInfinitude
 import ComputableAnalysis.FiniteGreenRectangle
 import ComputableAnalysis.FiniteCubeRootCertificate
+import ComputableAnalysis.FinitePellCertificate
 import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteCubicMVTExample
 import ComputableAnalysis.FiniteSepticMVTExample

@@ -1041,6 +1041,25 @@ proves this computation's nesting, explicit width schedule, irrationality
 criterion, and unit-interval rational \(\varepsilon\)--\(\delta\) modulus.
 \end{remark}
 
+\begin{remark}[Pell recurrence certificates]
+\label{thm:finite-pell-certificate}
+\lean{ComputableAnalysis.pellPair}
+\lean{ComputableAnalysis.pellInvariant}
+\lean{ComputableAnalysis.FinitePellCertificate}
+\lean{ComputableAnalysis.pellPair_invariant}
+\lean{ComputableAnalysis.finitePellCertificate}
+\lean{ComputableAnalysis.FinitePellCertificate.solution}
+\lean{ComputableAnalysis.finitePellCertificate_stage_one}
+\lean{ComputableAnalysis.finitePellCertificate_stage_two}
+\lean{ComputableAnalysis.finitePellCertificate_stage_three}
+The recurrence
+\begin{verbatim}
+(x,y) -> (3x+4y, 2x+3y)
+\end{verbatim}
+preserves \(x^2-2y^2=1\).  Each stage is a finite rational certificate;
+the infinite family is a potential-infinity interface.
+\end{remark}
+
 \begin{remark}[Pseudocode convention]\label{rem:pseudocode-convention}
 \uses{rem:computable-presentations,rem:algebraic-numbers-sqrt-two}
 Displayed code is Python-like finite rational pseudocode.  Variables are
