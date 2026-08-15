@@ -1,4 +1,4 @@
-import ComputableAnalysis.PiProofs
+import ComputableAnalysis.PtolemyLengthCore
 
 /-!
 # A finite Ptolemy length certificate
@@ -20,7 +20,7 @@ namespace FinitePtolemyLength
 
 open RationalCircle
 open RationalCircle.Stage
-open PiProofs
+open PtolemyLengthCore
 
 def ptolemyPointA : PiCirclePoint := RationalCircle.Stage.point 0
 
@@ -29,22 +29,6 @@ def ptolemyPointB : PiCirclePoint := RationalCircle.Stage.point (8 / 15)
 def ptolemyPointC : PiCirclePoint := RationalCircle.Stage.point (3 / 4)
 
 def ptolemyPointD : PiCirclePoint := RationalCircle.Stage.point (4 / 3)
-
-/-! A reusable bridge from a rational square certificate to the raw length
-algorithm.  This is the concrete square-root witness used below. -/
-
-theorem pointSegmentLengthRaw_equiv_of_square
-    (p q : PiCirclePoint) (r : Rat)
-    (hsquare : sq r = pointSegmentNormSq p q) :
-    (pointSegmentLengthRaw p q).Equiv (RealRaw.ofRat (qabs r)) := by
-  let hq : sqrtDomain (pointSegmentNormSq p q) :=
-    pointSegmentNormSq_sqrtDomain p q
-  have hspec : SqrtRawSpec (pointSegmentNormSq p q) hq :=
-    pointSegmentLengthRaw_spec p q
-  have hreal := sqrt_rational_of_square
-    (pointSegmentNormSq p q) r hq hspec hsquare
-  simpa [pointSegmentLengthRaw, sqrtReal, Real.ofRat, Real.ofRaw,
-    Real.Equiv] using hreal
 
 theorem ptolemyPoint_square_coordinates :
     pointSegmentNormSq ptolemyPointA ptolemyPointB = 256 / 289 ∧
