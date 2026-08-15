@@ -15,9 +15,9 @@ prefix -> finite identity -> tail bound -> nested enclosure
 \label{thm:finite-power-sum-interface}
 \label{thm:finite-stirling-certificate}
 
-The same interface handles geometric, alternating, power-sum, Fourier, and
+One interface handles geometric, alternating, power-sum, Fourier, and
 prime-reciprocal examples. Harmonic divergence means reaching every finite
-target at an explicit dyadic stage.
+target at an explicit stage.
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.prefix_le_endpoint}
 \lean{ComputableAnalysis.Series.FiniteGeometricSeriesCertificate.gap_le_tolerance}
@@ -100,9 +100,9 @@ target at an explicit dyadic stage.
 \label{thm:shared-rational-anchor}
 \label{thm:leibniz-arctan}
 
-Crude rectangles, binomial expansions, and termwise integration explore the
-same space of computations. Leibniz is a finite alternating prefix with a
-reciprocal tail; its identification with geometric \(\pi\) is a bridge.
+Crude rectangles, binomial expansions, and termwise integration explore one
+space of computations. Leibniz is a finite alternating prefix plus a tail;
+identification with geometric \(\pi\) is a bridge.
 \begin{verbatim}
 choose route -> compute prefix -> compare enclosures -> refine
 \end{verbatim}
@@ -125,8 +125,8 @@ choose route -> compute prefix -> compare enclosures -> refine
 \section{Basel and factorial growth}
 \label{thm:basel-geometric-overlap}
 
-Basel is an overlap of two raw interval algorithms: reciprocal-square prefixes
-and geometric area. Euler's completed identity is a bridge.
+Basel compares two raw interval algorithms: reciprocal-square prefixes and
+geometric area. Euler's completed identity is a bridge.
 \lean{ComputableAnalysis.Basel.baselSeriesRaw}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_valid}
 \lean{ComputableAnalysis.Basel.baselSeriesRaw_reaches_of_positive_tolerance}

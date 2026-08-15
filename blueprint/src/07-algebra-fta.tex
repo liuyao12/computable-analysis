@@ -1,8 +1,8 @@
 \chapter{Algebraic Root Certificates and the FTA Boundary}\label{ch:algebra-fta}
 
 An algebraic value is a rational box with a polynomial-image certificate.
-Isolation, splitting, and deflation are finite; completed-number
-identification is a bridge.
+Isolation, splitting, and deflation are finite; completed-number identification
+is a bridge.
 
 \section{Isolation and deflation}
 \label{thm:finite-box-polynomial-soundness}
@@ -16,8 +16,8 @@ identification is a bridge.
 box -> interval Horner evaluation -> discard or subdivide
     -> optionally deflate a supplied exact factor
 \end{verbatim}
-Search is finite; isolation replaces radical formulas. A supplied root and
-discriminant witness finish the cubic core.
+Finite search replaces radical formulas. A supplied root and discriminant
+witness finish the cubic core.
 \lean{ComputableAnalysis.QBox.FiniteRootExclusionCertificate}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide}
 \lean{ComputableAnalysis.FiniteFTASubdivision.survivingSubdivide_nonempty_of_root}
@@ -75,5 +75,5 @@ discriminant witness finish the cubic core.
 
 \section{Boundary}
 
-The supplied-root quintic certificate peels five exact factors. This is the
-computable Abel--Ruffini boundary, not a general quintic solver.
+The supplied-root quintic certificate peels five exact factors: a boundary,
+not a general quintic solver.

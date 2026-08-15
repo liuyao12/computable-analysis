@@ -1,8 +1,11 @@
 \chapter{Formalization Roadmap}
 
+The chapters are a map, not a second proof. Figures show the computation;
+pseudocode names the invariant; Lean supplies the details.
+
 \section{Admission rule}
 
-Keep results yielding a rational certificate, shrinking `realRaw`, valid
+Keep results that yield a rational certificate, shrinking `realRaw`, valid
 `real`, or overlap. Reuse routine finite combinatorics.
 
 \section{Order}
@@ -19,5 +22,5 @@ The preface indexes each scoped entry and its computable core.
 
 \section{Style}
 
-The blueprint gives ideas, pseudocode, and figures. Lean carries the details.
-Only `realRaw` and `real` distinguish this development.
+Only `realRaw` and `real` distinguish this development from standard real
+numbers; Lean carries the details.

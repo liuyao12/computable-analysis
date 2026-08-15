@@ -1,6 +1,6 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Approximate a linear ODE by matrix words and a factorial tail.
+Approximate a linear ODE by matrix words plus a factorial tail.
 
 \section{Construction}
 \label{thm:finite-cramer-interface}
@@ -12,7 +12,7 @@ add finite time-ordered matrix words
 bound the next words by a geometric/factorial tail
 \end{verbatim}
 Determinants, Cramer's rule, and Cayley--Hamilton supply the certificates.
-The boundary takes an annihilating polynomial as explicit input.
+The boundary takes an annihilating polynomial as input.
 \lean{ComputableAnalysis.cramer_two_by_two}
 \lean{ComputableAnalysis.cramer_2_1_1_3_certificate}
 \lean{ComputableAnalysis.cramer_3_2_1_2_certificate}
@@ -46,7 +46,7 @@ Mesh transitions give variation of constants and finite uniqueness.
 
 \section{Special cases}
 
-For rotations, the word expansion splits into cosine and sine prefixes.
+For rotations, words split into cosine and sine prefixes.
 \lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
 \lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
 \lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
