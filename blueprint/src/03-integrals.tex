@@ -1,91 +1,49 @@
 \chapter{Integrals}\label{ch:integrals}
 
 An integral is a program returning nested rational bounds. Lebesgue measure is
-outside scope.
+outside scope; the central object is a certified rectangle computation.
 
 \section{Rectangle algorithm}
 
-Classify each cell as increasing, decreasing, or containing finitely many
-certified turns; choose rectangles accordingly.
+For each cell, certify monotonicity or isolate finitely many turns.
 \begin{verbatim}
-mesh -> cell certificates -> lower/upper rectangles -> overlap
+mesh -> cell classification -> lower/upper rectangles -> overlap
 \end{verbatim}
-\lean{ComputableAnalysis.pieceCellBounds}
-\lean{ComputableAnalysis.pieceCellTurningAreaGap_le}
-\lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_le_common_range}
-\lean{ComputableAnalysis.Integral.FinitePiecewiseStageAssembly.compute_widths_shrink}
+This gives the computable mean-value/area principle for the functions covered
+by the certificates.
 \begin{figure}[!htbp]\centering
 \arctanRectangleEnclosureAnimation
 \caption{Certified lower and upper rectangles.}
 \label{fig:arctan-rectangle-enclosure}\end{figure}
 
-For $\sin(\pi x)$ on $[0,1/2]$, endpoints are exact; interior values have
-stage-dependent brackets.
+For $\sin(\pi x)$ on $[0,1/2]$, the endpoints are exact and each interior
+sample has a stage-dependent value bracket.
 \begin{figure}[!htbp]\centering
 \intervalSineIntegralStageAnimation
 \caption{Value brackets and rectangle bounds.}
 \label{fig:interval-sine-integral-stage}\end{figure}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_compute}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_valid}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_reaches_of_positive_tolerance}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfPeriodSineRaw_width_le_geometric}
-\lean{ComputableAnalysis.FiniteSineIntegral.halfAnglePrefix_stage_ten_near_one}
 
 \section{Finite identities}
 \label{thm:finite-green-rectangle}
 \label{def:integration-by-parts-certificate}
 \label{thm:integration-by-parts-certificate}
-
-Green's theorem begins with the finite rectangle identity:
-\begin{verbatim}
-boundary circulation of x dy -> signed area
-\end{verbatim}
-\lean{ComputableAnalysis.greenTriangleBoundary}
-\lean{ComputableAnalysis.greenTriangleBoundary_eq_half_shoelace}
-\lean{ComputableAnalysis.greenRectangleBoundary}
-\lean{ComputableAnalysis.greenRectangleArea}
-\lean{ComputableAnalysis.FiniteGreenRectangleCertificate}
-\lean{ComputableAnalysis.FiniteGreenRectangleCertificate.boundary}
-\lean{ComputableAnalysis.FiniteGreenRectangleCertificate.area}
-\lean{ComputableAnalysis.greenRectangleBoundary_eq_area}
-\lean{ComputableAnalysis.greenRectangleBoundary_split_horizontal}
-\lean{ComputableAnalysis.greenRectangleBoundary_split_vertical}
-\lean{ComputableAnalysis.greenRectangleArea_split_horizontal}
-\lean{ComputableAnalysis.greenRectangleArea_split_vertical}
-\lean{ComputableAnalysis.FiniteGreenRectangleCertificate.boundary_eq_area}
-\lean{ComputableAnalysis.finiteGreenRectangleCertificate}
-\lean{ComputableAnalysis.finiteGreenRectangleCertificate_unit}
-
-Substitution, telescoping, integration by parts, and polynomial FTC are finite
-rearrangements under one error budget.
-\begin{verbatim}
-finite sum -> algebraic identity -> endpoint difference -> error budget
-\end{verbatim}
-\lean{ComputableAnalysis.finiteIntegrationByParts}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.finiteRatSum_ibp_left_right}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticLeftRightSum_eq_endpoint_difference}
-\lean{ComputableAnalysis.FinitePolynomialIntegrationByParts.quadraticCubicLeftRightSum_eq_one}
-\lean{ComputableAnalysis.FiniteQuarticQuinticIntegrationByParts.quarticQuinticRightLeftSum_stage4}
 \label{cor:arctangent-logarithm-pi-route}
+
+\begin{verbatim}
+finite boundary sum -> algebraic identity -> endpoint difference
+                                      -> certified error budget
+\end{verbatim}
+Green's rectangle identity, substitution, telescoping, integration by parts,
+and polynomial FTC are instances of this finite pattern.
 
 \section{Tails and products}
 
-Compactify, bound tails, and use finite products for Gaussian and $n$-ball
-certificates. Multiple integration means iterated finite bounds.
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_four}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_six}
-\lean{ComputableAnalysis.gaussianEvenIntegralPrefix_stage_eight}
-\lean{ComputableAnalysis.gaussianTailBoxUpper}
-\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_two_hundred_nine_ten_ladder}
-\lean{ComputableAnalysis.gaussianTailBoxUpper_stage_two_hundred_nine_ten_sum}
-\lean{ComputableAnalysis.nBallVolumeModel_recurrence}
-\lean{ComputableAnalysis.gaussianProductModel_split}
-\lean{ComputableAnalysis.nBallVolumeModel_scale}
-\lean{ComputableAnalysis.nBallVolumeModel_stage_ten}
-\lean{ComputableAnalysis.nBallVolumeModel_stage_eleven}
-\lean{ComputableAnalysis.nBallVolumeModel_stage_twelve}
-\lean{ComputableAnalysis.nBallVolumeModel_stage_thirteen}
+Compactify the domain, bound the tail, and combine finite bounds. Multiple
+integrals are iterated finite enclosures; Gaussian and $n$-ball formulas are
+the main examples.
+\begin{verbatim}
+finite boxes -> product bounds -> tail certificate -> nested enclosure
+\end{verbatim}
 
 \section{Interface}
 

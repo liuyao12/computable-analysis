@@ -3,83 +3,35 @@
 \section{Secants before completeness}
 \label{thm:finite-quadrature-mean-value}
 
-The historical core is the mean-value relation, expressed as a finite
-certificate.
+Historically, the mean-value relation became a way to expose the order
+structure behind calculus. Here it is first stated as a finite bracket.
 \begin{verbatim}
 endpoint increment -> derivative bounds -> rational witness interval
 \end{verbatim}
-For monotone derivatives or convex functions, the increment lies between
-derivative bounds.
-\lean{ComputableAnalysis.monomialUnit_mvt_bisection_tolerance_certificate}
-\lean{ComputableAnalysis.quarticUnit_mvt_bisection_tolerance_certificate}
-\lean{ComputableAnalysis.Integral.finiteQuadrature_average_between_bounds}
-\lean{ComputableAnalysis.Differential.square_midpoint_mean_value}
-\lean{ComputableAnalysis.Polynomial.quadratic_secant_quotient}
-\lean{ComputableAnalysis.Polynomial.quadratic_secant_minus_derivative}
-\lean{ComputableAnalysis.ExactFunction.cube_secant_derivative_bracket}
-\lean{ComputableAnalysis.cube_secant_supplied_mvt_witness}
-\lean{ComputableAnalysis.cubic_mvt_unit_interval_certificate}
-\lean{ComputableAnalysis.cubic_mvt_signed_interval_certificate}
-\lean{ComputableAnalysis.cubic_mvt_rational_witness_interval}
-\lean{ComputableAnalysis.Differential.quartic_secant_derivative_bracket}
+Monotone derivatives and convex functions give the cleanest first cases.
 
 \section{FTC reconstruction}
 \label{thm:convex-ftc}
 
-Rectangle sums and derivative bounds describe one increment. Refine to overlap.
+The FTC is reconstructed from the same comparison, rather than assumed as a
+black box.
 \begin{verbatim}
 partition -> lower/upper sums -> derivative comparison -> overlap
 \end{verbatim}
-For finitely many certified turns, classify each mesh cell and use its
-endpoint/turn bracket.
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_le_one_le_rightSum}
-\lean{ComputableAnalysis.FiniteFTC.cubeDerivativeLeftSum_rightSum_gap_le_three_div}
-\lean{ComputableAnalysis.Integral.exactRat_cube_integral_certificate}
-\lean{ComputableAnalysis.Integral.exactRat_cube_integral_raw_equiv_one_fourth}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage8}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage16}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage32}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage64}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage128}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage256}
-\lean{ComputableAnalysis.FiniteFTC.sexticDerivativeLeftSum_stage256_le_one}
-\lean{ComputableAnalysis.pieceCellBounds_turning_contains_range}
-\lean{ComputableAnalysis.pieceCellTurningAreaGap_le}
-\lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_eq_width_sum}
-\lean{ComputableAnalysis.piecewiseRectangleAreaSum_gap_nonneg}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.gap_eq_width_sum}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.gap_nonneg}
-\lean{ComputableAnalysis.PiecewiseRectangleCertificate.lower_le_upper}
+On each cell, endpoint data and certified turns control the rectangle gap.
+Refinement makes the two enclosures meet.
 
 \section{Taylor}
 \label{thm:finite-taylor-ftc-prefix}
 
-Record a finite prefix, bound the remainder, refine.
-\lean{ComputableAnalysis.FiniteTaylorCertificate}
-\lean{ComputableAnalysis.finiteTaylorCertificate}
-\lean{ComputableAnalysis.FiniteTaylorCertificate.fold_identity}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.Certificate.common_factor_cancel}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.quartic_linear_worked_remainder_at_stage}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.octic_linear_worked_remainder_at_stage}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.nonic_linear_worked_remainder_at_stage}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.decic_linear_worked_remainder_at_stage}
-\lean{ComputableAnalysis.FiniteLHopitalCertificate.undecic_linear_worked_remainder_at_stage}
-\lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
-\lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_error_budget}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_half_interval_budget}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonneg_oddPartial}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonpos_evenPartial}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_le}
-\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_shrinks}
+\begin{verbatim}
+finite prefix -> finite identity -> remainder budget -> enclosure
+\end{verbatim}
+Taylor formulas and the arctangent kernel are instances of this FTC-style
+reconstruction.
 
 \section{Finite L'Hôpital}
 \label{thm:finite-lhopital-interface}
 
-Cancel a common factor and expose the finite remainder; no attained limit.
-\begin{verbatim}
-factor -> cancel -> cross-product remainder -> rational error bound
-\end{verbatim}
+Cancel a common factor, expose the finite remainder, and bound it rationally;
+no attained limit is required.

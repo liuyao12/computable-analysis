@@ -1,66 +1,34 @@
 \chapter{Linear Differential Equations}\label{ch:differential-equations}
 
-Approximate a linear ODE by matrix words plus a factorial tail.
+Approximate a linear ODE by finite matrix words and a certified factorial tail.
 
 \section{Construction}
 \label{thm:finite-cramer-interface}
 \label{thm:finite-cayley-hamilton-boundary}
 
 \begin{verbatim}
-state := initial vector
-add finite time-ordered matrix words
-bound the next words by a geometric/factorial tail
+initial state -> finite matrix words -> tail bound -> enclosure
 \end{verbatim}
-Determinants, Cramer's rule, and Cayley--Hamilton supply the certificates.
-The boundary takes an annihilating polynomial as input.
-\lean{ComputableAnalysis.cramer_two_by_two}
-\lean{ComputableAnalysis.cramer_2_1_1_3_certificate}
-\lean{ComputableAnalysis.cramer_3_2_1_2_certificate}
-\lean{ComputableAnalysis.cramer_signed_certificate}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_determinant}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_inverse_witness}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solution}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solves}
-\lean{ComputableAnalysis.LinearODE.concreteThreeNonDiagonalCramer_solves}
-\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_row_expansions}
-\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_solves}
-\lean{ComputableAnalysis.LinearODE.threeByThree_cramer_solves_of_determinant_ne_zero}
-\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate}
-\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.shifted_annihilates}
-\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.power_recurrence}
-\lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_mul_matrixPow}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_identity}
-\lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_fourth_power}
-\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_identity}
-\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_identity_from_generic}
-\lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_append_one}
-\lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_shifted_annihilation}
+Cramer's rule handles finite linear solves. Cayley--Hamilton supplies a
+recurrence when an annihilating polynomial is available.
 
 \section{Evolution and uniqueness}
 
-Mesh transitions give variation of constants and finite uniqueness.
-\lean{ComputableAnalysis.LinearODE.peanoBakerDiscreteSum}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_bound}
-\lean{ComputableAnalysis.LinearODE.peanoBakerFactorialTail_shifted_le_eps}
-\lean{ComputableAnalysis.LinearODE.selfDerivativeInitialValueUnique_of_volterra}
+Mesh transitions give a finite variation-of-constants construction and a
+finite uniqueness certificate.
+\begin{verbatim}
+mesh -> local transitions -> compatible prefixes -> overlap
+\end{verbatim}
 
 \section{Special cases}
 
-For rotations, words split into cosine and sine prefixes.
-\lean{ComputableAnalysis.LinearODE.RotationSystem.cosinePrefix}
-\lean{ComputableAnalysis.LinearODE.RotationSystem.sinePrefix}
-\lean{ComputableAnalysis.RotationPeanoBakerBridge.rotationCenter_eq_constantPeanoBakerPartial}
-\lean{ComputableAnalysis.RotationSeries.uniformRotationCenter_eq_expPartial}
+For rotations, matrix words split into cosine and sine prefixes.
 \label{thm:linear-ode-elementary-function-agreement}
 
 \section{Finite complex paths}
 
-Polygonal paths carry displacement certificates; closed paths have zero
-displacement for constant and polynomial differentials.
 \begin{verbatim}
-path -> segment increments -> finite sum -> endpoint/displacement certificate
+path -> segment increments -> finite sum -> endpoint certificate
 \end{verbatim}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolygonalPathCertificate.exactDisplacement_eq_zero}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate}
-\lean{ComputableAnalysis.ComplexPathIntegral.FiniteClosedPolynomialPathCertificate.exactDisplacement_eq_zero}
+Polygonal closed paths therefore give finite zero-displacement identities for
+the constant and polynomial differentials covered here.

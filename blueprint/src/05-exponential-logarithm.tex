@@ -2,20 +2,12 @@
 
 \section{Exponential}
 
-Evaluate a finite Taylor prefix and remainder.
 \begin{verbatim}
-prefix := 1 + x + ... + x^n/n!
-return prefix +/- certified remainder
+Taylor prefix -> remainder bound -> rational enclosure -> refine
 \end{verbatim}
-\lean{ComputableAnalysis.FiniteExponentialTaylor.expCoeff_succ_monomial}
-\lean{ComputableAnalysis.FiniteExponentialTaylorExample.expTaylorPrefix_stage12_one}
-\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_remainder_le}
-\lean{ComputableAnalysis.FiniteExponentialTaylor.scheduled_expTaylorPrefix_enclosure}
-\lean{ComputableAnalysis.FiniteExponentialTaylorExample.expTaylorPrefix_stage16_one}
-\lean{ComputableAnalysis.FiniteExponentialTaylorExample.scheduled_expTaylorPrefix_one_enclosure}
 
 \section{Logarithm and Euler identity}
 
-Use reciprocal bounds and finite composition. The logarithm bridge is deferred.
-\lean{ComputableAnalysis.FiniteHarmonic.harmonicSum_two_pow_reaches}
-\lean{ComputableAnalysis.Series.FiniteBinomialSeriesCertificate}
+Reciprocal bounds and finite composition provide the computable core. The
+completed logarithm bridge is recorded only when its representation is made
+explicit.
