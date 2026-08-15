@@ -42,7 +42,8 @@ partition -> lower/upper sums -> derivative comparison -> overlap
 \label{thm:finite-taylor-ftc-prefix}
 \label{thm:finite-lhopital-interface}
 
-Factor the known part, bound the remainder, and refine the quotient interval.
+Factor the known part, record the exact finite prefix, bound the remainder,
+and refine the interval.
 \lean{ComputableAnalysis.FiniteTaylorCertificate}
 \lean{ComputableAnalysis.finiteTaylorCertificate}
 \lean{ComputableAnalysis.FiniteTaylorCertificate.fold_identity}
@@ -54,6 +55,10 @@ Factor the known part, bound the remainder, and refine the quotient interval.
 \lean{ComputableAnalysis.FiniteLHopitalCertificate.undecic_linear_worked_remainder_at_stage}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_step}
 \lean{ComputableAnalysis.FinitePolynomial.finiteTaylorFTC_prefix}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_error_budget}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.finite_remainder_half_interval_budget}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonneg_oddPartial}
+\lean{ComputableAnalysis.Taylor.ArctanKernel.kernelRemainder_nonpos_evenPartial}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance}
 \lean{ComputableAnalysis.Taylor.ArctanKernel.kernelPartialIntegralBetween_unit_interval_width_le}
