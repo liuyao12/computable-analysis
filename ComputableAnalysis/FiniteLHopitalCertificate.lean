@@ -185,54 +185,6 @@ theorem cubic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
   have h := cubic_linear_worked_remainder (1 / (n : Rat)) hstep
   simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
 
-/-! The stage formula also carries an explicit rational error budget. -/
-
-set_option maxHeartbeats 10000000 in
-theorem cubic_linear_worked_remainder_at_stage_error_le_four_div
-    {n : Nat} (hn : 0 < n) :
-    qabs (((1 / (n : Rat)) * (3 + 3 * (1 / (n : Rat)) +
-        (1 / (n : Rat)) ^ 2)) /
-        ((1 / (n : Rat)) * 1) - 3) <=
-      4 / (n : Rat) := by
-  have hstage := cubic_linear_worked_remainder_at_stage hn
-  rw [hstage]
-  let x : Rat := 1 / (n : Rat)
-  have hxpos : 0 < x := by
-    dsimp [x]
-    rw [Rat.div_def]
-    exact Rat.mul_pos (by native_decide)
-      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn))
-  have hxle : x <= 1 := by
-    dsimp [x]
-    rw [Rat.div_def]
-    apply Rat.le_of_mul_le_mul_right (c := (n : Rat))
-    · have hne : (n : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
-      have hinv : (n : Rat)⁻¹ * n = 1 := by
-        rw [Rat.mul_comm]
-        exact Rat.mul_inv_cancel _ hne
-      simp only [Rat.one_mul]
-      rw [hinv]
-      exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (Nat.ne_of_gt hn))
-    · exact (Rat.natCast_pos).2 hn
-  have hsq : x * x <= x := by
-    have h := Rat.mul_le_mul_of_nonneg_left hxle (Rat.le_of_lt hxpos)
-    simpa [Rat.mul_one] using h
-  have hnonneg : 0 <= 3 * x + x ^ 2 := by
-    exact Rat.add_nonneg
-      (Rat.mul_nonneg (by native_decide) (Rat.le_of_lt hxpos))
-      (Rat.pow_nonneg (Rat.le_of_lt hxpos))
-  change qabs (3 * x + x ^ 2) <= 4 / (n : Rat)
-  rw [qabs_eq_self_of_nonneg hnonneg]
-  have hbound : 3 * x + x ^ 2 <= 4 * x := by
-    rw [show x ^ 2 = x * x by
-      simp [Rat.pow_succ, Rat.pow_zero, Rat.mul_assoc]]
-    grind
-  have hnrat : (0 : Rat) < n := (Rat.natCast_pos).2 hn
-  have hfour : (4 : Rat) * x = 4 / (n : Rat) := by
-    simp [x, Rat.div_def, Rat.mul_assoc]
-  rw [← hfour]
-  exact hbound
-
 /-! The quartic analogue: after cancelling `(x-1)` from `x^4-1`, the
 residual quotient differs from its base value `4` by the displayed finite
 polynomial in the step. -/
@@ -257,60 +209,6 @@ theorem quartic_linear_worked_remainder_at_stage {n : Nat} (hn : 0 < n) :
       ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn)))
   have h := quartic_linear_worked_remainder (1 / (n : Rat)) hstep
   simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using h
-
-set_option maxHeartbeats 10000000 in
-theorem quartic_linear_worked_remainder_at_stage_error_le_eleven_div
-    {n : Nat} (hn : 0 < n) :
-    qabs (((1 / (n : Rat)) * (4 + 6 * (1 / (n : Rat)) +
-        4 * (1 / (n : Rat)) ^ 2 + (1 / (n : Rat)) ^ 3)) /
-        ((1 / (n : Rat)) * 1) - 4) <=
-      11 / (n : Rat) := by
-  have hstage := quartic_linear_worked_remainder_at_stage hn
-  rw [hstage]
-  let x : Rat := 1 / (n : Rat)
-  have hxpos : 0 < x := by
-    dsimp [x]
-    rw [Rat.div_def]
-    exact Rat.mul_pos (by native_decide)
-      ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hn))
-  have hxle : x <= 1 := by
-    dsimp [x]
-    rw [Rat.div_def]
-    apply Rat.le_of_mul_le_mul_right (c := (n : Rat))
-    · have hne : (n : Rat) ≠ 0 := Rat.ne_of_gt ((Rat.natCast_pos).2 hn)
-      have hinv : (n : Rat)⁻¹ * n = 1 := by
-        rw [Rat.mul_comm]
-        exact Rat.mul_inv_cancel _ hne
-      simp only [Rat.one_mul]
-      rw [hinv]
-      exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (Nat.ne_of_gt hn))
-    · exact (Rat.natCast_pos).2 hn
-  have hsq : x * x <= x := by
-    have h := Rat.mul_le_mul_of_nonneg_left hxle (Rat.le_of_lt hxpos)
-    simpa [Rat.mul_one] using h
-  have hcube : x ^ 3 <= x := by
-    have hmul := Rat.mul_le_mul_of_nonneg_right hsq (Rat.le_of_lt hxpos)
-    calc
-      x ^ 3 = (x * x) * x := by
-        simp [Rat.pow_succ, Rat.pow_zero, Rat.mul_assoc]
-      _ <= x * x := hmul
-      _ <= x := hsq
-  have hnonneg : 0 <= 6 * x + 4 * x ^ 2 + x ^ 3 := by
-    exact Rat.add_nonneg
-      (Rat.add_nonneg
-        (Rat.mul_nonneg (by native_decide) (Rat.le_of_lt hxpos))
-        (Rat.mul_nonneg (by native_decide)
-          (Rat.pow_nonneg (Rat.le_of_lt hxpos))))
-      (Rat.pow_nonneg (Rat.le_of_lt hxpos))
-  change qabs (6 * x + 4 * x ^ 2 + x ^ 3) <= 11 / (n : Rat)
-  rw [qabs_eq_self_of_nonneg hnonneg]
-  have hbound : 6 * x + 4 * x ^ 2 + x ^ 3 <= 11 * x := by
-    grind [show x ^ 2 = x * x by
-      simp [Rat.pow_succ, Rat.pow_zero, Rat.mul_assoc]]
-  have hEleven : (11 : Rat) * x = 11 / (n : Rat) := by
-    simp [x, Rat.div_def, Rat.mul_assoc]
-  rw [← hEleven]
-  exact hbound
 
 /-! The quintic analogue: the residual after cancelling `(x-1)` from
 `x^5-1` differs from its base value `5` by a finite quartic polynomial. -/
