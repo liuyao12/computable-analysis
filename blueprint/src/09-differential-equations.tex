@@ -12,13 +12,20 @@ add finite time-ordered matrix words
 bound the next words by a geometric/factorial tail
 \end{verbatim}
 Determinants, Cramer's rule, and Cayley--Hamilton supply the certificates.
+For the computable boundary, an annihilating polynomial is explicit input;
+the finite matrix recurrence is proved without a general determinant theorem.
 \lean{ComputableAnalysis.cramer_two_by_two}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_determinant}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solution}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCramer_solves}
 \lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate}
+\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.shifted_annihilates}
+\lean{ComputableAnalysis.LinearODE.FiniteCayleyHamiltonCertificate.power_recurrence}
+\lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_mul_matrixPow}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_identity}
 \lean{ComputableAnalysis.LinearODE.concreteThreeCayleyMatrix_fourth_power}
+\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_identity}
+\lean{ComputableAnalysis.LinearODE.concreteCayleyMatrix_identity_from_generic}
 \lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_append_one}
 \lean{ComputableAnalysis.LinearODE.matrixPolynomialSum_shifted_annihilation}
 
