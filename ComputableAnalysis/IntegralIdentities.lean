@@ -5274,6 +5274,15 @@ theorem coordinateTimesArctanForwardFTCDerivativeBound_contains
   have hvalue := hlocal.1 t htDomain hclose
   rw [FunctionOnInterval.toRealFunRaw_compute_of_mem
     coordinateTimesArctanIntegralRectangleDerivativeOnUnit htDomain]
+  have htDeriv : inDomainInterval
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.lower
+      coordinateTimesArctanIntegralRectangleDerivativeOnUnit.upper t := by
+    change 0 <= t /\ t <= 1
+    exact htDomain
+  change QInterval.ContainsInterval _
+    ((coordinateTimesArctanIntegralRectangleDerivativeRaw t htDeriv).compute
+      (coordinateTimesArctanForwardContinuityStage
+        (coordinateTimesArctanForwardOuterStage eps)))
   simpa [coordinateTimesArctanForwardFTCDerivativeBound,
     coordinateTimesArctanForwardFTCDerivativeStage,
     coordinateTimesArctanIntegralRectangleDerivativeRaw,
@@ -6141,6 +6150,7 @@ theorem coordinateTimesArctanForwardTwoStageStabilizationRadius_covers_rectangle
     (n : Nat) :
     (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n).width <=
       coordinateTimesArctanForwardTwoStageStabilizationRadius n := by
+  change (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).width <= _
   simpa [coordinateTimesArctanForwardTwoStageStabilizationRadius] using
     ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ n
 
@@ -6263,11 +6273,10 @@ def coordinateTimesArctanForwardTwoStageMonotoneDefiniteIdentity :
         (Integral.monotoneIntegralFor coordinateTimesArctanIntegralRectangleDerivativeOnUnit
           coordinateTimesArctanForwardTwoStageMonotoneConstruction).Equiv
           ArctanGeometry.arctanIntegralRectangleRawAtOne := by
-      simpa [Integral.monotoneIntegralFor, Integral.integralFor,
-        coordinateTimesArctanForwardTwoStageMonotoneConstruction,
-        coordinateTimesArctanForwardTwoStageConstruction,
-        coordinateTimesArctanForwardTwoStageStabilizedRaw, RealRaw.Valid] using
-        coordinateTimesArctanForwardTwoStageStabilizedRaw_equiv_rectangleAtOne
+      change (coordinateTimesArctanForwardTwoStageFTC.boundedIntegralRaw.prefixStabilize
+        coordinateTimesArctanForwardTwoStageStabilizationRadius).Equiv
+        ArctanGeometry.arctanIntegralRectangleRawAtOne
+      exact coordinateTimesArctanForwardTwoStageStabilizedRaw_equiv_rectangleAtOne
     exact RealRaw.equiv_trans hleft hrect hendpoint hleftrect
       (RealRaw.equiv_symm
         coordinateTimesArctanIntegralRectangleOnUnit_endpointDifference_equiv_rectangleAtOne)
@@ -6342,7 +6351,7 @@ def coordinateTimesArctanIntegralRectangleOnUnit_forwardDerivativeAtZero :
     · subst n
       calc
         h <= 1 / (1 : Rat) := by
-          simpa only [if_pos rfl] using hsmall
+          simpa using hsmall
         _ = (precisionAtStage 0).val := by native_decide
     · simpa [precisionAtStage, hn] using hsmall
   have hzero : inDomainInterval coordinateTimesArctanIntegralRectangleOnUnit.lower
@@ -6797,6 +6806,8 @@ theorem arctanIntegrationByPartsMeshCandidate_overlaps_rectangleAtOne
       arctanIntegralRectangleMeshSamples (n + 1) n (n + 1) <=
         (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n).hi := by
     simpa [ArctanGeometry.arctanIntegralRectangleRawAtOne,
+      ArctanGeometry.arctanIntegralRectangleCompute,
+      ArctanGeometry.arctanIntegralRectangleComputeAtOne,
       arctanIntegralRectangleMeshBoxes, Nat.min_self, hendpoint] using hsample
   unfold arctanIntegrationByPartsMeshCandidate
     arctanIntegrationByPartsMeshCandidateCompute
@@ -6833,6 +6844,7 @@ theorem arctanIntegrationByPartsMeshStabilizationRadius_covers_rectangleAtOne
     (n : Nat) :
     (ArctanGeometry.arctanIntegralRectangleRawAtOne.compute n).width <=
       arctanIntegrationByPartsMeshStabilizationRadius n := by
+  change (ArctanGeometry.arctanIntegralRectangleComputeAtOne n).width <= _
   simpa [arctanIntegrationByPartsMeshStabilizationRadius] using
     ArctanGeometry.arctanIntegralRectangleComputeAtOne_width_le_four_div_succ n
 
@@ -7438,11 +7450,14 @@ def arctanGeomUnitRectangleDefiniteIdentity :
           arctanGeomOnUnit_endpointDifference_valid).Valid := by
       simpa [endpointDifferenceRaw, RealRaw.Valid] using
         arctanGeomOnUnit_endpointDifference_valid
-    simpa [arctanIntegralRectangleForAtOne] using
-      RealRaw.equiv_trans hleft hmid hright
-        arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
-        (RealRaw.equiv_symm
-          arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one)
+    change (Integral.integralFor arctanKernelIntervalAtOne
+      arctanIntegralRectangleConstructionAtOne).Equiv
+      (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+        arctanGeomOnUnit_endpointDifference_valid)
+    exact RealRaw.equiv_trans hleft hmid hright
+      arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
+      (RealRaw.equiv_symm
+        arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one)
 
 /-- The same unit arctangent endpoint identity, but with the integral side
 explicitly packaged as a monotone integral for the decreasing kernel. -/
@@ -7472,12 +7487,14 @@ def arctanGeomUnitRectangleMonotoneDefiniteIdentity :
       RealRaw.equiv_trans hleft hrect hgeom
         arctanIntegralRectangleMonotoneForAtOne_equiv_rectangleForAtOne
         arctanIntegralRectangleForAtOne_equiv_arctanGeom_one
-    simpa [arctanIntegralRectangleMonotoneForAtOne,
-      Integral.monotoneIntegralFor] using
-      RealRaw.equiv_trans hleft hgeom hendpoint
-        hmonoGeom
-        (RealRaw.equiv_symm
-          arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one)
+    change (Integral.integralFor arctanKernelIntervalAtOne
+      arctanIntegralRectangleMonotoneConstructionAtOne.construction).Equiv
+      (endpointDifferenceRaw arctanGeomOnUnit.toRealFunRaw 0 1
+        arctanGeomOnUnit_endpointDifference_valid)
+    exact RealRaw.equiv_trans hleft hgeom hendpoint
+      hmonoGeom
+      (RealRaw.equiv_symm
+        arctanGeomOnUnit_endpointDifference_equiv_arctanGeom_one)
 
 /-- The monotone rectangle endpoint identity, forgetting the monotonicity
 certificate and viewed through the ordinary `DefiniteIdentityFor` interface. -/
