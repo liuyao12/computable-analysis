@@ -14,8 +14,8 @@ namespace FinitePtolemySecondExample
 
 open RationalCircle
 open RationalCircle.Stage
-open PiProofs
 open FinitePtolemyLength
+open PtolemyLengthCore
 
 def secondPtolemyPointA : PiCirclePoint := RationalCircle.Stage.point 0
 def secondPtolemyPointB : PiCirclePoint := RationalCircle.Stage.point (5 / 12)
