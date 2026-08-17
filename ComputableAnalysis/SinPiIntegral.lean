@@ -1120,6 +1120,50 @@ theorem ArctanSinPiConstruction.canonicalPrimitive_domain_half
   exact ⟨⟨by native_decide, by native_decide⟩,
     ⟨by native_decide, by native_decide⟩⟩
 
+private theorem sub_zero_equiv (R : RealRaw) (hR : R.Valid) :
+    (R - RealRaw.zero).Equiv R := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff (R - RealRaw.zero) R n n).2
+  have horder := RealRaw.interval_order_of_valid R hR n
+  change QInterval.Overlaps
+    { lo := (R.compute n).lo - 0, hi := (R.compute n).hi - 0 }
+    (R.compute n)
+  simp [QInterval.Overlaps]
+  constructor <;> grind
+
+/-- Generic endpoint algebra for the computable primitive layer.  Once the
+endpoint values are certified as `0` and a raw value `R`, the endpoint
+difference is automatically equivalent to `R`; this theorem is independent
+of the analytic proof that establishes those endpoint laws. -/
+theorem endpointDifference_equiv_of_endpoint_equiv
+    {F : RealFunRaw} {a b : Rat}
+    (hF : F.Valid) (ha : F.domain a) (hb : F.domain b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b))
+    {R : RealRaw} (hR : R.Valid)
+    (hA : (F.apply hF a ha).Equiv RealRaw.zero)
+    (hB : (F.apply hF b hb).Equiv R) :
+    (endpointDifferenceRaw F a b hendpoint).Equiv R := by
+  let A : RealRaw := F.apply hF a ha
+  let B : RealRaw := F.apply hF b hb
+  have hAval : A.Valid := by
+    simpa [A, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF a ha
+  have hBval : B.Valid := by
+    simpa [B, RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF b hb
+  have hzero : RealRaw.zero.Valid := by
+    unfold RealRaw.zero
+    exact RealRaw.ofRat_valid 0
+  have hsub : (B - A).Equiv (R - RealRaw.zero) :=
+    RealRaw.sub_equiv hBval hR hAval hzero hB hA
+  have hsubvalid : (B - A).Valid := RealRaw.sub_valid hBval hAval
+  have htargetvalid : (R - RealRaw.zero).Valid :=
+    RealRaw.sub_valid hR hzero
+  change (B - A).Equiv R
+  exact RealRaw.equiv_trans hsubvalid htargetvalid hR hsub
+    (sub_zero_equiv R hR)
+
 structure CanonicalHalfIntegralReciprocalPiCertificate
     (S : ArctanSinPiConstruction) where
   ftc : StaticDyadicEffectiveFTC
