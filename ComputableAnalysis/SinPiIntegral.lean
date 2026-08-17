@@ -1854,6 +1854,37 @@ theorem tangentPullbackPrimitive_secant_error_le
             (by native_decide))
       _ = 4 * (r - p) := by grind
 
+theorem tangentPullback_rectangle_error_le
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p < r) (hr1 : r <= 1) :
+    qabs ((r - p) * tangentPullbackDensity p -
+      (tangentPullbackPrimitive r - tangentPullbackPrimitive p)) <=
+        4 * ((r - p) * (r - p)) := by
+  have hwidth : 0 < r - p := by grind
+  have hwidthne : r - p ≠ 0 := Rat.ne_of_gt hwidth
+  have hsec := tangentPullbackPrimitive_secant_error_le hp0 hpr hr1
+  have hrewrite :
+      (r - p) * tangentPullbackDensity p -
+          (tangentPullbackPrimitive r - tangentPullbackPrimitive p) =
+        -((r - p) *
+          ((tangentPullbackPrimitive r - tangentPullbackPrimitive p) /
+            (r - p) - tangentPullbackDensity p)) := by
+    rw [Rat.div_def]
+    have hcancel : (r - p)⁻¹ * (r - p) = 1 :=
+      Rat.inv_mul_cancel _ hwidthne
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  rw [hrewrite, qabs_neg, qabs_mul]
+  rw [qabs_eq_self_of_nonneg (by grind : 0 <= r - p)]
+  calc
+    (r - p) * qabs
+        ((tangentPullbackPrimitive r - tangentPullbackPrimitive p) /
+          (r - p) - tangentPullbackDensity p) <=
+        (r - p) * (4 * qabs (r - p)) :=
+      Rat.mul_le_mul_of_nonneg_left hsec (by grind)
+    _ = 4 * ((r - p) * (r - p)) := by
+      rw [qabs_eq_self_of_nonneg (by grind : 0 <= r - p)]
+      grind
+
 private theorem tangentPullbackDensity_lipschitz_difference
     {s t : Rat} (hs0 : 0 <= s) (hs1 : s <= 1)
     (ht0 : 0 <= t) (ht1 : t <= 1) :
