@@ -1592,8 +1592,38 @@ structure CanonicalHalfIntegralReciprocalPiCertificate
     S.canonicalPrimitive 0 ((1 : Rat) / 2)
     (FTC.endpointRawOfEffectiveFTC ftc.toEffectiveFTC)
   endpoint_equiv_reciprocalPi :
-    endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+  endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
       endpoint.endpoint_valid |>.Equiv reciprocalPiRaw
+
+/-- Assemble the canonical certificate once the finite FTC data, endpoint
+schedule, and the two inverse-search endpoint laws are available. -/
+def CanonicalHalfIntegralReciprocalPiCertificate.ofTangentEndpoints
+    (S : ArctanSinPiConstruction)
+    (ftc : StaticDyadicEffectiveFTC
+      S.canonicalPrimitive S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (integral : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (integral_plan : integral.plan =
+      FTC.integralPlanOfStaticDyadicEffectiveFTC ftc)
+    (endpoint : FTC.EndpointScheduleAgreement
+      S.canonicalPrimitive 0 ((1 : Rat) / 2)
+      (FTC.endpointRawOfEffectiveFTC ftc.toEffectiveFTC))
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (ht1 : (S.inverse.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Equiv
+      RealRaw.one) :
+    CanonicalHalfIntegralReciprocalPiCertificate S where
+  ftc := ftc
+  integral := integral
+  integral_plan := integral_plan
+  endpoint := endpoint
+  endpoint_equiv_reciprocalPi := by
+    simpa [ArctanSinPiConstruction.canonicalPrimitive] using
+      primitiveRawOfArctan_endpointDifference_equiv_of_tangent_endpoints
+        S.inverse ht0 ht1
 
 theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_canonical
     (S : ArctanSinPiConstruction)
