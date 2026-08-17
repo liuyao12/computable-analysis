@@ -243,6 +243,79 @@ def dyadicCell (a b : Rat) (path : Nat -> Bool) : Nat -> QInterval
       else
         { lo := midpoint, hi := previous.hi }
 
+theorem dyadicCell_width (a b : Rat) (path : Nat -> Bool) :
+    forall n, (dyadicCell a b path n).width =
+      (b - a) / (((2 ^ n : Nat) : Rat)) := by
+  intro n
+  induction n with
+  | zero =>
+      simp [dyadicCell, QInterval.width]
+      rw [Rat.div_def]
+      grind
+  | succ n ih =>
+      simp only [dyadicCell]
+      split <;> simp only [QInterval.width]
+      · change ((dyadicCell a b path n).lo +
+          (dyadicCell a b path n).hi) / 2 -
+            (dyadicCell a b path n).lo = _
+        rw [show ((dyadicCell a b path n).lo +
+            (dyadicCell a b path n).hi) / 2 -
+              (dyadicCell a b path n).lo =
+            ((dyadicCell a b path n).hi -
+              (dyadicCell a b path n).lo) / 2 by
+                grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]]
+        have ih' : (dyadicCell a b path n).hi -
+            (dyadicCell a b path n).lo =
+            (b - a) / (((2 ^ n : Nat) : Rat)) := by
+          simpa [QInterval.width] using ih
+        rw [ih']
+        rw [Rat.div_def]
+        have htwo : (2 : Rat) ≠ 0 := by native_decide
+        rw [show ((2 ^ (n + 1) : Nat) : Rat) =
+          2 * ((2 ^ n : Nat) : Rat) by
+            rw [Nat.pow_succ, Rat.natCast_mul,
+              show ((2 : Nat) : Rat) = 2 by native_decide]
+            exact Rat.mul_comm _ _]
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ htwo]
+      · change (dyadicCell a b path n).hi -
+          ((dyadicCell a b path n).lo +
+            (dyadicCell a b path n).hi) / 2 = _
+        rw [show (dyadicCell a b path n).hi -
+            ((dyadicCell a b path n).lo +
+              (dyadicCell a b path n).hi) / 2 =
+            ((dyadicCell a b path n).hi -
+              (dyadicCell a b path n).lo) / 2 by
+                grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]]
+        have ih' : (dyadicCell a b path n).hi -
+            (dyadicCell a b path n).lo =
+            (b - a) / (((2 ^ n : Nat) : Rat)) := by
+          simpa [QInterval.width] using ih
+        rw [ih']
+        rw [Rat.div_def]
+        have htwo : (2 : Rat) ≠ 0 := by native_decide
+        rw [show ((2 ^ (n + 1) : Nat) : Rat) =
+          2 * ((2 ^ n : Nat) : Rat) by
+            rw [Nat.pow_succ, Rat.natCast_mul,
+              show ((2 : Nat) : Rat) = 2 by native_decide]
+            exact Rat.mul_comm _ _]
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ htwo]
+
+theorem dyadicCell_step_subinterval (a b : Rat) (path : Nat -> Bool) (n : Nat)
+    (hordered : (dyadicCell a b path n).lo <=
+      (dyadicCell a b path n).hi) :
+    subintervalOf (dyadicCell a b path (n + 1))
+      (dyadicCell a b path n).lo (dyadicCell a b path n).hi := by
+  simp only [dyadicCell]
+  split <;> simp only [subintervalOf]
+  · constructor
+    · grind
+    constructor <;> grind
+  · constructor
+    · grind
+    constructor <;> grind
+
 /-- A fully executable inverse trace for a monotone interval branch.
 
 `path` is the actual finite search trace.  `value_overlaps` is the one
