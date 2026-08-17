@@ -142,6 +142,103 @@ search.  For a half-angle slope `u`, its imaginary coordinate is
 def rationalCircleSin (u : Rat) : Rat :=
   (2 * u) / (1 + u * u)
 
+private theorem rationalCircleSin_den_pos {u : Rat} (hu : 0 <= u) :
+    0 < 1 + u * u := by
+  have hsq : 0 <= u * u := Rat.mul_nonneg hu hu
+  grind
+
+private theorem rat_eq_of_mul_eq_mul_pos_local {a b c : Rat}
+    (hc : 0 < c) (h : a * c = b * c) : a = b := by
+  have hcne : c ≠ 0 := Rat.ne_of_gt hc
+  calc
+    a = (a * c) * c⁻¹ := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+private theorem rationalCircleSin_sub_formula {a b : Rat}
+    (ha : 0 <= a) (hb : 0 <= b) :
+    rationalCircleSin b - rationalCircleSin a =
+      (2 * (b - a) * (1 - a * b)) /
+        ((1 + a * a) * (1 + b * b)) := by
+  let da : Rat := 1 + a * a
+  let db : Rat := 1 + b * b
+  have hda : 0 < da := by
+    dsimp [da]
+    exact rationalCircleSin_den_pos ha
+  have hdb : 0 < db := by
+    dsimp [db]
+    exact rationalCircleSin_den_pos hb
+  have hprod : 0 < da * db := Rat.mul_pos hda hdb
+  apply rat_eq_of_mul_eq_mul_pos_local (c := da * db) hprod
+  unfold rationalCircleSin
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hda_ne : da ≠ 0 := Rat.ne_of_gt hda
+  have hdb_ne : db ≠ 0 := Rat.ne_of_gt hdb
+  have hda_cancel : da⁻¹ * da = 1 := Rat.inv_mul_cancel da hda_ne
+  have hdb_cancel : db⁻¹ * db = 1 := Rat.inv_mul_cancel db hdb_ne
+  have hleft :
+      (2 * b * db⁻¹ - 2 * a * da⁻¹) * (da * db) =
+        2 * b * da - 2 * a * db := by
+    calc
+      (2 * b * db⁻¹ - 2 * a * da⁻¹) * (da * db) =
+            (2 * b * db⁻¹) * (da * db) -
+            (2 * a * da⁻¹) * (da * db) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_mul]
+      _ = 2 * b * da - 2 * a * db := by
+        have h1 : (2 * b * db⁻¹) * (da * db) = 2 * b * da := by
+          calc
+            (2 * b * db⁻¹) * (da * db) =
+                2 * b * da * (db⁻¹ * db) := by
+                  grind [Rat.mul_assoc, Rat.mul_comm]
+            _ = 2 * b * da := by rw [hdb_cancel, Rat.mul_one]
+        have h2 : (2 * a * da⁻¹) * (da * db) = 2 * a * db := by
+          calc
+            (2 * a * da⁻¹) * (da * db) =
+                2 * a * db * (da⁻¹ * da) := by
+                  grind [Rat.mul_assoc, Rat.mul_comm]
+            _ = 2 * a * db := by rw [hda_cancel, Rat.mul_one]
+        rw [h1, h2]
+  have hright :
+      (2 * (b - a) * (1 - a * b) * (da * db)⁻¹) * (da * db) =
+        2 * (b - a) * (1 - a * b) := by
+    calc
+      (2 * (b - a) * (1 - a * b) * (da * db)⁻¹) * (da * db) =
+          2 * (b - a) * (1 - a * b) *
+            ((da * db)⁻¹ * (da * db)) := by
+              grind [Rat.mul_assoc, Rat.mul_comm]
+      _ = 2 * (b - a) * (1 - a * b) := by
+        have hcancel : (da * db)⁻¹ * (da * db) = 1 :=
+          Rat.inv_mul_cancel (da * db) (Rat.ne_of_gt hprod)
+        rw [hcancel, Rat.mul_one]
+  rw [hleft, hright]
+  dsimp [da, db]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
+private theorem rationalCircleSin_mono {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1) :
+    rationalCircleSin a <= rationalCircleSin b := by
+  have hb0 : 0 <= b := Rat.le_trans ha hab
+  have hprod : a * b <= 1 := by
+    have h1 := Rat.mul_le_mul_of_nonneg_right hb ha
+    have h2 := Rat.mul_le_mul_of_nonneg_left hab (Rat.le_of_lt (by native_decide : (0 : Rat) < 1))
+    grind
+  have hba : 0 <= b - a := by grind
+  have hnum : 0 <= 2 * (b - a) * (1 - a * b) := by
+    exact Rat.mul_nonneg
+      (Rat.mul_nonneg (by native_decide) hba) (by grind)
+  have hden : 0 < (1 + a * a) * (1 + b * b) :=
+    Rat.mul_pos (rationalCircleSin_den_pos ha)
+      (rationalCircleSin_den_pos hb0)
+  have hdiff : 0 <= rationalCircleSin b - rationalCircleSin a := by
+    rw [rationalCircleSin_sub_formula ha hb0, Rat.div_def]
+    exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
+  grind [Rat.sub_eq_add_neg]
+
 /-- Monotone interval evaluation of the rational circle sine parametrization
 on the first-quadrant slope range. -/
 def rationalCircleSinInterval (U : QInterval) : QInterval :=
