@@ -15916,6 +15916,67 @@ private theorem sum_width {f : Rat -> Rat} (L : Nat)
               ArctanGeometry.intervalSquareSum rest) := by
               grind [Rat.mul_add, Rat.add_assoc, Rat.add_comm]
 
+private theorem lowerSum_left_margin {f : Rat -> Rat} (L : Nat)
+    (intervals : List (Rat × Rat)) :
+    lowerSum f L intervals =
+      leftEndpointSum f intervals -
+        (L : Rat) * ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [lowerSum, leftEndpointSum, ArctanGeometry.intervalSquareSum]
+      grind
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      simp [lowerSum, leftEndpointSum, ArctanGeometry.intervalSquareSum]
+      rw [ih]
+      unfold lowerCell Integral.lipschitzLowerCell
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+private theorem upperSum_left_margin {f : Rat -> Rat} (L : Nat)
+    (intervals : List (Rat × Rat)) :
+    upperSum f L intervals =
+      leftEndpointSum f intervals +
+        (L : Rat) * ArctanGeometry.intervalSquareSum intervals := by
+  induction intervals with
+  | nil =>
+      simp [upperSum, leftEndpointSum, ArctanGeometry.intervalSquareSum]
+      grind
+  | cons interval rest ih =>
+      rcases interval with ⟨p, r⟩
+      simp [upperSum, leftEndpointSum, ArctanGeometry.intervalSquareSum]
+      rw [ih]
+      unfold upperCell Integral.lipschitzUpperCell
+      grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+        Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm]
+
+/-- The dyadic Lipschitz box contains an explicit symmetric margin around its
+left rectangle sum.  This is the useful computable form of the Darboux
+certificate: a stage computation contains every value within its Lipschitz
+error radius. -/
+theorem compute_contains_uniformLeftEndpointSum_margin
+    {f : Rat -> Rat} {L : Nat}
+    (hlip : Integral.LipschitzOnUnit f (L : Rat)) (stage : Nat) :
+    (compute f L stage).lo <=
+        uniformLeftEndpointSum f (2 ^ stage) -
+          (L : Rat) / (((2 ^ stage : Nat) : Rat)) /\
+      uniformLeftEndpointSum f (2 ^ stage) +
+          (L : Rat) / (((2 ^ stage : Nat) : Rat)) <=
+        (compute f L stage).hi := by
+  let cells := (ArctanGeometry.arctanAreaLoopState 1 stage).intervals
+  have hsquare := ArctanGeometry.arctanAreaLoopState_one_squareSum stage
+  have hmeshRat : 0 < (((2 ^ stage : Nat) : Rat)) :=
+    (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+  have hmeshNe : (((2 ^ stage : Nat) : Rat)) ≠ 0 := Rat.ne_of_gt hmeshRat
+  have hleft := dyadicLeftEndpointSum_eq_uniform f stage
+  change lowerSum f L cells <=
+      uniformLeftEndpointSum f (2 ^ stage) -
+        (L : Rat) / (((2 ^ stage : Nat) : Rat)) /\
+    uniformLeftEndpointSum f (2 ^ stage) +
+        (L : Rat) / (((2 ^ stage : Nat) : Rat)) <= upperSum f L cells
+  rw [lowerSum_left_margin, upperSum_left_margin, hleft, hsquare]
+  grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
 theorem compute_ordered {f : Rat -> Rat} {L : Nat} (stage : Nat) :
     0 <= (compute f L stage).width := by
   unfold compute QInterval.width

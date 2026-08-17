@@ -2275,6 +2275,45 @@ theorem tangentPullbackPrimitive_unit_endpoint_difference :
   rw [tangentPullbackPrimitive_one, tangentPullbackPrimitive_zero]
   native_decide
 
+/-- The rational tangent-chart integral is already identified with its exact
+endpoint difference.  This is a genuine stage-by-stage overlap proof: the
+left rectangles miss the primitive telescope by at most `4 / 2^n`, while the
+Lipschitz Darboux box has margin `20 / 2^n`. -/
+theorem tangentPullbackIntegral_equiv_one :
+    tangentPullbackIntegral.Equiv (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    tangentPullbackIntegral (RealRaw.ofRat 1) n n).2
+  rw [tangentPullbackIntegral_compute]
+  simp only [RealRaw.ofRat_compute]
+  unfold QInterval.Overlaps
+  dsimp
+  have hmesh : 0 < 2 ^ n := Nat.pow_pos (by omega : 0 < 2)
+  have hmargin :=
+    IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum_margin
+      tangentPullbackDensity_lipschitz_on_unit n
+  have herror := tangentPullback_uniformLeftEndpointSum_error_le hmesh
+  have hendpoint := tangentPullbackPrimitive_unit_endpoint_difference
+  have hlow :
+      -(4 / (((2 ^ n : Nat) : Rat))) <=
+        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+            tangentPullbackDensity (2 ^ n) - 1 := by
+    have hq := neg_qabs_le_self
+      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        tangentPullbackDensity (2 ^ n) - 1)
+    have hneg := Rat.neg_le_neg herror
+    exact Rat.le_trans (by simpa [hendpoint] using hneg) hq
+  have hhigh :
+      IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          tangentPullbackDensity (2 ^ n) - 1 <=
+        4 / (((2 ^ n : Nat) : Rat)) := by
+    have hq := self_le_qabs
+      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        tangentPullbackDensity (2 ^ n) - 1)
+    exact Rat.le_trans hq (by simpa [hendpoint] using herror)
+  constructor <;> grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+
 /-- `sin (pi*x)` as a function on the rational interval `[0,1/2]`. -/
 def sinPiOnHalf
     (C : FunctionRawConstruction)
