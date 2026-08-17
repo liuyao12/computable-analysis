@@ -4661,6 +4661,9 @@ def evalRaw (f : FunctionRaw) (z : QComplex) (hz : f.domain z) : ComplexRaw wher
   compute := f.compute z hz
   rate := f.rate z hz
 
+def Valid (f : FunctionRaw) : Prop :=
+  forall z (hz : f.domain z), (f.evalRaw z hz).Valid
+
 /-- Restrict a complex-valued raw function to the real axis and keep the real
 coordinate. -/
 def realPartOnRealAxis (f : FunctionRaw) : PartialRealFunRaw where
@@ -4679,10 +4682,72 @@ domain/extension hypotheses. -/
 def AgreeOnCommonDomain (f g : FunctionRaw) : Prop :=
   forall z (hf : f.domain z) (hg : g.domain z), (f.evalRaw z hf).Equiv (g.evalRaw z hg)
 
+theorem agreeOnCommonDomain_symm {f g : FunctionRaw} :
+    f.AgreeOnCommonDomain g -> g.AgreeOnCommonDomain f := by
+  intro h z hg hf
+  exact ComplexRaw.equiv_symm (h z hf hg)
+
 /-- Short alias for `AgreeOnCommonDomain`. -/
 def Compatible (f g : FunctionRaw) : Prop := AgreeOnCommonDomain f g
 
 end FunctionRaw
+
+/- The abstract complex-function layer.  A named special function is a
+   certified handle whose representations may have different complex domains.
+   Agreement is required only on the intersection of those domains. -/
+structure ComplexFunctionImplementation (preferred : FunctionRaw) where
+  raw : FunctionRaw
+  valid : raw.Valid
+  agrees : preferred.AgreeOnCommonDomain raw
+
+structure ComplexFunction where
+  preferred : FunctionRaw
+  valid : preferred.Valid
+  implementations : List
+    (ComplexFunctionImplementation preferred) := []
+
+namespace ComplexFunction
+
+structure Representation (f : ComplexFunction) where
+  raw : FunctionRaw
+  valid : raw.Valid
+  agrees : raw.AgreeOnCommonDomain f.preferred
+
+def ofRaw (raw : FunctionRaw) (h : raw.Valid) : ComplexFunction where
+  preferred := raw
+  valid := h
+  implementations := []
+
+def representations (f : ComplexFunction) : List FunctionRaw :=
+  f.preferred :: f.implementations.map ComplexFunctionImplementation.raw
+
+theorem implementation_agrees_preferred {f : ComplexFunction}
+    (impl : ComplexFunctionImplementation f.preferred) :
+    impl.raw.AgreeOnCommonDomain f.preferred :=
+  FunctionRaw.agreeOnCommonDomain_symm impl.agrees
+
+def preferredRepresentation (f : ComplexFunction) : Representation f where
+  raw := f.preferred
+  valid := f.valid
+  agrees := by
+    intro z hz hz'
+    exact ComplexRaw.equiv_refl (f.preferred.evalRaw z hz) (f.valid z hz)
+
+def implementationRepresentation {f : ComplexFunction}
+    (impl : ComplexFunctionImplementation f.preferred) : Representation f where
+  raw := impl.raw
+  valid := impl.valid
+  agrees := implementation_agrees_preferred impl
+
+def withAlternative (f : ComplexFunction) (raw : FunctionRaw)
+    (hvalid : raw.Valid)
+    (h : f.preferred.AgreeOnCommonDomain raw) : ComplexFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw, valid := hvalid, agrees := h } :: f.implementations
+
+end ComplexFunction
 
 structure ComplexCert where
   raw : ComplexRaw

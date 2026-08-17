@@ -1393,6 +1393,17 @@ computational layer, an input is supplied by a rational name and evaluation is
 a stage-indexed box algorithm.  The domain may be all rational names in a
 region, or only names in a branch domain, and every evaluation carries the
 domain proof.
+
+The project-facing abstract object is \code{ComplexFunction}.  It hosts
+several such computations of one useful special function.  Each registered
+representation has its own validity proof and a certificate
+\[
+  f\mathbin{\sim}g
+  \quad\text{on }D_f\cap D_g,
+\]
+not a claim that either representation belongs to a preselected classical
+function space.  Real-axis functions and one-sided Fourier views are derived
+restrictions of this complex layer when an application needs them.
 \end{definition}
 
 \begin{definition}[Real-input and real-valued functions]\label{def:real-fun-raw}

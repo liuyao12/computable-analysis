@@ -190,25 +190,30 @@ Most mistakes come from conflating these layers.
 | `QInterval` | A rational enclosure `[lo, hi]` | A real number or a shrinking proof |
 | `RealRaw` | A sequence of rational interval boxes | Validity; supply `RealRaw.Valid` |
 | `RealRaw.Equiv` | Overlap-based equality of two valid raw reals | Equality of implementations by definitional reduction |
-| `PartialRealFunRaw` | A function with a pointwise domain | A whole-interval domain certificate |
-| `PartialRealFunction` | An abstract special-function handle with certified concrete representations | A claim that it belongs to a preselected classical function space |
+| `FunctionRaw` | One domain-indexed complex-box computation | Validity; supply `FunctionRaw.Valid` |
+| `ComplexFunction` | An abstract complex special-function handle with certified concrete representations | A claim that it belongs to a preselected classical function space |
+| `PartialRealFunRaw` | A real-axis or restricted function with a pointwise domain | A whole-interval domain certificate |
+| `PartialRealFunction` | An abstract real-axis view when needed | A replacement for the complex function foundation |
 | `FunctionOnInterval` | A partial function certified at every rational point of `[a,b]` | Continuity, interval regularity, differentiability, or integrability |
 
-### Functions: concrete first, abstract only when useful
+### Functions: complex first, concrete first, abstract only when useful
 
-Use `PartialRealFunRaw` (or `RealFunRaw` when the domain is total on rationals)
-for one concrete computation:
+Use `FunctionRaw` for one concrete complex computation:
 
 ```text
-domain + (x, stage) ↦ rational interval
+complex domain + (z, stage) ↦ rational complex box
 ```
 
 The domain is part of the representation.  It is not necessary to decide
 whether the function is “continuous,” “analytic,” or any other classical
-category before formalizing a useful theorem.
+category before formalizing a useful theorem.  Use
+`FunctionRaw.realPartOnRealAxis` or another certified restriction when an
+argument needs real inputs.  Fourier constructions should likewise begin with
+complex-valued functions and restrict to a real parameter line only when that
+is the theorem’s actual domain.
 
-When a special function has several useful algorithms, package them as a
-`PartialRealFunction`.  Each implementation carries:
+When a complex special function has several useful algorithms, package them as
+a `ComplexFunction`.  Each implementation carries:
 
 - pointwise validity on its own domain; and
 - an explicit `AgreeOnOverlap` proof with the preferred implementation.
@@ -228,16 +233,16 @@ theorem preferred_valid : preferred.Valid := ...
 def alternate : PartialRealFunRaw := ...
 theorem alternate_valid : alternate.Valid := ...
 theorem alternate_agrees :
-    preferred.AgreeOnOverlap alternate := ...
+    preferred.AgreeOnCommonDomain alternate := ...
 
-def specialFunction : PartialRealFunction :=
-  (PartialRealFunction.ofRaw preferred preferred_valid).withAlternative
+def specialFunction : ComplexFunction :=
+  (ComplexFunction.ofRaw preferred preferred_valid).withAlternative
     alternate alternate_valid alternate_agrees
 ```
 
 This is the project’s “pre-classical” stance: formalize the special function
-and the algorithms actually needed, rather than first postulating a general
-function space and proving a classification theorem.
+and the complex algorithms actually needed, rather than first postulating a
+general function space and proving a classification theorem.
 
 For a rational formula with no singularities, begin with
 `FunctionOnInterval.exactRat`.  For a rational quotient, begin with `RatFun`
