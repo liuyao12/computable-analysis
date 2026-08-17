@@ -1646,6 +1646,211 @@ theorem rationalCircleSinInterval_formula (U : QInterval) :
       { lo := rationalCircleSin U.lo, hi := rationalCircleSin U.hi } :=
   rfl
 
+/-!
+## The rational tangent-chart pullback
+
+For the public function `sin (pi*x)` on `[0,1/2]`, write
+`u = tan (pi*x/2)`.  The finite change-of-variables calculation is then
+
+`sin (pi*x) dx = (1/pi) * (4*u/(1+u^2)^2) du`.
+
+The following definitions deliberately contain no real-valued `pi`: the
+factor `1/pi` is represented separately by `reciprocalPiRaw`.  The rational
+part is suitable for the existing Lipschitz--dyadic constructor.
+-/
+
+def tangentPullbackDensity (u : Rat) : Rat :=
+  4 * (u * (1 / (1 + u * u))) * (1 / (1 + u * u))
+
+def tangentPullbackPrimitive (u : Rat) : Rat :=
+  2 * (u * u) / (1 + u * u)
+
+theorem tangentPullbackPrimitive_endpoint_difference (p r : Rat) :
+    tangentPullbackPrimitive r - tangentPullbackPrimitive p =
+      (r - p) *
+        (2 * (r + p) *
+          ((1 + p * p) * (1 + r * r))⁻¹) := by
+  have hpSquare := rat_square_nonneg_basic p
+  have hrSquare := rat_square_nonneg_basic r
+  have hp : 0 < 1 + p * p := by grind
+  have hr : 0 < 1 + r * r := by grind
+  have hpne : 1 + p * p ≠ 0 := Rat.ne_of_gt hp
+  have hrne : 1 + r * r ≠ 0 := Rat.ne_of_gt hr
+  rw [tangentPullbackPrimitive, tangentPullbackPrimitive]
+  rw [Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg, Rat.inv_mul_rev,
+    Rat.mul_inv_cancel _ hpne, Rat.mul_inv_cancel _ hrne]
+
+private theorem tangentPullbackDensity_lipschitz_difference
+    {s t : Rat} (hs0 : 0 <= s) (hs1 : s <= 1)
+    (ht0 : 0 <= t) (ht1 : t <= 1) :
+    qabs (tangentPullbackDensity s - tangentPullbackDensity t) <=
+      20 * qabs (t - s) := by
+  let k : Rat -> Rat := fun x => 1 / (1 + x * x)
+  let p : Rat -> Rat := fun x => x * k x
+  have hk := IntegralIdentities.oneOverOnePlusSquare_lipschitz_on_unit.2
+    s t hs0 hs1 ht0 ht1
+  have hp := IntegralIdentities.coordinate_integralKernel_lipschitz_on_unit.2
+    s t hs0 hs1 ht0 ht1
+  have hks0 : 0 <= k s := by
+    dsimp [k]
+    have hsq := rat_square_nonneg_basic s
+    have hden : 0 < 1 + s * s := by grind
+    simpa [Rat.div_def] using Rat.le_of_lt ((Rat.inv_pos).2 hden)
+  have hkt0 : 0 <= k t := by
+    dsimp [k]
+    have hsq := rat_square_nonneg_basic t
+    have hden : 0 < 1 + t * t := by grind
+    simpa [Rat.div_def] using Rat.le_of_lt ((Rat.inv_pos).2 hden)
+  have hks1 : k s <= 1 := by
+    dsimp [k]
+    apply Rat.le_of_mul_le_mul_right (c := 1 + s * s)
+    · rw [Rat.div_def]
+      have hne : 1 + s * s ≠ 0 := by
+        have hsq := rat_square_nonneg_basic s
+        grind
+      have hcancel : (1 + s * s)⁻¹ * (1 + s * s) = 1 :=
+        Rat.inv_mul_cancel _ hne
+      calc
+        1 * (1 + s * s)⁻¹ * (1 + s * s) = 1 := by
+          simpa using hcancel
+        _ <= 1 * (1 + s * s) := by
+          have hsq := rat_square_nonneg_basic s
+          grind
+    · have hsq := rat_square_nonneg_basic s
+      grind
+  have hkt1 : k t <= 1 := by
+    dsimp [k]
+    apply Rat.le_of_mul_le_mul_right (c := 1 + t * t)
+    · rw [Rat.div_def]
+      have hne : 1 + t * t ≠ 0 := by
+        have hsq := rat_square_nonneg_basic t
+        grind
+      have hcancel : (1 + t * t)⁻¹ * (1 + t * t) = 1 :=
+        Rat.inv_mul_cancel _ hne
+      calc
+        1 * (1 + t * t)⁻¹ * (1 + t * t) = 1 := by
+          simpa using hcancel
+        _ <= 1 * (1 + t * t) := by
+          have hsq := rat_square_nonneg_basic t
+          grind
+    · have hsq := rat_square_nonneg_basic t
+      grind
+  have hps0 : 0 <= p s := by
+    dsimp [p]
+    exact Rat.mul_nonneg hs0 hks0
+  have hpt0 : 0 <= p t := by
+    dsimp [p]
+    exact Rat.mul_nonneg ht0 hkt0
+  have hps1 : p s <= 1 := by
+    dsimp [p]
+    have := Rat.mul_le_mul_of_nonneg_left hks1 hs0
+    exact Rat.le_trans this (by simpa using hs1)
+  have hsplit :
+      tangentPullbackDensity s - tangentPullbackDensity t =
+        4 * (p s * (k s - k t) + (p s - p t) * k t) := by
+    simp [tangentPullbackDensity, p, k]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  have hsumAbs :
+      qabs (p s * (k s - k t) + (p s - p t) * k t) <=
+        p s * qabs (k s - k t) + qabs (p s - p t) * k t := by
+    calc
+      qabs (p s * (k s - k t) + (p s - p t) * k t) <=
+          qabs (p s * (k s - k t)) + qabs ((p s - p t) * k t) :=
+        qabs_add_le _ _
+      _ = qabs (p s) * qabs (k s - k t) +
+          qabs (p s - p t) * qabs (k t) := by
+        simp only [qabs_mul]
+      _ = p s * qabs (k s - k t) + qabs (p s - p t) * k t := by
+        have hsp : qabs (s * k s) = s * k s := by
+          rw [qabs_mul, qabs_eq_self_of_nonneg hs0,
+            qabs_eq_self_of_nonneg hks0]
+        have hktAbs : qabs (k t) = k t :=
+          qabs_eq_self_of_nonneg hkt0
+        simp only [p]
+        rw [hsp, hktAbs]
+  have hfour : qabs (4 : Rat) = 4 := by native_decide
+  have hterm1 : p s * qabs (k s - k t) <=
+      p s * (2 * qabs (t - s)) := by
+    exact Rat.mul_le_mul_of_nonneg_left
+      (by simpa [k] using hk) hps0
+  have hterm2 : qabs (p s - p t) * k t <=
+      (3 * qabs (t - s)) * k t := by
+    exact Rat.mul_le_mul_of_nonneg_right
+      (by simpa [p, k, ArctanGeometry.integralKernel] using hp) hkt0
+  have hterm1' : p s * qabs (k s - k t) <= 2 * qabs (t - s) := by
+    calc
+      p s * qabs (k s - k t) <=
+          p s * (2 * qabs (t - s)) := hterm1
+      _ <= 1 * (2 * qabs (t - s)) := by
+        exact Rat.mul_le_mul_of_nonneg_right hps1
+          (Rat.mul_nonneg (by native_decide) (qabs_nonneg _))
+      _ = 2 * qabs (t - s) := by grind
+  have hterm2' : qabs (p s - p t) * k t <= 3 * qabs (t - s) := by
+    calc
+      qabs (p s - p t) * k t <=
+          (3 * qabs (t - s)) * k t := hterm2
+      _ <= (3 * qabs (t - s)) * 1 := by
+        exact Rat.mul_le_mul_of_nonneg_left hkt1
+          (Rat.mul_nonneg (by native_decide) (qabs_nonneg _))
+      _ = 3 * qabs (t - s) := by grind
+  have hsum := rat_add_le_add hterm1' hterm2'
+  calc
+    qabs (tangentPullbackDensity s - tangentPullbackDensity t) =
+        qabs (4 : Rat) *
+          qabs (p s * (k s - k t) + (p s - p t) * k t) := by
+      rw [hsplit, qabs_mul]
+    _ = 4 * qabs (p s * (k s - k t) + (p s - p t) * k t) := by rw [hfour]
+    _ <= 4 * (p s * qabs (k s - k t) + qabs (p s - p t) * k t) :=
+      Rat.mul_le_mul_of_nonneg_left hsumAbs (by native_decide)
+    _ <= 4 * (2 * qabs (t - s) + 3 * qabs (t - s)) :=
+      Rat.mul_le_mul_of_nonneg_left (rat_add_le_add hterm1' hterm2')
+        (by native_decide)
+    _ = 20 * qabs (t - s) := by grind
+
+theorem tangentPullbackDensity_lipschitz_on_unit :
+    Integral.LipschitzOnUnit tangentPullbackDensity 20 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    exact tangentPullbackDensity_lipschitz_difference hs0 hs1 ht0 ht1
+
+theorem tangentPullbackPrimitive_zero :
+    tangentPullbackPrimitive 0 = 0 := by native_decide
+
+theorem tangentPullbackPrimitive_one :
+    tangentPullbackPrimitive 1 = 1 := by native_decide
+
+/-- The tangent-chart density as an exact rational function on `[0,1]`. -/
+def tangentPullbackDensityOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat tangentPullbackDensity 0 1
+
+/-- The concrete dyadic Lipschitz integral of the rational tangent-chart
+density.  Every stage is a finite rational Darboux computation; no completed
+real integral is imported or used. -/
+def tangentPullbackIntegral : RealRaw :=
+  Integral.integralFor tangentPullbackDensityOnUnit
+    (IntegralIdentities.LipschitzDyadic.construction
+      tangentPullbackDensity 20 tangentPullbackDensity_lipschitz_on_unit)
+
+theorem tangentPullbackIntegral_valid :
+    tangentPullbackIntegral.Valid := by
+  exact Integral.integralFor_valid tangentPullbackDensityOnUnit
+    (IntegralIdentities.LipschitzDyadic.construction
+      tangentPullbackDensity 20 tangentPullbackDensity_lipschitz_on_unit)
+
+theorem tangentPullbackIntegral_compute (stage : Nat) :
+    tangentPullbackIntegral.compute stage =
+      IntegralIdentities.LipschitzDyadic.compute
+        tangentPullbackDensity 20 stage := rfl
+
+theorem tangentPullbackPrimitive_unit_endpoint_difference :
+    tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0 = 1 := by
+  rw [tangentPullbackPrimitive_one, tangentPullbackPrimitive_zero]
+  native_decide
+
 /-- `sin (pi*x)` as a function on the rational interval `[0,1/2]`. -/
 def sinPiOnHalf
     (C : FunctionRawConstruction)
