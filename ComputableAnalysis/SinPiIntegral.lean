@@ -1384,6 +1384,28 @@ theorem oneMinusCosFunRaw_bounds
   simpa [cosPiRawOfArctan, rationalCircleCosInterval] using
     (And.intro (by grind [hhi.2]) (by grind [hlo.1]))
 
+def oneMinusCosOnHalf
+    (B : IntegralIdentities.ArctanInverseBisection) : FunctionOnInterval where
+  raw := {
+    definedAt := fun x => 0 <= x /\ x <= (1 : Rat) / 2
+    compute := fun x _hx => (oneMinusCosFunRaw B).compute x
+  }
+  lower := 0
+  upper := (1 : Rat) / 2
+  defined_on := by
+    intro _ hx
+    exact hx
+  valid_on := by
+    intro x hx
+    exact oneMinusCosFunRaw_valid B x hx
+
+theorem oneMinusCosOnHalf_valid
+    (B : IntegralIdentities.ArctanInverseBisection) :
+  (oneMinusCosOnHalf B).raw.Valid := by
+  intro x hx
+  change RealRaw.ValidCompute ((oneMinusCosFunRaw B).compute x)
+  exact oneMinusCosFunRaw_valid B x hx
+
 def primitiveRawOfArctan
     (B : IntegralIdentities.ArctanInverseBisection) : RealFunRaw :=
   RealFunRaw.mul reciprocalPiFunRaw (oneMinusCosFunRaw B)
