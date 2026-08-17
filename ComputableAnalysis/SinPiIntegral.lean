@@ -816,6 +816,79 @@ theorem rationalCircleCos_difference_le_qabs
       exact qabs_eq_self_of_nonneg (by grind)]
     exact hcos
 
+theorem rationalCircleCosInterval_near_of_near
+    {U V : QInterval} (hU : subintervalOf U 0 1)
+    (hV : subintervalOf V 0 1) (eps : QPos)
+    (hnear : QInterval.NearAt U V eps) :
+    QInterval.NearAt (rationalCircleCosInterval U)
+      (rationalCircleCosInterval V)
+      { val := 4 * eps.val
+        property := Rat.mul_pos (by native_decide)
+          (eps.property) } := by
+  have hUwidth := rationalCircleCosInterval_width_le hU
+  have hVwidth := rationalCircleCosInterval_width_le hV
+  have hleft :
+      rationalCircleCos U.hi <= rationalCircleCos V.lo + 4 * eps.val := by
+    by_cases huv : V.lo <= U.hi
+    · have hmono := rationalCircleCos_mono hV.1 huv hU.2.2
+      grind
+    · have hdiff : U.hi <= V.lo := by grind
+      have hUhi0 : 0 <= U.hi := Rat.le_trans hU.1 hU.2.1
+      have hVlo1 : V.lo <= 1 := Rat.le_trans hV.2.1 hV.2.2
+      have hq := rationalCircleCos_difference_le_qabs
+        hUhi0 hU.2.2 hV.1 hVlo1
+          (a := U.hi) (b := V.lo)
+      have hdelta : V.lo - U.hi <= eps.val := by grind [hnear.2.1]
+      rw [show qabs (U.hi - V.lo) = V.lo - U.hi by
+        rw [show U.hi - V.lo = -(V.lo - U.hi) by grind [Rat.sub_eq_add_neg],
+          qabs_neg, qabs_eq_self_of_nonneg (by grind)]] at hq
+      have hself := self_le_qabs
+        (rationalCircleCos U.hi - rationalCircleCos V.lo)
+      grind
+  have hright :
+      rationalCircleCos V.hi <= rationalCircleCos U.lo + 4 * eps.val := by
+    by_cases huv : U.lo <= V.hi
+    · have hmono := rationalCircleCos_mono hU.1 huv hV.2.2
+      grind
+    · have hdiff : V.hi <= U.lo := by grind
+      have hVhi0 : 0 <= V.hi := Rat.le_trans hV.1 hV.2.1
+      have hUlo1 : U.lo <= 1 := Rat.le_trans hU.2.1 hU.2.2
+      have hq := rationalCircleCos_difference_le_qabs
+        hVhi0 hV.2.2 hU.1 hUlo1
+          (a := V.hi) (b := U.lo)
+      have hdelta : U.lo - V.hi <= eps.val := by grind [hnear.1]
+      rw [show qabs (V.hi - U.lo) = U.lo - V.hi by
+        rw [show V.hi - U.lo = -(U.lo - V.hi) by grind [Rat.sub_eq_add_neg],
+          qabs_neg, qabs_eq_self_of_nonneg (by grind)]] at hq
+      have hself := self_le_qabs
+        (rationalCircleCos V.hi - rationalCircleCos U.lo)
+      grind
+  unfold QInterval.NearAt rationalCircleCosInterval
+  dsimp
+  change rationalCircleCos U.hi <=
+      rationalCircleCos V.lo + 4 * eps.val /\
+    rationalCircleCos V.hi <=
+      rationalCircleCos U.lo + 4 * eps.val /\
+    rationalCircleCos U.lo - rationalCircleCos U.hi <= 4 * eps.val /\
+    rationalCircleCos V.lo - rationalCircleCos V.hi <= 4 * eps.val
+  constructor
+  · exact hleft
+  constructor
+  · exact hright
+  constructor
+  · have hwidth := hUwidth.2
+    have hsmall := hnear.2.2.1
+    have hwidth' : rationalCircleCos U.lo - rationalCircleCos U.hi <=
+        4 * U.width := by
+      simpa [rationalCircleCosInterval, QInterval.width] using hwidth
+    grind
+  · have hwidth := hVwidth.2
+    have hsmall := hnear.2.2.2
+    have hwidth' : rationalCircleCos V.lo - rationalCircleCos V.hi <=
+        4 * V.width := by
+      simpa [rationalCircleCosInterval, QInterval.width] using hwidth
+    grind
+
 private theorem rationalCircleCosInterval_valid
     (u : Nat -> QInterval)
     (hu : RealRaw.ValidCompute u)
