@@ -142,6 +142,9 @@ search.  For a half-angle slope `u`, its imaginary coordinate is
 def rationalCircleSin (u : Rat) : Rat :=
   (2 * u) / (1 + u * u)
 
+def rationalCircleSinInterval (U : QInterval) : QInterval :=
+  { lo := rationalCircleSin U.lo, hi := rationalCircleSin U.hi }
+
 private theorem rationalCircleSin_den_pos {u : Rat} (hu : 0 <= u) :
     0 < 1 + u * u := by
   have hsq : 0 <= u * u := Rat.mul_nonneg hu hu
@@ -239,10 +242,109 @@ private theorem rationalCircleSin_mono {a b : Rat}
     exact Rat.mul_nonneg hnum (Rat.le_of_lt ((Rat.inv_pos).2 hden))
   grind [Rat.sub_eq_add_neg]
 
-/-- Monotone interval evaluation of the rational circle sine parametrization
-on the first-quadrant slope range. -/
-def rationalCircleSinInterval (U : QInterval) : QInterval :=
-  { lo := rationalCircleSin U.lo, hi := rationalCircleSin U.hi }
+private theorem rationalCircleSin_width_le {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1) :
+    rationalCircleSin b - rationalCircleSin a <= 2 * (b - a) := by
+  have hb0 : 0 <= b := Rat.le_trans ha hab
+  have hba : 0 <= b - a := by grind
+  have habprod : a * b <= 1 := by
+    have h := Rat.mul_le_mul_of_nonneg_right hb ha
+    grind
+  have hden : 0 < (1 + a * a) * (1 + b * b) :=
+    Rat.mul_pos (rationalCircleSin_den_pos ha)
+      (rationalCircleSin_den_pos hb0)
+  have hden_one : 1 <= (1 + a * a) * (1 + b * b) := by
+    have haa : 0 <= a * a := Rat.mul_nonneg ha ha
+    have hbb : 0 <= b * b := Rat.mul_nonneg hb0 hb0
+    have hsum : 0 <= a * a + b * b + (a * a) * (b * b) := by
+      exact Rat.add_nonneg (Rat.add_nonneg haa hbb)
+        (Rat.mul_nonneg haa hbb)
+    grind [Rat.mul_add, Rat.add_mul]
+  rw [rationalCircleSin_sub_formula ha hb0]
+  apply Rat.le_of_mul_le_mul_right (c :=
+    (1 + a * a) * (1 + b * b))
+  · rw [Rat.div_def]
+    let D : Rat := (1 + a * a) * (1 + b * b)
+    let N : Rat := 2 * (b - a) * (1 - a * b)
+    have hD : D = (1 + a * a) * (1 + b * b) := rfl
+    have hcancel : D⁻¹ * D = 1 :=
+      Rat.inv_mul_cancel D (Rat.ne_of_gt hden)
+    have hNnonneg : 0 <= N := by
+      dsimp [N]
+      exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hba) (by grind)
+    have hNle : N <= 2 * (b - a) := by
+      dsimp [N]
+      have hp : 0 <= a * b := Rat.mul_nonneg ha hb0
+      have hfactor : 1 - a * b <= 1 := by
+        grind only [Rat.sub_eq_add_neg]
+      exact (by
+        calc
+          2 * (b - a) * (1 - a * b) <=
+              2 * (b - a) * 1 := by
+            exact Rat.mul_le_mul_of_nonneg_left hfactor
+              (Rat.mul_nonneg (by native_decide) hba)
+          _ = 2 * (b - a) := by simp)
+    calc
+      (N * D⁻¹) * D = N := by
+        rw [Rat.mul_assoc, hcancel, Rat.mul_one]
+      _ <= 2 * (b - a) * 1 := by simpa using hNle
+      _ <= 2 * (b - a) * D := by
+        exact Rat.mul_le_mul_of_nonneg_left hden_one
+          (Rat.mul_nonneg (by native_decide) hba)
+  · exact hden
+
+private theorem rationalCircleSinInterval_valid
+    (u : Nat -> QInterval)
+    (hu : RealRaw.ValidCompute u)
+    (hubounds : forall n, 0 <= (u n).lo /\ (u n).hi <= 1) :
+    RealRaw.ValidCompute (fun n => rationalCircleSinInterval (u n)) := by
+  constructor
+  · intro n
+    have horder : (u n).lo <= (u n).hi := by
+      have := hu.1 n
+      grind [QInterval.width]
+    have hmono := rationalCircleSin_mono
+      (hubounds n).1 horder (hubounds n).2
+    change rationalCircleSin (u n).hi - rationalCircleSin (u n).lo >= 0
+    grind
+  constructor
+  · intro n m hnm
+    have hn := hu.2.1 n m hnm
+    have hnl := hubounds n
+    have hml := hubounds m
+    have hlo := rationalCircleSin_mono hnl.1 hn.1
+      (Rat.le_trans hn.2.1 hml.2)
+    have hmid := rationalCircleSin_mono hml.1 hn.2.1 hml.2
+    have hhi := rationalCircleSin_mono
+      (Rat.le_trans hml.1 hn.2.1) hn.2.2 hnl.2
+    exact ⟨hlo, hmid, hhi⟩
+  · intro eps
+    have htwo_pos : 0 < (2 : Rat) := by native_decide
+    let half : QPos := ⟨eps.val / 2, by
+      rw [Rat.div_def]
+      exact Rat.mul_pos eps.property ((Rat.inv_pos).2 htwo_pos)⟩
+    obtain ⟨N, hN⟩ := hu.2.2 half
+    refine ⟨N, ?_⟩
+    intro n hn
+    have horder : (u n).lo <= (u n).hi := by
+      have := hu.1 n
+      grind [QInterval.width]
+    have hw := rationalCircleSin_width_le
+      (hubounds n).1 horder (hubounds n).2
+    have hsmall := hN n hn
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hsmall
+      (by native_decide : (0 : Rat) <= 2)
+    change rationalCircleSin (u n).hi - rationalCircleSin (u n).lo <= eps.val
+    have hhalf : 2 * half.val = eps.val := by
+      dsimp [half]
+      rw [Rat.div_def]
+      have htwo : (2 : Rat) ≠ 0 := by native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    calc
+      rationalCircleSin (u n).hi - rationalCircleSin (u n).lo <=
+          2 * ((u n).hi - (u n).lo) := hw
+      _ <= 2 * half.val := hscaled
+      _ = eps.val := hhalf
 
 /-- `sin(pi*x)` from the arctangent inverse, on rational `x` in `[0,1/2]`.
 
@@ -272,6 +374,84 @@ structure ArctanSinPiConstruction where
   sin_valid : forall x hx,
     RealRaw.ValidCompute
       ((sinPiRawOfArctan inverse x hx).compute)
+
+/-- Build the sine construction from the inverse search and its finite
+first-quadrant range proof.  The validity of the circle-coordinate evaluator
+is discharged by `rationalCircleSinInterval_valid`; it is not an additional
+analytic axiom. -/
+def ArctanSinPiConstruction.ofInverse
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (slope_bounded : forall x (hx : 0 <= x /\ x <= (1 : Rat) / 2) n,
+      0 <= (B.tangentRaw.compute (2 * x)
+        (by
+          change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+          constructor
+          · exact Rat.mul_nonneg (by native_decide) hx.1
+          · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+              (by native_decide : (0 : Rat) <= 2)
+            have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+            rw [hhalf] at h
+            exact h) n).lo /\
+      (B.tangentRaw.compute (2 * x)
+        (by
+          change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+          constructor
+          · exact Rat.mul_nonneg (by native_decide) hx.1
+          · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+              (by native_decide : (0 : Rat) <= 2)
+            have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+            rw [hhalf] at h
+            exact h) n).hi <= 1) :
+    ArctanSinPiConstruction where
+  inverse := B
+  sin_valid := by
+    intro x hx
+    apply rationalCircleSinInterval_valid
+    · exact B.tangentRaw_valid (2 * x) _
+    · exact slope_bounded x hx
+
+theorem arctanInverse_slope_bounded
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (x : Rat) (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    0 <= (B.tangentRaw.compute (2 * x)
+      (by
+        change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+        constructor
+        · exact Rat.mul_nonneg (by native_decide) hx.1
+        · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+            (by native_decide : (0 : Rat) <= 2)
+          have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+          rw [hhalf] at h
+          exact h) n).lo /\
+      (B.tangentRaw.compute (2 * x)
+        (by
+          change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+          constructor
+          · exact Rat.mul_nonneg (by native_decide) hx.1
+          · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+              (by native_decide : (0 : Rat) <= 2)
+            have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+            rw [hhalf] at h
+            exact h) n).hi <= 1 := by
+  let ht : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x) := by
+    change 0 <= 2 * x /\ 2 * x <= 1
+    constructor
+    · exact Rat.mul_nonneg (by native_decide) hx.1
+    · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+        (by native_decide : (0 : Rat) <= 2)
+      have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+      rw [hhalf] at h
+      exact h
+  have hs := B.tangentAt_stays_in_unitSlope (2 * x) ht n
+  change 0 <= ((B.tangentAt (2 * x) ht).compute n).lo /\
+    ((B.tangentAt (2 * x) ht).compute n).hi <= 1
+  exact ⟨hs.1, hs.2.2⟩
+
+def ArctanSinPiConstruction.canonical
+    (B : IntegralIdentities.ArctanInverseBisection) :
+    ArctanSinPiConstruction :=
+  ArctanSinPiConstruction.ofInverse B
+    (fun x hx n => arctanInverse_slope_bounded B x hx n)
 
 /-- Package the arctangent-backed evaluator as the interval function consumed
 by the equal-dyadic integral operator. -/
