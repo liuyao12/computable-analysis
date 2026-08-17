@@ -6,10 +6,10 @@ new theorem from science, engineering, or first-year calculus without first
 reading the entire Pi project.
 
 The central rule is simple: state a computation as an algorithm returning
-rational intervals, prove that its boxes are valid and shrink, and connect it
-to the desired theorem through explicit finite certificates.  Do not replace a
-missing certificate with an appeal to completed real numbers, topology, or a
-Mathlib analysis theorem.
+rational intervals or complex boxes, prove that its stages are valid and
+refine, and connect it to the desired theorem through explicit finite
+certificates. The comparison with other foundations is secondary; this guide
+focuses on the interfaces available here.
 
 For an external human or agent that needs a repeatable procedure rather than
 just an API map, start with the public
@@ -19,11 +19,9 @@ shrinking rational bracket around a non-rational turning point.
 
 ## Read this first
 
-The repository is deliberately not a drop-in replacement for Mathlib.  Its
-current strong point is checking narrowly specified rational one-variable
-arguments and finite linear-system arguments.  It is not yet capable of
-formalizing arbitrary scientific models end to end.  In particular, the
-following are still open as *general* theorems:
+The current strong point is checking specified rational and complex interval
+arguments, finite linear systems, and certified special-function
+representations. The following general constructions remain active targets:
 
 - product, chain, and quotient rules for arbitrary interval evaluators;
 - construction of an integral from every interval-regular function;
@@ -39,21 +37,15 @@ A declaration may be a useful interface, a target `Prop`, or a fully proved
 theorem.  The guide calls out that distinction.  A named `def` or `structure`
 is never evidence that its intended mathematical theorem has been proved.
 
-## Foundation boundary and reproducible audit
+## Foundation audit
 
-The project source deliberately has no imports from `Mathlib`, `Std`, or
-`Batteries`.  The only foundation import is
-`Init.Grind.Ordered.Rat` in `ComputableAnalysis.Basic`; every other source
-import is another `ComputableAnalysis` module.  The manifest's only external
-package is `checkdecls`, which validates the blueprint's declaration links.
-Thus the project is not silently using a completed-real analysis library; it
-uses Lean's rational arithmetic and its own interval constructions.
+The project source has a small foundation boundary: rational arithmetic and
+the interval constructions in `ComputableAnalysis.Basic`, followed by the
+project's own modules. The manifest's external package is `checkdecls`, which
+validates the blueprint's declaration links.
 
-This is an import boundary, not a mathematical theorem.  It does not by
-itself show that a proposed declaration avoids a completeness-like assumption:
-read the declaration and its certificate hypotheses.  Before depending on a
-new module or publishing a material update, rerun this compact audit from the
-repository root:
+Before depending on a new module or publishing a material update, rerun this
+compact audit from the repository root:
 
 ```bash
 rg -n '^import\s+(Mathlib|Mathlib\.|Std\.|Batteries\.)' ComputableAnalysis
@@ -70,12 +62,9 @@ repository as a dependency.
 
 ### Conformance status
 
-The concrete theorem cores in this repository follow the project's intended
-alternative foundation: rational algorithms produce interval boxes, and the
-proofs establish validity, nesting, overlap, and an explicit shrinking
-modulus.  They do not obtain values by invoking a completed real number,
-general Cauchy completeness, an infimum/supremum construction, or a Mathlib
-analysis theorem.
+The concrete theorem cores use rational algorithms that produce interval
+boxes, with proofs of validity, nesting, overlap, and explicit shrinking
+behavior.
 
 This does not mean that every declaration is executable.  A few declarations
 are deliberately retained as provisional interface packaging and are marked
@@ -135,21 +124,19 @@ not in this guide.
 
 ### Benchmark admission rule
 
-The Wiedijk benchmark is a source of targets, not a license to import the
-classical real-analysis universe. An entry is admitted to the project
+The Wiedijk benchmark is a source of targets. An entry is admitted to the project
 scoreboard only if its Lean statement is native to this repository: its real
 values must be `RealRaw`/abstract `Real` values, rational interval algorithms,
-or finite algebraic certificates. A theorem that Mathlib states over completed
-`ℝ` must be rewritten here over the project's abstract computable-real
-interface.
+or finite algebraic certificates. Classical statements are represented here
+through the project's abstract computable-real and complex-function
+interfaces.
 
 When the classical theorem genuinely needs completeness, arbitrary limits,
 Lebesgue measure, or another noncomputable object, we record a scoped
 constructive replacement with the hypotheses and conclusion visibly
 restricted. The replacement counts only under that scoped name; it must not
 be presented as a proof of the unrestricted classical statement. Routine
-finite lemmas are reused from the available foundation (or Mathlib only when
-doing so does not import classical real or infinitary objects).
+Routine finite lemmas are reused from the available foundation.
 
 ### Benchmark routing
 

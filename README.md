@@ -1,10 +1,10 @@
 # Computable Analysis
 
-*calculus without the completeness of the real numbers*
+*proof-oriented computable calculus from rational interval algorithms*
 
-This project is about proof-facing computable analysis, not building a
-general floating-point or numerical-functions library. Existing numerical
-libraries are already the right tool when the goal is fast computation.
+This project is proof-facing computable analysis. It makes stage-indexed
+rational interval algorithms, domains, finite estimates, and equivalence
+certificates available for mathematics, science, and engineering.
 
 The goal here is to express transparent rational interval algorithms in Lean,
 prove their validity and equivalence, and package certificates that can be
@@ -13,7 +13,8 @@ We prefer simple, inspectable constructions and clear proof obligations over
 being as fast as possible.
 
 See `GOALS.md` for the current mathematical roadmap and links to the Lean
-definitions/proved bridge theorems.
+definitions and proved bridge theorems. For comparisons with other analysis
+projects, see [`COMPARISON.md`](COMPARISON.md).
 
 For a fast, task-oriented map of the Lean API---including the difference
 between checked theorems, interfaces, and open targets---start with
