@@ -316,6 +316,24 @@ theorem dyadicCell_step_subinterval (a b : Rat) (path : Nat -> Bool) (n : Nat)
     · grind
     constructor <;> grind
 
+theorem dyadicCell_subinterval_of_source
+    (a b : Rat) (path : Nat -> Bool) (hab : a <= b) :
+    forall n, subintervalOf (dyadicCell a b path n) a b := by
+  intro n
+  induction n with
+  | zero =>
+      change a <= a /\ a <= b /\ b <= b
+      exact ⟨Rat.le_refl, hab, Rat.le_refl⟩
+  | succ n ih =>
+      have hordered : (dyadicCell a b path n).lo <=
+          (dyadicCell a b path n).hi := ih.2.1
+      have hstep := dyadicCell_step_subinterval a b path n hordered
+      constructor
+      · exact Rat.le_trans ih.1 hstep.1
+      constructor
+      · exact hstep.2.1
+      · exact Rat.le_trans hstep.2.2 ih.2.2
+
 /-- A fully executable inverse trace for a monotone interval branch.
 
 `path` is the actual finite search trace.  `value_overlaps` is the one
