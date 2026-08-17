@@ -49,6 +49,26 @@ area bracket -> angle bracket -> rational circle -> finite identities
 Quarter-turns and de Moivre belong here as finite rotation certificates;
 unrestricted angle semantics remain a separate bridge.
 
+\section{The first computable sine integral}
+\label{thm:computable-sine-half-integral}
+
+The public target is the fixed interval
+\(\int_0^{1/2}\sin(\pi x)\,dx\).  Values at rational inputs are produced
+by the arctangent inverse and the rational circle; the integral is the
+equal-dyadic rectangle algorithm.
+
+\begin{verbatim}
+sin(pi*x) -> equal dyadic rectangles -> realRaw integral
+          -> finite FTC certificate -> primitive endpoint difference
+          -> endpoint computation -> reciprocal-pi realRaw
+\end{verbatim}
+
+The proof does not import a completed real line.  It consists of a computable
+modulus for the evaluator, a finite interval FTC certificate, and the endpoint
+identities \(\cos(0)=1\), \(\cos(\pi/2)=0\).  Thus the familiar value is
+recorded as \(1/\pi\) only after the reciprocal-pi representation has been
+identified with that endpoint difference.
+
 \section{Scope boundary}
 
 Arbitrary discontinuities and non-effective measure are outside scope.

@@ -2987,6 +2987,29 @@ theorem halfIntegral_equiv_endpoint
       (endpointDifferenceRaw h.primitive 0 ((1 : Rat) / 2) h.endpoint_valid) :=
   h.ftc
 
+/-- Final value theorem for the public `sin (pi*x)` half-interval integral.
+
+The finite FTC certificate identifies the fixed equal-dyadic integral with the
+primitive's endpoint difference; an independent computable endpoint theorem
+may then identify that difference with `reciprocalPiRaw`.  This composition is
+the theorem-facing result and uses only `RealRaw.Equiv`. -/
+theorem halfIntegral_equiv_reciprocalPi_of_FTC
+    {C : FunctionRawConstruction}
+    {hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x)}
+    (h : HalfIntegralFTCCertificate C hdefined)
+    (hendpoint :
+      (endpointDifferenceRaw h.primitive 0 ((1 : Rat) / 2)
+        h.endpoint_valid).Equiv reciprocalPiRaw) :
+    (halfIntegral C hdefined h.integral).Equiv reciprocalPiRaw := by
+  have hintegral := halfIntegral_valid C hdefined h.integral
+  have hendpointValid :
+      (endpointDifferenceRaw h.primitive 0 ((1 : Rat) / 2)
+        h.endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using h.endpoint_valid
+  exact RealRaw.equiv_trans hintegral hendpointValid
+    reciprocalPiRaw_valid (halfIntegral_equiv_endpoint h) hendpoint
+
 end SinPiIntegral
 
 end ComputableAnalysis
