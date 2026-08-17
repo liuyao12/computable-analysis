@@ -1682,6 +1682,178 @@ theorem tangentPullbackPrimitive_endpoint_difference (p r : Rat) :
     Rat.sub_eq_add_neg, Rat.inv_mul_rev,
     Rat.mul_inv_cancel _ hpne, Rat.mul_inv_cancel _ hrne]
 
+private theorem tangentPullback_secant_polynomial (p r : Rat) :
+    2 * (r + p) * (1 + p * p) -
+        4 * p * (1 + r * r) =
+      2 * (r - p) * (1 - p * p - 2 * p * r) := by
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
+/-! The local secant identity is the finite FTC calculation used by the
+dyadic proof.  It compares the secant slope of the primitive with the
+pullback density at the left endpoint; no limiting real number is involved. -/
+
+theorem tangentPullbackPrimitive_secant_identity
+    {p r : Rat} (hpr : p < r) :
+    (tangentPullbackPrimitive r - tangentPullbackPrimitive p) / (r - p) -
+        tangentPullbackDensity p =
+      2 * (r - p) * (1 - p * p - 2 * p * r) /
+        ((1 + p * p) * (1 + p * p) * (1 + r * r)) := by
+  have hpSquare := rat_square_nonneg_basic p
+  have hrSquare := rat_square_nonneg_basic r
+  have hp : 0 < 1 + p * p := by grind
+  have hr : 0 < 1 + r * r := by grind
+  have hwidth : 0 < r - p := by grind
+  have hpne : 1 + p * p ≠ 0 := Rat.ne_of_gt hp
+  have hrne : 1 + r * r ≠ 0 := Rat.ne_of_gt hr
+  rw [tangentPullbackPrimitive_endpoint_difference]
+  rw [tangentPullbackDensity]
+  let A : Rat := 1 + p * p
+  let B : Rat := 1 + r * r
+  let W : Rat := r - p
+  have hprod : 0 < W * (A * A * B) := by
+    dsimp [W, A, B]
+    exact Rat.mul_pos hwidth (Rat.mul_pos (Rat.mul_pos hp hp) hr)
+  apply rat_eq_of_mul_eq_mul_pos_local (c := W * (A * A * B)) hprod
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hwidthne : r - p ≠ 0 := Rat.ne_of_gt hwidth
+  have hAne : A ≠ 0 := by dsimp [A]; exact hpne
+  have hBne : B ≠ 0 := by dsimp [B]; exact hrne
+  have hWne : W ≠ 0 := by dsimp [W]; exact hwidthne
+  have hA_cancel : A⁻¹ * A = 1 := Rat.inv_mul_cancel A hAne
+  have hB_cancel : B⁻¹ * B = 1 := Rat.inv_mul_cancel B hBne
+  have hW_cancel : W⁻¹ * W = 1 := Rat.inv_mul_cancel W hWne
+  have hAB_cancel : (A * B)⁻¹ * (A * A * B) = A := by
+    rw [Rat.inv_mul_rev]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_rev]
+  have hA2_cancel : A⁻¹ * A⁻¹ * (A * A * B) = B := by
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hD_cancel : (A * A * B)⁻¹ * (A * A * B) = 1 :=
+    Rat.inv_mul_cancel _ (Rat.ne_of_gt (Rat.mul_pos (Rat.mul_pos hp hp) hr))
+  change
+    ((W * (2 * (r + p) * (A * B)⁻¹) * W⁻¹ -
+      4 * (p * (1 * A⁻¹)) * (1 * A⁻¹)) * (W * (A * A * B))) =
+      (2 * W * (1 - p * p - 2 * p * r) * (A * A * B)⁻¹) *
+        (W * (A * A * B))
+  have hterm1 :
+      (W * (2 * (r + p) * (A * B)⁻¹) * W⁻¹) *
+          (W * (A * A * B)) = W * (2 * (r + p) * A) := by
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  have hterm2 :
+      (4 * (p * (1 * A⁻¹)) * (1 * A⁻¹)) *
+          (W * (A * A * B)) = 4 * p * W * B := by
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+      Rat.sub_eq_add_neg]
+  have hpoly :
+      2 * (r + p) * A - 4 * p * B =
+        2 * W * (1 - p * p - 2 * p * r) := by
+    simpa [A, B, W] using tangentPullback_secant_polynomial p r
+  calc
+    (W * (2 * (r + p) * (A * B)⁻¹) * W⁻¹ -
+        4 * (p * (1 * A⁻¹)) * (1 * A⁻¹)) * (W * (A * A * B)) =
+      W * (2 * (r + p) * A - 4 * p * B) := by
+        calc
+          _ = (W * (2 * (r + p) * (A * B)⁻¹) * W⁻¹) *
+                (W * (A * A * B)) -
+              (4 * (p * (1 * A⁻¹)) * (1 * A⁻¹)) *
+                (W * (A * A * B)) := by
+                  grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+                    Rat.mul_assoc, Rat.mul_comm]
+          _ = W * (2 * (r + p) * A) - 4 * p * W * B := by
+            rw [hterm1, hterm2]
+          _ = W * (2 * (r + p) * A - 4 * p * B) := by
+            grind [Rat.sub_eq_add_neg, Rat.add_mul, Rat.mul_add,
+              Rat.mul_assoc, Rat.mul_comm]
+    _ = 2 * W * W * (1 - p * p - 2 * p * r) := by
+      rw [hpoly]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (2 * W * (1 - p * p - 2 * p * r) * (A * A * B)⁻¹) *
+        (W * (A * A * B)) := by
+      calc
+        2 * W * W * (1 - p * p - 2 * p * r) =
+            2 * W * (1 - p * p - 2 * p * r) *
+              (W * ((A * A * B)⁻¹ * (A * A * B))) := by
+                grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = 2 * W * (1 - p * p - 2 * p * r) *
+              (W * (A * A * B)⁻¹ * (A * A * B)) := by
+                rw [hD_cancel]
+                grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = (2 * W * (1 - p * p - 2 * p * r) * (A * A * B)⁻¹) *
+              (W * (A * A * B)) := by
+                grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem tangentPullbackPrimitive_secant_error_le
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p < r) (hr1 : r <= 1) :
+    qabs ((tangentPullbackPrimitive r - tangentPullbackPrimitive p) /
+      (r - p) - tangentPullbackDensity p) <= 4 * qabs (r - p) := by
+  have hp1 : p <= 1 := Rat.le_trans (Rat.le_of_lt hpr) hr1
+  have hp2nonneg : 0 <= p * p := rat_square_nonneg_basic p
+  have hr0 : 0 <= r := Rat.le_trans hp0 (Rat.le_of_lt hpr)
+  have hr2nonneg : 0 <= r * r := rat_square_nonneg_basic r
+  have hp2le : p * p <= 1 := by
+    calc
+      p * p <= p * 1 := Rat.mul_le_mul_of_nonneg_left hp1 hp0
+      _ = p := by grind
+      _ <= 1 := hp1
+  have hprle : p * r <= 1 := by
+    calc
+      p * r <= 1 * r := Rat.mul_le_mul_of_nonneg_right hp1 hr0
+      _ <= 1 * 1 := Rat.mul_le_mul_of_nonneg_left hr1 (by native_decide)
+      _ = 1 := by native_decide
+  have hKlo : -2 <= 1 - p * p - 2 * p * r := by grind
+  have hprnonneg : 0 <= p * r := Rat.mul_nonneg hp0 hr0
+  have hKhi : 1 - p * p - 2 * p * r <= 2 := by grind
+  have hKabs : qabs (1 - p * p - 2 * p * r) <= 2 :=
+    qabs_le_of_neg_le_le hKlo hKhi
+  let A : Rat := 1 + p * p
+  let B : Rat := 1 + r * r
+  let D : Rat := A * A * B
+  have hAone : 1 <= A := by dsimp [A]; grind
+  have hBone : 1 <= B := by dsimp [B]; grind
+  have hDpos : 0 < D := by
+    exact Rat.mul_pos (Rat.mul_pos (by grind) (by grind)) (by grind)
+  have hDone : 1 <= D := by
+    have hAA : 1 <= A * A := by
+      calc
+        1 = (1 : Rat) * 1 := by native_decide
+        _ <= A * 1 := Rat.mul_le_mul_of_nonneg_right hAone (by native_decide)
+        _ <= A * A := Rat.mul_le_mul_of_nonneg_left hAone (by grind)
+    calc
+      1 = (1 : Rat) * 1 := by native_decide
+      _ <= (A * A) * 1 := Rat.mul_le_mul_of_nonneg_right hAA (by native_decide)
+      _ <= (A * A) * B := Rat.mul_le_mul_of_nonneg_left hBone (by grind)
+      _ = D := rfl
+  have hDne : D ≠ 0 := Rat.ne_of_gt hDpos
+  have hDinv0 : 0 <= D⁻¹ := Rat.le_of_lt ((Rat.inv_pos).2 hDpos)
+  have hDinvle : D⁻¹ <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := D)
+    · rw [Rat.inv_mul_cancel _ hDne]
+      grind
+    · exact hDpos
+  have hqabsW : qabs (r - p) = r - p := by
+    exact qabs_eq_self_of_nonneg (by grind)
+  have hqabsDinv : qabs D⁻¹ = D⁻¹ :=
+    qabs_eq_self_of_nonneg hDinv0
+  have hDdef : D = (1 + p * p) * (1 + p * p) * (1 + r * r) := by
+    rfl
+  rw [tangentPullbackPrimitive_secant_identity hpr]
+  rw [← hDdef, Rat.div_def, qabs_mul, qabs_mul, qabs_mul]
+  rw [hqabsW, hqabsDinv]
+  have hqabsTwo : qabs (2 : Rat) = 2 := by native_decide
+  rw [hqabsTwo]
+  calc
+      2 * (r - p) * qabs (1 - p * p - 2 * p * r) * D⁻¹ <=
+          2 * (r - p) * 2 * D⁻¹ := by
+            exact Rat.mul_le_mul_of_nonneg_right
+              (Rat.mul_le_mul_of_nonneg_left hKabs
+                (Rat.mul_nonneg (by native_decide) (by grind))) hDinv0
+      _ <= 2 * (r - p) * 2 * 1 := by
+        exact Rat.mul_le_mul_of_nonneg_left hDinvle
+          (Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) (by grind))
+            (by native_decide))
+      _ = 4 * (r - p) := by grind
+
 private theorem tangentPullbackDensity_lipschitz_difference
     {s t : Rat} (hs0 : 0 <= s) (hs1 : s <= 1)
     (ht0 : 0 <= t) (ht1 : t <= 1) :
