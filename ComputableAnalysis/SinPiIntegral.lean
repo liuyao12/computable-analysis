@@ -1613,6 +1613,22 @@ theorem canonicalSineEndpointIntegral_equiv_reciprocalPi
     primitiveRawOfArctan_endpointDifference_equiv_of_tangent_endpoints
       S.inverse ht0 ht1
 
+theorem ArctanSinPiConstruction.halfIntegral_equiv_canonicalSineEndpointIntegral
+    (S : ArctanSinPiConstruction)
+    (h : StaticDyadicEffectiveFTC S.canonicalPrimitive
+      S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (c : Integral.Construction S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
+    (endpoint : FTC.EndpointScheduleAgreement S.canonicalPrimitive
+      0 ((1 : Rat) / 2)
+      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC)) :
+    (S.halfIntegral c).Equiv (canonicalSineEndpointIntegral S) := by
+  have hinterval :=
+    S.halfIntegral_equiv_endpoint_of_staticFTC
+      S.canonicalPrimitive h c hplan endpoint
+  simpa [canonicalSineEndpointIntegral, endpointDifferenceRaw] using hinterval
+
 structure CanonicalHalfIntegralReciprocalPiCertificate
     (S : ArctanSinPiConstruction) where
   ftc : StaticDyadicEffectiveFTC
