@@ -512,6 +512,190 @@ private theorem rationalCircleSinInterval_valid
       _ <= 2 * half.val := hscaled
       _ = eps.val := hhalf
 
+/-! The real-coordinate companion used by the primitive. -/
+
+def rationalCircleCos (u : Rat) : Rat :=
+  (1 - u * u) / (1 + u * u)
+
+def rationalCircleCosInterval (U : QInterval) : QInterval :=
+  { lo := rationalCircleCos U.hi, hi := rationalCircleCos U.lo }
+
+private theorem rationalCircleCos_sub_formula {a b : Rat}
+    (ha : 0 <= a) (hb : 0 <= b) :
+    rationalCircleCos a - rationalCircleCos b =
+      (2 * (b - a) * (a + b)) /
+        ((1 + a * a) * (1 + b * b)) := by
+  let da : Rat := 1 + a * a
+  let db : Rat := 1 + b * b
+  have hda : 0 < da := by
+    dsimp [da]
+    exact rationalCircleSin_den_pos ha
+  have hdb : 0 < db := by
+    dsimp [db]
+    exact rationalCircleSin_den_pos hb
+  have hprod : 0 < da * db := Rat.mul_pos hda hdb
+  apply rat_eq_of_mul_eq_mul_pos_local (c := da * db) hprod
+  unfold rationalCircleCos
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hda_ne : da ≠ 0 := Rat.ne_of_gt hda
+  have hdb_ne : db ≠ 0 := Rat.ne_of_gt hdb
+  have hda_cancel : da⁻¹ * da = 1 := Rat.inv_mul_cancel da hda_ne
+  have hdb_cancel : db⁻¹ * db = 1 := Rat.inv_mul_cancel db hdb_ne
+  have hleft :
+      ((1 - a * a) * da⁻¹ - (1 - b * b) * db⁻¹) * (da * db) =
+        (1 - a * a) * db - (1 - b * b) * da := by
+    calc
+      ((1 - a * a) * da⁻¹ - (1 - b * b) * db⁻¹) * (da * db) =
+          ((1 - a * a) * da⁻¹) * (da * db) -
+            ((1 - b * b) * db⁻¹) * (da * db) := by
+              grind [Rat.sub_eq_add_neg, Rat.add_mul]
+      _ = (1 - a * a) * db - (1 - b * b) * da := by
+        have h1 : ((1 - a * a) * da⁻¹) * (da * db) =
+            (1 - a * a) * db := by
+          calc
+            ((1 - a * a) * da⁻¹) * (da * db) =
+                (1 - a * a) * db * (da⁻¹ * da) := by
+                  grind [Rat.mul_assoc, Rat.mul_comm]
+            _ = (1 - a * a) * db := by rw [hda_cancel, Rat.mul_one]
+        have h2 : ((1 - b * b) * db⁻¹) * (da * db) =
+            (1 - b * b) * da := by
+          calc
+            ((1 - b * b) * db⁻¹) * (da * db) =
+                (1 - b * b) * da * (db⁻¹ * db) := by
+                  grind [Rat.mul_assoc, Rat.mul_comm]
+            _ = (1 - b * b) * da := by rw [hdb_cancel, Rat.mul_one]
+        rw [h1, h2]
+  have hright :
+      (2 * (b - a) * (a + b) * (da * db)⁻¹) * (da * db) =
+        2 * (b - a) * (a + b) := by
+    rw [Rat.mul_assoc, Rat.inv_mul_cancel (da * db) (Rat.ne_of_gt hprod),
+      Rat.mul_one]
+  rw [hleft, hright]
+  dsimp [da, db]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
+private theorem rationalCircleCos_mono {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1) :
+    rationalCircleCos b <= rationalCircleCos a := by
+  have hb0 : 0 <= b := Rat.le_trans ha hab
+  have hdiff := rationalCircleCos_sub_formula ha hb0
+  have hba : 0 <= b - a := by grind
+  have hsum : 0 <= a + b := by grind
+  have hden : 0 < (1 + a * a) * (1 + b * b) :=
+    Rat.mul_pos (rationalCircleSin_den_pos ha)
+      (rationalCircleSin_den_pos hb0)
+  have hnum : 0 <= 2 * (b - a) * (a + b) := by
+    exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hba) hsum
+  have hinv : 0 <= ((1 + a * a) * (1 + b * b))⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hden)
+  have hdiff_nonneg : 0 <= rationalCircleCos a - rationalCircleCos b := by
+    rw [hdiff, Rat.div_def]
+    exact Rat.mul_nonneg hnum hinv
+  grind [Rat.sub_eq_add_neg]
+
+private theorem rationalCircleCos_width_le {a b : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hb : b <= 1) :
+    rationalCircleCos a - rationalCircleCos b <= 4 * (b - a) := by
+  have hb0 : 0 <= b := Rat.le_trans ha hab
+  have hden : 0 < (1 + a * a) * (1 + b * b) :=
+    Rat.mul_pos (rationalCircleSin_den_pos ha)
+      (rationalCircleSin_den_pos hb0)
+  have hden_one : 1 <= (1 + a * a) * (1 + b * b) := by
+    have haa : 0 <= a * a := Rat.mul_nonneg ha ha
+    have hbb : 0 <= b * b := Rat.mul_nonneg hb0 hb0
+    have hA : 1 <= 1 + a * a := by grind
+    have hB : 1 <= 1 + b * b := by grind
+    have hA0 : 0 <= 1 + a * a := by grind
+    calc
+      (1 : Rat) = 1 * 1 := by native_decide
+      _ <= (1 + a * a) * 1 :=
+        Rat.mul_le_mul_of_nonneg_right hA (by native_decide)
+      _ <= (1 + a * a) * (1 + b * b) :=
+        Rat.mul_le_mul_of_nonneg_left hB hA0
+  rw [rationalCircleCos_sub_formula ha hb0]
+  apply Rat.le_of_mul_le_mul_right
+    (c := (1 + a * a) * (1 + b * b))
+  · rw [Rat.div_def]
+    have hba : 0 <= b - a := by grind
+    have hsum : 0 <= a + b := by grind
+    have hnum : 0 <= 2 * (b - a) * (a + b) := by
+      exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hba) hsum
+    have hsum_le : a + b <= 2 := by grind
+    have hsumD : a + b <= 2 *
+        ((1 + a * a) * (1 + b * b)) := by
+      calc
+        a + b <= 2 := hsum_le
+        _ <= 2 * ((1 + a * a) * (1 + b * b)) := by
+          simpa using Rat.mul_le_mul_of_nonneg_left hden_one
+            (by native_decide : (0 : Rat) <= 2)
+    have hnum_le : 2 * (b - a) * (a + b) <=
+        4 * (b - a) * ((1 + a * a) * (1 + b * b)) := by
+      calc
+        2 * (b - a) * (a + b) <=
+            2 * (b - a) * (2 *
+              ((1 + a * a) * (1 + b * b))) := by
+          exact Rat.mul_le_mul_of_nonneg_left hsumD
+            (Rat.mul_nonneg (by native_decide) hba)
+        _ = 4 * (b - a) * ((1 + a * a) * (1 + b * b)) := by
+          grind [Rat.mul_assoc, Rat.mul_comm]
+    calc
+      (2 * (b - a) * (a + b) *
+          ((1 + a * a) * (1 + b * b))⁻¹) *
+          ((1 + a * a) * (1 + b * b)) =
+          2 * (b - a) * (a + b) := by
+            rw [Rat.mul_assoc,
+              Rat.inv_mul_cancel _ (Rat.ne_of_gt hden), Rat.mul_one]
+      _ <= 4 * (b - a) * ((1 + a * a) * (1 + b * b)) := hnum_le
+  · exact hden
+
+private theorem rationalCircleCosInterval_valid
+    (u : Nat -> QInterval)
+    (hu : RealRaw.ValidCompute u)
+    (hubounds : forall n, 0 <= (u n).lo /\ (u n).hi <= 1) :
+    RealRaw.ValidCompute (fun n => rationalCircleCosInterval (u n)) := by
+  constructor
+  · intro n
+    have horder := RealRaw.interval_order_of_valid
+      { compute := u } hu n
+    have hmono := rationalCircleCos_mono
+      (hubounds n).1 horder (hubounds n).2
+    change 0 <= rationalCircleCos (u n).lo - rationalCircleCos (u n).hi
+    grind [Rat.sub_eq_add_neg]
+  constructor
+  · intro n m hnm
+    have hn := hu.2.1 n m hnm
+    have hnl := hubounds n
+    have hml := hubounds m
+    have hcosLo := rationalCircleCos_mono
+      (by grind [RealRaw.interval_order_of_valid { compute := u } hu m])
+      hn.2.2 hnl.2
+    have hcosMid := rationalCircleCos_mono hml.1
+      (RealRaw.interval_order_of_valid { compute := u } hu m) hml.2
+    have hcosHi := rationalCircleCos_mono hnl.1 hn.1
+      (by grind [hml.2, RealRaw.interval_order_of_valid { compute := u } hu m])
+    exact ⟨hcosLo, hcosMid, hcosHi⟩
+  · intro eps
+    obtain ⟨N, hN⟩ := hu.2.2 ⟨eps.val / 4, by
+      rw [Rat.div_def]
+      exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide))⟩
+    refine ⟨N, ?_⟩
+    intro n hn
+    have horder := RealRaw.interval_order_of_valid { compute := u } hu n
+    have hw := hN n hn
+    have hcos := rationalCircleCos_width_le
+      (hubounds n).1 horder (hubounds n).2
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hw
+      (by native_decide : (0 : Rat) <= 4)
+    change rationalCircleCos (u n).lo - rationalCircleCos (u n).hi <= eps.val
+    calc
+      rationalCircleCos (u n).lo - rationalCircleCos (u n).hi <=
+          4 * ((u n).hi - (u n).lo) := hcos
+      _ <= 4 * (eps.val / 4) := hscaled
+      _ = eps.val := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+
 /-- `sin(pi*x)` from the arctangent inverse, on rational `x` in `[0,1/2]`.
 
 The computation first recovers the half-angle slope by certified bisection,
@@ -618,6 +802,47 @@ def ArctanSinPiConstruction.canonical
     ArctanSinPiConstruction :=
   ArctanSinPiConstruction.ofInverse B
     (fun x hx n => arctanInverse_slope_bounded B x hx n)
+
+/-! The explicit cosine coordinate and the primitive target. -/
+
+/-- `cos (pi*x)` from the same inverse slope boxes used by `sinPiRaw`. -/
+def cosPiRawOfArctan
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (x : Rat)
+    (hx : 0 <= x /\ x <= (1 : Rat) / 2) : RealRaw where
+  compute := fun n =>
+    rationalCircleCosInterval
+      ((B.tangentRaw.compute (2 * x)
+        (by
+          change RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x)
+          constructor
+          · exact Rat.mul_nonneg (by native_decide) hx.1
+          · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+              (by native_decide : (0 : Rat) <= 2)
+            have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+            rw [hhalf] at h
+            exact h) n))
+
+theorem cosPiRawOfArctan_valid
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (x : Rat) (hx : 0 <= x /\ x <= (1 : Rat) / 2) :
+    (cosPiRawOfArctan B x hx).Valid := by
+  apply rationalCircleCosInterval_valid
+  · exact B.tangentRaw_valid (2 * x) _
+  · exact fun n => arctanInverse_slope_bounded B x hx n
+
+def cosPiOnHalf
+    (B : IntegralIdentities.ArctanInverseBisection) : FunctionOnInterval where
+  raw := {
+    definedAt := fun x => 0 <= x /\ x <= (1 : Rat) / 2
+    compute := fun x hx => (cosPiRawOfArctan B x hx).compute
+  }
+  lower := 0
+  upper := (1 : Rat) / 2
+  defined_on := fun _ hx => hx
+  valid_on := by
+    intro x hx
+    exact cosPiRawOfArctan_valid B x hx
 
 /-- Package the arctangent-backed evaluator as the interval function consumed
 by the equal-dyadic integral operator. -/
