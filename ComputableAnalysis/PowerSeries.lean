@@ -424,6 +424,67 @@ theorem sinhCoeff_hasCoefficientShift :
     HasCoefficientShift sinhCoeff coshCoeff :=
   sinhCoeff_derivative
 
+/-!
+## Finite sine-series integration
+
+These identities are deliberately finite.  They form the algebraic core of
+the later computable FTC route: no infinite sum, completed real, or limit is
+used.  A remainder certificate can subsequently replace the finite Taylor
+polynomials by the project’s `RealRaw` sine evaluator.
+-/
+
+def sineTaylorTerm (x : Rat) (k : Nat) : Rat :=
+  altSign k * x ^ (2 * k + 1) / factorialRat (2 * k + 1)
+
+def cosineTaylorTerm (x : Rat) (k : Nat) : Rat :=
+  altSign k * x ^ (2 * k) / factorialRat (2 * k)
+
+def sineTaylorPartial (x : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => sineTaylorPartial x n + sineTaylorTerm x n
+
+def cosineTaylorPartial (x : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 => cosineTaylorPartial x n + cosineTaylorTerm x n
+
+def sineTaylorIntegralPartial (x : Rat) : Nat -> Rat
+  | 0 => 0
+  | n + 1 =>
+      sineTaylorIntegralPartial x n +
+        altSign n * x ^ (2 * n + 2) / factorialRat (2 * n + 2)
+
+theorem factorialRat_add_two (n : Nat) :
+    factorialRat (2 * n + 2) =
+      (((2 * n + 2 : Nat) : Rat) * ((2 * n + 1 : Nat) : Rat)) *
+        factorialRat (2 * n) := by
+  rw [show 2 * n + 2 = (2 * n + 1) + 1 by omega,
+    show 2 * n + 1 = (2 * n) + 1 by omega,
+    factorialRat_succ, factorialRat_succ]
+  grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem sineTaylorIntegralPartial_eq_one_sub_cosineTaylorPartial_succ
+    (x : Rat) :
+    forall n,
+      sineTaylorIntegralPartial x n =
+        1 - cosineTaylorPartial x (n + 1) := by
+  intro n
+  induction n with
+  | zero =>
+      simp [sineTaylorIntegralPartial, cosineTaylorPartial,
+        cosineTaylorTerm, altSign, factorialRat, factorial]
+      native_decide
+  | succ n ih =>
+      rw [sineTaylorIntegralPartial, cosineTaylorPartial, ih]
+      have hfact := factorialRat_add_two n
+      have hsign : altSign n = -altSign (n + 1) := by
+        unfold altSign
+        split <;> split <;> simp_all <;> omega
+      rw [hfact, hsign]
+      simp only [cosineTaylorTerm]
+      rw [show 2 * (n + 1) = 2 * n + 2 by omega]
+      grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+        Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 end FormalPowerSeries
 
 namespace RationalMajorant
