@@ -1165,6 +1165,89 @@ theorem primitiveRawOfArctan_zero_equiv_of_cosine_endpoint
   change (R * M).Equiv RealRaw.zero
   exact hprod
 
+private theorem primitive_half_product_equiv
+    (R M : RealRaw) (hR : R.Valid) (hM : M.Valid)
+    (hRb : forall n, 0 <= (R.compute n).lo /\ (R.compute n).hi <= 1)
+    (hMb : forall n, 0 <= (M.compute n).lo /\ (M.compute n).hi <= 1)
+    (hMone : M.Equiv RealRaw.one) :
+    (R * M).Equiv R := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff (R * M) R n n).2
+  have hRorder := RealRaw.interval_order_of_valid R hR n
+  have hMorder := RealRaw.interval_order_of_valid M hM n
+  have hm := (RealRaw.compareAt_overlap_iff M RealRaw.one n n).1 (hMone n)
+  simp [RealRaw.one, RealRaw.ofRat] at hm
+  change QInterval.Overlaps
+    (QBox.mulRealInterval (R.compute n).lo (R.compute n).hi
+      (M.compute n).lo (M.compute n).hi)
+    (R.compute n)
+  rw [QBox.mulRealInterval_of_nonneg (hRb n).1 hRorder
+    (hMb n).1 hMorder]
+  unfold QInterval.Overlaps
+  constructor
+  · calc
+      (R.compute n).lo * (M.compute n).lo <=
+          (R.compute n).lo * 1 :=
+        Rat.mul_le_mul_of_nonneg_left hm.1 (hRb n).1
+      _ <= (R.compute n).hi := by simpa using hRorder
+  · calc
+      (R.compute n).lo <= (R.compute n).hi * 1 := by simpa using hRorder
+      _ <= (R.compute n).hi * (M.compute n).hi :=
+        Rat.mul_le_mul_of_nonneg_left hm.2 (by grind)
+
+/-- The right endpoint of the canonical primitive is the reciprocal-pi raw
+number once the cosine evaluator supplies its quarter-turn endpoint law. -/
+theorem primitiveRawOfArctan_half_equiv_of_cosine_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (hc : (cosPiRawOfArctan B (1 / 2)
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.zero) :
+    ({ compute := (primitiveRawOfArctan B).compute (1 / 2) } : RealRaw).Equiv
+      reciprocalPiRaw := by
+  let R : RealRaw := reciprocalPiRaw
+  let M : RealRaw := { compute := (oneMinusCosFunRaw B).compute (1 / 2) }
+  have hR : R.Valid := by simpa [R] using reciprocalPiRaw_valid
+  have hRb : forall n, 0 <= (R.compute n).lo /\ (R.compute n).hi <= 1 := by
+    intro n
+    simpa [R] using reciprocalPiRaw_bounds n
+  have hM : M.Valid := by
+    change RealRaw.ValidCompute ((oneMinusCosFunRaw B).compute (1 / 2))
+    exact oneMinusCosFunRaw_valid B (1 / 2)
+      (by native_decide : (0 : Rat) <= 1 / 2 /\ (1 : Rat) / 2 <= 1 / 2)
+  have hMb : forall n, 0 <= (M.compute n).lo /\ (M.compute n).hi <= 1 := by
+    intro n
+    simpa [M] using oneMinusCosFunRaw_bounds B
+      (by native_decide : (0 : Rat) <= 1 / 2 /\ (1 : Rat) / 2 <= 1 / 2) n
+  have hMone : M.Equiv RealRaw.one := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff M RealRaw.one n n).2
+    change QInterval.Overlaps
+      (if hx : (0 : Rat) <= 1 / 2 /\ (1 : Rat) / 2 <= 1 / 2 then
+        { lo := 1 - ((cosPiRawOfArctan B (1 / 2) hx).compute n).hi,
+          hi := 1 - ((cosPiRawOfArctan B (1 / 2) hx).compute n).lo }
+       else { lo := 0, hi := 0 })
+      { lo := 1, hi := 1 }
+    rw [dif_pos (by native_decide : (0 : Rat) <= 1 / 2 /\ (1 : Rat) / 2 <= 1 / 2)]
+    have hc_n := (RealRaw.compareAt_overlap_iff
+      (cosPiRawOfArctan B (1 / 2) ⟨by native_decide, by native_decide⟩)
+      RealRaw.zero n n).1 (hc n)
+    simp [RealRaw.zero, RealRaw.ofRat] at hc_n
+    change QInterval.Overlaps
+      { lo := 1 - ((cosPiRawOfArctan B (1 / 2) _).compute n).hi,
+        hi := 1 - ((cosPiRawOfArctan B (1 / 2) _).compute n).lo }
+      { lo := 1, hi := 1 }
+    unfold QInterval.Overlaps at hc_n ⊢
+    constructor <;> grind
+  have hpvalid : (R * M).Valid :=
+    RealRaw.mul_valid_of_nonneg_bounded hR hM
+      (Bx := (1 : Rat)) (By := (1 : Rat))
+      (by native_decide) (by native_decide) hRb hMb
+  have hprod : (R * M).Equiv R :=
+    primitive_half_product_equiv R M hR hM hRb hMb hMone
+  change (R * M).Equiv R
+  exact hprod
+
 /-- Package the arctangent-backed evaluator as the interval function consumed
 by the equal-dyadic integral operator. -/
 def ArctanSinPiConstruction.onHalf
@@ -1314,6 +1397,60 @@ theorem endpointDifference_equiv_of_endpoint_equiv
   change (B - A).Equiv R
   exact RealRaw.equiv_trans hsubvalid htargetvalid hR hsub
     (sub_zero_equiv R hR)
+
+/-- The canonical primitive's endpoint difference is the reciprocal-pi raw
+number once the two geometric cosine endpoint laws are supplied.  This is the
+last finite endpoint-algebra bridge before the dyadic FTC certificate. -/
+theorem primitiveRawOfArctan_endpointDifference_equiv_of_cosine_endpoints
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (hc0 : (cosPiRawOfArctan B 0
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.one)
+    (hcHalf : (cosPiRawOfArctan B (1 / 2)
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.zero)
+    (hendpoint :
+      RealRaw.ValidCompute
+        (endpointDifferenceCompute (primitiveRawOfArctan B)
+          0 ((1 : Rat) / 2))) :
+    (endpointDifferenceRaw (primitiveRawOfArctan B) 0 ((1 : Rat) / 2)
+      hendpoint).Equiv reciprocalPiRaw := by
+  have hF : (primitiveRawOfArctan B).Valid :=
+    primitiveRawOfArctan_valid B
+  have ha : (primitiveRawOfArctan B).domain 0 := by
+    simp [primitiveRawOfArctan, RealFunRaw.mul, reciprocalPiFunRaw,
+      oneMinusCosFunRaw] <;> native_decide
+  have hb : (primitiveRawOfArctan B).domain ((1 : Rat) / 2) := by
+    simp [primitiveRawOfArctan, RealFunRaw.mul, reciprocalPiFunRaw,
+      oneMinusCosFunRaw] <;> native_decide
+  have hA : ((primitiveRawOfArctan B).apply hF 0 ha).Equiv
+      RealRaw.zero := by
+    change ({ compute := (primitiveRawOfArctan B).compute 0 } : RealRaw).Equiv
+      RealRaw.zero
+    exact primitiveRawOfArctan_zero_equiv_of_cosine_endpoint B hc0
+  have hB : ((primitiveRawOfArctan B).apply hF ((1 : Rat) / 2) hb).Equiv
+      reciprocalPiRaw := by
+    change ({ compute := (primitiveRawOfArctan B).compute ((1 : Rat) / 2) } :
+      RealRaw).Equiv reciprocalPiRaw
+    exact primitiveRawOfArctan_half_equiv_of_cosine_endpoint B hcHalf
+  exact endpointDifference_equiv_of_endpoint_equiv
+    hF ha hb hendpoint reciprocalPiRaw_valid hA hB
+
+theorem primitiveRawOfArctan_endpointDifference_equiv_of_cosine_endpoints'
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (hc0 : (cosPiRawOfArctan B 0
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.one)
+    (hcHalf : (cosPiRawOfArctan B (1 / 2)
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.zero) :
+    (endpointDifferenceRaw (primitiveRawOfArctan B) 0 ((1 : Rat) / 2)
+      (endpointDifference_valid_of_fun_valid
+        (primitiveRawOfArctan_valid B)
+        (by
+          simp [primitiveRawOfArctan, RealFunRaw.mul, reciprocalPiFunRaw,
+            oneMinusCosFunRaw] <;> native_decide)
+        (by
+          simp [primitiveRawOfArctan, RealFunRaw.mul, reciprocalPiFunRaw,
+            oneMinusCosFunRaw] <;> native_decide))).Equiv reciprocalPiRaw := by
+  apply primitiveRawOfArctan_endpointDifference_equiv_of_cosine_endpoints
+    B hc0 hcHalf
 
 structure CanonicalHalfIntegralReciprocalPiCertificate
     (S : ArctanSinPiConstruction) where
