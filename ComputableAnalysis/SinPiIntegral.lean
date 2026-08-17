@@ -1885,6 +1885,227 @@ theorem tangentPullback_rectangle_error_le
       rw [qabs_eq_self_of_nonneg (by grind : 0 <= r - p)]
       grind
 
+/-! A prefix form of the finite dyadic telescope.  This keeps the exact
+rectangle computation and the primitive endpoint difference in the same
+rational expression; the eventual sum estimate can therefore be proved by
+induction on the finite mesh rather than by invoking a completed integral. -/
+
+def tangentPullbackRectangleError (p r : Rat) : Rat :=
+  (r - p) * tangentPullbackDensity p -
+    (tangentPullbackPrimitive r - tangentPullbackPrimitive p)
+
+def tangentPullbackRectangleErrorPrefix (mesh : Nat) : Nat -> Rat
+  | 0 => 0
+  | terms + 1 =>
+      tangentPullbackRectangleErrorPrefix mesh terms +
+        tangentPullbackRectangleError
+          ((terms : Rat) / (mesh : Rat))
+          (((Nat.succ terms : Nat) : Rat) / (mesh : Rat))
+
+theorem tangentPullbackRectangleErrorPrefix_telescope
+    {mesh : Nat} (hmesh : 0 < mesh) :
+    forall terms,
+      IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum
+          tangentPullbackDensity mesh terms -
+          (tangentPullbackPrimitive ((terms : Nat) / (mesh : Rat)) -
+            tangentPullbackPrimitive 0) =
+        tangentPullbackRectangleErrorPrefix mesh terms
+  | 0 => by
+      have hzero : (0 : Rat) / (mesh : Rat) = 0 := by
+        rw [Rat.div_def]
+        grind
+      change 0 - (tangentPullbackPrimitive ((0 : Rat) / (mesh : Rat)) -
+        tangentPullbackPrimitive 0) = 0
+      rw [hzero]
+      grind
+  | terms + 1 => by
+      have hmeshRat : (mesh : Rat) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 hmesh)
+      rw [IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum,
+        tangentPullbackRectangleErrorPrefix]
+      have hsplit :
+          (IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum
+              tangentPullbackDensity mesh terms +
+            (1 / (mesh : Rat)) *
+              tangentPullbackDensity ((terms : Rat) / (mesh : Rat)) -
+            (tangentPullbackPrimitive ((terms + 1 : Nat) / (mesh : Rat)) -
+              tangentPullbackPrimitive 0)) =
+          (IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum
+              tangentPullbackDensity mesh terms -
+            (tangentPullbackPrimitive ((terms : Rat) / (mesh : Rat)) -
+              tangentPullbackPrimitive 0)) +
+          ((1 / (mesh : Rat)) *
+              tangentPullbackDensity ((terms : Rat) / (mesh : Rat)) -
+            (tangentPullbackPrimitive ((terms + 1 : Nat) / (mesh : Rat)) -
+              tangentPullbackPrimitive ((terms : Rat) / (mesh : Rat)))) := by
+        grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
+          Rat.mul_assoc, Rat.mul_comm]
+      rw [hsplit, tangentPullbackRectangleErrorPrefix_telescope hmesh terms]
+      have hwidth :
+          (((terms + 1 : Nat) : Rat) / (mesh : Rat)) -
+              ((terms : Rat) / (mesh : Rat)) =
+            1 / (mesh : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_mul, Rat.mul_add,
+          Rat.sub_eq_add_neg, Rat.mul_inv_cancel _ hmeshRat]
+      dsimp [tangentPullbackRectangleError]
+      rw [hwidth]
+
+theorem tangentPullbackRectangleErrorPrefix_abs_le
+    {mesh : Nat} (hmesh : 0 < mesh) :
+    forall terms, terms <= mesh ->
+      qabs (tangentPullbackRectangleErrorPrefix mesh terms) <=
+        4 * (((terms : Rat) / (mesh : Rat)) * (1 / (mesh : Rat)))
+  | 0, _ => by
+      simp [tangentPullbackRectangleErrorPrefix, qabs]
+      grind
+  | terms + 1, hterms => by
+      have hmeshRat : (mesh : Rat) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 hmesh)
+      have htermsLe : terms <= mesh := Nat.le_trans (Nat.le_succ terms) hterms
+      have hprev := tangentPullbackRectangleErrorPrefix_abs_le hmesh terms htermsLe
+      rw [tangentPullbackRectangleErrorPrefix]
+      have htermsLt : terms < mesh := Nat.lt_of_succ_le hterms
+      have hp0 : 0 <= (terms : Rat) / (mesh : Rat) := by
+        rw [Rat.div_def]
+        exact Rat.mul_nonneg (by exact_mod_cast Nat.zero_le terms)
+          (Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hmesh)))
+      have hr1 : ((Nat.succ terms : Nat) : Rat) / (mesh : Rat) <= 1 := by
+        rw [Rat.div_def]
+        have hcast : ((Nat.succ terms : Nat) : Rat) <= (mesh : Rat) := by
+          exact_mod_cast hterms
+        have hinv0 : 0 <= (mesh : Rat)⁻¹ :=
+          Rat.le_of_lt ((Rat.inv_pos).2 ((Rat.natCast_pos).2 hmesh))
+        calc
+          ((Nat.succ terms : Nat) : Rat) * (mesh : Rat)⁻¹ <=
+              (mesh : Rat) * (mesh : Rat)⁻¹ :=
+            Rat.mul_le_mul_of_nonneg_right hcast hinv0
+          _ = 1 := Rat.mul_inv_cancel _ hmeshRat
+      have hpr : (terms : Rat) / (mesh : Rat) <
+          ((Nat.succ terms : Nat) : Rat) / (mesh : Rat) := by
+        rw [Rat.div_def, Rat.div_def]
+        have hpos : 0 < (mesh : Rat)⁻¹ :=
+          (Rat.inv_pos).2 ((Rat.natCast_pos).2 hmesh)
+        exact Rat.mul_lt_mul_of_pos_right
+          (by exact_mod_cast (Nat.lt_succ_self terms)) hpos
+      have hcell := tangentPullback_rectangle_error_le hp0 hpr hr1
+      have hwidth :
+          ((Nat.succ terms : Nat) : Rat) / (mesh : Rat) -
+              (terms : Rat) / (mesh : Rat) =
+            1 / (mesh : Rat) := by
+        rw [Rat.div_def, Rat.div_def, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.add_mul, Rat.mul_add,
+          Rat.sub_eq_add_neg, Rat.mul_inv_cancel _ hmeshRat]
+      have hcell' :
+          qabs (tangentPullbackRectangleError
+            ((terms : Rat) / (mesh : Rat))
+            (((Nat.succ terms : Nat) : Rat) / (mesh : Rat))) <=
+            4 * ((1 / (mesh : Rat)) * (1 / (mesh : Rat))) := by
+        dsimp [tangentPullbackRectangleError] at hcell ⊢
+        rw [hwidth] at hcell ⊢
+        exact hcell
+      calc
+        qabs (tangentPullbackRectangleErrorPrefix mesh terms +
+            tangentPullbackRectangleError
+              ((terms : Rat) / (mesh : Rat))
+              (((Nat.succ terms : Nat) : Rat) / (mesh : Rat))) <=
+            qabs (tangentPullbackRectangleErrorPrefix mesh terms) +
+              qabs (tangentPullbackRectangleError
+                ((terms : Rat) / (mesh : Rat))
+                (((Nat.succ terms : Nat) : Rat) / (mesh : Rat))) :=
+          qabs_add_le _ _
+        _ <= 4 * (((terms : Rat) / (mesh : Rat)) * (1 / (mesh : Rat))) +
+              4 * ((1 / (mesh : Rat)) * (1 / (mesh : Rat))) :=
+          rat_add_le_add hprev hcell'
+        _ = 4 * ((((Nat.succ terms : Nat) : Rat) / (mesh : Rat)) *
+            (1 / (mesh : Rat))) := by
+          rw [Rat.div_def, Rat.div_def, Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+            Rat.sub_eq_add_neg, Rat.mul_inv_cancel _ hmeshRat]
+
+theorem tangentPullback_uniformLeftEndpointSum_error_le
+    {mesh : Nat} (hmesh : 0 < mesh) :
+    qabs
+        (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          tangentPullbackDensity mesh -
+          (tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0)) <=
+      4 / (mesh : Rat) := by
+  have htel := tangentPullbackRectangleErrorPrefix_telescope hmesh mesh
+  rw [IntegralIdentities.LipschitzDyadic.uniformLeftPrefixSum_at_mesh] at htel
+  have habs := tangentPullbackRectangleErrorPrefix_abs_le hmesh mesh
+    (Nat.le_refl mesh)
+  have hmeshRat : (mesh : Rat) ≠ 0 :=
+    Rat.ne_of_gt ((Rat.natCast_pos).2 hmesh)
+  have hunit : (mesh : Rat) / (mesh : Rat) = 1 := by
+    rw [Rat.div_def, Rat.mul_inv_cancel _ hmeshRat]
+  rw [hunit] at htel
+  rw [htel]
+  calc
+    qabs (tangentPullbackRectangleErrorPrefix mesh mesh) <=
+        4 * (((mesh : Rat) / (mesh : Rat)) * (1 / (mesh : Rat))) := habs
+    _ = 4 / (mesh : Rat) := by
+      rw [Rat.div_def, Rat.mul_inv_cancel _ hmeshRat]
+      grind [Rat.mul_assoc]
+
+private theorem tangentPullback_uniformSum_foldl_eq
+    (f : Rat -> Rat) {mesh : Nat} (hmesh : 0 < mesh) :
+    forall (xs : List Nat) (initial : Rat),
+      xs.foldl
+          (fun total (k : Nat) =>
+            total + ComputableAnalysis.mesh 0 1 mesh *
+              f (leftPoint 0 1 mesh k)) initial =
+        xs.foldl
+          (fun total (k : Nat) =>
+            total + (1 / (mesh : Rat)) * f ((k : Rat) / (mesh : Rat))) initial
+  | [], initial => rfl
+  | k :: rest, initial => by
+      have hmeshRat : (mesh : Rat) ≠ 0 :=
+        Rat.ne_of_gt ((Rat.natCast_pos).2 hmesh)
+      have hmeshEq : ComputableAnalysis.mesh 0 1 mesh =
+          (mesh : Rat)⁻¹ := by
+        unfold ComputableAnalysis.mesh
+        rw [if_neg (Nat.ne_of_gt hmesh), Rat.div_def]
+        grind
+      have hstep :
+          ComputableAnalysis.mesh 0 1 mesh * f (leftPoint 0 1 mesh k) =
+            (1 / (mesh : Rat)) * f ((k : Rat) / (mesh : Rat)) := by
+        rw [hmeshEq]
+        simp only [leftPoint]
+        rw [hmeshEq, Rat.div_def, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      change
+        rest.foldl
+            (fun total (k : Nat) => total +
+              (ComputableAnalysis.mesh 0 1 mesh) * f (leftPoint 0 1 mesh k))
+            (initial + ComputableAnalysis.mesh 0 1 mesh *
+              f (leftPoint 0 1 mesh k)) =
+          rest.foldl
+            (fun total (k : Nat) => total +
+              (1 / (mesh : Rat)) * f ((k : Rat) / (mesh : Rat)))
+            (initial + (1 / (mesh : Rat)) * f ((k : Rat) / (mesh : Rat)))
+      rw [hstep]
+      exact tangentPullback_uniformSum_foldl_eq f hmesh rest
+        (initial + (1 / (mesh : Rat)) * f ((k : Rat) / (mesh : Rat)))
+
+theorem tangentPullback_riemannLeftExact_eq_uniformLeftEndpointSum
+    {mesh : Nat} (hmesh : 0 < mesh) :
+    riemannLeftExact tangentPullbackDensity 0 1 mesh =
+      IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+        tangentPullbackDensity mesh := by
+  unfold riemannLeftExact
+  rw [tangentPullback_uniformSum_foldl_eq tangentPullbackDensity hmesh
+    (List.range mesh) (0 : Rat)]
+  rfl
+
+theorem tangentPullback_riemannLeftExact_stage_error_le (stage : Nat) :
+    qabs
+        (riemannLeftExact tangentPullbackDensity 0 1 (2 ^ stage) -
+          (tangentPullbackPrimitive 1 - tangentPullbackPrimitive 0)) <=
+      4 / (((2 ^ stage : Nat) : Rat)) := by
+  have hmesh : 0 < 2 ^ stage := Nat.pow_pos (by omega : 0 < 2)
+  rw [tangentPullback_riemannLeftExact_eq_uniformLeftEndpointSum hmesh]
+  exact tangentPullback_uniformLeftEndpointSum_error_le hmesh
+
 private theorem tangentPullbackDensity_lipschitz_difference
     {s t : Rat} (hs0 : 0 <= s) (hs1 : s <= 1)
     (ht0 : 0 <= t) (ht1 : t <= 1) :
