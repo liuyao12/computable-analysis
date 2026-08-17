@@ -119,6 +119,47 @@ def riemannLeftInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : QI
     (fun acc k => let I := g.compute (leftPoint a b n k) prec; { lo := acc.lo + h * I.lo, hi := acc.hi + h * I.hi })
     { lo := 0, hi := 0 }
 
+/-- The finite rectangle sum is insensitive to how an evaluator behaves away
+from its sample points.  This is the bridge used by the computable sine
+integral: a specialized nested-radical evaluator only needs to agree with
+the public `sin (pi*x)` evaluator on the dyadic left endpoints actually read
+by the equal-mesh algorithm. -/
+theorem riemannLeftInterval_congr_of_samples
+    (g h : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
+    (hpoint : forall k, k < subdivisions ->
+      g.compute (leftPoint a b subdivisions k) prec =
+        h.compute (leftPoint a b subdivisions k) prec) :
+    riemannLeftInterval g a b subdivisions prec =
+      riemannLeftInterval h a b subdivisions prec := by
+  unfold riemannLeftInterval
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) ->
+      forall (acc : QInterval),
+      (xs.foldl
+        (fun acc k =>
+          let I := g.compute (leftPoint a b subdivisions k) prec
+          { lo := acc.lo + mesh a b subdivisions * I.lo,
+            hi := acc.hi + mesh a b subdivisions * I.hi }) acc) =
+      (xs.foldl
+        (fun acc k =>
+          let I := h.compute (leftPoint a b subdivisions k) prec
+          { lo := acc.lo + mesh a b subdivisions * I.lo,
+            hi := acc.hi + mesh a b subdivisions * I.hi }) acc) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _hmem
+        intro acc
+        rfl
+    | cons k ks ih =>
+        intro hmem
+        intro acc
+        dsimp
+        rw [hpoint k (hmem k (by simp))]
+        exact ih (fun j hj => hmem j (by simp [hj])) _
+  exact hfold (List.range subdivisions)
+    (by intro k hk; exact List.mem_range.mp hk) { lo := 0, hi := 0 }
+
 /-- The finite left-endpoint sum for the product contribution
 `f\,\Delta g`.  This is the rational rectangle area swept when the second
 side of a rectangle changes while the first is held at its left endpoint. -/
@@ -1111,6 +1152,41 @@ structure Construction (f : RealFunRaw) (a b : Rat) where
 /-- The constructive integral operator. -/
 def integral (f : RealFunRaw) (a b : Rat) (c : Construction f a b) : RealRaw :=
   Certificate.realRaw c.certificate
+
+/-- Two integral constructions with the same plan represent the same raw
+integral when their integrand enclosures agree at every finite sample read by
+that plan.  This is the formal reason a dyadic-only special-function
+evaluator can replace a general evaluator inside the equal-dyadic integral:
+the replacement need not be defined by the same algorithm away from the
+sample grid. -/
+theorem integral_equiv_of_plan_and_samples
+    {f g : RealFunRaw} {a b : Rat}
+    (cf : Construction f a b) (cg : Construction g a b)
+    (hplan : cf.plan = cg.plan)
+    (hsamples : forall n k,
+      k < (cf.plan n).subdivisions ->
+      f.compute (leftPoint a b (cf.plan n).subdivisions k)
+        (cf.plan n).evalPrecision =
+        g.compute (leftPoint a b (cf.plan n).subdivisions k)
+        (cf.plan n).evalPrecision) :
+    (integral f a b cf).Equiv (integral g a b cg) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (integral f a b cf) (integral g a b cg) n n).2
+  have hcompute :
+      (integral f a b cf).compute n =
+        (integral g a b cg).compute n := by
+    unfold integral Certificate.realRaw Raw.toRealRaw algorithm
+    rw [← hplan]
+    apply riemannLeftInterval_congr_of_samples
+    intro k hk
+    exact hsamples n k hk
+  rw [hcompute]
+  unfold QInterval.Overlaps
+  have hwidth := cg.certificate.width_nonneg n
+  change 0 <= ((integral g a b cg).compute n).width at hwidth
+  grind [QInterval.width]
 
 /-- The exact constant integrand `x ↦ c`, as a raw function. -/
 def constantFunRaw (c : Rat) : RealFunRaw :=
