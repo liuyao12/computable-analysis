@@ -950,6 +950,32 @@ theorem oneMinusCosFunRaw_valid
     change (C.compute n).hi - (C.compute n).lo <= eps.val at hwidth
     grind
 
+theorem oneMinusCosFunRaw_bounds
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {x : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    0 <= ((oneMinusCosFunRaw B).compute x n).lo /\
+      ((oneMinusCosFunRaw B).compute x n).hi <= 1 := by
+  simp only [oneMinusCosFunRaw, dif_pos hx]
+  have ht := arctanInverse_slope_bounded B x hx n
+  have htarg : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x) := by
+    change 0 <= 2 * x /\ 2 * x <= 1
+    constructor
+    · exact Rat.mul_nonneg (by native_decide) hx.1
+    · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+        (by native_decide : (0 : Rat) <= 2)
+      have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+      rw [hhalf] at h
+      exact h
+  have htv := B.tangentRaw_valid (2 * x) htarg
+  have hto := RealRaw.interval_order_of_valid
+    { compute := B.tangentRaw.compute (2 * x) htarg } htv n
+  have hlo := rationalCircleCos_bounds ht.1 (by grind [ht.2])
+  have hhi := rationalCircleCos_bounds (by grind [ht.1]) ht.2
+  change 0 <= 1 - ((cosPiRawOfArctan B x _).compute n).hi /\
+    1 - ((cosPiRawOfArctan B x _).compute n).lo <= 1
+  simpa [cosPiRawOfArctan, rationalCircleCosInterval] using
+    (And.intro (by grind [hhi.2]) (by grind [hlo.1]))
+
 def primitiveRawOfArctan
     (B : IntegralIdentities.ArctanInverseBisection) : RealFunRaw :=
   RealFunRaw.mul reciprocalPiFunRaw (oneMinusCosFunRaw B)
