@@ -473,6 +473,38 @@ theorem rationalCircleSinInterval_width_le
   · grind
   · exact hsin
 
+theorem rationalCircleSin_difference_le_qabs
+    {a b : Rat} (ha0 : 0 <= a) (ha1 : a <= 1)
+    (hb0 : 0 <= b) (hb1 : b <= 1) :
+    qabs (rationalCircleSin a - rationalCircleSin b) <=
+      2 * qabs (a - b) := by
+  by_cases hab : a <= b
+  · have hsin := rationalCircleSin_width_le ha0 hab hb1
+    have hmono := rationalCircleSin_mono ha0 hab hb1
+    have hdiff : 0 <= rationalCircleSin b - rationalCircleSin a := by
+      have hnon : 0 <= 2 * (b - a) := by
+        exact Rat.mul_nonneg (by native_decide) (by grind)
+      grind
+    rw [show rationalCircleSin a - rationalCircleSin b =
+        -(rationalCircleSin b - rationalCircleSin a) by
+          grind [Rat.sub_eq_add_neg], qabs_neg,
+      qabs_eq_self_of_nonneg hdiff]
+    rw [show qabs (a - b) = b - a by
+      rw [show a - b = -(b - a) by grind [Rat.sub_eq_add_neg], qabs_neg,
+        qabs_eq_self_of_nonneg (by grind : 0 <= b - a)]]
+    exact hsin
+  · have hba : b <= a := by grind
+    have hsin := rationalCircleSin_width_le hb0 hba ha1
+    have hmono := rationalCircleSin_mono hb0 hba ha1
+    have hdiff : 0 <= rationalCircleSin a - rationalCircleSin b := by
+      have hnon : 0 <= 2 * (a - b) := by
+        exact Rat.mul_nonneg (by native_decide) (by grind)
+      grind
+    rw [qabs_eq_self_of_nonneg hdiff]
+    rw [show qabs (a - b) = a - b by
+      exact qabs_eq_self_of_nonneg (by grind)]
+    exact hsin
+
 private theorem rationalCircleSinInterval_valid
     (u : Nat -> QInterval)
     (hu : RealRaw.ValidCompute u)
