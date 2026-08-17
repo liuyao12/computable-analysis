@@ -5304,15 +5304,15 @@ abbrev e : Real := eCertified
 
 theorem eEulerNested_mem_eCertified_alternatives :
     eEulerNested ∈ eCertified.alternatives := by
-  simp [eCertified, Real.withAlternative]
+  simp [Real.alternatives, eCertified, Real.withAlternative]
 
 theorem eEulerStabilized_mem_eCertified_alternatives :
     eEulerStabilized ∈ eCertified.alternatives := by
-  simp [eCertified, Real.withAlternative]
+  simp [Real.alternatives, eCertified, Real.withAlternative]
 
 theorem ePowerSeries_mem_eCertified_alternatives :
     ePowerSeries ∈ eCertified.alternatives := by
-  simp [eCertified, Real.withAlternative]
+  simp [Real.alternatives, eCertified, Real.withAlternative]
 
 /-- The preferred compound-interest view of the abstract `e` handle. -/
 def eCompoundInterestRepresentation : Real.Representation e :=

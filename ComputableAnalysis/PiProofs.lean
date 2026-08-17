@@ -15241,23 +15241,15 @@ the end of this file. -/
 def piCertifiedPerimeter : Real :=
   { preferred := piCircleArea
     valid := by simpa [AreaValid] using AreaLoopValidity.areaValid
-    alternatives := [piCircumferenceStabilized, piCircumferenceReboxed]
-    alternative_valid := by
-      intro rep hrep
-      cases hrep with
-      | head => exact piCircumferenceStabilized_valid
-      | tail _ htail =>
-          cases htail with
-          | head => exact piCircumferenceReboxed_valid
-          | tail _ htail => cases htail
-    coherent := by
-      intro rep hrep
-      cases hrep with
-      | head => exact piCircumferenceStabilized_equiv_piCircleArea
-      | tail _ htail =>
-          cases htail with
-          | head => exact piCircumferenceReboxed_equiv_piCircleArea
-          | tail _ htail => cases htail }
+    implementations :=
+      [ { raw := piCircumferenceStabilized
+          valid := piCircumferenceStabilized_valid
+          equivalent := RealRaw.equiv_symm
+            piCircumferenceStabilized_equiv_piCircleArea }
+        { raw := piCircumferenceReboxed
+          valid := piCircumferenceReboxed_valid
+          equivalent := RealRaw.equiv_symm
+            piCircumferenceReboxed_equiv_piCircleArea } ] }
 
 theorem piCertifiedPerimeter_preferred :
     piCertifiedPerimeter.preferred = piCircleArea :=
@@ -18144,15 +18136,10 @@ explicit finite registry above. -/
 def piCertified : Real where
   preferred := piCircleArea
   valid := piPresentation_valid .area
-  alternatives := piCertifiedViews.map PiView.raw
-  alternative_valid := by
-    intro rep hrep
-    obtain ⟨view, _, rfl⟩ := List.mem_map.mp hrep
-    exact view.valid
-  coherent := by
-    intro rep hrep
-    obtain ⟨view, _, rfl⟩ := List.mem_map.mp hrep
-    exact view.equiv_piCircleArea
+  implementations := piCertifiedViews.map fun view =>
+    { raw := view.raw
+      valid := view.valid
+      equivalent := RealRaw.equiv_symm view.equiv_piCircleArea }
 
 theorem piCertified_preferred : piCertified.preferred = piCircleArea :=
   rfl

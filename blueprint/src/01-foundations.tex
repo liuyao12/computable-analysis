@@ -646,10 +646,11 @@ easier to show.
 \uses{def:raw-real,def:raw-equiv}
 The current Lean-facing real type is a \emph{certified handle}, not a quotient
 or a completed field.  It stores one preferred valid raw interval algorithm
-and a finite list of alternative valid algorithms, each equipped with a proof
-of \(\Equiv\) to the preferred one.  This makes a chosen computation and its
-rate directly available while recording the representation changes that have
-already been proved.
+and a finite spanning registry of certified implementation edges.  Each edge
+records only that its child algorithm is valid and equivalent to its parent;
+pairwise equivalences are derived by transitivity when needed.  Stage
+algorithms remain the primary proof objects, while rates and future cost data
+are optional implementation metadata.
 In particular, \code{Real.Representation.equiv} proves that any two certified
 representations of the same handle have equivalent raw evaluators.  This is an
 interoperability theorem about proved representations, not an identification
@@ -1338,9 +1339,9 @@ is nonzero as a real number.  For nonzero \(z\), define
 \lean{ComputableAnalysis.Complex}
 \uses{def:complex-raw}
 The current Lean-facing complex type stores a preferred certified complex-box
-algorithm and a finite list of certified equivalent alternatives.  As for
-\code{Real}, this is a computation-oriented representation layer rather than
-a quotient construction.
+algorithm and a finite spanning registry of certified implementation edges.
+As for \code{Real}, this is a computation-oriented representation layer rather
+than a quotient construction.
 \end{definition}
 
 \begin{proposition}[Complex raw arithmetic is representation-aware]\label{thm:complex-field}

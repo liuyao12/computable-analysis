@@ -2591,7 +2591,7 @@ namespace RealRaw
 
 def Valid (x : RealRaw) : Prop := ValidCompute x.compute
 
-/-- A cofinal schedule of requested stages.
+/-- A cofinal schedule of computation stages.
 
 The schedule may skip stages, but it must move monotonically forward and
 eventually pass every requested stage. -/
@@ -3500,33 +3500,31 @@ end RealRaw
 /-- A certified handle for a defined real number.
 
 This is the concrete project-facing layer above `RealRaw`: it records a chosen
-valid raw algorithm, together with any alternative raw algorithms already proved
-valid and equivalent to it.  The structure keeps computation first-class while
-still tracking the equivalence class it is meant to represent.
+valid raw algorithm, together with a finite certified spanning registry of
+implementation edges.  The structure keeps computation first-class while
+still tracking the abstract value it is meant to represent.
 -/
+/- A certified edge in the implementation tree of an abstract real.  The
+   parent is supplied by the containing `Real` (or by a future tree node); the
+   edge stores only the child algorithm, its validity proof, and the single
+   equivalence certificate needed to connect it to the parent. -/
+structure RealImplementation (parent : RealRaw) where
+  raw : RealRaw
+  valid : raw.Valid
+  equivalent : parent.Equiv raw
+  rate : RealRaw.Rate raw.compute := raw.rate
+
 structure Real where
   preferred : RealRaw
   valid : preferred.Valid
-  alternatives : List RealRaw := []
-  alternative_valid : forall rep, List.Mem rep alternatives -> rep.Valid := by
-    intro rep h
-    cases h
-  coherent : forall rep, List.Mem rep alternatives -> rep.Equiv preferred := by
-    intro rep h
-    cases h
+  implementations : List (RealImplementation preferred) := []
 
 namespace Real
 
 def ofRaw (x : RealRaw) (h : x.Valid) : Real where
   preferred := x
   valid := h
-  alternatives := []
-  alternative_valid := by
-    intro rep hrep
-    cases hrep
-  coherent := by
-    intro rep hrep
-    cases hrep
+  implementations := []
 
 def ofRat (q : Rat) : Real :=
   ofRaw (RealRaw.ofRat q) (RealRaw.ofRat_valid q)
@@ -3537,24 +3535,50 @@ def compute (x : Real) (n : Nat) : QInterval :=
 def rate (x : Real) : RealRaw.Rate x.preferred.compute :=
   x.preferred.rate
 
+/- Rates and complexity information belong to implementations, not to the
+   meaning of the abstract real.  The raw field remains available for legacy
+   algorithms, while this projection makes the intended user-facing API
+   explicit. -/
+def implementationRate {x : Real} (impl : RealImplementation x.preferred) :
+    RealRaw.Rate impl.raw.compute :=
+  impl.rate
+
 def representations (x : Real) : List RealRaw :=
-  x.preferred :: x.alternatives
+  x.preferred :: x.implementations.map RealImplementation.raw
+
+/- Compatibility views over the implementation tree.  These are derived
+   facts, not stored pairwise certificates. -/
+def alternatives (x : Real) : List RealRaw :=
+  x.implementations.map RealImplementation.raw
+
+theorem alternative_valid {x : Real} {rep : RealRaw}
+    (h : rep ∈ x.alternatives) : rep.Valid := by
+  obtain ⟨impl, himpl, rfl⟩ := List.mem_map.mp h
+  exact impl.valid
+
+theorem coherent {x : Real} {rep : RealRaw}
+    (h : rep ∈ x.alternatives) : rep.Equiv x.preferred := by
+  obtain ⟨impl, himpl, rfl⟩ := List.mem_map.mp h
+  exact RealRaw.equiv_symm impl.equivalent
+
+theorem implementation_equiv_preferred {x : Real}
+    (impl : RealImplementation x.preferred) :
+    impl.raw.Equiv x.preferred :=
+  RealRaw.equiv_symm impl.equivalent
+
+theorem implementations_equiv {x : Real}
+    (left right : RealImplementation x.preferred) :
+    left.raw.Equiv right.raw := by
+  exact RealRaw.equiv_trans left.valid x.valid right.valid
+    (implementation_equiv_preferred left) right.equivalent
 
 def withAlternative (x : Real) (rep : RealRaw) (hvalid : rep.Valid)
     (h : rep.Equiv x.preferred) : Real where
   preferred := x.preferred
   valid := x.valid
-  alternatives := rep :: x.alternatives
-  alternative_valid := by
-    intro candidate hc
-    cases hc with
-    | head => exact hvalid
-    | tail _ hc => exact x.alternative_valid candidate hc
-  coherent := by
-    intro candidate hc
-    cases hc with
-    | head => exact h
-    | tail _ hc => exact x.coherent candidate hc
+  implementations :=
+    { raw := rep, valid := hvalid, equivalent := RealRaw.equiv_symm h } ::
+      x.implementations
 
 def Equiv (x y : Real) : Prop :=
   x.preferred.Equiv y.preferred
@@ -3603,8 +3627,14 @@ def preferredRepresentation (x : Real) : Representation x where
 def alternativeRepresentation {x : Real} (rep : RealRaw)
     (h : List.Mem rep x.alternatives) : Representation x where
   raw := rep
-  valid := x.alternative_valid rep h
-  agrees := x.coherent rep h
+  valid := x.alternative_valid h
+  agrees := x.coherent h
+
+def implementationRepresentation {x : Real}
+    (impl : RealImplementation x.preferred) : Representation x where
+  raw := impl.raw
+  valid := impl.valid
+  agrees := implementation_equiv_preferred impl
 
 def computeUsing {x : Real} (rep : Representation x) (n : Nat) : QInterval :=
   rep.raw.compute n
@@ -4563,24 +4593,23 @@ structure ComplexCert where
 /-- A certified handle for a defined complex number.
 
 This is the concrete project-facing layer above `ComplexRaw`: it records a
-chosen valid box algorithm, together with any alternative box algorithms already
-proved equivalent to it.
+chosen valid box algorithm, together with a finite certified spanning registry
+of implementation edges.
 -/
+structure ComplexImplementation (parent : ComplexRaw) where
+  cert : ComplexCert
+  equivalent : parent.Equiv cert.raw
+  rate : ComplexRaw.Rate cert.raw.compute := cert.raw.rate
+
 structure Complex where
   preferred : ComplexCert
-  alternatives : List ComplexCert := []
-  coherent : forall rep, rep ∈ alternatives -> rep.raw.Equiv preferred.raw := by
-    intro rep h
-    cases h
+  implementations : List (ComplexImplementation preferred.raw) := []
 
 namespace Complex
 
 def ofCert (z : ComplexCert) : Complex where
   preferred := z
-  alternatives := []
-  coherent := by
-    intro rep h
-    cases h
+  implementations := []
 
 def ofRaw (z : ComplexRaw) (h : z.Valid) : Complex :=
   ofCert { raw := z, valid := h }
@@ -4599,17 +4628,21 @@ def rate (z : Complex) : ComplexRaw.Rate z.preferred.raw.compute :=
   z.preferred.raw.rate
 
 def representations (z : Complex) : List ComplexCert :=
-  z.preferred :: z.alternatives
+  z.preferred :: z.implementations.map ComplexImplementation.cert
+
+def alternatives (z : Complex) : List ComplexCert :=
+  z.implementations.map ComplexImplementation.cert
+
+theorem coherent {z : Complex} {rep : ComplexCert}
+    (h : rep ∈ z.alternatives) : rep.raw.Equiv z.preferred.raw := by
+  obtain ⟨impl, himpl, rfl⟩ := List.mem_map.mp h
+  exact ComplexRaw.equiv_symm impl.equivalent
 
 def withAlternative (z : Complex) (rep : ComplexCert)
     (h : rep.raw.Equiv z.preferred.raw) : Complex where
   preferred := z.preferred
-  alternatives := rep :: z.alternatives
-  coherent := by
-    intro candidate hc
-    cases hc with
-    | head => exact h
-    | tail _ hc => exact z.coherent candidate hc
+  implementations :=
+    { cert := rep, equivalent := ComplexRaw.equiv_symm h } :: z.implementations
 
 def Equiv (z w : Complex) : Prop :=
   z.preferred.raw.Equiv w.preferred.raw
@@ -4634,7 +4667,7 @@ def preferredRepresentation (z : Complex) : Representation z where
 def alternativeRepresentation {z : Complex} (rep : ComplexCert)
     (h : rep ∈ z.alternatives) : Representation z where
   cert := rep
-  agrees := z.coherent rep h
+  agrees := z.coherent h
 
 def computeUsing {z : Complex} (rep : Representation z) (n : Nat) : QBox :=
   rep.cert.raw.compute n

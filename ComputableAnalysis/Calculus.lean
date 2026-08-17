@@ -884,10 +884,13 @@ structure EffectiveModulusOn (f : RealFunRaw) (a b : Rat) where
           (f.compute y (evalPrecision n))
           n
 
-/- Constructive interval-sum integration. -/
+/- Constructive interval-sum integration.  The basic computation index is a
+   stage number.  Higher-level constructors may use a tolerance to choose a
+   sufficiently advanced stage, but tolerance selection is not part of the
+   `RealRaw` foundation. -/
 namespace Integral
 
-/-- Effective choices for computing an integral to a requested precision. -/
+/-- Effective choices for computing an integral at a selected stage. -/
 structure Plan where
   subdivisions : Nat
   evalPrecision : Nat
@@ -1388,7 +1391,7 @@ theorem endpointDifferenceRaw_adjacent_additive
 the integral of `dF` over the specific interval `[a,b]` is equal, as a
 computable real number, to `F(b)-F(a)`.
 
-Equality of computable reals is `RealRaw.Equiv`: at every requested precision,
+Equality of computable reals is `RealRaw.Equiv`: at every common computation stage,
 the two rational intervals overlap. -/
 def DefiniteIntegralEqualsEndpointDifference
     (F dF : RealFunRaw) (a b : Rat)
@@ -2904,7 +2907,7 @@ end DerivativeBoundFTC
 
 This is the public theorem name for the finite cell-bound route: once the
 derivative-bound certificate supplies overlapping bounded-sum and endpoint
-intervals at every requested precision, the two raw real algorithms are
+intervals at every selected computation stage, the two raw real algorithms are
 equivalent. -/
 theorem derivativeBoundFTC
     {F dF : RealFunRaw} {a b : Rat}
