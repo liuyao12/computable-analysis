@@ -1,5 +1,6 @@
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.CauchyPi
+import ComputableAnalysis.Calculus
 
 /-!
 # The half-interval integral of `sin (pi * x)`
@@ -3009,6 +3010,48 @@ theorem halfIntegral_equiv_reciprocalPi_of_FTC
     simpa [endpointDifferenceRaw, RealRaw.Valid] using h.endpoint_valid
   exact RealRaw.equiv_trans hintegral hendpointValid
     reciprocalPiRaw_valid (halfIntegral_equiv_endpoint h) hendpoint
+
+/-- Preferred-API version of the same final assembly.  Once the sine evaluator
+has an interval-regularity proof, a monotone Darboux schedule supplies the
+equal-mesh integral directly through `ConstructionFor`; the remaining FTC and
+endpoint facts are ordinary `RealRaw.Equiv` certificates. -/
+theorem ArctanSinPiConstruction.monotoneScheduleIntegral_equiv_reciprocalPi
+    (S : ArctanSinPiConstruction)
+    (hregular : IntervalRegularOn S.onHalf)
+    (hmonotone : NondecreasingOnInterval S.onHalf)
+    (hinterval : S.onHalf.lower <= S.onHalf.upper)
+    (schedule : ComputableAnalysis.Integral.MonotoneDarbouxSchedule
+      S.onHalf hregular hmonotone hinterval)
+    (hFTC :
+      (ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor schedule).Equiv
+        (endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+          (endpointDifference_valid_of_fun_valid
+            S.canonicalPrimitive_valid
+            S.canonicalPrimitive_domain_zero
+            S.canonicalPrimitive_domain_half)))
+    (hendpoint :
+      (endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+        (endpointDifference_valid_of_fun_valid
+          S.canonicalPrimitive_valid
+          S.canonicalPrimitive_domain_zero
+          S.canonicalPrimitive_domain_half)).Equiv reciprocalPiRaw) :
+    (ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor schedule).Equiv
+      reciprocalPiRaw := by
+  have hintegral :=
+    ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor_valid schedule
+  have hendpointValid :
+      (endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+        (endpointDifference_valid_of_fun_valid
+          S.canonicalPrimitive_valid
+          S.canonicalPrimitive_domain_zero
+          S.canonicalPrimitive_domain_half)).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      (endpointDifference_valid_of_fun_valid
+        S.canonicalPrimitive_valid
+        S.canonicalPrimitive_domain_zero
+        S.canonicalPrimitive_domain_half)
+  exact RealRaw.equiv_trans hintegral hendpointValid
+    reciprocalPiRaw_valid hFTC hendpoint
 
 end SinPiIntegral
 

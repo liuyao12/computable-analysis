@@ -4608,6 +4608,43 @@ theorem monotoneDarbouxScheduleRaw_width_le_of_tolerance
       (s.evalPrecision n) (s.input_budget n))
     hbudget
 
+/-- Convert a certified monotone Darboux schedule into the public integral
+construction interface.  The executable computation is exactly the schedule's
+equal-mesh endpoint sum; the schedule validity theorem supplies the
+`RealRaw.ValidCompute` certificate required by `ConstructionFor`. -/
+def monotoneDarbouxScheduleConstructionFor
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
+    Integral.ConstructionFor F where
+  compute := (monotoneDarbouxScheduleRaw s).compute
+  certificate := monotoneDarbouxScheduleRaw_valid s
+
+theorem monotoneDarbouxScheduleConstructionFor_compute
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
+    (monotoneDarbouxScheduleConstructionFor s).compute =
+      monotoneDarbouxScheduleCompute F hinterval s.pieces
+        s.evalPrecision s.pieces_pos := rfl
+
+def monotoneDarbouxScheduleIntegralFor
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) : RealRaw :=
+  Integral.integralFor F (monotoneDarbouxScheduleConstructionFor s)
+
+theorem monotoneDarbouxScheduleIntegralFor_valid
+    {F : FunctionOnInterval} {hregular : IntervalRegularOn F}
+    {hmonotone : NondecreasingOnInterval F}
+    {hinterval : F.lower <= F.upper}
+    (s : MonotoneDarbouxSchedule F hregular hmonotone hinterval) :
+    (monotoneDarbouxScheduleIntegralFor s).Valid :=
+  Integral.integralFor_valid F (monotoneDarbouxScheduleConstructionFor s)
+
 /-- The first-class integral object for monotone interval functions.
 
 The intended construction is by lower and upper endpoint sums on a static
