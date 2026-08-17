@@ -2924,6 +2924,48 @@ def ArctanSinPiConstruction.sinPiOnHalf_effectiveModulus
     rcases hsin with ⟨hxy, hyx, hwidthx, hwidthy⟩
     constructor <;> grind
 
+/-! Monotonicity also transports through the same finite circle map.  This is
+the bridge needed by the endpoint Darboux constructor: the inverse search
+supplies a monotone tangent branch, and the rational formula
+`2*u/(1+u^2)` is monotone on the certified unit-slope interval. -/
+
+theorem ArctanSinPiConstruction.onHalf_nondecreasing_of_tangent_nondecreasing
+    (S : ArctanSinPiConstruction)
+  (htangent : NondecreasingOnInterval
+      (IntegralIdentities.tangentOnUnit S.inverse)) :
+    NondecreasingOnInterval S.onHalf := by
+  intro x y hx hy hxy n
+  change 0 <= x ∧ x <= (1 : Rat) / 2 at hx
+  change 0 <= y ∧ y <= (1 : Rat) / 2 at hy
+  have hx' : 0 <= 2 * x /\ 2 * x <= 1 := by
+    constructor
+    · exact Rat.mul_nonneg (by native_decide) hx.1
+    · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+        (by native_decide : (0 : Rat) <= 2)
+      rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+      exact h
+  have hy' : 0 <= 2 * y /\ 2 * y <= 1 := by
+    constructor
+    · exact Rat.mul_nonneg (by native_decide) hy.1
+    · have h := Rat.mul_le_mul_of_nonneg_left hy.2
+        (by native_decide : (0 : Rat) <= 2)
+      rw [show (2 : Rat) * (1 / 2) = 1 by native_decide] at h
+      exact h
+  have htan := htangent (2 * x) (2 * y) hx' hy'
+    (Rat.mul_le_mul_of_nonneg_left hxy
+      (by native_decide : (0 : Rat) <= 2)) n
+  have hUx :=
+    IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
+      S.inverse (2 * x) hx' n
+  have hUy :=
+    IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
+      S.inverse (2 * y) hy' n
+  change (rationalCircleSinInterval
+      (S.inverse.tangentRaw.compute (2 * x) _ n)).lo <=
+    (rationalCircleSinInterval
+      (S.inverse.tangentRaw.compute (2 * y) _ n)).hi
+  exact rationalCircleSin_mono hUx.1 htan hUy.2.2
+
 /-- The equal-dyadic-subdivision integral of `sin (pi*x)` on `[0,1/2]`.
 
 The caller supplies the usual interval-sum certificate.  This is the
@@ -3052,6 +3094,42 @@ theorem ArctanSinPiConstruction.monotoneScheduleIntegral_equiv_reciprocalPi
         S.canonicalPrimitive_domain_half)
   exact RealRaw.equiv_trans hintegral hendpointValid
     reciprocalPiRaw_valid hFTC hendpoint
+
+/-- The theorem-facing specialization once the inverse branch has supplied
+monotonicity and the two finite endpoint laws.  This keeps the analytic
+certificate small at the call site: the circle monotonicity transport and the
+reciprocal-pi endpoint algebra are assembled here. -/
+theorem ArctanSinPiConstruction.monotoneScheduleIntegral_equiv_reciprocalPi_of_tangent_nondecreasing
+    (S : ArctanSinPiConstruction)
+    (htangent : NondecreasingOnInterval
+      (IntegralIdentities.tangentOnUnit S.inverse))
+    (hregular : IntervalRegularOn S.onHalf)
+    (hinterval : S.onHalf.lower <= S.onHalf.upper)
+    (schedule : ComputableAnalysis.Integral.MonotoneDarbouxSchedule
+      S.onHalf hregular
+      (S.onHalf_nondecreasing_of_tangent_nondecreasing htangent)
+      hinterval)
+    (hFTC :
+      (ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor schedule).Equiv
+        (endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+          (endpointDifference_valid_of_fun_valid
+            S.canonicalPrimitive_valid
+            S.canonicalPrimitive_domain_zero
+            S.canonicalPrimitive_domain_half)))
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (ht1 : (S.inverse.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Equiv
+      RealRaw.one) :
+    (ComputableAnalysis.Integral.monotoneDarbouxScheduleIntegralFor schedule).Equiv
+      reciprocalPiRaw := by
+  apply S.monotoneScheduleIntegral_equiv_reciprocalPi
+    hregular
+    (S.onHalf_nondecreasing_of_tangent_nondecreasing htangent)
+    hinterval schedule hFTC
+  simpa [canonicalSineEndpointIntegral] using
+    (canonicalSineEndpointIntegral_equiv_reciprocalPi S ht0 ht1)
 
 end SinPiIntegral
 
