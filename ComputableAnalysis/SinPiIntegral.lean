@@ -6,11 +6,11 @@ import ComputableAnalysis.Calculus
 # The half-interval integral of `sin (pi * x)`
 
 This file is the proof-facing entry point for the first nontrivial
-trigonometric integral.  The circle layer uses normalized quarter-turns: its
-input `t` denotes the angle `t * pi / 2`.  Consequently the requested
-function `sin (pi * x)` is obtained at a rational input by evaluating the
-circle sine at `2 * x`; no real-valued argument and no primitive real `pi` are
-used by the evaluator.
+trigonometric integral.  The project has one public sine convention:
+`sin (pi * x)`.  The circle layer has an internal normalized coordinate `t`
+for a quarter-turn; on the public half-period we pass `t = 2 * x`.  This is
+an implementation coordinate, not a second definition of sine.  No
+real-valued argument and no primitive real `pi` are used by the evaluator.
 
 The final equality is intentionally expressed through an effective FTC
 certificate.  The certificate is where the finite interval bounds,
@@ -334,6 +334,97 @@ theorem dyadicCell_subinterval_of_source
       · exact hstep.2.1
       · exact Rat.le_trans hstep.2.2 ih.2.2
 
+private theorem dyadicCell_subinterval_of_cell
+    (a b : Rat) (path : Nat -> Bool) (hab : a <= b) :
+    forall n m, n <= m ->
+      subintervalOf (dyadicCell a b path m)
+        (dyadicCell a b path n).lo (dyadicCell a b path n).hi := by
+  intro n m
+  induction m generalizing n with
+  | zero =>
+      intro hnm
+      have hn : n = 0 := Nat.eq_zero_of_le_zero hnm
+      subst n
+      exact ⟨Rat.le_refl, (by
+        have h := dyadicCell_subinterval_of_source a b path hab 0
+        exact h.2.1), Rat.le_refl⟩
+  | succ m ih =>
+      intro hnm
+      by_cases hEq : n = m + 1
+      · subst n
+        exact ⟨Rat.le_refl, (by
+          have h := dyadicCell_subinterval_of_source a b path hab (m + 1)
+          exact h.2.1), Rat.le_refl⟩
+      · have hnm' : n <= m := by omega
+        have ih' := ih n hnm'
+        have hordered : (dyadicCell a b path m).lo <=
+            (dyadicCell a b path m).hi := by
+          have h := dyadicCell_subinterval_of_source a b path hab m
+          exact h.2.1
+        have hstep := dyadicCell_step_subinterval a b path m hordered
+        constructor
+        · exact Rat.le_trans ih'.1 hstep.1
+        constructor
+        · exact hstep.2.1
+        · exact Rat.le_trans hstep.2.2 ih'.2.2
+
+set_option maxHeartbeats 5000000 in
+theorem dyadicCell_valid_of_width_le_one
+    (a b : Rat) (path : Nat -> Bool) (hab : a <= b)
+    (hwidth : b - a <= 1) :
+    RealRaw.ValidCompute (dyadicCell a b path) := by
+  have hbound : forall n,
+      (dyadicCell a b path n).width <=
+        1 / (((n + 1 : Nat) : Rat)) := by
+    intro n
+    rw [dyadicCell_width]
+    have hpow : (n + 1 : Nat) <= 2 ^ n := by
+      induction n with
+      | zero => omega
+      | succ n ih =>
+          calc
+            n + 1 + 1 <= 2 * (n + 1) := by omega
+            _ <= 2 * 2 ^ n := Nat.mul_le_mul_left 2 ih
+            _ = 2 ^ (n + 1) := by
+              rw [Nat.pow_succ]
+              omega
+    have hdenpos : 0 < ((n + 1 : Nat) : Rat) := by
+      exact_mod_cast (Nat.succ_pos n)
+    have hpowpos : 0 < ((2 ^ n : Nat) : Rat) := by
+      exact (Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2))
+    have hnum : 0 <= b - a := by grind
+    have hone :
+        1 / ((2 ^ n : Nat) : Rat) <=
+          1 / ((n + 1 : Nat) : Rat) :=
+      FTC.one_div_nat_antitone
+        (Nat.succ_pos n) (Nat.pow_pos (by omega : 0 < 2)) hpow
+    have hone_nonneg : 0 <=
+        1 / ((n + 1 : Nat) : Rat) := by
+      simpa [Rat.div_def] using
+        (Rat.le_of_lt ((Rat.inv_pos).2 hdenpos))
+    calc
+      (b - a) / ((2 ^ n : Nat) : Rat) =
+          (b - a) * (1 / ((2 ^ n : Nat) : Rat)) := by
+            simp [Rat.div_def]
+      _ <= (b - a) * (1 / ((n + 1 : Nat) : Rat)) :=
+        Rat.mul_le_mul_of_nonneg_left hone hnum
+      _ <= 1 * (1 / ((n + 1 : Nat) : Rat)) :=
+        Rat.mul_le_mul_of_nonneg_right hwidth hone_nonneg
+      _ = 1 / ((n + 1 : Nat) : Rat) := by simp
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    have hs := (dyadicCell_subinterval_of_source a b path hab n).2.1
+    rw [dyadicCell_width]
+    exact Rat.mul_nonneg (by grind)
+      (Rat.le_of_lt ((Rat.inv_pos).2
+        ((Rat.natCast_pos).2 (Nat.pow_pos (by omega : 0 < 2)))))
+  · intro n m hnm
+    have hcell := dyadicCell_subinterval_of_cell a b path hab n m hnm
+    exact ⟨hcell.1, hcell.2.1, hcell.2.2⟩
+  · apply shrinksToZero_of_natOverSuccBound (C := 1)
+    intro n
+    exact hbound n
+
 /-- A fully executable inverse trace for a monotone interval branch.
 
 `path` is the actual finite search trace.  `value_overlaps` is the one
@@ -356,6 +447,31 @@ structure DyadicInverseTrace
         (dyadicCell I.function.lower I.function.upper path n)
         (cell_in_source n) n)
       (y.value.compute n)
+
+/-- Build the standard interval fields of a dyadic trace once its path and
+forward-image overlap proof have been supplied.  In the arctangent branch
+the source is [0,1], so the width hypothesis is discharged by arithmetic;
+the only remaining search-specific field is value_overlaps. -/
+def DyadicInverseTrace.ofPath
+    {I : InvertibleFunctionOnInterval} {y : InRangeRaw I}
+    (path : Nat -> Bool)
+    (hsource : I.function.lower <= I.function.upper)
+    (hwidth : I.function.upper - I.function.lower <= 1)
+    (value_overlaps : forall n,
+      QInterval.Overlaps
+        (I.continuous.regular.evalInterval
+          (dyadicCell I.function.lower I.function.upper path n)
+          (dyadicCell_subinterval_of_source
+            I.function.lower I.function.upper path hsource n)
+          n)
+        (y.value.compute n)) :
+    DyadicInverseTrace I y where
+  path := path
+  cell_valid := dyadicCell_valid_of_width_le_one
+    I.function.lower I.function.upper path hsource hwidth
+  cell_in_source := dyadicCell_subinterval_of_source
+    I.function.lower I.function.upper path hsource
+  value_overlaps := value_overlaps
 
 /-- Turn an executable dyadic trace into the inverse-search interface. -/
 def DyadicInverseTrace.toSearch
