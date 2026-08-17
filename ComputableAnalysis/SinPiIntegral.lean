@@ -864,7 +864,7 @@ theorem reciprocalPiFunRaw_valid : reciprocalPiFunRaw.Valid := by
   intro _ _
   exact reciprocalPiRaw_valid
 
-private theorem reciprocalPiRaw_bounds (n : Nat) :
+theorem reciprocalPiRaw_bounds (n : Nat) :
     0 <= (reciprocalPiRaw.compute n).lo /\
     (reciprocalPiRaw.compute n).hi <= 1 := by
   change 0 <= (QInterval.inv (piCircleArea.compute n)).lo /\
