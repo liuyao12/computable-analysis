@@ -8,9 +8,11 @@ The target is the project-standard identity
 `pi * integral_0^(1/2) sin (pi*x) dx = 1`.
 At a finite stage we replace `pi` by a rational enclosure center and `sin`
 by its finite Taylor polynomial.  After the change of variable `u = pi*x`,
-the displayed quantity is simply the finite primitive of the sine prefix at
-`u = pi/2`.  This file records that computable finite layer only; it does not
-assert a completed integral or an attained classical limit.
+the displayed quantity is simply the finite primitive of the single public
+sine function at `u = pi/2`.  The occurrence of `pi / 2` here is an endpoint
+of that substitution, not a second sine convention.  This file records the
+computable finite layer only; it does not assert a completed integral or an
+attained classical limit.
 -/
 
 namespace ComputableAnalysis
