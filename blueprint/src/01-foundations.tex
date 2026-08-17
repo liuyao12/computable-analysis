@@ -658,14 +658,12 @@ In particular, \code{Real.Representation.equiv} proves that any two certified
 representations of the same handle have equivalent raw evaluators.  This is an
 interoperability theorem about proved representations, not an identification
 of all raw algorithms by quotienting.
-For functions, the same distinction is kept at the appropriate level: named
-presentations use dot-qualified public names.  Thus \code{arctan.geom} and
-\code{arctan.series} are explicit domain-aware function representations, while
-the later integral and rectangle calculators are denoted
-\code{arctan.integral} and \code{arctan.integral.rectangle}.  At a certified rational
-input their raw outputs may be packaged as \code{Real} handles, and a proved
-pointwise agreement is then recorded with \code{Real.withAlternative}; no
-quotient or unproved global identification is introduced.
+For functions, the same distinction is kept at the appropriate level: a
+\code{PartialRealFunRaw} is one domain-indexed computation, while
+\code{PartialRealFunction} packages several useful computations of one named
+special function.  Their certificates assert agreement only on common domain
+points.  We do not first classify the function as continuous or analytic; we
+formalize the domain and properties needed by the application.
 \end{definition}
 
 \begin{proposition}[Raw arithmetic respects representations]\label{thm:raw-reals-field}

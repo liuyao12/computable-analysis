@@ -3739,6 +3739,9 @@ structure PartialRealFunRaw where
 
 namespace PartialRealFunRaw
 
+def Valid (f : PartialRealFunRaw) : Prop :=
+  forall x (hx : f.definedAt x), RealRaw.ValidCompute (f.compute x hx)
+
 def evalRaw (f : PartialRealFunRaw)
     (x : Rat) (h : f.definedAt x) : RealRaw where
   compute := f.compute x h
@@ -3760,6 +3763,11 @@ theorem agreeOnOverlap_of_allStages {f g : PartialRealFunRaw} :
     f.AgreeOnOverlapAllStages g -> f.AgreeOnOverlap g := by
   intro h x hx hg
   exact RealRaw.allStagesOverlap_equiv (h x hx hg)
+
+theorem agreeOnOverlap_symm {f g : PartialRealFunRaw} :
+    f.AgreeOnOverlap g -> g.AgreeOnOverlap f := by
+  intro h x hx hg
+  exact RealRaw.equiv_symm (h x hg hx)
 def apply (f : PartialRealFunRaw)
     (_validOnDomain : forall x h, RealRaw.ValidCompute (f.compute x h))
     (x : Rat) (h : f.definedAt x) : RealRaw where
@@ -3772,6 +3780,67 @@ def eval? (f : PartialRealFunRaw) (decideDomain : (x : Rat) -> Decidable (f.defi
   if h : f.definedAt x then some (f.compute x h n) else none
 
 end PartialRealFunRaw
+
+/- An abstract partial function is a certified handle for one useful special
+   function.  Its concrete representations may have different domains, so each
+   registered implementation carries explicit agreement with the preferred
+   representation on the intersection of those domains.  This avoids making
+   an unjustified global claim about the function space. -/
+structure PartialRealFunctionImplementation
+    (preferred : PartialRealFunRaw) where
+  raw : PartialRealFunRaw
+  valid : raw.Valid
+  agrees : preferred.AgreeOnOverlap raw
+
+structure PartialRealFunction where
+  preferred : PartialRealFunRaw
+  valid : preferred.Valid
+  implementations : List
+    (PartialRealFunctionImplementation preferred) := []
+
+namespace PartialRealFunction
+
+structure Representation (f : PartialRealFunction) where
+  raw : PartialRealFunRaw
+  valid : raw.Valid
+  agrees : raw.AgreeOnOverlap f.preferred
+
+def ofRaw (raw : PartialRealFunRaw) (h : raw.Valid) : PartialRealFunction where
+  preferred := raw
+  valid := h
+  implementations := []
+
+def representations (f : PartialRealFunction) : List PartialRealFunRaw :=
+  f.preferred :: f.implementations.map
+    PartialRealFunctionImplementation.raw
+
+theorem implementation_agrees_preferred {f : PartialRealFunction}
+    (impl : PartialRealFunctionImplementation f.preferred) :
+    impl.raw.AgreeOnOverlap f.preferred :=
+  PartialRealFunRaw.agreeOnOverlap_symm impl.agrees
+
+def preferredRepresentation (f : PartialRealFunction) : Representation f where
+  raw := f.preferred
+  valid := f.valid
+  agrees := by
+    intro x hx hx'
+    exact RealRaw.equiv_refl (f.preferred.evalRaw x hx) (f.valid x hx)
+
+def implementationRepresentation {f : PartialRealFunction}
+    (impl : PartialRealFunctionImplementation f.preferred) : Representation f where
+  raw := impl.raw
+  valid := impl.valid
+  agrees := implementation_agrees_preferred impl
+
+def withAlternative (f : PartialRealFunction) (raw : PartialRealFunRaw)
+    (hvalid : raw.Valid)
+    (h : f.preferred.AgreeOnOverlap raw) : PartialRealFunction where
+  preferred := f.preferred
+  valid := f.valid
+  implementations :=
+    { raw := raw, valid := hvalid, agrees := h } :: f.implementations
+
+end PartialRealFunction
 
 structure EffectiveContinuous (f : RealFunRaw) where
   inputRadius : Nat -> QPos

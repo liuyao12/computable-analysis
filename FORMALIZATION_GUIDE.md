@@ -181,7 +181,7 @@ finished general theorem.
 support rather than a stable downstream API.  Prefer a theorem in one of the
 families above, and consult its module header before using it.
 
-## Five representations to keep separate
+## Representations to keep separate
 
 Most mistakes come from conflating these layers.
 
@@ -191,7 +191,53 @@ Most mistakes come from conflating these layers.
 | `RealRaw` | A sequence of rational interval boxes | Validity; supply `RealRaw.Valid` |
 | `RealRaw.Equiv` | Overlap-based equality of two valid raw reals | Equality of implementations by definitional reduction |
 | `PartialRealFunRaw` | A function with a pointwise domain | A whole-interval domain certificate |
+| `PartialRealFunction` | An abstract special-function handle with certified concrete representations | A claim that it belongs to a preselected classical function space |
 | `FunctionOnInterval` | A partial function certified at every rational point of `[a,b]` | Continuity, interval regularity, differentiability, or integrability |
+
+### Functions: concrete first, abstract only when useful
+
+Use `PartialRealFunRaw` (or `RealFunRaw` when the domain is total on rationals)
+for one concrete computation:
+
+```text
+domain + (x, stage) ↦ rational interval
+```
+
+The domain is part of the representation.  It is not necessary to decide
+whether the function is “continuous,” “analytic,” or any other classical
+category before formalizing a useful theorem.
+
+When a special function has several useful algorithms, package them as a
+`PartialRealFunction`.  Each implementation carries:
+
+- pointwise validity on its own domain; and
+- an explicit `AgreeOnOverlap` proof with the preferred implementation.
+
+The agreement statement is deliberately only about the intersection of the
+domains.  If a new representation is compared through an intermediate one,
+the intermediate domain must cover the relevant intersection; otherwise prove
+the new common-domain agreement directly.  This prevents an invalid appeal to
+transitivity across changing domains.
+
+Recommended pattern:
+
+```lean
+def preferred : PartialRealFunRaw := ...
+theorem preferred_valid : preferred.Valid := ...
+
+def alternate : PartialRealFunRaw := ...
+theorem alternate_valid : alternate.Valid := ...
+theorem alternate_agrees :
+    preferred.AgreeOnOverlap alternate := ...
+
+def specialFunction : PartialRealFunction :=
+  (PartialRealFunction.ofRaw preferred preferred_valid).withAlternative
+    alternate alternate_valid alternate_agrees
+```
+
+This is the project’s “pre-classical” stance: formalize the special function
+and the algorithms actually needed, rather than first postulating a general
+function space and proving a classification theorem.
 
 For a rational formula with no singularities, begin with
 `FunctionOnInterval.exactRat`.  For a rational quotient, begin with `RatFun`
