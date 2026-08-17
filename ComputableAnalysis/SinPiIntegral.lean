@@ -856,6 +856,109 @@ theorem rationalCircleCos_bounds {u : Rat}
   · simpa [hcos1] using hleft
   · simpa [hcos0] using hright
 
+theorem cosPiRawOfArctan_zero_equiv_one_of_tangent_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero) :
+    (cosPiRawOfArctan B 0
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.one := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (cosPiRawOfArctan B 0 ⟨by native_decide, by native_decide⟩)
+    RealRaw.one n n).2
+  have hT : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Valid :=
+    B.tangentAt_valid 0 RationalCircle.GeometricTrig.firstQuadrantBranch_zero
+  have hbounds := B.tangentAt_stays_in_unitSlope 0
+    RationalCircle.GeometricTrig.firstQuadrantBranch_zero n
+  have hzero := (RealRaw.compareAt_overlap_iff
+    (B.tangentAt 0 RationalCircle.GeometricTrig.firstQuadrantBranch_zero)
+    RealRaw.zero n n).1 (ht n)
+  simp [RealRaw.zero, RealRaw.ofRat] at hzero
+  let ht0 : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * 0) := by
+    dsimp [RationalCircle.GeometricTrig.firstQuadrantBranch,
+      RationalCircle.GeometricTrig.unitIntervalBranch]
+    constructor <;> native_decide
+  have hbounds' : subintervalOf (B.tangentRaw.compute (2 * 0) ht0 n) 0 1 := by
+    simpa [IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      IntegralIdentities.ArctanInverseBisection.tangentAt] using hbounds
+  change QInterval.Overlaps
+    (rationalCircleCosInterval (B.tangentRaw.compute (2 * 0) ht0 n))
+    { lo := 1, hi := 1 }
+  simp only [rationalCircleCosInterval]
+  have hlo : ((B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).compute n).lo = 0 := by
+    apply Rat.le_antisymm
+    · exact hzero.1
+    · exact hbounds.1
+  have hlo' : (B.tangentRaw.compute (2 * 0) ht0 n).lo = 0 := by
+    simpa [IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      IntegralIdentities.ArctanInverseBisection.tangentAt] using hlo
+  rw [hlo']
+  have hcos := rationalCircleCos_bounds
+    (by grind [hbounds'.1, hbounds'.2.1]) hbounds'.2.2
+  have hcos0 : rationalCircleCos 0 = 1 := by native_decide
+  rw [hcos0]
+  unfold QInterval.Overlaps
+  change rationalCircleCos (B.tangentRaw.compute (2 * 0) ht0 n).hi <= 1 /\
+    (1 : Rat) <= 1
+  exact ⟨hcos.2, by native_decide⟩
+
+theorem cosPiRawOfArctan_half_equiv_zero_of_tangent_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht : (B.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Equiv
+      RealRaw.one) :
+    (cosPiRawOfArctan B (1 / 2)
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.zero := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (cosPiRawOfArctan B (1 / 2) ⟨by native_decide, by native_decide⟩)
+    RealRaw.zero n n).2
+  have hT : (B.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Valid :=
+    B.tangentAt_valid 1 RationalCircle.GeometricTrig.firstQuadrantBranch_one
+  have hbounds := B.tangentAt_stays_in_unitSlope 1
+    RationalCircle.GeometricTrig.firstQuadrantBranch_one n
+  have hone := (RealRaw.compareAt_overlap_iff
+    (B.tangentAt 1 RationalCircle.GeometricTrig.firstQuadrantBranch_one)
+    RealRaw.one n n).1 (ht n)
+  simp [RealRaw.one, RealRaw.ofRat] at hone
+  let htHalf : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * (1 / 2)) := by
+    dsimp [RationalCircle.GeometricTrig.firstQuadrantBranch,
+      RationalCircle.GeometricTrig.unitIntervalBranch]
+    constructor <;> native_decide
+  have htwo : (2 : Rat) * (1 / 2) = 1 := by native_decide
+  have hbounds' : subintervalOf
+      (B.tangentRaw.compute (2 * (1 / 2)) htHalf n) 0 1 := by
+    simpa [htwo, IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      IntegralIdentities.ArctanInverseBisection.tangentAt] using hbounds
+  have hone' : 1 <= (B.tangentRaw.compute (2 * (1 / 2)) htHalf n).hi := by
+    simpa [htwo, IntegralIdentities.ArctanInverseBisection.tangentRaw,
+      IntegralIdentities.ArctanInverseBisection.tangentAt] using hone.2
+  have hhi : (B.tangentRaw.compute (2 * (1 / 2)) htHalf n).hi = 1 := by
+    apply Rat.le_antisymm
+    · exact hbounds'.2.2
+    · exact hone'
+  have hcos : 0 <= rationalCircleCos
+      (B.tangentRaw.compute (2 * (1 / 2)) htHalf n).lo :=
+    (rationalCircleCos_bounds hbounds'.1 (by grind [hbounds'.2.1])).1
+  change QInterval.Overlaps
+    (rationalCircleCosInterval
+      (B.tangentRaw.compute (2 * (1 / 2)) htHalf n))
+    { lo := 0, hi := 0 }
+  simp only [rationalCircleCosInterval]
+  rw [hhi]
+  have hcos1 : rationalCircleCos 1 = 0 := by native_decide
+  rw [hcos1]
+  unfold QInterval.Overlaps
+  change (0 : Rat) <= 0 /\ 0 <=
+    rationalCircleCos (B.tangentRaw.compute (2 * (1 / 2)) htHalf n).lo
+  exact ⟨by native_decide, hcos⟩
+
 def reciprocalPiFunRaw : RealFunRaw where
   domain := fun x => 0 <= x /\ x <= (1 : Rat) / 2
   compute := fun _ n => reciprocalPiRaw.compute n
@@ -1451,6 +1554,31 @@ theorem primitiveRawOfArctan_endpointDifference_equiv_of_cosine_endpoints'
             oneMinusCosFunRaw] <;> native_decide))).Equiv reciprocalPiRaw := by
   apply primitiveRawOfArctan_endpointDifference_equiv_of_cosine_endpoints
     B hc0 hcHalf
+
+/-- Same endpoint bridge with the inverse-search endpoint laws exposed
+directly.  These are the two finite inverse facts needed at normalized angles
+`0` and `1`; the circle-coordinate endpoint laws are then automatic. -/
+theorem primitiveRawOfArctan_endpointDifference_equiv_of_tangent_endpoints
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (ht1 : (B.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Equiv
+      RealRaw.one) :
+    (endpointDifferenceRaw (primitiveRawOfArctan B) 0 ((1 : Rat) / 2)
+      (endpointDifference_valid_of_fun_valid
+        (primitiveRawOfArctan_valid B)
+        (by
+          simp [primitiveRawOfArctan, RealFunRaw.mul, reciprocalPiFunRaw,
+            oneMinusCosFunRaw] <;> native_decide)
+        (by
+          simp [primitiveRawOfArctan, RealFunRaw.mul, reciprocalPiFunRaw,
+            oneMinusCosFunRaw] <;> native_decide))).Equiv reciprocalPiRaw := by
+  apply primitiveRawOfArctan_endpointDifference_equiv_of_cosine_endpoints'
+    B
+    (cosPiRawOfArctan_zero_equiv_one_of_tangent_endpoint B ht0)
+    (cosPiRawOfArctan_half_equiv_zero_of_tangent_endpoint B ht1)
 
 structure CanonicalHalfIntegralReciprocalPiCertificate
     (S : ArctanSinPiConstruction) where
