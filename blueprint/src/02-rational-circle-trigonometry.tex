@@ -38,10 +38,9 @@ subdivide -> certify cells -> add bounds -> compare or refine
 \section{Angles and rotations}
 \label{thm:finite-quarter-turn}
 
-The project uses one public sine convention throughout: \(\sin(\pi x)\).
-The circle algorithm may use an internal normalized quarter-turn coordinate
-\(t\in[0,1]\), with \(t=2x\) on this half-period.  This is an implementation
-coordinate, not a second user-facing sine convention.
+The blueprint writes sine in one way: \(\sin(\pi x)\).  Inside the circle
+algorithm we use the normalized quarter-turn coordinate \(t=2x\) on this
+half-period; it is only an implementation parameter.
 
 \begin{verbatim}
 area bracket -> angle bracket -> rational circle -> finite identities
