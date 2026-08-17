@@ -1,6 +1,7 @@
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.Calculus
+import ComputableAnalysis.TrigSpecialValues
 
 /-!
 # The half-interval integral of `sin (pi * x)`
@@ -57,6 +58,32 @@ end RationalCircle
 namespace SinPiIntegral
 
 open RationalCircle.GeometricTrig
+open RationalCircle.GeometricTrig.SpecialAngles
+
+/-- The first nontrivial dyadic sample has its certified nested-radical value.
+
+At `x = 1/4`, the public notation `sin (pi*x)` invokes the normalized circle
+input `2*x = 1/2`.  The special-angle certificate identifies that sample with
+the existing positive square-root representation of `1/2`; no value of a
+completed standard real is used. -/
+theorem sinPiRawOfConstruction_quarter_equiv_of_specialAngle
+    (C : FunctionRawConstruction)
+    (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x))
+    (hspecial : SpecialAngleValueTargets C) :
+    let hxquarter : (sinPiRawOfConstruction C hdefined).definedAt (1 / 4) := by
+      exact ⟨by native_decide, by native_decide⟩
+    ({ compute :=
+        (sinPiRawOfConstruction C hdefined).compute
+          (1 / 4) hxquarter } : RealRaw).Equiv
+      sinFortyFiveValue := by
+  dsimp
+  rcases hspecial.sin_forty_five with ⟨ht, hvalue⟩
+  have harg : (2 : Rat) * (1 / 4) = 1 / 2 := by native_decide
+  change
+    ({ compute := C.sinFunctionRaw.compute (2 * (1 / 4)) _ } : RealRaw).Equiv
+      sinFortyFiveValue
+  simpa [harg] using hvalue
 
 /-!
 ## The expected endpoint value
