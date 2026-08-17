@@ -1580,6 +1580,39 @@ theorem primitiveRawOfArctan_endpointDifference_equiv_of_tangent_endpoints
     (cosPiRawOfArctan_zero_equiv_one_of_tangent_endpoint B ht0)
     (cosPiRawOfArctan_half_equiv_zero_of_tangent_endpoint B ht1)
 
+/-- The endpoint-form computable integral for the canonical sine primitive.
+This is the exact value supplied by the finite FTC route; unlike a classical
+real integral, it is an explicit `RealRaw` endpoint computation. -/
+def canonicalSineEndpointIntegral
+    (S : ArctanSinPiConstruction) : RealRaw :=
+  endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+    (endpointDifference_valid_of_fun_valid
+      S.canonicalPrimitive_valid
+      S.canonicalPrimitive_domain_zero
+      S.canonicalPrimitive_domain_half)
+
+theorem canonicalSineEndpointIntegral_valid
+    (S : ArctanSinPiConstruction) :
+    (canonicalSineEndpointIntegral S).Valid := by
+  exact endpointDifference_valid_of_fun_valid
+    S.canonicalPrimitive_valid
+    S.canonicalPrimitive_domain_zero
+    S.canonicalPrimitive_domain_half
+
+theorem canonicalSineEndpointIntegral_equiv_reciprocalPi
+    (S : ArctanSinPiConstruction)
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (ht1 : (S.inverse.tangentAt 1
+      RationalCircle.GeometricTrig.firstQuadrantBranch_one).Equiv
+      RealRaw.one) :
+    (canonicalSineEndpointIntegral S).Equiv reciprocalPiRaw := by
+  simpa [canonicalSineEndpointIntegral,
+    ArctanSinPiConstruction.canonicalPrimitive] using
+    primitiveRawOfArctan_endpointDifference_equiv_of_tangent_endpoints
+      S.inverse ht0 ht1
+
 structure CanonicalHalfIntegralReciprocalPiCertificate
     (S : ArctanSinPiConstruction) where
   ftc : StaticDyadicEffectiveFTC
