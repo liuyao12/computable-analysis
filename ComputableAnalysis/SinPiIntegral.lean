@@ -459,6 +459,20 @@ private theorem rationalCircleSin_width_le {a b : Rat}
           (Rat.mul_nonneg (by native_decide) hba)
   · exact hden
 
+/-- The circle-coordinate evaluator has an explicit rational modulus: on the
+unit slope interval, changing the slope box by width `w` changes the sine
+box by at most `2*w`. -/
+theorem rationalCircleSinInterval_width_le
+    {U : QInterval} (hU : subintervalOf U 0 1) :
+    0 <= (rationalCircleSinInterval U).width /\
+      (rationalCircleSinInterval U).width <= 2 * U.width := by
+  have hsin := rationalCircleSin_width_le hU.1 hU.2.1 hU.2.2
+  have hmono := rationalCircleSin_mono hU.1 hU.2.1 hU.2.2
+  unfold rationalCircleSinInterval QInterval.width
+  constructor
+  · grind
+  · exact hsin
+
 private theorem rationalCircleSinInterval_valid
     (u : Nat -> QInterval)
     (hu : RealRaw.ValidCompute u)
