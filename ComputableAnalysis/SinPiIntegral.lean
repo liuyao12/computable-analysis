@@ -777,6 +777,45 @@ private theorem rationalCircleCos_width_le {a b : Rat}
       _ <= 4 * (b - a) * ((1 + a * a) * (1 + b * b)) := hnum_le
   · exact hden
 
+theorem rationalCircleCosInterval_width_le
+    {U : QInterval} (hU : subintervalOf U 0 1) :
+    0 <= (rationalCircleCosInterval U).width /\
+      (rationalCircleCosInterval U).width <= 4 * U.width := by
+  have hcos := rationalCircleCos_width_le hU.1 hU.2.1 hU.2.2
+  have hmono := rationalCircleCos_mono hU.1 hU.2.1 hU.2.2
+  unfold rationalCircleCosInterval QInterval.width
+  constructor
+  · grind
+  · simpa using hcos
+
+theorem rationalCircleCos_difference_le_qabs
+    {a b : Rat} (ha0 : 0 <= a) (ha1 : a <= 1)
+    (hb0 : 0 <= b) (hb1 : b <= 1) :
+    qabs (rationalCircleCos a - rationalCircleCos b) <=
+      4 * qabs (a - b) := by
+  by_cases hab : a <= b
+  · have hcos := rationalCircleCos_width_le ha0 hab hb1
+    have hmono := rationalCircleCos_mono ha0 hab hb1
+    have hdiff : 0 <= rationalCircleCos a - rationalCircleCos b := by
+      grind
+    rw [qabs_eq_self_of_nonneg hdiff]
+    rw [show qabs (a - b) = b - a by
+      rw [show a - b = -(b - a) by grind [Rat.sub_eq_add_neg], qabs_neg,
+        qabs_eq_self_of_nonneg (by grind : 0 <= b - a)]]
+    exact hcos
+  · have hba : b <= a := by grind
+    have hcos := rationalCircleCos_width_le hb0 hba ha1
+    have hmono := rationalCircleCos_mono hb0 hba ha1
+    have hdiff : 0 <= rationalCircleCos b - rationalCircleCos a := by
+      grind
+    rw [show rationalCircleCos a - rationalCircleCos b =
+        -(rationalCircleCos b - rationalCircleCos a) by
+          grind [Rat.sub_eq_add_neg], qabs_neg,
+      qabs_eq_self_of_nonneg hdiff]
+    rw [show qabs (a - b) = a - b by
+      exact qabs_eq_self_of_nonneg (by grind)]
+    exact hcos
+
 private theorem rationalCircleCosInterval_valid
     (u : Nat -> QInterval)
     (hu : RealRaw.ValidCompute u)
