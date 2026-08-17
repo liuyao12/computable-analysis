@@ -1046,6 +1046,125 @@ theorem primitiveRawOfArctan_bounds
         Rat.mul_le_mul_of_nonneg_right hR.2 hMhi0
       _ <= 1 := by simpa using hM.2
 
+private theorem primitive_mul_zero_equiv (R : RealRaw) (hR : R.Valid)
+    (hRnonneg : forall n, 0 <= (R.compute n).lo) :
+    (R * RealRaw.zero).Equiv RealRaw.zero := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff (R * RealRaw.zero) RealRaw.zero n n).2
+  have horder := RealRaw.interval_order_of_valid R hR n
+  change QInterval.Overlaps
+    (QBox.mulRealInterval (R.compute n).lo (R.compute n).hi 0 0)
+    { lo := 0, hi := 0 }
+  rw [QBox.mulRealInterval_of_nonneg (hRnonneg n) horder
+    (by native_decide) (by native_decide)]
+  simp [QInterval.Overlaps]
+
+private theorem one_sub_one_equiv_zero (C : RealRaw) (hC : C.Valid)
+    (hCeq : C.Equiv RealRaw.one) :
+    (RealRaw.one - C).Equiv RealRaw.zero := by
+  have hone : RealRaw.one.Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 1, hi := 1 })
+    exact RealRaw.ofRat_valid 1
+  have hzero : RealRaw.zero.Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+    exact RealRaw.ofRat_valid 0
+  have hsub : (RealRaw.one - C).Valid := RealRaw.sub_valid hone hC
+  have hself : (RealRaw.one - RealRaw.one).Equiv RealRaw.zero := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff
+      (RealRaw.one - RealRaw.one) RealRaw.zero n n).2
+    change QInterval.Overlaps
+      (RealRaw.subCompute RealRaw.one RealRaw.one n)
+      (RealRaw.zero.compute n)
+    simp [RealRaw.subCompute, RealRaw.one, RealRaw.zero,
+      RealRaw.ofRat, QInterval.Overlaps]
+    constructor <;> native_decide
+  exact RealRaw.equiv_trans hsub
+    (RealRaw.sub_valid hone hone) hzero
+    (RealRaw.sub_equiv hone hone hC hone
+      (RealRaw.equiv_refl RealRaw.one hone) hCeq) hself
+
+private theorem primitive_product_zero_equiv
+    (R M : RealRaw) (hR : R.Valid) (hM : M.Valid)
+    (hRb : forall n, 0 <= (R.compute n).lo /\ (R.compute n).hi <= 1)
+    (hMb : forall n, 0 <= (M.compute n).lo /\ (M.compute n).hi <= 1)
+    (hMzero : M.Equiv RealRaw.zero) :
+    (R * M).Equiv RealRaw.zero := by
+  have hzero : RealRaw.zero.Valid := by
+    change RealRaw.ValidCompute (fun _ : Nat => { lo := 0, hi := 0 })
+    exact RealRaw.ofRat_valid 0
+  have hprod : (R * M).Equiv (R * RealRaw.zero) := by
+    apply RealRaw.mul_equiv_of_nonneg hR hR hM hzero
+      (fun n => (hRb n).1) (fun n => (hRb n).1)
+      (fun n => (hMb n).1)
+      (fun n => by change 0 <= 0; native_decide)
+      (RealRaw.equiv_refl R hR) hMzero
+  have hpvalid : (R * M).Valid :=
+    RealRaw.mul_valid_of_nonneg_bounded hR hM
+      (Bx := (1 : Rat)) (By := (1 : Rat))
+      (by native_decide) (by native_decide) hRb hMb
+  have hzvalid : (R * RealRaw.zero).Valid :=
+    RealRaw.mul_valid_of_nonneg_bounded hR hzero
+      (Bx := (1 : Rat)) (By := (1 : Rat))
+      (by native_decide) (by native_decide) hRb
+      (fun n => by change 0 <= 0 /\ 0 <= 1; native_decide)
+  exact RealRaw.equiv_trans hpvalid hzvalid hzero hprod
+    (primitive_mul_zero_equiv R hR (fun n => (hRb n).1))
+
+/-- The left endpoint of the canonical primitive is zero once the geometric
+cosine evaluator supplies its endpoint law.  This is the finite interval
+algebra needed by the final FTC certificate; no completed real is involved. -/
+theorem primitiveRawOfArctan_zero_equiv_of_cosine_endpoint
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (hc : (cosPiRawOfArctan B 0
+      ⟨by native_decide, by native_decide⟩).Equiv RealRaw.one) :
+    ({ compute := (primitiveRawOfArctan B).compute 0 } : RealRaw).Equiv
+      RealRaw.zero := by
+  let R : RealRaw := reciprocalPiRaw
+  let M : RealRaw := { compute := (oneMinusCosFunRaw B).compute 0 }
+  have hR : R.Valid := by simpa [R] using reciprocalPiRaw_valid
+  have hRb : forall n, 0 <= (R.compute n).lo /\ (R.compute n).hi <= 1 := by
+    intro n
+    simpa [R] using reciprocalPiRaw_bounds n
+  have hM : M.Valid := by
+    change RealRaw.ValidCompute ((oneMinusCosFunRaw B).compute 0)
+    exact oneMinusCosFunRaw_valid B 0
+      (by native_decide : (0 : Rat) <= 0 /\ (0 : Rat) <= 1 / 2)
+  have hMb : forall n, 0 <= (M.compute n).lo /\ (M.compute n).hi <= 1 := by
+    intro n
+    simpa [M] using oneMinusCosFunRaw_bounds B
+      (by native_decide : (0 : Rat) <= 0 /\ (0 : Rat) <= 1 / 2) n
+  have hC : (cosPiRawOfArctan B 0
+      ⟨by native_decide, by native_decide⟩).Valid :=
+    cosPiRawOfArctan_valid B 0 ⟨by native_decide, by native_decide⟩
+  have hMzero : M.Equiv RealRaw.zero := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff M RealRaw.zero n n).2
+    change QInterval.Overlaps
+      (if hx : (0 : Rat) <= 0 /\ (0 : Rat) <= 1 / 2 then
+        { lo := 1 - ((cosPiRawOfArctan B 0 hx).compute n).hi,
+          hi := 1 - ((cosPiRawOfArctan B 0 hx).compute n).lo }
+       else { lo := 0, hi := 0 })
+      { lo := 0, hi := 0 }
+    rw [dif_pos (by native_decide : (0 : Rat) <= 0 /\ (0 : Rat) <= 1 / 2)]
+    have hc_n := (RealRaw.compareAt_overlap_iff
+      (cosPiRawOfArctan B 0 ⟨by native_decide, by native_decide⟩)
+      RealRaw.one n n).1 (hc n)
+    simp [RealRaw.one, RealRaw.ofRat] at hc_n
+    change QInterval.Overlaps
+      { lo := 1 - ((cosPiRawOfArctan B 0 _).compute n).hi,
+        hi := 1 - ((cosPiRawOfArctan B 0 _).compute n).lo }
+      { lo := 0, hi := 0 }
+    unfold QInterval.Overlaps at hc_n ⊢
+    constructor <;> grind
+  have hprod : (R * M).Equiv RealRaw.zero :=
+    primitive_product_zero_equiv R M hR hM hRb hMb hMzero
+  change (R * M).Equiv RealRaw.zero
+  exact hprod
+
 /-- Package the arctangent-backed evaluator as the interval function consumed
 by the equal-dyadic integral operator. -/
 def ArctanSinPiConstruction.onHalf
