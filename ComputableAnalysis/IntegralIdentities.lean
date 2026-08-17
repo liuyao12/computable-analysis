@@ -7202,6 +7202,30 @@ theorem targetAt_halfQuarterTurn_equiv
 
 end ArctanInverseBisection
 
+/-- Expose the inverse tangent evaluator on its normalized quarter-turn
+interval.  This is the function-level interface consumed by the project's
+effective-modulus and interval-regularity APIs; it does not assert continuity
+by itself. -/
+def tangentOnUnit (B : ArctanInverseBisection) : FunctionOnInterval where
+  raw := {
+    definedAt := RationalCircle.GeometricTrig.unitIntervalBranch
+    compute := fun t ht => B.tangentRaw.compute t ht
+  }
+  lower := 0
+  upper := 1
+  defined_on := by
+    intro _ ht
+    exact ht
+  valid_on := by
+    intro t ht
+    exact B.tangentRaw_valid t ht
+
+theorem tangentOnUnit_valid (B : ArctanInverseBisection) :
+    forall t ht,
+      RealRaw.ValidCompute ((tangentOnUnit B).compute t ht) := by
+  intro t ht
+  exact B.tangentRaw_valid t ht
+
 theorem arctanGeomOnUnit_toRealFunRaw_compute_zero (n : Nat) :
     arctanGeomOnUnit.toRealFunRaw.compute 0 n =
       (ArctanGeometry.arctanGeom (0 : Rat)).compute n := by

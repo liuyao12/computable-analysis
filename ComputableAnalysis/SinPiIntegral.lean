@@ -2507,6 +2507,40 @@ def sinPiOnHalf
     intro x hx
     exact sinPiRawOfConstruction_valid C hdefined x hx
 
+theorem ArctanSinPiConstruction.sinPiOnHalf_near_of_tangent_near
+    (S : ArctanSinPiConstruction)
+    {x y : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2)
+    (hy : 0 <= y /\ y <= (1 : Rat) / 2)
+    (htx : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x))
+    (hty : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * y))
+    (n : Nat)
+    (hnear : QInterval.NearAt
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x)
+        htx n)
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y)
+        hty n) (precisionAtStage n)) :
+    QInterval.NearAt
+      (S.onHalf.compute x hx n)
+      (S.onHalf.compute y hy n)
+      { val := 2 * (precisionAtStage n).val
+        property := Rat.mul_pos (by native_decide)
+          (precisionAtStage n).property } := by
+  have hUx : subintervalOf
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x) htx n) 0 1 :=
+    IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
+      S.inverse (2 * x) htx n
+  have hUy : subintervalOf
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y) hty n) 0 1 :=
+    IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
+      S.inverse (2 * y) hty n
+  change QInterval.NearAt
+    (rationalCircleSinInterval
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x) htx n))
+    (rationalCircleSinInterval
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y) hty n)) _
+  exact rationalCircleSinInterval_near_of_near hUx hUy
+    (precisionAtStage n) hnear
+
 /-- The equal-dyadic-subdivision integral of `sin (pi*x)` on `[0,1/2]`.
 
 The caller supplies the usual interval-sum certificate.  This is the
