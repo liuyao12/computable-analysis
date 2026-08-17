@@ -1,4 +1,5 @@
 import ComputableAnalysis.IntegralIdentities
+import ComputableAnalysis.CauchyPi
 
 /-!
 # The half-interval integral of `sin (pi * x)`
@@ -55,6 +56,171 @@ end RationalCircle
 namespace SinPiIntegral
 
 open RationalCircle.GeometricTrig
+
+/-!
+## The expected endpoint value
+
+The integral certificate below is independent of which certified pi
+implementation is preferred.  For the displayed value `1 / pi`, we use the
+circle-area pi raw and invert its positive rational boxes.  This is an
+interval operation, not division in Mathlib's real numbers.
+-/
+
+private theorem piCircleArea_interval_bounds (n : Nat) :
+    2 <= (piCircleArea.compute n).lo /\
+    (piCircleArea.compute n).hi <= 4 := by
+  have hnest := (CauchyPi.piCircleArea_valid).2.1 0 n (Nat.zero_le n)
+  have hlo : 2 <= (piCircleArea.compute n).lo := by
+    simpa [piCircleArea_compute_zero] using hnest.1
+  have hhi : (piCircleArea.compute n).hi <= 4 := by
+    simpa [piCircleArea_compute_zero] using hnest.2.2
+  exact ⟨hlo, hhi⟩
+
+private theorem piCircleArea_interval_positive (n : Nat) :
+    0 < (piCircleArea.compute n).lo := by
+  have htwo : (0 : Rat) < 2 := by native_decide
+  grind [piCircleArea_interval_bounds n]
+
+private theorem one_div_antitone_pos_local {a b : Rat}
+    (ha : 0 < a) (hab : a <= b) : 1 / b <= 1 / a := by
+  apply Rat.le_of_mul_le_mul_right (c := a * b)
+  · have hane : a ≠ 0 := Rat.ne_of_gt ha
+    have hb : 0 < b := by grind
+    have hbne : b ≠ 0 := Rat.ne_of_gt hb
+    calc
+      (1 / b) * (a * b) = a := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hbne]
+      _ <= b := by grind
+      _ = (1 / a) * (a * b) := by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hane]
+  · exact Rat.mul_pos ha (by grind)
+
+private theorem reciprocalPi_compute (n : Nat) :
+    (QInterval.inv (piCircleArea.compute n)) =
+      { lo := 1 / (piCircleArea.compute n).hi,
+        hi := 1 / (piCircleArea.compute n).lo } := by
+  simp [QInterval.inv, piCircleArea_interval_positive]
+
+def reciprocalPiRaw : RealRaw where
+  compute := fun n => QInterval.inv (piCircleArea.compute n)
+
+theorem reciprocalPiRaw_valid : reciprocalPiRaw.Valid := by
+  constructor
+  · intro n
+    change 0 <= (QInterval.inv (piCircleArea.compute n)).width
+    rw [reciprocalPi_compute n]
+    have hlo := piCircleArea_interval_positive n
+    have hhi : 0 < (piCircleArea.compute n).hi := by
+      grind [RealRaw.interval_order_of_valid piCircleArea
+        CauchyPi.piCircleArea_valid n]
+    have hreciplo : 0 < 1 / (piCircleArea.compute n).hi := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 hhi)
+    have hreciphi : 0 < 1 / (piCircleArea.compute n).lo := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 hlo)
+    have horder := RealRaw.interval_order_of_valid piCircleArea
+      CauchyPi.piCircleArea_valid n
+    have hrecip_order := one_div_antitone_pos_local hlo horder
+    unfold QInterval.width
+    grind [Rat.sub_eq_add_neg]
+  · constructor
+    · intro n m hnm
+      change (QInterval.inv (piCircleArea.compute n)).lo <=
+        (QInterval.inv (piCircleArea.compute m)).lo /\
+        (QInterval.inv (piCircleArea.compute m)).lo <=
+          (QInterval.inv (piCircleArea.compute m)).hi /\
+        (QInterval.inv (piCircleArea.compute m)).hi <=
+          (QInterval.inv (piCircleArea.compute n)).hi
+      rw [reciprocalPi_compute n, reciprocalPi_compute m]
+      have hvalid := CauchyPi.piCircleArea_valid
+      have hnested := hvalid.2.1 n m hnm
+      have hloN := piCircleArea_interval_positive n
+      have hloM := piCircleArea_interval_positive m
+      have hhiN := RealRaw.interval_order_of_valid piCircleArea hvalid n
+      have hhiM := RealRaw.interval_order_of_valid piCircleArea hvalid m
+      constructor
+      · exact one_div_antitone_pos_local
+          (a := (piCircleArea.compute m).hi)
+          (b := (piCircleArea.compute n).hi) (by grind) hnested.2.2
+      · constructor
+        · exact one_div_antitone_pos_local
+            (a := (piCircleArea.compute m).lo)
+            (b := (piCircleArea.compute m).hi) hloM hhiM
+        · exact one_div_antitone_pos_local
+            (a := (piCircleArea.compute n).lo)
+            (b := (piCircleArea.compute m).lo) hloN hnested.1
+    · intro eps
+      let wide : QPos :=
+        { val := 4 * eps.val
+          property := by exact Rat.mul_pos (by native_decide) eps.property }
+      obtain ⟨N, hN⟩ := CauchyPi.piCircleArea_valid.2.2 wide
+      refine ⟨N, ?_⟩
+      intro n hn
+      change (QInterval.inv (piCircleArea.compute n)).width <= eps.val
+      rw [reciprocalPi_compute n]
+      have hvalid := CauchyPi.piCircleArea_valid
+      have hbounds := piCircleArea_interval_bounds n
+      have hlo := piCircleArea_interval_positive n
+      have hhi := RealRaw.interval_order_of_valid piCircleArea hvalid n
+      have hwidth := hN n hn
+      have hprod : 4 <=
+          (piCircleArea.compute n).lo * (piCircleArea.compute n).hi := by
+        have hlow := hbounds.1
+        have horder := RealRaw.interval_order_of_valid piCircleArea
+          hvalid n
+        have hhigh : 2 <= (piCircleArea.compute n).hi := by grind
+        calc
+          (4 : Rat) = 2 * 2 := by native_decide
+          _ <= (piCircleArea.compute n).lo * 2 := by
+            exact Rat.mul_le_mul_of_nonneg_right hlow (by native_decide)
+          _ <= (piCircleArea.compute n).lo *
+              (piCircleArea.compute n).hi := by
+            exact Rat.mul_le_mul_of_nonneg_left hhigh
+              (by grind [piCircleArea_interval_bounds n])
+      change 1 / (piCircleArea.compute n).lo -
+        1 / (piCircleArea.compute n).hi <= eps.val
+      rw [show (1 / (piCircleArea.compute n).lo) -
+          (1 / (piCircleArea.compute n).hi) =
+          ((piCircleArea.compute n).hi -
+            (piCircleArea.compute n).lo) /
+            ((piCircleArea.compute n).lo *
+              (piCircleArea.compute n).hi) by
+        rw [Rat.div_def, Rat.div_def, Rat.div_def]
+        have hlo_ne : (piCircleArea.compute n).lo ≠ 0 :=
+          Rat.ne_of_gt hlo
+        have hhi_ne : (piCircleArea.compute n).hi ≠ 0 :=
+          Rat.ne_of_gt (by grind)
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.inv_mul_rev,
+          Rat.mul_inv_cancel _ hlo_ne, Rat.mul_inv_cancel _ hhi_ne]]
+      have hwidth_nonneg : 0 <= (piCircleArea.compute n).width := by
+        exact hvalid.1 n
+      have hden := one_div_antitone_pos_local (by native_decide : (0 : Rat) < 4)
+        hprod
+      have hden' :
+          ((piCircleArea.compute n).lo * (piCircleArea.compute n).hi)⁻¹ <=
+            (1 / 4 : Rat) := by
+        simpa [Rat.div_def] using hden
+      calc
+        ((piCircleArea.compute n).hi - (piCircleArea.compute n).lo) /
+            ((piCircleArea.compute n).lo * (piCircleArea.compute n).hi) <=
+            (piCircleArea.compute n).width * (1 / 4) := by
+              rw [Rat.div_def]
+              exact Rat.mul_le_mul_of_nonneg_left hden' hwidth_nonneg
+        _ <= wide.val * (1 / 4) := by
+              exact Rat.mul_le_mul_of_nonneg_right hwidth
+                (by native_decide)
+        _ = (4 * eps.val) / 4 := by
+          dsimp [wide]
+          rw [Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm]
+        _ = eps.val := by
+          rw [Rat.div_def]
+          grind
 
 /-!
 ## Executable dyadic inverse traces
@@ -497,6 +663,40 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_endpoint_of_staticFTC
       (endpointDifferenceRaw F 0 ((1 : Rat) / 2) endpoint.endpoint_valid) := by
   exact FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
     h c hplan endpoint
+
+/-- The complete proof object needed to identify the half-period integral with
+the expected reciprocal-pi value.  The primitive and its static-dyadic FTC
+certificate are intentionally fields: they are the analytic work, while the
+endpoint target and the computable value `reciprocalPiRaw` are now fixed by
+the project. -/
+structure HalfIntegralReciprocalPiCertificate
+    (S : ArctanSinPiConstruction) where
+  primitive : RealFunRaw
+  ftc : StaticDyadicEffectiveFTC primitive S.onHalf.toRealFunRaw
+    0 ((1 : Rat) / 2)
+  integral : Integral.Construction S.onHalf.toRealFunRaw
+    0 ((1 : Rat) / 2)
+  integral_plan : integral.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC ftc
+  endpoint : FTC.EndpointScheduleAgreement primitive 0 ((1 : Rat) / 2)
+    (FTC.endpointRawOfEffectiveFTC ftc.toEffectiveFTC)
+  endpoint_equiv_reciprocalPi :
+    endpointDifferenceRaw primitive 0 ((1 : Rat) / 2)
+      endpoint.endpoint_valid |>.Equiv reciprocalPiRaw
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi
+    (S : ArctanSinPiConstruction)
+    (h : HalfIntegralReciprocalPiCertificate S) :
+    (S.halfIntegral h.integral).Equiv reciprocalPiRaw := by
+  have hinterval :=
+    S.halfIntegral_equiv_endpoint_of_staticFTC h.primitive h.ftc h.integral
+      h.integral_plan h.endpoint
+  have hendpointValid :
+      (endpointDifferenceRaw h.primitive 0 ((1 : Rat) / 2)
+        h.endpoint.endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using h.endpoint.endpoint_valid
+  exact RealRaw.equiv_trans (S.halfIntegral_valid h.integral)
+    hendpointValid
+    reciprocalPiRaw_valid hinterval h.endpoint_equiv_reciprocalPi
 
 theorem rationalCircleSinInterval_formula (U : QInterval) :
     rationalCircleSinInterval U =
