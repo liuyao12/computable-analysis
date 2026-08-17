@@ -1014,6 +1014,38 @@ theorem primitiveRawOfArctan_valid
     simpa [cosPiRawOfArctan, rationalCircleCosInterval] using
       (And.intro (by grind [hhi.2]) (by grind [hlo.1]))
 
+theorem primitiveRawOfArctan_bounds
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {x : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    0 <= ((primitiveRawOfArctan B).compute x n).lo /\
+      ((primitiveRawOfArctan B).compute x n).hi <= 1 := by
+  have hR := reciprocalPiRaw_bounds n
+  have hM := oneMinusCosFunRaw_bounds B hx n
+  have hRorder := RealRaw.interval_order_of_valid reciprocalPiRaw
+    reciprocalPiRaw_valid n
+  have hMvalid := oneMinusCosFunRaw_valid B x hx
+  have hMorder := RealRaw.interval_order_of_valid
+    { compute := (oneMinusCosFunRaw B).compute x } hMvalid n
+  change 0 <= (QBox.mulRealInterval
+      (reciprocalPiRaw.compute n).lo (reciprocalPiRaw.compute n).hi
+      ((oneMinusCosFunRaw B).compute x n).lo
+      ((oneMinusCosFunRaw B).compute x n).hi).lo /\
+    (QBox.mulRealInterval
+      (reciprocalPiRaw.compute n).lo (reciprocalPiRaw.compute n).hi
+      ((oneMinusCosFunRaw B).compute x n).lo
+      ((oneMinusCosFunRaw B).compute x n).hi).hi <= 1
+  rw [QBox.mulRealInterval_of_nonneg hR.1 hRorder hM.1 hMorder]
+  constructor
+  · exact Rat.mul_nonneg hR.1 hM.1
+  · have hMhi0 : 0 <= ((oneMinusCosFunRaw B).compute x n).hi := by
+      grind
+    calc
+      (reciprocalPiRaw.compute n).hi *
+          ((oneMinusCosFunRaw B).compute x n).hi <=
+          1 * ((oneMinusCosFunRaw B).compute x n).hi :=
+        Rat.mul_le_mul_of_nonneg_right hR.2 hMhi0
+      _ <= 1 := by simpa using hM.2
+
 /-- Package the arctangent-backed evaluator as the interval function consumed
 by the equal-dyadic integral operator. -/
 def ArctanSinPiConstruction.onHalf
