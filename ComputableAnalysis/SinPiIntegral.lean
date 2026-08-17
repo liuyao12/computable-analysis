@@ -479,6 +479,25 @@ theorem ArctanSinPiConstruction.halfIntegral_valid
     (S.halfIntegral c).Valid := by
   exact FTC.integral_valid_of_construction c
 
+/-- Static-dyadic FTC bridge for the arctangent-backed sine evaluator.
+
+This is the final theorem-facing assembly point: a primitive `F`, a finite
+static-dyadic FTC certificate, and the endpoint schedule agreement identify
+the actual equal-dyadic integral with `F(1/2)-F(0)`. -/
+theorem ArctanSinPiConstruction.halfIntegral_equiv_endpoint_of_staticFTC
+    (S : ArctanSinPiConstruction)
+    (F : RealFunRaw)
+    (h : StaticDyadicEffectiveFTC F S.onHalf.toRealFunRaw
+      0 ((1 : Rat) / 2))
+    (c : Integral.Construction S.onHalf.toRealFunRaw 0 ((1 : Rat) / 2))
+    (hplan : c.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC h)
+    (endpoint : FTC.EndpointScheduleAgreement F 0 ((1 : Rat) / 2)
+      (FTC.endpointRawOfEffectiveFTC h.toEffectiveFTC)) :
+    (S.halfIntegral c).Equiv
+      (endpointDifferenceRaw F 0 ((1 : Rat) / 2) endpoint.endpoint_valid) := by
+  exact FTC.staticDyadicEffectiveFTC_definiteIntegralEqualsEndpoint_of_endpointAgreement
+    h c hplan endpoint
+
 theorem rationalCircleSinInterval_formula (U : QInterval) :
     rationalCircleSinInterval U =
       { lo := rationalCircleSin U.lo, hi := rationalCircleSin U.hi } :=
