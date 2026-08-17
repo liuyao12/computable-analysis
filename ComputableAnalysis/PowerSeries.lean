@@ -1040,6 +1040,70 @@ theorem qabs_pow_le_pow {x B : Rat} (hB : 0 <= B)
         _ <= B ^ n * B :=
           Rat.mul_le_mul_of_nonneg_left hx (Rat.pow_nonneg hB)
 
+/-! A factorial majorant for the individual sine terms on the bounded input
+range used by the `sin (pi*x)` half-period. -/
+
+theorem sineTaylorTerm_qabs_le_factorialTailTerm
+    {x : Rat} (hx : qabs x <= 2) (k : Nat) :
+    qabs (FormalPowerSeries.sineTaylorTerm x k) <=
+      factorialTailTerm 2 (2 * k + 1) := by
+  unfold FormalPowerSeries.sineTaylorTerm factorialTailTerm
+  rw [Rat.div_def, qabs_mul, qabs_mul]
+  have hsign : qabs (FormalPowerSeries.altSign k) = 1 := by
+    unfold FormalPowerSeries.altSign
+    split <;> native_decide
+  rw [hsign]
+  have hpow : qabs (x ^ (2 * k + 1)) <=
+      (2 : Rat) ^ (2 * k + 1) :=
+    qabs_pow_le_pow (by native_decide) hx _
+  have hfactor : 0 <= (factorialRat (2 * k + 1))⁻¹ := by
+    exact Rat.le_of_lt ((Rat.inv_pos).2 (factorialRat_pos _))
+  have hqfactor : qabs (factorialRat (2 * k + 1))⁻¹ =
+      (factorialRat (2 * k + 1))⁻¹ :=
+    qabs_eq_self_of_nonneg hfactor
+  rw [hqfactor]
+  simpa [Rat.div_def] using
+    (Rat.mul_le_mul_of_nonneg_right hpow hfactor)
+
+def sineTaylorTailPartial (x : Rat) (N : Nat) : Nat -> Rat
+  | 0 => 0
+  | k + 1 =>
+      sineTaylorTailPartial x N k +
+        FormalPowerSeries.sineTaylorTerm x (N + k)
+
+theorem sineTaylorTailPartial_qabs_le_factorialTailPartial
+    {x : Rat} (hx : qabs x <= 2) (N k : Nat) :
+    qabs (sineTaylorTailPartial x N k) <=
+      factorialTailPartial 2 (2 * N + 1) (2 * k) := by
+  induction k with
+  | zero =>
+      simp [sineTaylorTailPartial, factorialTailPartial]
+      native_decide
+  | succ k ih =>
+      rw [sineTaylorTailPartial]
+      have hterm := sineTaylorTerm_qabs_le_factorialTailTerm hx (N + k)
+      rw [show 2 * (N + k) + 1 = (2 * N + 1) + 2 * k by omega] at hterm
+      rw [show 2 * (k + 1) = 2 * k + 2 by omega,
+        factorialTailPartial]
+      have hnonneg :
+          0 <= factorialTailTerm 2 ((2 * N + 1) + (2 * k + 1)) :=
+        factorialTailTerm_nonneg (by native_decide) _
+      calc
+        qabs (sineTaylorTailPartial x N k +
+            FormalPowerSeries.sineTaylorTerm x (N + k)) <=
+            qabs (sineTaylorTailPartial x N k) +
+              qabs (FormalPowerSeries.sineTaylorTerm x (N + k)) :=
+          qabs_add_le _ _
+        _ <= factorialTailPartial 2 (2 * N + 1) (2 * k) +
+              factorialTailTerm 2 ((2 * N + 1) + 2 * k) :=
+          rat_add_le_add ih hterm
+        _ <= factorialTailPartial 2 (2 * N + 1) (2 * k) +
+              factorialTailTerm 2 ((2 * N + 1) + 2 * k) +
+                factorialTailTerm 2 ((2 * N + 1) + (2 * k + 1)) := by
+          grind [Rat.add_assoc]
+        _ = factorialTailPartial 2 (2 * N + 1) (2 * k + 2) := by
+          rw [factorialTailPartial, factorialTailPartial]
+
 /- The finite difference of two rational powers has an explicit
 Lipschitz bound on any symmetric rational box of radius at least one.
 The proof is a direct finite recurrence, with no completed-real mean-value
