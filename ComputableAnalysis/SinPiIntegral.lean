@@ -1240,6 +1240,71 @@ def oneMinusCosFunRaw
     else
       { lo := 0, hi := 0 }
 
+theorem cosPiRawOfArctan_near_of_tangent_near
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {x y : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2)
+    (hy : 0 <= y /\ y <= (1 : Rat) / 2)
+    (htx : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x))
+    (hty : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * y))
+    (n : Nat)
+    (hnear : QInterval.NearAt
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * x) htx n)
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * y) hty n)
+      (precisionAtStage n)) :
+    QInterval.NearAt
+      ((cosPiRawOfArctan B x hx).compute n)
+      ((cosPiRawOfArctan B y hy).compute n)
+      { val := 4 * (precisionAtStage n).val
+        property := Rat.mul_pos (by native_decide)
+          (precisionAtStage n).property } := by
+  have hUx : subintervalOf
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * x) htx n) 0 1 :=
+    IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
+      B (2 * x) htx n
+  have hUy : subintervalOf
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * y) hty n) 0 1 :=
+    IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
+      B (2 * y) hty n
+  change QInterval.NearAt
+    (rationalCircleCosInterval
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * x) htx n))
+    (rationalCircleCosInterval
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * y) hty n)) _
+  exact rationalCircleCosInterval_near_of_near hUx hUy
+    (precisionAtStage n) hnear
+
+theorem oneMinusCosFunRaw_near_of_tangent_near
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {x y : Rat} (hx : 0 <= x /\ x <= (1 : Rat) / 2)
+    (hy : 0 <= y /\ y <= (1 : Rat) / 2)
+    (htx : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x))
+    (hty : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * y))
+    (n : Nat)
+    (hnear : QInterval.NearAt
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * x) htx n)
+      ((IntegralIdentities.tangentOnUnit B).compute (2 * y) hty n)
+      (precisionAtStage n)) :
+    QInterval.NearAt
+      ((oneMinusCosFunRaw B).compute x n)
+      ((oneMinusCosFunRaw B).compute y n)
+      { val := 4 * (precisionAtStage n).val
+        property := Rat.mul_pos (by native_decide)
+          (precisionAtStage n).property } := by
+  have hcos := cosPiRawOfArctan_near_of_tangent_near B hx hy htx hty n hnear
+  simp only [oneMinusCosFunRaw, dif_pos hx, dif_pos hy]
+  change QInterval.NearAt
+    { lo := 1 - ((cosPiRawOfArctan B x hx).compute n).hi
+      hi := 1 - ((cosPiRawOfArctan B x hx).compute n).lo }
+    { lo := 1 - ((cosPiRawOfArctan B y hy).compute n).hi
+      hi := 1 - ((cosPiRawOfArctan B y hy).compute n).lo } _
+  unfold QInterval.NearAt QInterval.width at hcos ⊢
+  rcases hcos with ⟨hxy, hyx, hwidthx, hwidthy⟩
+  constructor
+  · grind
+  constructor
+  · grind
+  constructor <;> grind
+
 theorem oneMinusCosFunRaw_valid
   (B : IntegralIdentities.ArctanInverseBisection) :
     (oneMinusCosFunRaw B).Valid := by
