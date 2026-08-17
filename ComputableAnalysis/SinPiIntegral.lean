@@ -1067,6 +1067,64 @@ theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi
     hendpointValid
     reciprocalPiRaw_valid hinterval h.endpoint_equiv_reciprocalPi
 
+/-! The theorem-facing certificate uses the primitive constructed above,
+rather than allowing an unrelated primitive to be supplied.  This is the
+canonical `sin (pi*x)` statement: the remaining analytic obligations are
+exactly the finite FTC certificate and the endpoint computation for this
+primitive. -/
+
+def ArctanSinPiConstruction.canonicalPrimitive
+    (S : ArctanSinPiConstruction) : RealFunRaw :=
+  primitiveRawOfArctan S.inverse
+
+theorem ArctanSinPiConstruction.canonicalPrimitive_valid
+    (S : ArctanSinPiConstruction) :
+    S.canonicalPrimitive.Valid := by
+  exact primitiveRawOfArctan_valid S.inverse
+
+theorem ArctanSinPiConstruction.canonicalPrimitive_domain_zero
+    (S : ArctanSinPiConstruction) :
+    S.canonicalPrimitive.domain 0 := by
+  exact ⟨⟨by native_decide, by native_decide⟩,
+    ⟨by native_decide, by native_decide⟩⟩
+
+theorem ArctanSinPiConstruction.canonicalPrimitive_domain_half
+    (S : ArctanSinPiConstruction) :
+    S.canonicalPrimitive.domain ((1 : Rat) / 2) := by
+  exact ⟨⟨by native_decide, by native_decide⟩,
+    ⟨by native_decide, by native_decide⟩⟩
+
+structure CanonicalHalfIntegralReciprocalPiCertificate
+    (S : ArctanSinPiConstruction) where
+  ftc : StaticDyadicEffectiveFTC
+    S.canonicalPrimitive S.onHalf.toRealFunRaw
+    0 ((1 : Rat) / 2)
+  integral : Integral.Construction S.onHalf.toRealFunRaw
+    0 ((1 : Rat) / 2)
+  integral_plan : integral.plan = FTC.integralPlanOfStaticDyadicEffectiveFTC ftc
+  endpoint : FTC.EndpointScheduleAgreement
+    S.canonicalPrimitive 0 ((1 : Rat) / 2)
+    (FTC.endpointRawOfEffectiveFTC ftc.toEffectiveFTC)
+  endpoint_equiv_reciprocalPi :
+    endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+      endpoint.endpoint_valid |>.Equiv reciprocalPiRaw
+
+theorem ArctanSinPiConstruction.halfIntegral_equiv_reciprocalPi_canonical
+    (S : ArctanSinPiConstruction)
+    (h : CanonicalHalfIntegralReciprocalPiCertificate S) :
+    (S.halfIntegral h.integral).Equiv reciprocalPiRaw := by
+  have hinterval :=
+    S.halfIntegral_equiv_endpoint_of_staticFTC
+      S.canonicalPrimitive h.ftc h.integral h.integral_plan h.endpoint
+  have hendpointValid :
+      (endpointDifferenceRaw S.canonicalPrimitive 0 ((1 : Rat) / 2)
+        h.endpoint.endpoint_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using h.endpoint.endpoint_valid
+  exact RealRaw.equiv_trans
+    (S.halfIntegral_valid h.integral)
+    hendpointValid reciprocalPiRaw_valid hinterval
+    h.endpoint_equiv_reciprocalPi
+
 theorem rationalCircleSinInterval_formula (U : QInterval) :
     rationalCircleSinInterval U =
       { lo := rationalCircleSin U.lo, hi := rationalCircleSin U.hi } :=
