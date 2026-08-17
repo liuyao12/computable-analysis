@@ -3379,6 +3379,35 @@ theorem halfIntegral_valid
     (halfIntegral C hdefined c).Valid := by
   exact FTC.integral_valid_of_construction c
 
+/-- A dyadic sample replacement computes the same public sine integral.
+
+The replacement `g` may use a specialized evaluator—for example, nested
+radicals at dyadic angles—because the equal-dyadic algorithm never reads its
+values away from the left endpoints of its finite meshes.  Agreement is still
+required at every finite stage and every sample point, so this is a
+constructive algorithm-transport theorem rather than an extensional claim
+about an unrepresented real function. -/
+theorem halfIntegral_equiv_of_dyadic_sample_replacement
+    (C : FunctionRawConstruction)
+    (hdefined : forall x, 0 <= x -> x <= (1 : Rat) / 2 ->
+      C.sinFunctionRaw.definedAt (2 * x))
+    (c : Integral.Construction
+      (sinPiOnHalf C hdefined).toRealFunRaw 0 ((1 : Rat) / 2))
+    (g : RealFunRaw)
+    (cg : Integral.Construction g 0 ((1 : Rat) / 2))
+    (hplan : c.plan = cg.plan)
+    (hsamples : forall n k,
+      k < (c.plan n).subdivisions ->
+      (sinPiOnHalf C hdefined).toRealFunRaw.compute
+        (leftPoint 0 ((1 : Rat) / 2) (c.plan n).subdivisions k)
+        (c.plan n).evalPrecision =
+      g.compute
+        (leftPoint 0 ((1 : Rat) / 2) (c.plan n).subdivisions k)
+        (c.plan n).evalPrecision) :
+    (halfIntegral C hdefined c).Equiv
+      (Integral.integral g 0 ((1 : Rat) / 2) cg) := by
+  exact Integral.integral_equiv_of_plan_and_samples c cg hplan hsamples
+
 /--
 The exact reusable conclusion of the elementary sine-integral argument.
 
