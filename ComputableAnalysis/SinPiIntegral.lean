@@ -655,6 +655,44 @@ def arctanInverseBisectionOfDyadicTraces
   targetAt_equiv_halfQuarterTurn := targetAt_equiv_halfQuarterTurn
   bisectionAt := fun y => (traceAt y).toSearch
 
+/--
+Build the inverse-search package from rational preimage witnesses.
+
+This is the strongest fully executable shortcut currently available: for each
+normalized first-quadrant target, a rational slope witness is supplied and is
+then kept inside every selected dyadic cell.  The constructor does not choose
+an inverse or appeal to a completed real line; the witness family is the
+finite search data.  The general arctangent branch still needs a separate
+construction of such witnesses (or an equivalent target-directed search).
+-/
+def arctanInverseBisectionOfRationalWitnesses
+    (branch : InvertibleFunctionOnInterval)
+    (branch_is_geometric : branch.function =
+      IntegralIdentities.arctanGeomOnUnit)
+    (targetAt : forall t : RationalCircle.GeometricTrig.QuarterTurn,
+      RationalCircle.GeometricTrig.firstQuadrantBranch t -> InRangeRaw branch)
+    (targetAt_equiv_halfQuarterTurn :
+      forall t ht, (targetAt t ht).value.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw t))
+    (targetWitness : forall _y : InRangeRaw branch, Rat)
+    (targetWitness_in_domain : forall y : InRangeRaw branch,
+      inDomainInterval branch.function.lower branch.function.upper
+        (targetWitness y))
+    (targetWitness_equiv : forall y : InRangeRaw branch,
+      ({ compute := branch.function.compute
+          (targetWitness y) (targetWitness_in_domain y) } : RealRaw).Equiv
+        y.value)
+    (source_width : branch.function.upper - branch.function.lower <= 1) :
+    IntegralIdentities.ArctanInverseBisection := by
+  apply arctanInverseBisectionOfDyadicTraces branch branch_is_geometric
+    targetAt targetAt_equiv_halfQuarterTurn
+  intro y
+  exact DyadicInverseTrace.ofRationalWitness
+    (targetWitness y)
+    (targetWitness_in_domain y)
+    source_width
+    (targetWitness_equiv y)
+
 /-- The rational circle parametrization used after the inverse-arctangent
 search.  For a half-angle slope `u`, its imaginary coordinate is
 `2*u/(1+u^2)`. -/
