@@ -2804,33 +2804,124 @@ theorem ArctanSinPiConstruction.sinPiOnHalf_near_of_tangent_near
     (hy : 0 <= y /\ y <= (1 : Rat) / 2)
     (htx : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x))
     (hty : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * y))
-    (n : Nat)
+    (evalStage : Nat) (eps : QPos)
     (hnear : QInterval.NearAt
       ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x)
-        htx n)
+        htx evalStage)
       ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y)
-        hty n) (precisionAtStage n)) :
+        hty evalStage) eps) :
     QInterval.NearAt
-      (S.onHalf.compute x hx n)
-      (S.onHalf.compute y hy n)
-      { val := 2 * (precisionAtStage n).val
-        property := Rat.mul_pos (by native_decide)
-          (precisionAtStage n).property } := by
+      (S.onHalf.compute x hx evalStage)
+      (S.onHalf.compute y hy evalStage)
+      { val := 2 * eps.val
+        property := Rat.mul_pos (by native_decide) eps.property } := by
   have hUx : subintervalOf
-      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x) htx n) 0 1 :=
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x)
+        htx evalStage) 0 1 :=
     IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
-      S.inverse (2 * x) htx n
+      S.inverse (2 * x) htx evalStage
   have hUy : subintervalOf
-      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y) hty n) 0 1 :=
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y)
+        hty evalStage) 0 1 :=
     IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
-      S.inverse (2 * y) hty n
+      S.inverse (2 * y) hty evalStage
   change QInterval.NearAt
     (rationalCircleSinInterval
-      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x) htx n))
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * x)
+        htx evalStage))
     (rationalCircleSinInterval
-      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y) hty n)) _
+      ((IntegralIdentities.tangentOnUnit S.inverse).compute (2 * y)
+        hty evalStage)) _
   exact rationalCircleSinInterval_near_of_near hUx hUy
-    (precisionAtStage n) hnear
+    eps hnear
+
+/-- Effective modulus for the public `sin (pi*x)` evaluator.  The factor two
+in the input schedule accounts for the reparameterization `t = 2*x`; the
+second factor two in the output budget is the rational-circle sine Lipschitz
+bound.  This is still a finite interval theorem: no classical real sine is
+used. -/
+def ArctanSinPiConstruction.sinPiOnHalf_effectiveModulus
+    (S : ArctanSinPiConstruction)
+    (tangentModulus : EffectiveModulusFor
+      (IntegralIdentities.tangentOnUnit S.inverse)) :
+    EffectiveModulusFor S.onHalf where
+  inputPrecision := fun n =>
+    2 * tangentModulus.inputPrecision (2 * (n + 1))
+  evalPrecision := fun n =>
+    tangentModulus.evalPrecision (2 * (n + 1))
+  close := by
+    intro x y n hx hy hclose
+    let m := 2 * (n + 1)
+    have hscale :
+        2 * (precisionAtStage m).val <= (precisionAtStage n).val := by
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          have hrec := one_div_antitone_pos_local
+            (a := ((n + 1 : Nat) : Rat))
+            (b := ((n + 2 : Nat) : Rat))
+            ((Rat.natCast_pos).2 (by omega))
+            (Rat.natCast_le_natCast.2 (by omega))
+          have heq :
+              2 * (1 / (((2 * (n + 2) : Nat) : Rat))) =
+                1 / (((n + 2 : Nat) : Rat)) := by
+            rw [Rat.natCast_mul, Rat.div_def, Rat.div_def]
+            have hn : ((n + 2 : Nat) : Rat) ≠ 0 :=
+              Rat.ne_of_gt ((Rat.natCast_pos).2 (by omega))
+            grind [Rat.mul_assoc, Rat.mul_comm,
+              Rat.mul_inv_cancel _ hn]
+          dsimp [m, precisionAtStage]
+          rw [heq]
+          exact hrec
+    have hx' : 0 <= 2 * x /\ 2 * x <= 1 := by
+      have hx0 : 0 <= x := hx.1
+      have hxhalf : x <= (1 : Rat) / 2 := hx.2
+      constructor
+      · exact Rat.mul_nonneg (by native_decide) hx0
+      · have h := Rat.mul_le_mul_of_nonneg_left hxhalf
+          (by native_decide : (0 : Rat) <= 2)
+        have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+        rw [hhalf] at h
+        exact h
+    have hy' : 0 <= 2 * y /\ 2 * y <= 1 := by
+      have hy0 : 0 <= y := hy.1
+      have hyhalf : y <= (1 : Rat) / 2 := hy.2
+      constructor
+      · exact Rat.mul_nonneg (by native_decide) hy0
+      · have h := Rat.mul_le_mul_of_nonneg_left hyhalf
+          (by native_decide : (0 : Rat) <= 2)
+        have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+        rw [hhalf] at h
+        exact h
+    have hinput : qabs (2 * y - 2 * x) <=
+        1 / ((tangentModulus.inputPrecision m : Nat) : Rat) := by
+      have hmul := Rat.mul_le_mul_of_nonneg_left hclose
+        (by native_decide : (0 : Rat) <= 2)
+      rw [show 2 * y - 2 * x = 2 * (y - x) by grind, qabs_mul]
+      have htwo : qabs (2 : Rat) = 2 := by native_decide
+      rw [htwo]
+      have hmul' : 2 * qabs (y - x) <=
+          2 * (1 / ((2 * tangentModulus.inputPrecision m : Nat) : Rat)) := by
+        simpa [m, Rat.natCast_mul, Rat.mul_comm] using hmul
+      calc
+        2 * qabs (y - x) <=
+            2 * (1 / ((2 * tangentModulus.inputPrecision m : Nat) : Rat)) := hmul'
+        _ = 1 / ((tangentModulus.inputPrecision m : Nat) : Rat) := by
+          rw [Rat.natCast_mul, Rat.div_def, Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel]
+    have htangent := tangentModulus.close
+      (2 * x) (2 * y) m hx' hy' hinput
+    have hsin := S.sinPiOnHalf_near_of_tangent_near
+      hx hy hx' hy' (tangentModulus.evalPrecision m)
+      (precisionAtStage m) htangent
+    change QInterval.NearAt
+      (S.onHalf.compute x hx (tangentModulus.evalPrecision m))
+      (S.onHalf.compute y hy (tangentModulus.evalPrecision m))
+      (precisionAtStage n)
+    unfold QInterval.NearAt QInterval.width at hsin ⊢
+    rcases hsin with ⟨hxy, hyx, hwidthx, hwidthy⟩
+    constructor <;> grind
 
 /-- The equal-dyadic-subdivision integral of `sin (pi*x)` on `[0,1/2]`.
 
