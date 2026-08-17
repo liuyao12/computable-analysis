@@ -3636,6 +3636,35 @@ def implementationRepresentation {x : Real}
   valid := impl.valid
   agrees := implementation_equiv_preferred impl
 
+/- Add an implementation by comparing it with any already certified
+   representation.  The proof obligation and public API are parent-relative:
+   callers do not need to establish a fresh equivalence with the preferred
+   implementation. -/
+def withAlternativeFrom (x : Real) (parent : Representation x)
+    (rep : RealRaw) (hvalid : rep.Valid)
+    (h : rep.Equiv parent.raw) : Real where
+  preferred := x.preferred
+  valid := x.valid
+  implementations :=
+    { raw := rep
+      valid := hvalid
+      equivalent := RealRaw.equiv_trans x.valid parent.valid hvalid
+        (RealRaw.equiv_symm parent.agrees) (RealRaw.equiv_symm h) } ::
+      x.implementations
+
+def withAlternativeFromImplementation (x : Real)
+    (parent : RealImplementation x.preferred)
+    (rep : RealRaw) (hvalid : rep.Valid)
+    (h : rep.Equiv parent.raw) : Real where
+  preferred := x.preferred
+  valid := x.valid
+  implementations :=
+    { raw := rep
+      valid := hvalid
+      equivalent := RealRaw.equiv_trans x.valid parent.valid hvalid
+        parent.equivalent (RealRaw.equiv_symm h) } ::
+      x.implementations
+
 def computeUsing {x : Real} (rep : Representation x) (n : Nat) : QInterval :=
   rep.raw.compute n
 

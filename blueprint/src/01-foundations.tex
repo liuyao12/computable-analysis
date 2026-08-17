@@ -651,6 +651,9 @@ records only that its child algorithm is valid and equivalent to its parent;
 pairwise equivalences are derived by transitivity when needed.  Stage
 algorithms remain the primary proof objects, while rates and future cost data
 are optional implementation metadata.
+When a new implementation is added, its certificate may compare it with any
+existing certified representation; it need not compare directly with the
+preferred one.
 In particular, \code{Real.Representation.equiv} proves that any two certified
 representations of the same handle have equivalent raw evaluators.  This is an
 interoperability theorem about proved representations, not an identification
