@@ -4,7 +4,7 @@ import ComputableAnalysis.RotationTaylorBridge
 /-!
 # Finite half-period sine integral certificates
 
-The target is the normalized identity
+The target is the project-standard identity
 `pi * integral_0^(1/2) sin (pi*x) dx = 1`.
 At a finite stage we replace `pi` by a rational enclosure center and `sin`
 by its finite Taylor polynomial.  After the change of variable `u = pi*x`,
