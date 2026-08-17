@@ -1246,17 +1246,17 @@ theorem cosPiRawOfArctan_near_of_tangent_near
     (hy : 0 <= y /\ y <= (1 : Rat) / 2)
     (htx : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x))
     (hty : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * y))
-    (n : Nat)
+    (n : Nat) (eps : QPos)
     (hnear : QInterval.NearAt
       ((IntegralIdentities.tangentOnUnit B).compute (2 * x) htx n)
       ((IntegralIdentities.tangentOnUnit B).compute (2 * y) hty n)
-      (precisionAtStage n)) :
+      eps) :
     QInterval.NearAt
       ((cosPiRawOfArctan B x hx).compute n)
       ((cosPiRawOfArctan B y hy).compute n)
-      { val := 4 * (precisionAtStage n).val
+      { val := 4 * eps.val
         property := Rat.mul_pos (by native_decide)
-          (precisionAtStage n).property } := by
+          eps.property } := by
   have hUx : subintervalOf
       ((IntegralIdentities.tangentOnUnit B).compute (2 * x) htx n) 0 1 :=
     IntegralIdentities.ArctanInverseBisection.tangentAt_stays_in_unitSlope
@@ -1271,7 +1271,7 @@ theorem cosPiRawOfArctan_near_of_tangent_near
     (rationalCircleCosInterval
       ((IntegralIdentities.tangentOnUnit B).compute (2 * y) hty n)) _
   exact rationalCircleCosInterval_near_of_near hUx hUy
-    (precisionAtStage n) hnear
+    eps hnear
 
 theorem oneMinusCosFunRaw_near_of_tangent_near
     (B : IntegralIdentities.ArctanInverseBisection)
@@ -1279,18 +1279,19 @@ theorem oneMinusCosFunRaw_near_of_tangent_near
     (hy : 0 <= y /\ y <= (1 : Rat) / 2)
     (htx : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * x))
     (hty : RationalCircle.GeometricTrig.firstQuadrantBranch (2 * y))
-    (n : Nat)
+    (n : Nat) (eps : QPos)
     (hnear : QInterval.NearAt
       ((IntegralIdentities.tangentOnUnit B).compute (2 * x) htx n)
       ((IntegralIdentities.tangentOnUnit B).compute (2 * y) hty n)
-      (precisionAtStage n)) :
+      eps) :
     QInterval.NearAt
       ((oneMinusCosFunRaw B).compute x n)
       ((oneMinusCosFunRaw B).compute y n)
-      { val := 4 * (precisionAtStage n).val
+      { val := 4 * eps.val
         property := Rat.mul_pos (by native_decide)
-          (precisionAtStage n).property } := by
-  have hcos := cosPiRawOfArctan_near_of_tangent_near B hx hy htx hty n hnear
+          eps.property } := by
+  have hcos := cosPiRawOfArctan_near_of_tangent_near
+    B hx hy htx hty n eps hnear
   simp only [oneMinusCosFunRaw, dif_pos hx, dif_pos hy]
   change QInterval.NearAt
     { lo := 1 - ((cosPiRawOfArctan B x hx).compute n).hi
@@ -1405,6 +1406,97 @@ theorem oneMinusCosOnHalf_valid
   intro x hx
   change RealRaw.ValidCompute ((oneMinusCosFunRaw B).compute x)
   exact oneMinusCosFunRaw_valid B x hx
+
+set_option maxHeartbeats 1000000 in
+def oneMinusCosOnHalf_effectiveModulus
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (tangentModulus : EffectiveModulusFor
+      (IntegralIdentities.tangentOnUnit B)) :
+    EffectiveModulusFor (oneMinusCosOnHalf B) where
+  inputPrecision := fun n =>
+    2 * tangentModulus.inputPrecision (4 * (n + 1))
+  evalPrecision := fun n =>
+    tangentModulus.evalPrecision (4 * (n + 1))
+  close := by
+    intro x y n hx hy hclose
+    change 0 <= x /\ x <= (1 : Rat) / 2 at hx
+    change 0 <= y /\ y <= (1 : Rat) / 2 at hy
+    let m := 4 * (n + 1)
+    have hscale :
+        4 * (precisionAtStage m).val <= (precisionAtStage n).val := by
+      cases n with
+      | zero => native_decide
+      | succ n =>
+          have hrec := one_div_antitone_pos_local
+            (a := ((n + 1 : Nat) : Rat))
+            (b := ((n + 2 : Nat) : Rat))
+            ((Rat.natCast_pos).2 (Nat.succ_pos n))
+            (Rat.natCast_le_natCast.2 (by omega))
+          have heq :
+              4 * (1 / (((4 * (n + 2) : Nat) : Rat))) =
+                1 / (((n + 2 : Nat) : Rat)) := by
+            rw [Rat.natCast_mul, Rat.div_def, Rat.div_def]
+            have hn : ((n + 2 : Nat) : Rat) ≠ 0 :=
+              Rat.ne_of_gt ((Rat.natCast_pos).2 (by omega))
+            grind [Rat.mul_assoc, Rat.mul_comm,
+              Rat.mul_inv_cancel _ hn]
+          dsimp [m, precisionAtStage]
+          rw [heq]
+          exact hrec
+    have hx' : 0 <= 2 * x /\ 2 * x <= 1 := by
+      constructor
+      · exact Rat.mul_nonneg (by native_decide) hx.1
+      · have h := Rat.mul_le_mul_of_nonneg_left hx.2
+          (by native_decide : (0 : Rat) <= 2)
+        have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+        have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+        simpa [oneMinusCosOnHalf, hhalf] using h
+    have hy' : 0 <= 2 * y /\ 2 * y <= 1 := by
+      constructor
+      · exact Rat.mul_nonneg (by native_decide) hy.1
+      · have h := Rat.mul_le_mul_of_nonneg_left hy.2
+          (by native_decide : (0 : Rat) <= 2)
+        have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+        have hhalf : (2 : Rat) * (1 / 2) = 1 := by native_decide
+        simpa [oneMinusCosOnHalf, hhalf] using h
+    have hinput : qabs (2 * y - 2 * x) <=
+        1 / ((tangentModulus.inputPrecision m : Nat) : Rat) := by
+      have hmul := Rat.mul_le_mul_of_nonneg_left hclose
+        (by native_decide : (0 : Rat) <= 2)
+      rw [show 2 * y - 2 * x = 2 * (y - x) by grind, qabs_mul]
+      have htwo : qabs (2 : Rat) = 2 := by native_decide
+      rw [htwo]
+      have hmul' : 2 * qabs (y - x) <=
+          2 * (1 / ((2 * tangentModulus.inputPrecision m : Nat) : Rat)) := by
+        simpa [m, Rat.natCast_mul, Rat.mul_comm] using hmul
+      calc
+        2 * qabs (y - x) <=
+            2 * (1 / ((2 * tangentModulus.inputPrecision m : Nat) : Rat)) := hmul'
+        _ = 1 / ((tangentModulus.inputPrecision m : Nat) : Rat) := by
+          rw [Rat.natCast_mul, Rat.div_def, Rat.div_def]
+          grind [Rat.mul_assoc, Rat.mul_comm,
+            Rat.mul_inv_cancel]
+    have htangent := tangentModulus.close
+      (2 * x) (2 * y) m hx' hy' hinput
+    have honeMinus := oneMinusCosFunRaw_near_of_tangent_near
+      B hx hy
+      (by exact hx') (by exact hy')
+      (tangentModulus.evalPrecision m) (precisionAtStage m) htangent
+    change QInterval.NearAt
+      ((oneMinusCosOnHalf B).compute x hx (tangentModulus.evalPrecision m))
+      ((oneMinusCosOnHalf B).compute y hy (tangentModulus.evalPrecision m))
+      (precisionAtStage n)
+    change QInterval.NearAt
+      ((oneMinusCosFunRaw B).compute x (tangentModulus.evalPrecision m))
+      ((oneMinusCosFunRaw B).compute y (tangentModulus.evalPrecision m))
+      (precisionAtStage n)
+    change QInterval.NearAt
+      ((oneMinusCosFunRaw B).compute x (tangentModulus.evalPrecision m))
+      ((oneMinusCosFunRaw B).compute y (tangentModulus.evalPrecision m))
+      (precisionAtStage n)
+    unfold QInterval.NearAt QInterval.width at honeMinus ⊢
+    rcases honeMinus with ⟨hxy, hyx, hwidthx, hwidthy⟩
+    constructor <;> grind
 
 def primitiveRawOfArctan
     (B : IntegralIdentities.ArctanInverseBisection) : RealFunRaw :=
