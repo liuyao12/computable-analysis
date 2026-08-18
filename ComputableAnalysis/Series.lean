@@ -1860,6 +1860,16 @@ theorem sineAlternatingRaw_partial_eq_sineTaylorPartial
       rw [partialSum, FormalPowerSeries.sineTaylorPartial, ih,
         sineAlternatingRaw_signedTerm_eq_sineTaylorTerm hx]
 
+theorem sineAlternatingRaw_interval_eq_sineTaylorInterval
+    {x : Rat} (hx : 0 <= x) (hterms : qabs x <= 2) (n : Nat) :
+    (sineAlternatingRaw x hterms).interval n =
+      evenOddInterval (FormalPowerSeries.sineTaylorPartial x) n := by
+  unfold sineAlternatingRaw AlternatingRaw.interval alternatingInterval
+  unfold evenOddInterval
+  have h0 := sineAlternatingRaw_partial_eq_sineTaylorPartial hx hterms (2 * n)
+  have h1 := sineAlternatingRaw_partial_eq_sineTaylorPartial hx hterms (2 * n + 1)
+  rw [h0, h1]
+
 end AlternatingRaw
 
 end Series
