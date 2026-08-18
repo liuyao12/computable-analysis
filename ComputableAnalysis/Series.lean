@@ -1484,6 +1484,179 @@ structure AlternatingRaw where
   term_decreasing : forall n, term (n + 1) <= term n
   term_shrinks : ShrinksToZero term
 
+/-! The sine Taylor series is an alternating series once its rational input
+has been enclosed in `[-2,2]`.  The term is kept as an absolute value here;
+the signed partial sums are supplied by `AlternatingRaw.partialSum`. -/
+
+def sineTermMagnitude (x : Rat) (k : Nat) : Rat :=
+  qabs (FormalPowerSeries.sineTaylorTerm x k)
+
+theorem sineTermMagnitude_eq_factorialTailTerm
+    (x : Rat) (k : Nat) :
+    sineTermMagnitude x k =
+      RationalMajorant.factorialTailTerm (qabs x) (2 * k + 1) := by
+  unfold sineTermMagnitude FormalPowerSeries.sineTaylorTerm
+    RationalMajorant.factorialTailTerm
+  rw [Rat.div_def, qabs_mul, qabs_mul,
+    RationalMajorant.qabs_pow_eq_pow_qabs]
+  have hsign : qabs (FormalPowerSeries.altSign k) = 1 := by
+    unfold FormalPowerSeries.altSign
+    split <;> native_decide
+  rw [hsign]
+  have hfactor : 0 <= (factorialRat (2 * k + 1))⁻¹ := by
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      (RationalMajorant.factorialRat_pos _))
+  rw [qabs_eq_self_of_nonneg hfactor]
+  simp [Rat.div_def]
+
+theorem sineTermMagnitude_nonneg (x : Rat) (k : Nat) :
+    0 <= sineTermMagnitude x k :=
+  qabs_nonneg _
+
+theorem halfPow_le_one (n : Nat) :
+    ((1 : Rat) / 2) ^ n <= 1 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [Rat.pow_succ]
+      calc
+        ((1 : Rat) / 2) ^ n * (1 / 2) <= 1 * (1 / 2) :=
+          Rat.mul_le_mul_of_nonneg_right ih (by native_decide)
+        _ <= 1 * 1 :=
+          Rat.mul_le_mul_of_nonneg_left (by native_decide) (by native_decide)
+        _ = 1 := by native_decide
+
+theorem halfPow_add_le_left (a b : Nat) :
+    ((1 : Rat) / 2) ^ (a + b) <= ((1 : Rat) / 2) ^ a := by
+  induction b with
+  | zero => simp
+  | succ b ih =>
+      rw [show a + (b + 1) = (a + b) + 1 by omega, Rat.pow_succ]
+      calc
+        ((1 : Rat) / 2) ^ (a + b) * (1 / 2) <=
+            ((1 : Rat) / 2) ^ a * (1 / 2) :=
+          Rat.mul_le_mul_of_nonneg_right ih (by native_decide)
+        _ <= ((1 : Rat) / 2) ^ a * 1 :=
+          Rat.mul_le_mul_of_nonneg_left (by native_decide)
+            (Rat.pow_nonneg (by native_decide))
+        _ = ((1 : Rat) / 2) ^ a := by simp
+
+theorem sineTermMagnitude_decreasing {x : Rat} (hx : qabs x <= 2) (k : Nat) :
+    sineTermMagnitude x (k + 1) <= sineTermMagnitude x k := by
+  rw [sineTermMagnitude_eq_factorialTailTerm,
+    sineTermMagnitude_eq_factorialTailTerm]
+  rw [show 2 * (k + 1) + 1 = (2 * k + 1) + 1 + 1 by omega,
+    RationalMajorant.factorialTailTerm_succ,
+    RationalMajorant.factorialTailTerm_succ]
+  have hC : 0 <= qabs x := qabs_nonneg x
+  have hden1 : 0 < ((2 * k + 2 : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (by omega)
+  have hden2 : 0 < ((2 * k + 3 : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (by omega)
+  have hratio1 : qabs x / ((2 * k + 2 : Nat) : Rat) <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := ((2 * k + 2 : Nat) : Rat))
+    · calc
+        qabs x * ((2 * k + 2 : Nat) : Rat)⁻¹ *
+            ((2 * k + 2 : Nat) : Rat) = qabs x := by
+              rw [Rat.mul_assoc,
+                Rat.inv_mul_cancel _ (Rat.ne_of_gt hden1), Rat.mul_one]
+        _ <= 2 := hx
+        _ <= ((2 * k + 2 : Nat) : Rat) := by exact_mod_cast (by omega)
+        _ = 1 * ((2 * k + 2 : Nat) : Rat) := by grind
+    · exact hden1
+  have hratio2 : qabs x / ((2 * k + 3 : Nat) : Rat) <= 1 := by
+    apply Rat.le_of_mul_le_mul_right (c := ((2 * k + 3 : Nat) : Rat))
+    · calc
+        qabs x * ((2 * k + 3 : Nat) : Rat)⁻¹ *
+            ((2 * k + 3 : Nat) : Rat) = qabs x := by
+              rw [Rat.mul_assoc,
+                Rat.inv_mul_cancel _ (Rat.ne_of_gt hden2), Rat.mul_one]
+        _ <= 2 := hx
+        _ <= ((2 * k + 3 : Nat) : Rat) := by exact_mod_cast (by omega)
+        _ = 1 * ((2 * k + 3 : Nat) : Rat) := by grind
+    · exact hden2
+  have hterm0 : 0 <=
+      RationalMajorant.factorialTailTerm (qabs x) (2 * k + 1) :=
+    RationalMajorant.factorialTailTerm_nonneg hC _
+  calc
+    RationalMajorant.factorialTailTerm (qabs x) (2 * k + 1) *
+        (qabs x / ((2 * k + 2 : Nat) : Rat)) *
+        (qabs x / ((2 * k + 3 : Nat) : Rat)) <=
+        RationalMajorant.factorialTailTerm (qabs x) (2 * k + 1) := by
+      have hprod :
+          qabs x / ((2 * k + 2 : Nat) : Rat) *
+              (qabs x / ((2 * k + 3 : Nat) : Rat)) <= 1 * 1 :=
+        calc
+          qabs x / ((2 * k + 2 : Nat) : Rat) *
+              (qabs x / ((2 * k + 3 : Nat) : Rat)) <=
+              1 * (qabs x / ((2 * k + 3 : Nat) : Rat)) :=
+            Rat.mul_le_mul_of_nonneg_right hratio1
+              (Rat.mul_nonneg hC
+                (Rat.le_of_lt ((Rat.inv_pos).2 hden2)))
+          _ <= 1 * 1 :=
+            Rat.mul_le_mul_of_nonneg_left hratio2 (by native_decide)
+      calc
+        _ = RationalMajorant.factorialTailTerm (qabs x) (2 * k + 1) *
+            ((qabs x / ((2 * k + 2 : Nat) : Rat)) *
+              (qabs x / ((2 * k + 3 : Nat) : Rat))) := by
+                grind [Rat.mul_assoc]
+        _ <= RationalMajorant.factorialTailTerm (qabs x) (2 * k + 1) * (1 * 1) :=
+          Rat.mul_le_mul_of_nonneg_left hprod hterm0
+        _ = RationalMajorant.factorialTailTerm (qabs x) (2 * k + 1) := by
+          rw [Rat.mul_one, Rat.mul_one]
+
+theorem sineTermMagnitude_shrinks {x : Rat} (hx : qabs x <= 2) :
+    ShrinksToZero (sineTermMagnitude x) := by
+  intro eps
+  let C : Rat := qabs x
+  let start : Nat := RationalMajorant.factorialTailStart C
+  let shift : Nat := RationalMajorant.halfDecayShift
+    (2 * RationalMajorant.factorialTailTerm C start) eps
+  refine ⟨start + shift, ?_⟩
+  intro n hn
+  have hindex : start + shift <= 2 * n + 1 := by omega
+  obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hindex
+  have hC : 0 <= C := by
+    dsimp [C]
+    exact qabs_nonneg x
+  have hstart := RationalMajorant.factorialTailStart_satisfies C
+  have hgeom := RationalMajorant.factorialTailTerm_le_geometric_from_start
+    hC hstart (shift + d)
+  have hpow : ((1 : Rat) / 2) ^ (shift + d) <=
+      ((1 : Rat) / 2) ^ shift :=
+    halfPow_add_le_left shift d
+  have hbound :
+      RationalMajorant.factorialTailTerm C start *
+          ((1 : Rat) / 2) ^ shift <= eps.val := by
+    calc
+      RationalMajorant.factorialTailTerm C start *
+          ((1 : Rat) / 2) ^ shift <=
+          (2 * RationalMajorant.factorialTailTerm C start) *
+            ((1 : Rat) / 2) ^ shift := by
+        exact Rat.mul_le_mul_of_nonneg_right
+          (by grind [RationalMajorant.factorialTailTerm_nonneg hC start])
+          (Rat.pow_nonneg (by native_decide))
+      _ <= eps.val := by
+        have hterm0 : 0 <=
+            RationalMajorant.factorialTailTerm C start :=
+          RationalMajorant.factorialTailTerm_nonneg hC start
+        exact RationalMajorant.halfDecayShift_spec
+          (Rat.mul_nonneg (by native_decide) hterm0) eps
+  have hterm :
+      RationalMajorant.factorialTailTerm C (start + shift + d) <= eps.val := by
+    calc
+      RationalMajorant.factorialTailTerm C (start + shift + d) <=
+          RationalMajorant.factorialTailTerm C start *
+            ((1 : Rat) / 2) ^ (shift + d) := by
+        simpa [Nat.add_assoc] using hgeom
+      _ <= RationalMajorant.factorialTailTerm C start *
+          ((1 : Rat) / 2) ^ shift := by
+        exact Rat.mul_le_mul_of_nonneg_left hpow
+          (RationalMajorant.factorialTailTerm_nonneg hC start)
+      _ <= eps.val := hbound
+  rw [sineTermMagnitude_eq_factorialTailTerm]
+  simpa [C, hd, Nat.add_assoc] using hterm
+
 def leibnizTerm (n : Nat) : Rat :=
   1 / ((2 * n + 1 : Nat) : Rat)
 
@@ -1652,6 +1825,41 @@ theorem leibnizAlternatingRaw_reaches_of_positive_tolerance (eps : QPos) :
   exact Rat.le_trans
     (leibnizAlternatingRaw_width_le_one_div_succ eps.val.den)
     (one_div_den_succ_le_of_pos eps.property)
+
+def sineAlternatingRaw (x : Rat) (hx : qabs x <= 2) : AlternatingRaw where
+  term := sineTermMagnitude x
+  term_nonneg := sineTermMagnitude_nonneg x
+  term_decreasing := sineTermMagnitude_decreasing hx
+  term_shrinks := sineTermMagnitude_shrinks hx
+
+theorem sineAlternatingRaw_valid (x : Rat) (hx : qabs x <= 2) :
+    (sineAlternatingRaw x hx).toRealRaw.Valid :=
+  (sineAlternatingRaw x hx).toRealRaw_valid
+
+theorem sineAlternatingRaw_signedTerm_eq_sineTaylorTerm
+    {x : Rat} (hx : 0 <= x) (k : Nat) :
+    signedTerm (sineTermMagnitude x) k =
+      FormalPowerSeries.sineTaylorTerm x k := by
+  have hxabs : qabs x = x := qabs_eq_self_of_nonneg hx
+  have hmag := sineTermMagnitude_eq_factorialTailTerm x k
+  rw [hxabs] at hmag
+  unfold signedTerm alternatingSign FormalPowerSeries.sineTaylorTerm
+  unfold RationalMajorant.factorialTailTerm at hmag
+  by_cases hk : k % 2 = 0
+  · simp [hk, FormalPowerSeries.altSign, hmag]
+  · simp [hk, FormalPowerSeries.altSign, hmag]
+    grind [Rat.div_def, Rat.mul_assoc]
+
+theorem sineAlternatingRaw_partial_eq_sineTaylorPartial
+    {x : Rat} (hx : 0 <= x) (hterms : qabs x <= 2) (n : Nat) :
+    partialSum (sineTermMagnitude x) n =
+      FormalPowerSeries.sineTaylorPartial x n := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [partialSum, FormalPowerSeries.sineTaylorPartial, ih,
+        sineAlternatingRaw_signedTerm_eq_sineTaylorTerm hx]
+
 end AlternatingRaw
 
 end Series
