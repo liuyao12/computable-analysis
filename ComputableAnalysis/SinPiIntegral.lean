@@ -83,7 +83,17 @@ theorem sinPiRawOfConstruction_quarter_equiv_of_specialAngle
   change
     ({ compute := C.sinFunctionRaw.compute (2 * (1 / 4)) _ } : RealRaw).Equiv
       sinFortyFiveValue
-  simpa [harg] using hvalue
+  have hq : C.sinFunctionRaw.definedAt (2 * (1 / 4)) :=
+    hdefined (1 / 4) (by native_decide) (by native_decide)
+  change
+    ({ compute := C.sinFunctionRaw.compute (2 * (1 / 4)) hq } : RealRaw).Equiv
+      sinFortyFiveValue
+  have hcompute :
+      C.sinFunctionRaw.compute (2 * (1 / 4)) hq =
+        C.sinFunctionRaw.compute (1 / 2) ht := by
+    congr 1
+  rw [hcompute]
+  exact hvalue
 
 /-!
 ## The expected endpoint value
