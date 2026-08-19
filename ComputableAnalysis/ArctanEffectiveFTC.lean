@@ -105,6 +105,69 @@ theorem arctanForwardQuotientPaddedKernelBound_contains
   have hD := overlaps_implies_contains_width_padding hAin hAD
   simpa [arctanForwardQuotientPaddedKernelBound, A, B, D, K] using hD
 
+theorem arctanForwardQuotient_padding_width_le
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1)
+    (δ : QPos) (η : QPos) (N : Nat)
+    (hη : η.val = h * δ.val / 3)
+    (hN : 256 * (η.val.den + 1) <= N) :
+    (QInterval.scaleRat (1 / h)
+      (ArctanGeometry.chartAddAreaLoopCompute x
+        (ArctanGeometry.tangentChartIncrement x h) N)).width +
+        (QInterval.differenceQuotient
+          (ArctanGeometry.arctanIntegralRectangleCompute (x + h) N)
+          (ArctanGeometry.arctanIntegralRectangleCompute x N) h).width <=
+      δ.val := by
+  have hNrect : 4 * (η.val.den + 1) <= N := by omega
+  have hchart := ArctanGeometry.tangentChartAreaLoopCompute_width_le_eps_on_unit
+    hx0 hx1 hpos hupper η N hN
+  have hleft := ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+    hx0 hx1 η N hNrect
+  have hright := ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+    (by grind : 0 <= x + h) (by grind : x + h <= 1) η N hNrect
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have hscale : (1 / h) * η.val = δ.val / 3 := by
+    rw [hη, Rat.div_def]
+    have hcancel : h⁻¹ * h = 1 :=
+      Rat.inv_mul_cancel h (Rat.ne_of_gt hpos)
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hA :
+      (QInterval.scaleRat (1 / h)
+        (ArctanGeometry.chartAddAreaLoopCompute x
+          (ArctanGeometry.tangentChartIncrement x h) N)).width <=
+        (1 / h) * η.val := by
+    rw [QInterval.scaleRat_width_of_nonneg hinv]
+    exact Rat.mul_le_mul_of_nonneg_left hchart hinv
+  have hD :
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute (x + h) N)
+        (ArctanGeometry.arctanIntegralRectangleCompute x N) h).width <=
+        2 * ((1 / h) * η.val) := by
+    unfold QInterval.differenceQuotient QInterval.divRat
+    rw [QInterval.scaleRat_width_of_nonneg hinv, QInterval.sub_width]
+    calc
+      (1 / h) *
+          ((ArctanGeometry.arctanIntegralRectangleCompute (x + h) N).width +
+            (ArctanGeometry.arctanIntegralRectangleCompute x N).width) <=
+          (1 / h) * (η.val + η.val) :=
+        Rat.mul_le_mul_of_nonneg_left (rat_add_le_add hright hleft) hinv
+      _ = 2 * ((1 / h) * η.val) := by
+        grind [Rat.mul_add, Rat.mul_assoc, Rat.mul_comm]
+  calc
+    (QInterval.scaleRat (1 / h)
+        (ArctanGeometry.chartAddAreaLoopCompute x
+          (ArctanGeometry.tangentChartIncrement x h) N)).width +
+        (QInterval.differenceQuotient
+          (ArctanGeometry.arctanIntegralRectangleCompute (x + h) N)
+          (ArctanGeometry.arctanIntegralRectangleCompute x N) h).width <=
+        (1 / h) * η.val + 2 * ((1 / h) * η.val) :=
+      rat_add_le_add hA hD
+    _ = δ.val := by
+      rw [hscale]
+      grind [Rat.div_def]
+
 def arctanPrimitiveRaw : RealFunRaw where
   domain := inDomainInterval 0 1
   compute := fun x n => (ArctanGeometry.arctanIntegralRectangleRaw x).compute n
@@ -112,6 +175,44 @@ def arctanPrimitiveRaw : RealFunRaw where
 theorem arctanPrimitiveRaw_valid : arctanPrimitiveRaw.Valid := by
   intro x hx
   exact ArctanGeometry.arctanIntegralRectangleRaw_valid hx.1 hx.2
+
+theorem arctanForwardEndpoint_scale_contains
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) (N : Nat) :
+    (QInterval.scaleRat h
+      (arctanForwardQuotientPaddedKernelBound x h N)).ContainsInterval
+      (endpointDifferenceInterval arctanPrimitiveRaw x (x + h) N) := by
+  have hquotient := arctanForwardQuotientPaddedKernelBound_contains
+    hx0 hx1 hpos hupper N
+  have hscale := QInterval.scaleRat_contains_of_nonneg
+    (Rat.le_of_lt hpos) hquotient
+  have heq :
+      QInterval.scaleRat h
+        (QInterval.differenceQuotient
+          (ArctanGeometry.arctanIntegralRectangleCompute (x + h) N)
+          (ArctanGeometry.arctanIntegralRectangleCompute x N) h) =
+        endpointDifferenceInterval arctanPrimitiveRaw x (x + h) N := by
+    have hinv : 0 <= 1 / h := by
+      rw [Rat.div_def]
+      simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+    have hcancel : h * h⁻¹ = 1 :=
+      Rat.mul_inv_cancel h (Rat.ne_of_gt hpos)
+    change QInterval.scaleRat h
+        (QInterval.differenceQuotient
+          (ArctanGeometry.arctanIntegralRectangleCompute (x + h) N)
+          (ArctanGeometry.arctanIntegralRectangleCompute x N) h) =
+      { lo := (ArctanGeometry.arctanIntegralRectangleCompute (x + h) N).lo -
+          (ArctanGeometry.arctanIntegralRectangleCompute x N).hi,
+        hi := (ArctanGeometry.arctanIntegralRectangleCompute (x + h) N).hi -
+          (ArctanGeometry.arctanIntegralRectangleCompute x N).lo }
+    unfold QInterval.differenceQuotient QInterval.divRat
+      QInterval.scaleRat QInterval.sub
+    simp only [if_pos (Rat.le_of_lt hpos), if_pos hinv]
+    apply (QInterval.mk.injEq _ _ _ _).mpr
+    constructor <;> grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
+      Rat.sub_eq_add_neg]
+  rw [← heq]
+  exact hscale
 
 def arctanKernelRaw : RealFunRaw :=
   RealFunRaw.exact (fun x : Rat => 1 / (1 + x * x))
