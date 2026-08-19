@@ -105,6 +105,13 @@ That bridge is now represented by the checked
    making the remaining convergence estimate an explicit rational inequality.
    The dyadic tangent-square raw now exports the exact width law
    `tangentSquareIntegral_width`: `128 / 2^n`.
+   **Normalization correction:** `tangentSquareIntegral` is the unscaled
+   tangent-chart integral, whose endpoint is the quarter-turn raw
+   `halfQuarterTurnRaw 1` (the computable analogue of `pi/4`).  The value
+   `1/4` belongs to the normalized product
+   `reciprocalPiRaw * tangentSquareIntegral`, matching
+   `integral_0^(1/2) sin(pi*x)^2 dx`.  The existing rational-`1/4` contract is
+   therefore only a provisional placeholder until this scaling is formalized.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

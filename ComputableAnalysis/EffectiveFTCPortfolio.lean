@@ -255,6 +255,10 @@ structure EffectiveFTCPortfolio where
     (ExpProofs.uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw).Equiv
       ExpProofs.uniformExpOnUnit_selectedStageFTCIndexed.toSelected.endpointRaw
 
+/- The raw `tangentSquareIntegral` is unscaled: its natural endpoint is the
+   quarter-turn raw.  The rational `1/4` target below is retained only as a
+   provisional contract for the normalized reciprocal-pi product; it must not
+   be read as a value theorem for the unscaled chart integral. -/
 structure TangentSquareIntegralValueSubgoal where
   lower_contains :
     forall n, (SinPiIntegral.tangentSquareIntegral.compute n).lo <= (1 / 4 : Rat)
