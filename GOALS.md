@@ -260,6 +260,12 @@ from monomial brackets structurally.
    evaluator, using only nonnegative rational interval boxes.  This opens a
    monotone-Darboux subroute for `sin²` without changing the effective FTC
    acceptance interface.
+   The concrete monotone-Darboux raw is now packaged as
+   `sinPiSquareMonotoneIntegral`, with validity proved by
+   `sinPiSquareMonotoneIntegral_valid`.  Its remaining inputs are explicit:
+   sine monotonicity, interval regularity of the square evaluator, and a
+   finite proof-relevant Darboux schedule.  Thus the monotone route has a
+   checkable construction before its endpoint-value theorem is supplied.
    It also exposes the completed finite predecessor through
    `finiteSineSquarePrefix_effectiveFTC_equiv_value`, whose value is
    `6389/161280`.  The remaining transport subgoal is the same stagewise

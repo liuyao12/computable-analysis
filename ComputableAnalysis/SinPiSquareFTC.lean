@@ -1024,6 +1024,37 @@ theorem sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing
   have hsq' := Rat.mul_le_mul_of_nonneg_right hxy' hyhi0
   grind [Rat.pow_succ]
 
+/-! Once interval regularity and sine monotonicity are supplied, the public
+monotone-Darboux integral for the squared evaluator is a concrete `RealRaw`.
+The schedule is proof-relevant; no completed-real integral is hidden here. -/
+
+def sinPiSquareMonotoneIntegral
+    (S : ArctanSinPiConstruction)
+    (hsine : NondecreasingOnInterval S.onHalf)
+    (hregular : IntervalRegularOn (sinPiSquareOnHalfFunctionOnInterval S))
+    (hinterval :
+      (sinPiSquareOnHalfFunctionOnInterval S).lower <=
+        (sinPiSquareOnHalfFunctionOnInterval S).upper)
+    (schedule : Integral.MonotoneDarbouxSchedule
+      (sinPiSquareOnHalfFunctionOnInterval S) hregular
+      (sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing S hsine)
+      hinterval) : RealRaw :=
+  Integral.monotoneDarbouxScheduleIntegralFor schedule
+
+theorem sinPiSquareMonotoneIntegral_valid
+    (S : ArctanSinPiConstruction)
+    (hsine : NondecreasingOnInterval S.onHalf)
+    (hregular : IntervalRegularOn (sinPiSquareOnHalfFunctionOnInterval S))
+    (hinterval :
+      (sinPiSquareOnHalfFunctionOnInterval S).lower <=
+        (sinPiSquareOnHalfFunctionOnInterval S).upper)
+    (schedule : Integral.MonotoneDarbouxSchedule
+      (sinPiSquareOnHalfFunctionOnInterval S) hregular
+      (sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing S hsine)
+      hinterval) :
+    (sinPiSquareMonotoneIntegral S hsine hregular hinterval schedule).Valid := by
+  exact Integral.monotoneDarbouxScheduleIntegralFor_valid schedule
+
 /-!
 ## The effective-FTC acceptance interface
 
