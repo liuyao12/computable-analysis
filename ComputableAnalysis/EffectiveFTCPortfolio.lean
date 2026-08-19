@@ -72,8 +72,36 @@ theorem piCircleArea_compute_lo_nonneg (n : Nat) :
   rw [ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum]
   exact Rat.mul_nonneg (by native_decide)
     (ArctanGeometry.geometricLowerSum_nonneg _
-      (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
-        (by native_decide) n))
+        (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
+          (by native_decide) n))
+
+theorem piCircleArea_compute_lo_ge_two (n : Nat) :
+    2 <= (piCircleArea.compute n).lo := by
+  rw [← ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  change 2 <=
+    ((RealRaw.scaleRat (4 : Rat)
+      (ArctanGeometry.arctanGeom (1 : Rat))).compute n).lo
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= 4)]
+  rw [ArctanGeometry.arctanGeom_one_compute_eq n]
+  unfold ArctanGeometry.positiveLoopComputeAtStage
+  change 2 <= 4 * (ArctanGeometry.arctanAreaLoopState 1 n).lo
+  rw [ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum]
+  have hnest := ArctanGeometry.positiveLoopComputeAtStage_nested
+    (x := (1 : Rat)) (by native_decide) 0 n (Nat.zero_le n)
+  have hzero :
+      (ArctanGeometry.positiveLoopComputeAtStage (1 : Rat) 0).lo =
+        (1 / 2 : Rat) := by
+    native_decide
+  have hbase : (1 / 2 : Rat) <=
+      (ArctanGeometry.positiveLoopComputeAtStage (1 : Rat) n).lo := by
+    rw [← hzero]
+    exact hnest.1
+  unfold ArctanGeometry.positiveLoopComputeAtStage at hbase
+  change (1 / 2 : Rat) <=
+      (ArctanGeometry.arctanAreaLoopState 1 n).lo at hbase
+  rw [ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum] at hbase
+  grind
 
 theorem tangentSquareCellControl_left_rectangle_contained
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
