@@ -528,6 +528,17 @@ from monomial brackets structurally.
    finite overlap between the
    nested-radical square raw integral and the tangent-chart anchor.
 
+   That global certificate is now closed for the tangent-chart primitive:
+   `tangentSquareFTC_cellControl` packages the scheduled cell witness,
+   `tangentSquareFTC_riemann_width_le` proves the summed width budget, and
+   `tangentSquareEffectiveCandidateFTC` supplies the complete
+   `CandidateDerivativeFTC` data.  The generic closure is exposed as
+   `tangentSquareEffectiveCandidateFTC_equiv_endpoint`.  The remaining
+   squared-sine subgoals are now specifically (i) identify its
+   `tangentSquareCombinedDerivativeRaw` with the chosen `sin²` evaluator on
+   the rational chart, (ii) prove finite overlap with the nested-radical
+   dyadic integral, and (iii) transport the endpoint to `1/4`.
+
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by
    `tangentSquarePrimitiveOnUnit_endpointDifference_equiv_halfQuarterTurn`.

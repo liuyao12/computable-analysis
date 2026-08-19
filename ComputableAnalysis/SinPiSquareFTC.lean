@@ -1571,6 +1571,120 @@ theorem tangentSquareFTC_endpoint_width_le (eps : QPos) :
       (ArctanGeometry.arctanIntegralRectangleCompute 1 N).width <= eps.val
   exact Rat.le_trans hsum hη
 
+def tangentSquareFTC_cellControl (eps : QPos) {k : Nat}
+    (hk : k < (tangentSquareFTCPartition eps).pieces) :
+    CandidateDerivativeCellControl
+      (RealFunRaw.add Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw)
+      tangentSquareCombinedDerivativeRaw
+      ((tangentSquareFTCPartition eps).cell k hk) := by
+  let P := tangentSquareFTCPartition eps
+  let δ := tangentSquareFTCPadding eps
+  let η := tangentSquareFTCStageBudget eps
+  let N := tangentSquareFTCEndpointStage eps
+  let C := P.cell k hk
+  have hcell : C.width = mesh 0 1 P.pieces := by
+    dsimp [C]
+    exact RationalPartition.uniform_cell_width 0 1 P.pieces
+      P.positive (by native_decide) k hk
+  have hC : 0 < C.width := by
+    rw [hcell]
+    change 0 < mesh 0 1 (256 * (eps.val.den + 1))
+    unfold mesh
+    have hpieces : 0 < 256 * (eps.val.den + 1) := by omega
+    rw [if_neg (Nat.ne_of_gt hpieces), Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 (by exact_mod_cast P.positive))
+  have hη : η.val = C.width * δ.val / 3 := by
+    dsimp [η, tangentSquareFTCStageBudget, δ]
+    change mesh 0 1 P.pieces * δ.val / 3 = C.width * δ.val / 3
+    rw [hcell]
+  have hN : 256 * (η.val.den + 1) <= N := by
+    dsimp [N, tangentSquareFTCEndpointStage]
+    exact Nat.le_refl _
+  simpa [P, δ, η, N, C] using
+    tangentSquareCombinedDerivativeCellControl C δ η N hC hη hN
+
+theorem tangentSquareFTC_riemann_width_le (eps : QPos) :
+    ((tangentSquareFTCPartition eps).boundIntegralSum
+      (fun k hk =>
+        (tangentSquareFTC_cellControl eps hk).bound 0)).width <= eps.val := by
+  let P := tangentSquareFTCPartition eps
+  let δ := tangentSquareFTCPadding eps
+  let W := mesh 0 1 P.pieces
+  let E : Rat := W + W * W + 2 * δ.val + 192 * W
+  have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+    P.pieces P.positive (by native_decide : (0 : Rat) <= 1)
+      (fun k hk => (tangentSquareFTC_cellControl eps hk).bound 0) E (by
+        intro k hk
+        let C := P.cell k hk
+        have hcell : C.width = W := by
+          dsimp [C, W, P]
+          exact RationalPartition.uniform_cell_width 0 1
+            (tangentSquareFTCPartition eps).pieces
+            (tangentSquareFTCPartition eps).positive
+            (by native_decide) k hk
+        change (QInterval.addInterval
+            (Integral.arctanKernelPaddedBound C δ.val 0)
+            (tangentSquareCorrectionCommonBound C)).width <= E
+        unfold E
+        rw [QInterval.addInterval_width]
+        unfold Integral.arctanKernelPaddedBound
+          tangentSquareCorrectionCommonBound QInterval.width
+        rw [hcell]
+        grind [Rat.sub_eq_add_neg, Rat.mul_assoc, Rat.mul_comm])
+  have hW0 : 0 <= W := by
+    dsimp [W]
+    exact mesh_nonneg_of_le P.positive (by native_decide)
+  have hWformula : W =
+      1 / (256 * ((eps.val.den + 1 : Nat) : Rat)) := by
+    change mesh 0 1 (256 * (eps.val.den + 1)) =
+      1 / (256 * ((eps.val.den + 1 : Nat) : Rat))
+    unfold mesh
+    rw [if_neg (by omega : 256 * (eps.val.den + 1) ≠ 0), Rat.div_def,
+      Rat.natCast_mul,
+      Rat.natCast_add]
+    simp [Rat.div_def]
+    grind
+  have hW1 : W <= 1 := by
+    rw [hWformula]
+    have hden : (1 : Rat) <=
+        (256 : Rat) * ((eps.val.den + 1 : Nat) : Rat) := by
+      have hdn : (1 : Rat) <= ((eps.val.den + 1 : Nat) : Rat) := by
+        exact_mod_cast (Nat.succ_le_succ (Nat.zero_le eps.val.den))
+      grind
+    have hpos : 0 < (256 : Rat) *
+        ((eps.val.den + 1 : Nat) : Rat) :=
+      Rat.mul_pos (by native_decide) (Rat.natCast_pos.mpr (by omega))
+    apply Rat.le_of_mul_le_mul_right (c :=
+      (256 : Rat) * ((eps.val.den + 1 : Nat) : Rat))
+    · have hc := Rat.inv_mul_cancel _ (Rat.ne_of_gt hpos)
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hpos
+  have hWsq : W * W <= W :=
+    by simpa using (Rat.mul_le_mul_of_nonneg_left hW1 hW0)
+  have hWle : W <= eps.val / 256 := by
+    rw [hWformula]
+    have hone := FTC.one_div_den_succ_le_of_pos eps.property
+    have hinv : 0 <= (256 : Rat)⁻¹ :=
+      Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide))
+    have hmul := Rat.mul_le_mul_of_nonneg_right hone hinv
+    simpa [Rat.div_def, Rat.inv_mul_rev, Rat.mul_assoc, Rat.mul_comm]
+      using hmul
+  have hδ : δ.val = eps.val / 64 := by rfl
+  have hE : E <= eps.val := by
+    dsimp [E]
+    rw [hδ]
+    have hW194 := Rat.mul_le_mul_of_nonneg_left hWle
+      (by native_decide : (0 : Rat) <= 194)
+    have hWsq' := Rat.le_trans hWsq hWle
+    have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.div_def]
+  have hE' : (1 - 0) * E <= eps.val := by
+    have hzero : (1 : Rat) - 0 = 1 := by native_decide
+    rw [hzero, Rat.one_mul]
+    exact hE
+  exact Rat.le_trans hsum hE'
+
 /- The effective local certificate uses the finite arctangent rectangle
 primitive.  The geometric arctangent evaluator remains the separate value
 anchor used below. -/
@@ -1582,6 +1696,44 @@ theorem tangentSquareEffectivePrimitiveOnUnit_valid :
   apply RealFunRaw.add_valid
   · exact Integral.arctanPrimitiveRaw_valid
   · exact tangentSquareCorrectionRaw_valid
+
+def tangentSquareEffectiveCandidateFTC :
+    CandidateDerivativeFTC tangentSquareEffectivePrimitiveOnUnit
+      tangentSquareCombinedDerivativeRaw 0 1 where
+  primitive_domain_lower := by
+    unfold tangentSquareEffectivePrimitiveOnUnit RealFunRaw.add
+    exact ⟨⟨by native_decide, by native_decide⟩, trivial⟩
+  primitive_domain_upper := by
+    unfold tangentSquareEffectivePrimitiveOnUnit RealFunRaw.add
+    exact ⟨⟨by native_decide, by native_decide⟩, trivial⟩
+  choosePartition := tangentSquareFTCPartition
+  chooseEndpointPrecision := tangentSquareFTCEndpointStage
+  chooseBoundStage := fun _ => 0
+  cellControl := fun eps k hk => tangentSquareFTC_cellControl eps hk
+  riemann_width := tangentSquareFTC_riemann_width_le
+  endpoint_width := tangentSquareFTC_endpoint_width_le
+  overlap := by
+    intro eps
+    apply RationalPartition.boundIntegralSum_overlaps_endpointDifference
+      (tangentSquareFTCPartition eps) tangentSquareEffectivePrimitiveOnUnit
+      (tangentSquareFTCEndpointStage eps)
+      tangentSquareEffectivePrimitiveOnUnit_valid
+    · intro i hi
+      have hleft := (tangentSquareFTCPartition eps).monotone
+        0 i (Nat.zero_le _) hi
+      have hright := (tangentSquareFTCPartition eps).monotone
+        i (tangentSquareFTCPartition eps).pieces hi (Nat.le_refl _)
+      rw [(tangentSquareFTCPartition eps).left_endpoint] at hleft
+      rw [(tangentSquareFTCPartition eps).right_endpoint] at hright
+      unfold tangentSquareEffectivePrimitiveOnUnit RealFunRaw.add
+      exact ⟨⟨hleft, hright⟩, trivial⟩
+    · intro k hk
+      exact (tangentSquareFTC_cellControl eps hk).endpoint_difference_contained 0
+
+theorem tangentSquareEffectiveCandidateFTC_equiv_endpoint :
+    tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw :=
+  candidateDerivativeFTC tangentSquareEffectiveCandidateFTC
 
 theorem tangentSquareEffectivePrimitive_endpoint_contains
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
