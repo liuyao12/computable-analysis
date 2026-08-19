@@ -101,7 +101,11 @@ from monomial brackets structurally.
    cell by a finite rational box; (iii) prove that a sufficiently small cell
    turns `intervalNearAtPrecision` for the secant quotient into containment
    of the scaled endpoint-difference interval; and (iv) assemble the finite
-   partition and width schedules.
+   partition and width schedules.  The rational bridge is now formalized by
+   `QInterval.nearAt_symm`,
+   `QInterval.scaleRat_differenceQuotient_of_pos`, and
+   `QInterval.scaleRat_differenceQuotient_contains_of_near` in
+   `Differential.lean`.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
