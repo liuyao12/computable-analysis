@@ -3472,6 +3472,70 @@ theorem equiv_endpoint
 
 end SelectedStageCandidateDerivativeFTC
 
+/-! A proof-irrelevance-friendly presentation of the selected-stage
+certificate.  The interval bound depends on the cell number, but not on the
+proof that the number is below the finite partition size.  This is equivalent
+to `SelectedStageCandidateDerivativeFTC`; the indexed form is easier to
+instantiate when a concrete partition is built from explicit breakpoints. -/
+
+structure SelectedStageCandidateDerivativeFTCIndexed
+    (F dF : RealFunRaw) (a b : Rat) where
+  primitive_valid : F.Valid
+  choosePartition : QPos -> RationalPartition a b
+  chooseStage : QPos -> Nat
+  derivativeBound : QPos -> Nat -> QInterval
+  primitive_domain_on :
+    forall eps i, i <= (choosePartition eps).pieces ->
+      F.domain ((choosePartition eps).point i)
+  candidate_domain_on :
+    forall eps k (hk : k < (choosePartition eps).pieces) x,
+      ((choosePartition eps).cell k hk).contains x -> dF.domain x
+  candidate_contained :
+    forall eps k (hk : k < (choosePartition eps).pieces) x
+      (_ : ((choosePartition eps).cell k hk).contains x),
+      QInterval.ContainsInterval
+        (derivativeBound eps k)
+        (dF.compute x (chooseStage eps))
+  local_endpoint_contained :
+    forall eps k (hk : k < (choosePartition eps).pieces),
+      QInterval.ContainsInterval
+        (((choosePartition eps).cell k hk).scaleBound
+          (derivativeBound eps k))
+        (endpointDifferenceInterval F
+          ((choosePartition eps).cell k hk).lower
+          ((choosePartition eps).cell k hk).upper
+          (chooseStage eps))
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k _ => derivativeBound eps k)).width <= eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b (chooseStage eps)).width <= eps.val
+
+def SelectedStageCandidateDerivativeFTCIndexed.toSelected
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTCIndexed F dF a b) :
+    SelectedStageCandidateDerivativeFTC F dF a b where
+  primitive_valid := h.primitive_valid
+  choosePartition := h.choosePartition
+  chooseStage := h.chooseStage
+  derivativeBound := fun eps k _ => h.derivativeBound eps k
+  primitive_domain_on := h.primitive_domain_on
+  candidate_domain_on := h.candidate_domain_on
+  candidate_contained := h.candidate_contained
+  local_endpoint_contained := h.local_endpoint_contained
+  riemann_width := by
+    intro eps
+    simpa using h.riemann_width eps
+  endpoint_width := h.endpoint_width
+
+theorem selectedStageCandidateDerivativeFTCIndexed
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : SelectedStageCandidateDerivativeFTCIndexed F dF a b) :
+    h.toSelected.boundedIntegralRaw.Equiv h.toSelected.endpointRaw := by
+  exact SelectedStageCandidateDerivativeFTC.equiv_endpoint h.toSelected
+
 /-- Top-level closure theorem for the stage-indexed candidate-derivative
 strategy. -/
 theorem selectedStageCandidateDerivativeFTC
