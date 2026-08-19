@@ -49,6 +49,11 @@ endpoint transport must connect nested-radical sine boxes with a rational
 identity; it is therefore the main current test rather than a replacement for
 the polynomial regression suite.
 
+The completed portion is also bundled as the checked Lean structure
+`effectiveFTCPortfolio` in `ComputableAnalysis/EffectiveFTCPortfolio.lean`.
+Its fields deliberately name the concrete certificates; adding the true
+nested-radical square requires extending this bundle with its endpoint bridge.
+
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
 interval bounds.  This keeps the remaining squared-prefix proof in the same
