@@ -35,6 +35,9 @@ def tangentSquareDensity (u : Rat) : Rat :=
 def tangentSquareRationalPart (u : Rat) : Rat :=
   -((2 * u) / (1 + u * u) ^ 2) + u / (1 + u * u)
 
+def tangentSquareChartFactor (u : Rat) : Rat :=
+  u / (1 + u * u)
+
 def tangentSquareRationalDerivative (u : Rat) : Rat :=
   (-1 + 6 * u * u - u ^ 4) / (1 + u * u) ^ 3
 
@@ -56,6 +59,163 @@ theorem tangentSquareDensity_decomposition (u : Rat) :
     Rat.inv_mul_cancel _ hdenne
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
+
+theorem tangentSquareDensity_eq_two_factor_mul_tangentPullbackDensity
+    (u : Rat) :
+    tangentSquareDensity u =
+      2 * tangentSquareChartFactor u * tangentPullbackDensity u := by
+  unfold tangentSquareDensity tangentSquareChartFactor tangentPullbackDensity
+  have hden : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg, Rat.mul_inv_cancel _ hden]
+
+theorem tangentSquareChartFactor_bounds
+    {u : Rat} (hu0 : 0 <= u) (hu1 : u <= 1) :
+    0 <= tangentSquareChartFactor u /\ tangentSquareChartFactor u <= 1 := by
+  unfold tangentSquareChartFactor
+  have hsq : 0 <= u * u := rat_square_nonneg_basic u
+  have hden : 0 < 1 + u * u := by grind
+  have hinv : 0 <= (1 + u * u)⁻¹ :=
+    Rat.le_of_lt ((Rat.inv_pos).2 hden)
+  constructor
+  · exact Rat.mul_nonneg hu0 hinv
+  · rw [Rat.div_def]
+    have hne : 1 + u * u ≠ 0 := Rat.ne_of_gt hden
+    have hcancel : (1 + u * u)⁻¹ * (1 + u * u) = 1 :=
+      Rat.inv_mul_cancel _ hne
+    apply Rat.le_of_mul_le_mul_right (c := 1 + u * u)
+    · rw [Rat.mul_assoc, hcancel]
+      have hmul := Rat.mul_le_mul_of_nonneg_left hu1 hu0
+      grind
+    · exact hden
+
+theorem tangentSquareDensity_lipschitz_on_unit :
+    Integral.LipschitzOnUnit tangentSquareDensity 64 := by
+  constructor
+  · native_decide
+  · intro s t hs0 hs1 ht0 ht1
+    let p : Rat -> Rat := tangentSquareChartFactor
+    let d : Rat -> Rat := tangentPullbackDensity
+    have hp := IntegralIdentities.coordinate_integralKernel_lipschitz_on_unit.2
+      s t hs0 hs1 ht0 ht1
+    have hps := tangentSquareChartFactor_bounds hs0 hs1
+    have hpt := tangentSquareChartFactor_bounds ht0 ht1
+    have hd := tangentPullbackDensity_lipschitz_on_unit.2
+      s t hs0 hs1 ht0 ht1
+    have hD : forall u : Rat, 0 <= u -> u <= 1 ->
+        0 <= d u /\ d u <= 4 := by
+      intro u hu0 hu1
+      unfold d tangentPullbackDensity
+      have hpf := tangentSquareChartFactor_bounds hu0 hu1
+      have hsq : 0 <= u * u := rat_square_nonneg_basic u
+      have hden : 0 < 1 + u * u := by grind
+      have hinv : 0 <= (1 / (1 + u * u) : Rat) := by
+        simpa [Rat.div_def] using Rat.le_of_lt ((Rat.inv_pos).2 hden)
+      have hp0 : 0 <= u * (1 / (1 + u * u)) := by
+        simpa [tangentSquareChartFactor, Rat.div_def, Rat.mul_assoc] using hpf.1
+      have hp1 : u * (1 / (1 + u * u)) <= 1 := by
+        simpa [tangentSquareChartFactor, Rat.div_def, Rat.mul_assoc] using hpf.2
+      constructor
+      · exact Rat.mul_nonneg (Rat.mul_nonneg (by native_decide) hp0) hinv
+      · have hinv1 : (1 / (1 + u * u) : Rat) <= 1 := by
+          rw [Rat.div_def]
+          have hne : 1 + u * u ≠ 0 := Rat.ne_of_gt hden
+          apply Rat.le_of_mul_le_mul_right (c := 1 + u * u)
+          · rw [Rat.mul_assoc, Rat.inv_mul_cancel _ hne]
+            grind
+          · exact hden
+        have hprod := Rat.mul_le_mul_of_nonneg_right hp1 hinv
+        have hprod' : u * (1 / (1 + u * u)) * (1 / (1 + u * u)) <= 1 := by
+          calc
+            u * (1 / (1 + u * u)) * (1 / (1 + u * u)) <=
+                1 * (1 / (1 + u * u)) := by simpa [Rat.mul_assoc] using hprod
+            _ <= 1 := by simpa using hinv1
+        simpa [Rat.mul_assoc] using Rat.mul_le_mul_of_nonneg_left hprod'
+          (by native_decide : (0 : Rat) <= 4)
+    have hds := hD s hs0 hs1
+    have hdt := hD t ht0 ht1
+    have hsplit :
+        tangentSquareDensity s - tangentSquareDensity t =
+          2 * (p s * (d s - d t) + (p s - p t) * d t) := by
+      rw [tangentSquareDensity_eq_two_factor_mul_tangentPullbackDensity,
+        tangentSquareDensity_eq_two_factor_mul_tangentPullbackDensity]
+      dsimp [p, d]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+        Rat.sub_eq_add_neg]
+    have hsum :
+        qabs (p s * (d s - d t) + (p s - p t) * d t) <=
+          p s * qabs (d s - d t) + qabs (p s - p t) * d t := by
+      calc
+        qabs (p s * (d s - d t) + (p s - p t) * d t) <=
+            qabs (p s * (d s - d t)) + qabs ((p s - p t) * d t) :=
+          qabs_add_le _ _
+        _ = qabs (p s) * qabs (d s - d t) +
+            qabs (p s - p t) * qabs (d t) := by
+          simp only [qabs_mul]
+        _ = p s * qabs (d s - d t) +
+            qabs (p s - p t) * d t := by
+          rw [qabs_eq_self_of_nonneg hps.1,
+            qabs_eq_self_of_nonneg hdt.1]
+    have hterm1 :
+        p s * qabs (d s - d t) <= p s * (20 * qabs (t - s)) :=
+      Rat.mul_le_mul_of_nonneg_left
+        (by simpa [d] using hd) hps.1
+    have hterm2 :
+        qabs (p s - p t) * d t <= (3 * qabs (t - s)) * d t :=
+      Rat.mul_le_mul_of_nonneg_right
+        (by simpa [p, tangentSquareChartFactor,
+          ArctanGeometry.integralKernel, Rat.div_def, Rat.mul_assoc] using hp) hdt.1
+    calc
+      qabs (tangentSquareDensity s - tangentSquareDensity t) =
+          qabs (2 * (p s * (d s - d t) + (p s - p t) * d t)) := by rw [hsplit]
+      _ = qabs (2 : Rat) *
+          qabs (p s * (d s - d t) + (p s - p t) * d t) := by rw [qabs_mul]
+      _ <= 2 * (20 * qabs (t - s) + 3 * qabs (t - s) * 4) := by
+        rw [show qabs (2 : Rat) = 2 by native_decide]
+        have hsum'' :
+            p s * (20 * qabs (t - s)) +
+                3 * qabs (t - s) * d t <=
+              20 * qabs (t - s) + 3 * qabs (t - s) * 4 := by
+          have h1 : p s * (20 * qabs (t - s)) <=
+              20 * qabs (t - s) := by
+            simpa [p] using Rat.mul_le_mul_of_nonneg_right hps.2
+              (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 20)
+                (qabs_nonneg (t - s)))
+          have h2 := Rat.mul_le_mul_of_nonneg_left hdt.2
+            (Rat.mul_nonneg (by native_decide : (0 : Rat) <= 3)
+              (qabs_nonneg (t - s)))
+          exact rat_add_le_add h1 h2
+        have hsum' := rat_add_le_add hterm1 hterm2
+        have hbound := Rat.le_trans hsum hsum'
+        have hbound' := Rat.le_trans hbound hsum''
+        exact Rat.mul_le_mul_of_nonneg_left hbound'
+          (by native_decide : (0 : Rat) <= 2)
+      _ = 64 * qabs (t - s) := by grind
+
+/-! The independent dyadic anchor for the squared tangent-chart density.  This
+is deliberately separate from the nested-radical candidate: the latter is
+related to this object only by a proved overlap theorem. -/
+
+def tangentSquareDensityOnUnit : FunctionOnInterval :=
+  FunctionOnInterval.exactRat tangentSquareDensity 0 1
+
+def tangentSquareIntegral : RealRaw :=
+  Integral.integralFor tangentSquareDensityOnUnit
+    (IntegralIdentities.LipschitzDyadic.construction
+      tangentSquareDensity 64 tangentSquareDensity_lipschitz_on_unit)
+
+theorem tangentSquareIntegral_valid :
+    tangentSquareIntegral.Valid := by
+  exact Integral.integralFor_valid tangentSquareDensityOnUnit
+    (IntegralIdentities.LipschitzDyadic.construction
+      tangentSquareDensity 64 tangentSquareDensity_lipschitz_on_unit)
+
+theorem tangentSquareIntegral_compute (stage : Nat) :
+    tangentSquareIntegral.compute stage =
+      IntegralIdentities.LipschitzDyadic.compute
+        tangentSquareDensity 64 stage := rfl
 
 theorem tangentSquareDensity_eq_circleSin_sq_mul_chartJacobian (u : Rat) :
     tangentSquareDensity u =

@@ -368,6 +368,18 @@ from monomial brackets structurally.
    cross-stage nesting subgoal is reduced to one explicit common-anchor
    overlap theorem; stabilization itself is formalized and sorry-free.
 
+   The independent anchor is now concrete as `tangentSquareDensityOnUnit` and
+   `tangentSquareIntegral`.  The theorem
+   `tangentSquareDensity_lipschitz_on_unit` supplies the finite bound `64`,
+   while `tangentSquareIntegral_valid` and
+   `tangentSquareIntegral_compute` expose its valid dyadic computation.  This
+   makes the remaining square proof a sharply stated three-part subgoal:
+   (i) prove nested-radical square boxes overlap this anchor, (ii) prove the
+   tangent primitive gives the same endpoint value, and (iii) invoke the
+   generic effective FTC closure.  The polynomial square prefix remains the
+   first fully closed product example; the tangent-square route is the first
+   non-polynomial product example under active formalization.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but
