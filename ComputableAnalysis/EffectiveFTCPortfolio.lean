@@ -752,6 +752,49 @@ def NestedRadicalSquareIntegralConstructionSubgoal.of_canonical_search
   simpa [hdyadic, Integral.staticDyadicPlan,
     Integral.staticDyadicSubdivisions] using hover
 
+theorem NestedRadicalSquareIntegralConstructionSubgoal.transport_of_compute
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    (hcandidate :
+      SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.Valid)
+    (hcompute : forall n,
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
+    (hcommon : SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness) :
+    (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
+      (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+        SinPiIntegral.tangentSquareIntegral) := by
+  have hevaluator :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Valid := by
+    exact FTC.integral_valid_of_construction H.integral
+  have hequiv_candidate :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw := by
+    apply RealRaw.sameStageOverlap_equiv
+    intro n
+    apply (RealRaw.compareAt_overlap_iff
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral)
+      SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw n n).2
+    rw [hcompute n]
+    have hwidth := hcandidate.1 n
+    unfold QInterval.width at hwidth
+    exact ⟨by grind, by grind⟩
+  have hanchor := hcommon.to_equiv
+  have hstable :
+      (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+        SinPiIntegral.tangentSquareIntegral).Valid := by
+    exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap
+      hanchor
+  have hprefix :
+      SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.Equiv
+        (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+          SinPiIntegral.tangentSquareIntegral) := by
+    exact RealRaw.candidate_equiv_prefixStabilize
+      SinPiIntegral.tangentSquareIntegral_valid hanchor
+      (fun n => Rat.le_refl)
+  exact RealRaw.equiv_trans hevaluator hcandidate hstable
+    hequiv_candidate hprefix
+
 theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_tangent_anchor
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (H : NestedRadicalSquareIntegralConstructionSubgoal S)
