@@ -441,6 +441,12 @@ from monomial brackets structurally.
    first fully closed product example; the tangent-square route is the first
    non-polynomial product example under active formalization.
 
+   Independently, the primitive endpoint algebra is now transported to the
+   circle-angle representation by
+   `tangentSquarePrimitiveOnUnit_endpointDifference_equiv_halfQuarterTurn`.
+   The remaining value step is therefore explicitly the reciprocal-`pi`
+   scaling and its compatibility with the square-integral anchor.
+
    The first of these is now an explicit proposition consumed by
    `dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap`
    and

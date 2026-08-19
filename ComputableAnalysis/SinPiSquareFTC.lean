@@ -329,6 +329,47 @@ theorem tangentSquarePrimitiveOnUnit_endpointDifference_equiv_arctan :
       ArctanGeometry.arctanGeom (0 : Rat)) hvalid n
   exact ⟨horder, horder⟩
 
+theorem tangentSquarePrimitiveOnUnit_endpointDifference_equiv_halfQuarterTurn :
+    (endpointDifferenceRaw tangentSquarePrimitiveOnUnit 0 1
+      tangentSquarePrimitiveOnUnit_endpointDifference_valid).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have hendpoint :
+      (endpointDifferenceRaw tangentSquarePrimitiveOnUnit 0 1
+        tangentSquarePrimitiveOnUnit_endpointDifference_valid).Valid := by
+    simpa [endpointDifferenceRaw, RealRaw.Valid] using
+      tangentSquarePrimitiveOnUnit_endpointDifference_valid
+  have hsub :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit (by native_decide) (by native_decide))
+      (ArctanGeometry.arctanGeom_valid_on_unit (by native_decide) (by native_decide))
+  have hquarter :
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid := by
+    change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+    exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+      CauchyPi.piCircleArea_valid
+  have hgeom : (ArctanGeometry.arctanGeom (1 : Rat)).Valid :=
+    ArctanGeometry.arctanGeom_valid_on_unit (by native_decide) (by native_decide)
+  have hsub_to_geom :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    IntegralIdentities.arctanGeom_one_sub_zero_equiv
+  have hgeom_to_quarter :
+      (ArctanGeometry.arctanGeom (1 : Rat)).Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
+    ArctanGeometry.arctanGeom_one_equiv_piCircleArea_quarter
+  have hendpoint_to_geom :
+      (endpointDifferenceRaw tangentSquarePrimitiveOnUnit 0 1
+        tangentSquarePrimitiveOnUnit_endpointDifference_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat)) :=
+    RealRaw.equiv_trans hendpoint hsub hgeom
+      tangentSquarePrimitiveOnUnit_endpointDifference_equiv_arctan
+      hsub_to_geom
+  exact RealRaw.equiv_trans hendpoint hgeom hquarter
+    hendpoint_to_geom hgeom_to_quarter
+
 theorem finiteSineSquarePrefix_effectiveFTC_equiv_endpoint :
     FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
