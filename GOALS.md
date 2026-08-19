@@ -115,7 +115,9 @@ from monomial brackets structurally.
    candidate-containment field.  The next obligations are to use
    `uniformExpCellRange` as the derivative box, verify its summed width
    schedule (its exact width is exposed by `uniformExpCellRange_width`), and
-   assemble the selected-stage certificate.
+   assemble the selected-stage certificate.  The generic finite cancellation
+   identity `rat_adjacent_difference_fold` is now available in
+   `Calculus.lean` for the center-increment part of that width proof.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

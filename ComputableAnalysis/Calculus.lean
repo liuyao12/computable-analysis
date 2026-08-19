@@ -12,6 +12,35 @@ theorem leftPoint_zero (a b : Rat) (n : Nat) :
   unfold leftPoint
   grind
 
+/-! Doubling the public half-interval identifies its equal-mesh sample grid
+with the normalized unit-interval grid. -/
+theorem two_mul_leftPoint_zero_half_eq_leftPoint_zero_one
+    (n k : Nat) :
+    2 * leftPoint 0 ((1 : Rat) / 2) n k = leftPoint 0 1 n k := by
+  by_cases hn : n = 0
+  · subst n
+    simp [leftPoint, mesh]
+    native_decide
+  · have hnrat : (n : Rat) ≠ 0 := by
+      exact Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn))
+    unfold leftPoint mesh
+    rw [if_neg hn, if_neg hn]
+    simp only [Rat.zero_add]
+    rw [Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_inv_cancel _ hnrat]
+
+theorem mesh_zero_half_eq_half_mesh_zero_one (n : Nat) :
+    mesh 0 ((1 : Rat) / 2) n = (1 / 2) * mesh 0 1 n := by
+  by_cases hn : n = 0
+  · subst n
+    simp [mesh]
+  · have hnr : (n : Rat) ≠ 0 :=
+      Rat.ne_of_gt ((Rat.natCast_pos).2 (Nat.pos_of_ne_zero hn))
+    unfold mesh
+    rw [if_neg hn, if_neg hn, Rat.div_def, Rat.div_def]
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hnr]
+
 /-- The last point of a positive uniform rational mesh is its right endpoint.
 This is an exact rational identity; no limiting argument is involved. -/
 theorem leftPoint_endpoint {a b : Rat} {n : Nat} (hn : 0 < n) :
@@ -118,6 +147,131 @@ def riemannLeftInterval (g : RealFunRaw) (a b : Rat) (n : Nat) (prec : Nat) : QI
   (List.range n).foldl
     (fun acc k => let I := g.compute (leftPoint a b n k) prec; { lo := acc.lo + h * I.lo, hi := acc.hi + h * I.hi })
     { lo := 0, hi := 0 }
+
+/-- The finite rectangle sum is insensitive to how an evaluator behaves away
+from its sample points.  This is the bridge used by the computable sine
+integral: a specialized nested-radical evaluator only needs to agree with
+the public `sin (pi*x)` evaluator on the dyadic left endpoints actually read
+by the equal-mesh algorithm. -/
+theorem riemannLeftInterval_congr_of_samples
+    (g h : RealFunRaw) (a b : Rat) (subdivisions prec : Nat)
+    (hpoint : forall k, k < subdivisions ->
+      g.compute (leftPoint a b subdivisions k) prec =
+        h.compute (leftPoint a b subdivisions k) prec) :
+    riemannLeftInterval g a b subdivisions prec =
+      riemannLeftInterval h a b subdivisions prec := by
+  unfold riemannLeftInterval
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) ->
+      forall (acc : QInterval),
+      (xs.foldl
+        (fun acc k =>
+          let I := g.compute (leftPoint a b subdivisions k) prec
+          { lo := acc.lo + mesh a b subdivisions * I.lo,
+            hi := acc.hi + mesh a b subdivisions * I.hi }) acc) =
+      (xs.foldl
+        (fun acc k =>
+          let I := h.compute (leftPoint a b subdivisions k) prec
+          { lo := acc.lo + mesh a b subdivisions * I.lo,
+            hi := acc.hi + mesh a b subdivisions * I.hi }) acc) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _hmem
+        intro acc
+        rfl
+    | cons k ks ih =>
+        intro hmem
+        intro acc
+        dsimp
+        rw [hpoint k (hmem k (by simp))]
+        exact ih (fun j hj => hmem j (by simp [hj])) _
+  exact hfold (List.range subdivisions)
+    (by intro k hk; exact List.mem_range.mp hk) { lo := 0, hi := 0 }
+
+/-- Overlapping sample boxes give overlapping rectangle sums.
+
+This is the interval-valued version of the sample-transport lemma above.  It
+is intentionally weaker than exact sample equality: a specialized evaluator
+may use nested radicals, Taylor bounds, or another finite algorithm, provided
+that its box at every sampled dyadic point overlaps the public evaluator's
+box.  The proof is finite induction over the mesh; the only order fact used
+is that the mesh width is nonnegative. -/
+theorem riemannLeftInterval_overlap_of_samples
+    (g h : RealFunRaw) (a b : Rat) (hab : a <= b)
+    (subdivisions prec : Nat)
+    (hpoint : forall k, k < subdivisions ->
+      QInterval.Overlaps
+        (g.compute (leftPoint a b subdivisions k) prec)
+        (h.compute (leftPoint a b subdivisions k) prec)) :
+    QInterval.Overlaps
+      (riemannLeftInterval g a b subdivisions prec)
+      (riemannLeftInterval h a b subdivisions prec) := by
+  unfold riemannLeftInterval
+  have hmesh : 0 <= mesh a b subdivisions := by
+    by_cases hn : 0 < subdivisions
+    · exact mesh_nonneg_of_le hn hab
+    · have hz : subdivisions = 0 := by omega
+      simp [mesh, hz]
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) ->
+      forall (accG accH : QInterval), QInterval.Overlaps accG accH ->
+      QInterval.Overlaps
+        (xs.foldl
+          (fun acc k =>
+            let I := g.compute (leftPoint a b subdivisions k) prec
+            { lo := acc.lo + mesh a b subdivisions * I.lo,
+              hi := acc.hi + mesh a b subdivisions * I.hi })
+          accG)
+        (xs.foldl
+          (fun acc k =>
+            let I := h.compute (leftPoint a b subdivisions k) prec
+            { lo := acc.lo + mesh a b subdivisions * I.lo,
+              hi := acc.hi + mesh a b subdivisions * I.hi })
+          accH) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _ accG accH hover
+        exact hover
+    | cons k ks ih =>
+        intro hmem
+        have hk : k < subdivisions := hmem k (by simp)
+        have hks : forall j, j ∈ ks -> j < subdivisions := by
+          intro j hj
+          exact hmem j (by simp [hj])
+        intro accG accH hover
+        have hsample := hpoint k hk
+        have hstep : QInterval.Overlaps
+            { lo := accG.lo + mesh a b subdivisions *
+                (g.compute (leftPoint a b subdivisions k) prec).lo,
+              hi := accG.hi + mesh a b subdivisions *
+                (g.compute (leftPoint a b subdivisions k) prec).hi }
+            { lo := accH.lo + mesh a b subdivisions *
+                (h.compute (leftPoint a b subdivisions k) prec).lo,
+              hi := accH.hi + mesh a b subdivisions *
+                (h.compute (leftPoint a b subdivisions k) prec).hi } := by
+          unfold QInterval.Overlaps at hover hsample ⊢
+          constructor
+          · have hscaled :
+              mesh a b subdivisions *
+                  (g.compute (leftPoint a b subdivisions k) prec).lo <=
+                mesh a b subdivisions *
+                  (h.compute (leftPoint a b subdivisions k) prec).hi :=
+            Rat.mul_le_mul_of_nonneg_left hsample.1 hmesh
+            grind
+          · have hscaled :
+              mesh a b subdivisions *
+                  (h.compute (leftPoint a b subdivisions k) prec).lo <=
+                mesh a b subdivisions *
+                  (g.compute (leftPoint a b subdivisions k) prec).hi :=
+            Rat.mul_le_mul_of_nonneg_left hsample.2 hmesh
+            grind
+        simpa using ih hks _ _ hstep
+  exact hfold (List.range subdivisions)
+    (by intro k hk; exact List.mem_range.mp hk)
+    { lo := 0, hi := 0 } { lo := 0, hi := 0 } (by
+      simp [QInterval.Overlaps])
 
 /-- The finite left-endpoint sum for the product contribution
 `f\,\Delta g`.  This is the rational rectangle area swept when the second
@@ -857,6 +1011,62 @@ def slopeBetween (Fy Fx : QInterval) (dx : Rat) : QInterval :=
 
 end QInterval
 
+theorem QInterval.scaleByRat_add_mul_of_nonneg
+    {r h : Rat} (hr : 0 <= r) (A I : QInterval) :
+    QInterval.scaleByRat r
+        { lo := A.lo + h * I.lo, hi := A.hi + h * I.hi } =
+      { lo := (QInterval.scaleByRat r A).lo + (r * h) * I.lo,
+        hi := (QInterval.scaleByRat r A).hi + (r * h) * I.hi } := by
+  unfold QInterval.scaleByRat
+  simp only [if_pos hr]
+  grind [Rat.mul_assoc, Rat.mul_add]
+
+theorem riemannLeftInterval_half_eq_half_scale_unit
+    (g h : RealFunRaw) (subdivisions prec : Nat)
+    (hpoint : forall k, k < subdivisions ->
+      g.compute (leftPoint 0 ((1 : Rat) / 2) subdivisions k) prec =
+        h.compute (leftPoint 0 1 subdivisions k) prec) :
+    riemannLeftInterval g 0 ((1 : Rat) / 2) subdivisions prec =
+      QInterval.scaleByRat (1 / 2)
+        (riemannLeftInterval h 0 1 subdivisions prec) := by
+  let stepG : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := g.compute (leftPoint 0 ((1 : Rat) / 2) subdivisions k) prec
+    { lo := acc.lo + mesh 0 ((1 : Rat) / 2) subdivisions * I.lo,
+      hi := acc.hi + mesh 0 ((1 : Rat) / 2) subdivisions * I.hi }
+  let stepH : QInterval -> Nat -> QInterval := fun acc k =>
+    let I := h.compute (leftPoint 0 1 subdivisions k) prec
+    { lo := acc.lo + mesh 0 1 subdivisions * I.lo,
+      hi := acc.hi + mesh 0 1 subdivisions * I.hi }
+  have hstep : forall k, k < subdivisions -> forall A B,
+      A = QInterval.scaleByRat (1 / 2) B ->
+      stepG A k = QInterval.scaleByRat (1 / 2) (stepH B k) := by
+    intro k hk A B hAB
+    dsimp [stepG, stepH]
+    rw [hpoint k hk, mesh_zero_half_eq_half_mesh_zero_one]
+    rw [QInterval.scaleByRat_add_mul_of_nonneg
+      (by native_decide : (0 : Rat) <= 1 / 2)]
+    rw [hAB]
+  have hfold : forall (xs : List Nat),
+      (forall k, k ∈ xs -> k < subdivisions) -> forall A B,
+      A = QInterval.scaleByRat (1 / 2) B ->
+      xs.foldl stepG A = QInterval.scaleByRat (1 / 2) (xs.foldl stepH B) := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro _hmem A B hAB
+        simpa using hAB
+    | cons k ks ih =>
+        intro hmem A B hAB
+        simp only [List.foldl]
+        apply ih (fun j hj => hmem j (by simp [hj]))
+          (stepG A k) (stepH B k)
+        exact hstep k (hmem k (by simp)) A B hAB
+  simpa [riemannLeftInterval, stepG, stepH] using
+    hfold (List.range subdivisions)
+      (by intro k hk; exact List.mem_range.mp hk)
+      { lo := 0, hi := 0 } { lo := 0, hi := 0 }
+      (by simp [QInterval.scaleByRat])
+
 /-- Effective modulus on a rational interval.
 
 This is legacy pointwise-style continuity data used by the current FTC target.
@@ -1111,6 +1321,72 @@ structure Construction (f : RealFunRaw) (a b : Rat) where
 /-- The constructive integral operator. -/
 def integral (f : RealFunRaw) (a b : Rat) (c : Construction f a b) : RealRaw :=
   Certificate.realRaw c.certificate
+
+/-- Two integral constructions with the same plan represent the same raw
+integral when their integrand enclosures agree at every finite sample read by
+that plan.  This is the formal reason a dyadic-only special-function
+evaluator can replace a general evaluator inside the equal-dyadic integral:
+the replacement need not be defined by the same algorithm away from the
+sample grid. -/
+theorem integral_equiv_of_plan_and_samples
+    {f g : RealFunRaw} {a b : Rat}
+    (cf : Construction f a b) (cg : Construction g a b)
+    (hplan : cf.plan = cg.plan)
+    (hsamples : forall n k,
+      k < (cf.plan n).subdivisions ->
+      f.compute (leftPoint a b (cf.plan n).subdivisions k)
+        (cf.plan n).evalPrecision =
+        g.compute (leftPoint a b (cf.plan n).subdivisions k)
+        (cf.plan n).evalPrecision) :
+    (integral f a b cf).Equiv (integral g a b cg) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (integral f a b cf) (integral g a b cg) n n).2
+  have hcompute :
+      (integral f a b cf).compute n =
+        (integral g a b cg).compute n := by
+    unfold integral Certificate.realRaw Raw.toRealRaw algorithm
+    rw [← hplan]
+    apply riemannLeftInterval_congr_of_samples
+    intro k hk
+    exact hsamples n k hk
+  rw [hcompute]
+  unfold QInterval.Overlaps
+  have hwidth := cg.certificate.width_nonneg n
+  change 0 <= ((integral g a b cg).compute n).width at hwidth
+  grind [QInterval.width]
+
+/-- The interval-valued sample-transport theorem for equal-dyadic integrals.
+
+Unlike `integral_equiv_of_plan_and_samples`, this version does not require
+the two finite evaluators to return identical boxes.  Overlap at every point
+read by the common plan is enough for overlap of the resulting rectangle sums.
+This is the intended interface for replacing the arctangent-backed sine
+evaluator by a separately implemented nested-radical evaluator. -/
+theorem integral_equiv_of_plan_and_sample_overlaps
+    {f g : RealFunRaw} {a b : Rat} (hab : a <= b)
+    (cf : Construction f a b) (cg : Construction g a b)
+    (hplan : cf.plan = cg.plan)
+    (hsamples : forall n k,
+      k < (cf.plan n).subdivisions ->
+      QInterval.Overlaps
+        (f.compute
+          (leftPoint a b (cf.plan n).subdivisions k)
+          (cf.plan n).evalPrecision)
+        (g.compute
+          (leftPoint a b (cf.plan n).subdivisions k)
+          (cf.plan n).evalPrecision)) :
+    (integral f a b cf).Equiv (integral g a b cg) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (integral f a b cf) (integral g a b cg) n n).2
+  unfold integral Certificate.realRaw Raw.toRealRaw algorithm
+  rw [← hplan]
+  exact riemannLeftInterval_overlap_of_samples f g a b hab
+    (cf.plan n).subdivisions (cf.plan n).evalPrecision
+    (fun k hk => hsamples n k hk)
 
 /-- The exact constant integrand `x ↦ c`, as a raw function. -/
 def constantFunRaw (c : Rat) : RealFunRaw :=
@@ -2240,6 +2516,22 @@ theorem uniform_cell_width (a b : Rat) (pieces : Nat)
     mesh a b pieces
   exact leftPoint_step a b pieces k
 
+/-! Finite telescoping for rational adjacent increments.  This is the order
+identity used when a cell-range width is split into a center increment and a
+uniform tail contribution. -/
+
+theorem rat_adjacent_difference_fold (points : Nat -> Rat) (n : Nat) :
+    (List.range n).foldl
+      (fun acc k => acc + (points (k + 1) - points k)) 0 =
+      points n - points 0 := by
+  induction n with
+  | zero => simp [Rat.sub_self]
+  | succ n ih =>
+      simp only [List.range_succ, List.foldl_append, List.foldl_cons,
+        List.foldl_nil]
+      rw [ih]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
 /-- Regard a partition's breakpoint list as a total rational path by holding
 its final value constant beyond the last cell.  This permits the finite
 corner-sum estimates to apply directly to partition data. -/
@@ -2914,6 +3206,82 @@ theorem derivativeBoundFTC
     (h : DerivativeBoundFTC F dF a b) :
     h.boundedIntegralRaw.Equiv h.endpointRaw :=
   h.equiv_endpoint
+
+/-! A streamlined effective-FTC certificate.  In `DerivativeBoundFTC` the
+final overlap is exposed as a field for compatibility with older callers.
+Here it is derived from the local endpoint containments: summing the scaled
+derivative boxes contains the sum of the adjacent endpoint differences, and
+the latter contains the global endpoint difference.  Thus this is the
+interface intended for ordinary use: the analytic work is reduced to finite
+derivative bounds and an arbitrarily small width schedule. -/
+
+structure EffectiveDerivativeBoundFTC
+    (F dF : RealFunRaw) (a b : Rat) where
+  primitive_valid : F.Valid
+  primitive_domain_lower : F.domain a
+  primitive_domain_upper : F.domain b
+  choosePartition : QPos -> RationalPartition a b
+  chooseEndpointPrecision : QPos -> Nat
+  chooseBoundStage : QPos -> Nat
+  derivativeBound :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        DerivativeBoundOnSubinterval dF
+          ((choosePartition eps).cell k hk)
+  domain_at_partition :
+    forall eps i, i <= (choosePartition eps).pieces ->
+      F.domain ((choosePartition eps).point i)
+  localControl :
+    forall eps,
+      forall k (hk : k < (choosePartition eps).pieces),
+        LocalFTCFromDerivativeBound F dF
+          ((choosePartition eps).cell k hk)
+          (derivativeBound eps k hk)
+  endpointPrecision_agreement :
+    forall eps k (hk : k < (choosePartition eps).pieces) n,
+      (localControl eps k hk).endpointPrecision n =
+        chooseEndpointPrecision eps
+  riemann_width :
+    forall eps,
+      ((choosePartition eps).boundIntegralSum
+        (fun k hk =>
+          (derivativeBound eps k hk).bound (chooseBoundStage eps))).width <=
+        eps.val
+  endpoint_width :
+    forall eps,
+      (endpointDifferenceInterval F a b
+        (chooseEndpointPrecision eps)).width <= eps.val
+
+def EffectiveDerivativeBoundFTC.toDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b) :
+    DerivativeBoundFTC F dF a b where
+  primitive_domain_lower := h.primitive_domain_lower
+  primitive_domain_upper := h.primitive_domain_upper
+  choosePartition := h.choosePartition
+  chooseEndpointPrecision := h.chooseEndpointPrecision
+  chooseBoundStage := h.chooseBoundStage
+  derivativeBound := h.derivativeBound
+  localControl := h.localControl
+  riemann_width := h.riemann_width
+  endpoint_width := h.endpoint_width
+  overlap := by
+    intro eps
+    apply RationalPartition.boundIntegralSum_overlaps_endpointDifference
+      (h.choosePartition eps) F (h.chooseEndpointPrecision eps)
+      h.primitive_valid (h.domain_at_partition eps)
+    intro k hk
+    have hlocal := (h.localControl eps k hk).endpoint_contained
+      (h.chooseBoundStage eps)
+    rw [h.endpointPrecision_agreement eps k hk (h.chooseBoundStage eps)] at hlocal
+    simpa [RationalPartition.cell, RationalSubinterval.scaleBound] using hlocal
+
+theorem effectiveDerivativeBoundFTC
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : EffectiveDerivativeBoundFTC F dF a b) :
+    h.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      h.toDerivativeBoundFTC.endpointRaw :=
+  h.toDerivativeBoundFTC.equiv_endpoint
 
 /-- Global finite certificate for the "candidate derivative versus computed
 secants" strategy.
@@ -4024,7 +4392,7 @@ structure IntervalRegularOn (F : FunctionOnInterval) where
     forall I hI x hx n,
       I.lo <= x ->
       x <= I.hi ->
-      QInterval.ContainsInterval
+        QInterval.ContainsInterval
         (evalInterval I hI n)
         (F.compute x hx n)
 
@@ -5709,6 +6077,25 @@ theorem apply_stays_in_source {I : InvertibleFunctionOnInterval}
     (inv : InverseRaw I) (y : InRangeRaw I) :
     forall n, subintervalOf ((inv.apply y).compute n) I.function.lower I.function.upper :=
   inv.preimage_subinterval y
+
+/-! A rational preimage certificate upgrades an inverse interval computation
+from mere source validity to an explicit represented value.  This is the
+small inverse-layer fact needed by half-angle constructions: the geometric
+argument supplies a rational slope `u`, while this theorem supplies its
+`RealRaw.Equiv` statement. -/
+theorem apply_equiv_of_rational_preimage
+    {I : InvertibleFunctionOnInterval} (inv : InverseRaw I)
+    (y : InRangeRaw I) (u : Rat)
+    (hpreimage : forall n,
+      QInterval.Overlaps
+        ((inv.apply y).compute n)
+        ({ lo := u, hi := u } : QInterval)) :
+    (inv.apply y).Equiv (RealRaw.ofRat u) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (inv.apply y) (RealRaw.ofRat u) n n).2
+  simpa [RealRaw.ofRat] using hpreimage n
 
 theorem apply_value_overlaps_target {I : InvertibleFunctionOnInterval}
     (inv : InverseRaw I) (y : InRangeRaw I) :
