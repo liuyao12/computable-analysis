@@ -54,6 +54,67 @@ theorem rationalCircleSin_sq_eq_one_sub_cos_sq (u : Rat) :
   have h := rationalCircleSin_sq_add_cos_sq u
   grind
 
+/-! A box-level form of the circle identity.  It is intentionally stated for
+rational witness values: the later nested-radical transport supplies such
+witnesses through its tangent-box overlap certificates. -/
+
+def rationalSquareInterval (I : QInterval) : QInterval :=
+  { lo := I.lo * I.lo, hi := I.hi * I.hi }
+
+def rationalOneMinusSquareInterval (I : QInterval) : QInterval :=
+  { lo := 1 - I.hi * I.hi, hi := 1 - I.lo * I.lo }
+
+theorem rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
+    {S C : QInterval} {s c : Rat}
+    (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1)
+    (hs : S.lo <= s ∧ s <= S.hi) (hc : C.lo <= c ∧ c <= C.hi)
+    (hcircle : s * s + c * c = 1) :
+    QInterval.Overlaps (rationalSquareInterval S)
+      (rationalOneMinusSquareInterval C) := by
+  have hSlo : 0 <= S.lo := hS.1
+  have hChi : C.hi <= 1 := hC.2.2
+  have hs0 : 0 <= s := Rat.le_trans hSlo hs.1
+  have hc0 : 0 <= c := Rat.le_trans hC.1 hc.1
+  have Shi0 : 0 <= S.hi := Rat.le_trans hSlo hS.2.1
+  have Clo0 : 0 <= C.lo := hC.1
+  have Chi0 : 0 <= C.hi := Rat.le_trans Clo0 hC.2.1
+  have hSsq_lo : S.lo * S.lo <= s * s := by
+    have h := Rat.mul_le_mul_of_nonneg_right hs.1
+      (Rat.add_nonneg hs0 hSlo)
+    grind [Rat.mul_add, Rat.add_mul]
+  have hSsq_hi : s * s <= S.hi * S.hi := by
+    have h := Rat.mul_le_mul_of_nonneg_right hs.2
+      (Rat.add_nonneg hs0 Shi0)
+    grind [Rat.mul_add, Rat.add_mul]
+  have hCsq_lo : C.lo * C.lo <= c * c := by
+    have h := Rat.mul_le_mul_of_nonneg_right hc.1
+      (Rat.add_nonneg hc0 Clo0)
+    grind [Rat.mul_add, Rat.add_mul]
+  have hCsq_hi : c * c <= C.hi * C.hi := by
+    have h := Rat.mul_le_mul_of_nonneg_right hc.2
+      (Rat.add_nonneg hc0 Chi0)
+    grind [Rat.mul_add, Rat.add_mul]
+  have hsquare_mem :
+      S.lo * S.lo <= s * s ∧ s * s <= S.hi * S.hi :=
+    ⟨hSsq_lo, hSsq_hi⟩
+  have hcomplement_mem :
+      1 - C.hi * C.hi <= 1 - c * c ∧
+        1 - c * c <= 1 - C.lo * C.lo := by
+    constructor <;> grind
+  unfold rationalSquareInterval rationalOneMinusSquareInterval
+    QInterval.Overlaps
+  change S.lo * S.lo <= 1 - C.lo * C.lo ∧
+    1 - C.hi * C.hi <= S.hi * S.hi
+  constructor
+  · calc
+      S.lo * S.lo <= s * s := hsquare_mem.1
+      _ = 1 - c * c := by grind
+      _ <= 1 - C.lo * C.lo := hcomplement_mem.2
+  · calc
+      1 - C.hi * C.hi <= 1 - c * c := hcomplement_mem.1
+      _ = s * s := by grind
+      _ <= S.hi * S.hi := hsquare_mem.2
+
 theorem sinPiSquareOnHalf_valid (S : ArctanSinPiConstruction) :
     (sinPiSquareOnHalf S).Valid := by
   have hvalid : (sinPiOnHalfRaw S).Valid := by

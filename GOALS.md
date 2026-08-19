@@ -258,7 +258,10 @@ from monomial brackets structurally.
    `finiteSineSquarePrefix_effectiveFTC_equiv_value`, whose value is
    `6389/161280`.  The remaining transport subgoal is the same stagewise
    sine/cosine identity on each dyadic cell, followed by the rational
-   endpoint anchor `1/4`.
+   endpoint anchor `1/4`.  The first interval-level algebra step is now
+   formalized as `rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle`:
+   any rational sine/cosine witnesses on the unit circle give overlapping
+   square and complementary-square boxes, with all enclosure slack retained.
 
 9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
    the existing coefficient-shift certificates for the concrete finite
