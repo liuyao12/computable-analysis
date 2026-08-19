@@ -4122,6 +4122,82 @@ theorem uniformExpExpandedCellRange_width_le
       rat_add_le_add hrange Rat.le_refl
     _ <= 9 * (precisionAtStage n).val / 2 := by grind
 
+theorem uniformExpExpandedCellRange_width_le_eps
+    (eps : QPos) (n : Nat) {a b : Rat}
+    (ha : 0 <= a) (hb : b <= 1) (hab : a < b)
+    (hstep : b - a <= (precisionAtStage n).val / 200)
+    (hprecision : (precisionAtStage n).val <= eps.val / 5) :
+    (QInterval.expand
+      (uniformExpCellRange a b
+        (uniformExpQuotientPrecision (b - a)
+          (Rat.ne_of_gt ((Rat.lt_iff_sub_pos a b).mp hab)) n))
+      (2 * (precisionAtStage n).val)).width <= eps.val := by
+  have hw := uniformExpExpandedCellRange_width_le n ha hb hab hstep
+  have hw' :
+      (uniformExpCellRange a b
+          (uniformExpQuotientPrecision (b - a)
+            (Rat.ne_of_gt ((Rat.lt_iff_sub_pos a b).mp hab)) n)).width +
+        2 * (2 * (precisionAtStage n).val) <=
+      9 * (precisionAtStage n).val / 2 := by
+    simpa [QInterval.expand_width] using hw
+  have heps : 0 <= eps.val := Rat.le_of_lt eps.property
+  rw [QInterval.expand_width]
+  calc
+    (uniformExpCellRange a b
+        (uniformExpQuotientPrecision (b - a)
+          (Rat.ne_of_gt ((Rat.lt_iff_sub_pos a b).mp hab)) n)).width +
+        2 * (2 * (precisionAtStage n).val) <=
+        9 * (precisionAtStage n).val / 2 := hw'
+    _ <= eps.val := by grind
+
+theorem uniformExpFTCLeftPoint_bounds (eps : QPos) (k : Nat)
+    (hk : k < uniformExpFTCPieces eps) :
+    0 <= leftPoint 0 1 (uniformExpFTCPieces eps) k /\
+      leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1) <= 1 := by
+  have hn := uniformExpFTCPieces_pos eps
+  constructor
+  · have h0 := leftPoint_monotone hn (by native_decide : (0 : Rat) <= 1)
+        (Nat.zero_le k)
+    simpa [leftPoint_zero] using h0
+  · have h1 := leftPoint_monotone hn (by native_decide : (0 : Rat) <= 1)
+        (Nat.succ_le_of_lt hk)
+    have hend := leftPoint_endpoint (a := (0 : Rat)) (b := 1) hn
+    calc
+      leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1) <=
+          leftPoint 0 1 (uniformExpFTCPieces eps)
+            (uniformExpFTCPieces eps) := h1
+      _ = 1 := hend
+
+theorem uniformExpFTCLeftPoint_strict (eps : QPos) (k : Nat)
+    (hk : k < uniformExpFTCPieces eps) :
+    leftPoint 0 1 (uniformExpFTCPieces eps) k <
+      leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1) := by
+  apply (Rat.lt_iff_sub_pos _ _).mpr
+  rw [leftPoint_step]
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt (uniformExpFTCPieces_pos eps)), Rat.div_def]
+  exact Rat.mul_pos (by native_decide)
+    ((Rat.inv_pos).2 ((Rat.natCast_pos).2
+      (uniformExpFTCPieces_pos eps)))
+
+theorem uniformExpFTCLeftPoint_step_le (eps : QPos) (k : Nat)
+    (hk : k < uniformExpFTCPieces eps) :
+    leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1) -
+        leftPoint 0 1 (uniformExpFTCPieces eps) k <=
+      (precisionAtStage (uniformExpFTCIndex eps)).val / 200 := by
+  rw [leftPoint_step]
+  exact uniformExpFTCPieces_mesh_le eps
+
+theorem uniformExpFTCMesh_ne (eps : QPos) :
+    mesh 0 1 (uniformExpFTCPieces eps) ≠ 0 := by
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt (uniformExpFTCPieces_pos eps))]
+  exact Rat.ne_of_gt (by
+    rw [Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 ((Rat.natCast_pos).2
+        (uniformExpFTCPieces_pos eps))))
+
 theorem uniformExpEndpointBox_width_le_at_quotient_stage
     (n : Nat) {a b : Rat}
     (ha : 0 <= a) (hb : b <= 1) (hab : a < b) :

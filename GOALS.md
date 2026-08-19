@@ -168,6 +168,11 @@ from monomial brackets structurally.
    `uniformExpFTCIndexedBound_eq` now exposes the bound’s concrete expanded
    interval separately, so the remaining proof can use an independent
    quotient-stage width-transport lemma before re-entering the partition sum.
+   That independent lemma is now checked as
+   `uniformExpExpandedCellRange_width_le_eps`; the auxiliary rational-grid
+   facts `uniformExpFTCLeftPoint_bounds`, `uniformExpFTCLeftPoint_strict`,
+   `uniformExpFTCLeftPoint_step_le`, and `uniformExpFTCMesh_ne` are also
+   available for the final finite-sum application.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
