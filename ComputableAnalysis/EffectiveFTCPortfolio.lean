@@ -425,6 +425,22 @@ theorem TangentSquareFTCIntegralCompatibilitySubgoal.equivalent
     SinPiIntegral.tangentSquareEffectiveIntegralRaw
     SinPiIntegral.tangentSquareIntegral n n).2 (H.stage_overlap n)
 
+/- The correctly normalized tangent-chart value is obtained in two stages:
+   first identify the unscaled chart integral with the quarter-turn endpoint;
+   only then apply the reciprocal-pi factor.  The scheduled endpoint validity
+   is kept as data because an arbitrary endpoint-stage selector need not be
+   nested by itself. -/
+structure TangentSquareQuarterTurnValueSubgoal where
+  tangent_integral_valid : SinPiIntegral.tangentSquareIntegral.Valid
+  effective_integral_valid :
+    SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid
+  endpoint_valid :
+    SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid
+  compatibility : TangentSquareFTCIntegralCompatibilitySubgoal
+  endpoint_equiv_quarter :
+    SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
+
 theorem TangentSquareIntegralValueSubgoal.value
     (H : TangentSquareIntegralValueSubgoal) :
     SinPiIntegral.tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
