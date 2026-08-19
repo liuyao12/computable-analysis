@@ -260,6 +260,11 @@ from monomial brackets structurally.
    evaluator, using only nonnegative rational interval boxes.  This opens a
    monotone-Darboux subroute for `sin²` without changing the effective FTC
    acceptance interface.
+   The inverse-search obligation is now named by the finite structure
+   `TangentMonotonicityCertificate`; its `weak_order` field is converted to
+   tangent, sine, and squared monotonicity by
+   `sinPiSquareOnHalf_nondecreasing_of_tangent_certificate`.  This isolates
+   the remaining search proof to one stagewise rational-box inequality.
    The concrete monotone-Darboux raw is now packaged as
    `sinPiSquareMonotoneIntegral`, with validity proved by
    `sinPiSquareMonotoneIntegral_valid`.  Its remaining inputs are explicit:

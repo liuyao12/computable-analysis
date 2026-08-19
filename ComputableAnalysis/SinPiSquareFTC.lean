@@ -983,6 +983,28 @@ def sinPiSquareOnHalfFunctionOnInterval
     intro x hx
     exact sinPiSquareOnHalf_valid S x ⟨hx, hx⟩
 
+/-! The inverse-search monotonicity obligation is kept as finite data.  It is
+the exact missing property needed to turn ordered angle inputs into ordered
+tangent boxes; no extensional inverse-function axiom is introduced. -/
+
+structure TangentMonotonicityCertificate
+    (B : IntegralIdentities.ArctanInverseBisection) where
+  weak_order : forall (s t : Rat)
+    (hs : RationalCircle.GeometricTrig.firstQuadrantBranch s)
+    (ht : RationalCircle.GeometricTrig.firstQuadrantBranch t),
+    s <= t -> forall n,
+      (B.tangentRaw.compute s hs n).lo <=
+        (B.tangentRaw.compute t ht n).hi
+
+theorem TangentMonotonicityCertificate.tangent_nondecreasing
+    {B : IntegralIdentities.ArctanInverseBisection}
+    (C : TangentMonotonicityCertificate B) :
+    NondecreasingOnInterval (IntegralIdentities.tangentOnUnit B) := by
+  intro s t hs ht hst n
+  change 0 <= s /\ s <= 1 at hs
+  change 0 <= t /\ t <= 1 at ht
+  exact C.weak_order s t hs ht hst n
+
 /-! Monotonicity is inherited from the sine evaluator at the interval level.
 The hypothesis is intentionally the existing weak interval monotonicity
 (`lower` at the left sample is below `upper` at the right sample), which is
@@ -1023,6 +1045,14 @@ theorem sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing
     Rat.le_trans hboundsy.1 hordery
   have hsq' := Rat.mul_le_mul_of_nonneg_right hxy' hyhi0
   grind [Rat.pow_succ]
+
+theorem sinPiSquareOnHalf_nondecreasing_of_tangent_certificate
+    (S : ArctanSinPiConstruction)
+    (C : TangentMonotonicityCertificate S.inverse) :
+    NondecreasingOnInterval (sinPiSquareOnHalfFunctionOnInterval S) := by
+  exact sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing S
+    (S.onHalf_nondecreasing_of_tangent_nondecreasing
+      C.tangent_nondecreasing)
 
 /-! Once interval regularity and sine monotonicity are supplied, the public
 monotone-Darboux integral for the squared evaluator is a concrete `RealRaw`.
