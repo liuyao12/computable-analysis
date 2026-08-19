@@ -479,6 +479,60 @@ structure NormalizedTangentSquareValueSubgoal where
       (SinPiIntegral.reciprocalPiRaw *
         RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
 
+/-! The correctly scaled transport obligation for the genuine `sin²` target.
+The equal-dyadic integral is in the original `x` variable, whereas the
+tangent-chart integral is in `u`; the Jacobian contributes `1/pi`.  Thus the
+finite overlap must be against `normalizedTangentSquareIntegral`, not the
+unscaled chart integral. -/
+structure NormalizedTangentSquareCommonWitness where
+  witness : Nat -> Rat
+  candidate_lo_le : forall n,
+    SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo <= witness n
+  witness_le_candidate_hi : forall n,
+    witness n <= (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
+  normalized_lo_le : forall n,
+    normalizedTangentSquareIntegral.compute n).lo <= witness n
+  witness_le_normalized_hi : forall n,
+    witness n <= normalizedTangentSquareIntegral.compute n).hi
+
+theorem NormalizedTangentSquareCommonWitness.to_equiv
+    (H : NormalizedTangentSquareCommonWitness) :
+    SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.Equiv
+      normalizedTangentSquareIntegral := by
+  apply SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
+  intro n
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans (H.candidate_lo_le n)
+      (H.witness_le_normalized_hi n),
+    Rat.le_trans (H.normalized_lo_le n)
+      (H.witness_le_candidate_hi n)⟩
+
+structure NormalizedTangentSquareTransportSubgoal where
+  commonWitness : NormalizedTangentSquareCommonWitness
+  normalized_valid : normalizedTangentSquareIntegral.Valid
+  normalized_anchor_valid :
+    (SinPiIntegral.reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
+
+theorem NormalizedTangentSquareTransportSubgoal.value
+    (H : NormalizedTangentSquareTransportSubgoal) :
+    (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+      normalizedTangentSquareIntegral).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  have hcandidate := H.commonWitness.to_equiv
+  have hstable :=
+    SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+      H.normalized_valid hcandidate
+  have hanchor :
+      normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
+    exact RealRaw.equiv_trans H.normalized_anchor_valid
+      (RealRaw.ofRat_valid _) (by
+        exact reciprocalPi_quarterTurn_equiv_quarter)
+  exact RealRaw.equiv_trans
+    (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
+      H.normalized_valid hcandidate)
+    H.normalized_valid (RealRaw.ofRat_valid _) hstable hanchor
+
 theorem NormalizedTangentSquareValueSubgoal.value
     (H : NormalizedTangentSquareValueSubgoal) :
     normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
