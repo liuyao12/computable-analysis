@@ -265,6 +265,95 @@ theorem dyadicNestedRadicalSquareStage_width_le
         (by native_decide : (0 : Rat) <= 2)
       simpa [QInterval.width, Rat.div_def] using hwidth'
 
+theorem dyadicNestedRadicalSquareStage_ordered
+    (n k : Nat) (hk : k < 2 ^ n) :
+    0 <= (rationalSquareInterval
+      (dyadicNestedRadicalStageSinAt n k)).width := by
+  have hbounds : subintervalOf
+      (dyadicNestedRadicalStageSinAt n k) 0 1 := by
+    change subintervalOf (dyadicNestedRadicalTableAt n n k).1 0 1
+    exact (dyadicNestedRadicalTableAt_bounds n n k (by omega)).1
+  unfold rationalSquareInterval QInterval.width
+  have hgap : 0 <=
+      (dyadicNestedRadicalStageSinAt n k).hi -
+        (dyadicNestedRadicalStageSinAt n k).lo := by
+    have h := (Rat.add_le_add_left (c :=
+      -(dyadicNestedRadicalStageSinAt n k).lo)).2 hbounds.2.1
+    have hzero :
+        -(dyadicNestedRadicalStageSinAt n k).lo +
+            (dyadicNestedRadicalStageSinAt n k).lo = 0 := by
+      grind
+    rw [hzero] at h
+    simpa [Rat.sub_eq_add_neg, Rat.add_comm] using h
+  have hsum :
+      0 <= (dyadicNestedRadicalStageSinAt n k).hi +
+        (dyadicNestedRadicalStageSinAt n k).lo := by
+    exact Rat.add_nonneg
+      (Rat.le_trans hbounds.1 hbounds.2.1) hbounds.1
+  have hfactor :
+      (dyadicNestedRadicalStageSinAt n k).hi *
+          (dyadicNestedRadicalStageSinAt n k).hi -
+          (dyadicNestedRadicalStageSinAt n k).lo *
+            (dyadicNestedRadicalStageSinAt n k).lo =
+        ((dyadicNestedRadicalStageSinAt n k).hi -
+          (dyadicNestedRadicalStageSinAt n k).lo) *
+          ((dyadicNestedRadicalStageSinAt n k).hi +
+            (dyadicNestedRadicalStageSinAt n k).lo) := by
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.sub_eq_add_neg]
+  rw [hfactor]
+  exact Rat.mul_nonneg hgap hsum
+
+theorem dyadicNestedRadicalSquareLeftSum_ordered
+    (n : Nat) :
+    0 <= (dyadicNestedRadicalSquareLeftSum n).width := by
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) (2 ^ n) :=
+    mesh_nonneg_of_le (Nat.pow_pos (by omega)) (by native_decide)
+  have hcell : forall k, k ∈ List.range (2 ^ n) ->
+      0 <= (QInterval.scaleByRat
+        (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+        (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))).width := by
+    intro k hk
+    rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+    exact Rat.mul_nonneg hmesh
+      (dyadicNestedRadicalSquareStage_ordered n k (List.mem_range.mp hk))
+  unfold dyadicNestedRadicalSquareLeftSum
+  rw [RationalPartition.addInterval_fold_width]
+  have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  rw [hzero]
+  have hfold : forall (xs : List Nat) (initial : Rat),
+      0 <= initial ->
+      (forall k, k ∈ xs ->
+        0 <= (QInterval.scaleByRat
+          (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+          (rationalSquareInterval
+            (dyadicNestedRadicalStageSinAt n k))).width) ->
+      0 <= xs.foldl
+        (fun total k => total +
+          (QInterval.scaleByRat
+            (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+            (rationalSquareInterval
+              (dyadicNestedRadicalStageSinAt n k))).width) initial := by
+    intro xs
+    induction xs with
+    | nil =>
+        intro initial hinit hterms
+        simpa using hinit
+    | cons k xs ih =>
+        intro initial hinit hterms
+        apply ih (initial +
+          (QInterval.scaleByRat
+            (mesh 0 ((1 : Rat) / 2) (2 ^ n))
+            (rationalSquareInterval
+              (dyadicNestedRadicalStageSinAt n k))).width)
+        · exact Rat.add_nonneg hinit (hterms k (by simp))
+        · intro j hj
+          exact hterms j (by simp [hj])
+  simpa only [Rat.zero_add] using
+    hfold (List.range (2 ^ n)) 0 (by native_decide) hcell
+
 theorem dyadicNestedRadicalSquareLeftSum_width_le
     (n : Nat) :
     (dyadicNestedRadicalSquareLeftSum n).width <=

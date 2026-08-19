@@ -355,6 +355,13 @@ from monomial brackets structurally.
    certificate obligations are now only orderedness/nesting and the FTC
    endpoint overlap.
 
+   Orderedness is now also proved: `dyadicNestedRadicalSquareStage_ordered`
+   handles each squared table box, and
+   `dyadicNestedRadicalSquareLeftSum_ordered` handles the complete finite
+   sum.  Cross-stage nesting is intentionally still open; the existing sine
+   candidate has the same gap and currently uses prefix stabilization when an
+   independently certified anchor is available.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but
