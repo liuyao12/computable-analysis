@@ -380,6 +380,15 @@ from monomial brackets structurally.
    first fully closed product example; the tangent-square route is the first
    non-polynomial product example under active formalization.
 
+   The first of these is now an explicit proposition consumed by
+   `dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap`
+   and
+   `dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral`.
+   Supplying
+   `dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral` is
+   therefore the exact next subgoal; no hidden convergence or completeness
+   assumption remains in the stabilization step.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but

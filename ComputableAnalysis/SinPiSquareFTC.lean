@@ -604,6 +604,24 @@ theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
   intro n
   exact Rat.le_refl
 
+/-! The concrete common-anchor interface for the `sin²` target.  The only
+remaining evaluator-specific proposition is the overlap hypothesis below;
+once it is supplied, validity and equivalence of the stabilized dyadic
+integral are automatic consequences of the finite width certificate. -/
+
+theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap
+    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral) :
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized tangentSquareIntegral).Valid := by
+  exact dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
+    tangentSquareIntegral_valid hover
+
+theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral
+    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral) :
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized tangentSquareIntegral).Equiv
+      tangentSquareIntegral := by
+  exact dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+    tangentSquareIntegral_valid hover
+
 /- The finite rational-circle identity used by the future primitive proof.
    Keeping this as an algebraic theorem makes the intended `sin²` route
    explicit before any interval-level cosine transport is added. -/
