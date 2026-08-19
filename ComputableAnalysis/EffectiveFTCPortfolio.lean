@@ -59,7 +59,7 @@ theorem affine_signed_unitSlope_integral_equiv
   exact RealRaw.ofRat_equiv_self _
 
 theorem piCircleArea_compute_lo_nonneg (n : Nat) :
-    0 <= (CauchyPi.piCircleArea.compute n).lo := by
+    0 <= (piCircleArea.compute n).lo := by
   rw [← ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   change 0 <=
     (RealRaw.scaleRat (4 : Rat)
