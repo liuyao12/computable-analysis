@@ -663,6 +663,19 @@ theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareInteg
   exact dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
     tangentSquareIntegral_valid hover
 
+theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
+    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral)
+    (hvalue : tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))) :
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized tangentSquareIntegral).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact RealRaw.equiv_trans
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap
+      hover)
+    tangentSquareIntegral_valid (RealRaw.ofRat_valid _)
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral
+      hover)
+    hvalue
+
 /- The finite rational-circle identity used by the future primitive proof.
    Keeping this as an algebraic theorem makes the intended `sin²` route
    explicit before any interval-level cosine transport is added. -/

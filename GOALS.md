@@ -451,6 +451,11 @@ from monomial brackets structurally.
    `dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap`
    and
    `dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_tangentSquareIntegral`.
+   The final raw-real transport step is now packaged as
+   `dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor`:
+   after the overlap and anchor-value certificates are supplied, it closes
+   the nested-radical square integral at `1/4` without any classical-real
+   reasoning.
    Supplying
    `dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral` is
    therefore the exact next subgoal; no hidden convergence or completeness
