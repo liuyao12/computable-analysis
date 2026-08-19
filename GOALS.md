@@ -123,7 +123,11 @@ from monomial brackets structurally.
    stage, and `uniformExpCellTailSum_le_half` proves that the accumulated tail
    allowance is at most half the requested width.  The remaining width
    obligation is the weighted center-increment estimate needed by the actual
-   integral sum, followed by the selected-stage certificate assembly.
+   integral sum.  The common Taylor center is now bounded on `[0,1]` by the
+   rational lemmas `uniformExpCenter_nonneg_on_unit` and
+   `uniformExpCenter_le_three_on_unit`; these are the finite algebraic input
+   for that weighted estimate, followed by the selected-stage certificate
+   assembly.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

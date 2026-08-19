@@ -3055,6 +3055,65 @@ theorem uniformExpCenter_mono_on_unit
   exact FinitePolynomial.expTaylorPrefix_mono_on_unit
     (uniformExpTailTerms n - 1) hx hy hxy
 
+private theorem uniformExpCenter_one_le_three (n : Nat) :
+    uniformExpCenter 1 n <= (3 : Rat) := by
+  change ePowerSeriesCenterAtTerms (uniformExpTailTerms n) <= (3 : Rat)
+  have hstart : 0 < uniformExpTailStart := by
+    unfold uniformExpTailStart
+    native_decide
+  exact ePowerSeries_centerAtTerms_le_three _ (by
+    unfold uniformExpTailTerms
+    omega)
+
+private theorem uniformExpCenter_zero (n : Nat) :
+    uniformExpCenter 0 n = (1 : Rat) := by
+  unfold uniformExpCenter
+  have hterms : uniformExpTailTerms n =
+      (uniformExpTailTerms n - 1) + 1 := by
+    have hstart : 1 <= uniformExpTailStart := by
+      unfold uniformExpTailStart
+      native_decide
+    unfold uniformExpTailTerms
+    omega
+  rw [hterms, powerSeriesCenterAtTerms_eq_expTaylorPrefix]
+  unfold FinitePolynomial.expTaylorPrefix
+  have hzero : forall m,
+      FinitePolynomial.integratedTaylorPrefix
+          FormalPowerSeries.expCoeff m 0 = 0 := by
+    intro m
+    induction m with
+    | zero => simp [FinitePolynomial.integratedTaylorPrefix]
+    | succ m ih =>
+        have hpow : 0 ^ (m + 1) = (0 : Rat) := by
+          induction m with
+          | zero => native_decide
+          | succ m ihm => simp [Rat.pow_succ, ihm]
+        change FinitePolynomial.integratedTaylorPrefix
+            FormalPowerSeries.expCoeff m 0 +
+          FormalPowerSeries.expCoeff m *
+            (0 ^ (m + 1) / ((m + 1 : Nat) : Rat)) = 0
+        rw [ih, hpow, Rat.div_def, Rat.zero_mul,
+          Rat.mul_zero, Rat.zero_add]
+  rw [hzero]
+  grind
+
+theorem uniformExpCenter_nonneg_on_unit
+    (n : Nat) {x : Rat} (hx : 0 <= x) (hx1 : x <= 1) :
+    0 <= uniformExpCenter x n := by
+  have hmono := uniformExpCenter_mono_on_unit n (x := 0) (y := x)
+    (by native_decide) hx1 hx
+  rw [uniformExpCenter_zero] at hmono
+  grind
+
+theorem uniformExpCenter_le_three_on_unit
+    (n : Nat) {x : Rat} (hx : 0 <= x) (hx1 : x <= 1) :
+    uniformExpCenter x n <= (3 : Rat) := by
+  have hmono : uniformExpCenter x n <= uniformExpCenter 1 n :=
+    uniformExpCenter_mono_on_unit n hx (by native_decide) hx1
+  calc
+    uniformExpCenter x n <= uniformExpCenter 1 n := hmono
+    _ <= (3 : Rat) := uniformExpCenter_one_le_three n
+
 /-- A symmetric rational box around the common finite exponential prefix. -/
 def uniformExpBox (x : Rat) (n : Nat) : QInterval :=
   intervalAround (uniformExpCenter x n) (uniformExpTailRadius n)
