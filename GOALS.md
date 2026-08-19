@@ -117,7 +117,13 @@ from monomial brackets structurally.
    schedule (its exact width is exposed by `uniformExpCellRange_width`), and
    assemble the selected-stage certificate.  The generic finite cancellation
    identity `rat_adjacent_difference_fold` is now available in
-   `Calculus.lean` for the center-increment part of that width proof.
+   `Calculus.lean` for the center-increment part of that width proof.  The
+   tail schedule is now explicit: `uniformExpCellPieces` chooses the finite
+   dyadic partition size, `uniformExpCellStage` chooses one common factorial
+   stage, and `uniformExpCellTailSum_le_half` proves that the accumulated tail
+   allowance is at most half the requested width.  The remaining width
+   obligation is the weighted center-increment estimate needed by the actual
+   integral sum, followed by the selected-stage certificate assembly.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

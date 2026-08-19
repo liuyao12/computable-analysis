@@ -3285,6 +3285,61 @@ private theorem uniformExpTailMagnitude_le_geometric (n : Nat) :
   rw [hterms]
   simpa [uniformExpTailMagnitude] using htail
 
+def uniformExpCellPieces (eps : QPos) : Nat := eps.val.den + 1
+
+def uniformExpCellStage (eps : QPos) : Nat :=
+  RationalMajorant.halfDecayShift
+    (((uniformExpCellPieces eps : Nat) : Rat) *
+      (4 * uniformExpTailMagnitude 0))
+    { val := eps.val / 2
+      property := by
+        rw [Rat.div_def]
+        exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide)) }
+
+theorem uniformExpCellTailSum_le_half (eps : QPos) :
+    (uniformExpCellPieces eps : Rat) *
+        (2 * uniformExpTailRadius (uniformExpCellStage eps)) <=
+      eps.val / 2 := by
+  let pieces : Nat := uniformExpCellPieces eps
+  let bound : Rat := (pieces : Rat) * (4 * uniformExpTailMagnitude 0)
+  let half : QPos := ⟨eps.val / 2, by
+      rw [Rat.div_def]
+      exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide))⟩
+  let stage : Nat := RationalMajorant.halfDecayShift bound half
+  have hbound : 0 <= bound := by
+    dsimp [bound]
+    exact Rat.mul_nonneg (by exact_mod_cast (Nat.zero_le pieces))
+      (Rat.mul_nonneg (by native_decide)
+        (uniformExpTailMagnitude_nonneg 0))
+  have htail := uniformExpTailMagnitude_le_geometric stage
+  have hshift := RationalMajorant.halfDecayShift_spec hbound half
+  have hscaled : (pieces : Rat) *
+      (4 * uniformExpTailMagnitude stage) <= half.val := by
+    calc
+      (pieces : Rat) * (4 * uniformExpTailMagnitude stage) <=
+          (pieces : Rat) *
+            (4 * (uniformExpTailMagnitude 0 * ((1 : Rat) / 2) ^ stage)) := by
+        exact Rat.mul_le_mul_of_nonneg_left
+          (Rat.mul_le_mul_of_nonneg_left htail (by native_decide))
+          (by exact_mod_cast (Nat.zero_le pieces))
+      _ = bound * ((1 : Rat) / 2) ^ stage := by
+        dsimp [bound]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      _ <= half.val := hshift
+  have hscaled' :
+      (uniformExpCellPieces eps : Rat) *
+          (4 * uniformExpTailMagnitude (uniformExpCellStage eps)) <=
+        eps.val / 2 := by
+    simpa [pieces, stage, uniformExpCellStage, bound, half,
+      uniformExpCellPieces, Rat.mul_assoc, Rat.mul_comm] using hscaled
+  unfold uniformExpTailRadius
+  have hfactor :
+      2 * (2 * uniformExpTailMagnitude (uniformExpCellStage eps)) =
+        4 * uniformExpTailMagnitude (uniformExpCellStage eps) := by
+    grind
+  rw [hfactor]
+  exact hscaled'
+
 /-- The positive rational tail allowance assigned to a quotient with a
 nonzero rational step.  It reserves one twenty-fourth of the requested output
 precision times `|h|`, so all tail widths remain controlled after division by
