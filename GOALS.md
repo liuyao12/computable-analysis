@@ -347,6 +347,14 @@ from monomial brackets structurally.
    certificate must establish the squared equal-dyadic integral’s ordering,
    nesting, and shrinking, then connect it to the tangent primitive.
 
+   The square equal-dyadic candidate is now explicit as
+   `dyadicNestedRadicalSquareLeftSum`, with raw wrapper
+   `dyadicNestedRadicalSquareIntegralRaw`.  Its finite boxes satisfy
+   `dyadicNestedRadicalSquareLeftSum_width_le` and therefore
+   `dyadicNestedRadicalSquareIntegralRaw_widths_shrink`; the remaining
+   certificate obligations are now only orderedness/nesting and the FTC
+   endpoint overlap.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but

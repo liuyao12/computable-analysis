@@ -190,6 +190,145 @@ def sinPiOnHalfRaw (S : ArctanSinPiConstruction) : RealFunRaw where
 def sinPiSquareOnHalf (S : ArctanSinPiConstruction) : RealFunRaw :=
   RealFunRaw.mul (sinPiOnHalfRaw S) (sinPiOnHalfRaw S)
 
+def rationalSquareInterval (I : QInterval) : QInterval :=
+  { lo := I.lo * I.lo, hi := I.hi * I.hi }
+
+def rationalOneMinusSquareInterval (I : QInterval) : QInterval :=
+  { lo := 1 - I.hi * I.hi, hi := 1 - I.lo * I.lo }
+
+/- The raw equal-dyadic square candidate.  Its validity/nesting certificate
+is intentionally separate: this definition is only the finite algorithm. -/
+def dyadicNestedRadicalSquareLeftSum (n : Nat) : QInterval :=
+  let N := 2 ^ n
+  let h := mesh 0 ((1 : Rat) / 2) N
+  (List.range N).foldl
+    (fun acc k =>
+      QInterval.addInterval acc
+        (QInterval.scaleByRat h
+          (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))))
+    { lo := 0, hi := 0 }
+
+theorem dyadicNestedRadicalSquareStage_width_le
+    (n k : Nat) (hk : k < 2 ^ n) :
+    (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k)).width <=
+      2 / ((n + 1 : Nat) : Rat) := by
+  have hbounds := dyadicNestedRadicalTableAt_bounds n n k (by omega)
+  have hwidth := dyadicNestedRadicalStageSinAt_width_le n k hk
+  have hbounds' : subintervalOf
+      (dyadicNestedRadicalStageSinAt n k) 0 1 := by
+    change subintervalOf (dyadicNestedRadicalTableAt n n k).1 0 1
+    exact hbounds.1
+  unfold rationalSquareInterval QInterval.width at *
+  dsimp only at *
+  have hfactor :
+      (dyadicNestedRadicalStageSinAt n k).hi *
+          (dyadicNestedRadicalStageSinAt n k).hi -
+          (dyadicNestedRadicalStageSinAt n k).lo *
+            (dyadicNestedRadicalStageSinAt n k).lo =
+        ((dyadicNestedRadicalStageSinAt n k).hi -
+          (dyadicNestedRadicalStageSinAt n k).lo) *
+          ((dyadicNestedRadicalStageSinAt n k).hi +
+            (dyadicNestedRadicalStageSinAt n k).lo) := by
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+      Rat.mul_comm, Rat.sub_eq_add_neg]
+  rw [hfactor]
+  have hsum :
+      (dyadicNestedRadicalStageSinAt n k).hi +
+          (dyadicNestedRadicalStageSinAt n k).lo <= 2 := by
+    have hlo1 :
+        (dyadicNestedRadicalStageSinAt n k).lo <= 1 :=
+      Rat.le_trans hbounds'.2.1 hbounds'.2.2
+    have hsum' := rat_add_le_add hbounds'.2.2 hlo1
+    grind
+  have hgap : 0 <=
+      (dyadicNestedRadicalStageSinAt n k).hi -
+        (dyadicNestedRadicalStageSinAt n k).lo := by
+    have h := (Rat.add_le_add_left (c :=
+      -(dyadicNestedRadicalStageSinAt n k).lo)).2 hbounds'.2.1
+    have hzero :
+        -(dyadicNestedRadicalStageSinAt n k).lo +
+            (dyadicNestedRadicalStageSinAt n k).lo = 0 := by
+      grind
+    rw [hzero] at h
+    simpa [Rat.sub_eq_add_neg, Rat.add_comm] using h
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hsum hgap
+  calc
+    ((dyadicNestedRadicalStageSinAt n k).hi -
+        (dyadicNestedRadicalStageSinAt n k).lo) *
+        ((dyadicNestedRadicalStageSinAt n k).hi +
+          (dyadicNestedRadicalStageSinAt n k).lo) <=
+        2 * (dyadicNestedRadicalStageSinAt n k).width := by
+          simpa [QInterval.width, Rat.mul_comm] using hscaled
+    _ <= 2 / ((n + 1 : Nat) : Rat) := by
+      have hwidth' := Rat.mul_le_mul_of_nonneg_left
+        (by simpa [QInterval.width, Rat.div_def] using hwidth)
+        (by native_decide : (0 : Rat) <= 2)
+      simpa [QInterval.width, Rat.div_def] using hwidth'
+
+theorem dyadicNestedRadicalSquareLeftSum_width_le
+    (n : Nat) :
+    (dyadicNestedRadicalSquareLeftSum n).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  let N := 2 ^ n
+  have hN : 0 < N := by
+    dsimp [N]
+    exact Nat.pow_pos (by omega)
+  have hmesh : 0 <= mesh 0 ((1 : Rat) / 2) N :=
+    mesh_nonneg_of_le hN (by native_decide)
+  have hsum := RationalPartition.rat_add_fold_le_length_mul (List.range N)
+    (fun k =>
+      (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+        (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))).width)
+    (mesh 0 ((1 : Rat) / 2) N *
+      (2 / ((n + 1 : Nat) : Rat))) (by
+      intro k hk
+      have hklt : k < N := List.mem_range.mp hk
+      rw [QInterval.scaleByRat_width_of_nonneg hmesh]
+      exact Rat.mul_le_mul_of_nonneg_left
+        (dyadicNestedRadicalSquareStage_width_le n k
+          (by simpa [N] using hklt)) hmesh)
+  calc
+    (dyadicNestedRadicalSquareLeftSum n).width =
+        (List.range N).foldl
+          (fun total k => total +
+            (QInterval.scaleByRat (mesh 0 ((1 : Rat) / 2) N)
+              (rationalSquareInterval
+                (dyadicNestedRadicalStageSinAt n k))).width) 0 := by
+      unfold dyadicNestedRadicalSquareLeftSum
+      rw [RationalPartition.addInterval_fold_width]
+      have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+        unfold QInterval.width
+        grind
+      rw [hzero]
+      simp [N]
+      grind
+    _ <= (N : Rat) * (mesh 0 ((1 : Rat) / 2) N *
+      (2 / ((n + 1 : Nat) : Rat))) := by simpa using hsum
+    _ = 1 / ((n + 1 : Nat) : Rat) := by
+      have hmesh_total := natCast_mul_mesh_eq_sub
+        (a := (0 : Rat)) (b := (1 : Rat) / 2) hN
+      rw [show (N : Rat) *
+          (mesh 0 ((1 : Rat) / 2) N *
+            (2 / ((n + 1 : Nat) : Rat))) =
+          ((N : Rat) * mesh 0 ((1 : Rat) / 2) N) *
+            (2 / ((n + 1 : Nat) : Rat)) by
+          grind [Rat.mul_assoc]]
+      rw [hmesh_total]
+      have hden : ((n + 1 : Nat) : Rat) ≠ 0 := by
+        exact_mod_cast (Nat.succ_ne_zero n)
+      rw [Rat.div_def, Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel _ hden]
+
+def dyadicNestedRadicalSquareIntegralRaw : RealRaw where
+  compute := dyadicNestedRadicalSquareLeftSum
+
+theorem dyadicNestedRadicalSquareIntegralRaw_widths_shrink :
+    RealRaw.WidthsShrinkToZero
+      dyadicNestedRadicalSquareIntegralRaw.compute := by
+  change RealRaw.WidthsShrinkToZero dyadicNestedRadicalSquareLeftSum
+  exact shrinksToZero_of_natOverSuccBound
+    (fun n => dyadicNestedRadicalSquareLeftSum_width_le n)
+
 /- The finite rational-circle identity used by the future primitive proof.
    Keeping this as an algebraic theorem makes the intended `sin²` route
    explicit before any interval-level cosine transport is added. -/
@@ -202,12 +341,6 @@ theorem rationalCircleSin_sq_eq_one_sub_cos_sq (u : Rat) :
 /-! A box-level form of the circle identity.  It is intentionally stated for
 rational witness values: the later nested-radical transport supplies such
 witnesses through its tangent-box overlap certificates. -/
-
-def rationalSquareInterval (I : QInterval) : QInterval :=
-  { lo := I.lo * I.lo, hi := I.hi * I.hi }
-
-def rationalOneMinusSquareInterval (I : QInterval) : QInterval :=
-  { lo := 1 - I.hi * I.hi, hi := 1 - I.lo * I.lo }
 
 theorem rationalSquareInterval_overlap_of_interval_overlap
     {I J : QInterval}
