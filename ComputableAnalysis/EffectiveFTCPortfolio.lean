@@ -808,6 +808,12 @@ def NestedRadicalSquareQuarterBoundsSubgoal.toValueSubgoal
   { commonWitness := H.toCommonWitness T
     tangentAnchorValue := T }
 
+def NestedRadicalSquareQuarterBoundsSubgoal.toValueSubgoal_of_tangent_sum_certificate
+    (H : NestedRadicalSquareQuarterBoundsSubgoal)
+    (T : TangentSquareLeftSumQuarterCertificate) :
+    NestedRadicalSinPiSquareValueSubgoal :=
+  H.toValueSubgoal T.to_value_subgoal
+
 theorem NestedRadicalSquareIntegralConstructionSubgoal.transport_of_compute
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (H : NestedRadicalSquareIntegralConstructionSubgoal S)
