@@ -236,6 +236,32 @@ theorem nestedRadicalSquare_tangent_stage_two_overlap :
   unfold QInterval.Overlaps
   native_decide
 
+/- An independent value route for the nested-radical evaluator.  It avoids
+   assuming the tangent-chart change of variables: the analytic work is
+   reduced to proving that every executable stage box contains the rational
+   target `1/4`. -/
+structure NestedRadicalSquareQuarterValueSubgoal where
+  lower_contains :
+    forall n, (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo <=
+      (1 / 4 : Rat)
+  upper_contains :
+    forall n, (1 / 4 : Rat) <=
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
+
+theorem NestedRadicalSquareQuarterValueSubgoal.value
+    (H : NestedRadicalSquareQuarterValueSubgoal) :
+    SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw
+    (RealRaw.ofRat (1 / 4)) n n).2
+  change QInterval.Overlaps
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n)
+    ((RealRaw.ofRat (1 / 4)).compute n)
+  unfold QInterval.Overlaps RealRaw.ofRat
+  exact ⟨H.lower_contains n, H.upper_contains n⟩
+
 theorem tangentSquareCellControl_left_rectangle_contained
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
