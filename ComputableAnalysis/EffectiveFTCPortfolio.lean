@@ -874,7 +874,7 @@ theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_quarter_bounds
     (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
       H.publicConstruction).Equiv (RealRaw.ofRat (1 / 4)) := by
   exact H.value_of_tangent_anchor htransport
-    hsquare.toValueSubgoal htangent
+    (hsquare.toValueSubgoal htangent)
 
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   square_value := Integral.exactRat_square_integral_raw_equiv_one_third
