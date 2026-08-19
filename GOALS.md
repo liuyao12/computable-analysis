@@ -103,6 +103,8 @@ That bridge is now represented by the checked
    the endpoint-difference sum.  Its companion
    `effectiveFTCIntervalFold_width` exposes the exact sum of cell widths,
    making the remaining convergence estimate an explicit rational inequality.
+   The dyadic tangent-square raw now exports the exact width law
+   `tangentSquareIntegral_width`: `128 / 2^n`.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
