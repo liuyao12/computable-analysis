@@ -66,6 +66,51 @@ noncomputable def DyadicTangentWitnessFamily.of_search_family
       Classical.choose_spec (Classical.choose_spec
         (hsearch depth k hk precision)) }
 
+/-! The only exceptional dyadic cell is the zero endpoint.  All positive
+cells use the canonical half-angle certificate; the endpoint uses the exact
+zero tangent law.  This is the concrete assembly theorem that turns the
+geometric certificate family into the executable witness family consumed by
+the public nested-radical integral theorem. -/
+
+noncomputable def DyadicTangentWitnessFamily.of_halfAngle_certificate_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (precision depth k : Nat) (hk : k < 2 ^ depth),
+      0 < k -> CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_search_family B
+  intro depth k hk precision
+  by_cases hzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search_at B ht0 precision depth hk
+    exact ⟨0, u, by simpa [dyadicNestedRadicalTableAt_zero_sin] using hu⟩
+  · have hpos : 0 < k := by omega
+    exact canonical_dyadic_search_of_halfAngle_certificate_at B hpos
+      (hcertificate precision depth k hk hpos)
+
+noncomputable def DyadicTangentWitnessFamily.of_overlap_family
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hover : forall (depth k : Nat) (hk : k < 2 ^ depth), 0 < k ->
+      forall precision, QInterval.Overlaps
+        (rationalCircleSinInterval
+          (dyadicTangentBoxAt B precision depth k hk))
+        ((dyadicNestedRadicalTableAt precision depth k).1)) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_search_family B
+  intro depth k hk precision
+  by_cases hzero : k = 0
+  · subst k
+    obtain ⟨u, hu⟩ := canonical_dyadic_zero_search_at B ht0 precision depth hk
+    exact ⟨0, u, by simpa [dyadicNestedRadicalTableAt_zero_sin] using hu⟩
+  · have hpos : 0 < k := by omega
+    exact canonical_dyadic_search_of_overlap_at B hk hpos
+      (hover depth k hk hpos precision)
+
 end SinPiIntegral
 
 end ComputableAnalysis

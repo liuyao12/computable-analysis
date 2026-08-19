@@ -114,9 +114,11 @@ from monomial brackets structurally.
    `CanonicalDyadicHalfAngleCertificateAt` and their family theorem
    `canonical_dyadic_search_of_halfAngle_certificate_at_family`; the zero cell
    is handled separately by the endpoint overlap theorem.  The proof-level
-   assembly adapter `DyadicTangentWitnessFamily.of_search_family` is now
-   present, so the remaining obligation is the certificate family itself (or
-   a direct precision-aware overlap proof).  The final target is
+   assembly adapters `DyadicTangentWitnessFamily.of_search_family` and
+   `DyadicTangentWitnessFamily.of_halfAngle_certificate_family` are now
+   present.  Thus the remaining obligation is exactly the positive-cell
+   certificate family (the zero cell is fully discharged), or a direct
+   precision-aware overlap proof.  The final target is
    `computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC`, with the direct
    Riemann--Stieltjes proof retained as an independent comparison.
 
