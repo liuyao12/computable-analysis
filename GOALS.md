@@ -253,9 +253,12 @@ from monomial brackets structurally.
    opaque special function.  The current acceptance interface is
    `SinPiSquareEffectiveFTCData` in `SinPiSquareFTC.lean`; it requires the
    primitive, local derivative-bound certificate, and validity of both raw
-   outputs before the generic closure theorem can be invoked.  Its concrete
-   transport subgoal is the same stagewise sine/cosine identity on each
-   dyadic cell, followed by the rational endpoint anchor `1/4`.
+   outputs before the generic closure theorem can be invoked.  The same file
+   now exposes the completed finite predecessor through
+   `finiteSineSquarePrefix_effectiveFTC_equiv_value`, whose value is
+   `6389/161280`.  The remaining transport subgoal is the same stagewise
+   sine/cosine identity on each dyadic cell, followed by the rational
+   endpoint anchor `1/4`.
 
 9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
    the existing coefficient-shift certificates for the concrete finite

@@ -78,6 +78,7 @@ import ComputableAnalysis.FiniteQuarticQuadraticSplit
 import ComputableAnalysis.FunctionDomains
 import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.SinPiIntegral
+import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.IntegrationByPartsPi
 import ComputableAnalysis.Logarithm
 import ComputableAnalysis.LogarithmicPi
