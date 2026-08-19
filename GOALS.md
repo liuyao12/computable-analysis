@@ -100,7 +100,9 @@ That bridge is now represented by the checked
    with the existing endpoint-difference enclosure for the same cell.
    The finite assembly theorem `effectiveFTCIntervalFold_contains` now folds
    these common boxes into simultaneous enclosures for the left-sample sum and
-   the endpoint-difference sum.
+   the endpoint-difference sum.  Its companion
+   `effectiveFTCIntervalFold_width` exposes the exact sum of cell widths,
+   making the remaining convergence estimate an explicit rational inequality.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

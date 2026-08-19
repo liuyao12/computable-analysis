@@ -114,6 +114,28 @@ theorem effectiveFTCIntervalFold_contains
     intro k
     exact hendpoint k
 
+theorem effectiveFTCIntervalFold_width
+    (term : Nat -> QInterval) (xs : List Nat) :
+    (effectiveFTCIntervalFold term xs).width =
+      ratNatListSum (fun k => (term k).width) xs := by
+  unfold effectiveFTCIntervalFold
+  rw [RationalPartition.addInterval_fold_width]
+  have hfold (f : Nat -> Rat) (ys : List Nat) :
+      ys.foldl (fun total k => total + f k) 0 = ratNatListSum f ys := by
+    induction ys with
+    | nil => rfl
+    | cons k ys ih =>
+        simp only [List.foldl, ratNatListSum]
+        rw [RationalPartition.rat_add_fold_initial]
+        rw [ih]
+        grind
+  rw [hfold]
+  have hzero : ({ lo := 0, hi := 0 } : QInterval).width = 0 := by
+    unfold QInterval.width
+    grind
+  rw [hzero]
+  grind
+
 theorem squareEffectiveFTC_endpointRaw_valid :
     (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
   have heq :
