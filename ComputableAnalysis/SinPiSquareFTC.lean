@@ -194,6 +194,67 @@ theorem tangentSquareDensity_lipschitz_on_unit :
           (by native_decide : (0 : Rat) <= 2)
       _ = 64 * qabs (t - s) := by grind
 
+/-! The first local certificate for the tangent-square effective FTC.  The
+cell box is deliberately conservative: its center is the exact rational
+density at the left endpoint and its padding is the proved Lipschitz constant
+times the cell width. -/
+
+def tangentSquareDensityRaw : RealFunRaw :=
+  RealFunRaw.exact tangentSquareDensity
+
+theorem tangentSquareDensityRaw_valid : tangentSquareDensityRaw.Valid :=
+  RealFunRaw.exact_valid _
+
+def tangentSquareCellBound (C : RationalSubinterval 0 1) : QInterval :=
+  { lo := tangentSquareDensity C.lower - 64 * C.width,
+    hi := tangentSquareDensity C.lower + 64 * C.width }
+
+theorem tangentSquareCellBound_ordered
+    (C : RationalSubinterval 0 1) :
+    0 <= (tangentSquareCellBound C).width := by
+  unfold tangentSquareCellBound QInterval.width
+  have hw : 0 <= C.width := by
+    unfold RationalSubinterval.width
+    grind [C.ordered]
+  grind
+
+theorem tangentSquareCellBound_contains_density
+    (C : RationalSubinterval 0 1) {x : Rat}
+    (hx : C.contains x) :
+    (tangentSquareCellBound C).ContainsInterval
+      (tangentSquareDensityRaw.compute x 0) := by
+  have hC0 : 0 <= C.lower := C.lower_mem
+  have hC1 : C.upper <= 1 := C.upper_mem
+  have hxa : 0 <= x := Rat.le_trans hC0 hx.1
+  have hxb : x <= 1 := Rat.le_trans hx.2 hC1
+  have hLip := tangentSquareDensity_lipschitz_on_unit.2
+    C.lower x hC0 (Rat.le_trans C.ordered hC1) hxa hxb
+  have hdist : qabs (x - C.lower) <= C.width := by
+    rw [qabs_eq_self_of_nonneg (by grind [hx.1])]
+    calc
+      x - C.lower <= C.upper - C.lower := by grind [hx.2]
+      _ = C.width := by rfl
+  have hdiff : qabs (tangentSquareDensity x -
+      tangentSquareDensity C.lower) <= 64 * C.width := by
+    have hLip' : qabs (tangentSquareDensity x -
+        tangentSquareDensity C.lower) <= 64 * qabs (x - C.lower) := by
+      have hneg : tangentSquareDensity C.lower - tangentSquareDensity x =
+          -(tangentSquareDensity x - tangentSquareDensity C.lower) := by
+        grind
+      rw [hneg, qabs_neg] at hLip
+      exact hLip
+    exact Rat.le_trans hLip'
+      (Rat.mul_le_mul_of_nonneg_left hdist (by native_decide))
+  unfold tangentSquareCellBound QInterval.ContainsInterval
+  change tangentSquareDensity C.lower - 64 * C.width <=
+      tangentSquareDensity x /\
+    tangentSquareDensity x <= tangentSquareDensity C.lower + 64 * C.width
+  have hlow := neg_qabs_le_self
+    (tangentSquareDensity x - tangentSquareDensity C.lower)
+  have hhigh := self_le_qabs
+    (tangentSquareDensity x - tangentSquareDensity C.lower)
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 /-! The independent dyadic anchor for the squared tangent-chart density.  This
 is deliberately separate from the nested-radical candidate: the latter is
 related to this object only by a proved overlap theorem. -/

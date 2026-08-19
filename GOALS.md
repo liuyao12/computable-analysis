@@ -482,6 +482,13 @@ from monomial brackets structurally.
    first fully closed product example; the tangent-square route is the first
    non-polynomial product example under active formalization.
 
+   The first local derivative certificate for this route is now explicit:
+   `tangentSquareDensityRaw`, `tangentSquareCellBound_ordered`, and
+   `tangentSquareCellBound_contains_density` provide the rational cell box
+   required by a candidate-derivative FTC certificate.  The remaining local
+   theorem is endpoint containment for the tangent-square primitive on the
+   same cell.
+
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by
    `tangentSquarePrimitiveOnUnit_endpointDifference_equiv_halfQuarterTurn`.
