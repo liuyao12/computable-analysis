@@ -619,6 +619,49 @@ theorem dyadicNestedRadicalSquareIntegralRaw_widths_shrink :
   exact shrinksToZero_of_natOverSuccBound
     (fun n => dyadicNestedRadicalSquareLeftSum_width_le n)
 
+theorem dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
+    (anchor : RealRaw)
+    (hoverlap : forall n,
+      QInterval.Overlaps
+        (dyadicNestedRadicalSquareLeftSum n) (anchor.compute n)) :
+    dyadicNestedRadicalSquareIntegralRaw.Equiv anchor := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  exact (RealRaw.compareAt_overlap_iff
+    dyadicNestedRadicalSquareIntegralRaw anchor n n).2 (hoverlap n)
+
+/-! The remaining square change-of-variables certificate is represented by a
+rational common witness at every finite stage.  The four inequalities are the
+complete proof obligation for transporting the squared dyadic sum to the
+tangent-square anchor; no exact value of either integral is included here. -/
+structure DyadicNestedRadicalSquareTangentCommonWitness where
+  witness : Nat -> Rat
+  candidate_lo_le : forall n,
+    (dyadicNestedRadicalSquareLeftSum n).lo <= witness n
+  witness_le_candidate_hi : forall n,
+    witness n <= (dyadicNestedRadicalSquareLeftSum n).hi
+  tangent_lo_le : forall n,
+    (tangentSquareIntegral.compute n).lo <= witness n
+  witness_le_tangent_hi : forall n,
+    witness n <= (tangentSquareIntegral.compute n).hi
+
+theorem DyadicNestedRadicalSquareTangentCommonWitness.to_overlap
+    (h : DyadicNestedRadicalSquareTangentCommonWitness) (n : Nat) :
+    QInterval.Overlaps
+      (dyadicNestedRadicalSquareLeftSum n)
+      (tangentSquareIntegral.compute n) := by
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans (h.candidate_lo_le n)
+      (h.witness_le_tangent_hi n),
+    Rat.le_trans (h.tangent_lo_le n)
+      (h.witness_le_candidate_hi n)⟩
+
+theorem DyadicNestedRadicalSquareTangentCommonWitness.to_equiv
+    (h : DyadicNestedRadicalSquareTangentCommonWitness) :
+    dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral := by
+  exact dyadicNestedRadicalSquareIntegralRaw_equiv_of_overlap
+    tangentSquareIntegral h.to_overlap
+
 /- Prefix stabilization is the direct-only implementation of the missing
 cross-stage nesting proof.  The anchor is a proof-side object; the stabilized
 evaluator itself reads only the square candidate and the rational widths. -/

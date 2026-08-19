@@ -460,6 +460,11 @@ from monomial brackets structurally.
    `dyadicNestedRadicalSquareIntegralRaw.Equiv tangentSquareIntegral` is
    therefore the exact next subgoal; no hidden convergence or completeness
    assumption remains in the stabilization step.
+   The overlap obligation is now exposed in the same finite-witness form as
+   the sine route: `DyadicNestedRadicalSquareTangentCommonWitness` has four
+   rational inequalities, `to_overlap` turns them into stagewise interval
+   overlap, and `to_equiv` transports the complete square raw integral to
+   `tangentSquareIntegral`.
 
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
