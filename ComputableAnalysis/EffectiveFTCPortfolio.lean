@@ -444,16 +444,13 @@ structure NormalizedTangentSquareValueSubgoal where
     normalizedTangentSquareIntegral.Equiv
       (SinPiIntegral.reciprocalPiRaw *
         RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
-  reciprocal_quarter :
-    (SinPiIntegral.reciprocalPiRaw *
-      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Equiv
-        (RealRaw.ofRat (1 / 4))
 
 theorem NormalizedTangentSquareValueSubgoal.value
     (H : NormalizedTangentSquareValueSubgoal) :
     normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
   exact RealRaw.equiv_trans H.normalized_valid
-    H.anchor_valid (RealRaw.ofRat_valid _) H.chart_transport H.reciprocal_quarter
+    H.anchor_valid (RealRaw.ofRat_valid _) H.chart_transport
+    reciprocalPi_quarterTurn_equiv_quarter
 
 theorem tangentSquareIntegral_stage_zero_contains_quarter :
     QInterval.Overlaps
