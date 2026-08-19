@@ -287,6 +287,25 @@ theorem tangentPullbackEffectiveFTC_equiv_one :
   rw [heq] at h'
   exact h'
 
+theorem tangentPullbackEffectiveFTC_equiv_positiveIntegral :
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      positiveTangentPullbackIntegral := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    positiveTangentPullbackIntegral n n).2
+  have hleft := (RealRaw.compareAt_overlap_iff
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    (RealRaw.ofRat 1) n n).1
+      (tangentPullbackEffectiveFTC_equiv_one n)
+  have hright := (RealRaw.compareAt_overlap_iff
+    positiveTangentPullbackIntegral (RealRaw.ofRat 1) n n).1
+      (positiveTangentPullbackIntegral_equiv_one n)
+  simp only [RealRaw.ofRat_compute] at hleft hright
+  unfold QInterval.Overlaps at hleft hright ⊢
+  constructor <;> grind
+
 end SinPiIntegral
 
 end ComputableAnalysis
