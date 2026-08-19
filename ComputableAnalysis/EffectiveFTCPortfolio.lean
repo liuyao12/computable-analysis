@@ -58,6 +58,22 @@ theorem affine_signed_unitSlope_integral_equiv
   rw [Integral.exactRat_affine_signed_unitSlope_raw_eq_ofRat]
   exact RealRaw.ofRat_equiv_self _
 
+theorem piCircleArea_compute_lo_nonneg (n : Nat) :
+    0 <= (CauchyPi.piCircleArea.compute n).lo := by
+  rw [← ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute n]
+  change 0 <=
+    (RealRaw.scaleRat (4 : Rat)
+      (ArctanGeometry.arctanGeom (1 : Rat))).compute n |>.lo
+  unfold RealRaw.scaleRat RealRaw.scaleRatCompute
+  simp only [if_pos (by native_decide : (0 : Rat) <= 4)]
+  rw [ArctanGeometry.arctanGeom_one_compute_eq n]
+  unfold ArctanGeometry.positiveLoopComputeAtStage
+  rw [ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum]
+  exact Rat.mul_nonneg (by native_decide)
+    (ArctanGeometry.geometricLowerSum_nonneg _
+      (ArctanGeometry.arctanAreaLoopState_intervals_nonnegative
+        (by native_decide) n))
+
 theorem tangentSquareCellControl_left_rectangle_contained
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
