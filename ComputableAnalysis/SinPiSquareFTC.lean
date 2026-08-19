@@ -1387,6 +1387,19 @@ theorem tangentSquareCombinedDerivativeRaw_valid :
   · exact RealFunRaw.exact_valid _
   · exact tangentSquareCorrectionDerivativeRaw_valid
 
+theorem tangentSquareCombinedDerivativeRaw_compute_eq_density
+    {x : Rat} (hx0 : 0 <= x) (hx1 : x <= 1) (n : Nat) :
+    tangentSquareCombinedDerivativeRaw.compute x n =
+      tangentSquareDensityRaw.compute x n := by
+  unfold tangentSquareCombinedDerivativeRaw tangentSquareDensityRaw
+    RealFunRaw.add Integral.arctanKernelRaw
+    tangentSquareCorrectionDerivativeRaw RealFunRaw.exact
+  change QInterval.mk
+      (1 / (1 + x * x) + tangentSquareRationalDerivative x)
+      (1 / (1 + x * x) + tangentSquareRationalDerivative x) =
+    QInterval.mk (tangentSquareDensity x) (tangentSquareDensity x)
+  rw [tangentSquareDensity_decomposition]
+
 def tangentSquareCombinedDerivativeCellControl
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)

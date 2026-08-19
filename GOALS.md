@@ -534,9 +534,11 @@ from monomial brackets structurally.
    `tangentSquareEffectiveCandidateFTC` supplies the complete
    `CandidateDerivativeFTC` data.  The generic closure is exposed as
    `tangentSquareEffectiveCandidateFTC_equiv_endpoint`.  The remaining
-   squared-sine subgoals are now specifically (i) identify its
-   `tangentSquareCombinedDerivativeRaw` with the chosen `sin²` evaluator on
-   the rational chart, (ii) prove finite overlap with the nested-radical
+   squared-sine bridge has begun: `tangentSquareCombinedDerivativeRaw_compute_eq_density`
+   identifies the combined candidate with the exact rational
+   `tangentSquareDensityRaw` evaluator at every chart point.  The remaining
+   squared-sine subgoals are now specifically (i) identify this density with
+   the chosen `sin²` evaluator on the rational chart, (ii) prove finite overlap with the nested-radical
    dyadic integral, and (iii) transport the endpoint to `1/4`.
 
    Independently, the primitive endpoint algebra is now transported to the
