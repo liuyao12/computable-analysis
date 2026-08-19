@@ -108,6 +108,11 @@ from monomial brackets structurally.
    `square_secant_derivative_bracket` and
    `cube_secant_derivative_bracket` in `Differential.lean`.
 
+   The first generic value-level closure is now exported as
+   `square_effective_value` in `effectiveFTCPortfolio`: the effective FTC
+   certificate for the primitive `x^2` and derivative `2*x` proves its
+   bounded integral is `1`, including validity of its scheduled endpoint raw.
+
 3. **Higher polynomial regression.**  Instantiate the same FTC route for
    the scaled primitives `F x = x^5/5`, `dF x = x^4` and
    `F x = x^6/6`, `dF x = x^5`, with derivative bounds generated from
