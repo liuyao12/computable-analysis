@@ -265,6 +265,10 @@ from monomial brackets structurally.
    tangent, sine, and squared monotonicity by
    `sinPiSquareOnHalf_nondecreasing_of_tangent_certificate`.  This isolates
    the remaining search proof to one stagewise rational-box inequality.
+   The certificate is intentionally independent of the analytic target: its
+   `weak_order` field is the precise finite property to prove for the chosen
+   inverse-search algorithm, and the downstream sine-square theorems require
+   no stronger notion of inverse monotonicity.
    The concrete monotone-Darboux raw is now packaged as
    `sinPiSquareMonotoneIntegral`, with validity proved by
    `sinPiSquareMonotoneIntegral_valid`.  Its remaining inputs are explicit:
