@@ -133,8 +133,10 @@ from monomial brackets structurally.
      `DyadicReflectedHalfAngleCertificate` by reflection around the unit
      circle, preserving the same rational interval containment;
    - **assembly:** feed the three certificate families into
-     `dyadicNestedRadical_sample_overlap_of_branch_certificates`, then into
-     `DyadicTangentWitnessFamily.of_overlap_family`.
+   `dyadicNestedRadical_sample_overlap_of_branch_certificates`, then into
+   `DyadicTangentWitnessFamily.of_overlap_family`; the combined adapter
+   `DyadicTangentWitnessFamily.of_branch_certificate_families` is now
+   formalized.
 
    Each certificate has a `to_public_overlap` theorem already; the remaining
    proofs are finite interval inequalities and circle identities, not a new

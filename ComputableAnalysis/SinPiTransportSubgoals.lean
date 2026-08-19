@@ -111,6 +111,32 @@ noncomputable def DyadicTangentWitnessFamily.of_overlap_family
     exact canonical_dyadic_search_of_overlap_at B hk hpos
       (hover depth k hk hpos precision)
 
+/-! Final assembly adapter for the three finite refinement branches.  Once
+the even, lower-odd, and reflected-upper-odd certificates are supplied, the
+existing overlap assembly gives precisely the overlap family consumed above.
+This leaves no hidden classical continuity premise in the transport step. -/
+
+noncomputable def DyadicTangentWitnessFamily.of_branch_certificate_families
+    (B : IntegralIdentities.ArctanInverseBisection)
+    (ht0 : (B.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (even_certificate : forall (precision n j : Nat) (hj : j < 2 ^ n),
+      DyadicEvenStepCertificate B precision n j hj)
+    (lower_certificate : forall (precision n j : Nat)
+      (hbound : 2 * j + 1 <= 2 ^ n),
+      DyadicHalfAngleChildCertificate B precision n j hbound)
+    (upper_certificate : forall (precision n k : Nat)
+      (hupper : 2 ^ n < k) (hk : k < 2 ^ (n + 1)),
+      DyadicReflectedHalfAngleCertificate B precision n k hupper hk) :
+    DyadicTangentWitnessFamily B := by
+  apply DyadicTangentWitnessFamily.of_overlap_family B ht0
+  intro depth k hk hpos precision
+  have hover := dyadicNestedRadical_sample_overlap_of_branch_certificates_of_endpoint
+    B ht0 even_certificate lower_certificate upper_certificate
+    precision depth k hk
+  simpa [sinPiRawOfArctan, dyadicTangentBoxAt] using hover
+
 end SinPiIntegral
 
 end ComputableAnalysis
