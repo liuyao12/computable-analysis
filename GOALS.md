@@ -154,6 +154,10 @@ from monomial brackets structurally.
    selected-stage closure theorem.  The exponential instance is being moved
    to this indexed presentation; only the explicit uniform-partition rewrite
    remains in the local and summed-width fields.
+   The uniform partition now also exports
+   `uniformExpFTCPartition_cell_width` and
+   `uniformExpFTCPartition_cell_strict`, isolating the only endpoint facts
+   needed by those two rewrites.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

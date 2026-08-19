@@ -3462,6 +3462,12 @@ private theorem uniformExpSelfDerivativeEvalPrecision_of_ne
       uniformExpQuotientPrecision h hh n := by
   simp [uniformExpSelfDerivativeEvalPrecision, hh]
 
+theorem uniformExpSelfDerivativeEvalPrecision_eq_quotient
+    (h : Rat) (hh : h ≠ 0) (n : Nat) :
+    uniformExpSelfDerivativeEvalPrecision h n =
+      uniformExpQuotientPrecision h hh n := by
+  exact uniformExpSelfDerivativeEvalPrecision_of_ne h hh n
+
 /-- At the selected quotient stage, the scalar factorial tail is at most the
 explicit `|h|`-scaled tolerance.  This is the computable tail transport that
 will be combined with the uniform finite secant bound. -/
@@ -5248,6 +5254,23 @@ theorem uniformExpFTCPartition_cell_mesh_pos (eps : QPos) (k : Nat)
   rw [Rat.div_def]
   exact Rat.mul_pos (by native_decide)
     ((Rat.inv_pos).2 ((Rat.natCast_pos).2 (uniformExpFTCPieces_pos eps)))
+
+theorem uniformExpFTCPartition_cell_width (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpFTCPartition eps).pieces) :
+    ((uniformExpFTCPartition eps).cell k hk).width =
+      mesh 0 1 (uniformExpFTCPieces eps) := by
+  unfold uniformExpFTCPartition
+  exact RationalPartition.uniform_cell_width 0 1
+    (uniformExpFTCPieces eps) (uniformExpFTCPieces_pos eps)
+    (by native_decide) k hk
+
+theorem uniformExpFTCPartition_cell_strict (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpFTCPartition eps).pieces) :
+    ((uniformExpFTCPartition eps).cell k hk).lower <
+      ((uniformExpFTCPartition eps).cell k hk).upper := by
+  apply (Rat.lt_iff_sub_pos _ _).mpr
+  simpa [RationalSubinterval.width] using
+    uniformExpFTCPartition_cell_mesh_pos eps k hk
 
 /-- On the unit interval the common-prefix representation and the selected
 adaptive representation are pointwise equivalent. -/
