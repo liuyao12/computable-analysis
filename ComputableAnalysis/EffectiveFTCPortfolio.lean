@@ -145,6 +145,14 @@ structure TangentSquareIntegralValueSubgoal where
   upper_contains :
     forall n, (1 / 4 : Rat) <= (SinPiIntegral.tangentSquareIntegral.compute n).hi
 
+theorem tangentSquareIntegral_stage_zero_contains_quarter :
+    QInterval.Overlaps
+      (SinPiIntegral.tangentSquareIntegral.compute 0)
+      ({ lo := (1 / 4 : Rat), hi := 1 / 4 } : QInterval) := by
+  unfold QInterval.Overlaps
+  rw [SinPiIntegral.tangentSquareIntegral_compute]
+  native_decide
+
 structure TangentSquareFTCIntegralCompatibilitySubgoal where
   stage_overlap :
     forall n, QInterval.Overlaps

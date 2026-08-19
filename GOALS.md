@@ -80,6 +80,10 @@ That bridge is now represented by the checked
    the effective FTC bounded-sum raw and the independent dyadic anchor.
    Its concrete form is `TangentSquareFTCIntegralCommonWitness`, four rational
    inequalities per stage that produce this overlap automatically.
+   The first anchor check is now executable as
+   `tangentSquareIntegral_stage_zero_contains_quarter`; the remaining anchor
+   work is the uniform all-stage interval containment, not an untracked appeal
+   to completed real numbers.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
