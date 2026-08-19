@@ -93,8 +93,15 @@ from monomial brackets structurally.
    with the exact initial value
    `uniformExpOnUnit_zero_equiv_one`; the remaining FTC subgoal is to convert
    that two-sided secant certificate into
-   `EffectiveDerivativeBoundFTC` local endpoint controls and then identify
-   the resulting endpoint difference with `exp(1) - 1`.
+   `SelectedStageCandidateDerivativeFTC` local endpoint controls (the
+   selected-stage interface deliberately permits separate derivative and
+   endpoint stages), and then identify the resulting endpoint difference with
+   `exp(1) - 1`.  Split this bridge into: (i) expose the interval evaluator as
+   a `RealFunRaw`; (ii) enclose the exponential derivative on every rational
+   cell by a finite rational box; (iii) prove that a sufficiently small cell
+   turns `intervalNearAtPrecision` for the secant quotient into containment
+   of the scaled endpoint-difference interval; and (iv) assemble the finite
+   partition and width schedules.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
