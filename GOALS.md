@@ -285,8 +285,11 @@ from monomial brackets structurally.
    The algebraic core is now proved as
    `unitSquareInterval_width_le_two_mul`: every ordered rational interval in
    `[0,1]` has a squared interval of width at most twice its width.  The
-   remaining regularity work is therefore only the clamping branch and its
-   finite input-stage bookkeeping.
+   clamping algebra is now also formalized by
+   `unitClampInterval_contains`, `unitClampInterval_subinterval_of_contains`,
+   and `unitClampInterval_width_le`.  The remaining regularity work is
+   therefore only the two-branch evaluator definition and its finite
+   input-stage bookkeeping.
    The final closure is named
    `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
    its validity, the FTC equivalence, and the endpoint value `1/4`, the
