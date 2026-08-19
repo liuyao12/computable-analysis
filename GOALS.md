@@ -92,7 +92,10 @@ That bridge is now represented by the checked
    anchors for the eventual uniform estimate.  The reusable finite fold
    `rat_list_sum_pair_error` now assembles cellwise endpoint/left-sample
    errors into a global rational bound, leaving only the concrete tangent
-   square cell inequalities to be supplied.
+   square cell inequalities to be supplied.  The first such local inequality
+   is proved by `tangentSquareCellControl_left_rectangle_contained`: the
+   tangent-square common derivative box contains the exact left-endpoint
+   density after cell-width scaling.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

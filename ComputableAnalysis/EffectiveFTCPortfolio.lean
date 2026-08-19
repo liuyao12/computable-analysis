@@ -42,6 +42,31 @@ theorem rat_list_sum_pair_error
       constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc,
         Rat.add_comm, Rat.add_left_comm]
 
+theorem tangentSquareCellControl_left_rectangle_contained
+    (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
+    (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
+    (hN : 256 * (η.val.den + 1) <= N) :
+    (C.scaleBound
+      ((SinPiIntegral.tangentSquareCombinedDerivativeCellControl
+        C δ η N hC hη hN).bound 0)).ContainsInterval
+      (C.scaleBound
+        ({ lo := SinPiIntegral.tangentSquareDensity C.lower,
+           hi := SinPiIntegral.tangentSquareDensity C.lower } : QInterval)) := by
+  let H := SinPiIntegral.tangentSquareCombinedDerivativeCellControl
+    C δ η N hC hη hN
+  have hcontains := H.candidate_contained 0 C.lower
+    (by exact ⟨Rat.le_refl, C.ordered⟩)
+  have heval : H.derivativeEvalPrecision 0 = 0 := by rfl
+  rw [heval,
+    SinPiIntegral.tangentSquareCombinedDerivativeRaw_compute_eq_density
+    (x := C.lower) C.lower_mem (Rat.le_trans C.ordered C.upper_mem) 0] at hcontains
+  change (QInterval.scaleByRat C.width (H.bound 0)).ContainsInterval
+    (QInterval.scaleByRat C.width
+      ({ lo := SinPiIntegral.tangentSquareDensity C.lower,
+         hi := SinPiIntegral.tangentSquareDensity C.lower } : QInterval))
+  exact QInterval.scaleByRat_contains_of_nonneg
+    (Rat.le_of_lt hC) hcontains
+
 theorem squareEffectiveFTC_endpointRaw_valid :
     (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
   have heq :
