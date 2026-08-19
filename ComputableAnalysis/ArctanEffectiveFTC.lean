@@ -501,6 +501,302 @@ theorem arctanUniformPaddedSum_width_le
   rw [hone] at hsum
   exact hsum
 
+def arctanFTCPartition (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (4 * (eps.val.den + 1))
+    (by omega) (by native_decide)
+
+def arctanFTCCellPadding (eps : QPos) : QPos :=
+  { val := eps.val / 8
+    property := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide)) }
+
+def arctanFTCStageBudget (eps : QPos) : QPos :=
+  let P := arctanFTCPartition eps
+  let δ := arctanFTCCellPadding eps
+  { val := mesh 0 1 P.pieces * δ.val / 3
+    property := by
+      have hP : 0 < P.pieces := P.positive
+      have hmesh : 0 < mesh 0 1 P.pieces := by
+        unfold mesh
+        rw [if_neg (Nat.ne_of_gt hP), Rat.div_def]
+        exact Rat.mul_pos (by native_decide)
+          ((Rat.inv_pos).2 (by exact_mod_cast hP))
+      rw [Rat.div_def]
+      exact Rat.mul_pos (Rat.mul_pos hmesh δ.property)
+        ((Rat.inv_pos).2 (by native_decide)) }
+
+def arctanFTCEndpointStage (eps : QPos) : Nat :=
+  256 * ((arctanFTCStageBudget eps).val.den + 1)
+
+theorem arctanFTCStageBudget_le (eps : QPos) :
+    2 * (arctanFTCStageBudget eps).val <= eps.val := by
+  let P := arctanFTCPartition eps
+  let δ := arctanFTCCellPadding eps
+  have hD : 0 < ((eps.val.den + 1 : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+  have hM : P.pieces = 4 * (eps.val.den + 1) := by
+    rfl
+  have hmesh : mesh 0 1 P.pieces =
+      1 / (4 * ((eps.val.den + 1 : Nat) : Rat)) := by
+    change mesh 0 1 (4 * (eps.val.den + 1)) =
+      1 / (4 * ((eps.val.den + 1 : Nat) : Rat))
+    unfold mesh
+    rw [if_neg (by omega : 4 * (eps.val.den + 1) ≠ 0), Rat.div_def]
+    rw [Rat.natCast_mul, Rat.natCast_add]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hone : 1 / ((eps.val.den + 1 : Nat) : Rat) <= eps.val :=
+    FTC.one_div_den_succ_le_of_pos eps.property
+  have hmesh_le : mesh 0 1 P.pieces <= eps.val / 4 := by
+    rw [hmesh, Rat.div_def, Rat.div_def] at ⊢
+    have hfour : (0 : Rat) < 4 := by native_decide
+    have hinv : 0 <= ((eps.val.den + 1 : Nat) : Rat)⁻¹ :=
+      Rat.le_of_lt ((Rat.inv_pos).2 hD)
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  change 2 * (mesh 0 1 P.pieces * δ.val / 3) <= eps.val
+  have hδval : δ.val = eps.val / 8 := by rfl
+  rw [hδval]
+  rw [hmesh]
+  have hδ : eps.val / 8 <= eps.val := by
+    apply Rat.le_of_mul_le_mul_right (c := (8 : Rat))
+    · rw [Rat.div_def]
+      have hcancel : (8 : Rat)⁻¹ * 8 = 1 := by native_decide
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · native_decide
+  rw [Rat.div_def]
+  have hmesh0 : 0 <= 1 / (4 * ((eps.val.den + 1 : Nat) : Rat)) := by
+    have hden4 : 0 < (4 : Rat) * ((eps.val.den + 1 : Nat) : Rat) :=
+      Rat.mul_pos (by native_decide) hD
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 hden4))
+  have hprod : 0 <= mesh 0 1 P.pieces * (eps.val / 8) :=
+    Rat.mul_nonneg (by rw [hmesh]; exact hmesh0)
+      (by
+        rw [Rat.div_def]
+        exact Rat.le_of_lt (Rat.mul_pos eps.property
+          ((Rat.inv_pos).2 (by native_decide))))
+  have hmesh_one : mesh 0 1 P.pieces <= 1 := by
+    rw [hmesh, Rat.div_def]
+    have hden4 : 0 < (4 : Rat) * ((eps.val.den + 1 : Nat) : Rat) :=
+      Rat.mul_pos (by native_decide) hD
+    apply Rat.le_of_mul_le_mul_right (c := (4 : Rat) *
+      ((eps.val.den + 1 : Nat) : Rat))
+    · have hcancel :
+          ((4 : Rat) * ((eps.val.den + 1 : Nat) : Rat))⁻¹ *
+            (4 * ((eps.val.den + 1 : Nat) : Rat)) = 1 :=
+        Rat.inv_mul_cancel _ (Rat.ne_of_gt hden4)
+      have hge : (1 : Rat) <= 4 * ((eps.val.den + 1 : Nat) : Rat) := by
+        have hden1 : (1 : Rat) <= ((eps.val.den + 1 : Nat) : Rat) := by
+          exact_mod_cast (Nat.succ_le_succ (Nat.zero_le eps.val.den))
+        grind
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hden4
+  have hdelta8 : 0 <= eps.val / 8 := by
+    rw [Rat.div_def]
+    exact Rat.mul_nonneg (Rat.le_of_lt eps.property)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))
+  have hprod_le :
+      mesh 0 1 P.pieces * (eps.val / 8) <= eps.val / 8 :=
+    by
+      have h := Rat.mul_le_mul_of_nonneg_right hmesh_one hdelta8
+      simpa using h
+  have hfactor : 0 <= (2 : Rat) * (3 : Rat)⁻¹ :=
+    Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))
+  have hscaled := Rat.mul_le_mul_of_nonneg_right hprod_le hfactor
+  have hsmall : 2 * (3 : Rat)⁻¹ * (eps.val / 8) <= eps.val := by
+    have htwo : 0 <= 2 * (3 : Rat)⁻¹ * (eps.val / 8) := by
+      exact Rat.mul_nonneg
+        (Rat.mul_nonneg (by native_decide)
+          (Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide)))) hdelta8
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  rw [hmesh] at hscaled
+  apply Rat.le_trans (b := 2 * (3 : Rat)⁻¹ * (eps.val / 8))
+  · simpa [Rat.mul_assoc, Rat.mul_comm] using hscaled
+  · exact hsmall
+
+theorem arctanFTC_endpoint_width_le (eps : QPos) :
+    (endpointDifferenceInterval arctanPrimitiveRaw 0 1
+      (arctanFTCEndpointStage eps)).width <= eps.val := by
+  let η := arctanFTCStageBudget eps
+  let N := arctanFTCEndpointStage eps
+  have hN : 256 * (η.val.den + 1) = N := by
+    rfl
+  have hNrect : 4 * (η.val.den + 1) <= N := by
+    rw [← hN]
+    omega
+  have hzero := ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+    (x := (0 : Rat)) (by native_decide) (by native_decide) η N hNrect
+  have hone := ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+    (x := (1 : Rat)) (by native_decide) (by native_decide) η N hNrect
+  have hsum :
+      (ArctanGeometry.arctanIntegralRectangleCompute 0 N).width +
+        (ArctanGeometry.arctanIntegralRectangleCompute 1 N).width <=
+      η.val + η.val := rat_add_le_add hzero hone
+  have hη := arctanFTCStageBudget_le eps
+  rw [endpointDifferenceInterval_width]
+  change
+    (ArctanGeometry.arctanIntegralRectangleCompute 0 N).width +
+        (ArctanGeometry.arctanIntegralRectangleCompute 1 N).width <= eps.val
+  exact Rat.le_trans hsum (by grind)
+
+theorem arctanFTC_riemann_width_le (eps : QPos) :
+    ((arctanFTCPartition eps).boundIntegralSum
+      (fun k hk => arctanKernelPaddedBound
+        ((arctanFTCPartition eps).cell k hk)
+        (arctanFTCCellPadding eps).val
+        (arctanFTCEndpointStage eps))).width <= eps.val := by
+  let P := arctanFTCPartition eps
+  let δ := arctanFTCCellPadding eps
+  let N := arctanFTCEndpointStage eps
+  have hsum := arctanUniformPaddedSum_width_le P.pieces P.positive
+    δ.val (Rat.le_of_lt δ.property) N
+  have hD : 0 < ((eps.val.den + 1 : Nat) : Rat) := by
+    exact (Rat.natCast_pos).2 (Nat.succ_pos eps.val.den)
+  have hmesh : mesh 0 1 P.pieces =
+      1 / (4 * ((eps.val.den + 1 : Nat) : Rat)) := by
+    change mesh 0 1 (4 * (eps.val.den + 1)) = _
+    unfold mesh
+    rw [if_neg (by omega : 4 * (eps.val.den + 1) ≠ 0), Rat.div_def]
+    rw [Rat.natCast_mul, Rat.natCast_add]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hmesh_nonneg : 0 <= mesh 0 1 P.pieces := by
+    rw [hmesh, Rat.div_def]
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.le_of_lt ((Rat.inv_pos).2 (Rat.mul_pos (by native_decide) hD)))
+  have hmesh_le_one : mesh 0 1 P.pieces <= 1 := by
+    rw [hmesh, Rat.div_def]
+    have hden4 : 0 < (4 : Rat) * ((eps.val.den + 1 : Nat) : Rat) :=
+      Rat.mul_pos (by native_decide) hD
+    apply Rat.le_of_mul_le_mul_right (c := (4 : Rat) *
+      ((eps.val.den + 1 : Nat) : Rat))
+    · have hcancel :
+          ((4 : Rat) * ((eps.val.den + 1 : Nat) : Rat))⁻¹ *
+            (4 * ((eps.val.den + 1 : Nat) : Rat)) = 1 :=
+        Rat.inv_mul_cancel _ (Rat.ne_of_gt hden4)
+      have hge : (1 : Rat) <= 4 * ((eps.val.den + 1 : Nat) : Rat) := by
+        have hden1 : (1 : Rat) <= ((eps.val.den + 1 : Nat) : Rat) := by
+          exact_mod_cast (Nat.succ_le_succ (Nat.zero_le eps.val.den))
+        grind
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    · exact hden4
+  have hone : 1 / ((eps.val.den + 1 : Nat) : Rat) <= eps.val :=
+    FTC.one_div_den_succ_le_of_pos eps.property
+  have hmesh_le : mesh 0 1 P.pieces <= eps.val / 4 := by
+    rw [hmesh, Rat.div_def, Rat.div_def] at ⊢
+    have hinv : 0 <= ((eps.val.den + 1 : Nat) : Rat)⁻¹ :=
+      Rat.le_of_lt ((Rat.inv_pos).2 hD)
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hmesh_sq : mesh 0 1 P.pieces * mesh 0 1 P.pieces <=
+      mesh 0 1 P.pieces := by
+    have h := Rat.mul_le_mul_of_nonneg_left hmesh_le_one hmesh_nonneg
+    simpa using h
+  have hδ : (arctanFTCCellPadding eps).val = eps.val / 8 := by rfl
+  change ((P.boundIntegralSum
+      (fun k hk => arctanKernelPaddedBound (P.cell k hk) δ.val N)).width <=
+      mesh 0 1 P.pieces + mesh 0 1 P.pieces * mesh 0 1 P.pieces +
+        2 * δ.val) at hsum
+  have hsum' := hsum
+  rw [hδ] at hsum'
+  have heps0 : 0 <= eps.val := Rat.le_of_lt eps.property
+  have hfinal :
+      mesh 0 1 P.pieces + mesh 0 1 P.pieces * mesh 0 1 P.pieces +
+          2 * (eps.val / 8) <= eps.val := by
+    grind [Rat.div_def]
+  exact Rat.le_trans hsum' hfinal
+
+def arctanEffectiveFTCData :
+    EffectiveDerivativeBoundFTC arctanPrimitiveRaw arctanKernelRaw 0 1 where
+  primitive_valid := arctanPrimitiveRaw_valid
+  primitive_domain_lower := by
+    change 0 <= (0 : Rat) ∧ (0 : Rat) <= 1
+    constructor <;> native_decide
+  primitive_domain_upper := by
+    change 0 <= (1 : Rat) ∧ (1 : Rat) <= 1
+    constructor <;> native_decide
+  choosePartition := arctanFTCPartition
+  chooseEndpointPrecision := arctanFTCEndpointStage
+  chooseBoundStage := fun _ => 0
+  derivativeBound := by
+    intro eps k hk
+    let P := arctanFTCPartition eps
+    let δ := arctanFTCCellPadding eps
+    let η := arctanFTCStageBudget eps
+    let N := arctanFTCEndpointStage eps
+    let C := P.cell k hk
+    have hcell : C.width = mesh 0 1 P.pieces := by
+      dsimp [C, P, arctanFTCPartition]
+      apply RationalPartition.uniform_cell_width
+    have hC : 0 < C.width := by
+      rw [hcell]
+      rw [show P.pieces = 4 * (eps.val.den + 1) by rfl]
+      unfold mesh
+      rw [if_neg (by omega : 4 * (eps.val.den + 1) ≠ 0)]
+      rw [Rat.div_def]
+      exact Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 (Rat.natCast_pos.mpr (by omega)))
+    have hη : η.val = C.width * δ.val / 3 := by
+      dsimp [η, arctanFTCStageBudget, δ, arctanFTCCellPadding]
+      rw [hcell]
+    exact (arctanPaddedDerivativeCellControl C δ η N hC hη (by
+      dsimp [N, arctanFTCEndpointStage, η]
+      omega)).toDerivativeBound
+  domain_at_partition := by
+    intro eps i hi
+    let P := arctanFTCPartition eps
+    change 0 <= P.point i ∧ P.point i <= 1
+    constructor
+    · calc
+        0 = P.point 0 := P.left_endpoint.symm
+        _ <= P.point i := P.monotone 0 i (Nat.zero_le _) hi
+    · calc
+        P.point i <= P.point P.pieces := P.monotone i P.pieces hi (Nat.le_refl _)
+        _ = 1 := P.right_endpoint
+  localControl := by
+    intro eps k hk
+    let P := arctanFTCPartition eps
+    let δ := arctanFTCCellPadding eps
+    let η := arctanFTCStageBudget eps
+    let N := arctanFTCEndpointStage eps
+    let C := P.cell k hk
+    have hcell : C.width = mesh 0 1 P.pieces := by
+      dsimp [C, P, arctanFTCPartition]
+      apply RationalPartition.uniform_cell_width
+    have hC : 0 < C.width := by
+      rw [hcell]
+      rw [show P.pieces = 4 * (eps.val.den + 1) by rfl]
+      unfold mesh
+      rw [if_neg (by omega : 4 * (eps.val.den + 1) ≠ 0)]
+      rw [Rat.div_def]
+      exact Rat.mul_pos (by native_decide)
+        ((Rat.inv_pos).2 (Rat.natCast_pos.mpr (by omega)))
+    have hη : η.val = C.width * δ.val / 3 := by
+      dsimp [η, arctanFTCStageBudget, δ, arctanFTCCellPadding]
+      rw [hcell]
+    exact (arctanPaddedDerivativeCellControl C δ η N hC hη (by
+      dsimp [N, arctanFTCEndpointStage, η]
+      omega)).toLocalFTC
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    change ((arctanFTCPartition eps).boundIntegralSum
+      (fun k hk => arctanKernelPaddedBound
+        ((arctanFTCPartition eps).cell k hk)
+        (arctanFTCCellPadding eps).val
+        (arctanFTCEndpointStage eps))).width <= eps.val
+    exact arctanFTC_riemann_width_le eps
+  endpoint_width := by
+    intro eps
+    exact arctanFTC_endpoint_width_le eps
+
+theorem arctanEffectiveFTC_equiv_endpoint :
+    arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      arctanEffectiveFTCData.toDerivativeBoundFTC.endpointRaw :=
+  effectiveDerivativeBoundFTC arctanEffectiveFTCData
+
 def arctanKernelDerivativeBound (eps : QPos) (k : Nat)
     (hk : k < (RationalPartition.uniform 0 1 (eps.val.den + 1)
       (by omega) (by native_decide)).pieces) :
