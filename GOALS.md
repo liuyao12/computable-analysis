@@ -180,6 +180,13 @@ from monomial brackets structurally.
    `uniform_boundIntegralSum_width_le_indexed`, and the exponential module
    packages its application as `uniformExpFTCIndexedSum_width_le_of_cell_bounds`.
    The remaining obligation is isolated to the per-cell width hypothesis.
+   That hypothesis is now proved by transporting each explicit endpoint
+   quotient through `uniformExpQuotientPrecision_congr`; the concrete sum
+   theorem is `uniformExpFTCIndexedSum_width_le`.  The full indexed
+   certificate is assembled as `uniformExpOnUnit_selectedStageFTCIndexed`,
+   with effective-FTC equivalence exported by
+   `uniformExpOnUnit_selectedStageFTCIndexed_equiv_endpoint`.  The next
+   exponential subgoal is endpoint-value identification, not convergence.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

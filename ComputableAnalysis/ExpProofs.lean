@@ -3450,6 +3450,14 @@ def uniformExpQuotientPrecision (h : Rat) (hh : h ≠ 0) (n : Nat) : Nat :=
   RationalMajorant.halfDecayShift (uniformExpTailMagnitude 0)
     (uniformExpQuotientTailTolerance h hh n)
 
+theorem uniformExpQuotientPrecision_congr
+    {h₁ h₂ : Rat} (heq : h₁ = h₂)
+    (hh₁ : h₁ ≠ 0) (hh₂ : h₂ ≠ 0) (n : Nat) :
+    uniformExpQuotientPrecision h₁ hh₁ n =
+      uniformExpQuotientPrecision h₂ hh₂ n := by
+  cases heq
+  rfl
+
 /-- A total evaluator-stage function for the derivative interface.  Its value
 at the unused zero step is arbitrary; every quotient proof supplies `h ≠ 0`
 and therefore takes the common-tail branch. -/
@@ -5348,6 +5356,30 @@ theorem uniformExpFTCPartition_cell_strict (eps : QPos) (k : Nat)
   simpa [RationalSubinterval.width] using
     uniformExpFTCPartition_cell_mesh_pos eps k hk
 
+def uniformExpFTCIndexedStep (eps : QPos) (k : Nat) : Rat :=
+  leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1) -
+    leftPoint 0 1 (uniformExpFTCPieces eps) k
+
+theorem uniformExpFTCIndexedStep_pos (eps : QPos) (k : Nat) :
+    0 < uniformExpFTCIndexedStep eps k := by
+  unfold uniformExpFTCIndexedStep
+  rw [leftPoint_step]
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt (uniformExpFTCPieces_pos eps)), Rat.div_def]
+  exact Rat.mul_pos (by native_decide)
+    ((Rat.inv_pos).2 ((Rat.natCast_pos).2
+      (uniformExpFTCPieces_pos eps)))
+
+theorem uniformExpFTCIndexedStep_ne (eps : QPos) (k : Nat) :
+    uniformExpFTCIndexedStep eps k ≠ 0 :=
+  Rat.ne_of_gt (uniformExpFTCIndexedStep_pos eps k)
+
+theorem uniformExpFTCIndexedStep_eq_mesh (eps : QPos) (k : Nat) :
+    uniformExpFTCIndexedStep eps k =
+      mesh 0 1 (uniformExpFTCPieces eps) := by
+  unfold uniformExpFTCIndexedStep
+  exact leftPoint_step 0 1 (uniformExpFTCPieces eps) k
+
 def uniformExpFTCIndexedBound (eps : QPos) (k : Nat) : QInterval :=
   QInterval.expand
     (uniformExpCellRange
@@ -5368,6 +5400,46 @@ theorem uniformExpFTCIndexedBound_eq (eps : QPos) (k : Nat) :
         (2 * (precisionAtStage (uniformExpFTCIndex eps)).val) := by
   unfold uniformExpFTCIndexedBound
   rfl
+
+def uniformExpFTCQuotientBound (eps : QPos) (k : Nat)
+    (hh : uniformExpFTCIndexedStep eps k ≠ 0) : QInterval :=
+  QInterval.expand
+    (uniformExpCellRange
+      (leftPoint 0 1 (uniformExpFTCPieces eps) k)
+      (leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1))
+      (uniformExpQuotientPrecision
+        (uniformExpFTCIndexedStep eps k) hh (uniformExpFTCIndex eps)))
+    (2 * (precisionAtStage (uniformExpFTCIndex eps)).val)
+
+theorem uniformExpQuotientBound_eq_indexedBound (eps : QPos) (k : Nat)
+    (hh : uniformExpFTCIndexedStep eps k ≠ 0) :
+    uniformExpFTCQuotientBound eps k hh =
+      uniformExpFTCIndexedBound eps k := by
+  unfold uniformExpFTCQuotientBound uniformExpFTCIndexedBound
+  have hq := uniformExpQuotientPrecision_congr
+    (uniformExpFTCIndexedStep_eq_mesh eps k) hh
+    (by exact uniformExpFTCMesh_ne eps) (uniformExpFTCIndex eps)
+  rw [hq]
+  rw [uniformExpFTCStage_eq_quotient eps]
+
+theorem uniformExpFTCQuotientBound_width_le (eps : QPos) (k : Nat)
+    (hk : k < uniformExpFTCPieces eps) :
+    (uniformExpFTCQuotientBound eps k
+      (uniformExpFTCIndexedStep_ne eps k)).width <= eps.val := by
+  unfold uniformExpFTCQuotientBound
+  exact uniformExpExpandedCellRange_width_le_eps eps
+    (uniformExpFTCIndex eps)
+    (uniformExpFTCLeftPoint_bounds eps k hk).1
+    (uniformExpFTCLeftPoint_bounds eps k hk).2
+    (uniformExpFTCLeftPoint_strict eps k hk)
+    (uniformExpFTCLeftPoint_step_le eps k hk)
+    (uniformExpFTCPrecision_le_input eps)
+
+theorem uniformExpFTCIndexedBound_width_le (eps : QPos) (k : Nat)
+    (hk : k < uniformExpFTCPieces eps) :
+    (uniformExpFTCIndexedBound eps k).width <= eps.val := by
+  rw [← uniformExpQuotientBound_eq_indexedBound]
+  exact uniformExpFTCQuotientBound_width_le eps k hk
 
 theorem uniformExpFTCIndexedBound_contains
     (eps : QPos) (k : Nat) (hk : k < (uniformExpFTCPartition eps).pieces)
@@ -5634,6 +5706,42 @@ theorem uniformExpFTCIndexedSum_width_le_of_cell_bounds (eps : QPos)
     (uniformExpFTCPieces_pos eps) (by native_decide)).boundIntegralSum
     (fun k _ => uniformExpFTCIndexedBound eps k)).width <= eps.val
   exact Rat.le_trans hsum (by grind)
+
+theorem uniformExpFTCIndexedSum_width_le (eps : QPos) :
+    ((uniformExpFTCPartition eps).boundIntegralSum
+      (fun k _ => uniformExpFTCIndexedBound eps k)).width <= eps.val := by
+  exact uniformExpFTCIndexedSum_width_le_of_cell_bounds eps
+    (fun k hk => uniformExpFTCIndexedBound_width_le eps k
+      (by exact hk))
+
+def uniformExpOnUnit_selectedStageFTCIndexed :
+    SelectedStageCandidateDerivativeFTCIndexed
+      uniformExpOnUnitRealFunRaw uniformExpOnUnitRealFunRaw 0 1 where
+  primitive_valid := uniformExpOnUnitRealFunRaw_valid
+  choosePartition := uniformExpFTCPartition
+  chooseStage := uniformExpFTCStage
+  derivativeBound := uniformExpFTCIndexedBound
+  primitive_domain_on := by
+    intro eps i hi
+    exact (uniformExpFTCPartition eps).point_in_bounds hi
+  candidate_domain_on := by
+    intro eps k hk x hx
+    exact RationalSubinterval.contains_inDomain
+      ((uniformExpFTCPartition eps).cell k hk) hx
+  candidate_contained := by
+    intro eps k hk x hx
+    exact uniformExpFTCIndexedBound_contains eps k hk x hx
+  local_endpoint_contained := by
+    intro eps k hk
+    exact uniformExpFTCIndexedBound_local_endpoint_contained eps k hk
+  riemann_width := uniformExpFTCIndexedSum_width_le
+  endpoint_width := uniformExpFTC_endpoint_width_le
+
+theorem uniformExpOnUnit_selectedStageFTCIndexed_equiv_endpoint :
+    (uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw).Equiv
+      uniformExpOnUnit_selectedStageFTCIndexed.toSelected.endpointRaw := by
+  exact selectedStageCandidateDerivativeFTCIndexed
+    uniformExpOnUnit_selectedStageFTCIndexed
 
 /-- The common-prefix unit-interval evaluator has the exact exponential
 initial value at zero.  This makes its analytic derivative certificate a
