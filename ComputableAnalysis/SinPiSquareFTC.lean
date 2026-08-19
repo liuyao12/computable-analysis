@@ -378,6 +378,89 @@ theorem tangentSquareRationalPart_one :
     tangentSquareRationalPart 1 = 0 := by
   native_decide
 
+private theorem rat_eq_of_mul_eq_mul_pos_square
+    {a b c : Rat} (hc : 0 < c) (h : a * c = b * c) : a = b := by
+  have hcne : c ≠ 0 := Rat.ne_of_gt hc
+  calc
+    a = (a * c) * c⁻¹ := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ = (b * c) * c⁻¹ := by rw [h]
+    _ = b := by
+      have hcancel : c * c⁻¹ = 1 := Rat.mul_inv_cancel c hcne
+      grind [Rat.mul_assoc, Rat.mul_comm]
+
+theorem tangentSquareRationalPart_difference_identity
+    (p r : Rat) :
+    tangentSquareRationalPart r - tangentSquareRationalPart p =
+      -((r - p) * (p * r + 1) * (p * r - p - r - 1) *
+        (p * r + p + r - 1)) /
+        ((1 + p * p) ^ 2 * (1 + r * r) ^ 2) := by
+  have hp : 0 < 1 + p * p := by
+    have h := rat_square_nonneg_basic p
+    grind
+  have hr : 0 < 1 + r * r := by
+    have h := rat_square_nonneg_basic r
+    grind
+  let A : Rat := 1 + p * p
+  let B : Rat := 1 + r * r
+  let W : Rat := r - p
+  have hprod : 0 < A * A * B * B := by
+    exact Rat.mul_pos (Rat.mul_pos (Rat.mul_pos hp hp) hr) hr
+  apply rat_eq_of_mul_eq_mul_pos_square (c := A * A * B * B) hprod
+  rw [tangentSquareRationalPart, tangentSquareRationalPart]
+  rw [Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def, Rat.div_def]
+  have hAne : A ≠ 0 := Rat.ne_of_gt hp
+  have hBne : B ≠ 0 := Rat.ne_of_gt hr
+  have hA_cancel : A⁻¹ * A = 1 := Rat.inv_mul_cancel A hAne
+  have hB_cancel : B⁻¹ * B = 1 := Rat.inv_mul_cancel B hBne
+  have hA2_cancel : (A * A)⁻¹ * (A * A) = 1 :=
+    Rat.inv_mul_cancel _ (Rat.ne_of_gt (Rat.mul_pos hp hp))
+  have hB2_cancel : (B * B)⁻¹ * (B * B) = 1 :=
+    Rat.inv_mul_cancel _ (Rat.ne_of_gt (Rat.mul_pos hr hr))
+  have hR1 :
+      (2 * r * (B * B)⁻¹) * (A * A * B * B) = 2 * r * (A * A) := by
+    rw [Rat.inv_mul_rev]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hR2 :
+      (r * B⁻¹) * (A * A * B * B) = r * (A * A * B) := by
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hP1 :
+      (2 * p * (A * A)⁻¹) * (A * A * B * B) = 2 * p * (B * B) := by
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hP2 :
+      (p * A⁻¹) * (A * A * B * B) = p * (A * B * B) := by
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hApow : (1 + p * p) ^ 2 = A * A := by
+    dsimp [A]
+    simp [Rat.pow_succ]
+  have hBpow : (1 + r * r) ^ 2 = B * B := by
+    dsimp [B]
+    simp [Rat.pow_succ]
+  rw [hApow, hBpow]
+  have hAinv : (1 + p * p)⁻¹ = A⁻¹ := by rfl
+  have hBinv : (1 + r * r)⁻¹ = B⁻¹ := by rfl
+  rw [hAinv, hBinv]
+  change
+    ((-(2 * r * (B * B)⁻¹) + r * B⁻¹) -
+      (-(2 * p * (A * A)⁻¹) + p * A⁻¹)) *
+        (A * A * B * B) =
+      (-(W * (p * r + 1) * (p * r - p - r - 1) *
+        (p * r + p + r - 1)) * (A * A * (B * B))⁻¹) *
+        (A * A * B * B)
+  have hleft :
+      ((-(2 * r * (B * B)⁻¹) + r * B⁻¹) -
+        (-(2 * p * (A * A)⁻¹) + p * A⁻¹)) *
+          (A * A * B * B) =
+        (-(2 * r * (A * A)) + r * (A * A * B)) -
+          (-(2 * p * (B * B)) + p * (A * B * B)) := by
+    grind [Rat.mul_assoc, Rat.mul_comm,
+      Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg]
+  rw [hleft]
+  rw [Rat.inv_mul_rev]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
 /- The tangent-coordinate primitive is the arctangent geometry evaluator plus
 the rational correction from the decomposition above.  The correction is
 kept as an exact rational function, so this is a genuine computable function

@@ -492,6 +492,10 @@ from monomial brackets structurally.
    `tangentSquarePartition`, `tangentSquarePartition_cell_strict`, and
    `tangentSquareUniformBoundSum_width_le`; its partition uses
    `128 * (den(eps)+1)` cells and is entirely rational.
+   The rational correction in the tangent-chart primitive now has the exact
+   finite endpoint identity `tangentSquareRationalPart_difference_identity`.
+   The remaining local step is its interval bound and combination with the
+   arctangent endpoint box.
 
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by
