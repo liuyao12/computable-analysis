@@ -106,7 +106,9 @@ from monomial brackets structurally.
    the `sinPiStieltjesIntegral` interval.  Its `to_overlap` theorem supplies
    the stagewise transport, after which
    `dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_commonWitness`
-   closes the computable value theorem.  The final target is
+   closes the computable value theorem.  The base checkpoint is now proved by
+   `dyadicNestedRadicalStieltjes_base_witness` at stage zero; the remaining
+   work is the refinement step for arbitrary stages.  The final target is
    `computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC`, with the direct
    Riemann--Stieltjes proof retained as an independent comparison.
 
