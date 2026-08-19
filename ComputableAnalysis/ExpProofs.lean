@@ -5282,6 +5282,17 @@ def uniformExpFTCIndexedBound (eps : QPos) (k : Nat) : QInterval :=
 
 attribute [irreducible] uniformExpFTCIndexedBound
 
+theorem uniformExpFTCIndexedBound_eq (eps : QPos) (k : Nat) :
+    uniformExpFTCIndexedBound eps k =
+      QInterval.expand
+        (uniformExpCellRange
+          ((uniformExpFTCPartition eps).point k)
+          ((uniformExpFTCPartition eps).point (k + 1))
+          (uniformExpFTCStage eps))
+        (2 * (precisionAtStage (uniformExpFTCIndex eps)).val) := by
+  unfold uniformExpFTCIndexedBound
+  rfl
+
 theorem uniformExpFTCIndexedBound_contains
     (eps : QPos) (k : Nat) (hk : k < (uniformExpFTCPartition eps).pieces)
     (x : Rat) (hx : ((uniformExpFTCPartition eps).cell k hk).contains x) :

@@ -165,6 +165,9 @@ from monomial brackets structurally.
    `uniformExpFTCIndexedBound_local_endpoint_contained`.  The remaining
    width theorem will be stated over explicit `leftPoint` endpoints, avoiding
    a dependent `cell` projection in the theorem statement.
+   `uniformExpFTCIndexedBound_eq` now exposes the bound’s concrete expanded
+   interval separately, so the remaining proof can use an independent
+   quotient-stage width-transport lemma before re-entering the partition sum.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
