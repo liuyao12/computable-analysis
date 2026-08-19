@@ -319,6 +319,13 @@ from monomial brackets structurally.
    work is to supply the derivative-bound/tail certificate relating this
    primitive to the nested-radical `sin(pi*x)^2` dyadic integral.
 
+   The exact bridge identity is now exposed as
+   `tangentSquareDensity_eq_circleSin_sq_mul_chartJacobian`: the tangent-chart
+   density is the rational-circle sine squared times the chart Jacobian.  The
+   library root also exports the completed tangent-chart `sin(pi*x)` FTC
+   certificate from `TangentPullbackEffectiveFTC.lean`; this is a second
+   non-polynomial checkpoint while square-tail transport remains open.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but

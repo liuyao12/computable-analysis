@@ -57,6 +57,18 @@ theorem tangentSquareDensity_decomposition (u : Rat) :
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
 
+theorem tangentSquareDensity_eq_circleSin_sq_mul_chartJacobian (u : Rat) :
+    tangentSquareDensity u =
+      RationalCircle.Trigonometry.sin u *
+          RationalCircle.Trigonometry.sin u *
+          (2 / (1 + u * u)) := by
+  rw [RationalCircle.Trigonometry.sin_eq]
+  have hden : 1 + u * u ≠ 0 :=
+    Rat.ne_of_gt (RationalCircle.Stage.one_add_square_pos u)
+  rw [tangentSquareDensity, Rat.div_def, Rat.div_def, Rat.div_def]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg, Rat.mul_inv_cancel _ hden]
+
 theorem tangentSquareRationalPart_zero :
     tangentSquareRationalPart 0 = 0 := by
   native_decide
