@@ -109,8 +109,11 @@ from monomial brackets structurally.
    closes the computable value theorem.  The base checkpoint is now proved by
    `dyadicNestedRadicalStieltjes_base_witness` at stage zero.  The exact
    stage-one, stage-two, and stage-three overlap checkpoints are also proved
-   in `SinPiTransportSubgoals.lean`; the remaining work is the refinement
-   step for arbitrary stages.  The final target is
+   in `SinPiTransportSubgoals.lean`; the remaining refinement is now
+   decomposed into the positive-cell certificates
+   `CanonicalDyadicHalfAngleCertificateAt` and their family theorem
+   `canonical_dyadic_search_of_halfAngle_certificate_at_family`; the zero cell
+   is handled separately by the endpoint overlap theorem.  The final target is
    `computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC`, with the direct
    Riemann--Stieltjes proof retained as an independent comparison.
 
