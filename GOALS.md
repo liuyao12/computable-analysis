@@ -500,9 +500,21 @@ from monomial brackets structurally.
    `CandidateDerivativeCellControl`-ready endpoint box.  The remaining local
    step of the endpoint assembly is now discharged by
    `endpointDifferenceInterval_add_contains` and
-   `tangentSquareEffectivePrimitive_endpoint_contains`.  The remaining
-   refinement is to center one common derivative box so that it serves both
-   pointwise density containment and this assembled endpoint control.
+   `tangentSquareEffectivePrimitive_endpoint_contains`.  The centered
+   correction refinement is now formalized.  The rational polynomial bound
+   `tangentSquareRationalPart_secant_polynomial_qabs_le`, the cleared
+   denominator identity `tangentSquareRationalPart_secant_error_cleared`,
+   and the secant estimate
+   `tangentSquareRationalPart_secant_error_qabs_le` prove an explicit
+   `34 * cell.width` error.  This is transported to
+   `tangentSquareCorrectionCenteredBound_contains_endpoint`; its scaled
+   partition has shrinking global width by
+   `tangentSquareCorrectionCenteredUniformBoundSum_width_le`.  The assembled
+   local certificate is exposed as
+   `tangentSquareEffectivePrimitive_centered_endpoint_contains`.  The
+   remaining work is the common arctangent-plus-correction derivative box,
+   followed by the finite overlap between the nested-radical square raw
+   integral and the tangent-chart anchor.
 
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by
