@@ -86,6 +86,26 @@ identities below. -/
 def differenceQuotient (f : Rat -> Rat) (x h : Rat) : Rat :=
   (f (x + h) - f x) / h
 
+theorem differenceQuotient_add (f g : Rat -> Rat) {x h : Rat}
+    (hh : h ≠ 0) :
+    differenceQuotient (fun z => f z + g z) x h =
+      differenceQuotient f x h + differenceQuotient g x h := by
+  unfold differenceQuotient
+  rw [Rat.div_def, Rat.div_def, Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm]
+
+theorem differenceQuotient_scale (c : Rat) (f : Rat -> Rat) {x h : Rat}
+    (hh : h ≠ 0) :
+    differenceQuotient (fun z => c * f z) x h =
+      c * differenceQuotient f x h := by
+  unfold differenceQuotient
+  rw [Rat.div_def, Rat.div_def]
+  have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+  grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul, Rat.mul_assoc,
+    Rat.mul_comm]
+
 /- A finite L'Hopital-style cancellation certificate: away from the common
 zero `a`, the quotient of the factored numerator and denominator is the
 derivative ratio at `a`, namely `2 * a / 1`, plus its exact linear remainder.

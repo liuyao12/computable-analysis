@@ -1725,6 +1725,20 @@ theorem qabs_neg (x : Rat) : qabs (-x) = qabs x := by
     have hnx : 0 <= -x := by grind
     rw [qabs_eq_self_of_nonneg hnx, qabs_eq_neg_of_nonpos hxl]
 
+/- A small product-order helper used by finite interval estimates. -/
+theorem rat_mul_le_mul_of_nonneg {a b c d : Rat}
+    (ha : 0 <= a) (hab : a <= b) (hc : 0 <= c) (hcd : c <= d) :
+    a * c <= b * d := by
+  calc
+    a * c <= b * c := Rat.mul_le_mul_of_nonneg_right hab hc
+    _ <= b * d := Rat.mul_le_mul_of_nonneg_left hcd (by grind)
+
+theorem rat_mul_le_mul_of_nonpos_left {a b c : Rat}
+    (hab : a <= b) (hc : c <= 0) : c * b <= c * a := by
+  have hnc : 0 <= -c := by grind
+  have h := Rat.mul_le_mul_of_nonneg_left hab hnc
+  grind [Rat.neg_mul]
+
 theorem qabs_mul (x y : Rat) : qabs (x * y) = qabs x * qabs y := by
   by_cases hx : 0 <= x
   · by_cases hy : 0 <= y
@@ -3707,6 +3721,30 @@ def Valid (f : RealFunRaw) : Prop :=
 theorem exact_valid (f : Rat -> Rat) : (exact f).Valid := by
   intro x _hx
   exact RealRaw.ofRat_valid (f x)
+
+/-! A function-level stage schedule.  This is the bridge between a raw
+evaluator's native computation stages and a calculus interface that needs a
+cofinal, possibly finer, evaluation schedule.  It changes only the exposed
+algorithm; at every rational input it remains equivalent to the original
+raw evaluator. -/
+
+def stageSchedule (f : RealFunRaw) (sigma : RealRaw.StageSchedule) : RealFunRaw where
+  domain := f.domain
+  compute := fun x n => f.compute x (sigma.stage n)
+
+theorem stageSchedule_valid {f : RealFunRaw} (hf : f.Valid)
+    (sigma : RealRaw.StageSchedule) :
+    (f.stageSchedule sigma).Valid := by
+  intro x hx
+  exact RealRaw.schedule_valid { compute := f.compute x } (hf x hx) sigma
+
+theorem stageSchedule_apply_equiv {f : RealFunRaw} (hf : f.Valid)
+    (sigma : RealRaw.StageSchedule) {x : Rat} (hx : f.domain x) :
+    (RealRaw.schedule sigma ({ compute := f.compute x } : RealRaw)).Equiv
+      ({ compute := f.compute x } : RealRaw) := by
+  exact RealRaw.equiv_symm
+    (RealRaw.schedule_equiv ({ compute := f.compute x } : RealRaw)
+      (hf x hx) sigma)
 
 theorem validAt {f : RealFunRaw} (h : f.Valid)
     {x : Rat} (hx : f.domain x) :

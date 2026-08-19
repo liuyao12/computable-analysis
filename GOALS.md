@@ -13,6 +13,135 @@ as `Base.lean`, `Core.lean`, or `RealEquiv.lean` are historical planning notes,
 not a description of the current module graph. The checked blueprint
 (`blueprint/lean_decls`) and current Lean declarations take precedence.
 
+## Effective FTC: concrete sorry-free subgoals
+
+The effective FTC is to be established by a ladder of concrete integrals.
+Every item below must end in a Lean theorem with rational interval data only,
+no `sorry`, no imported completed-real theorem, and a successful module build.
+The common pattern is: construct an effective derivative enclosure, prove the
+scaled enclosure contains the endpoint difference on each rational cell,
+prove the global width tends to zero, and invoke
+`effectiveDerivativeBoundFTC`.
+
+The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
+product-order lemma needed when a cell estimate multiplies two nonnegative
+interval bounds.  This keeps the remaining squared-prefix proof in the same
+finite rational foundation rather than importing an ordered-real argument.
+The differential layer also exposes exact rational composition rules
+`differenceQuotient_add` and `differenceQuotient_scale`, so the squared-prefix
+secant bracket can be assembled from monomial brackets structurally.
+
+### Auditable concrete-rung matrix
+
+| rung | integrand on the stated interval | primitive used by the certificate | target | Lean evidence |
+|---|---|---|---|---|
+| A | `1`, `x` on `[0,1/2]` | affine primitives | `1/2`, `1/8` | affine interval certificates |
+| B | `x^2`, `x^3`, `x^4`, `x^5` on `[0,1]` | `x^3/3`, `x^4/4`, `x^5/5`, `x^6/6` | `1/3`, `1/4`, `1/5`, `1/6` | `FiniteFTCIntervalRegular.lean` |
+| C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | `ArctanEffectiveFTC.lean` bounds; local FTC pending |
+| D | `exp x` on a bounded rational interval | computable exponential raw | endpoint difference | exponential evaluator; certificate pending |
+| E | finite sine prefix `x-x^3/6` on `[0,1/2]` | `x^2/2-x^4/24` | `47/384` | complete `EffectiveDerivativeBoundFTC` certificate |
+| F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | derivative certificate complete; cell enclosure pending |
+| G | nested-radical `sin (pi*x)` on `[0,1/2]` | arctan/circle construction | `1/pi` | direct FTC route exists; effective tail transport pending |
+| H | nested-radical `sin (pi*x)^2` on `[0,1/2]` | cosine-identity or transported square primitive | `1/4` | acceptance interface exists; effective certificate pending |
+
+1. **Exact affine and constant cases.**  Integrate `fun _ => 1` and
+   `fun x => x` on rational intervals.  These are regression tests for the
+   endpoint-difference and dyadic-sum interfaces; the answers are `b-a` and
+   `(b*b-a*a)/2`.
+
+2. **Convex polynomial cases.**  Complete the generic secant-bound adapter
+   first with the calibration primitives `F x = x*x`, `dF x = 2*x` and
+   `F x = x*x*x`, `dF x = 3*x*x`.  The actual integral targets use the
+   correctly scaled primitives `F x = x^3/3`, `dF x = x^2` and then
+   `F x = x^4/4`, `dF x = x^3`; their values must be `1/3` and `1/4` on
+   `[0,1]`.  Existing finite targets are
+   `exactRat_square_integral_certificate` and
+   `exactRat_cube_integral_certificate`; the finite secant inputs are
+   `square_secant_derivative_bracket` and
+   `cube_secant_derivative_bracket` in `Differential.lean`.
+
+3. **Higher polynomial regression.**  Instantiate the same FTC route for
+   the scaled primitives `F x = x^5/5`, `dF x = x^4` and
+   `F x = x^6/6`, `dF x = x^5`, with derivative bounds generated from
+   neighboring secants rather than a function-specific endpoint theorem.
+   Preserve the existing exact targets `1/5` and `1/6` while making the
+   generic route the proof-facing API.  The reusable finite algebra is
+   `quartic_secant_derivative_bracket` and
+   `monomial_succ_secant_derivative_bracket`.
+
+4. **Concave inverse-function case.**  Formalize `F x = arctan x` on
+   `[0,1]`, with `dF x = 1/(1+x*x)`.  Use concavity to order neighboring
+   secants and the existing rational rectangle evaluator to produce the
+   derivative boxes.  The result should identify the integral with the
+   endpoint difference `arctan 1 - arctan 0`.
+
+5. **Convex exponential case.**  Use the computable exponential evaluator
+   with `F' = F`, and prove the endpoint identity on a bounded rational
+   interval.  This is the first non-polynomial test that requires a genuine
+   width schedule for interval multiplication and power-series tails.
+
+6. **Rational tangent-chart case.**  Keep
+   `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
+   benchmark.  Refactor `tangentPullbackIntegral_equiv_one` so its proof is an
+   explicit instance of the generic effective FTC, with the existing
+   `4 / 2^n` secant error and Lipschitz Darboux margin as the width schedule.
+
+7. **Original sine integral.**  Construct the derivative certificate for the
+   computable primitive behind `sin (pi*x)` on `[0,1/2]`, using the convex
+   neighboring-secant route (the derivative is increasing there).  Then prove
+   the equal-dyadic integral equals the endpoint difference and identify that
+   difference with `reciprocalPiRaw`.  The final target is
+   `computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC`, with the direct
+   Riemann--Stieltjes proof retained as an independent comparison.
+
+8. **Squared sine test.**  Formalize the concrete non-polynomial target
+   `∫₀^(1/2) sin(pi*x)^2 dx = 1/4`.  Use the computable identity
+   `sin(u)^2 = (1 - cos(2*u))/2` to expose the bounded oscillatory case while
+   retaining rational interval evaluation at every stage.  The endpoint
+   anchor is rational because `sin(pi)=0`; the effective proof should make
+   the identity transport explicit rather than treating the square as a new
+   opaque special function.  The current acceptance interface is
+   `SinPiSquareEffectiveFTCData` in `SinPiSquareFTC.lean`; it requires the
+   primitive, local derivative-bound certificate, and validity of both raw
+   outputs before the generic closure theorem can be invoked.
+
+9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
+   the existing coefficient-shift certificates for the concrete finite
+   functions `sineTaylorPrefix 1`, `sineTaylorPrefix 2`, and
+   `sineTaylorPrefix 3`, with derivatives `cosineTaylorPrefix 0`,
+   `cosineTaylorPrefix 1`, and `cosineTaylorPrefix 2`.  Integrate these
+   rational polynomial primitives on `[0,1/2]` by
+   `effectiveDerivativeBoundFTC`, record their exact endpoint values, and
+   then prove tail transport from the prefixes to the nested-radical sine
+   evaluator.  This separates the finite algebraic FTC proof from the
+   genuinely infinite-process remainder proof.  The first rung is now
+   checked in `FiniteSinePrefixFTC.lean`: `sineTaylorPrefix 2 = x` and its
+   `[0,1/2]` integral is proved equivalent to `1/8`.  The next rung now
+   exposes `sineTaylorPrefix 4 = x - x^3/6`, its primitive endpoint factor,
+   its finite coefficient-shift derivative certificate, and the certified
+   endpoint derivative range `sineTaylorPrefixThreeDerivativeBound` on each
+   rational partition cell.  Its complete effective-FTC certificate is now
+   `sineTaylorPrefixThreeEffectiveFTCData`, with endpoint value `47/384`.
+   The same file also records the squared finite prefix and its primitive
+   endpoint value `6389/161280`, making `sin^2` the next concrete product
+   case rather than a purely abstract placeholder.  Its derivative is also
+   exposed through `sineTaylorPrefixThreeSquare_derivative_certificate`,
+   generated by the generic coefficient-shift construction.  The order
+   bridge `sineTaylorPrefixThreeSquare_nondecreasing` now proves the squared
+   prefix is nondecreasing on `[0,1/2]`.  The derivative-width estimate
+   `sineTaylorPrefixThreeSquare_derivative_width_le` now proves that its
+   oscillation on a cell is at most the cell width; this is the mesh factor
+   needed by the effective-FTC schedule.  The remaining local obligation is
+   isolated as a finite secant-bracket theorem for the displayed primitive;
+   its exact rational secant quotient is now exposed by
+   `sineTaylorPrefixThreeSquarePrimitive_secant_formula`.
+
+The first six items are reusable infrastructure and regression coverage; items
+7--9 are the sine applications.  A later general theorem may package the same
+argument for any interval-regular convex or concave computable primitive, but
+the concrete ladder must be completed first so every hidden assumption is
+exposed by a finite certificate.
+
 ## Ground Layer
 
 The finite `sqrt 2` bisection trace now reaches stage 24 with the exact
