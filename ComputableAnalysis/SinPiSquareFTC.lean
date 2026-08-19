@@ -65,6 +65,98 @@ theorem tangentSquareRationalPart_one :
     tangentSquareRationalPart 1 = 0 := by
   native_decide
 
+/- The tangent-coordinate primitive is the arctangent geometry evaluator plus
+the rational correction from the decomposition above.  The correction is
+kept as an exact rational function, so this is a genuine computable function
+object rather than only a symbolic antiderivative. -/
+def tangentSquareRationalPrimitive (u : Rat) : Rat :=
+  2 * tangentSquareRationalPart u
+
+def tangentSquarePrimitiveOnUnit : RealFunRaw :=
+  RealFunRaw.add IntegralIdentities.arctanGeomOnUnit.toRealFunRaw
+    (RealFunRaw.exact tangentSquareRationalPrimitive)
+
+theorem tangentSquarePrimitiveOnUnit_valid :
+    tangentSquarePrimitiveOnUnit.Valid := by
+  apply RealFunRaw.add_valid
+  · exact FunctionOnInterval.toRealFunRaw_valid IntegralIdentities.arctanGeomOnUnit
+  · exact RealFunRaw.exact_valid tangentSquareRationalPrimitive
+
+theorem tangentSquareRationalPrimitive_zero :
+    tangentSquareRationalPrimitive 0 = 0 := by
+  simp [tangentSquareRationalPrimitive, tangentSquareRationalPart_zero]
+
+theorem tangentSquareRationalPrimitive_one :
+    tangentSquareRationalPrimitive 1 = 0 := by
+  simp [tangentSquareRationalPrimitive, tangentSquareRationalPart_one]
+
+theorem tangentSquarePrimitiveOnUnit_endpointDifference_compute_eq (n : Nat) :
+    endpointDifferenceCompute tangentSquarePrimitiveOnUnit 0 1 n =
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).compute n := by
+  simp only [endpointDifferenceCompute, endpointDifferenceInterval,
+    tangentSquarePrimitiveOnUnit, RealFunRaw.add, RealFunRaw.exact]
+  rw [IntegralIdentities.arctanGeomOnUnit_toRealFunRaw_compute_one n,
+    IntegralIdentities.arctanGeomOnUnit_toRealFunRaw_compute_zero n,
+    tangentSquareRationalPrimitive_one,
+    tangentSquareRationalPrimitive_zero]
+  change _ = QInterval.mk
+    (((ArctanGeometry.arctanGeom (1 : Rat)).compute n).lo -
+      ((ArctanGeometry.arctanGeom (0 : Rat)).compute n).hi)
+    (((ArctanGeometry.arctanGeom (1 : Rat)).compute n).hi -
+      ((ArctanGeometry.arctanGeom (0 : Rat)).compute n).lo)
+  congr 1 <;> grind
+
+theorem tangentSquarePrimitiveOnUnit_endpointDifference_valid :
+    RealRaw.ValidCompute
+      (endpointDifferenceCompute tangentSquarePrimitiveOnUnit 0 1) := by
+  have hsub :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (0 : Rat)) (by native_decide) (by native_decide))
+  have hcompute :
+      endpointDifferenceCompute tangentSquarePrimitiveOnUnit 0 1 =
+        (ArctanGeometry.arctanGeom (1 : Rat) -
+          ArctanGeometry.arctanGeom (0 : Rat)).compute := by
+    funext n
+    exact tangentSquarePrimitiveOnUnit_endpointDifference_compute_eq n
+  rw [hcompute]
+  exact hsub
+
+theorem tangentSquarePrimitiveOnUnit_endpointDifference_equiv_arctan :
+    (endpointDifferenceRaw tangentSquarePrimitiveOnUnit 0 1
+      tangentSquarePrimitiveOnUnit_endpointDifference_valid).Equiv
+        (ArctanGeometry.arctanGeom (1 : Rat) -
+          ArctanGeometry.arctanGeom (0 : Rat)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (endpointDifferenceRaw tangentSquarePrimitiveOnUnit 0 1
+      tangentSquarePrimitiveOnUnit_endpointDifference_valid)
+    (ArctanGeometry.arctanGeom (1 : Rat) -
+      ArctanGeometry.arctanGeom (0 : Rat)) n n).2
+  change QInterval.Overlaps
+    (endpointDifferenceCompute tangentSquarePrimitiveOnUnit 0 1 n)
+    ((ArctanGeometry.arctanGeom (1 : Rat) -
+      ArctanGeometry.arctanGeom (0 : Rat)).compute n)
+  rw [tangentSquarePrimitiveOnUnit_endpointDifference_compute_eq n]
+  have hvalid :
+      (ArctanGeometry.arctanGeom (1 : Rat) -
+        ArctanGeometry.arctanGeom (0 : Rat)).Valid :=
+    RealRaw.sub_valid
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (1 : Rat)) (by native_decide) (by native_decide))
+      (ArctanGeometry.arctanGeom_valid_on_unit
+        (x := (0 : Rat)) (by native_decide) (by native_decide))
+  have horder := RealRaw.interval_order_of_valid
+    (ArctanGeometry.arctanGeom (1 : Rat) -
+      ArctanGeometry.arctanGeom (0 : Rat)) hvalid n
+  exact ⟨horder, horder⟩
+
 theorem finiteSineSquarePrefix_effectiveFTC_equiv_endpoint :
     FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by

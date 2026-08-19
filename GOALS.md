@@ -310,6 +310,15 @@ from monomial brackets structurally.
    its exact rational secant quotient is now exposed by
    `sineTaylorPrefixThreeSquarePrimitive_secant_formula`.
 
+   The true tangent-chart endpoint route now has a named computable primitive
+   `tangentSquarePrimitiveOnUnit`: the existing geometric arctangent evaluator
+   plus twice the exact rational correction.  Its endpoint correction is zero
+   at both `0` and `1`, and
+   `tangentSquarePrimitiveOnUnit_endpointDifference_equiv_arctan` proves its
+   endpoint difference is the arctangent endpoint difference.  The remaining
+   work is to supply the derivative-bound/tail certificate relating this
+   primitive to the nested-radical `sin(pi*x)^2` dyadic integral.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but
