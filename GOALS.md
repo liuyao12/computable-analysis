@@ -134,7 +134,11 @@ from monomial brackets structurally.
    `uniformExpUniformCellRange_width_le_eps`.  The remaining bridge is to
    synchronize the step-aware derivative evaluator with this common cell
    stage, transport its `intervalNearAtPrecision` result to a scaled endpoint
-   enclosure, and assemble `SelectedStageCandidateDerivativeFTC`.
+   enclosure, and assemble `SelectedStageCandidateDerivativeFTC`.  The local
+   transport portion is now formalized by
+   `uniformExpCell_endpoint_contained_of_step`: for a positive cell and an
+   admissible finite step, the existing step-aware derivative certificate
+   yields the required expanded, scaled endpoint interval.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

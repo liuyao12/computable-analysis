@@ -4992,6 +4992,65 @@ def uniformExpOnUnit_hasDerivativeOnInterval :
           (uniformExpTailMagnitude_nonneg stage)) hcenter hbudget
       hquotientWidth hderivativeWidth
 
+theorem uniformExpCell_endpoint_contained_of_step
+    {a b : Rat} (n : Nat)
+    (ha : 0 <= a) (hb : b <= 1) (hab : a < b)
+    (hsmall : qabs (b - a) <=
+      1 / ((uniformExpOnUnit_hasDerivativeOnInterval.stepPrecision n : Nat) : Rat)) :
+    let h := b - a
+    let stage := uniformExpSelfDerivativeEvalPrecision h n
+    QInterval.ContainsInterval
+      (QInterval.scaleByRat h
+        (QInterval.expand (uniformExpCellRange a b stage)
+          (2 * (precisionAtStage n).val)))
+      (endpointDifferenceInterval uniformExpOnUnitRealFunRaw a b stage) := by
+  let h : Rat := b - a
+  let stage : Nat := uniformExpSelfDerivativeEvalPrecision h n
+  have hpos : 0 < h := by
+    dsimp [h]
+    exact (Rat.lt_iff_sub_pos a b).mp hab
+  have hh : h ≠ 0 := Rat.ne_of_gt hpos
+  have ha1 : a <= 1 := Rat.le_trans (Rat.le_of_lt hab) hb
+  have hclose := uniformExpOnUnit_hasDerivativeOnInterval.close
+    a h n ⟨ha, ha1⟩
+    (by
+      have : a + h = b := by dsimp [h]; grind
+      rw [this]
+      exact ⟨Rat.le_trans ha (Rat.le_of_lt hab), hb⟩)
+    (by exact ⟨ha, ha1⟩) hh hsmall
+  change QInterval.NearAt
+    (QInterval.differenceQuotient
+      (uniformExpBox (a + h) stage) (uniformExpBox a stage) h)
+    (uniformExpBox a stage) (precisionAtStage n) at hclose
+  have hscaledBox :=
+    QInterval.scaleByRat_expand_contains_subInterval_of_differenceQuotient_near
+      (A := uniformExpBox a stage) (B := uniformExpBox (a + h) stage)
+      (D := uniformExpBox a stage) (h := h) (eps := precisionAtStage n)
+      hpos hclose
+  have hrangeBox := uniformExpBox_contains_cellRange stage ha hb
+    Rat.le_refl (Rat.le_of_lt hab)
+  have hexpand :
+      (QInterval.expand (uniformExpCellRange a b stage)
+        (2 * (precisionAtStage n).val)).ContainsInterval
+        (QInterval.expand (uniformExpBox a stage)
+          (2 * (precisionAtStage n).val)) := by
+    unfold QInterval.ContainsInterval QInterval.expand at *
+    grind
+  have hscaledRange := QInterval.scaleByRat_contains_of_nonneg
+    (Rat.le_of_lt hpos) hexpand
+  have hcombined := hscaledRange.trans hscaledBox
+  have hab_eq : a + h = b := by
+    dsimp [h]
+    grind
+  rw [hab_eq] at hcombined
+  change QInterval.ContainsInterval
+    (QInterval.scaleByRat h
+      (QInterval.expand (uniformExpCellRange a b stage)
+        (2 * (precisionAtStage n).val)))
+    (endpointDifferenceInterval uniformExpOnUnitRealFunRaw a b stage)
+  simpa [h, endpointDifferenceInterval, uniformExpOnUnitRealFunRaw,
+    uniformExpRaw_compute, QInterval.subInterval] using hcombined
+
 /-- The common-prefix unit-interval evaluator has the exact exponential
 initial value at zero.  This makes its analytic derivative certificate a
 constructive initial-value solution, ready for the separate uniqueness
