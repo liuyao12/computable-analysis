@@ -88,6 +88,32 @@ theorem tangentSquareCellControl_left_and_endpoint_share_bound
   · exact (SinPiIntegral.tangentSquareCombinedDerivativeCellControl
       C δ η N hC hη hN).endpoint_difference_contained 0
 
+def effectiveFTCIntervalFold (term : Nat -> QInterval) (xs : List Nat) : QInterval :=
+  xs.foldl (fun acc k => QInterval.addInterval acc (term k))
+    { lo := 0, hi := 0 }
+
+theorem effectiveFTCIntervalFold_contains
+    (xs : List Nat) (bound left endpoint : Nat -> QInterval)
+    (hleft : forall k,
+      (bound k).ContainsInterval (left k))
+    (hendpoint : forall k,
+      (bound k).ContainsInterval (endpoint k)) :
+    (effectiveFTCIntervalFold bound xs).ContainsInterval
+        (effectiveFTCIntervalFold left xs) /\
+      (effectiveFTCIntervalFold bound xs).ContainsInterval
+        (effectiveFTCIntervalFold endpoint xs) := by
+  constructor
+  · unfold effectiveFTCIntervalFold
+    apply RationalPartition.addInterval_fold_contains xs bound left
+      (QInterval.containsInterval_refl _)
+    intro k
+    exact hleft k
+  · unfold effectiveFTCIntervalFold
+    apply RationalPartition.addInterval_fold_contains xs bound endpoint
+      (QInterval.containsInterval_refl _)
+    intro k
+    exact hendpoint k
+
 theorem squareEffectiveFTC_endpointRaw_valid :
     (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
   have heq :

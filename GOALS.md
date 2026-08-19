@@ -98,6 +98,9 @@ That bridge is now represented by the checked
    density after cell-width scaling.  The paired theorem
    `tangentSquareCellControl_left_and_endpoint_share_bound` packages this
    with the existing endpoint-difference enclosure for the same cell.
+   The finite assembly theorem `effectiveFTCIntervalFold_contains` now folds
+   these common boxes into simultaneous enclosures for the left-sample sum and
+   the endpoint-difference sum.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
