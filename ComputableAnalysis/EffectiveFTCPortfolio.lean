@@ -42,6 +42,22 @@ theorem rat_list_sum_pair_error
       constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc,
         Rat.add_comm, Rat.add_left_comm]
 
+/-! A parameterized affine calibration for the portfolio.
+
+This is deliberately stated at the interval-regular/raw level: the
+construction is an executable rational monotone integral, and the endpoint
+value is itself a rational raw.  It supplies the linear rung that the
+monomial examples use implicitly, without importing completed real numbers.
+-/
+theorem affine_signed_unitSlope_integral_equiv
+    (r c a b : Rat) (hrneg : -1 <= r) (hrpos : r <= 1) :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => r * x + c) a b)
+      (Integral.exactRat_affine_signed_unitSlope r c a b hrneg hrpos)).Equiv
+      (RealRaw.ofRat ((b - a) * (r * (a + b) / 2 + c))) := by
+  rw [Integral.exactRat_affine_signed_unitSlope_raw_eq_ofRat]
+  exact RealRaw.ofRat_equiv_self _
+
 theorem tangentSquareCellControl_left_rectangle_contained
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
