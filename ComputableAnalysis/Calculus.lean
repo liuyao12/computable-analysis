@@ -1637,6 +1637,40 @@ theorem endpointDifference_valid_of_fun_valid
   change RealRaw.ValidCompute (RealRaw.subCompute B A)
   exact hsub
 
+/-! The interval implementation of an endpoint difference is the same raw
+real as subtracting the two endpoint evaluations.  This is the small API
+bridge that lets an effective FTC certificate state its conclusion using the
+familiar notation `F b - F a`. -/
+
+theorem endpointDifferenceRaw_equiv_sub_apply
+    {F : RealFunRaw} (hF : F.Valid) {a b : Rat}
+    (ha : F.domain a) (hb : F.domain b)
+    (hdiff : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    (endpointDifferenceRaw F a b hdiff).Equiv
+      ((F.apply hF b hb) - (F.apply hF a ha)) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    (endpointDifferenceRaw F a b hdiff)
+    ((F.apply hF b hb) - (F.apply hF a ha)) n n).2
+  change QInterval.Overlaps
+    (endpointDifferenceInterval F a b n)
+    (RealRaw.subCompute (F.apply hF b hb) (F.apply hF a ha) n)
+  unfold endpointDifferenceInterval RealRaw.subCompute
+    RealFunRaw.apply RealFunRaw.applyCompute
+  simp only [QInterval.Overlaps]
+  have hAvalid : (F.apply hF a ha).Valid := by
+    simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF a ha
+  have hBvalid : (F.apply hF b hb).Valid := by
+    simpa [RealRaw.Valid, RealFunRaw.apply, RealFunRaw.applyCompute] using
+      hF b hb
+  have hA := RealRaw.interval_order_of_valid (F.apply hF a ha) hAvalid n
+  have hB := RealRaw.interval_order_of_valid (F.apply hF b hb) hBvalid n
+  change (F.compute a n).lo <= (F.compute a n).hi at hA
+  change (F.compute b n).lo <= (F.compute b n).hi at hB
+  grind
+
 /-- Endpoint differences telescope over adjacent intervals:
 \((F(b)-F(a))+(F(c)-F(b))\sim F(c)-F(a)\). -/
 theorem endpointDifferenceRaw_adjacent_additive

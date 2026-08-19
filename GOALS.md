@@ -185,8 +185,11 @@ from monomial brackets structurally.
    theorem is `uniformExpFTCIndexedSum_width_le`.  The full indexed
    certificate is assembled as `uniformExpOnUnit_selectedStageFTCIndexed`,
    with effective-FTC equivalence exported by
-   `uniformExpOnUnit_selectedStageFTCIndexed_equiv_endpoint`.  The next
-   exponential subgoal is endpoint-value identification, not convergence.
+   `uniformExpOnUnit_selectedStageFTCIndexed_equiv_endpoint`, with the public
+   alias `uniformExpOnUnit_effectiveFTC`.  The generic calculus API now also
+   proves `endpointDifferenceRaw_equiv_sub_apply`, identifying endpoint
+   interval computations with ordinary raw subtraction.  The next rung is
+   the nested-radical sine/sine-squared certificate.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

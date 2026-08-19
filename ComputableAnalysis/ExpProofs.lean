@@ -5743,6 +5743,18 @@ theorem uniformExpOnUnit_selectedStageFTCIndexed_equiv_endpoint :
   exact selectedStageCandidateDerivativeFTCIndexed
     uniformExpOnUnit_selectedStageFTCIndexed
 
+/-! Public spelling of the first completed effective FTC instance.  Its
+endpoint raw is the certified stage-indexed evaluator for
+`uniformExpOnUnitRealFunRaw 1 - uniformExpOnUnitRealFunRaw 0`; the generic
+`endpointDifferenceRaw_equiv_sub_apply` bridge in `Calculus` identifies that
+interval construction with ordinary raw subtraction whenever a direct
+endpoint-difference schedule is desired. -/
+
+theorem uniformExpOnUnit_effectiveFTC :
+    (uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw).Equiv
+      uniformExpOnUnit_selectedStageFTCIndexed.toSelected.endpointRaw :=
+  uniformExpOnUnit_selectedStageFTCIndexed_equiv_endpoint
+
 /-- The common-prefix unit-interval evaluator has the exact exponential
 initial value at zero.  This makes its analytic derivative certificate a
 constructive initial-value solution, ready for the separate uniqueness
