@@ -519,9 +519,13 @@ from monomial brackets structurally.
    usable on both sides of `CandidateDerivativeCellControl`.
    `tangentSquareCombinedDerivativeCellControl` is the next concrete FTC
    witness: it combines the arctangent padded kernel with the rational
-   correction for the tangent-square primitive.  The remaining global step is
-   to choose a sufficiently fine rational partition and stage schedule for
-   this cell control, followed by the finite overlap between the
+   correction for the tangent-square primitive.  The global schedule
+   primitives are now explicit as `tangentSquareFTCPartition`,
+   `tangentSquareFTCPadding`, `tangentSquareFTCStageBudget`, and
+   `tangentSquareFTCEndpointStage`; the endpoint obligation is discharged by
+   `tangentSquareFTC_endpoint_width_le`.  The remaining global step is to
+   close the dependent-width bookkeeping for the summed cell boxes and the
+   finite overlap between the
    nested-radical square raw integral and the tangent-chart anchor.
 
    Independently, the primitive endpoint algebra is now transported to the

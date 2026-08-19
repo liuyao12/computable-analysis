@@ -1457,6 +1457,120 @@ def tangentSquareCombinedDerivativeCellControl
       rw [hscale]
       exact hsum }
 
+def tangentSquareFTCPartition (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (256 * (eps.val.den + 1))
+    (by omega) (by native_decide)
+
+def tangentSquareFTCPadding (eps : QPos) : QPos :=
+  { val := eps.val / 64
+    property := by
+      rw [Rat.div_def]
+      exact Rat.mul_pos eps.property ((Rat.inv_pos).2 (by native_decide)) }
+
+def tangentSquareFTCStageBudget (eps : QPos) : QPos :=
+  let P := tangentSquareFTCPartition eps
+  let δ := tangentSquareFTCPadding eps
+  { val := mesh 0 1 P.pieces * δ.val / 3
+    property := by
+      have hP : 0 < P.pieces := P.positive
+      have hmesh : 0 < mesh 0 1 P.pieces := by
+        unfold mesh
+        rw [if_neg (Nat.ne_of_gt hP), Rat.div_def]
+        exact Rat.mul_pos (by native_decide)
+          ((Rat.inv_pos).2 (by exact_mod_cast hP))
+      rw [Rat.div_def]
+      exact Rat.mul_pos (Rat.mul_pos hmesh δ.property)
+        ((Rat.inv_pos).2 (by native_decide)) }
+
+def tangentSquareFTCEndpointStage (eps : QPos) : Nat :=
+  256 * ((tangentSquareFTCStageBudget eps).val.den + 1)
+
+theorem tangentSquareFTC_endpoint_width_le (eps : QPos) :
+    (endpointDifferenceInterval
+      (RealFunRaw.add Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw)
+      0 1 (tangentSquareFTCEndpointStage eps)).width <= eps.val := by
+  let η := tangentSquareFTCStageBudget eps
+  let N := tangentSquareFTCEndpointStage eps
+  have hN : 256 * (η.val.den + 1) = N := by rfl
+  have hNrect : 4 * (η.val.den + 1) <= N := by
+    rw [← hN]
+    omega
+  have hzero := ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+    (x := (0 : Rat)) (by native_decide) (by native_decide) η N hNrect
+  have hone := ArctanGeometry.arctanIntegralRectangleCompute_width_le_eps_of_precision
+    (x := (1 : Rat)) (by native_decide) (by native_decide) η N hNrect
+  have hsum :
+      (ArctanGeometry.arctanIntegralRectangleCompute 0 N).width +
+        (ArctanGeometry.arctanIntegralRectangleCompute 1 N).width <=
+      2 * η.val := by
+    have h := rat_add_le_add hzero hone
+    grind
+  have hη : 2 * η.val <= eps.val := by
+    dsimp [η, tangentSquareFTCStageBudget]
+    have hpieces : 0 < (tangentSquareFTCPartition eps).pieces :=
+      (tangentSquareFTCPartition eps).positive
+    have hmesh1 : mesh 0 1 (tangentSquareFTCPartition eps).pieces <= 1 := by
+      change mesh 0 1 (256 * (eps.val.den + 1)) <= 1
+      unfold mesh
+      rw [if_neg (by omega : 256 * (eps.val.den + 1) ≠ 0), Rat.div_def]
+      rw [Rat.natCast_mul, Rat.natCast_add]
+      have hden : (1 : Rat) <=
+          (256 : Rat) * ((eps.val.den + 1 : Nat) : Rat) := by
+        have hd : (1 : Rat) <= ((eps.val.den + 1 : Nat) : Rat) := by
+          exact_mod_cast (Nat.succ_le_succ (Nat.zero_le eps.val.den))
+        grind
+      apply Rat.le_of_mul_le_mul_right
+        (c := (256 : Rat) * ((eps.val.den + 1 : Nat) : Rat))
+      · have hcancel :
+            ((256 : Rat) * ((eps.val.den + 1 : Nat) : Rat))⁻¹ *
+              (256 * ((eps.val.den + 1 : Nat) : Rat)) = 1 :=
+          Rat.inv_mul_cancel _ (Rat.ne_of_gt
+            (Rat.mul_pos (by native_decide)
+              (Rat.natCast_pos.mpr (by omega))))
+        grind [Rat.mul_assoc, Rat.mul_comm]
+      · exact Rat.mul_pos (by native_decide)
+          (Rat.natCast_pos.mpr (by omega))
+    have hmesh : 0 <= mesh 0 1 (tangentSquareFTCPartition eps).pieces :=
+      mesh_nonneg_of_le (tangentSquareFTCPartition eps).positive
+        (by native_decide)
+    have hδ : 0 <= (tangentSquareFTCPadding eps).val :=
+      Rat.le_of_lt (tangentSquareFTCPadding eps).property
+    have hprodle := Rat.mul_le_mul_of_nonneg_right hmesh1 hδ
+    have hinv3 : 0 <= (3 : Rat)⁻¹ :=
+      Rat.le_of_lt ((Rat.inv_pos).2 (by native_decide))
+    have hscaled := Rat.mul_le_mul_of_nonneg_right hprodle hinv3
+    dsimp [tangentSquareFTCPadding] at hscaled ⊢
+    grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm]
+  have hzeroCompute :
+      (RealFunRaw.add Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw).compute
+          0 (tangentSquareFTCEndpointStage eps) =
+        Integral.arctanPrimitiveRaw.compute 0
+          (tangentSquareFTCEndpointStage eps) := by
+    simp [RealFunRaw.add, Integral.arctanPrimitiveRaw,
+      tangentSquareCorrectionRaw, RealFunRaw.exact,
+      tangentSquareRationalPart_zero,
+      ArctanGeometry.arctanIntegralRectangleRaw,
+      ArctanGeometry.arctanIntegralRectangleCompute,
+      ArctanGeometry.integralSumInterval]
+    constructor <;> grind
+  have honeCompute :
+      (RealFunRaw.add Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw).compute
+          1 (tangentSquareFTCEndpointStage eps) =
+        Integral.arctanPrimitiveRaw.compute 1
+          (tangentSquareFTCEndpointStage eps) := by
+    simp [RealFunRaw.add, Integral.arctanPrimitiveRaw,
+      tangentSquareCorrectionRaw, RealFunRaw.exact,
+      tangentSquareRationalPart_one,
+      ArctanGeometry.arctanIntegralRectangleRaw,
+      ArctanGeometry.arctanIntegralRectangleCompute,
+      ArctanGeometry.integralSumInterval]
+    constructor <;> grind
+  rw [endpointDifferenceInterval_width]
+  rw [hzeroCompute, honeCompute]
+  change (ArctanGeometry.arctanIntegralRectangleCompute 0 N).width +
+      (ArctanGeometry.arctanIntegralRectangleCompute 1 N).width <= eps.val
+  exact Rat.le_trans hsum hη
+
 /- The effective local certificate uses the finite arctangent rectangle
 primitive.  The geometric arctangent evaluator remains the separate value
 anchor used below. -/
