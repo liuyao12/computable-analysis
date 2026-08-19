@@ -38,7 +38,7 @@ from monomial brackets structurally.
 |---|---|---|---|---|
 | A | `1`, `x` on `[0,1/2]` | affine primitives | `1/2`, `1/8` | affine interval certificates |
 | B | `x^2`, `x^3`, `x^4`, `x^5` on `[0,1]` | `x^3/3`, `x^4/4`, `x^5/5`, `x^6/6` | `1/3`, `1/4`, `1/5`, `1/6` | `FiniteFTCIntervalRegular.lean` |
-| C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | kernel derivative bound and overlap-to-width-padding bridge complete; same-stage endpoint transport pending |
+| C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | kernel derivative bound and same-stage padded forward-quotient containment complete; quantitative width schedule pending |
 | D | `exp x` on a bounded rational interval | computable exponential raw | endpoint difference | exponential evaluator; certificate pending |
 | E | finite sine prefix `x-x^3/6` on `[0,1/2]` | `x^2/2-x^4/24` | `47/384` | complete `EffectiveDerivativeBoundFTC` certificate |
 | F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | complete `EffectiveDerivativeBoundFTC` certificate |
@@ -73,8 +73,13 @@ from monomial brackets structurally.
 4. **Concave inverse-function case.**  Formalize `F x = arctan x` on
    `[0,1]`, with `dF x = 1/(1+x*x)`.  Use concavity to order neighboring
    secants and the existing rational rectangle evaluator to produce the
-   derivative boxes.  The result should identify the integral with the
-   endpoint difference `arctan 1 - arctan 0`.
+   derivative boxes.  The current finite bridge is
+   `arctanForwardQuotientPaddedKernelBound_contains`: it converts the
+   tangent-chart and ordinary-forward overlaps into containment after paying
+   explicit stage widths.  The remaining proof is to choose the stage as a
+   function of the cell width and prove the resulting global padding tends to
+   zero.  The result should identify the integral with the endpoint difference
+   `arctan 1 - arctan 0`.
 
 5. **Convex exponential case.**  Use the computable exponential evaluator
    with `F' = F`, and prove the endpoint identity on a bounded rational

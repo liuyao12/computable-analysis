@@ -26,6 +26,85 @@ theorem overlaps_implies_contains_width_padding
   unfold QInterval.ContainsInterval QInterval.Overlaps QInterval.width at *
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+theorem overlaps_implies_contains_width_padding_left
+    {I A B : QInterval}
+    (hIB : I.ContainsInterval B) (hAB : A.Overlaps B) :
+    ({ lo := I.lo - A.width, hi := I.hi + A.width } : QInterval).ContainsInterval A := by
+  unfold QInterval.ContainsInterval QInterval.Overlaps QInterval.width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
+theorem arctan_zero_tangent_quotient_ordered
+    {h t : Rat} (hpos : 0 < h) (ht0 : 0 <= t) (n : Nat) :
+    0 <= (QInterval.differenceQuotient
+      (ArctanGeometry.arctanIntegralRectangleCompute t n)
+      (ArctanGeometry.arctanIntegralRectangleCompute 0 n) h).width := by
+  have hinv : 0 <= 1 / h := by
+    rw [Rat.div_def]
+    simpa using Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+  have htord := ArctanGeometry.arctanIntegralRectangleCompute_ordered ht0 n
+  have hzeroord := ArctanGeometry.arctanIntegralRectangleCompute_ordered
+    (by native_decide : (0 : Rat) <= 0) n
+  unfold QInterval.width at htord hzeroord
+  have hwidth :
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute t n)
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 n) h).width =
+        (1 / h) *
+          ((ArctanGeometry.arctanIntegralRectangleCompute t n).width +
+        (ArctanGeometry.arctanIntegralRectangleCompute 0 n).width) := by
+    rw [QInterval.differenceQuotient, QInterval.divRat,
+      QInterval.scaleRat_width_of_nonneg hinv, QInterval.sub_width]
+  rw [hwidth]
+  exact Rat.mul_nonneg hinv (Rat.add_nonneg htord hzeroord)
+
+def arctanForwardQuotientPaddedKernelBound (x h : Rat) (n : Nat) : QInterval :=
+  let A := QInterval.scaleRat (1 / h)
+    (ArctanGeometry.chartAddAreaLoopCompute x
+      (ArctanGeometry.tangentChartIncrement x h) n)
+  let D := QInterval.differenceQuotient
+    (ArctanGeometry.arctanIntegralRectangleCompute (x + h) n)
+    (ArctanGeometry.arctanIntegralRectangleCompute x n) h
+  { lo := ArctanGeometry.integralKernel x - (h + h * h) - A.width - D.width,
+    hi := ArctanGeometry.integralKernel x + A.width + D.width }
+
+theorem arctanForwardQuotientPaddedKernelBound_contains
+    {x h : Rat} (hx0 : 0 <= x) (hx1 : x <= 1)
+    (hpos : 0 < h) (hupper : x + h <= 1) (n : Nat) :
+    (arctanForwardQuotientPaddedKernelBound x h n).ContainsInterval
+      (QInterval.differenceQuotient
+        (ArctanGeometry.arctanIntegralRectangleCompute (x + h) n)
+        (ArctanGeometry.arctanIntegralRectangleCompute x n) h) := by
+  let A := QInterval.scaleRat (1 / h)
+    (ArctanGeometry.chartAddAreaLoopCompute x
+      (ArctanGeometry.tangentChartIncrement x h) n)
+  let B := QInterval.differenceQuotient
+    (ArctanGeometry.arctanIntegralRectangleCompute
+      (ArctanGeometry.tangentChartIncrement x h) n)
+    (ArctanGeometry.arctanIntegralRectangleCompute 0 n) h
+  let D := QInterval.differenceQuotient
+    (ArctanGeometry.arctanIntegralRectangleCompute (x + h) n)
+    (ArctanGeometry.arctanIntegralRectangleCompute x n) h
+  let K : QInterval :=
+    { lo := ArctanGeometry.integralKernel x - (h + h * h),
+      hi := ArctanGeometry.integralKernel x }
+  have hK : K.ContainsInterval B := by
+    exact ArctanGeometry.arctanIntegralRectangleCompute_tangentChart_quotient_kernel_contains
+      hx0 hx1 hpos n
+  have hA : A.ContainsInterval B := by
+    exact ArctanGeometry.tangentChart_transport_scaled_contains_chartQuotient_on_unit
+      hx0 hx1 hpos hupper n
+  have hBord : 0 <= B.width := by
+    exact arctan_zero_tangent_quotient_ordered hpos
+      (Rat.le_of_lt (ArctanGeometry.tangentChartIncrement_pos hx0 hpos)) n
+  have hAB : A.Overlaps B := QInterval.overlaps_of_contains_right hA hBord
+  have hAin : ({ lo := K.lo - A.width, hi := K.hi + A.width } : QInterval).ContainsInterval A :=
+    overlaps_implies_contains_width_padding_left hK hAB
+  have hAD : A.Overlaps D := by
+    exact ArctanGeometry.tangentChart_transport_scaled_overlaps_forwardQuotient_on_unit
+      hx0 hx1 hpos hupper n
+  have hD := overlaps_implies_contains_width_padding hAin hAD
+  simpa [arctanForwardQuotientPaddedKernelBound, A, B, D, K] using hD
+
 def arctanPrimitiveRaw : RealFunRaw where
   domain := inDomainInterval 0 1
   compute := fun x n => (ArctanGeometry.arctanIntegralRectangleRaw x).compute n
