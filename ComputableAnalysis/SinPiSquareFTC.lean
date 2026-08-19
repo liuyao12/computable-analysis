@@ -1170,6 +1170,41 @@ theorem tangentSquareCorrectionCenteredBound_contains_endpoint
   constructor <;> grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
     Rat.mul_assoc, Rat.mul_comm]
 
+theorem tangentSquareCorrectionCommonBound_contains_endpoint
+    (C : RationalSubinterval 0 1) (n : Nat)
+    (hstrict : C.lower < C.upper) :
+    (C.scaleBound (tangentSquareCorrectionCommonBound C)).ContainsInterval
+      (endpointDifferenceInterval tangentSquareCorrectionRaw
+        C.lower C.upper n) := by
+  have hcenter := tangentSquareCorrectionCenteredBound_contains_endpoint
+    C n hstrict
+  have hw : 0 < C.width := by
+    unfold RationalSubinterval.width at *
+    grind
+  unfold QInterval.ContainsInterval at hcenter ⊢
+  unfold RationalSubinterval.scaleBound tangentSquareCorrectionCenteredBound
+    QInterval.scaleByRat at hcenter
+  unfold RationalSubinterval.scaleBound tangentSquareCorrectionCommonBound
+    QInterval.scaleByRat at ⊢
+  simp only [if_pos (Rat.le_of_lt hw)] at hcenter ⊢
+  have hleft : C.width *
+      (tangentSquareRationalDerivative C.lower - 96 * C.width) <=
+      C.width *
+        (tangentSquareRationalDerivative C.lower - 34 * C.width) := by
+    have hcoef : tangentSquareRationalDerivative C.lower - 96 * C.width <=
+        tangentSquareRationalDerivative C.lower - 34 * C.width := by
+      grind [Rat.sub_eq_add_neg]
+    exact Rat.mul_le_mul_of_nonneg_left hcoef (Rat.le_of_lt hw)
+  have hright : C.width *
+      (tangentSquareRationalDerivative C.lower + 34 * C.width) <=
+      C.width *
+        (tangentSquareRationalDerivative C.lower + 96 * C.width) := by
+    have hcoef : tangentSquareRationalDerivative C.lower + 34 * C.width <=
+        tangentSquareRationalDerivative C.lower + 96 * C.width := by
+      grind
+    exact Rat.mul_le_mul_of_nonneg_left hcoef (Rat.le_of_lt hw)
+  exact ⟨Rat.le_trans hleft hcenter.1, Rat.le_trans hcenter.2 hright⟩
+
 def tangentSquareCorrectionCenteredPartition (eps : QPos) :
     RationalPartition 0 1 :=
   RationalPartition.uniform 0 1 (68 * (eps.val.den + 1))
@@ -1342,6 +1377,85 @@ theorem endpointDifferenceInterval_add_contains
   unfold endpointDifferenceInterval RealFunRaw.add
     QInterval.addInterval QInterval.ContainsInterval
   constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+def tangentSquareCombinedDerivativeRaw : RealFunRaw :=
+  RealFunRaw.add Integral.arctanKernelRaw tangentSquareCorrectionDerivativeRaw
+
+theorem tangentSquareCombinedDerivativeRaw_valid :
+    tangentSquareCombinedDerivativeRaw.Valid := by
+  apply RealFunRaw.add_valid
+  · exact RealFunRaw.exact_valid _
+  · exact tangentSquareCorrectionDerivativeRaw_valid
+
+def tangentSquareCombinedDerivativeCellControl
+    (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
+    (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
+    (hN : 256 * (η.val.den + 1) <= N) :
+    CandidateDerivativeCellControl
+      (RealFunRaw.add Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw)
+      tangentSquareCombinedDerivativeRaw C := by
+  exact {
+    bound := fun _ => QInterval.addInterval
+      (Integral.arctanKernelPaddedBound C δ.val N)
+      (tangentSquareCorrectionCommonBound C)
+    derivativeEvalPrecision := fun _ => 0
+    endpointPrecision := fun _ => N
+    primitive_domain_lower := by
+      unfold RealFunRaw.add Integral.arctanPrimitiveRaw
+        tangentSquareCorrectionRaw RealFunRaw.exact
+      exact ⟨⟨C.lower_mem, Rat.le_trans C.ordered C.upper_mem⟩, trivial⟩
+    primitive_domain_upper := by
+      unfold RealFunRaw.add Integral.arctanPrimitiveRaw
+        tangentSquareCorrectionRaw RealFunRaw.exact
+      exact ⟨⟨Rat.le_trans C.lower_mem C.ordered, C.upper_mem⟩, trivial⟩
+    candidate_domain_on := fun _ _ => by
+      constructor <;> trivial
+    bound_ordered := fun _ => by
+      unfold QInterval.addInterval QInterval.width
+      have ha := Integral.arctanKernelPaddedBound_ordered C δ.val
+        (Rat.le_of_lt δ.property) N
+      have hc := tangentSquareCorrectionCommonBound_ordered C
+      change 0 <=
+        ((Integral.arctanKernelPaddedBound C δ.val N).hi +
+            (tangentSquareCorrectionCommonBound C).hi) -
+          ((Integral.arctanKernelPaddedBound C δ.val N).lo +
+            (tangentSquareCorrectionCommonBound C).lo)
+      unfold QInterval.width at ha hc
+      grind [Rat.sub_eq_add_neg]
+    candidate_contained := fun _ x hx => by
+      have ha := Integral.arctanKernelPaddedBound_contains C δ.val
+        (Rat.le_of_lt δ.property) N hx
+      have hc := tangentSquareCorrectionCommonBound_contains_derivative C hx
+      have hadd := QInterval.addInterval_contains ha hc
+      simpa [tangentSquareCombinedDerivativeRaw, RealFunRaw.add,
+        Integral.arctanKernelRaw, tangentSquareCorrectionDerivativeRaw,
+        RealFunRaw.exact, QInterval.addInterval] using hadd
+    endpoint_difference_contained := fun _ => by
+      have ha := Integral.arctanKernelPaddedBound_local_endpoint_contains
+        C δ η N hC hη hN
+      have hstrict : C.lower < C.upper := by
+        unfold RationalSubinterval.width at hC
+        grind
+      have hc := tangentSquareCorrectionCommonBound_contains_endpoint
+        C N hstrict
+      have hadd := QInterval.addInterval_contains ha hc
+      have hsum := hadd.trans (endpointDifferenceInterval_add_contains
+        Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw
+        C.lower C.upper N)
+      have hscale :
+          C.scaleBound (QInterval.addInterval
+            (Integral.arctanKernelPaddedBound C δ.val N)
+            (tangentSquareCorrectionCommonBound C)) =
+          QInterval.addInterval
+            (C.scaleBound (Integral.arctanKernelPaddedBound C δ.val N))
+            (C.scaleBound (tangentSquareCorrectionCommonBound C)) := by
+        unfold RationalSubinterval.scaleBound QInterval.scaleByRat
+          QInterval.addInterval
+        simp only [if_pos (Rat.le_of_lt hC)]
+        apply (QInterval.mk.injEq _ _ _ _).mpr
+        constructor <;> grind [Rat.mul_add]
+      rw [hscale]
+      exact hsum }
 
 /- The effective local certificate uses the finite arctangent rectangle
 primitive.  The geometric arctangent evaluator remains the separate value

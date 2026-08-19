@@ -511,10 +511,18 @@ from monomial brackets structurally.
    partition has shrinking global width by
    `tangentSquareCorrectionCenteredUniformBoundSum_width_le`.  The assembled
    local certificate is exposed as
-   `tangentSquareEffectivePrimitive_centered_endpoint_contains`.  The
-   remaining work is the common arctangent-plus-correction derivative box,
-   followed by the finite overlap between the nested-radical square raw
-   integral and the tangent-chart anchor.
+   `tangentSquareEffectivePrimitive_centered_endpoint_contains`.  The common
+   derivative box is now explicit: `tangentSquareRationalDerivative_lipschitz_on_unit`
+   gives the finite constant `96`, while
+   `tangentSquareCorrectionCommonBound_contains_derivative` and
+   `tangentSquareCorrectionCommonBound_contains_endpoint` make the same box
+   usable on both sides of `CandidateDerivativeCellControl`.
+   `tangentSquareCombinedDerivativeCellControl` is the next concrete FTC
+   witness: it combines the arctangent padded kernel with the rational
+   correction for the tangent-square primitive.  The remaining global step is
+   to choose a sufficiently fine rational partition and stage schedule for
+   this cell control, followed by the finite overlap between the
+   nested-radical square raw integral and the tangent-chart anchor.
 
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by
