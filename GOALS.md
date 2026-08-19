@@ -498,7 +498,11 @@ from monomial brackets structurally.
    available as `tangentSquareRationalPart_difference_qabs_le` and
    `tangentSquareCorrectionBound_contains_endpoint`; the latter is a direct
    `CandidateDerivativeCellControl`-ready endpoint box.  The remaining local
-   step is combining this correction box with the arctangent endpoint box.
+   step of the endpoint assembly is now discharged by
+   `endpointDifferenceInterval_add_contains` and
+   `tangentSquareEffectivePrimitive_endpoint_contains`.  The remaining
+   refinement is to center one common derivative box so that it serves both
+   pointwise density containment and this assembled endpoint control.
 
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by

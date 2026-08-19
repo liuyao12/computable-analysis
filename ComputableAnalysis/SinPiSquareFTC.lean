@@ -1,5 +1,6 @@
 import ComputableAnalysis.SinPiIntegral
 import ComputableAnalysis.FiniteSinePrefixFTC
+import ComputableAnalysis.ArctanEffectiveFTC
 
 /-!
 # The squared-sine test function
@@ -654,6 +655,49 @@ theorem tangentSquarePrimitiveOnUnit_valid :
   apply RealFunRaw.add_valid
   · exact FunctionOnInterval.toRealFunRaw_valid IntegralIdentities.arctanGeomOnUnit
   · exact RealFunRaw.exact_valid tangentSquareRationalPrimitive
+
+theorem endpointDifferenceInterval_add_contains
+    (F G : RealFunRaw) (p r : Rat) (n : Nat) :
+    (QInterval.addInterval
+      (endpointDifferenceInterval F p r n)
+      (endpointDifferenceInterval G p r n)).ContainsInterval
+      (endpointDifferenceInterval (RealFunRaw.add F G) p r n) := by
+  unfold endpointDifferenceInterval RealFunRaw.add
+    QInterval.addInterval QInterval.ContainsInterval
+  constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm]
+
+/- The effective local certificate uses the finite arctangent rectangle
+primitive.  The geometric arctangent evaluator remains the separate value
+anchor used below. -/
+def tangentSquareEffectivePrimitiveOnUnit : RealFunRaw :=
+  RealFunRaw.add Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw
+
+theorem tangentSquareEffectivePrimitiveOnUnit_valid :
+    tangentSquareEffectivePrimitiveOnUnit.Valid := by
+  apply RealFunRaw.add_valid
+  · exact Integral.arctanPrimitiveRaw_valid
+  · exact tangentSquareCorrectionRaw_valid
+
+theorem tangentSquareEffectivePrimitive_endpoint_contains
+    (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
+    (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
+    (hN : 256 * (η.val.den + 1) <= N) :
+    QInterval.ContainsInterval
+      (QInterval.addInterval
+        (C.scaleBound (Integral.arctanKernelPaddedBound C δ.val N))
+        (C.scaleBound tangentSquareCorrectionBound))
+      (endpointDifferenceInterval tangentSquareEffectivePrimitiveOnUnit
+        C.lower C.upper N) := by
+  have harctan := Integral.arctanKernelPaddedBound_local_endpoint_contains
+    C δ η N hC hη hN
+  have hstrict : C.lower < C.upper := by
+    unfold RationalSubinterval.width at hC
+    grind
+  have hcorrection := tangentSquareCorrectionBound_contains_endpoint
+    C N hstrict
+  have hsum := QInterval.addInterval_contains harctan hcorrection
+  exact hsum.trans (endpointDifferenceInterval_add_contains
+    Integral.arctanPrimitiveRaw tangentSquareCorrectionRaw C.lower C.upper N)
 
 theorem tangentSquareRationalPrimitive_zero :
     tangentSquareRationalPrimitive 0 = 0 := by
