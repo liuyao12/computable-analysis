@@ -23,6 +23,32 @@ scaled enclosure contains the endpoint difference on each rational cell,
 prove the global width tends to zero, and invoke
 `effectiveDerivativeBoundFTC`.
 
+### Function portfolio and execution order
+
+The project should grow by adding concrete functions, not by introducing an
+unusable theorem about an unspecified class of functions.  The first portfolio
+is:
+
+1. **Polynomial controls:** constants, affine functions, and the monomials
+   `x^2` through `x^5`.  These calibrate secant bounds, primitives, and exact
+   rational endpoint values.
+2. **Rational inverse functions:** `1/(1+x^2)` and `arctan x`.  These test
+   concave secant bounds and the project’s rational rectangle evaluator.
+3. **Power-series functions:** `exp x` and finite sine/cosine prefixes.  These
+   test explicit tail schedules while retaining rational interval values.
+4. **Product/composition functions:** the finite square prefix, followed by
+   the genuine computable function `sin(pi*x)^2` on `[0,1/2]`.
+5. **Next non-polynomial applications:** `sin(pi*x)^2` on other rational
+   arcs, rational trigonometric products, and Gaussian-type integrands when a
+   finite interval/tail certificate is available.
+
+For every entry, the formalization target is a named `EffectiveDerivativeBoundFTC`
+certificate (or a clearly stated monotone-Darboux fallback), a raw integral,
+and an endpoint-value theorem.  The `sin²` case is the first composition whose
+endpoint transport must connect nested-radical sine boxes with a rational
+identity; it is therefore the main current test rather than a replacement for
+the polynomial regression suite.
+
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
 interval bounds.  This keeps the remaining squared-prefix proof in the same
