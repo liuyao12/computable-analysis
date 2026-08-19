@@ -3063,6 +3063,13 @@ def uniformExpCellRange (a b : Rat) (n : Nat) : QInterval :=
   { lo := uniformExpCenter a n - uniformExpTailRadius n,
     hi := uniformExpCenter b n + uniformExpTailRadius n }
 
+theorem uniformExpCellRange_width (a b : Rat) (n : Nat) :
+    (uniformExpCellRange a b n).width =
+      uniformExpCenter b n - uniformExpCenter a n +
+        2 * uniformExpTailRadius n := by
+  unfold uniformExpCellRange QInterval.width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm, Rat.add_left_comm]
+
 theorem uniformExpBox_contains_cellRange
     (n : Nat) {a b x : Rat}
     (ha : 0 <= a) (hb : b <= 1)

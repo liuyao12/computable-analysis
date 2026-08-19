@@ -114,7 +114,8 @@ from monomial brackets structurally.
    `uniformExpOnUnitRealFunRaw_compute_contains_cellRange` now discharges the
    candidate-containment field.  The next obligations are to use
    `uniformExpCellRange` as the derivative box, verify its summed width
-   schedule, and assemble the selected-stage certificate.
+   schedule (its exact width is exposed by `uniformExpCellRange_width`), and
+   assemble the selected-stage certificate.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
