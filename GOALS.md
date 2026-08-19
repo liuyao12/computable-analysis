@@ -275,6 +275,13 @@ from monomial brackets structurally.
    sine monotonicity, interval regularity of the square evaluator, and a
    finite proof-relevant Darboux schedule.  Thus the monotone route has a
    checkable construction before its endpoint-value theorem is supplied.
+   Its interval-regularity subgoal is now stated constructively: define the
+   square evaluator's interval output by a two-branch schedule, returning the
+   certified unit box `[0,1]` on large input cells and a clamped square of the
+   sine regularity box on small cells.  The small-cell branch must prove the
+   width estimate `2 * sineWidth <= 1/(n+1)`; the large-cell branch is already
+   width-zero-error at the square's bounded range.  This avoids assuming that
+   an arbitrary wide regularity box is ordered.
    The final closure is named
    `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
    its validity, the FTC equivalence, and the endpoint value `1/4`, the
