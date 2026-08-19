@@ -1049,6 +1049,49 @@ theorem differenceQuotient_singleton
   unfold differenceQuotient divRat sub scaleRat
   simp [Rat.div_def, Rat.mul_comm]
 
+/-! A positive cell width cancels the interval quotient denominator.  This is
+the algebraic bridge used by the effective FTC: a finite secant enclosure can
+be transported back to an endpoint-difference enclosure before the local
+boxes are summed. -/
+
+theorem scaleRat_differenceQuotient_of_pos
+    {A B : QInterval} {h : Rat} (hpos : 0 < h) :
+    scaleRat h (differenceQuotient B A h) = sub B A := by
+  have hnonneg : 0 <= h := Rat.le_of_lt hpos
+  have hne : h ≠ 0 := Rat.ne_of_gt hpos
+  unfold differenceQuotient divRat scaleRat sub
+  simp only [if_pos hnonneg]
+  rw [if_pos]
+  · simp only [Rat.div_def]
+    have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hne
+    grind [Rat.mul_assoc, Rat.mul_comm, Rat.sub_eq_add_neg]
+  · exact by
+      rw [Rat.div_def]
+      exact Rat.mul_nonneg (by native_decide)
+        (Rat.le_of_lt ((Rat.inv_pos).2 hpos))
+
+theorem nearAt_symm {I J : QInterval} {eps : QPos} :
+    I.NearAt J eps -> J.NearAt I eps := by
+  intro h
+  unfold NearAt at *
+  rcases h with ⟨hIJ, hJI, hIw, hJw⟩
+  exact ⟨hJI, hIJ, hJw, hIw⟩
+
+/-! A near secant quotient gives a concrete scaled endpoint enclosure. -/
+
+theorem scaleRat_differenceQuotient_contains_of_near
+    {A B D : QInterval} {h : Rat} {eps : QPos}
+    (hpos : 0 < h)
+    (hnear : (differenceQuotient B A h).NearAt D eps) :
+    (scaleRat h (expand D (2 * eps.val))).ContainsInterval (sub B A) := by
+  have hnear' : D.NearAt (differenceQuotient B A h) eps :=
+    nearAt_symm hnear
+  have hcontains := expand_contains_right_of_near hnear'
+  have hscaled := scaleRat_contains_of_nonneg
+    (Rat.le_of_lt hpos) hcontains
+  rw [scaleRat_differenceQuotient_of_pos hpos] at hscaled
+  exact hscaled
+
 /-- Reversing a positive finite step reverses both interval endpoints and the
 sign of its denominator, leaving the enclosure of the difference quotient
 unchanged.  This is the finite algebra needed to transport a forward
