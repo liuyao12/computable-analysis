@@ -306,6 +306,11 @@ from monomial brackets structurally.
    `sinPiSquareOnHalfScheduledFunctionOnInterval`; the full interval-regularity
    certificate is `sinPiSquareScheduled_intervalRegular`, and its monotonicity
    transport is `sinPiSquareScheduled_nondecreasing_of_sine_nondecreasing`.
+   The resulting concrete equal-dyadic integral is now packaged as
+   `sinPiSquareScheduledMonotoneIntegral`, with validity and conditional
+   endpoint-value closure supplied by
+   `sinPiSquareScheduledMonotoneIntegral_valid` and
+   `sinPiSquareScheduledMonotoneIntegral_equiv_value`.
    The final closure is named
    `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
    its validity, the FTC equivalence, and the endpoint value `1/4`, the
