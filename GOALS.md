@@ -91,15 +91,19 @@ from monomial brackets structurally.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
-   benchmark.  Refactor `tangentPullbackIntegral_equiv_one` so its proof is an
-   explicit instance of the generic effective FTC, with the existing
-   `4 / 2^n` secant error and Lipschitz Darboux margin as the width schedule.
+   benchmark.  This is now formalized in
+   `TangentPullbackEffectiveFTC.lean`: the generic candidate-derivative
+   certificate, rational secant schedule, and direct equivalence to both
+   tangent integral implementations are complete.
 
 7. **Original sine integral.**  Construct the derivative certificate for the
    computable primitive behind `sin (pi*x)` on `[0,1/2]`, using the convex
    neighboring-secant route (the derivative is increasing there).  Then prove
    the equal-dyadic integral equals the endpoint difference and identify that
-   difference with `reciprocalPiRaw`.  The final target is
+   difference with `reciprocalPiRaw`.  The remaining concrete certificate is
+   `ArctanSinPiConstruction.TangentChartTransport`: prove its stagewise
+   overlap field against `tangentChartIntegral`, then invoke
+   `halfIntegral_equiv_reciprocalPi_of_tangentChart`.  The final target is
    `computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC`, with the direct
    Riemann--Stieltjes proof retained as an independent comparison.
 
@@ -112,7 +116,9 @@ from monomial brackets structurally.
    opaque special function.  The current acceptance interface is
    `SinPiSquareEffectiveFTCData` in `SinPiSquareFTC.lean`; it requires the
    primitive, local derivative-bound certificate, and validity of both raw
-   outputs before the generic closure theorem can be invoked.
+   outputs before the generic closure theorem can be invoked.  Its concrete
+   transport subgoal is the same stagewise sine/cosine identity on each
+   dyadic cell, followed by the rational endpoint anchor `1/4`.
 
 9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
    the existing coefficient-shift certificates for the concrete finite
