@@ -147,10 +147,40 @@ theorem rationalTangentSquareWitnessSearchList_sound
         assumption
       · exact ih h
 
+theorem rationalTangentSquareWitnessSearchList_complete
+    {U S C : QInterval} {us : List Rat} {u : Rat}
+    (hmem : u ∈ us)
+    (hadm : rationalTangentSquareWitnessAdmissibleBool U S C u = true) :
+    ∃ v, rationalTangentSquareWitnessSearchList U S C us = some v := by
+  induction us with
+  | nil => simp at hmem
+  | cons q qs ih =>
+      simp only [List.mem_cons] at hmem
+      simp only [rationalTangentSquareWitnessSearchList]
+      split
+      · exact ⟨q, rfl⟩
+      · rcases hmem with rfl | hmem
+        · contradiction
+        · exact ih hmem
+
 def rationalTangentSquareWitnessSearch
     (U S C : QInterval) (m : Nat) : Option Rat :=
   rationalTangentSquareWitnessSearchList U S C
     (rationalTangentWitnessBoxGrid U m)
+
+theorem rationalTangentSquareWitnessSearch_complete_of_grid_candidate
+    {U S C : QInterval} (m k : Nat) (hk : k <= 2 ^ m)
+    (hadm : rationalTangentSquareWitnessAdmissibleBool U S C
+      (U.lo + U.width * ((k : Rat) / ((2 ^ m : Nat) : Rat))) = true) :
+    ∃ v, rationalTangentSquareWitnessSearch U S C m = some v := by
+  apply rationalTangentSquareWitnessSearchList_complete
+    (u := U.lo + U.width * ((k : Rat) / ((2 ^ m : Nat) : Rat)))
+  · unfold rationalTangentWitnessBoxGrid
+    let N := 2 ^ m
+    have hk' : k < N + 1 := by dsimp [N]; omega
+    apply List.mem_map.mpr
+    exact ⟨k, by simpa using hk', rfl⟩
+  · exact hadm
 
 theorem rationalTangentSquareWitnessSearch_sound
     {U S C : QInterval} {m : Nat} {u : Rat}

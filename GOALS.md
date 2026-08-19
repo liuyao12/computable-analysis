@@ -268,7 +268,10 @@ from monomial brackets structurally.
    `s^2+c^2=1`.  The executable predicate and search are
    `rationalTangentSquareWitnessAdmissibleBool` and
    `rationalTangentSquareWitnessSearch`; successful searches are decoded by
-   `rationalTangentSquareWitnessSearch_sound`.
+   `rationalTangentSquareWitnessSearch_sound`, while
+   `rationalTangentSquareWitnessSearch_complete_of_grid_candidate` closes
+   the finite-list completeness step whenever a checked grid candidate is
+   supplied.
 
 9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
    the existing coefficient-shift certificates for the concrete finite
