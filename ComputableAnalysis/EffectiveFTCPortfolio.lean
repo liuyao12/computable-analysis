@@ -218,6 +218,24 @@ theorem nestedRadicalSquare_tangent_stage_zero_overlap :
   unfold QInterval.Overlaps
   native_decide
 
+theorem nestedRadicalSquare_tangent_stage_one_overlap :
+    QInterval.Overlaps
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 1)
+      (SinPiIntegral.tangentSquareIntegral.compute 1) := by
+  unfold SinPiIntegral.dyadicNestedRadicalSquareLeftSum
+  rw [SinPiIntegral.tangentSquareIntegral_compute]
+  unfold QInterval.Overlaps
+  native_decide
+
+theorem nestedRadicalSquare_tangent_stage_two_overlap :
+    QInterval.Overlaps
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 2)
+      (SinPiIntegral.tangentSquareIntegral.compute 2) := by
+  unfold SinPiIntegral.dyadicNestedRadicalSquareLeftSum
+  rw [SinPiIntegral.tangentSquareIntegral_compute]
+  unfold QInterval.Overlaps
+  native_decide
+
 theorem tangentSquareCellControl_left_rectangle_contained
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
