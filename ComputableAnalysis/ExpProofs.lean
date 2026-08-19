@@ -4441,6 +4441,21 @@ theorem uniformExpOnUnit_compute (x : Rat)
     (hx : inDomainInterval (0 : Rat) 1 x) (n : Nat) :
     uniformExpOnUnit.compute x hx n = (uniformExpRaw x).compute n := rfl
 
+/-! The generic FTC layer consumes `RealFunRaw`, while the derivative layer
+uses `FunctionOnInterval`.  This adapter exposes the same certified common
+prefix evaluator at the former interface without changing its algorithm. -/
+
+def uniformExpOnUnitRealFunRaw : RealFunRaw where
+  domain := fun x => 0 <= x /\ x <= (1 : Rat)
+  compute := fun x n => (uniformExpRaw x).compute n
+
+theorem uniformExpOnUnitRealFunRaw_valid :
+    uniformExpOnUnitRealFunRaw.Valid := by
+  intro x hx
+  exact uniformExpRaw_valid x (by
+    rw [qabs_eq_self_of_nonneg hx.1]
+    exact Rat.le_trans hx.2 (by native_decide))
+
 /-- On the unit interval the common-prefix representation and the selected
 adaptive representation are pointwise equivalent. -/
 theorem uniformExpOnUnit_equivalent_expPowerSeriesOnUnit :
