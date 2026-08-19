@@ -1054,6 +1054,24 @@ theorem sinPiSquareOnHalf_nondecreasing_of_tangent_certificate
     (S.onHalf_nondecreasing_of_tangent_nondecreasing
       C.tangent_nondecreasing)
 
+theorem unitSquareInterval_width_le_two_mul
+    {J : QInterval} (hJ : subintervalOf J 0 1) :
+    (QBox.mulRealInterval J.lo J.hi J.lo J.hi).width <=
+      2 * J.width := by
+  have horder : J.lo <= J.hi := hJ.2.1
+  have hsq := QBox.mulRealInterval_self_of_nonneg hJ.1 horder
+  rw [hsq]
+  unfold QInterval.width
+  have hsum : J.hi + J.lo <= 2 := by grind [hJ.2.2]
+  have hgap : 0 <= J.hi - J.lo := by
+    grind
+  have hfactor : J.hi * J.hi - J.lo * J.lo =
+      (J.hi - J.lo) * (J.hi + J.lo) := by
+    grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg]
+  rw [hfactor]
+  have hmul := Rat.mul_le_mul_of_nonneg_left hsum hgap
+  grind [Rat.mul_comm]
+
 /-! Once interval regularity and sine monotonicity are supplied, the public
 monotone-Darboux integral for the squared evaluator is a concrete `RealRaw`.
 The schedule is proof-relevant; no completed-real integral is hidden here. -/

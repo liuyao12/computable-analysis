@@ -282,6 +282,11 @@ from monomial brackets structurally.
    width estimate `2 * sineWidth <= 1/(n+1)`; the large-cell branch is already
    width-zero-error at the square's bounded range.  This avoids assuming that
    an arbitrary wide regularity box is ordered.
+   The algebraic core is now proved as
+   `unitSquareInterval_width_le_two_mul`: every ordered rational interval in
+   `[0,1]` has a squared interval of width at most twice its width.  The
+   remaining regularity work is therefore only the clamping branch and its
+   finite input-stage bookkeeping.
    The final closure is named
    `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
    its validity, the FTC equivalence, and the endpoint value `1/4`, the
