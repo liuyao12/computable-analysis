@@ -24,6 +24,47 @@ def finiteSineSquarePrefixRaw : RealFunRaw :=
 def finiteSineSquarePrefixPrimitiveRaw : RealFunRaw :=
   FiniteSinePrefix.sineTaylorPrefixThreeSquarePrimitiveRaw
 
+/-! Tangent-chart endpoint algebra for the true squared-sine target.  With
+`u = tan(pi*x/2)`, the normalized density is
+`8*u^2/(1+u^2)^3`.  Its primitive splits into the existing arctangent kernel
+and an exact rational correction. -/
+
+def tangentSquareDensity (u : Rat) : Rat :=
+  (8 * u * u) / (1 + u * u) ^ 3
+
+def tangentSquareRationalPart (u : Rat) : Rat :=
+  -((2 * u) / (1 + u * u) ^ 2) + u / (1 + u * u)
+
+def tangentSquareRationalDerivative (u : Rat) : Rat :=
+  (-1 + 6 * u * u - u ^ 4) / (1 + u * u) ^ 3
+
+theorem tangentSquareDensity_decomposition (u : Rat) :
+    tangentSquareDensity u =
+      1 / (1 + u * u) + tangentSquareRationalDerivative u := by
+  unfold tangentSquareDensity tangentSquareRationalDerivative
+  have hden : 1 + u * u > 0 := by
+    have hsq : 0 <= u * u := by
+      exact rat_square_nonneg_basic u
+    grind
+  have hdenne : 1 + u * u ≠ 0 := Rat.ne_of_gt hden
+  rw [Rat.div_def, Rat.div_def]
+  have hpow : (1 + u * u) ^ 3 =
+      (1 + u * u) * (1 + u * u) * (1 + u * u) := by
+    simp [Rat.pow_succ]
+  rw [hpow]
+  have hcancel : (1 + u * u)⁻¹ * (1 + u * u) = 1 :=
+    Rat.inv_mul_cancel _ hdenne
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
+    Rat.sub_eq_add_neg]
+
+theorem tangentSquareRationalPart_zero :
+    tangentSquareRationalPart 0 = 0 := by
+  native_decide
+
+theorem tangentSquareRationalPart_one :
+    tangentSquareRationalPart 1 = 0 := by
+  native_decide
+
 theorem finiteSineSquarePrefix_effectiveFTC_equiv_endpoint :
     FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by

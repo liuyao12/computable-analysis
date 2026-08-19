@@ -274,7 +274,10 @@ from monomial brackets structurally.
    `rationalTangentSquareWitnessSearch_sound`, while
    `rationalTangentSquareWitnessSearch_complete_of_grid_candidate` closes
    the finite-list completeness step whenever a checked grid candidate is
-   supplied.
+   supplied.  The endpoint route is also now reduced algebraically by
+   `tangentSquareDensity_decomposition`: the tangent-chart density splits
+   into the existing arctangent kernel plus the rational correction
+   `tangentSquareRationalPart`, whose values at `0` and `1` are both zero.
 
 9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
    the existing coefficient-shift certificates for the concrete finite
