@@ -106,11 +106,13 @@ from monomial brackets structurally.
    `QInterval.scaleRat_differenceQuotient_of_pos`, and
    `QInterval.scaleRat_differenceQuotient_contains_of_near` in
    `Differential.lean`.
-   The next finite exponential obligations are therefore: prove a rational
-   cell-range certificate for `uniformExpRaw` (equivalently, a monotonicity or
-   endpoint-range lemma for the positive factorial evaluator), use that range
-   as the narrow derivative box on each partition cell, and verify the
-   resulting sum-width schedule.
+   The finite cell-range subgoal is now proved: nonnegative Taylor prefixes
+   are monotone via `integratedTaylorPrefix_mono_on_unit`, the exponential
+   specialization is `expTaylorPrefix_mono_on_unit`, and
+   `uniformExpBox_contains_cellRange` encloses every evaluator box on a
+   rational cell.  The next obligations are to use `uniformExpCellRange` as
+   the derivative box, verify its summed width schedule, and assemble the
+   selected-stage certificate.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

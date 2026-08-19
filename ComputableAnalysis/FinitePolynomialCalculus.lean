@@ -566,6 +566,48 @@ def integratedTaylorPrefix (coeffs : Nat -> Rat) : Nat -> Rat -> Rat
       integratedTaylorPrefix coeffs n x +
         coeffs n * (x ^ (n + 1) / ((n + 1 : Nat) : Rat))
 
+/-! Finite order facts for positive Taylor coefficients.  These are purely
+rational statements; they provide the range monotonicity needed to turn a
+finite factorial prefix into a derivative box on a rational cell. -/
+
+theorem integratedTaylorPrefix_mono_on_unit
+    (coeffs : Nat -> Rat) (hcoeff : forall n, 0 <= coeffs n)
+    (n : Nat) {x y : Rat}
+    (hx : 0 <= x) (hy : y <= 1) (hxy : x <= y) :
+    integratedTaylorPrefix coeffs n x <=
+      integratedTaylorPrefix coeffs n y := by
+  induction n with
+  | zero => simp [integratedTaylorPrefix]
+  | succ n ih =>
+      simp only [integratedTaylorPrefix]
+      have hpow : x ^ (n + 1) <= y ^ (n + 1) := by
+        have hpow_all : ∀ m : Nat, x ^ m <= y ^ m := by
+          intro m
+          induction m with
+          | zero => simp
+          | succ m ihm =>
+              have hleft : x ^ m * x <= y ^ m * x :=
+                Rat.mul_le_mul_of_nonneg_right ihm hx
+              have hright : y ^ m * x <= y ^ m * y :=
+                Rat.mul_le_mul_of_nonneg_left hxy (Rat.pow_nonneg (by
+                  exact Rat.le_trans hx hxy))
+              calc
+                x ^ (m + 1) = x ^ m * x := by rw [Rat.pow_succ]
+                _ <= y ^ m * x := hleft
+                _ <= y ^ m * y := hright
+                _ = y ^ (m + 1) := by rw [Rat.pow_succ]
+        exact hpow_all (n + 1)
+      have hterm :
+          coeffs n * (x ^ (n + 1) / ((n + 1 : Nat) : Rat)) <=
+            coeffs n * (y ^ (n + 1) / ((n + 1 : Nat) : Rat)) := by
+        have hden : 0 <= 1 / ((n + 1 : Nat) : Rat) := by
+          exact Rat.le_of_lt (one_div_nat_pos (Nat.succ_pos n))
+        rw [Rat.div_def, Rat.div_def]
+        have hmul := Rat.mul_le_mul_of_nonneg_left hpow (hcoeff n)
+        have hscaled := Rat.mul_le_mul_of_nonneg_right hmul hden
+        simpa [Rat.div_def, Rat.mul_assoc, Rat.mul_comm] using hscaled
+      exact rat_add_le_add ih hterm
+
 /-- The finite endpoint contribution of the next integrated Taylor monomial.
 
 This is the exact rational FTC recurrence for a finite polynomial primitive:
@@ -848,6 +890,20 @@ def taylorPrefixAt_hasDerivativeOnInterval
 /-- The ordinary finite factorial-series prefix for exponential. -/
 def expTaylorPrefix (n : Nat) (x : Rat) : Rat :=
   1 + integratedTaylorPrefix FormalPowerSeries.expCoeff n x
+
+theorem expTaylorPrefix_mono_on_unit
+    (n : Nat) {x y : Rat}
+    (hx : 0 <= x) (hy : y <= 1) (hxy : x <= y) :
+    expTaylorPrefix n x <= expTaylorPrefix n y := by
+  have hcoeff : forall k, 0 <= FormalPowerSeries.expCoeff k := by
+    intro k
+    unfold FormalPowerSeries.expCoeff
+    rw [Rat.div_def, Rat.one_mul]
+    exact Rat.le_of_lt ((Rat.inv_pos).2
+      (RationalMajorant.factorialRat_pos k))
+  unfold expTaylorPrefix
+  exact rat_add_le_add (by rfl) (integratedTaylorPrefix_mono_on_unit
+    FormalPowerSeries.expCoeff hcoeff n hx hy hxy)
 
 /-- The factorial-series prefix one degree lower, the derivative of
 `expTaylorPrefix n`. -/

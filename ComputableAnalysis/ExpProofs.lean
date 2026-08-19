@@ -3028,9 +3028,54 @@ def uniformExpTailRadius (n : Nat) : Rat :=
 def uniformExpCenter (x : Rat) (n : Nat) : Rat :=
   powerSeriesCenterAtTerms x (uniformExpTailTerms n)
 
+theorem uniformExpCenter_mono_on_unit
+    (n : Nat) {x y : Rat}
+    (hx : 0 <= x) (hy : y <= 1) (hxy : x <= y) :
+    uniformExpCenter x n <= uniformExpCenter y n := by
+  have hterms : uniformExpTailTerms n =
+      (uniformExpTailTerms n - 1) + 1 := by
+    have hstart : 1 <= uniformExpTailStart := by native_decide
+    unfold uniformExpTailTerms
+    omega
+  have hback : uniformExpTailTerms n - 1 + 1 - 1 =
+      uniformExpTailTerms n - 1 := by omega
+  have hcenter_x :
+      powerSeriesCenterAtTerms x (uniformExpTailTerms n) =
+        FinitePolynomial.expTaylorPrefix
+          (uniformExpTailTerms n - 1) x := by
+    rw [hterms, powerSeriesCenterAtTerms_eq_expTaylorPrefix, hback]
+  have hcenter_y :
+      powerSeriesCenterAtTerms y (uniformExpTailTerms n) =
+        FinitePolynomial.expTaylorPrefix
+          (uniformExpTailTerms n - 1) y := by
+    rw [hterms, powerSeriesCenterAtTerms_eq_expTaylorPrefix, hback]
+  change powerSeriesCenterAtTerms x (uniformExpTailTerms n) <=
+    powerSeriesCenterAtTerms y (uniformExpTailTerms n)
+  rw [hcenter_x, hcenter_y]
+  exact FinitePolynomial.expTaylorPrefix_mono_on_unit
+    (uniformExpTailTerms n - 1) hx hy hxy
+
 /-- A symmetric rational box around the common finite exponential prefix. -/
 def uniformExpBox (x : Rat) (n : Nat) : QInterval :=
   intervalAround (uniformExpCenter x n) (uniformExpTailRadius n)
+
+def uniformExpCellRange (a b : Rat) (n : Nat) : QInterval :=
+  { lo := uniformExpCenter a n - uniformExpTailRadius n,
+    hi := uniformExpCenter b n + uniformExpTailRadius n }
+
+theorem uniformExpBox_contains_cellRange
+    (n : Nat) {a b x : Rat}
+    (ha : 0 <= a) (hb : b <= 1)
+    (hax : a <= x) (hxb : x <= b) :
+    (uniformExpCellRange a b n).ContainsInterval
+      (uniformExpBox x n) := by
+  have hleft := uniformExpCenter_mono_on_unit n ha (by
+    exact Rat.le_trans hxb hb) hax
+  have hright := uniformExpCenter_mono_on_unit n (by
+    exact Rat.le_trans ha hax) hb hxb
+  unfold uniformExpCellRange uniformExpBox intervalAround
+    QInterval.ContainsInterval
+  constructor <;> grind
 
 private theorem uniform_exp_tail_start (n : Nat) :
     (2 : Rat) <= (((uniformExpTailTerms n + 1 : Nat) : Rat) / 2) := by
