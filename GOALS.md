@@ -139,6 +139,14 @@ from monomial brackets structurally.
    `uniformExpCell_endpoint_contained_of_step`: for a positive cell and an
    admissible finite step, the existing step-aware derivative certificate
    yields the required expanded, scaled endpoint interval.
+   The common-stage schedule is now explicit: `uniformExpFTCIndex` uses the
+   denominator of `eps/5`, while `uniformExpFTCPieces` multiplies that index
+   by both `200` and the derivative step precision.  The mesh lemmas
+   `uniformExpFTCPieces_mesh_le` and `uniformExpFTCPieces_step_le` establish
+   the two required small-step inequalities.  `uniformExpFTCStage` selects
+   the resulting common quotient stage, and
+   `uniformExpFTC_endpoint_width_le` controls the global endpoint box.  What
+   remains is only the final dependent-record assembly, using these fields.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
