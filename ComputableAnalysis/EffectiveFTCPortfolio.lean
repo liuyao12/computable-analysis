@@ -672,6 +672,39 @@ theorem NestedRadicalSinPiSquareValueSubgoal.value
   exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
     H.commonWitness.to_equiv H.tangentAnchorValue.value
 
+/- The specialized construction boundary for the squared nested-radical
+   evaluator.  Once these fields are supplied, the generic equal-plan
+   interval-sum theorem transports the public `sin²` integral to the
+   evaluator's certified integral. -/
+structure NestedRadicalSquareIntegralConstructionSubgoal
+    (S : SinPiIntegral.ArctanSinPiConstruction) where
+  publicConstruction : Integral.Construction
+    (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
+  evaluator : RealFunRaw
+  integral : Integral.Construction evaluator 0 ((1 : Rat) / 2)
+  same_plan : publicConstruction.plan = integral.plan
+  sample_overlap : forall n k,
+    k < (publicConstruction.plan n).subdivisions ->
+    QInterval.Overlaps
+      ((SinPiIntegral.sinPiSquareOnHalf S).compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (publicConstruction.plan n).subdivisions k)
+        (publicConstruction.plan n).evalPrecision)
+      (evaluator.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (publicConstruction.plan n).subdivisions k)
+        (publicConstruction.plan n).evalPrecision)
+
+theorem NestedRadicalSquareIntegralConstructionSubgoal.public_equiv_evaluator
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S) :
+    (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
+      H.publicConstruction).Equiv
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral) := by
+  exact Integral.integral_equiv_of_plan_and_sample_overlaps
+    (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
+    H.publicConstruction H.integral H.same_plan H.sample_overlap
+
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   square_value := Integral.exactRat_square_integral_raw_equiv_one_third
   cube_value := Integral.exactRat_cube_integral_raw_equiv_one_fourth
