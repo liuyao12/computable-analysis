@@ -78,6 +78,8 @@ That bridge is now represented by the checked
    The separate algorithm-compatibility obligation is represented by
    `TangentSquareFTCIntegralCompatibilitySubgoal`: stagewise overlap between
    the effective FTC bounded-sum raw and the independent dyadic anchor.
+   Its concrete form is `TangentSquareFTCIntegralCommonWitness`, four rational
+   inequalities per stage that produce this overlap automatically.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

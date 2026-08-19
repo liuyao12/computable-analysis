@@ -151,6 +151,32 @@ structure TangentSquareFTCIntegralCompatibilitySubgoal where
       (SinPiIntegral.tangentSquareEffectiveIntegralRaw.compute n)
       (SinPiIntegral.tangentSquareIntegral.compute n)
 
+structure TangentSquareFTCIntegralCommonWitness where
+  witness : Nat -> Rat
+  effective_lo_le :
+    forall n,
+      (SinPiIntegral.tangentSquareEffectiveIntegralRaw.compute n).lo <= witness n
+  witness_le_effective_hi :
+    forall n,
+      witness n <= (SinPiIntegral.tangentSquareEffectiveIntegralRaw.compute n).hi
+  anchor_lo_le :
+    forall n,
+      (SinPiIntegral.tangentSquareIntegral.compute n).lo <= witness n
+  witness_le_anchor_hi :
+    forall n,
+      witness n <= (SinPiIntegral.tangentSquareIntegral.compute n).hi
+
+theorem TangentSquareFTCIntegralCommonWitness.to_compatibility
+    (H : TangentSquareFTCIntegralCommonWitness) :
+    TangentSquareFTCIntegralCompatibilitySubgoal := by
+  exact {
+    stage_overlap := fun n => by
+      unfold QInterval.Overlaps
+      exact ⟨Rat.le_trans (H.effective_lo_le n)
+          (H.witness_le_anchor_hi n),
+        Rat.le_trans (H.anchor_lo_le n)
+          (H.witness_le_effective_hi n)⟩ }
+
 theorem TangentSquareFTCIntegralCompatibilitySubgoal.equivalent
     (H : TangentSquareFTCIntegralCompatibilitySubgoal) :
     SinPiIntegral.tangentSquareEffectiveIntegralRaw.Equiv
