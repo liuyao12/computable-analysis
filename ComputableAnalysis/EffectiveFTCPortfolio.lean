@@ -663,8 +663,15 @@ theorem tangentSquareIntegral_equiv_halfQuarterTurn_of_common_witness
         (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
     SinPiIntegral.tangentSquareIntegral.Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
-  exact (TangentSquareQuarterTurnValueSubgoal.of_common_witness
-    effective_integral_valid endpoint_valid common endpoint_equiv_quarter).value
+  let H := TangentSquareQuarterTurnValueSubgoal.of_common_witness
+    effective_integral_valid endpoint_valid common endpoint_equiv_quarter
+  have hanchor_endpoint := RealRaw.equiv_trans
+    H.tangent_integral_valid H.effective_integral_valid H.endpoint_valid
+    H.tangent_equiv_effective
+    SinPiIntegral.tangentSquareEffectiveIntegralRaw_equiv_endpoint
+  exact RealRaw.equiv_trans
+    H.tangent_integral_valid H.endpoint_valid H.quarter_valid
+    hanchor_endpoint H.endpoint_equiv_quarter
 
 theorem TangentSquareQuarterTurnValueSubgoal.effective_equiv_endpoint
     (H : TangentSquareQuarterTurnValueSubgoal) :
