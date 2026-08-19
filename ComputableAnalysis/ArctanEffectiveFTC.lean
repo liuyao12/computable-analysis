@@ -15,6 +15,17 @@ namespace ComputableAnalysis
 
 namespace Integral
 
+/-- An overlap can be converted into containment after paying the width of
+the second interval.  This is the finite interval bridge needed when a
+geometric transport theorem provides overlap, while the effective FTC local
+certificate asks for containment. -/
+theorem overlaps_implies_contains_width_padding
+    {I A B : QInterval}
+    (hIA : I.ContainsInterval A) (hAB : A.Overlaps B) :
+    ({ lo := I.lo - B.width, hi := I.hi + B.width } : QInterval).ContainsInterval B := by
+  unfold QInterval.ContainsInterval QInterval.Overlaps QInterval.width at *
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 def arctanPrimitiveRaw : RealFunRaw where
   domain := inDomainInterval 0 1
   compute := fun x n => (ArctanGeometry.arctanIntegralRectangleRaw x).compute n
