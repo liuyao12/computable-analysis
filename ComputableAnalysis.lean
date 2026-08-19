@@ -80,6 +80,7 @@ import ComputableAnalysis.IntegralIdentities
 import ComputableAnalysis.SinPiIntegral
 import ComputableAnalysis.TangentPullbackEffectiveFTC
 import ComputableAnalysis.SinPiSquareFTC
+import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.IntegrationByPartsPi
 import ComputableAnalysis.Logarithm
 import ComputableAnalysis.LogarithmicPi
