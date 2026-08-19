@@ -62,12 +62,13 @@ theorem piCircleArea_compute_lo_nonneg (n : Nat) :
     0 <= (piCircleArea.compute n).lo := by
   rw [← ArctanGeometry.four_arctanGeom_one_compute_eq_piCircleArea_compute n]
   change 0 <=
-    (RealRaw.scaleRat (4 : Rat)
-      (ArctanGeometry.arctanGeom (1 : Rat))).compute n |>.lo
+    ((RealRaw.scaleRat (4 : Rat)
+      (ArctanGeometry.arctanGeom (1 : Rat))).compute n).lo
   unfold RealRaw.scaleRat RealRaw.scaleRatCompute
   simp only [if_pos (by native_decide : (0 : Rat) <= 4)]
   rw [ArctanGeometry.arctanGeom_one_compute_eq n]
   unfold ArctanGeometry.positiveLoopComputeAtStage
+  change 0 <= 4 * (ArctanGeometry.arctanAreaLoopState 1 n).lo
   rw [ArctanGeometry.arctanAreaLoopState_lo_eq_geometricLowerSum]
   exact Rat.mul_nonneg (by native_decide)
     (ArctanGeometry.geometricLowerSum_nonneg _
