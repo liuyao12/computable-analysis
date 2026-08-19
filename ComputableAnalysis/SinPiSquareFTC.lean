@@ -241,6 +241,46 @@ theorem rationalSquareInterval_mul_self_eq
   unfold rationalSquareInterval
   exact QBox.mulRealInterval_self_of_nonneg hI.1 horder
 
+theorem sinPiSquareOnHalf_compute_of_mem
+    (S : ArctanSinPiConstruction) {x : Rat}
+    (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    (sinPiSquareOnHalf S).compute x n =
+      QBox.mulRealInterval
+        ((sinPiRawOfArctan S.inverse x hx).compute n).lo
+        ((sinPiRawOfArctan S.inverse x hx).compute n).hi
+        ((sinPiRawOfArctan S.inverse x hx).compute n).lo
+        ((sinPiRawOfArctan S.inverse x hx).compute n).hi := by
+  change QBox.mulRealInterval
+      ((sinPiOnHalfRaw S).compute x n).lo
+      ((sinPiOnHalfRaw S).compute x n).hi
+      ((sinPiOnHalfRaw S).compute x n).lo
+      ((sinPiOnHalfRaw S).compute x n).hi = _
+  rw [show (sinPiOnHalfRaw S).compute x n =
+      (sinPiRawOfArctan S.inverse x hx).compute n by
+        simp [sinPiOnHalfRaw, hx]]
+
+theorem sinPiSquare_sample_overlap_of_sine_and_table_overlap
+    (S : ArctanSinPiConstruction) {x : Rat}
+    (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat)
+    {T : QInterval}
+    (hT : subintervalOf T 0 1)
+    (hsample : QInterval.Overlaps
+      ((sinPiRawOfArctan S.inverse x hx).compute n) T) :
+    QInterval.Overlaps
+      ((sinPiSquareOnHalf S).compute x n)
+      (rationalSquareInterval T) := by
+  have hS : subintervalOf
+      ((sinPiRawOfArctan S.inverse x hx).compute n) 0 1 := by
+    have hb := S.sinPiRawOfArctan_bounds hx n
+    have hv := S.sin_valid x hx
+    have ho := RealRaw.interval_order_of_valid
+      (x := (sinPiRawOfArctan S.inverse x hx)) hv n
+    exact ⟨hb.1, ho, hb.2⟩
+  rw [sinPiSquareOnHalf_compute_of_mem S hx n,
+    rationalSquareInterval_mul_self_eq hS]
+  exact rationalSquareInterval_overlap_of_interval_overlap
+    hS hT hsample
+
 theorem square_sample_overlap_of_sine_sample_overlap
     {I J : QInterval}
     (hI : subintervalOf I 0 1)

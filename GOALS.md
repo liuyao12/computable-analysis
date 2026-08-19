@@ -333,6 +333,13 @@ from monomial brackets structurally.
    nested-radical sine sample-overlap certificates through this lemma and then
    construct the corresponding squared-integrand integral certificate.
 
+   That evaluator-specific bridge is now present as
+   `sinPiSquare_sample_overlap_of_sine_and_table_overlap`: it consumes the
+   existing sine sample overlap and `sinPiRawOfArctan_bounds`, constructs the
+   missing interval ordering, and returns overlap with the squared nested-
+   radical table.  The remaining task is the integral-construction field for
+   the squared evaluator and its endpoint/primitive certificate.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but
