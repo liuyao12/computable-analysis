@@ -23,6 +23,16 @@ scaled enclosure contains the endpoint difference on each rational cell,
 prove the global width tends to zero, and invoke
 `effectiveDerivativeBoundFTC`.
 
+There is one separate representation obligation whenever the FTC certificate
+chooses endpoint stages independently of the public raw evaluator: prove an
+`EndpointScheduleAgreement` (validity plus equivalence to the canonical
+endpoint-difference raw).  Endpoint equivalence alone is insufficient, since
+an arbitrary stage selector need not preserve the nested-interval invariant.
+The reusable equivalence half is
+`DerivativeBoundFTC.endpointRaw_equiv_endpointDifference` in `Calculus.lean`;
+each concrete certificate must still discharge its scheduled-endpoint validity
+or use a stabilized raw evaluator.
+
 ### Function portfolio and execution order
 
 The project should grow by adding concrete functions, not by introducing an

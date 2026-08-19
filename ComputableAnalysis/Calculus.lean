@@ -3244,6 +3244,48 @@ theorem equiv_endpoint
 
 end DerivativeBoundFTC
 
+/-! A scheduled endpoint computation represents the same raw endpoint as the
+canonical endpoint-difference computation.  The proof only uses nesting of
+the two endpoint evaluators; no monotonicity of the schedule is required. -/
+theorem DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
+    {F dF : RealFunRaw} {a b : Rat}
+    (h : DerivativeBoundFTC F dF a b)
+    (hF : F.Valid)
+    (ha : F.domain a) (hb : F.domain b)
+    (hendpoint : RealRaw.ValidCompute (endpointDifferenceCompute F a b)) :
+    h.endpointRaw.Equiv (endpointDifferenceRaw F a b hendpoint) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  let s := h.chooseEndpointPrecision (precisionAtStage n)
+  apply (RealRaw.compareAt_overlap_iff h.endpointRaw
+    (endpointDifferenceRaw F a b hendpoint) n n).2
+  change QInterval.Overlaps
+    (endpointDifferenceInterval F a b s)
+    (endpointDifferenceInterval F a b n)
+  unfold endpointDifferenceInterval QInterval.Overlaps
+  have hA := hF a ha
+  have hB := hF b hb
+  by_cases hsn : s <= n
+  · have hAs := hA.2.1 s n hsn
+    have hBs := hB.2.1 s n hsn
+    change (F.compute a s).lo <= (F.compute a n).lo /\
+      (F.compute a n).lo <= (F.compute a n).hi /\
+      (F.compute a n).hi <= (F.compute a s).hi at hAs
+    change (F.compute b s).lo <= (F.compute b n).lo /\
+      (F.compute b n).lo <= (F.compute b n).hi /\
+      (F.compute b n).hi <= (F.compute b s).hi at hBs
+    grind
+  · have hns : n <= s := by omega
+    have hAn := hA.2.1 n s hns
+    have hBn := hB.2.1 n s hns
+    change (F.compute a n).lo <= (F.compute a s).lo /\
+      (F.compute a s).lo <= (F.compute a s).hi /\
+      (F.compute a s).hi <= (F.compute a n).hi at hAn
+    change (F.compute b n).lo <= (F.compute b s).lo /\
+      (F.compute b s).lo <= (F.compute b s).hi /\
+      (F.compute b s).hi <= (F.compute b n).hi at hBn
+    grind
+
 /-- Top-level derivative-bound FTC bridge.
 
 This is the public theorem name for the finite cell-bound route: once the
