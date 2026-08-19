@@ -89,7 +89,10 @@ That bridge is now represented by the checked
    numbers.  The first two nontrivial finite left sums are checked directly by
    `tangentSquareLeftSum_stage_one_quarter_certificate` and
    `tangentSquareLeftSum_stage_two_quarter_certificate`; these are regression
-   anchors for the eventual uniform estimate.
+   anchors for the eventual uniform estimate.  The reusable finite fold
+   `rat_list_sum_pair_error` now assembles cellwise endpoint/left-sample
+   errors into a global rational bound, leaving only the concrete tangent
+   square cell inequalities to be supplied.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

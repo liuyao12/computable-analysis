@@ -20,6 +20,28 @@ its unfinished endpoint bridge is tracked in `SinPiSquareFTC.lean`.
 
 namespace ComputableAnalysis
 
+def ratNatListSum (f : Nat -> Rat) : List Nat -> Rat
+  | [] => 0
+  | k :: xs => f k + ratNatListSum f xs
+
+theorem rat_list_sum_pair_error
+    (xs : List Nat) (left endpoint width : Nat -> Rat)
+    (hwidth : forall k, k ∈ xs ->
+      endpoint k - width k <= left k /\
+      left k <= endpoint k + width k) :
+    ratNatListSum endpoint xs - ratNatListSum width xs <= ratNatListSum left xs /\
+      ratNatListSum left xs <= ratNatListSum endpoint xs + ratNatListSum width xs := by
+  induction xs with
+  | nil =>
+      simp [ratNatListSum]
+      native_decide
+  | cons k xs ih =>
+      have hk := hwidth k (by simp)
+      have hrest := ih (fun j hj => hwidth j (by simp [hj]))
+      simp only [ratNatListSum]
+      constructor <;> grind [Rat.sub_eq_add_neg, Rat.add_assoc,
+        Rat.add_comm, Rat.add_left_comm]
+
 theorem squareEffectiveFTC_endpointRaw_valid :
     (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
   have heq :
