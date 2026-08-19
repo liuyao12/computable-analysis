@@ -495,6 +495,11 @@ from monomial brackets structurally.
    The remaining value step is therefore explicitly the reciprocal-`pi`
    scaling and its compatibility with the square-integral anchor.
 
+   The primitive algebra has also been checked for consistency: the rational
+   correction in `tangentSquarePrimitiveOnUnit` is now exactly
+   `tangentSquareRationalPart`, whose rational derivative is the correction in
+   `tangentSquareDensity_decomposition` (there is no spurious factor of two).
+
    The first of these is now an explicit proposition consumed by
    `dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap`
    and

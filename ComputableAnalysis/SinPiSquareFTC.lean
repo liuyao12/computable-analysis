@@ -303,7 +303,7 @@ the rational correction from the decomposition above.  The correction is
 kept as an exact rational function, so this is a genuine computable function
 object rather than only a symbolic antiderivative. -/
 def tangentSquareRationalPrimitive (u : Rat) : Rat :=
-  2 * tangentSquareRationalPart u
+  tangentSquareRationalPart u
 
 def tangentSquarePrimitiveOnUnit : RealFunRaw :=
   RealFunRaw.add IntegralIdentities.arctanGeomOnUnit.toRealFunRaw
