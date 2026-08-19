@@ -266,6 +266,10 @@ from monomial brackets structurally.
    sine monotonicity, interval regularity of the square evaluator, and a
    finite proof-relevant Darboux schedule.  Thus the monotone route has a
    checkable construction before its endpoint-value theorem is supplied.
+   The final closure is named
+   `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
+   its validity, the FTC equivalence, and the endpoint value `1/4`, the
+   theorem gives the desired integral value using only `RealRaw.Equiv`.
    It also exposes the completed finite predecessor through
    `finiteSineSquarePrefix_effectiveFTC_equiv_value`, whose value is
    `6389/161280`.  The remaining transport subgoal is the same stagewise

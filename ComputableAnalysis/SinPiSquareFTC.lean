@@ -1055,6 +1055,28 @@ theorem sinPiSquareMonotoneIntegral_valid
     (sinPiSquareMonotoneIntegral S hsine hregular hinterval schedule).Valid := by
   exact Integral.monotoneDarbouxScheduleIntegralFor_valid schedule
 
+theorem sinPiSquareMonotoneIntegral_equiv_value
+    (S : ArctanSinPiConstruction)
+    (hsine : NondecreasingOnInterval S.onHalf)
+    (hregular : IntervalRegularOn (sinPiSquareOnHalfFunctionOnInterval S))
+    (hinterval :
+      (sinPiSquareOnHalfFunctionOnInterval S).lower <=
+        (sinPiSquareOnHalfFunctionOnInterval S).upper)
+    (schedule : Integral.MonotoneDarbouxSchedule
+      (sinPiSquareOnHalfFunctionOnInterval S) hregular
+      (sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing S hsine)
+      hinterval)
+    (endpoint : RealRaw) (hendpoint : endpoint.Valid)
+    (hFTC :
+      (sinPiSquareMonotoneIntegral S hsine hregular hinterval schedule).Equiv
+        endpoint)
+    (hvalue : endpoint.Equiv (RealRaw.ofRat (1 / 4))) :
+    (sinPiSquareMonotoneIntegral S hsine hregular hinterval schedule).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact RealRaw.equiv_trans
+    (sinPiSquareMonotoneIntegral_valid S hsine hregular hinterval schedule)
+    hendpoint (RealRaw.ofRat_valid _) hFTC hvalue
+
 /-!
 ## The effective-FTC acceptance interface
 
