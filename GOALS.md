@@ -158,6 +158,13 @@ from monomial brackets structurally.
    `uniformExpFTCPartition_cell_width` and
    `uniformExpFTCPartition_cell_strict`, isolating the only endpoint facts
    needed by those two rewrites.
+   The indexed exponential bound is now exposed as
+   `uniformExpFTCIndexedBound`; its pointwise containment theorem and its
+   scaled endpoint theorem are independently checked as
+   `uniformExpFTCIndexedBound_contains` and
+   `uniformExpFTCIndexedBound_local_endpoint_contained`.  The remaining
+   width theorem will be stated over explicit `leftPoint` endpoints, avoiding
+   a dependent `cell` projection in the theorem statement.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

@@ -5272,6 +5272,39 @@ theorem uniformExpFTCPartition_cell_strict (eps : QPos) (k : Nat)
   simpa [RationalSubinterval.width] using
     uniformExpFTCPartition_cell_mesh_pos eps k hk
 
+def uniformExpFTCIndexedBound (eps : QPos) (k : Nat) : QInterval :=
+  QInterval.expand
+    (uniformExpCellRange
+      ((uniformExpFTCPartition eps).point k)
+      ((uniformExpFTCPartition eps).point (k + 1))
+      (uniformExpFTCStage eps))
+    (2 * (precisionAtStage (uniformExpFTCIndex eps)).val)
+
+attribute [irreducible] uniformExpFTCIndexedBound
+
+theorem uniformExpFTCIndexedBound_contains
+    (eps : QPos) (k : Nat) (hk : k < (uniformExpFTCPartition eps).pieces)
+    (x : Rat) (hx : ((uniformExpFTCPartition eps).cell k hk).contains x) :
+    QInterval.ContainsInterval (uniformExpFTCIndexedBound eps k)
+      (uniformExpOnUnitRealFunRaw.compute x (uniformExpFTCStage eps)) := by
+  let C := (uniformExpFTCPartition eps).cell k hk
+  change C.contains x at hx
+  have hrange := uniformExpOnUnitRealFunRaw_compute_contains_cellRange
+    (n := uniformExpFTCStage eps) (a := C.lower) (b := C.upper) (x := x)
+    C.lower_mem C.upper_mem hx.1 hx.2
+  unfold uniformExpFTCIndexedBound
+  change QInterval.ContainsInterval
+    (QInterval.expand (uniformExpCellRange C.lower C.upper
+      (uniformExpFTCStage eps))
+      (2 * (precisionAtStage (uniformExpFTCIndex eps)).val))
+    (uniformExpOnUnitRealFunRaw.compute x (uniformExpFTCStage eps))
+  unfold QInterval.ContainsInterval QInterval.expand
+  rcases hrange with ⟨hlo, hhi⟩
+  have hp := (precisionAtStage (uniformExpFTCIndex eps)).property
+  have hr : 0 <= 2 * (precisionAtStage (uniformExpFTCIndex eps)).val :=
+    Rat.mul_nonneg (by native_decide) (Rat.le_of_lt hp)
+  exact ⟨by grind, by grind⟩
+
 /-- On the unit interval the common-prefix representation and the selected
 adaptive representation are pointwise equivalent. -/
 theorem uniformExpOnUnit_equivalent_expPowerSeriesOnUnit :
@@ -5449,6 +5482,57 @@ theorem uniformExpCell_endpoint_contained_of_step
     (endpointDifferenceInterval uniformExpOnUnitRealFunRaw a b stage)
   simpa [h, endpointDifferenceInterval, uniformExpOnUnitRealFunRaw,
     uniformExpRaw_compute, QInterval.subInterval] using hcombined
+
+theorem uniformExpFTCIndexedBound_local_endpoint_contained
+    (eps : QPos) (k : Nat)
+    (hk : k < (uniformExpFTCPartition eps).pieces) :
+    QInterval.ContainsInterval
+      (((uniformExpFTCPartition eps).cell k hk).scaleBound
+        (uniformExpFTCIndexedBound eps k))
+      (endpointDifferenceInterval uniformExpOnUnitRealFunRaw
+        ((uniformExpFTCPartition eps).cell k hk).lower
+        ((uniformExpFTCPartition eps).cell k hk).upper
+        (uniformExpFTCStage eps)) := by
+  let C := (uniformExpFTCPartition eps).cell k hk
+  have hpos : 0 < C.width := by
+    dsimp [C]
+    exact uniformExpFTCPartition_cell_mesh_pos eps k hk
+  have hab : C.lower < C.upper := by
+    apply (Rat.lt_iff_sub_pos _ _).mpr
+    simpa [RationalSubinterval.width] using hpos
+  have htransport := uniformExpCell_endpoint_contained_of_step
+    (n := uniformExpFTCIndex eps) C.lower_mem C.upper_mem hab
+    (by
+      rw [qabs_eq_self_of_nonneg
+        (Rat.le_of_lt ((Rat.lt_iff_sub_pos _ _).mp hab))]
+      change C.width <= 1 /
+        ((uniformExpOnUnit_hasDerivativeOnInterval.stepPrecision
+          (uniformExpFTCIndex eps) : Nat) : Rat)
+      rw [show C.width = mesh 0 1 (uniformExpFTCPieces eps) by
+        dsimp [C]
+        exact uniformExpFTCPartition_cell_width eps k hk]
+      exact uniformExpFTCPieces_step_le eps)
+  have hstage :
+      uniformExpSelfDerivativeEvalPrecision (C.upper - C.lower)
+          (uniformExpFTCIndex eps) = uniformExpFTCStage eps := by
+    have heq : C.upper - C.lower =
+        mesh 0 1 (uniformExpFTCPieces eps) := by
+      dsimp [C, RationalSubinterval.width]
+      exact uniformExpFTCPartition_cell_width eps k hk
+    rw [heq]
+    rw [uniformExpSelfDerivativeEvalPrecision_eq_quotient]
+    rw [uniformExpFTCStage_eq_quotient eps]
+  unfold uniformExpFTCIndexedBound
+  change QInterval.ContainsInterval
+    (C.scaleBound
+      (QInterval.expand (uniformExpCellRange C.lower C.upper
+        (uniformExpFTCStage eps))
+        (2 * (precisionAtStage (uniformExpFTCIndex eps)).val)))
+    (endpointDifferenceInterval uniformExpOnUnitRealFunRaw
+      C.lower C.upper (uniformExpFTCStage eps))
+  unfold RationalSubinterval.scaleBound RationalSubinterval.width
+  rw [← hstage]
+  exact htransport
 
 /-- The common-prefix unit-interval evaluator has the exact exponential
 initial value at zero.  This makes its analytic derivative certificate a
