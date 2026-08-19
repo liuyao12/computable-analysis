@@ -862,6 +862,20 @@ theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_tangent_anchor
       (RealRaw.equiv_trans hevaluator hstable (RealRaw.ofRat_valid (1 / 4))
         htransport hvalue.value)
 
+theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_quarter_bounds
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    (htransport :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
+        (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+          SinPiIntegral.tangentSquareIntegral))
+    (hsquare : NestedRadicalSquareQuarterBoundsSubgoal)
+    (htangent : TangentSquareIntegralValueSubgoal) :
+    (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
+      H.publicConstruction).Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact H.value_of_tangent_anchor htransport
+    hsquare.toValueSubgoal htangent
+
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   square_value := Integral.exactRat_square_integral_raw_equiv_one_third
   cube_value := Integral.exactRat_cube_integral_raw_equiv_one_fourth
