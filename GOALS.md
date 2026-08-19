@@ -101,9 +101,12 @@ from monomial brackets structurally.
    neighboring-secant route (the derivative is increasing there).  Then prove
    the equal-dyadic integral equals the endpoint difference and identify that
    difference with `reciprocalPiRaw`.  The remaining concrete certificate is
-   `ArctanSinPiConstruction.TangentChartTransport`: prove its stagewise
-   overlap field against `tangentChartIntegral`, then invoke
-   `halfIntegral_equiv_reciprocalPi_of_tangentChart`.  The final target is
+   `DyadicNestedRadicalStieltjesCommonWitness`: provide one rational witness
+   at every stage that lies in both the nested-radical left-sum interval and
+   the `sinPiStieltjesIntegral` interval.  Its `to_overlap` theorem supplies
+   the stagewise transport, after which
+   `dyadicNestedRadicalIntegralRaw_stabilized_equiv_reciprocalPi_of_commonWitness`
+   closes the computable value theorem.  The final target is
    `computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC`, with the direct
    Riemann--Stieltjes proof retained as an independent comparison.
 
