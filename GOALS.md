@@ -254,7 +254,13 @@ from monomial brackets structurally.
    `SinPiSquareEffectiveFTCData` in `SinPiSquareFTC.lean`; it requires the
    primitive, local derivative-bound certificate, and validity of both raw
    outputs before the generic closure theorem can be invoked.  The same file
-   now exposes the completed finite predecessor through
+   now exposes the interval monotonicity bridge
+   `sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing`: any existing
+   nondecreasing sine evaluator on `[0,1/2]` yields a nondecreasing squared
+   evaluator, using only nonnegative rational interval boxes.  This opens a
+   monotone-Darboux subroute for `sin²` without changing the effective FTC
+   acceptance interface.
+   It also exposes the completed finite predecessor through
    `finiteSineSquarePrefix_effectiveFTC_equiv_value`, whose value is
    `6389/161280`.  The remaining transport subgoal is the same stagewise
    sine/cosine identity on each dyadic cell, followed by the rational

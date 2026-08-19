@@ -969,6 +969,61 @@ theorem sinPiSquareOnHalf_valid (S : ArctanSinPiConstruction) :
     · rename_i hfalse
       exact False.elim (hfalse hx)
 
+def sinPiSquareOnHalfFunctionOnInterval
+    (S : ArctanSinPiConstruction) : FunctionOnInterval where
+  raw := {
+    definedAt := fun x => 0 <= x /\ x <= (1 : Rat) / 2
+    compute := fun x _ => (sinPiSquareOnHalf S).compute x }
+  lower := 0
+  upper := (1 : Rat) / 2
+  defined_on := by
+    intro x hx
+    exact hx
+  valid_on := by
+    intro x hx
+    exact sinPiSquareOnHalf_valid S x ⟨hx, hx⟩
+
+/-! Monotonicity is inherited from the sine evaluator at the interval level.
+The hypothesis is intentionally the existing weak interval monotonicity
+(`lower` at the left sample is below `upper` at the right sample), which is
+exactly what the monotone Darboux interface asks for. -/
+
+theorem sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing
+    (S : ArctanSinPiConstruction)
+    (hsine : NondecreasingOnInterval S.onHalf) :
+    NondecreasingOnInterval (sinPiSquareOnHalfFunctionOnInterval S) := by
+  intro x y hx hy hxy n
+  have hsin := hsine x y hx hy hxy n
+  have hboundsx := S.sinPiRawOfArctan_bounds hx n
+  have hboundsy := S.sinPiRawOfArctan_bounds hy n
+  change ((sinPiSquareOnHalf S).compute x n).lo <=
+    ((sinPiSquareOnHalf S).compute y n).hi
+  rw [sinPiSquareOnHalf_compute_of_mem S hx n,
+    sinPiSquareOnHalf_compute_of_mem S hy n]
+  have horderx := RealRaw.interval_order_of_valid
+    { compute := (sinPiRawOfArctan S.inverse x hx).compute }
+    (S.sin_valid x hx) n
+  have hordery := RealRaw.interval_order_of_valid
+    { compute := (sinPiRawOfArctan S.inverse y hy).compute }
+    (S.sin_valid y hy) n
+  rw [QBox.mulRealInterval_self_of_nonneg hboundsx.1 horderx,
+    QBox.mulRealInterval_self_of_nonneg hboundsy.1 hordery]
+  change
+    ((sinPiRawOfArctan S.inverse x hx).compute n).lo *
+        ((sinPiRawOfArctan S.inverse x hx).compute n).lo <=
+      ((sinPiRawOfArctan S.inverse y hy).compute n).hi *
+        ((sinPiRawOfArctan S.inverse y hy).compute n).hi
+  have hxy' :
+      ((sinPiRawOfArctan S.inverse x hx).compute n).lo <=
+        ((sinPiRawOfArctan S.inverse y hy).compute n).hi := by
+    exact hsin
+  have hsq := Rat.mul_le_mul_of_nonneg_left hxy' hboundsx.1
+  have hyhi0 : 0 <=
+      ((sinPiRawOfArctan S.inverse y hy).compute n).hi :=
+    Rat.le_trans hboundsy.1 hordery
+  have hsq' := Rat.mul_le_mul_of_nonneg_right hxy' hyhi0
+  grind [Rat.pow_succ]
+
 /-!
 ## The effective-FTC acceptance interface
 
