@@ -625,6 +625,27 @@ structure TangentSquareQuarterTurnValueSubgoal where
     SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
 
+def TangentSquareQuarterTurnValueSubgoal.of_common_witness
+    (effective_integral_valid :
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
+    (endpoint_valid :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid)
+    (common : TangentSquareFTCIntegralCommonWitness)
+    (endpoint_equiv_quarter :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
+    TangentSquareQuarterTurnValueSubgoal := by
+  refine {
+    tangent_integral_valid := SinPiIntegral.tangentSquareIntegral_valid
+    effective_integral_valid := effective_integral_valid
+    endpoint_valid := endpoint_valid
+    quarter_valid := ?_
+    compatibility := common.to_compatibility
+    endpoint_equiv_quarter := endpoint_equiv_quarter }
+  change (RealRaw.scaleRat ((1 : Rat) / 4) piCircleArea).Valid
+  exact RealRaw.scaleRat_valid_of_nonneg (by native_decide)
+    CauchyPi.piCircleArea_valid
+
 theorem TangentSquareQuarterTurnValueSubgoal.tangent_equiv_effective
     (H : TangentSquareQuarterTurnValueSubgoal) :
     SinPiIntegral.tangentSquareIntegral.Equiv
