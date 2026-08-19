@@ -95,7 +95,9 @@ That bridge is now represented by the checked
    square cell inequalities to be supplied.  The first such local inequality
    is proved by `tangentSquareCellControl_left_rectangle_contained`: the
    tangent-square common derivative box contains the exact left-endpoint
-   density after cell-width scaling.
+   density after cell-width scaling.  The paired theorem
+   `tangentSquareCellControl_left_and_endpoint_share_bound` packages this
+   with the existing endpoint-difference enclosure for the same cell.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

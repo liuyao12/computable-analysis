@@ -67,6 +67,27 @@ theorem tangentSquareCellControl_left_rectangle_contained
   exact QInterval.scaleByRat_contains_of_nonneg
     (Rat.le_of_lt hC) hcontains
 
+theorem tangentSquareCellControl_left_and_endpoint_share_bound
+    (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
+    (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
+    (hN : 256 * (η.val.den + 1) <= N) :
+    let H := SinPiIntegral.tangentSquareCombinedDerivativeCellControl
+      C δ η N hC hη hN
+    (C.scaleBound (H.bound 0)).ContainsInterval
+        (C.scaleBound
+          ({ lo := SinPiIntegral.tangentSquareDensity C.lower,
+             hi := SinPiIntegral.tangentSquareDensity C.lower } : QInterval)) /\
+      (C.scaleBound (H.bound 0)).ContainsInterval
+        (endpointDifferenceInterval
+          (RealFunRaw.add Integral.arctanPrimitiveRaw
+            SinPiIntegral.tangentSquareCorrectionRaw)
+          C.lower C.upper N) := by
+  dsimp
+  constructor
+  · exact tangentSquareCellControl_left_rectangle_contained C δ η N hC hη hN
+  · exact (SinPiIntegral.tangentSquareCombinedDerivativeCellControl
+      C δ η N hC hη hN).endpoint_difference_contained 0
+
 theorem squareEffectiveFTC_endpointRaw_valid :
     (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
   have heq :
