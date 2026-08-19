@@ -1113,6 +1113,52 @@ theorem unitSquareInterval_width_le_two_mul
   have hmul := Rat.mul_le_mul_of_nonneg_left hsum hgap
   grind [Rat.mul_comm]
 
+theorem unitClampSquare_width_le_two_mul_of_contains
+    {E K : QInterval}
+    (hEorder : E.lo <= E.hi)
+    (hK : subintervalOf K 0 1)
+    (hcontains : E.ContainsInterval K) :
+    (QBox.mulRealInterval (unitClampInterval E).lo
+      (unitClampInterval E).hi (unitClampInterval E).lo
+      (unitClampInterval E).hi).width <= 2 * E.width := by
+  have hJsub : subintervalOf (unitClampInterval E) 0 1 :=
+    unitClampInterval_subinterval_of_contains hEorder hK hcontains
+  have hsq := unitSquareInterval_width_le_two_mul hJsub
+  have hclamp := unitClampInterval_width_le (I := E)
+  have hJwidth : (unitClampInterval E).width <= E.width := hclamp
+  exact Rat.le_trans hsq
+    (Rat.mul_le_mul_of_nonneg_left hJwidth
+      (by native_decide : (0 : Rat) <= 2))
+
+theorem unitClampSquare_width_le_of_contains
+    {E K : QInterval} {n : Nat}
+    (hEorder : E.lo <= E.hi)
+    (hEwidth : E.width <= 1 / (((2 * n + 2 : Nat) : Nat) : Rat))
+    (hK : subintervalOf K 0 1)
+    (hcontains : E.ContainsInterval K) :
+    (QBox.mulRealInterval (unitClampInterval E).lo
+      (unitClampInterval E).hi (unitClampInterval E).lo
+      (unitClampInterval E).hi).width <=
+      1 / ((n + 1 : Nat) : Rat) := by
+  have htwo := unitClampSquare_width_le_two_mul_of_contains
+    hEorder hK hcontains
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hEwidth
+    (by native_decide : (0 : Rat) <= 2)
+  calc
+    (QBox.mulRealInterval (unitClampInterval E).lo
+        (unitClampInterval E).hi (unitClampInterval E).lo
+        (unitClampInterval E).hi).width <= 2 * E.width := htwo
+    _ <= 2 * (1 / (((2 * n + 2 : Nat) : Nat) : Rat)) := hscaled
+    _ = 1 / ((n + 1 : Nat) : Rat) := by
+      have hcast : (((2 * n + 2 : Nat) : Nat) : Rat) =
+          2 * ((n + 1 : Nat) : Rat) := by
+        rw [Rat.natCast_add, Rat.natCast_add, Rat.natCast_mul]
+        grind
+      rw [hcast, Rat.div_def, Rat.div_def]
+      have hne : ((n + 1 : Nat) : Rat) ≠ 0 := by
+        exact Rat.ne_of_gt ((Rat.natCast_pos).2 (by omega))
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
 def sinPiSquareClampedInterval
     (S : ArctanSinPiConstruction)
     (hsine : IntervalRegularOn S.onHalf)

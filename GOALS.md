@@ -296,6 +296,11 @@ from monomial brackets structurally.
    `sinPiSquareClampedInterval_of_large`.  The remaining certificate proof
    can therefore reason by an explicit finite case split rather than by an
    informal appeal to boundedness.
+   The quantitative clamping step is now reusable:
+   `unitClampSquare_width_le_two_mul_of_contains` transports the square-width
+   estimate through a certified point box, and
+   `unitClampSquare_width_le_of_contains` converts a sine enclosure of width
+   `1/(2*n+2)` into the required squared enclosure of width `1/(n+1)`.
    The final closure is named
    `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
    its validity, the FTC equivalence, and the endpoint value `1/4`, the
