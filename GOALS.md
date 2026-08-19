@@ -87,7 +87,14 @@ from monomial brackets structurally.
 5. **Convex exponential case.**  Use the computable exponential evaluator
    with `F' = F`, and prove the endpoint identity on a bounded rational
    interval.  This is the first non-polynomial test that requires a genuine
-   width schedule for interval multiplication and power-series tails.
+   width schedule for interval multiplication and power-series tails.  The
+   algorithmic derivative rung is already available as
+   `uniformExpOnUnit_hasDerivativeOnInterval` in `ExpProofs.lean`, together
+   with the exact initial value
+   `uniformExpOnUnit_zero_equiv_one`; the remaining FTC subgoal is to convert
+   that two-sided secant certificate into
+   `EffectiveDerivativeBoundFTC` local endpoint controls and then identify
+   the resulting endpoint difference with `exp(1) - 1`.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
