@@ -243,6 +243,64 @@ theorem arctanKernel_antitone_on_unit {a b x : Rat}
   · exact ArctanGeometry.integralKernel_antitone_nonneg hx0 hxb
   · exact ArctanGeometry.integralKernel_antitone_nonneg ha hx
 
+theorem arctanKernel_variation_le_step
+    {a x : Rat} (ha0 : 0 <= a) (hax : a <= x) (hx1 : x <= 1) :
+    1 / (1 + a * a) - 1 / (1 + x * x) <= x - a := by
+  let da : Rat := 1 + a * a
+  let dx : Rat := 1 + x * x
+  have hda : 0 < da := by
+    dsimp [da]
+    exact RationalCircle.Stage.one_add_square_pos a
+  have hdx : 0 < dx := by
+    dsimp [dx]
+    exact RationalCircle.Stage.one_add_square_pos x
+  have hprod : 0 < da * dx := Rat.mul_pos hda hdx
+  have hsum01 : a + x <= 1 + a * x := by
+    have hnonneg : 0 <= (1 - a) * (1 - x) := by
+      exact Rat.mul_nonneg (by grind) (by grind)
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  have hsquare := RationalCircle.Stage.ratSquare_nonneg (x - a)
+  have hden : 1 + a * x <= da * dx := by
+    change 1 + a * x <= (1 + a * a) * (1 + x * x)
+    have hcross : a * x <= (a * a + x * x) / 2 := by
+      rw [Rat.div_def]
+      have htwo : 0 < (2 : Rat) := by native_decide
+      apply Rat.le_of_mul_le_mul_right (c := (2 : Rat))
+      · grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm,
+          Rat.sub_eq_add_neg]
+      · exact htwo
+    have hsqsum : 0 <= a * a + x * x := by
+      exact Rat.add_nonneg (RationalCircle.Stage.ratSquare_nonneg a)
+        (RationalCircle.Stage.ratSquare_nonneg x)
+    have hcross' : a * x <= a * a + x * x := by
+      exact Rat.le_trans hcross (by
+        rw [Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm])
+    have hprodnonneg : 0 <= a * a * (x * x) := by
+      exact Rat.mul_nonneg (RationalCircle.Stage.ratSquare_nonneg a)
+        (RationalCircle.Stage.ratSquare_nonneg x)
+    grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  have hsumden : a + x <= da * dx := Rat.le_trans hsum01 hden
+  have hnum : (x - a) * (a + x) <= (x - a) * (da * dx) :=
+    Rat.mul_le_mul_of_nonneg_left hsumden (by grind)
+  have hformula :
+      1 / da - 1 / dx = ((x - a) * (a + x)) / (da * dx) := by
+    simp only [Rat.div_def, Rat.one_mul, Rat.inv_mul_rev]
+    have hcancelA : da * da⁻¹ = 1 := Rat.mul_inv_cancel da (Rat.ne_of_gt hda)
+    have hcancelX : dx * dx⁻¹ = 1 := Rat.mul_inv_cancel dx (Rat.ne_of_gt hdx)
+    dsimp [da, dx] at hcancelA hcancelX ⊢
+    grind [Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  rw [hformula, Rat.div_def]
+  calc
+    ((x - a) * (a + x)) * (da * dx)⁻¹ <=
+        ((x - a) * (da * dx)) * (da * dx)⁻¹ :=
+      Rat.mul_le_mul_of_nonneg_right hnum
+        (Rat.le_of_lt ((Rat.inv_pos).2 hprod))
+    _ = x - a := by
+      rw [Rat.mul_assoc, Rat.mul_inv_cancel _ (Rat.ne_of_gt hprod)]
+      grind
+
 def arctanKernelBound
     {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
   { lo := 1 / (1 + C.upper * C.upper),
