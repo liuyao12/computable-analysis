@@ -467,6 +467,40 @@ theorem arctanPaddedBound_scaled_width_le
     RationalCircle.Stage.ratSquare_nonneg C.width
   grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.mul_add]
 
+theorem arctanUniformPaddedSum_width_le
+    (M : Nat) (hM : 0 < M) (δ : Rat) (hδ : 0 <= δ) (N : Nat) :
+    ((RationalPartition.uniform 0 1 M hM (by native_decide)).boundIntegralSum
+      (fun k hk => arctanKernelPaddedBound
+        ((RationalPartition.uniform 0 1 M hM (by native_decide)).cell k hk)
+        δ N)).width <=
+      mesh 0 1 M + mesh 0 1 M * mesh 0 1 M + 2 * δ := by
+  have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+    M hM (by native_decide : (0 : Rat) <= 1)
+    (fun k hk => arctanKernelPaddedBound
+      ((RationalPartition.uniform 0 1 M hM (by native_decide)).cell k hk)
+      δ N)
+    (mesh 0 1 M + mesh 0 1 M * mesh 0 1 M + 2 * δ) (by
+      intro k hk
+      let C := (RationalPartition.uniform 0 1 M hM
+        (by native_decide : (0 : Rat) <= 1)).cell k hk
+      have hcell := RationalPartition.uniform_cell_width 0 1 M hM
+        (by native_decide : (0 : Rat) <= 1) k hk
+      change (arctanKernelPaddedBound C δ N).width <=
+        mesh 0 1 M + mesh 0 1 M * mesh 0 1 M + 2 * δ
+      unfold arctanKernelPaddedBound QInterval.width
+      have hsq : 0 <= C.width * C.width :=
+        RationalCircle.Stage.ratSquare_nonneg C.width
+      rw [hcell]
+      grind [Rat.sub_eq_add_neg, Rat.add_assoc]
+    )
+  have hzero : (1 : Rat) - 0 = 1 := by native_decide
+  rw [hzero] at hsum
+  have hone : (1 : Rat) *
+      (mesh 0 1 M + mesh 0 1 M * mesh 0 1 M + 2 * δ) =
+      mesh 0 1 M + mesh 0 1 M * mesh 0 1 M + 2 * δ := by grind
+  rw [hone] at hsum
+  exact hsum
+
 def arctanKernelDerivativeBound (eps : QPos) (k : Nat)
     (hk : k < (RationalPartition.uniform 0 1 (eps.val.den + 1)
       (by omega) (by native_decide)).pieces) :
