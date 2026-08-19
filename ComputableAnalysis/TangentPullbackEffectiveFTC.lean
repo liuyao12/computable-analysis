@@ -259,6 +259,34 @@ theorem tangentPullbackEndpoint_equiv_one :
   unfold QInterval.Overlaps endpointDifferenceInterval
   native_decide
 
+theorem tangentPullbackEffectiveFTC_equiv_one :
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat 1) := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    (RealRaw.ofRat 1) n n).2
+  have h := (RealRaw.compareAt_overlap_iff
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.endpointRaw n n).1
+      (tangentPullbackEffectiveFTC_equiv_endpoint n)
+  change QInterval.Overlaps
+    (tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw.compute n)
+    { lo := 1, hi := 1 }
+  have h' : QInterval.Overlaps
+      (tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw.compute n)
+      { lo := 1 - 0, hi := 1 - 0 } := by
+    simpa [DerivativeBoundFTC.endpointRaw, DerivativeBoundFTC.endpointCompute,
+      DerivativeBoundFTC.endpointInterval, endpointDifferenceInterval,
+      tangentPullbackPrimitiveRaw, RealFunRaw.exact,
+      tangentPullbackPrimitive_one, tangentPullbackPrimitive_zero] using h
+  have heq : ({ lo := 1 - 0, hi := 1 - 0 } : QInterval) =
+      { lo := 1, hi := 1 } := by
+    native_decide
+  rw [heq] at h'
+  exact h'
+
 end SinPiIntegral
 
 end ComputableAnalysis
