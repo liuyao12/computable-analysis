@@ -496,7 +496,8 @@ from monomial brackets structurally.
    finite endpoint identity `tangentSquareRationalPart_difference_identity`.
    Its quantitative and cell-level endpoint certificates are now also
    available as `tangentSquareRationalPart_difference_qabs_le` and
-   `tangentSquareCorrectionBound_contains_endpoint`.  The remaining local
+   `tangentSquareCorrectionBound_contains_endpoint`; the latter is a direct
+   `CandidateDerivativeCellControl`-ready endpoint box.  The remaining local
    step is combining this correction box with the arctangent endpoint box.
 
    Independently, the primitive endpoint algebra is now transported to the
