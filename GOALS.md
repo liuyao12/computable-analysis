@@ -64,9 +64,9 @@ from monomial brackets structurally.
 |---|---|---|---|---|
 | A | `1`, `x` on `[0,1/2]` | affine primitives | `1/2`, `1/8` | affine interval certificates |
 | B | `x^2`, `x^3`, `x^4`, `x^5` on `[0,1]` | `x^3/3`, `x^4/4`, `x^5/5`, `x^6/6` | `1/3`, `1/4`, `1/5`, `1/6` | complete finite certificates in `FiniteFTCIntervalRegular.lean` and `FiniteFTCQuartic.lean`; `fifthIntegralEffectiveFTC_equiv_one_sixth` closes the fifth-power rung |
-| C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | complete `EffectiveDerivativeBoundFTC` certificate; equivalence exported by `arctanEffectiveFTC_equiv_endpoint` |
+| C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | **complete:** `arctanEffectiveFTCData` and `arctanEffectiveFTC_equiv_endpoint` |
 | T | `4u/(1+u^2)^2` on `[0,1]` | `2u^2/(1+u^2)` | `1` | complete `CandidateDerivativeFTC` certificate and direct equivalence to `positiveTangentPullbackIntegral`; value theorem exported by `tangentPullbackEffectiveFTC_equiv_one` |
-| D | `exp x` on `[0,1]` | computable exponential raw | endpoint difference | `uniformExpOnUnit_effectiveFTC` in `ExpProofs.lean` |
+| D | `exp x` on `[0,1]` | computable exponential raw | endpoint difference | **complete:** `uniformExpOnUnit_effectiveFTC` in `ExpProofs.lean` (selected-stage certificate) |
 | E | finite sine prefix `x-x^3/6` on `[0,1/2]` | `x^2/2-x^4/24` | `47/384` | complete `EffectiveDerivativeBoundFTC` certificate |
 | F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | complete `EffectiveDerivativeBoundFTC` certificate |
 | G | nested-radical `sin (pi*x)` on `[0,1/2]` | arctan/circle construction | `1/pi` | direct FTC route exists; effective tail transport pending |
@@ -97,7 +97,7 @@ from monomial brackets structurally.
    `quartic_secant_derivative_bracket` and
    `monomial_succ_secant_derivative_bracket`.
 
-4. **Concave inverse-function case.**  Formalize `F x = arctan x` on
+4. **Concave inverse-function case.**  **Complete.**  Formalize `F x = arctan x` on
    `[0,1]`, with `dF x = 1/(1+x*x)`.  Use concavity to order neighboring
    secants and the existing rational rectangle evaluator to produce the
    derivative boxes.  The current finite bridge is
@@ -107,17 +107,22 @@ from monomial brackets structurally.
    `arctanForwardQuotient_padding_width_le` supplies the stage schedule, and
    `arctanForwardEndpoint_scale_contains` transports the quotient enclosure
    to the primitive endpoint difference.  The remaining proof is to assemble
-   these local boxes into the public FTC certificate and identify the result
-   with `arctan 1 - arctan 0`.
+   these local boxes into `arctanEffectiveFTCData`; the public endpoint
+   equivalence is `arctanEffectiveFTC_equiv_endpoint`.
 
-5. **Convex exponential case.**  Use the computable exponential evaluator
+5. **Convex exponential case.**  **Complete as a selected-stage certificate.**
+   Use the computable exponential evaluator
    with `F' = F`, and prove the endpoint identity on a bounded rational
    interval.  This is the first non-polynomial test that requires a genuine
    width schedule for interval multiplication and power-series tails.  The
    algorithmic derivative rung is already available as
    `uniformExpOnUnit_hasDerivativeOnInterval` in `ExpProofs.lean`, together
    with the exact initial value
-   `uniformExpOnUnit_zero_equiv_one`; the remaining FTC subgoal is to convert
+   `uniformExpOnUnit_zero_equiv_one`; the selected-stage conversion is
+   `uniformExpOnUnit_selectedStageFTCIndexed`, and
+   `uniformExpOnUnit_effectiveFTC` closes the endpoint equivalence.  The
+   remaining refinement is to identify its endpoint raw with the conventional
+   notation `exp(1) - 1`.  The proof split was to convert
    that two-sided secant certificate into
    `SelectedStageCandidateDerivativeFTC` local endpoint controls (the
    selected-stage interface deliberately permits separate derivative and
