@@ -772,6 +772,35 @@ theorem NestedRadicalSquareCandidateValiditySubgoal.valid
     exact SinPiIntegral.dyadicNestedRadicalSquareLeftSum_ordered n
   · exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_widths_shrink
 
+/- The arbitrary common witness can be specialized to the expected value.
+   This leaves precisely the two-sided finite enclosure of `1/4` for the
+   nested-radical square sums; the tangent-square side already has the same
+   two-sided interface. -/
+structure NestedRadicalSquareQuarterBoundsSubgoal where
+  lower_contains : forall n,
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo <= (1 / 4 : Rat)
+  upper_contains : forall n,
+    (1 / 4 : Rat) <=
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
+
+def NestedRadicalSquareQuarterBoundsSubgoal.toCommonWitness
+    (H : NestedRadicalSquareQuarterBoundsSubgoal)
+    (T : TangentSquareIntegralValueSubgoal) :
+    SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness := by
+  refine {
+    witness := fun _ => (1 / 4 : Rat)
+    candidate_lo_le := H.lower_contains
+    witness_le_candidate_hi := H.upper_contains
+    tangent_lo_le := T.lower_contains
+    witness_le_tangent_hi := T.upper_contains }
+
+def NestedRadicalSquareQuarterBoundsSubgoal.toValueSubgoal
+    (H : NestedRadicalSquareQuarterBoundsSubgoal)
+    (T : TangentSquareIntegralValueSubgoal) :
+    NestedRadicalSinPiSquareValueSubgoal :=
+  { commonWitness := H.toCommonWitness T
+    tangentAnchorValue := T }
+
 theorem NestedRadicalSquareIntegralConstructionSubgoal.transport_of_compute
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (H : NestedRadicalSquareIntegralConstructionSubgoal S)
