@@ -99,6 +99,8 @@ structure EffectiveFTCPortfolio where
   sine_prefix_square_value :
     FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (RealRaw.ofRat (6389 / 161280))
+  tangent_pullback_value :
+    SinPiIntegral.tangentPullbackIntegral.Equiv (RealRaw.ofRat 1)
   cube_value :
     (Integral.raw
       (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1)
@@ -215,6 +217,7 @@ theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   quartic_effective_value := Integral.quarticIntegralEffectiveFTC_equiv_one_fifth
   sine_prefix_square_value :=
     FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value
+  tangent_pullback_value := SinPiIntegral.tangentPullbackIntegral_equiv_one
   square := Integral.squareEffectiveFTC_equiv_endpoint
   cube := Integral.cubeEffectiveFTC_equiv_endpoint
   quartic := Integral.quarticEffectiveFTC_equiv_endpoint
