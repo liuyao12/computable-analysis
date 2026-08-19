@@ -21,6 +21,27 @@ theorem dyadicNestedRadicalStieltjes_base_witness :
     change (sinPiStieltjesIntegral.compute 0).lo <= 0
     native_decide
 
+theorem dyadicNestedRadicalStieltjes_stage_one_overlap :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum 1)
+      (sinPiStieltjesIntegral.compute 1) := by
+  unfold QInterval.Overlaps
+  native_decide
+
+theorem dyadicNestedRadicalStieltjes_stage_two_overlap :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum 2)
+      (sinPiStieltjesIntegral.compute 2) := by
+  unfold QInterval.Overlaps
+  native_decide
+
+theorem dyadicNestedRadicalStieltjes_stage_three_overlap :
+    QInterval.Overlaps
+      (dyadicNestedRadicalLeftSum 3)
+      (sinPiStieltjesIntegral.compute 3) := by
+  unfold QInterval.Overlaps
+  native_decide
+
 end SinPiIntegral
 
 end ComputableAnalysis
