@@ -120,7 +120,25 @@ from monomial brackets structurally.
    certificate family (the zero cell is fully discharged), or a direct
    precision-aware overlap proof.  The final target is
    `computableSinPiHalfIntegral_equiv_reciprocalPi_of_FTC`, with the direct
-   Riemann--Stieltjes proof retained as an independent comparison.
+   Riemann--Stieltjes proof retained as an independent comparison.  Split
+   the positive-cell certificate family into these finite rational subgoals:
+
+   - **even child:** construct `DyadicEvenStepCertificate`, proving that the
+     parent nested-radical sine box survives the precision change and is
+     contained in the even child box;
+   - **lower odd child:** construct `DyadicHalfAngleChildCertificate`, with a
+     rational cosine parent box, the clipped half-angle square-root sine box,
+     and the outer tangent containment;
+   - **upper odd child:** construct
+     `DyadicReflectedHalfAngleCertificate` by reflection around the unit
+     circle, preserving the same rational interval containment;
+   - **assembly:** feed the three certificate families into
+     `dyadicNestedRadical_sample_overlap_of_branch_certificates`, then into
+     `DyadicTangentWitnessFamily.of_overlap_family`.
+
+   Each certificate has a `to_public_overlap` theorem already; the remaining
+   proofs are finite interval inequalities and circle identities, not a new
+   appeal to completed real numbers.
 
 8. **Squared sine test.**  Formalize the concrete non-polynomial target
    `∫₀^(1/2) sin(pi*x)^2 dx = 1/4`.  Use the computable identity
