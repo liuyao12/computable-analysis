@@ -5621,6 +5621,20 @@ theorem uniformExpFTCIndexedBound_local_endpoint_contained
   rw [← hstage]
   exact htransport
 
+theorem uniformExpFTCIndexedSum_width_le_of_cell_bounds (eps : QPos)
+    (hbound : forall k, k < uniformExpFTCPieces eps ->
+      (uniformExpFTCIndexedBound eps k).width <= eps.val) :
+    ((uniformExpFTCPartition eps).boundIntegralSum
+      (fun k _ => uniformExpFTCIndexedBound eps k)).width <= eps.val := by
+  have hsum := RationalPartition.uniform_boundIntegralSum_width_le_indexed
+    (a := (0 : Rat)) (b := 1) (uniformExpFTCPieces eps)
+    (uniformExpFTCPieces_pos eps) (by native_decide)
+    (fun k => uniformExpFTCIndexedBound eps k) eps.val hbound
+  change ((RationalPartition.uniform 0 1 (uniformExpFTCPieces eps)
+    (uniformExpFTCPieces_pos eps) (by native_decide)).boundIntegralSum
+    (fun k _ => uniformExpFTCIndexedBound eps k)).width <= eps.val
+  exact Rat.le_trans hsum (by grind)
+
 /-- The common-prefix unit-interval evaluator has the exact exponential
 initial value at zero.  This makes its analytic derivative certificate a
 constructive initial-value solution, ready for the separate uniqueness

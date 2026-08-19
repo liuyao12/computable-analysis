@@ -2889,6 +2889,21 @@ theorem uniform_boundIntegralSum_width_le {a b : Rat}
       grind [Rat.div_def, Rat.mul_assoc, Rat.mul_comm,
         Rat.mul_inv_cancel]
 
+/-- The same finite width estimate with a bound indexed only by the cell
+number.  Concrete algorithms normally compute one bound for each grid point;
+the proof that the index is below the finite piece count should not become
+part of that algorithm's type. -/
+theorem uniform_boundIntegralSum_width_le_indexed {a b : Rat}
+    (pieces : Nat) (hpieces : 0 < pieces) (hab : a <= b)
+    (bound : Nat -> QInterval) (eps : Rat)
+    (hbound : forall k, k < pieces -> (bound k).width <= eps) :
+    ((uniform a b pieces hpieces hab).boundIntegralSum
+      (fun k _ => bound k)).width <= (b - a) * eps := by
+  apply uniform_boundIntegralSum_width_le pieces hpieces hab
+    (fun k _ => bound k) eps
+  intro k hk
+  exact hbound k hk
+
 /-- The recursive prefix form of `endpointDifferenceSum`.  It avoids any
 hidden reindexing while proving the finite telescope. -/
 def endpointDifferencePrefix {a b : Rat} (P : RationalPartition a b)

@@ -176,6 +176,10 @@ from monomial brackets structurally.
    `uniformExpFTCIndexedBound` now uses these explicit `leftPoint` endpoints
    directly; partition-cell proofs enter only through the containment and
    local endpoint lemmas.
+   The finite-sum layer is now nondependent: `Calculus.lean` provides
+   `uniform_boundIntegralSum_width_le_indexed`, and the exponential module
+   packages its application as `uniformExpFTCIndexedSum_width_le_of_cell_bounds`.
+   The remaining obligation is isolated to the per-cell width hypothesis.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
