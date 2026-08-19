@@ -198,6 +198,20 @@ theorem rationalTangentSquareWitnessSearch_sound
     of_decide_eq_true hb.1.2,
     of_decide_eq_true hb.2⟩
 
+theorem CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap
+    {B : IntegralIdentities.ArctanInverseBisection}
+    {precision depth k : Nat} {hk : k < 2 ^ depth}
+    (h : CanonicalDyadicHalfAngleCertificateAt B precision depth k hk) :
+    QInterval.Overlaps
+      (rationalSquareInterval
+        (dyadicNestedRadicalTableAt precision depth k).1)
+      (rationalOneMinusSquareInterval h.cosineBox) := by
+  exact rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
+    (dyadicNestedRadicalTableAt_bounds precision depth k
+      (Nat.le_of_lt hk)).1
+    h.cosineBox_subinterval h.sine_contains h.cosine_contains
+    h.circle_identity
+
 /-! The same transport target, named at a dyadic nested-radical sample.  The
 remaining witness-search proof only has to supply the two interval-membership
 facts and the rational circle equation. -/
