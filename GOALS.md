@@ -290,6 +290,12 @@ from monomial brackets structurally.
    and `unitClampInterval_width_le`.  The remaining regularity work is
    therefore only the two-branch evaluator definition and its finite
    input-stage bookkeeping.
+   The executable branch is now named
+   `sinPiSquareClampedInterval`, with reduction theorems
+   `sinPiSquareClampedInterval_of_small` and
+   `sinPiSquareClampedInterval_of_large`.  The remaining certificate proof
+   can therefore reason by an explicit finite case split rather than by an
+   informal appeal to boundedness.
    The final closure is named
    `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
    its validity, the FTC equivalence, and the endpoint value `1/4`, the

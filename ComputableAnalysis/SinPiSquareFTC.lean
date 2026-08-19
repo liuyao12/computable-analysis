@@ -1113,6 +1113,45 @@ theorem unitSquareInterval_width_le_two_mul
   have hmul := Rat.mul_le_mul_of_nonneg_left hsum hgap
   grind [Rat.mul_comm]
 
+def sinPiSquareClampedInterval
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf)
+    (I : QInterval) (hI : subintervalOf I 0 ((1 : Rat) / 2))
+    (n : Nat) : QInterval :=
+  if _hsmall : I.width <=
+      1 / ((hsine.inputPrecision (2 * n + 1) : Nat) : Rat) then
+    let E := hsine.evalInterval I hI (2 * n + 1)
+    QBox.mulRealInterval
+      (unitClampInterval E).lo (unitClampInterval E).hi
+      (unitClampInterval E).lo (unitClampInterval E).hi
+  else
+    { lo := 0, hi := 1 }
+
+theorem sinPiSquareClampedInterval_of_small
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf)
+    (I : QInterval) (hI : subintervalOf I 0 ((1 : Rat) / 2))
+    (n : Nat)
+    (hsmall : I.width <=
+      1 / ((hsine.inputPrecision (2 * n + 1) : Nat) : Rat)) :
+    sinPiSquareClampedInterval S hsine I hI n =
+      QBox.mulRealInterval
+        (unitClampInterval (hsine.evalInterval I hI (2 * n + 1))).lo
+        (unitClampInterval (hsine.evalInterval I hI (2 * n + 1))).hi
+        (unitClampInterval (hsine.evalInterval I hI (2 * n + 1))).lo
+        (unitClampInterval (hsine.evalInterval I hI (2 * n + 1))).hi := by
+  simp [sinPiSquareClampedInterval, hsmall]
+
+theorem sinPiSquareClampedInterval_of_large
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf)
+    (I : QInterval) (hI : subintervalOf I 0 ((1 : Rat) / 2))
+    (n : Nat)
+    (hlarge : ¬ I.width <=
+      1 / ((hsine.inputPrecision (2 * n + 1) : Nat) : Rat)) :
+    sinPiSquareClampedInterval S hsine I hI n = { lo := 0, hi := 1 } := by
+  simp [sinPiSquareClampedInterval, hlarge]
+
 /-! Once interval regularity and sine monotonicity are supplied, the public
 monotone-Darboux integral for the squared evaluator is a concrete `RealRaw`.
 The schedule is proof-relevant; no completed-real integral is hidden here. -/
