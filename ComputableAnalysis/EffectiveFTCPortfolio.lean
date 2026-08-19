@@ -652,6 +652,20 @@ theorem TangentSquareQuarterTurnValueSubgoal.tangent_equiv_effective
       SinPiIntegral.tangentSquareEffectiveIntegralRaw := by
   exact RealRaw.equiv_symm H.compatibility.equivalent
 
+theorem tangentSquareIntegral_equiv_halfQuarterTurn_of_common_witness
+    (effective_integral_valid :
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid)
+    (endpoint_valid :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid)
+    (common : TangentSquareFTCIntegralCommonWitness)
+    (endpoint_equiv_quarter :
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
+        (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))) :
+    SinPiIntegral.tangentSquareIntegral.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  exact (TangentSquareQuarterTurnValueSubgoal.of_common_witness
+    effective_integral_valid endpoint_valid common endpoint_equiv_quarter).value
+
 theorem TangentSquareQuarterTurnValueSubgoal.effective_equiv_endpoint
     (H : TangentSquareQuarterTurnValueSubgoal) :
     SinPiIntegral.tangentSquareEffectiveIntegralRaw.Equiv
