@@ -1054,6 +1054,47 @@ theorem sinPiSquareOnHalf_nondecreasing_of_tangent_certificate
     (S.onHalf_nondecreasing_of_tangent_nondecreasing
       C.tangent_nondecreasing)
 
+def unitClampInterval (I : QInterval) : QInterval :=
+  QInterval.intersection I { lo := 0, hi := 1 }
+
+theorem unitClampInterval_contains
+    {I K : QInterval}
+    (hI : I.ContainsInterval K)
+    (hK : subintervalOf K 0 1) :
+    (unitClampInterval I).ContainsInterval K := by
+  unfold unitClampInterval
+  apply QInterval.intersection_contains hI
+  exact ⟨hK.1, hK.2.2⟩
+
+theorem unitClampInterval_subinterval_of_contains
+    {I K : QInterval}
+    (hIorder : I.lo <= I.hi)
+    (hK : subintervalOf K 0 1)
+    (hI : I.ContainsInterval K) :
+    subintervalOf (unitClampInterval I) 0 1 := by
+  have hKorder : K.lo <= K.hi := hK.2.1
+  have hover : I.Overlaps ({ lo := 0, hi := 1 } : QInterval) := by
+    unfold QInterval.Overlaps
+    have hI' := hI
+    unfold QInterval.ContainsInterval at hI'
+    have hK' := hK
+    unfold subintervalOf at hK'
+    grind
+  have hord : (unitClampInterval I).lo <=
+      (unitClampInterval I).hi := by
+    exact QInterval.intersection_ordered_of_overlaps hIorder
+      (by native_decide) hover
+  change 0 <= max I.lo 0 /\ max I.lo 0 <= min I.hi 1 /\ min I.hi 1 <= 1
+  change max I.lo 0 <= min I.hi 1 at hord
+  grind
+
+theorem unitClampInterval_width_le
+    {I K : QInterval} :
+    (unitClampInterval I).width <= I.width := by
+  unfold unitClampInterval
+  exact QInterval.width_le_of_contains
+    (QInterval.intersection_contained_left I { lo := 0, hi := 1 })
+
 theorem unitSquareInterval_width_le_two_mul
     {J : QInterval} (hJ : subintervalOf J 0 1) :
     (QBox.mulRealInterval J.lo J.hi J.lo J.hi).width <=
