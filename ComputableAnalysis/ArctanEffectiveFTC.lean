@@ -449,6 +449,24 @@ def arctanPaddedDerivativeCellControl
       simpa [RationalSubinterval.scaleBound] using
         arctanKernelPaddedBound_local_endpoint_contains C δ η N hC hη hN }
 
+theorem arctanPaddedBound_scaled_width_le
+    (C : RationalSubinterval 0 1) (δ : Rat) (hδ : 0 <= δ) (N : Nat) :
+    (C.scaleBound (arctanKernelPaddedBound C δ N)).width <=
+      C.width * (C.width + C.width * C.width + 2 * δ) := by
+  have hw : 0 <= C.width := by
+    have h := (Rat.add_le_add_right (c := -C.lower)).2 C.ordered
+    unfold RationalSubinterval.width
+    rw [Rat.sub_eq_add_neg]
+    have hzero : C.lower + -C.lower = 0 := by grind
+    rw [hzero] at h
+    exact h
+  unfold RationalSubinterval.scaleBound
+  rw [QInterval.scaleByRat_width_of_nonneg hw]
+  unfold arctanKernelPaddedBound QInterval.width
+  have hsq : 0 <= C.width * C.width :=
+    RationalCircle.Stage.ratSquare_nonneg C.width
+  grind [Rat.sub_eq_add_neg, Rat.add_assoc, Rat.mul_add]
+
 def arctanKernelDerivativeBound (eps : QPos) (k : Nat)
     (hk : k < (RationalPartition.uniform 0 1 (eps.val.den + 1)
       (by omega) (by native_decide)).pieces) :
