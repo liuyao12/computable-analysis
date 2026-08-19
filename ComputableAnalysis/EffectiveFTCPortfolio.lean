@@ -445,6 +445,10 @@ structure EffectiveFTCPortfolio where
   tangentSquareEffective :
     SinPiIntegral.tangentSquareEffectiveIntegralRaw.Equiv
       SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw
+  tangentSquareEndpoint :
+    (endpointDifferenceRaw SinPiIntegral.tangentSquareEffectivePrimitiveOnUnit 0 1
+      SinPiIntegral.tangentSquareEffectivePrimitive_endpointDifference_valid).Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
   sinePrefixSquare :
     FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw
@@ -930,6 +934,8 @@ theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   arctan := Integral.arctanEffectiveFTC_equiv_endpoint
   tangentPullback := SinPiIntegral.tangentPullbackEffectiveFTC_equiv_endpoint
   tangentSquareEffective := SinPiIntegral.tangentSquareEffectiveIntegralRaw_equiv_endpoint
+  tangentSquareEndpoint :=
+    SinPiIntegral.tangentSquareEffectivePrimitive_endpointDifference_equiv_halfQuarterTurn
   sinePrefixSquare := FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint
   exponential := ExpProofs.uniformExpOnUnit_effectiveFTC
 
