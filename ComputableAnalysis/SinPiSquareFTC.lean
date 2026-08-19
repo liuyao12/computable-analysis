@@ -212,6 +212,27 @@ theorem CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap
     h.cosineBox_subinterval h.sine_contains h.cosine_contains
     h.circle_identity
 
+theorem canonical_dyadic_certificate_at_of_rational_witness_square_overlap
+    (B : IntegralIdentities.ArctanInverseBisection)
+    {precision depth k : Nat} (hk : k < 2 ^ depth)
+    (u : Rat) (hu0 : 0 <= u) (hu1 : u <= 1)
+    (hsine : (dyadicNestedRadicalTableAt precision depth k).1.lo <=
+        rationalCircleSin u /\
+      rationalCircleSin u <=
+        (dyadicNestedRadicalTableAt precision depth k).1.hi)
+    (houter : (dyadicTangentBoxAt B precision depth k hk).ContainsInterval
+      (rationalHalfAngleTangentInterval
+        ((dyadicNestedRadicalTableAt precision depth k).1)
+        { lo := rationalCircleCos u, hi := rationalCircleCos u })) :
+    QInterval.Overlaps
+      (rationalSquareInterval
+        (dyadicNestedRadicalTableAt precision depth k).1)
+      (rationalOneMinusSquareInterval
+        ({ lo := rationalCircleCos u, hi := rationalCircleCos u } : QInterval)) := by
+  let h := canonical_dyadic_certificate_at_of_rational_witness
+    B hk u hu0 hu1 hsine houter
+  exact h.to_square_complement_overlap
+
 /-! The same transport target, named at a dyadic nested-radical sample.  The
 remaining witness-search proof only has to supply the two interval-membership
 facts and the rational circle equation. -/

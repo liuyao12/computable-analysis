@@ -264,6 +264,9 @@ from monomial brackets structurally.
    square and complementary-square boxes, with all enclosure slack retained.
    The existing `CanonicalDyadicHalfAngleCertificateAt` now feeds this
    transport through `CanonicalDyadicHalfAngleCertificateAt.to_square_complement_overlap`.
+   The rational-witness constructor is connected directly by
+   `canonical_dyadic_certificate_at_of_rational_witness_square_overlap`, so
+   the existing one-coordinate tangent search can be reused.
    The remaining local obligation is explicitly the finite witness search
    for `s`, `c`, and `s^2+c^2=1`.  The executable predicate and search are
    `rationalTangentSquareWitnessAdmissibleBool` and
