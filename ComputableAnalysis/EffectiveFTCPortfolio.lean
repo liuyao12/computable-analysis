@@ -3,6 +3,7 @@ import ComputableAnalysis.ExpProofs
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.FiniteFTCIntervalRegular
 import ComputableAnalysis.SinPiSquareFTC
+import ComputableAnalysis.TangentPullbackEffectiveFTC
 
 /-!
 # Auditable effective-FTC portfolio
@@ -34,6 +35,9 @@ structure EffectiveFTCPortfolio where
   arctan :
     (Integral.arctanEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw).Equiv
       Integral.arctanEffectiveFTCData.toDerivativeBoundFTC.endpointRaw
+  tangentPullback :
+    SinPiIntegral.tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      SinPiIntegral.tangentPullbackCandidateFTCData.toDerivativeBoundFTC.endpointRaw
   sinePrefixSquare :
     FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw
@@ -47,6 +51,7 @@ theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   quartic := Integral.quarticEffectiveFTC_equiv_endpoint
   fifth := Integral.fifthIntegralEffectiveFTC_equiv_endpoint
   arctan := Integral.arctanEffectiveFTC_equiv_endpoint
+  tangentPullback := SinPiIntegral.tangentPullbackEffectiveFTC_equiv_endpoint
   sinePrefixSquare := FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint
   exponential := ExpProofs.uniformExpOnUnit_effectiveFTC
 
