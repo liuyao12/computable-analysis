@@ -44,7 +44,7 @@ from monomial brackets structurally.
 | E | finite sine prefix `x-x^3/6` on `[0,1/2]` | `x^2/2-x^4/24` | `47/384` | complete `EffectiveDerivativeBoundFTC` certificate |
 | F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | complete `EffectiveDerivativeBoundFTC` certificate |
 | G | nested-radical `sin (pi*x)` on `[0,1/2]` | arctan/circle construction | `1/pi` | direct FTC route exists; effective tail transport pending |
-| H | nested-radical `sin (pi*x)^2` on `[0,1/2]` | cosine-identity or transported square primitive | `1/4` | acceptance interface exists; effective certificate pending |
+| H | nested-radical `sin (pi*x)^2` on `[0,1/2]` | cosine-identity or transported square primitive | `1/4` | scheduled interval-regularity and monotonicity certificates complete; endpoint/FTC transport pending |
 
 1. **Exact affine and constant cases.**  Integrate `fun _ => 1` and
    `fun x => x` on rational intervals.  These are regression tests for the
@@ -301,6 +301,11 @@ from monomial brackets structurally.
    estimate through a certified point box, and
    `unitClampSquare_width_le_of_contains` converts a sine enclosure of width
    `1/(2*n+2)` into the required squared enclosure of width `1/(n+1)`.
+   The stage alignment is now explicit through
+   `sinPiSquareFTCStageSchedule` and
+   `sinPiSquareOnHalfScheduledFunctionOnInterval`; the full interval-regularity
+   certificate is `sinPiSquareScheduled_intervalRegular`, and its monotonicity
+   transport is `sinPiSquareScheduled_nondecreasing_of_sine_nondecreasing`.
    The final closure is named
    `sinPiSquareMonotoneIntegral_equiv_value`: after supplying an endpoint raw,
    its validity, the FTC equivalence, and the endpoint value `1/4`, the

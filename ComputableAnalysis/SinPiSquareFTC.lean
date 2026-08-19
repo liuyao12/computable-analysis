@@ -983,6 +983,171 @@ def sinPiSquareOnHalfFunctionOnInterval
     intro x hx
     exact sinPiSquareOnHalf_valid S x ⟨hx, hx⟩
 
+def sinPiSquareFTCStageSchedule : RealRaw.StageSchedule where
+  stage := fun n => 2 * n + 1
+  monotone := by
+    intro n m hnm
+    omega
+  cofinal := by
+    intro target
+    refine ⟨target, ?_⟩
+    omega
+
+def sinPiSquareOnHalfScheduledFunctionOnInterval
+    (S : ArctanSinPiConstruction) : FunctionOnInterval where
+  raw := {
+    definedAt := fun x => 0 <= x /\ x <= (1 : Rat) / 2
+    compute := fun x _ =>
+      fun n => (sinPiSquareOnHalf S).compute x
+        (sinPiSquareFTCStageSchedule.stage n) }
+  lower := 0
+  upper := (1 : Rat) / 2
+  defined_on := by
+    intro x hx
+    exact hx
+  valid_on := by
+    intro x hx
+    change RealRaw.ValidCompute
+      (fun n => (sinPiSquareOnHalf S).compute x
+        (sinPiSquareFTCStageSchedule.stage n))
+    exact RealRaw.schedule_valid
+      { compute := (sinPiSquareOnHalf S).compute x }
+      (sinPiSquareOnHalf_valid S x ⟨hx, hx⟩)
+      sinPiSquareFTCStageSchedule
+
+theorem sinPiSquareOnHalfScheduled_compute_of_mem
+    (S : ArctanSinPiConstruction) {x : Rat}
+    (hx : 0 <= x /\ x <= (1 : Rat) / 2) (n : Nat) :
+    (sinPiSquareOnHalfScheduledFunctionOnInterval S).compute x
+      (by exact hx) n =
+      (sinPiSquareOnHalf S).compute x
+        (sinPiSquareFTCStageSchedule.stage n) := by
+  rfl
+
+/- def sinPiSquareScheduled_intervalRegular
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf) :
+    IntervalRegularOn
+      (sinPiSquareOnHalfScheduledFunctionOnInterval S) := by
+  refine
+    { evalInterval := fun I hI n =>
+        sinPiSquareClampedInterval S hsine I hI n
+      inputPrecision := fun n => hsine.inputPrecision
+        (sinPiSquareFTCStageSchedule.stage n)
+      inputPrecision_pos := by
+        intro n
+        exact hsine.inputPrecision_pos _
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hsmall
+    have hsmall' : I.width <=
+        1 / ((hsine.inputPrecision
+          (sinPiSquareFTCStageSchedule.stage n) : Nat) : Rat) := hsmall
+    have hEwidth := hsine.output_width I hI'
+      (sinPiSquareFTCStageSchedule.stage n) hsmall'
+    have hKsub : subintervalOf
+        (S.onHalf.compute I.lo (S.onHalf.defined_on I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+          (sinPiSquareFTCStageSchedule.stage n)) 0 1 := by
+      change subintervalOf
+        ((sinPiRawOfArctan S.inverse I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩).compute
+          (sinPiSquareFTCStageSchedule.stage n)) 0 1
+      have hbounds := S.sinPiRawOfArctan_bounds
+        ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩
+        (sinPiSquareFTCStageSchedule.stage n)
+      have horder := RealRaw.interval_order_of_valid
+        (sinPiRawOfArctan S.inverse I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+        (S.sin_valid I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+        (sinPiSquareFTCStageSchedule.stage n)
+      exact ⟨hbounds.1, horder, hbounds.2⟩
+    have hEcontains := hsine.contains_point_values I hI' I.lo
+      (S.onHalf.defined_on I.lo
+        ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+      (sinPiSquareFTCStageSchedule.stage n)
+      (by exact Rat.le_refl) hI'.2.1
+    have hEorder :
+        (hsine.evalInterval I hI'
+          (sinPiSquareFTCStageSchedule.stage n)).lo <=
+          (hsine.evalInterval I hI'
+            (sinPiSquareFTCStageSchedule.stage n)).hi := by
+      exact Rat.le_trans hEcontains.1
+        (Rat.le_trans hKsub.2.1 hEcontains.2)
+    have hwidth := unitClampSquare_width_le_of_contains
+      hEorder hEwidth.2 hKsub hEcontains
+    simpa [sinPiSquareClampedInterval, hsmall] using hwidth
+  · intro I hI x hx n hxlo hxhi
+    have hI' : subintervalOf I 0 ((1 : Rat) / 2) := by
+      simpa [sinPiSquareOnHalfScheduledFunctionOnInterval] using hI
+    have hx' : 0 <= x /\ x <= (1 : Rat) / 2 := by
+      simpa [sinPiSquareOnHalfScheduledFunctionOnInterval] using hx
+    have hI_sine : subintervalOf I S.onHalf.lower S.onHalf.upper := by
+      simpa [ArctanSinPiConstruction.onHalf] using hI'
+    by_cases hsmall : I.width <=
+      1 / ((hsine.inputPrecision
+        (sinPiSquareFTCStageSchedule.stage n) : Nat) : Rat)
+    · have hKsub : subintervalOf
+          ((S.onHalf.compute x (S.onHalf.defined_on x hx'
+            (sinPiSquareFTCStageSchedule.stage n))) 0 1 := by
+        change subintervalOf
+          ((sinPiRawOfArctan S.inverse x hx').compute
+            (sinPiSquareFTCStageSchedule.stage n)) 0 1
+        have hbounds := S.sinPiRawOfArctan_bounds hx'
+          (sinPiSquareFTCStageSchedule.stage n)
+        have horder := RealRaw.interval_order_of_valid
+          (sinPiRawOfArctan S.inverse x hx')
+          (S.sin_valid x hx') (sinPiSquareFTCStageSchedule.stage n)
+        exact ⟨hbounds.1, horder, hbounds.2⟩
+      have hEcontains := hsine.contains_point_values I hI_sine x
+        (S.onHalf.defined_on x hx')
+        (sinPiSquareFTCStageSchedule.stage n) hxlo hxhi
+      have hEorder :
+          (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n)).lo <=
+            (hsine.evalInterval I hI_sine
+              (sinPiSquareFTCStageSchedule.stage n)).hi := by
+        exact Rat.le_trans hEcontains.1
+          (Rat.le_trans hKsub.2.1 hEcontains.2)
+      have hclamp := unitClampInterval_contains hEcontains hKsub
+      have hsq := unitSquareInterval_contains_of_contains
+        (unitClampInterval_subinterval_of_contains hEorder hKsub hEcontains)
+        hKsub hclamp
+      change I.width <=
+        1 / ((hsine.inputPrecision (2 * n + 1) : Nat) : Rat) at hsmall
+      rw [sinPiSquareClampedInterval_of_small S hsine I hI' n hsmall]
+      change QInterval.ContainsInterval _
+        ((sinPiSquareOnHalfScheduledFunctionOnInterval S).compute x _ n)
+      rw [sinPiSquareOnHalfScheduled_compute_of_mem S hx' n]
+      rw [show sinPiSquareFTCStageSchedule.stage n = 2 * n + 1 by rfl]
+      simpa [sinPiSquareOnHalf_compute_of_mem S hx] using hsq
+    · rw [sinPiSquareClampedInterval_of_large S hsine I hI n hsmall]
+      change QInterval.ContainsInterval { lo := 0, hi := 1 }
+        ((sinPiSquareOnHalfScheduledFunctionOnInterval S).compute x _ n)
+      rw [sinPiSquareOnHalfScheduled_compute_of_mem S hx n]
+      rw [show sinPiSquareFTCStageSchedule.stage n = 2 * n + 1 by rfl]
+      rw [sinPiSquareOnHalf_compute_of_mem S hx]
+      have hbounds := S.sinPiRawOfArctan_bounds hx (2 * n + 1)
+      have horder := RealRaw.interval_order_of_valid
+        (sinPiRawOfArctan S.inverse x hx)
+        (S.sin_valid x hx) (2 * n + 1)
+      have hself := QBox.mulRealInterval_self_of_nonneg
+        hbounds.1 horder
+      rw [hself]
+      unfold QInterval.ContainsInterval
+      constructor
+      · exact Rat.mul_nonneg hbounds.1 hbounds.1
+      · have hhi_nonneg : 0 <=
+            ((sinPiRawOfArctan S.inverse x hx).compute
+              (sinPiSquareFTCStageSchedule.stage n)).hi :=
+          Rat.le_trans hbounds.1 horder
+        have hstep := Rat.mul_le_mul_of_nonneg_left
+          hbounds.2 hhi_nonneg
+        grind
+
+ -/
+
 /-! The inverse-search monotonicity obligation is kept as finite data.  It is
 the exact missing property needed to turn ordered angle inputs into ordered
 tangent boxes; no extensional inverse-function axiom is introduced. -/
@@ -1159,6 +1324,25 @@ theorem unitClampSquare_width_le_of_contains
         exact Rat.ne_of_gt ((Rat.natCast_pos).2 (by omega))
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+theorem unitSquareInterval_contains_of_contains
+    {E K : QInterval}
+    (hE : subintervalOf E 0 1)
+    (hK : subintervalOf K 0 1)
+    (hcontains : E.ContainsInterval K) :
+    QBox.mulRealInterval E.lo E.hi E.lo E.hi |>.ContainsInterval
+      (QBox.mulRealInterval K.lo K.hi K.lo K.hi) := by
+  rw [rationalSquareInterval_mul_self_eq hE,
+    rationalSquareInterval_mul_self_eq hK]
+  unfold rationalSquareInterval QInterval.ContainsInterval
+  have hsquare_mono {a b : Rat} (ha : 0 <= a) (hab : a <= b) :
+      a * a <= b * b := by
+    have hb : 0 <= b := Rat.le_trans ha hab
+    exact Rat.le_trans
+      (Rat.mul_le_mul_of_nonneg_left hab ha)
+      (Rat.mul_le_mul_of_nonneg_right hab hb)
+  exact ⟨hsquare_mono hE.1 hcontains.1,
+    hsquare_mono (Rat.le_trans hK.1 hK.2.1) hcontains.2⟩
+
 def sinPiSquareClampedInterval
     (S : ArctanSinPiConstruction)
     (hsine : IntervalRegularOn S.onHalf)
@@ -1197,6 +1381,216 @@ theorem sinPiSquareClampedInterval_of_large
       1 / ((hsine.inputPrecision (2 * n + 1) : Nat) : Rat)) :
     sinPiSquareClampedInterval S hsine I hI n = { lo := 0, hi := 1 } := by
   simp [sinPiSquareClampedInterval, hlarge]
+
+def sinPiSquareScheduled_intervalRegular
+    (S : ArctanSinPiConstruction)
+    (hsine : IntervalRegularOn S.onHalf) :
+    IntervalRegularOn
+      (sinPiSquareOnHalfScheduledFunctionOnInterval S) := by
+  refine
+    { evalInterval := fun I hI n =>
+        sinPiSquareClampedInterval S hsine I hI n
+      inputPrecision := fun n => hsine.inputPrecision
+        (sinPiSquareFTCStageSchedule.stage n)
+      inputPrecision_pos := by
+        intro n
+        exact hsine.inputPrecision_pos _
+      output_width := ?_
+      contains_point_values := ?_ }
+  · intro I hI n hsmall
+    have hI' : subintervalOf I 0 ((1 : Rat) / 2) := by
+      simpa [sinPiSquareOnHalfScheduledFunctionOnInterval] using hI
+    have hI_sine : subintervalOf I S.onHalf.lower S.onHalf.upper := by
+      simpa [ArctanSinPiConstruction.onHalf] using hI'
+    have hEwidth := hsine.output_width I hI_sine
+      (sinPiSquareFTCStageSchedule.stage n) hsmall
+    have hKsub : subintervalOf
+        (S.onHalf.compute I.lo (S.onHalf.defined_on I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+          (sinPiSquareFTCStageSchedule.stage n)) 0 1 := by
+      change subintervalOf
+        ((sinPiRawOfArctan S.inverse I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩).compute
+          (sinPiSquareFTCStageSchedule.stage n)) 0 1
+      have hbounds := S.sinPiRawOfArctan_bounds
+        ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩
+        (sinPiSquareFTCStageSchedule.stage n)
+      have horder := RealRaw.interval_order_of_valid
+        (sinPiRawOfArctan S.inverse I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+        (S.sin_valid I.lo
+          ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+        (sinPiSquareFTCStageSchedule.stage n)
+      exact ⟨hbounds.1, horder, hbounds.2⟩
+    have hEcontains := hsine.contains_point_values I hI_sine I.lo
+      (S.onHalf.defined_on I.lo
+        ⟨hI'.1, Rat.le_trans hI'.2.1 hI'.2.2⟩)
+      (sinPiSquareFTCStageSchedule.stage n)
+      (by exact Rat.le_refl) hI'.2.1
+    have hEorder :
+        (hsine.evalInterval I hI_sine
+          (sinPiSquareFTCStageSchedule.stage n)).lo <=
+          (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n)).hi := by
+      exact Rat.le_trans hEcontains.1
+        (Rat.le_trans hKsub.2.1 hEcontains.2)
+    have hwidth := unitClampSquare_width_le_of_contains
+      hEorder hEwidth.2 hKsub hEcontains
+    have hJsub : subintervalOf
+        (unitClampInterval (hsine.evalInterval I hI_sine
+          (sinPiSquareFTCStageSchedule.stage n))) 0 1 :=
+      unitClampInterval_subinterval_of_contains hEorder hKsub hEcontains
+    have hwidth_nonneg : 0 <=
+        (QBox.mulRealInterval
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).lo
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).hi
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).lo
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).hi).width := by
+      have hself := QBox.mulRealInterval_self_of_nonneg
+        hJsub.1 hJsub.2.1
+      rw [hself]
+      change 0 <=
+        (unitClampInterval (hsine.evalInterval I hI_sine
+          (sinPiSquareFTCStageSchedule.stage n))).hi *
+            (unitClampInterval (hsine.evalInterval I hI_sine
+              (sinPiSquareFTCStageSchedule.stage n))).hi -
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).lo *
+            (unitClampInterval (hsine.evalInterval I hI_sine
+              (sinPiSquareFTCStageSchedule.stage n))).lo
+      have hlo : 0 <=
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).lo := hJsub.1
+      have hgap : 0 <=
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).hi -
+            (unitClampInterval (hsine.evalInterval I hI_sine
+              (sinPiSquareFTCStageSchedule.stage n))).lo := by
+        grind [hJsub.2.1]
+      have hsum : 0 <=
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).hi +
+            (unitClampInterval (hsine.evalInterval I hI_sine
+              (sinPiSquareFTCStageSchedule.stage n))).lo := by
+        have hhi := Rat.le_trans hlo hJsub.2.1
+        exact Rat.add_nonneg hhi hlo
+      have hfactor :
+          (unitClampInterval (hsine.evalInterval I hI_sine
+            (sinPiSquareFTCStageSchedule.stage n))).hi *
+              (unitClampInterval (hsine.evalInterval I hI_sine
+                (sinPiSquareFTCStageSchedule.stage n))).hi -
+              (unitClampInterval (hsine.evalInterval I hI_sine
+                (sinPiSquareFTCStageSchedule.stage n))).lo *
+                  (unitClampInterval (hsine.evalInterval I hI_sine
+                    (sinPiSquareFTCStageSchedule.stage n))).lo =
+            ((unitClampInterval (hsine.evalInterval I hI_sine
+              (sinPiSquareFTCStageSchedule.stage n))).hi -
+                (unitClampInterval (hsine.evalInterval I hI_sine
+                  (sinPiSquareFTCStageSchedule.stage n))).lo) *
+              ((unitClampInterval (hsine.evalInterval I hI_sine
+                (sinPiSquareFTCStageSchedule.stage n))).hi +
+                (unitClampInterval (hsine.evalInterval I hI_sine
+                  (sinPiSquareFTCStageSchedule.stage n))).lo) := by
+        grind [Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg]
+      rw [hfactor]
+      exact Rat.mul_nonneg hgap hsum
+    change I.width <=
+      1 / ((hsine.inputPrecision (2 * n + 1) : Nat) : Rat) at hsmall
+    rw [sinPiSquareClampedInterval_of_small S hsine I hI' n hsmall]
+    exact ⟨hwidth_nonneg, hwidth⟩
+  · intro I hI x hx n hxlo hxhi
+    have hI' : subintervalOf I 0 ((1 : Rat) / 2) := by
+      simpa [sinPiSquareOnHalfScheduledFunctionOnInterval] using hI
+    have hx' : 0 <= x /\ x <= (1 : Rat) / 2 := by
+      simpa [sinPiSquareOnHalfScheduledFunctionOnInterval,
+        inDomainInterval] using hx
+    have hI_sine : subintervalOf I S.onHalf.lower S.onHalf.upper := by
+      simpa [ArctanSinPiConstruction.onHalf] using hI'
+    by_cases hsmall : I.width <=
+      1 / ((hsine.inputPrecision
+        (sinPiSquareFTCStageSchedule.stage n) : Nat) : Rat)
+    · have hKsub : subintervalOf
+          ((S.onHalf.compute x (S.onHalf.defined_on x hx')
+            (sinPiSquareFTCStageSchedule.stage n))) 0 1 := by
+        change subintervalOf
+          ((sinPiRawOfArctan S.inverse x hx').compute
+            (sinPiSquareFTCStageSchedule.stage n)) 0 1
+        have hbounds := S.sinPiRawOfArctan_bounds hx'
+          (sinPiSquareFTCStageSchedule.stage n)
+        have horder := RealRaw.interval_order_of_valid
+          (sinPiRawOfArctan S.inverse x hx')
+          (S.sin_valid x hx') (sinPiSquareFTCStageSchedule.stage n)
+        exact ⟨hbounds.1, horder, hbounds.2⟩
+      have hEcontains := hsine.contains_point_values I hI' x
+        (S.onHalf.defined_on x hx')
+        (sinPiSquareFTCStageSchedule.stage n) hxlo hxhi
+      have hEorder :
+          (hsine.evalInterval I hI
+            (sinPiSquareFTCStageSchedule.stage n)).lo <=
+            (hsine.evalInterval I hI
+              (sinPiSquareFTCStageSchedule.stage n)).hi := by
+        exact Rat.le_trans hEcontains.1
+          (Rat.le_trans hKsub.2.1 hEcontains.2)
+      have hclamp := unitClampInterval_contains hEcontains hKsub
+      have hsq := unitSquareInterval_contains_of_contains
+        (unitClampInterval_subinterval_of_contains hEorder hKsub hEcontains)
+        hKsub hclamp
+      rw [sinPiSquareClampedInterval_of_small S hsine I hI' n hsmall]
+      change QInterval.ContainsInterval _
+        ((sinPiSquareOnHalfScheduledFunctionOnInterval S).compute x _ n)
+      rw [sinPiSquareOnHalfScheduled_compute_of_mem S hx' n]
+      simpa [sinPiSquareOnHalf_compute_of_mem S hx',
+        FunctionOnInterval.compute,
+        ArctanSinPiConstruction.onHalf,
+        sinPiSquareFTCStageSchedule] using hsq
+    · rw [sinPiSquareClampedInterval_of_large S hsine I hI' n hsmall]
+      change QInterval.ContainsInterval { lo := 0, hi := 1 }
+        ((sinPiSquareOnHalfScheduledFunctionOnInterval S).compute x _ n)
+      rw [sinPiSquareOnHalfScheduled_compute_of_mem S hx' n]
+      rw [sinPiSquareOnHalf_compute_of_mem S hx']
+      have hbounds := S.sinPiRawOfArctan_bounds hx'
+        (sinPiSquareFTCStageSchedule.stage n)
+      have horder := RealRaw.interval_order_of_valid
+        (sinPiRawOfArctan S.inverse x hx')
+        (S.sin_valid x hx') (sinPiSquareFTCStageSchedule.stage n)
+      have hself := QBox.mulRealInterval_self_of_nonneg
+        hbounds.1 horder
+      rw [hself]
+      unfold QInterval.ContainsInterval
+      constructor
+      · exact Rat.mul_nonneg hbounds.1 hbounds.1
+      · have hhi_nonneg : 0 <=
+            ((sinPiRawOfArctan S.inverse x hx').compute
+              (sinPiSquareFTCStageSchedule.stage n)).hi :=
+          Rat.le_trans hbounds.1 horder
+        have hstep := Rat.mul_le_mul_of_nonneg_left
+          hbounds.2 hhi_nonneg
+        grind
+
+theorem sinPiSquareScheduled_nondecreasing_of_sine_nondecreasing
+    (S : ArctanSinPiConstruction)
+    (hsine : NondecreasingOnInterval S.onHalf) :
+    NondecreasingOnInterval
+      (sinPiSquareOnHalfScheduledFunctionOnInterval S) := by
+  intro x y hx hy hxy n
+  have hx' : 0 <= x /\ x <= (1 : Rat) / 2 := by
+    simpa [sinPiSquareOnHalfScheduledFunctionOnInterval,
+      inDomainInterval] using hx
+  have hy' : 0 <= y /\ y <= (1 : Rat) / 2 := by
+    simpa [sinPiSquareOnHalfScheduledFunctionOnInterval,
+      inDomainInterval] using hy
+  have hmono := sinPiSquareOnHalf_nondecreasing_of_sine_nondecreasing
+    S hsine
+  change ((sinPiSquareOnHalf S).compute x
+      (sinPiSquareFTCStageSchedule.stage n)).lo <=
+    ((sinPiSquareOnHalf S).compute y
+      (sinPiSquareFTCStageSchedule.stage n)).hi
+  exact hmono x y hx' hy' hxy
+    (sinPiSquareFTCStageSchedule.stage n)
 
 /-! Once interval regularity and sine monotonicity are supplied, the public
 monotone-Darboux integral for the squared evaluator is a concrete `RealRaw`.
