@@ -281,6 +281,28 @@ theorem sinPiSquare_sample_overlap_of_sine_and_table_overlap
   exact rationalSquareInterval_overlap_of_interval_overlap
     hS hT hsample
 
+theorem sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search
+    (S : ArctanSinPiConstruction)
+    {n k : Nat} (hk : k < 2 ^ n) (m : Nat) (u : Rat)
+    (hsearch : rationalTangentWitnessBoxSearch
+      (dyadicTangentBox S.inverse hk)
+      (dyadicNestedRadicalStageSinAt n k) m = some u) :
+    QInterval.Overlaps
+      ((sinPiSquareOnHalf S).compute
+        (leftPoint 0 ((1 : Rat) / 2) (2 ^ n) k) n)
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k)) := by
+  have hsin :=
+    arctanSinPi_nestedRadicalStage_sample_overlap_of_canonical_box_search
+      S.inverse hk m u hsearch
+  exact sinPiSquare_sample_overlap_of_sine_and_table_overlap S
+    (dyadicHalfDomain hk) n
+    (by
+      change subintervalOf
+        (dyadicNestedRadicalTableAt n n k).1 0 1
+      exact (dyadicNestedRadicalTableAt_bounds n n k
+        (Nat.le_of_lt hk)).1)
+    (by simpa [sinPiSquareOnHalf, sinPiOnHalfRaw] using hsin)
+
 theorem square_sample_overlap_of_sine_sample_overlap
     {I J : QInterval}
     (hI : subintervalOf I 0 1)

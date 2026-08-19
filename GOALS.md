@@ -340,6 +340,13 @@ from monomial brackets structurally.
    radical table.  The remaining task is the integral-construction field for
    the squared evaluator and its endpoint/primitive certificate.
 
+   The canonical-search specialization
+   `sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search`
+   now connects a successful finite tangent-box search directly to the
+   squared stage table.  No new square-root search is needed; the next
+   certificate must establish the squared equal-dyadic integral’s ordering,
+   nesting, and shrinking, then connect it to the tangent primitive.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but
