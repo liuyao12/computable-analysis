@@ -38,7 +38,7 @@ from monomial brackets structurally.
 |---|---|---|---|---|
 | A | `1`, `x` on `[0,1/2]` | affine primitives | `1/2`, `1/8` | affine interval certificates |
 | B | `x^2`, `x^3`, `x^4`, `x^5` on `[0,1]` | `x^3/3`, `x^4/4`, `x^5/5`, `x^6/6` | `1/3`, `1/4`, `1/5`, `1/6` | `FiniteFTCIntervalRegular.lean` |
-| C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | same-stage containment, scaled endpoint containment, and quantitative padding schedule complete; FTC certificate assembly pending |
+| C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | complete `EffectiveDerivativeBoundFTC` certificate; equivalence exported by `arctanEffectiveFTC_equiv_endpoint` |
 | D | `exp x` on a bounded rational interval | computable exponential raw | endpoint difference | exponential evaluator; certificate pending |
 | E | finite sine prefix `x-x^3/6` on `[0,1/2]` | `x^2/2-x^4/24` | `47/384` | complete `EffectiveDerivativeBoundFTC` certificate |
 | F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | complete `EffectiveDerivativeBoundFTC` certificate |
