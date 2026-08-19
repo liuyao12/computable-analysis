@@ -324,6 +324,131 @@ theorem arctanKernelBound_ordered
     C.ordered (by exact Rat.le_refl)
   grind
 
+def arctanKernelPaddedBound (C : RationalSubinterval 0 1)
+    (δ : Rat) (n : Nat) : QInterval :=
+  { lo := ArctanGeometry.integralKernel C.lower -
+        (C.width + C.width * C.width) - δ,
+    hi := ArctanGeometry.integralKernel C.lower + δ }
+
+theorem arctanKernelPaddedBound_contains
+    (C : RationalSubinterval 0 1) (δ : Rat) (hδ : 0 <= δ) (n : Nat)
+    {x : Rat} (hx : C.contains x) :
+    QInterval.ContainsInterval (arctanKernelPaddedBound C δ n)
+      (arctanKernelRaw.compute x n) := by
+  have hvar := arctanKernel_variation_le_step C.lower_mem hx.1
+    (Rat.le_trans hx.2 C.upper_mem)
+  have hmono := arctanKernel_antitone_on_unit C.lower_mem C.ordered
+    hx.1 hx.2
+  have hlo :
+      ArctanGeometry.integralKernel C.lower -
+          (C.width + C.width * C.width) - δ <=
+        1 / (1 + x * x) := by
+    have hvar' : ArctanGeometry.integralKernel C.lower - C.width <=
+        1 / (1 + x * x) := by
+      have hstep : x - C.lower <= C.width := by
+        have hstep' := (Rat.add_le_add_right (c := -C.lower)).2 hx.2
+        simpa [RationalSubinterval.width, Rat.sub_eq_add_neg] using hstep'
+      have h := hvar
+      unfold ArctanGeometry.integralKernel at h ⊢
+      grind only [Rat.sub_eq_add_neg]
+    have hsq : 0 <= C.width * C.width :=
+      RationalCircle.Stage.ratSquare_nonneg C.width
+    grind only [Rat.sub_eq_add_neg]
+  have hhi :
+      1 / (1 + x * x) <= ArctanGeometry.integralKernel C.lower + δ := by
+    exact Rat.le_trans hmono.2 (by
+      grind [ArctanGeometry.integralKernel])
+  unfold arctanKernelPaddedBound arctanKernelRaw RealFunRaw.exact
+    QInterval.ContainsInterval at *
+  exact ⟨hlo, hhi⟩
+
+theorem arctanKernelPaddedBound_ordered
+    (C : RationalSubinterval 0 1) (δ : Rat) (hδ : 0 <= δ) (n : Nat) :
+    0 <= (arctanKernelPaddedBound C δ n).width := by
+  unfold arctanKernelPaddedBound QInterval.width
+  have hsq : 0 <= C.width * C.width :=
+    RationalCircle.Stage.ratSquare_nonneg C.width
+  have hw : 0 <= C.width := by
+    have h := (Rat.add_le_add_right (c := -C.lower)).2 C.ordered
+    unfold RationalSubinterval.width
+    have hzero : C.lower + -C.lower = 0 := by grind
+    rw [hzero] at h
+    rw [Rat.sub_eq_add_neg]
+    exact h
+  have h2d : 0 <= 2 * δ := Rat.mul_nonneg (by native_decide) hδ
+  have hnonneg : 0 <= C.width + C.width * C.width + 2 * δ := by
+    exact Rat.add_nonneg (Rat.add_nonneg hw hsq) h2d
+  grind only [Rat.sub_eq_add_neg, Rat.add_assoc]
+
+theorem arctanKernelPaddedBound_local_endpoint_contains
+    (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
+    (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
+    (hN : 256 * (η.val.den + 1) <= N) :
+    (C.scaleBound (arctanKernelPaddedBound C δ.val N)).ContainsInterval
+      (endpointDifferenceInterval arctanPrimitiveRaw C.lower C.upper N) := by
+  have hx0 : 0 <= C.lower := C.lower_mem
+  have hx1 : C.lower <= 1 := Rat.le_trans C.ordered C.upper_mem
+  have hCupper : C.lower + C.width = C.upper := by
+    unfold RationalSubinterval.width
+    grind
+  have hupper : C.lower + C.width <= 1 := by
+    rw [hCupper]
+    exact C.upper_mem
+  have hpadwidth := arctanForwardQuotient_padding_width_le
+    hx0 hx1 hC hupper δ η N hη hN
+  let K : QInterval :=
+    { lo := ArctanGeometry.integralKernel C.lower -
+        (C.width + C.width * C.width),
+      hi := ArctanGeometry.integralKernel C.lower }
+  have hvariation := arctanKernel_variation_le_step
+    hx0 C.ordered C.upper_mem
+  have hbaseK :
+      (arctanKernelPaddedBound C 0 N).ContainsInterval K := by
+    unfold arctanKernelPaddedBound K QInterval.ContainsInterval
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  let E := arctanForwardQuotientPaddedKernelBound C.lower C.width N
+  have hbaseE :
+      (arctanKernelPaddedBound C δ.val N).ContainsInterval E := by
+    unfold arctanKernelPaddedBound K E
+      arctanForwardQuotientPaddedKernelBound QInterval.ContainsInterval at *
+    constructor <;> grind [Rat.sub_eq_add_neg]
+  have hscaled := QInterval.scaleRat_contains_of_nonneg
+    (Rat.le_of_lt hC) hbaseE
+  have hendpoint := arctanForwardEndpoint_scale_contains
+    hx0 hx1 hC hupper N
+  have htrans := hscaled.trans hendpoint
+  have hscaleEq :
+      QInterval.scaleByRat C.width (arctanKernelPaddedBound C δ.val N) =
+        QInterval.scaleRat C.width (arctanKernelPaddedBound C δ.val N) := by
+    unfold QInterval.scaleByRat QInterval.scaleRat
+    simp only [if_pos (Rat.le_of_lt hC)]
+  rw [← hCupper]
+  rw [RationalSubinterval.scaleBound, hscaleEq]
+  exact htrans
+
+def arctanPaddedDerivativeCellControl
+    (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
+    (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
+    (hN : 256 * (η.val.den + 1) <= N) :
+    CandidateDerivativeCellControl arctanPrimitiveRaw arctanKernelRaw C := by
+  exact {
+    bound := fun _ => arctanKernelPaddedBound C δ.val N
+    derivativeEvalPrecision := fun _ => 0
+    endpointPrecision := fun _ => N
+    primitive_domain_lower := by
+      exact ⟨C.lower_mem, Rat.le_trans C.ordered C.upper_mem⟩
+    primitive_domain_upper := by
+      exact ⟨Rat.le_trans C.lower_mem C.ordered, C.upper_mem⟩
+    candidate_domain_on := fun _ _ => trivial
+    bound_ordered := fun _ => arctanKernelPaddedBound_ordered C δ.val
+      (Rat.le_of_lt δ.property) N
+    candidate_contained := fun _ x hx => by
+      exact arctanKernelPaddedBound_contains C δ.val
+        (Rat.le_of_lt δ.property) N hx
+    endpoint_difference_contained := fun _ => by
+      simpa [RationalSubinterval.scaleBound] using
+        arctanKernelPaddedBound_local_endpoint_contains C δ η N hC hη hN }
+
 def arctanKernelDerivativeBound (eps : QPos) (k : Nat)
     (hk : k < (RationalPartition.uniform 0 1 (eps.val.den + 1)
       (by omega) (by native_decide)).pieces) :
