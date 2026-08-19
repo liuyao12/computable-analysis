@@ -2,6 +2,7 @@ import ComputableAnalysis.ArctanEffectiveFTC
 import ComputableAnalysis.ExpProofs
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.FiniteFTCIntervalRegular
+import ComputableAnalysis.SinPiSquareFTC
 
 /-!
 # Auditable effective-FTC portfolio
@@ -48,5 +49,23 @@ theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   arctan := Integral.arctanEffectiveFTC_equiv_endpoint
   sinePrefixSquare := FiniteSinePrefix.sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint
   exponential := ExpProofs.uniformExpOnUnit_effectiveFTC
+
+/-!
+The next rung is deliberately represented by the exact missing proof data.
+The generic certificate already turns the integral into an endpoint raw; the
+only remaining value theorem is that this endpoint raw is `1/4`.
+-/
+
+structure SinPiSquareEffectiveFTCEndpointSubgoal
+    (S : SinPiIntegral.ArctanSinPiConstruction) where
+  data : SinPiIntegral.SinPiSquareEffectiveFTCData S
+  endpoint_value :
+    data.endpointRaw.Equiv (RealRaw.ofRat (1 / 4))
+
+theorem SinPiSquareEffectiveFTCEndpointSubgoal.integral_value
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : SinPiSquareEffectiveFTCEndpointSubgoal S) :
+    H.data.integralRaw.Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact H.data.endpoint_equiv_of_value H.endpoint_value
 
 end ComputableAnalysis
