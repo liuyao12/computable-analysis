@@ -488,6 +488,10 @@ from monomial brackets structurally.
    required by a candidate-derivative FTC certificate.  The remaining local
    theorem is endpoint containment for the tangent-square primitive on the
    same cell.
+   The independent global width obligation is also discharged by
+   `tangentSquarePartition`, `tangentSquarePartition_cell_strict`, and
+   `tangentSquareUniformBoundSum_width_le`; its partition uses
+   `128 * (den(eps)+1)` cells and is entirely rational.
 
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by

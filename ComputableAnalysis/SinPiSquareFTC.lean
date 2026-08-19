@@ -255,6 +255,86 @@ theorem tangentSquareCellBound_contains_density
     (tangentSquareDensity x - tangentSquareDensity C.lower)
   constructor <;> grind [Rat.sub_eq_add_neg]
 
+def tangentSquarePartition (eps : QPos) : RationalPartition 0 1 :=
+  RationalPartition.uniform 0 1 (128 * (eps.val.den + 1))
+    (by omega) (by native_decide)
+
+theorem tangentSquarePartition_cell_strict
+    (eps : QPos) {k : Nat}
+    (hk : k < (tangentSquarePartition eps).pieces) :
+    ((tangentSquarePartition eps).cell k hk).lower <
+      ((tangentSquarePartition eps).cell k hk).upper := by
+  have hpos : 0 < mesh 0 1 (128 * (eps.val.den + 1)) := by
+    change 0 < mesh 0 1 (128 * (eps.val.den + 1))
+    unfold mesh
+    rw [if_neg (by omega : 128 * (eps.val.den + 1) ≠ 0)]
+    rw [Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 (Rat.natCast_pos.mpr (by omega)))
+  have hw : 0 < ((tangentSquarePartition eps).cell k hk).width := by
+    change 0 < ((RationalPartition.uniform 0 1
+      (128 * (eps.val.den + 1)) (by omega) (by native_decide)).cell k hk).width
+    rw [RationalPartition.uniform_cell_width 0 1
+      (128 * (eps.val.den + 1)) (by omega) (by native_decide) k hk]
+    exact hpos
+  unfold RationalSubinterval.width at hw
+  exact by grind
+
+theorem tangentSquareUniformBoundSum_width_le (eps : QPos) :
+    ((tangentSquarePartition eps).boundIntegralSum
+      (fun k hk => tangentSquareCellBound
+        ((tangentSquarePartition eps).cell k hk))).width <= eps.val := by
+  let P := tangentSquarePartition eps
+  have hbound : forall k (hk : k < P.pieces),
+      (tangentSquareCellBound (P.cell k hk)).width <=
+        128 * mesh 0 1 P.pieces := by
+    intro k hk
+    have hcell : (P.cell k hk).width = mesh 0 1 P.pieces := by
+      change ((RationalPartition.uniform 0 1
+        (128 * (eps.val.den + 1)) (by omega) (by native_decide)).cell k hk).width =
+        mesh 0 1 (128 * (eps.val.den + 1))
+      rw [RationalPartition.uniform_cell_width 0 1
+        (128 * (eps.val.den + 1)) (by omega) (by native_decide) k hk]
+    rw [show (tangentSquareCellBound (P.cell k hk)).width =
+      128 * (P.cell k hk).width by
+        unfold tangentSquareCellBound QInterval.width
+        grind [Rat.sub_eq_add_neg]]
+    rw [hcell]
+    exact Rat.le_refl
+  have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+    P.pieces P.positive (show (0 : Rat) <= 1 by native_decide)
+    (fun k hk => tangentSquareCellBound (P.cell k hk))
+    (128 * mesh 0 1 P.pieces) hbound
+  change ((P.boundIntegralSum
+    (fun k hk => tangentSquareCellBound (P.cell k hk))).width <=
+    (1 - 0) * (128 * mesh 0 1 P.pieces)) at hsum
+  change ((P.boundIntegralSum
+    (fun k hk => tangentSquareCellBound (P.cell k hk))).width <= eps.val)
+  have hmesh : mesh 0 1 P.pieces =
+      1 / (((128 * (eps.val.den + 1) : Nat) : Rat)) := by
+    change mesh 0 1 (128 * (eps.val.den + 1)) = _
+    unfold mesh
+    rw [if_neg (by omega : 128 * (eps.val.den + 1) ≠ 0)]
+    rw [Rat.div_def, Rat.natCast_mul, Rat.natCast_add]
+    grind [Rat.mul_assoc, Rat.mul_comm]
+  have hone : 1 / (((eps.val.den + 1 : Nat) : Rat)) <= eps.val :=
+    FTC.one_div_den_succ_le_of_pos eps.property
+  rw [hmesh] at hsum
+  have hsum' :
+      (P.boundIntegralSum
+        (fun k hk => tangentSquareCellBound (P.cell k hk))).width <=
+        1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+    calc
+      (P.boundIntegralSum
+          (fun k hk => tangentSquareCellBound (P.cell k hk))).width <=
+          (1 - 0) *
+            (128 * (1 / (((128 * (eps.val.den + 1) : Nat) : Rat)))) := by
+              simpa using hsum
+      _ = 1 / (((eps.val.den + 1 : Nat) : Rat)) := by
+        rw [Rat.natCast_mul, Rat.natCast_add, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm]
+  exact Rat.le_trans hsum' hone
+
 /-! The independent dyadic anchor for the squared tangent-chart density.  This
 is deliberately separate from the nested-radical candidate: the latter is
 related to this object only by a proved overlap theorem. -/
