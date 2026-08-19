@@ -110,9 +110,11 @@ from monomial brackets structurally.
    are monotone via `integratedTaylorPrefix_mono_on_unit`, the exponential
    specialization is `expTaylorPrefix_mono_on_unit`, and
    `uniformExpBox_contains_cellRange` encloses every evaluator box on a
-   rational cell.  The next obligations are to use `uniformExpCellRange` as
-   the derivative box, verify its summed width schedule, and assemble the
-   selected-stage certificate.
+   rational cell.  The raw-function-facing theorem
+   `uniformExpOnUnitRealFunRaw_compute_contains_cellRange` now discharges the
+   candidate-containment field.  The next obligations are to use
+   `uniformExpCellRange` as the derivative box, verify its summed width
+   schedule, and assemble the selected-stage certificate.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

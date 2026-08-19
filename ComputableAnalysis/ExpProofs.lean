@@ -4501,6 +4501,17 @@ theorem uniformExpOnUnitRealFunRaw_valid :
     rw [qabs_eq_self_of_nonneg hx.1]
     exact Rat.le_trans hx.2 (by native_decide))
 
+theorem uniformExpOnUnitRealFunRaw_compute_contains_cellRange
+    (n : Nat) {a b x : Rat}
+    (ha : 0 <= a) (hb : b <= 1)
+    (hax : a <= x) (hxb : x <= b) :
+    (uniformExpCellRange a b n).ContainsInterval
+      (uniformExpOnUnitRealFunRaw.compute x n) := by
+  change (uniformExpCellRange a b n).ContainsInterval
+    ((uniformExpRaw x).compute n)
+  rw [uniformExpRaw_compute]
+  exact uniformExpBox_contains_cellRange n ha hb hax hxb
+
 /-- On the unit interval the common-prefix representation and the selected
 adaptive representation are pointwise equivalent. -/
 theorem uniformExpOnUnit_equivalent_expPowerSeriesOnUnit :
