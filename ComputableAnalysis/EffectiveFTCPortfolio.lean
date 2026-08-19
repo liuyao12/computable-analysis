@@ -2,6 +2,7 @@ import ComputableAnalysis.ArctanEffectiveFTC
 import ComputableAnalysis.ExpProofs
 import ComputableAnalysis.FiniteSinePrefixFTC
 import ComputableAnalysis.FiniteFTCIntervalRegular
+import ComputableAnalysis.FiniteFTCQuartic
 import ComputableAnalysis.SinPiSquareFTC
 import ComputableAnalysis.TangentPullbackEffectiveFTC
 
@@ -20,6 +21,24 @@ its unfinished endpoint bridge is tracked in `SinPiSquareFTC.lean`.
 namespace ComputableAnalysis
 
 structure EffectiveFTCPortfolio where
+  square_value :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x * x) 0 1)
+      Integral.exactRat_square_integral_certificate).Equiv
+      (RealRaw.ofRat (1 / 3))
+  cube_value :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 3) 0 1)
+      Integral.exactRat_cube_integral_certificate).Equiv
+      (RealRaw.ofRat (1 / 4))
+  quartic_value :
+    (Integral.raw
+      (FunctionOnInterval.exactRat (fun x : Rat => x ^ 4) 0 1)
+      Integral.exactRat_quartic_integral_certificate).Equiv
+      (RealRaw.ofRat (1 / 5))
+  fifth_value :
+    Integral.fifthIntegralEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (1 / 6))
   square :
     (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw).Equiv
       Integral.squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw
@@ -46,6 +65,10 @@ structure EffectiveFTCPortfolio where
       ExpProofs.uniformExpOnUnit_selectedStageFTCIndexed.toSelected.endpointRaw
 
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
+  square_value := Integral.exactRat_square_integral_raw_equiv_one_third
+  cube_value := Integral.exactRat_cube_integral_raw_equiv_one_fourth
+  quartic_value := Integral.exactRat_quartic_integral_raw_equiv_one_fifth
+  fifth_value := Integral.fifthIntegralEffectiveFTC_equiv_one_sixth
   square := Integral.squareEffectiveFTC_equiv_endpoint
   cube := Integral.cubeEffectiveFTC_equiv_endpoint
   quartic := Integral.quarticEffectiveFTC_equiv_endpoint
