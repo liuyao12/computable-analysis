@@ -705,6 +705,53 @@ theorem NestedRadicalSquareIntegralConstructionSubgoal.public_equiv_evaluator
     (by native_decide : (0 : Rat) <= (1 : Rat) / 2)
     H.publicConstruction H.integral H.same_plan H.sample_overlap
 
+/- The next constructor makes the remaining `sin²` obligation concrete.  The
+   evaluator is required only to return the squared nested-radical box at the
+   public plan's sample points; the canonical half-angle certificates then
+   supply the interval overlaps needed by the generic integral transport. -/
+def NestedRadicalSquareIntegralConstructionSubgoal.of_canonical_search
+    (S : SinPiIntegral.ArctanSinPiConstruction)
+    (publicConstruction : Integral.Construction
+      (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2))
+    (evaluator : RealFunRaw)
+    (integral : Integral.Construction evaluator 0 ((1 : Rat) / 2))
+    (hdyadic : publicConstruction.plan = Integral.staticDyadicPlan)
+    (hplan : publicConstruction.plan = integral.plan)
+    (hevaluator : forall n k,
+      k < (publicConstruction.plan n).subdivisions ->
+      evaluator.compute
+        (leftPoint 0 ((1 : Rat) / 2)
+          (publicConstruction.plan n).subdivisions k)
+        (publicConstruction.plan n).evalPrecision =
+        SinPiIntegral.rationalSquareInterval
+          (SinPiIntegral.dyadicNestedRadicalStageSinAt n k))
+    (ht0 : (S.inverse.tangentAt 0
+      RationalCircle.GeometricTrig.firstQuadrantBranch_zero).Equiv
+      RealRaw.zero)
+    (hcertificate : forall (n k : Nat) (hk : k < 2 ^ n),
+      0 < k -> SinPiIntegral.CanonicalDyadicHalfAngleCertificate
+        S.inverse n k hk) :
+    NestedRadicalSquareIntegralConstructionSubgoal S := by
+  refine {
+    publicConstruction := publicConstruction
+    evaluator := evaluator
+    integral := integral
+    same_plan := hplan
+    sample_overlap := ?_ }
+  intro n k hk
+  have hk' : k < 2 ^ n := by
+    simpa [hdyadic, Integral.staticDyadicPlan,
+      Integral.staticDyadicSubdivisions] using hk
+  obtain ⟨m, u, hu⟩ :=
+    SinPiIntegral.canonical_dyadic_search_of_halfAngle_certificate_family
+      S.inverse ht0 hcertificate n k hk'
+  have hover := SinPiIntegral.sinPiSquare_nestedRadicalStage_sample_overlap_of_canonical_box_search
+    S hk' m u hu
+  have he := hevaluator n k hk
+  rw [he]
+  simpa [hdyadic, Integral.staticDyadicPlan,
+    Integral.staticDyadicSubdivisions] using hover
+
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   square_value := Integral.exactRat_square_integral_raw_equiv_one_third
   cube_value := Integral.exactRat_cube_integral_raw_equiv_one_fourth
