@@ -436,10 +436,37 @@ structure TangentSquareQuarterTurnValueSubgoal where
     SinPiIntegral.tangentSquareEffectiveIntegralRaw.Valid
   endpoint_valid :
     SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Valid
+  quarter_valid :
+    (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
   compatibility : TangentSquareFTCIntegralCompatibilitySubgoal
   endpoint_equiv_quarter :
     SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw.Equiv
       (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
+
+theorem TangentSquareQuarterTurnValueSubgoal.tangent_equiv_effective
+    (H : TangentSquareQuarterTurnValueSubgoal) :
+    SinPiIntegral.tangentSquareIntegral.Equiv
+      SinPiIntegral.tangentSquareEffectiveIntegralRaw := by
+  exact RealRaw.equiv_symm H.compatibility.equivalent
+
+theorem TangentSquareQuarterTurnValueSubgoal.effective_equiv_endpoint
+    (H : TangentSquareQuarterTurnValueSubgoal) :
+    SinPiIntegral.tangentSquareEffectiveIntegralRaw.Equiv
+      SinPiIntegral.tangentSquareEffectiveCandidateFTC.toDerivativeBoundFTC.endpointRaw := by
+  exact SinPiIntegral.tangentSquareEffectiveIntegralRaw_equiv_endpoint
+
+theorem TangentSquareQuarterTurnValueSubgoal.value
+    (H : TangentSquareQuarterTurnValueSubgoal) :
+    SinPiIntegral.tangentSquareIntegral.Equiv
+      (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) := by
+  have hanchor_eff := H.tangent_equiv_effective
+  have heff_endpoint := H.effective_equiv_endpoint
+  have hanchor_endpoint := RealRaw.equiv_trans
+    H.tangent_integral_valid H.effective_integral_valid H.endpoint_valid
+    hanchor_eff heff_endpoint
+  exact RealRaw.equiv_trans
+    H.tangent_integral_valid H.endpoint_valid H.quarter_valid
+    hanchor_endpoint H.endpoint_equiv_quarter
 
 theorem TangentSquareIntegralValueSubgoal.value
     (H : TangentSquareIntegralValueSubgoal) :
