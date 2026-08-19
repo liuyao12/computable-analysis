@@ -418,6 +418,32 @@ theorem dyadicNestedRadicalSquareIntegralRaw_widths_shrink :
   exact shrinksToZero_of_natOverSuccBound
     (fun n => dyadicNestedRadicalSquareLeftSum_width_le n)
 
+/- Prefix stabilization is the direct-only implementation of the missing
+cross-stage nesting proof.  The anchor is a proof-side object; the stabilized
+evaluator itself reads only the square candidate and the rational widths. -/
+def dyadicNestedRadicalSquareIntegralRaw_stabilized
+    (anchor : RealRaw) : RealRaw :=
+  RealRaw.prefixStabilize dyadicNestedRadicalSquareIntegralRaw
+    (fun n => (anchor.compute n).width)
+
+theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
+    {anchor : RealRaw} (hanchor : anchor.Valid)
+    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv anchor) :
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized anchor).Valid := by
+  apply RealRaw.prefixStabilize_valid
+    dyadicNestedRadicalSquareIntegralRaw_widths_shrink hanchor hover
+  · intro n
+    exact Rat.le_refl
+  · exact hanchor.2.2
+
+theorem dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
+    {anchor : RealRaw} (hanchor : anchor.Valid)
+    (hover : dyadicNestedRadicalSquareIntegralRaw.Equiv anchor) :
+    (dyadicNestedRadicalSquareIntegralRaw_stabilized anchor).Equiv anchor := by
+  apply RealRaw.prefixStabilize_equiv_anchor hanchor hover
+  intro n
+  exact Rat.le_refl
+
 /- The finite rational-circle identity used by the future primitive proof.
    Keeping this as an algebraic theorem makes the intended `sin²` route
    explicit before any interval-level cosine transport is added. -/

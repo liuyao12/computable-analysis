@@ -362,6 +362,12 @@ from monomial brackets structurally.
    candidate has the same gap and currently uses prefix stabilization when an
    independently certified anchor is available.
 
+   The square route now exposes the same direct-only repair:
+   `dyadicNestedRadicalSquareIntegralRaw_stabilized` and its theorems
+   `..._valid_of_overlap` and `..._equiv_anchor_of_overlap`.  Thus the
+   cross-stage nesting subgoal is reduced to one explicit common-anchor
+   overlap theorem; stabilization itself is formalized and sorry-free.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but
