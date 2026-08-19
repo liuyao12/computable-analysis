@@ -461,6 +461,183 @@ theorem tangentSquareRationalPart_difference_identity
   grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
 
+theorem tangentSquareRationalPart_difference_qabs_le
+    {p r : Rat} (hp0 : 0 <= p) (hpr : p <= r) (hr1 : r <= 1) :
+    qabs (tangentSquareRationalPart r - tangentSquareRationalPart p) <=
+      8 * (r - p) := by
+  have hW : 0 <= r - p := by grind
+  have hpr0 : 0 <= p * r := Rat.mul_nonneg hp0 (Rat.le_trans hp0 hpr)
+  have hp1 : p <= 1 := Rat.le_trans hpr hr1
+  have hpr1' : p * r <= 1 := by
+    have h := Rat.mul_le_mul_of_nonneg_left hr1 hp0
+    grind
+  have hA0 : 0 <= p * r + 1 := by grind
+  have hA2 : p * r + 1 <= 2 := by grind
+  have hB0 : -2 <= p * r - p - r - 1 := by
+    have hprod : 0 <= (1 - p) * (1 - r) := by
+      exact Rat.mul_nonneg (by grind) (by grind)
+    grind [Rat.mul_add, Rat.add_mul]
+  have hB2 : p * r - p - r - 1 <= 2 := by grind
+  have hC0 : -2 <= p * r + p + r - 1 := by grind
+  have hC2 : p * r + p + r - 1 <= 2 := by grind
+  have hDpos : 0 < (1 + p * p) ^ 2 * (1 + r * r) ^ 2 := by
+    have hpden : 0 < 1 + p * p := by
+      have h := rat_square_nonneg_basic p
+      grind
+    have hrden : 0 < 1 + r * r := by
+      have h := rat_square_nonneg_basic r
+      grind
+    have hp2 : 0 < (1 + p * p) ^ 2 := by
+      simpa [Rat.pow_succ] using Rat.mul_pos hpden hpden
+    have hr2 : 0 < (1 + r * r) ^ 2 := by
+      simpa [Rat.pow_succ] using Rat.mul_pos hrden hrden
+    exact Rat.mul_pos hp2 hr2
+  have hDone : 1 <= (1 + p * p) ^ 2 * (1 + r * r) ^ 2 := by
+    have hpden : 1 <= (1 + p * p) ^ 2 := by
+      have h := rat_square_nonneg_basic p
+      have hone : 1 <= 1 + p * p := by grind
+      calc
+        1 = (1 : Rat) * 1 := by native_decide
+        _ <= (1 + p * p) * 1 := Rat.mul_le_mul_of_nonneg_right hone (by native_decide)
+        _ <= (1 + p * p) * (1 + p * p) :=
+          Rat.mul_le_mul_of_nonneg_left hone (by grind)
+        _ = (1 + p * p) ^ 2 := by simp [Rat.pow_succ]
+    have hrden : 1 <= (1 + r * r) ^ 2 := by
+      have h := rat_square_nonneg_basic r
+      have hone : 1 <= 1 + r * r := by grind
+      calc
+        1 = (1 : Rat) * 1 := by native_decide
+        _ <= (1 + r * r) * 1 := Rat.mul_le_mul_of_nonneg_right hone (by native_decide)
+        _ <= (1 + r * r) * (1 + r * r) :=
+          Rat.mul_le_mul_of_nonneg_left hone (by grind)
+        _ = (1 + r * r) ^ 2 := by simp [Rat.pow_succ]
+    calc
+      1 = (1 : Rat) * 1 := by native_decide
+      _ <= (1 + p * p) ^ 2 * 1 := by
+        exact Rat.mul_le_mul_of_nonneg_right hpden (by native_decide)
+      _ <= (1 + p * p) ^ 2 * (1 + r * r) ^ 2 :=
+        Rat.mul_le_mul_of_nonneg_left hrden (by
+          exact Rat.le_trans (by native_decide) hpden)
+  have hDinv : (0 : Rat) <= ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ := by
+    exact Rat.le_of_lt ((Rat.inv_pos).2 hDpos)
+  have hDinv_le : ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ <= (1 : Rat) := by
+    apply Rat.le_of_mul_le_mul_right
+      (c := ((1 + p * p) ^ 2 * (1 + r * r) ^ 2 : Rat))
+    · rw [Rat.inv_mul_cancel _ (Rat.ne_of_gt hDpos)]
+      simpa using hDone
+    · exact hDpos
+  rw [tangentSquareRationalPart_difference_identity, Rat.div_def]
+  rw [qabs_mul, qabs_neg, qabs_mul, qabs_mul, qabs_mul,
+    qabs_eq_self_of_nonneg hW]
+  have hAabs : qabs (p * r + 1) <= 2 := by
+    rw [qabs_eq_self_of_nonneg hA0]
+    exact hA2
+  have hBabs : qabs (p * r - p - r - 1) <= 2 :=
+    qabs_le_of_neg_le_le hB0 hB2
+  have hCabs : qabs (p * r + p + r - 1) <= 2 :=
+    qabs_le_of_neg_le_le hC0 hC2
+  have hDabs : qabs ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ <= 1 := by
+    rw [qabs_eq_self_of_nonneg hDinv]
+    exact hDinv_le
+  calc
+    (r - p) * qabs (p * r + 1) *
+        qabs (p * r - p - r - 1) *
+        qabs (p * r + p + r - 1) *
+        qabs ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ <=
+      (r - p) * 2 * 2 * 2 * 1 := by
+        have hrest0 : 0 <=
+            qabs (p * r - p - r - 1) *
+              qabs (p * r + p + r - 1) *
+              qabs ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ := by
+          exact Rat.mul_nonneg (Rat.mul_nonneg
+            (qabs_nonneg _) (qabs_nonneg _)) (qabs_nonneg _)
+        have hW2 : 0 <= (r - p) * 2 :=
+          Rat.mul_nonneg hW (by native_decide)
+        have hW22 : 0 <= (r - p) * 2 * 2 :=
+          Rat.mul_nonneg hW2 (by native_decide)
+        have hW222 : 0 <= (r - p) * 2 * 2 * 2 :=
+          Rat.mul_nonneg hW22 (by native_decide)
+        calc
+          (r - p) * qabs (p * r + 1) *
+              qabs (p * r - p - r - 1) *
+              qabs (p * r + p + r - 1) *
+              qabs ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ <=
+            (r - p) * 2 *
+              qabs (p * r - p - r - 1) *
+              qabs (p * r + p + r - 1) *
+              qabs ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ := by
+                simpa [Rat.mul_assoc] using
+                  Rat.mul_le_mul_of_nonneg_left
+                    (Rat.mul_le_mul_of_nonneg_right hAabs hrest0) hW
+          _ <= (r - p) * 2 * 2 *
+              qabs (p * r + p + r - 1) *
+              qabs ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ := by
+                simpa [Rat.mul_assoc] using
+                  Rat.mul_le_mul_of_nonneg_left
+                    (Rat.mul_le_mul_of_nonneg_right hBabs
+                    (Rat.mul_nonneg (qabs_nonneg _)
+                        (qabs_nonneg _))) hW2
+          _ <= (r - p) * 2 * 2 * 2 *
+              qabs ((1 + p * p) ^ 2 * (1 + r * r) ^ 2)⁻¹ := by
+                simpa [Rat.mul_assoc] using
+                  Rat.mul_le_mul_of_nonneg_left
+                    (Rat.mul_le_mul_of_nonneg_right hCabs
+                      (qabs_nonneg _))
+                    hW22
+          _ <= (r - p) * 2 * 2 * 2 * 1 := by
+                simpa [Rat.mul_assoc] using
+                  Rat.mul_le_mul_of_nonneg_left hDabs
+                    hW222
+    _ = 8 * (r - p) := by grind
+
+def tangentSquareCorrectionRaw : RealFunRaw :=
+  RealFunRaw.exact tangentSquareRationalPart
+
+theorem tangentSquareCorrectionRaw_valid : tangentSquareCorrectionRaw.Valid :=
+  RealFunRaw.exact_valid _
+
+def tangentSquareCorrectionBound : QInterval :=
+  { lo := -8, hi := 8 }
+
+theorem tangentSquareCorrectionBound_ordered :
+    0 <= tangentSquareCorrectionBound.width := by
+  native_decide
+
+theorem tangentSquareCorrectionBound_contains_endpoint
+    (C : RationalSubinterval 0 1) (n : Nat)
+    (hstrict : C.lower < C.upper) :
+    (C.scaleBound tangentSquareCorrectionBound).ContainsInterval
+      (endpointDifferenceInterval tangentSquareCorrectionRaw
+        C.lower C.upper n) := by
+  have hwidth : 0 <= C.width := by
+    unfold RationalSubinterval.width
+    grind [C.ordered]
+  have hqabs := tangentSquareRationalPart_difference_qabs_le
+    C.lower_mem C.ordered C.upper_mem
+  have hwEq : C.width = C.upper - C.lower := rfl
+  have hprimitive :
+      endpointDifferenceInterval tangentSquareCorrectionRaw
+        C.lower C.upper n =
+        { lo := tangentSquareRationalPart C.upper -
+            tangentSquareRationalPart C.lower,
+          hi := tangentSquareRationalPart C.upper -
+            tangentSquareRationalPart C.lower } := by
+    unfold endpointDifferenceInterval tangentSquareCorrectionRaw
+      RealFunRaw.exact
+    rfl
+  rw [hprimitive]
+  unfold RationalSubinterval.scaleBound tangentSquareCorrectionBound
+    QInterval.scaleByRat
+  simp only [if_pos hwidth]
+  unfold QInterval.ContainsInterval
+  have hlow := neg_qabs_le_self
+    (tangentSquareRationalPart C.upper -
+      tangentSquareRationalPart C.lower)
+  have hhigh := self_le_qabs
+    (tangentSquareRationalPart C.upper -
+      tangentSquareRationalPart C.lower)
+  constructor <;> grind [Rat.sub_eq_add_neg]
+
 /- The tangent-coordinate primitive is the arctangent geometry evaluator plus
 the rational correction from the decomposition above.  The correction is
 kept as an exact rational function, so this is a genuine computable function

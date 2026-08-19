@@ -494,8 +494,10 @@ from monomial brackets structurally.
    `128 * (den(eps)+1)` cells and is entirely rational.
    The rational correction in the tangent-chart primitive now has the exact
    finite endpoint identity `tangentSquareRationalPart_difference_identity`.
-   The remaining local step is its interval bound and combination with the
-   arctangent endpoint box.
+   Its quantitative and cell-level endpoint certificates are now also
+   available as `tangentSquareRationalPart_difference_qabs_le` and
+   `tangentSquareCorrectionBound_contains_endpoint`.  The remaining local
+   step is combining this correction box with the arctangent endpoint box.
 
    Independently, the primitive endpoint algebra is now transported to the
    circle-angle representation by
