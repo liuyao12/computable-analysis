@@ -326,6 +326,13 @@ from monomial brackets structurally.
    certificate from `TangentPullbackEffectiveFTC.lean`; this is a second
    non-polynomial checkpoint while square-tail transport remains open.
 
+   The first square-tail transport rung is now formalized at the finite-box
+   level: `square_sample_overlap_of_sine_sample_overlap` proves that overlap
+   of two sine enclosures inside `[0,1]` is preserved by the interval square
+   operation.  The remaining evaluator-specific rung is to feed the existing
+   nested-radical sine sample-overlap certificates through this lemma and then
+   construct the corresponding squared-integrand integral certificate.
+
 The first six items are reusable infrastructure and regression coverage; items
 7--9 are the sine applications.  A later general theorem may package the same
 argument for any interval-regular convex or concave computable primitive, but

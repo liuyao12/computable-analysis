@@ -209,6 +209,50 @@ def rationalSquareInterval (I : QInterval) : QInterval :=
 def rationalOneMinusSquareInterval (I : QInterval) : QInterval :=
   { lo := 1 - I.hi * I.hi, hi := 1 - I.lo * I.lo }
 
+theorem rationalSquareInterval_overlap_of_interval_overlap
+    {I J : QInterval}
+    (hI : subintervalOf I 0 1)
+    (hJ : subintervalOf J 0 1)
+    (hover : QInterval.Overlaps I J) :
+    QInterval.Overlaps (rationalSquareInterval I)
+      (rationalSquareInterval J) := by
+  have hIlo : 0 <= I.lo := hI.1
+  have hJlo : 0 <= J.lo := hJ.1
+  have hIhi : I.hi <= 1 := hI.2.2
+  have hJhi : J.hi <= 1 := hJ.2.2
+  have hIorder : I.lo <= I.hi := hI.2.1
+  have hJorder : J.lo <= J.hi := hJ.2.1
+  have hsquare_mono {a b : Rat} (ha : 0 <= a) (hab : a <= b) :
+      a * a <= b * b := by
+    have hb : 0 <= b := Rat.le_trans ha hab
+    exact Rat.le_trans
+      (Rat.mul_le_mul_of_nonneg_left hab ha)
+      (Rat.mul_le_mul_of_nonneg_right hab hb)
+  unfold rationalSquareInterval QInterval.Overlaps
+  constructor
+  · exact hsquare_mono hIlo hover.1
+  · exact hsquare_mono hJlo hover.2
+
+theorem rationalSquareInterval_mul_self_eq
+    {I : QInterval} (hI : subintervalOf I 0 1) :
+    QBox.mulRealInterval I.lo I.hi I.lo I.hi =
+      rationalSquareInterval I := by
+  have horder : I.lo <= I.hi := hI.2.1
+  unfold rationalSquareInterval
+  exact QBox.mulRealInterval_self_of_nonneg hI.1 horder
+
+theorem square_sample_overlap_of_sine_sample_overlap
+    {I J : QInterval}
+    (hI : subintervalOf I 0 1)
+    (hJ : subintervalOf J 0 1)
+    (hover : QInterval.Overlaps I J) :
+    QInterval.Overlaps
+      (QBox.mulRealInterval I.lo I.hi I.lo I.hi)
+      (QBox.mulRealInterval J.lo J.hi J.lo J.hi) := by
+  rw [rationalSquareInterval_mul_self_eq hI,
+    rationalSquareInterval_mul_self_eq hJ]
+  exact rationalSquareInterval_overlap_of_interval_overlap hI hJ hover
+
 theorem rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
     {S C : QInterval} {s c : Rat}
     (hS : subintervalOf S 0 1) (hC : subintervalOf C 0 1)
