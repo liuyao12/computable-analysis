@@ -153,6 +153,24 @@ theorem tangentSquareIntegral_stage_zero_contains_quarter :
   rw [SinPiIntegral.tangentSquareIntegral_compute]
   native_decide
 
+theorem tangentSquareLeftSum_stage_one_quarter_certificate :
+    ((1 / 4 : Rat) - (64 : Rat) / (((2 ^ 1 : Nat) : Rat)) <=
+        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          SinPiIntegral.tangentSquareDensity (2 ^ 1)) ∧
+      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          SinPiIntegral.tangentSquareDensity (2 ^ 1) <=
+        (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 1 : Nat) : Rat))) := by
+  native_decide
+
+theorem tangentSquareLeftSum_stage_two_quarter_certificate :
+    ((1 / 4 : Rat) - (64 : Rat) / (((2 ^ 2 : Nat) : Rat)) <=
+        IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          SinPiIntegral.tangentSquareDensity (2 ^ 2)) ∧
+      (IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          SinPiIntegral.tangentSquareDensity (2 ^ 2) <=
+        (1 / 4 : Rat) + (64 : Rat) / (((2 ^ 2 : Nat) : Rat))) := by
+  native_decide
+
 structure TangentSquareLeftSumQuarterCertificate where
   lower_sum :
     forall n,

@@ -86,7 +86,10 @@ That bridge is now represented by the checked
    the finite left sum within the explicit `64/2^n` Darboux margin.  Its
    `to_value_subgoal` theorem converts that rational-sum certificate into the
    uniform all-stage interval containment, without an appeal to completed real
-   numbers.
+   numbers.  The first two nontrivial finite left sums are checked directly by
+   `tangentSquareLeftSum_stage_one_quarter_certificate` and
+   `tangentSquareLeftSum_stage_two_quarter_certificate`; these are regression
+   anchors for the eventual uniform estimate.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
