@@ -75,6 +75,9 @@ That bridge is now represented by the checked
    and the other is `TangentSquareIntegralValueSubgoal`, whose two inequalities
    say that every anchor interval contains `1/4`.  Its `value` theorem closes
    the stabilized dyadic value once those finite certificates are supplied.
+   The separate algorithm-compatibility obligation is represented by
+   `TangentSquareFTCIntegralCompatibilitySubgoal`: stagewise overlap between
+   the effective FTC bounded-sum raw and the independent dyadic anchor.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

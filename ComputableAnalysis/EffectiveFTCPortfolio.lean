@@ -145,6 +145,22 @@ structure TangentSquareIntegralValueSubgoal where
   upper_contains :
     forall n, (1 / 4 : Rat) <= (SinPiIntegral.tangentSquareIntegral.compute n).hi
 
+structure TangentSquareFTCIntegralCompatibilitySubgoal where
+  stage_overlap :
+    forall n, QInterval.Overlaps
+      (SinPiIntegral.tangentSquareEffectiveIntegralRaw.compute n)
+      (SinPiIntegral.tangentSquareIntegral.compute n)
+
+theorem TangentSquareFTCIntegralCompatibilitySubgoal.equivalent
+    (H : TangentSquareFTCIntegralCompatibilitySubgoal) :
+    SinPiIntegral.tangentSquareEffectiveIntegralRaw.Equiv
+      SinPiIntegral.tangentSquareIntegral := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  exact (RealRaw.compareAt_overlap_iff
+    SinPiIntegral.tangentSquareEffectiveIntegralRaw
+    SinPiIntegral.tangentSquareIntegral n n).2 (H.stage_overlap n)
+
 theorem TangentSquareIntegralValueSubgoal.value
     (H : TangentSquareIntegralValueSubgoal) :
     SinPiIntegral.tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
