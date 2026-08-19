@@ -752,6 +752,26 @@ def NestedRadicalSquareIntegralConstructionSubgoal.of_canonical_search
   simpa [hdyadic, Integral.staticDyadicPlan,
     Integral.staticDyadicSubdivisions] using hover
 
+/- The square-sum width estimate and orderedness are already proved.  This
+   isolates the one missing raw-real property: cross-stage nesting of the
+   finite dyadic square sums. -/
+structure NestedRadicalSquareCandidateValiditySubgoal where
+  nested : forall n m, n <= m ->
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo <=
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum m).lo /\
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum m).lo <=
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum m).hi /\
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum m).hi <=
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
+
+theorem NestedRadicalSquareCandidateValiditySubgoal.valid
+    (H : NestedRadicalSquareCandidateValiditySubgoal) :
+    SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.Valid := by
+  refine ⟨?_, H.nested, ?_⟩
+  · intro n
+    exact SinPiIntegral.dyadicNestedRadicalSquareLeftSum_ordered n
+  · exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_widths_shrink
+
 theorem NestedRadicalSquareIntegralConstructionSubgoal.transport_of_compute
     {S : SinPiIntegral.ArctanSinPiConstruction}
     (H : NestedRadicalSquareIntegralConstructionSubgoal S)
@@ -794,6 +814,19 @@ theorem NestedRadicalSquareIntegralConstructionSubgoal.transport_of_compute
       (fun n => Rat.le_refl)
   exact RealRaw.equiv_trans hevaluator hcandidate hstable
     hequiv_candidate hprefix
+
+theorem NestedRadicalSquareIntegralConstructionSubgoal.transport_of_validity_subgoal
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    (hvalid : NestedRadicalSquareCandidateValiditySubgoal)
+    (hcompute : forall n,
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).compute n =
+        SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw.compute n)
+    (hcommon : SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness) :
+    (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
+      (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+        SinPiIntegral.tangentSquareIntegral) := by
+  exact H.transport_of_compute hvalid.valid hcompute hcommon
 
 theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_tangent_anchor
     {S : SinPiIntegral.ArctanSinPiConstruction}
