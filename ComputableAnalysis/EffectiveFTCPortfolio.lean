@@ -752,6 +752,33 @@ def NestedRadicalSquareIntegralConstructionSubgoal.of_canonical_search
   simpa [hdyadic, Integral.staticDyadicPlan,
     Integral.staticDyadicSubdivisions] using hover
 
+theorem NestedRadicalSquareIntegralConstructionSubgoal.value_of_tangent_anchor
+    {S : SinPiIntegral.ArctanSinPiConstruction}
+    (H : NestedRadicalSquareIntegralConstructionSubgoal S)
+    (htransport :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Equiv
+        (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+          SinPiIntegral.tangentSquareIntegral))
+    (hvalue : NestedRadicalSinPiSquareValueSubgoal) :
+    (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S) 0 ((1 : Rat) / 2)
+      H.publicConstruction).Equiv (RealRaw.ofRat (1 / 4)) := by
+  have hpublic :
+      (Integral.integral (SinPiIntegral.sinPiSquareOnHalf S)
+        0 ((1 : Rat) / 2) H.publicConstruction).Valid := by
+    exact FTC.integral_valid_of_construction H.publicConstruction
+  have hevaluator :
+      (Integral.integral H.evaluator 0 ((1 : Rat) / 2) H.integral).Valid := by
+    exact FTC.integral_valid_of_construction H.integral
+  have hstable :
+      (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+        SinPiIntegral.tangentSquareIntegral).Valid := by
+    exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_tangentSquareIntegral_overlap
+      hvalue.commonWitness.to_equiv
+  exact RealRaw.equiv_trans hpublic hevaluator
+    (RealRaw.ofRat_valid (1 / 4)) H.public_equiv_evaluator
+      (RealRaw.equiv_trans hevaluator hstable (RealRaw.ofRat_valid (1 / 4))
+        htransport hvalue.value)
+
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   square_value := Integral.exactRat_square_integral_raw_equiv_one_third
   cube_value := Integral.exactRat_cube_integral_raw_equiv_one_fourth
