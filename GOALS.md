@@ -173,6 +173,9 @@ from monomial brackets structurally.
    facts `uniformExpFTCLeftPoint_bounds`, `uniformExpFTCLeftPoint_strict`,
    `uniformExpFTCLeftPoint_step_le`, and `uniformExpFTCMesh_ne` are also
    available for the final finite-sum application.
+   `uniformExpFTCIndexedBound` now uses these explicit `leftPoint` endpoints
+   directly; partition-cell proofs enter only through the containment and
+   local endpoint lemmas.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution

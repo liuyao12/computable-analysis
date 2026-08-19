@@ -5351,8 +5351,8 @@ theorem uniformExpFTCPartition_cell_strict (eps : QPos) (k : Nat)
 def uniformExpFTCIndexedBound (eps : QPos) (k : Nat) : QInterval :=
   QInterval.expand
     (uniformExpCellRange
-      ((uniformExpFTCPartition eps).point k)
-      ((uniformExpFTCPartition eps).point (k + 1))
+      (leftPoint 0 1 (uniformExpFTCPieces eps) k)
+      (leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1))
       (uniformExpFTCStage eps))
     (2 * (precisionAtStage (uniformExpFTCIndex eps)).val)
 
@@ -5362,8 +5362,8 @@ theorem uniformExpFTCIndexedBound_eq (eps : QPos) (k : Nat) :
     uniformExpFTCIndexedBound eps k =
       QInterval.expand
         (uniformExpCellRange
-          ((uniformExpFTCPartition eps).point k)
-          ((uniformExpFTCPartition eps).point (k + 1))
+          (leftPoint 0 1 (uniformExpFTCPieces eps) k)
+          (leftPoint 0 1 (uniformExpFTCPieces eps) (k + 1))
           (uniformExpFTCStage eps))
         (2 * (precisionAtStage (uniformExpFTCIndex eps)).val) := by
   unfold uniformExpFTCIndexedBound
