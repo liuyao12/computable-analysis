@@ -112,6 +112,9 @@ That bridge is now represented by the checked
    `reciprocalPiRaw * tangentSquareIntegral`, matching
    `integral_0^(1/2) sin(pi*x)^2 dx`.  The existing rational-`1/4` contract is
    therefore only a provisional placeholder until this scaling is formalized.
+   The corrected contract is now `NormalizedTangentSquareValueSubgoal`, whose
+   `value` theorem requires the normalized raw validity, transport to the
+   quarter-turn anchor, and the reciprocal-π quarter-scale identity.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

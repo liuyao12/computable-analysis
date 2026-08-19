@@ -265,6 +265,29 @@ structure TangentSquareIntegralValueSubgoal where
   upper_contains :
     forall n, (1 / 4 : Rat) <= (SinPiIntegral.tangentSquareIntegral.compute n).hi
 
+def normalizedTangentSquareIntegral : RealRaw :=
+  SinPiIntegral.reciprocalPiRaw * SinPiIntegral.tangentSquareIntegral
+
+structure NormalizedTangentSquareValueSubgoal where
+  normalized_valid : normalizedTangentSquareIntegral.Valid
+  anchor_valid :
+    (SinPiIntegral.reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
+  chart_transport :
+    normalizedTangentSquareIntegral.Equiv
+      (SinPiIntegral.reciprocalPiRaw *
+        RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
+  reciprocal_quarter :
+    (SinPiIntegral.reciprocalPiRaw *
+      RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Equiv
+        (RealRaw.ofRat (1 / 4))
+
+theorem NormalizedTangentSquareValueSubgoal.value
+    (H : NormalizedTangentSquareValueSubgoal) :
+    normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
+  exact RealRaw.equiv_trans H.normalized_valid
+    H.anchor_valid (RealRaw.ofRat_valid _) H.chart_transport H.reciprocal_quarter
+
 theorem tangentSquareIntegral_stage_zero_contains_quarter :
     QInterval.Overlaps
       (SinPiIntegral.tangentSquareIntegral.compute 0)
