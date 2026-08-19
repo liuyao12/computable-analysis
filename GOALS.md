@@ -112,6 +112,8 @@ from monomial brackets structurally.
    `square_effective_value` in `effectiveFTCPortfolio`: the effective FTC
    certificate for the primitive `x^2` and derivative `2*x` proves its
    bounded integral is `1`, including validity of its scheduled endpoint raw.
+   The same value-level closure is now exported for the cubic primitive
+   `x^3` and derivative `3*x^2` as `cube_effective_value`.
 
 3. **Higher polynomial regression.**  Instantiate the same FTC route for
    the scaled primitives `F x = x^5/5`, `dF x = x^4` and

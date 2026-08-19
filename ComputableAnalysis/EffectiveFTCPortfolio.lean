@@ -33,9 +33,40 @@ theorem squareEffectiveFTC_endpointRaw_valid :
       Integral.squarePrimitiveRaw, RealFunRaw.exact,
       endpointDifferenceCompute, endpointDifferenceInterval]
     native_decide
+
   change RealRaw.ValidCompute
     (fun n => endpointDifferenceCompute Integral.squarePrimitiveRaw 0 1
       (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.chooseEndpointPrecision
+        (precisionAtStage n)))
+  rw [heq]
+  unfold RealRaw.ValidCompute
+  constructor
+  · intro n
+    simp [QInterval.width] <;> grind
+  constructor
+  · intro n m hnm
+    simp
+  · intro eps
+    refine ⟨0, ?_⟩
+    intro n hn
+    simp [QInterval.width] <;> grind
+
+theorem cubeEffectiveFTC_endpointRaw_valid :
+    (Integral.cubeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
+  have heq :
+      (fun n => endpointDifferenceCompute Integral.cubePrimitiveRaw 0 1
+        (Integral.cubeEffectiveFTCData.toDerivativeBoundFTC.chooseEndpointPrecision
+          (precisionAtStage n))) =
+      (fun _ => ({ lo := 1, hi := 1 } : QInterval)) := by
+    funext n
+    simp [Integral.cubeEffectiveFTCData,
+      DerivativeBoundFTC.endpointRaw, DerivativeBoundFTC.endpointCompute,
+      Integral.cubePrimitiveRaw, RealFunRaw.exact,
+      endpointDifferenceCompute, endpointDifferenceInterval]
+    native_decide
+  change RealRaw.ValidCompute
+    (fun n => endpointDifferenceCompute Integral.cubePrimitiveRaw 0 1
+      (Integral.cubeEffectiveFTCData.toDerivativeBoundFTC.chooseEndpointPrecision
         (precisionAtStage n)))
   rw [heq]
   unfold RealRaw.ValidCompute
@@ -58,6 +89,9 @@ structure EffectiveFTCPortfolio where
       (RealRaw.ofRat (1 / 3))
   square_effective_value :
     Integral.squareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat 1)
+  cube_effective_value :
+    Integral.cubeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
       (RealRaw.ofRat 1)
   cube_value :
     (Integral.raw
@@ -118,6 +152,23 @@ theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
       DerivativeBoundFTC.endpointInterval,
       Integral.squareEffectiveFTCData, Integral.squarePrimitiveRaw,
       RealFunRaw.exact, endpointDifferenceInterval] at ⊢
+    unfold QInterval.Overlaps at hover ⊢
+    grind
+  cube_effective_value := by
+    intro n
+    apply (RealRaw.compareAt_overlap_iff
+      Integral.cubeEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+      (RealRaw.ofRat 1) n n).2
+    let H := Integral.cubeEffectiveFTCData.toDerivativeBoundFTC
+    change QInterval.Overlaps
+      (H.boundedIntegralInterval (precisionAtStage n))
+      ({ lo := 1, hi := 1 } : QInterval)
+    have hover := H.overlap (precisionAtStage n)
+    simp [H, Integral.cubeEffectiveFTCData, endpointDifferenceInterval,
+      Integral.cubePrimitiveRaw, RealFunRaw.exact] at hover
+    simp [H, DerivativeBoundFTC.boundedIntegralInterval,
+      Integral.cubeEffectiveFTCData, Integral.cubePrimitiveRaw,
+      RealFunRaw.exact] at ⊢
     unfold QInterval.Overlaps at hover ⊢
     grind
   square := Integral.squareEffectiveFTC_equiv_endpoint
