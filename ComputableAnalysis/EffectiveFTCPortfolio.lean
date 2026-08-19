@@ -209,6 +209,15 @@ theorem reciprocalPi_quarterTurn_equiv_quarter :
                 Rat.mul_inv_cancel _ hlo_ne]
     · exact hPlo
 
+theorem nestedRadicalSquare_tangent_stage_zero_overlap :
+    QInterval.Overlaps
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 0)
+      (SinPiIntegral.tangentSquareIntegral.compute 0) := by
+  unfold SinPiIntegral.dyadicNestedRadicalSquareLeftSum
+  rw [SinPiIntegral.tangentSquareIntegral_compute]
+  unfold QInterval.Overlaps
+  native_decide
+
 theorem tangentSquareCellControl_left_rectangle_contained
     (C : RationalSubinterval 0 1) (δ η : QPos) (N : Nat)
     (hC : 0 < C.width) (hη : η.val = C.width * δ.val / 3)
