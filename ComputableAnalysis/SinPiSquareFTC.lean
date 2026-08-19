@@ -115,6 +115,59 @@ theorem rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
       _ = s * s := by grind
       _ <= S.hi * S.hi := hsquare_mem.2
 
+/-! A square-aware variant of the finite tangent search.  The existing search
+checks only the sine box; this predicate checks both circle coordinates, so a
+successful result can be consumed by the square/complement transport above. -/
+
+def rationalTangentSquareWitnessAdmissibleBool
+    (U S C : QInterval) (u : Rat) : Bool :=
+  (U.lo <= u) && (u <= U.hi) &&
+    (S.lo <= rationalCircleSin u) &&
+    (rationalCircleSin u <= S.hi) &&
+    (C.lo <= rationalCircleCos u) &&
+    (rationalCircleCos u <= C.hi)
+
+def rationalTangentSquareWitnessSearchList
+    (U S C : QInterval) : List Rat -> Option Rat
+  | [] => none
+  | u :: us =>
+      if rationalTangentSquareWitnessAdmissibleBool U S C u then some u
+      else rationalTangentSquareWitnessSearchList U S C us
+
+theorem rationalTangentSquareWitnessSearchList_sound
+    {U S C : QInterval} {us : List Rat} {u : Rat}
+    (h : rationalTangentSquareWitnessSearchList U S C us = some u) :
+    rationalTangentSquareWitnessAdmissibleBool U S C u = true := by
+  induction us with
+  | nil => simp [rationalTangentSquareWitnessSearchList] at h
+  | cons v vs ih =>
+      simp only [rationalTangentSquareWitnessSearchList] at h
+      split at h
+      · cases h
+        assumption
+      · exact ih h
+
+def rationalTangentSquareWitnessSearch
+    (U S C : QInterval) (m : Nat) : Option Rat :=
+  rationalTangentSquareWitnessSearchList U S C
+    (rationalTangentWitnessBoxGrid U m)
+
+theorem rationalTangentSquareWitnessSearch_sound
+    {U S C : QInterval} {m : Nat} {u : Rat}
+    (h : rationalTangentSquareWitnessSearch U S C m = some u) :
+    U.lo <= u /\ u <= U.hi /\
+      S.lo <= rationalCircleSin u /\ rationalCircleSin u <= S.hi /\
+      C.lo <= rationalCircleCos u /\ rationalCircleCos u <= C.hi := by
+  have hb := rationalTangentSquareWitnessSearchList_sound h
+  simp only [rationalTangentSquareWitnessAdmissibleBool,
+    Bool.and_eq_true] at hb
+  refine ⟨of_decide_eq_true hb.1.1.1.1.1,
+    of_decide_eq_true hb.1.1.1.1.2,
+    of_decide_eq_true hb.1.1.1.2,
+    of_decide_eq_true hb.1.1.2,
+    of_decide_eq_true hb.1.2,
+    of_decide_eq_true hb.2⟩
+
 /-! The same transport target, named at a dyadic nested-radical sample.  The
 remaining witness-search proof only has to supply the two interval-membership
 facts and the rational circle equation. -/

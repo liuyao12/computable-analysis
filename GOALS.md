@@ -265,7 +265,10 @@ from monomial brackets structurally.
    Its dyadic-sample specialization is
    `dyadicNestedRadicalStage_square_complement_overlap`; the remaining local
    obligation is now explicitly the finite witness search for `s`, `c`, and
-   `s^2+c^2=1`.
+   `s^2+c^2=1`.  The executable predicate and search are
+   `rationalTangentSquareWitnessAdmissibleBool` and
+   `rationalTangentSquareWitnessSearch`; successful searches are decoded by
+   `rationalTangentSquareWitnessSearch_sound`.
 
 9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
    the existing coefficient-shift certificates for the concrete finite
