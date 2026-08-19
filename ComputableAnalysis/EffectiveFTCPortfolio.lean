@@ -153,6 +153,48 @@ theorem tangentSquareIntegral_stage_zero_contains_quarter :
   rw [SinPiIntegral.tangentSquareIntegral_compute]
   native_decide
 
+structure TangentSquareLeftSumQuarterCertificate where
+  lower_sum :
+    forall n,
+      IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+          SinPiIntegral.tangentSquareDensity (2 ^ n) <=
+        (1 / 4 : Rat) +
+          (64 : Rat) / (((2 ^ n : Nat) : Rat))
+  upper_sum :
+    forall n,
+      (1 / 4 : Rat) -
+          (64 : Rat) / (((2 ^ n : Nat) : Rat))
+          <= IntegralIdentities.LipschitzDyadic.uniformLeftEndpointSum
+            SinPiIntegral.tangentSquareDensity (2 ^ n)
+
+theorem TangentSquareLeftSumQuarterCertificate.to_value_subgoal
+    (H : TangentSquareLeftSumQuarterCertificate) :
+    TangentSquareIntegralValueSubgoal := by
+  constructor
+  · intro n
+    have hmargin :=
+      IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum_margin
+        SinPiIntegral.tangentSquareDensity_lipschitz_on_unit n
+    rw [SinPiIntegral.tangentSquareIntegral_compute]
+    change (IntegralIdentities.LipschitzDyadic.compute
+      SinPiIntegral.tangentSquareDensity 64 n).lo <= (1 / 4 : Rat)
+    have hleft := hmargin.1
+    have hsum := H.lower_sum n
+    exact Rat.le_trans hleft (by
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm])
+  · intro n
+    have hmargin :=
+      IntegralIdentities.LipschitzDyadic.compute_contains_uniformLeftEndpointSum_margin
+        SinPiIntegral.tangentSquareDensity_lipschitz_on_unit n
+    rw [SinPiIntegral.tangentSquareIntegral_compute]
+    change (1 / 4 : Rat) <=
+      (IntegralIdentities.LipschitzDyadic.compute
+        SinPiIntegral.tangentSquareDensity 64 n).hi
+    have hright := hmargin.2
+    have hsum := H.upper_sum n
+    exact Rat.le_trans (by
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc, Rat.mul_comm]) hright
+
 structure TangentSquareFTCIntegralCompatibilitySubgoal where
   stage_overlap :
     forall n, QInterval.Overlaps

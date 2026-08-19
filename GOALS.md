@@ -82,8 +82,11 @@ That bridge is now represented by the checked
    inequalities per stage that produce this overlap automatically.
    The first anchor check is now executable as
    `tangentSquareIntegral_stage_zero_contains_quarter`; the remaining anchor
-   work is the uniform all-stage interval containment, not an untracked appeal
-   to completed real numbers.
+   work is now the concrete `TangentSquareLeftSumQuarterCertificate`: bound
+   the finite left sum within the explicit `64/2^n` Darboux margin.  Its
+   `to_value_subgoal` theorem converts that rational-sum certificate into the
+   uniform all-stage interval containment, without an appeal to completed real
+   numbers.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative
