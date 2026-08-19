@@ -306,6 +306,25 @@ theorem tangentPullbackEffectiveFTC_equiv_positiveIntegral :
   unfold QInterval.Overlaps at hleft hright ⊢
   constructor <;> grind
 
+theorem tangentPullbackEffectiveFTC_equiv_dyadicIntegral :
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      tangentPullbackIntegral := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  apply (RealRaw.compareAt_overlap_iff
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    tangentPullbackIntegral n n).2
+  have hleft := (RealRaw.compareAt_overlap_iff
+    tangentPullbackCandidateFTCData.toDerivativeBoundFTC.boundedIntegralRaw
+    (RealRaw.ofRat 1) n n).1
+      (tangentPullbackEffectiveFTC_equiv_one n)
+  have hright := (RealRaw.compareAt_overlap_iff
+    tangentPullbackIntegral (RealRaw.ofRat 1) n n).1
+      (tangentPullbackIntegral_equiv_one n)
+  simp only [RealRaw.ofRat_compute] at hleft hright
+  unfold QInterval.Overlaps at hleft hright ⊢
+  constructor <;> grind
+
 end SinPiIntegral
 
 end ComputableAnalysis
