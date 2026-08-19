@@ -1089,7 +1089,7 @@ theorem unitClampInterval_subinterval_of_contains
   grind
 
 theorem unitClampInterval_width_le
-    {I K : QInterval} :
+    {I : QInterval} :
     (unitClampInterval I).width <= I.width := by
   unfold unitClampInterval
   exact QInterval.width_le_of_contains
