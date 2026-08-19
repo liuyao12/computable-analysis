@@ -64,10 +64,16 @@ The completed portion is also bundled as the checked Lean structure
 Its fields deliberately name the concrete certificates; adding the true
 nested-radical square requires extending this bundle with its endpoint bridge.
 That bridge is now represented by the checked
-`SinPiSquareEffectiveFTCEndpointSubgoal`: it asks for a
-`SinPiSquareEffectiveFTCData` certificate and exactly one additional theorem,
-the endpoint equivalence to `1/4`; its `integral_value` theorem derives the
-desired integral equivalence from those fields.
+   `SinPiSquareEffectiveFTCEndpointSubgoal`: it asks for a
+   `SinPiSquareEffectiveFTCData` certificate and exactly one additional theorem,
+   the endpoint equivalence to `1/4`; its `integral_value` theorem derives the
+   desired integral equivalence from those fields.
+
+   The nested-radical route is now split into the checked
+   `NestedRadicalSinPiSquareValueSubgoal`: one field is the finite common
+   witness between the nested-radical square sum and `tangentSquareIntegral`,
+   and the other is the quarter-turn value of that anchor.  Its `value` theorem
+   closes the stabilized dyadic value once those two certificates are supplied.
 
 The rational arithmetic layer now exposes `rat_mul_le_mul_of_nonneg`, the
 product-order lemma needed when a cell estimate multiplies two nonnegative

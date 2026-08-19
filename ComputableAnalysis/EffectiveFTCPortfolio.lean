@@ -137,6 +137,23 @@ structure EffectiveFTCPortfolio where
     (ExpProofs.uniformExpOnUnit_selectedStageFTCIndexed.toSelected.boundedIntegralRaw).Equiv
       ExpProofs.uniformExpOnUnit_selectedStageFTCIndexed.toSelected.endpointRaw
 
+/-! The remaining genuine `sin(pi*x)^2` transport is packaged as two finite
+certificates.  The closure theorem below is unconditional once these fields
+are supplied; no completed-real existence theorem is hidden in the package. -/
+structure NestedRadicalSinPiSquareValueSubgoal where
+  commonWitness :
+    SinPiIntegral.DyadicNestedRadicalSquareTangentCommonWitness
+  tangentAnchorValue :
+    SinPiIntegral.tangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4))
+
+theorem NestedRadicalSinPiSquareValueSubgoal.value
+    (H : NestedRadicalSinPiSquareValueSubgoal) :
+    (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized
+      SinPiIntegral.tangentSquareIntegral).Equiv
+      (RealRaw.ofRat (1 / 4)) := by
+  exact SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_value_of_anchor
+    H.commonWitness.to_equiv H.tangentAnchorValue
+
 theorem effectiveFTCPortfolio : EffectiveFTCPortfolio where
   square_value := Integral.exactRat_square_integral_raw_equiv_one_third
   cube_value := Integral.exactRat_cube_integral_raw_equiv_one_fourth
