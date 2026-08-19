@@ -115,6 +115,29 @@ theorem rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
       _ = s * s := by grind
       _ <= S.hi * S.hi := hsquare_mem.2
 
+/-! The same transport target, named at a dyadic nested-radical sample.  The
+remaining witness-search proof only has to supply the two interval-membership
+facts and the rational circle equation. -/
+
+def dyadicNestedRadicalStageCosAt (n k : Nat) : QInterval :=
+  (dyadicNestedRadicalStageTable n k).2
+
+theorem dyadicNestedRadicalStage_square_complement_overlap
+    {n k : Nat} (_hk : k <= 2 ^ n) (s c : Rat)
+    (hS : subintervalOf (dyadicNestedRadicalStageSinAt n k) 0 1)
+    (hC : subintervalOf (dyadicNestedRadicalStageCosAt n k) 0 1)
+    (hs : (dyadicNestedRadicalStageSinAt n k).lo <= s ∧
+      s <= (dyadicNestedRadicalStageSinAt n k).hi)
+    (hc : (dyadicNestedRadicalStageCosAt n k).lo <= c ∧
+      c <= (dyadicNestedRadicalStageCosAt n k).hi)
+    (hcircle : s * s + c * c = 1) :
+    QInterval.Overlaps
+      (rationalSquareInterval (dyadicNestedRadicalStageSinAt n k))
+      (rationalOneMinusSquareInterval
+        (dyadicNestedRadicalStageCosAt n k)) := by
+  exact rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle
+    hS hC hs hc hcircle
+
 theorem sinPiSquareOnHalf_valid (S : ArctanSinPiConstruction) :
     (sinPiSquareOnHalf S).Valid := by
   have hvalid : (sinPiOnHalfRaw S).Valid := by

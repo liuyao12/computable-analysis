@@ -262,6 +262,10 @@ from monomial brackets structurally.
    formalized as `rationalSquareInterval_overlap_oneMinusSquareInterval_of_circle`:
    any rational sine/cosine witnesses on the unit circle give overlapping
    square and complementary-square boxes, with all enclosure slack retained.
+   Its dyadic-sample specialization is
+   `dyadicNestedRadicalStage_square_complement_overlap`; the remaining local
+   obligation is now explicitly the finite witness search for `s`, `c`, and
+   `s^2+c^2=1`.
 
 9. **Finite trigonometric-prefix rung.**  Before closing items 7 or 8, use
    the existing coefficient-shift certificates for the concrete finite
