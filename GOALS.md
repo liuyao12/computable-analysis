@@ -29,7 +29,8 @@ interval bounds.  This keeps the remaining squared-prefix proof in the same
 finite rational foundation rather than importing an ordered-real argument.
 The differential layer also exposes exact rational composition rules
 `differenceQuotient_add` and `differenceQuotient_scale`, so the squared-prefix
-secant bracket can be assembled from monomial brackets structurally.
+secant bracket and its conservative shrinking cell enclosure are assembled
+from monomial brackets structurally.
 
 ### Auditable concrete-rung matrix
 
@@ -40,7 +41,7 @@ secant bracket can be assembled from monomial brackets structurally.
 | C | `1/(1+x^2)` on `[0,1]` | rational rectangle `arctan` raw | `arctan 1 - arctan 0` | `ArctanEffectiveFTC.lean` bounds; local FTC pending |
 | D | `exp x` on a bounded rational interval | computable exponential raw | endpoint difference | exponential evaluator; certificate pending |
 | E | finite sine prefix `x-x^3/6` on `[0,1/2]` | `x^2/2-x^4/24` | `47/384` | complete `EffectiveDerivativeBoundFTC` certificate |
-| F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | derivative certificate complete; cell enclosure pending |
+| F | squared prefix `(x-x^3/6)^2` on `[0,1/2]` | `x^3/3-x^5/15+x^7/252` | `6389/161280` | complete `EffectiveDerivativeBoundFTC` certificate |
 | G | nested-radical `sin (pi*x)` on `[0,1/2]` | arctan/circle construction | `1/pi` | direct FTC route exists; effective tail transport pending |
 | H | nested-radical `sin (pi*x)^2` on `[0,1/2]` | cosine-identity or transported square primitive | `1/4` | acceptance interface exists; effective certificate pending |
 

@@ -687,6 +687,430 @@ theorem sineTaylorPrefixThreeSquarePrimitive_endpoint :
       6389 / 161280 := by
   native_decide
 
+/-! A conservative cell enclosure for the squared prefix.  Its endpoints are
+obtained by combining the three monomial secant brackets above; the slack is
+still proportional to the cell width, which is exactly what the effective FTC
+needs. -/
+
+/-
+def sineTaylorPrefixThreeSquareBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := C.lower ^ 2 - C.upper ^ 4 / 3 + C.lower ^ 6 / 36
+    hi := C.upper ^ 2 - C.lower ^ 4 / 3 + C.upper ^ 6 / 36 }
+
+theorem sineTaylorPrefixThreeSquareBound_ordered
+    {a b : Rat} (C : RationalSubinterval a b)
+    (ha : 0 <= C.lower) (hb : C.upper <= (1 : Rat) / 2) (n : Nat) :
+    0 <= (sineTaylorPrefixThreeSquareBound C n).width := by
+  unfold sineTaylorPrefixThreeSquareBound QInterval.width
+  have hupper : 0 <= C.upper := Rat.le_trans ha C.ordered
+  have h2 : C.upper ^ 2 - C.lower ^ 2 <= C.width := by
+    have hf : C.upper ^ 2 - C.lower ^ 2 =
+        C.width * (C.upper + C.lower) := by
+      unfold RationalSubinterval.width
+      grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+    rw [hf]
+    apply Rat.mul_le_mul_of_nonneg_left
+    · grind
+    · exact (by unfold RationalSubinterval.width; grind)
+  have h4 : (C.upper ^ 4 - C.lower ^ 4) / 3 <= C.width / 6 := by
+    have hf : C.upper ^ 4 - C.lower ^ 4 =
+        C.width * (C.upper + C.lower) *
+          (C.upper ^ 2 + C.lower ^ 2) := by
+      unfold RationalSubinterval.width
+      grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+    rw [hf]
+    have hsum : C.upper + C.lower <= 1 := by grind
+    have hsq : C.upper ^ 2 + C.lower ^ 2 <= 1 / 2 := by
+      have hu : C.upper ^ 2 <= 1 / 4 := by
+        have h := Rat.mul_le_mul_of_nonneg_right hb hupper
+        have h' := Rat.mul_le_mul_of_nonneg_left hb
+          (by native_decide : (0 : Rat) <= 1 / 2)
+        rw [show (1 / 2 : Rat) * (1 / 2) = 1 / 4 by native_decide] at h'
+        simpa [Rat.pow_succ] using h
+      have hl : C.lower ^ 2 <= 1 / 4 := by
+        have hla : C.lower <= (1 : Rat) / 2 := Rat.le_trans C.ordered hb
+        have h := Rat.mul_le_mul_of_nonneg_right hla (by exact ha)
+        have h' := Rat.mul_le_mul_of_nonneg_left hla
+          (by native_decide : (0 : Rat) <= 1 / 2)
+        rw [show (1 / 2 : Rat) * (1 / 2) = 1 / 4 by native_decide] at h'
+        simpa [Rat.pow_succ] using h'
+      grind
+    have hprod := Rat.mul_le_mul_of_nonneg
+      (by unfold RationalSubinterval.width; grind)
+      hsum (by grind : (0 : Rat) <= C.width * (C.upper + C.lower)) hsq
+    rw [Rat.div_def]
+    have hthree : (0 : Rat) <= 1 / 3 := by native_decide
+    have hscale := Rat.mul_le_mul_of_nonneg_left hprod hthree
+    grind [Rat.div_def]
+  have h6 : (C.upper ^ 6 - C.lower ^ 6) / 36 <= C.width / 576 := by
+    have hf : C.upper ^ 6 - C.lower ^ 6 =
+        C.width * (C.upper + C.lower) *
+          (C.upper ^ 4 + C.upper ^ 2 * C.lower ^ 2 + C.lower ^ 4) := by
+      unfold RationalSubinterval.width
+      grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add,
+        Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+    rw [hf]
+    have hsum : C.upper + C.lower <= 1 := by grind
+    have hpoly : C.upper ^ 4 + C.upper ^ 2 * C.lower ^ 2 + C.lower ^ 4 <= 3 / 16 := by
+      have hu : C.upper ^ 2 <= 1 / 4 := by
+        have h := Rat.mul_le_mul_of_nonneg_right hb hupper
+        have h' := Rat.mul_le_mul_of_nonneg_left hb
+          (by native_decide : (0 : Rat) <= 1 / 2)
+        rw [show (1 / 2 : Rat) * (1 / 2) = 1 / 4 by native_decide] at h'
+        simpa [Rat.pow_succ] using h'
+      have hl : C.lower ^ 2 <= 1 / 4 := by
+        have hla : C.lower <= (1 : Rat) / 2 := Rat.le_trans C.ordered hb
+        have h' := Rat.mul_le_mul_of_nonneg_left hla
+          (by native_decide : (0 : Rat) <= 1 / 2)
+        rw [show (1 / 2 : Rat) * (1 / 2) = 1 / 4 by native_decide] at h'
+        simpa [Rat.pow_succ] using h'
+      have hcross : C.upper ^ 2 * C.lower ^ 2 <= 1 / 16 := by
+        exact rat_mul_le_mul_of_nonneg (by exact Rat.pow_nonneg hupper) hu
+          (by exact Rat.pow_nonneg ha) hl
+      have hu4 : C.upper ^ 4 <= 1 / 16 := by
+        have := rat_mul_le_mul_of_nonneg (by exact Rat.pow_nonneg hupper) hu
+          (by exact Rat.pow_nonneg hupper) hu
+        simpa [Rat.pow_succ] using this
+      have hl4 : C.lower ^ 4 <= 1 / 16 := by
+        have := rat_mul_le_mul_of_nonneg (by exact Rat.pow_nonneg ha) hl
+          (by exact Rat.pow_nonneg ha) hl
+        simpa [Rat.pow_succ] using this
+      grind
+    have hprod := Rat.mul_le_mul_of_nonneg
+      (by unfold RationalSubinterval.width; grind)
+      hsum (by grind : (0 : Rat) <= C.width * (C.upper + C.lower)) hpoly
+    rw [Rat.div_def]
+    have hscale := Rat.mul_le_mul_of_nonneg_left hprod
+      (by native_decide : (0 : Rat) <= 1 / 36)
+    grind [Rat.div_def]
+  have hwidth : 0 <= C.width := by
+    unfold RationalSubinterval.width
+    grind
+  have hsum : 0 <=
+      (C.upper ^ 2 - C.lower ^ 2) +
+        (C.upper ^ 4 - C.lower ^ 4) / 3 +
+        (C.upper ^ 6 - C.lower ^ 6) / 36 := by
+    exact rat_add_le_add (rat_add_le_add (by grind) (by grind)) (by grind)
+  grind
+-/
+
+def sineTaylorPrefixThreeSquareBound
+    {a b : Rat} (C : RationalSubinterval a b) (_n : Nat) : QInterval :=
+  { lo := (C.lower - C.lower ^ 3 / 6) ^ 2 - C.width
+    hi := (C.upper - C.upper ^ 3 / 6) ^ 2 + C.width }
+
+theorem sineTaylorPrefixThreeSquare_quartic_width
+    {a b : Rat} (ha : 0 <= a) (hab : a <= b)
+    (hb : b <= (1 : Rat) / 2) :
+    (b ^ 4 - a ^ 4) / 3 <= b - a := by
+  have hwidth : 0 <= b - a := by grind
+  have hsum : 0 <= b + a := by grind
+  have hsum_le : b + a <= 1 := by grind
+  have hsq : 0 <= b ^ 2 + a ^ 2 := by
+    exact Rat.add_nonneg (Rat.pow_nonneg (Rat.le_trans ha hab))
+      (Rat.pow_nonneg ha)
+  have hsq_le : b ^ 2 + a ^ 2 <= 1 := by
+    have hb2 : b ^ 2 <= 1 / 4 := by
+      have h1 := Rat.mul_le_mul_of_nonneg_right hb
+        (by exact Rat.le_trans ha hab)
+      have h2 := Rat.mul_le_mul_of_nonneg_left hb
+        (by native_decide : (0 : Rat) <= 1 / 2)
+      rw [show (1 / 2 : Rat) * (1 / 2) = 1 / 4 by native_decide] at h2
+      simpa [Rat.pow_succ] using Rat.le_trans h1 h2
+    have ha2 : a ^ 2 <= 1 / 4 := by
+      have ha' : a <= (1 : Rat) / 2 := Rat.le_trans hab hb
+      have h1 := Rat.mul_le_mul_of_nonneg_right ha' ha
+      have h2 := Rat.mul_le_mul_of_nonneg_left ha'
+        (by native_decide : (0 : Rat) <= 1 / 2)
+      rw [show (1 / 2 : Rat) * (1 / 2) = 1 / 4 by native_decide] at h2
+      simpa [Rat.pow_succ] using Rat.le_trans h1 h2
+    grind
+  have hfirst : (b - a) * (b + a) <= b - a := by
+    have h := Rat.mul_le_mul_of_nonneg_left hsum_le hwidth
+    simpa using h
+  have hprod := rat_mul_le_mul_of_nonneg
+    (by exact Rat.mul_nonneg hwidth hsum) hfirst hsq hsq_le
+  have hfactor : b ^ 4 - a ^ 4 =
+      (b - a) * (b + a) * (b ^ 2 + a ^ 2) := by
+    grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add,
+      Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  rw [hfactor]
+  rw [Rat.div_def]
+  have hscale := Rat.mul_le_mul_of_nonneg_left hprod
+    (by native_decide : (0 : Rat) <= 1 / 3)
+  grind [Rat.div_def]
+
+theorem sineTaylorPrefixThreeSquareBound_ordered
+    {a b : Rat} (C : RationalSubinterval a b)
+    (ha : 0 <= C.lower) (hb : C.upper <= (1 : Rat) / 2) (n : Nat) :
+    0 <= (sineTaylorPrefixThreeSquareBound C n).width := by
+  unfold sineTaylorPrefixThreeSquareBound QInterval.width
+  have hq := sineTaylorPrefixThreeSquare_derivative_width_le
+    (a := C.lower) (b := C.upper) ha C.ordered hb
+  have hqnonneg := sineTaylorPrefixThreeSquare_nondecreasing
+    (a := C.lower) (b := C.upper) ha C.ordered hb
+  unfold sineTaylorPrefixThreeSquareDerivativeValue at hqnonneg
+  have hw : 0 <= C.width := by
+    unfold RationalSubinterval.width
+    grind [C.ordered]
+  unfold sineTaylorPrefixThreeSquareDerivativeValue at hq
+  unfold RationalSubinterval.width at hw ⊢
+  grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem sineTaylorPrefixThreeSquareBound_width_le
+    {a b : Rat} (C : RationalSubinterval a b)
+    (ha : 0 <= C.lower) (hb : C.upper <= (1 : Rat) / 2) (n : Nat) :
+    (sineTaylorPrefixThreeSquareBound C n).width <= 3 * C.width := by
+  unfold sineTaylorPrefixThreeSquareBound QInterval.width
+  have hq := sineTaylorPrefixThreeSquare_derivative_width_le
+    (a := C.lower) (b := C.upper) ha C.ordered hb
+  have hqnonneg := sineTaylorPrefixThreeSquare_nondecreasing
+    (a := C.lower) (b := C.upper) ha C.ordered hb
+  unfold sineTaylorPrefixThreeSquareDerivativeValue at hq hqnonneg
+  unfold RationalSubinterval.width
+  grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+    Rat.mul_assoc, Rat.mul_comm]
+
+theorem sineTaylorPrefixThreeSquare_secant_bracket
+    {a b : Rat} (ha : 0 <= a) (hab : a <= b)
+    (hb : b <= (1 : Rat) / 2) (hne : b - a ≠ 0) :
+    (a - a ^ 3 / 6) ^ 2 - (b - a) <=
+        differenceQuotient sineTaylorPrefixThreeSquarePrimitiveValue a (b - a) /\
+      differenceQuotient sineTaylorPrefixThreeSquarePrimitiveValue a (b - a) <=
+        (b - b ^ 3 / 6) ^ 2 + (b - a) := by
+  have hs := sineTaylorPrefixThreeSquarePrimitive_secant_bracket ha hab hb hne
+  have hq := sineTaylorPrefixThreeSquare_quartic_width ha hab hb
+  have hleft : (a - a ^ 3 / 6) ^ 2 - (b - a) <=
+      a ^ 2 - b ^ 4 / 3 + a ^ 6 / 36 := by
+    grind [Rat.pow_succ, Rat.div_def]
+  have hright : b ^ 2 - a ^ 4 / 3 + b ^ 6 / 36 <=
+      (b - b ^ 3 / 6) ^ 2 + (b - a) := by
+    grind [Rat.pow_succ, Rat.div_def]
+  exact ⟨Rat.le_trans hleft hs.1, Rat.le_trans hs.2 hright⟩
+
+theorem sineTaylorPrefixThreeSquare_local_endpoint_contained
+    {a b : Rat} (C : RationalSubinterval a b) (n : Nat)
+    (ha : 0 <= C.lower) (hb : C.upper <= (1 : Rat) / 2)
+    (hne : C.upper - C.lower ≠ 0) :
+    (C.scaleBound (sineTaylorPrefixThreeSquareBound C n)).ContainsInterval
+      (endpointDifferenceInterval sineTaylorPrefixThreeSquarePrimitiveRaw
+        C.lower C.upper 0) := by
+  have hw : 0 <= C.width := by
+    unfold RationalSubinterval.width
+    grind [C.ordered]
+  have hs := sineTaylorPrefixThreeSquare_secant_bracket
+    (a := C.lower) (b := C.upper) ha C.ordered hb hne
+  have hfactor :
+      (C.upper ^ 3 / 3 - C.upper ^ 5 / 15 + C.upper ^ 7 / 252) -
+          (C.lower ^ 3 / 3 - C.lower ^ 5 / 15 + C.lower ^ 7 / 252) =
+        C.width * differenceQuotient
+          sineTaylorPrefixThreeSquarePrimitiveValue C.lower C.width := by
+    unfold sineTaylorPrefixThreeSquarePrimitiveValue
+      differenceQuotient RationalSubinterval.width
+    rw [Rat.div_def]
+    have hcancel : C.width * C.width⁻¹ = 1 :=
+      Rat.mul_inv_cancel C.width hne
+    grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.mul_add, Rat.add_mul,
+      Rat.mul_assoc, Rat.mul_comm]
+  unfold RationalSubinterval.scaleBound endpointDifferenceInterval
+    sineTaylorPrefixThreeSquarePrimitiveRaw RealFunRaw.exact
+  simp only [QInterval.scaleByRat, if_pos hw]
+  rw [hfactor]
+  constructor
+  · exact Rat.mul_le_mul_of_nonneg_left hs.1 hw
+  · exact Rat.mul_le_mul_of_nonneg_left hs.2 hw
+
+def sineTaylorPrefixThreeSquarePartitionOf (eps : QPos) :
+    RationalPartition 0 ((1 : Rat) / 2) :=
+  RationalPartition.uniform 0 ((1 : Rat) / 2)
+    (2 * (eps.val.den + 1)) (by omega) (by native_decide)
+
+def sineTaylorPrefixThreeSquareDerivativeBound (eps : QPos) (k : Nat)
+    (hk : k < (sineTaylorPrefixThreeSquarePartitionOf eps).pieces) :
+    DerivativeBoundOnSubinterval sineTaylorPrefixThreeSquareRaw
+      ((sineTaylorPrefixThreeSquarePartitionOf eps).cell k hk) := by
+  let C := (sineTaylorPrefixThreeSquarePartitionOf eps).cell k hk
+  exact {
+    bound := fun n => sineTaylorPrefixThreeSquareBound C n
+    evalPrecision := fun _ => 0
+    domain_on := fun x hx => trivial
+    bound_ordered := fun n => by
+      exact sineTaylorPrefixThreeSquareBound_ordered C C.lower_mem C.upper_mem n
+    contains_values := fun n x hx => by
+      have hw : 0 <= C.width := by
+        unfold RationalSubinterval.width
+        grind [C.ordered]
+      have hmono := sineTaylorPrefixThreeSquare_nondecreasing
+        (a := C.lower) (b := x) C.lower_mem hx.1
+          (Rat.le_trans hx.2 C.upper_mem)
+      have hmono' := sineTaylorPrefixThreeSquare_nondecreasing
+        (a := x) (b := C.upper) (Rat.le_trans C.lower_mem hx.1)
+          hx.2 C.upper_mem
+      unfold sineTaylorPrefixThreeSquareDerivativeValue at hmono hmono'
+      unfold sineTaylorPrefixThreeSquareBound sineTaylorPrefixThreeSquareRaw
+        RealFunRaw.exact QInterval.ContainsInterval
+      constructor <;> grind [Rat.sub_eq_add_neg] }
+
+theorem sineTaylorPrefixThreeSquare_cell_width_pos
+    (eps : QPos) (k : Nat)
+    (hk : k < (sineTaylorPrefixThreeSquarePartitionOf eps).pieces) :
+    0 < ((sineTaylorPrefixThreeSquarePartitionOf eps).cell k hk).width := by
+  let N := 2 * (eps.val.den + 1)
+  have hN : 0 < N := by omega
+  have hmesh : 0 < mesh 0 ((1 : Rat) / 2) N := by
+    unfold mesh
+    rw [if_neg (Nat.ne_of_gt hN), Rat.div_def]
+    exact Rat.mul_pos (by native_decide)
+      ((Rat.inv_pos).2 (by exact_mod_cast hN))
+  have hcell := RationalPartition.uniform_cell_width 0 ((1 : Rat) / 2)
+    N hN (by native_decide) k hk
+  unfold sineTaylorPrefixThreeSquarePartitionOf at hcell ⊢
+  rw [hcell]
+  exact hmesh
+
+def sineTaylorPrefixThreeSquareEffectiveFTCData :
+    EffectiveDerivativeBoundFTC sineTaylorPrefixThreeSquarePrimitiveRaw
+      sineTaylorPrefixThreeSquareRaw 0 ((1 : Rat) / 2) where
+  primitive_valid := RealFunRaw.exact_valid _
+  primitive_domain_lower := trivial
+  primitive_domain_upper := trivial
+  choosePartition := fun eps => sineTaylorPrefixThreeSquarePartitionOf eps
+  chooseEndpointPrecision := fun _ => 0
+  chooseBoundStage := fun _ => 0
+  derivativeBound := by
+    intro eps k hk
+    exact sineTaylorPrefixThreeSquareDerivativeBound eps k hk
+  domain_at_partition := by
+    intro eps i hi
+    trivial
+  localControl := by
+    intro eps k hk
+    let C := (sineTaylorPrefixThreeSquarePartitionOf eps).cell k hk
+    let B := sineTaylorPrefixThreeSquareDerivativeBound eps k hk
+    have hpos : 0 < C.width := by
+      dsimp [C, sineTaylorPrefixThreeSquarePartitionOf]
+      apply sineTaylorPrefixThreeSquare_cell_width_pos
+    exact {
+      primitive_domain_lower := trivial
+      primitive_domain_upper := trivial
+      endpointPrecision := fun _ => 0
+      endpoint_contained := by
+        intro n
+        exact sineTaylorPrefixThreeSquare_local_endpoint_contained C n
+          C.lower_mem C.upper_mem (Rat.ne_of_gt hpos) }
+  endpointPrecision_agreement := by
+    intro eps k hk n
+    rfl
+  riemann_width := by
+    intro eps
+    let N := 2 * (eps.val.den + 1)
+    have hN : 0 < N := by omega
+    have hbound : forall k (hk : k < N),
+        (sineTaylorPrefixThreeSquareBound
+          ((RationalPartition.uniform 0 ((1 : Rat) / 2) N hN
+            (by native_decide)).cell k hk) 0).width <=
+          3 * mesh 0 ((1 : Rat) / 2) N := by
+      intro k hk
+      let C := (RationalPartition.uniform 0 ((1 : Rat) / 2) N hN
+        (by native_decide : (0 : Rat) <= 1 / 2)).cell k hk
+      have hcell := sineTaylorPrefixThreeSquareBound_width_le
+        C C.lower_mem C.upper_mem 0
+      have hmesh := RationalPartition.uniform_cell_width 0 ((1 : Rat) / 2)
+        N hN (by native_decide) k hk
+      change (sineTaylorPrefixThreeSquareBound C 0).width <=
+        3 * mesh 0 ((1 : Rat) / 2) N
+      calc
+        (sineTaylorPrefixThreeSquareBound C 0).width <= 3 * C.width := hcell
+        _ = 3 * mesh 0 ((1 : Rat) / 2) N := by rw [hmesh]
+    have hsum := RationalPartition.uniform_boundIntegralSum_width_le
+      N hN (by native_decide : (0 : Rat) <= 1 / 2)
+      (fun k hk =>
+        (sineTaylorPrefixThreeSquareDerivativeBound eps k hk).bound 0)
+      (3 * mesh 0 ((1 : Rat) / 2) N) hbound
+    have hpart : sineTaylorPrefixThreeSquarePartitionOf eps =
+        RationalPartition.uniform 0 ((1 : Rat) / 2) N hN
+          (by native_decide) := by
+      unfold sineTaylorPrefixThreeSquarePartitionOf N
+      congr
+    have hmesh : mesh 0 ((1 : Rat) / 2) N = 1 / (2 * (N : Rat)) := by
+      unfold mesh
+      rw [if_neg (Nat.ne_of_gt hN), Rat.div_def]
+      grind
+    have hNrat : (N : Rat) = 2 * ((eps.val.den : Rat) + 1) := by
+      dsimp [N]
+      simp [Rat.natCast_mul, Rat.natCast_add]
+    have hden := FTC.one_div_den_succ_le_of_pos eps.property
+    have hfinal : ((1 : Rat) / 2) * (3 * mesh 0 ((1 : Rat) / 2) N) <= eps.val := by
+      rw [hmesh, hNrat]
+      have hsmall : 1 / ((eps.val.den : Rat) + 1) <= eps.val := by
+        simpa [Rat.natCast_add] using hden
+      rw [Rat.div_def] at hsmall ⊢
+      have hpos : 0 < (eps.val.den : Rat) + 1 := by
+        exact_mod_cast (Nat.succ_pos eps.val.den)
+      have hinv : 0 <= ((eps.val.den : Rat) + 1)⁻¹ :=
+        Rat.le_of_lt ((Rat.inv_pos).2 hpos)
+      have heq :
+          (1 * (2 : Rat)⁻¹) *
+              (3 * (1 / (2 * ((2 : Rat) * ((eps.val.den : Rat) + 1))))) =
+            (3 / 8) * ((eps.val.den : Rat) + 1)⁻¹ := by
+        rw [Rat.div_def, Rat.div_def]
+        grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+      rw [heq]
+      have hcoef : (3 / 8 : Rat) <= 1 := by native_decide
+      have hscaled := Rat.mul_le_mul_of_nonneg_right hcoef hinv
+      have hsmall' : ((eps.val.den : Rat) + 1)⁻¹ <= eps.val := by
+        have h := hden
+        rw [Rat.div_def] at h
+        simpa using h
+      exact Rat.le_trans hscaled (by simpa using hsmall')
+    have hsum' :
+        ((sineTaylorPrefixThreeSquarePartitionOf eps).boundIntegralSum
+          (fun k hk =>
+            (sineTaylorPrefixThreeSquareDerivativeBound eps k hk).bound 0)).width <=
+          ((1 : Rat) / 2) * (3 * mesh 0 ((1 : Rat) / 2) N) := by
+      change ((RationalPartition.uniform 0 ((1 : Rat) / 2) N hN
+        (by native_decide)).boundIntegralSum
+          (fun k hk =>
+            (sineTaylorPrefixThreeSquareDerivativeBound eps k hk).bound 0)).width <=
+        ((1 : Rat) / 2) * (3 * mesh 0 ((1 : Rat) / 2) N)
+      have hhalf : ((1 : Rat) / 2) - 0 = 1 / 2 := by native_decide
+      rw [hhalf] at hsum
+      exact hsum
+    exact Rat.le_trans hsum' hfinal
+  endpoint_width := by
+    intro eps
+    simpa [endpointDifferenceInterval, sineTaylorPrefixThreeSquarePrimitiveRaw,
+      RealFunRaw.exact, QInterval.width, Rat.sub_self] using
+      (Rat.le_of_lt eps.property)
+
+theorem sineTaylorPrefixThreeSquareEffectiveFTC_equiv_endpoint :
+    sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw := by
+  exact effectiveDerivativeBoundFTC sineTaylorPrefixThreeSquareEffectiveFTCData
+
+theorem sineTaylorPrefixThreeSquareEffectiveFTC_equiv_value :
+    sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC.boundedIntegralRaw.Equiv
+      (RealRaw.ofRat (6389 / 161280)) := by
+  let H := sineTaylorPrefixThreeSquareEffectiveFTCData.toDerivativeBoundFTC
+  intro n
+  apply (RealRaw.compareAt_overlap_iff _ _ n n).2
+  have hover := H.overlap (precisionAtStage n)
+  change QInterval.Overlaps
+    (H.boundedIntegralCompute n) { lo := 6389 / 161280, hi := 6389 / 161280 }
+  have hzero :
+      ((1 / 2 : Rat) ^ 3 / 3 - (1 / 2 : Rat) ^ 5 / 15 +
+        (1 / 2 : Rat) ^ 7 / 252) -
+        ((0 : Rat) ^ 3 / 3 - (0 : Rat) ^ 5 / 15 +
+          (0 : Rat) ^ 7 / 252) = 6389 / 161280 := by native_decide
+  simpa [H, DerivativeBoundFTC.boundedIntegralCompute,
+    DerivativeBoundFTC.boundedIntegralInterval,
+    DerivativeBoundFTC.endpointInterval, endpointDifferenceInterval,
+    sineTaylorPrefixThreeSquarePrimitiveRaw, RealFunRaw.exact, hzero] using hover
+
 /-! The square prefix also has a checked coefficient-shift derivative
 certificate.  This is the finite algebra that the later effective-FTC cell
 bounds will consume. -/
