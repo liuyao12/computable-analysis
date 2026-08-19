@@ -3344,7 +3344,38 @@ private theorem uniformExpTailMagnitude_le_geometric (n : Nat) :
   rw [hterms]
   simpa [uniformExpTailMagnitude] using htail
 
-def uniformExpCellPieces (eps : QPos) : Nat := eps.val.den + 1
+def uniformExpCellPieces (eps : QPos) : Nat :=
+  200 * (eps.val.den + 1)
+
+theorem uniformExpCellPieces_pos (eps : QPos) :
+    0 < uniformExpCellPieces eps := by
+  unfold uniformExpCellPieces
+  omega
+
+theorem uniformExpCellMesh_le (eps : QPos) :
+    mesh 0 1 (uniformExpCellPieces eps) <= eps.val / 200 := by
+  have hp := uniformExpCellPieces_pos eps
+  unfold mesh
+  rw [if_neg (Nat.ne_of_gt hp)]
+  have hden :
+      1 / (((eps.val.den + 1 : Nat) : Rat)) <= eps.val :=
+    FTC.one_div_den_succ_le_of_pos eps.property
+  have hscaled := Rat.mul_le_mul_of_nonneg_left hden
+    (show 0 <= (1 / 200 : Rat) by native_decide)
+  -- The deliberately generous factor `200` leaves room for the polynomial
+  -- secant constant and the tail contribution in the cell-range width.
+  calc
+    (1 - 0) / ((uniformExpCellPieces eps : Nat) : Rat) =
+        (1 / 200 : Rat) /
+          (((eps.val.den + 1 : Nat) : Rat)) := by
+      unfold uniformExpCellPieces
+      rw [show (1 : Rat) - 0 = 1 by grind, Rat.div_def, Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
+    _ <= (1 / 200 : Rat) * eps.val := by
+      simpa [Rat.div_def, Rat.mul_assoc] using hscaled
+    _ = eps.val / 200 := by
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm]
 
 def uniformExpCellStage (eps : QPos) : Nat :=
   RationalMajorant.halfDecayShift
@@ -3768,6 +3799,215 @@ theorem uniformExpCenter_secant_error_le
             uniformExpCenter x n) + qabs (tailError / h) := qabs_add_le _ _
     _ <= qabs h * 34 + 2 * uniformExpTailMagnitude n / qabs h :=
       rat_add_le_add hfinite htailQuotient
+
+theorem uniformExpCenter_difference_le
+    {a b : Rat} (n : Nat)
+    (ha : 0 <= a) (hb : b <= 1) (hab : a < b) :
+    uniformExpCenter b n - uniformExpCenter a n <=
+      3 * (b - a) + 34 * (b - a) ^ 2 +
+        2 * uniformExpTailMagnitude n := by
+  let h : Rat := b - a
+  have hpos : 0 < h := by
+    dsimp [h]
+    exact (Rat.lt_iff_sub_pos a b).mp hab
+  have hh : h ≠ 0 := Rat.ne_of_gt hpos
+  have ha1 : a <= 1 := Rat.le_trans (Rat.le_of_lt hab) hb
+  have hxh : qabs (a + h) <= 2 := by
+    have hab_eq : a + h = b := by
+      dsimp [h]
+      grind
+    have hbnonneg : 0 <= b := Rat.le_trans ha (Rat.le_of_lt hab)
+    rw [hab_eq, qabs_eq_self_of_nonneg hbnonneg]
+    exact Rat.le_trans hb (by native_decide)
+  have hx : qabs a <= 2 := by
+    rw [qabs_eq_self_of_nonneg ha]
+    exact Rat.le_trans ha1 (by native_decide)
+  have hsec := uniformExpCenter_secant_error_le
+    (x := a) (h := h) hh hx hxh n
+  have hcenter : 0 <= uniformExpCenter a n :=
+    uniformExpCenter_nonneg_on_unit n ha ha1
+  have hcenter_le : uniformExpCenter a n <= (3 : Rat) :=
+    uniformExpCenter_le_three_on_unit n ha ha1
+  have hqabs : qabs h = h := qabs_eq_self_of_nonneg (Rat.le_of_lt hpos)
+  have hsec' :
+      qabs ((uniformExpCenter (a + h) n - uniformExpCenter a n) / h -
+        uniformExpCenter a n) <=
+        h * 34 + 2 * uniformExpTailMagnitude n / h := by
+    simpa [hqabs] using hsec
+  have hquot :
+      qabs ((uniformExpCenter (a + h) n - uniformExpCenter a n) / h) <=
+        3 + h * 34 + 2 * uniformExpTailMagnitude n / h := by
+    have hsplit :
+        (uniformExpCenter (a + h) n - uniformExpCenter a n) / h =
+          uniformExpCenter a n +
+            ((uniformExpCenter (a + h) n - uniformExpCenter a n) / h -
+              uniformExpCenter a n) := by
+      grind [Rat.sub_eq_add_neg, Rat.div_def, Rat.mul_assoc,
+        Rat.mul_comm]
+    rw [hsplit]
+    calc
+      qabs (uniformExpCenter a n +
+          ((uniformExpCenter (a + h) n - uniformExpCenter a n) / h -
+            uniformExpCenter a n)) <=
+          qabs (uniformExpCenter a n) +
+            qabs ((uniformExpCenter (a + h) n - uniformExpCenter a n) / h -
+              uniformExpCenter a n) := qabs_add_le _ _
+      _ <= 3 + (h * 34 + 2 * uniformExpTailMagnitude n / h) := by
+        rw [qabs_eq_self_of_nonneg hcenter]
+        exact rat_add_le_add hcenter_le hsec'
+      _ = 3 + h * 34 + 2 * uniformExpTailMagnitude n / h := by
+        grind [Rat.add_assoc]
+  have hdiff_qabs :
+      qabs (uniformExpCenter b n - uniformExpCenter a n) =
+        h * qabs ((uniformExpCenter b n - uniformExpCenter a n) / h) := by
+    have hdiv := qabs_div_eq_div_qabs
+      (uniformExpCenter b n - uniformExpCenter a n) h hh
+    rw [hdiv, hqabs, Rat.div_def]
+    have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+    grind [Rat.mul_assoc]
+  have hdiff_nonneg :
+      0 <= uniformExpCenter b n - uniformExpCenter a n := by
+    have hmono := uniformExpCenter_mono_on_unit n ha hb (Rat.le_of_lt hab)
+    grind [Rat.sub_eq_add_neg]
+  have hdiff_eq :
+      uniformExpCenter b n - uniformExpCenter a n =
+        h * qabs ((uniformExpCenter b n - uniformExpCenter a n) / h) := by
+    rw [← hdiff_qabs, qabs_eq_self_of_nonneg hdiff_nonneg]
+  have hqbound := Rat.mul_le_mul_of_nonneg_left hquot (Rat.le_of_lt hpos)
+  rw [show a + h = b by dsimp [h]; grind] at hqbound
+  calc
+    uniformExpCenter b n - uniformExpCenter a n =
+        h * qabs ((uniformExpCenter b n - uniformExpCenter a n) / h) := hdiff_eq
+    _ <=
+        h * (3 + h * 34 + 2 * uniformExpTailMagnitude n / h) := hqbound
+    _ = 3 * h + 34 * h ^ 2 + 2 * uniformExpTailMagnitude n := by
+      rw [Rat.div_def]
+      have hcancel : h * h⁻¹ = 1 := Rat.mul_inv_cancel h hh
+      grind [Rat.mul_assoc, Rat.mul_comm,
+        Rat.pow_succ]
+
+theorem uniformExpCellRange_width_le
+    {a b : Rat} (n : Nat)
+    (ha : 0 <= a) (hb : b <= 1) (hab : a <= b) :
+    (uniformExpCellRange a b n).width <=
+      3 * (b - a) + 34 * (b - a) ^ 2 +
+        6 * uniformExpTailMagnitude n := by
+  by_cases heq : a = b
+  · subst heq
+    rw [uniformExpCellRange_width]
+    simp only [Rat.sub_self, Rat.zero_add]
+    unfold uniformExpTailRadius
+    have htail : 0 <= uniformExpTailMagnitude n :=
+      uniformExpTailMagnitude_nonneg n
+    grind
+  · have hlt : a < b := (Rat.lt_iff_le_and_ne).2 ⟨hab, heq⟩
+    rw [uniformExpCellRange_width]
+    have hcenter := uniformExpCenter_difference_le n ha hb hlt
+    unfold uniformExpTailRadius
+    have htail : 0 <= uniformExpTailMagnitude n :=
+      uniformExpTailMagnitude_nonneg n
+    calc
+      uniformExpCenter b n - uniformExpCenter a n +
+          2 * (2 * uniformExpTailMagnitude n) <=
+          (3 * (b - a) + 34 * (b - a) ^ 2 +
+            2 * uniformExpTailMagnitude n) +
+            2 * (2 * uniformExpTailMagnitude n) :=
+        rat_add_le_add hcenter Rat.le_refl
+      _ <= 3 * (b - a) + 34 * (b - a) ^ 2 +
+          6 * uniformExpTailMagnitude n := by
+        grind
+
+theorem uniformExpCellRange_width_le_eps
+    (eps : QPos) {a b : Rat}
+    (ha : 0 <= a) (hb : b <= 1) (hab : a <= b)
+    (hstep : b - a <= eps.val / 200) :
+    (uniformExpCellRange a b (uniformExpCellStage eps)).width <= eps.val := by
+  have hwidth := uniformExpCellRange_width_le
+    (uniformExpCellStage eps) ha hb hab
+  have hnonneg : 0 <= b - a := by
+    grind [Rat.sub_eq_add_neg]
+  have hleone : b - a <= 1 := by
+    grind [Rat.sub_eq_add_neg]
+  have hsq : (b - a) ^ 2 <= b - a := by
+    rw [show (b - a) ^ 2 = (b - a) * (b - a) by
+      simp [Rat.pow_succ]]
+    have hmul := Rat.mul_le_mul_of_nonneg_left hleone hnonneg
+    grind
+  have hcenter :
+      3 * (b - a) + 34 * (b - a) ^ 2 <= eps.val / 4 := by
+    have hlinear : 3 * (b - a) + 34 * (b - a) ^ 2 <=
+        37 * (b - a) := by
+      have hsq' := Rat.mul_le_mul_of_nonneg_left hsq
+        (by native_decide : (0 : Rat) <= 34)
+      grind
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hstep
+      (by native_decide : (0 : Rat) <= 37)
+    calc
+      3 * (b - a) + 34 * (b - a) ^ 2 <= 37 * (b - a) := hlinear
+      _ <= 37 * (eps.val / 200) := hscaled
+      _ <= eps.val / 4 := by grind
+  have htail := uniformExpCellTailSum_le_half eps
+  have hpieces : 1 <= (uniformExpCellPieces eps : Rat) := by
+    have hp := uniformExpCellPieces_pos eps
+    exact_mod_cast (Nat.one_le_iff_ne_zero.mpr (Nat.ne_of_gt hp))
+  have hradius_nonneg :
+      0 <= 2 * uniformExpTailRadius (uniformExpCellStage eps) := by
+    unfold uniformExpTailRadius
+    exact Rat.mul_nonneg (by native_decide)
+      (Rat.mul_nonneg (by native_decide)
+        (uniformExpTailMagnitude_nonneg _))
+  have hradius :
+      2 * uniformExpTailRadius (uniformExpCellStage eps) <= eps.val / 2 := by
+    calc
+      2 * uniformExpTailRadius (uniformExpCellStage eps) =
+          1 * (2 * uniformExpTailRadius (uniformExpCellStage eps)) := by
+            grind
+      _ <= (uniformExpCellPieces eps : Rat) *
+          (2 * uniformExpTailRadius (uniformExpCellStage eps)) := by
+            exact Rat.mul_le_mul_of_nonneg_right hpieces hradius_nonneg
+      _ <= eps.val / 2 := htail
+  unfold uniformExpTailRadius at hwidth
+  have htailwidth :
+      6 * uniformExpTailMagnitude (uniformExpCellStage eps) <=
+        3 * eps.val / 4 := by
+    have hscaled := Rat.mul_le_mul_of_nonneg_left hradius
+      (by native_decide : (0 : Rat) <= 3 / 2)
+    calc
+      6 * uniformExpTailMagnitude (uniformExpCellStage eps) =
+          (3 / 2 : Rat) *
+            (2 * (2 * uniformExpTailMagnitude (uniformExpCellStage eps))) := by
+              grind
+      _ <= (3 / 2 : Rat) * (eps.val / 2) := hscaled
+      _ = 3 * eps.val / 4 := by grind
+  calc
+    (uniformExpCellRange a b (uniformExpCellStage eps)).width <=
+        3 * (b - a) + 34 * (b - a) ^ 2 +
+          6 * uniformExpTailMagnitude (uniformExpCellStage eps) := hwidth
+    _ <= eps.val / 4 + 3 * eps.val / 4 :=
+      rat_add_le_add hcenter htailwidth
+    _ <= eps.val := by grind
+
+theorem uniformExpUniformCellRange_width_le_eps
+    (eps : QPos) (k : Nat)
+    (hk : k < uniformExpCellPieces eps) :
+    (uniformExpCellRange
+      ((RationalPartition.uniform 0 1 (uniformExpCellPieces eps)
+        (uniformExpCellPieces_pos eps) (by native_decide)).cell k hk).lower
+      ((RationalPartition.uniform 0 1 (uniformExpCellPieces eps)
+        (uniformExpCellPieces_pos eps) (by native_decide)).cell k hk).upper
+      (uniformExpCellStage eps)).width <= eps.val := by
+  let P := RationalPartition.uniform 0 1 (uniformExpCellPieces eps)
+    (uniformExpCellPieces_pos eps) (by native_decide)
+  let C := P.cell k hk
+  have hstep : C.upper - C.lower <= eps.val / 200 := by
+    rw [show C.upper - C.lower = mesh 0 1 (uniformExpCellPieces eps) by
+      dsimp [C, P]
+      exact RationalPartition.uniform_cell_width 0 1
+        (uniformExpCellPieces eps) (uniformExpCellPieces_pos eps)
+        (by native_decide) k hk]
+    exact uniformExpCellMesh_le eps
+  exact uniformExpCellRange_width_le_eps eps C.lower_mem C.upper_mem
+    C.ordered hstep
 
 /-- The `ε |h| / 24` tail allowance simultaneously controls the center tail
 in a quotient, the quotient-box width, and the derivative-box width whenever

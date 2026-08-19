@@ -126,8 +126,15 @@ from monomial brackets structurally.
    integral sum.  The common Taylor center is now bounded on `[0,1]` by the
    rational lemmas `uniformExpCenter_nonneg_on_unit` and
    `uniformExpCenter_le_three_on_unit`; these are the finite algebraic input
-   for that weighted estimate, followed by the selected-stage certificate
-   assembly.
+   for that weighted estimate.  The resulting local estimate is exposed by
+   `uniformExpCenter_difference_le` and `uniformExpCellRange_width_le`.
+   The concrete partition schedule now uses
+   `uniformExpCellPieces = 200 * (eps.den + 1)`; its mesh and every cell range
+   are controlled by `uniformExpCellMesh_le` and
+   `uniformExpUniformCellRange_width_le_eps`.  The remaining bridge is to
+   synchronize the step-aware derivative evaluator with this common cell
+   stage, transport its `intervalNearAtPrecision` result to a scaled endpoint
+   enclosure, and assemble `SelectedStageCandidateDerivativeFTC`.
 
 6. **Rational tangent-chart case.**  Keep
    `tangentPullbackDensity` and `tangentPullbackPrimitive` as the substitution
