@@ -790,10 +790,10 @@ structure NormalizedTangentSquareTransportSubgoal where
   normalized_anchor_valid :
     (SinPiIntegral.reciprocalPiRaw *
       RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
-  chart_transport :
-    normalizedTangentSquareIntegral.Equiv
-      (SinPiIntegral.reciprocalPiRaw *
-        RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
+  chart_transport : SignedRawProductEquivalenceSubgoal
+    SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw
+    SinPiIntegral.tangentSquareIntegral
+    (RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
 
 theorem NormalizedTangentSquareTransportSubgoal.value
     (H : NormalizedTangentSquareTransportSubgoal) :
@@ -806,11 +806,16 @@ theorem NormalizedTangentSquareTransportSubgoal.value
   have hstable :=
     SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
       hnormalized hcandidate
+  have hchart :
+      normalizedTangentSquareIntegral.Equiv
+        (SinPiIntegral.reciprocalPiRaw *
+          RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)) :=
+    H.chart_transport.equiv
   have hanchor :
       normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
     exact RealRaw.equiv_trans hnormalized
       H.normalized_anchor_valid (RealRaw.ofRat_valid _)
-      H.chart_transport reciprocalPi_quarterTurn_equiv_quarter
+      hchart reciprocalPi_quarterTurn_equiv_quarter
   exact RealRaw.equiv_trans
     (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
       hnormalized hcandidate)
