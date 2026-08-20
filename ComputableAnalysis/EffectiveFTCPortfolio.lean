@@ -733,6 +733,36 @@ theorem normalizedTangentSquare_stage_zero_overlap :
   rw [SinPiIntegral.tangentSquareIntegral_compute]
   native_decide
 
+theorem normalizedTangentSquare_stage_one_overlap :
+    QInterval.Overlaps
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 1)
+      (normalizedTangentSquareIntegral.compute 1) := by
+  change QInterval.Overlaps
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 1)
+    (QBox.mulRealInterval
+      (SinPiIntegral.reciprocalPiRaw.compute 1).lo
+      (SinPiIntegral.reciprocalPiRaw.compute 1).hi
+      (SinPiIntegral.tangentSquareIntegral.compute 1).lo
+      (SinPiIntegral.tangentSquareIntegral.compute 1).hi)
+  unfold QInterval.Overlaps
+  rw [SinPiIntegral.tangentSquareIntegral_compute]
+  native_decide
+
+theorem normalizedTangentSquare_stage_two_overlap :
+    QInterval.Overlaps
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 2)
+      (normalizedTangentSquareIntegral.compute 2) := by
+  change QInterval.Overlaps
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 2)
+    (QBox.mulRealInterval
+      (SinPiIntegral.reciprocalPiRaw.compute 2).lo
+      (SinPiIntegral.reciprocalPiRaw.compute 2).hi
+      (SinPiIntegral.tangentSquareIntegral.compute 2).lo
+      (SinPiIntegral.tangentSquareIntegral.compute 2).hi)
+  unfold QInterval.Overlaps
+  rw [SinPiIntegral.tangentSquareIntegral_compute]
+  native_decide
+
 structure NormalizedTangentSquareTransportSubgoal where
   commonWitness : NormalizedTangentSquareCommonWitness
   normalized_validity :
