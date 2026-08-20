@@ -641,6 +641,60 @@ theorem normalizedTangentSquareProduct_widths_shrink_of_bounds
       rw [Rat.div_def]
       grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
 
+theorem normalizedTangentSquareProduct_endpoint_bounds :
+    forall n,
+      qabs (SinPiIntegral.reciprocalPiRaw.compute n).lo <= (128 : Rat) /\
+      qabs (SinPiIntegral.tangentSquareIntegral.compute n).lo <= (128 : Rat) /\
+      qabs (SinPiIntegral.tangentSquareIntegral.compute n).hi <= (128 : Rat) := by
+  intro n
+  have hrecip := SinPiIntegral.reciprocalPiRaw_bounds n
+  have hrecip_lo : qabs (SinPiIntegral.reciprocalPiRaw.compute n).lo <=
+      (128 : Rat) := by
+    have horder := RealRaw.interval_order_of_valid
+      SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw_valid n
+    rw [qabs_eq_self_of_nonneg hrecip.1]
+    grind [hrecip.2]
+  have hrecip_hi : qabs (SinPiIntegral.reciprocalPiRaw.compute n).hi <=
+      (128 : Rat) := by
+    have hhi0 : 0 <= (SinPiIntegral.reciprocalPiRaw.compute n).hi := by
+      exact Rat.le_trans hrecip.1
+        (RealRaw.interval_order_of_valid
+          SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw_valid n)
+    rw [qabs_eq_self_of_nonneg hhi0]
+    grind [hrecip.2]
+  have htan0lo : qabs (SinPiIntegral.tangentSquareIntegral.compute 0).lo <=
+      (128 : Rat) := by
+    rw [SinPiIntegral.tangentSquareIntegral_compute]
+    native_decide
+  have htan0hi : qabs (SinPiIntegral.tangentSquareIntegral.compute 0).hi <=
+      (128 : Rat) := by
+    rw [SinPiIntegral.tangentSquareIntegral_compute]
+    native_decide
+  have htan_nested := SinPiIntegral.tangentSquareIntegral_valid.2.1
+    0 n (Nat.zero_le n)
+  have htan_order_n := RealRaw.interval_order_of_valid
+    SinPiIntegral.tangentSquareIntegral SinPiIntegral.tangentSquareIntegral_valid n
+  have htan_lo_lower : -(128 : Rat) <=
+      (SinPiIntegral.tangentSquareIntegral.compute n).lo := by
+    exact Rat.le_trans
+      (Rat.le_trans (by grind) (neg_qabs_le_self _))
+      htan_nested.1
+  have htan_hi_upper :
+      (SinPiIntegral.tangentSquareIntegral.compute n).hi <= (128 : Rat) := by
+    have h0hi :
+        (SinPiIntegral.tangentSquareIntegral.compute 0).hi <= (128 : Rat) :=
+      Rat.le_trans (self_le_qabs _) htan0hi
+    exact Rat.le_trans htan_nested.2.2 h0hi
+  have htan_lo_upper :
+      (SinPiIntegral.tangentSquareIntegral.compute n).lo <= (128 : Rat) :=
+    Rat.le_trans htan_order_n htan_hi_upper
+  have htan_hi_lower : -(128 : Rat) <=
+      (SinPiIntegral.tangentSquareIntegral.compute n).hi :=
+    Rat.le_trans htan_lo_lower htan_order_n
+  refine ⟨hrecip_lo, ?_, ?_⟩
+  · exact qabs_le_of_neg_le_le htan_lo_lower htan_lo_upper
+  · exact qabs_le_of_neg_le_le htan_hi_lower htan_hi_upper
+
 theorem normalizedTangentSquareProduct_valid_of_bounds
     {B : Rat} (hB : 0 < B)
     (hbound : forall n,
@@ -653,6 +707,31 @@ theorem normalizedTangentSquareProduct_valid_of_bounds
     ordered := normalizedTangentSquareProduct_ordered
     nested := normalizedTangentSquareProduct_nested
     widths_shrink := normalizedTangentSquareProduct_widths_shrink_of_bounds hB hbound }
+
+theorem normalizedTangentSquareProduct_valid :
+    SignedRawProductValiditySubgoal
+      SinPiIntegral.reciprocalPiRaw SinPiIntegral.tangentSquareIntegral := by
+  exact normalizedTangentSquareProduct_valid_of_bounds
+    (by native_decide) normalizedTangentSquareProduct_endpoint_bounds
+
+theorem normalizedTangentSquareIntegral_valid :
+    normalizedTangentSquareIntegral.Valid := by
+  exact normalizedTangentSquareProduct_valid.valid
+
+theorem normalizedTangentSquare_stage_zero_overlap :
+    QInterval.Overlaps
+      (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 0)
+      (normalizedTangentSquareIntegral.compute 0) := by
+  change QInterval.Overlaps
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum 0)
+    (QBox.mulRealInterval
+      (SinPiIntegral.reciprocalPiRaw.compute 0).lo
+      (SinPiIntegral.reciprocalPiRaw.compute 0).hi
+      (SinPiIntegral.tangentSquareIntegral.compute 0).lo
+      (SinPiIntegral.tangentSquareIntegral.compute 0).hi)
+  unfold QInterval.Overlaps
+  rw [SinPiIntegral.tangentSquareIntegral_compute]
+  native_decide
 
 structure NormalizedTangentSquareTransportSubgoal where
   commonWitness : NormalizedTangentSquareCommonWitness
