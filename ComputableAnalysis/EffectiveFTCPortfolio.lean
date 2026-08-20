@@ -763,6 +763,25 @@ theorem normalizedTangentSquare_stage_two_overlap :
   rw [SinPiIntegral.tangentSquareIntegral_compute]
   native_decide
 
+/-! Signed product equivalence is a stagewise interval obligation.  The
+nonnegative-product shortcut is intentionally not used here: both products
+may contain negative coarse-stage endpoints. -/
+structure SignedRawProductEquivalenceSubgoal
+    (x x' y y' : RealRaw) where
+  left_valid : (x * y).Valid
+  right_valid : (x' * y').Valid
+  stage_overlap : forall n,
+    QInterval.Overlaps ((x * y).compute n) ((x' * y').compute n)
+
+theorem SignedRawProductEquivalenceSubgoal.equiv
+    {x x' y y' : RealRaw}
+    (H : SignedRawProductEquivalenceSubgoal x x' y y') :
+    (x * y).Equiv (x' * y') := by
+  apply RealRaw.sameStageOverlap_equiv
+  intro n
+  exact (RealRaw.compareAt_overlap_iff (x * y) (x' * y') n n).2
+    (H.stage_overlap n)
+
 structure NormalizedTangentSquareTransportSubgoal where
   commonWitness : NormalizedTangentSquareCommonWitness
   normalized_validity :
