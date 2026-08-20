@@ -507,9 +507,28 @@ theorem NormalizedTangentSquareCommonWitness.to_equiv
     Rat.le_trans (H.normalized_lo_le n)
       (H.witness_le_candidate_hi n)⟩
 
+/-! A signed product cannot use the nonnegative-product shortcut at coarse
+stages.  This certificate exposes exactly the three obligations required by
+`RealRaw.Valid`, rather than assuming a convergence theorem for multiplication.
+-/
+structure SignedRawProductValiditySubgoal (x y : RealRaw) where
+  ordered : forall n, 0 <= ((x * y).compute n).width
+  nested : forall n m, n <= m ->
+    ((x * y).compute n).lo <= ((x * y).compute m).lo /\
+    ((x * y).compute m).lo <= ((x * y).compute m).hi /\
+    ((x * y).compute m).hi <= ((x * y).compute n).hi
+  widths_shrink : RealRaw.WidthsShrinkToZero (x * y).compute
+
+theorem SignedRawProductValiditySubgoal.valid
+    {x y : RealRaw} (H : SignedRawProductValiditySubgoal x y) :
+    (x * y).Valid := by
+  exact ⟨H.ordered, H.nested, H.widths_shrink⟩
+
 structure NormalizedTangentSquareTransportSubgoal where
   commonWitness : NormalizedTangentSquareCommonWitness
-  normalized_valid : normalizedTangentSquareIntegral.Valid
+  normalized_validity :
+    SignedRawProductValiditySubgoal
+      SinPiIntegral.reciprocalPiRaw SinPiIntegral.tangentSquareIntegral
   normalized_anchor_valid :
     (SinPiIntegral.reciprocalPiRaw *
       RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
@@ -524,18 +543,20 @@ theorem NormalizedTangentSquareTransportSubgoal.value
       normalizedTangentSquareIntegral).Equiv
       (RealRaw.ofRat (1 / 4)) := by
   have hcandidate := H.commonWitness.to_equiv
+  have hnormalized : normalizedTangentSquareIntegral.Valid := by
+    exact H.normalized_validity.valid
   have hstable :=
     SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_equiv_anchor_of_overlap
-      H.normalized_valid hcandidate
+      hnormalized hcandidate
   have hanchor :
       normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
-    exact RealRaw.equiv_trans H.normalized_valid
+    exact RealRaw.equiv_trans hnormalized
       H.normalized_anchor_valid (RealRaw.ofRat_valid _)
       H.chart_transport reciprocalPi_quarterTurn_equiv_quarter
   exact RealRaw.equiv_trans
     (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
-      H.normalized_valid hcandidate)
-    H.normalized_valid (RealRaw.ofRat_valid _) hstable hanchor
+      hnormalized hcandidate)
+    hnormalized (RealRaw.ofRat_valid _) hstable hanchor
 
 theorem NormalizedTangentSquareValueSubgoal.value
     (H : NormalizedTangentSquareValueSubgoal) :
