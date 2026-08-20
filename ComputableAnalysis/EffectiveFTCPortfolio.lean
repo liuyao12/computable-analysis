@@ -524,6 +524,25 @@ theorem SignedRawProductValiditySubgoal.valid
     (x * y).Valid := by
   exact ⟨H.ordered, H.nested, H.widths_shrink⟩
 
+theorem normalizedTangentSquareProduct_ordered (n : Nat) :
+    0 <= (normalizedTangentSquareIntegral.compute n).width := by
+  change 0 <= (QBox.mulRealInterval
+    (SinPiIntegral.reciprocalPiRaw.compute n).lo
+    (SinPiIntegral.reciprocalPiRaw.compute n).hi
+    (SinPiIntegral.tangentSquareIntegral.compute n).lo
+    (SinPiIntegral.tangentSquareIntegral.compute n).hi).width
+  have hrecip := RealRaw.interval_order_of_valid
+    SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw_valid n
+  have htangent := RealRaw.interval_order_of_valid
+    SinPiIntegral.tangentSquareIntegral SinPiIntegral.tangentSquareIntegral_valid n
+  have h := QBox.mulRealInterval_ordered
+    (a := (SinPiIntegral.reciprocalPiRaw.compute n).lo)
+    (b := (SinPiIntegral.reciprocalPiRaw.compute n).hi)
+    (c := (SinPiIntegral.tangentSquareIntegral.compute n).lo)
+    (d := (SinPiIntegral.tangentSquareIntegral.compute n).hi) hrecip htangent
+  unfold QInterval.width
+  grind
+
 structure NormalizedTangentSquareTransportSubgoal where
   commonWitness : NormalizedTangentSquareCommonWitness
   normalized_validity :
