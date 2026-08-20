@@ -487,13 +487,13 @@ unscaled chart integral. -/
 structure NormalizedTangentSquareCommonWitness where
   witness : Nat -> Rat
   candidate_lo_le : forall n,
-    SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo <= witness n
+    (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).lo <= witness n
   witness_le_candidate_hi : forall n,
     witness n <= (SinPiIntegral.dyadicNestedRadicalSquareLeftSum n).hi
   normalized_lo_le : forall n,
-    normalizedTangentSquareIntegral.compute n).lo <= witness n
+    (normalizedTangentSquareIntegral.compute n).lo <= witness n
   witness_le_normalized_hi : forall n,
-    witness n <= normalizedTangentSquareIntegral.compute n).hi
+    witness n <= (normalizedTangentSquareIntegral.compute n).hi
 
 theorem NormalizedTangentSquareCommonWitness.to_equiv
     (H : NormalizedTangentSquareCommonWitness) :
@@ -513,6 +513,10 @@ structure NormalizedTangentSquareTransportSubgoal where
   normalized_anchor_valid :
     (SinPiIntegral.reciprocalPiRaw *
       RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat)).Valid
+  chart_transport :
+    normalizedTangentSquareIntegral.Equiv
+      (SinPiIntegral.reciprocalPiRaw *
+        RationalCircle.GeometricTrig.halfQuarterTurnRaw (1 : Rat))
 
 theorem NormalizedTangentSquareTransportSubgoal.value
     (H : NormalizedTangentSquareTransportSubgoal) :
@@ -525,9 +529,9 @@ theorem NormalizedTangentSquareTransportSubgoal.value
       H.normalized_valid hcandidate
   have hanchor :
       normalizedTangentSquareIntegral.Equiv (RealRaw.ofRat (1 / 4)) := by
-    exact RealRaw.equiv_trans H.normalized_anchor_valid
-      (RealRaw.ofRat_valid _) (by
-        exact reciprocalPi_quarterTurn_equiv_quarter)
+    exact RealRaw.equiv_trans H.normalized_valid
+      H.normalized_anchor_valid (RealRaw.ofRat_valid _)
+      H.chart_transport reciprocalPi_quarterTurn_equiv_quarter
   exact RealRaw.equiv_trans
     (SinPiIntegral.dyadicNestedRadicalSquareIntegralRaw_stabilized_valid_of_overlap
       H.normalized_valid hcandidate)
