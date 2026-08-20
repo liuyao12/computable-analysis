@@ -543,6 +543,37 @@ theorem normalizedTangentSquareProduct_ordered (n : Nat) :
   unfold QInterval.width
   grind
 
+theorem normalizedTangentSquareProduct_nested (n m : Nat) (hnm : n <= m) :
+    (normalizedTangentSquareIntegral.compute n).lo <=
+        (normalizedTangentSquareIntegral.compute m).lo /\
+      (normalizedTangentSquareIntegral.compute m).hi <=
+        (normalizedTangentSquareIntegral.compute n).hi := by
+  have hrecip := SinPiIntegral.reciprocalPiRaw_valid.2.1 n m hnm
+  have htangent := SinPiIntegral.tangentSquareIntegral_valid.2.1 n m hnm
+  change (QBox.mulRealInterval
+      (SinPiIntegral.reciprocalPiRaw.compute n).lo
+      (SinPiIntegral.reciprocalPiRaw.compute n).hi
+      (SinPiIntegral.tangentSquareIntegral.compute n).lo
+      (SinPiIntegral.tangentSquareIntegral.compute n).hi).lo <=
+      (QBox.mulRealInterval
+        (SinPiIntegral.reciprocalPiRaw.compute m).lo
+        (SinPiIntegral.reciprocalPiRaw.compute m).hi
+        (SinPiIntegral.tangentSquareIntegral.compute m).lo
+        (SinPiIntegral.tangentSquareIntegral.compute m).hi).lo /\
+    (QBox.mulRealInterval
+        (SinPiIntegral.reciprocalPiRaw.compute m).lo
+        (SinPiIntegral.reciprocalPiRaw.compute m).hi
+        (SinPiIntegral.tangentSquareIntegral.compute m).lo
+        (SinPiIntegral.tangentSquareIntegral.compute m).hi).hi <=
+      (QBox.mulRealInterval
+        (SinPiIntegral.reciprocalPiRaw.compute n).lo
+        (SinPiIntegral.reciprocalPiRaw.compute n).hi
+        (SinPiIntegral.tangentSquareIntegral.compute n).lo
+        (SinPiIntegral.tangentSquareIntegral.compute n).hi).hi
+  exact QBox.mulRealInterval_nested
+    hrecip.1 hrecip.2.1 hrecip.2.2
+    htangent.1 htangent.2.1 htangent.2.2
+
 structure NormalizedTangentSquareTransportSubgoal where
   commonWitness : NormalizedTangentSquareCommonWitness
   normalized_validity :
