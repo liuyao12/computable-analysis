@@ -546,6 +546,8 @@ theorem normalizedTangentSquareProduct_ordered (n : Nat) :
 theorem normalizedTangentSquareProduct_nested (n m : Nat) (hnm : n <= m) :
     (normalizedTangentSquareIntegral.compute n).lo <=
         (normalizedTangentSquareIntegral.compute m).lo /\
+      (normalizedTangentSquareIntegral.compute m).lo <=
+        (normalizedTangentSquareIntegral.compute m).hi /\
       (normalizedTangentSquareIntegral.compute m).hi <=
         (normalizedTangentSquareIntegral.compute n).hi := by
   have hrecip := SinPiIntegral.reciprocalPiRaw_valid.2.1 n m hnm
@@ -564,15 +566,93 @@ theorem normalizedTangentSquareProduct_nested (n m : Nat) (hnm : n <= m) :
         (SinPiIntegral.reciprocalPiRaw.compute m).lo
         (SinPiIntegral.reciprocalPiRaw.compute m).hi
         (SinPiIntegral.tangentSquareIntegral.compute m).lo
+        (SinPiIntegral.tangentSquareIntegral.compute m).hi).lo <=
+      (QBox.mulRealInterval
+        (SinPiIntegral.reciprocalPiRaw.compute m).lo
+        (SinPiIntegral.reciprocalPiRaw.compute m).hi
+        (SinPiIntegral.tangentSquareIntegral.compute m).lo
+        (SinPiIntegral.tangentSquareIntegral.compute m).hi).hi /\
+    (QBox.mulRealInterval
+        (SinPiIntegral.reciprocalPiRaw.compute m).lo
+        (SinPiIntegral.reciprocalPiRaw.compute m).hi
+        (SinPiIntegral.tangentSquareIntegral.compute m).lo
         (SinPiIntegral.tangentSquareIntegral.compute m).hi).hi <=
       (QBox.mulRealInterval
         (SinPiIntegral.reciprocalPiRaw.compute n).lo
         (SinPiIntegral.reciprocalPiRaw.compute n).hi
         (SinPiIntegral.tangentSquareIntegral.compute n).lo
         (SinPiIntegral.tangentSquareIntegral.compute n).hi).hi
-  exact QBox.mulRealInterval_nested
+  have hproduct := QBox.mulRealInterval_nested
     hrecip.1 hrecip.2.1 hrecip.2.2
     htangent.1 htangent.2.1 htangent.2.2
+  have hrecipM := RealRaw.interval_order_of_valid
+    SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw_valid m
+  have htangentM := RealRaw.interval_order_of_valid
+    SinPiIntegral.tangentSquareIntegral SinPiIntegral.tangentSquareIntegral_valid m
+  have hm := QBox.mulRealInterval_ordered
+    (a := (SinPiIntegral.reciprocalPiRaw.compute m).lo)
+    (b := (SinPiIntegral.reciprocalPiRaw.compute m).hi)
+    (c := (SinPiIntegral.tangentSquareIntegral.compute m).lo)
+    (d := (SinPiIntegral.tangentSquareIntegral.compute m).hi)
+    hrecipM htangentM
+  exact ⟨hproduct.1, hm, hproduct.2⟩
+
+theorem normalizedTangentSquareProduct_widths_shrink_of_bounds
+    {B : Rat} (hB : 0 < B)
+    (hbound : forall n,
+      qabs (SinPiIntegral.reciprocalPiRaw.compute n).lo <= B /\
+      qabs (SinPiIntegral.tangentSquareIntegral.compute n).lo <= B /\
+      qabs (SinPiIntegral.tangentSquareIntegral.compute n).hi <= B) :
+    RealRaw.WidthsShrinkToZero normalizedTangentSquareIntegral.compute := by
+  intro eps
+  let delta : QPos := ⟨eps.val / ((4 : Rat) * B), by
+    rw [Rat.div_def]
+    exact Rat.mul_pos eps.property ((Rat.inv_pos).2
+      (Rat.mul_pos (by native_decide) hB))⟩
+  obtain ⟨Nr, hr⟩ := SinPiIntegral.reciprocalPiRaw_valid.2.2 delta
+  obtain ⟨Nt, ht⟩ := SinPiIntegral.tangentSquareIntegral_valid.2.2 delta
+  refine ⟨Nat.max Nr Nt, ?_⟩
+  intro n hn
+  have hnr : Nr <= n := Nat.le_trans (Nat.le_max_left _ _) hn
+  have hnt : Nt <= n := Nat.le_trans (Nat.le_max_right _ _) hn
+  have hwr := hr n hnr
+  have hwt := ht n hnt
+  have hro := RealRaw.interval_order_of_valid
+    SinPiIntegral.reciprocalPiRaw SinPiIntegral.reciprocalPiRaw_valid n
+  have hto := RealRaw.interval_order_of_valid
+    SinPiIntegral.tangentSquareIntegral SinPiIntegral.tangentSquareIntegral_valid n
+  have hp := QBox.mulRealInterval_width_le_of_abs_bounded
+    hro hto (hbound n).1 (hbound n).2.1 (hbound n).2.2
+  change (QBox.mulRealInterval
+      (SinPiIntegral.reciprocalPiRaw.compute n).lo
+      (SinPiIntegral.reciprocalPiRaw.compute n).hi
+      (SinPiIntegral.tangentSquareIntegral.compute n).lo
+      (SinPiIntegral.tangentSquareIntegral.compute n).hi).width <= eps.val
+  calc
+    _ <= (2 : Rat) * B *
+        ((SinPiIntegral.reciprocalPiRaw.compute n).width +
+          (SinPiIntegral.tangentSquareIntegral.compute n).width) := hp
+    _ <= (2 : Rat) * B * (delta.val + delta.val) := by
+      exact Rat.mul_le_mul_of_nonneg_left
+        (rat_add_le_add hwr hwt)
+        (Rat.mul_nonneg (by native_decide) (Rat.le_of_lt hB))
+    _ = eps.val := by
+      dsimp [delta]
+      rw [Rat.div_def]
+      grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_inv_cancel]
+
+theorem normalizedTangentSquareProduct_valid_of_bounds
+    {B : Rat} (hB : 0 < B)
+    (hbound : forall n,
+      qabs (SinPiIntegral.reciprocalPiRaw.compute n).lo <= B /\
+      qabs (SinPiIntegral.tangentSquareIntegral.compute n).lo <= B /\
+      qabs (SinPiIntegral.tangentSquareIntegral.compute n).hi <= B) :
+    SignedRawProductValiditySubgoal
+      SinPiIntegral.reciprocalPiRaw SinPiIntegral.tangentSquareIntegral := by
+  exact {
+    ordered := normalizedTangentSquareProduct_ordered
+    nested := normalizedTangentSquareProduct_nested
+    widths_shrink := normalizedTangentSquareProduct_widths_shrink_of_bounds hB hbound }
 
 structure NormalizedTangentSquareTransportSubgoal where
   commonWitness : NormalizedTangentSquareCommonWitness
