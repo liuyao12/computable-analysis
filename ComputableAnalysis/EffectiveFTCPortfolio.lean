@@ -773,6 +773,77 @@ structure SignedRawProductEquivalenceSubgoal
   stage_overlap : forall n,
     QInterval.Overlaps ((x * y).compute n) ((x' * y').compute n)
 
+/-! Product equivalence does not require nonnegative factors.  At a fixed
+stage, choose the maximum of the two lower endpoints in each factor box.
+Factor overlap and interval validity put these two maxima in both boxes; the
+product of the two rational witnesses is therefore contained in both product
+boxes by the four-corner enclosure theorem. -/
+theorem signedRawProduct_stage_overlap_of_factor_equiv
+    {x x' y y' : RealRaw}
+    (hx : x.Valid) (hx' : x'.Valid) (hy : y.Valid) (hy' : y'.Valid)
+    (hxx' : x.Equiv x') (hyy' : y.Equiv y') (n : Nat) :
+    QInterval.Overlaps ((x * y).compute n) ((x' * y').compute n) := by
+  have hxx := (RealRaw.compareAt_overlap_iff x x' n n).1
+    (RealRaw.sameStageOverlap_of_equiv hx hx' hxx' n)
+  have hyy := (RealRaw.compareAt_overlap_iff y y' n n).1
+    (RealRaw.sameStageOverlap_of_equiv hy hy' hyy' n)
+  unfold QInterval.Overlaps at hxx hyy
+  have hxorder := RealRaw.interval_order_of_valid x hx n
+  have hx'order := RealRaw.interval_order_of_valid x' hx' n
+  have hyorder := RealRaw.interval_order_of_valid y hy n
+  have hy'order := RealRaw.interval_order_of_valid y' hy' n
+  let a : Rat := maxRat2 (x.compute n).lo (x'.compute n).lo
+  let b : Rat := maxRat2 (y.compute n).lo (y'.compute n).lo
+  have ha_x : (x.compute n).lo <= a := by
+    unfold a maxRat2
+    split <;> grind
+  have ha_x' : (x'.compute n).lo <= a := by
+    unfold a maxRat2
+    split <;> grind
+  have ha_hi : a <= (x.compute n).hi := by
+    unfold a maxRat2
+    split <;> grind
+  have ha'_hi : a <= (x'.compute n).hi := by
+    unfold a maxRat2
+    split <;> grind
+  have hb_y : (y.compute n).lo <= b := by
+    unfold b maxRat2
+    split <;> grind
+  have hb_y' : (y'.compute n).lo <= b := by
+    unfold b maxRat2
+    split <;> grind
+  have hb_hi : b <= (y.compute n).hi := by
+    unfold b maxRat2
+    split <;> grind
+  have hb'_hi : b <= (y'.compute n).hi := by
+    unfold b maxRat2
+    split <;> grind
+  have hleft := QBox.mulRealInterval_contains
+    ha_x ha_hi hb_y hb_hi
+  have hright := QBox.mulRealInterval_contains
+    ha_x' ha'_hi hb_y' hb'_hi
+  change QInterval.Overlaps
+    (QBox.mulRealInterval
+      (x.compute n).lo (x.compute n).hi
+      (y.compute n).lo (y.compute n).hi)
+    (QBox.mulRealInterval
+      (x'.compute n).lo (x'.compute n).hi
+      (y'.compute n).lo (y'.compute n).hi)
+  unfold QInterval.Overlaps
+  exact ⟨Rat.le_trans hleft.1 hright.2,
+    Rat.le_trans hright.1 hleft.2⟩
+
+theorem SignedRawProductEquivalenceSubgoal.of_factor_equiv
+    {x x' y y' : RealRaw}
+    (left_valid : (x * y).Valid) (right_valid : (x' * y').Valid)
+    (hx : x.Valid) (hx' : x'.Valid) (hy : y.Valid) (hy' : y'.Valid)
+    (hxx' : x.Equiv x') (hyy' : y.Equiv y') :
+    SignedRawProductEquivalenceSubgoal x x' y y' :=
+  { left_valid := left_valid
+    right_valid := right_valid
+    stage_overlap := fun n => signedRawProduct_stage_overlap_of_factor_equiv
+      hx hx' hy hy' hxx' hyy' n }
+
 theorem SignedRawProductEquivalenceSubgoal.equiv
     {x x' y y' : RealRaw}
     (H : SignedRawProductEquivalenceSubgoal x x' y y') :
