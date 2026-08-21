@@ -12,6 +12,7 @@ import ComputableAnalysis.CubicRootWitnessCertificate
 import ComputableAnalysis.FiniteGreenRectangle
 import ComputableAnalysis.FiniteGeometryFormulaInterfaces
 import ComputableAnalysis.FiniteCayleyHamiltonExample
+import ComputableAnalysis.FiniteChordPowerExample
 
 /-!
 # Wiedijk's List scoreboard
@@ -232,5 +233,11 @@ theorem wiedijk_item_forty_nine_cayley_hamilton_certificate :
             (LinearODE.matrixIdentity 2))) =
       LinearODE.matrixZero 2 := by
   exact LinearODE.concreteCayleyMatrix_identity_from_generic
+
+theorem wiedijk_item_fifty_five_chord_power_certificate :
+    (RationalCircle.horizontalChordPowerSqrtRaw (4 / 5) 1
+      (by native_decide) (by native_decide)).Equiv
+      (RealRaw.ofRat (3 / 5)) := by
+  exact RationalCircle.horizontalChordPowerSqrtRaw_equiv_three_fifths
 
 end ComputableAnalysis
