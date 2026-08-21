@@ -160,6 +160,23 @@ theorem finiteFourierSynthesisAt_zero_coefficients
       rw [qcomplex_zero_mul]
       exact qcomplex_zero_add _
 
+/-! Finite synthesis is linear in its coefficient table.  This is the
+dual algebraic statement to linearity of the sampled coefficient map. -/
+theorem finiteFourierSynthesisAt_add
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient₁ coefficient₂ coefficient : Nat → QComplex)
+    (hcoefficient : ∀ mode, mode ∈ modes →
+      coefficient mode = QComplex.add (coefficient₁ mode) (coefficient₂ mode)) :
+    finiteFourierSynthesisAt root k modes coefficient =
+      QComplex.add
+        (finiteFourierSynthesisAt root k modes coefficient₁)
+        (finiteFourierSynthesisAt root k modes coefficient₂) := by
+  unfold finiteFourierSynthesisAt
+  rw [qcomplexListSum_map_congr]
+  · exact qcomplexListSum_map_add modes _ _
+  · intro mode hmode
+    rw [hcoefficient mode hmode, QComplex.add_mul_cert]
+
 /-! The finite sample inner product is linear in the sampled values.  This is
 the algebraic step needed to transport Fourier coefficients through addition;
 it is stated entirely over rational-complex stage data. -/
