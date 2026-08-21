@@ -1488,9 +1488,8 @@ result into `exists_basicPrime_gt`: every finite bound `n` has a certified
 prime strictly above it.  This is the direct potential-infinity form of prime
 unboundedness.
 
-**Current benchmark count.** At this certificate boundary, 48 entries have a
-checked project-relevant core: 1, 2, 3, 4, 9, 14, 15, 16, 17, 23, 26, 27, 34, 35, 37, 38, 42, 43, 44, 46, 49, 55, 57, 60, 64, 65, 66, 68,
-69, 73, 74, 75, 76, 77, 78, 79, 80, 81, 85, 89, 91, 92, 94, 95, 97, 98, and 100. This counts finite and rational-coordinate cores
+**Current benchmark count.** At this certificate boundary, 52 entries have a
+checked project-relevant core: 1, 2, 3, 4, 8, 9, 11, 14, 15, 16, 17, 21, 23, 26, 27, 34, 35, 37, 38, 39, 42, 43, 44, 46, 49, 55, 57, 60, 64, 65, 66, 68, 69, 73, 74, 75, 76, 77, 78, 79, 80, 81, 85, 89, 90, 91, 92, 94, 95, 97, 98, and 100. This counts finite and rational-coordinate cores
 honestly; it does not claim full classical theorem statements for every item.
 The admission rule is strict: every counted entry must have a project-native
 statement over `RealRaw`/abstract `Real`, rational interval data, or a finite
@@ -1534,6 +1533,12 @@ an explicit computational interface. The new
 from those four modes by exact rational combinations of their real and
 imaginary coordinates. This completes the finite inverse-transform checkpoint
 for item 76; infinite Fourier convergence and completeness remain deferred.
+The complex-first extension now adds the same finite transform boundary for
+arbitrary rational-complex samples: explicit mode formulas, Parseval,
+unnormalized inverse reconstruction, injectivity, conjugate symmetry,
+linearity, period-four indexing, and cyclic convolution. These are exact
+finite QComplex identities; they do not introduce Mathlib's completed
+complex numbers or silently claim convergence of a general Fourier series.
 
 The exact lattice triangles in `FinitePickCertificate.lean` add item 92's
 finite coordinate core.  The `(4,3)` triangle has area `6`, boundary count `8`,
