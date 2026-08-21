@@ -11,6 +11,7 @@ import ComputableAnalysis.FinitePrimeInfinitude
 import ComputableAnalysis.FiniteBertrandCertificate
 import ComputableAnalysis.CubicRootWitnessCertificate
 import ComputableAnalysis.FiniteGreenRectangle
+import ComputableAnalysis.FiniteIsoperimetricCertificate
 import ComputableAnalysis.FiniteGeometryFormulaInterfaces
 import ComputableAnalysis.FiniteCayleyHamiltonExample
 import ComputableAnalysis.FiniteChordPowerExample
@@ -978,6 +979,16 @@ theorem wiedijk_item_forty_three_triangle_isoperimetric_bound
     (h3 : 0 ≤ a - b + c) (h4 : 0 ≤ a + b - c) :
     256 * RationalCircle.heronProduct a b c ≤ (a + b + c) ^ 4 := by
   exact RationalCircle.triangle_isoperimetric_heron_bound h1 h2 h3 h4
+
+theorem wiedijk_item_forty_three_rectangle_isoperimetric
+    {a b : Rat} :
+    16 * rectangleArea a b ≤ rectanglePerimeter a b ^ 2 := by
+  exact rectangle_isoperimetric
+
+theorem wiedijk_item_forty_three_rectangle_isoperimetric_equality
+    {a b : Rat} :
+    16 * rectangleArea a b = rectanglePerimeter a b ^ 2 ↔ a = b := by
+  exact rectangle_isoperimetric_eq_iff
 
 theorem wiedijk_item_thirty_nine_pell_recurrence (stage : Nat) :
     (pellPair stage).1 * (pellPair stage).1 -
