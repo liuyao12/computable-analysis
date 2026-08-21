@@ -1835,6 +1835,19 @@ theorem wiedijk_item_fourteen_basel_computable_target :
         (Basel.piSquaredOverSixRaw piCircleArea) := by
   exact Basel.eulerBasel_geometric_iff_allStagesOverlap
 
+/-! The Basel witness pattern is an instance of the general cofinal-overlap
+theorem in `Basic`: a future analytic proof may choose later finite stages for
+each earlier pair and need only prove one rational interval overlap there. -/
+theorem wiedijk_item_fourteen_basel_of_cofinal_stage_overlap
+    (hcofinal : ∀ n m, ∃ N M, n ≤ N ∧ m ≤ M ∧
+      RealRaw.compareAt DirichletSeries.zetaTwoRaw
+        (Basel.geometricPiSquaredOverSixRaw) N M = .overlap) :
+    Basel.eulerBasel_geometricPi := by
+  unfold Basel.eulerBasel_geometricPi Basel.EulerBaselStatement
+  exact RealRaw.equiv_of_cofinal_stage_overlap
+    DirichletSeries.zetaTwoRaw_validCompute
+    Basel.geometricPiSquaredOverSixRaw_valid hcofinal
+
 theorem wiedijk_item_fourteen_basel_of_stagewise_witness
     (h : forall n m : Nat, ∃ q : Rat,
       (DirichletSeries.zetaTwoRaw.compute n).lo <= q ∧

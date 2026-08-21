@@ -3290,6 +3290,28 @@ theorem allStagesOverlap_of_equiv {x y : RealRaw}
   fun hxy => allStagesOverlap_of_sameStageOverlap hx hy
     (sameStageOverlap_of_equiv hx hy hxy)
 
+/-! Cofinal finite overlap is enough for equivalence.  This is the reusable
+computable-real form of the witness pattern used by analytic identities such
+as Basel: later stages may be selected separately for each requested pair of
+earlier stages, and nesting transports their overlap back. -/
+theorem equiv_of_cofinal_stage_overlap {x y : RealRaw}
+    (hx : x.Valid) (hy : y.Valid)
+    (hcofinal : ∀ n m, ∃ N M, n ≤ N ∧ m ≤ M ∧
+      compareAt x y N M = .overlap) :
+    x.Equiv y := by
+  apply RealRaw.allStagesOverlap_equiv
+  intro n m
+  obtain ⟨N, M, hnN, hmM, hover⟩ := hcofinal n m
+  have hxnest := hx.2.1 n N hnN
+  have hynest := hy.2.1 m M hmM
+  have hover' := (compareAt_overlap_iff x y N M).1 hover
+  apply (compareAt_overlap_iff x y n m).2
+  constructor
+  · exact Rat.le_trans hxnest.1
+      (Rat.le_trans hover'.1 hynest.2.2)
+  · exact Rat.le_trans hynest.1
+      (Rat.le_trans hover'.2 hxnest.2.2)
+
 theorem equiv_iff_allStagesOverlap {x y : RealRaw}
     (hx : x.Valid) (hy : y.Valid) :
     x.Equiv y ↔ x.AllStagesOverlap y :=
