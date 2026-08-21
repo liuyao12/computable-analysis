@@ -496,6 +496,32 @@ theorem fourPointComplexFourierTransform_scale
   simp only [hscale]
   simp only [← hadd]
 
+theorem fourPointComplexFourierTransform_period_four
+    (x₀ x₁ x₂ x₃ : QComplex) (mode : Nat) :
+    fourPointComplexFourierTransform x₀ x₁ x₂ x₃ (mode + 4) =
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ mode := by
+  have hphase (k : Nat) :
+      QComplex.natPow RotationSeries.imaginaryUnit ((mode + 4) * k) =
+        QComplex.natPow RotationSeries.imaginaryUnit (mode * k) := by
+    have hshift : ∀ n j : Nat,
+        QComplex.natPow RotationSeries.imaginaryUnit (n + 4 * j) =
+          QComplex.natPow RotationSeries.imaginaryUnit n := by
+      intro n j
+      induction j with
+      | zero => simp
+      | succ j ih =>
+          rw [show n + 4 * (j + 1) = (n + 4 * j) + 4 by omega,
+            QComplex.natPow_add]
+          have hfour :
+              QComplex.natPow RotationSeries.imaginaryUnit 4 =
+                QComplex.one := by
+            simpa [QComplex.natPow] using (quarterTurn_natPow_period_four 0)
+          rw [hfour, QComplex.mul_one_cert, ih]
+    simpa [Nat.add_mul] using
+      (hshift (mode * k) k)
+  unfold fourPointComplexFourierTransform
+  rw [hphase 0, hphase 1, hphase 2, hphase 3]
+
 /-! Real rational samples have the usual finite conjugate symmetry: the first
 and third modes pair up, while the zero and Nyquist modes are self-conjugate.
 This is stated directly in rational-complex coordinates. -/

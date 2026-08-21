@@ -2225,6 +2225,12 @@ theorem wiedijk_item_seventy_six_complex_fourier_linearity
   exact ⟨fourPointComplexFourierTransform_add x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ mode,
     fourPointComplexFourierTransform_scale r x₀ x₁ x₂ x₃ mode⟩
 
+theorem wiedijk_item_seventy_six_complex_fourier_period_four
+    (x₀ x₁ x₂ x₃ : QComplex) (mode : Nat) :
+    fourPointComplexFourierTransform x₀ x₁ x₂ x₃ (mode + 4) =
+      fourPointComplexFourierTransform x₀ x₁ x₂ x₃ mode := by
+  exact fourPointComplexFourierTransform_period_four x₀ x₁ x₂ x₃ mode
+
 theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
     (z : QComplex) :
     QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by
