@@ -186,4 +186,21 @@ theorem fourPointFourierTransform_parseval (x₀ x₁ x₂ x₃ : Rat) :
   grind [Rat.pow_succ, Rat.sub_eq_add_neg, Rat.add_assoc, Rat.add_comm,
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
+/-! Real rational samples have the usual finite conjugate symmetry: the first
+and third modes pair up, while the zero and Nyquist modes are self-conjugate.
+This is stated directly in rational-complex coordinates. -/
+theorem fourPointFourierTransform_conjugate_symmetry
+    (x₀ x₁ x₂ x₃ : Rat) :
+    QComplex.conj (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) =
+        fourPointFourierTransform x₀ x₁ x₂ x₃ 3 /\
+      QComplex.conj (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) =
+        fourPointFourierTransform x₀ x₁ x₂ x₃ 0 /\
+      QComplex.conj (fourPointFourierTransform x₀ x₁ x₂ x₃ 2) =
+        fourPointFourierTransform x₀ x₁ x₂ x₃ 2 := by
+  rcases fourPointFourierTransform_modes x₀ x₁ x₂ x₃ with
+    ⟨h₀, h₁, h₂, h₃⟩
+  rw [h₁, h₃, h₀, h₂]
+  simp [QComplex.conj]
+  grind [Rat.sub_eq_add_neg]
+
 end ComputableAnalysis

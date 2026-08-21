@@ -503,6 +503,16 @@ theorem wiedijk_item_seventy_six_fourier_linear_foundation
     fourPointFourierTransform_scale r x₀ x₁ x₂ x₃ mode,
     fourPointFourierTransform_constant_modes r⟩
 
+theorem wiedijk_item_seventy_six_fourier_conjugate_symmetry
+    (x₀ x₁ x₂ x₃ : Rat) :
+    QComplex.conj (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) =
+        fourPointFourierTransform x₀ x₁ x₂ x₃ 3 /\
+      QComplex.conj (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) =
+        fourPointFourierTransform x₀ x₁ x₂ x₃ 0 /\
+      QComplex.conj (fourPointFourierTransform x₀ x₁ x₂ x₃ 2) =
+        fourPointFourierTransform x₀ x₁ x₂ x₃ 2 := by
+  exact fourPointFourierTransform_conjugate_symmetry x₀ x₁ x₂ x₃
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
