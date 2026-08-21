@@ -719,6 +719,34 @@ theorem wiedijk_item_fifteen_derivative_bound_ftc_close_at
       (certificate.endpointInterval eps) eps := by
   exact certificate.closeAt eps
 
+/-! The polynomial base case is exposed independently of the packaged FTC
+portfolio.  It is the finite algebraic core: a primitive prefix has an exact
+endpoint recurrence, and its coefficient-shift polynomial has a certified
+finite-difference derivative. -/
+theorem wiedijk_item_fifteen_polynomial_primitive_endpoint_step
+    (coeffs : Nat -> Rat) (n : Nat) (a b : Rat) :
+    FinitePolynomial.integratedTaylorPrefix coeffs (n + 1) b -
+        FinitePolynomial.integratedTaylorPrefix coeffs (n + 1) a =
+      (FinitePolynomial.integratedTaylorPrefix coeffs n b -
+        FinitePolynomial.integratedTaylorPrefix coeffs n a) +
+        coeffs n *
+          (b ^ (n + 1) / ((n + 1 : Nat) : Rat) -
+            a ^ (n + 1) / ((n + 1 : Nat) : Rat)) := by
+  exact FinitePolynomial.integratedTaylorPrefix_endpointDifference_succ
+    coeffs n a b
+
+def wiedijk_item_fifteen_polynomial_derivative_certificate
+    (coeffs : FormalPowerSeries.Coeffs) (terms : Nat)
+    (a b C : Rat) (hleft : -C <= a) (hright : b <= C)
+    (hC1 : 1 <= C) :
+    HasDerivativeOnInterval
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefix coeffs terms) a b)
+      (FunctionOnInterval.exactRat
+        (FinitePolynomial.taylorPrefixShift coeffs terms) a b) := by
+  exact FinitePolynomial.taylorPrefix_hasDerivativeOnInterval
+    coeffs terms a b C hleft hright hC1
+
 theorem wiedijk_item_fifteen_convexity_ftc
     {F dF : RealFunRaw} {a b : Rat}
     (certificate : ConvexFTCCertificate F dF a b) :
