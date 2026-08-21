@@ -8,6 +8,7 @@ import ComputableAnalysis.FiniteDeMoivreExample
 import ComputableAnalysis.FiniteCubeRootBisectionExample
 import ComputableAnalysis.FinitePrimeInfinitude
 import ComputableAnalysis.FiniteBertrandCertificate
+import ComputableAnalysis.CubicRootWitnessCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -185,5 +186,23 @@ theorem wiedijk_item_ninety_eight_bertrand_finite_certificate :
       (∃ p, BasicPrime p ∧ 40 < p ∧ p < 80) /\
       (∃ p, BasicPrime p ∧ 50 < p ∧ p < 100) := by
   exact bertrand_finite_certificate
+
+theorem wiedijk_item_thirty_seven_cubic_witness_certificate
+    (certificate : FiniteDeflationChain.CubicRootWitnessCertificate)
+    (x : QComplex) :
+    (IsComputableRoot certificate.coeffs
+      (exactComplexCert certificate.root1)) /\
+    (IsComputableRoot certificate.coeffs
+      (exactComplexCert certificate.root2)) /\
+    (IsComputableRoot certificate.coeffs
+      (exactComplexCert certificate.root3)) /\
+    CPoly.eval certificate.coeffs x =
+      QComplex.mul
+        (FiniteDeflationChain.rootFactorProduct
+          [certificate.root1, certificate.root2, certificate.root3] x)
+        (CPoly.eval
+          (FiniteDeflationChain.deflatedCoeffs certificate.coeffs
+            [certificate.root1, certificate.root2, certificate.root3]) x) := by
+  exact certificate.computable_roots_and_factorization x
 
 end ComputableAnalysis
