@@ -642,6 +642,16 @@ theorem wiedijk_item_fifty_five_chord_power_certificate :
       (RealRaw.ofRat (3 / 5)) := by
   exact RationalCircle.horizontalChordPowerSqrtRaw_equiv_three_fifths
 
+theorem wiedijk_item_fifty_five_horizontal_chord_power_identity
+    {r h t : Rat} (hcircle : r * r + h * h = 1) :
+    (t + r) * (t - r) = t * t + h * h - 1 := by
+  exact RationalCircle.horizontalChord_power_identity hcircle
+
+theorem wiedijk_item_fifty_five_horizontal_chord_power_nonnegative
+    {r t : Rat} (hr : 0 <= r) (hout : r <= t ∨ t <= -r) :
+    0 <= (t + r) * (t - r) := by
+  exact RationalCircle.horizontalChord_power_nonneg_of_outside hr hout
+
 theorem wiedijk_item_forty_three_triangle_isoperimetric_bound
     {a b c : Rat}
     (h1 : 0 ≤ a + b + c) (h2 : 0 ≤ -a + b + c)
