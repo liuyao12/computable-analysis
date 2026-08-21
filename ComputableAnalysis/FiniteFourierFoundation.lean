@@ -457,4 +457,34 @@ theorem finiteFourierSum_fourPoint_bridge
     fourPointFourierTransform]
   rw [qcomplex_add_zero, qcomplex_add_assoc, qcomplex_add_assoc]
 
+theorem finiteFourierSum_quarterTurn_constant_block_mode_one
+    (c : QComplex) :
+    finiteFourierSum RotationSeries.imaginaryUnit 1 [c, c, c, c] =
+      QComplex.zero := by
+  cases c
+  simp [finiteFourierSum, finiteFourierSumAux, RotationSeries.imaginaryUnit,
+    QComplex.natPow, QComplex.mul, QComplex.add, QComplex.zero]
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem finiteFourierSum_quarterTurn_constant_block_mode_two
+    (c : QComplex) :
+    finiteFourierSum RotationSeries.imaginaryUnit 2 [c, c, c, c] =
+      QComplex.zero := by
+  cases c
+  simp [finiteFourierSum, finiteFourierSumAux, RotationSeries.imaginaryUnit,
+    QComplex.natPow, QComplex.mul, QComplex.add, QComplex.zero]
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem finiteFourierSum_quarterTurn_constant_block_mode_three
+    (c : QComplex) :
+    finiteFourierSum RotationSeries.imaginaryUnit 3 [c, c, c, c] =
+      QComplex.zero := by
+  cases c
+  simp [finiteFourierSum, finiteFourierSumAux, RotationSeries.imaginaryUnit,
+    QComplex.natPow, QComplex.mul, QComplex.add, QComplex.zero]
+  constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.mul_add,
+    Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 end ComputableAnalysis
