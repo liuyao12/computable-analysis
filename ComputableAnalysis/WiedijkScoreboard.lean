@@ -22,6 +22,7 @@ import ComputableAnalysis.FiniteHarmonicGrowthInterface
 import ComputableAnalysis.FiniteInverseSearchInterface
 import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteQuadratureMeanValue
+import ComputableAnalysis.MonotonicityConvexity
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.Basel
@@ -1436,6 +1437,28 @@ theorem wiedijk_item_seventy_five_cubic_secant_enclosure
         c₁ + 2 * c₂ * a + 3 * c₃ * a ^ 2 + ε := by
   exact Polynomial.finiteCubic_secant_derivative_enclosure_of_budget
     hcoeffs ha hab hne hε
+
+/-! The convex-function route is the general computable MVT interface: a
+pointwise derivative is not postulated as an attained real value, but is
+constructed from shrinking left/right secant hulls. -/
+theorem wiedijk_item_seventy_five_convex_pointwise_derivative_valid
+    {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q : Rat}
+    (certificate : ConvexDerivative.Pointwise H q) :
+    certificate.raw.Valid := by
+  exact certificate.raw_valid
+
+theorem wiedijk_item_seventy_five_convex_derivative_order
+    {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C} {q₁ q₂ : Rat}
+    (left : ConvexDerivative.Pointwise H q₁)
+    (later : ConvexDerivative.Pointwise H q₂)
+    (n : Nat)
+    (hgap : q₁ + left.step n <= q₂ - later.step n) :
+    QInterval.WeakLe (left.compute n) (later.compute n) := by
+  exact left.compute_weakLe_of_gap later n hgap
 
 /-! Item 73 in its computable form: a successor inequality propagates to any
 finite pair of stages.  This is the order content needed by stage algorithms;
