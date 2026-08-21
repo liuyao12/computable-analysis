@@ -2380,6 +2380,13 @@ theorem wiedijk_item_seventy_six_fourier_finite_reconstruction
       certificate.sample k := by
   exact certificate.reconstructs hk
 
+theorem wiedijk_item_seventy_six_quarter_turn_finite_reconstruction
+    (x₀ x₁ x₂ x₃ : Rat) {k : Nat} (hk : k < 4) :
+    finiteFourierSynthesisAt RotationSeries.imaginaryUnit k [0, 1, 2, 3]
+        (quarterTurnFourierReconstructionCertificate x₀ x₁ x₂ x₃).coefficient =
+      (quarterTurnFourierReconstructionCertificate x₀ x₁ x₂ x₃).sample k := by
+  exact (quarterTurnFourierReconstructionCertificate x₀ x₁ x₂ x₃).reconstructs hk
+
 theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
     (hr1 : r < 1) :
