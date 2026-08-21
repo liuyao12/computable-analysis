@@ -937,6 +937,17 @@ theorem wiedijk_item_thirty_five_taylor_right_rectangle_error
   exact Taylor.ArctanKernel.kernelPartial_rightRectangle_error_bound
     hp0 hp1 hpr hr1 n
 
+theorem wiedijk_item_thirty_five_arctan_integral_taylor_raw :
+    Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw.Valid := by
+  exact Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_valid
+
+theorem wiedijk_item_thirty_five_arctan_integral_taylor_precision
+    (eps : QPos) :
+    ∃ n : Nat,
+      (Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw.compute n).width
+        <= eps.val := by
+  exact Taylor.ArctanKernel.kernelPartialIntegralAtOneRaw_reaches_of_positive_tolerance eps
+
 theorem wiedijk_item_seventeen_de_moivre_certificate :
     RationalCircle.Trigonometry.toQComplex
         (RationalCircle.Trigonometry.pointPow
