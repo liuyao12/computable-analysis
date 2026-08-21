@@ -641,6 +641,38 @@ theorem wiedijk_item_thirty_five_taylor_derivative_rational_scaling
       (FormalPowerSeries.scaleRat r F) (FormalPowerSeries.scaleRat r f) := by
   exact FormalPowerSeries.hasCoefficientShift_scaleRat r hF
 
+theorem wiedijk_item_thirty_five_taylor_arctan_remainder
+    (x eps : Rat) (n : Nat)
+    (hbudget : (x * x) ^ (n + 1) <= eps) :
+    Taylor.ArctanKernel.kernelPartial x n - eps <=
+        1 / (1 + x * x) /\
+      1 / (1 + x * x) <=
+        Taylor.ArctanKernel.kernelPartial x n + eps := by
+  exact FirstYearCalculus.arctanKernel_error_box x eps n hbudget
+
+theorem wiedijk_item_thirty_five_taylor_half_interval_precision
+    {x : Rat} (hx0 : 0 <= x) (hxhalf : x <= (1 : Rat) / 2) (n : Nat) :
+    1 / (1 + x * x) =
+        Taylor.ArctanKernel.kernelPartial x n +
+          Taylor.ArctanKernel.kernelRemainder x n /\
+      qabs (Taylor.ArctanKernel.kernelRemainder x n) <=
+        1 / (((n + 2 : Nat) : Rat)) := by
+  exact Taylor.ArctanKernel.finite_remainder_half_interval_budget
+    hx0 hxhalf n
+
+theorem wiedijk_item_thirty_five_taylor_right_rectangle_error
+    {p r : Rat}
+    (hp0 : 0 <= p) (hp1 : p <= 1)
+    (hpr : p <= r) (hr1 : r <= 1) (n : Nat) :
+    -((n : Rat) * ((n + 1 : Nat) : Rat) * (r - p) * (r - p)) <=
+        (r - p) * Taylor.ArctanKernel.kernelPartial r n -
+          Taylor.ArctanKernel.kernelPartialIntegralBetween p r n /\
+      (r - p) * Taylor.ArctanKernel.kernelPartial r n -
+          Taylor.ArctanKernel.kernelPartialIntegralBetween p r n <=
+        (n : Rat) * ((n + 1 : Nat) : Rat) * (r - p) * (r - p) := by
+  exact Taylor.ArctanKernel.kernelPartial_rightRectangle_error_bound
+    hp0 hp1 hpr hr1 n
+
 theorem wiedijk_item_seventeen_de_moivre_certificate :
     RationalCircle.Trigonometry.toQComplex
         (RationalCircle.Trigonometry.pointPow
