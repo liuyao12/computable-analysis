@@ -1514,6 +1514,43 @@ theorem wiedijk_item_seventy_six_fourier_parseval
       4 * (x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2) := by
   exact fourPointFourierTransform_parseval x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_fourier_convolution
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : Rat) :
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 0 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 0)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 0) /\
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 1 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 1)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 1) /\
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 2 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 2)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 2) /\
+    fourPointFourierTransform
+        (fourPointConvolution₀ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₁ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₂ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃)
+        (fourPointConvolution₃ x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃) 3 =
+      QComplex.mul
+        (fourPointFourierTransform x₀ x₁ x₂ x₃ 3)
+        (fourPointFourierTransform y₀ y₁ y₂ y₃ 3) := by
+  exact fourPointFourierTransform_cyclic_convolution
+    x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃
+
 theorem wiedijk_item_seventy_six_fourier_mode_period_four (mode : Nat) :
     fourPointFourierSum (mode + 4) = fourPointFourierSum mode := by
   exact fourPointFourierSum_period_four mode
