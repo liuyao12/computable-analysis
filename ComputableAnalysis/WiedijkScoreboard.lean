@@ -5,6 +5,7 @@ import ComputableAnalysis.FiniteBinomialCertificate
 import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteDeMoivreExample
+import ComputableAnalysis.FiniteCubeRootBisectionExample
 
 /-!
 # Wiedijk's List scoreboard
@@ -164,5 +165,10 @@ theorem wiedijk_item_seventeen_de_moivre_certificate :
         (RationalCircle.Trigonometry.toQComplex
           RationalCircle.Trigonometry.deMoivreThreeFive) 2 := by
   exact RationalCircle.Trigonometry.deMoivreThreeFive_square_complex_bridge
+
+theorem wiedijk_item_eight_doubling_cube_stage_twenty_four :
+    (monotoneTargetBisectionIterate cubeTarget 2 24 cubeTargetInitial).width =
+      1 / 16777216 := by
+  exact cubeTarget_bisection_stage24_width
 
 end ComputableAnalysis
