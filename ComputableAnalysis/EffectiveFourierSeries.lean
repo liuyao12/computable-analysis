@@ -46,6 +46,19 @@ theorem EffectiveFourierSeries.stage_contained
   exact QBox.nested_trans (F.candidate_stage n)
     (ComplexRaw.cauchyStabilize_contains_current F.future_containment n)
 
+/-! A precision witness is the actual finite rational-complex Fourier stage,
+not merely an abstract point in the stabilized box. -/
+theorem EffectiveFourierSeries.precision_witness
+    (F : EffectiveFourierSeries) (eps : QPos) :
+    ∃ N : Nat, ∃ q : QComplex,
+      (QBox.point q).NestedIn (F.stabilized.compute N) /\
+      (F.stabilized.compute N).width <= eps.val /\
+      (F.stabilized.compute N).height <= eps.val := by
+  obtain ⟨N, hN⟩ := (F.stabilized_valid).2.2 eps
+  refine ⟨N, finiteFourierSum F.root F.mode (F.stage N),
+    F.stage_contained N, ?_⟩
+  exact hN N (Nat.le_refl N)
+
 /-! Every finite Fourier computation is an effective series with finite
 support: the stage is already stable, so its radius and all box widths are
 zero.  This is a useful sanity-check instance before adding genuinely

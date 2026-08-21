@@ -1738,6 +1738,14 @@ theorem wiedijk_item_seventy_six_effective_fourier_precision
       (series.stabilized.compute n).height <= eps.val := by
   exact (series.stabilized_valid).2.2 eps
 
+theorem wiedijk_item_seventy_six_effective_fourier_precision_witness
+    (series : EffectiveFourierSeries) (eps : QPos) :
+    ∃ N : Nat, ∃ q : QComplex,
+      (QBox.point q).NestedIn (series.stabilized.compute N) /\
+      (series.stabilized.compute N).width <= eps.val /\
+      (series.stabilized.compute N).height <= eps.val := by
+  exact series.precision_witness eps
+
 theorem wiedijk_item_seventy_six_fourier_tail_error_box
     (certificate : EffectiveFourierTailCertificate)
     (k n : Nat) (hkn : k <= n) :
