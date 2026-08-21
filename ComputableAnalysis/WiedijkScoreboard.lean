@@ -1479,6 +1479,17 @@ theorem wiedijk_item_seventy_six_quarter_turn_geometric_fourier_valid
   exact EffectiveFourierSeries.stabilized_valid
     (quarterTurnGeometricFourierSeries r hr0 hrhalf hr1)
 
+theorem wiedijk_item_seventy_six_quarter_turn_geometric_fourier_precision
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) (eps : QPos) :
+    ∃ N : Nat, ∀ n, N <= n ->
+      ((quarterTurnGeometricFourierSeries r hr0 hrhalf hr1).stabilized.compute n).width
+          <= eps.val /\
+      ((quarterTurnGeometricFourierSeries r hr0 hrhalf hr1).stabilized.compute n).height
+          <= eps.val := by
+  exact (EffectiveFourierSeries.stabilized_valid
+    (quarterTurnGeometricFourierSeries r hr0 hrhalf hr1)).2.2 eps
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
