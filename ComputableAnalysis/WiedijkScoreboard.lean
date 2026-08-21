@@ -30,6 +30,7 @@ import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.EffectiveFourierTail
 import ComputableAnalysis.FiniteFourierGeometric
+import ComputableAnalysis.FiniteCauchySchwarzList
 import ComputableAnalysis.FiniteComplexQuadraticExample
 import ComputableAnalysis.FiniteDigitDivisibilityInterface
 import ComputableAnalysis.FinitePickCertificate
@@ -1168,6 +1169,12 @@ theorem wiedijk_item_seventy_eight_cauchy_schwarz_4d
       (a * a + b * b + c * c + d * d) *
         (w * w + x * x + y * y + z * z) := by
   exact cauchy_schwarz_4d a b c d w x y z
+
+theorem wiedijk_item_seventy_eight_cauchy_schwarz_finite_lists
+    {xs ys : List Rat} (hlen : xs.length = ys.length) :
+    (rationalDot xs ys) ^ 2 <=
+      rationalSumSquares xs * rationalSumSquares ys := by
+  exact rationalDot_cauchy_schwarz_of_length_eq hlen
 
 theorem wiedijk_item_seventy_nine_finite_intermediate_value
     (certificate : FiniteInverseSearchCertificate) :
