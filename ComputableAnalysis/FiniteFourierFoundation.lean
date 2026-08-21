@@ -100,6 +100,13 @@ private theorem qcomplex_scale_add
   simp [QComplex.scaleRat, QComplex.add]
   constructor <;> grind [Rat.mul_add]
 
+private theorem qcomplex_mul_comm (x y : QComplex) :
+    QComplex.mul x y = QComplex.mul y x := by
+  cases x
+  cases y
+  simp [QComplex.mul]
+  constructor <;> grind [Rat.add_comm, Rat.mul_comm]
+
 private theorem qcomplex_zero_mul (z : QComplex) :
     QComplex.mul QComplex.zero z = QComplex.zero := by
   cases z
@@ -189,6 +196,53 @@ theorem finiteFourierSum_append
         (finiteFourierSumAux root mode xs.length ys) := by
   simpa [finiteFourierSum] using
     (finiteFourierSum_aux_append root mode 0 xs ys)
+
+/-! Shifting the sample index contributes one common phase factor.  This is
+the finite block law used when a longer stage is assembled from translated
+blocks; it is purely a rational-complex identity. -/
+theorem finiteFourierSum_aux_phase
+    (root : QComplex) (mode k : Nat) (xs : List QComplex) :
+    finiteFourierSumAux root mode k xs =
+      QComplex.mul
+        (QComplex.natPow root (mode * k))
+        (finiteFourierSumAux root mode 0 xs) := by
+  induction xs generalizing k with
+  | nil =>
+      simp only [finiteFourierSumAux]
+      rw [qcomplex_mul_comm]
+      exact (qcomplex_zero_mul _).symm
+  | cons x xs ih =>
+      simp only [finiteFourierSumAux]
+      rw [ih (k := k + 1)]
+      have hindex : mode * (k + 1) = mode * k + mode := by
+        rw [Nat.mul_add, Nat.mul_one]
+      rw [hindex, QComplex.natPow_add]
+      rw [ih (k := 1)]
+      simp [QComplex.natPow, QComplex.mul_one_cert]
+      rw [QComplex.mul_add_cert]
+      rw [qcomplex_mul_comm x (QComplex.natPow root (mode * k))]
+      rw [QComplex.mul_assoc_cert]
+
+theorem finiteFourierSum_phase
+    (root : QComplex) (mode : Nat) (xs : List QComplex) (k : Nat) :
+    finiteFourierSumAux root mode k xs =
+      QComplex.mul
+        (QComplex.natPow root (mode * k))
+        (finiteFourierSum root mode xs) := by
+  simpa [finiteFourierSum] using
+    (finiteFourierSum_aux_phase root mode k xs)
+
+theorem finiteFourierSum_append_phase
+    (root : QComplex) (mode : Nat)
+    (xs ys : List QComplex) :
+    finiteFourierSum root mode (xs ++ ys) =
+      QComplex.add
+        (finiteFourierSum root mode xs)
+        (QComplex.mul
+          (QComplex.natPow root (mode * xs.length))
+          (finiteFourierSum root mode ys)) := by
+  rw [finiteFourierSum_append]
+  rw [finiteFourierSum_phase root mode ys xs.length]
 
 theorem finiteFourierSum_aux_one
     (mode k : Nat) (xs : List QComplex) :

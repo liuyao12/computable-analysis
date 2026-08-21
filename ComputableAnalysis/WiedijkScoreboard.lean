@@ -532,6 +532,17 @@ theorem wiedijk_item_seventy_six_fourier_conjugate_symmetry
         fourPointFourierTransform x₀ x₁ x₂ x₃ 2 := by
   exact fourPointFourierTransform_conjugate_symmetry x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_fourier_block_phase
+    (root : QComplex) (mode : Nat)
+    (xs ys : List QComplex) :
+    finiteFourierSum root mode (xs ++ ys) =
+      QComplex.add
+        (finiteFourierSum root mode xs)
+        (QComplex.mul
+          (QComplex.natPow root (mode * xs.length))
+          (finiteFourierSum root mode ys)) := by
+  exact finiteFourierSum_append_phase root mode xs ys
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
