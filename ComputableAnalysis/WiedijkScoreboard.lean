@@ -434,6 +434,16 @@ than the unrestricted classical theorem for every continuous function. -/
 theorem wiedijk_item_fifteen_effective_ftc : EffectiveFTCPortfolio := by
   exact effectiveFTCPortfolio
 
+/-! The reusable FTC theorem is exposed separately from the portfolio of
+concrete examples.  Its hypotheses are finite derivative-bound certificates;
+the conclusion is equivalence of the bounded Riemann-style integral and the
+endpoint difference as raw computable reals. -/
+theorem wiedijk_item_fifteen_derivative_bound_ftc
+    {F dF : RealFunRaw} {a b : Rat}
+    (certificate : DerivativeBoundFTC F dF a b) :
+    certificate.boundedIntegralRaw.Equiv certificate.endpointRaw := by
+  exact certificate.equiv_endpoint
+
 theorem wiedijk_item_twenty_six_leibniz_series :
     Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw.Valid := by
   exact Series.AlternatingRaw.leibnizAlternatingRaw_valid
