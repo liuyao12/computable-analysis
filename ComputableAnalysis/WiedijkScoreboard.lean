@@ -2045,6 +2045,17 @@ theorem wiedijk_item_seventy_six_fourier_parseval
       4 * (x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2) := by
   exact fourPointFourierTransform_parseval x₀ x₁ x₂ x₃
 
+theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
+    (z : QComplex) :
+    QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by
+  exact QComplex.normSq_conj z
+
+theorem wiedijk_item_seventy_six_qcomplex_energy_multiplication
+    (z w : QComplex) :
+    QComplex.normSq (QComplex.mul z w) =
+      QComplex.normSq z * QComplex.normSq w := by
+  exact QComplex.normSq_mul z w
+
 /-! The normalized energy form is often the more convenient interface for
 downstream Fourier arguments.  It is still an exact identity in `Rat`; no
 limit or completed real number is introduced. -/

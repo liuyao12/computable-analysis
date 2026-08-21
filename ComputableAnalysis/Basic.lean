@@ -3999,6 +3999,22 @@ theorem natPow_mul (z w : QComplex) (n : Nat) :
 
 def coordDist (z w : QComplex) : Rat := max (qabs (z.re - w.re)) (qabs (z.im - w.im))
 def normSq (z : QComplex) : Rat := z.re * z.re + z.im * z.im
+
+theorem normSq_conj (z : QComplex) :
+    normSq (conj z) = normSq z := by
+  cases z
+  simp [normSq, conj]
+  grind [Rat.neg_mul, Rat.mul_neg, Rat.neg_neg]
+
+theorem normSq_mul (z w : QComplex) :
+    normSq (mul z w) = normSq z * normSq w := by
+  cases z
+  cases w
+  simp [normSq, mul]
+  grind [Rat.add_assoc, Rat.add_comm, Rat.mul_assoc, Rat.mul_comm,
+    Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg, Rat.neg_mul,
+    Rat.mul_neg, Rat.neg_neg]
+
 def inv? (z : QComplex) : Option QComplex :=
   let n := normSq z
   if n = 0 then
