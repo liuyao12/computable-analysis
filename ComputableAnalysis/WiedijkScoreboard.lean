@@ -1056,6 +1056,18 @@ def wiedijk_item_thirty_five_finite_taylor_centered_bridge
   exact FinitePolynomial.taylorPrefixAt_hasDerivativeOnInterval
     basepoint coeffs terms a b C hleft hright hC1
 
+/-! The centered form also exposes the actual secant enclosure behind the
+Taylor--Lagrange bridge.  This is the reusable finite statement: on a bounded
+local interval, the coefficient-shift prefix sandwiches every secant slope. -/
+def wiedijk_item_thirty_five_taylor_centered_secant_bound
+    (basepoint C : Rat) (coeffs : FormalPowerSeries.Coeffs)
+    (hC1 : 1 <= C) (terms : Nat) :
+    FinitePolynomial.CenteredSecantDerivativeBound basepoint C
+      (FinitePolynomial.taylorPrefixAt basepoint coeffs terms)
+      (FinitePolynomial.taylorPrefixShiftAt basepoint coeffs terms) := by
+  exact FinitePolynomial.taylorPrefixAtSecantBound
+    C basepoint coeffs hC1 terms
+
 theorem wiedijk_item_thirty_five_taylor_arctan_remainder
     (x eps : Rat) (n : Nat)
     (hbudget : (x * x) ^ (n + 1) <= eps) :
