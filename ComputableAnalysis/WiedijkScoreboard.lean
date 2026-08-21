@@ -404,6 +404,14 @@ theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
   exact binomial_stage5_two_one_value
 
+/-! The benchmark example is backed by the reusable finite binomial law.  The
+sum is indexed only through `n + 1`, so this is an exact rational computation
+with no appeal to an infinite expansion. -/
+theorem wiedijk_item_forty_four_binomial_theorem
+    (n : Nat) (x y : Rat) :
+    Series.binomialSum n x y (n + 1) = (x + y) ^ n := by
+  exact Series.binomialSum_eq_pow n x y
+
 theorem wiedijk_item_sixty_bezout (a b : Nat) :
     Exists fun x : Int =>
       Exists fun y : Int =>
