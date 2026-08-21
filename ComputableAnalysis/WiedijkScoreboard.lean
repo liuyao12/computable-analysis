@@ -1003,6 +1003,32 @@ theorem wiedijk_item_seventy_five_local_derivative_bound_mvt
         (certificate.endpointPrecision n)) := by
   exact certificate.endpoint_contained n
 
+theorem wiedijk_item_seventy_five_secant_error_bound
+    {coeffs : List Rat} {a b : Rat}
+    (hcoeffs : forall c, c ∈ coeffs -> 0 <= c)
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0) :
+    qabs (ExactFunction.differenceQuotient
+      (fun z => Polynomial.eval coeffs z) a (b - a) -
+        Polynomial.finiteDerivativeEval coeffs a) <=
+      Polynomial.finiteDerivativeEval coeffs b -
+        Polynomial.finiteDerivativeEval coeffs a := by
+  exact Polynomial.finitePolynomial_secant_qabs_error_le_derivative_gap
+    hcoeffs ha hab hne
+
+theorem wiedijk_item_seventy_five_cubic_secant_enclosure
+    {c₀ c₁ c₂ c₃ a b ε : Rat}
+    (hcoeffs : forall c, c ∈ [c₀, c₁, c₂, c₃] -> 0 <= c)
+    (ha : 0 <= a) (hab : a <= b) (hne : b - a ≠ 0)
+    (hε : (2 * c₂ + 6 * c₃ * b) * (b - a) <= ε) :
+    c₁ + 2 * c₂ * a + 3 * c₃ * a ^ 2 <=
+        ExactFunction.differenceQuotient
+          (fun z => Polynomial.eval [c₀, c₁, c₂, c₃] z) a (b - a) /\
+      ExactFunction.differenceQuotient
+          (fun z => Polynomial.eval [c₀, c₁, c₂, c₃] z) a (b - a) <=
+        c₁ + 2 * c₂ * a + 3 * c₃ * a ^ 2 + ε := by
+  exact Polynomial.finiteCubic_secant_derivative_enclosure_of_budget
+    hcoeffs ha hab hne hε
+
 /-! Item 73 in its computable form: a successor inequality propagates to any
 finite pair of stages.  This is the order content needed by stage algorithms;
 it does not smuggle in a supremum or a completed limit. -/
