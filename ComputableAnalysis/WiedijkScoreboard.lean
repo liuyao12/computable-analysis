@@ -17,6 +17,7 @@ import ComputableAnalysis.FiniteTriangleIsoperimetricCertificate
 import ComputableAnalysis.FinitePellCertificate
 import ComputableAnalysis.FiniteQuarticSplitExample
 import ComputableAnalysis.FiniteHarmonicGrowthInterface
+import ComputableAnalysis.FiniteInverseSearchInterface
 
 /-!
 # Wiedijk's List scoreboard
@@ -310,5 +311,11 @@ theorem wiedijk_item_seventy_eight_cauchy_schwarz_2d
     (a * c + b * d) ^ 2 <=
       (a * a + b * b) * (c * c + d * d) := by
   exact cauchy_schwarz_2d a c b d
+
+theorem wiedijk_item_seventy_nine_finite_intermediate_value
+    (certificate : FiniteInverseSearchCertificate) :
+    certificate.map certificate.output.lo ≤ certificate.target /\
+      certificate.target ≤ certificate.map certificate.output.hi := by
+  exact certificate.output_bracket
 
 end ComputableAnalysis
