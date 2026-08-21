@@ -558,6 +558,20 @@ theorem wiedijk_item_fifteen_curvature_ftc
       certificate.toDerivativeBoundFTC.endpointRaw := by
   exact certificate.equiv_endpoint
 
+theorem wiedijk_item_fifteen_effective_interval_fold_width
+    (term : Nat -> QInterval) (xs : List Nat) :
+    (effectiveFTCIntervalFold term xs).width =
+      ratNatListSum (fun k => (term k).width) xs := by
+  exact effectiveFTCIntervalFold_width term xs
+
+theorem wiedijk_item_fifteen_square_endpoint_certificate :
+    (Integral.squareEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
+  exact squareEffectiveFTC_endpointRaw_valid
+
+theorem wiedijk_item_fifteen_cube_endpoint_certificate :
+    (Integral.cubeEffectiveFTCData.toDerivativeBoundFTC.endpointRaw).Valid := by
+  exact cubeEffectiveFTC_endpointRaw_valid
+
 theorem wiedijk_item_twenty_six_leibniz_series :
     Series.AlternatingRaw.leibnizAlternatingRaw.toRealRaw.Valid := by
   exact Series.AlternatingRaw.leibnizAlternatingRaw_valid
