@@ -5,6 +5,7 @@ import ComputableAnalysis.Algebraic
 import ComputableAnalysis.AlgebraicNumbers
 import ComputableAnalysis.AlgebraicFunctions
 import ComputableAnalysis.IrrationalSqrt
+import ComputableAnalysis.WiedijkScoreboard
 import ComputableAnalysis.ArctanGeometry
 import ComputableAnalysis.ArctanPresentations
 import ComputableAnalysis.ArctanScheduledRegular
