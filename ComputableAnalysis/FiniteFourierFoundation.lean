@@ -354,6 +354,44 @@ theorem finiteFourierSum_zero_mode_replicate
       QComplex.scaleRat (n : Rat) c := by
   rw [finiteFourierSum_zero_mode, qcomplexListSum_replicate]
 
+private theorem qcomplex_scaleRat_succ (n : Nat) (c : QComplex) :
+    QComplex.scaleRat ((n + 1 : Nat) : Rat) c =
+      QComplex.add c (QComplex.scaleRat (n : Rat) c) := by
+  cases c
+  simp [QComplex.scaleRat, QComplex.add]
+  constructor <;> grind
+
+private theorem qcomplex_one_mul (z : QComplex) :
+    QComplex.mul QComplex.one z = z := by
+  cases z
+  simp [QComplex.mul, QComplex.one]
+  constructor <;> grind
+
+private theorem qcomplex_mode_power_one_of_phase_one
+    (root : QComplex) (mode : Nat)
+    (hphase : QComplex.natPow root mode = QComplex.one) :
+    forall k : Nat, QComplex.natPow root (mode * k) = QComplex.one := by
+  intro k
+  induction k with
+  | zero => simp [QComplex.natPow]
+  | succ k ih =>
+      rw [Nat.mul_succ, QComplex.natPow_add, ih, hphase]
+      exact QComplex.mul_one_cert _
+
+theorem finiteFourierSum_replicate_of_phase_one
+    (root : QComplex) (mode n : Nat) (c : QComplex)
+    (hphase : QComplex.natPow root mode = QComplex.one) :
+    finiteFourierSum root mode (List.replicate n c) =
+      QComplex.scaleRat (n : Rat) c := by
+  have hpower := qcomplex_mode_power_one_of_phase_one root mode hphase
+  induction n with
+  | zero =>
+      simp [finiteFourierSum_empty, QComplex.scaleRat, QComplex.zero]
+  | succ n ih =>
+      rw [List.replicate_succ, finiteFourierSum_cons_phase]
+      rw [hphase, qcomplex_one_mul, ih]
+      exact (qcomplex_scaleRat_succ n c).symm
+
 theorem finiteFourierSum_aux_scale
     (r : Rat) (root : QComplex) (mode k : Nat)
     (xs : List QComplex) :

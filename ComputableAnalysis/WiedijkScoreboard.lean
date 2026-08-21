@@ -1837,6 +1837,13 @@ theorem wiedijk_item_seventy_six_fourier_zero_mode_constant_samples
       QComplex.scaleRat (n : Rat) c := by
   exact finiteFourierSum_zero_mode_replicate root n c
 
+theorem wiedijk_item_seventy_six_fourier_constant_samples_phase_one
+    (root : QComplex) (mode n : Nat) (c : QComplex)
+    (hphase : QComplex.natPow root mode = QComplex.one) :
+    finiteFourierSum root mode (List.replicate n c) =
+      QComplex.scaleRat (n : Rat) c := by
+  exact finiteFourierSum_replicate_of_phase_one root mode n c hphase
+
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four
     (mode : Nat) (samples : List QComplex) :
     finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =
