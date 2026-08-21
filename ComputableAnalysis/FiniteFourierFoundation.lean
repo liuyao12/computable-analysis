@@ -335,6 +335,25 @@ theorem finiteFourierSum_zero_mode
         simp [QComplex.natPow, QComplex.mul_one_cert]
   exact haux 0 xs
 
+theorem qcomplexListSum_replicate (n : Nat) (c : QComplex) :
+    qcomplexListSum (List.replicate n c) =
+      QComplex.scaleRat (n : Rat) c := by
+  induction n with
+  | zero =>
+      simp [qcomplexListSum, QComplex.scaleRat, QComplex.zero]
+  | succ n ih =>
+      simp only [List.replicate_succ, qcomplexListSum]
+      rw [ih]
+      cases c
+      simp [QComplex.add, QComplex.scaleRat]
+      constructor <;> grind [Rat.add_mul]
+
+theorem finiteFourierSum_zero_mode_replicate
+    (root : QComplex) (n : Nat) (c : QComplex) :
+    finiteFourierSum root 0 (List.replicate n c) =
+      QComplex.scaleRat (n : Rat) c := by
+  rw [finiteFourierSum_zero_mode, qcomplexListSum_replicate]
+
 theorem finiteFourierSum_aux_scale
     (r : Rat) (root : QComplex) (mode k : Nat)
     (xs : List QComplex) :

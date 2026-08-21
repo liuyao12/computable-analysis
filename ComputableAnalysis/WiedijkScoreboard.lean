@@ -1826,6 +1826,12 @@ theorem wiedijk_item_seventy_six_fourier_zero_mode
     finiteFourierSum root 0 samples = qcomplexListSum samples := by
   exact finiteFourierSum_zero_mode root samples
 
+theorem wiedijk_item_seventy_six_fourier_zero_mode_constant_samples
+    (root : QComplex) (n : Nat) (c : QComplex) :
+    finiteFourierSum root 0 (List.replicate n c) =
+      QComplex.scaleRat (n : Rat) c := by
+  exact finiteFourierSum_zero_mode_replicate root n c
+
 theorem wiedijk_item_seventy_six_finite_list_mode_period_four
     (mode : Nat) (samples : List QComplex) :
     finiteFourierSum RotationSeries.imaginaryUnit (mode + 4) samples =
