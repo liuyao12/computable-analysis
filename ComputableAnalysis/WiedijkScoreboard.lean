@@ -1119,8 +1119,7 @@ theorem wiedijk_item_ninety_eight_bertrand_certificate_sound
     (certificate : FinitePrimeIntervalCertificate) :
     ∃ p, BasicPrime p ∧ certificate.lowerBound < p ∧
       p < certificate.upperBound := by
-  exact ⟨certificate.witness, certificate.witness_prime,
-    certificate.lower_lt, certificate.witness_lt⟩
+  exact certificate.exists_witness
 
 theorem wiedijk_item_ninety_eight_prime_search_decision
     {p : Nat} (hp : 2 <= p) :

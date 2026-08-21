@@ -24,6 +24,13 @@ theorem FinitePrimeIntervalCertificate.in_interval
       certificate.witness < certificate.upperBound :=
   ⟨certificate.lower_lt, certificate.witness_lt⟩
 
+theorem FinitePrimeIntervalCertificate.exists_witness
+    (certificate : FinitePrimeIntervalCertificate) :
+    ∃ p, BasicPrime p ∧ certificate.lowerBound < p /\
+      p < certificate.upperBound := by
+  exact ⟨certificate.witness, certificate.witness_prime,
+    certificate.lower_lt, certificate.witness_lt⟩
+
 def finitePrimeIntervalCertificate
     (lowerBound upperBound witness : Nat)
     (witness_prime : BasicPrime witness)
