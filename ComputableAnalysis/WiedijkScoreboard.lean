@@ -636,6 +636,19 @@ theorem wiedijk_item_seventy_nine_finite_intermediate_value
       certificate.target ≤ certificate.map certificate.output.hi := by
   exact certificate.output_bracket
 
+theorem wiedijk_item_seventy_nine_effective_bisection
+    {f : Rat -> Rat} {I : QInterval} (target : Rat)
+    (hI : I.lo <= I.hi)
+    (hlo : f I.lo <= target) (hhi : target <= f I.hi)
+    (hwidth : I.width <= 1) (eps : QPos) :
+    let J := monotoneTargetBisectionIterate f target eps.val.den I
+    J.lo <= J.hi /\
+      (f J.lo <= target /\ target <= f J.hi) /\
+      (J.lo >= I.lo /\ J.hi <= I.hi) /\
+      J.width <= eps.val := by
+  exact monotoneTargetBisectionIterate_tolerance_certificate
+    (f := f) (I := I) target hI hlo hhi hwidth eps
+
 /-! Item 75 in its computable form: for a nonnegative-coefficient polynomial,
 the secant slope is enclosed by endpoint derivative evaluations.  This is the
 finite certificate that replaces the classical assertion that some attained
