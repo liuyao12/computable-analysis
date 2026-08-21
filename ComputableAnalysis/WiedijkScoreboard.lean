@@ -6,6 +6,7 @@ import ComputableAnalysis.EffectiveFTCPortfolio
 import ComputableAnalysis.FirstYearCalculus
 import ComputableAnalysis.FiniteDeMoivreExample
 import ComputableAnalysis.FiniteCubeRootBisectionExample
+import ComputableAnalysis.FinitePrimeInfinitude
 
 /-!
 # Wiedijk's List scoreboard
@@ -170,5 +171,10 @@ theorem wiedijk_item_eight_doubling_cube_stage_twenty_four :
     (monotoneTargetBisectionIterate cubeTarget 2 24 cubeTargetInitial).width =
       1 / 16777216 := by
   exact cubeTarget_bisection_stage24_width
+
+theorem wiedijk_item_eleven_prime_unboundedness (bound : Nat) :
+    ∃ certificate : PrimeUnboundednessCertificate bound,
+      bound < certificate.witness := by
+  exact primeUnboundednessCertificate_exists bound
 
 end ComputableAnalysis
