@@ -342,6 +342,18 @@ theorem wiedijk_item_two_factorized_quadratic_root_characterization
         (factorizedQuadraticPolynomial r s) z ↔ z = r ∨ z = s := by
   exact factorizedQuadraticPolynomial_hasExactRoot_iff r s z
 
+/-! The general project-facing FTA boundary: a finite factorization witness
+for each input polynomial is sufficient to produce an algebraic computable
+root.  The witness-existence premise remains explicit rather than being
+silently replaced by classical algebraic closure. -/
+theorem wiedijk_item_two_factorized_witness_to_algebraic_fta
+    (hfactor : forall coeffs : CPoly.Coeffs,
+      CPoly.positiveDegree coeffs ->
+        Exists fun roots : List QComplex =>
+          roots ≠ [] ∧ coeffs = factorizedPolynomial roots) :
+    AlgebraicFTA := by
+  exact AlgebraicFTA_of_factorizedWitness hfactor
+
 /-! Item 16 in its constructive finite boundary: a bounded rational-root
 search for a monic quintic returns no candidate.  This does not assert the
 classical impossibility theorem or provide a general radicals solver. -/
