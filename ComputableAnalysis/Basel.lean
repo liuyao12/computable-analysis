@@ -146,6 +146,24 @@ theorem eulerBasel_geometric_iff_allStagesOverlap :
     DirichletSeries.zetaTwoRaw_validCompute
     geometricPiSquaredOverSixRaw_valid
 
+/-- A stagewise rational-witness criterion for the geometric Basel identity.
+The future analytic proof only has to construct these finite witnesses; no
+completed real number or classical completeness principle is required here. -/
+theorem eulerBasel_geometric_of_stagewise_witness
+    (h : forall n m : Nat, ∃ q : Rat,
+      (DirichletSeries.zetaTwoRaw.compute n).lo <= q ∧
+        q <= (DirichletSeries.zetaTwoRaw.compute n).hi ∧
+      ((piSquaredOverSixRaw piCircleArea).compute m).lo <= q ∧
+        q <= ((piSquaredOverSixRaw piCircleArea).compute m).hi) :
+    eulerBasel_geometricPi := by
+  unfold eulerBasel_geometricPi EulerBaselStatement
+  apply RealRaw.allStagesOverlap_equiv
+  intro n m
+  apply (RealRaw.compareAt_overlap_iff
+    DirichletSeries.zetaTwoRaw (piSquaredOverSixRaw piCircleArea) n m).2
+  rcases h n m with ⟨q, hzl, hzh, hpl, hph⟩
+  constructor <;> grind
+
 end Basel
 
 end ComputableAnalysis

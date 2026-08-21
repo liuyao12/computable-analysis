@@ -1146,6 +1146,15 @@ theorem wiedijk_item_fourteen_basel_computable_target :
         (Basel.piSquaredOverSixRaw piCircleArea) := by
   exact Basel.eulerBasel_geometric_iff_allStagesOverlap
 
+theorem wiedijk_item_fourteen_basel_of_stagewise_witness
+    (h : forall n m : Nat, ∃ q : Rat,
+      (DirichletSeries.zetaTwoRaw.compute n).lo <= q ∧
+        q <= (DirichletSeries.zetaTwoRaw.compute n).hi ∧
+      ((Basel.piSquaredOverSixRaw piCircleArea).compute m).lo <= q ∧
+        q <= ((Basel.piSquaredOverSixRaw piCircleArea).compute m).hi) :
+    Basel.eulerBasel_geometricPi := by
+  exact Basel.eulerBasel_geometric_of_stagewise_witness h
+
 theorem wiedijk_item_fourteen_basel_finite_overlap_certificate :
     (DirichletSeries.zetaTwoInterval 200000).lo <=
         (BaselFiniteComparison.geometricPiSquaredOverSixCompute 12).hi /\
