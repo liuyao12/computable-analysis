@@ -667,6 +667,18 @@ theorem wiedijk_item_forty_two_reciprocal_triangular_series :
     Series.triangularTelescopingRaw.Equiv (RealRaw.ofRat 2) := by
   exact Series.triangularTelescopingRaw_equiv_two
 
+theorem wiedijk_item_forty_two_reciprocal_triangular_stage
+    (n : Nat) :
+    Series.triangularTelescopingSum n =
+      2 - 2 / ((n : Rat) + 1) := by
+  exact Series.triangularTelescopingSum_eq n
+
+theorem wiedijk_item_forty_two_reciprocal_triangular_tail
+    (n : Nat) :
+    2 - Series.triangularTelescopingSum n =
+      2 / ((n : Rat) + 1) := by
+  exact Series.triangularTelescopingSum_tail_eq n
+
 theorem wiedijk_item_thirty_four_harmonic_growth (target : Nat) :
     (target : Rat) <= FiniteHarmonic.harmonicSum (2 ^ (2 * target)) := by
   exact FiniteHarmonic.harmonicSum_two_pow_reaches target
