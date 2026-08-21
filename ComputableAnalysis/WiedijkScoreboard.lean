@@ -14,6 +14,7 @@ import ComputableAnalysis.FiniteGeometryFormulaInterfaces
 import ComputableAnalysis.FiniteCayleyHamiltonExample
 import ComputableAnalysis.FiniteChordPowerExample
 import ComputableAnalysis.FiniteTriangleIsoperimetricCertificate
+import ComputableAnalysis.FinitePellCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -247,5 +248,10 @@ theorem wiedijk_item_forty_three_triangle_isoperimetric_bound
     (h3 : 0 ≤ a - b + c) (h4 : 0 ≤ a + b - c) :
     256 * RationalCircle.heronProduct a b c ≤ (a + b + c) ^ 4 := by
   exact RationalCircle.triangle_isoperimetric_heron_bound h1 h2 h3 h4
+
+theorem wiedijk_item_thirty_nine_pell_recurrence (stage : Nat) :
+    (pellPair stage).1 * (pellPair stage).1 -
+        2 * (pellPair stage).2 * (pellPair stage).2 = 1 := by
+  exact pellPair_invariant stage
 
 end ComputableAnalysis
