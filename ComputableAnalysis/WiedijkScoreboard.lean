@@ -621,6 +621,16 @@ theorem wiedijk_item_twenty_six_leibniz_stage_width (n : Nat) :
       1 / ((4 * n + 1 : Nat) : Rat) := by
   exact Series.AlternatingRaw.leibnizAlternatingRaw_width_eq_reciprocal n
 
+theorem wiedijk_item_twenty_six_leibniz_stage_budget
+    {n : Nat} {eps : Rat} (hbudget : 1 / ((4 * n + 1 : Nat) : Rat) <= eps) :
+    (Series.AlternatingRaw.leibnizAlternatingRaw.interval n).width <= eps := by
+  exact Series.AlternatingRaw.leibnizAlternatingRaw_width_le_of_budget hbudget
+
+theorem wiedijk_item_twenty_six_leibniz_precision (eps : QPos) :
+    ∃ n : Nat,
+      (Series.AlternatingRaw.leibnizAlternatingRaw.interval n).width <= eps.val := by
+  exact Series.AlternatingRaw.leibnizAlternatingRaw_reaches_of_positive_tolerance eps
+
 theorem wiedijk_item_thirty_five_taylor_table :
     FirstYearCalculus.PowerSeriesDerivativeEntry.hasCheckedProof
       FirstYearCalculus.PowerSeriesDerivativeEntry.exp /\
