@@ -528,6 +528,13 @@ theorem wiedijk_item_one_hundred_finite_descartes_bound
   exact ⟨certificate.variation_eq_count,
     certificate.variation_bound⟩
 
+theorem wiedijk_item_one_hundred_direct_descartes_variation_bound
+    {coefficients : List Rat}
+    (hne : (coefficients.filter (fun c => c != 0)).length > 0) :
+    Polynomial.signChangeCountIgnoringZeros coefficients + 1 <=
+      (coefficients.filter (fun c => c != 0)).length := by
+  exact Polynomial.signChangeCountIgnoringZeros_add_one_le_filter_length hne
+
 theorem wiedijk_item_forty_four_binomial_certificate :
     Series.binomialSum 5 2 1 6 = 243 := by
   exact binomial_stage5_two_one_value
