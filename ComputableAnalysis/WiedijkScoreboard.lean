@@ -27,6 +27,7 @@ import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
+import ComputableAnalysis.FiniteStirlingInterface
 
 /-!
 # Wiedijk's List scoreboard
@@ -146,11 +147,12 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
   ⟨78, "Rational Cauchy--Schwarz"⟩,
   ⟨79, "Finite intermediate-value bracket"⟩,
   ⟨81, "Finite prime-reciprocal extension"⟩,
-  ⟨76, "Finite Fourier transform certificate"⟩
+  ⟨76, "Finite Fourier transform certificate"⟩,
+  ⟨90, "Finite Stirling-ratio certificate"⟩
 ]
 
 theorem wiedijkCalculusAnalysisAnchoredEntries_count :
-    wiedijkCalculusAnalysisAnchoredEntries.length = 15 := by
+    wiedijkCalculusAnalysisAnchoredEntries.length = 16 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -500,5 +502,13 @@ theorem wiedijk_item_eighty_one_finite_prime_reciprocal_extension
     ∃ p, BasicPrime p ∧ p ∉ xs ∧
       primeReciprocalSum xs < primeReciprocalSum (p :: xs) := by
   exact exists_prime_reciprocal_extension xs hprime
+
+/-! Item 90 in its finite computable form: the factorial ratio used by
+Stirling is enclosed by an explicit rational interval, with a certified error
+bound.  The unrestricted asymptotic equivalence is intentionally not claimed
+by this finite certificate. -/
+theorem wiedijk_item_ninety_finite_stirling_certificate :
+    qabs (finiteStirlingTenCertificate.ratioValue - 1) ≤ 1 / 100 := by
+  exact finiteStirlingTenCertificate_unit_error
 
 end ComputableAnalysis
