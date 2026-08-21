@@ -1478,6 +1478,23 @@ theorem wiedijk_item_seventy_five_convex_partial_derivative_valid
         (certificate.toPartialRealFunRaw.compute q hq) := by
   exact certificate.partial_valid
 
+theorem wiedijk_item_seventy_five_exact_convex_right_derivative_mono
+    {F : RealFunRaw} {a b q₁ q₂ : Rat}
+    {hF : ExactConvexOn F a b}
+    (D₁ : RightDerivativeAt hF q₁)
+    (D₂ : RightDerivativeAt hF q₂)
+    (hq : q₁ < q₂) :
+    D₁.raw.Le D₂.raw := by
+  exact rightDerivativeAt_mono D₁ D₂ hq
+
+theorem wiedijk_item_seventy_five_exact_convex_corner_order
+    {F : RealFunRaw} {a b q : Rat}
+    {hF : ExactConvexOn F a b}
+    (Dleft : LeftDerivativeAt hF q)
+    (Dright : RightDerivativeAt hF q) :
+    Dleft.raw.Le Dright.raw := by
+  exact leftDerivativeAt_le_rightDerivativeAt Dleft Dright
+
 /-! Item 73 in its computable form: a successor inequality propagates to any
 finite pair of stages.  This is the order content needed by stage algorithms;
 it does not smuggle in a supremum or a completed limit. -/
