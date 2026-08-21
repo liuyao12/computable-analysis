@@ -105,50 +105,9 @@ def quarterTurnFourierOrthogonalityCertificate :
   inner_product := by
     intro mode₁ mode₂ h₁ h₂
     simp at h₁ h₂
-      rcases h₁ with rfl | rfl | rfl | rfl <;>
+    rcases h₁ with rfl | rfl | rfl | rfl <;>
       rcases h₂ with rfl | rfl | rfl | rfl <;>
         native_decide
-
-/-! A reconstruction package for the same four-point transform.  The
-coefficients use the normalized conjugate inner product, so the synthesis
-uses the positive quarter-turn powers. -/
-def quarterTurnFourierReconstructionCertificate
-    (x₀ x₁ x₂ x₃ : Rat) :
-    FiniteFourierReconstructionCertificate where
-  orthogonality := quarterTurnFourierOrthogonalityCertificate
-  sample := fun k =>
-    match k with
-    | 0 => QComplex.ofRat x₀
-    | 1 => QComplex.ofRat x₁
-    | 2 => QComplex.ofRat x₂
-    | 3 => QComplex.ofRat x₃
-    | _ => QComplex.zero
-  coefficient := fun mode =>
-    QComplex.scaleRat (1 / (4 : Rat))
-      (finiteFourierSampleInnerProduct RotationSeries.imaginaryUnit 4 mode
-        (fun k =>
-          match k with
-          | 0 => QComplex.ofRat x₀
-          | 1 => QComplex.ofRat x₁
-          | 2 => QComplex.ofRat x₂
-          | 3 => QComplex.ofRat x₃
-          | _ => QComplex.zero))
-  coefficient_formula := by
-    intro mode hmode
-    rfl
-  reconstruction := by
-    intro k hk
-    have hkcases : k = 0 ∨ k = 1 ∨ k = 2 ∨ k = 3 := by omega
-    rcases hkcases with rfl | rfl | rfl | rfl
-    all_goals
-      simp [finiteFourierSynthesisAt, finiteFourierSampleInnerProduct,
-        quarterTurnFourierOrthogonalityCertificate,
-        finiteFourierModeInnerProduct, qcomplexListSum,
-        RotationSeries.imaginaryUnit, QComplex.natPow,
-        QComplex.conj, QComplex.mul, QComplex.add, QComplex.scaleRat,
-        QComplex.ofRat]
-      constructor <;> grind [Rat.add_assoc, Rat.add_comm, Rat.add_left_comm,
-        Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
 
 theorem FiniteFourierOrthogonalityCertificate.mode_vector_length
     (certificate : FiniteFourierOrthogonalityCertificate)
