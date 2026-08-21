@@ -150,6 +150,24 @@ def constantFunctionSampleCertificate
     simp [FunctionRaw.exact, FunctionRaw.evalRaw, QBox.point,
       QBox.NestedIn]
 
+/-! The next concrete instance is an affine complex function.  It is still
+entirely finite: at every rational-complex input the function returns an
+exact rational-complex value, and the sample certificate records that exact
+value as its zero-width enclosure. -/
+def affineFunctionSampleCertificate
+    (a b : QComplex) (points : List QComplex) :
+    EffectiveFourierSampleCertificate where
+  function := FunctionRaw.exact (fun z => QComplex.add (QComplex.mul a z) b)
+  samples := points.map (fun z => (z, QComplex.add (QComplex.mul a z) b))
+  sample_domain := by
+    intro p hp
+    trivial
+  sample_value := by
+    intro p hp
+    rcases List.mem_map.1 hp with ⟨z, hz, rfl⟩
+    simp [FunctionRaw.exact, FunctionRaw.evalRaw, QBox.point,
+      QBox.NestedIn]
+
 /-! A coefficient certificate separates the analytic integrand from the
 Fourier bookkeeping.  An eventual Fourier instance supplies an integrand such
 as `f * phase`; this structure only records the computable complex path

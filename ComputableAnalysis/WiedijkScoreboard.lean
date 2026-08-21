@@ -1855,6 +1855,12 @@ theorem wiedijk_item_seventy_six_constant_function_fourier_instance
     ((constantFunctionSampleCertificate c points).toSeries root mode).stabilized.Valid := by
   exact (constantFunctionSampleCertificate c points).toSeries_valid root mode
 
+theorem wiedijk_item_seventy_six_affine_function_fourier_instance
+    (a b : QComplex) (points : List QComplex)
+    (root : QComplex) (mode : Nat) :
+    ((affineFunctionSampleCertificate a b points).toSeries root mode).stabilized.Valid := by
+  exact (affineFunctionSampleCertificate a b points).toSeries_valid root mode
+
 theorem wiedijk_item_seventy_six_complex_integral_certificate
     {f : ComplexPathIntegral.EntireBoxFunctionRaw}
     {vertices : List QComplex}
