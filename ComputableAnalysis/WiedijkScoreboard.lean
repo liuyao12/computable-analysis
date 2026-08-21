@@ -23,6 +23,7 @@ import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
 import ComputableAnalysis.FiniteLHopitalCertificate
 import ComputableAnalysis.Basel
+import ComputableAnalysis.FiniteFourierCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -139,11 +140,12 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
   ⟨75, "Effective mean-value enclosure"⟩,
   ⟨77, "Finite sum-of-squares identity"⟩,
   ⟨78, "Rational Cauchy--Schwarz"⟩,
-  ⟨79, "Finite intermediate-value bracket"⟩
+  ⟨79, "Finite intermediate-value bracket"⟩,
+  ⟨76, "Finite Fourier transform certificate"⟩
 ]
 
 theorem wiedijkCalculusAnalysisAnchoredEntries_count :
-    wiedijkCalculusAnalysisAnchoredEntries.length = 12 := by
+    wiedijkCalculusAnalysisAnchoredEntries.length = 13 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -426,5 +428,36 @@ theorem wiedijk_item_fourteen_basel_computable_target :
       DirichletSeries.zetaTwoRaw.AllStagesOverlap
         (Basel.piSquaredOverSixRaw piCircleArea) := by
   exact Basel.eulerBasel_geometric_iff_allStagesOverlap
+
+/-! Item 76 in its finite computable form: rational samples have an exact
+four-mode transform, inverse reconstruction, and Parseval energy identity.
+The infinite Fourier convergence statement is intentionally not hidden inside
+this certificate. -/
+theorem wiedijk_item_seventy_six_finite_fourier_certificate
+    (x₀ x₁ x₂ x₃ : Rat) :
+    (fourPointFourierTransform x₀ x₁ x₂ x₃ 0 =
+        { re := x₀ + x₁ + x₂ + x₃, im := 0 } /\
+      fourPointFourierTransform x₀ x₁ x₂ x₃ 1 =
+        { re := x₀ - x₂, im := x₁ - x₃ } /\
+      fourPointFourierTransform x₀ x₁ x₂ x₃ 2 =
+        { re := x₀ - x₁ + x₂ - x₃, im := 0 } /\
+      fourPointFourierTransform x₀ x₁ x₂ x₃ 3 =
+        { re := x₀ - x₂, im := x₃ - x₁ }) /\
+    (let f₀ := fourPointFourierTransform x₀ x₁ x₂ x₃ 0
+     let f₁ := fourPointFourierTransform x₀ x₁ x₂ x₃ 1
+     let f₂ := fourPointFourierTransform x₀ x₁ x₂ x₃ 2
+     let f₃ := fourPointFourierTransform x₀ x₁ x₂ x₃ 3
+     f₀.re + f₁.re + f₂.re + f₃.re = 4 * x₀ /\
+       f₀.re - f₂.re + f₁.im - f₃.im = 4 * x₁ /\
+       f₀.re - f₁.re + f₂.re - f₃.re = 4 * x₂ /\
+       f₀.re - f₂.re - f₁.im + f₃.im = 4 * x₃) /\
+    QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 0) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 1) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 2) +
+        QComplex.normSq (fourPointFourierTransform x₀ x₁ x₂ x₃ 3) =
+      4 * (x₀ ^ 2 + x₁ ^ 2 + x₂ ^ 2 + x₃ ^ 2) := by
+  exact ⟨fourPointFourierTransform_modes x₀ x₁ x₂ x₃,
+    fourPointFourierTransform_reconstruct x₀ x₁ x₂ x₃,
+    fourPointFourierTransform_parseval x₀ x₁ x₂ x₃⟩
 
 end ComputableAnalysis
