@@ -598,6 +598,12 @@ theorem wiedijk_item_thirty_seven_cubic_witness_certificate
             [certificate.root1, certificate.root2, certificate.root3]) x) := by
   exact certificate.computable_roots_and_factorization x
 
+theorem wiedijk_item_thirty_seven_factorized_cubic_root_characterization
+    (r s t z : QComplex) :
+    CPoly.hasExactRoot (factorizedCubicPolynomial r s t) z ↔
+      z = r ∨ z = s ∨ z = t := by
+  exact factorizedCubicPolynomial_hasExactRoot_iff r s t z
+
 theorem wiedijk_item_twenty_one_green_rectangle
     (left right bottom top : Rat) :
     greenRectangleBoundary left right bottom top =
