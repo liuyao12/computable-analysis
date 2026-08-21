@@ -881,6 +881,12 @@ theorem wiedijk_item_fifteen_scheduled_endpoint_equiv_canonical
   exact DerivativeBoundFTC.endpointRaw_equiv_endpointDifference
     certificate hF ha hb hendpoint
 
+theorem wiedijk_item_fifteen_two_stage_derivative_ftc
+    {F dF : RealFunRaw} {a b : Rat}
+    (certificate : TwoStageCandidateDerivativeFTC F dF a b) :
+    certificate.boundedIntegralRaw.Equiv certificate.endpointRaw := by
+  exact certificate.equiv_endpoint
+
 /-! The polynomial base case is exposed independently of the packaged FTC
 portfolio.  It is the finite algebraic core: a primitive prefix has an exact
 endpoint recurrence, and its coefficient-shift polynomial has a certified
