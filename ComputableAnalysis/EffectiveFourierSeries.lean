@@ -228,6 +228,15 @@ def geometricFourierZeroModeSeries
     intro n hn
     exact Rat.le_of_lt eps.property
 
+theorem geometricFourierZeroModeSeries_candidate_contains_limit
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) (n : Nat) :
+    (QBox.point ({ re := 1 / (1 - r), im := 0 } : QComplex)).NestedIn
+      ((geometricFourierZeroModeSeries r hr0 hrhalf hr1).candidate.compute n) := by
+  dsimp [geometricFourierZeroModeSeries]
+  simp [QBox.point, QBox.NestedIn, QComplex.le_def]
+  exact Series.geometricSum_le_inv_one_sub hr0 hr1 n
+
 /-! A nonzero quarter-turn Fourier instance.  Its candidates are the exact
 finite coefficient stages; the stabilization radius is the rational bound
 `2 * r^n`.  The factor two is valid for `r <= 1/2`, while the tail proof

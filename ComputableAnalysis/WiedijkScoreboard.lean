@@ -1817,6 +1817,14 @@ theorem wiedijk_item_seventy_six_geometric_tail_fourier_valid
   exact EffectiveFourierSeries.stabilized_valid
     (geometricFourierZeroModeSeries r hr0 hrhalf hr1)
 
+theorem wiedijk_item_seventy_six_geometric_fourier_candidate_limit_enclosure
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) (n : Nat) :
+    (QBox.point ({ re := 1 / (1 - r), im := 0 } : QComplex)).NestedIn
+      ((geometricFourierZeroModeSeries r hr0 hrhalf hr1).candidate.compute n) := by
+  exact geometricFourierZeroModeSeries_candidate_contains_limit
+    r hr0 hrhalf hr1 n
+
 theorem wiedijk_item_seventy_six_generic_fourier_tail_bridge
     (certificate : EffectiveFourierTailCertificate) :
     certificate.toSeries.stabilized.Valid := by
