@@ -1063,6 +1063,21 @@ theorem wiedijk_item_sixty_four_lhopital_certificate_remainder
             certificate.denConst certificate.denSlope certificate.step) := by
   exact certificate.residual_remainder_identity
 
+theorem wiedijk_item_sixty_four_lhopital_exact_ratio
+    (step numeratorConstant numeratorSlope denominatorConstant denominatorSlope : Rat)
+    (hstep : step ≠ 0) (hden0 : denominatorConstant ≠ 0)
+    (hden : denominatorConstant + denominatorSlope * step ≠ 0)
+    (hcross : numeratorSlope * denominatorConstant -
+      numeratorConstant * denominatorSlope = 0) :
+    (step * FiniteLHopitalCertificate.affineResidual
+        numeratorConstant numeratorSlope step) /
+      (step * FiniteLHopitalCertificate.affineResidual
+        denominatorConstant denominatorSlope step) =
+      numeratorConstant / denominatorConstant := by
+  exact FiniteLHopitalCertificate.affine_residual_quotient_eq_base_of_cross_product_eq_zero
+    step numeratorConstant numeratorSlope denominatorConstant denominatorSlope
+    hstep hden0 hden hcross
+
 /-! Item 14 is already expressed at the right abstraction level in the Basel
 module.  This alias records the remaining proof obligation explicitly: the
 series and the geometric `pi^2 / 6` computation must overlap at every finite
