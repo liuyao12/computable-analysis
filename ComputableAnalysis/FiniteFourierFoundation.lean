@@ -255,4 +255,18 @@ theorem finiteFourierSum_singleton
   simp [finiteFourierSum, finiteFourierSumAux]
   exact qcomplex_add_zero _
 
+/-! The original four-point rational transform is an instance of the general
+finite-list evaluator at the quarter-turn root.  This bridge lets its
+orthogonality, reconstruction, and Parseval certificates be reused as tests
+of the general API. -/
+theorem finiteFourierSum_fourPoint_bridge
+    (x₀ x₁ x₂ x₃ : Rat) (mode : Nat) :
+    finiteFourierSum RotationSeries.imaginaryUnit mode
+        [QComplex.ofRat x₀, QComplex.ofRat x₁,
+          QComplex.ofRat x₂, QComplex.ofRat x₃] =
+      fourPointFourierTransform x₀ x₁ x₂ x₃ mode := by
+  simp [finiteFourierSum, finiteFourierSumAux,
+    fourPointFourierTransform]
+  rw [qcomplex_add_zero, qcomplex_add_assoc, qcomplex_add_assoc]
+
 end ComputableAnalysis
