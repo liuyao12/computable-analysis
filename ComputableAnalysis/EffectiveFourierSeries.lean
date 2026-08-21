@@ -1,4 +1,5 @@
 import ComputableAnalysis.FiniteFourierFoundation
+import ComputableAnalysis.Series
 
 /-!
 # Effective Fourier-stage interface
@@ -77,6 +78,76 @@ def finiteSupportFourierSeries
       (QBox.expand (QBox.point (finiteFourierSum root mode samples)) 0)
     simp [QBox.point, QBox.expand, QBox.NestedIn]
     constructor <;> grind
+  radius_shrinks := by
+    intro eps
+    refine ⟨0, ?_⟩
+    intro n hn
+    exact Rat.le_of_lt eps.property
+
+/-! A first genuinely infinite instance: the zero-frequency partial sums of
+the geometric coefficient family `1, r, r^2, ...`.  The candidate boxes use
+the exact rational prefix and the exact geometric-series upper endpoint.
+Their widths shrink by the existing effective geometric-series theorem. -/
+def geometricFourierZeroModeSeries
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) : EffectiveFourierSeries where
+  root := QComplex.one
+  mode := 0
+  stage := fun n =>
+    [QComplex.ofRat (Series.geometricSum r n)]
+  candidate := {
+    compute := fun n =>
+      { lo := { re := Series.geometricSum r n, im := 0 },
+        hi := { re := 1 / (1 - r), im := 0 } }
+  }
+  radius := fun _ => 0
+  candidate_stage := by
+    intro n
+    dsimp
+    change (QBox.point
+      (finiteFourierSum QComplex.one 0
+        [QComplex.ofRat (Series.geometricSum r n)])).NestedIn _
+    simp [finiteFourierSum_singleton, QComplex.natPow,
+      QComplex.mul, QComplex.one, QComplex.ofRat,
+      QBox.point, QBox.NestedIn]
+    constructor
+    · exact ⟨by grind [Rat.add_zero], by native_decide⟩
+    · exact ⟨by simpa [Rat.add_zero, Rat.sub_eq_add_neg] using
+          Series.geometricSum_le_inv_one_sub hr0 hr1 n,
+        by native_decide⟩
+  candidate_ordered := by
+    intro n
+    dsimp
+    unfold QBox.Ordered
+    simp only [QComplex.le_def]
+    exact ⟨Series.geometricSum_le_inv_one_sub hr0 hr1 n,
+      by native_decide⟩
+  candidate_shrinks := by
+    dsimp
+    intro eps
+    obtain ⟨N, hN⟩ :=
+      (Series.geometricRaw_valid_of_le_half hr0 hrhalf hr1).2.2 eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    have h := hN n hn
+    simp only [QBox.width, QBox.height]
+    change 1 / (1 - r) - Series.geometricSum r n <= eps.val /\
+      0 - 0 <= eps.val
+    exact ⟨h, by grind [Rat.sub_self]⟩
+  future_containment := by
+    dsimp
+    intro k n hkn
+    change
+      ({ lo := { re := Series.geometricSum r n, im := 0 },
+          hi := { re := 1 / (1 - r), im := 0 } } : QBox).NestedIn
+        (QBox.expand
+          { lo := { re := Series.geometricSum r k, im := 0 },
+            hi := { re := 1 / (1 - r), im := 0 } } 0)
+    simp [QBox.expand, QBox.NestedIn]
+    constructor
+    · exact ⟨by simpa [Rat.add_zero, Rat.sub_eq_add_neg] using
+        Series.geometricSum_le_of_le hr0 hkn, by grind⟩
+    · exact ⟨by grind, by grind⟩
   radius_shrinks := by
     intro eps
     refine ⟨0, ?_⟩

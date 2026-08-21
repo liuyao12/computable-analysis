@@ -564,6 +564,13 @@ theorem wiedijk_item_seventy_six_finite_support_fourier_valid
   exact EffectiveFourierSeries.stabilized_valid
     (finiteSupportFourierSeries root mode samples)
 
+theorem wiedijk_item_seventy_six_geometric_tail_fourier_valid
+    (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
+    (hr1 : r < 1) :
+    (geometricFourierZeroModeSeries r hr0 hrhalf hr1).stabilized.Valid := by
+  exact EffectiveFourierSeries.stabilized_valid
+    (geometricFourierZeroModeSeries r hr0 hrhalf hr1)
+
 /-! Item 9 in its computable form: the circle-area interval algorithm is
 valid, and agrees with the independently constructed rational rectangle
 integral for the Cauchy kernel. -/
