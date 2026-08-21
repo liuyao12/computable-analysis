@@ -76,6 +76,36 @@ theorem MonotoneIntervalCertificate.precision_witness
   · grind
   · exact hN N (Nat.le_refl N)
 
+/-! Turn the endpoint certificate directly into the project's raw-real data.
+The construction is deliberately just the two rational endpoints at each
+stage; no supremum, completeness axiom, or standard `Real` is involved. -/
+def MonotoneIntervalCertificate.toRealRaw
+    (certificate : MonotoneIntervalCertificate) : RealRaw where
+  compute := fun n =>
+    { lo := certificate.loStage n
+      hi := certificate.hiStage n }
+
+theorem MonotoneIntervalCertificate.toRealRaw_valid
+    (certificate : MonotoneIntervalCertificate) :
+    certificate.toRealRaw.Valid := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro n
+    change 0 ≤ certificate.hiStage n - certificate.loStage n
+    grind [certificate.enclosed n]
+  · intro n m hnm
+    change certificate.loStage n ≤ certificate.loStage m /\
+      certificate.loStage m ≤ certificate.hiStage m /\
+      certificate.hiStage m ≤ certificate.hiStage n
+    exact ⟨certificate.lower_pair_le hnm,
+      certificate.enclosed m,
+      certificate.upper_pair_ge hnm⟩
+  · intro eps
+    obtain ⟨N, hN⟩ := certificate.width_shrinks eps
+    refine ⟨N, ?_⟩
+    intro n hn
+    change certificate.hiStage n - certificate.loStage n ≤ eps.val
+    exact hN n hn
+
 def finiteAscendingSequenceCertificate
     (sequence : Nat → Rat) (stage : Nat)
     (successor_le : ∀ n, sequence n ≤ sequence (n + 1)) :
