@@ -15,6 +15,7 @@ import ComputableAnalysis.FiniteCayleyHamiltonExample
 import ComputableAnalysis.FiniteChordPowerExample
 import ComputableAnalysis.FiniteTriangleIsoperimetricCertificate
 import ComputableAnalysis.FinitePellCertificate
+import ComputableAnalysis.FiniteQuarticSplitExample
 
 /-!
 # Wiedijk's List scoreboard
@@ -253,5 +254,24 @@ theorem wiedijk_item_thirty_nine_pell_recurrence (stage : Nat) :
     (pellPair stage).1 * (pellPair stage).1 -
         2 * (pellPair stage).2 * (pellPair stage).2 = 1 := by
   exact pellPair_invariant stage
+
+theorem wiedijk_item_forty_six_quartic_root_certificate :
+    CPoly.hasExactRoot
+        (finiteQuarticQuadraticSplit quarticSplitOne quarticSplitZero
+          quarticSplitMinusOne quarticSplitOne quarticSplitZero
+          quarticSplitMinusFour) quarticSplitOne /\
+      CPoly.hasExactRoot
+        (finiteQuarticQuadraticSplit quarticSplitOne quarticSplitZero
+          quarticSplitMinusOne quarticSplitOne quarticSplitZero
+          quarticSplitMinusFour) quarticSplitMinusOne /\
+      CPoly.hasExactRoot
+        (finiteQuarticQuadraticSplit quarticSplitOne quarticSplitZero
+          quarticSplitMinusOne quarticSplitOne quarticSplitZero
+          quarticSplitMinusFour) quarticSplitTwo /\
+      CPoly.hasExactRoot
+        (finiteQuarticQuadraticSplit quarticSplitOne quarticSplitZero
+          quarticSplitMinusOne quarticSplitOne quarticSplitZero
+          quarticSplitMinusFour) quarticSplitMinusTwo := by
+  exact quartic_split_example_roots
 
 end ComputableAnalysis
