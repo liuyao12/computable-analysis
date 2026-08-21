@@ -301,4 +301,8 @@ theorem wiedijk_item_sixty_five_isosceles_equal_legs (h b : Rat) :
         { x := 0, y := h } { x := -b, y := 0 } := by
   exact RationalCircle.Stage.isosceles_equal_legs h b
 
+theorem wiedijk_item_ninety_one_triangle_inequality (steps : List Rat) :
+    qabs (ratListSum steps) <= ratListAbsSum steps := by
+  exact RationalCircle.Stage.rationalPolyline_length_ge_straight_segment steps
+
 end ComputableAnalysis
