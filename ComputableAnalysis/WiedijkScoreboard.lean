@@ -2415,6 +2415,17 @@ theorem wiedijk_item_seventy_six_fourier_finite_reconstruction
       certificate.sample k := by
   exact certificate.reconstructs hk
 
+theorem wiedijk_item_seventy_six_fourier_reconstruction_under_equivalent_coefficients
+    (certificate : FiniteFourierReconstructionCertificate)
+    (coefficient' : Nat → QComplex)
+    (hcoeff : ∀ mode, mode ∈ certificate.orthogonality.modes →
+      coefficient' mode = certificate.coefficient mode)
+    {k : Nat} (hk : k < certificate.orthogonality.length) :
+    finiteFourierSynthesisAt certificate.orthogonality.root k
+        certificate.orthogonality.modes coefficient' =
+      certificate.sample k := by
+  exact certificate.reconstructs_of_coefficient_congr coefficient' hcoeff hk
+
 theorem wiedijk_item_seventy_six_fourier_synthesis_coefficient_congr
     (root : QComplex) (k : Nat) (modes : List Nat)
     (coefficient₁ coefficient₂ : Nat → QComplex)

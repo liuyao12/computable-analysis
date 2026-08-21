@@ -160,6 +160,24 @@ theorem FiniteFourierReconstructionCertificate.reconstructs
       certificate.sample k := by
   exact certificate.reconstruction k hk
 
+/-! Reconstruction is invariant under replacing coefficients by an extension
+that agrees on the certified mode list.  This is the bridge between a
+canonical finite Fourier table and an independently computed implementation
+of the same coefficients. -/
+theorem FiniteFourierReconstructionCertificate.reconstructs_of_coefficient_congr
+    (certificate : FiniteFourierReconstructionCertificate)
+    (coefficient' : Nat → QComplex)
+    (hcoeff : ∀ mode, mode ∈ certificate.orthogonality.modes →
+      coefficient' mode = certificate.coefficient mode)
+    {k : Nat} (hk : k < certificate.orthogonality.length) :
+    finiteFourierSynthesisAt certificate.orthogonality.root k
+        certificate.orthogonality.modes coefficient' =
+      certificate.sample k := by
+  rw [finiteFourierSynthesisAt_congr
+    certificate.orthogonality.root k certificate.orthogonality.modes
+    coefficient' certificate.coefficient hcoeff]
+  exact certificate.reconstruction k hk
+
 /-! The four-point transform is the first concrete instance of the general
 interface.  Its orthogonality claims are checked by finite reduction of the
 rational-complex arithmetic, rather than imported from a theorem about
