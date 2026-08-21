@@ -527,6 +527,21 @@ theorem wiedijk_item_thirty_five_taylor_table :
       FirstYearCalculus.PowerSeriesDerivativeEntry.cosh := by
   exact FirstYearCalculus.checked_power_series_table
 
+theorem wiedijk_item_thirty_five_taylor_derivative_addition
+    {F f G g : FormalPowerSeries.Coeffs}
+    (hF : FormalPowerSeries.HasCoefficientShift F f)
+    (hG : FormalPowerSeries.HasCoefficientShift G g) :
+    FormalPowerSeries.HasCoefficientShift
+      (FormalPowerSeries.add F G) (FormalPowerSeries.add f g) := by
+  exact FormalPowerSeries.hasCoefficientShift_add hF hG
+
+theorem wiedijk_item_thirty_five_taylor_derivative_rational_scaling
+    (r : Rat) {F f : FormalPowerSeries.Coeffs}
+    (hF : FormalPowerSeries.HasCoefficientShift F f) :
+    FormalPowerSeries.HasCoefficientShift
+      (FormalPowerSeries.scaleRat r F) (FormalPowerSeries.scaleRat r f) := by
+  exact FormalPowerSeries.hasCoefficientShift_scaleRat r hF
+
 theorem wiedijk_item_seventeen_de_moivre_certificate :
     RationalCircle.Trigonometry.toQComplex
         (RationalCircle.Trigonometry.pointPow
