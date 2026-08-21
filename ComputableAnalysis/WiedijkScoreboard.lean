@@ -504,6 +504,17 @@ theorem wiedijk_item_seventeen_de_moivre_certificate :
           RationalCircle.Trigonometry.deMoivreThreeFive) 2 := by
   exact RationalCircle.Trigonometry.deMoivreThreeFive_square_complex_bridge
 
+/-! The finite De Moivre example is an instance of the general rational-circle
+power law.  Natural powers are computed recursively and transported to
+`QComplex`; no angle-valued or completed-real exponential is involved. -/
+theorem wiedijk_item_seventeen_de_moivre_general
+    (p : PiCirclePoint) (n : Nat) :
+    RationalCircle.Trigonometry.toQComplex
+        (RationalCircle.Trigonometry.pointPow p n) =
+      QComplex.natPow
+        (RationalCircle.Trigonometry.toQComplex p) n := by
+  exact RationalCircle.Trigonometry.toQComplex_pointPow p n
+
 theorem wiedijk_item_eight_doubling_cube_stage_twenty_four :
     (monotoneTargetBisectionIterate cubeTarget 2 24 cubeTargetInitial).width =
       1 / 16777216 := by
