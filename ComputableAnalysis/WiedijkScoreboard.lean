@@ -1373,6 +1373,22 @@ theorem wiedijk_item_nine_effective_circle_area :
   exact ⟨CauchyPi.piCircleArea_valid,
     CauchyPi.rectangleRaw_equiv_piCircleArea⟩
 
+theorem wiedijk_item_nine_circle_area_stage_ordered (n : Nat) :
+    0 <= (piCircleArea.compute n).width := by
+  exact (CauchyPi.piCircleArea_valid).1 n
+
+theorem wiedijk_item_nine_circle_area_stage_nested
+    {n m : Nat} (hnm : n <= m) :
+    (piCircleArea.compute n).lo <= (piCircleArea.compute m).lo /\
+      (piCircleArea.compute m).lo <= (piCircleArea.compute m).hi /\
+      (piCircleArea.compute m).hi <= (piCircleArea.compute n).hi := by
+  exact (CauchyPi.piCircleArea_valid).2.1 n m hnm
+
+theorem wiedijk_item_nine_circle_area_precision (eps : QPos) :
+    ∃ N : Nat, ∀ n, N <= n ->
+      (piCircleArea.compute n).width <= eps.val := by
+  exact (CauchyPi.piCircleArea_valid).2.2 eps
+
 /-! Item 81 in its potential-infinity form: every finite certified list of
 primes can be extended by a new prime, strictly increasing the rational
 reciprocal accumulator.  This is the finite-stage content of divergence. -/
