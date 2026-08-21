@@ -1,5 +1,6 @@
 import ComputableAnalysis.IrrationalSqrt
 import ComputableAnalysis.SqrtTwoDescent
+import ComputableAnalysis.RationalCircle
 
 /-!
 # Wiedijk's List scoreboard
@@ -83,5 +84,16 @@ completed real-number predicate. -/
 theorem wiedijk_item_one_sqrt_two :
     RealRaw.Irrational (sqrtRat (2 : Rat) (by native_decide)) := by
   exact sqrt_two_irrational_via_descent
+
+theorem wiedijk_item_three_denumerability (q : Rat) :
+    Exists fun n : Nat => RationalCode.decode (rationalNatCode n) = q := by
+  exact rationalNatCode_decode_surjective q
+
+theorem wiedijk_item_four_pythagorean
+    (u v : PiCirclePoint) (horth : RationalCircle.Stage.dot u v = 0) :
+    RationalCircle.Stage.segmentNormSq RationalCircle.Stage.origin u +
+        RationalCircle.Stage.segmentNormSq RationalCircle.Stage.origin v =
+      RationalCircle.Stage.segmentNormSq u v := by
+  exact RationalCircle.Stage.rightTriangle_pythagorean u v horth
 
 end ComputableAnalysis
