@@ -349,6 +349,18 @@ theorem wiedijk_item_ninety_seven_cramer_certificate :
       ((2 : Rat) * 1 + 1 * 3 = 5 /\ 1 * 1 + 3 * 3 = 10) := by
   exact cramer_2_1_1_3_certificate
 
+theorem wiedijk_item_ninety_seven_rational_two_by_two_cramer
+    (a b c d x y : Rat) (hdet : a * d - b * c ≠ 0) :
+    a * ((x * d - b * y) / (a * d - b * c)) +
+          b * ((a * y - x * c) / (a * d - b * c)) = x /\
+      c * ((x * d - b * y) / (a * d - b * c)) +
+          d * ((a * y - x * c) / (a * d - b * c)) = y := by
+  have hcancel : (a * d - b * c)⁻¹ * (a * d - b * c) = 1 :=
+    Rat.inv_mul_cancel _ hdet
+  constructor <;> rw [Rat.div_def, Rat.div_def]
+  · grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+  · grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
 theorem wiedijk_item_one_hundred_descartes_certificate :
     Polynomial.signChangeCountIgnoringZeros Polynomial.twoVariationQuadratic = 2 /\
       (forall x : Rat, 0 < x ->
