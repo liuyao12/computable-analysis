@@ -1338,6 +1338,16 @@ theorem wiedijk_item_seventy_nine_effective_bisection_width
       I.width / (2 ^ n : Rat) := by
   exact monotoneTargetBisectionIterate_width target n
 
+theorem wiedijk_item_seventy_nine_stage_bracket
+    (certificate : FiniteInverseSearchCertificate) (n : Nat) :
+    certificate.map
+        (monotoneTargetBisectionIterate certificate.map certificate.target n
+          certificate.initialInterval).lo <= certificate.target /\
+      certificate.target <= certificate.map
+        (monotoneTargetBisectionIterate certificate.map certificate.target n
+          certificate.initialInterval).hi := by
+  exact certificate.stage_bracket n
+
 theorem wiedijk_item_seventy_nine_bisection_to_real_raw
     (certificate : FiniteInverseSearchCertificate)
     (hwidth : certificate.initialInterval.width <= 1) :

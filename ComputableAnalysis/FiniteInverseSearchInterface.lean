@@ -52,6 +52,25 @@ theorem FiniteInverseSearchCertificate.output_midpoint_witness
   have hmid := QInterval.midpoint_mem hordered
   exact ⟨hbracket.1, hbracket.2, hmid.1, hmid.2⟩
 
+theorem FiniteInverseSearchCertificate.stage_bracket
+    (certificate : FiniteInverseSearchCertificate) (n : Nat) :
+    certificate.map
+        (monotoneTargetBisectionIterate certificate.map certificate.target n
+          certificate.initialInterval).lo <= certificate.target /\
+      certificate.target <= certificate.map
+        (monotoneTargetBisectionIterate certificate.map certificate.target n
+          certificate.initialInterval).hi := by
+  exact monotoneBisectionIterate_preserves_target_bracket
+    certificate.target certificate.ordered certificate.lower_bracket
+    certificate.upper_bracket n
+
+theorem FiniteInverseSearchCertificate.stage_width
+    (certificate : FiniteInverseSearchCertificate) (n : Nat) :
+    (monotoneTargetBisectionIterate certificate.map certificate.target n
+      certificate.initialInterval).width =
+        certificate.initialInterval.width / (2 ^ n : Rat) := by
+  exact monotoneTargetBisectionIterate_width certificate.target n
+
 /-! The finite inverse search can also be run at every stage, producing the
 nested interval algorithm used by `RealRaw`.  The only extra hypothesis is
 the harmless normalization that the initial interval has width at most one;
