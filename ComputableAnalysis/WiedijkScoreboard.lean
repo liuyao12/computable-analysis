@@ -2415,6 +2415,20 @@ theorem wiedijk_item_seventy_six_fourier_finite_reconstruction
       certificate.sample k := by
   exact certificate.reconstructs hk
 
+theorem wiedijk_item_seventy_six_fourier_synthesis_coefficient_congr
+    (root : QComplex) (k : Nat) (modes : List Nat)
+    (coefficient₁ coefficient₂ : Nat → QComplex)
+    (hcoeff : ∀ mode, mode ∈ modes → coefficient₁ mode = coefficient₂ mode) :
+    finiteFourierSynthesisAt root k modes coefficient₁ =
+      finiteFourierSynthesisAt root k modes coefficient₂ := by
+  exact finiteFourierSynthesisAt_congr root k modes coefficient₁ coefficient₂ hcoeff
+
+theorem wiedijk_item_seventy_six_fourier_zero_coefficient_synthesis
+    (root : QComplex) (k : Nat) (modes : List Nat) :
+    finiteFourierSynthesisAt root k modes (fun _ => QComplex.zero) =
+      QComplex.zero := by
+  exact finiteFourierSynthesisAt_zero_coefficients root k modes
+
 theorem wiedijk_item_seventy_six_quarter_turn_generic_tail_valid
     (r : Rat) (hr0 : 0 <= r) (hrhalf : r <= (1 : Rat) / 2)
     (hr1 : r < 1) :
