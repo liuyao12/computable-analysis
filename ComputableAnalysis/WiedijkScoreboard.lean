@@ -1460,6 +1460,14 @@ theorem wiedijk_item_seventy_five_convex_derivative_order
     QInterval.WeakLe (left.compute n) (later.compute n) := by
   exact left.compute_weakLe_of_gap later n hgap
 
+theorem wiedijk_item_seventy_five_convex_derivative_function_valid
+    {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C}
+    (certificate : ConvexDerivative.PointwiseFunction H) :
+    certificate.toRealFunRaw.Valid := by
+  exact certificate.valid
+
 /-! Item 73 in its computable form: a successor inequality propagates to any
 finite pair of stages.  This is the order content needed by stage algorithms;
 it does not smuggle in a supremum or a completed limit. -/
