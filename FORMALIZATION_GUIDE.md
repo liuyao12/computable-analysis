@@ -142,8 +142,11 @@ Routine finite lemmas are reused from the available foundation.
 
 The benchmark alignment is maintained in
 [`blueprint/src/08-roadmap.tex`](blueprint/src/08-roadmap.tex).  It currently
-records 47 checked project-relevant finite, rational-coordinate, or
-certificate-level cores.  The easiest entries are distributed across
+records 52 scoped project-relevant finite, rational-coordinate, or
+certificate-level cores.  The machine-checked registry and its coverage
+invariants are in
+[`ComputableAnalysis/WiedijkScoreboard.lean`](ComputableAnalysis/WiedijkScoreboard.lean).
+The easiest entries are distributed across
 Foundations, Circle and Trigonometry, Infinite Series, Effective Calculus,
 Algebra and FTA, and Linear Differential Equations; the remaining benchmark
 numbers have explicit supporting or out-of-scope dispositions there.  Use the
