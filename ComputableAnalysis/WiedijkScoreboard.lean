@@ -226,6 +226,17 @@ theorem wiedijkCalculusAnalysisComputableEntries_cover_count :
       wiedijkCalculusAnalysisEntries.length := by
   native_decide
 
+def wiedijkEntryNumbers (entries : List WiedijkEntry) : List Nat :=
+  entries.map WiedijkEntry.number
+
+/-! The coverage invariant is about benchmark identities, not merely list
+lengths: every calculus/analysis number occurs in the computable proxy, even
+though the proxy may use a different project-facing name or ordering. -/
+theorem wiedijkCalculusAnalysisComputableEntries_cover_numbers :
+    (wiedijkEntryNumbers wiedijkCalculusAnalysisComputableEntries).Perm
+      (wiedijkEntryNumbers wiedijkCalculusAnalysisEntries) := by
+  native_decide
+
 /-! First completed row: the benchmark statement is exposed directly through
 the project's raw-real irrationality predicate, rather than Mathlib's
 completed real-number predicate. -/
