@@ -793,6 +793,23 @@ theorem wiedijk_item_fourteen_effective_basel_series :
   exact ⟨Basel.baselSeriesRaw_valid,
     Basel.baselSeriesRaw_reaches_of_positive_tolerance⟩
 
+/-! The series side also has an explicit all-stage tail law.  This is the
+computable content available before proving that its limit equals the
+geometric `pi^2 / 6` construction. -/
+theorem wiedijk_item_fourteen_zeta_two_stage_tail
+    {n m : Nat} (hnm : n <= m) :
+    (DirichletSeries.zetaTwoInterval n).lo <=
+      (DirichletSeries.zetaTwoInterval m).lo /\
+      (DirichletSeries.zetaTwoInterval m).hi <=
+        (DirichletSeries.zetaTwoInterval n).hi := by
+  have h := DirichletSeries.zetaTwoInterval_nested n m hnm
+  exact ⟨h.1, h.2.2⟩
+
+theorem wiedijk_item_fourteen_zeta_two_width_budget
+    {n : Nat} (hn : 0 < n) :
+    (DirichletSeries.zetaTwoInterval n).width <= 1 / (n : Rat) := by
+  exact DirichletSeries.zetaTwoInterval_width_le_one_div n hn
+
 /-! Item 76 in its finite computable form: rational samples have an exact
 four-mode transform, inverse reconstruction, and Parseval energy identity.
 The infinite Fourier convergence statement is intentionally not hidden inside
