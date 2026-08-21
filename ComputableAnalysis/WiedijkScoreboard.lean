@@ -252,6 +252,14 @@ theorem wiedijk_item_sixteen_exact_candidate_search_none_iff
       ∀ z, z ∈ candidates -> ¬ CPoly.hasExactRoot coeffs z := by
   exact exactRootSearch_none_iff
 
+theorem wiedijk_item_sixteen_factorized_quintic_root_characterization
+    (r₁ r₂ r₃ r₄ r₅ z : QComplex) :
+    CPoly.hasExactRoot
+        (factorizedQuinticPolynomial r₁ r₂ r₃ r₄ r₅) z ↔
+      z ∈ [r₁, r₂, r₃, r₄, r₅] := by
+  exact factorizedQuinticPolynomial_hasExactRoot_iff_mem
+    r₁ r₂ r₃ r₄ r₅ z
+
 theorem wiedijk_item_three_denumerability (q : Rat) :
     Exists fun n : Nat => RationalCode.decode (rationalNatCode n) = q := by
   exact rationalNatCode_decode_surjective q
