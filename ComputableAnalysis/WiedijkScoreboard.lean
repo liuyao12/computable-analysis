@@ -21,6 +21,7 @@ import ComputableAnalysis.FiniteInverseSearchInterface
 import ComputableAnalysis.PolynomialMeanValue
 import ComputableAnalysis.FiniteQuadratureMeanValue
 import ComputableAnalysis.FiniteMonotoneSequenceInterface
+import ComputableAnalysis.FiniteLHopitalCertificate
 
 /-!
 # Wiedijk's List scoreboard
@@ -131,6 +132,7 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
   ⟨26, "Certified Leibniz series"⟩,
   ⟨35, "Certified Taylor table"⟩,
   ⟨43, "Finite isoperimetric bound"⟩,
+  ⟨64, "Finite L'Hopital residual certificate"⟩,
   ⟨66, "Finite geometric series"⟩,
   ⟨73, "Finite monotone-sequence order"⟩,
   ⟨75, "Effective mean-value enclosure"⟩,
@@ -140,7 +142,7 @@ def wiedijkCalculusAnalysisAnchoredEntries : List WiedijkEntry := [
 ]
 
 theorem wiedijkCalculusAnalysisAnchoredEntries_count :
-    wiedijkCalculusAnalysisAnchoredEntries.length = 11 := by
+    wiedijkCalculusAnalysisAnchoredEntries.length = 12 := by
   native_decide
 
 /-! First completed row: the benchmark statement is exposed directly through
@@ -391,5 +393,26 @@ theorem wiedijk_item_seventy_three_finite_monotone_sequence
     {a b : Nat} (hab : a ≤ b) :
     certificate.sequence a ≤ certificate.sequence b := by
   exact certificate.pair_le hab
+
+/-! Item 64 in its computable form: after cancelling a common nonzero linear
+factor, the quotient differs from its base value by an explicit rational
+remainder.  The remainder is the finite convergence certificate; no completed
+real limit is assumed. -/
+theorem wiedijk_item_sixty_four_effective_lhopital
+    (step numeratorConstant numeratorSlope denominatorConstant denominatorSlope : Rat)
+    (hstep : step ≠ 0) (hden0 : denominatorConstant ≠ 0)
+    (hden : denominatorConstant + denominatorSlope * step ≠ 0) :
+    ((step * FiniteLHopitalCertificate.affineResidual
+        numeratorConstant numeratorSlope step) /
+        (step * FiniteLHopitalCertificate.affineResidual
+          denominatorConstant denominatorSlope step)) -
+      numeratorConstant / denominatorConstant =
+      ((numeratorSlope * denominatorConstant - numeratorConstant * denominatorSlope) *
+          step) /
+        (denominatorConstant * FiniteLHopitalCertificate.affineResidual
+          denominatorConstant denominatorSlope step) := by
+  exact FiniteLHopitalCertificate.affine_residual_quotient_certificate
+    step numeratorConstant numeratorSlope denominatorConstant denominatorSlope
+    hstep hden0 hden
 
 end ComputableAnalysis
