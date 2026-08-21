@@ -36,6 +36,10 @@ def qcomplexListConj : List QComplex → List QComplex
   | [] => []
   | x :: xs => QComplex.conj x :: qcomplexListConj xs
 
+def qcomplexListSum : List QComplex → QComplex
+  | [] => QComplex.zero
+  | x :: xs => QComplex.add x (qcomplexListSum xs)
+
 private theorem qcomplex_add_four_rearrange
     (a b c d : QComplex) :
     QComplex.add (QComplex.add a b) (QComplex.add c d) =
@@ -96,6 +100,19 @@ private theorem qcomplex_scale_add
   simp [QComplex.scaleRat, QComplex.add]
   constructor <;> grind [Rat.mul_add]
 
+private theorem qcomplex_zero_mul (z : QComplex) :
+    QComplex.mul QComplex.zero z = QComplex.zero := by
+  cases z
+  simp [QComplex.mul, QComplex.zero]
+  constructor <;> grind
+
+private theorem qcomplex_natPow_one (n : Nat) :
+    QComplex.natPow QComplex.one n = QComplex.one := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      rw [QComplex.natPow_succ, ih, QComplex.mul_one_cert]
+
 theorem finiteFourierSum_empty (root : QComplex) (mode : Nat) :
     finiteFourierSum root mode [] = QComplex.zero := by
   rfl
@@ -107,6 +124,13 @@ theorem finiteFourierSum_cons (root : QComplex) (mode k : Nat)
         (QComplex.mul x (QComplex.natPow root (mode * k)))
         (finiteFourierSumAux root mode (k + 1) xs) := by
   rfl
+
+theorem finiteFourierSum_prepend_zero
+    (root : QComplex) (mode : Nat) (xs : List QComplex) :
+    finiteFourierSum root mode (QComplex.zero :: xs) =
+      finiteFourierSumAux root mode 1 xs := by
+  simp only [finiteFourierSum, finiteFourierSumAux]
+  rw [qcomplex_zero_mul, qcomplex_zero_add]
 
 theorem finiteFourierSum_aux_add
     (root : QComplex) (mode k : Nat)
@@ -165,6 +189,20 @@ theorem finiteFourierSum_append
         (finiteFourierSumAux root mode xs.length ys) := by
   simpa [finiteFourierSum] using
     (finiteFourierSum_aux_append root mode 0 xs ys)
+
+theorem finiteFourierSum_aux_one
+    (mode k : Nat) (xs : List QComplex) :
+    finiteFourierSumAux QComplex.one mode k xs = qcomplexListSum xs := by
+  induction xs generalizing k with
+  | nil => rfl
+  | cons x xs ih =>
+      simp only [finiteFourierSumAux, qcomplexListSum]
+      rw [qcomplex_natPow_one, QComplex.mul_one_cert, ih]
+
+theorem finiteFourierSum_one
+    (mode : Nat) (xs : List QComplex) :
+    finiteFourierSum QComplex.one mode xs = qcomplexListSum xs := by
+  exact finiteFourierSum_aux_one mode 0 xs
 
 theorem finiteFourierSum_aux_scale
     (r : Rat) (root : QComplex) (mode k : Nat)
