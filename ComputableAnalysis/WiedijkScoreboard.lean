@@ -1079,6 +1079,26 @@ theorem wiedijk_item_sixty_five_isosceles_equal_legs (h b : Rat) :
         { x := 0, y := h } { x := -b, y := 0 } := by
   exact RationalCircle.Stage.isosceles_equal_legs h b
 
+theorem wiedijk_item_sixty_five_isosceles_symmetry_certificate (h b : Rat) :
+    RationalCircle.Stage.segmentNormSq
+        { x := 0, y := h } { x := b, y := 0 } =
+      RationalCircle.Stage.segmentNormSq
+        { x := 0, y := h } { x := -b, y := 0 } /\
+      RationalCircle.Stage.dot
+        { x := 0, y := h } { x := b, y := 0 } = 0 /\
+      RationalCircle.Stage.segmentNormSq
+        { x := b, y := 0 } { x := -b, y := 0 } = 4 * b * b /\
+      RationalCircle.Stage.segmentNormSq
+        { x := 0, y := h } { x := b, y := 0 } =
+          RationalCircle.Stage.segmentNormSq
+            { x := 0, y := h } { x := 0, y := 0 } +
+            RationalCircle.Stage.segmentNormSq
+              { x := 0, y := 0 } { x := b, y := 0 } := by
+  exact ⟨RationalCircle.Stage.isosceles_equal_legs h b,
+    RationalCircle.Stage.isosceles_axis_orthogonal h b,
+    RationalCircle.Stage.isosceles_base_normSq h b,
+    RationalCircle.Stage.isosceles_axis_pythagorean h b⟩
+
 theorem wiedijk_item_ninety_one_triangle_inequality (steps : List Rat) :
     qabs (ratListSum steps) <= ratListAbsSum steps := by
   exact RationalCircle.Stage.rationalPolyline_length_ge_straight_segment steps
