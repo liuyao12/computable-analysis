@@ -187,6 +187,22 @@ private theorem qcomplex_mul_scale_local
   constructor <;> grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add,
     Rat.add_mul]
 
+private theorem qcomplex_conj_conj_local (z : QComplex) :
+    QComplex.conj (QComplex.conj z) = z := by
+  cases z
+  simp [QComplex.conj]
+
+private theorem qcomplexListSum_conj
+    (xs : List QComplex) :
+    QComplex.conj (qcomplexListSum xs) =
+      qcomplexListSum (xs.map QComplex.conj) := by
+  induction xs with
+  | nil =>
+      simp [qcomplexListSum, QComplex.conj, QComplex.zero]
+  | cons x xs ih =>
+      simp only [qcomplexListSum, List.map_cons, QComplex.conj_add]
+      rw [ih]
+
 /-! Scalar multiplication is the second half of the finite coefficient
 linearity law. -/
 theorem finiteFourierSampleInnerProduct_scale
@@ -201,6 +217,31 @@ theorem finiteFourierSampleInnerProduct_scale
   · rw [qcomplexListSum_map_scale]
   · intro k hk
     rw [hsample k, qcomplex_mul_scale_local]
+
+/-! Conjugating both the root and the sampled values conjugates the finite
+Fourier coefficient.  This is the stage-level symmetry used for real-valued
+signals. -/
+theorem finiteFourierSampleInnerProduct_conj
+    (root : QComplex) (length mode : Nat)
+    (sample₀ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.conj (sample₀ k)) :
+    finiteFourierSampleInnerProduct (QComplex.conj root) length mode sample =
+      QComplex.conj
+        (finiteFourierSampleInnerProduct root length mode sample₀) := by
+  unfold finiteFourierSampleInnerProduct
+  rw [qcomplexListSum_conj]
+  rw [List.map_map]
+  apply qcomplexListSum_map_congr (List.range length)
+    (fun k => QComplex.mul
+      (QComplex.conj (QComplex.natPow (QComplex.conj root) (mode * k)))
+      (sample k))
+    (fun k => QComplex.conj (QComplex.mul
+      (QComplex.conj (QComplex.natPow root (mode * k)))
+      (sample₀ k)))
+  intro k hk
+  rw [hsample k, QComplex.conj_mul, QComplex.conj_natPow,
+    qcomplex_conj_conj_local]
+  simp only [qcomplex_conj_conj_local]
 
 structure FiniteFourierOrthogonalityCertificate where
   root : QComplex

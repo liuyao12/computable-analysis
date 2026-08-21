@@ -2487,6 +2487,16 @@ theorem wiedijk_item_seventy_six_fourier_coefficient_scaling
   exact finiteFourierSampleInnerProduct_scale
     root length mode r sample₀ sample hsample
 
+theorem wiedijk_item_seventy_six_fourier_coefficient_conjugation
+    (root : QComplex) (length mode : Nat)
+    (sample₀ sample : Nat → QComplex)
+    (hsample : ∀ k, sample k = QComplex.conj (sample₀ k)) :
+    finiteFourierSampleInnerProduct (QComplex.conj root) length mode sample =
+      QComplex.conj
+        (finiteFourierSampleInnerProduct root length mode sample₀) := by
+  exact finiteFourierSampleInnerProduct_conj
+    root length mode sample₀ sample hsample
+
 theorem wiedijk_item_seventy_six_fourier_finite_reconstruction
     (certificate : FiniteFourierReconstructionCertificate)
     {k : Nat} (hk : k < certificate.orthogonality.length) :
