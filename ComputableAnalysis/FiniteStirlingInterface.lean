@@ -57,6 +57,16 @@ theorem FiniteStirlingRatioCertificate.abs_error_le_of_tolerance
   rw [qabs_eq_self_of_nonneg hnonneg]
   grind
 
+/-! The ratio has an exact finite stage law.  This is the recurrence used by
+any stagewise Stirling computation; no asymptotic limit is involved. -/
+theorem finiteStirlingRatio_succ_numerator
+    (n : Nat) (e root : Rat) :
+    finiteStirlingRatio (n + 1) e root =
+      (((n + 1 : Nat) : Rat) * factorialRat n) /
+        (root * ((((n + 1 : Nat) : Rat) / e) ^ (n + 1))) := by
+  unfold finiteStirlingRatio
+  rw [FormalPowerSeries.factorialRat_succ]
+
 def finiteStirlingTenCertificate : FiniteStirlingRatioCertificate where
   index := 10
   eApprox := finiteStirlingEApprox

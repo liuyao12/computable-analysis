@@ -2448,6 +2448,13 @@ theorem wiedijk_item_ninety_finite_stirling_ratio_positive
     0 < finiteStirlingRatio n e root := by
   exact finiteStirlingRatio_pos he hroot
 
+theorem wiedijk_item_ninety_finite_stirling_stage_step
+    (n : Nat) (e root : Rat) :
+    finiteStirlingRatio (n + 1) e root =
+      (((n + 1 : Nat) : Rat) * factorialRat n) /
+        (root * ((((n + 1 : Nat) : Rat) / e) ^ (n + 1))) := by
+  exact finiteStirlingRatio_succ_numerator n e root
+
 theorem wiedijk_item_ninety_factorial_successor_certificate
     (certificate : FiniteFactorialCertificate) :
     factorialRat (certificate.stage + 1) =
