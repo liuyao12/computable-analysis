@@ -333,6 +333,13 @@ theorem wiedijk_item_ninety_four_law_of_cosines_certificate :
           2 * RationalCircle.Stage.dot p q := by
   exact RationalCircle.Stage.finiteLawOfCosines_unit_orthogonal_certificate
 
+theorem wiedijk_item_ninety_four_law_of_cosines_general
+    (p q : PiCirclePoint) :
+    RationalCircle.Stage.segmentNormSq p q =
+      RationalCircle.Stage.normSq p + RationalCircle.Stage.normSq q -
+        2 * RationalCircle.Stage.dot p q := by
+  exact RationalCircle.Stage.segmentNormSq_law_of_cosines p q
+
 theorem wiedijk_item_ninety_five_ptolemy_certificate :
     (PtolemyLengthCore.pointSegmentLengthRaw
         FinitePtolemyLength.ptolemyPointA FinitePtolemyLength.ptolemyPointB).Equiv
@@ -360,6 +367,17 @@ theorem wiedijk_item_ninety_seven_rational_two_by_two_cramer
   constructor <;> rw [Rat.div_def, Rat.div_def]
   · grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
   · grind [Rat.mul_add, Rat.add_mul, Rat.mul_assoc, Rat.mul_comm]
+
+theorem wiedijk_item_twenty_one_green_rectangle_additivity
+    (left middle right bottom top : Rat) :
+    greenRectangleBoundary left middle bottom top +
+        greenRectangleBoundary middle right bottom top =
+      greenRectangleBoundary left right bottom top /\
+    greenRectangleArea left middle bottom top +
+        greenRectangleArea middle right bottom top =
+      greenRectangleArea left right bottom top := by
+  exact ⟨greenRectangleBoundary_split_horizontal left middle right bottom top,
+    greenRectangleArea_split_horizontal left middle right bottom top⟩
 
 theorem wiedijk_item_one_hundred_descartes_certificate :
     Polynomial.signChangeCountIgnoringZeros Polynomial.twoVariationQuadratic = 2 /\
