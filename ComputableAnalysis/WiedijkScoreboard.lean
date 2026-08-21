@@ -1512,6 +1512,14 @@ theorem wiedijk_item_fourteen_effective_basel_series :
   exact ⟨Basel.baselSeriesRaw_valid,
     Basel.baselSeriesRaw_reaches_of_positive_tolerance⟩
 
+theorem wiedijk_item_fourteen_basel_precision_midpoint_witness
+    (eps : QPos) :
+    ∃ n : Nat, ∃ q : Rat,
+      (Basel.baselSeriesRaw.compute n).lo <= q /\
+        q <= (Basel.baselSeriesRaw.compute n).hi /\
+        (Basel.baselSeriesRaw.compute n).width <= eps.val := by
+  exact Basel.baselSeriesRaw_precision_midpoint_witness eps
+
 /-! The series side also has an explicit all-stage tail law.  This is the
 computable content available before proving that its limit equals the
 geometric `pi^2 / 6` construction. -/

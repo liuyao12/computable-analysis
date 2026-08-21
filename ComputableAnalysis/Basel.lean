@@ -42,6 +42,30 @@ theorem baselSeriesRaw_reaches_of_positive_tolerance (eps : QPos) :
   exact DirichletSeries.zetaTwoInterval_width_le_of_denominator_budget
     eps.property (Nat.le_refl (eps.val.den + 1))
 
+/-! A precision request also produces a concrete rational representative.
+This is the form consumed by later computable arguments: the midpoint is not
+an attained limit, but a finite rational sample certified to lie in the
+stage interval. -/
+theorem baselSeriesRaw_precision_midpoint_witness (eps : QPos) :
+    ∃ n : Nat, ∃ q : Rat,
+      (baselSeriesRaw.compute n).lo <= q /\
+        q <= (baselSeriesRaw.compute n).hi /\
+        (baselSeriesRaw.compute n).width <= eps.val := by
+  let n := eps.val.den + 1
+  let I := baselSeriesRaw.compute n
+  have hordered : I.lo <= I.hi := by
+    dsimp [I, n]
+    rw [baselSeriesRaw_compute_eq]
+    exact DirichletSeries.zetaTwoInterval_ordered _
+  have hwidth : I.width <= eps.val := by
+    dsimp [I, n]
+    rw [baselSeriesRaw_compute_eq]
+    exact DirichletSeries.zetaTwoInterval_width_le_of_denominator_budget
+      eps.property (Nat.le_refl (eps.val.den + 1))
+  refine ⟨n, I.midpoint, ?_⟩
+  exact ⟨(QInterval.midpoint_mem hordered).1,
+    (QInterval.midpoint_mem hordered).2, hwidth⟩
+
 def baselSeries : Real :=
   Real.ofRaw baselSeriesRaw baselSeriesRaw_valid
 
