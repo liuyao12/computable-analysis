@@ -44,6 +44,35 @@ theorem fourPointFourierSum_fifth_mode :
     fourPointFourierSum 5 = QComplex.zero := by
   native_decide
 
+theorem fourPointFourierSum_period_four (mode : Nat) :
+    fourPointFourierSum (mode + 4) = fourPointFourierSum mode := by
+  have hfour : QComplex.natPow RotationSeries.imaginaryUnit 4 =
+      QComplex.one := by
+    native_decide
+  have hshift : forall (n k : Nat),
+      QComplex.natPow RotationSeries.imaginaryUnit (n + 4 * k) =
+        QComplex.natPow RotationSeries.imaginaryUnit n := by
+    intro n k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        rw [show n + 4 * (k + 1) = (n + 4 * k) + 4 by omega,
+          QComplex.natPow_add, hfour, QComplex.mul_one_cert, ih]
+  unfold fourPointFourierSum
+  have h0 : QComplex.natPow RotationSeries.imaginaryUnit ((mode + 4) * 0) =
+      QComplex.natPow RotationSeries.imaginaryUnit (mode * 0) := by
+    simp
+  have h1 : QComplex.natPow RotationSeries.imaginaryUnit ((mode + 4) * 1) =
+      QComplex.natPow RotationSeries.imaginaryUnit (mode * 1) := by
+    simpa [Nat.add_mul] using hshift (mode * 1) 1
+  have h2 : QComplex.natPow RotationSeries.imaginaryUnit ((mode + 4) * 2) =
+      QComplex.natPow RotationSeries.imaginaryUnit (mode * 2) := by
+    simpa [Nat.add_mul] using hshift (mode * 2) 2
+  have h3 : QComplex.natPow RotationSeries.imaginaryUnit ((mode + 4) * 3) =
+      QComplex.natPow RotationSeries.imaginaryUnit (mode * 3) := by
+    simpa [Nat.add_mul] using hshift (mode * 3) 3
+  rw [h0, h1, h2, h3]
+
 theorem fourPointFourier_orthogonality_certificate :
     fourPointFourierSum 0 = { re := 4, im := 0 } /\
       fourPointFourierSum 1 = QComplex.zero /\
