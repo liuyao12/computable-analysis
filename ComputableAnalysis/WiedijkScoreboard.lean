@@ -27,6 +27,7 @@ import ComputableAnalysis.FiniteFourierCertificate
 import ComputableAnalysis.FiniteFourierFoundation
 import ComputableAnalysis.EffectiveFourierSeries
 import ComputableAnalysis.FiniteFourierGeometric
+import ComputableAnalysis.FiniteComplexQuadraticExample
 import ComputableAnalysis.CauchyPi
 import ComputableAnalysis.FinitePrimeReciprocalCertificate
 import ComputableAnalysis.FiniteStirlingInterface
@@ -183,6 +184,26 @@ completed real-number predicate. -/
 theorem wiedijk_item_one_sqrt_two :
     RealRaw.Irrational (sqrtRat (2 : Rat) (by native_decide)) := by
   exact sqrt_two_irrational_via_descent
+
+/-! Item 2 in its constructive finite boundary: a complex quadratic with
+exact rational-coordinate roots and an executable factorization certificate.
+This records the computable replacement, not unrestricted root existence for
+all complex polynomials. -/
+theorem wiedijk_item_two_finite_complex_quadratic_certificate :
+    CPoly.eval finiteComplexQuadratic finiteComplexQuadraticUpper =
+        QComplex.zero /\
+      CPoly.eval finiteComplexQuadratic finiteComplexQuadraticLower =
+        QComplex.zero /\
+      finiteComplexQuadraticUpper ≠ finiteComplexQuadraticLower /\
+      (forall z : QComplex,
+        CPoly.eval finiteComplexQuadratic z =
+          QComplex.mul
+            (QComplex.sub z finiteComplexQuadraticUpper)
+            (QComplex.sub z finiteComplexQuadraticLower)) := by
+  exact ⟨finiteComplexQuadratic_upper_root,
+    finiteComplexQuadratic_lower_root,
+    finiteComplexQuadratic_roots_distinct,
+    finiteComplexQuadratic_factorization⟩
 
 theorem wiedijk_item_three_denumerability (q : Rat) :
     Exists fun n : Nat => RationalCode.decode (rationalNatCode n) = q := by
