@@ -1282,6 +1282,18 @@ theorem wiedijk_item_seventy_six_generic_fourier_tail_bridge
     certificate.toSeries.stabilized.Valid := by
   exact certificate.toSeries_valid
 
+theorem wiedijk_item_seventy_six_effective_fourier_valid
+    (series : EffectiveFourierSeries) :
+    series.stabilized.Valid := by
+  exact series.stabilized_valid
+
+theorem wiedijk_item_seventy_six_effective_fourier_stage_enclosure
+    (series : EffectiveFourierSeries) (n : Nat) :
+    (QBox.point
+      (finiteFourierSum series.root series.mode (series.stage n))).NestedIn
+      (series.stabilized.compute n) := by
+  exact series.stage_contained n
+
 theorem wiedijk_item_seventy_six_fourier_tail_error_box
     (certificate : EffectiveFourierTailCertificate)
     (k n : Nat) (hkn : k <= n) :
