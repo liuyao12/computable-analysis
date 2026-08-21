@@ -2452,6 +2452,15 @@ theorem wiedijk_item_eighty_one_finite_prime_reciprocal_extension
       primeReciprocalSum xs < primeReciprocalSum (p :: xs) := by
   exact exists_prime_reciprocal_extension xs hprime
 
+theorem wiedijk_item_eighty_one_prime_reciprocal_extension_above
+    (xs : List Nat)
+    (hprime : ∀ p, p ∈ xs → BasicPrime p)
+    (bound : Nat)
+    (hbound : ∀ q, q ∈ xs → q ≤ bound) :
+    ∃ p, BasicPrime p ∧ bound < p ∧ p ∉ xs ∧
+      primeReciprocalSum xs < primeReciprocalSum (p :: xs) := by
+  exact exists_prime_reciprocal_extension_above xs hprime bound hbound
+
 theorem wiedijk_item_eighty_one_prime_reciprocal_extension_chain
     (xs : List Nat)
     (hprime : ∀ p, p ∈ xs → BasicPrime p) (length : Nat) :

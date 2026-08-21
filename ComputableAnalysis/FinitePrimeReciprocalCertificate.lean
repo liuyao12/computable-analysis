@@ -113,6 +113,23 @@ theorem exists_prime_reciprocal_extension (xs : List Nat)
     ⟨p, hp, hpnot⟩
   exact ⟨p, hp, hpnot, primeReciprocalSum_cons_gt hp.1⟩
 
+/-! The extension can be chosen beyond any finite bound containing the list.
+This makes the potential-infinity content explicit while keeping every stage
+finite and rational. -/
+theorem exists_prime_reciprocal_extension_above
+    (xs : List Nat)
+    (hprime : ∀ p, p ∈ xs → BasicPrime p)
+    (bound : Nat)
+    (hbound : ∀ q, q ∈ xs → q ≤ bound) :
+    ∃ p, BasicPrime p ∧ bound < p ∧ p ∉ xs ∧
+      primeReciprocalSum xs < primeReciprocalSum (p :: xs) := by
+  rcases exists_basicPrime_gt bound with ⟨p, hp, hpbound⟩
+  have hpnot : p ∉ xs := by
+    intro hmem
+    have hle := hbound p hmem
+    omega
+  exact ⟨p, hp, hpbound, hpnot, primeReciprocalSum_cons_gt hp.1⟩
+
 /-! A finite extension chain can be made as long as requested.  This is the
 strongest conclusion available from strict extension alone: it records
 potential infinity without claiming that the reciprocal accumulator crosses
