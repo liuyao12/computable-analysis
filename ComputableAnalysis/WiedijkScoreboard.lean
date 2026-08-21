@@ -1468,6 +1468,16 @@ theorem wiedijk_item_seventy_five_convex_derivative_function_valid
     certificate.toRealFunRaw.Valid := by
   exact certificate.valid
 
+theorem wiedijk_item_seventy_five_convex_partial_derivative_valid
+    {F : RealFunRaw} {a b : Rat}
+    {C : RationalSubinterval a b}
+    {H : CurvatureOnSubinterval F C}
+    (certificate : ConvexDerivative.PointwiseFunction H) :
+    forall q hq,
+      RealRaw.ValidCompute
+        (certificate.toPartialRealFunRaw.compute q hq) := by
+  exact certificate.partial_valid
+
 /-! Item 73 in its computable form: a successor inequality propagates to any
 finite pair of stages.  This is the order content needed by stage algorithms;
 it does not smuggle in a supremum or a completed limit. -/
