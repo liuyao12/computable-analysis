@@ -605,6 +605,121 @@ theorem fourPointComplexFourierTransform_cyclic_convolution
     Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul,
     Rat.sub_eq_add_neg]
 
+theorem fourPointComplexFourierTransform_injective
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex)
+    (h₀ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0)
+    (h₁ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1)
+    (h₂ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2)
+    (h₃ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3) :
+    x₀ = y₀ ∧ x₁ = y₁ ∧ x₂ = y₂ ∧ x₃ = y₃ := by
+  have hcancel (x y : QComplex)
+      (h : QComplex.scaleRat 4 x = QComplex.scaleRat 4 y) : x = y := by
+    cases x
+    cases y
+    simp [QComplex.scaleRat] at h
+    congr 1 <;> grind
+  have hx := fourPointComplexFourierTransform_reconstruct x₀ x₁ x₂ x₃
+  have hy := fourPointComplexFourierTransform_reconstruct y₀ y₁ y₂ y₃
+  dsimp at hx hy
+  have hs₀ : QComplex.scaleRat 4 x₀ = QComplex.scaleRat 4 y₀ := by
+    calc
+      QComplex.scaleRat 4 x₀ =
+          QComplex.add (QComplex.add
+            (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0)
+            (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1))
+            (QComplex.add
+              (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2)
+              (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3)) := hx.1.symm
+      _ = QComplex.add (QComplex.add
+            (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0)
+            (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1))
+            (QComplex.add
+              (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2)
+              (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3)) := by
+            rw [h₀, h₁, h₂, h₃]
+      _ = QComplex.scaleRat 4 y₀ := hy.1
+  have hs₁ : QComplex.scaleRat 4 x₁ = QComplex.scaleRat 4 y₁ := by
+    calc
+      QComplex.scaleRat 4 x₁ =
+          QComplex.add
+            (QComplex.add
+              (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0)
+              (QComplex.mul
+                (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit)
+                (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1)))
+            (QComplex.add
+              (QComplex.scaleRat (-1)
+                (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2))
+              (QComplex.mul RotationSeries.imaginaryUnit
+                (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3))) := hx.2.1.symm
+      _ = QComplex.add
+            (QComplex.add
+              (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0)
+              (QComplex.mul
+                (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit)
+                (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1)))
+            (QComplex.add
+              (QComplex.scaleRat (-1)
+                (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2))
+              (QComplex.mul RotationSeries.imaginaryUnit
+                (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3))) := by
+            rw [h₀, h₁, h₂, h₃]
+      _ = QComplex.scaleRat 4 y₁ := hy.2.1
+  have hs₂ : QComplex.scaleRat 4 x₂ = QComplex.scaleRat 4 y₂ := by
+    calc
+      QComplex.scaleRat 4 x₂ =
+          QComplex.add (QComplex.add
+            (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0)
+            (QComplex.scaleRat (-1)
+              (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1)))
+            (QComplex.add
+              (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2)
+              (QComplex.scaleRat (-1)
+                (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3))) := hx.2.2.1.symm
+      _ = QComplex.add (QComplex.add
+            (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0)
+            (QComplex.scaleRat (-1)
+              (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1)))
+            (QComplex.add
+              (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2)
+              (QComplex.scaleRat (-1)
+                (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3))) := by
+            rw [h₀, h₁, h₂, h₃]
+      _ = QComplex.scaleRat 4 y₂ := hy.2.2.1
+  have hs₃ : QComplex.scaleRat 4 x₃ = QComplex.scaleRat 4 y₃ := by
+    calc
+      QComplex.scaleRat 4 x₃ =
+          QComplex.add
+            (QComplex.add
+              (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0)
+              (QComplex.mul RotationSeries.imaginaryUnit
+                (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1)))
+            (QComplex.add
+              (QComplex.scaleRat (-1)
+                (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2))
+              (QComplex.mul
+                (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit)
+                (fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3))) := hx.2.2.2.symm
+      _ = QComplex.add
+            (QComplex.add
+              (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0)
+              (QComplex.mul RotationSeries.imaginaryUnit
+                (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1)))
+            (QComplex.add
+              (QComplex.scaleRat (-1)
+                (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2))
+              (QComplex.mul
+                (QComplex.scaleRat (-1) RotationSeries.imaginaryUnit)
+                (fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3))) := by
+            rw [h₀, h₁, h₂, h₃]
+      _ = QComplex.scaleRat 4 y₃ := hy.2.2.2
+  exact ⟨hcancel _ _ hs₀, hcancel _ _ hs₁,
+    hcancel _ _ hs₂, hcancel _ _ hs₃⟩
+
 /-! Real rational samples have the usual finite conjugate symmetry: the first
 and third modes pair up, while the zero and Nyquist modes are self-conjugate.
 This is stated directly in rational-complex coordinates. -/

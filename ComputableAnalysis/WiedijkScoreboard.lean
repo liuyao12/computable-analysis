@@ -2268,6 +2268,20 @@ theorem wiedijk_item_seventy_six_complex_fourier_convolution
   exact fourPointComplexFourierTransform_cyclic_convolution
     x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃
 
+theorem wiedijk_item_seventy_six_complex_fourier_injective
+    (x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ : QComplex)
+    (h₀ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 0 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 0)
+    (h₁ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 1 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 1)
+    (h₂ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 2 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 2)
+    (h₃ : fourPointComplexFourierTransform x₀ x₁ x₂ x₃ 3 =
+      fourPointComplexFourierTransform y₀ y₁ y₂ y₃ 3) :
+    x₀ = y₀ ∧ x₁ = y₁ ∧ x₂ = y₂ ∧ x₃ = y₃ := by
+  exact fourPointComplexFourierTransform_injective
+    x₀ x₁ x₂ x₃ y₀ y₁ y₂ y₃ h₀ h₁ h₂ h₃
+
 theorem wiedijk_item_seventy_six_qcomplex_energy_conjugation
     (z : QComplex) :
     QComplex.normSq (QComplex.conj z) = QComplex.normSq z := by
