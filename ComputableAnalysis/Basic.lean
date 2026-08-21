@@ -4015,6 +4015,12 @@ theorem normSq_mul (z w : QComplex) :
     Rat.mul_add, Rat.add_mul, Rat.sub_eq_add_neg, Rat.neg_mul,
     Rat.mul_neg, Rat.neg_neg]
 
+theorem normSq_scaleRat (r : Rat) (z : QComplex) :
+    normSq (scaleRat r z) = r * r * normSq z := by
+  cases z
+  simp [normSq, scaleRat]
+  grind [Rat.mul_assoc, Rat.mul_comm, Rat.mul_add, Rat.add_mul]
+
 def inv? (z : QComplex) : Option QComplex :=
   let n := normSq z
   if n = 0 then

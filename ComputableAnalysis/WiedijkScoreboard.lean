@@ -2056,6 +2056,12 @@ theorem wiedijk_item_seventy_six_qcomplex_energy_multiplication
       QComplex.normSq z * QComplex.normSq w := by
   exact QComplex.normSq_mul z w
 
+theorem wiedijk_item_seventy_six_qcomplex_energy_scaling
+    (r : Rat) (z : QComplex) :
+    QComplex.normSq (QComplex.scaleRat r z) =
+      r * r * QComplex.normSq z := by
+  exact QComplex.normSq_scaleRat r z
+
 /-! The normalized energy form is often the more convenient interface for
 downstream Fourier arguments.  It is still an exact identity in `Rat`; no
 limit or completed real number is introduced. -/
