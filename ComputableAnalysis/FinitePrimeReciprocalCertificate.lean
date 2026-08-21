@@ -113,4 +113,31 @@ theorem exists_prime_reciprocal_extension (xs : List Nat)
     ⟨p, hp, hpnot⟩
   exact ⟨p, hp, hpnot, primeReciprocalSum_cons_gt hp.1⟩
 
+/-! A finite extension chain can be made as long as requested.  This is the
+strongest conclusion available from strict extension alone: it records
+potential infinity without claiming that the reciprocal accumulator crosses
+every numerical threshold. -/
+theorem exists_prime_reciprocal_extension_chain (xs : List Nat)
+    (hprime : ∀ p, p ∈ xs → BasicPrime p) (length : Nat) :
+    ∃ ys, ys.length = xs.length + length /\
+      (∀ p, p ∈ ys → BasicPrime p) /\
+      primeReciprocalSum xs <= primeReciprocalSum ys := by
+  induction length generalizing xs with
+  | zero =>
+      exact ⟨xs, by simp, hprime, Rat.le_refl⟩
+  | succ length ih =>
+      obtain ⟨p, hp, hpnot, hinc⟩ :=
+        exists_prime_reciprocal_extension xs hprime
+      obtain ⟨ys, hyslen, hysprime, hle⟩ :=
+        ih (xs := p :: xs) (hprime := by
+          intro q hq
+          simp only [List.mem_cons] at hq
+          rcases hq with rfl | hq
+          · exact hp
+          · exact hprime q hq)
+      refine ⟨ys, ?_, hysprime, ?_⟩
+      · simp only [List.length_cons] at hyslen
+        omega
+      · exact Rat.le_trans (Rat.le_of_lt hinc) hle
+
 end ComputableAnalysis
