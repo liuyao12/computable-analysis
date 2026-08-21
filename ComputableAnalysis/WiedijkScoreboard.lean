@@ -279,4 +279,8 @@ theorem wiedijk_item_twenty_three_pythagorean_triple (m n : Rat) :
       (m * m + n * n) ^ 2 := by
   exact RationalCircle.pythagoreanTriple_identity m n
 
+theorem wiedijk_item_forty_two_reciprocal_triangular_series :
+    Series.triangularTelescopingRaw.Equiv (RealRaw.ofRat 2) := by
+  exact Series.triangularTelescopingRaw_equiv_two
+
 end ComputableAnalysis
